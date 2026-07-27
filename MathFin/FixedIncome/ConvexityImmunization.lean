@@ -81,7 +81,7 @@ lemma hasDerivAt_neg_bondPortfolioDur_r
 /-- **Single-bond convexity**: a single-bond portfolio's convexity-times-value
 equals `w · (T − t)² · exp(−r(T − t))`. -/
 lemma bondPortfolio_single_bond_conv
-    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :
+    {ι : Type*} (i : ι) (w T : ι → ℝ) (t r : ℝ) :
     bondPortfolioConv {i} w T t r =
       w i * (T i - t) ^ 2 * Real.exp (-(r * (T i - t))) := by
   unfold bondPortfolioConv

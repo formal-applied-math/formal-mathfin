@@ -208,7 +208,7 @@ an EMM — so the construction yields a genuine risk-neutral measure, not
 merely one under which the driver is standard normal. Composes
 `exists_of_physical` with `discounted_terminal_eq_S0`. -/
 theorem discounted_terminal_eq_S0_of_physical {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    {P : Measure Ω} [IsProbabilityMeasure P]
+    {P : Measure Ω}
     {S_0 K r σ T : ℝ} {W : Ω → ℝ} (c : ℝ)
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T)
     (hWmeas : Measurable W) (hW : HasLaw W (gaussianReal 0 1) P) :
@@ -227,7 +227,7 @@ Black-Scholes closed form. Every other BS-family result composes the same
 way; this one stands for the pipeline. Composes `exists_of_physical` with
 `bs_call_formula`. -/
 theorem bs_call_formula_of_physical {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    {P : Measure Ω} [IsProbabilityMeasure P]
+    {P : Measure Ω}
     {S_0 K r σ T : ℝ} {W : Ω → ℝ} (c : ℝ)
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T)
     (hWmeas : Measurable W) (hW : HasLaw W (gaussianReal 0 1) P) :

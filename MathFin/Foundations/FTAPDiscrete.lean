@@ -168,6 +168,7 @@ theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage �
   rw [eq_empty_of_pos_singleton hP hnull] at hmem
   simp at hmem
 
+omit [IsProbabilityMeasure P] in
 /-- **Backward direction**: no arbitrage ⟹ an equivalent martingale measure
 exists. The separating-dual `q` of the gains subspace, normalised to a
 probability `Q`, is the EMM: strict positivity gives `Q ~ P`, and the

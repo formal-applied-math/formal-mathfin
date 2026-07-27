@@ -284,11 +284,18 @@ and the `Martingale/Centering.lean` predictability restatements.
 | `MathFin.coherentRisk_isLUB` (`RiskMeasures/AcceptanceSet.lean:103`) | `[Nonempty ι]` |
 
 Nothing in the library changed here — the linter did (batteries moved
-`fa08db58 → 023ce7d6` with Mathlib). That is **seven declarations, eight
-arguments** (an earlier note in this document said six; the count was wrong).
+`fa08db58 → 023ce7d6` with Mathlib).
 
-**All eight are now removed**, because on inspection every one is genuinely
-dead rather than domain-documenting:
+**Count, corrected twice.** The table above lists what the *tail* of the lint
+output showed. `lake lint` prints its findings grouped by module in alphabetical
+order, and reading a log tail shows the end of that list, not the whole of it —
+which looks identical when the surviving entries happen to start at `F`. The
+authoritative line is the summary header: **`Found 13 errors in 1865
+declarations (plus 1542 automatically generated ones) in MathFin with 14
+linters`**. Read the header, not the tail.
+
+**All of them are now removed** — 21 arguments across two rounds — because on
+inspection every one is genuinely dead rather than domain-documenting:
 
 * the four inline binders (`GaussianGirsanov`, `SDEUniqueness`, `RiskParityFOC`,
   `AcceptanceSet`) are deleted from the signatures;
@@ -338,8 +345,11 @@ done:**
    minutes of wall clock. The refreshed ledger is committed by the sweep's merge
    job; every row records `verified_at_commit`, so the claim is auditable rather
    than asserted.
-2. **The linter findings are fixed** — all eight dead arguments removed (see
-   above), not silenced.
+2. **The linter findings are fixed** — every dead argument removed, not
+   silenced. This took two rounds: removing an unused instance argument can make
+   it unused one level up, in a consumer that only held it to pass down. The
+   second round is where the true count surfaced (13 findings, from the summary
+   header rather than a truncated tail).
 
 The `pin-bump.yml` and `ledger-sweep.yml` workflows this branch adds are the
 durable part: the next bump gets a build signal without the ledger deadlock, and

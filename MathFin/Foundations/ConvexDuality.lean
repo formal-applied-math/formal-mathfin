@@ -81,7 +81,7 @@ functional). The geometric heart shared by the FTAP (gains cone), the coherent-r
 representation (acceptance cone), and superhedging (super-replication cone). Generalizes
 `exists_pos_dual_of_disjoint_stdSimplex` (subspace ⇒ two-sided `= 0`) to a cone (one-sided `≤ 0`). -/
 theorem exists_pos_separating_of_cone_disjoint_simplex
-    {ι : Type*} [Fintype ι] [Nonempty ι]
+    {ι : Type*} [Fintype ι]
     (C : Set (ι → ℝ)) (hCconv : Convex ℝ C) (hCclosed : IsClosed C)
     (hCcone : ∀ ⦃x⦄, x ∈ C → ∀ ⦃c : ℝ⦄, 0 ≤ c → c • x ∈ C)
     (hdisj : Disjoint (stdSimplex ℝ ι) C) :

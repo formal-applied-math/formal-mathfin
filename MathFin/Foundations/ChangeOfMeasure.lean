@@ -56,7 +56,7 @@ Doléans martingale `E^{a−c}` by a forward Wald factor). The mechanism is unch
 touch `M`), then `Z_u D_u =ᵐ M_u` and `M`'s martingale property close the loop. No stochastic
 calculus, only conditional expectations. -/
 theorem changeOfMeasure_setIntegral_eq_of_ae_martingale
-    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsFiniteMeasure P]
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
     {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
     {Z D M : ℝ≥0 → Ω → ℝ} (T : ℝ≥0)
     (hZmeasT : Measurable (Z T)) (hZpos : ∀ ω, 0 ≤ Z T ω)

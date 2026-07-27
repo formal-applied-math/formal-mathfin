@@ -35,7 +35,7 @@ predictable strategy `φ`, the discounted P&L
 `V_T = ∑_{t<T} φ_{t+1}(ω) · (S_{t+1} − S_t)`
 cannot be `P`-a.s. nonnegative and strictly positive on a `P`-non-null set. -/
 theorem emm_implies_no_arbitrage
-    {Ω : Type*} [m0 : MeasurableSpace Ω] {P : Measure Ω} [IsProbabilityMeasure P]
+    {Ω : Type*} [m0 : MeasurableSpace Ω] {P : Measure Ω}
     {T : ℕ} {𝓕 : Filtration ℕ m0} {S : ℕ → Ω → ℝ}
     {Q : Measure Ω} [IsProbabilityMeasure Q]
     (hQP : Q ≪ P) (hPQ : P ≪ Q)

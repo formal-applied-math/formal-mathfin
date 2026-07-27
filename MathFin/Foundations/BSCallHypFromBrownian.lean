@@ -74,7 +74,7 @@ variance computation `T.toNNReal / NNReal.mk((√T)², _) = 1` reduces to
 `Real.sq_sqrt` + `NNReal.div_self`. -/
 lemma scaled_isPreBrownian_eval_law
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {Q : Measure Ω}
     (W : ℝ≥0 → Ω → ℝ) (hW : IsPreBrownianReal W Q)
     {T : ℝ} (hT : 0 < T) :
     HasLaw (fun ω ↦ W T.toNNReal ω / Real.sqrt T) (gaussianReal 0 1) Q := by
