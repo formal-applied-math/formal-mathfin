@@ -13,6 +13,7 @@
 | [`patterns.md`](patterns.md) | Distilled Lean / Mathlib proof patterns + technical idioms + workflow notes + anti-patterns. | Before writing a non-trivial proof, especially if it touches gaussian / martingale / convexity / Lp machinery. |
 | [`roadmap.md`](roadmap.md) | Strategic depth-vs-breadth framing + tactical phase log of completed milestones. | When picking the next theorem to formalise, or to understand the historical trajectory. |
 | [`upstreaming.md`](upstreaming.md) | Log + playbook for contributing MathFin results upstream to brownian-motion / Mathlib (live: issue #440 → PR #446). | When submitting a `Foundations/` result upstream, or checking a contribution's status. |
+| [`upstream-consumption-review-2026-07-27.md`](upstream-consumption-review-2026-07-27.md) | The v4.31.0 → v4.32.0 bump: why that rung, the drift sweep that found the one real break, and the ranked backlog of what to consume from the new Mathlib/BrownianMotion instead of carrying. | At every pin bump — the drift-sweep method is meant to be re-run verbatim — and when a local scaffold looks like it might now exist upstream. |
 | [`values-review.md`](values-review.md) | The eight judgment lenses and the per-round verdict log — the review panel that closes every proof-content session. | To see the quality bar and what each round found, fixed, and deferred. |
 
 ## Cross-references
