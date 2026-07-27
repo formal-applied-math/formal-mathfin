@@ -99,7 +99,7 @@ theorem changeOfMeasure_setIntegral_eq_of_ae_martingale
 under `Q := P.withDensity (Z_T)` on `[0,T]`. This is the constant-θ Girsanov situation, where
 `Z · D = Wald(a−θ)` is a genuine martingale everywhere. -/
 theorem changeOfMeasure_setIntegral_eq
-    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsFiniteMeasure P]
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
     {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
     {Z D : ℝ≥0 → Ω → ℝ} (T : ℝ≥0)
     (hZmeasT : Measurable (Z T)) (hZpos : ∀ ω, 0 ≤ Z T ω)

@@ -40,7 +40,7 @@ namespace MathFin
 `ι → ℝ` that meets the standard simplex only outside itself admits a
 strictly-positive vector `q` whose induced functional annihilates `V`. -/
 theorem exists_pos_dual_of_disjoint_stdSimplex
-    {ι : Type*} [Fintype ι] [Nonempty ι]
+    {ι : Type*} [Fintype ι]
     (V : Submodule ℝ (ι → ℝ)) (hV : ∀ v ∈ V, v ∉ stdSimplex ℝ ι) :
     ∃ q : ι → ℝ, (∀ i, 0 < q i) ∧ ∀ v ∈ V, ∑ i, q i * v i = 0 := by
   -- A subspace is a two-sided cone: apply the cone-separation root to `V`, then

@@ -387,7 +387,7 @@ exit times localize, and `min` with `N ↑ ⊤` preserves all three properties).
 noncomputable def sigmaSeq (B : ℝ≥0 → Ω → ℝ) (N : ℕ) (ω : Ω) : WithTop ℝ≥0 :=
   min (exitTime B N ω) ((N : ℝ≥0) : WithTop ℝ≥0)
 
-lemma isLocalizingSequence_sigma [IsProbabilityMeasure μ] (hBmeas : ∀ t, Measurable (B t))
+lemma isLocalizingSequence_sigma (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) :
     IsLocalizingSequence (augFiltration (μ := μ) hBmeas) (fun N ↦ sigmaSeq B N) μ where
   isStoppingTime := fun N ↦

@@ -252,7 +252,7 @@ terminal `bsTerminal S_0 μ σ T W` (drift `μ`) with the risk-neutral one, and
 This composes the previously-standalone drift-invariance identity into the EMM
 pipeline, closing the `physical → EMM` step at the level of the physical model. -/
 theorem discounted_physical_terminal_eq_S0 {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    {P : Measure Ω} [IsProbabilityMeasure P]
+    {P : Measure Ω}
     {S_0 r μ σ T : ℝ} {W : Ω → ℝ}
     (hS_0 : 0 < S_0) (hσ : 0 < σ) (hT : 0 < T)
     (hWmeas : Measurable W) (hW : HasLaw W (gaussianReal 0 1) P) :

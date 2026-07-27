@@ -266,6 +266,7 @@ theorem noArbitrage_of_isEMM (hS : StronglyAdapted 𝓕 S)
     (integral_eq_zero_iff_of_nonneg_ae hposQ Integrable.of_finite).mp hGint
   exact hQ.Pabs.ae_eq hzeroQ
 
+omit [IsProbabilityMeasure P] in
 /-- **Finite-Ω Fundamental Theorem of Asset Pricing** (Harrison–Pliska; the
 finite case of Dalang–Morton–Willinger): a finite-horizon, single-asset market
 on a finite full-support probability space has no arbitrage **iff** it admits an
