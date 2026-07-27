@@ -108,11 +108,11 @@ private lemma martingaleTransform_smul (c : ℝ) (φ : ℕ → Ω → ℝ) (n : 
   simp only [martingaleTransform, Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
   exact Finset.sum_congr rfl fun k _ ↦ by ring
 
+omit [MeasurableSingletonClass Ω] in
 /-- Every element of the attainable-gains subspace is the discounted gains of a
 predictable strategy. (`span`-induction: the generators are the gains of the
 single-period indicator strategies, and predictable gains are closed under the
 vector-space operations.) -/
-omit [MeasurableSingletonClass Ω] in
 theorem mem_gains_imp_predictable {g : Ω → ℝ} (hg : g ∈ gainsSubspace 𝓕 S T) :
     ∃ φ : ℕ → Ω → ℝ,
       StronglyAdapted 𝓕 (fun n ↦ φ (n + 1)) ∧ martingaleTransform φ S T = g := by
@@ -146,9 +146,9 @@ theorem mem_gains_imp_predictable {g : Ω → ℝ} (hg : g ∈ gainsSubspace �
     obtain ⟨φ, hφ, hφeq⟩ := ih
     exact ⟨c • φ, fun n ↦ (hφ n).const_smul c, by rw [martingaleTransform_smul, hφeq]⟩
 
+omit [IsProbabilityMeasure P] in
 /-- Under no arbitrage, the attainable-gains subspace is disjoint from the
 standard simplex: a non-negative, non-zero gains vector would be an arbitrage. -/
-omit [IsProbabilityMeasure P] in
 theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
     ∀ v ∈ gainsSubspace 𝓕 S T, v ∉ stdSimplex ℝ Ω := by
   intro v hv hsimplex
@@ -224,11 +224,11 @@ theorem exists_isEMM_of_noArbitrage (hS : StronglyAdapted 𝓕 S)
     integral_sub Integrable.of_finite.integrableOn Integrable.of_finite.integrableOn] at hkey
   linarith [hkey]
 
+omit [Nonempty Ω] [IsProbabilityMeasure P] in
 /-- **Forward direction**: an equivalent martingale measure precludes arbitrage.
 Under the EMM `Q`, the discounted gains telescope to `∫ G_T dQ = 0`; a
 non-negative integrand with zero integral is `0` a.e., and equivalence transports
 this back to `P`. -/
-omit [Nonempty Ω] [IsProbabilityMeasure P] in
 theorem noArbitrage_of_isEMM (hS : StronglyAdapted 𝓕 S)
     {Q : Measure Ω} (hQ : IsEMM 𝓕 P S T Q) : NoArbitrage 𝓕 P S T := by
   haveI := hQ.prob
