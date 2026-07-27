@@ -695,7 +695,13 @@ theorem boundary_tendsto_L2 (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (S 
       ((hcont_f (0 : ℝ)).comp (S.continuous_cut n)).measurable.comp (hBmeas 0)
     have m3 : Measurable (fun ω ↦ f (T : ℝ) (B T ω)) := (hcont_f (T : ℝ)).measurable.comp (hBmeas T)
     have m4 : Measurable (fun ω ↦ f (0 : ℝ) (B 0 ω)) := (hcont_f (0 : ℝ)).measurable.comp (hBmeas 0)
-    simpa only [hbn, fCut] using (m1.sub m2).sub (m3.sub m4)
+    -- `Measurable.sub` concludes in the `Pi` form `g - h`; the goal is the pointwise
+    -- lambda. They are defeq, but `simpa` matches syntactically, so state the
+    -- pointwise form here and let defeq do the coercion.
+    have hm : Measurable fun ω ↦
+        f (T : ℝ) (S.cut n (B T ω)) - f (0 : ℝ) (S.cut n (B 0 ω))
+          - (f (T : ℝ) (B T ω) - f (0 : ℝ) (B 0 ω)) := (m1.sub m2).sub (m3.sub m4)
+    simpa only [hbn, fCut] using hm
   -- pointwise: eventually `bn n ω = 0`, hence `(bn n ω)² → 0`
   have hlim : ∀ ω, Tendsto (fun n ↦ (bn n ω) ^ 2) atTop (𝓝 0) := fun ω ↦
     (tendsto_congr' (by
