@@ -20,7 +20,7 @@ This module provides the object as a hypothesis-bundling structure (its fields a
 Applebaum Def. 2.3.1 properties) plus the two Poisson moment facts the isometry needs —
 `𝔼[N(B)] = ν̂(B)` and `𝔼[N(B)²] = ν̂(B)² + ν̂(B)` — hence `𝔼[Ñ(B)] = 0`, `𝔼[Ñ(B)²] = ν̂(B)`.
 
-Mathlib carries the Poisson law (`poissonMeasure`, `poissonPMFReal`, `integral_poissonMeasure`)
+Mathlib carries the Poisson law (`poissonMeasure`, `integral_poissonMeasure`)
 but *not* its mean or variance; we derive them here from the total-mass identity by a single
 index shift (`(n+1)·pmf(n+1) = r·pmf(n)`), with no exp-series differentiation.
 

@@ -50,7 +50,7 @@ lean_exe blueprint_export where
 -- them; a batteries drift would invalidate the entire baked Mathlib build).
 require LeanArchitect from git
   "https://github.com/hanwenzhu/LeanArchitect.git" @
-  "v4.30.0"
+  "v4.32.0"
 
 -- RemyDegenne/brownian-motion: Brownian motion construction, multivariate
 -- Gaussian, Kolmogorov-Chentsov continuity, Doob's L^p inequality, stochastic
@@ -59,7 +59,7 @@ require LeanArchitect from git
 -- lean-toolchain are authoritative (mathfin.toml just sets local_project = ".").
 require BrownianMotion from git
   "https://github.com/RemyDegenne/brownian-motion.git" @
-  "bdf5ea0c34f9e6d75bce5f0609a968d6e9e99e8e"
+  "4d52fa776130a29d4ad7d6eda2035a919c0b4696"
 
 -- Pinned to Degenne brownian-motion's lake-manifest commit (so all transitive
 -- versions resolve consistently). Bump together with the BrownianMotion pin.
@@ -67,4 +67,4 @@ require BrownianMotion from git
 -- requires, so mathlib-last pins batteries/Cli/etc. at Mathlib's revs.
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4" @
-  "fabf563a7c95a166b8d7b6efca11c8b4dc9d911f"
+  "81a5d257c8e410db227a6665ed08f64fea08e997"

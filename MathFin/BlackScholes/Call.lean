@@ -29,7 +29,7 @@ risk-neutral lognormal hypothesis:
   Mathlib leverage: `gaussianReal`, `gaussianPDFReal`,
   `gaussianReal_map_const_mul`, `gaussianReal_map_add_const`,
   `gaussianReal_map_neg`, `integral_gaussianReal_eq_integral_smul`,
-  `integral_map`, `MeasureTheory.HasLaw`, `MeasureTheory.NoAtoms`.
+  `integral_map`, `MeasureTheory.HasLaw`, `MeasureTheory.NullSingletonClass`.
 
   ## Triple-check audit (2026-05-17)
 

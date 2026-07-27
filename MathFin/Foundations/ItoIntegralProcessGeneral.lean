@@ -73,7 +73,7 @@ theorem itoSimpleProcessLp_norm_le (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (
   calc eLpNorm (itoSimpleProcess hBmeas V t) 2 μ
       = eLpNorm (μ[itoSimple hBmeas V | natFiltration hBmeas t]) 2 μ :=
         (eLpNorm_congr_ae hcond).symm
-    _ ≤ eLpNorm (itoSimple hBmeas V) 2 μ := eLpNorm_condExp_le
+    _ ≤ eLpNorm (itoSimple hBmeas V) 2 μ := eLpNorm_condExp_le_eLpNorm _ one_le_two
 
 /-- **B1a's t-process as a linear map** on the `T`-bounded simple processes,
 `V ↦ (V●B)_t`. The target of the `extendOfNorm` extension. -/
@@ -215,7 +215,7 @@ theorem itoProcessCLM_norm_le (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
   rw [Lp.norm_def, ← itoIntegralCLM_T_norm hB T hBmeas φ, Lp.norm_def]
   refine ENNReal.toReal_mono (Lp.memLp (itoIntegralCLM_T hB T hBmeas φ)).2.ne ?_
   rw [eLpNorm_congr_ae hae]
-  exact eLpNorm_condExp_le
+  exact eLpNorm_condExp_le_eLpNorm _ one_le_two
 
 /-- **At the terminal time the process is the terminal integral.** `(φ●B)_T = itoIntegralCLM_T φ`
 as `Lp` elements: both are continuous-linear in `φ` and reproduce `itoSimple V` on the dense
