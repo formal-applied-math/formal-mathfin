@@ -1,0 +1,70 @@
+name: pin-bump build
+
+# THE BUILD SIGNAL FOR A DEPENDENCY BUMP — and nothing else.
+#
+# `build.yml` is the enforced per-push floor and runs the Python values gates
+# (including `ledger status`) BEFORE `lake build`, deliberately: a stale ledger
+# claim is a honesty failure and should fail fast, in seconds, without burning
+# 30 minutes of runner time.
+#
+# That ordering is circular for exactly one kind of change. A substantive pin
+# bump (lean-toolchain / lakefile.lean / lake-manifest.json) moves the pin
+# segment of every entry's input hash, so the WHOLE corpus restales by
+# construction — and `ledger rebase-pins` is explicitly not a shortcut for one
+# ("never as a shortcut after substantive pin bumps"). Clearing the ledger needs
+# a `ledger verify` sweep; a sweep needs a working library at the new pin; and
+# with `build.yml` stopping at the gate, nothing ever tells us whether the
+# library builds. The bump cannot be evaluated at all.
+#
+# This workflow breaks that cycle WITHOUT touching the floor. It runs only on
+# PRs that change a pin file, and it does one thing: build the library at the
+# new pin. It is not a gate on anything else, it does not re-implement the
+# values gates, and `build.yml` stays exactly as red as it was until the ledger
+# is genuinely re-verified. The intended sequence for a bump is:
+#
+#   1. this workflow goes green            → the library compiles at the new pin
+#   2. `ledger verify` sweep runs          → the corpus is re-verified
+#   3. `build.yml` goes green              → the honesty floor is satisfied
+#
+# A green run here is NOT a claim that the corpus is verified. It is the
+# narrower, prior claim that there is something worth verifying.
+
+on:
+  pull_request:
+    paths:
+      - 'lean-toolchain'
+      - 'lakefile.lean'
+      - 'lake-manifest.json'
+  workflow_dispatch:
+
+concurrency:
+  group: pin-bump-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: lake build at the new pin
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Report the pins under test
+        run: |
+          echo "toolchain: $(cat lean-toolchain)"
+          python3 - <<'PY'
+          import json
+          m = json.load(open("lake-manifest.json"))
+          for p in m["packages"]:
+              if not p.get("inherited"):
+                  print(f'{p["name"]:<16} {p["rev"]}  (inputRev {p.get("inputRev")})')
+          PY
+
+      # Same lean-action as build.yml: elan + the Mathlib olean cache + `lake
+      # build`. BrownianMotion, LeanArchitect and MathFin build from source.
+      # A green build is also the axiom-cleanliness proof — MathFin/AxiomAudit
+      # and the generated MathFin/AxiomAuditGen are `#guard_msgs`-pinned, so
+      # any axiom drift at the new pin fails right here.
+      - name: Build (elan + Mathlib cache + lake build)
+        uses: leanprover/lean-action@v1
