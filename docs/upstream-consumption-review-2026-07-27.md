@@ -328,16 +328,20 @@ The Mathlib olean cache host (`lakecache.blob.core.windows.net`) is unreachable
 from the environment this review was written in, so every build ran on a GitHub
 runner — which is where the memory doctrine puts full-environment work anyway.
 
-**What remains before `build.yml` can be green**, in order:
+**Both of the things that stood between this bump and a green `build.yml` are
+done:**
 
-1. The **`ledger verify` sweep**. All 341 entries are stale by construction
-   after a substantive pin bump, and `rebase-pins` is explicitly not a shortcut
-   for one. This needs a machine that can hold a Lean environment; the doctrine
-   puts corpus-scale sweeps on a runner, and the foundry's `batch-verify.yml`
-   (a `workflow_dispatch` parallel `lake env lean` pool) is the closest existing
-   substrate.
-2. The **linter triage** above.
+1. **The corpus is re-verified.** `ledger-sweep.yml` ran twelve shards of
+   `ledger verify --all --exec` on runners and the ledger is **341 fresh, 0
+   stale, 0 missing** — every benchmark snippet re-elaborated against the new
+   pin, not rehashed. Median 5.4 s per entry, 1682 Lean-seconds in total, ~28
+   minutes of wall clock. The refreshed ledger is committed by the sweep's merge
+   job; every row records `verified_at_commit`, so the claim is auditable rather
+   than asserted.
+2. **The linter findings are fixed** — all eight dead arguments removed (see
+   above), not silenced.
 
-Neither is a question about whether the bump is sound — the build and the axiom
-audits already answer that — but both stand between this branch and a green
-enforced gate.
+The `pin-bump.yml` and `ledger-sweep.yml` workflows this branch adds are the
+durable part: the next bump gets a build signal without the ledger deadlock, and
+a corpus sweep that fits in half an hour instead of a lost afternoon.
+
