@@ -156,7 +156,7 @@ driver, and `Q` is the equivalent martingale measure — its martingale
 property `E_Q[e^{−rT} S_T] = S_0` follows from the resulting `BSCallHyp` via
 `discounted_terminal_eq_S0`. -/
 theorem BSCallHyp.exists_of_physical {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    {P : Measure Ω} [IsProbabilityMeasure P]
+    {P : Measure Ω}
     {S_0 K r σ T : ℝ} {W : Ω → ℝ} (c : ℝ)
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T)
     (hWmeas : Measurable W) (hW : HasLaw W (gaussianReal 0 1) P) :

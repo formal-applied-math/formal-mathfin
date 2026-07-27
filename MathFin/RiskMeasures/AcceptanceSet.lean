@@ -105,7 +105,7 @@ measure `ρ` is the supremum of expected loss over its representing probability 
 least upper bound of `{∑ qᵢ (-Xᵢ) | q ∈ representingSet ρ}`. The upper bound is cash-invariance; the
 least-upper-bound is the point-from-cone separation of the rejected position `X + (ρX - ε)·1` from the
 acceptance cone, normalised to a representing density. -/
-theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] [Nonempty ι] {ρ : (ι → ℝ) → ℝ}
+theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] {ρ : (ι → ℝ) → ℝ}
     (hρ : IsCoherentRisk ρ) (X : ι → ℝ) :
     IsLUB ((fun q ↦ ∑ i, q i * (- X i)) '' representingSet ρ) (ρ X) := by
   classical

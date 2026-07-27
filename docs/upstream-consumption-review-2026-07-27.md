@@ -284,21 +284,32 @@ and the `Martingale/Centering.lean` predictability restatements.
 | `MathFin.coherentRisk_isLUB` (`RiskMeasures/AcceptanceSet.lean:103`) | `[Nonempty ι]` |
 
 Nothing in the library changed here — the linter did (batteries moved
-`fa08db58 → 023ce7d6` with Mathlib). **This is a triage item, not a defect**, and
-it is exactly the split `CLAUDE.md` describes: some of these are dead weight to
-delete, and some are deliberate domain-documenting hypotheses to record in
-`scripts/nolints.json` with a justification. Deciding which is which is a
-judgment call about how the statements should read — an `[IsProbabilityMeasure P]`
-on an FTAP statement may well be worth keeping even though the proof never
-touches it — so it is left for the maintainer rather than silently resolved
-here.
+`fa08db58 → 023ce7d6` with Mathlib). That is **seven declarations, eight
+arguments** (an earlier note in this document said six; the count was wrong).
 
-Practical consequence: **`build.yml` will fail on this lint even once the ledger
-is fresh**, because lean-action lints inside its build step. Either the seven
-findings get triaged, or `build.yml` gains `lint: "false"` and lint.yml stays
-the only place the suite runs. `pin-bump.yml` takes the latter route for
-itself, deliberately: it exists to answer "does the library compile at the new
-pin", and a style finding must not be able to answer that question wrongly.
+**All eight are now removed**, because on inspection every one is genuinely
+dead rather than domain-documenting:
+
+* the four inline binders (`GaussianGirsanov`, `SDEUniqueness`, `RiskParityFOC`,
+  `AcceptanceSet`) are deleted from the signatures;
+* the three in `FTAPDiscrete` come from a section `variable` line shared with
+  declarations that *do* need them, so they are dropped per-declaration with
+  `omit … in` — the same idiom already used in `GirsanovPredictableTheta`.
+
+The clearest case is `noArbitrage_of_isEMM`, which carried
+`[IsProbabilityMeasure P]` while opening with `haveI := hQ.prob`: it takes
+probability-ness from the EMM structure it is handed, so the ambient instance
+was never doing anything. `CLAUDE.md` points `unusedArguments` at exactly this
+(lens-3, zero slop: "dead hypotheses"), so removing them is the aligned move,
+not a lint-silencing one. Removing an unused instance binder is safe for
+callers — instances are inferred, so a call site that still has the instance in
+scope simply no longer needs it.
+
+`pin-bump.yml` still passes `lint: "false"`, deliberately and for a different
+reason: it exists to answer "does the library compile at the new pin", and a
+style finding must not be able to answer that question wrongly. The suite keeps
+running inside `build.yml` (via lean-action's auto-config) and on demand via
+`lint.yml`.
 
 ## Verification status of this bump
 

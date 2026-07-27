@@ -132,7 +132,7 @@ theorem isRiskParity_iff_cross_product
 /-- **Risk parity implies each `RC_i = Var(w) / |s|`**: at a risk-parity
 portfolio, every asset contributes `1/N`-th of the total variance. -/
 theorem riskContribution_eq_variance_div_card_of_riskParity
-    {ι : Type*} [DecidableEq ι] (s : Finset ι) (Sg : ι → ι → ℝ)
+    {ι : Type*} (s : Finset ι) (Sg : ι → ι → ℝ)
     (w : ι → ℝ) (i : ι) (hi : i ∈ s) (hs : s.Nonempty)
     (h_RP : IsRiskParity s Sg w) :
     riskContribution s Sg w i =

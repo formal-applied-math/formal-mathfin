@@ -278,10 +278,21 @@ def cmd_verify(args) -> int:
         tuple(sorted(MATHFIN_IMPORT_RE.findall(item[2]))) or ("~mathlib-only",),
         item[0], item[1],
     ))
+    if args.shard:
+        index, count = _parse_shard(args.shard)
+        # Deal round-robin off the import-set-sorted list rather than slicing
+        # contiguously: identical import sets cluster together, so contiguous
+        # slices would hand one shard all the cheap repeats and another all the
+        # expensive cold ones. Round-robin spreads both evenly.
+        targets = [t for i, t in enumerate(targets) if i % count == index]
+        print(f"shard {index + 1}/{count}: {len(targets)} of the selected entries",
+              flush=True)
     if args.limit:
         targets = targets[: args.limit]
     if not targets:
         print("nothing to verify — ledger is fresh")
+        if args.fragment:
+            Path(args.fragment).write_text("{}\n", encoding="utf-8")
         return 0
 
     head = _git_head()
@@ -291,6 +302,9 @@ def cmd_verify(args) -> int:
     print(f"verifying {len(targets)} entries via {via} (HEAD {head})",
           flush=True)
     failures = []
+    # Rows verified by THIS run, written out incrementally so an interrupted or
+    # timed-out shard still contributes everything it finished.
+    fragment: dict[str, dict] = {}
     for i, (fname, tid, code, digest) in enumerate(targets, 1):
         t0 = time.monotonic()
         try:
@@ -310,6 +324,11 @@ def cmd_verify(args) -> int:
                 "benchmark_file": fname,
             }
             save_ledger(ledger)
+            fragment[tid] = ledger["entries"][tid]
+            if args.fragment:
+                Path(args.fragment).write_text(
+                    json.dumps(fragment, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8")
             print(f"[{i}/{len(targets)}] OK   {tid} ({elapsed}s)", flush=True)
         else:
             failures.append((fname, tid, verdict.get("errors", [])))
@@ -323,6 +342,41 @@ def cmd_verify(args) -> int:
         for err in errors[:3]:
             print(f"       {err}")
     return 1 if failures else 0
+
+
+def _parse_shard(spec: str) -> tuple[int, int]:
+    """``"i/N"`` (1-based) → ``(i - 1, N)``."""
+    try:
+        raw_index, raw_count = spec.split("/", 1)
+        index, count = int(raw_index), int(raw_count)
+    except ValueError:
+        raise SystemExit(f"--shard expects 'i/N', got {spec!r}") from None
+    if not (1 <= index <= count):
+        raise SystemExit(f"--shard index out of range: {spec!r}")
+    return index - 1, count
+
+
+def cmd_merge_fragments(args) -> int:
+    """Fold shard fragments back into the ledger.
+
+    A sharded sweep runs N jobs that never see each other's ledgers, so each
+    writes only the rows it verified. Merging is a plain row-wise update: rows
+    are keyed by entry id and every fragment row is the product of an actual
+    successful check, so there is nothing to reconcile — a row present in two
+    fragments (possible only if the shard spec changed mid-sweep) is identical
+    up to timing, and last-write-wins is harmless."""
+    ledger = load_ledger()
+    entries = ledger.setdefault("entries", {})
+    merged = 0
+    for path in args.fragments:
+        rows = json.loads(Path(path).read_text(encoding="utf-8"))
+        for tid, row in rows.items():
+            entries[tid] = row
+            merged += 1
+        print(f"{path}: {len(rows)} rows")
+    save_ledger(ledger)
+    print(f"merged {merged} rows from {len(args.fragments)} fragment(s)")
+    return 0
 
 
 def cmd_rebase_pins(args) -> int:
@@ -393,11 +447,24 @@ def main() -> int:
                                "daemons)")
     p_verify.add_argument("--timeout", type=float, default=1800.0,
                           help="per-entry daemon timeout in seconds")
+    p_verify.add_argument("--shard", default="",
+                          help="'i/N' (1-based): verify only this shard of the "
+                               "selected entries, dealt round-robin off the "
+                               "import-set ordering. For runner sweeps.")
+    p_verify.add_argument("--fragment", default="",
+                          help="write the rows verified by THIS run to a JSON "
+                               "file, for `merge-fragments` to fold back in")
+    p_merge = sub.add_parser(
+        "merge-fragments",
+        help="fold shard fragments (see `verify --fragment`) into the ledger")
+    p_merge.add_argument("fragments", nargs="+", help="fragment JSON files")
     args = parser.parse_args()
     if args.command == "status":
         return cmd_status(args)
     if args.command == "rebase-pins":
         return cmd_rebase_pins(args)
+    if args.command == "merge-fragments":
+        return cmd_merge_fragments(args)
     return cmd_verify(args)
 
 
