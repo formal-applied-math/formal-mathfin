@@ -346,10 +346,19 @@ done:**
    job; every row records `verified_at_commit`, so the claim is auditable rather
    than asserted.
 2. **The linter findings are fixed** — every dead argument removed, not
-   silenced. This took two rounds: removing an unused instance argument can make
-   it unused one level up, in a consumer that only held it to pass down. The
-   second round is where the true count surfaced (13 findings, from the summary
-   header rather than a truncated tail).
+   silenced: **27 arguments over four rounds (8 → 13 → 5 → 1)**, ending with
+   `lake lint` reporting zero. It took four rounds because removing an unused instance argument can make
+   it unused one level up, in a consumer that only held it to pass down — so
+   each layer peeled revealed the next, converging quickly. The second round is
+   where the true count surfaced, read from the summary header rather than a
+   truncated log tail.
+
+   The loop this exposed is worth recording: `build.yml` lints only *after* its
+   ledger gate, and after a bump that gate needs a full corpus sweep, so the
+   feedback time for a one-line signature edit was ~45 minutes. `pin-bump.yml`
+   now carries an advisory lint job in parallel with the build
+   (`continue-on-error`), which answers "did that clear the linter" in ~3
+   minutes without touching the ledger.
 
 The `pin-bump.yml` and `ledger-sweep.yml` workflows this branch adds are the
 durable part: the next bump gets a build signal without the ledger deadlock, and
