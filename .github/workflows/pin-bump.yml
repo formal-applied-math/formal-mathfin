@@ -87,3 +87,24 @@ jobs:
         if: failure()
         run: |
           lake build 2>&1 | grep -E "error:|warning:|✖" -A 25 | head -300 || true
+
+  # Advisory lint, reported but never fatal. A bump is exactly when the linter
+  # set moves (batteries travels with Mathlib), and the findings surface in
+  # build.yml — but only AFTER its ledger gate passes, which after a bump means
+  # after a full corpus sweep. That ordering makes the shortest feedback loop
+  # for "did I clear the linter" absurdly long. This job answers it directly,
+  # in parallel with the build, and `continue-on-error` keeps a style finding
+  # from reddening the build signal this workflow exists to give.
+  lint:
+    name: env-linter inventory (advisory)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build + lint
+        uses: leanprover/lean-action@v1
+        with:
+          lint: "true"
