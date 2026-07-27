@@ -68,3 +68,13 @@ jobs:
       # any axiom drift at the new pin fails right here.
       - name: Build (elan + Mathlib cache + lake build)
         uses: leanprover/lean-action@v1
+
+      # On a bump the interesting output is the FIRST error in each failing
+      # module, and Lake buries those under thousands of "✔ Built …" lines —
+      # the summary at the end names the failed targets but not why. This
+      # re-runs the build incrementally (everything that succeeded is cached,
+      # so only the failures re-elaborate) and prints just the diagnostics.
+      - name: Surface the first errors from failing modules
+        if: failure()
+        run: |
+          lake build 2>&1 | grep -E "error:|warning:|✖" -A 25 | head -300 || true

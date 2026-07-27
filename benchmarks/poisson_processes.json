@@ -46,7 +46,7 @@
         "reference": "Theorem 3.3.9",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full derivation at increment level: the structure encodes only the textbook hypotheses (component increment laws + cross-independence); the superposition conclusion is DERIVED via MathFin.Foundations.PoissonSuperposition (poissonMeasure_conv_poissonMeasure: the Poisson convolution identity, proved from point masses + the binomial theorem, absent from Mathlib; plus the independent-sum-to-convolution bridge). Upgraded reduced_core -> full 2026-06-05."
+        "formalization_scope": "Full derivation at increment level: the structure encodes only the textbook hypotheses (component increment laws + cross-independence); the superposition conclusion is DERIVED via MathFin.Foundations.PoissonSuperposition (the Poisson convolution identity is Mathlib's ProbabilityTheory.poissonMeasure_conv_poissonMeasure, consumed via a re-export; MathFin supplies the pushforward-form independent-sum bridge, which Mathlib carries only in HasLaw form). Upgraded reduced_core -> full 2026-06-05."
       }
     },
     {
