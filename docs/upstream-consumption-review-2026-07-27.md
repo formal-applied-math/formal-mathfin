@@ -266,13 +266,67 @@ and the `Martingale/Centering.lean` predictability restatements.
 
 ---
 
+## The linter set moved too — a new triage item
+
+`lean-action`'s auto-config runs `lake lint` whenever the lakefile declares a
+`lintDriver`, so the environment linters run inside every `build.yml` job. On
+`main` (Lean v4.31.0) they pass. At the new pin they report **six
+`unusedArguments` findings** across five files that were clean before:
+
+| declaration | unused argument |
+|---|---|
+| `MathFin.mem_gains_imp_predictable` (`Foundations/FTAPDiscrete.lean:111`) | `[MeasurableSingletonClass Ω]` |
+| `MathFin.gains_disjoint_stdSimplex` (`Foundations/FTAPDiscrete.lean:148`) | `[IsProbabilityMeasure P]` |
+| `MathFin.noArbitrage_of_isEMM` (`Foundations/FTAPDiscrete.lean:225`) | `[Nonempty Ω]`, `[IsProbabilityMeasure P]` |
+| `MathFin.BSCallHyp.exists_of_physical` (`Foundations/GaussianGirsanov.lean:145`) | `[IsProbabilityMeasure P]` |
+| `MathFin.sde_pathwise_uniqueness` (`Foundations/SDEUniqueness.lean:171`) | `[IsProbabilityMeasure μ]` |
+| `MathFin.riskContribution_eq_variance_div_card_of_riskParity` (`Portfolio/RiskParityFOC.lean:132`) | `[DecidableEq ι]` |
+| `MathFin.coherentRisk_isLUB` (`RiskMeasures/AcceptanceSet.lean:103`) | `[Nonempty ι]` |
+
+Nothing in the library changed here — the linter did (batteries moved
+`fa08db58 → 023ce7d6` with Mathlib). **This is a triage item, not a defect**, and
+it is exactly the split `CLAUDE.md` describes: some of these are dead weight to
+delete, and some are deliberate domain-documenting hypotheses to record in
+`scripts/nolints.json` with a justification. Deciding which is which is a
+judgment call about how the statements should read — an `[IsProbabilityMeasure P]`
+on an FTAP statement may well be worth keeping even though the proof never
+touches it — so it is left for the maintainer rather than silently resolved
+here.
+
+Practical consequence: **`build.yml` will fail on this lint even once the ledger
+is fresh**, because lean-action lints inside its build step. Either the seven
+findings get triaged, or `build.yml` gains `lint: "false"` and lint.yml stays
+the only place the suite runs. `pin-bump.yml` takes the latter route for
+itself, deliberately: it exists to answer "does the library compile at the new
+pin", and a style finding must not be able to answer that question wrongly.
+
 ## Verification status of this bump
 
-The pins, the regenerated `lake-manifest.json` and the four source fixes above
-are in this branch. The Mathlib olean cache host
-(`lakecache.blob.core.windows.net`) is unreachable from the environment this
-review was written in, so **no local `lake build` was run**: the build gate is
-CI, and the corpus's verification ledger is stale by construction after a
-substantive pin bump (`rebase-pins` is explicitly not a shortcut for one). The
-remaining work is therefore: green `lake build` at the new pin, then a
-`ledger verify` sweep on a machine that can hold a Lean environment.
+**`lake build` is green at the new pin: "Build completed successfully (8979
+jobs)"** — the whole library, `MathFin/AxiomAudit` and the generated
+`MathFin/AxiomAuditGen` included, so the `#guard_msgs`-pinned axiom sets are
+unchanged by the bump. That took four rounds on `pin-bump.yml`:
+
+1. 223/262 MathFin modules built; `ItoIntegralL2` failed and blocked 39.
+2. The `SimpleProcess.integral` index-type port cleared the whole Itô tower;
+   two `Pi`-vs-pointwise goal-shape failures remained.
+3. One more of the same, one tower up (`GirsanovAdaptedTheta`).
+4. Green.
+
+The Mathlib olean cache host (`lakecache.blob.core.windows.net`) is unreachable
+from the environment this review was written in, so every build ran on a GitHub
+runner — which is where the memory doctrine puts full-environment work anyway.
+
+**What remains before `build.yml` can be green**, in order:
+
+1. The **`ledger verify` sweep**. All 341 entries are stale by construction
+   after a substantive pin bump, and `rebase-pins` is explicitly not a shortcut
+   for one. This needs a machine that can hold a Lean environment; the doctrine
+   puts corpus-scale sweeps on a runner, and the foundry's `batch-verify.yml`
+   (a `workflow_dispatch` parallel `lake env lean` pool) is the closest existing
+   substrate.
+2. The **linter triage** above.
+
+Neither is a question about whether the bump is sound — the build and the axiom
+audits already answer that — but both stand between this branch and a green
+enforced gate.

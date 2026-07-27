@@ -66,8 +66,17 @@ jobs:
       # A green build is also the axiom-cleanliness proof — MathFin/AxiomAudit
       # and the generated MathFin/AxiomAuditGen are `#guard_msgs`-pinned, so
       # any axiom drift at the new pin fails right here.
+      # `lint: false` is deliberate. lean-action's auto-config runs `lake lint`
+      # whenever the lakefile declares a `lintDriver`, and ours does. The
+      # environment-linter suite is ADVISORY in this repo by doctrine — it has
+      # its own on-demand workflow (lint.yml) precisely because its findings
+      # must be triaged, not auto-blocked. This job answers one question, "does
+      # the library compile at the new pin", and a style finding must not be
+      # able to answer it wrongly.
       - name: Build (elan + Mathlib cache + lake build)
         uses: leanprover/lean-action@v1
+        with:
+          lint: "false"
 
       # On a bump the interesting output is the FIRST error in each failing
       # module, and Lake buries those under thousands of "✔ Built …" lines —
