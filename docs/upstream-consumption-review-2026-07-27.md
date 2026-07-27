@@ -38,10 +38,91 @@ Re-test `v4.33.0` once LeanArchitect and lean_scout tag it.
 
 | what | where | why |
 |---|---|---|
-| `eLpNorm_condExp_le` → `eLpNorm_condExp_le_eLpNorm _ one_le_two` | `Foundations/ItoIntegralProcessGeneral.lean` (×2) | The old Mathlib name is **gone** at the new pin. Its replacement is the *generalised* `(f) {p} (hp : 1 ≤ p)` form — which is BM's `Auxiliary/Jensen.eLpNorm_condExp_le_eLpNorm`, **upstreamed into Mathlib** in this window and deleted from BM. Consuming it is the coherent move, not a workaround. |
+| `eLpNorm_condExp_le` → `eLpNorm_condExp_le_eLpNorm _ (by simp)` | `Foundations/ItoIntegralProcessGeneral.lean` (×2) | The old Mathlib name is **gone** at the new pin. Its replacement is the *generalised* `(f) {p} (hp : 1 ≤ p)` form — which is BM's `Auxiliary/Jensen.eLpNorm_condExp_le_eLpNorm`, **upstreamed into Mathlib** in this window and deleted from BM. Consuming it is the coherent move, not a workaround. |
 | `NoAtoms` → `NullSingletonClass`, `noAtoms_gaussianReal` → `nullSingletonClass_gaussianReal` | `Foundations/StandardNormal.lean` | Deprecated aliases (since 2026-06-09). Still compile, with warnings; the class rename is upstream's, so we follow it. |
 | stale docstring names | `BlackScholes/Call.lean`, `Foundations/PoissonRandomMeasure.lean` | `MeasureTheory.NoAtoms` and `poissonPMFReal` (deprecated → `poissonMeasure`) cited as live API. |
 | coherence note repointed | `Foundations/ItoIntegralProcessContinuousModification.lean` | The note justified the file by "Degenne's `exists_modification_isCadlag` is `sorry`-backed". That lemma **no longer exists**: `StochasticIntegral/CadlagModification.lean` was deleted and replaced by `Quasimartingale/CadlagModification.lean` (1162 lines, `cadlagModif`). The justification survives — the successor still carries `sorry`s — but the citation had to be re-aimed at the real file, or the note would be an honest-looking claim about a name that is gone. |
+| **the index-type change** (see below) | `Foundations/ItoIntegralL2.lean`, `Foundations/ItoIntegralProcess.lean` | `SimpleProcess.integral` went from `WithTop ι → Ω → G` to `ι → Ω → G` upstream, and `integral_top` was commented out. Both MathFin call sites broke. |
+| duplicated Poisson convolution replaced by consumption | `Foundations/PoissonSuperposition.lean` | see "the duplicate we were carrying" below |
+
+### The one that actually mattered: a type changed under a name that did not
+
+`SimpleProcess.integral`, Degenne's elementary stochastic integral, was
+`WithTop ι → Ω → G` at the old pin. `⊤` named the untruncated value and
+`integral_top` unfolded it to the increment sum. At the new pin it is
+`ι → Ω → G`: the index dropped `WithTop`, `integral_top` is commented out
+upstream, and with `ι = ℝ≥0` there is no `⊤` left to evaluate at.
+
+Two consequences, both instructive:
+
+* `itoSimpleProcess` (evaluation at a finite `t`) needed only the coercion
+  removed — `(t : WithTop ℝ≥0)` → `t` — and its `stoppedProcess` helper
+  collapsed from `untopA` bookkeeping to `rfl`. Semantics unchanged.
+* `itoSimple` (the untruncated value) can no longer be *expressed* as an
+  evaluation of `integral`. It is now defined as the increment sum, with
+  `itoSimple_apply` definitional, and its additivity/homogeneity — which used
+  to ride on `integral_add_left`/`integral_smul_left` — proved directly on the
+  `Finsupp` sum. Restoring the consumption relation (`itoSimple = integral … t`
+  for any `t` dominating `V`'s finite support, via a `horizon V :=
+  V.value.support.sup Prod.snd`) is a **follow-up**: it needs a
+  time-independence lemma (`integral … i = integral … j` once both dominate the
+  support) that also repairs additivity through `integral_add_left` at a common
+  time. That is the coherent end state; the current form is the honest
+  intermediate.
+
+**No name-level sweep can catch this**, and neither can a grep: every
+identifier we referenced still exists upstream. Only the build finds it. That
+is the argument for the `pin-bump.yml` workflow this branch adds.
+
+### Blast radius, honestly stated
+
+The first pin-bump build named exactly two failing targets —
+`Foundations.GirsanovSimpleDoleansMoments` and `Foundations.ItoIntegralL2` — out
+of 8979. That understates it: Lake reports the *roots* of a failure and silently
+skips their dependents. `ItoIntegralL2` has **39 transitive dependents** inside
+`MathFin/` (the entire Itô-integral tower, including `ItoIntegralProcess`, which
+carries the same `WithTop` idiom); `GirsanovSimpleDoleansMoments` has 2. So the
+accurate statement after run 1 was: **223 of 262 MathFin modules verified
+building at the new pin, 39 blocked behind one upstream type change, 2 blocked
+behind a second failure.**
+
+### The duplicate we were carrying
+
+`MathFin.PoissonSuperposition.poissonMeasure_conv_poissonMeasure` proved
+`poissonMeasure a ∗ poissonMeasure b = poissonMeasure (a + b)` from the point
+masses — a Cauchy product collapsed by the binomial theorem, ~95 lines with two
+private helpers. Mathlib has proved *the same statement, verbatim*, since
+2026-05-26 (leanprover-community/mathlib4#34435, via characteristic functions).
+It was already upstream **at the old pin**: this was not drift introduced by the
+bump, it was a standing duplication that the file's own docstring denied ("**no
+convolution identity** for it") and the benchmark's `formalization_scope`
+repeated ("absent from Mathlib").
+
+Now a re-export. What the file still genuinely owns is
+`indepFun_map_add_poissonMeasure`: Mathlib's superposition statements are
+`HasLaw`-shaped, while the Poisson-process tower states increment laws as
+pushforward equalities and derives the measurability side conditions from a
+nonzero pushforward instead of assuming them.
+
+The lesson generalises: **a "Mathlib does not have this" comment is a claim with
+a shelf life.** MathFin makes 29 such claims in its docstrings. Re-testing all
+29 against the new pin is what found this one — and it is the cheapest audit in
+this document (greps, minutes). The other 26 held: no `tanh` derivative, no
+matrix-valued differentiation, no Gaussian quantile/`Φ⁻¹` API, no
+Farkas/polyhedral separation, no Lindeberg/triangular-array CLT, no counting
+process, no gamma/exponential convolution, no Poisson generating function, and
+still no `Lᵖ`-bound producer of uniform integrability. Two more were stale
+rather than false and are corrected in this branch (`exists_modification_isCadlag`
+no longer exists; Degenne now proves *an* isometry, just not ours).
+
+### Our own contribution came back to us
+
+`docs/upstreaming.md` still listed PR #446 (stochastic intervals) as "ready for
+review". It **merged** — upstream commit `eaa4391`, present in every pin we have
+used since, with the defs renamed `stochasticIoc` → `stochIoc` and friends. The
+draft under `upstream/brownian-motion/` was a copy of code that is now upstream,
+and is deleted. The other two staged drafts were re-checked and are still
+genuinely absent upstream, so they remain live candidates.
 
 ### Method (repeatable at the next bump)
 
@@ -60,7 +141,17 @@ took seconds — worth re-running verbatim on every bump *before* a build:
    short-name collisions (`of`, `one`, `id`, …) and can be filtered by length.
 
 This catches renames and removals. It does **not** catch signature changes,
-`simp`-set drift, or instance-resolution changes — those need the build.
+`simp`-set drift, or instance-resolution changes — those need the build, which
+is what actually found the `SimpleProcess.integral` index change.
+
+**Two bugs in the sweep as first written, both worth fixing before reuse:**
+tokenising with a `(?<![A-Za-z0-9_.'])` lookbehind means a dotted use like
+`SimpleProcess.integral_top` never matches the bare removed name `integral_top`
+— compare the *last component* of dotted uses as well, or the sweep silently
+under-reports. And a declaration that upstream **comments out** rather than
+deletes still shows up as removed on the `-` side while its `+` side (`-- @[simp]
+lemma …`) matches nothing, which is correct here but means "gone" should be read
+as "gone from the API", not "gone from the file".
 
 ---
 
