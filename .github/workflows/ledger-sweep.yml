@@ -1,0 +1,169 @@
+name: ledger sweep
+
+# CORPUS-SCALE RE-VERIFICATION, on a runner — the sweep the memory doctrine
+# says belongs here rather than on the 10 GB box (CLAUDE.md, "Full-environment
+# batch work runs on GitHub runners").
+#
+# Why it has to exist: a substantive pin bump moves the pin segment of every
+# entry's input hash, so all ~341 benchmark entries restale at once, and
+# `ledger rebase-pins` is explicitly NOT a shortcut for that case ("never as a
+# shortcut after substantive pin bumps — those won't match the proof gate
+# anyway, by design"). The only honest way back to a fresh ledger is to
+# re-verify, and re-verifying the corpus serially is 4-6 hours of Lean.
+#
+# Shape: `verify --exec` re-checks each snippet with a stateless
+# `lake env lean` (~30-90 s each, immune to the daemon's cold-start
+# pathology). Twelve shards, dealt round-robin off the import-set ordering so
+# no shard inherits all the cold import sets, bring that to ~30 min of
+# wall-clock. Each shard writes only the rows it verified (`--fragment`); a
+# final job folds them together (`merge-fragments`) and commits the refreshed
+# ledger back to the branch, because a ledger nobody committed proves nothing.
+#
+# Triggering: pin-file PRs (a bump is exactly when the whole corpus restales)
+# plus manual dispatch. It is deliberately NOT on every PR — an ordinary proof
+# change restales a handful of entries, which the local daemon path handles in
+# minutes.
+#
+# Loop safety: the merge job pushes a commit to the PR branch, which re-triggers
+# this workflow (the PR's diff still touches the pin files). That second run
+# finds the ledger already fresh, the preflight short-circuits it, and no
+# further commit is made. The recursion terminates after exactly one extra
+# no-op run.
+
+on:
+  pull_request:
+    paths:
+      - 'lean-toolchain'
+      - 'lakefile.lean'
+      - 'lake-manifest.json'
+  workflow_dispatch:
+
+concurrency:
+  group: ledger-sweep-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  # Cheap stdlib-only gate: if nothing is stale there is no sweep to run, and
+  # this is also what stops the push-retrigger recursion.
+  preflight:
+    name: is anything stale?
+    runs-on: ubuntu-latest
+    outputs:
+      stale: ${{ steps.check.outputs.stale }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        run: |
+          if python3 -m tools.verify.ledger status > status.txt; then
+            echo "ledger is already fresh — nothing to sweep"
+            echo "stale=false" >> "$GITHUB_OUTPUT"
+          else
+            head -1 status.txt
+            echo "stale=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  verify:
+    name: shard ${{ matrix.shard }}/12
+    needs: preflight
+    if: needs.preflight.outputs.stale == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+
+      # Build the library once per shard so `lake env lean` has oleans to
+      # elaborate against. `lint: false` for the same reason as pin-bump.yml:
+      # the env-linter suite is advisory here and must not fail a sweep.
+      - name: Build (elan + Mathlib cache + lake build)
+        uses: leanprover/lean-action@v1
+        with:
+          lint: "false"
+
+      # LEDGER_EXEC_LOCAL: run `lake env lean` in THIS environment rather than
+      # `docker exec`-ing into the local daemon container.
+      - name: Verify this shard
+        env:
+          LEDGER_EXEC_LOCAL: "1"
+        run: |
+          python3 -m tools.verify.ledger verify --all --exec \
+            --shard "${{ matrix.shard }}/12" \
+            --fragment "fragment-${{ matrix.shard }}.json" \
+            --timeout 600
+
+      # Uploaded even on failure: a shard that verified 25 of its 29 entries
+      # still moves the ledger forward, and throwing that away would mean
+      # re-running an hour of Lean to recover it.
+      - name: Upload the rows this shard verified
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ledger-fragment-${{ matrix.shard }}
+          path: fragment-${{ matrix.shard }}.json
+          if-no-files-found: warn
+
+  merge:
+    name: merge fragments + commit the refreshed ledger
+    needs: verify
+    if: always() && needs.verify.result != 'skipped'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ledger-fragment-*
+          path: fragments
+          merge-multiple: true
+
+      - name: Fold the fragments into verification_ledger.json
+        run: |
+          shopt -s nullglob
+          files=(fragments/fragment-*.json)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "no fragments — nothing verified"; exit 1
+          fi
+          python3 -m tools.verify.ledger merge-fragments "${files[@]}"
+
+      - name: Report the resulting freshness
+        id: status
+        run: |
+          python3 -m tools.verify.ledger status | head -1
+          python3 -m tools.verify.ledger status > /dev/null \
+            && echo "fresh=true" >> "$GITHUB_OUTPUT" \
+            || echo "fresh=false" >> "$GITHUB_OUTPUT"
+
+      - name: Commit
+        run: |
+          if git diff --quiet -- verification_ledger.json; then
+            echo "ledger unchanged — nothing to commit"; exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add verification_ledger.json
+          git commit -m "chore(ledger): re-verify the corpus at the new pin
+
+Sharded \`ledger verify --all --exec\` sweep on runners (ledger-sweep.yml).
+Every row here is a snippet that was re-elaborated against the new pin, not a
+rehash — \`rebase-pins\` is not valid after a substantive pin bump."
+          git push
+
+      # The sweep is only "done" if the ledger is actually fresh afterwards.
+      # A shard that failed entries leaves them stale, and that must be loud.
+      - name: Fail if entries remain stale
+        if: steps.status.outputs.fresh != 'true'
+        run: |
+          echo "::error::sweep incomplete — entries are still stale (see the shard logs for FAILs)"
+          python3 -m tools.verify.ledger status | head -40
+          exit 1
