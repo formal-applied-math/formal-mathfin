@@ -120,6 +120,11 @@ services:
     mem_limit: 6g
     environment:
       - LEAN_NUM_THREADS=${LEAN_NUM_THREADS:-1}
+      # Per-request elaboration cap (lean_backend `_ELAB_TIMEOUT_S`). Default 180s
+      # covers ~all entries; override (e.g. 600) for the rare heavy corpus entry
+      # (barrier/reflection/Itô-formula proofs) so a `ledger verify` sweep does not
+      # get its REPL killed mid-elaboration. Backward-compatible: unset ⇒ 180.
+      - LEAN_ELAB_TIMEOUT=${LEAN_ELAB_TIMEOUT:-180}
     volumes:
       - ../tools:/app/tools:ro
       - ../MathFin:/app/MathFin
