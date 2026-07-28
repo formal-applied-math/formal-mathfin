@@ -29,10 +29,15 @@ services:
     working_dir: /app
     # lean-lsp-mcp is not in the image; install it once at start, then idle.
     # docker exec spawns the actual stdio MCP per vibe session.
+    #
+    # PINNED: this container holds RW mounts on MathFin/ and the lakefile, so an
+    # unpinned install would give whatever PyPI serves that day write access to
+    # the Lean sources. 0.28.1 is the version the harness was validated against.
+    # Bump deliberately, after a vibe session against the new version.
     entrypoint: ["sh", "-c"]
     command:
       - >-
-        (pip install --quiet --no-warn-script-location lean-lsp-mcp
-        || pip install --quiet --no-warn-script-location --break-system-packages lean-lsp-mcp)
+        (pip install --quiet --no-warn-script-location lean-lsp-mcp==0.28.1
+        || pip install --quiet --no-warn-script-location --break-system-packages lean-lsp-mcp==0.28.1)
         && echo LEAN_LSP_MCP_READY && exec sleep infinity
     restart: "no"
