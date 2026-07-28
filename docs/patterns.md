@@ -889,6 +889,13 @@ sorry`.
 - **Natural generality** (already in the drafter contract, restated here): `s.Nonempty`
   over a member-witness; `A ≠ 0` over provable positivity; the minimal typeclass the
   callees need.
+- **Check the sign on a scale-invariance / homogeneity claim** (2026-07-19). `f (c • x)
+  = |c| · f x` (or `= c · f x`) for ALL real `c` is usually FALSE for `c < 0` when `f`
+  is a sup/inf over an asymmetric set — a drawdown, a range, any one-sided extremum: a
+  negative scalar flips the extremum. Default the quantifier to `0 ≤ c` (or `c > 0`)
+  unless the sign genuinely does not matter, and match the sign convention the issue's
+  sibling clauses already use. #73 `maxDD`: the issue's `∀ c` form is false — `P =
+  ![0, 1]` gives `maxDD (-P) = 1 ≠ 0 = |-1| · maxDD P`; the true claim is `0 ≤ c`.
 
 ## Repair table (compiler error → fix) (2026-07-18)
 
