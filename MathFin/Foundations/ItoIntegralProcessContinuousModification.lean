@@ -37,10 +37,12 @@ continuous and adapted for every `ω`). It is **not** proved here.
 
 ## Coherence
 
-Pure consumption + assembly. Degenne's general càdlàg modification
-(`exists_modification_isCadlag`) is `sorry`-backed, so this result is not a
-duplicate; and the `L²`-continuity + Doob route yields a genuinely **continuous**
-(not merely càdlàg) version. Nothing of the isometry, density, or martingale
+Pure consumption + assembly. Degenne's general càdlàg modification is still
+work-in-progress at our pin — the old `exists_modification_isCadlag` was retired
+with `StochasticIntegral/CadlagModification.lean` and its successor,
+`cadlagModif` in `StochasticIntegral/Quasimartingale/CadlagModification.lean`,
+carries `sorry`s — so this result is not a duplicate; and the `L²`-continuity +
+Doob route yields a genuinely **continuous** (not merely càdlàg) version. Nothing of the isometry, density, or martingale
 property is reproved — the maximal inequality is Degenne's, the continuous
 approximants are B3's, the density is B1b's.
 

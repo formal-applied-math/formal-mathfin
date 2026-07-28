@@ -41,7 +41,14 @@ exactly what `indepFun_shift` is stated against.
 
 Degenne's `BrownianMotion/StochasticIntegral/` already abstracts the
 simple-predictable-integrand objects (`SimpleProcess`, `ElementaryPredictableSet`,
-`L2Predictable`) — but proves **no** isometry; that is the gap this file fills.
+`L2Predictable`) — but proves no *integrand-to-integral* isometry; that is the gap
+this file fills. (Since the 2026-07-27 pin bump upstream does prove an isometry,
+`SquareIntegrable.toL2Isom` in `StochasticIntegral/SquareIntegrable.lean` — but it
+is the other one: the `LinearIsometryEquiv` sending a square-integrable martingale
+to its terminal value `X ∞` in `L²`, i.e. the Doob-space isomorphism, not
+`‖∫ φ dB‖₂² = ∫ 𝔼[φ²] dt`. The two compose rather than compete, and consuming
+`SquareIntegrable` for our `L²`-martingale layer is an open follow-up — see
+`docs/upstream-consumption-review-2026-07-27.md`.)
 We re-encode adaptedness concretely as `AdaptedAt` (factoring through
 `pastProcess`) so that the weak-Markov independence `IsPreBrownianReal.indepFun_shift`
 applies directly. The deterministic moments `integral_two_increment` /

@@ -11,7 +11,20 @@ name: lint
 # re-implementing it. `getDeclsInPackage MathFin` scopes the lint to our
 # library; Mathlib / BrownianMotion declarations are not linted.
 #
-# ON-DEMAND ONLY (workflow_dispatch), ADVISORY, deliberately NOT per-push.
+# ON-DEMAND ONLY (workflow_dispatch) for the FULL suite with its own reporting.
+#
+# CAVEAT, learned the hard way during the 2026-07-27 pin bump: this workflow is
+# not the only place `lake lint` runs. `lean-action`'s auto-config runs the
+# configured `lintDriver` as part of its build step, so build.yml lints on every
+# push too — the env-linter suite has been a de-facto per-push gate all along,
+# and the "deliberately NOT per-push" this comment used to claim was wrong. It
+# passed silently until the bump changed the linter set (batteries moved with
+# Mathlib) and surfaced 21 unused arguments across the library.
+#
+# Two consequences worth knowing: a linter change upstream can turn build.yml
+# red without a single line of MathFin changing, and any workflow that wants a
+# BUILD signal specifically must pass `lint: "false"` (as pin-bump.yml and the
+# ledger sweep do) or a style finding will masquerade as a build failure.
 # The env-linter suite reports findings that must be TRIAGED, not auto-blocked:
 # some are genuine slop to fix (a real dead argument), some are deliberate
 # conventions to record in `scripts/nolints.json` (e.g. a domain-documenting

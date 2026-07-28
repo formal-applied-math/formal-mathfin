@@ -296,10 +296,15 @@ lemma memLp_mixedProduct_two {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 
       * simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) 2 P := by
   have hDmeas := measurable_driftExp (X := X) (P := P) hs hc a N u
   have hZmeas := measurable_simpleDoleans (X := X) (P := P) hs hc hc_bdd N T
-  rw [memLp_two_iff_integrable_sq (hDmeas.mul hZmeas).aestronglyMeasurable]
+  -- `Measurable.mul` concludes in the `Pi` form `g * h`, while the goal's `MemLp`
+  -- is about the pointwise lambda; `rw` needs the syntactic form, so pin it here.
+  have hDZ : Measurable fun ω ↦
+      Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)
+        * simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω := hDmeas.mul hZmeas
+  rw [memLp_two_iff_integrable_sq hDZ.aestronglyMeasurable]
   refine (((integrable_driftExp_four (X := X) (P := P) hs hs0 hc hc_bdd a N huT hNT).add
     (integrable_simpleDoleans_four (X := X) (P := P) hs hs0 hc hc_bdd N hNT)).const_mul 2⁻¹).mono'
-    ((hDmeas.mul hZmeas).pow_const 2).aestronglyMeasurable (ae_of_all _ fun ω ↦
+    (hDZ.pow_const 2).aestronglyMeasurable (ae_of_all _ fun ω ↦
       (Real.norm_of_nonneg (sq_nonneg _)).le.trans (sq_mul_le_half_add_pow4 _ _))
 
 include hX in

@@ -108,6 +108,7 @@ private lemma martingaleTransform_smul (c : ℝ) (φ : ℕ → Ω → ℝ) (n : 
   simp only [martingaleTransform, Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
   exact Finset.sum_congr rfl fun k _ ↦ by ring
 
+omit [MeasurableSingletonClass Ω] in
 /-- Every element of the attainable-gains subspace is the discounted gains of a
 predictable strategy. (`span`-induction: the generators are the gains of the
 single-period indicator strategies, and predictable gains are closed under the
@@ -145,6 +146,7 @@ theorem mem_gains_imp_predictable {g : Ω → ℝ} (hg : g ∈ gainsSubspace �
     obtain ⟨φ, hφ, hφeq⟩ := ih
     exact ⟨c • φ, fun n ↦ (hφ n).const_smul c, by rw [martingaleTransform_smul, hφeq]⟩
 
+omit [IsProbabilityMeasure P] in
 /-- Under no arbitrage, the attainable-gains subspace is disjoint from the
 standard simplex: a non-negative, non-zero gains vector would be an arbitrage. -/
 theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
@@ -166,6 +168,7 @@ theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage �
   rw [eq_empty_of_pos_singleton hP hnull] at hmem
   simp at hmem
 
+omit [IsProbabilityMeasure P] in
 /-- **Backward direction**: no arbitrage ⟹ an equivalent martingale measure
 exists. The separating-dual `q` of the gains subspace, normalised to a
 probability `Q`, is the EMM: strict positivity gives `Q ~ P`, and the
@@ -222,6 +225,7 @@ theorem exists_isEMM_of_noArbitrage (hS : StronglyAdapted 𝓕 S)
     integral_sub Integrable.of_finite.integrableOn Integrable.of_finite.integrableOn] at hkey
   linarith [hkey]
 
+omit [Nonempty Ω] [IsProbabilityMeasure P] in
 /-- **Forward direction**: an equivalent martingale measure precludes arbitrage.
 Under the EMM `Q`, the discounted gains telescope to `∫ G_T dQ = 0`; a
 non-negative integrand with zero integral is `0` a.e., and equivalence transports
@@ -262,6 +266,7 @@ theorem noArbitrage_of_isEMM (hS : StronglyAdapted 𝓕 S)
     (integral_eq_zero_iff_of_nonneg_ae hposQ Integrable.of_finite).mp hGint
   exact hQ.Pabs.ae_eq hzeroQ
 
+omit [IsProbabilityMeasure P] in
 /-- **Finite-Ω Fundamental Theorem of Asset Pricing** (Harrison–Pliska; the
 finite case of Dalang–Morton–Willinger): a finite-horizon, single-asset market
 on a finite full-support probability space has no arbitrage **iff** it admits an

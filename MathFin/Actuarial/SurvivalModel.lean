@@ -116,7 +116,7 @@ lemma survive_zero [IsProbabilityMeasure P] (hX : Measurable X) (x : ℝ)
 /-- **The survival ratio** `tpₓ = S_X(x+t) / S_X(x)` for `t ≥ 0` — the survival-ratio keystone (AFP: `ccdfTx_ccdfX`).
 Conditioning on survival to age `x`, a further `t` years of survival has probability the ratio of
 the two unconditional survival probabilities. -/
-lemma survive_eq_survivalFunction_ratio [IsProbabilityMeasure P] (hX : Measurable X) (x : ℝ)
+lemma survive_eq_survivalFunction_ratio (hX : Measurable X) (x : ℝ)
     {t : ℝ} (ht : 0 ≤ t) :
     survive P X t x = survivalFunction P X (x + t) / survivalFunction P X x := by
   have hsub : alive X (x + t) ⊆ alive X x := alive_subset_alive (le_add_of_nonneg_right ht)

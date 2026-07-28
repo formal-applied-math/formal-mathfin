@@ -14,17 +14,23 @@ Draft files targeting other repos' module trees live under `upstream/` (our `lak
 never builds them; catalogue in `upstream/README.md`). This doc logs what has been
 *submitted* as a PR and how to do it again.
 
-As of 2026-05-27 the first full submission is **PR #446** (issue #440, stochastic
-intervals): CI-green, claimed, ready for review.
+As of 2026-07-27 the first full submission, **PR #446** (issue #440, stochastic
+intervals), is **MERGED** — it is in BrownianMotion as
+`BrownianMotion/StochasticIntegral/StochasticInterval.lean` (commit `eaa4391`,
+"feat: stochastic intervals (#446)"), and has been in every pin we have used
+since. Upstream renamed the defs on the way in: our `stochasticIcc/Ico/Ioc/Ioo`
+and `stochasticGraph` are their `stochIcc/Ico/Ioc/Ioo` and `stochGraph`.
 
 ## Submitted contributions
 
 | target | contribution | PR | status |
 |---|---|---|---|
-| brownian-motion | stochastic intervals; `]]σ,τ]]` predictable + an elementary predictable set (issue #440) | [#446](https://github.com/RemyDegenne/brownian-motion/pull/446) | ready for review — CI green, claimed (2026-05-27) |
+| brownian-motion | stochastic intervals; `]]σ,τ]]` predictable + an elementary predictable set (issue #440) | [#446](https://github.com/RemyDegenne/brownian-motion/pull/446) | **merged** — upstream `eaa4391`, landed as `stochIcc`/`stochIoc`/… (confirmed 2026-07-27) |
 
 Staged but not yet submitted (drafts only, under `upstream/`): `brownian-motion/Martingale.lean`,
-`mathlib/RealTail.lean`.
+`mathlib/RealTail.lean`. Both re-checked against the 2026-07-27 pins and still absent upstream
+(`squareSubTime_isMartingale` / `waldExponential_isMartingale` are in no BrownianMotion module;
+the Gaussian tail lemmas are in no Mathlib `Gaussian/Real.lean`), so both remain live candidates.
 
 ## Record: #440 — stochastic intervals (PR #446)
 

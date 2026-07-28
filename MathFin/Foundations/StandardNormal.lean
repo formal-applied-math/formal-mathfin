@@ -84,9 +84,10 @@ lemma Phi_neg (x : ℝ) : Phi (-x) = 1 - Phi x := by
   have h_eq : gaussianReal (0 : ℝ) 1 (Set.Iic (-x)) = gaussianReal 0 1 (Set.Ici x) := by
     conv_lhs => rw [← hmap]
     rw [Measure.map_apply measurable_neg measurableSet_Iic, h_preimage]
-  -- Ici x and Iio x partition univ; under NoAtoms, Q(Iio x) = Q(Iic x)
+  -- Ici x and Iio x partition univ; under NullSingletonClass, Q(Iio x) = Q(Iic x)
   have h_one_nz : (1 : ℝ≥0) ≠ 0 := one_ne_zero
-  haveI : NoAtoms (gaussianReal (0 : ℝ) 1) := noAtoms_gaussianReal h_one_nz
+  haveI : NullSingletonClass (gaussianReal (0 : ℝ) 1) :=
+    nullSingletonClass_gaussianReal h_one_nz
   have h_iio_iic : gaussianReal (0 : ℝ) 1 (Set.Iic x) = gaussianReal 0 1 (Set.Iio x) := by
     have h_decomp : Set.Iic x = Set.Iio x ∪ {x} := by
       ext y; simp [Set.mem_Iic, le_iff_lt_or_eq, eq_comm]

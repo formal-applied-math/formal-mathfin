@@ -181,7 +181,7 @@ The energy `E s = 𝔼[(Xₛ−Yₛ)²]` satisfies `E s ≤ (2·Cdrift·s + 2·C
 prefactor is dominated by the constant `K = 2·Cdrift·t + 2·Cdiff`, and
 `gronwall_zero_of_le_const_mul_integral` forces `E ≡ 0`, i.e. `Xₜ = Yₜ` a.s. -/
 theorem sde_pathwise_uniqueness
-    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
+    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
     {μ_coef : ℝ → ℝ} {X Y : ℝ → Ω → ℝ} {Iσ : (ℝ → Ω → ℝ) → ℝ → Ω → ℝ}
     {Cdrift Cdiff : ℝ} (hCd : 0 ≤ Cdrift)
     (hXYint : ∀ s, 0 ≤ s → Integrable (fun ω ↦ (X s ω - Y s ω) ^ 2) μ)

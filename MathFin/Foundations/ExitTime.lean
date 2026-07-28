@@ -190,7 +190,7 @@ each `exitTime N` is a stopping time (closed-set route, no right-continuity), th
 a.s. monotone, and it escapes to `⊤` a.s. (continuous paths are bounded on compacts). This is the
 repo's first genuine `IsLocalizingSequence` — the localization engine that lifts the
 bounded-derivative Itô formula to unbounded coefficients. -/
-theorem isLocalizingSequence_exitTime [IsProbabilityMeasure μ] (hBmeas : ∀ t, Measurable (B t))
+theorem isLocalizingSequence_exitTime (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) :
     IsLocalizingSequence (augFiltration (μ := μ) hBmeas) (fun N ↦ exitTime B N) μ where
   isStoppingTime := fun N i ↦

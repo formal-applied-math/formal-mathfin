@@ -491,10 +491,16 @@ lemma memLp_fn_two (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → �
       * simpleDoleansExp (X := B) (unifPart T n) (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω) 2 μ := by
   have hDmeas := measurable_Dn hBmeas hadap a T u n
   have hZmeas := measurable_Zn hB hBmeas hadap hbdd T n
-  rw [memLp_two_iff_integrable_sq (hDmeas.mul hZmeas).aestronglyMeasurable]
+  -- `Measurable.mul` concludes in the `Pi` form `g * h`, while the goal's `MemLp`
+  -- is about the pointwise lambda; `rw` needs the syntactic form, so pin it here.
+  have hDZ : Measurable fun ω ↦ Real.exp (a * (B u ω + simpleDrift (unifPart T n)
+        (fun i ω ↦ θ (unifPart T n i) ω) n u ω) - a ^ 2 * (u : ℝ) / 2)
+      * simpleDoleansExp (X := B) (unifPart T n)
+        (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω := hDmeas.mul hZmeas
+  rw [memLp_two_iff_integrable_sq hDZ.aestronglyMeasurable]
   refine (((integrable_Dn_four hB hBmeas hadap hbdd a T huT n).add
     (integrable_Zn_four hB hBmeas hadap hbdd T n)).const_mul 2⁻¹).mono'
-    ((hDmeas.mul hZmeas).pow_const 2).aestronglyMeasurable (ae_of_all _ fun ω ↦
+    (hDZ.pow_const 2).aestronglyMeasurable (ae_of_all _ fun ω ↦
       (Real.norm_of_nonneg (sq_nonneg _)).le.trans (sq_mul_le_half_add_pow4 _ _))
 
 include hB in

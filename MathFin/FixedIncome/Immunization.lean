@@ -77,7 +77,7 @@ lemma hasDerivAt_bondPortfolioValue_r
 
 /-- **Single-bond portfolio duration**: matches the ZCB duration `(T − t)`. -/
 lemma bondPortfolio_single_bond_dur
-    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :
+    {ι : Type*} (i : ι) (w T : ι → ℝ) (t r : ℝ) :
     bondPortfolioDur {i} w T t r =
       w i * (T i - t) * Real.exp (-(r * (T i - t))) := by
   unfold bondPortfolioDur
@@ -85,7 +85,7 @@ lemma bondPortfolio_single_bond_dur
 
 /-- Single-bond portfolio value matches the ZCB price `w · exp(−r(T − t))`. -/
 lemma bondPortfolio_single_bond_value
-    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :
+    {ι : Type*} (i : ι) (w T : ι → ℝ) (t r : ℝ) :
     bondPortfolioValue {i} w T t r = w i * Real.exp (-(r * (T i - t))) := by
   unfold bondPortfolioValue
   simp

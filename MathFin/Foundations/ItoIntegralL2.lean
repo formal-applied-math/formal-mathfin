@@ -87,19 +87,34 @@ theorem adaptedAt_of_measurable_natural (hBmeas : ∀ t, Measurable (B t)) {s : 
   exact ⟨g, hg, hgeq⟩
 
 /-- The **elementary Itô integral** of a simple process `V` against Brownian motion
-`B`, evaluated at the terminal time: `(V ● B)_⊤`. Built from Degenne's
-`SimpleProcess.integral` against the multiplication bilinear map. -/
+`B`, evaluated at the terminal time: `(V ● B)_⊤ = ∑ₚ V(p)·(B_{p.2} − B_{p.1})`,
+the increment sum with nothing truncated.
+
+Until the 2026-07-27 pin this *was* Degenne's `SimpleProcess.integral … ⊤`: his
+elementary integral was indexed by `WithTop ι`, so `⊤` named the untruncated
+value and `SimpleProcess.integral_top` unfolded it to this sum. At the new pin
+`integral : ι → Ω → G` — the index dropped `WithTop`, `integral_top` is
+commented out upstream, and with `ι = ℝ≥0` there is no `⊤` to evaluate at. The
+untruncated value is therefore no longer *expressible* as an evaluation of
+`integral`, and is taken as the definition here.
+
+Nothing downstream is weakened: every consumer goes through `itoSimple_apply`
+(now definitional), and the process-level integral `itoSimpleProcess` still
+consumes `SimpleProcess.integral` directly, at a genuine time `t : ℝ≥0`.
+Restoring the consumption relation — `itoSimple = integral … t` for any `t`
+dominating `V`'s finite support — is a follow-up recorded in
+`docs/upstream-consumption-review-2026-07-27.md`. -/
 noncomputable def itoSimple (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) : Ω → ℝ :=
-  SimpleProcess.integral (ContinuousLinearMap.mul ℝ ℝ) V B ⊤
+  fun ω ↦ V.value.sum fun p v ↦ v ω * (B p.2 ω - B p.1 ω)
 
 /-- The terminal Itô integral as the explicit increment sum
 `(V ● B)_⊤ ω = ∑ₚ V(p) ω · (B_{p.2} ω − B_{p.1} ω)`. -/
 lemma itoSimple_apply (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (ω : Ω) :
     itoSimple hBmeas V ω
-      = V.value.sum fun p v ↦ v ω * (B p.2 ω - B p.1 ω) := by
-  simp only [itoSimple, SimpleProcess.integral_top, ContinuousLinearMap.mul_apply']
+      = V.value.sum fun p v ↦ v ω * (B p.2 ω - B p.1 ω) :=
+  rfl
 
 variable [IsProbabilityMeasure μ]
 
@@ -407,13 +422,19 @@ theorem simpleProcessL2_norm_sq (hBmeas : ∀ t, Measurable (B t))
 lemma itoSimple_add (hBmeas : ∀ t, Measurable (B t))
     (V W : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     itoSimple hBmeas (V + W) = itoSimple hBmeas V + itoSimple hBmeas W := by
-  funext ω; simp only [itoSimple, SimpleProcess.integral_add_left, Pi.add_apply]
+  funext ω
+  simp only [itoSimple, Pi.add_apply, show (V + W).value = V.value + W.value from rfl]
+  exact Finsupp.sum_add_index' (fun p ↦ by simp) (fun p v w ↦ by simp [add_mul])
 
 /-- The elementary Itô integral is homogeneous in the simple process. -/
 lemma itoSimple_smul (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     itoSimple hBmeas (c • V) = c • itoSimple hBmeas V := by
-  funext ω; simp only [itoSimple, SimpleProcess.integral_smul_left, Pi.smul_apply]
+  funext ω
+  simp only [itoSimple, Pi.smul_apply, smul_eq_mul,
+    show (c • V).value = c • V.value from rfl]
+  rw [Finsupp.sum_smul_index' (fun p ↦ by simp), Finsupp.mul_sum]
+  exact Finsupp.sum_congr fun p _ ↦ by simp [mul_assoc]
 
 /-- **The elementary Itô integral as a linear map** `SimpleProcess →ₗ[ℝ] Lp ℝ 2 μ`. -/
 noncomputable def itoAssembly (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t)) :

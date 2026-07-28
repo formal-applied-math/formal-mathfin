@@ -102,7 +102,7 @@ theorem integral_increment (hB : BrownianQuadraticVariation μ B)
   rw [← h_map_int, h_map, integral_id_gaussianReal]
 
 /-- Integrability of the BM increment `B_t − B_s` under a finite measure. -/
-theorem integrable_increment [IsFiniteMeasure μ]
+theorem integrable_increment
     (hB : BrownianQuadraticVariation μ B) {s t : ℝ} (hs : 0 ≤ s) (hst : s ≤ t) :
     Integrable (fun ω ↦ B t ω - B s ω) μ := by
   obtain ⟨v, _, h_map⟩ := hB.gaussian_increments hs hst

@@ -52,19 +52,23 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 
 /-- **Process-level elementary Itô integral** of a simple `V` against Brownian
 motion `B`, at finite time `t`. Degenne's `SimpleProcess.integral` against
-multiplication, evaluated at the deterministic stopping time `(t : WithTop ℝ≥0)`. -/
+multiplication, evaluated at the deterministic stopping time `t`.
+
+Since the 2026-07-27 pin his integral is indexed by `ι` itself rather than
+`WithTop ι`, so the time argument is `t : ℝ≥0` with no coercion; the semantics
+are unchanged (the definition still truncates each increment at `t`). -/
 noncomputable def itoSimpleProcess (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas))
     (t : ℝ≥0) : Ω → ℝ :=
-  SimpleProcess.integral (ContinuousLinearMap.mul ℝ ℝ) V B (t : WithTop ℝ≥0)
+  SimpleProcess.integral (ContinuousLinearMap.mul ℝ ℝ) V B t
 
 /-- The deterministic stopped process at a constant time `u` collapses to
-`B (· ∧ u)`: `stoppedProcess B (fun _ ↦ ↑u) s = B (min s u)` (the `WithTop`
-`min`/`untopA` coercions). -/
+`B (· ∧ u)`: `stoppedProcess B (fun _ ↦ u) s = B (min s u)`. With the time index
+no longer wrapped in `WithTop`, this is Mathlib's definition of
+`stoppedProcess` unfolded — the `untopA` bookkeeping the old pin needed is
+gone. -/
 private lemma stoppedProcess_const_coe (u s : ℝ≥0) (ω : Ω) :
-    stoppedProcess B (fun _ : Ω ↦ (u : WithTop ℝ≥0)) s ω = B (min s u) ω := by
-  show B (min (s : WithTop ℝ≥0) (u : WithTop ℝ≥0)).untopA ω = B (min s u) ω
-  rw [← WithTop.coe_min, WithTop.untopA_eq_untop WithTop.coe_ne_top, WithTop.untop_coe]
+    stoppedProcess B (fun _ : Ω ↦ u) s ω = B (min s u) ω := rfl
 
 /-- **Explicit truncated increment-sum**:
 `(V ● B)_t ω = ∑_p V(p)(ω)·(B_{p.2∧t}(ω) − B_{p.1∧t}(ω))`. -/

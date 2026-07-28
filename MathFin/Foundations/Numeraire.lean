@@ -153,6 +153,7 @@ variable {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsFiniteMeasure Q]
   {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration Q 𝓕]
   {B N X : ℝ≥0 → Ω → ℝ} {B0 N0 : ℝ}
 
+omit [IsFiniteMeasure Q] in
 /-- **The dynamic change-of-numéraire theorem** (set-integral form). Fix a pricing
 measure `Q` for the reference numéraire `B` and a second strictly positive numéraire
 `N`, both adapted, with the normalisation process `t ↦ (B₀/N₀)(N_t/B_t)` a
