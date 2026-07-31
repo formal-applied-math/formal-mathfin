@@ -3794,6 +3794,60 @@
           "refined": "signature-bound def arguments + docstrings (docBlame); unused hσ_eq hypothesis and unused Insurance import removed; per-principle lemmas extracted, bundle derived from them"
         }
       }
+    },
+    {
+      "id": "mf-performance-gain_to_pain",
+      "name": "Add the gain-to-pain ratio and prove it is nonnegative",
+      "description": "The gain-to-pain ratio, total gains over total losses on a finite period set, is nonnegative — unconditionally.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.RatiosExtended\n\nopen MathFin\n\n/-- The gain-to-pain ratio is nonnegative: both legs are sums of positive/negative parts. -/\ntheorem mf_performance_gain_to_pain {ι : Type*} (s : Finset ι) (r : ι → ℝ) :\n    0 ≤ gainToPain s r :=\n  MathFin.gainToPain_nonneg s r\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Add the gain-to-pain ratio and prove it is nonnegative",
+        "difficulty": "good-first",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Performance/RatiosExtended.lean (magistral-drafted statement, leanstral proof, human-refined at review). Re-export from MathFin. Axioms-clean. Introduces definitions: gainToPain (new-defs review class).",
+        "provenance": {
+          "statement_source": "magistral-autoform",
+          "statement_model": "magistral-medium",
+          "source": "leanstral-autoform",
+          "model": "labs-leanstral-1-5",
+          "issue": 161,
+          "new_defs": [
+            "gainToPain"
+          ],
+          "refined": "spurious `0 < pain` hypothesis dropped (the drafter guarded a division Lean does not need guarding — x/0 = 0); def restated on Mathlib's posPart/negPart instead of open-coded max, which supplies posPart_sub_negPart and hence one_le_gainToPain_iff (ratio ≥ 1 ↔ the period was profitable) as the lemma that makes the definition earn its place; landed in the existing RatiosExtended module the issue named, not a new one-lemma module"
+        }
+      }
+    },
+    {
+      "id": "mf-performance-upside_capture",
+      "name": "Add the upside-capture ratio and prove homogeneity in the portfolio return",
+      "description": "The upside-capture ratio is homogeneous of degree one in the portfolio leg — unconditionally.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.RatiosExtended\n\nopen MathFin\n\n/-- Upside capture is homogeneous of degree one in the portfolio return. -/\ntheorem mf_performance_upside_capture {ι : Type*} (up : Finset ι) (p b : ι → ℝ) (c : ℝ) :\n    upCapture up (c • p) b = c * upCapture up p b :=\n  MathFin.upCapture_smul up p b c\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Add the upside-capture ratio and prove positive homogeneity in the portfolio return",
+        "difficulty": "small",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Performance/RatiosExtended.lean (magistral-drafted statement, leanstral proof, human-refined at review). Re-export from MathFin. Axioms-clean. Introduces definitions: upCapture (new-defs review class).",
+        "provenance": {
+          "statement_source": "magistral-autoform",
+          "statement_model": "magistral-medium",
+          "source": "leanstral-autoform",
+          "model": "labs-leanstral-1-5",
+          "issue": 162,
+          "new_defs": [
+            "upCapture"
+          ],
+          "refined": "spurious `∑ b ≠ 0` hypothesis dropped (mul_div_assoc needs no nonvanishing denominator); scalar leg stated as `c • p` and the lemma named `_smul`, since the claim is degree-one homogeneity and `_scale_invariant` is already taken in this namespace by the genuinely invariant Sortino/Treynor/IR lemmas; landed in the existing RatiosExtended module the issue named, not a new one-lemma module"
+        }
+      }
     }
   ]
 }
