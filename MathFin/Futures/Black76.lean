@@ -122,4 +122,45 @@ theorem blackPayerSwaption_eq_bsVGarman (A F K σ T : ℝ) (hA : 0 < A) :
   unfold blackPayerSwaption bsVGarman
   rw [hd1, hd2]; ring
 
+/-! ## Black-76 caplet and floorlet
+
+A **caplet** is a European call on a forward rate, scaled by the accrual factor
+`α` over the accrual period; a **floorlet** is its put counterpart. Both follow
+the same no-separate-discount convention as the swaption above — the forward
+numéraire absorbs the drift, so the discount does not appear in the formula.
+
+Written out, the caplet is `α · [F Φ(d₁) − K Φ(d₂)]`, which is the payer
+swaption's formula with the accrual factor sitting in the annuity slot. That is
+not a coincidence worth hiding: `blackCaplet_eq_blackPayerSwaption` records it,
+and caplet-floorlet parity is then the payer-receiver parity already proved
+above, applied. -/
+
+/-- **Black-76 caplet price**: `α · [F Φ(d₁) − K Φ(d₂)]`, the accrual-scaled
+Black-76 call on the forward rate `F`, with `d_i = bsd_i F K 0 σ T`. -/
+noncomputable def blackCaplet (F K σ T α : ℝ) : ℝ :=
+  α * (F * Phi (bsd1 F K 0 σ T) - K * Phi (bsd2 F K 0 σ T))
+
+/-- **Black-76 floorlet price**: `α · [K Φ(−d₂) − F Φ(−d₁)]`, the put counterpart
+of `blackCaplet`. -/
+noncomputable def blackFloorlet (F K σ T α : ℝ) : ℝ :=
+  α * (K * Phi (-(bsd2 F K 0 σ T)) - F * Phi (-(bsd1 F K 0 σ T)))
+
+/-- **The caplet is a payer swaption in disguise**: same Black-76 shape, with the
+accrual factor `α` where the swaption carries its annuity `A`. The two
+instruments differ in their numéraire story, not in their formula. -/
+theorem blackCaplet_eq_blackPayerSwaption (F K σ T α : ℝ) :
+    blackCaplet F K σ T α = blackPayerSwaption α F K σ T := rfl
+
+/-- **The floorlet is a receiver swaption in disguise**, by the same reading. -/
+theorem blackFloorlet_eq_blackReceiverSwaption (F K σ T α : ℝ) :
+    blackFloorlet F K σ T α = blackReceiverSwaption α F K σ T := rfl
+
+/-- **Caplet-floorlet parity**: `V^caplet − V^floorlet = α · (F − K)`, the
+forward-rate analogue of put-call parity. Given the structural identity above it
+*is* payer-receiver parity, so it is that theorem applied rather than the same
+`Phi`-symmetry argument run a second time. -/
+theorem caplet_floorlet_parity (F K σ T α : ℝ) :
+    blackCaplet F K σ T α - blackFloorlet F K σ T α = α * (F - K) :=
+  swaption_payer_receiver_parity α F K σ T
+
 end MathFin

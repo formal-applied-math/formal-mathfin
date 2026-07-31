@@ -103,4 +103,38 @@ lemma hasDerivAt_bsV_charm {K r σ : ℝ} (hσ : 0 < σ)
   have h_Phi_d1 := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp τ h_d1_τ
   convert h_Phi_d1 using 1 <;> rfl
 
+/-- **Speed**: `∂³V/∂S³ = ∂Γ/∂S = -ϕ(d₁) (d₁ + σ√τ) / (S² σ² τ)`.
+
+Gamma is the quotient `ϕ(d₁(S)) / (S σ √τ)` (`hasDerivAt_bsV_SS`), so speed is
+one quotient rule away. Numerator derivative is `ϕ'(d₁) ∂_S d₁ = -d₁ ϕ(d₁)/(S σ √τ)`;
+denominator derivative is the constant `σ √τ`. The two contributions carry `d₁`
+and `σ√τ` respectively, which is where the `d₁ + σ√τ` numerator comes from —
+and note the denominator is `S² σ² τ`, not `S² σ √τ`. -/
+lemma hasDerivAt_bsV_SSS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
+    HasDerivAt (fun s ↦ gaussianPDFReal 0 1 (bsd1 s K r σ τ) / (s * σ * Real.sqrt τ))
+      (-(gaussianPDFReal 0 1 (bsd1 S K r σ τ) * (bsd1 S K r σ τ + σ * Real.sqrt τ)
+        / (S ^ 2 * σ ^ 2 * τ))) S := by
+  have h_sqrt_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
+  have h_sqrt_ne : Real.sqrt τ ≠ 0 := h_sqrt_pos.ne'
+  have hσ_ne : σ ≠ 0 := hσ.ne'
+  have hS_ne : S ≠ 0 := hS.ne'
+  have h_num := (hasDerivAt_gaussianPDFReal_zero_one (bsd1 S K r σ τ)).comp S
+    (hasDerivAt_bsd1_S (r := r) hK hσ hτ hS)
+  have h_den : HasDerivAt (fun s : ℝ ↦ s * σ * Real.sqrt τ) (σ * Real.sqrt τ) S := by
+    simpa using ((hasDerivAt_id S).mul_const σ).mul_const (Real.sqrt τ)
+  -- Pin the quotient's expected type so `.div` elaborates against the goal's
+  -- instances rather than handing back a Pi-`/` of functions.
+  have h : HasDerivAt (fun s ↦ gaussianPDFReal 0 1 (bsd1 s K r σ τ) / (s * σ * Real.sqrt τ))
+      ((-(bsd1 S K r σ τ * gaussianPDFReal 0 1 (bsd1 S K r σ τ)) * (1 / (S * σ * Real.sqrt τ))
+            * (S * σ * Real.sqrt τ)
+          - gaussianPDFReal 0 1 (bsd1 S K r σ τ) * (σ * Real.sqrt τ))
+        / (S * σ * Real.sqrt τ) ^ 2) S :=
+    h_num.div h_den (by positivity)
+  convert h using 1
+  rw [show S ^ 2 * σ ^ 2 * τ = (S * σ * Real.sqrt τ) ^ 2 from by
+    rw [mul_pow, mul_pow, Real.sq_sqrt hτ.le]]
+  field_simp
+  ring
+
 end MathFin
