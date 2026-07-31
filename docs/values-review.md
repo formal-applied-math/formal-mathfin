@@ -74,6 +74,68 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-07-31 — corpus 344 — open-PR review round: the spurious-guard class
+
+Scope: the eight open PRs, not a new proof program. Deviation from protocol worth naming — this
+round was adjudicated by a single reviewer rather than a three-agent panel, so treat the per-lens
+gradients below as one reading, and re-run the panel at the next proof session.
+
+**Upgrades executed.**
+
+1. **Lens 3 (zero slop) + lens 5 (first principles) — the headline.** All four autoform PRs for
+   #161/#162 shipped a **division guard the theorem does not need**: `0 < ∑ r⁻` on gain-to-pain
+   nonnegativity, `∑ b ≠ 0` on upside-capture homogeneity. In Lean `x / 0 = 0`, so `div_nonneg`
+   over two nonneg sums and `mul_div_assoc` both discharge unconditionally. Neither issue asked
+   for the guard — the drafter added it. Both dropped; the merged statements are strictly
+   stronger than what was drafted. This is the *dead-hypothesis* failure mode, and it is the one
+   the kernel cannot see: a weaker theorem type-checks exactly as happily as a strong one.
+2. **Lens 2 (coherence).** `gainToPain` restated on Mathlib's `posPart`/`negPart` (`r⁺`, `r⁻`)
+   instead of open-coded `max _ 0`. That is not cosmetic: it is what makes
+   `posPart_sub_negPart` available, and hence `one_le_gainToPain_iff`.
+3. **Lens 1 (inspired math).** `0 ≤ gainToPain` is bookkeeping — it says a quotient of
+   nonnegatives is nonnegative and nothing about finance. `one_le_gainToPain_iff` (the ratio
+   clears 1 exactly when `0 ≤ ∑ r`) is the statement that makes the definition worth having, and
+   it is where a positivity hypothesis is genuinely load-bearing. Added alongside.
+4. **Lens 4 (architecture).** Four PRs created four new one-lemma modules
+   (`GainToPain`, `PerformanceRatios`, `UpCapture`, `PerformanceRatiosExtended`) when both issues
+   named `Performance/RatiosExtended.lean`, beside the four ratios they belong with. Consolidated
+   into one change in that module; four duplicate PRs closed.
+5. **Lens 6 (idiomatic register).** `upCapture_scale_invariant` renamed `upCapture_smul`: the
+   claim is degree-one homogeneity, and `_scale_invariant` is already taken in this namespace by
+   Sortino/Treynor/IR, which genuinely *are* invariant (`f (c • x) = f x`). Scalar leg stated as
+   `c • p`. Also removed: unused `open MeasureTheory ProbabilityTheory` / `open scoped NNReal
+   ENNReal BigOperators` in every draft, and an `@[simp]` attached to an `example` (a no-op).
+
+**Ranked backlog.**
+
+1. **A redundant-hypothesis prober, in the foundry gate chain.** The spurious guard slipped
+   through four independent drafts and a kernel check. It is mechanically detectable: after a
+   proof lands, re-elaborate it with each hypothesis deleted in turn; anything that still
+   compiles was decorative. Seconds per target on the daemon, no model in the loop. This is the
+   single highest-value gate the pipeline is missing — owner: foundry.
+2. **`AxiomAuditGen` misses bundle-shaped proof terms.** The generator only picks up qualified
+   `:= MathFin.X`, so a benchmark closed by `⟨MathFin.a …, MathFin.b …⟩` (PR #166's FRA entry)
+   escapes the exhaustive audit entirely. #166's author noticed and hand-added to the *curated*
+   `AxiomAudit.lean` — the right instinct, but it silently promotes an ordinary entry into the
+   headliner file. Extend the extractor to walk anonymous constructors and `And.intro` spines.
+3. **`formalization.yaml`'s automation disclosure is pinned to a retired pipeline.**
+   `tools/formalization_yaml.py:164,238,240` hardcode "statement specified by Magistral" +
+   `magistral-medium`, and `tests/test_formalization_yaml.py:113-115` *asserts* it. Magistral left
+   the foundry on 2026-07-29 (`docs/upgrade-backlog.md`). Today's file is still accurate for
+   today's corpus — every autoform entry in it was drafted before the cutover — but the next one
+   will make the disclosure false. Needs a decision, not a patch: the drafter is now Claude, and
+   standing policy is that Claude is never attributed. Owner: R.
+4. **`docs/patterns.md`: fold in the guard rule.** The file already carries "check the sign on a
+   scale-invariance / homogeneity claim" (2026-07-19) and "`A ≠ 0` over provable positivity".
+   The neighbouring rule this round earned — *no guard on a division unless the conclusion
+   actually breaks at zero* — belongs beside them, aimed at the drafter.
+
+**Evidence / context.** Mechanical floor green on the integrated tree: full `lake build` 8981
+jobs, `ledger status` 344/344 fresh (all four new entries re-verified through the daemon at the
+v4.32.0 pin), 30/30 python gates, `AxiomAuditGen` byte-fresh at 284 guards. Note the pin
+interaction that would otherwise have pushed main red: every one of these PRs was built against
+the pre-#168 toolchain, so all of them carried stale entry hashes.
+
 ## 2026-07-16 — corpus 335 — multi-asset matrix Riccati (BEGV Prop 2) via spectral reduction
 
 `Foundations/MatrixMarketMakingRiccati` (M1 abstract matrix Riccati `a' = a·a − Â·Â` solved in closed

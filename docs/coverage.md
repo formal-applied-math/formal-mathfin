@@ -26,7 +26,25 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-18, in-out barrier parity — closes #53):** corpus
+> **Live status (2026-07-31, gain-to-pain + upside capture — closes #161, #162):** corpus
+> **344**, **312 full + 18 wrappers = 330/344 delivery-ready**, 14 reduced cores, 0 placeholders.
+> `mf-performance-gain_to_pain` and `mf-performance-upside_capture`
+> (`Performance/RatiosExtended`): the two realised-path ratios join the four moment ratios
+> already in that module. `gainToPain` is written on Mathlib's positive/negative parts
+> (`r⁺`, `r⁻`) rather than open-coded `max _ 0`, which buys `posPart_sub_negPart` and hence
+> `one_le_gainToPain_iff` — the ratio clears 1 exactly when the period was profitable, the
+> statement that makes the definition worth having. `upCapture_smul` is degree-one
+> homogeneity in the portfolio leg.
+>
+> Both landed as **one** refined change consolidating four duplicate autoform PRs
+> (#163/#165 for #161, #164/#167 for #162 — the pipeline drafted each target twice). Each
+> draft carried a **spurious division guard** (`0 < ∑ r⁻`, `∑ b ≠ 0`) that neither issue
+> asked for and neither proof needs: in Lean `x / 0 = 0`, so nonnegativity and homogeneity
+> both hold unconditionally. The guards are dropped, so the merged statements are strictly
+> *stronger* than the drafted ones. Each draft also created a new one-lemma module instead of
+> the `RatiosExtended` module both issues named; consolidated. Axioms-clean.
+>
+> **Prior (2026-07-18, in-out barrier parity — closes #53):** corpus
 > **342**, **310 full + 18 wrappers = 328/342 delivery-ready**, 14 reduced cores, 0 placeholders.
 > `mf-barrier-inout-parity` (`BlackScholes/BarrierParity`, closes #53): knock-in / knock-out
 > **in-out parity** `V_in + V_out = V_vanilla` — the barrier-hit event `A` and its complement

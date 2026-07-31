@@ -9,7 +9,7 @@ public import Mathlib
 public import MathFin.Performance.Ratios
 
 /-!
-# Extended performance ratios: Sortino, Treynor, Information ratio
+# Extended performance ratios: Sortino, Treynor, Information, gain-to-pain, upside capture
 
 Standard quant performance metrics beyond the basic Sharpe ratio:
 
@@ -29,12 +29,31 @@ Sortino, Treynor, and IR are all instances of `(a − b)/d`. Their
 handles the Sharpe scale invariance — proving that the master is load-bearing
 across all four ratios in the library.)
 
+The last two are *realised* ratios: they aggregate a return path over a finite
+period set rather than combining summary moments.
+
+* **Gain-to-pain ratio** `(∑ r⁺) / (∑ r⁻)`, total gains over total losses
+  (Schwager). Written with Mathlib's positive/negative parts `r⁺ = max r 0`,
+  `r⁻ = max (-r) 0`, so `posPart_sub_negPart` supplies the decomposition
+  `∑ r⁺ − ∑ r⁻ = ∑ r` that turns "ratio ≥ 1" into "the period was profitable".
+* **Upside-capture ratio** `(∑_{up} p) / (∑_{up} b)`, portfolio gains over
+  benchmark gains on the up-market periods (Morningstar).
+
+Both are quotients, and in Lean `x / 0 = 0`; the nonnegativity and homogeneity
+statements below therefore need **no** nonvanishing side condition — the
+degenerate no-loss / flat-benchmark case is covered by the same statement. The
+one place a hypothesis is genuinely load-bearing is
+`one_le_gainToPain_iff`, where `0 < ∑ r⁻` is what makes the quotient
+comparable to `1` at all.
+
 Results:
 
 * `sortinoRatio`, `sortinoRatio_scale_invariant`, `sortinoRatio_translation`.
 * `treynorRatio`, `treynorRatio_scale_invariant`.
 * `informationRatio`, `informationRatio_scale_invariant`.
 * `trackingErrorSq`, `trackingErrorSq_self`, `trackingErrorSq_ge_diff_sq`.
+* `gainToPain`, `gainToPain_nonneg`, `one_le_gainToPain_iff`.
+* `upCapture`, `upCapture_smul`.
 -/
 
 @[expose] public section
@@ -109,5 +128,41 @@ lemma trackingErrorSq_ge_diff_sq (σ_p σ_b cov : ℝ) (h_cs : cov ≤ σ_p * σ
     (σ_p - σ_b) ^ 2 ≤ trackingErrorSq σ_p σ_b cov := by
   unfold trackingErrorSq
   nlinarith [h_cs]
+
+variable {ι : Type*}
+
+/-- **Gain-to-pain ratio** over a finite period set `s` with returns `r`: total
+gains `∑ r⁺` over total losses `∑ r⁻` (Schwager). -/
+noncomputable def gainToPain (s : Finset ι) (r : ι → ℝ) : ℝ :=
+  (∑ i ∈ s, (r i)⁺) / (∑ i ∈ s, (r i)⁻)
+
+/-- **Gain-to-pain is nonnegative**: both legs are sums of positive/negative
+parts. Unconditionally — with no losses the denominator is `0` and the ratio is
+`0`, which the statement already covers. -/
+lemma gainToPain_nonneg (s : Finset ι) (r : ι → ℝ) : 0 ≤ gainToPain s r :=
+  div_nonneg (Finset.sum_nonneg fun _ _ ↦ posPart_nonneg _)
+    (Finset.sum_nonneg fun _ _ ↦ negPart_nonneg _)
+
+/-- **Gain-to-pain exceeds one exactly on a profitable period set**: since
+`r⁺ - r⁻ = r` summand-wise, `∑ r⁺ ≥ ∑ r⁻` says precisely `∑ r ≥ 0`. Here the
+positive-pain hypothesis is load-bearing — it is what makes the quotient
+comparable to `1`. -/
+lemma one_le_gainToPain_iff (s : Finset ι) (r : ι → ℝ)
+    (h : 0 < ∑ i ∈ s, (r i)⁻) :
+    1 ≤ gainToPain s r ↔ 0 ≤ ∑ i ∈ s, r i := by
+  rw [gainToPain, one_le_div h, ← sub_nonneg, ← Finset.sum_sub_distrib]
+  simp [posPart_sub_negPart]
+
+/-- **Upside-capture ratio** over the up-market periods `up`: portfolio gains
+`∑ p` over benchmark gains `∑ b` (Morningstar). -/
+noncomputable def upCapture (up : Finset ι) (p b : ι → ℝ) : ℝ :=
+  (∑ i ∈ up, p i) / (∑ i ∈ up, b i)
+
+/-- **Upside capture is homogeneous of degree one in the portfolio leg**: the
+scalar factors out of the numerator sum, and `mul_div_assoc` carries it past the
+benchmark leg with no nonvanishing condition. -/
+lemma upCapture_smul (up : Finset ι) (p b : ι → ℝ) (c : ℝ) :
+    upCapture up (c • p) b = c * upCapture up p b := by
+  simp [upCapture, ← Finset.mul_sum, mul_div_assoc]
 
 end MathFin
