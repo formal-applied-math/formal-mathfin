@@ -1237,10 +1237,10 @@
     },
     "mf-fixedincome-fra": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-07-25",
-      "elapsed_s": 4.5,
-      "input_hash": "5bedcb70874d2a874dc9f818df5875fe64aafa56280aa69729ef4c3274674f24",
-      "verified_at_commit": "53cf29b"
+      "date": "2026-07-31",
+      "elapsed_s": 68.4,
+      "input_hash": "7e522f10fde3673e79a8b2ad9736603d497d38157d4b47a75cb37e0737d902de",
+      "verified_at_commit": "unknown"
     },
     "mf-fixedincome-swap": {
       "benchmark_file": "mathematical_finance.json",
