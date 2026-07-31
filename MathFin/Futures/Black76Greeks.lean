@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.Futures.Black76
 public import MathFin.BlackScholes.PDE
+public import MathFin.BlackScholes.HigherGreeks
 
 /-!
 # Black-76 Greeks
@@ -49,6 +50,19 @@ lemma hasDerivAt_blackV_FF {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)
   have h := h_bs.const_mul (Real.exp (-(r * T)))
   convert h using 1 <;> try rfl
   ring
+
+/-- **Black-76 speed**: `∂³_F V_B = e^{-rT} · (-ϕ(d₁) (d₁ + σ√T) / (F² σ² T))`.
+
+Same shape as the other Black-76 Greeks: the discount factor does not depend on
+`F`, so it rides through the differentiation as a constant multiplier on the
+zero-drift BS speed. -/
+lemma hasDerivAt_blackV_FFF {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)
+    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :
+    HasDerivAt (fun f ↦ Real.exp (-(r * T)) *
+        (gaussianPDFReal 0 1 (bsd1 f K 0 σ T) / (f * σ * Real.sqrt T)))
+      (Real.exp (-(r * T)) * -(gaussianPDFReal 0 1 (bsd1 F K 0 σ T) *
+        (bsd1 F K 0 σ T + σ * Real.sqrt T) / (F ^ 2 * σ ^ 2 * T))) F :=
+  (hasDerivAt_bsV_SSS (r := 0) hK hσ hF hT).const_mul (Real.exp (-(r * T)))
 
 /-- **Black-76 vega**: `∂_σ V_B = e^{-rT} · F · ϕ(d₁) · √T`. -/
 lemma hasDerivAt_blackV_sigma {K : ℝ} (hK : 0 < K) (r : ℝ)

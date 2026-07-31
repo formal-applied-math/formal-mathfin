@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (284 constants). Scope: proof-position MathFin names only —
+  corpus (287 constants). Scope: proof-position MathFin names only —
   statement-position defs are exercised by elaboration + the verification
   ledger, and library_wrapper entries cite upstream names.
 
@@ -233,6 +233,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.butterfly_payoff_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.butterfly_payoff_nonneg
 
+/-- info: 'MathFin.caplet_floorlet_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.caplet_floorlet_parity
+
 /-- info: 'MathFin.cappedCall_eq_bull_spread' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.cappedCall_eq_bull_spread
 
@@ -446,6 +449,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.hasDerivAt_blackV_FF' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_blackV_FF
 
+/-- info: 'MathFin.hasDerivAt_blackV_FFF' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_blackV_FFF
+
 /-- info: 'MathFin.hasDerivAt_blackV_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_blackV_T
 
@@ -535,6 +541,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.hasDerivAt_bsV_KK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsV_KK
+
+/-- info: 'MathFin.hasDerivAt_bsV_SSS' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsV_SSS
 
 /-- info: 'MathFin.hasDerivAt_bsV_charm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsV_charm

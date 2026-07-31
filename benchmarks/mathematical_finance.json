@@ -3872,6 +3872,54 @@
           "refined": "spurious `∑ b ≠ 0` hypothesis dropped (mul_div_assoc needs no nonvanishing denominator); scalar leg stated as `c • p` and the lemma named `_smul`, since the claim is degree-one homogeneity and `_scale_invariant` is already taken in this namespace by the genuinely invariant Sortino/Treynor/IR lemmas; landed in the existing RatiosExtended module the issue named, not a new one-lemma module"
         }
       }
+    },
+    {
+      "id": "mf-bs-speed",
+      "name": "BS Speed (∂³V/∂S³)",
+      "description": "BS speed ∂³V/∂S³ = ∂Γ/∂S = -ϕ(d₁)(d₁ + σ√τ)/(S² σ² τ), one quotient rule on the gamma expression ϕ(d₁)/(S σ √τ).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\n/-- BS speed: the third spot derivative of the call, i.e. the spot derivative of gamma. -/\ntheorem mf_bs_speed {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => gaussianPDFReal 0 1 (bsd1 s K r σ τ) / (s * σ * Real.sqrt τ))\n      (-(gaussianPDFReal 0 1 (bsd1 S K r σ τ) * (bsd1 S K r σ τ + σ * Real.sqrt τ)\n        / (S ^ 2 * σ ^ 2 * τ))) S :=\n  MathFin.hasDerivAt_bsV_SSS hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS speed (Wystup 2002; Hull 19.4)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/BlackScholes/HigherGreeks.lean, beside vanna/volga/charm. Quotient rule on the gamma expression, with the chain rule ϕ'(d₁) = -d₁·ϕ(d₁) supplying the numerator derivative; the σ²τ denominator (not σ√τ) is where the two contributions combine. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black76-speed",
+      "name": "Black-76 Speed",
+      "description": "Black-76 speed ∂³_F V_B = e^{-rT}·(-ϕ(d₁)(d₁ + σ√T)/(F² σ² T)): the discount factor is F-independent, so it rides through as a constant multiplier on the zero-drift BS speed.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Black76Greeks\n\nopen MathFin ProbabilityTheory\n\n/-- Black-76 speed: the zero-drift BS speed carried through the discount factor. -/\ntheorem mf_black76_speed {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun f => Real.exp (-(r * T)) *\n        (gaussianPDFReal 0 1 (bsd1 f K 0 σ T) / (f * σ * Real.sqrt T)))\n      (Real.exp (-(r * T)) * -(gaussianPDFReal 0 1 (bsd1 F K 0 σ T) *\n        (bsd1 F K 0 σ T + σ * Real.sqrt T) / (F ^ 2 * σ ^ 2 * T))) F :=\n  MathFin.hasDerivAt_blackV_FFF hK hσ r hF hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-76 speed (Hull 17.6)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Futures/Black76Greeks.lean. Bare-term const_mul of the r = 0 BS speed, matching the shape of the sibling Black-76 greeks: e^{-rT} stays live in both the function and the value, so r is load-bearing. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-caplet-floorlet-parity",
+      "name": "Black-76 Caplet-Floorlet Parity",
+      "description": "V^caplet - V^floorlet = α·(F - K), the forward-rate analogue of put-call parity. The caplet/floorlet pair is the payer/receiver swaption pair with the accrual factor in the annuity slot, so parity is that theorem applied.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Black76\n\nopen MathFin\n\n/-- Caplet-floorlet parity, the forward-rate analogue of put-call parity. -/\ntheorem mf_caplet_floorlet_parity (F K σ T α : ℝ) :\n    blackCaplet F K σ T α - blackFloorlet F K σ T α = α * (F - K) :=\n  MathFin.caplet_floorlet_parity F K σ T α\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-76 caplet/floorlet parity (Hull 29.2)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Futures/Black76.lean. Derived by application of swaption_payer_receiver_parity rather than re-running the Phi-symmetry argument: blackCaplet_eq_blackPayerSwaption records that the caplet is the payer swaption's formula with the accrual factor where the annuity sits. The caplet and floorlet price definitions are exercised through this identity and the ledger; they carry no separate benchmark entry, since price-equals-definition closes by rfl. Re-export from MathFin. Axioms-clean."
+      }
     }
   ]
 }

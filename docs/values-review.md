@@ -74,7 +74,7 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
-## 2026-07-31 — corpus 344 — open-PR review round: the spurious-guard class
+## 2026-07-31 — corpus 348 — open-PR review round: the spurious-guard class
 
 Scope: the eight open PRs, not a new proof program. Deviation from protocol worth naming — this
 round was adjudicated by a single reviewer rather than a three-agent panel, so treat the per-lens
@@ -100,7 +100,19 @@ gradients below as one reading, and re-run the panel at the next proof session.
    (`GainToPain`, `PerformanceRatios`, `UpCapture`, `PerformanceRatiosExtended`) when both issues
    named `Performance/RatiosExtended.lean`, beside the four ratios they belong with. Consolidated
    into one change in that module; four duplicate PRs closed.
-5. **Lens 6 (idiomatic register).** `upCapture_scale_invariant` renamed `upCapture_smul`: the
+5. **Lens 4 again, on the two stale outside PRs (#36, #38).** Both had sat six weeks with
+   review feedback unaddressed and had gone stale against the pin bump; finished in-session
+   rather than closed. Two placement/derivation calls beyond the original submissions: *speed*
+   moved out of `BlackScholes/PDE.lean` into `HigherGreeks.lean` beside vanna/volga/charm, since
+   gamma is literally the quotient `ϕ(d₁)/(S σ √τ)` and speed is one quotient rule off it; and
+   *caplet-floorlet parity* is now `swaption_payer_receiver_parity` **applied**, not the same
+   `Phi`-symmetry argument run twice — `blackCaplet_eq_blackPayerSwaption` says why (the caplet
+   is the payer swaption with the accrual factor in the annuity slot). The submitted `rfl`-backed
+   price entries were dropped rather than allowlisted, keeping `DEFINITIONAL_RFL_ALLOWLIST`
+   empty. Note the pin interaction: the original proof used `HasDerivAt.mul`, which no longer
+   elaborates against the goal's instances on Mathlib 81a5d257 — `HasDerivAt.div` with a pinned
+   expected type does, and is the conceptually right rule anyway.
+6. **Lens 6 (idiomatic register).** `upCapture_scale_invariant` renamed `upCapture_smul`: the
    claim is degree-one homogeneity, and `_scale_invariant` is already taken in this namespace by
    Sortino/Treynor/IR, which genuinely *are* invariant (`f (c • x) = f x`). Scalar leg stated as
    `c • p`. Also removed: unused `open MeasureTheory ProbabilityTheory` / `open scoped NNReal

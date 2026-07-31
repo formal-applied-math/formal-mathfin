@@ -26,7 +26,27 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-31, forward-rate agreement — closes #67):** corpus **345**,
+> **Live status (2026-07-31, speed greeks + caplet/floorlet parity — closes #8, #27):** corpus
+> **348**, **316 full + 18 wrappers = 334/348 delivery-ready**, 14 reduced cores, 0 placeholders.
+> Three entries finishing two contributions that had been open since June (#36, #38, mertunsall)
+> and had gone stale against the pin bump.
+> `mf-bs-speed` (`BlackScholes/HigherGreeks`): **speed** `∂³V/∂S³ = ∂Γ/∂S =
+> -ϕ(d₁)(d₁ + σ√τ)/(S²σ²τ)`. Placed beside vanna/volga/charm rather than in the PDE file —
+> gamma *is* the quotient `ϕ(d₁)/(S σ √τ)` (`hasDerivAt_bsV_SS`), so speed is one quotient rule
+> away, with `ϕ'(d₁) = -d₁ϕ(d₁)` supplying the numerator derivative. The contribution also
+> corrected the formula in issue #8, which was algebraically wrong.
+> `mf-black76-speed` (`Futures/Black76Greeks`): the discount factor is `F`-independent, so the
+> Black-76 speed is a bare-term `const_mul` of the `r = 0` BS speed, with `e^{-rT}` live in both
+> the function and the value — matching the sibling greeks, so the `r` binder is load-bearing.
+> `mf-caplet-floorlet-parity` (`Futures/Black76`): `V^caplet - V^floorlet = α·(F - K)`, derived by
+> *applying* `swaption_payer_receiver_parity` rather than re-running the same `Phi`-symmetry
+> argument — `blackCaplet_eq_blackPayerSwaption` records that a caplet is the payer swaption's
+> formula with the accrual factor where the annuity sits. The caplet and floorlet price
+> definitions carry no benchmark entry of their own: price-equals-definition closes by `rfl`, so
+> they are exercised through the parity identity and the ledger instead, and the
+> definitional-`rfl` allowlist stays empty. Axioms-clean.
+>
+> **Prior (2026-07-31, forward-rate agreement — closes #67):** corpus **345**,
 > **313 full + 18 wrappers = 331/345 delivery-ready**, 14 reduced cores, 0 placeholders.
 > `mf-fixedincome-fra` (`FixedIncome/FRA`, closes #67; the first outside contribution to the
 > corpus): the simple forward rate `F = (P(0,T₁)/P(0,T₂) - 1)/δ`, FRA value
