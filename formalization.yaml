@@ -43,8 +43,8 @@ automation:
       prompting_notes: author edits MathFin/<Section>/*.lean directly
     - method: machine autoformalization (two-stage; scout, not author)
       models:
-        - magistral-medium
         - labs-leanstral-1-5
+        - magistral-medium
       framework: "mathfin-foundry: probe / vibe <-> lean-lsp-mcp"
       tool_setup: token-paced GitHub Actions pipeline; Magistral specifies the statement, Leanstral formalizes + proves it. A cheap autop tactic-probe may scout-close a goal Leanstral missed; those open as DRAFT PRs (labeled scout-proof, attributed to the tactic, refactored before merge, never silently merged). On a Leanstral pass it opens a ready-for-review PR on formal-mathfin that a human reviews (8-lens values panel) and merges
       prompting_notes: "4 autoformalized proof(s) merged (two-stage: statement specified by Magistral, formalization + proof by Leanstral) (closing #66, #85, #161, #162)"

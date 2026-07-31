@@ -139,6 +139,8 @@ def build_doc(root: str) -> dict:
     # disclosure MECHANICAL — it cannot drift from a hand-set number.
     afp_count = 0
     afp_issues: list = []
+    autoform_models: set = set()
+    autoform_drafters: set = set()
     for base, t in _theorems(root):
         n += 1
         md = t.get("metadata") or {}
@@ -149,6 +151,22 @@ def build_doc(root: str) -> dict:
             autoform_count += 1
             if prov.get("issue") is not None:
                 autoform_issues.append(prov["issue"])
+            # The disclosure names the models the CORPUS actually records, rather
+            # than a pipeline hardcoded here. The pipeline changes (magistral was the
+            # statement drafter until 2026-07-29, then left entirely); a hardcoded
+            # sentence stays accurate only until the next entry lands, and this file
+            # is the public AI-disclosure artifact — the one place a stale claim is
+            # least acceptable. Entries keep their own historical attribution.
+            # the prover is fixed by `source == leanstral-autoform`; the drafter
+            # model is whatever the entry recorded, and is simply absent once the
+            # convention went drafter-agnostic
+            autoform_models.add(str(prov.get("model") or "labs-leanstral-1-5"))
+            sm = prov.get("statement_model")
+            if sm and sm != "autoform":
+                autoform_models.add(str(sm))
+            src = prov.get("statement_source")
+            if src and src != "autoform":
+                autoform_drafters.add(str(src).replace("-autoform", ""))
         elif prov.get("source") == "afp-actuarial-mathematics":
             afp_count += 1
             if prov.get("issue") is not None:
@@ -160,8 +178,13 @@ def build_doc(root: str) -> dict:
         d[status] = d.get(status, 0) + 1
 
     ready = totals["full"] + totals["library_wrapper"]
+    # Two-stage is the shape; WHO fills each stage is read off the corpus, so this
+    # sentence cannot outlive the pipeline it describes. Entries drafted before a model
+    # left keep naming it — that is their honest history — and a drafter the entries do
+    # not name is not invented here (the current drafter is deliberately unattributed).
+    drafter = ", ".join(sorted(autoform_drafters)).title() or "an unnamed drafter"
     autoform_note = (f"{autoform_count} autoformalized proof(s) merged "
-                     "(two-stage: statement specified by Magistral, formalization + proof by "
+                     f"(two-stage: statement specified by {drafter}, formalization + proof by "
                      "Leanstral)")
     if autoform_issues:
         issues = ", ".join("#" + str(i) for i in sorted(set(autoform_issues)))
@@ -235,9 +258,9 @@ def build_doc(root: str) -> dict:
                 },
                 {
                     "method": "machine autoformalization (two-stage; scout, not author)",
-                    "models": ["magistral-medium", "labs-leanstral-1-5"],
+                    "models": sorted(autoform_models) or ["labs-leanstral-1-5"],
                     "framework": "mathfin-foundry: probe / vibe <-> lean-lsp-mcp",
-                    "tool_setup": ("token-paced GitHub Actions pipeline; Magistral specifies the "
+                    "tool_setup": (f"token-paced GitHub Actions pipeline; {drafter} specifies the "
                                    "statement, Leanstral formalizes + proves it. A cheap autop "
                                    "tactic-probe may scout-close a goal Leanstral missed; those "
                                    "open as DRAFT PRs (labeled scout-proof, attributed to the "
