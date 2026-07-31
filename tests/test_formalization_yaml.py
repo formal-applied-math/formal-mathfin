@@ -11,6 +11,7 @@
    axioms, sorry=0) track the live corpus.
 """
 
+import json
 import os
 
 from tools import formalization_yaml as F
@@ -104,16 +105,51 @@ def test_autoform_provenance_count_is_mechanical(tmp_path):
 
 
 def test_autoform_disclosure_is_two_stage():
-    # the automation disclosure names BOTH pipeline stages honestly: Magistral
-    # specifies the statement (statement_source), Leanstral formalizes + proves —
-    # not only the leanstral prover — and discloses the autop scout mechanism.
+    # the automation disclosure names BOTH pipeline stages honestly: whoever
+    # specified the statement (statement_source), and Leanstral formalizing +
+    # proving — not only the prover — plus the autop scout mechanism.
     doc = F.build_doc(ROOT)
     method = next(m for m in doc["automation"]["methods"]
                   if "labs-leanstral-1-5" in m.get("models", []))
-    assert "magistral-medium" in method["models"]
     note = method["prompting_notes"]
-    assert "Magistral" in note and "Leanstral" in note
+    assert "Leanstral" in note
+    assert "specified by" in note and "formalization + proof by" in note
     assert "autop" in method["tool_setup"]
+
+
+def test_autoform_disclosure_is_derived_not_pinned_to_a_pipeline(tmp_path):
+    # the drafter named in the disclosure comes from the CORPUS, so it cannot
+    # outlive the pipeline it describes. Magistral drafted every autoform entry
+    # merged before it left on 2026-07-29; an entry drafted after must not inherit
+    # that claim just because the generator hardcoded it.
+    (tmp_path / "benchmarks").mkdir()
+    (tmp_path / "tools").mkdir()
+    (tmp_path / "tools" / "formalization_meta.toml").write_text("", encoding="utf-8")
+
+    def write(prov):
+        (tmp_path / "benchmarks" / "b.json").write_text(json.dumps({"theorems": [
+            {"id": "x", "name": "x", "domain": "mathematical_finance",
+             "code": {"lean": "x"},
+             "metadata": {"formalization_status": "full", "provenance": prov}}]}),
+            encoding="utf-8")
+
+    write({"source": "leanstral-autoform", "issue": 1,
+           "statement_source": "magistral-autoform", "statement_model": "magistral-medium"})
+    doc = F.build_doc(str(tmp_path))
+    note = _machine_note(doc)
+    method = next(m for m in doc["automation"]["methods"]
+                  if "labs-leanstral-1-5" in m.get("models", []))
+    assert "Magistral" in note and "magistral-medium" in method["models"]
+
+    # same corpus shape, drafter unattributed (the post-cutover convention)
+    write({"source": "leanstral-autoform", "issue": 1,
+           "statement_source": "autoform", "statement_model": "autoform"})
+    doc2 = F.build_doc(str(tmp_path))
+    method2 = next(m for m in doc2["automation"]["methods"]
+                   if "labs-leanstral-1-5" in m.get("models", []))
+    assert "Magistral" not in _machine_note(doc2)
+    assert "magistral-medium" not in method2["models"]
+    assert "Magistral" not in method2["tool_setup"]
 
 
 def test_autoform_count_matches_corpus_provenance():

@@ -45,6 +45,46 @@ GEN_PATH = Path("MathFin/AxiomAuditGen.lean")
 # position, so capturing them is correct.
 PROOF_HEAD_RE = re.compile(r":=\s*\(*\s*(MathFin\.[A-Za-z_][A-Za-z0-9_.']*)")
 
+# Any MathFin constant anywhere in a proof BODY. The head match above sees only
+# the first name, so a benchmark closed by a bundle — `⟨MathFin.a …, MathFin.b …⟩`,
+# or an `And.intro` spine — put every constant but the first outside the audit.
+# `mf-fixedincome-fra` (PR #166) hit exactly this: both its theorems escaped the
+# generated audit entirely, and the contributor hand-added them to the CURATED
+# AxiomAudit.lean, which is meant for headliners rather than routine entries.
+MATHFIN_NAME_RE = re.compile(r"(MathFin\.[A-Za-z_][A-Za-z0-9_.']*)")
+
+# Start of a declaration, to bound a proof body: everything from a decl's `:=`
+# up to the next decl is proof position; past that is the next statement.
+DECL_START_RE = re.compile(
+    r"(?m)^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*"
+    r"(?:theorem|lemma|def|abbrev|instance|example)\b")
+
+_OPEN, _CLOSE = "([{", ")]}"
+
+
+def proof_bodies(code: str) -> list[str]:
+    """The proof-position spans of a benchmark snippet: for each declaration, the
+    text from its top-level `:=` to the start of the next declaration.
+
+    Bounding by the next declaration is what keeps this proof-position only — the
+    scope the generated audit claims. A `:=` nested inside brackets (a named
+    argument, a structure instance) is not the proof separator, so the scan tracks
+    depth the same way `ledger`/`af_parse` do."""
+    starts = [m.start() for m in DECL_START_RE.finditer(code)] + [len(code)]
+    out: list[str] = []
+    for i in range(len(starts) - 1):
+        seg = code[starts[i]:starts[i + 1]]
+        depth = 0
+        for j, c in enumerate(seg):
+            if c in _OPEN:
+                depth += 1
+            elif c in _CLOSE:
+                depth -= 1
+            elif c == ":" and depth == 0 and j + 1 < len(seg) and seg[j + 1] == "=":
+                out.append(seg[j + 2:])
+                break
+    return out
+
 STANDARD_AXIOMS = "[propext, Classical.choice, Quot.sound]"
 
 # name -> full #guard_msgs doc-comment body, for results whose axiom set is a
@@ -58,6 +98,8 @@ def collect_proof_position_names() -> list[str]:
     for _path, theorem in iter_entries():
         code = theorem.get("code", {}).get("lean", "")
         names.update(PROOF_HEAD_RE.findall(code))
+        for body in proof_bodies(code):
+            names.update(MATHFIN_NAME_RE.findall(body))
     return sorted(names)
 
 
