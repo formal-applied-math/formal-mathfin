@@ -118,35 +118,63 @@ gradients below as one reading, and re-run the panel at the next proof session.
    `c • p`. Also removed: unused `open MeasureTheory ProbabilityTheory` / `open scoped NNReal
    ENNReal BigOperators` in every draft, and an `@[simp]` attached to an `example` (a no-op).
 
-**Ranked backlog.**
+**Ranked backlog — all four executed the same day (2026-07-31).** Recorded as a
+backlog first, then built; kept here in the original order with what shipped.
 
-1. **A redundant-hypothesis prober, in the foundry gate chain.** The spurious guard slipped
-   through four independent drafts and a kernel check. It is mechanically detectable: after a
-   proof lands, re-elaborate it with each hypothesis deleted in turn; anything that still
-   compiles was decorative. Seconds per target on the daemon, no model in the loop. This is the
-   single highest-value gate the pipeline is missing — owner: foundry.
-2. **`AxiomAuditGen` misses bundle-shaped proof terms.** The generator only picks up qualified
-   `:= MathFin.X`, so a benchmark closed by `⟨MathFin.a …, MathFin.b …⟩` (PR #166's FRA entry)
-   escapes the exhaustive audit entirely. #166's author noticed and hand-added to the *curated*
-   `AxiomAudit.lean` — the right instinct, but it silently promotes an ordinary entry into the
-   headliner file. Extend the extractor to walk anonymous constructors and `And.intro` spines.
-3. **`formalization.yaml`'s automation disclosure is pinned to a retired pipeline.**
-   `tools/formalization_yaml.py:164,238,240` hardcode "statement specified by Magistral" +
-   `magistral-medium`, and `tests/test_formalization_yaml.py:113-115` *asserts* it. Magistral left
-   the foundry on 2026-07-29 (`docs/upgrade-backlog.md`). Today's file is still accurate for
-   today's corpus — every autoform entry in it was drafted before the cutover — but the next one
-   will make the disclosure false. Needs a decision, not a patch: the drafter is now Claude, and
-   standing policy is that Claude is never attributed. Owner: R.
-4. **`docs/patterns.md`: fold in the guard rule.** The file already carries "check the sign on a
-   scale-invariance / homogeneity claim" (2026-07-19) and "`A ≠ 0` over provable positivity".
-   The neighbouring rule this round earned — *no guard on a division unless the conclusion
-   actually breaks at zero* — belongs beside them, aimed at the drafter.
+1. **A necessity prober in the foundry gate chain.** ✅ `probe/strengthen.py`, wired
+   into `vibe_prove._cmd_gate` (`NECESSITY=0` disables). **The first writing of this
+   item was wrong and the correction is the interesting part.** It said "delete each
+   binder and re-elaborate; anything that still compiles was decorative" — but that
+   pass already existed (`autoformalize.strengthen_candidate`, keyed on
+   unused-variable warnings), and neither it nor a deletion probe catches the observed
+   cases, because both drafts genuinely *use* the guard (`have hden := h.le`;
+   `field_simp [h]`). No warning fires, and deleting the binder just breaks the proof.
+   The distinction that matters is **used by this proof** vs **needed by this
+   theorem**, and only re-proving without it can tell them apart. What shipped: a free
+   elaboration filter (a binder the signature depends on never reaches the prover),
+   then a fixed tactic sweep on what survives — daemon-only and zero tokens, because
+   the gate phase holds the Lean slot while the vibe harness is down — accepted only
+   on a full re-gate. Open limit, stated: a fixed sweep will miss hypotheses whose
+   removal needs a real proof.
+2. **`AxiomAuditGen` misses bundle-shaped proof terms.** ✅ #171. The extractor now
+   walks each declaration's proof body, bounded by the next declaration so the
+   proof-position scope holds. 284 → **304** guards; the two FRA names moved out of
+   the curated headliner file into the generated one. The other 18 were constants
+   already load-bearing in proof position that had simply never been pinned —
+   `bs_pde_holds`, `hasDerivAt_bsV_SS`, `newtonSeq_tendsto_root` among them, which is
+   the more sobering half of the finding.
+3. **`formalization.yaml`'s disclosure pinned to a retired pipeline.** ✅ #171, and
+   *not* by renaming. The drafter and model list are read off the corpus's own
+   per-entry provenance, so the sentence cannot outlive the pipeline it describes.
+   Output today is unchanged — all four autoform entries really were magistral-drafted
+   and keep that attribution — while an entry recorded drafter-agnostically no longer
+   inherits it. What the disclosure should say once a Claude-drafted entry lands is
+   still R's call; the generator just stops asserting what the corpus does not record.
+4. **`patterns.md`: fold in the guard rule.** ✅ 891aec8, beside the existing
+   sign-check and natural-generality rules, plus two repair-table rows earned the same
+   day (a `convert` on `HasDerivAt` left an instance-equality goal after the v4.32.0
+   pin moved `HasDerivAt.mul` under a June-era proof; and the `√τ`-cancellation move).
 
-**Evidence / context.** Mechanical floor green on the integrated tree: full `lake build` 8981
-jobs, `ledger status` 344/344 fresh (all four new entries re-verified through the daemon at the
-v4.32.0 pin), 30/30 python gates, `AxiomAuditGen` byte-fresh at 284 guards. Note the pin
-interaction that would otherwise have pushed main red: every one of these PRs was built against
-the pre-#168 toolchain, so all of them carried stale entry hashes.
+**Also shipped in the foundry the same day** (`docs/upgrade-backlog.md` R–V, 465 tests
+green): placement now honours the issue's `location:` line — `assemble.splice_into_module`
+merges declarations into an existing module, which is what makes honouring it safe,
+since the old failure was a whole-file write deleting the module's theorems; a
+ground-truth duplicate backstop that asks GitHub rather than trusting a mutable state
+file; a provenance sanitizer at the corpus boundary plus four migrated queue entries;
+and emit hygiene (post-gate `trim_unused_opens`, inert attributes on `example`,
+implicit type binders).
+
+**Evidence / context.** Mechanical floor green throughout: full `lake build` 8981 jobs on the
+integrated tree, `ledger status` 348/348 fresh (every new entry re-verified through the daemon at
+the v4.32.0 pin, plus the siblings the edited modules restaled), 31/31 python gates,
+`AxiomAuditGen` byte-fresh at 304 guards. Note the pin interaction that would otherwise have
+pushed main red: every one of the eight open PRs was built against the pre-#168 toolchain, so all
+of them carried stale entry hashes.
+
+**A note on the shape of this round.** Three of the four backlog items were found by *reading the
+pipeline's shipped artifacts back against the issues that seeded them* — not by reviewing new
+proof content. The corpus grew by 7 entries; the durable output was four gates and a corrected
+belief about which one was missing. Worth repeating when the merge queue next backs up.
 
 ## 2026-07-16 — corpus 335 — multi-asset matrix Riccati (BEGV Prop 2) via spectral reduction
 
