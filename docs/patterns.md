@@ -896,6 +896,19 @@ sorry`.
   unless the sign genuinely does not matter, and match the sign convention the issue's
   sibling clauses already use. #73 `maxDD`: the issue's `∀ c` form is false — `P =
   ![0, 1]` gives `maxDD (-P) = 1 ≠ 0 = |-1| · maxDD P`; the true claim is `0 ≤ c`.
+- **Do NOT guard a division unless the conclusion actually breaks at zero** (2026-07-31).
+  In Lean `x / 0 = 0`, so a quotient statement is usually *already* true in the
+  degenerate case and a `denominator ≠ 0` hypothesis is dead weight — it makes the
+  theorem strictly weaker for nothing. `div_nonneg` needs only `0 ≤` on both legs, and
+  `mul_div_assoc` (`a * b / c = a * (b / c)`) has no side condition at all. The reflex
+  is imported from ordinary mathematics, where `x/0` is undefined; it fired on 4/4
+  autoform drafts of #161/#162 (`0 < ∑ r⁻` on gain-to-pain nonnegativity, `∑ b ≠ 0` on
+  upside-capture homogeneity) and no gate caught it, because a weaker theorem
+  type-checks exactly as happily as a strong one. **Test before asserting a guard:
+  delete it and see if the proof still closes.** Do keep the hypothesis where it is
+  genuinely load-bearing — `one_le_gainToPain_iff` needs `0 < ∑ r⁻`, because that is
+  what makes the quotient comparable to `1` (`one_le_div`), and `fraValue`'s `δ ≠ 0`
+  and `P₂ ≠ 0` both fail concretely at zero.
 
 ## Repair table (compiler error → fix) (2026-07-18)
 
@@ -905,6 +918,8 @@ a general search; most are one-line and defeq-driven.
 | Error signature | Fix |
 |---|---|
 | "did not find an occurrence" / "made no progress" with `(fun … ↦ …) x` or a Pi-`+`/`-`/`*` of lambdas in the goal | `show` the beta-reduced goal / `simp only []`; or type-annotate the `have` with the single-lambda form. Diagnose a stuck `convert` with `exact h`. |
+| `convert` on a `HasDerivAt` leaves a goal between two **instances** (`instAddCommGroup = normedCommRing.toAddCommGroup`) | The combinator (`HasDerivAt.mul`/`.div`) returned a Pi-`*`/`/` of functions, so `convert … using 1` descended into the instance argument. Bind the result to a `have` whose **expected type spells the goal's lambda**, and let the combinator elaborate into it — then `convert` has only the value goal left. Surfaced 2026-07-31: a June-era `.mul` proof of BS speed stopped elaborating at the v4.32.0 pin; `.div` (the right rule for a quotient anyway) with a pinned type fixed it. |
+| A `√τ` that will not cancel after `field_simp` | Rewrite the goal's denominator into the squared form rather than chasing `Real.sq_sqrt` through the result: `rw [show S ^ 2 * σ ^ 2 * τ = (S * σ * √τ) ^ 2 from by rw [mul_pow, mul_pow, Real.sq_sqrt hτ.le]]`, then `field_simp; ring`. Same move as `bs_identity`'s `σ ^ 2 * τ = (σ * √τ) ^ 2`. |
 | Unknown identifier `X` | grep the **pinned** `.lake/packages/mathlib` for `X` and `Namespace.X` (loogle tracks a newer pin — upper bound only); if a sibling edited this session declares `X`, it's stale-olean: rebuild, don't respell. |
 | "typeclass instance problem is stuck `C args ?m.N`" | name the implicit at the call site (`(μ := μ)`), `@`-apply, or bind a fully-typed `have` first. |
 | "Function expected at `zero_le` … type `0 ≤ ?m`" | drop the applied argument, use the bare term; toggle the primed/unprimed variant. |
