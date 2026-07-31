@@ -3767,6 +3767,30 @@
       }
     },
     {
+      "id": "mf-fixedincome-fra",
+      "name": "Forward-rate agreement value and fair-rate identity",
+      "description": "The simple forward rate implied by two zero-coupon bonds gives the FRA discount-factor value, and the FRA is worth zero exactly at that rate.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.FRA\n\nopen MathFin\n\n/-- The ZCB-implied simple forward rate expands the FRA value to the discount-factor difference, and it is the unique fixed rate giving zero value. -/\ntheorem mf_fixedincome_fra (r δ K T1 T2 : ℝ) (hδ : δ ≠ 0) :\n    fraValue δ (zcb r 0 T2) (fraForwardRate (zcb r 0 T1) (zcb r 0 T2) δ) K =\n        zcb r 0 T1 - zcb r 0 T2 - δ * zcb r 0 T2 * K\n      ∧ (fraValue δ (zcb r 0 T2) (fraForwardRate (zcb r 0 T1) (zcb r 0 T2) δ) K = 0 ↔\n        K = fraForwardRate (zcb r 0 T1) (zcb r 0 T2) δ) :=\n  ⟨MathFin.fraValue_zcb_eq_discount_difference r δ K T1 T2 hδ,\n   MathFin.fraValue_zcb_eq_zero_iff r δ K T1 T2 hδ⟩\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Forward-rate agreement: F = (P(0,T₁)/P(0,T₂)−1)/δ and V = δ·P(0,T₂)·(F−K)",
+        "difficulty": "small",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/FixedIncome/FRA.lean. The generic FRA algebra is instantiated on the existing deterministic zcb curve. The discount-factor denominator is proved nonzero from zcb_pos; only the nonzero accrual period is assumed. The benchmark re-exports both the expanded value identity and the fair-rate zero-value equivalence. Axioms-clean.",
+        "provenance": {
+          "issue": 67,
+          "new_defs": [
+            "fraForwardRate",
+            "fraValue"
+          ],
+          "refined": "structural zcb consumer; no let-bound conclusion and no rfl-backed full entry"
+        }
+      }
+    },
+    {
       "id": "mf-insurance-premium-principles",
       "name": "Formalize the classical loaded premium principles (expected-value, variance, standard-deviation) and their nonnegative-loading bounds",
       "description": "Classical loaded premium principles and their nonnegative-loading bounds: each prices at or above the pure premium.",
