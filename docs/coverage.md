@@ -26,7 +26,18 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-31, gain-to-pain + upside capture — closes #161, #162):** corpus
+> **Live status (2026-07-31, forward-rate agreement — closes #67):** corpus **345**,
+> **313 full + 18 wrappers = 331/345 delivery-ready**, 14 reduced cores, 0 placeholders.
+> `mf-fixedincome-fra` (`FixedIncome/FRA`, closes #67; the first outside contribution to the
+> corpus): the simple forward rate `F = (P(0,T₁)/P(0,T₂) - 1)/δ`, FRA value
+> `V = δ·P(0,T₂)·(F-K)`, its expanded discount-factor identity, and the fair-rate equivalence
+> `V = 0 ↔ K = F`. The generic discount-factor algebra is stated once and instantiated on the
+> existing `zcb` curve; `P(0,T₂) ≠ 0` is *derived* from `zcb_pos` rather than assumed, leaving
+> `δ ≠ 0` as the only hypothesis — the natural-generality discipline applied without prompting.
+> The proof structurally consumes `MathFin.zcb`; it does not encode the conclusion in a `let`
+> binding or close a benchmark with `rfl`.
+>
+> **Prior (2026-07-31, gain-to-pain + upside capture — closes #161, #162):** corpus
 > **344**, **312 full + 18 wrappers = 330/344 delivery-ready**, 14 reduced cores, 0 placeholders.
 > `mf-performance-gain_to_pain` and `mf-performance-upside_capture`
 > (`Performance/RatiosExtended`): the two realised-path ratios join the four moment ratios

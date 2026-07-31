@@ -1235,6 +1235,13 @@
       "input_hash": "ef2cbf3dfa547186214ac6281ec59f2c20fa980bae15586a2bf8c7aabcd89722",
       "verified_at_commit": "ad96063"
     },
+    "mf-fixedincome-fra": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-31",
+      "elapsed_s": 68.4,
+      "input_hash": "7e522f10fde3673e79a8b2ad9736603d497d38157d4b47a75cb37e0737d902de",
+      "verified_at_commit": "unknown"
+    },
     "mf-fixedincome-swap": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-07-27",

@@ -93,6 +93,12 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.forwardRate_eq_neg_log_discount' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms MathFin.forwardRate_eq_neg_log_discount
 
+/-- info: 'MathFin.fraValue_zcb_eq_discount_difference' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.fraValue_zcb_eq_discount_difference
+
+/-- info: 'MathFin.fraValue_zcb_eq_zero_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.fraValue_zcb_eq_zero_iff
+
 /-- info: 'MathFin.force_eq_neg_log_deriv_survival' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms MathFin.force_eq_neg_log_deriv_survival
 
