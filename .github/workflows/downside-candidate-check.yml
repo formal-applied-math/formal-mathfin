@@ -17,11 +17,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Python gates
+      - name: Install Python gates
         run: |
           pip install --quiet pytest
-          python3 -m pytest tests/ -q
-          python3 -m tools.formalization_yaml --check
 
       - name: Build (elan + Mathlib cache + lake build)
         uses: leanprover/lean-action@v1
@@ -30,6 +28,11 @@ jobs:
         run: |
           python3 -m tools.verify.ledger verify --stale --limit 1 --exec --timeout 1800
           python3 -m tools.verify.ledger status
+
+      - name: Final Python gates
+        run: |
+          python3 -m pytest tests/ -q
+          python3 -m tools.formalization_yaml --check
 
       - name: Upload verified ledger
         if: always()
