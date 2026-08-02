@@ -1794,6 +1794,22 @@
       }
     },
     {
+      "id": "mf-downside-performance-metrics",
+      "name": "Omega, Maximum Drawdown, and Calmar",
+      "description": "Finite-state Omega is nonnegative and satisfies its threshold identity; finite-path maximum drawdown is nonnegative and positively homogeneous; the Calmar ratio is invariant under positive common scaling.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.DownsideMetrics\n\nopen MathFin\n\ntheorem downside_performance_metrics_full\n    {ι : Type*} [Fintype ι] (m : MathFin.FiniteReturnModel ι) (threshold : ℝ)\n    (hdown : MathFin.omegaDownside m threshold ≠ 0)\n    {n : ℕ} (price : Fin n → ℝ) (annualReturn c : ℝ) (hc : 0 < c) :\n    (0 ≤ MathFin.omegaRatio m threshold ∧\n      MathFin.omegaRatio m threshold - 1 =\n        (MathFin.finiteExpectedReturn m - threshold) / MathFin.omegaDownside m threshold) ∧\n    (0 ≤ MathFin.maximumDrawdown price ∧\n      MathFin.maximumDrawdown (fun i => c * price i) =\n        c * MathFin.maximumDrawdown price) ∧\n    MathFin.calmarRatio (c * annualReturn) (c * MathFin.maximumDrawdown price) =\n      MathFin.calmarRatio annualReturn (MathFin.maximumDrawdown price) :=\n  MathFin.downsideMetrics_bundle m threshold hdown price annualReturn c hc\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Omega ratio (Keating-Shadwick 2002); maximum drawdown and Calmar ratio (Young 1991)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Finite-state Omega ratio with normalized nonnegative weights, finite-path maximum drawdown over chronological peak-to-trough candidates, and positive-scaling Calmar invariance. Lives in MathFin/Performance/DownsideMetrics.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-bond-dur-rate-deriv",
       "name": "Bond Portfolio Duration Rate Sensitivity",
       "description": "Derivative of the duration-times-value w.r.t. rate: ∂_r (D_P·P) = −C_P·P, where C_P is the convexity-times-value.",

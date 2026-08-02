@@ -1029,4 +1029,11 @@ GBM under its risk-neutral measure (`Q = P`, `discountedGBM_isMartingale` a full
 /-- info: 'MathFin.discountedGBM_noArbitrageSimple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.discountedGBM_noArbitrageSimple
 
+/-! ## Downside performance metrics (#73)
+
+The finite-state Omega identity, finite-path maximum drawdown, and Calmar
+scaling law are audited here as one public acceptance bundle. -/
+
+#print axioms MathFin.downsideMetrics_bundle
+
 end MathFin.AxiomAudit

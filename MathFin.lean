@@ -394,6 +394,7 @@ import MathFin.Portfolio.BlackLittermanND
 -- Performance
 import MathFin.Performance.Ratios
 import MathFin.Performance.RatiosExtended
+import MathFin.Performance.DownsideMetrics
 import MathFin.Performance.Kelly
 import MathFin.Performance.KellyNumeraire
 
