@@ -2,7 +2,7 @@ name: Downside candidate check
 
 on:
   push:
-    branches: [codex/issue-73-downside-metrics]
+    branches: [codex/issue-73-downside-metrics-rebased-check]
   workflow_dispatch:
 
 permissions:
