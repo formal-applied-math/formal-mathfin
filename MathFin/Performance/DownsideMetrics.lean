@@ -41,7 +41,8 @@ def omegaDownside {ι : Type*} [Fintype ι]
   ∑ i, m.weight i * max (threshold - m.outcome i) 0
 
 /-- Omega ratio at a threshold in a finite state space. -/
-def omegaRatio {ι : Type*} [Fintype ι] (m : FiniteReturnModel ι) (threshold : ℝ) : ℝ :=
+noncomputable def omegaRatio {ι : Type*} [Fintype ι]
+    (m : FiniteReturnModel ι) (threshold : ℝ) : ℝ :=
   omegaUpside m threshold / omegaDownside m threshold
 
 private theorem positivePart_sub_negativePart (x : ℝ) :
@@ -127,7 +128,7 @@ private theorem listMaximum_map_mul (c : ℝ) (hc : 0 ≤ c) (xs : List ℝ) :
         rw [max_eq_left h', max_eq_left (mul_le_mul_of_nonneg_left h' hc)]
 
 /-- All chronologically admissible peak-to-trough losses of a finite price path. -/
-def drawdownCandidates {n : ℕ} (price : Fin n → ℝ) : List ℝ :=
+noncomputable def drawdownCandidates {n : ℕ} (price : Fin n → ℝ) : List ℝ :=
   (((Finset.univ : Finset (Fin n)).product Finset.univ).toList).map fun ij =>
     if ij.1 ≤ ij.2 then price ij.1 - price ij.2 else 0
 
@@ -137,7 +138,7 @@ private theorem drawdownCandidates_scale {n : ℕ} (price : Fin n → ℝ) (c : 
   simp [drawdownCandidates, List.map_map, mul_sub]
 
 /-- Maximum drawdown of a finite price path. -/
-def maximumDrawdown {n : ℕ} (price : Fin n → ℝ) : ℝ :=
+noncomputable def maximumDrawdown {n : ℕ} (price : Fin n → ℝ) : ℝ :=
   listMaximum (drawdownCandidates price)
 
 /-- Maximum drawdown is nonnegative, including for an empty path. -/
@@ -152,7 +153,7 @@ theorem maximumDrawdown_scale {n : ℕ} (price : Fin n → ℝ) (c : ℝ) (hc : 
   rw [drawdownCandidates_scale, listMaximum_map_mul c hc]
 
 /-- Calmar ratio: annual return divided by maximum drawdown. -/
-def calmarRatio (annualReturn maxDrawdown : ℝ) : ℝ :=
+noncomputable def calmarRatio (annualReturn maxDrawdown : ℝ) : ℝ :=
   annualReturn / maxDrawdown
 
 /-- Calmar ratio is invariant under strictly positive common scaling. -/
