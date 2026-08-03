@@ -22,7 +22,9 @@ open scoped BigOperators
 
 /-- A finite return model with nonnegative probability weights of total mass one. -/
 structure FiniteReturnModel (ι : Type*) [Fintype ι] where
+  /-- Probability weight assigned to a state. -/
   weight : ι → ℝ
+  /-- Return realized in a state. -/
   outcome : ι → ℝ
   weight_nonneg : ∀ i, 0 ≤ weight i
   weight_sum_one : ∑ i, weight i = 1
