@@ -25,6 +25,8 @@ jobs:
         uses: leanprover/lean-action@v1
 
       - name: Verify the missing downside benchmark and update ledger
+        env:
+          LEDGER_EXEC_LOCAL: "1"
         run: |
           python3 -m tools.verify.ledger verify --stale --limit 1 --exec --timeout 1800
           python3 -m tools.verify.ledger status
