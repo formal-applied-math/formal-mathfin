@@ -96,3 +96,46 @@ def test_the_corpus_still_backs_what_the_disclosure_says_today():
         base = str(model).lower()
         assert any(w in corpus for w in COMPONENT_WORDS if w in base) or "leanstral" in base, (
             f"disclosure lists model {model!r} with no corpus provenance behind it")
+
+
+def _drafter_counts() -> tuple[int, dict]:
+    """(autoformalized entries, {drafter -> how many entries name it}). An entry whose
+    `statement_source` is absent or the drafter-agnostic `autoform` counts as
+    unattributed, which is the honest state after the pipeline stopped naming drafters."""
+    total, per = 0, {}
+    for path in glob.glob(os.path.join(ROOT, "benchmarks", "*.json")):
+        data = json.load(open(path, encoding="utf-8"))
+        for t in (data.get("theorems", data) if isinstance(data, dict) else data):
+            prov = (t.get("metadata") or {}).get("provenance") or {}
+            if prov.get("source") != "leanstral-autoform":
+                continue
+            total += 1
+            src = str(prov.get("statement_source") or "autoform").replace("-autoform", "")
+            if src != "autoform":
+                per[src] = per.get(src, 0) + 1
+    return total, per
+
+
+def test_the_disclosure_does_not_generalize_one_drafter_to_every_entry():
+    """The subtler sibling of the hardcoding bug: naming a drafter the corpus DOES
+    record, but attaching it to the total count, so entries it never touched are
+    attributed to it.
+
+    Concretely — #66/#85 were drafted by Magistral (2026-07-18, while it was live);
+    #161/#162 landed 2026-07-31, after it was removed from the pipeline on 2026-07-27,
+    and their queue entries carried the name only because provenance used to be stamped
+    at enqueue. A sentence reading "4 proofs (statement specified by Magistral)" credits
+    a model with work it did not do.
+
+    So: whenever a named drafter accounts for fewer than all autoformalized entries, the
+    disclosure has to say how many are actually its."""
+    total, per = _drafter_counts()
+    note = str(_machine_method(F.build_doc(ROOT)).get("prompting_notes", "")).lower()
+    for drafter, count in per.items():
+        if drafter not in note:
+            continue
+        if count != total:
+            assert re.search(rf"{re.escape(drafter)}[^,.]*\({count}\)", note), (
+                f"the disclosure names {drafter!r} beside a total of {total} "
+                f"autoformalized entries, but only {count} record it as their drafter. "
+                f"Attribute the count explicitly. Note reads: {note!r}")

@@ -141,6 +141,7 @@ def build_doc(root: str) -> dict:
     afp_issues: list = []
     autoform_models: set = set()
     autoform_drafters: set = set()
+    autoform_drafter_counts: dict = {}
     for base, t in _theorems(root):
         n += 1
         md = t.get("metadata") or {}
@@ -164,9 +165,12 @@ def build_doc(root: str) -> dict:
             sm = prov.get("statement_model")
             if sm and sm != "autoform":
                 autoform_models.add(str(sm))
-            src = prov.get("statement_source")
-            if src and src != "autoform":
-                autoform_drafters.add(str(src).replace("-autoform", ""))
+            src = str(prov.get("statement_source") or "autoform").replace("-autoform", "")
+            if src != "autoform":
+                autoform_drafters.add(src)
+            # per-drafter tallies: naming a drafter beside the TOTAL credits it with
+            # entries it never touched once the pipeline has had more than one.
+            autoform_drafter_counts[src] = autoform_drafter_counts.get(src, 0) + 1
         elif prov.get("source") == "afp-actuarial-mathematics":
             afp_count += 1
             if prov.get("issue") is not None:
@@ -182,10 +186,34 @@ def build_doc(root: str) -> dict:
     # sentence cannot outlive the pipeline it describes. Entries drafted before a model
     # left keep naming it — that is their honest history — and a drafter the entries do
     # not name is not invented here (the current drafter is deliberately unattributed).
-    drafter = ", ".join(sorted(autoform_drafters)).title() or "an unnamed drafter"
+    # When one drafter accounts for every entry, name it plainly. Once the corpus holds
+    # entries from more than one drafter — or from a drafter and the later
+    # drafter-agnostic convention — each gets its own count, because "N proofs, statement
+    # specified by X" reads as a claim about all N.
+    named = sorted(autoform_drafters)
+    if len(named) == 1 and autoform_drafter_counts.get(named[0]) == autoform_count:
+        drafter = named[0].title()
+    elif named:
+        parts = [f"{d.title()} ({autoform_drafter_counts.get(d, 0)})" for d in named]
+        unattributed = autoform_drafter_counts.get("autoform", 0)
+        if unattributed:
+            parts.append(f"an unnamed drafter ({unattributed})")
+        drafter = " and ".join(parts) if len(parts) == 2 else ", ".join(parts)
+    else:
+        drafter = "an unnamed drafter"
     autoform_note = (f"{autoform_count} autoformalized proof(s) merged "
                      f"(two-stage: statement specified by {drafter}, formalization + proof by "
                      "Leanstral)")
+    # `drafter` carries per-entry counts, which belong in the tally sentence above. The
+    # pipeline description below is about SHAPE, so it names the drafters without counts
+    # and takes a plural verb once there is more than one.
+    shape_names = [d.title() for d in named] + (
+        ["an unnamed drafter"] if autoform_drafter_counts.get("autoform") else [])
+    if not shape_names:
+        shape_names = ["an unnamed drafter"]
+    drafter_shape = (" and ".join(shape_names) if len(shape_names) == 2
+                     else ", ".join(shape_names))
+    specifies = "specifies" if len(shape_names) == 1 else "specify"
     if autoform_issues:
         issues = ", ".join("#" + str(i) for i in sorted(set(autoform_issues)))
         autoform_note += f" (closing {issues})"
@@ -260,7 +288,8 @@ def build_doc(root: str) -> dict:
                     "method": "machine autoformalization (two-stage; scout, not author)",
                     "models": sorted(autoform_models) or ["labs-leanstral-1-5"],
                     "framework": "mathfin-foundry: probe / vibe <-> lean-lsp-mcp",
-                    "tool_setup": (f"token-paced GitHub Actions pipeline; {drafter} specifies the "
+                    "tool_setup": (f"token-paced GitHub Actions pipeline; {drafter_shape} "
+                                   f"{specifies} the "
                                    "statement, Leanstral formalizes + proves it. A cheap autop "
                                    "tactic-probe may scout-close a goal Leanstral missed; those "
                                    "open as DRAFT PRs (labeled scout-proof, attributed to the "

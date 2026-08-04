@@ -150,6 +150,20 @@ backlog first, then built; kept here in the original order with what shipped.
    and keep that attribution — while an entry recorded drafter-agnostically no longer
    inherits it. What the disclosure should say once a Claude-drafted entry lands is
    still R's call; the generator just stops asserting what the corpus does not record.
+
+   > **Correction (2026-08-04).** "All four autoform entries really were
+   > magistral-drafted" was wrong, and wrong when written. Magistral left the drafter on
+   > **2026-07-27** (foundry `17ac296`); `mf-performance-gain_to_pain` and
+   > `mf-performance-upside_capture` landed **2026-07-31**, so they cannot have been
+   > drafted by it. They carried `magistral-autoform` only because provenance was
+   > stamped at ENQUEUE rather than by the stage that ran — the exact defect
+   > `assemble.py::sanitize_provenance` was built to stop, added too late for entries
+   > already merged. The review checked that the generator derived its claim from the
+   > corpus, and did not check whether the corpus itself was true. Both markers are now
+   > scrubbed to `autoform`; #66/#85 (2026-07-18, genuinely Magistral-era) keep theirs.
+   > The generator also over-generalized: it named one drafter beside the TOTAL count,
+   > crediting Magistral with all four. It now tallies per drafter, with a regression
+   > test (`test_the_disclosure_does_not_generalize_one_drafter_to_every_entry`).
 4. **`patterns.md`: fold in the guard rule.** ✅ 891aec8, beside the existing
    sign-check and natural-generality rules, plus two repair-table rows earned the same
    day (a `convert` on `HasDerivAt` left an instance-equality goal after the v4.32.0
