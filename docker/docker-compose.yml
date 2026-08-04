@@ -62,6 +62,16 @@ services:
       # The verification ledger is read in-container only by tests/test_ledger.py;
       # writes happen host-side via `python3 -m tools.verify.ledger`.
       - ../verification_ledger.json:/app/verification_ledger.json:ro
+      # Same deal for the generated self-report: tests/test_formalization_yaml.py
+      # compares the committed file byte-for-byte against the generator's output.
+      # Without this mount the file is simply ABSENT in-container and the gate
+      # fails its `isfile` assert — a false red that looks like staleness
+      # (observed 2026-08-03). Its inputs (tools/formalization_meta.toml,
+      # benchmarks/*.json) are already mounted, so the mount closes the gap.
+      # Safe as a single-file mount despite the inode caveat below: `--write`
+      # truncates in place (`open(out, "w")`) rather than renaming, so a running
+      # container keeps seeing current content.
+      - ../formalization.yaml:/app/formalization.yaml:ro
       - lean_interact_cache:/usr/local/lib/python3.12/dist-packages/lean_interact/cache
       # SHARED olean cache with the `lean-repl` daemon (same named volume).
       # Without this, `verify` built oleans into its own ephemeral container
