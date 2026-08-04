@@ -37,9 +37,10 @@ Two commitments make that trustworthy:
   invariant in [`MathFin/AxiomAudit.lean`](MathFin/AxiomAudit.lean).
 - **Honest scope, enforced — never overclaimed.** Every entry declares a faithfulness status
   (`full` / `library_wrapper` / `reduced_core`); an input-hash [verification
-  ledger](verification_ledger.json) records exactly what each was checked under; and a multi-agent
-  [values review](docs/values-review.md) runs on a CI cadence. The README does not claim a result the
-  kernel has not accepted.
+  ledger](verification_ledger.json) records exactly what each was checked under; a machine-generated
+  [`formalization.yaml`](formalization.yaml) self-report discloses how each result was produced; and a
+  multi-agent [values review](docs/values-review.md) runs on a CI-enforced cadence. The README does not
+  claim a result the kernel has not accepted.
 
 ## The architecture — the field's spine
 
@@ -49,7 +50,7 @@ Mathematical finance is a few deep principles whose consequences are the models.
 | Pillar | The principle | In the library |
 |---|---|---|
 | **I — No-arbitrage as convex duality** | the separating hyperplane *is* the equivalent martingale measure | the FTAP tower · [`ConvexDuality`](MathFin/Foundations/ConvexDuality.lean) · state prices |
-| **II — Stochastic calculus** | every model is `dX = b dt + σ dB`; Itô makes functionals computable | the Itô tower: from-scratch L² integral, Itô's formula, quadratic variation |
+| **II — Stochastic calculus** | every model is `dX = b dt + σ dB`; Itô makes functionals computable | the Itô tower: from-scratch L² integral, Itô's formula, quadratic variation, and its jump analogue |
 | **III — Probabilistic ⟷ analytic duality** | the price is both a risk-neutral expectation and a PDE solution | the BS-PDE keystone (Feynman–Kac and Itô routes) |
 | **IV — Intensity & exponential families** | closed forms and the "exp of an integrated intensity" | Gaussian closed forms · the exponential-discount root · credit/mortality unification |
 
@@ -60,8 +61,8 @@ Mathematical finance is a few deep principles whose consequences are the models.
 | **Convex duality** | I ↔ IV (pricing ↔ risk) | ✅ **WIRED** — the FTAP and the coherent-risk representation are proved to be the *same* Hahn–Banach theorem |
 | **Feynman–Kac** | II ↔ III | ✅ **WIRED** — the Black–Scholes PDE from the risk-neutral expectation |
 | **Donsker / CLT** | discrete ↔ continuous | ✅ **WIRED** — CRR binomial → Black–Scholes |
-| **Girsanov** | I ↔ II | ◐ **wired — bounded case closed** — the EMM is an *explicit* change of measure, and the distributional Girsanov is now **fully closed for bounded predictable θ** (the honest Itô-`L²` domain): `B^θ = B + ∫θ ds` is a `Q`-Brownian motion (Gaussian *and independent* increments) under `Q = withDensity(exp(−∫θ dB − ½∫θ² ds))`; only the general `L²`/progressive-θ (Novikov, unbounded) case stays open |
 | **Numéraire** | IV ↔ I | ✅ **WIRED** — the price-invariance seam `N₀·𝔼^{Qᴺ}[X/N_T] = B₀·𝔼^Q[X/B_T]` (`changeOfNumeraire`), with BS-stock / Margrabe-`S²` / Kelly-EMM instances |
+| **Girsanov** | I ↔ II | ◐ **bounded case closed** — the EMM is an *explicit* change of measure, and the distributional Girsanov is fully closed for bounded predictable θ (the honest Itô-`L²` domain); only the general `L²`/progressive-θ (Novikov, unbounded) case stays open |
 
 → The full spine, seam by seam: **[`docs/mathematical-architecture.md`](docs/mathematical-architecture.md)**.
 
@@ -72,8 +73,10 @@ Mathematical finance is a few deep principles whose consequences are the models.
 | **Pricing = risk, one theorem** | the FTAP separating functional and the coherent-risk representation are the same finite-dimensional Hahn–Banach separation | [`exists_pos_separating_of_cone_disjoint_simplex`](MathFin/Foundations/ConvexDuality.lean) · [`coherentRisk_isLUB`](MathFin/RiskMeasures/AcceptanceSet.lean) |
 | **BS PDE from Feynman–Kac** | the Black–Scholes PDE derived from the risk-neutral expectation by heat-kernel differentiation — independent of the closed form and of Itô | [`bsV_satisfies_bs_pde_via_feynmanKac`](MathFin/BlackScholes/PDEFromFeynmanKac.lean) |
 | **CRR → Black–Scholes** | the n-step binomial call price converges to `S₀Φ(d₁) − Ke^{−rT}Φ(d₂)` (characteristic functions + Lévy continuity + put-call parity) | [`binomialPrice_call_tendsto_bs_closed`](MathFin/Binomial/CRRClosedForm.lean) |
-| **Continuous-time Itô formula** | `f(B_T) − f(B_0) = ∫₀ᵀ f′(B_s) dB_s + ½∫₀ᵀ f″(B_s) ds`, on a from-scratch L² Itô integral, for a general `C³` `f` with no growth bound | [`ito_formula_unrestricted`](MathFin/Foundations/ItoFormulaUnrestricted.lean) |
-| **The EMM via Girsanov** | the risk-neutral measure is *constructed* as an explicit density change of the physical measure, `Q = withDensity(exp(−θX_T − ½θ²T))`; the discounted stock is a proven `Q`-martingale — retiring the Wald shortcut | [`bs_discounted_isQMartingale`](MathFin/Foundations/Girsanov.lean) |
+| **Continuous-time Itô formula** | `f(B_T) − f(B_0) = ∫₀ᵀ f′(B_s) dB_s + ½∫₀ᵀ f″(B_s) ds`, on a from-scratch L² Itô integral, for a general `C³` `f` with no growth bound | [`ito_formula_unrestricted`](MathFin/Foundations/ItoFormulaUnrestrictedLocMart.lean) |
+| **The EMM via Girsanov** | the risk-neutral measure is *constructed* as an explicit density change of the physical measure; the discounted stock is a proven `Q`-martingale — retiring the Wald shortcut | [`bs_discounted_isQMartingale`](MathFin/Foundations/Girsanov.lean) |
+| **Itô–Lévy L² isometry** | the compensated-Poisson stochastic integral built to an L²-isometric continuous linear operator, on a from-scratch density argument | [`assembly_isometry`](MathFin/Foundations/PoissonCompensatedIntegralOperator.lean) |
+| **SDE existence + uniqueness** | the Picard contraction in the predictable `L²` space, and pathwise uniqueness by an `L²`-energy Grönwall argument | [`picardMap_contraction`](MathFin/Foundations/SDEExistence.lean) · [`IsL2SolutionPair.uniqueness`](MathFin/Foundations/SDEUniqueness.lean) |
 | **Jump risk is never free** | the Merton (1976) jump-diffusion price dominates Black–Scholes | [`bsV_le_mertonCallPrice`](MathFin/BlackScholes/MertonDominance.lean) |
 
 ## A theorem, up close
@@ -102,8 +105,14 @@ See [`MathFin/Examples.lean`](MathFin/Examples.lean) for a curated tour.
 | library wrappers | 18 |
 | reduced cores (honest special cases) | 14 |
 | placeholders / sorries | **0** |
+| Lean modules · lines of Lean | 264 · ~55,100 |
+| verification ledger | 348 fresh, 0 stale |
 | axioms used | `propext, Classical.choice, Quot.sound` only |
-| Lean / Mathlib | `v4.32.0`, pinned ([`lean-toolchain`](lean-toolchain)) |
+| Lean / Mathlib | `v4.32.0` / `81a5d257`, pinned ([`lean-toolchain`](lean-toolchain), [`lake-manifest.json`](lake-manifest.json)) |
+
+The library is organized by theme under [`MathFin/`](MathFin): `Foundations/` (127 modules — the
+stochastic core), `BlackScholes/` (51), `FixedIncome/` (24), `Binomial/` (18), `Portfolio/` (14),
+`RiskMeasures/` (9), `Actuarial/` (6), `Performance/` (4), `Futures/` (3), `Bridges/` (2), `DeFi/` (1).
 
 ## Quick start
 
@@ -119,7 +128,8 @@ docker compose -f docker/docker-compose.yml up -d lean-repl
 ./scripts/lean-check.sh MathFin/<Section>/<Module>.lean
 ```
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full workflow.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full workflow and
+[`docs/onboarding.md`](docs/onboarding.md) for a guided path into the codebase.
 
 ## How verification works
 
@@ -131,10 +141,28 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full workflow.
 - **Verification ledger.** [`verification_ledger.json`](verification_ledger.json) records the input-hash
   (snippet + transitive imports + toolchain pins) each entry last verified under; only entries whose
   inputs changed re-run.
-- **CI gates.** Every push runs the Python gates (status taxonomy, forbidden tactics, ledger freshness)
-  and the environment linter *before* the Lean build.
+- **Kernel replay.** A `leanchecker` job re-checks proof terms *below* the elaborator. It is
+  best-effort and `workflow_dispatch`-only: the full-Mathlib environment does not fit in a 16 GB
+  hosted runner, and the README says so rather than implying a green replay it cannot run.
+- **CI gates.** Every push runs the Python gates (status taxonomy, forbidden tactics, ledger freshness,
+  generated-artifact freshness) and the environment linter *before* the Lean build.
 - **Values review.** Sessions that change proof content close with a multi-agent review over eight
-  judgment lenses, logged in [`docs/values-review.md`](docs/values-review.md) (cadence CI-enforced).
+  judgment lenses, logged in [`docs/values-review.md`](docs/values-review.md). It is an upgrade engine
+  producing a ranked backlog, not a pass/fail stamp; only its cadence is machine-enforced.
+
+## Provenance — who proved what
+
+Some entries are drafted by an automated pipeline rather than by hand, and the library says which.
+[`formalization.yaml`](formalization.yaml) is generated from the corpus (never hand-edited, freshness
+CI-enforced) and records the methods in use: interactive human authoring, and a two-stage machine
+autoformalization loop that drafts a statement, gates it adversarially, and proves it. Machine-drafted
+entries carry a `provenance` marker in their benchmark entry, so the disclosure is counted from the
+corpus rather than asserted.
+
+Automation is held to the same bar as hand-authored work: a proof that a machine found is refactored to
+the conceptually right argument before it merges, and a statement that is *faithful but empty* — an
+instantiation of an already-∀-quantified lemma, or a Mathlib result restated in finance names — is
+rejected rather than counted.
 
 ## What's covered
 
@@ -143,39 +171,49 @@ A breadth-and-depth library across eleven areas. Headlines per area (full per-th
 
 - **Black–Scholes & exotics** — the full Greek matrix (δ, γ, vega, θ, ρ, vanna, volga, charm), digitals,
   BS-Merton dividends, Garman–Kohlhagen FX, implied-vol uniqueness, the PDE, Breeden–Litzenberger;
-  Margrabe exchange, chooser, capped/bull/butterfly, lookback, Asian bounds.
+  Margrabe exchange, chooser, capped/bull/butterfly, lookback, geometric-Asian, barrier parity, quanto.
 - **Bachelier & Black-76** — arithmetic-BM pricing + Greeks; the futures-options formula + swaption.
 - **Binomial / lattice** — replication + uniqueness, American/Bermudan via the Snell envelope, **CRR →
-  Black–Scholes** convergence, Merton 1973 dominance, André's reflection principle.
+  Black–Scholes** convergence, Merton 1973 dominance, André's reflection principle, barrier/lookback.
 - **Fixed income & credit** — bonds, duration/convexity, Redington immunization, yield-curve bootstrap,
-  reduced-form hazard credit, Vasicek (ODE + SDE law), KMV–Merton default.
+  zero-coupon and forward rates, FRAs, vanilla interest-rate swaps, the T-forward measure, reduced-form
+  hazard credit, first-to-default, Vasicek (ODE + SDE law), KMV–Merton default.
 - **Portfolio & performance** — Markowitz (2- and N-asset), CAPM + equilibrium, two-fund separation,
   risk parity, Black–Litterman, tangency; Sharpe/Sortino/Treynor/Information ratios, Kelly.
 - **Risk measures** — Gaussian VaR/CVaR closed forms, the coherent (ADEH) axioms + **the representation
   as a sup over measures**, spectral measures, Rockafellar–Uryasev, Herfindahl–Hirschman.
 - **Stochastic foundations** — the **Itô tower** (from-scratch L² integral, isometry, quadratic
-  variation, Itô's formula) and its jump analogue, the **compensated-Poisson (Itô–Lévy) integral** (the
-  stochastic integral against a compensated Poisson random measure, built to an L²-isometric continuous
-  linear operator — proving `cgarryZA/LevyStochCalc`'s cited axiom #6 in full generality), the **FTAP
-  tower** (finite-Ω multi-period, general-Ω one-period, d-asset), static Girsanov, Feynman–Kac, and
-  **the convex-duality unification**.
-- **Actuarial & DeFi** — Gompertz mortality, annuities, net premium; constant-product (Uniswap-v2) AMMs.
+  variation, Itô's formula) and its jump analogue, the **compensated-Poisson (Itô–Lévy) integral** built
+  to an L²-isometric continuous linear operator, the **SDE tower** (Picard existence, `L²`-Grönwall
+  uniqueness, pathwise decomposition), the **FTAP tower** (finite-Ω multi-period, general-Ω one-period,
+  d-asset), Girsanov, Feynman–Kac, and **the convex-duality unification**.
+- **Market microstructure** — the Avellaneda–Stoikov market-making problem: the Riccati value function,
+  its approximate-HJB solution, and the constant half-spread / linear-skew closed forms, single-asset
+  and multi-asset (matrix Riccati by spectral reduction).
+- **Actuarial & DeFi** — Gompertz mortality, survival models, annuities, net premium, compound-Poisson
+  MGF; constant-product (Uniswap-v2) AMMs.
 
 ## Scope: what's not done
 
 Honesty is the point, so the gaps are explicit:
 
 - **14 `reduced_core` entries** — special cases or algebraic/structural cores whose fully general form is
-  not yet formalized (the 2-D Itô formula, Lévy's characterisation, the fully-general
-  `L²`/progressive Girsanov under Novikov, some Markov/Poisson cores). Tracked per-entry in [`docs/coverage.md`](docs/coverage.md).
-- **SDE existence + uniqueness** — existence is the Picard fixed point in the predictable `L²` space `E` (conditional on the small-horizon contraction); **uniqueness (Theorem 8.2.5) is now `full`**, derived via the `L²`-energy Grönwall argument (`IsL2SolutionPair.uniqueness`).
-- **Girsanov (I↔II) — the bounded case is closed** — the EMM/change-of-measure martingale side is proved, and the distributional Girsanov is now **fully closed for bounded predictable θ** — the honest domain of the Itô `L²` integral: `Btheta_isQBrownianMotion_predictable` shows `B^θ_u = B_u + ∫₀ᵘθ ds` is a `Q`-Brownian motion (zero start, Gaussian increments `N(0, t−s)`, *and* independent disjoint increments) under `Q = withDensity(exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds))`, dropping the path-continuity of the earlier bounded-adapted-continuous case (`Btheta_isQBrownianMotion_adapted`). The route is **spine-free**: the simple-θ exponential-martingale identity is passed to the limit through an a.e.-subsequence set-integral engine — no continuous stochastic-exponential-is-a-martingale (Novikov) crux and no adapted-integrand Itô formula. This is the culmination of the constant → simple → continuous-adapted → **predictable** arc; only the fully-general `L²`/progressive-θ (Novikov, unbounded) case remains open. The **numéraire (IV↔I)** bridge *is* wired (`changeOfNumeraire` + its BS-stock / Margrabe-`S²` / Kelly-EMM instances).
+  not yet formalized (the 2-D Itô formula, Lévy's characterisation, the fully-general `L²`/progressive
+  Girsanov under Novikov, some Markov/Poisson cores). Tracked per-entry in
+  [`docs/coverage.md`](docs/coverage.md).
+- **18 `library_wrapper` entries** — thin restatements consuming a Mathlib/BrownianMotion lemma. They are
+  delivery-ready but are not original derivations, and are counted separately for that reason.
+- **Girsanov's general case** — the bounded-predictable-θ result is closed; the fully-general
+  `L²`/progressive-θ case under Novikov remains open.
 - **Known upstream/limit gaps** — e.g. the superhedging strong-duality *equality* needs a
   finite-dimensional Farkas / polyhedral-cone closedness absent from Mathlib at this pin
   ([#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39)).
 
 The frontier is in the [open issues](https://github.com/raphaelrrcoelho/formal-mathfin/issues) and
-[`docs/roadmap.md`](docs/roadmap.md).
+[`docs/roadmap.md`](docs/roadmap.md). For genuinely *unsolved* problems — as opposed to unformalized
+known mathematics — [`docs/open-problems.md`](docs/open-problems.md) is a survey built over three
+adversarial rounds, where each entry carries an evidence class and the date of the most recent source
+asserting it is still open.
 
 ## Documentation
 
@@ -185,8 +223,11 @@ The frontier is in the [open issues](https://github.com/raphaelrrcoelho/formal-m
 | [`docs/architecture.md`](docs/architecture.md) | The engineering design: structural-principle modules, the three honesty tiers, the bridge methodology. |
 | [`docs/blueprint.md`](docs/blueprint.md) | The deductive spine — a dependency graph from Brownian motion to Black–Scholes, each node linked to its proof. |
 | [`docs/coverage.md`](docs/coverage.md) | Per-theorem audit: faithfulness status, verification evidence, claim wording. |
+| [`docs/open-problems.md`](docs/open-problems.md) | Unsolved problems in the field, by evidence class, with where this library has leverage. |
 | [`docs/roadmap.md`](docs/roadmap.md) | Strategic depth-vs-breadth framing and the tactical phase log. |
+| [`docs/hjm-program.md`](docs/hjm-program.md) | The HJM formalization program: stochastic Fubini as a shared primitive, the drift condition as its consumer. |
 | [`docs/values-review.md`](docs/values-review.md) | The judgment layer: the eight review lenses and the upgrade log. |
+| [`docs/onboarding.md`](docs/onboarding.md) · [`docs/troubleshooting.md`](docs/troubleshooting.md) | Getting in, and getting unstuck. |
 | [`docs/bridges.md`](docs/bridges.md) · [`docs/leaps.md`](docs/leaps.md) · [`docs/patterns.md`](docs/patterns.md) | The Foundations→pricing bridges, the deductive leaps, and distilled Lean proof patterns. |
 
 ## Contributing · citation · license
