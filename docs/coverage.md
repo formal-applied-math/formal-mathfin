@@ -26,6 +26,26 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+> **Record correction (2026-08-04, drafter attribution — no theorem changed):** corpus
+> **348**, **316 full + 18 wrappers = 334/348 delivery-ready**, 14 reduced cores, 0
+> placeholders — all unchanged; this touched `metadata.provenance` only, and the ledger
+> stayed 348 fresh because the input-hash covers snippet + imports + pins, not metadata.
+> `mf-performance-gain_to_pain` and `mf-performance-upside_capture` recorded
+> `statement_source: magistral-autoform`. They landed **2026-07-31**; Magistral left the
+> drafter on **2026-07-27** (foundry `17ac296`), so they cannot have been drafted by it.
+> The name was baked in at ENQUEUE rather than written by the stage that ran — the defect
+> `assemble.py::sanitize_provenance` exists to stop, added after these had already merged.
+> Both are scrubbed to the drafter-agnostic `autoform` via that same function, so their
+> `formalization_scope` prose now reads "autoformalized statement" rather than
+> "magistral-drafted statement". `mf-fixedincome-swap` (#66) and
+> `mf-insurance-premium-principles` (#85) landed 2026-07-18, genuinely in the Magistral
+> era, and **keep** their attribution — the correction is not a rename.
+> `formalization.yaml` had a second fault of the same family: it derived the drafter from
+> provenance correctly and then attached it to the TOTAL, crediting one drafter with all
+> four entries. It now tallies per drafter ("Magistral (2) and an unnamed drafter (2)"),
+> with `test_the_disclosure_does_not_generalize_one_drafter_to_every_entry` asserting the
+> property. Full rationale in [`values-review.md`](values-review.md).
+>
 > **Live status (2026-07-31, speed greeks + caplet/floorlet parity — closes #8, #27):** corpus
 > **348**, **316 full + 18 wrappers = 334/348 delivery-ready**, 14 reduced cores, 0 placeholders.
 > Three entries finishing two contributions that had been open since June (#36, #38, mertunsall)
