@@ -60,7 +60,9 @@ def parse_response(response) -> dict:
         error_msgs = legacy_errors
 
     sorries = getattr(response, "sorries", [])
-    sorry_count = len(sorries) if isinstance(sorries, list) else 0
+    if not isinstance(sorries, list):
+        sorries = []
+    sorry_count = len(sorries)
 
     def fmt(m) -> str:
         data = getattr(m, "data", None)
@@ -73,11 +75,25 @@ def parse_response(response) -> dict:
             return str(data)
         return str(m)
 
+    def fmt_sorry(s) -> dict:
+        """lean-interact's `Sorry` carries `.goal` — the proof state at that position.
+        We used to count these and drop the goals, which left every daemon consumer
+        blind to intermediate proof states. Surfacing them is what lets a caller splice
+        a `sorry` into a proof prefix and read back the state the next tactic acts on.
+        Tolerant of a shape without `.goal`/`.start_pos` (an older REPL): report None
+        rather than raising inside the daemon's response path."""
+        pos = getattr(s, "start_pos", None)
+        return {"line": getattr(pos, "line", None) if pos is not None else None,
+                "column": getattr(pos, "column", None) if pos is not None else None,
+                "goal": getattr(s, "goal", None)}
+
     return {
         "success": not error_msgs and sorry_count == 0,
         "errors": [fmt(m) for m in error_msgs],
         "warnings": [fmt(m) for m in warning_msgs],
         "sorry_count": sorry_count,
+        # Additive: callers keying on success/errors/sorry_count are unaffected.
+        "sorries": [fmt_sorry(s) for s in sorries],
     }
 
 
