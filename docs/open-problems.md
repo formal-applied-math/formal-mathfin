@@ -4,6 +4,12 @@
 scouting report for the other activity: genuinely unsolved problems, and which
 of them our existing formalization actually gives us leverage on.
 
+**Tracking issue:** [#177](https://github.com/raphaelrrcoelho/formal-mathfin/issues/177)
+(umbrella). Active targets: [#174](https://github.com/raphaelrrcoelho/formal-mathfin/issues/174)
+SVI domain · [#175](https://github.com/raphaelrrcoelho/formal-mathfin/issues/175)
+American convexity · [#176](https://github.com/raphaelrrcoelho/formal-mathfin/issues/176)
+impact propagator.
+
 ## How this list was built, and why it is organized by evidence
 
 Four adversarial rounds were run against current literature (2026-08). Rounds
