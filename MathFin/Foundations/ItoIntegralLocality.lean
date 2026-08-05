@@ -199,7 +199,13 @@ theorem coeFn_smulAdaptedCLM (T a : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun p ↦ afterFactor a Z p * φ p :=
   coeFn_mulBddCLM _ _ _ φ
 
-/-- Scaling a predictable `L²` integrand by a bounded `𝓕_a`-measurable factor. -/
+/-- Scaling a predictable `L²` integrand by a bounded `𝓕_a`-measurable factor —
+which, to stay inside the predictable `L²`, must be `Z` *switched on after `a`*:
+the integrand is `afterFactor a Z · φ = 𝟙_{a < t}·Z ω·φ (t,ω)`, not `Z ω·φ (t,ω)`
+(the latter is not predictable, and is not a.e. equal to anything that is). The
+switch is invisible on the integrands this file is about — those supported on
+`(a, T]` — where the coefficient is exactly `Z ω·φ (t,ω)`: see
+`coeFn_smulAdapted`. Unconditionally, `coeFn_smulAdapted_afterFactor`. -/
 noncomputable def smulAdapted (T a : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (Z : Ω → ℝ) (hZm : Measurable[ItoIntegralL2.natFiltration hBmeas a] Z)
     (C : ℝ) (hZb : ∀ ω, |Z ω| ≤ C)
@@ -428,16 +434,6 @@ private lemma itoSimple_afterStepSP_smul (T a : ℝ≥0) (hBmeas : ∀ t, Measur
 
 /-! ### `𝓕_a`-linearity -/
 
-/-- On the dense simple embeddings the Itô CLM is the elementary integral
-(`extendOfNorm_eq` against the assembly isometry). -/
-private lemma itoIntegralCLM_T_simpleAssembly (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (V : TBoundedSP T hBmeas) :
-    itoIntegralCLM_T hB T hBmeas (simpleAssembly_T (μ := μ) T hBmeas V)
-      = ItoIntegralL2.itoSimpleLp hB hBmeas V.val := by
-  rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-    ⟨1, fun W ↦ by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas W).le⟩]
-  rfl
-
 /-- **`𝓕_a`-linearity of the Itô integral.** A bounded `𝓕_a`-measurable factor
 passes through the stochastic integral of an integrand supported on `(a, T]`. -/
 theorem itoIntegralCLM_T_smulAdapted (T a : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
@@ -465,7 +461,7 @@ theorem itoIntegralCLM_T_smulAdapted (T a : ℝ≥0) (hBmeas : ∀ t, Measurable
                 (fun _ ↦ abs_one.le) V) from
         (simpleAssembly_T_afterStepSP T a hBmeas (fun _ ↦ (1 : ℝ)) measurable_const 1
           (fun _ ↦ abs_one.le) V).symm,
-      itoIntegralCLM_T_simpleAssembly, itoIntegralCLM_T_simpleAssembly]
+      itoIntegralCLM_T_simpleAssembly_T, itoIntegralCLM_T_simpleAssembly_T]
     refine Lp.ext ?_
     filter_upwards [(ItoIntegralL2.memLp_itoSimple hB hBmeas
         (afterStepSP T a hBmeas Z hZm C hZb V).val).coeFn_toLp,

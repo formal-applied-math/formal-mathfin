@@ -114,16 +114,6 @@ theorem itoProcessCLM_simpleAssembly_T (T t : ℝ≥0) (hBmeas : ∀ u, Measurab
     ⟨1, fun W ↦ by rw [one_mul]; exact itoSimpleProcessLp_norm_le hB T t hBmeas W.val W.property⟩]
   rfl
 
-/-- The existing terminal CLM on a simple embedding reproduces `itoSimpleLp` (the
-`ItoIntegralCLM` analogue of `itoProcessCLM_simpleAssembly_T`). -/
-theorem itoIntegralCLM_T_simpleAssembly_T (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (V : TBoundedSP T hBmeas) :
-    itoIntegralCLM_T hB T hBmeas (simpleAssembly_T (μ := μ) T hBmeas V)
-      = itoSimpleLp hB hBmeas V.val := by
-  rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-    ⟨1, fun W ↦ by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas W).le⟩]
-  rfl
-
 omit [IsProbabilityMeasure μ] in
 /-- B1a's martingale to the terminal: `μ[itoSimple V | 𝓕_t] = (V●B)_t` for
 `T`-bounded `V` (`(V●B)_{T'} = itoSimple V` at `T' = t ⊔ T`). -/
