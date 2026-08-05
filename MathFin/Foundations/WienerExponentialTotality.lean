@@ -18,9 +18,13 @@ step-integrand Doléans exponential
 
   `D = ∏ₖ exp(hₖ(B_{sₖ₊₁} − B_{sₖ}) − ½hₖ²(sₖ₊₁ − sₖ))`
 
-inside the range of `∫·dB`, up to the constant `1`. This file supplies the other half: a
-centered `F ∈ L²(𝓕ᴮ_T)` orthogonal to all of them is `0`. Those two facts together are the
+inside the range of `∫·dB`, up to the constant `1`. This file supplies the other half: an
+`F ∈ L²(𝓕ᴮ_T)` orthogonal to all of them is `0`. Those two facts together are the
 representation theorem.
+
+Centering is *not* a hypothesis here. The family already contains the constant `1` — take the
+zero integrand `h ≡ 0` over any one cell, where every factor is `exp(0) = 1` — so orthogonality
+to the family says `∫F = 0` all by itself.
 
 ## The three moves
 
@@ -51,9 +55,11 @@ content of `BrownianCylinderGeneration`), so Lévy's upward theorem sends `𝔼[
 
 `hB` is not decoration. Without a Brownian law the statement is **false**: for the (continuous,
 measurable) process `B ≡ Z` constant in time, every increment vanishes, so every
-`stepDoleansExp` is a positive constant and `hFperp` reduces to `∫F = 0` — yet any centered
-non-zero `σ(Z)`-measurable `F ∈ L²` would then have to be `0`. Brownianness enters twice: at
-`B₀ = 0` (Step A's telescope) and at the Gaussian tails (Step B's open `integrableExpSet`).
+`stepDoleansExp` is a positive constant and `hFperp` says no more than `∫F = 0` — yet `F = Z` is
+centered, `σ(Z) = 𝓕_T`-measurable, in `L²`, and not `0`. (A time-constant but *random* `B` is
+what the counterexample needs; `B ≡ 0` will not do, since it makes `𝓕_T = ⊥` and forces `F = 0`
+for the right reason.) Brownianness enters twice: at `B₀ = 0` (Step A's telescope) and at the
+Gaussian tails (Step B's open `integrableExpSet`).
 
 ## Main results
 
@@ -387,7 +393,13 @@ private lemma setIntegral_eq_zero_of_iSup_comap (hB : IsPreBrownianReal B μ)
   rw [integral_eq_lintegral_pos_part_sub_lintegral_neg_part hfint.restrict, ep, em, hnuA, sub_self]
 
 /-- **Totality of the Wiener exponentials.** An `L²` variable measurable for the Brownian
-σ-algebra `𝓕ᴮ_T`, centered and orthogonal to every step-integrand Doléans exponential, is zero.
+σ-algebra `𝓕ᴮ_T` and orthogonal to every step-integrand Doléans exponential is zero.
+
+Centering is derived, not assumed. The zero integrand `h ≡ 0` over the single cell `[0,T]` (with
+the monotone witness `s k = if k = 0 then 0 else T`, legitimate even at `T = 0`) makes every
+factor `exp(0) = 1`, so `hFperp` at that one instantiation is exactly `∫F = 0`. The proof reaches
+it through Step A at `n = 0` and then `λ = 0` inside Step B, which is the same fact taking the
+route the argument was already travelling.
 
 Three moves. Step A (`integral_mul_exp_linear_eq_zero`) trades the Doléans family for the raw
 exponentials `exp(∑ᵢ λᵢ B_{tᵢ})`. Step B (`setIntegral_eq_zero_of_iSup_comap`) turns that, by
@@ -401,7 +413,6 @@ theorem eq_zero_of_orthogonal_stepDoleans (hB : IsPreBrownianReal B μ)
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0)
     (F : Lp ℝ 2 μ)
     (hFmeas : AEStronglyMeasurable[ItoIntegralL2.natFiltration hBmeas T] (⇑F) μ)
-    (_hF1 : ∫ ω, F ω ∂μ = 0)
     (hFperp : ∀ (s : ℕ → ℝ≥0), Monotone s → ∀ (h : ℕ → ℝ) (N : ℕ),
       s 0 = 0 → s N = T → ∫ ω, F ω * stepDoleansExp B s h N ω ∂μ = 0) :
     F = 0 := by
