@@ -209,6 +209,9 @@ import MathFin.Foundations.ItoFormulaGBM
 -- Martingale representation, step 3: the Doléans exponential of a deterministic step
 -- integrand is an Itô integral (time locality of `∫·dB` + unbounded `𝓕_a`-scaling)
 import MathFin.Foundations.DoleansStepRepresentation
+-- Martingale representation, step 4: the Wiener exponentials are total in `L²(𝓕ᴮ_T)`
+-- (Abel summation + Laplace-transform uniqueness on `ℝⁿ` + Lévy's upward theorem)
+import MathFin.Foundations.WienerExponentialTotality
 import MathFin.Foundations.ItoFormulaProcess
 import MathFin.Foundations.ExitTime
 import MathFin.Foundations.ItoFormulaUnrestricted
