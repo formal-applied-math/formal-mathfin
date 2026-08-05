@@ -6,9 +6,10 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoIntegralBrownian
+public import MathFin.Foundations.ItoIntegralProcessIsometry
 
 /-!
-# `𝓕_a`-linearity of the Itô integral
+# Locality of the Itô integral — in the sample space, and in time
 
 The Itô integral is linear over the reals by construction — it is a CLM. It is
 in fact linear over something much larger: over the **`𝓕_a`-measurable random
@@ -60,6 +61,36 @@ The reusable abstraction extracted along the way is `mulBddCLM`: multiplication
 by a bounded measurable function as a continuous operator on `L²`, for an
 arbitrary measure. Both the integrand-side scaling (on `trim_T`) and the
 sample-side scaling (on `μ`) are instances of it.
+
+## Locality in time
+
+The same word governs the time variable: an integrand that lives on one side of
+a time `u` has an integral that lives on that side too. Both halves are read off
+the time-indexed Itô isometry `‖(φ●B)_u‖² = ∫_{(0,u]} φ²`
+(`ItoIntegralProcessGeneral.itoProcessCLM_norm_sq`):
+
+* switched on only after `u` ⟹ `(φ●B)_u = 0` — its band energy is zero;
+* switched off after `u` ⟹ `∫₀ᵀ φ dB = (φ●B)_u`, hence `𝓕_u`-measurable. Here the
+  band energy is the *whole* energy, so the `𝓕_u`-projection of `∫₀ᵀ φ dB` has full
+  norm; and a norm-preserving orthogonal projection is the identity on that vector
+  (`condExpL2` is definitionally `Submodule.orthogonalProjectionOnto`, so the Hilbert
+  API applies verbatim).
+
+Subtracting the two gives `∫₀ᵀ 𝟙_{(u,T]}·φ dB = ∫₀ᵀ φ dB − (φ●B)_u`
+(`itoIntegralCLM_T_restrictAfterCLM`): restricting an integrand to `(u,T]` removes
+exactly the past of its integral. That is what turns a *terminal* identity, which is
+all an Itô formula hands out, into an identity for an inner increment — the shape a
+Doléans exponential over a partition needs.
+
+## The sample-side form of the integrand hypothesis
+
+`itoIntegralCLM_T_smulAdapted_of_memLp` asks for `Z·φ ∈ L²(trim)`, a statement about
+the integrand. Callers that obtained `φ` from an Itô formula have no handle on it, but
+do know `∫φ dB` explicitly, and so can check `Z·∫φ dB ∈ L²(μ)` instead. The isometry
+says these are the same requirement, and `itoIntegralCLM_T_smul_of_memLp` performs the
+transfer: truncating `Z` at level `M` gives genuine integrands whose energies *are* the
+sample-side energies, uniformly bounded; they converge pointwise to `Z·φ`, and Fatou
+carries the bound to the limit.
 -/
 
 @[expose] public section
@@ -262,6 +293,20 @@ theorem restrictAfterCLM_eq (T a : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   split_ifs with h
   · rw [one_mul]
   · rw [zero_mul, e2 (not_lt.mp h)]
+
+omit [IsProbabilityMeasure μ] in
+/-- **`restrictAfterCLM` unfolded** — the unconditional companion of
+`restrictAfterCLM_eq`: the integrand switched on strictly after `a`. -/
+theorem coeFn_restrictAfterCLM (T a : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    ⇑(restrictAfterCLM T a hBmeas φ) =ᵐ[trimMeasure_T (μ := μ) T hBmeas]
+      fun p ↦ if a < p.1 then φ p else 0 := by
+  filter_upwards [coeFn_smulAdaptedCLM T a hBmeas (fun _ ↦ (1 : ℝ)) measurable_const 1
+    (fun _ ↦ abs_one.le) φ] with p hp
+  rw [show ⇑(restrictAfterCLM T a hBmeas φ) p
+      = afterFactor a (fun _ ↦ (1 : ℝ)) p * (φ : ℝ≥0 × Ω → ℝ) p from hp]
+  simp only [afterFactor]
+  split_ifs <;> simp
 
 /-! ### Simple processes restarted at `a` -/
 
@@ -560,5 +605,192 @@ theorem itoIntegralCLM_T_smulAdapted_mem_range (T a : ℝ≥0) (hBmeas : ∀ t, 
       ⇑(itoIntegralCLM_T hB T hBmeas χ)
         =ᵐ[μ] fun ω ↦ Z ω * itoIntegralCLM_T hB T hBmeas φ ω :=
   ⟨hZφ.toLp _, itoIntegralCLM_T_smulAdapted_of_memLp hB T a hBmeas Z hZm φ hφ hZφ⟩
+
+/-- **The hypothesis in its sample-side form.** `itoIntegralCLM_T_smulAdapted_of_memLp`
+asks for `Z·φ ∈ L²(trim)`; a caller whose `φ` came out of an Itô formula knows nothing
+about it, but does know `∫φ dB`, and so can offer `Z·∫φ dB ∈ L²(μ)` instead. The Itô
+isometry makes these the same requirement: truncating `Z` at level `M` gives genuine
+integrands `𝟙_{|Z|≤M}·Z·φ` whose energies *are* the sample-side energies
+`‖𝟙_{|Z|≤M}·Z·∫φ dB‖ ≤ ‖Z·∫φ dB‖`, uniformly bounded; they converge pointwise to `Z·φ`,
+so Fatou bounds its energy too. The extra `⇑ψ =ᵐ Z·φ` conclusion is what lets a caller
+inherit the *support* of `φ`. -/
+theorem itoIntegralCLM_T_smul_of_memLp (T a : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (Z : Ω → ℝ) (hZm : Measurable[ItoIntegralL2.natFiltration hBmeas a] Z)
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (hφ : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), p.1 ≤ a → φ p = 0)
+    (hZI : MemLp (fun ω ↦ Z ω * itoIntegralCLM_T hB T hBmeas φ ω) 2 μ) :
+    ∃ ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+      (⇑ψ =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun p ↦ Z p.2 * φ p) ∧
+      ⇑(itoIntegralCLM_T hB T hBmeas ψ)
+        =ᵐ[μ] fun ω ↦ Z ω * itoIntegralCLM_T hB T hBmeas φ ω := by
+  -- the truncations `Z_M = 𝟙_{|Z| ≤ M}·Z`, bounded and `𝓕_a`-measurable
+  have hAm (M : ℕ) : MeasurableSet[ItoIntegralL2.natFiltration hBmeas a]
+      {ω | |Z ω| ≤ (M : ℝ)} := by
+    rw [show {ω | |Z ω| ≤ (M : ℝ)} = Z ⁻¹' (Set.Icc (-(M : ℝ)) (M : ℝ)) from by
+      ext ω; simp [abs_le]]
+    exact hZm measurableSet_Icc
+  have hZMm (M : ℕ) : Measurable[ItoIntegralL2.natFiltration hBmeas a]
+      (Set.indicator {ω | |Z ω| ≤ (M : ℝ)} Z) := hZm.indicator (hAm M)
+  have hZMb (M : ℕ) (ω : Ω) : |Set.indicator {ω | |Z ω| ≤ (M : ℝ)} Z ω| ≤ (M : ℝ) := by
+    by_cases hm : ω ∈ {ω | |Z ω| ≤ (M : ℝ)}
+    · rw [Set.indicator_of_mem hm]; exact hm
+    · simp [Set.indicator_of_notMem hm]
+  -- their energies are bounded by the sample-side one, through the Itô isometry
+  have hbound (M : ℕ) :
+      ‖smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ‖ ≤ ‖hZI.toLp _‖ := by
+    rw [← itoIntegralCLM_T_norm hB T hBmeas (smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ)]
+    refine Lp.norm_le_norm_of_ae_le ?_
+    filter_upwards [itoIntegralCLM_T_smulAdapted hB T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ hφ,
+      hZI.coeFn_toLp] with ω h1 h2
+    rw [h1, h2, Real.norm_eq_abs, Real.norm_eq_abs, abs_mul, abs_mul]
+    refine mul_le_mul_of_nonneg_right ?_ (abs_nonneg _)
+    by_cases hm : ω ∈ {ω | |Z ω| ≤ (M : ℝ)}
+    · rw [Set.indicator_of_mem hm]
+    · rw [Set.indicator_of_notMem hm, abs_zero]; exact abs_nonneg _
+  -- Fatou: the limit integrand `Z·φ` inherits the bound
+  have hZφ : MemLp (fun p : ℝ≥0 × Ω ↦ Z p.2 * φ p) 2 (trimMeasure_T (μ := μ) T hBmeas) := by
+    have hmeas : AEStronglyMeasurable[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable]
+        (fun p : ℝ≥0 × Ω ↦ Z p.2 * φ p) (trimMeasure_T (μ := μ) T hBmeas) := by
+      refine AEStronglyMeasurable.congr
+        ((measurable_afterFactor hBmeas hZm).stronglyMeasurable.aestronglyMeasurable.mul
+          (Lp.aestronglyMeasurable φ)) ?_
+      filter_upwards [hφ] with p hp
+      simp only [Pi.mul_apply, afterFactor]
+      split_ifs with hc
+      · rfl
+      · rw [hp (not_lt.mp hc), mul_zero, mul_zero]
+    have hlim : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas),
+        Tendsto (fun M : ℕ ↦
+            (smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ : ℝ≥0 × Ω → ℝ) p)
+          atTop (𝓝 (Z p.2 * φ p)) := by
+      filter_upwards [ae_all_iff.mpr (fun M : ℕ ↦
+        coeFn_smulAdapted_afterFactor T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ), hφ] with p hall hp
+      rcases le_or_gt p.1 a with hle | hlt
+      · have hz (M : ℕ) :
+            (smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ : ℝ≥0 × Ω → ℝ) p = 0 := by
+          rw [hall M]
+          simp only [afterFactor, if_neg (not_lt.mpr hle), zero_mul]
+        simp only [hz, hp hle, mul_zero]
+        exact tendsto_const_nhds
+      · refine Tendsto.congr' ?_ tendsto_const_nhds
+        filter_upwards [eventually_ge_atTop ⌈|Z p.2|⌉₊] with M hM
+        have hmem : p.2 ∈ {ω | |Z ω| ≤ (M : ℝ)} :=
+          (Nat.le_ceil |Z p.2|).trans (by exact_mod_cast hM : ((⌈|Z p.2|⌉₊ : ℕ) : ℝ) ≤ (M : ℝ))
+        rw [hall M]
+        simp only [afterFactor, if_pos hlt, Set.indicator_of_mem hmem]
+    have hle : atTop.liminf (fun M : ℕ ↦ eLpNorm
+        (⇑(smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ)) 2
+          (trimMeasure_T (μ := μ) T hBmeas))
+        ≤ ENNReal.ofReal ‖hZI.toLp (fun ω ↦ Z ω * itoIntegralCLM_T hB T hBmeas φ ω)‖ := by
+      refine liminf_le_of_frequently_le' (Filter.Frequently.of_forall fun M ↦ ?_)
+      rw [show eLpNorm (⇑(smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ)) 2
+            (trimMeasure_T (μ := μ) T hBmeas)
+          = ENNReal.ofReal ‖smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ‖ from by
+        rw [Lp.norm_def, ENNReal.ofReal_toReal (Lp.eLpNorm_ne_top _)]]
+      exact ENNReal.ofReal_le_ofReal (hbound M)
+    exact ⟨hmeas, lt_of_le_of_lt ((MeasureTheory.Lp.eLpNorm_lim_le_liminf_eLpNorm
+      (fun M : ℕ ↦ Lp.aestronglyMeasurable
+        (smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ)) _ hlim).trans hle)
+      ENNReal.ofReal_lt_top⟩
+  exact ⟨hZφ.toLp _, hZφ.coeFn_toLp,
+    itoIntegralCLM_T_smulAdapted_of_memLp hB T a hBmeas Z hZm φ hφ hZφ⟩
+
+/-! ### Locality in time -/
+
+section TimeLocality
+
+open ItoIntegralProcessGeneral
+
+omit [IsProbabilityMeasure μ] in
+/-- `(0,u] × Ω` is predictable — the band the time-indexed isometry integrates over. -/
+private lemma measurableSet_timeBand (u : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+    MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable]
+      (Set.Ioc 0 u ×ˢ (Set.univ : Set Ω)) :=
+  MeasureTheory.measurableSet_predictable_Ioc_prod
+    (𝓕 := ItoIntegralL2.natFiltration hBmeas) 0 u MeasurableSet.univ
+
+/-- The predictable trim measure lives on the band `(0,T] × Ω`. -/
+private lemma ae_fst_mem_Ioc (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+    ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), z.1 ∈ Set.Ioc 0 T := by
+  rw [trimMeasure_T_eq_restrict]
+  exact ae_restrict_of_forall_mem (measurableSet_timeBand T hBmeas) (fun z hz ↦ hz.1)
+
+/-- **An integrand switched on only after `u` has not yet moved at `u`.** By the
+time-indexed Itô isometry the energy of `(φ●B)_u` is `∫_{(0,u]} φ²`, which vanishes
+when `φ` does. -/
+theorem itoProcessCLM_eq_zero_of_vanishes_before (T u : ℝ≥0) (huT : u ≤ T)
+    (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (hφ : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), p.1 ≤ u → φ p = 0) :
+    itoProcessCLM hB T u hBmeas φ = 0 := by
+  have hzero : ∫ z in (Set.Ioc 0 u ×ˢ (Set.univ : Set Ω)), (φ z) ^ 2
+      ∂(trimMeasure_T (μ := μ) T hBmeas) = 0 := by
+    have hae : ∀ᵐ z ∂((trimMeasure_T (μ := μ) T hBmeas).restrict
+        (Set.Ioc 0 u ×ˢ (Set.univ : Set Ω))), (φ z) ^ 2 = 0 := by
+      rw [ae_restrict_iff' (measurableSet_timeBand u hBmeas)]
+      filter_upwards [hφ] with z hz hzmem
+      rw [hz hzmem.1.2]
+      ring
+    rw [integral_congr_ae hae, integral_zero]
+  refine norm_eq_zero.mp (pow_eq_zero_iff two_ne_zero |>.mp ?_)
+  rw [itoProcessCLM_norm_sq hB huT hBmeas φ, hzero]
+
+/-- **An integrand switched off after `u` has already finished at `u`**: its Itô
+integral over `[0,T]` is the Itô-integral *process* at time `u`, hence
+`𝓕_u`-measurable. The energy of `(φ●B)_u` is `∫_{(0,u]} φ² = ‖φ‖² = ‖∫₀ᵀ φ dB‖²`, so
+the `𝓕_u`-projection of `∫₀ᵀ φ dB` has full norm — and an orthogonal projection that
+preserves the norm is the identity on that vector. -/
+theorem itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after (T u : ℝ≥0) (huT : u ≤ T)
+    (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (hφ : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), u < p.1 → φ p = 0) :
+    itoIntegralCLM_T hB T hBmeas φ = itoProcessCLM hB T u hBmeas φ := by
+  haveI : Fact ((ItoIntegralL2.natFiltration hBmeas u : MeasurableSpace Ω) ≤ mΩ) :=
+    ⟨(ItoIntegralL2.natFiltration hBmeas).le u⟩
+  set X := itoIntegralCLM_T hB T hBmeas φ with hX
+  -- the band energy is the whole energy: `φ` is carried by `(0,u]`
+  have hband : ∫ z in (Set.Ioc 0 u ×ˢ (Set.univ : Set Ω)), (φ z) ^ 2
+      ∂(trimMeasure_T (μ := μ) T hBmeas)
+      = ∫ z, (φ z) ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+    refine setIntegral_eq_integral_of_ae_compl_eq_zero ?_
+    filter_upwards [hφ, ae_fst_mem_Ioc T hBmeas] with z hz hzT hznot
+    rw [hz (by by_contra hc; exact hznot ⟨⟨hzT.1, not_lt.mp hc⟩, Set.mem_univ _⟩)]
+    ring
+  have hnorm : ‖(condExpL2 ℝ ℝ ((ItoIntegralL2.natFiltration hBmeas).le u) X : Lp ℝ 2 μ)‖ = ‖X‖ := by
+    have hsq : ‖itoProcessCLM hB T u hBmeas φ‖ ^ 2 = ‖X‖ ^ 2 := by
+      rw [itoProcessCLM_norm_sq hB huT hBmeas φ, hband, hX, itoIntegralCLM_T_norm hB T hBmeas φ,
+        ItoIntegralL2.lp_two_norm_sq φ]
+    rw [← itoProcessCLM_eq_condExpL2 hB T u hBmeas φ]
+    have hs := congrArg Real.sqrt hsq
+    rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq (norm_nonneg _)] at hs
+  rw [itoProcessCLM_eq_condExpL2 hB T u hBmeas φ]
+  have hcoe : ((condExpL2 ℝ ℝ ((ItoIntegralL2.natFiltration hBmeas).le u) X : Lp ℝ 2 μ))
+      = (lpMeas ℝ ℝ (ItoIntegralL2.natFiltration hBmeas u) 2 μ).starProjection X := rfl
+  rw [hcoe] at hnorm ⊢
+  exact (Submodule.starProjection_eq_self_iff.mpr
+    ((Submodule.mem_iff_norm_starProjection _ X).mpr hnorm)).symm
+
+/-- **Restricting an integrand to `(u,T]` removes exactly the past of the integral.**
+`∫₀ᵀ 𝟙_{(u,T]}·φ dB = ∫₀ᵀ φ dB − (φ●B)_u`: the complementary piece `𝟙_{(0,u]}·φ` is
+switched off after `u`, so its integral is the process value at `u`
+(`itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after`), and the restriction itself
+contributes nothing at `u` (`itoProcessCLM_eq_zero_of_vanishes_before`). This is the
+lemma that converts a terminal Itô identity into one for an inner increment. -/
+theorem itoIntegralCLM_T_restrictAfterCLM (T u : ℝ≥0) (huT : u ≤ T)
+    (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    itoIntegralCLM_T hB T hBmeas (restrictAfterCLM T u hBmeas φ)
+      = itoIntegralCLM_T hB T hBmeas φ - itoProcessCLM hB T u hBmeas φ := by
+  set R := restrictAfterCLM T u hBmeas φ with hR
+  have hafter : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), p.1 ≤ u → R p = 0 := by
+    filter_upwards [coeFn_restrictAfterCLM T u hBmeas φ] with p hp hpu
+    rw [hp, if_neg (not_lt.mpr hpu)]
+  have hbefore : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), u < p.1 → (φ - R) p = 0 := by
+    filter_upwards [coeFn_restrictAfterCLM T u hBmeas φ, Lp.coeFn_sub φ R] with p hp hsub hpu
+    rw [hsub, Pi.sub_apply, hp, if_pos hpu, sub_self]
+  have hkey : itoIntegralCLM_T hB T hBmeas (φ - R) = itoProcessCLM hB T u hBmeas φ := by
+    rw [itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after hB T u huT hBmeas (φ - R) hbefore,
+      map_sub, itoProcessCLM_eq_zero_of_vanishes_before hB T u huT hBmeas R hafter, sub_zero]
+  rw [← hkey, map_sub]
+  abel
+
+end TimeLocality
 
 end MathFin
