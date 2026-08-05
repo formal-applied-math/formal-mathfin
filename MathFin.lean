@@ -206,6 +206,9 @@ import MathFin.Foundations.BrownianExpMoment
 import MathFin.Foundations.ItoFormulaLocalized
 import MathFin.Foundations.ItoFormulaItoProcess
 import MathFin.Foundations.ItoFormulaGBM
+-- Martingale representation, step 3: the Doléans exponential of a deterministic step
+-- integrand is an Itô integral (time locality of `∫·dB` + unbounded `𝓕_a`-scaling)
+import MathFin.Foundations.DoleansStepRepresentation
 import MathFin.Foundations.ItoFormulaProcess
 import MathFin.Foundations.ExitTime
 import MathFin.Foundations.ItoFormulaUnrestricted
