@@ -177,6 +177,9 @@ import MathFin.Foundations.ItoFormulaSquaredL2
 -- Keystone: `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` as a genuine `itoIntegralCLM_T` identity
 -- (the continuous Itô integral's first real consumer)
 import MathFin.Foundations.ItoIntegralBrownian
+-- `𝓕_a`-linearity: a bounded `𝓕_a`-measurable factor passes through `∫₀ᵀ · dB`
+-- when the integrand lives on `(a,T]` (locality of the stochastic integral)
+import MathFin.Foundations.ItoIntegralLocality
 -- Summit A: bounded-derivative continuous-time Itô formula in L² (CLM-identified)
 import MathFin.Foundations.WeightedQuadraticVariation
 import MathFin.Foundations.ItoFormulaRemainder
