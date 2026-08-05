@@ -124,6 +124,8 @@ import MathFin.Foundations.DiscreteIto
 import MathFin.Foundations.ItoIsometryAdapted
 -- Continuous L²-adapted Itô integral (construction, anchored on Degenne SimpleProcess)
 import MathFin.Foundations.ItoIntegralL2
+-- 𝓕ᴮ_T is the countable supremum of dyadic cylinder σ-algebras (path continuity)
+import MathFin.Foundations.BrownianCylinderGeneration
 -- The Itô integral as a continuous linear isometry `Lp 2 trim_T → Lp 2 μ` on `[0,T]`
 import MathFin.Foundations.ItoIntegralCLM
 -- The unbounded-horizon `[0,∞)` Itô integral CLM `Lp 2 trim_full → Lp 2 μ` (Summit B / B2)
