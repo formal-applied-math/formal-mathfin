@@ -57,7 +57,7 @@ preserves the mean.
 * `centeredBrownianL2`, `mem_centeredBrownianL2` — the centered `𝓕ᴮ_T`-measurable subspace.
 * `itoIsometryCentered`, `coe_itoIsometryCentered`, `itoIsometryCentered_surjective` —
   the Itô isometry corestricted to that subspace, and its surjectivity.
-* `itoIsometryEquiv_T` — those two bundled: `φ ↦ ∫₀ᵀ φ dB` as a linear isometric
+* `itoIsometryEquiv` — those two bundled: `φ ↦ ∫₀ᵀ φ dB` as a linear isometric
   equivalence onto `centeredBrownianL2`.
 * `martingale_representation` — process form (corpus entry `gir-thm-9.3.4`).
 -/
@@ -316,7 +316,7 @@ theorem itoIsometryCentered_surjective (hBmeas : ∀ t, Measurable (B t))
 from the predictable `L²` integrands onto the centered `𝓕ᴮ_T`-measurable part of `L²(μ)`:
 the corestriction is injective because it is an isometry, and surjective by
 `itoIsometryCentered_surjective`. -/
-noncomputable def itoIsometryEquiv_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+noncomputable def itoIsometryEquiv (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) :
     Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) ≃ₗᵢ[ℝ]
