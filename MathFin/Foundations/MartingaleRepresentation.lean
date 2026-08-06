@@ -55,8 +55,10 @@ preserves the mean.
 * `itoIntegralCLM_T_surjective_onto_centered` — submodule form: the Itô integrals together
   with the constants exhaust `lpMeas ℝ ℝ 𝓕ᴮ_T 2 μ`.
 * `centeredBrownianL2`, `mem_centeredBrownianL2` — the centered `𝓕ᴮ_T`-measurable subspace.
-* `itoIsometryCentered_T`, `coe_itoIsometryCentered_T`, `itoIsometryCentered_T_surjective` —
+* `itoIsometryCentered`, `coe_itoIsometryCentered`, `itoIsometryCentered_surjective` —
   the Itô isometry corestricted to that subspace, and its surjectivity.
+* `itoIsometryEquiv_T` — those two bundled: `φ ↦ ∫₀ᵀ φ dB` as a linear isometric
+  equivalence onto `centeredBrownianL2`.
 * `martingale_representation` — process form (corpus entry `gir-thm-9.3.4`).
 -/
 
@@ -287,7 +289,7 @@ lemma mem_centeredBrownianL2 (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (F
 
 /-- The `[0,T]` Itô integral corestricted to its true target, the centered
 `𝓕ᴮ_T`-measurable subspace: `ItoIntegralCovariation.itoIsometry_T` with a sharper codomain. -/
-noncomputable def itoIsometryCentered_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+noncomputable def itoIsometryCentered (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) :
     Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) →ₗᵢ[ℝ] centeredBrownianL2 (μ := μ) T hBmeas where
   toLinearMap := LinearMap.codRestrict (centeredBrownianL2 (μ := μ) T hBmeas)
@@ -297,19 +299,30 @@ noncomputable def itoIsometryCentered_T (hB : IsPreBrownianReal B μ) (T : ℝ�
   norm_map' φ := itoIntegralCLM_T_norm hB T hBmeas φ
 
 /-- The corestriction changes nothing but the codomain. -/
-@[simp] lemma coe_itoIsometryCentered_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+@[simp] lemma coe_itoIsometryCentered (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    (itoIsometryCentered_T hB T hBmeas φ : Lp ℝ 2 μ) = itoIntegralCLM_T hB T hBmeas φ := rfl
+    (itoIsometryCentered hB T hBmeas φ : Lp ℝ 2 μ) = itoIntegralCLM_T hB T hBmeas φ := rfl
 
-/-- **The Itô isometry is onto the centered subspace.** With `itoIsometryCentered_T`'s
-isometry (hence injectivity) this says `φ ↦ ∫₀ᵀ φ dB` is a linear isometric equivalence onto
-`centeredBrownianL2`; `LinearIsometryEquiv.ofSurjective` bundles the two. -/
-theorem itoIsometryCentered_T_surjective (hBmeas : ∀ t, Measurable (B t))
+/-- **The Itô isometry is onto the centered subspace.** Every centered `𝓕ᴮ_T`-measurable `L²`
+variable is hit, by the kernel form. -/
+theorem itoIsometryCentered_surjective (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) :
-    Function.Surjective (itoIsometryCentered_T hB T hBmeas) := fun y ↦
+    Function.Surjective (itoIsometryCentered hB T hBmeas) := fun y ↦
   let ⟨hy1, hy2⟩ := (mem_centeredBrownianL2 T hBmeas _).mp y.2
   let ⟨ψ, hψ⟩ := mem_range_itoIntegralCLM_T_of_centered hB hBmeas hBcont T y hy1 hy2
-  ⟨ψ, Subtype.ext ((coe_itoIsometryCentered_T hB T hBmeas ψ).trans hψ)⟩
+  ⟨ψ, Subtype.ext ((coe_itoIsometryCentered hB T hBmeas ψ).trans hψ)⟩
+
+/-- **The Itô isometry as an equivalence.** `φ ↦ ∫₀ᵀ φ dB` is a linear isometric equivalence
+from the predictable `L²` integrands onto the centered `𝓕ᴮ_T`-measurable part of `L²(μ)`:
+the corestriction is injective because it is an isometry, and surjective by
+`itoIsometryCentered_surjective`. -/
+noncomputable def itoIsometryEquiv_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) :
+    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) ≃ₗᵢ[ℝ]
+      centeredBrownianL2 (μ := μ) T hBmeas :=
+  LinearIsometryEquiv.ofSurjective (itoIsometryCentered hB T hBmeas)
+    (itoIsometryCentered_surjective hB hBmeas hBcont T)
 
 /-- **Martingale representation, process form.** Corpus entry `gir-thm-9.3.4`: every
 square-integrable martingale on the Brownian filtration is its initial value plus an Itô
