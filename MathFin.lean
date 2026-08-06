@@ -212,6 +212,9 @@ import MathFin.Foundations.DoleansStepRepresentation
 -- Martingale representation, step 4: the Wiener exponentials are total in `L²(𝓕ᴮ_T)`
 -- (Abel summation + Laplace-transform uniqueness on `ℝⁿ` + Lévy's upward theorem)
 import MathFin.Foundations.WienerExponentialTotality
+-- Martingale representation, step 5: the Itô integral is onto the centered `𝓕ᴮ_T`-measurable
+-- part of `L²(μ)` — terminal, submodule and process forms of the representation theorem
+import MathFin.Foundations.MartingaleRepresentation
 import MathFin.Foundations.ItoFormulaProcess
 import MathFin.Foundations.ExitTime
 import MathFin.Foundations.ItoFormulaUnrestricted
