@@ -1356,3 +1356,30 @@ Ho–Lee #156 and the Vasicek/Hull–White seam #157. Musiela (#158) is a deferr
 **Next:** the keystone `stochFubini_ofCLM` (#141, the tower-agnostic primitive) then its Itô instance (#142)
 — every downstream tier waits on it; its one hard step is the L²-representative fact (maybe already in Mathlib).
 #140 (a would-be `integral_comp_comm` wrapper) was dissolved into #141 as an anti-wrapper cleanup.
+
+## known gap: the localized Itô formula does not identify its integrand (2026-08-06)
+
+Surfaced during Task 3 of the martingale-representation program
+(`docs/plans/2026-08-04-martingale-representation.md`). `ito_formula_td_localized`
+(`Foundations/ItoFormulaLocalized.lean`) returns a bare `∃ gfx`, and everything built on it inherits
+the same shape: `ito_formula_expBrownian`, `ito_formula_gbm`, and `discountedGBM_eq_itoIntegral`
+(`Foundations/ItoFormulaGBM.lean`) all produce a witness without saying what it is. The internal
+per-cutoff step it calls, `cutoff_bddDeriv` (`Foundations/ItoFormulaLocalized.lean:326`), is also a
+bare existential, so naming the integrand means editing a four-theorem chain, not patching one file:
+`cutoff_bddDeriv → ito_formula_td_localized → ito_formula_itoProcess`
+(`Foundations/ItoFormulaItoProcess.lean`) `→ ito_formula_gbm`/`discountedGBM_eq_itoIntegral`. Only
+`ito_formula_td_L2_bddDeriv_explicit` (`Foundations/ItoFormulaTD.lean`) carries the naming conjunct,
+and it wants globally bounded derivatives; the exponential's own partial, of the shape `σ·exp(σx)`, is
+not bounded, so that route stays closed here.
+
+Consequence: no consumer of `ito_formula_gbm` or `discountedGBM_eq_itoIntegral` can currently identify
+the diffusion coefficient. The library cannot say "the delta is `σS`" from these lemmas alone. The
+statement is true and provable: redoing `ito_formula_td_localized`'s L²-limit argument with an extra
+a.e.-identification pass would give it. It is just not derivable from the tower's exported API today.
+
+Task 3 needed exactly that: the integrand of the constant-volatility Doléans exponential, named. It
+worked around the gap instead, going from the known *value* of the integral (a difference of Wald
+exponentials) to the result via the Itô isometry + truncation + Fatou
+(`itoIntegralCLM_T_smul_of_memLp`), which needs no witness. The gap stayed open by choice, not by
+oversight. The one task that would have forced the fix was rearranged to avoid needing it, and nothing
+else in the corpus currently needs the named form. Leave it until a consumer does.

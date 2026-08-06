@@ -268,7 +268,9 @@ For `V : TBoundedSP T hBmeas` supported on `(a, T]`, the integral is the finite 
 
 - [ ] **Step 4: Extend by density**
 
-Both sides are continuous in `φ`: the left by `(itoIntegralCLM_T ...).continuous` composed with continuity of `smulAdapted` in `φ` (it is bounded-linear, operator norm `≤ C`), the right by multiplication by a bounded function being continuous on `L²`. Conclude with `DenseRange.equalizer (simpleAssembly_T_denseRange T hBmeas)` — the same closing move `itoProcessCLM_eq_condExpL2` and `itoProcessCLM_terminal_eq` use in `ItoIntegralProcessGeneral.lean:144,223`. Read those two proofs before writing this one; they are the template.
+Both sides are continuous in `φ`: the left by `(itoIntegralCLM_T ...).continuous` composed with continuity of `smulAdapted` in `φ` (it is bounded-linear, operator norm `≤ C`), the right by multiplication by a bounded function being continuous on `L²`. Conclude with `DenseRange.equalizer (simpleAssembly_T_denseRange T hBmeas)` — the same closing move `itoProcessCLM_eq_condExpL2` and `itoProcessCLM_terminal_eq` use in `ItoIntegralProcessGeneral.lean:144,216`. Read those two proofs before writing this one; they are the template.
+
+(Line numbers in this plan are as-of drafting. The Task 3 fix round moved a lemma down into `ItoIntegralCLM.lean`, shifting `itoProcessCLM_terminal_eq` from `:223` to `:216`. Trust the declaration *names* over the line numbers, and re-grep before citing one.)
 
 - [ ] **Step 5: Add the unbounded-`Z` corollary by truncation**
 
