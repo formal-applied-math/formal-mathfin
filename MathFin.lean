@@ -215,6 +215,9 @@ import MathFin.Foundations.WienerExponentialTotality
 -- Martingale representation, step 5: the Itô integral is onto the centered `𝓕ᴮ_T`-measurable
 -- part of `L²(μ)` — terminal, submodule and process forms of the representation theorem
 import MathFin.Foundations.MartingaleRepresentation
+-- Martingale representation, step 6: its finance reading — replication, superreplication
+-- duality, and uniqueness of the pricing measure on the Brownian filtration
+import MathFin.Foundations.MarketCompleteness
 import MathFin.Foundations.ItoFormulaProcess
 import MathFin.Foundations.ExitTime
 import MathFin.Foundations.ItoFormulaUnrestricted
