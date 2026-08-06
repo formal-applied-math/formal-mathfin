@@ -1053,7 +1053,8 @@ weaker statement exactly as happily as the true one.
 The detection rule that actually catches it: a scratch-file signature is suspect when it (a) omits
 a `variable`-block hypothesis it never names, and (b) is a claim about a *specific* process rather
 than an arbitrary one. An audit of the remaining scratch statements against that rule found
-exactly one more defect: `itoIsometryEquiv_T` (the terminal-integral isometry `φ ↦ ∫₀ᵀ φ dB`,
+exactly one more defect: `itoIsometryEquiv_T` (shipped as `itoIsometryEquiv` — an
+underscore in a `def` name is a `lake lint` error; the terminal-integral isometry `φ ↦ ∫₀ᵀ φ dB`,
 which plainly does not exist without a Brownian motion to integrate against). Everything else was
 clean because it happened to mention `itoIntegralCLM_T hB` or similar and picked the variable up
 that way.

@@ -426,7 +426,7 @@ git commit -m "feat(foundations): totality of the Wiener exponentials in L2 of t
 
 **Interfaces:**
 - Consumes: Task 3, Task 4, `ItoIntegralCovariation.itoIsometry_T hB T hBmeas : Lp ℝ 2 (trimMeasure_T T hBmeas) →ₗᵢ[ℝ] Lp ℝ 2 μ`, `ItoIntegralProcessGeneral.itoProcessCLM_eq_condExpL2` and `.itoProcessCLM_terminal_eq`.
-- Produces: `itoIntegralCLM_T_surjective_onto_centered`, `itoIsometryEquiv_T`, `exists_itoIntegral_representation`, `martingale_representation` — consumed by Task 6.
+- Produces: `itoIntegralCLM_T_surjective_onto_centered`, `itoIsometryEquiv`, `exists_itoIntegral_representation`, `martingale_representation` — consumed by Task 6. (Shipped as `itoIsometryEquiv`, not the drafted `itoIsometryEquiv_T`: an underscore in a `def` name is a `lake lint` error, and `T` is already an explicit argument.)
 
 - [ ] **Step 1: State the four results and check they elaborate**
 
@@ -449,7 +449,7 @@ theorem martingale_representation (hBmeas : ∀ t, Measurable (B t))
       ∀ t ≤ T, M t =ᵐ[μ] fun ω ↦ M 0 ω + itoProcessCLM hB T t hBmeas φ ω := sorry
 ```
 
-Also state the submodule form (`range ⊔ span{1} = lpMeas ...`) and the bundled `itoIsometryEquiv_T`; the exact spelling of the latter depends on which `LinearIsometryEquiv.of*` constructor fits, so settle it in Task 0.
+Also state the submodule form (`range ⊔ span{1} = lpMeas ...`) and the bundled `itoIsometryEquiv`; the exact spelling of the latter depends on which `LinearIsometryEquiv.of*` constructor fits, so settle it in Task 0.
 
 - [ ] **Step 2: Prove `range I` is closed**
 
