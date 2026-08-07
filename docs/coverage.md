@@ -26,11 +26,14 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-08-07, martingale representation + market completeness; then the localized
-> Itô formula named its integrand):** corpus
-> **351**, **320 full + 18 wrappers = 338/351 delivery-ready**, 13 reduced cores, 0 placeholders.
-> Ledger 351 fresh / 0 stale / 0 missing; pytest 42 passed; `lake build` and `lake lint` green with
-> no `#guard_msgs` failure, so the five new curated axiom pins hold.
+> **Live status (2026-08-07):** corpus
+> **353**, **322 full + 18 wrappers = 340/353 delivery-ready**, 13 reduced cores, 0 placeholders.
+> Ledger 353 fresh / 0 stale / 0 missing; `lake build` and `lake lint` green with no `#guard_msgs`
+> failure. The round covered martingale representation + market completeness, then the localized Itô
+> formula naming its integrand, then the description-semantics fix below; the last two entries are
+> the downside-performance-metrics work of
+> [#173](https://github.com/raphaelrrcoelho/formal-mathfin/pull/173) and the von Neumann–Morgenstern
+> lotteries of [#178](https://github.com/raphaelrrcoelho/formal-mathfin/pull/178).
 > `itoIntegralCLM_T` was already a `LinearIsometry` from the predictable `L²(dt⊗dμ)` integrands into
 > `L²(μ)`. `MathFin/Foundations/MartingaleRepresentation.lean` identifies its image exactly:
 > `itoIntegralCLM_T_surjective_onto_centered` says the Itô integrals together with the constants
@@ -107,8 +110,23 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > `ae_fst_mem_Ioc_trimMeasure_T` existed six times across five files; five retired. The mechanical
 > slice is now gated (`test_prose_does_not_outrun_statement`, negative-controlled against the three
 > conjuncts it exists to protect); the judgment slice is a standing first pass in the values-review
-> protocol and in `CLAUDE.md`. Open: `description` serves as textbook target for 36 entries and as
-> delivered result for the rest, with nothing marking which, and it is published.
+> protocol and in `CLAUDE.md`.
+>
+> **`description` now has one job** (2026-08-07, closing that open item). All 36 textbook-framed
+> descriptions were read against their statements and **15 — 42% — claimed more than the Lean
+> proved**. Beyond the five already corrected: a sign error (`mart-prop-2.5.5` wrote `(X_n−a)⁻`
+> where the theorem proves the submartingale `(X_N−a)⁺`); a stale description contradicting its own
+> status (`gir-thm-9.1.8` said "Kept reduced_core" on a `full` entry); a multivariate claim delivered
+> only in 1-D (`dist-thm-B.1.2-affine`); `[B,B]_t = t` where the theorem proves the L¹-mean
+> `E[Σ(ΔB)²] → t` (`sc-thm-6.1.1`); plus local-vs-global Hölder, one of two tower equalities,
+> unclaimed continuity of a stopped process, and two Poisson entries stating increment laws for a
+> pair where the prose said "process" and "family".
+>
+> The rule is now: **`description` states the theorem as this entry proves it**; where an entry
+> delivers less than the source theorem it is named after, the description says so. The structural
+> cause was an asymmetry — `formalization_scope`, the honest per-entry disclosure, exists on every
+> entry and was **not** exported, while `description` was. The claim shipped and the disclosure
+> stayed home. `tools/verify/hf_dataset.py` now publishes both.
 >
 > **Record correction (2026-08-04, drafter attribution — no theorem changed):** corpus
 > **348**, **316 full + 18 wrappers = 334/348 delivery-ready**, 14 reduced cores, 0

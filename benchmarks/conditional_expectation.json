@@ -20,7 +20,7 @@
     {
       "id": "ce-prop-2.1.11-tower",
       "name": "Tower Property",
-      "description": "Proposition 2.1.11(6): For H ⊆ G ⊆ F, E[E[X|G] | H] = E[E[X|H] | G] = E[X|H]",
+      "description": "Proposition 2.1.11(6), the TOWER direction: for H ⊆ G ⊆ F, E[E[X|G] | H] = E[X|H] a.s. The companion equality E[E[X|H] | G] = E[X|H] (pulling out the coarser conditioning) is not delivered by this entry.",
       "domain": "measure_theory",
       "code": {
         "lean": "import Mathlib.MeasureTheory.Function.ConditionalExpectation.Basic\n\nopen MeasureTheory\n\n-- Tower property: μ[μ[f|m₂]|m₁] =ᵐ[μ] μ[f|m₁] for m₁ ≤ m₂.\n-- (Mathlib statement is almost-everywhere equality.)\ntheorem condexp_tower {α : Type*} {m₁ m₂ m₀ : MeasurableSpace α} {μ : Measure α}\n    (hm₁₂ : m₁ ≤ m₂) (hm₂ : m₂ ≤ m₀) [SigmaFinite (μ.trim hm₂)]\n    {f : α → ℝ} :\n    μ[μ[f | m₂] | m₁] =ᵐ[μ] μ[f | m₁] :=\n  condExp_condExp_of_le hm₁₂ hm₂"

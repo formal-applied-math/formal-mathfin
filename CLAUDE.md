@@ -122,6 +122,14 @@ claim. The mechanical slice is enforced by
 and belongs to the values review's standing first pass
 (`docs/values-review.md`). Do it before the review's lenses, not after.
 
+**Benchmark `description` states what the entry PROVES**, not the textbook theorem
+it is named after. Where an entry delivers less than its source theorem, the
+description says so in the same field — it is published in the HF dataset
+(`tools/verify/hf_dataset.py`), so it is an outward-facing claim. The long-form
+per-entry disclosure is `metadata.formalization_scope`, published alongside it
+since 2026-08-07: exporting the claim while withholding the disclosure is what let
+15 of 36 textbook-framed descriptions drift into overstating.
+
 **Verification ledger** (`verification_ledger.json` + `tools/verify/ledger.py`):
 every benchmark entry's validity depends on exactly its snippet code, the
 transitive MathFin modules it imports, and the toolchain pins — the ledger
