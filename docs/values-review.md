@@ -74,6 +74,190 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-08-07 — corpus 351 — martingale representation on the Brownian filtration, and continuous-time completeness
+
+Scope: the nine-task program behind `Foundations/{BrownianCylinderGeneration, ItoIntegralLocality,
+DoleansStepRepresentation, WienerExponentialTotality, MartingaleRepresentation, MarketCompleteness}`,
+its cleanup pass, and the corpus work that landed with it. Corpus 348 → **351** (320 `full`,
+18 `library_wrapper`, 13 `reduced_core`, 0 placeholder); `gir-thm-9.3.4` moved `reduced_core → full`.
+
+Protocol deviation, named as the last round named its own: this was not a three-agent panel at the
+close. It was eleven scoped review passes, one or two per task, plus this closing read of the shipped
+modules against the program record. Every pass was independent and adversarial — several overturned an
+implementer's claim, one overturned the controller's own strategy — but each saw a single task. Nobody
+read the program whole until now, which is why the recurring cross-task pattern below took nine tasks to
+become visible. Re-run the panel at the next proof session.
+
+Per-lens **exemplar → next upgrade**:
+
+- **1 Inspired math.** *Exemplar:* the re-framing that made the theorem cheap. Issue #49 had filed
+  representation as a consequence of the adapted-integrand Itô formula. It is not one. Surjectivity of
+  an isometry onto a closed subspace is a *totality* statement about its range, and the whole proof is
+  an orthogonal decomposition — no Itô formula for `f(∫θ dB)`, no pathwise quadratic variation. Second
+  exemplar, one floor down: `itoIntegralCLM_T_restrictAfterCLM`, "restricting an integrand to `(u,T]`
+  removes exactly the past of its integral," which is what turns the *terminal* identity an Itô formula
+  hands out into an identity for an inner increment. That single lemma is what lets a Doléans
+  exponential over a partition be assembled at all. *Upgrade (HIGH):* the theorem proves `φ` exists and
+  is unique and never says what it is. Naming it is #182 (Clark–Ocone) or #183 (the localized formula's
+  integrand); both routes reach the same missing capability, stating a delta.
+- **2 Coherence.** *Exemplar:* `Measure.ext_of_charFunDual` consumed as Cramér–Wold in one step, and
+  `condExpL2` used through the Hilbert API because it is *definitionally*
+  `Submodule.orthogonalProjectionOnto` — neither argument is re-derived in finance clothing.
+  *The finding, and it is the headline:* three separate general lemmas landed in application files and
+  each had to be moved. `itoIntegralCLM_T_simpleAssembly_T` existed in **three** copies; the locality
+  facts sat in `DoleansStepRepresentation` when `ItoIntegralLocality` exists to hold them;
+  `itoProcessCLM_zero_time` and `integral_itoIntegralCLM_T` sat in `MartingaleRepresentation` when
+  `ItoIntegralProcessGeneral` is their floor. Three in one program is a rate. *Upgrade (HIGH):* ask the
+  placement question at **dispatch**, not at review — a task brief that names the destination file for
+  each general fact it expects to produce. #185 clears the residue (`mulBddCLM` vs the older hand-rolled
+  `truncCLM`, `inner_eq_integral_mul` inlined at seven sites, an MGF-to-Gaussian-law block written three
+  times in `ExpMartingaleQBrownian`).
+- **3 Zero slop.** *Exemplar:* four specified statements turned out false or underivable and every one
+  was reported rather than forced through. `coeFn_smulAdapted` as drafted was false (`(t,ω) ↦ Z ω` is
+  not predictable for merely `𝓕_a`-measurable `Z`; the repair multiplies by `𝟙_{a<t}·Z`, which is a
+  generating predictable rectangle and a bonus total CLM). Two statements in `WienerExponentialTotality`
+  were missing `IsPreBrownianReal B μ` and were false without it, with a counterexample sharp enough to
+  distinguish the *right* one (`B ≡ Z`, time-constant but random) from a wrong one that fails for the
+  wrong reason (`B ≡ 0` collapses `𝓕_T` to `⊥`). And `constDoleans_sub_one_eq_itoIntegral` was reported
+  first as "unprovable" and corrected to "not derivable from the exported API" — the weaker, true claim.
+  Then the strengthening: `hF1` was a hypothesis `eq_zero_of_orthogonal_stepDoleans` did not need, and it
+  was **dropped from the public signature**, not underscored. *Upgrade (HIGH):* one is left.
+  `stepDoleans_sub_one_mem_range` still carries `(_hs0 : s 0 = 0)`, underscored to clear a `lake lint`
+  error. The underscore is the tell: it silences the linter and leaves the theorem weaker than what was
+  proved. #184.
+- **4 Architectural ingenuity.** *Exemplar:* the crown is stated as **surjectivity of an isometry the
+  library already had**, not as a bespoke theorem. `itoIsometryCentered` corestricts `itoIntegralCLM_T`
+  to `centeredBrownianL2 := lpMeas 𝓕ᴮ_T ⊓ (ℝ ∙ 1)ᗮ`, `itoIsometryCentered_surjective` closes it, and
+  `itoIsometryEquiv` is one `LinearIsometryEquiv.ofSurjective` call. So `itoIntegralCLM_T` gains a
+  structure theorem and the library gains no parallel construction. The codomain's *definition* is the
+  mathematical content. *Upgrade (MED):* `mulBddCLM` was extracted mid-proof as the general operator
+  (bounded multiplication on `L²`, arbitrary measure) and instantiated twice in the same file, which is
+  the right instinct — but it sits **above** the special case it should absorb. The extraction and the
+  DAG placement are the same question, asked once (see lens 2).
+- **5 First principles.** *Exemplar:* `PricesGainsAtZero` is hypothesised and then *guarded*.
+  `pricesGainsAtZero_self` proves `μ` satisfies it, so nothing downstream is vacuous;
+  `pricesGainsAtZero_of_gains_martingale` derives it from the textbook condition. The header states
+  plainly which step of the textbook second-FTAP proof is hypothesised (EMM ⟹ gains are a fair game,
+  which needs `∫ φ dS`) and which is proved. Elsewhere the same discipline: `𝔼[∫₀ᵀ φ dB] = 0` is proved
+  one floor down rather than assumed, and `M 0` being a.e. constant is the representation read at
+  `t = 0` rather than a hypothesis. And the corpus flip is the anti-smuggle — `gir-thm-9.3.4` was a
+  `Prop`-structure whose conclusion was a bundled field read off by projection, and it is now the real
+  theorem. *Upgrade (MED):* the two guards are never **composed**. Guard 1 is proved directly, so the
+  file never exhibits guard 2's hypothesis triple as inhabited. Routing `pricesGainsAtZero_self` through
+  the guard makes it load-bearing, and wants the general-integrand Itô process bundled as a `Martingale`
+  — an object worth having on its own. #186.
+- **6 Idiomatic register.** *Exemplar:* `omit [IsProbabilityMeasure μ]` applied exactly where the callee
+  does not need it, verified against the callees rather than cargo-culted; and the `have`-binder rule
+  becoming *binding in the plan* after it recurred, instead of being re-raised per task. *Upgrade
+  (MED):* the two `lake lint` failures on underscored `def` names landed in consecutive rounds because
+  the first fix swept the reported instance and not the class. The class is real and discoverable
+  without CI: every other `_T` def in this tower (`itoIsometry_T`, `trimMeasure_T`, `itoIntegralCLM_T`,
+  `simpleAssembly_T`, `itoAssembly_T`, `timeMeasure_T`) lives in a sub-namespace, and
+  `MartingaleRepresentation` declares only `namespace MathFin`. Either sub-namespace it or record the
+  rule where an author reads it before pushing.
+- **7 Concept clarity.** *Exemplar:* the docstrings record the **amendments in the artifact**, not only
+  in session reports. `WienerExponentialTotality`'s "why the hypotheses are what they are" carries the
+  counterexample that forced `hB`, and says why the obvious counterexample fails.
+  `ItoIntegralLocality`'s header opens with "the definitional wrinkle it has to survive" and states the
+  falsity that was discovered mid-task. `MarketCompleteness` says which `IsEMM` fields the corollary
+  consumes (`isProb`, `ac`) and that `martingale` rides along unused so the statement stays in the
+  vocabulary a reader looks it up under. A reader learns the mathematics *and* what it cost.
+  *The counterweight, and it is not small:* the `## Result` section that `CONTRIBUTING.md:103` requires
+  was missing from four of the six new modules. Root cause is worth stating flatly — implementers were
+  pointed at an exemplar file that also omits it. The exemplar beat the written rule four times before
+  anyone checked the rule, and when the cleanup pass went to fix it, the *destination* file for the
+  lemma moves (`ItoIntegralProcessGeneral`) had none either. The drift is older than this program.
+  *Upgrade (HIGH, cheap):* make it mechanical. `tests/test_router.py` already enforces
+  `@[expose] public section` on every `module`-header file; a `## Result` presence check is the same
+  gate and would have caught five files.
+- **8 Beautiful math.** *Exemplar:* the sentence the whole theorem reduces to. `z ⊥ range`, so
+  `∫ z·D = ∫ z·(D−1) + ∫ z = 0` for every step Doléans `D`: the first term dies because `D−1` is in the
+  range, the second by centering, and totality kills `z`. Alongside it, the observation that the
+  totality theorem needs no centering hypothesis at all, because the family already contains the
+  constant `1` (take `h ≡ 0` over one cell, where every factor is `exp 0`). *Upgrade (MED):* the
+  argument's shape is only tested in one dimension. Step B of the totality proof is already stated over
+  an arbitrary `Fintype ι` and pushes into `ℝ^ι`, so it generalizes to a vector driver for free; the
+  Doléans rung does not, because of the cross terms. #180 is where we find out whether the decomposition
+  was the right shape or the convenient one.
+
+**Upgrades executed this session (the program).**
+
+1. **Three general-lemma relocations** (lens 2/4): the three-way `itoIntegralCLM_T_simpleAssembly_T`
+   dedup to one definition site; the locality facts into `ItoIntegralLocality`; `itoProcessCLM_zero_time`
+   (now public `@[simp]`) and `integral_itoIntegralCLM_T` into `ItoIntegralProcessGeneral`.
+2. **A spurious hypothesis removed from a public signature** (lens 3/5): `hF1` gone from
+   `eq_zero_of_orthogonal_stepDoleans`, which is strictly stronger than what was specified.
+3. **The crown stated as a structure theorem** on an existing isometry, plus the bundled
+   `itoIsometryEquiv` (lens 4).
+4. **`mulBddCLM`** extracted as the general bounded-multiplication operator over an arbitrary measure
+   (lens 2/4); **dead API deleted** (`itoIntegralCLM_T_smulAdapted_mem_range`, zero consumers after the
+   route changed) (lens 3).
+5. **`PricesGainsAtZero` guarded rather than asserted**, with the hypothesis-minimal
+   `measure_eq_of_pricesGainsAtZero` as the public form and `emm_unique_of_complete` as its corollary
+   (lens 5).
+6. **`## Result` sections** added to five files, including the pre-existing gap in
+   `ItoIntegralProcessGeneral` (lens 7); `inner_eq_integral_mul` hoisted public.
+7. **`gir-thm-9.3.4` `reduced_core → full`** — a `Prop`-structure projection replaced by the theorem
+   (lens 5).
+8. **`patterns.md`** gained the 2026-08-06 batch in-flight, not batched at the end, and `roadmap.md`
+   gained the localized-Itô-integrand gap as a standing known gap (lens 7).
+
+**Refreshed ranked backlog.**
+
+1. **[HIGH] Ask the placement question at dispatch.** Three general lemmas in the wrong file in one
+   program, and the sharpest data point is self-directed: the third copy of
+   `itoIntegralCLM_T_simpleAssembly_T` was found because **this file had already recorded it** as a LOW
+   item on 2026-07-10 (`docs/values-review.md:433`) and nobody acted on it for four weeks. The review
+   model's stated failure mode is a review that finds nothing to improve. The subtler one is a review
+   that finds it, ranks it, writes it down, and then does not do it. Concrete form: task briefs name the
+   destination file for each anticipated general fact, and LOW backlog items get an issue number instead
+   of a bullet. #185 clears the current residue.
+2. **[HIGH] The underscore is a signal, not a fix.** #184 drops `(_hs0 : s 0 = 0)` from
+   `stepDoleans_sub_one_mem_range`. This is the second instance of the class in six weeks (the first was
+   the 2026-07-31 spurious division guards, `docs/patterns.md:1031`), and both times a public signature
+   shipped a theorem weaker than the one proved, past every gate. The 2026-07-31 necessity prober only
+   runs on foundry drafts. Hand-authored `MathFin/` has no equivalent, and a `_`-prefixed binder in a
+   **public** signature is a cheap, precise trigger for one.
+3. **[HIGH, cheap] A `## Result` presence gate** in `tests/test_router.py`, beside the
+   `@[expose] public section` check. Five files were caught by hand this session; the written rule lost
+   to an exemplar four times in a row, which is what a written rule does when nothing checks it.
+4. **[MED] Compose the `PricesGainsAtZero` guards** (#186), which needs the general-integrand Itô
+   process as a bundled `Martingale`. The bundle is the object every "the gains process is a martingale"
+   statement wants to be stated on, so the cost is not sunk in this one file.
+5. **[MED] Name the integrand.** #183 (the localized Itô formula's four-theorem chain) and #182
+   (`L¹`/`H¹` plus Clark–Ocone). `roadmap.md` defers #183 for want of a consumer, and that is right as
+   far as it goes — with one honest qualification: Task 3 *rearranged itself to avoid needing it*. The
+   absence of a consumer is partly an artifact of routing around the gap, so re-examine at the next
+   pricing-side consumer rather than treating it as settled.
+6. **[MED] The vector driver** (#180), gated on the two-process Itô formula (#48). Half the argument
+   already generalizes; the Doléans rung is where the cross terms bite.
+7. **[MED] The second-FTAP converse** (#181), and behind it the missing `∫ φ dS` that would let `IsEMM`
+   supply `PricesGainsAtZero` outright instead of hypothesising it.
+8. *(Carried from prior panels, unchanged:)* the discrete general-Ω multi-period **DMW crown**; the
+   general **2D covariation Itô** tower (#48); **Girsanov L²/Novikov**; and hoisting the private
+   std-normal Gaussian MGF to a shared home, now sharpened by #185's third item, which is the same fact
+   written three times in `ExpMartingaleQBrownian`.
+
+**Evidence / context.** Mechanical floor green: `lake build MathFin` + `lake lint` clean with no
+`#guard_msgs` failures, `ledger status` 351/351 fresh, 42/42 python gates, `AxiomAuditGen` 304 → **308**
+guards, five curated axiom pins whose messages were *observed* against the daemon rather than guessed,
+four `@[blueprint]` nodes. The honesty rule the reviews extracted is now enforced in prose:
+`emm_unique_of_complete` is **not** the unconditional second FTAP — `IsEMM` contributes `isProb` and
+`ac`, and the fair-game step is a hypothesis. The wording that passes is "uniqueness of the pricing
+measure on the Brownian filtration, for measures that price the traded gains at zero." Issue #49 was
+closed against the landed commits and split; #179 carries `sc-thm-9.1.1` alone, with what it actually
+needs.
+
+**A note on the shape of this round.** Two failures in this program had the same structure, and the pair
+is more instructive than either. A `sorry`-typecheck verified that a signature *elaborates* and was read
+as verifying that it says what was meant, which is how two theorems shipped without the hypothesis that
+makes them true. An isolation probe verified that `obtain ⟨ψ,hψ⟩ := hy` *elaborates* and was read as
+licensing the edit, which is how a cosmetic pass broke the build on hypothesis lifetime — both the
+implementer and its reviewer read `id hy` as noise. Both are a green check answering a different
+question than the one asked, and in each case the check was real, cheap, and honestly run. `patterns.md`
+now records the pair. The generalizable form: when a probe comes back green, say out loud which property
+it established, and compare that sentence to the property at risk.
+
 ## 2026-07-31 — corpus 348 — open-PR review round: the spurious-guard class
 
 Scope: the eight open PRs, not a new proof program. Deviation from protocol worth naming — this
