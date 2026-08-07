@@ -195,8 +195,7 @@ theorem prefersEU_independence (s : Finset ι) (u : ι → ℝ) {α : ℝ} (hα 
     prefersEU s u (mix α p r) (mix α q r) := by
   unfold prefersEU at h ⊢
   rw [expectedUtility_mix, expectedUtility_mix]
-  have hmul := mul_le_mul_of_nonneg_left h hα
-  linarith
+  exact add_le_add (mul_le_mul_of_nonneg_left h hα) le_rfl
 
 /-- **Strict independence**: a strict preference survives mixing with a common
 lottery, at any *positive* weight. -/
@@ -205,8 +204,7 @@ theorem prefersEU_strict_independence (s : Finset ι) (u : ι → ℝ) {α : ℝ
     (h : expectedUtility s u q < expectedUtility s u p) :
     expectedUtility s u (mix α q r) < expectedUtility s u (mix α p r) := by
   rw [expectedUtility_mix, expectedUtility_mix]
-  have hmul := mul_lt_mul_of_pos_left h hα
-  linarith
+  exact add_lt_add_of_lt_of_le (mul_lt_mul_of_pos_left h hα) le_rfl
 
 /-- The scalar behind the Archimedean axiom: for reals `R < Q < P` there is a
 strict convex weight placing `Q` between `R` and `P`, namely `Q`'s position on
@@ -270,14 +268,7 @@ theorem prefersEU_affine_invariant (s : Finset ι) (u : ι → ℝ) {a b : ℝ}
     (hp : ∑ i ∈ s, p i = 1) (hq : ∑ i ∈ s, q i = 1) :
     prefersEU s (fun i ↦ a * u i + b) p q ↔ prefersEU s u p q := by
   unfold prefersEU
-  rw [expectedUtility_affine s u a b hp, expectedUtility_affine s u a b hq]
-  constructor
-  · intro h
-    have hmul : a * expectedUtility s u q ≤ a * expectedUtility s u p := by linarith
-    exact le_of_mul_le_mul_left hmul ha
-  · intro h
-    have hmul : a * expectedUtility s u q ≤ a * expectedUtility s u p :=
-      mul_le_mul_of_nonneg_left h ha.le
-    linarith
+  rw [expectedUtility_affine s u a b hp, expectedUtility_affine s u a b hq,
+    add_le_add_iff_right, mul_le_mul_iff_of_pos_left ha]
 
 end MathFin

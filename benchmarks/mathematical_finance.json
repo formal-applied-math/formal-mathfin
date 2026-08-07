@@ -3328,6 +3328,22 @@
       }
     },
     {
+      "id": "mf-vnm-expected-utility",
+      "name": "von Neumann-Morgenstern Axioms for Expected Utility",
+      "description": "Expected utility over finite-outcome lotteries is affine in the lottery mixture, the induced preference satisfies the von Neumann-Morgenstern axioms (completeness, transitivity, independence, Archimedean continuity with the indifference weight exhibited), and the preference is invariant under positive affine rescaling of the utility. Soundness direction only: the vNM representation theorem (axioms imply an expected-utility form) is not delivered.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.VonNeumannMorgenstern\n\nopen MathFin\n\n/-- The pivot of the vNM development: expected utility is affine in the lottery mixture,\n    `EU(αp + (1−α)q) = α·EU(p) + (1−α)·EU(q)`. Needs no hypotheses on the lotteries —\n    it is linearity of the finite sum, and it is exactly what fails for the non-linear\n    functionals invented to explain the Allais paradox. -/\ntheorem vnm_expected_utility_mix\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) (α : ℝ) (p q : ι → ℝ) :\n    MathFin.expectedUtility s u (MathFin.mix α p q)\n      = α * MathFin.expectedUtility s u p + (1 - α) * MathFin.expectedUtility s u q :=\n  MathFin.expectedUtility_mix s u α p q\n\n/-- vNM independence: mixing a common lottery into both sides preserves the\n    expected-utility preference, at any nonnegative weight. -/\ntheorem vnm_independence\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) {α : ℝ} (hα : 0 ≤ α)\n    {p q r : ι → ℝ} (h : MathFin.prefersEU s u p q) :\n    MathFin.prefersEU s u (MathFin.mix α p r) (MathFin.mix α q r) :=\n  MathFin.prefersEU_independence s u hα h\n\n/-- vNM continuity (the Archimedean axiom): strictly between a better and a worse lottery,\n    some strict mixture of the outer pair is exactly indifferent to the middle one; the\n    weight is exhibited as the position of the middle utility on the outer utility\n    interval, not obtained from a limit. -/\ntheorem vnm_continuity\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) {p q r : ι → ℝ}\n    (hpq : MathFin.expectedUtility s u q < MathFin.expectedUtility s u p)\n    (hqr : MathFin.expectedUtility s u r < MathFin.expectedUtility s u q) :\n    ∃ α : ℝ, 0 < α ∧ α < 1 ∧\n      MathFin.expectedUtility s u (MathFin.mix α p r) = MathFin.expectedUtility s u q :=\n  MathFin.prefersEU_continuity s u hpq hqr\n\n/-- vNM cardinality: a positive affine rescaling of the utility induces exactly the same\n    preference on lotteries — utility is cardinal only up to origin and scale. -/\ntheorem vnm_affine_invariance\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) {a b : ℝ} (ha : 0 < a)\n    {p q : ι → ℝ} (hp : ∑ i ∈ s, p i = 1) (hq : ∑ i ∈ s, q i = 1) :\n    MathFin.prefersEU s (fun i ↦ a * u i + b) p q ↔ MathFin.prefersEU s u p q :=\n  MathFin.prefersEU_affine_invariant s u ha hp hq\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "von Neumann-Morgenstern (1944), Theory of Games and Economic Behavior; the layer beneath RiskMeasures/UtilityDerivation",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Finite-outcome lotteries as normalized nonnegative weight vectors; the mixture algebra (identity, commutation, compounding, closure), affinity of expected utility in the mixture, the vNM axioms verified for the induced preference, and cardinal uniqueness as an iff (positive affine rescaling leaves the preference exactly unchanged). The representation theorem (axioms imply existence of a utility) is deliberately out of scope, recorded in the module doc. Lives in MathFin/RiskMeasures/VonNeumannMorgenstern.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-superhedging-emm-bound",
       "name": "Fundamental Superhedging Bound",
       "description": "In a finite-state market, every equivalent martingale measure prices a claim at most its super-replication cost. The EMM prices of a claim lie below its superhedging price — the dual side of the no-arbitrage pricing interval and the pricing-side companion of the coherent-risk representation.",
