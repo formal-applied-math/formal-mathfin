@@ -1389,6 +1389,36 @@ already ahead of the corpus statements: all five affected entries described the 
 `∫₀ᵀ f_x(s,B_s) dB_s` or `∫₀ᵀ σŜ(s) dB_s` in their descriptions and docstrings while stating only
 `∃ gfx`. The statements have caught up with what was being claimed for them.
 
+## audit: prose against statement, repo-wide (2026-08-07, corpus 351 unchanged)
+
+Follow-on to [#183](https://github.com/raphaelrrcoelho/formal-mathfin/issues/183), which surfaced the
+defect twice in one day and so stopped being a one-off. Six places claimed more than the Lean proved.
+The class is structural, not careless: prose is written to describe the theorem the author has in mind,
+the statement lands weaker, and nothing re-reads one against the other.
+
+Found and fixed: `sc-thm-7.1.1`, the `C²` sibling of the #183 chain — its description wrote
+`∫₀ᵗ f'(B_s) dB_s` over an `∃ gf'`, so the conjunct now runs
+`itoIntegralCLM_T_of_bdd_cont → ito_formula_L2_bddDeriv → _mk`. Four descriptions that claimed a
+textbook theorem the entry narrows: `cm-thm-4.3.10` (no `L^p` convergence), `sc-thm-8.2.5` (uniqueness,
+not existence), `sc-thm-7.4.5` (constant `σ`), `sc-thm-9.2.1` (the Feynman–Kac identification, not
+uniqueness of a bounded classical solution). And the README landmark row rendering
+`ito_formula_unrestricted` as an integral identity when it proves a local-martingale statement.
+
+Also retired: `ae_fst_mem_Ioc_trimMeasure_T` written **six** times across five files, the sixth added
+the day before by the audit's own author. That is the previous review's headline failure repeating in a
+new shape, which is why the top backlog item is now a duplicate-statement detector rather than another
+note telling people not to duplicate.
+
+Made permanent, per the user's instruction that this become a final step before any future development:
+`test_values.py::test_prose_does_not_outrun_statement` for the mechanical slice (an `∃` whose witness is
+never pinned while the prose writes the integral that would pin it), the standing first pass in
+`docs/values-review.md`'s protocol, and the corresponding paragraph in `CLAUDE.md`.
+
+**Still open, and it is the bigger half:** `description` has two incompatible jobs. For 36 entries it is
+the textbook target, for the rest the delivered result, nothing marks which, and it ships in the HF
+dataset. Four of the five highest-risk ones are corrected ad hoc; the other 32 are unread against their
+statements.
+
 ## phase: martingale representation + market completeness (2026-08-07, corpus 348→351)
 
 Conversion #4 of the 2026-06-29 table, the one flagged "HIGH (Clark-Hida; may need upstream)". It needed

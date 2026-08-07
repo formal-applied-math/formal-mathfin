@@ -502,11 +502,7 @@ lemma uncurry_marshalStepSP_ae_eq_clamp (hBmeas : ∀ t, Measurable (B t)) (T : 
     {C : ℝ} (hC : 0 ≤ C) {N : ℕ} (hmpN : marshalPart hBmeas T V N = T) :
     Function.uncurry ⇑(marshalStepSP hBmeas T V hle hC N).val
       =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ clampM C (Function.uncurry ⇑V z) := by
-  have hsupp : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), z.1 ∈ Set.Ioc 0 T := by
-    rw [trimMeasure_T_eq_restrict]
-    exact ae_restrict_of_forall_mem
-      (MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := natFiltration hBmeas) 0 T
-        MeasurableSet.univ) (fun z hz ↦ hz.1)
+  have hsupp := ae_fst_mem_Ioc_trimMeasure_T (μ := μ) T hBmeas
   filter_upwards [hsupp] with z hz
   exact uncurry_marshalStepSP_eq_clamp hBmeas T V hle hC hmpN hz.1 hz.2 z.2
 

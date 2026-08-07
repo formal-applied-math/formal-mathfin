@@ -150,11 +150,7 @@ theorem itoIntegralCLM_T_of_bdd_cont_td (hBmeas : ∀ t, Measurable (B t))
   have hf_memLp : ∀ n, MemLp (f n) 2 (trimMeasure_T (μ := μ) T hBmeas) :=
     fun n ↦ memLp_uncurry_trim_T T hBmeas _
   -- `trimMeasure_T` is supported on `(0,T] × Ω`
-  have hsupp : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), z.1 ∈ Set.Ioc 0 T := by
-    rw [trimMeasure_T_eq_restrict]
-    refine ae_restrict_of_forall_mem
-      (MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := natFiltration hBmeas) 0 T
-        MeasurableSet.univ) (fun z hz ↦ hz.1)
+  have hsupp := ae_fst_mem_Ioc_trimMeasure_T (μ := μ) T hBmeas
   -- the uncurried step functions converge a.e. to `φ(·, B)` (cell collapse + continuity
   -- of the composite path `s ↦ φ(s, B_s ω)` — the frozen time and space slots converge
   -- together because both are evaluated along the same `tₖ → s`)
