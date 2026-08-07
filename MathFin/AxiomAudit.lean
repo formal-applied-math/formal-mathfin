@@ -1082,4 +1082,19 @@ scaling law are audited here as one public acceptance bundle. -/
 /-- info: 'MathFin.downsideMetrics_bundle' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.downsideMetrics_bundle
 
+/-! ### von Neumann–Morgenstern expected utility (#178)
+
+The layer beneath `RiskMeasures.UtilityDerivation`, which takes the expected-utility form as
+given: lotteries with their mixture algebra, affinity of the expected-utility functional in
+the mixture (the pivot — every axiom below is a corollary of it), the vNM axioms verified for
+the induced preference, and cardinal uniqueness under positive affine rescaling. Soundness
+half only: the representation theorem (axioms ⟹ ∃u) is deliberately out of scope, and the
+module doc says so. -/
+
+/-- info: 'MathFin.expectedUtility_mix' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.expectedUtility_mix
+
+/-- info: 'MathFin.prefersEU_affine_invariant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.prefersEU_affine_invariant
+
 end MathFin.AxiomAudit

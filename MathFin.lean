@@ -424,6 +424,11 @@ import MathFin.RiskMeasures.Spectral
 import MathFin.RiskMeasures.Concentration
 -- Phase 21: first-principles coherent-axiom derivation from concave utility
 import MathFin.RiskMeasures.UtilityDerivation
+-- The layer beneath UtilityDerivation, which takes the expected-utility form as given:
+-- von Neumann-Morgenstern lotteries, the mixture algebra, affinity of expected utility in
+-- the mixture, and the vNM axioms verified for the induced preference (the soundness half,
+-- plus invariance of the preference under positive affine rescaling of the utility)
+import MathFin.RiskMeasures.VonNeumannMorgenstern
 -- Phase 1 (convex-duality unification): coherent-risk ADEH representation — acceptance cone
 -- separation giving the representing probability measures (risk-side Hahn–Banach)
 import MathFin.RiskMeasures.AcceptanceSet
