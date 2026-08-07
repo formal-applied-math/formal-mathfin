@@ -714,12 +714,6 @@ private lemma measurableSet_timeBand (u : ℝ≥0) (hBmeas : ∀ t, Measurable (
   MeasureTheory.measurableSet_predictable_Ioc_prod
     (𝓕 := ItoIntegralL2.natFiltration hBmeas) 0 u MeasurableSet.univ
 
-/-- The predictable trim measure lives on the band `(0,T] × Ω`. -/
-private lemma ae_fst_mem_Ioc (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
-    ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), z.1 ∈ Set.Ioc 0 T := by
-  rw [trimMeasure_T_eq_restrict]
-  exact ae_restrict_of_forall_mem (measurableSet_timeBand T hBmeas) (fun z hz ↦ hz.1)
-
 /-- **An integrand switched on only after `u` has not yet moved at `u`.** By the
 time-indexed Itô isometry the energy of `(φ●B)_u` is `∫_{(0,u]} φ²`, which vanishes
 when `φ` does. -/
@@ -756,7 +750,7 @@ theorem itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after (T u : ℝ≥0) (huT
       ∂(trimMeasure_T (μ := μ) T hBmeas)
       = ∫ z, (φ z) ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) := by
     refine setIntegral_eq_integral_of_ae_compl_eq_zero ?_
-    filter_upwards [hφ, ae_fst_mem_Ioc T hBmeas] with z hz hzT hznot
+    filter_upwards [hφ, ae_fst_mem_Ioc_trimMeasure_T (μ := μ) T hBmeas] with z hz hzT hznot
     rw [hz (by by_contra hc; exact hznot ⟨⟨hzT.1, not_lt.mp hc⟩, Set.mem_univ _⟩)]
     ring
   have hnorm : ‖(condExpL2 ℝ ℝ ((ItoIntegralL2.natFiltration hBmeas).le u) X : Lp ℝ 2 μ)‖ = ‖X‖ := by

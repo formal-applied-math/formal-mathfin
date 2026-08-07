@@ -37,8 +37,12 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
 include hB
 
 /-- **CLM-identified bounded-derivative Itô formula in `L²`.** For `f ∈ C³` with `|f′| ≤ C₁`,
-`|f″| ≤ C₂`, `|f‴| ≤ C₃`, there is an Itô-`L²` integrand `gf'` (the realization of
-`s ↦ f′(B_s)`) with `f(B_T) − f(B_0) =ᵐ[μ] itoIntegralCLM_T gf' + ½∫₀ᵀ f″(B_s) ds`. -/
+`|f″| ≤ C₂`, `|f‴| ≤ C₃`, there is an Itô-`L²` integrand `gf'` with
+
+  `gf' =ᵐ [f′(B_·)]`  and  `f(B_T) − f(B_0) =ᵐ[μ] itoIntegralCLM_T gf' + ½∫₀ᵀ f″(B_s) ds`.
+
+The first conjunct is what makes the second the Itô *formula* rather than a decomposition into
+some Itô integral. It is the time-independent case of `ito_formula_td_L2_bddDeriv`. -/
 theorem ito_formula_L2_bddDeriv
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ B s ω)) (T : ℝ≥0)
     {f f' f'' f''' : ℝ → ℝ}
@@ -47,14 +51,15 @@ theorem ito_formula_L2_bddDeriv
     {C1 : ℝ} (hf1 : ∀ x, |f' x| ≤ C1) {C2 : ℝ} (hf2 : ∀ x, |f'' x| ≤ C2)
     {C3 : ℝ} (hf3 : ∀ x, |f''' x| ≤ C3) :
     ∃ gf' : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+      (⇑gf' =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ f' (B z.1 z.2)) ∧
       (fun ω ↦ f (B T ω) - f (B 0 ω)) =ᵐ[μ]
         (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gf') ω
           + (1 / 2) * ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure) := by
   have hf'_cont : Continuous f' := continuous_iff_continuousAt.mpr fun x ↦ (hf' x).continuousAt
   have hf''_cont : Continuous f'' := continuous_iff_continuousAt.mpr fun x ↦ (hf'' x).continuousAt
   have hf_cont : Continuous f := continuous_iff_continuousAt.mpr fun x ↦ (hf x).continuousAt
-  obtain ⟨gf', hgf'⟩ := itoIntegralCLM_T_of_bdd_cont hB hBmeas hBcont hf'_cont hf1 T
-  refine ⟨gf', ?_⟩
+  obtain ⟨gf', hname, hgf'⟩ := itoIntegralCLM_T_of_bdd_cont hB hBmeas hBcont hf'_cont hf1 T
+  refine ⟨gf', hname, ?_⟩
   set I : Ω → ℝ := fun ω ↦ f (B T ω) - f (B 0 ω)
     - (1 / 2) * ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure with hI
   -- `f` is `C₁`-Lipschitz, so `f(B_t)` is dominated by `|f 0| + C₁·|B_t| ∈ L²`
@@ -104,6 +109,8 @@ theorem ito_formula_L2_bddDeriv_mk {X : ℝ≥0 → Ω → ℝ} (hX : IsPreBrown
     {C1 : ℝ} (hf1 : ∀ x, |f' x| ≤ C1) {C2 : ℝ} (hf2 : ∀ x, |f'' x| ≤ C2)
     {C3 : ℝ} (hf3 : ∀ x, |f''' x| ≤ C3) :
     ∃ gf' : Lp ℝ 2 (trimMeasure_T (μ := μ) T (fun t ↦ IsPreBrownianReal.measurable_mk (h := hX) t)),
+      (⇑gf' =ᵐ[trimMeasure_T (μ := μ) T (fun t ↦ IsPreBrownianReal.measurable_mk (h := hX) t)]
+        fun z ↦ f' (IsPreBrownianReal.mk (h := hX) X z.1 z.2)) ∧
       (fun ω ↦ f (IsPreBrownianReal.mk (h := hX) X T ω) - f (IsPreBrownianReal.mk (h := hX) X 0 ω)) =ᵐ[μ]
         (fun ω ↦ (itoIntegralCLM_T (hX.isBrownianReal_mk).toIsPreBrownianReal T
                     (fun t ↦ IsPreBrownianReal.measurable_mk (h := hX) t) gf') ω

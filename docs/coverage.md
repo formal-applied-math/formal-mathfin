@@ -96,6 +96,20 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > `ito_formula_td_L2_bddDeriv_explicit` already carried — the mechanism that created the gap — is
 > merged away: the two are one theorem under the shorter name.
 >
+> **The audit that followed** (2026-08-07, corpus unchanged). Two overstatements in one day stopped
+> being a one-off, so the class was swept repo-wide. `sc-thm-7.1.1` had the identical defect one tower
+> over — description writing `∫₀ᵗ f'(B_s) dB_s` over an `∃ gf'` — now fixed through
+> `itoIntegralCLM_T_of_bdd_cont → ito_formula_L2_bddDeriv → _mk`. Four descriptions corrected where
+> they claimed the textbook theorem and the entry delivers less (`cm-thm-4.3.10` no `L^p` convergence,
+> `sc-thm-8.2.5` uniqueness not existence, `sc-thm-7.4.5` constant `σ`, `sc-thm-9.2.1` the Feynman–Kac
+> identification not PDE uniqueness). The README's landmark row for `ito_formula_unrestricted` was
+> rendering a local-martingale theorem as an integral identity. And
+> `ae_fst_mem_Ioc_trimMeasure_T` existed six times across five files; five retired. The mechanical
+> slice is now gated (`test_prose_does_not_outrun_statement`, negative-controlled against the three
+> conjuncts it exists to protect); the judgment slice is a standing first pass in the values-review
+> protocol and in `CLAUDE.md`. Open: `description` serves as textbook target for 36 entries and as
+> delivered result for the rest, with nothing marking which, and it is published.
+>
 > **Record correction (2026-08-04, drafter attribution — no theorem changed):** corpus
 > **348**, **316 full + 18 wrappers = 334/348 delivery-ready**, 14 reduced cores, 0
 > placeholders — all unchanged; this touched `metadata.provenance` only, and the ledger

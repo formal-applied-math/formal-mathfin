@@ -186,13 +186,15 @@ lemma tendsto_norm_toLp_sub' {α : Type*} {m : MeasurableSpace α} {ν : Measure
   simpa only [Function.comp_def, Real.sqrt_zero] using (Real.continuous_sqrt.tendsto 0).comp h
 
 /-- **Riemann ↔ CLM bridge.** For bounded continuous `φ`, the uniform-partition
-Riemann–Itô sums `∑ φ(B_{tₖ})·ΔBₖ` converge in `L²(μ)` to `itoIntegralCLM_T gφ`, where
-`gφ` is the trim-`L²` realization of `s ↦ φ(B_s)` (the trim-`L²` limit of the step
-approximations `simpleAssembly_T (stepφ n)`). -/
+Riemann–Itô sums `∑ φ(B_{tₖ})·ΔBₖ` converge in `L²(μ)` to `itoIntegralCLM_T gφ`, with the
+integrand **named**: `gφ =ᵐ [φ(B_·)]` (it is the trim-`L²` limit of the step approximations
+`simpleAssembly_T (stepφ n)`, and that limit is `φ∘B` a.e.). Carrying the identification here
+is what lets `ito_formula_L2_bddDeriv` state which integrand its Itô term integrates. -/
 theorem itoIntegralCLM_T_of_bdd_cont (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ B s ω))
     {φ : ℝ → ℝ} (hφ_cont : Continuous φ) {C : ℝ} (hφ_bdd : ∀ x, |φ x| ≤ C) (T : ℝ≥0) :
     ∃ gφ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+      (⇑gφ =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ φ (B z.1 z.2)) ∧
       Tendsto (fun n ↦ (memLp_riemannφ hB hBmeas hφ_cont.measurable hφ_bdd T n).toLp
           (riemannφ hBmeas φ T n))
         atTop (𝓝 (itoIntegralCLM_T hB T hBmeas gφ)) := by
@@ -203,11 +205,7 @@ theorem itoIntegralCLM_T_of_bdd_cont (hBmeas : ∀ t, Measurable (B t))
   have hf_memLp : ∀ n, MemLp (f n) 2 (trimMeasure_T (μ := μ) T hBmeas) :=
     fun n ↦ memLp_uncurry_trim_T T hBmeas _
   -- `trimMeasure_T` is supported on `(0,T] × Ω`
-  have hsupp : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), z.1 ∈ Set.Ioc 0 T := by
-    rw [trimMeasure_T_eq_restrict]
-    refine ae_restrict_of_forall_mem
-      (MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := natFiltration hBmeas) 0 T
-        MeasurableSet.univ) (fun z hz ↦ hz.1)
+  have hsupp := ae_fst_mem_Ioc_trimMeasure_T (μ := μ) T hBmeas
   -- the uncurried step functions converge a.e. to `φ∘B` (cell collapse + path continuity)
   have hae_conv : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas),
       Tendsto (fun n ↦ f n z) atTop (𝓝 (gφ_fn z)) := by
@@ -274,7 +272,7 @@ theorem itoIntegralCLM_T_of_bdd_cont (hBmeas : ∀ t, Measurable (B t))
       (fun n ↦ ((hf_memLp n).aestronglyMeasurable.sub hgφ_aesm).pow 2)
       (integrable_const _) hbnd hlim
     simpa using this
-  refine ⟨hgφ_memLp.toLp gφ_fn, ?_⟩
+  refine ⟨hgφ_memLp.toLp gφ_fn, MemLp.coeFn_toLp _, ?_⟩
   have hLp : Tendsto (fun n ↦ (hf_memLp n).toLp (f n)) atTop (𝓝 (hgφ_memLp.toLp gφ_fn)) :=
     tendsto_iff_norm_sub_tendsto_zero.mpr (tendsto_norm_toLp_sub' hf_memLp hgφ_memLp hint)
   have key : ∀ n, itoIntegralCLM_T hB T hBmeas ((hf_memLp n).toLp (f n))

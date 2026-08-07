@@ -56,6 +56,28 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   propagate) and the next **upgrade** (the gradient). Genuine slop uncovered
   is fixed in-session; larger upgrades become ranked backlog items with
   owners (usually a future session's opening move).
+- **The standing first pass — read the prose against its own statement.**
+  Before the lenses, for everything the session touched: does the docstring,
+  the corpus `description`, or the doc paragraph claim more than the Lean
+  says? This is not a hypothetical failure. On 2026-08-07 five corpus
+  entries described the stochastic term as `∫₀ᵀ f_x(s,B_s) dB_s` while
+  stating only `∃ gfx`; the README's landmark table rendered
+  `ito_formula_unrestricted` as an integral identity when the theorem proves
+  only that a residual is a continuous local martingale; and four more
+  descriptions claimed a textbook theorem (`L^p` convergence, existence *and*
+  uniqueness, general `σ(s)`, uniqueness of a bounded classical PDE solution)
+  where the entry delivered a narrower result. Nobody wrote a false claim on
+  purpose — the prose described the theorem everyone had in mind and the
+  statement quietly said less.
+  The mechanical half is now `test_values.py::test_prose_does_not_outrun_statement`
+  (an `∃`-statement whose witness is never pinned down while the prose writes
+  the integral that would pin it down). The judgment half stays here, and it
+  is the larger half: `description` is published in the HF dataset and
+  documented as "natural-language mathematical statement", so it is an
+  outward-facing claim, not a private note. Where an entry's `description`
+  states the **textbook target** rather than the delivered result — 36 entries
+  do — the delivered scope must be explicit in the same field, not left to
+  `formalization_scope`.
 - **Record**: append a review block below, headed
   `## YYYY-MM-DD — corpus <N> — <one-line title>` (the freshness test parses
   the date and the `corpus <N>` count anywhere in the heading; a
@@ -3146,3 +3168,132 @@ characterization is nowhere claimed.
 3. *(nit, accepted)* the rfl-tripwire's tail regex is documented
    "good enough" in-file; a Lean-aware scanner is not worth its weight while
    the catch rate is this good (1 for 1 on first run).
+
+## 2026-08-07 — corpus 351 — naming the Itô integrand, and a systematic prose-vs-statement audit
+
+Scope: the `#183` chain (`ItoFormulaTD`/`…Localized`/`…ItoProcess`/`…GBM`), the follow-on audit the
+user asked for after two prose overstatements turned up in one day, and the `ItoFormulaCLM` /
+`ItoIntegralRiemannBridge` work that audit forced. Corpus **351**, unchanged — no entries added,
+seven strengthened or corrected. This is a single-reviewer pass, not the three-agent panel; the panel
+is still owed at the next proof session (carried from the last round, which owed it too — see the
+backlog).
+
+### Upgrades executed
+
+1. **The Itô chain names its integrand** (#183, PR #189). Every rung from `ito_formula_td_L2_bddDeriv`
+   to `discountedGBM_eq_itoIntegral` states `gfx =ᵐ [the integrand]`, ending at `σ·Ŝ(·)`.
+2. **The `C²` sibling, found by the audit, not by the issue.** `sc-thm-7.1.1` had exactly the same
+   defect one tower over: its description wrote `∫₀ᵗ f'(B_s) dB_s` while the statement said `∃ gf'`.
+   Fixed by carrying the conjunct through `itoIntegralCLM_T_of_bdd_cont → ito_formula_L2_bddDeriv →
+   _mk`. The TD bridge had exposed the identification since it was written; the untimed one never did.
+3. **Two forgetful wrappers merged away.** `ito_formula_td_L2_bddDeriv_explicit` + its conjunct-dropping
+   wrapper are one theorem now.
+4. **`ae_fst_mem_Ioc_trimMeasure_T` existed six times.** One private lemma in `ItoIntegralLocality`,
+   four inline `have`s (`ItoIntegralRiemannBridge`, `…TD`, `…Adapted`, `SimpleProcessPartition`), and
+   the public one I added *yesterday* in `ItoIntegralCLM` without noticing the other five. All five
+   duplicates retired.
+5. **Four descriptions corrected** where they claimed the textbook theorem and the entry delivered
+   less: `cm-thm-4.3.10` (`L^p` convergence not delivered — a.s. along ℕ plus in-measure in real time
+   is), `sc-thm-8.2.5` (uniqueness only, not existence), `sc-thm-7.4.5` (constant `σ`, not `σ(s)`),
+   `sc-thm-9.2.1` (the Feynman–Kac identification, not uniqueness of a bounded classical solution).
+6. **The gate**: `test_values.py::test_prose_does_not_outrun_statement`, plus the standing first pass
+   in this file's protocol and in `CLAUDE.md`.
+
+### The lenses, as gradients
+
+**1 Inspired math.** *Exemplar:* the identification argument. `L²` convergence gives a.e. convergence
+only along a subsequence, which reads like a weakness and is exactly enough — and the pointwise input
+is not analysis at all, just the observation that the truncation goes inert at each point once
+`n ≥ |B|`. The `L²` membership of `f_x(·,B)` then falls *out* of the identification instead of being
+its prerequisite. *Upgrade (MED):* `ae_eq_of_tendsto_Lp_of_tendsto` is `private` with one consumer.
+The second consumer promotes it; if a third appears it wants a real home and a Mathlib-shaped name.
+
+**2 Coherence.** *The finding, and it is the headline again.* Last round's headline was three general
+lemmas stranded in application files. This round: the *same* fact written six times, and I added the
+sixth. The last round's own recorded lesson did not prevent it, because nothing looks for duplicates —
+I wrote a lemma without grepping for its statement first. *Upgrade (HIGH):* a duplicate-statement
+detector. A cheap version — normalise whitespace on each `have h : <prop> := by` and each lemma
+conclusion, hash, report collisions across files — would have caught all five. This is the highest-value
+item on the backlog because it is the one failure this repo keeps repeating.
+
+**3 Zero slop.** *Exemplar:* `discountedGBM_eq_itoIntegral`'s proof is four lines and every one is the
+mathematical step. *Finding, fixed:* the `hsupp` copies were slop by the strict definition —
+"duplicated sub-derivations". *Upgrade (LOW):* `ito_formula_itoProcess` now mixes a bulleted goal with
+an unbulleted one after `refine ⟨gfx, ?_, ?_⟩`. Idiomatic, but the file would read better with both
+bulleted; costs a re-indent, worth folding into the next touch.
+
+**4 Architectural ingenuity.** *Exemplar:* the conjunct rides the existing `∃` rather than spawning a
+parallel `_explicit` tower — six statements got stronger and no new names appeared. *Upgrade (MED):*
+`ito_formula_expBrownian` is strengthened and has no consumer at all, corpus or library. Keep it (it
+is the pedagogical rung), but it is the kind of thing that should be *either* consumed *or* deleted
+within a phase or two.
+
+**5 First principles.** *Exemplar:* nothing in the chain is assumed; each rung derives its conjunct
+from the rung below, and `cutoff_bddDeriv` derives it from a theorem that already knew it. *Finding,
+open:* `sc-thm-9.1.8` is honestly labelled `reduced_core` and its docstring says "specification", but
+its hypothesis is a structure (`GirsanovGeneral`) that bundles what the conclusion reads off. That is
+the reduced-core shape working as intended and disclosed — but it is worth stating plainly in the
+entry that the structure is the hypothesis, since "specification" is doing quiet work.
+
+**6 Idiomatic register.** *Exemplar:* `{mα : MeasurableSpace α}` as a plain implicit, matching
+Mathlib's own measure-theory convention — which is *why* our helper composes with a trim measure at
+all; instance-implicit would have synthesized `Prod.instMeasurableSpace` and failed. *Upgrade (LOW):*
+`ae_fst_mem_Ioc_trimMeasure_T` is a mouthful; a Mathlib reviewer would want
+`trimMeasure_T.ae_fst_mem_Ioc` or similar once it has a namespace worth dotting into.
+
+**7 Concept clarity.** *This is the round's weak lens, and the reason the user asked for the audit.*
+Six separate places said more than their Lean did. The pattern is not carelessness, it is structural:
+prose is written to describe the theorem the author has in mind, and when the statement lands weaker,
+nothing re-reads the prose against it. *Upgrade (executed, partial):* the mechanical gate and the
+standing first pass. *Upgrade (HIGH, open):* **`description` has two incompatible jobs.** For 36
+entries it is the textbook target; for the rest it is the delivered result; nothing marks which, and it
+is published in the HF dataset. Either split the field (`textbook_statement` vs `description`) or
+require every textbook-framed description to carry its delivered scope inline — the four I corrected
+now do, ad hoc. 225 of 351 entries carry no docstring at all, so for those `description` is the *only*
+prose and carries the whole weight.
+
+**8 Beautiful math.** *Exemplar:* "the truncation is eventually inert at every point, and an `L²` limit
+is an a.e. limit along a subsequence" — two sentences, no estimates, and the theorem falls out.
+*Upgrade (MED):* the same eventually-inert observation should retire domination arguments elsewhere in
+the localization files; `boundary_tendsto_L2` and `drift_tendsto_L2` still do dominated convergence
+where pointwise eventual-constancy may be available.
+
+### Ranked backlog
+
+1. **[HIGH] A duplicate-statement detector** (lens 2). Six copies of one fact, and the round that
+   recorded the lesson still produced the sixth. Normalise-and-hash lemma conclusions and `have`
+   propositions; report cross-file collisions. Owner: next session's opening move.
+2. **[HIGH] Split or discipline `description`** (lens 7). Two jobs, one published field, no marker.
+3. **[HIGH, carried] Run the actual three-agent panel.** Two rounds running have deviated — last round
+   ran eleven scoped passes, this round is a single reviewer. Both deviations were reasonable and both
+   were the same deviation. The next proof session runs the panel or the protocol should be amended to
+   say what we actually do.
+4. **[MED] #182 — Clark–Ocone**, naming the *representation's* `φ`. #183 named the Itô formula's
+   integrand; this is the harder and more valuable half, and it is what "state the delta of a general
+   claim" actually needs.
+5. **[MED] Audit the remaining 32 textbook-framed descriptions** (lens 7). I checked the five highest-
+   risk and corrected four. The rest are unread against their statements.
+6. **[MED] Retire dominated convergence where eventual-inertness suffices** (lens 8).
+7. *(Carried, unchanged:)* compose the `PricesGainsAtZero` guards (#186); the vector driver (#180);
+   the second-FTAP converse (#181); the discrete general-Ω multi-period DMW crown; the 2D covariation
+   Itô tower (#48); Girsanov `L²`/Novikov.
+
+### Evidence
+
+Mechanical floor: `lake build MathFin` + `lake lint` green; pytest 6/6 in `test_values.py` including
+the new gate, full suite green; ledger re-verified; axiom pins hold; `AxiomAuditGen` byte-fresh at 308
+guards.
+
+The new gate was negative-controlled rather than trusted: reverting the three naming conjuncts in a
+scratch copy made it fail with exactly those three ids. Its first draft did *not* have that property —
+it accepted any `=ᵐ` after the `∃`, including the main identity, and so passed `sc-thm-7.1.1`, the very
+entry the audit was chasing. A gate that cannot fail on the defect it was written for is worse than no
+gate, because it launders the defect as checked.
+
+**Checks that dissolved**: `gir-pricing-measure-unique` (prose says "uniqueness", statement is
+`Q A = μ A` for arbitrary measurable `A` — that *is* the uniqueness); `mf-fixedincome-fra` ("the unique
+fixed rate" is delivered by the `↔`); `mf-cash-or-nothing` / `mf-asset-or-nothing` (the "iff" is in the
+payoff's definition, not a claimed equivalence); `pp-thm-3.3.5` (same); `sde-picard-existence-uniqueness`
+(`∃!` on the Picard fixed point, and the docstring identifies fixed point with solution);
+`sc-thm-9.1.8` (the `∃ v` *is* pinned, through a coercion the first regex could not see);
+`mart-thm-2.4.6` (Doob `L^p`, description matches).

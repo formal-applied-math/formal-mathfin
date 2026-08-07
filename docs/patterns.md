@@ -1193,3 +1193,40 @@ instance-implicit `[MeasurableSpace α]` will have `Prod.instMeasurableSpace` sy
 Use a plain implicit `{mα : MeasurableSpace α}`, determined by the measure argument. Mathlib's own
 measure-theory lemmas (`tendstoInMeasure_of_tendsto_Lp` among them) declare it exactly this way, and
 that is why they compose with our trims at all.
+
+### Grep the statement before writing the lemma
+
+`ae_fst_mem_Ioc_trimMeasure_T` — "trim-a.e. `z`, `z.1 ∈ Ioc 0 T`" — existed **six** times when the
+2026-08-07 audit looked: a `private lemma` in `ItoIntegralLocality`, four inline `have`s
+(`ItoIntegralRiemannBridge`, `…TD`, `…Adapted`, `SimpleProcessPartition`), and the public one added the
+day before in `ItoIntegralCLM` by someone who did not check. Five are now retired.
+
+The lesson is not "avoid duplication", which everyone already believes. It is that **the duplicate is
+invisible from the site where you create it.** You are writing a `have` inside a proof, it is two lines,
+and naming it would be ceremony. That judgment is right locally and wrong five times over. Before
+adding any general-looking `have` or lemma, grep for its *conclusion* — not its name, which does not
+exist yet:
+
+```bash
+grep -rn "z.1 ∈ Set.Ioc 0 T" MathFin --include='*.lean'
+```
+
+The previous values review's headline was the same failure in a different shape (three general lemmas
+stranded in application files), and recording that lesson did not stop this one, because nothing
+searches. That is why "a duplicate-statement detector" is the top backlog item rather than another
+note.
+
+### Negative-control every gate you write
+
+The prose-vs-statement gate's first draft passed the whole corpus, including `sc-thm-7.1.1` — the entry
+it was written to catch. It tested for *any* `=ᵐ` after the `∃`, and `sc-thm-7.1.1`'s main identity is
+itself an `=ᵐ`, so the check confirmed a property that was always true instead of the one at risk.
+
+So: before trusting a new gate, **reintroduce the defect and watch it fail.** Copy the corpus to a
+scratch directory, revert the fix, run the gate, confirm it names exactly the reverted entries, delete
+the copy. It costs a minute. A gate that cannot fail on its own motivating example is worse than no
+gate, because everything downstream now reads as checked.
+
+Same genus as the `sorry`-typecheck and isolation-probe traps recorded in the 2026-08-06 batch: a
+cheap check silently redefines success. Third instance in two sessions, this time in a gate we wrote
+ourselves rather than one we inherited.
