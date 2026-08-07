@@ -1,0 +1,8 @@
+# `verification_ledger.json` is a flat {id: row} map of DERIVED state. Git's
+# default text merge combines two branches silently whenever they touch
+# different regions of it — which on 2026-08-07 dropped a row during the #173
+# merge and put main red. Route it through the semantic driver instead, which
+# unions disjoint verifications and DROPS any entry the two sides verified
+# under different inputs, so it re-verifies rather than asserting a verdict
+# this tree never had. See tools/verify/ledger_merge.py for the install line.
+verification_ledger.json merge=mathfin-ledger

@@ -253,6 +253,39 @@ for the entries already past.
 
 ---
 
+## A merge left the ledger describing a tree nobody verified
+
+**Symptom:** right after a `git merge` or rebase, `ledger status` reports MISSING rows, or
+`tests/test_ledger.py::test_every_benchmark_entry_has_a_ledger_row` fails naming an entry that
+plainly exists in `benchmarks/`.
+
+**Cause:** `verification_ledger.json` is a flat `{id: row}` map. Git's default text merge combines
+two branches without conflicting whenever they touch different regions of the file, so a row can be
+dropped (or carried across) with no conflict marker and no warning. Observed 2026-08-07: the #173
+merge dropped `mf-vnm-expected-utility` while the corpus side kept the entry, and main went red.
+
+Note the ledger is self-healing against *wrong* rows — `classify` recomputes every input hash from
+the working tree, so a carried-over row whose inputs changed reports STALE. The damaging case is a
+**missing** row, and the gates catch that too. What failed was not detection but *timing*: main has
+no branch protection, so a locally-created merge commit reached it without pre-merge CI.
+
+**Fix:**
+```bash
+# one-time per clone — git config is not versioned
+git config merge.mathfin-ledger.name "semantic merge for verification_ledger.json"
+git config merge.mathfin-ledger.driver "python3 tools/verify/ledger_merge.py %O %A %B %L %P"
+git config core.hooksPath .githooks
+
+# after any merge that touched benchmarks/ or MathFin/
+python3 -m tools.verify.ledger status
+python3 -m tools.verify.ledger verify   # daemon up; re-runs only what is stale/missing
+```
+`.gitattributes` already routes the file at the driver; the two `git config` lines are what make it
+take effect. Treat the ledger as regenerable output — if a merge touched it, re-derive rather than
+hand-resolve.
+
+---
+
 ## CI fails on `test_values.py` after a benchmark edit
 
 **Symptom:** `tests/test_values.py` fails with "stale AxiomAuditGen" or a
