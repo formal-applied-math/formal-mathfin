@@ -1119,3 +1119,77 @@ ones share an import set is worth roughly 3×.
 That reframes the standing "keep authored files small" advice: what costs time is import churn between
 consecutive checks, not the number of declarations in the file under test. When a session has to touch
 several modules, order the checks by import closure rather than by the order the edits happened.
+
+## Naming an `L²` limit, and the wrapper that hid one (2026-08-07 batch)
+
+From [#183](https://github.com/raphaelrrcoelho/formal-mathfin/issues/183): carrying the identification
+`gfx =ᵐ [the integrand]` through the localized Itô chain.
+
+### Identify an `L²` limit by *pointwise* limits of a.e. representatives
+
+The general fact (`ae_eq_of_tendsto_Lp_of_tendsto`, `Foundations/ItoFormulaLocalized.lean`): if
+`gₙ → g` in `L²` and each `gₙ` is a.e. equal to a concrete `hₙ` with `hₙ x → h x` for every `x`, then
+`g =ᵐ h`. Three lines of Mathlib — `tendstoInMeasure_of_tendsto_Lp` for the `Lp`-to-in-measure step,
+`TendstoInMeasure.exists_seq_tendsto_ae` for the subsequence, `tendsto_nhds_unique` to finish, with
+`ae_all_iff` folding the countably many a.e. equalities into one.
+
+Two things make this the cheap route, and both are easy to miss.
+
+**The subsequence is enough.** `L²` convergence gives a.e. convergence only along a subsequence, which
+reads like a weakness. It is not: a subsequence of a convergent sequence has the same limit, and limits
+in `ℝ` are unique, so the identification is settled.
+
+**`h ∈ L²` is a conclusion, not a hypothesis.** The obvious alternative — show `hₙ → h` in `L²` and use
+uniqueness of `Lp` limits — needs `h ∈ L²` up front, which for the localized Itô formula means proving
+`f_x(·, B_·) ∈ L²(trim)` by domination. The a.e. route asks nothing of `h`; membership falls out
+afterwards from `g ∈ L²` and `g =ᵐ h`. When a limit statement seems to need an integrability
+prerequisite, check whether the a.e. formulation gets it for free.
+
+At the call site the pointwise hypothesis was not an analysis argument at all. Each cutoff's chain-rule
+integrand `f_x(·, φₙ(B))·φₙ'(B)` is *eventually constant* in `n` at every point: once `n ≥ |B|`,
+`cut_eq_id_of_abs_le` and `cutD1_eq_one_of_abs_lt` make the truncation inert. So the whole limit is
+`tendsto_const_nhds.congr'` against an `eventually_ge_atTop ⌈|·|⌉₊` filter — no domination, no measure
+theory. A localizing family that is eventually inert pointwise is usually identifiable this way.
+
+### A trim measure erases a time cutoff
+
+`ae_fst_mem_Ioc_trimMeasure_T` (`Foundations/ItoIntegralCLM.lean`): trim-a.e. `z`, `z.1 ∈ Ioc 0 T`, the
+pointwise reading of `trimMeasure_T_eq_restrict`. That is what lets `ito_formula_itoProcess` state its
+integrand as `σ·f'(X₀ + b·z.1 + σ·B)` although the localized formula hands back
+`σ·f'(X₀ + b·φₙ(z.1) + σ·B)`: past the horizon the trim charges nothing, and inside it `φₙ = id`. The
+same erasure applies to any time-localized construction whose statement lives on the trim.
+
+### The forgetful wrapper is a defect generator
+
+`ito_formula_td_L2_bddDeriv_explicit` had carried the naming conjunct since it was written.
+`ito_formula_td_L2_bddDeriv` was a wrapper whose only job was to drop it, kept for "consumers that only
+need the integrated identity". Every consumer then used the short name, the conjunct was never
+propagated, and #183 is the result: a four-theorem chain of bare existentials sitting directly on top
+of a theorem that already knew the answer.
+
+The tell is in the docstring. A wrapper justified as "drops X, retained for consumers that only need Y"
+is not a convenience — it is a fork in the API where the weaker branch has the better name, and the
+weaker branch wins. Prefer one theorem stating the strongest true thing; consumers project with `.2` or
+discard with `⟨g, -, h⟩`. This is the anti-wrapper rule (`feedback_avoid_wrapper_lemmas`) applied to
+our *own* lemmas rather than to Mathlib's, and it is where that rule actually earns its keep.
+
+Corollary worth checking during any values review: **where prose outruns the statement.** All five
+corpus entries touched here described the stochastic term as `∫₀ᵀ f_x(s,B_s) dB_s` or `∫₀ᵀ σŜ(s) dB_s`
+in their `description` and docstring while stating only `∃ gfx`. Nobody wrote a false claim
+deliberately; the prose described the theorem everyone had in mind, and the statement quietly said
+less. Reading a docstring against its own statement is a cheap, high-yield audit.
+
+### Two mechanical traps met on the way
+
+**A `refine` hole under a lambda cannot see the binder.** `refine ⟨w, lemma h₁ h₂ fun z ↦ tac ?_, ?_⟩`
+elaborates, but the resulting goal does *not* have `z` in context — the metavariable is created outside
+the lambda — so the next tactic fails with `Unknown identifier 'z'`. Put the hole directly under the
+binder and continue in tactic mode: `refine lemma h₁ h₂ fun z ↦ ?_` then work on the goal.
+
+**`[MeasurableSpace α]` blocks unification with a non-canonical σ-algebra.** A helper stated with an
+instance-implicit `[MeasurableSpace α]` will have `Prod.instMeasurableSpace` synthesized for
+`α = ℝ≥0 × Ω`, which is not the predictable σ-algebra the trim measure carries — the error is
+"synthesized type class instance is not definitionally equal to expression inferred by typing rules".
+Use a plain implicit `{mα : MeasurableSpace α}`, determined by the measure argument. Mathlib's own
+measure-theory lemmas (`tendstoInMeasure_of_tendsto_Lp` among them) declare it exactly this way, and
+that is why they compose with our trims at all.

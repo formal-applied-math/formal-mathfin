@@ -439,12 +439,9 @@ diffusion integrand a function of `B`. -/
 to a process identity holding for **every** `t ≤ T`: `f(t,B_t) − f(0,B_0) =ᵐ itoProcessL2Inf t F +
 ∫₀ᵗ (f_t + ½f_xx) ds`, the stochastic term the genuine Itô-integral *process* — a continuous `L²`
 martingale with an everywhere-continuous local-martingale modification. The witness is canonical
-(`ito_formula_td_L2_bddDeriv_explicit` exposes `gfx =ᵐ [f_x(·,B)]`); the construction is the
+(`ito_formula_td_L2_bddDeriv` exposes `gfx =ᵐ [f_x(·,B)]`); the construction is the
 zero-extension `exists_fullHorizon_extension` fed to the existing `[0,∞)` horizon-consistency. No
 Markov property, no PDE — entirely inside the Itô tower. -/
-
-/-- info: 'MathFin.ito_formula_td_L2_bddDeriv_explicit' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.ito_formula_td_L2_bddDeriv_explicit
 
 /-- info: 'MathFin.ito_formula_td_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ito_formula_td_process

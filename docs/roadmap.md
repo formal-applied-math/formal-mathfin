@@ -1360,32 +1360,34 @@ Ho–Lee #156 and the Vasicek/Hull–White seam #157. Musiela (#158) is a deferr
 — every downstream tier waits on it; its one hard step is the L²-representative fact (maybe already in Mathlib).
 #140 (a would-be `integral_comp_comm` wrapper) was dissolved into #141 as an anti-wrapper cleanup.
 
-## known gap: the localized Itô formula does not identify its integrand (2026-08-06)
+## closed: the localized Itô formula now identifies its integrand (2026-08-07, [#183](https://github.com/raphaelrrcoelho/formal-mathfin/issues/183))
 
-Surfaced during Task 3 of the martingale-representation program
-(`docs/plans/2026-08-04-martingale-representation.md`). `ito_formula_td_localized`
-(`Foundations/ItoFormulaLocalized.lean`) returns a bare `∃ gfx`, and everything built on it inherits
-the same shape: `ito_formula_expBrownian`, `ito_formula_gbm`, and `discountedGBM_eq_itoIntegral`
-(`Foundations/ItoFormulaGBM.lean`) all produce a witness without saying what it is. The internal
-per-cutoff step it calls, `cutoff_bddDeriv` (`Foundations/ItoFormulaLocalized.lean:326`), is also a
-bare existential, so naming the integrand means editing a four-theorem chain, not patching one file:
-`cutoff_bddDeriv → ito_formula_td_localized → ito_formula_itoProcess`
-(`Foundations/ItoFormulaItoProcess.lean`) `→ ito_formula_gbm`/`discountedGBM_eq_itoIntegral`. Only
-`ito_formula_td_L2_bddDeriv_explicit` (`Foundations/ItoFormulaTD.lean`) carries the naming conjunct,
-and it wants globally bounded derivatives; the exponential's own partial, of the shape `σ·exp(σx)`, is
-not bounded, so that route stays closed here.
+Opened 2026-08-06 out of Task 3 of the martingale-representation program, closed the next day.
+`ito_formula_td_localized` returned a bare `∃ gfx` and everything built on it inherited that shape, so
+no consumer of `ito_formula_gbm` or `discountedGBM_eq_itoIntegral` could identify the diffusion
+coefficient — the library could not say "the delta is `σŜ`".
 
-Consequence: no consumer of `ito_formula_gbm` or `discountedGBM_eq_itoIntegral` can currently identify
-the diffusion coefficient. The library cannot say "the delta is `σS`" from these lemmas alone. The
-statement is true and provable: redoing `ito_formula_td_localized`'s L²-limit argument with an extra
-a.e.-identification pass would give it. It is just not derivable from the tower's exported API today.
+Every link now carries `gfx =ᵐ [the integrand]`:
+`ito_formula_td_L2_bddDeriv → cutoff_bddDeriv → ito_formula_td_localized → ito_formula_itoProcess →
+ito_formula_gbm`/`ito_formula_expBrownian → discountedGBM_eq_itoIntegral`, ending at
+`gfx =ᵐ [σ·Ŝ(·)]` for the discounted GBM.
 
-Task 3 needed exactly that: the integrand of the constant-volatility Doléans exponential, named. It
-worked around the gap instead, going from the known *value* of the integral (a difference of Wald
-exponentials) to the result via the Itô isometry + truncation + Fatou
-(`itoIntegralCLM_T_smul_of_memLp`), which needs no witness. The gap stayed open by choice, not by
-oversight. The one task that would have forced the fix was rearranged to avoid needing it, and nothing
-else in the corpus currently needs the named form. Leave it until a consumer does.
+**The argument is cheaper than the one the issue projected.** The plan was to redo the `L²`-limit with
+an a.e.-identification pass, which reads as needing `f_x(·, B_·) ∈ L²(trim)` first. It does not. Each
+cutoff's chain-rule integrand `f_x(·, φₙ(B))·φₙ'(B)` is *eventually constant* at `f_x(·, B)` at every
+point — once `n ≥ |B|` the truncation is inert (`φₙ = id`, `φₙ' = 1`) — and an `L²` limit agrees a.e.
+with a pointwise limit of a.e. representatives, because `L²` convergence gives a.e. convergence along a
+subsequence and limits in `ℝ` are unique. That is `ae_eq_of_tendsto_Lp_of_tendsto`, a general
+`Lp` fact stated once and applied once. The `L²` membership of `f_x(·, B_·)` then falls out *of* the
+identification instead of being a prerequisite for it.
+
+Two things the fix surfaced that the issue did not name. First, the forgetful wrapper: the naming
+conjunct had existed all along in `ito_formula_td_L2_bddDeriv_explicit`, and
+`ito_formula_td_L2_bddDeriv` was a wrapper whose only job was to drop it — the exact mechanism that
+produced the gap. The two are now one theorem under the shorter name. Second, the corpus prose was
+already ahead of the corpus statements: all five affected entries described the integral as
+`∫₀ᵀ f_x(s,B_s) dB_s` or `∫₀ᵀ σŜ(s) dB_s` in their descriptions and docstrings while stating only
+`∃ gfx`. The statements have caught up with what was being claimed for them.
 
 ## phase: martingale representation + market completeness (2026-08-07, corpus 348→351)
 

@@ -48,19 +48,16 @@ factor, which Cauchy–Schwarz multiplies.
 
 That is also why the constant case is stated existentially here. The plan called for a
 version *naming* the integrand as `s ↦ σ·exp(σB_s − ½σ²s)`, to feed the `L²(trim)`
-hypothesis directly. That statement is true, but it is not derivable from the tower's
-exported API. The exponential Itô formula arrives along the chain
+hypothesis directly, and at the time that was not derivable from the tower's exported
+API: every link of the chain
 
   `cutoff_bddDeriv → ito_formula_td_localized → ito_formula_itoProcess →
-   ito_formula_gbm → discountedGBM_eq_itoIntegral`,
+   ito_formula_gbm → discountedGBM_eq_itoIntegral`
 
-and every link of it is a bare existential: `cutoff_bddDeriv`
-(`ItoFormulaLocalized.lean:326`) already is, and `ito_formula_td_localized` takes an `L²`
-limit of those witnesses without identifying it. Only
-`ito_formula_td_L2_bddDeriv_explicit` carries the naming conjunct, and it wants *bounded*
-derivatives, which `σ·exp(σx)` is not. Naming the integrand is therefore a four-theorem
-change upstream rather than a lemma here; the sample-side transfer removes the need
-for it.
+was a bare existential. The chain now carries the naming conjunct throughout, so the named
+form is one `obtain` away should a consumer want it. This file still does not: the
+sample-side transfer never needed the integrand's identity, only its integral's second
+moment, and stating what a proof does not use is what the `∃` here honestly records.
 
 ## Result
 
@@ -97,7 +94,7 @@ theorem constDoleans_sub_one_mem_range (hBmeas : ∀ t, Measurable (B t))
     ∃ φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
       (fun ω ↦ Real.exp (σ * B T ω - σ ^ 2 * (T : ℝ) / 2) - 1)
         =ᵐ[μ] ⇑(itoIntegralCLM_T hB T hBmeas φ) := by
-  obtain ⟨gfx, hgfx⟩ := discountedGBM_eq_itoIntegral hB hBmeas hBcont T 1 σ
+  obtain ⟨gfx, -, hgfx⟩ := discountedGBM_eq_itoIntegral hB hBmeas hBcont T 1 σ
   refine ⟨gfx, ?_⟩
   filter_upwards [hgfx, ItoIntegralBrownian.eval_zero_ae hB hBmeas] with ω hω h0
   rw [← hω, h0]

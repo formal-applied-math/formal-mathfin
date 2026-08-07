@@ -26,7 +26,8 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-08-07, martingale representation + market completeness):** corpus
+> **Live status (2026-08-07, martingale representation + market completeness; then the localized
+> Itô formula named its integrand):** corpus
 > **351**, **320 full + 18 wrappers = 338/351 delivery-ready**, 13 reduced cores, 0 placeholders.
 > Ledger 351 fresh / 0 stale / 0 missing; pytest 42 passed; `lake build` and `lake lint` green with
 > no `#guard_msgs` failure, so the five new curated axiom pins hold.
@@ -74,6 +75,26 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > wider than `ContinuousMarket.SimpleStrategy`; the widening is forced, since a general `L²` claim is
 > not the terminal value of any piecewise-constant holding. `ContinuousMarket` itself is untouched
 > apart from a scope paragraph. All four entries axioms-clean.
+>
+> **The localized Itô formula now names its integrand**
+> ([#183](https://github.com/raphaelrrcoelho/formal-mathfin/issues/183), closed 2026-08-07; no corpus
+> entries added, five strengthened). The chain
+> `ito_formula_td_L2_bddDeriv → cutoff_bddDeriv → ito_formula_td_localized → ito_formula_itoProcess →
+> ito_formula_gbm`/`ito_formula_expBrownian → discountedGBM_eq_itoIntegral` was a run of bare
+> existentials, so no consumer could identify the diffusion coefficient — the library could not say
+> "the delta is `σŜ`". Every link now carries `gfx =ᵐ [the integrand]`, ending at `gfx =ᵐ [σ·Ŝ(·)]`
+> for the discounted GBM, and `sc-thm-7.1.2`, `sc-ito-formula-localized`, `sc-ito-formula-gbm`,
+> `sc-discounted-gbm-ito` and `sc-ito-formula-ito-process` state it. **This closed a fidelity gap, not
+> just a convenience one:** all five entries' `description` and docstring already wrote the integral as
+> `∫₀ᵀ f_x(s,B_s) dB_s` / `∫₀ᵀ σŜ(s) dB_s` while the Lean said only `∃ gfx` — the prose was ahead of
+> the statement. The identification argument is a general `Lp` fact
+> (`ae_eq_of_tendsto_Lp_of_tendsto`: an `L²` limit agrees a.e. with a pointwise limit of a.e.
+> representatives, via subsequence a.e. convergence) applied to the observation that each cutoff's
+> chain-rule integrand is *eventually constant* at `f_x(·, B)` at every point. `L²` membership of
+> `f_x(·, B_·)` comes out of the identification rather than being a prerequisite. The forgetful wrapper
+> `ito_formula_td_L2_bddDeriv`, whose only job was to drop the conjunct
+> `ito_formula_td_L2_bddDeriv_explicit` already carried — the mechanism that created the gap — is
+> merged away: the two are one theorem under the shorter name.
 >
 > **Record correction (2026-08-04, drafter attribution — no theorem changed):** corpus
 > **348**, **316 full + 18 wrappers = 334/348 delivery-ready**, 14 reduced cores, 0
@@ -527,18 +548,18 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > Itô-**formula** consumer for the first time, and is the prerequisite for the unrestricted-`C²`
 > (stopping-time localization) Itô formula. The construction is entirely inside the Itô tower —
 > **no Markov property, no PDE**: the terminal formula's witness is now canonical
-> (`ito_formula_td_L2_bddDeriv_explicit` exposes `gfx =ᵐ [f_x(·,B)]`), zero-extended to a `[0,∞)`
+> (`ito_formula_td_L2_bddDeriv` exposes `gfx =ᵐ [f_x(·,B)]`), zero-extended to a `[0,∞)`
 > integrand `F` (`exists_fullHorizon_extension`) and matched to each horizon via the existing
 > consistency `itoProcessL2Inf_eq_itoProcessCLM`. Earlier (corpus 298): **the Itô
 > formula decomposes `f(X)` for a general `C³` exp-growth `f` against a constant-coefficient Itô
 > process** `X_t = X₀ + b·t + σ B_t` (`Foundations/ItoFormulaItoProcess.lean`,
 > `sc-ito-formula-ito-process`, **`full`**),
-> `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds`. Earlier:
+> `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds`, `gfx =ᵐ [σ·f'(X_·)]`. Earlier:
 > **Geometric Brownian motion is decomposed by the genuine continuous
 > Itô integral** (`Foundations/ItoFormulaGBM.lean`, entries `sc-ito-formula-gbm` and
 > `sc-discounted-gbm-ito`, both **`full`**) — the **first pricing-ward consumer of the analytic
 > Itô tower**, which until now had *none* (GBM/BS pricing ran via separate algebraic towers and
-> the Wald exponential). `ito_formula_gbm` gives `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ ds`
+> the Wald exponential). `ito_formula_gbm` gives `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ ds` with `gfx =ᵐ [σ·Ŝ(·)]`
 > for the GBM value `Ŝ(t)=S₀ exp((m−σ²/2)t+σ B_t)`, the stochastic term the *real* Itô integral.
 > The route is the classic one — **localization in time**: the GBM value is `t`-exponential (fails
 > the localized formula's `t`-uniform growth), so the localized formula is applied to the
@@ -558,7 +579,8 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > and drift converge in `L²(μ)` (Brownian marginals have every exponential moment,
 > `BrownianExpMoment`; the drift dominator is the new base stone `pathIntegral_expGrowth_memLp`),
 > so `aₙ=itoIntegralCLM_T gfxₙ` is Cauchy, the Itô **isometry** transfers Cauchy-ness to the
-> integrands, completeness gives the witness, and CLM **continuity** identifies the limit.
+> integrands, completeness gives the witness, CLM **continuity** identifies the limit, and an
+> a.e.-identification pass names it (`gfx =ᵐ [f_x(·,B_·)]`).
 > Axioms-clean `[propext, Classical.choice, Quot.sound]`. Earlier:
 > **The unbounded-horizon Itô integral is a continuous local martingale on
 > the whole half-line `ℝ≥0`** (`Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean`,
