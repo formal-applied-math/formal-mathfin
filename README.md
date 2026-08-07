@@ -17,7 +17,7 @@
 > what is proved and what is assumed, and the deep connections between the field's pillars made
 > *load-bearing* rather than decorative.
 
-**`348` theorems · `334` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
+**`351` theorems · `338` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
 
 ---
 
@@ -63,6 +63,7 @@ Mathematical finance is a few deep principles whose consequences are the models.
 | **Donsker / CLT** | discrete ↔ continuous | ✅ **WIRED** — CRR binomial → Black–Scholes |
 | **Numéraire** | IV ↔ I | ✅ **WIRED** — the price-invariance seam `N₀·𝔼^{Qᴺ}[X/N_T] = B₀·𝔼^Q[X/B_T]` (`changeOfNumeraire`), with BS-stock / Margrabe-`S²` / Kelly-EMM instances |
 | **Girsanov** | I ↔ II | ◐ **bounded case closed** — the EMM is an *explicit* change of measure, and the distributional Girsanov is fully closed for bounded predictable θ (the honest Itô-`L²` domain); only the general `L²`/progressive-θ (Novikov, unbounded) case stays open |
+| **Martingale representation** | I ↔ II | ✅ **WIRED** — the same seam from the other side: the Itô integral is proved *onto* the centered `𝓕ᴮ_T`-measurable claims, so every square-integrable claim has a unique hedge, and the pricing measure is pinned on that filtration for measures that price the traded gains at zero |
 
 → The full spine, seam by seam: **[`docs/mathematical-architecture.md`](docs/mathematical-architecture.md)**.
 
@@ -77,6 +78,7 @@ Mathematical finance is a few deep principles whose consequences are the models.
 | **The EMM via Girsanov** | the risk-neutral measure is *constructed* as an explicit density change of the physical measure; the discounted stock is a proven `Q`-martingale — retiring the Wald shortcut | [`bs_discounted_isQMartingale`](MathFin/Foundations/Girsanov.lean) |
 | **Itô–Lévy L² isometry** | the compensated-Poisson stochastic integral built to an L²-isometric continuous linear operator, on a from-scratch density argument | [`assembly_isometry`](MathFin/Foundations/PoissonCompensatedIntegralOperator.lean) |
 | **SDE existence + uniqueness** | the Picard contraction in the predictable `L²` space, and pathwise uniqueness by an `L²`-energy Grönwall argument | [`picardMap_contraction`](MathFin/Foundations/SDEExistence.lean) · [`IsL2SolutionPair.uniqueness`](MathFin/Foundations/SDEUniqueness.lean) |
+| **Martingale representation** | the Itô integral `φ ↦ ∫₀ᵀ φ dB` is onto the centered `𝓕ᴮ_T`-measurable part of `L²(μ)` — by orthogonal decomposition against its closed range plus totality of the step Doléans exponentials, with no Malliavin calculus; the finance reading is that every square-integrable claim has a unique hedge | [`itoIntegralCLM_T_surjective_onto_centered`](MathFin/Foundations/MartingaleRepresentation.lean) · [`exists_replicating_strategy`](MathFin/Foundations/MarketCompleteness.lean) |
 | **Jump risk is never free** | the Merton (1976) jump-diffusion price dominates Black–Scholes | [`bsV_le_mertonCallPrice`](MathFin/BlackScholes/MertonDominance.lean) |
 
 ## A theorem, up close
@@ -99,18 +101,18 @@ See [`MathFin/Examples.lean`](MathFin/Examples.lean) for a curated tour.
 
 | | |
 |---|---:|
-| theorems (machine-checked) | **348** |
-| delivery-ready (`full` + `library_wrapper`) | **334** |
-| full derivations | 316 |
+| theorems (machine-checked) | **351** |
+| delivery-ready (`full` + `library_wrapper`) | **338** |
+| full derivations | 320 |
 | library wrappers | 18 |
-| reduced cores (honest special cases) | 14 |
+| reduced cores (honest special cases) | 13 |
 | placeholders / sorries | **0** |
-| Lean modules · lines of Lean | 264 · ~55,100 |
-| verification ledger | 348 fresh, 0 stale |
+| Lean modules · lines of Lean | 270 · ~57,750 |
+| verification ledger | 351 fresh, 0 stale |
 | axioms used | `propext, Classical.choice, Quot.sound` only |
 | Lean / Mathlib | `v4.32.0` / `81a5d257`, pinned ([`lean-toolchain`](lean-toolchain), [`lake-manifest.json`](lake-manifest.json)) |
 
-The library is organized by theme under [`MathFin/`](MathFin): `Foundations/` (127 modules — the
+The library is organized by theme under [`MathFin/`](MathFin): `Foundations/` (133 modules — the
 stochastic core), `BlackScholes/` (51), `FixedIncome/` (24), `Binomial/` (18), `Portfolio/` (14),
 `RiskMeasures/` (9), `Actuarial/` (6), `Performance/` (4), `Futures/` (3), `Bridges/` (2), `DeFi/` (1).
 
@@ -186,7 +188,8 @@ A breadth-and-depth library across eleven areas. Headlines per area (full per-th
   variation, Itô's formula) and its jump analogue, the **compensated-Poisson (Itô–Lévy) integral** built
   to an L²-isometric continuous linear operator, the **SDE tower** (Picard existence, `L²`-Grönwall
   uniqueness, pathwise decomposition), the **FTAP tower** (finite-Ω multi-period, general-Ω one-period,
-  d-asset), Girsanov, Feynman–Kac, and **the convex-duality unification**.
+  d-asset), Girsanov, **martingale representation** and the market completeness it delivers,
+  Feynman–Kac, and **the convex-duality unification**.
 - **Market microstructure** — the Avellaneda–Stoikov market-making problem: the Riccati value function,
   its approximate-HJB solution, and the constant half-spread / linear-skew closed forms, single-asset
   and multi-asset (matrix Riccati by spectral reduction).
@@ -197,7 +200,7 @@ A breadth-and-depth library across eleven areas. Headlines per area (full per-th
 
 Honesty is the point, so the gaps are explicit:
 
-- **14 `reduced_core` entries** — special cases or algebraic/structural cores whose fully general form is
+- **13 `reduced_core` entries** — special cases or algebraic/structural cores whose fully general form is
   not yet formalized (the 2-D Itô formula, Lévy's characterisation, the fully-general `L²`/progressive
   Girsanov under Novikov, some Markov/Poisson cores). Tracked per-entry in
   [`docs/coverage.md`](docs/coverage.md).
@@ -205,6 +208,12 @@ Honesty is the point, so the gaps are explicit:
   delivery-ready but are not original derivations, and are counted separately for that reason.
 - **Girsanov's general case** — the bounded-predictable-θ result is closed; the fully-general
   `L²`/progressive-θ case under Novikov remains open.
+- **The second FTAP is not proved unconditionally.** What is proved is that a probability measure
+  `Q ≪ μ` which prices the traded Itô gains at zero agrees with `μ` on `𝓕ᴮ_T`. Gains-neutrality is an
+  explicit hypothesis (`PricesGainsAtZero`), not a consequence of being a martingale measure for a
+  price process: the wealth process martingale representation builds integrates against `B`, and
+  nothing in `IsEMM S Q` makes that a `Q`-fair game. Only `complete ⟹ unique` is delivered; the
+  converse needs the Jacod–Yor extreme-point characterisation.
 - **Known upstream/limit gaps** — e.g. the superhedging strong-duality *equality* needs a
   finite-dimensional Farkas / polyhedral-cone closedness absent from Mathlib at this pin
   ([#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39)).

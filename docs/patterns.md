@@ -1059,6 +1059,31 @@ which plainly does not exist without a Brownian motion to integrate against). Ev
 clean because it happened to mention `itoIntegralCLM_T hB` or similar and picked the variable up
 that way.
 
+### Its twin: an isolation probe can only falsify
+
+The same program's cleanup pass produced the other half of that lesson, and the two belong together.
+Priority D changed `obtain ⟨ψ, hψ⟩ := id hy` to `obtain ⟨ψ, hψ⟩ := hy` in
+`Foundations/MartingaleRepresentation.lean`, reading the `id` as a redundant defeq nudge. It is not.
+`id` is the idiom for destructuring *without clearing*: a bare `obtain … := hy` consumes `hy` and
+removes it from context, while `id hy` destructures a copy and leaves the original alive. `hy` is used
+again a few lines down (`exact hy`), so the file stopped compiling with `Unknown identifier hy`. Both
+the implementer and the reviewer had read the edit as cosmetic.
+
+What makes it worth recording is how it was checked. The pass *did* probe the edit in isolation, and saw
+green. The probe asserted the wrong property: it checked that `obtain ⟨ψ, hψ⟩ := hy` **elaborates**,
+which it does, cleanly, and that green was read as licensing the edit. The property at risk was
+hypothesis **lifetime**, which surfaces only when something later uses `hy`. An isolation probe
+reproduces the code but not its context, so it can falsify a local claim and never confirm one that
+depends on the surroundings.
+
+This and the `sorry`-typecheck entry above are one genus: **a green check answering a different question
+than the one asked.** The typecheck answers "does this signature elaborate?" when the question was "does
+it say what I meant?". The isolation probe answers "does this line elaborate?" when the question was
+"does the file still work with this line changed?". In both cases the fix is to pick a check whose scope
+matches the claim: the whole-file `lake build` gate for an edit inside a proof, drop-and-reprove for a
+hypothesis (next entry). The `id hy` now carries a comment saying why, since two independent agents
+misread it unannotated.
+
 ### The used-vs-needed guard, once more
 
 The 2026-07-31 entry above (under "Statement design") already covers a hypothesis that is unnecessary
@@ -1075,3 +1100,21 @@ only dropping the hypothesis and re-deriving centering internally (from `hFperp`
 instantiation) surfaced that it was never needed. The signature change itself needed a human-partner
 call, since it strengthened a spec-mandated theorem. The discovery, though, came from drop-and-reprove,
 not from any gate.
+
+### Never name a measure `R`
+
+A measure bound to `R` breaks integral notation: `∫ ω, f ω ∂R` elaborates as `∫ ω, (f ω ∂R)` against
+`volume`, so the error lands on the integrand and says nothing about the name. Rename to `ν`. Cost of
+rediscovering it in `Foundations/MarketCompleteness.lean` was one confusing round trip, and there is no
+diagnostic that points at the cause.
+
+### Daemon overruns track import-set switches, not file size
+
+A 26-line scratch file overran the daemon's elaboration cap in the same session in which a 126-line one
+passed. Size was not the variable. The 126-line file's imports were already resident from the preceding
+check, while the 26-line one switched import sets and paid the load. Sequencing checks so consecutive
+ones share an import set is worth roughly 3×.
+
+That reframes the standing "keep authored files small" advice: what costs time is import churn between
+consecutive checks, not the number of declarations in the file under test. When a session has to touch
+several modules, order the checks by import closure rather than by the order the edits happened.

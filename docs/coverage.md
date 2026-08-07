@@ -26,6 +26,55 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+> **Live status (2026-08-07, martingale representation + market completeness):** corpus
+> **351**, **320 full + 18 wrappers = 338/351 delivery-ready**, 13 reduced cores, 0 placeholders.
+> Ledger 351 fresh / 0 stale / 0 missing; pytest 42 passed; `lake build` and `lake lint` green with
+> no `#guard_msgs` failure, so the five new curated axiom pins hold.
+> `itoIntegralCLM_T` was already a `LinearIsometry` from the predictable `L²(dt⊗dμ)` integrands into
+> `L²(μ)`. `MathFin/Foundations/MartingaleRepresentation.lean` identifies its image exactly:
+> `itoIntegralCLM_T_surjective_onto_centered` says the Itô integrals together with the constants
+> exhaust `lpMeas ℝ ℝ 𝓕ᴮ_T 2 μ`, and `itoIsometryEquiv` bundles the isometry as an equivalence onto
+> the centered part. The route is orthogonal decomposition against the (closed, because isometric)
+> range, plus totality of the step-integrand Doléans exponentials
+> (`WienerExponentialTotality.eq_zero_of_orthogonal_stepDoleans`,
+> `DoleansStepRepresentation.stepDoleans_sub_one_mem_range`), settled on the dyadic cylinder
+> σ-algebras of `BrownianCylinderGeneration`, whose supremum is the natural filtration
+> (`iSup_cylinderFiltration_eq_natFiltration`). No Malliavin calculus and no adapted-integrand Itô
+> formula. Centering, `𝔼[∫₀ᵀ φ dB] = 0`, is proved a floor down as
+> `ItoIntegralProcessGeneral.integral_itoIntegralCLM_T`, not assumed.
+> **`gir-thm-9.3.4` flips `reduced_core → full`** (14 → 13 reduced cores): it had been a `Prop`
+> structure whose conclusion was a bundled field read off by projection, and it now re-exports
+> `martingale_representation`, the process form the entry states.
+> Three new entries. `gir-mrt-range-surjective` is the submodule form above.
+> `gir-market-completeness` (`MathFin/Foundations/MarketCompleteness.lean`,
+> `exists_replicating_strategy`) is the finance reading: every `L²` `𝓕ᴮ_T`-claim is the terminal
+> wealth `𝔼_μ[H] + ∫₀ᵀ φ dB` of a strategy, with a *unique* hedge. `gir-pricing-measure-unique`
+> (`measure_eq_of_pricesGainsAtZero`) is uniqueness of the pricing measure on the Brownian
+> filtration, for measures that price the traded gains at zero.
+>
+> **Scope of the uniqueness result, stated plainly.** `gir-pricing-measure-unique` is **not** the
+> unconditional second FTAP, and it does **not** follow from `IsEMM` alone. The textbook argument
+> needs the replicating wealth to be a stochastic integral against the price `S`, hence a martingale
+> under every EMM; the wealth process martingale representation builds is an integral against `B`,
+> and `S` and `B` share only a filtration. That fair-game step is therefore a named hypothesis,
+> `PricesGainsAtZero Q`: every terminal Itô integral is `Q`-integrable with zero `Q`-mean. What is
+> hypothesised is step (i) of the textbook proof; what is proved is step (ii). The hypothesis is
+> guarded by two proved facts rather than asserted: `pricesGainsAtZero_self` (`μ` satisfies it, so
+> nothing here is vacuous) and `pricesGainsAtZero_of_gains_martingale` (it follows from the textbook
+> gains-martingale condition). The corollary `emm_unique_of_complete` consumes only the `isProb` and
+> `ac` fields of `IsEMM`; its `martingale` field rides along unused, kept so the statement stays in
+> the vocabulary a reader looks it up under. Only `complete ⟹ unique` is delivered — the converse
+> needs the Jacod–Yor extreme-point characterisation and is out of scope.
+> The companion `superReplication_eq_emm_price` is the continuous-time superreplication duality, and
+> its "EMM price" is `𝔼_μ[H]`. It does **not** close
+> [#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39): `Foundations/SuperhedgingDuality`
+> is a finite-state one-period matrix model whose Farkas gate is untouched. The two equalities hold
+> for structurally different reasons, separation there and martingale representation here, and
+> neither implies the other. The hedging strategy class is the Itô-integrable predictable integrands,
+> wider than `ContinuousMarket.SimpleStrategy`; the widening is forced, since a general `L²` claim is
+> not the terminal value of any piecewise-constant holding. `ContinuousMarket` itself is untouched
+> apart from a scope paragraph. All four entries axioms-clean.
+>
 > **Record correction (2026-08-04, drafter attribution — no theorem changed):** corpus
 > **348**, **316 full + 18 wrappers = 334/348 delivery-ready**, 14 reduced cores, 0
 > placeholders — all unchanged; this touched `metadata.provenance` only, and the ledger
@@ -46,7 +95,7 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > with `test_the_disclosure_does_not_generalize_one_drafter_to_every_entry` asserting the
 > property. Full rationale in [`values-review.md`](values-review.md).
 >
-> **Live status (2026-07-31, speed greeks + caplet/floorlet parity — closes #8, #27):** corpus
+> **Prior (2026-07-31, speed greeks + caplet/floorlet parity — closes #8, #27):** corpus
 > **348**, **316 full + 18 wrappers = 334/348 delivery-ready**, 14 reduced cores, 0 placeholders.
 > Three entries finishing two contributions that had been open since June (#36, #38, mertunsall)
 > and had gone stale against the pin bump.

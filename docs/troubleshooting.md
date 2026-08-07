@@ -157,6 +157,34 @@ Do not push with stale ledger entries — the CI `ledger status` gate will fail.
 
 ---
 
+## `ledger verify` times out on entry after entry (the timeout spiral)
+
+**Symptom:** a corpus-scale `python3 -m tools.verify.ledger verify` starts failing on
+timeouts and then keeps failing, with each entry reported at just over the cap.
+Entries you know are cheap take as long as ones you know are hard.
+
+**Cause:** `LEAN_ELAB_TIMEOUT` defaults to `180` (`docker/docker-compose.yml:137`),
+which is fine for authoring a single file and too tight for a sweep. The failure
+mode is a **spiral**, not an isolated timeout: a timeout kills the REPL, so the next
+entry pays a ~120s reload out of its own budget and times out too, killing the REPL
+again. Measured on 2026-08-07: entries reported at 182–201s under the 180s cap ran at
+27–47s at `LEAN_ELAB_TIMEOUT=600`, and a warm entry in the same sweep ran at 31.7s.
+The entries were never the problem; the cap interacting with the restart cost was.
+
+**Fix:** raise the cap and restart the daemon before the sweep.
+```bash
+docker compose -f docker/docker-compose.yml down lean-repl
+LEAN_ELAB_TIMEOUT=600 docker compose -f docker/docker-compose.yml up -d lean-repl
+# wait for the daemon to answer a real lean-check (log-grep and port probes both lie),
+# then:
+python3 -m tools.verify.ledger verify
+```
+
+Once a sweep has spiralled, re-running it without raising the cap reproduces it. Stop
+the sweep, fix the cap, and re-run rather than grinding through the remaining entries.
+
+---
+
 ## CI fails on `test_values.py` after a benchmark edit
 
 **Symptom:** `tests/test_values.py` fails with "stale AxiomAuditGen" or a
