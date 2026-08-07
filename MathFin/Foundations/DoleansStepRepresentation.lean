@@ -354,12 +354,14 @@ private theorem stepDoleans_aux (hBmeas : ∀ t, Measurable (B t))
       ring
 
 /-- **The step-integrand Doléans exponential is an Itô integral.** For a monotone
-partition `0 = s₀ ≤ … ≤ s_N = T` and deterministic heights `h`, the Doléans
-exponential `∏ₖ exp(hₖΔBₖ − ½hₖ²Δsₖ)`, minus one, lies in the range of `∫₀ᵀ · dB`. -/
+partition `s₀ ≤ … ≤ s_N = T` and deterministic heights `h`, the Doléans
+exponential `∏ₖ exp(hₖΔBₖ − ½hₖ²Δsₖ)`, minus one, lies in the range of `∫₀ᵀ · dB`.
+The partition need not start at `0`: the induction bottoms out at the empty product
+`D₀ = 1`, which is the zero integrand's integral whatever `s 0` is. -/
 theorem stepDoleans_sub_one_mem_range (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (T : ℝ≥0)
     (s : ℕ → ℝ≥0) (hs : Monotone s) (h : ℕ → ℝ) (N : ℕ)
-    (_hs0 : s 0 = 0) (hsN : s N = T) :
+    (hsN : s N = T) :
     ∃ φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
       (fun ω ↦ stepDoleansExp B s h N ω - 1)
         =ᵐ[μ] ⇑(itoIntegralCLM_T hB T hBmeas φ) :=

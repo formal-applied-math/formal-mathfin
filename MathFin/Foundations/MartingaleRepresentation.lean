@@ -137,9 +137,9 @@ private lemma integral_mul_stepDoleansExp_eq_zero (hBmeas : ∀ t, Measurable (B
     (hBcont : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (T : ℝ≥0) (z : Lp ℝ 2 μ)
     (hz : z ∈ (LinearMap.range (itoIntegralCLM_T hB T hBmeas).toLinearMap)ᗮ)
     (hz0 : ∫ ω, z ω ∂μ = 0) (s : ℕ → ℝ≥0) (hs : Monotone s) (h : ℕ → ℝ) (N : ℕ)
-    (hs0 : s 0 = 0) (hsN : s N = T) :
+    (hsN : s N = T) :
     ∫ ω, z ω * stepDoleansExp B s h N ω ∂μ = 0 := by
-  obtain ⟨χ, hχ⟩ := stepDoleans_sub_one_mem_range hB hBmeas hBcont T s hs h N hs0 hsN
+  obtain ⟨χ, hχ⟩ := stepDoleans_sub_one_mem_range hB hBmeas hBcont T s hs h N hsN
   have hmul : Integrable (fun ω ↦ (itoIntegralCLM_T hB T hBmeas χ) ω * z ω) μ :=
     MemLp.integrable_mul (Lp.memLp (itoIntegralCLM_T hB T hBmeas χ)) (Lp.memLp z)
   have hXz : ∫ ω, (itoIntegralCLM_T hB T hBmeas χ) ω * z ω ∂μ = 0 := by
@@ -183,7 +183,9 @@ theorem mem_range_itoIntegralCLM_T_of_centered (hBmeas : ∀ t, Measurable (B t)
     exact sub_mem hFmeas hymem
   rw [hFyz, eq_zero_of_orthogonal_stepDoleans hB hBmeas hBcont T z
     (mem_lpMeas_iff_aestronglyMeasurable.mp hzmem)
-    (integral_mul_stepDoleansExp_eq_zero hB hBmeas hBcont T z hz hz0), add_zero]
+    -- the totality theorem still asks for `s 0 = 0`; the representation no longer needs it.
+    (fun s hs h N _ hsN ↦
+      integral_mul_stepDoleansExp_eq_zero hB hBmeas hBcont T z hz hz0 s hs h N hsN), add_zero]
   exact hy
 
 /-! ### The headline forms -/
