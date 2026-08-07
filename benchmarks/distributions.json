@@ -20,7 +20,7 @@
     {
       "id": "dist-thm-B.1.2-affine",
       "name": "Affine Transformation of Multivariate Normal",
-      "description": "Theorem B.1.2(3): If X is multivariate normal with mean μ and covariance Σ, and Y = CX + d, then Y is multivariate normal with mean Cμ + d and covariance CΣC^T",
+      "description": "Theorem B.1.2(3), 1-D instances: if X has law N(μ, v) then c·X has law N(cμ, c²v) and X + y has law N(μ + y, v), via Mathlib's HasLaw API. The general multivariate affine map Y = CX + d with covariance CΣCᵀ is NOT delivered — these are the scalar cases.",
       "domain": "measure_theory",
       "code": {
         "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory\n\n-- 1D affine instances of Theorem B.1.2(3) for real Gaussians (Mathlib v4.30):\n--   If X has law N(μ, v) under P and Y = c·X, then Y has law N(c·μ, c²·v).\n--   If X has law N(μ, v) under P and Y = X + y, then Y has law N(μ + y, v).\n-- Mathlib v4.30 expresses these via `HasLaw X (gaussianReal μ v) P`; the\n-- prior `Measure.map` form is no longer the surface API.\nexample {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {μ : ℝ} {v : NNReal} {X : Ω → ℝ}\n    (hX : HasLaw X (gaussianReal μ v) P) (c : ℝ) :\n    HasLaw (fun ω ↦ c * X ω)\n      (gaussianReal (c * μ) (.mk (c ^ 2) (sq_nonneg _) * v)) P :=\n  gaussianReal_const_mul hX c\n\nexample {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {μ : ℝ} {v : NNReal} {X : Ω → ℝ}\n    (hX : HasLaw X (gaussianReal μ v) P) (y : ℝ) :\n    HasLaw (fun ω ↦ X ω + y) (gaussianReal (μ + y) v) P :=\n  gaussianReal_add_const hX y\n"
@@ -36,7 +36,7 @@
     {
       "id": "dist-thm-B.1.3-conditional",
       "name": "Conditional Distribution of Bivariate Gaussian",
-      "description": "Theorem B.1.3(2): For (X,Y) jointly Gaussian with Σ_{YY} > 0, E[X|Y] = μ_X + Σ_{XY} Σ_{YY}^{-1}(Y - μ_Y)",
+      "description": "Theorem B.1.3(2), BIVARIATE case: for (X,Y) jointly Gaussian with σ_Y > 0, E[X|σ(Y)] = μ_X + (ρ σ_X/σ_Y)(Y − μ_Y) a.s. — the two-variable instance of the general Σ_XY Σ_YY⁻¹ formula; the vector-valued case is not delivered.",
       "domain": "measure_theory",
       "code": {
         "lean": "import MathFin.Foundations.BivariateGaussian\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Theorem B.1.3 (2): for a bivariate Gaussian pair (X, Y) with positive\n    marginal variances and correlation ρ ∈ (−1, 1), the conditional expectation\n    of X given σ(Y) is μ_X + (ρ σ_X / σ_Y)(Y − μ_Y) almost surely.\n    Re-export of `MathFin.BivariateGaussianHyp.conditional_expectation_formula`\n    (real derivation in `MathFin/Foundations/BivariateGaussian.lean`: orthogonal\n    regression, joint-Gaussian transfer via a linear CLM, Cov = 0 ⇒\n    `HasGaussianLaw.indepFun_of_covariance_eq_zero`, then condExp linearity). -/\ntheorem bivariate_gaussian_conditional_expectation\n    {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P]\n    {X Y : Ω → ℝ} {μ_X μ_Y σ_X σ_Y ρ : ℝ}\n    (h : MathFin.BivariateGaussianHyp P X Y μ_X μ_Y σ_X σ_Y ρ) :\n    (P[X | MeasurableSpace.comap Y inferInstance])\n      =ᵐ[P] fun ω => μ_X + (ρ * σ_X / σ_Y) * (Y ω - μ_Y) :=\n  h.conditional_expectation_formula\n"

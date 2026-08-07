@@ -12,8 +12,14 @@ hand-maintained).
 Emits into ``--out DIR``:
 
 * ``formal-mathfin-theorems.jsonl`` — one row per theorem: id, name, domain,
-  formalization_status, description, lean_code, source_file (the published
-  schema, unchanged).
+  formalization_status, description, formalization_scope, lean_code,
+  source_file.
+
+  ``formalization_scope`` was added 2026-08-07. It had existed on every entry
+  and been withheld from the export, so the *claim* (``description``) shipped
+  while the *disclosure* stayed private — which is exactly the asymmetry that
+  let 15 of 36 textbook-framed descriptions drift into claiming more than their
+  Lean proved. Publish both or neither.
 * ``README.md`` — the dataset card, counts and toolchain pin computed.
 
 Pure stdlib; safe on the host.
@@ -46,6 +52,8 @@ def build_rows() -> list[dict]:
             "formalization_status":
                 (t.get("metadata") or {}).get("formalization_status"),
             "description": t.get("description", ""),
+            "formalization_scope":
+                (t.get("metadata") or {}).get("formalization_scope", ""),
             "lean_code": code.get("lean") if isinstance(code, dict) else None,
             "source_file": path.name,
         })
@@ -106,7 +114,12 @@ The dataset provides these fields for each theorem:
 - **name**: human-readable title
 - **domain**: subject classification
 - **formalization_status**: faithfulness category
-- **description**: natural-language mathematical statement
+- **description**: the theorem **as this entry proves it**. Where an entry
+  delivers less than the source theorem it is named after, the description says
+  so — it describes the Lean, not the textbook target. The citation for the
+  target is in the source text referenced by `id`.
+- **formalization_scope**: per-entry disclosure — what was derived, from which
+  primitives, by what method, and what is explicitly out of scope
 - **lean_code**: compilable Lean 4 implementation
 - **source_file**: benchmark origin
 

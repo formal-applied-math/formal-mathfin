@@ -3263,7 +3263,16 @@ where pointwise eventual-constancy may be available.
 1. **[HIGH] A duplicate-statement detector** (lens 2). Six copies of one fact, and the round that
    recorded the lesson still produced the sixth. Normalise-and-hash lemma conclusions and `have`
    propositions; report cross-file collisions. Owner: next session's opening move.
-2. **[HIGH] Split or discipline `description`** (lens 7). Two jobs, one published field, no marker.
+2. ~~**[HIGH] Split or discipline `description`**~~ **executed 2026-08-07.** One job: `description`
+   states the theorem as the entry proves it. All 36 textbook-framed descriptions read against their
+   statements — **15, i.e. 42%, overstated**, including a sign error (`mart-prop-2.5.5`), a stale
+   description contradicting its own `full` status (`gir-thm-9.1.8`), a multivariate claim delivered
+   in 1-D (`dist-thm-B.1.2-affine`), and `[B,B]_t = t` where the L¹-mean is what holds
+   (`sc-thm-6.1.1`). Structural cause found and fixed: `formalization_scope` — the honest per-entry
+   disclosure — existed on every entry and was **not** exported while `description` was, so the claim
+   shipped and the disclosure stayed home. Both are published now. *Residual (LOW):* nothing
+   mechanically checks a description against its statement; that is judgment and stays with the
+   standing first pass.
 3. **[HIGH, carried] Run the actual three-agent panel.** Two rounds running have deviated — last round
    ran eleven scoped passes, this round is a single reviewer. Both deviations were reasonable and both
    were the same deviation. The next proof session runs the panel or the protocol should be amended to

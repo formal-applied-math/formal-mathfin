@@ -4,7 +4,7 @@
     {
       "id": "cm-thm-4.3.7",
       "name": "Stopped Continuous Martingale is Martingale",
-      "description": "Theorem 4.3.7: For a continuous martingale (M_t) and a stopping time τ, the stopped process M_{t∧τ} is also a continuous martingale",
+      "description": "Theorem 4.3.7: for a right-continuous martingale M and a stopping time τ, the stopped process M_{t∧τ} (restricted to {τ > ⊥}) is again a martingale. The MARTINGALE property is what is delivered; continuity of the stopped process is not part of the statement.",
       "domain": "martingales",
       "code": {
         "lean": "import Mathlib\nimport BrownianMotion.StochasticIntegral.LocalMartingale\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Theorem 4.3.7 (continuous-time stopped martingale, library wrapper). Direct\n    one-line re-export of Degenne's `Martingale.stoppedProcess_indicator` from\n    `BrownianMotion/StochasticIntegral/LocalMartingale.lean`. The textbook\n    conclusion that `M_{t∧τ}` is a martingale w.r.t. the same filtration is\n    formalised as `Martingale (stoppedProcess (indicator {τ > ⊥} M) τ) 𝓕 P`:\n    the indicator wrapping is Degenne's canonical form and coincides with\n    `stoppedProcess M τ` on `{τ > ⊥}` (the usual textbook setting with\n    `τ ≥ 0` a.s.). -/\ntheorem stopped_continuous_martingale\n    {P : Measure Ω} [IsFiniteMeasure P]\n    {𝓕 : Filtration ℝ≥0 mΩ} {M : ℝ≥0 → Ω → ℝ} {τ : Ω → WithTop ℝ≥0}\n    (hM : Martingale M 𝓕 P)\n    (hM_cont : ∀ ω, Function.IsRightContinuous (M · ω))\n    (hτ : IsStoppingTime 𝓕 τ) :\n    Martingale (stoppedProcess (fun i ↦ {ω | ⊥ < τ ω}.indicator (M i)) τ) 𝓕 P :=\n  hM.stoppedProcess_indicator hM_cont hτ\n"

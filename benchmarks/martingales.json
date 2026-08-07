@@ -68,7 +68,7 @@
     {
       "id": "mart-prop-2.5.5",
       "name": "Upcrossing Inequality",
-      "description": "Proposition 2.5.5: E[U_n([a,b])] ≤ E[(X_n - a)⁻] / (b - a) where U_n counts upcrossings of [a,b]",
+      "description": "Proposition 2.5.5, SUBMARTINGALE form: (b − a) · E[U_N([a,b])] ≤ E[(X_N − a)⁺], where U_N counts upcrossings of [a,b] before N. Note the positive part — the supermartingale form with (X_N − a)⁻ is a different statement and is not this entry.",
       "domain": "martingales",
       "code": {
         "lean": "import Mathlib.Probability.Martingale.Upcrossing\n\nopen MeasureTheory ProbabilityTheory\n\n-- Mathlib's `MeasureTheory.upcrossingsBefore a b f N` counts the upcrossings of [a, b]\n-- by the process f before time N. The submartingale upcrossing inequality is exactly\n-- `Submartingale.mul_integral_upcrossingsBefore_le_integral_pos_part`:\n--   (b - a) · E[upcrossingsBefore a b f N] ≤ E[(f N - a)⁺].\nexample {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω} [IsFiniteMeasure μ]\n    {ℱ : Filtration ℕ m0} {f : ℕ → Ω → ℝ}\n    (a b : ℝ) (hf : Submartingale f ℱ μ) (N : ℕ) :\n    (b - a) * μ[fun ω => (MeasureTheory.upcrossingsBefore a b f N ω : ℝ)]\n      ≤ μ[fun ω => (f N ω - a)⁺] :=\n  hf.mul_integral_upcrossingsBefore_le_integral_pos_part a b N"
