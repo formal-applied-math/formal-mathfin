@@ -107,7 +107,8 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
 `x + ∫₀ᵀ φ dB` of the self-financing strategy holding `φ` is `H`, almost everywhere. Reading
 the Itô integral as the traded gain fixes the normalisation, and it is the only place this
 file leaves `S` behind: the discounted price *is* `B` (a Bachelier-type market), so `φ` counts
-units held and `∫₀ᵀ φ dB` is what holding them earns. -/
+units held and `∫₀ᵀ φ dB` is what holding them earns — the general `S` returns only in
+`emm_unique_of_complete`, where it is *not* identified with `B`. -/
 def Replicates (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (x : ℝ)
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (H : Ω → ℝ) : Prop :=
   H =ᵐ[μ] fun ω ↦ x + itoIntegralCLM_T hB T hBmeas φ ω
