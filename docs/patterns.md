@@ -931,3 +931,191 @@ a general search; most are one-line and defeq-driven.
 | "Ambiguous term X" (`intervalIntegral` vs `MeasureTheory`) | qualify by the goal's integral syntax. |
 | "failed to synthesize `LE Type`/`OfNat Type`" | `ℝ≥0` misparsed as `ℝ ≥ 0` — add `open scoped NNReal`; `𝓝` → `open Topology`. |
 | cast mismatch inside a `fun n : ℕ ↦ …` | put the ℕ-consuming atom leftmost, or ascribe the binder; write `(2:ℝ) •`, never `2 •`. |
+| "(deterministic) timeout at whnf, 200000 heartbeats" on `le_iSup₂`/`iSup₂_le` over `MeasurableSpace` | pin the family explicitly, e.g. `le_iSup₂ (f := fun u (_ : u ≤ T) ↦ MeasurableSpace.comap (B u) inferInstance) …` — left unpinned, higher-order unification searches through `sSup`/`generateFrom` and blows the budget. |
+| a lemma with an *instance*-implicit `[MeasurableSpace α]` (e.g. `measurable_of_tendsto_metrizable`) silently resolves to the ambient space instead of a non-ambient target σ-algebra | apply it with `@` and pass the target σ-algebra positionally. Contrast `measurable_iff_comap_le`, whose measurable-space arguments are plain implicits and unify correctly on their own. |
+
+## Martingale-representation infrastructure (2026-08-06 batch)
+
+Patterns from the martingale-representation program's first four tasks
+(`docs/plans/2026-08-04-martingale-representation.md`): locality and totality results for the Itô
+integral, and the orthogonality argument that identifies the representation.
+
+### `𝓕_a`-linearity of a stochastic integral, by simple-process density
+
+The shape: build the two sides as continuous linear maps and equalize them on the dense range of
+simple-process assemblies via `DenseRange.equalizer`, exactly as `Foundations/ItoIntegralProcessGeneral.lean`'s
+`itoProcessCLM_eq_condExpL2` (:134, the `DenseRange.equalizer` call at :144) and
+`itoProcessCLM_terminal_eq` (:213, at :216) already do. Both are worth reading as templates before
+writing a third instance of this technique.
+
+The wrinkle that made it non-obvious (`Foundations/ItoIntegralLocality.lean`, Task 2): multiplying an
+Itô integrand by a merely `𝓕_a`-measurable `Z` is *not* predictable. Predictability of
+`(t,ω) ↦ Z ω` would need `Z` to be `𝓕_0`-measurable, and the trim measure `trim_T` charges the whole
+band `(0,a]`, not just `{0}`, so no a.e.-equal predictable representative exists either. The statement
+is false, not just hard. The repair multiplies by `afterFactor a Z (t,ω) = 𝟙_{a<t}·Z ω` instead, which
+*is* predictable (`Ioi a ×ˢ F` for `F ∈ 𝓕_a` is a generating predictable rectangle) and stays a total
+CLM on the whole of `Lp ℝ 2 (trimMeasure_T …)`. Totality matters mechanically: `DenseRange.equalizer`
+equalizes on the whole space, so the operator can't be defined only on a supported-after-`a` subspace —
+the support hypothesis has to live on the *characterizing* lemma (`coeFn_smulAdapted`, which takes
+`hφ : ∀ᵐ p, p.1 ≤ a → φ p = 0` and is then invisible against the naive `Z p.2 * φ p`) rather than on
+the definition. The unconditional a.e. form is `coeFn_smulAdapted_afterFactor`.
+
+Extracted along the way: `mulBddCLM` — multiplication by a bounded measurable function as a CLM on
+`Lp ℝ 2 ν`, for an arbitrary measure and σ-algebra. Mathlib has no such operator; both scalings in
+`ItoIntegralLocality.lean` are instances of it.
+
+### An unbounded multiplier, without truncation machinery
+
+The obvious route to extend the bounded-`Z` result to unbounded `Z` is `clampM` plus dominated
+convergence. `itoIntegralCLM_T_smulAdapted_of_memLp` (`Foundations/ItoIntegralLocality.lean`) doesn't
+do that: for each `M : ℕ`, let `A = {|Z| ≤ M} ∈ 𝓕_a` and apply the *bounded* theorem twice — once
+factoring `𝟙_A` (bound `1`) against the sample-side integrand, once factoring `𝟙_A · Z` (bound `M`)
+against the trim-side one. The two scaled results coincide a.e. (both reduce to `𝟙_{a<t}·𝟙_A·Z·φ`), so
+the claim holds on `A`; `ae_all_iff` + `exists_nat_ge` glue the countable family of `A`'s to the whole
+space. About 40 lines against a full truncation analysis, and no dominated-convergence argument
+anywhere.
+
+### Orthogonality to a vanishing conditional expectation, via MGF comparison
+
+`Foundations/WienerExponentialTotality.lean` (Task 4) proves an `F ∈ L²(𝓕ᴮ_T)` orthogonal to every
+step-Doléans exponential is `0`. Split `F = F⁺ − F⁻`, push both parts forward by
+`ν± = μ.withDensity (ENNReal.ofReal ∘ (±f))` into two *finite* measures on `ι → ℝ`. The domain where
+the complex MGF argument is licensed, `integrableExpSet`, is the whole space: `F ∈ L²` against an
+`exp⟨λ,X⟩` that is also `L²` (Gaussian-tailed Brownian marginals) makes their product `L¹` for every
+`λ`, by Cauchy–Schwarz — so the set is `univ`, hence open, and `eqOn_complexMGF_of_mgf'` extends the
+equality everywhere. Because `ν±` are finite rather than probability measures, this is the *primed*
+lemma, which additionally wants `ν⁺(Ω) = ν⁻(Ω)`, i.e. that `F` is centered — itself read off the
+orthogonality hypothesis at one instantiation (see the used-vs-needed note below). Finish with
+Cramér–Wold done properly for a vector index: not `Measure.ext_of_complexMGF_eq` (one-dimensional), but
+`charFunDual (ν.map X) L = complexMGF ⟨λ,X⟩ ν i` for `λᵢ = L(eᵢ)`, so MGF equality at every `λ` is
+exactly the hypothesis of `Measure.ext_of_charFunDual` on the plain product `ι → ℝ` — cheaper than
+routing through `EuclideanSpace ℝ ι`, which needs a `MeasurableEquiv` detour around `WithLp`.
+
+Record the distinction that made a shared root with `ExpMartingaleQBrownian.lean` the wrong move, even
+though both files import `ComplexMGF`. That file's three internal call sites compare a genuine
+*probability* measure against `gaussianReal` on `ℝ`, using the *unprimed* `eqOn_complexMGF_of_mgf` and
+the one-dimensional `ext_of_complexMGF_eq` (a real, pre-existing triplication, worth a standalone
+cleanup: the statement `map_eq_gaussianReal_of_mgf_eq` is ready to paste). `WienerExponentialTotality`
+compares two finite Jordan pieces on `ℝ^ι` and needs `charFunDual` for the vector finish; its
+`integrableExpSet = univ` comes from Cauchy–Schwarz, not a Gaussian-law transfer. The literal overlap
+between the two is one line: `interior univ = univ`, so the `EqOn` holds everywhere. A root lemma for
+one line would be a bare Mathlib wrapper, which this repo's anti-wrapper stance forbids. Different
+setting, no extraction.
+
+### Countable generation of a natural filtration, from path continuity
+
+`Foundations/BrownianCylinderGeneration.lean` (Task 1) proves
+`⨆ₙ cylinderSigma B T n = natFiltration hBmeas T`, where
+`cylinderSigma B T n = ⨆ q ∈ dyadicGrid T n, comap (B q) inferInstance` is the σ-algebra generated by
+the level-`n` dyadic grid. Path continuity is used exactly once: given `s ≤ T`, the nearest dyadic grid
+points `qₙ → s` (`tendsto_nat_floor_mul_div_atTop`, read along `x = 2ⁿ`), and continuity turns that
+into `B qₙ → B s` pointwise, which `measurable_of_tendsto_metrizable` upgrades to measurability of
+`B s` against the supremum σ-algebra. Every other inclusion is pure `iSup` bookkeeping. The result has
+to be bundled as a genuine `cylinderFiltration : Filtration ℕ mΩ` (monotone, `≤` the ambient space),
+not left as a bare fact about a supremum of σ-algebras. Task 4's use of it (closing `F =ᵐ 0` via Lévy's
+upward martingale-convergence theorem, `Integrable.tendsto_eLpNorm_condExp`) needs the `Filtration`
+structure to feed that lemma, which is exactly why it reaches for
+`iSup_cylinderFiltration_eq_natFiltration` rather than the plain σ-algebra version.
+
+### Verification discipline: daemon `autoImplicit`, and the `lake lint` unused-argument gate
+
+Two disciplines paid for themselves repeatedly across this program's four tasks. First: the daemon
+elaborates with `autoImplicit true`, `lake build` with `false`, so a file that lean-checks clean is not
+yet known to build. Every task re-verified once under a temporary `set_option autoImplicit false`
+before calling itself done — one extra round trip, and it is the only way to rule out a class of bug
+the daemon alone can't see (Task 2's report is the first to name it explicitly; Tasks 3 and 4 both
+adopted it unprompted).
+
+Second: `lake lint` is a CI gate `lake build` does not run, and its `unusedArguments` check turns an
+unused hypothesis kept for signature fidelity into a build-failing error, not a warning.
+`Foundations/DoleansStepRepresentation.lean`'s `stepDoleans_sub_one_mem_range` kept `hs0 : s 0 = 0`
+because the specified signature carried it (the hypothesis was later dropped outright — see the
+used-vs-needed entry below — but the lint lesson stands), and the daemon reported only a plain
+`linter.unusedVariables` warning, which `lake lint` then failed the build on. The repair that preserves
+the public interface is renaming to `_hs0` (arity, type, and argument position all unchanged, so no
+call site moves), the same move Task 4 later applied to `_hF1`. Recorded lesson: a
+`linter.unusedVariables` warning from the daemon predicts a `lake lint` error, so treat it as red at
+authoring time, not as noise to clear later.
+
+### A `sorry`-typecheck verifies elaboration, not intent
+
+`Foundations/WienerExponentialTotality.lean`'s `eq_zero_of_orthogonal_stepDoleans` and
+`integral_mul_exp_linear_eq_zero` were both drafted under a `variable` block carrying
+`(hB : IsPreBrownianReal B μ)`, but neither statement's body mentioned `hB`. Lean only
+auto-includes an explicit `variable` binder a statement names, so both theorems shipped without
+it, and both were false as stated: a time-constant but random `B t ω = Z ω` is continuous,
+measurable, and satisfies every remaining hypothesis, while giving a nonzero `F` (`F = Z`,
+`𝓕_T`-measurable since `𝓕_T = σ(Z)`, centered, in `L²`, orthogonal to the whole Doléans family).
+The lazy counterexample `B ≡ 0` does not work: it collapses `𝓕_T` to `⊥` (`comap_const`,
+`iSup_bot`) and forces `F = 0` for the wrong reason, a measurability collapse rather than
+Brownianness. A `sorry`-stubbed signature check cannot tell these apart. It proves the false,
+weaker statement exactly as happily as the true one.
+
+The detection rule that actually catches it: a scratch-file signature is suspect when it (a) omits
+a `variable`-block hypothesis it never names, and (b) is a claim about a *specific* process rather
+than an arbitrary one. An audit of the remaining scratch statements against that rule found
+exactly one more defect: `itoIsometryEquiv_T` (shipped as `itoIsometryEquiv` — an
+underscore in a `def` name is a `lake lint` error; the terminal-integral isometry `φ ↦ ∫₀ᵀ φ dB`,
+which plainly does not exist without a Brownian motion to integrate against). Everything else was
+clean because it happened to mention `itoIntegralCLM_T hB` or similar and picked the variable up
+that way.
+
+### Its twin: an isolation probe can only falsify
+
+The same program's cleanup pass produced the other half of that lesson, and the two belong together.
+Priority D changed `obtain ⟨ψ, hψ⟩ := id hy` to `obtain ⟨ψ, hψ⟩ := hy` in
+`Foundations/MartingaleRepresentation.lean`, reading the `id` as a redundant defeq nudge. It is not.
+`id` is the idiom for destructuring *without clearing*: a bare `obtain … := hy` consumes `hy` and
+removes it from context, while `id hy` destructures a copy and leaves the original alive. `hy` is used
+again a few lines down (`exact hy`), so the file stopped compiling with `Unknown identifier hy`. Both
+the implementer and the reviewer had read the edit as cosmetic.
+
+What makes it worth recording is how it was checked. The pass *did* probe the edit in isolation, and saw
+green. The probe asserted the wrong property: it checked that `obtain ⟨ψ, hψ⟩ := hy` **elaborates**,
+which it does, cleanly, and that green was read as licensing the edit. The property at risk was
+hypothesis **lifetime**, which surfaces only when something later uses `hy`. An isolation probe
+reproduces the code but not its context, so it can falsify a local claim and never confirm one that
+depends on the surroundings.
+
+This and the `sorry`-typecheck entry above are one genus: **a green check answering a different question
+than the one asked.** The typecheck answers "does this signature elaborate?" when the question was "does
+it say what I meant?". The isolation probe answers "does this line elaborate?" when the question was
+"does the file still work with this line changed?". In both cases the fix is to pick a check whose scope
+matches the claim: the whole-file `lake build` gate for an edit inside a proof, drop-and-reprove for a
+hypothesis (next entry). The `id hy` now carries a comment saying why, since two independent agents
+misread it unannotated.
+
+### The used-vs-needed guard, once more
+
+The 2026-07-31 entry above (under "Statement design") already covers a hypothesis that is unnecessary
+from the moment it's drafted — a division guard nothing downstream needs. This program produced a
+different-shaped instance of the same failure mode, worth recording rather than folding silently into
+the same bullet: a hypothesis a proof *consumes* can still be unnecessary to the *theorem*, discovered
+only after the fact. `eq_zero_of_orthogonal_stepDoleans` (`Foundations/WienerExponentialTotality.lean`)
+carried a centering hypothesis `hF1 : ∫ F ∂μ = 0` in its public signature, as specified. The
+orthogonality hypothesis `hFperp` already implies it at one instantiation (`h ≡ 0, N = 1`: the
+step-Doléans exponential of the zero integrand is identically `1`, independent of `B`, so `hFperp`
+there says exactly `∫F = 0`). `hF1` was redundant from the start. Underscoring it (`_hF1`) satisfied
+the lint gate without exposing the redundancy, because the theorem type-checks identically either way;
+only dropping the hypothesis and re-deriving centering internally (from `hFperp` at that one
+instantiation) surfaced that it was never needed. The signature change itself needed a human-partner
+call, since it strengthened a spec-mandated theorem. The discovery, though, came from drop-and-reprove,
+not from any gate.
+
+### Never name a measure `R`
+
+A measure bound to `R` breaks integral notation: `∫ ω, f ω ∂R` elaborates as `∫ ω, (f ω ∂R)` against
+`volume`, so the error lands on the integrand and says nothing about the name. Rename to `ν`. Cost of
+rediscovering it in `Foundations/MarketCompleteness.lean` was one confusing round trip, and there is no
+diagnostic that points at the cause.
+
+### Daemon overruns track import-set switches, not file size
+
+A 26-line scratch file overran the daemon's elaboration cap in the same session in which a 126-line one
+passed. Size was not the variable. The 126-line file's imports were already resident from the preceding
+check, while the 26-line one switched import sets and paid the load. Sequencing checks so consecutive
+ones share an import set is worth roughly 3×.
+
+That reframes the standing "keep authored files small" advice: what costs time is import churn between
+consecutive checks, not the number of declarations in the file under test. When a session has to touch
+several modules, order the checks by import closure rather than by the order the edits happened.

@@ -719,6 +719,22 @@ noncomputable def itoIntegralCLM_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) →L[ℝ] Lp ℝ 2 μ :=
   (itoAssembly_T hB T hBmeas).extendOfNorm (simpleAssembly_T (μ := μ) T hBmeas)
 
+/-- **The CLM agrees with the elementary Itô integral on a simple embedding**:
+`itoIntegralCLM_T (simpleAssembly_T V) = itoSimpleLp V` (equivalently
+`itoAssembly_T V` — the two are definitionally the same term). Immediate from
+`extendOfNorm_eq` against the assembly isometry, and the bridge every consumer of
+the CLM crosses to get back to the finite increment sum
+`∑ V(p)·(B_{p.2} − B_{p.1})`: it is what makes `DenseRange.equalizer` arguments
+over `simpleAssembly_T_denseRange` computable at all. Lives here, next to the
+construction it unfolds, rather than in any one consumer. -/
+theorem itoIntegralCLM_T_simpleAssembly_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t)) (V : TBoundedSP T hBmeas) :
+    itoIntegralCLM_T hB T hBmeas (simpleAssembly_T (μ := μ) T hBmeas V)
+      = ItoIntegralL2.itoSimpleLp hB hBmeas V.val := by
+  rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
+    ⟨1, fun W ↦ by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas W).le⟩]
+  rfl
+
 /-- **The continuous-time Itô isometry on `[0,T]`.** For every
 `f ∈ Lp 2 trim_T`, `‖itoIntegralCLM_T f‖ = ‖f‖`. -/
 theorem itoIntegralCLM_T_norm (hB : IsPreBrownianReal B μ) (T : ℝ≥0)

@@ -260,6 +260,9 @@ records it). The library spent a month building the exact gate it named, then ne
 - **THE CEILING — the 17 `reduced_core` entries.** These are spec-level *encodings* (a `structure`
   whose fields assume the conclusion), written when the deep theorems were genuinely out of reach.
   **Girsanov, SDE existence/uniqueness, martingale representation, Lévy's characterization are stubs.**
+  *(Update: Girsanov `gir-thm-9.1.8` landed 2026-07-09, SDE `sc-thm-8.2.5` 2026-07-03, martingale
+  representation `gir-thm-9.3.4` 2026-08-07. Of this list only Novikov `gir-thm-9.1.7` and Lévy's
+  characterization `sc-thm-9.1.1` are still `reduced_core`; the count is now 13.)*
   This — a magnificent Itô tower whose deepest intended consumers are still stubs — is the precise gap
   between "very-good structural-depth library" and "top-notch stochastic-finance library."
 
@@ -274,7 +277,7 @@ adapted-coefficient Itô, blocked on Degenne's continuous-modification π-system
 | 1 | **Novikov** (gir-thm-9.1.7) | 9 | MEDIUM (~150-200 ln) | the gateway: the adapted Doléans-Dade exponential `Z_t=exp(∫θdB−½∫θ²ds)` as a martingale |
 | 2 | **Girsanov** — martingale + distributional (const → simple → continuous adapted) ✅ (2026-06-30 → 2026-07-09) | 9 | DONE (bounded adapted continuous θ): `bs_discounted_isQMartingale` = the EMM as an explicit measure change + a reusable Bayes engine; the distributional Girsanov `Btheta_isQBrownianMotion` (const) → `Btheta_simple_isQBrownianMotion` (simple) → **`Btheta_isQBrownianMotion_adapted` (bounded adapted continuous, `gir-thm-9.1.8` `full`)**, all one application of the process-agnostic `isQBrownianMotion_of_expMartingale` — spine-free, no adapted-integrand Itô formula, no Novikov crux. Only the strictly more general `L²`/progressive-θ under Novikov (`sc-thm-9.1.8`) stays open | risk-neutral pricing under measure change |
 | 3 | **SDE existence/uniqueness** (sc-thm-8.2.5) | 9 | HIGH (~300-400) | the SDE model zoo (Vasicek/CIR/Heston/jump-diffusion) — Picard on the Itô isometry |
-| 4 | **Martingale representation** (gir-thm-9.3.4) | 9 | HIGH (Clark-Hida; may need upstream) | hedging / replication / market completeness |
+| 4 | **Martingale representation** (gir-thm-9.3.4) ✅ (2026-08-07) | 9 | DONE, and the feared Clark-Hida/upstream route was not the one taken: `itoIntegralCLM_T_surjective_onto_centered` gets surjectivity from an orthogonal decomposition against the (closed) range plus totality of the step Doléans exponentials — no Malliavin calculus, no adapted-integrand Itô formula | hedging / replication / market completeness — all three landed with it (`exists_replicating_strategy`, `superReplication_eq_emm_price`, and pricing-measure uniqueness for gains-neutral measures) |
 | 5 | **2D Itô formula** (sc-thm-7.5.2) | 7 | LOW-MED | multi-asset derivatives (the 1-D TD formula is already built) |
 
 The **first brick** for #1-#3 is the same: the adapted **Doléans-Dade stochastic exponential** as a
@@ -1356,3 +1359,72 @@ Ho–Lee #156 and the Vasicek/Hull–White seam #157. Musiela (#158) is a deferr
 **Next:** the keystone `stochFubini_ofCLM` (#141, the tower-agnostic primitive) then its Itô instance (#142)
 — every downstream tier waits on it; its one hard step is the L²-representative fact (maybe already in Mathlib).
 #140 (a would-be `integral_comp_comm` wrapper) was dissolved into #141 as an anti-wrapper cleanup.
+
+## known gap: the localized Itô formula does not identify its integrand (2026-08-06)
+
+Surfaced during Task 3 of the martingale-representation program
+(`docs/plans/2026-08-04-martingale-representation.md`). `ito_formula_td_localized`
+(`Foundations/ItoFormulaLocalized.lean`) returns a bare `∃ gfx`, and everything built on it inherits
+the same shape: `ito_formula_expBrownian`, `ito_formula_gbm`, and `discountedGBM_eq_itoIntegral`
+(`Foundations/ItoFormulaGBM.lean`) all produce a witness without saying what it is. The internal
+per-cutoff step it calls, `cutoff_bddDeriv` (`Foundations/ItoFormulaLocalized.lean:326`), is also a
+bare existential, so naming the integrand means editing a four-theorem chain, not patching one file:
+`cutoff_bddDeriv → ito_formula_td_localized → ito_formula_itoProcess`
+(`Foundations/ItoFormulaItoProcess.lean`) `→ ito_formula_gbm`/`discountedGBM_eq_itoIntegral`. Only
+`ito_formula_td_L2_bddDeriv_explicit` (`Foundations/ItoFormulaTD.lean`) carries the naming conjunct,
+and it wants globally bounded derivatives; the exponential's own partial, of the shape `σ·exp(σx)`, is
+not bounded, so that route stays closed here.
+
+Consequence: no consumer of `ito_formula_gbm` or `discountedGBM_eq_itoIntegral` can currently identify
+the diffusion coefficient. The library cannot say "the delta is `σS`" from these lemmas alone. The
+statement is true and provable: redoing `ito_formula_td_localized`'s L²-limit argument with an extra
+a.e.-identification pass would give it. It is just not derivable from the tower's exported API today.
+
+Task 3 needed exactly that: the integrand of the constant-volatility Doléans exponential, named. It
+worked around the gap instead, going from the known *value* of the integral (a difference of Wald
+exponentials) to the result via the Itô isometry + truncation + Fatou
+(`itoIntegralCLM_T_smul_of_memLp`), which needs no witness. The gap stayed open by choice, not by
+oversight. The one task that would have forced the fix was rearranged to avoid needing it, and nothing
+else in the corpus currently needs the named form. Leave it until a consumer does.
+
+## phase: martingale representation + market completeness (2026-08-07, corpus 348→351)
+
+Conversion #4 of the 2026-06-29 table, the one flagged "HIGH (Clark-Hida; may need upstream)". It needed
+neither Malliavin calculus nor anything upstream. `itoIntegralCLM_T` was already a `LinearIsometry` from
+the predictable `L²(dt⊗dμ)` integrands into `L²(μ)`; the missing fact was the identity of its image, and
+surjectivity onto a closed subspace is a **totality** statement, so the proof is an orthogonal
+decomposition plus a density argument in disguise. Six new modules, ~2,430 lines. Five carry the theorem:
+`BrownianCylinderGeneration` (the natural filtration as the supremum of dyadic cylinder σ-algebras, bundled
+as a `Filtration ℕ`), `ItoIntegralLocality` (`𝓕_a`-linearity of the terminal integral, by
+`DenseRange.equalizer` on simple-process assemblies), `DoleansStepRepresentation` (every step-integrand
+Doléans exponential, minus one, lies in the range), `WienerExponentialTotality` (anything orthogonal to all
+of them is zero, by Abel summation → MGF analytic continuation on cylinders → Lévy upward convergence), and
+`MartingaleRepresentation` itself, where the two halves meet in the ambient `L²(μ)`.
+`gir-thm-9.3.4` flips `reduced_core → full` (14 → 13 reduced cores) and three entries are new:
+`gir-mrt-range-surjective`, `gir-market-completeness`, `gir-pricing-measure-unique`. Ledger 351 fresh,
+pytest 42, `lake build` + `lake lint` green, five curated axiom pins holding.
+
+`MarketCompleteness` is the finance reading: `exists_replicating_strategy` (`∃!` hedge for every
+square-integrable `𝓕ᴮ_T`-claim, priced at `𝔼_μ[H]`) and `superReplication_eq_emm_price` (the
+continuous-time superreplication duality at that same price). Neither closes
+[#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39): `Foundations/SuperhedgingDuality` is a
+finite-state one-period matrix model whose Farkas gate is untouched, and the two dualities hold for
+structurally different reasons, separation there and martingale representation here.
+
+**What the uniqueness half does and does not claim.** `measure_eq_of_pricesGainsAtZero` is uniqueness of
+the pricing measure on the Brownian filtration *for measures that price the traded gains at zero*. It is not
+the unconditional second FTAP: the textbook fair-game step needs the replicating wealth to be an integral
+against the price `S`, the wealth here integrates against `B`, and `S` and `B` share only a filtration, so
+that step is a named hypothesis (`PricesGainsAtZero`) guarded by two proved facts, `pricesGainsAtZero_self`
+and `pricesGainsAtZero_of_gains_martingale`. Only `complete ⟹ unique` is delivered.
+
+**Next on this axis, in order of what would actually be consumed:** (1) the stochastic integral `∫ φ dS`
+against a general price process, which is what turns `PricesGainsAtZero` from a hypothesis into a
+consequence of `IsEMM` and would retire the caveat above rather than restate it — `ContinuousMarket`
+already records its absence as deliberate; (2) the converse `unique ⟹ complete`, needing the Jacod–Yor
+extreme-point characterisation of the set of martingale measures, additive rather than a rewrite; (3)
+composing the two `PricesGainsAtZero` guards, since `pricesGainsAtZero_self` is proved directly and so
+never exhibits `_of_gains_martingale`'s hypothesis triple as inhabited. The real cost there is that the
+repo has a bundled `Martingale` only for `itoSimpleProcess`, and a general integrand has only the pointwise
+`itoIntegralProcessGen_isMartingale`. Novikov (`gir-thm-9.1.7`) and Lévy's characterization
+(`sc-thm-9.1.1`) remain the two Itô-tower `reduced_core`s from the original conversion table.

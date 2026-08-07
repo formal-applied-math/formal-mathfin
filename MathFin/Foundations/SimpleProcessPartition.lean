@@ -541,16 +541,6 @@ lemma norm_simpleAssembly_marshalStepSP_sub_le (hBmeas : ∀ t, Measurable (B t)
   simp only [Pi.sub_apply, Real.norm_eq_abs]
   exact clampM_dist_le (hbdd z.1 z.2)
 
-/-- **The CLM agrees with the elementary Itô integral on simple processes.**
-`itoIntegralCLM_T (simpleAssembly_T V) = itoAssembly_T V`, immediate from the `extendOfNorm`
-construction of the CLM. -/
-lemma itoIntegralCLM_T_simpleAssembly_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
-    (hBmeas : ∀ t, Measurable (B t)) (V : TBoundedSP T hBmeas) :
-    itoIntegralCLM_T hB T hBmeas (simpleAssembly_T (μ := μ) T hBmeas V)
-      = itoAssembly_T hB T hBmeas V := by
-  rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange T hBmeas)
-    ⟨1, fun W ↦ by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas W).le⟩]
-
 /-- **The clamped marshalled approximant converges to `θ̂` in the integrand `L²`.** The contraction
 `norm_simpleAssembly_marshalStepSP_sub_le` squeezed against `V n → θ̂`. This is the single
 `E`-convergence that drives all three functional limits (stochastic integral, drift, quadratic
@@ -589,7 +579,11 @@ theorem tendsto_itoAssembly_marshalStepSP (hB : IsPreBrownianReal B μ) (T : ℝ
           ((marshalEndpoints hBmeas T (V n).val).card - 1)))
       atTop (𝓝 (itoIntegralCLM_T hB T hBmeas
         (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) := by
-  simpa only [Function.comp_def, itoIntegralCLM_T_simpleAssembly_T] using
+  have hbridge (W : TBoundedSP T hBmeas) :
+      itoIntegralCLM_T hB T hBmeas (simpleAssembly_T (μ := μ) T hBmeas W)
+        = itoAssembly_T hB T hBmeas W :=
+    itoIntegralCLM_T_simpleAssembly_T hB T hBmeas W
+  simpa only [Function.comp_def, hbridge] using
     ((itoIntegralCLM_T hB T hBmeas).continuous.tendsto _).comp
       (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
 

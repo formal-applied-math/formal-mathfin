@@ -19,6 +19,7 @@ import MathFin.Foundations.FeynmanKacHeatEquation
 import MathFin.Foundations.GaussianGirsanov
 import MathFin.Foundations.BSCallHypFromBrownian
 import MathFin.Foundations.ContinuousFTAP
+import MathFin.Foundations.MarketCompleteness
 import MathFin.Foundations.CarrMadan
 import MathFin.BlackScholes.Call
 import MathFin.BlackScholes.PDE
@@ -164,6 +165,45 @@ attribute [blueprint "thm:continuous-ftap" (title := "Continuous-time first FTAP
   exponential — the defining EMM property, with no stochastic-integral
   machinery. -/)]
   MathFin.discountedGBM_isMartingale
+
+attribute [blueprint "thm:martingale-representation" (title := "Martingale representation (terminal form)")
+  (statement := /-- Every square-integrable $\mathcal{F}^B_T$-measurable claim is its
+  own mean plus an Itô integral, $F = E[F] + \int_0^T \varphi\,dB$, for a *unique*
+  integrand $\varphi$. The Itô isometry's range is closed, hence orthogonally
+  complemented; the remainder of the decomposition is centered and
+  $\mathcal{F}^B_T$-measurable, so it is orthogonal to every step-integrand Doléans
+  exponential, and Wiener-exponential totality kills it. Uniqueness is injectivity of an
+  isometry. -/)]
+  MathFin.exists_itoIntegral_representation
+
+attribute [blueprint "thm:martingale-representation-process" (title := "Martingale representation (process form)")
+  (statement := /-- Every square-integrable martingale on the Brownian filtration is its
+  initial value plus an Itô integral process, $M_t = M_0 + (\varphi\cdot B)_t$ for
+  $t \le T$. The terminal form supplies the integrand; the martingale property spreads it
+  over the horizon, because $(\varphi\cdot B)_t$ is the $\mathcal{F}_t$-conditional
+  expectation of $\int_0^T\varphi\,dB$. That $M_0$ is a.e. constant is not assumed — it is
+  the representation read at $t = 0$. -/)]
+  MathFin.martingale_representation
+
+attribute [blueprint "thm:market-completeness" (title := "Completeness of the Brownian market")
+  (statement := /-- Every square-integrable $\mathcal{F}^B_T$-claim is replicated from
+  initial wealth $E_\mu[H]$ by a unique Itô-integrable strategy — the representation
+  theorem read as a trading statement, the integrand *being* the hedge. The strategy class
+  is the predictable $L^2$ integrands (piecewise-constant holdings could not hedge a
+  general $L^2$ claim), and the traded gain is the integral against $B$ itself: the
+  stochastic integral $\int\varphi\,dS$ against a general price is absent by design. -/)]
+  MathFin.exists_replicating_strategy
+
+attribute [blueprint "thm:pricing-measure" (title := "The pricing measure on 𝓕ᴮ_T is unique")
+  (statement := /-- A probability measure $Q \ll \mu$ that prices the traded Itô gains at
+  zero agrees with $\mu$ on all of $\mathcal{F}^B_T$: replicate an event's indicator, and
+  only the initial wealth $\mu(A)$ survives. This is *not* the unconditional second FTAP.
+  Gains-neutrality is a hypothesis, not a consequence of $Q$ being a martingale measure for
+  a price $S$ — the wealth built here is an integral against $B$, and nothing in
+  $\mathrm{IsEMM}\,S\,Q$ makes that a $Q$-fair game. The hypothesis is guarded: $\mu$
+  satisfies it, and the textbook gains-martingale condition implies it. Only
+  complete $\Rightarrow$ unique is proved; the Jacod–Yor converse is out of scope. -/)]
+  MathFin.measure_eq_of_pricesGainsAtZero
 
 -- ===== pricing =====
 

@@ -87,6 +87,35 @@ lemma memLp_exp_abs_eval (s : ℝ≥0) (c : ℝ) :
     abs_of_nonneg (by positivity : (0 : ℝ) ≤ Real.exp (c * B s ω) + Real.exp (-c * B s ω))]
   exact exp_abs_le_add c (B s ω)
 
+/-- `exp(c · (B_v − B_u)) ∈ L²(μ)`: an increment has a second exponential moment too.
+The increment is not a marginal, so the law transfer does not apply to it directly;
+instead `xy ≤ ½(x² + y²)` splits it into the two marginals `exp(2c·B_v)` and
+`exp(−2c·B_u)`, each already in `L²`. -/
+lemma memLp_exp_incr (u v : ℝ≥0) (c : ℝ) :
+    MemLp (fun ω ↦ Real.exp (c * (B v ω - B u ω))) 2 μ := by
+  have hmeas : AEStronglyMeasurable (fun ω ↦ Real.exp (c * (B v ω - B u ω))) μ :=
+    (Real.measurable_exp.comp_aemeasurable
+      (((hB.hasLaw_eval v).aemeasurable.sub (hB.hasLaw_eval u).aemeasurable).const_mul
+        c)).aestronglyMeasurable
+  have key (ω : Ω) : Real.exp (c * (B v ω - B u ω))
+      ≤ 1 / 2 * (Real.exp (2 * c * B v ω) + Real.exp (-(2 * c) * B u ω)) := by
+    have h1 : Real.exp (c * (B v ω - B u ω))
+        = Real.exp (c * B v ω) * Real.exp (-(c * B u ω)) := by
+      rw [← Real.exp_add]; congr 1; ring
+    have h2 : Real.exp (2 * c * B v ω) = Real.exp (c * B v ω) ^ 2 := by
+      rw [sq, ← Real.exp_add]; congr 1; ring
+    have h3 : Real.exp (-(2 * c) * B u ω) = Real.exp (-(c * B u ω)) ^ 2 := by
+      rw [sq, ← Real.exp_add]; congr 1; ring
+    rw [h1, h2, h3]
+    nlinarith [sq_nonneg (Real.exp (c * B v ω) - Real.exp (-(c * B u ω)))]
+  refine MemLp.mono (((memLp_exp_mul_eval hB v (2 * c)).add
+    (memLp_exp_mul_eval hB u (-(2 * c)))).const_mul (1 / 2)) hmeas (ae_of_all _ fun ω ↦ ?_)
+  simp only [Pi.add_apply]
+  rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _),
+    abs_of_nonneg (by positivity :
+      (0 : ℝ) ≤ 1 / 2 * (Real.exp (2 * c * B v ω) + Real.exp (-(2 * c) * B u ω)))]
+  exact key ω
+
 /-- `exp(c · |B_s|)` is integrable: dominated by `exp(c·B_s) + exp(−c·B_s) ∈ L¹`. -/
 lemma integrable_exp_abs_eval (s : ℝ≥0) (c : ℝ) :
     Integrable (fun ω ↦ Real.exp (c * |B s ω|)) μ :=

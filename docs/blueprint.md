@@ -61,6 +61,10 @@ graph TD
   itoSquaredL2["Itô for x² in L²: ∑B·ΔB → ½(B_T²−B₀²−T)"]:::proved
   mertonDominance["Merton dominance: jump risk is never free"]:::proved
   itoIntegralBrownian["∫₀ᵀ B dB = ½(B_T² − B₀² − T)"]:::proved
+  martingaleRepresentation["Martingale representation (terminal form)"]:::proved
+  marketCompleteness["Completeness of the Brownian market"]:::proved
+  martingaleRepresentationProcess["Martingale representation (process form)"]:::proved
+  pricingMeasure["The pricing measure on 𝓕ᴮ_T is unique"]:::proved
   pathwiseIto["Pathwise Itô · Lévy · SDEs"]:::gated
 
   brownianMotion --> itoIntegralClm
@@ -91,6 +95,18 @@ graph TD
   itoIntegralClm --> itoIntegralBrownian
   itoIsometryAdapted --> itoIntegralBrownian
   itoSquaredL2 --> itoIntegralBrownian
+  brownianMotion --> martingaleRepresentation
+  itoIntegralClm --> martingaleRepresentation
+  itoFormulaTdL2 --> martingaleRepresentation
+  brownianMotion --> marketCompleteness
+  itoIntegralClm --> marketCompleteness
+  martingaleRepresentation --> marketCompleteness
+  brownianMotion --> martingaleRepresentationProcess
+  itoIntegralClm --> martingaleRepresentationProcess
+  martingaleRepresentation --> martingaleRepresentationProcess
+  brownianMotion --> pricingMeasure
+  itoIntegralClm --> pricingMeasure
+  marketCompleteness --> pricingMeasure
   itoIntegralClm --> pathwiseIto
   itoFormulaL2 --> pathwiseIto
 

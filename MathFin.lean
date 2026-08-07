@@ -124,6 +124,8 @@ import MathFin.Foundations.DiscreteIto
 import MathFin.Foundations.ItoIsometryAdapted
 -- Continuous L²-adapted Itô integral (construction, anchored on Degenne SimpleProcess)
 import MathFin.Foundations.ItoIntegralL2
+-- 𝓕ᴮ_T is the countable supremum of dyadic cylinder σ-algebras (path continuity)
+import MathFin.Foundations.BrownianCylinderGeneration
 -- The Itô integral as a continuous linear isometry `Lp 2 trim_T → Lp 2 μ` on `[0,T]`
 import MathFin.Foundations.ItoIntegralCLM
 -- The unbounded-horizon `[0,∞)` Itô integral CLM `Lp 2 trim_full → Lp 2 μ` (Summit B / B2)
@@ -175,6 +177,9 @@ import MathFin.Foundations.ItoFormulaSquaredL2
 -- Keystone: `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` as a genuine `itoIntegralCLM_T` identity
 -- (the continuous Itô integral's first real consumer)
 import MathFin.Foundations.ItoIntegralBrownian
+-- `𝓕_a`-linearity: a bounded `𝓕_a`-measurable factor passes through `∫₀ᵀ · dB`
+-- when the integrand lives on `(a,T]` (locality of the stochastic integral)
+import MathFin.Foundations.ItoIntegralLocality
 -- Summit A: bounded-derivative continuous-time Itô formula in L² (CLM-identified)
 import MathFin.Foundations.WeightedQuadraticVariation
 import MathFin.Foundations.ItoFormulaRemainder
@@ -201,6 +206,18 @@ import MathFin.Foundations.BrownianExpMoment
 import MathFin.Foundations.ItoFormulaLocalized
 import MathFin.Foundations.ItoFormulaItoProcess
 import MathFin.Foundations.ItoFormulaGBM
+-- Martingale representation, step 3: the Doléans exponential of a deterministic step
+-- integrand is an Itô integral (time locality of `∫·dB` + unbounded `𝓕_a`-scaling)
+import MathFin.Foundations.DoleansStepRepresentation
+-- Martingale representation, step 4: the Wiener exponentials are total in `L²(𝓕ᴮ_T)`
+-- (Abel summation + Laplace-transform uniqueness on `ℝⁿ` + Lévy's upward theorem)
+import MathFin.Foundations.WienerExponentialTotality
+-- Martingale representation, step 5: the Itô integral is onto the centered `𝓕ᴮ_T`-measurable
+-- part of `L²(μ)` — terminal, submodule and process forms of the representation theorem
+import MathFin.Foundations.MartingaleRepresentation
+-- Martingale representation, step 6: its finance reading — replication, superreplication
+-- duality, and uniqueness of the pricing measure on the Brownian filtration
+import MathFin.Foundations.MarketCompleteness
 import MathFin.Foundations.ItoFormulaProcess
 import MathFin.Foundations.ExitTime
 import MathFin.Foundations.ItoFormulaUnrestricted
