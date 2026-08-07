@@ -25,7 +25,7 @@ is *Itô's lemma as a semimartingale decomposition*: the compensated process
 ## The construction (entirely inside the Itô tower — no Markov property, no PDE)
 
 The single new ingredient is the **canonical witness** now exposed by
-`ito_formula_td_L2_bddDeriv_explicit`: the terminal integrand `gfx` is the explicit `L²` class
+`ito_formula_td_L2_bddDeriv`: the terminal integrand `gfx` is the explicit `L²` class
 `[f_x(s, B_s)]` (not a bare existential). With that:
 
 * **Zero-extension** (`exists_fullHorizon_extension`): the horizon-`T` witness `gfx`, supported on
@@ -139,7 +139,7 @@ theorem ito_formula_td_process
         (∀ ω, Continuous fun t ↦ X t ω) ∧
         IsLocalMartingale X (augFiltration (μ := μ) hBmeas) μ) := by
   -- the explicit horizon-`T` witness `gfx_T = [f_x(·, B)]`
-  obtain ⟨gfxT, hgfxT_eq, -⟩ := ito_formula_td_L2_bddDeriv_explicit hB hBmeas hBcont T
+  obtain ⟨gfxT, hgfxT_eq, -⟩ := ito_formula_td_L2_bddDeriv hB hBmeas hBcont T
     hf_t hf_tt hf_tx hf_x hf_xx hf_xxx hf_x_cont hf_xx_cont hbd_t hbd_x hbd_xx hbd_tt hbd_tx hbd_xxx
   -- extend it to a `[0,∞)` integrand `F` agreeing with `gfx_T` (hence `[f_x]`) on `(0,T]`
   obtain ⟨F, hF_eq⟩ := exists_fullHorizon_extension T hBmeas gfxT
@@ -148,7 +148,7 @@ theorem ito_formula_td_process
   refine ⟨F, fun t ht ↦ ?_, fun i j hij ↦ itoProcessL2Inf_isMartingale hB hBmeas F hij,
     exists_continuous_localMartingale_modification_infinite hB hBmeas hBcont (f := F)⟩
   -- the explicit horizon-`t` witness and terminal identity at `t`
-  obtain ⟨gfxt, hgfxt_eq, hMt⟩ := ito_formula_td_L2_bddDeriv_explicit hB hBmeas hBcont t
+  obtain ⟨gfxt, hgfxt_eq, hMt⟩ := ito_formula_td_L2_bddDeriv hB hBmeas hBcont t
     hf_t hf_tt hf_tx hf_x hf_xx hf_xxx hf_x_cont hf_xx_cont hbd_t hbd_x hbd_xx hbd_tt hbd_tx hbd_xxx
   have hle_tT : trimMeasure_T (μ := μ) t hBmeas ≤ trimMeasure_T (μ := μ) T hBmeas := by
     rw [trimMeasure_T_eq_restrict, trimMeasure_T_eq_restrict]

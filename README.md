@@ -50,7 +50,7 @@ Mathematical finance is a few deep principles whose consequences are the models.
 | Pillar | The principle | In the library |
 |---|---|---|
 | **I — No-arbitrage as convex duality** | the separating hyperplane *is* the equivalent martingale measure | the FTAP tower · [`ConvexDuality`](MathFin/Foundations/ConvexDuality.lean) · state prices |
-| **II — Stochastic calculus** | every model is `dX = b dt + σ dB`; Itô makes functionals computable | the Itô tower: from-scratch L² integral, Itô's formula, quadratic variation, and its jump analogue |
+| **II — Stochastic calculus** | every model is `dX = b dt + σ dB`; Itô makes functionals computable | the Itô tower: from-scratch L² integral, Itô's formula, quadratic variation, and its jump analogue — and it *names* the `σ`, down to `dŜ = σŜ dB` for the discounted price |
 | **III — Probabilistic ⟷ analytic duality** | the price is both a risk-neutral expectation and a PDE solution | the BS-PDE keystone (Feynman–Kac and Itô routes) |
 | **IV — Intensity & exponential families** | closed forms and the "exp of an integrated intensity" | Gaussian closed forms · the exponential-discount root · credit/mortality unification |
 
@@ -74,7 +74,8 @@ Mathematical finance is a few deep principles whose consequences are the models.
 | **Pricing = risk, one theorem** | the FTAP separating functional and the coherent-risk representation are the same finite-dimensional Hahn–Banach separation | [`exists_pos_separating_of_cone_disjoint_simplex`](MathFin/Foundations/ConvexDuality.lean) · [`coherentRisk_isLUB`](MathFin/RiskMeasures/AcceptanceSet.lean) |
 | **BS PDE from Feynman–Kac** | the Black–Scholes PDE derived from the risk-neutral expectation by heat-kernel differentiation — independent of the closed form and of Itô | [`bsV_satisfies_bs_pde_via_feynmanKac`](MathFin/BlackScholes/PDEFromFeynmanKac.lean) |
 | **CRR → Black–Scholes** | the n-step binomial call price converges to `S₀Φ(d₁) − Ke^{−rT}Φ(d₂)` (characteristic functions + Lévy continuity + put-call parity) | [`binomialPrice_call_tendsto_bs_closed`](MathFin/Binomial/CRRClosedForm.lean) |
-| **Continuous-time Itô formula** | `f(B_T) − f(B_0) = ∫₀ᵀ f′(B_s) dB_s + ½∫₀ᵀ f″(B_s) ds`, on a from-scratch L² Itô integral, for a general `C³` `f` with no growth bound | [`ito_formula_unrestricted`](MathFin/Foundations/ItoFormulaUnrestrictedLocMart.lean) |
+| **Continuous-time Itô formula** | `f(T,B_T) − f(0,B_0) − ∫₀ᵀ(f_t + ½f_xx) ds` is a continuous **local martingale** — Itô's lemma as a semimartingale decomposition — for a general `C³` `f` with no growth bound, on a from-scratch L² Itô integral. Where the partials are bounded, that residual is *identified*: `= ∫₀ᵀ f_x(s,B_s) dB_s` | [`ito_formula_unrestricted`](MathFin/Foundations/ItoFormulaUnrestrictedLocMart.lean) · [`ito_formula_td_L2_bddDeriv`](MathFin/Foundations/ItoFormulaTD.lean) |
+| **GBM decomposed, coefficients named** | `dŜ = σŜ dB + mŜ dt` for `Ŝ(t) = S₀e^{(m−σ²/2)t+σB_t}`, the stochastic term the genuine Itô integral of a *named* integrand — so the diffusion coefficient of the discounted price is sayable, not merely known to exist | [`ito_formula_gbm`](MathFin/Foundations/ItoFormulaGBM.lean) · [`discountedGBM_eq_itoIntegral`](MathFin/Foundations/ItoFormulaGBM.lean) |
 | **The EMM via Girsanov** | the risk-neutral measure is *constructed* as an explicit density change of the physical measure; the discounted stock is a proven `Q`-martingale — retiring the Wald shortcut | [`bs_discounted_isQMartingale`](MathFin/Foundations/Girsanov.lean) |
 | **Itô–Lévy L² isometry** | the compensated-Poisson stochastic integral built to an L²-isometric continuous linear operator, on a from-scratch density argument | [`assembly_isometry`](MathFin/Foundations/PoissonCompensatedIntegralOperator.lean) |
 | **SDE existence + uniqueness** | the Picard contraction in the predictable `L²` space, and pathwise uniqueness by an `L²`-energy Grönwall argument | [`picardMap_contraction`](MathFin/Foundations/SDEExistence.lean) · [`IsL2SolutionPair.uniqueness`](MathFin/Foundations/SDEUniqueness.lean) |
@@ -185,7 +186,8 @@ A breadth-and-depth library across eleven areas. Headlines per area (full per-th
 - **Risk measures** — Gaussian VaR/CVaR closed forms, the coherent (ADEH) axioms + **the representation
   as a sup over measures**, spectral measures, Rockafellar–Uryasev, Herfindahl–Hirschman.
 - **Stochastic foundations** — the **Itô tower** (from-scratch L² integral, isometry, quadratic
-  variation, Itô's formula) and its jump analogue, the **compensated-Poisson (Itô–Lévy) integral** built
+  variation, Itô's formula — stating *which* integrand, down to `dŜ = σŜ dB` for geometric Brownian
+  motion) and its jump analogue, the **compensated-Poisson (Itô–Lévy) integral** built
   to an L²-isometric continuous linear operator, the **SDE tower** (Picard existence, `L²`-Grönwall
   uniqueness, pathwise decomposition), the **FTAP tower** (finite-Ω multi-period, general-Ω one-period,
   d-asset), Girsanov, **martingale representation** and the market completeness it delivers,
@@ -214,6 +216,11 @@ Honesty is the point, so the gaps are explicit:
   price process: the wealth process martingale representation builds integrates against `B`, and
   nothing in `IsEMM S Q` makes that a `Q`-fair game. Only `complete ⟹ unique` is delivered; the
   converse needs the Jacod–Yor extreme-point characterisation.
+- **The replicating hedge is unique but unnamed.** For a general square-integrable claim, market
+  completeness gives a unique `φ` with `H = 𝔼[H] + ∫₀ᵀ φ dB` and says nothing about what `φ` is.
+  Naming it is Clark–Ocone ([#182](https://github.com/raphaelrrcoelho/formal-mathfin/issues/182)) and
+  is open. The Itô *formula's* integrand is named throughout — that is how `dŜ = σŜ dB` is stated —
+  but that is the weaker of the two facts.
 - **Known upstream/limit gaps** — e.g. the superhedging strong-duality *equality* needs a
   finite-dimensional Farkas / polyhedral-cone closedness absent from Mathlib at this pin
   ([#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39)).

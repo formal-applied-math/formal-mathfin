@@ -234,6 +234,25 @@ and needs the daemon **down** under the memory doctrine.
 
 ---
 
+## Entries are stale again right after a successful `ledger verify`
+
+**Symptom:** `ledger verify` reports "26 verified, 0 failed", and `ledger status` immediately
+afterwards still shows a handful stale — including entries the sweep just reported OK.
+
+**Cause:** you edited a `MathFin/` file while the sweep was running. The sweep stamps each entry
+with the input-hash it computed when it started, so every entry verified after your edit records
+the *pre-edit* hash. `status` recomputes and correctly calls them stale. Measured 2026-08-07: a
+one-line comment move inside `ItoFormulaLocalized.lean` mid-sweep left 10 of 26 entries stale.
+
+Note the gate behaved correctly — this costs time, not correctness. There is no path here to a
+false green.
+
+**Fix:** re-run `ledger verify`; it picks up only the newly-stale ones. Better, treat a sweep as a
+quiet period: finish the source edits, then start it. If you must edit during one, expect to pay
+for the entries already past.
+
+---
+
 ## CI fails on `test_values.py` after a benchmark edit
 
 **Symptom:** `tests/test_values.py` fails with "stale AxiomAuditGen" or a

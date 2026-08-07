@@ -98,8 +98,11 @@ Per-lens **exemplar → next upgrade**:
   removes exactly the past of its integral," which is what turns the *terminal* identity an Itô formula
   hands out into an identity for an inner increment. That single lemma is what lets a Doléans
   exponential over a partition be assembled at all. *Upgrade (HIGH):* the theorem proves `φ` exists and
-  is unique and never says what it is. Naming it is #182 (Clark–Ocone) or #183 (the localized formula's
-  integrand); both routes reach the same missing capability, stating a delta.
+  is unique and never says what it is. Two routes were named here, #182 (Clark–Ocone) and #183 (the
+  localized Itô formula's integrand). **#183 landed 2026-08-07** and reaches the capability for claims
+  the Itô formula already covers — `discountedGBM_eq_itoIntegral` now states `gfx =ᵐ [σ·Ŝ(·)]`, a
+  stated delta. It does *not* touch the representation's `φ` for a general `L²` claim, which is what
+  #182 is for; the upgrade stays HIGH on that half.
 - **2 Coherence.** *Exemplar:* `Measure.ext_of_charFunDual` consumed as Cramér–Wold in one step, and
   `condExpL2` used through the Hilbert API because it is *definitionally*
   `Submodule.orthogonalProjectionOnto` — neither argument is re-derived in finance clothing.
@@ -229,11 +232,17 @@ Per-lens **exemplar → next upgrade**:
 4. **[MED] Compose the `PricesGainsAtZero` guards** (#186), which needs the general-integrand Itô
    process as a bundled `Martingale`. The bundle is the object every "the gains process is a martingale"
    statement wants to be stated on, so the cost is not sunk in this one file.
-5. **[MED] Name the integrand.** #183 (the localized Itô formula's four-theorem chain) and #182
-   (`L¹`/`H¹` plus Clark–Ocone). `roadmap.md` defers #183 for want of a consumer, and that is right as
-   far as it goes — with one honest qualification: Task 3 *rearranged itself to avoid needing it*. The
-   absence of a consumer is partly an artifact of routing around the gap, so re-examine at the next
-   pricing-side consumer rather than treating it as settled.
+5. **[MED] Name the integrand.** ~~#183 (the localized Itô formula's four-theorem chain)~~ **executed
+   2026-08-07** — the whole chain down to `discountedGBM_eq_itoIntegral` now states
+   `gfx =ᵐ [σ·Ŝ(·)]`, so the diffusion coefficient of the discounted price is sayable. This panel's
+   qualification is what settled it: `roadmap.md` had deferred #183 for want of a consumer, and the
+   note here was that the absence of a consumer was partly an artifact of Task 3 *rearranging itself
+   to avoid needing it*. It was. Two things the deferral had not priced in: the naming conjunct
+   already existed one rung down (`ito_formula_td_L2_bddDeriv_explicit`) behind a forgetful wrapper,
+   and five corpus entries were already *describing* the named integrand in prose while stating only
+   `∃ gfx` — so this was a fidelity repair, not only a capability. **Still open: #182** (`L¹`/`H¹`
+   plus Clark–Ocone), which is what names the *representation's* `φ` for a general claim; #183 names
+   the Itô *formula's* integrand, a different and weaker thing.
 6. **[MED] The vector driver** (#180), gated on the two-process Itô formula (#48). Half the argument
    already generalizes; the Doléans rung is where the cross terms bite.
 7. **[MED] The second-FTAP converse** (#181), and behind it the missing `∫ φ dS` that would let `IsEMM`

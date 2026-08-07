@@ -255,7 +255,12 @@ L²-cutoff localization that *consumes* the bounded engine rather than re-provin
   no Tonelli, no joint measurability;
 - the limit is identified by the Itô **isometry** `itoIntegralCLM_T_norm` (Cauchy transfer)
   + completeness + CLM **continuity** — the deep Itô tower (QV, isometry, CLM) carries the
-  pricing weight with zero new analytic machinery beyond the cutoff.
+  pricing weight with zero new analytic machinery beyond the cutoff;
+- and the limit integrand is **named** (`gfx =ᵐ [f_x(·,B_·)]`, 2026-08-07,
+  [#183](https://github.com/raphaelrrcoelho/formal-mathfin/issues/183)): each cutoff's chain-rule
+  integrand is eventually constant at `f_x(·,B)` at every point, since `φₙ = id` and `φₙ' = 1`
+  once `n ≥ |B|`, and an `L²` limit agrees a.e. with a pointwise limit of a.e. representatives.
+  `f_x(·,B_·) ∈ L²(trim)` is a *consequence* of that identification, not a prerequisite.
 
 **The rung-3 unlock realized — GBM decomposed by the Itô integral (2026-06-28).** The localized
 formula was the *capability*; `Foundations/ItoFormulaGBM.lean` is the **first actual
@@ -266,7 +271,8 @@ Itô side*: until now the deep tower (`ItoIntegralCLM`/`ItoFormulaTD`/`ItoFormul
 and Feynman–Kac, and `discountedGBM_isMartingale` (`ContinuousFTAP.lean`) was proved via the
 Wald exponential, never the Itô integral.
 - `ito_formula_gbm`: `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ ds` for the GBM value
-  `Ŝ(t)=S₀ exp((m−σ²/2)t+σ B_t)`, the stochastic term the **genuine continuous Itô integral**.
+  `Ŝ(t)=S₀ exp((m−σ²/2)t+σ B_t)`, the stochastic term the **genuine continuous Itô integral** of a
+  **named** integrand, `gfx =ᵐ [σ·Ŝ(·)]` — so the decomposition reads `dŜ = σŜ dB + mŜ dt`.
 - Route = **localization in time** (the classic argument): the GBM value is `t`-exponential and
   fails the localized formula's `t`-uniform growth, so the localized formula is applied to the
   time-localized exponent `S₀ exp((m−σ²/2)·φₙ(t)+σx)` (`φₙ=SmoothTrunc.cut n`, `n=⌈T⌉₊`), the
@@ -274,7 +280,9 @@ Wald exponential, never the Itô integral.
   drift `(m−σ²/2)·Ŝ` and the Itô correction `½σ²·Ŝ` collapse to `m·Ŝ`. The only new ingredient
   is the plateau-slope lemma `SmoothTrunc.phi'_eq_one_of_lt` (derivative-uniqueness vs `id`).
 - `discountedGBM_eq_itoIntegral` (`m=0`): the drift vanishes, so the discounted-GBM increment
-  is a **pure Itô integral** — the Itô-integral content of the discounted-GBM martingale.
+  is a **pure Itô integral** of `σ·Ŝ` — the Itô-integral content of the discounted-GBM
+  martingale, and the point at which the library can *state* a diffusion coefficient: the
+  `dB`-hedge of the discounted price is `σŜ`.
   *Open:* re-grounding `discountedGBM_isMartingale` at the **process** level (all `t`, Brownian
   filtration) on the Itô integral, which this terminal-time decomposition opens.
 
@@ -282,7 +290,9 @@ Wald exponential, never the Itô integral.
 generalizes the GBM decomposition from the exponential value function to an arbitrary `C³`
 exponential-growth `f`. For the constant-coefficient Itô process `X_t = X₀ + b·t + σ B_t`,
 `ito_formula_itoProcess` gives `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds`
-— i.e. `∫ f'(X) dX + ½∫ f''(X)σ² ds`, the diffusion the genuine continuous Itô integral. Same
+with `gfx =ᵐ [σ·f'(X_·)]` — i.e. `∫ f'(X) dX + ½∫ f''(X)σ² ds`, the diffusion the genuine
+continuous Itô integral of an identified integrand (the time cutoff erases itself from the naming
+conjunct because the trim measure charges only `(0,T] × Ω`, where `φₙ = id`). Same
 time-localization of the `b·t` exponent as GBM (`ito_formula_gbm` is the `f = S₀·exp` case);
 constant coefficients keep the diffusion integrand `σ f'(X_s)` a function of `B_s`, which the tower
 handles directly. The shared `SmoothTrunc` plateau lemmas (`cut_eq_id_of_abs_le`,
@@ -299,7 +309,7 @@ fixed-`T` `Lp` statement) and the **pathwise** continuous-local-martingale tower
 terminal formula to a process identity for every `t ≤ T` — `f(t,B_t) − f(0,B_0) =ᵐ itoProcessL2Inf
 t F + ∫₀ᵗ (f_t + ½f_xx) ds` — so the compensated process is (a modification of) a continuous local
 martingale: *Itô's lemma as a semimartingale decomposition*. The bridge is **one new stone**, the
-canonical-witness exposure `ito_formula_td_L2_bddDeriv_explicit` (`gfx =ᵐ [f_x(·,B)]`) plus the
+canonical-witness exposure `ito_formula_td_L2_bddDeriv` (`gfx =ᵐ [f_x(·,B)]`) plus the
 zero-extension `exists_fullHorizon_extension`; the horizon-matching is the *existing*
 `itoProcessL2Inf_eq_itoProcessCLM`. No Markov property, no PDE. This makes the `[0,∞)` CLM tower
 load-bearing as an Itô-formula consumer for the first time, and is the prerequisite for the

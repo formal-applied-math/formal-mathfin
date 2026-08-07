@@ -50,10 +50,12 @@ function `f` whose derivatives are of at-most-exponential growth (`|f^{(k)} x| �
 
   `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X_s)·b + ½·f''(X_s)·σ²) ds`,
 
-with the trim-`L²` integrand `gfx` realizing the diffusion `s ↦ σ·f'(X_s)` and the genuine
-continuous Itô integral `itoIntegralCLM_T` carrying it. Together with the drift's `f'(X_s)·b`
-term this is `f(X_T) − f(X₀) = ∫₀ᵀ f'(X_s) dX_s + ½∫₀ᵀ f''(X_s)·σ² ds`. The instantiation of
-`ito_formula_td_localized` at the time-localized inner map `(t, x) ↦ X₀ + b·φₙ(t) + σx`. -/
+with the trim-`L²` integrand `gfx` **named**: `gfx =ᵐ [σ·f'(X_·)]`, the diffusion coefficient
+of `X`, carried by the genuine continuous Itô integral `itoIntegralCLM_T`. Together with the
+drift's `f'(X_s)·b` term this is `f(X_T) − f(X₀) = ∫₀ᵀ f'(X_s) dX_s + ½∫₀ᵀ f''(X_s)·σ² ds`. The
+instantiation of `ito_formula_td_localized` at the time-localized inner map
+`(t, x) ↦ X₀ + b·φₙ(t) + σx`; the time cutoff `φₙ` erases itself from the naming conjunct
+because the trim measure charges only `(0, T] × Ω`, where `φₙ` is the identity. -/
 theorem ito_formula_itoProcess (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) (X₀ b σ : ℝ)
     {f f' f'' f''' : ℝ → ℝ}
@@ -64,6 +66,8 @@ theorem ito_formula_itoProcess (hBmeas : ∀ t, Measurable (B t))
     (hg'' : ∀ x, |f'' x| ≤ C * Real.exp (lam * |x|))
     (hg''' : ∀ x, |f''' x| ≤ C * Real.exp (lam * |x|)) :
     ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+      (⇑gfx =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦
+        σ * f' (X₀ + b * z.1 + σ * B z.1 z.2)) ∧
       (fun ω ↦ f (X₀ + b * (T : ℝ) + σ * B T ω) - f (X₀ + b * (0 : ℝ) + σ * B 0 ω)) =ᵐ[μ]
         (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gfx) ω
           + ∫ s in Set.Ioc 0 T,
@@ -149,7 +153,7 @@ theorem ito_formula_itoProcess (hBmeas : ∀ t, Measurable (B t))
   -- the clean `x`-exponent derivative (constant inner offset `c`, slope `σ`)
   have hInx : ∀ c y : ℝ, HasDerivAt (fun u ↦ c + σ * u) σ y :=
     fun c y ↦ by simpa using ((hasDerivAt_id y).const_mul σ).const_add c
-  obtain ⟨gfx, hgfx⟩ := ito_formula_td_localized hB hBmeas hBcont T
+  obtain ⟨gfx, hname, hgfx⟩ := ito_formula_td_localized hB hBmeas hBcont T
     (f := fun t x ↦ f (X₀ + b * S.cut n t + σ * x))
     (f_t := fun t x ↦ b * S.cutD1 n t * f' (X₀ + b * S.cut n t + σ * x))
     (f_x := fun t x ↦ σ * f' (X₀ + b * S.cut n t + σ * x))
@@ -226,7 +230,12 @@ theorem ito_formula_itoProcess (hBmeas : ∀ t, Measurable (B t))
     (fun t x ↦ hbound (fun t ↦ b * σ * S.cutD1 n t) f'' hcoef_tx hg'' t x)
     (fun t x ↦ hbound (fun _ ↦ σ ^ 3) f''' hcoef_xxx hg''' t x)
   -- reduce off `[0, T]`: the cutoff is the identity, with unit slope
-  refine ⟨gfx, ?_⟩
+  refine ⟨gfx, ?_, ?_⟩
+  · -- the trim charges only `(0, T] × Ω`, where `φₙ = id`, so the cutoff leaves the integrand
+    filter_upwards [hname, ae_fst_mem_Ioc_trimMeasure_T (μ := μ) T hBmeas] with z hz hmem
+    have hzn : (z.1 : ℝ) ≤ (n : ℝ) := le_trans (by exact_mod_cast hmem.2) hTn
+    rw [hz, S.cut_eq_id_of_abs_le (x := (z.1 : ℝ))
+      (by rw [abs_of_nonneg (NNReal.coe_nonneg z.1)]; linarith)]
   filter_upwards [hgfx] with ω hω
   rw [S.cut_eq_id_of_abs_le (x := (T : ℝ)) (by rw [abs_of_nonneg (NNReal.coe_nonneg T)]; linarith),
       S.cut_eq_id_of_abs_le (x := (0 : ℝ)) (by rw [abs_zero]; positivity)] at hω

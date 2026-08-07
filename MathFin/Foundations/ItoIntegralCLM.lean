@@ -273,6 +273,18 @@ lemma trimMeasure_T_eq_restrict (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       ← MeasureTheory.restrict_trim 𝓕.predictable_le_prod _
         (MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) 0 T MeasurableSet.univ)]
 
+/-- **The `T`-trim lives on `(0, T] × Ω`**: trim-a.e. `z`, the time coordinate `z.1` lies in
+`Ioc 0 T`. The pointwise reading of `trimMeasure_T_eq_restrict` — a restriction charges nothing
+outside the set it restricts to. What an integrand does past the horizon is therefore invisible
+to the trim, so a time cutoff that is the identity on `[0, T]` may be erased from any
+trim-a.e. statement. -/
+lemma ae_fst_mem_Ioc_trimMeasure_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+    ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), z.1 ∈ Set.Ioc 0 T := by
+  rw [trimMeasure_T_eq_restrict]
+  exact (ae_restrict_mem (MeasureTheory.measurableSet_predictable_Ioc_prod
+    (𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) 0 T MeasurableSet.univ)).mono
+    fun _ hz ↦ hz.1
+
 variable (hB : IsPreBrownianReal B μ)
 
 /-- `uncurry V ∈ L²` in the T-restricted trim. Mirrors

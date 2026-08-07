@@ -28,6 +28,11 @@ The engine of continuous-time models: every model is `dX = b dt + σ dB`, and It
 stochastic integral make functionals of `X` computable.
 - **Library:** the Itô tower — `ItoIntegralCLM` (+ isometry), `QuadraticVariationL2`,
   `ItoFormulaUnrestricted` (general C³ as a continuous local martingale), `ItoFormulaGBM`.
+- Since 2026-08-07 ([#183](https://github.com/raphaelrrcoelho/formal-mathfin/issues/183)) the tower
+  states the `σ` in `dX = b dt + σ dB`, not merely that some `σ` exists: every rung from
+  `ito_formula_td_L2_bddDeriv` down to `discountedGBM_eq_itoIntegral` names its integrand, ending at
+  `gfx =ᵐ [σ·Ŝ(·)]` for the discounted GBM. Naming the *representation's* integrand for a general
+  `L²` claim — the Clark–Ocone direction, #182 — is still open.
 
 ### Pillar III — The probabilistic ⟷ analytic duality (generator / Feynman–Kac / PDE)
 The same price is a risk-neutral **expectation** (probabilistic) and a **PDE solution** (analytic); the
