@@ -141,6 +141,25 @@ python3 -m tools.verify.ledger status      # fresh/stale/missing (exit 1 if not 
 python3 -m tools.verify.ledger verify      # re-verify just the stale entries (daemon must be up)
 ```
 
+**The ledger is derived state, and merges it.** It is a flat `{id: row}` map, so
+git's default text merge combines two branches silently whenever they touch
+different regions — which on 2026-08-07 dropped a row during the #173 merge and
+put main red. `.gitattributes` routes it through `tools/verify/ledger_merge.py`,
+which unions disjoint verifications and DROPS any entry the two sides verified
+under different inputs so it re-verifies rather than asserting a verdict this
+tree never had. Two setup lines per clone, since git config is not versioned:
+
+```bash
+git config merge.mathfin-ledger.name "semantic merge for verification_ledger.json"
+git config merge.mathfin-ledger.driver "python3 tools/verify/ledger_merge.py %O %A %B %L %P"
+git config core.hooksPath .githooks   # pre-push: blocks a red ledger reaching main
+```
+
+Without them git falls back to the text merge, so `tests/test_ledger.py` stays the
+real safety net; the driver is what keeps it from firing. **main has no branch
+protection**, so a locally-created merge commit reaches it with no pre-merge CI —
+that is how #173 landed red. The `pre-push` hook covers that gap host-side in ~1s.
+
 Host-side, stdlib-only; the Lean work happens in the lean-repl daemon. This
 replaces blanket re-verification sweeps — only entries whose inputs changed
 ever re-run. Benchmark snippets that import a MathFin module do NOT

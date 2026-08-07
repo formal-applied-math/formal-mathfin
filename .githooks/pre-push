@@ -1,0 +1,36 @@
+#!/bin/sh
+# Block a push to main whose ledger does not describe the tree being pushed.
+#
+# Why this exists: main has no branch protection, so a locally-created merge
+# commit reaches main without any pre-merge CI. On 2026-08-07 the #173 merge
+# did exactly that — PR CI had validated the PR head and main separately, never
+# their merge — and main landed red on a dropped ledger row.
+#
+# Deliberately stdlib + host-side only (no docker, ~1s): this catches the class
+# that actually escaped, and a hook slow enough to be bypassed is worse than no
+# hook. The full suite still runs in CI.
+#
+# Enable per clone (git config is not versioned):
+#     git config core.hooksPath .githooks
+# Skip once, deliberately:  git push --no-verify
+
+pushing_main=0
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+    case "$remote_ref" in refs/heads/main) pushing_main=1 ;; esac
+done
+[ "$pushing_main" -eq 1 ] || exit 0
+
+command -v python3 >/dev/null 2>&1 || exit 0
+
+if ! python3 -m tools.verify.ledger status >/tmp/mathfin-prepush.$$ 2>&1; then
+    echo "pre-push: BLOCKED — the verification ledger does not describe this tree." >&2
+    tail -12 /tmp/mathfin-prepush.$$ >&2
+    echo "" >&2
+    echo "  stale rows  -> python3 -m tools.verify.ledger verify   (daemon up)" >&2
+    echo "  missing rows-> usually a merge dropped them; same command re-adds" >&2
+    echo "  deliberate  -> git push --no-verify" >&2
+    rm -f /tmp/mathfin-prepush.$$
+    exit 1
+fi
+rm -f /tmp/mathfin-prepush.$$
+exit 0
