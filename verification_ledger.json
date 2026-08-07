@@ -2110,6 +2110,13 @@
       "input_hash": "af7822d7a44d5bf673a86cdb375ba7e55d7087f282c973e7149e44331e7fe750",
       "verified_at_commit": "ad96063"
     },
+    "mf-vnm-expected-utility": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-07",
+      "elapsed_s": 104.8,
+      "input_hash": "ec9505b191289a5ce971639f7adc12b17119ea477e10ac18c797db806080f7e3",
+      "verified_at_commit": "9910e8e"
+    },
     "mf-worstcase-risk-representation": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-07-27",
