@@ -147,7 +147,7 @@ theorem iSup_cylinderSigma_eq_natFiltration (hBmeas : ∀ t, Measurable (B t))
       push_cast
       ring
   -- `B s` is a pointwise limit of `⨆ₙ cylinderSigma`-measurable functions.
-  have hgrid : ∀ n : ℕ, Measurable[⨆ m : ℕ, cylinderSigma B T m] (B (q n)) := fun n ↦
+  have hgrid (n : ℕ) : Measurable[⨆ m : ℕ, cylinderSigma B T m] (B (q n)) :=
     Measurable.of_comap_le <|
       (le_iSup₂ (f := fun r (_ : r ∈ dyadicGrid T n) ↦
         MeasurableSpace.comap (B r) inferInstance) (q n) (hqmem n)).trans

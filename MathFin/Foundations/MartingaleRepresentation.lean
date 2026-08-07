@@ -164,7 +164,7 @@ theorem mem_range_itoIntegralCLM_T_of_centered (hBmeas : ∀ t, Measurable (B t)
     ((itoIsometry_T hB T hBmeas).isometry.isClosedEmbedding.isClosed_range).completeSpace_coe
   obtain ⟨y, hy, z, hz, hFyz⟩ :=
     (LinearMap.range (itoIntegralCLM_T hB T hBmeas).toLinearMap).exists_add_mem_mem_orthogonal F
-  obtain ⟨ψ, hψ⟩ := id hy
+  obtain ⟨ψ, hψ⟩ := hy
   have hymem : y ∈ lpMeas ℝ ℝ (ItoIntegralL2.natFiltration hBmeas T) 2 μ := by
     rw [← hψ]
     exact itoIntegralCLM_T_mem_lpMeas hB T hBmeas ψ

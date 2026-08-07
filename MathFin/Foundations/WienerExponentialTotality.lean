@@ -119,10 +119,9 @@ theorem integral_mul_exp_linear_eq_zero (hB : IsPreBrownianReal B μ)
       s 0 = 0 → s N = T → ∫ ω, F ω * stepDoleansExp B s h N ω ∂μ = 0) :
     ∀ (n : ℕ) (t : Fin n → ℝ≥0), (∀ i, t i ≤ T) → ∀ lam : Fin n → ℝ,
       ∫ ω, F ω * Real.exp (∑ i, lam i * B (t i) ω) ∂μ = 0 := by
-  classical
   intro n t htT lam
   -- The refining grid: `{0, T} ∪ {tᵢ}`, monotonically enumerated.
-  set S : Finset ℝ≥0 := insert 0 (insert T (Finset.image t Finset.univ)) with hSdef
+  set S : Finset ℝ≥0 := insert 0 (insert T (Finset.image t Finset.univ))
   have h0S : (0 : ℝ≥0) ∈ S := Finset.mem_insert_self _ _
   have hTS : T ∈ S := Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)
   have htS (i : Fin n) : t i ∈ S :=
@@ -158,7 +157,7 @@ theorem integral_mul_exp_linear_eq_zero (hB : IsPreBrownianReal B μ)
     rw [h1]
     exact le_antisymm (Finset.max'_le S _ _ hSle) (Finset.le_max' S T hTS)
   -- The Abel coefficients: `cₖ = ∑ᵢ λᵢ·1_{sₖ < tᵢ}`.
-  set c : ℕ → ℝ := fun k ↦ ∑ i, if s k < t i then lam i else 0 with hcdef
+  set c : ℕ → ℝ := fun k ↦ ∑ i, if s k < t i then lam i else 0
   -- Per-index telescoping: the `i`-th slice of the Abel sum is `λᵢ(B_{tᵢ} − B_{s₀})`.
   have hcell (i : Fin n) (ω : Ω) :
       ∑ k ∈ Finset.range N, (if s k < t i then lam i else 0) * (B (s (k + 1)) ω - B (s k) ω)
@@ -418,9 +417,8 @@ theorem eq_zero_of_orthogonal_stepDoleans (hB : IsPreBrownianReal B μ)
     (hFperp : ∀ (s : ℕ → ℝ≥0), Monotone s → ∀ (h : ℕ → ℝ) (N : ℕ),
       s 0 = 0 → s N = T → ∫ ω, F ω * stepDoleansExp B s h N ω ∂μ = 0) :
     F = 0 := by
-  classical
   -- The `𝓕ᴮ_T`-strongly-measurable representative Lévy's theorem asks for.
-  set f : Ω → ℝ := hFmeas.mk (⇑F) with hfdef
+  set f : Ω → ℝ := hFmeas.mk (⇑F)
   have hfae : (⇑F) =ᵐ[μ] f := hFmeas.ae_eq_mk
   have hfsm : StronglyMeasurable[ItoIntegralL2.natFiltration hBmeas T] f :=
     hFmeas.stronglyMeasurable_mk
@@ -440,10 +438,10 @@ theorem eq_zero_of_orthogonal_stepDoleans (hB : IsPreBrownianReal B μ)
         ∫ ω, f ω * Real.exp (∑ i, lam i * B (i : ℝ≥0) ω) ∂μ = 0 := by
       obtain ⟨e⟩ : Nonempty (Fin (Fintype.card {q : ℝ≥0 // q ∈ dyadicGrid T n})
           ≃ {q : ℝ≥0 // q ∈ dyadicGrid T n}) := ⟨(Fintype.equivFin _).symm⟩
-      have hsum (ω : Ω) : ∑ j, lam (e j) * B ((e j : ℝ≥0)) ω = ∑ i, lam i * B (i : ℝ≥0) ω :=
+      have hsum (ω : Ω) : ∑ j, lam (e j) * B (e j : ℝ≥0) ω = ∑ i, lam i * B (i : ℝ≥0) ω :=
         Equiv.sum_comp e fun i ↦ lam i * B (i : ℝ≥0) ω
       simpa only [hsum] using
-        hperp _ (fun j ↦ ((e j : ℝ≥0))) (fun j ↦ dyadicGrid_le (e j).2) fun j ↦ lam (e j)
+        hperp _ (fun j ↦ (e j : ℝ≥0)) (fun j ↦ dyadicGrid_le (e j).2) fun j ↦ lam (e j)
     have hAcyl : MeasurableSet[⨆ i : {q : ℝ≥0 // q ∈ dyadicGrid T n},
         MeasurableSpace.comap (B (i : ℝ≥0)) inferInstance] A := by
       rw [← iSup_subtype' (p := fun q : ℝ≥0 ↦ q ∈ dyadicGrid T n)

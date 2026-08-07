@@ -136,13 +136,14 @@ theorem constDoleans_band_mem_range (hBmeas : ∀ t, Measurable (B t))
     refine hcondExpL2.trans ((condExp_congr_ae hψ.symm).trans ?_)
     exact ((IsFilteredPreBrownian.waldExponential_isMartingale σ).sub
       (martingale_const _ _ 1)).2 u T huT
+  have hcut := Lp.coeFn_sub (restrictAfterCLM T a hBmeas ψ) (restrictAfterCLM T b hBmeas ψ)
+  have hcuta := coeFn_restrictAfterCLM T a hBmeas ψ
+  have hcutb := coeFn_restrictAfterCLM T b hBmeas ψ
   refine ⟨restrictAfterCLM T a hBmeas ψ - restrictAfterCLM T b hBmeas ψ, ?_, ?_, ?_⟩
-  · filter_upwards [Lp.coeFn_sub (restrictAfterCLM T a hBmeas ψ) (restrictAfterCLM T b hBmeas ψ),
-      coeFn_restrictAfterCLM T a hBmeas ψ, coeFn_restrictAfterCLM T b hBmeas ψ] with p h1 h2 h3 hpa
+  · filter_upwards [hcut, hcuta, hcutb] with p h1 h2 h3 hpa
     rw [h1, Pi.sub_apply, h2, h3, if_neg (not_lt.mpr hpa), if_neg (not_lt.mpr (hpa.trans hab)),
       sub_self]
-  · filter_upwards [Lp.coeFn_sub (restrictAfterCLM T a hBmeas ψ) (restrictAfterCLM T b hBmeas ψ),
-      coeFn_restrictAfterCLM T a hBmeas ψ, coeFn_restrictAfterCLM T b hBmeas ψ] with p h1 h2 h3 hpb
+  · filter_upwards [hcut, hcuta, hcutb] with p h1 h2 h3 hpb
     rw [h1, Pi.sub_apply, h2, h3, if_pos (lt_of_le_of_lt hab hpb), if_pos hpb, sub_self]
   · rw [map_sub, itoIntegralCLM_T_restrictAfterCLM hB T a haT hBmeas ψ,
       itoIntegralCLM_T_restrictAfterCLM hB T b hbT hBmeas ψ]

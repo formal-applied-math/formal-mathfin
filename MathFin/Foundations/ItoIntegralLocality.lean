@@ -526,32 +526,24 @@ theorem itoIntegralCLM_T_smulAdapted (T a : ℝ≥0) (hBmeas : ∀ t, Measurable
       (ContinuousLinearMap.continuous _) (ContinuousLinearMap.continuous _)
       (funext fun V ↦ ?_)) ψ
     simp only [Function.comp_apply, ContinuousLinearMap.comp_apply]
+    -- `V` restarted at `a` unscaled: the `Z = 1` companion of `afterStepSP … Z … V`.
+    set U := afterStepSP T a hBmeas (fun _ ↦ (1 : ℝ)) measurable_const 1 (fun _ ↦ abs_one.le) V
     rw [← simpleAssembly_T_afterStepSP T a hBmeas Z hZm C hZb V,
       show restrictAfterCLM T a hBmeas (simpleAssembly_T (μ := μ) T hBmeas V)
-          = simpleAssembly_T (μ := μ) T hBmeas
-              (afterStepSP T a hBmeas (fun _ ↦ (1 : ℝ)) measurable_const 1
-                (fun _ ↦ abs_one.le) V) from
+          = simpleAssembly_T (μ := μ) T hBmeas U from
         (simpleAssembly_T_afterStepSP T a hBmeas (fun _ ↦ (1 : ℝ)) measurable_const 1
           (fun _ ↦ abs_one.le) V).symm,
       itoIntegralCLM_T_simpleAssembly_T, itoIntegralCLM_T_simpleAssembly_T]
     refine Lp.ext ?_
     filter_upwards [(ItoIntegralL2.memLp_itoSimple hB hBmeas
         (afterStepSP T a hBmeas Z hZm C hZb V).val).coeFn_toLp,
-      coeFn_mulBddCLM μ hZmΩ hZb (ItoIntegralL2.itoSimpleLp hB hBmeas
-        (afterStepSP T a hBmeas (fun _ ↦ (1 : ℝ)) measurable_const 1
-          (fun _ ↦ abs_one.le) V).val),
-      (ItoIntegralL2.memLp_itoSimple hB hBmeas
-        (afterStepSP T a hBmeas (fun _ ↦ (1 : ℝ)) measurable_const 1
-          (fun _ ↦ abs_one.le) V).val).coeFn_toLp] with ω f1 f2 f3
+      coeFn_mulBddCLM μ hZmΩ hZb (ItoIntegralL2.itoSimpleLp hB hBmeas U.val),
+      (ItoIntegralL2.memLp_itoSimple hB hBmeas U.val).coeFn_toLp] with ω f1 f2 f3
     rw [show (ItoIntegralL2.itoSimpleLp hB hBmeas
           (afterStepSP T a hBmeas Z hZm C hZb V).val : Ω → ℝ) ω
         = ItoIntegralL2.itoSimple hBmeas (afterStepSP T a hBmeas Z hZm C hZb V).val ω from f1,
-      f2, show (ItoIntegralL2.itoSimpleLp hB hBmeas
-          (afterStepSP T a hBmeas (fun _ ↦ (1 : ℝ)) measurable_const 1
-            (fun _ ↦ abs_one.le) V).val : Ω → ℝ) ω
-        = ItoIntegralL2.itoSimple hBmeas
-            (afterStepSP T a hBmeas (fun _ ↦ (1 : ℝ)) measurable_const 1
-              (fun _ ↦ abs_one.le) V).val ω from f3]
+      f2, show (ItoIntegralL2.itoSimpleLp hB hBmeas U.val : Ω → ℝ) ω
+        = ItoIntegralL2.itoSimple hBmeas U.val ω from f3]
     exact itoSimple_afterStepSP_smul T a hBmeas Z hZm C hZb V ω
   have h1 := DFunLike.congr_fun hEq φ
   simp only [ContinuousLinearMap.comp_apply, restrictAfterCLM_eq T a hBmeas φ hφ] at h1
@@ -585,15 +577,13 @@ theorem itoIntegralCLM_T_smulAdapted_of_memLp (T a : ℝ≥0) (hBmeas : ∀ t, M
       exact hZm measurableSet_Icc
     have hg1m : Measurable[ItoIntegralL2.natFiltration hBmeas a]
         (Set.indicator {ω | |Z ω| ≤ (M : ℝ)} (fun _ ↦ (1 : ℝ))) := measurable_const.indicator hAm
-    have hg1b : ∀ ω, |Set.indicator {ω | |Z ω| ≤ (M : ℝ)} (fun _ ↦ (1 : ℝ)) ω| ≤ 1 := by
-      intro ω
+    have hg1b (ω : Ω) : |Set.indicator {ω | |Z ω| ≤ (M : ℝ)} (fun _ ↦ (1 : ℝ)) ω| ≤ 1 := by
       by_cases hm : ω ∈ {ω | |Z ω| ≤ (M : ℝ)}
       · simp [Set.indicator_of_mem hm]
       · simp [Set.indicator_of_notMem hm]
     have hgZm : Measurable[ItoIntegralL2.natFiltration hBmeas a]
         (Set.indicator {ω | |Z ω| ≤ (M : ℝ)} Z) := hZm.indicator hAm
-    have hgZb : ∀ ω, |Set.indicator {ω | |Z ω| ≤ (M : ℝ)} Z ω| ≤ (M : ℝ) := by
-      intro ω
+    have hgZb (ω : Ω) : |Set.indicator {ω | |Z ω| ≤ (M : ℝ)} Z ω| ≤ (M : ℝ) := by
       by_cases hm : ω ∈ {ω | |Z ω| ≤ (M : ℝ)}
       · rw [Set.indicator_of_mem hm]; exact hm
       · simp [Set.indicator_of_notMem hm]
@@ -690,7 +680,7 @@ theorem itoIntegralCLM_T_smul_of_memLp (T a : ℝ≥0) (hBmeas : ∀ t, Measurab
       · refine Tendsto.congr' ?_ tendsto_const_nhds
         filter_upwards [eventually_ge_atTop ⌈|Z p.2|⌉₊] with M hM
         have hmem : p.2 ∈ {ω | |Z ω| ≤ (M : ℝ)} :=
-          (Nat.le_ceil |Z p.2|).trans (by exact_mod_cast hM : ((⌈|Z p.2|⌉₊ : ℕ) : ℝ) ≤ (M : ℝ))
+          (Nat.le_ceil |Z p.2|).trans (Nat.cast_le.mpr hM)
         rw [hall M]
         simp only [afterFactor, if_pos hlt, Set.indicator_of_mem hmem]
     have hle : atTop.liminf (fun M : ℕ ↦ eLpNorm
@@ -793,7 +783,7 @@ theorem itoIntegralCLM_T_restrictAfterCLM (T u : ℝ≥0) (huT : u ≤ T)
     (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     itoIntegralCLM_T hB T hBmeas (restrictAfterCLM T u hBmeas φ)
       = itoIntegralCLM_T hB T hBmeas φ - itoProcessCLM hB T u hBmeas φ := by
-  set R := restrictAfterCLM T u hBmeas φ with hR
+  set R := restrictAfterCLM T u hBmeas φ
   have hafter : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), p.1 ≤ u → R p = 0 := by
     filter_upwards [coeFn_restrictAfterCLM T u hBmeas φ] with p hp hpu
     rw [hp, if_neg (not_lt.mpr hpu)]
