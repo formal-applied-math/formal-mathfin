@@ -185,6 +185,55 @@ the sweep, fix the cap, and re-run rather than grinding through the remaining en
 
 ---
 
+## The daemon stops answering after a long session (the memory wedge)
+
+**Symptom:** `lean-check.sh` returns **nothing at all** and the request never completes.
+The container is up, the log shows the request arriving, and no result line follows. An
+agent driving the daemon looks like it has hung.
+
+**Cause:** the daemon accumulates memory across many check/gate cycles and eventually
+sits at its `mem_limit`. Measured on 2026-08-06 after ~15h uptime: `docker stats`
+showed `5.861GiB / 6GiB` at 31% CPU, with a request logged at 02:30:01 and no result
+ever emitted. This is not the two-Lean-processes hazard the memory doctrine warns
+about; it is one long-lived process reaching the ceiling on its own.
+
+**Diagnosis:** `docker stats --no-stream | grep lean` and compare against the compose
+`mem_limit`. An **empty** `lean-check` response is the tell. An *error* means the daemon
+answered; silence means it could not.
+
+**Fix:** restart it. There is nothing to salvage.
+```bash
+docker compose -f docker/docker-compose.yml down lean-repl
+LEAN_ELAB_TIMEOUT=600 docker compose -f docker/docker-compose.yml up -d lean-repl
+```
+Memory after a restart sat at ~939MiB, so the headroom is real once reclaimed. On a long
+session, restart proactively rather than waiting for the wedge.
+
+---
+
+## An in-container step fails with "Read-only file system" writing to `docs/`
+
+**Symptom:** something like
+`sh: 1: cannot create /app/docs/blueprint_nodes.json: Read-only file system`, while the
+same command's Lean work succeeded.
+
+**Cause:** compose bind-mounts `tools/`, `benchmarks/`, `tests/`, `mathfin.toml` and the
+Lake pieces. **`docs/` is not mounted.** Anything run inside the container that writes
+there fails, even though reading the repo works.
+
+**Fix:** capture the container's stdout on the host instead of redirecting inside it.
+```bash
+docker compose -f docker/docker-compose.yml run --rm -T --entrypoint sh verify \
+  -c 'lake exe blueprint_export MathFin.Blueprint' > docs/blueprint_nodes.json
+```
+Validate the captured output before overwriting a tracked file — compose can print
+container-lifecycle noise, so write to a scratch path first and check it parses.
+
+Note `lake exe blueprint_export` loads the MathFin environment, so it is a Lean process
+and needs the daemon **down** under the memory doctrine.
+
+---
+
 ## CI fails on `test_values.py` after a benchmark edit
 
 **Symptom:** `tests/test_values.py` fails with "stale AxiomAuditGen" or a
