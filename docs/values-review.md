@@ -121,10 +121,13 @@ Per-lens **exemplar → next upgrade**:
   wrong reason (`B ≡ 0` collapses `𝓕_T` to `⊥`). And `constDoleans_sub_one_eq_itoIntegral` was reported
   first as "unprovable" and corrected to "not derivable from the exported API" — the weaker, true claim.
   Then the strengthening: `hF1` was a hypothesis `eq_zero_of_orthogonal_stepDoleans` did not need, and it
-  was **dropped from the public signature**, not underscored. *Upgrade (HIGH):* one is left.
-  `stepDoleans_sub_one_mem_range` still carries `(_hs0 : s 0 = 0)`, underscored to clear a `lake lint`
-  error. The underscore is the tell: it silences the linter and leaves the theorem weaker than what was
-  proved. #184.
+  was **dropped from the public signature**, not underscored. A second instance,
+  `stepDoleans_sub_one_mem_range`'s `(_hs0 : s 0 = 0)`, was underscored to clear a `lake lint` error and
+  logged as #184 — the underscore being the tell that it silences the linter and leaves the theorem
+  weaker than what was proved. The final whole-branch review ruled it fix-now rather than issue-later,
+  on the grounds that it was a *new* declaration, so the branch would have introduced the very defect
+  this review ranks HIGH. Dropped in `6530fae`; the hypothesis was inert (`stepDoleansExp … 0` is the
+  empty product, and the worker `stepDoleans_aux` never took it).
 - **4 Architectural ingenuity.** *Exemplar:* the crown is stated as **surjectivity of an isometry the
   library already had**, not as a bespoke theorem. `itoIsometryCentered` corestricts `itoIntegralCLM_T`
   to `centeredBrownianL2 := lpMeas 𝓕ᴮ_T ⊓ (ℝ ∙ 1)ᗮ`, `itoIsometryCentered_surjective` closes it, and
@@ -212,8 +215,10 @@ Per-lens **exemplar → next upgrade**:
    that finds it, ranks it, writes it down, and then does not do it. Concrete form: task briefs name the
    destination file for each anticipated general fact, and LOW backlog items get an issue number instead
    of a bullet. #185 clears the current residue.
-2. **[HIGH] The underscore is a signal, not a fix.** #184 drops `(_hs0 : s 0 = 0)` from
-   `stepDoleans_sub_one_mem_range`. This is the second instance of the class in six weeks (the first was
+2. **[HIGH] The underscore is a signal, not a fix.** *(#184, executed before merge in `6530fae` — the
+   final whole-branch review ruled it fix-now, since `stepDoleans_sub_one_mem_range` is a new
+   declaration and shipping it would have introduced the defect this item names.)* Dropping
+   `(_hs0 : s 0 = 0)` was the second instance of the class in six weeks (the first was
    the 2026-07-31 spurious division guards, `docs/patterns.md:1031`), and both times a public signature
    shipped a theorem weaker than the one proved, past every gate. The 2026-07-31 necessity prober only
    runs on foundry drafts. Hand-authored `MathFin/` has no equivalent, and a `_`-prefixed binder in a

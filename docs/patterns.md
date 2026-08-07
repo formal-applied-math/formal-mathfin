@@ -1029,7 +1029,8 @@ adopted it unprompted).
 Second: `lake lint` is a CI gate `lake build` does not run, and its `unusedArguments` check turns an
 unused hypothesis kept for signature fidelity into a build-failing error, not a warning.
 `Foundations/DoleansStepRepresentation.lean`'s `stepDoleans_sub_one_mem_range` kept `hs0 : s 0 = 0`
-because the specified signature carried it, and the daemon reported only a plain
+because the specified signature carried it (the hypothesis was later dropped outright — see the
+used-vs-needed entry below — but the lint lesson stands), and the daemon reported only a plain
 `linter.unusedVariables` warning, which `lake lint` then failed the build on. The repair that preserves
 the public interface is renaming to `_hs0` (arity, type, and argument position all unchanged, so no
 call site moves), the same move Task 4 later applied to `_hF1`. Recorded lesson: a
