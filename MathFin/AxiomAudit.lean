@@ -1074,4 +1074,12 @@ proved facts, `pricesGainsAtZero_self` (μ satisfies it, so nothing is vacuous) 
 /-- info: 'MathFin.measure_eq_of_pricesGainsAtZero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.measure_eq_of_pricesGainsAtZero
 
+/-! ### Downside performance metrics (#73)
+
+The finite-state Omega identity, finite-path maximum drawdown, and Calmar
+scaling law are audited here as one public acceptance bundle. -/
+
+/-- info: 'MathFin.downsideMetrics_bundle' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.downsideMetrics_bundle
+
 end MathFin.AxiomAudit

@@ -1263,6 +1263,13 @@
       "input_hash": "85d8b6019bd989a9822747b7bd0f30ae15cc8e4f1fdf9e91aed0fe4dbfc47436",
       "verified_at_commit": "ad96063"
     },
+    "mf-downside-performance-metrics": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-03",
+      "elapsed_s": 5.6,
+      "input_hash": "3f7f29fdd1cc34ab92907b1c63bb4586d95fd0470db3265ca5f0f1bfe448f11c",
+      "verified_at_commit": "509784a"
+    },
     "mf-exchange-numeraire": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-07-27",
