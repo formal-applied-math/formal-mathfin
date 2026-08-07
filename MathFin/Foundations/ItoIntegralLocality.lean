@@ -91,6 +91,33 @@ says these are the same requirement, and `itoIntegralCLM_T_smul_of_memLp` perfor
 transfer: truncating `Z` at level `M` gives genuine integrands whose energies *are* the
 sample-side energies, uniformly bounded; they converge pointwise to `Z·φ`, and Fatou
 carries the bound to the limit.
+
+## Result
+
+* `memLp_mul_of_bdd`, `mulBddCLM`, `coeFn_mulBddCLM` — multiplication by a bounded measurable
+  function as a continuous operator on `L²`, and its characterising a.e. identity.
+* `afterFactor`, `abs_afterFactor_le`, `measurable_afterFactor` — the `𝓕_a`-measurable factor
+  switched on after `a`, the bound it inherits from `Z`, and its predictability.
+* `smulAdaptedCLM`, `coeFn_smulAdaptedCLM` — scaling a predictable `L²` integrand by that
+  factor, as a CLM.
+* `smulAdapted`, `coeFn_smulAdapted_afterFactor`, `coeFn_smulAdapted` — the same scaling
+  applied to one integrand, unfolded unconditionally and (the switch being invisible there)
+  on integrands supported after `a`.
+* `restrictAfterCLM`, `restrictAfterCLM_eq`, `coeFn_restrictAfterCLM` — the `Z = 1` instance:
+  restriction of an integrand to `(a,T]`.
+* `ae_fst_ne_zero` — the time origin is `trim_T`-null.
+* `afterStepSP` — a `T`-bounded simple process restarted at `a` and scaled by `Z`.
+* `itoIntegralCLM_T_smulAdapted` — **`𝓕_a`-linearity** for a bounded factor.
+* `itoIntegralCLM_T_smulAdapted_of_memLp` — the same for an unbounded factor, under the
+  integrand-side hypothesis `Z·φ ∈ L²(trim)`.
+* `itoIntegralCLM_T_smul_of_memLp` — and under the sample-side hypothesis
+  `Z·∫₀ᵀ φ dB ∈ L²(μ)` instead.
+* `itoProcessCLM_eq_zero_of_vanishes_before` — an integrand switched on only after `u` has
+  `(φ●B)_u = 0`.
+* `itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after` — one switched off after `u` has
+  `∫₀ᵀ φ dB = (φ●B)_u`, hence a `𝓕_u`-measurable integral.
+* `itoIntegralCLM_T_restrictAfterCLM` — restricting an integrand to `(u,T]` subtracts exactly
+  `(φ●B)_u` from its integral.
 -/
 
 @[expose] public section
@@ -593,18 +620,6 @@ theorem itoIntegralCLM_T_smulAdapted_of_memLp (T a : ℝ≥0) (hBmeas : ∀ t, M
   filter_upwards [ae_all_iff.mpr key] with ω hω
   obtain ⟨M, hM⟩ := exists_nat_ge |Z ω|
   exact hω M hM
-
-/-- **Unbounded `Z`, existential form** — the shape the step-integrand Doléans
-induction consumes: `Z·∫φ dB` is itself an Itô integral. -/
-theorem itoIntegralCLM_T_smulAdapted_mem_range (T a : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (Z : Ω → ℝ) (hZm : Measurable[ItoIntegralL2.natFiltration hBmeas a] Z)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
-    (hφ : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), p.1 ≤ a → φ p = 0)
-    (hZφ : MemLp (fun p : ℝ≥0 × Ω ↦ Z p.2 * φ p) 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    ∃ χ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      ⇑(itoIntegralCLM_T hB T hBmeas χ)
-        =ᵐ[μ] fun ω ↦ Z ω * itoIntegralCLM_T hB T hBmeas φ ω :=
-  ⟨hZφ.toLp _, itoIntegralCLM_T_smulAdapted_of_memLp hB T a hBmeas Z hZm φ hφ hZφ⟩
 
 /-- **The hypothesis in its sample-side form.** `itoIntegralCLM_T_smulAdapted_of_memLp`
 asks for `Z·φ ∈ L²(trim)`; a caller whose `φ` came out of an Itô formula knows nothing

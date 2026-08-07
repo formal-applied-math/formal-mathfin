@@ -61,10 +61,12 @@ what the counterexample needs; `B ≡ 0` will not do, since it makes `𝓕_T = �
 for the right reason.) Brownianness enters twice: at `B₀ = 0` (Step A's telescope) and at the
 Gaussian tails (Step B's open `integrableExpSet`).
 
-## Main results
+## Result
 
-* `MathFin.integral_mul_exp_linear_eq_zero` — Step A.
-* `MathFin.eq_zero_of_orthogonal_stepDoleans` — the totality theorem.
+* `integral_mul_exp_linear_eq_zero` — Step A: orthogonality to the whole step-Doléans family
+  already forces orthogonality to `exp(∑ᵢ λᵢ B_{tᵢ})` for every finite family of times in
+  `[0,T]` and every real `λ`.
+* `eq_zero_of_orthogonal_stepDoleans` — the totality theorem.
 -/
 
 @[expose] public section

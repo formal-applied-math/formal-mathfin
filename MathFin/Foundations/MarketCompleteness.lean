@@ -12,9 +12,10 @@ public import MathFin.Foundations.ContinuousMarket
 # Market completeness: replication, superreplication, and the pricing measure
 
 The finance reading of `MartingaleRepresentation`. On the Brownian filtration `𝓕ᴮ`, with `μ` the
-measure under which `B` is a Brownian motion — so `μ` is the model's reference, risk-neutral
-measure — the representation theorem says exactly that the market driven by `B` is **complete**:
-every square-integrable `𝓕ᴮ_T`-claim is the terminal wealth of a strategy started at the claim's
+measure under which `B` is a Brownian motion — the model's reference measure, which
+`measure_eq_of_pricesGainsAtZero` then shows *is* the pricing measure on `𝓕ᴮ_T` — the
+representation theorem says exactly that the market driven by `B` is **complete**: every
+square-integrable `𝓕ᴮ_T`-claim is the terminal wealth of a strategy started at the claim's
 price `𝔼_μ[H]`. Three consequences are recorded here: replication, the superreplication
 duality, and uniqueness of the pricing measure.
 
@@ -94,7 +95,7 @@ implies the other.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory
-open ItoIntegralCLM ItoIntegralL2
+open ItoIntegralCLM ItoIntegralL2 ItoIntegralProcessGeneral
 open scoped NNReal ENNReal
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
@@ -103,7 +104,10 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
 /-! ### Replication -/
 
 /-- `φ` **replicates** the claim `H` from initial wealth `x`: the terminal wealth
-`x + ∫₀ᵀ φ dB` of the self-financing strategy holding `φ` is `H`, almost everywhere. -/
+`x + ∫₀ᵀ φ dB` of the self-financing strategy holding `φ` is `H`, almost everywhere. Reading
+the Itô integral as the traded gain fixes the normalisation, and it is the only place this
+file leaves `S` behind: the discounted price *is* `B` (a Bachelier-type market), so `φ` counts
+units held and `∫₀ᵀ φ dB` is what holding them earns. -/
 def Replicates (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (x : ℝ)
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (H : Ω → ℝ) : Prop :=
   H =ᵐ[μ] fun ω ↦ x + itoIntegralCLM_T hB T hBmeas φ ω

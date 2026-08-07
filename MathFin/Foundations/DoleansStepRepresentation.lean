@@ -61,6 +61,18 @@ limit of those witnesses without identifying it. Only
 derivatives, which `σ·exp(σx)` is not. Naming the integrand is therefore a four-theorem
 change upstream rather than a lemma here; the sample-side transfer removes the need
 for it.
+
+## Result
+
+* `constDoleans_sub_one_mem_range` — the constant-`σ` Doléans exponential, minus one, is an
+  Itô integral over `[0,T]`.
+* `constDoleans_band_mem_range` — the band form: the increment `M_b − M_a` is the integral of
+  an integrand supported on `(a,b]`, and the two support clauses come with it.
+* `constDoleans_shift_sub_one_mem_range` — that band renormalised by the `𝓕_a`-measurable
+  `1/M_a`, giving `M_T/M_a − 1`.
+* `stepDoleansExp` — the Doléans exponential of a deterministic step integrand.
+* `stepDoleans_sub_one_mem_range` — **the theorem**: that exponential, minus one, lies in the
+  range of `∫₀ᵀ · dB`.
 -/
 
 @[expose] public section

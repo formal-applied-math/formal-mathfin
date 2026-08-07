@@ -29,7 +29,25 @@ conditional expectation is an L² contraction. The bridge to B1a is then
 *definitional* (`extendOfNorm_eq`).
 
 The infinite-horizon `[0,∞)` integral (σ-finite predictable exhaustion) is the
-separate later milestone B2. -/
+separate later milestone B2.
+
+## Result
+
+* `itoSimpleProcessLp_norm_le` — the contraction bound `extendOfNorm` consumes.
+* `itoProcessLM`, `itoProcessCLM` — B1a's t-process as a linear map, and its extension to a
+  general predictable `L²` integrand.
+* `itoProcessCLM_simpleAssembly_T` — the definitional bridge back to B1a.
+* `itoProcessCLM_zero_time` — the process starts at `0`.
+* `condExp_itoSimple_eq` — B1a's martingale read to the terminal.
+* `itoProcessCLM_eq_condExpL2` — **the key identity**: `(φ●B)_t` is the `𝓕_t`-projection of
+  the terminal integral.
+* `itoProcessCLM_aeStronglyMeasurable`, `itoIntegralProcessGen_isMartingale` — its two
+  corollaries: a.e.-adaptedness and the martingale property.
+* `itoProcessCLM_norm_le` — the contraction `‖(φ●B)_t‖ ≤ ‖φ‖`.
+* `itoProcessCLM_terminal_eq`, `itoProcessCLM_norm_terminal` — at the horizon the process is
+  the terminal integral, so the contraction is the Itô isometry.
+* `integral_itoIntegralCLM_T` — the terminal integral is centered.
+* `itoIntegralProcessGen_l2_continuous` — `t ↦ (φ●B)_t` is `L²`-continuous. -/
 
 @[expose] public section
 
@@ -113,6 +131,19 @@ theorem itoProcessCLM_simpleAssembly_T (T t : ℝ≥0) (hBmeas : ∀ u, Measurab
   rw [itoProcessCLM, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
     ⟨1, fun W ↦ by rw [one_mul]; exact itoSimpleProcessLp_norm_le hB T t hBmeas W.val W.property⟩]
   rfl
+
+/-- **The Itô integral process starts at zero.** On the dense simple processes this is
+`itoSimpleProcess_zero_time`, and both sides are continuous-linear in the integrand. -/
+@[simp] theorem itoProcessCLM_zero_time (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    itoProcessCLM hB T 0 hBmeas φ = 0 := by
+  refine congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
+    (itoProcessCLM hB T 0 hBmeas).continuous
+    (continuous_const (y := (0 : Lp ℝ 2 μ))) (funext fun V ↦ ?_)) φ
+  simp only [Function.comp_apply, itoProcessCLM_simpleAssembly_T, itoSimpleProcessLp]
+  refine Lp.ext (((memLp_itoSimpleProcess hB hBmeas V.val 0).coeFn_toLp).trans ?_)
+  rw [itoSimpleProcess_zero_time]
+  exact (Lp.coeFn_zero ℝ 2 μ).symm
 
 omit [IsProbabilityMeasure μ] in
 /-- B1a's martingale to the terminal: `μ[itoSimple V | 𝓕_t] = (V●B)_t` for
@@ -226,6 +257,17 @@ theorem itoProcessCLM_norm_terminal (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     ‖itoProcessCLM hB T T hBmeas φ‖ = ‖φ‖ := by
   rw [itoProcessCLM_terminal_eq hB T hBmeas φ, itoIntegralCLM_T_norm hB T hBmeas φ]
+
+/-- **The Itô integral is centered**, `𝔼[∫₀ᵀ φ dB] = 0`: the integral process is a
+martingale started at `0`, and conditioning preserves the mean. -/
+theorem integral_itoIntegralCLM_T (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    ∫ ω, itoIntegralCLM_T hB T hBmeas φ ω ∂μ = 0 := by
+  have hmart := itoIntegralProcessGen_isMartingale hB T hBmeas φ (i := 0) (j := T) zero_le
+  rw [itoProcessCLM_zero_time hB T hBmeas φ] at hmart
+  rw [← itoProcessCLM_terminal_eq hB T hBmeas φ,
+    ← integral_condExp ((natFiltration hBmeas).le 0), integral_congr_ae hmart]
+  simp
 
 /-- **L²-continuity.** `t ↦ (φ●B)_t` is continuous into `Lp ℝ 2 μ`. The simple-
 process integrals `t ↦ (Vₙ●B)_t` (continuous by B1a's

@@ -40,15 +40,15 @@ the constants and the range both sit inside `lpMeas ℝ ℝ 𝓕ᴮ_T 2 μ`, so 
 does too, and no `comap` transport is needed. The `Kᗮ = ⊥ ↔ K = ⊤` route would have needed it,
 `Submodule.orthogonal_eq_bot_iff` being ambient-relative.
 
-The centering fact `𝔼[∫₀ᵀ φ dB] = 0` is proved here rather than assumed: the integral *process*
-is a martingale (`itoIntegralProcessGen_isMartingale`) started at `0`
-(`itoProcessCLM_zero_time`, by density from `itoSimpleProcess_zero_time`), and conditioning
-preserves the mean.
+The centering fact `𝔼[∫₀ᵀ φ dB] = 0` is proved, not assumed — one floor down, as
+`ItoIntegralProcessGeneral.integral_itoIntegralCLM_T`: the integral *process* is a martingale
+(`itoIntegralProcessGen_isMartingale`) started at `0` (`itoProcessCLM_zero_time`, by density
+from `itoSimpleProcess_zero_time`), and conditioning preserves the mean.
 
 ## Result
 
+* `inner_eq_integral_mul` — the real `L²` inner product as an integral of a product.
 * `itoIntegralCLM_T_mem_lpMeas` — the terminal Itô integral is `𝓕ᴮ_T`-measurable.
-* `integral_itoIntegralCLM_T` — the Itô integral is centered.
 * `mem_range_itoIntegralCLM_T_of_centered` — kernel form: a centered `𝓕ᴮ_T`-measurable `L²`
   variable *is* an Itô integral.
 * `exists_itoIntegral_representation` — terminal form: `F =ᵐ 𝔼[F] + ∫₀ᵀ φ dB` for a unique `φ`.
@@ -78,7 +78,7 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
 
 omit [IsProbabilityMeasure μ] in
 /-- The real `L²` inner product as an integral of a product. -/
-private lemma inner_eq_integral_mul (f g : Lp ℝ 2 μ) :
+lemma inner_eq_integral_mul (f g : Lp ℝ 2 μ) :
     ⟪f, g⟫_ℝ = ∫ ω, f ω * g ω ∂μ := by
   rw [L2.inner_def]
   simp [RCLike.inner_apply, mul_comm]
@@ -118,7 +118,7 @@ private lemma integral_sub_mean (F : Lp ℝ 2 μ) :
     integral_sub ((Lp.memLp F).integrable one_le_two) (integrable_const _),
     integral_const, probReal_univ, one_smul, sub_self]
 
-/-! ### The Itô integral is `𝓕ᴮ_T`-measurable and centered -/
+/-! ### The Itô integral is `𝓕ᴮ_T`-measurable -/
 
 /-- The terminal Itô integral is `𝓕ᴮ_T`-measurable: at the horizon the integral *process*
 is the terminal integral, and the process is adapted. -/
@@ -127,30 +127,6 @@ lemma itoIntegralCLM_T_mem_lpMeas (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t
     itoIntegralCLM_T hB T hBmeas φ ∈ lpMeas ℝ ℝ (ItoIntegralL2.natFiltration hBmeas T) 2 μ := by
   rw [← itoProcessCLM_terminal_eq hB T hBmeas φ]
   exact itoProcessCLM_aeStronglyMeasurable hB T T hBmeas φ
-
-/-- **The Itô integral process starts at zero.** On the dense simple processes this is
-`itoSimpleProcess_zero_time`, and both sides are continuous-linear in the integrand. -/
-private lemma itoProcessCLM_zero_time (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    itoProcessCLM hB T 0 hBmeas φ = 0 := by
-  refine congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-    (itoProcessCLM hB T 0 hBmeas).continuous
-    (continuous_const (y := (0 : Lp ℝ 2 μ))) (funext fun V ↦ ?_)) φ
-  simp only [Function.comp_apply, itoProcessCLM_simpleAssembly_T, itoSimpleProcessLp]
-  refine Lp.ext (((memLp_itoSimpleProcess hB hBmeas V.val 0).coeFn_toLp).trans ?_)
-  rw [itoSimpleProcess_zero_time]
-  exact (Lp.coeFn_zero ℝ 2 μ).symm
-
-/-- **The Itô integral is centered**, `𝔼[∫₀ᵀ φ dB] = 0`: the integral process is a
-martingale started at `0`, and conditioning preserves the mean. -/
-lemma integral_itoIntegralCLM_T (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    ∫ ω, itoIntegralCLM_T hB T hBmeas φ ω ∂μ = 0 := by
-  have hmart := itoIntegralProcessGen_isMartingale hB T hBmeas φ (i := 0) (j := T) zero_le
-  rw [itoProcessCLM_zero_time hB T hBmeas φ] at hmart
-  rw [← itoProcessCLM_terminal_eq hB T hBmeas φ,
-    ← integral_condExp ((natFiltration hBmeas).le 0), integral_congr_ae hmart]
-  simp
 
 /-! ### Surjectivity onto the centered subspace -/
 
