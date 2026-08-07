@@ -273,6 +273,18 @@ lemma trimMeasure_T_eq_restrict (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       ← MeasureTheory.restrict_trim 𝓕.predictable_le_prod _
         (MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) 0 T MeasurableSet.univ)]
 
+/-- **The `T`-trim lives on `(0, T] × Ω`**: trim-a.e. `z`, the time coordinate `z.1` lies in
+`Ioc 0 T`. The pointwise reading of `trimMeasure_T_eq_restrict` — a restriction charges nothing
+outside the set it restricts to. What an integrand does past the horizon is therefore invisible
+to the trim, so a time cutoff that is the identity on `[0, T]` may be erased from any
+trim-a.e. statement. -/
+lemma ae_fst_mem_Ioc_trimMeasure_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+    ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), z.1 ∈ Set.Ioc 0 T := by
+  rw [trimMeasure_T_eq_restrict]
+  exact (ae_restrict_mem (MeasureTheory.measurableSet_predictable_Ioc_prod
+    (𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) 0 T MeasurableSet.univ)).mono
+    fun _ hz ↦ hz.1
+
 variable (hB : IsPreBrownianReal B μ)
 
 /-- `uncurry V ∈ L²` in the T-restricted trim. Mirrors
@@ -718,6 +730,22 @@ noncomputable def itoIntegralCLM_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) :
     Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) →L[ℝ] Lp ℝ 2 μ :=
   (itoAssembly_T hB T hBmeas).extendOfNorm (simpleAssembly_T (μ := μ) T hBmeas)
+
+/-- **The CLM agrees with the elementary Itô integral on a simple embedding**:
+`itoIntegralCLM_T (simpleAssembly_T V) = itoSimpleLp V` (equivalently
+`itoAssembly_T V` — the two are definitionally the same term). Immediate from
+`extendOfNorm_eq` against the assembly isometry, and the bridge every consumer of
+the CLM crosses to get back to the finite increment sum
+`∑ V(p)·(B_{p.2} − B_{p.1})`: it is what makes `DenseRange.equalizer` arguments
+over `simpleAssembly_T_denseRange` computable at all. Lives here, next to the
+construction it unfolds, rather than in any one consumer. -/
+theorem itoIntegralCLM_T_simpleAssembly_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t)) (V : TBoundedSP T hBmeas) :
+    itoIntegralCLM_T hB T hBmeas (simpleAssembly_T (μ := μ) T hBmeas V)
+      = ItoIntegralL2.itoSimpleLp hB hBmeas V.val := by
+  rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
+    ⟨1, fun W ↦ by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas W).le⟩]
+  rfl
 
 /-- **The continuous-time Itô isometry on `[0,T]`.** For every
 `f ∈ Lp 2 trim_T`, `‖itoIntegralCLM_T f‖ = ‖f‖`. -/

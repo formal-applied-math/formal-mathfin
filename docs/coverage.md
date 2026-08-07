@@ -26,6 +26,90 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+> **Live status (2026-08-07, martingale representation + market completeness; then the localized
+> Itô formula named its integrand):** corpus
+> **351**, **320 full + 18 wrappers = 338/351 delivery-ready**, 13 reduced cores, 0 placeholders.
+> Ledger 351 fresh / 0 stale / 0 missing; pytest 42 passed; `lake build` and `lake lint` green with
+> no `#guard_msgs` failure, so the five new curated axiom pins hold.
+> `itoIntegralCLM_T` was already a `LinearIsometry` from the predictable `L²(dt⊗dμ)` integrands into
+> `L²(μ)`. `MathFin/Foundations/MartingaleRepresentation.lean` identifies its image exactly:
+> `itoIntegralCLM_T_surjective_onto_centered` says the Itô integrals together with the constants
+> exhaust `lpMeas ℝ ℝ 𝓕ᴮ_T 2 μ`, and `itoIsometryEquiv` bundles the isometry as an equivalence onto
+> the centered part. The route is orthogonal decomposition against the (closed, because isometric)
+> range, plus totality of the step-integrand Doléans exponentials
+> (`WienerExponentialTotality.eq_zero_of_orthogonal_stepDoleans`,
+> `DoleansStepRepresentation.stepDoleans_sub_one_mem_range`), settled on the dyadic cylinder
+> σ-algebras of `BrownianCylinderGeneration`, whose supremum is the natural filtration
+> (`iSup_cylinderFiltration_eq_natFiltration`). No Malliavin calculus and no adapted-integrand Itô
+> formula. Centering, `𝔼[∫₀ᵀ φ dB] = 0`, is proved a floor down as
+> `ItoIntegralProcessGeneral.integral_itoIntegralCLM_T`, not assumed.
+> **`gir-thm-9.3.4` flips `reduced_core → full`** (14 → 13 reduced cores): it had been a `Prop`
+> structure whose conclusion was a bundled field read off by projection, and it now re-exports
+> `martingale_representation`, the process form the entry states.
+> Three new entries. `gir-mrt-range-surjective` is the submodule form above.
+> `gir-market-completeness` (`MathFin/Foundations/MarketCompleteness.lean`,
+> `exists_replicating_strategy`) is the finance reading: every `L²` `𝓕ᴮ_T`-claim is the terminal
+> wealth `𝔼_μ[H] + ∫₀ᵀ φ dB` of a strategy, with a *unique* hedge. `gir-pricing-measure-unique`
+> (`measure_eq_of_pricesGainsAtZero`) is uniqueness of the pricing measure on the Brownian
+> filtration, for measures that price the traded gains at zero.
+>
+> **Scope of the uniqueness result, stated plainly.** `gir-pricing-measure-unique` is **not** the
+> unconditional second FTAP, and it does **not** follow from `IsEMM` alone. The textbook argument
+> needs the replicating wealth to be a stochastic integral against the price `S`, hence a martingale
+> under every EMM; the wealth process martingale representation builds is an integral against `B`,
+> and `S` and `B` share only a filtration. That fair-game step is therefore a named hypothesis,
+> `PricesGainsAtZero Q`: every terminal Itô integral is `Q`-integrable with zero `Q`-mean. What is
+> hypothesised is step (i) of the textbook proof; what is proved is step (ii). The hypothesis is
+> guarded by two proved facts rather than asserted: `pricesGainsAtZero_self` (`μ` satisfies it, so
+> nothing here is vacuous) and `pricesGainsAtZero_of_gains_martingale` (it follows from the textbook
+> gains-martingale condition). The corollary `emm_unique_of_complete` consumes only the `isProb` and
+> `ac` fields of `IsEMM`; its `martingale` field rides along unused, kept so the statement stays in
+> the vocabulary a reader looks it up under. Only `complete ⟹ unique` is delivered — the converse
+> needs the Jacod–Yor extreme-point characterisation and is out of scope.
+> The companion `superReplication_eq_emm_price` is the continuous-time superreplication duality, and
+> its "EMM price" is `𝔼_μ[H]`. It does **not** close
+> [#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39): `Foundations/SuperhedgingDuality`
+> is a finite-state one-period matrix model whose Farkas gate is untouched. The two equalities hold
+> for structurally different reasons, separation there and martingale representation here, and
+> neither implies the other. The hedging strategy class is the Itô-integrable predictable integrands,
+> wider than `ContinuousMarket.SimpleStrategy`; the widening is forced, since a general `L²` claim is
+> not the terminal value of any piecewise-constant holding. `ContinuousMarket` itself is untouched
+> apart from a scope paragraph. All four entries axioms-clean.
+>
+> **The localized Itô formula now names its integrand**
+> ([#183](https://github.com/raphaelrrcoelho/formal-mathfin/issues/183), closed 2026-08-07; no corpus
+> entries added, five strengthened). The chain
+> `ito_formula_td_L2_bddDeriv → cutoff_bddDeriv → ito_formula_td_localized → ito_formula_itoProcess →
+> ito_formula_gbm`/`ito_formula_expBrownian → discountedGBM_eq_itoIntegral` was a run of bare
+> existentials, so no consumer could identify the diffusion coefficient — the library could not say
+> "the delta is `σŜ`". Every link now carries `gfx =ᵐ [the integrand]`, ending at `gfx =ᵐ [σ·Ŝ(·)]`
+> for the discounted GBM, and `sc-thm-7.1.2`, `sc-ito-formula-localized`, `sc-ito-formula-gbm`,
+> `sc-discounted-gbm-ito` and `sc-ito-formula-ito-process` state it. **This closed a fidelity gap, not
+> just a convenience one:** all five entries' `description` and docstring already wrote the integral as
+> `∫₀ᵀ f_x(s,B_s) dB_s` / `∫₀ᵀ σŜ(s) dB_s` while the Lean said only `∃ gfx` — the prose was ahead of
+> the statement. The identification argument is a general `Lp` fact
+> (`ae_eq_of_tendsto_Lp_of_tendsto`: an `L²` limit agrees a.e. with a pointwise limit of a.e.
+> representatives, via subsequence a.e. convergence) applied to the observation that each cutoff's
+> chain-rule integrand is *eventually constant* at `f_x(·, B)` at every point. `L²` membership of
+> `f_x(·, B_·)` comes out of the identification rather than being a prerequisite. The forgetful wrapper
+> `ito_formula_td_L2_bddDeriv`, whose only job was to drop the conjunct
+> `ito_formula_td_L2_bddDeriv_explicit` already carried — the mechanism that created the gap — is
+> merged away: the two are one theorem under the shorter name.
+>
+> **The audit that followed** (2026-08-07, corpus unchanged). Two overstatements in one day stopped
+> being a one-off, so the class was swept repo-wide. `sc-thm-7.1.1` had the identical defect one tower
+> over — description writing `∫₀ᵗ f'(B_s) dB_s` over an `∃ gf'` — now fixed through
+> `itoIntegralCLM_T_of_bdd_cont → ito_formula_L2_bddDeriv → _mk`. Four descriptions corrected where
+> they claimed the textbook theorem and the entry delivers less (`cm-thm-4.3.10` no `L^p` convergence,
+> `sc-thm-8.2.5` uniqueness not existence, `sc-thm-7.4.5` constant `σ`, `sc-thm-9.2.1` the Feynman–Kac
+> identification not PDE uniqueness). The README's landmark row for `ito_formula_unrestricted` was
+> rendering a local-martingale theorem as an integral identity. And
+> `ae_fst_mem_Ioc_trimMeasure_T` existed six times across five files; five retired. The mechanical
+> slice is now gated (`test_prose_does_not_outrun_statement`, negative-controlled against the three
+> conjuncts it exists to protect); the judgment slice is a standing first pass in the values-review
+> protocol and in `CLAUDE.md`. Open: `description` serves as textbook target for 36 entries and as
+> delivered result for the rest, with nothing marking which, and it is published.
+>
 > **Record correction (2026-08-04, drafter attribution — no theorem changed):** corpus
 > **348**, **316 full + 18 wrappers = 334/348 delivery-ready**, 14 reduced cores, 0
 > placeholders — all unchanged; this touched `metadata.provenance` only, and the ledger
@@ -46,7 +130,7 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > with `test_the_disclosure_does_not_generalize_one_drafter_to_every_entry` asserting the
 > property. Full rationale in [`values-review.md`](values-review.md).
 >
-> **Live status (2026-07-31, speed greeks + caplet/floorlet parity — closes #8, #27):** corpus
+> **Prior (2026-07-31, speed greeks + caplet/floorlet parity — closes #8, #27):** corpus
 > **348**, **316 full + 18 wrappers = 334/348 delivery-ready**, 14 reduced cores, 0 placeholders.
 > Three entries finishing two contributions that had been open since June (#36, #38, mertunsall)
 > and had gone stale against the pin bump.
@@ -478,18 +562,18 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > Itô-**formula** consumer for the first time, and is the prerequisite for the unrestricted-`C²`
 > (stopping-time localization) Itô formula. The construction is entirely inside the Itô tower —
 > **no Markov property, no PDE**: the terminal formula's witness is now canonical
-> (`ito_formula_td_L2_bddDeriv_explicit` exposes `gfx =ᵐ [f_x(·,B)]`), zero-extended to a `[0,∞)`
+> (`ito_formula_td_L2_bddDeriv` exposes `gfx =ᵐ [f_x(·,B)]`), zero-extended to a `[0,∞)`
 > integrand `F` (`exists_fullHorizon_extension`) and matched to each horizon via the existing
 > consistency `itoProcessL2Inf_eq_itoProcessCLM`. Earlier (corpus 298): **the Itô
 > formula decomposes `f(X)` for a general `C³` exp-growth `f` against a constant-coefficient Itô
 > process** `X_t = X₀ + b·t + σ B_t` (`Foundations/ItoFormulaItoProcess.lean`,
 > `sc-ito-formula-ito-process`, **`full`**),
-> `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds`. Earlier:
+> `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds`, `gfx =ᵐ [σ·f'(X_·)]`. Earlier:
 > **Geometric Brownian motion is decomposed by the genuine continuous
 > Itô integral** (`Foundations/ItoFormulaGBM.lean`, entries `sc-ito-formula-gbm` and
 > `sc-discounted-gbm-ito`, both **`full`**) — the **first pricing-ward consumer of the analytic
 > Itô tower**, which until now had *none* (GBM/BS pricing ran via separate algebraic towers and
-> the Wald exponential). `ito_formula_gbm` gives `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ ds`
+> the Wald exponential). `ito_formula_gbm` gives `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ ds` with `gfx =ᵐ [σ·Ŝ(·)]`
 > for the GBM value `Ŝ(t)=S₀ exp((m−σ²/2)t+σ B_t)`, the stochastic term the *real* Itô integral.
 > The route is the classic one — **localization in time**: the GBM value is `t`-exponential (fails
 > the localized formula's `t`-uniform growth), so the localized formula is applied to the
@@ -509,7 +593,8 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > and drift converge in `L²(μ)` (Brownian marginals have every exponential moment,
 > `BrownianExpMoment`; the drift dominator is the new base stone `pathIntegral_expGrowth_memLp`),
 > so `aₙ=itoIntegralCLM_T gfxₙ` is Cauchy, the Itô **isometry** transfers Cauchy-ness to the
-> integrands, completeness gives the witness, and CLM **continuity** identifies the limit.
+> integrands, completeness gives the witness, CLM **continuity** identifies the limit, and an
+> a.e.-identification pass names it (`gfx =ᵐ [f_x(·,B_·)]`).
 > Axioms-clean `[propext, Classical.choice, Quot.sound]`. Earlier:
 > **The unbounded-horizon Itô integral is a continuous local martingale on
 > the whole half-line `ℝ≥0`** (`Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean`,
@@ -611,6 +696,12 @@ python3 -m tools.verify.coverage_report
 
 Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, higher-order BS greeks including charm, Bachelier greeks, digital greeks, BS-Merton with dividends, Garman-Kohlhagen FX, Black-76 greeks; second pass: Bachelier γ/θ, asset-or-nothing γ, BS-Merton δ/γ/vega, American options in binomial tree; third pass: CRR drift-quotient limit closing the analytic content of CRR-to-BS; fifth pass: cash-or-nothing digital gamma closing the previously deferred quotient-rule item; sixth pass: full digital ρ/vega/θ matrix for cash and asset variants — 6 theorems closing the remaining digital Greek gap; seventh pass: Black-76 ρ and θ closing the futures-options Greek set; eighth pass: CRR drift limit n-form `n·(2p_n−1)·σ·√(T/n) → (r−σ²/2)T` closing the previously deferred substitution work; ninth pass: Phase 5 broader mathematical-finance — fixed-income ZCB pricing/yield/duration/convexity, two-asset Markowitz portfolio theory with completing-the-square factorization, CAPM beta + portfolio linearity — 12 theorems extending the project beyond derivatives pricing into fixed income and portfolio theory; tenth pass: Phase 6 quant-risk + N-asset portfolio + bond immunization — Gaussian VaR/CVaR closed forms with affine/scaling identities, bond portfolio rate sensitivity + Redington-style first-order immunization, N-asset Markowitz variance via Finset double sum with diagonal/iid/PSD/two-asset specializations — 15 theorems; eleventh pass: Phase 7 performance / coherent risk / fixed-income depth / static bounds / two-fund separation — Sharpe (√T scaling + scale invariance) + Kelly criterion, gaussian VaR/CVaR coherent risk-measure axioms (translation, homogeneity, monotonicity, gaussian subadditivity via joint-stdev triangle inequality), annuity geometric-series closed form + forward/spot consistency + coupon-bond YTM monotonicity, Phi ≤ 1 + BS call/put price upper bounds + box-spread arbitrage identity, capital market line equation + Sharpe invariance + two-fund decomposition — 23 theorems extending the project into performance measurement, axiomatic risk, and multi-fund portfolio theory; twelfth pass: Phase 8 extended performance / second-order immunization / Asian option inequality — Sortino/Treynor/Information ratios + tracking-error decomposition, second-derivative bond rate sensitivity ∂²P/∂r² = C_P·P + Redington second-order convexity-matching immunization, two-element and equal-weight n-element AM-GM with two-date geometric ≤ arithmetic Asian payoff bound — 13 theorems; **thirteenth pass: Phase 9 credit-risk + strike Greeks + multi-period Kelly** — reduced-form credit spread under constant hazard with survival monotonicity, BS strike-direction derivatives (∂_K bsV, ∂_K bsP, ∂²_K bsV) via magic-identity collapse + put-call parity, multi-period Kelly criterion with myopia + fraction sign analysis — 14 theorems):
 **267 / 284 delivery-ready** (249 full + 18 library wrappers), 17 reduced cores, 0 placeholders.
+
+> **2026-08-02 — downside-performance round (#73).** Added one `full` benchmark entry
+> covering finite-state Omega nonnegativity and its threshold identity, maximum-drawdown
+> nonnegativity and nonnegative scaling on finite price paths, and positive-scaling
+> invariance of the Calmar ratio. The corrected drawdown theorem deliberately assumes
+> `0 ≤ c`; negative scaling reverses peak-to-trough order and is not claimed.
 
 > **Poisson cluster + Itô-QV upgrade round (2026-06-05).** Four reduced cores
 > earned `full` by replacing statement-level specs with genuine derivations,

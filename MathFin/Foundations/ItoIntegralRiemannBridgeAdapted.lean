@@ -150,11 +150,7 @@ theorem itoIntegralCLM_T_of_bdd_adapted_cont (hBmeas : ∀ t, Measurable (B t))
   have hgθ_memLp : MemLp gθ_fn 2 (trimMeasure_T (μ := μ) T hBmeas) :=
     memLp_uncurry_of_bdd_adapted_cont T hBmeas hadap hcont hbdd
   -- `trimMeasure_T` is supported on `(0,T] × Ω`
-  have hsupp : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), z.1 ∈ Set.Ioc 0 T := by
-    rw [trimMeasure_T_eq_restrict]
-    refine ae_restrict_of_forall_mem
-      (MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := natFiltration hBmeas) 0 T
-        MeasurableSet.univ) (fun z hz ↦ hz.1)
+  have hsupp := ae_fst_mem_Ioc_trimMeasure_T (μ := μ) T hBmeas
   -- the uncurried step functions converge a.e. to `θ` (cell collapse + path continuity)
   have hae_conv : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas),
       Tendsto (fun n ↦ f n z) atTop (𝓝 (gθ_fn z)) := by

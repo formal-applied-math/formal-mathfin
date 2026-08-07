@@ -37,13 +37,14 @@ include hB
 
 /-- **Itô formula for `exp(σ·B)`.** For a pre-Brownian motion `B` with continuous paths,
 `exp(σ B_T) − exp(σ B_0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ ½σ²·exp(σ B_s) ds`, where the
-trim-`L²` integrand `gfx` realizes `s ↦ σ·exp(σ B_s)`. The instantiation of
+trim-`L²` integrand is named: `gfx =ᵐ [σ·exp(σ B_·)]`. The instantiation of
 `ito_formula_td_localized` at the time-independent exponential-growth value function
 `f(t, x) = exp(σx)` (whose partials `f_x = σ exp(σx)`, `f_xx = σ² exp(σx)` are unbounded —
 out of reach of the bounded-derivative formula — but of exponential growth). -/
 theorem ito_formula_expBrownian (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) (σ : ℝ) :
     ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+      (⇑gfx =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ σ * Real.exp (σ * B z.1 z.2)) ∧
       (fun ω ↦ Real.exp (σ * B T ω) - Real.exp (σ * B 0 ω)) =ᵐ[μ]
         (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gfx) ω
           + ∫ s in Set.Ioc 0 T, (1 / 2) * (σ ^ 2 * Real.exp (σ * B s ω))
@@ -65,7 +66,7 @@ theorem ito_formula_expBrownian (hBmeas : ∀ t, Measurable (B t))
     rw [hC, abs_pow]; nlinarith [abs_nonneg σ, sq_nonneg σ, sq_abs σ, pow_nonneg (abs_nonneg σ) 3]
   have hlin : ∀ x : ℝ, HasDerivAt (fun u ↦ σ * u) σ x :=
     fun x ↦ by simpa using (hasDerivAt_id x).const_mul σ
-  obtain ⟨gfx, hgfx⟩ := ito_formula_td_localized hB hBmeas hBcont T
+  obtain ⟨gfx, hname, hgfx⟩ := ito_formula_td_localized hB hBmeas hBcont T
     (f := fun _ x ↦ Real.exp (σ * x)) (f_t := fun _ _ ↦ 0)
     (f_x := fun _ x ↦ σ * Real.exp (σ * x)) (f_xx := fun _ x ↦ σ ^ 2 * Real.exp (σ * x))
     (f_tt := fun _ _ ↦ 0) (f_tx := fun _ _ ↦ 0)
@@ -90,7 +91,7 @@ theorem ito_formula_expBrownian (hBmeas : ∀ t, Measurable (B t))
     (fun t x ↦ by simpa using mul_nonneg (le_trans (abs_nonneg _) hkx) (Real.exp_nonneg _))
     (fun t x ↦ by simpa using mul_nonneg (le_trans (abs_nonneg _) hkx) (Real.exp_nonneg _))
     (fun t x ↦ hbd (σ ^ 3) hkxxx x)
-  refine ⟨gfx, ?_⟩
+  refine ⟨gfx, hname, ?_⟩
   filter_upwards [hgfx] with ω hω
   rw [hω, add_right_inj]
   exact integral_congr_ae (ae_of_all _ fun s ↦ zero_add _)
@@ -100,7 +101,8 @@ theorem ito_formula_expBrownian (hBmeas : ∀ t, Measurable (B t))
 
   `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ(s) ds`,
 
-with the genuine continuous Itô integral `itoIntegralCLM_T` carrying the `σ Ŝ` diffusion. The
+with the genuine continuous Itô integral `itoIntegralCLM_T` carrying the diffusion, **named**:
+`gfx =ᵐ [σ·Ŝ(·)]`. So the decomposition is `dŜ = σŜ dB + mŜ dt`, coefficients and all. The
 **`f = S₀·exp` special case of `ito_formula_itoProcess`** — the Itô process `X_t = (m−σ²/2)t + σ B_t`
 (`X₀ = 0`, drift `b = m−σ²/2`): there `f' = f'' = S₀·exp`, so the general drift
 `f'(X)·b + ½f''(X)·σ² = S₀ exp(X)·(m−σ²/2) + ½σ²·S₀ exp(X) = m·Ŝ` (the time-localization `−σ²/2`
@@ -110,6 +112,8 @@ grounding it on the continuous Itô integral rather than the explicit Wald expon
 theorem ito_formula_gbm (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) (S₀ m σ : ℝ) :
     ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+      (⇑gfx =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦
+        σ * (S₀ * Real.exp ((m - σ ^ 2 / 2) * z.1 + σ * B z.1 z.2))) ∧
       (fun ω ↦ S₀ * Real.exp ((m - σ ^ 2 / 2) * (T : ℝ) + σ * B T ω)
               - S₀ * Real.exp ((m - σ ^ 2 / 2) * (0 : ℝ) + σ * B 0 ω)) =ᵐ[μ]
         (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gfx) ω
@@ -119,7 +123,7 @@ theorem ito_formula_gbm (hBmeas : ∀ t, Measurable (B t))
   have hexp : ∀ y : ℝ, |S₀ * Real.exp y| ≤ |S₀| * Real.exp (1 * |y|) := fun y ↦ by
     rw [abs_mul, abs_of_pos (Real.exp_pos _), one_mul]
     exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (le_abs_self _)) (abs_nonneg _)
-  obtain ⟨gfx, hgfx⟩ := ito_formula_itoProcess hB hBmeas hBcont T 0 (m - σ ^ 2 / 2) σ
+  obtain ⟨gfx, hname, hgfx⟩ := ito_formula_itoProcess hB hBmeas hBcont T 0 (m - σ ^ 2 / 2) σ
     (f := fun y ↦ S₀ * Real.exp y) (f' := fun y ↦ S₀ * Real.exp y)
     (f'' := fun y ↦ S₀ * Real.exp y) (f''' := fun y ↦ S₀ * Real.exp y)
     (fun y ↦ (Real.hasDerivAt_exp y).const_mul S₀)
@@ -127,7 +131,8 @@ theorem ito_formula_gbm (hBmeas : ∀ t, Measurable (B t))
     (fun y ↦ (Real.hasDerivAt_exp y).const_mul S₀)
     (lam := 1) (C := |S₀|) zero_le_one hexp hexp hexp
   -- on `[0, T]` the inner offset `X₀ = 0` drops out and the drift `b·f' + ½σ²f''` collapses to `m·Ŝ`
-  refine ⟨gfx, ?_⟩
+  simp only [zero_add] at hname
+  refine ⟨gfx, hname, ?_⟩
   filter_upwards [hgfx] with ω hω
   simp only [zero_add] at hω
   rw [hω, add_right_inj]
@@ -137,21 +142,28 @@ theorem ito_formula_gbm (hBmeas : ∀ t, Measurable (B t))
 `ito_formula_gbm` at the risk-neutral drift `m = 0`: the discounted geometric Brownian motion
 `Ŝ(t) = S₀ exp(−(σ²/2)·t + σ B_t)` satisfies
 
-  `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx`,
+  `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx`     with     `gfx =ᵐ [σ·Ŝ(·)]`,
 
 the drift vanishing because the localization drift `−σ²/2` exactly cancels the Itô second-order
 correction `½σ²`. This is the **Itô-integral content of the discounted-GBM martingale**
 (`discountedGBM_isMartingale`, there obtained via the Wald exponential): the discounted price
 moves only through its `σ Ŝ` diffusion against `dB`, with no drift — so the increment is a pure
-Itô integral, and the martingale property is the martingale property of that integral. -/
+Itô integral, and the martingale property is the martingale property of that integral.
+
+The naming conjunct is what makes this usable for hedging: the `dB`-integrand replicating the
+discounted price is `σ Ŝ`, so a reader can *state* the diffusion coefficient, not merely know
+that one exists. Without it the theorem says the increment is some Itô integral and stops. -/
 theorem discountedGBM_eq_itoIntegral (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) (S₀ σ : ℝ) :
     ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+      (⇑gfx =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦
+        σ * (S₀ * Real.exp (-(σ ^ 2 / 2) * z.1 + σ * B z.1 z.2))) ∧
       (fun ω ↦ S₀ * Real.exp (-(σ ^ 2 / 2) * (T : ℝ) + σ * B T ω)
               - S₀ * Real.exp (σ * B 0 ω)) =ᵐ[μ]
         (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gfx) ω) := by
-  obtain ⟨gfx, hgfx⟩ := ito_formula_gbm hB hBmeas hBcont T S₀ 0 σ
-  refine ⟨gfx, ?_⟩
+  obtain ⟨gfx, hname, hgfx⟩ := ito_formula_gbm hB hBmeas hBcont T S₀ 0 σ
+  simp only [zero_sub] at hname
+  refine ⟨gfx, hname, ?_⟩
   filter_upwards [hgfx] with ω hω
   rw [show -(σ ^ 2 / 2) * (T : ℝ) = (0 - σ ^ 2 / 2) * (T : ℝ) by ring,
       show σ * B 0 ω = (0 - σ ^ 2 / 2) * (0 : ℝ) + σ * B 0 ω by ring, hω]

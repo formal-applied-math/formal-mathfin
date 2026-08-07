@@ -106,6 +106,22 @@ owners. The judgment is human/agent; the CADENCE is machine-enforced:
 recorded review by more than 12 entries (a cadence threshold — did we refresh
 and act on the backlog — not a quality verdict).
 
+**The last step of every session, before anything is called done: read the
+prose against its own statement.** For every docstring, corpus `description`,
+and doc paragraph the session touched, ask whether it claims more than the
+Lean proves. This is the one failure the rest of the gates structurally
+cannot see — the build is green precisely because the statement is weaker
+than the prose. It has happened repeatedly and never on purpose: the prose
+describes the theorem the author had in mind and the statement quietly says
+less (2026-08-07: five corpus entries writing `∫₀ᵀ f_x(s,B_s) dB_s` over an
+`∃ gfx`; the README landmark table rendering a local-martingale theorem as an
+integral identity; four descriptions claiming a textbook result the entry
+narrows). `description` ships in the HF dataset, so it is an outward-facing
+claim. The mechanical slice is enforced by
+`test_values.py::test_prose_does_not_outrun_statement`; the rest is judgment
+and belongs to the values review's standing first pass
+(`docs/values-review.md`). Do it before the review's lenses, not after.
+
 **Verification ledger** (`verification_ledger.json` + `tools/verify/ledger.py`):
 every benchmark entry's validity depends on exactly its snippet code, the
 transitive MathFin modules it imports, and the toolchain pins — the ledger

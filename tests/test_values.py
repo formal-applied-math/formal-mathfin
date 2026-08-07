@@ -323,3 +323,80 @@ def test_values_review_is_current() -> None:
         "(docs/values-review.md) and record the verdict before pushing more "
         "proof content."
     )
+
+
+# --------------------------------------------------------------------------
+# The prose-vs-statement gate.
+#
+# Twice on 2026-08-07 a green build shipped prose that claimed more than the
+# Lean beneath it. Five corpus entries described the stochastic term as
+# `∫₀ᵀ f_x(s,B_s) dB_s` while their statements said only `∃ gfx` (#183), and
+# the README's landmark table rendered `ito_formula_unrestricted` as an
+# integral identity when the theorem proves only that a residual is a
+# continuous local martingale. Nobody wrote a false claim on purpose: the
+# prose described the theorem everyone had in mind and the statement quietly
+# said less.
+#
+# This catches the mechanical half of that class — an existential whose
+# witness the statement never pins down, while the prose writes the integral
+# that would pin it down. The judgment half (a description that overstates in
+# some other way) belongs to the values review, whose protocol now carries it
+# as a standing step.
+#
+# Deliberately narrow: it fires only on `∃`-statements, and only when the
+# prose writes an integral against a driver. A first draft accepted any `=ᵐ`
+# after the `∃` as evidence of identification and so passed `sc-thm-7.1.1`,
+# whose main identity is itself an `=ᵐ` — the check answered a different
+# question than the one asked. Match the witness by NAME.
+EXISTS_WITNESS_RE = re.compile(r"∃!?\s*([A-Za-z_][A-Za-z0-9_'’]*)\s*[:,]")
+# an integral against a driver: `∫ … dB`, `dB_s`, `dW`, `dX`, `dM`
+PROSE_CLAIMS_INTEGRAL_RE = re.compile(r"∫[^\n]{0,90}\bd[BWXM]\b|\bd[BWXM]_[a-z]\b")
+DOCSTRING_RE = re.compile(r"/--(.*?)-/", re.S)
+STATEMENT_START_RE = re.compile(r"\n(?:theorem|lemma)\s")
+
+# Entries whose prose names an integrand the statement does not pin down, with
+# the reason it is acceptable. Keep this empty unless there is a real reason.
+PROSE_STATEMENT_ALLOWLIST: dict[str, str] = {}
+
+
+def _headline_statement(code: str) -> str:
+    match = STATEMENT_START_RE.search(code)
+    statement = code[match.start():] if match else code
+    for marker in (":= by", ":=\n"):
+        index = statement.find(marker)
+        if index != -1:
+            return statement[:index]
+    return statement
+
+
+def test_prose_does_not_outrun_statement() -> None:
+    offenders = []
+    for _path, entry in iter_entries():
+        code = (entry.get("code") or {}).get("lean", "")
+        if not code:
+            continue
+        statement = _headline_statement(code)
+        witness = EXISTS_WITNESS_RE.search(statement)
+        if not witness:
+            continue
+        name = witness.group(1)
+        # the statement pins the witness down if it equates it to anything
+        identified = (
+            re.search(rf"(⇑\s*)?{re.escape(name)}\s*=", statement) is not None
+            or re.search(rf"=\s*{re.escape(name)}\b", statement) is not None
+            # a coerced witness, `(v : ℝ) = t - s`, is pinned down just as well
+            or re.search(rf"\(\s*{re.escape(name)}\s*:[^)]*\)\s*=", statement) is not None
+            or "∃!" in statement
+        )
+        if identified:
+            continue
+        doc = DOCSTRING_RE.search(code)
+        prose = (doc.group(1) if doc else "") + "\n" + (entry.get("description") or "")
+        if PROSE_CLAIMS_INTEGRAL_RE.search(prose) and entry["id"] not in PROSE_STATEMENT_ALLOWLIST:
+            offenders.append(entry["id"])
+    assert not offenders, (
+        "these entries write an integral against a driver in their prose while "
+        "their statement leaves the existential witness unnamed — either carry "
+        "the identification into the statement, or reword the prose to say what "
+        f"is actually proved: {sorted(offenders)}"
+    )

@@ -157,6 +157,102 @@ Do not push with stale ledger entries — the CI `ledger status` gate will fail.
 
 ---
 
+## `ledger verify` times out on entry after entry (the timeout spiral)
+
+**Symptom:** a corpus-scale `python3 -m tools.verify.ledger verify` starts failing on
+timeouts and then keeps failing, with each entry reported at just over the cap.
+Entries you know are cheap take as long as ones you know are hard.
+
+**Cause:** `LEAN_ELAB_TIMEOUT` defaults to `180` (`docker/docker-compose.yml:137`),
+which is fine for authoring a single file and too tight for a sweep. The failure
+mode is a **spiral**, not an isolated timeout: a timeout kills the REPL, so the next
+entry pays a ~120s reload out of its own budget and times out too, killing the REPL
+again. Measured on 2026-08-07: entries reported at 182–201s under the 180s cap ran at
+27–47s at `LEAN_ELAB_TIMEOUT=600`, and a warm entry in the same sweep ran at 31.7s.
+The entries were never the problem; the cap interacting with the restart cost was.
+
+**Fix:** raise the cap and restart the daemon before the sweep.
+```bash
+docker compose -f docker/docker-compose.yml down lean-repl
+LEAN_ELAB_TIMEOUT=600 docker compose -f docker/docker-compose.yml up -d lean-repl
+# wait for the daemon to answer a real lean-check (log-grep and port probes both lie),
+# then:
+python3 -m tools.verify.ledger verify
+```
+
+Once a sweep has spiralled, re-running it without raising the cap reproduces it. Stop
+the sweep, fix the cap, and re-run rather than grinding through the remaining entries.
+
+---
+
+## The daemon stops answering after a long session (the memory wedge)
+
+**Symptom:** `lean-check.sh` returns **nothing at all** and the request never completes.
+The container is up, the log shows the request arriving, and no result line follows. An
+agent driving the daemon looks like it has hung.
+
+**Cause:** the daemon accumulates memory across many check/gate cycles and eventually
+sits at its `mem_limit`. Measured on 2026-08-06 after ~15h uptime: `docker stats`
+showed `5.861GiB / 6GiB` at 31% CPU, with a request logged at 02:30:01 and no result
+ever emitted. This is not the two-Lean-processes hazard the memory doctrine warns
+about; it is one long-lived process reaching the ceiling on its own.
+
+**Diagnosis:** `docker stats --no-stream | grep lean` and compare against the compose
+`mem_limit`. An **empty** `lean-check` response is the tell. An *error* means the daemon
+answered; silence means it could not.
+
+**Fix:** restart it. There is nothing to salvage.
+```bash
+docker compose -f docker/docker-compose.yml down lean-repl
+LEAN_ELAB_TIMEOUT=600 docker compose -f docker/docker-compose.yml up -d lean-repl
+```
+Memory after a restart sat at ~939MiB, so the headroom is real once reclaimed. On a long
+session, restart proactively rather than waiting for the wedge.
+
+---
+
+## An in-container step fails with "Read-only file system" writing to `docs/`
+
+**Symptom:** something like
+`sh: 1: cannot create /app/docs/blueprint_nodes.json: Read-only file system`, while the
+same command's Lean work succeeded.
+
+**Cause:** compose bind-mounts `tools/`, `benchmarks/`, `tests/`, `mathfin.toml` and the
+Lake pieces. **`docs/` is not mounted.** Anything run inside the container that writes
+there fails, even though reading the repo works.
+
+**Fix:** capture the container's stdout on the host instead of redirecting inside it.
+```bash
+docker compose -f docker/docker-compose.yml run --rm -T --entrypoint sh verify \
+  -c 'lake exe blueprint_export MathFin.Blueprint' > docs/blueprint_nodes.json
+```
+Validate the captured output before overwriting a tracked file — compose can print
+container-lifecycle noise, so write to a scratch path first and check it parses.
+
+Note `lake exe blueprint_export` loads the MathFin environment, so it is a Lean process
+and needs the daemon **down** under the memory doctrine.
+
+---
+
+## Entries are stale again right after a successful `ledger verify`
+
+**Symptom:** `ledger verify` reports "26 verified, 0 failed", and `ledger status` immediately
+afterwards still shows a handful stale — including entries the sweep just reported OK.
+
+**Cause:** you edited a `MathFin/` file while the sweep was running. The sweep stamps each entry
+with the input-hash it computed when it started, so every entry verified after your edit records
+the *pre-edit* hash. `status` recomputes and correctly calls them stale. Measured 2026-08-07: a
+one-line comment move inside `ItoFormulaLocalized.lean` mid-sweep left 10 of 26 entries stale.
+
+Note the gate behaved correctly — this costs time, not correctness. There is no path here to a
+false green.
+
+**Fix:** re-run `ledger verify`; it picks up only the newly-stale ones. Better, treat a sweep as a
+quiet period: finish the source edits, then start it. If you must edit during one, expect to pay
+for the entries already past.
+
+---
+
 ## CI fails on `test_values.py` after a benchmark edit
 
 **Symptom:** `tests/test_values.py` fails with "stale AxiomAuditGen" or a

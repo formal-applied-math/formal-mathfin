@@ -312,6 +312,24 @@ private lemma abs_le_of_expGrowth_deriv {f f_x : ℝ → ℝ → ℝ}
       _ = C * (Real.exp (lam * |y|) * Real.exp |y|) := by ring
   linarith
 
+/-- **An `L²` limit is pinned down by pointwise limits of a.e. representatives.** If `gₙ → g`
+in `L²` and each `gₙ` is a.e. equal to a concrete function `hₙ` with `hₙ x → h x` for every `x`,
+then `g =ᵐ h`.
+
+`L²` convergence gives a.e. convergence only along a *subsequence* — which is all that is
+needed, since a subsequence of a convergent sequence has the same limit and limits in `ℝ` are
+unique. Nothing is asked of `h`: its `L²` membership is a *conclusion*, obtained from `g ∈ L²`
+by the a.e. equality, rather than a hypothesis to be discharged first. -/
+private lemma ae_eq_of_tendsto_Lp_of_tendsto {α : Type*} {mα : MeasurableSpace α}
+    {ν : Measure α} {g : ℕ → Lp ℝ 2 ν} {gInf : Lp ℝ 2 ν} (hg : Tendsto g atTop (𝓝 gInf))
+    {h : ℕ → α → ℝ} {hInf : α → ℝ} (hname : ∀ n, ⇑(g n) =ᵐ[ν] h n)
+    (hpt : ∀ x, Tendsto (fun n ↦ h n x) atTop (𝓝 (hInf x))) :
+    ⇑gInf =ᵐ[ν] hInf := by
+  obtain ⟨ns, hns, hae⟩ := (tendstoInMeasure_of_tendsto_Lp hg).exists_seq_tendsto_ae
+  filter_upwards [hae, ae_all_iff.2 hname] with x hx hall
+  exact tendsto_nhds_unique hx
+    (((hpt x).comp hns.tendsto_atTop).congr fun i ↦ (hall (ns i)).symm)
+
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
 
@@ -322,7 +340,11 @@ of exponential growth, each `fₙ` has globally bounded partials (the truncation
 the argument to `[−M₀(n+1), M₀(n+1)]`, where the growth bound is a constant, times the
 `n`-uniform bounds on `φₙ`'s derivatives), so `ito_formula_td_L2_bddDeriv` applies and yields
 a trim-`L²` integrand `gfxₙ` realizing the chain-rule integrand. The drift integrand is the
-genuine `(fₙ)_t + ½(fₙ)_xx` written through the chain rule. -/
+genuine `(fₙ)_t + ½(fₙ)_xx` written through the chain rule.
+
+The integrand is **named**: `gfxₙ =ᵐ [f_x(·, φₙ(B)) · φₙ'(B)]`, the chain rule read off the
+cutoff. Carrying this conjunct through the cutoff step is what lets `ito_formula_td_localized`
+identify its own integrand in the limit. -/
 theorem cutoff_bddDeriv (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) (S : SmoothTrunc) (n : ℕ)
     {f f_t f_x f_xx f_tt f_tx f_xxx : ℝ → ℝ → ℝ}
@@ -342,6 +364,8 @@ theorem cutoff_bddDeriv (hBmeas : ∀ t, Measurable (B t))
     (hg_tx : ∀ t x, |f_tx t x| ≤ C * Real.exp (lam * |x|))
     (hg_xxx : ∀ t x, |f_xxx t x| ≤ C * Real.exp (lam * |x|)) :
     ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+      (⇑gfx =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦
+        f_x z.1 (S.cut n (B z.1 z.2)) * S.cutD1 n (B z.1 z.2)) ∧
       (fun ω ↦ fCut f S n T (B T ω) - fCut f S n 0 (B 0 ω)) =ᵐ[μ]
         (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gfx) ω
           + ∫ s in Set.Ioc 0 T,
@@ -977,7 +1001,15 @@ gfxₙ` is Cauchy; the Itô **isometry** transfers Cauchy-ness to `(gfxₙ)`, co
 witness `gfxInf`, and CLM **continuity** identifies its image with the limit. The bounded case is
 the special case `λ = 0`; this is a drop-in for `ito_formula_td_L2_bddDeriv` (it additionally
 asks `f_t` to be jointly continuous, which exponential growth — unlike a global bound — does not
-supply). -/
+supply).
+
+The limit integrand is **named**: `gfx =ᵐ [f_x(·, B_·)]`. Each `gfxₙ` is the chain-rule
+integrand `f_x(·, φₙ(B))·φₙ'(B)` of its cutoff, and at every point the cutoff is *eventually
+inert* — once `n ≥ |B|` we have `φₙ = id` and `φₙ' = 1` there, so the sequence is eventually
+constant at `f_x(·, B)`. An `L²` limit agrees a.e. with a pointwise limit of a.e.
+representatives (`ae_eq_of_tendsto_Lp_of_tendsto`), which settles it. Note this route never has
+to prove `f_x(·, B_·) ∈ L²(trim)` — that falls out of the identification, being the one thing a
+direct `L²`-convergence argument would have had to establish first. -/
 theorem ito_formula_td_localized
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
     (T : ℝ≥0) {f f_t f_x f_xx f_tt f_tx f_xxx : ℝ → ℝ → ℝ}
@@ -998,6 +1030,7 @@ theorem ito_formula_td_localized
     (hg_tx : ∀ t x, |f_tx t x| ≤ C * Real.exp (lam * |x|))
     (hg_xxx : ∀ t x, |f_xxx t x| ≤ C * Real.exp (lam * |x|)) :
     ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+      (⇑gfx =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ f_x z.1 (B z.1 z.2)) ∧
       (fun ω ↦ f T (B T ω) - f 0 (B 0 ω)) =ᵐ[μ]
         (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gfx) ω
           + ∫ s in Set.Ioc 0 T,
@@ -1006,8 +1039,8 @@ theorem ito_formula_td_localized
     Differentiable.continuous fun x ↦ (hf_x t x).differentiableAt
   have hC0 : 0 ≤ C := le_trans (abs_nonneg _) (by simpa using hg_x 0 0)
   obtain ⟨S⟩ := smoothTrunc_exists
-  choose gfx hid using fun n ↦ cutoff_bddDeriv hB hBmeas hBcont T S n hf_t hf_tt hf_tx hf_x hf_xx
-    hf_xxx hf_x_cont hf_xx_cont hlam hg_t hg_x hg_xx hg_tt hg_tx hg_xxx
+  choose gfx hname hid using fun n ↦ cutoff_bddDeriv hB hBmeas hBcont T S n hf_t hf_tt hf_tx
+    hf_x hf_xx hf_xxx hf_x_cont hf_xx_cont hlam hg_t hg_x hg_xx hg_tt hg_tx hg_xxx
   -- `L²` membership of the boundary terms, via the `f`-value growth bound
   have hfeval : ∀ (t : ℝ) (r : ℝ≥0) (g : Ω → ℝ), Measurable g → (∀ ω, |g ω| ≤ |B r ω|) →
       MemLp (fun ω ↦ f t (g ω)) 2 μ := by
@@ -1122,7 +1155,14 @@ theorem ito_formula_td_localized
       rw [dist_eq_norm, dist_eq_norm, ← map_sub, itoIntegralCLM_T_norm]
     rw [hdist]; exact hN m hm k hk
   obtain ⟨gfxInf, hgfxInf⟩ := cauchySeq_tendsto_of_complete hgfx_cauchy
-  refine ⟨gfxInf, ?_⟩
+  refine ⟨gfxInf, ?_, ?_⟩
+  · -- each cutoff's chain-rule integrand is eventually `f_x(·, B)` at every point, the truncation
+    -- going inert (`φₙ = id`, `φₙ' = 1`) once `n ≥ |B|`
+    refine ae_eq_of_tendsto_Lp_of_tendsto hgfxInf hname fun z ↦ ?_
+    refine tendsto_const_nhds.congr' (Filter.EventuallyEq.symm ?_)
+    filter_upwards [eventually_ge_atTop ⌈|B z.1 z.2|⌉₊] with n hn
+    have hxn : |B z.1 z.2| ≤ (n : ℝ) := le_trans (Nat.le_ceil _) (by exact_mod_cast hn)
+    rw [S.cut_eq_id_of_abs_le (by linarith), S.cutD1_eq_one_of_abs_lt (by linarith), mul_one]
   -- CLM continuity ⇒ `itoIntegralCLM_T gfxInf = bdy − drift`
   have hJ : itoIntegralCLM_T hB T hBmeas gfxInf = hbdy_memLp.toLp _ - hdrift_memLp.toLp _ :=
     tendsto_nhds_unique

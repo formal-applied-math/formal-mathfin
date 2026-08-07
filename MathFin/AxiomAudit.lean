@@ -439,12 +439,9 @@ diffusion integrand a function of `B`. -/
 to a process identity holding for **every** `t ≤ T`: `f(t,B_t) − f(0,B_0) =ᵐ itoProcessL2Inf t F +
 ∫₀ᵗ (f_t + ½f_xx) ds`, the stochastic term the genuine Itô-integral *process* — a continuous `L²`
 martingale with an everywhere-continuous local-martingale modification. The witness is canonical
-(`ito_formula_td_L2_bddDeriv_explicit` exposes `gfx =ᵐ [f_x(·,B)]`); the construction is the
+(`ito_formula_td_L2_bddDeriv` exposes `gfx =ᵐ [f_x(·,B)]`); the construction is the
 zero-extension `exists_fullHorizon_extension` fed to the existing `[0,∞)` horizon-consistency. No
 Markov property, no PDE — entirely inside the Itô tower. -/
-
-/-- info: 'MathFin.ito_formula_td_L2_bddDeriv_explicit' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.ito_formula_td_L2_bddDeriv_explicit
 
 /-- info: 'MathFin.ito_formula_td_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ito_formula_td_process
@@ -1028,5 +1025,61 @@ GBM under its risk-neutral measure (`Q = P`, `discountedGBM_isMartingale` a full
 
 /-- info: 'MathFin.discountedGBM_noArbitrageSimple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.discountedGBM_noArbitrageSimple
+
+/-! ### Martingale representation, and the completeness it buys
+
+The Itô integral `φ ↦ ∫₀ᵀ φ dB` is an isometry (`itoIsometry_T`, audited above); these theorems
+identify its IMAGE exactly as the centered `𝓕ᴮ_T`-measurable part of `L²(μ)`. Surjectivity of an
+isometry is a *totality* statement about its range, and it is proved as one: the range is closed
+(the isometric image of a complete space) hence orthogonally complemented, so a centered
+`𝓕ᴮ_T`-measurable `F` splits as `y + z` with `z ⊥ range`; `z` inherits measurability and centering,
+so it is orthogonal to every step-integrand Doléans exponential (`stepDoleans_sub_one_mem_range`
+puts `D − 1` in the range, centering kills the leftover `1`), and Wiener-exponential totality
+(`eq_zero_of_orthogonal_stepDoleans`) forces `z = 0`. No Malliavin calculus, no adapted-integrand
+Itô formula.
+
+* `itoIntegralCLM_T_surjective_onto_centered` — submodule form: range ⊔ constants = `lpMeas 𝓕ᴮ_T`.
+* `exists_itoIntegral_representation` — terminal form, with a UNIQUE integrand (injectivity of an
+  isometry).
+* `martingale_representation` — process form (corpus `gir-thm-9.3.4`): `M t =ᵐ M 0 + (φ●B)_t` for
+  `t ≤ T`, the terminal integrand spread over the horizon by
+  `itoProcessCLM_eq_condExpL2`. `M 0` is not assumed constant — it is the representation at `t = 0`.
+
+The finance reading (`Foundations/MarketCompleteness.lean`) is completeness:
+`exists_replicating_strategy` hedges every square-integrable `𝓕ᴮ_T`-claim from initial wealth
+`𝔼_μ[H]`, uniquely.
+
+`measure_eq_of_pricesGainsAtZero` is the pricing-measure statement, and its scope is narrower than
+the textbook second FTAP — deliberately, and the audit records it rather than the slogan. It says:
+a probability measure `Q ≪ μ` that prices the traded gains at zero agrees with `μ` on all of
+`𝓕ᴮ_T`. Gains-neutrality is a HYPOTHESIS (`PricesGainsAtZero`), not a consequence of `IsEMM`: the
+replicating wealth here is an integral against `B`, while an EMM `Q` makes `S` — not `B` — a
+martingale, and the missing link `∫ φ dS` is absent by design. The hypothesis is guarded by two
+proved facts, `pricesGainsAtZero_self` (μ satisfies it, so nothing is vacuous) and
+`pricesGainsAtZero_of_gains_martingale` (the textbook gains-martingale condition implies it). Only
+`complete ⟹ unique` is delivered; the Jacod–Yor converse is out of scope. -/
+
+/-- info: 'MathFin.itoIntegralCLM_T_surjective_onto_centered' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.itoIntegralCLM_T_surjective_onto_centered
+
+/-- info: 'MathFin.exists_itoIntegral_representation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.exists_itoIntegral_representation
+
+/-- info: 'MathFin.martingale_representation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.martingale_representation
+
+/-- info: 'MathFin.exists_replicating_strategy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.exists_replicating_strategy
+
+/-- info: 'MathFin.measure_eq_of_pricesGainsAtZero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.measure_eq_of_pricesGainsAtZero
+
+/-! ### Downside performance metrics (#73)
+
+The finite-state Omega identity, finite-path maximum drawdown, and Calmar
+scaling law are audited here as one public acceptance bundle. -/
+
+/-- info: 'MathFin.downsideMetrics_bundle' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.downsideMetrics_bundle
 
 end MathFin.AxiomAudit

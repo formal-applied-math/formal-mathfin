@@ -36,6 +36,7 @@ docs/superpowers/
 
 # agent-local state (mirrors .codex/)
 .claude/
+.superpowers/
 
 # HF dataset build output (CI artifact, regenerated from benchmarks/)
 dist/

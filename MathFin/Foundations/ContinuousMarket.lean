@@ -42,6 +42,16 @@ times, and the general stochastic integral `∫ φ dS`). Absent by design:
 `IsEMM` here is stated *on a process* `S`, exactly the object Delbaen–Schachermayer's theorem
 would produce — so this frame is a strict sub-object of the DS one, and extending it to
 meaning 2 is additive (new strategy class + new theorem), not a rewrite.
+
+One such extension already exists. `Foundations/MarketCompleteness` states replication,
+superreplication duality and uniqueness of the pricing measure over the **Itô-integrable
+predictable** integrands rather than `SimpleStrategy`. That widening is forced by the
+mathematics, not chosen: the hedge martingale representation returns is a general predictable
+process, and a general `L²` claim is not the terminal value of any piecewise-constant holding,
+so a completeness statement over `SimpleStrategy` would have no witnesses. `SimpleStrategy`
+remains the right class *here*, where the whole point is that the forward no-arbitrage
+conclusion needs no stochastic integration at all — a finite sum of predictable increments. The
+two classes coexist; neither file changes the other, and `IsEMM` is shared unchanged.
 -/
 
 @[expose] public section
