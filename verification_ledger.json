@@ -265,9 +265,9 @@
     "gir-market-completeness": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-08-07",
-      "elapsed_s": 29.1,
-      "input_hash": "37fb3dbd409c7ca3ad6f135844b27f655a61ac5e21bb4a2597e120eaa4eeeee3",
-      "verified_at_commit": "14d78b2"
+      "elapsed_s": 250.5,
+      "input_hash": "8880170235c0a802428dfd2189399125b2458e305e5da4f114d20b1f448a0f16",
+      "verified_at_commit": "37fba3a"
     },
     "gir-martingale-reindex": {
       "benchmark_file": "girsanov_finance.json",
@@ -279,16 +279,16 @@
     "gir-mrt-range-surjective": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-08-07",
-      "elapsed_s": 26.3,
-      "input_hash": "c33b35df8ae170689b72939351e93ed5ae1dd27ed5911a41e305afa5d28c41b3",
-      "verified_at_commit": "14d78b2"
+      "elapsed_s": 203.5,
+      "input_hash": "f1f34c8d23c06ee221da99b31f464c8247f7c8453e64ab39e6f665d7c8837b76",
+      "verified_at_commit": "37fba3a"
     },
     "gir-pricing-measure-unique": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-08-07",
-      "elapsed_s": 46.1,
-      "input_hash": "831c27cd6c69e3640a1dbc28626bd938d2a87d0a976e9fe3e4dcfcb19226d816",
-      "verified_at_commit": "14d78b2"
+      "elapsed_s": 109.9,
+      "input_hash": "a12a952ca5f5671bf083adb942057ddf37e473924afc68a85727fc5d112765d5",
+      "verified_at_commit": "37fba3a"
     },
     "gir-simple-adapted": {
       "benchmark_file": "girsanov_finance.json",
@@ -321,9 +321,9 @@
     "gir-thm-9.3.4": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-08-07",
-      "elapsed_s": 46.5,
-      "input_hash": "89c888c9ba4f6330d4761539d3ba440a1a34138a990132d4cbbe26ec851eb6c8",
-      "verified_at_commit": "14d78b2"
+      "elapsed_s": 121.9,
+      "input_hash": "9364115ecf693774aa48666229b1e08980749661cd8665fcafbd285887f6d345",
+      "verified_at_commit": "37fba3a"
     },
     "mart-prop-2.5.5": {
       "benchmark_file": "martingales.json",
