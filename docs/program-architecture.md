@@ -1,6 +1,16 @@
 # Program architecture — owning the corner across more than one field
 
-**Date:** 2026-08-06 · **Status:** design proposal · **Companion:** [`applied-areas.md`](applied-areas.md)
+**Date:** 2026-08-06 (rev. 2026-08-09: three-repo constraint) · **Status:** design
+proposal · **Companion:** [`applied-areas.md`](applied-areas.md)
+
+**Constraint (owner decision, 2026-08-09):** exactly three repos —
+`formal-mathfin`, `formal-econometrics`, and the foundry. The four *layers* below
+survive unchanged; what changed is their mapping onto repos. The two
+infrastructure layers do not get repos of their own: the apparatus anchors in
+`formal-mathfin` (it must stay public — the gates run in the domain libraries'
+public CI and on contributors' machines, and the foundry is private), and the
+commons collapses into a `ForMathlib/` convention inside the domain libraries,
+which the departure-lounge doctrine had already reduced it to in spirit.
 
 The question: how should the repos be shaped for (1) maximum ownership of the
 formally-verified-applied-mathematics corner, (2) the best autoformalization
@@ -32,60 +42,93 @@ of vigilance.
 
 ---
 
-## 1. Topology — four layers
+## 1. Topology — four layers, three repos
 
 ```
-L0  commons/            Lean. Field-neutral substrate Mathlib lacks. A DEPARTURE LOUNGE.
-L1  apparatus/          Python pkg + Lean meta + reusable CI. The honesty machinery.
-L2  formal-mathfin/     Domain library.  ── independent Lake projects
-    formal-econometrics/     Domain library.
-L3  foundry/            One retargetable pipeline. Domain content is DATA.
+                        formal-mathfin/            formal-econometrics/        foundry/  (private)
+L0 commons              MathFin/ForMathlib/   ←──  Lake git-dep (or copy)
+L1 apparatus            tools/verify/ (anchor) ──→ pip git-dep                 pip git-dep
+L2 domain library       MathFin/ + benchmarks      Econometrics/ + benchmarks
+L3 foundry                                                                     probe/ + domains/
 ```
 
-Four repos at steady state, not one per idea and not one big one.
+The layers are roles, not repos. Two placement decisions do all the work:
 
-### L0 `commons` — the ownership play
+### L0 commons → `ForMathlib/` inside the domain libraries
 
 Field-neutral mathematics that several applied libraries need and Mathlib does not
-have. From the substrate audit: **Brouwer and Kakutani fixed points** (absent —
+have — from the substrate audit: **Brouwer and Kakutani fixed points** (absent —
 verified), the **pointwise Birkhoff ergodic theorem** (absent), empirical-process
 basics, mixing conditions.
 
-**The rule that keeps it from becoming a junk drawer: it is a departure lounge, not
-a home.** Every declaration carries an upstream target and an owner; a CI report ages
-them; nothing is allowed to live there permanently. A `commons` that accepts code
-with no upstream target is a `utils/` directory with better branding, and it will
-rot the same way.
+The departure-lounge doctrine survives intact; only the address changes. The Lean
+ecosystem already has the exact convention: a **`ForMathlib/` directory** —
+"material that belongs upstream, staged here" (junwei-lu's asymptotic-statistics
+repo uses it; so do many Mathlib-adjacent projects; `upstream/` here is the same
+idea). So:
 
-**Why this layer is the ownership move.** Owning the most theorems in econometrics is
-a weak claim — EconCSLib can outproduce us and probably will. Being the group whose
-code everyone else *imports* is the claim that compounds. Brouwer is missing from
-Mathlib; general equilibrium, Nash existence, and every fixed-point equilibrium
-argument need it. Build and upstream it and EconCSLib, the GE projects, and everyone
-after them consume our work.
+- A field-neutral lemma is born in **whichever domain library needs it first**,
+  under `<Lib>/ForMathlib/`, upstream-tagged from day one.
+- The rules that kept the commons from rotting transfer verbatim: every declaration
+  carries an upstream target; a CI report ages them; nothing lives there
+  permanently. A `ForMathlib/` entry with no upstream target is a `utils/` file
+  with better branding.
+- **Cross-library consumption, in order of preference:** (1) it lands in Mathlib
+  and both libraries consume it at the next pin bump — upstreaming *is* the
+  sharing mechanism, which is why aging is enforced; (2) for a single small lemma
+  needed before upstream lands, **copy it**, marked with its origin — honest
+  duplication with a deletion date beats infrastructure; (3) for a genuinely large
+  block (the fixed-point tower), `formal-econometrics` takes a **Lake git-dependency
+  on `formal-mathfin`** pinned to a tag. Lake elaborates only the imported closure,
+  so the cost is not "build all of finance" — it is **pin lockstep**: both
+  libraries must resolve the same Mathlib, so econometrics cannot bump until
+  mathfin does. That is a real coupling; accept it only when the block is too big
+  to copy, and let the aging report keep the pressure on until upstream removes
+  the dependency again.
+
+**Why this layer is still the ownership move.** Owning the most theorems in
+econometrics is a weak claim — EconCSLib can outproduce us and probably will. Being
+the group whose code everyone else *imports* is the claim that compounds. Brouwer is
+missing from Mathlib; general equilibrium, Nash existence, and every fixed-point
+equilibrium argument need it. Build and upstream it and EconCSLib, the GE projects,
+and everyone after them consume our work.
 
 > **Upstreamed lemmas are the only theorems that cannot be out-produced.**
 
 The muscle already exists — `docs/upstreaming.md`, BrownianMotion PR #446 merged.
-This layer makes it a program rather than an occasional courtesy.
+If anything, losing the commons repo *strengthens* this: there is now no
+comfortable middle where field-neutral code can settle. It is in a domain library
+on a deletion clock, or it is in Mathlib.
 
-### L1 `apparatus` — the honesty machinery, extracted once
+### L1 apparatus → anchored in `formal-mathfin`, consumed by the others
 
 Today `tools/verify/` (ledger, coverage report, axiom-audit generator, corpus
 model, blueprint render) and the three gate test-suites are excellent and are
-**welded to one corpus**. Extract to a pip-installable package plus a set of
-`workflow_call` GitHub workflows that domain libraries call in three lines.
+**welded to one corpus**. The genericization still happens — but **in place**, not
+into a new repo: `tools/verify` becomes corpus-parameterized (it already reads
+`mathfin.toml`; the residual mathfin-isms are naming and defaults), and
+`formal-econometrics` and the foundry consume it as a **pip git-dependency pinned
+to a tag** (`pip install "mathfin @ git+https://github.com/raphaelrrcoelho/formal-mathfin@apparatus-v1"`),
+plus `workflow_call` workflows referenced cross-repo the same way.
 
-Contents: ledger, coverage report, `axiom_audit_gen`, blueprint exporter/renderer,
-values-review cadence test, forbidden-text gates, `formalization_status` schema,
-HF dataset publisher.
+**Why mathfin and not the foundry:** the foundry is private, and the apparatus
+must stay public — `build.yml` runs `python3 -m tools.verify.ledger status` in the
+domain libraries' public CI, and outside contributors run the same gates locally.
+Parking the honesty machinery in a private repo would make the public libraries'
+green checkmarks irreproducible to anyone but us, which is the opposite of what
+the machinery is for.
 
-What stays domain-side: the pillar/bridge vocabulary, the blueprint prose, the
-benchmark JSONs, `AxiomAudit.lean`'s curated headliners.
+**The cost, stated honestly:** this is an asymmetric marriage — mathfin is
+flagship *and* toolsmith, and apparatus changes motivated by econometrics land as
+mathfin commits. Tolerable at one maintainer and two libraries; it is the first
+thing to revisit if either stops being true. Two disciplines keep it honest:
+apparatus releases are **tags** (`apparatus-v1`, `-v2`, …) so econometrics
+upgrades deliberately rather than tracking a moving branch, and any
+`tools/verify` change that special-cases mathfin's corpus (rather than reading
+config) is treated as a bug.
 
-This is what stops the second library from being a copy-paste of the first that
-drifts out of sync within a quarter — the standard way a two-library program
-quietly becomes one maintained library and one stale one.
+What stays domain-side regardless: the pillar/bridge vocabulary, the blueprint
+prose, the benchmark JSONs, each library's curated `AxiomAudit.lean` headliners.
 
 ### L2 Domain libraries — independent Lake projects, deliberately
 
@@ -97,9 +140,10 @@ Not a monorepo. Two reasons, and the first is decisive:
 2. Each field's pillars/bridges should be answerable to that field. A shared build
    dilutes exactly the architectural claim that makes each library worth having.
 
-Cost, stated honestly: `commons` must stay **thin**, because every domain library
-rebuilds against it and a fat commons multiplies build cost by the number of
-libraries.
+The 3-repo corollary: since econometrics *may* take a Lake dep on mathfin for a
+large `ForMathlib/` block, independence is now a **default with one sanctioned
+exception**, entered only under the conditions in L0 above and exited at the next
+successful upstream.
 
 ### L3 `foundry` — one pipeline, domain content as data
 
@@ -209,18 +253,19 @@ shared infrastructure is worse than duplication. After is a de-duplication acros
 two live corpora, each with its own drift, which is the expensive version.
 
 Concretely: **formal-econometrics phase 0 should deliberately copy the apparatus.**
-Run its first ~20 entries on the copy, note what actually diverged, and extract L1
-against that evidence. The second library is the forcing function that reveals which
-abstractions are real; do not pre-empt it.
+Run its first ~20 entries on the copy, note what actually diverged, and genericize
+`tools/verify` in place against that evidence — then delete the copy and switch
+econometrics to the tagged pip dependency. The second library is the forcing
+function that reveals which abstractions are real; do not pre-empt it.
 
 | When | Move |
 |---|---|
 | Now | Foundry domain packs (`domains/mathfin/` first, extracted from `house_context.py` + `af_prompts.py`) — mechanical, testable against the existing corpus, and it makes library two a config change |
 | Now | Measure leaf fraction and spine density on the 348-entry corpus. Numbers first, thresholds later |
-| Library 2 phase 0 | Copy the apparatus deliberately. Do not extract yet |
-| Library 2 at ~20 entries | Extract L1 `apparatus` against observed divergence. Cut over both libraries |
-| When a second domain needs it | Create L0 `commons`, seeded with Brouwer/Kakutani, upstream-tagged from day one |
-| Library 3 | Revisit whether a GitHub org is warranted |
+| Library 2 phase 0 | Copy the apparatus into `formal-econometrics` deliberately. Do not genericize yet |
+| Library 2 at ~20 entries | Genericize `tools/verify` in place in mathfin against observed divergence; tag `apparatus-v1`; econometrics and foundry switch to the tagged pip dep and delete their copies |
+| First field-neutral block | `MathFin/ForMathlib/` (or the econometrics twin, whichever births it), upstream-tagged from day one, aging report wired into CI |
+| If ever a library 3 | Revisit both the three-repo cap and a GitHub org together |
 
 **On the org:** it makes the collection legible as a program rather than scattered
 personal projects, which is worth real money for an ownership claim. But the repo
@@ -234,9 +279,16 @@ Decide deliberately rather than by drift.
 ## 5. What not to do
 
 - **A monorepo.** The memory doctrine forbids it outright.
-- **Extracting the apparatus before library two exists.** You will guess the seams
-  wrong.
-- **A `commons` without mandatory upstream targets.** That is a `utils/` package.
+- **Genericizing the apparatus before library two exists.** You will guess the
+  seams wrong.
+- **A `ForMathlib/` without mandatory upstream targets.** That is a `utils/`
+  directory.
+- **Moving the apparatus into the private foundry.** The gates run in public CI
+  and on contributors' machines; a private toolchain makes the public green
+  checkmark irreproducible.
+- **A standing Lake dependency between the domain libraries.** The sanctioned
+  exception (L0) is temporary by construction — pin lockstep is the tax meter,
+  and upstreaming is how the meter stops.
 - **Competing on theorem count.** EconCSLib is at 40k lines. The defensible position
   is the faithfulness contract — kernel-enforced scope declarations against their
   LLM-as-judge — and the upstreamed substrate. Volume is the one axis where we lose.
