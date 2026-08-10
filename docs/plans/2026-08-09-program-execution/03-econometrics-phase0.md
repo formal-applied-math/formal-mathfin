@@ -58,6 +58,32 @@ Module 1 — `Econometrics/Identification/PotentialOutcomes.lean`:
   layer plus an instrument) but implement only what DiD consumes. No speculative
   generality — that is the same seams-guessed-wrong trap.
 
+### The encoding decision, and what the pin actually carries (checked 2026-08-09)
+
+Both candidate encodings of "conditional on `D = 1`" exist at
+`81a5d257c8e410db227a6665ed08f64fea08e997`:
+
+- `ProbabilityTheory.cond` — `Mathlib/Probability/ConditionalProbability.lean`,
+  notation `μ[|s]` / `μ[t|s]`, with `cond_apply`, `cond_apply'`,
+  `cond_isProbabilityMeasure`, `cond_cond_eq_cond_inter`.
+- `MeasureTheory.condExp` w.r.t. `MeasurableSpace.comap D ⊥`, plus the `condExpL2`
+  projection layer the substrate audit found.
+
+**Take `cond` for the statement.** It is what the informal theorem says (condition
+on a positive-probability event), it is far cheaper for a binary `D`, and it keeps
+the four observable means literally four integrals. `condExp` is the encoding
+phases 1–2 will need when RDD and IV condition on covariates, so spend a *bounded*
+attempt on a bridge lemma between the two — and if the bridge is not cheap, record
+it in `docs/phase0-verdict.md` as a phase-1 question rather than grinding.
+
+**One adapter lemma is already known missing.** `ConditionalProbability.lean`
+contains zero `integral` lemmas: `∫ f ∂(μ[|s]) = (μ s)⁻¹ • ∫ x in s, f x ∂μ` is not
+in Mathlib at this pin. It should follow from `cond`'s definition plus
+`integral_smul_measure` in a few lines. Write it standalone with a
+`ForMathlib`-shaped docstring and count it honestly against the kill threshold — it
+is field-neutral, so it is also the most likely trigger for runbook 05, well ahead
+of the Brouwer tower that runbook anticipates.
+
 Module 2 — `Econometrics/Identification/DiD.lean`:
 - State parallel trends as the conditional-expectation restriction
   `𝔼[Y₀(post) − Y₀(pre) | D = 1] = 𝔼[Y₀(post) − Y₀(pre) | D = 0]`

@@ -26,15 +26,24 @@ live here, in the flagship's docs tree.)
 |---|---|---|---|---|
 | 01 | [`01-architecture-metrics.md`](01-architecture-metrics.md) | `formal-mathfin` | **now** | — |
 | 02 | [`02-foundry-domain-packs.md`](02-foundry-domain-packs.md) | `mathfin-foundry` | **now** | — |
-| 03 | [`03-econometrics-phase0.md`](03-econometrics-phase0.md) | `formal-econometrics` (new) | **now** (after 02 is nice-to-have, not required) | — |
+| 03 | [`03-econometrics-phase0.md`](03-econometrics-phase0.md) | `formal-econometrics` (new) | **now** | — |
+| 06 | [`06-foundry-target-plane.md`](06-foundry-target-plane.md) | `mathfin-foundry` + the new library | 02 landed **and** 03's library builds green | 02, 03 |
 | 04 | [`04-apparatus-genericize.md`](04-apparatus-genericize.md) | `formal-mathfin` | **econometrics reaches ~20 entries** | 03 |
-| 05 | [`05-formathlib-aging.md`](05-formathlib-aging.md) | whichever repo births the block | **first field-neutral Lean block** (likely the fixed-point tower) | 03 |
+| 05 | [`05-formathlib-aging.md`](05-formathlib-aging.md) | whichever repo births the block | **first field-neutral Lean block** | 03 |
 
-01 and 02 are independent and can run in any order (but NOT simultaneously if both
-need the Lean slot — see the memory rule below). 03 opens the second library. 04
-and 05 are **trigger-based: do not run them early** — running 04 before its
-trigger violates the program's central timing rule (genericize exactly once,
-against observed divergence, not speculation).
+02 and 03 are the pair that opens the second field, and they are **parallel-safe by
+construction**: 03 needs the one Lean-loaded process, 02 is pure host-side Python and
+needs none. Run them together. 03 is the probe with the live kill criterion, so it is
+the one whose verdict can change the program; 02 is mechanical and its risk is bounded
+by a byte-identical golden test.
+
+06 finishes what 02 starts — 02 makes `probe/` domain-free, 06 moves the scripts,
+workflows, image and issue contract that decide which repo the pipeline points at.
+Neither is the retarget on its own.
+
+04 and 05 are **trigger-based: do not run them early** — running 04 before its
+trigger violates the program's central timing rule (genericize exactly once, against
+observed divergence, not speculation). 01 is independent of all of it.
 
 ## Rules that bind every session
 
