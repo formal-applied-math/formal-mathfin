@@ -62,7 +62,7 @@ Mathematical finance is a few deep principles whose consequences are the models.
 | **Feynman–Kac** | II ↔ III | ✅ **WIRED** — the Black–Scholes PDE from the risk-neutral expectation |
 | **Donsker / CLT** | discrete ↔ continuous | ✅ **WIRED** — CRR binomial → Black–Scholes |
 | **Numéraire** | IV ↔ I | ✅ **WIRED** — the price-invariance seam `N₀·𝔼^{Qᴺ}[X/N_T] = B₀·𝔼^Q[X/B_T]` (`changeOfNumeraire`), with BS-stock / Margrabe-`S²` / Kelly-EMM instances |
-| **Girsanov** | I ↔ II | ◐ **bounded case closed** — the EMM is an *explicit* change of measure, and the distributional Girsanov is fully closed for bounded predictable θ (the honest Itô-`L²` domain); only the general `L²`/progressive-θ (Novikov, unbounded) case stays open |
+| **Girsanov** | I ↔ II | ◐ **bounded case closed** — the EMM is an *explicit* change of measure, and Girsanov is fully closed for bounded predictable θ (the honest Itô-`L²` domain): `B^θ` is a `Q`-Brownian motion in full — zero start, Gaussian **and** independent increments. Unbounded/progressive θ stays open, and so does Novikov's condition itself ([scope](#scope-whats-not-done)) |
 | **Martingale representation** | I ↔ II | ✅ **WIRED** — the same seam from the other side: the Itô integral is proved *onto* the centered `𝓕ᴮ_T`-measurable claims, so every square-integrable claim has a unique hedge, and the pricing measure is pinned on that filtration for measures that price the traded gains at zero |
 
 → The full spine, seam by seam: **[`docs/mathematical-architecture.md`](docs/mathematical-architecture.md)**.
@@ -203,13 +203,18 @@ A breadth-and-depth library across eleven areas. Headlines per area (full per-th
 Honesty is the point, so the gaps are explicit:
 
 - **13 `reduced_core` entries** — special cases or algebraic/structural cores whose fully general form is
-  not yet formalized (the 2-D Itô formula, Lévy's characterisation, the fully-general `L²`/progressive
-  Girsanov under Novikov, some Markov/Poisson cores). Tracked per-entry in
+  not yet formalized (the 2-D Itô formula, Lévy's characterisation, Novikov's condition, the
+  fully-general `L²`/progressive Girsanov, some Markov/Poisson cores). Tracked per-entry in
   [`docs/coverage.md`](docs/coverage.md).
 - **18 `library_wrapper` entries** — thin restatements consuming a Mathlib/BrownianMotion lemma. They are
   delivery-ready but are not original derivations, and are counted separately for that reason.
-- **Girsanov's general case** — the bounded-predictable-θ result is closed; the fully-general
-  `L²`/progressive-θ case under Novikov remains open.
+- **Girsanov's general case, and Novikov separately.** The ladder is closed through bounded
+  predictable θ (constant → simple-adapted → adapted-continuous → predictable), which is exactly the
+  domain of the `L²` Itô integral it is built on; unbounded, merely progressively-measurable θ remains
+  open. **Novikov's condition is not derived either** — its entry is a structure spec carrying a
+  uniform `L¹` bound in place of `𝔼[exp(½∫₀ᵀθ²ds)] < ∞` (the genuine condition needs `∫θ dB`, and no θ
+  or `B` appears in the structure), so the martingale conclusion is read off by projection. The open
+  case is therefore *two* gaps, not one hypothesis away from a proved theorem.
 - **The second FTAP is not proved unconditionally.** What is proved is that a probability measure
   `Q ≪ μ` which prices the traded Itô gains at zero agrees with `μ` on `𝓕ᴮ_T`. Gains-neutrality is an
   explicit hypothesis (`PricesGainsAtZero`), not a consequence of being a martingale measure for a
