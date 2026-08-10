@@ -88,10 +88,16 @@ idea). So:
 
 **Why this layer is still the ownership move.** Owning the most theorems in
 econometrics is a weak claim — EconCSLib can outproduce us and probably will. Being
-the group whose code everyone else *imports* is the claim that compounds. Brouwer is
-missing from Mathlib; general equilibrium, Nash existence, and every fixed-point
-equilibrium argument need it. Build and upstream it and EconCSLib, the GE projects,
-and everyone after them consume our work.
+the group whose code everyone else *imports* is the claim that compounds.
+
+The original example here was Brouwer: missing from Mathlib, needed by general
+equilibrium and every fixed-point equilibrium argument, so build and upstream it.
+**That example is retired (2026-08-09):** `harfe/fixed-point-theorems-lean4` already
+proves Brouwer and Kakutani sorry-free at our exact pin, so building them would be
+reproving. The principle survives the example, and gains a sharper form — the
+departure lounge is for what *nobody* has, and the way to check is to look before
+building. Where someone else already holds a field-neutral block, the ownership move
+is to help it upstream, not to duplicate it.
 
 > **Upstreamed lemmas are the only theorems that cannot be out-produced.**
 
@@ -237,10 +243,12 @@ promotion should require a distinct review pass. Do not let the component optimi
 throughput also decide what is architecturally load-bearing — that is precisely the
 conflict §0 says cannot be resolved by good intentions.
 
-**Point the foundry at `commons`.** A Brouwer construction is an excellent foundry
-target: hard, self-contained, no domain vocabulary, and the payoff is upstream
-ownership. It is also a genuine test of the decomposer, which is what that path was
-built for.
+**Point the foundry at `commons`.** A field-neutral construction is an excellent foundry
+target: hard, self-contained, no domain vocabulary, and the payoff is upstream ownership.
+It is also a genuine test of the decomposer, which is what that path was built for. Brouwer
+was the worked example until 2026-08-09, when it turned out to exist already — so the
+selection rule matters more than the example: **survey before targeting**, and prefer a
+block that is genuinely absent from every Lean library, not merely from Mathlib.
 
 ---
 

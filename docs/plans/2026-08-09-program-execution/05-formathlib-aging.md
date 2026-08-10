@@ -1,9 +1,17 @@
 # 05 — ForMathlib/ and the aging report
 
-**Repo:** whichever domain library births the first field-neutral block (the
-likely first case: the Brouwer/Kakutani tower, wanted by general equilibrium and
-worth building as a foundry campaign) · **Trigger:** that block exists or is
-about to · **Design source:** `docs/program-architecture.md` §1 (L0).
+**Repo:** whichever domain library births the first field-neutral block ·
+**Trigger:** that block exists or is about to · **Design source:**
+`docs/program-architecture.md` §1 (L0).
+
+The Brouwer/Kakutani tower was this runbook's expected first case. It is not:
+`harfe/fixed-point-theorems-lean4` proves both sorry-free at our exact pin
+(`applied-areas.md` §2a, corrected 2026-08-09), so building it would be reproving.
+The likelier first case is now something much smaller — e.g. the missing
+`∫ f ∂(μ[|s]) = (μ s)⁻¹ • ∫ x in s, f x ∂μ` that runbook 03 will need on contact.
+**Before staging anything under `ForMathlib/`, search the Lean ecosystem, not just
+Mathlib.** That check is cheap and it is the difference between a departure lounge
+and a duplication.
 
 ## Do not run early
 
@@ -63,16 +71,17 @@ In order of preference, per program-architecture.md:
    modes, the deletion-at-pin-bump rule.
 4. Update `docs/upstreaming.md` (mathfin) to reference the mechanics: the
    playbook now has a queue with timestamps, not just a log.
-5. If the block is the Brouwer tower: file the upstream issue/PR plan against
-   Mathlib early (statement-level, before polishing everything) — upstream
-   review cycles are long and start best from a skeleton the maintainers have
-   seen coming; `docs/upstreaming.md` has the working method from BrownianMotion
-   PR #446.
+5. File the upstream issue/PR plan against Mathlib early — statement-level, before
+   polishing everything. Upstream review cycles are long and start best from a
+   skeleton the maintainers have seen coming; `docs/upstreaming.md` has the working
+   method from BrownianMotion PR #446.
 
 ## Acceptance criteria
 
 - [ ] Every `ForMathlib/` file carries the contract block; test enforces it.
 - [ ] Aging report runs and shows the first entry with age 0.
 - [ ] Both CLAUDE.md files carry the consumption rules.
-- [ ] If Brouwer: the upstream target module path is real (checked against
-      current Mathlib layout), and an issue/PR skeleton exists or is drafted.
+- [ ] The upstream target module path is real (checked against the current Mathlib
+      layout), and an issue/PR skeleton exists or is drafted.
+- [ ] The block was searched for across the Lean ecosystem — not only Mathlib —
+      before being staged, and the search is recorded.

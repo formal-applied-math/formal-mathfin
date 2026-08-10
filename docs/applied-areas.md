@@ -63,8 +63,8 @@ vibes. This is the table that decides what is buildable in year one.
 
 | Missing | Consequence |
 |---|---|
-| **Brouwer fixed point.** Grep for `brouwer` returns only *Brouwer algebras* (Heyting/co-Heyting). No no-retraction theorem, no simplex retraction. The only fixed-point theorems in the library are Banach contraction and the 1-D IVT (`exists_mem_Icc_isFixedPt_of_mapsTo`). | **Gates all of general equilibrium.** Arrow–Debreu existence is not a year-one target |
-| **Kakutani** (correspondence-valued), **Schauder** | Same gate; Kakutani is what GE existence actually needs |
+| **Brouwer fixed point.** Grep for `brouwer` returns only *Brouwer algebras* (Heyting/co-Heyting). No no-retraction theorem, no simplex retraction. The only fixed-point theorems in the library are Banach contraction and the 1-D IVT (`exists_mem_Icc_isFixedPt_of_mapsTo`). | Absent from *Mathlib* — but formalized elsewhere in Lean 4 at our exact pin; see the correction below |
+| **Kakutani** (correspondence-valued) | Same: absent from Mathlib, present elsewhere. **Schauder** (infinite-dimensional) remains unformalized as far as this survey found |
 | **Pointwise (Birkhoff) ergodic theorem** — only the *mean* L² version exists | a.s. ergodic LLN unavailable; see §3.2 for why this is survivable and even clarifying |
 | **Donsker / functional CLT / empirical processes** | Unit-root asymptotics (Dickey–Fuller limits) out of reach without building it |
 | **Mixing conditions** (α/β/φ-mixing), CLT for dependent data | Must be built for time series |
@@ -74,11 +74,29 @@ vibes. This is the table that decides what is buildable in year one.
 
 ### The two findings that reorder everything
 
-**(a) No Brouwer means GE is a two-year project, not a one-year one.** Arrow–Debreu
-existence, the second welfare theorem's converse direction, Sonnenschein–Mantel–Debreu
-— all sit behind Kakutani, which sits behind Brouwer, which does not exist. The
-Scarf→Brouwer→Nash paper confirms the cost is real: building that route *was* their
-paper. Anyone entering GE pays that toll first. **Demote GE.**
+**(a) ~~No Brouwer means GE is a two-year project.~~ CORRECTED 2026-08-09.** The original
+finding was that Arrow–Debreu existence, the second welfare theorem's converse, and
+Sonnenschein–Mantel–Debreu all sit behind Kakutani, which sits behind Brouwer, which does
+not exist — so anyone entering GE pays that toll first, and GE should be demoted.
+
+The grep was right about Mathlib and wrong about Lean. **`harfe/fixed-point-theorems-lean4`
+(MIT) proves both Brouwer and Kakutani, sorry-free, on `leanprover/lean4:v4.32.0` and
+Mathlib `81a5d257c8e4` — byte-identical to our pin.** `brouwer_fixed_point` is the general
+statement (nonempty compact convex subset of a finite-dimensional real normed space,
+continuous self-map), routed through a cubical Sperner lemma; `kakutani_fixed_point` is the
+correspondence-valued form GE existence actually needs. It is a proper Lake package
+(`lean_lib FixedPointTheorems`, `autoImplicit false`).
+
+Two consequences. **The GE toll is not ours to pay** — under this repo's coherence-first
+rule (consume the idiomatic lemma, never reprove it), building a Brouwer tower would now be
+reproving live, MIT-licensed, pin-compatible work. And **the highest-value action shifts
+from building to upstreaming**: Brouwer and Kakutani belong in Mathlib, and helping that
+land serves every project downstream of them, which is precisely the ownership argument in
+`program-architecture.md` §1 (L0).
+
+The demotion of GE therefore stands only on its *second* leg — that identification and time
+series are emptier ground — not on a missing prerequisite. Re-rank on evidence, not on this
+sentence.
 
 **(b) The missing pointwise ergodic theorem is a feature, not a bug — it picks the
 spine for us.** Classical time-series econometrics is built on *covariance*
@@ -96,6 +114,39 @@ whatsoever.** It is conditional expectation, orthogonal projection, and linear
 algebra — every piece of which Mathlib has today.
 
 ---
+
+## 2b. The rest of the Lean ecosystem — surveyed 2026-08-09
+
+§2 audited Mathlib and stopped there, which is how it concluded that Brouwer had to
+be built. This section is the missing half: **what exists in Lean outside Mathlib,
+and could it be a Lake dependency rather than work?**
+
+The gate is not quality, it is the **pin**. A Lake dependency forces both projects
+onto one Mathlib revision, so a library two minor versions behind would drag us
+*backwards* off `81a5d257c8e4` — and that would also break the premise that
+`formal-mathfin` and its siblings can share a `ForMathlib/` block, which requires a
+shared Mathlib (`program-architecture.md` §1 L0).
+
+| Library | Toolchain / Mathlib | Carries | Verdict |
+|---|---|---|---|
+| [`harfe/fixed-point-theorems-lean4`](https://github.com/harfe/fixed-point-theorems-lean4) (MIT) | **v4.32.0 / `81a5d257c8e4` — identical** | Brouwer **and** Kakutani via cubical Sperner, sorry-free; proper Lake package, `autoImplicit false` | **The find.** Retires §2a. Consume or help upstream; do not rebuild |
+| [`YuanheZ/lean-stat-learning-theory`](https://github.com/YuanheZ/lean-stat-learning-theory) (★115, ICML 2026) | **v4.32.0 / `81a5d257c8e4` — identical** | chaining, covering numbers, metric entropy, Dudley, sub-Gaussian, Hanson–Wright, nonparametric least-squares rates | **Watch, do not depend yet.** Its least-squares layer is finite-sample *rate* theory over the empirical norm on `Fin n → ℝ`; identification is population-level and pre-sample, so there is nothing to consume yet. It becomes the right dependency at the time-series phase — its empirical-process stack is exactly what §2 lists as absent and blocking Dickey–Fuller |
+| [`Lean-MoDS/StatsMLlib`](https://github.com/Lean-MoDS/StatsMLlib) (★18) | **v4.32.0 / `81a5d257c8e4` — identical** | probability, concentration, entropy, Gaussian, moments, random matrices; a thin `Statistics/Regression/LeastSquares` | **Watch.** Re-check when pillar I needs normal equations |
+| [`junwei-lu/Lean-Asymptotic-Statistical-Theory`](https://github.com/junwei-lu/Lean-Asymptotic-Statistical-Theory) | v4.29.1 / `5e932f97dd25` | van der Vaart: LAN, Hájek–Le Cam, Donsker, efficient influence functions | **Source, not dependency** — three minor versions behind |
+| [`gametheoryinlean/EconCSLib`](https://github.com/gametheoryinlean/EconCSLib) (★26) | v4.30.0 / `c5ea00351c28` | game theory, mechanism design, market design, social choice | **Source, not dependency** — pin, and it is the competitor of §1 |
+| [`nikhgarg/EconCSLib`](https://github.com/nikhgarg/EconCSLib) (★12) | v4.30.0-rc2 / `5450b53e5ddc` | AI-assisted economics-and-computation formalization | **Source, not dependency** — pin |
+
+**For phase 0: no new dependencies.** Mathlib alone. Difference-in-differences needs
+conditional expectation and nothing else on this list, and a dependency you do not
+consume is coupling with no payoff plus a standing pin obligation. The three
+pin-compatible libraries get **named triggers** instead: fixed points when general
+equilibrium is actually scoped, the empirical-process stack when time-series
+asymptotics start, StatsMLlib's regression layer when pillar I needs normal
+equations.
+
+**Re-run this survey at every pin bump**, alongside §2's absent-list. Both decay,
+and this one decays faster: three of these six libraries did not exist eighteen
+months ago.
 
 ## 3. The open territories, ranked
 
@@ -169,15 +220,20 @@ contraction, which Mathlib has. Weakness: less overlap with our existing
 ### 3.4 General equilibrium — rank 4, deferred
 
 Arrow–Debreu existence, welfare theorems, Debreu–Scarf core convergence,
-Sonnenschein–Mantel–Debreu. Open, important — and **gated behind building Brouwer
-and Kakutani from scratch** (§2a). The second welfare theorem alone is reachable
-today (it is separating-hyperplane, and `geometric_hahn_banach_compact_closed` is
-right there), which makes it a good *flag-plant* entry. But the existence half is a
-different order of investment.
+Sonnenschein–Mantel–Debreu. Open and important. The prerequisite that made this rank 4
+— building Brouwer and Kakutani from scratch — **is no longer ours to build** (§2a,
+corrected 2026-08-09): `harfe/fixed-point-theorems-lean4` has both, sorry-free, at our
+exact pin. The second welfare theorem was already reachable (separating-hyperplane, and
+`geometric_hahn_banach_compact_closed` is right there), which makes it a good *flag-plant*
+entry; the existence half is now a dependency decision rather than a research programme.
 
-If the Brouwer/Kakutani prerequisite is built, it should be built **as a Mathlib
-upstream contribution**, not as library-local code — which is also the highest-value
-version of that work.
+What remains genuinely open about GE is the *definitional* layer — preferences, endowments,
+allocations, Walrasian equilibrium — which §2 confirms has no Mathlib vocabulary at all.
+That is the same shape as the identification bet: the analysis is available, the economics
+is ours to design.
+
+The highest-value version of the fixed-point work is now **helping Brouwer and Kakutani
+into Mathlib**, not re-deriving them locally.
 
 ---
 
