@@ -62,7 +62,7 @@ Mathematical finance is a few deep principles whose consequences are the models.
 | **Feynman–Kac** | II ↔ III | ✅ **WIRED** — the Black–Scholes PDE from the risk-neutral expectation |
 | **Lattice limit (CLT)** | discrete ↔ continuous | ✅ **WIRED** — CRR binomial → Black–Scholes, by characteristic functions and Lévy continuity through put-call parity. Donsker's invariance principle itself is *not* formalized; this seam is the pricing limit, not the functional CLT |
 | **Numéraire** | IV ↔ I | ✅ **WIRED** — the price-invariance seam `N₀·𝔼^{Qᴺ}[X/N_T] = B₀·𝔼^Q[X/B_T]` (`changeOfNumeraire`), with BS-stock / Margrabe-`S²` / Kelly-EMM instances |
-| **Girsanov** | I ↔ II | ✅ **WIRED** — the EMM is an *explicit* change of measure, and Girsanov is closed across the whole domain the `L²` Itô integral supports: for bounded predictable θ, `B^θ` is a `Q`-Brownian motion in full — zero start, Gaussian **and** independent increments. Beyond that domain (unbounded, merely progressive θ) it is open, as is Novikov's condition itself ([scope](#scope-whats-not-done)) |
+| **Girsanov** | I ↔ II | ✅ **WIRED** — the EMM is an *explicit* change of measure, and the distributional Girsanov is closed for **bounded** predictable θ: `B^θ` is a `Q`-Brownian motion in full — zero start, Gaussian **and** independent increments. That is strictly inside the integrand class: `itoIntegralCLM_T` is defined on all of `L²`-predictable, and boundedness is a real extra hypothesis, so unbounded `L²`/progressive θ is open, as is Novikov's condition itself ([scope](#scope-whats-not-done)) |
 | **Martingale representation** | I ↔ II | ✅ **WIRED** — the same seam from the other side: the Itô integral is proved *onto* the centered `𝓕ᴮ_T`-measurable claims, so every square-integrable claim has a unique hedge, and the pricing measure is pinned on that filtration for measures that price the traded gains at zero |
 
 → The full spine, seam by seam: **[`docs/mathematical-architecture.md`](docs/mathematical-architecture.md)**.
@@ -209,9 +209,10 @@ Honesty is the point, so the gaps are explicit:
 - **18 `library_wrapper` entries** — thin restatements consuming a Mathlib/BrownianMotion lemma. They are
   delivery-ready but are not original derivations, and are counted separately for that reason.
 - **Girsanov's general case, and Novikov separately.** The ladder is closed through bounded
-  predictable θ (constant → simple-adapted → adapted-continuous → predictable), which is exactly the
-  domain of the `L²` Itô integral it is built on; unbounded, merely progressively-measurable θ remains
-  open. **Novikov's condition is not derived either** — its entry is a structure spec carrying a
+  predictable θ (constant → simple-adapted → adapted-continuous → predictable). That is *narrower*
+  than the integrand class the ladder is built on: `itoIntegralCLM_T` maps all of `Lp ℝ 2 (trimMeasure_T T)`,
+  and on a finite measure `L² ⊋ L^∞`, so a square-integrable predictable θ need not be bounded.
+  Unbounded, merely progressively-measurable θ remains open. **Novikov's condition is not derived either** — its entry is a structure spec carrying a
   uniform `L¹` bound in place of `𝔼[exp(½∫₀ᵀθ²ds)] < ∞` (the genuine condition needs `∫θ dB`, and no θ
   or `B` appears in the structure), so the martingale conclusion is read off by projection. The open
   case is therefore *two* gaps, not one hypothesis away from a proved theorem.

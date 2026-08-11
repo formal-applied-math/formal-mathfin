@@ -72,9 +72,10 @@ change-of-measure engine), with the *distributional* Girsanov now **fully closed
 increments — via `indepFun_iff_charFun_prod` on the Gaussian joint law, no adapted Itô), and now **fully
 closed for bounded adapted continuous θ** (2026-07-09, `Btheta_isQBrownianMotion_adapted`, `gir-thm-9.1.8`
 `full`, via the spine-free simple → continuous limit), and finally **for bounded predictable θ**
-(`Btheta_isQBrownianMotion_predictable_of_bdd`, `gir-thm-9.1.8-predictable` `full`) — which is the whole
-domain the `L²` Itô integral supports, so the seam is closed wherever the tower can state it; only the
-strictly more general `L²`/progressive-θ under Novikov is still open, as is Novikov's condition itself
+(`Btheta_isQBrownianMotion_predictable_of_bdd`, `gir-thm-9.1.8-predictable` `full`) — note the hypothesis
+is *bounded* predictable (`∀ t ω, |θ t ω| ≤ C`), which is strictly inside the integrand class:
+`itoIntegralCLM_T : Lp ℝ 2 (trimMeasure_T T) →L[ℝ] Lp ℝ 2 μ` accepts every square-integrable predictable
+integrand, and on a finite measure `L² ⊋ L^∞`. So the strictly more general `L²`/progressive-θ under Novikov is still open, as is Novikov's condition itself
 (`gir-thm-9.1.7`, a structure spec, not a derivation); the numéraire (IV↔I) is now **wired at its achievable scope** (2026-07-03):
 the change-of-numéraire *formula* (`Foundations/Numeraire.changeOfNumeraire`, consumed by the BS stock
 numéraire and the Margrabe `S²`-numéraire), **and** the numéraire-*portfolio* ⟹ EMM direction in the
