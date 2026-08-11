@@ -56,7 +56,7 @@ integrated intensity"* unifies discounting, mortality, credit hazard, and the Po
 | **Feynman–Kac** (generator) | II ↔ III | **WIRED** (BS-PDE keystone). Not yet abstracted to a general generator / Kolmogorov-backward framework. |
 | **Convex duality** (separation / Legendre–Fenchel) | I (pricing) ↔ IV (risk) | **WIRED (Phase 1, 2026-06-29).** The shared root `Foundations/ConvexDuality.exists_pos_separating_of_cone_disjoint_simplex` (cone↔simplex) + its companion `exists_separating_of_not_mem_cone` (point↔cone) now carry **both** towers: the FTAP kernel `exists_pos_dual_of_disjoint_stdSimplex` is *re-derived* from the root (pricing side), and the coherent-risk ADEH representation `RiskMeasures/AcceptanceSet.coherentRisk_isLUB` is its risk-side instance (`WorstCaseRisk.worstCase_isLUB` a concrete case). Superhedging is wired as the `SuperhedgingDuality.emm_le_superReplication` bound; the strong-duality *equality* awaits a finite-dim Farkas (Mathlib gap). |
 | **The numéraire** (change of numéraire; log-optimal portfolio) | IV ↔ I (EMM) | **WIRED (2026-07-03) — both seam directions, at their achievable scope.** *(a) The change-of-numéraire law.* `Foundations/Numeraire.changeOfNumeraire`: with `Q^N = Q.withDensity((N_T·B₀)/(N₀·B_T))`, `N₀·𝔼^{Q^N}[X/N_T] = B₀·𝔼^Q[X/B_T]` for every claim `X` (a pure measure-transport identity + cancellation of `N_T` — no integrability needed), companion `numeraireMeasure_isProbabilityMeasure`. Genuinely **consumed** by two instances: `StockNumeraire.stockNumeraireMeasure_eq_numeraireMeasure` (BS stock numéraire = instance `B_T=e^{rT}`, `B₀=1`, `N=S`) and `ExchangeOption.exchangeOption_numeraire_price` (Margrabe's `S²`-numéraire valuation = instance `X=` exchange payoff, `N=S²`). (Garman's normal form is post-integration closed-form algebra — no measure — so not an instance; none was fabricated.) *(b) The numéraire-portfolio ⟹ EMM direction.* `Performance/KellyNumeraire.kellyNumeraire_isRiskNeutral`: the growth-optimal (Kelly) wealth, as deflator, turns the physical measure into the EMM (`q₊·b + q₋·(−1) = 0`), the `p`-independence being the Kelly first-order condition. **Honest remaining scope:** direction (b) is the **discrete, two-outcome** shadow of the **continuous** Long/Platen benchmark theorem (deflated prices are `P`-martingales, EMM density `∝ 1/N*`), still gated on a state-price-density / market model absent from the Itô tower. |
-| **Donsker / CLT** (discrete → continuous) | Binomial ↔ Black–Scholes | **WIRED** (`CRRConvergence.binomialPrice_call_tendsto_bs`). |
+| **Lattice limit (CLT)** (discrete → continuous) | Binomial ↔ Black–Scholes | **WIRED** (`CRRConvergence.binomialPrice_call_tendsto_bs`), by characteristic functions and Lévy continuity. Donsker's invariance principle is **not** formalized — this is the pricing limit, not the functional CLT, and `docs/applied-areas.md` lists Donsker among the gaps. |
 
 ## Coherence verdict
 
@@ -64,15 +64,18 @@ Individually the towers are coherent and the *engineering* architecture is docum
 (2026-06-29) realized the spine's #1 unification**: the convex-duality bridge (I↔IV) is now WIRED — the
 FTAP separating functional and the coherent-risk-measure representation are *proved* to be the same
 Hahn–Banach root (`Foundations/ConvexDuality`), no longer split across files that never name it. Of the
-bridges, Feynman–Kac (II↔III), Donsker (discrete↔continuous), and convex-duality (I↔IV) are WIRED;
-Girsanov (I↔II) is now **partially wired** (Phase 2, 2026-06-30 — the EMM/change-of-measure *martingale*
+bridges, Feynman–Kac (II↔III), the lattice limit (discrete↔continuous), and convex-duality (I↔IV) are WIRED;
+Girsanov (I↔II) is now **wired** (Phase 2, 2026-06-30 — the EMM/change-of-measure *martingale*
 side, constant θ: the risk-neutral measure is an explicit density change, built on a reusable Bayes
 change-of-measure engine), with the *distributional* Girsanov now **fully closed for constant θ**
 (2026-07-05, `Btheta_isQBrownianMotion`: `B^θ` is a `Q`-Brownian motion — Gaussian *and independent*
 increments — via `indepFun_iff_charFun_prod` on the Gaussian joint law, no adapted Itô), and now **fully
 closed for bounded adapted continuous θ** (2026-07-09, `Btheta_isQBrownianMotion_adapted`, `gir-thm-9.1.8`
-`full`, via the spine-free simple → continuous limit) — only the strictly more general `L²`/progressive-θ
-under Novikov still open; the numéraire (IV↔I) is now **wired at its achievable scope** (2026-07-03):
+`full`, via the spine-free simple → continuous limit), and finally **for bounded predictable θ**
+(`Btheta_isQBrownianMotion_predictable_of_bdd`, `gir-thm-9.1.8-predictable` `full`) — which is the whole
+domain the `L²` Itô integral supports, so the seam is closed wherever the tower can state it; only the
+strictly more general `L²`/progressive-θ under Novikov is still open, as is Novikov's condition itself
+(`gir-thm-9.1.7`, a structure spec, not a derivation); the numéraire (IV↔I) is now **wired at its achievable scope** (2026-07-03):
 the change-of-numéraire *formula* (`Foundations/Numeraire.changeOfNumeraire`, consumed by the BS stock
 numéraire and the Margrabe `S²`-numéraire), **and** the numéraire-*portfolio* ⟹ EMM direction in the
 discrete Kelly market (`Performance/KellyNumeraire`), with only the *continuous* Long/Platen version of

@@ -60,9 +60,9 @@ Mathematical finance is a few deep principles whose consequences are the models.
 |---|---|---|
 | **Convex duality** | I ↔ IV (pricing ↔ risk) | ✅ **WIRED** — the FTAP and the coherent-risk representation are proved to be the *same* Hahn–Banach theorem |
 | **Feynman–Kac** | II ↔ III | ✅ **WIRED** — the Black–Scholes PDE from the risk-neutral expectation |
-| **Donsker / CLT** | discrete ↔ continuous | ✅ **WIRED** — CRR binomial → Black–Scholes |
+| **Lattice limit (CLT)** | discrete ↔ continuous | ✅ **WIRED** — CRR binomial → Black–Scholes, by characteristic functions and Lévy continuity through put-call parity. Donsker's invariance principle itself is *not* formalized; this seam is the pricing limit, not the functional CLT |
 | **Numéraire** | IV ↔ I | ✅ **WIRED** — the price-invariance seam `N₀·𝔼^{Qᴺ}[X/N_T] = B₀·𝔼^Q[X/B_T]` (`changeOfNumeraire`), with BS-stock / Margrabe-`S²` / Kelly-EMM instances |
-| **Girsanov** | I ↔ II | ◐ **bounded case closed** — the EMM is an *explicit* change of measure, and Girsanov is fully closed for bounded predictable θ (the honest Itô-`L²` domain): `B^θ` is a `Q`-Brownian motion in full — zero start, Gaussian **and** independent increments. Unbounded/progressive θ stays open, and so does Novikov's condition itself ([scope](#scope-whats-not-done)) |
+| **Girsanov** | I ↔ II | ✅ **WIRED** — the EMM is an *explicit* change of measure, and Girsanov is closed across the whole domain the `L²` Itô integral supports: for bounded predictable θ, `B^θ` is a `Q`-Brownian motion in full — zero start, Gaussian **and** independent increments. Beyond that domain (unbounded, merely progressive θ) it is open, as is Novikov's condition itself ([scope](#scope-whats-not-done)) |
 | **Martingale representation** | I ↔ II | ✅ **WIRED** — the same seam from the other side: the Itô integral is proved *onto* the centered `𝓕ᴮ_T`-measurable claims, so every square-integrable claim has a unique hedge, and the pricing measure is pinned on that filtration for measures that price the traded gains at zero |
 
 → The full spine, seam by seam: **[`docs/mathematical-architecture.md`](docs/mathematical-architecture.md)**.
