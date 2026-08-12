@@ -1,11 +1,16 @@
 # Program architecture — owning the corner across more than one field
 
-**Date:** 2026-08-06 (rev. 2026-08-09: three-repo constraint) · **Status:** design
-proposal · **Companion:** [`applied-areas.md`](applied-areas.md)
+**Date:** 2026-08-06 (rev. 2026-08-09: three-repo constraint; rev. 2026-08-11:
+library 3 arrived, cap lifted to four) · **Status:** design proposal · **Companion:** [`applied-areas.md`](applied-areas.md)
 
-**Constraint (owner decision, 2026-08-09):** exactly three repos —
-`formal-mathfin`, `formal-econometrics`, and the foundry. The four *layers* below
-survive unchanged; what changed is their mapping onto repos. The two
+**Constraint (owner decision, 2026-08-09, superseded 2026-08-11):** the cap was
+*exactly three repos* — `formal-mathfin`, `formal-econometrics`, and the foundry.
+**`formal-macroeconomics` is library 3, created 2026-08-10 and populated
+2026-08-11**, so the cap is now four. This is the contingency at the foot of §7
+firing ("if ever a library 3"), not an accident: that row said to revisit the cap
+and the GitHub-org question *together*, and the org half is still open.
+The four *layers* below survive unchanged; what changed is their mapping onto
+repos. The two
 infrastructure layers do not get repos of their own: the apparatus anchors in
 `formal-mathfin` (it must stay public — the gates run in the domain libraries'
 public CI and on contributors' machines, and the foundry is private), and the
@@ -42,15 +47,21 @@ of vigilance.
 
 ---
 
-## 1. Topology — four layers, three repos
+## 1. Topology — four layers, four repos
 
 ```
-                        formal-mathfin/            formal-econometrics/        foundry/  (private)
-L0 commons              MathFin/ForMathlib/   ←──  Lake git-dep (or copy)
-L1 apparatus            tools/verify/ (anchor) ──→ pip git-dep                 pip git-dep
-L2 domain library       MathFin/ + benchmarks      Econometrics/ + benchmarks
-L3 foundry                                                                     probe/ + domains/
+                    formal-mathfin/        formal-econometrics/  formal-macroeconomics/  foundry/ (private)
+L0 commons          MathFin/ForMathlib/ ←─ Lake git-dep (or copy) ←─ (copy, phase 0)
+L1 apparatus        tools/verify/ (anchor) → pip git-dep           → (none yet)          pip git-dep
+L2 domain library   MathFin/ + benchmarks   Econometrics/ + bench   Macroeconomics/       
+L3 foundry                                                                                probe/ + domains/
 ```
+
+`formal-macroeconomics` is at phase 0 and carries **none of L1 yet**: one theorem
+(the Solow steady state), an axiom audit, and nothing else. That is the deliberate
+order set out in §7 — copy or defer the apparatus until the corpus is big enough to
+show which abstractions are real. It shares the Mathlib pin with its two siblings,
+which is what keeps a shared `ForMathlib/` block possible.
 
 The layers are roles, not repos. Two placement decisions do all the work:
 
@@ -273,7 +284,7 @@ function that reveals which abstractions are real; do not pre-empt it.
 | Library 2 phase 0 | Copy the apparatus into `formal-econometrics` deliberately. Do not genericize yet |
 | Library 2 at ~20 entries | Genericize `tools/verify` in place in mathfin against observed divergence; tag `apparatus-v1`; econometrics and foundry switch to the tagged pip dep and delete their copies |
 | First field-neutral block | `MathFin/ForMathlib/` (or the econometrics twin, whichever births it), upstream-tagged from day one, aging report wired into CI |
-| If ever a library 3 | Revisit both the three-repo cap and a GitHub org together |
+| ~~If ever a library 3~~ **fired 2026-08-11** | `formal-macroeconomics` exists. The cap is lifted to four (see the header). **The GitHub-org half of this row is still undecided** — and the note below says it is closer to now-or-never than it looks, so it should not be left to drift a second time |
 
 **On the org:** it makes the collection legible as a program rather than scattered
 personal projects, which is worth real money for an ownership claim. But the repo
