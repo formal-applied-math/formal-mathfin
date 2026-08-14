@@ -2,7 +2,7 @@
 
 Vendored (and made count-honest) from the original one-off
 ``build_dataset.py`` that published
-https://huggingface.co/datasets/raphaelrrcoelho/formal-mathfin-theorems —
+https://huggingface.co/datasets/formal-applied-math/formal-mathfin-theorems —
 this repo is the single source of truth; CI (`hf-publish.yml`) rebuilds and
 uploads on every push that touches ``benchmarks/``. The dataset card's
 counts are COMPUTED here at build time (the originally-published card had

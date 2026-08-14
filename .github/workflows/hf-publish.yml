@@ -1,7 +1,7 @@
 name: hf-publish
 
 # Refresh the public Hugging Face dataset
-# (raphaelrrcoelho/formal-mathfin-theorems) whenever the benchmark corpus
+# (formal-applied-math/formal-mathfin-theorems) whenever the benchmark corpus
 # changes on main. The dataset files — JSONL + the card with COMPUTED counts
 # — are built by tools/verify/hf_dataset.py from benchmarks/*.json; this
 # repo is the single source of truth (the originally-published card had
@@ -53,10 +53,10 @@ jobs:
 
           api = HfApi(token=os.environ["HF_TOKEN"])
           api.upload_folder(
-              repo_id="raphaelrrcoelho/formal-mathfin-theorems",
+              repo_id="formal-applied-math/formal-mathfin-theorems",
               repo_type="dataset",
               folder_path="dist/hf",
               commit_message="ci: refresh dataset from formal-mathfin main",
           )
-          print("uploaded dist/hf -> raphaelrrcoelho/formal-mathfin-theorems")
+          print("uploaded dist/hf -> formal-applied-math/formal-mathfin-theorems")
           EOF

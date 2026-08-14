@@ -24,7 +24,7 @@
   "related_identifiers": [
     {
       "relation": "isSupplementedBy",
-      "identifier": "https://huggingface.co/datasets/raphaelrrcoelho/formal-mathfin-theorems",
+      "identifier": "https://huggingface.co/datasets/formal-applied-math/formal-mathfin-theorems",
       "scheme": "url"
     },
     {
