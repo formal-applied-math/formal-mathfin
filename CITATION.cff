@@ -11,9 +11,11 @@ type: software
 license: Apache-2.0
 repository-code: "https://github.com/formal-applied-math/formal-mathfin"
 url: "https://github.com/formal-applied-math/formal-mathfin"
-doi: 10.5281/zenodo.20477782
-version: "1.0.0"
-date-released: "2026-05-31"
+# All-versions (concept) DOI: always resolves to the newest release, so a
+# citation tracks the library rather than freezing at one snapshot.
+doi: 10.5281/zenodo.20477781
+version: "1.2.0"
+date-released: "2026-07-11"
 keywords:
   - Lean 4
   - formal verification

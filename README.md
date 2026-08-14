@@ -5,7 +5,7 @@
 [![blueprint](https://img.shields.io/badge/blueprint-deductive_spine-blue)](docs/blueprint.md)
 [![Lean](https://img.shields.io/badge/Lean-4.32.0-blue)](lean-toolchain)
 [![license](https://img.shields.io/badge/license-Apache_2.0-blue)](LICENSE)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20477782.svg)](https://doi.org/10.5281/zenodo.20477782)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20477781.svg)](https://doi.org/10.5281/zenodo.20477781)
 [![arXiv](https://img.shields.io/badge/arXiv-2606.01356-b31b1b)](https://arxiv.org/abs/2606.01356)
 [![dataset](https://img.shields.io/badge/HF-dataset-ffcc4d)](https://huggingface.co/datasets/raphaelrrcoelho/formal-mathfin-theorems)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
@@ -256,6 +256,6 @@ asserting it is still open.
 
 Contributions welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md) and the
 [good first issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
-Please cite via the [Zenodo DOI](https://doi.org/10.5281/zenodo.20477782) or the
+Please cite via the [Zenodo DOI](https://doi.org/10.5281/zenodo.20477781) or the
 [paper](https://arxiv.org/abs/2606.01356) ([`CITATION.cff`](CITATION.cff)). Licensed under
 [Apache 2.0](LICENSE).
