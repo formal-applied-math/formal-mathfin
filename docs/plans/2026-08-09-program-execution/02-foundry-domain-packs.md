@@ -1,6 +1,6 @@
 # 02 — Foundry domain packs: make domain content data
 
-**Repo:** `mathfin-foundry` · **Trigger:** now · **Est. scope:** two to three
+**Repo:** `formal-foundry` · **Trigger:** now · **Est. scope:** two to three
 sessions (see the re-audit below — the first estimate of one session was based on
 a reference count that was low by ~4×)
 **Design source:** `formal-mathfin/docs/program-architecture.md` §1 (L3) and §3.

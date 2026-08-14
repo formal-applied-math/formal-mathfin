@@ -44,7 +44,7 @@ run them locally; the foundry is private.
    - `formal-econometrics`: delete the copied `tools/`, add the pinned pip dep
      (requirements + CI install step), point its `econometrics.toml` at the new
      schema, all gates green.
-   - `mathfin-foundry`: same for whatever `tools.verify` surface it imports
+   - `formal-foundry`: same for whatever `tools.verify` surface it imports
      (ledger models, `af_parse` interop — grep first).
 7. **Discipline notes into both CLAUDE.md files**: apparatus upgrades are
    deliberate tag bumps; any `tools/` change that special-cases a corpus instead

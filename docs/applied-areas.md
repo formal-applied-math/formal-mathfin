@@ -281,7 +281,7 @@ whose entire subject matter is "that empirical claim was overstated", an
 honesty-first library is a defensible position a larger, looser library cannot
 take.**
 
-**The foundry.** `mathfin-foundry`'s pipeline (Claude specifies → Claude formalizes
+**The foundry.** `formal-foundry`'s pipeline (Claude specifies → Claude formalizes
 agentically against lean-lsp → depth gate → triviality gate → kernel gates →
 Leanstral proves → refinery → human-merged PR) is domain-agnostic. Retargeting is
 swapping the pointer modules and the house doctrine. **Marginal cost of library two

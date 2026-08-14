@@ -25,9 +25,9 @@ live here, in the flagship's docs tree.)
 | # | File | Repo | Trigger | Depends on |
 |---|---|---|---|---|
 | 01 | [`01-architecture-metrics.md`](01-architecture-metrics.md) | `formal-mathfin` | **now** | — |
-| 02 | [`02-foundry-domain-packs.md`](02-foundry-domain-packs.md) | `mathfin-foundry` | **now** | — |
+| 02 | [`02-foundry-domain-packs.md`](02-foundry-domain-packs.md) | `formal-foundry` | **now** | — |
 | 03 | [`03-econometrics-phase0.md`](03-econometrics-phase0.md) | `formal-econometrics` (new) | **now** | — |
-| 06 | [`06-foundry-target-plane.md`](06-foundry-target-plane.md) | `mathfin-foundry` + the new library | 02 landed **and** 03's library builds green | 02, 03 |
+| 06 | [`06-foundry-target-plane.md`](06-foundry-target-plane.md) | `formal-foundry` + the new library | 02 landed **and** 03's library builds green | 02, 03 |
 | 04 | [`04-apparatus-genericize.md`](04-apparatus-genericize.md) | `formal-mathfin` | **econometrics reaches ~20 entries** | 03 |
 | 05 | [`05-formathlib-aging.md`](05-formathlib-aging.md) | whichever repo births the block | **first field-neutral Lean block** | 03 |
 

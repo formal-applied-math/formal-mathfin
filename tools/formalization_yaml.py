@@ -287,7 +287,7 @@ def build_doc(root: str) -> dict:
                 {
                     "method": "machine autoformalization (two-stage; scout, not author)",
                     "models": sorted(autoform_models) or ["labs-leanstral-1-5"],
-                    "framework": "mathfin-foundry: probe / vibe <-> lean-lsp-mcp",
+                    "framework": "formal-foundry: probe / vibe <-> lean-lsp-mcp",
                     "tool_setup": (f"token-paced GitHub Actions pipeline; {drafter_shape} "
                                    f"{specifies} the "
                                    "statement, Leanstral formalizes + proves it. A cheap autop "

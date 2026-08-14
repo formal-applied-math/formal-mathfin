@@ -1,6 +1,6 @@
 # 06 — The target plane: point the foundry at a second repo, and prove it
 
-**Repo:** `mathfin-foundry` (plus a seeded issue in the target library) ·
+**Repo:** `formal-foundry` (plus a seeded issue in the target library) ·
 **Trigger:** runbook 02 landed AND runbook 03's library builds green ·
 **Est. scope:** one to two sessions, most of it CI
 **Design source:** `docs/program-architecture.md` §1 (L3), §3.
