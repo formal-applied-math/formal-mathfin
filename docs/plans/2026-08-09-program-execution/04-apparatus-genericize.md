@@ -18,7 +18,8 @@ Turn `tools/` into a corpus-parameterized package that BOTH libraries and the
 foundry consume from **this repo** as a pip git-dependency pinned to a tag —
 ending the copy from phase 0. The apparatus stays here (not the foundry) because
 it must remain public: `build.yml` runs the gates in public CI and contributors
-run them locally; the foundry is private.
+run them locally. (The foundry was private when this runbook was written; it went
+public on 2026-08-14, which does not change where the apparatus belongs.)
 
 ## Steps
 

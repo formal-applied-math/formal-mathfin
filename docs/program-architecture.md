@@ -13,7 +13,7 @@ The four *layers* below survive unchanged; what changed is their mapping onto
 repos. The two
 infrastructure layers do not get repos of their own: the apparatus anchors in
 `formal-mathfin` (it must stay public — the gates run in the domain libraries'
-public CI and on contributors' machines, and the foundry is private), and the
+public CI and on contributors' machines), and the
 commons collapses into a `ForMathlib/` convention inside the domain libraries,
 which the departure-lounge doctrine had already reduced it to in spirit.
 
@@ -128,12 +128,19 @@ into a new repo: `tools/verify` becomes corpus-parameterized (it already reads
 to a tag** (`pip install "mathfin @ git+https://github.com/formal-applied-math/formal-mathfin@apparatus-v1"`),
 plus `workflow_call` workflows referenced cross-repo the same way.
 
-**Why mathfin and not the foundry:** the foundry is private, and the apparatus
-must stay public — `build.yml` runs `python3 -m tools.verify.ledger status` in the
-domain libraries' public CI, and outside contributors run the same gates locally.
-Parking the honesty machinery in a private repo would make the public libraries'
-green checkmarks irreproducible to anyone but us, which is the opposite of what
-the machinery is for.
+**Why mathfin and not the foundry:** the apparatus must stay public — `build.yml`
+runs `python3 -m tools.verify.ledger status` in the domain libraries' public CI, and
+outside contributors run the same gates locally. Parking the honesty machinery
+anywhere it could go private would make the public libraries' green checkmarks
+irreproducible to anyone but us, which is the opposite of what the machinery is for.
+
+*Revised 2026-08-14:* this argument originally rested on the foundry being private.
+It no longer is — `formal-foundry` went public with its history reattributed and its
+prompts, gates and run telemetry visible, on the reasoning that a claim that a
+machine drafted a theorem is only auditable if the machinery is inspectable. The
+placement conclusion is unchanged and now rests on the stronger ground: the
+apparatus belongs beside the corpora whose claims it gates, not in the tool that
+generates candidates for them.
 
 **The cost, stated honestly:** this is an asymmetric marriage — mathfin is
 flagship *and* toolsmith, and apparatus changes motivated by econometrics land as
