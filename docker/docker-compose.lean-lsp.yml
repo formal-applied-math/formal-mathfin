@@ -13,7 +13,7 @@
 #   docker compose -f docker/docker-compose.yml -f docker/docker-compose.lean-lsp.yml down lean-lsp
 services:
   lean-lsp:
-    image: ghcr.io/raphaelrrcoelho/mathfin-verify:latest
+    image: ghcr.io/formal-applied-math/mathfin-verify:latest
     container_name: mathfin-lean-lsp
     cpuset: "${VERIFY_CPUSET:-0-3}"
     mem_limit: 6g

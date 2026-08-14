@@ -58,9 +58,9 @@ breadth at this stage, and what the concrete next round would look like.
 > the coherent-risk representation (risk) are now *one* Hahn–Banach root (`Foundations/ConvexDuality`,
 > `RiskMeasures/AcceptanceSet`). That was the most-tractable, highest-leverage seam (finite-dim convex
 > analysis, no Itô dependency). The Itô-track crown jewels below are next — **Girsanov (#2)** is the
-> queued bridge ([#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40); first brick = the
+> queued bridge ([#40](https://github.com/formal-applied-math/formal-mathfin/issues/40); first brick = the
 > adapted Doléans–Dade exponential), and the superhedging strong-duality *equality* hit a Mathlib
-> **Farkas gap** ([#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39)).
+> **Farkas gap** ([#39](https://github.com/formal-applied-math/formal-mathfin/issues/39)).
 
 > **Update (2026-06-30) — Phase 2: Girsanov, the martingale side (corpus 308).** The continuous EMM is
 > now an *explicit* change of measure: `Foundations/Girsanov.bs_discounted_isQMartingale` tilts the
@@ -72,7 +72,7 @@ breadth at this stage, and what the concrete next round would look like.
 > present — every `ito_formula_*` is `f(t,B_t)`, and QV exists only in expectation. So general adapted
 > `θ` and the *distributional* Girsanov (`gir-thm-9.1.8`, drift-corrected `B^θ` is `Q`-Brownian) stay
 > `reduced_core`, honestly documented — an Itô-tower item to re-scout, not force. See
-> [#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40).
+> [#40](https://github.com/formal-applied-math/formal-mathfin/issues/40).
 
 > **Update (2026-07-05) — Phase 2 distributional Girsanov, CONSTANT θ FULLY CLOSED (corpus 314).** The
 > re-scout paid off: for *constant* `θ` the distributional Girsanov is now complete —
@@ -89,7 +89,7 @@ breadth at this stage, and what the concrete next round would look like.
 > process-agnostic `Foundations/ExpMartingaleQBrownian.isQBrownianMotion_of_expMartingale` — const-θ
 > supplies only its exponential martingale (`expBtheta_isQMartingale`, as `IsExpQMartingale`) and
 > instantiates it; the simple-/continuous-θ Route-α bricks reuse the same seam. See
-> [#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40).
+> [#40](https://github.com/formal-applied-math/formal-mathfin/issues/40).
 >
 > **Update (2026-07-06) — SIMPLE (piecewise-constant) adapted θ FULLY CLOSED (corpus 315).** The
 > abstraction paid off: `Foundations/GirsanovSimpleTheta.Btheta_simple_isQBrownianMotion` (corpus
@@ -137,7 +137,7 @@ breadth at this stage, and what the concrete next round would look like.
 > `docs/plans/2026-07-06-girsanov-track-alpha.md` (Track-α COMPLETE).
 
 > **Update (2026-07-07) — finance-delivery breadth: the Vasicek affine bond price + the T-forward measure
-> (corpus 315 → 317, [#46](https://github.com/raphaelrrcoelho/formal-mathfin/issues/46)).** A pause on the
+> (corpus 315 → 317, [#46](https://github.com/formal-applied-math/formal-mathfin/issues/46)).** A pause on the
 > Girsanov-α4 depth track to cash in two finance-delivery items off machinery already load-bearing — no new
 > frontier. (1) **Vasicek zero-coupon bond price** (`FixedIncome/VasicekBondPrice`, entry
 > `mf-vasicek-bond-price`, **`full`**): `P(0,T) = 𝔼[exp(−∫₀ᵀ r_s ds)]` as the Gaussian Laplace transform of the
@@ -166,7 +166,7 @@ breadth at this stage, and what the concrete next round would look like.
 > follow-on. Depth track (Girsanov-α4) resumes next.
 
 > **DELIVERED (2026-07-03) — SDE existence made pathwise: the E-fixed point as a sample-path process
-> ([#19](https://github.com/raphaelrrcoelho/formal-mathfin/issues/19) → existence bridge).** The Picard
+> ([#19](https://github.com/formal-applied-math/formal-mathfin/issues/19) → existence bridge).** The Picard
 > solution, previously banked only as the abstract `L²`-fixed point `picardSolution ∈ E`, is now realized
 > as a genuine **pathwise** process. `Foundations/SDEPathwise.sde_pathwise_decomposition` slices the
 > fixed-point equation `X = Φ(X)` into the sample-path identity
@@ -185,7 +185,7 @@ breadth at this stage, and what the concrete next round would look like.
 > pathwise-existence bridge is now complete on the drift side, all axiom-clean.
 
 > **DELIVERED (2026-07-02) — SDE existence via Picard
-> ([#44](https://github.com/raphaelrrcoelho/formal-mathfin/issues/44)).** The strong solution of
+> ([#44](https://github.com/formal-applied-math/formal-mathfin/issues/44)).** The strong solution of
 > `dX = b(X)dt + σ(X)dB` is now **constructed as a Picard fixed point** in the predictable `L²` space `E`,
 > its diffusion term the actual assembled Itô integral: `Foundations/SDEExistence` proves the contraction
 > estimate `‖Φ X − Φ Y‖ ≤ (T·L_b + √T·L_σ)‖X − Y‖` and gets existence **and** uniqueness via Banach's
@@ -196,7 +196,7 @@ breadth at this stage, and what the concrete next round would look like.
 > rather than by the `ℝ≥0`↔`ℝ` E-translation.)
 
 > **DELIVERED (2026-07-03) — SDE strong-solution uniqueness via the L²-energy Grönwall argument
-> ([#19](https://github.com/raphaelrrcoelho/formal-mathfin/issues/19)).** The **uniqueness half of Theorem
+> ([#19](https://github.com/formal-applied-math/formal-mathfin/issues/19)).** The **uniqueness half of Theorem
 > 8.2.5** (`sc-thm-8.2.5`) is now a genuinely *derived* theorem — flipped **`reduced_core` → `full`**.
 > `Foundations/SDEUniqueness` proves two `L²` strong solutions of `dX = μ(X)dt + σ(X)dB` sharing the driver
 > agree a.s. at every time: the state energy `E t = 𝔼[(Xₜ−Yₜ)²]` satisfies `E t ≤ (2·Cdrift·t+2·Cdiff)·∫₀ᵗE`
@@ -210,7 +210,7 @@ breadth at this stage, and what the concrete next round would look like.
 > integral (`itoProcessCLM_norm_sq`), cited, not the conclusion.
 
 > **DELIVERED (2026-07-03) — the change of numéraire, both seam directions (substantial advance on
-> [#45](https://github.com/raphaelrrcoelho/formal-mathfin/issues/45)).** (1) `Foundations/Numeraire.changeOfNumeraire`
+> [#45](https://github.com/formal-applied-math/formal-mathfin/issues/45)).** (1) `Foundations/Numeraire.changeOfNumeraire`
 > is the abstract price-invariance law `N₀·𝔼^{Q^N}[X/N_T] = B₀·𝔼^Q[X/B_T]` (density `dQ^N/dQ = (N_T·B₀)/(N₀·B_T)`,
 > no integrability hypothesis), **`full`** entry `mf-change-of-numeraire`, **consumed** by two instances — the
 > BS stock numéraire (`stockNumeraireMeasure_eq_numeraireMeasure`) and Margrabe's `S²`-numéraire
@@ -224,17 +224,17 @@ breadth at this stage, and what the concrete next round would look like.
 > **Forward — two tracks (name the axis first).** The remaining work splits cleanly, and the axis
 > decides the phase:
 > - **Finance-delivery track** (finance theorems — the q-fin.MF / "formal theory of finance" artifact):
->   the **numéraire bridge** IV↔I ([#45](https://github.com/raphaelrrcoelho/formal-mathfin/issues/45) —
+>   the **numéraire bridge** IV↔I ([#45](https://github.com/formal-applied-math/formal-mathfin/issues/45) —
 >   change-of-numéraire formula + `S²`-numéraire instance + the discrete Kelly numéraire-portfolio ⇒ EMM
 >   all delivered 2026-07-03; only the *continuous* Long/Platen benchmark still OPEN); the forward-measure
 >   (bond numéraire) instance is the natural next `numeraireMeasure` instance; **finance
->   breadth** ([#46](https://github.com/raphaelrrcoelho/formal-mathfin/issues/46) — exotic + American
+>   breadth** ([#46](https://github.com/formal-applied-math/formal-mathfin/issues/46) — exotic + American
 >   options, Vasicek bond pricing, coherent-risk/CVaR breadth). These ship finance results — bridges and
 >   theorems like convex-duality (I↔IV) and Feynman–Kac (II↔III).
 > - **Depth / landmark track** (Mathlib-absent formalization landmarks — the AI4Math axis): SDE existence
->   ([#44](https://github.com/raphaelrrcoelho/formal-mathfin/issues/44)); general adapted-θ Girsanov
->   ([#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40)); superhedging strong duality /
->   finite-dim Farkas ([#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39)); the
+>   ([#44](https://github.com/formal-applied-math/formal-mathfin/issues/44)); general adapted-θ Girsanov
+>   ([#40](https://github.com/formal-applied-math/formal-mathfin/issues/40)); superhedging strong duality /
+>   finite-dim Farkas ([#39](https://github.com/formal-applied-math/formal-mathfin/issues/39)); the
 >   generator/Kolmogorov (II↔III) and Cox/intensity (IV) abstractions (plan Phases 5.1–5.2). These deepen
 >   a pillar; they do not ship a finance result. **The 2026-05-22 head below (breadth vs depth) is the
 >   same tension, now named by axis.**
@@ -1360,7 +1360,7 @@ Ho–Lee #156 and the Vasicek/Hull–White seam #157. Musiela (#158) is a deferr
 — every downstream tier waits on it; its one hard step is the L²-representative fact (maybe already in Mathlib).
 #140 (a would-be `integral_comp_comm` wrapper) was dissolved into #141 as an anti-wrapper cleanup.
 
-## closed: the localized Itô formula now identifies its integrand (2026-08-07, [#183](https://github.com/raphaelrrcoelho/formal-mathfin/issues/183))
+## closed: the localized Itô formula now identifies its integrand (2026-08-07, [#183](https://github.com/formal-applied-math/formal-mathfin/issues/183))
 
 Opened 2026-08-06 out of Task 3 of the martingale-representation program, closed the next day.
 `ito_formula_td_localized` returned a bare `∃ gfx` and everything built on it inherited that shape, so
@@ -1391,7 +1391,7 @@ already ahead of the corpus statements: all five affected entries described the 
 
 ## audit: prose against statement, repo-wide (2026-08-07, corpus 351 unchanged)
 
-Follow-on to [#183](https://github.com/raphaelrrcoelho/formal-mathfin/issues/183), which surfaced the
+Follow-on to [#183](https://github.com/formal-applied-math/formal-mathfin/issues/183), which surfaced the
 defect twice in one day and so stopped being a one-off. Six places claimed more than the Lean proved.
 The class is structural, not careless: prose is written to describe the theorem the author has in mind,
 the statement lands weaker, and nothing re-reads one against the other.
@@ -1439,7 +1439,7 @@ pytest 42, `lake build` + `lake lint` green, five curated axiom pins holding.
 `MarketCompleteness` is the finance reading: `exists_replicating_strategy` (`∃!` hedge for every
 square-integrable `𝓕ᴮ_T`-claim, priced at `𝔼_μ[H]`) and `superReplication_eq_emm_price` (the
 continuous-time superreplication duality at that same price). Neither closes
-[#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39): `Foundations/SuperhedgingDuality` is a
+[#39](https://github.com/formal-applied-math/formal-mathfin/issues/39): `Foundations/SuperhedgingDuality` is a
 finite-state one-period matrix model whose Farkas gate is untouched, and the two dualities hold for
 structurally different reasons, separation there and martingale representation here.
 

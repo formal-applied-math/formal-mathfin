@@ -1122,7 +1122,7 @@ several modules, order the checks by import closure rather than by the order the
 
 ## Naming an `L²` limit, and the wrapper that hid one (2026-08-07 batch)
 
-From [#183](https://github.com/raphaelrrcoelho/formal-mathfin/issues/183): carrying the identification
+From [#183](https://github.com/formal-applied-math/formal-mathfin/issues/183): carrying the identification
 `gfx =ᵐ [the integrand]` through the localized Itô chain.
 
 ### Identify an `L²` limit by *pointwise* limits of a.e. representatives

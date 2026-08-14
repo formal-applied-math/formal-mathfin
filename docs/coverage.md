@@ -32,8 +32,8 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > failure. The round covered martingale representation + market completeness, then the localized Itô
 > formula naming its integrand, then the description-semantics fix below; the last two entries are
 > the downside-performance-metrics work of
-> [#173](https://github.com/raphaelrrcoelho/formal-mathfin/pull/173) and the von Neumann–Morgenstern
-> lotteries of [#178](https://github.com/raphaelrrcoelho/formal-mathfin/pull/178).
+> [#173](https://github.com/formal-applied-math/formal-mathfin/pull/173) and the von Neumann–Morgenstern
+> lotteries of [#178](https://github.com/formal-applied-math/formal-mathfin/pull/178).
 > `itoIntegralCLM_T` was already a `LinearIsometry` from the predictable `L²(dt⊗dμ)` integrands into
 > `L²(μ)`. `MathFin/Foundations/MartingaleRepresentation.lean` identifies its image exactly:
 > `itoIntegralCLM_T_surjective_onto_centered` says the Itô integrals together with the constants
@@ -71,7 +71,7 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > needs the Jacod–Yor extreme-point characterisation and is out of scope.
 > The companion `superReplication_eq_emm_price` is the continuous-time superreplication duality, and
 > its "EMM price" is `𝔼_μ[H]`. It does **not** close
-> [#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39): `Foundations/SuperhedgingDuality`
+> [#39](https://github.com/formal-applied-math/formal-mathfin/issues/39): `Foundations/SuperhedgingDuality`
 > is a finite-state one-period matrix model whose Farkas gate is untouched. The two equalities hold
 > for structurally different reasons, separation there and martingale representation here, and
 > neither implies the other. The hedging strategy class is the Itô-integrable predictable integrands,
@@ -80,7 +80,7 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > apart from a scope paragraph. All four entries axioms-clean.
 >
 > **The localized Itô formula now names its integrand**
-> ([#183](https://github.com/raphaelrrcoelho/formal-mathfin/issues/183), closed 2026-08-07; no corpus
+> ([#183](https://github.com/formal-applied-math/formal-mathfin/issues/183), closed 2026-08-07; no corpus
 > entries added, five strengthened). The chain
 > `ito_formula_td_L2_bddDeriv → cutoff_bddDeriv → ito_formula_td_localized → ito_formula_itoProcess →
 > ito_formula_gbm`/`ito_formula_expBrownian → discountedGBM_eq_itoIntegral` was a run of bare

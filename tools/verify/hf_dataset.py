@@ -101,7 +101,7 @@ BrownianMotion package. Each entry includes a theorem's formal statement,
 its proof, subject area, and a "faithfulness tier" indicating alignment
 between the mathematical and formal claims.
 
-Sourced from the [`formal-mathfin`](https://github.com/raphaelrrcoelho/formal-mathfin)
+Sourced from the [`formal-mathfin`](https://github.com/formal-applied-math/formal-mathfin)
 library, this collection serves as training and evaluation material for
 autoformalization and automated theorem proving focused on quantitative
 finance — a domain underrepresented in existing mathematical benchmarks.

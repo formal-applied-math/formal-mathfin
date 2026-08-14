@@ -33,7 +33,7 @@ run them locally; the foundry is private.
    with `Router` validating against the configured list (mathfin's routing table
    moves into `mathfin.toml`).
 3. **Package boundary.** Make `tools/` installable from git
-   (`pip install "mathfin @ git+https://github.com/raphaelrrcoelho/formal-mathfin@apparatus-v1"`
+   (`pip install "mathfin @ git+https://github.com/formal-applied-math/formal-mathfin@apparatus-v1"`
    — the existing `pyproject.toml` already names the package `mathfin`; keep the
    name for now, renaming is cosmetic churn). Entry points unchanged
    (`python3 -m tools.verify.ledger` etc. must keep working IN this repo).

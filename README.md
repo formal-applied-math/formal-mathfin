@@ -1,6 +1,6 @@
 # Mathematical finance, formally verified
 
-[![build](https://github.com/raphaelrrcoelho/formal-mathfin/actions/workflows/build.yml/badge.svg)](https://github.com/raphaelrrcoelho/formal-mathfin/actions/workflows/build.yml)
+[![build](https://github.com/formal-applied-math/formal-mathfin/actions/workflows/build.yml/badge.svg)](https://github.com/formal-applied-math/formal-mathfin/actions/workflows/build.yml)
 [![axioms](https://img.shields.io/badge/axioms-propext%2C%20Classical.choice%2C%20Quot.sound-blue)](MathFin/AxiomAudit.lean)
 [![blueprint](https://img.shields.io/badge/blueprint-deductive_spine-blue)](docs/blueprint.md)
 [![Lean](https://img.shields.io/badge/Lean-4.32.0-blue)](lean-toolchain)
@@ -224,14 +224,14 @@ Honesty is the point, so the gaps are explicit:
   converse needs the Jacod–Yor extreme-point characterisation.
 - **The replicating hedge is unique but unnamed.** For a general square-integrable claim, market
   completeness gives a unique `φ` with `H = 𝔼[H] + ∫₀ᵀ φ dB` and says nothing about what `φ` is.
-  Naming it is Clark–Ocone ([#182](https://github.com/raphaelrrcoelho/formal-mathfin/issues/182)) and
+  Naming it is Clark–Ocone ([#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)) and
   is open. The Itô *formula's* integrand is named throughout — that is how `dŜ = σŜ dB` is stated —
   but that is the weaker of the two facts.
 - **Known upstream/limit gaps** — e.g. the superhedging strong-duality *equality* needs a
   finite-dimensional Farkas / polyhedral-cone closedness absent from Mathlib at this pin
-  ([#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39)).
+  ([#39](https://github.com/formal-applied-math/formal-mathfin/issues/39)).
 
-The frontier is in the [open issues](https://github.com/raphaelrrcoelho/formal-mathfin/issues) and
+The frontier is in the [open issues](https://github.com/formal-applied-math/formal-mathfin/issues) and
 [`docs/roadmap.md`](docs/roadmap.md). For genuinely *unsolved* problems — as opposed to unformalized
 known mathematics — [`docs/open-problems.md`](docs/open-problems.md) is a survey built over three
 adversarial rounds, where each entry carries an evidence class and the date of the most recent source
@@ -255,7 +255,7 @@ asserting it is still open.
 ## Contributing · citation · license
 
 Contributions welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md) and the
-[good first issues](https://github.com/raphaelrrcoelho/formal-mathfin/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+[good first issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 Please cite via the [Zenodo DOI](https://doi.org/10.5281/zenodo.20477782) or the
 [paper](https://arxiv.org/abs/2606.01356) ([`CITATION.cff`](CITATION.cff)). Licensed under
 [Apache 2.0](LICENSE).

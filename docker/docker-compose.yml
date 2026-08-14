@@ -12,11 +12,11 @@ services:
     #   TOKEN=$(grep -E '^[[:space:]]+oauth_token:' ~/.config/gh/hosts.yml | head -1 | awk '{print $2}')
     #   echo "$TOKEN" | docker login ghcr.io -u raphaelrrcoelho --password-stdin
     #   DATE=$(date -u +%Y-%m-%d)
-    #   docker tag docker-verify:latest ghcr.io/raphaelrrcoelho/mathfin-verify:$DATE
-    #   docker tag docker-verify:latest ghcr.io/raphaelrrcoelho/mathfin-verify:latest
-    #   docker push ghcr.io/raphaelrrcoelho/mathfin-verify:$DATE
-    #   docker push ghcr.io/raphaelrrcoelho/mathfin-verify:latest
-    image: ghcr.io/raphaelrrcoelho/mathfin-verify:latest
+    #   docker tag docker-verify:latest ghcr.io/formal-applied-math/mathfin-verify:$DATE
+    #   docker tag docker-verify:latest ghcr.io/formal-applied-math/mathfin-verify:latest
+    #   docker push ghcr.io/formal-applied-math/mathfin-verify:$DATE
+    #   docker push ghcr.io/formal-applied-math/mathfin-verify:latest
+    image: ghcr.io/formal-applied-math/mathfin-verify:latest
     build:
       context: ..
       dockerfile: docker/Dockerfile.verify
@@ -122,7 +122,7 @@ services:
   #   ./scripts/lean-check.sh MathFin/<Section>/<Module>.lean    # fast iteration
   #   docker compose -f docker/docker-compose.yml down lean-repl       # tear down
   lean-repl:
-    image: ghcr.io/raphaelrrcoelho/mathfin-verify:latest
+    image: ghcr.io/formal-applied-math/mathfin-verify:latest
     build:
       context: ..
       dockerfile: docker/Dockerfile.verify

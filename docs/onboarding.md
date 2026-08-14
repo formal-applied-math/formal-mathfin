@@ -7,7 +7,7 @@ with this codebase.
 ## 1. Pick a task
 
 Browse issues labelled
-[`good first issue`](https://github.com/raphaelrrcoelho/formal-mathfin/issues?q=is%3Aopen+label%3A%22good+first+issue%22).
+[`good first issue`](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3A%22good+first+issue%22).
 
 Good entry points by type:
 - **Documentation only** (no build required): glossary, troubleshooting FAQ,

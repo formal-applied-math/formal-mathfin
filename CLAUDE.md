@@ -13,7 +13,7 @@ plain `lake build` from the repo root is the canonical verification.
 ## Commands
 
 Preferred runner is Docker. The image is hosted on GHCR
-(`ghcr.io/raphaelrrcoelho/mathfin-verify`, public). Pull-first,
+(`ghcr.io/formal-applied-math/mathfin-verify`, public). Pull-first,
 build-fallback:
 
 ```bash

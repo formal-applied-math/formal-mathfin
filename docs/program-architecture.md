@@ -125,7 +125,7 @@ model, blueprint render) and the three gate test-suites are excellent and are
 into a new repo: `tools/verify` becomes corpus-parameterized (it already reads
 `mathfin.toml`; the residual mathfin-isms are naming and defaults), and
 `formal-econometrics` and the foundry consume it as a **pip git-dependency pinned
-to a tag** (`pip install "mathfin @ git+https://github.com/raphaelrrcoelho/formal-mathfin@apparatus-v1"`),
+to a tag** (`pip install "mathfin @ git+https://github.com/formal-applied-math/formal-mathfin@apparatus-v1"`),
 plus `workflow_call` workflows referenced cross-repo the same way.
 
 **Why mathfin and not the foundry:** the foundry is private, and the apparatus
@@ -284,14 +284,25 @@ function that reveals which abstractions are real; do not pre-empt it.
 | Library 2 phase 0 | Copy the apparatus into `formal-econometrics` deliberately. Do not genericize yet |
 | Library 2 at ~20 entries | Genericize `tools/verify` in place in mathfin against observed divergence; tag `apparatus-v1`; econometrics and foundry switch to the tagged pip dep and delete their copies |
 | First field-neutral block | `MathFin/ForMathlib/` (or the econometrics twin, whichever births it), upstream-tagged from day one, aging report wired into CI |
-| ~~If ever a library 3~~ **fired 2026-08-11** | `formal-macroeconomics` exists. The cap is lifted to four (see the header). **The GitHub-org half of this row is still undecided** — and the note below says it is closer to now-or-never than it looks, so it should not be left to drift a second time |
+| ~~If ever a library 3~~ **closed 2026-08-13** | Both halves settled. `formal-macroeconomics` lifted the cap to four, and all four repos now live in the **`formal-applied-math`** org. Redirects carry the old URLs; the 29 stars, 7 forks and 133 issues came across intact |
 
-**On the org:** it makes the collection legible as a program rather than scattered
-personal projects, which is worth real money for an ownership claim. But the repo
-URL is load-bearing in the Zenodo DOI, the arXiv paper, and the HF dataset. GitHub
-redirects, so a move is survivable rather than catastrophic — but the cost only
-grows as more links accumulate. **This is closer to now-or-never than it appears.**
-Decide deliberately rather than by drift.
+**On the org — done 2026-08-13, `formal-applied-math`.** It makes the collection
+legible as a program rather than scattered personal projects, which is worth real
+money for an ownership claim. The repo URL was load-bearing in the Zenodo DOI, the
+arXiv papers, and the HF dataset; GitHub redirects carry all three, and the arXiv
+footnotes are the one set that can never be edited, so they rely on the redirect
+permanently. Two things did **not** follow the transfer and had to be handled
+separately, which is the transferable lesson:
+
+* **Container packages live in the user namespace, not the repo's.**
+  `ghcr.io/raphaelrrcoelho/mathfin-verify` did not move with the repo; the image
+  had to be republished under the org and every hardcoded path updated. A repo
+  transfer silently breaks any workflow that pushes to a user-namespace package.
+* **The Zenodo webhook is per-repository.** Existing DOIs and records are permanent
+  and unaffected, but the integration must be re-enabled against the new path or
+  future releases mint no DOI.
+
+The HuggingFace dataset was untouched: its namespace is HuggingFace's, not GitHub's.
 
 ---
 
