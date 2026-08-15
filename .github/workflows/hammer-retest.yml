@@ -1,0 +1,152 @@
+name: hammer re-test
+
+# THE EXPERIMENT THAT WAS NEVER RUN FAIRLY, MADE MACHINERY.
+#
+# The 2026-06-06 pilot scored LeanHammer 0/10 kernel-accepted, but it ran hammer
+# one Lean version off its target (their main tracked v4.30.0 stable; we were on
+# v4.30.0-rc2) and the report itself attributes the failure to that skew.
+# LeanHammer main has targeted v4.32.0 — our exact pin — since 2026-07-14
+# (c9ea5bf1), so the question can finally be answered. This job answers it.
+#
+# It GATES NOTHING and is workflow_dispatch only. The Hammer cluster is
+# deliberately NOT a tracked dependency: adding it would tax every build with
+# the ~1157-job Hammer/Duper/auto/premise-selection compile before there is any
+# evidence it pays for itself. scripts/hammer-retest.sh inserts the require
+# ephemerally inside the container — the same pattern the foundry's
+# build-index.sh uses for lean_scout. Promotion to a tracked dep is gated on
+# this job's result; criteria in docs/hammer-pilot-2026-06-06.md, "What result
+# changes the policy".
+#
+# Runner, not the dev box: the memory doctrine puts full-environment batch work
+# on GitHub runners (4-core/16 GB), never on the 10 GB WSL client.
+
+on:
+  workflow_dispatch:
+    inputs:
+      hammer_rev:
+        description: "LeanHammer rev — MUST target v4.32.0 (main was a841fded on 2026-08-08)"
+        type: string
+        default: "a841fded"
+      pilots:
+        description: "Which pilots to run"
+        type: choice
+        options: ["A", "A+B", "A+B+C"]
+        default: "A+B"
+      per_file_timeout:
+        description: "Seconds per pilot file (2026-06-06 baseline: ~31 min/goal)"
+        type: string
+        default: "1800"
+
+concurrency:
+  group: hammer-retest
+  cancel-in-progress: true
+
+jobs:
+  retest:
+    name: hammer vs the pilot goals
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      # The verify image is Mathlib-sized; the runner's default free disk is not.
+      - name: Reclaim disk
+        run: |
+          df -h / | tail -1
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc \
+                      /usr/local/.ghcup /usr/local/share/boost /opt/hostedtoolcache/CodeQL \
+                      /usr/local/lib/node_modules 2>/dev/null || true
+          docker image prune -af >/dev/null 2>&1 || true
+          echo "after cleanup:"; df -h / | tail -1
+
+      - uses: actions/checkout@v4
+
+      # PRIVACY is a hard precondition, not a hope: the default LeanHammer
+      # premise selector is a CLOUD server (leanpremise.net). Every pilot file
+      # must pin the local symbolic selector before anything runs.
+      - name: Privacy pre-flight
+        run: |
+          fail=0
+          for f in tests/hammer_pilot/Pilot*.lean; do
+            if ! grep -q 'set_library_suggestions sineQuaNonSelector' "$f"; then
+              echo "::error file=$f::no local premise selector pinned — refusing to run"
+              fail=1
+            fi
+            if grep -qE 'leanpremise\.net|premiseSelection\.apiBaseUrl' "$f"; then
+              echo "::error file=$f::references a remote selector"
+              fail=1
+            fi
+          done
+          if [ "$fail" = 0 ]; then echo "all pilot files pin the local symbolic selector"; fi
+          exit $fail
+
+      - name: GHCR login (optional — image is public; login only eases rate limits)
+        env:
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          if [ -n "$GHCR_TOKEN" ]; then
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u raphaelrrcoelho --password-stdin
+          else
+            echo "no GHCR_TOKEN set — anonymous pull (mathfin-verify is public)"
+          fi
+
+      - name: Pull the pinned verify image
+        run: docker pull ghcr.io/formal-applied-math/mathfin-verify:latest
+
+      - name: Re-test
+        env:
+          HAMMER_REV: ${{ inputs.hammer_rev }}
+          PILOTS: ${{ inputs.pilots }}
+          TMO: ${{ inputs.per_file_timeout }}
+        run: |
+          mkdir -p out
+          docker run --rm \
+            -v "$PWD":/work:ro -v "$PWD/out":/out \
+            -e HAMMER_REV -e PILOTS -e TMO \
+            --entrypoint bash \
+            ghcr.io/formal-applied-math/mathfin-verify:latest /work/scripts/hammer-retest.sh
+
+      - name: Summarise
+        if: always()
+        run: |
+          {
+            echo "## hammer re-test — \`${{ inputs.hammer_rev }}\`"
+            echo
+            if [ -f out/blocked.txt ]; then
+              echo "**Blocked before the mathematics.** That is itself a result:"
+              echo
+              echo '```'
+              cat out/blocked.txt
+              echo '```'
+              echo
+              echo "If it is a toolchain skew, pick a rev whose \`lean-toolchain\` matches"
+              echo "\`$(cat lean-toolchain)\`. If it is a build failure, check open issue"
+              echo "JOSHCLUNE/LeanHammer#18 (import-time \`lazyReduce.skipProof\` error)."
+            elif [ -s out/results.tsv ]; then
+              echo "| pilot | verdict | wall clock | \`(kernel)\` lines | sorries | errors |"
+              echo "|---|---|---|---|---|---|"
+              while IFS="$(printf '\t')" read -r f v e k s x; do
+                printf '| %s | **%s** | %dm %02ds | %s | %s | %s |\n' \
+                  "$f" "$v" "$((e/60))" "$((e%60))" "$k" "$s" "$x"
+              done < out/results.tsv
+              echo
+              echo "**Baseline to beat (2026-06-06):** 0/10 kernel-accepted, ~31 min/goal,"
+              echo "PilotB 9366 s for 5 goals. A non-zero \`(kernel)\` count means the"
+              echo "reconstruction bug is real rather than toolchain skew."
+              echo
+              echo "\`PilotA_default\` is the generated grind-driver variant — the config"
+              echo "that actually produced the 2026-06-06 kernel rejections."
+              echo
+              echo "**PilotB is the discriminating file.** Decision criteria:"
+              echo "\`docs/hammer-pilot-2026-06-06.md\` → \"What result changes the policy\"."
+            else
+              echo "No results produced — check the Re-test step log."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hammer-retest-logs
+          path: out/
+          if-no-files-found: warn
+          retention-days: 30

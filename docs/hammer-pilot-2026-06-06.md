@@ -55,37 +55,43 @@ pin it blocks the re-test at step 3.
 
 ## The re-test
 
-Restated against the current pin. The pilot's operational findings are folded
-in — they are the part that cost time to learn.
+**It is a CI job now, not a checklist:**
+[`.github/workflows/hammer-retest.yml`](../.github/workflows/hammer-retest.yml)
+→ Run workflow. `workflow_dispatch` only; it gates nothing.
 
-```bash
-# 1. ONE Lean process (memory doctrine): the daemon must be down.
-docker compose -f docker/docker-compose.yml down lean-repl
+Inputs: the hammer rev (default `a841fded`), which pilots to run (default
+`A+B`), and a per-file timeout (default 1800 s, against a ~31 min/goal
+baseline). Results land in the run summary as a table, with full logs uploaded
+as an artifact.
 
-# 2. Pilot goals onto a branch off CURRENT main — do NOT check out the old
-#    branch, which would revert the tree to June pins.
-git checkout -b hammer-retest main
-git checkout c51d683 -- tests/hammer_pilot/     # branch `hammer-pilot` is kept
+The procedure lives in [`scripts/hammer-retest.sh`](../scripts/hammer-retest.sh),
+which encodes what the 2026-06-06 run cost time to learn:
 
-# 3. Add the dep at a rev targeting v4.32.0 (main, or c9ea5bf1 or later).
-#    Snapshot lean-toolchain first: `lake update` DID rewrite it last time.
-cp lean-toolchain /tmp/lean-toolchain.bak
-#    ...add the require to lakefile.lean, mathlib-LAST so its pins win and
-#    batteries stays at Mathlib's rev (no Mathlib rebuild)...
-lake update Hammer && diff /tmp/lean-toolchain.bak lean-toolchain || cp /tmp/lean-toolchain.bak lean-toolchain
+- **mathlib-last ordering.** The require is inserted *before* `require mathlib`
+  by [`scripts/hammer_lakefile_patch.py`](../scripts/hammer_lakefile_patch.py).
+  Lake gives later requires precedence on transitive conflicts, so appending
+  would let Hammer's batteries/Cli pins win and rebuild the baked Mathlib —
+  hours on a 4-core runner.
+- **`lake update` rewrites `lean-toolchain`.** Snapshotted and restored.
+- **Skew refusal.** If hammer's `lean-toolchain` does not equal ours, the script
+  writes `blocked.txt` and stops rather than producing another confounded
+  number. That is the one mistake this whole exercise exists to not repeat.
+- **The grind-driver variant.** `PilotA` pins `{disableGrind := true}`, so it
+  never exercises the driver that produced the kernel rejections; the script
+  generates `PilotA_default` with the config stripped.
+- **Privacy is a precondition.** The workflow refuses to start unless every
+  pilot file pins the local symbolic selector. The default LeanHammer premise
+  selector is a cloud server.
+- **Kernel replay is the metric.** `lake env lean` elaborates *and* kernel-checks;
+  a tactic that "succeeds" while the kernel rejects is not a success.
 
-# 4. Privacy is non-negotiable: every pilot file keeps
-#    `set_library_suggestions sineQuaNonSelector.intersperse currentFile`,
-#    or a self-hosted premise server. NEVER the default cloud selector.
-
-# 5. Kernel replay is the metric — a tactic that "succeeds" proves nothing.
-docker compose -f docker/docker-compose.yml run --rm --entrypoint sh verify \
-  -c 'cd /app && lake env lean tests/hammer_pilot/PilotA.lean'
-```
-
-Ledger cost is zero: `Hammer`, `Duper`, `auto` and `«premise-selection»` are all
-in `PIN_EXCLUDED_PACKAGES` (`tools/verify/ledger.py`), so adding the dep restales
-no entries. The boundary test enforces that no library module imports them.
+The dependency is **ephemeral** — inserted inside the container, never committed
+to the tracked lakefile. Adding the Hammer cluster to the real build would tax
+every CI run with a ~1157-job compile before there is any evidence it pays.
+Promoting it to a tracked dep is the step gated on the criteria below; the
+plumbing for that already exists (`Hammer`, `Duper`, `auto`,
+`«premise-selection»` are in `ledger.PIN_EXCLUDED_PACKAGES`, and `lakefile.lean`
+is not a ledger pin file, so a tracked dep restales nothing).
 
 ## What result changes the policy
 
@@ -175,7 +181,6 @@ where our toolkit fails (nonlinear inequalities), hammer failed too.
 ---
 
 *Provenance: the report was written on the `hammer-pilot` branch and moved into
-`docs/` on 2026-08-14 during a stale-branch sweep. That branch is **kept** at
-`c51d683` because the three pilot files (`tests/hammer_pilot/Pilot{A,B,C}.lean`)
-live only there and step 2 of the re-test needs them — do not delete it without
-first salvaging those files.*
+`docs/` on 2026-08-14. The three pilot files now live in `tests/hammer_pilot/`,
+tracked, so the branch is no longer load-bearing and can be deleted; it remains
+at `c51d683` only as the original record.*
