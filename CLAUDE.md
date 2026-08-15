@@ -253,7 +253,10 @@ In-loop automation (all CPU-local, pin-respecting):
   with NATIVE Aesop/Duper/Grind reconstruction — kernel-checked, axiom-clean.
   PRIVACY: never use the default cloud selector; every file sets
   `set_library_suggestions` to a local selector (sineQuaNon / MePo) or a
-  self-hosted `premiseSelection.apiBaseUrl`.
+  self-hosted `premiseSelection.apiBaseUrl`. Piloted 2026-06-06 —
+  **verdict: do not adopt at that rev × toolchain** (0/10 kernel-accepted,
+  ~31 min/goal); the evidence and the re-test baseline are in
+  `docs/hammer-pilot-2026-06-06.md`.
 
 The gate (the repo contract applies unchanged to machine-found proofs):
 - Automation output is a **scout, not an author**. A goal closed by
