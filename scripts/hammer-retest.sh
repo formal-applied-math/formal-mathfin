@@ -35,7 +35,8 @@ if ! python3 "$WORK/scripts/hammer_lakefile_patch.py" "$HAMMER_REV"; then
 fi
 
 echo "[retest] lake update Hammer @ $HAMMER_REV"
-lake update Hammer 2>&1 | tail -40
+lake update Hammer > "$OUT/update.log" 2>&1
+tail -25 "$OUT/update.log"
 
 if ! diff -q /tmp/toolchain.bak lean-toolchain >/dev/null 2>&1; then
   echo "[retest] WARNING: lake update rewrote lean-toolchain — restoring"
@@ -52,11 +53,23 @@ if [ "$OURS" != "$THEIRS" ]; then
   cat "$OUT/blocked.txt"; exit 0
 fi
 
-echo "[retest] lake build Hammer"
-timeout 5400 lake build Hammer 2>&1 | tail -60
-BUILD=${PIPESTATUS[0]}
+# NEVER pipe a build log you are diagnosing into `tail` — the FIRST error is
+# the diagnostic one, and the 2026-08-15 run lost every per-target failure
+# message that way, leaving only Lake's closing summary. Full log to the
+# artifact; on failure surface the EARLIEST errors.
+echo "[retest] lake build Hammer (full log -> build.log)"
+timeout 5400 lake build Hammer > "$OUT/build.log" 2>&1
+BUILD=$?
+grep -c . "$OUT/build.log" >/dev/null 2>&1 || true
 if [ "$BUILD" -ne 0 ]; then
-  echo "Hammer cluster did not build (exit $BUILD)" > "$OUT/blocked.txt"
+  {
+    echo "Hammer cluster did not build (exit $BUILD)"
+    echo
+    echo "first errors:"
+    grep -nEi "error|failed|cannot|no such|not found|denied|unsupported" "$OUT/build.log" \
+      | grep -v "^.*Some required targets logged failures" | head -40
+  } > "$OUT/blocked.txt"
+  cat "$OUT/blocked.txt"
   exit 0
 fi
 
