@@ -253,10 +253,13 @@ In-loop automation (all CPU-local, pin-respecting):
   with NATIVE Aesop/Duper/Grind reconstruction — kernel-checked, axiom-clean.
   PRIVACY: never use the default cloud selector; every file sets
   `set_library_suggestions` to a local selector (sineQuaNon / MePo) or a
-  self-hosted `premiseSelection.apiBaseUrl`. Piloted 2026-06-06 —
-  **verdict: do not adopt at that rev × toolchain** (0/10 kernel-accepted,
-  ~31 min/goal); the evidence and the re-test baseline are in
-  `docs/hammer-pilot-2026-06-06.md`.
+  self-hosted `premiseSelection.apiBaseUrl`. Piloted 2026-06-06 (0/10
+  kernel-accepted, ~31 min/goal) — but that ran hammer one Lean version off its
+  target and the report blames the skew, so it is an **expired verdict, not a
+  settled one**. LeanHammer main has targeted our `v4.32.0` since 2026-07-14, so
+  the re-test is unblocked; `docs/hammer-pilot-2026-06-06.md` has the procedure
+  and names the three goals that decide it. Low priority: it is an
+  authoring-loop question, and hammer is not on the foundry's critical path.
 
 The gate (the repo contract applies unchanged to machine-found proofs):
 - Automation output is a **scout, not an author**. A goal closed by
