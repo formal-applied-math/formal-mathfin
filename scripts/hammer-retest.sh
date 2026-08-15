@@ -27,6 +27,24 @@ TMO="${TMO:-1800}"
 mkdir -p "$OUT"
 cd "$APP" || { echo "no $APP"; exit 1; }
 
+# `unzip` is not in the verify image, and that alone blocked the 2026-08-15
+# runs: curl fetched both the Zipperposition binary and the cvc5 static bundle,
+# then Lake reported "could not execute external process 'unzip'" and every
+# native target (libcvc5, libcadical, libgmp, libpicpoly) failed on the files
+# that were never extracted. Installed at RUNTIME rather than baked into
+# Dockerfile.verify: the image is the verification anchor, and only this
+# workflow needs a zip extractor.
+if ! command -v unzip >/dev/null 2>&1; then
+  echo "[retest] installing unzip (absent from the verify image)"
+  if ! (apt-get update -qq && apt-get install -y -qq --no-install-recommends unzip) \
+       > "$OUT/provision.log" 2>&1; then
+    { echo "could not install unzip — the external solver toolchain cannot be extracted"
+      tail -20 "$OUT/provision.log"; } > "$OUT/blocked.txt"
+    cat "$OUT/blocked.txt"; exit 0
+  fi
+fi
+echo "[retest] unzip: $(command -v unzip)"
+
 # `lake update` rewrote lean-toolchain during the 2026-06-06 pilot.
 cp lean-toolchain /tmp/toolchain.bak
 
