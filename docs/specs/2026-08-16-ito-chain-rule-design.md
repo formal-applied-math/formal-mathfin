@@ -160,7 +160,10 @@ Work items, as executed:
    Membership is immediate from `SimpleProcess.coe_bounded` (a simple process is uniformly
    bounded) plus finiteness, via `MemLp.of_bound`; no relation to `trim_T` is needed.
 3. **Done.** `isFiniteMeasure_sqWeight` — `f²·trim_T` is finite because `f ∈ L²(trim_T)`.
-4. **Open.** `simpleAssembly_sqWeight_denseRange` itself, by the reduction above.
+4. **Done.** `simpleAssembly_sqWeight_denseRange`, by the reduction above. Two further
+   helpers in `ItoIntegralCLM` were de-privatised for it (`uncurry_iocSP_T_eq`, and
+   `setIntegral_eq_setIntegral_inter_supp`, itself generalised from an `L²` class to a plain
+   function). `lake build MathFin && lake lint` green.
 
 `simpleAssembly_T_denseRange` keeps its statement and its proof; it is not re-derived, because
 under this route there is nothing to re-derive it from — the shared content is the π-λ core,

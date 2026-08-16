@@ -565,8 +565,10 @@ noncomputable def iocSP_T {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     rcases h_in_I with rfl
     exact hbT⟩
 
-/-- The uncurry of `iocSP_T hab hbT hF` agrees pointwise with `(Ioc a b × F).indicator 1`. -/
-private lemma uncurry_iocSP_T_eq {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
+/-- The uncurry of `iocSP_T hab hbT hF` agrees pointwise with `(Ioc a b × F).indicator 1`.
+Public because `PredictableDensityGeneral` needs it to run the same rectangle argument
+against the bracket-weighted measure. -/
+lemma uncurry_iocSP_T_eq {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) {F : Set Ω}
     (hF : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) a] F) :
     Function.uncurry ⇑(iocSP_T hBmeas hab hbT hF : TBoundedSP T hBmeas).val
@@ -628,9 +630,9 @@ private lemma inner_simpleAssembly_T_iocSP_T {T : ℝ≥0} (hBmeas : ∀ t, Meas
 `R` equals the integral over `R ∩ (Ioc 0 T × univ)`. The complement of
 `Ioc 0 T × univ` is `trim_T`-null because `trim_T = trim_full.restrict
 (Ioc 0 T × univ)`. -/
-private lemma setIntegral_eq_setIntegral_inter_supp {T : ℝ≥0}
+lemma setIntegral_eq_setIntegral_inter_supp {T : ℝ≥0}
     (hBmeas : ∀ t, Measurable (B t))
-    (g : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (R : Set (ℝ≥0 × Ω))
+    (g : ℝ≥0 × Ω → ℝ) (R : Set (ℝ≥0 × Ω))
     (hR : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable] R) :
     ∫ z in R, g z ∂(trimMeasure_T (μ := μ) T hBmeas) =
       ∫ z in R ∩ (Set.Ioc 0 T ×ˢ Set.univ), g z ∂(trimMeasure_T (μ := μ) T hBmeas) := by

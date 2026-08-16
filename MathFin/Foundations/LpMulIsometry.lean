@@ -38,6 +38,8 @@ Mathlib's `withDensitySMulLI` does. This is the step at which a naive attempt br
 * `sqWeight` — the weighted measure `f²·ν`.
 * `lintegral_sqWeight` — the change-of-density identity for lower integrals.
 * `eLpNorm_mul_eq` — the norm identity, for an arbitrary function.
+* `integral_sqWeight`, `setIntegral_sqWeight` — the Bochner transfer, and its set form.
+* `sqWeight_ae_ne_zero` — `f²·ν` is carried by `{f ≠ 0}`.
 * `memLp_mul` — `ψ ∈ L²(f²·ν)` implies `f·ψ ∈ L²(ν)`.
 * `mulLM`, `mulLI` — the map as a linear map and as a `LinearIsometry`, with `coeFn_mulLM`
   the characterising a.e. identity.
@@ -88,6 +90,36 @@ lemma eLpNorm_mul_eq (hf : Measurable f) (g : α → ℝ) :
   rw [enorm_mul, ENNReal.mul_rpow_of_nonneg _ _ (by norm_num : (0:ℝ) ≤ (2:ℝ≥0∞).toReal)]
   congr 1
   rw [show ((2 : ℝ≥0∞).toReal) = ((2 : ℕ) : ℝ) by norm_num, ENNReal.rpow_natCast]
+
+/-- `(‖r‖ₑ²).toReal = r²` — the real form of the density, used to turn a `withDensity`
+transfer into an honest multiplication by `f²`. -/
+lemma enorm_sq_toReal (r : ℝ) : (‖r‖ₑ ^ 2).toReal = r ^ 2 := by
+  rw [ENNReal.toReal_pow, Real.enorm_eq_ofReal_abs, ENNReal.toReal_ofReal (abs_nonneg r),
+    sq_abs]
+
+/-- **Bochner transfer.** Integrating `u` against `f²·ν` is integrating `f²·u` against `ν`. -/
+lemma integral_sqWeight (hf : Measurable f) (u : α → ℝ) :
+    ∫ x, u x ∂(sqWeight ν f) = ∫ x, f x ^ 2 * u x ∂ν := by
+  rw [sqWeight, integral_withDensity_eq_integral_toReal_smul (measurable_sqDensity hf)
+    (Eventually.of_forall fun x ↦ (sqDensity_ne_top x).lt_top)]
+  exact integral_congr_ae (Eventually.of_forall fun x ↦ by
+    simp only [smul_eq_mul, enorm_sq_toReal])
+
+/-- The set-integral form of `integral_sqWeight`. -/
+lemma setIntegral_sqWeight (hf : Measurable f) {R : Set α} (hR : MeasurableSet R) (u : α → ℝ) :
+    ∫ x in R, u x ∂(sqWeight ν f) = ∫ x in R, f x ^ 2 * u x ∂ν := by
+  rw [sqWeight, restrict_withDensity hR,
+    integral_withDensity_eq_integral_toReal_smul (measurable_sqDensity hf)
+      (Eventually.of_forall fun x ↦ (sqDensity_ne_top x).lt_top)]
+  exact integral_congr_ae (Eventually.of_forall fun x ↦ by
+    simp only [smul_eq_mul, enorm_sq_toReal])
+
+/-- `f²·ν` is carried by `{f ≠ 0}`: the weight kills the rest. This is what turns "`f²·g = 0`
+`ν`-a.e." into "`g = 0` a.e. for the weighted measure". -/
+lemma sqWeight_ae_ne_zero (hf : Measurable f) : ∀ᵐ x ∂(sqWeight ν f), f x ≠ 0 := by
+  rw [sqWeight, ae_withDensity_iff (measurable_sqDensity hf)]
+  filter_upwards with x hx hfx
+  exact hx (by simp [hfx])
 
 /-- `ψ ∈ L²(f²·ν)` implies `f·ψ ∈ L²(ν)`. The measurability is not transported across the
 measures — an `Lp` element carries a genuinely `StronglyMeasurable` representative
