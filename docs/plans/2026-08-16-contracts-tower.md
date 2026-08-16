@@ -481,7 +481,7 @@ git commit -m "feat(contracts): payoff evaluation is measurable, and adapted to 
 - Probe: `<scratchpad>/probe3.lean`
 
 **Interfaces:**
-- Consumes: `Contract`, `Contract.pathPV`, `pathPV_both`, `pathPV_scale` (Task 1); `Payoff.measurable_eval` (Task 2); `MathFin.ContinuousMarket.IsEMM` (`MathFin/Foundations/ContinuousMarket.lean:71`).
+- Consumes: `Contract`, `Contract.pathPV`, `pathPV_both`, `pathPV_scale` (Task 1); `MathFin.ContinuousMarket.IsEMM` (`MathFin/Foundations/ContinuousMarket.lean:71`). It does **not** consume Task 2's measurability results: the `Integrable` hypotheses here are assumed, not derived. Task 5 Step 6 is where measurability would be used, if the integrability hypotheses get discharged there.
 - Produces:
   - `Contract.value (Q : Measure Ω) (D : ℝ≥0 → ℝ) (X : ι → ℝ≥0 → Ω → ℝ) (c : Contract ι) : ℝ`
   - `Contract.value_both`, `Contract.value_scale`
@@ -935,6 +935,24 @@ The headline entry, in full:
 }
 ```
 
+
+The eight entries, each re-exporting exactly one theorem:
+
+| id | re-exports | import |
+|---|---|---|
+| `mf-contract-pathpv-both` | `Contract.pathPV_both` | `MathFin.Contracts.Core` |
+| `mf-contract-eval-adapted` | `Payoff.measurable_eval_of_obsTimes_le` | `MathFin.Contracts.Adapted` |
+| `mf-contract-value-linear` | `Contract.value_both` | `MathFin.Contracts.Pricing` |
+| `mf-contract-value-deliver-asset` | `Contract.value_deliverAsset` | `MathFin.Contracts.Pricing` |
+| `mf-contract-european-call` | `value_europeanCall` | `MathFin.Contracts.BlackScholes` |
+| `mf-contract-european-put` | `value_europeanPut` | `MathFin.Contracts.BlackScholes` |
+| `mf-contract-digital-cash-or-nothing` | `value_digitalCall` | `MathFin.Contracts.BlackScholes` |
+| `mf-contract-capped-call` | `cappedCall_payoff_eq` | `MathFin.Contracts.CappedCall` |
+
+Each snippet restates the theorem's full signature and closes with the bare
+qualified term (`MathFin.Contracts.<name> <args>`), never `by exact`. Copy each
+signature from the module you wrote it in — do not retype it from memory.
+
 **The `description` states what the entry proves, not the textbook theorem it is named after.** It ships in the HF dataset, so it is an outward-facing claim.
 
 - [ ] **Step 2: Verify each snippet elaborates**
@@ -1255,11 +1273,32 @@ docker compose -f docker/docker-compose.yml run --rm \
 
 Running it red first is the only evidence the gate can actually fail.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Regenerate the derived state the benchmark edit staled**
+
+Adding `metadata.contract_spec` to four entries is a benchmark edit, so both
+derived artifacts go stale:
+
+```bash
+python3 -m tools.verify.axiom_audit_gen --write
+python3 -m tools.verify.ledger status      # expect the four entries stale
+docker compose -f docker/docker-compose.yml up -d lean-repl
+python3 -m tools.verify.ledger verify
+python3 -m tools.verify.ledger status      # must exit 0
+docker compose -f docker/docker-compose.yml down lean-repl
+docker compose -f docker/docker-compose.yml run --rm \
+  --entrypoint python3 verify -m pytest tests/ -q
+```
+
+Without this the task lands red: `test_values.py` enforces byte-freshness of
+`MathFin/AxiomAuditGen.lean` after ANY benchmark edit, and `test_ledger.py`
+requires a fresh row per entry.
+
+- [ ] **Step 6: Commit**
 
 ```bash
 git add MathFin/Contracts/Scope.lean tests/test_values.py \
-        benchmarks/mathematical_finance.json MathFin.lean
+        benchmarks/mathematical_finance.json MathFin/AxiomAuditGen.lean \
+        verification_ledger.json MathFin.lean
 git commit -m "feat(contracts): the modelling scope travels with the Lean object, gated against drift"
 ```
 
