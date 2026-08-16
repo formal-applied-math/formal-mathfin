@@ -332,9 +332,21 @@ statement a reader should reach for and why, rather than deleting the old framin
 `Q = μ.withDensity (ENNReal.ofReal ∘ D)` with `D ∈ L²(μ)` rather than via `Measure.rnDeriv`,
 which R3 anticipated. The `Lp` band decomposition that §4.7 was blocked on is now in 4.3.
 
-**What the phase did *not* do.** No corpus entries, no `AxiomAudit`/`AxiomAuditGen`, no updates
-to `coverage.md` / `bridges.md` / `leaps.md` / `mathematical-architecture.md`, and no values
-review. The mathematics is delivered; the repo-upgrade half of the phase is not.
+**The repo-upgrade half, done 2026-08-16.** Five corpus entries (353 → 358, all `full`);
+`AxiomAuditGen` regenerated at 318 guards and seven results pinned in the curated `AxiomAudit`;
+`formalization.yaml` regenerated; ledger 358/358; `coverage.md`, `bridges.md` (rows CHAIN and
+CHAIN.2, MRT.2 marked superseded on its uniqueness half), `leaps.md` (Leap 6),
+`mathematical-architecture.md`, `roadmap.md`, `README.md` and `patterns.md` all updated; values
+review recorded.
+
+**Follow-ups opened:** the drift term
+([#194](https://github.com/formal-applied-math/formal-mathfin/issues/194)), the summed band
+identity and uniqueness against written-out sums
+([#195](https://github.com/formal-applied-math/formal-mathfin/issues/195)), instantiating
+Degenne's `IsStochasticIntegral` at the next stable pin
+([#196](https://github.com/formal-applied-math/formal-mathfin/issues/196)), and the
+`elemIntegrand`/`rectTerm` duplicate
+([#197](https://github.com/formal-applied-math/formal-mathfin/issues/197)).
 
 ---
 

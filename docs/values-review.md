@@ -3269,15 +3269,17 @@ is delivered; and that `Q = μ` holds **on `𝓕ᴮ_T`** and says nothing off it
    panel required for whole-repo rounds" — that is honest and still keeps the panel where it earns
    its cost.
 2. **[HIGH, carried] A duplicate-statement detector.** This round produced a new instance to find:
-   `elemIntegrand` vs `ItoIntegralL2.rectTerm`, the same function twice. A normalise-and-hash pass
+   `elemIntegrand` vs `ItoIntegralL2.rectTerm`, the same function twice
+   ([#197](https://github.com/formal-applied-math/formal-mathfin/issues/197)). A normalise-and-hash pass
    over definition bodies would have caught it in seconds.
 3. **[MED] Instantiate Degenne's `IsStochasticIntegral`** at the next stable pin, retiring the
-   bespoke uniqueness clause (lens 2). Blocked on `v4.33.0` leaving RC.
-4. **[MED] The summed band identity.** State `∫ V dM = ∑ᵢ Vᵢ·(M_{tᵢ₊₁} − M_{tᵢ})` for a general
+   bespoke uniqueness clause (lens 2). Blocked on `v4.33.0` leaving RC —
+   [#196](https://github.com/formal-applied-math/formal-mathfin/issues/196).
+4. **[MED] The summed band identity** ([#195](https://github.com/formal-applied-math/formal-mathfin/issues/195))**.** State `∫ V dM = ∑ᵢ Vᵢ·(M_{tᵢ₊₁} − M_{tᵢ})` for a general
    simple process, which the `Lp` decomposition now makes routine, and restate
    `itoIntegralAgainst_unique` against written-out Riemann–Stieltjes sums — the form the docstring
    currently has to disclaim.
-5. **[MED] The drift term**, `S = S₀ + ∫b ds + (σ●B)`, reusing `DriftProcessModification`. It is what
+5. **[MED] The drift term** ([#194](https://github.com/formal-applied-math/formal-mathfin/issues/194)), `S = S₀ + ∫b ds + (σ●B)`, reusing `DriftProcessModification`. It is what
    the HJM bond dynamics (#146–#150) need, and it generalises this phase's price.
 6. **[MED] Give `bracketMeasure` its API** so the `def`-opacity friction stops recurring (lens 4).
 7. **[LOW] Upstream the general-`p` multiplication isometry** `L^p(‖f‖ᵖ·ν) →ₗᵢ L^p(ν)` (lens 2).
