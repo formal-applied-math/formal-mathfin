@@ -247,6 +247,117 @@ theorem itoIntegralAgainst_elementary (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
     Lp.coeFn_sub (itoProcessCLM hB T b hBmeas φ) (itoProcessCLM hB T a hBmeas φ)] with ω h1 h2
   rw [hW, h1, hband, h2, Pi.sub_apply]
 
+/-! ### A simple process is a finite sum of bands
+
+Layer (c) integrates a *simple process* against `M`, while the identity above is for a single
+band. The two meet here: a simple process is the finite sum of its rectangle terms, and each
+rectangle term is a band. `ItoIntegralL2.rectTerm` is literally `elemIntegrand` — same
+function, different name — so the a.e. decomposition already in the tower is the content, and
+what is added is its `Lp` form. -/
+
+omit mΩ in
+/-- `Z·1_{(a,b]}` is a difference of two `afterFactor`s. This is how the band inherits
+predictable measurability, `afterFactor` being predictable by `measurable_afterFactor`. -/
+theorem elemIntegrand_eq_sub {a b : ℝ≥0} (hab : a ≤ b) (Z : Ω → ℝ) :
+    elemIntegrand a b Z = afterFactor a Z - afterFactor b Z := by
+  funext z
+  show (Set.Ioc a b).indicator (fun _ ↦ (1 : ℝ)) z.1 * Z z.2
+      = (if a < z.1 then Z z.2 else 0) - (if b < z.1 then Z z.2 else 0)
+  by_cases h1 : a < z.1
+  · by_cases h2 : b < z.1
+    · rw [Set.indicator_of_notMem (fun hm ↦ absurd hm.2 (not_le.mpr h2)), zero_mul,
+        if_pos h1, if_pos h2, sub_self]
+    · rw [Set.indicator_of_mem (show z.1 ∈ Set.Ioc a b from ⟨h1, not_lt.mp h2⟩), one_mul,
+        if_pos h1, if_neg h2, sub_zero]
+  · have h2 : ¬ b < z.1 := fun h ↦ h1 (lt_of_le_of_lt hab h)
+    rw [Set.indicator_of_notMem (fun hm ↦ h1 hm.1), zero_mul, if_neg h1, if_neg h2, sub_zero]
+
+omit [IsProbabilityMeasure μ] in
+/-- The band is predictable. -/
+theorem measurable_elemIntegrand (hBmeas : ∀ t, Measurable (B t)) {a b : ℝ≥0} (hab : a ≤ b)
+    {Z : Ω → ℝ} (hZm : Measurable[ItoIntegralL2.natFiltration hBmeas a] Z) :
+    Measurable[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable]
+      (elemIntegrand a b Z) := by
+  rw [elemIntegrand_eq_sub hab Z]
+  exact (measurable_afterFactor hBmeas hZm).sub
+    (measurable_afterFactor hBmeas
+      (hZm.mono ((ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).mono hab) le_rfl))
+
+omit mΩ in
+/-- The band inherits a bound on its coefficient: the indicator only ever switches it off. -/
+theorem norm_elemIntegrand_le {a b : ℝ≥0} {Z : Ω → ℝ} {C : ℝ} (hZb : ∀ ω, ‖Z ω‖ ≤ C)
+    (z : ℝ≥0 × Ω) : ‖elemIntegrand a b Z z‖ ≤ C := by
+  simp only [elemIntegrand, Set.indicator_apply]
+  split_ifs with h
+  · rw [one_mul]; exact hZb z.2
+  · rw [zero_mul, norm_zero]; exact le_trans (norm_nonneg (Z z.2)) (hZb z.2)
+
+omit [IsProbabilityMeasure μ] in
+/-- A band of a simple process is `L²` against the bracket: it is bounded, and the bracket
+measure is finite. -/
+theorem memLp_elemIntegrand_of_mem_support (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (V : TBoundedSP T hBmeas)
+    {p : ℝ≥0 × ℝ≥0} (hp : p ∈ V.val.value.support) :
+    MemLp (elemIntegrand p.1 p.2 (V.val.value p)) 2
+      (bracketMeasure (μ := μ) T hBmeas φ) := by
+  obtain ⟨C, hC⟩ := V.val.bounded_value
+  exact MemLp.of_bound
+    (measurable_elemIntegrand hBmeas (V.val.le_of_mem_support_value p hp)
+      (V.val.measurable_value p)).stronglyMeasurable.aestronglyMeasurable C
+    (Eventually.of_forall fun z ↦ norm_elemIntegrand_le (fun ω ↦ hC p hp ω) z)
+
+open scoped Classical in
+/-- **The band of `V` at the rectangle `p`, as an element of `L²(⟨M⟩)`.** Total by
+construction: off the support of `V.value` the hypotheses that make the band `L²` are
+unavailable, and the band is `0` there anyway. -/
+noncomputable def bandLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (V : TBoundedSP T hBmeas)
+    (p : ℝ≥0 × ℝ≥0) : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ) :=
+  if h : MemLp (elemIntegrand p.1 p.2 (V.val.value p)) 2
+      (bracketMeasure (μ := μ) T hBmeas φ) then h.toLp _ else 0
+
+omit [IsProbabilityMeasure μ] in
+open scoped Classical in
+/-- On the support, `bandLp` is the band. -/
+theorem coeFn_bandLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (V : TBoundedSP T hBmeas)
+    {p : ℝ≥0 × ℝ≥0} (hp : p ∈ V.val.value.support) :
+    ⇑(bandLp T hBmeas φ V p) =ᵐ[bracketMeasure (μ := μ) T hBmeas φ]
+      elemIntegrand p.1 p.2 (V.val.value p) := by
+  rw [bandLp, dif_pos (memLp_elemIntegrand_of_mem_support T hBmeas φ V hp)]
+  exact MemLp.coeFn_toLp _
+
+/-- **A simple process is the sum of its bands**, in `L²(⟨M⟩)`. This is what lets the
+single-band identity above be summed into a statement about a whole simple process — and hence
+what connects it to the dense family of `PredictableDensityGeneral`. -/
+theorem simpleAssemblyOfMeasure_eq_sum_bands (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (V : TBoundedSP T hBmeas) :
+    simpleAssemblyOfMeasure T hBmeas (bracketMeasure (μ := μ) T hBmeas φ) V
+      = ∑ p ∈ V.val.value.support, bandLp T hBmeas φ V p := by
+  refine Lp.ext ?_
+  have hbot : ∀ᵐ z ∂(bracketMeasure (μ := μ) T hBmeas φ), z.1 ≠ 0 :=
+    (withDensity_absolutelyContinuous (trimMeasure_T (μ := μ) T hBmeas)
+      (fun z ↦ ‖(φ : ℝ≥0 × Ω → ℝ) z‖ₑ ^ 2)).ae_le (ae_fst_ne_zero T hBmeas)
+  have hsum : ⇑(∑ p ∈ V.val.value.support, bandLp T hBmeas φ V p)
+      =ᵐ[bracketMeasure (μ := μ) T hBmeas φ]
+      fun z ↦ ∑ p ∈ V.val.value.support, elemIntegrand p.1 p.2 (V.val.value p) z := by
+    refine (Lp.coeFn_fun_finsetSum _ _).trans ?_
+    have hall : ∀ᵐ z ∂(bracketMeasure (μ := μ) T hBmeas φ),
+        ∀ q : {x // x ∈ V.val.value.support},
+          (bandLp T hBmeas φ V q.1 : ℝ≥0 × Ω → ℝ) z
+            = elemIntegrand (q.1).1 (q.1).2 (V.val.value q.1) z :=
+      ae_all_iff.mpr fun q ↦ coeFn_bandLp T hBmeas φ V q.2
+    filter_upwards [hall] with z hz
+    exact Finset.sum_congr rfl fun p hp ↦ hz ⟨p, hp⟩
+  filter_upwards [coeFn_simpleAssemblyOfMeasure T hBmeas
+      (bracketMeasure (μ := μ) T hBmeas φ) V, hsum, hbot] with z h1 h2 h3
+  rw [h1, h2]
+  show ⇑V.val z.1 z.2 = _
+  rw [SimpleProcess.apply_eq, Set.indicator_of_notMem (by simpa using h3), zero_add, Finsupp.sum]
+  refine Finset.sum_congr rfl fun p _ ↦ ?_
+  simp only [elemIntegrand, Set.indicator_apply]
+  split_ifs <;> simp
+
 /-! ### Uniqueness -/
 
 /-- **Uniqueness.** A continuous linear map out of `L²(⟨M⟩)` that agrees with
