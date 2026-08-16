@@ -221,6 +221,7 @@ import MathFin.Foundations.MartingaleRepresentation
 -- Martingale representation, step 6: its finance reading — replication, superreplication
 -- duality, and uniqueness of the pricing measure on the Brownian filtration
 import MathFin.Foundations.MarketCompleteness
+import MathFin.Foundations.MarketCompletenessInPrice
 import MathFin.Foundations.ItoFormulaProcess
 import MathFin.Foundations.ExitTime
 import MathFin.Foundations.ItoFormulaUnrestricted

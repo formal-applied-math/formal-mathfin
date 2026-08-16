@@ -40,6 +40,8 @@ Mathlib's `withDensitySMulLI` does. This is the step at which a naive attempt br
 * `eLpNorm_mul_eq` — the norm identity, for an arbitrary function.
 * `integral_sqWeight`, `setIntegral_sqWeight` — the Bochner transfer, and its set form.
 * `sqWeight_ae_ne_zero` — `f²·ν` is carried by `{f ≠ 0}`.
+* `ae_of_sqWeight_of_ae_ne_zero` — a.e. statements transfer back when `f ≠ 0` a.e.
+* `exists_mulLI_eq` — for `f ≠ 0` a.e. the multiplication isometry is **onto**: `ψ := u/f`.
 * `memLp_mul` — `ψ ∈ L²(f²·ν)` implies `f·ψ ∈ L²(ν)`.
 * `mulLM`, `mulLI` — the map as a linear map and as a `LinearIsometry`, with `coeFn_mulLM`
   the characterising a.e. identity.
@@ -129,6 +131,14 @@ lemma memLp_mul (hf : Measurable f) (ψ : Lp ℝ 2 (sqWeight ν f)) :
   ⟨hf.aestronglyMeasurable.mul (Lp.stronglyMeasurable ψ).aestronglyMeasurable,
     by rw [eLpNorm_mul_eq hf]; exact Lp.eLpNorm_lt_top ψ⟩
 
+/-- When `f ≠ 0` a.e., an a.e. statement for the weighted measure transfers back to `ν`. The
+two measures are then equivalent: `f²·ν ≪ ν` always, and the density is a.e. nonzero. -/
+lemma ae_of_sqWeight_of_ae_ne_zero (hf : Measurable f) (hf0 : ∀ᵐ x ∂ν, f x ≠ 0)
+    {p : α → Prop} (h : ∀ᵐ x ∂(sqWeight ν f), p x) : ∀ᵐ x ∂ν, p x := by
+  rw [sqWeight, ae_withDensity_iff (measurable_sqDensity hf)] at h
+  filter_upwards [h, hf0] with x hx hx0
+  exact hx (sqDensity_ne_zero hx0)
+
 /-- **Multiplication by `f` as a linear map** `L²(f²·ν) →ₗ[ℝ] L²(ν)`. -/
 noncomputable def mulLM (ν : Measure α) (hf : Measurable f) :
     Lp ℝ 2 (sqWeight ν f) →ₗ[ℝ] Lp ℝ 2 ν where
@@ -174,6 +184,26 @@ lemma mulLI_toLinearMap (ν : Measure α) (hf : Measurable f) :
 lemma coeFn_mulLI (ν : Measure α) (hf : Measurable f) (ψ : Lp ℝ 2 (sqWeight ν f)) :
     ⇑(mulLI ν hf ψ) =ᵐ[ν] fun x ↦ f x * ψ x :=
   coeFn_mulLM ν hf ψ
+
+/-- **Multiplication by `f` is onto when `f ≠ 0` a.e.** The preimage of `u` is `u/f`, which
+lands in the weighted space precisely because the weight cancels the division:
+`∫|u/f|² f² dν = ∫|u|² dν`. This is what turns a hedge against `B` into a holding in a price
+with volatility `f`. -/
+theorem exists_mulLI_eq (hf : Measurable f) (hf0 : ∀ᵐ x ∂ν, f x ≠ 0) (u : Lp ℝ 2 ν) :
+    ∃ ψ : Lp ℝ 2 (sqWeight ν f), mulLI ν hf ψ = u := by
+  have hcancel : (fun x ↦ f x * ((u : α → ℝ) x / f x)) =ᵐ[ν] ⇑u := by
+    filter_upwards [hf0] with x hx
+    field_simp
+  have hquot : MemLp (fun x ↦ (u : α → ℝ) x / f x) 2 (sqWeight ν f) := by
+    refine ⟨(((Lp.stronglyMeasurable u).measurable.div hf)).aestronglyMeasurable, ?_⟩
+    rw [← eLpNorm_mul_eq hf, eLpNorm_congr_ae hcancel]
+    exact Lp.eLpNorm_lt_top u
+  refine ⟨hquot.toLp _, Lp.ext ?_⟩
+  have hcoe : ∀ᵐ x ∂ν, (hquot.toLp _ : α → ℝ) x = (u : α → ℝ) x / f x :=
+    ae_of_sqWeight_of_ae_ne_zero hf hf0 hquot.coeFn_toLp
+  filter_upwards [coeFn_mulLI ν hf (hquot.toLp _), hcoe, hf0] with x h1 h2 hx
+  rw [h1, h2]
+  field_simp
 
 end LpMulIsometry
 end MathFin
