@@ -222,6 +222,7 @@ import MathFin.Foundations.MartingaleRepresentation
 -- duality, and uniqueness of the pricing measure on the Brownian filtration
 import MathFin.Foundations.MarketCompleteness
 import MathFin.Foundations.MarketCompletenessInPrice
+import MathFin.Foundations.PricingMeasureL2Density
 import MathFin.Foundations.ItoFormulaProcess
 import MathFin.Foundations.ExitTime
 import MathFin.Foundations.ItoFormulaUnrestricted
