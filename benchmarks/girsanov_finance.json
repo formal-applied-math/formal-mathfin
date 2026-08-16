@@ -288,6 +288,38 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The frame's forward FTAP isEMM_noArbitrageSimple applied to discountedGBM_isEMM: a one-line corollary giving no simple-strategy arbitrage for the risk-neutral discounted GBM. Non-vacuous (for σ ≠ 0 the discounted GBM is a genuine non-constant martingale). Lives in MathFin/Foundations/ContinuousFTAP.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "gir-replication-in-price",
+      "name": "Completeness as a Unique Holding in the Price",
+      "description": "For the discounted price S = S₀ + (σ●B) with σ ≠ 0 a.e., every square-integrable 𝓕ᴮ_T-claim is the terminal wealth 𝔼_μ[H] + ∫₀ᵀ ψ dS of a unique holding ψ in the price itself, rather than of an integrand against the driver B.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.MarketCompletenessInPrice\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM MathFin.ItoIntegralAgainstMartingale\nopen MathFin.MarketCompletenessInPrice\nopen scoped NNReal ENNReal\n\n/-- **Completeness, as a holding in the price.** For the discounted price `S = S₀ + (σ●B)`\n    with volatility a.e. nonzero, every square-integrable `𝓕ᴮ_T`-claim is the terminal wealth\n    `𝔼_μ[H] + ∫₀ᵀ ψ dS` of a **unique** holding `ψ` in `S` — not merely of an integrand\n    against the driver `B`. Only `σ ≠ 0` a.e. is required, no uniform lower bound: the\n    bracket-weighted norm rescales, `‖ψ‖_{L²(⟨S⟩)} = ‖φ‖`. Re-export of\n    `MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price`. -/\ntheorem exists_unique_replicating_holding_in_price\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0)\n    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))\n    (hσ : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), (σ : ℝ≥0 × Ω → ℝ) z ≠ 0)\n    (H : Lp ℝ 2 μ)\n    (hHmeas : AEStronglyMeasurable[natFiltration hBmeas T] (⇑H) μ) :\n    ∃! ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas σ),\n      (⇑H) =ᵐ[μ] fun ω ↦ (∫ x, H x ∂μ)\n        + (itoIntegralAgainstCLM hB T hBmeas σ ψ : Ω → ℝ) ω :=\n  MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price\n    (hB := hB) hBmeas hBcont T σ hσ H hHmeas\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Market completeness expressed in the traded asset (Shreve II 5.3; Karatzas–Shreve 1.6)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price. Derivation: martingale representation supplies the hedge phi against B, surjectivity of multiplication by sigma rewrites it as sigma.psi, and the chain rule turns the integral of psi against S back into the integral of phi against B; uniqueness is injectivity of an isometry. SCOPE, stated honestly. (1) The price is DRIFTLESS by construction, S = S0 + (sigma-dot-B) — the discounted price under the reference measure. A drift term is additive and is not built here. (2) The nondegeneracy hypothesis is only sigma != 0 a.e., NOT a uniform lower bound; that is a genuine weakening, since the bracket-weighted norm rescales the holding. (3) Nothing here asserts that the wealth process is a martingale under any second measure; that is the separate gir-pricing-measure-density. (4) The holding class is the integrands square-integrable against the bracket d<S> = sigma^2 ds, wider than piecewise-constant strategies."
+      }
+    },
+    {
+      "id": "gir-pricing-measure-density",
+      "name": "The Pricing Measure is μ, under a Square-Integrable Density",
+      "description": "For S = S₀ + (σ●B) with σ ≠ 0 a.e.: a probability measure Q = D·μ with D ∈ L²(μ), under which S is a martingale, agrees with μ on the whole of 𝓕ᴮ_T. The gains-neutrality that the earlier uniqueness statement assumed is here derived from S being a Q-martingale.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.PricingMeasureL2Density\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM\nopen MathFin.MarketCompletenessInPrice MathFin.PricingMeasureL2Density\nopen scoped NNReal ENNReal\n\n/-- **`μ` is the pricing measure, under a square-integrable density.** For the discounted\n    price `S = S₀ + (σ●B)` with `σ ≠ 0` a.e.: a probability measure `Q = D·μ` with\n    `D ∈ L²(μ)`, under which `S` is a martingale, agrees with `μ` on the whole of `𝓕ᴮ_T`.\n    The gains-neutrality that `measure_eq_of_pricesGainsAtZero` had to assume is here a\n    CONSEQUENCE of `S` being a `Q`-martingale, so the hypothesis is discharged rather than\n    posited. Re-export of `MathFin.PricingMeasureL2Density.measure_eq_of_density`. -/\ntheorem pricing_measure_eq_of_sq_integrable_density\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0)\n    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))\n    (hσ : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), (σ : ℝ≥0 × Ω → ℝ) z ≠ 0) {S₀ : ℝ}\n    {D : Lp ℝ 2 μ} (hDmeas : Measurable (⇑D)) (hD : ∀ ω, 0 ≤ (D : Ω → ℝ) ω)\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    (hQ : Q = μ.withDensity fun ω ↦ ENNReal.ofReal ((D : Ω → ℝ) ω))\n    (hmart : Martingale (pricePath hB T hBmeas S₀ σ) (natFiltration hBmeas) Q)\n    {A : Set Ω} (hA : MeasurableSet[natFiltration hBmeas T] A) :\n    Q A = μ A :=\n  MathFin.PricingMeasureL2Density.measure_eq_of_density\n    (hB := hB) hBmeas hBcont T σ hσ hDmeas hD hQ hmart hA\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Uniqueness of the equivalent martingale measure on a Brownian filtration — the second FTAP's complete ⟹ unique direction (Shreve II 5.4), here under a square-integrable density",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.PricingMeasureL2Density.measure_eq_of_density. This STRENGTHENS gir-pricing-measure-unique, which assumed PricesGainsAtZero: here that condition is a CONSEQUENCE of S being a Q-martingale plus a square-integrable density, so the hypothesis is discharged. Derivation: the functional psi -> E_Q[integral of psi against S] is an inner product against the density composed with an isometry, hence continuous; it vanishes on a band because that integral is Z.(S_b - S_a), a bounded predictable weight against a Q-martingale increment; hence on simple processes by linearity and the Lp band decomposition; hence everywhere by density; then the existing measure_eq_of_pricesGainsAtZero applies. SCOPE, stated honestly. (1) The density hypothesis is Q = mu.withDensity (ENNReal.ofReal . D) with D in L^2(mu) and D >= 0 — square integrability is what makes the functional continuous and is not removable by this argument. (2) sigma != 0 a.e. is used, to convert gains against S into gains against B. (3) The price is driftless. (4) Only the direction complete implies unique is delivered; the converse needs the Jacod-Yor extreme-point characterisation and is untouched. (5) This is uniqueness ON THE BROWNIAN SIGMA-ALGEBRA 𝓕^B_T, i.e. Q agrees with mu there; it says nothing about Q off that sigma-algebra."
+      }
     }
   ]
 }
