@@ -24,6 +24,10 @@ instantiates it at `F = ℝ`; a multi-asset model would instantiate at `F = Fin 
 * `SimpleStrategy.gains` — the discounted terminal gains of a simple strategy against `S`.
 * `NoArbitrageSimple S` — no simple strategy's gains are `P`-a.s. nonnegative and strictly
   positive on a `P`-non-null set.
+* `increment_integrable`, `increment_integral_zero` — a bounded predictable weight against a
+  `Q`-martingale increment is `Q`-integrable with zero `Q`-mean. Public because the
+  pricing-measure argument of `PricingMeasureL2Density` is built out of exactly these, summed
+  over a simple process's bands.
 
 ## Scope: meaning-1 (operational) vs. meaning-2 (Delbaen–Schachermayer) FTAP
 
@@ -128,7 +132,7 @@ theorem martingale_comp_monotone {Q : Measure Ω} {S : ℝ≥0 → Ω → F}
 /-- **A predictable-weighted increment `⟪φ, S t − S s⟫` is `Q`-integrable** when `φ` is bounded
 and `S` is a `Q`-martingale (so `S t`, `S s` are integrable): Cauchy–Schwarz bounds the inner
 product by `K · ‖S t − S s‖`, which is integrable. -/
-private theorem increment_integrable {Q : Measure Ω} [IsProbabilityMeasure Q]
+theorem increment_integrable {Q : Measure Ω}
     {S : ℝ≥0 → Ω → F} (hS : Martingale S 𝓕 Q) {φ : Ω → F} {s t : ℝ≥0}
     (hφ : StronglyMeasurable[𝓕 s] φ) {K : ℝ} (hφb : ∀ ω, ‖φ ω‖ ≤ K) :
     Integrable (fun ω ↦ ⟪φ ω, S t ω - S s ω⟫_ℝ) Q := by
@@ -142,7 +146,7 @@ private theorem increment_integrable {Q : Measure Ω} [IsProbabilityMeasure Q]
 /-- **A predictable-weighted martingale increment has zero `Q`-integral.** For a `Q`-martingale
 `S`, a `𝓕 s`-measurable bounded weight `φ`, and `s ≤ t`, the increment gain `⟪φ, S t − S s⟫`
 integrates to `0`: pull `φ` out of `Q[· | 𝓕 s]` and use `Q[S t − S s | 𝓕 s] = 0`. -/
-private theorem increment_integral_zero {Q : Measure Ω} [IsProbabilityMeasure Q]
+theorem increment_integral_zero {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S : ℝ≥0 → Ω → F} (hS : Martingale S 𝓕 Q) {φ : Ω → F} {s t : ℝ≥0} (hst : s ≤ t)
     (hφ : StronglyMeasurable[𝓕 s] φ) {K : ℝ} (hφb : ∀ ω, ‖φ ω‖ ≤ K) :
     ∫ ω, ⟪φ ω, S t ω - S s ω⟫_ℝ ∂Q = 0 := by
