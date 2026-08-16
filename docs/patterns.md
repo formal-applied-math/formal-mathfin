@@ -1230,3 +1230,83 @@ gate, because everything downstream now reads as checked.
 Same genus as the `sorry`-typecheck and isolation-probe traps recorded in the 2026-08-06 batch: a
 cheap check silently redefines success. Third instance in two sessions, this time in a gate we wrote
 ourselves rather than one we inherited.
+
+
+## Weighted `L²`, and integrating against an Itô integral (2026-08-16 batch)
+
+From the chain-rule phase (`ItoIntegralAgainstMartingale`, `LpMulIsometry`,
+`PredictableDensityGeneral`, `PricingMeasureL2Density`).
+
+### Build the integral against `M` by transport, not by a second `extendOfNorm`
+
+The integrands square-integrable against `M = φ●B` live on the bracket-weighted `L²(φ²·ν)`, and
+`ψ ↦ ψφ` is an isometry from there into `L²(ν)`. So `∫· dM := itoIntegralCLM_T ∘ (mulLI φ)` has the
+right domain *and* the right isometry with no new analysis. The from-scratch alternative needs the
+conditional bracket identity `𝔼[(M_t − M_s)² | 𝓕_s] = 𝔼[⟨M⟩_t − ⟨M⟩_s | 𝓕_s]`, which the tower does
+not have. **The transport proves what the from-scratch construction would have assumed.**
+
+The price of transport is that the definition alone proves nothing, so the elementary identity
+(`∫ Z·1_{(a,b]} dM = Z·(M_b − M_a)`) is not decoration — it is the theorem that makes the name honest.
+State it, and say in the docstring what it does *not* cover.
+
+### Weighted `L²` classes are coarser: every linearity proof ends in a case split
+
+`Lp ℝ 2 (f²·ν)` is classes modulo `(f²·ν)`-null sets, which is coarser than modulo `ν`-null: `{f = 0}`
+is `(f²·ν)`-null and generally not `ν`-null. So two representatives of one class can disagree on a
+`ν`-non-null set, and `ψ ↦ fψ` is still well defined because both products vanish where `f = 0`.
+Mathlib's `withDensitySMulLI` (the `p = 1` case) does exactly this, and the tool is
+`ae_withDensity_iff`, which converts `∀ᵐ x ∂(ν.withDensity g), P x` into `∀ᵐ x ∂ν, g x ≠ 0 → P x`.
+Every `filter_upwards` in `mulLM` ends `rcases eq_or_ne (f x) 0`.
+
+When `f ≠ 0` a.e. the two measures are *equivalent* and the implication runs both ways
+(`ae_of_sqWeight_of_ae_ne_zero`) — which is what lets a hypothesis stated for the weighted measure be
+used against `ν`, and it is easy to reach for the wrong direction.
+
+### Weaken a hypothesis instead of porting the proof
+
+The weighted density theorem looked like a 150-line port of a π-λ induction to a second measure. It
+was not needed: the induction's core only ever used that its argument is **integrable**, so the
+weight moves into the integrand as `h := f²·g`, and orthogonality to every simple process says
+`∫_R h = 0` on every rectangle. `h` is `L¹` and generally not `L²` — which is precisely why the core
+had to be restated from an `L²` class to an integrable function. **Before porting a long argument to
+a new setting, check what its hypotheses are actually used for.**
+
+### A `dite` makes a summand total when the hypotheses live on the support
+
+To decompose a simple process into its bands *inside* `Lp`, the summand needs `p.1 ≤ p.2`, the
+`𝓕_{p.1}`-measurability and the bound on `V.value p` — all available only for `p ∈ support`, which
+would make the summand dependent on membership and the `Finset` sum painful. Define it as
+
+```lean
+if h : MemLp (elemIntegrand p.1 p.2 (V.val.value p)) 2 ν then h.toLp _ else 0
+```
+
+which is total, prove `coeFn_bandLp` under the membership hypothesis, and the sum is an ordinary
+`Finset.sum` over a non-dependent function. Off the support the band is `0` anyway, so nothing is
+lost. `MeasureTheory.Lp.coeFn_fun_finsetSum` is the coeFn lemma for such a sum (note: `Lp.coeFn_sum`
+is the *sequence* space `lp`, a different object).
+
+### `rw` does not unfold a `def`, and does not see through a beta-redex
+
+Two failures that cost several iterations each, both with the same symptom (`Did not find an
+occurrence of the pattern`):
+
+* the goal mentions `bandRestrict …` and the hypothesis is about its unfolding — `rw` will not unfold
+  a `def`; use `simp only [bandRestrict]` or a `show`;
+* the goal is `(fun x => …) ω = …` after `filter_upwards` or inside `∃!` — `rw` matches syntactically
+  and the redex is not reduced; `simp only [lemma]` beta-reduces first and works.
+
+### Instance search does not unfold a `def` either
+
+`bracketMeasure T hBmeas φ` is `sqWeight (trimMeasure_T …) ⇑φ` by `rfl`, and an
+`IsFiniteMeasure (sqWeight …)` instance is *not* found for the `bracketMeasure` form. Supply it with a
+local `haveI` at the one call site rather than duplicating the instance. Relatedly, pin the σ-algebra
+by giving the `def` an explicit return type: `sqWeight` applied to a trimmed measure will otherwise
+resolve its `MeasurableSpace` by instance search to `Prod.instMeasurableSpace` and mismatch — the same
+trap `trimMeasure_T`'s own docstring warns about.
+
+### De-privatising is a free audit
+
+`increment_integrable` was `private`, so `lake lint` never checked it. Making it public revealed that
+it never used its `IsProbabilityMeasure` hypothesis — nor even `IsFiniteMeasure`. The binder is gone.
+If a private lemma is worth exposing, expect the linter to find something.

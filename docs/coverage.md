@@ -26,7 +26,47 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-08-07):** corpus
+> **Live status (2026-08-16):** corpus
+> **358**, **327 full + 18 wrappers = 345/358 delivery-ready**, 13 reduced cores, 0 placeholders.
+> Ledger 358 fresh / 0 stale / 0 missing; `lake build MathFin` and `lake lint` green, `pytest`
+> 48/48, `AxiomAuditGen` at 318 guards. The round built the **Itô chain rule** and what it
+> unlocks — see the block immediately below — closing the `∫ φ dS` gap that six places in the
+> repo had been recording as the missing primitive.
+>
+> **2026-08-16 — the chain rule, the integral against a price, and the pricing measure
+> (353 → 358).** For a predictable `L²` driver `φ` and `M = φ●B`, the integrands
+> square-integrable against `M` are the bracket-weighted `L²(φ²·trim_T)`, and
+> `ItoIntegralAgainstMartingale.itoIntegralAgainstCLM` is `itoIntegralCLM_T` precomposed with
+> multiplication by `φ`. Both factors are isometries, so `‖∫ψ dM‖ = ‖ψ‖_{L²(⟨M⟩)}` — the Itô
+> isometry against `M`, and the reason the weighted space is the right domain. Five entries:
+> `sc-ito-chain-rule` (`∫ψ dM = ∫ψφ dB`), `sc-ito-integral-band`
+> (`∫ Z·1_{(a,b]} dM = Z·(M_b − M_a)`, the Riemann–Stieltjes agreement that identifies the
+> construction), `sc-simple-dense-bracket` (simple processes dense in the weighted `L²`),
+> `gir-replication-in-price`, `gir-pricing-measure-density`.
+>
+> **What changed for the pricing measure.** `gir-pricing-measure-unique` (2026-08-07) assumed
+> `PricesGainsAtZero`. `gir-pricing-measure-density` **derives** it: for `S = S₀ + (σ●B)` with
+> `σ ≠ 0` a.e., a probability measure `Q = D·μ` with `D ∈ L²(μ)` under which `S` is a
+> martingale prices the traded gains at zero, hence agrees with `μ` on all of `𝓕ᴮ_T`. The
+> functional `ψ ↦ 𝔼_Q[∫ψ dS]` is an inner product against the density composed with an
+> isometry, so continuity is `innerSL`'s; it vanishes on a band because that integral is a
+> bounded predictable weight against a `Q`-martingale increment, then on simple processes by
+> linearity and the `Lp` band decomposition, then everywhere by density.
+>
+> **Scope, stated plainly, and unchanged where it was already honest.** Square-integrability of
+> the density is not removable by this argument — it is exactly what buys continuity. The price
+> is **driftless** by construction; a drift term is additive and is what the HJM bond dynamics
+> need. `σ ≠ 0` a.e. is required (only that — no uniform lower bound; the weighted norm
+> rescales). Only `complete ⟹ unique` is delivered, the Jacod–Yor converse being untouched, and
+> the agreement `Q = μ` is **on `𝓕ᴮ_T`**, saying nothing off that σ-algebra. The single-band
+> identity does **not** come with a stated summed version over a general simple process: what
+> exists is the `Lp` decomposition `simpleAssemblyOfMeasure_eq_sum_bands` it would follow from,
+> and `itoIntegralAgainst_unique` correspondingly takes agreement on simple processes rather
+> than on written-out sums. Degenne's axiomatic `IsStochasticIntegral` characterisation is the
+> right frame for that uniqueness clause but exists only on `v4.33.0-rc1`, so instantiating it
+> waits for a stable pin.
+>
+> **Superseded status (2026-08-07):** corpus
 > **353**, **322 full + 18 wrappers = 340/353 delivery-ready**, 13 reduced cores, 0 placeholders.
 > Ledger 353 fresh / 0 stale / 0 missing; `lake build` and `lake lint` green with no `#guard_msgs`
 > failure. The round covered martingale representation + market completeness, then the localized Itô

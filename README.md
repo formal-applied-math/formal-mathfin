@@ -63,7 +63,7 @@ Mathematical finance is a few deep principles whose consequences are the models.
 | **Lattice limit (CLT)** | discrete ↔ continuous | ✅ **WIRED** — CRR binomial → Black–Scholes, by characteristic functions and Lévy continuity through put-call parity. Donsker's invariance principle itself is *not* formalized; this seam is the pricing limit, not the functional CLT |
 | **Numéraire** | IV ↔ I | ✅ **WIRED** — the price-invariance seam `N₀·𝔼^{Qᴺ}[X/N_T] = B₀·𝔼^Q[X/B_T]` (`changeOfNumeraire`), with BS-stock / Margrabe-`S²` / Kelly-EMM instances |
 | **Girsanov** | I ↔ II | ✅ **WIRED** — the EMM is an *explicit* change of measure, and the distributional Girsanov is closed for **bounded** predictable θ: `B^θ` is a `Q`-Brownian motion in full — zero start, Gaussian **and** independent increments. That is strictly inside the integrand class: `itoIntegralCLM_T` is defined on all of `L²`-predictable, and boundedness is a real extra hypothesis, so unbounded `L²`/progressive θ is open, as is Novikov's condition itself ([scope](#scope-whats-not-done)) |
-| **Martingale representation** | I ↔ II | ✅ **WIRED** — the same seam from the other side: the Itô integral is proved *onto* the centered `𝓕ᴮ_T`-measurable claims, so every square-integrable claim has a unique hedge, and the pricing measure is pinned on that filtration for measures that price the traded gains at zero |
+| **Martingale representation** | I ↔ II | ✅ **WIRED** — the same seam from the other side: the Itô integral is proved *onto* the centered `𝓕ᴮ_T`-measurable claims, so every square-integrable claim has a unique hedge, and (since 2026-08-16, via the Itô chain rule) that hedge is a holding in the **price** and the pricing measure is pinned without assuming gains-neutrality — from a square-integrable density plus the price being a `Q`-martingale |
 
 → The full spine, seam by seam: **[`docs/mathematical-architecture.md`](docs/mathematical-architecture.md)**.
 
@@ -216,12 +216,14 @@ Honesty is the point, so the gaps are explicit:
   uniform `L¹` bound in place of `𝔼[exp(½∫₀ᵀθ²ds)] < ∞` (the genuine condition needs `∫θ dB`, and no θ
   or `B` appears in the structure), so the martingale conclusion is read off by projection. The open
   case is therefore *two* gaps, not one hypothesis away from a proved theorem.
-- **The second FTAP is not proved unconditionally.** What is proved is that a probability measure
-  `Q ≪ μ` which prices the traded Itô gains at zero agrees with `μ` on `𝓕ᴮ_T`. Gains-neutrality is an
-  explicit hypothesis (`PricesGainsAtZero`), not a consequence of being a martingale measure for a
-  price process: the wealth process martingale representation builds integrates against `B`, and
-  nothing in `IsEMM S Q` makes that a `Q`-fair game. Only `complete ⟹ unique` is delivered; the
-  converse needs the Jacod–Yor extreme-point characterisation.
+- **The second FTAP is not proved unconditionally.** Since 2026-08-16 gains-neutrality is no longer
+  an assumption: for the discounted price `S = S₀ + (σ●B)` with `σ ≠ 0` a.e., a probability measure
+  `Q = D·μ` with a **square-integrable density** `D ∈ L²(μ)`, under which `S` is a martingale,
+  prices the traded gains at zero and hence agrees with `μ` on `𝓕ᴮ_T`. What remains conditional is
+  that density hypothesis — it is what makes the pricing functional continuous and this argument
+  does not remove it — together with `σ ≠ 0` and a **driftless** price. Only `complete ⟹ unique` is
+  delivered; the converse needs the Jacod–Yor extreme-point characterisation. The earlier statement,
+  which took `PricesGainsAtZero` outright, is still in the library and still true.
 - **The replicating hedge is unique but unnamed.** For a general square-integrable claim, market
   completeness gives a unique `φ` with `H = 𝔼[H] + ∫₀ᵀ φ dB` and says nothing about what `φ` is.
   Naming it is Clark–Ocone ([#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)) and

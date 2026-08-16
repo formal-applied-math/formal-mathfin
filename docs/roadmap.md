@@ -1450,13 +1450,70 @@ against the price `S`, the wealth here integrates against `B`, and `S` and `B` s
 that step is a named hypothesis (`PricesGainsAtZero`) guarded by two proved facts, `pricesGainsAtZero_self`
 and `pricesGainsAtZero_of_gains_martingale`. Only `complete ⟹ unique` is delivered.
 
-**Next on this axis, in order of what would actually be consumed:** (1) the stochastic integral `∫ φ dS`
-against a general price process, which is what turns `PricesGainsAtZero` from a hypothesis into a
-consequence of `IsEMM` and would retire the caveat above rather than restate it — `ContinuousMarket`
-already records its absence as deliberate; (2) the converse `unique ⟹ complete`, needing the Jacod–Yor
+**Item (1) below was executed 2026-08-16 — see the phase at the end of this file.** `∫ φ dS` exists,
+`PricesGainsAtZero` is a conclusion under a square-integrable density, and the hedge is held in the
+price. The caveat above is retired rather than restated, though its statements remain true as written.
+
+**Next on this axis, in order of what would actually be consumed:** (1) ~~the stochastic integral
+`∫ φ dS` against a general price process~~ **done (2026-08-16)**, for a driftless Itô-process price;
+the general-semimartingale integral and a drift term remain; (2) the converse `unique ⟹ complete`, needing the Jacod–Yor
 extreme-point characterisation of the set of martingale measures, additive rather than a rewrite; (3)
 composing the two `PricesGainsAtZero` guards, since `pricesGainsAtZero_self` is proved directly and so
 never exhibits `_of_gains_martingale`'s hypothesis triple as inhabited. The real cost there is that the
 repo has a bundled `Martingale` only for `itoSimpleProcess`, and a general integrand has only the pointwise
 `itoIntegralProcessGen_isMartingale`. Novikov (`gir-thm-9.1.7`) and Lévy's characterization
 (`sc-thm-9.1.1`) remain the two Itô-tower `reduced_core`s from the original conversion table.
+
+
+## phase: the Itô chain rule, the integral against a price, and the pricing measure (2026-08-16, corpus 353→358)
+
+The seam Leap 5 left open. Martingale representation produced a hedge, but as an integrand against
+the **driver** `B`; a trader holds units of the **price**. Six places in the repo — `AxiomAudit`,
+`ContinuousMarket`, `MarketCompleteness`, `bridges.md`, `leaps.md`, `mathematical-architecture.md` —
+recorded the same missing primitive, `∫ φ dS`. This phase builds it and cashes it.
+
+**The construction is a transport, not a second tower.** For a driver `φ` and `M = φ●B`, the bracket
+is `d⟨M⟩ = φ² ds`, so the integrands square-integrable against `M` are `L²(φ²·trim_T)`; and
+`ψ ↦ ψφ` is an isometry from there into `L²(trim_T)`. Composing with `itoIntegralCLM_T` gives
+`∫· dM` with the correct domain and the correct isometry `‖∫ψ dM‖ = ‖ψ‖_{L²(⟨M⟩)}` for free. Two
+alternatives were considered and rejected in the design: building from scratch (which needs the
+*conditional* bracket identity the tower lacks, and whose extra generality has no consumer at this
+pin), and a bare formula on the flat domain (which is not a CLM and whose isometry cannot even be
+stated in the `⟨M⟩` norm).
+
+**What earns the name.** Defining by a formula proves nothing. `itoIntegralAgainst_elementary` shows
+that on a band `Z·1_{(a,b]}` the construction returns `Z·(M_b − M_a)` — the Riemann–Stieltjes sum.
+Both halves already existed in the locality file: `1_{(a,b]}·φ` is a difference of two
+`restrictAfterCLM`, whose integrals are `M_a` and `M_b`, and the `𝓕_a`-measurable factor passes
+through by `itoIntegralCLM_T_smulAdapted`.
+
+**The finance payoff.** `exists_replicating_strategy_in_price`: every square-integrable `𝓕ᴮ_T`-claim
+is the terminal wealth of a *unique holding in `S`*. Only `σ ≠ 0` a.e. is needed — the weighted norm
+rescales, `‖ψ‖_{L²(⟨S⟩)} = ‖φ‖`, so no uniform lower bound, which would have been a real restriction
+on the model. Then `measure_eq_of_density`: if `S` is a `Q`-martingale and `Q = D·μ` with
+`D ∈ L²(μ)`, then `Q` prices the traded gains at zero — a **conclusion**, where
+`measure_eq_of_pricesGainsAtZero` had to assume it — and agrees with `μ` on all of `𝓕ᴮ_T`. The
+argument uses no stochastic integration under `Q`: the functional `ψ ↦ 𝔼_Q[∫ψ dS]` is `⟪D, ·⟫`
+composed with an isometry, so continuity is `innerSL`'s; it vanishes on a band because that integral
+is a bounded predictable weight against a `Q`-martingale increment; then on simple processes by
+linearity and the `Lp` band decomposition; then everywhere by density.
+
+**Three things the work corrected in passing.** The design called for porting the 150-line π-λ
+density induction to a second measure; unnecessary, because the core only uses *integrability*, so
+the weight moves into the integrand as `h := f²·g` (which is `L¹` and generally not `L²` — hence the
+core's hypothesis was weakened). De-privatising `increment_integrable` let `lake lint` see that it
+never used its `IsProbabilityMeasure`, invisible while the lemma was private. And
+`measure_eq_of_density` first carried `Q ≪ μ` beside the density hypothesis, which derives it — a
+spurious guard, removed rather than shipped.
+
+**What stays open, and is stated in every artifact that mentions this work:** square-integrability
+of the density (it is what buys continuity, and this argument does not remove it); a **drift** in the
+price (additive, reusing the pathwise drift object the Girsanov work built — and what the HJM bond
+dynamics need); the Jacod–Yor converse `unique ⟹ complete`; the integral against a general
+semimartingale, so `ContinuousMarket`'s meaning-2 boundary narrows without closing; and the summed
+band identity over a general simple process, for which the library has the `Lp` decomposition but not
+the summed statement. Degenne's axiomatic `IsStochasticIntegral` is the right frame for the
+uniqueness clause and exists only on `v4.33.0-rc1`, so instantiating it waits for a stable pin.
+
+Gates: `lake build MathFin` + `lake lint` green, `pytest` 48/48, ledger 358/358 fresh,
+`AxiomAuditGen` 318 guards, seven new curated axiom pins, no `sorry`.
