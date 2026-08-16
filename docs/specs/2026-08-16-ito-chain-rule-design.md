@@ -313,6 +313,39 @@ statement for an arbitrary strategy class with no price attached, and
 additive, and the module docstring of `MarketCompleteness` should be rewritten to say which
 statement a reader should reach for and why, rather than deleting the old framing.
 
+### Status, 2026-08-16
+
+| module | state |
+|---|---|
+| 4.1 `PredictableDensityGeneral` | **done** — density in the bracket-weighted `L²` |
+| 4.2 `LpMulIsometry` | **done** — the isometry, the transfers, and surjectivity for `f ≠ 0` a.e. |
+| 4.3 `ItoIntegralAgainstMartingale` | **done** — chain rule, isometry, single-band identity, uniqueness |
+| 4.4 | folded into 4.5 as `pricePath`; a two-field structure earned nothing |
+| 4.5 `MarketCompletenessInPrice` | **done** — replication as a unique holding in the price |
+| 4.6 `ContinuousMarket` | **done** — increment lemmas exposed; lint then found a hypothesis they never used, now dropped |
+| 4.7 `PricingMeasureL2Density` | **open** — blocked on one lemma, below |
+
+**What layer (c) still needs, exactly.** The argument in §4.7 is unchanged and each of its four
+steps lands on something that now exists, with one exception. Step 1 asks that `∫ψ dS` be the
+Riemann sum for an *elementary* `ψ`; 4.3 proves this for a **single band** `Z·1_{(a,b]}`, and
+the dense family of 4.1 is the **simple processes**, which are finite sums of bands. Bridging
+them needs
+
+> `simpleAssemblyOfMeasure T hBmeas (bracketMeasure T hBmeas σ) V` decomposed, **in `Lp`**, as
+> `∑ p ∈ V.val.value.support, (the band element at p)`.
+
+The ingredients are all present — `ItoIntegralL2.uncurry_ae_eq_sum_rectTerm` is exactly this
+decomposition a.e. (its `rectTerm` *is* `elemIntegrand`), `{⊥} ×ˢ univ` is null by
+`ItoIntegralLocality.ae_fst_ne_zero`, and a band's predictable measurability comes from
+`elemIntegrand a b Z = afterFactor a Z − afterFactor b Z` plus `measurable_afterFactor`. What
+makes it real work rather than a rewrite is that the per-band hypotheses (`p.1 ≤ p.2`, the
+`𝓕_{p.1}`-measurability and the bound on `V.value p`) are available only *for `p` in the
+support, so the summand is dependent on membership and the `Finset` sum has to be built with
+that in hand.
+
+Once that lemma exists, (c) is linearity plus the three remaining steps, and the payoff
+statement is the one §4.7 already writes down.
+
 ---
 
 ## 5. Not in scope
