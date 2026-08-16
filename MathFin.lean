@@ -128,6 +128,8 @@ import MathFin.Foundations.ItoIntegralL2
 import MathFin.Foundations.BrownianCylinderGeneration
 -- The Itô integral as a continuous linear isometry `Lp 2 trim_T → Lp 2 μ` on `[0,T]`
 import MathFin.Foundations.ItoIntegralCLM
+import MathFin.Foundations.LpMulIsometry
+import MathFin.Foundations.PredictableDensityGeneral
 -- The unbounded-horizon `[0,∞)` Itô integral CLM `Lp 2 trim_full → Lp 2 μ` (Summit B / B2)
 import MathFin.Foundations.ItoIntegralL2Dense
 -- Covariation of Itô integrals: the bilinear Itô isometry ⟪∫φdB,∫ψdB⟫=⟪φ,ψ⟫ (D1)

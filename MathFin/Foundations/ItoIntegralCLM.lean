@@ -49,7 +49,9 @@ Adds (the genuinely new content of this file):
   σ-algebra. T enters at the measure layer (`trimMeasure_T`), not here.
 * `isPiSystem_predictableRect` — closure under non-empty intersection.
 * `setIntegral_eq_zero_of_orthogonal_pred` — π-λ-induction set-integral
-  vanishing.
+  vanishing, for any *integrable* `g` (not merely an `L²` class: the weighted
+  density argument of `PredictableDensityGeneral` applies it to `g·w`, which is
+  only `L¹`).
 * `simpleAssembly_T_denseRange` — density of the existing simple-process
   assembly's range, in the restricted trim `L²`.
 * `itoIntegralCLM_T` — the CLM.
@@ -468,15 +470,14 @@ predictable-measurable set. Dynkin's π-λ theorem over `predictableRect`; the
 total-integral step uses finiteness of `trimMeasure_T`. -/
 lemma setIntegral_eq_zero_of_orthogonal_pred (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t))
-    (g : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    {g : ℝ≥0 × Ω → ℝ}
+    (hg_int : Integrable g (trimMeasure_T (μ := μ) T hBmeas))
     (h_orth : ∀ R ∈ predictableRect (mΩ := mΩ) hBmeas,
       ∫ z in R, g z ∂(trimMeasure_T (μ := μ) T hBmeas) = 0)
     (s : Set (ℝ≥0 × Ω))
     (hs : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable] s) :
     ∫ z in s, g z ∂(trimMeasure_T (μ := μ) T hBmeas) = 0 := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
-  have hg_int : Integrable g (trimMeasure_T (μ := μ) T hBmeas) :=
-    (Lp.memLp g).integrable one_le_two
   -- Total integral vanishes: trim_T is supported on `Ioc 0 T × univ`. For
   -- `T > 0` the rect is in `predictableRect` (orthogonality); for `T = 0`
   -- trim_T is zero.
@@ -720,7 +721,8 @@ theorem simpleAssembly_T_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
   exact Lp.ae_eq_zero_of_forall_setIntegral_eq_zero g
     (by norm_num : (2 : ℝ≥0∞) ≠ 0) (by norm_num : (2 : ℝ≥0∞) ≠ ∞)
     (fun _ _ _ ↦ ((Lp.memLp g).integrable one_le_two).integrableOn)
-    (fun s hs _ ↦ setIntegral_eq_zero_of_orthogonal_pred T hBmeas g h_orth s hs)
+    (fun s hs _ ↦ setIntegral_eq_zero_of_orthogonal_pred T hBmeas
+      ((Lp.memLp g).integrable one_le_two) h_orth s hs)
 
 /-! ### The CLM `itoIntegralCLM_T` and its isometry -/
 
