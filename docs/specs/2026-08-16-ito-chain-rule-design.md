@@ -141,16 +141,30 @@ theorem simpleAssembly_denseRange_of_absolutelyContinuous
     DenseRange (simpleAssembly_ν T hBmeas ν)
 ```
 
-Work items:
+**Route taken (2026-08-16, better than the port this section first specified).** The port is
+not necessary. The π-λ core `setIntegral_eq_zero_of_orthogonal_pred` only ever uses that its
+argument is *integrable*, and the weighted problem reduces to it by moving the weight into the
+integrand: if `g ∈ L²(f²·trim_T)` is orthogonal to every simple process, then `h := f²·g` is
+`trim_T`-integrable, orthogonality says `∫_R h d(trim) = 0` on every predictable rectangle, the
+core gives `h = 0` a.e., and `f²·trim_T` is carried by `{f ≠ 0}`, so `g = 0` for the weighted
+measure. `h` is `L¹` and generally not `L²`, which is exactly why the core had to be weakened
+from an `L²` class to an integrable function — a two-line change with two call sites, rather
+than a 150-line duplication of the induction.
 
-1. `setIntegral_eq_zero_of_orthogonal_pred` (`:469`, already de-privatised for
-   `ItoIntegralL2Dense`) restated for such a `ν`, deriving the support facts from `hν`.
-2. `simpleAssembly_ν` — the assembly of a `TBoundedSP` into `Lp ℝ 2 ν`. Simple processes are
-   bounded and `ν` is finite, so membership is immediate; this is the same underlying
-   function as `simpleAssembly_T` with a different target space.
-3. The density theorem itself, then `simpleAssembly_T_denseRange` **re-derived as the
-   instance** `ν := trim_T`. The original statement must not change — it has downstream
-   consumers (`ItoIntegralLocality`, `MartingaleRepresentation`, `ItoIntegralL2Dense`).
+Work items, as executed:
+
+1. **Done.** `setIntegral_eq_zero_of_orthogonal_pred` weakened to `{g : ℝ≥0 × Ω → ℝ}` plus
+   `Integrable g (trimMeasure_T …)`; call sites in `ItoIntegralCLM` and `ItoIntegralL2Dense`
+   pass `(Lp.memLp g).integrable one_le_two`. Full `lake build MathFin` green.
+2. **Done.** `simpleAssembly_ν` — the assembly into `Lp ℝ 2 ν` for any finite predictable `ν`.
+   Membership is immediate from `SimpleProcess.coe_bounded` (a simple process is uniformly
+   bounded) plus finiteness, via `MemLp.of_bound`; no relation to `trim_T` is needed.
+3. **Done.** `isFiniteMeasure_sqWeight` — `f²·trim_T` is finite because `f ∈ L²(trim_T)`.
+4. **Open.** `simpleAssembly_sqWeight_denseRange` itself, by the reduction above.
+
+`simpleAssembly_T_denseRange` keeps its statement and its proof; it is not re-derived, because
+under this route there is nothing to re-derive it from — the shared content is the π-λ core,
+which both now call.
 
 ### 4.2 `Foundations/LpMulIsometry.lean` — the `p = 2` multiplication isometry
 
