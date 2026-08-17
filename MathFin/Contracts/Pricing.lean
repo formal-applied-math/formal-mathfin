@@ -53,11 +53,12 @@ is load-bearing.
 ## Source
 
 The layered separation of contract semantics from pricing semantics, and the
-framing "the contract is not the model", are due to Paul Bilokon, *The Contract
-Is Not the Model: Proof-Carrying Exotic Derivatives and the Economics of Model
-Risk* (working paper, 9 August 2026; Mathematical Finance, Imperial College
-London), with code at <https://github.com/thalesians/lean_contracts>
-(Apache-2.0). That paper in turn builds on the compositional contract-DSL of
+framing "the contract is not the model", are due to Paul Bilokon,
+*The Contract Is Not the Model: Proof-Carrying Exotic Derivatives and the
+Economics of Model Risk* (working paper, 9 August 2026; Mathematical
+Finance, Imperial College London), with code at
+<https://github.com/thalesians/lean_contracts> (Apache-2.0). That paper in
+turn builds on the compositional contract-DSL of
 Peyton Jones, Eber and Seward (2000) and the certified-contract work of Bahr,
 Berthold and Elsman (2015) and Annenkov (2018).
 

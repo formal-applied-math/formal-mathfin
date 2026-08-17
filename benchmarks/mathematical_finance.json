@@ -3952,6 +3952,134 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof in MathFin/Futures/Black76.lean. Derived by application of swaption_payer_receiver_parity rather than re-running the Phi-symmetry argument: blackCaplet_eq_blackPayerSwaption records that the caplet is the payer swaption's formula with the accrual factor where the annuity sits. The caplet and floorlet price definitions are exercised through this identity and the ledger; they carry no separate benchmark entry, since price-equals-definition closes by rfl. Re-export from MathFin. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-contract-pathpv-both",
+      "name": "Contract Pathwise PV is Additive Over both",
+      "description": "pathPV is additive over Contract.both: the pathwise present value of two combined contracts along one fixed scenario is the sum of their pathwise present values, for any discount curve D. Purely a finite-list-sum fact about pathPV -- no integral, measure or integrability hypothesis is involved yet.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Core\n\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {ι : Type*}\n\n/-- `pathPV` is additive over `Contract.both`. -/\ntheorem pathPV_both' (D : ℝ≥0 → ℝ) (s : Scenario ι) (a b : Contract ι) :\n    (Contract.both a b).pathPV D s = a.pathPV D s + b.pathPV D s :=\n  MathFin.Contracts.Contract.pathPV_both D s a b\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Compositional contract semantics (Peyton Jones, Eber & Seward 2000). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Contract.pathPV_both in MathFin/Contracts/Core.lean: pathPV, defined as the discounted sum over a contract's List (ℝ≥0 × ℝ) cashflows, is additive over Contract.both by List.sum distributing over List.append. Unconditional -- no integrability or measure-theoretic hypothesis, since pathPV is a finite list sum along one fixed scenario, not yet an integral. Stated for a generic index type ι -- this lemma is not itself restricted to a single asset; the corpus's BlackScholes/CappedCall entries below instantiate ι = Unit for a single-asset market observed only at T. Payoff is a finite inductive, so any payoff kernel it can express is over a finite observation grid; the Payoff/Contract language has no calendar, business-day convention, market-disruption, corporate-action or issuer-credit node at any instantiation, so this is never a legal instrument and none of that content is claimed. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-eval-adapted",
+      "name": "A Payoff is Adapted to Its Observation Times",
+      "description": "Evaluating a Payoff against a filtration-adapted model X is F_u-measurable as soon as every observation time the payoff's syntax reads is <= u -- the adaptedness hypothesis a Payoff needs to be a legitimate pricing integrand. obsTimes is a syntactic over-approximation, so the theorem gives a sufficient, not necessary, adaptedness criterion.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Adapted\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Evaluating a payoff against a filtration-adapted model is `𝓕 u`-measurable\nonce every observation time it reads is `≤ u`. -/\ntheorem measurable_eval_of_obsTimes_le' {𝓕 : Filtration ℝ≥0 mΩ} {u : ℝ≥0}\n    (e : Payoff ι) (X : ι → ℝ≥0 → Ω → ℝ)\n    (hX : ∀ i t, Measurable[𝓕 t] (X i t))\n    (hle : ∀ t ∈ e.obsTimes, t ≤ u) :\n    Measurable[𝓕 u] fun ω ↦ e.eval (fun i t ↦ X i t ω) :=\n  MathFin.Contracts.Payoff.measurable_eval_of_obsTimes_le e X hX hle\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Adapted stochastic integrands (Shreve, Stochastic Calculus for Finance II, ch. 3-4). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Payoff.measurable_eval_of_obsTimes_le in MathFin/Contracts/Adapted.lean, by structural induction on the six Payoff constructors, threading Measurable.add/.sub/.mul/.max/.min and Measurable.ite through Filtration.mono. obsTimes is computed syntactically by walking the payoff tree and is a deliberate over-approximation (e.g. mul (const 0) (obs i t) evaluates to 0 on every scenario yet obsTimes still lists t), so the theorem is a sufficient, not necessary, adaptedness criterion. Stated for a generic index type ι -- this lemma is not itself restricted to a single asset; the corpus's BlackScholes/CappedCall entries below instantiate ι = Unit for a single-asset market observed only at T. Payoff is a finite inductive, so any payoff kernel it can express is over a finite observation grid; the Payoff/Contract language has no calendar, business-day convention, market-disruption, corporate-action or issuer-credit node at any instantiation, so this is never a legal instrument and none of that content is claimed. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-value-linear",
+      "name": "Contract Value is Additive Over both",
+      "description": "Contract.value is additive over Contract.both, given both summands' discounted pathwise present values are Q-integrable: the value of a combined contract is the sum of the two values. Unlike value_scale (unconditional, since integral_const_mul holds even off the integrable set), this direction genuinely needs both integrability hypotheses -- integral_add is false without them.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Pricing\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- `Contract.value` is additive over `both`, given both summands' discounted\npathwise present values are integrable. -/\ntheorem value_both' (Q : Measure Ω) (D : ℝ≥0 → ℝ)\n    (X : ι → ℝ≥0 → Ω → ℝ) (a b : Contract ι)\n    (ha : Integrable (fun ω ↦ a.pathPV D (scenarioAt X ω)) Q)\n    (hb : Integrable (fun ω ↦ b.pathPV D (scenarioAt X ω)) Q) :\n    (Contract.both a b).value Q D X = a.value Q D X + b.value Q D X :=\n  MathFin.Contracts.Contract.value_both Q D X a b ha hb\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Linearity of arbitrage-free pricing (the law of one price; Hull 1.1, Shreve ch. 5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Contract.value_both in MathFin/Contracts/Pricing.lean, by MeasureTheory.integral_add applied through pathPV_both. Carries explicit Integrable hypotheses on each summand's discounted pathPV under Q; no linearity is claimed without them, unlike the unconditional value_scale direction. Stated for a generic index type ι -- this lemma is not itself restricted to a single asset; the corpus's BlackScholes/CappedCall entries below instantiate ι = Unit for a single-asset market observed only at T. Payoff is a finite inductive, so any payoff kernel it can express is over a finite observation grid; the Payoff/Contract language has no calendar, business-day convention, market-disruption, corporate-action or issuer-credit node at any instantiation, so this is never a legal instrument and none of that content is claimed. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-value-deliver-asset",
+      "name": "Value of Delivering a Martingale Asset",
+      "description": "A contract that simply delivers a Q-martingale asset S at time T, undiscounted, is worth today's Q-expectation of S at time 0: value = integral S_0 dQ. Proved from Martingale.condExp_ae_eq chained through integral_condExp; needs only that S is a Q-martingale and Q a probability measure, no equivalent-martingale-measure (IsEMM) content.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Pricing\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- A contract that simply delivers a `Q`-martingale asset `S` at `T`,\nundiscounted, is worth today's `Q`-expectation of `S` at time `0`. -/\ntheorem value_deliverAsset' {𝓕 : Filtration ℝ≥0 mΩ}\n    {S : ℝ≥0 → Ω → ℝ} {Q : Measure Ω} [IsProbabilityMeasure Q]\n    (hM : Martingale S 𝓕 Q) (T : ℝ≥0) :\n    (Contract.pay T (Payoff.obs () T)).value Q (fun _ ↦ 1) (fun _ ↦ S)\n      = ∫ ω, S 0 ω ∂Q :=\n  MathFin.Contracts.Contract.value_deliverAsset hM T\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Risk-neutral pricing of asset delivery (Shreve 5.2, martingale pricing). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Contract.value_deliverAsset in MathFin/Contracts/Pricing.lean. The contract observes and pays the asset only at the single time T (Contract.pay T (Payoff.obs () T)); the discount curve is fixed to the constant 1 (undiscounted) and the model to a single asset (fun _ => S). Hypotheses are Martingale S 𝓕 Q and [IsProbabilityMeasure Q] -- deliberately not the library's IsEMM bundle, since this argument never touches the mutual-absolute-continuity content (ac/ac') that distinguishes an equivalent martingale measure from a bare martingale measure. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-european-call",
+      "name": "Reified European Call Prices to the Black-Scholes Formula",
+      "description": "The reified European call contract europeanCall K T -- a Payoff literally built from max, sub and const nodes rather than an inline lambda -- prices under the single-asset Black-Scholes model to the closed-form call formula S_0 Phi(d_1) - K e^{-rT} Phi(d_2). The proof reduces Contract.value to the exact integral MathFin.bs_call_formula already computes; no new Black-Scholes content is proved here.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.BlackScholes\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The reified European call prices to the Black-Scholes call formula. -/\ntheorem value_europeanCall' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :\n    (europeanCall K T).value Q (fun _ ↦ Real.exp (-r * T)) (bsAssets S_0 r σ T Z)\n      = S_0 * Phi (bsd1 S_0 K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) :=\n  MathFin.Contracts.value_europeanCall h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-Scholes European call formula (Hull 15.6, Shreve 4.5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. value_europeanCall in MathFin/Contracts/BlackScholes.lean: value_pay_eq unfolds Contract.value on a single pay node to the discounted payoff integral, then MathFin.bs_call_formula closes it directly -- no new Black-Scholes content, the whole content is the reduction. bsAssets is constant in t and equal to the terminal log-normal price bsTerminal at every time (no path is supplied), under the BSCallHyp integrability/law hypothesis bundle the underlying closed form already requires. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-european-put",
+      "name": "Reified European Put Prices to the Black-Scholes Formula",
+      "description": "The reified European put contract europeanPut K T prices under the single-asset Black-Scholes model to the closed-form put formula K e^{-rT} Phi(-d_2) - S_0 Phi(-d_1). The proof reduces Contract.value to the exact integral MathFin.bs_put_formula already computes; no new Black-Scholes content is proved here.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.BlackScholes\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The reified European put prices to the Black-Scholes put formula. -/\ntheorem value_europeanPut' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :\n    (europeanPut K T).value Q (fun _ ↦ Real.exp (-r * T)) (bsAssets S_0 r σ T Z)\n      = K * Real.exp (-r * T) * Phi (-(bsd2 S_0 K r σ T)) - S_0 * Phi (-(bsd1 S_0 K r σ T)) :=\n  MathFin.Contracts.value_europeanPut h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-Scholes European put formula (Hull 16.6, Shreve 4.5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. value_europeanPut in MathFin/Contracts/BlackScholes.lean: the same value_pay_eq reduction as the call, closed by MathFin.bs_put_formula -- no new Black-Scholes content, the whole content is the reduction. bsAssets is constant in t and equal to the terminal log-normal price bsTerminal at every time (no path is supplied), under the BSCallHyp integrability/law hypothesis bundle the underlying closed form already requires. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-digital-cash-or-nothing",
+      "name": "Reified Digital Call Prices to Its Closed Form",
+      "description": "The reified cash-or-nothing digital call digitalCall K T -- pays 1 at T iff S_T > K -- prices under the single-asset Black-Scholes model to e^{-rT} Phi(d_2). The proof reduces Contract.value to the exact integral MathFin.bs_cash_or_nothing_formula already computes; no new Black-Scholes content is proved here.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.BlackScholes\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The reified cash-or-nothing digital call prices to the Black-Scholes\ncash-or-nothing formula. -/\ntheorem value_digitalCall' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :\n    (digitalCall K T).value Q (fun _ ↦ Real.exp (-r * T)) (bsAssets S_0 r σ T Z)\n      = Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) :=\n  MathFin.Contracts.value_digitalCall h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cash-or-nothing digital option pricing (Hull 26.4). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. value_digitalCall in MathFin/Contracts/BlackScholes.lean: the same value_pay_eq reduction, closed by MathFin.bs_cash_or_nothing_formula -- no new Black-Scholes content, the whole content is the reduction. bsAssets is constant in t and equal to the terminal log-normal price bsTerminal at every time (no path is supplied), under the BSCallHyp integrability/law hypothesis bundle the underlying closed form already requires. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-capped-call",
+      "name": "Capped Call as a Composed Contract",
+      "description": "The capped call, defined as a long call at K1 plus a short call at K2, pays min(max(S_T - K1, 0), K2 - K1) in every scenario, and its Black-Scholes value is the difference of the two European call values -- obtained by linearity of the value functional, with no third integral evaluated.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.CappedCall\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The composed contract really pays the capped-call payoff. -/\ntheorem cappedCall_payoff_eq' {K₁ K₂ : ℝ} (h : K₁ ≤ K₂) {T : ℝ≥0}\n    (s : Scenario Unit) :\n    (cappedCall K₁ K₂ T).pathPV (fun _ ↦ 1) s\n      = min (max (s () T - K₁) 0) (K₂ - K₁) :=\n  MathFin.Contracts.cappedCall_payoff_eq h s\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Capped call / bull spread decomposition (Hull 12.3). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Two theorems in MathFin/Contracts/CappedCall.lean: cappedCall_payoff_eq identifies the composed contract's pathwise payoff with the capped-call payoff, and value_cappedCall prices it as the difference of two European call values via linearity of the value functional. The value theorem carries explicit integrability hypotheses on each leg. The contract observes the underlying only at T; calendars, business-day conventions and early exercise are outside the language. Axioms-clean."
+      }
     }
   ]
 }

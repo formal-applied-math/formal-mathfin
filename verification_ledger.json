@@ -1193,6 +1193,62 @@
       "input_hash": "d38d28f6e8d0ceb8c1b5d552729e1419adbc78c6d22bc0f3783b890bf8f57cf9",
       "verified_at_commit": "ad96063"
     },
+    "mf-contract-capped-call": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-17",
+      "elapsed_s": 51.3,
+      "input_hash": "2fa340399cb25bb88f039e2c96ef776b1f2ed71084be3f148c002450d52fc0ff",
+      "verified_at_commit": "df149eb"
+    },
+    "mf-contract-digital-cash-or-nothing": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-17",
+      "elapsed_s": 61.8,
+      "input_hash": "4d64ed9077dcaafb1238d8053a95556649a67984e796b4c9104bd03bc4e52f0f",
+      "verified_at_commit": "df149eb"
+    },
+    "mf-contract-european-call": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-17",
+      "elapsed_s": 52.4,
+      "input_hash": "307847b506d74933528a7a9531411374a6405194baa129dbfc1c530e3e82b336",
+      "verified_at_commit": "df149eb"
+    },
+    "mf-contract-european-put": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-17",
+      "elapsed_s": 50.9,
+      "input_hash": "6d8c5753fd6887bea96a75fb58e8b5c340c9ce4aaad5dd5c719af80c3f3a1c17",
+      "verified_at_commit": "df149eb"
+    },
+    "mf-contract-eval-adapted": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-17",
+      "elapsed_s": 9.2,
+      "input_hash": "f364cda8e605ad3bbcbb556841b39e7bb91858f619136fe4c1ca781672d72655",
+      "verified_at_commit": "df149eb"
+    },
+    "mf-contract-pathpv-both": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-17",
+      "elapsed_s": 51.9,
+      "input_hash": "994eef0f80553fbce3550c2726c62651829bdcf89eacd9d4dc0c6a0ff1ad5acf",
+      "verified_at_commit": "df149eb"
+    },
+    "mf-contract-value-deliver-asset": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-17",
+      "elapsed_s": 50.5,
+      "input_hash": "7a7c4ff6006937f49e9072d7abfd4140d8ef18f794e1bbf84aadc6a0d65a161a",
+      "verified_at_commit": "df149eb"
+    },
+    "mf-contract-value-linear": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-17",
+      "elapsed_s": 48.7,
+      "input_hash": "2a45bbedcc93024796ffb2f9df75f8ce32d8005022b8d8150df0004a48a22b56",
+      "verified_at_commit": "df149eb"
+    },
     "mf-convex-duality-root": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-07-27",
