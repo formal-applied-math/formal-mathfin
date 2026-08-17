@@ -40,6 +40,8 @@ Mathlib's `withDensitySMulLI` does. This is the step at which a naive attempt br
 * `eLpNorm_mul_eq` — the norm identity, for an arbitrary function.
 * `integral_sqWeight`, `setIntegral_sqWeight` — the Bochner transfer, and its set form.
 * `sqWeight_ae_ne_zero` — `f²·ν` is carried by `{f ≠ 0}`.
+* `sqWeight_sqWeight` — **the weight composes**, `(f²·ν) weighted by g² = (fg)²·ν`; read as a
+  bracket this is `d⟨ψ●M⟩ = ψ² d⟨M⟩`, and `coeFn_mulLI_mulLI` is its map-level form.
 * `ae_of_sqWeight_of_ae_ne_zero` — a.e. statements transfer back when `f ≠ 0` a.e.
 * `exists_mulLI_eq` — for `f ≠ 0` a.e. the multiplication isometry is **onto**: `ψ := u/f`.
 * `memLp_mul` — `ψ ∈ L²(f²·ν)` implies `f·ψ ∈ L²(ν)`.
@@ -80,6 +82,26 @@ lemma lintegral_sqWeight (hf : Measurable f) (g : α → ℝ≥0∞) :
   rw [sqWeight, lintegral_withDensity_eq_lintegral_mul_non_measurable _
     (measurable_sqDensity hf) (Eventually.of_forall fun x ↦ (sqDensity_ne_top x).lt_top)]
   rfl
+
+/-- The weight only sees `f` up to a `ν`-null set. -/
+lemma sqWeight_congr_ae {g : α → ℝ} (h : f =ᵐ[ν] g) : sqWeight ν f = sqWeight ν g := by
+  rw [sqWeight, sqWeight]
+  exact withDensity_congr_ae (by filter_upwards [h] with x hx; rw [hx])
+
+/-- **The weight composes**: weighting by `g` on top of a weighting by `f` is weighting by the
+product. Densities multiply, and `‖fg‖ₑ² = ‖f‖ₑ²‖g‖ₑ²`.
+
+This is the associativity of the chain rule. Reading `sqWeight` as a bracket, it says
+`d⟨ψ●M⟩ = ψ² d⟨M⟩`: an Itô integral against an Itô integral is again one, with the brackets
+composing the way the integrands do. -/
+lemma sqWeight_sqWeight (hf : Measurable f) {g : α → ℝ} (hg : Measurable g) :
+    sqWeight (sqWeight ν f) g = sqWeight ν (fun x ↦ f x * g x) := by
+  have hdens : (fun x ↦ ‖f x * g x‖ₑ ^ 2)
+      = (fun x ↦ ‖f x‖ₑ ^ 2) * (fun x ↦ ‖g x‖ₑ ^ 2) := by
+    funext x
+    simp [enorm_mul, mul_pow]
+  simp only [sqWeight, hdens]
+  exact (withDensity_mul ν (measurable_sqDensity hf) (measurable_sqDensity hg)).symm
 
 /-- **The norm identity.** `‖f·g‖_{L²(ν)} = ‖g‖_{L²(f²·ν)}`, for an arbitrary `g` — no
 integrability is needed, both sides being lower integrals. -/
@@ -184,6 +206,26 @@ lemma mulLI_toLinearMap (ν : Measure α) (hf : Measurable f) :
 lemma coeFn_mulLI (ν : Measure α) (hf : Measurable f) (ψ : Lp ℝ 2 (sqWeight ν f)) :
     ⇑(mulLI ν hf ψ) =ᵐ[ν] fun x ↦ f x * ψ x :=
   coeFn_mulLM ν hf ψ
+
+/-- **Multiplying twice is multiplying by the product.** The composite
+`L²(g²f²·ν) → L²(f²·ν) → L²(ν)` sends `χ` to `f·(g·χ)`.
+
+The inner identity holds only `(f²·ν)`-a.e., which is strictly weaker than `ν`-a.e., so it does
+not transfer — but it does not need to: off `{f ≠ 0}` the outer multiplication kills both sides.
+Same case split as the well-definedness argument, for the same reason. -/
+lemma coeFn_mulLI_mulLI (ν : Measure α) (hf : Measurable f) {g : α → ℝ} (hg : Measurable g)
+    (χ : Lp ℝ 2 (sqWeight (sqWeight ν f) g)) :
+    ⇑(mulLI ν hf (mulLI (sqWeight ν f) hg χ)) =ᵐ[ν] fun x ↦ f x * (g x * χ x) := by
+  -- term mode, not `rw`: the measure is `sqWeight ν f`, which is `ν.withDensity …` only up to
+  -- unfolding, and `rw` matches syntactically. Elaboration unifies up to defeq and succeeds.
+  have h2 : ∀ᵐ x ∂ν, ‖f x‖ₑ ^ 2 ≠ 0 →
+      (mulLI (sqWeight ν f) hg χ : α → ℝ) x = g x * (χ : α → ℝ) x :=
+    (ae_withDensity_iff (measurable_sqDensity hf)).1 (coeFn_mulLI (sqWeight ν f) hg χ)
+  filter_upwards [coeFn_mulLI ν hf (mulLI (sqWeight ν f) hg χ), h2] with x hx1 hx2
+  rw [hx1]
+  rcases eq_or_ne (f x) 0 with h0 | h0
+  · simp [h0]
+  · rw [hx2 (sqDensity_ne_zero h0)]
 
 /-- **Multiplication by `f` is onto when `f ≠ 0` a.e.** The preimage of `u` is `u/f`, which
 lands in the weighted space precisely because the weight cancels the division:

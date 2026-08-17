@@ -51,7 +51,7 @@ private lemma integral_rectTerm_mul_band (t : ℝ≥0) (hBmeas : ∀ u, Measurab
       = fun z ↦ ((Set.Ioc p.1 p.2).indicator (fun _ ↦ (1 : ℝ)) z.1
                     * (Set.Ioc q.1 q.2).indicator (fun _ ↦ (1 : ℝ)) z.1)
                   * (V.value p z.2 * V.value q z.2) := by
-    funext z; simp only [rectTerm]; ring
+    funext z; simp only [rectTerm, elemIntegrand]; ring
   rw [setIntegral_congr_fun (measurableSet_Ioc.prod MeasurableSet.univ)
         (fun z _ ↦ congrFun hfun z),
       ← Measure.restrict_prod_eq_prod_univ,

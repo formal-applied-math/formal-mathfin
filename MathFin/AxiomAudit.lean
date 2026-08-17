@@ -1142,4 +1142,43 @@ converse, a drift term in the price, and the integral against a general semimart
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.PricingMeasureL2Density.measure_eq_of_density
 
+/-! ### The coherence pass over the chain-rule tower (2026-08-16)
+
+Three things the first pass left. The band identity is now **summed** over a whole simple
+process, so uniqueness can be stated against the written-out Riemann–Stieltjes sums rather than
+against agreement with the integral being characterised. The construction is shown **closed under
+itself**: `d⟨ψ●M⟩ = ψ² d⟨M⟩`. And the price gets an **adapted** version — `Martingale` requires
+adaptedness pointwise, while the `Lp`-valued `pricePath` supplies only its a.e. version, so the
+pricing-measure theorems were conditioned on a hypothesis with no exhibited witness;
+`exists_density_price_martingale` is that witness, the price-side counterpart of
+`pricesGainsAtZero_self`. -/
+
+/-- info: 'MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_simpleProcess' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_simpleProcess
+
+/-- info: 'MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_unique_of_riemannStieltjes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_unique_of_riemannStieltjes
+
+/-- info: 'MathFin.ItoIntegralAgainstMartingale.bracketMeasure_mulLI' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralAgainstMartingale.bracketMeasure_mulLI
+
+/-- info: 'MathFin.LpMulIsometry.sqWeight_sqWeight' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.LpMulIsometry.sqWeight_sqWeight
+
+/-- info: 'MathFin.ItoIntegralL2.uncurry_ae_eq_sum_rectTerm_of_ae_fst_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralL2.uncurry_ae_eq_sum_rectTerm_of_ae_fst_ne_zero
+
+/-- info: 'MathFin.MarketCompletenessInPrice.exists_adapted_price_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.MarketCompletenessInPrice.exists_adapted_price_martingale
+
+/-- info: 'MathFin.PricingMeasureL2Density.exists_density_price_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.PricingMeasureL2Density.exists_density_price_martingale
+
 end MathFin.AxiomAudit

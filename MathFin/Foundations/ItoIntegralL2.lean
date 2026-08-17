@@ -32,6 +32,10 @@ intervals, which is exactly why `rect_increment_pairing` is the right tool.
   `SimpleProcess.value` carries) to `ItoIsometryAdapted.AdaptedAt` (factoring through the
   past process), via Doob–Dynkin (`Measurable.exists_eq_measurable_comp`). This is what
   lets the `AdaptedAt`-stated isometry core consume Degenne's `SimpleProcess`.
+* `elemIntegrand` — the elementary integrand `Z·1_{(a,b]}`, and `rectTerm` its instance at a
+  simple process's band; `uncurry_ae_eq_sum_rectTerm_of_ae_fst_ne_zero` decomposes a simple
+  process into its bands for **any** measure charging the time origin nothing, which is what
+  lets the bracket-weighted spaces of the integral-against-a-martingale reuse it.
 * `itoSimple` / `itoSimple_apply` — the elementary Itô integral
   `(V ● B)_⊤ = ∑ₚ V(p)·(B_{p.2}−B_{p.1})` (Degenne's `SimpleProcess.integral` against
   multiplication, at the terminal time `⊤`).
@@ -271,12 +275,26 @@ set (the time-fibre `{⊥}`), the finite sum over `V.value.support` of **rectang
 a finite-measure interval and `V` is bounded), so `uncurry V ∈ L²(timeMeasure.prod μ)`; being
 predictable-strongly-measurable, it descends to `L2Predictable timeMeasure μ`. -/
 
+/-- **The elementary integrand** `Z·1_{(a,b]}`: a bounded weight on `Ω` switched on over a
+time band. It is the atom of every simple process (`rectTerm` below is this at the band `p`
+with weight `V.value p`) and, in the tower above, the integrand on which a stochastic integral
+is pinned to its Riemann–Stieltjes value. It depends on neither the driver nor the
+filtration. -/
+noncomputable def elemIntegrand (a b : ℝ≥0) (Z : Ω → ℝ) : ℝ≥0 × Ω → ℝ :=
+  fun z ↦ (Set.Ioc a b).indicator (fun _ ↦ (1 : ℝ)) z.1 * Z z.2
+
 /-- The contribution of one interval `p` to the uncurried simple process, in product
-form `𝟙_{(p.1,p.2]}(t) · V(p)(ω)`. -/
+form `𝟙_{(p.1,p.2]}(t) · V(p)(ω)` — the elementary integrand at the band `p`. -/
 noncomputable def rectTerm (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (p : ℝ≥0 × ℝ≥0) :
     ℝ≥0 × Ω → ℝ :=
-  fun z ↦ (Set.Ioc p.1 p.2).indicator (fun _ ↦ (1 : ℝ)) z.1 * V.value p z.2
+  elemIntegrand p.1 p.2 (V.value p)
+
+/-- `rectTerm` is the elementary integrand at its band — definitionally, so the two names
+never drift apart. -/
+lemma rectTerm_eq_elemIntegrand (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (p : ℝ≥0 × ℝ≥0) :
+    rectTerm hBmeas V p = elemIntegrand p.1 p.2 (V.value p) := rfl
 
 /-- The rectangle term as an indicator of the product rectangle `(p.1,p.2] ×ˢ univ`. -/
 lemma rectTerm_eq_indicator (hBmeas : ∀ t, Measurable (B t))
@@ -284,7 +302,7 @@ lemma rectTerm_eq_indicator (hBmeas : ∀ t, Measurable (B t))
     rectTerm hBmeas V p
       = (Set.Ioc p.1 p.2 ×ˢ (Set.univ : Set Ω)).indicator (fun z ↦ V.value p z.2) := by
   funext z
-  rw [rectTerm, Set.indicator_apply, Set.indicator_apply]
+  rw [rectTerm, elemIntegrand, Set.indicator_apply, Set.indicator_apply]
   simp only [Set.mem_prod, Set.mem_univ, and_true]
   split_ifs <;> simp
 
@@ -304,22 +322,39 @@ lemma memLp_rectTerm (hBmeas : ∀ t, Measurable (B t))
   exact MemLp.of_bound hmeas.aestronglyMeasurable V.valueBound
     (ae_of_all _ fun z ↦ by rw [Real.norm_eq_abs]; exact V.value_le_valueBound p z.2)
 
+/-- **The uncurried simple process is a.e. the finite sum of its rectangle terms** — for
+*any* measure that charges the time origin nothing.
+
+The origin is the whole content: `SimpleProcess.apply_eq` writes `V` as its value at `⊥` plus
+the band sum, and the first term is what has to go. Nothing else about the measure is used, and
+in particular nothing about the σ-algebra it lives on, so the same statement serves the flat
+product measure here and the bracket-weighted predictable measure the integral against an Itô
+integral is built on. -/
+lemma uncurry_ae_eq_sum_rectTerm_of_ae_fst_ne_zero {m : MeasurableSpace (ℝ≥0 × Ω)}
+    {ν : @Measure (ℝ≥0 × Ω) m} (hν : ∀ᵐ z ∂ν, z.1 ≠ 0) (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
+    Function.uncurry ⇑V =ᵐ[ν] fun z ↦ ∑ p ∈ V.value.support, rectTerm hBmeas V p z := by
+  filter_upwards [hν] with z hz
+  show ⇑V z.1 z.2 = _
+  rw [SimpleProcess.apply_eq, Set.indicator_of_notMem (by simpa using hz), zero_add, Finsupp.sum]
+  refine Finset.sum_congr rfl fun p _ ↦ ?_
+  rw [rectTerm, elemIntegrand, Set.indicator_apply, Set.indicator_apply]
+  split_ifs <;> simp
+
+/-- The time origin is `timeMeasure.prod μ`-null, the time fibre `{⊥}` being Lebesgue-null. -/
+lemma ae_fst_ne_zero_prod (μ : Measure Ω) [SFinite μ] :
+    ∀ᵐ z : ℝ≥0 × Ω ∂(timeMeasure.prod μ), z.1 ≠ 0 := by
+  rw [Filter.eventually_iff, mem_ae_iff,
+      show {z : ℝ≥0 × Ω | z.1 ≠ 0}ᶜ = {(0 : ℝ≥0)} ×ˢ (Set.univ : Set Ω) from by ext z; simp,
+      Measure.prod_prod, timeMeasure_singleton, zero_mul]
+
 /-- **The uncurried simple process is a.e. the finite sum of its rectangle terms.**
 They agree off the time-fibre `{⊥}`, which is `timeMeasure.prod μ`-null. -/
 lemma uncurry_ae_eq_sum_rectTerm (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     Function.uncurry ⇑V
-      =ᵐ[timeMeasure.prod μ] fun z ↦ ∑ p ∈ V.value.support, rectTerm hBmeas V p z := by
-  have hmem : {z : ℝ≥0 × Ω | z.1 ≠ ⊥} ∈ MeasureTheory.ae (timeMeasure.prod μ) := by
-    rw [mem_ae_iff,
-        show {z : ℝ≥0 × Ω | z.1 ≠ ⊥}ᶜ = {(⊥ : ℝ≥0)} ×ˢ (Set.univ : Set Ω) from by ext z; simp,
-        Measure.prod_prod, timeMeasure_singleton, zero_mul]
-  filter_upwards [hmem] with z hz
-  show ⇑V z.1 z.2 = _
-  rw [SimpleProcess.apply_eq, Set.indicator_of_notMem (by simpa using hz), zero_add, Finsupp.sum]
-  refine Finset.sum_congr rfl fun p _ ↦ ?_
-  rw [rectTerm, Set.indicator_apply, Set.indicator_apply]
-  split_ifs <;> simp
+      =ᵐ[timeMeasure.prod μ] fun z ↦ ∑ p ∈ V.value.support, rectTerm hBmeas V p z :=
+  uncurry_ae_eq_sum_rectTerm_of_ae_fst_ne_zero (ae_fst_ne_zero_prod μ) hBmeas V
 
 /-- **The uncurried simple process is `L²`** in the product measure (finite sum of
 `L²` rectangle terms). -/
@@ -361,7 +396,7 @@ lemma integral_rectTerm_mul (hBmeas : ∀ t, Measurable (B t))
       = fun z ↦ ((Set.Ioc p.1 p.2).indicator (fun _ ↦ (1 : ℝ)) z.1
                     * (Set.Ioc q.1 q.2).indicator (fun _ ↦ (1 : ℝ)) z.1)
                   * (V.value p z.2 * V.value q z.2) := by
-    funext z; simp only [rectTerm]; ring
+    funext z; simp only [rectTerm, elemIntegrand]; ring
   rw [hfun, integral_prod_mul
         (fun i ↦ (Set.Ioc p.1 p.2).indicator (fun _ ↦ (1 : ℝ)) i
           * (Set.Ioc q.1 q.2).indicator (fun _ ↦ (1 : ℝ)) i)
