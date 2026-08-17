@@ -9,12 +9,19 @@ public import MathFin.Contracts.Adapted
 public import MathFin.Foundations.ContinuousMarket
 
 /-!
-# Pricing a contract: value, its linearity, and the EMM seam
+# Pricing a contract: value, its linearity, and the martingale seam
 
 A `Contract` is still model-agnostic data until it meets a stochastic model. `Scenario`
 becomes a random variable once a model `X : ι → ℝ≥0 → Ω → ℝ` and an outcome `ω : Ω` are
 fixed (`scenarioAt`); `Contract.value` integrates the resulting `pathPV` against a pricing
 measure `Q` and a discount curve `D`.
+
+This file's connection to the market vocabulary is through `Martingale`, not `IsEMM`:
+`value_deliverAsset`'s pricing identity needs a `Q`-martingale price process and `Q` a
+probability measure, nothing more. The mutual-absolute-continuity content that makes a
+martingale measure an *equivalent* one — `IsEMM`'s `ac`/`ac'` fields — is not needed by
+anything here; it lives in `ContinuousMarket.lean` (`isEMM_noArbitrageSimple`), where it
+is load-bearing.
 
 ## Main definitions
 
@@ -29,16 +36,20 @@ measure `Q` and a discount curve `D`.
   Mathlib's Bochner integral (it returns `0` off the integrable set on both sides), while
   `value_both` genuinely needs both summands integrable — `integral_add` is false without
   them. That asymmetry, not a uniform "linearity", is the honest content of this pair.
-* `Contract.value_deliverAsset` — the EMM seam: under `IsEMM S Q`, a contract that simply
-  delivers the asset `S` at time `T` is worth `∫ ω, S 0 ω ∂Q` today. This is genuinely an EMM
-  fact — it consumes `hEMM.martingale` between times `0` and `T` — not a restatement of
-  conditional-expectation machinery.
+* `Contract.value_deliverAsset` — a contract that simply delivers the asset `S` at time `T`
+  is worth `∫ ω, S 0 ω ∂Q` today, given `S` is a `Q`-martingale and `Q` a probability
+  measure. Mechanically this *is* conditional-expectation machinery (`condExp_ae_eq` +
+  `integral_condExp`), the same kind `value_process_martingale` uses, evaluated at the
+  fixed times `0` and `T` — it carries no equivalence content, so it is stated against
+  `Martingale` directly rather than the library's `IsEMM` bundle, whose `ac`/`ac'` fields
+  this argument never needs.
 * `Contract.value_process_martingale` — the conditional-expectation value process of *any*
   integrable contract is a `Q`-martingale. Deliberately stated with **no** `IsEMM` hypothesis:
   it is `martingale_condExp` specialized to a contract's cashflows, true for any `Q` with a
   `SigmaFiniteFiltration`, not a fact about the pricing measure. Shipping it with an `IsEMM`
-  hypothesis would misattribute a conditional-expectation fact to the EMM structure —
-  `value_deliverAsset` above is where this file's actual EMM content lives.
+  hypothesis would misattribute a conditional-expectation fact to the EMM structure — and, as
+  `value_deliverAsset` above shows, no theorem in this file has any actual EMM content to
+  misattribute it to.
 
 ## Source
 
@@ -54,9 +65,10 @@ Berthold and Elsman (2015) and Annenkov (2018).
 Bilokon separates pricing semantics from contract semantics — a pricing model
 is a law over deterministic scenarios — and that separation is his; but his
 `PricingModel.value` integrates a function never shown measurable and his
-`value_eq_of_pathPV_eq` is `congrArg` under the integral, whereas this file
-states its results against the library's existing `ContinuousMarket.IsEMM`
-and carries real integrability hypotheses.
+`value_eq_of_pathPV_eq` is `congrArg` under the integral, whereas this file's
+linearity carries real integrability hypotheses and its delivery-of-asset
+identity is a genuine martingale-pricing fact (`Martingale.condExp_ae_eq`
+chained through `integral_condExp`), not an unconditional integral congruence.
 
 No code is copied from `lean_contracts`; every definition and proof here is
 written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
@@ -99,25 +111,30 @@ theorem Contract.value_both (Q : Measure Ω) (D : ℝ≥0 → ℝ)
   simp only [value, Contract.pathPV_both]
   exact integral_add ha hb
 
-/-- **The EMM seam.** Under `IsEMM S Q`, a contract that simply delivers the asset `S` at
-time `T`, undiscounted, is worth `∫ ω, S 0 ω ∂Q` today — the `Q`-price of `S` at time `0`.
-This genuinely uses `hEMM.martingale`, between times `0` and `T`: it is the one theorem in
-this file that is an EMM fact rather than a conditional-expectation fact. -/
-theorem Contract.value_deliverAsset {P : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}
-    {S : ℝ≥0 → Ω → ℝ} {Q : Measure Ω} (hEMM : IsEMM (P := P) (𝓕 := 𝓕) S Q)
-    (T : ℝ≥0) :
+/-- Under a `Q`-martingale `S` and `Q` a probability measure, a contract that simply
+delivers the asset `S` at time `T`, undiscounted, is worth `∫ ω, S 0 ω ∂Q` today — the
+`Q`-price of `S` at time `0`. This is `Martingale.condExp_ae_eq` between `0` and `T`
+chained through `integral_condExp`: a martingale-plus-probability-measure fact evaluated
+at fixed times, the same conditional-expectation machinery `value_process_martingale`
+uses. It carries no equivalence content — `Q` need not be an EMM for `S`, only a
+probability measure under which `S` is a martingale — so it is stated against
+`Martingale` directly rather than the library's `IsEMM` bundle, whose `ac`/`ac'` fields
+this argument never needs; that mutual-absolute-continuity content lives elsewhere
+(`ContinuousMarket.isEMM_noArbitrageSimple`). -/
+theorem Contract.value_deliverAsset {𝓕 : Filtration ℝ≥0 mΩ}
+    {S : ℝ≥0 → Ω → ℝ} {Q : Measure Ω} [IsProbabilityMeasure Q]
+    (hM : Martingale S 𝓕 Q) (T : ℝ≥0) :
     (Contract.pay T (Payoff.obs () T)).value Q (fun _ ↦ 1) (fun _ ↦ S)
       = ∫ ω, S 0 ω ∂Q := by
-  haveI := hEMM.isProb
   simp only [value, Contract.pathPV, Contract.cashflows, Payoff.eval, scenarioAt,
     List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, one_mul, add_zero]
   rw [← integral_condExp (𝓕.le 0)]
-  exact integral_congr_ae (hEMM.martingale.condExp_ae_eq zero_le)
+  exact integral_congr_ae (hM.condExp_ae_eq zero_le)
 
 /-- The conditional-expectation value process of any integrable contract is a
 `Q`-martingale. This needs **no** EMM hypothesis: it is a property of conditional
-expectation, not of the pricing measure. `value_deliverAsset` is the statement in
-this file that actually consumes `IsEMM`. -/
+expectation, not of the pricing measure — no theorem in this file needs `IsEMM`;
+`value_deliverAsset` needs only `Martingale S 𝓕 Q` and `[IsProbabilityMeasure Q]`. -/
 theorem Contract.value_process_martingale {Q : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}
     [SigmaFiniteFiltration Q 𝓕] (D : ℝ≥0 → ℝ) (X : ι → ℝ≥0 → Ω → ℝ)
     (c : Contract ι) :
