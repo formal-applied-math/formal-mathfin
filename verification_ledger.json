@@ -1200,6 +1200,13 @@
       "input_hash": "2fa340399cb25bb88f039e2c96ef776b1f2ed71084be3f148c002450d52fc0ff",
       "verified_at_commit": "df149eb"
     },
+    "mf-contract-capped-call-value": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-17",
+      "elapsed_s": 12.4,
+      "input_hash": "75112573a5ac8ce00617e4351aa293ee5d9c969160829d1471f5d77a5e5a492a",
+      "verified_at_commit": "beb88e3"
+    },
     "mf-contract-digital-cash-or-nothing": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-08-17",

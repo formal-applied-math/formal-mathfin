@@ -4068,7 +4068,7 @@
     {
       "id": "mf-contract-capped-call",
       "name": "Capped Call as a Composed Contract",
-      "description": "The capped call, defined as a long call at K1 plus a short call at K2, pays min(max(S_T - K1, 0), K2 - K1) in every scenario, and its Black-Scholes value is the difference of the two European call values -- obtained by linearity of the value functional, with no third integral evaluated.",
+      "description": "The composed contract cappedCall K1 K2 T -- a long call at K1 plus a short call at K2 -- really pays min(max(S_T - K1, 0), K2 - K1) in every scenario. This payoff identity is what earns the composed object its name; the contract's Black-Scholes value is a separate theorem, published as mf-contract-capped-call-value.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Contracts.CappedCall\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The composed contract really pays the capped-call payoff. -/\ntheorem cappedCall_payoff_eq' {K₁ K₂ : ℝ} (h : K₁ ≤ K₂) {T : ℝ≥0}\n    (s : Scenario Unit) :\n    (cappedCall K₁ K₂ T).pathPV (fun _ ↦ 1) s\n      = min (max (s () T - K₁) 0) (K₂ - K₁) :=\n  MathFin.Contracts.cappedCall_payoff_eq h s\n"
@@ -4076,9 +4076,25 @@
       "metadata": {
         "chapter": 9,
         "reference": "Capped call / bull spread decomposition (Hull 12.3). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. cappedCall_payoff_eq in MathFin/Contracts/CappedCall.lean: for K1 <= K2, the composed contract cappedCall K1 K2 T -- built from a long europeanCall K1 T and a short europeanCall K2 T via Contract.both/Contract.scale -- has the same pathPV as the capped-call payoff min(max(S - K1, 0), K2 - K1), by cappedCall_eq_bull_spread transported from a pointwise real identity to the contract's pathPV. This is a payoff-level identity only: no Contract.value, no integral, no integrability hypothesis anywhere in the statement. The Black-Scholes pricing result for this same contract is a separate theorem, value_cappedCall, published as mf-contract-capped-call-value -- this entry does not witness it. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-capped-call-value",
+      "name": "Capped Call Value by Composition",
+      "description": "The capped call's Black-Scholes value -- the price of cappedCall K1 K2 T under the single-asset Black-Scholes model -- is the difference of the two europeanCall closed forms, obtained by Contract.value_both and Contract.value_scale applied to value_europeanCall twice: composition, not a third integral, produces the price. The integrability hypotheses Contract.value_both would otherwise need are discharged internally (domination against the terminal asset price's Gaussian MGF), not left for the caller to supply.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.CappedCall\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The capped call's Black-Scholes value is the difference of the two European\ncall values, by composition -- no integral is touched a third time. -/\ntheorem value_cappedCall' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K₁ K₂ r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ}\n    (h₁ : BSCallHyp Q S_0 K₁ r σ T Z) (h₂ : BSCallHyp Q S_0 K₂ r σ T Z) :\n    (cappedCall K₁ K₂ T).value Q (fun _ ↦ Real.exp (-r * T)) (bsAssets S_0 r σ T Z)\n      = (S_0 * Phi (bsd1 S_0 K₁ r σ T) - K₁ * Real.exp (-r * T) * Phi (bsd2 S_0 K₁ r σ T))\n      - (S_0 * Phi (bsd1 S_0 K₂ r σ T) - K₂ * Real.exp (-r * T) * Phi (bsd2 S_0 K₂ r σ T)) :=\n  MathFin.Contracts.value_cappedCall h₁ h₂\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Capped call / bull spread decomposition (Hull 12.3). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Two theorems in MathFin/Contracts/CappedCall.lean: cappedCall_payoff_eq identifies the composed contract's pathwise payoff with the capped-call payoff, and value_cappedCall prices it as the difference of two European call values via linearity of the value functional. The value theorem carries explicit integrability hypotheses on each leg. The contract observes the underlying only at T; calendars, business-day conventions and early exercise are outside the language. Axioms-clean."
+        "formalization_scope": "Full formal proof. value_cappedCall in MathFin/Contracts/CappedCall.lean: cappedCall K1 K2 T's Contract.value under the single-asset Black-Scholes model is exactly the difference of the two value_europeanCall closed forms, by Contract.value_both and Contract.value_scale applied to value_europeanCall twice and closed by ring -- Contract.value is never unfolded and no integral is touched a third time. The Integrable hypotheses Contract.value_both needs are discharged internally by integrable_europeanCall_pathPV (domination against the terminal asset price bsTerminal, itself integrable via the Gaussian MGF transfer integrable_exp_mul_of_hasLaw), so the caller supplies only the BSCallHyp bundle each leg's value_europeanCall already needs -- a real strengthening over the bare linearity lemma, which would otherwise leave two Integrable side-conditions for the caller. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
       }
     }
   ]
