@@ -101,7 +101,9 @@ Files that change together live together: the two capped-call theorems share eve
   - `inductive Contract (ι : Type*)` with `zero`, `pay (t : ℝ≥0) (amount : Payoff ι)`, `both (a b : Contract ι)`, `scale (c : ℝ) (a : Contract ι)`
   - `Contract.cashflows : Scenario ι → Contract ι → List (ℝ≥0 × ℝ)`
   - `Contract.pathPV : (ℝ≥0 → ℝ) → Scenario ι → Contract ι → ℝ`
-  - `Contract.pathPV_pay`, `Contract.pathPV_both`, `Contract.pathPV_scale`
+  - `Contract.pathPV_both`, `Contract.pathPV_scale`
+  - (No `pathPV_pay`: nothing downstream names it. Task 4 Step 7's `value_pay_eq` is
+    where a pay-level lemma actually earns its place.)
 
 - [ ] **Step 1: Create the isolated worktree**
 
@@ -194,7 +196,7 @@ end Probe
 ./scripts/lean-check.sh <scratchpad>/probe1.lean
 ```
 
-Expected: `{"success": true, ..., "sorry_count": 2}`.
+Expected: `sorry_count: 2`, `errors: []`. **`success` will be `false`** — the daemon computes `success = (no errors AND sorry_count == 0)` (`tools/verify/lean_repl.py:91`), so a stubbed statement can never report `success: true`. The RED signal is **zero errors with the expected sorry count**; `success` is meaningless until GREEN.
 
 If `success` is false, the *definitions* are wrong — fix those before touching the proofs. The likely failures are `Max.max`/`Min.min` needing explicit qualification because `Payoff.max` shadows them inside the namespace, and the `noncomputable` markers (`Real` has no executable `<` decision procedure, so `indicatorLt` forces `noncomputable` and pulls it up through `cashflows` and `pathPV`).
 
@@ -369,7 +371,7 @@ end MathFin.Contracts
 ./scripts/lean-check.sh <scratchpad>/probe2.lean
 ```
 
-Expected: `{"success": true, ..., "sorry_count": 2}`.
+Expected: `sorry_count: 2`, `errors: []`. **`success` will be `false`** — the daemon computes `success = (no errors AND sorry_count == 0)` (`tools/verify/lean_repl.py:91`), so a stubbed statement can never report `success: true`. The RED signal is **zero errors with the expected sorry count**; `success` is meaningless until GREEN.
 
 If `Payoff.obsTimes` fails to compile, the grouped-alternative syntax (`| .add a b | .sub a b => …`) requires every grouped constructor to bind the same variable names in the same order — check that all six binary constructors are declared `(a b : Payoff ι)`.
 
@@ -552,7 +554,7 @@ Note `ι := Unit` is forced in `value_deliverAsset` by `Payoff.obs ()`; let Lean
 ./scripts/lean-check.sh <scratchpad>/probe3.lean
 ```
 
-Expected: `{"success": true, ..., "sorry_count": 3}`.
+Expected: `sorry_count: 3`, `errors: []`. **`success` will be `false`** — the daemon computes `success = (no errors AND sorry_count == 0)` (`tools/verify/lean_repl.py:91`), so a stubbed statement can never report `success: true`. The RED signal is **zero errors with the expected sorry count**; `success` is meaningless until GREEN.
 
 The likely failure is the implicit-argument shape of `IsEMM`: it is stated with `{P : Measure Ω}` and `{𝓕 : Filtration ℝ≥0 mΩ}` as section variables over a general inner-product-space-valued `S`, so at `F = ℝ` the instances must resolve. Read `MathFin/Foundations/ContinuousMarket.lean:60-78` for the exact `variable` block before adjusting.
 
@@ -708,7 +710,7 @@ The `T : ℝ≥0` in the contract and the `T : ℝ` in `BSCallHyp` are bridged b
 ./scripts/lean-check.sh <scratchpad>/probe4.lean
 ```
 
-Expected: `{"success": true, ..., "sorry_count": 3}`.
+Expected: `sorry_count: 3`, `errors: []`. **`success` will be `false`** — the daemon computes `success = (no errors AND sorry_count == 0)` (`tools/verify/lean_repl.py:91`), so a stubbed statement can never report `success: true`. The RED signal is **zero errors with the expected sorry count**; `success` is meaningless until GREEN.
 
 If the right-hand sides do not elaborate, the argument order of `bsd1`/`bsd2` or the shape of `BSCallHyp` differs from what Step 1 read. Fix the statement, not the source theorem.
 
@@ -852,7 +854,7 @@ end MathFin.Contracts
 ./scripts/lean-check.sh <scratchpad>/probe5.lean
 ```
 
-Expected: `{"success": true, ..., "sorry_count": 2}`.
+Expected: `sorry_count: 2`, `errors: []`. **`success` will be `false`** — the daemon computes `success = (no errors AND sorry_count == 0)` (`tools/verify/lean_repl.py:91`), so a stubbed statement can never report `success: true`. The RED signal is **zero errors with the expected sorry count**; `success` is meaningless until GREEN.
 
 - [ ] **Step 4: Prove `cappedCall_payoff_eq`**
 
