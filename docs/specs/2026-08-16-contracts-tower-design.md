@@ -175,9 +175,25 @@ Stated here so no downstream prose outruns it:
 2. **The martingale rung is the value process, not the hedge.** Rung (b) proves
    the discounted value process is a `Q`-martingale with the right terminal value
    and time-0 value. It does **not** prove that process is the wealth of a
-   replicating strategy — that needs `∫ψ dS`, which is the separate in-flight
-   `2026-08-16-ito-chain-rule-design.md`. The two specs must not be merged and
-   must not be executed in the same worktree.
+   replicating strategy.
+
+   *Amended 2026-08-17.* When this spec was written, the missing primitive was
+   `∫ψ dS`, and it was in flight as `2026-08-16-ito-chain-rule-design.md`. **That
+   work has since landed on `main` as PR #198.** `Foundations/MarketCompletenessInPrice.lean`
+   now supplies `pricePath` (the discounted price `S₀ + (σ●B)`) and
+   `exists_replicating_strategy_in_price`: every square-integrable `𝓕ᴮ_T`-claim is
+   the terminal wealth of a *unique* holding in the price, needing only `σ ≠ 0`
+   a.e. rather than a uniform lower bound.
+
+   So the blocker named here no longer exists, and the hedge rung is now
+   buildable: a contract's `value` could be identified with the initial wealth of
+   the unique replicating holding in `S`, which is the statement a practitioner
+   would actually want. **It remains out of scope for this plan** — the eight
+   tasks are unchanged — but it is now a *deferred* rung with its dependency
+   satisfied, not a blocked one, and it is the strongest candidate for the next
+   phase. `ContinuousMarket.IsEMM` remains the correct target for rung (b)'s seam
+   theorem; `MarketCompletenessInPrice.pricePath` is the obvious concrete `S` to
+   instantiate it at.
 3. **Rung (c) is single-asset.** `bs_call_formula` and friends are stated under
    `BSCallHyp` at `ι = Unit`. Multi-asset instances need a joint law we do not
    have.

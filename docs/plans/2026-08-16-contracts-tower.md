@@ -993,10 +993,29 @@ Expected: pytest green; `ledger status` reports the eight new entries as `missin
 - [ ] **Step 5: Verify the new ledger rows**
 
 ```bash
-docker compose -f docker/docker-compose.yml up -d lean-repl
+LEAN_ELAB_TIMEOUT=600 docker compose -f docker/docker-compose.yml up -d lean-repl
 python3 -m tools.verify.ledger verify
-python3 -m tools.verify.ledger status      # must exit 0
+python3 -m tools.verify.ledger status      # must exit 0 — THIS is the gate
 ```
+
+**Two traps here, both verified in `tools/verify/ledger.py` on 2026-08-17:**
+
+* **`ledger verify`'s exit code is not a sufficient gate.** Its happy path does
+  end `return 1 if failures else 0` (`ledger.py:345`), but the ABORT path at
+  `:314` — taken when the checker becomes unavailable, which is exactly what a
+  killed REPL looks like — does a bare `break` **without appending to
+  `failures`**. The summary then prints `len(targets) - len(failures)` as
+  "verified", counting every entry the loop never reached, and returns `0`. A
+  sweep that dies a third of the way through reports success. **Always follow
+  `verify` with `status`**, which recomputes freshness from the input hashes and
+  is the only sound gate.
+* **Raise the elaboration cap for sweeps.** The per-request default is 180s
+  (`LEAN_ELAB_TIMEOUT`). Two existing corpus entries sit at the boundary —
+  `sc-ito-formula-unrestricted-islocalmartingale` at 177.6s and
+  `sc-ito-covariation-bilinear-isometry` at 199.1s — so under load either can
+  blow the cap, get its REPL killed, and trigger exactly the ABORT above. `600`
+  clears both. This is a pre-existing corpus flake, not something this branch
+  introduces.
 
 - [ ] **Step 6: Write the attribution gate**
 
@@ -1283,9 +1302,11 @@ derived artifacts go stale:
 ```bash
 python3 -m tools.verify.axiom_audit_gen --write
 python3 -m tools.verify.ledger status      # expect the four entries stale
-docker compose -f docker/docker-compose.yml up -d lean-repl
+LEAN_ELAB_TIMEOUT=600 docker compose -f docker/docker-compose.yml up -d lean-repl
 python3 -m tools.verify.ledger verify
-python3 -m tools.verify.ledger status      # must exit 0
+python3 -m tools.verify.ledger status      # must exit 0 — the sweep's own exit
+                                           # code is NOT a sufficient gate; see
+                                           # Task 6 Step 5
 docker compose -f docker/docker-compose.yml down lean-repl
 docker compose -f docker/docker-compose.yml run --rm \
   --entrypoint python3 verify -m pytest tests/ -q
