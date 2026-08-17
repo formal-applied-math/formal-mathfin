@@ -25,11 +25,11 @@ filtered probability space.
 
 * `Payoff.obsTimes` — the list of times a payoff's `obs` leaves read, found by
   walking the syntax tree. It is a *syntactic* over-approximation: a payoff
-  can mention a time inside a branch that evaluation never takes (e.g. the
-  `false` side of an `indicatorLt`), so `obsTimes` may list times the value
-  does not actually depend on. Consequently the adaptedness theorem below is
-  *sufficient*, not necessary — a payoff can be `𝓕 u`-adapted for reasons
-  `obsTimes` does not see.
+  can list a time its value does not actually depend on — e.g.
+  `Payoff.mul (.const 0) (.obs i t)` evaluates to `0` on every scenario, so
+  `obsTimes` listing `t` overstates what the value depends on. Consequently
+  the adaptedness theorem below is *sufficient*, not necessary — a payoff can
+  be `𝓕 u`-adapted for reasons `obsTimes` does not see.
 
 ## Main results
 
@@ -74,8 +74,9 @@ namespace MathFin.Contracts
 variable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}
 
 /-- The times a `Payoff`'s `obs` leaves read, found syntactically. An
-over-approximation: a payoff can mention a time on a branch evaluation never
-takes, so this may list times the value does not actually depend on. -/
+over-approximation: e.g. `Payoff.mul (.const 0) (.obs i t)` evaluates to `0`
+on every scenario, so this may list times the value does not actually depend
+on. -/
 def Payoff.obsTimes : Payoff ι → List ℝ≥0
   | .const _ => []
   | .obs _ t => [t]
