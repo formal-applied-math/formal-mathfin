@@ -475,3 +475,4 @@ import MathFin.Contracts.Core
 import MathFin.Contracts.Adapted
 import MathFin.Contracts.Pricing
 import MathFin.Contracts.BlackScholes
+import MathFin.Contracts.CappedCall
