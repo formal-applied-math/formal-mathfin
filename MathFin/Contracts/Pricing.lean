@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Contracts.Adapted
-public import MathFin.Foundations.ContinuousMarket
 
 /-!
 # Pricing a contract: value, its linearity, and the martingale seam
@@ -77,7 +76,7 @@ written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 
 @[expose] public section
 
-open MeasureTheory MathFin.ContinuousMarket
+open MeasureTheory
 open scoped NNReal
 
 namespace MathFin.Contracts
