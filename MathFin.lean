@@ -472,3 +472,4 @@ import MathFin.Actuarial.ActuarialInsurance
 -- Contracts tower: a reified payoff language, model-agnostic until priced
 -- (Bilokon, "The Contract Is Not the Model", 9 August 2026)
 import MathFin.Contracts.Core
+import MathFin.Contracts.Adapted
