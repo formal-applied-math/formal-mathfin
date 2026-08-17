@@ -652,6 +652,54 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal construction. The compensated-Poisson (Ito-Levy) integral realized as a CLM itoLevyIntegralL2 N : levyClosure N ->L[R] L2(P) and proven a global L2 isometry ||itoLevyIntegralL2 N H|| = ||H|| for EVERY H in the L2 closure. Method: on the marked simple integrands (levySimpleModule, a Finsupp submodule of adapted bounded box-coefficients) the two L2 embeddings intAssembly (into L2(P)) and emb (into L2(dP x dnuhat)) have equal norm (assembly_isometry) -- both squared norms expand into the same box-family double sum, equated term-by-term by the overlapping-box bilinear pairing integral_bilinear_pairing (LHS) and Fubini integral_prod_mul (RHS). The target space is DEFINED as levyClosure N = topologicalClosure (range emb), so density of the simple integrands is a soft topological fact (embCorestrict_denseRange, via IsInducing.subtypeVal.dense_iff), sidestepping an explicit marked-predictable sigma-algebra characterisation (the trimmed-measure route the continuous Ito CLM took). LinearMap.extendOfNorm then yields the CLM, and the shared isometry kernel LinearMap.norm_extendOfNorm_eq_of_isometry -- lifted here into its own Mathlib-only leaf ExtendOfNormIsometry.lean, now consumed by the Wiener, Ito, and Levy towers alike -- extends the norm identity from the dense range to the whole closure. Closes the dense-extension follow-up declared by sc-levy-bilinear-pairing and sc-levy-isometry-compensated-simple: LevyStochCalc axiom #6 in full generality. The submodule-codomain extendOfNorm application bridges a Submodule.addCommMonoid vs seminormed-group AddCommMonoid instance diamond (refine-then-exact for the def, unfold for the norm theorem). Existence of a PRM (LevyStochCalc axiom #2) remains a declared, deferred Summit. Not a definitional rfl. Axioms: only [propext, Classical.choice, Quot.sound]."
       }
+    },
+    {
+      "id": "sc-ito-chain-rule",
+      "name": "Itô Chain Rule: the Integral against an Itô Integral",
+      "description": "For a predictable L² driver φ and M = φ●B, the integral of ψ against M equals the integral of ψφ against B — the chain rule (associativity) of the Itô integral. The integrands are those square-integrable against the bracket d⟨M⟩ = φ² ds.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoIntegralAgainstMartingale\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM MathFin.ItoIntegralAgainstMartingale\nopen scoped NNReal ENNReal\n\n/-- **The Itô chain rule.** For a predictable `L²` driver `φ` and the Itô integral process\n    `M = φ●B`, integrating a `ψ` square-integrable against the bracket `d⟨M⟩ = φ² ds` is\n    integrating `ψφ` against `B`. Stated with the product supplied as any predictable `L²`\n    integrand `χ` a.e. equal to `φ·ψ`, which is how a caller has it. Re-export of\n    `MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_eq_itoIntegral`. -/\ntheorem ito_integral_chain_rule\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)\n    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))\n    (ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ))\n    (χ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))\n    (hχ : ⇑χ =ᵐ[trimMeasure_T (μ := μ) T hBmeas]\n      fun z ↦ (φ : ℝ≥0 × Ω → ℝ) z * (ψ : ℝ≥0 × Ω → ℝ) z) :\n    itoIntegralAgainstCLM hB T hBmeas φ ψ = itoIntegralCLM_T hB T hBmeas χ :=\n  MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_eq_itoIntegral\n    (hB := hB) T hBmeas φ ψ χ hχ\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Associativity of the stochastic integral (Karatzas–Shreve 3.2.20; Revuz–Yor IV.2)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_eq_itoIntegral. The integral against M = phi-dot-B is DEFINED as itoIntegralCLM_T precomposed with multiplication by phi, on the bracket-weighted space L^2(phi^2 . trim_T); the chain rule is therefore an identity of that construction, and what identifies the construction as the stochastic integral against M is the separate band identity sc-ito-integral-band (see it). SCOPE. (1) M is an Ito integral against a Brownian motion, not a general continuous L^2 martingale: the bracket is absolutely continuous with a known density phi^2, which is what makes the weighted space available. (2) Bounded horizon [0,T]. (3) chi is supplied by the caller as any predictable L^2 integrand a.e. equal to phi.psi; the theorem does not assert that such a chi exists for every psi (it does, being the image of the multiplication isometry, but that is mulLI's statement, not this one)."
+      }
+    },
+    {
+      "id": "sc-ito-integral-band",
+      "name": "The Integral against an Itô Integral, on a Band: Z·(M_b − M_a)",
+      "description": "On the band integrand Z·1_{(a,b]} with Z bounded and 𝓕_a-measurable, the integral against M = φ●B is the increment Z·(M_b − M_a). This is the Riemann–Stieltjes agreement that identifies the construction as the stochastic integral against M.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoIntegralAgainstMartingale\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM MathFin.ItoIntegralAgainstMartingale\nopen MathFin.ItoIntegralProcessGeneral\nopen scoped NNReal ENNReal\n\n/-- **The elementary identity that identifies the integral against `M = φ●B`.** On the band\n    integrand `Z·1_{(a,b]}`, with `Z` bounded and `𝓕_a`-measurable, the integral against `M`\n    is the increment `Z·(M_b − M_a)` — the Riemann–Stieltjes sum. This is what makes the\n    construction the stochastic integral against `M` rather than a name for a formula.\n    Re-export of `MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_elementary`. -/\ntheorem ito_integral_against_martingale_on_a_band\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)\n    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))\n    {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T)\n    (Z : Ω → ℝ) (hZm : Measurable[natFiltration hBmeas a] Z)\n    (C : ℝ) (hZb : ∀ ω, |Z ω| ≤ C)\n    (ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ))\n    (hψ : ⇑ψ =ᵐ[bracketMeasure (μ := μ) T hBmeas φ] elemIntegrand a b Z) :\n    ⇑(itoIntegralAgainstCLM hB T hBmeas φ ψ) =ᵐ[μ]\n      fun ω ↦ Z ω * (itoProcessCLM hB T b hBmeas φ ω - itoProcessCLM hB T a hBmeas φ ω) :=\n  MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_elementary\n    (hB := hB) T hBmeas φ hab hbT Z hZm C hZb ψ hψ\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Elementary-integrand agreement for the stochastic integral (Karatzas–Shreve 3.2; the Riemann–Stieltjes characterisation)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_elementary. SCOPE, stated honestly. This is the SINGLE-BAND identity: the integrand is Z.1_{(a,b]} for one interval. The corresponding statement for a general simple process — its integral being the sum of its band increments — is NOT this theorem; what the library proves in that direction is simpleAssemblyOfMeasure_eq_sum_bands, which decomposes a simple process into its bands inside L^2 and from which the summed identity follows by linearity, but the summed identity itself is not stated as a theorem. The uniqueness statement itoIntegralAgainst_unique correspondingly takes agreement with the integral on simple processes as its hypothesis, not agreement with explicitly written Riemann-Stieltjes sums."
+      }
+    },
+    {
+      "id": "sc-simple-dense-bracket",
+      "name": "Simple Processes are Dense in the Bracket-Weighted Predictable L²",
+      "description": "The T-bounded simple processes have dense range in L²(f²·trim_T), the predictable integrands square-integrable against a bracket with density f². The flat (f = 1) density theorem is the special case.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.PredictableDensityGeneral\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM MathFin.LpMulIsometry\nopen MathFin.PredictableDensityGeneral\nopen scoped NNReal ENNReal\n\n/-- **Simple processes are dense in the bracket-weighted predictable `L²`.** For a predictable\n    `f`, the `T`-bounded simple processes have dense range in `L²(f²·trim_T)` — the space of\n    integrands square-integrable against a martingale with bracket `f² ds`. The flat density\n    theorem is the `f = 1` case; the weighted one is what an integral against an Itô integral\n    needs. Re-export of\n    `MathFin.PredictableDensityGeneral.simpleAssembly_sqWeight_denseRange`. -/\ntheorem simple_processes_dense_in_bracket_weighted_L2\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))\n    {f : ℝ≥0 × Ω → ℝ}\n    (hf : Measurable[(natFiltration (mΩ := mΩ) hBmeas).predictable] f)\n    [IsFiniteMeasure (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f)] :\n    DenseRange (simpleAssemblyOfMeasure T hBmeas\n      (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f)) :=\n  MathFin.PredictableDensityGeneral.simpleAssembly_sqWeight_denseRange T hBmeas hf\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Density of simple processes in the integrand space of a stochastic integral (Karatzas–Shreve 3.2.5, weighted form)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.PredictableDensityGeneral.simpleAssembly_sqWeight_denseRange. Derivation: an element of the weighted L^2 orthogonal to every simple process makes h := f^2.g integrable against trim_T with vanishing integral over every predictable rectangle; the pi-lambda core setIntegral_eq_zero_of_orthogonal_pred (weakened for this call from an L^2 class to an integrable function, h being L^1 and generally not L^2) promotes that to every predictable set, and f^2.trim_T is carried by {f != 0}. SCOPE. The weight enters as a measurable predictable f with f^2.trim_T finite (the hypothesis is the IsFiniteMeasure instance); no relation between f and any martingale is used or asserted here."
+      }
     }
   ]
 }

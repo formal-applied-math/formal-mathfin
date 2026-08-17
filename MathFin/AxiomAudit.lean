@@ -1097,4 +1097,49 @@ module doc says so. -/
 /-- info: 'MathFin.prefersEU_affine_invariant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.prefersEU_affine_invariant
 
+/-! ### The Itô chain rule, the integral against a price, and the pricing measure
+
+The phase that closed the `∫ φ dS` gap `MarketCompleteness` recorded. For a driver `φ` and
+`M = φ●B`, the integral against `M` is built on the bracket-weighted `L²(φ²·trim_T)` and the
+**chain rule** identifies it with `∫ ψφ dB`; the **band identity** `∫ Z·1_{(a,b]} dM =
+Z·(M_b − M_a)` is what makes that construction the stochastic integral against `M` rather than
+a name for a formula, and the weighted **density** theorem is what a dense family of such bands
+requires. The finance reading is a hedge held in the *price*, and the pricing measure is then
+pinned without assuming gains-neutrality: `PricesGainsAtZero`, hypothesised by
+`measure_eq_of_pricesGainsAtZero` above, becomes a conclusion once `Q` has a square-integrable
+density and the price is a `Q`-martingale. Still out of scope, unchanged: the Jacod–Yor
+converse, a drift term in the price, and the integral against a general semimartingale. -/
+
+/-- info: 'MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_eq_itoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_eq_itoIntegral
+
+/-- info: 'MathFin.ItoIntegralAgainstMartingale.norm_itoIntegralAgainstCLM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralAgainstMartingale.norm_itoIntegralAgainstCLM
+
+/-- info: 'MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_elementary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_elementary
+
+/-- info: 'MathFin.ItoIntegralAgainstMartingale.simpleAssemblyOfMeasure_eq_sum_bands' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralAgainstMartingale.simpleAssemblyOfMeasure_eq_sum_bands
+
+/-- info: 'MathFin.PredictableDensityGeneral.simpleAssembly_sqWeight_denseRange' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.PredictableDensityGeneral.simpleAssembly_sqWeight_denseRange
+
+/-- info: 'MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price
+
+/-- info: 'MathFin.PricingMeasureL2Density.pricesGainsAtZero_of_density' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.PricingMeasureL2Density.pricesGainsAtZero_of_density
+
+/-- info: 'MathFin.PricingMeasureL2Density.measure_eq_of_density' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.PricingMeasureL2Density.measure_eq_of_density
+
 end MathFin.AxiomAudit

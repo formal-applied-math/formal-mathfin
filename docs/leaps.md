@@ -215,3 +215,55 @@ the same sense as the Delbaen–Schachermayer boundary `ContinuousMarket` record
 `superReplication_eq_emm_price` does not close the finite-state Farkas gap in
 `Foundations/SuperhedgingDuality`: separation proves the duality there, martingale
 representation proves it here, and neither implies the other.
+
+**The gap named in the last paragraph is closed by Leap 6 (2026-08-16).** `∫ φ dS` now exists,
+`PricesGainsAtZero` is derivable rather than assumed, and the hedge is held in the price. The
+paragraph above stands as written — every statement in it is still true — but the absence it
+records is no longer an absence.
+
+## Leap 6 — the chain rule: the hedge is held in the *price* (2026-08-16)
+
+`MathFin/Foundations/ItoIntegralAgainstMartingale.lean`,
+`MathFin/Foundations/MarketCompletenessInPrice.lean`,
+`MathFin/Foundations/PricingMeasureL2Density.lean`.
+
+Leap 5 identified the image of `φ ↦ ∫₀ᵀ φ dB` exactly, and with it produced a hedge. What it
+could not say is that the hedge is a *holding in the traded asset*: the wealth it builds is an
+integral against `B`, and a trader holds units of `S`. Six places in the repo recorded the same
+missing primitive, `∫ φ dS`. Leap 6 builds it.
+
+The construction is a transport, not a second tower. For a driver `φ`, the Itô integral process
+`M = φ●B` has bracket `d⟨M⟩ = φ² ds`, so the integrands square-integrable against `M` are the
+weighted space `L²(φ²·trim_T)`; and `ψ ↦ ψφ` is an isometry from it into `L²(trim_T)`. Composing
+with `itoIntegralCLM_T` gives `∫· dM` with the right domain and the right isometry for free.
+
+| Theorem | Content |
+|---|---|
+| `LpMulIsometry.mulLI` | Multiplication by `f` as a `LinearIsometry` `L²(f²·ν) →ₗᵢ L²(ν)`. Mathlib has only `p = 1` (`withDensitySMulLI`), where density and multiplier coincide; at `p = 2` the multiplier is the density's square root, which is what makes the norm come out right. The content is well-definedness: `{f = 0}` is `(f²·ν)`-null but not `ν`-null, so representatives of one class can differ on a `ν`-non-null set — and the map is still well defined, because on `{f = 0}` both products vanish. |
+| `PredictableDensityGeneral.simpleAssembly_sqWeight_denseRange` | Simple processes are dense in the weighted `L²`. The flat π-λ induction is not ported: its core only ever uses *integrability*, so the weight moves into the integrand as `h := f²·g`, which is `L¹` and generally not `L²` — which is why the core had to be weakened from an `L²` class to an integrable function. |
+| `ItoIntegralAgainstMartingale.itoIntegralAgainst_eq_itoIntegral` | **The chain rule.** `∫ψ dM = ∫ψφ dB`. |
+| `ItoIntegralAgainstMartingale.norm_itoIntegralAgainstCLM` | The Itô isometry against `M`: `‖∫ψ dM‖_{L²(μ)} = ‖ψ‖_{L²(⟨M⟩)}`. |
+| **`ItoIntegralAgainstMartingale.itoIntegralAgainst_elementary`** | **What earns the name.** On a band `Z·1_{(a,b]}` with `Z` bounded and `𝓕_a`-measurable, the integral is `Z·(M_b − M_a)` — the Riemann–Stieltjes sum. Defining by a formula proves nothing; this is the theorem that says the formula computes the integral one wanted. Both halves came from the locality file: `1_{(a,b]}·φ` is a difference of two `restrictAfterCLM`, and the `𝓕_a`-measurable factor passes through by `itoIntegralCLM_T_smulAdapted`. |
+| `MarketCompletenessInPrice.exists_replicating_strategy_in_price` | **Completeness, in the price.** Every square-integrable `𝓕ᴮ_T`-claim is the terminal wealth of a *unique* holding `ψ` in `S = S₀ + (σ●B)`. Only `σ ≠ 0` a.e. is needed, not a uniform lower bound: `‖ψ‖²_{L²(⟨S⟩)} = ∫(φ/σ)²σ² = ‖φ‖²`, so the weighted norm rescales and the holding is admissible however small `σ` gets. |
+| **`PricingMeasureL2Density.measure_eq_of_density`** | **The capstone.** If `S` is a `Q`-martingale and `Q = D·μ` with `D ∈ L²(μ)`, then `Q` agrees with `μ` on all of `𝓕ᴮ_T`. Leap 5's `PricesGainsAtZero` is a *conclusion* here, not a hypothesis. |
+
+The pricing-measure argument is four steps, and none of them is stochastic integration under
+`Q`. The functional `ψ ↦ 𝔼_Q[∫ψ dS]` is `⟪D, ∫ψ dS⟫` — an inner product against a fixed `L²(μ)`
+element composed with an isometry — so continuity is `innerSL`'s and square-integrability of the
+density is exactly what buys it. On a band the integral is `Z·(S_b − S_a)`, a bounded predictable
+weight against a `Q`-martingale increment, whose mean is zero by a lemma that predates all of
+this (`ContinuousMarket.increment_integral_zero`, previously private). A simple process is the
+finite sum of its bands. And the simple processes are dense. That is the whole proof.
+
+**The abstraction boundary, again drawn deliberately.** Square-integrability of the density is
+not removable by this argument — it is what makes the functional continuous, and without it the
+dense-set step has nothing to stand on. The price is **driftless**: `S = S₀ + (σ●B)`, which is
+what a discounted price is under the reference measure; a drift `∫b ds` is additive, reuses the
+pathwise drift object the Girsanov work already built, and is what the HJM bond dynamics need.
+Only `complete ⟹ unique` is delivered; the converse still needs Jacod–Yor. And the agreement
+`Q = μ` is **on `𝓕ᴮ_T`** — it says nothing off that σ-algebra. Finally, the band identity is for a
+single band: the summed version over a general simple process is not stated as a theorem, only
+the `Lp` decomposition it would follow from, and the uniqueness clause takes agreement on simple
+processes rather than on written-out Riemann–Stieltjes sums. Degenne's axiomatic
+`IsStochasticIntegral` is the right frame for that clause and exists only on `v4.33.0-rc1`, so
+instantiating it waits for a stable pin.

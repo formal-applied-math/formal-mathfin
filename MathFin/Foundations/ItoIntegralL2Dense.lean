@@ -244,7 +244,8 @@ private lemma aezeroOfOrth (hBmeas : ∀ t, Measurable (B t))
         (by norm_num : (2 : ℝ≥0∞) ≠ 0) (by norm_num : (2 : ℝ≥0∞) ≠ ∞)
         (fun _ _ _ ↦ ((Lp.memLp gₙ).integrable one_le_two).integrableOn)
         (fun s hs _ ↦ ItoIntegralCLM.setIntegral_eq_zero_of_orthogonal_pred
-          (μ := μ) ((n : ℝ≥0) + 1) hBmeas gₙ h_transfer s hs)
+          (μ := μ) ((n : ℝ≥0) + 1) hBmeas ((Lp.memLp gₙ).integrable one_le_two)
+          h_transfer s hs)
     exact hgn_coe.symm.trans hgn0
   -- patch: a.e. zero on every frame + the cover's complement is null ⇒ a.e. zero
   have key : ∀ᵐ z ∂((timeMeasure.prod μ).trim

@@ -49,7 +49,9 @@ Adds (the genuinely new content of this file):
   σ-algebra. T enters at the measure layer (`trimMeasure_T`), not here.
 * `isPiSystem_predictableRect` — closure under non-empty intersection.
 * `setIntegral_eq_zero_of_orthogonal_pred` — π-λ-induction set-integral
-  vanishing.
+  vanishing, for any *integrable* `g` (not merely an `L²` class: the weighted
+  density argument of `PredictableDensityGeneral` applies it to `g·w`, which is
+  only `L¹`).
 * `simpleAssembly_T_denseRange` — density of the existing simple-process
   assembly's range, in the restricted trim `L²`.
 * `itoIntegralCLM_T` — the CLM.
@@ -468,15 +470,14 @@ predictable-measurable set. Dynkin's π-λ theorem over `predictableRect`; the
 total-integral step uses finiteness of `trimMeasure_T`. -/
 lemma setIntegral_eq_zero_of_orthogonal_pred (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t))
-    (g : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    {g : ℝ≥0 × Ω → ℝ}
+    (hg_int : Integrable g (trimMeasure_T (μ := μ) T hBmeas))
     (h_orth : ∀ R ∈ predictableRect (mΩ := mΩ) hBmeas,
       ∫ z in R, g z ∂(trimMeasure_T (μ := μ) T hBmeas) = 0)
     (s : Set (ℝ≥0 × Ω))
     (hs : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable] s) :
     ∫ z in s, g z ∂(trimMeasure_T (μ := μ) T hBmeas) = 0 := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
-  have hg_int : Integrable g (trimMeasure_T (μ := μ) T hBmeas) :=
-    (Lp.memLp g).integrable one_le_two
   -- Total integral vanishes: trim_T is supported on `Ioc 0 T × univ`. For
   -- `T > 0` the rect is in `predictableRect` (orthogonality); for `T = 0`
   -- trim_T is zero.
@@ -564,8 +565,10 @@ noncomputable def iocSP_T {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     rcases h_in_I with rfl
     exact hbT⟩
 
-/-- The uncurry of `iocSP_T hab hbT hF` agrees pointwise with `(Ioc a b × F).indicator 1`. -/
-private lemma uncurry_iocSP_T_eq {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
+/-- The uncurry of `iocSP_T hab hbT hF` agrees pointwise with `(Ioc a b × F).indicator 1`.
+Public because `PredictableDensityGeneral` needs it to run the same rectangle argument
+against the bracket-weighted measure. -/
+lemma uncurry_iocSP_T_eq {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) {F : Set Ω}
     (hF : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) a] F) :
     Function.uncurry ⇑(iocSP_T hBmeas hab hbT hF : TBoundedSP T hBmeas).val
@@ -627,9 +630,9 @@ private lemma inner_simpleAssembly_T_iocSP_T {T : ℝ≥0} (hBmeas : ∀ t, Meas
 `R` equals the integral over `R ∩ (Ioc 0 T × univ)`. The complement of
 `Ioc 0 T × univ` is `trim_T`-null because `trim_T = trim_full.restrict
 (Ioc 0 T × univ)`. -/
-private lemma setIntegral_eq_setIntegral_inter_supp {T : ℝ≥0}
+lemma setIntegral_eq_setIntegral_inter_supp {T : ℝ≥0}
     (hBmeas : ∀ t, Measurable (B t))
-    (g : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (R : Set (ℝ≥0 × Ω))
+    (g : ℝ≥0 × Ω → ℝ) (R : Set (ℝ≥0 × Ω))
     (hR : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable] R) :
     ∫ z in R, g z ∂(trimMeasure_T (μ := μ) T hBmeas) =
       ∫ z in R ∩ (Set.Ioc 0 T ×ˢ Set.univ), g z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
@@ -720,7 +723,8 @@ theorem simpleAssembly_T_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
   exact Lp.ae_eq_zero_of_forall_setIntegral_eq_zero g
     (by norm_num : (2 : ℝ≥0∞) ≠ 0) (by norm_num : (2 : ℝ≥0∞) ≠ ∞)
     (fun _ _ _ ↦ ((Lp.memLp g).integrable one_le_two).integrableOn)
-    (fun s hs _ ↦ setIntegral_eq_zero_of_orthogonal_pred T hBmeas g h_orth s hs)
+    (fun s hs _ ↦ setIntegral_eq_zero_of_orthogonal_pred T hBmeas
+      ((Lp.memLp g).integrable one_le_two) h_orth s hs)
 
 /-! ### The CLM `itoIntegralCLM_T` and its isometry -/
 

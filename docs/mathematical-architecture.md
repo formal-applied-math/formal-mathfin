@@ -90,10 +90,24 @@ representation wires it in the direction of *uniqueness and attainability*:
 `MartingaleRepresentation.itoIntegralCLM_T_surjective_onto_centered` proves the Itô integral exhausts the
 centered `𝓕ᴮ_T`-measurable part of `L²(μ)`, and `MarketCompleteness.exists_replicating_strategy` reads off a
 unique hedge for every square-integrable claim. Together they close the seam. What is still open on it: the
-`L²`/progressive-θ Girsanov under Novikov, the converse `unique ⟹ complete` (Jacod–Yor extreme points), and
-the stochastic integral `∫ φ dS` against a general price process, which is what would turn the
-gains-neutrality hypothesis `PricesGainsAtZero` into a consequence of `IsEMM` rather than an assumption
-beside it. The continuous Long/Platen numéraire-portfolio benchmark also stays open.
+`L²`/progressive-θ Girsanov under Novikov, and the converse `unique ⟹ complete` (Jacod–Yor extreme
+points). The continuous Long/Platen numéraire-portfolio benchmark also stays open.
+
+**The `∫ φ dS` half is closed (2026-08-16) — the chain rule.** What that sentence used to list as the
+third open item is built. For a driver `φ` and `M = φ●B`, `ItoIntegralAgainstMartingale` puts the
+integral against `M` on the bracket-weighted `L²(φ²·trim_T)` by composing `itoIntegralCLM_T` with the
+`p = 2` multiplication isometry `ψ ↦ ψφ` (`LpMulIsometry`; Mathlib carries only `p = 1`, where density
+and multiplier coincide). Both factors are isometries, so `‖∫ψ dM‖ = ‖ψ‖_{L²(⟨M⟩)}`; the chain rule
+`∫ψ dM = ∫ψφ dB` is then how the object is built, and what identifies it as *the* stochastic integral
+against `M` is `itoIntegralAgainst_elementary`, the Riemann–Stieltjes agreement `∫ Z·1_{(a,b]} dM =
+Z·(M_b − M_a)` on a band. The finance consequence is that a hedge is a **holding in the price**
+(`MarketCompletenessInPrice.exists_replicating_strategy_in_price`, needing only `σ ≠ 0` a.e. — the
+weighted norm rescales, so no uniform lower bound), and that the gains-neutrality hypothesis becomes a
+theorem: `PricingMeasureL2Density.measure_eq_of_density` derives `PricesGainsAtZero` from `S` being a
+`Q`-martingale together with a square-integrable density, and concludes `Q = μ` on `𝓕ᴮ_T`. Still out of
+scope on this seam, unchanged: the Jacod–Yor converse, a drift term in the price (additive; what HJM
+needs), and the integral against a general semimartingale — `ContinuousMarket`'s meaning-2 boundary
+narrows but does not close.
 
 ## The higher-math unification roadmap (apparently-disconnected fields that connect)
 

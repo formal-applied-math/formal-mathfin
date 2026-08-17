@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (313 constants). Scope: proof-position MathFin names only —
+  corpus (318 constants). Scope: proof-position MathFin names only —
   statement-position defs are exercised by elaboration + the verification
   ledger, and library_wrapper entries cite upstream names.
 
@@ -53,8 +53,17 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.IsL2SolutionPair.uniqueness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.IsL2SolutionPair.uniqueness
 
+/-- info: 'MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_elementary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_elementary
+
+/-- info: 'MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_eq_itoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_eq_itoIntegral
+
 /-- info: 'MathFin.ItoProcessQV.tendsto_qv_ito_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ItoProcessQV.tendsto_qv_ito_process
+
+/-- info: 'MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price
 
 /-- info: 'MathFin.OnePeriod.ftap_one_period' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.OnePeriod.ftap_one_period
@@ -82,6 +91,12 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.PoissonThinning.thinned_streams' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.PoissonThinning.thinned_streams
+
+/-- info: 'MathFin.PredictableDensityGeneral.simpleAssembly_sqWeight_denseRange' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.PredictableDensityGeneral.simpleAssembly_sqWeight_denseRange
+
+/-- info: 'MathFin.PricingMeasureL2Density.measure_eq_of_density' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.PricingMeasureL2Density.measure_eq_of_density
 
 /-- info: 'MathFin.SDEExistence.picardMap_exists_unique_fixedPoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.SDEExistence.picardMap_exists_unique_fixedPoint

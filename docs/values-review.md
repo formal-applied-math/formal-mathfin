@@ -3169,6 +3169,137 @@ characterization is nowhere claimed.
    "good enough" in-file; a Lean-aware scanner is not worth its weight while
    the catch rate is this good (1 for 1 on first run).
 
+## 2026-08-16 — corpus 358 — the Itô chain rule, the integral against a price, and the pricing measure
+
+### The standing first pass — prose against statement
+
+Two claims in this session's own prose outran their statements and were corrected before the work
+was committed, both caught by reading the docstring back against the theorem rather than by any gate:
+
+1. `ItoIntegralAgainstMartingale`'s module docstring said uniqueness pins the map among "continuous
+   linear maps agreeing with those sums". It does not: `itoIntegralAgainst_unique` takes agreement
+   with `itoIntegralAgainstCLM` **on simple processes**, and the Riemann–Stieltjes identity is proved
+   for a *single band*. The docstring now says exactly that, and says the summed version over a
+   general simple process is not stated — only the `Lp` decomposition it would follow from. The same
+   disclosure is in `sc-ito-integral-band`'s `formalization_scope`.
+2. `PricingMeasureL2Density` presented `|𝔼_Q[X]| ≤ ‖X‖‖D‖` as if it were a lemma of the file.
+   Continuity actually comes from `innerSL` being a CLM. Reworded to say so.
+
+A third correction is not prose but its structural cousin: `measure_eq_of_density` carried `Q ≪ μ`
+beside the density hypothesis, which *derives* it. That is the spurious-guard class from the
+2026-07-31 round, and it was removed rather than shipped — the theorem now takes only what it needs.
+
+Every other new `description` and `formalization_scope` was read against its statement. The scopes
+state, in the same field as the claim: that square-integrability of the density is not removable by
+this argument; that the price is driftless; that `σ ≠ 0` a.e. is used; that only `complete ⟹ unique`
+is delivered; and that `Q = μ` holds **on `𝓕ᴮ_T`** and says nothing off it.
+
+### Upgrades executed
+
+- **The seam is finished, not merely extended.** Leap 5 shipped with a named hypothesis on top of it,
+  and six documents recorded the same missing primitive. `PricesGainsAtZero` is now a *conclusion*
+  under a square-integrable density (lens 5: the hypothesis no longer secretly contains the
+  conclusion — it is derived from `S` being a `Q`-martingale).
+- **A hypothesis weakened instead of an argument duplicated** (lens 3). The design called for porting
+  a 150-line π-λ induction to a second measure. The core only used *integrability*, so the weight
+  moved into the integrand (`h := f²·g`, which is `L¹` and generally not `L²`) and the core's
+  hypothesis was restated. One argument, two consumers, no copy — directly against the standing
+  backlog item on duplicate statements.
+- **A spurious hypothesis found by exposure** (lens 3). De-privatising `increment_integrable` put it
+  in front of `lake lint`, which showed it never used `IsProbabilityMeasure` — nor `IsFiniteMeasure`.
+  The binder is gone.
+- **The nondegeneracy hypothesis is the sharp one** (lens 1). Replication in the price needs only
+  `σ ≠ 0` a.e., not a uniform lower bound, because the bracket-weighted norm rescales:
+  `‖ψ‖²_{L²(⟨S⟩)} = ∫(φ/σ)²σ² = ‖φ‖²`. A uniform bound would have been a real restriction on the
+  model, and was the obvious thing to assume.
+- **An upstreaming candidate isolated** (lens 2). The `p = 2` multiplication isometry
+  `L²(f²·ν) →ₗᵢ L²(ν)` is absent from Mathlib at *any* `p` (verified: `withDensitySMulLI` is `p = 1`,
+  where density and multiplier coincide; loogle finds nothing for `eLpNorm`/`withDensity`). It lives
+  in its own file, stated generically, tagged as an upstreaming candidate.
+
+### The lenses, as gradients
+
+1. **Inspired math.** *Exemplar:* the whole integral against `M` obtained by transport — the isometry
+   and the domain fall out, and the from-scratch route's hardest step (the conditional bracket
+   identity) is never needed. *Upgrade (MED):* the same transport should give the integral against
+   any `M` whose bracket is absolutely continuous with a *named* density, once a second such `M`
+   exists; today `φ●B` is the only producer, so the generality has no consumer and was correctly
+   not built.
+2. **Coherence.** *Exemplar:* `SimpleProcess.coe_bounded`, `uncurry_ae_eq_sum_rectTerm` and
+   `measurable_afterFactor` were consumed rather than re-derived; `rectTerm` turned out to be
+   literally our `elemIntegrand`. *Upgrade (HIGH):* Degenne's `IsRiemannStieltjesExtension` /
+   `IsStochasticIntegral` is the right frame for our uniqueness clause and exists only on
+   `v4.33.0-rc1`. Instantiating it at the next **stable** pin would replace a bespoke
+   uniqueness-by-density with the ecosystem's characterisation.
+3. **Zero slop.** *Exemplar:* the `dite` in `bandLp`, which makes the summand total so the `Finset`
+   sum is over a non-dependent function — the alternative was threading membership proofs through a
+   dependent sum. *Upgrade (MED):* `elemIntegrand` and `ItoIntegralL2.rectTerm` are the same
+   function under two names. One should be defined as the other, or one retired.
+4. **Architectural ingenuity.** *Exemplar:* one density theorem serves both the uniqueness clause of
+   layer (a) and the limit argument of layer (c) — the structural reason this route was chosen over
+   the alternatives, and it held. *Upgrade (MED):* `bracketMeasure` is a `def` that neither instance
+   search nor `rw` unfolds, which cost a `haveI` at one call site and a type ascription at another.
+   Either make it reducible or give it the small API (`_eq`, the instance in both forms) that stops
+   the friction recurring.
+5. **First principles.** *Exemplar:* the pricing-measure argument uses **no stochastic integration
+   under `Q`** — band, sum, density, and a martingale-increment lemma that predates the phase.
+   *Upgrade (LOW):* the driftless price is an honest restriction, not a hidden one, but the drift
+   extension is what would let the same argument speak about a general Itô-process price.
+6. **Idiomatic register.** *Exemplar:* `mulLM` / `mulLI` split the linear map from its isometry
+   exactly as the tower's own `itoProcessLM` / `itoProcessCLM` do. *Upgrade (LOW):* `lake lint`
+   rejected `simpleAssembly_ν`; it was renamed rather than added to `nolints.json`, which is the
+   right call, but the file's siblings (`simpleAssembly_T`, `iocSP_T`) are all exemptions. The
+   convention should be settled one way.
+7. **Concept clarity.** *Exemplar:* "defining `∫ψ dM` by a formula proves nothing on its own; what
+   earns the name is the elementary identity" — the docstring states the epistemic status of its own
+   construction. *Upgrade (MED):* `ItoIntegralAgainstMartingale` is now ~380 lines carrying the
+   construction, the band identity, the decomposition and uniqueness. Splitting the band/decomposition
+   half into its own file would keep the daemon loop fast and the reading order clearer.
+8. **Beautiful math.** *Exemplar:* "the weight moves into the integrand" — one sentence, and a
+   150-line port evaporates. *Upgrade (MED):* the same move may retire other weighted-space work
+   before it is written; it deserves to be the first thing tried whenever a measure-change appears in
+   a hypothesis rather than a conclusion.
+
+### Ranked backlog
+
+1. **[HIGH, carried — now three rounds] Run the actual three-agent panel, or amend the protocol.**
+   This round did not run it either: the maintainer reviewed alone. Three consecutive deviations is
+   no longer an exception, it is the actual practice, and the protocol should either be enforced or
+   rewritten to describe what is really done. Recommend amending it to "maintainer review, with a
+   panel required for whole-repo rounds" — that is honest and still keeps the panel where it earns
+   its cost.
+2. **[HIGH, carried] A duplicate-statement detector.** This round produced a new instance to find:
+   `elemIntegrand` vs `ItoIntegralL2.rectTerm`, the same function twice
+   ([#197](https://github.com/formal-applied-math/formal-mathfin/issues/197)). A normalise-and-hash pass
+   over definition bodies would have caught it in seconds.
+3. **[MED] Instantiate Degenne's `IsStochasticIntegral`** at the next stable pin, retiring the
+   bespoke uniqueness clause (lens 2). Blocked on `v4.33.0` leaving RC —
+   [#196](https://github.com/formal-applied-math/formal-mathfin/issues/196).
+4. **[MED] The summed band identity** ([#195](https://github.com/formal-applied-math/formal-mathfin/issues/195))**.** State `∫ V dM = ∑ᵢ Vᵢ·(M_{tᵢ₊₁} − M_{tᵢ})` for a general
+   simple process, which the `Lp` decomposition now makes routine, and restate
+   `itoIntegralAgainst_unique` against written-out Riemann–Stieltjes sums — the form the docstring
+   currently has to disclaim.
+5. **[MED] The drift term** ([#194](https://github.com/formal-applied-math/formal-mathfin/issues/194)), `S = S₀ + ∫b ds + (σ●B)`, reusing `DriftProcessModification`. It is what
+   the HJM bond dynamics (#146–#150) need, and it generalises this phase's price.
+6. **[MED] Give `bracketMeasure` its API** so the `def`-opacity friction stops recurring (lens 4).
+7. **[LOW] Upstream the general-`p` multiplication isometry** `L^p(‖f‖ᵖ·ν) →ₗᵢ L^p(ν)` (lens 2).
+8. *(Carried, unchanged:)* Clark–Ocone (#182); the vector driver (#180); the second-FTAP converse
+   (#181), which this phase narrows the gap to but does not touch; the discrete general-Ω DMW crown;
+   the 2D covariation Itô tower (#48); Girsanov `L²`/Novikov.
+
+### Evidence
+
+Mechanical floor: `lake build MathFin` + `lake lint` green; `pytest` 48/48; ledger 358/358 fresh
+(31 entries re-verified after the `ItoIntegralCLM`/`ContinuousMarket` edits, then 5 new rows, zero
+failures); `AxiomAuditGen` regenerated at 318 guards; seven new curated axiom pins, all
+`[propext, Classical.choice, Quot.sound]`; no `sorry`; `formalization.yaml` regenerated.
+
+Not a panel finding but worth recording as method: the daemon's readiness signal lied twice in this
+session — `docker compose logs | grep READY` matched a **stale** READY from before a restart, and a
+`lean-check` against it returned nothing. The only sound check remained the functional one (poll
+`lean-check` until it answers), which is what the daemon memory already says. The cheap signal is
+cheap because it is wrong.
+
 ## 2026-08-07 — corpus 351 — naming the Itô integrand, and a systematic prose-vs-statement audit
 
 Scope: the `#183` chain (`ItoFormulaTD`/`…Localized`/`…ItoProcess`/`…GBM`), the follow-on audit the

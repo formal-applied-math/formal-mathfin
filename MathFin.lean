@@ -128,6 +128,9 @@ import MathFin.Foundations.ItoIntegralL2
 import MathFin.Foundations.BrownianCylinderGeneration
 -- The Itô integral as a continuous linear isometry `Lp 2 trim_T → Lp 2 μ` on `[0,T]`
 import MathFin.Foundations.ItoIntegralCLM
+import MathFin.Foundations.LpMulIsometry
+import MathFin.Foundations.PredictableDensityGeneral
+import MathFin.Foundations.ItoIntegralAgainstMartingale
 -- The unbounded-horizon `[0,∞)` Itô integral CLM `Lp 2 trim_full → Lp 2 μ` (Summit B / B2)
 import MathFin.Foundations.ItoIntegralL2Dense
 -- Covariation of Itô integrals: the bilinear Itô isometry ⟪∫φdB,∫ψdB⟫=⟪φ,ψ⟫ (D1)
@@ -218,6 +221,8 @@ import MathFin.Foundations.MartingaleRepresentation
 -- Martingale representation, step 6: its finance reading — replication, superreplication
 -- duality, and uniqueness of the pricing measure on the Brownian filtration
 import MathFin.Foundations.MarketCompleteness
+import MathFin.Foundations.MarketCompletenessInPrice
+import MathFin.Foundations.PricingMeasureL2Density
 import MathFin.Foundations.ItoFormulaProcess
 import MathFin.Foundations.ExitTime
 import MathFin.Foundations.ItoFormulaUnrestricted
