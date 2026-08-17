@@ -233,7 +233,10 @@ integral against `B`, and a trader holds units of `S`. Six places in the repo re
 missing primitive, `∫ φ dS`. Leap 6 builds it.
 
 The construction is a transport, not a second tower. For a driver `φ`, the Itô integral process
-`M = φ●B` has bracket `d⟨M⟩ = φ² ds`, so the integrands square-integrable against `M` are the
+`M = φ●B` has bracket `d⟨M⟩ = φ² ds` in the standard theory — a motivation, not a formalised
+identification: the repo constructs no quadratic variation, so `bracketMeasure` is *defined* as
+`φ²·trim_T` and earns the reading through the isometry and `bracketMeasure_mulLI` rather than
+through a `⟨M⟩` object — so the integrands square-integrable against `M` are the
 weighted space `L²(φ²·trim_T)`; and `ψ ↦ ψφ` is an isometry from it into `L²(trim_T)`. Composing
 with `itoIntegralCLM_T` gives `∫· dM` with the right domain and the right isometry for free.
 
@@ -245,7 +248,10 @@ with `itoIntegralCLM_T` gives `∫· dM` with the right domain and the right iso
 | `ItoIntegralAgainstMartingale.norm_itoIntegralAgainstCLM` | The Itô isometry against `M`: `‖∫ψ dM‖_{L²(μ)} = ‖ψ‖_{L²(⟨M⟩)}`. |
 | **`ItoIntegralAgainstMartingale.itoIntegralAgainst_elementary`** | **What earns the name.** On a band `Z·1_{(a,b]}` with `Z` bounded and `𝓕_a`-measurable, the integral is `Z·(M_b − M_a)` — the Riemann–Stieltjes sum. Defining by a formula proves nothing; this is the theorem that says the formula computes the integral one wanted. Both halves came from the locality file: `1_{(a,b]}·φ` is a difference of two `restrictAfterCLM`, and the `𝓕_a`-measurable factor passes through by `itoIntegralCLM_T_smulAdapted`. |
 | `MarketCompletenessInPrice.exists_replicating_strategy_in_price` | **Completeness, in the price.** Every square-integrable `𝓕ᴮ_T`-claim is the terminal wealth of a *unique* holding `ψ` in `S = S₀ + (σ●B)`. Only `σ ≠ 0` a.e. is needed, not a uniform lower bound: `‖ψ‖²_{L²(⟨S⟩)} = ∫(φ/σ)²σ² = ‖φ‖²`, so the weighted norm rescales and the holding is admissible however small `σ` gets. |
-| **`PricingMeasureL2Density.measure_eq_of_density`** | **The capstone.** If `S` is a `Q`-martingale and `Q = D·μ` with `D ∈ L²(μ)`, then `Q` agrees with `μ` on all of `𝓕ᴮ_T`. Leap 5's `PricesGainsAtZero` is a *conclusion* here, not a hypothesis. |
+| `ItoIntegralAgainstMartingale.itoIntegralAgainst_simpleProcess` | **The band identity, summed.** `∫V dM = ∑ₚ V(p)·(M_{p.2} − M_{p.1})` for a simple process, which is what makes `itoIntegralAgainst_unique_of_riemannStieltjes` able to take agreement with the *written-out* sums as its hypothesis rather than agreement with the integral being characterised. |
+| `ItoIntegralAgainstMartingale.bracketMeasure_mulLI` | **The tower closes on itself.** `d⟨ψ●M⟩ = ψ² d⟨M⟩`: an Itô integral against an Itô integral is again one, the brackets composing the way the integrands do. Densities multiply, and that is the whole proof. |
+| **`PricingMeasureL2Density.measure_eq_of_density`** | **The capstone.** If an adapted process agreeing a.e. with `S` is a `Q`-martingale and `Q = D·μ` with `D ∈ L²(μ)`, then `Q` agrees with `μ` on all of `𝓕ᴮ_T`. Leap 5's `PricesGainsAtZero` is a *conclusion* here, not a hypothesis. |
+| `MarketCompletenessInPrice.pricePathCondExp` | **The adaptedness the `Lp` process does not have.** `Martingale` requires adaptedness pointwise; an `Lp`-valued process supplies only its a.e. version, so `Martingale (pricePath …) 𝓕 Q` is a hypothesis with no exhibited witness. Rebuilding the price from `μ[· | 𝓕_t]` — adapted by construction, a.e. equal by `itoProcessCLM_eq_condExpL2` — supplies one, and `exists_density_price_martingale` assembles it. Without this the capstone would be true and empty. |
 
 The pricing-measure argument is four steps, and none of them is stochastic integration under
 `Q`. The functional `ψ ↦ 𝔼_Q[∫ψ dS]` is `⟪D, ∫ψ dS⟫` — an inner product against a fixed `L²(μ)`

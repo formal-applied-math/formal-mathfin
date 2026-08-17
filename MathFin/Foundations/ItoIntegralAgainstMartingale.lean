@@ -13,9 +13,13 @@ public import MathFin.Foundations.PredictableDensityGeneral
 For a fixed predictable `φ ∈ L²(trim_T)` write `M := φ●B` for the Itô integral process
 `M_t = (φ●B)_t`. This file integrates *against* `M`.
 
-`M` is a continuous `L²` martingale whose bracket is `d⟨M⟩ = φ² ds ⊗ dμ`, so the integrands
-square-integrable against it are `L²(⟨M⟩) = L²(φ²·trim_T)` — the `bracketMeasure` below. The
-integral is then
+In the standard theory `M` is a continuous `L²` martingale with bracket `d⟨M⟩ = φ² ds ⊗ dμ`, so
+the integrands square-integrable against it are `L²(⟨M⟩) = L²(φ²·trim_T)`. That is the
+motivation for `bracketMeasure` below, and it is worth being exact about its status here: the
+library has no quadratic-variation object, so `bracketMeasure` is *defined* as `φ²·trim_T` and
+"bracket" is a name for it, not a theorem about `⟨M⟩`. What is proved is the fact the name is
+wanted for — `‖∫ψ dM‖_{L²(μ)} = ‖ψ‖_{L²(φ²·trim_T)}`, below — and pathwise continuity of `M`
+lives in `ItoIntegralProcessContinuousModification`, not here. The integral is then
 
   `∫ψ dM := ∫ ψφ dB`,
 
@@ -39,14 +43,12 @@ Defining `∫ψ dM` by a formula proves nothing on its own. What earns the name 
 the Riemann–Stieltjes sum one would have written down by hand. So the formula is a
 construction, and the elementary identity is what identifies it.
 
-**Exactly what uniqueness says here.** `itoIntegralAgainst_unique` takes agreement with
-`itoIntegralAgainstCLM` on the simple processes — the dense family of
-`PredictableDensityGeneral` — and concludes equality. It does *not* take agreement with
-explicitly written Riemann–Stieltjes sums as its hypothesis, because the identity above is
-proved for a single band `Z·1_{(a,b]}` and the extension to a general simple process, whose
-integral is the sum of its band increments, is not proved in this file. Stating uniqueness
-against the sums would need that extension first; it is a routine but real piece of work and
-is left as a follow-up.
+**Uniqueness against the sums.** The band identity is summed over a simple process's
+rectangles in `itoIntegralAgainst_simpleProcess`, so `itoIntegralAgainst_unique_of_riemannStieltjes`
+takes the hypothesis one wants — agreement with the *explicitly written* Riemann–Stieltjes sums
+`∑ₚ V(p)·(M_{p.2} − M_{p.1})` — and concludes equality. Nothing in that hypothesis mentions the
+integral being characterised. (`itoIntegralAgainst_unique`, agreement on the simple processes,
+remains as the density statement it is built from.)
 
 The proof of the elementary identity is short because the locality machinery already exists:
 `1_{(a,b]}·φ` is `restrictAfterCLM a φ − restrictAfterCLM b φ`, whose integral is
@@ -69,8 +71,12 @@ the upstream predicate is a follow-up for the next stable pin bump.
 * `norm_itoIntegralAgainstCLM` — the Itô isometry against `M`.
 * `itoIntegralAgainst_elementary` — **the identification**, on a single band:
   `∫ Z·1_{(a,b]} dM = Z·(M_b − M_a)`.
-* `itoIntegralAgainst_unique` — a continuous linear map agreeing with `itoIntegralAgainstCLM`
-  on the simple processes is it.
+* `itoIntegralAgainst_simpleProcess` — **the summed identity**: on a simple process,
+  `∫V dM = ∑ₚ V(p)·(M_{p.2} − M_{p.1})`.
+* `itoIntegralAgainst_unique_of_riemannStieltjes` — **uniqueness against those sums**; and
+  `itoIntegralAgainst_unique`, the density statement it factors through.
+* `bracketMeasure_mulLI` — `d⟨ψ●M⟩ = ψ² d⟨M⟩`: the construction is closed under itself, the
+  brackets composing the way the integrands do.
 -/
 
 @[expose] public section
@@ -78,8 +84,8 @@ the upstream predicate is a follow-up for the next stable pin bump.
 namespace MathFin
 namespace ItoIntegralAgainstMartingale
 
-open MeasureTheory ProbabilityTheory Filter ItoIntegralCLM LpMulIsometry
-  PredictableDensityGeneral ItoIntegralProcessGeneral ItoIntegralProcessGeneral
+open MeasureTheory ProbabilityTheory Filter ItoIntegralL2 ItoIntegralCLM LpMulIsometry
+  PredictableDensityGeneral ItoIntegralProcessGeneral
 open scoped NNReal ENNReal InnerProductSpace
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
@@ -87,8 +93,11 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
 
 /-! ### The bracket measure -/
 
-/-- The bracket measure `d⟨M⟩ = φ² ds ⊗ dμ` of `M = φ●B`, as a measure on the predictable
-σ-algebra. This is the domain of integration against `M`. -/
+/-- The measure `φ²·trim_T` on the predictable σ-algebra — the domain of integration against
+`M = φ●B`. It is `d⟨M⟩` of the standard theory, and is so named, but the identification is a
+motivation rather than a formalised one: no quadratic variation of `M` is constructed in this
+repo. What is proved about it is `norm_itoIntegralAgainstCLM`, the isometry, and
+`bracketMeasure_mulLI`, that it composes the way a bracket should. -/
 noncomputable def bracketMeasure (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     @Measure (ℝ≥0 × Ω)
@@ -156,10 +165,6 @@ theorem norm_itoIntegralAgainstCLM (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B 
   rfl
 
 /-! ### The elementary identity that earns the name -/
-
-/-- The elementary integrand `Z·1_{(a,b]}`, as a function on `ℝ≥0 × Ω`. -/
-noncomputable def elemIntegrand (a b : ℝ≥0) (Z : Ω → ℝ) : ℝ≥0 × Ω → ℝ :=
-  fun z ↦ (Set.Ioc a b).indicator (fun _ ↦ (1 : ℝ)) z.1 * Z z.2
 
 /-- `1_{(a,b]}·φ`, as an element of the flat predictable `L²`: the difference of the two
 restrictions the locality file already provides. -/
@@ -249,11 +254,11 @@ theorem itoIntegralAgainst_elementary (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
 
 /-! ### A simple process is a finite sum of bands
 
-Layer (c) integrates a *simple process* against `M`, while the identity above is for a single
-band. The two meet here: a simple process is the finite sum of its rectangle terms, and each
-rectangle term is a band. `ItoIntegralL2.rectTerm` is literally `elemIntegrand` — same
-function, different name — so the a.e. decomposition already in the tower is the content, and
-what is added is its `Lp` form. -/
+The single-band identity is summed over a simple process here. A simple process *is* the finite
+sum of its bands: `ItoIntegralL2.rectTerm` is the elementary integrand at the band `p`, by
+definition, and the a.e. decomposition is `uncurry_ae_eq_sum_rectTerm_of_ae_fst_ne_zero`, which
+holds for any measure charging the time origin nothing — the bracket measure among them. What is
+added here is its `Lp` form. -/
 
 omit mΩ in
 /-- `Z·1_{(a,b]}` is a difference of two `afterFactor`s. This is how the band inherits
@@ -349,16 +354,38 @@ theorem simpleAssemblyOfMeasure_eq_sum_bands (T : ℝ≥0) (hBmeas : ∀ t, Meas
       ae_all_iff.mpr fun q ↦ coeFn_bandLp T hBmeas φ V q.2
     filter_upwards [hall] with z hz
     exact Finset.sum_congr rfl fun p hp ↦ hz ⟨p, hp⟩
-  filter_upwards [coeFn_simpleAssemblyOfMeasure T hBmeas
-      (bracketMeasure (μ := μ) T hBmeas φ) V, hsum, hbot] with z h1 h2 h3
-  rw [h1, h2]
-  show ⇑V.val z.1 z.2 = _
-  rw [SimpleProcess.apply_eq, Set.indicator_of_notMem (by simpa using h3), zero_add, Finsupp.sum]
-  refine Finset.sum_congr rfl fun p _ ↦ ?_
-  simp only [elemIntegrand, Set.indicator_apply]
-  split_ifs <;> simp
+  refine ((coeFn_simpleAssemblyOfMeasure T hBmeas (bracketMeasure (μ := μ) T hBmeas φ) V).trans
+    (uncurry_ae_eq_sum_rectTerm_of_ae_fst_ne_zero hbot hBmeas V.val)).trans hsum.symm
 
-/-! ### Uniqueness -/
+/-! ### The summed identity, and uniqueness -/
+
+/-- **The Riemann–Stieltjes identity, for a whole simple process.** Integrating `V` against `M`
+returns the sum of its band increments,
+
+  `∫V dM = ∑ₚ V(p)·(M_{p.2} − M_{p.1})`,
+
+the sum one would write down by hand. This is `itoIntegralAgainst_elementary` summed over
+`simpleAssemblyOfMeasure_eq_sum_bands`. -/
+theorem itoIntegralAgainst_simpleProcess (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (V : TBoundedSP T hBmeas) :
+    ⇑(itoIntegralAgainstCLM hB T hBmeas φ
+        (simpleAssemblyOfMeasure T hBmeas (bracketMeasure (μ := μ) T hBmeas φ) V))
+      =ᵐ[μ] fun ω ↦ ∑ p ∈ V.val.value.support, V.val.value p ω
+          * ((itoProcessCLM hB T p.2 hBmeas φ : Ω → ℝ) ω
+              - (itoProcessCLM hB T p.1 hBmeas φ : Ω → ℝ) ω) := by
+  obtain ⟨C, hC⟩ := V.val.bounded_value
+  rw [simpleAssemblyOfMeasure_eq_sum_bands, map_sum]
+  have hterm : ∀ q : {x // x ∈ V.val.value.support},
+      ∀ᵐ ω ∂μ, (itoIntegralAgainstCLM hB T hBmeas φ (bandLp T hBmeas φ V q.1) : Ω → ℝ) ω
+        = V.val.value q.1 ω * ((itoProcessCLM hB T (q.1).2 hBmeas φ : Ω → ℝ) ω
+            - (itoProcessCLM hB T (q.1).1 hBmeas φ : Ω → ℝ) ω) :=
+    fun q ↦ itoIntegralAgainst_elementary (hB := hB) T hBmeas φ
+      (V.val.le_of_mem_support_value q.1 q.2) (V.property q.1 q.2) (V.val.value q.1)
+      (V.val.measurable_value q.1) C (fun ω ↦ by simpa [Real.norm_eq_abs] using hC q.1 q.2 ω)
+      (bandLp T hBmeas φ V q.1) (coeFn_bandLp T hBmeas φ V q.2)
+  refine (Lp.coeFn_fun_finsetSum _ _).trans ?_
+  filter_upwards [ae_all_iff.mpr hterm] with ω hω
+  exact Finset.sum_congr rfl fun p hp ↦ hω ⟨p, hp⟩
 
 /-- **Uniqueness.** A continuous linear map out of `L²(⟨M⟩)` that agrees with
 `itoIntegralAgainstCLM` on the simple processes is `itoIntegralAgainstCLM`. With
@@ -379,6 +406,47 @@ theorem itoIntegralAgainst_unique (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t
   exact congrFun (DenseRange.equalizer
     (simpleAssembly_sqWeight_denseRange T hBmeas (Lp.stronglyMeasurable φ).measurable)
     I.continuous (itoIntegralAgainstCLM hB T hBmeas φ).continuous (funext hI)) ψ
+
+/-- **Uniqueness, against the written-out sums.** A continuous linear map out of `L²(⟨M⟩)` whose
+value on every simple process is that process's Riemann–Stieltjes sum against `M` is
+`itoIntegralAgainstCLM`. The hypothesis names no stochastic integral: it is the finite sum of
+increments, which is what "the integral extends the elementary one" means. -/
+theorem itoIntegralAgainst_unique_of_riemannStieltjes (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (I : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ) →L[ℝ] Lp ℝ 2 μ)
+    (hI : ∀ V : TBoundedSP T hBmeas,
+      ⇑(I (simpleAssemblyOfMeasure T hBmeas (bracketMeasure (μ := μ) T hBmeas φ) V))
+        =ᵐ[μ] fun ω ↦ ∑ p ∈ V.val.value.support, V.val.value p ω
+            * ((itoProcessCLM hB T p.2 hBmeas φ : Ω → ℝ) ω
+                - (itoProcessCLM hB T p.1 hBmeas φ : Ω → ℝ) ω)) :
+    I = itoIntegralAgainstCLM hB T hBmeas φ :=
+  itoIntegralAgainst_unique T hBmeas φ I fun V ↦
+    Lp.ext ((hI V).trans (itoIntegralAgainst_simpleProcess T hBmeas φ V).symm)
+
+/-! ### The construction is closed under itself -/
+
+omit [IsProbabilityMeasure μ] in
+/-- **`d⟨ψ●M⟩ = ψ² d⟨M⟩`.** The driver of `∫ψ dM` is `ψφ`, so its bracket measure is
+`(ψφ)²·trim_T` — which is `ψ²` weighting `φ²·trim_T`, the bracket of `M`. So integrating against
+an integral-against-an-integral is integrating against the product, and the tower closes on
+itself rather than needing a new construction at each level.
+
+Densities multiply (`LpMulIsometry.sqWeight_sqWeight`); the only care is that the driver is an
+`Lp` class, so the weight has to be moved along an a.e. identity first. -/
+theorem bracketMeasure_mulLI (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ)) :
+    bracketMeasure (μ := μ) T hBmeas
+        (mulLI (trimMeasure_T (μ := μ) T hBmeas) (Lp.stronglyMeasurable φ).measurable ψ)
+      = sqWeight (bracketMeasure (μ := μ) T hBmeas φ) (⇑ψ) :=
+  -- a bare term, deliberately: both `rw [bracketMeasure]` and a `show` fail here. `rw` cannot
+  -- unfold a `def`, and `show` produces a goal that is type-correct only at default transparency
+  -- (`ψ`'s type names `bracketMeasure`, the rewritten form names `sqWeight`), which then breaks
+  -- `rw`'s motive. Term-mode unification handles the defeq and never builds a motive.
+  (sqWeight_congr_ae (coeFn_mulLI (trimMeasure_T (μ := μ) T hBmeas)
+      (Lp.stronglyMeasurable φ).measurable ψ)).trans
+    (sqWeight_sqWeight (ν := trimMeasure_T (μ := μ) T hBmeas)
+      (Lp.stronglyMeasurable φ).measurable (Lp.stronglyMeasurable ψ).measurable).symm
 
 end ItoIntegralAgainstMartingale
 end MathFin

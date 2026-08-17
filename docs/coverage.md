@@ -26,12 +26,42 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-08-16):** corpus
+> **Live status (2026-08-17):** corpus
 > **358**, **327 full + 18 wrappers = 345/358 delivery-ready**, 13 reduced cores, 0 placeholders.
 > Ledger 358 fresh / 0 stale / 0 missing; `lake build MathFin` and `lake lint` green, `pytest`
-> 48/48, `AxiomAuditGen` at 318 guards. The round built the **Itô chain rule** and what it
-> unlocks — see the block immediately below — closing the `∫ φ dS` gap that six places in the
-> repo had been recording as the missing primitive.
+> 48/48, `AxiomAuditGen` at 318 guards (325 curated). The **Itô chain rule** round built the
+> `∫ φ dS` primitive that six places in the repo had been recording as missing; the **coherence
+> pass** immediately after closed what that round left open — see the two blocks below.
+>
+> **2026-08-17 — coherence pass over the chain-rule tower (corpus unchanged at 358).** No new
+> entries; the round is about what the previous one asserted rather than proved.
+>
+> * **The uniqueness clause now says what it should.** The band identity is summed over a whole
+>   simple process (`itoIntegralAgainst_simpleProcess`), so
+>   `itoIntegralAgainst_unique_of_riemannStieltjes` takes agreement with the *written-out* sums
+>   `∑ₚ V(p)·(M_{p.2} − M_{p.1})` — a hypothesis naming no stochastic integral — rather than
+>   agreement with the object being characterised. Closes #195.
+> * **A theorem that may have been vacuous is now known not to be.** `Martingale` requires
+>   adaptedness pointwise; `pricePath`, built from `Lp` classes, supplies only its a.e. version,
+>   so `PricingMeasureL2Density`'s martingale hypothesis had **no exhibited witness**. The
+>   statements are now carried on an abstract adapted `S` agreeing a.e. with the price — the form
+>   `ContinuousMarket.IsEMM` already used, for the same reason — and
+>   `exists_density_price_martingale` supplies the witness via `pricePathCondExp`, the price
+>   rebuilt from `μ[· | 𝓕_t]`. This is the price-side counterpart of `pricesGainsAtZero_self`.
+>   Nothing in the gate stack could see this: the theorem was true, axiom-clean and green.
+> * **A duplicated proof removed and a definition deduplicated.**
+>   `ItoIntegralL2.uncurry_ae_eq_sum_rectTerm_of_ae_fst_ne_zero` states the band decomposition for
+>   *any* measure charging the time origin nothing — generalised over the `MeasurableSpace` too,
+>   which is the part that lets a trimmed measure reuse it. `elemIntegrand` became the primitive
+>   and `rectTerm` its `rfl`-equal instance. Closes #197.
+> * **A hypothesis deleted and one weakened.** `hDmeas : Measurable ⇑D` was derivable
+>   (`Lp.stronglyMeasurable`) and was carried through five theorems and out into the corpus;
+>   `hD` is now a.e. rather than pointwise. `lake lint` then found `bracketMeasure_mulLI`'s
+>   `[IsProbabilityMeasure μ]` unused.
+> * **`d⟨ψ●M⟩ = ψ² d⟨M⟩`** (`bracketMeasure_mulLI`): the construction is closed under itself.
+> * **Prose corrected.** `bracketMeasure` is *defined* as `φ²·trim_T`; the repo constructs no
+>   quadratic variation, so the identification with `d⟨M⟩` is motivation, and the docstrings and
+>   `leaps.md` now say so. Earning the name is #200; #199 and #201 carry the other deferrals.
 >
 > **2026-08-16 — the chain rule, the integral against a price, and the pricing measure
 > (353 → 358).** For a predictable `L²` driver `φ` and `M = φ●B`, the integrands

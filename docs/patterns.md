@@ -1310,3 +1310,164 @@ trap `trimMeasure_T`'s own docstring warns about.
 `increment_integrable` was `private`, so `lake lint` never checked it. Making it public revealed that
 it never used its `IsProbabilityMeasure` hypothesis — nor even `IsFiniteMeasure`. The binder is gone.
 If a private lemma is worth exposing, expect the linter to find something.
+
+
+## The `Lp`-process adaptedness trap, and lifting to the widest measure (2026-08-16, second batch)
+
+From the coherence pass over the chain-rule tower.
+
+### An `Lp`-valued process is *not* adapted, and `Martingale` will not tell you
+
+`Lp.stronglyMeasurable f` produces a representative measurable for the **ambient** σ-algebra. For a
+filtration it gives only `AEStronglyMeasurable[𝓕 t]` — which is what the `L²` theory needs and is
+strictly weaker than `Adapted`, which `Martingale` requires pointwise. So
+
+```lean
+Martingale (fun t ω ↦ S₀ + (itoProcessCLM hB T t hBmeas σ : Ω → ℝ) ω) 𝓕 Q
+```
+
+is a hypothesis with **no known witness**, and every theorem assuming it typechecks, passes the axiom
+audit, and may be vacuous. Nothing in the toolchain flags this: it is a true theorem about an empty
+situation.
+
+Two fixes, both cheap:
+
+* **Rebuild the process from `μ[· | 𝓕 t]`.** Conditional expectation is `𝓕 t`-strongly measurable by
+  construction (`stronglyMeasurable_condExp`), and `(φ●B)_t` is a.e. equal to it — for us that is
+  `itoProcessCLM_eq_condExpL2`, an identity the tower was already built on. `martingale_condExp` then
+  hands over the martingale property.
+* **State the theorem over an abstract adapted `S`** plus `∀ t ≤ T, S t =ᵐ[μ] price t`. This is what
+  `ContinuousMarket.IsEMM` already does, for exactly this reason; instantiating it with an `Lp`
+  coercion is the regression to watch for.
+
+Ship both: the abstract statement, and a `∃ S, Martingale S 𝓕 μ ∧ …` witness beside it. The repo's
+older `pricesGainsAtZero_self` is the same instinct — **a hypothesis with no exhibited witness is a
+finding, not a style point.**
+
+### Lift a lemma to the widest measure it is true for, not the one that needed it
+
+`uncurry_ae_eq_sum_rectTerm` was stated for `timeMeasure.prod μ`, with the null-set fact inlined in the
+proof. Reading it, the *only* thing used is that the measure charges the time origin nothing — not
+finiteness, not the product structure, not even which σ-algebra it lives on. Generalising to
+
+```lean
+{m : MeasurableSpace (ℝ≥0 × Ω)} {ν : @Measure (ℝ≥0 × Ω) m} (hν : ∀ᵐ z ∂ν, z.1 ≠ 0)
+```
+
+made the bracket-weighted predictable measure a second consumer and deleted a copy of the proof that
+had been written against it. **Generalising over the `MeasurableSpace` too is the part that is easy to
+miss** — a trimmed measure has a different type, so a lemma implicitly fixed to `Prod.instMeasurableSpace`
+cannot be reused however weak its measure hypotheses are.
+
+The tell that this was owed: two proofs sharing four load-bearing lines verbatim
+(`SimpleProcess.apply_eq` → `Set.indicator_of_notMem` → `zero_add` → `Finsupp.sum`).
+
+### Same function, two names: dedupe toward the *smaller* signature
+
+`ItoIntegralL2.rectTerm hBmeas V p` and `elemIntegrand p.1 p.2 (V.value p)` were the same function.
+The dedupe direction is not "whichever came first" — it is toward the definition with fewer
+irrelevant parameters. `elemIntegrand` mentions neither the driver nor the filtration, so it became
+the primitive and `rectTerm` its instance, `rfl`-equal so the two can never drift. Downstream cost was
+three `rw [rectTerm]` sites that needed `elemIntegrand` added to the unfolding.
+
+
+### The slot watcher that watched the wrong noun (2026-08-16)
+
+Waiting for the shared Lean slot, I armed
+
+```bash
+until ! docker ps --format '{{.Names}}' | grep -q '^docker-lean-repl-1$'; do sleep 20; done
+```
+
+It fired, correctly: the daemon container was gone. The slot was **not** free. The other session
+had taken the daemon down in order to run its authoritative `lake build MathFin` in a one-shot
+`verify` container — a differently-named container running a differently-named process, holding
+the same 4-5 GB. Acting on that signal would have put two Mathlib-loaded Lean processes on a
+10 GB box, which is every OOM this repo has ever had.
+
+The watcher tracked **the daemon**, and the property at risk is **any Lean-loaded process**. Those
+coincide right up until the moment they matter — the handoff. The condition to wait on is the
+property, not the artifact that usually carries it:
+
+```bash
+until [ -z "$(docker ps --format '{{.Image}}' | grep -i mathfin-verify)" ] \
+   && [ -z "$(ps -eo comm | grep -x lake)" ]; do sleep 20; done
+```
+
+Same shape as the `grep -c` and `sorry`-typecheck traps in earlier batches, and the third time the
+lesson has arrived as *a check that passes while the thing it stands for is false*.
+
+**The corrected watcher then fired too, and was also wrong.** It caught the nine-second gap between
+the peer's `lake build` container exiting and its daemon coming back up — a gap *between two of
+their steps*, not a handoff. Which is the real lesson, one level down:
+
+> **No instantaneous poll of an unowned resource can tell you the resource is yours.** "Nobody is
+> using it right now" and "it has been handed to me" are different propositions, and only the
+> second one is safe to act on. Every poll of the first races the owner's next step, and here each
+> false positive invites starting a 4-5 GB process on a box with room for one.
+
+Polling was not merely unreliable, it was actively hazardous: a watcher that fires wrongly is worse
+than no watcher, because it manufactures a moment of apparent permission. The sound protocol is
+mutual exclusion by **explicit transfer** — the other session pings when it has stopped and intends
+to stay stopped. Use polls only to notice that a promised handoff has *not* arrived, never to
+substitute for one.
+
+
+### A background task's "exit code 0" is the WRAPPER's, not the command's (2026-08-16)
+
+A `ledger verify` sweep failed two entries. The task-completion notification said
+`completed (exit code 0)`, and I wrote that down as "`ledger verify` exits 0 while reporting
+failures" — and nearly filed it as a bug.
+
+It is false. `ledger.py:345` ends `return 1 if failures else 0`, and my own log's first line was
+`LEDGER_VERIFY_EXIT=1`. The command exited **1**, correctly. The `0` was the background wrapper's
+status.
+
+This is already in the repo's memory from the SDE phase — *"bg-build notification exit = the
+wrapper's; grep REAL_BUILD_EXIT"* — which is why the build commands here echo `REAL_BUILD_EXIT=$?`
+into their own log. The lesson that did not transfer: **having written the echo, read it.** I
+printed the true exit code into the file and then quoted the notification instead. Always take the
+exit code from the line the command itself wrote.
+
+### The real defect: an aborted sweep reports success (2026-08-16)
+
+Chasing the above turned up a genuine bug in the same function. `ledger.py:310` handles a dead
+checker with
+
+```python
+except (ConnectionRefusedError, OSError, subprocess.TimeoutExpired) as exc:
+    print(f"\nABORT at {tid}: checker unavailable ({exc}). ...")
+    break
+```
+
+which `break`s **without appending to `failures`**. Two consequences, since line 338 prints
+`done: {len(targets) - len(failures)} verified`:
+
+* every entry the loop never reached is counted as **verified**, because the count is inferred from
+  `len(targets)` rather than from successes;
+* `failures` can be empty, so the function returns **0**.
+
+So a sweep that dies a third of the way through announces success with an inflated count. And the
+trigger is precisely a REPL killed by `LEAN_ELAB_TIMEOUT` — the timeout and the false-success are
+one bug, not two.
+
+**`ledger status` is the only sound gate**, and the reason is not that verify's exit code lies: it
+is that `status` recomputes freshness from input hashes, so it cannot be fooled by a loop that
+never ran. Trust the recomputation, never the sweep's self-report.
+
+### The 180s elaboration cap is a latent corpus flake, not a per-branch problem
+
+Both failures above were `LEAN_ELAB_TIMEOUT`, not proofs. Re-running with
+
+```bash
+LEAN_ELAB_TIMEOUT=600 docker compose -f docker/docker-compose.yml up -d lean-repl
+```
+
+cleared both, at **177.6s and 199.1s**. Note the first number: that entry passes the 180s default
+by two seconds, so whether it fails depends on machine load, not on the branch. Any sweep that
+restales the heavy Itô entries can fail on either.
+
+`docker-compose.yml` already documents the override for "the rare heavy corpus entry"; the thing
+worth adding is that **the rare entry is not reliably rare** — it is marginal. Prefer 600 for any
+sweep that restales the Itô closure, and do not spend time diagnosing a timeout as a proof
+regression: a `daemon error:` prefix means the REPL died, not that the theorem broke.

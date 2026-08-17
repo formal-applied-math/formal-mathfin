@@ -682,7 +682,7 @@
         "reference": "Elementary-integrand agreement for the stochastic integral (Karatzas–Shreve 3.2; the Riemann–Stieltjes characterisation)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_elementary. SCOPE, stated honestly. This is the SINGLE-BAND identity: the integrand is Z.1_{(a,b]} for one interval. The corresponding statement for a general simple process — its integral being the sum of its band increments — is NOT this theorem; what the library proves in that direction is simpleAssemblyOfMeasure_eq_sum_bands, which decomposes a simple process into its bands inside L^2 and from which the summed identity follows by linearity, but the summed identity itself is not stated as a theorem. The uniqueness statement itoIntegralAgainst_unique correspondingly takes agreement with the integral on simple processes as its hypothesis, not agreement with explicitly written Riemann-Stieltjes sums."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_elementary. SCOPE, stated honestly. This is the SINGLE-BAND identity: the integrand is Z.1_{(a,b]} for one interval. The summed statement for a general simple process is a separate theorem, itoIntegralAgainst_simpleProcess (benchmarked as sc-ito-integral-riemann-sum), obtained from this one by summing over simpleAssemblyOfMeasure_eq_sum_bands; uniqueness against the written-out Riemann-Stieltjes sums is itoIntegralAgainst_unique_of_riemannStieltjes."
       }
     },
     {

@@ -3169,6 +3169,126 @@ characterization is nowhere claimed.
    "good enough" in-file; a Lean-aware scanner is not worth its weight while
    the catch rate is this good (1 for 1 on first run).
 
+## 2026-08-17 — corpus 358 — coherence pass over the chain-rule tower
+
+A review round that produced code. No corpus growth: the session's subject was what the previous
+round *asserted* rather than proved, and what it duplicated.
+
+### The standing first pass — prose against statement
+
+The previous round ran this pass and corrected two overclaims. It missed a third, and this round
+found it:
+
+**`bracketMeasure` was named for a theorem the library does not have.** The module docstring said
+"`M` is a continuous `L²` martingale whose bracket is `d⟨M⟩ = φ² ds ⊗ dμ`". The repo constructs no
+quadratic variation of `M`, and pathwise continuity lives in a different module. `bracketMeasure`
+is *defined* as `φ²·trim_T`; "bracket" is a name. The docstrings and `docs/leaps.md` now say that
+in as many words, and point at what *is* proved — the isometry, and `bracketMeasure_mulLI`.
+
+The lesson is about the pass itself, not the sentence. **A definition's name is a claim, and the
+first pass was reading theorem statements against docstrings — not definition names against the
+theory they borrow from.** A name is the most-repeated claim in a library: it appears at every call
+site, and it is the one thing a reader takes on trust. Add definitions to the pass.
+
+Conversely, one disclaimer came *out* honestly: `ItoIntegralAgainstMartingale`'s "the summed version
+is not stated" paragraph was deleted because the summed version is now a theorem, not because the
+wording softened.
+
+### The finding the gate stack structurally cannot see
+
+`PricingMeasureL2Density`'s theorems hypothesised `Martingale (pricePath …) 𝓕 Q`. `Martingale`
+requires `Adapted` — `StronglyMeasurable[𝓕 t]` pointwise. `pricePath` is assembled from `Lp`
+classes, whose representatives are strongly measurable for the *ambient* σ-algebra and only **a.e.**
+measurable for the filtration. So nothing in the repo — not even `μ` — was known to satisfy that
+hypothesis. The theorems were true, axiom-clean, `lake lint`-clean, ledger-fresh, and possibly
+**vacuous**.
+
+Every gate passed them, and no gate could have failed them: each one asks whether the proof is
+sound, and this is a question about whether the *hypothesis is inhabited*. It is the exact dual of
+the 2026-07-31 spurious-guard finding — that round found hypotheses the theorem did not need; this
+one found a hypothesis nothing was known to meet.
+
+The repo already knew this instinct: `MarketCompleteness.pricesGainsAtZero_self` exists for no other
+reason. The price-side counterpart was simply not written. It is now
+(`exists_density_price_martingale`), and the statements moved onto an abstract adapted `S` agreeing
+a.e. with the price — which is the form `ContinuousMarket.IsEMM` had used all along, for exactly
+this reason. **Instantiating an abstract-process hypothesis with an `Lp`-valued process is the
+regression to watch for.**
+
+*Proposed standing check, cheap:* for every new hypothesis of the form "X is a martingale / is
+adapted / satisfies P", ask whether the repo exhibits one. If not, either produce a witness or say
+in the docstring that none is known. This is a five-minute question and it caught a live one.
+
+### Upgrades executed
+
+- **A duplicated proof deleted by generalising to the widest measure** (lens 3, lens 4).
+  `uncurry_ae_eq_sum_rectTerm` had been restated against a second measure with four load-bearing
+  lines copied verbatim. The only fact used is that the measure charges the time origin nothing —
+  not finiteness, not the product structure, **not even the σ-algebra**. Generalising over the
+  `MeasurableSpace` as well as the measure is what let a *trimmed* measure reuse it, and is the part
+  that is easy to miss.
+- **A definition deduplicated toward the smaller signature** (lens 3). `rectTerm` and
+  `elemIntegrand` were the same function. The dedupe direction is not seniority — it is toward the
+  definition with fewer irrelevant parameters. `elemIntegrand` mentions neither driver nor
+  filtration, so it is now the primitive and `rectTerm` its `rfl`-equal instance. Closed #197.
+- **The uniqueness clause now names no stochastic integral** (lens 1, lens 7).
+  `itoIntegralAgainst_unique_of_riemannStieltjes` takes agreement with the written-out sums
+  `∑ₚ V(p)·(M_{p.2} − M_{p.1})`. A characterisation whose hypothesis mentions the object being
+  characterised is a weaker thing than it looks, and the previous round said so honestly rather than
+  fixing it. Closed #195.
+- **A derivable hypothesis deleted from five theorems and the corpus** (lens 3). `hDmeas :
+  Measurable ⇑D` is `(Lp.stronglyMeasurable D).measurable` — a fact the same tower used four times
+  elsewhere. It had shipped into `gir-pricing-measure-density`'s published statement. `hD` also went
+  from pointwise to a.e., which is what makes it satisfiable for a class you did not construct.
+- **The construction shown closed under itself** (lens 8). `sqWeight_sqWeight` — densities multiply —
+  gives `bracketMeasure_mulLI`: `d⟨ψ●M⟩ = ψ² d⟨M⟩`. Two lines of content for the statement that the
+  tower does not need a new construction at each level.
+- **Three deferrals filed rather than silently dropped** (#199, #200, #201), each with the reason it
+  was not done in-session.
+
+### The lenses, as gradients
+
+1. **Inspired math.** *Exemplar:* `d⟨ψ●M⟩ = ψ² d⟨M⟩` proved by observing that `withDensity`
+   composes. *Upgrade (HIGH):* the bracket is still only a name — #200 makes it earn one via
+   `𝔼[(M_b − M_a)²] = ⟨M⟩((a,b]×Ω)`, which is reachable from the isometry today.
+2. **Coherence.** *Exemplar:* `martingale_condExp` and `martingale_const` consumed rather than
+   re-derived; the adapted price is Mathlib's conditional expectation, not a bespoke object.
+   *Upgrade (MED):* `simpleAssembly_T` is now a special case of `simpleAssemblyOfMeasure` with a
+   worse proof (#199) — the dependency runs the wrong way and wants a downward move.
+3. **Zero slop.** *Exemplar:* three deletions this round (a copied proof, a duplicate definition, a
+   derivable hypothesis) and no additions that lacked a consumer. *Upgrade (MED):* the corpus still
+   carries `formalization_scope` prose that repeats module docstrings nearly verbatim; one of them
+   should be the source.
+4. **Architectural ingenuity.** *Exemplar:* generalising a lemma over its `MeasurableSpace` so a
+   trimmed measure can consume it. *Upgrade (MED):* the same question is owed of the other
+   `trim_T`-specific lemmas in `ItoIntegralCLM` — how many are secretly measure-generic?
+5. **First principles.** *Exemplar:* the vacuity finding came from asking what `Martingale` actually
+   requires, rather than from any tool. *Upgrade (HIGH):* make the witness question a standing check,
+   per the proposal above.
+6. **Idiomatic register.** *Exemplar:* `bracketMeasure_mulLI` is a bare proof term — forced, since
+   both `rw` and `show` fail on a `def`-vs-`sqWeight` motive, and also correct by house style.
+   *Upgrade (LOW):* three `rw [thedef]` sites were fixed reactively this round; a grep for
+   `rw [` immediately followed by a local `def` name would find the rest before the build does.
+7. **Concept clarity.** *Exemplar:* the module docstring now states what `bracketMeasure` is and is
+   not, in the place a reader meets it. *Upgrade (MED):* `docs/blueprint.md` has not been regenerated
+   since the tower landed; the new uniqueness edge is not in the graph.
+8. **Beautiful math.** *Exemplar:* the price's adapted version is not a repair — `μ[X | 𝓕_t]` is the
+   *right* object, and the `Lp` process was always the convenient shadow of it. *Upgrade (MED):*
+   `pricePathCondExp` and `ItoIntegralProcessContinuousModification.itoContinuousMod` are two
+   modifications of the same process built for different reasons; whether the continuous one is
+   adapted, and so subsumes this one, is not known and is worth asking.
+
+### Ranked backlog out of this round
+
+| rank | item | owner |
+|---|---|---|
+| 1 | Witness check as a standing pass (lens 5) — five minutes, caught a live vacuity | next session |
+| 2 | #200 — let `bracketMeasure` earn its name | unassigned |
+| 3 | #199 — collapse `simpleAssembly_T`, fixing the dependency direction | unassigned |
+| 4 | Regenerate `docs/blueprint.md` (lens 7) | next session |
+| 5 | Audit the other `trim_T`-specific lemmas for hidden measure-genericity (lens 4) | unassigned |
+| 6 | #201 — compose project-name collision (infra; schedule with a pin bump) | unassigned |
+
 ## 2026-08-16 — corpus 358 — the Itô chain rule, the integral against a price, and the pricing measure
 
 ### The standing first pass — prose against statement
