@@ -32,6 +32,10 @@ Three rungs, all in scope:
 | **(b)** | `eval` is measurable; `obsTimes ≤ u` ⟹ `eval` is `𝓕 u`-measurable; the discounted value process is a `Q`-martingale under `IsEMM` |
 | **(c)** | `value (europeanCall K T) = bs_call_formula`, and the same for put / cash-or-nothing / capped call — the last by **composition**, not by a new integral |
 
+*Amended 2026-08-17, again.* Rung (b)'s "under `IsEMM`" is what was planned when this
+table was written. What shipped is narrower, deliberately: see the second amendment in
+§3, item 2, for the reversal and why it stands.
+
 Rung (c) is the point. A reified contract whose price is a machine-checked
 Black–Scholes formula does not exist anywhere, including in the source paper,
 whose pricing layer is a `structure` and one `congrArg`.
@@ -161,6 +165,10 @@ The pricing statement is then stated against the EMM object we already have,
 `ContinuousMarket.IsEMM` (`MathFin/Foundations/ContinuousMarket.lean:75`), rather
 than against a fresh `PricingModel` record.
 
+*Amended 2026-08-17, again.* That is what was planned. What shipped is stated against
+a bare `Martingale S 𝓕 Q` and `[IsProbabilityMeasure Q]` instead — see the second
+amendment in §3, item 2.
+
 ---
 
 ## 3. The honest ceiling
@@ -194,6 +202,34 @@ Stated here so no downstream prose outruns it:
    phase. `ContinuousMarket.IsEMM` remains the correct target for rung (b)'s seam
    theorem; `MarketCompletenessInPrice.pricePath` is the obvious concrete `S` to
    instantiate it at.
+
+   *Amended 2026-08-17, again — this time correcting the amendment above, not the
+   original spec.* Two claims have gone stale since that paragraph was written, and
+   are corrected here rather than rewritten in place, per this doc's own practice of
+   recording what was intended against what was built:
+
+   1. **Rung (b) shipped without `IsEMM`, on purpose.** The sentence directly above
+      ("`ContinuousMarket.IsEMM` remains the correct target for rung (b)'s seam
+      theorem") turned out wrong, as did §0's rung-(b) table and §2.4's "stated
+      against the EMM object we already have". What shipped is
+      `Contracts/Pricing.value_deliverAsset`, unbundled to a bare
+      `[IsProbabilityMeasure Q]` and `Martingale S 𝓕 Q` hypothesis: the proof
+      consumes only two of `IsEMM`'s four fields (`isProb`, `martingale`), never the
+      mutual-absolute-continuity `ac`/`ac'` content that makes a martingale measure
+      an *equivalent* one — the same convention `ContinuousMarket.lean` itself
+      already draws elsewhere. This is a considered reversal, not a shortfall:
+      bundling `IsEMM` in would misattribute equivalence content to a theorem that
+      never touches it. It is settled, not open for a further pass.
+   2. **No theorem identifies a terminal or time-0 value with the payoff.** The
+      claim two paragraphs up — "Rung (b) proves the discounted value process is a
+      `Q`-martingale with the right terminal value and time-0 value" — overstates
+      what shipped. `Contract.value_process_martingale` proves only the martingale
+      property, for *any* contract, with no claim about specific times.
+      `Contract.value_deliverAsset` is a separate, narrower theorem — one
+      single-cashflow contract, not the general value process — that does identify
+      a time-0 value, `∫ ω, S 0 ω ∂Q`, with the payoff at `T`. Read the martingale
+      claim without the terminal/time-0 gloss; the identification lives in the
+      other theorem.
 3. **Rung (c) is single-asset.** `bs_call_formula` and friends are stated under
    `BSCallHyp` at `ι = Unit`. Multi-asset instances need a joint law we do not
    have.

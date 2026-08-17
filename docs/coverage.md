@@ -29,17 +29,20 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > **Live status (2026-08-17):** corpus
 > **367**, **336 full + 18 wrappers = 354/367 delivery-ready**, 13 reduced cores, 0 placeholders.
 > Ledger 367 fresh / 0 stale / 0 missing; `lake build MathFin` and `lake lint` green, `pytest`
-> 50/50, `AxiomAuditGen` at 327 guards (229 curated). The **contracts tower** below is the new
+> 50/50, `AxiomAuditGen` at 327 guards (231 curated). The **contracts tower** below is the new
 > round; the **Itô chain rule** and its coherence pass are the two blocks after it.
 >
 > **2026-08-17 — the contracts tower: a reified payoff language, closed to Black–Scholes (358 →
 > 367).** Five new modules under `MathFin/Contracts/`, nine entries `mf-contract-*`. `Core.lean`
 > reifies a payoff as data — `Payoff ι` / `Contract ι` inductives over a **typed** underlying
 > index `ι` (`ι = Unit` for the single-asset instances below), not the inline lambda every other
-> payoff in the library is written as. `Adapted.lean` proves the reification pays for itself:
-> `Payoff.measurable_eval_of_obsTimes_le` is the adaptedness hypothesis a `Payoff` needs to be a
-> legitimate pricing integrand at all — `𝓕 u`-measurability follows from every observation time
-> in `obsTimes` (a syntactic, sufficient-not-necessary over-approximation) being `≤ u`.
+> payoff in the library is written as. `Adapted.lean` proves the reification pays for itself,
+> against a *future* rung: `Payoff.measurable_eval_of_obsTimes_le` is the adaptedness hypothesis
+> a `Payoff` will need to be a legitimate stochastic-integral integrand — `𝓕 u`-measurability
+> follows from every observation time in `obsTimes` (a syntactic, sufficient-not-necessary
+> over-approximation) being `≤ u`. **No theorem in this round consumes it yet** — `Pricing.lean`
+> integrates against a fixed measure, never a filtration, so it has nothing to discharge this
+> hypothesis against.
 > `Pricing.lean` integrates `pathPV` against a measure into `Contract.value`, proves it linear
 > (`value_scale` unconditional, `value_both` needing both integrability hypotheses —
 > `integral_add` is false without them), and proves `value_deliverAsset` /

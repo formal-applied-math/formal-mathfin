@@ -117,9 +117,10 @@ Before this tower every payoff in the library was a lambda written once, inline,
 integral that priced it (Pillar II/III territory): the payoff and the pricing model were the same
 syntactic object, so nothing could be said about the payoff independently of the model that
 happened to price it. `Payoff ι` / `Contract ι` (inductives over a typed underlying index) give the
-payoff its own object, prove it measurable and adapted to its own observation times — the exact
-hypothesis Pillar II's stochastic-integral machinery needs an integrand to satisfy — and reduce
-`Contract.value` on four reified instruments to the Black–Scholes closed forms Pillar IV's
+payoff its own object, prove it measurable and adapted to its own observation times — the
+hypothesis a future Pillar II stochastic-integral rung will need an integrand to satisfy, not
+yet consumed by anything in this round — and reduce `Contract.value` on four reified instruments
+to the Black–Scholes closed forms Pillar IV's
 Gaussian-moment machinery already produced (`bs_call_formula`/`bs_put_formula`/
 `bs_cash_or_nothing_formula` are direct Gaussian-integral derivations; none routes through Pillar
 III's Feynman–Kac/PDE keystone). `Contracts/Pricing.lean`

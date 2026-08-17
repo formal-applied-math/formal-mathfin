@@ -1576,5 +1576,5 @@ disruption, corporate action or issuer credit exists anywhere in the language.
 
 Gates: `lake build MathFin` + `lake lint` green, `pytest` 50/50, ledger 367/367 fresh,
 `AxiomAuditGen` 327 guards (nine new, one per corpus entry) — two of the nine also curated into
-`AxiomAudit.lean` (`cappedCall_payoff_eq`, `value_cappedCall`), 229 curated guards total — no
+`AxiomAudit.lean` (`cappedCall_payoff_eq`, `value_cappedCall`), 231 curated guards total — no
 `sorry`.
