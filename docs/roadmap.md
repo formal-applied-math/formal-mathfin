@@ -1517,3 +1517,64 @@ uniqueness clause and exists only on `v4.33.0-rc1`, so instantiating it waits fo
 
 Gates: `lake build MathFin` + `lake lint` green, `pytest` 48/48, ledger 358/358 fresh,
 `AxiomAuditGen` 318 guards, seven new curated axiom pins, no `sorry`.
+
+## phase: the contracts tower — a reified payoff language, closed to Black–Scholes (2026-08-17, corpus 358→367)
+
+MathFin had 62 payoff-bearing modules and no object that represents *a contract*: every payoff was
+a lambda written inline inside the integral that priced it, so the payoff and the model were the
+same syntactic object and nothing could be said about one without the other. `MathFin/Contracts/`
+(`Core.lean`, `Adapted.lean`, `Pricing.lean`, `BlackScholes.lean`, `CappedCall.lean`) reifies the
+payoff as data — `Payoff ι` / `Contract ι` inductives over a typed underlying index — proves the
+reification is measurable and adapted to its own observation times, and closes the loop: the
+reified European call, put, digital and capped call all price to Black–Scholes closed forms the
+library already had, the capped call by *composing* two `value_europeanCall` results rather than
+evaluating a third integral (`value_pay_eq` is the one reduction lemma every instrument shares).
+Full design: `docs/specs/2026-08-16-contracts-tower-design.md`.
+
+**Consulted as a source, not a template.** Paul Bilokon, *The Contract Is Not the Model:
+Proof-Carrying Exotic Derivatives and the Economics of Model Risk* (working paper, 9 August 2026;
+code at `github.com/thalesians/lean_contracts`, Apache-2.0) supplies the thesis — the deterministic
+cashflow map is a separate object from the probability law over scenarios, and must be validated
+first — and the five-layer decomposition it implies. No code is taken; see `docs/sources.md` for
+what was and was not. The type design (typed `ι` rather than `String` keys, `ℝ≥0` time, one
+inductive rather than a mutual `NumExpr`/`BoolExpr` pair), the measurability/adaptedness theorems,
+and the reduction to existing closed forms have no counterpart in the source, whose own artifact
+has never been kernel-built.
+
+**Delivered, nine entries, all `full`, axioms-clean:** `mf-contract-pathpv-both`,
+`mf-contract-eval-adapted`, `mf-contract-value-linear`, `mf-contract-value-deliver-asset`,
+`mf-contract-european-call`, `mf-contract-european-put`, `mf-contract-digital-cash-or-nothing`,
+`mf-contract-capped-call` (the payoff identity), `mf-contract-capped-call-value` (the price) — kept
+as two entries rather than one so the pricing claim cannot attach itself to the entry that only
+witnesses the payoff.
+
+**Two rungs deliberately deferred, each with the concrete case that forces it, not built ahead of
+that case:**
+
+* **Branching contracts and the lifecycle state machine** (outstanding notional, absorbing
+  termination, partial redemption). This is the strongest part of Bilokon's own artifact and the
+  right next rung — but it earns its place only once a callable instrument is in the corpus, and
+  none is yet. **Forced by:** the first autocall entry.
+* **Path-dependent instances.** Every instrument in this phase observes the underlying only at its
+  maturity `T`; `bsAssets` is constant in `t` and equal to the terminal log-normal price at every
+  time, which is correct for these single-maturity instruments and not an oversight — it supplies
+  no path. **Forced by:** wiring `bsAssets` (or a successor model map) to the full GBM path rather
+  than the terminal value, which an Asian or barrier reified instrument needs.
+
+**What stays open and is stated in every artifact this phase touches.** Rung (b) — the martingale
+seam (`value_deliverAsset`, `value_process_martingale`) — is the value process, not the hedge:
+`Contract.value` is not identified with the initial wealth of a replicating strategy. That
+blocker's dependency, `∫ ψ dS`, landed the day before this phase as
+`MarketCompletenessInPrice.exists_replicating_strategy_in_price` (previous phase, 2026-08-16), so
+the hedge rung is now buildable — `ContinuousMarket.IsEMM` is still the correct target and
+`pricePath` the obvious concrete `S` — but it stays out of scope here and is the strongest
+candidate for the phase after the two forced rungs above. Rung (c) is single-asset (`ι = Unit`)
+under `BSCallHyp`; `Payoff` is a finite inductive walked by a `List`, so every instance is a payoff
+kernel over a finite observation grid — no continuously-monitored barrier is expressible at any
+instantiation. None of this is a term-sheet formalisation: no calendar, business-day convention,
+disruption, corporate action or issuer credit exists anywhere in the language.
+
+Gates: `lake build MathFin` + `lake lint` green, `pytest` 50/50, ledger 367/367 fresh,
+`AxiomAuditGen` 327 guards (nine new, one per corpus entry) — two of the nine also curated into
+`AxiomAudit.lean` (`cappedCall_payoff_eq`, `value_cappedCall`), 229 curated guards total — no
+`sorry`.

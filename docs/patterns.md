@@ -1471,3 +1471,112 @@ restales the heavy Itô entries can fail on either.
 worth adding is that **the rare entry is not reliably rare** — it is marginal. Prefer 600 for any
 sweep that restales the Itô closure, and do not spend time diagnosing a timeout as a proof
 regression: a `daemon error:` prefix means the REPL died, not that the theorem broke.
+
+## The contracts tower — Lean authoring and environment traps (2026-08-17 batch)
+
+Five patterns from building `MathFin/Contracts/` (the reified `Payoff`/`Contract` tower and its
+reduction to Black–Scholes closed forms). The first two are ordinary Lean-authoring habit; the
+last three are environment traps this box produced, and are worth more precisely because they
+cost real wall-clock time and none of them announced themselves as errors.
+
+### Statement-first probing is the Lean substitute for a failing test
+
+`sorry` is banned in `MathFin/`, so there is no failing-test analogue of red-green-refactor —
+except there is: write the theorem *statement* with a `sorry` body in a scratch file, `lean-check`
+it, and read **zero errors at the expected `sorry_count`** as the passing RED signal (an elaborating
+statement with an admittedly-missing proof), exactly the way a failing assertion is the passing
+signal in TDD's red phase.
+
+The trap this avoids: `tools/verify/lean_repl.py:91` computes
+
+```python
+"success": not error_msgs and sorry_count == 0,
+```
+
+so a stubbed statement can **never** report `success: true` — that field alone will always read as
+failure while a `sorry` is in the file. The signal to read is `errors: []` at the sorry count you
+expected, not `success`. Getting a statement to *elaborate* — the types, the implicit-argument
+resolution, the right hypothesis bundle — is usually the hard part of a contracts-tower proof;
+once it typechecks with a `sorry`, the proof itself is often short (`value_pay_eq` was one `simp`
+call once its statement stopped fighting elaboration).
+
+### Reify-then-reduce: `simp only` to the existing theorem's exact shape, then `exact`
+
+Every `value_*` theorem in `BlackScholes.lean` and `CappedCall.lean` follows the same shape: unfold
+the reified contract's semantics with a targeted `simp only [...]` list until the goal is
+*syntactically* the integral an existing closed-form theorem already proves, then close with
+`exact`/`rw` against that theorem — no new integral is ever touched. The one discipline that keeps
+this from becoming eleven near-duplicate `simp only` lists is to extract the shared unfolding into
+one lemma once a second call site needs it:
+
+```lean
+private theorem value_pay_eq {ι : Type*} (Q : Measure Ω) (D : ℝ≥0 → ℝ)
+    (X : ι → ℝ≥0 → Ω → ℝ) (t : ℝ≥0) (a : Payoff ι) :
+    (Contract.pay t a).value Q D X = ∫ ω, D t * a.eval (scenarioAt X ω) ∂Q := by
+  simp [Contract.value, Contract.pathPV, Contract.cashflows]
+```
+
+`value_europeanCall`, `value_europeanPut` and `value_digitalCall` each then close with
+`rw [<def>, value_pay_eq]` followed by the one line that invokes the target theorem. Two
+guardrails make the pattern honest rather than a shortcut: never escalate the `simp only` list to a
+bare `simp` (an unbounded simp set can accidentally discharge — or silently reshape — the very goal
+the reduction is supposed to leave intact for the target theorem to close), and never edit the
+target theorem to meet the reified goal halfway; the reification either reaches the library's
+existing statement exactly, or the reduction lemma is wrong.
+
+### A named volume masks the image's baked oleans — read past the pull
+
+`docker compose pull verify` alone does **not** give a fresh container the image's prebuilt
+`.lake` tree. `docker-compose.yml:149` documents why, right where the mount is declared:
+
+```
+# built (~10–15 min). The named volume is populated from the image's
+# `/app/.lake/` on first creation (Docker semantics), then survives
+```
+
+`docker_lake_build_cache` is mounted at `/app/.lake` for **both** `verify` and `lean-repl`
+(`Dockerfile.verify:33-38` is what bakes the oleans into the image in the first place: `COPY
+MathFin/` then `lake exe cache get && lake build`). Docker only populates a named volume from the
+image on the volume's *first* creation — an existing volume from a previous image hides whatever
+the newly-pulled image baked. A pull that "did nothing" is not evidence the image is unchanged; it
+is evidence the volume predates it.
+
+### Rebasing onto a published commit is nearly free — measured
+
+When a branch needs rebasing onto a `main` whose GHCR image CI has already published, the sequence
+`daemon down → rebase → docker volume rm docker_lake_build_cache → daemon up` re-populates the
+volume from the image's baked tree — a file **copy**, not a re-elaboration — and Lake then
+elaborates only what the branch adds on top. **Measured 2026-08-17: 9 modules instead of ~9000,
+about 59 seconds instead of the usual 10–15 minutes.**
+
+Two preconditions, both easy to get wrong silently:
+
+* the image must be built from the **exact commit** being rebased onto — check the
+  `publish-verify-image` workflow run's `headSha`, not the image's OCI labels, which carry only the
+  Ubuntu base version and say nothing about the Lean/Mathlib/MathFin content baked in;
+* the branch must not modify any file the image's Dockerfile layer baked (`lakefile.lean`,
+  `lean-toolchain`, `lake-manifest.json`, `MathFin.lean`, anything under `MathFin/` at that commit).
+
+If either fails, the volume-drop buys nothing and Lake falls back to the ordinary rebuild it would
+have paid anyway — the downside of trying is bounded at zero, which is why it is always worth
+attempting before assuming a full rebuild is required.
+
+### A long-running session's daemon silently changes image when it cycles
+
+If `:latest` moves while a session is already running, the next `docker compose up -d lean-repl`
+brings the daemon back on the **new** image with no signal that anything changed — no warning, no
+version bump in the logs, nothing to grep for. Harmless when the toolchain and Mathlib pin are
+unchanged across the two images. Not harmless otherwise: if the pull carried a toolchain or Mathlib
+bump, the session is now elaborating proofs written for one Lean against a different one, mid-task,
+and the first symptom reads as a proof failure — a tactic that "stopped working" — rather than as
+what it actually is, an environment change underneath an unchanged file.
+
+Guard: after any daemon restart in a session where `:latest` may have moved, diff the running
+image's toolchain against the tree's —
+
+```bash
+docker run --rm --entrypoint cat <image> /app/lean-toolchain
+```
+
+— against `cat lean-toolchain`. One second, and it turns a silent mid-session environment change
+into an immediate, legible mismatch.

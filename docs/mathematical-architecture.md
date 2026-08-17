@@ -109,6 +109,41 @@ scope on this seam, unchanged: the Jacod–Yor converse, a drift term in the pri
 needs), and the integral against a general semimartingale — `ContinuousMarket`'s meaning-2 boundary
 narrows but does not close.
 
+## A representation layer, not a fifth pillar: the reified contract (2026-08-17)
+
+`MathFin/Contracts/` is not a new mathematical principle beside the four pillars — it is a
+**representation layer that sits across them**, and is worth recording here for that reason.
+Before this tower every payoff in the library was a lambda written once, inline, inside the
+integral that priced it (Pillar II/III territory): the payoff and the pricing model were the same
+syntactic object, so nothing could be said about the payoff independently of the model that
+happened to price it. `Payoff ι` / `Contract ι` (inductives over a typed underlying index) give the
+payoff its own object, prove it measurable and adapted to its own observation times — the exact
+hypothesis Pillar II's stochastic-integral machinery needs an integrand to satisfy — and reduce
+`Contract.value` on four reified instruments to the Black–Scholes closed forms Pillar IV's
+Gaussian-moment machinery already produced (`bs_call_formula`/`bs_put_formula`/
+`bs_cash_or_nothing_formula` are direct Gaussian-integral derivations; none routes through Pillar
+III's Feynman–Kac/PDE keystone). `Contracts/Pricing.lean`
+is deliberately thin at the Pillar I seam: `value_deliverAsset` and `value_process_martingale` are
+conditional-expectation facts (`Martingale.condExp_ae_eq` + `martingale_condExp`), needing a bare
+probability measure under which the price is a martingale, not `ContinuousMarket.IsEMM`'s
+equivalence content — so this layer touches Pillar I's *martingale* vocabulary without yet drawing
+on its *no-arbitrage* one.
+
+Consulted as a source, not a template: Bilokon, *The Contract Is Not the Model* (2026); see
+`docs/sources.md` and `docs/bridges.md` rows CT/CT.2 for what was taken and what was designed
+afresh.
+
+**Two rungs deferred, each waiting on the corpus case that forces it, not built ahead of it:**
+branching contracts and the lifecycle state machine (outstanding notional, absorbing termination) —
+the strongest part of the source artifact, forced by the first autocall entry; and path-dependent
+instances — every instrument here observes only at maturity `T`, forced by wiring the model map to
+the full GBM path rather than the terminal value, which an Asian or barrier reified instrument
+needs. A third, not deferred but genuinely open: identifying `Contract.value` with the initial
+wealth of a replicating strategy rather than merely a martingale value process — its dependency,
+`∫ ψ dS`, is now built (`MarketCompletenessInPrice.exists_replicating_strategy_in_price`, the row
+above), so this is buildable rather than blocked, and is the natural next seam between this layer
+and Pillar I.
+
 ## The higher-math unification roadmap (apparently-disconnected fields that connect)
 
 Ranked by leverage × tractability:

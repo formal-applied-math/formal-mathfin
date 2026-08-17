@@ -81,6 +81,7 @@ Mathematical finance is a few deep principles whose consequences are the models.
 | **SDE existence + uniqueness** | the Picard contraction in the predictable `L²` space, and pathwise uniqueness by an `L²`-energy Grönwall argument | [`picardMap_contraction`](MathFin/Foundations/SDEExistence.lean) · [`IsL2SolutionPair.uniqueness`](MathFin/Foundations/SDEUniqueness.lean) |
 | **Martingale representation** | the Itô integral `φ ↦ ∫₀ᵀ φ dB` is onto the centered `𝓕ᴮ_T`-measurable part of `L²(μ)` — by orthogonal decomposition against its closed range plus totality of the step Doléans exponentials, with no Malliavin calculus; the finance reading is that every square-integrable claim has a unique hedge | [`itoIntegralCLM_T_surjective_onto_centered`](MathFin/Foundations/MartingaleRepresentation.lean) · [`exists_replicating_strategy`](MathFin/Foundations/MarketCompleteness.lean) |
 | **Jump risk is never free** | the Merton (1976) jump-diffusion price dominates Black–Scholes | [`bsV_le_mertonCallPrice`](MathFin/BlackScholes/MertonDominance.lean) |
+| **A reified capped call, priced by composition** | a reified capped call — built by composing two reified European-call contracts, long at `K₁` and short at `K₂`, rather than written as one more inline payoff — whose Black–Scholes value is the difference of two European call values, by linearity of `Contract.value` alone; no third integral is touched. Contract-reification framing after Bilokon 2026 ([`docs/sources.md`](docs/sources.md)) | [`value_cappedCall`](MathFin/Contracts/CappedCall.lean) · [`cappedCall_payoff_eq`](MathFin/Contracts/CappedCall.lean) |
 
 ## A theorem, up close
 
@@ -102,20 +103,21 @@ See [`MathFin/Examples.lean`](MathFin/Examples.lean) for a curated tour.
 
 | | |
 |---|---:|
-| theorems (machine-checked) | **353** |
-| delivery-ready (`full` + `library_wrapper`) | **340** |
-| full derivations | 322 |
+| theorems (machine-checked) | **367** |
+| delivery-ready (`full` + `library_wrapper`) | **354** |
+| full derivations | 336 |
 | library wrappers | 18 |
 | reduced cores (honest special cases) | 13 |
 | placeholders / sorries | **0** |
-| Lean modules · lines of Lean | 270 · ~57,750 |
-| verification ledger | 353 fresh, 0 stale |
+| Lean modules · lines of Lean | 282 · ~60,600 |
+| verification ledger | 367 fresh, 0 stale |
 | axioms used | `propext, Classical.choice, Quot.sound` only |
 | Lean / Mathlib | `v4.32.0` / `81a5d257`, pinned ([`lean-toolchain`](lean-toolchain), [`lake-manifest.json`](lake-manifest.json)) |
 
-The library is organized by theme under [`MathFin/`](MathFin): `Foundations/` (133 modules — the
+The library is organized by theme under [`MathFin/`](MathFin): `Foundations/` (138 modules — the
 stochastic core), `BlackScholes/` (51), `FixedIncome/` (24), `Binomial/` (18), `Portfolio/` (14),
-`RiskMeasures/` (9), `Actuarial/` (6), `Performance/` (4), `Futures/` (3), `Bridges/` (2), `DeFi/` (1).
+`RiskMeasures/` (10), `Actuarial/` (6), `Contracts/` (5), `Performance/` (5), `Futures/` (3),
+`Bridges/` (2), `DeFi/` (1).
 
 ## Quick start
 
