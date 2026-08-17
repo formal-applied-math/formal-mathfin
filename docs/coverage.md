@@ -27,11 +27,56 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 ## Current Audit
 
 > **Live status (2026-08-17):** corpus
-> **358**, **327 full + 18 wrappers = 345/358 delivery-ready**, 13 reduced cores, 0 placeholders.
-> Ledger 358 fresh / 0 stale / 0 missing; `lake build MathFin` and `lake lint` green, `pytest`
-> 48/48, `AxiomAuditGen` at 318 guards (325 curated). The **Itô chain rule** round built the
-> `∫ φ dS` primitive that six places in the repo had been recording as missing; the **coherence
-> pass** immediately after closed what that round left open — see the two blocks below.
+> **367**, **336 full + 18 wrappers = 354/367 delivery-ready**, 13 reduced cores, 0 placeholders.
+> Ledger 367 fresh / 0 stale / 0 missing; `lake build MathFin` and `lake lint` green, `pytest`
+> 50/50, `AxiomAuditGen` at 327 guards (231 curated). The **contracts tower** below is the new
+> round; the **Itô chain rule** and its coherence pass are the two blocks after it.
+>
+> **2026-08-17 — the contracts tower: a reified payoff language, closed to Black–Scholes (358 →
+> 367).** Five new modules under `MathFin/Contracts/`, nine entries `mf-contract-*`. `Core.lean`
+> reifies a payoff as data — `Payoff ι` / `Contract ι` inductives over a **typed** underlying
+> index `ι` (`ι = Unit` for the single-asset instances below), not the inline lambda every other
+> payoff in the library is written as. `Adapted.lean` proves the reification pays for itself,
+> against a *future* rung: `Payoff.measurable_eval_of_obsTimes_le` is the adaptedness hypothesis
+> a `Payoff` will need to be a legitimate stochastic-integral integrand — `𝓕 u`-measurability
+> follows from every observation time in `obsTimes` (a syntactic, sufficient-not-necessary
+> over-approximation) being `≤ u`. **No theorem in this round consumes it yet** — `Pricing.lean`
+> integrates against a fixed measure, never a filtration, so it has nothing to discharge this
+> hypothesis against.
+> `Pricing.lean` integrates `pathPV` against a measure into `Contract.value`, proves it linear
+> (`value_scale` unconditional, `value_both` needing both integrability hypotheses —
+> `integral_add` is false without them), and proves `value_deliverAsset` /
+> `value_process_martingale` from `Martingale.condExp_ae_eq` and `martingale_condExp` alone —
+> deliberately **no** `IsEMM` hypothesis anywhere in the file, since neither theorem touches the
+> mutual-absolute-continuity content (`ac`/`ac'`) that turns a martingale measure into an
+> *equivalent* one. `BlackScholes.lean` and `CappedCall.lean` close the loop: `value_pay_eq`
+> reduces `Contract.value` on any single-cashflow contract to exactly the payoff integral, so
+> `value_europeanCall`/`value_europeanPut`/`value_digitalCall` reach `bs_call_formula` /
+> `bs_put_formula` / `bs_cash_or_nothing_formula` by one `rw` each, and `value_cappedCall` reaches
+> the bull-spread difference by **composing** `value_europeanCall` twice through
+> `Contract.value_both`/`value_scale` — no third integral. `cappedCall_payoff_eq` is a separate
+> theorem (`mf-contract-capped-call`) transporting the existing pointwise identity
+> `cappedCall_eq_bull_spread` onto the composed contract's `pathPV`; it, not the definition's
+> name, is what earns `cappedCall` its name, and the corpus keeps the payoff and value claims as
+> two entries (`mf-contract-capped-call` / `mf-contract-capped-call-value`) rather than one that
+> would silently attach the pricing result to whichever entry a reader opens first.
+>
+> **The honest ceiling, stated once for the whole tower.** `Payoff` is a finite inductive walked
+> by `List`-valued `obsTimes`, so every instance here is a payoff kernel over a **finite**
+> observation grid — no continuously-monitored barrier is expressible. Rung (c) (the
+> `BlackScholes.lean`/`CappedCall.lean` reductions) is **single-asset**, `ι = Unit`, under the
+> `BSCallHyp` hypothesis bundle each closed form already needed; nothing here prices under a
+> model that is not separately assumed. The martingale rung (`value_deliverAsset`,
+> `value_process_martingale`) is the **value process**, not the hedge: it does not identify
+> `Contract.value` with the initial wealth of a replicating strategy (that primitive,
+> `MarketCompletenessInPrice.exists_replicating_strategy_in_price`, landed on `main` the day
+> before this round and is the natural next rung, deferred). And none of it is a term-sheet
+> formalisation — no calendar, business-day convention, disruption, corporate action or issuer
+> credit exists at any instantiation, and no entry's `description` or `formalization_scope`
+> claims one. Consulted as a source, not a template: Bilokon, *The Contract Is Not the Model*
+> (working paper, 2026); see `docs/sources.md` for what was taken and what was not. All nine
+> entries axioms-clean, `full`. Net: corpus 358 → **367**, **327 full → 336 full** + 18 = 354/367
+> delivery-ready, 13 reduced, 0 placeholders.
 >
 > **2026-08-17 — coherence pass over the chain-rule tower (corpus unchanged at 358).** No new
 > entries; the round is about what the previous one asserted rather than proved.

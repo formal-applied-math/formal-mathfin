@@ -1181,4 +1181,32 @@ pricing-measure theorems were conditioned on a hypothesis with no exhibited witn
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.PricingMeasureL2Density.exists_density_price_martingale
 
+/-! ### The contracts tower: pricing by composition, not by a third integral (2026-08-17)
+
+`MathFin/Contracts/{Core,Adapted,Pricing,BlackScholes,CappedCall}.lean` separates a payoff's
+*meaning* — reified as `Payoff`/`Contract` data, independent of any stochastic model — from the
+model that prices it. Every payoff elsewhere in this library is written inline as a lambda inside
+the integral that prices it, so the payoff and the model are the same syntactic object; here they
+are not, and that separation is what buys `CappedCall.lean` its headline: `cappedCall K₁ K₂ T` is
+*defined* as a long call at `K₁` composed with a short call at `K₂`, `cappedCall_payoff_eq` proves
+the composed object really pays `min(max(S − K₁, 0), K₂ − K₁)`, and `value_cappedCall` prices it as
+the *difference of two already-proved `europeanCall` values* — by `Contract.value_both` and
+`Contract.value_scale` alone, with no integral touched a third time. `Contracts/BlackScholes.lean`
+reduces each of `europeanCall`, `europeanPut` and `digitalCall` to the library's existing closed
+forms exactly once; every composed instrument built from them afterward prices by algebra on those
+three values rather than by a fresh integration argument.
+
+The layered design and the framing "the contract is not the model" are due to Paul Bilokon, *The
+Contract Is Not the Model* (working paper, 9 August 2026), with code at
+<https://github.com/thalesians/lean_contracts> (Apache-2.0); no code is copied from it — see each
+module's `## Source` section for the full credit line. -/
+
+/-- info: 'MathFin.Contracts.cappedCall_payoff_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.cappedCall_payoff_eq
+
+/-- info: 'MathFin.Contracts.value_cappedCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.value_cappedCall
+
 end MathFin.AxiomAudit

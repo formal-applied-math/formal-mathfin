@@ -18,6 +18,11 @@ LIBRARY sources and the generated audit artifacts (complementing
 4. ``test_axiom_audit_gen_is_fresh`` — ``MathFin/AxiomAuditGen.lean`` is
    byte-identical to the generator's output (generated artifacts are never
    hand-edited; regeneration is a no-op).
+6. ``test_contracts_cite_source`` / ``test_contracts_corpus_entries_cite_source``
+   — the ``MathFin/Contracts/`` tower's design is Bilokon's; every module
+   docstring and every ``mf-contract-*`` corpus entry must carry the credit
+   line, not just one or the other (the corpus ships in the HF dataset, so
+   the citation must travel with the claim).
 """
 
 import re
@@ -28,6 +33,7 @@ from tools.verify.corpus import iter_entries
 
 AUDIT_PATH = Path("MathFin/AxiomAudit.lean")
 BLUEPRINT_PATH = Path("MathFin/Blueprint.lean")
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 # --------------------------------------------------------------------------
@@ -400,3 +406,51 @@ def test_prose_does_not_outrun_statement() -> None:
         "the identification into the statement, or reword the prose to say what "
         f"is actually proved: {sorted(offenders)}"
     )
+
+
+# --------------------------------------------------------------------------
+# 6. the contracts tower cites its source, in the Lean AND in the corpus
+#
+# Attribution that depends on remembering to write it is attribution that
+# gets dropped by the first refactor. The tower's design is Bilokon's
+# (working paper, 9 August 2026); the Lean is ours. A module that carries the
+# design without the credit line — or a published corpus entry that omits it
+# — is the exact failure these two gates exist to prevent.
+# --------------------------------------------------------------------------
+
+CONTRACTS_DIR = REPO_ROOT / "MathFin" / "Contracts"
+SOURCE_MARKERS = (
+    "Bilokon",
+    "The Contract Is Not the Model",
+    "github.com/thalesians/lean_contracts",
+    "Apache-2.0",
+    "No code is copied",
+)
+
+
+def test_contracts_cite_source() -> None:
+    # Every Contracts/ module credits the work it derives from. A reader of
+    # one file must not have to find the credit in a different one.
+    modules = sorted(CONTRACTS_DIR.glob("*.lean"))
+    assert modules, "no modules found under MathFin/Contracts/"
+    for path in modules:
+        text = path.read_text()
+        missing = [m for m in SOURCE_MARKERS if m not in text]
+        assert not missing, (
+            f"{path.relative_to(REPO_ROOT)} is missing its source attribution: "
+            f"{missing}. Every MathFin/Contracts/*.lean docstring must end with "
+            "the ## Source block (see the plan's Global Constraints and "
+            "docs/specs/2026-08-16-contracts-tower-design.md section 6)."
+        )
+
+
+def test_contracts_corpus_entries_cite_source() -> None:
+    # The citation ships with the claim in the HF dataset, not only in the Lean.
+    for _path, entry in iter_entries():
+        if not entry["id"].startswith("mf-contract-"):
+            continue
+        ref = entry.get("metadata", {}).get("reference", "")
+        assert "Bilokon" in ref, (
+            f"{entry['id']}: metadata.reference must name the source paper - "
+            "the corpus is published, so the credit must travel with the claim"
+        )
