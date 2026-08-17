@@ -1,6 +1,6 @@
 # The contract is not the model: a reified payoff tower — design
 
-**Date:** 2026-08-16 · **Status:** design, awaiting approval · **Corpus at design time:** 353
+**Date:** 2026-08-16 · **Status:** design, awaiting approval · **Corpus at design time:** 358
 **Companions:** [`mathematical-architecture.md`](../mathematical-architecture.md),
 [`bridges.md`](../bridges.md), [`roadmap.md`](../roadmap.md),
 [`2026-08-16-ito-chain-rule-design.md`](2026-08-16-ito-chain-rule-design.md) (in flight, disjoint)
@@ -158,7 +158,7 @@ contract be an integrand at all, and it is exactly what the source's `value`
 assumes without proof.
 
 The pricing statement is then stated against the EMM object we already have,
-`ContinuousMarket.IsEMM` (`MathFin/Foundations/ContinuousMarket.lean:71`), rather
+`ContinuousMarket.IsEMM` (`MathFin/Foundations/ContinuousMarket.lean:75`), rather
 than against a fresh `PricingModel` record.
 
 ---
@@ -219,12 +219,16 @@ and a different cadence. The mathematical core does not.
 * Adds ~8 entries to `benchmarks/mathematical_finance.json`, domain
   `mathematical_finance`, status `full`.
 * `REVIEW_SLACK_ENTRIES = 12` and the newest recorded values review covers corpus
-  **351** against a live corpus of **353**. Eight new entries reach 361 — inside
-  slack, but a second phase on top trips `test_values_review_is_current`. Budget
-  a values-review round at the close.
+  **358**, against a live corpus of **358** — both moved when PR #198 (the Itô
+  chain rule) merged to `main` on 2026-08-16 and recorded its own review round.
+  Eight new entries reach 366 — inside slack, but a second phase on top trips
+  `test_values_review_is_current`. Budget a values-review round at the close.
+  Re-derive both numbers at execution time rather than trusting this line:
+  `python3 -m tools.verify.coverage_report`, and the newest `corpus <N>` header
+  in `docs/values-review.md`.
 * `MathFin/AxiomAuditGen.lean` must be regenerated
   (`python3 -m tools.verify.axiom_audit_gen --write`) after the benchmark edit.
-* `MathFin.lean` gains four import lines. It is a **single-file bind mount**:
+* `MathFin.lean` gains five import lines (six if the optional `Scope.lean` rung lands). It is a **single-file bind mount**:
   after editing, re-sync into any running container or restart the service.
 
 ---

@@ -483,7 +483,7 @@ git commit -m "feat(contracts): payoff evaluation is measurable, and adapted to 
 - Probe: `<scratchpad>/probe3.lean`
 
 **Interfaces:**
-- Consumes: `Contract`, `Contract.pathPV`, `pathPV_both`, `pathPV_scale` (Task 1); `MathFin.ContinuousMarket.IsEMM` (`MathFin/Foundations/ContinuousMarket.lean:71`). It does **not** consume Task 2's measurability results: the `Integrable` hypotheses here are assumed, not derived. Task 5 Step 6 is where measurability would be used, if the integrability hypotheses get discharged there.
+- Consumes: `Contract`, `Contract.pathPV`, `pathPV_both`, `pathPV_scale` (Task 1); `MathFin.ContinuousMarket.IsEMM` (`MathFin/Foundations/ContinuousMarket.lean:75`). It does **not** consume Task 2's measurability results: the `Integrable` hypotheses here are assumed, not derived. Task 5 Step 6 is where measurability would be used, if the integrability hypotheses get discharged there.
 - Produces:
   - `Contract.value (Q : Measure Ω) (D : ℝ≥0 → ℝ) (X : ι → ℝ≥0 → Ω → ℝ) (c : Contract ι) : ℝ`
   - `Contract.value_both`, `Contract.value_scale`
@@ -1183,7 +1183,7 @@ The mechanical slice is `test_prose_does_not_outrun_statement`; the rest is judg
 python3 -m tools.verify.coverage_report
 ```
 
-`REVIEW_SLACK_ENTRIES = 12`; the newest recorded review covers corpus **351** against a live corpus of **353**. Eight entries reaches 361 — inside slack, so this phase does not trip the gate, but the next one will. If `test_values_review_is_current` fails, run the multi-agent panel per `docs/values-review.md` and record a ranked backlog plus the upgrades executed — never an "8/8 PASS".
+`REVIEW_SLACK_ENTRIES = 12`; the newest recorded review covers corpus **358** against a live corpus of **358** (PR #198 moved both). Eight entries reaches 366 — inside slack, so this phase does not trip the gate, but the next one will. Re-derive these two numbers before trusting them: run `python3 -m tools.verify.coverage_report` and grep `docs/values-review.md` for the newest `corpus <N>` header, rather than reading them from this plan. If `test_values_review_is_current` fails, run the multi-agent panel per `docs/values-review.md` and record a ranked backlog plus the upgrades executed — never an "8/8 PASS".
 
 - [ ] **Step 9: Commit**
 
