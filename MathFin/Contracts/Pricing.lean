@@ -5,7 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Contracts.Adapted
+public import MathFin.Contracts.Core
 
 /-!
 # Pricing a contract: value, its linearity, and the martingale seam
@@ -42,13 +42,16 @@ is load-bearing.
   fixed times `0` and `T` — it carries no equivalence content, so it is stated against
   `Martingale` directly rather than the library's `IsEMM` bundle, whose `ac`/`ac'` fields
   this argument never needs.
-* `Contract.value_process_martingale` — the conditional-expectation value process of *any*
-  integrable contract is a `Q`-martingale. Deliberately stated with **no** `IsEMM` hypothesis:
-  it is `martingale_condExp` specialized to a contract's cashflows, true for any `Q` with a
-  `SigmaFiniteFiltration`, not a fact about the pricing measure. Shipping it with an `IsEMM`
-  hypothesis would misattribute a conditional-expectation fact to the EMM structure — and, as
-  `value_deliverAsset` above shows, no theorem in this file has any actual EMM content to
-  misattribute it to.
+* `Contract.value_process_martingale` — the conditional-expectation value process of a
+  contract is a `Q`-martingale. Carries **no** `Integrable` hypothesis: `martingale_condExp`
+  is unconditional, because Mathlib's Bochner integral returns the junk value `0` off the
+  integrable set, and the constant-`0` process is trivially a martingale — so the theorem is
+  honest but its content lives entirely in the integrable case. It is also stated with **no**
+  `IsEMM` hypothesis: it is `martingale_condExp` specialized to a contract's cashflows, true
+  for any `Q` with a `SigmaFiniteFiltration`, not a fact about the pricing measure. Shipping it
+  with an `IsEMM` hypothesis would misattribute a conditional-expectation fact to the EMM
+  structure — and, as `value_deliverAsset` above shows, no theorem in this file has any actual
+  EMM content to misattribute it to.
 
 ## Source
 
@@ -131,8 +134,10 @@ theorem Contract.value_deliverAsset {𝓕 : Filtration ℝ≥0 mΩ}
   rw [← integral_condExp (𝓕.le 0)]
   exact integral_congr_ae (hM.condExp_ae_eq zero_le)
 
-/-- The conditional-expectation value process of any integrable contract is a
-`Q`-martingale. This needs **no** EMM hypothesis: it is a property of conditional
+/-- The conditional-expectation value process of a contract is a `Q`-martingale. Needs
+**no** `Integrable` hypothesis — `martingale_condExp` is unconditional, so a non-integrable
+contract just gives the constant-`0` martingale (Bochner junk value); the theorem's content
+is the integrable case. Needs **no** EMM hypothesis either: it is a property of conditional
 expectation, not of the pricing measure — no theorem in this file needs `IsEMM`;
 `value_deliverAsset` needs only `Martingale S 𝓕 Q` and `[IsProbabilityMeasure Q]`. -/
 theorem Contract.value_process_martingale {Q : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}

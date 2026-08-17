@@ -125,6 +125,11 @@ theorem value_digitalCall {Q : Measure Ω} [IsProbabilityMeasure Q]
     (digitalCall K T).value Q (fun _ ↦ Real.exp (-r * T)) (bsAssets S_0 r σ T Z)
       = Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) := by
   rw [digitalCall, value_pay_eq]
+  have heq (ω : Ω) : Payoff.eval (scenarioAt (bsAssets S_0 r σ T Z) ω)
+      ((Payoff.const K).indicatorLt (Payoff.obs () T))
+        = (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (bsTerminal S_0 r σ T (Z ω)) := by
+    simp [Payoff.eval, scenarioAt, bsAssets, Set.indicator_apply, Set.mem_Ioi]
+  simp only [heq]
   exact MathFin.bs_cash_or_nothing_formula h
 
 /-- The reified European put prices to the Black–Scholes put formula: the value of

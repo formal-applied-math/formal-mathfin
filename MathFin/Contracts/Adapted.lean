@@ -16,10 +16,12 @@ substitute a genuinely stochastic model `X : ι → ℝ≥0 → Ω → ℝ` for 
 `Scenario`, and `fun ω ↦ e.eval (fun i t ↦ X i t ω)` is measurable
 (`Payoff.measurable_eval`), and moreover `𝓕 u`-measurable as soon as every
 observation the payoff makes is dated no later than `u`
-(`Payoff.measurable_eval_of_obsTimes_le`). That second fact is what makes a
-`Payoff` a legitimate integrand: it is the exact adaptedness hypothesis
-`Contracts/Pricing.lean` needs to integrate a contract's cashflows against a
-filtered probability space.
+(`Payoff.measurable_eval_of_obsTimes_le`). That second fact is what will make a
+`Payoff` a legitimate stochastic-integral integrand: it is the adaptedness
+hypothesis a future integral rung against a filtered probability space will
+need. **No theorem in the tower consumes it yet** — `Contracts/Pricing.lean`
+integrates only against a fixed measure `Q`, never against a filtration, so it
+has no adaptedness hypothesis to discharge with this file's results.
 
 ## Main definitions
 
@@ -110,8 +112,10 @@ private theorem obsTimes_append_le {u : ℝ≥0} {l₁ l₂ : List ℝ≥0}
 
 /-- Evaluating a payoff against a filtration-adapted model `X` is adapted to
 `𝓕 u`, as soon as every time the payoff observes is dated no later than `u`.
-This is the theorem that makes a `Payoff` a legitimate integrand: it is the
-adaptedness hypothesis `Contracts/Pricing.lean` needs. -/
+This is the theorem that will make a `Payoff` a legitimate stochastic-integral
+integrand — the adaptedness hypothesis a future integral rung will need.
+No theorem in the tower consumes it yet: `Contracts/Pricing.lean` integrates
+against a fixed measure, not a filtration. -/
 theorem Payoff.measurable_eval_of_obsTimes_le
     {𝓕 : Filtration ℝ≥0 mΩ} {u : ℝ≥0} (e : Payoff ι) (X : ι → ℝ≥0 → Ω → ℝ)
     (hX : ∀ i t, Measurable[𝓕 t] (X i t))
