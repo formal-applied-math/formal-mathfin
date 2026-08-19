@@ -69,13 +69,15 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > 367).** Five new modules under `MathFin/Contracts/`, nine entries `mf-contract-*`. `Core.lean`
 > reifies a payoff as data — `Payoff ι` / `Contract ι` inductives over a **typed** underlying
 > index `ι` (`ι = Unit` for the single-asset instances below), not the inline lambda every other
-> payoff in the library is written as. `Adapted.lean` proves the reification pays for itself,
-> against a *future* rung: `Payoff.measurable_eval_of_obsTimes_le` is the adaptedness hypothesis
-> a `Payoff` will need to be a legitimate stochastic-integral integrand — `𝓕 u`-measurability
-> follows from every observation time in `obsTimes` (a syntactic, sufficient-not-necessary
-> over-approximation) being `≤ u`. **No theorem in this round consumes it yet** — `Pricing.lean`
-> integrates against a fixed measure, never a filtration, so it has nothing to discharge this
-> hypothesis against.
+> payoff in the library is written as. `Adapted.lean` proves the reification pays for itself:
+> `Payoff.measurable_eval_of_obsTimes_le` is the adaptedness hypothesis a `Payoff` will need to
+> be a legitimate stochastic-integral integrand — `𝓕 u`-measurability follows from every
+> observation time in `obsTimes` (a syntactic, sufficient-not-necessary over-approximation)
+> being `≤ u`; **it still has no consumer**, since `Pricing.lean` integrates against a fixed
+> measure, never a filtration. Its unconditional sibling `Payoff.measurable_eval` does have one
+> as of 2026-08-19: the a.e.-measurable variant `Payoff.aemeasurable_eval` is consumed by
+> `CappedCall.lean`'s `integrable_europeanCall_pathPV`, which needs exactly the `AEMeasurable`
+> strength `BSCallHyp` supplies rather than the `Measurable` this file originally proved.
 > `Pricing.lean` integrates `pathPV` against a measure into `Contract.value`, proves it linear
 > (`value_scale` unconditional, `value_both` needing both integrability hypotheses —
 > `integral_add` is false without them), and proves `value_deliverAsset` /

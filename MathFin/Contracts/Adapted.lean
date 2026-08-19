@@ -19,9 +19,18 @@ observation the payoff makes is dated no later than `u`
 (`Payoff.measurable_eval_of_obsTimes_le`). That second fact is what will make a
 `Payoff` a legitimate stochastic-integral integrand: it is the adaptedness
 hypothesis a future integral rung against a filtered probability space will
-need. **No theorem in the tower consumes it yet** — `Contracts/Pricing.lean`
-integrates only against a fixed measure `Q`, never against a filtration, so it
-has no adaptedness hypothesis to discharge with this file's results.
+need. **`measurable_eval_of_obsTimes_le` has no consumer yet** —
+`Contracts/Pricing.lean` integrates only against a fixed measure `Q`, never
+against a filtration, so it has no adaptedness hypothesis to discharge with
+this file's results.
+
+`Payoff.aemeasurable_eval` weakens `measurable_eval`'s hypothesis from
+`Measurable` to `AEMeasurable` — the strength the tower's own pricing
+hypotheses actually supply (`BSCallHyp`'s `Z_law : HasLaw Z (gaussianReal 0 1)
+Q` gives only `AEMeasurable Z`, never `Measurable Z`). Unlike its two
+siblings, it **is** consumed: `Contracts/CappedCall.lean`'s
+`integrable_europeanCall_pathPV` calls it directly, in place of hand-rolling
+the same measurability argument against `bsAssets`.
 
 ## Main definitions
 
@@ -44,6 +53,15 @@ has no adaptedness hypothesis to discharge with this file's results.
   into one by the corresponding `Measurable.add`/`.sub`/`.mul`/`.max`/`.min`
   lemma, or `Measurable.ite` composed with `measurableSet_lt` for
   `indicatorLt`.
+* `Payoff.aemeasurable_eval` — the same conclusion as `measurable_eval`, from
+  the weaker hypothesis that each `X i t` is only `AEMeasurable`. Built from
+  `measurable_eval` applied to measurable representatives `(hX i t).mk (X i
+  t)`, transported across the a.e. equality `e.eval X =ᵐ[μ] e.eval X'` proved
+  by a second structural induction (each `obs` leaf contributes
+  `AEMeasurable.ae_eq_mk`; the six binary constructors combine two a.e. facts
+  by `filter_upwards`) — not a direct induction into `AEMeasurable`, whose
+  `indicatorLt` case would need a `NullMeasurableSet` this route avoids
+  producing.
 
 ## Source
 
@@ -101,6 +119,31 @@ theorem Payoff.measurable_eval (e : Payoff ι) (X : ι → ℝ≥0 → Ω → �
   | indicatorLt a b ha hb =>
       exact Measurable.ite (measurableSet_lt ha hb) measurable_const measurable_const
 
+/-- Evaluating a payoff against an a.e.-measurable model is a.e.-measurable: the strength a
+consumer whose model only satisfies `AEMeasurable` (e.g. `HasLaw.aemeasurable`, never
+`Measurable`) actually has. Built from `measurable_eval` on each model coordinate's measurable
+representative `(hX i t).mk (X i t)`, transported across its a.e. equality with the original —
+not a second induction into `AEMeasurable`, whose `indicatorLt` case wants a
+`NullMeasurableSet` awkward to produce here. -/
+theorem Payoff.aemeasurable_eval {μ : Measure Ω} (e : Payoff ι) (X : ι → ℝ≥0 → Ω → ℝ)
+    (hX : ∀ i t, AEMeasurable (X i t) μ) :
+    AEMeasurable (fun ω ↦ e.eval (fun i t ↦ X i t ω)) μ := by
+  let X' : ι → ℝ≥0 → Ω → ℝ := fun i t ↦ (hX i t).mk (X i t)
+  have heq (e : Payoff ι) : (fun ω ↦ e.eval (fun i t ↦ X i t ω))
+      =ᵐ[μ] fun ω ↦ e.eval (fun i t ↦ X' i t ω) := by
+    induction e with
+    | const c => exact .of_forall fun _ ↦ rfl
+    | obs i t => exact (hX i t).ae_eq_mk
+    | add a b ha hb => filter_upwards [ha, hb] with ω hae hbe; simp only [Payoff.eval, hae, hbe]
+    | sub a b ha hb => filter_upwards [ha, hb] with ω hae hbe; simp only [Payoff.eval, hae, hbe]
+    | mul a b ha hb => filter_upwards [ha, hb] with ω hae hbe; simp only [Payoff.eval, hae, hbe]
+    | max a b ha hb => filter_upwards [ha, hb] with ω hae hbe; simp only [Payoff.eval, hae, hbe]
+    | min a b ha hb => filter_upwards [ha, hb] with ω hae hbe; simp only [Payoff.eval, hae, hbe]
+    | indicatorLt a b ha hb =>
+        filter_upwards [ha, hb] with ω hae hbe; simp only [Payoff.eval, hae, hbe]
+  have hX'meas : ∀ i t, Measurable (X' i t) := fun i t ↦ (hX i t).measurable_mk
+  exact (Payoff.measurable_eval e X' hX'meas).aemeasurable.congr (heq e).symm
+
 /-- If a hypothesis `∀ t ∈ l₁ ++ l₂, t ≤ u` holds, it holds on each summand
 separately. Stated on the raw list (rather than on `Payoff.add`'s `obsTimes`)
 so it is reusable, unconditionally, across all six binary constructors. -/
@@ -114,8 +157,10 @@ private theorem obsTimes_append_le {u : ℝ≥0} {l₁ l₂ : List ℝ≥0}
 `𝓕 u`, as soon as every time the payoff observes is dated no later than `u`.
 This is the theorem that will make a `Payoff` a legitimate stochastic-integral
 integrand — the adaptedness hypothesis a future integral rung will need.
-No theorem in the tower consumes it yet: `Contracts/Pricing.lean` integrates
-against a fixed measure, not a filtration. -/
+Still has no consumer: `Contracts/Pricing.lean` integrates against a fixed
+measure, not a filtration, and unlike `measurable_eval`'s a.e. counterpart
+above, no `Payoff` in the tower yet needs an argument observed before a fixed
+time rather than a fixed measure. -/
 theorem Payoff.measurable_eval_of_obsTimes_le
     {𝓕 : Filtration ℝ≥0 mΩ} {u : ℝ≥0} (e : Payoff ι) (X : ι → ℝ≥0 → Ω → ℝ)
     (hX : ∀ i t, Measurable[𝓕 t] (X i t))
