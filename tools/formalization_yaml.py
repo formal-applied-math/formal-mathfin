@@ -1,4 +1,4 @@
-"""Generate formalization.yaml (mathlib-initiative v0.3) from the repo.
+"""Generate formalization.yaml (mathlib-initiative v0.4) from the repo.
 
 The file = MECHANICAL truth generated here (counts, axioms, sorry=0, the
 divergence taxonomy, per-domain alignment) ⊕ EDITORIAL side-car
@@ -224,21 +224,42 @@ def build_doc(root: str) -> dict:
         afp_note += f" (issues {issues})"
 
     proj = meta.get("project", {})
+    # v0.4 / Palomar mandate `description` (the public registry abstract) and
+    # `responsible_maintainers`. Both are editorial — the side-car owns them.
     project = {
         "name": proj.get("name", "formal-mathfin"),
+        "description": " ".join(proj.get("description", "").split()),
         "authors": proj.get("authors", []),
         "license": proj.get("license", "Apache-2.0"),
+        "responsible_maintainers": proj.get("responsible_maintainers", []),
     }
 
+    cls = meta.get("classification", {})
+    classification = {
+        "arxiv": cls.get("arxiv", []),
+        "msc2020": cls.get("msc2020", []),
+    }
+
+    # v0.4 source contract: every source carries a `relationship` drawn from
+    # {formalizes, adapts, independently-proves, background, other}, and result
+    # origin is derived from `sources` rather than a top-level provenance block.
+    # Optional fields are omitted rather than emitted empty.
     sources = []
-    for s in meta.get("sources", []):
-        sources.append({
-            "title": s.get("title", ""), "authors": s.get("authors", []),
-            "id": s.get("id", ""), "type": s.get("type", ""),
-            "license": s.get("license", ""),
-            "author_contacted": s.get("author_contacted", "n/a"),
-            "prior_work": s.get("prior_work", ""),
-        })
+    for src in meta.get("sources", []):
+        row = {
+            "title": src.get("title", ""),
+            "authors": src.get("authors", []),
+            "id": src.get("id", ""),
+            "type": src.get("type", ""),
+            "relationship": src.get("relationship", "background"),
+            "license": src.get("license", "unknown"),
+            "author_endorsement": src.get("author_endorsement", "not-contacted"),
+        }
+        if src.get("location"):
+            row["location"] = src["location"]
+        if src.get("note"):
+            row["note"] = src["note"]
+        sources.append(row)
 
     main_results = []
     for m in meta.get("main_results", []):
@@ -263,8 +284,9 @@ def build_doc(root: str) -> dict:
 
     review = meta.get("review", {})
     doc = {
-        "version": "v0.3",
+        "version": "v0.4",
         "project": project,
+        "classification": classification,
         "sources": sources,
         "status": {
             "scope": (f"{n} theorems across continuous-time stochastic processes and "
@@ -278,14 +300,20 @@ def build_doc(root: str) -> dict:
         "automation": {
             "methods": [
                 {
-                    "method": "interactive human authoring",
+                    "method": "copilot",
                     "models": ["Claude Code (authoring assistant)"],
                     "framework": "Lean 4 + Mathlib + BrownianMotion; VS Code / lean-repl daemon",
-                    "tool_setup": "lake build; AxiomAudit + verification-ledger + values-review gates",
+                    "tool_setup": ("interactive human authoring: lake build; AxiomAudit + "
+                                   "verification-ledger + values-review gates"),
+                    "cost": {
+                        "wall_time": "continuous over 2026-05 to 2026-08",
+                        "spend_usd": "subscription-based",
+                        "hardware": "local machine",
+                    },
                     "prompting_notes": "author edits MathFin/<Section>/*.lean directly",
                 },
                 {
-                    "method": "machine autoformalization (two-stage; scout, not author)",
+                    "method": "agent",
                     "models": sorted(autoform_models) or ["labs-leanstral-1-5"],
                     "framework": "formal-foundry: probe / vibe <-> lean-lsp-mcp",
                     "tool_setup": (f"token-paced GitHub Actions pipeline; {drafter_shape} "
@@ -296,15 +324,25 @@ def build_doc(root: str) -> dict:
                                    "tactic, refactored before merge, never silently merged). On a "
                                    "Leanstral pass it opens a ready-for-review PR on formal-mathfin "
                                    "that a human reviews (8-lens values panel) and merges"),
+                    "cost": {
+                        "wall_time": "token-paced CI runs",
+                        "spend_usd": "0 (Mistral Labs beta)",
+                        "hardware": "GitHub Actions runners",
+                    },
                     "prompting_notes": autoform_note,
                 },
                 {
-                    "method": "own design, external source consulted (cited)",
+                    "method": "manual",
                     "models": [],
                     "framework": ("Lean 4 + Mathlib, this library's conventions; an Isabelle/HOL "
                                   "AFP entry consulted as a source for the classical result set"),
                     "tool_setup": ("provenance.source == afp-actuarial-mathematics; per-file "
                                    "citation header; cited with the author's permission"),
+                    "cost": {
+                        "wall_time": "not tracked",
+                        "spend_usd": "0",
+                        "hardware": "local machine",
+                    },
                     "prompting_notes": afp_note,
                 },
             ],

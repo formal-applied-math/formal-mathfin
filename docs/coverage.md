@@ -32,6 +32,26 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > 50/50, `AxiomAuditGen` at 327 guards (231 curated). The **contracts tower** below is the new
 > round; the **Itô chain rule** and its coherence pass are the two blocks after it.
 >
+> **KNOWN ISSUE — the CRR→BS convergence theorems are vacuous as stated
+> (2026-08-19, unresolved).** All three carry the hypothesis
+> `hna : ∀ n, BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)`,
+> and that hypothesis is unsatisfiable. At `n = 0`, `crrStep T 0 = T / 0 = 0`
+> (Lean division by zero), so `crrUp = crrDown = Real.exp 0 = 1` and the
+> per-step rate is `0`; `BinomialNoArb 1 1 0` then demands `Real.exp 0 < 1`,
+> i.e. `1 < 1`. Machine-checked: `¬ ∀ n, BinomialNoArb …` is provable for
+> arbitrary `r σ T`. Affects `binomialPrice_call_tendsto_bs_closed`
+> (`MathFin/Binomial/CRRClosedForm.lean`), `binomialPrice_call_tendsto_bs` and
+> `tendsto_integral_put` (`MathFin/Binomial/CRRCharFun.lean`), and therefore
+> the corpus entry `mf-crr-bs-call-convergence` (currently tiered `full`) and
+> the README landmark row. The *proofs* are real — they never exploit the
+> vacuity — but the statements as written assert nothing, because no instance
+> of `hna` exists. The fix is to restrict the hypothesis to the indices the
+> limit actually uses (`∀ n, 0 < n → …`, or `∀ᶠ n in atTop, …`) and re-derive
+> the `Tendsto` on `atTop`; the tier and the README wording should be
+> revisited in the same pass. No existing gate can see this: the axiom audit,
+> kernel replay, ledger freshness and the `sorry` scan are all perfectly
+> satisfied by a vacuous statement.
+>
 > **2026-08-17 — the contracts tower: a reified payoff language, closed to Black–Scholes (358 →
 > 367).** Five new modules under `MathFin/Contracts/`, nine entries `mf-contract-*`. `Core.lean`
 > reifies a payoff as data — `Payoff ι` / `Contract ι` inductives over a **typed** underlying

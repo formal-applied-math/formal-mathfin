@@ -1,5 +1,5 @@
 """Freshness + independence gate for the generated formalization.yaml
-(mathlib-initiative v0.3 self-report).
+(mathlib-initiative v0.4 self-report).
 
 1. ``test_formalization_yaml_is_fresh`` — the committed file is byte-identical
    to the generator's output (a generated artifact is never hand-edited;
@@ -35,7 +35,7 @@ def test_generator_is_foundry_independent():
     assert "import foundry" not in src and "mathfin_foundry" not in src
     # and it builds a full document from main-repo data alone
     doc = F.build_doc(ROOT)
-    assert doc["version"] == "v0.3"
+    assert doc["version"] == "v0.4"
     assert set(doc) >= {"project", "sources", "status", "automation",
                         "fidelity", "review", "alignment"}
 

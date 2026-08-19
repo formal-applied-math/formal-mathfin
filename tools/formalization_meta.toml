@@ -1,44 +1,91 @@
-# Editorial side-car for formalization.yaml (mathlib-initiative v0.3 standard).
+# Editorial side-car for formalization.yaml (mathlib-initiative v0.4 standard).
 #
 # `tools/formalization_yaml.py` generates the MECHANICAL truth (counts, axioms,
 # sorry=0, the divergence taxonomy, per-domain alignment) from the repo, and
 # merges the EDITORIAL fields below — the ones no tool can honestly derive
-# (source bibliography, chosen headline results, human reviewers). Keep this
-# file truthful and current; the generator will not invent these.
+# (source bibliography, subject classification, chosen headline results, human
+# reviewers). Keep this file truthful and current; the generator will not invent
+# these.
 
 [project]
 name = "formal-mathfin"
 authors = ["Raphael Coelho"]
 license = "Apache-2.0"
+# v0.4 / Palomar: the people answerable for this formalization.
+responsible_maintainers = ["Raphael Coelho"]
+# v0.4 / Palomar: the concise public abstract. States what the registered
+# declarations prove, then places them in the library.
+description = """\
+A Lean 4 library of formally verified mathematical finance, built on Mathlib \
+and Rémy Degenne's BrownianMotion package. The declarations registered from \
+this repository are the Artzner–Delbaen–Eber–Heath representation theorem for \
+coherent risk measures on a finite state space — a coherent risk measure is the \
+least upper bound of expected loss over its representing set of probability \
+vectors, obtained by separating a rejected position from the acceptance cone — \
+together with the coherence of worst-case loss, which witnesses on a nonempty \
+state space that the representation theorem's hypothesis is satisfiable. They sit in a wider corpus \
+covering continuous-time stochastic processes and mathematical finance: the \
+Itô integral and Itô formula, Girsanov's theorem and the equivalent martingale \
+measure, martingale representation and market completeness, SDE existence and \
+uniqueness, the fundamental theorem of asset pricing, and Black–Scholes \
+pricing and its exotics."""
 
-# Informal sources the corpus formalizes. Complete the bibliographic fields;
-# `author_contacted` is one of: yes | no | n/a.
+# v0.4 / Palomar: classify the MATHEMATICS, not the use of Lean.
+# arXiv: 1-2 official identifiers. MSC2020: 1-8 five-character identifiers.
+[classification]
+arxiv = ["q-fin.RM", "q-fin.MF"]
+msc2020 = ["91G70", "91B30", "91G20", "60H05", "46N10"]
+
+# Informal sources the corpus formalizes. `relationship` is one of:
+# formalizes | adapts | independently-proves | background | other.
+# `author_endorsement` is one of: participated | endorsed | no-response |
+# not-contacted | declined | n/a | other.
+[[sources]]
+id = "artzner-delbaen-eber-heath-1999"
+title = "Coherent Measures of Risk"
+authors = ["Philippe Artzner", "Freddy Delbaen", "Jean-Marc Eber", "David Heath"]
+type = "article"
+location = "Mathematical Finance 9 (1999) 203-228; doi:10.1111/1467-9965.00068"
+relationship = "formalizes"
+license = "unknown"
+author_endorsement = "not-contacted"
+note = "The registered declarations formalize the finite-state case treated in this paper: the four coherence axioms, the representing set of probability vectors, and the representation of the risk measure as a least upper bound of expected loss. The paper's general (infinite-dimensional) statement is not claimed."
+
 [[sources]]
 id = "saporito-stochastic-processes"
 title = "Stochastic Processes (lecture notes / textbook)"
 authors = ["Yuri F. Saporito"]
 type = "textbook"
-license = ""
-author_contacted = "n/a"
-prior_work = ""
+location = ""
+relationship = "formalizes"
+license = "unknown"
+author_endorsement = "not-contacted"
+note = "The spine the wider corpus follows chapter by chapter; not a source for the registered declarations."
 
 [[sources]]
 id = "standard-mathematical-finance-literature"
-title = "Standard mathematical-finance literature (Black–Scholes, CRR, Vasicek, Margrabe, FTAP, …)"
+title = "Standard mathematical-finance literature (Black-Scholes, CRR, Vasicek, Margrabe, FTAP, ...)"
 authors = []
 type = "canonical results"
-license = ""
-author_contacted = "n/a"
-prior_work = ""
+location = ""
+relationship = "background"
+license = "unknown"
+author_endorsement = "n/a"
+note = "Canonical results whose textbook statements the wider corpus tracks."
 
 # Headline results to surface under status.main_results. Each: the Lean
 # declaration, its file, and (optionally) the informal statement it tracks.
-# Left for R to curate — the generator emits [] until populated, never guesses.
-# Example row (uncomment + verify):
-# [[main_results]]
-# declaration = "MathFin.discountedGBM_isMartingale"
-# file = "MathFin/BlackScholes/RiskNeutral.lean"
-# literature = "First fundamental theorem of asset pricing (continuous GBM)"
+[[main_results]]
+declaration = "MathFin.coherentRisk_isLUB"
+file = "MathFin/RiskMeasures/AcceptanceSet.lean"
+literature = "Coherent-risk representation on a finite state space (Artzner-Delbaen-Eber-Heath 1999)"
+source = "artzner-delbaen-eber-heath-1999"
+
+[[main_results]]
+declaration = "MathFin.worstCase_isCoherent"
+file = "MathFin/RiskMeasures/WorstCaseRisk.lean"
+literature = "Worst-case loss is a coherent risk measure (witness that the axioms are satisfiable)"
+source = "artzner-delbaen-eber-heath-1999"
 
 [review]
 # Human/agent reviewers of record for the values-review panel.

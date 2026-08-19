@@ -2,28 +2,56 @@
 # Mechanical fields: regenerate with `--write`. Editorial fields:
 # edit tools/formalization_meta.toml, then regenerate.
 # Per-statement informal→Lean map: docs/coverage.md + benchmarks/.
-version: v0.3
+version: v0.4
 project:
   name: formal-mathfin
+  description: "A Lean 4 library of formally verified mathematical finance, built on Mathlib and Rémy Degenne's BrownianMotion package. The declarations registered from this repository are the Artzner–Delbaen–Eber–Heath representation theorem for coherent risk measures on a finite state space — a coherent risk measure is the least upper bound of expected loss over its representing set of probability vectors, obtained by separating a rejected position from the acceptance cone — together with the coherence of worst-case loss, which witnesses on a nonempty state space that the representation theorem's hypothesis is satisfiable. They sit in a wider corpus covering continuous-time stochastic processes and mathematical finance: the Itô integral and Itô formula, Girsanov's theorem and the equivalent martingale measure, martingale representation and market completeness, SDE existence and uniqueness, the fundamental theorem of asset pricing, and Black–Scholes pricing and its exotics."
   authors:
     - Raphael Coelho
   license: Apache-2.0
+  responsible_maintainers:
+    - Raphael Coelho
+classification:
+  arxiv:
+    - q-fin.RM
+    - q-fin.MF
+  msc2020:
+    - 91G70
+    - 91B30
+    - 91G20
+    - 60H05
+    - 46N10
 sources:
+  - title: Coherent Measures of Risk
+    authors:
+      - Philippe Artzner
+      - Freddy Delbaen
+      - Jean-Marc Eber
+      - David Heath
+    id: artzner-delbaen-eber-heath-1999
+    type: article
+    relationship: formalizes
+    license: unknown
+    author_endorsement: not-contacted
+    location: Mathematical Finance 9 (1999) 203-228; doi:10.1111/1467-9965.00068
+    note: "The registered declarations formalize the finite-state case treated in this paper: the four coherence axioms, the representing set of probability vectors, and the representation of the risk measure as a least upper bound of expected loss. The paper's general (infinite-dimensional) statement is not claimed."
   - title: Stochastic Processes (lecture notes / textbook)
     authors:
       - Yuri F. Saporito
     id: saporito-stochastic-processes
     type: textbook
-    license: ""
-    author_contacted: n/a
-    prior_work: ""
-  - title: Standard mathematical-finance literature (Black–Scholes, CRR, Vasicek, Margrabe, FTAP, …)
+    relationship: formalizes
+    license: unknown
+    author_endorsement: not-contacted
+    note: The spine the wider corpus follows chapter by chapter; not a source for the registered declarations.
+  - title: Standard mathematical-finance literature (Black-Scholes, CRR, Vasicek, Margrabe, FTAP, ...)
     authors: []
     id: standard-mathematical-finance-literature
     type: canonical results
-    license: ""
-    author_contacted: n/a
-    prior_work: ""
+    relationship: background
+    license: unknown
+    author_endorsement: n/a
+    note: Canonical results whose textbook statements the wider corpus tracks.
 status:
   scope: 367 theorems across continuous-time stochastic processes and mathematical finance, built on Mathlib + BrownianMotion; 354 delivery-ready (full + library-wrapper).
   sorry_count: 0
@@ -32,26 +60,58 @@ status:
     - propext
     - Classical.choice
     - Quot.sound
-  main_results: []
+  main_results:
+    - declaration: MathFin.coherentRisk_isLUB
+      file: MathFin/RiskMeasures/AcceptanceSet.lean
+      sorry_count: 0
+      axioms:
+        - propext
+        - Classical.choice
+        - Quot.sound
+      literature_dependencies:
+        - statement: Coherent-risk representation on a finite state space (Artzner-Delbaen-Eber-Heath 1999)
+          source: artzner-delbaen-eber-heath-1999
+    - declaration: MathFin.worstCase_isCoherent
+      file: MathFin/RiskMeasures/WorstCaseRisk.lean
+      sorry_count: 0
+      axioms:
+        - propext
+        - Classical.choice
+        - Quot.sound
+      literature_dependencies:
+        - statement: Worst-case loss is a coherent risk measure (witness that the axioms are satisfiable)
+          source: artzner-delbaen-eber-heath-1999
 automation:
   methods:
-    - method: interactive human authoring
+    - method: copilot
       models:
         - Claude Code (authoring assistant)
       framework: Lean 4 + Mathlib + BrownianMotion; VS Code / lean-repl daemon
-      tool_setup: lake build; AxiomAudit + verification-ledger + values-review gates
+      tool_setup: "interactive human authoring: lake build; AxiomAudit + verification-ledger + values-review gates"
+      cost:
+        wall_time: continuous over 2026-05 to 2026-08
+        spend_usd: subscription-based
+        hardware: local machine
       prompting_notes: author edits MathFin/<Section>/*.lean directly
-    - method: machine autoformalization (two-stage; scout, not author)
+    - method: agent
       models:
         - labs-leanstral-1-5
         - magistral-medium
       framework: "formal-foundry: probe / vibe <-> lean-lsp-mcp"
       tool_setup: token-paced GitHub Actions pipeline; Magistral and an unnamed drafter specify the statement, Leanstral formalizes + proves it. A cheap autop tactic-probe may scout-close a goal Leanstral missed; those open as DRAFT PRs (labeled scout-proof, attributed to the tactic, refactored before merge, never silently merged). On a Leanstral pass it opens a ready-for-review PR on formal-mathfin that a human reviews (8-lens values panel) and merges
+      cost:
+        wall_time: token-paced CI runs
+        spend_usd: 0 (Mistral Labs beta)
+        hardware: GitHub Actions runners
       prompting_notes: "4 autoformalized proof(s) merged (two-stage: statement specified by Magistral (2) and an unnamed drafter (2), formalization + proof by Leanstral) (closing #66, #85, #161, #162)"
-    - method: own design, external source consulted (cited)
+    - method: manual
       models: []
       framework: Lean 4 + Mathlib, this library's conventions; an Isabelle/HOL AFP entry consulted as a source for the classical result set
       tool_setup: provenance.source == afp-actuarial-mathematics; per-file citation header; cited with the author's permission
+      cost:
+        wall_time: not tracked
+        spend_usd: "0"
+        hardware: local machine
       prompting_notes: "2 proof(s) authored in our own design, with Yosuke Ito's AFP 'Actuarial Mathematics' (Survival_Model, BSD) consulted as a source and cited (issues #112)"
   spend_usd: 0 (Mistral Labs beta)
   notes: "scout, not author: the pipeline opens the PR; a human reviews and merges, so no machine proof enters the library unreviewed"

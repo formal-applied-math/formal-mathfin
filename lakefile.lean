@@ -32,6 +32,28 @@ package MathFin where
 lean_lib MathFin where
   globs := #[.andSubmodules `MathFin]
 
+-- Palomar registry submission (https://palomar-registry.org). `Challenge.lean`
+-- is the small, Mathlib-only statement of record that a mathematical reader is
+-- expected to audit; `Solution.lean` repeats those declarations verbatim and
+-- discharges them against `MathFin/RiskMeasures/`. Comparator
+-- (leanprover/comparator, driven by `comparator.json`) checks mechanically that
+-- the two agree on the statement and that the proof uses only the three
+-- permitted axioms.
+--
+-- `Challenge.lean` deliberately leaves its two theorems as `sorry`: that is the
+-- Comparator contract — the Challenge states, the Solution proves — so `lake
+-- build` prints a `declaration uses 'sorry'` warning for those two, and ONLY
+-- those two. The library itself remains sorry-free (`MathFin/AxiomAudit.lean`
+-- and `tests/test_values.py` are the enforced floor). Both are default targets
+-- so a change that breaks the submission goes red here rather than at intake.
+@[default_target]
+lean_lib Challenge where
+  roots := #[`Challenge]
+
+@[default_target]
+lean_lib Solution where
+  roots := #[`Solution]
+
 -- Blueprint JSON emitter with *inferred* dependency edges (LeanArchitect's
 -- own `--json` path omits them; see MathFin/Blueprint/Export.lean). Used by
 -- `tools/blueprint_render.py` to regenerate the docs/blueprint.md spine.
