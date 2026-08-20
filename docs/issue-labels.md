@@ -60,15 +60,52 @@ cross-cutting.
 
 ## Status labels
 
-| Label | Use for |
+| Label | Use for | Written by |
+|---|---|---|
+| `status:needs-triage` | New issue that has not been classified yet. | human |
+| `status:needs-info` | Waiting on clarification before work should start. | human |
+| `status:ready` | Scoped enough for a contributor to pick up. | human, or the pipeline on release |
+| `status:in-progress` | Someone is actively working on it. | human, or the pipeline on seed |
+| `status:blocked-upstream` | Blocked on Mathlib, BrownianMotion, or another external project. | human |
+| `status:blocked-design` | Blocked on a modeling, theorem-shape, or architecture decision. | human |
+| `status:review` | PR exists and maintainer review is the next step. | human, or the pipeline on PR |
+
+### Three of these are machine-written
+
+The autoformalization pipeline in `formal-foundry` used to only READ this backlog.
+It kept its own private record of which issues it had already worked, that record
+drifted from reality, and the pipeline re-drafted work it had already queued. The
+fix was to stop keeping a private record: **the issue is now the state machine, and
+everything the pipeline stores locally is a cache of it.**
+
+So the pipeline moves an issue between three of the seven statuses:
+
+| transition | when |
 |---|---|
-| `status:needs-triage` | New issue that has not been classified yet. |
-| `status:needs-info` | Waiting on clarification before work should start. |
-| `status:ready` | Scoped enough for a contributor to pick up. |
-| `status:in-progress` | Someone is actively working on it. |
-| `status:blocked-upstream` | Blocked on Mathlib, BrownianMotion, or another external project. |
-| `status:blocked-design` | Blocked on a modeling, theorem-shape, or architecture decision. |
-| `status:review` | PR exists and maintainer review is the next step. |
+| `status:ready` → `status:in-progress` | a gated Lean stub for the issue is staged in the pipeline's queue |
+| `status:in-progress` → `status:review` | a PR closing the issue has been opened |
+| back to `status:ready` | the PR was closed unmerged, or the staged stub was retired |
+| → closed | GitHub closes it when the PR merges |
+
+Three consequences worth knowing when you triage:
+
+- **A label may move without a human touching it.** If an issue you filed is
+  suddenly `status:in-progress` with nobody assigned, a machine drafted a statement
+  for it. Nothing has been merged — see below.
+- **The four other statuses are yours alone, and the pipeline will not overrule
+  them.** `status:blocked-design` in particular looks identical to "ready" from the
+  machine's side (no PR, no stub), so it is explicitly excluded: parking an issue
+  there reliably keeps it out of the pipeline. An issue with *no* status label is
+  likewise never promoted — the pipeline repairs its own writes, it does not decide
+  what is worth proving.
+- **`status:review` still means a human reviews it.** Scout-not-author is unchanged:
+  a machine may draft a statement and find a proof, and a person refines and merges
+  it. No label transition here is an approval of anything.
+
+Label writes are best-effort by design — a failed write must never fail a pipeline
+run — so a stale status is possible. The pipeline re-derives all three from the
+observable facts (open PRs, staged stubs) at the start of each run, so a stale one
+corrects itself rather than needing a manual fix.
 
 ## Triage examples
 
