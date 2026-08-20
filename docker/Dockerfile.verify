@@ -29,7 +29,12 @@ WORKDIR /app
 # the MathFin library + its direct deps (BrownianMotion etc.). This bakes
 # the olean tree into the image at /app/.lake/, so the first verify call no
 # longer pays for a cold Lake build.
-COPY lakefile.lean lean-toolchain lake-manifest.json MathFin.lean ./
+# `Challenge.lean` / `Solution.lean` are the Palomar registry targets that
+# `lakefile.lean` declares as `lean_lib`s. The bare `lake build` below builds
+# every declared target, so omitting them fails the image build outright --
+# publish-verify-image has been red since 2dedd2e for exactly this reason.
+COPY lakefile.lean lean-toolchain lake-manifest.json MathFin.lean \
+     Challenge.lean Solution.lean ./
 COPY MathFin/ MathFin/
 RUN elan toolchain install "$(cat lean-toolchain)" \
     && lean --version \
