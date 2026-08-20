@@ -32,9 +32,17 @@ pricing and its exotics."""
 
 # v0.4 / Palomar: classify the MATHEMATICS, not the use of Lean.
 # arXiv: 1-2 official identifiers. MSC2020: 1-8 five-character identifiers.
+# Both are validated at intake against the registry's vendored taxonomies, which
+# are the authoritative list to check a code against before adding it:
+#   https://github.com/PalomarRegistry/PalomarSubmission/blob/HEAD/taxonomies/msc2020-codes.json
+#   https://github.com/PalomarRegistry/PalomarSubmission/blob/HEAD/taxonomies/arxiv-categories.json
+# A well-formed code is not necessarily a live one: 91B30 ("Risk theory,
+# insurance") is MSC2010 and was retired in MSC2020, and it failed intake here.
+# 46A22 replaces it and is the better fit anyway -- the representation theorem is
+# a Hahn-Banach separation, and a code may describe the mathematics in the proof.
 [classification]
 arxiv = ["q-fin.RM", "q-fin.MF"]
-msc2020 = ["91G70", "91B30", "91G20", "60H05", "46N10"]
+msc2020 = ["91G70", "46A22", "91G20", "60H05", "46N10"]
 
 # Informal sources the corpus formalizes. `relationship` is one of:
 # formalizes | adapts | independently-proves | background | other.

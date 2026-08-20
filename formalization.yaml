@@ -17,7 +17,7 @@ classification:
     - q-fin.MF
   msc2020:
     - 91G70
-    - 91B30
+    - 46A22
     - 91G20
     - 60H05
     - 46N10
