@@ -17,7 +17,7 @@
 > what is proved and what is assumed, and the deep connections between the field's pillars made
 > *load-bearing* rather than decorative.
 
-**`353` theorems · `340` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
+**`367` theorems · `354` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
 
 ---
 
@@ -197,6 +197,11 @@ A breadth-and-depth library across eleven areas. Headlines per area (full per-th
 - **Market microstructure** — the Avellaneda–Stoikov market-making problem: the Riccati value function,
   its approximate-HJB solution, and the constant half-spread / linear-skew closed forms, single-asset
   and multi-asset (matrix Riccati by spectral reduction).
+- **Contract reification** — a payoff language (`Payoff`/`Contract` over a typed underlying index)
+  separating *what an instrument pays* from *the model that prices it*, with evaluation proved
+  measurable, and the reified European call, put, cash-or-nothing digital and capped call reduced to
+  the closed forms the library already proves — the capped call by **composing** two European call
+  values, no third integral. Framing after Bilokon 2026 ([`docs/sources.md`](docs/sources.md)).
 - **Actuarial & DeFi** — Gompertz mortality, survival models, annuities, net premium, compound-Poisson
   MGF; constant-product (Uniswap-v2) AMMs.
 
@@ -231,6 +236,14 @@ Honesty is the point, so the gaps are explicit:
   Naming it is Clark–Ocone ([#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)) and
   is open. The Itô *formula's* integrand is named throughout — that is how `dŜ = σŜ dB` is stated —
   but that is the weaker of the two facts.
+- **The contract layer is a payoff kernel, not a legal instrument.** `MathFin/Contracts/` reifies
+  what an instrument *pays* over a finite observation grid, single-asset. Calendars, business-day
+  conventions, market disruption, corporate actions and issuer credit are absent from the language and
+  are not claimed; nor is a lifecycle layer (branching contracts, outstanding notional, termination),
+  which waits on the first callable instrument to force it. One theorem in that tower —
+  `Payoff.measurable_eval_of_obsTimes_le`, the filtration-indexed *adapted* variant — still has no
+  consumer, because nothing yet integrates a contract against a filtration; its a.e.-measurable
+  sibling is consumed.
 - **Known upstream/limit gaps** — e.g. the superhedging strong-duality *equality* needs a
   finite-dimensional Farkas / polyhedral-cone closedness absent from Mathlib at this pin
   ([#39](https://github.com/formal-applied-math/formal-mathfin/issues/39)).
@@ -254,6 +267,7 @@ asserting it is still open.
 | [`docs/hjm-program.md`](docs/hjm-program.md) | The HJM formalization program: stochastic Fubini as a shared primitive, the drift condition as its consumer. |
 | [`docs/values-review.md`](docs/values-review.md) | The judgment layer: the eight review lenses and the upgrade log. |
 | [`docs/onboarding.md`](docs/onboarding.md) · [`docs/troubleshooting.md`](docs/troubleshooting.md) | Getting in, and getting unstuck. |
+| [`docs/sources.md`](docs/sources.md) | External formalisations and papers this library has learned from: what was taken from each, what was not, and where the credit lives in the code. |
 | [`docs/bridges.md`](docs/bridges.md) · [`docs/leaps.md`](docs/leaps.md) · [`docs/patterns.md`](docs/patterns.md) | The Foundations→pricing bridges, the deductive leaps, and distilled Lean proof patterns. |
 
 ## Contributing · citation · license
