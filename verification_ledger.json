@@ -1193,6 +1193,48 @@
       "input_hash": "d38d28f6e8d0ceb8c1b5d552729e1419adbc78c6d22bc0f3783b890bf8f57cf9",
       "verified_at_commit": "70acfe0"
     },
+    "mf-contract-capped-call": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-20",
+      "elapsed_s": 56.1,
+      "input_hash": "37d18ca53347fb0b51fe48aba60858628d73176e72c53feb7543f8e4f16b120a",
+      "verified_at_commit": "57078d1"
+    },
+    "mf-contract-capped-call-value": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-20",
+      "elapsed_s": 52.3,
+      "input_hash": "d356daf0107fd82138e8c64f43e5262dcd158ddffa1de6a46ba079331697834a",
+      "verified_at_commit": "57078d1"
+    },
+    "mf-contract-digital-cash-or-nothing": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-20",
+      "elapsed_s": 63.2,
+      "input_hash": "babbfb3d7f6ba23a64e30386b0a7f6f4a01a2ecd0eaf351d43e1142d957f5f9b",
+      "verified_at_commit": "57078d1"
+    },
+    "mf-contract-european-call": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-20",
+      "elapsed_s": 50.5,
+      "input_hash": "0e6a0b99e088cb264bde571ad31a43e2e4efa30f727196516a64bd82c50874ad",
+      "verified_at_commit": "57078d1"
+    },
+    "mf-contract-european-put": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-20",
+      "elapsed_s": 52.5,
+      "input_hash": "44c7fc981f54ef92efc1bd852d301e2457e4a1d6ba46e5d335784494ed5ae4f2",
+      "verified_at_commit": "57078d1"
+    },
+    "mf-contract-eval-adapted": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-20",
+      "elapsed_s": 3.9,
+      "input_hash": "74e1e98fc3aca2eaaa34982eccc0ecee5666f5d355c6f35777f57c25fd54da7a",
+      "verified_at_commit": "57078d1"
+    },
     "mf-contract-pathpv-both": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-08-20",
@@ -1240,6 +1282,55 @@
       "date": "2026-08-20",
       "elapsed_s": 5.6,
       "input_hash": "0fd33cceca96a3b51c23a0d839ad28a3233693e36fbf0a086d72702c68447562",
+      "verified_at_commit": "70acfe0"
+    },
+    "mf-crr-bs-call-convergence": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-20",
+      "elapsed_s": 4.7,
+      "input_hash": "138c2c3bb6e7aa81c7d2d2dc193a2a7fea1b8fec3c48bf25490afea14f8a6e28",
+      "verified_at_commit": "70acfe0"
+    },
+    "mf-crr-drift-limit": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-20",
+      "elapsed_s": 3.8,
+      "input_hash": "69382c5cbc4dc4ee5ea73b573e397fbe5cc602b4f94538f8499bcf5612395350",
+      "verified_at_commit": "70acfe0"
+    },
+    "mf-crr-drift-quotient": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-20",
+      "elapsed_s": 5.1,
+      "input_hash": "55bea7ba357557c7bff0b1689784e051b416e79b1fdcd771f396f898cde2ba70",
+      "verified_at_commit": "70acfe0"
+    },
+    "mf-crr-gaussian-limit": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-20",
+      "elapsed_s": 3.8,
+      "input_hash": "df5488e0aecd6d7ae5b1d25dde36521a6eef3d2631dcfb0206b661fcc1eff44f",
+      "verified_at_commit": "70acfe0"
+    },
+    "mf-crr-one-step-martingale": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-20",
+      "elapsed_s": 3.8,
+      "input_hash": "903606b5fcfb4542dde4ff5e26da814b5d51d27f1eb03a5174eb86dfc1c83c86",
+      "verified_at_commit": "70acfe0"
+    },
+    "mf-crr-prob-half": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-20",
+      "elapsed_s": 5.3,
+      "input_hash": "8746dbfd4f32b8896c1a521230b22e40cefefd56c4a3872139f501dd374cf8e3",
+      "verified_at_commit": "70acfe0"
+    },
+    "mf-crr-variance-limit": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-08-20",
+      "elapsed_s": 5.6,
+      "input_hash": "9ad48611acd647bf15521cb916f743293cc14fdec6f285268a2510f9747f485f",
       "verified_at_commit": "70acfe0"
     },
     "mf-cvar-rockafellar-uryasev": {

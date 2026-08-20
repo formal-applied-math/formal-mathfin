@@ -91,6 +91,13 @@ services:
       # into the container with no rebuild.
       - ../MathFin:/app/MathFin
       - ../MathFin.lean:/app/MathFin.lean
+      # Palomar registry targets. `lakefile.lean` declares `lean_lib Challenge`
+      # and `lean_lib Solution` (added on main 2026-08-20), so without these two
+      # mounts every containerised `lake build` fails with "some modules have bad
+      # imports" — the lakefile is mounted but the files it names are not. CI is
+      # unaffected because it checks out the whole repo.
+      - ../Challenge.lean:/app/Challenge.lean
+      - ../Solution.lean:/app/Solution.lean
       - ../lakefile.lean:/app/lakefile.lean
       - ../lake-manifest.json:/app/lake-manifest.json
       - ../lean-toolchain:/app/lean-toolchain
@@ -139,6 +146,13 @@ services:
       - ../tools:/app/tools:ro
       - ../MathFin:/app/MathFin
       - ../MathFin.lean:/app/MathFin.lean
+      # Palomar registry targets. `lakefile.lean` declares `lean_lib Challenge`
+      # and `lean_lib Solution` (added on main 2026-08-20), so without these two
+      # mounts every containerised `lake build` fails with "some modules have bad
+      # imports" — the lakefile is mounted but the files it names are not. CI is
+      # unaffected because it checks out the whole repo.
+      - ../Challenge.lean:/app/Challenge.lean
+      - ../Solution.lean:/app/Solution.lean
       - ../lakefile.lean:/app/lakefile.lean
       - ../lake-manifest.json:/app/lake-manifest.json
       - ../lean-toolchain:/app/lean-toolchain
