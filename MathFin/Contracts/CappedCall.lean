@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Contracts.Adapted
 public import MathFin.Contracts.BlackScholes
 public import MathFin.BlackScholes.CappedCall
 public import MathFin.Foundations.BrownianMartingale
@@ -40,7 +41,9 @@ via `cappedCall_eq_bull_spread`.
   an integral. The discounted payoff's integrability, which `Contract.value_both` needs, is
   discharged internally (`integrable_europeanCall_pathPV`) by domination against the
   terminal asset price, whose exponential moment is `integrable_exp_mul_of_hasLaw`'s
-  Gaussian MGF transfer.
+  Gaussian MGF transfer; the payoff's measurability step is `Adapted.lean`'s
+  `Payoff.aemeasurable_eval`, applied to the reified `europeanCall` payoff rather than
+  hand-rolled against `bsTerminal` directly.
 
 ## Source
 
@@ -83,7 +86,10 @@ noncomputable def cappedCall (K₁ K₂ : ℝ) (T : ℝ≥0) : Contract Unit :=
 /-- The discounted payoff of a reified European call is integrable under `BSCallHyp`: it is
 dominated by the terminal asset price `bsTerminal`, itself integrable via the Gaussian MGF
 transfer `integrable_exp_mul_of_hasLaw`. This is what lets `value_cappedCall` below drop the
-integrability hypotheses `Contract.value_both` would otherwise need supplied by hand. -/
+integrability hypotheses `Contract.value_both` would otherwise need supplied by hand.
+Measurability of the payoff comes from `Payoff.aemeasurable_eval` applied to `europeanCall`'s
+own payoff data, not from a bespoke argument against `bsTerminal`: `BSCallHyp`'s `Z_law`
+supplies only `AEMeasurable Z`, which is exactly the hypothesis strength that theorem wants. -/
 private theorem integrable_europeanCall_pathPV {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :
     Integrable (fun ω ↦ (europeanCall K T).pathPV
@@ -98,17 +104,21 @@ private theorem integrable_europeanCall_pathPV {Q : Measure Ω} [IsProbabilityMe
     exact (integrable_exp_mul_of_hasLaw hZ (σ * Real.sqrt T)).const_mul _
   have h_asset_pos (ω : Ω) : 0 < bsTerminal S_0 r σ T (Z ω) :=
     mul_pos hS_0 (Real.exp_pos _)
+  have hX : ∀ (i : Unit) (t : ℝ≥0), AEMeasurable (bsAssets S_0 r σ T Z i t) Q :=
+    fun _ _ ↦ h_asset_meas.comp_aemeasurable hZ.aemeasurable
   have h_payoff_meas : AEStronglyMeasurable
-      (fun ω ↦ max (bsTerminal S_0 r σ T (Z ω) - K) 0) Q :=
-    ((h_asset_meas.sub measurable_const).max measurable_const).comp_aemeasurable
-      hZ.aemeasurable |>.aestronglyMeasurable
+      (fun ω ↦ max (bsTerminal S_0 r σ T (Z ω) - K) 0) Q := by
+    have h := (Payoff.aemeasurable_eval
+      (europeanCallPayoff K T)
+      (bsAssets S_0 r σ T Z) hX).aestronglyMeasurable
+    simpa only [europeanCallPayoff, Payoff.eval, bsAssets] using h
   have h_payoff_int : Integrable (fun ω ↦ max (bsTerminal S_0 r σ T (Z ω) - K) 0) Q := by
     refine h_asset_int.mono' h_payoff_meas (ae_of_all _ fun ω ↦ ?_)
     rw [Real.norm_eq_abs, abs_of_nonneg (le_max_right _ _)]
     calc max (bsTerminal S_0 r σ T (Z ω) - K) 0
         ≤ max (bsTerminal S_0 r σ T (Z ω)) 0 := max_le_max (by linarith) le_rfl
       _ = bsTerminal S_0 r σ T (Z ω) := max_eq_left (h_asset_pos ω).le
-  simp only [europeanCall, Contract.pathPV, Contract.cashflows, Payoff.eval,
+  simp only [europeanCall, europeanCallPayoff, Contract.pathPV, Contract.cashflows, Payoff.eval,
     scenarioAt, bsAssets, List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
   exact h_payoff_int.const_mul _
 
@@ -120,8 +130,8 @@ theorem cappedCall_payoff_eq {K₁ K₂ : ℝ} (h : K₁ ≤ K₂) {T : ℝ≥0}
     (s : Scenario Unit) :
     (cappedCall K₁ K₂ T).pathPV (fun _ ↦ 1) s
       = min (max (s () T - K₁) 0) (K₂ - K₁) := by
-  simp only [cappedCall, Contract.pathPV, Contract.cashflows, europeanCall, Payoff.eval,
-    List.map_append, List.map_cons, List.map_nil, List.sum_append,
+  simp only [cappedCall, Contract.pathPV, Contract.cashflows, europeanCall, europeanCallPayoff,
+    Payoff.eval, List.map_append, List.map_cons, List.map_nil, List.sum_append,
     List.sum_cons, List.sum_nil, one_mul, add_zero]
   linarith [MathFin.cappedCall_eq_bull_spread (s () T) K₁ K₂ h]
 

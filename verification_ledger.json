@@ -1196,44 +1196,44 @@
     "mf-contract-capped-call": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-08-20",
-      "elapsed_s": 5.3,
-      "input_hash": "af21c4f288e54ee539bd6f337e0d20624d0cd4f920ddbcd63e30ea7f6fd29d5c",
-      "verified_at_commit": "70acfe0"
+      "elapsed_s": 56.1,
+      "input_hash": "37d18ca53347fb0b51fe48aba60858628d73176e72c53feb7543f8e4f16b120a",
+      "verified_at_commit": "57078d1"
     },
     "mf-contract-capped-call-value": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-08-20",
-      "elapsed_s": 5.5,
-      "input_hash": "dd3a700f9cbac63482be246b2d035378dabae6fea8c3c5b667500a4c54d3f493",
-      "verified_at_commit": "70acfe0"
+      "elapsed_s": 52.3,
+      "input_hash": "d356daf0107fd82138e8c64f43e5262dcd158ddffa1de6a46ba079331697834a",
+      "verified_at_commit": "57078d1"
     },
     "mf-contract-digital-cash-or-nothing": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-08-20",
-      "elapsed_s": 5.6,
-      "input_hash": "01c8029fff751f4e7cb7ec6cac9ca28af649dd651b540df2fc69b1596cfe5e88",
-      "verified_at_commit": "70acfe0"
+      "elapsed_s": 63.2,
+      "input_hash": "babbfb3d7f6ba23a64e30386b0a7f6f4a01a2ecd0eaf351d43e1142d957f5f9b",
+      "verified_at_commit": "57078d1"
     },
     "mf-contract-european-call": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-08-20",
-      "elapsed_s": 3.8,
-      "input_hash": "337608907130cd66b1d112249b6cd1a290c28f4df0f1816e1141b01b6cf41885",
-      "verified_at_commit": "70acfe0"
+      "elapsed_s": 50.5,
+      "input_hash": "0e6a0b99e088cb264bde571ad31a43e2e4efa30f727196516a64bd82c50874ad",
+      "verified_at_commit": "57078d1"
     },
     "mf-contract-european-put": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-08-20",
-      "elapsed_s": 5.2,
-      "input_hash": "fab1e951de113811a94593000abe22d3e3a6af606ec391c10b1dc9475e17b18f",
-      "verified_at_commit": "70acfe0"
+      "elapsed_s": 52.5,
+      "input_hash": "44c7fc981f54ef92efc1bd852d301e2457e4a1d6ba46e5d335784494ed5ae4f2",
+      "verified_at_commit": "57078d1"
     },
     "mf-contract-eval-adapted": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-08-20",
-      "elapsed_s": 5.2,
-      "input_hash": "5b7d5bf5b143bfd5a12284c5c41f1cb82d669976e0ef70c0ff16c6aa0918b858",
-      "verified_at_commit": "70acfe0"
+      "elapsed_s": 3.9,
+      "input_hash": "74e1e98fc3aca2eaaa34982eccc0ecee5666f5d355c6f35777f57c25fd54da7a",
+      "verified_at_commit": "57078d1"
     },
     "mf-contract-pathpv-both": {
       "benchmark_file": "mathematical_finance.json",
