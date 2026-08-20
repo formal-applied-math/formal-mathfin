@@ -22,7 +22,15 @@ The Lean evidence is a Challenge/Solution pair, checked by
 | [`comparator.json`](../comparator.json) | which declarations are compared, and under which axioms |
 | [`formalization.yaml`](../formalization.yaml) | the v0.4 self-report; its `project.description` is the public abstract |
 
-Two declarations are registered, both in namespace `ADEH`:
+Status: submitted as `abzuy8zzjtwg` at commit `06f88ca`. Mechanical
+verification passed — Comparator accepted both declarations under
+`propext`, `Quot.sound`, `Classical.choice`, with the Challenge recorded at
+`trust_level: high` and no untrusted sources — and the editorial review
+identified no blocking problem. *Registration is a separate, deliberate step*
+(it publishes the review and creates preservation tags) and is the maintainer's
+decision, so this document does not claim a registry record exists.
+
+Two declarations are compared, both in namespace `ADEH`:
 
 - `ADEH.coherentRisk_isLUB` — the Artzner–Delbaen–Eber–Heath representation
   theorem on a finite state space: a coherent risk measure is the *least upper
