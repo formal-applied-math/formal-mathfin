@@ -80,7 +80,7 @@ lemma exp_neg_mul_integral_put_gaussian_eq {r σ T S₀ K : ℝ}
   exact hpf
 
 /-- **Cox–Ross–Rubinstein → Black–Scholes, closed form.** Under no-arbitrage at
-every step, the `n`-step CRR binomial call price converges to the *literal*
+every step with `n ≥ 1`, the `n`-step CRR binomial call price converges to the *literal*
 Black–Scholes call price `S₀·Φ(d₁) − K·e^{−rT}·Φ(d₂)`.
 
 This is `binomialPrice_call_tendsto_bs` with its put-call-parity integral limit
@@ -88,7 +88,7 @@ chained, via `exp_neg_mul_integral_put_gaussian_eq` + `Phi_neg`, onto the closed
 `Φ`-form. -/
 theorem binomialPrice_call_tendsto_bs_closed {r σ T S₀ K : ℝ}
     (hσ : 0 < σ) (hT : 0 < T) (hS₀ : 0 < S₀) (hK : 0 < K)
-    (hna : ∀ n, BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
+    (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
     Tendsto (fun n : ℕ ↦ binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
         (fun x ↦ max (x - K) 0) n S₀) atTop
       (𝓝 (S₀ * Phi (bsd1 S₀ K r σ T)

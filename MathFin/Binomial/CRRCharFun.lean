@@ -496,13 +496,17 @@ lemma integral_const_mul_exp_gaussian {r σ T S₀ : ℝ} (hT : 0 < T) :
 put payoff `x ↦ max(K − S₀eˣ, 0)` is bounded and continuous, this is immediate from
 the convergence in distribution `crr_tendsto_gaussian_inDistribution`. -/
 lemma tendsto_integral_put {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT : 0 < T) (hS₀ : 0 < S₀)
-    (hna : ∀ n, BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
+    (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
     Tendsto (fun n : ℕ ↦ ∫ x, max (K - S₀ * Real.exp x) 0
         ∂(convPow (crrStepMeasure r σ T n) n)) atTop
       (𝓝 (∫ x, max (K - S₀ * Real.exp x) 0
         ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) := by
-  have hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := fun n ↦
-    ⟨(crrUpProb_mem_Ioo (hna n)).1.le, (crrUpProb_mem_Ioo (hna n)).2.le⟩
+  -- `n = 0` is degenerate (`crrProb_zero`) and no-arbitrage is impossible there,
+  -- but the `0 ≤ p ≤ 1` bound the limit consumes survives it anyway.
+  have hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := fun n ↦ by
+    rcases Nat.eq_zero_or_pos n with rfl | hn
+    · simp
+    · exact ⟨(crrUpProb_mem_Ioo (hna n hn)).1.le, (crrUpProb_mem_Ioo (hna n hn)).2.le⟩
   have hcont : Continuous (fun x : ℝ ↦ max (K - S₀ * Real.exp x) 0) := by fun_prop
   have hbound : ∀ x : ℝ, ‖max (K - S₀ * Real.exp x) 0‖ ≤ |K| := fun x ↦ by
     rw [Real.norm_eq_abs, abs_of_nonneg (le_max_right _ _)]
@@ -526,14 +530,18 @@ price equals a discounted expectation (`binomialPrice_eq_integral_convPow`) that
 converges weakly (`tendsto_integral_put`); binomial put-call parity
 (`binomialPrice_callPut_parity`) lifts this to the (unbounded) call. -/
 theorem binomialPrice_call_tendsto_bs {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT : 0 < T) (hS₀ : 0 < S₀)
-    (hna : ∀ n, BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
+    (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
     Tendsto (fun n : ℕ ↦ binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
         (fun x ↦ max (x - K) 0) n S₀) atTop
       (𝓝 (Real.exp (-(r * T)) * ∫ x, max (K - S₀ * Real.exp x) 0
           ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal)
         + (S₀ - K * Real.exp (-(r * T))))) := by
-  have hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := fun n ↦
-    ⟨(crrUpProb_mem_Ioo (hna n)).1.le, (crrUpProb_mem_Ioo (hna n)).2.le⟩
+  -- `n = 0` is degenerate (`crrProb_zero`) and no-arbitrage is impossible there,
+  -- but the `0 ≤ p ≤ 1` bound the limit consumes survives it anyway.
+  have hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := fun n ↦ by
+    rcases Nat.eq_zero_or_pos n with rfl | hn
+    · simp
+    · exact ⟨(crrUpProb_mem_Ioo (hna n hn)).1.le, (crrUpProb_mem_Ioo (hna n hn)).2.le⟩
   -- Put payoff: measurable, and bounded on `(0,∞)` by `|K|` (since `S₀eˣ > 0`).
   have hmeas : Measurable (fun y : ℝ ↦ max (K - y) 0) := by fun_prop
   have hbd : ∀ y : ℝ, 0 < y → |max (K - y) 0| ≤ |K| := fun y hy ↦ by
@@ -564,7 +572,7 @@ theorem binomialPrice_call_tendsto_bs {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT :
         (fun x ↦ max (K - x) 0) n S₀ + (S₀ - K * Real.exp (-(r * T)))
       = binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
         (fun x ↦ max (x - K) 0) n S₀
-  rw [binomialPrice_callPut_parity (hna n) n S₀, neg_mul, hdisc n hn]
+  rw [binomialPrice_callPut_parity (hna n hn) n S₀, neg_mul, hdisc n hn]
 
 end Distributional
 

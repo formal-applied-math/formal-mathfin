@@ -88,6 +88,50 @@ lemma crrDown_lt_crrUp {σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) {n : ℕ} (hn : 
   rw [Real.exp_lt_exp]
   linarith [mul_pos hσ h_sqrt_pos]
 
+/-- At `n = 0` the CRR step degenerates: `crrStep T 0 = T / 0 = 0`, so `u = d = 1`
+and the risk-neutral probability is the junk value `0 / 0 = 0`.
+
+This is why the no-arbitrage hypothesis of the convergence theorems is stated for
+`0 < n`. `BinomialNoArb 1 1 0` is *false* — it demands `Real.exp 0 < 1` — so a
+hypothesis quantified over every `n` is unsatisfiable and the theorem carrying it
+says nothing. The `0 ≤ p ≤ 1` bound the limit actually consumes survives at
+`n = 0` regardless, which is what makes the restricted hypothesis enough. -/
+@[simp]
+lemma crrProb_zero (r σ T : ℝ) : crrProb r σ T 0 = 0 := by
+  simp [crrProb, crrUp, crrDown, crrPerStepRate, crrStep]
+
+/-- **The CRR no-arbitrage condition is satisfiable, and generically so.** If the
+volatility dominates the drift over the horizon (`|r|·√T < σ`), then every CRR
+step with `n ≥ 1` is arbitrage-free.
+
+Some restriction is unavoidable in both directions: `n = 0` is degenerate
+(`crrProb_zero`), and for a fixed `n` a large enough `|r|` pushes `e^{rΔt}`
+outside `[d, u]`. Since `√(T/n) ≤ √T` for `n ≥ 1`, the single bound `|r|·√T < σ`
+covers every step at once — so this discharges the hypothesis of
+`binomialPrice_call_tendsto_bs_closed` on a nonempty set of parameters. -/
+lemma binomialNoArb_crr {r σ T : ℝ} (hT : 0 < T) (hrT : |r| * Real.sqrt T < σ)
+    {n : ℕ} (hn : 0 < n) :
+    BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n) := by
+  have hn1 : (1 : ℕ) ≤ n := hn
+  have hnR : (1 : ℝ) ≤ n := by exact_mod_cast hn1
+  have hstep : 0 < crrStep T n := div_pos hT (by linarith)
+  have hsqrt : 0 < Real.sqrt (crrStep T n) := Real.sqrt_pos.mpr hstep
+  -- `√Δt ≤ √T`, so the single bound `|r|·√T < σ` bounds every step.
+  have hmono : Real.sqrt (crrStep T n) ≤ Real.sqrt T :=
+    Real.sqrt_le_sqrt (by rw [crrStep]; exact div_le_self hT.le hnR)
+  have hkey : |r| * Real.sqrt (crrStep T n) < σ :=
+    lt_of_le_of_lt (mul_le_mul_of_nonneg_left hmono (abs_nonneg r)) hrT
+  -- hence `|r·Δt| < σ·√Δt`, which is exactly `d < e^{rΔt} < u`.
+  have hbound : |r * crrStep T n| < σ * Real.sqrt (crrStep T n) := by
+    rw [abs_mul, abs_of_pos hstep, ← Real.mul_self_sqrt hstep.le, ← mul_assoc]
+    exact mul_lt_mul_of_pos_right hkey hsqrt
+  rw [abs_lt] at hbound
+  refine ⟨Real.exp_pos _, ?_, ?_⟩
+  · show Real.exp (-(σ * Real.sqrt (crrStep T n))) < Real.exp (r * crrStep T n)
+    exact Real.exp_lt_exp.mpr hbound.1
+  · show Real.exp (r * crrStep T n) < Real.exp (σ * Real.sqrt (crrStep T n))
+    exact Real.exp_lt_exp.mpr hbound.2
+
 /-! ### One-step risk-neutral martingale identity (algebraic, exact) -/
 
 /-- **CRR one-step martingale identity** (exact, not asymptotic):
