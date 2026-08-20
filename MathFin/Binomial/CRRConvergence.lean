@@ -122,9 +122,13 @@ lemma binomialNoArb_crr {r σ T : ℝ} (hT : 0 < T) (hrT : |r| * Real.sqrt T < �
   have hkey : |r| * Real.sqrt (crrStep T n) < σ :=
     lt_of_le_of_lt (mul_le_mul_of_nonneg_left hmono (abs_nonneg r)) hrT
   -- hence `|r·Δt| < σ·√Δt`, which is exactly `d < e^{rΔt} < u`.
+  have hsq : crrStep T n = Real.sqrt (crrStep T n) * Real.sqrt (crrStep T n) :=
+    (Real.mul_self_sqrt hstep.le).symm
   have hbound : |r * crrStep T n| < σ * Real.sqrt (crrStep T n) := by
-    rw [abs_mul, abs_of_pos hstep, ← Real.mul_self_sqrt hstep.le, ← mul_assoc]
-    exact mul_lt_mul_of_pos_right hkey hsqrt
+    calc |r * crrStep T n| = |r| * crrStep T n := by rw [abs_mul, abs_of_pos hstep]
+      _ = |r| * Real.sqrt (crrStep T n) * Real.sqrt (crrStep T n) := by
+          rw [mul_assoc, ← hsq]
+      _ < σ * Real.sqrt (crrStep T n) := mul_lt_mul_of_pos_right hkey hsqrt
   rw [abs_lt] at hbound
   refine ⟨Real.exp_pos _, ?_, ?_⟩
   · show Real.exp (-(σ * Real.sqrt (crrStep T n))) < Real.exp (r * crrStep T n)
