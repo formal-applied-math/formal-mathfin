@@ -520,7 +520,10 @@ lemma tendsto_integral_put {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT : 0 < T) (hS
     bsLimitProbMeasure, MeasureTheory.ProbabilityMeasure.coe_mk] using hconv
 
 /-- **Cox–Ross–Rubinstein → Black–Scholes, the call-price convergence.** Under
-no-arbitrage at every step, the `n`-step CRR binomial price of a European call
+no-arbitrage at every step with `n ≥ 1` — a hypothesis `binomialNoArb_crr`
+discharges whenever `|r|·√T < σ`, and one that must exclude `n = 0`, where the
+step degenerates to `u = d = 1` and no-arbitrage is impossible — the `n`-step
+CRR binomial price of a European call
 converges to the Black–Scholes call price, written in put-call-parity form as
 `e^{−rT}·E[(K − S_T)₊] + (S₀ − K e^{−rT})` — the discounted put expectation plus the
 forward, with `S_T = S₀ e^X`, `X ∼ N((r − σ²/2)T, σ²T)`.
