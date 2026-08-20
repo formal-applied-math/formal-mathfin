@@ -41,11 +41,12 @@ perfectly happy with an empty statement. Registering the worst-case witness
 alongside it makes non-vacuity a *mechanically checked* part of the submission
 rather than a claim in prose.
 
-This is not hypothetical. It is the failure mode found in this library's own
-CRR→Black–Scholes convergence theorems, whose `∀ n, BinomialNoArb (crrUp σ T n)
-…` hypothesis is unsatisfiable at `n = 0` (`crrStep T 0 = T / 0 = 0`, so
-`u = d = 1` and coherence demands `exp 0 < 1`). See
-[`docs/coverage.md`](coverage.md).
+This is not hypothetical. Choosing what to submit is what uncovered it in this
+library's own CRR→Black–Scholes convergence theorems, whose
+`∀ n, BinomialNoArb (crrUp σ T n) …` hypothesis was unsatisfiable at `n = 0`
+(`crrStep T 0 = T / 0 = 0`, so `u = d = 1` and no-arbitrage demands
+`exp 0 < 1`) — all three were vacuously true, and every gate in the repository
+passed them. Fixed on 2026-08-20; see [`docs/coverage.md`](coverage.md).
 
 ## The Challenge dependency rule
 

@@ -32,25 +32,38 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > 50/50, `AxiomAuditGen` at 327 guards (231 curated). The **contracts tower** below is the new
 > round; the **Itô chain rule** and its coherence pass are the two blocks after it.
 >
-> **KNOWN ISSUE — the CRR→BS convergence theorems are vacuous as stated
-> (2026-08-19, unresolved).** All three carry the hypothesis
+> **FIXED — the CRR→BS convergence theorems were vacuous as stated
+> (found 2026-08-19, fixed 2026-08-20).** All three carried
 > `hna : ∀ n, BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)`,
-> and that hypothesis is unsatisfiable. At `n = 0`, `crrStep T 0 = T / 0 = 0`
-> (Lean division by zero), so `crrUp = crrDown = Real.exp 0 = 1` and the
-> per-step rate is `0`; `BinomialNoArb 1 1 0` then demands `Real.exp 0 < 1`,
-> i.e. `1 < 1`. Machine-checked: `¬ ∀ n, BinomialNoArb …` is provable for
-> arbitrary `r σ T`. Affects `binomialPrice_call_tendsto_bs_closed`
-> (`MathFin/Binomial/CRRClosedForm.lean`), `binomialPrice_call_tendsto_bs` and
-> `tendsto_integral_put` (`MathFin/Binomial/CRRCharFun.lean`), and therefore
-> the corpus entry `mf-crr-bs-call-convergence` (currently tiered `full`) and
-> the README landmark row. The *proofs* are real — they never exploit the
-> vacuity — but the statements as written assert nothing, because no instance
-> of `hna` exists. The fix is to restrict the hypothesis to the indices the
-> limit actually uses (`∀ n, 0 < n → …`, or `∀ᶠ n in atTop, …`) and re-derive
-> the `Tendsto` on `atTop`; the tier and the README wording should be
-> revisited in the same pass. No existing gate can see this: the axiom audit,
-> kernel replay, ledger freshness and the `sorry` scan are all perfectly
-> satisfied by a vacuous statement.
+> and no `(r, σ, T)` satisfies it: at `n = 0`, `crrStep T 0 = T / 0 = 0` (Lean
+> division by zero), so `u = d = Real.exp 0 = 1` and `BinomialNoArb 1 1 0`
+> demands `Real.exp 0 < 1`. Every theorem carrying it was vacuously true.
+> Machine-checked: `¬ ∀ n, BinomialNoArb …` is provable for arbitrary `r σ T`.
+>
+> The hypothesis is now `∀ n, 0 < n → …`, which is all the limit ever consumed —
+> both identity steps in the proof were already established eventually-in-`n`,
+> and the only place needing `n = 0` was the `0 ≤ p ≤ 1` bound, which survives
+> the degenerate step on its own (`crrProb_zero`). Restricting a hypothesis is
+> not by itself evidence it can be met, so `MathFin.binomialNoArb_crr`
+> (`MathFin/Binomial/CRRConvergence.lean`) proves it can: whenever
+> `|r|·√T < σ`, every step with `n ≥ 1` is arbitrage-free, since
+> `√(T/n) ≤ √T` bounds all of them at once. Both restrictions are necessary —
+> `n = 0` is degenerate, and for a fixed `n` a large enough `|r|` pushes
+> `e^{rΔt}` outside `[d, u]`. Affected
+> `binomialPrice_call_tendsto_bs_closed`, `binomialPrice_call_tendsto_bs`,
+> `tendsto_integral_put`, the entry `mf-crr-bs-call-convergence` (which keeps
+> its `full` tier — the proof was always a real derivation; it is the statement
+> that asserted nothing) and the README landmark row.
+>
+> Worth recording *why* nothing caught it: the proof never exploited the
+> vacuity, so every gate passed honestly. The axiom audit, kernel replay, ledger
+> freshness, the `sorry` scan, `lake build`, `lake lint` and even the
+> prose-vs-statement gate are all satisfied by a vacuous statement — the last
+> one compares prose against a statement that is itself empty. Soundness gates
+> ask whether the proof is valid, and it was. Nothing asked whether the
+> hypothesis was inhabited. It surfaced only because the Palomar submission
+> (`docs/palomar.md`) forced the statement to be restated for an outside
+> auditor in Mathlib alone.
 >
 > **2026-08-17 — the contracts tower: a reified payoff language, closed to Black–Scholes (358 →
 > 367).** Five new modules under `MathFin/Contracts/`, nine entries `mf-contract-*`. `Core.lean`
