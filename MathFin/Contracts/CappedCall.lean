@@ -109,16 +109,16 @@ private theorem integrable_europeanCall_pathPV {Q : Measure Ω} [IsProbabilityMe
   have h_payoff_meas : AEStronglyMeasurable
       (fun ω ↦ max (bsTerminal S_0 r σ T (Z ω) - K) 0) Q := by
     have h := (Payoff.aemeasurable_eval
-      (Payoff.max (Payoff.sub (Payoff.obs () T) (Payoff.const K)) (Payoff.const 0))
+      (europeanCallPayoff K T)
       (bsAssets S_0 r σ T Z) hX).aestronglyMeasurable
-    simpa only [Payoff.eval, bsAssets] using h
+    simpa only [europeanCallPayoff, Payoff.eval, bsAssets] using h
   have h_payoff_int : Integrable (fun ω ↦ max (bsTerminal S_0 r σ T (Z ω) - K) 0) Q := by
     refine h_asset_int.mono' h_payoff_meas (ae_of_all _ fun ω ↦ ?_)
     rw [Real.norm_eq_abs, abs_of_nonneg (le_max_right _ _)]
     calc max (bsTerminal S_0 r σ T (Z ω) - K) 0
         ≤ max (bsTerminal S_0 r σ T (Z ω)) 0 := max_le_max (by linarith) le_rfl
       _ = bsTerminal S_0 r σ T (Z ω) := max_eq_left (h_asset_pos ω).le
-  simp only [europeanCall, Contract.pathPV, Contract.cashflows, Payoff.eval,
+  simp only [europeanCall, europeanCallPayoff, Contract.pathPV, Contract.cashflows, Payoff.eval,
     scenarioAt, bsAssets, List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
   exact h_payoff_int.const_mul _
 
@@ -130,8 +130,8 @@ theorem cappedCall_payoff_eq {K₁ K₂ : ℝ} (h : K₁ ≤ K₂) {T : ℝ≥0}
     (s : Scenario Unit) :
     (cappedCall K₁ K₂ T).pathPV (fun _ ↦ 1) s
       = min (max (s () T - K₁) 0) (K₂ - K₁) := by
-  simp only [cappedCall, Contract.pathPV, Contract.cashflows, europeanCall, Payoff.eval,
-    List.map_append, List.map_cons, List.map_nil, List.sum_append,
+  simp only [cappedCall, Contract.pathPV, Contract.cashflows, europeanCall, europeanCallPayoff,
+    Payoff.eval, List.map_append, List.map_cons, List.map_nil, List.sum_append,
     List.sum_cons, List.sum_nil, one_mul, add_zero]
   linarith [MathFin.cappedCall_eq_bull_spread (s () T) K₁ K₂ h]
 

@@ -1193,27 +1193,6 @@
       "input_hash": "d38d28f6e8d0ceb8c1b5d552729e1419adbc78c6d22bc0f3783b890bf8f57cf9",
       "verified_at_commit": "70acfe0"
     },
-    "mf-contract-digital-cash-or-nothing": {
-      "benchmark_file": "mathematical_finance.json",
-      "date": "2026-08-20",
-      "elapsed_s": 5.6,
-      "input_hash": "01c8029fff751f4e7cb7ec6cac9ca28af649dd651b540df2fc69b1596cfe5e88",
-      "verified_at_commit": "70acfe0"
-    },
-    "mf-contract-european-call": {
-      "benchmark_file": "mathematical_finance.json",
-      "date": "2026-08-20",
-      "elapsed_s": 3.8,
-      "input_hash": "337608907130cd66b1d112249b6cd1a290c28f4df0f1816e1141b01b6cf41885",
-      "verified_at_commit": "70acfe0"
-    },
-    "mf-contract-european-put": {
-      "benchmark_file": "mathematical_finance.json",
-      "date": "2026-08-20",
-      "elapsed_s": 5.2,
-      "input_hash": "fab1e951de113811a94593000abe22d3e3a6af606ec391c10b1dc9475e17b18f",
-      "verified_at_commit": "70acfe0"
-    },
     "mf-contract-pathpv-both": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-08-20",

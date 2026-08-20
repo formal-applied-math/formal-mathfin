@@ -74,10 +74,11 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > be a legitimate stochastic-integral integrand — `𝓕 u`-measurability follows from every
 > observation time in `obsTimes` (a syntactic, sufficient-not-necessary over-approximation)
 > being `≤ u`; **it still has no consumer**, since `Pricing.lean` integrates against a fixed
-> measure, never a filtration. Its unconditional sibling `Payoff.measurable_eval` does have one
-> as of 2026-08-19: the a.e.-measurable variant `Payoff.aemeasurable_eval` is consumed by
-> `CappedCall.lean`'s `integrable_europeanCall_pathPV`, which needs exactly the `AEMeasurable`
-> strength `BSCallHyp` supplies rather than the `Measurable` this file originally proved.
+> measure, never a filtration. Its a.e.-measurable sibling `Payoff.aemeasurable_eval` does have
+> one as of 2026-08-19: `CappedCall.lean`'s `integrable_europeanCall_pathPV` calls it directly,
+> needing exactly the `AEMeasurable` strength `BSCallHyp` supplies rather than the `Measurable`
+> its own unconditional sibling `Payoff.measurable_eval` proves — that one stays consumed only
+> internally, by `aemeasurable_eval` on measurable representatives, not by `CappedCall.lean`.
 > `Pricing.lean` integrates `pathPV` against a measure into `Contract.value`, proves it linear
 > (`value_scale` unconditional, `value_both` needing both integrability hypotheses —
 > `integral_add` is false without them), and proves `value_deliverAsset` /

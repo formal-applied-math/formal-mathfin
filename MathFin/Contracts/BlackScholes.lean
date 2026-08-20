@@ -37,6 +37,8 @@ the existing theorem.
 
 * `bsAssets` — the single-asset Black–Scholes model as a model map `Unit → ℝ≥0 → Ω → ℝ`,
   constant in `t` and equal to `bsTerminal` at every time.
+* `europeanCallPayoff` — the call's payoff data on its own, so `CappedCall.lean` can build
+  against exactly this term rather than a second copy of it.
 * `europeanCall`, `europeanPut`, `digitalCall` — the three reified `Contract Unit`s.
 
 ## Main results
@@ -85,9 +87,15 @@ path-dependent instance needs the full GBM path and is deferred. -/
 noncomputable def bsAssets (S_0 r σ T : ℝ) (Z : Ω → ℝ) : Unit → ℝ≥0 → Ω → ℝ :=
   fun _ _ ω ↦ bsTerminal S_0 r σ T (Z ω)
 
+/-- The European call payoff `max (S_T - K) 0`, on its own so a consumer outside this file
+(`CappedCall.lean`'s measurability argument) can reference the same term rather than
+re-spelling it. -/
+noncomputable def europeanCallPayoff (K : ℝ) (T : ℝ≥0) : Payoff Unit :=
+  .max (.sub (.obs () T) (.const K)) (.const 0)
+
 /-- The reified European call: pays `max (S_T - K) 0` at maturity `T`. -/
 noncomputable def europeanCall (K : ℝ) (T : ℝ≥0) : Contract Unit :=
-  .pay T (.max (.sub (.obs () T) (.const K)) (.const 0))
+  .pay T (europeanCallPayoff K T)
 
 /-- The reified European put: pays `max (K - S_T) 0` at maturity `T`. -/
 noncomputable def europeanPut (K : ℝ) (T : ℝ≥0) : Contract Unit :=
