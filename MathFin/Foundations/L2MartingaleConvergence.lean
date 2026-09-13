@@ -55,134 +55,21 @@ namespace L2MartingaleConvergence
 variable {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}
   {ℱ : Filtration ℕ m0} {f : ℕ → Ω → ℝ} {R : ℝ≥0}
 
-/-- Partial running maximum of the enorms, `H n ω = max_{k ≤ n} ‖f k ω‖ₑ`. -/
-private noncomputable def H (f : ℕ → Ω → ℝ) (n : ℕ) (ω : Ω) : ℝ≥0∞ :=
-  (Finset.range (n + 1)).sup fun k ↦ ‖f k ω‖ₑ
-
-/-- All-time envelope `G ω = ⨆ n ‖f n ω‖ₑ`. -/
-private noncomputable def G (f : ℕ → Ω → ℝ) (ω : Ω) : ℝ≥0∞ :=
-  ⨆ n, ‖f n ω‖ₑ
-
-private lemma H_mono (ω : Ω) : Monotone fun n ↦ H f n ω := fun _ _ hab ↦
-  Finset.sup_mono (Finset.range_mono (Nat.add_le_add_right hab 1))
-
-private lemma G_eq_iSup_H (ω : Ω) : G f ω = ⨆ n, H f n ω := by
-  refine le_antisymm (iSup_le fun n ↦ le_iSup_of_le n ?_) (iSup_le fun n ↦ ?_)
-  · show ‖f n ω‖ₑ ≤ (Finset.range (n + 1)).sup fun k ↦ ‖f k ω‖ₑ
-    exact Finset.le_sup (f := fun k ↦ ‖f k ω‖ₑ) (Finset.self_mem_range_succ n)
-  · show ((Finset.range (n + 1)).sup fun k ↦ ‖f k ω‖ₑ) ≤ G f ω
-    exact Finset.sup_le fun k _ ↦ le_iSup (fun m ↦ ‖f m ω‖ₑ) k
-
-private lemma measurable_H (hmeas : ∀ n, Measurable (f n)) (n : ℕ) :
-    Measurable (H f n) := by
-  show Measurable fun ω ↦ (Finset.range (n + 1)).sup fun k ↦ ‖f k ω‖ₑ
-  simp only [Finset.sup_eq_iSup]
-  exact .iSup fun k ↦ .iSup fun _ ↦ (hmeas k).enorm
-
-private lemma measurable_G (hmeas : ∀ n, Measurable (f n)) : Measurable (G f) :=
-  .iSup fun n ↦ (hmeas n).enorm
-
-/-- `∫⁻ ‖g‖ₑ² = (eLpNorm g 2 μ)²`: the seminorm with the rpow peeled off. -/
-private lemma lintegral_enorm_sq (g : Ω → ℝ) :
-    ∫⁻ ω, ‖g ω‖ₑ ^ (2 : ℕ) ∂μ = eLpNorm g 2 μ ^ (2 : ℕ) := by
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (p := 2) (by norm_num) (by norm_num),
-    ← ENNReal.rpow_natCast _ 2, ← ENNReal.rpow_mul]
-  rw [show (1 / (2 : ℝ≥0∞).toReal * ((2 : ℕ) : ℝ) : ℝ) = 1 by norm_num, ENNReal.rpow_one]
-  refine lintegral_congr fun ω ↦ ?_
-  rw [← ENNReal.rpow_natCast]
-  norm_num
-
-/-- The enorm running maximum is the enorm of the real running maximum, so the
-Doob bound on the latter transfers. -/
-private lemma H_eq_enorm_runMax (n : ℕ) (ω : Ω) :
-    H f n ω = ‖(Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
-        (fun k ↦ ‖f k ω‖)‖ₑ := by
-  show ((Finset.range (n + 1)).sup fun k ↦ ‖f k ω‖ₑ)
-    = ‖(Finset.range (n + 1)).sup' Finset.nonempty_range_add_one (fun k ↦ ‖f k ω‖)‖ₑ
-  refine le_antisymm (Finset.sup_le fun k hk ↦ ?_) ?_
-  · rw [← ofReal_norm, ← ofReal_norm]
-    exact ENNReal.ofReal_le_ofReal
-      ((Finset.le_sup' (fun m ↦ ‖f m ω‖) hk).trans (Real.le_norm_self _))
-  · obtain ⟨k₀, hk₀, heq⟩ := Finset.exists_mem_eq_sup'
-      Finset.nonempty_range_add_one (fun k ↦ ‖f k ω‖)
-    rw [heq, show ‖(‖f k₀ ω‖)‖ₑ = ‖f k₀ ω‖ₑ from by
-      rw [← ofReal_norm, norm_norm, ofReal_norm]]
-    exact Finset.le_sup (f := fun k ↦ ‖f k ω‖ₑ) hk₀
-
-/-- Squared partial maxima have uniformly bounded lintegral: this is the
-library's Doob L² maximal inequality (`eLpNorm_norm_runMax_le` at `p = 2`). -/
-private lemma lintegral_H_sq_le [IsFiniteMeasure μ]
-    (hf : Martingale f ℱ μ) (hbdd : ∀ n, eLpNorm (f n) 2 μ ≤ R) (n : ℕ) :
-    ∫⁻ ω, H f n ω ^ (2 : ℕ) ∂μ ≤ ((2 : ℝ≥0∞) * R) ^ (2 : ℕ) := by
-  have h_doob : eLpNorm (fun ω ↦
-      (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one fun k ↦ ‖f k ω‖) 2 μ
-      ≤ (2 : ℝ≥0∞) * R := by
-    have h := hf.eLpNorm_norm_runMax_le one_lt_two n
-    rw [show ENNReal.ofReal (2 : ℝ) = (2 : ℝ≥0∞) by simp] at h
-    refine h.trans ?_
-    rw [show ((2 : ℝ) / (2 - 1)) = 2 by norm_num,
-      show ENNReal.ofReal (2 : ℝ) = (2 : ℝ≥0∞) by simp]
-    exact mul_le_mul_right (hbdd n) _
-  calc ∫⁻ ω, H f n ω ^ (2 : ℕ) ∂μ
-      = eLpNorm (fun ω ↦ (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
-          fun k ↦ ‖f k ω‖) 2 μ ^ (2 : ℕ) := by
-        rw [← lintegral_enorm_sq]
-        exact lintegral_congr fun ω ↦ by rw [H_eq_enorm_runMax]
-    _ ≤ ((2 : ℝ≥0∞) * R) ^ (2 : ℕ) := pow_le_pow_left' h_doob 2
-
-/-- Monotone convergence: the envelope `G` is square-integrable, with the same
-Doob bound. -/
-private lemma lintegral_G_sq_le [IsFiniteMeasure μ]
-    (hf : Martingale f ℱ μ) (hmeas : ∀ n, Measurable (f n))
-    (hbdd : ∀ n, eLpNorm (f n) 2 μ ≤ R) :
-    ∫⁻ ω, G f ω ^ (2 : ℕ) ∂μ ≤ ((2 : ℝ≥0∞) * R) ^ (2 : ℕ) := by
-  have h_ptwise : ∀ ω, G f ω ^ (2 : ℕ) = ⨆ n, H f n ω ^ (2 : ℕ) := by
-    intro ω
-    have h2 : Tendsto (fun n ↦ H f n ω ^ (2 : ℕ)) atTop
-        (𝓝 ((⨆ n, H f n ω) ^ (2 : ℕ))) :=
-      ((ENNReal.continuous_pow 2).tendsto _).comp (tendsto_atTop_iSup (H_mono ω))
-    have h3 : Tendsto (fun n ↦ H f n ω ^ (2 : ℕ)) atTop
-        (𝓝 (⨆ n, H f n ω ^ (2 : ℕ))) :=
-      tendsto_atTop_iSup fun a b hab ↦ pow_le_pow_left' (H_mono ω hab) 2
-    rw [G_eq_iSup_H]
-    exact tendsto_nhds_unique h2 h3
-  calc ∫⁻ ω, G f ω ^ (2 : ℕ) ∂μ
-      = ∫⁻ ω, ⨆ n, H f n ω ^ (2 : ℕ) ∂μ := lintegral_congr h_ptwise
-    _ = ⨆ n, ∫⁻ ω, H f n ω ^ (2 : ℕ) ∂μ :=
-        lintegral_iSup (fun n ↦ (measurable_H hmeas n).pow_const 2)
-          fun a b hab ω ↦ pow_le_pow_left' (H_mono ω hab) 2
-    _ ≤ ((2 : ℝ≥0∞) * R) ^ (2 : ℕ) := iSup_le fun n ↦ lintegral_H_sq_le hf hbdd n
-
-/-- The real-valued envelope: in `L²` and dominating all `f n`. -/
+/-- The real-valued envelope, in `L²` and dominating all `f n`. The `p = 2` case of
+`MeasureTheory.LpDominator.dominator`: Doob's maximal inequality plus monotone convergence
+give an all-time envelope `⨆ₙ ‖fₙ‖` that is itself `L²` and dominates every `fₙ`. -/
 private lemma exists_dominator [IsFiniteMeasure μ]
     (hf : Martingale f ℱ μ) (hmeas : ∀ n, Measurable (f n))
     (hbdd : ∀ n, eLpNorm (f n) 2 μ ≤ R) :
     ∃ g : Ω → ℝ, Measurable g ∧ MemLp g 2 μ ∧ ∀ n, ∀ᵐ ω ∂μ, ‖f n ω‖ ≤ g ω := by
-  have hG_sq_ne : ∫⁻ ω, G f ω ^ (2 : ℕ) ∂μ ≠ ∞ :=
-    (lt_of_le_of_lt (lintegral_G_sq_le hf hmeas hbdd) (by finiteness)).ne
-  have hG_fin : ∀ᵐ ω ∂μ, G f ω ^ (2 : ℕ) < ∞ :=
-    ae_lt_top ((measurable_G hmeas).pow_const 2) hG_sq_ne
-  have h_ne : ∀ᵐ ω ∂μ, G f ω ≠ ∞ := by
-    filter_upwards [hG_fin] with ω hω
-    exact fun hcon ↦ by simp [hcon] at hω
-  refine ⟨fun ω ↦ (G f ω).toReal, (measurable_G hmeas).ennreal_toReal, ?_, ?_⟩
-  · refine ⟨(measurable_G hmeas).ennreal_toReal.aestronglyMeasurable, ?_⟩
-    have h_eq : ∫⁻ ω, ‖(G f ω).toReal‖ₑ ^ (2 : ℕ) ∂μ = ∫⁻ ω, G f ω ^ (2 : ℕ) ∂μ := by
-      refine lintegral_congr_ae ?_
-      filter_upwards [h_ne] with ω hω
-      rw [← ofReal_norm, Real.norm_of_nonneg ENNReal.toReal_nonneg,
-        ENNReal.ofReal_toReal hω]
-    have h_lt : eLpNorm (fun ω ↦ (G f ω).toReal) 2 μ ^ (2 : ℕ) < ∞ := by
-      rw [← lintegral_enorm_sq, h_eq]
-      exact lt_of_le_of_lt (lintegral_G_sq_le hf hmeas hbdd) (by finiteness)
-    by_contra hcon
-    rw [not_lt, top_le_iff] at hcon
-    rw [hcon] at h_lt
-    simp at h_lt
-  · intro n
-    filter_upwards [h_ne] with ω hω
-    have h2 := ENNReal.toReal_mono hω (le_iSup (fun m ↦ ‖f m ω‖ₑ) n)
-    rwa [← ofReal_norm, ENNReal.toReal_ofReal (norm_nonneg _)] at h2
+  have htwo : ENNReal.ofReal (2 : ℝ) = (2 : ℝ≥0∞) := by simp
+  have hb : ∀ n, eLpNorm (f n) (ENNReal.ofReal (2 : ℝ)) μ ≤ ENNReal.ofReal (R : ℝ) := by
+    intro n; rw [htwo, ENNReal.ofReal_coe_nnreal]; exact hbdd n
+  refine ⟨MeasureTheory.LpDominator.dominator f,
+    MeasureTheory.LpDominator.measurable_dominator hf, ?_,
+    fun n ↦ MeasureTheory.LpDominator.norm_le_dominator one_lt_two hf hb n⟩
+  simpa only [htwo] using
+    MeasureTheory.LpDominator.dominator_memLp (p := (2 : ℝ)) one_lt_two hf hb
 
 /-- A single L² dominator makes the family uniformly integrable in L² — this is
 Degenne's `uniformIntegrable_of_dominated_singleton` projected to `UnifIntegrable`
