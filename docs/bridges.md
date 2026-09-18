@@ -104,6 +104,11 @@ favor of Mathlib equivalents). Phase 30 (Bridge A,
 
 ### Foundations/WienerIntegral.lean + WienerIntegralL2.lean (580 LOC combined)
 
+- **Update (2026-09, #215):** `WienerIntegral.lean` (the step-function kernel)
+  is retired. `WienerIntegralL2` subsumes both its isometries
+  (`covariance_increment_aux` allows overlapping intervals;
+  `wiener_assembly_isometry` takes arbitrary coefficients), so this entry now
+  covers `WienerIntegralL2.lean` alone.
 - **Status:** Foundation work. Possible partial overlap with BM package.
 - **BM package equivalents:** `StochasticIntegral/SimpleProcess.lean`,
   `MonotoneProcess.lean`, `LocalMartingale.lean`, `Predictable.lean`,
