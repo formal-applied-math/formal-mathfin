@@ -52,7 +52,7 @@
     {
       "id": "mart-thm-2.5.1",
       "name": "L²-bounded Martingale Convergence (a.s. and L²)",
-      "description": "A martingale bounded in L² converges to the limit process almost surely AND in L²-norm. The L² half is absent from Mathlib; it is proved in MathFin via the library's Doob L² maximal inequality (envelope dominator), Chebyshev, and Vitali's convergence theorem.",
+      "description": "A martingale bounded in L² converges to the limit process almost surely AND in L²-norm. The L² half is absent from Mathlib; it is proved in MathFin via the library's Doob L² maximal inequality (an L² envelope dominating every f_n), uniform integrability from that single dominator, and Vitali's convergence theorem.",
       "domain": "martingales",
       "code": {
         "lean": "import MathFin.Foundations.L2MartingaleConvergence\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\ntheorem martingale_L2_convergence_thm {Ω : Type*} {m0 : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsFiniteMeasure μ] {ℱ : Filtration ℕ m0}\n    {f : ℕ → Ω → ℝ} {R : ℝ≥0}\n    (hf : Martingale f ℱ μ) (hbdd : ∀ n, eLpNorm (f n) 2 μ ≤ R) :\n    (∀ᵐ ω ∂μ, Filter.Tendsto (fun n => f n ω) Filter.atTop\n      (nhds (ℱ.limitProcess f μ ω))) ∧\n    Filter.Tendsto (fun n => eLpNorm (f n - ℱ.limitProcess f μ) 2 μ)\n      Filter.atTop (nhds 0) :=\n  MathFin.martingale_ae_tendsto_and_eLpNorm_two_tendsto hf hbdd\n"
@@ -62,7 +62,7 @@
         "reference": "Theorem 2.5.1",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full statement: a.e. convergence (Mathlib's upcrossing-based ae_tendsto_limitProcess) AND L²-norm convergence. The L² half is NOT in Mathlib; MathFin.Foundations.L2MartingaleConvergence derives it by manufacturing uniform integrability in L² from this library's Doob L² maximal inequality (DoobLpMaximalInequality.eLpNorm_norm_runMax_le: monotone-convergence envelope dominator + Chebyshev + MemLp.eLpNorm_indicator_le), closed by Vitali. Differentiates this entry from mart-thm-2.5.3 (the a.s.-only Mathlib wrapper). Axioms-clean."
+        "formalization_scope": "Full statement: a.e. convergence (Mathlib's upcrossing-based ae_tendsto_limitProcess) AND L²-norm convergence. The L² half is NOT in Mathlib; MathFin.Foundations.L2MartingaleConvergence derives it by manufacturing uniform integrability in L² from this library's Doob L² maximal inequality (Martingale.eLpNorm_norm_runMax_le, lifted by monotone convergence to an L² envelope dominating every f_n: MeasureTheory.LpDominator) and Degenne's uniformIntegrable_of_dominated_singleton, closed by Vitali. Differentiates this entry from mart-thm-2.5.3 (the a.s.-only Mathlib wrapper). Axioms-clean."
       }
     },
     {
