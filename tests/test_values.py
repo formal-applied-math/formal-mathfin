@@ -408,6 +408,36 @@ def test_prose_does_not_outrun_statement() -> None:
     )
 
 
+# A reduced_core entry delivers less than the theorem it is named after — that
+# is what the status means — so its `description` has to say what it leaves
+# out. On 2026-09-18 none of the thirteen did: each stated the textbook theorem
+# while the Lean read the conclusion off a structure field or proved a first
+# case (sc-thm-9.1.8 named its status, in a paragraph that had gone stale).
+# `formalization_scope` carried the disclosure; the field that heads the HF
+# record did not. The 2026-08-07 sweep corrected fifteen textbook-framed
+# descriptions, none of them reduced_core — the status looked like disclosure
+# enough, and it does not ship as prose.
+SCOPE_DISCLOSURE_RE = re.compile(
+    r"\bnot\s+(?:\w+\s+)?(?:derived|delivered|proved|formali[sz]ed)\b",
+    re.IGNORECASE,
+)
+
+
+def test_reduced_core_description_discloses_scope() -> None:
+    offenders = [
+        entry["id"]
+        for _path, entry in iter_entries()
+        if entry.get("metadata", {}).get("formalization_status") == "reduced_core"
+        and not SCOPE_DISCLOSURE_RE.search(entry.get("description") or "")
+    ]
+    assert not offenders, (
+        "these reduced_core entries state their source theorem without saying "
+        "what the entry does not deliver — `description` ships in the HF "
+        "dataset, so the disclosure goes in that field (e.g. '… is not derived "
+        f"here'): {sorted(offenders)}"
+    )
+
+
 # --------------------------------------------------------------------------
 # 6. the contracts tower cites its source, in the Lean AND in the corpus
 #

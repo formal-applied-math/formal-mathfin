@@ -107,7 +107,7 @@ See [`MathFin/Examples.lean`](MathFin/Examples.lean) for a curated tour.
 | delivery-ready (`full` + `library_wrapper`) | **359** |
 | full derivations | 341 |
 | library wrappers | 18 |
-| reduced cores (honest special cases) | 13 |
+| reduced cores (12 structure specifications, 1 special case) | 13 |
 | placeholders / sorries | **0** |
 | Lean modules · lines of Lean | 459 · ~83,100 |
 | verification ledger | 372 fresh, 0 stale |
@@ -212,9 +212,12 @@ A breadth-and-depth library across eleven areas. Headlines per area (full per-th
 
 Honesty is the point, so the gaps are explicit:
 
-- **13 `reduced_core` entries** — special cases or algebraic/structural cores whose fully general form is
-  not yet formalized (the 2-D Itô formula, Lévy's characterisation, Novikov's condition, the
-  fully-general `L²`/progressive Girsanov, some Markov/Poisson cores). Tracked per-entry in
+- **13 `reduced_core` entries.** Twelve are *structure specifications*: the textbook conclusion is
+  a field of a structure and the theorem reads it back, so nothing is derived (the Brownian
+  reflection principle, nowhere differentiability and LIL, the 2-D Itô formula, Lévy's
+  characterisation, Novikov's condition, the fully-general `L²`/progressive Girsanov, five Markov-chain
+  results). One is a derived special case: the Poisson process's *first* interarrival time is
+  exponential, not the whole iid sequence. Each entry's `description` says which. Tracked per-entry in
   [`docs/coverage.md`](docs/coverage.md).
 - **18 `library_wrapper` entries** — thin restatements consuming a Mathlib/BrownianMotion lemma. They are
   delivery-ready but are not original derivations, and are counted separately for that reason.
