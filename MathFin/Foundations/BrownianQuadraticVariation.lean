@@ -192,7 +192,7 @@ variance-swap tower can be driven from a single `IsPreBrownianReal` hypothesis
 (plus evaluation-measurability — `IsPreBrownianReal` supplies only a.e.
 measurability). The increment law is read off `IsPreBrownianReal.hasLaw_sub` with
 arguments `t' s'` (subject `B t' − B s'`, no negation), mirroring
-`Foundations.WienerIntegral.hasLaw_increment`. -/
+`MathFin.hasLaw_increment` (`Foundations/GaussianMoments.lean`). -/
 theorem brownianQuadraticVariation_of_isPreBrownianReal
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
     (hB : IsPreBrownianReal B μ) (hBmeas : ∀ u : ℝ≥0, Measurable (B u)) :

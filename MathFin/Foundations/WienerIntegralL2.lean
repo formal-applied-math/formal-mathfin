@@ -7,7 +7,7 @@ module
 
 public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
-public import MathFin.Foundations.WienerIntegral
+public import MathFin.Foundations.ExtendOfNormIsometry
 
 /-!
 # Wiener integral on L²([0, T])
