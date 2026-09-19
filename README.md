@@ -17,7 +17,7 @@
 > what is proved and what is assumed, and the deep connections between the field's pillars made
 > *load-bearing* rather than decorative.
 
-**`372` theorems · `359` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
+**`373` theorems · `360` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
 
 ---
 
@@ -103,14 +103,14 @@ See [`MathFin/Examples.lean`](MathFin/Examples.lean) for a curated tour.
 
 | | |
 |---|---:|
-| theorems (machine-checked) | **372** |
-| delivery-ready (`full` + `library_wrapper`) | **359** |
-| full derivations | 341 |
+| theorems (machine-checked) | **373** |
+| delivery-ready (`full` + `library_wrapper`) | **360** |
+| full derivations | 342 |
 | library wrappers | 18 |
 | reduced cores (honest special cases) | 13 |
 | placeholders / sorries | **0** |
-| Lean modules · lines of Lean | 459 · ~83,100 |
-| verification ledger | 372 fresh, 0 stale |
+| Lean modules · lines of Lean | 460 · ~83,100 |
+| verification ledger | 373 fresh, 0 stale |
 | axioms used | `propext, Classical.choice, Quot.sound` only |
 | Lean / Mathlib / BrownianMotion | `v4.33.0-rc1` / `0434c033` / `314f04a`, pinned ([`lean-toolchain`](lean-toolchain), [`lake-manifest.json`](lake-manifest.json)) — a Lean **release candidate**, tracking BrownianMotion, which has not moved to a stable `v4.33.x` |
 
