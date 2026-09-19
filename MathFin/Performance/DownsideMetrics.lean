@@ -71,7 +71,7 @@ theorem omega_upside_sub_downside {ι : Type*} [Fintype ι]
           intro i _
           rw [← mul_sub]
           congr 1
-          convert positivePart_sub_negativePart (m.outcome i - threshold) using 1 <;> ring
+          simpa only [neg_sub] using positivePart_sub_negativePart (m.outcome i - threshold)
     _ = ∑ i, (m.weight i * m.outcome i - threshold * m.weight i) := by
           apply Finset.sum_congr rfl
           intro i _
