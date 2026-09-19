@@ -95,6 +95,7 @@ import MathFin.Foundations.WienerIntegralIndicator
 -- Structural / principle modules:
 import MathFin.Foundations.StandardGaussianMGF
 import MathFin.Foundations.ExponentialDiscount
+import MathFin.Foundations.Bisection
 -- Phase 13 additions:
 import MathFin.Foundations.StatePrices
 import MathFin.Foundations.TriangleArbitrage
