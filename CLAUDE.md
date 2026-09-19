@@ -142,6 +142,8 @@ or benchmark edit:
 ```bash
 python3 -m tools.verify.ledger status      # fresh/stale/missing (exit 1 if not all fresh)
 python3 -m tools.verify.ledger verify      # re-verify just the stale entries (daemon must be up)
+# local Lean slot taken? re-verify the stale rows on runners; the bot commits them to the branch
+gh workflow run ledger-sweep.yml --ref <branch> -f scope=stale
 ```
 
 **The ledger is derived state, and merges it.** It is a flat `{id: row}` map, so
