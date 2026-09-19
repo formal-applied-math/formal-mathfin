@@ -121,9 +121,7 @@ claim. The mechanical slice is enforced by
 `test_values.py::test_prose_does_not_outrun_statement` and
 `::test_reduced_core_description_discloses_scope`; the rest is judgment
 and belongs to the values review's standing first pass
-(`docs/values-review.md`), which `python3 -m tools.verify.prose_sweep`
-can order (advisory, needs `TYPESAFE_API_KEY`; a lead, never a verdict).
-Do it before the review's lenses, not after.
+(`docs/values-review.md`). Do it before the review's lenses, not after.
 
 **Benchmark `description` states what the entry PROVES**, not the textbook theorem
 it is named after. Where an entry delivers less than its source theorem, the

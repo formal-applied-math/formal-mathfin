@@ -9,18 +9,27 @@ public import Mathlib
 public import MathFin.BlackScholes.PDE
 
 /-!
-# Higher-order Black–Scholes Greeks: vanna and volga
+# Higher-order Black–Scholes Greeks
 
-For the European call price `V(S, σ, τ) = S Φ(d₁) − K e^{-rτ} Φ(d₂)`, we
-derive the two most-used second-order Greeks:
+For the European call price `V(S, σ, τ) = S Φ(d₁) − K e^{-rτ} Φ(d₂)`, the
+second- and third-order Greeks, each stated for the price itself:
 
-* **Vanna**: `∂²V/∂σ∂S = ∂(vega)/∂S = -ϕ(d₁) · d₂ / σ`.
-* **Volga (aka vomma)**: `∂²V/∂σ² = ∂(vega)/∂σ = vega · d₁ · d₂ / σ`.
+* **Vanna**: `∂/∂S (∂V/∂σ) = -ϕ(d₁) · d₂ / σ` (`hasDerivAt_S_deriv_bsV_sigma`).
+* **Volga (aka vomma)**: `∂²V/∂σ² = vega · d₁ · d₂ / σ` (`hasDerivAt_deriv_bsV_sigma`).
+* **Charm**: `∂/∂τ (∂V/∂S) = ϕ(d₁) · ((r + σ²/2)τ − log(S/K)) / (2στ√τ)`
+  (`hasDerivAt_tau_deriv_bsV_S`).
+* **Speed**: `∂³V/∂S³ = -ϕ(d₁) (d₁ + σ√τ) / (S² σ² τ)` (`hasDerivAt_deriv_deriv_bsV_S`).
 
-The key algebraic shortcut is `∂_σ d₁ = -d₂/σ` (from
-`hasDerivAt_bsd1_sigma_clean` below), which compresses an otherwise messy
-quotient-rule expression. Combined with `ϕ'(z) = -z · ϕ(z)`, both Greeks
-follow from one chain rule + one product/scalar rule.
+Each comes in two steps. A formula lemma (`hasDerivAt_bsV_vanna`, …) differentiates
+the closed form of the lower-order Greek. `hasDerivAt_deriv_of_eventually` (volga, speed)
+or its mixed-partial form `hasDerivAt_deriv_param_of_eventually` (vanna, charm) then makes
+it a statement about the price, since that closed form is the lower-order derivative near
+the point.
+
+With `ϕ'(z) = -z · ϕ(z)`, each formula is one chain rule plus one product, quotient or
+scalar rule. Volga's uses the shortcut `∂_σ d₁ = -d₂/σ` (`hasDerivAt_bsd1_sigma_clean`
+below), which compresses an otherwise messy quotient-rule expression; vanna's uses
+`∂_S d₁` and collapses via `σ√τ − d₁ = -d₂`.
 -/
 
 @[expose] public section
@@ -46,13 +55,14 @@ private lemma hasDerivAt_bsd1_sigma_clean (S K r : ℝ) {σ τ : ℝ}
   rw [show Real.sqrt τ ^ 2 = τ from h_sqrt_sq]
   ring
 
-/-- **Vanna**: `∂²V/∂σ∂S = ∂(vega)/∂S = -ϕ(d₁) · d₂ / σ`.
+/-- **The vanna formula**: the S-derivative of the vega formula is `-ϕ(d₁) · d₂ / σ`. The
+mixed partial of the price itself is `hasDerivAt_S_deriv_bsV_sigma`.
 
 Strategy: vega-as-function-of-S is `S · ϕ(d₁(S)) · √τ`. Product rule:
 `d/dS = ϕ(d₁) √τ + S · ϕ'(d₁) · ∂_S d₁ · √τ`. With `ϕ'(d₁) = -d₁ ϕ(d₁)` and
 `∂_S d₁ = 1/(S σ √τ)`, the S's cancel:
 `= ϕ(d₁) √τ - d₁ ϕ(d₁) / σ = ϕ(d₁) (σ√τ − d₁) / σ = -ϕ(d₁) d₂ / σ`. -/
-lemma hasDerivAt_bsV_vanna {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+private lemma hasDerivAt_bsV_vanna {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     HasDerivAt (fun s ↦ s * gaussianPDFReal 0 1 (bsd1 s K r σ τ) * Real.sqrt τ)
       (-(gaussianPDFReal 0 1 (bsd1 S K r σ τ) * bsd2 S K r σ τ / σ)) S := by
@@ -71,14 +81,26 @@ lemma hasDerivAt_bsV_vanna {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   field_simp
   ring
 
-/-- **Volga (Vomma)**: `∂²V/∂σ² = ∂(vega)/∂σ = vega · d₁ · d₂ / σ`.
+/-- **Vanna**: `∂/∂S (∂V/∂σ) = -ϕ(d₁) · d₂ / σ`, for the call price itself: vega
+`S · ϕ(d₁) · √τ` is `∂V/∂σ` at every spot `S > 0` (`hasDerivAt_bsV_sigma`), and its
+S-derivative is the vanna formula (`hasDerivAt_bsV_vanna`). -/
+theorem hasDerivAt_S_deriv_bsV_sigma {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
+    HasDerivAt (fun s ↦ deriv (fun σ' ↦ bsV K r σ' s τ) σ)
+      (-(gaussianPDFReal 0 1 (bsd1 S K r σ τ) * bsd2 S K r σ τ / σ)) S :=
+  hasDerivAt_deriv_param_of_eventually
+    ((eventually_gt_nhds hS).mono fun _ hs ↦ hasDerivAt_bsV_sigma hK hs hσ hτ)
+    (hasDerivAt_bsV_vanna hK hσ hS hτ)
+
+/-- **The volga (vomma) formula**: the σ-derivative of the vega formula is
+`vega · d₁ · d₂ / σ`. The second σ-derivative of the price itself is
+`hasDerivAt_deriv_bsV_sigma`.
 
 Strategy: vega-as-function-of-σ is `S · ϕ(d₁(σ)) · √τ`. Chain rule via the
 clean derivative `∂_σ d₁ = -d₂/σ` (above) and `ϕ'(d₁) = -d₁ ϕ(d₁)`:
 `d/dσ[ϕ(d₁(σ))] = -d₁ ϕ(d₁) · (-d₂/σ) = d₁ d₂ ϕ(d₁) / σ`. Multiply by
 constants S and √τ. -/
-lemma hasDerivAt_bsV_volga {K r : ℝ} (_hK : 0 < K)
-    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :
+private lemma hasDerivAt_bsV_volga {K r S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :
     HasDerivAt (fun s ↦ S * gaussianPDFReal 0 1 (bsd1 S K r s τ) * Real.sqrt τ)
       (S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) * Real.sqrt τ
         * bsd1 S K r σ τ * bsd2 S K r σ τ / σ) σ := by
@@ -90,22 +112,46 @@ lemma hasDerivAt_bsV_volga {K r : ℝ} (_hK : 0 < K)
   convert h_full using 1 <;> try rfl
   field_simp
 
-/-- **Charm**: `∂Δ/∂τ = ∂Φ(d₁)/∂τ = ϕ(d₁) · ((r + σ²/2)τ − log(S/K)) / (2στ√τ)`.
+/-- **Volga (vomma)**: `∂²V/∂σ² = vega · d₁ · d₂ / σ`, for the call price itself: vega is
+`∂V/∂σ` at every volatility `σ > 0` (`hasDerivAt_bsV_sigma`), and its σ-derivative is the
+volga formula (`hasDerivAt_bsV_volga`). -/
+theorem hasDerivAt_deriv_bsV_sigma {K r : ℝ} (hK : 0 < K) {S σ τ : ℝ} (hS : 0 < S)
+    (hσ : 0 < σ) (hτ : 0 < τ) :
+    HasDerivAt (deriv fun σ' ↦ bsV K r σ' S τ)
+      (S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) * Real.sqrt τ * bsd1 S K r σ τ *
+        bsd2 S K r σ τ / σ) σ :=
+  hasDerivAt_deriv_of_eventually
+    ((eventually_gt_nhds hσ).mono fun _ hσ' ↦ hasDerivAt_bsV_sigma hK hS hσ' hτ)
+    (hasDerivAt_bsV_volga hS hσ hτ)
 
-The product/chain rules give `ϕ(d₁) · ∂_τ d₁`. The magic identity is not
-needed here: `∂_τ d₁` already has a clean closed form. -/
-lemma hasDerivAt_bsV_charm {K r σ : ℝ} (hσ : 0 < σ)
+/-- **The charm formula**: the τ-derivative of the delta formula `Φ(d₁)` is
+`ϕ(d₁) · ((r + σ²/2)τ − log(S/K)) / (2στ√τ)`, by the chain rule: `∂_τ d₁` already has a clean
+closed form, so the magic identity is not needed. The mixed partial of the price itself is
+`hasDerivAt_tau_deriv_bsV_S`. -/
+private lemma hasDerivAt_bsV_charm {K r σ : ℝ} (hσ : 0 < σ)
     {S τ : ℝ} (hτ : 0 < τ) :
     HasDerivAt (fun t ↦ Phi (bsd1 S K r σ t))
       (gaussianPDFReal 0 1 (bsd1 S K r σ τ)
-        * (((r + σ ^ 2 / 2) * τ - Real.log (S / K)) / (2 * σ * τ * Real.sqrt τ))) τ := by
-  have h_d1_τ := hasDerivAt_bsd1_tau S K r σ hσ hτ
-  have h_Phi_d1 := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp τ h_d1_τ
-  convert h_Phi_d1 using 1 <;> rfl
+        * (((r + σ ^ 2 / 2) * τ - Real.log (S / K)) / (2 * σ * τ * Real.sqrt τ))) τ :=
+  (hasDerivAt_Phi (bsd1 S K r σ τ)).comp τ (hasDerivAt_bsd1_tau S K r σ hσ hτ)
 
-/-- **Speed**: `∂³V/∂S³ = ∂Γ/∂S = -ϕ(d₁) (d₁ + σ√τ) / (S² σ² τ)`.
+/-- **Charm**: `∂/∂τ (∂V/∂S) = ϕ(d₁) · ((r + σ²/2)τ − log(S/K)) / (2στ√τ)`, for the call
+price itself: the delta `Φ(d₁)` is `∂V/∂S` at every maturity `τ > 0` (`hasDerivAt_bsV_S`),
+and its τ-derivative is the charm formula (`hasDerivAt_bsV_charm`). -/
+theorem hasDerivAt_tau_deriv_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
+    HasDerivAt (fun t ↦ deriv (fun s ↦ bsV K r σ s t) S)
+      (gaussianPDFReal 0 1 (bsd1 S K r σ τ) *
+        (((r + σ ^ 2 / 2) * τ - Real.log (S / K)) / (2 * σ * τ * Real.sqrt τ))) τ :=
+  hasDerivAt_deriv_param_of_eventually
+    ((eventually_gt_nhds hτ).mono fun _ ht ↦ hasDerivAt_bsV_S hK hσ hS ht)
+    (hasDerivAt_bsV_charm hσ hτ)
 
-Gamma is the quotient `ϕ(d₁(S)) / (S σ √τ)` (`hasDerivAt_bsV_SS`), so speed is
+/-- **The speed formula**: the S-derivative of the gamma formula is
+`-ϕ(d₁) (d₁ + σ√τ) / (S² σ² τ)`. The third derivative of the price itself is
+`hasDerivAt_deriv_deriv_bsV_S`.
+
+Gamma is the quotient `ϕ(d₁(S)) / (S σ √τ)` (`hasDerivAt_deriv_bsV_S`), so speed is
 one quotient rule away. Numerator derivative is `ϕ'(d₁) ∂_S d₁ = -d₁ ϕ(d₁)/(S σ √τ)`;
 denominator derivative is the constant `σ √τ`. The two contributions carry `d₁`
 and `σ√τ` respectively, which is where the `d₁ + σ√τ` numerator comes from —
@@ -136,5 +182,17 @@ lemma hasDerivAt_bsV_SSS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     rw [mul_pow, mul_pow, Real.sq_sqrt hτ.le]]
   field_simp
   ring
+
+/-- **Speed**: `∂³V/∂S³ = -ϕ(d₁) (d₁ + σ√τ) / (S² σ² τ)`, for the call price itself: the
+genuine gamma `hasDerivAt_deriv_bsV_S` holds on all of `S > 0`, and the derivative of its
+formula is `hasDerivAt_bsV_SSS`. -/
+theorem hasDerivAt_deriv_deriv_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
+    HasDerivAt (deriv (deriv fun s ↦ bsV K r σ s τ))
+      (-(gaussianPDFReal 0 1 (bsd1 S K r σ τ) * (bsd1 S K r σ τ + σ * Real.sqrt τ) /
+        (S ^ 2 * σ ^ 2 * τ))) S :=
+  hasDerivAt_deriv_of_eventually
+    ((eventually_gt_nhds hS).mono fun _ hs ↦ hasDerivAt_deriv_bsV_S hK hσ hs hτ)
+    (hasDerivAt_bsV_SSS hK hσ hS hτ)
 
 end MathFin

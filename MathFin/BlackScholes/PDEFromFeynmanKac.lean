@@ -290,9 +290,9 @@ theorem bsV_satisfies_bs_pde_via_feynmanKac {K r σ : ℝ} (hK : 0 < K) (hσ : 0
       HasDerivAt (fun S' ↦ deriv (fun S'' ↦ bsV K r σ S'' τ) S') VSS S ∧
       -Vτ + (1 / 2) * σ ^ 2 * S ^ 2 * VSS + r * S * VS - r * bsV K r σ S τ = 0 := by
   refine ⟨_, _, _, hasDerivAt_bsV_tau_fk hK hσ hS hτ, hasDerivAt_bsV_S_fk hK hσ hτ hS,
-    (hasDerivAt_bsV_SS_fk (r := r) hK hσ hτ hS).congr_of_eventuallyEq ?_, ?_⟩
-  · filter_upwards [isOpen_Ioi.mem_nhds hS] with S' hS'
-    exact (hasDerivAt_bsV_S_fk hK hσ hτ hS').deriv
+    hasDerivAt_deriv_of_eventually
+      ((eventually_gt_nhds hS).mono fun _ hS' ↦ hasDerivAt_bsV_S_fk hK hσ hτ hS')
+      (hasDerivAt_bsV_SS_fk (r := r) hK hσ hτ hS), ?_⟩
   · have ht₀ : (0 : ℝ) < σ ^ 2 * τ := by positivity
     have hSne : S ≠ 0 := hS.ne'
     set c₀ : ℝ := Real.log S + (r - σ ^ 2 / 2) * τ

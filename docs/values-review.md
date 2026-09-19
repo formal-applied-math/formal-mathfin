@@ -80,26 +80,29 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   `description` states the **textbook target** rather than the delivered
   result, the delivered scope must be explicit in the same field, not left to
   `formalization_scope`.
-  **Ordering the reading (optional, advisory).** `python3 -m tools.verify.prose_sweep`
-  scores every `description` against its snippet's statements with TypeSafe's
-  Jev (needs `TYPESAFE_API_KEY`; about three cents and a minute for the whole
-  corpus, cached, and `--since <rev>` restricts it to what changed). Read its
-  top 15 before the lenses and fix what is real. It ranks; it does not
-  certify. Measured on 2026-09-18 against the corpus before that day's
-  corrections, 16 of the 23 entries it scored above 0.7 were genuine
-  mismatches, 2 borderline and 5 false alarms — descriptions that narrate the
-  proof, and faithful restatements. Its blind spot is a conclusion assumed as a
-  structure field, which reads as faithful because the text matches; the
-  `reduced_core` gate covers that class. **Retire it** the first review whose top 15 contains nothing real in
-  the work since the previous review, and say so in that review's block.
-  **Derivatives of an explicit expression.** An entry whose statement
-  differentiates an explicit lower-order expression — a delta `Φ(d₁)`, a vega
-  `S·ϕ(d₁)·√τ`, a strike sensitivity — says so ("stated as the S-derivative of
-  …") and cites what identifies that expression with the lower-order
-  derivative: a corpus entry or a library lemma. It may name the higher
-  derivative as that composition, never as though one theorem stated it.
-  `sc-bs-pde-feynman-kac` shows the upgrade that retires this rule: state the
-  genuine higher derivative with `deriv`.
+  **Machine ordering: tried and retired.** On 2026-09-18 a TypeSafe Jev
+  classifier (`tools/verify/prose_sweep.py`, now in git history) scored every
+  `description` against its statements to order this pass. It earned its keep
+  once, on an unread backlog: before that day's corrections, 16 of the 23
+  entries it scored above 0.7 were genuine mismatches. Its blind spot was a
+  conclusion assumed as a structure field, which the `reduced_core` gate now
+  covers. Against the prose of two review rounds it found nothing real, and it
+  was retired by its own rule at the second ("the Greeks state genuine higher
+  derivatives"). Revive it only for a large unread backlog, never to read a
+  change's own prose.
+  **Higher derivatives are stated with `deriv`.** An entry named for a
+  higher-order sensitivity states it for the price itself:
+  `HasDerivAt (deriv V) …`, or `s ↦ deriv (V s) y` for a mixed partial. It does
+  not state the derivative of an explicit lower-order formula such as a delta
+  `Φ(d₁)` or a vega `S·ϕ(d₁)·√τ`. `hasDerivAt_deriv_of_eventually`, or
+  `hasDerivAt_deriv_param_of_eventually` for a mixed partial
+  (`Foundations/DerivOfDeriv.lean`), makes the formula-level result a
+  statement about the price, once the formula is shown to be the lower
+  derivative near the point. The Greeks family has stated genuine higher derivatives since
+  2026-09-18. An entry that still differentiates a formula says so in its
+  description ("stated as the S-derivative of …"). It cites the entry or lemma
+  that identifies the formula with the lower-order derivative, and it never
+  names the higher derivative as though one theorem stated it.
   **Names are labels, not claims.** An entry's `name` may label the result it
   targets; it may not assert a property the entry does not deliver
   ("Existence and Uniqueness" on a uniqueness entry, "Convexity" where only a
@@ -3342,6 +3345,127 @@ characterization is nowhere claimed.
 3. *(nit, accepted)* the rfl-tripwire's tail regex is documented
    "good enough" in-file; a Lean-aware scanner is not worth its weight while
    the catch rate is this good (1 for 1 on first run).
+
+## 2026-09-18 — corpus 373 — higher derivatives are stated for the price
+
+Executes backlog item 1 of the block below ("the backlog round"). Twenty corpus entries now
+state the derivative of the price, not of a formula for a lower-order derivative: the 17
+Greeks-family entries, `sc-bs-pde`'s gamma conjunct and the zero-coupon duration and
+convexity. Three read-only review agents split the lenses (1, 2, 4), (5, 7) with the standing
+first pass, and (3, 6, 8). The authoring agent adjudicated and ran all Lean serially.
+
+### The standing first pass — prose against statement
+
+- **The change's own prose had five errors**, all fixed:
+  - The ConvexityImmunization header said "duration" and "convexity" where the hypotheses
+    match duration-times-value and convexity-times-value. With `P_A ≠ P_L` those differ.
+  - The StrikeGreeks header asserted strict signs, and a put sign, that the library does not
+    prove.
+  - Two docstrings were labelled "Strike convexity" over a second derivative, which is the
+    protocol's own example of a name that asserts too much.
+  - The HigherGreeks header credited the wrong transport lemma for vanna and charm.
+  - The DigitalGreeks header attributed δ_asset to the magic identity, which nothing in that
+    file uses.
+- **Older prose**, fixed:
+  - `lognormalTerminalPDF_nonneg` claimed the convexity route and a probability density.
+  - `bsV_gamma_pos` claimed strict convexity in spot.
+  - `mf-bond-2nd-immunization` described Redington's condition as `≥`, which is strict.
+  - `mf-breeden-litzenberger` called a density formula "the law of S_T".
+  - ConvexPricingFunctional, architecture.md, open-problems.md and patterns.md still cited
+    formula lemmas for claims about the price.
+- **The same failure, outside the family.** `mf-zcb-duration` and `mf-zcb-convexity` stated
+  cancellation identities, `(c·B)/B = c`, and were described as `−∂_r B/B` and `∂²_r B/B`.
+  Both now carry `deriv`.
+- **A proof that did not use its premise.** `lognormalTerminalPDF_nonneg_via_strike_convexity`
+  is named for the convexity route. Its convexity step was an unused `have`: the sign came
+  from `gaussianPDFReal_nonneg`, and was then divided back out. `open-problems.md` listed the
+  route as "already proved". It now takes the sign from the convexity, and the BL header says
+  that the convexity is itself proved from the sign, so the two routes close a loop.
+
+### Upgrades executed
+
+1. **`Foundations/DerivOfDeriv.lean`** (lenses 2, 4). This is the missing adapter between how
+   Mathlib produces second derivatives and how it consumes them. It has three lemmas:
+   - `hasDerivAt_deriv_of_eventually`, whose hypothesis shape is Mathlib's own;
+   - `hasDerivAt_deriv_param_of_eventually`, the mixed-partial twin;
+   - `deriv_deriv_nonneg_of_convexOn`, the converse of `convexOn_of_deriv2_nonneg'`, lifted
+     out of the Breeden–Litzenberger proof.
+
+   The first two are one term each and hold over any nontrivially normed field and normed
+   space.
+2. **Twenty genuine statements** (lenses 5, 7). Each is two arguments to item 1.
+3. **Names** (lenses 6, 7):
+   - Formula lemmas consumed only in their own file are private.
+   - `hasDerivAt_bsV_SS`, shared across three files, is renamed `hasDerivAt_Phi_bsd1_S` for
+     what it states. `hasDerivAt_bsV_SSS`, which Black-76 still consumes, keeps its name
+     until backlog item 2 retires that use.
+   - `breedenLitzenberger`, `almgrenChrissPath_satisfies_EL` and
+     `bondPortfolio_immunization_second_order` now label the genuine theorems.
+     Breeden–Litzenberger is `hasDerivAt_deriv_bsV_K` with the value read as a density, and
+     its formula lemma is gone.
+4. **Coherence** (lens 2):
+   - `bsV_strike_convexOn` and `bsV_spot_convexOn` lost four private transport helpers.
+   - `PDEFromFeynmanKac`'s hand-rolled transport is now a call to item 1.
+   - `deriv2_bsV_eq_exp_neg_rT_pdf` is retired.
+5. **Zero slop** (lens 3):
+   - Dead hypotheses dropped: volga's `_hK`, and Almgren–Chriss's `sinh(κT) ≠ 0` on three
+     lemmas. Under `x / 0 = 0` the degenerate closed form is the zero path.
+   - The duplicated `h_inner` block is now one private lemma.
+   - Seven formula proofs lost a `have … exact h`, a `convert … field_simp` or a
+     `convert … <;> rfl`.
+   - The immunization step now reads `congr_deriv (sub_eq_zero_of_eq h_match_conv)`, where
+     `rw; ring` hid it.
+6. **Register** (lens 6):
+   - `(eventually_gt_nhds h).mono` at all 14 sites. Mathlib uses `eventually_gt_nhds` 11
+     times and `eventually_of_mem (Ioi_mem_nhds _)` never.
+   - `.of_forall` is eta-reduced.
+   - `deriv^[2]` hypotheses close as `(sign).trans_eq h.deriv.symm`, not `show … ▸`.
+7. **Protocol.** The "derivatives of an explicit expression" rule is replaced by its
+   successor. `patterns.md` records the lemma, the idiom and the naming scheme
+   `hasDerivAt_<outer>_deriv_<f>_<inner>`.
+8. **The prose sweep is retired, by its own rule.** It was run against every description
+   changed since the previous review: these 18 and the two bisection entries. None scored
+   above 0.7, and the top three (0.49, 0.45, 0.38) read as narration, such as "since the put
+   and call deltas differ by a constant". `tools/verify/prose_sweep.py` and its tests are
+   removed, and the protocol paragraph records what the sweep found while it ran.
+
+Adjudicated down:
+- `theorem` vs `lemma`: dismissed. The split consistently marks headline results against
+  supporting formulas.
+- Merging the two transport lemmas into one: dismissed, since it would make unification
+  harder.
+- Term-mode chain rules for the PDE and Bachelier gamma formulas: tried, and they fail to
+  elaborate. `S` is the first argument of `bsd1` and `bachelierD`, so `?h S =?= bsd1 S …` is
+  not first-order, and the expected type reaches the composition before `Phi` is known. They
+  stay a `have` plus `congr_deriv`. Charm's variable is the last argument, so its chain rule
+  is a term.
+
+### Ranked backlog
+
+| rank | item | owner |
+|---|---|---|
+| 1 | **Redington's theorem proper.** Two steps: state the surplus second derivative unconditionally (value `Conv_A − Conv_L`), then apply Mathlib's `isLocalMin_of_deriv_deriv_pos`. Under matched duration-times-value and `Conv_A > Conv_L` this gives `IsLocalMin (A − L) r`, the result `mf-bond-2nd-immunization` now says it lacks | unassigned |
+| 2 | **Push the discount factor through at the `deriv` level** for Black-76 and BS-Merton: `deriv_const_mul_field'`, then `.const_mul` on the BS genuine gamma and speed. This retires `_FF`, `_FFF`, `bsVDiv_SS` and the Black-76 speed's `mul_div_assoc` bridge. `hasDerivAt_bsV_SSS` can then go private | unassigned |
+| 3 | **GreekSigns for the price.** State the signs as `0 < deriv (deriv V) S`, plus the strike version, and drop `bsV_gamma_pos`'s dead `_hK`. Then prove strict convexity in spot and strike with `strictConvexOn_of_deriv2_pos'` | unassigned |
+| 4 | **The same transport elsewhere**, when next touched: `ConvexitySensitivity.hasDerivAt_bondPriceDisc_secondDeriv`; `FeynmanKacHeatEquation.hasDerivAt_feynmanU_xx`, where a genuine `∂_t u = ½∂_xx u` closes part of sc-thm-9.2.1's gap; and the hand-rolled `deriv` identifications in `AmericanPut/`. Also `deriv2_comp_neg` re-derives Mathlib's `iteratedDeriv_comp_neg` | unassigned |
+| 5 | `mf-breeden-litzenberger` is `mf-bsV-KK-deriv` with its value read as a density. It earns a separate entry only once it identifies the law of `S_T` | unassigned |
+| 6 | Upstream `DerivOfDeriv` to Mathlib, after settling the name against `hasDerivAt_deriv_iff`'s stem | unassigned |
+
+### Evidence/context
+
+Mechanical floor:
+- The native default `lake build` passed (9215 jobs), including `AxiomAuditGen.lean` (333
+  guards) and `AxiomAudit.lean`.
+- The only MathFin warning is `DownsideMetrics`', which #225 fixed on main.
+- `pytest` passed 52/52 in the verify container.
+- Each changed snippet elaborated with no errors, warnings or `sorry`: the twenty entries and
+  `sc-bs-pde-feynman-kac`, whose module changed.
+- The 94 restaled ledger rows are re-verified on runners by `ledger-sweep.yml`
+  (`scope: stale`). The bot's ledger commit on this branch is the record.
+
+Lean ran through a single slot throughout. The daemon was OOM-killed once at its 6 GB cap
+after about fifteen checks, and the six snippets it dropped were re-checked with fresh
+`lake env lean` processes.
 
 ## 2026-09-18 — corpus 372 — the backlog round: the Greeks rule, names that assert, and a dropped guard
 

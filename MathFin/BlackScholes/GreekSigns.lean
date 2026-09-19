@@ -63,8 +63,9 @@ theorem bsV_delta_le_one (S K r σ τ : ℝ) : Phi (bsd1 S K r σ τ) ≤ 1 :=
 
 /-! ## Gamma sign constraint -/
 
-/-- **Call gamma is strictly positive**: `∂²_S V = ϕ(d_1) / (S σ √τ) > 0`
-for `S, σ, τ > 0`. The call price is strictly convex in spot. -/
+/-- **Call gamma is strictly positive**: the gamma formula `ϕ(d_1) / (S σ √τ)`, which is
+`∂²_S V` by `hasDerivAt_deriv_bsV_S`, is positive for `S, σ, τ > 0`. Convexity in spot is
+`SpotConvexity.bsV_spot_convexOn`; strict convexity is not proved. -/
 theorem bsV_gamma_pos {K r σ : ℝ} (_hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     0 < gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ) := by

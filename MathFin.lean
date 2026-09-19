@@ -100,6 +100,7 @@ import MathFin.Foundations.StatePrices
 import MathFin.Foundations.TriangleArbitrage
 import MathFin.Foundations.CarrMadan
 import MathFin.Foundations.AlmgrenChriss
+import MathFin.Foundations.DerivOfDeriv
 import MathFin.Foundations.MarketMakingRiccati
 import MathFin.Foundations.MatrixMarketMakingRiccati
 import MathFin.Foundations.ConvexPricingFunctional

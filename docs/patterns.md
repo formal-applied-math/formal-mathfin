@@ -31,9 +31,10 @@ Example: **K-convexity** of the call now lives at three scales in
   `convexOn_of_deriv2_nonneg'` and the closed-form second derivative.
 
 Before this session, the three lived as essentially independent claims.
-Now the second-derivative computation in `BreedenLitzenberger.lean`
-(`lognormalTerminalPDF_nonneg`) reads as "the infinitesimal face of the
-same convexity," and `Spreads.lean` reads it as "the discrete face."
+Now `BreedenLitzenberger.lean`'s
+`lognormalTerminalPDF_nonneg_via_strike_convexity` reads the density's sign as
+"the infinitesimal face of the same convexity," and `Spreads.lean` reads it as
+"the discrete face."
 
 The pattern generalises. Wherever a property holds at a payoff level and
 is preserved by a non-negative pricing functional, three scales suffice.
@@ -138,25 +139,33 @@ Mathlib has two variants:
 `bsV_strike_convexOn` uses the `'` variant since BS is only defined for
 `K > 0`. Choose the variant by domain openness.
 
-### `HasDerivAt.congr_of_eventuallyEq` for `deriv f` identification
+### `hasDerivAt_deriv_of_eventually` for second derivatives
 
-To prove that `deriv f` has a specific value at a point, when `f` has a
-known closed-form derivative, the pattern is:
+To state a second derivative of `f` when `f` has a known closed-form first
+derivative `g`, differentiate the formula and transport it:
 
 ```lean
--- Local equality of derivatives in a neighborhood:
-have h_ev : (fun K' => deriv f K') =ᶠ[nhds K] explicit_first_deriv := by
-  filter_upwards [open_set.mem_nhds h_K_pos] with K' hK'
-  exact (hasDerivAt_f hK').deriv
-
--- Transport HasDerivAt of the explicit form to HasDerivAt of `deriv f`:
-have h_KK_for_deriv_f : HasDerivAt (deriv f) (second_deriv K) K :=
-  h_KK.congr_of_eventuallyEq h_ev
+hasDerivAt_deriv_of_eventually
+  ((eventually_gt_nhds hK).mono fun _ hk ↦ hasDerivAt_f hk)  -- f' = g near K
+  hasDerivAt_g                                                -- g' at K
 ```
 
-Used in `deriv_bsV_eventuallyEq` and the third hypothesis of
-`bsV_strike_convexOn`. This is *the* idiom for "second derivative via
-intermediate explicit first derivative."
+The lemma (`Foundations/DerivOfDeriv.lean`) packages
+`HasDerivAt.congr_of_eventuallyEq` with `HasDerivAt.deriv`, and
+`hasDerivAt_deriv_param_of_eventually` is the mixed-partial form
+`s ↦ deriv (F s) y`. When the first derivative holds everywhere, the first
+argument is `.of_forall (hasDerivAt_f …)`. Mathlib's second-derivative
+consumers (`convexOn_of_deriv2_nonneg'`) state their hypotheses with
+`deriv^[2] f`, which is definitionally `deriv (deriv f)`, so a sign closes them
+as `(sign).trans_eq h.deriv.symm`. `deriv_deriv_nonneg_of_convexOn` is the
+converse: convexity gives the sign.
+
+Naming: `hasDerivAt_<outer>_deriv_<f>_<inner>`, with `<outer>` dropped when it
+equals `<inner>`. Examples are `hasDerivAt_deriv_bsV_S` (gamma),
+`hasDerivAt_deriv_deriv_bsV_S` (speed), `hasDerivAt_S_deriv_bsV_sigma` (vanna,
+the S-derivative of `∂V/∂σ`) and `hasDerivAt_tau_deriv_bsV_S` (charm). The formula
+lemma underneath is named for its formula (`hasDerivAt_Phi_bsd1_S`) or kept
+private, never for the Greek it is not.
 
 ### `Subtype.ext` for `Equiv.left_inv` / `Equiv.right_inv`
 

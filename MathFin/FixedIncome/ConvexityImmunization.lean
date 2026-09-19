@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Foundations.DerivOfDeriv
 public import MathFin.FixedIncome.Immunization
 public import MathFin.FixedIncome.ZCB
 
@@ -23,17 +24,20 @@ For each ZCB: `∂² B/∂r² = (T - t)² · B`. For a portfolio:
 
 and the derivative `∂_r (-Dur_P · P) = Conv_P · P`.
 
-Second-order immunization: matching both duration AND convexity of the asset
-portfolio with the liability portfolio gives a quadratic-order-stable hedge.
+Second-order immunization: matching duration-times-value makes `∂(A − L)/∂r`
+vanish (`Immunization.lean`), and matching convexity-times-value makes
+`∂²(A − L)/∂r²` vanish, so together they leave the surplus flat to second order
+at the current rate.
 
 Results:
 
 * `bondPortfolioConv`: convexity-times-value `Conv_P · P`.
 * `hasDerivAt_bondPortfolioDur_r`: `∂_r (Dur_P · P) = −Conv_P · P`.
-* `hasDerivAt_neg_bondPortfolioDur_r`: `∂_r (−Dur_P · P) = Conv_P · P` (this
-  is the second derivative of the portfolio value).
-* `bondPortfolio_immunization_second_order`: matching convexity gives
-  `∂² (A − L)/∂r² = 0`.
+* `hasDerivAt_neg_bondPortfolioDur_r`: `∂_r (−Dur_P · P) = Conv_P · P`.
+* `hasDerivAt_deriv_bondPortfolioValue_r`: `∂²P/∂r² = Conv_P · P`, for the value
+  itself.
+* `bondPortfolio_immunization_second_order`: matching convexity-times-value gives
+  `∂² (A − L)/∂r² = 0`, for the surplus itself.
 -/
 
 @[expose] public section
@@ -68,15 +72,24 @@ lemma hasDerivAt_bondPortfolioDur_r
   rw [Finset.sum_neg_distrib] at h_raw
   exact h_raw
 
-/-- **Second derivative of portfolio value w.r.t. rate**:
-`∂²P/∂r² = Conv_P · P` (equivalently `∂_r (−Dur_P · P) = Conv_P · P`). -/
+/-- **The second-derivative formula**: the r-derivative of `∂P/∂r = −Dur_P · P` is
+`Conv_P · P`. The second derivative of the value itself is
+`hasDerivAt_deriv_bondPortfolioValue_r`. -/
 lemma hasDerivAt_neg_bondPortfolioDur_r
     {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :
     HasDerivAt (fun r' ↦ -bondPortfolioDur s w T t r')
-      (bondPortfolioConv s w T t r) r := by
-  have h := (hasDerivAt_bondPortfolioDur_r s w T t r).neg
-  rw [neg_neg] at h
-  exact h
+      (bondPortfolioConv s w T t r) r :=
+  (hasDerivAt_bondPortfolioDur_r s w T t r).neg.congr_deriv (neg_neg _)
+
+/-- **Second derivative of portfolio value**: `∂²P/∂r² = Conv_P · P`, for the value itself:
+`∂P/∂r = −Dur_P · P` at every rate (`hasDerivAt_bondPortfolioValue_r`), and its derivative is
+the formula of `hasDerivAt_neg_bondPortfolioDur_r`. -/
+theorem hasDerivAt_deriv_bondPortfolioValue_r {ι : Type*} (s : Finset ι) (w T : ι → ℝ)
+    (t r : ℝ) :
+    HasDerivAt (deriv fun r' ↦ bondPortfolioValue s w T t r') (bondPortfolioConv s w T t r) r :=
+  hasDerivAt_deriv_of_eventually
+    (.of_forall (hasDerivAt_bondPortfolioValue_r s w T t))
+    (hasDerivAt_neg_bondPortfolioDur_r s w T t r)
 
 /-- **Single-bond convexity**: a single-bond portfolio's convexity-times-value
 equals `w · (T − t)² · exp(−r(T − t))`. -/
@@ -87,27 +100,22 @@ lemma bondPortfolio_single_bond_conv
   unfold bondPortfolioConv
   simp
 
-/-- **Second-order immunization**: if both the duration-times-value AND the
-convexity-times-value of the asset portfolio match those of the liability,
-then both the first and second derivatives of `P_A − P_L` vanish at the
-current rate. The first-order condition is `bondPortfolio_immunization_first_order`;
-this lemma covers the second-order condition. -/
-lemma bondPortfolio_immunization_second_order
-    {ι κ : Type*}
-    (sA : Finset ι) (wA TA : ι → ℝ)
-    (sL : Finset κ) (wL TL : κ → ℝ)
-    (t r : ℝ)
-    (h_match_conv :
-      bondPortfolioConv sA wA TA t r = bondPortfolioConv sL wL TL t r) :
-    HasDerivAt (fun r' ↦
-        -bondPortfolioDur sA wA TA t r' -
-        (-bondPortfolioDur sL wL TL t r'))
-      0 r := by
-  have hA := hasDerivAt_neg_bondPortfolioDur_r sA wA TA t r
-  have hL := hasDerivAt_neg_bondPortfolioDur_r sL wL TL t r
-  have h := hA.sub hL
-  convert h using 1 <;> try rfl
-  rw [h_match_conv]
-  ring
+/-- **Second-order immunization**: matching convexity-times-value gives
+`∂²(P_A − P_L)/∂r² = 0` at the current rate, for the surplus itself. The second derivative of
+each side is its convexity-times-value (`hasDerivAt_neg_bondPortfolioDur_r`), so matching those
+cancels it. Matching duration-times-value is the separate first-order condition,
+`bondPortfolio_immunization_first_order`. -/
+theorem bondPortfolio_immunization_second_order {ι κ : Type*} (sA : Finset ι)
+    (wA TA : ι → ℝ) (sL : Finset κ) (wL TL : κ → ℝ) (t r : ℝ)
+    (h_match_conv : bondPortfolioConv sA wA TA t r = bondPortfolioConv sL wL TL t r) :
+    HasDerivAt
+      (deriv fun r' ↦ bondPortfolioValue sA wA TA t r' - bondPortfolioValue sL wL TL t r') 0 r :=
+  hasDerivAt_deriv_of_eventually
+    (.of_forall fun r' ↦
+      (hasDerivAt_bondPortfolioValue_r sA wA TA t r').sub
+        (hasDerivAt_bondPortfolioValue_r sL wL TL t r'))
+    (((hasDerivAt_neg_bondPortfolioDur_r sA wA TA t r).sub
+      (hasDerivAt_neg_bondPortfolioDur_r sL wL TL t r)).congr_deriv
+        (sub_eq_zero_of_eq h_match_conv))
 
 end MathFin

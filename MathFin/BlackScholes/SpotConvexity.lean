@@ -19,7 +19,7 @@ is its spot-direction dual at the two scales that make sense for `S`:
    function is convex.
 2. **Continuous price level**, `S ↦ bsV K r σ S τ`: convex on `(0, ∞)` by
    the second-derivative test — gamma is non-negative
-   (`hasDerivAt_bsV_SS` + `convexOn_of_deriv2_nonneg'`).
+   (`hasDerivAt_deriv_bsV_S` + `convexOn_of_deriv2_nonneg'`).
 
 Financially: pricing preserves the convexity of the payoff. Gamma-positivity
 (`bsV_gamma_pos`) is the infinitesimal face of the same fact; the
@@ -60,57 +60,20 @@ The proof is the second-derivative test, exactly parallel to
 `bsV_strike_convexOn`:
 
 * `hasDerivAt_bsV_S`: `∂_S bsV = Φ(d₁)` (delta) exists at every `S > 0`.
-* `hasDerivAt_bsV_SS`: `∂²_S bsV = ϕ(d₁)/(S σ √τ)` (gamma) exists and is
-  non-negative for every `S > 0`.
-
-The only delicate step is identifying `deriv (fun s ↦ bsV K r σ s τ)` with
-the closed-form delta in a neighbourhood of each interior point, so the
-second derivative inherits the closed form. -/
-
-/-- **First-derivative identification on `(0, ∞)`**: `deriv` agrees with the
-closed-form delta on the whole positive half-line. -/
-private lemma deriv_bsV_S_eq_on_Ioi (K r σ τ : ℝ) (hK : 0 < K) (hσ : 0 < σ)
-    (hτ : 0 < τ) {S : ℝ} (hS : S ∈ Set.Ioi (0 : ℝ)) :
-    deriv (fun s ↦ bsV K r σ s τ) S = Phi (bsd1 S K r σ τ) :=
-  (hasDerivAt_bsV_S (K := K) (r := r) (σ := σ) hK hσ hS hτ).deriv
-
-/-- **Local equality of derivatives on `(0, ∞)`**: in a neighbourhood of any
-`S > 0`, `deriv (fun s ↦ bsV K r σ s τ)` agrees with the closed-form delta,
-so derivative facts about the closed form transfer to `deriv`. -/
-private lemma deriv_bsV_S_eventuallyEq (K r σ τ : ℝ) (hK : 0 < K) (hσ : 0 < σ)
-    (hτ : 0 < τ) {S : ℝ} (hS : 0 < S) :
-    (fun s ↦ deriv (fun s' ↦ bsV K r σ s' τ) s) =ᶠ[nhds S]
-      (fun s ↦ Phi (bsd1 s K r σ τ)) := by
-  filter_upwards [isOpen_Ioi.mem_nhds (Set.mem_Ioi.mpr hS)] with s hs
-  exact deriv_bsV_S_eq_on_Ioi K r σ τ hK hσ hτ hs
+* `hasDerivAt_deriv_bsV_S`: `∂²_S bsV = ϕ(d₁)/(S σ √τ)` (gamma) exists at every
+  `S > 0`, and it is positive (`bsV_gamma_pos`). -/
 
 /-- **BS call price is convex in the spot on `(0, ∞)`** — the continuous-
 price face of S-convexity: at every `S > 0`,
 `∂²_S bsV = ϕ(d₁)/(S σ √τ) ≥ 0` (gamma). -/
 theorem bsV_spot_convexOn {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ) :
-    ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun s ↦ bsV K r σ s τ) := by
-  refine convexOn_of_deriv2_nonneg' (convex_Ioi 0) ?_ ?_ ?_
-  -- (1) bsV is differentiable in S on Ioi 0 (from hasDerivAt_bsV_S).
-  · intro S hS
-    exact ((hasDerivAt_bsV_S (K := K) (r := r) (σ := σ) hK hσ hS hτ).differentiableAt
-      ).differentiableWithinAt
-  -- (2) deriv bsV is differentiable on Ioi 0 (from hasDerivAt_bsV_SS, transported).
-  · intro S hS
-    have h_pos : (0 : ℝ) < S := hS
-    have h_SS := hasDerivAt_bsV_SS (K := K) (r := r) (σ := σ) hK hσ h_pos hτ
-    have h_ev := deriv_bsV_S_eventuallyEq K r σ τ hK hσ hτ h_pos
-    exact ((h_SS.congr_of_eventuallyEq h_ev).differentiableAt).differentiableWithinAt
-  -- (3) deriv^[2] bsV S ≥ 0 for S > 0 — gamma is non-negative.
-  · intro S hS
-    have h_pos : (0 : ℝ) < S := hS
-    have h_SS := hasDerivAt_bsV_SS (K := K) (r := r) (σ := σ) hK hσ h_pos hτ
-    have h_ev := deriv_bsV_S_eventuallyEq K r σ τ hK hσ hτ h_pos
-    have h_d2 : deriv^[2] (fun s ↦ bsV K r σ s τ) S =
-        gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ) :=
-      (h_SS.congr_of_eventuallyEq h_ev).deriv
-    rw [h_d2]
-    -- gamma-nonneg *is* the named sign fact `bsV_gamma_pos` (`GreekSigns`).
-    exact (bsV_gamma_pos hK hσ h_pos hτ).le
+    ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun s ↦ bsV K r σ s τ) :=
+  convexOn_of_deriv2_nonneg' (convex_Ioi 0)
+    (fun _ hS ↦ (hasDerivAt_bsV_S hK hσ hS hτ).differentiableAt.differentiableWithinAt)
+    (fun _ hS ↦ (hasDerivAt_deriv_bsV_S hK hσ hS hτ).differentiableAt.differentiableWithinAt)
+    -- gamma-nonneg *is* the named sign fact `bsV_gamma_pos` (`GreekSigns`)
+    fun _ hS ↦ (bsV_gamma_pos (r := r) hK hσ hS hτ).le.trans_eq
+      (hasDerivAt_deriv_bsV_S hK hσ hS hτ).deriv.symm
 
 /-- **The price lies above its tangent at any `S₀ > 0`, with slope delta**:
 `bsV(S₀) + Φ(d₁(S₀))·(s − S₀) ≤ bsV(s)`. The supporting-hyperplane form of

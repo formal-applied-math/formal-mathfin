@@ -13,7 +13,7 @@ public import MathFin.BlackScholes.Put
 # Black–Scholes put Greeks
 
 For the European put price `P(S, τ) = K · e^{-rτ} · Φ(-d₂) − S · Φ(-d₁)`, we
-derive the five first-order Greeks. The strategy is **put-call parity**:
+derive the five standard Greeks. The strategy is **put-call parity**:
 
   `P = V − S + K · e^{-rτ}`
 
@@ -26,7 +26,8 @@ constant/identity derivatives + put-call symmetry `Φ(d) + Φ(-d) = 1`.
 * `bsP` — the BS European put price as a function of `(S, τ)`.
 * `bsP_eq_bsV` — put-call parity for the price functions.
 * `hasDerivAt_bsP_S` — δ_P = Φ(d₁) − 1.
-* `hasDerivAt_bsP_SS` — γ_P = ϕ(d₁) / (S σ √τ) (same as call gamma).
+* `hasDerivAt_deriv_bsP_S` — γ_P = ϕ(d₁) / (S σ √τ) (same as call gamma), from the
+  formula-level `hasDerivAt_bsP_SS`.
 * `hasDerivAt_bsP_tau` — θ_P in `τ`-form.
 * `hasDerivAt_bsP_sigma` — vega_P = S ϕ(d₁) √τ (same as call vega).
 * `hasDerivAt_bsP_r` — ρ_P = -K τ e^{-rτ} Φ(-d₂).
@@ -65,17 +66,25 @@ lemma hasDerivAt_bsP_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   convert h using 1 <;> try rfl
   ring
 
-/-- **Put gamma**: `∂²_S P = ϕ(d₁) / (S σ √τ)` — the same as call gamma
-(differs from put by a linear term in `S`, which vanishes on second differentiation). -/
-lemma hasDerivAt_bsP_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+/-- **The put gamma formula**: the S-derivative of the put delta `Φ(d₁) − 1` is
+`ϕ(d₁) / (S σ √τ)` — the call's gamma formula, since the two deltas differ by a constant.
+The second derivative of the put price itself is `hasDerivAt_deriv_bsP_S`. -/
+private lemma hasDerivAt_bsP_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     HasDerivAt (fun s ↦ Phi (bsd1 s K r σ τ) - 1)
-      (gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) S := by
-  have h := hasDerivAt_bsV_SS (r := r) hK hσ hS hτ
-  have h_const : HasDerivAt (fun _ : ℝ ↦ (1 : ℝ)) 0 S := hasDerivAt_const _ _
-  have h' := h.sub h_const
-  convert h' using 1 <;> try rfl
-  ring
+      (gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) S :=
+  (hasDerivAt_Phi_bsd1_S (r := r) hK hσ hS hτ).sub_const 1
+
+/-- **Put gamma**: `∂²P/∂S² = ϕ(d₁) / (S σ √τ)`, for the put price itself: the put delta
+`Φ(d₁) − 1` is `∂P/∂S` on all of `S > 0` (`hasDerivAt_bsP_S`), and its derivative is the gamma
+formula (`hasDerivAt_bsP_SS`). -/
+theorem hasDerivAt_deriv_bsP_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
+    HasDerivAt (deriv fun s ↦ bsP K r σ s τ)
+      (gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) S :=
+  hasDerivAt_deriv_of_eventually
+    ((eventually_gt_nhds hS).mono fun _ hs ↦ hasDerivAt_bsP_S hK hσ hs hτ)
+    (hasDerivAt_bsP_SS hK hσ hS hτ)
 
 /-- **Put theta** (`∂_τ` form): `∂_τ P = σ S ϕ(d₁) / (2 √τ) − r K e^{-rτ} Φ(-d₂)`.
 

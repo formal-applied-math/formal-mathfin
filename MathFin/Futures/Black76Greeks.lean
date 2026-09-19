@@ -18,7 +18,9 @@ with `d_i = bsdi F K 0 σ T` (i.e., zero drift), the Greeks are simply the BS
 Greeks evaluated at `r = 0` and post-multiplied by the discount factor `e^{-rT}`:
 
 * `hasDerivAt_blackV_F` — δ = e^{-rT} · Φ(d₁).
-* `hasDerivAt_blackV_FF` — γ = e^{-rT} · ϕ(d₁) / (F σ √T).
+* `hasDerivAt_deriv_blackV_F` — γ = e^{-rT} · ϕ(d₁) / (F σ √T), from the
+  formula-level `hasDerivAt_blackV_FF`.
+* `hasDerivAt_deriv_deriv_blackV_F` — speed = e^{-rT} · (-ϕ(d₁) (d₁ + σ√T) / (F² σ² T)).
 * `hasDerivAt_blackV_sigma` — vega = e^{-rT} · F · ϕ(d₁) · √T.
 -/
 
@@ -36,33 +38,59 @@ noncomputable def blackV (K σ : ℝ) (r F T : ℝ) : ℝ :=
 /-- **Black-76 delta**: `∂_F V_B = e^{-rT} · Φ(d₁)`. -/
 lemma hasDerivAt_blackV_F {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)
     {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :
-    HasDerivAt (fun f ↦ blackV K σ r f T) (Real.exp (-(r * T)) * Phi (bsd1 F K 0 σ T)) F := by
-  have h_bs := hasDerivAt_bsV_S (r := 0) hK hσ hF hT
-  have h := h_bs.const_mul (Real.exp (-(r * T)))
-  exact h
+    HasDerivAt (fun f ↦ blackV K σ r f T) (Real.exp (-(r * T)) * Phi (bsd1 F K 0 σ T)) F :=
+  (hasDerivAt_bsV_S (r := 0) hK hσ hF hT).const_mul (Real.exp (-(r * T)))
 
-/-- **Black-76 gamma**: `∂²_F V_B = e^{-rT} · ϕ(d₁) / (F σ √T)`. -/
-lemma hasDerivAt_blackV_FF {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)
+/-- **The Black-76 gamma formula**: the F-derivative of the delta `e^{-rT} · Φ(d₁)` is
+`e^{-rT} · ϕ(d₁) / (F σ √T)`. The second derivative of the price itself is
+`hasDerivAt_deriv_blackV_F`. -/
+private lemma hasDerivAt_blackV_FF {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)
     {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :
     HasDerivAt (fun f ↦ Real.exp (-(r * T)) * Phi (bsd1 f K 0 σ T))
       (Real.exp (-(r * T)) * gaussianPDFReal 0 1 (bsd1 F K 0 σ T) / (F * σ * Real.sqrt T)) F := by
-  have h_bs := hasDerivAt_bsV_SS (r := 0) hK hσ hF hT
+  have h_bs := hasDerivAt_Phi_bsd1_S (r := 0) hK hσ hF hT
   have h := h_bs.const_mul (Real.exp (-(r * T)))
   convert h using 1 <;> try rfl
   ring
 
-/-- **Black-76 speed**: `∂³_F V_B = e^{-rT} · (-ϕ(d₁) (d₁ + σ√T) / (F² σ² T))`.
+/-- **Black-76 gamma**: `∂²V_B/∂F² = e^{-rT} · ϕ(d₁) / (F σ √T)`, for the price itself: the
+delta `e^{-rT} · Φ(d₁)` is `∂V_B/∂F` on all of `F > 0` (`hasDerivAt_blackV_F`), and its
+derivative is the gamma formula (`hasDerivAt_blackV_FF`). -/
+theorem hasDerivAt_deriv_blackV_F {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)
+    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :
+    HasDerivAt (deriv fun f ↦ blackV K σ r f T)
+      (Real.exp (-(r * T)) * gaussianPDFReal 0 1 (bsd1 F K 0 σ T) / (F * σ * Real.sqrt T)) F :=
+  hasDerivAt_deriv_of_eventually
+    ((eventually_gt_nhds hF).mono fun _ hf ↦ hasDerivAt_blackV_F hK hσ r hf hT)
+    (hasDerivAt_blackV_FF hK hσ r hF hT)
+
+/-- **The Black-76 speed formula**: the F-derivative of the gamma formula is
+`e^{-rT} · (-ϕ(d₁) (d₁ + σ√T) / (F² σ² T))`. The third derivative of the price itself is
+`hasDerivAt_deriv_deriv_blackV_F`.
 
 Same shape as the other Black-76 Greeks: the discount factor does not depend on
 `F`, so it rides through the differentiation as a constant multiplier on the
 zero-drift BS speed. -/
-lemma hasDerivAt_blackV_FFF {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)
+private lemma hasDerivAt_blackV_FFF {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)
     {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :
     HasDerivAt (fun f ↦ Real.exp (-(r * T)) *
         (gaussianPDFReal 0 1 (bsd1 f K 0 σ T) / (f * σ * Real.sqrt T)))
       (Real.exp (-(r * T)) * -(gaussianPDFReal 0 1 (bsd1 F K 0 σ T) *
         (bsd1 F K 0 σ T + σ * Real.sqrt T) / (F ^ 2 * σ ^ 2 * T))) F :=
   (hasDerivAt_bsV_SSS (r := 0) hK hσ hF hT).const_mul (Real.exp (-(r * T)))
+
+/-- **Black-76 speed**: `∂³V_B/∂F³ = e^{-rT} · (-ϕ(d₁) (d₁ + σ√T) / (F² σ² T))`, for the
+price itself: the genuine gamma `hasDerivAt_deriv_blackV_F` holds on all of `F > 0`, and the
+derivative of its formula is `hasDerivAt_blackV_FFF`. -/
+theorem hasDerivAt_deriv_deriv_blackV_F {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)
+    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :
+    HasDerivAt (deriv (deriv fun f ↦ blackV K σ r f T))
+      (Real.exp (-(r * T)) * -(gaussianPDFReal 0 1 (bsd1 F K 0 σ T) *
+        (bsd1 F K 0 σ T + σ * Real.sqrt T) / (F ^ 2 * σ ^ 2 * T))) F :=
+  hasDerivAt_deriv_of_eventually
+    ((eventually_gt_nhds hF).mono fun _ hf ↦
+      (hasDerivAt_deriv_blackV_F hK hσ r hf hT).congr_deriv (mul_div_assoc _ _ _))
+    (hasDerivAt_blackV_FFF hK hσ r hF hT)
 
 /-- **Black-76 vega**: `∂_σ V_B = e^{-rT} · F · ϕ(d₁) · √T`. -/
 lemma hasDerivAt_blackV_sigma {K : ℝ} (hK : 0 < K) (r : ℝ)

@@ -276,17 +276,17 @@
     {
       "id": "mf-bs-put-gamma",
       "name": "BS Put Gamma",
-      "description": "Put gamma, stated as the S-derivative of the put delta: ∂/∂S (Φ(d₁) − 1) = ϕ(d₁)/(S σ √τ). That Φ(d₁) − 1 is ∂P/∂S is mf-bs-put-delta; composed, this is ∂²P/∂S². Same as the call gamma, since the two deltas differ by a constant.",
+      "description": "Put gamma: the second S-derivative of the Black-Scholes put price, ∂²P/∂S² = ϕ(d₁)/(S σ √τ). Same as the call gamma, since the put and call deltas differ by a constant.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.PutGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_put_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => MathFin.Phi (MathFin.bsd1 s K r σ τ) - 1)\n      (gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) S :=\n  MathFin.hasDerivAt_bsP_SS hK hσ hS hτ\n"
+        "lean": "import MathFin.BlackScholes.PutGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_put_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (deriv fun s => MathFin.bsP K r σ s τ)\n      (gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) S :=\n  MathFin.hasDerivAt_deriv_bsP_S hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "BS put gamma (Hull 19.4)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Same as call gamma (the linear correction in put-call parity has zero second derivative). Lives in MathFin/BlackScholes/PutGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the put price itself: the gamma formula hasDerivAt_bsP_SS (the S-derivative of the delta Φ(d₁) − 1) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the delta formula is ∂P/∂S on all of S > 0 (hasDerivAt_bsP_S). Same as call gamma (the linear correction in put-call parity has zero second derivative). Lives in MathFin/BlackScholes/PutGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -340,49 +340,49 @@
     {
       "id": "mf-bs-vanna",
       "name": "BS Vanna (∂²V/∂σ∂S)",
-      "description": "Vanna, stated as the S-derivative of the vega expression: ∂/∂S (S·ϕ(d₁)·√τ) = −ϕ(d₁)·d₂/σ. That S·ϕ(d₁)·√τ is ∂V/∂σ is mf-vega; composed, this is ∂²V/∂σ∂S. Cross-Greek between spot and volatility.",
+      "description": "Vanna: the S-derivative of the Black-Scholes vega, ∂/∂S (∂V/∂σ) = −ϕ(d₁)·d₂/σ, a mixed second derivative of the call price. Cross-Greek between spot and volatility.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_vanna_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => s * gaussianPDFReal 0 1 (MathFin.bsd1 s K r σ τ) * Real.sqrt τ)\n      (-(gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) * MathFin.bsd2 S K r σ τ / σ)) S :=\n  MathFin.hasDerivAt_bsV_vanna hK hσ hS hτ\n"
+        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_vanna_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => deriv (fun σ' => MathFin.bsV K r σ' s τ) σ)\n      (-(gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) * MathFin.bsd2 S K r σ τ / σ)) S :=\n  MathFin.hasDerivAt_S_deriv_bsV_sigma hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "BS vanna (Wystup 2002)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Product + chain rule on vega(S), with σ√τ - d₁ = -d₂ collapse. Lives in MathFin/BlackScholes/HigherGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the call price itself: the vanna formula hasDerivAt_bsV_vanna (product + chain rule on the vega formula S·ϕ(d₁)·√τ, with the σ√τ − d₁ = −d₂ collapse) is transported to `s ↦ ∂V/∂σ(s)` by hasDerivAt_deriv_param_of_eventually (Foundations/DerivOfDeriv.lean), since the vega formula is ∂V/∂σ at every S > 0 (hasDerivAt_bsV_sigma). Lives in MathFin/BlackScholes/HigherGreeks.lean. Axioms-clean."
       }
     },
     {
       "id": "mf-bs-volga",
       "name": "BS Volga / Vomma (∂²V/∂σ²)",
-      "description": "Volga, stated as the σ-derivative of the vega expression: ∂/∂σ (S·ϕ(d₁)·√τ) = vega · d₁ · d₂ / σ. That S·ϕ(d₁)·√τ is ∂V/∂σ is mf-vega; composed, this is ∂²V/∂σ², the second-order sensitivity of option value to volatility.",
+      "description": "Volga (vomma): the second σ-derivative of the Black-Scholes call price, ∂²V/∂σ² = vega · d₁ · d₂ / σ with vega = S·ϕ(d₁)·√τ, the second-order sensitivity of option value to volatility.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_volga_thm {K r : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => S * gaussianPDFReal 0 1 (MathFin.bsd1 S K r s τ) * Real.sqrt τ)\n      (S * gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) * Real.sqrt τ\n        * MathFin.bsd1 S K r σ τ * MathFin.bsd2 S K r σ τ / σ) σ :=\n  MathFin.hasDerivAt_bsV_volga hK hS hσ hτ\n"
+        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_volga_thm {K r : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (deriv fun σ' => MathFin.bsV K r σ' S τ)\n      (S * gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) * Real.sqrt τ\n        * MathFin.bsd1 S K r σ τ * MathFin.bsd2 S K r σ τ / σ) σ :=\n  MathFin.hasDerivAt_deriv_bsV_sigma hK hS hσ hτ\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "BS volga / vomma (Wystup 2002)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof using the clean derivative ∂_σ d₁ = -d₂/σ + chain rule on ϕ. Lives in MathFin/BlackScholes/HigherGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the call price itself: the volga formula hasDerivAt_bsV_volga (the clean derivative ∂_σ d₁ = −d₂/σ + chain rule on ϕ, applied to the vega formula) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the vega formula is ∂V/∂σ on all of σ > 0 (hasDerivAt_bsV_sigma). Lives in MathFin/BlackScholes/HigherGreeks.lean. Axioms-clean."
       }
     },
     {
       "id": "mf-bs-charm",
       "name": "BS Charm (∂Δ/∂τ)",
-      "description": "Charm, stated as the τ-derivative of the delta expression: ∂/∂τ Φ(d₁) = ϕ(d₁)·((r + σ²/2)τ − log(S/K))/(2στ√τ). That Φ(d₁) is the call delta ∂V/∂S is the delta leg of sc-bs-pde; composed, this is ∂Δ/∂τ, the decay of delta with time to maturity.",
+      "description": "Charm: the τ-derivative of the Black-Scholes call delta, ∂/∂τ (∂V/∂S) = ϕ(d₁)·((r + σ²/2)τ − log(S/K))/(2στ√τ), the sensitivity of delta to time to maturity.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_charm_thm {K r σ : ℝ} (hσ : 0 < σ)\n    {S τ : ℝ} (hτ : 0 < τ) :\n    HasDerivAt (fun t => Phi (bsd1 S K r σ t))\n      (gaussianPDFReal 0 1 (bsd1 S K r σ τ)\n        * (((r + σ ^ 2 / 2) * τ - Real.log (S / K)) / (2 * σ * τ * Real.sqrt τ))) τ :=\n  MathFin.hasDerivAt_bsV_charm hσ hτ\n"
+        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_charm_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun t => deriv (fun s => MathFin.bsV K r σ s t) S)\n      (gaussianPDFReal 0 1 (bsd1 S K r σ τ)\n        * (((r + σ ^ 2 / 2) * τ - Real.log (S / K)) / (2 * σ * τ * Real.sqrt τ))) τ :=\n  MathFin.hasDerivAt_tau_deriv_bsV_S hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "BS charm (Wystup 2002)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via chain rule on Φ(d₁(τ)): ∂_τ d₁ · ϕ(d₁). Lives in MathFin/BlackScholes/PDE.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the call delta itself: the charm formula hasDerivAt_bsV_charm (chain rule on Φ(d₁(τ)): ∂_τ d₁ · ϕ(d₁)) is transported to `t ↦ ∂V/∂S(t)` by hasDerivAt_deriv_param_of_eventually (Foundations/DerivOfDeriv.lean), since Φ(d₁) is ∂V/∂S at every τ > 0 (hasDerivAt_bsV_S). Lives in MathFin/BlackScholes/HigherGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -500,17 +500,17 @@
     {
       "id": "mf-black76-gamma",
       "name": "Black-76 Gamma",
-      "description": "Futures option gamma, stated as the F-derivative of the Black-76 delta: ∂/∂F (e^{-rT}·Φ(d₁)) = e^{-rT}·ϕ(d₁)/(F σ √T). That e^{-rT}·Φ(d₁) is ∂V_B/∂F is mf-black76-delta; composed, this is ∂²V_B/∂F².",
+      "description": "Futures option gamma: the second F-derivative of the Black-76 price, ∂²V_B/∂F² = e^{-rT}·ϕ(d₁)/(F σ √T).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Futures.Black76Greeks\n\nopen MathFin ProbabilityTheory\n\ntheorem black76_gamma_thm {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun f => Real.exp (-(r * T)) * MathFin.Phi (MathFin.bsd1 f K 0 σ T))\n      (Real.exp (-(r * T)) * gaussianPDFReal 0 1 (MathFin.bsd1 F K 0 σ T)\n        / (F * σ * Real.sqrt T)) F :=\n  MathFin.hasDerivAt_blackV_FF hK hσ r hF hT\n"
+        "lean": "import MathFin.Futures.Black76Greeks\n\nopen MathFin ProbabilityTheory\n\ntheorem black76_gamma_thm {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (deriv fun f => MathFin.blackV K σ r f T)\n      (Real.exp (-(r * T)) * gaussianPDFReal 0 1 (MathFin.bsd1 F K 0 σ T)\n        / (F * σ * Real.sqrt T)) F :=\n  MathFin.hasDerivAt_deriv_blackV_F hK hσ r hF hT\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Black-76 gamma (Hull 17.6)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. bsV gamma at r=0 times outer discount factor. Lives in MathFin/Futures/Black76Greeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the Black-76 price itself: the gamma formula hasDerivAt_blackV_FF (bsV gamma at r=0 times outer discount factor) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the delta e^{-rT}·Φ(d₁) is ∂V_B/∂F on all of F > 0 (hasDerivAt_blackV_F). Lives in MathFin/Futures/Black76Greeks.lean. Axioms-clean."
       }
     },
     {
@@ -532,17 +532,17 @@
     {
       "id": "mf-bachelier-gamma",
       "name": "Bachelier Gamma",
-      "description": "Bachelier gamma, stated as the S-derivative of the Bachelier delta: ∂/∂S Φ(d) = ϕ(d)/(σ √T), by the chain rule on Φ(d(S)). That Φ(d) is ∂V/∂S is mf-bachelier-delta; composed, this is ∂²V/∂S².",
+      "description": "Bachelier gamma: the second S-derivative of the Bachelier (normal-model) call price, ∂²V/∂S² = ϕ(d)/(σ √T), at every spot S.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.BachelierGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bachelier_gamma_thm {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : ℝ) :\n    HasDerivAt (fun s => MathFin.Phi (MathFin.bachelierD s K σ T))\n      (gaussianPDFReal 0 1 (MathFin.bachelierD S K σ T) / (σ * Real.sqrt T)) S :=\n  MathFin.hasDerivAt_bachelierV_SS hσ hT S\n"
+        "lean": "import MathFin.BlackScholes.BachelierGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bachelier_gamma_thm {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : ℝ) :\n    HasDerivAt (deriv fun s => MathFin.bachelierV K σ T s)\n      (gaussianPDFReal 0 1 (MathFin.bachelierD S K σ T) / (σ * Real.sqrt T)) S :=\n  MathFin.hasDerivAt_deriv_bachelierV_S hσ hT S\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Bachelier gamma",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Chain rule on Φ(d(S)) with ∂_S d = 1/(σ√T). Lives in MathFin/BlackScholes/BachelierGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the Bachelier price itself: the gamma formula hasDerivAt_bachelierV_SS (chain rule on Φ(d(S)) with ∂_S d = 1/(σ√T)) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the delta Φ(d) is ∂V/∂S at every S (hasDerivAt_bachelierV_S). Lives in MathFin/BlackScholes/BachelierGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -564,17 +564,17 @@
     {
       "id": "mf-asset-digital-gamma",
       "name": "Asset-or-Nothing Digital Gamma",
-      "description": "Asset digital gamma, stated as the S-derivative of the asset-digital delta: ∂/∂S (Φ(d₁) + ϕ(d₁)/(σ√τ)) = -ϕ(d₁)·d₂/(S σ² τ), the Φ-term and pdf-term contributions collapsed via σ√τ − d₁ = -d₂. That Φ(d₁) + ϕ(d₁)/(σ√τ) is ∂V_asset/∂S is mf-asset-digital-delta; composed, this is ∂²V_asset/∂S².",
+      "description": "Asset-or-nothing digital gamma: the second S-derivative of the asset-digital price, ∂²V_asset/∂S² = -ϕ(d₁)·d₂/(S σ² τ); the Φ-term and pdf-term contributions of the delta Φ(d₁) + ϕ(d₁)/(σ√τ) collapse via σ√τ − d₁ = -d₂.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem asset_digital_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt\n      (fun s => MathFin.Phi (MathFin.bsd1 s K r σ τ) +\n        gaussianPDFReal 0 1 (MathFin.bsd1 s K r σ τ) / (σ * Real.sqrt τ))\n      (-(gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) *\n        MathFin.bsd2 S K r σ τ / (S * σ^2 * τ))) S :=\n  MathFin.hasDerivAt_bsAssetDigital_SS hK hσ hS hτ\n"
+        "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem asset_digital_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (deriv fun s => MathFin.bsAssetDigital K r σ s τ)\n      (-(gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) *\n        MathFin.bsd2 S K r σ τ / (S * σ^2 * τ))) S :=\n  MathFin.hasDerivAt_deriv_bsAssetDigital_S hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Asset-or-nothing gamma (Hull 26.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Sum of Φ-chain-rule and pdf-chain-rule contributions, collapsed via the σ√τ − d₁ = -d₂ identity. Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the asset-digital price itself: the gamma formula hasDerivAt_bsAssetDigital_SS (sum of Φ-chain-rule and pdf-chain-rule contributions, collapsed via the σ√τ − d₁ = -d₂ identity) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the delta formula is ∂V_asset/∂S on all of S > 0 (hasDerivAt_bsAssetDigital_S). Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -596,17 +596,17 @@
     {
       "id": "mf-bs-merton-gamma",
       "name": "BS-Merton Gamma (Dividends)",
-      "description": "BS-Merton gamma, stated as the S-derivative of the dividend-adjusted delta: ∂/∂S (e^{-qτ}·Φ(d₁')) = e^{-qτ}·ϕ(d₁')/(S σ √τ), with d₁' the d₁ of rate r − q. That e^{-qτ}·Φ(d₁') is ∂V_q/∂S is mf-bs-merton-delta; composed, this is ∂²V_q/∂S².",
+      "description": "BS-Merton gamma: the second S-derivative of the call price with continuous dividend yield q, ∂²V_q/∂S² = e^{-qτ}·ϕ(d₁')/(S σ √τ), with d₁' the d₁ of rate r − q.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.DividendsGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_merton_gamma_thm {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => Real.exp (-(q * τ)) *\n        MathFin.Phi (MathFin.bsd1 s K (r - q) σ τ))\n      (Real.exp (-(q * τ)) * gaussianPDFReal 0 1 (MathFin.bsd1 S K (r - q) σ τ)\n        / (S * σ * Real.sqrt τ)) S :=\n  MathFin.hasDerivAt_bsVDiv_SS hK hσ hS hτ\n"
+        "lean": "import MathFin.BlackScholes.DividendsGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_merton_gamma_thm {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (deriv fun s => MathFin.bsVDiv K r q σ s τ)\n      (Real.exp (-(q * τ)) * gaussianPDFReal 0 1 (MathFin.bsd1 S K (r - q) σ τ)\n        / (S * σ * Real.sqrt τ)) S :=\n  MathFin.hasDerivAt_deriv_bsVDiv_S hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "BS-Merton dividends gamma (Hull 17.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Direct const_mul of the BS call gamma at effective drift r-q. Lives in MathFin/BlackScholes/DividendsGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the dividend-adjusted price itself: the gamma formula hasDerivAt_bsVDiv_SS (direct const_mul of the BS call gamma at effective drift r-q) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the delta e^{-qτ}·Φ(d₁') is ∂V_q/∂S on all of S > 0 (hasDerivAt_bsVDiv_S). Lives in MathFin/BlackScholes/DividendsGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -740,17 +740,17 @@
     {
       "id": "mf-cash-digital-gamma",
       "name": "Cash-or-Nothing Digital Gamma",
-      "description": "Cash digital gamma, stated as the S-derivative of the cash-digital delta δ_cash(s) = e^{-rτ}·ϕ(d₂(s))/(s·σ·√τ): ∂δ_cash/∂S = -e^{-rτ}·ϕ(d₂)·d₁/(S² σ² τ), a quotient rule collapsed via d₂ + σ√τ = d₁. That δ_cash is ∂V_cash/∂S is mf-cash-digital-delta; composed, this is ∂²V_cash/∂S².",
+      "description": "Cash-or-nothing digital gamma: the second S-derivative of the cash-digital price, ∂²V_cash/∂S² = -e^{-rτ}·ϕ(d₂)·d₁/(S² σ² τ); differentiating the delta e^{-rτ}·ϕ(d₂)/(S·σ·√τ) is a quotient rule collapsed via d₂ + σ√τ = d₁.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem cash_digital_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt\n      (fun s => Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (MathFin.bsd2 s K r σ τ) / (s * σ * Real.sqrt τ))\n      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) *\n        MathFin.bsd1 S K r σ τ / (S^2 * σ^2 * τ))) S :=\n  MathFin.hasDerivAt_bsCashDigital_SS hK hσ hS hτ\n"
+        "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem cash_digital_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (deriv fun s => MathFin.bsCashDigital K r σ s τ)\n      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) *\n        MathFin.bsd1 S K r σ τ / (S^2 * σ^2 * τ))) S :=\n  MathFin.hasDerivAt_deriv_bsCashDigital_S hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Cash-or-nothing gamma (Hull 26.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via quotient rule on δ_cash(s) = e^{-rτ}·ϕ(d₂(s))/(s·σ·√τ). Numerator f(s) = e^{-rτ}·ϕ(d₂(s)) with f'(S) = e^{-rτ}·(-d₂·ϕ(d₂))·(1/(Sσ√τ)); denominator g(s) = s·σ·√τ with g'(S) = σ·√τ. Quotient (f'·g − f·g')/g² collapses via d₂ + σ√τ = d₁. Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the cash-digital price itself: the gamma formula hasDerivAt_bsCashDigital_SS, a quotient rule on δ_cash(s) = e^{-rτ}·ϕ(d₂(s))/(s·σ·√τ) — numerator f(s) = e^{-rτ}·ϕ(d₂(s)) with f'(S) = e^{-rτ}·(-d₂·ϕ(d₂))·(1/(Sσ√τ)), denominator g(s) = s·σ·√τ with g'(S) = σ·√τ, and (f'·g − f·g')/g² collapsed via d₂ + σ√τ = d₁ — is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since δ_cash is ∂V_cash/∂S on all of S > 0 (hasDerivAt_bsCashDigital_S). Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -935,14 +935,14 @@
       "description": "ZCB Macaulay duration equals remaining time: -∂_r B(t,T) / B(t,T) = T - t.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.ZCB\n\nopen MathFin\n\ntheorem zcb_duration_thm (t T r : ℝ) :\n    -(-(T - t) * MathFin.zcb r t T) / MathFin.zcb r t T = T - t :=\n  MathFin.zcb_duration_eq_time_to_maturity t T r\n"
+        "lean": "import MathFin.FixedIncome.ZCB\n\nopen MathFin\n\ntheorem zcb_duration_thm (t T r : ℝ) :\n    -deriv (fun r' => MathFin.zcb r' t T) r / MathFin.zcb r t T = T - t :=\n  MathFin.zcb_duration_eq_time_to_maturity t T r\n"
       },
       "metadata": {
         "chapter": 10,
         "reference": "Macaulay/Modified Duration for ZCB (Hull 4.8)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: the rate derivative ∂_r B = −(T − t)·B of the price itself (hasDerivAt_zcb_r) substituted into −∂_r B / B. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
       }
     },
     {
@@ -951,14 +951,14 @@
       "description": "ZCB convexity equals squared remaining time: ∂²_r B(t,T) / B(t,T) = (T - t)².",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.ZCB\n\nopen MathFin\n\ntheorem zcb_convexity_thm (t T r : ℝ) :\n    ((T - t)^2 * MathFin.zcb r t T) / MathFin.zcb r t T = (T - t)^2 :=\n  MathFin.zcb_convexity_eq_time_to_maturity_sq t T r\n"
+        "lean": "import MathFin.FixedIncome.ZCB\n\nopen MathFin\n\ntheorem zcb_convexity_thm (t T r : ℝ) :\n    deriv (deriv fun r' => MathFin.zcb r' t T) r / MathFin.zcb r t T = (T - t)^2 :=\n  MathFin.zcb_convexity_eq_time_to_maturity_sq t T r\n"
       },
       "metadata": {
         "chapter": 10,
         "reference": "Bond convexity for ZCB (Hull 4.9)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: the second rate-derivative of the price itself, ∂²_r B = (T − t)²·B (hasDerivAt_deriv_zcb_r, via hasDerivAt_deriv_of_eventually in Foundations/DerivOfDeriv.lean), divided by B. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
       }
     },
     {
@@ -1828,17 +1828,17 @@
     {
       "id": "mf-bond-2nd-deriv",
       "name": "Bond Portfolio Second-Order Rate Sensitivity",
-      "description": "Stated as the r-derivative of minus the duration-times-value: ∂/∂r(−D_P·P) = C_P·P, the convexity-times-value of the portfolio. That −D_P·P is ∂P/∂r is mf-bond-portfolio-rate-deriv; composed, this is ∂²P/∂r² = C_P·P.",
+      "description": "The second rate-derivative of a zero-coupon bond portfolio's value P(r) = Σᵢ wᵢ·e^{−r(Tᵢ − t)}: ∂²P/∂r² = Σᵢ wᵢ(Tᵢ − t)²·e^{−r(Tᵢ − t)}, the convexity-times-value C_P·P.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_2nd_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => -MathFin.bondPortfolioDur s w T t r')\n      (MathFin.bondPortfolioConv s w T t r) r :=\n  MathFin.hasDerivAt_neg_bondPortfolioDur_r s w T t r\n"
+        "lean": "import MathFin.FixedIncome.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_2nd_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (deriv fun r' => MathFin.bondPortfolioValue s w T t r')\n      (MathFin.bondPortfolioConv s w T t r) r :=\n  MathFin.hasDerivAt_deriv_bondPortfolioValue_r s w T t r\n"
       },
       "metadata": {
         "chapter": 14,
         "reference": "Bond convexity (Fabozzi, Fixed Income Mathematics Ch 5)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof by negating the duration derivative. Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the portfolio value itself: the r-derivative of minus the duration-times-value (hasDerivAt_neg_bondPortfolioDur_r, by negating the duration derivative) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since −D_P·P is ∂P/∂r at every r (hasDerivAt_bondPortfolioValue_r). Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
       }
     },
     {
@@ -1860,17 +1860,17 @@
     {
       "id": "mf-bond-2nd-immunization",
       "name": "Bond Portfolio Second-Order Immunization",
-      "description": "Matching the convexity-times-value Σᵢ wᵢ(Tᵢ − t)²·e^{−r(Tᵢ − t)} of the asset and liability bond portfolios gives ∂²(A-L)/∂r² = 0 at the current rate r, stated as the vanishing r-derivative of the dollar-duration gap. The statement assumes only the convexity match; duration matching is the separate first-order condition. Second-order Redington immunization.",
+      "description": "Matching the convexity-times-value Σᵢ wᵢ(Tᵢ − t)²·e^{−r(Tᵢ − t)} of the asset and liability bond portfolios gives ∂²(A − L)/∂r² = 0 at the current rate r: the surplus has zero second rate-derivative. The statement assumes only the convexity-times-value match; matching duration-times-value is the separate first-order condition. Redington's second-order condition is the strict inequality ∂²A/∂r² > ∂²L/∂r², with values and first derivatives matched, which makes the surplus a local minimum. This entry is the equality boundary, where the second-order term vanishes, and claims no minimum.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_2nd_immunization_thm\n    {ι κ : Type*}\n    (sA : Finset ι) (wA TA : ι → ℝ)\n    (sL : Finset κ) (wL TL : κ → ℝ)\n    (t r : ℝ)\n    (h_match_conv : MathFin.bondPortfolioConv sA wA TA t r =\n                    MathFin.bondPortfolioConv sL wL TL t r) :\n    HasDerivAt (fun r' =>\n        -MathFin.bondPortfolioDur sA wA TA t r' -\n        (-MathFin.bondPortfolioDur sL wL TL t r'))\n      0 r :=\n  MathFin.bondPortfolio_immunization_second_order sA wA TA sL wL TL t r h_match_conv\n"
+        "lean": "import MathFin.FixedIncome.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_2nd_immunization_thm\n    {ι κ : Type*}\n    (sA : Finset ι) (wA TA : ι → ℝ)\n    (sL : Finset κ) (wL TL : κ → ℝ)\n    (t r : ℝ)\n    (h_match_conv : MathFin.bondPortfolioConv sA wA TA t r =\n                    MathFin.bondPortfolioConv sL wL TL t r) :\n    HasDerivAt (deriv fun r' =>\n        MathFin.bondPortfolioValue sA wA TA t r' - MathFin.bondPortfolioValue sL wL TL t r')\n      0 r :=\n  MathFin.bondPortfolio_immunization_second_order sA wA TA sL wL TL t r h_match_conv\n"
       },
       "metadata": {
         "chapter": 14,
         "reference": "Second-order Redington immunization (Fabozzi Ch 5; Hull Ch 4.11)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via second-derivative sensitivities of A and L plus convexity matching. Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the surplus A − L itself: the second derivative of each side is its convexity-times-value (hasDerivAt_neg_bondPortfolioDur_r, the r-derivative of −Dur·P), so matching those makes the r-derivative of the dollar-duration gap vanish. That is transported to `deriv` of the surplus by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the dollar-duration gap is ∂(A − L)/∂r at every r (hasDerivAt_bondPortfolioValue_r on each side). Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
       }
     },
     {
@@ -2068,17 +2068,17 @@
     {
       "id": "mf-bsV-KK-deriv",
       "name": "Call Price Second Strike-Derivative",
-      "description": "Stated as the K-derivative of the call's strike sensitivity: ∂/∂K(−e^{-rτ}·Φ(d_2)) = e^{-rτ}·ϕ(d_2)/(K·σ·√τ). That −e^{-rτ}·Φ(d_2) is ∂_K bsV is mf-bsV-K-deriv; composed, this is ∂²_K bsV. Its sign — and with it convexity of the call price in strike, the butterfly-spread non-negativity — is not part of this entry's statement.",
+      "description": "The second strike-derivative of the Black-Scholes call price: ∂²V/∂K² = e^{-rτ}·ϕ(d_2)/(K·σ·√τ). Its sign — and with it convexity of the call price in strike, the butterfly-spread non-negativity — is not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.StrikeGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bsV_KK_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => -(Real.exp (-(r * τ)) *\n        MathFin.Phi (MathFin.bsd2 S k r σ τ)))\n      (Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ)) K :=\n  MathFin.hasDerivAt_bsV_KK hS hσ hK hτ\n"
+        "lean": "import MathFin.BlackScholes.StrikeGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bsV_KK_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (deriv fun k => MathFin.bsV k r σ S τ)\n      (Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ)) K :=\n  MathFin.hasDerivAt_deriv_bsV_K hS hσ hK hτ\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Call price convexity in strike (butterfly spread non-negativity; Hull Ch 12.8)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: derivative of -e^{-rτ}·Phi(d_2(K)) chains via Phi' = ϕ and ∂_K d_2. Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the call price itself: the K-derivative of the strike sensitivity -e^{-rτ}·Phi(d_2(K)) (hasDerivAt_bsV_KK, chaining via Phi' = ϕ and ∂_K d_2) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since -e^{-rτ}·Phi(d_2) is ∂_K bsV on all of K > 0 (hasDerivAt_bsV_K). Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -2420,17 +2420,17 @@
     {
       "id": "mf-bsP-KK-deriv",
       "name": "Put Price Second Strike-Derivative",
-      "description": "Stated as the K-derivative of the put's strike sensitivity: ∂/∂K(e^{-rτ}·Φ(−d_2)) = e^{-rτ}·ϕ(d_2)/(K·σ·√τ). That e^{-rτ}·Φ(−d_2) is ∂_K bsP is mf-bsP-K-deriv; composed, this is ∂²_K bsP — the same as the call's, since put and call differ by a function linear in K.",
+      "description": "The second strike-derivative of the Black-Scholes put price: ∂²P/∂K² = e^{-rτ}·ϕ(d_2)/(K·σ·√τ), the same as the call's, since put and call differ by a function linear in K.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.PutStrikeConvexity\n\nopen ProbabilityTheory MathFin\n\ntheorem bsP_KK_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => Real.exp (-(r * τ)) * MathFin.Phi (-MathFin.bsd2 S k r σ τ))\n      (Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ)) K :=\n  MathFin.hasDerivAt_bsP_KK hS hσ hK hτ\n"
+        "lean": "import MathFin.BlackScholes.PutStrikeConvexity\n\nopen ProbabilityTheory MathFin\n\ntheorem bsP_KK_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (deriv fun k => MathFin.bsP k r σ S τ)\n      (Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ)) K :=\n  MathFin.hasDerivAt_deriv_bsP_K hS hσ hK hτ\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Put price convexity in strike (mirror of call convexity; Hull Ch 12.8)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via derivative of Phi(-d_2(K)) + PDF symmetry + field_simp. Lives in MathFin/BlackScholes/PutStrikeConvexity.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the put price itself: the K-derivative of the strike sensitivity e^{-rτ}·Phi(-d_2(K)) (hasDerivAt_bsP_KK, via the derivative of Phi(-d_2(K)) + PDF symmetry + field_simp) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since e^{-rτ}·Phi(-d_2) is ∂_K bsP on all of K > 0 (hasDerivAt_bsP_K). Lives in MathFin/BlackScholes/PutStrikeConvexity.lean. Axioms-clean."
       }
     },
     {
@@ -2660,17 +2660,17 @@
     {
       "id": "mf-breeden-litzenberger",
       "name": "Breeden-Litzenberger under Black-Scholes: Second Strike-Derivative of the Call",
-      "description": "Breeden-Litzenberger under Black-Scholes, stated as the K-derivative of the call's strike sensitivity: ∂/∂K(−e^{-rT}·Φ(d_2)) = e^{-rT} · ϕ(d_2)/(K σ √T), the discounted lognormal density with risk-neutral parameters at K (lognormalTerminalPDF). That −e^{-rT}·Φ(d_2) is ∂_K bsV is mf-bsV-K-deriv; composed, this is ∂²_K bsV. That the density is the law of S_T under the pricing measure is not part of this entry's statement.",
+      "description": "Breeden-Litzenberger under Black-Scholes: the second strike-derivative of the call price is the discounted lognormal density with risk-neutral parameters at K, ∂²V/∂K² = e^{-rT}·ϕ(d_2)/(K σ √T) (lognormalTerminalPDF). That this function is a probability density, or the density of S_T under a pricing measure, is not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.BreedenLitzenberger\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem breedenLitzenberger_thm {S_0 r σ : ℝ} (hS : 0 < S_0) (hσ : 0 < σ)\n    {K T : ℝ} (hK : 0 < K) (hT : 0 < T) :\n    HasDerivAt (fun k => -(Real.exp (-(r * T)) * Phi (bsd2 S_0 k r σ T)))\n      (Real.exp (-(r * T)) * MathFin.lognormalTerminalPDF S_0 r σ T K) K :=\n  MathFin.breedenLitzenberger hS hσ hK hT\n"
+        "lean": "import MathFin.BlackScholes.BreedenLitzenberger\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem breedenLitzenberger_thm {S_0 r σ : ℝ} (hS : 0 < S_0) (hσ : 0 < σ)\n    {K T : ℝ} (hK : 0 < K) (hT : 0 < T) :\n    HasDerivAt (deriv fun k => bsV k r σ S_0 T)\n      (Real.exp (-(r * T)) * MathFin.lognormalTerminalPDF S_0 r σ T K) K :=\n  MathFin.breedenLitzenberger hS hσ hK hT\n"
       },
       "metadata": {
         "chapter": 14,
         "reference": "Breeden-Litzenberger 1978 (state-price densities from option prices)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+        "formalization_scope": "Full formal proof: the call's second strike-derivative (hasDerivAt_deriv_bsV_K) with its value read as the density lognormalTerminalPDF, which unfolds to ϕ(d_2)/(K σ √T). Re-export from MathFin. Axioms-clean."
       }
     },
     {
@@ -3172,17 +3172,17 @@
     {
       "id": "mf-almgren-chriss-EL",
       "name": "Almgren-Chriss Trajectory Satisfies EL Equation",
-      "description": "The closed-form Almgren-Chriss optimal-execution trajectory X(t) = X_0 · sinh(κ(T-t))/sinh(κT), for sinh(κT) ≠ 0, satisfies the Euler-Lagrange equation X''(t) = κ² · X(t), stated as the t-derivative of X'(t) = −X_0·κ·cosh(κ(T-t))/sinh(κT). That this expression is X' is hasDerivAt_almgrenChrissPath in the source module.",
+      "description": "The closed-form Almgren-Chriss trajectory X(t) = X_0 · sinh(κ(T-t))/sinh(κT) satisfies the Euler-Lagrange equation X''(t) = κ² · X(t) at every t. No condition on sinh(κT) is needed: under Lean's x/0 = 0 the degenerate closed form is the zero path, which satisfies the equation too.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.AlmgrenChriss\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem almgrenChrissPath_satisfies_EL_thm (X_0 κ T : ℝ)\n    (hT : Real.sinh (κ * T) ≠ 0) (t : ℝ) :\n    HasDerivAt (fun s : ℝ =>\n        -(X_0 * κ * Real.cosh (κ * (T - s)) / Real.sinh (κ * T)))\n      (κ^2 * MathFin.almgrenChrissPath X_0 κ T t) t :=\n  MathFin.almgrenChrissPath_satisfies_EL X_0 κ T hT t\n"
+        "lean": "import MathFin.Foundations.AlmgrenChriss\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem almgrenChrissPath_satisfies_EL_thm (X_0 κ T t : ℝ) :\n    HasDerivAt (deriv (MathFin.almgrenChrissPath X_0 κ T))\n      (κ^2 * MathFin.almgrenChrissPath X_0 κ T t) t :=\n  MathFin.almgrenChrissPath_satisfies_EL X_0 κ T t\n"
       },
       "metadata": {
         "chapter": 16,
         "reference": "Almgren-Chriss optimal execution (Almgren-Chriss 2000)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the trajectory itself: the t-derivative of the first-derivative formula X'(t) = −X_0·κ·cosh(κ(T-t))/sinh(κT) is κ²·X(t) (chain rule on cosh), transported to `deriv` of X by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since that formula is X' at every t (hasDerivAt_almgrenChrissPath). Re-export from MathFin. Axioms-clean."
       }
     },
     {
@@ -3924,33 +3924,33 @@
     {
       "id": "mf-bs-speed",
       "name": "BS Speed (∂³V/∂S³)",
-      "description": "BS speed, stated as the S-derivative of the gamma expression: ∂/∂S (ϕ(d₁)/(S σ √τ)) = -ϕ(d₁)(d₁ + σ√τ)/(S² σ² τ), one quotient rule. The gamma expression is the S-derivative of the delta Φ(d₁) (the gamma leg of sc-bs-pde, whose delta leg is ∂V/∂S = Φ(d₁)), so this is ∂³V/∂S³ by composing three results, not one theorem.",
+      "description": "BS speed: the third S-derivative of the Black-Scholes call price, ∂³V/∂S³ = -ϕ(d₁)(d₁ + σ√τ)/(S² σ² τ), one quotient rule on the gamma ϕ(d₁)/(S σ √τ).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\n/-- BS speed, stated as the spot derivative of the gamma expression `ϕ(d₁)/(S σ √τ)`;\n    with the delta and gamma legs of `sc-bs-pde` it is the third spot derivative of the\n    call. -/\ntheorem mf_bs_speed {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => gaussianPDFReal 0 1 (bsd1 s K r σ τ) / (s * σ * Real.sqrt τ))\n      (-(gaussianPDFReal 0 1 (bsd1 S K r σ τ) * (bsd1 S K r σ τ + σ * Real.sqrt τ)\n        / (S ^ 2 * σ ^ 2 * τ))) S :=\n  MathFin.hasDerivAt_bsV_SSS hK hσ hS hτ\n"
+        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\n/-- BS speed: the third spot derivative of the call price, `∂³V/∂S³`. -/\ntheorem mf_bs_speed {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (deriv (deriv fun s => bsV K r σ s τ))\n      (-(gaussianPDFReal 0 1 (bsd1 S K r σ τ) * (bsd1 S K r σ τ + σ * Real.sqrt τ)\n        / (S ^ 2 * σ ^ 2 * τ))) S :=\n  MathFin.hasDerivAt_deriv_deriv_bsV_S hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "BS speed (Wystup 2002; Hull 19.4)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof in MathFin/BlackScholes/HigherGreeks.lean, beside vanna/volga/charm. Quotient rule on the gamma expression, with the chain rule ϕ'(d₁) = -d₁·ϕ(d₁) supplying the numerator derivative; the σ²τ denominator (not σ√τ) is where the two contributions combine. Re-export from MathFin. Axioms-clean."
+        "formalization_scope": "Full formal proof in MathFin/BlackScholes/HigherGreeks.lean, beside vanna/volga/charm, stated for the call price itself. The speed formula hasDerivAt_bsV_SSS is a quotient rule on the gamma expression, with the chain rule ϕ'(d₁) = -d₁·ϕ(d₁) supplying the numerator derivative; the σ²τ denominator (not σ√τ) is where the two contributions combine. It is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean) twice: the delta Φ(d₁) is ∂V/∂S on all of S > 0, so ∂²V/∂S² is the gamma expression there (hasDerivAt_deriv_bsV_S), and so ∂³V/∂S³ is its derivative. Re-export from MathFin. Axioms-clean."
       }
     },
     {
       "id": "mf-black76-speed",
       "name": "Black-76 Speed",
-      "description": "Black-76 speed, stated as the F-derivative of the Black-76 gamma expression: ∂/∂F (e^{-rT}·ϕ(d₁)/(F σ √T)) = e^{-rT}·(-ϕ(d₁)(d₁ + σ√T)/(F² σ² T)): the discount factor is F-independent, so it rides through as a constant multiplier on the zero-drift BS speed. With mf-black76-delta and mf-black76-gamma, this is ∂³_F V_B by composition.",
+      "description": "Black-76 speed: the third F-derivative of the Black-76 price, ∂³V_B/∂F³ = e^{-rT}·(-ϕ(d₁)(d₁ + σ√T)/(F² σ² T)); the discount factor is F-independent, so it rides through as a constant multiplier on the zero-drift BS speed.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Futures.Black76Greeks\n\nopen MathFin ProbabilityTheory\n\n/-- Black-76 speed: the zero-drift BS speed carried through the discount factor. -/\ntheorem mf_black76_speed {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun f => Real.exp (-(r * T)) *\n        (gaussianPDFReal 0 1 (bsd1 f K 0 σ T) / (f * σ * Real.sqrt T)))\n      (Real.exp (-(r * T)) * -(gaussianPDFReal 0 1 (bsd1 F K 0 σ T) *\n        (bsd1 F K 0 σ T + σ * Real.sqrt T) / (F ^ 2 * σ ^ 2 * T))) F :=\n  MathFin.hasDerivAt_blackV_FFF hK hσ r hF hT\n"
+        "lean": "import MathFin.Futures.Black76Greeks\n\nopen MathFin ProbabilityTheory\n\n/-- Black-76 speed: the third futures-price derivative of the Black-76 price, the zero-drift\n    BS speed carried through the discount factor. -/\ntheorem mf_black76_speed {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (deriv (deriv fun f => blackV K σ r f T))\n      (Real.exp (-(r * T)) * -(gaussianPDFReal 0 1 (bsd1 F K 0 σ T) *\n        (bsd1 F K 0 σ T + σ * Real.sqrt T) / (F ^ 2 * σ ^ 2 * T))) F :=\n  MathFin.hasDerivAt_deriv_deriv_blackV_F hK hσ r hF hT\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Black-76 speed (Hull 17.6)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof in MathFin/Futures/Black76Greeks.lean. Bare-term const_mul of the r = 0 BS speed, matching the shape of the sibling Black-76 greeks: e^{-rT} stays live in both the function and the value, so r is load-bearing. Re-export from MathFin. Axioms-clean."
+        "formalization_scope": "Full formal proof in MathFin/Futures/Black76Greeks.lean, stated for the Black-76 price itself. The speed formula hasDerivAt_blackV_FFF is a bare-term const_mul of the r = 0 BS speed, matching the shape of the sibling Black-76 greeks: e^{-rT} stays live in both the function and the value, so r is load-bearing. It is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean) twice, through the genuine gamma hasDerivAt_deriv_blackV_F. Re-export from MathFin. Axioms-clean."
       }
     },
     {

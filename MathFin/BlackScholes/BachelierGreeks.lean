@@ -13,7 +13,7 @@ public import MathFin.BlackScholes.PDE
 # Bachelier model Greeks
 
 For the Bachelier call price `V_bach(S, σ, T) = (S − K) Φ(d) + σ √T ϕ(d)`
-where `d = (S − K)/(σ √T)`, we derive the four first-order Greeks:
+where `d = (S − K)/(σ √T)`, we derive four Greeks:
 
 * **Delta**: `∂V/∂S = Φ(d)`.
 * **Gamma**: `∂²V/∂S² = ϕ(d) / (σ √T)`.
@@ -116,14 +116,25 @@ lemma hasDerivAt_bachelierV_sigma {K T : ℝ} (hT : 0 < T)
   field_simp
   ring
 
-/-- **Bachelier gamma**: `∂²V/∂S² = ϕ(d) / (σ √T)`. Chain rule on `Φ(d(S))`. -/
-lemma hasDerivAt_bachelierV_SS {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : ℝ) :
+/-- **The Bachelier gamma formula**: the S-derivative of the delta `Φ(d(S))` is
+`ϕ(d) / (σ √T)`, by the chain rule. The second derivative of the price itself is
+`hasDerivAt_deriv_bachelierV_S`. -/
+private lemma hasDerivAt_bachelierV_SS {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : ℝ) :
     HasDerivAt (fun s ↦ Phi (bachelierD s K σ T))
       (gaussianPDFReal 0 1 (bachelierD S K σ T) / (σ * Real.sqrt T)) S := by
-  have h_d_S := hasDerivAt_bachelierD_S (K := K) hσ hT S
-  have h := (hasDerivAt_Phi (bachelierD S K σ T)).comp S h_d_S
-  convert h using 1 <;> try rfl
-  field_simp
+  -- `S` is `bachelierD`'s first argument, so the chain rule is elaborated before its target
+  have h := (hasDerivAt_Phi (bachelierD S K σ T)).comp S (hasDerivAt_bachelierD_S (K := K) hσ hT S)
+  exact h.congr_deriv (mul_one_div _ _)
+
+/-- **Bachelier gamma**: `∂²V/∂S² = ϕ(d) / (σ √T)`, for the price itself: the delta `Φ(d)` is
+`∂V/∂S` at every spot (`hasDerivAt_bachelierV_S`), and its derivative is the gamma formula
+(`hasDerivAt_bachelierV_SS`). -/
+theorem hasDerivAt_deriv_bachelierV_S {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : ℝ) :
+    HasDerivAt (deriv fun s ↦ bachelierV K σ T s)
+      (gaussianPDFReal 0 1 (bachelierD S K σ T) / (σ * Real.sqrt T)) S :=
+  hasDerivAt_deriv_of_eventually
+    (.of_forall (hasDerivAt_bachelierV_S hσ hT))
+    (hasDerivAt_bachelierV_SS hσ hT S)
 
 /-- **Bachelier theta**: `∂V/∂T = σ · ϕ(d) / (2 √T)`.
 
