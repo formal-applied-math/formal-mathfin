@@ -118,9 +118,12 @@ less (2026-08-07: five corpus entries writing `∫₀ᵀ f_x(s,B_s) dB_s` over a
 integral identity; four descriptions claiming a textbook result the entry
 narrows). `description` ships in the HF dataset, so it is an outward-facing
 claim. The mechanical slice is enforced by
-`test_values.py::test_prose_does_not_outrun_statement`; the rest is judgment
+`test_values.py::test_prose_does_not_outrun_statement` and
+`::test_reduced_core_description_discloses_scope`; the rest is judgment
 and belongs to the values review's standing first pass
-(`docs/values-review.md`). Do it before the review's lenses, not after.
+(`docs/values-review.md`), which `python3 -m tools.verify.prose_sweep`
+can order (advisory, needs `TYPESAFE_API_KEY`; a lead, never a verdict).
+Do it before the review's lenses, not after.
 
 **Benchmark `description` states what the entry PROVES**, not the textbook theorem
 it is named after. Where an entry delivers less than its source theorem, the
@@ -139,6 +142,8 @@ or benchmark edit:
 ```bash
 python3 -m tools.verify.ledger status      # fresh/stale/missing (exit 1 if not all fresh)
 python3 -m tools.verify.ledger verify      # re-verify just the stale entries (daemon must be up)
+# local Lean slot taken? re-verify the stale rows on runners; the bot commits them to the branch
+gh workflow run ledger-sweep.yml --ref <branch> -f scope=stale
 ```
 
 **The ledger is derived state, and merges it.** It is a flat `{id: row}` map, so

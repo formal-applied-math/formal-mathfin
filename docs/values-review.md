@@ -69,15 +69,41 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   where the entry delivered a narrower result. Nobody wrote a false claim on
   purpose — the prose described the theorem everyone had in mind and the
   statement quietly said less.
-  The mechanical half is now `test_values.py::test_prose_does_not_outrun_statement`
-  (an `∃`-statement whose witness is never pinned down while the prose writes
-  the integral that would pin it down). The judgment half stays here, and it
-  is the larger half: `description` is published in the HF dataset and
-  documented as "natural-language mathematical statement", so it is an
-  outward-facing claim, not a private note. Where an entry's `description`
-  states the **textbook target** rather than the delivered result — 36 entries
-  do — the delivered scope must be explicit in the same field, not left to
+  The mechanical half is two gates in `test_values.py`:
+  `test_prose_does_not_outrun_statement` (an `∃`-statement whose witness is
+  never pinned down while the prose writes the integral that would pin it
+  down) and `test_reduced_core_description_discloses_scope` (a `reduced_core`
+  `description` must say what the entry does not deliver). The judgment half
+  stays here, and it is the larger half: `description` is published in the HF
+  dataset and documented as "natural-language mathematical statement", so it
+  is an outward-facing claim, not a private note. Where an entry's
+  `description` states the **textbook target** rather than the delivered
+  result, the delivered scope must be explicit in the same field, not left to
   `formalization_scope`.
+  **Ordering the reading (optional, advisory).** `python3 -m tools.verify.prose_sweep`
+  scores every `description` against its snippet's statements with TypeSafe's
+  Jev (needs `TYPESAFE_API_KEY`; about three cents and a minute for the whole
+  corpus, cached, and `--since <rev>` restricts it to what changed). Read its
+  top 15 before the lenses and fix what is real. It ranks; it does not
+  certify. Measured on 2026-09-18 against the corpus before that day's
+  corrections, 16 of the 23 entries it scored above 0.7 were genuine
+  mismatches, 2 borderline and 5 false alarms — descriptions that narrate the
+  proof, and faithful restatements. Its blind spot is a conclusion assumed as a
+  structure field, which reads as faithful because the text matches; the
+  `reduced_core` gate covers that class. **Retire it** the first review whose top 15 contains nothing real in
+  the work since the previous review, and say so in that review's block.
+  **Derivatives of an explicit expression.** An entry whose statement
+  differentiates an explicit lower-order expression — a delta `Φ(d₁)`, a vega
+  `S·ϕ(d₁)·√τ`, a strike sensitivity — says so ("stated as the S-derivative of
+  …") and cites what identifies that expression with the lower-order
+  derivative: a corpus entry or a library lemma. It may name the higher
+  derivative as that composition, never as though one theorem stated it.
+  `sc-bs-pde-feynman-kac` shows the upgrade that retires this rule: state the
+  genuine higher derivative with `deriv`.
+  **Names are labels, not claims.** An entry's `name` may label the result it
+  targets; it may not assert a property the entry does not deliver
+  ("Existence and Uniqueness" on a uniqueness entry, "Convexity" where only a
+  second derivative is stated).
 - **Record**: append a review block below, headed
   `## YYYY-MM-DD — corpus <N> — <one-line title>` (the freshness test parses
   the date and the `corpus <N>` count anywhere in the heading; a
@@ -3222,6 +3248,175 @@ characterization is nowhere claimed.
 3. *(nit, accepted)* the rfl-tripwire's tail regex is documented
    "good enough" in-file; a Lean-aware scanner is not worth its weight while
    the catch rate is this good (1 for 1 on first run).
+
+## 2026-09-18 — corpus 372 — the backlog round: the Greeks rule, names that assert, and a dropped guard
+
+Executed against the ranked backlog of the block below, in its order: items 1–5 landed, item 6
+belongs to the next review. Single reviewer; no agent panel.
+
+### Upgrades executed
+
+1. **The Greeks rule, decided once and applied across the family.** Seventeen entries — every
+   gamma, vanna, volga, charm and speed, the two strike second-derivatives, Breeden–Litzenberger,
+   the bond second derivative, Almgren–Chriss and `sc-bs-pde` — differentiate an explicit
+   lower-order expression while their descriptions named the higher derivative of the price. The
+   rule, now in the protocol: say what is differentiated, cite the entry or lemma that identifies
+   the expression, and name the higher derivative only as that composition. Every member had a
+   citable source. Reading them turned up two claims beyond the derivative:
+   `mf-bsV-KK-deriv` asserted `≥ 0` and convexity in strike, neither stated, and
+   `mf-breeden-litzenberger` called a formula definition "the risk-neutral PDF of S_T". The
+   module lemma `hasDerivAt_bsV_SS` has the same shape — named for `∂²V/∂S²`, stating
+   `∂_S Φ(d₁)` — so the Lean upgrade belongs at the source (backlog 1).
+2. **`herfindahl_card_inv_le_of_sum_one` drops `s.Nonempty`.** The budget `∑ w = 1` forces it
+   (`Finset.nonempty_of_sum_ne_zero`), and the corpus signature follows: the spurious-guard class
+   of 2026-07-31, in library code this time.
+3. **Snippet docstrings, the same reading.** Of the 58 entries touched in these two rounds, 26
+   carry docstrings and 17 needed the correction their descriptions had. The structure
+   specifications' were the worst: `gir-thm-9.1.7`'s promised "a progressively measurable
+   integrand θ … and a witness that the Doléans–Dade exponential … is a true martingale" with no θ
+   in the structure; `sc-thm-9.1.8`'s called a mean-one density "the Doléans–Dade exponential of
+   θ · B"; `sc-thm-9.1.1`'s called an expected squared-increment limit "⟨X⟩_t = t". Each now says
+   it is a statement-level specification, and every conclusion field reads "the textbook
+   conclusion, assumed".
+4. **Names that assert.** Thirteen renamed, found by pointing the sweep at the 98 names that make
+   a claim and reading the top of its ranking. `sc-thm-8.2.5` was still "Existence and Uniqueness
+   of SDE Solutions" six weeks after its description was narrowed to uniqueness; "American =
+   European", "Continuous Local Martingale", "iid Exponential", "Convexity in Strike", "⟹ EMM"
+   and "L2 Martingale" each asserted more than the statement; two autoformalized entries were
+   still named after the issues that seeded them ("Add the gain-to-pain ratio and prove it is
+   nonnegative"). The rule — names are labels, not claims — is now in the protocol.
+5. **The sweep's short-name collisions.** Definitions are indexed by qualified name, resolved
+   through the snippet's `open`s, and skipped when still ambiguous: a wrong definition misleads
+   more than a missing one. The question also learned the Greeks rule — a conclusion attributed
+   to composing with a named entry or lemma is a citation — without which five of the rewritten
+   Greeks read as overclaims. Re-measured: 16 of 17 labeled pairs ordered correctly and none of
+   the 17 fixes above 0.5; on the corpus at `4eaa424`, 16 of the 23 entries above 0.7 genuine.
+
+Also: `markov_chains.json` stores `\u`-escaped JSON, and the previous round wrote five
+descriptions into it as raw unicode; re-escaped. And `ledger-sweep.yml` gained a `scope: stale`
+dispatch input, because this round's 18 restaled rows had to be re-verified on runners — the one
+local Lean slot was held by two other sessions throughout.
+
+### Ranked backlog
+
+| rank | item | owner |
+|---|---|---|
+| 1 | **The Greeks upgrade in Lean.** One congruence lemma — `HasDerivAt f (g y) y` for `y` near `x` and `HasDerivAt g g' x` give `HasDerivAt (deriv f) g' x` — then restate the 17 family entries, and `hasDerivAt_bsV_SS` at the source, as genuine higher derivatives, as `sc-bs-pde-feynman-kac` already does. Retires the rule above | unassigned |
+| 2 | The sweep reads `description` only, so the docstring reading of item 3 covered the 58 entries touched here, not the other 314 snippets. Point it at docstrings (one more state field) and run it once | unassigned |
+| 3 | Keep or retire the sweep at the next review, by the protocol's rule | next reviewer |
+
+### Evidence/context
+
+Mechanical floor: `pytest` 59/59 in-container. No Lean ran locally: the lemma names in the new
+`herfindahl` proof were confirmed against the pinned Mathlib sources, and the 18 restaled rows
+are re-verified on runners by `ledger-sweep.yml` (`scope: stale`), whose shards also build the
+library — the bot's ledger commit on this branch is the record. Sweep, final state: 372 scored,
+5 above 0.7, all read as false alarms (three narrate the proof; `bm-def-5.1.1` is a definition
+entry and `mf-bull-call-spread-payoff-le` restates its payoff inequality).
+
+## 2026-09-18 — corpus 372 — the standing first pass, machine-ranked: every `reduced_core` description now says what it is
+
+Scope: prose only — 35 corpus `description`s, README's two `reduced_core` lines, one
+`coverage.md` paragraph — plus a new gate and an advisory tool. No proof content or snippet
+code changed, so no ledger input moved. The question behind the round was whether a cheap
+classifier could order the standing first pass; TypeSafe's Jev (`jev-1.13.0`) was piloted for
+that. Single reviewer; no agent panel.
+
+### The standing first pass — prose against statement
+
+**The largest finding needed no model.** All thirteen `reduced_core` descriptions stated the
+textbook theorem each entry is named after. Twelve of those entries are structure
+specifications — the conclusion is a field, read back by projection, so nothing is derived:
+the Brownian reflection principle, nowhere differentiability and the LIL, Novikov, five
+Markov-chain results, the general Girsanov, the 2-D Itô formula, Lévy's characterisation. The
+thirteenth, `pp-prop-3.3.6`, derives the *first* interarrival law and claimed the iid
+sequence. `formalization_scope` said all of this; `description`, the field that heads the HF
+record, said none of it. The 2026-08-07 round corrected fifteen textbook-framed descriptions
+and none of these — the status looked like disclosure enough, and a status is not prose. Two
+were wrong as well as unproved: `mc-thm-1.4.32` claimed almost-sure convergence for a
+structure with no probability measure in it, and `sc-thm-7.5.2`'s second-order terms
+integrate against `ds`, not `d⟨X⟩`. `sc-thm-9.1.8` still carried the "Kept reduced_core until
+brick α4" paragraph that round had removed from its sibling. By lens 5 these entries are the
+case "a hypothesis secretly contains the conclusion", honest only while the prose says so. All
+thirteen now name their form (STRUCTURE SPECIFICATION, FIRST-ARRIVAL form), say what the Lean
+states, and end on what is not derived; `test_reduced_core_description_discloses_scope` fails
+all thirteen at `4eaa424` and passes now.
+
+**The model's part.** Jev scores each `description` against its snippet's statements and the
+MathFin definitions they name. On 17 descriptions this repo had already corrected (9966f6c,
+fbc9190, 33cd561, 48cb004, df3cea7), the overclaiming version outscored its fix 16 times; the
+exception, `mf-crr-gaussian-limit`, is an under-claim. On the corpus, 25 entries scored above
+0.7; read by hand, 15 were genuine mismatches, 2 borderline and 8 false alarms, five of them
+descriptions that narrate the proof. It caught what no regex here reads: `mf-no-arb-forward-price`
+named `F = S₀/DF` over an `∃! F`; `mf-merton-1973-no-early-exercise` asserted American =
+European, which nothing in the entry states; `mf-first-to-default-spread` claimed default
+correlation "only lowers" the spread — unproved, and true only under positive dependence.
+It also missed most of the `reduced_core` class — four of thirteen above 0.7 in the first run —
+because a structure spec's statement contains the textbook conclusion verbatim and the text
+matches. That class is a gate for exactly that reason.
+
+Corrected in `full` entries (22):
+
+- *a consequence the statement does not carry, stated as proved* — `mf-crr-prob-half` and
+  `mf-crr-drift-quotient` (the variance and drift limits), `mf-newton-raphson-fixed-at-root`
+  (the `(1/2)ⁿ` rate), `mf-vega` (positivity), `mf-herfindahl-cauchy-schwarz` (the equality
+  case), `mf-macaulay-modified-discrete` (`−dP/dy`), `mf-worstcase-risk-representation`
+  (coherence), `mf-merton-1973-no-early-exercise`, `mf-kelly-numeraire-emm` (closed forms,
+  `p`-independence, normalisation), `mf-kelly-n-periods-foc` (optimality, where the statement is
+  the first-order condition), `mf-first-to-default-spread`, `sc-ito-simple-process-local-martingale`
+  (path continuity), `mf-cvar-rockafellar-uryasev` (where the minimum is attained);
+- *an object named where the statement leaves it existential* — `mf-no-arb-forward-price`,
+  `sc-ito-formula-unrestricted-local`, and `sc-ito-formula-unrestricted-islocalmartingale` (one
+  of the eight first read as narrative: it names the localizer its statement keeps inside a
+  typeclass);
+- *a hypothesis stated stronger than the theorem needs* (the 48cb004 class) —
+  `mf-joint-stdev-triangle`, `mf-bond-2nd-immunization`;
+- *a misreading* — `mf-kelly-fraction-zero-iff` and `mf-kelly-fraction-pos-iff` read
+  `p(b+1) = 1` as zero expected log-growth; it is zero edge;
+- *proved in the module, not in the entry* — `mf-vnm-expected-utility` (completeness,
+  transitivity);
+- *a stale term* — `mf-ftap-one-period-vector` still said "Esscher / minimal-divergence" after
+  c7db914 renamed the construction a logistic tilt in the module.
+
+### Upgrades executed
+
+* 35 descriptions (13 `reduced_core`, 22 `full`); README's two `reduced_core` lines, which
+  called twelve structure specifications "honest special cases"; the `coverage.md` Kelly
+  paragraph.
+* `test_reduced_core_description_discloses_scope` (lens 7, made mechanical where it can be).
+* `tools/verify/prose_sweep.py` — advisory, stdlib, cached, pinned model — and
+  `tests/test_prose_sweep.py`, which pins its statement extraction. Five extraction defects in
+  the pilot each presented as a finding: a second theorem unread, `(μ := μ)` ending a
+  statement, a `let` binding cutting the conclusion off, an `example` unseen, a `class` in a
+  comment read as a definition.
+* Protocol: the standing-first-pass bullet names both gates, the sweep, its blind spot and its
+  retirement rule.
+
+### Ranked backlog
+
+| rank | item | owner |
+|---|---|---|
+| 1 | **The Greeks' "derivative of an explicit expression" pattern.** `mf-bs-put-gamma` proves `∂_S(Φ(d₁) − 1) = ϕ(d₁)/(Sσ√τ)` and is described as `∂²P/∂S²`; `mf-almgren-chriss-EL` differentiates an explicit `X′` and is described as `X″ = κ²X`. Each is right by composition with a result the entry does not state. Decide the house rule once — accept "composition with a named library theorem" in the protocol, or disclose — and apply it across the family, not to the two the sweep surfaced | unassigned |
+| 2 | `herfindahl_card_inv_le_of_sum_one` assumes `s.Nonempty`, which `∑ w = 1` already implies (an empty sum is `0`) — the spurious-guard class of 2026-07-31, found in passing. Drop and re-prove; one ledger row re-verifies | unassigned |
+| 3 | The same reading for the snippet docstrings of the 35 entries — `mf-kelly-numeraire-emm`'s still says "the GOP-deflated measure is the EMM". Code edits, so each re-verifies in the ledger | unassigned |
+| 4 | Entry `name`s that assert what the entry does not prove — `mf-merton-1973-no-early-exercise` is named "American = European for Non-Dividend Call" | unassigned |
+| 5 | The sweep's definition index keys on the short name, so the `IsEMM`/`NoArbitrage` variants collide; that is two of the eight standing false alarms (`mf-ftap-one-period-{vector,general}`). Render definitions through the elaborator or the foundry's scout index — or leave it and let the retirement rule decide | unassigned |
+| 6 | Keep or retire the sweep at the next review, by the protocol's rule | next reviewer |
+
+### Evidence/context
+
+Mechanical floor: `pytest` 57/57 in-container; `ledger status` 372/372 fresh (the ledger hashes
+snippet code, modules and pins — `description` is not an input); no Lean run, since no proof
+content changed. Sweep, final state: 372 scored, 8 above 0.7, all read as false alarms — three
+narrate the proof, two are the name collision above, and three are faithful on a close read (a
+definition entry, a payoff restatement, a uniqueness corollary of strict monotonicity); of the
+35 corrected entries one scores above 0.7, the collision case. The committed tool renders
+definitions slightly differently from the pilot, so it was re-measured on its own pipeline: 17
+of 17 labeled pairs ordered correctly, and on the corpus at `4eaa424` 27 entries above 0.7, 20
+of them shared with the pilot's 25 (16 genuine, 2 borderline, 9 false alarms by the readings
+above). The pilot's scratch artefacts (the labeled pairs, per-version results) are not
+committed; `python3 -m tools.verify.prose_sweep --json OUT` regenerates scores against the
+corpus as it now stands.
 
 ## 2026-09-08 — corpus 370 — the open-PR round: two outside contributions, one merged
 
