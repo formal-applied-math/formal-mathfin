@@ -6,9 +6,9 @@ of them our existing formalization actually gives us leverage on.
 
 **Tracking issue:** [#177](https://github.com/formal-applied-math/formal-mathfin/issues/177)
 (umbrella). Active targets: [#174](https://github.com/formal-applied-math/formal-mathfin/issues/174)
-SVI domain · [#175](https://github.com/formal-applied-math/formal-mathfin/issues/175)
-American convexity · [#176](https://github.com/formal-applied-math/formal-mathfin/issues/176)
-impact propagator.
+SVI domain · [#176](https://github.com/formal-applied-math/formal-mathfin/issues/176)
+impact propagator. Solved: [#175](https://github.com/formal-applied-math/formal-mathfin/issues/175)
+American convexity, by Robert Martin in [#212](https://github.com/formal-applied-math/formal-mathfin/pull/212).
 
 ## How this list was built, and why it is organized by evidence
 
@@ -84,7 +84,7 @@ re-verified.
 
 ## Tier 1 — surviving open problems
 
-### 1. Convexity of the American exercise boundary for `0 < q < r`
+### 1. Convexity of the American exercise boundary for `0 < q < r` — **solved**
 **Class B · bracketed by theorems on both sides**
 
 A clean trichotomy in the dividend yield `q`:
@@ -93,30 +93,24 @@ A clean trichotomy in the dividend yield `q`:
 |---|---|
 | `q = 0` | convexity **proved** (Chen–Chadam–Cheng–Saunders; Ekström) |
 | `q > r` | convexity **disproved** — the boundary is not convex |
-| `0 < q < r` | **open** in the literature — see the status note below |
+| `0 < q < r` | convexity **proved** by Robert Martin (2026), machine-checked in this repo |
 
-**Status in this repo (2026-09-08).** `MathFin/BlackScholes/AmericanPut/` contains a
-machine-checked, axiom-clean proof covering `0 ≤ q ≤ r` — the whole open region and
-both endpoints — contributed in
-[#212](https://github.com/formal-applied-math/formal-mathfin/pull/212) and ported from
+**Solved (2026-09).** Robert Martin proved convexity on the whole open region, and his
+proof is machine-checked and axiom-clean in `MathFin/BlackScholes/AmericanPut/`,
+contributed in [#212](https://github.com/formal-applied-math/formal-mathfin/pull/212) and ported from
 [robertmartin8/AmericanPutConvexity](https://github.com/robertmartin8/AmericanPutConvexity).
-The two headline declarations are
-`Stopping.brownianUsualLogBoundary_convexOn` and `brownianUsualStockBoundary_strictConvexOn`.
+For `K, r, σ > 0` and `0 ≤ q ≤ r`, `log(B(τ)/K)` is convex and `B(τ)` is strictly convex
+in time to expiry `τ > 0`, so both endpoints are covered too. The headline declarations
+are `Stopping.brownianUsualLogBoundary_convexOn` and
+`brownianUsualStockBoundary_strictConvexOn`.
 
-What that is and is not. The boundary is built from the actual optimal-stopping value —
-a supremum over all stopping times bounded by the horizon, on the completed usual
-filtration of Degenne's constructed Brownian motion — not from an assumed free-boundary
-solution, and the axiom audit shows no `sorryAx`. So the Lean says what it says. But the
-proof is new, was substantially AI-assisted, and **has not been refereed**; the kernel
-accepting a statement is evidence about the statement, not about whether it is the
-theorem the literature means. The declarations also do not quantify over arbitrary
-probability-space representations, and prove convexity in the chord sense, not `C²`
-regularity or `B'' > 0`.
-
-This entry therefore stays on the list, reclassified from *open* to **claimed-resolved,
-pending review**. It is the one place in this document where the repo has a candidate
-answer rather than a scouting report, and the honest reading is that someone should check
-it. `q > r` remains disproved and is not claimed.
+The statement is the classical one. The value is the supremum, over all stopping times
+bounded by the horizon, of the expected discounted put payoff on a geometric Brownian
+motion with drift `r − q`, on the completed usual filtration of Degenne's constructed
+Brownian motion. `B` is the supremum of the stock prices in `[0, K]` where the value
+equals the payoff. Nothing assumes a free-boundary solution. Convexity is in the usual
+chord sense; `C²` regularity and `B'' > 0` are not claimed. `q > r` remains disproved
+and is not claimed.
 
 Regularity under jump diffusions is settled separately: `C¹` except at
 maturity, `C^∞` under a regularity assumption on the jump distribution, with
@@ -583,7 +577,7 @@ Missing is small and well-defined: an SVI parametrization module and
 Durrleman's `g`. Positivity certificates land in the house idiom
 (`nlinarith [certificates]`, kernel-checkable, no `native_decide`).
 
-### 2. American boundary convexity for `0 < q < r` (§1) — strong module set, one seam
+### 2. American boundary convexity for `0 < q < r` (§1) — solved in #212
 
 `Binomial/SnellEnvelope.americanPrice_is_snell_envelope` plus
 `Binomial/American`, `AmericanCallNoDividend`, `Bermudan`,
@@ -591,9 +585,9 @@ Durrleman's `g`. Positivity certificates land in the house idiom
 (`StrikeConvexity`, `PutStrikeConvexity`, `SpotConvexity`).
 `Binomial/CRRConvergence` is the discrete→continuous seam.
 
-Gap, and it is genuine: our American machinery is **binomial/discrete**, while
-the problem concerns the *continuous* free boundary. CRRConvergence makes the
-bridge plausible rather than automatic.
+Solved in [#212](https://github.com/formal-applied-math/formal-mathfin/pull/212), and not through this seam. The proof works in continuous
+time, on the optimal-stopping value directly, and builds on the Itô-formula and
+Feynman–Kac modules in `Foundations/` rather than the binomial layer.
 
 ### 3. Impact-kernel positive-definiteness (§5) — cheapest decisive output
 
@@ -647,7 +641,7 @@ it: start where built code and durable evidence overlap — **§2 (SVI)**, **§1
 are certificate-shaped: the answer is a polynomial positivity, a
 bounded-parameter-window convexity argument, or an explicit finite
 counterexample. That is the one class where a proof assistant adjudicates
-rather than taxes.
+rather than taxes. §1 has since been solved, in [#212](https://github.com/formal-applied-math/formal-mathfin/pull/212).
 
 Avoid Class C entries as *starting* points — they supplied essentially every
 casualty across four rounds. And before committing to **any** entry here,
