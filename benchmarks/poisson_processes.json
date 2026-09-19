@@ -19,7 +19,7 @@
     },
     {
       "id": "pp-prop-3.3.6",
-      "name": "Interarrival Times are iid Exponential",
+      "name": "Interarrival Times: the First Arrival is Exponential",
       "description": "Proposition 3.3.6, FIRST-ARRIVAL form: for a counting process with rate λ > 0, Poisson(λ(t−s)) increments and independent increments, the first arrival time has law Exp(λ), and the no-arrival probabilities factorise, P(N_t = 0) = P(N_s = 0)·P(N_t − N_s = 0) for 0 ≤ s ≤ t. Both are derived from the counting-process axioms. That the whole interarrival sequence is iid Exp(λ) is not delivered: it needs the strong Markov property of the process.",
       "domain": "poisson_processes",
       "code": {

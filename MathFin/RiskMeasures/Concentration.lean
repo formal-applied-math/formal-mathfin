@@ -66,9 +66,11 @@ lemma herfindahl_le_one_of_sum_le_one_of_nonneg
       ≤ ∑ i ∈ s, w i := Finset.sum_le_sum h_bound
     _ ≤ 1 := h_sum
 
-/-- **Cauchy-Schwarz lower bound HHI ≥ 1/n** under unit-budget constraint. -/
+/-- **Cauchy-Schwarz lower bound HHI ≥ 1/n** under unit-budget constraint. The
+budget alone forces `s` nonempty — an empty sum is `0`, not `1` — so no
+nonemptiness hypothesis is needed. -/
 lemma herfindahl_card_inv_le_of_sum_one (s : Finset ι) (w : ι → ℝ)
-    (hs : s.Nonempty) (h_sum : ∑ i ∈ s, w i = 1) :
+    (h_sum : ∑ i ∈ s, w i = 1) :
     (s.card : ℝ)⁻¹ ≤ herfindahl s w := by
   unfold herfindahl
   -- Mathlib's Cauchy–Schwarz card form, exactly this statement.
@@ -76,7 +78,8 @@ lemma herfindahl_card_inv_le_of_sum_one (s : Finset ι) (w : ι → ℝ)
     sq_sum_le_card_mul_sum_sq
   rw [h_sum, one_pow] at h_cs
   -- h_cs : 1 ≤ s.card * ∑ wᵢ²
-  have h_card_pos : 0 < (s.card : ℝ) := by exact_mod_cast hs.card_pos
+  have h_card_pos : 0 < (s.card : ℝ) :=
+    Nat.cast_pos.mpr (Finset.nonempty_of_sum_ne_zero (by rw [h_sum]; exact one_ne_zero)).card_pos
   rw [inv_le_iff_one_le_mul₀ h_card_pos]
   linarith
 

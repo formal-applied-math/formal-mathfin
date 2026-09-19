@@ -96,7 +96,7 @@ abbrev CausalBoundaryData (a : ℝ) := {g : ℝ →ᵇ ℝ // ∀ t, t ≤ a →
 
 theorem isClosed_causalBoundaryData (a : ℝ) :
     IsClosed {g : ℝ →ᵇ ℝ | ∀ t, t ≤ a → g t = 0} := by
-  simp only [setOf_forall]
+  simp only [ofPred_forall]
   exact isClosed_iInter fun t => isClosed_iInter fun _ =>
     isClosed_eq (by fun_prop) continuous_const
 

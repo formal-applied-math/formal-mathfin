@@ -8,11 +8,12 @@ The output is a reading order, most suspect first. A score is a lead, never a
 verdict: nothing here certifies faithfulness, and nothing here gates CI.
 
 Measured on this pipeline (2026-09-18, ``jev-1.13.0``): on 17 descriptions this
-repo later corrected, the overclaiming version outscored its fix in all 17; on
-the corpus as it stood before the 2026-09-18 corrections, 27 entries scored
-above 0.7 — 16 genuine mismatches, 2 borderline, 9 false alarms (descriptions
-that narrate the proof, definitions sharing a name across namespaces, faithful
-restatements). Blind spot: a conclusion assumed as a structure field reads as
+repo later corrected, the overclaiming version outscored its fix in 16 (the
+exception is an under-claim), and none of the 17 fixes scored above 0.5; on the
+corpus as it stood before the 2026-09-18 corrections, 23 entries scored above
+0.7 — 16 genuine mismatches, 2 borderline, 5 false alarms (three narrate the
+proof, two are faithful on a close read). Blind spot: a conclusion assumed as a
+structure field reads as
 faithful, because the text matches — ``test_reduced_core_description_discloses_scope``
 covers that class. Retirement rule: ``docs/values-review.md`` (the standing
 first pass).
@@ -106,26 +107,53 @@ DEF_RE = re.compile(
 )
 MODIFIERS_RE = re.compile(r"\s*(?:@\[[^\]]*\]\s*)?(?:(?:private|protected|noncomputable|partial|unsafe)\s+)*")
 IDENT_RE = re.compile(r"[A-Za-z_][\w']*(?:\.[A-Za-z_][\w']*)*")
+# `namespace X` pushes X; any `section` pushes nothing; `end` pops one of either.
+SCOPE_RE = re.compile(
+    r"^[ \t]*(?:namespace[ \t]+(?P<ns>[\w.']+)"
+    r"|(?:@\[[^\]\n]*\][ \t]*)?(?:(?:public|private|noncomputable)[ \t]+)*section\b"
+    r"|(?P<end>end)\b)",
+    re.M,
+)
+OPEN_RE = re.compile(r"^open\b([^\n]*)", re.M)
+COMMENT_RE = re.compile(r"/-.*?-/|--[^\n]*", re.S)
+
+
+def _blank_comments(text: str) -> str:
+    """``text`` with every comment replaced by spaces — same length, same line
+    breaks — so positions found in it index the original."""
+    return COMMENT_RE.sub(lambda m: re.sub(r"[^\n]", " ", m.group()), text)
 
 
 def _declarations(text: str):
-    """``(short_name, rendered)`` for each column-0 definition in ``text``: its
-    signature/fields up to the first blank line, then its docstring."""
+    """``(qualified_name, rendered)`` for each column-0 definition in ``text``,
+    qualified by its enclosing ``namespace`` blocks: its signature/fields up to
+    the first blank line, then its docstring."""
+    scopes = [(m.start(), m.group("ns"), m.group("end") is not None)
+              for m in SCOPE_RE.finditer(_blank_comments(text))]
+    stack: list[str | None] = []
+    seen = 0
     for m in DEF_RE.finditer(text):
         kind = m.start("kind")
+        while seen < len(scopes) and scopes[seen][0] < kind:
+            _, namespace, is_end = scopes[seen]
+            if is_end:
+                stack = stack[:-1]
+            else:
+                stack.append(namespace)  # None for a section
+            seen += 1
         if MODIFIERS_RE.fullmatch(text[text.rfind("\n", 0, kind) + 1:kind]) is None:
             continue  # `class` inside a comment is not a declaration
         block = text[kind:kind + 1200]
         blank = re.search(r"\n\s*\n", block)
         block = DOCSTRING_RE.sub("", block[:blank.start()] if blank else block)
         doc = " ".join((m.group("doc") or "").split())
-        yield m.group("name").split(".")[-1], " ".join(block.split())[:600] + (f" — {doc[:300]}" if doc else "")
+        qualified = ".".join([ns for ns in stack if ns] + [m.group("name")])
+        yield qualified, " ".join(block.split())[:600] + (f" — {doc[:300]}" if doc else "")
 
 
 def definition_index(root: Path = Path("MathFin")) -> dict[str, str]:
-    """Short name → rendered definition, over the library. Keyed by the last name
-    component, so a name declared in two namespaces resolves to one of them — the
-    elaborator is the ground truth; this is a reading aid."""
+    """Qualified name → rendered definition, over the library. The elaborator
+    is the ground truth; this is a reading aid."""
     index: dict[str, str] = {}
     for path in sorted(root.rglob("*.lean")):
         for name, rendered in _declarations(path.read_text(encoding="utf-8")):
@@ -134,13 +162,35 @@ def definition_index(root: Path = Path("MathFin")) -> dict[str, str]:
     return index
 
 
+def _resolve(token: str, by_suffix: dict[str, list[str]], opened: list[str]) -> str | None:
+    """The qualified name ``token`` refers to — read the way Lean would, through
+    the snippet's ``open``s — or None when it names nothing here, or two things
+    equally well. A wrong definition misleads more than a missing one."""
+    candidates = by_suffix.get(token, [])
+    if len(candidates) > 1:
+        candidates = [q for q in candidates if q == token or any(q == f"{ns}.{token}" for ns in opened)]
+    return candidates[0] if len(candidates) == 1 else None
+
+
 def named_definitions(stmts: list[str], code: str, index: dict[str, str], limit: int = 6) -> dict[str, str]:
     local = dict(_declarations(code))  # a snippet's own spec structure wins
+    opened = [ns for line in OPEN_RE.findall(code)
+              for ns in IDENT_RE.findall(re.sub(r"\(.*?\)", "", line)) if ns not in ("scoped", "in")]
+    by_suffix: dict[str, list[str]] = {}
+    for qualified in index:
+        parts = qualified.split(".")
+        for i in range(len(parts)):
+            by_suffix.setdefault(".".join(parts[i:]), []).append(qualified)
     found: dict[str, str] = {}
     for token in (t for s in stmts for t in IDENT_RE.findall(s)):
-        name = token.split(".")[-1]
-        if name not in found and (name in local or name in index):
-            found[name] = local.get(name) or index[name]
+        if token in local:
+            name, rendered = token, local[token]
+        elif (qualified := _resolve(token, by_suffix, opened)) is not None:
+            name, rendered = qualified.split(".")[-1], index[qualified]
+        else:
+            continue
+        if name not in found:
+            found[name] = rendered
             if len(found) == limit:
                 break
     return found
@@ -161,7 +211,9 @@ QUESTIONS = {
                 "the meaning of names the theorems use. A sentence in `description` saying some case or "
                 "part is NOT delivered is a scope disclosure, not a claim. A sentence explaining HOW the "
                 "result is proved (the method, the proof route, an analogy with another result) is not "
-                "a claim about the result either."
+                "a claim about the result either. Nor is a further conclusion that `description` "
+                "attributes to composing this result with another result it names (another entry or "
+                "lemma, e.g. 'with mf-vega, this is ∂²V/∂σ²'): that is a citation."
             ),
         },
         "criteria": {

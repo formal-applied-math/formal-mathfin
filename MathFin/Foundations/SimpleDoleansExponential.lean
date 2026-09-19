@@ -147,11 +147,9 @@ theorem condExp_exp_adapted_mul_increment
   have h_meas_diff : Measurable (fun ω ↦ X t ω - X r ω) :=
     (((hX.stronglyAdapted t).mono (𝓕.le t)).measurable).sub
       (((hX.stronglyAdapted r).mono (𝓕.le r)).measurable)
-  -- The increment law and the variance identity `nndist = t − r`.
-  set v : ℝ≥0 := nndist (t : ℝ) (r : ℝ) with hvdef
-  have hΔlaw : HasLaw (fun ω ↦ X t ω - X r ω) (gaussianReal 0 v) P := hX.hasLaw_sub t r
-  have hv : (v : ℝ) = (t : ℝ) - (r : ℝ) := by
-    rw [hvdef, coe_nndist, Real.dist_eq, abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr hrt))]
+  -- The increment law, with variance `t − r`.
+  have hΔlaw : HasLaw (fun ω ↦ X t ω - X r ω) (gaussianReal 0 (t - r)) P :=
+    hasLaw_increment hX.toIsPreBrownianReal hrt
   have hindep0 : Indep (MeasurableSpace.comap (fun ω ↦ X t ω - X r ω) (borel ℝ)) (𝓕 r) P :=
     hX.indep r t hrt
   -- The candidate conditional expectation `g = exp(½ c² (t−r))` is `𝓕_r`-measurable.
@@ -187,7 +185,7 @@ theorem condExp_exp_adapted_mul_increment
     (fun A _ _ ↦ hg_int.integrableOn) (fun A hA _ ↦ ?_) hg_sm.aestronglyMeasurable).symm
   have hfreeze := condExp_exp_adapted_freeze_setIntegral (P := P) (𝓕 := 𝓕) hc.measurable hK
     h_meas_diff hΔlaw hindep0 hA
-  rw [hv] at hfreeze
+  rw [NNReal.coe_sub hrt] at hfreeze
   exact hfreeze.symm
 
 /-- **The normalized cell factor conditionally integrates to `1`.** For `c` `𝓕_r`-measurable

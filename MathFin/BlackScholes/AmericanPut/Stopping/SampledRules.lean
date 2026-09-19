@@ -41,7 +41,7 @@ def DiscreteRule.toSampledRule {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω�
     have he : {ω | (s (η.time ω) : WithTop ℝ≥0) ≤ t} =
         ⋃ i : ℕ, if s i ≤ t then {ω | (η.time ω : WithTop ℕ) ≤ i} else ∅ := by
       ext ω
-      simp only [mem_setOf_eq,WithTop.coe_le_coe,mem_iUnion]
+      simp only [mem_ofPred_eq,WithTop.coe_le_coe,mem_iUnion]
       constructor
       · intro hω
         refine ⟨η.time ω,?_⟩
