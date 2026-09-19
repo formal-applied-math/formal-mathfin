@@ -34,14 +34,6 @@ namespace ProbabilityTheory
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
   {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}
 
-/-- For `s ≤ t : ℝ≥0`, the NNReal-valued increment-variance `max (t-s) (s-t)`
-coerces to `(t : ℝ) - (s : ℝ)` (since truncated `s - t = 0` when `s ≤ t`). -/
-private lemma max_sub_coe_eq_of_le {s t : ℝ≥0} (hst : s ≤ t) :
-    ((max (t - s) (s - t) : ℝ≥0) : ℝ) = (t : ℝ) - (s : ℝ) := by
-  have hst_zero : s - t = (0 : ℝ≥0) := tsub_eq_zero_of_le hst
-  rw [hst_zero, max_eq_left zero_le]
-  exact NNReal.coe_sub hst
-
 /-- MGF specialization: for `α : ℝ` and `v : ℝ≥0`,
 `∫ x, exp(α x) ∂(gaussianReal 0 v) = exp(α² v / 2)`. The Gaussian-MGF-along-a-law base
 stone, also consumed by `BrownianExpMoment` (the natural long-term home is `GaussianMoments`,
@@ -111,12 +103,8 @@ theorem squareSubTime_isMartingale :
   have h_meas_diff : Measurable (fun ω ↦ X t ω - X s ω) := h_meas_t.sub h_meas_s
   have h_eq_diff : (fun ω ↦ X t ω - X s ω) = (X t - X s : Ω → ℝ) := rfl
   -- HasLaws from `IsPreBrownianReal`.
-  have hmax : (max (t - s) (s - t) : ℝ≥0) = nndist (t : ℝ) (s : ℝ) := by
-    apply NNReal.coe_injective
-    rw [coe_nndist, Real.dist_eq, max_sub_coe_eq_of_le hst,
-      abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr hst))]
-  have hL_diff : HasLaw (X t - X s) (gaussianReal 0 (max (t - s) (s - t))) P := by
-    rw [hmax]; exact hX.hasLaw_sub t s
+  have hL_diff : HasLaw (X t - X s) (gaussianReal 0 (t - s)) P :=
+    MathFin.hasLaw_increment hX.toIsPreBrownianReal hst
   have hL_s : HasLaw (X s) (gaussianReal 0 s) P := hX.hasLaw_eval s
   -- L² membership transferred via HasLaw + `memLp_id_gaussianReal`.
   have h_Bs_memLp : MemLp (X s) 2 P :=
@@ -138,10 +126,10 @@ theorem squareSubTime_isMartingale :
   -- Variance of increment integral: ∫ (X_t − X_s)² ∂P = t − s.
   have h_int_diff_sq_zero : ∫ ω, (X t ω - X s ω) ^ 2 ∂P = (t : ℝ) - (s : ℝ) := by
     have h_change : ∫ ω, (X t ω - X s ω) ^ 2 ∂P
-        = ∫ x, x ^ 2 ∂(gaussianReal 0 (max (t - s) (s - t))) := by
+        = ∫ x, x ^ 2 ∂(gaussianReal 0 (t - s)) := by
       simpa [Function.comp] using hL_diff.integral_comp (f := fun x : ℝ ↦ x ^ 2) (by fun_prop)
     rw [h_change, MathFin.integral_sq_gaussianReal]
-    exact max_sub_coe_eq_of_le hst
+    exact NNReal.coe_sub hst
   -- `𝓕_s`-measurability of `X_s` and `(X_s)²`.
   have h_smeas_s : StronglyMeasurable[𝓕 s] (X s) := hX.stronglyAdapted s
   have h_smeas_s_sq : StronglyMeasurable[𝓕 s] (fun ω ↦ (X s ω) ^ 2) := by
@@ -277,12 +265,8 @@ theorem waldExponential_isMartingale (α : ℝ) :
   have h_meas_s : Measurable (X s) := ((hX.stronglyAdapted s).mono (𝓕.le s)).measurable
   have h_meas_diff : Measurable (fun ω ↦ X t ω - X s ω) := h_meas_t.sub h_meas_s
   have h_eq_diff : (fun ω ↦ X t ω - X s ω) = (X t - X s : Ω → ℝ) := rfl
-  have hmax : (max (t - s) (s - t) : ℝ≥0) = nndist (t : ℝ) (s : ℝ) := by
-    apply NNReal.coe_injective
-    rw [coe_nndist, Real.dist_eq, max_sub_coe_eq_of_le hst,
-      abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr hst))]
-  have hL_diff : HasLaw (X t - X s) (gaussianReal 0 (max (t - s) (s - t))) P := by
-    rw [hmax]; exact hX.hasLaw_sub t s
+  have hL_diff : HasLaw (X t - X s) (gaussianReal 0 (t - s)) P :=
+    MathFin.hasLaw_increment hX.toIsPreBrownianReal hst
   -- Integrability of `exp(α (X_t − X_s))`.
   have h_int_exp_diff : Integrable (fun ω ↦ Real.exp (α * (X t ω - X s ω))) P := by
     have := integrable_exp_mul_of_hasLaw (h_eq_diff ▸ hL_diff) α
@@ -290,9 +274,9 @@ theorem waldExponential_isMartingale (α : ℝ) :
   -- Mean of `exp(α (X_t − X_s))` (Gaussian MGF at `α`).
   have h_int_exp_diff_eq :
       ∫ ω, Real.exp (α * (X t ω - X s ω)) ∂P
-        = Real.exp (α ^ 2 * ((max (t - s) (s - t) : ℝ≥0) : ℝ) / 2) := by
+        = Real.exp (α ^ 2 * ((t - s : ℝ≥0) : ℝ) / 2) := by
     have hf : AEStronglyMeasurable (fun x : ℝ ↦ Real.exp (α * x))
-                (gaussianReal 0 (max (t - s) (s - t))) := by fun_prop
+                (gaussianReal 0 (t - s)) := by fun_prop
     have h := hL_diff.integral_comp hf
     have h_lhs : ((fun x ↦ Real.exp (α * x)) ∘ (X t - X s))
                = (fun ω ↦ Real.exp (α * (X t ω - X s ω))) := rfl
@@ -324,7 +308,7 @@ theorem waldExponential_isMartingale (α : ℝ) :
   have h_int_Dst : Integrable Dst P := hDst_factor ▸ h_int_exp_diff.const_mul _
   -- Mean of `D_{st}` is 1.
   have h_int_Dst_eq_one : ∫ ω, Dst ω ∂P = 1 := by
-    rw [hDst_factor, integral_const_mul, h_int_exp_diff_eq, max_sub_coe_eq_of_le hst,
+    rw [hDst_factor, integral_const_mul, h_int_exp_diff_eq, NNReal.coe_sub hst,
         ← Real.exp_add]
     rw [show -(α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2) + α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2 = 0
         from by ring, Real.exp_zero]

@@ -185,14 +185,14 @@ theorem qv_equals_t (hB : BrownianQuadraticVariation μ B)
 end BrownianQuadraticVariation
 
 /-- **Bridge: a (measurable) pre-Brownian motion is a quadratic-variation
-process.** Reparametrising a Mathlib `IsPreBrownianReal` process
+process.** Reparametrising a BrownianMotion-package `IsPreBrownianReal` process
 `B : ℝ≥0 → Ω → ℝ` to the real line via `Real.toNNReal` (`B' t := B t.toNNReal`),
 the result satisfies the `BrownianQuadraticVariation` hypotheses, so the whole
 variance-swap tower can be driven from a single `IsPreBrownianReal` hypothesis
 (plus evaluation-measurability — `IsPreBrownianReal` supplies only a.e.
-measurability). The increment law is read off `IsPreBrownianReal.hasLaw_sub` with
-arguments `t' s'` (subject `B t' − B s'`, no negation), mirroring
-`MathFin.hasLaw_increment` (`Foundations/GaussianMoments.lean`). -/
+measurability). The increment law is `MathFin.hasLaw_increment` (Degenne's
+`IsPreBrownianReal.hasLaw_sub` with its `nndist` variance read as the `ℝ≥0` subtraction) at
+the reparametrised times `t.toNNReal`, `s.toNNReal`. -/
 theorem brownianQuadraticVariation_of_isPreBrownianReal
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
     (hB : IsPreBrownianReal B μ) (hBmeas : ∀ u : ℝ≥0, Measurable (B u)) :
@@ -204,13 +204,6 @@ theorem brownianQuadraticVariation_of_isPreBrownianReal
     have hst' : s.toNNReal ≤ t.toNNReal := Real.toNNReal_mono hst
     refine ⟨t.toNNReal - s.toNNReal, ?_, ?_⟩
     · rw [NNReal.coe_sub hst', Real.coe_toNNReal t ht, Real.coe_toNNReal s hs]
-    · have hL := hB.hasLaw_sub t.toNNReal s.toNNReal
-      have hvar : nndist (t.toNNReal : ℝ) (s.toNNReal : ℝ)
-          = (t.toNNReal - s.toNNReal : ℝ≥0) := by
-        apply NNReal.coe_injective
-        rw [coe_nndist, Real.dist_eq, NNReal.coe_sub hst',
-          abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr hst'))]
-      rw [← hvar]
-      exact hL.map_eq
+    · exact (hasLaw_increment hB hst').map_eq
 
 end MathFin

@@ -56,13 +56,7 @@ law (`HasLaw.integral_comp`) to the Gaussian kurtosis identity `integral_pow4_ga
 This is the source of the `2(Δt)²` mean-square fluctuation of a squared increment. -/
 theorem integral_increment_pow4 {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
     ∫ ω, (B t₁ ω - B t₀ ω) ^ 4 ∂μ = 3 * ((t₁ : ℝ) - t₀) ^ 2 := by
-  have hv : nndist (t₁ : ℝ) (t₀ : ℝ) = t₁ - t₀ := by
-    apply NNReal.coe_injective
-    rw [coe_nndist, Real.dist_eq, NNReal.coe_sub ht,
-      abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr ht))]
-  have hlaw : HasLaw (fun ω ↦ B t₁ ω - B t₀ ω) (gaussianReal 0 (t₁ - t₀)) μ := by
-    rw [← hv]; exact hB.hasLaw_sub t₁ t₀
-  have hcomp := hlaw.integral_comp (f := fun x : ℝ ↦ x ^ 4)
+  have hcomp := (hasLaw_increment hB ht).integral_comp (f := fun x : ℝ ↦ x ^ 4)
     (measurable_id.pow_const 4).aestronglyMeasurable
   simp only [Function.comp_def] at hcomp
   rw [hcomp, integral_pow4_gaussianReal, NNReal.coe_sub ht]
@@ -73,13 +67,7 @@ Gaussian identity `integral_sq_sub_var_sq_gaussianReal`. This is the per-interva
 that sums to the `2t²/n` quadratic-variation rate. -/
 theorem integral_increment_sq_centered {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
     ∫ ω, ((B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) ^ 2 ∂μ = 2 * ((t₁ : ℝ) - t₀) ^ 2 := by
-  have hv : nndist (t₁ : ℝ) (t₀ : ℝ) = t₁ - t₀ := by
-    apply NNReal.coe_injective
-    rw [coe_nndist, Real.dist_eq, NNReal.coe_sub ht,
-      abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr ht))]
-  have hlaw : HasLaw (fun ω ↦ B t₁ ω - B t₀ ω) (gaussianReal 0 (t₁ - t₀)) μ := by
-    rw [← hv]; exact hB.hasLaw_sub t₁ t₀
-  have hcomp := hlaw.integral_comp
+  have hcomp := (hasLaw_increment hB ht).integral_comp
     (f := fun y : ℝ ↦ (y ^ 2 - ((t₁ - t₀ : ℝ≥0) : ℝ)) ^ 2) (by fun_prop)
   simp only [Function.comp_def] at hcomp
   rw [integral_sq_sub_var_sq_gaussianReal] at hcomp
@@ -102,13 +90,7 @@ for `t₀ ≤ t₁`. The law-transfer of `integral_sq_sub_var_gaussianReal` — 
 This is the centering that makes the cross terms vanish. -/
 theorem integral_increment_centered_mean {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
     ∫ ω, ((B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) ∂μ = 0 := by
-  have hv : nndist (t₁ : ℝ) (t₀ : ℝ) = t₁ - t₀ := by
-    apply NNReal.coe_injective
-    rw [coe_nndist, Real.dist_eq, NNReal.coe_sub ht,
-      abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr ht))]
-  have hlaw : HasLaw (fun ω ↦ B t₁ ω - B t₀ ω) (gaussianReal 0 (t₁ - t₀)) μ := by
-    rw [← hv]; exact hB.hasLaw_sub t₁ t₀
-  have hcomp := hlaw.integral_comp
+  have hcomp := (hasLaw_increment hB ht).integral_comp
     (f := fun y : ℝ ↦ y ^ 2 - ((t₁ - t₀ : ℝ≥0) : ℝ)) (by fun_prop)
   simp only [Function.comp_def] at hcomp
   rw [integral_sq_sub_var_gaussianReal] at hcomp
