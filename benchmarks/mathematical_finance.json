@@ -2676,17 +2676,33 @@
     {
       "id": "mf-impliedvol-bracket",
       "name": "Bisection Bracket Existence for Implied Volatility",
-      "description": "By IVT and strict monotonicity, any target price strictly between f(σ_lo) and f(σ_hi) admits a unique implied volatility σ ∈ (σ_lo, σ_hi). This is the bisection-method correctness statement.",
+      "description": "For f continuous and strictly increasing on [σ_lo, σ_hi], any target strictly between f(σ_lo) and f(σ_hi) is attained at a unique σ ∈ (σ_lo, σ_hi): the IVT gives existence, strict monotonicity gives uniqueness. This is the existence half of the bisection method. It says a root exists in the bracket, not that the bisection iterates converge to it; convergence, and the Black-Scholes instantiation, are mf-impliedvol-bisection.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.BisectionIV\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem impliedVol_bracket_exists_thm {f : ℝ → ℝ} {σ_lo σ_hi C_obs : ℝ}\n    (h_lo_lt_hi : σ_lo < σ_hi)\n    (h_cont : ContinuousOn f (Set.Icc σ_lo σ_hi))\n    (h_mono : StrictMonoOn f (Set.Icc σ_lo σ_hi))\n    (h_brkt : f σ_lo < C_obs ∧ C_obs < f σ_hi) :\n    ∃! σ : ℝ, σ ∈ Set.Ioo σ_lo σ_hi ∧ f σ = C_obs :=\n  MathFin.impliedVol_bracket_exists h_lo_lt_hi h_cont h_mono h_brkt\n"
       },
       "metadata": {
         "chapter": 14,
-        "reference": "Bisection method for implied vol (Press et al., Numerical Recipes)",
+        "reference": "Intermediate value theorem; bracketing for bisection (Press et al., Numerical Recipes, §9.1)",
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-impliedvol-bisection",
+      "name": "Bisection Converges to the Implied Volatility",
+      "description": "For K, S, T > 0, any rate r, and a volatility bracket 0 < σ_lo < σ_hi whose Black-Scholes call prices straddle the market price, bsV(σ_lo) < C_obs < bsV(σ_hi): there is an implied volatility σ ∈ (σ_lo, σ_hi), it is the only positive σ with bsV(σ) = C_obs, and the bisection estimates converge to it. After n halvings (n = 0, 1, …; n = 0 is the midpoint of [σ_lo, σ_hi]) the estimate is within (σ_hi − σ_lo)/2^(n+1) of σ. The bisection iteration is a noncomputable definition over ℝ in the library, not an assumed sequence; floating-point error and stopping rules are not modelled.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.BisectionIV\n\nopen Filter Topology\nopen MathFin\n\ntheorem impliedVol_bisection_converges_thm {K r T S σ_lo σ_hi C_obs : ℝ}\n    (hK : 0 < K) (hT : 0 < T) (hS : 0 < S) (h_lo : 0 < σ_lo) (h_lo_hi : σ_lo < σ_hi)\n    (h_brkt : bsV K r σ_lo S T < C_obs ∧ C_obs < bsV K r σ_hi S T) :\n    ∃ σ ∈ Set.Ioo σ_lo σ_hi, bsV K r σ S T = C_obs ∧\n      (∀ σ' > 0, bsV K r σ' S T = C_obs → σ' = σ) ∧\n      (∀ n, |bisectMid (fun v ↦ bsV K r v S T) C_obs σ_lo σ_hi n - σ| ≤\n        (σ_hi - σ_lo) / 2 ^ (n + 1)) ∧\n      Tendsto (bisectMid (fun v ↦ bsV K r v S T) C_obs σ_lo σ_hi) atTop (𝓝 σ) :=\n  MathFin.impliedVol_bisection_converges hK hT hS h_lo h_lo_hi h_brkt\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Bisection method: Burden & Faires, Numerical Analysis, §2.1; Press et al., Numerical Recipes, §9.1. Implied volatility by iterative search: Hull, Options, Futures, and Other Derivatives (implied volatilities)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The bisection iteration is defined, not assumed (Foundations/Bisection.lean): bisectStep (evaluate at the midpoint, keep the half that straddles the target), bisect (its n-fold iterate) and bisectMid (the midpoint of the n-th bracket, counted from n = 0). The generic convergence theorem assumes only that σ ∈ [lo, hi] is the threshold of f against C on the bracket (f x < C ↔ x < σ for x ∈ [lo, hi]); the limit point enters only through that hypothesis, which needs neither continuity nor strictness, and in general the threshold need not solve f σ = C. Under it a step maps the trap [lo, σ] × [σ, hi] into itself, so by Set.MapsTo.iterate every bracket contains σ; each step halves the width; hence |bisectMid n − σ| ≤ (hi − lo)/2^(n+1) → 0. For the BS call price, bsV_continuousOn_sigma and the intermediate value theorem put σ strictly inside the bracket; bsV_strictMonoOn_sigma makes σ the threshold, and implied_volatility_unique makes it the only positive implied volatility. Axioms-clean. LIMITS: exact real arithmetic, so no floating-point error analysis and no stopping rule. The textbook bisection theorem for a merely continuous f with a sign change (convergence to some root, no monotonicity) is not formalized here."
       }
     },
     {

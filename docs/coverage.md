@@ -26,6 +26,39 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Implied volatility by bisection: convergence (2026-09-18)
+
+The new entry below carries `formalization_status: full`. The bisection
+iteration is a (noncomputable) definition in the library, not an assumed
+sequence, and the entry proves an explicit rate, not only a limit. The generic
+method lives in `MathFin/Foundations/Bisection.lean`. Its convergence theorem
+takes the limit point as an input, in the form bisection uses: `σ ∈ [lo, hi]` is
+the threshold of `f` against the target, `f x < C ↔ x < σ` on the bracket. It
+assumes neither continuity nor strictness. A strictly increasing `f` with
+`f σ = C` satisfies it, and then `σ` is the root. For the Black–Scholes call
+price,
+`bsV_continuousOn_sigma` and the intermediate value theorem supply the root;
+`bsV_strictMonoOn_sigma` makes it the threshold and the only positive implied
+volatility.
+
+| Benchmark ID | Mathematical conclusion | Lean module and declaration | Faithfulness |
+|---|---|---|---|
+| `mf-impliedvol-bisection` | For `K, S, T > 0`, any `r`, and a bracket `0 < σ_lo < σ_hi` with `bsV(σ_lo) < C_obs < bsV(σ_hi)`: an implied volatility `σ ∈ (σ_lo, σ_hi)` exists and is the only positive one; after `n` halvings (`n = 0` is the midpoint of `[σ_lo, σ_hi]`) the bisection estimate is within `(σ_hi − σ_lo)/2ⁿ⁺¹` of `σ`, and the estimates converge to `σ` | `MathFin/BlackScholes/BisectionIV.lean`, `MathFin.impliedVol_bisection_converges` (generic core: `MathFin/Foundations/Bisection.lean`) | `full` |
+
+`mf-impliedvol-bracket`'s description used to call its lemma "the
+bisection-method correctness statement". The lemma proves only that the bracket
+contains exactly one root, so the description now says that and points here
+for convergence. Its proof now consumes Mathlib's `intermediate_value_Ioo` for
+existence and uses strict monotonicity only for uniqueness; the statement is
+unchanged. The textbook bisection theorem for a merely continuous `f` with a
+sign change (convergence to *some* root) is not formalized.
+
+The native default `lake build` passed, including `AxiomAuditGen.lean` (now
+333 guards), and `lake lint` passed. Both bisection entries re-verified through
+the daemon; the ledger reports 373 fresh, 0 stale, and 0 missing entries. The
+arithmetic is exact over `ℝ`: no floating-point error analysis or stopping rule
+is claimed.
+
 ### American put option boundary: geometric contribution (#175)
 
 The two new entries below carry `formalization_status: full`. Their hypotheses
@@ -48,11 +81,12 @@ boundary regularity, classical curvature, strict log-convexity, or `q > r`
 result is claimed by these entries. The dated baseline below records the
 prior corpus audit, not a verification of this addition.
 
-> **Live status (2026-09-08):** corpus
-> **372**, **341 full + 18 wrappers = 359/372 delivery-ready**, 13 reduced cores, 0 placeholders.
-> Ledger 372 fresh / 0 stale / 0 missing; `lake build MathFin` and `lake lint` green, `pytest`
-> 50/50, `AxiomAuditGen` at 332 guards (243 curated). The **American put exercise-boundary
-> geometry** and the **Glosten–Milgrom spread** below are the newest rounds; the bracket
+> **Live status (2026-09-18):** corpus
+> **373**, **342 full + 18 wrappers = 360/373 delivery-ready**, 13 reduced cores, 0 placeholders.
+> Ledger 373 fresh / 0 stale / 0 missing; `lake build MathFin` and `lake lint` green, `pytest`
+> 59/59, `AxiomAuditGen` at 333 guards (243 curated). **Implied volatility by bisection** (above)
+> is the newest round; the **American put exercise-boundary geometry** and the **Glosten–Milgrom
+> spread** below precede it; the bracket
 > compensator, the conditional bracket, the unconditional one, the **contracts tower**, the
 > **Itô chain rule**, and its coherence pass follow.
 >

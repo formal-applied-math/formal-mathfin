@@ -122,6 +122,100 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-09-18 — corpus 373 — bisection converges to the implied volatility
+
+Scope: the new `MathFin/Foundations/Bisection.lean` (the bisection method and
+its convergence at a threshold); `MathFin/BlackScholes/BisectionIV.lean` (the
+Black–Scholes instance, `impliedVol_bisection_converges`, corpus entry
+`mf-impliedvol-bisection`); `bsV_continuousOn_sigma` in `ImpliedVolatility.lean`;
+and the narrowed description of `mf-impliedvol-bracket`. Three read-only review
+agents split the lenses: (1, 2, 4); (5, 7) plus the standing first pass; and
+(3, 6, 8). The authoring agent adjudicated and ran all Lean serially. There were
+no blockers.
+
+### The standing first pass — prose against statement
+
+- The session started from an overclaim. `mf-impliedvol-bracket`'s description
+  and `BisectionIV`'s module docstring called an IVT existence-and-uniqueness
+  lemma "the bisection-method correctness statement" and said a bracket
+  "suffices for convergence". Convergence is now proved, and the old
+  description says what its lemma proves.
+- The panel caught four more gaps in the new prose, all fixed:
+  - The outward prose did not state where the index starts. The Lean counts
+    from `n = 0`, Burden–Faires from `p₁`, so an unindexed `/2ⁿ⁺¹` reads as
+    twice the true accuracy.
+  - "Needs only strict monotonicity" left out that the root is an input. A
+    strictly increasing `f` with a jump can straddle `C` with no root, and the
+    midpoints then converge to the jump.
+  - "The only implied volatility" was too strong: `implied_volatility_unique`
+    covers positive ones only.
+  - Numerical Recipes was cited for implied volatility, which it does not treat.
+
+### Upgrades executed
+
+- **Coherence (lens 2), flagged by all three agents.** `impliedVol_bracket_exists`
+  re-derived Mathlib's open-interval IVT through two `lt_iff_lt` legs. It now
+  consumes `intermediate_value_Ioo`, so continuity gives existence and strict
+  monotonicity gives only uniqueness, the split its docstring describes.
+- **Right generality (lenses 4, 5, 6; checklist item 7), flagged by two
+  agents.** The trap uses only that `σ` is the threshold of `f` against `C`
+  (`f x < C ↔ x < σ` on the bracket), so `StrictMonoOn` over-assumed. The core
+  now takes the threshold hypothesis, and the step's two branches are the
+  equivalence's two directions. Strict monotonicity is the instance
+  (`hmono.lt_iff_lt`). `mapsTo_bisectStep` also lost an `hσ` derivable from the
+  trap.
+- **Architecture (lens 4).** The generic method moved to
+  `Foundations/Bisection.lean`, which imports only Mathlib, so a quantile or VaR
+  consumer need not import Black–Scholes.
+- **Zero slop (lens 3), flagged by two agents.** `bsV`'s continuity in `σ` was
+  derived twice. It is now `bsV_continuousOn_sigma`, used by
+  `bsV_strictMonoOn_sigma` and by the headline, whose two BS inputs now both
+  read `….mono hpos`.
+- **Concept clarity (lens 7).** The headline proves its own "the":
+  `∀ σ' > 0, bsV σ' = C_obs → σ' = σ` is one of its conjuncts.
+- **Elegance (lens 8).** Halving is now a one-step lemma
+  (`bisectStep_snd_sub_fst`) iterated by a forward `rw` chain, the same shape as
+  the trap → `bisect_mem`.
+
+### Exemplars
+
+- `bisect_mem`: the invariant, `Set.MapsTo.iterate` and the base case in one
+  line.
+- `bisect_snd_sub_fst`: stated with no hypotheses, exactly as general as it is
+  true.
+- `tendsto_bisectMid`: checklist item 13 verbatim, a single squeeze term.
+
+### Ranked backlog
+
+1. **The textbook bisection theorem** (lenses 1, 7, 8; two agents). For every
+   `f`, the step preserves the straddle `{I | f I.1 < C ∧ C ≤ f I.2}`, the same
+   `MapsTo.iterate` shape. With continuity, the nested endpoints converge to
+   *a* root at the same rate. That is Burden–Faires Thm 2.1, with no
+   monotonicity, and the threshold theorem becomes the corollary that names
+   the root.
+2. **Implied volatility from no-arbitrage alone** (lens 5). Replace the bracket
+   hypothesis with `C_obs ∈ ((S − Ke^{−rT})⁺, S)`. This needs the limits of
+   `bsV` as `σ → 0⁺` and as `σ → ∞`, which MathFin does not have yet. The result
+   would be that every arbitrage-free call price has a unique implied
+   volatility, and bisection finds it.
+3. **VaR by bisection** (lens 1). The threshold form would cover a
+   right-continuous CDF at its quantile (`F x < α ↔ x < VaR_α`) without
+   continuity or strictness. Land it together with that consumer in
+   `RiskMeasures/`.
+4. **Safeguarded Newton** (lens 4). `mapsTo_bisectStep` uses only that the split
+   point lies in the bracket.
+   - Extract a split at any interior point.
+   - State the a-posteriori bound `|mid − σ| ≤ (bₙ − aₙ)/2`.
+   - A Newton–bisection hybrid then inherits the enclosure.
+   - `NewtonConvergence`'s basin induction would read better as a
+     `MapsTo.iterate` too.
+5. **Naming** (lens 6). `impliedVol_bracket_exists` is generic in `f`. A
+   Mathlib-register name would change the corpus snippet, so defer it to the
+   entry's next touch.
+
+Adjudicated down: generalizing the codomain to a `LinearOrder` (the threshold
+form already covers that) and a `StrictAntiOn` variant (bisect `-f` instead).
+
 ## 2026-09-06 — corpus 371 — American put option boundary geometry (#175)
 
 Three review agents split the eight lenses: proof architecture and upstream
