@@ -126,7 +126,7 @@ theorem smoothPricingSubsolution_le_before_terminal {k h : ℝ} (hk : 0 ≤ k)
     have hh := hmax hyQ
     have hden : 0 < T-y.2 := sub_pos.mpr hy.2.2
     have hd : u y-F y ≤ V w/(T-y.2) := (le_div_iff₀ hden).mpr (by
-      simpa only [mem_setOf_eq,V,mul_comm] using hh)
+      simpa only [mem_ofPred_eq,V,mul_comm] using hh)
     linarith
   have htest := hsub w hwint G hG hG0 htouch
   rw [pricingOperator_barrier ((hFs.contDiffAt hnear).differentiableAt (by norm_num))

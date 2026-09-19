@@ -79,7 +79,7 @@ theorem brownianNegativeGerm_measurable_germ :
   obtain ⟨M,hM⟩ := eventually_atTop.mp
     (brownianProbeTime_tendsto.eventually (Iio_mem_nhds hs))
   rw [brownianNegativeGerm_tail M]
-  simp only [setOf_forall,setOf_exists]
+  simp only [ofPred_forall,ofPred_exists]
   apply MeasurableSet.iInter
   intro N
   apply MeasurableSet.iUnion
@@ -92,7 +92,7 @@ theorem brownianNegativeGerm_measurable_germ :
         ((Filtration.natural brownian (fun t => (measurable_brownian t).stronglyMeasurable)).mono
           (hM n hmn).le)
     exact measurableSet_lt (hW.measurable.const_mul _) measurable_const
-  · simp only [hn,false_and,setOf_false]
+  · simp only [hn,false_and,ofPred_false]
     exact @MeasurableSet.empty _ (Filtration.natural brownian
       (fun t => (measurable_brownian t).stronglyMeasurable) s)
 
@@ -137,7 +137,7 @@ theorem brownianNegativeGerm_prob_one : gaussianLimit brownianNegativeGerm = 1 :
     brownianNegativeGerm_measurable_germ with hz | ho
   · have hae : ∀ᵐ ω ∂gaussianLimit, ω ∉ brownianNegativeGerm := by
       rw [ae_iff]
-      simpa only [not_not,setOf_mem_eq] using hz
+      simpa only [not_not,ofPred_mem_eq] using hz
     have hlim : ∀ᵐ ω ∂gaussianLimit,
         Tendsto (fun n => negativeProbeTest (brownianProbe n ω)) atTop (𝓝 0) := by
       filter_upwards [hae] with ω hω

@@ -56,7 +56,7 @@ noncomputable def GridRule.toDiscreteRule (θ : GridRule 𝓕 T δ) (hδ : 0 < �
     convert! hs using 1
     ext ω
     simp only [WithTop.coe_le_coe,le_min_iff,
-      θ.val.le_horizon ω,and_true,mem_setOf_eq]
+      θ.val.le_horizon ω,and_true,mem_ofPred_eq]
     convert! (gridIndex_le_iff θ.val hδ ω i) using 1
     simp
   le_horizon := gridIndex_bounded θ.val
@@ -75,7 +75,7 @@ noncomputable def DiscreteRule.toPhysicalBoundedRule
     by_cases hT : T ≤ t
     · have he : {ω | ((min ((η.time ω : ℝ≥0)*δ) T : ℝ≥0) : WithTop ℝ≥0) ≤ t} = univ := by
         ext ω
-        simp only [mem_setOf_eq,WithTop.coe_le_coe,mem_univ,iff_true]
+        simp only [mem_ofPred_eq,WithTop.coe_le_coe,mem_univ,iff_true]
         exact (min_le_right _ _).trans hT
       rw [he]
       exact MeasurableSet.univ
@@ -85,7 +85,7 @@ noncomputable def DiscreteRule.toPhysicalBoundedRule
         𝓕.mono ((min_le_left _ _).trans hfloor) _ (η.stopping ⌊t/δ⌋₊)
       convert! hm using 1
       ext ω
-      simp only [mem_setOf_eq,WithTop.coe_le_coe,min_le_iff,hT,or_false]
+      simp only [mem_ofPred_eq,WithTop.coe_le_coe,min_le_iff,hT,or_false]
       rw [← le_div_iff₀ hδ,← Nat.le_floor_iff (show (0 : ℝ≥0) ≤ t/δ from bot_le)]
       constructor <;> intro hh <;> exact_mod_cast hh
   le_horizon := fun _ => min_le_right _ _
