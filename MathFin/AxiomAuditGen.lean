@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (332 constants). Scope: proof-position MathFin names only —
+  corpus (333 constants). Scope: proof-position MathFin names only —
   statement-position defs are exercised by elaboration + the verification
   ledger, and library_wrapper entries cite upstream names.
 
@@ -688,6 +688,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.herfindahl_card_inv_le_of_sum_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.herfindahl_card_inv_le_of_sum_one
+
+/-- info: 'MathFin.impliedVol_bisection_converges' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.impliedVol_bisection_converges
 
 /-- info: 'MathFin.impliedVol_bracket_exists' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.impliedVol_bracket_exists

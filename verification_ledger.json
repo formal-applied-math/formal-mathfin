@@ -1615,17 +1615,24 @@
     },
     "mf-implied-vol-unique": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-09-10",
-      "elapsed_s": 3.7,
-      "input_hash": "5f2159dd979039c478652fc35251120908c1c6a87bc7b612f8e3d6be9b925097",
-      "verified_at_commit": "ec948e9"
+      "date": "2026-09-18",
+      "elapsed_s": 71.1,
+      "input_hash": "b6674ac953d4ab0d1744b08b6157b9345f64a712d682fa803cf3f7136f083d2b",
+      "verified_at_commit": "4eaa424"
+    },
+    "mf-impliedvol-bisection": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-09-18",
+      "elapsed_s": 10.2,
+      "input_hash": "de36f730ffb77b29a44cea8f4fb207bf0142f971c9a7b3c3dd64f92d750dac0e",
+      "verified_at_commit": "4eaa424"
     },
     "mf-impliedvol-bracket": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-09-10",
-      "elapsed_s": 5.3,
-      "input_hash": "7312018e597079fb33bbf1b0e5961ac9650cd9ca3b99aceb0c1e36cf2f4c4e9e",
-      "verified_at_commit": "ec948e9"
+      "date": "2026-09-18",
+      "elapsed_s": 46.3,
+      "input_hash": "a95cbed380202bfd72dd9f4f141b0c53480b14f98cc94cda424edb7496548994",
+      "verified_at_commit": "4eaa424"
     },
     "mf-information-ratio-scale-invariant": {
       "benchmark_file": "mathematical_finance.json",
@@ -1832,10 +1839,10 @@
     },
     "mf-merton-dominance": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-09-10",
-      "elapsed_s": 5.5,
-      "input_hash": "fda580e24683e3bb55a9c22de2c09d82821f035ba09e21847d8979ce00bef4bd",
-      "verified_at_commit": "ec948e9"
+      "date": "2026-09-18",
+      "elapsed_s": 64.2,
+      "input_hash": "0d090f33460feab93dc6b0644f7f9dc51052d8e9457c6510124a5026c83c051d",
+      "verified_at_commit": "4eaa424"
     },
     "mf-merton-put-call-parity": {
       "benchmark_file": "mathematical_finance.json",
@@ -1888,10 +1895,10 @@
     },
     "mf-newton-raphson-fixed-at-root": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-09-10",
-      "elapsed_s": 3.7,
-      "input_hash": "562807883cbc4ceb373b2c67ae939ae84f1cf8cbb19e9d2556aeaecf3c2723b4",
-      "verified_at_commit": "ec948e9"
+      "date": "2026-09-18",
+      "elapsed_s": 67.4,
+      "input_hash": "566890ba34db468b329ed69562f1429495ff6890ee4d4432fa4fc77a09b5c8be",
+      "verified_at_commit": "4eaa424"
     },
     "mf-no-arb-forward-price": {
       "benchmark_file": "mathematical_finance.json",
