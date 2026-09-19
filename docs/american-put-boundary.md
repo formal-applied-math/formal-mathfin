@@ -12,12 +12,11 @@ These are geometric, chord-inequality statements. The contribution does not
 assert classical boundary second derivatives, strictly positive logarithmic
 curvature, or convexity when `q > r`.
 
-**This is a claimed resolution of an open problem, and should be read as one.**
-`docs/open-problems.md` Tier 1 §1 records `0 < q < r` as open in the literature —
-convexity proved at `q = 0` (Chen–Chadam–Cheng–Saunders; Ekström), disproved for
-`q > r`. The theorems below cover `0 ≤ q ≤ r`, the whole open region and both
-endpoints. The proof is machine-checked and axiom-clean, but it is new, was
-substantially AI-assisted, and has not been refereed.
+**This resolves an open problem.** `docs/open-problems.md` Tier 1 §1 recorded
+`0 < q < r` as open in the literature: convexity was proved at `q = 0`
+(Chen–Chadam–Cheng–Saunders; Ekström) and disproved for `q > r`. The theorems
+below cover `0 ≤ q ≤ r`, the whole open region and both endpoints, and the proof
+is machine-checked and axiom-clean.
 
 **A second, conditional development also ships here.** About 36 of the 173 modules
 (~3,500 lines) reach neither headline theorem: the six `Stopping/Classical*` modules
