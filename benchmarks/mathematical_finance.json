@@ -276,7 +276,7 @@
     {
       "id": "mf-bs-put-gamma",
       "name": "BS Put Gamma",
-      "description": "Put gamma: ∂²P/∂S² = ϕ(d₁) / (S σ √τ). Same as call gamma since put-call parity differs by a linear function of S.",
+      "description": "Put gamma, stated as the S-derivative of the put delta: ∂/∂S (Φ(d₁) − 1) = ϕ(d₁)/(S σ √τ). That Φ(d₁) − 1 is ∂P/∂S is mf-bs-put-delta; composed, this is ∂²P/∂S². Same as the call gamma, since the two deltas differ by a constant.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.PutGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_put_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => MathFin.Phi (MathFin.bsd1 s K r σ τ) - 1)\n      (gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) S :=\n  MathFin.hasDerivAt_bsP_SS hK hσ hS hτ\n"
@@ -340,7 +340,7 @@
     {
       "id": "mf-bs-vanna",
       "name": "BS Vanna (∂²V/∂σ∂S)",
-      "description": "Vanna: ∂²V/∂σ∂S = ∂(vega)/∂S = -ϕ(d₁) · d₂ / σ. Cross-Greek between spot and volatility.",
+      "description": "Vanna, stated as the S-derivative of the vega expression: ∂/∂S (S·ϕ(d₁)·√τ) = −ϕ(d₁)·d₂/σ. That S·ϕ(d₁)·√τ is ∂V/∂σ is mf-vega; composed, this is ∂²V/∂σ∂S. Cross-Greek between spot and volatility.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_vanna_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => s * gaussianPDFReal 0 1 (MathFin.bsd1 s K r σ τ) * Real.sqrt τ)\n      (-(gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) * MathFin.bsd2 S K r σ τ / σ)) S :=\n  MathFin.hasDerivAt_bsV_vanna hK hσ hS hτ\n"
@@ -356,7 +356,7 @@
     {
       "id": "mf-bs-volga",
       "name": "BS Volga / Vomma (∂²V/∂σ²)",
-      "description": "Volga: ∂²V/∂σ² = vega · d₁ · d₂ / σ. The convexity of option value in volatility.",
+      "description": "Volga, stated as the σ-derivative of the vega expression: ∂/∂σ (S·ϕ(d₁)·√τ) = vega · d₁ · d₂ / σ. That S·ϕ(d₁)·√τ is ∂V/∂σ is mf-vega; composed, this is ∂²V/∂σ², the second-order sensitivity of option value to volatility.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_volga_thm {K r : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => S * gaussianPDFReal 0 1 (MathFin.bsd1 S K r s τ) * Real.sqrt τ)\n      (S * gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) * Real.sqrt τ\n        * MathFin.bsd1 S K r σ τ * MathFin.bsd2 S K r σ τ / σ) σ :=\n  MathFin.hasDerivAt_bsV_volga hK hS hσ hτ\n"
@@ -372,7 +372,7 @@
     {
       "id": "mf-bs-charm",
       "name": "BS Charm (∂Δ/∂τ)",
-      "description": "Charm: ∂Δ/∂τ = ϕ(d₁) · ((r + σ²/2)τ − log(S/K)) / (2στ√τ). Higher-order Greek: the decay of delta with respect to time to maturity.",
+      "description": "Charm, stated as the τ-derivative of the delta expression: ∂/∂τ Φ(d₁) = ϕ(d₁)·((r + σ²/2)τ − log(S/K))/(2στ√τ). That Φ(d₁) is the call delta ∂V/∂S is the delta leg of sc-bs-pde; composed, this is ∂Δ/∂τ, the decay of delta with time to maturity.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_charm_thm {K r σ : ℝ} (hσ : 0 < σ)\n    {S τ : ℝ} (hτ : 0 < τ) :\n    HasDerivAt (fun t => Phi (bsd1 S K r σ t))\n      (gaussianPDFReal 0 1 (bsd1 S K r σ τ)\n        * (((r + σ ^ 2 / 2) * τ - Real.log (S / K)) / (2 * σ * τ * Real.sqrt τ))) τ :=\n  MathFin.hasDerivAt_bsV_charm hσ hτ\n"
@@ -500,7 +500,7 @@
     {
       "id": "mf-black76-gamma",
       "name": "Black-76 Gamma",
-      "description": "Futures option gamma: ∂²V_B/∂F² = e^{-rT} · ϕ(d₁) / (F σ √T).",
+      "description": "Futures option gamma, stated as the F-derivative of the Black-76 delta: ∂/∂F (e^{-rT}·Φ(d₁)) = e^{-rT}·ϕ(d₁)/(F σ √T). That e^{-rT}·Φ(d₁) is ∂V_B/∂F is mf-black76-delta; composed, this is ∂²V_B/∂F².",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Futures.Black76Greeks\n\nopen MathFin ProbabilityTheory\n\ntheorem black76_gamma_thm {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun f => Real.exp (-(r * T)) * MathFin.Phi (MathFin.bsd1 f K 0 σ T))\n      (Real.exp (-(r * T)) * gaussianPDFReal 0 1 (MathFin.bsd1 F K 0 σ T)\n        / (F * σ * Real.sqrt T)) F :=\n  MathFin.hasDerivAt_blackV_FF hK hσ r hF hT\n"
@@ -532,7 +532,7 @@
     {
       "id": "mf-bachelier-gamma",
       "name": "Bachelier Gamma",
-      "description": "Bachelier gamma: ∂²V/∂S² = ϕ(d) / (σ √T). Chain rule on Φ(d(S)).",
+      "description": "Bachelier gamma, stated as the S-derivative of the Bachelier delta: ∂/∂S Φ(d) = ϕ(d)/(σ √T), by the chain rule on Φ(d(S)). That Φ(d) is ∂V/∂S is mf-bachelier-delta; composed, this is ∂²V/∂S².",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.BachelierGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bachelier_gamma_thm {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : ℝ) :\n    HasDerivAt (fun s => MathFin.Phi (MathFin.bachelierD s K σ T))\n      (gaussianPDFReal 0 1 (MathFin.bachelierD S K σ T) / (σ * Real.sqrt T)) S :=\n  MathFin.hasDerivAt_bachelierV_SS hσ hT S\n"
@@ -564,7 +564,7 @@
     {
       "id": "mf-asset-digital-gamma",
       "name": "Asset-or-Nothing Digital Gamma",
-      "description": "Asset digital gamma: ∂²V_asset/∂S² = -ϕ(d₁) · d₂ / (S σ² T). Sum of Φ-term and pdf-term contributions, collapsed via σ√T − d₁ = -d₂.",
+      "description": "Asset digital gamma, stated as the S-derivative of the asset-digital delta: ∂/∂S (Φ(d₁) + ϕ(d₁)/(σ√τ)) = -ϕ(d₁)·d₂/(S σ² τ), the Φ-term and pdf-term contributions collapsed via σ√τ − d₁ = -d₂. That Φ(d₁) + ϕ(d₁)/(σ√τ) is ∂V_asset/∂S is mf-asset-digital-delta; composed, this is ∂²V_asset/∂S².",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem asset_digital_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt\n      (fun s => MathFin.Phi (MathFin.bsd1 s K r σ τ) +\n        gaussianPDFReal 0 1 (MathFin.bsd1 s K r σ τ) / (σ * Real.sqrt τ))\n      (-(gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) *\n        MathFin.bsd2 S K r σ τ / (S * σ^2 * τ))) S :=\n  MathFin.hasDerivAt_bsAssetDigital_SS hK hσ hS hτ\n"
@@ -596,7 +596,7 @@
     {
       "id": "mf-bs-merton-gamma",
       "name": "BS-Merton Gamma (Dividends)",
-      "description": "BS-Merton gamma: ∂²V_q/∂S² = e^{-qT} · ϕ(d₁') / (S σ √T).",
+      "description": "BS-Merton gamma, stated as the S-derivative of the dividend-adjusted delta: ∂/∂S (e^{-qτ}·Φ(d₁')) = e^{-qτ}·ϕ(d₁')/(S σ √τ), with d₁' the d₁ of rate r − q. That e^{-qτ}·Φ(d₁') is ∂V_q/∂S is mf-bs-merton-delta; composed, this is ∂²V_q/∂S².",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.DividendsGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_merton_gamma_thm {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => Real.exp (-(q * τ)) *\n        MathFin.Phi (MathFin.bsd1 s K (r - q) σ τ))\n      (Real.exp (-(q * τ)) * gaussianPDFReal 0 1 (MathFin.bsd1 S K (r - q) σ τ)\n        / (S * σ * Real.sqrt τ)) S :=\n  MathFin.hasDerivAt_bsVDiv_SS hK hσ hS hτ\n"
@@ -740,7 +740,7 @@
     {
       "id": "mf-cash-digital-gamma",
       "name": "Cash-or-Nothing Digital Gamma",
-      "description": "Cash digital gamma: ∂²V_cash/∂S² = -e^{-rτ} · ϕ(d₂) · d₁ / (S² σ² τ). Quotient rule on δ_cash(s) = e^{-rτ}·ϕ(d₂(s))/(s·σ·√τ), collapsed via d₂ + σ√τ = d₁.",
+      "description": "Cash digital gamma, stated as the S-derivative of the cash-digital delta δ_cash(s) = e^{-rτ}·ϕ(d₂(s))/(s·σ·√τ): ∂δ_cash/∂S = -e^{-rτ}·ϕ(d₂)·d₁/(S² σ² τ), a quotient rule collapsed via d₂ + σ√τ = d₁. That δ_cash is ∂V_cash/∂S is mf-cash-digital-delta; composed, this is ∂²V_cash/∂S².",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem cash_digital_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt\n      (fun s => Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (MathFin.bsd2 s K r σ τ) / (s * σ * Real.sqrt τ))\n      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) *\n        MathFin.bsd1 S K r σ τ / (S^2 * σ^2 * τ))) S :=\n  MathFin.hasDerivAt_bsCashDigital_SS hK hσ hS hτ\n"
@@ -1828,7 +1828,7 @@
     {
       "id": "mf-bond-2nd-deriv",
       "name": "Bond Portfolio Second-Order Rate Sensitivity",
-      "description": "The second derivative ∂²P/∂r² = C_P·P, where C_P is the convexity-times-value of the portfolio.",
+      "description": "Stated as the r-derivative of minus the duration-times-value: ∂/∂r(−D_P·P) = C_P·P, the convexity-times-value of the portfolio. That −D_P·P is ∂P/∂r is mf-bond-portfolio-rate-deriv; composed, this is ∂²P/∂r² = C_P·P.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.FixedIncome.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_2nd_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => -MathFin.bondPortfolioDur s w T t r')\n      (MathFin.bondPortfolioConv s w T t r) r :=\n  MathFin.hasDerivAt_neg_bondPortfolioDur_r s w T t r\n"
@@ -2067,8 +2067,8 @@
     },
     {
       "id": "mf-bsV-KK-deriv",
-      "name": "Call Price Convexity in Strike",
-      "description": "∂²_K bsV = e^{-rτ}·ϕ(d_2)/(K·σ·√τ) ≥ 0 — call price is convex in strike (equivalent to butterfly-spread non-negativity).",
+      "name": "Call Price Second Strike-Derivative",
+      "description": "Stated as the K-derivative of the call's strike sensitivity: ∂/∂K(−e^{-rτ}·Φ(d_2)) = e^{-rτ}·ϕ(d_2)/(K·σ·√τ). That −e^{-rτ}·Φ(d_2) is ∂_K bsV is mf-bsV-K-deriv; composed, this is ∂²_K bsV. Its sign — and with it convexity of the call price in strike, the butterfly-spread non-negativity — is not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.StrikeGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bsV_KK_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => -(Real.exp (-(r * τ)) *\n        MathFin.Phi (MathFin.bsd2 S k r σ τ)))\n      (Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ)) K :=\n  MathFin.hasDerivAt_bsV_KK hS hσ hK hτ\n"
@@ -2419,8 +2419,8 @@
     },
     {
       "id": "mf-bsP-KK-deriv",
-      "name": "Put Price Convexity in Strike",
-      "description": "∂²_K bsP = e^{-rτ}·ϕ(d_2)/(K·σ·√τ) — same as call convexity in K, since put and call differ by a function linear in K.",
+      "name": "Put Price Second Strike-Derivative",
+      "description": "Stated as the K-derivative of the put's strike sensitivity: ∂/∂K(e^{-rτ}·Φ(−d_2)) = e^{-rτ}·ϕ(d_2)/(K·σ·√τ). That e^{-rτ}·Φ(−d_2) is ∂_K bsP is mf-bsP-K-deriv; composed, this is ∂²_K bsP — the same as the call's, since put and call differ by a function linear in K.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.PutStrikeConvexity\n\nopen ProbabilityTheory MathFin\n\ntheorem bsP_KK_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => Real.exp (-(r * τ)) * MathFin.Phi (-MathFin.bsd2 S k r σ τ))\n      (Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ)) K :=\n  MathFin.hasDerivAt_bsP_KK hS hσ hK hτ\n"
@@ -2579,7 +2579,7 @@
     },
     {
       "id": "mf-macaulay-modified-discrete",
-      "name": "Modified Duration equals Macaulay Duration divided by (1+y)",
+      "name": "Modified Duration Numerator = Macaulay Numerator / (1+y)",
       "description": "Under discrete annual compounding (1 + y ≠ 0), the modified duration numerator equals the Macaulay duration numerator divided by (1+y). This is the algebraic core of the price-sensitivity identity -dP/dy = D_mod · P with D_mod = D_mac / (1+y); that derivative identity is not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
@@ -2659,8 +2659,8 @@
     },
     {
       "id": "mf-breeden-litzenberger",
-      "name": "Breeden-Litzenberger: Implied Risk-Neutral PDF from Option Prices",
-      "description": "The second strike-derivative of the BS call equals the discounted lognormal PDF: ∂²_K bsV(K) = e^{-rT} · ϕ(d_2)/(K σ √T), which is the risk-neutral PDF of S_T at K times the discount factor.",
+      "name": "Breeden-Litzenberger under Black-Scholes: Second Strike-Derivative of the Call",
+      "description": "Breeden-Litzenberger under Black-Scholes, stated as the K-derivative of the call's strike sensitivity: ∂/∂K(−e^{-rT}·Φ(d_2)) = e^{-rT} · ϕ(d_2)/(K σ √T), the discounted lognormal density with risk-neutral parameters at K (lognormalTerminalPDF). That −e^{-rT}·Φ(d_2) is ∂_K bsV is mf-bsV-K-deriv; composed, this is ∂²_K bsV. That the density is the law of S_T under the pricing measure is not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.BreedenLitzenberger\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem breedenLitzenberger_thm {S_0 r σ : ℝ} (hS : 0 < S_0) (hσ : 0 < σ)\n    {K T : ℝ} (hK : 0 < K) (hT : 0 < T) :\n    HasDerivAt (fun k => -(Real.exp (-(r * T)) * Phi (bsd2 S_0 k r σ T)))\n      (Real.exp (-(r * T)) * MathFin.lognormalTerminalPDF S_0 r σ T K) K :=\n  MathFin.breedenLitzenberger hS hσ hK hT\n"
@@ -2820,10 +2820,10 @@
     {
       "id": "mf-herfindahl-cauchy-schwarz",
       "name": "Herfindahl-Hirschman Index Lower Bound by Cauchy-Schwarz",
-      "description": "Under the unit-budget constraint Σ w_i = 1 on a nonempty index set s, the Cauchy-Schwarz inequality gives HHI = Σ w_i² ≥ 1/n where n = card s. The equality case (equal weights) is not part of this entry's statement.",
+      "description": "Under the unit-budget constraint Σ w_i = 1, which forces the index set s to be nonempty, the Cauchy-Schwarz inequality gives HHI = Σ w_i² ≥ 1/n where n = card s. The equality case (equal weights) is not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.Concentration\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem herfindahl_card_inv_le_of_sum_one_thm {ι : Type*}\n    (s : Finset ι) (w : ι → ℝ) (hs : s.Nonempty) (h_sum : ∑ i ∈ s, w i = 1) :\n    (s.card : ℝ)⁻¹ ≤ MathFin.herfindahl s w :=\n  MathFin.herfindahl_card_inv_le_of_sum_one s w hs h_sum\n"
+        "lean": "import MathFin.RiskMeasures.Concentration\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem herfindahl_card_inv_le_of_sum_one_thm {ι : Type*}\n    (s : Finset ι) (w : ι → ℝ) (h_sum : ∑ i ∈ s, w i = 1) :\n    (s.card : ℝ)⁻¹ ≤ MathFin.herfindahl s w :=\n  MathFin.herfindahl_card_inv_le_of_sum_one s w h_sum\n"
       },
       "metadata": {
         "chapter": 13,
@@ -2883,7 +2883,7 @@
     },
     {
       "id": "mf-merton-1973-no-early-exercise",
-      "name": "Merton 1973: American = European for Non-Dividend Call",
+      "name": "Merton 1973: European Call Strictly Exceeds Immediate Exercise (No Dividends)",
       "description": "Under the Black–Scholes lognormal hypothesis and a positive interest rate r > 0, the European call value strictly exceeds the immediate-exercise payoff: bsV > S₀ − K. This strict dominance is Merton's (1973) reason that early exercise of a non-dividend-paying American call is never optimal; the American-equals-European conclusion itself is not formalized in this entry.",
       "domain": "mathematical_finance",
       "code": {
@@ -3156,7 +3156,7 @@
     {
       "id": "mf-almgren-chriss-EL",
       "name": "Almgren-Chriss Trajectory Satisfies EL Equation",
-      "description": "The closed-form Almgren-Chriss optimal-execution trajectory X(t) = X_0 · sinh(κ(T-t))/sinh(κT) satisfies the Euler-Lagrange equation X''(t) = κ² · X(t).",
+      "description": "The closed-form Almgren-Chriss optimal-execution trajectory X(t) = X_0 · sinh(κ(T-t))/sinh(κT), for sinh(κT) ≠ 0, satisfies the Euler-Lagrange equation X''(t) = κ² · X(t), stated as the t-derivative of X'(t) = −X_0·κ·cosh(κ(T-t))/sinh(κT). That this expression is X' is hasDerivAt_almgrenChrissPath in the source module.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Foundations.AlmgrenChriss\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem almgrenChrissPath_satisfies_EL_thm (X_0 κ T : ℝ)\n    (hT : Real.sinh (κ * T) ≠ 0) (t : ℝ) :\n    HasDerivAt (fun s : ℝ =>\n        -(X_0 * κ * Real.cosh (κ * (T - s)) / Real.sinh (κ * T)))\n      (κ^2 * MathFin.almgrenChrissPath X_0 κ T t) t :=\n  MathFin.almgrenChrissPath_satisfies_EL X_0 κ T hT t\n"
@@ -3317,7 +3317,7 @@
       "description": "The worst-case loss maxᵢ(-Xᵢ) is the least upper bound of expected loss over the entire probability simplex — the ADEH representation made concrete on a recognisable risk measure. Its coherence is a separate theorem (worstCase_isCoherent) and not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.WorstCaseRisk\n\nopen scoped BigOperators\n\n/-- **Worst-case loss = sup of expected loss over the probability simplex.** The most conservative\n    coherent risk measure `worstCase X = maxᵢ (-Xᵢ)` is a concrete `IsCoherentRisk`, and its ADEH\n    representation (Task 1.3) specialises to the supremum over the entire probability simplex.\n    Re-exports `MathFin.worstCase_isLUB`. -/\ntheorem worstcase_risk_representation {ι : Type*} [Fintype ι] [Nonempty ι] (X : ι → ℝ) :\n    IsLUB ((fun q => ∑ i, q i * (- X i)) '' stdSimplex ℝ ι) (MathFin.worstCase X) :=\n  MathFin.worstCase_isLUB X\n"
+        "lean": "import MathFin.RiskMeasures.WorstCaseRisk\n\nopen scoped BigOperators\n\n/-- **Worst-case loss = sup of expected loss over the probability simplex.** The worst-case\n    loss `worstCase X = maxᵢ (-Xᵢ)` is the least upper bound of expected loss over the entire\n    probability simplex — the ADEH representation made concrete. Its coherence is\n    `MathFin.worstCase_isCoherent`, not restated here. Re-exports `MathFin.worstCase_isLUB`. -/\ntheorem worstcase_risk_representation {ι : Type*} [Fintype ι] [Nonempty ι] (X : ι → ℝ) :\n    IsLUB ((fun q => ∑ i, q i * (- X i)) '' stdSimplex ℝ ι) (MathFin.worstCase X) :=\n  MathFin.worstCase_isLUB X\n"
       },
       "metadata": {
         "chapter": 14,
@@ -3413,7 +3413,7 @@
       "description": "On an arbitrary probability space, for a ℝᵈ-valued discounted excess return Y, no arbitrage ⟺ there is an equivalent martingale measure Q ~ P with Y integrable and E_Q[Y] = 0 ∈ ℝᵈ — with no non-redundancy hypothesis. The backward direction is an explicit logistic-tilt construction (the softplus analogue of the Esscher measure, not the Esscher measure itself): minimise the smooth convex potential θ ↦ E[log(1 + exp⟪θ,Y⟫)]. The potential is constant along the gains kernel N = {θ : ⟪θ,Y⟫ = 0 a.e.} and coercive on its orthogonal complement Nᗮ, so a minimiser on Nᗮ is automatically global (redundant directions absorbed); its first-order condition E[Y·σ⟪θ₀,Y⟫] = 0 (σ logistic) yields a strictly-positive bounded density.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.FTAPOnePeriodVector\n\nopen MeasureTheory\n\n/-- **d-asset one-period FTAP** (Föllmer–Schied 1.6, full). For a measurable\n    `ℝᵈ`-valued discounted excess return `Y` on an arbitrary probability space and\n    constant portfolios `θ ∈ ℝᵈ`, no arbitrage holds iff there is an equivalent martingale\n    measure `Q ~ P` with `Y` integrable and `E_Q[Y] = 0` — with **no non-redundancy\n    hypothesis** (redundant assets are absorbed by minimising the potential over the gains\n    kernel's orthogonal complement). Backward: the explicit Esscher / minimal-divergence\n    EMM from minimising `θ ↦ E[log(1+exp⟪θ,Y⟫)]`. Re-exports\n    `MathFin.OnePeriodVector.ftap_one_period_vector` at `F = EuclideanSpace ℝ (Fin d)`. -/\ntheorem ftap_one_period_vector_market {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (P : Measure Ω) [IsProbabilityMeasure P] {d : ℕ} (Y : Ω → EuclideanSpace ℝ (Fin d))\n    (hY : Measurable Y) :\n    MathFin.OnePeriodVector.NoArbitrage P Y ↔ ∃ Q, MathFin.OnePeriodVector.IsEMM P Y Q :=\n  MathFin.OnePeriodVector.ftap_one_period_vector P Y hY"
+        "lean": "import MathFin.Foundations.FTAPOnePeriodVector\n\nopen MeasureTheory\n\n/-- **d-asset one-period FTAP** (Föllmer–Schied 1.6, full). For a measurable\n    `ℝᵈ`-valued discounted excess return `Y` on an arbitrary probability space and\n    constant portfolios `θ ∈ ℝᵈ`, no arbitrage holds iff there is an equivalent martingale\n    measure `Q ~ P` with `Y` integrable and `E_Q[Y] = 0` — with **no non-redundancy\n    hypothesis** (redundant assets are absorbed by minimising the potential over the gains\n    kernel's orthogonal complement). Backward: an explicit logistic-tilt EMM (the softplus\n    analogue of the Esscher measure) from minimising `θ ↦ E[log(1+exp⟪θ,Y⟫)]`. Re-exports\n    `MathFin.OnePeriodVector.ftap_one_period_vector` at `F = EuclideanSpace ℝ (Fin d)`. -/\ntheorem ftap_one_period_vector_market {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (P : Measure Ω) [IsProbabilityMeasure P] {d : ℕ} (Y : Ω → EuclideanSpace ℝ (Fin d))\n    (hY : Measurable Y) :\n    MathFin.OnePeriodVector.NoArbitrage P Y ↔ ∃ Q, MathFin.OnePeriodVector.IsEMM P Y Q :=\n  MathFin.OnePeriodVector.ftap_one_period_vector P Y hY"
       },
       "metadata": {
         "chapter": 14,
@@ -3489,11 +3489,11 @@
     },
     {
       "id": "mf-kelly-numeraire-emm",
-      "name": "Kelly Numéraire Portfolio ⟹ EMM (Price Invariance, discrete)",
+      "name": "Kelly Numéraire Deflator Makes the Bet Fair (Discrete, Two-Outcome)",
       "description": "In the two-outcome bet (win probability 0 < p < 1, odds b > 0), deflate the physical probabilities by the growth-optimal (Kelly) terminal wealth W*₊ = 1 + f*·b, W*₋ = 1 − f*, where f* = (p·b − (1 − p))/b is the Kelly fraction. The deflated weights q₊ = p/W*₊ and q₋ = (1 − p)/W*₋ give the bet zero expected return: q₊·b + q₋·(−1) = 0. This is the martingale half of the discrete numéraire-portfolio ⟹ EMM identity; the closed forms q₊ = 1/(b+1), q₋ = b/(b+1), their independence of p, and their summing to 1 (which makes q a probability) are not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Performance.KellyNumeraire\n\nopen MathFin\n\n/-- **The Kelly (growth-optimal) portfolio as numéraire induces the risk-neutral\nmeasure.** In the two-outcome market (bet at fraction `f` pays odds `b` with physical\nprobability `p`), deflate the physical measure by the growth-optimal terminal wealth\n`W*₊ = 1 + f*·b`, `W*₋ = 1 - f*` at the Kelly fraction `f* = kellyFraction p b`. The\nresulting probabilities `q₊ = p/W*₊`, `q₋ = (1-p)/W*₋` make the bet a martingale — zero\nexpected excess return `q₊·b + q₋·(-1) = 0` — i.e. the GOP-deflated measure is the EMM.\nThe discrete numéraire-portfolio ⟹ EMM identity. Re-exports\n`MathFin.kellyNumeraire_isRiskNeutral`. -/\ntheorem kelly_numeraire_isRiskNeutral {p b : ℝ} (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    p / (1 + kellyFraction p b * b) * b\n      + (1 - p) / (1 - kellyFraction p b) * (-1) = 0 :=\n  MathFin.kellyNumeraire_isRiskNeutral hp hp1 hb\n"
+        "lean": "import MathFin.Performance.KellyNumeraire\n\nopen MathFin\n\n/-- **Deflating by the Kelly (growth-optimal) wealth makes the bet fair.** In the\ntwo-outcome market (bet at fraction `f` pays odds `b` with physical\nprobability `p`), deflate the physical measure by the growth-optimal terminal wealth\n`W*₊ = 1 + f*·b`, `W*₋ = 1 - f*` at the Kelly fraction `f* = kellyFraction p b`. The\nresulting probabilities `q₊ = p/W*₊`, `q₋ = (1-p)/W*₋` give the bet zero\nexpected excess return, `q₊·b + q₋·(-1) = 0`: the martingale half of the discrete\nnuméraire-portfolio ⟹ EMM identity (that `q₊ + q₋ = 1` is not stated here). Re-exports\n`MathFin.kellyNumeraire_isRiskNeutral`. -/\ntheorem kelly_numeraire_isRiskNeutral {p b : ℝ} (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    p / (1 + kellyFraction p b * b) * b\n      + (1 - p) / (1 - kellyFraction p b) * (-1) = 0 :=\n  MathFin.kellyNumeraire_isRiskNeutral hp hp1 hb\n"
       },
       "metadata": {
         "chapter": 10,
@@ -3771,7 +3771,7 @@
     },
     {
       "id": "mf-fixedincome-swap",
-      "name": "Formalize the vanilla interest-rate swap value and par swap rate S = (P(0,T₀)−P(0,Tₙ))/(δ·Σ P(0,Tᵢ))",
+      "name": "Vanilla Interest-Rate Swap: Zero Value iff Par Swap Rate",
       "description": "Vanilla interest-rate swap: annuity, payer-swap value, par swap rate, and the par identity over the zcb curve.",
       "domain": "mathematical_finance",
       "code": {
@@ -3853,7 +3853,7 @@
     },
     {
       "id": "mf-performance-gain_to_pain",
-      "name": "Add the gain-to-pain ratio and prove it is nonnegative",
+      "name": "Gain-to-Pain Ratio is Nonnegative",
       "description": "The gain-to-pain ratio, total gains over total losses on a finite period set, is nonnegative — unconditionally.",
       "domain": "mathematical_finance",
       "code": {
@@ -3908,10 +3908,10 @@
     {
       "id": "mf-bs-speed",
       "name": "BS Speed (∂³V/∂S³)",
-      "description": "BS speed ∂³V/∂S³ = ∂Γ/∂S = -ϕ(d₁)(d₁ + σ√τ)/(S² σ² τ), one quotient rule on the gamma expression ϕ(d₁)/(S σ √τ).",
+      "description": "BS speed, stated as the S-derivative of the gamma expression: ∂/∂S (ϕ(d₁)/(S σ √τ)) = -ϕ(d₁)(d₁ + σ√τ)/(S² σ² τ), one quotient rule. The gamma expression is the S-derivative of the delta Φ(d₁) (the gamma leg of sc-bs-pde, whose delta leg is ∂V/∂S = Φ(d₁)), so this is ∂³V/∂S³ by composing three results, not one theorem.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\n/-- BS speed: the third spot derivative of the call, i.e. the spot derivative of gamma. -/\ntheorem mf_bs_speed {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => gaussianPDFReal 0 1 (bsd1 s K r σ τ) / (s * σ * Real.sqrt τ))\n      (-(gaussianPDFReal 0 1 (bsd1 S K r σ τ) * (bsd1 S K r σ τ + σ * Real.sqrt τ)\n        / (S ^ 2 * σ ^ 2 * τ))) S :=\n  MathFin.hasDerivAt_bsV_SSS hK hσ hS hτ\n"
+        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\n/-- BS speed, stated as the spot derivative of the gamma expression `ϕ(d₁)/(S σ √τ)`;\n    with the delta and gamma legs of `sc-bs-pde` it is the third spot derivative of the\n    call. -/\ntheorem mf_bs_speed {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => gaussianPDFReal 0 1 (bsd1 s K r σ τ) / (s * σ * Real.sqrt τ))\n      (-(gaussianPDFReal 0 1 (bsd1 S K r σ τ) * (bsd1 S K r σ τ + σ * Real.sqrt τ)\n        / (S ^ 2 * σ ^ 2 * τ))) S :=\n  MathFin.hasDerivAt_bsV_SSS hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -3924,7 +3924,7 @@
     {
       "id": "mf-black76-speed",
       "name": "Black-76 Speed",
-      "description": "Black-76 speed ∂³_F V_B = e^{-rT}·(-ϕ(d₁)(d₁ + σ√T)/(F² σ² T)): the discount factor is F-independent, so it rides through as a constant multiplier on the zero-drift BS speed.",
+      "description": "Black-76 speed, stated as the F-derivative of the Black-76 gamma expression: ∂/∂F (e^{-rT}·ϕ(d₁)/(F σ √T)) = e^{-rT}·(-ϕ(d₁)(d₁ + σ√T)/(F² σ² T)): the discount factor is F-independent, so it rides through as a constant multiplier on the zero-drift BS speed. With mf-black76-delta and mf-black76-gamma, this is ∂³_F V_B by composition.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Futures.Black76Greeks\n\nopen MathFin ProbabilityTheory\n\n/-- Black-76 speed: the zero-drift BS speed carried through the discount factor. -/\ntheorem mf_black76_speed {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun f => Real.exp (-(r * T)) *\n        (gaussianPDFReal 0 1 (bsd1 f K 0 σ T) / (f * σ * Real.sqrt T)))\n      (Real.exp (-(r * T)) * -(gaussianPDFReal 0 1 (bsd1 F K 0 σ T) *\n        (bsd1 F K 0 σ T + σ * Real.sqrt T) / (F ^ 2 * σ ^ 2 * T))) F :=\n  MathFin.hasDerivAt_blackV_FFF hK hσ r hF hT\n"

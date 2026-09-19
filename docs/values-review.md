@@ -86,13 +86,24 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   corpus, cached, and `--since <rev>` restricts it to what changed). Read its
   top 15 before the lenses and fix what is real. It ranks; it does not
   certify. Measured on 2026-09-18 against the corpus before that day's
-  corrections, 16 of the 27 entries it scored above 0.7 were genuine
-  mismatches, 2 borderline and 9 false alarms — descriptions that narrate the
-  proof, definitions that share a short name across namespaces (its index keys
-  on it), faithful restatements. Its blind spot is a conclusion assumed as a
+  corrections, 16 of the 23 entries it scored above 0.7 were genuine
+  mismatches, 2 borderline and 5 false alarms — descriptions that narrate the
+  proof, and faithful restatements. Its blind spot is a conclusion assumed as a
   structure field, which reads as faithful because the text matches; the
   `reduced_core` gate covers that class. **Retire it** the first review whose top 15 contains nothing real in
   the work since the previous review, and say so in that review's block.
+  **Derivatives of an explicit expression.** An entry whose statement
+  differentiates an explicit lower-order expression — a delta `Φ(d₁)`, a vega
+  `S·ϕ(d₁)·√τ`, a strike sensitivity — says so ("stated as the S-derivative of
+  …") and cites what identifies that expression with the lower-order
+  derivative: a corpus entry or a library lemma. It may name the higher
+  derivative as that composition, never as though one theorem stated it.
+  `sc-bs-pde-feynman-kac` shows the upgrade that retires this rule: state the
+  genuine higher derivative with `deriv`.
+  **Names are labels, not claims.** An entry's `name` may label the result it
+  targets; it may not assert a property the entry does not deliver
+  ("Existence and Uniqueness" on a uniqueness entry, "Convexity" where only a
+  second derivative is stated).
 - **Record**: append a review block below, headed
   `## YYYY-MM-DD — corpus <N> — <one-line title>` (the freshness test parses
   the date and the `corpus <N>` count anywhere in the heading; a
@@ -3237,6 +3248,71 @@ characterization is nowhere claimed.
 3. *(nit, accepted)* the rfl-tripwire's tail regex is documented
    "good enough" in-file; a Lean-aware scanner is not worth its weight while
    the catch rate is this good (1 for 1 on first run).
+
+## 2026-09-18 — corpus 372 — the backlog round: the Greeks rule, names that assert, and a dropped guard
+
+Executed against the ranked backlog of the block below, in its order: items 1–5 landed, item 6
+belongs to the next review. Single reviewer; no agent panel.
+
+### Upgrades executed
+
+1. **The Greeks rule, decided once and applied across the family.** Seventeen entries — every
+   gamma, vanna, volga, charm and speed, the two strike second-derivatives, Breeden–Litzenberger,
+   the bond second derivative, Almgren–Chriss and `sc-bs-pde` — differentiate an explicit
+   lower-order expression while their descriptions named the higher derivative of the price. The
+   rule, now in the protocol: say what is differentiated, cite the entry or lemma that identifies
+   the expression, and name the higher derivative only as that composition. Every member had a
+   citable source. Reading them turned up two claims beyond the derivative:
+   `mf-bsV-KK-deriv` asserted `≥ 0` and convexity in strike, neither stated, and
+   `mf-breeden-litzenberger` called a formula definition "the risk-neutral PDF of S_T". The
+   module lemma `hasDerivAt_bsV_SS` has the same shape — named for `∂²V/∂S²`, stating
+   `∂_S Φ(d₁)` — so the Lean upgrade belongs at the source (backlog 1).
+2. **`herfindahl_card_inv_le_of_sum_one` drops `s.Nonempty`.** The budget `∑ w = 1` forces it
+   (`Finset.nonempty_of_sum_ne_zero`), and the corpus signature follows: the spurious-guard class
+   of 2026-07-31, in library code this time.
+3. **Snippet docstrings, the same reading.** Of the 58 entries touched in these two rounds, 26
+   carry docstrings and 17 needed the correction their descriptions had. The structure
+   specifications' were the worst: `gir-thm-9.1.7`'s promised "a progressively measurable
+   integrand θ … and a witness that the Doléans–Dade exponential … is a true martingale" with no θ
+   in the structure; `sc-thm-9.1.8`'s called a mean-one density "the Doléans–Dade exponential of
+   θ · B"; `sc-thm-9.1.1`'s called an expected squared-increment limit "⟨X⟩_t = t". Each now says
+   it is a statement-level specification, and every conclusion field reads "the textbook
+   conclusion, assumed".
+4. **Names that assert.** Thirteen renamed, found by pointing the sweep at the 98 names that make
+   a claim and reading the top of its ranking. `sc-thm-8.2.5` was still "Existence and Uniqueness
+   of SDE Solutions" six weeks after its description was narrowed to uniqueness; "American =
+   European", "Continuous Local Martingale", "iid Exponential", "Convexity in Strike", "⟹ EMM"
+   and "L2 Martingale" each asserted more than the statement; two autoformalized entries were
+   still named after the issues that seeded them ("Add the gain-to-pain ratio and prove it is
+   nonnegative"). The rule — names are labels, not claims — is now in the protocol.
+5. **The sweep's short-name collisions.** Definitions are indexed by qualified name, resolved
+   through the snippet's `open`s, and skipped when still ambiguous: a wrong definition misleads
+   more than a missing one. The question also learned the Greeks rule — a conclusion attributed
+   to composing with a named entry or lemma is a citation — without which five of the rewritten
+   Greeks read as overclaims. Re-measured: 16 of 17 labeled pairs ordered correctly and none of
+   the 17 fixes above 0.5; on the corpus at `4eaa424`, 16 of the 23 entries above 0.7 genuine.
+
+Also: `markov_chains.json` stores `\u`-escaped JSON, and the previous round wrote five
+descriptions into it as raw unicode; re-escaped. And `ledger-sweep.yml` gained a `scope: stale`
+dispatch input, because this round's 18 restaled rows had to be re-verified on runners — the one
+local Lean slot was held by two other sessions throughout.
+
+### Ranked backlog
+
+| rank | item | owner |
+|---|---|---|
+| 1 | **The Greeks upgrade in Lean.** One congruence lemma — `HasDerivAt f (g y) y` for `y` near `x` and `HasDerivAt g g' x` give `HasDerivAt (deriv f) g' x` — then restate the 17 family entries, and `hasDerivAt_bsV_SS` at the source, as genuine higher derivatives, as `sc-bs-pde-feynman-kac` already does. Retires the rule above | unassigned |
+| 2 | The sweep reads `description` only, so the docstring reading of item 3 covered the 58 entries touched here, not the other 314 snippets. Point it at docstrings (one more state field) and run it once | unassigned |
+| 3 | Keep or retire the sweep at the next review, by the protocol's rule | next reviewer |
+
+### Evidence/context
+
+Mechanical floor: `pytest` 59/59 in-container. No Lean ran locally: the lemma names in the new
+`herfindahl` proof were confirmed against the pinned Mathlib sources, and the 18 restaled rows
+are re-verified on runners by `ledger-sweep.yml` (`scope: stale`), whose shards also build the
+library — the bot's ledger commit on this branch is the record. Sweep, final state: 372 scored,
+5 above 0.7, all read as false alarms (three narrate the proof; `bm-def-5.1.1` is a definition
+entry and `mf-bull-call-spread-payoff-le` restates its payoff inequality).
 
 ## 2026-09-18 — corpus 372 — the standing first pass, machine-ranked: every `reduced_core` description now says what it is
 

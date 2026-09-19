@@ -22,7 +22,9 @@ name: ledger sweep
 # Triggering: pin-file PRs (a bump is exactly when the whole corpus restales)
 # plus manual dispatch. It is deliberately NOT on every PR — an ordinary proof
 # change restales a handful of entries, which the local daemon path handles in
-# minutes.
+# minutes. When that path is unavailable (the one local Lean slot is taken), a
+# manual dispatch with `scope: stale` re-verifies just those entries here;
+# `scope: all` (the default, and what pin-file PRs get) re-verifies everything.
 #
 # Loop safety: the merge job pushes a commit to the PR branch, which re-triggers
 # this workflow (the PR's diff still touches the pin files). That second run
@@ -37,6 +39,12 @@ on:
       - 'lakefile.lean'
       - 'lake-manifest.json'
   workflow_dispatch:
+    inputs:
+      scope:
+        description: "all = re-verify every entry (a pin bump); stale = only entries whose inputs changed"
+        type: choice
+        options: [all, stale]
+        default: all
 
 concurrency:
   group: ledger-sweep-${{ github.ref }}
@@ -93,8 +101,9 @@ jobs:
       - name: Verify this shard
         env:
           LEDGER_EXEC_LOCAL: "1"
+          SCOPE: ${{ inputs.scope || 'all' }}
         run: |
-          python3 -m tools.verify.ledger verify --all --exec \
+          python3 -m tools.verify.ledger verify "--${SCOPE}" --exec \
             --shard "${{ matrix.shard }}/12" \
             --fragment "fragment-${{ matrix.shard }}.json" \
             --timeout 600
@@ -145,6 +154,8 @@ jobs:
             || echo "fresh=false" >> "$GITHUB_OUTPUT"
 
       - name: Commit
+        env:
+          SCOPE: ${{ inputs.scope || 'all' }}
         run: |
           if git diff --quiet -- verification_ledger.json; then
             echo "ledger unchanged — nothing to commit"; exit 0
@@ -152,9 +163,15 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add verification_ledger.json
-          git commit \
-            -m "chore(ledger): re-verify the corpus at the new pin" \
-            -m "Sharded 'ledger verify --all --exec' sweep on runners (ledger-sweep.yml). Every row here is a snippet re-elaborated against the new pin, not a rehash — 'rebase-pins' is not valid after a substantive pin bump."
+          if [ "$SCOPE" = stale ]; then
+            git commit \
+              -m "chore(ledger): re-verify the entries whose inputs changed" \
+              -m "Sharded 'ledger verify --stale --exec' on runners (ledger-sweep.yml, scope: stale). Every row here is a snippet re-elaborated against its changed inputs, not a rehash."
+          else
+            git commit \
+              -m "chore(ledger): re-verify the corpus at the new pin" \
+              -m "Sharded 'ledger verify --all --exec' sweep on runners (ledger-sweep.yml). Every row here is a snippet re-elaborated against the new pin, not a rehash — 'rebase-pins' is not valid after a substantive pin bump."
+          fi
           git push
 
       # The sweep is only "done" if the ledger is actually fresh afterwards.

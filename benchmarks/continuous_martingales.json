@@ -47,7 +47,7 @@
     },
     {
       "id": "cm-thm-4.3.10",
-      "name": "L^p Continuous Martingale Convergence",
+      "name": "L^p-Bounded Right-Continuous Martingale: Convergence a.s. Along ℕ and in Measure",
       "description": "Theorem 4.3.10, DELIVERED form: a right-continuous martingale bounded in L^p (p > 1) converges a.s. along the integers to an integrable M_∞, and in measure in real time. The textbook statement's L^p-convergence half is not delivered.",
       "domain": "martingales",
       "code": {
