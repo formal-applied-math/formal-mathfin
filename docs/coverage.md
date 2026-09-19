@@ -783,9 +783,11 @@ prior corpus audit, not a verification of this addition.
 > instance `B_T = e^{rT}`, `B₀ = 1`, `N = S`, and `ExchangeOption.exchangeOption_numeraire_price` (entry
 > `mf-exchange-numeraire`, **`full`**) exhibits Margrabe's `S²`-numéraire valuation as the instance
 > `X =` exchange payoff, `N = S²`. (2) `Performance/KellyNumeraire.kellyNumeraire_isRiskNeutral` (entry
-> `mf-kelly-numeraire-emm`, **`full`**) delivers the *numéraire-portfolio ⟹ EMM* direction: the
-> growth-optimal (Kelly) wealth, used as deflator, turns the physical measure into the risk-neutral one
-> (`q₊·b + q₋·(−1) = 0`), the `p`-independence being exactly the Kelly first-order condition. **Honest
+> `mf-kelly-numeraire-emm`, **`full`**) delivers the martingale half of the *numéraire-portfolio ⟹ EMM*
+> direction: deflated by the growth-optimal (Kelly) wealth, the physical weights give the bet zero
+> expected return (`q₊·b + q₋·(−1) = 0`). The closed forms `q₊ = 1/(b+1)`, `q₋ = b/(b+1)`, their
+> `p`-independence (the Kelly first-order condition) and their summing to `1` are not in the entry's
+> statement, so `q` is not shown to be a probability measure. **Honest
 > scope:** the portfolio⟹EMM direction is the **discrete, two-outcome** market — the elementary shadow of
 > the **continuous** Long/Platen benchmark theorem (deflated prices are `P`-martingales, EMM density
 > `∝ 1/N*`), which still needs a state-price-density / market model absent from the Itô tower. Garman's
