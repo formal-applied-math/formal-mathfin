@@ -84,7 +84,7 @@ prior corpus audit, not a verification of this addition.
 > **Live status (2026-09-18):** corpus
 > **373**, **342 full + 18 wrappers = 360/373 delivery-ready**, 13 reduced cores, 0 placeholders.
 > Ledger 373 fresh / 0 stale / 0 missing; `lake build MathFin` and `lake lint` green, `pytest`
-> 57/57, `AxiomAuditGen` at 333 guards (243 curated). **Implied volatility by bisection** (above)
+> 59/59, `AxiomAuditGen` at 333 guards (243 curated). **Implied volatility by bisection** (above)
 > is the newest round; the **American put exercise-boundary geometry** and the **Glosten–Milgrom
 > spread** below precede it; the bracket
 > compensator, the conditional bracket, the unconditional one, the **contracts tower**, the

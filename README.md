@@ -109,7 +109,7 @@ See [`MathFin/Examples.lean`](MathFin/Examples.lean) for a curated tour.
 | library wrappers | 18 |
 | reduced cores (12 structure specifications, 1 special case) | 13 |
 | placeholders / sorries | **0** |
-| Lean modules · lines of Lean | 459 · ~82,800 |
+| Lean modules · lines of Lean | 459 · ~82,700 |
 | verification ledger | 373 fresh, 0 stale |
 | axioms used | `propext, Classical.choice, Quot.sound` only |
 | Lean / Mathlib / BrownianMotion | `v4.33.0-rc1` / `0434c033` / `314f04a`, pinned ([`lean-toolchain`](lean-toolchain), [`lake-manifest.json`](lake-manifest.json)) — a Lean **release candidate**, tracking BrownianMotion, which has not moved to a stable `v4.33.x` |
