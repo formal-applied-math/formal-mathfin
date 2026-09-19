@@ -16,15 +16,18 @@ For the two digital (binary) European options:
 * **Cash-or-nothing** call price `V_cash(S, τ) = e^{-rτ} Φ(d₂)`.
 * **Asset-or-nothing** call price `V_asset(S, τ) = S Φ(d₁)`.
 
-We derive their deltas and the asset-side gamma:
+We derive their deltas and gammas:
 
 * `hasDerivAt_bsCashDigital_S` — δ_cash = e^{-rτ} ϕ(d₂) / (S σ √τ).
 * `hasDerivAt_bsAssetDigital_S` — δ_asset = Φ(d₁) + ϕ(d₁) / (σ √τ).
-* `hasDerivAt_bsAssetDigital_SS` — γ_asset = -ϕ(d₁) · d₂ / (S σ² τ).
+* `hasDerivAt_deriv_bsAssetDigital_S` — γ_asset = -ϕ(d₁) · d₂ / (S σ² τ).
+* `hasDerivAt_deriv_bsCashDigital_S` — γ_cash = -e^{-rτ} ϕ(d₂) · d₁ / (S² σ² τ).
 
-(The latter follows from the BS magic identity `K e^{-rτ} ϕ(d₂) = S ϕ(d₁)`
-which collapses the `S · ϕ(d₁) · ∂_S d₁` chain-rule term, and uses the
-clean identity `σ√τ − d₁ = -d₂`.)
+(δ_asset is the product rule on `S · Φ(d₁(S))`, with
+`S · ϕ(d₁) · ∂_S d₁ = ϕ(d₁)/(σ√τ)`; γ_asset collapses via `σ√τ − d₁ = -d₂`, and
+γ_cash via `d₂ + σ√τ = d₁`. Each gamma differentiates its delta's formula
+(`hasDerivAt_bsAssetDigital_SS`, `hasDerivAt_bsCashDigital_SS`) before
+`hasDerivAt_deriv_of_eventually` makes it a statement about the price.)
 -/
 
 @[expose] public section
@@ -76,12 +79,14 @@ lemma hasDerivAt_bsAssetDigital_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   simp only [Function.comp_apply]
   field_simp
 
-/-- **Asset-or-nothing gamma**: `∂²V_asset/∂S² = -ϕ(d₁) · d₂ / (S σ² τ)`.
+/-- **The asset-or-nothing gamma formula**: the S-derivative of the delta
+`δ_asset = Φ(d₁) + ϕ(d₁)/(σ√τ)` is `-ϕ(d₁) · d₂ / (S σ² τ)`. The second derivative of the
+price itself is `hasDerivAt_deriv_bsAssetDigital_S`.
 
-Differentiating δ_asset = Φ(d₁) + ϕ(d₁)/(σ√τ): the Φ-term contributes
+Differentiating δ_asset: the Φ-term contributes
 `ϕ(d₁) · ∂_S d₁ = ϕ(d₁)/(Sσ√τ)`, and the ϕ-term contributes
 `-d₁ ϕ(d₁) · ∂_S d₁ / (σ√τ) = -d₁ ϕ(d₁)/(Sσ²τ)`. Sum via `σ√τ − d₁ = -d₂`. -/
-lemma hasDerivAt_bsAssetDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+private lemma hasDerivAt_bsAssetDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     HasDerivAt
       (fun s ↦ Phi (bsd1 s K r σ τ) +
@@ -106,6 +111,17 @@ lemma hasDerivAt_bsAssetDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   field_simp
   rw [show Real.sqrt τ ^ 2 = τ from h_sqrt_sq]
   ring
+
+/-- **Asset-or-nothing gamma**: `∂²V_asset/∂S² = -ϕ(d₁) · d₂ / (S σ² τ)`, for the price
+itself: `δ_asset` is `∂V_asset/∂S` on all of `S > 0` (`hasDerivAt_bsAssetDigital_S`), and its
+derivative is the gamma formula (`hasDerivAt_bsAssetDigital_SS`). -/
+theorem hasDerivAt_deriv_bsAssetDigital_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
+    HasDerivAt (deriv fun s ↦ bsAssetDigital K r σ s τ)
+      (-(gaussianPDFReal 0 1 (bsd1 S K r σ τ) * bsd2 S K r σ τ / (S * σ ^ 2 * τ))) S :=
+  hasDerivAt_deriv_of_eventually
+    ((eventually_gt_nhds hS).mono fun _ hs ↦ hasDerivAt_bsAssetDigital_S hK hσ hs hτ)
+    (hasDerivAt_bsAssetDigital_SS hK hσ hS hτ)
 
 /-- **Asset-or-nothing theta**: `∂_τ V_asset = S · ϕ(d₁) · ∂_τ d₁`.
 
@@ -226,15 +242,17 @@ lemma hasDerivAt_bsCashDigital_r (S K σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ :
   simp only [Function.comp_apply]
   ring
 
-/-- **Cash-or-nothing gamma**: `∂²V_cash/∂S² = -e^{-rτ} · ϕ(d₂) · d₁ / (S² σ² τ)`.
+/-- **The cash-or-nothing gamma formula**: the S-derivative of the delta
+`δ_cash(s) = e^{-rτ} · ϕ(d₂(s)) / (s · σ · √τ)` is `-e^{-rτ} · ϕ(d₂) · d₁ / (S² σ² τ)`. The
+second derivative of the price itself is `hasDerivAt_deriv_bsCashDigital_S`.
 
-Differentiating δ_cash(s) = `e^{-rτ} · ϕ(d₂(s)) / (s · σ · √τ)` as a quotient
+Differentiating δ_cash as a quotient
 `f(s)/g(s)` with `f(s) = e^{-rτ} · ϕ(d₂(s))` and `g(s) = s · σ · √τ`:
 * `f'(S) = e^{-rτ} · (-d₂ · ϕ(d₂)) · (1/(S σ √τ))`
 * `g'(S) = σ · √τ`
 * `(f/g)'(S) = (f' · g − f · g') / g²`
 * Numerator algebraically collapses via `d₂ + σ√τ = d₁`. -/
-lemma hasDerivAt_bsCashDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+private lemma hasDerivAt_bsCashDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     HasDerivAt
       (fun s ↦ Real.exp (-(r * τ)) *
@@ -267,5 +285,17 @@ lemma hasDerivAt_bsCashDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   field_simp
   rw [show Real.sqrt τ ^ 2 = τ from h_sqrt_sq]
   ring
+
+/-- **Cash-or-nothing gamma**: `∂²V_cash/∂S² = -e^{-rτ} · ϕ(d₂) · d₁ / (S² σ² τ)`, for the
+price itself: `δ_cash` is `∂V_cash/∂S` on all of `S > 0` (`hasDerivAt_bsCashDigital_S`), and
+its derivative is the gamma formula (`hasDerivAt_bsCashDigital_SS`). -/
+theorem hasDerivAt_deriv_bsCashDigital_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
+    HasDerivAt (deriv fun s ↦ bsCashDigital K r σ s τ)
+      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (bsd2 S K r σ τ) * bsd1 S K r σ τ /
+        (S ^ 2 * σ ^ 2 * τ))) S :=
+  hasDerivAt_deriv_of_eventually
+    ((eventually_gt_nhds hS).mono fun _ hs ↦ hasDerivAt_bsCashDigital_S hK hσ hs hτ)
+    (hasDerivAt_bsCashDigital_SS hK hσ hS hτ)
 
 end MathFin

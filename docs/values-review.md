@@ -92,14 +92,19 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   structure field, which reads as faithful because the text matches; the
   `reduced_core` gate covers that class. **Retire it** the first review whose top 15 contains nothing real in
   the work since the previous review, and say so in that review's block.
-  **Derivatives of an explicit expression.** An entry whose statement
-  differentiates an explicit lower-order expression — a delta `Φ(d₁)`, a vega
-  `S·ϕ(d₁)·√τ`, a strike sensitivity — says so ("stated as the S-derivative of
-  …") and cites what identifies that expression with the lower-order
-  derivative: a corpus entry or a library lemma. It may name the higher
-  derivative as that composition, never as though one theorem stated it.
-  `sc-bs-pde-feynman-kac` shows the upgrade that retires this rule: state the
-  genuine higher derivative with `deriv`.
+  **Higher derivatives are stated with `deriv`.** An entry named for a
+  higher-order sensitivity states it for the price itself:
+  `HasDerivAt (deriv V) …`, or `s ↦ deriv (V s) y` for a mixed partial. It does
+  not state the derivative of an explicit lower-order formula such as a delta
+  `Φ(d₁)` or a vega `S·ϕ(d₁)·√τ`. `hasDerivAt_deriv_of_eventually`, or
+  `hasDerivAt_deriv_param_of_eventually` for a mixed partial
+  (`Foundations/DerivOfDeriv.lean`), makes the formula-level result a
+  statement about the price, once the formula is shown to be the lower
+  derivative near the point. The Greeks family has stated genuine higher derivatives since
+  2026-09-18. An entry that still differentiates a formula says so in its
+  description ("stated as the S-derivative of …"). It cites the entry or lemma
+  that identifies the formula with the lower-order derivative, and it never
+  names the higher derivative as though one theorem stated it.
   **Names are labels, not claims.** An entry's `name` may label the result it
   targets; it may not assert a property the entry does not deliver
   ("Existence and Uniqueness" on a uniqueness entry, "Convexity" where only a

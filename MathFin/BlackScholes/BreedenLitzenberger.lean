@@ -20,39 +20,44 @@ strike-derivative of the European call price:
   `f_{S_T}(K) = e^{rT} · ∂²_K C(K)`.
 
 Specialising to the BS model: `∂²_K bsV = e^{-rT} · ϕ(d_2)/(K σ √T)`
-(`hasDerivAt_bsV_KK` in `StrikeGreeks.lean`), so
+(`hasDerivAt_deriv_bsV_K` in `StrikeGreeks.lean`), so
 
   `f_{S_T}(K) = ϕ(d_2(K)) / (K σ √T)`,
 
 which is the lognormal density at `K` (parameters
-`log S_0 + (r − σ²/2)T, σ² T`).
+`log S_0 + (r − σ²/2)T, σ² T`). This file defines `lognormalTerminalPDF` as that
+formula. It proves neither that `S_T` has it as its density nor, beyond the
+differential identity at the end, that it integrates to 1.
 
 ## Structural connection: PDF positivity = strike-convexity of the price
 
 The non-negativity `0 ≤ f_{S_T}(K)` is *not* an independent fact. It is the
-infinitesimal manifestation of the convexity chain that runs through this
-library:
+infinitesimal manifestation of a convexity chain:
 
 1. The call **payoff** is convex in `K` (`convexOn_call_payoff` in
    `StrikeConvexity.lean`).
-2. Risk-neutral expectation preserves convexity (positive linear operator).
+2. Risk-neutral expectation preserves convexity: integration against a positive
+   measure does (the finite-state form is `callPrice_finiteState_convexOn_K`).
 3. So the call **price** `K ↦ bsV K r σ S T` is convex in `K`.
 4. So `∂²_K bsV ≥ 0`.
 5. By Breeden-Litzenberger, `∂²_K bsV = e^{-rT} · f_{S_T}(K)`, so
    `f_{S_T}(K) ≥ 0`.
 
-Steps 1, 4, 5 are formal lemmas in this library; steps 2-3 are conceptual
-(risk-neutral expectation preserving convexity is the Jensen-inequality
-direction for `E_Q`). The PDF positivity at step 5 is what
-`lognormalTerminalPDF_nonneg` below records.
+Step 1 is formal. Step 2 is not formalized for the lognormal law, so step 3 is
+proved instead by the second-derivative test (`bsV_strike_convexOn`), whose
+input is the sign of the closed form in step 4. In this library the chain is
+therefore a consistency loop, not an independent source of the sign. Steps
+3 → 4 → 5 are formal: `lognormalTerminalPDF_nonneg_via_strike_convexity`
+derives step 5 from step 3, and `lognormalTerminalPDF_nonneg` proves it
+directly.
 
 Results:
 
 * `lognormalTerminalPDF`: definition.
 * `breedenLitzenberger`: `∂²_K bsV(K) = e^{-rT} · lognormalTerminalPDF(K)`.
-* `lognormalTerminalPDF_nonneg`: `0 ≤ lognormalTerminalPDF`, the
-  infinitesimal face of payoff convexity (the discrete face is
-  `butterfly_payoff_nonneg`).
+* `lognormalTerminalPDF_nonneg`: `0 ≤ lognormalTerminalPDF`, directly.
+* `lognormalTerminalPDF_nonneg_via_strike_convexity`: the same, from the strike
+  convexity of the price.
 -/
 
 @[expose] public section
@@ -66,29 +71,19 @@ parameter: `f(K) = ϕ(d_2(K)) / (K · σ · √T)`. -/
 noncomputable def lognormalTerminalPDF (S_0 r σ T K : ℝ) : ℝ :=
   gaussianPDFReal 0 1 (bsd2 S_0 K r σ T) / (K * σ * Real.sqrt T)
 
-/-- **Breeden-Litzenberger formula** under the Black-Scholes model: the
-discounted PDF of `S_T` at `K` equals the second strike-derivative of the
-call price. Stated as the derivative of the first strike-derivative
-`-(e^{-rT}·Φ(d_2))` of `bsV`. -/
+/-- **Breeden-Litzenberger formula** under the Black-Scholes model: the second
+strike-derivative of the call price is the discounted lognormal density,
+`∂²C/∂K² = e^{-rT} · lognormalTerminalPDF(K)`. This is `hasDerivAt_deriv_bsV_K` with the value
+read as a density, since `lognormalTerminalPDF` unfolds to `ϕ(d₂) / (K σ √T)`. -/
 theorem breedenLitzenberger {S_0 r σ : ℝ} (hS : 0 < S_0) (hσ : 0 < σ)
     {K T : ℝ} (hK : 0 < K) (hT : 0 < T) :
-    HasDerivAt (fun k ↦ -(Real.exp (-(r * T)) * Phi (bsd2 S_0 k r σ T)))
-      (Real.exp (-(r * T)) * lognormalTerminalPDF S_0 r σ T K) K := by
-  have h := hasDerivAt_bsV_KK (S := S_0) (r := r) (σ := σ) hS hσ hK hT
-  convert h using 1
-  unfold lognormalTerminalPDF
-  have hK_ne : K ≠ 0 := hK.ne'
-  have hσ_ne : σ ≠ 0 := hσ.ne'
-  have hsqrtT_pos : 0 < Real.sqrt T := Real.sqrt_pos.mpr hT
-  have hsqrtT_ne : Real.sqrt T ≠ 0 := hsqrtT_pos.ne'
-  field_simp
+    HasDerivAt (deriv fun k ↦ bsV k r σ S_0 T)
+      (Real.exp (-(r * T)) * lognormalTerminalPDF S_0 r σ T K) K :=
+  (hasDerivAt_deriv_bsV_K hS hσ hK hT).congr_deriv (mul_div_assoc _ _ _)
 
-/-- **Implied PDF non-negativity** = *infinitesimal* face of call-payoff
-convexity in `K`. The same convexity that gives `butterfly_payoff_nonneg`
-discretely gives `0 ≤ ∂²_K bsV` infinitesimally, and Breeden-Litzenberger
-identifies this with `e^{-rT} · f_{S_T}(K)`. So `f_{S_T} ≥ 0` is the
-non-negativity of the implied probability density — as it must be, since
-it *is* a probability density. -/
+/-- **Implied PDF non-negativity**, directly: `ϕ ≥ 0` and `K σ √T > 0`. The route through the
+strike convexity of the price is `lognormalTerminalPDF_nonneg_via_strike_convexity`. That
+`lognormalTerminalPDF` is a probability density is not proved here. -/
 theorem lognormalTerminalPDF_nonneg
     {S_0 r σ T K : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     0 ≤ lognormalTerminalPDF S_0 r σ T K := by
@@ -104,81 +99,33 @@ theorem lognormalTerminalPDF_nonneg
 The proof of `lognormalTerminalPDF_nonneg` above uses direct positivity of the
 gaussian PDF (one-line). This section records the **structural derivation**
 through `bsV_strike_convexOn`, exhibiting PDF non-negativity as the
-infinitesimal face of the K-convexity principle.
-
-The bridge is the algebraic identity below: `∂²_K bsV K = e^{-rT} · PDF(K)`.
-Equivalent to the Breeden-Litzenberger statement `∂²_K V = e^{-rT} · f_{S_T}`
-in the BS world. Combined with `bsV_strike_convexOn ⟹ 0 ≤ ∂²_K bsV K`, it
-gives PDF non-negativity as a structural consequence of price-convexity. -/
-
-/-- **Algebraic identity bridging strike convexity to the implied PDF**:
-the second strike-derivative of the BS call price equals `e^{-rT}` times the
-lognormal terminal PDF. -/
-theorem deriv2_bsV_eq_exp_neg_rT_pdf
-    {S_0 r σ : ℝ} (hS₀ : 0 < S_0) (hσ : 0 < σ)
-    {K T : ℝ} (hK : 0 < K) (hT : 0 < T) :
-    deriv (deriv (fun K' ↦ bsV K' r σ S_0 T)) K =
-      Real.exp (-(r * T)) * lognormalTerminalPDF S_0 r σ T K := by
-  -- First identify deriv on Ioi 0 with the explicit closed form.
-  have h_ev : (fun K' ↦ deriv (fun k ↦ bsV k r σ S_0 T) K') =ᶠ[nhds K]
-      (fun K' ↦ -(Real.exp (-(r * T)) * Phi (bsd2 S_0 K' r σ T))) := by
-    filter_upwards [isOpen_Ioi.mem_nhds (Set.mem_Ioi.mpr hK)] with K' hK'
-    exact (hasDerivAt_bsV_K hS₀ hσ hK' hT).deriv
-  -- The explicit first derivative has the explicit second derivative.
-  have h_KK := hasDerivAt_bsV_KK (S := S_0) (r := r) (σ := σ) hS₀ hσ hK hT
-  -- Transport via eventually-eq to get HasDerivAt of (deriv bsV) at K.
-  have h := h_KK.congr_of_eventuallyEq h_ev
-  -- Conclude: deriv of (deriv bsV) at K equals the explicit second-derivative value.
-  rw [h.deriv]
-  -- Identify that value with exp(-rT) · lognormalTerminalPDF.
-  unfold lognormalTerminalPDF
-  have h_sqrtT_pos : 0 < Real.sqrt T := Real.sqrt_pos.mpr hT
-  have h_sqrtT_ne : Real.sqrt T ≠ 0 := h_sqrtT_pos.ne'
-  have hσ_ne : σ ≠ 0 := hσ.ne'
-  have hK_ne : K ≠ 0 := hK.ne'
-  field_simp
+infinitesimal face of the K-convexity principle: convexity makes
+`0 ≤ ∂²_K bsV` (`deriv_deriv_nonneg_of_convexOn`), and Breeden-Litzenberger
+identifies `∂²_K bsV` with `e^{-rT} · PDF(K)`. -/
 
 /-- **PDF non-negativity as a corollary of strike convexity** (structural
 derivation closing the three-scale loop).
 
 The derivation chain made explicit:
 
-1. `convexOn_call_payoff`: the payoff `K ↦ max(S − K, 0)` is convex in K.
-2. `bsV_strike_convexOn`: the BS call *price* is convex in K on `(0, ∞)`
-   (via second-derivative test).
-3. **Strike convexity ⟹ `0 ≤ ∂²_K bsV`** (via `ConvexOn.monotoneOn_deriv` +
-   the explicit first-derivative formula being decreasing — done here
-   directly via `hasDerivAt_bsV_KK`'s closed form).
-4. `deriv2_bsV_eq_exp_neg_rT_pdf` (above): `∂²_K bsV = e^{-rT} · PDF`.
-5. So `0 ≤ e^{-rT} · PDF`. Dividing by positive `e^{-rT}` gives the result.
+1. `bsV_strike_convexOn`: the BS call *price* is convex in K on `(0, ∞)`.
+2. `deriv_deriv_nonneg_of_convexOn`: so `0 ≤ ∂²_K bsV` there, since its strike
+   derivative is monotone (`ConvexOn.monotoneOn_deriv`).
+3. `breedenLitzenberger`: `∂²_K bsV = e^{-rT} · PDF`.
+4. So `0 ≤ e^{-rT} · PDF`. Dividing by positive `e^{-rT}` gives the result.
 
 The complementary `lognormalTerminalPDF_nonneg` proof above is shorter
-(direct gaussian-PDF positivity); this proof is the *structural* statement
-that the PDF inherits its sign from `bsV`-convexity. Both routes converge. -/
+(direct gaussian-PDF positivity); this proof takes the sign from
+`bsV`-convexity alone. Since `bsV_strike_convexOn` is itself proved by the
+second-derivative test, the two routes close a loop rather than giving
+independent sources for the sign. -/
 theorem lognormalTerminalPDF_nonneg_via_strike_convexity
     {S_0 r σ T K : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     0 ≤ lognormalTerminalPDF S_0 r σ T K := by
-  -- Step 1: pin the structural input — bsV is strike-convex on (0, ∞).
-  -- (Listed but not unfolded here: the convexity is what justifies step 2.)
-  have _h_conv : ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun K' ↦ bsV K' r σ S_0 T) :=
-    bsV_strike_convexOn hS₀ hσ hT
-  -- Step 2: from the closed form `∂²_K bsV K = e^{-rT}·gaussianPDF/(K σ √T)`
-  -- (the same formula that drives bsV_strike_convexOn), the second derivative
-  -- is non-negative.
-  have h_d2_eq := deriv2_bsV_eq_exp_neg_rT_pdf (r := r) hS₀ hσ hK hT
-  have h_exp_pos : 0 < Real.exp (-(r * T)) := Real.exp_pos _
-  have h_den_pos : 0 < K * σ * Real.sqrt T :=
-    mul_pos (mul_pos hK hσ) (Real.sqrt_pos.mpr hT)
-  have h_pdf_unfolded_nn : 0 ≤ gaussianPDFReal 0 1 (bsd2 S_0 K r σ T) /
-      (K * σ * Real.sqrt T) :=
-    div_nonneg (gaussianPDFReal_nonneg _ _ _) h_den_pos.le
-  have h_d2_nn : 0 ≤ deriv (deriv (fun K' ↦ bsV K' r σ S_0 T)) K := by
-    rw [h_d2_eq]; unfold lognormalTerminalPDF
-    exact mul_nonneg h_exp_pos.le h_pdf_unfolded_nn
-  -- Step 3: Breeden-Litzenberger identifies the second derivative with
-  -- exp(-rT) · PDF; the positive factor `e^{-rT}` cancels, leaving PDF ≥ 0.
-  rw [h_d2_eq] at h_d2_nn
-  exact (mul_nonneg_iff_of_pos_left h_exp_pos).mp h_d2_nn
+  have h := deriv_deriv_nonneg_of_convexOn (bsV_strike_convexOn (r := r) hS₀ hσ hT) isOpen_Ioi
+    (fun _ hk ↦ (hasDerivAt_bsV_K hS₀ hσ hk hT).differentiableAt) (Set.mem_Ioi.mpr hK)
+  rw [(breedenLitzenberger hS₀ hσ hK hT).deriv] at h
+  exact (mul_nonneg_iff_of_pos_left (Real.exp_pos _)).mp h
 
 /-! ## Change of variables to standard normal (folded from `LognormalCOV.lean`)
 

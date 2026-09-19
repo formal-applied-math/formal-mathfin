@@ -19,7 +19,8 @@ and derive the Greeks via existing call Greeks at effective drift `r − q`.
 
 * `bsVDiv` — the dividend-adjusted call price, expressed via the identity.
 * `hasDerivAt_bsVDiv_S` — δ_q = e^{-qT} · Φ(d₁').
-* `hasDerivAt_bsVDiv_SS` — γ_q = e^{-qT} · ϕ(d₁') / (S σ √τ).
+* `hasDerivAt_deriv_bsVDiv_S` — γ_q = e^{-qT} · ϕ(d₁') / (S σ √τ), from the
+  formula-level `hasDerivAt_bsVDiv_SS`.
 * `hasDerivAt_bsVDiv_sigma` — vega_q = e^{-qT} · S · ϕ(d₁') · √τ.
 -/
 
@@ -37,20 +38,33 @@ noncomputable def bsVDiv (K r q σ : ℝ) (S τ : ℝ) : ℝ :=
 lemma hasDerivAt_bsVDiv_S {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     HasDerivAt (fun s ↦ bsVDiv K r q σ s τ)
-      (Real.exp (-(q * τ)) * Phi (bsd1 S K (r - q) σ τ)) S := by
-  have h_bs := hasDerivAt_bsV_S (r := r - q) hK hσ hS hτ
-  exact h_bs.const_mul (Real.exp (-(q * τ)))
+      (Real.exp (-(q * τ)) * Phi (bsd1 S K (r - q) σ τ)) S :=
+  (hasDerivAt_bsV_S (r := r - q) hK hσ hS hτ).const_mul (Real.exp (-(q * τ)))
 
-/-- **BS-Merton gamma**: `∂²_S V_q = e^{-qT} · ϕ(d₁') / (S σ √τ)`. -/
-lemma hasDerivAt_bsVDiv_SS {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+/-- **The BS-Merton gamma formula**: the S-derivative of the delta `e^{-qτ} · Φ(d₁')` is
+`e^{-qτ} · ϕ(d₁') / (S σ √τ)`. The second derivative of the price itself is
+`hasDerivAt_deriv_bsVDiv_S`. -/
+private lemma hasDerivAt_bsVDiv_SS {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     HasDerivAt (fun s ↦ Real.exp (-(q * τ)) * Phi (bsd1 s K (r - q) σ τ))
       (Real.exp (-(q * τ)) * gaussianPDFReal 0 1 (bsd1 S K (r - q) σ τ)
         / (S * σ * Real.sqrt τ)) S := by
-  have h_bs := hasDerivAt_bsV_SS (r := r - q) hK hσ hS hτ
+  have h_bs := hasDerivAt_Phi_bsd1_S (r := r - q) hK hσ hS hτ
   have h := h_bs.const_mul (Real.exp (-(q * τ)))
   convert h using 1 <;> try rfl
   ring
+
+/-- **BS-Merton gamma**: `∂²V_q/∂S² = e^{-qτ} · ϕ(d₁') / (S σ √τ)`, for the price itself:
+the delta `e^{-qτ} · Φ(d₁')` is `∂V_q/∂S` on all of `S > 0` (`hasDerivAt_bsVDiv_S`), and its
+derivative is the gamma formula (`hasDerivAt_bsVDiv_SS`). -/
+theorem hasDerivAt_deriv_bsVDiv_S {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
+    HasDerivAt (deriv fun s ↦ bsVDiv K r q σ s τ)
+      (Real.exp (-(q * τ)) * gaussianPDFReal 0 1 (bsd1 S K (r - q) σ τ)
+        / (S * σ * Real.sqrt τ)) S :=
+  hasDerivAt_deriv_of_eventually
+    ((eventually_gt_nhds hS).mono fun _ hs ↦ hasDerivAt_bsVDiv_S hK hσ hs hτ)
+    (hasDerivAt_bsVDiv_SS hK hσ hS hτ)
 
 /-- **BS-Merton vega**: `∂_σ V_q = e^{-qT} · S · ϕ(d₁') · √τ`. -/
 lemma hasDerivAt_bsVDiv_sigma {K r q : ℝ} (hK : 0 < K)

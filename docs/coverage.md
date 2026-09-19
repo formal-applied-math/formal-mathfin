@@ -26,6 +26,46 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Higher derivatives are stated for the price (2026-09-18)
+
+No entries were added. Twenty `full` entries now state a stronger theorem:
+
+- the Greeks: the put, Black-76, Bachelier, digital and BS-Merton gammas, vanna, volga,
+  charm, and both speeds;
+- the call and put second strike derivatives, and Breeden–Litzenberger;
+- the two bond second-order entries, the zero-coupon duration and convexity, and the
+  Almgren–Chriss Euler–Lagrange equation;
+- the gamma conjunct of `sc-bs-pde`.
+
+Each used to differentiate an explicit lower-order formula, for example `∂_S Φ(d₁)`
+rather than `∂²V/∂S²`. Its description named the higher derivative through a composition
+with another result. The zero-coupon pair was weaker still: each stated a cancellation,
+`(c·B)/B = c`, and was described as a derivative. Now each states the derivative of the
+price itself: `HasDerivAt (deriv V) …`, `s ↦ deriv (V s) y` for a mixed partial, or
+`deriv` inside the ratio. One congruence lemma, `hasDerivAt_deriv_of_eventually` in
+`Foundations/DerivOfDeriv.lean`, carries each formula-level result over. It applies because
+the formula is the lower derivative on a neighbourhood of the point.
+
+Charm now also assumes `K > 0` and `S > 0`, which its delta needs. Almgren–Chriss no
+longer assumes `sinh(κT) ≠ 0`, which no derivative ever used.
+
+Most formula lemmas are now private. `hasDerivAt_bsV_SS`, shared across three files, is
+renamed `hasDerivAt_Phi_bsd1_S` for what it states. The names `breedenLitzenberger`,
+`almgrenChrissPath_satisfies_EL` and `bondPortfolio_immunization_second_order` now label
+the genuine theorems.
+
+`bsV_strike_convexOn` and `bsV_spot_convexOn` use the new lemmas in place of four private
+transport helpers. `lognormalTerminalPDF_nonneg_via_strike_convexity` now takes its sign
+from the strike convexity it is named for. Before, its convexity step was an unused
+`have`, so the `docs/open-problems.md` entry calling that route "already proved" was not
+true until now.
+
+The native default `lake build` passed (9215 jobs), including `AxiomAuditGen.lean` with
+333 guards. Each changed snippet elaborated with no errors, warnings or `sorry`: the
+twenty restated entries and `sc-bs-pde-feynman-kac`, whose module changed. `pytest`
+passed 52/52 in the verify container. The change restaled 94 ledger rows, and
+`ledger-sweep.yml` (`scope: stale`) re-verifies them on runners.
+
 ### Implied volatility by bisection: convergence (2026-09-18)
 
 The new entry below carries `formalization_status: full`. The bisection

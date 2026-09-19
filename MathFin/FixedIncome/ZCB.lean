@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Foundations.DerivOfDeriv
 
 /-!
 # Fixed-income basics under a deterministic short rate
@@ -22,8 +23,8 @@ Results:
 * `hasDerivAt_zcb_r`: `∂_r B(t, T) = -(T - t) · B(t, T)` — the bond duration is
   the time-to-maturity.
 * `zcb_duration_eq_time_to_maturity`: `-∂_r B / B = T - t`.
-* `hasDerivAt_zcb_r_r`: second-derivative identity giving convexity
-  `∂²_r B / B = (T - t)²`.
+* `hasDerivAt_deriv_zcb_r`: `∂²_r B(t, T) = (T - t)² · B(t, T)`.
+* `zcb_convexity_eq_time_to_maturity_sq`: convexity `∂²_r B / B = (T - t)²`.
 
 The model is purely deterministic; the Vasicek / CIR / HJM stochastic versions
 would need Itô calculus.
@@ -68,21 +69,30 @@ lemma hasDerivAt_zcb_r (t T : ℝ) (r : ℝ) :
 
 /-- ZCB Macaulay duration equals time-to-maturity: `-∂_r B / B = T - t`. -/
 lemma zcb_duration_eq_time_to_maturity (t T r : ℝ) :
-    -(-(T - t) * zcb r t T) / zcb r t T = T - t := by
+    -deriv (fun r' ↦ zcb r' t T) r / zcb r t T = T - t := by
   have h_ne : zcb r t T ≠ 0 := (zcb_pos r t T).ne'
+  rw [(hasDerivAt_zcb_r t T r).deriv]
   field_simp
 
-/-- `∂²_r B(t, T) = (T - t)² · B(t, T)`. Convexity = (time-to-maturity)². -/
-lemma hasDerivAt_zcb_r_r (t T : ℝ) (r : ℝ) :
+/-- The r-derivative of the duration formula `-(T - t) · B` is `(T - t)² · B`. The second
+derivative of the price itself is `hasDerivAt_deriv_zcb_r`. -/
+private lemma hasDerivAt_zcb_r_r (t T : ℝ) (r : ℝ) :
     HasDerivAt (fun r' ↦ -(T - t) * zcb r' t T) ((T - t)^2 * zcb r t T) r := by
   have h := (hasDerivAt_zcb_r t T r).const_mul (-(T - t))
   rw [show (T - t) ^ 2 * zcb r t T = -(T - t) * (-(T - t) * zcb r t T) from by ring]
   exact h
 
+/-- `∂²_r B(t, T) = (T - t)² · B(t, T)`, for the price itself: `∂_r B = -(T - t) · B` at every
+rate (`hasDerivAt_zcb_r`). -/
+theorem hasDerivAt_deriv_zcb_r (t T r : ℝ) :
+    HasDerivAt (deriv fun r' ↦ zcb r' t T) ((T - t) ^ 2 * zcb r t T) r :=
+  hasDerivAt_deriv_of_eventually (.of_forall (hasDerivAt_zcb_r t T)) (hasDerivAt_zcb_r_r t T r)
+
 /-- ZCB convexity = squared time-to-maturity: `∂²_r B / B = (T - t)²`. -/
 lemma zcb_convexity_eq_time_to_maturity_sq (t T r : ℝ) :
-    ((T - t)^2 * zcb r t T) / zcb r t T = (T - t)^2 := by
+    deriv (deriv fun r' ↦ zcb r' t T) r / zcb r t T = (T - t)^2 := by
   have h_ne : zcb r t T ≠ 0 := (zcb_pos r t T).ne'
+  rw [(hasDerivAt_deriv_zcb_r t T r).deriv]
   field_simp
 
 end MathFin

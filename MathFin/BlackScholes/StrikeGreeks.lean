@@ -11,15 +11,15 @@ public import MathFin.BlackScholes.PDE
 public import MathFin.BlackScholes.PutGreeks
 
 /-!
-# Black-Scholes price monotonicity and convexity in the strike `K`
+# Black-Scholes strike derivatives
 
 Standard derivative-Greek identities in the strike direction:
 
-* `∂_K bsV = -e^{-rτ} · Φ(d₂)` (call price strictly decreasing in `K`).
-* `∂_K bsP = e^{-rτ} · Φ(-d₂)` (put price strictly increasing in `K`),
-  via put-call parity `bsP = bsV - S + K · e^{-rτ}`.
-* `∂²_K bsV = e^{-rτ} · ϕ(d₂) / (K σ √τ) ≥ 0` (call price convex in `K` —
-  equivalent to butterfly-spread non-negativity).
+* `∂_K bsV = -e^{-rτ} · Φ(d₂)`; its sign, `≤ 0`, is `bsV_partial_K_nonpos`.
+* `∂_K bsP = e^{-rτ} · Φ(-d₂)`, via put-call parity `bsP = bsV - S + K · e^{-rτ}`.
+* `∂²_K bsV = e^{-rτ} · ϕ(d₂) / (K σ √τ)`; its sign, `≥ 0` (`bsV_partial_KK_nonneg`), is
+  what `StrikeConvexity.bsV_strike_convexOn` turns into convexity of the call price in `K`
+  (butterfly-spread non-negativity).
 
 The clean closed forms come from the magic identity
 `S · ϕ(d₁) = K · e^{-rτ} · ϕ(d₂)` (`bs_identity`) which collapses the
@@ -30,7 +30,8 @@ Results:
 * `hasDerivAt_bsd1_K`, `hasDerivAt_bsd2_K`: `∂_K d_i = −1/(K σ √τ)`.
 * `hasDerivAt_bsV_K`: `∂_K bsV = −e^{-rτ} · Φ(d₂)`.
 * `hasDerivAt_bsP_K`: `∂_K bsP = e^{-rτ} · Φ(-d₂)`.
-* `hasDerivAt_bsV_KK`: `∂²_K bsV = e^{-rτ} · ϕ(d₂) / (K σ √τ)` (convexity in K).
+* `hasDerivAt_bsV_KK`: the K-derivative of `−e^{-rτ} · Φ(d₂)` is `e^{-rτ} · ϕ(d₂) / (K σ √τ)`.
+* `hasDerivAt_deriv_bsV_K`: `∂²_K bsV = e^{-rτ} · ϕ(d₂) / (K σ √τ)`, for the price itself.
 -/
 
 @[expose] public section
@@ -168,10 +169,11 @@ lemma hasDerivAt_bsP_K {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
     linarith [mul_comm (Real.exp (-(r * τ))) (Phi (bsd2 S K r σ τ))]
   exact hval ▸ h1
 
-/-- **Convexity of the call price in `K`** (Greek `∂²_K bsV`):
-`∂²_K bsV = e^{-rτ} · ϕ(d₂) / (K σ √τ) ≥ 0`. This is butterfly-spread
-non-negativity in differential form. -/
-lemma hasDerivAt_bsV_KK {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
+/-- **The second strike-derivative formula** (Greek `∂²_K bsV`): the K-derivative of
+`∂_K bsV = -e^{-rτ} Φ(d₂)` is `e^{-rτ} · ϕ(d₂) / (K σ √τ)`. The second derivative of the price
+itself is `hasDerivAt_deriv_bsV_K`; the convexity in `K` it yields — butterfly-spread
+non-negativity — is `bsV_strike_convexOn`. -/
+private lemma hasDerivAt_bsV_KK {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
     {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :
     HasDerivAt (fun k ↦ -(Real.exp (-(r * τ)) * Phi (bsd2 S k r σ τ)))
       (Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (bsd2 S K r σ τ) /
@@ -185,5 +187,16 @@ lemma hasDerivAt_bsV_KK {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
   refine h.congr_deriv ?_
   -- value: -(e^{-rτ}·(ϕ(d_2)·(-1/(K·σ·√τ)))) = e^{-rτ}·ϕ(d_2)/(K·σ·√τ)
   field_simp
+
+/-- **Second strike-derivative of the call**: `∂²C/∂K² = e^{-rτ} · ϕ(d₂) / (K σ √τ)`, for the
+price itself: `∂_K bsV = -e^{-rτ} Φ(d₂)` on all of `K > 0` (`hasDerivAt_bsV_K`), and its
+derivative is the formula of `hasDerivAt_bsV_KK`. -/
+theorem hasDerivAt_deriv_bsV_K {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
+    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :
+    HasDerivAt (deriv fun k ↦ bsV k r σ S τ)
+      (Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (bsd2 S K r σ τ) / (K * σ * Real.sqrt τ)) K :=
+  hasDerivAt_deriv_of_eventually
+    ((eventually_gt_nhds hK).mono fun _ hk ↦ hasDerivAt_bsV_K hS hσ hk hτ)
+    (hasDerivAt_bsV_KK hS hσ hK hτ)
 
 end MathFin

@@ -12,7 +12,7 @@ public import MathFin.BlackScholes.PutGreeks
 public import MathFin.BlackScholes.StrikeGreeks
 
 /-!
-# Put-price convexity in strike
+# The put price's second strike-derivative
 
 The put price's second `K`-derivative matches the call's:
 
@@ -23,8 +23,11 @@ of put-call symmetry at the strike-convexity level.
 
 Results:
 
-* `hasDerivAt_bsP_KK`: `∂²_K bsP = e^{-rτ} · ϕ(d₂) / (K σ √τ)` (PDF evenness
-  `gaussianPDFReal_zero_one_neg` now lives in `Foundations.StandardNormal`).
+* `hasDerivAt_bsP_KK`: the K-derivative of `e^{-rτ} · Φ(−d₂)` is
+  `e^{-rτ} · ϕ(d₂) / (K σ √τ)` (PDF evenness `gaussianPDFReal_zero_one_neg` now lives
+  in `Foundations.StandardNormal`).
+* `hasDerivAt_deriv_bsP_K`: `∂²_K bsP = e^{-rτ} · ϕ(d₂) / (K σ √τ)`, for the price
+  itself.
 -/
 
 @[expose] public section
@@ -33,11 +36,11 @@ namespace MathFin
 
 open Real ProbabilityTheory
 
-/-- **Put-price convexity in `K`**: `∂²_K bsP = e^{-rτ} · ϕ(d₂) / (K σ √τ)`,
-identical to the call-price convexity (`hasDerivAt_bsV_KK`). The proof goes
-through the put strike-derivative `∂_K bsP = e^{-rτ} · Φ(−d₂)` from
-`BlackScholes.StrikeGreeks`. -/
-lemma hasDerivAt_bsP_KK {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
+/-- **The put's second strike-derivative formula**: the K-derivative of
+`∂_K bsP = e^{-rτ} · Φ(−d₂)` (from `BlackScholes.StrikeGreeks`) is `e^{-rτ} · ϕ(d₂) / (K σ √τ)`,
+the call's value (`hasDerivAt_deriv_bsV_K`). The second derivative of the put price itself is
+`hasDerivAt_deriv_bsP_K`. -/
+private lemma hasDerivAt_bsP_KK {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
     {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :
     HasDerivAt (fun k ↦ Real.exp (-(r * τ)) * Phi (-bsd2 S k r σ τ))
       (Real.exp (-(r * τ)) *
@@ -59,5 +62,16 @@ lemma hasDerivAt_bsP_KK {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
   refine h1.congr_deriv ?_
   rw [h_pdf_sym]
   field_simp
+
+/-- **Second strike-derivative of the put**: `∂²P/∂K² = e^{-rτ} · ϕ(d₂) / (K σ √τ)`, for the
+price itself: `∂_K bsP = e^{-rτ} Φ(−d₂)` on all of `K > 0` (`hasDerivAt_bsP_K`), and its
+derivative is the formula of `hasDerivAt_bsP_KK`. -/
+theorem hasDerivAt_deriv_bsP_K {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
+    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :
+    HasDerivAt (deriv fun k ↦ bsP k r σ S τ)
+      (Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (bsd2 S K r σ τ) / (K * σ * Real.sqrt τ)) K :=
+  hasDerivAt_deriv_of_eventually
+    ((eventually_gt_nhds hK).mono fun _ hk ↦ hasDerivAt_bsP_K hS hσ hk hτ)
+    (hasDerivAt_bsP_KK hS hσ hK hτ)
 
 end MathFin

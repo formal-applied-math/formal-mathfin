@@ -27,8 +27,8 @@ through a *non-negative linear operator*.
 In the library currently, four facts touch this principle:
 
 * **Payoff** convex (`convexOn_call_payoff` in `BlackScholes/StrikeConvexity`).
-* **Price** has `∂²_K bsV ≥ 0` (`hasDerivAt_bsV_KK` in `BlackScholes/StrikeGreeks`,
-  whose RHS is manifestly non-negative).
+* **Price** has `∂²_K bsV ≥ 0` (`hasDerivAt_deriv_bsV_K` in `BlackScholes/StrikeGreeks`,
+  with the sign `bsV_partial_KK_nonneg`).
 * **Discrete second-difference of payoff ≥ 0** (`butterfly_payoff_nonneg`
   in `BlackScholes/Spreads`).
 * **Implied PDF ≥ 0** (`lognormalTerminalPDF_nonneg` in

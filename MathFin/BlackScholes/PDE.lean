@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.Foundations.GaussianCDFDeriv
+public import MathFin.Foundations.DerivOfDeriv
 
 /-!
 # Black–Scholes PDE — forward direction
@@ -333,16 +334,27 @@ lemma hasDerivAt_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   field_simp
   linear_combination -h_bs
 
-/-- **Gamma**: `∂²_S V = ϕ(d₁) / (S σ √τ)`. This is `∂_S [Phi(d₁(S))]` since
-`∂_S V = Phi(d₁)` (the `hasDerivAt_bsV_S` result). -/
-lemma hasDerivAt_bsV_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+/-- **The gamma formula**: the S-derivative of the delta `Φ(d₁(S))` is
+`ϕ(d₁) / (S σ √τ)`, by the chain rule. This differentiates the delta's formula; the second
+derivative of the price itself is `hasDerivAt_deriv_bsV_S`. -/
+lemma hasDerivAt_Phi_bsd1_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     HasDerivAt (fun s ↦ Phi (bsd1 s K r σ τ))
       (gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) S := by
-  have h_d1_S := hasDerivAt_bsd1_S (r := r) hK hσ hτ hS
-  have h_Phi_d1 := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp S h_d1_S
-  convert h_Phi_d1 using 1 <;> try rfl
-  field_simp
+  -- `S` is `bsd1`'s first argument, so the chain rule is elaborated before its target
+  have h := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp S (hasDerivAt_bsd1_S (r := r) hK hσ hτ hS)
+  exact h.congr_deriv (mul_one_div _ _)
+
+/-- **Gamma**: `∂²V/∂S² = ϕ(d₁) / (S σ √τ)`, for the call price itself. The delta `Φ(d₁)` is
+`∂V/∂S` on all of `S > 0` (`hasDerivAt_bsV_S`), so near `S` the derivative of the price is the
+delta formula, whose own derivative is the gamma formula (`hasDerivAt_Phi_bsd1_S`). -/
+theorem hasDerivAt_deriv_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
+    HasDerivAt (deriv fun s ↦ bsV K r σ s τ)
+      (gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) S :=
+  hasDerivAt_deriv_of_eventually
+    ((eventually_gt_nhds hS).mono fun _ hs ↦ hasDerivAt_bsV_S hK hσ hs hτ)
+    (hasDerivAt_Phi_bsd1_S hK hσ hS hτ)
 
 /-- **Theta (without τ → t sign flip)**: `∂_τ V = σ S ϕ(d₁) / (2 √τ) + r K e^{-rτ} Φ(d₂)`.
 The combination of product/chain rules + the magic identity (`K e^{-rτ} ϕ(d₂) = S ϕ(d₁)`)

@@ -311,7 +311,7 @@ graph above (nothing in the spine proves it); it feeds the Greeks and the PDE.
 [`BlackScholes/PDE.lean`](../MathFin/BlackScholes/PDE.lean)
 
 ### Greeks ✅
-δ (`hasDerivAt_bsV_S`), γ (`hasDerivAt_bsV_SS`), vega (`hasDerivAt_bsV_sigma`),
+δ (`hasDerivAt_bsV_S`), γ (`hasDerivAt_deriv_bsV_S`), vega (`hasDerivAt_bsV_sigma`),
 θ (`hasDerivAt_bsV_t`), ρ (`hasDerivAt_bsV_r`) — each derived through
 `bs_identity`.
 → *Finance:* the hedging sensitivities.

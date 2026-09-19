@@ -23,7 +23,7 @@ different scales of resolution:
    (`ConvexPricingFunctional.callPrice_finiteState_convexOn_K`).
 3. **Continuous BS price level**, `K ↦ bsV K r σ S τ`. Convex on `(0, ∞)`
    because its second `K`-derivative is non-negative
-   (`hasDerivAt_bsV_KK` + `convexOn_of_deriv2_nonneg'`).
+   (`hasDerivAt_deriv_bsV_K` + `convexOn_of_deriv2_nonneg'`).
 
 The three scales are not three theorems; they are one principle realised at
 three different levels of integration. This file packages all three so the
@@ -38,9 +38,11 @@ hierarchy is visible.
 * **Butterfly non-negativity at price** (`callPrice_finiteState_butterfly_nonneg`) —
   pricing functional preserves convexity, hence the same second-difference
   is non-negative at the price level.
-* **Breeden-Litzenberger PDF positivity** (`lognormalTerminalPDF_nonneg`) —
-  the infinitesimal manifestation of price-level convexity, by
-  `bsV_strike_convexOn` below + `convexOn_iff_deriv2_nonneg`.
+* **Breeden-Litzenberger PDF positivity**
+  (`lognormalTerminalPDF_nonneg_via_strike_convexity`) — the infinitesimal
+  manifestation of price-level convexity, from `bsV_strike_convexOn` below via
+  `deriv_deriv_nonneg_of_convexOn`. That convexity is itself proved from the sign,
+  so this is a loop, not an independent derivation.
 
 ## Results
 
@@ -93,69 +95,24 @@ Beyond the payoff (`convexOn_call_payoff`), the *price itself* is convex
 in the strike. The proof is the second-derivative test:
 
 * `hasDerivAt_bsV_K`: `∂_K bsV = −e^{-rτ} · Φ(d_2)` exists at every `K > 0`.
-* `hasDerivAt_bsV_KK`: `∂²_K bsV = e^{-rτ} · ϕ(d_2) / (K σ √τ)` exists and
-  is non-negative for every `K > 0`.
+* `hasDerivAt_deriv_bsV_K`: `∂²_K bsV = e^{-rτ} · ϕ(d_2) / (K σ √τ)` exists at
+  every `K > 0`, and it is non-negative (`bsV_partial_KK_nonneg`).
 
-We feed these to Mathlib's `convexOn_of_deriv2_nonneg'`. The only delicate
-step is identifying `deriv (fun K' ↦ bsV K' r σ S τ)` with the explicit
-first derivative in a neighborhood of each interior point so the second
-derivative inherits the closed form — handled below with
-`HasDerivAt.congr_of_eventuallyEq`. -/
-
-/-- **First-derivative identification on `(0, ∞)`**: the closed form for
-`∂_K bsV` from `hasDerivAt_bsV_K` agrees with `deriv` on the whole positive
-half-line. Used to bridge `hasDerivAt_bsV_KK` to a second-derivative
-statement on `deriv` itself. -/
-private lemma deriv_bsV_eq_on_Ioi (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ)
-    (hτ : 0 < τ) {K : ℝ} (hK : K ∈ Set.Ioi (0 : ℝ)) :
-    deriv (fun k ↦ bsV k r σ S τ) K =
-      -(Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ)) :=
-  (hasDerivAt_bsV_K (S := S) (r := r) (σ := σ) hS hσ hK hτ).deriv
-
-/-- **Local equality of derivatives on `(0, ∞)`**: in a neighbourhood of any
-`K > 0`, `deriv (fun K' ↦ bsV K' r σ S τ)` agrees with the explicit closed
-form, so derivative facts about the closed form transfer to `deriv`. -/
-private lemma deriv_bsV_eventuallyEq (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ)
-    (hτ : 0 < τ) {K : ℝ} (hK : 0 < K) :
-    (fun K' ↦ deriv (fun k ↦ bsV k r σ S τ) K') =ᶠ[nhds K]
-      (fun K' ↦ -(Real.exp (-(r * τ)) * Phi (bsd2 S K' r σ τ))) := by
-  filter_upwards [isOpen_Ioi.mem_nhds (Set.mem_Ioi.mpr hK)] with K' hK'
-  exact deriv_bsV_eq_on_Ioi S r σ τ hS hσ hτ hK'
+We feed these to Mathlib's `convexOn_of_deriv2_nonneg'`. -/
 
 /-- **BS call price is convex in the strike on `(0, ∞)`** — the continuous-
 price face of the K-convexity principle.
 
 This is the second-derivative test applied to BS: at every `K > 0`,
-`∂²_K bsV = e^{-rτ} · ϕ(d_2)/(K σ √τ) ≥ 0`. The hypotheses of
-`convexOn_of_deriv2_nonneg'` are the differentiability of `bsV` and of its
-first derivative on `Ioi 0`, both of which we have in closed form from
-`hasDerivAt_bsV_K` and `hasDerivAt_bsV_KK`. -/
+`∂²_K bsV = e^{-rτ} · ϕ(d_2)/(K σ √τ) ≥ 0`. -/
 theorem bsV_strike_convexOn {S r σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :
-    ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun K ↦ bsV K r σ S τ) := by
-  refine convexOn_of_deriv2_nonneg' (convex_Ioi 0) ?_ ?_ ?_
-  -- (1) bsV is differentiable on Ioi 0 (from hasDerivAt_bsV_K).
-  · intro K hK
-    exact ((hasDerivAt_bsV_K (S := S) (r := r) (σ := σ) hS hσ hK hτ).differentiableAt
-      ).differentiableWithinAt
-  -- (2) deriv bsV is differentiable on Ioi 0 (from hasDerivAt_bsV_KK, transported via h_ev).
-  · intro K hK
-    have h_pos : 0 < K := hK
-    have h_KK := hasDerivAt_bsV_KK (S := S) (r := r) (σ := σ) hS hσ h_pos hτ
-    have h_ev := deriv_bsV_eventuallyEq S r σ τ hS hσ hτ h_pos
-    exact ((h_KK.congr_of_eventuallyEq h_ev).differentiableAt).differentiableWithinAt
-  -- (3) deriv^[2] bsV K ≥ 0 for K > 0.
-  · intro K hK
-    have h_pos : 0 < K := hK
-    have h_KK := hasDerivAt_bsV_KK (S := S) (r := r) (σ := σ) hS hσ h_pos hτ
-    have h_ev := deriv_bsV_eventuallyEq S r σ τ hS hσ hτ h_pos
-    have h_d2 : deriv^[2] (fun k ↦ bsV k r σ S τ) K =
-        Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (bsd2 S K r σ τ) /
-          (K * σ * Real.sqrt τ) :=
-      (h_KK.congr_of_eventuallyEq h_ev).deriv
-    rw [h_d2]
-    -- the 2nd-`K`-derivative-nonneg step *is* the named butterfly /
-    -- Breeden-Litzenberger sign fact `bsV_partial_KK_nonneg` (`GreekSigns`).
-    exact bsV_partial_KK_nonneg h_pos hσ hτ S r
+    ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun K ↦ bsV K r σ S τ) :=
+  convexOn_of_deriv2_nonneg' (convex_Ioi 0)
+    (fun _ hK ↦ (hasDerivAt_bsV_K hS hσ hK hτ).differentiableAt.differentiableWithinAt)
+    (fun _ hK ↦ (hasDerivAt_deriv_bsV_K hS hσ hK hτ).differentiableAt.differentiableWithinAt)
+    -- the sign is the named butterfly / Breeden-Litzenberger fact (`GreekSigns`)
+    fun _ hK ↦ (bsV_partial_KK_nonneg hK hσ hτ S r).trans_eq
+      (hasDerivAt_deriv_bsV_K hS hσ hK hτ).deriv.symm
 
 /-- **Put price is convex in the strike on `(0, ∞)`** — free from the call's
 strike-convexity: `bsP = bsV + (K·e^{-rτ} − S)` differs from `bsV` by an affine

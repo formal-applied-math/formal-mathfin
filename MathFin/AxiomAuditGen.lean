@@ -515,14 +515,14 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.gompertz_cumulative_force' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.gompertz_cumulative_force
 
+/-- info: 'MathFin.hasDerivAt_S_deriv_bsV_sigma' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_S_deriv_bsV_sigma
+
 /-- info: 'MathFin.hasDerivAt_T_mul_spotRate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_T_mul_spotRate
 
 /-- info: 'MathFin.hasDerivAt_bachelierV_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bachelierV_S
-
-/-- info: 'MathFin.hasDerivAt_bachelierV_SS' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bachelierV_SS
 
 /-- info: 'MathFin.hasDerivAt_bachelierV_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bachelierV_T
@@ -532,12 +532,6 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.hasDerivAt_blackV_F' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_blackV_F
-
-/-- info: 'MathFin.hasDerivAt_blackV_FF' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_blackV_FF
-
-/-- info: 'MathFin.hasDerivAt_blackV_FFF' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_blackV_FFF
 
 /-- info: 'MathFin.hasDerivAt_blackV_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_blackV_T
@@ -557,9 +551,6 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.hasDerivAt_bsAssetDigital_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsAssetDigital_S
 
-/-- info: 'MathFin.hasDerivAt_bsAssetDigital_SS' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsAssetDigital_SS
-
 /-- info: 'MathFin.hasDerivAt_bsAssetDigital_r' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsAssetDigital_r
 
@@ -571,9 +562,6 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.hasDerivAt_bsCashDigital_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsCashDigital_S
-
-/-- info: 'MathFin.hasDerivAt_bsCashDigital_SS' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsCashDigital_SS
 
 /-- info: 'MathFin.hasDerivAt_bsCashDigital_r' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsCashDigital_r
@@ -587,14 +575,8 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.hasDerivAt_bsP_K' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsP_K
 
-/-- info: 'MathFin.hasDerivAt_bsP_KK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsP_KK
-
 /-- info: 'MathFin.hasDerivAt_bsP_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsP_S
-
-/-- info: 'MathFin.hasDerivAt_bsP_SS' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsP_SS
 
 /-- info: 'MathFin.hasDerivAt_bsP_r' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsP_r
@@ -607,9 +589,6 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.hasDerivAt_bsVDiv_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsVDiv_S
-
-/-- info: 'MathFin.hasDerivAt_bsVDiv_SS' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsVDiv_SS
 
 /-- info: 'MathFin.hasDerivAt_bsVDiv_q' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsVDiv_q
@@ -626,20 +605,8 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.hasDerivAt_bsV_K' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsV_K
 
-/-- info: 'MathFin.hasDerivAt_bsV_KK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsV_KK
-
 /-- info: 'MathFin.hasDerivAt_bsV_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsV_S
-
-/-- info: 'MathFin.hasDerivAt_bsV_SS' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsV_SS
-
-/-- info: 'MathFin.hasDerivAt_bsV_SSS' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsV_SSS
-
-/-- info: 'MathFin.hasDerivAt_bsV_charm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsV_charm
 
 /-- info: 'MathFin.hasDerivAt_bsV_r' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsV_r
@@ -650,17 +617,50 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.hasDerivAt_bsV_t' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsV_t
 
-/-- info: 'MathFin.hasDerivAt_bsV_vanna' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsV_vanna
-
-/-- info: 'MathFin.hasDerivAt_bsV_volga' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsV_volga
-
 /-- info: 'MathFin.hasDerivAt_bsd1_K' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsd1_K
 
 /-- info: 'MathFin.hasDerivAt_bsd2_K' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsd2_K
+
+/-- info: 'MathFin.hasDerivAt_deriv_bachelierV_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_deriv_bachelierV_S
+
+/-- info: 'MathFin.hasDerivAt_deriv_blackV_F' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_deriv_blackV_F
+
+/-- info: 'MathFin.hasDerivAt_deriv_bondPortfolioValue_r' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_deriv_bondPortfolioValue_r
+
+/-- info: 'MathFin.hasDerivAt_deriv_bsAssetDigital_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_deriv_bsAssetDigital_S
+
+/-- info: 'MathFin.hasDerivAt_deriv_bsCashDigital_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_deriv_bsCashDigital_S
+
+/-- info: 'MathFin.hasDerivAt_deriv_bsP_K' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_deriv_bsP_K
+
+/-- info: 'MathFin.hasDerivAt_deriv_bsP_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_deriv_bsP_S
+
+/-- info: 'MathFin.hasDerivAt_deriv_bsVDiv_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_deriv_bsVDiv_S
+
+/-- info: 'MathFin.hasDerivAt_deriv_bsV_K' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_deriv_bsV_K
+
+/-- info: 'MathFin.hasDerivAt_deriv_bsV_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_deriv_bsV_S
+
+/-- info: 'MathFin.hasDerivAt_deriv_bsV_sigma' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_deriv_bsV_sigma
+
+/-- info: 'MathFin.hasDerivAt_deriv_deriv_blackV_F' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_deriv_deriv_blackV_F
+
+/-- info: 'MathFin.hasDerivAt_deriv_deriv_bsV_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_deriv_deriv_bsV_S
 
 /-- info: 'MathFin.hasDerivAt_matrixRiccatiCoeff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_matrixRiccatiCoeff
@@ -668,14 +668,14 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.hasDerivAt_mmMatrixValueCoeff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_mmMatrixValueCoeff
 
-/-- info: 'MathFin.hasDerivAt_neg_bondPortfolioDur_r' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_neg_bondPortfolioDur_r
-
 /-- info: 'MathFin.hasDerivAt_neg_log_zcb_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_neg_log_zcb_T
 
 /-- info: 'MathFin.hasDerivAt_riccatiCoeff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_riccatiCoeff
+
+/-- info: 'MathFin.hasDerivAt_tau_deriv_bsV_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_tau_deriv_bsV_S
 
 /-- info: 'MathFin.hasEMM_multi_iff_not_hasArbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasEMM_multi_iff_not_hasArbitrage

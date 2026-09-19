@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Foundations.DerivOfDeriv
 
 /-!
 # Almgren-Chriss optimal execution (deterministic closed form)
@@ -43,6 +44,10 @@ function-space machinery beyond Mathlib's current pin.
 * `almgrenChrissPath_at_terminal`: `X(T) = 0`.
 * `hasDerivAt_almgrenChrissPath`: first derivative.
 * `almgrenChrissPath_satisfies_EL`: `X''(t) = κ² · X(t)`.
+
+Neither derivative needs `sinh(κT) ≠ 0`: under Lean's `x / 0 = 0` the degenerate
+closed form is the zero path, which satisfies both. Only the initial condition
+uses it.
 -/
 
 @[expose] public section
@@ -71,47 +76,33 @@ theorem almgrenChrissPath_at_terminal (X_0 κ T : ℝ) :
   rw [sub_self, mul_zero, Real.sinh_zero]
   simp
 
+/-- `d/dt (κ (T − t)) = −κ`: the inner derivative of both hyperbolic factors. -/
+private lemma hasDerivAt_mul_sub (κ T t : ℝ) : HasDerivAt (fun t : ℝ ↦ κ * (T - t)) (-κ) t := by
+  simpa using ((hasDerivAt_id t).const_sub T).const_mul κ
+
 /-- **First derivative**: `X'(t) = −X_0 · κ · cosh(κ (T − t)) / sinh(κ T)`. -/
-theorem hasDerivAt_almgrenChrissPath (X_0 κ T : ℝ)
-    (hT : Real.sinh (κ * T) ≠ 0) (t : ℝ) :
+theorem hasDerivAt_almgrenChrissPath (X_0 κ T t : ℝ) :
     HasDerivAt (almgrenChrissPath X_0 κ T)
       (-(X_0 * κ * Real.cosh (κ * (T - t)) / Real.sinh (κ * T))) t := by
   unfold almgrenChrissPath
-  -- Inner derivative: d/dt (κ (T − t)) = −κ.
-  have h_inner : HasDerivAt (fun t : ℝ ↦ κ * (T - t)) (-κ) t := by
-    have h_id : HasDerivAt (fun t : ℝ ↦ T - t) (-1) t := by
-      have := (hasDerivAt_id t).const_sub T
-      simpa using this
-    have := h_id.const_mul κ
-    convert this using 1 <;> first | ring | rfl
-  have h_sinh : HasDerivAt (fun t ↦ Real.sinh (κ * (T - t)))
-                (Real.cosh (κ * (T - t)) * (-κ)) t := h_inner.sinh
-  have h_mul := h_sinh.const_mul X_0
-  have h_div := h_mul.div_const (Real.sinh (κ * T))
-  convert h_div using 1 <;> first | field_simp | rfl
+  convert ((hasDerivAt_mul_sub κ T t).sinh.const_mul X_0).div_const (Real.sinh (κ * T))
+    using 1 <;> first | rfl | ring
 
-/-- **Almgren-Chriss EL equation**: the closed-form trajectory satisfies
-`X''(t) = κ² · X(t)` (the Euler-Lagrange equation of the cost functional).
-The second derivative — obtained by differentiating the first — has the
-same `sinh(κ (T − t))` shape multiplied by `κ²`. -/
-theorem almgrenChrissPath_satisfies_EL (X_0 κ T : ℝ)
-    (hT : Real.sinh (κ * T) ≠ 0) (t : ℝ) :
-    HasDerivAt (fun s : ℝ ↦
-        -(X_0 * κ * Real.cosh (κ * (T - s)) / Real.sinh (κ * T)))
-      (κ^2 * almgrenChrissPath X_0 κ T t) t := by
+/-- The t-derivative of the first-derivative formula `−X₀ κ cosh(κ (T − t)) / sinh(κ T)` is
+`κ² · X(t)`: the same `sinh(κ (T − t))` shape, multiplied by `κ²`. -/
+private lemma hasDerivAt_almgrenChrissPath_deriv_formula (X_0 κ T t : ℝ) :
+    HasDerivAt (fun s : ℝ ↦ -(X_0 * κ * Real.cosh (κ * (T - s)) / Real.sinh (κ * T)))
+      (κ ^ 2 * almgrenChrissPath X_0 κ T t) t := by
   unfold almgrenChrissPath
-  -- d/dt of cosh(κ (T − t)) = sinh(κ (T − t)) · (−κ).
-  have h_inner : HasDerivAt (fun t : ℝ ↦ κ * (T - t)) (-κ) t := by
-    have h_id : HasDerivAt (fun t : ℝ ↦ T - t) (-1) t := by
-      have := (hasDerivAt_id t).const_sub T
-      simpa using this
-    have := h_id.const_mul κ
-    convert this using 1 <;> first | ring | rfl
-  have h_cosh : HasDerivAt (fun t ↦ Real.cosh (κ * (T - t)))
-                (Real.sinh (κ * (T - t)) * (-κ)) t := h_inner.cosh
-  have h_const_mul := h_cosh.const_mul (X_0 * κ)
-  have h_div := h_const_mul.div_const (Real.sinh (κ * T))
-  have h_neg := h_div.neg
-  convert h_neg using 1 <;> first | rfl | field_simp
+  convert (((hasDerivAt_mul_sub κ T t).cosh.const_mul (X_0 * κ)).div_const
+    (Real.sinh (κ * T))).neg using 1 <;> first | rfl | ring
+
+/-- **Almgren-Chriss EL equation**: the closed-form trajectory satisfies `X''(t) = κ² · X(t)`,
+the Euler-Lagrange equation of the cost functional: `hasDerivAt_almgrenChrissPath` gives `X'`
+at every `t`, and the derivative of that formula is `κ² · X(t)`. -/
+theorem almgrenChrissPath_satisfies_EL (X_0 κ T t : ℝ) :
+    HasDerivAt (deriv (almgrenChrissPath X_0 κ T)) (κ ^ 2 * almgrenChrissPath X_0 κ T t) t :=
+  hasDerivAt_deriv_of_eventually (.of_forall (hasDerivAt_almgrenChrissPath X_0 κ T))
+    (hasDerivAt_almgrenChrissPath_deriv_formula X_0 κ T t)
 
 end MathFin
