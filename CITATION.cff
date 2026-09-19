@@ -14,8 +14,8 @@ url: "https://github.com/formal-applied-math/formal-mathfin"
 # All-versions (concept) DOI: always resolves to the newest release, so a
 # citation tracks the library rather than freezing at one snapshot.
 doi: 10.5281/zenodo.20477781
-version: "1.3.0"
-date-released: "2026-08-14"
+version: "1.4.0"
+date-released: "2026-09-19"
 keywords:
   - Lean 4
   - formal verification
@@ -25,8 +25,8 @@ keywords:
   - stochastic calculus
 abstract: >-
   A Lean 4 library of machine-checked mathematical-finance theorems
-  (338 delivery-ready theorems across eleven areas), built on Mathlib and
-  Rémy Degenne's BrownianMotion package. Every result is classified by
+  (360 delivery-ready theorems), built on Mathlib and Rémy Degenne's
+  BrownianMotion package. Every result is classified by
   how faithfully its Lean statement matches the mathematical claim, and
   a build-enforced axiom audit pins the axioms each proof depends on.
 preferred-citation:

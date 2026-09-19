@@ -3,7 +3,7 @@
 [![build](https://github.com/formal-applied-math/formal-mathfin/actions/workflows/build.yml/badge.svg)](https://github.com/formal-applied-math/formal-mathfin/actions/workflows/build.yml)
 [![axioms](https://img.shields.io/badge/axioms-propext%2C%20Classical.choice%2C%20Quot.sound-blue)](MathFin/AxiomAudit.lean)
 [![blueprint](https://img.shields.io/badge/blueprint-deductive_spine-blue)](docs/blueprint.md)
-[![Lean](https://img.shields.io/badge/Lean-4.32.0-blue)](lean-toolchain)
+[![Lean](https://img.shields.io/badge/Lean-4.33.0--rc1-blue)](lean-toolchain)
 [![license](https://img.shields.io/badge/license-Apache_2.0-blue)](LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20477781.svg)](https://doi.org/10.5281/zenodo.20477781)
 [![arXiv](https://img.shields.io/badge/arXiv-2606.01356-b31b1b)](https://arxiv.org/abs/2606.01356)

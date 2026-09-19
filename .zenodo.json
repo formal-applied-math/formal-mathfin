@@ -9,7 +9,7 @@
       "orcid": "0009-0001-6601-1023"
     }
   ],
-  "description": "A Lean 4 library of machine-checked mathematical-finance theorems: 251 sorry-free theorems across eleven areas (Black-Scholes pricing with the full Greek matrix and exotics; binomial trees including the CRR-to-Black-Scholes scaling limit and American/Snell options; fixed income; portfolio theory; coherent risk measures; actuarial mathematics; DeFi; and the continuous-time stochastic-calculus foundations: the Wiener/Ito L2 isometry, the continuous Ito integral, and a static-Girsanov derivation of the risk-neutral measure). Built on Mathlib and Remy Degenne's BrownianMotion package. Every result is classified by faithfulness tier, and a build-enforced AxiomAudit pins the axioms each proof depends on.",
+  "description": "A Lean 4 library of machine-checked mathematical-finance theorems: 373 sorry-free theorems, 360 of them delivery-ready, depending only on the axioms propext, Classical.choice and Quot.sound. It covers continuous-time stochastic calculus (the Ito integral, Ito's formula, quadratic variation and martingale representation), Black-Scholes pricing with the Greeks and exotics, binomial trees including the CRR-to-Black-Scholes limit and American options, the geometry of the American put exercise boundary, fixed income, portfolio theory, coherent risk measures, actuarial mathematics, market microstructure and DeFi. Built on Mathlib and Remy Degenne's BrownianMotion package. Every result is classified by how faithfully its Lean statement matches the mathematical claim, and a build-enforced axiom audit pins the axioms each proof depends on.",
   "keywords": [
     "Lean 4",
     "formal verification",
