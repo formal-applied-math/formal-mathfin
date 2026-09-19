@@ -98,22 +98,6 @@ private instance instSigmaFiniteTrimNatFiltration {hBmeas : ∀ t, Measurable (B
     MeasureTheory.isFiniteMeasure_trim _
   inferInstance
 
-/-- For `s ≤ t : ℝ≥0`, the truncated increment variance `max (t-s) (s-t)` is the
-`ℝ≥0`-nndistance of the coerced times. -/
-private lemma maxSub_eq_nndist {s t : ℝ≥0} (hst : s ≤ t) :
-    (max (t - s) (s - t) : ℝ≥0) = nndist (t : ℝ) (s : ℝ) := by
-  apply NNReal.coe_injective
-  have hle : ((s : ℝ) ≤ (t : ℝ)) := by exact_mod_cast hst
-  rw [coe_nndist, Real.dist_eq, tsub_eq_zero_of_le hst, max_eq_left zero_le,
-    NNReal.coe_sub hst, abs_of_nonneg (sub_nonneg.mpr hle)]
-
-/-- For `s ≤ t : ℝ≥0`, the truncated variance coerces to the real elapsed time. -/
-private lemma maxSubCoe {s t : ℝ≥0} (hst : s ≤ t) :
-    ((max (t - s) (s - t) : ℝ≥0) : ℝ) = (t : ℝ) - (s : ℝ) := by
-  have hst_zero : s - t = (0 : ℝ≥0) := tsub_eq_zero_of_le hst
-  rw [hst_zero, max_eq_left zero_le]
-  exact NNReal.coe_sub hst
-
 /-! ### The conditional Brownian kernels -/
 
 /-- Functions of a Brownian increment condition on the past as constants: if
@@ -141,9 +125,7 @@ theorem condExp_increment_eq_zero (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {u v : ℝ≥0} (huv : u ≤ v) :
     (μ[fun ω ↦ B v ω - B u ω | natFiltration hBmeas u]) =ᵐ[μ] fun _ ↦ (0 : ℝ) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hL : HasLaw (B v - B u)
-      (gaussianReal 0 (max (v - u) (u - v))) μ := by
-    rw [maxSub_eq_nndist huv]; exact hB.hasLaw_sub v u
+  have hL : HasLaw (B v - B u) (gaussianReal 0 (v - u)) μ := hasLaw_increment hB huv
   have hint : ∫ ω, (B v ω - B u ω) ∂μ = 0 := by
     have h_eq : (fun ω ↦ B v ω - B u ω) = (B v - B u : Ω → ℝ) := rfl
     rw [h_eq, hL.integral_eq, integral_id_gaussianReal]
@@ -157,15 +139,13 @@ theorem condExp_increment_sq (hB : IsPreBrownianReal B μ)
     (μ[fun ω ↦ (B v ω - B u ω) ^ 2 | natFiltration hBmeas u])
       =ᵐ[μ] fun _ ↦ (v : ℝ) - u := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hL : HasLaw (B v - B u)
-      (gaussianReal 0 (max (v - u) (u - v))) μ := by
-    rw [maxSub_eq_nndist huv]; exact hB.hasLaw_sub v u
+  have hL : HasLaw (B v - B u) (gaussianReal 0 (v - u)) μ := hasLaw_increment hB huv
   have hint : ∫ ω, (B v ω - B u ω) ^ 2 ∂μ = (v : ℝ) - u := by
     have h_change : ∫ ω, (B v ω - B u ω) ^ 2 ∂μ
-        = ∫ x, x ^ 2 ∂(gaussianReal 0 (max (v - u) (u - v))) := by
+        = ∫ x, x ^ 2 ∂(gaussianReal 0 (v - u)) := by
       simpa [Function.comp] using hL.integral_comp (f := fun x : ℝ ↦ x ^ 2) (by fun_prop)
     rw [h_change, integral_sq_gaussianReal]
-    exact maxSubCoe huv
+    exact NNReal.coe_sub huv
   exact condExp_func_increment hB hBmeas huv (measurable_id.pow_const 2) hint
 
 omit [IsProbabilityMeasure μ] in
@@ -174,9 +154,7 @@ private theorem memLp_increment (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {u v : ℝ≥0} (huv : u ≤ v) :
     MemLp (fun ω ↦ B v ω - B u ω) 2 μ := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hL : HasLaw (B v - B u)
-      (gaussianReal 0 (max (v - u) (u - v))) μ := by
-    rw [maxSub_eq_nndist huv]; exact hB.hasLaw_sub v u
+  have hL : HasLaw (B v - B u) (gaussianReal 0 (v - u)) μ := hasLaw_increment hB huv
   have hd : Measurable (fun ω ↦ B v ω - B u ω) := (hBmeas v).sub (hBmeas u)
   rw [show (fun ω ↦ B v ω - B u ω) = (B v - B u : Ω → ℝ) from rfl]
   exact ((hL.map_eq ▸ memLp_id_gaussianReal 2 :

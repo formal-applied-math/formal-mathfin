@@ -49,7 +49,7 @@ theorem brownianUsualActualContactTime_le_of_downcrossing {k h : ℝ} (hk : 0 < 
       x+(k-h-1)*(s : ℝ)+Real.sqrt 2*brownian s ω := by
     simp only [canonicalLogPath,min_eq_left hs.le,min_eq_left hsR.le]
   have hlt := hcont.2
-  dsimp only [mem_setOf_eq] at hlt
+  dsimp only [mem_ofPred_eq] at hlt
   rw [hpath] at hlt
   linarith
 

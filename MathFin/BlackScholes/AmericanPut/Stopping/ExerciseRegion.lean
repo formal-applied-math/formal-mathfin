@@ -104,9 +104,9 @@ theorem exerciseSet_closed (hW : Measurable W.uncurry) (hzero : ∀ᵐ ω ∂P, 
     ext S
     constructor
     · rintro ⟨hS,hSK,he⟩
-      exact ⟨⟨hS,hSK⟩,by simpa only [mem_setOf_eq,max_eq_left hS] using he⟩
+      exact ⟨⟨hS,hSK⟩,by simpa only [mem_ofPred_eq,max_eq_left hS] using he⟩
     · rintro ⟨⟨hS,hSK⟩,he⟩
-      exact ⟨hS,hSK,by simpa only [mem_setOf_eq,max_eq_left hS] using he⟩
+      exact ⟨hS,hSK,by simpa only [mem_ofPred_eq,max_eq_left hS] using he⟩
   rw [heq]
   exact isClosed_Icc.inter (isClosed_eq hc (by fun_prop))
 

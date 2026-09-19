@@ -50,7 +50,7 @@ private lemma min_gt_iInter (hn : 0 < n) (t : ℝ) :
       (fun i : Fin n ↦ τ i ω))}
       = ⋂ i : Fin n, (τ i) ⁻¹' Set.Ioi t := by
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_iInter, Set.mem_preimage, Set.mem_Ioi]
+  simp only [Set.mem_ofPred_eq, Set.mem_iInter, Set.mem_preimage, Set.mem_Ioi]
   exact ⟨fun h i => h.trans_le (Finset.inf'_le _ (Finset.mem_univ i)),
     fun h => (Finset.lt_inf'_iff _).2 fun i _ => h i⟩
 

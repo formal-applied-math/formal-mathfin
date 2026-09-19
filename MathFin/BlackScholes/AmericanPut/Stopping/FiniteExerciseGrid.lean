@@ -47,7 +47,7 @@ theorem rounded_time_stopping (θ : BoundedRule 𝓕 T) (hδ : 0 < δ) :
   by_cases hT : T ≤ t
   · have he : {ω | ((min ((gridIndex θ δ ω : ℝ≥0)*δ) T : ℝ≥0) : WithTop ℝ≥0) ≤ t} = univ := by
       ext ω
-      simp only [mem_setOf_eq,WithTop.coe_le_coe,mem_univ,iff_true]
+      simp only [mem_ofPred_eq,WithTop.coe_le_coe,mem_univ,iff_true]
       exact (min_le_right _ _).trans hT
     rw [he]
     exact MeasurableSet.univ
@@ -56,7 +56,7 @@ theorem rounded_time_stopping (θ : BoundedRule 𝓕 T) (hδ : 0 < δ) :
     have he : {ω | ((min ((gridIndex θ δ ω : ℝ≥0)*δ) T : ℝ≥0) : WithTop ℝ≥0) ≤ t} =
         {ω | θ.time ω ≤ (⌊t/δ⌋₊ : ℝ≥0)*δ} := by
       ext ω
-      simp only [mem_setOf_eq,WithTop.coe_le_coe,min_le_iff,hT,or_false]
+      simp only [mem_ofPred_eq,WithTop.coe_le_coe,min_le_iff,hT,or_false]
       rw [← le_div_iff₀ hδ,← Nat.le_floor_iff (show (0 : ℝ≥0) ≤ t/δ from bot_le),
         gridIndex_le_iff θ hδ]
     rw [he]

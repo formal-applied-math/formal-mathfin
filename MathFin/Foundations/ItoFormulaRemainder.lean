@@ -103,18 +103,10 @@ include hB
 for `t₀ ≤ t₁` (law-transfer of the Gaussian identity `integral_pow6_gaussianReal`). -/
 theorem integral_increment_pow6 {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
     ∫ ω, (B t₁ ω - B t₀ ω) ^ 6 ∂μ = 15 * ((t₁ : ℝ) - t₀) ^ 3 := by
-  have hmax : ((max (t₁ - t₀) (t₀ - t₁) : ℝ≥0) : ℝ) = (t₁ : ℝ) - t₀ := by
-    rw [max_eq_left (by rw [tsub_eq_zero_of_le ht]; exact zero_le), NNReal.coe_sub ht]
-  have hbridge : (max (t₁ - t₀) (t₀ - t₁) : ℝ≥0) = nndist (t₁ : ℝ) (t₀ : ℝ) := by
-    apply NNReal.coe_injective
-    rw [coe_nndist, Real.dist_eq, hmax,
-      abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr ht))]
-  have hlaw : HasLaw (B t₁ - B t₀) (gaussianReal 0 (max (t₁ - t₀) (t₀ - t₁))) μ := by
-    rw [hbridge]; exact hB.hasLaw_sub t₁ t₀
-  have hcomp := hlaw.integral_comp (f := fun x : ℝ ↦ x ^ 6)
+  have hcomp := (hasLaw_increment hB ht).integral_comp (f := fun x : ℝ ↦ x ^ 6)
     (measurable_id.pow_const 6).aestronglyMeasurable
-  simp only [Function.comp_def, Pi.sub_apply] at hcomp
-  rw [hcomp, integral_pow6_gaussianReal, hmax]
+  simp only [Function.comp_def] at hcomp
+  rw [hcomp, integral_pow6_gaussianReal, NNReal.coe_sub ht]
 
 /-- The sixth power of a Brownian increment is integrable (all Gaussian moments are
 finite); the companion to `integral_increment_pow6`. -/
