@@ -84,7 +84,7 @@
     {
       "id": "mf-vega",
       "name": "BS Vega (Sensitivity to Volatility)",
-      "description": "Vega = dV/dσ = S phi(d_1) sqrt(T). The Black-Scholes call price has derivative with respect to volatility equal to S * pdf(d_1) * sqrt(T), strictly positive for S, T > 0.",
+      "description": "Vega = dV/dσ = S phi(d_1) sqrt(τ). For K, S, σ, τ > 0 the Black-Scholes call price has derivative with respect to volatility equal to S * pdf(d_1) * sqrt(τ). Its positivity is not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.PDE\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\n/-- Black-Scholes vega: dV/dσ = S phi(d_1) sqrt(τ). -/\ntheorem bs_vega {K r : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => MathFin.bsV K r s S τ)\n      (S * gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) * Real.sqrt τ) σ :=\n  MathFin.hasDerivAt_bsV_sigma hK hS hσ hτ\n"
@@ -196,7 +196,7 @@
     {
       "id": "mf-crr-prob-half",
       "name": "CRR Risk-Neutral Probability Tends to 1/2",
-      "description": "Under CRR parameterization, p_n → 1/2 as n → ∞. This is the substantive analytic step in the CRR-to-BS correspondence: the per-step Bernoulli increment becomes asymptotically symmetric. Implies the variance limit n · σ² Δt · 4 p_n (1 - p_n) → σ² T.",
+      "description": "Under the CRR parameterization with σ > 0 and T > 0, the risk-neutral up-probability p_n → 1/2 as n → ∞: the per-step Bernoulli increment becomes asymptotically symmetric. This is the analytic step behind the variance limit n · σ² Δt · 4 p_n (1 - p_n) → σ² T in the CRR-to-Black–Scholes correspondence; that limit is not itself stated in this entry.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Binomial.CRRConvergence\n\nopen MathFin Filter\nopen scoped Topology\n\n/-- CRR risk-neutral probability tends to 1/2 as n → ∞. -/\ntheorem crr_prob_tendsto_half {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto (fun n : ℕ => crrProb r σ T n) Filter.atTop (𝓝 (1/2)) :=\n  MathFin.crrProb_tendsto_half hσ hT\n"
@@ -676,7 +676,7 @@
     {
       "id": "mf-crr-drift-quotient",
       "name": "CRR Drift Quotient Limit",
-      "description": "(2 e^{rh²} − e^{σh} − e^{−σh}) / (h · (e^{σh} − e^{−σh})) → (r − σ²/2)/σ as h → 0. Substantive analytic content of the CRR-to-BS drift correspondence. Combined with sinh-side scaling (n → ∞ via h_n = √(T/n) and σT factor), gives the textbook drift limit n · (2 p_n − 1) · σ√(T/n) → (r − σ²/2)T. The substitution itself is routine; the analytic content is captured here.",
+      "description": "For σ ≠ 0, (2 e^{rh²} − e^{σh} − e^{−σh}) / (h · (e^{σh} − e^{−σh})) → (r − σ²/2)/σ as h → 0 (h ≠ 0). Substantive analytic content of the CRR-to-BS drift correspondence: it is the step behind the textbook drift limit n · (2 p_n − 1) · σ√(T/n) → (r − σ²/2)T (substitute h_n = √(T/n) and scale by σT), which is not itself stated in this entry.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Binomial.DriftLimit\n\nopen MathFin Filter\nopen scoped Topology\n\ntheorem crr_drift_quotient_thm {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :\n    Tendsto (fun h : ℝ =>\n        (2 * Real.exp (r * h^2) - Real.exp (σ * h) - Real.exp (-(σ * h)))\n          / (h * (Real.exp (σ * h) - Real.exp (-(σ * h)))))\n      (𝓝[≠] 0) (𝓝 ((r - σ^2 / 2) / σ)) :=\n  MathFin.crr_drift_limit_h hσ r\n"
@@ -1476,7 +1476,7 @@
     {
       "id": "mf-joint-stdev-triangle",
       "name": "Joint Standard-Deviation Triangle Inequality",
-      "description": "√(σ₁² + 2·ρ·σ₁·σ₂ + σ₂²) ≤ σ₁ + σ₂ whenever |ρ| ≤ 1 and σ_i ≥ 0. The substantive inequality behind gaussian subadditivity.",
+      "description": "√(σ₁² + 2·ρ·σ₁·σ₂ + σ₂²) ≤ σ₁ + σ₂ whenever σ₁, σ₂ ≥ 0 and ρ ≤ 1 — in particular for every correlation |ρ| ≤ 1. The substantive inequality behind gaussian subadditivity.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem joint_stdev_triangle_thm {σ₁ σ₂ ρ : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) :\n    Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2) ≤ σ₁ + σ₂ :=\n  MathFin.joint_stdev_le h₁ h₂ hρ\n"
@@ -1860,7 +1860,7 @@
     {
       "id": "mf-bond-2nd-immunization",
       "name": "Bond Portfolio Second-Order Immunization",
-      "description": "Matching both duration AND convexity of the asset and liability gives ∂²(A-L)/∂r² = 0 at the current rate — second-order Redington immunization.",
+      "description": "Matching the convexity-times-value Σᵢ wᵢ(Tᵢ − t)²·e^{−r(Tᵢ − t)} of the asset and liability bond portfolios gives ∂²(A-L)/∂r² = 0 at the current rate r, stated as the vanishing r-derivative of the dollar-duration gap. The statement assumes only the convexity match; duration matching is the separate first-order condition. Second-order Redington immunization.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.FixedIncome.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_2nd_immunization_thm\n    {ι κ : Type*}\n    (sA : Finset ι) (wA TA : ι → ℝ)\n    (sL : Finset κ) (wL TL : κ → ℝ)\n    (t r : ℝ)\n    (h_match_conv : MathFin.bondPortfolioConv sA wA TA t r =\n                    MathFin.bondPortfolioConv sL wL TL t r) :\n    HasDerivAt (fun r' =>\n        -MathFin.bondPortfolioDur sA wA TA t r' -\n        (-MathFin.bondPortfolioDur sL wL TL t r'))\n      0 r :=\n  MathFin.bondPortfolio_immunization_second_order sA wA TA sL wL TL t r h_match_conv\n"
@@ -1972,7 +1972,7 @@
     {
       "id": "mf-first-to-default-spread",
       "name": "First-to-Default Spread Is the Sum of Single-Name Hazards",
-      "description": "For a basket of jointly independent exponential default times τ_i ~ Exp(rates i), the first-to-default credit spread — read off the measure of the basket survival event — equals Σ rates: basket intensity is the sum of single-name intensities, so FtD spreads are additive under independence (the extremal case; default correlation only lowers the spread).",
+      "description": "For a basket of jointly independent exponential default times τ_i ~ Exp(rates i), the first-to-default credit spread — read off the measure of the basket survival event, −log μ(min_i τ_i > t)/t for t > 0 — equals Σ rates: basket intensity is the sum of single-name intensities, so FtD spreads are additive under independence. Dependent default times are not treated.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.FixedIncome.FirstToDefault\n\nopen MeasureTheory ProbabilityTheory MathFin\n\ntheorem first_to_default_spread_thm\n    {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}\n    {n : ℕ} {rates : Fin n → ℝ} {τ : Fin n → Ω → ℝ}\n    (hrates_pos : ∀ i, 0 < rates i)\n    (hexp_law : ∀ i, Measure.map (τ i) μ = expMeasure (rates i))\n    (hindep : iIndepFun τ μ)\n    (hmeas : ∀ i, Measurable (τ i))\n    (hn : 0 < n) {t : ℝ} (ht : 0 < t) :\n    -Real.log ((μ {ω | t < Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩\n        (fun i : Fin n => τ i ω)}).toReal) / t\n      = ∑ i, rates i :=\n  MathFin.firstToDefault_spread_eq_sum_hazards hrates_pos hexp_law hindep hmeas hn ht\n"
@@ -2100,7 +2100,7 @@
     {
       "id": "mf-kelly-n-periods-foc",
       "name": "Multi-Period Kelly First-Order Optimality",
-      "description": "The Kelly fraction f* is optimal for any horizon T (the optimal fraction doesn't depend on horizon — Kelly is myopic).",
+      "description": "For every horizon of n periods, the first-order condition for the expected log-growth n·g(f) holds at the one-period Kelly fraction f*: the derivative in f vanishes there, so the horizon does not move the critical point (Kelly is myopic). That f* maximizes the growth is not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Performance.Kelly\n\nopen MathFin\n\ntheorem kelly_n_periods_foc_thm (n : ℕ) {p b : ℝ}\n    (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    HasDerivAt (fun f => (n : ℝ) * MathFin.kellyGrowth p b f) 0\n      (MathFin.kellyFraction p b) :=\n  MathFin.kelly_n_periods_deriv_at_kelly n hp hp1 hb\n"
@@ -2132,7 +2132,7 @@
     {
       "id": "mf-kelly-fraction-zero-iff",
       "name": "Kelly Fraction = 0 iff Break-Even Bet",
-      "description": "Kelly fraction f* = 0 if and only if p·(b+1) = 1 — i.e., the bet has zero expected log-growth.",
+      "description": "For odds b ≠ 0, the Kelly fraction f* = 0 if and only if p·(b+1) = 1 — i.e., exactly when the bet has zero edge, p·b − (1 − p) = 0.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Performance.Kelly\n\nopen MathFin\n\ntheorem kelly_fraction_zero_iff_thm (p : ℝ) {b : ℝ} (hb : b ≠ 0) :\n    MathFin.kellyFraction p b = 0 ↔ p * (b + 1) = 1 :=\n  MathFin.kellyFraction_eq_zero_iff p hb\n"
@@ -2148,7 +2148,7 @@
     {
       "id": "mf-kelly-fraction-pos-iff",
       "name": "Kelly Fraction > 0 iff Favorable Bet",
-      "description": "Kelly fraction f* > 0 if and only if p·(b+1) > 1 — the bet has strictly positive expected log-growth.",
+      "description": "For odds b > 0, the Kelly fraction f* > 0 if and only if p·(b+1) > 1 — i.e., exactly when the bet has positive edge, p·b − (1 − p) > 0.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Performance.Kelly\n\nopen MathFin\n\ntheorem kelly_fraction_pos_iff_thm (p : ℝ) {b : ℝ} (hb : 0 < b) :\n    0 < MathFin.kellyFraction p b ↔ 1 < p * (b + 1) :=\n  MathFin.kellyFraction_pos_iff p hb\n"
@@ -2580,7 +2580,7 @@
     {
       "id": "mf-macaulay-modified-discrete",
       "name": "Modified Duration equals Macaulay Duration divided by (1+y)",
-      "description": "Under discrete annual compounding, the modified duration numerator equals the Macaulay duration numerator divided by (1+y). At the level of price-sensitivities, -dP/dy = D_mod · P where D_mod = D_mac / (1+y).",
+      "description": "Under discrete annual compounding (1 + y ≠ 0), the modified duration numerator equals the Macaulay duration numerator divided by (1+y). This is the algebraic core of the price-sensitivity identity -dP/dy = D_mod · P with D_mod = D_mac / (1+y); that derivative identity is not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.FixedIncome.MacaulayModified\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem modifiedNumerator_eq_macaulayNumerator_div_thm {ι : Type*}\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (y : ℝ) (hy : 1 + y ≠ 0) :\n    MathFin.modifiedNumerator s t c y =\n      MathFin.macaulayNumerator s t c y / (1 + y) :=\n  MathFin.modifiedNumerator_eq_macaulayNumerator_div s t c y hy\n"
@@ -2788,7 +2788,7 @@
     {
       "id": "mf-cvar-rockafellar-uryasev",
       "name": "Gaussian CVaR: Rockafellar-Uryasev Variational Characterization",
-      "description": "The Rockafellar–Uryasev variational theorem for the Gaussian loss L = μ + σ·Z: CVaR_α is the least value of the objective c ↦ c + E[(L−c)⁺]/(1−α), attained at c = VaR_α (IsLeast, gaussianCVaR_isLeast_ruObjective). Minimality by the pointwise tail certificate (L−c)⁺ ≥ (L−c)·𝟙_{Z>z}; the additive form CVaR = VaR + σ·(ϕ(z)/(1−α) − z) is the objective evaluated at the minimizer.",
+      "description": "The Rockafellar–Uryasev variational theorem for the Gaussian loss L = μ + σ·Z with σ > 0, quantile-parametrized by z with Φ(z) = α < 1: CVaR_α = μ + σ·ϕ(z)/(1−α) is the least value of the objective c ↦ c + E[(L−c)⁺]/(1−α), and that least value is attained (IsLeast over the objective's range). The statement does not name the minimizer; the proof attains it at c = VaR_α (gaussianVaR).",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.RockafellarUryasev\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\ntheorem gaussian_cvar_rockafellar_uryasev_thm (μ σ z α : ℝ) (hσ : 0 < σ)\n    (hzα : MathFin.Phi z = α) (hα1 : α < 1) :\n    IsLeast (Set.range (MathFin.ruObjective μ σ α)) (MathFin.gaussianCVaR μ σ z α) :=\n  MathFin.gaussianCVaR_isLeast_ruObjective μ σ z α hσ hzα hα1\n"
@@ -2820,7 +2820,7 @@
     {
       "id": "mf-herfindahl-cauchy-schwarz",
       "name": "Herfindahl-Hirschman Index Lower Bound by Cauchy-Schwarz",
-      "description": "Under unit-budget constraint (Σ w_i = 1), the Cauchy-Schwarz inequality gives HHI = Σ w_i² ≥ 1/n where n = card s. Equality at equal weights.",
+      "description": "Under the unit-budget constraint Σ w_i = 1 on a nonempty index set s, the Cauchy-Schwarz inequality gives HHI = Σ w_i² ≥ 1/n where n = card s. The equality case (equal weights) is not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.Concentration\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem herfindahl_card_inv_le_of_sum_one_thm {ι : Type*}\n    (s : Finset ι) (w : ι → ℝ) (hs : s.Nonempty) (h_sum : ∑ i ∈ s, w i = 1) :\n    (s.card : ℝ)⁻¹ ≤ MathFin.herfindahl s w :=\n  MathFin.herfindahl_card_inv_le_of_sum_one s w hs h_sum\n"
@@ -2884,7 +2884,7 @@
     {
       "id": "mf-merton-1973-no-early-exercise",
       "name": "Merton 1973: American = European for Non-Dividend Call",
-      "description": "Under positive interest rate and BS lognormal hypothesis, bsV > S - K. Strict dominance over immediate-exercise payoff implies American call equals European call (early exercise never optimal).",
+      "description": "Under the Black–Scholes lognormal hypothesis and a positive interest rate r > 0, the European call value strictly exceeds the immediate-exercise payoff: bsV > S₀ − K. This strict dominance is Merton's (1973) reason that early exercise of a non-dividend-paying American call is never optimal; the American-equals-European conclusion itself is not formalized in this entry.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Binomial.AmericanCallNoDividend\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem bsV_strict_gt_immediate_exercise_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) (hr : 0 < r) :\n    S_0 - K < bsV K r σ S_0 T :=\n  MathFin.bsV_strict_gt_immediate_exercise h hr\n"
@@ -3172,7 +3172,7 @@
     {
       "id": "mf-newton-raphson-fixed-at-root",
       "name": "Newton-Raphson Iteration: Local Quadratic Convergence",
-      "description": "Local quadratic convergence of Newton–Raphson at a simple root: one step contracts quadratically at the sharp Newton–Kantorovich constant, |newtonStep f f' x − r| ≤ (L/(2m))·(x − r)², under HasDerivAt f + L-Lipschitz f' + |f'| ≥ m > 0 near r; in the basin |x₀ − r| ≤ δ with L·δ ≤ m the error halves each step, giving (1/2)ⁿ geometric decay and newtonSeq → r.",
+      "description": "Local quadratic convergence of Newton–Raphson at a simple root r: under HasDerivAt f, an L-Lipschitz f' and |f'| ≥ m > 0 on [r − δ, r + δ], one step contracts quadratically at the sharp Newton–Kantorovich constant, |newtonStep f f' x − r| ≤ (L/(2m))·(x − r)² for x in that interval; and from any x₀ with |x₀ − r| ≤ δ and L·δ ≤ m, newtonSeq → r. The (1/2)ⁿ error bound behind that convergence is proved in the source module (newtonSeq_error_le_geometric) but is not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.NewtonConvergence\n\nopen Filter Topology MathFin\n\ntheorem newton_quadratic_error_and_tendsto_thm {f f' : ℝ → ℝ} {r δ m L x₀ : ℝ}\n    (hroot : f r = 0) (hm0 : 0 < m) (hL : 0 ≤ L)\n    (hd : ∀ y ∈ Set.Icc (r - δ) (r + δ), HasDerivAt f (f' y) y)\n    (hlip : ∀ y ∈ Set.Icc (r - δ) (r + δ), ∀ w ∈ Set.Icc (r - δ) (r + δ),\n      |f' y - f' w| ≤ L * |y - w|)\n    (hm : ∀ y ∈ Set.Icc (r - δ) (r + δ), m ≤ |f' y|)\n    (hx₀ : |x₀ - r| ≤ δ) (hbasin : L * δ ≤ m) :\n    (∀ x ∈ Set.Icc (r - δ) (r + δ),\n        |MathFin.newtonStep f f' x - r| ≤ L / (2 * m) * (x - r) ^ 2) ∧\n      Tendsto (MathFin.newtonSeq f f' x₀) atTop (𝓝 r) :=\n  ⟨fun _ hx => MathFin.newtonStep_quadratic_error hroot hm0 hL hd hlip hm hx,\n    MathFin.newtonSeq_tendsto_root hroot hm0 hL hd hlip hm hx₀ hbasin⟩\n"
@@ -3235,7 +3235,7 @@
     {
       "id": "mf-no-arb-forward-price",
       "name": "Forward Price from No-Arbitrage",
-      "description": "The unique fair forward strike making the contract (S_T - F) worth zero at inception is F = S0 / DF (cash-and-carry). Existence and uniqueness from linearity of the pricing functional.",
+      "description": "Given state-price weights q that price the zero-coupon bond at DF ≠ 0 and the stock at S₀, exactly one forward strike F makes the forward contract's payoff S_T − F worth zero at inception. The statement asserts existence and uniqueness (∃!); the proof's witness is the cash-and-carry value F = S₀/DF, which the statement does not name.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Foundations.NoArbitrageDerivations\n\nopen MathFin\n\ntheorem forward_price_eq_spot_div_discount_thm\n    {ι : Type*} (s : Finset ι) (q : ι → ℝ) (S : ι → ℝ)\n    (DF S₀ : ℝ) (hDF : DF ≠ 0)\n    (h_bond : ∑ i ∈ s, q i = DF)\n    (h_stock : ∑ i ∈ s, q i * S i = S₀) :\n    ∃! F : ℝ, ∑ i ∈ s, q i * (S i - F) = 0 :=\n  MathFin.forward_price_eq_spot_div_discount s q S DF S₀ hDF h_bond h_stock\n"
@@ -3314,7 +3314,7 @@
     {
       "id": "mf-worstcase-risk-representation",
       "name": "Worst-Case Loss as a Coherent-Risk Instance",
-      "description": "The worst-case loss maxᵢ(-Xᵢ) is a concrete coherent risk measure, and its ADEH representation specialises to the supremum of expected loss over the entire probability simplex — making the abstract finite-state representation tangible on a recognisable risk measure.",
+      "description": "The worst-case loss maxᵢ(-Xᵢ) is the least upper bound of expected loss over the entire probability simplex — the ADEH representation made concrete on a recognisable risk measure. Its coherence is a separate theorem (worstCase_isCoherent) and not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.WorstCaseRisk\n\nopen scoped BigOperators\n\n/-- **Worst-case loss = sup of expected loss over the probability simplex.** The most conservative\n    coherent risk measure `worstCase X = maxᵢ (-Xᵢ)` is a concrete `IsCoherentRisk`, and its ADEH\n    representation (Task 1.3) specialises to the supremum over the entire probability simplex.\n    Re-exports `MathFin.worstCase_isLUB`. -/\ntheorem worstcase_risk_representation {ι : Type*} [Fintype ι] [Nonempty ι] (X : ι → ℝ) :\n    IsLUB ((fun q => ∑ i, q i * (- X i)) '' stdSimplex ℝ ι) (MathFin.worstCase X) :=\n  MathFin.worstCase_isLUB X\n"
@@ -3330,7 +3330,7 @@
     {
       "id": "mf-vnm-expected-utility",
       "name": "von Neumann-Morgenstern Axioms for Expected Utility",
-      "description": "Expected utility over finite-outcome lotteries is affine in the lottery mixture, the induced preference satisfies the von Neumann-Morgenstern axioms (completeness, transitivity, independence, Archimedean continuity with the indifference weight exhibited), and the preference is invariant under positive affine rescaling of the utility. Soundness direction only: the vNM representation theorem (axioms imply an expected-utility form) is not delivered.",
+      "description": "Expected utility over finite-outcome lotteries is affine in the lottery mixture; the induced preference satisfies independence and Archimedean continuity (an indifference weight α ∈ (0,1) exists); and, for normalized lotteries, the preference is invariant under positive affine rescaling of the utility. Completeness and transitivity of the preference are proved in the source module (prefersEU_total, prefersEU_trans) but are not restated in this entry. Soundness direction only: the vNM representation theorem (axioms imply an expected-utility form) is not delivered.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.VonNeumannMorgenstern\n\nopen MathFin\n\n/-- The pivot of the vNM development: expected utility is affine in the lottery mixture,\n    `EU(αp + (1−α)q) = α·EU(p) + (1−α)·EU(q)`. Needs no hypotheses on the lotteries —\n    it is linearity of the finite sum, and it is exactly what fails for the non-linear\n    functionals invented to explain the Allais paradox. -/\ntheorem vnm_expected_utility_mix\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) (α : ℝ) (p q : ι → ℝ) :\n    MathFin.expectedUtility s u (MathFin.mix α p q)\n      = α * MathFin.expectedUtility s u p + (1 - α) * MathFin.expectedUtility s u q :=\n  MathFin.expectedUtility_mix s u α p q\n\n/-- vNM independence: mixing a common lottery into both sides preserves the\n    expected-utility preference, at any nonnegative weight. -/\ntheorem vnm_independence\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) {α : ℝ} (hα : 0 ≤ α)\n    {p q r : ι → ℝ} (h : MathFin.prefersEU s u p q) :\n    MathFin.prefersEU s u (MathFin.mix α p r) (MathFin.mix α q r) :=\n  MathFin.prefersEU_independence s u hα h\n\n/-- vNM continuity (the Archimedean axiom): strictly between a better and a worse lottery,\n    some strict mixture of the outer pair is exactly indifferent to the middle one; the\n    weight is exhibited as the position of the middle utility on the outer utility\n    interval, not obtained from a limit. -/\ntheorem vnm_continuity\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) {p q r : ι → ℝ}\n    (hpq : MathFin.expectedUtility s u q < MathFin.expectedUtility s u p)\n    (hqr : MathFin.expectedUtility s u r < MathFin.expectedUtility s u q) :\n    ∃ α : ℝ, 0 < α ∧ α < 1 ∧\n      MathFin.expectedUtility s u (MathFin.mix α p r) = MathFin.expectedUtility s u q :=\n  MathFin.prefersEU_continuity s u hpq hqr\n\n/-- vNM cardinality: a positive affine rescaling of the utility induces exactly the same\n    preference on lotteries — utility is cardinal only up to origin and scale. -/\ntheorem vnm_affine_invariance\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) {a b : ℝ} (ha : 0 < a)\n    {p q : ι → ℝ} (hp : ∑ i ∈ s, p i = 1) (hq : ∑ i ∈ s, q i = 1) :\n    MathFin.prefersEU s (fun i ↦ a * u i + b) p q ↔ MathFin.prefersEU s u p q :=\n  MathFin.prefersEU_affine_invariant s u ha hp hq\n"
@@ -3410,7 +3410,7 @@
     {
       "id": "mf-ftap-one-period-vector",
       "name": "d-Asset One-Period FTAP (Esscher EMM, finite-dimensional market)",
-      "description": "On an arbitrary probability space, for a ℝᵈ-valued discounted excess return Y, no arbitrage ⟺ there is an equivalent martingale measure Q ~ P with Y integrable and E_Q[Y] = 0 ∈ ℝᵈ — with no non-redundancy hypothesis. The backward direction is the explicit Esscher / minimal-divergence construction: minimise the smooth convex potential θ ↦ E[log(1 + exp⟪θ,Y⟫)]. The potential is constant along the gains kernel N = {θ : ⟪θ,Y⟫ = 0 a.e.} and coercive on its orthogonal complement Nᗮ, so a minimiser on Nᗮ is automatically global (redundant directions absorbed); its first-order condition E[Y·σ⟪θ₀,Y⟫] = 0 (σ logistic) yields a strictly-positive bounded density.",
+      "description": "On an arbitrary probability space, for a ℝᵈ-valued discounted excess return Y, no arbitrage ⟺ there is an equivalent martingale measure Q ~ P with Y integrable and E_Q[Y] = 0 ∈ ℝᵈ — with no non-redundancy hypothesis. The backward direction is an explicit logistic-tilt construction (the softplus analogue of the Esscher measure, not the Esscher measure itself): minimise the smooth convex potential θ ↦ E[log(1 + exp⟪θ,Y⟫)]. The potential is constant along the gains kernel N = {θ : ⟪θ,Y⟫ = 0 a.e.} and coercive on its orthogonal complement Nᗮ, so a minimiser on Nᗮ is automatically global (redundant directions absorbed); its first-order condition E[Y·σ⟪θ₀,Y⟫] = 0 (σ logistic) yields a strictly-positive bounded density.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Foundations.FTAPOnePeriodVector\n\nopen MeasureTheory\n\n/-- **d-asset one-period FTAP** (Föllmer–Schied 1.6, full). For a measurable\n    `ℝᵈ`-valued discounted excess return `Y` on an arbitrary probability space and\n    constant portfolios `θ ∈ ℝᵈ`, no arbitrage holds iff there is an equivalent martingale\n    measure `Q ~ P` with `Y` integrable and `E_Q[Y] = 0` — with **no non-redundancy\n    hypothesis** (redundant assets are absorbed by minimising the potential over the gains\n    kernel's orthogonal complement). Backward: the explicit Esscher / minimal-divergence\n    EMM from minimising `θ ↦ E[log(1+exp⟪θ,Y⟫)]`. Re-exports\n    `MathFin.OnePeriodVector.ftap_one_period_vector` at `F = EuclideanSpace ℝ (Fin d)`. -/\ntheorem ftap_one_period_vector_market {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (P : Measure Ω) [IsProbabilityMeasure P] {d : ℕ} (Y : Ω → EuclideanSpace ℝ (Fin d))\n    (hY : Measurable Y) :\n    MathFin.OnePeriodVector.NoArbitrage P Y ↔ ∃ Q, MathFin.OnePeriodVector.IsEMM P Y Q :=\n  MathFin.OnePeriodVector.ftap_one_period_vector P Y hY"
@@ -3490,7 +3490,7 @@
     {
       "id": "mf-kelly-numeraire-emm",
       "name": "Kelly Numéraire Portfolio ⟹ EMM (Price Invariance, discrete)",
-      "description": "The growth-optimal (Kelly) portfolio is the numéraire portfolio: deflating the physical measure by the growth-optimal terminal wealth turns it into the equivalent martingale measure. In the two-outcome bet, the GOP-deflated probabilities q₊ = p/W*₊ = 1/(b+1), q₋ = (1-p)/W*₋ = b/(b+1) (independent of the physical p) sum to 1 and make the bet a martingale (q₊·b + q₋·(-1) = 0). The p-independence is exactly the Kelly first-order condition. The discrete numéraire-portfolio ⟹ EMM identity.",
+      "description": "In the two-outcome bet (win probability 0 < p < 1, odds b > 0), deflate the physical probabilities by the growth-optimal (Kelly) terminal wealth W*₊ = 1 + f*·b, W*₋ = 1 − f*, where f* = (p·b − (1 − p))/b is the Kelly fraction. The deflated weights q₊ = p/W*₊ and q₋ = (1 − p)/W*₋ give the bet zero expected return: q₊·b + q₋·(−1) = 0. This is the martingale half of the discrete numéraire-portfolio ⟹ EMM identity; the closed forms q₊ = 1/(b+1), q₋ = b/(b+1), their independence of p, and their summing to 1 (which makes q a probability) are not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Performance.KellyNumeraire\n\nopen MathFin\n\n/-- **The Kelly (growth-optimal) portfolio as numéraire induces the risk-neutral\nmeasure.** In the two-outcome market (bet at fraction `f` pays odds `b` with physical\nprobability `p`), deflate the physical measure by the growth-optimal terminal wealth\n`W*₊ = 1 + f*·b`, `W*₋ = 1 - f*` at the Kelly fraction `f* = kellyFraction p b`. The\nresulting probabilities `q₊ = p/W*₊`, `q₋ = (1-p)/W*₋` make the bet a martingale — zero\nexpected excess return `q₊·b + q₋·(-1) = 0` — i.e. the GOP-deflated measure is the EMM.\nThe discrete numéraire-portfolio ⟹ EMM identity. Re-exports\n`MathFin.kellyNumeraire_isRiskNeutral`. -/\ntheorem kelly_numeraire_isRiskNeutral {p b : ℝ} (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    p / (1 + kellyFraction p b * b) * b\n      + (1 - p) / (1 - kellyFraction p b) * (-1) = 0 :=\n  MathFin.kellyNumeraire_isRiskNeutral hp hp1 hb\n"
