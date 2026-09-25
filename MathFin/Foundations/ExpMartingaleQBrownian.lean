@@ -266,7 +266,7 @@ private theorem Y_increments_mgf_range (h : IsExpQMartingale Q 𝓕 Y T) {t : �
       ∫ ω, Real.exp (∑ k ∈ Finset.range n, a k * (Y (t (k + 1)) ω - Y (t k) ω)) ∂Q
         = ∏ k ∈ Finset.range n, Real.exp (a k ^ 2 * ((t (k + 1) : ℝ) - (t k : ℝ)) / 2) := by
   induction n generalizing a with
-  | zero => constructor <;> simp [integrable_const]
+  | zero => constructor <;> simp
   | succ n ih =>
     have hmeasY : ∀ w, Measurable (Y w) := fun w ↦ ((h.adapted w).mono (𝓕.le w)).measurable
     have htn : t n ≤ t (n + 1) := ht (Nat.le_add_right n 1)
@@ -403,8 +403,7 @@ theorem increments_iIndepFun_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) 
       rw [PiLp.inner_apply, ← Fin.sum_univ_eq_sum_range]
       refine Finset.sum_congr rfl fun i _ ↦ ?_
       rw [hc i]
-      simp only [PiLp.toLp_apply, WithLp.ofLp_toLp, RCLike.inner_apply, conj_trivial]
-      ring
+      simp only [RCLike.inner_apply, conj_trivial]
     simp only [hinner, Complex.ofReal_one, one_mul]
   have hmarg (i : Fin n) : charFun (Q.map fun ω ↦ Y (t ((i : ℕ) + 1)) ω - Y (t i) ω) (w i)
       = Complex.exp ((-(w i ^ 2 * ((t ((i : ℕ) + 1) : ℝ) - (t i : ℝ)) / 2) : ℝ) : ℂ) := by
