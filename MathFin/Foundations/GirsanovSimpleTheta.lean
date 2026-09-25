@@ -19,9 +19,9 @@ Route-α, brick α3 (`docs/plans/2026-07-06-girsanov-track-alpha.md`). For a mar
 `Z_T = E^{−c}_T` (`simpleDoleansExp s (fun i ↦ −c i) N T`). Under `Q = P.withDensity Z_T`, the
 drift-corrected process `B^θ_t = X_t + ∑_i c_i (s_{i+1}∧t − s_i∧t)` starts at `0`, has `N(0,t−s)`
 increments, and independent increments (`HasIndepIncrements`) on `[0,T]`, which together fix every
-finite-dimensional law of `B^θ` on `[0,T]` to that of a `Q`-Brownian motion; path continuity is not
-stated. This is the bounded-**adapted**-θ Girsanov for the simple case, strictly beyond constant θ,
-on the existing tower with no adapted-integrand Itô formula.
+finite-dimensional law of `B^θ` under `Q` on `[0,T]` to that of a standard Brownian motion; path
+continuity is not stated. This is the bounded-**adapted**-θ Girsanov for the simple case, strictly
+beyond constant θ, on the existing tower with no adapted-integrand Itô formula.
 
 The route is the process-agnostic exponential characterization
 `Foundations/ExpMartingaleQBrownian.isQBrownianMotion_of_expMartingale`: supply the exponential

@@ -27,8 +27,8 @@ spine-free architecture:
 * the uniform `L⁴`/`L²` moment bounds (`GirsanovSimpleDoleansMoments`) feed the a.e.-subsequence
   set-integral engine, exactly as in the continuous case, and `isQBrownianMotion_of_expMartingale`
   reads off zero start, `N(0,t−s)` increments, and independent increments (`HasIndepIncrements`)
-  on `[0,T]`, which together fix every finite-dimensional law of `B^θ` on `[0,T]` to that of a
-  `Q`-Brownian motion; path continuity is not stated.
+  on `[0,T]`, which together fix every finite-dimensional law of `B^θ` under `Q` on `[0,T]` to that
+  of a standard Brownian motion; path continuity is not stated.
 
 The limit drift is the genuinely-`𝓕`-adapted `driftContinuousMod θ̂` (a.e. equal to the honest
 integral `∫₀ᵘθds`), so no fresh predictable-progressive-measurability lemma is needed.

@@ -20,8 +20,8 @@ in each `t`) continuous (every path `s ↦ θ_s ω`) market price of risk `θ`, 
 `Q = μ.withDensity Z_T` with the Doléans density `Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)` the
 drift-corrected process `B^θ_u = B_u + ∫₀ᵘθ ds` starts at `0`, has `N(0,t−s)` increments, and has
 independent increments (`HasIndepIncrements`) on `[0,T]`, which together fix every
-finite-dimensional law of `B^θ` on `[0,T]` to that of a `Q`-Brownian motion; path continuity is not
-stated.
+finite-dimensional law of `B^θ` under `Q` on `[0,T]` to that of a standard Brownian motion; path
+continuity is not stated.
 
 The route is **spine-free**: rather than build a continuous Doléans stochastic exponential and prove
 it is a martingale (a Novikov-flavoured crux), we pass the *simple* exponential-martingale identity to

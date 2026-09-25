@@ -245,9 +245,10 @@ its law is `N(0,t−s)`. -/
 private theorem integrable_exp_Y_increment (h : IsExpQMartingale Q 𝓕 Y T) (c : ℝ) {s t : ℝ≥0}
     (hst : s ≤ t) (htT : t ≤ T) :
     Integrable (fun ω ↦ Real.exp (c * (Y t ω - Y s ω))) Q := by
+  have hincmeas : Measurable fun ω ↦ Y t ω - Y s ω := (h.measurable t).sub (h.measurable s)
   rw [show (fun ω ↦ Real.exp (c * (Y t ω - Y s ω)))
         = (fun x ↦ Real.exp (c * x)) ∘ (fun ω ↦ Y t ω - Y s ω) from rfl,
-      ← integrable_map_measure (by fun_prop) ((h.measurable t).sub (h.measurable s)).aemeasurable,
+      ← integrable_map_measure (by fun_prop) hincmeas.aemeasurable,
       increment_map_eq_gaussianReal_of_expMartingale h hst htT]
   exact integrable_exp_mul_gaussianReal c
 
@@ -381,8 +382,8 @@ theorem increments_iIndepFun_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) 
       -- a centred Gaussian with the diagonal variance,
       _ = Complex.exp ((-(∑ k ∈ Finset.range n, c k ^ 2 * ((t (k + 1) : ℝ) - (t k : ℝ))) / 2 : ℝ)
             : ℂ) := by
-        rw [Y_linComb_range_map_eq_gaussianReal h ht htT n c (v := ⟨_, hσ2⟩) rfl,
-          charFun_gaussianReal, NNReal.coe_mk]
+        rw [Y_linComb_range_map_eq_gaussianReal h ht htT n c (Real.coe_toNNReal _ hσ2),
+          charFun_gaussianReal, Real.coe_toNNReal _ hσ2]
         congr 1
         push_cast
         ring

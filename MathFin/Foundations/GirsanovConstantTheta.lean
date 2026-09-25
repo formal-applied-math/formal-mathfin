@@ -268,8 +268,8 @@ theorem Btheta_increment_map_eq_gaussianReal
 Under `Q = P.withDensity(exp(−θ X_T − ½θ² T))` the drift-corrected process `B^θ_t = X_t + θ t` has,
 on `[0,T]`: zero start `B^θ_0 = 0` a.e. `Q`, Gaussian increments `B^θ_t − B^θ_s ~ N(0, t−s)`, and
 independent increments (`HasIndepIncrements`). Together these fix every finite-dimensional law of
-`B^θ` on `[0,T]` to that of a `Q`-Brownian motion; path continuity is not stated. One application of
-`isQBrownianMotion_of_expMartingale` to the constant-θ exponential martingale
+`B^θ` under `Q` on `[0,T]` to that of a standard Brownian motion; path continuity is not stated. One
+application of `isQBrownianMotion_of_expMartingale` to the constant-θ exponential martingale
 (`isExpQMartingale_Btheta`), reached on the existing tower (Bayes engine + Wald exponentials) with no
 adapted-integrand Itô formula. The bounded-*adapted*-θ statements are delivered separately, by
 `GirsanovSimpleTheta` (piecewise-constant), `GirsanovAdaptedTheta` (bounded continuous
