@@ -185,12 +185,12 @@ theorem qv_equals_t (hB : BrownianQuadraticVariation μ B)
 end BrownianQuadraticVariation
 
 /-- **Bridge: a (measurable) pre-Brownian motion is a quadratic-variation
-process.** Reparametrising a BrownianMotion-package `IsPreBrownianReal` process
+process.** Reparametrising a pre-Brownian (`IsPreBrownianReal`) process
 `B : ℝ≥0 → Ω → ℝ` to the real line via `Real.toNNReal` (`B' t := B t.toNNReal`),
 the result satisfies the `BrownianQuadraticVariation` hypotheses, so the whole
 variance-swap tower can be driven from a single `IsPreBrownianReal` hypothesis
 (plus evaluation-measurability — `IsPreBrownianReal` supplies only a.e.
-measurability). The increment law is `MathFin.hasLaw_increment` (Degenne's
+measurability). The increment law is `MathFin.hasLaw_increment` (Mathlib's
 `IsPreBrownianReal.hasLaw_sub` with its `nndist` variance read as the `ℝ≥0` subtraction) at
 the reparametrised times `t.toNNReal`, `s.toNNReal`. -/
 theorem brownianQuadraticVariation_of_isPreBrownianReal

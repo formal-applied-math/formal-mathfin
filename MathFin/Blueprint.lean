@@ -56,12 +56,13 @@ the mathematics says, with deferrals named, never papered over.
 
 @[expose] public section
 
--- ===== root: the driving noise (upstream — Degenne's brownian-motion) =====
+-- ===== root: the driving noise (upstream — Mathlib) =====
 
-attribute [blueprint "def:brownian-motion" (title := "Brownian motion (Degenne, upstream)")
+attribute [blueprint "def:brownian-motion" (title := "Brownian motion (Mathlib, upstream)")
   (statement := /-- The driving noise: independent stationary Gaussian increments,
-  $B_t \sim N(0,t)$ — `IsPreBrownianReal`, consumed from Rémy Degenne's
-  `brownian-motion` package, on which this library builds. -/)]
+  $B_t \sim N(0,t)$ — `IsPreBrownianReal`, now in Mathlib. Rémy Degenne's
+  `brownian-motion` package, on which this library also builds, supplies the
+  continuous modification and the filtered versions. -/)]
   ProbabilityTheory.IsPreBrownianReal
 
 -- ===== foundations =====

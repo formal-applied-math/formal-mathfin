@@ -43,9 +43,9 @@
   "label": "thm:carr-madan",
   "file": "/app/MathFin/Foundations/CarrMadan.lean"},
  {"uses": [],
-  "title": "Brownian motion (Degenne, upstream)",
+  "title": "Brownian motion (Mathlib, upstream)",
   "text":
-  "The driving noise: independent stationary Gaussian increments,\n  $B_t \\sim N(0,t)$ — `IsPreBrownianReal`, consumed from Rémy Degenne's\n  `brownian-motion` package, on which this library builds.",
+  "The driving noise: independent stationary Gaussian increments,\n  $B_t \\sim N(0,t)$ — `IsPreBrownianReal`, now in Mathlib. Rémy Degenne's\n  `brownian-motion` package, on which this library also builds, supplies the\n  continuous modification and the filtered versions.",
   "name": "ProbabilityTheory.IsPreBrownianReal",
   "module": "Mathlib.Probability.BrownianMotion.Basic",
   "line": 70,

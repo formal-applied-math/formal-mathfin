@@ -17,7 +17,7 @@ The existing `BSCallHyp` and `BachelierHyp` hypotheses are stated at the
 **marginal level**: `Z ~ N(0, 1)` under `Q` with `S_T = bsTerminal …(Z ω)`
 (BS) or `S_T = S_0 + σ √T · Z(ω)` (Bachelier). This file shows that both
 hypotheses are *consequences* of having a pre-Brownian motion `W : ℝ≥0 → Ω →
-ℝ` (`IsPreBrownianReal W Q` from the `BrownianMotion` package), by setting
+ℝ` (Mathlib's `IsPreBrownianReal W Q`), by setting
 
   `Z := W T.toNNReal / √T`,
 

@@ -12,7 +12,7 @@ their faithfulness status in [`coverage.md`](coverage.md).
 **Status legend.** Green: machine-checked in Lean 4, and — for the headline
 nodes — `#print axioms`-clean ([`AxiomAudit.lean`](../MathFin/AxiomAudit.lean)
 build-pins them to `[propext, Classical.choice, Quot.sound]`). Blue: consumed
-from an upstream package (Degenne's `brownian-motion`) — coherence made
+from upstream (Mathlib's `IsPreBrownianReal`) — coherence made
 visible. 🚧 *partially* formalized — a genuine machine-checked core with an
 explicitly deferred lifting step (the gap is named in the file, never papered
 over). ⏳ stated but not yet formalized — the Mathlib-gated frontier. No node
@@ -32,7 +32,7 @@ edge is a genuine logical root.
 <!-- BEGIN GENERATED SPINE (tools/blueprint_render.py — do not hand-edit) -->
 ```mermaid
 graph TD
-  brownianMotion["Brownian motion (Degenne, upstream)"]:::upstream
+  brownianMotion["Brownian motion (Mathlib, upstream)"]:::upstream
   binomialRepresentation["Binomial martingale representation (completeness)"]:::proved
   bsCall["Black–Scholes call formula"]:::proved
   bsIdentity["bs_identity: S·φ(d₁) = Ke^{−rτ}·φ(d₂)"]:::proved

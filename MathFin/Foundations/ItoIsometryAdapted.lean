@@ -21,7 +21,7 @@ increment `B_{t₁} - B_{t₀}` is *independent of the past* `𝓕_{t₀}` (the 
 Markov property `IsPreBrownianReal.indepFun_shift`), and has mean zero.
 
 This file builds that genuinely-stochastic core, grounded directly on
-Degenne's `IsPreBrownianReal.indepFun_shift` and `hasLaw_sub`. Adaptedness is
+Mathlib's `IsPreBrownianReal.indepFun_shift` and `hasLaw_sub`. Adaptedness is
 encoded faithfully as factoring through the *past process*
 `fun (t : Set.Iic t₀) ↦ B t ω` — the natural Brownian filtration, which is
 exactly what `indepFun_shift` is stated against.
