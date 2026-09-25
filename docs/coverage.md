@@ -69,6 +69,14 @@ statements turned up four older imprecisions, now fixed:
 - `cm-thm-4.3.7`'s indicator form agrees with M<sub>t∧τ</sub> on {τ > 0}.
 - `cm-thm-4.3.9`'s description now states the sharp form the Lean proves.
 
+A follow-up brought the Lean docstrings of four of these snippets (`bm-thm-5.3.2`,
+`bm-prop-5.1.2`, `cm-thm-4.3.7`, `cm-thm-4.3.9`) in line with their scope notes. It also fixed
+`bm-thm-5.3.2`'s description, which allowed β = 0, and `sc-thm-7.1.1`, whose description said
+f ∈ C². That theorem assumes f′, f″ and f‴ exist and are bounded, and the description now says
+so. Its scope now uses the current names. It notes that `ito_formula_unrestricted` proves the
+localization to C³ in local-martingale form, and it cites `ito_formula_L2_bddDeriv_mk` for the
+path-continuity hypothesis.
+
 `test_library_wrapper_citations_are_pinned` keeps the list in step with the corpus. Every wrapper
 entry needs a row, each listed name must still appear in its proof, and each must be pinned. The
 test cannot see a name that a row leaves out; that is still a review item.
