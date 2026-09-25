@@ -125,6 +125,134 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-09-25 — corpus 373 — Girsanov: jointly independent increments under Q
+
+Scope: `isQBrownianMotion_of_expMartingale` now concludes `HasIndepIncrements` on `[0,T]` where it
+concluded independence of two increments at a time (`increments_iIndepFun_of_expMartingale`,
+`hasIndepIncrements_of_expMartingale`), and the four Girsanov entries (`gir-const-theta-qbm`,
+`gir-simple-adapted`, `gir-thm-9.1.8`, `gir-thm-9.1.8-predictable`) state it. They stay `full`,
+revising the criterion recorded the same day in `docs/coverage.md`, which counted path continuity
+as part of the gap. The review widened the change to the seven structure entries that encoded
+"independent increments" the same pairwise way. Three read-only review agents split the lenses:
+(1, 2, 4); (5, 7) plus the standing first pass; and (3, 6, 8). The authoring agent adjudicated. The
+local slot has no Lean, so the GitHub runners were the checker; the refactor broke two rewrites,
+fixed from the build log. There were no blockers.
+
+### The standing first pass — prose against statement
+
+- **The change's own prose overclaimed in six places**, all fixed:
+  - `docs/coverage.md` said the previous section's gap was closed. That section names two, and
+    path continuity is still open. Its status paragraph said the entries derive the
+    finite-dimensional law; they derive three properties that fix it, an implication Mathlib
+    proves on `ℝ≥0` (`HasIndepIncrements.isPreBrownianReal_of_hasLaw`) and the library does not
+    restate for `[0,T]`. It also conditioned on `𝓕_{t_n}` where `𝓕_{t_{n−1}}` is meant.
+  - The `AxiomAudit.lean` section header still read "`B^θ` is a `Q`-Brownian motion".
+  - In four descriptions "on [0, T]" bound only the last property, and `N(0, t−s)` increments
+    are false past `T`.
+  - `gir-thm-9.1.8-predictable` and the README wrote the process as `B_u + ∫₀ᵘθ ds`. The Lean
+    states the result for an adapted modification of it.
+  - `sc-thm-9.1.8` called the bounded results stronger than its assumed field. They hold on
+    `[0,T]` only, and for the opposite sign convention.
+  - "The finite-dimensional law of a Q-Brownian motion" is that of a standard Brownian motion;
+    it does not depend on Q.
+- **Older prose**, fixed:
+  - `docs/bridges.md` and `docs/mathematical-architecture.md` called the result "a genuine
+    `Q`-Brownian motion". The roadmap's 2026-07-05 and 2026-07-10 updates do too. Being dated
+    records, they stay as written, and a new phase entry records the correction.
+  - Three Lean docstrings and the blueprint's Brownian-motion node credited `IsPreBrownianReal`
+    to Degenne's package. It is in Mathlib.
+- **Encodings behind "faithful" claims.** `bm-def-5.1.1` and `cv-poisson-def`, whose scopes say
+  "Faithful Lean encoding", stated independence of two increments at a time. `bm-def-5.1.1` was
+  also indexed by `ℝ`, so its increment law constrained negative times. Both now use
+  `HasIndepIncrements` on `ℝ≥0`. Five structure specifications with the same pairwise field
+  (`bm-thm-5.1.7`, `bm-cor-5.3.4`, `bm-thm-5.3.5`, `sc-thm-9.1.1`, `sc-thm-9.1.8`) now use
+  `HasIndepIncrements` too.
+
+### Upgrades executed
+
+- **Coherence (lens 2), all three agents.** The corpus has one notion of independent increments,
+  Mathlib's `HasIndepIncrements`, wherever it states one. `IsExpQMartingale.adapted` is Mathlib's
+  `StronglyAdapted`, the predicate Degenne's `IsFilteredPreBrownian` uses.
+- **Zero slop (lens 3), all three agents.** Removed:
+  - the pairwise lemmas `increments_indepFun_of_expMartingale` and `Btheta_increments_indepFun`,
+    which had no consumers (pairwise independence is `iIndepFun.indepFun` of the joint
+    statement);
+  - eight re-derivations of `Measurable (Y u)`, now `IsExpQMartingale.measurable`;
+  - the second proof that the variance is nonnegative (the law lemma takes the variance as a
+    parameter);
+  - dead `have`s and `set … with` in the induction;
+  - the `mgf_id_gaussianReal` / `0 * a` entry ramp repeated at the three callers of
+    `map_eq_gaussianReal_of_mgf`, which now takes the MGF in the shape they produce and ends in
+    `simpa`.
+- **First principles (lens 5).** The two copies of the AM–GM integrability block are one
+  Cauchy–Schwarz lemma, `integrable_exp_mul_exp`, via `MemLp.integrable_mul`: the certificate that
+  shows why.
+- **Elegance (lens 8).** `increments_iIndepFun_of_expMartingale` is a three-step calc, where it
+  was a nine-`have` ladder: the joint characteristic function equals that of a Gaussian linear
+  combination at `1`, which is the product of the marginals. That is the Cramér–Wold shape.
+- **Concept clarity (lens 7).** The docstrings say the zero start is restated, not derived, and
+  that independence from the past `𝓕_s` is not claimed. The descriptions tell the like-for-like
+  story: `B` is assumed pre-Brownian, and `B^θ` gets the finite-dimensional laws of a Brownian
+  motion. Nothing about paths is assumed or concluded.
+
+### Exemplars
+
+- The `IsExpQMartingale` abstraction. The four Girsanov theorems got the stronger conclusion
+  through statement-only edits; their proofs did not change.
+- The calc in `Y_increments_mgf_range`: the tower property in four named Mathlib steps
+  (`integral_condExp`, `condExp_mul_of_stronglyMeasurable_left`, `integral_mul_const`,
+  `Finset.prod_range_succ`), the textbook proof line for line.
+- `hasIndepIncrements_of_expMartingale`: Mathlib's predicate, proved in Mathlib's idiom (`of_nat`,
+  `iIndepFun_iff_finset`, `iIndepFun.precomp`).
+
+### Ranked backlog
+
+1. **Independence from the past, and the filtered conclusion** (lenses 1, 4, 5; all three agents).
+   - The deterministic conditional MGF already gives `Y_t − Y_s ⟂ 𝓕_s`. For `A ∈ 𝓕_s`, the
+     increment's MGF under `Q[·|A]` is Gaussian, so `map_eq_gaussianReal_of_mgf` and `Indep_iff`
+     give independence. That is the "conditional MGF ⟹ independence" lemma Mathlib lacks.
+   - A second, process-agnostic lemma would follow: adapted with increments independent of the
+     past implies `HasIndepIncrements`, by a set-level induction.
+   - Together they would retire the MGF induction and the characteristic-function computation
+     (about 170 lines). They would also strengthen the conclusion to the `IsFilteredPreBrownian`
+     shape that textbook Girsanov states.
+2. **Path continuity under a continuous `B`** (lens 5). Under `IsBrownianReal B μ`, every drift
+   here is Lipschitz in `t` for each `ω`, and `Q ≪ μ`, so `B^θ` has a.s. continuous paths. State
+   the predictable case for the drift `∫₀ᵘθ ds` itself via the modification transfer. The two
+   Theorem 9.1.8 entries would then deliver Definition 5.1.1 on `[0,T]`.
+3. **Make the finite-dimensional gloss a statement** (lenses 2, 7).
+   - `HasIndepIncrements.isGaussianProcess` gives `IsGaussianProcess (fun t : Set.Iic T ↦ Y t) Q`
+     in a few lines, since `Set.Iic` has `OrderBot`.
+   - Add the mean and the covariance `min s t`, or a horizon-restricted
+     `isPreBrownianReal_of_hasLaw`, which is a candidate for upstream.
+4. **The fixed-`Q` characterization in upstream vocabulary** (lens 1).
+   `(∀ T, IsExpQMartingale Q 𝓕 Y T) → IsPreBrownianReal Y Q`, via
+   `HasIndepIncrements.isPreBrownianReal_of_hasLaw`. With backlog 1 this becomes
+   `IsFilteredPreBrownian`: the exponential-martingale characterization of Brownian motion.
+5. **`Fin` indexing** (lenses 4, 6, 8; two agents). State the MGF lemma for
+   `t : Fin (n+1) → ℝ≥0`, the shape of both `HasIndepIncrements` and `iIndepFun_iff_charFun_pi`.
+   That removes the `dite` extension `c` and the finset re-bounding.
+6. **Names** (lenses 6, 7; all three agents).
+   - `isQBrownianMotion_of_expMartingale` and the `Btheta_*isQBrownianMotion*` theorems assert
+     the continuity-inclusive notion, now that Mathlib separates `IsPreBrownianReal` from
+     `IsBrownianReal`.
+   - The private `Y_…` and `linComb` lemmas embed a variable name.
+   - Rename after backlog 3 settles what the conclusion is called.
+7. **Upstream candidates** (lens 2).
+   - The pairwise corollary for non-adjacent increments, `HasIndepIncrements.indepFun_sub_sub'`
+     (Mathlib has only the adjacent case).
+   - A public `map_eq_gaussianReal_of_mgf`, a special case of Mathlib's MGF-uniqueness TODO.
+8. **Older duplication** (lens 3).
+   - `integrable_expY` and `integrable_exp_Y_increment` repeat a law-transfer chain that
+     `mgf_pos_iff` shortens.
+   - `condExp_expY` and `condExp_Y_increment` repeat the `exp(aY − ½a²t)` factoring.
+
+Adjudicated down:
+- The Gaussian-vector route to independence (`HasGaussianLaw.iIndepFun_of_covariance_eq_zero`).
+  It needs joint Gaussianity plus a covariance computation, so two agents found it longer.
+- Trimming the hand-written `(t k : ℝ)` casts. They keep separately elaborated statements
+  syntactically aligned for `rw`.
+
 ## 2026-09-18 — corpus 373 — bisection converges to the implied volatility
 
 Scope: the new `MathFin/Foundations/Bisection.lean` (the bisection method and
