@@ -222,17 +222,17 @@
     },
     "gir-const-theta-marginal": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-09-18",
-      "elapsed_s": 2.8,
-      "input_hash": "dd21c6ecebddb492108a84e76e9fbc8efabf5f798ab4129f8df2ebaf251169c4",
-      "verified_at_commit": "8b714d8"
+      "date": "2026-09-25",
+      "elapsed_s": 5.3,
+      "input_hash": "34af3ebcc6155d12864494b8771b6f9d5193318089d43f0aa936ce5655fbe985",
+      "verified_at_commit": "7da3e15"
     },
     "gir-const-theta-qbm": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-09-18",
-      "elapsed_s": 2.8,
-      "input_hash": "7a76318566ab24e14ae8d6b99d3ff5177ebf0c76c650aad7e22ae2aa16c990c9",
-      "verified_at_commit": "8b714d8"
+      "date": "2026-09-25",
+      "elapsed_s": 3.7,
+      "input_hash": "5809fa3914b50c9ce32bc840ca5792cd193cdbccd947f230d50253ff5b476536",
+      "verified_at_commit": "7da3e15"
     },
     "gir-continuous-emm-forward": {
       "benchmark_file": "girsanov_finance.json",
@@ -306,10 +306,10 @@
     },
     "gir-simple-adapted": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-09-18",
-      "elapsed_s": 2.8,
-      "input_hash": "cedb2fe90208112dad7bfa7af0c1cb18ae473e2d4fff8ec5e78310e12d4d3788",
-      "verified_at_commit": "8b714d8"
+      "date": "2026-09-25",
+      "elapsed_s": 5.2,
+      "input_hash": "e61b1866860e931b2a6dbeb518186929db2bfc14bdce3dafcd6e52ef66c666f0",
+      "verified_at_commit": "7da3e15"
     },
     "gir-thm-9.1.7": {
       "benchmark_file": "girsanov_finance.json",
@@ -320,17 +320,17 @@
     },
     "gir-thm-9.1.8": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-09-18",
-      "elapsed_s": 2.8,
-      "input_hash": "7360578f737b4e560df4baf35c287ced5fdb480ea3a1781a0a5f662640e656c2",
-      "verified_at_commit": "8b714d8"
+      "date": "2026-09-25",
+      "elapsed_s": 5.4,
+      "input_hash": "c67d892f4fabecdfb62a5324ffaaa649bea1f233cdbca83261789501b195f767",
+      "verified_at_commit": "7da3e15"
     },
     "gir-thm-9.1.8-predictable": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-09-18",
-      "elapsed_s": 2.8,
-      "input_hash": "34986946acee3d6c8fb641c24dcc046ead10fc49781cbd8cf4daf45064ca3fd9",
-      "verified_at_commit": "8b714d8"
+      "date": "2026-09-25",
+      "elapsed_s": 5.5,
+      "input_hash": "e4b644ef527c1fa8b30ed08bbe2fa7f8bf29b0c4b28fd2a920c0013c94ae81a9",
+      "verified_at_commit": "7da3e15"
     },
     "gir-thm-9.3.4": {
       "benchmark_file": "girsanov_finance.json",
