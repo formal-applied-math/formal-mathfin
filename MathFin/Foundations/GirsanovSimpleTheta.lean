@@ -425,7 +425,7 @@ theorem Btheta_simple_isQBrownianMotion (s : ℕ → ℝ≥0) (hs : Monotone s) 
               ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)).map
             (fun ω ↦ (X t' ω + simpleDrift s c N t' ω) - (X s' ω + simpleDrift s c N s' ω))
             = gaussianReal 0 (t' - s'))
-      ∧ HasIndepIncrements (fun t' : Set.Iic T ↦ fun ω ↦ X t' ω + simpleDrift s c N t' ω)
+      ∧ HasIndepIncrements (fun (t' : Set.Iic T) ω ↦ X t' ω + simpleDrift s c N t' ω)
           (P.withDensity fun ω ↦
             ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)) := by
   have hdneg : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (fun ω ↦ -(c i ω)) :=

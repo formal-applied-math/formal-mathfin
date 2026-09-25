@@ -35,16 +35,19 @@ both `P`-martingales; the engine turns `D_t = exp(a·B^θ_t − ½a² t)` into a
 Gaussian-MGF term via `integrable_exp_mul_of_hasLaw`) — the same device as
 `bs_discounted_isQMartingale`.
 
-The identity `E_Q[exp(a(B^θ_t − B^θ_s)) | 𝓕_s] = exp(½a²(t−s))` for all `a` determines every
-finite-dimensional law of `B^θ` on `[0,T]` as that of a `Q`-Brownian motion. The theorems below
+The identity `E_Q[exp(a(B^θ_t − B^θ_s)) | 𝓕_s] = exp(½a²(t−s))` for all `a`, together with
+`B^θ_0 = 0`, determines every finite-dimensional law of `B^θ` on `[0,T]` as that of a `Q`-Brownian
+motion. The theorems below
 derive from it (through `ExpMartingaleQBrownian`) the marginal law, the `N(0,t−s)` increment law,
 and independent increments (`HasIndepIncrements`) on `[0,T]`; path continuity is not stated. This
 is the constant-θ case of the distributional Girsanov theorem, reached with the existing tower — no
 adapted-integrand Itô formula.
 
-## Main result
+## Main results
 
-* `MathFin.expBtheta_isQMartingale`
+* `MathFin.expBtheta_isQMartingale` — the exponential `Q`-martingale above.
+* `MathFin.Btheta_isQBrownianMotion` — zero start, `N(0,t−s)` increments and independent
+  increments of `B^θ` under `Q` on `[0,T]`.
 -/
 
 @[expose] public section
@@ -261,24 +264,6 @@ theorem Btheta_increment_map_eq_gaussianReal
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
   exact increment_map_eq_gaussianReal_of_expMartingale (isExpQMartingale_Btheta (X := X) (𝓕 := 𝓕) θ T) hst htT
 
-/-- **Constant-θ distributional Girsanov: two non-overlapping increments are `Q`-independent.** For
-`s ≤ t ≤ u ≤ v ≤ T`, the increments `B^θ_t − B^θ_s` and `B^θ_v − B^θ_u` are independent
-under `Q`. One application of `increments_indepFun_of_expMartingale`, the two-increment case of
-`increments_iIndepFun_of_expMartingale`. -/
-theorem Btheta_increments_indepFun
-    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
-    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
-    {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
-    (θ : ℝ) (T : ℝ≥0) {s t u v : ℝ≥0}
-    (hst : s ≤ t) (htu : t ≤ u) (huv : u ≤ v) (hvT : v ≤ T) :
-    IndepFun (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
-        (fun ω ↦ (X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ)))
-      (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) := by
-  haveI : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
-      (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
-    girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
-  exact increments_indepFun_of_expMartingale (isExpQMartingale_Btheta (X := X) (𝓕 := 𝓕) θ T) hst htu huv hvT
-
 /-- **Constant-θ distributional Girsanov: `B^θ` has the increments of a `Q`-Brownian motion.**
 Under `Q = P.withDensity(exp(−θ X_T − ½θ² T))` the drift-corrected process `B^θ_t = X_t + θ t` has,
 on `[0,T]`: zero start `B^θ_0 = 0` a.e. `Q`, Gaussian increments `B^θ_t − B^θ_s ~ N(0, t−s)`, and
@@ -299,7 +284,7 @@ theorem Btheta_isQBrownianMotion
       ∧ (∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T →
           (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))).map
               (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))) = gaussianReal 0 (t - s))
-      ∧ HasIndepIncrements (fun t : Set.Iic T ↦ fun ω ↦ X t ω + θ * ((t : ℝ≥0) : ℝ))
+      ∧ HasIndepIncrements (fun (t : Set.Iic T) ω ↦ X t ω + θ * ((t : ℝ≥0) : ℝ))
           (P.withDensity fun ω ↦ ENNReal.ofReal
             (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) := by
   haveI : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal

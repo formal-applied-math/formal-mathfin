@@ -1013,8 +1013,8 @@ routing through `EuclideanSpace ℝ ι`, which needs a `MeasurableEquiv` detour 
 Record the distinction that made a shared root with `ExpMartingaleQBrownian.lean` the wrong move, even
 though both files import `ComplexMGF`. That file's three internal call sites compare a genuine
 *probability* measure against `gaussianReal` on `ℝ`, using the *unprimed* `eqOn_complexMGF_of_mgf` and
-the one-dimensional `ext_of_complexMGF_eq` (a real, pre-existing triplication, worth a standalone
-cleanup: the statement `map_eq_gaussianReal_of_mgf_eq` is ready to paste). `WienerExponentialTotality`
+the one-dimensional `ext_of_complexMGF_eq` (a real, pre-existing triplication, since 2026-09-25 one
+private lemma, `map_eq_gaussianReal_of_mgf`). `WienerExponentialTotality`
 compares two finite Jordan pieces on `ℝ^ι` and needs `charFunDual` for the vector finish; its
 `integrableExpSet = univ` comes from Cauchy–Schwarz, not a Gaussian-law transfer. The literal overlap
 between the two is one line: `interior univ = univ`, so the `EqOn` holds everywhere. A root lemma for

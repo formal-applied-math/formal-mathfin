@@ -1695,3 +1695,31 @@ submartingale is untouched.
 Gates: `lake build MathFin` + `lake lint` green, `pytest` 50/50, ledger 369/369 fresh,
 `AxiomAuditGen` 329 guards, two new curated axiom pins, blueprint regenerated (35 nodes + 1 frontier), no
 `sorry`.
+
+## phase: Girsanov's increments are jointly independent (2026-09-25, corpus 373 unchanged)
+
+The third property the Girsanov entries derive is now joint independence of the increments. Until
+this date `isQBrownianMotion_of_expMartingale`, and through it `gir-const-theta-qbm`,
+`gir-simple-adapted`, `gir-thm-9.1.8` and `gir-thm-9.1.8-predictable`, stated independence of two
+increments at a time, which is weaker than the jointly independent increments of a Brownian motion.
+The 2026-07-05 update above calls the result "a genuine `Q`-Brownian motion" and the 2026-07-10
+update "a `Q`-Brownian motion"; both overstate it. It now states Mathlib's `HasIndepIncrements` on
+`[0,T]`. The proof inducts on the number of increments: the joint MGF factors through the
+conditional expectation given the last time but one, and `iIndepFun_iff_charFun_pi` turns the
+Gaussian law of every linear combination into joint independence. With zero start and `N(0,t−s)`
+increments, this fixes the finite-dimensional laws of a Brownian motion on `[0,T]`. That is the
+level at which these entries assume `B` itself (`IsPreBrownianReal`, `IsFilteredPreBrownian`). Path
+continuity is still not stated.
+
+Seven structure entries encoded "independent increments" the same pairwise way: `bm-def-5.1.1`,
+`cv-poisson-def`, `bm-thm-5.1.7`, `bm-cor-5.3.4`, `bm-thm-5.3.5`, `sc-thm-9.1.1` and `sc-thm-9.1.8`.
+Each now uses `HasIndepIncrements`, and the two definitions move to the time axis `ℝ≥0`. The details
+are in `docs/coverage.md` ("Girsanov: independent increments, proved"), and the review and its
+backlog in `docs/values-review.md` (2026-09-25).
+
+Still open on this seam:
+
+- path continuity of `B^θ`;
+- independence of its increments from the past filtration, which the deterministic conditional MGF
+  already implies but no entry states;
+- unbounded θ under Novikov's condition (`sc-thm-9.1.8`).
