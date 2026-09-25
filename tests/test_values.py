@@ -23,13 +23,25 @@ LIBRARY sources and the generated audit artifacts (complementing
    docstring and every ``mf-contract-*`` corpus entry must carry the credit
    line, not just one or the other (the corpus ships in the HF dataset, so
    the citation must travel with the claim).
+7. ``test_cited_theorems_are_axiom_pinned`` / ``test_benchmark_citations_resolve``
+   — every MathFin theorem a non-wrapper benchmark proof cites is pinned by one
+   of the two axiom audits, with citations resolved by declaration (``open``,
+   dot notation, non-``MathFin`` namespaces), and no identifier that could be
+   such a citation is left unresolved.
 """
 
 import re
 from pathlib import Path
 
-from tools.verify.axiom_audit_gen import GEN_PATH, PROOF_HEAD_RE, generate
+from tools.verify.axiom_audit_gen import GEN_PATH, generate
 from tools.verify.corpus import iter_entries
+from tools.verify.mathfin_index import (
+    assigned_constants,
+    cited_theorems,
+    declaration_index,
+    unresolved_short_names,
+)
+from tools.verify.mathfin_index import strip_comments as _strip_comments
 
 AUDIT_PATH = Path("MathFin/AxiomAudit.lean")
 BLUEPRINT_PATH = Path("MathFin/Blueprint.lean")
@@ -58,55 +70,6 @@ FORBIDDEN_PATTERNS = (
 
 # (path-as-str, token) pairs, each with a justification comment.
 FORBIDDEN_ALLOWLIST: set = set()
-
-
-def _strip_comments(src: str) -> str:
-    """Remove Lean comments (nested ``/- -/`` blocks incl. docstrings, and
-    ``--`` line comments), preserving newlines so line numbers stay stable.
-    String literals are respected so ``--`` inside a string survives."""
-    out = []
-    i, n = 0, len(src)
-    depth = 0
-    in_string = False
-    while i < n:
-        c = src[i]
-        nxt = src[i + 1] if i + 1 < n else ""
-        if depth == 0 and not in_string and c == '"':
-            in_string = True
-            out.append(c)
-            i += 1
-            continue
-        if in_string:
-            if c == "\\":
-                out.append(c)
-                out.append(nxt)
-                i += 2
-                continue
-            if c == '"':
-                in_string = False
-            out.append(c)
-            i += 1
-            continue
-        if c == "/" and nxt == "-":
-            depth += 1
-            i += 2
-            continue
-        if depth > 0:
-            if c == "-" and nxt == "/":
-                depth -= 1
-                i += 2
-                continue
-            if c == "\n":
-                out.append(c)
-            i += 1
-            continue
-        if c == "-" and nxt == "-":
-            while i < n and src[i] != "\n":
-                i += 1
-            continue
-        out.append(c)
-        i += 1
-    return "".join(out)
 
 
 def test_mathfin_sources_free_of_forbidden_text() -> None:
@@ -184,6 +147,7 @@ def _mathfin_decl_tail_index() -> dict:
 
 def test_full_entries_are_not_definitional_rfl() -> None:
     index = _mathfin_decl_tail_index()
+    decls = declaration_index()
     failures = []
     for path, theorem in iter_entries():
         if theorem.get("metadata", {}).get("formalization_status") != "full":
@@ -197,8 +161,9 @@ def test_full_entries_are_not_definitional_rfl() -> None:
             if tail and RFL_TAIL_RE.match(tail):
                 failures.append(f"{tid} ({path.name}): snippet decl "
                                 f"`{name}` is rfl-class: `{tail}`")
-        # (b) the cited module theorems
-        for full_name in sorted(set(PROOF_HEAD_RE.findall(code))):
+        # (b) the cited module theorems: whatever follows a `:=`, resolved by
+        # declaration so an unqualified or dot-notation citation is seen too
+        for full_name in sorted(assigned_constants(code, decls)):
             short = full_name.split(".")[-1]
             for fpath, tail in index.get(short, []):
                 if tail and RFL_TAIL_RE.match(tail):
@@ -484,3 +449,79 @@ def test_contracts_corpus_entries_cite_source() -> None:
             f"{entry['id']}: metadata.reference must name the source paper - "
             "the corpus is published, so the credit must travel with the claim"
         )
+
+
+# --------------------------------------------------------------------------
+# 7. every theorem a benchmark proof cites is axiom-pinned
+#
+# The generated audit claims to pin every MathFin theorem the corpus cites.
+# Until 2026-09-25 it found citations by the spelling `MathFin.…`, and five
+# theorems cited by `full` entries escaped both audit files: two cited through
+# `open ProbabilityTheory`, one through `open MathFin`, one by dot notation on
+# a hypothesis, and one declared by a MathFin file inside `namespace
+# MeasureTheory`. Citations are now resolved by declaration
+# (tools/verify/mathfin_index.py); these tests hold the claim to that.
+# --------------------------------------------------------------------------
+
+# The five, named here so that a regression in the resolver itself cannot
+# quietly drop them again.
+ESCAPED_2026_09_25 = (
+    "ProbabilityTheory.IsFilteredPreBrownian.squareSubTime_isMartingale",
+    "ProbabilityTheory.IsFilteredPreBrownian.waldExponential_isMartingale",
+    "MathFin.isStoppingTime_hittingAfter_of_open",
+    "MathFin.BivariateGaussianHyp.conditional_expectation_formula",
+    "MeasureTheory.maximal_ineq_Lp",
+)
+
+# (entry id, identifier) pairs the resolver cannot resolve, each checked by hand
+# not to be a MathFin citation.
+UNRESOLVED_ALLOWLIST: dict[tuple[str, str], str] = {
+    ("pp-prop-3.3.6", "P.mono"): "a field of the snippet's own structure `P`",
+    ("pp-thm-3.3.10", ".sub"): "Mathlib's `Measurable.sub`, by dot notation on a term",
+}
+
+
+def _pinned_names() -> set:
+    return {name for path in (AUDIT_PATH, GEN_PATH)
+            for name in re.findall(r"#print axioms\s+([A-Za-z_][\w.']*)",
+                                   path.read_text())}
+
+
+def test_cited_theorems_are_axiom_pinned() -> None:
+    pinned = _pinned_names()
+    index = declaration_index()
+    missing = [name for name in ESCAPED_2026_09_25 if name not in pinned]
+    for path, entry in iter_entries():
+        if entry.get("metadata", {}).get("formalization_status") == "library_wrapper":
+            continue
+        code = entry.get("code", {}).get("lean", "")
+        missing += [f"{entry['id']} ({path.name}) cites {name}"
+                    for name in sorted(cited_theorems(code, index))
+                    if name not in pinned]
+    assert not missing, (
+        "benchmark entries cite MathFin theorems that neither "
+        f"{AUDIT_PATH} nor {GEN_PATH} pins — regenerate with "
+        "`python3 -m tools.verify.axiom_audit_gen --write`, or fix the "
+        "resolver if it no longer finds the citation:\n  " + "\n  ".join(missing)
+    )
+
+
+def test_benchmark_citations_resolve() -> None:
+    # The pin above covers what the resolver resolves. An identifier it cannot
+    # resolve but that shares a name with a MathFin theorem is where a citation
+    # could still hide (on 2026-09-25, an `open` continued onto a second line).
+    index = declaration_index()
+    unresolved = [
+        f"{entry['id']} ({path.name}): {ident}"
+        for path, entry in iter_entries()
+        if entry.get("metadata", {}).get("formalization_status") != "library_wrapper"
+        for ident in sorted(unresolved_short_names(entry.get("code", {}).get("lean", ""), index))
+        if (entry["id"], ident) not in UNRESOLVED_ALLOWLIST
+    ]
+    assert not unresolved, (
+        "these identifiers share a name with a MathFin theorem but do not "
+        "resolve to one, so the axiom audit cannot tell whether they cite it — "
+        "cite by full name or give the binder a written type, or, if it is not "
+        "a MathFin citation, add it to UNRESOLVED_ALLOWLIST with the reason:\n  "
+        + "\n  ".join(unresolved)
+    )

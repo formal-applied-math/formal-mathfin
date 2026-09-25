@@ -13,8 +13,9 @@ on:
 # A green build is *also* the axiom-cleanliness proof: MathFin/AxiomAudit.lean
 # #guard_msgs-pins every headline theorem to [propext, Classical.choice,
 # Quot.sound] — and the GENERATED MathFin/AxiomAuditGen.lean extends the pin
-# to every proof-position MathFin constant cited by the benchmark corpus —
-# so `lake build` fails if any of them drifts.
+# to every constant declared in MathFin/ that a benchmark proof cites
+# (resolved by declaration: tools/verify/mathfin_index.py) — so `lake build`
+# fails if any of them drifts.
 #
 # The kernel-replay layer (toolchain `leanchecker` over every content module)
 # lives in kernel-replay.yml — nightly + workflow_dispatch, deliberately not

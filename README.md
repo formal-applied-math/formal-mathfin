@@ -16,8 +16,8 @@ Release 1.4.0 records 373 results from the literature in [`benchmarks/`](benchma
 Lean statement and proof. Of these, 342 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 13 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
-build-time audit checks that the main results below, and most other theorems the benchmark cites,
-depend only on the axioms `propext`, `Classical.choice` and `Quot.sound`.
+build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
+axioms `propext`, `Classical.choice` and `Quot.sound`.
 
 Here, for example, is the convergence of the Cox–Ross–Rubinstein call price to the Black–Scholes
 price, from [`CRRClosedForm.lean`](MathFin/Binomial/CRRClosedForm.lean):
@@ -152,10 +152,10 @@ Comparator below).
 
 - **Axioms.** [`MathFin/AxiomAudit.lean`](MathFin/AxiomAudit.lean) and the generated
   [`MathFin/AxiomAuditGen.lean`](MathFin/AxiomAuditGen.lean) run `#print axioms` on a curated list
-  of headline results and on every library theorem that a benchmark entry cites by its full
-  `MathFin.` name, and compare the output with `#guard_msgs`. A `sorry` or an extra axiom anywhere
-  in the proof of one of them fails the build. Theorems cited under a shorter name are not yet
-  covered.
+  of headline results and on every library constant that a benchmark entry's proof cites, and
+  compare the output with `#guard_msgs`. A `sorry` or an extra axiom anywhere in the proof of one of
+  them fails the build. Citations are found by where a name is declared, so a name cited under
+  `open`, by dot notation, or from a namespace other than `MathFin` is covered.
 
 - **Comparator.** [`Challenge.lean`](Challenge.lean) states the coherent-risk representation
   theorem, with a witness that its hypothesis is satisfiable, using only Mathlib;

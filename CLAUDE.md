@@ -85,7 +85,8 @@ first run), blueprint-spine ⊆ curated AxiomAudit, and byte-freshness of the
 GENERATED exhaustive audit `MathFin/AxiomAuditGen.lean` — after ANY
 benchmark edit regenerate it with
 `python3 -m tools.verify.axiom_audit_gen --write` (it pins every
-proof-position MathFin constant cited by the corpus; the curated
+constant declared in `MathFin/` that a benchmark proof cites, resolved by
+declaration through `open`s and dot notation; the curated
 `MathFin/AxiomAudit.lean` remains the storied headliner file). CI
 (`build.yml`) runs pytest + `ledger status` BEFORE the Lean build — pushes
 with failing gates or stale ledger claims go red.

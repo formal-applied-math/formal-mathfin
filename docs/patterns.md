@@ -763,10 +763,15 @@ edit lints the stale olean and re-reports the old failures at the old line numbe
   verification **self-certifies** hand-derived coefficients — a wrong sign/coefficient fails `ring`, so a green
   build IS the check (used for the market-making `B`/`C` ODE right-hand sides).
 
-### `axiom_audit_gen` pins `:= MathFin.X` re-export HEADS only
-- A benchmark proved by an anonymous constructor `:= ⟨MathFin.a …, MathFin.b …⟩` gets **none** of its cited
-  constants auto-pinned (the gen matches `:=\s*\(*\s*MathFin\.…`). Fine when they're trivial + ledger-covered;
-  add to the curated `AxiomAudit.lean` if you want them pinned.
+### `axiom_audit_gen` resolves citations by declaration, not by spelling
+- Every constant declared in `MathFin/` that a snippet's proof body cites is pinned, however it is written:
+  `MathFin.foo`, `foo` under `open MathFin`, `h.foo` for a binder `h : MathFin.T …`, or a theorem a MathFin
+  file declares in `namespace ProbabilityTheory` / `MeasureTheory`. `tools/verify/mathfin_index.py` builds
+  the declaration index and does the resolution (2026-09-25; before that the generator matched the spelling
+  `MathFin.…` and five `full` citations escaped both audit files).
+- It is textual. Dot notation on a term that is not a named binder (`(f x).foo`) is not resolved; if such
+  an identifier shares a name with a MathFin theorem, `test_benchmark_citations_resolve` fails until you
+  cite by full name, give the binder a written type, or allowlist it with the reason.
 
 ### ★ Review subagents must NOT touch the daemon
 - A review subagent that runs `./scripts/lean-check.sh` / `docker` will bring the lean-repl daemon up **and tear

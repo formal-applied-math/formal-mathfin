@@ -90,7 +90,8 @@ The CI pipeline runs `pytest tests/ -q` → `python3 -m tools.verify.ledger stat
    - `tests/test_ledger.py` — ledger freshness and globally unique ids.
    - `tests/test_values.py` — no forbidden tactics, no `rfl`-backed `full`
      entries, blueprint-spine ⊆ curated `AxiomAudit`, byte-fresh
-     `AxiomAuditGen.lean`.
+     `AxiomAuditGen.lean`, and every MathFin theorem a benchmark proof cites
+     axiom-pinned in one of the two audit files.
 
 ## Style
 

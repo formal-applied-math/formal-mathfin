@@ -1,23 +1,29 @@
 """Generate ``MathFin/AxiomAuditGen.lean`` — the exhaustive axiom audit.
 
 The curated ``MathFin/AxiomAudit.lean`` pins the *headliner* theorems with
-dated, storied sections. This generator closes the complement: every MathFin
-constant consumed in PROOF POSITION by any benchmark snippet gets a
+dated, storied sections. This generator closes the complement: every constant
+declared in ``MathFin/`` that a benchmark snippet's proof cites gets a
 ``#guard_msgs``-pinned ``#print axioms`` check, so no benchmark-cited theorem
 can pick up ``sorryAx`` (a ``sorry``) or a non-standard axiom without
-breaking ``lake build``. With this file, "the audited set is representative,
-not exhaustive" stops being true for the benchmark-facing surface.
+breaking ``lake build``.
+
+Citations are resolved by declaration, not by spelling
+(``tools/verify/mathfin_index.py``): a snippet may ``open MathFin`` and cite a
+name unqualified, use dot notation on a typed hypothesis, or cite a theorem a
+MathFin file declares in ``namespace ProbabilityTheory`` or
+``namespace MeasureTheory``. Until 2026-09-25 this generator matched only the
+spelling ``MathFin.…``, and five theorems cited by ``full`` entries escaped
+both audit files.
 
 Scope (documented, deliberate):
 
-* *proof position* means a ``MathFin.*`` constant at the head of a proof term
-  (immediately after ``:=``). Statement-position defs are exercised by
-  elaboration + the verification ledger; ``library_wrapper`` entries cite
-  upstream (Mathlib / BrownianMotion) names, whose axiom hygiene is
-  upstream's contract.
-* expected messages default to the three standard axioms; pure-algebra
-  results that need fewer are recorded in ``EXPECTED_OVERRIDES`` (built
-  empirically from build output — the build is the oracle).
+* *proof position*: identifiers in the proof bodies of a snippet, from each
+  declaration's top-level ``:=`` to the next declaration. Statement-position
+  defs are exercised by elaboration + the verification ledger; names that
+  resolve to Mathlib or BrownianMotion are upstream's contract.
+* expected messages default to the three standard axioms; results that need
+  fewer are recorded in ``EXPECTED_OVERRIDES`` (built empirically from build
+  output — the build is the oracle).
 
 Usage::
 
@@ -31,59 +37,14 @@ and regeneration must be a no-op).
 
 from __future__ import annotations
 
-import re
 import sys
 from pathlib import Path
 
 from tools.verify.corpus import iter_entries
+from tools.verify.mathfin_index import cited_constants, declaration_index
 
 GEN_PATH = Path("MathFin/AxiomAuditGen.lean")
-
-# A MathFin constant at the head of a proof term: `:=` (possibly across a
-# newline, possibly behind opening parens) immediately followed by the name.
-# Named arguments inside proofs (`(h := MathFin.foo)`) are still proof
-# position, so capturing them is correct.
-PROOF_HEAD_RE = re.compile(r":=\s*\(*\s*(MathFin\.[A-Za-z_][A-Za-z0-9_.']*)")
-
-# Any MathFin constant anywhere in a proof BODY. The head match above sees only
-# the first name, so a benchmark closed by a bundle — `⟨MathFin.a …, MathFin.b …⟩`,
-# or an `And.intro` spine — put every constant but the first outside the audit.
-# `mf-fixedincome-fra` (PR #166) hit exactly this: both its theorems escaped the
-# generated audit entirely, and the contributor hand-added them to the CURATED
-# AxiomAudit.lean, which is meant for headliners rather than routine entries.
-MATHFIN_NAME_RE = re.compile(r"(MathFin\.[A-Za-z_][A-Za-z0-9_.']*)")
-
-# Start of a declaration, to bound a proof body: everything from a decl's `:=`
-# up to the next decl is proof position; past that is the next statement.
-DECL_START_RE = re.compile(
-    r"(?m)^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*"
-    r"(?:theorem|lemma|def|abbrev|instance|example)\b")
-
-_OPEN, _CLOSE = "([{", ")]}"
-
-
-def proof_bodies(code: str) -> list[str]:
-    """The proof-position spans of a benchmark snippet: for each declaration, the
-    text from its top-level `:=` to the start of the next declaration.
-
-    Bounding by the next declaration is what keeps this proof-position only — the
-    scope the generated audit claims. A `:=` nested inside brackets (a named
-    argument, a structure instance) is not the proof separator, so the scan tracks
-    depth the same way `ledger`/`af_parse` do."""
-    starts = [m.start() for m in DECL_START_RE.finditer(code)] + [len(code)]
-    out: list[str] = []
-    for i in range(len(starts) - 1):
-        seg = code[starts[i]:starts[i + 1]]
-        depth = 0
-        for j, c in enumerate(seg):
-            if c in _OPEN:
-                depth += 1
-            elif c in _CLOSE:
-                depth -= 1
-            elif c == ":" and depth == 0 and j + 1 < len(seg) and seg[j + 1] == "=":
-                out.append(seg[j + 2:])
-                break
-    return out
+GEN_NAMESPACE = "MathFin.AxiomAuditGen"
 
 STANDARD_AXIOMS = "[propext, Classical.choice, Quot.sound]"
 
@@ -94,13 +55,25 @@ EXPECTED_OVERRIDES: dict[str, str] = {}
 
 
 def collect_proof_position_names() -> list[str]:
+    index = declaration_index()
     names: set[str] = set()
     for _path, theorem in iter_entries():
-        code = theorem.get("code", {}).get("lean", "")
-        names.update(PROOF_HEAD_RE.findall(code))
-        for body in proof_bodies(code):
-            names.update(MATHFIN_NAME_RE.findall(body))
+        names |= cited_constants(theorem.get("code", {}).get("lean", ""), index)
+    _check_unambiguous(names, index)
     return sorted(names)
+
+
+def _check_unambiguous(names: set[str], index) -> None:
+    """`#print axioms N` runs inside `namespace MathFin.AxiomAuditGen`, where Lean
+    tries `MathFin.AxiomAuditGen.N` and `MathFin.N` before `N`. A name outside
+    `MathFin` (say `MeasureTheory.maximal_ineq_Lp`) would silently print a
+    different constant if MathFin declared the same name under its namespace."""
+    parts = GEN_NAMESPACE.split(".")
+    prefixes = [".".join(parts[:k]) for k in range(len(parts), 0, -1)]
+    shadowed = sorted(f"{name} (shadowed by {p}.{name})" for name in names
+                      for p in prefixes if f"{p}.{name}" in index)
+    if shadowed:
+        raise SystemExit("ambiguous #print axioms targets: " + ", ".join(shadowed))
 
 
 def _guard_block(name: str) -> str:
@@ -118,16 +91,18 @@ def generate() -> str:
     header = f"""/-
   GENERATED FILE — do not edit by hand.
 
-  Exhaustive axiom audit: every MathFin constant consumed in PROOF POSITION
-  by a benchmark snippet is #guard_msgs-pinned to its exact axiom set, so no
+  Exhaustive axiom audit: every constant declared in MathFin/ that a benchmark
+  snippet's proof cites is #guard_msgs-pinned to its exact axiom set, so no
   benchmark-cited theorem can pick up `sorryAx` (a `sorry`) or a non-standard
   axiom without breaking `lake build`.
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus ({len(names)} constants). Scope: proof-position MathFin names only —
-  statement-position defs are exercised by elaboration + the verification
-  ledger, and library_wrapper entries cite upstream names.
+  corpus ({len(names)} constants). Citations are resolved by declaration
+  (tools/verify/mathfin_index.py), so a name cited unqualified under `open`,
+  by dot notation on a hypothesis, or declared outside the MathFin namespace
+  is pinned like any other. Statement-position defs are exercised by
+  elaboration + the verification ledger, and upstream names are upstream's.
 
   Regenerate:  python3 -m tools.verify.axiom_audit_gen --write
   Freshness:   tests/test_values.py::test_axiom_audit_gen_is_fresh
@@ -135,11 +110,11 @@ def generate() -> str:
 -/
 import MathFin
 
-namespace MathFin.AxiomAuditGen
+namespace {GEN_NAMESPACE}
 
 """
     body = "\n".join(_guard_block(name) for name in names)
-    return header + body + "\nend MathFin.AxiomAuditGen\n"
+    return header + body + f"\nend {GEN_NAMESPACE}\n"
 
 
 def main(argv: list[str]) -> int:
