@@ -964,12 +964,12 @@ as a genuine `changeOfNumeraire` instance (`X` = the exchange payoff, `N = S²`)
 /-- info: 'MathFin.exchangeOption_numeraire_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.exchangeOption_numeraire_price
 
-/-! ## Distributional Girsanov (Track-α): `B^θ` is a `Q`-Brownian motion — constant → simple → continuous adapted (2026-07-09)
+/-! ## Distributional Girsanov (Track-α): the increment laws of `B^θ` under `Q` — constant → simple → continuous adapted (2026-07-09)
 
-The three defining Brownian properties of the drift-corrected process — zero start, Gaussian
-`𝒩(0,t−s)` increments, and independence of disjoint increments — are read off, under the Girsanov
-measure `Q = P.withDensity(Z_T)`, from a *single* structural hypothesis: that every
-`exp(a·B^θ − ½a²·)` is a `Q`-martingale on `[0,T]`. That reduction is
+Three of the four defining Brownian properties of the drift-corrected process (all but path
+continuity) — zero start, Gaussian `𝒩(0,t−s)` increments, and independent increments — are read
+off, under the Girsanov measure `Q = P.withDensity(Z_T)`, from a *single* structural hypothesis:
+that every `exp(a·B^θ − ½a²·)` is a `Q`-martingale on `[0,T]`. That reduction is
 `isQBrownianMotion_of_expMartingale`, which runs the characteristic-function chain (marginal MGF →
 increment MGF → joint MGF → linear-combination Gaussian law → independence via `charFun`) exactly
 ONCE, process-agnostically. Each θ regime then supplies only its own exponential-martingale identity
