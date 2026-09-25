@@ -11,14 +11,16 @@ public import MathFin.Foundations.DriftRiemannConvergence
 public import MathFin.Foundations.UnifIntegrableL2
 public import MathFin.Foundations.GirsanovSimpleDoleansMoments
 
-/-! # Continuous bounded-adapted-θ Girsanov — `B^θ` is a `Q`-Brownian motion (α4 assembly)
+/-! # Continuous bounded-adapted-θ Girsanov — the increments of `B^θ` under `Q` (α4 assembly)
 
 Route-α, brick α4 (`docs/plans/2026-07-06-girsanov-track-alpha.md`). Closes the general bounded
 **adapted continuous** Girsanov theorem by passing the simple-θ result
 (`isExpQMartingale_BthetaSimple`) to the limit. For a bounded (`|θ| ≤ C`) adapted (`𝓕_t`-measurable
 in each `t`) continuous (every path `s ↦ θ_s ω`) market price of risk `θ`, under
 `Q = μ.withDensity Z_T` with the Doléans density `Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)` the
-drift-corrected process `B^θ_u = B_u + ∫₀ᵘθ ds` is a genuine `Q`-Brownian motion.
+drift-corrected process `B^θ_u = B_u + ∫₀ᵘθ ds` starts at `0`, has `N(0,t−s)` increments, and any
+two non-overlapping increments are independent. Joint independence of three or more increments is
+not stated, so this is not the full law of a `Q`-Brownian motion.
 
 The route is **spine-free**: rather than build a continuous Doléans stochastic exponential and prove
 it is a martingale (a Novikov-flavoured crux), we pass the *simple* exponential-martingale identity to
@@ -26,7 +28,7 @@ the limit. The `unifPart`-partition approximants `c⁽ⁿ⁾_i = θ(tᵢ)` give,
 `∫_A exp(a·Yⁿ − ½)·Z⁽ⁿ⁾_T dμ = …`; the stochastic exponent `Wⁿ = ∑θ(tᵢ)ΔBᵢ → ∫θdB` in `L²` (brick b),
 the drift parts converge everywhere (the drift Riemann lemmas), and the set-integral limit goes
 through the a.e.-subsequence endpoint `tendsto_setIntegral_of_subseq_ae_of_sq_bound`. Then
-`isQBrownianMotion_of_expMartingale` reads off the `Q`-Brownian properties.
+`isQBrownianMotion_of_expMartingale` reads off those three properties.
 -/
 
 @[expose] public section
@@ -614,7 +616,7 @@ lemma tendsto_fn_ae_subseq (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → 
     exact (Real.continuous_exp.tendsto _).comp (((hdrift.const_add (B u ω)).const_mul a).sub_const _)
   exact hD.mul hZ
 
-/-! ### The continuous exponential-martingale data and the `Q`-Brownian conclusion -/
+/-! ### The continuous exponential-martingale data and the increment laws under `Q` -/
 
 include hB in
 /-- **Continuous bounded-adapted-θ exponential-martingale data.** For a bounded (`|θ| ≤ C`) adapted
@@ -694,11 +696,12 @@ theorem isExpQMartingale_BthetaCont (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ
         (engine s' (hst'.trans ht'T)))
 
 include hB in
-/-- **Continuous bounded-adapted-θ distributional Girsanov: `B^θ` is a `Q`-Brownian motion.** For a
-bounded, adapted, path-continuous market price of risk `θ`, under `Q = μ.withDensity(Z_T)` with the
-Doléans density `Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)`, the drift-corrected process
-`B^θ_u = B_u + ∫₀ᵘθ ds` is a `Q`-Brownian motion on `[0,T]`: zero start, Gaussian increments
-`𝒩(0,t−s)`, and independence of disjoint increments. One application of the exponential
+/-- **Continuous bounded-adapted-θ distributional Girsanov: the increments of `B^θ` under `Q`.** For
+a bounded, adapted, path-continuous market price of risk `θ`, under `Q = μ.withDensity(Z_T)` with
+the Doléans density `Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)`, the drift-corrected process
+`B^θ_u = B_u + ∫₀ᵘθ ds` has, on `[0,T]`: zero start, Gaussian increments `𝒩(0,t−s)`, and
+independence of any two non-overlapping increments. Joint independence of three or more increments
+is not stated. One application of the exponential
 characterization `isQBrownianMotion_of_expMartingale` to `isExpQMartingale_BthetaCont` — the general
 adapted continuous case, closed on the existing tower with no adapted-integrand Itô formula. -/
 theorem Btheta_isQBrownianMotion_adapted (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}

@@ -8,20 +8,26 @@ module
 public import MathFin.Foundations.BrownianMartingale
 
 /-!
-# The exponential characterization of a `Q`-Brownian motion
+# Brownian increment laws from an exponential martingale
 
 A process-agnostic packaging of the argument that turns an **exponential-martingale
-hypothesis** into a full Brownian motion under a probability measure `Q`. Fix a
+hypothesis** into the increment laws of a Brownian motion under a probability measure `Q`. Fix a
 probability space `(Ω, Q)`, a filtration `𝓕`, a horizon `T`, and a real process
 `Y : ℝ≥0 → Ω → ℝ` that is `𝓕`-adapted, starts at `0` (a.e. `Q`), and satisfies
 
   `for every a : ℝ, the process t ↦ exp(a·Y_t − ½a² t) is a Q-martingale on [0,T]`.
 
 These three data are bundled as `IsExpQMartingale Q 𝓕 Y T`. The single theorem
-`isQBrownianMotion_of_expMartingale` then reads off the three defining properties of a
-`Q`-Brownian motion — zero start, `N(0,t−s)` increments, and independence of disjoint
-increments — via Mathlib's characteristic-function machinery, *without* any reference to
-the specific construction of `Y` or `Q`.
+`isQBrownianMotion_of_expMartingale` then reads off three properties of `Y` under `Q` — zero
+start, `N(0,t−s)` increments, and independence of any two non-overlapping increments — via
+Mathlib's characteristic-function machinery, *without* any reference to the specific
+construction of `Y` or `Q`.
+
+Independence is proved for two increments at a time. Joint independence of three or more
+increments, and with it the finite-dimensional law of a Brownian motion, is not stated, and
+neither is path continuity. Deriving joint independence from the same hypothesis needs the step
+from a deterministic conditional MGF given `𝓕_s` to independence from `𝓕_s`, which is not
+formalized here.
 
 The mechanism is exactly the one that powered the constant-`θ` Girsanov file: the
 exponential martingale at `s = 0` fixes the marginal moment-generating function
@@ -31,8 +37,8 @@ and freezing an earlier increment out of a later conditional expectation factori
 joint moment-generating function, giving increment independence through
 `indepFun_iff_charFun_prod`.
 
-The value of the abstraction is coherence: the constant-`θ`, simple-`θ`, and (eventually)
-continuous-`θ` Girsanov drift-corrected processes each need only supply their own
+The value of the abstraction is coherence: the constant-, simple-, continuous- and
+predictable-`θ` Girsanov drift-corrected processes each need only supply their own
 exponential martingale (via the Bayes change-of-measure engine) and then instantiate this
 one theorem — no re-derivation of the ten-lemma characteristic-function chain.
 
@@ -41,8 +47,9 @@ one theorem — no re-derivation of the ten-lemma characteristic-function chain.
 * `MathFin.IsExpQMartingale` — the hypothesis bundle (adapted, zero-start, exp-martingale).
 * `MathFin.map_eq_gaussianReal_of_expMartingale` — the marginal law `Q.map Y_t = N(0,t)`.
 * `MathFin.increment_map_eq_gaussianReal_of_expMartingale` — the increment law `N(0,t−s)`.
-* `MathFin.increments_indepFun_of_expMartingale` — disjoint increments are `Q`-independent.
-* `MathFin.isQBrownianMotion_of_expMartingale` — the three defining properties packaged.
+* `MathFin.increments_indepFun_of_expMartingale` — two non-overlapping increments are
+  `Q`-independent.
+* `MathFin.isQBrownianMotion_of_expMartingale` — the three properties packaged.
 -/
 
 @[expose] public section
@@ -358,8 +365,8 @@ private theorem Y_linComb_map_eq_gaussianReal (h : IsExpQMartingale Q 𝓕 Y T) 
     hlcmeas.aemeasurable aemeasurable_id hcomplexeq
   rwa [Measure.map_id] at hmap
 
-/-- **Disjoint increments are `Q`-independent.** For `s ≤ t ≤ u ≤ v ≤ T`, `Y_t − Y_s` and
-`Y_v − Y_u` are independent under `Q`. By `indepFun_iff_charFun_prod`, independence is the
+/-- **Two non-overlapping increments are `Q`-independent.** For `s ≤ t ≤ u ≤ v ≤ T`, `Y_t − Y_s`
+and `Y_v − Y_u` are independent under `Q`. By `indepFun_iff_charFun_prod`, independence is the
 factorisation of the joint characteristic function; the joint charFun is the charFun-at-`1` of the
 Gaussian linear combination (`Y_linComb_map_eq_gaussianReal`), which equals the product of the two
 marginal Gaussian characteristic functions. -/
@@ -402,16 +409,18 @@ theorem increments_indepFun_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) {
   push_cast
   ring
 
-/-- **The exponential characterization of a `Q`-Brownian motion.** From the exponential-martingale
-data `IsExpQMartingale Q 𝓕 Y T`, the process `Y` has the three defining properties of a Brownian
-motion under `Q` on `[0,T]`:
+/-- **Brownian increment laws from an exponential martingale.** From the exponential-martingale
+data `IsExpQMartingale Q 𝓕 Y T`, the process `Y` has three properties under `Q` on `[0,T]`:
 
 * **zero start** — `Y_0 = 0` a.e. `Q`;
 * **Gaussian increments** — `Y_t − Y_s ~ N(0, t−s)` (`increment_map_eq_gaussianReal_of_expMartingale`);
-* **independent increments** — disjoint increments are `Q`-independent (`increments_indepFun_of_expMartingale`).
+* **pairwise independent increments** — any two non-overlapping increments are `Q`-independent
+  (`increments_indepFun_of_expMartingale`).
 
-Process- and measure-agnostic: any drift-corrected Girsanov process supplying its own exponential
-martingale (via the Bayes engine) is a `Q`-Brownian motion by one application of this theorem. -/
+Joint independence of three or more increments, and path continuity, are not stated, so this is
+not the full law of a `Q`-Brownian motion (see the module docstring). Process- and
+measure-agnostic: any drift-corrected Girsanov process supplying its own exponential martingale
+(via the Bayes engine) gets these three properties by one application of this theorem. -/
 theorem isQBrownianMotion_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) :
     (∀ᵐ ω ∂Q, Y 0 ω = 0)
       ∧ (∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T →

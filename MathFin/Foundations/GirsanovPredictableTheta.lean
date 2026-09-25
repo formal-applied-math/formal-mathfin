@@ -11,7 +11,7 @@ public import MathFin.Foundations.GirsanovAdaptedTheta
 public import MathFin.Foundations.DriftProcessPredictable
 public import MathFin.Foundations.DriftProcessModification
 
-/-! # Bounded **predictable**-θ Girsanov — `B^θ` is a `Q`-Brownian motion (Rung 1)
+/-! # Bounded **predictable**-θ Girsanov — the increments of `B^θ` under `Q` (Rung 1)
 
 Generalizes the continuous-adapted Girsanov theorem (`GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted`)
 to a bounded **predictable** market price of risk `θ` — the honest domain of the Itô `L²` integral,
@@ -26,7 +26,9 @@ spine-free architecture:
   quadratic variation `∑cᵢ²Δτ_T → ∫₀ᵀθ²ds` (both here, via the drift-modification tower);
 * the uniform `L⁴`/`L²` moment bounds (`GirsanovSimpleDoleansMoments`) feed the a.e.-subsequence
   set-integral engine, exactly as in the continuous case, and `isQBrownianMotion_of_expMartingale`
-  reads off the `Q`-Brownian properties.
+  reads off zero start, `N(0,t−s)` increments, and independence of any two non-overlapping
+  increments. Joint independence of three or more increments is not stated, so this is not the
+  full law of a `Q`-Brownian motion.
 
 The limit drift is the genuinely-`𝓕`-adapted `driftContinuousMod θ̂` (a.e. equal to the honest
 integral `∫₀ᵘθds`), so no fresh predictable-progressive-measurability lemma is needed.
@@ -564,7 +566,7 @@ lemma exists_subseq_tendsto_ae₂ {f g : ℕ → Ω → ℝ} {F G : Ω → ℝ}
 
 end Convergence
 
-/-! ## The predictable-θ assembly: limit objects and the `Q`-Brownian conclusion -/
+/-! ## The predictable-θ assembly: limit objects and the increment laws under `Q` -/
 
 section Assembly
 
@@ -865,7 +867,7 @@ lemma isProbabilityMeasure_predGirsanov (hBmeas : ∀ t, Measurable (B t)) (T : 
       (ae_of_all _ fun ω ↦ (contDoleansExp_pos _ _ _ _).le),
     integral_ZTpred_eq_one hB hBmeas T hpred hC hbdd V hV, ENNReal.ofReal_one]
 
-/-! ### The exponential-martingale data and the `Q`-Brownian conclusion -/
+/-! ### The exponential-martingale data and the increment laws under `Q` -/
 
 include hB in
 /-- **Predictable bounded-θ exponential-martingale data.** For a bounded (`|θ| ≤ C`) predictable market
@@ -971,11 +973,13 @@ theorem isExpQMartingale_BthetaPredictable (hBmeas : ∀ t, Measurable (B t)) {�
         (Filter.eventually_atTop.mpr ⟨0, fun n _ ↦ (hsimple n).symm⟩))
 
 include hB in
-/-- **Predictable bounded-θ distributional Girsanov: `B^θ` is a `Q`-Brownian motion.** For a bounded
-**predictable** market price of risk `θ` (the honest `L²` Itô-integrand domain, no continuity), under
-`Q = μ.withDensity(Z_T)` with the Doléans density `Z_T = exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds)`, the drift-corrected
-process `B^θ_u = B_u + driftContinuousMod θ̂ u` is a `Q`-Brownian motion on `[0,T]`: zero start, Gaussian
-increments `𝒩(0,t−s)`, and independence of disjoint increments. One application of the exponential
+/-- **Predictable bounded-θ distributional Girsanov: the increments of `B^θ` under `Q`.** For a
+bounded **predictable** market price of risk `θ` (the honest `L²` Itô-integrand domain, no
+continuity), under `Q = μ.withDensity(Z_T)` with the Doléans density
+`Z_T = exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds)`, the drift-corrected process `B^θ_u = B_u + driftContinuousMod θ̂ u`
+has, on `[0,T]`: zero start, Gaussian increments `𝒩(0,t−s)`, and independence of any two
+non-overlapping increments. Joint independence of three or more increments is not stated. One
+application of the exponential
 characterization `isQBrownianMotion_of_expMartingale` to `isExpQMartingale_BthetaPredictable` — the
 bounded-predictable case (Rung 1), strengthening the bounded-adapted-continuous
 `Btheta_isQBrownianMotion_adapted` to the full honest Itô-integrand domain. -/
@@ -1005,9 +1009,10 @@ theorem Btheta_isQBrownianMotion_predictable (hBmeas : ∀ t, Measurable (B t)) 
 include hB in
 /-- **Bounded-predictable-θ Girsanov, clean form.** For a bounded predictable market price of risk `θ`
 (no approximating sequence in the hypotheses — one is obtained internally via `exists_approxSeq`, and
-the conclusion `ZTpred`/`BthetaPred` depends only on `θ`), the drift-corrected process
-`B^θ_u = B_u + driftContinuousMod θ̂ u` is a `Q`-Brownian motion on `[0,T]` under
-`Q = μ.withDensity(exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds))`. The benchmark-facing form of
+the conclusion `ZTpred`/`BthetaPred` depends only on `θ`), under
+`Q = μ.withDensity(exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds))` the drift-corrected process
+`B^θ_u = B_u + driftContinuousMod θ̂ u` starts at `0`, has `𝒩(0,t−s)` increments, and any two
+non-overlapping increments are independent, on `[0,T]`. The benchmark-facing form of
 `Btheta_isQBrownianMotion_predictable`. -/
 theorem Btheta_isQBrownianMotion_predictable_of_bdd (hBmeas : ∀ t, Measurable (B t))
     {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)

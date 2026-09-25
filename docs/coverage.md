@@ -26,6 +26,43 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Girsanov: what the increment statements prove (2026-09-25)
+
+No statement or proof changed. Four `full` entries described their conclusion as "`B^θ` is a
+`Q`-Brownian motion", two of them "in full". Each proves three properties of the drift-corrected
+process under `Q`, on `[0, T]`:
+
+1. `B^θ_0 = 0` almost surely;
+2. `B^θ_t − B^θ_s ~ N(0, t − s)` for `s ≤ t ≤ T`;
+3. `B^θ_t − B^θ_s` and `B^θ_v − B^θ_u` are independent for `s ≤ t ≤ u ≤ v ≤ T`.
+
+The third is independence of two increments at a time. A Brownian motion also has jointly
+independent increments, which fix its finite-dimensional law, and continuous paths. Neither is
+stated. All four entries read the three properties off `isQBrownianMotion_of_expMartingale`
+(`Foundations/ExpMartingaleQBrownian.lean`), whose conclusion has the same form.
+
+| Benchmark ID | θ | Lean declaration |
+|---|---|---|
+| `gir-const-theta-qbm` | constant | `Btheta_isQBrownianMotion` |
+| `gir-simple-adapted` | bounded, piecewise-constant adapted | `Btheta_simple_isQBrownianMotion` |
+| `gir-thm-9.1.8` | bounded, continuous adapted | `Btheta_isQBrownianMotion_adapted` |
+| `gir-thm-9.1.8-predictable` | bounded, predictable | `Btheta_isQBrownianMotion_predictable_of_bdd` |
+
+Their names, descriptions, scope notes and snippet docstrings now state the three properties, and
+so do the docstrings of the five Lean modules involved. The two Theorem 9.1.8 entries say in
+`description` that the textbook conclusion is not derived in full. The same wording in the scope
+of `gir-const-theta-marginal` and in the description and scope of `sc-thm-9.1.8` was corrected
+with them, as were the notes further down this file. The declaration names still say
+`isQBrownianMotion`; renaming them changes the API and is left for a separate decision.
+
+The four entries stay `full` for now. By the vocabulary above, the two Theorem 9.1.8 entries are
+narrower than the textbook theorem, whose conclusion is a Brownian motion, so they meet the
+`reduced_core` definition unless the gap is closed in Lean. The hypothesis `IsExpQMartingale`
+already fixes the conditional MGF of `Y_t − Y_s` given all of `𝓕_s`, so the missing step is to
+show that a deterministic conditional MGF makes the increment independent of `𝓕_s`. Joint
+independence of the increments over any partition then follows by induction, since the earlier
+increments are `𝓕_s`-measurable.
+
 ### Higher derivatives are stated for the price (2026-09-18)
 
 No entries were added. Twenty `full` entries now state a stronger theorem:
@@ -701,7 +738,8 @@ prior corpus audit, not a verification of this addition.
 > `Foundations/GirsanovPredictableTheta.Btheta_isQBrownianMotion_predictable_of_bdd`) **strengthens**
 > the continuous-adapted `gir-thm-9.1.8` to a bounded **predictable** `θ` — the honest domain of the Itô
 > `L²` integral, dropping the path-continuity assumption. `B^θ_u = B_u + driftContinuousMod θ̂ u` (the
-> genuinely-`𝓕`-adapted modification of `∫₀ᵘθ ds`) is a `Q`-Brownian motion under
+> genuinely-`𝓕`-adapted modification of `∫₀ᵘθ ds`) starts at `0`, has `N(0,t−s)` increments, and has
+> any two non-overlapping increments independent under
 > `Q = μ.withDensity(exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds))`. **Still spine-free**, over a Route-B marshalled
 > density approximation: `θ` is approximated in `L²` by clamped dense simple processes marshalled into
 > single-partition `(s,c)` form (so `isExpQMartingale_BthetaSimple` applies per `n`); the stochastic
@@ -717,8 +755,8 @@ prior corpus audit, not a verification of this addition.
 > **Prior (2026-07-09, continuous-adapted Girsanov closes `gir-thm-9.1.8`):** corpus **318**,
 > **285 full + 18 wrappers = 303/318 delivery-ready**, 15 reduced cores, 0 placeholders. `gir-thm-9.1.8`
 > flips `reduced_core → full`: `girsanov_adapted_continuous_qbm`
-> (`Foundations/GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted`) derives the complete Q-Brownian
-> motion — zero start, Gaussian `𝒩(0,t−s)` increments, independence of disjoint increments — for a
+> (`Foundations/GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted`) derives zero start, Gaussian
+> `𝒩(0,t−s)` increments, and independence of any two non-overlapping increments under `Q` for a
 > bounded (`|θ| ≤ C`), `𝓕`-adapted, path-continuous `θ`, under `Q = μ.withDensity(exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds))`
 > with `B^θ_u = B_u + ∫₀ᵘθ ds`. **Spine-free:** rather than a continuous Doléans stochastic exponential
 > proved to be a martingale (a Novikov crux), the simple-θ exponential-martingale identity
@@ -860,10 +898,10 @@ prior corpus audit, not a verification of this addition.
 > a martingale set-integral). The one new estimate is the mixed-time integrability of `D_u·Z_T`, via
 > AM–GM (`exp(σX_u)exp(−θX_T) ≤ exp(2σX_u)+exp(−2θX_T)`, each Gaussian-MGF-integrable). This partially
 > wires the architecture doc's Girsanov seam (I↔II, the martingale side; see `mathematical-architecture.md`).
-> **The distributional side is now fully closed for constant `θ` (2026-07-05):**
+> **The distributional side, for constant `θ` (2026-07-05):**
 > `Foundations/GirsanovConstantTheta.Btheta_isQBrownianMotion` proves the drift-corrected
-> `B^θ_t = X_t + θ t` is a genuine `Q`-Brownian motion — zero start, Gaussian increments
-> `B^θ_t − B^θ_s ~ N(0, t−s)`, **and** independence of disjoint increments (corpus
+> `B^θ_t = X_t + θ t` has zero start, Gaussian increments
+> `B^θ_t − B^θ_s ~ N(0, t−s)`, **and** independence of any two non-overlapping increments (corpus
 > `gir-const-theta-qbm`, `full`; the marginal law is `gir-const-theta-marginal`, `full`). All three
 > properties are now read off in **one** application of the process-agnostic exponential
 > characterization `Foundations/ExpMartingaleQBrownian.isQBrownianMotion_of_expMartingale` (2026-07-06):
@@ -880,7 +918,7 @@ prior corpus audit, not a verification of this addition.
 >
 > **Simple (piecewise-constant) adapted θ — now `full` (2026-07-06):** `gir-simple-adapted`
 > (`Foundations/GirsanovSimpleTheta.Btheta_simple_isQBrownianMotion`) proves `B^θ_t = X_t + ∑_i c_i
-> (s_{i+1}∧t − s_i∧t)` is a `Q`-Brownian motion under `Q = P.withDensity(E^{−c}_T)` for bounded
+> (s_{i+1}∧t − s_i∧t)` has the same three properties under `Q = P.withDensity(E^{−c}_T)` for bounded
 > `𝓕_{s i}`-measurable multipliers — the general bounded-**adapted**-θ Girsanov for the simple case,
 > strictly beyond constant θ, via one application of `isQBrownianMotion_of_expMartingale` (no charFun
 > chain re-derived). The two simple-θ-specific ingredients: the spine `simple_spine_ae`

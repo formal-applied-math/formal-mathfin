@@ -35,10 +35,12 @@ both `P`-martingales; the engine turns `D_t = exp(a·B^θ_t − ½a² t)` into a
 Gaussian-MGF term via `integrable_exp_mul_of_hasLaw`) — the same device as
 `bs_discounted_isQMartingale`.
 
-Since `E_Q[exp(a(B^θ_t − B^θ_s)) | 𝓕_s] = exp(½a²(t−s))` for all `a` characterizes
-`B^θ` as a `Q`-Brownian motion, this is the constant-θ half of the distributional
-Girsanov (`gir-thm-9.1.8`), reached with the existing tower — no adapted-integrand
-Itô formula.
+The identity `E_Q[exp(a(B^θ_t − B^θ_s)) | 𝓕_s] = exp(½a²(t−s))` for all `a` determines the law
+of `B^θ` as that of a `Q`-Brownian motion. The theorems below derive from it the marginal law, the
+`N(0,t−s)` increment law, and the independence of two non-overlapping increments (through
+`ExpMartingaleQBrownian`); joint independence of three or more increments is not derived. This is
+the constant-θ case of the distributional Girsanov theorem, reached with the existing tower — no
+adapted-integrand Itô formula.
 
 ## Main result
 
@@ -259,8 +261,8 @@ theorem Btheta_increment_map_eq_gaussianReal
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
   exact increment_map_eq_gaussianReal_of_expMartingale (isExpQMartingale_Btheta (X := X) (𝓕 := 𝓕) θ T) hst htT
 
-/-- **Constant-θ distributional Girsanov: increments are `Q`-independent.** For
-`s ≤ t ≤ u ≤ v ≤ T`, the disjoint increments `B^θ_t − B^θ_s` and `B^θ_v − B^θ_u` are independent
+/-- **Constant-θ distributional Girsanov: two non-overlapping increments are `Q`-independent.** For
+`s ≤ t ≤ u ≤ v ≤ T`, the increments `B^θ_t − B^θ_s` and `B^θ_v − B^θ_u` are independent
 under `Q`. One application of `increments_indepFun_of_expMartingale` (whose engine is
 `indepFun_iff_charFun_prod` on the Gaussian joint law). -/
 theorem Btheta_increments_indepFun
@@ -277,14 +279,14 @@ theorem Btheta_increments_indepFun
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
   exact increments_indepFun_of_expMartingale (isExpQMartingale_Btheta (X := X) (𝓕 := 𝓕) θ T) hst htu huv hvT
 
-/-- **Constant-θ distributional Girsanov: `B^θ` is a `Q`-Brownian motion.** The three defining
-properties under `Q = P.withDensity(exp(−θ X_T − ½θ² T))` — zero start `B^θ_0 = 0` a.e. `Q`,
-Gaussian increments `B^θ_t − B^θ_s ~ N(0, t−s)`, and independence of disjoint increments — packaged
-by one application of the exponential characterization `isQBrownianMotion_of_expMartingale` to the
-constant-θ exponential martingale (`isExpQMartingale_Btheta`). This is the constant-θ half of
-Girsanov (`gir-thm-9.1.8`) in full, reached on the existing tower (Bayes engine + Wald exponentials
-+ the reusable characteristic-function characterization), with no adapted-integrand Itô formula.
-The general bounded-*adapted*-θ statement is delivered separately, by
+/-- **Constant-θ distributional Girsanov: the increments of `B^θ` under `Q`.** Three properties
+under `Q = P.withDensity(exp(−θ X_T − ½θ² T))` — zero start `B^θ_0 = 0` a.e. `Q`, Gaussian
+increments `B^θ_t − B^θ_s ~ N(0, t−s)`, and independence of any two non-overlapping increments —
+packaged by one application of `isQBrownianMotion_of_expMartingale` to the constant-θ exponential
+martingale (`isExpQMartingale_Btheta`). Joint independence of three or more increments is not
+stated, so this is not the full law of a `Q`-Brownian motion. Reached on the existing tower (Bayes
+engine + Wald exponentials + the reusable characteristic-function argument), with no
+adapted-integrand Itô formula. The bounded-*adapted*-θ statements are delivered separately, by
 `GirsanovSimpleTheta` (piecewise-constant), `GirsanovAdaptedTheta` (bounded continuous
 adapted) and `GirsanovPredictableTheta` (bounded predictable). -/
 theorem Btheta_isQBrownianMotion

@@ -11,19 +11,21 @@ public import MathFin.Foundations.ChangeOfMeasure
 public import MathFin.Foundations.ExpMartingaleQBrownian
 
 /-!
-# Simple (piecewise-constant adapted) Girsanov — `B^θ` is a `Q`-Brownian motion
+# Simple (piecewise-constant adapted) Girsanov — the increments of `B^θ` under `Q`
 
 Route-α, brick α3 (`docs/plans/2026-07-06-girsanov-track-alpha.md`). For a market price of risk
 `θ` that is **simple** (piecewise-constant adapted) over a partition `s : ℕ → ℝ≥0` with bounded,
 `𝓕_{s i}`-measurable multipliers `c`, the Girsanov density is the simple Doléans exponential
 `Z_T = E^{−c}_T` (`simpleDoleansExp s (fun i ↦ −c i) N T`). Under `Q = P.withDensity Z_T`, the
-drift-corrected process `B^θ_t = X_t + ∑_i c_i (s_{i+1}∧t − s_i∧t)` is a genuine `Q`-Brownian
-motion — the general bounded-**adapted**-θ Girsanov for the simple case, strictly beyond constant
-θ, on the existing tower with no adapted-integrand Itô formula.
+drift-corrected process `B^θ_t = X_t + ∑_i c_i (s_{i+1}∧t − s_i∧t)` starts at `0`, has `N(0,t−s)`
+increments, and any two non-overlapping increments are independent — the bounded-**adapted**-θ
+Girsanov for the simple case, strictly beyond constant θ, on the existing tower with no
+adapted-integrand Itô formula. Joint independence of three or more increments is not stated, so
+this is not the full law of a `Q`-Brownian motion.
 
 The route is the process-agnostic exponential characterization
 `Foundations/ExpMartingaleQBrownian.isQBrownianMotion_of_expMartingale`: supply the exponential
-martingale `exp(a·B^θ − ½a²·)` and read off the `Q`-Brownian properties, with no
+martingale `exp(a·B^θ − ½a²·)` and read off those three properties, with no
 characteristic-function chain re-derived. The two ingredients specific to simple θ are:
 * the **spine** (`simple_spine`, `simple_spine_ae`): `E^{−c}·exp(a·B^θ − ½a²·) =ᵐ E^{a−c}`, i.e.
   `Z·D` is again a simple Doléans density (the "tilted density" trick);
@@ -37,8 +39,8 @@ characteristic-function chain re-derived. The two ingredients specific to simple
   measure;
 * `MathFin.isExpQMartingale_BthetaSimple` — `B^θ` packaged as exponential-martingale data over
   `[0,T]`;
-* `MathFin.Btheta_simple_isQBrownianMotion` — `B^θ` is a `Q`-Brownian motion (zero start, `N(0,t−s)`
-  increments, independent disjoint increments).
+* `MathFin.Btheta_simple_isQBrownianMotion` — under `Q`, `B^θ` starts at `0`, has `N(0,t−s)`
+  increments, and any two non-overlapping increments are independent.
 -/
 
 @[expose] public section
@@ -402,11 +404,12 @@ theorem isExpQMartingale_BthetaSimple (s : ℕ → ℝ≥0) (hs : Monotone s) (h
       hst' ht'T hA
 
 include hX in
-/-- **Simple (piecewise-constant adapted) distributional Girsanov: `B^θ` is a `Q`-Brownian motion.**
-For a partition covering `[0,T]` (`s_0 = 0`, `T ≤ s_N`) and bounded adapted multipliers `c`, under
-`Q = P.withDensity(E^{−c}_T)` the drift-corrected process `B^θ_t = X_t + ∑_i c_i (s_{i+1}∧t − s_i∧t)`
-is a `Q`-Brownian motion on `[0,T]`: zero start, Gaussian increments `N(0,t−s)`, and independence of
-disjoint increments. One application of the exponential characterization
+/-- **Simple (piecewise-constant adapted) distributional Girsanov: the increments of `B^θ` under
+`Q`.** For a partition covering `[0,T]` (`s_0 = 0`, `T ≤ s_N`) and bounded adapted multipliers `c`,
+under `Q = P.withDensity(E^{−c}_T)` the drift-corrected process
+`B^θ_t = X_t + ∑_i c_i (s_{i+1}∧t − s_i∧t)` has, on `[0,T]`: zero start, Gaussian increments
+`N(0,t−s)`, and independence of any two non-overlapping increments. Joint independence of three or
+more increments is not stated. One application of the exponential characterization
 `isQBrownianMotion_of_expMartingale` to `isExpQMartingale_BthetaSimple` — no characteristic-function
 chain re-derived (the whole payoff of the abstraction). This is the general bounded-*adapted*-θ
 Girsanov for the simple case, strictly beyond constant θ, on the existing tower — no adapted-integrand
