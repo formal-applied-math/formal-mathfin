@@ -466,5 +466,5 @@ proof terms — inside the verify container:
 `lake build MathFin.Blueprint blueprint_export && lake exe blueprint_export
 MathFin.Blueprint > docs/blueprint_nodes.json`, then host-side
 `python3 tools/blueprint_render.py`. For the per-theorem faithfulness audit
-see [`coverage.md`](coverage.md); for the storefront and build instructions
+see [`coverage.md`](coverage.md); for an overview and build instructions
 see the [README](../README.md).*

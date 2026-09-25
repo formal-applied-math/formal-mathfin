@@ -24,7 +24,7 @@
 
 ## Cross-references
 
-- For the storefront pitch and the at-a-glance tables, see [`../README.md`](../README.md).
+- For an overview of the library and its main results, see [`../README.md`](../README.md).
 - For the contributor workflow (how to add a theorem, run the build, open a PR), see [`../CONTRIBUTING.md`](../CONTRIBUTING.md).
 - For upstream-PR drafts targeting Mathlib / BrownianMotion, see [`../upstream/`](../upstream/).
 
