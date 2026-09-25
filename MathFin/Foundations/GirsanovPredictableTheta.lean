@@ -26,9 +26,9 @@ spine-free architecture:
   quadratic variation `∑cᵢ²Δτ_T → ∫₀ᵀθ²ds` (both here, via the drift-modification tower);
 * the uniform `L⁴`/`L²` moment bounds (`GirsanovSimpleDoleansMoments`) feed the a.e.-subsequence
   set-integral engine, exactly as in the continuous case, and `isQBrownianMotion_of_expMartingale`
-  reads off zero start, `N(0,t−s)` increments, and independence of any two non-overlapping
-  increments. Joint independence of three or more increments is not stated, so this is not the
-  full law of a `Q`-Brownian motion.
+  reads off zero start, `N(0,t−s)` increments, and independent increments (`HasIndepIncrements`)
+  on `[0,T]`, which together fix every finite-dimensional law of `B^θ` on `[0,T]` to that of a
+  `Q`-Brownian motion; path continuity is not stated.
 
 The limit drift is the genuinely-`𝓕`-adapted `driftContinuousMod θ̂` (a.e. equal to the honest
 integral `∫₀ᵘθds`), so no fresh predictable-progressive-measurability lemma is needed.
@@ -977,9 +977,9 @@ include hB in
 bounded **predictable** market price of risk `θ` (the honest `L²` Itô-integrand domain, no
 continuity), under `Q = μ.withDensity(Z_T)` with the Doléans density
 `Z_T = exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds)`, the drift-corrected process `B^θ_u = B_u + driftContinuousMod θ̂ u`
-has, on `[0,T]`: zero start, Gaussian increments `𝒩(0,t−s)`, and independence of any two
-non-overlapping increments. Joint independence of three or more increments is not stated. One
-application of the exponential
+has, on `[0,T]`: zero start, Gaussian increments `𝒩(0,t−s)`, and independent increments
+(`HasIndepIncrements`), which fix its finite-dimensional laws on `[0,T]`; path continuity is not
+stated. One application of the exponential
 characterization `isQBrownianMotion_of_expMartingale` to `isExpQMartingale_BthetaPredictable` — the
 bounded-predictable case (Rung 1), strengthening the bounded-adapted-continuous
 `Btheta_isQBrownianMotion_adapted` to the full honest Itô-integrand domain. -/
@@ -994,12 +994,8 @@ theorem Btheta_isQBrownianMotion_predictable (hBmeas : ∀ t, Measurable (B t)) 
           (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)).map
             (fun ω ↦ BthetaPred (μ := μ) T hBmeas hpred hbdd t ω
               - BthetaPred (μ := μ) T hBmeas hpred hbdd s ω) = gaussianReal 0 (t - s))
-      ∧ (∀ ⦃s t u v : ℝ≥0⦄, s ≤ t → t ≤ u → u ≤ v → v ≤ T →
-          IndepFun (fun ω ↦ BthetaPred (μ := μ) T hBmeas hpred hbdd t ω
-              - BthetaPred (μ := μ) T hBmeas hpred hbdd s ω)
-            (fun ω ↦ BthetaPred (μ := μ) T hBmeas hpred hbdd v ω
-              - BthetaPred (μ := μ) T hBmeas hpred hbdd u ω)
-            (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω))) := by
+      ∧ HasIndepIncrements (fun t : Set.Iic T ↦ BthetaPred (μ := μ) T hBmeas hpred hbdd t)
+          (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) := by
   haveI : IsProbabilityMeasure (μ.withDensity fun ω ↦
       ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) :=
     isProbabilityMeasure_predGirsanov hB hBmeas T hpred hC hbdd V hV
@@ -1011,8 +1007,8 @@ include hB in
 (no approximating sequence in the hypotheses — one is obtained internally via `exists_approxSeq`, and
 the conclusion `ZTpred`/`BthetaPred` depends only on `θ`), under
 `Q = μ.withDensity(exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds))` the drift-corrected process
-`B^θ_u = B_u + driftContinuousMod θ̂ u` starts at `0`, has `𝒩(0,t−s)` increments, and any two
-non-overlapping increments are independent, on `[0,T]`. The benchmark-facing form of
+`B^θ_u = B_u + driftContinuousMod θ̂ u` starts at `0`, has `𝒩(0,t−s)` increments, and has
+independent increments, on `[0,T]`. The benchmark-facing form of
 `Btheta_isQBrownianMotion_predictable`. -/
 theorem Btheta_isQBrownianMotion_predictable_of_bdd (hBmeas : ∀ t, Measurable (B t))
     {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
@@ -1023,12 +1019,8 @@ theorem Btheta_isQBrownianMotion_predictable_of_bdd (hBmeas : ∀ t, Measurable 
           (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)).map
             (fun ω ↦ BthetaPred (μ := μ) T hBmeas hpred hbdd t ω
               - BthetaPred (μ := μ) T hBmeas hpred hbdd s ω) = gaussianReal 0 (t - s))
-      ∧ (∀ ⦃s t u v : ℝ≥0⦄, s ≤ t → t ≤ u → u ≤ v → v ≤ T →
-          IndepFun (fun ω ↦ BthetaPred (μ := μ) T hBmeas hpred hbdd t ω
-              - BthetaPred (μ := μ) T hBmeas hpred hbdd s ω)
-            (fun ω ↦ BthetaPred (μ := μ) T hBmeas hpred hbdd v ω
-              - BthetaPred (μ := μ) T hBmeas hpred hbdd u ω)
-            (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω))) := by
+      ∧ HasIndepIncrements (fun t : Set.Iic T ↦ BthetaPred (μ := μ) T hBmeas hpred hbdd t)
+          (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) := by
   obtain ⟨V, hV⟩ := exists_approxSeq (μ := μ) hBmeas T hpred hbdd
   exact Btheta_isQBrownianMotion_predictable hB hBmeas hpred hC hbdd T V hV
 

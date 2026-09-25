@@ -18,10 +18,10 @@ Route-α, brick α3 (`docs/plans/2026-07-06-girsanov-track-alpha.md`). For a mar
 `𝓕_{s i}`-measurable multipliers `c`, the Girsanov density is the simple Doléans exponential
 `Z_T = E^{−c}_T` (`simpleDoleansExp s (fun i ↦ −c i) N T`). Under `Q = P.withDensity Z_T`, the
 drift-corrected process `B^θ_t = X_t + ∑_i c_i (s_{i+1}∧t − s_i∧t)` starts at `0`, has `N(0,t−s)`
-increments, and any two non-overlapping increments are independent — the bounded-**adapted**-θ
-Girsanov for the simple case, strictly beyond constant θ, on the existing tower with no
-adapted-integrand Itô formula. Joint independence of three or more increments is not stated, so
-this is not the full law of a `Q`-Brownian motion.
+increments, and independent increments (`HasIndepIncrements`) on `[0,T]`, which together fix every
+finite-dimensional law of `B^θ` on `[0,T]` to that of a `Q`-Brownian motion; path continuity is not
+stated. This is the bounded-**adapted**-θ Girsanov for the simple case, strictly beyond constant θ,
+on the existing tower with no adapted-integrand Itô formula.
 
 The route is the process-agnostic exponential characterization
 `Foundations/ExpMartingaleQBrownian.isQBrownianMotion_of_expMartingale`: supply the exponential
@@ -40,7 +40,7 @@ characteristic-function chain re-derived. The two ingredients specific to simple
 * `MathFin.isExpQMartingale_BthetaSimple` — `B^θ` packaged as exponential-martingale data over
   `[0,T]`;
 * `MathFin.Btheta_simple_isQBrownianMotion` — under `Q`, `B^θ` starts at `0`, has `N(0,t−s)`
-  increments, and any two non-overlapping increments are independent.
+  increments, and has independent increments on `[0,T]`.
 -/
 
 @[expose] public section
@@ -408,8 +408,8 @@ include hX in
 `Q`.** For a partition covering `[0,T]` (`s_0 = 0`, `T ≤ s_N`) and bounded adapted multipliers `c`,
 under `Q = P.withDensity(E^{−c}_T)` the drift-corrected process
 `B^θ_t = X_t + ∑_i c_i (s_{i+1}∧t − s_i∧t)` has, on `[0,T]`: zero start, Gaussian increments
-`N(0,t−s)`, and independence of any two non-overlapping increments. Joint independence of three or
-more increments is not stated. One application of the exponential characterization
+`N(0,t−s)`, and independent increments (`HasIndepIncrements`), which fix its finite-dimensional
+laws on `[0,T]`; path continuity is not stated. One application of the exponential characterization
 `isQBrownianMotion_of_expMartingale` to `isExpQMartingale_BthetaSimple` — no characteristic-function
 chain re-derived (the whole payoff of the abstraction). This is the general bounded-*adapted*-θ
 Girsanov for the simple case, strictly beyond constant θ, on the existing tower — no adapted-integrand
@@ -425,11 +425,9 @@ theorem Btheta_simple_isQBrownianMotion (s : ℕ → ℝ≥0) (hs : Monotone s) 
               ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)).map
             (fun ω ↦ (X t' ω + simpleDrift s c N t' ω) - (X s' ω + simpleDrift s c N s' ω))
             = gaussianReal 0 (t' - s'))
-      ∧ (∀ ⦃s' t' u' v' : ℝ≥0⦄, s' ≤ t' → t' ≤ u' → u' ≤ v' → v' ≤ T →
-          IndepFun (fun ω ↦ (X t' ω + simpleDrift s c N t' ω) - (X s' ω + simpleDrift s c N s' ω))
-              (fun ω ↦ (X v' ω + simpleDrift s c N v' ω) - (X u' ω + simpleDrift s c N u' ω))
-            (P.withDensity fun ω ↦
-              ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω))) := by
+      ∧ HasIndepIncrements (fun t' : Set.Iic T ↦ fun ω ↦ X t' ω + simpleDrift s c N t' ω)
+          (P.withDensity fun ω ↦
+            ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)) := by
   have hdneg : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (fun ω ↦ -(c i ω)) :=
     fun i ↦ (hc i).neg
   have hbneg : ∀ i ω, |(-(c i ω))| ≤ K := fun i ω ↦ by rw [abs_neg]; exact hc_bdd i ω

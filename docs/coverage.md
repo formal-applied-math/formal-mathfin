@@ -81,7 +81,40 @@ path-continuity hypothesis.
 entry needs a row, each listed name must still appear in its proof, and each must be pinned. The
 test cannot see a name that a row leaves out; that is still a review item.
 
+### Girsanov: independent increments, proved (2026-09-25)
+
+The gap described in the next section is closed in Lean. `isQBrownianMotion_of_expMartingale` now
+concludes, for the process `Y` under `Q` on `[0, T]`:
+
+1. `Y_0 = 0` almost surely;
+2. `Y_t − Y_s ~ N(0, t − s)` for `s ≤ t ≤ T`;
+3. `HasIndepIncrements (fun t : Set.Iic T ↦ Y t) Q`: for any `t₀ ≤ ⋯ ≤ tₙ` in `[0, T]`, the
+   increments are jointly independent (Mathlib's definition).
+
+Together these fix every finite-dimensional law of `Y` on `[0, T]` to that of a Brownian motion.
+Path continuity is still not stated.
+
+The proof extends the two-increment argument to `n` increments. By induction on `n`, the joint MGF
+of `n` successive increments is the product of the Gaussian ones: the earlier increments are
+`𝓕_{t_n}`-measurable and factor out of the conditional expectation given `𝓕_{t_n}`, which is
+deterministic on the last increment. So every linear combination of the increments is Gaussian
+with the diagonal variance, and `iIndepFun_iff_charFun_pi` turns that into joint independence
+(`increments_iIndepFun_of_expMartingale`). `HasIndepIncrements.of_nat` reduces the general statement
+to the first `N` increments of a monotone sequence (`hasIndepIncrements_of_expMartingale`). The
+pairwise lemma is now a special case, and the two-increment code it used is gone. One lemma,
+`map_eq_gaussianReal_of_mgf`, replaces three copies of the MGF-to-law argument.
+
+The four Girsanov entries get the stronger conclusion through that one theorem. `gir-const-theta-qbm`,
+`gir-simple-adapted`, `gir-thm-9.1.8` and `gir-thm-9.1.8-predictable` now state `HasIndepIncrements`
+in place of the pairwise property, and their names, descriptions and scope notes say so. They stay
+`full`: each derives from primitives the finite-dimensional law of a Brownian motion on `[0, T]`,
+which is how this library states Brownian motion elsewhere (`IsPreBrownianReal`), and each
+description says that path continuity is not stated. `sc-thm-9.1.8`, the general case under
+Novikov's condition, stays `reduced_core`.
+
 ### Girsanov: what the increment statements prove (2026-09-25)
+
+*Superseded the same day by the section above, which closes this gap in Lean.*
 
 No statement or proof changed. Four `full` entries described their conclusion as "`B^θ` is a
 `Q`-Brownian motion", two of them "in full". Each proves three properties of the drift-corrected

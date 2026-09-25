@@ -35,11 +35,11 @@ both `P`-martingales; the engine turns `D_t = exp(a·B^θ_t − ½a² t)` into a
 Gaussian-MGF term via `integrable_exp_mul_of_hasLaw`) — the same device as
 `bs_discounted_isQMartingale`.
 
-The identity `E_Q[exp(a(B^θ_t − B^θ_s)) | 𝓕_s] = exp(½a²(t−s))` for all `a` determines the law
-of `B^θ` as that of a `Q`-Brownian motion. The theorems below derive from it the marginal law, the
-`N(0,t−s)` increment law, and the independence of two non-overlapping increments (through
-`ExpMartingaleQBrownian`); joint independence of three or more increments is not derived. This is
-the constant-θ case of the distributional Girsanov theorem, reached with the existing tower — no
+The identity `E_Q[exp(a(B^θ_t − B^θ_s)) | 𝓕_s] = exp(½a²(t−s))` for all `a` determines every
+finite-dimensional law of `B^θ` on `[0,T]` as that of a `Q`-Brownian motion. The theorems below
+derive from it (through `ExpMartingaleQBrownian`) the marginal law, the `N(0,t−s)` increment law,
+and independent increments (`HasIndepIncrements`) on `[0,T]`; path continuity is not stated. This
+is the constant-θ case of the distributional Girsanov theorem, reached with the existing tower — no
 adapted-integrand Itô formula.
 
 ## Main result
@@ -263,8 +263,8 @@ theorem Btheta_increment_map_eq_gaussianReal
 
 /-- **Constant-θ distributional Girsanov: two non-overlapping increments are `Q`-independent.** For
 `s ≤ t ≤ u ≤ v ≤ T`, the increments `B^θ_t − B^θ_s` and `B^θ_v − B^θ_u` are independent
-under `Q`. One application of `increments_indepFun_of_expMartingale` (whose engine is
-`indepFun_iff_charFun_prod` on the Gaussian joint law). -/
+under `Q`. One application of `increments_indepFun_of_expMartingale`, the two-increment case of
+`increments_iIndepFun_of_expMartingale`. -/
 theorem Btheta_increments_indepFun
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
     {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
@@ -279,13 +279,13 @@ theorem Btheta_increments_indepFun
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
   exact increments_indepFun_of_expMartingale (isExpQMartingale_Btheta (X := X) (𝓕 := 𝓕) θ T) hst htu huv hvT
 
-/-- **Constant-θ distributional Girsanov: the increments of `B^θ` under `Q`.** Three properties
-under `Q = P.withDensity(exp(−θ X_T − ½θ² T))` — zero start `B^θ_0 = 0` a.e. `Q`, Gaussian
-increments `B^θ_t − B^θ_s ~ N(0, t−s)`, and independence of any two non-overlapping increments —
-packaged by one application of `isQBrownianMotion_of_expMartingale` to the constant-θ exponential
-martingale (`isExpQMartingale_Btheta`). Joint independence of three or more increments is not
-stated, so this is not the full law of a `Q`-Brownian motion. Reached on the existing tower (Bayes
-engine + Wald exponentials + the reusable characteristic-function argument), with no
+/-- **Constant-θ distributional Girsanov: `B^θ` has the increments of a `Q`-Brownian motion.**
+Under `Q = P.withDensity(exp(−θ X_T − ½θ² T))` the drift-corrected process `B^θ_t = X_t + θ t` has,
+on `[0,T]`: zero start `B^θ_0 = 0` a.e. `Q`, Gaussian increments `B^θ_t − B^θ_s ~ N(0, t−s)`, and
+independent increments (`HasIndepIncrements`). Together these fix every finite-dimensional law of
+`B^θ` on `[0,T]` to that of a `Q`-Brownian motion; path continuity is not stated. One application of
+`isQBrownianMotion_of_expMartingale` to the constant-θ exponential martingale
+(`isExpQMartingale_Btheta`), reached on the existing tower (Bayes engine + Wald exponentials) with no
 adapted-integrand Itô formula. The bounded-*adapted*-θ statements are delivered separately, by
 `GirsanovSimpleTheta` (piecewise-constant), `GirsanovAdaptedTheta` (bounded continuous
 adapted) and `GirsanovPredictableTheta` (bounded predictable). -/
@@ -299,11 +299,9 @@ theorem Btheta_isQBrownianMotion
       ∧ (∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T →
           (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))).map
               (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))) = gaussianReal 0 (t - s))
-      ∧ (∀ ⦃s t u v : ℝ≥0⦄, s ≤ t → t ≤ u → u ≤ v → v ≤ T →
-          IndepFun (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
-              (fun ω ↦ (X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ)))
-            (P.withDensity fun ω ↦ ENNReal.ofReal
-              (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2)))) := by
+      ∧ HasIndepIncrements (fun t : Set.Iic T ↦ fun ω ↦ X t ω + θ * ((t : ℝ≥0) : ℝ))
+          (P.withDensity fun ω ↦ ENNReal.ofReal
+            (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) := by
   haveI : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
       (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T

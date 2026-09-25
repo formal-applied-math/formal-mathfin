@@ -47,8 +47,8 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 - **Girsanov's theorem.** For bounded predictable $`\theta`$, let
   $`dQ = \exp\big(-\int_0^T \theta\,dB - \tfrac12 \int_0^T \theta^2\,dt\big)\,dP`$. On $`[0,T]`$,
-  under $`Q`$, the process $`B_t + \int_0^t \theta_s\,ds`$ starts at $`0`$, has
-  $`\mathcal{N}(0,t-s)`$ increments, and any two non-overlapping increments are independent
+  under $`Q`$, the process $`B_t + \int_0^t \theta_s\,ds`$ starts at $`0`$ and has independent
+  $`\mathcal{N}(0,t-s)`$ increments, so its finite-dimensional laws are those of a Brownian motion
   ([`Btheta_isQBrownianMotion_predictable_of_bdd`](MathFin/Foundations/GirsanovPredictableTheta.lean)).
 
 - **Martingale representation.** Every square-integrable, $`\mathcal{F}^B_T`$-measurable random
@@ -112,7 +112,8 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   the general form of Girsanov's theorem, Lévy's characterization, the two-dimensional Itô formula,
   and five theorems on Markov chains. The thirteenth proves a special case: the first interarrival
   time of a Poisson process is exponential.
-- Girsanov's theorem is proved only for bounded predictable $`\theta`$.
+- Girsanov's theorem is proved only for bounded predictable $`\theta`$, and only for the
+  finite-dimensional laws: path continuity of the new Brownian motion is not stated.
 - Of the second fundamental theorem, only the direction from completeness to uniqueness is proved:
   for a price $`S = S_0 + \int_0^t \sigma\,dB`$ with $`\sigma \neq 0`$ almost everywhere, a
   probability measure with square-integrable density with respect to $`P`$, under which $`S`$ is a

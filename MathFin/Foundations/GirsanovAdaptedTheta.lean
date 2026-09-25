@@ -18,9 +18,10 @@ Route-α, brick α4 (`docs/plans/2026-07-06-girsanov-track-alpha.md`). Closes th
 (`isExpQMartingale_BthetaSimple`) to the limit. For a bounded (`|θ| ≤ C`) adapted (`𝓕_t`-measurable
 in each `t`) continuous (every path `s ↦ θ_s ω`) market price of risk `θ`, under
 `Q = μ.withDensity Z_T` with the Doléans density `Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)` the
-drift-corrected process `B^θ_u = B_u + ∫₀ᵘθ ds` starts at `0`, has `N(0,t−s)` increments, and any
-two non-overlapping increments are independent. Joint independence of three or more increments is
-not stated, so this is not the full law of a `Q`-Brownian motion.
+drift-corrected process `B^θ_u = B_u + ∫₀ᵘθ ds` starts at `0`, has `N(0,t−s)` increments, and has
+independent increments (`HasIndepIncrements`) on `[0,T]`, which together fix every
+finite-dimensional law of `B^θ` on `[0,T]` to that of a `Q`-Brownian motion; path continuity is not
+stated.
 
 The route is **spine-free**: rather than build a continuous Doléans stochastic exponential and prove
 it is a martingale (a Novikov-flavoured crux), we pass the *simple* exponential-martingale identity to
@@ -700,8 +701,8 @@ include hB in
 a bounded, adapted, path-continuous market price of risk `θ`, under `Q = μ.withDensity(Z_T)` with
 the Doléans density `Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)`, the drift-corrected process
 `B^θ_u = B_u + ∫₀ᵘθ ds` has, on `[0,T]`: zero start, Gaussian increments `𝒩(0,t−s)`, and
-independence of any two non-overlapping increments. Joint independence of three or more increments
-is not stated. One application of the exponential
+independent increments (`HasIndepIncrements`), which fix its finite-dimensional laws on `[0,T]`;
+path continuity is not stated. One application of the exponential
 characterization `isQBrownianMotion_of_expMartingale` to `isExpQMartingale_BthetaCont` — the general
 adapted continuous case, closed on the existing tower with no adapted-integrand Itô formula. -/
 theorem Btheta_isQBrownianMotion_adapted (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
@@ -714,11 +715,9 @@ theorem Btheta_isQBrownianMotion_adapted (hBmeas : ∀ t, Measurable (B t)) {θ 
           (μ.withDensity fun ω ↦
               ENNReal.ofReal (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω)).map
             (fun ω ↦ BthetaCont B θ t ω - BthetaCont B θ s ω) = gaussianReal 0 (t - s))
-      ∧ (∀ ⦃s t u v : ℝ≥0⦄, s ≤ t → t ≤ u → u ≤ v → v ≤ T →
-          IndepFun (fun ω ↦ BthetaCont B θ t ω - BthetaCont B θ s ω)
-              (fun ω ↦ BthetaCont B θ v ω - BthetaCont B θ u ω)
-            (μ.withDensity fun ω ↦
-              ENNReal.ofReal (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω))) := by
+      ∧ HasIndepIncrements (fun t : Set.Iic T ↦ BthetaCont B θ t)
+          (μ.withDensity fun ω ↦
+            ENNReal.ofReal (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω)) := by
   haveI : IsProbabilityMeasure (μ.withDensity fun ω ↦
       ENNReal.ofReal (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω)) :=
     isProbabilityMeasure_contGirsanov hB hBmeas hadap hcont hbdd T

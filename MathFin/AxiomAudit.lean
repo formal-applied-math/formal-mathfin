@@ -985,10 +985,21 @@ and lands as a one-line application:
   stochastic exponential to be a martingale (the Novikov crux), the simple-θ identity is passed to
   the limit — the mixed-time set-integral `∫_A exp(a·Yⁿ−½)·Zⁿ_T dμ` converges through the
   a.e.-subsequence engine `tendsto_setIntegral_of_subseq_ae_of_sq_bound` with a route-A L⁴/AM-GM
-  uniform `L²` bound, and no adapted-integrand Itô formula is used anywhere. -/
+  uniform `L²` bound, and no adapted-integrand Itô formula is used anywhere.
+
+*2026-09-25:* until this date the independence read off was two increments at a time. It is now
+independence of any number of increments (`HasIndepIncrements` on `[0,T]`, through
+`increments_iIndepFun_of_expMartingale`), which with the other two properties fixes the
+finite-dimensional law of a Brownian motion on `[0,T]`. Path continuity is not stated. -/
 
 /-- info: 'MathFin.isQBrownianMotion_of_expMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.isQBrownianMotion_of_expMartingale
+
+/-- info: 'MathFin.increments_iIndepFun_of_expMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.increments_iIndepFun_of_expMartingale
+
+/-- info: 'MathFin.hasIndepIncrements_of_expMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasIndepIncrements_of_expMartingale
 
 /-- info: 'MathFin.Btheta_isQBrownianMotion' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.Btheta_isQBrownianMotion

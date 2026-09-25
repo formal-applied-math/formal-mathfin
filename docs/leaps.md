@@ -113,12 +113,12 @@ The Wiener integral (`Foundations/WienerIntegralL2.lean`) handles
 That is **not** the Itô integral. Leap 4 builds the genuinely-stochastic
 core: a **random, adapted** integrand `φ`, where the cross-terms vanish for a
 deeper reason — the next increment `B_{t₁} − B_{t₀}` is *independent of the
-past* `𝓕_{t₀}` (the weak Markov property `IsPreBrownian.indepFun_shift`) and
+past* `𝓕_{t₀}` (the weak Markov property `IsPreBrownianReal.indepFun_shift`) and
 has mean zero.
 
 The increment-independence this was long thought to wait on is **not** WIP:
-it is `IsPreBrownian.hasIndepIncrements` and `IsPreBrownian.indepFun_shift`,
-fully proven in Degenne's package. The deductive chain:
+it is `IsPreBrownianReal.hasIndepIncrements` and `IsPreBrownianReal.indepFun_shift`,
+fully proven upstream (in Degenne's package, since moved to Mathlib). The deductive chain:
 
 | Theorem | Content |
 |---|---|

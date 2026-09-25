@@ -130,9 +130,10 @@ graph TD
 
 ### Brownian motion ✅ *(upstream)*
 The driving noise: a process with independent, stationary, Gaussian increments,
-`B t ~ N(0, t)`. Taken from Rémy Degenne's
-[`brownian-motion`](https://github.com/RemyDegenne/brownian-motion) package
-(`IsPreBrownian`), on which this library builds.
+`B t ~ N(0, t)`. The definition, `IsPreBrownianReal`, and its basic API are now in Mathlib
+(`Mathlib/Probability/BrownianMotion/Basic.lean`). Rémy Degenne's
+[`brownian-motion`](https://github.com/RemyDegenne/brownian-motion) package, on which this library
+also builds, supplies the continuous modification and the filtered versions.
 
 ### Quadratic variation ✅
 `∑ (B_{t_{k+1}} − B_{t_k})² → T` as the partition refines — in **L²**
