@@ -14,13 +14,13 @@ risk measures and actuarial mathematics.
 
 Release 1.4.0 records 373 results from the literature in [`benchmarks/`](benchmarks), each with a
 Lean statement and proof. Of these, 342 are proved in full, 18 restate a lemma from Mathlib or
-BrownianMotion, and 13 are reduced cores that prove less than the result they are named after;
-[`docs/coverage.md`](docs/coverage.md) gives the status and scope of each. The library contains no
-`sorry`, and the build checks that every library theorem these results use depends only on the
-axioms `propext`, `Classical.choice` and `Quot.sound`.
+BrownianMotion, and 13 are reduced cores that prove less than the result they are named after.
+Each entry records its status and what it leaves out. The library contains no `sorry`, and a
+build-time audit checks that the main results below, and most other theorems the benchmark cites,
+depend only on the axioms `propext`, `Classical.choice` and `Quot.sound`.
 
-Here, for example, is the convergence of the Cox–Ross–Rubinstein model to Black–Scholes, from
-[`CRRClosedForm.lean`](MathFin/Binomial/CRRClosedForm.lean):
+Here, for example, is the convergence of the Cox–Ross–Rubinstein call price to the Black–Scholes
+price, from [`CRRClosedForm.lean`](MathFin/Binomial/CRRClosedForm.lean):
 
 ```lean
 theorem binomialPrice_call_tendsto_bs_closed {r σ T S₀ K : ℝ}
@@ -32,8 +32,8 @@ theorem binomialPrice_call_tendsto_bs_closed {r σ T S₀ K : ℝ}
           - K * Real.exp (-(r * T)) * Phi (bsd2 S₀ K r σ T)))
 ```
 
-The hypothesis `hna`, that every step of the tree is free of arbitrage, holds whenever
-$`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRConvergence.lean)).
+The hypothesis `hna`, that the $`n`$-step tree is free of arbitrage for every $`n \ge 1`$, holds
+whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRConvergence.lean)).
 
 ## Main results
 
@@ -53,13 +53,15 @@ $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRConvergence.
 
 - **Martingale representation.** Every square-integrable, $`\mathcal{F}^B_T`$-measurable random
   variable $`H`$ can be written $`H = \mathbb{E}[H] + \int_0^T \varphi\,dB`$ for a unique
-  $`\varphi`$. Read as a trading statement, every such claim has a unique hedge
+  $`\varphi`$. In trading terms, each such claim is replicated from initial wealth
+  $`\mathbb{E}[H]`$ by a unique strategy
   ([`exists_replicating_strategy`](MathFin/Foundations/MarketCompleteness.lean)).
 
 - **Stochastic differential equations.** If $`b`$ and $`\sigma`$ are Lipschitz with constants
-  $`L_b`$ and $`L_\sigma`$, the equation $`dX = b(X)\,dt + \sigma(X)\,dB`$ has a unique solution
-  among square-integrable predictable processes on any horizon with
-  $`T L_b + \sqrt{T} L_\sigma < 1`$, obtained as the fixed point of the Picard map
+  $`L_b`$ and $`L_\sigma`$, the Picard map
+  $`X \mapsto \eta + \int_0^{\cdot} b(X)\,ds + \int_0^{\cdot} \sigma(X)\,dB`$ of
+  $`dX = b(X)\,dt + \sigma(X)\,dB`$ has a unique fixed point in the $`L^2`$ space of predictable
+  processes on $`[0,T]`$ whenever $`T L_b + \sqrt{T} L_\sigma < 1`$
   ([`picardMap_exists_unique_fixedPoint`](MathFin/Foundations/SDEExistence.lean)).
 
 - **Fundamental theorem of asset pricing.** A market with one risky asset, finitely many periods
@@ -115,11 +117,13 @@ $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRConvergence.
   for a price $`S = S_0 + \int_0^t \sigma\,dB`$ with $`\sigma \neq 0`$ almost everywhere, a
   probability measure with square-integrable density with respect to $`P`$, under which $`S`$ is a
   martingale, agrees with $`P`$ on $`\mathcal{F}^B_T`$.
-- Martingale representation proves that a hedge exists and is unique, but does not identify it.
-  That is the Clark–Ocone formula
-  ([#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)).
-- SDE solutions are constructed only on short horizons, $`T L_b + \sqrt{T} L_\sigma < 1`$.
-- The binomial limit is a convergence of prices. Donsker's invariance principle is not formalized.
+- Martingale representation proves that a hedge exists and is unique, but does not identify it;
+  that needs the Clark–Ocone formula
+  ([#182](https://github.com/formal-applied-math/formal-mathfin/issues/182), open).
+- Existence for SDEs with Lipschitz coefficients is proved only on horizons with
+  $`T L_b + \sqrt{T} L_\sigma < 1`$.
+- The binomial limit is proved for call prices and for the law of the terminal log-return.
+  Convergence of the price process (Donsker's invariance principle) is not formalized.
 - The multi-period fundamental theorem and the representation of coherent risk measures are proved
   on finite probability spaces only.
 
@@ -141,38 +145,45 @@ Docker image and a faster edit-and-check loop for contributors.
 
 ## Verification
 
-A successful `lake build` checks every proof. In this repository, `sorry` appears only in the two
-theorems of [`Challenge.lean`](Challenge.lean), which are left unproved on purpose (see Comparator
-below).
+A successful `lake build` checks every proof in the library. The benchmark entries are not Lake
+targets and are checked separately (see Benchmark below). In this repository, `sorry` appears only
+in the two theorems of [`Challenge.lean`](Challenge.lean), which are left unproved on purpose (see
+Comparator below).
 
 - **Axioms.** [`MathFin/AxiomAudit.lean`](MathFin/AxiomAudit.lean) and the generated
-  [`MathFin/AxiomAuditGen.lean`](MathFin/AxiomAuditGen.lean) run `#print axioms` on every library
-  theorem the benchmark results use and compare the output with `#guard_msgs`. A `sorry` or an extra
-  axiom anywhere in the proof of one of them fails the build.
+  [`MathFin/AxiomAuditGen.lean`](MathFin/AxiomAuditGen.lean) run `#print axioms` on a curated list
+  of headline results and on every library theorem that a benchmark entry cites by its full
+  `MathFin.` name, and compare the output with `#guard_msgs`. A `sorry` or an extra axiom anywhere
+  in the proof of one of them fails the build. Theorems cited under a shorter name are not yet
+  covered.
 
 - **Comparator.** [`Challenge.lean`](Challenge.lean) states the coherent-risk representation
   theorem, with a witness that its hypothesis is satisfiable, using only Mathlib;
   [`Solution.lean`](Solution.lean) proves both from the library.
   [Comparator](https://github.com/leanprover/comparator), configured by
   [`comparator.json`](comparator.json), checks that the two files state the same theorems and that
-  the proofs use only the three standard axioms. See [`docs/palomar.md`](docs/palomar.md).
+  the proofs use only the three standard axioms. It accepted both at commit `06f88ca` and is not
+  run in CI; see [`docs/palomar.md`](docs/palomar.md).
 
 - **Benchmark.** Each entry in [`benchmarks/`](benchmarks) records a result's Lean statement, its
-  status and its scope. [`verification_ledger.json`](verification_ledger.json) stores a hash of each
-  entry's inputs at its last check, and CI fails if any entry is out of date. The entries are
-  published as a
+  status and its scope. The ledger runner, `tools/verify/ledger.py`, checks each entry's snippet
+  against the library, and [`verification_ledger.json`](verification_ledger.json) stores a hash of
+  the inputs it was checked under; CI fails if any entry's inputs have changed since. The entries
+  are published as a
   [Hugging Face dataset](https://huggingface.co/datasets/formal-applied-math/formal-mathfin-theorems).
 
-- **Kernel replay.** `leanchecker` re-checks every declaration from the compiled `.olean` files.
-  Running it on the whole library needs more memory than a hosted CI runner has, so that job runs
-  on demand rather than on every push.
+- **Kernel replay.** A workflow replays every declaration through `leanchecker`, but the full
+  Mathlib environment it loads does not fit on a 16 GB hosted runner, and the replay has not
+  completed.
 
-- **Provenance.** [`formalization.yaml`](formalization.yaml) records how the library was written,
-  including the AI tools used and the entries drafted by an automated pipeline.
+- **Provenance.** [`formalization.yaml`](formalization.yaml) describes how the library was written,
+  including AI assistance and the entries drafted by an automated pipeline. The American put port
+  records its own provenance in [`docs/american-put-boundary.md`](docs/american-put-boundary.md).
 
 ## Documentation
 
-- [`docs/coverage.md`](docs/coverage.md): status, scope and verification evidence for each result.
+- [`docs/coverage.md`](docs/coverage.md): a dated log of status changes and corrections, with
+  verification evidence.
 - [`docs/blueprint.md`](docs/blueprint.md): a dependency graph from Brownian motion to Black–Scholes,
   generated from the Lean source.
 - [`docs/mathematical-architecture.md`](docs/mathematical-architecture.md): the principles the
@@ -211,10 +222,10 @@ release. Both are in [`CITATION.cff`](CITATION.cff).
 
 The library depends on Mathlib and on BrownianMotion, the formalization of Brownian motion and
 stochastic integration led by Rémy Degenne. Much of the benchmark follows Yuri F. Saporito's
-*Stochastic Processes*. The contract language follows the design in Paul Bilokon's *The Contract Is
-Not the Model* (2026), the survival models draw on Yosuke Ito's Archive of Formal Proofs entry on
-actuarial mathematics ([`docs/sources.md`](docs/sources.md)), and the American put results are
-ported from Robert Martin's
+*Stochastic Processes*. The contract language takes its design ideas, but no code, from Paul
+Bilokon's *The Contract Is Not the Model* (2026), and the survival models draw on Yosuke Ito's
+Archive of Formal Proofs entry on actuarial mathematics ([`docs/sources.md`](docs/sources.md)). The
+American put results are ported from Robert Martin's
 [AmericanPutConvexity](https://github.com/robertmartin8/AmericanPutConvexity).
 
 ## License
