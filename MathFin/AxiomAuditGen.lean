@@ -8,17 +8,27 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (356 constants). Citations are resolved by declaration
-  (tools/verify/mathfin_index.py), so a name cited unqualified under `open`,
-  by dot notation on a hypothesis, or declared outside the MathFin namespace
-  is pinned like any other. Statement-position defs are exercised by
-  elaboration + the verification ledger, and upstream names are upstream's.
+  corpus (356 MathFin constants, 29 upstream). Citations
+  are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
+  unqualified under `open`, by dot notation on a hypothesis, or declared
+  outside the MathFin namespace is pinned like any other. Statement-position
+  defs are exercised by elaboration + the verification ledger. The second
+  section pins the Mathlib and BrownianMotion constants that library_wrapper
+  entries cite (UPSTREAM_CITATIONS in the generator).
 
   Regenerate:  python3 -m tools.verify.axiom_audit_gen --write
   Freshness:   tests/test_values.py::test_axiom_audit_gen_is_fresh
   (Excluded from CI kernel replay like AxiomAudit: whole-library closure.)
 -/
 import MathFin
+import BrownianMotion.Gaussian.BrownianMotion
+import BrownianMotion.StochasticIntegral.DoobLp
+import BrownianMotion.StochasticIntegral.LocalMartingale
+import Mathlib.MeasureTheory.Function.ConditionalExpectation.Basic
+import Mathlib.Probability.ConditionalExpectation
+import Mathlib.Probability.Martingale.Convergence
+import Mathlib.Probability.Martingale.OptionalStopping
+import Mathlib.Probability.Martingale.Upcrossing
 
 namespace MathFin.AxiomAuditGen
 
@@ -1089,5 +1099,98 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'ProbabilityTheory.IsFilteredPreBrownian.waldExponential_isMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms ProbabilityTheory.IsFilteredPreBrownian.waldExponential_isMartingale
+
+/-! ## Upstream constants cited by `library_wrapper` entries
+
+A `library_wrapper` entry re-exports a Mathlib or BrownianMotion theorem, and it
+counts as delivered. BrownianMotion at the current pin has `sorry`s of its own,
+so these are pinned here rather than left to upstream. -/
+
+/-- info: 'ConvexOn.map_condExp_le_of_finiteDimensional' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms ConvexOn.map_condExp_le_of_finiteDimensional
+
+/-- info: 'Eq.symm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Eq.symm
+
+/-- info: 'LT.lt.ne'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms LT.lt.ne'
+
+/-- info: 'MeasureTheory.Integrable.smul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MeasureTheory.Integrable.smul
+
+/-- info: 'MeasureTheory.IsProbabilityMeasure.measure_univ' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MeasureTheory.IsProbabilityMeasure.measure_univ
+
+/-- info: 'MeasureTheory.Martingale.stoppedProcess_indicator' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MeasureTheory.Martingale.stoppedProcess_indicator
+
+/-- info: 'MeasureTheory.Measure.trim' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MeasureTheory.Measure.trim
+
+/-- info: 'MeasureTheory.MeasurePreserving.map_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MeasureTheory.MeasurePreserving.map_eq
+
+/-- info: 'MeasureTheory.SigmaFinite' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MeasureTheory.SigmaFinite
+
+/-- info: 'MeasureTheory.Submartingale.ae_tendsto_limitProcess' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MeasureTheory.Submartingale.ae_tendsto_limitProcess
+
+/-- info: 'MeasureTheory.Submartingale.mul_integral_upcrossingsBefore_le_integral_pos_part' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MeasureTheory.Submartingale.mul_integral_upcrossingsBefore_le_integral_pos_part
+
+/-- info: 'MeasureTheory.condExp_add' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MeasureTheory.condExp_add
+
+/-- info: 'MeasureTheory.condExp_condExp_of_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MeasureTheory.condExp_condExp_of_le
+
+/-- info: 'MeasureTheory.condExp_indep_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MeasureTheory.condExp_indep_eq
+
+/-- info: 'MeasureTheory.condExp_mul_of_stronglyMeasurable_left' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MeasureTheory.condExp_mul_of_stronglyMeasurable_left
+
+/-- info: 'MeasureTheory.condExp_smul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MeasureTheory.condExp_smul
+
+/-- info: 'MeasureTheory.maximal_ineq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MeasureTheory.maximal_ineq
+
+/-- info: 'MeasureTheory.measure_empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MeasureTheory.measure_empty
+
+/-- info: 'Pi.add_apply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Pi.add_apply
+
+/-- info: 'ProbabilityTheory.IsGaussianProcess.isPreBrownianReal_of_covariance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms ProbabilityTheory.IsGaussianProcess.isPreBrownianReal_of_covariance
+
+/-- info: 'ProbabilityTheory.IsPreBrownianReal.isMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms ProbabilityTheory.IsPreBrownianReal.isMartingale
+
+/-- info: 'ProbabilityTheory.IsPreBrownianReal.memHolder_mk' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms ProbabilityTheory.IsPreBrownianReal.memHolder_mk
+
+/-- info: 'ProbabilityTheory.gaussianReal_add_const' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms ProbabilityTheory.gaussianReal_add_const
+
+/-- info: 'ProbabilityTheory.gaussianReal_const_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms ProbabilityTheory.gaussianReal_const_mul
+
+/-- info: 'ProbabilityTheory.maximal_ineq_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms ProbabilityTheory.maximal_ineq_nonneg
+
+/-- info: 'ProbabilityTheory.measurePreserving_eval_multivariateGaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms ProbabilityTheory.measurePreserving_eval_multivariateGaussian
+
+/-- info: 'Real.log_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Real.log_div
+
+/-- info: 'inferInstance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms inferInstance
+
+/-- info: 'min_eq_left' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms min_eq_left
 
 end MathFin.AxiomAuditGen

@@ -24,21 +24,24 @@ LIBRARY sources and the generated audit artifacts (complementing
    line, not just one or the other (the corpus ships in the HF dataset, so
    the citation must travel with the claim).
 7. ``test_cited_theorems_are_axiom_pinned`` / ``test_benchmark_citations_resolve``
-   — every MathFin theorem a non-wrapper benchmark proof cites is pinned by one
-   of the two axiom audits, with citations resolved by declaration (``open``,
-   dot notation, non-``MathFin`` namespaces), and no identifier that could be
-   such a citation is left unresolved.
+   / ``test_library_wrapper_citations_are_pinned`` — every MathFin theorem a
+   non-wrapper benchmark proof cites is pinned by one of the two axiom audits,
+   with citations resolved by declaration (``open``, dot notation,
+   non-``MathFin`` namespaces); no identifier that could be such a citation is
+   left unresolved; and every upstream constant a ``library_wrapper`` entry
+   cites is listed in the generator's ``UPSTREAM_CITATIONS`` and pinned.
 """
 
 import re
 from pathlib import Path
 
-from tools.verify.axiom_audit_gen import GEN_PATH, generate
+from tools.verify.axiom_audit_gen import GEN_PATH, UPSTREAM_CITATIONS, generate
 from tools.verify.corpus import iter_entries
 from tools.verify.mathfin_index import (
     assigned_constants,
     cited_theorems,
     declaration_index,
+    proof_words,
     unresolved_short_names,
 )
 from tools.verify.mathfin_index import strip_comments as _strip_comments
@@ -524,4 +527,33 @@ def test_benchmark_citations_resolve() -> None:
         "cite by full name or give the binder a written type, or, if it is not "
         "a MathFin citation, add it to UNRESOLVED_ALLOWLIST with the reason:\n  "
         + "\n  ".join(unresolved)
+    )
+
+
+def test_library_wrapper_citations_are_pinned() -> None:
+    # A library_wrapper entry re-exports a Mathlib or BrownianMotion theorem and
+    # counts as delivered, and BrownianMotion at the current pin has `sorry`s. The
+    # upstream names are listed by hand in UPSTREAM_CITATIONS; this keeps the list
+    # in step with the corpus and with the generated audit.
+    wrappers = {
+        entry["id"]: entry.get("code", {}).get("lean", "")
+        for _path, entry in iter_entries()
+        if entry.get("metadata", {}).get("formalization_status") == "library_wrapper"
+    }
+    pinned = _pinned_names()
+    problems = [f"{entry_id}: no UPSTREAM_CITATIONS row"
+                for entry_id in sorted(wrappers.keys() - UPSTREAM_CITATIONS.keys())]
+    problems += [f"{entry_id}: has an UPSTREAM_CITATIONS row but is not a library_wrapper"
+                 for entry_id in sorted(UPSTREAM_CITATIONS.keys() - wrappers.keys())]
+    for entry_id, names in sorted(UPSTREAM_CITATIONS.items()):
+        words = proof_words(wrappers.get(entry_id, ""))
+        problems += [f"{entry_id}: {name} does not appear in its proof"
+                     for name in names if name.rsplit(".", 1)[-1] not in words]
+        problems += [f"{entry_id}: {name} is not pinned"
+                     for name in names if name not in pinned]
+    assert not problems, (
+        "UPSTREAM_CITATIONS in tools/verify/axiom_audit_gen.py is out of step "
+        "with the library_wrapper entries — list each upstream constant the "
+        "proof cites, fully qualified, then run "
+        "`python3 -m tools.verify.axiom_audit_gen --write`:\n  " + "\n  ".join(problems)
     )

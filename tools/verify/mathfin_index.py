@@ -365,3 +365,12 @@ def unresolved_short_names(code: str, index: dict[str, Decl] | None = None) -> s
         if any(comp in short for comp in ident.split(".")):
             out.add(("." if is_field else "") + ident)
     return out
+
+
+def proof_words(code: str) -> set[str]:
+    """Every name component of every identifier in a snippet's proof bodies:
+    `hf.smul c` gives `hf`, `smul` and `c`. For checking that a hand-kept list of
+    upstream citations still matches the proof it describes."""
+    return {comp for body in proof_bodies(strip_comments(code))
+            for m in _IDENT_RE.finditer(_strip_strings(body))
+            for comp in m.group(2).split(".")}
