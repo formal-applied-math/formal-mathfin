@@ -19,10 +19,10 @@
     },
     "bm-prop-5.1.2": {
       "benchmark_file": "brownian_motion.json",
-      "date": "2026-09-10",
-      "elapsed_s": 5.5,
-      "input_hash": "61137f30ed38c8f26a83607a6a194b9ea86149b20701c9c41e5c0391bc732885",
-      "verified_at_commit": "ec948e9"
+      "date": "2026-09-25",
+      "elapsed_s": 7.1,
+      "input_hash": "c19e3612b6d7a44e8da426d4d1f8867d3d8f813f4afcefcb086362bedb5c2e2d",
+      "verified_at_commit": "19d5af0"
     },
     "bm-rmk-5.1.6-exp": {
       "benchmark_file": "brownian_motion.json",
@@ -61,10 +61,10 @@
     },
     "bm-thm-5.3.2": {
       "benchmark_file": "brownian_motion.json",
-      "date": "2026-09-10",
-      "elapsed_s": 5.7,
-      "input_hash": "a4ed1ca7290a657dfd053f5112f76162410ecde8ad556b0a75c22a848d23eb32",
-      "verified_at_commit": "ec948e9"
+      "date": "2026-09-25",
+      "elapsed_s": 7.7,
+      "input_hash": "27f6ec94e8d5f48a000c0ef67fd76b4c9a384de2dd31d4e20328fd0bd6d82abb",
+      "verified_at_commit": "19d5af0"
     },
     "bm-thm-5.3.5": {
       "benchmark_file": "brownian_motion.json",
@@ -124,17 +124,17 @@
     },
     "cm-thm-4.3.7": {
       "benchmark_file": "continuous_martingales.json",
-      "date": "2026-09-10",
-      "elapsed_s": 99.3,
-      "input_hash": "9c3631bfd0c8817413421fd557d9d1590cb9c3e105c97997273c34709b99df80",
-      "verified_at_commit": "907923d"
+      "date": "2026-09-25",
+      "elapsed_s": 7.5,
+      "input_hash": "86e313a5bd051e4b67c0961cabcbe28e82646dfc24f9a760a0c5a77f4a0ab46c",
+      "verified_at_commit": "19d5af0"
     },
     "cm-thm-4.3.9": {
       "benchmark_file": "continuous_martingales.json",
-      "date": "2026-09-10",
-      "elapsed_s": 122.4,
-      "input_hash": "cb3ed6c5b7b416907e5ea619d3d405aece148b605891bb050955e72941141210",
-      "verified_at_commit": "907923d"
+      "date": "2026-09-25",
+      "elapsed_s": 7.3,
+      "input_hash": "f83aa4ed1caa40c468a5b0dbf9428e2ba8625fc49d7265bd964ccb60a74dbade",
+      "verified_at_commit": "19d5af0"
     },
     "cv-cond-exp-tower": {
       "benchmark_file": "cross_validated.json",
