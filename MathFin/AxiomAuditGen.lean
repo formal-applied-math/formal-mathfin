@@ -1109,10 +1109,10 @@ so these are pinned here rather than left to upstream. -/
 /-- info: 'ConvexOn.map_condExp_le_of_finiteDimensional' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms ConvexOn.map_condExp_le_of_finiteDimensional
 
-/-- info: 'Eq.symm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Eq.symm' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms Eq.symm
 
-/-- info: 'LT.lt.ne'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'LT.lt.ne'' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms LT.lt.ne'
 
 /-- info: 'MeasureTheory.Integrable.smul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -1160,7 +1160,7 @@ so these are pinned here rather than left to upstream. -/
 /-- info: 'MeasureTheory.measure_empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MeasureTheory.measure_empty
 
-/-- info: 'Pi.add_apply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Pi.add_apply' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms Pi.add_apply
 
 /-- info: 'ProbabilityTheory.IsGaussianProcess.isPreBrownianReal_of_covariance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -1187,10 +1187,10 @@ so these are pinned here rather than left to upstream. -/
 /-- info: 'Real.log_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Real.log_div
 
-/-- info: 'inferInstance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'inferInstance' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms inferInstance
 
-/-- info: 'min_eq_left' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'min_eq_left' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms min_eq_left
 
 end MathFin.AxiomAuditGen

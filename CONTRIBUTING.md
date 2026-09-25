@@ -91,7 +91,10 @@ The CI pipeline runs `pytest tests/ -q` → `python3 -m tools.verify.ledger stat
    - `tests/test_values.py` — no forbidden tactics, no `rfl`-backed `full`
      entries, blueprint-spine ⊆ curated `AxiomAudit`, byte-fresh
      `AxiomAuditGen.lean`, and every MathFin theorem a benchmark proof cites
-     axiom-pinned in one of the two audit files.
+     axiom-pinned in one of the two audit files. A new `library_wrapper`
+     entry also needs a row in `UPSTREAM_CITATIONS`
+     (`tools/verify/axiom_audit_gen.py`) naming the upstream theorems it
+     re-exports, fully qualified.
 
 ## Style
 

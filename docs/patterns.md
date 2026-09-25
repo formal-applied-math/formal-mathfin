@@ -772,6 +772,11 @@ edit lints the stale olean and re-reports the old failures at the old line numbe
 - It is textual. Dot notation on a term that is not a named binder (`(f x).foo`) is not resolved; if such
   an identifier shares a name with a MathFin theorem, `test_benchmark_citations_resolve` fails until you
   cite by full name, give the binder a written type, or allowlist it with the reason.
+- Upstream (Mathlib / BrownianMotion) theorems are pinned only for `library_wrapper` entries, from the
+  hand-kept `UPSTREAM_CITATIONS` in the generator. A new wrapper entry needs a row there (fully qualified
+  names, including lemmas reached by dot notation); `test_library_wrapper_citations_are_pinned` fails
+  without it. Constants that need fewer than the three standard axioms (`Eq.symm`, `min_eq_left`, …) get
+  an `EXPECTED_OVERRIDES` entry copied from the build's `#guard_msgs` diff.
 
 ### ★ Review subagents must NOT touch the daemon
 - A review subagent that runs `./scripts/lean-check.sh` / `docker` will bring the lean-repl daemon up **and tear

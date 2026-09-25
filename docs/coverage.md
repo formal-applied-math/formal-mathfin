@@ -26,6 +26,53 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Library wrappers: the upstream theorems are axiom-pinned (2026-09-25)
+
+No statement or proof changed. The 18 `library_wrapper` entries re-export a Mathlib or
+BrownianMotion theorem and count as delivered, but both axiom audits skipped names declared
+outside `MathFin/`. BrownianMotion has `sorry`s at the current pin (314f04a), and two wrapper
+snippets import modules that contain one. `cm-thm-4.3.7` imports LocalMartingale, whose import
+closure has six sorried declarations: `isStable_submartingale` (LocalMartingale),
+`Submartingale.stoppedValue_min_ae_le_condExp` (OptionalSampling), and
+`Submartingale.uniformIntegrable_stoppedValue`, `Martingale.ae_tendsto_limitProcess` and both
+`Martingale.condExp_limitProcess_ae_eq` lemmas (UniformIntegrable). `cm-thm-4.3.9` imports
+DoobLp, which has two: `integral_iSup_le_norm_rpow_le` and `integral_iSup_norm_rpow_le`. The
+other wrapper snippets reach no sorried BrownianMotion module. Importing a module with a `sorry`
+does not make a theorem depend on it; `#print axioms` settles that.
+
+The 29 upstream constants that wrapper proofs cite are now listed in `UPSTREAM_CITATIONS`
+(`tools/verify/axiom_audit_gen.py`) and pinned in `MathFin/AxiomAuditGen.lean`. In build.yml
+run 36151826318, 24 matched the standard three axioms and five reported fewer. None depends on
+`sorryAx`:
+
+| Entry | Upstream theorem | Axioms |
+|---|---|---|
+| `cm-thm-4.3.7` | `MeasureTheory.Martingale.stoppedProcess_indicator` (BrownianMotion) | the standard three |
+| `cm-thm-4.3.9` | `ProbabilityTheory.maximal_ineq_nonneg` (BrownianMotion) | the standard three |
+| `bm-thm-5.1.5` | `ProbabilityTheory.IsPreBrownianReal.isMartingale` (BrownianMotion) | the standard three |
+| `bm-thm-5.3.2` | `ProbabilityTheory.IsPreBrownianReal.memHolder_mk` (BrownianMotion) | the standard three |
+
+The other 25 come from Mathlib or Lean core. Twenty use the standard three; `min_eq_left` uses
+only `propext`, and `Eq.symm`, `LT.lt.ne'`, `Pi.add_apply` and `inferInstance` use none.
+
+Five scope notes described BrownianMotion as it was at an older pin. Four cited that pin
+(51807683), `cm-thm-4.3.7` and `cm-thm-4.3.9` cited `#print axioms` checks made there, and
+`bm-thm-5.1.5` said "Axioms-clean." They now cite the guards and the current names (`IsPreBrownian`
+became `IsPreBrownianReal`). `bm-prop-5.1.2` now cites Mathlib, where
+`IsGaussianProcess.isPreBrownianReal_of_covariance` has moved. Reading the five against their
+statements turned up four older imprecisions, now fixed:
+
+- `bm-thm-5.1.5` holds for any filtration carrying `IsFilteredPreBrownian`. The natural
+  filtration is one of them, but the entry does not instantiate it.
+- `bm-thm-5.3.2`'s almost-sure path claim needs `IsBrownianReal.mk_ae_forall_eq`, not only
+  `mk_ae_eq`.
+- `cm-thm-4.3.7`'s indicator form agrees with M<sub>t∧τ</sub> on {τ > 0}.
+- `cm-thm-4.3.9`'s description now states the sharp form the Lean proves.
+
+`test_library_wrapper_citations_are_pinned` keeps the list in step with the corpus. Every wrapper
+entry needs a row, each listed name must still appear in its proof, and each must be pinned. The
+test cannot see a name that a row leaves out; that is still a review item.
+
 ### Girsanov: what the increment statements prove (2026-09-25)
 
 No statement or proof changed. Four `full` entries described their conclusion as "`B^θ` is a

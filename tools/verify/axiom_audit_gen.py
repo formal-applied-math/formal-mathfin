@@ -55,8 +55,16 @@ STANDARD_AXIOMS = "[propext, Classical.choice, Quot.sound]"
 
 # name -> full #guard_msgs doc-comment body, for results whose axiom set is a
 # strict subset of the standard three (pure-algebra theorems). Populated from
-# build output; the build is the oracle for these strings.
-EXPECTED_OVERRIDES: dict[str, str] = {}
+# build output; the build is the oracle for these strings. The five below are
+# upstream constants cited by library_wrapper entries (build.yml run
+# 36151826318, 2026-09-25).
+EXPECTED_OVERRIDES: dict[str, str] = {
+    "Eq.symm": "info: 'Eq.symm' does not depend on any axioms",
+    "LT.lt.ne'": "info: 'LT.lt.ne'' does not depend on any axioms",
+    "Pi.add_apply": "info: 'Pi.add_apply' does not depend on any axioms",
+    "inferInstance": "info: 'inferInstance' does not depend on any axioms",
+    "min_eq_left": "info: 'min_eq_left' depends on axioms: [propext]",
+}
 
 # The upstream constants each `library_wrapper` entry's proof cites, fully
 # qualified, including lemmas reached by dot notation (`hf.smul` is

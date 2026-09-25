@@ -155,7 +155,9 @@ Comparator below).
   of headline results and on every library constant that a benchmark entry's proof cites, and
   compare the output with `#guard_msgs`. A `sorry` or an extra axiom anywhere in the proof of one of
   them fails the build. Citations are found by where a name is declared, so a name cited under
-  `open`, by dot notation, or from a namespace other than `MathFin` is covered.
+  `open`, by dot notation, or from a namespace other than `MathFin` is covered. The Mathlib and
+  BrownianMotion theorems that `library_wrapper` entries re-export are pinned too: BrownianMotion
+  has `sorry`s of its own, and none of those theorems depends on one.
 
 - **Comparator.** [`Challenge.lean`](Challenge.lean) states the coherent-risk representation
   theorem, with a witness that its hypothesis is satisfiable, using only Mathlib;

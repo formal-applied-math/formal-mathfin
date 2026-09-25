@@ -20,7 +20,7 @@
     {
       "id": "bm-thm-5.1.5",
       "name": "BM Martingale Property",
-      "description": "Theorem 5.1.5: B_t is a martingale w.r.t. its natural filtration -- a single-line re-export of Degenne's IsPreBrownian.isMartingale. (The companion 'B_t^2 - t is a martingale' is squareSubTime_isMartingale in MathFin/Foundations/BrownianMartingale.lean, a separate result, not this entry.)",
+      "description": "Theorem 5.1.5: a pre-Brownian motion B is a martingale w.r.t. any filtration 𝓕 to which it is adapted with each increment B_t - B_s independent of 𝓕_s (IsFilteredPreBrownian) -- a single-line re-export of BrownianMotion's IsPreBrownianReal.isMartingale. The natural filtration qualifies when each B_t is measurable (IsPreBrownianReal.isFilteredPreBrownian); this entry does not instantiate it. (The companion 'B_t^2 - t is a martingale' is squareSubTime_isMartingale in MathFin/Foundations/BrownianMartingale.lean, a separate result, not this entry.)",
       "domain": "brownian_motion",
       "code": {
         "lean": "import MathFin.Foundations.BrownianMartingale\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Theorem 5.1.5: a pre-Brownian motion adapted to a filtration with future\n    increments independent of the past is a martingale w.r.t. that\n    filtration. Direct re-export of Degenne's `IsPreBrownianReal.isMartingale`\n    from `BrownianMotion/Gaussian/BrownianMotion.lean`. -/\ntheorem brownian_is_martingale\n    {P : Measure Ω} [IsProbabilityMeasure P]\n    {𝓕 : Filtration ℝ≥0 mΩ} {B : ℝ≥0 → Ω → ℝ}\n    [IsFilteredPreBrownian B 𝓕 P] :\n    Martingale B 𝓕 P :=\n  IsPreBrownianReal.isMartingale B 𝓕 P\n"
@@ -30,7 +30,7 @@
         "reference": "Theorem 5.1.5",
         "difficulty": "intermediate",
         "formalization_status": "library_wrapper",
-        "formalization_scope": "library_wrapper: single-line re-export of IsPreBrownian.isMartingale from the BrownianMotion (Degenne) package; statement matches. Axioms-clean.",
+        "formalization_scope": "library_wrapper: single-line re-export of ProbabilityTheory.IsPreBrownianReal.isMartingale from the BrownianMotion (Degenne) package; statement matches. Its axioms are pinned in MathFin/AxiomAuditGen.lean: propext, Classical.choice, Quot.sound, checked at every build.",
         "v430_recovery": {
           "from": "reduced_core",
           "to": "full",
@@ -68,7 +68,7 @@
         "reference": "Theorem 5.3.2",
         "difficulty": "advanced",
         "formalization_status": "library_wrapper",
-        "formalization_scope": "Lean library wrapper of Degenne `IsPreBrownian.memHolder_mk` (from `RemyDegenne/brownian-motion` at pin 51807683). The textbook claim \"almost every BM path is locally α-Hölder for every α ∈ (0, 1/2)\" is an immediate corollary of Degenne's lemma, which gives the stronger conclusion that the continuous modification `h.mk B` is everywhere (not just a.s.) locally β-Hölder for every β < 1/2. The textbook claim transfers via `IsPreBrownian.mk_ae_eq`. The underlying real proof uses the Kolmogorov-Chentsov theorem (`BrownianMotion.Continuity.KolmogorovChentsov`), which is the result the textbook implicitly invokes.",
+        "formalization_scope": "Lean library wrapper of BrownianMotion's `ProbabilityTheory.IsPreBrownianReal.memHolder_mk` (`RemyDegenne/brownian-motion`), whose axioms are pinned in MathFin/AxiomAuditGen.lean: propext, Classical.choice, Quot.sound, checked at every build. The textbook claim \"almost every BM path is locally α-Hölder for every α ∈ (0, 1/2)\" follows from Degenne's lemma, which says that every path of the continuous modification `h.mk B` (not just almost every one) is locally β-Hölder for every β ∈ (0, 1/2). For a Brownian motion, whose paths are a.s. continuous, `IsBrownianReal.mk_ae_forall_eq` says that B and `h.mk B` agree at every time for almost every ω, which carries the claim over to B; that step is not part of this entry. The underlying proof uses the Kolmogorov-Chentsov theorem (`BrownianMotion.Continuity.KolmogorovChentsov`), which is the result the textbook implicitly invokes.",
         "v430_recovery": {
           "from": "placeholder",
           "to": "library_wrapper",
@@ -161,7 +161,7 @@
         "reference": "Proposition 5.1.2",
         "difficulty": "foundational",
         "formalization_status": "library_wrapper",
-        "formalization_scope": "Lean library wrapper of Degenne `IsGaussianProcess.isPreBrownian_of_covariance` (from `RemyDegenne/brownian-motion` at pin 51807683). The textbook claim \"centered Gaussian process with covariance min(s,t) is a Brownian motion\" is exactly what `IsPreBrownian` packages (modulo path continuity, separately addressed by Kolmogorov-Chentsov in `bm-thm-5.3.2`). The previous structural reduced_core encoding is replaced by a direct library wrap using Degenne's now-cached BM build (lean_interact_cache volume).",
+        "formalization_scope": "Lean library wrapper of Mathlib's `ProbabilityTheory.IsGaussianProcess.isPreBrownianReal_of_covariance` (`Mathlib/Probability/BrownianMotion/Basic.lean`; the result moved there from Degenne's BrownianMotion), whose axioms are pinned in MathFin/AxiomAuditGen.lean: propext, Classical.choice, Quot.sound, checked at every build. The textbook claim \"centered Gaussian process with covariance min(s,t) is a Brownian motion\" is exactly what `IsPreBrownianReal` packages (modulo path continuity, separately addressed by Kolmogorov-Chentsov in `bm-thm-5.3.2`). The previous structural reduced_core encoding was replaced by this direct library wrap.",
         "v430_recovery": {
           "from": "placeholder",
           "to": "library_wrapper",
