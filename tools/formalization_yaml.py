@@ -126,13 +126,27 @@ def _theorems(root: str):
             yield base, t
 
 
+def _prover_name(model: str) -> str:
+    """The name the disclosure gives the model that PROVED an entry, read off the entry's
+    `provenance.model`. Leanstral was the only prover until 2026-09-28; the foundry now
+    picks the prover per run (`[prover] engine`), and a sentence that named Leanstral
+    unconditionally would credit it with proofs it never wrote."""
+    low = model.lower()
+    if "leanstral" in low:
+        return "Leanstral"
+    if low.startswith("claude"):
+        return f"Claude ({model})"
+    return model
+
+
 def build_doc(root: str) -> dict:
     meta = _load_meta(root)
     by_file: dict[str, dict] = {}
     totals = {"full": 0, "library_wrapper": 0, "reduced_core": 0, "placeholder": 0}
     n = 0
     # provenance: entries the autoform pipeline scouted carry
-    # metadata.provenance.source == "leanstral-autoform" (+ the issue it closed).
+    # metadata.provenance.source == "leanstral-autoform" (+ the issue it closed, and the
+    # prover's model id — the marker names the pipeline, which predates other provers).
     # Counting them here keeps the automation disclosure MECHANICAL — it can never
     # drift from a hand-set "0" once machine-scouted proofs start merging.
     autoform_count = 0
@@ -146,6 +160,7 @@ def build_doc(root: str) -> dict:
     autoform_models: set = set()
     autoform_drafters: set = set()
     autoform_drafter_counts: dict = {}
+    autoform_prover_counts: dict = {}
     for base, t in _theorems(root):
         n += 1
         md = t.get("metadata") or {}
@@ -162,10 +177,14 @@ def build_doc(root: str) -> dict:
             # sentence stays accurate only until the next entry lands, and this file
             # is the public AI-disclosure artifact — the one place a stale claim is
             # least acceptable. Entries keep their own historical attribution.
-            # the prover is fixed by `source == leanstral-autoform`; the drafter
-            # model is whatever the entry recorded, and is simply absent once the
-            # convention went drafter-agnostic
-            autoform_models.add(str(prov.get("model") or "labs-leanstral-1-5"))
+            # `source == leanstral-autoform` marks the pipeline, not the prover: the
+            # prover is the entry's `model` (Leanstral when absent, the only prover
+            # before 2026-09-28). The drafter model is whatever the entry recorded, and
+            # is simply absent once the convention went drafter-agnostic
+            prover_model = str(prov.get("model") or "labs-leanstral-1-5")
+            autoform_models.add(prover_model)
+            pname = _prover_name(prover_model)
+            autoform_prover_counts[pname] = autoform_prover_counts.get(pname, 0) + 1
             sm = prov.get("statement_model")
             if sm and sm != "autoform":
                 autoform_models.add(str(sm))
@@ -209,9 +228,24 @@ def build_doc(root: str) -> dict:
         drafter = " and ".join(parts) if len(parts) == 2 else ", ".join(parts)
     else:
         drafter = "an unnamed drafter"
+    # The prover is derived the same way: one prover for every entry is named plainly;
+    # more than one gets per-prover counts, since "N proofs, proof by X" reads as a claim
+    # about all N. With no autoform entries the historical prover stands in.
+    provers = sorted(autoform_prover_counts) or ["Leanstral"]
+    if len(provers) == 1:
+        prover = provers[0]
+    else:
+        parts = [f"{p} ({autoform_prover_counts[p]})" for p in provers]
+        prover = " and ".join(parts) if len(parts) == 2 else ", ".join(parts)
+    prover_shape = " and ".join(provers) if len(provers) == 2 else ", ".join(provers)
+    proves = "formalizes + proves" if len(provers) == 1 else "formalize + prove"
+    prover_pass = f"a {provers[0]} pass" if len(provers) == 1 else "a prover pass"
+    # "0 (Mistral Labs beta)" was true of Leanstral's free endpoint only
+    autoform_spend = ("0 (Mistral Labs beta)" if provers == ["Leanstral"]
+                      else "subscription-based")
     autoform_note = (f"{autoform_count} autoformalized proof(s) merged "
                      f"(two-stage: statement specified by {drafter}, formalization + proof by "
-                     "Leanstral)")
+                     f"{prover})")
     # `drafter` carries per-entry counts, which belong in the tally sentence above. The
     # pipeline description below is about SHAPE, so it names the drafters without counts
     # and takes a plural verb once there is more than one.
@@ -327,15 +361,16 @@ def build_doc(root: str) -> dict:
                     "framework": "formal-foundry: probe / vibe <-> lean-lsp-mcp",
                     "tool_setup": (f"token-paced GitHub Actions pipeline; {drafter_shape} "
                                    f"{specifies} the "
-                                   "statement, Leanstral formalizes + proves it. A cheap autop "
-                                   "tactic-probe may scout-close a goal Leanstral missed; those "
-                                   "open as DRAFT PRs (labeled scout-proof, attributed to the "
-                                   "tactic, refactored before merge, never silently merged). On a "
-                                   "Leanstral pass it opens a ready-for-review PR on formal-mathfin "
-                                   "that a human reviews (8-lens values panel) and merges"),
+                                   f"statement, {prover_shape} {proves} it. A cheap autop "
+                                   f"tactic-probe may scout-close a goal {prover_shape} missed; "
+                                   "those open as DRAFT PRs (labeled scout-proof, attributed to "
+                                   "the tactic, refactored before merge, never silently merged). "
+                                   f"On {prover_pass} it opens a ready-for-review PR on "
+                                   "formal-mathfin that a human reviews (8-lens values panel) and "
+                                   "merges"),
                     "cost": {
                         "wall_time": "token-paced CI runs",
-                        "spend_usd": "0 (Mistral Labs beta)",
+                        "spend_usd": autoform_spend,
                         "hardware": "GitHub Actions runners",
                     },
                     "prompting_notes": autoform_note,

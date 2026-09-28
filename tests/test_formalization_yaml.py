@@ -187,3 +187,46 @@ def test_autoform_count_matches_corpus_provenance():
             if prov.get("source") == "leanstral-autoform":
                 n += 1
     assert _machine_note(F.build_doc(ROOT)).startswith(f"{n} autoformalized proof")
+
+
+def _foundry_method(doc):
+    for m in doc["automation"]["methods"]:
+        if "formal-foundry" in str(m.get("framework", "")):
+            return m
+    raise AssertionError("foundry method not found")
+
+
+def _corpus(tmp_path, *provs):
+    (tmp_path / "benchmarks").mkdir(exist_ok=True)
+    (tmp_path / "tools").mkdir(exist_ok=True)
+    (tmp_path / "tools" / "formalization_meta.toml").write_text("", encoding="utf-8")
+    (tmp_path / "benchmarks" / "b.json").write_text(json.dumps({"theorems": [
+        {"id": f"x{i}", "name": f"x{i}", "domain": "mathematical_finance",
+         "code": {"lean": "x"},
+         "metadata": {"formalization_status": "full", "provenance": prov}}
+        for i, prov in enumerate(provs)]}), encoding="utf-8")
+    return F.build_doc(str(tmp_path))
+
+
+def test_the_disclosure_names_the_prover_the_entries_record(tmp_path):
+    # the foundry proves with the model `[prover] engine` selects (Claude by default from
+    # 2026-09-28, when Mistral retired the Leanstral endpoint). An entry Claude proved must
+    # not be disclosed as "proof by Leanstral", nor as costing nothing.
+    m = _foundry_method(_corpus(tmp_path, {"source": "leanstral-autoform", "issue": 129,
+                                           "model": "claude-sonnet-5"}))
+    assert "formalization + proof by Claude (claude-sonnet-5)" in m["prompting_notes"]
+    assert "Leanstral" not in m["prompting_notes"] + m["tool_setup"]
+    assert "Claude (claude-sonnet-5) formalizes + proves it" in m["tool_setup"]
+    assert m["cost"]["spend_usd"] == "subscription-based"
+    assert "claude-sonnet-5" in m["models"]
+
+
+def test_a_mixed_corpus_credits_each_prover_with_its_own_entries(tmp_path):
+    m = _foundry_method(_corpus(
+        tmp_path,
+        {"source": "leanstral-autoform", "issue": 66},                 # historical: Leanstral
+        {"source": "leanstral-autoform", "issue": 129, "model": "claude-sonnet-5"}))
+    note = m["prompting_notes"]
+    assert "proof by Claude (claude-sonnet-5) (1) and Leanstral (1)" in note
+    assert "Claude (claude-sonnet-5) and Leanstral formalize + prove it" in m["tool_setup"]
+    assert "On a prover pass" in m["tool_setup"]
