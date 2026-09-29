@@ -491,3 +491,4 @@ import MathFin.Execution.GlostenMilgromModel
 -- Continuous-time American put option exercise-boundary geometry
 import MathFin.BlackScholes.AmericanPut.Stopping.PhysicalBoundaryConvexity
 import MathFin.BlackScholes.AmericanPut.Stopping.AEHorizonValue
+import MathFin.BlackScholes.MertonJumpDiffusionDelta
