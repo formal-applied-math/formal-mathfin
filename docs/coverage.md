@@ -26,6 +26,39 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### A price with a drift, and the integral against it (2026-09-29)
+
+One entry added, `sc-ito-integral-against-drifted-price` (`full`). Corpus 373 → 374.
+
+`Foundations/PricePathDrift.lean` adds `S = S₀ + ∫b ds + (σ●B)` next to the driftless
+`MarketCompletenessInPrice.pricePath`, which is unchanged, so nothing downstream of it moves.
+The drift is `driftContinuousMod`, the pathwise object the Girsanov track built. No second
+time-integral is constructed. `∫ψ dS` is `gainsDrift`, the drift integral of `ψb` plus
+`itoIntegralAgainstCLM`.
+
+`gainsDrift_eq_setIntegral`, the entry, proves the gains are a.e. `∫₀ᵀ ψ(s,ω) b(s,ω) ds + ∫ψ dM`.
+The Itô half holds by definition. The work is on the drift half: `driftContinuousMod_eq_setIntegral`
+identifies the limit object for an `L²` integrand, and `ae_slice_of_ae_trim` moves the
+`trim`-a.e. identity `toLp (ψb) = ψb` onto a.e. path. Predictability makes the set measurable,
+which is what lets the two a.e. quantifiers swap. `pricePathDrift_eq_setIntegral` is the same
+identification for the price itself.
+
+`b = 0` recovers the driftless objects a.e. (`pricePathDrift_zero_drift`,
+`gainsDrift_zero_drift`), not definitionally. `driftContinuousMod 0` is a `limUnder` along a chosen
+approximating sequence, and nothing makes that sequence vanish pointwise.
+`memLp_mul_zero_drift` shows the side condition holds for every holding at `b = 0`, so
+`gainsDrift_zero_drift` discharges it rather than assuming it.
+
+Scope. `ψb ∈ L²(trim)` is a hypothesis. Square-integrability against the bracket does not imply
+it, and `L²` is more than a pathwise integral needs. It is what `driftContinuousMod`'s domain
+asks for. The drift term also reads `ψ` where the bracket does not: a holding in `L²(σ²·trim)` is
+determined only where `σ ≠ 0`, while `∫ψb ds` reads it wherever `b ≠ 0`. On `{σ = 0, b ≠ 0}` the
+gains depend on the representative, not only on the class. That is the set where a drift can be
+collected without risk. For a discounted price, no arbitrage forces `b = σλ` and then it is
+null; nothing here assumes it.
+With `b ≠ 0`, `S` is not a martingale under `μ`, and neither completeness in the drifted price
+nor a pricing-measure statement is claimed.
+
 ### Library wrappers: the upstream theorems are axiom-pinned (2026-09-25)
 
 No statement or proof changed. The 18 `library_wrapper` entries re-export a Mathlib or

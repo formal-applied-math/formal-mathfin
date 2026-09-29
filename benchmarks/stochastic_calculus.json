@@ -686,6 +686,22 @@
       }
     },
     {
+      "id": "sc-ito-integral-against-drifted-price",
+      "name": "The Integral against an Itô-Process Price: ∫ψ dS = ∫ψb ds + ∫ψ dM",
+      "description": "For the price S = S₀ + ∫b ds + σ●B, the integral ∫₀ᵀ ψ dS is a.e. the pathwise Lebesgue integral ∫₀ᵀ ψb ds plus ∫ψ dM, with M = σ●B. Assumes ψb is square-integrable, which the condition on ψ does not imply.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.PricePathDrift\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM MathFin.ItoIntegralAgainstMartingale\nopen MathFin.PricePathDrift\nopen scoped NNReal ENNReal\n\n/-- **The integral against a price with a drift.** For `S = S₀ + ∫b ds + (σ●B)`, the gains\n    `∫₀ᵀ ψ dS` of a holding `ψ` square-integrable against the bracket, under the side\n    condition that `ψb` is square-integrable against `trim` (not implied by the first), are\n    a.e. the pathwise Lebesgue integral `∫₀ᵀ ψ(s,ω) b(s,ω) ds` plus the Itô integral of `ψ`\n    against `M = σ●B`. Re-export of `MathFin.PricePathDrift.gainsDrift_eq_setIntegral`. -/\ntheorem integral_against_drifted_price\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)\n    (b σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))\n    (ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas σ))\n    (hψb : MemLp (fun z ↦ ψ z * b z) 2 (trimMeasure_T (μ := μ) T hBmeas)) :\n    ∀ᵐ ω ∂μ, gainsDrift hB T hBmeas b σ ψ hψb ω\n      = (∫ s in Set.Ioc (0 : ℝ≥0) T, ψ (s, ω) * b (s, ω) ∂timeMeasure)\n        + (itoIntegralAgainstCLM hB T hBmeas σ ψ : Ω → ℝ) ω :=\n  MathFin.PricePathDrift.gainsDrift_eq_setIntegral (hB := hB) T hBmeas b σ ψ hψb\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Integration against a continuous semimartingale, drift part (Karatzas–Shreve 3.2.C; Shreve II 4.4)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.PricePathDrift.gainsDrift_eq_setIntegral. The drift term is driftContinuousMod applied to psi*b, identified path by path with the Lebesgue integral of the product; the Ito part is itoIntegralAgainstCLM by definition. SCOPE. (1) psi*b in L^2(trim_T) is a hypothesis, not implied by the bracket condition on psi. (2) On {sigma = 0, b != 0} the gains depend on the representative of psi; for a discounted price no arbitrage (b = sigma.lambda) makes this set null, which is not assumed. (3) S is not a martingale when b != 0; no pricing-measure or completeness statement. (4) b = 0 recovers the driftless integral a.e., not definitionally."
+      }
+    },
+    {
       "id": "sc-simple-dense-bracket",
       "name": "Simple Processes are Dense in the Bracket-Weighted Predictable L²",
       "description": "The T-bounded simple processes have dense range in L²(f²·trim_T), the predictable integrands square-integrable against a bracket with density f². The flat (f = 1) density theorem is the special case.",

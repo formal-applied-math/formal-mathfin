@@ -2453,6 +2453,13 @@
       "input_hash": "02bc8130beeb15165113fb49dbfd81b24d2069b4b295e429d1c0562b87b1d4b5",
       "verified_at_commit": "79f8b65"
     },
+    "sc-ito-integral-against-drifted-price": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-09-29",
+      "elapsed_s": 4.3,
+      "input_hash": "c82a93963c663ced09c6beb6275b347380e68bc2a849faaad82ded1ce084a2bf",
+      "verified_at_commit": "0ce0285"
+    },
     "sc-ito-integral-band": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-09-25",
