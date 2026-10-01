@@ -36,9 +36,9 @@ is not required.
 
 The hedge is produced and is unique; nothing here says the *wealth process* is a martingale
 under a second measure, which is what the second FTAP needs and what
-`PricingMeasureL2Density` takes up. And the price is driftless: a drift term
-`∫b ds` is additive (it reuses the pathwise drift object of `DriftProcessModification`) and is
-what the HJM bond dynamics need, but no result here requires it.
+`PricingMeasureL2Density` takes up. And the price is driftless. The price with a drift,
+`S = S₀ + ∫b ds + (σ●B)`, and the integral against it are `Foundations/PricePathDrift.lean`,
+which reuses the pathwise drift object of `DriftProcessModification`; no result here needs it.
 
 ## An adapted version, and why it is needed
 

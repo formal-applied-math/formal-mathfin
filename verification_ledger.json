@@ -285,10 +285,10 @@
     },
     "gir-pricing-measure-density": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-09-25",
-      "elapsed_s": 3.4,
-      "input_hash": "bb9fcd86b9622cab0f3bd312df2d597c4ccc2370b1f6f9c16cce69c37cd94042",
-      "verified_at_commit": "79f8b65"
+      "date": "2026-10-01",
+      "elapsed_s": 126.9,
+      "input_hash": "2c901969697c0e7a4de395009cf71d6778bc61a5f177d5dfff8e06c8f89e9a8d",
+      "verified_at_commit": "2472423"
     },
     "gir-pricing-measure-unique": {
       "benchmark_file": "girsanov_finance.json",
@@ -299,10 +299,10 @@
     },
     "gir-replication-in-price": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-09-25",
-      "elapsed_s": 3.5,
-      "input_hash": "9ffa7680bcdb893a03692b146ad6f23566781662964ddf48d6bedaf361757922",
-      "verified_at_commit": "79f8b65"
+      "date": "2026-10-01",
+      "elapsed_s": 3.3,
+      "input_hash": "d23782f48ba6a2967ccbd82b88cd7fb6575f45571925d7f7f192402877085871",
+      "verified_at_commit": "2472423"
     },
     "gir-simple-adapted": {
       "benchmark_file": "girsanov_finance.json",
@@ -2910,10 +2910,10 @@
     },
     "sc-ito-integral-against-drifted-price": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-09-29",
-      "elapsed_s": 4.3,
-      "input_hash": "c82a93963c663ced09c6beb6275b347380e68bc2a849faaad82ded1ce084a2bf",
-      "verified_at_commit": "0ce0285"
+      "date": "2026-10-01",
+      "elapsed_s": 56.5,
+      "input_hash": "39028de34801c323e983c4bc56dbe6ce87572aeda82b703de95693989ad73e19",
+      "verified_at_commit": "2472423"
     },
     "sc-ito-integral-band": {
       "benchmark_file": "stochastic_calculus.json",

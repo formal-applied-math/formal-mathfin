@@ -117,9 +117,11 @@ bundled `Martingale` structure for `M² − ⟨M⟩`, and Doob–Meyer for a gen
 weighted norm rescales, so no uniform lower bound), and that the gains-neutrality hypothesis becomes a
 theorem: `PricingMeasureL2Density.measure_eq_of_density` derives `PricesGainsAtZero` from `S` being a
 `Q`-martingale together with a square-integrable density, and concludes `Q = μ` on `𝓕ᴮ_T`. Still out of
-scope on this seam, unchanged: the Jacod–Yor converse, a drift term in the price (additive; what HJM
-needs), and the integral against a general semimartingale — `ContinuousMarket`'s meaning-2 boundary
-narrows but does not close.
+scope on this seam: the Jacod–Yor converse and the integral against a general semimartingale —
+`ContinuousMarket`'s meaning-2 boundary narrows but does not close. The drift term (#194) is now in
+`Foundations/PricePathDrift.lean`: `S = S₀ + ∫b ds + (σ●B)` and `∫ψ dS = ∫ψb ds + ∫ψ dM`, with
+`ψb ∈ L²` an explicit side condition; with a drift `S` is not a martingale, so no completeness or
+pricing-measure statement extends to it.
 
 ## A representation layer, not a fifth pillar: the reified contract (2026-08-17)
 
