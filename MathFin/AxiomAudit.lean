@@ -1348,5 +1348,57 @@ than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen
 /-- info: 'MathFin.PricePathDrift.gainsDrift_zero_drift' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.PricePathDrift.gainsDrift_zero_drift
+/-! ## Quantitative risk management: quantiles, VaR/ES for every law, copulas, EVT, IRB -/
+
+/-- info: 'MathFin.hasLaw_quantile' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.hasLaw_quantile
+
+/-- info: 'MathFin.quantile_le_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.quantile_le_iff
+
+/-- info: 'MathFin.isLeast_rockafellarUryasev' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.isLeast_rockafellarUryasev
+
+/-- info: 'MathFin.expectedShortfall_isCoherentRiskMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.expectedShortfall_isCoherentRiskMeasure
+
+/-- info: 'MathFin.isGreatest_integral_mul_expectedShortfall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.isGreatest_integral_mul_expectedShortfall
+
+/-- info: 'MathFin.expectedShortfall_of_hasLaw_gaussianReal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.expectedShortfall_of_hasLaw_gaussianReal
+
+/-- info: 'MathFin.valueAtRisk_sum_bernoulli_superadditive_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.valueAtRisk_sum_bernoulli_superadditive_iff
+
+/-- info: 'MathFin.valueAtRisk_add_gt_of_paretoHalf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.valueAtRisk_add_gt_of_paretoHalf
+
+/-- info: 'MathFin.strictlyElicits_pinballLoss' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.strictlyElicits_pinballLoss
+
+/-- info: 'MathFin.not_isElicitable_expectedShortfall_integrable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.not_isElicitable_expectedShortfall_integrable
+
+/-- info: 'MathFin.measureReal_le_eq_copulaOf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.measureReal_le_eq_copulaOf
+
+/-- info: 'MathFin.covariance_eq_integral_cdf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.covariance_eq_integral_cdf
+
+/-- info: 'MathFin.measureReal_poisson_max_gpd' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.measureReal_poisson_max_gpd
+
+/-- info: 'MathFin.gpdCDF_inMDA' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.gpdCDF_inMDA
+
+/-- info: 'MathFin.tendsto_valueAtRisk_oneFactorLossFraction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.tendsto_valueAtRisk_oneFactorLossFraction
+
+/-- info: 'MathFin.isMinOn_valueAtRisk_iff_isMinOn_portfolioVarN' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.isMinOn_valueAtRisk_iff_isMinOn_portfolioVarN
+
+/-- info: 'MathFin.valueAtRisk_gbm_loss' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.valueAtRisk_gbm_loss
 
 end MathFin.AxiomAudit

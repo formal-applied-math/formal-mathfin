@@ -26,6 +26,106 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Quantitative risk management: quantiles, VaR for every law, ES for every integrable loss (2026-10-01)
+
+New benchmark file `benchmarks/quantitative_risk_management.json`, drawn from McNeil, Frey and
+Embrechts, *Quantitative Risk Management* (2015) and its exercise book (Hofert, Frey and McNeil,
+2020). Every entry carries `formalization_status: full`.
+
+The base layer is `Foundations/Quantile.lean`, the generalized inverse of a CDF, which Mathlib
+does not have. Value-at-risk (`RiskMeasures/ValueAtRisk.lean`) is defined for every law, atoms included. The
+expected-shortfall theorems hold for every integrable loss. The library's earlier Gaussian closed forms, which take a quantile
+parameter `z`, are now theorems about the law at `z = Φ⁻¹(α)` (`qrm-gaussian-var-is-var`,
+`qrm-gaussian-es`).
+
+What is not covered:
+- Sklar's theorem is proved for continuous margins only.
+- The Clayton tail-dependence limit is a statement about the copula function; the Clayton
+  measure is not constructed.
+- Fisher–Tippett–Gnedenko and Pickands–Balkema–de Haan are not formalized. The extreme-value
+  entries prove domain-of-attraction memberships by computation, max-stability, and the exact
+  Poisson–GPD maximum law.
+- The Basel IRB limit assumes the one-factor Gaussian threshold model with pairwise independent
+  idiosyncratic terms.
+
+| Benchmark ID | Mathematical conclusion | Lean module and declaration | Faithfulness |
+|---|---|---|---|
+| `qrm-quantile-transform` | For every probability measure μ on ℝ, its quantile function (the generalized inverse p ↦ inf{x | p ≤ F(x)} of the CDF) has law μ under the uniform law on (0, 1). | `MathFin/Foundations/Quantile.lean`, `MathFin.hasLaw_quantile` | `full` |
+| `qrm-quantile-galois` | For p ∈ (0, 1) and any measure μ on ℝ, quantile μ p ≤ x ↔ p ≤ F_μ(x): the generalized inverse of the CDF is its lower adjoint, with no continuity or strict-monotonicity assumption. | `MathFin/Foundations/Quantile.lean`, `MathFin.quantile_le_iff` | `full` |
+| `qrm-probability-integral-transform` | If X has law μ and the CDF F of μ is continuous, then F(X) is uniformly distributed on (0, 1). | `MathFin/Foundations/Quantile.lean`, `MathFin.hasLaw_cdf` | `full` |
+| `qrm-quantile-equivariance` | For a probability measure μ, a monotone lower-semicontinuous h (e.g. continuous increasing) and p ∈ (0, 1): the p-quantile of the image law μ∘h⁻¹ is h(quantile μ p). | `MathFin/Foundations/Quantile.lean`, `MathFin.quantile_map` | `full` |
+| `qrm-gaussian-quantile` | For p ∈ (0, 1), the p-quantile of N(m, v) is m + √v · Φ⁻¹(p), where Φ⁻¹ is the standard normal quantile function. | `MathFin/Foundations/NormalQuantile.lean`, `MathFin.quantile_gaussianReal` | `full` |
+| `qrm-var-comonotone-additive` | For a loss factor Z and monotone lower-semicontinuous f, g, VaR_α(f(Z) + g(Z)) = VaR_α(f(Z)) + VaR_α(g(Z)) for every α ∈ (0, 1) (comonotone additivity in its common-factor form). | `MathFin/RiskMeasures/ValueAtRisk.lean`, `MathFin.valueAtRisk_add_of_comonotone` | `full` |
+| `qrm-var-additive-linear-dependence` | For an a.e.-measurable loss X, α ∈ (0, 1), a ≥ 0 and b ∈ ℝ: VaR_α(X + (aX + b)) = VaR_α(X) + VaR_α(aX + b). | `MathFin/RiskMeasures/ValueAtRisk.lean`, `MathFin.valueAtRisk_add_affine` | `full` |
+| `qrm-gaussian-var-is-var` | For a loss X ~ N(m, v) and α ∈ (0, 1), VaR_α(X) = gaussianVaR m √v (Φ⁻¹(α)) = m + √v·Φ⁻¹(α): the library's quantile-parametrized Gaussian closed form is the value-at-risk of the law. | `MathFin/RiskMeasures/GaussianValueAtRisk.lean`, `MathFin.valueAtRisk_of_hasLaw_gaussianReal` | `full` |
+| `qrm-rockafellar-uryasev` | For an integrable loss X and α ∈ (0, 1), expected shortfall ES_α(X) = (1−α)⁻¹∫_α^1 VaR_u(X) du is the least value of c ↦ c + (1−α)⁻¹E[(X − c)⁺], and that value is attained (the minimizer c = VaR_α(X) is `rockafellarUryasev_valueAtRisk`). No continuity of the law is assumed. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.isLeast_rockafellarUryasev` | `full` |
+| `qrm-es-subadditive` | For integrable losses X, Y on one probability space and α ∈ (0, 1): ES_α(X + Y) ≤ ES_α(X) + ES_α(Y). | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_add_le` | `full` |
+| `qrm-es-coherent` | For α ∈ (0, 1), X ↦ ES_α(X) satisfies the four coherence axioms (monotonicity, translation invariance, positive homogeneity, subadditivity) on the integrable losses of any probability space. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_isCoherentRiskMeasure` | `full` |
+| `qrm-es-acerbi-tasche` | For an integrable loss X, α ∈ (0, 1) and q = VaR_α(X): ES_α(X) = (1−α)⁻¹(E[X·1{X > q}] + q·(1 − α − P(X > q))), the correction term accounting for an atom at q. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_eq_acerbiTasche` | `full` |
+| `qrm-es-dual-representation` | For an integrable loss X and α ∈ (0, 1), ES_α(X) is the greatest value of E[D·X] over densities D with 0 ≤ D ≤ (1−α)⁻¹ a.s. and E[D] = 1; the maximum is attained. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.isGreatest_integral_mul_expectedShortfall` | `full` |
+| `qrm-es-monotone-level` | For an integrable loss X and 0 < α ≤ β < 1, ES_α(X) ≤ ES_β(X). | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_mono_level` | `full` |
+| `qrm-es-adeh-representation` | On a finite probability space, X ↦ ES_α(−X) satisfies the ADEH axioms (IsCoherentRisk), so ES_α(−X) is the least upper bound of the expected losses ∑ qᵢ(−Xᵢ) over its representing probability vectors. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_isLUB_representingSet` | `full` |
+| `qrm-gaussian-es` | For a loss X ~ N(m, v) with v > 0 and α ∈ (0, 1): ES_α(X) = gaussianCVaR m √v (Φ⁻¹(α)) α = m + √v·ϕ(Φ⁻¹(α))/(1 − α). | `MathFin/RiskMeasures/GaussianExpectedShortfall.lean`, `MathFin.expectedShortfall_of_hasLaw_gaussianReal` | `full` |
+| `qrm-var-bisection` | For any loss X, α ∈ (0, 1) and a bracket with P(X ≤ lo) < α ≤ P(X ≤ hi), bisection on x ↦ P(X ≤ x) against α converges to VaR_α(X) (with error at most (hi − lo)/2^(n+1) after n steps, abs_bisectMid_sub_valueAtRisk_le). | `MathFin/RiskMeasures/ValueAtRiskBisection.lean`, `MathFin.tendsto_bisectMid_valueAtRisk` | `full` |
+| `qrm-var-superadditive-bernoulli` | For d independent Bernoulli(p) losses Y₁,…,Y_d (values in {0,1}, p ∈ (0,1)) and α ∈ (0, 1): ∑ VaR_α(Yᵢ) < VaR_α(∑ Yᵢ) if and only if (1 − p)^d < α ≤ 1 − p. So VaR is superadditive for such losses whenever d ≥ 2 and α lies in that range. | `MathFin/RiskMeasures/VaRSuperadditivity.lean`, `MathFin.valueAtRisk_sum_bernoulli_superadditive_iff` | `full` |
+| `qrm-var-superadditive-pareto` | For independent L₁, L₂ with Pareto law F(x) = 1 − x^(−1/2) on [1, ∞) and every α ∈ (0, 1): VaR_α(L₁) + VaR_α(L₂) < VaR_α(L₁ + L₂). | `MathFin/RiskMeasures/VaRSuperadditivity.lean`, `MathFin.valueAtRisk_add_gt_of_paretoHalf` | `full` |
+| `qrm-var-gaussian-subadditive-iff` | For a jointly Gaussian pair (X₁, X₂) whose covariance is strictly below √Var X₁·√Var X₂ and α ∈ (0, 1): VaR_α(X₁ + X₂) ≤ VaR_α(X₁) + VaR_α(X₂) if and only if α ≥ 1/2. | `MathFin/RiskMeasures/VaRSuperadditivity.lean`, `MathFin.valueAtRisk_add_le_iff_of_hasGaussianLaw` | `full` |
+| `qrm-es-exponential` | For X ~ Exp(r) (r > 0) and α ∈ (0, 1): ES_α(X) = (1 − log(1 − α))/r (the VaR is `valueAtRisk_of_hasLaw_expMeasure`: −log(1 − α)/r). | `MathFin/RiskMeasures/RiskClosedForms.lean`, `MathFin.expectedShortfall_of_hasLaw_expMeasure` | `full` |
+| `qrm-es-var-ratio-exponential` | For X ~ Exp(r), ES_α(X)/VaR_α(X) → 1 as α → 1⁻ (light tail). | `MathFin/RiskMeasures/RiskClosedForms.lean`, `MathFin.tendsto_expectedShortfall_div_valueAtRisk_expMeasure` | `full` |
+| `qrm-es-lomax` | For X with Lomax law F(x) = 1 − (κ/(κ + x))^θ, θ > 1, κ > 0 and α ∈ (0, 1): ES_α(X) = κ(θ/(θ − 1)·(1 − α)^(−1/θ) − 1). | `MathFin/RiskMeasures/RiskClosedForms.lean`, `MathFin.expectedShortfall_of_hasLaw_lomaxMeasure` | `full` |
+| `qrm-es-var-ratio-pareto` | For X with Lomax law (θ > 1, κ > 0), ES_α(X)/VaR_α(X) → θ/(θ − 1) as α → 1⁻: the heavy tail is visible in the shortfall-to-quantile ratio. | `MathFin/RiskMeasures/RiskClosedForms.lean`, `MathFin.tendsto_expectedShortfall_div_valueAtRisk_lomaxMeasure` | `full` |
+| `qrm-median-shortfall` | For a loss with continuous CDF and α ∈ (0, 1), the median of the conditional law of X given X > VaR_α(X) equals VaR_{(1+α)/2}(X). | `MathFin/RiskMeasures/RiskClosedForms.lean`, `MathFin.medianShortfall_eq_valueAtRisk` | `full` |
+| `qrm-var-elicitable` | For α ∈ (0, 1), the pinball loss (𝟙{y ≤ x} − α)(x − y) strictly elicits the α-quantile on the probability measures with finite mean whose α-quantile is unique (CDF > α right after it): the quantile is the unique minimizer of the expected score. | `MathFin/RiskMeasures/Elicitability.lean`, `MathFin.strictlyElicits_pinballLoss` | `full` |
+| `qrm-es-not-elicitable` | For every α ∈ (0, 1), no scoring function with finite expected score under every law in the class elicits ES_α on the probability measures with finite mean: δ₀ and ((1+α)/2)δ₋₁ + ((1−α)/2)δ₁ both have ES_α = 0 while their mixture (1−α)δ₀ + α·(second law) has ES_α = α/2, so the level set is not convex. | `MathFin/RiskMeasures/Elicitability.lean`, `MathFin.not_isElicitable_expectedShortfall_integrable` | `full` |
+| `qrm-frechet-lower-not-copula` | For an index type with at least three elements, no copula (probability measure on ℝ^ι with uniform coordinates) has distribution function u ↦ max(∑ uᵢ − (d − 1), 0) on [0, 1]^ι. | `MathFin/Foundations/Copula.lean`, `MathFin.not_exists_isCopula_frechetLower` | `full` |
+| `qrm-frechet-hoeffding-lower` | For every copula C on ℝ^ι and u ∈ [0, 1]^ι: ∑ uᵢ − (d − 1) ≤ C(U ≤ u). | `MathFin/Foundations/Copula.lean`, `MathFin.IsCopula.sum_sub_le_measureReal_Iic` | `full` |
+| `qrm-sklar-existence-copula` | For a random vector X whose marginal CDFs are continuous, the joint law of the probability-integral transforms (F₁(X₁), …, F_d(X_d)) is a copula (probability measure with uniform coordinates). | `MathFin/Foundations/Sklar.lean`, `MathFin.isCopula_copulaOf` | `full` |
+| `qrm-sklar-representation` | For a random vector X with continuous marginal CDFs F_i: P(X ≤ x) = C(F₁(x₁), …, F_d(x_d)) for all x, where C is the copula of X (continuous-margins case of Sklar's theorem). | `MathFin/Foundations/Sklar.lean`, `MathFin.measureReal_le_eq_copulaOf` | `full` |
+| `qrm-sklar-uniqueness` | For a random vector X with continuous marginal CDFs, any copula C with P(X ≤ x) = C(F₁(x₁), …, F_d(x_d)) for all x equals the copula of X. | `MathFin/Foundations/Sklar.lean`, `MathFin.eq_copulaOf_of_measureReal_le` | `full` |
+| `qrm-copula-invariance` | For a random vector X and strictly increasing T₁, …, T_d, the joint law of the probability-integral transforms of (T₁(X₁), …, T_d(X_d)) (copulaOf, a copula when the margins are continuous) equals that of X. | `MathFin/Foundations/Sklar.lean`, `MathFin.copulaOf_comp_strictMono` | `full` |
+| `qrm-fgm-copula` | The function uv + θuv(1 − u)(1 − v) is the distribution function on [0, 1]² of some bivariate copula if and only if |θ| ≤ 1. | `MathFin/Foundations/CopulaFamilies.lean`, `MathFin.exists_isCopula_fgm_iff` | `full` |
+| `qrm-fgm-spearman` | For |θ| ≤ 1, Spearman's rho (12E[U₀U₁] − 3) of the FGM copula is θ/3, so the family only reaches rank correlations in [−1/3, 1/3]. | `MathFin/Foundations/CopulaFamilies.lean`, `MathFin.spearmanRho_fgmCopula` | `full` |
+| `qrm-clayton-tail-dependence` | For θ > 0 the Clayton copula function C_θ(u, u) = (2u^(−θ) − 1)^(−1/θ) satisfies C_θ(u, u)/u → 2^(−1/θ) as u → 0⁺ (lower tail dependence coefficient), proved at the level of the copula function. | `MathFin/Foundations/CopulaFamilies.lean`, `MathFin.tendsto_claytonCopulaFun_diag_div` | `full` |
+| `qrm-hoeffding-covariance` | For square-integrable X, Y: cov(X, Y) = ∫∫ (P(X ≤ s, Y ≤ t) − P(X ≤ s)P(Y ≤ t)) ds dt. | `MathFin/Foundations/HoeffdingCovariance.lean`, `MathFin.covariance_eq_integral_cdf` | `full` |
+| `qrm-covariance-ordering` | For two square-integrable pairs with the same marginal laws whose joint distribution functions are pointwise ordered, their covariances are ordered the same way. | `MathFin/Foundations/HoeffdingCovariance.lean`, `MathFin.covariance_le_covariance_of_cdf_le` | `full` |
+| `qrm-default-correlation-bound` | For events A, B: cov(1_A, 1_B) ≤ min(P(A), P(B)) − P(A)P(B) (the comonotone Fréchet bound for default indicators). | `MathFin/Foundations/HoeffdingCovariance.lean`, `MathFin.covariance_indicator_one_le` | `full` |
+| `qrm-marshall-olkin-survival` | For independent exponential T₁, T₂, T₃ with rates λ₁, λ₂, λ₃ and Xⱼ = min(Tⱼ, T₃): P(X₁ > s, X₂ > t) = exp(−λ₁s − λ₂t − λ₃ max(s, t)) for s, t ≥ 0. | `MathFin/Foundations/MarshallOlkin.lean`, `MathFin.marshallOlkin_survival` | `full` |
+| `qrm-marshall-olkin-ftd` | In the Marshall–Olkin model with all three rates positive, the first-to-default spread −log P(min(X₁, X₂) > t)/t (equal to λ₁ + λ₂ + λ₃, `marshallOlkin_firstToDefault_spread`) is strictly below the sum of the single-name spreads (λ₁ + λ₃) + (λ₂ + λ₃). | `MathFin/Foundations/MarshallOlkin.lean`, `MathFin.marshallOlkin_firstToDefault_spread_lt` | `full` |
+| `qrm-correlation-fallacy` | There exist random variables Z, Y, both N(0, 1), with cov(Z, Y) = 0 that are not independent, not jointly Gaussian, and whose sum is not Gaussian (Y = V·Z with an independent random sign V). | `MathFin/Foundations/CorrelationFallacies.lean`, `MathFin.exists_gaussian_uncorrelated_not_indepFun` | `full` |
+| `qrm-evt-poisson-approximation` | For a nonnegative F, thresholds uₙ and h > 0: F(uₙ)ⁿ → h if and only if n(1 − F(uₙ)) → −log h. | `MathFin/Foundations/ExtremeValue.lean`, `MathFin.tendsto_pow_iff_tendsto_nat_mul_tail` | `full` |
+| `qrm-gev-max-stable` | For every shape ξ, x and n ≥ 1: H_ξ(cₙx + dₙ)ⁿ = H_ξ(x) with the explicit normalizations gevNormScale ξ n and gevNormLoc ξ n. | `MathFin/Foundations/ExtremeValue.lean`, `MathFin.gevCDF_max_stable` | `full` |
+| `qrm-exponential-gumbel-mda` | For r > 0 the exponential CDF lies in MDA(H₀) (witnessed by cₙ = 1/r, dₙ = log n/r): F(x/r + log n/r)ⁿ → exp(−e^(−x)). | `MathFin/Foundations/ExtremeValue.lean`, `MathFin.cdf_expMeasure_inMDA` | `full` |
+| `qrm-gpd-mda` | For β > 0 and every ξ ∈ ℝ, the generalized Pareto distribution function G_{ξ,β} lies in MDA(H_ξ). | `MathFin/Foundations/GeneralizedPareto.lean`, `MathFin.gpdCDF_inMDA` | `full` |
+| `qrm-gpd-mean-excess` | For the GPD law with ξ < 1, β > 0 and a threshold u ≥ 0 in the support: E[X − u | X > u] = (β + ξu)/(1 − ξ), linear in u. | `MathFin/Foundations/GeneralizedPareto.lean`, `MathFin.integral_sub_cond_gpdMeasure` | `full` |
+| `qrm-poisson-gpd-gev` | For N ~ Poisson(λ) independent of iid GPD(ξ, β) losses Yᵢ (ξ ≠ 0), and x ≥ 0: P(max_{i<N} Yᵢ ≤ x) = H_ξ((x − μ)/σ) with σ = βλ^ξ, μ = β(λ^ξ − 1)/ξ. | `MathFin/Foundations/PoissonMaxima.lean`, `MathFin.measureReal_poisson_max_gpd` | `full` |
+| `qrm-quantile-convergence` | If Xₙ → Y almost surely and the α-quantile of Y is unique (F_Y(x) > α for every x above it), then the α-quantiles of the laws of Xₙ converge to the α-quantile of the law of Y. | `MathFin/Foundations/QuantileConvergence.lean`, `MathFin.tendsto_quantile_of_tendsto_ae` | `full` |
+| `qrm-bernoulli-mixture-moments` | For defaults Yᵢ = 1{Uᵢ ≤ Q} with Q ∈ [0, 1], Uᵢ iid uniform and independent of Q: the probability that every obligor in a set s defaults is E[Q^|s|]. | `MathFin/RiskMeasures/BernoulliMixture.lean`, `MathFin.measureReal_iInter_default_eq_integral_pow` | `full` |
+| `qrm-default-correlation` | In the exchangeable Bernoulli mixture, the default correlation of two distinct obligors equals Var(Q)/(E[Q](1 − E[Q])) (hence is nonnegative, defaultCorrelation_nonneg). | `MathFin/RiskMeasures/BernoulliMixture.lean`, `MathFin.defaultCorrelation_eq` | `full` |
+| `qrm-one-factor-pd` | For independent N(0, 1) factor F and idiosyncratic ε, π ∈ (0, 1) and ρ ∈ [0, 1]: P(√ρ F + √(1 − ρ) ε ≤ Φ⁻¹(π)) = π. | `MathFin/RiskMeasures/BernoulliMixture.lean`, `MathFin.oneFactor_measureReal_default` | `full` |
+| `qrm-large-portfolio-lln` | In the one-factor Gaussian threshold model with pairwise independent N(0, 1) idiosyncratic terms (any factor F, any π, ρ < 1), the default fraction of the first m obligors converges almost surely to p(F) = Φ((Φ⁻¹(π) − √ρ F)/√(1 − ρ)). | `MathFin/RiskMeasures/VasicekIRB.lean`, `MathFin.tendsto_oneFactorLossFraction_ae` | `full` |
+| `qrm-basel-irb-formula` | In the one-factor Gaussian threshold model (standard normal factor, pairwise independent standard normal idiosyncratic terms, α ∈ (0, 1), ρ < 1), VaR_α of the default fraction of the first m obligors converges as m → ∞ to Φ((Φ⁻¹(π) + √ρ·Φ⁻¹(α))/√(1 − ρ)) (asrfQuantile), the worst-case default rate at the core of the Basel IRB formula. Loss given default, expected-loss subtraction and the maturity adjustment are not modelled. | `MathFin/RiskMeasures/VasicekIRB.lean`, `MathFin.tendsto_valueAtRisk_oneFactorLossFraction` | `full` |
+| `qrm-equicorrelation-psd` | For d ≥ 2, the matrix with ones on the diagonal and ρ off it is positive semidefinite if and only if −1/(d − 1) ≤ ρ ≤ 1. | `MathFin/Portfolio/Equicorrelation.lean`, `MathFin.posSemidef_equicorrelationMatrix_iff` | `full` |
+| `qrm-var-optimal-is-markowitz` | For a Gaussian random vector X, α ∈ (1/2, 1) and a set S of weights with a common expected portfolio loss, w₀ minimizes VaR_α(∑ wᵢXᵢ) over S if and only if it minimizes the portfolio variance wᵀΣw over S. | `MathFin/Bridges/GaussianRiskMarkowitz.lean`, `MathFin.isMinOn_valueAtRisk_iff_isMinOn_portfolioVarN` | `full` |
+| `qrm-es-optimal-is-markowitz` | For a Gaussian random vector X, α ∈ (1/2, 1) and a set S of weights with a common expected portfolio loss, w₀ minimizes ES_α(∑ wᵢXᵢ) over S if and only if it minimizes the portfolio variance over S. | `MathFin/Bridges/GaussianRiskMarkowitz.lean`, `MathFin.isMinOn_expectedShortfall_iff_isMinOn_portfolioVarN` | `full` |
+| `qrm-var-subadditive-gaussian-portfolios` | For a Gaussian random vector X, α ∈ [1/2, 1) and weight vectors w, w': VaR_α(⟨w, X⟩ + ⟨w', X⟩) ≤ VaR_α(⟨w, X⟩) + VaR_α(⟨w', X⟩). | `MathFin/Bridges/GaussianRiskMarkowitz.lean`, `MathFin.valueAtRisk_portfolio_add_le` | `full` |
+| `qrm-systematic-floor` | For a covariance kernel with variance v ≥ 0 and common covariance ρv (ρ ≤ 1) and fully invested weights, the portfolio variance is at least ρv (the identity Var(w) = v((1 − ρ)·HHI(w) + ρ) is `portfolioVarN_equicorrelated_of_sum_eq_one`). | `MathFin/Bridges/EquicorrelationConcentration.lean`, `MathFin.mul_le_portfolioVarN_equicorrelated` | `full` |
+| `qrm-square-root-of-time` | For a geometric Brownian motion S_t = S₀exp((μ − σ²/2)t + σB_t) driven by a pre-Brownian motion and σ ≥ 0: the h-period log-loss −log(S_{t+h}/S_t) has VaR_α = −(μ − σ²/2)h + σ√h·Φ⁻¹(α), so the volatility term scales with √h. | `MathFin/Bridges/SquareRootOfTime.lean`, `MathFin.valueAtRisk_gbm_loss` | `full` |
+| `qrm-expectile-exists-unique` | For an integrable loss Y and α ∈ (0, 1) there is exactly one e with α·E[(Y − e)⁺] = (1 − α)·E[(e − Y)⁺] (the α-expectile). | `MathFin/RiskMeasures/Expectile.lean`, `MathFin.existsUnique_expectileGap_eq_zero` | `full` |
+| `qrm-expectile-monotone` | For an integrable loss Y and 0 < α ≤ β < 1, the α-expectile is at most the β-expectile. | `MathFin/RiskMeasures/Expectile.lean`, `MathFin.expectile_mono` | `full` |
+| `qrm-covariance-cauchy-schwarz` | For square-integrable X, Y on a probability space: cov(X, Y) ≤ √Var X · √Var Y. | `MathFin/RiskMeasures/StandardDeviationPrinciple.lean`, `MathFin.covariance_le_sqrt_mul_sqrt` | `full` |
+| `qrm-sd-principle-subadditive` | For k ≥ 0 and square-integrable X, Y: E[X + Y] + k·sd(X + Y) ≤ (E[X] + k·sd(X)) + (E[Y] + k·sd(Y)). | `MathFin/RiskMeasures/StandardDeviationPrinciple.lean`, `MathFin.stdDevPrinciple_add_le` | `full` |
+| `qrm-sd-principle-not-monotone` | For k ≥ 0 and a loss B ≤ 0 equal to −1 with probability q > 0 and 0 otherwise, if q(1 + k²) < k² then E[B] + k·sd(B) > 0 = the principle's value at the zero loss, although B ≤ 0. | `MathFin/RiskMeasures/StandardDeviationPrinciple.lean`, `MathFin.stdDevPrinciple_not_monotone` | `full` |
+
+Verification:
+- The default `lake build` passed, including the curated `AxiomAudit.lean`, which gained 17
+  headline guards, and the regenerated `AxiomAuditGen.lean` (450 guards).
+- `lake lint` passed.
+- The ledger reports 438 fresh, 0 stale and 0 missing entries; all 65 new entries were verified
+  through the daemon.
+- `pytest` passed 57/57.
+- A three-agent values review (2026-10-01, `docs/values-review.md`) found ten prose overclaims,
+  all corrected before verification.
+
 ### A price with a drift, and the integral against it (2026-09-29)
 
 One entry added, `sc-ito-integral-against-drifted-price` (`full`). Corpus 373 → 374.

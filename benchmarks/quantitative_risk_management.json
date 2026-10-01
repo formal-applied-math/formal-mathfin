@@ -1,0 +1,1045 @@
+{
+  "description": "Quantitative risk management: the general quantile layer, value-at-risk and expected shortfall for every law (Rockafellar–Uryasev, coherence, dual representation, elicitability), copulas and Sklar's theorem, dependence, extreme value theory, Bernoulli-mixture credit portfolios and the Basel IRB limit theorem. `chapter` refers to McNeil, Frey and Embrechts, Quantitative Risk Management (2015); exercises cite Hofert, Frey and McNeil, The QRM Exercise Book (2020).",
+  "theorems": [
+    {
+      "id": "qrm-quantile-transform",
+      "name": "Quantile Transform",
+      "description": "For every probability measure μ on ℝ, its quantile function (the generalized inverse p ↦ inf{x | p ≤ F(x)} of the CDF) has law μ under the uniform law on (0, 1).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.Quantile\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem hasLaw_quantile_thm (μ : Measure ℝ) [IsProbabilityMeasure μ] :\n    HasLaw (quantile μ) μ (volume.restrict (Ioo 0 1)) :=\n  MathFin.hasLaw_quantile μ\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "MFE (2015) Proposition 7.2 / Appendix A.1.2; QRM Exercise Book Ex. 7.2 context",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Proved from the Galois connection with the CDF and Measure.ext_of_Iic. Lives in MathFin/Foundations/Quantile.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-quantile-galois",
+      "name": "Quantile–CDF Galois Connection",
+      "description": "For p ∈ (0, 1) and any measure μ on ℝ, quantile μ p ≤ x ↔ p ≤ F_μ(x): the generalized inverse of the CDF is its lower adjoint, with no continuity or strict-monotonicity assumption.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.Quantile\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem quantile_le_iff_thm {μ : Measure ℝ} {p : ℝ} {x : ℝ} (hp : p ∈ Ioo 0 1) :\n    quantile μ p ≤ x ↔ p ≤ cdf μ x :=\n  MathFin.quantile_le_iff hp\n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "MFE (2015) Appendix A.1.2 (generalized inverse); QRM Exercise Book Ex. 2.6",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Right-continuity of the CDF (StieltjesFunction) keeps the infimum in the set. Lives in MathFin/Foundations/Quantile.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-probability-integral-transform",
+      "name": "Probability Integral Transform",
+      "description": "If X has law μ and the CDF F of μ is continuous, then F(X) is uniformly distributed on (0, 1).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.Quantile\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem hasLaw_cdf_thm {μ : Measure ℝ} {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} [IsProbabilityMeasure μ] (hX : HasLaw X μ P) (hF : Continuous (cdf μ)) :\n    HasLaw (fun ω ↦ cdf μ (X ω)) (volume.restrict (Ioo 0 1)) P :=\n  MathFin.hasLaw_cdf hX hF\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "MFE (2015) Proposition 7.2; QRM Exercise Book Ex. 7.2",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. F ∘ quantile μ is the identity on (0, 1) for continuous F; transported along the quantile transform. Lives in MathFin/Foundations/Quantile.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-quantile-equivariance",
+      "name": "Quantiles Commute with Monotone Maps",
+      "description": "For a probability measure μ, a monotone lower-semicontinuous h (e.g. continuous increasing) and p ∈ (0, 1): the p-quantile of the image law μ∘h⁻¹ is h(quantile μ p).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.Quantile\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem quantile_map_thm {μ : Measure ℝ} {p : ℝ} [IsProbabilityMeasure μ] {h : ℝ → ℝ} (hmono : Monotone h) (hlsc : LowerSemicontinuous h) (hp : p ∈ Ioo 0 1) :\n    quantile (μ.map h) p = h (quantile μ p) :=\n  MathFin.quantile_map hmono hlsc hp\n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "MFE (2015) Proposition A.3; QRM Exercise Book Ex. 2.21",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Both sides have the same lower sets, via the Galois connection and closedness of {h ≤ y}. Lives in MathFin/Foundations/Quantile.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-gaussian-quantile",
+      "name": "Quantile of a Gaussian Law",
+      "description": "For p ∈ (0, 1), the p-quantile of N(m, v) is m + √v · Φ⁻¹(p), where Φ⁻¹ is the standard normal quantile function.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.NormalQuantile\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem quantile_gaussianReal_thm {p : ℝ} (m : ℝ) (v : ℝ≥0) (hp : p ∈ Ioo 0 1) :\n    quantile (gaussianReal m v) p = m + √(v : ℝ) * PhiInv p :=\n  MathFin.quantile_gaussianReal m v hp\n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "MFE (2015) Example 2.11",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. N(m, v) is the affine image of N(0, 1); quantile equivariance. Lives in MathFin/Foundations/NormalQuantile.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-var-comonotone-additive",
+      "name": "VaR Is Additive for Monotone Functions of a Common Factor",
+      "description": "For a loss factor Z and monotone lower-semicontinuous f, g, VaR_α(f(Z) + g(Z)) = VaR_α(f(Z)) + VaR_α(g(Z)) for every α ∈ (0, 1) (comonotone additivity in its common-factor form).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.ValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem valueAtRisk_add_of_comonotone_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} [IsProbabilityMeasure P] {Z : Ω → ℝ} (hZ : AEMeasurable Z P) {f : ℝ → ℝ} {g : ℝ → ℝ} (hf : Monotone f) (hf' : LowerSemicontinuous f) (hg : Monotone g) (hg' : LowerSemicontinuous g) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk (fun ω ↦ f (Z ω) + g (Z ω)) P α = valueAtRisk (fun ω ↦ f (Z ω)) P α + valueAtRisk (fun ω ↦ g (Z ω)) P α :=\n  MathFin.valueAtRisk_add_of_comonotone hZ hf hf' hg hg' hα\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "MFE (2015) Proposition 7.20; QRM Exercise Book Ex. 2.8",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Three applications of VaR equivariance under monotone lower-semicontinuous maps. Lives in MathFin/RiskMeasures/ValueAtRisk.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-var-additive-linear-dependence",
+      "name": "VaR Additivity for Linearly Dependent Losses",
+      "description": "For an a.e.-measurable loss X, α ∈ (0, 1), a ≥ 0 and b ∈ ℝ: VaR_α(X + (aX + b)) = VaR_α(X) + VaR_α(aX + b).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.ValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem valueAtRisk_add_affine_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {α : ℝ} [IsProbabilityMeasure P] (hX : AEMeasurable X P) (hα : α ∈ Ioo 0 1) {a : ℝ} (ha : 0 ≤ a) (b : ℝ) :\n    valueAtRisk (fun ω ↦ X ω + (a * X ω + b)) P α = valueAtRisk X P α + valueAtRisk (fun ω ↦ a * X ω + b) P α :=\n  MathFin.valueAtRisk_add_affine hX hα ha b\n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "QRM Exercise Book Ex. 2.8",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Instance of comonotone additivity. Lives in MathFin/RiskMeasures/ValueAtRisk.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-gaussian-var-is-var",
+      "name": "Gaussian VaR Closed Form Is the VaR of the Law",
+      "description": "For a loss X ~ N(m, v) and α ∈ (0, 1), VaR_α(X) = gaussianVaR m √v (Φ⁻¹(α)) = m + √v·Φ⁻¹(α): the library's quantile-parametrized Gaussian closed form is the value-at-risk of the law.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.GaussianValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem valueAtRisk_of_hasLaw_gaussianReal_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {α : ℝ} {m : ℝ} {v : ℝ≥0} (hX : HasLaw X (gaussianReal m v) P) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk X P α = gaussianVaR m √(v : ℝ) (PhiInv α) :=\n  MathFin.valueAtRisk_of_hasLaw_gaussianReal hX hα\n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "MFE (2015) Example 2.11",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Law invariance of VaR plus the Gaussian quantile. Lives in MathFin/RiskMeasures/GaussianValueAtRisk.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-rockafellar-uryasev",
+      "name": "Rockafellar–Uryasev Theorem (Every Integrable Loss)",
+      "description": "For an integrable loss X and α ∈ (0, 1), expected shortfall ES_α(X) = (1−α)⁻¹∫_α^1 VaR_u(X) du is the least value of c ↦ c + (1−α)⁻¹E[(X − c)⁺], and that value is attained (the minimizer c = VaR_α(X) is `rockafellarUryasev_valueAtRisk`). No continuity of the law is assumed.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.ExpectedShortfall\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem isLeast_rockafellarUryasev_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {α : ℝ} [IsProbabilityMeasure P] (hX : Integrable X P) (hα : α ∈ Ioo 0 1) :\n    IsLeast (range (rockafellarUryasev X P α)) (expectedShortfall X P α) :=\n  MathFin.isLeast_rockafellarUryasev hX hα\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Rockafellar–Uryasev (2000, 2002); MFE (2015) Section 8.2",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Pointwise certificate (q(u) − c)⁺ ≥ (q(u) − c)·1{u > α} in quantile coordinates; exact at c = q(α). Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-es-subadditive",
+      "name": "Expected Shortfall Is Subadditive",
+      "description": "For integrable losses X, Y on one probability space and α ∈ (0, 1): ES_α(X + Y) ≤ ES_α(X) + ES_α(Y).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.ExpectedShortfall\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem expectedShortfall_add_le_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {Y : Ω → ℝ} {α : ℝ} [IsProbabilityMeasure P] (hX : Integrable X P) (hY : Integrable Y P) (hα : α ∈ Ioo 0 1) :\n    expectedShortfall (fun ω ↦ X ω + Y ω) P α ≤ expectedShortfall X P α + expectedShortfall Y P α :=\n  MathFin.expectedShortfall_add_le hX hY hα\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Acerbi–Tasche (2002); MFE (2015) Section 8.1; QRM Exercise Book Ex. 2.6, 8.2(c)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Rockafellar–Uryasev objective of X + Y at VaR_α(X) + VaR_α(Y) and (a + b)⁺ ≤ a⁺ + b⁺. Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-es-coherent",
+      "name": "Expected Shortfall Is a Coherent Risk Measure",
+      "description": "For α ∈ (0, 1), X ↦ ES_α(X) satisfies the four coherence axioms (monotonicity, translation invariance, positive homogeneity, subadditivity) on the integrable losses of any probability space.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.ExpectedShortfall\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem expectedShortfall_isCoherentRiskMeasure_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} [IsProbabilityMeasure P] (hα : α ∈ Ioo 0 1) :\n    IsCoherentRiskMeasure P (fun X ↦ expectedShortfall X P α) :=\n  MathFin.expectedShortfall_isCoherentRiskMeasure hα\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Artzner–Delbaen–Eber–Heath (1999); Acerbi–Tasche (2002); MFE (2015) Section 8.1",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Bundles monotonicity, translation, homogeneity (quantile equivariance) and subadditivity (Rockafellar–Uryasev). Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-es-acerbi-tasche",
+      "name": "Acerbi–Tasche Formula for Expected Shortfall",
+      "description": "For an integrable loss X, α ∈ (0, 1) and q = VaR_α(X): ES_α(X) = (1−α)⁻¹(E[X·1{X > q}] + q·(1 − α − P(X > q))), the correction term accounting for an atom at q.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.ExpectedShortfall\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem expectedShortfall_eq_acerbiTasche_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {α : ℝ} [IsProbabilityMeasure P] (hX : Integrable X P) (hα : α ∈ Ioo 0 1) :\n    expectedShortfall X P α = (1 - α)⁻¹ * ((∫ ω in {ω | valueAtRisk X P α < X ω}, X ω ∂P) + valueAtRisk X P α * (1 - α - P.real {ω | valueAtRisk X P α < X ω})) :=\n  MathFin.expectedShortfall_eq_acerbiTasche hX hα\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Acerbi–Tasche (2002); MFE (2015) Proposition 8.13; QRM Exercise Book Ex. 8.19",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The Rockafellar–Uryasev objective at q with (X − q)⁺ = (X − q)·1{X > q}. Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-es-dual-representation",
+      "name": "Dual Representation of Expected Shortfall",
+      "description": "For an integrable loss X and α ∈ (0, 1), ES_α(X) is the greatest value of E[D·X] over densities D with 0 ≤ D ≤ (1−α)⁻¹ a.s. and E[D] = 1; the maximum is attained.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.ExpectedShortfall\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem isGreatest_integral_mul_expectedShortfall_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {α : ℝ} [IsProbabilityMeasure P] (hX : Integrable X P) (hα : α ∈ Ioo 0 1) :\n    IsGreatest {r | ∃ D : Ω → ℝ, AEStronglyMeasurable D P ∧ (∀ᵐ ω ∂P, 0 ≤ D ω) ∧ (∀ᵐ ω ∂P, D ω ≤ (1 - α)⁻¹) ∧ ∫ ω, D ω ∂P = 1 ∧ r = ∫ ω, D ω * X ω ∂P} (expectedShortfall X P α) :=\n  MathFin.isGreatest_integral_mul_expectedShortfall hX hα\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "MFE (2015) Section 8.1.3; QRM Exercise Book Ex. 8.2(a)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Upper bound by the Rockafellar–Uryasev objective; the maximizer is constructed as a function of X: (1−α)⁻¹ on {X > q} plus a fraction of the atom at q, making g(x)(x − q) = (1−α)⁻¹(x − q)⁺. Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-es-monotone-level",
+      "name": "Expected Shortfall Is Nondecreasing in the Level",
+      "description": "For an integrable loss X and 0 < α ≤ β < 1, ES_α(X) ≤ ES_β(X).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.ExpectedShortfall\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem expectedShortfall_mono_level_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {α : ℝ} [IsProbabilityMeasure P] (hX : Integrable X P) (hα : α ∈ Ioo 0 1) {β : ℝ} (hβ : β ∈ Ioo 0 1) (hαβ : α ≤ β) :\n    expectedShortfall X P α ≤ expectedShortfall X P β :=\n  MathFin.expectedShortfall_mono_level hX hα hβ hαβ\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "QRM Exercise Book Ex. 8.2(b)",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. From the dual representation: raising α enlarges the set of admissible densities. Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-es-adeh-representation",
+      "name": "ES in the ADEH Representation (Finite State)",
+      "description": "On a finite probability space, X ↦ ES_α(−X) satisfies the ADEH axioms (IsCoherentRisk), so ES_α(−X) is the least upper bound of the expected losses ∑ qᵢ(−Xᵢ) over its representing probability vectors.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.ExpectedShortfall\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem expectedShortfall_isLUB_representingSet_thm {α : ℝ} {ι : Type*} [Fintype ι] [MeasurableSpace ι] [MeasurableSingletonClass ι] (P : Measure ι) [IsProbabilityMeasure P] (hα : α ∈ Ioo 0 1) (X : ι → ℝ) :\n    IsLUB ((fun q ↦ ∑ i, q i * (-X i)) '' representingSet fun X : ι → ℝ ↦ expectedShortfall (fun i ↦ -X i) P α) (expectedShortfall (fun i ↦ -X i) P α) :=\n  MathFin.expectedShortfall_isLUB_representingSet P hα X\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Artzner–Delbaen–Eber–Heath (1999); MFE (2015) Section 8.1.3 (finite state)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. ES coherence plugged into the existing finite-state ADEH theorem coherentRisk_isLUB. Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-gaussian-es",
+      "name": "Expected Shortfall of a Gaussian Loss",
+      "description": "For a loss X ~ N(m, v) with v > 0 and α ∈ (0, 1): ES_α(X) = gaussianCVaR m √v (Φ⁻¹(α)) α = m + √v·ϕ(Φ⁻¹(α))/(1 − α).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.GaussianExpectedShortfall\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem expectedShortfall_of_hasLaw_gaussianReal_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {X : Ω → ℝ} {α : ℝ} {m : ℝ} {v : ℝ≥0} (hv : v ≠ 0) (hX : HasLaw X (gaussianReal m v) P) (hα : α ∈ Ioo 0 1) :\n    expectedShortfall X P α = gaussianCVaR m √(v : ℝ) (PhiInv α) α :=\n  MathFin.expectedShortfall_of_hasLaw_gaussianReal hv hX hα\n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "MFE (2015) Example 2.14; QRM Exercise Book Ex. 2.17",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The law-side and density-side Rockafellar–Uryasev objectives coincide, so the general minimum (ES) equals the Gaussian minimum computed in RockafellarUryasev.lean. Lives in MathFin/RiskMeasures/GaussianExpectedShortfall.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-var-bisection",
+      "name": "VaR by Bisection on the CDF",
+      "description": "For any loss X, α ∈ (0, 1) and a bracket with P(X ≤ lo) < α ≤ P(X ≤ hi), bisection on x ↦ P(X ≤ x) against α converges to VaR_α(X) (with error at most (hi − lo)/2^(n+1) after n steps, abs_bisectMid_sub_valueAtRisk_le).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.ValueAtRiskBisection\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem tendsto_bisectMid_valueAtRisk_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {X : Ω → ℝ} {α : ℝ} {lo : ℝ} {hi : ℝ} (hX : AEMeasurable X P) (hα : α ∈ Ioo 0 1) (hlo : P.real {ω | X ω ≤ lo} < α) (hhi : α ≤ P.real {ω | X ω ≤ hi}) :\n    Tendsto (bisectMid (fun x ↦ P.real {ω | X ω ≤ x}) α lo hi) atTop (𝓝 (valueAtRisk X P α)) :=\n  MathFin.tendsto_bisectMid_valueAtRisk hX hα hlo hhi\n\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Numerical quantile computation; MFE (2015) Chapter 9 context",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. VaR is the threshold of the CDF against α (Galois connection), which is what Foundations/Bisection.lean converges under. Lives in MathFin/RiskMeasures/ValueAtRiskBisection.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-var-superadditive-bernoulli",
+      "name": "VaR Superadditivity for Independent Bernoulli Losses",
+      "description": "For d independent Bernoulli(p) losses Y₁,…,Y_d (values in {0,1}, p ∈ (0,1)) and α ∈ (0, 1): ∑ VaR_α(Yᵢ) < VaR_α(∑ Yᵢ) if and only if (1 − p)^d < α ≤ 1 − p. So VaR is superadditive for such losses whenever d ≥ 2 and α lies in that range.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.VaRSuperadditivity\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem valueAtRisk_sum_bernoulli_superadditive_iff_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} [IsProbabilityMeasure P] {ι : Type*} [Fintype ι] {Y : ι → Ω → ℝ} {p : ℝ} (hmeas : ∀ i, Measurable (Y i)) (h01 : ∀ i ω, Y i ω = 0 ∨ Y i ω = 1) (hp : ∀ i, P.real {ω | Y i ω = 1} = p) (hind : iIndepFun Y P) (hα : α ∈ Ioo 0 1) :\n    ∑ i, valueAtRisk (Y i) P α < valueAtRisk (fun ω ↦ ∑ i, Y i ω) P α ↔ (1 - p) ^ Fintype.card ι < α ∧ α ≤ 1 - p :=\n  MathFin.valueAtRisk_sum_bernoulli_superadditive_iff hmeas h01 hp hind hα\n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "QRM Exercise Book Ex. 2.20, 2.27; MFE (2015) Example 2.25",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Exact VaR values of each loan and of the portfolio from the Galois connection and independence. Lives in MathFin/RiskMeasures/VaRSuperadditivity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-var-superadditive-pareto",
+      "name": "VaR Superadditivity for Infinite-Mean Pareto Losses",
+      "description": "For independent L₁, L₂ with Pareto law F(x) = 1 − x^(−1/2) on [1, ∞) and every α ∈ (0, 1): VaR_α(L₁) + VaR_α(L₂) < VaR_α(L₁ + L₂).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.VaRSuperadditivity\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem valueAtRisk_add_gt_of_paretoHalf_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} [IsProbabilityMeasure P] {L₁ : Ω → ℝ} {L₂ : Ω → ℝ} (h₁ : HasLaw L₁ (paretoMeasure 1 (1 / 2)) P) (h₂ : HasLaw L₂ (paretoMeasure 1 (1 / 2)) P) (hind : IndepFun L₁ L₂ P) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk L₁ P α + valueAtRisk L₂ P α < valueAtRisk (fun ω ↦ L₁ ω + L₂ ω) P α :=\n  MathFin.valueAtRisk_add_gt_of_paretoHalf h₁ h₂ hind hα\n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "QRM Exercise Book Ex. 2.28",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Convolution CDF 1 − 2√(x − 1)/x on [2, ∞) computed from the laws; compared at 2·VaR_α(L₁). Lives in MathFin/RiskMeasures/VaRSuperadditivity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-var-gaussian-subadditive-iff",
+      "name": "Gaussian VaR Subadditivity iff α ≥ 1/2",
+      "description": "For a jointly Gaussian pair (X₁, X₂) whose covariance is strictly below √Var X₁·√Var X₂ and α ∈ (0, 1): VaR_α(X₁ + X₂) ≤ VaR_α(X₁) + VaR_α(X₂) if and only if α ≥ 1/2.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.VaRSuperadditivity\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem valueAtRisk_add_le_iff_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} [IsProbabilityMeasure P] {X₁ : Ω → ℝ} {X₂ : Ω → ℝ} (h : HasGaussianLaw (fun ω ↦ (X₁ ω, X₂ ω)) P) (hcorr : cov[X₁, X₂; P] < √Var[X₁; P] * √Var[X₂; P]) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk (fun ω ↦ X₁ ω + X₂ ω) P α ≤ valueAtRisk X₁ P α + valueAtRisk X₂ P α ↔ 1 / 2 ≤ α :=\n  MathFin.valueAtRisk_add_le_iff_of_hasGaussianLaw h hcorr hα\n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "QRM Exercise Book Ex. 2.22",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Gaussian VaR of each loss and of the sum, and the sign of Φ⁻¹(α). Lives in MathFin/RiskMeasures/VaRSuperadditivity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-es-exponential",
+      "name": "Expected Shortfall of an Exponential Loss",
+      "description": "For X ~ Exp(r) (r > 0) and α ∈ (0, 1): ES_α(X) = (1 − log(1 − α))/r (the VaR is `valueAtRisk_of_hasLaw_expMeasure`: −log(1 − α)/r).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.RiskClosedForms\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem expectedShortfall_of_hasLaw_expMeasure_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {α : ℝ} {r : ℝ} (hr : 0 < r) (hX : HasLaw X (expMeasure r) P) (hα : α ∈ Ioo 0 1) :\n    expectedShortfall X P α = (1 - Real.log (1 - α)) / r :=\n  MathFin.expectedShortfall_of_hasLaw_expMeasure hr hX hα\n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "QRM Exercise Book Ex. 2.12(a)",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Quantile of the exponential law and its integral over (α, 1). Lives in MathFin/RiskMeasures/RiskClosedForms.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-es-var-ratio-exponential",
+      "name": "ES/VaR → 1 for the Exponential Law",
+      "description": "For X ~ Exp(r), ES_α(X)/VaR_α(X) → 1 as α → 1⁻ (light tail).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.RiskClosedForms\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem tendsto_expectedShortfall_div_valueAtRisk_expMeasure_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {r : ℝ} (hr : 0 < r) (hX : HasLaw X (expMeasure r) P) :\n    Tendsto (fun α ↦ expectedShortfall X P α / valueAtRisk X P α) (𝓝[<] 1) (𝓝 1) :=\n  MathFin.tendsto_expectedShortfall_div_valueAtRisk_expMeasure hr hX\n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "QRM Exercise Book Ex. 2.23(a)",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. From the exponential closed forms. Lives in MathFin/RiskMeasures/RiskClosedForms.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-es-lomax",
+      "name": "Expected Shortfall of a Pareto (Lomax) Loss",
+      "description": "For X with Lomax law F(x) = 1 − (κ/(κ + x))^θ, θ > 1, κ > 0 and α ∈ (0, 1): ES_α(X) = κ(θ/(θ − 1)·(1 − α)^(−1/θ) − 1).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.RiskClosedForms\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem expectedShortfall_of_hasLaw_lomaxMeasure_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {α : ℝ} {θ : ℝ} {κ : ℝ} (hθ : 1 < θ) (hκ : 0 < κ) (hX : HasLaw X (lomaxMeasure θ κ) P) (hα : α ∈ Ioo 0 1) :\n    expectedShortfall X P α = κ * (θ / (θ - 1) * (1 - α) ^ (-θ⁻¹) - 1) :=\n  MathFin.expectedShortfall_of_hasLaw_lomaxMeasure hθ hκ hX hα\n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "QRM Exercise Book Ex. 2.12(d)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Lomax law built as a measure, its quantile, and the integral of the quantile over (α, 1). Lives in MathFin/RiskMeasures/RiskClosedForms.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-es-var-ratio-pareto",
+      "name": "ES/VaR → θ/(θ − 1) for Pareto Tails",
+      "description": "For X with Lomax law (θ > 1, κ > 0), ES_α(X)/VaR_α(X) → θ/(θ − 1) as α → 1⁻: the heavy tail is visible in the shortfall-to-quantile ratio.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.RiskClosedForms\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem tendsto_expectedShortfall_div_valueAtRisk_lomaxMeasure_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {θ : ℝ} {κ : ℝ} (hθ : 1 < θ) (hκ : 0 < κ) (hX : HasLaw X (lomaxMeasure θ κ) P) :\n    Tendsto (fun α ↦ expectedShortfall X P α / valueAtRisk X P α) (𝓝[<] 1) (𝓝 (θ / (θ - 1))) :=\n  MathFin.tendsto_expectedShortfall_div_valueAtRisk_lomaxMeasure hθ hκ hX\n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "QRM Exercise Book Ex. 2.23(c)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. From the Lomax closed forms. Lives in MathFin/RiskMeasures/RiskClosedForms.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-median-shortfall",
+      "name": "Median Shortfall Equals VaR at (1 + α)/2",
+      "description": "For a loss with continuous CDF and α ∈ (0, 1), the median of the conditional law of X given X > VaR_α(X) equals VaR_{(1+α)/2}(X).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.RiskClosedForms\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem medianShortfall_eq_valueAtRisk_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {α : ℝ} [IsProbabilityMeasure P] (hX : AEMeasurable X P) (hF : Continuous (cdf (P.map X))) (hα : α ∈ Ioo 0 1) :\n    medianShortfall X P α = valueAtRisk X P ((1 + α) / 2) :=\n  MathFin.medianShortfall_eq_valueAtRisk hX hF hα\n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "QRM Exercise Book Ex. 2.29(b)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Conditional CDF in terms of F and the Galois connection. Lives in MathFin/RiskMeasures/RiskClosedForms.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-var-elicitable",
+      "name": "VaR Is Elicitable by the Pinball Loss",
+      "description": "For α ∈ (0, 1), the pinball loss (𝟙{y ≤ x} − α)(x − y) strictly elicits the α-quantile on the probability measures with finite mean whose α-quantile is unique (CDF > α right after it): the quantile is the unique minimizer of the expected score.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.Elicitability\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem strictlyElicits_pinballLoss_thm {α : ℝ} (hα : α ∈ Ioo 0 1) :\n    StrictlyElicits (pinballLoss α) (fun μ ↦ quantile μ α) {μ | IsProbabilityMeasure μ ∧ Integrable id μ ∧ ∀ x, quantile μ α < x → α < cdf μ x} :=\n  MathFin.strictlyElicits_pinballLoss hα\n\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Gneiting (2011); MFE (2015) Section 9.3; QRM Exercise Book Ex. 9.5, 9.16",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Expected pinball loss = (1 − α)·(Rockafellar–Uryasev objective) − (1 − α)E[Y]; uniqueness from an exact excess formula. Lives in MathFin/RiskMeasures/Elicitability.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-es-not-elicitable",
+      "name": "Expected Shortfall Is Not Elicitable",
+      "description": "For every α ∈ (0, 1), no scoring function with finite expected score under every law in the class elicits ES_α on the probability measures with finite mean: δ₀ and ((1+α)/2)δ₋₁ + ((1−α)/2)δ₁ both have ES_α = 0 while their mixture (1−α)δ₀ + α·(second law) has ES_α = α/2, so the level set is not convex.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.Elicitability\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem not_isElicitable_expectedShortfall_integrable_thm {α : ℝ} (hα : α ∈ Ioo 0 1) :\n    ¬ IsElicitable (fun μ ↦ expectedShortfall id μ α) {μ | IsProbabilityMeasure μ ∧ Integrable id μ} :=\n  MathFin.not_isElicitable_expectedShortfall_integrable hα\n\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Gneiting (2011); MFE (2015) Section 9.3; QRM Exercise Book Ex. 9.5(c)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Elicitable functionals have convex level sets (mixture argument); the three ES values are pinned by a Rockafellar–Uryasev threshold and an explicit dual density. Lives in MathFin/RiskMeasures/Elicitability.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-frechet-lower-not-copula",
+      "name": "The Lower Fréchet Bound Is Not a Copula for d ≥ 3",
+      "description": "For an index type with at least three elements, no copula (probability measure on ℝ^ι with uniform coordinates) has distribution function u ↦ max(∑ uᵢ − (d − 1), 0) on [0, 1]^ι.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.Copula\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem not_exists_isCopula_frechetLower_thm {ι : Type*} [Fintype ι] (hι : 3 ≤ Fintype.card ι) :\n    ¬ ∃ C : Measure (ι → ℝ), IsCopula C ∧ ∀ u : ι → ℝ, (∀ i, u i ∈ Icc 0 1) → C.real (Iic u) = max (∑ i, u i - (Fintype.card ι - 1)) 0 :=\n  MathFin.not_exists_isCopula_frechetLower hι\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "QRM Exercise Book Ex. 7.3; MFE (2015) Section 7.1.2",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The events {Uᵢ ≤ 1/2} would be pairwise null with mass 1/2 each. Lives in MathFin/Foundations/Copula.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-frechet-hoeffding-lower",
+      "name": "Fréchet–Hoeffding Lower Bound",
+      "description": "For every copula C on ℝ^ι and u ∈ [0, 1]^ι: ∑ uᵢ − (d − 1) ≤ C(U ≤ u).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.Copula\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem IsCopula_sum_sub_le_measureReal_Iic_thm {ι : Type*} {C : Measure (ι → ℝ)} [Fintype ι] (hC : IsCopula C) (u : ι → ℝ) (hu : ∀ i, u i ∈ Icc 0 1) :\n    ∑ i, u i - (Fintype.card ι - 1) ≤ C.real (Iic u) :=\n  MathFin.IsCopula.sum_sub_le_measureReal_Iic hC u hu\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "MFE (2015) Theorem 7.7",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Union bound on the complements of the coordinate events. Lives in MathFin/Foundations/Copula.lean (upper bound: IsCopula.measureReal_Iic_le). Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-sklar-existence-copula",
+      "name": "Sklar's Theorem: the Rank Law Is a Copula",
+      "description": "For a random vector X whose marginal CDFs are continuous, the joint law of the probability-integral transforms (F₁(X₁), …, F_d(X_d)) is a copula (probability measure with uniform coordinates).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.Sklar\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem isCopula_copulaOf_thm {ι : Type*} [Fintype ι] {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ι → ℝ} [IsProbabilityMeasure P] (hX : AEMeasurable X P) (hF : ∀ i, Continuous (cdf (P.map fun ω ↦ X ω i))) :\n    IsCopula (copulaOf X P) :=\n  MathFin.isCopula_copulaOf hX hF\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Sklar (1959); MFE (2015) Theorem 7.3",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Probability integral transform on each coordinate. Lives in MathFin/Foundations/Sklar.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-sklar-representation",
+      "name": "Sklar's Theorem: Joint CDF = Copula of the Margins",
+      "description": "For a random vector X with continuous marginal CDFs F_i: P(X ≤ x) = C(F₁(x₁), …, F_d(x_d)) for all x, where C is the copula of X (continuous-margins case of Sklar's theorem).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.Sklar\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem measureReal_le_eq_copulaOf_thm {ι : Type*} [Fintype ι] {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ι → ℝ} [IsProbabilityMeasure P] (hX : AEMeasurable X P) (hF : ∀ i, Continuous (cdf (P.map fun ω ↦ X ω i))) (x : ι → ℝ) :\n    P.real {ω | X ω ≤ x} = (copulaOf X P).real (Iic fun i ↦ cdf (P.map fun ω ↦ X ω i) (x i)) :=\n  MathFin.measureReal_le_eq_copulaOf hX hF x\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Sklar (1959); MFE (2015) Theorem 7.3; QRM Exercise Book Ex. 7.2",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. {X_i ≤ x_i} and {F_i(X_i) ≤ F_i(x_i)} agree almost surely. Lives in MathFin/Foundations/Sklar.lean. Non-continuous margins are not covered. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-sklar-uniqueness",
+      "name": "Sklar's Theorem: Uniqueness for Continuous Margins",
+      "description": "For a random vector X with continuous marginal CDFs, any copula C with P(X ≤ x) = C(F₁(x₁), …, F_d(x_d)) for all x equals the copula of X.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.Sklar\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem eq_copulaOf_of_measureReal_le_thm {ι : Type*} [Fintype ι] {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ι → ℝ} [IsProbabilityMeasure P] (hX : AEMeasurable X P) (hF : ∀ i, Continuous (cdf (P.map fun ω ↦ X ω i))) {C : Measure (ι → ℝ)} (hC : IsCopula C) (hCX : ∀ x, P.real {ω | X ω ≤ x} = C.real (Iic fun i ↦ cdf (P.map fun ω ↦ X ω i) (x i))) :\n    C = copulaOf X P :=\n  MathFin.eq_copulaOf_of_measureReal_le hX hF hC hCX\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Sklar (1959); MFE (2015) Theorem 7.3",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Continuous margins have range ⊇ (0, 1); joint distribution functions on (0, 1)^ι determine the law. Lives in MathFin/Foundations/Sklar.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-copula-invariance",
+      "name": "Copulas Are Invariant under Increasing Transformations",
+      "description": "For a random vector X and strictly increasing T₁, …, T_d, the joint law of the probability-integral transforms of (T₁(X₁), …, T_d(X_d)) (copulaOf, a copula when the margins are continuous) equals that of X.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.Sklar\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem copulaOf_comp_strictMono_thm {ι : Type*} [Fintype ι] {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ι → ℝ} [IsProbabilityMeasure P] (hX : AEMeasurable X P) {T : ι → ℝ → ℝ} (hT : ∀ i, StrictMono (T i)) :\n    copulaOf (fun ω i ↦ T i (X ω i)) P = copulaOf X P :=\n  MathFin.copulaOf_comp_strictMono hX hT\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "MFE (2015) Proposition 7.7",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The probability-integral transforms are unchanged. Lives in MathFin/Foundations/Sklar.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-fgm-copula",
+      "name": "Farlie–Gumbel–Morgenstern Copula Exists iff |θ| ≤ 1",
+      "description": "The function uv + θuv(1 − u)(1 − v) is the distribution function on [0, 1]² of some bivariate copula if and only if |θ| ≤ 1.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.CopulaFamilies\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem exists_isCopula_fgm_iff_thm (θ : ℝ) :\n    (∃ C : Measure (Fin 2 → ℝ), IsCopula C ∧ ∀ u : Fin 2 → ℝ, (∀ i, u i ∈ Icc 0 1) → C.real (Iic u) = u 0 * u 1 + θ * u 0 * u 1 * (1 - u 0) * (1 - u 1)) ↔ |θ| ≤ 1 :=\n  MathFin.exists_isCopula_fgm_iff θ\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "QRM Exercise Book Ex. 7.19(a)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Density 1 + θ(1 − 2u)(1 − 2v) for |θ| ≤ 1; a negative rectangle mass otherwise. Lives in MathFin/Foundations/CopulaFamilies.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-fgm-spearman",
+      "name": "Spearman's Rho of the FGM Copula",
+      "description": "For |θ| ≤ 1, Spearman's rho (12E[U₀U₁] − 3) of the FGM copula is θ/3, so the family only reaches rank correlations in [−1/3, 1/3].",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.CopulaFamilies\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem spearmanRho_fgmCopula_thm {θ : ℝ} (hθ : |θ| ≤ 1) :\n    spearmanRho (fgmCopula θ) = θ / 3 :=\n  MathFin.spearmanRho_fgmCopula hθ\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "QRM Exercise Book Ex. 7.19(d)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Integral of uv against the FGM density. Lives in MathFin/Foundations/CopulaFamilies.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-clayton-tail-dependence",
+      "name": "Clayton Lower Tail Dependence 2^(−1/θ)",
+      "description": "For θ > 0 the Clayton copula function C_θ(u, u) = (2u^(−θ) − 1)^(−1/θ) satisfies C_θ(u, u)/u → 2^(−1/θ) as u → 0⁺ (lower tail dependence coefficient), proved at the level of the copula function.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.CopulaFamilies\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem tendsto_claytonCopulaFun_diag_div_thm {θ : ℝ} (hθ : 0 < θ) :\n    Tendsto (fun u ↦ claytonCopulaFun θ u u / u) (𝓝[>] 0) (𝓝 (2 ^ (-1 / θ))) :=\n  MathFin.tendsto_claytonCopulaFun_diag_div hθ\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "QRM Exercise Book Ex. 7.17(b)",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Real analysis of the closed form; the Clayton measure itself is not constructed here. Lives in MathFin/Foundations/CopulaFamilies.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-hoeffding-covariance",
+      "name": "Hoeffding's Covariance Identity",
+      "description": "For square-integrable X, Y: cov(X, Y) = ∫∫ (P(X ≤ s, Y ≤ t) − P(X ≤ s)P(Y ≤ t)) ds dt.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.HoeffdingCovariance\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem covariance_eq_integral_cdf_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {X : Ω → ℝ} {Y : Ω → ℝ} (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :\n    cov[X, Y; P] = ∫ p : ℝ × ℝ, (P.real {ω | X ω ≤ p.1 ∧ Y ω ≤ p.2} - P.real {ω | X ω ≤ p.1} * P.real {ω | Y ω ≤ p.2}) :=\n  MathFin.covariance_eq_integral_cdf hX hY\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Höffding (1940); MFE (2015) Lemma 7.27",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Independent copy on the product space and Fubini, via ∫(1{s < a} − 1{s < b}) ds = a − b. Lives in MathFin/Foundations/HoeffdingCovariance.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-covariance-ordering",
+      "name": "Concordance Ordering Orders Covariances",
+      "description": "For two square-integrable pairs with the same marginal laws whose joint distribution functions are pointwise ordered, their covariances are ordered the same way.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.HoeffdingCovariance\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem covariance_le_covariance_of_cdf_le_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {X : Ω → ℝ} {Y : Ω → ℝ} {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {P' : Measure Ω'} [IsProbabilityMeasure P'] {X' : Ω' → ℝ} {Y' : Ω' → ℝ} (hX : MemLp X 2 P) (hY : MemLp Y 2 P) (hX' : MemLp X' 2 P') (hY' : MemLp Y' 2 P') (hlawX : P.map X = P'.map X') (hlawY : P.map Y = P'.map Y') (hF : ∀ s t, P.real {ω | X ω ≤ s ∧ Y ω ≤ t} ≤ P'.real {ω | X' ω ≤ s ∧ Y' ω ≤ t}) :\n    cov[X, Y; P] ≤ cov[X', Y'; P'] :=\n  MathFin.covariance_le_covariance_of_cdf_le hX hY hX' hY' hlawX hlawY hF\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "QRM Exercise Book Ex. 7.14",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Hoeffding's identity. Lives in MathFin/Foundations/HoeffdingCovariance.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-default-correlation-bound",
+      "name": "Upper Bound on Default Covariance",
+      "description": "For events A, B: cov(1_A, 1_B) ≤ min(P(A), P(B)) − P(A)P(B) (the comonotone Fréchet bound for default indicators).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.HoeffdingCovariance\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem covariance_indicator_one_le_thm {α : Type*} {mα : MeasurableSpace α} {μ : Measure α} [IsProbabilityMeasure μ] {A : Set α} {B : Set α} (hA : MeasurableSet A) (hB : MeasurableSet B) :\n    cov[A.indicator 1, B.indicator 1; μ] ≤ min (μ.real A) (μ.real B) - μ.real A * μ.real B :=\n  MathFin.covariance_indicator_one_le hA hB\n\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "QRM Exercise Book Ex. 11.7",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. cov(1_A, 1_B) = P(A∩B) − P(A)P(B) and P(A∩B) ≤ min. Lives in MathFin/Foundations/HoeffdingCovariance.lean (lower bound le_covariance_indicator_one). Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-marshall-olkin-survival",
+      "name": "Marshall–Olkin Joint Survival Function",
+      "description": "For independent exponential T₁, T₂, T₃ with rates λ₁, λ₂, λ₃ and Xⱼ = min(Tⱼ, T₃): P(X₁ > s, X₂ > t) = exp(−λ₁s − λ₂t − λ₃ max(s, t)) for s, t ≥ 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.MarshallOlkin\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem marshallOlkin_survival_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {T : Fin 3 → Ω → ℝ} {rate : Fin 3 → ℝ} (hrate : ∀ i, 0 < rate i) (hT : ∀ i, HasLaw (T i) (expMeasure (rate i)) P) (hind : iIndepFun T P) {s : ℝ} {t : ℝ} (hs : 0 ≤ s) (ht : 0 ≤ t) :\n    P.real {ω | s < min (T 0 ω) (T 2 ω) ∧ t < min (T 1 ω) (T 2 ω)} = Real.exp (-(rate 0 * s) - rate 1 * t - rate 2 * max s t) :=\n  MathFin.marshallOlkin_survival hrate hT hind hs ht\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Marshall–Olkin (1967); QRM Exercise Book Ex. 7.23",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Independence of the three shocks. Lives in MathFin/Foundations/MarshallOlkin.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-marshall-olkin-ftd",
+      "name": "Common Shock Lowers the First-to-Default Spread",
+      "description": "In the Marshall–Olkin model with all three rates positive, the first-to-default spread −log P(min(X₁, X₂) > t)/t (equal to λ₁ + λ₂ + λ₃, `marshallOlkin_firstToDefault_spread`) is strictly below the sum of the single-name spreads (λ₁ + λ₃) + (λ₂ + λ₃).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.MarshallOlkin\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem marshallOlkin_firstToDefault_spread_lt_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {T : Fin 3 → Ω → ℝ} {rate : Fin 3 → ℝ} (hrate : ∀ i, 0 < rate i) (hT : ∀ i, HasLaw (T i) (expMeasure (rate i)) P) (hind : iIndepFun T P) {t : ℝ} (ht : 0 < t) :\n    -Real.log (P.real {ω | t < min (min (T 0 ω) (T 2 ω)) (min (T 1 ω) (T 2 ω))}) / t < -Real.log (P.real {ω | t < min (T 0 ω) (T 2 ω)}) / t + -Real.log (P.real {ω | t < min (T 1 ω) (T 2 ω)}) / t :=\n  MathFin.marshallOlkin_firstToDefault_spread_lt hrate hT hind ht\n\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "QRM Exercise Book Ex. 7.23; MathFin FixedIncome/FirstToDefault (independent case)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. min(X₁, X₂) = min(T₁, T₂, T₃); a machine-checked instance of the FirstToDefault docstring's claim that default correlation lowers the FtD spread. Lives in MathFin/Foundations/MarshallOlkin.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-correlation-fallacy",
+      "name": "Normal Margins, Zero Correlation, Not Independent",
+      "description": "There exist random variables Z, Y, both N(0, 1), with cov(Z, Y) = 0 that are not independent, not jointly Gaussian, and whose sum is not Gaussian (Y = V·Z with an independent random sign V).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.CorrelationFallacies\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem exists_gaussian_uncorrelated_not_indepFun_thm :\n    ∃ (Ω : Type) (_ : MeasurableSpace Ω) (P : Measure Ω) (Z Y : Ω → ℝ), IsProbabilityMeasure P ∧ HasLaw Z (gaussianReal 0 1) P ∧ HasLaw Y (gaussianReal 0 1) P ∧ cov[Z, Y; P] = 0 ∧ ¬ Z ⟂ᵢ[P] Y ∧ ¬ HasGaussianLaw (fun ω ↦ (Z ω, Y ω)) P ∧ ¬ ∃ m v, HasLaw (fun ω ↦ Z ω + Y ω) (gaussianReal m v) P :=\n  MathFin.exists_gaussian_uncorrelated_not_indepFun \n\n"
+      },
+      "metadata": {
+        "chapter": 6,
+        "reference": "Embrechts–McNeil–Straumann (2002); QRM Exercise Book Ex. 6.1, 6.18",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. P(Z + VZ = 0) = 1/2 rules out every Gaussian law. Lives in MathFin/Foundations/CorrelationFallacies.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-evt-poisson-approximation",
+      "name": "Maxima: Fⁿ(uₙ) → h iff n(1 − F(uₙ)) → −log h",
+      "description": "For a nonnegative F, thresholds uₙ and h > 0: F(uₙ)ⁿ → h if and only if n(1 − F(uₙ)) → −log h.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.ExtremeValue\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem tendsto_pow_iff_tendsto_nat_mul_tail_thm {F : ℝ → ℝ} (hF : ∀ x, 0 ≤ F x) (u : ℕ → ℝ) {h : ℝ} (hh : 0 < h) :\n    Tendsto (fun n ↦ F (u n) ^ n) atTop (𝓝 h) ↔ Tendsto (fun n : ℕ ↦ (n : ℝ) * (1 - F (u n))) atTop (𝓝 (-Real.log h)) :=\n  MathFin.tendsto_pow_iff_tendsto_nat_mul_tail hF u hh\n\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "QRM Exercise Book Ex. 5.23(a); MFE (2015) Section 5.1",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Logarithmic comparison n log a ~ −n(1 − a). Lives in MathFin/Foundations/ExtremeValue.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-gev-max-stable",
+      "name": "Max-Stability of the GEV Family",
+      "description": "For every shape ξ, x and n ≥ 1: H_ξ(cₙx + dₙ)ⁿ = H_ξ(x) with the explicit normalizations gevNormScale ξ n and gevNormLoc ξ n.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.ExtremeValue\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem gevCDF_max_stable_thm (ξ : ℝ) (x : ℝ) {n : ℕ} (hn : n ≠ 0) :\n    gevCDF ξ (gevNormScale ξ n * x + gevNormLoc ξ n) ^ n = gevCDF ξ x :=\n  MathFin.gevCDF_max_stable ξ x hn\n\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "QRM Exercise Book Ex. 5.10; MFE (2015) Section 5.1.1",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Algebra of the GEV distribution function, all three types. Lives in MathFin/Foundations/ExtremeValue.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-exponential-gumbel-mda",
+      "name": "Exponential Law Is in the Gumbel Domain of Attraction",
+      "description": "For r > 0 the exponential CDF lies in MDA(H₀) (witnessed by cₙ = 1/r, dₙ = log n/r): F(x/r + log n/r)ⁿ → exp(−e^(−x)).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.ExtremeValue\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem cdf_expMeasure_inMDA_thm {r : ℝ} (hr : 0 < r) :\n    InMDA (cdf (expMeasure r)) (gevCDF 0) :=\n  MathFin.cdf_expMeasure_inMDA hr\n\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "QRM Exercise Book Ex. 5.23(b)",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Poisson-approximation lemma. Lives in MathFin/Foundations/ExtremeValue.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-gpd-mda",
+      "name": "GPD Lies in the Domain of Attraction of H_ξ",
+      "description": "For β > 0 and every ξ ∈ ℝ, the generalized Pareto distribution function G_{ξ,β} lies in MDA(H_ξ).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.GeneralizedPareto\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem gpdCDF_inMDA_thm {β : ℝ} (hβ : 0 < β) (ξ : ℝ) :\n    InMDA (gpdCDF ξ β) (gevCDF ξ) :=\n  MathFin.gpdCDF_inMDA hβ ξ\n\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "QRM Exercise Book Ex. 5.16",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Explicit normalizing sequences and the Poisson-approximation lemma. Lives in MathFin/Foundations/GeneralizedPareto.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-gpd-mean-excess",
+      "name": "Mean Excess Function of the GPD",
+      "description": "For the GPD law with ξ < 1, β > 0 and a threshold u ≥ 0 in the support: E[X − u | X > u] = (β + ξu)/(1 − ξ), linear in u.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.GeneralizedPareto\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem integral_sub_cond_gpdMeasure_thm {ξ : ℝ} {β : ℝ} (hβ : 0 < β) (hξ1 : ξ < 1) {u : ℝ} (hu : 0 ≤ u) (hsupp : 0 < 1 + ξ * (u / β)) :\n    ∫ x, (x - u) ∂((gpdMeasure ξ β)[|Ioi u]) = (β + ξ * u) / (1 - ξ) :=\n  MathFin.integral_sub_cond_gpdMeasure hβ hξ1 hu hsupp\n\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "QRM Exercise Book Ex. 5.19(b); MFE (2015) Section 5.2.1",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Conditional law of the excess is again GPD (threshold stability). Lives in MathFin/Foundations/GeneralizedPareto.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-poisson-gpd-gev",
+      "name": "Poisson Number of GPD Losses Has a GEV Maximum",
+      "description": "For N ~ Poisson(λ) independent of iid GPD(ξ, β) losses Yᵢ (ξ ≠ 0), and x ≥ 0: P(max_{i<N} Yᵢ ≤ x) = H_ξ((x − μ)/σ) with σ = βλ^ξ, μ = β(λ^ξ − 1)/ξ.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.PoissonMaxima\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem measureReal_poisson_max_gpd_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {N : Ω → ℕ} {Y : ℕ → Ω → ℝ} {r : ℝ≥0} {ξ : ℝ} {β : ℝ} (hξ : ξ ≠ 0) (hβ : 0 < β) (hr : 0 < r) (hN : HasLaw N (poissonMeasure r) P) (hNm : Measurable N) (hYm : ∀ i, Measurable (Y i)) (hY : ∀ i, HasLaw (Y i) (gpdMeasure ξ β) P) (hind : iIndepFun Y P) (hNY : IndepFun N (fun ω i ↦ Y i ω) P) {x : ℝ} (hx : 0 ≤ x) :\n    P.real {ω | ∀ i < N ω, Y i ω ≤ x} = gevCDF ξ ((x - β * ((r : ℝ) ^ ξ - 1) / ξ) / (β * (r : ℝ) ^ ξ)) :=\n  MathFin.measureReal_poisson_max_gpd hξ hβ hr hN hNm hYm hY hind hNY hx\n\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "QRM Exercise Book Ex. 5.26",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Poisson generating function E[G(x)^N] = exp(−λḠ(x)) (Foundations/PoissonPgf.lean). Lives in MathFin/Foundations/PoissonMaxima.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-quantile-convergence",
+      "name": "Quantiles Converge along Almost-Sure Convergence",
+      "description": "If Xₙ → Y almost surely and the α-quantile of Y is unique (F_Y(x) > α for every x above it), then the α-quantiles of the laws of Xₙ converge to the α-quantile of the law of Y.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.QuantileConvergence\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem tendsto_quantile_of_tendsto_ae_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {X : ℕ → Ω → ℝ} {Y : Ω → ℝ} (hX : ∀ n, AEMeasurable (X n) P) (hY : AEMeasurable Y P) (hlim : ∀ᵐ ω ∂P, Tendsto (fun n ↦ X n ω) atTop (𝓝 (Y ω))) {α : ℝ} (hα : α ∈ Ioo 0 1) (hstrict : ∀ x, quantile (P.map Y) α < x → α < cdf (P.map Y) x) :\n    Tendsto (fun n ↦ quantile (P.map (X n)) α) atTop (𝓝 (quantile (P.map Y) α)) :=\n  MathFin.tendsto_quantile_of_tendsto_ae hX hY hlim hα hstrict\n\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "van der Vaart (1998) Lemma 21.2",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Galois connection and liminf of measures. Lives in MathFin/Foundations/QuantileConvergence.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-bernoulli-mixture-moments",
+      "name": "Joint Default Probabilities of a Bernoulli Mixture",
+      "description": "For defaults Yᵢ = 1{Uᵢ ≤ Q} with Q ∈ [0, 1], Uᵢ iid uniform and independent of Q: the probability that every obligor in a set s defaults is E[Q^|s|].",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.BernoulliMixture\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem measureReal_iInter_default_eq_integral_pow_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {ι : Type*} [Fintype ι] {Q : Ω → ℝ} {U : ι → Ω → ℝ} (hQ : AEMeasurable Q P) (hQ01 : ∀ᵐ ω ∂P, Q ω ∈ Icc 0 1) (hU : ∀ i, HasLaw (U i) (volume.restrict (Ioo 0 1)) P) (hUind : iIndepFun U P) (hQU : Q ⟂ᵢ[P] fun ω i ↦ U i ω) (s : Finset ι) :\n    P.real (⋂ i ∈ s, {ω | U i ω ≤ Q ω}) = ∫ ω, Q ω ^ s.card ∂P :=\n  MathFin.measureReal_iInter_default_eq_integral_pow hQ hQ01 hU hUind hQU s\n\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "QRM Exercise Book Ex. 11.11(a); MFE (2015) Section 11.2",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Independence and Fubini over the factor. Lives in MathFin/RiskMeasures/BernoulliMixture.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-default-correlation",
+      "name": "Default Correlation of a Bernoulli Mixture",
+      "description": "In the exchangeable Bernoulli mixture, the default correlation of two distinct obligors equals Var(Q)/(E[Q](1 − E[Q])) (hence is nonnegative, defaultCorrelation_nonneg).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.BernoulliMixture\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem defaultCorrelation_eq_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {ι : Type*} [Fintype ι] {Q : Ω → ℝ} {U : ι → Ω → ℝ} (hQ : AEMeasurable Q P) (hQ01 : ∀ᵐ ω ∂P, Q ω ∈ Icc 0 1) (hU : ∀ i, HasLaw (U i) (volume.restrict (Ioo 0 1)) P) (hUind : iIndepFun U P) (hQU : Q ⟂ᵢ[P] fun ω i ↦ U i ω) {i : ι} {j : ι} (hij : i ≠ j) :\n    (P.real ({ω | U i ω ≤ Q ω} ∩ {ω | U j ω ≤ Q ω}) - P.real {ω | U i ω ≤ Q ω} ^ 2) / (P.real {ω | U i ω ≤ Q ω} - P.real {ω | U i ω ≤ Q ω} ^ 2) = Var[Q; P] / (P[Q] * (1 - P[Q])) :=\n  MathFin.defaultCorrelation_eq hQ hQ01 hU hUind hQU hij\n\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "QRM Exercise Book Ex. 11.4(a), 11.11(b)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. π₂ − π₁² = Var(Q). Lives in MathFin/RiskMeasures/BernoulliMixture.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-one-factor-pd",
+      "name": "One-Factor Gaussian Threshold Model Calibrates to π",
+      "description": "For independent N(0, 1) factor F and idiosyncratic ε, π ∈ (0, 1) and ρ ∈ [0, 1]: P(√ρ F + √(1 − ρ) ε ≤ Φ⁻¹(π)) = π.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.BernoulliMixture\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem oneFactor_measureReal_default_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {π : ℝ} {ρ : ℝ} {F : Ω → ℝ} {e : Ω → ℝ} (hF : HasLaw F (gaussianReal 0 1) P) (he : HasLaw e (gaussianReal 0 1) P) (hFe : F ⟂ᵢ[P] e) (hπ : π ∈ Ioo 0 1) (hρ0 : 0 ≤ ρ) (hρ1 : ρ ≤ 1) :\n    P.real {ω | √ρ * F ω + √(1 - ρ) * e ω ≤ PhiInv π} = π :=\n  MathFin.oneFactor_measureReal_default hF he hFe hπ hρ0 hρ1\n\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "QRM Exercise Book Ex. 11.2(c), 11.9",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The asset return is N(0, 1). Lives in MathFin/RiskMeasures/BernoulliMixture.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-large-portfolio-lln",
+      "name": "Large-Portfolio Loss Fraction Converges to the Conditional PD",
+      "description": "In the one-factor Gaussian threshold model with pairwise independent N(0, 1) idiosyncratic terms (any factor F, any π, ρ < 1), the default fraction of the first m obligors converges almost surely to p(F) = Φ((Φ⁻¹(π) − √ρ F)/√(1 − ρ)).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.VasicekIRB\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem tendsto_oneFactorLossFraction_ae_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {π : ℝ} {ρ : ℝ} {ε : ℕ → Ω → ℝ} (hε : ∀ i, HasLaw (ε i) (gaussianReal 0 1) P) (hind : Pairwise fun i j ↦ ε i ⟂ᵢ[P] ε j) (hρ : ρ < 1) (F : Ω → ℝ) :\n    ∀ᵐ ω ∂P, Tendsto (fun m ↦ oneFactorLossFraction π ρ F ε m ω) atTop (𝓝 (oneFactorPD π ρ (F ω))) :=\n  MathFin.tendsto_oneFactorLossFraction_ae hε hind hρ F\n\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Vasicek (2002); MFE (2015) Section 11.3.2; QRM Exercise Book Ex. 11.16, 11.17",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The loss fraction is an empirical CDF evaluated at a factor-dependent point; almost surely the empirical CDF converges at every point at once (Etemadi's strong law at rationals plus a monotone squeeze). Lives in MathFin/RiskMeasures/VasicekIRB.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-basel-irb-formula",
+      "name": "The ASRF Quantile Is the Limit of Portfolio VaR",
+      "description": "In the one-factor Gaussian threshold model (standard normal factor, pairwise independent standard normal idiosyncratic terms, α ∈ (0, 1), ρ < 1), VaR_α of the default fraction of the first m obligors converges as m → ∞ to Φ((Φ⁻¹(π) + √ρ·Φ⁻¹(α))/√(1 − ρ)) (asrfQuantile), the worst-case default rate at the core of the Basel IRB formula. Loss given default, expected-loss subtraction and the maturity adjustment are not modelled.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.VasicekIRB\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem tendsto_valueAtRisk_oneFactorLossFraction_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {π : ℝ} {ρ : ℝ} {α : ℝ} {F : Ω → ℝ} {ε : ℕ → Ω → ℝ} (hF : HasLaw F (gaussianReal 0 1) P) (hε : ∀ i, HasLaw (ε i) (gaussianReal 0 1) P) (hind : Pairwise fun i j ↦ ε i ⟂ᵢ[P] ε j) (hρ : ρ < 1) (hα : α ∈ Ioo 0 1) :\n    Tendsto (fun m ↦ valueAtRisk (oneFactorLossFraction π ρ F ε m) P α) atTop (𝓝 (asrfQuantile π ρ α)) :=\n  MathFin.tendsto_valueAtRisk_oneFactorLossFraction hF hε hind hρ hα\n\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Vasicek (2002); Gordy (2003); MFE (2015) Section 11.3.2",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Almost-sure convergence of the loss fraction, quantile convergence, and VaR of p(F) by equivariance. Lives in MathFin/RiskMeasures/VasicekIRB.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-equicorrelation-psd",
+      "name": "Equicorrelation Matrix Is PSD iff −1/(d−1) ≤ ρ ≤ 1",
+      "description": "For d ≥ 2, the matrix with ones on the diagonal and ρ off it is positive semidefinite if and only if −1/(d − 1) ≤ ρ ≤ 1.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.Equicorrelation\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem posSemidef_equicorrelationMatrix_iff_thm {n : Type*} [Fintype n] [DecidableEq n] {ρ : ℝ} (hn : 2 ≤ Fintype.card n) :\n    (equicorrelationMatrix n ρ).PosSemidef ↔ -1 / ((Fintype.card n : ℝ) - 1) ≤ ρ ∧ ρ ≤ 1 :=\n  MathFin.posSemidef_equicorrelationMatrix_iff hn\n\n"
+      },
+      "metadata": {
+        "chapter": 6,
+        "reference": "QRM Exercise Book Ex. 6.26",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Quadratic form (1 − ρ)∑wᵢ² + ρ(∑wᵢ)². Lives in MathFin/Portfolio/Equicorrelation.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-var-optimal-is-markowitz",
+      "name": "VaR-Optimal Gaussian Portfolios Are Markowitz Portfolios",
+      "description": "For a Gaussian random vector X, α ∈ (1/2, 1) and a set S of weights with a common expected portfolio loss, w₀ minimizes VaR_α(∑ wᵢXᵢ) over S if and only if it minimizes the portfolio variance wᵀΣw over S.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Bridges.GaussianRiskMarkowitz\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem isMinOn_valueAtRisk_iff_isMinOn_portfolioVarN_thm {ι : Type*} [Fintype ι] {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : ι → Ω → ℝ} {α : ℝ} (hX : HasGaussianLaw (fun ω ↦ (X · ω)) P) (hα : α ∈ Ioo (1 / 2) 1) {S : Set (ι → ℝ)} {c : ℝ} (hS : ∀ w ∈ S, ∑ i, w i * P[X i] = c) {w₀ : ι → ℝ} (hw₀ : w₀ ∈ S) :\n    IsMinOn (fun w ↦ valueAtRisk (fun ω ↦ ∑ i, w i * X i ω) P α) S w₀ ↔ IsMinOn (fun w ↦ portfolioVarN Finset.univ w fun i j ↦ cov[X i, X j; P]) S w₀ :=\n  MathFin.isMinOn_valueAtRisk_iff_isMinOn_portfolioVarN hX hα hS hw₀\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "QRM Exercise Book Ex. 8.6; MFE (2015) Section 8.2",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Location–scale principle: VaR_α(⟨w, X⟩) = mean + √(wᵀΣw)·Φ⁻¹(α). Lives in MathFin/Bridges/GaussianRiskMarkowitz.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-es-optimal-is-markowitz",
+      "name": "ES-Optimal Gaussian Portfolios Are Markowitz Portfolios",
+      "description": "For a Gaussian random vector X, α ∈ (1/2, 1) and a set S of weights with a common expected portfolio loss, w₀ minimizes ES_α(∑ wᵢXᵢ) over S if and only if it minimizes the portfolio variance over S.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Bridges.GaussianRiskMarkowitz\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem isMinOn_expectedShortfall_iff_isMinOn_portfolioVarN_thm {ι : Type*} [Fintype ι] {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : ι → Ω → ℝ} {α : ℝ} (hX : HasGaussianLaw (fun ω ↦ (X · ω)) P) (hα : α ∈ Ioo (1 / 2) 1) {S : Set (ι → ℝ)} {c : ℝ} (hS : ∀ w ∈ S, ∑ i, w i * P[X i] = c) {w₀ : ι → ℝ} (hw₀ : w₀ ∈ S) :\n    IsMinOn (fun w ↦ expectedShortfall (fun ω ↦ ∑ i, w i * X i ω) P α) S w₀ ↔ IsMinOn (fun w ↦ portfolioVarN Finset.univ w fun i j ↦ cov[X i, X j; P]) S w₀ :=\n  MathFin.isMinOn_expectedShortfall_iff_isMinOn_portfolioVarN hX hα hS hw₀\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "QRM Exercise Book Ex. 8.6",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Location–scale principle for ES. Lives in MathFin/Bridges/GaussianRiskMarkowitz.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-var-subadditive-gaussian-portfolios",
+      "name": "VaR Is Subadditive on Gaussian Portfolio Losses",
+      "description": "For a Gaussian random vector X, α ∈ [1/2, 1) and weight vectors w, w': VaR_α(⟨w, X⟩ + ⟨w', X⟩) ≤ VaR_α(⟨w, X⟩) + VaR_α(⟨w', X⟩).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Bridges.GaussianRiskMarkowitz\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem valueAtRisk_portfolio_add_le_thm {ι : Type*} [Fintype ι] {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : ι → Ω → ℝ} {α : ℝ} (hX : HasGaussianLaw (fun ω ↦ (X · ω)) P) (hα : α ∈ Ico (1 / 2) 1) (w : ι → ℝ) (w' : ι → ℝ) :\n    valueAtRisk (fun ω ↦ ∑ i, w i * X i ω + ∑ i, w' i * X i ω) P α ≤ valueAtRisk (fun ω ↦ ∑ i, w i * X i ω) P α + valueAtRisk (fun ω ↦ ∑ i, w' i * X i ω) P α :=\n  MathFin.valueAtRisk_portfolio_add_le hX hα w w'\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "QRM Exercise Book Ex. 8.4",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Subadditivity of the portfolio standard deviation for a PSD covariance kernel and Φ⁻¹(α) ≥ 0. Lives in MathFin/Bridges/GaussianRiskMarkowitz.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-systematic-floor",
+      "name": "Systematic Variance Floor of Equicorrelated Portfolios",
+      "description": "For a covariance kernel with variance v ≥ 0 and common covariance ρv (ρ ≤ 1) and fully invested weights, the portfolio variance is at least ρv (the identity Var(w) = v((1 − ρ)·HHI(w) + ρ) is `portfolioVarN_equicorrelated_of_sum_eq_one`).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Bridges.EquicorrelationConcentration\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem mul_le_portfolioVarN_equicorrelated_thm {ι : Type*} [DecidableEq ι] {s : Finset ι} {w : ι → ℝ} {σ : ι → ι → ℝ} {v : ℝ} {ρ : ℝ} (h_var : ∀ i ∈ s, σ i i = v) (h_cov : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → σ i j = ρ * v) (h_sum : ∑ i ∈ s, w i = 1) (hv : 0 ≤ v) (hρ : ρ ≤ 1) :\n    ρ * v ≤ portfolioVarN s w σ :=\n  MathFin.mul_le_portfolioVarN_equicorrelated h_var h_cov h_sum hv hρ\n\n"
+      },
+      "metadata": {
+        "chapter": 6,
+        "reference": "QRM Exercise Book Ex. 6.16; generalizes Bridges/ConcentrationVariance",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Var(w) = v((1 − ρ)HHI + ρ) with HHI ≥ 0. Lives in MathFin/Bridges/EquicorrelationConcentration.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-square-root-of-time",
+      "name": "Square-Root-of-Time Volatility Scaling for GBM Log-Losses",
+      "description": "For a geometric Brownian motion S_t = S₀exp((μ − σ²/2)t + σB_t) driven by a pre-Brownian motion and σ ≥ 0: the h-period log-loss −log(S_{t+h}/S_t) has VaR_α = −(μ − σ²/2)h + σ√h·Φ⁻¹(α), so the volatility term scales with √h.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Bridges.SquareRootOfTime\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem valueAtRisk_gbm_loss_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B P) {S₀ : ℝ} (hS₀ : 0 < S₀) (μ : ℝ) {σ : ℝ} (hσ : 0 ≤ σ) (t : ℝ≥0) (h : ℝ≥0) {α : ℝ} (hα : α ∈ Ioo 0 1) :\n    valueAtRisk (fun ω ↦ -Real.log (gbmValue S₀ μ σ (t + h) (B (t + h) ω) / gbmValue S₀ μ σ t (B t ω))) P α = gaussianVaR (-((μ - σ ^ 2 / 2) * h)) (σ * √(h : ℝ)) (PhiInv α) :=\n  MathFin.valueAtRisk_gbm_loss hB hS₀ μ hσ t h hα\n\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "MFE (2015) Example 9.4; QRM Exercise Book Ex. 3.16, 9.13",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The loss is an affine image of the N(0, h) Brownian increment. Lives in MathFin/Bridges/SquareRootOfTime.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-expectile-exists-unique",
+      "name": "Existence and Uniqueness of Expectiles",
+      "description": "For an integrable loss Y and α ∈ (0, 1) there is exactly one e with α·E[(Y − e)⁺] = (1 − α)·E[(e − Y)⁺] (the α-expectile).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.Expectile\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem existsUnique_expectileGap_eq_zero_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {Y : Ω → ℝ} {α : ℝ} (hY : Integrable Y P) (hα : α ∈ Ioo 0 1) :\n    ∃! e, expectileGap α Y P e = 0 :=\n  MathFin.existsUnique_expectileGap_eq_zero hY hα\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "MFE (2015) Section 8.2.6; QRM Exercise Book Ex. 8.13, 8.14",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The gap falls at rate ≥ min(α, 1 − α) and is continuous; intermediate value theorem. Lives in MathFin/RiskMeasures/Expectile.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-expectile-monotone",
+      "name": "Expectiles Are Nondecreasing in the Level",
+      "description": "For an integrable loss Y and 0 < α ≤ β < 1, the α-expectile is at most the β-expectile.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.Expectile\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem expectile_mono_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {Y : Ω → ℝ} {α : ℝ} (hY : Integrable Y P) (hα : α ∈ Ioo 0 1) {β : ℝ} (hβ : β ∈ Ioo 0 1) (hαβ : α ≤ β) :\n    expectile α Y P ≤ expectile β Y P :=\n  MathFin.expectile_mono hY hα hβ hαβ\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "QRM Exercise Book Ex. 8.13",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Raising the level raises the gap pointwise, moving its unique root right. Lives in MathFin/RiskMeasures/Expectile.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-covariance-cauchy-schwarz",
+      "name": "Cauchy–Schwarz Inequality for Covariance",
+      "description": "For square-integrable X, Y on a probability space: cov(X, Y) ≤ √Var X · √Var Y.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.StandardDeviationPrinciple\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem covariance_le_sqrt_mul_sqrt_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {X : Ω → ℝ} {Y : Ω → ℝ} (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :\n    cov[X, Y; P] ≤ √Var[X; P] * √Var[Y; P] :=\n  MathFin.covariance_le_sqrt_mul_sqrt hX hY\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "QRM Exercise Book Ex. 8.11 context",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Discriminant of the nonnegative quadratic t ↦ Var(X + tY). Lives in MathFin/RiskMeasures/StandardDeviationPrinciple.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-sd-principle-subadditive",
+      "name": "Standard-Deviation Principle Is Subadditive",
+      "description": "For k ≥ 0 and square-integrable X, Y: E[X + Y] + k·sd(X + Y) ≤ (E[X] + k·sd(X)) + (E[Y] + k·sd(Y)).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.StandardDeviationPrinciple\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem stdDevPrinciple_add_le_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {X : Ω → ℝ} {Y : Ω → ℝ} {k : ℝ} (hk : 0 ≤ k) (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :\n    stdDevPrinciple k (fun ω ↦ X ω + Y ω) P ≤ stdDevPrinciple k X P + stdDevPrinciple k Y P :=\n  MathFin.stdDevPrinciple_add_le hk hX hY\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "QRM Exercise Book Ex. 8.11, 2.19",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Subadditivity of the standard deviation via covariance Cauchy–Schwarz. Lives in MathFin/RiskMeasures/StandardDeviationPrinciple.lean (translation invariance and homogeneity alongside). Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-sd-principle-not-monotone",
+      "name": "Standard-Deviation Principle Fails Monotonicity on a Two-Point Loss",
+      "description": "For k ≥ 0 and a loss B ≤ 0 equal to −1 with probability q > 0 and 0 otherwise, if q(1 + k²) < k² then E[B] + k·sd(B) > 0 = the principle's value at the zero loss, although B ≤ 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.StandardDeviationPrinciple\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem stdDevPrinciple_not_monotone_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {k : ℝ} (hk : 0 ≤ k) {B : Ω → ℝ} (hBm : Measurable B) (hB : ∀ ω, B ω = -1 ∨ B ω = 0) {q : ℝ} (hq : P.real {ω | B ω = -1} = q) (hq0 : 0 < q) (hqk : q * (1 + k ^ 2) < k ^ 2) :\n    (∀ ω, B ω ≤ 0) ∧ stdDevPrinciple k (fun _ ↦ (0 : ℝ)) P < stdDevPrinciple k B P :=\n  MathFin.stdDevPrinciple_not_monotone hk hBm hB hq hq0 hqk\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "QRM Exercise Book Ex. 8.11",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Mean −q and variance q(1 − q) of the two-point loss. Lives in MathFin/RiskMeasures/StandardDeviationPrinciple.lean. Axioms-clean."
+      }
+    }
+  ]
+}
