@@ -531,3 +531,4 @@ import MathFin.Portfolio.Equicorrelation
 import MathFin.Bridges.GaussianRiskMarkowitz
 import MathFin.Bridges.EquicorrelationConcentration
 import MathFin.Bridges.SquareRootOfTime
+import MathFin.BlackScholes.MertonJumpDiffusionDelta
