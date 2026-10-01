@@ -125,6 +125,119 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-01 — corpus 438 — quantitative risk management: quantiles, VaR for every law, ES for every integrable loss, copulas, extremes, the ASRF limit
+
+Scope: 30 new modules and `benchmarks/quantitative_risk_management.json` (65 entries, all `full`).
+They are drawn from McNeil–Frey–Embrechts (2015) and the QRM Exercise Book (Hofert–Frey–McNeil
+2020).
+- The base layer is `Foundations/Quantile.lean`, the generalized inverse CDF, which Mathlib lacks.
+- `valueAtRisk` and `expectedShortfall` are defined for every law. Rockafellar–Uryasev, ES
+  coherence, Acerbi–Tasche and the dual representation are proved for every integrable loss.
+- Further results: the Gaussian ES closed form from the old Gaussian R–U file; VaR by bisection;
+  VaR superadditivity (Bernoulli, infinite-mean Pareto, a Gaussian pair iff α < 1/2);
+  elicitability (pinball loss for VaR, a three-law counterexample for ES); expectiles; the
+  standard-deviation principle; copulas and Sklar (continuous margins); Hoeffding's covariance
+  identity; Marshall–Olkin with the first-to-default link; GEV/GPD domains of attraction and the
+  Poisson–GPD maximum; Bernoulli mixtures; the ASRF quantile as the limit of portfolio VaR;
+  Gaussian VaR/ES-optimal portfolios being Markowitz portfolios; the equicorrelation floor; and
+  the square-root-of-time rule for GBM log-losses.
+
+Six forked sub-agents wrote most of the leaf modules and the parent integrated them. Three
+read-only review agents split the lenses: (1, 2, 4); (5, 7) plus the standing first pass; and
+(3, 6, 8). The parent adjudicated.
+
+### The standing first pass — prose against statement
+
+Ten definite overclaims were found, and all are fixed:
+- `qrm-rockafellar-uryasev` and the `isLeast_rockafellarUryasev` docstring said "attained at
+  `VaR_α`". `IsLeast (range …)` says only that the minimum is attained. The minimizer is
+  `rockafellarUryasev_valueAtRisk`, now cited. "Every law" became "every integrable loss" in the
+  name and the module title.
+- `qrm-es-dual-representation` said the maximum is "attained by a function of X". The statement
+  gives *some* `D`. That fact moved to the scope, as a remark about the proof.
+- `qrm-basel-irb-formula` claimed "the Basel IRB risk-weight formula". The theorem proves the
+  ASRF worst-case default rate. The entry is renamed, and `VasicekIRB.lean` now says what it does
+  not model: LGD, expected-loss subtraction, the maturity adjustment and the 12.5 scaling.
+- The `qrm-large-portfolio-lln` scope said "Glivenko–Cantelli-style uniform" convergence. It is
+  pointwise convergence at every point simultaneously, almost surely.
+- `expectedShortfall_isLUB_representingSet` said the dual representation "identifies" the ADEH
+  representing set. That identification is not proved, and the docstring now says so.
+- Four descriptions stated a value proved by a neighbouring lemma, not by their own statement:
+  the FtD spread `λ₁+λ₂+λ₃`, the HHI identity, the exponential VaR, and Gaussian coherence "for
+  the levels risk managers use". Each now cites the lemma or states the narrower fact.
+- The `qrm-es-adeh-representation` snippet carried a stray `[IsProbabilityMeasure P]` binder
+  before `P` was bound. It elaborated only because the daemon's REPL auto-binds implicits.
+
+Judgment calls were taken as proposed:
+- the quantile-convergence hypothesis is phrased as a unique quantile;
+- "no scoring function" is relative to finite expected scores;
+- the names "square-root-of-time … log-losses" and "additive for monotone functions of a common
+  factor";
+- the witness of the Gumbel MDA is named;
+- `α ∈ (0, 1)` is stated where it was missing.
+
+### Upgrades executed
+
+- **Coherence (lens 2) and architecture (lens 4).** Duplicated quantile facts now live once, in
+  `Foundations/Quantile.lean`:
+  - `quantile_eq_iff`, moved from `RiskClosedForms`;
+  - `quantile_expMeasure`, now at general rate, replacing a private rate-1 copy in
+    `GeneralizedPareto`;
+  - `uniformIoo_Iic`, replacing four proofs that uniform `(0,1)` gives `Iic c` mass `c`, in
+    `Quantile`, `Copula` and `BernoulliMixture`.
+- **Coherence (lens 2).** `VasicekIRB`'s negated-factor law is now Mathlib's `gaussianReal_neg`,
+  not a hand-rolled pushforward. The reviewer's other "re-derived" claim, the preimage form of
+  `HasLaw.measureReal_eq`, did not hold: Mathlib's lemma is for set-builder events. The adapter
+  stays, with a docstring saying why. `Set.Ioi_union_left` does not exist at the pin.
+- **Zero slop (lens 3).** Removed the dead private `integrable_max_sub'` (`Expectile.lean`), plus
+  the no-op tactics and unused-variable warnings the sub-agents left. Every new module builds
+  without warnings.
+- **Concept clarity (lens 7).** `HoeffdingCovariance` now points to `Copula.lean` for the
+  Fréchet–Hoeffding bounds, where it had said they were "not proved".
+
+### Exemplars
+
+- `quantile_le_iff` (`Foundations/Quantile.lean`): one Galois connection, from which every VaR
+  property is read off. It needs no case analysis for atoms or flat stretches.
+- `expectedShortfall_add_le`: subadditivity is the Rockafellar–Uryasev objective at
+  `VaR_X + VaR_Y` plus `(a + b)⁺ ≤ a⁺ + b⁺`.
+- `expectedShortfall_mono_level`: monotonicity in the level falls out of the dual
+  representation, because raising `α` relaxes the density bound.
+- `tendsto_valueAtRisk_oneFactorLossFraction`: the ASRF quantile as a genuine limit theorem.
+  The chain is Etemadi's strong law, the empirical CDF, quantile convergence, and VaR equivariance.
+
+### Ranked backlog
+
+1. **One discriminant Cauchy–Schwarz** (lenses 3, 4; two agents). It is derived three times:
+   `covariance_le_sqrt_mul_sqrt`, `sqrt_portfolioVarN_add_le`, and a strict form in
+   `VaRSuperadditivity`. Lift `(∀ t, 0 ≤ a t² + b t + c) → b ≤ 2√a√c` to `Foundations`. Then
+   `sqrt_variance_add_le` becomes the two-asset case of `sqrt_portfolioVarN_add_le`.
+2. **Quantile convergence under convergence in distribution** (lens 1, 2). Use Mathlib's
+   Portmanteau theorem. The a.s. version follows, and the ASRF limit then holds in distribution.
+3. **The positive-part identity `max t 0 = t + max (−t) 0`** (lens 3). It is case-split four times
+   (`Expectile`, `Elicitability` ×2, `ExpectedShortfall`). Use one lemma from Mathlib's posPart API.
+4. **Tail-integrability helper** `integrableOn_valueAtRisk_Ioo` (lens 6). The
+   `(integrableOn_valueAtRisk hX).mono_set (Ioo_subset_Ioo_left hα.1.le)` term appears about
+   eight times.
+5. **`Expectile` via `StrictAnti`** (lens 8). Prove `strictAnti_expectileGap` once. Uniqueness,
+   the `hset` characterization and `expectile_mono` then become `injective` / `le_iff_le`,
+   replacing five `nlinarith` calls.
+6. **Small lifts.**
+   - `Phi_eq_iff` belongs in `NormalQuantile`.
+   - `cdf_map_eq_measureReal` and `measure_Iio_quantile_le` belong in `Quantile`.
+   - Make the Gaussian VaR of a `HasGaussianLaw` variable public. It is now duplicated between
+     `VaRSuperadditivity` and `GaussianRiskMarkowitz`.
+   - Prove `medianShortfall_eq_valueAtRisk` through `quantile_le_iff`, not by unfolding `sInf`.
+   - Add a named `correlation` (written inline four times) and a transfer lemma
+     `IsCoherentRiskMeasure → IsCoherentRisk` on finite spaces.
+7. **Breadth still open from the triage.**
+   - Sklar's theorem for general margins (the distributional transform).
+   - The Clayton copula as a measure (gamma frailty).
+   - Fisher–Tippett–Gnedenko and Pickands–Balkema–de Haan.
+   - Uniform (Glivenko–Cantelli) convergence of the empirical CDF.
+   - Expectile closed forms (Ex. 8.14) and coherence for α ≥ 1/2.
+   - Identifying the ADEH representing set of ES with the bounded densities.
+
 ## 2026-09-25 — corpus 373 — Girsanov: jointly independent increments under Q
 
 Scope: `isQBrownianMotion_of_expMartingale` now concludes `HasIndepIncrements` on `[0,T]` where it
