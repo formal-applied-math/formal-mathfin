@@ -95,6 +95,23 @@ import MathFin.Foundations.WienerIntegralIndicator
 import MathFin.Foundations.StandardGaussianMGF
 import MathFin.Foundations.ExponentialDiscount
 import MathFin.Foundations.Bisection
+-- The quantile function (generalized inverse CDF): Galois connection, quantile transform,
+-- probability integral transform, equivariance; and the standard normal quantile Φ⁻¹
+import MathFin.Foundations.Quantile
+import MathFin.Foundations.NormalQuantile
+-- QRM foundations: quantile convergence, copulas and Sklar's theorem, Hoeffding's covariance
+-- identity, Marshall–Olkin common shocks, correlation fallacies, extreme value theory (GEV, GPD,
+-- maxima of Poisson-many losses)
+import MathFin.Foundations.QuantileConvergence
+import MathFin.Foundations.Copula
+import MathFin.Foundations.Sklar
+import MathFin.Foundations.CopulaFamilies
+import MathFin.Foundations.HoeffdingCovariance
+import MathFin.Foundations.MarshallOlkin
+import MathFin.Foundations.CorrelationFallacies
+import MathFin.Foundations.ExtremeValue
+import MathFin.Foundations.GeneralizedPareto
+import MathFin.Foundations.PoissonMaxima
 -- Phase 13 additions:
 import MathFin.Foundations.StatePrices
 import MathFin.Foundations.TriangleArbitrage
@@ -447,6 +464,23 @@ import MathFin.RiskMeasures.AcceptanceSet
 -- Phase 1 (convex-duality unification): worst-case loss — the most conservative coherent risk
 -- measure, concrete instance of the ADEH representation (sup over the entire probability simplex)
 import MathFin.RiskMeasures.WorstCaseRisk
+-- Value-at-risk and expected shortfall of a general loss (any law, atoms included), and the
+-- Gaussian closed forms identified as the VaR of the law at z = Φ⁻¹(α)
+import MathFin.RiskMeasures.ValueAtRisk
+import MathFin.RiskMeasures.GaussianValueAtRisk
+-- Expected shortfall: Rockafellar–Uryasev for every law, coherence, dual representation; the
+-- Gaussian ES closed form; VaR by bisection; VaR superadditivity; closed forms and tail ratios;
+-- elicitability (VaR elicitable, ES not); Bernoulli mixtures and the Basel IRB limit theorem
+import MathFin.RiskMeasures.ExpectedShortfall
+import MathFin.RiskMeasures.GaussianExpectedShortfall
+import MathFin.RiskMeasures.ValueAtRiskBisection
+import MathFin.RiskMeasures.VaRSuperadditivity
+import MathFin.RiskMeasures.RiskClosedForms
+import MathFin.RiskMeasures.Elicitability
+import MathFin.RiskMeasures.Expectile
+import MathFin.RiskMeasures.StandardDeviationPrinciple
+import MathFin.RiskMeasures.BernoulliMixture
+import MathFin.RiskMeasures.VasicekIRB
 -- Phase 1 (convex-duality unification): fundamental superhedging bound — every EMM prices a claim
 -- at most its super-replication cost (the pricing-side companion of the coherent-risk representation)
 import MathFin.Foundations.SuperhedgingDuality
@@ -491,3 +525,9 @@ import MathFin.Execution.GlostenMilgromModel
 -- Continuous-time American put option exercise-boundary geometry
 import MathFin.BlackScholes.AmericanPut.Stopping.PhysicalBoundaryConvexity
 import MathFin.BlackScholes.AmericanPut.Stopping.AEHorizonValue
+-- QRM bridges: equicorrelation, Gaussian VaR/ES-optimal = Markowitz portfolios, the HHI
+-- systematic floor, and the square-root-of-time rule for GBM losses
+import MathFin.Portfolio.Equicorrelation
+import MathFin.Bridges.GaussianRiskMarkowitz
+import MathFin.Bridges.EquicorrelationConcentration
+import MathFin.Bridges.SquareRootOfTime

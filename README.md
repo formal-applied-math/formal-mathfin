@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-Release 1.4.0 records 373 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 342 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 438 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 407 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 13 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -101,13 +101,15 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 | Lattice models | binomial replication, American and Bermudan options via the Snell envelope, Cox–Ross–Rubinstein convergence, André's reflection principle |
 | Fixed income and credit | bonds, duration and convexity, immunization, yield curves, forward rates, FRAs, swaps and swaptions, the forward measure, Vasicek, hazard rates, CDS, first-to-default, KMV–Merton |
 | Portfolio theory | Markowitz, CAPM, two-fund separation, the tangency portfolio, risk parity, Black–Litterman; Sharpe, Sortino, Treynor and information ratios; the Kelly criterion |
-| Risk measures | Gaussian VaR and CVaR, coherent and spectral risk measures, Rockafellar–Uryasev, expected utility, concentration indices |
+| Risk measures | the quantile function; value-at-risk and expected shortfall for every law: Rockafellar–Uryasev, coherence of ES, its dual representation, VaR superadditivity, elicitability (VaR yes, ES no), expectiles; coherent and spectral risk measures, expected utility, concentration indices |
+| Dependence and extremes | copulas and Sklar's theorem (continuous margins), Fréchet–Hoeffding bounds, Hoeffding's covariance identity, Marshall–Olkin common shocks; GEV and GPD domains of attraction, maxima of Poisson-many losses |
+| Credit portfolios | Bernoulli mixtures, the one-factor Gaussian threshold model, and the Basel IRB formula as the limit of portfolio VaR |
 | Market microstructure | Avellaneda–Stoikov market making, the Glosten–Milgrom spread |
 | Other | a contract language that separates payoffs from pricing models; survival models, mortality and annuities; compound Poisson losses; constant-product AMMs |
 
 ## Limitations
 
-- Thirteen of the 373 results are reduced cores. Twelve assume a structure whose fields include the
+- Thirteen of the 438 results are reduced cores. Twelve assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, Lévy's characterization, the two-dimensional Itô formula,
