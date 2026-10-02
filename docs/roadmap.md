@@ -1514,6 +1514,10 @@ semimartingale, so `ContinuousMarket`'s meaning-2 boundary narrows without closi
 band identity over a general simple process, for which the library has the `Lp` decomposition but not
 the summed statement. Degenne's axiomatic `IsStochasticIntegral` is the right frame for the
 uniqueness clause and exists only on `v4.33.0-rc1`, so instantiating it waits for a stable pin.
+*(2026-10-02: both have moved. The summed identity landed as `itoIntegralAgainst_simpleProcess`.
+The pin has been on `v4.33.0-rc1` since 2026-09-11, so `IsStochasticIntegral` is available; what
+remains for [#196](https://github.com/formal-applied-math/formal-mathfin/issues/196) is a
+monotone-class proof of its uniqueness clause.)*
 
 Gates: `lake build MathFin` + `lake lint` green, `pytest` 48/48, ledger 358/358 fresh,
 `AxiomAuditGen` 318 guards, seven new curated axiom pins, no `sorry`.

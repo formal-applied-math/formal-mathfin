@@ -66,9 +66,11 @@ by `itoIntegralCLM_T_bandRestrict`; the `𝓕_a`-measurable factor `Z` passes th
 
 Degenne's package carries an axiomatic characterisation of the stochastic integral
 (`IsRiemannStieltjesExtension`, `IsStochasticIntegral`), whose uniqueness clause is the same
-idea in a wider frame (dominated convergence rather than `L²` density). It exists only on
-`v4.33.0-rc1`, so `itoIntegralAgainst_unique` is proved here in the `L²` frame; instantiating
-the upstream predicate is a follow-up for the next stable pin bump.
+idea in a wider frame (dominated convergence rather than `L²` density). It is available at the
+current pin, and `itoIntegralAgainst_unique` is still proved here in the `L²` frame.
+Instantiating the upstream predicate (#196) is not a corollary of that proof: an extension in
+the upstream sense need not be `L²`-continuous, so its uniqueness clause takes a monotone-class
+argument instead of density.
 
 ## Result
 

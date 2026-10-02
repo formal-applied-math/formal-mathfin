@@ -272,9 +272,10 @@ dense-set step has nothing to stand on. The price is **driftless**: `S = S₀ + 
 what a discounted price is under the reference measure; a drift `∫b ds` is additive, reuses the
 pathwise drift object the Girsanov work already built, and is what the HJM bond dynamics need.
 Only `complete ⟹ unique` is delivered; the converse still needs Jacod–Yor. And the agreement
-`Q = μ` is **on `𝓕ᴮ_T`** — it says nothing off that σ-algebra. Finally, the band identity is for a
-single band: the summed version over a general simple process is not stated as a theorem, only
-the `Lp` decomposition it would follow from, and the uniqueness clause takes agreement on simple
-processes rather than on written-out Riemann–Stieltjes sums. Degenne's axiomatic
-`IsStochasticIntegral` is the right frame for that clause and exists only on `v4.33.0-rc1`, so
-instantiating it waits for a stable pin.
+`Q = μ` is **on `𝓕ᴮ_T`** — it says nothing off that σ-algebra. Finally, the uniqueness clause is
+stated in the `L²` frame. The band identity is summed over a simple process
+(`itoIntegralAgainst_simpleProcess`), so the clause takes agreement with the written-out
+Riemann–Stieltjes sums. Degenne's axiomatic `IsStochasticIntegral` is the wider frame for it and
+is available at the current pin, but instantiating it (#196) is not a corollary of the density
+proof: an extension in its sense need not be `L²`-continuous, so it takes a monotone-class
+argument.

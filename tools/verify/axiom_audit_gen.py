@@ -70,7 +70,9 @@ EXPECTED_OVERRIDES: dict[str, str] = {
 # qualified, including lemmas reached by dot notation (`hf.smul` is
 # `MeasureTheory.Integrable.smul`). `mathfin_index` resolves only MathFin
 # declarations, so this list is kept by hand. The names were checked against
-# the pinned sources on 2026-09-25 (Mathlib 0434c033, BrownianMotion 314f04a).
+# the pinned sources on 2026-09-25 (Mathlib 0434c033, BrownianMotion 314f04a),
+# and their pinned axioms held again after the 2026-10-02 bump to BrownianMotion
+# 0d5b6eb.
 # `test_library_wrapper_citations_are_pinned` fails if an entry is missing, a
 # name no longer appears in its proof, or a name is not pinned.
 UPSTREAM_CITATIONS: dict[str, tuple[str, ...]] = {

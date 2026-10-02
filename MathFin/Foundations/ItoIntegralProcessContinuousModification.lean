@@ -37,14 +37,14 @@ continuous and adapted for every `ω`). It is **not** proved here.
 
 ## Coherence
 
-Pure consumption + assembly. Degenne's general càdlàg modification is still
-work-in-progress at our pin — the old `exists_modification_isCadlag` was retired
-with `StochasticIntegral/CadlagModification.lean` and its successor,
-`cadlagModif` in `StochasticIntegral/Quasimartingale/CadlagModification.lean`,
-carries `sorry`s — so this result is not a duplicate; and the `L²`-continuity +
-Doob route yields a genuinely **continuous** (not merely càdlàg) version. Nothing of the isometry, density, or martingale
-property is reproved — the maximal inequality is Degenne's, the continuous
-approximants are B3's, the density is B1b's.
+Pure consumption + assembly. Degenne's general càdlàg modification, `cadlagModif` in
+`StochasticIntegral/Quasimartingale/CadlagModificationBanach.lean`, has no `sorry` at our
+pin, but it is a modification only for a right-continuous filtration and adapted only for a
+complete one: the usual conditions, which `natFiltration` does not carry. So this result is
+not a duplicate, and the `L²`-continuity + Doob route yields a genuinely **continuous** (not
+merely càdlàg) version. Nothing of the isometry, density, or martingale property is reproved —
+the maximal inequality is Degenne's, the continuous approximants are B3's, the density is
+B1b's.
 
 See `docs/superpowers/specs/2026-06-26-ito-continuous-modification-design.md`.
 -/
