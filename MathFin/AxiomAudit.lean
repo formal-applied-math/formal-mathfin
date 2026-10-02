@@ -1335,6 +1335,19 @@ model. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.BlackScholes.AmericanPut.Stopping.aeExerciseThreshold_eq
 
+/-! ### The price with a drift (2026-09-29)
+
+`gainsDrift_eq_setIntegral` identifies the drift part of `∫ψ dS` with the pathwise Lebesgue
+integral of `ψb`. `gainsDrift_zero_drift` recovers the driftless integral at `b = 0`, a.e. rather
+than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen sequence. -/
+
+/-- info: 'MathFin.PricePathDrift.gainsDrift_eq_setIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.PricePathDrift.gainsDrift_eq_setIntegral
+
+/-- info: 'MathFin.PricePathDrift.gainsDrift_zero_drift' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.PricePathDrift.gainsDrift_zero_drift
 /-! ## Quantitative risk management: quantiles, VaR/ES for every law, copulas, EVT, IRB -/
 
 /-- info: 'MathFin.hasLaw_quantile' depends on axioms: [propext, Classical.choice, Quot.sound] -/

@@ -246,6 +246,8 @@ import MathFin.Foundations.MartingaleRepresentation
 -- duality, and uniqueness of the pricing measure on the Brownian filtration
 import MathFin.Foundations.MarketCompleteness
 import MathFin.Foundations.MarketCompletenessInPrice
+-- The price with a drift, S = S₀ + ∫b ds + (σ●B), and the integral against it
+import MathFin.Foundations.PricePathDrift
 import MathFin.Foundations.PricingMeasureL2Density
 import MathFin.Foundations.ItoFormulaProcess
 import MathFin.Foundations.ExitTime
