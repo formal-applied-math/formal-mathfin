@@ -3076,7 +3076,7 @@
     {
       "id": "mf-compound-poisson-mgf",
       "name": "Compound-Poisson Aggregate-Loss MGF",
-      "description": "e^{-λ} · e^{λM} = e^{λ(M − 1)}: the algebraic core of the compound-Poisson MGF identity E[e^{tS}] = exp(λ(M_X(t) − 1)).",
+      "description": "For iid claim sizes Xᵢ, the MGF of the n-claim sum ∑_{i<n} Xᵢ, integrated against the Poisson(λ) law of n, equals exp(λ(M_X(t) − 1)). This is the compound-Poisson aggregate-loss MGF in mixture form: the claim count enters as the Poisson weights, not as a random variable N independent of the claims.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Actuarial.CompoundPoissonMGF\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- **Compound-Poisson aggregate-loss MGF.** For a Poisson claim count `N ∼ Poisson(λ)` and\ni.i.d. claim sizes `Xᵢ`, integrating the `n`-claim aggregate MGF against the Poisson law gives\n`exp(λ·(M_X(t) − 1))` — the Poisson PGF evaluated at the common claim MGF. Re-exports\n`MathFin.compoundPoisson_mgf`. -/\ntheorem compound_poisson_mgf\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}\n    (lam : ℝ≥0) (t : ℝ) (X : ℕ → Ω → ℝ)\n    (hindep : iIndepFun X μ) (hmeas : ∀ i, Measurable (X i))\n    (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) :\n    ∫ n, mgf (fun ω => ∑ i ∈ Finset.range n, X i ω) μ t ∂(poissonMeasure lam)\n      = Real.exp ((lam : ℝ) * (mgf (X 0) μ t - 1)) :=\n  MathFin.compoundPoisson_mgf lam t X hindep hmeas hident\n"

@@ -17,10 +17,12 @@ a quadratic (LQ) approximation of the trade-intensity Hamiltonians, to a **matri
 system (their Proposition 2). Its closed-form solution is the matrix analogue of the scalar
 `a(t) = Â · tanh (Â (T − t))` verified in `MathFin.Foundations.MarketMakingRiccati`.
 
-Mathlib carries neither a matrix `tanh` nor matrix-valued differentiation at this pin. We sidestep
-both by **spectral reduction**: for a real symmetric (Hermitian) matrix `Â` with eigendecomposition
-`Â = U · diag(λ) · Uᴴ` (`U = hÂ.eigenvectorUnitary`, `λ = hÂ.eigenvalues`), we *define* the matrix
-Riccati coefficient in already-diagonalised form using the scalar `riccatiCoeff`:
+We work by **spectral reduction**: for a real symmetric (Hermitian) matrix `Â` with
+eigendecomposition `Â = U · diag(λ) · Uᴴ` (`U = hÂ.eigenvectorUnitary`, `λ = hÂ.eigenvalues`), we
+*define* the matrix Riccati coefficient in already-diagonalised form using the scalar
+`riccatiCoeff`. This is the construction behind Mathlib's functional calculus for Hermitian
+matrices, `Matrix.IsHermitian.cfc`, applied to `riccatiCoeff`; it is spelled out here rather than
+taken from `cfc`:
 
 `matrixRiccatiCoeff hÂ T t = U · diag (fun i ↦ riccatiCoeff (λ i) T t) · Uᴴ`.
 
@@ -37,7 +39,8 @@ For exponential order-arrival intensities the single-asset Avellaneda–Stoikov 
 *multi-asset* problem has no closed form, which is precisely why BEGV quadratically approximate the
 Hamiltonians to recover a solvable Riccati. So this module formalises the tractable approximate closed
 form (the spectral route below); the **exact linearisation is the deeper, more faithful target**
-(gated on matrix-exponential calculus, absent at this pin). Read the result as "this closed form solves
+(not formalised here; the matrix-exponential derivative it needs is Mathlib's
+`hasDerivAt_exp_smul_const`). Read the result as "this closed form solves
 this approximate Riccati", not as "optimal market making, mechanised".
 
 We verify, in two layers:

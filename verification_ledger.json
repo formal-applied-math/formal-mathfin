@@ -1861,37 +1861,37 @@
     "mf-mm-matrix-riccati": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-02",
-      "elapsed_s": 5.2,
-      "input_hash": "b239cc465331d2d1f5a52848f0519c4fae02e45551078854a13bea2e03d1d727",
-      "verified_at_commit": "fdfecac"
+      "elapsed_s": 54.1,
+      "input_hash": "375e5e559dae4bf7087dcd3fc838802d2fc0cc45920a5713c6425df3f5abc756",
+      "verified_at_commit": "92c48dd"
     },
     "mf-mm-matrix-value": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-02",
-      "elapsed_s": 6.2,
-      "input_hash": "fe5f2bc2cabe186e8f2a48bc78ee482b0311dd42ee8d913e2d6d1670f4421a6e",
-      "verified_at_commit": "fdfecac"
+      "elapsed_s": 147.5,
+      "input_hash": "82e1f103eedcb08fe9d8e46a9e016f82919ae74df3de95144b1fd7bd86e344c8",
+      "verified_at_commit": "92c48dd"
     },
     "mf-mm-quotes": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-02",
-      "elapsed_s": 5.1,
-      "input_hash": "2f3558681b607366290fc88bbb8ae7d5c9b318818c71347db84b04372ded33b6",
-      "verified_at_commit": "fdfecac"
+      "elapsed_s": 14.2,
+      "input_hash": "5da1da9f1dc99e247d002f81cee43a288d0de4daf0acf973d7e91acfbbfc152e",
+      "verified_at_commit": "92c48dd"
     },
     "mf-mm-riccati": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-02",
-      "elapsed_s": 3.7,
-      "input_hash": "eea3b2ba6fbad1802bd7802a2a761d57fa6edc4280be03123658d01025c6c523",
-      "verified_at_commit": "fdfecac"
+      "elapsed_s": 58.4,
+      "input_hash": "87f5d4f402614de23b7b055bf6a09012f74e6434d76194566ab1cac85fee0fc4",
+      "verified_at_commit": "92c48dd"
     },
     "mf-mm-value-function": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-02",
-      "elapsed_s": 6.2,
-      "input_hash": "1acfe19cb7cb69daddab7a3b20fa7f6674895a9727ac71254565a6fa40406a5d",
-      "verified_at_commit": "fdfecac"
+      "elapsed_s": 61.3,
+      "input_hash": "744e21e19659b54af159063e1fa44f7837e1e6ee5733ef80c69ef5da4db7bf99",
+      "verified_at_commit": "92c48dd"
     },
     "mf-newton-raphson-fixed-at-root": {
       "benchmark_file": "mathematical_finance.json",

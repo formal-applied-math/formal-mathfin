@@ -785,8 +785,13 @@ edit lints the stale olean and re-reports the old failures at the old line numbe
 
 ## Matrix Riccati via spectral reduction (2026-07-16, multi-asset follow-on)
 
-The matrix analogue of `a(t) = Â·tanh(Â(T−t))` (BEGV Prop. 2, `MatrixMarketMakingRiccati.lean`), with
-**no matrix `tanh`/`exp`** (both absent at the pin) and **no Mathlib matrix-differentiation** (also absent).
+The matrix analogue of `a(t) = Â·tanh(Â(T−t))` (BEGV Prop. 2, `MatrixMarketMakingRiccati.lean`), built
+without a matrix transcendental. *(Corrected 2026-10-02: this section first said Mathlib had no matrix
+`tanh`/`exp` and no matrix differentiation. It has all three in the sense used here. `Matrix.IsHermitian.cfc f`
+is exactly the `U · diagonal (f ∘ λ) · star U` construction below, `exp` on matrices comes with
+`hasDerivAt_exp_smul_const`, and `HasDerivAt` works for matrix-valued maps once a matrix norm is chosen, as
+the file does with `Matrix.Norms.Operator`. Only the scalar `tanh` derivative is genuinely missing. Reach for
+`cfc` before hand-rolling the next spectral definition.)*
 
 ### Spectral reduction — define diagonalised, reduce the ODE per eigenvalue
 - For Hermitian `Â = U·diag(λ)·Uᴴ` (`U = hÂ.eigenvectorUnitary`, `λ = hÂ.eigenvalues`), **define** the matrix
