@@ -17,8 +17,9 @@ Riccati system whose solution is a closed-form proxy for the value function `θ(
 
 This Riccati is the LQ-**approximation** view, not the fundamental structure: for exponential
 intensities the exact single-asset problem is *linearisable* by a Hopf–Cole change of variables into a
-linear ODE system (Guéant–Lehalle–Fernandez-Tapia), the deeper and more faithful target (gated on
-matrix-exponential calculus, absent at this pin). We formalise the tractable approximate closed form
+linear ODE system (Guéant–Lehalle–Fernandez-Tapia), the deeper and more faithful target (not
+formalised here; the matrix-exponential derivative it needs is Mathlib's
+`hasDerivAt_exp_smul_const`). We formalise the tractable approximate closed form
 (see `MatrixMarketMakingRiccati` for the multi-asset analogue and the full landscape note).
 
 Specialised here to a **single asset** (`d = 1`), we verify, in three layers:
@@ -40,7 +41,8 @@ Out of scope: the stochastic optimal-control substrate (existence/uniqueness of 
 function solving the exact HJ equation, and the verification theorem linking `θ` to optimal
 quotes — controlled marked-point-process control beyond the current pin); that the approximate
 value function approximates the true one (justified numerically in the paper); the exact Hopf–Cole
-linearisation (the fundamental structure — matrix-exponential-gated, absent at this pin); and deriving
+linearisation (the fundamental structure; Mathlib's `hasDerivAt_exp_smul_const` covers the
+matrix-exponential calculus it needs, so what is missing is the construction itself); and deriving
 `δ̃_ξ` from the intensity sup (it is defined by its known closed form from Guéant [18] /
 Guéant–Lehalle–Fernandez-Tapia [20]). The multi-asset **approximate** matrix Riccati is now discharged
 in `MatrixMarketMakingRiccati`.
