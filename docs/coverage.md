@@ -163,7 +163,8 @@ nor a pricing-measure statement is claimed.
 
 No statement or proof changed. The 18 `library_wrapper` entries re-export a Mathlib or
 BrownianMotion theorem and count as delivered, but both axiom audits skipped names declared
-outside `MathFin/`. BrownianMotion has `sorry`s at the current pin (314f04a), and two wrapper
+outside `MathFin/`. BrownianMotion has `sorry`s at the pin (314f04a, and the same eight below
+at 0d5b6eb, the 2026-10-02 bump), and two wrapper
 snippets import modules that contain one. `cm-thm-4.3.7` imports LocalMartingale, whose import
 closure has six sorried declarations: `isStable_submartingale` (LocalMartingale),
 `Submartingale.stoppedValue_min_ae_le_condExp` (OptionalSampling), and
@@ -667,7 +668,10 @@ prior corpus audit, not a verification of this addition.
 > and `itoIntegralAgainst_unique` correspondingly takes agreement on simple processes rather
 > than on written-out sums. Degenne's axiomatic `IsStochasticIntegral` characterisation is the
 > right frame for that uniqueness clause but exists only on `v4.33.0-rc1`, so instantiating it
-> waits for a stable pin.
+> waits for a stable pin. *(2026-10-02: both have moved. The summed identity landed as
+> `itoIntegralAgainst_simpleProcess`, and the pin has been on `v4.33.0-rc1` since 2026-09-11, so
+> what remains for [#196](https://github.com/formal-applied-math/formal-mathfin/issues/196) is a
+> monotone-class proof of the uniqueness clause.)*
 >
 > **Superseded status (2026-08-07):** corpus
 > **353**, **322 full + 18 wrappers = 340/353 delivery-ready**, 13 reduced cores, 0 placeholders.
