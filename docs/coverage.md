@@ -26,6 +26,31 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The integral against an Itô integral is a stochastic integral, in Degenne's sense (2026-10-02)
+
+One entry added, `sc-ito-is-stochastic-integral` (`full`). Corpus 439 → 440.
+
+BrownianMotion's `StochasticIntegral.lean` characterises a stochastic integral axiomatically:
+Riemann–Stieltjes values on elementary processes, linearity, indistinguishability and dominated
+convergence (`IsRiemannStieltjesExtension`), plus agreement with every other such extension on the
+common domain (`IsStochasticIntegral`). `Foundations/StochasticIntegralCharacterisation.lean` proves
+that the integral against `M = φ●B` is one, for `M` stopped at `T` and the natural Brownian
+filtration. BrownianMotion does not instantiate the predicate anywhere at the pin.
+
+The domain is the processes indistinguishable from a predictable process square-integrable against
+the bracket. That is forced rather than chosen: the predicate asks for a domain closed under
+indistinguishability, and the natural filtration is not complete, so such a process need not be
+predictable itself. The uniqueness clause is the substantive part. An extension in the upstream
+sense need not be `L²`-continuous, so `itoIntegralAgainst_unique` does not reach it; the proof is a
+monotone-class argument from dominated convergence, through a Dynkin argument over the predictable
+rectangles. Dominated convergence in `L^p`, which Mathlib at the pin has only through uniform
+integrability, is proved in general on the way (`tendsto_eLpNorm_sub_of_dominated`).
+
+Scope. The integrator is an Itô integral against a Brownian motion, not a general semimartingale.
+As in the upstream `SIntegral`, the integral is the terminal value; the process `t ↦ ∫₀ᵗ` is not
+part of the statement. `itoIntegralAgainst_unique`, uniqueness among continuous linear maps on
+`L²(⟨M⟩)`, stays as a separate theorem with a different hypothesis.
+
 ### Quantitative risk management: quantiles, VaR for every law, ES for every integrable loss (2026-10-01)
 
 New benchmark file `benchmarks/quantitative_risk_management.json`, drawn from McNeil, Frey and
@@ -669,9 +694,9 @@ prior corpus audit, not a verification of this addition.
 > than on written-out sums. Degenne's axiomatic `IsStochasticIntegral` characterisation is the
 > right frame for that uniqueness clause but exists only on `v4.33.0-rc1`, so instantiating it
 > waits for a stable pin. *(2026-10-02: both have moved. The summed identity landed as
-> `itoIntegralAgainst_simpleProcess`, and the pin has been on `v4.33.0-rc1` since 2026-09-11, so
-> what remains for [#196](https://github.com/formal-applied-math/formal-mathfin/issues/196) is a
-> monotone-class proof of the uniqueness clause.)*
+> `itoIntegralAgainst_simpleProcess`, and the integral is now an instance of
+> `IsStochasticIntegral`, `sc-ito-is-stochastic-integral` above
+> ([#196](https://github.com/formal-applied-math/formal-mathfin/issues/196)).)*
 >
 > **Superseded status (2026-08-07):** corpus
 > **353**, **322 full + 18 wrappers = 340/353 delivery-ready**, 13 reduced cores, 0 placeholders.

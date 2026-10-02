@@ -686,6 +686,22 @@
       }
     },
     {
+      "id": "sc-ito-is-stochastic-integral",
+      "name": "The Integral against an Itô Integral is a Stochastic Integral (Degenne's Characterisation)",
+      "description": "For a predictable L² driver φ and M = φ●B, the integral against M, defined on the processes indistinguishable from a predictable process square-integrable against the bracket ⟨M⟩, satisfies BrownianMotion's IsStochasticIntegral for the integrator M stopped at T and the natural Brownian filtration: it returns the Riemann–Stieltjes sums on elementary processes with simple coefficients, is linear, respects indistinguishability and dominated convergence, and agrees almost surely with every other such extension on their common domain.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.StochasticIntegralCharacterisation\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM MathFin.ItoIntegralAgainstMartingale\nopen MathFin.StochasticIntegralCharacterisation\nopen scoped NNReal ENNReal\n\n/-- **The integral against an Itô integral is a stochastic integral in Degenne's sense.** For a\n    predictable `L²` driver `φ` and `M = φ●B`, the integral against `M` on the processes with a\n    predictable version square-integrable against the bracket satisfies BrownianMotion's\n    `IsStochasticIntegral` for `M` stopped at `T`: Riemann–Stieltjes values on elementary\n    processes, linearity, indistinguishability, dominated convergence, and agreement with every\n    other such extension on the common domain. Re-export of\n    `MathFin.StochasticIntegralCharacterisation.isStochasticIntegral`. -/\ntheorem ito_integral_against_is_stochastic_integral\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)\n    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :\n    IsStochasticIntegral μ (integrator T hBmeas φ hB) (natFiltration hBmeas)\n      (sIntegral T hBmeas φ hB) (domain T hBmeas φ) :=\n  MathFin.StochasticIntegralCharacterisation.isStochasticIntegral hB\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Characterisation of the stochastic integral by its Riemann–Stieltjes values and dominated convergence (BrownianMotion IsStochasticIntegral, J. van Winden)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.StochasticIntegralCharacterisation.isStochasticIntegral, an instance of the upstream predicate ProbabilityTheory.IsStochasticIntegral from BrownianMotion/StochasticIntegral/StochasticIntegral.lean. SCOPE. (1) The integrator is an Ito integral M = phi-dot-B against a Brownian motion, stopped at T; the upstream predicate is stated for a general integrator. (2) The filtration is the natural, uncompleted Brownian filtration, so the domain is defined up to indistinguishability: the processes with a predictable version square-integrable against the bracket phi^2 . trim_T. (3) As in the upstream SIntegral, the integral is a random variable, the value at the terminal time; the integral process t -> int_0^t is not part of this statement. (4) The uniqueness clause is proved by a monotone-class argument from dominated convergence, not from L^2 density; the density-based uniqueness among continuous linear maps, itoIntegralAgainst_unique, is a separate theorem with a different hypothesis (continuity rather than dominated convergence)."
+      }
+    },
+    {
       "id": "sc-ito-integral-against-drifted-price",
       "name": "The Integral against an Itô-Process Price: ∫ψ dS = ∫ψb ds + ∫ψ dM",
       "description": "For the price S = S₀ + ∫b ds + σ●B, the integral ∫₀ᵀ ψ dS is a.e. the pathwise Lebesgue integral ∫₀ᵀ ψb ds plus ∫ψ dM, with M = σ●B. Assumes ψb is square-integrable, which the condition on ψ does not imply.",
