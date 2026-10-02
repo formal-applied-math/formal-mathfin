@@ -81,7 +81,7 @@ require LeanArchitect from git
 -- lean-toolchain are authoritative (mathfin.toml just sets local_project = ".").
 require BrownianMotion from git
   "https://github.com/RemyDegenne/brownian-motion.git" @
-  "314f04a34ff75e18fd383917ae7fe7d77beb1b6f"
+  "0d5b6eb928e616d3b1f774ad7d233c167d9f42c9"
 
 -- Pinned to Degenne brownian-motion's lake-manifest commit (so all transitive
 -- versions resolve consistently). Bump together with the BrownianMotion pin.
