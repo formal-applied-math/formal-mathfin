@@ -50,7 +50,8 @@ We verify, in two layers:
   instance; since `n` is finite the space is finite-dimensional, all norms are equivalent, and the
   derivative statement is norm-independent), for every Hermitian `Â`. This is the genuine multi-asset
   matrix `tanh`-Riccati closed form (an identification with `Â·tanh(Â(T−t))` made in prose under the
-  Hermitian functional calculus — no matrix `tanh` object is built in Lean, the pin carrying none).
+  Hermitian functional calculus — no matrix `tanh` is built here, though Mathlib's
+  `hÂ.cfc Real.tanh` would give one).
 * **§2 Market-making instantiation** — with a positive diagonal `D₊` and a symmetric `Σ`, and `Â`
   the Hermitian square root scale `Â·Â = γ • (D₊^{½} Σ D₊^{½})`, the coefficient
   `A(t) = ½ • (D₊^{-½} · matrixRiccatiCoeff hÂ T t · D₊^{-½})` solves the market-making matrix

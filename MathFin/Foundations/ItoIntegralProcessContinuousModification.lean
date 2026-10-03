@@ -39,8 +39,8 @@ continuous and adapted for every `ω`). It is **not** proved here.
 
 Pure consumption + assembly. Degenne's general càdlàg modification, `cadlagModif` in
 `StochasticIntegral/Quasimartingale/CadlagModificationBanach.lean`, has no `sorry` at our
-pin, but it is a modification only for a right-continuous filtration and adapted only for a
-complete one: the usual conditions, which `natFiltration` does not carry. So this result is
+pin, but it is a modification only for a right-continuous filtration, and adapted only if that
+filtration is also complete: the usual conditions, which `natFiltration` does not carry. So this result is
 not a duplicate, and the `L²`-continuity + Doob route yields a genuinely **continuous** (not
 merely càdlàg) version. Nothing of the isometry, density, or martingale property is reproved —
 the maximal inequality is Degenne's, the continuous approximants are B3's, the density is
