@@ -8,15 +8,15 @@ module
 public import MathFin.Foundations.ItoIntegralAgainstMartingale
 public import BrownianMotion.StochasticIntegral.StochasticIntegral
 
-/-! # The integral against an Itô integral is a stochastic integral, in Degenne's sense
+/-! # The integral against an Itô integral is a stochastic integral, in BrownianMotion's sense
 
 BrownianMotion's `StochasticIntegral.lean` characterises a stochastic integral axiomatically.
 `IsRiemannStieltjesExtension P Y 𝓕 I S` asks that a map `I` from processes to random variables,
 defined on a domain `S`, return the Riemann–Stieltjes sum `X·(Y_j − Y_i)` on every elementary
 process `𝟙_{(i,j]}·X` with a simple `𝓕_i`-measurable coefficient (and `X·(Y_i − Y_0)` on
 `𝟙_{[0,i]}·X`), be linear, respect indistinguishability, and pass to the limit under dominated
-convergence. `IsStochasticIntegral` adds that any two such extensions agree almost surely on the
-intersection of their domains.
+convergence. `IsStochasticIntegral` adds that `I` agrees almost surely with every such extension
+on the intersection of their domains.
 
 This file instantiates both for the integral against `M = φ●B` of `ItoIntegralAgainstMartingale`
 (`isStochasticIntegral`), with integrator `M` stopped at `T`, the natural Brownian filtration, and
@@ -28,21 +28,25 @@ the processes indistinguishable from a predictable process square-integrable aga
 * **The integrator is stopped at `T`.** The upstream integral runs over the whole time axis, ours
   over `[0, T]`. `integrator` is `t ↦ M_{t∧T}`, so a band past `T` integrates to `0` on both
   sides.
-* **The domain is closed under indistinguishability, not `⟨M⟩`-a.e. equality.** The natural
-  filtration is not complete, so a process indistinguishable from a predictable one need not be
-  predictable. The domain is the processes with a predictable version (`IsPredictableVersion`),
+* **The domain is closed under indistinguishability, not `⟨M⟩`-a.e. equality.** The predicate
+  asks for that closure, and a process indistinguishable from a predictable one need not be
+  predictable, or even jointly measurable, whatever the filtration. The domain is the processes
+  with a predictable version (`IsPredictableVersion`),
   and the integral reads the `L²(⟨M⟩)` class of a version, which does not depend on the version
   chosen (`integrandLp_eq`, through `ae_bracketMeasure_of_ae_forall`).
 * **Uniqueness is a monotone-class argument, not density.** An extension in the upstream sense
-  need not be `L²`-continuous, so `itoIntegralAgainst_unique`, which is uniqueness among
-  continuous linear maps, does not reach it. Every extension does have dominated convergence, and
+  is not assumed `L²`-continuous, nor even defined on `L²(⟨M⟩)`, so `itoIntegralAgainst_unique`,
+  which is uniqueness among continuous linear maps, does not reach it. Every extension does have
+  dominated convergence, and
   the proof runs on that: agreement on predictable indicators by a Dynkin argument over the
   predictable rectangles, then on simple functions, on bounded processes, and finally on the whole
   common domain by truncation, a process dominating its own truncations.
 
-Mathlib at this pin reaches `L^p` convergence through uniform integrability
-(`tendsto_Lp_finite_of_tendsto_ae`) and has no dominated form of it, so that is proved here in
-general (`tendsto_eLpNorm_sub_of_dominated`).
+Mathlib at this pin has dominated convergence in `L^p` only for `p = 1`
+(`tendsto_lintegral_norm_of_dominated_convergence`). Elsewhere the library reaches `L²` through
+BrownianMotion's `uniformIntegrable_of_dominated_singleton` and Vitali's theorem
+(`tendsto_Lp_finite_of_tendsto_ae`), which need `1 ≤ p` and a finite measure. Here it is proved
+directly, for every `p < ∞` and every measure (`tendsto_eLpNorm_sub_of_dominated_convergence`).
 
 ## Result
 
@@ -53,7 +57,7 @@ general (`tendsto_eLpNorm_sub_of_dominated`).
 * `sIntegral_ae_eq_of_isRiemannStieltjesExtension` — its uniqueness half: every extension agrees
   with this one on the common domain.
 * `sIntegral_band`, `sIntegral_bottomBand` — the elementary values, on processes.
-* `tendsto_eLpNorm_sub_of_dominated` — dominated convergence in `L^p`, `0 < p < ∞`.
+* `tendsto_eLpNorm_sub_of_dominated_convergence` — dominated convergence in `L^p`, `p < ∞`.
 -/
 
 @[expose] public section
@@ -67,44 +71,43 @@ section DominatedLp
 
 variable {α E : Type*} {m : MeasurableSpace α} {ν : Measure α} [NormedAddCommGroup E]
 
-/-- **Dominated convergence in `L^p`**, for `0 < p < ∞`: a sequence that converges almost
-everywhere and is dominated by a single `L^p` function converges to its limit in `L^p`. -/
-theorem tendsto_eLpNorm_sub_of_dominated {p : ℝ≥0∞} (hp0 : p ≠ 0) (hp : p ≠ ∞)
-    {f : ℕ → α → E} {g : α → E} {G : α → ℝ}
-    (hf : ∀ n, AEStronglyMeasurable (f n) ν) (hG : MemLp G p ν)
-    (hbound : ∀ n, ∀ᵐ x ∂ν, ‖f n x‖ ≤ G x)
-    (hlim : ∀ᵐ x ∂ν, Tendsto (fun n ↦ f n x) atTop (𝓝 (g x))) :
-    Tendsto (fun n ↦ eLpNorm (f n - g) p ν) atTop (𝓝 0) := by
+/-- **Dominated convergence in `L^p`**, for `p < ∞`: a sequence that converges almost everywhere
+and is dominated by a single `L^p` function converges to its limit in `L^p`. The measure is
+arbitrary and `p < 1` is allowed. -/
+theorem tendsto_eLpNorm_sub_of_dominated_convergence {p : ℝ≥0∞} (hp : p ≠ ∞)
+    {F : ℕ → α → E} {f : α → E} (bound : α → ℝ)
+    (F_measurable : ∀ n, AEStronglyMeasurable (F n) ν) (bound_memLp : MemLp bound p ν)
+    (h_bound : ∀ n, ∀ᵐ x ∂ν, ‖F n x‖ ≤ bound x)
+    (h_lim : ∀ᵐ x ∂ν, Tendsto (fun n ↦ F n x) atTop (𝓝 (f x))) :
+    Tendsto (fun n ↦ eLpNorm (F n - f) p ν) atTop (𝓝 0) := by
+  rcases eq_or_ne p 0 with rfl | hp0
+  · simp
   have hp_pos : 0 < p.toReal := ENNReal.toReal_pos hp0 hp
-  have hgm : AEStronglyMeasurable g ν := aestronglyMeasurable_of_tendsto_ae _ hf hlim
-  -- the `p`-th powers of `‖f n − g‖ₑ` are dominated by `(2‖G‖ₑ)^p` and tend to `0`
-  have hdom (n : ℕ) : (fun x ↦ ‖(f n - g) x‖ₑ ^ p.toReal) ≤ᵐ[ν]
-      fun x ↦ (2 * ‖G x‖ₑ) ^ p.toReal := by
-    filter_upwards [hbound n, hlim, ae_all_iff.2 hbound] with x hn hx hall
-    have hle (y : E) (hy : ‖y‖ ≤ G x) : ‖y‖ₑ ≤ ‖G x‖ₑ :=
-      enorm_le_iff_norm_le.2 (hy.trans ((le_abs_self _).trans (Real.norm_eq_abs _).ge))
+  have hfm : AEStronglyMeasurable f ν := aestronglyMeasurable_of_tendsto_ae _ F_measurable h_lim
+  -- the `p`-th powers of `‖F n − f‖ₑ` are dominated by `(2‖bound‖ₑ)^p` and tend to `0`
+  have hdom (n : ℕ) : (fun x ↦ ‖(F n - f) x‖ₑ ^ p.toReal) ≤ᵐ[ν]
+      fun x ↦ (2 * ‖bound x‖ₑ) ^ p.toReal := by
+    filter_upwards [h_lim, ae_all_iff.2 h_bound] with x hx hall
+    have hle (y : E) (hy : ‖y‖ ≤ bound x) : ‖y‖ₑ ≤ ‖bound x‖ₑ :=
+      enorm_le_iff_norm_le.2 (hy.trans (Real.le_norm_self _))
     gcongr
-    calc ‖(f n - g) x‖ₑ ≤ ‖f n x‖ₑ + ‖g x‖ₑ := enorm_sub_le
-      _ ≤ ‖G x‖ₑ + ‖G x‖ₑ := add_le_add (hle _ hn) (hle _ (le_of_tendsto' hx.norm hall))
-      _ = 2 * ‖G x‖ₑ := (two_mul _).symm
-  have hfin : ∫⁻ x, (2 * ‖G x‖ₑ) ^ p.toReal ∂ν ≠ ∞ := by
+    calc ‖(F n - f) x‖ₑ ≤ ‖F n x‖ₑ + ‖f x‖ₑ := enorm_sub_le
+      _ ≤ ‖bound x‖ₑ + ‖bound x‖ₑ :=
+        add_le_add (hle _ (hall n)) (hle _ (le_of_tendsto' hx.norm hall))
+      _ = 2 * ‖bound x‖ₑ := (two_mul _).symm
+  have hfin : ∫⁻ x, (2 * ‖bound x‖ₑ) ^ p.toReal ∂ν ≠ ∞ := by
     simp_rw [ENNReal.mul_rpow_of_nonneg _ _ hp_pos.le]
     rw [lintegral_const_mul' _ _ (by simp)]
     exact ENNReal.mul_ne_top (by simp)
-      (lintegral_rpow_enorm_lt_top_of_eLpNorm_lt_top hp0 hp hG.eLpNorm_lt_top).ne
-  have hzero : ∀ᵐ x ∂ν, Tendsto (fun n ↦ ‖(f n - g) x‖ₑ ^ p.toReal) atTop (𝓝 0) := by
-    filter_upwards [hlim] with x hx
-    have h0 : Tendsto (fun n ↦ ‖(f n - g) x‖ₑ) atTop (𝓝 0) := by
-      simpa using (tendsto_sub_nhds_zero_iff.2 hx).enorm
-    have h1 := ((ENNReal.continuous_rpow_const (y := p.toReal)).tendsto 0).comp h0
-    rwa [ENNReal.zero_rpow_of_pos hp_pos] at h1
+      (lintegral_rpow_enorm_lt_top_of_eLpNorm_lt_top hp0 hp bound_memLp.eLpNorm_lt_top).ne
+  have hzero : ∀ᵐ x ∂ν, Tendsto (fun n ↦ ‖(F n - f) x‖ₑ ^ p.toReal) atTop (𝓝 0) := by
+    filter_upwards [h_lim] with x hx
+    simpa [ENNReal.zero_rpow_of_pos hp_pos] using
+      (tendsto_sub_nhds_zero_iff.2 hx).enorm.ennrpow_const p.toReal
   have hlin := tendsto_lintegral_of_dominated_convergence' _
-    (fun n ↦ ((hf n).sub hgm).enorm.pow_const _) hdom hfin hzero
-  simp only [lintegral_zero] at hlin
-  have hroot := ((ENNReal.continuous_rpow_const (y := 1 / p.toReal)).tendsto 0).comp hlin
-  rw [ENNReal.zero_rpow_of_pos (one_div_pos.2 hp_pos)] at hroot
+    (fun n ↦ ((F_measurable n).sub hfm).enorm.pow_const _) hdom hfin hzero
   simp_rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp0 hp]
-  exact hroot
+  simpa [ENNReal.zero_rpow_of_pos (inv_pos.2 hp_pos)] using hlin.ennrpow_const (1 / p.toReal)
 
 end DominatedLp
 
@@ -131,12 +134,11 @@ theorem ae_bracketMeasure_of_ae_forall (T : ℝ≥0) (hBmeas : ∀ t, Measurable
     ∀ᵐ z ∂(bracketMeasure (μ := μ) T hBmeas φ), q z := by
   have hnull : trimMeasure_T (μ := μ) T hBmeas {z | ¬ q z} = 0 := by
     unfold trimMeasure_T
-    rw [trim_measurableSet_eq _ (show MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas).predictable] {z | ¬ q z}
-      from hq.compl)]
-    refine measure_mono_null (t := Set.univ ×ˢ toMeasurable μ {ω | ¬ ∀ t, q (t, ω)}) ?_ ?_
-    · rintro ⟨t, ω⟩ hz
-      exact ⟨Set.mem_univ _, subset_toMeasurable _ _ fun hall ↦ hz (hall t)⟩
-    · rw [Measure.prod_prod, measure_toMeasurable, ae_iff.1 h, mul_zero]
+    rw [trim_measurableSet_eq _
+      (show MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas).predictable] {z | ¬ q z} from hq.compl)]
+    refine measure_mono_null (t := Set.univ ×ˢ {ω | ¬ ∀ t, q (t, ω)})
+      (fun z hz ↦ ⟨Set.mem_univ _, fun hall ↦ hz (hall z.1)⟩) ?_
+    rw [Measure.prod_prod, ae_iff.1 h, mul_zero]
   exact (withDensity_absolutelyContinuous _ _).ae_le (ae_iff.2 hnull)
 
 /-! ### The domain: processes with a predictable square-integrable version -/
@@ -146,8 +148,8 @@ variable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMe
 /-- `X'` is a **predictable square-integrable version** of the process `X`: predictable as a
 function of `(t, ω)`, square-integrable against the bracket `⟨M⟩`, and indistinguishable from
 `X`. Indistinguishability, not `⟨M⟩`-a.e. equality, is the relation the upstream
-characterisation is stated for, and for the uncompleted natural filtration it is genuinely
-different: a process indistinguishable from a predictable one need not be predictable. -/
+characterisation is stated for, and it is genuinely different: a process indistinguishable from
+a predictable one need not be predictable, or even jointly measurable, whatever the filtration. -/
 def IsPredictableVersion (X X' : ℝ≥0 → Ω → ℝ) : Prop :=
   Measurable[(natFiltration (mΩ := mΩ) hBmeas).predictable] (Function.uncurry X') ∧
     MemLp (Function.uncurry X') 2 (bracketMeasure (μ := μ) T hBmeas φ) ∧ X ≡ᵐ[μ] X'
@@ -166,7 +168,7 @@ theorem uncurry_ae_eq_of_isPredictableVersion {X X₁ X₂ : ℝ≥0 → Ω → 
     (q := fun z ↦ Function.uncurry X₁ z = Function.uncurry X₂ z)
     (measurableSet_eq_fun h₁.1 h₂.1) ?_
   filter_upwards [h₁.2.2, h₂.2.2] with ω h1 h2 t
-  simp only [Function.uncurry_apply_pair, ← h1 t, h2 t]
+  exact (h1 t).symm.trans (h2 t)
 
 variable (T hBmeas φ) in
 open scoped Classical in
@@ -180,39 +182,30 @@ theorem integrandLp_eq {X X' : ℝ≥0 → Ω → ℝ} (h : IsPredictableVersion
     integrandLp T hBmeas φ X = h.2.1.toLp _ := by
   have hX : X ∈ domain T hBmeas φ := ⟨X', h⟩
   rw [integrandLp, dif_pos hX]
-  exact Lp.ext ((MemLp.coeFn_toLp _).trans
-    ((uncurry_ae_eq_of_isPredictableVersion hX.choose_spec h).trans (MemLp.coeFn_toLp _).symm))
+  exact MemLp.toLp_congr _ _ (uncurry_ae_eq_of_isPredictableVersion hX.choose_spec h)
 
 /-! ### The integrator and the integral -/
 
 variable (T hBmeas φ) in
 /-- **The integrator**: `M = φ●B` stopped at `T`, `t ↦ M_{t ∧ T}`, read through a representative
 of each `M_t`. The upstream predicate integrates over the whole time axis; stopping the
-integrator at `T` is what makes that the integral over `[0, T]`. -/
+integrator at `T` is what makes that the integral over `[0, T]`. The predicate reads the
+integrator only through increments `Y_j − Y_i` almost surely, at fixed times, so the choice of
+representatives does not matter. -/
 noncomputable def integrator (hB : IsPreBrownianReal B μ) : ℝ≥0 → Ω → ℝ :=
   fun t ↦ ⇑(itoProcessCLM hB T (min t T) hBmeas φ)
 
 variable (T hBmeas φ) in
-/-- **The integral against `M`, on processes**: integrate the `L²(⟨M⟩)` class of the process. -/
+/-- **The integral against `M`, on processes**: integrate the `L²(⟨M⟩)` class of the process.
+Named after the upstream `SIntegral`, the type of maps from processes to random variables. -/
 noncomputable def sIntegral (hB : IsPreBrownianReal B μ) : (ℝ≥0 → Ω → ℝ) → Ω → ℝ :=
   fun X ↦ ⇑(itoIntegralAgainstCLM hB T hBmeas φ (integrandLp T hBmeas φ X))
 
-/-- The bracket charges no time after `T`. -/
-theorem ae_fst_le_bracketMeasure : ∀ᵐ z ∂(bracketMeasure (μ := μ) T hBmeas φ), z.1 ≤ T := by
-  have hIoi : MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas).predictable]
-      (Set.Ioi T ×ˢ (Set.univ : Set Ω)) :=
-    measurableSet_predictable_Ioi_prod MeasurableSet.univ
-  have hnull : trimMeasure_T (μ := μ) T hBmeas (Set.Ioi T ×ˢ (Set.univ : Set Ω)) = 0 := by
-    unfold trimMeasure_T
-    rw [trim_measurableSet_eq _ hIoi, Measure.prod_prod, timeMeasure_T,
-      Measure.restrict_apply measurableSet_Ioi,
-      (Set.eq_empty_iff_forall_notMem (s := Set.Ioi T ∩ Set.Ioc 0 T)).2
-        fun x hx ↦ absurd hx.2.2 (not_le.2 hx.1), measure_empty, zero_mul]
-  have hsub : {z : ℝ≥0 × Ω | ¬ z.1 ≤ T} ⊆ Set.Ioi T ×ˢ (Set.univ : Set Ω) :=
-    fun z hz ↦ ⟨not_le.1 hz, Set.mem_univ _⟩
-  have hae : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), z.1 ≤ T :=
-    ae_iff.2 (measure_mono_null hsub hnull)
-  exact (withDensity_absolutelyContinuous _ _).ae_le hae
+/-- The bracket lives on `(0, T] × Ω`: it charges neither the time origin nor any time after `T`.
+Read off `trim_T` through the density. -/
+theorem ae_fst_mem_Ioc_bracketMeasure :
+    ∀ᵐ z ∂(bracketMeasure (μ := μ) T hBmeas φ), z.1 ∈ Set.Ioc 0 T :=
+  (withDensity_absolutelyContinuous _ _).ae_le (ae_fst_mem_Ioc_trimMeasure_T T hBmeas)
 
 /-! ### The elementary processes -/
 
@@ -233,36 +226,35 @@ theorem isPredictableVersion_band {i j : ℝ≥0} (hij : i ≤ j) {X : Ω → �
   have hm := measurable_elemIntegrand hBmeas hij hXm
   refine ⟨by rw [uncurry_band]; exact hm, ?_, .rfl⟩
   rw [uncurry_band]
-  exact MemLp.of_bound hm.stronglyMeasurable.aestronglyMeasurable C
+  exact MemLp.of_bound hm.aestronglyMeasurable C
     (Eventually.of_forall fun z ↦ norm_elemIntegrand_le hC z)
 
 /-- **The band identity, on processes**: the integral of `1_{(i,j]}·X` against `M` is
 `X·(M_{j∧T} − M_{i∧T})`, with the band cut off at `T`. -/
 theorem sIntegral_band (hB : IsPreBrownianReal B μ) {i j : ℝ≥0} (hij : i ≤ j) {X : Ω → ℝ}
-    (hXm : Measurable[natFiltration hBmeas i] X) {C : ℝ} (hC : ∀ ω, |X ω| ≤ C) :
+    (hXm : Measurable[natFiltration hBmeas i] X) {C : ℝ} (hC : ∀ ω, ‖X ω‖ ≤ C) :
     sIntegral T hBmeas φ hB (fun k ω ↦ if k ∈ Set.Ioc i j then X ω else 0)
       =ᵐ[μ] X * (integrator T hBmeas φ hB j - integrator T hBmeas φ hB i) := by
-  have hv := isPredictableVersion_band (T := T) (φ := φ) hij hXm (C := C)
-    (fun ω ↦ by simpa [Real.norm_eq_abs] using hC ω)
+  have hv := isPredictableVersion_band (T := T) (φ := φ) hij hXm hC
   simp only [sIntegral, integrandLp_eq hv]
   by_cases hiT : i ≤ T
   · have hcut : ⇑(hv.2.1.toLp _) =ᵐ[bracketMeasure (μ := μ) T hBmeas φ]
         elemIntegrand i (min j T) X := by
-      filter_upwards [MemLp.coeFn_toLp hv.2.1, ae_fst_le_bracketMeasure (T := T) (φ := φ)]
+      filter_upwards [MemLp.coeFn_toLp hv.2.1, ae_fst_mem_Ioc_bracketMeasure (T := T) (φ := φ)]
         with z hz hzT
       rw [hz, uncurry_band]
-      simp only [elemIntegrand, Set.indicator_apply, Set.mem_Ioc, le_min_iff, hzT, and_true]
+      simp only [elemIntegrand, Set.indicator_apply, Set.mem_Ioc, le_min_iff, hzT.2, and_true]
     filter_upwards [itoIntegralAgainst_elementary (hB := hB) T hBmeas φ (le_min hij hiT)
       (min_le_right _ _) X hXm C hC (hv.2.1.toLp _) hcut] with ω hω
     simp only [hω, integrator, Pi.mul_apply, Pi.sub_apply, min_eq_left hiT]
   · rw [not_le] at hiT
     have hzero : hv.2.1.toLp _ = 0 := by
       refine Lp.ext ?_
-      filter_upwards [MemLp.coeFn_toLp hv.2.1, ae_fst_le_bracketMeasure (T := T) (φ := φ),
+      filter_upwards [MemLp.coeFn_toLp hv.2.1, ae_fst_mem_Ioc_bracketMeasure (T := T) (φ := φ),
         Lp.coeFn_zero ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ)] with z hz hzT h0
       rw [hz, h0, uncurry_band]
       simp only [elemIntegrand, Set.indicator_apply, Set.mem_Ioc, Pi.zero_apply]
-      rw [if_neg fun h ↦ absurd (hiT.trans h.1) (not_lt.2 hzT), zero_mul]
+      rw [if_neg fun h ↦ absurd (hiT.trans h.1) (not_lt.2 hzT.2), zero_mul]
     rw [hzero, map_zero]
     filter_upwards [Lp.coeFn_zero ℝ 2 μ] with ω hω
     simp [integrator, min_eq_right hiT.le, min_eq_right (hiT.le.trans hij)]
@@ -276,27 +268,21 @@ theorem uncurry_bottomBand_of_ne_zero (i : ℝ≥0) (X : Ω → ℝ) {z : ℝ≥
     pos_iff_ne_zero.2 hz, true_and]
   split_ifs <;> simp
 
-omit [IsProbabilityMeasure μ] in
 /-- The initial band, with an `𝓕_0`-measurable coefficient, is predictable. Unlike the later bands
 it charges the time origin, through `{0} × Ω`. -/
 theorem measurable_bottomBand (i : ℝ≥0) {X : Ω → ℝ}
     (hXm : Measurable[natFiltration hBmeas ⊥] X) :
     Measurable[(natFiltration (mΩ := mΩ) hBmeas).predictable]
       (Function.uncurry (fun k ω ↦ if k ∈ Set.Iic i then X ω else 0)) := by
-  intro S hS
-  have hin : MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas).predictable]
-      (Set.Iic i ×ˢ (X ⁻¹' S)) :=
-    measurableSet_predictable_Iic_prod (hXm hS)
-  have hout : MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas).predictable]
-      ((Set.Iic i ×ˢ (Set.univ : Set Ω))ᶜ) :=
-    (measurableSet_predictable_Iic_prod MeasurableSet.univ).compl
-  by_cases h0 : (0 : ℝ) ∈ S
-  · convert hin.union hout using 1
-    ext z
-    by_cases hz : z.1 ≤ i <;> simp [Function.uncurry, hz, h0]
-  · convert hin using 1
-    ext z
-    by_cases hz : z.1 ≤ i <;> simp [Function.uncurry, hz, h0]
+  have hX : Measurable[(natFiltration (mΩ := mΩ) hBmeas).predictable] fun z : ℝ≥0 × Ω ↦ X z.2 :=
+    fun S hS ↦ by
+      have h := measurableSet_predictable_univ_prod (𝓕 := natFiltration hBmeas) (hXm hS)
+      rw [Set.univ_prod] at h
+      exact h
+  convert hX.indicator
+    (measurableSet_predictable_Iic_prod (i := i) (s := Set.univ) MeasurableSet.univ) using 1
+  funext z
+  by_cases hz : z.1 ≤ i <;> simp [Function.uncurry, hz]
 
 omit [IsProbabilityMeasure μ] in
 /-- The initial band with a bounded `𝓕_0`-measurable coefficient is its own predictable
@@ -306,36 +292,30 @@ theorem isPredictableVersion_bottomBand (i : ℝ≥0) {X : Ω → ℝ}
     IsPredictableVersion T hBmeas φ (fun k ω ↦ if k ∈ Set.Iic i then X ω else 0)
       (fun k ω ↦ if k ∈ Set.Iic i then X ω else 0) := by
   refine ⟨measurable_bottomBand i hXm, ?_, .rfl⟩
-  refine MemLp.of_bound (measurable_bottomBand i hXm).stronglyMeasurable.aestronglyMeasurable
-    C (Eventually.of_forall fun z ↦ ?_)
+  refine MemLp.of_bound (measurable_bottomBand i hXm).aestronglyMeasurable C
+    (Eventually.of_forall fun z ↦ ?_)
   simp only [Function.uncurry]
   split_ifs
   · exact hC _
   · simpa using (norm_nonneg (X z.2)).trans (hC z.2)
 
 /-- **The initial band identity**: the integral of `1_{[0,i]}·X` against `M` is
-`X·(M_{i∧T} − M_0)`. The time origin is `⟨M⟩`-null, so the initial band integrates as the band on
-`(0, i]`. -/
+`X·(M_{i∧T} − M_0)`. The time origin is `⟨M⟩`-null, so the initial band has the class of the band
+on `(0, i]`, and the band identity applies. -/
 theorem sIntegral_bottomBand (hB : IsPreBrownianReal B μ) (i : ℝ≥0) {X : Ω → ℝ}
-    (hXm : Measurable[natFiltration hBmeas ⊥] X) {C : ℝ} (hC : ∀ ω, |X ω| ≤ C) :
+    (hXm : Measurable[natFiltration hBmeas ⊥] X) {C : ℝ} (hC : ∀ ω, ‖X ω‖ ≤ C) :
     sIntegral T hBmeas φ hB (fun k ω ↦ if k ∈ Set.Iic i then X ω else 0)
       =ᵐ[μ] X * (integrator T hBmeas φ hB i - integrator T hBmeas φ hB ⊥) := by
-  have hv := isPredictableVersion_bottomBand (T := T) (φ := φ) i hXm (C := C)
-    (fun ω ↦ by simpa [Real.norm_eq_abs] using hC ω)
-  simp only [sIntegral, integrandLp_eq hv]
-  have hbot : ∀ᵐ z ∂(bracketMeasure (μ := μ) T hBmeas φ), z.1 ≠ 0 :=
-    (withDensity_absolutelyContinuous _ _).ae_le (ae_fst_ne_zero T hBmeas)
-  have hcut : ⇑(hv.2.1.toLp _) =ᵐ[bracketMeasure (μ := μ) T hBmeas φ]
-      elemIntegrand 0 (min i T) X := by
-    filter_upwards [MemLp.coeFn_toLp hv.2.1, ae_fst_le_bracketMeasure (T := T) (φ := φ), hbot]
-      with z hz hzT hz0
-    rw [hz, uncurry_bottomBand_of_ne_zero i X hz0]
-    simp only [elemIntegrand, Set.indicator_apply, Set.mem_Ioc, le_min_iff, hzT, and_true]
-  filter_upwards [itoIntegralAgainst_elementary (hB := hB) T hBmeas φ zero_le
-    (min_le_right _ _) X hXm C hC (hv.2.1.toLp _) hcut] with ω hω
-  have h0 : min (⊥ : ℝ≥0) T = 0 := by simp
-  refine hω.trans ?_
-  simp only [integrator, Pi.mul_apply, Pi.sub_apply, h0]
+  have hv := isPredictableVersion_bottomBand (T := T) (φ := φ) i hXm hC
+  have hv' := isPredictableVersion_band (T := T) (φ := φ) (zero_le : (0 : ℝ≥0) ≤ i) hXm hC
+  have hclass : hv.2.1.toLp _ = hv'.2.1.toLp _ := by
+    refine MemLp.toLp_congr _ _ ?_
+    filter_upwards [ae_fst_mem_Ioc_bracketMeasure (T := T) (φ := φ)] with z hz
+    rw [uncurry_band, uncurry_bottomBand_of_ne_zero i X hz.1.ne']
+  have hband := sIntegral_band (T := T) (φ := φ) hB (zero_le : (0 : ℝ≥0) ≤ i) hXm hC
+  simp only [sIntegral, integrandLp_eq hv, integrandLp_eq hv'] at hband ⊢
+  rw [hclass]
+  exact hband
 
 /-! ### Versions are closed under the operations the characterisation asks for -/
 
@@ -361,20 +341,12 @@ theorem integrandLp_add {X₁ X₂ X₁' X₂' : ℝ≥0 → Ω → ℝ}
     (h₁ : IsPredictableVersion T hBmeas φ X₁ X₁') (h₂ : IsPredictableVersion T hBmeas φ X₂ X₂') :
     integrandLp T hBmeas φ (X₁ + X₂) = integrandLp T hBmeas φ X₁ + integrandLp T hBmeas φ X₂ := by
   rw [integrandLp_eq (h₁.add h₂), integrandLp_eq h₁, integrandLp_eq h₂]
-  refine Lp.ext ?_
-  filter_upwards [MemLp.coeFn_toLp (h₁.add h₂).2.1, Lp.coeFn_add (h₁.2.1.toLp _) (h₂.2.1.toLp _),
-    MemLp.coeFn_toLp h₁.2.1, MemLp.coeFn_toLp h₂.2.1] with z hz hadd h1 h2
-  rw [hz, hadd, Pi.add_apply, h1, h2]
-  rfl
+  exact MemLp.toLp_add _ _
 
 theorem integrandLp_const_smul {X X' : ℝ≥0 → Ω → ℝ} (h : IsPredictableVersion T hBmeas φ X X')
     (c : ℝ) : integrandLp T hBmeas φ (c • X) = c • integrandLp T hBmeas φ X := by
   rw [integrandLp_eq (h.const_smul c), integrandLp_eq h]
-  refine Lp.ext ?_
-  filter_upwards [MemLp.coeFn_toLp (h.const_smul c).2.1, Lp.coeFn_smul c (h.2.1.toLp _),
-    MemLp.coeFn_toLp h.2.1] with z hz hsmul h1
-  rw [hz, hsmul, Pi.smul_apply, h1]
-  rfl
+  exact MemLp.toLp_const_smul c _
 
 /-! ### Dominated convergence -/
 
@@ -393,7 +365,7 @@ theorem sIntegral_dct (hB : IsPreBrownianReal B μ) (X : ℕ → ℝ≥0 → Ω 
   obtain ⟨Vd, hVd⟩ := h₂
   set pred := (natFiltration (mΩ := mΩ) hBmeas).predictable
   -- the limit version, pathwise
-  set Vl : ℝ≥0 → Ω → ℝ := fun t ω ↦ limUnder atTop (fun n ↦ V n t ω) with hVl_def
+  set Vl : ℝ≥0 → Ω → ℝ := fun t ω ↦ limUnder atTop (fun n ↦ V n t ω)
   have hall : ∀ᵐ ω ∂μ, (∀ n t, V n t ω = X n t ω) ∧ ∀ t, Vd t ω = X_dom t ω := by
     filter_upwards [ae_all_iff.2 fun n ↦ (hV n).2.2, hVd.2.2] with ω hn hd
     exact ⟨fun n t ↦ (hn n t).symm, fun t ↦ (hd t).symm⟩
@@ -433,32 +405,21 @@ theorem sIntegral_dct (hB : IsPreBrownianReal B μ) (X : ℕ → ℝ≥0 → Ω 
       hVl_eq.mono fun ω h t ↦ (h t).symm⟩
   refine ⟨⟨Vl, hVl⟩, ?_⟩
   -- convergence in `L²(⟨M⟩)`, then through the isometry, then in measure
-  have hLp : Tendsto (fun n ↦ (hV n).2.1.toLp (Function.uncurry (V n))) atTop
-      (𝓝 (hVl.2.1.toLp (Function.uncurry Vl))) := by
-    rw [Lp.tendsto_Lp_iff_tendsto_eLpNorm]
-    have hcongr (n : ℕ) : eLpNorm (⇑((hV n).2.1.toLp (Function.uncurry (V n)))
-        - Function.uncurry Vl) 2 (bracketMeasure (μ := μ) T hBmeas φ)
-        = eLpNorm (Function.uncurry (V n) - Function.uncurry Vl) 2
-            (bracketMeasure (μ := μ) T hBmeas φ) :=
-      eLpNorm_congr_ae ((MemLp.coeFn_toLp _).sub EventuallyEq.rfl)
-    simp_rw [hcongr]
-    exact tendsto_eLpNorm_sub_of_dominated two_ne_zero ENNReal.ofNat_ne_top
-      (fun n ↦ (hVm n).aestronglyMeasurable) hVd.2.1.norm hdom hconv
-  have hM := ((itoIntegralAgainstCLM hB T hBmeas φ).continuous.tendsto _).comp hLp
-  have hfun : (fun n ↦ sIntegral T hBmeas φ hB (X n))
-      = fun n ↦ ⇑(itoIntegralAgainstCLM hB T hBmeas φ
-          ((hV n).2.1.toLp (Function.uncurry (V n)))) := by
-    funext n
-    simp only [sIntegral, integrandLp_eq (hV n)]
-  rw [hfun, show sIntegral T hBmeas φ hB X_lim = ⇑(itoIntegralAgainstCLM hB T hBmeas φ
-      (hVl.2.1.toLp (Function.uncurry Vl))) by simp only [sIntegral, integrandLp_eq hVl]]
-  exact tendstoInMeasure_of_tendsto_eLpNorm two_ne_zero (fun n ↦ Lp.aestronglyMeasurable _)
-    (Lp.aestronglyMeasurable _) ((Lp.tendsto_Lp_iff_tendsto_eLpNorm' _ _).1 hM)
+  have hLp : Tendsto (fun n ↦ integrandLp T hBmeas φ (X n)) atTop
+      (𝓝 (integrandLp T hBmeas φ X_lim)) := by
+    have hseq : (fun n ↦ integrandLp T hBmeas φ (X n)) = fun n ↦ (hV n).2.1.toLp _ :=
+      funext fun n ↦ integrandLp_eq (hV n)
+    rw [hseq, integrandLp_eq hVl]
+    exact (Lp.tendsto_Lp_iff_tendsto_eLpNorm'' _ (fun n ↦ (hV n).2.1) _ hVl.2.1).2
+      (tendsto_eLpNorm_sub_of_dominated_convergence ENNReal.ofNat_ne_top _
+        (fun n ↦ (hVm n).aestronglyMeasurable) hVd.2.1.norm hdom hconv)
+  exact tendstoInMeasure_of_tendsto_Lp
+    (((itoIntegralAgainstCLM hB T hBmeas φ).continuous.tendsto _).comp hLp)
 
 /-! ### The integral against `M` extends the Riemann–Stieltjes integral -/
 
 /-- **The integral against `M` is an extension of the Riemann–Stieltjes integral**, in the sense of
-Degenne's `IsRiemannStieltjesExtension`: on elementary processes it is the Riemann–Stieltjes sum
+BrownianMotion's `IsRiemannStieltjesExtension`: on elementary processes it is the Riemann–Stieltjes sum
 against `M` stopped at `T`, and it respects linearity, indistinguishability and dominated
 convergence. -/
 theorem isRiemannStieltjesExtension (hB : IsPreBrownianReal B μ) :
@@ -466,23 +427,16 @@ theorem isRiemannStieltjesExtension (hB : IsPreBrownianReal B μ) :
       (sIntegral T hBmeas φ hB) (domain T hBmeas φ) where
   measurable _ _ := Lp.aestronglyMeasurable _
   elementary_ioc i j hij X := by
-    obtain ⟨C, hC⟩ : ∃ C, ∀ ω, ‖X ω‖ ≤ C := by
+    -- a simple function over `𝓕_i` is bounded and `𝓕_i`-measurable
+    obtain ⟨⟨C, hC⟩, hXm⟩ : (∃ C, ∀ ω, ‖X ω‖ ≤ C) ∧ Measurable[natFiltration hBmeas i] X := by
       letI : MeasurableSpace Ω := natFiltration hBmeas i
-      exact X.exists_forall_norm_le
-    have hXm : Measurable[natFiltration hBmeas i] X := by
-      letI : MeasurableSpace Ω := natFiltration hBmeas i
-      exact X.measurable
-    exact ⟨⟨_, isPredictableVersion_band hij hXm hC⟩,
-      sIntegral_band hB hij hXm (C := C) fun ω ↦ by simpa [Real.norm_eq_abs] using hC ω⟩
+      exact ⟨X.exists_forall_norm_le, X.measurable⟩
+    exact ⟨⟨_, isPredictableVersion_band hij hXm hC⟩, sIntegral_band hB hij hXm hC⟩
   elementary_iic i X := by
-    obtain ⟨C, hC⟩ : ∃ C, ∀ ω, ‖X ω‖ ≤ C := by
+    obtain ⟨⟨C, hC⟩, hXm⟩ : (∃ C, ∀ ω, ‖X ω‖ ≤ C) ∧ Measurable[natFiltration hBmeas ⊥] X := by
       letI : MeasurableSpace Ω := natFiltration hBmeas ⊥
-      exact X.exists_forall_norm_le
-    have hXm : Measurable[natFiltration hBmeas ⊥] X := by
-      letI : MeasurableSpace Ω := natFiltration hBmeas ⊥
-      exact X.measurable
-    exact ⟨⟨_, isPredictableVersion_bottomBand i hXm hC⟩,
-      sIntegral_bottomBand hB i hXm (C := C) fun ω ↦ by simpa [Real.norm_eq_abs] using hC ω⟩
+      exact ⟨X.exists_forall_norm_le, X.measurable⟩
+    exact ⟨⟨_, isPredictableVersion_bottomBand i hXm hC⟩, sIntegral_bottomBand hB i hXm hC⟩
   integral_add X₁ X₂ h₁ h₂ := by
     obtain ⟨V₁, hV₁⟩ := h₁
     obtain ⟨V₂, hV₂⟩ := h₂
@@ -501,19 +455,23 @@ theorem isRiemannStieltjesExtension (hB : IsPreBrownianReal B μ) :
     refine ⟨⟨V, hV.of_indistinguishable h₂⟩, ?_⟩
     simp only [sIntegral]
     rw [integrandLp_eq hV, integrandLp_eq (hV.of_indistinguishable h₂)]
-  integral_dct X X_dom X_lim h₁ h₂ h_dom h_lim := sIntegral_dct hB X X_dom X_lim h₁ h₂ h_dom h_lim
+  integral_dct := sIntegral_dct hB
 
 /-! ### Uniqueness: every extension agrees with this one on the common domain
 
 The uniqueness clause of `IsStochasticIntegral` ranges over *every* Riemann–Stieltjes extension
-`I'` with domain `S'`. Such an `I'` need not be `L²`-continuous, so the density argument behind
-`itoIntegralAgainst_unique` does not reach it; what `I'` does have is dominated convergence. The
-proof is therefore a monotone-class argument. The class `Agree` of processes on which the two
-integrals agree contains the elementary processes and is closed under sums, scalings and
-dominated limits. A Dynkin argument over the predictable rectangles puts every predictable
-indicator cut at a time `K` into it; simple functions follow by linearity, bounded predictable
-processes by uniform approximation, and then everything in the common domain by truncation, a
-process serving as its own dominating function. -/
+`I'` with domain `S'`. Such an `I'` is not assumed `L²`-continuous, nor even defined on
+`L²(⟨M⟩)`, so the density argument behind `itoIntegralAgainst_unique` does not reach it; what
+`I'` does have is dominated convergence. The proof is therefore a monotone-class argument, and
+nothing in it uses `M`: it needs only that both integrals are Riemann–Stieltjes extensions for
+the same integrator and filtration. The class `Agree` of processes on which the two integrals
+agree contains the elementary processes and is closed under sums, scalings and dominated limits.
+A Dynkin argument over the predictable rectangles puts every predictable indicator cut at a time
+`K` into it. The cut is needed because the constant process `1` need not lie in `S'`, while the
+elementary `𝟙_{[0,K]}` does and dominates every process bounded by one and switched off after
+`K`. Simple functions follow by linearity, bounded predictable processes by bounded pointwise
+approximation, and then everything in the common domain by truncation, a process serving as its
+own dominating function. -/
 
 section Uniqueness
 
@@ -720,32 +678,28 @@ theorem sIntegral_ae_eq_of_isRiemannStieltjesExtension
   obtain ⟨hVS', hI'V⟩ := hI'.integral_indistinguishable X V hX' hV.2.2
   -- truncate the version at height and time `n`
   set W : ℕ → ℝ≥0 → Ω → ℝ := fun n ↦
-    cut (fun z ↦ if |Function.uncurry V z| ≤ n then Function.uncurry V z else 0) n with hW
+    cut ({z | |Function.uncurry V z| ≤ n}.indicator (Function.uncurry V)) n
   have hWagree (n : ℕ) : Agree T hBmeas φ hB I' S' (W n) := by
     have hm : Measurable[(natFiltration (mΩ := mΩ) hBmeas).predictable]
-        (fun z ↦ if |Function.uncurry V z| ≤ n then Function.uncurry V z else 0) := by
+        ({z | |Function.uncurry V z| ≤ n}.indicator (Function.uncurry V)) := by
       letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
-      exact Measurable.ite (measurableSet_le hV.1.abs measurable_const) hV.1 measurable_const
+      exact hV.1.indicator (measurableSet_le hV.1.abs measurable_const)
     refine agree_cut_bounded hI' n hm (Nat.cast_nonneg n) fun z ↦ ?_
-    split_ifs with h
-    · simpa [Real.norm_eq_abs] using h
-    · simp
+    by_cases h : |Function.uncurry V z| ≤ n
+    · simpa [Set.indicator_of_mem (s := {z | |Function.uncurry V z| ≤ n}) h] using h
+    · simp [Set.indicator_of_notMem (s := {z | |Function.uncurry V z| ≤ n}) h]
   have hVagree : Agree T hBmeas φ hB I' S' V := by
-    refine Agree.of_tendsto hI' hWagree ⟨⟨V, hVV⟩, hVS'⟩ (fun n t ω ↦ ?_) (fun t ω ↦ ?_)
-    · show |W n t ω| ≤ |V t ω|
-      simp only [hW, cut]
-      rw [Set.indicator_apply]
-      split_ifs
-      all_goals first
-        | exact le_rfl
-        | (rw [abs_zero]; exact abs_nonneg _)
-    · obtain ⟨N, hN⟩ := exists_nat_ge (max (t : ℝ) |V t ω|)
-      refine tendsto_const_nhds.congr' ?_
-      filter_upwards [eventually_ge_atTop N] with n hn
-      have hn' : max (t : ℝ) |V t ω| ≤ n := hN.trans (Nat.cast_le.2 hn)
-      have htn : t ≤ (n : ℝ≥0) := by exact_mod_cast (le_max_left _ _).trans hn'
-      have hVn : |V t ω| ≤ n := (le_max_right _ _).trans hn'
-      simp [hW, cut, htn, hVn]
+    refine Agree.of_tendsto hI' hWagree ⟨⟨V, hVV⟩, hVS'⟩
+      (fun n t ω ↦ by
+        simp only [W, cut, ← Real.norm_eq_abs]
+        exact (norm_indicator_le_norm_self _ _).trans (norm_indicator_le_norm_self _ _))
+      (fun t ω ↦ tendsto_const_nhds.congr' ?_)
+    filter_upwards [(tendsto_natCast_atTop_atTop (R := ℝ≥0)).eventually_ge_atTop t,
+      (tendsto_natCast_atTop_atTop (R := ℝ)).eventually_ge_atTop |V t ω|] with n htn hVn
+    simp only [W, cut, Set.indicator_of_mem
+      (show (t, ω) ∈ Set.Iic (n : ℝ≥0) ×ˢ (Set.univ : Set Ω) from ⟨htn, Set.mem_univ _⟩)]
+    rw [Set.indicator_of_mem (s := {z | |Function.uncurry V z| ≤ (n : ℝ)}) hVn]
+    rfl
   have hXV : sIntegral T hBmeas φ hB X = sIntegral T hBmeas φ hB V := by
     simp only [sIntegral, integrandLp_eq hV, integrandLp_eq hVV]
   rw [hXV]
@@ -755,7 +709,7 @@ end Uniqueness
 
 /-! ### The characterisation -/
 
-/-- **The integral against `M = φ●B` is a stochastic integral in Degenne's sense.**
+/-- **The integral against `M = φ●B` is a stochastic integral in BrownianMotion's sense.**
 
 `IsStochasticIntegral` asks for an extension of the Riemann–Stieltjes integral (elementary values,
 linearity, indistinguishability, dominated convergence) that agrees with every other such

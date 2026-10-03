@@ -285,10 +285,10 @@
     },
     "gir-pricing-measure-density": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-10-02",
-      "elapsed_s": 37.4,
-      "input_hash": "3c0d4f7ab0064d3bd679b65e39f7ed7363a98677a2c08e5a03b014a10ea9ca81",
-      "verified_at_commit": "92c48dd"
+      "date": "2026-10-03",
+      "elapsed_s": 56.0,
+      "input_hash": "dff6e3d4c0d52e886b2c3aa4ee5372f49ee4378a94a40bae0dafb71c58f1b545",
+      "verified_at_commit": "f61a5e8"
     },
     "gir-pricing-measure-unique": {
       "benchmark_file": "girsanov_finance.json",
@@ -299,10 +299,10 @@
     },
     "gir-replication-in-price": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-10-02",
-      "elapsed_s": 52.0,
-      "input_hash": "a5591669e41cdcafd091f09059f4701884cb483f8c98a6960f699198b19ea1dc",
-      "verified_at_commit": "92c48dd"
+      "date": "2026-10-03",
+      "elapsed_s": 49.4,
+      "input_hash": "44761bdf4bab20060be1839c6731ccad4873150d6e558b96068a0b188543821b",
+      "verified_at_commit": "f61a5e8"
     },
     "gir-simple-adapted": {
       "benchmark_file": "girsanov_finance.json",
@@ -327,10 +327,10 @@
     },
     "gir-thm-9.1.8-predictable": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-10-02",
-      "elapsed_s": 5.2,
-      "input_hash": "256fba3af0fee22757c6c698326cdb1ee752241c0a7fb72f228ebb32ecb37691",
-      "verified_at_commit": "fdfecac"
+      "date": "2026-10-03",
+      "elapsed_s": 57.5,
+      "input_hash": "44328d87bd89ec0c493641a54882a6a20fb1990ce5b67b468bb167e4c2316da4",
+      "verified_at_commit": "f61a5e8"
     },
     "gir-thm-9.3.4": {
       "benchmark_file": "girsanov_finance.json",
@@ -495,17 +495,17 @@
     },
     "mf-american-put-log-boundary-convex": {
       "benchmark_file": "american_put_boundary.json",
-      "date": "2026-10-02",
-      "elapsed_s": 4.3,
-      "input_hash": "a2bd8c56af0f6f6d5a0915c412e199479acaeb48fc2b9e5e32e7fadf51f5188f",
-      "verified_at_commit": "fdfecac"
+      "date": "2026-10-03",
+      "elapsed_s": 66.4,
+      "input_hash": "145d5718265b35b23407d933da5e47bbcc2ef941cb9e8809e37d2e5e6fb50abd",
+      "verified_at_commit": "f61a5e8"
     },
     "mf-american-put-stock-boundary-strict-convex": {
       "benchmark_file": "american_put_boundary.json",
-      "date": "2026-10-02",
-      "elapsed_s": 6.3,
-      "input_hash": "a818e64a017434a431e426013ab2db10253a898272f0a9aa6b0fc3a84450d1f4",
-      "verified_at_commit": "fdfecac"
+      "date": "2026-10-03",
+      "elapsed_s": 52.8,
+      "input_hash": "7ead96f493375579482cffde575b49d098861861844dde5b33834dae0affcbc7",
+      "verified_at_commit": "f61a5e8"
     },
     "mf-american-supermartingale": {
       "benchmark_file": "mathematical_finance.json",
@@ -1202,10 +1202,10 @@
     },
     "mf-compound-poisson-mgf": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-02",
-      "elapsed_s": 3.7,
-      "input_hash": "5c337e611f8e36d815b858dc7c790332701db720ba70aa141e97bf4003108b80",
-      "verified_at_commit": "fdfecac"
+      "date": "2026-10-03",
+      "elapsed_s": 3.0,
+      "input_hash": "3f0436b1813688f804678c118940286944a3ac18317475c807bcfce7662038f2",
+      "verified_at_commit": "f61a5e8"
     },
     "mf-contract-capped-call": {
       "benchmark_file": "mathematical_finance.json",
@@ -1860,17 +1860,17 @@
     },
     "mf-mm-matrix-riccati": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-02",
-      "elapsed_s": 54.1,
-      "input_hash": "375e5e559dae4bf7087dcd3fc838802d2fc0cc45920a5713c6425df3f5abc756",
-      "verified_at_commit": "92c48dd"
+      "date": "2026-10-03",
+      "elapsed_s": 58.0,
+      "input_hash": "03058f763a80df707bc912a54a41c45b5fb1c8ae4fd69425487d999fd5fa5d5d",
+      "verified_at_commit": "f61a5e8"
     },
     "mf-mm-matrix-value": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-02",
-      "elapsed_s": 147.5,
-      "input_hash": "82e1f103eedcb08fe9d8e46a9e016f82919ae74df3de95144b1fd7bd86e344c8",
-      "verified_at_commit": "92c48dd"
+      "date": "2026-10-03",
+      "elapsed_s": 126.0,
+      "input_hash": "289f75cfaeae9f41852c894f0cb89c2ca1f07d9d11ff54f9d48dfd5717043543",
+      "verified_at_commit": "f61a5e8"
     },
     "mf-mm-quotes": {
       "benchmark_file": "mathematical_finance.json",
@@ -2749,17 +2749,17 @@
     },
     "sc-bracket-compensator": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-02",
-      "elapsed_s": 2.5,
-      "input_hash": "4eab93e8ca771ca8b85a6ec02037621f0664cf9f1b8fb1cbed096ec28e9e5226",
-      "verified_at_commit": "92c48dd"
+      "date": "2026-10-03",
+      "elapsed_s": 63.3,
+      "input_hash": "3e45b97ea95131bbedb2ef7189e045c75a11ec500ca1f25350130bb28bd41c17",
+      "verified_at_commit": "f61a5e8"
     },
     "sc-bracket-conditional": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-02",
-      "elapsed_s": 38.7,
-      "input_hash": "151d5a114ddd89c09808cd9080f16fb82482a5d7e1739abc5d74d6f8e8c92bd1",
-      "verified_at_commit": "92c48dd"
+      "date": "2026-10-03",
+      "elapsed_s": 60.3,
+      "input_hash": "e052b66a6018bc5170a669d416ac03a03cc42f353dd2acaa56cfa8599331d2ef",
+      "verified_at_commit": "f61a5e8"
     },
     "sc-bs-pde": {
       "benchmark_file": "stochastic_calculus.json",
@@ -2791,17 +2791,17 @@
     },
     "sc-exit-times-localizing-sequence": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-02",
-      "elapsed_s": 6.3,
-      "input_hash": "648e62134335acfc55d56288d5a1bd2b246720bbdedb8eb56fc1c784d49b66cd",
-      "verified_at_commit": "fdfecac"
+      "date": "2026-10-03",
+      "elapsed_s": 93.1,
+      "input_hash": "0c0790fa9a12680f0e3b1c52c75bdc10dbda58437a22ca97be576a73dad5824e",
+      "verified_at_commit": "f61a5e8"
     },
     "sc-ito-chain-rule": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-02",
-      "elapsed_s": 86.6,
-      "input_hash": "10e08bda48b41abc4ed8a480593b8602bb3cb5e2eee9c65da6332f7cb6d5ccc8",
-      "verified_at_commit": "92c48dd"
+      "date": "2026-10-03",
+      "elapsed_s": 57.2,
+      "input_hash": "02ebe673ab88d7dc79cf3179e41cc4d296243b44bbdaa8db7b85274fc44194c5",
+      "verified_at_commit": "f61a5e8"
     },
     "sc-ito-covariation-bilinear-isometry": {
       "benchmark_file": "stochastic_calculus.json",
@@ -2833,31 +2833,31 @@
     },
     "sc-ito-formula-td-process": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-02",
-      "elapsed_s": 6.4,
-      "input_hash": "f9dfc2beb3060dec6cabc37ce93f7aee80d8a8ed80068c74522aa2e380caa538",
-      "verified_at_commit": "fdfecac"
+      "date": "2026-10-03",
+      "elapsed_s": 189.5,
+      "input_hash": "50ed9bc43819808ad7474c66a47caac5b9dbc724828a0e895faa1828e4313923",
+      "verified_at_commit": "f61a5e8"
     },
     "sc-ito-formula-unrestricted-islocalmartingale": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-02",
-      "elapsed_s": 3.7,
-      "input_hash": "0168dc95e08c0975334b81f9ebff2d343827ea5bbc41f2548da4e1680deb0c0f",
-      "verified_at_commit": "fdfecac"
+      "date": "2026-10-03",
+      "elapsed_s": 49.8,
+      "input_hash": "dc70082b62db2030bc0bc16bda77076173003010791a6721d0293e778258fe55",
+      "verified_at_commit": "f61a5e8"
     },
     "sc-ito-formula-unrestricted-local": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-02",
-      "elapsed_s": 5.3,
-      "input_hash": "bd45efbbd772fb1413d32de718ad91bcd6c7d122041ef9aee4a6ebcfe58a227c",
-      "verified_at_commit": "fdfecac"
+      "date": "2026-10-03",
+      "elapsed_s": 54.9,
+      "input_hash": "135ed7a1c72950d7d8e965557bfe415779e89ae096f76c75ed775b6a9cf1a900",
+      "verified_at_commit": "f61a5e8"
     },
     "sc-ito-general-continuous-modification": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-02",
-      "elapsed_s": 4.7,
-      "input_hash": "412ad04ad62a3dc5594677b2a0110a0c12f945176fd5ac573d72eafdb37890e2",
-      "verified_at_commit": "fdfecac"
+      "date": "2026-10-03",
+      "elapsed_s": 58.9,
+      "input_hash": "38a87108371afe8d8f658606d0cd0d1d305857f9eb4e60fd3263cf4586fde805",
+      "verified_at_commit": "f61a5e8"
     },
     "sc-ito-general-l2-continuity": {
       "benchmark_file": "stochastic_calculus.json",
@@ -2868,10 +2868,10 @@
     },
     "sc-ito-general-local-martingale": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-02",
-      "elapsed_s": 3.7,
-      "input_hash": "49b77b9160211f8e30d6b544bb440d8a0629a2e4d8e222e53b2e0dc3396a7e8d",
-      "verified_at_commit": "fdfecac"
+      "date": "2026-10-03",
+      "elapsed_s": 178.6,
+      "input_hash": "ba4c48fa93dc3737506e8de4ccc40b39b8a0c61bcde7f4e8f09366f2d8029d8b",
+      "verified_at_commit": "f61a5e8"
     },
     "sc-ito-general-martingale": {
       "benchmark_file": "stochastic_calculus.json",
@@ -2903,31 +2903,31 @@
     },
     "sc-ito-infinite-local-martingale": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-02",
-      "elapsed_s": 5.9,
-      "input_hash": "e748872d2869a7d1806f0f44daaf92f71e4566ae78198c259d9256e0b3bab59d",
-      "verified_at_commit": "fdfecac"
+      "date": "2026-10-03",
+      "elapsed_s": 57.1,
+      "input_hash": "89a2e7fe67d1f2af9886e5d94b76e5757426c890369e487fe198a4a1a2531e2b",
+      "verified_at_commit": "f61a5e8"
     },
     "sc-ito-integral-against-drifted-price": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-02",
-      "elapsed_s": 48.7,
-      "input_hash": "3e24a42c7f2b2be3693519aa1482849323eb1b7f9eefa0f7c5bf6f5ce7c2e4f9",
-      "verified_at_commit": "92c48dd"
+      "date": "2026-10-03",
+      "elapsed_s": 168.9,
+      "input_hash": "2ccc717130118da6c041adb4ae2caa6e9f1a3e56921a78b086f02710f033d000",
+      "verified_at_commit": "f61a5e8"
     },
     "sc-ito-integral-band": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-02",
-      "elapsed_s": 35.6,
-      "input_hash": "8904d619001e2c2ad7526160a305755dae633c38496a6f5773b2f51b203217ea",
-      "verified_at_commit": "92c48dd"
+      "date": "2026-10-03",
+      "elapsed_s": 117.8,
+      "input_hash": "f4fe56cd4fa399a40a4d181c47b2301d3701a92e0427d4b987c35b027d0f7a38",
+      "verified_at_commit": "f61a5e8"
     },
     "sc-ito-is-stochastic-integral": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-02",
-      "elapsed_s": 2.3,
-      "input_hash": "b0b8f1ea4879f8c0f8aa35266139dc8c35255b01785dacdecb08bdc2143315d8",
-      "verified_at_commit": "47176bf"
+      "date": "2026-10-03",
+      "elapsed_s": 57.4,
+      "input_hash": "b5095de21658d4de5dc1bd4dcb52f374f4b49b39e88f7a53ac27ce44cb0c9aed",
+      "verified_at_commit": "f61a5e8"
     },
     "sc-ito-simple-process-isometry": {
       "benchmark_file": "stochastic_calculus.json",
@@ -3078,10 +3078,10 @@
     },
     "sde-picard-existence-uniqueness": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-02",
-      "elapsed_s": 5.2,
-      "input_hash": "c1d26e2c46219f282d603cae07714695b1a78d8ec63a849b7f2dddfcaf3ab724",
-      "verified_at_commit": "fdfecac"
+      "date": "2026-10-03",
+      "elapsed_s": 67.9,
+      "input_hash": "6b2036b39bd9df8d7ee78a066f4f7c3a51efddf58a87841cdc84e7d7cd039aaf",
+      "verified_at_commit": "f61a5e8"
     }
   }
 }

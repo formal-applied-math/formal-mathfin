@@ -151,7 +151,7 @@ import MathFin.Foundations.ItoIntegralCLM
 import MathFin.Foundations.LpMulIsometry
 import MathFin.Foundations.PredictableDensityGeneral
 import MathFin.Foundations.ItoIntegralAgainstMartingale
--- Degenne's axiomatic characterisation, instantiated: the integral against M = φ●B is an
+-- BrownianMotion's axiomatic characterisation, instantiated: the integral against M = φ●B is an
 -- `IsStochasticIntegral` (Riemann–Stieltjes values, dominated convergence, uniqueness)
 import MathFin.Foundations.StochasticIntegralCharacterisation
 -- The pointwise bracket: conditional Brownian kernels + single-band generators whose

@@ -67,10 +67,11 @@ by `itoIntegralCLM_T_bandRestrict`; the `𝓕_a`-measurable factor `Z` passes th
 Degenne's package carries an axiomatic characterisation of the stochastic integral
 (`IsRiemannStieltjesExtension`, `IsStochasticIntegral`), whose uniqueness clause is the same
 idea in a wider frame (dominated convergence rather than `L²` density). The integral built
-here satisfies it, for `M` stopped at `T`: `StochasticIntegralCharacterisation.isStochasticIntegral`.
-That is not a corollary of `itoIntegralAgainst_unique`, which stays here as uniqueness among
-continuous linear maps: an extension in the upstream sense need not be `L²`-continuous, and the
-characterisation's uniqueness clause is proved by a monotone-class argument instead.
+here satisfies it, for `M` stopped at `T`:
+`StochasticIntegralCharacterisation.isStochasticIntegral`. That is not a corollary of
+`itoIntegralAgainst_unique`, which stays here as uniqueness among continuous linear maps: an
+extension in the upstream sense is not assumed `L²`-continuous, so the characterisation's
+uniqueness clause is proved by a monotone-class argument instead.
 
 ## Result
 
