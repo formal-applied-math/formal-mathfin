@@ -11,16 +11,40 @@ public import MathFin.Foundations.WeightedQuadraticVariation
 /-! # Quadratic variation of an Itô process with adapted coefficients
 
 Step B2 of the adapted-coefficient Itô formula
-(`docs/specs/2026-07-05-adapted-ito-formula-design.md`, status of 2026-10-03), in progress. The
-target is `∑ₖ wₖ(ΔXₖ)² → ∫₀ᵀ w σ² ds` for `X = X₀ + A + σ●B` with a Lipschitz drift `A` and a
-bounded adapted continuous weight `w`, by splitting `(ΔXₖ)²` into a drift part, a cross part, the
-freezing defect of `AdaptedStochasticIntegralFreezing`, and the weighted quadratic variation of
-`B`.
+(`docs/specs/2026-07-05-adapted-ito-formula-design.md`, status of 2026-10-03). Let
+`X = X₀ + A + σ●B`, with `σ` bounded, adapted and path-continuous and the drift path `A`
+Lipschitz in time, and let `w` be a bounded adapted weight with continuous paths. Along the uniform
+partition `tₖ = kT/n` of `[0, T]`,
 
-## Result so far
+  `∑ₖ w(tₖ)(ΔXₖ)² → ∫₀ᵀ w σ² ds` in `L¹(μ)`.
 
-* `norm_sq_increment_le` — the increment of `M = σ●B` over `(a, b]` has squared `L²` norm at most
-  `C²·(b − a)`, read off the bracket identity `norm_sq_increment_eq_bracket`.
+`ItoProcessQV` has the unweighted statement for constant `σ`. Write `ΔMₖ` for the increment of
+`M = σ●B` and `Dₖ = ΔMₖ − σ(tₖ)ΔBₖ` for its freezing defect (`AdaptedStochasticIntegralFreezing`).
+Then `(ΔXₖ)² − σ(tₖ)²(ΔBₖ)² = (ΔAₖ)² + 2ΔAₖΔMₖ + 2DₖΔMₖ − Dₖ²`, which `abs_mul_sq_sub_le` turns
+into a bound, and
+
+* the drift part `∑ (ΔAₖ)²` is at most `Cₐ²T²/n`;
+* the cross part `∑ 2ΔAₖΔMₖ` is `O(1/√n)` in `L¹`, since `‖ΔMₖ‖² ≤ C²T/n`
+  (`norm_sq_increment_le`);
+* the freezing part is at most `2√(∑‖Dₖ‖²)·√(C²T) + ∑‖Dₖ‖²` in `L¹`, by Cauchy–Schwarz, and
+  `∑‖Dₖ‖² → 0` (`tendsto_sum_norm_sq_freezingDefect`);
+* the frozen squares carry the weighted quadratic variation of `B` with weight `w σ²`
+  (`tendsto_weighted_qv_process`).
+
+The limit is in `L¹`, where `ItoProcessQV` has `L²`: an `L²` bound on the freezing part would need
+fourth moments of `σ●B`, which the tower does not have. `L¹` convergence gives convergence in
+probability, which is what identifying a limit almost surely needs.
+
+`X` only has to agree with `X₀ + A + σ●B` almost surely at each time of `[0, T]`, so any
+modification qualifies. The weight must be adapted to the natural filtration of `B` and have
+continuous paths for every `ω`, as `tendsto_weighted_qv_process` asks.
+
+## Main results
+
+* `tendsto_weighted_qv_adapted` — the weighted statement above.
+* `tendsto_qv_adapted` — `∑ₖ (ΔXₖ)² → ∫₀ᵀ σ² ds` in `L¹(μ)`, the case `w ≡ 1`.
+* `norm_sq_increment_le` — the increment of `σ●B` over `(a, b]` has squared `L²` norm at most
+  `C²·(b − a)`.
 -/
 
 @[expose] public section
@@ -39,6 +63,89 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
   {σ : ℝ≥0 → Ω → ℝ}
   (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (σ t))
   (hcont : ∀ ω, Continuous (fun t : ℝ≥0 ↦ σ t ω)) {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C)
+
+/-! ### Tools: the partition, Cauchy–Schwarz in expectation, and the pointwise split -/
+
+/-- The cells of the uniform partition have length `T/n`. -/
+theorem unifPart_succ_sub (n k : ℕ) :
+    ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) / n := by
+  push_cast [unifPart]
+  ring
+
+omit [IsProbabilityMeasure μ] in
+/-- **Cauchy–Schwarz in expectation**: `∫|f·g| ≤ √(∫f²)·√(∫g²)`, from Hölder at exponents `2, 2`. -/
+theorem integral_abs_mul_le {f g : Ω → ℝ} (hf : MemLp f 2 μ) (hg : MemLp g 2 μ) :
+    ∫ ω, |f ω * g ω| ∂μ ≤ √(∫ ω, f ω ^ 2 ∂μ) * √(∫ ω, g ω ^ 2 ∂μ) := by
+  have h := integral_mul_le_Lp_mul_Lq_of_nonneg (μ := μ) Real.HolderConjugate.two_two
+    (f := fun ω ↦ |f ω|) (g := fun ω ↦ |g ω|) (ae_of_all _ fun _ ↦ abs_nonneg _)
+    (ae_of_all _ fun _ ↦ abs_nonneg _) (by rw [ENNReal.ofReal_ofNat]; exact hf.abs)
+    (by rw [ENNReal.ofReal_ofNat]; exact hg.abs)
+  have hsq (x : ℝ) : |x| ^ (2 : ℝ) = x ^ 2 := by rw [Real.rpow_two, sq_abs]
+  simp only [hsq, ← Real.sqrt_eq_rpow] at h
+  simpa only [abs_mul] using h
+
+/-- `∫|f| ≤ √(∫f²)` on a probability space: `integral_abs_mul_le` against the constant `1`. -/
+theorem integral_abs_le_sqrt {f : Ω → ℝ} (hf : MemLp f 2 μ) :
+    ∫ ω, |f ω| ∂μ ≤ √(∫ ω, f ω ^ 2 ∂μ) := by
+  simpa using integral_abs_mul_le hf (memLp_const (1 : ℝ))
+
+
+/-- **The pointwise split.** Write `m` for the increment of the martingale part and `D = m − s·b`
+for its freezing defect against the frozen increment `s·b`. Then `m² − (s·b)² = 2D·m − D²`, so a
+drift increment `|a| ≤ ε` and a weight `|w| ≤ c` give
+`|w(a + m)² − w s² b²| ≤ c(ε² + 2ε|m| + 2|D·m| + D²)`. -/
+theorem abs_mul_sq_sub_le {w a m s b c ε : ℝ} (hw : |w| ≤ c) (ha : |a| ≤ ε) :
+    |w * (a + m) ^ 2 - w * s ^ 2 * b ^ 2|
+      ≤ c * (ε ^ 2 + 2 * ε * |m| + 2 * |(m - s * b) * m| + (m - s * b) ^ 2) := by
+  have ha2 : a ^ 2 ≤ ε ^ 2 := by rw [← sq_abs]; exact pow_le_pow_left₀ (abs_nonneg a) ha 2
+  have ham : |a * m| ≤ ε * |m| := by
+    rw [abs_mul]; exact mul_le_mul_of_nonneg_right ha (abs_nonneg m)
+  rw [show w * (a + m) ^ 2 - w * s ^ 2 * b ^ 2
+      = w * (a ^ 2 + 2 * (a * m) + 2 * ((m - s * b) * m) - (m - s * b) ^ 2) by ring, abs_mul]
+  refine mul_le_mul hw (abs_le.2 ⟨?_, ?_⟩) (abs_nonneg _) ((abs_nonneg w).trans hw) <;>
+    linarith [neg_abs_le (a * m), le_abs_self (a * m), neg_abs_le ((m - s * b) * m),
+      le_abs_self ((m - s * b) * m), sq_nonneg a, sq_nonneg (m - s * b), sq_nonneg ε]
+
+/-! ### The Brownian term, in `L¹` -/
+
+include hB in
+/-- The Brownian term `∑ₖ v(tₖ)(ΔBₖ)² − ∫₀ᵀ v ds` of a bounded measurable weight with continuous
+paths is in `L²`. -/
+theorem memLp_weighted_qv_sub {v : ℝ≥0 → Ω → ℝ} (hv_meas : ∀ s, Measurable (v s))
+    (hv_cont : ∀ ω, Continuous fun s ↦ v s ω) {Cv : ℝ} (hCv : 0 ≤ Cv)
+    (hv_bdd : ∀ s ω, |v s ω| ≤ Cv) (n : ℕ) :
+    MemLp (fun ω ↦ ∑ k ∈ Finset.range n,
+        v (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
+      - ∫ s in Set.Ioc 0 T, v s ω ∂ItoIntegralL2.timeMeasure) 2 μ := by
+  have hsum : MemLp (fun ω ↦ ∑ k ∈ Finset.range n,
+      v (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) 2 μ := by
+    refine memLp_finsetSum _ fun k _ ↦ ?_
+    have hZ : MemLp (fun ω ↦ (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) 2 μ := by
+      simpa using memLp_increment_sq_centered_two hB (unifPart T n k) (unifPart T n (k + 1)) 0
+    refine (hZ.const_mul Cv).mono ((hv_meas _).aestronglyMeasurable.mul hZ.aestronglyMeasurable)
+      (ae_of_all _ fun ω ↦ ?_)
+    simp only [Real.norm_eq_abs, abs_mul, abs_of_nonneg hCv]
+    exact mul_le_mul_of_nonneg_right (hv_bdd _ _) (abs_nonneg _)
+  exact hsum.sub (memLp_pathIntegral_process hv_meas hv_cont hCv hv_bdd T)
+
+include hB in
+/-- **The weighted quadratic variation of `B`, in `L¹`**: `tendsto_weighted_qv_process` read
+through `∫|f| ≤ √(∫f²)`. -/
+theorem tendsto_integral_abs_weighted_qv {v : ℝ≥0 → Ω → ℝ}
+    (hv_adap : ∀ s, StronglyMeasurable[(natFiltration hBmeas s : MeasurableSpace Ω)] (v s))
+    (hv_cont : ∀ ω, Continuous fun s ↦ v s ω) {Cv : ℝ} (hCv : 0 ≤ Cv)
+    (hv_bdd : ∀ s ω, |v s ω| ≤ Cv) :
+    Tendsto (fun n : ℕ ↦ ∫ ω, |∑ k ∈ Finset.range n,
+        v (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
+      - ∫ s in Set.Ioc 0 T, v s ω ∂ItoIntegralL2.timeMeasure| ∂μ) atTop (𝓝 0) := by
+  have h := (tendsto_weighted_qv_process hB hBmeas
+    (fun s ↦ adaptedAt_of_measurable_natural hBmeas (hv_adap s).measurable) hv_cont hCv hv_bdd
+    T).sqrt
+  rw [Real.sqrt_zero] at h
+  exact squeeze_zero (fun n ↦ integral_nonneg fun ω ↦ abs_nonneg _)
+    (fun n ↦ integral_abs_le_sqrt (memLp_weighted_qv_sub hB T
+      (fun s ↦ ((hv_adap s).mono ((natFiltration hBmeas).le s)).measurable) hv_cont hCv hv_bdd n))
+    h
 
 /-! ### The increments of `M = σ●B` -/
 
@@ -76,6 +183,248 @@ theorem norm_sq_increment_le {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) :
     _ = C ^ 2 * ((b : ℝ) - a) := by
       rw [ENNReal.toReal_mul, ENNReal.toReal_ofReal (sq_nonneg C),
         ENNReal.toReal_ofReal (sub_nonneg.2 (by exact_mod_cast hab))]
+
+/-- The increment `ΔMₖ` of `M = σ●B` over the `k`-th cell of the uniform partition. -/
+noncomputable def cellIncrement (n k : ℕ) : Lp ℝ 2 μ :=
+  itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas (processToLp T hBmeas hadap hcont hbdd)
+    - itoProcessCLM hB T (unifPart T n k) hBmeas (processToLp T hBmeas hadap hcont hbdd)
+
+/-- The increment over a cell has squared `L²` norm at most `C²·T/n`. -/
+theorem norm_sq_cellIncrement_le {n k : ℕ} (hk : k < n) :
+    ‖cellIncrement hB T hBmeas hadap hcont hbdd n k‖ ^ 2 ≤ C ^ 2 * (T / n) := by
+  simpa only [cellIncrement, unifPart_succ_sub] using norm_sq_increment_le hB T hBmeas hadap hcont
+    hbdd (unifPart_mono T n (Nat.le_succ k)) (unifPart_le_T hk)
+
+/-! ### The quadratic variation -/
+
+section QV
+
+variable {w : ℝ≥0 → Ω → ℝ}
+  (hw_adap : ∀ s, StronglyMeasurable[(natFiltration hBmeas s : MeasurableSpace Ω)] (w s))
+  (hw_cont : ∀ ω, Continuous fun s ↦ w s ω) {Cw : ℝ} (hw_bdd : ∀ s ω, |w s ω| ≤ Cw)
+  {X A : ℝ≥0 → Ω → ℝ} {X₀ : Ω → ℝ} {Ca : ℝ}
+  (hA : ∀ ⦃s t : ℝ≥0⦄, s ≤ t → ∀ ω, |A t ω - A s ω| ≤ Ca * ((t : ℝ) - s))
+  (hX : ∀ t ≤ T, X t =ᵐ[μ] fun ω ↦ X₀ ω + A t ω
+    + itoProcessCLM hB T t hBmeas (processToLp T hBmeas hadap hcont hbdd) ω)
+
+include hw_bdd hA hX in
+/-- **The pathwise bound.** Almost surely, the weighted quadratic-variation error of `X` is at most
+the drift, cross and freezing contributions of the cells plus the Brownian term. -/
+theorem ae_abs_weighted_qv_sub_le (n : ℕ) : ∀ᵐ ω ∂μ,
+    |∑ k ∈ Finset.range n, w (unifPart T n k) ω
+          * (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω) ^ 2
+        - ∫ s in Set.Ioc 0 T, w s ω * σ s ω ^ 2 ∂ItoIntegralL2.timeMeasure|
+      ≤ ∑ k ∈ (Finset.range n).attach, Cw * ((Ca * (T / n)) ^ 2
+            + 2 * (Ca * (T / n)) * |cellIncrement hB T hBmeas hadap hcont hbdd n k ω|
+            + 2 * |freezingDefect hB T hBmeas hadap hcont hbdd n k ω
+                * cellIncrement hB T hBmeas hadap hcont hbdd n k ω|
+            + freezingDefect hB T hBmeas hadap hcont hbdd n k ω ^ 2)
+        + |∑ k ∈ Finset.range n, w (unifPart T n k) ω * σ (unifPart T n k) ω ^ 2
+              * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
+            - ∫ s in Set.Ioc 0 T, w s ω * σ s ω ^ 2 ∂ItoIntegralL2.timeMeasure| := by
+  have hXn : ∀ᵐ ω ∂μ, ∀ j : ℕ, j ≤ n → X (unifPart T n j) ω = X₀ ω + A (unifPart T n j) ω
+      + itoProcessCLM hB T (unifPart T n j) hBmeas (processToLp T hBmeas hadap hcont hbdd) ω := by
+    refine ae_all_iff.2 fun j ↦ ?_
+    by_cases hj : j ≤ n
+    · filter_upwards [hX _ (unifPart_le_T hj)] with ω hω _ using hω
+    · exact ae_of_all _ fun ω h ↦ absurd h hj
+  have hΔ : ∀ᵐ ω ∂μ, ∀ k : ℕ, cellIncrement hB T hBmeas hadap hcont hbdd n k ω
+      = itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas (processToLp T hBmeas hadap hcont hbdd) ω
+        - itoProcessCLM hB T (unifPart T n k) hBmeas (processToLp T hBmeas hadap hcont hbdd) ω :=
+    ae_all_iff.2 fun k ↦ Lp.coeFn_sub _ _
+  have hD := ae_all_iff.2 fun k ↦ coeFn_freezingDefect hB T hBmeas hadap hcont hbdd n k
+  filter_upwards [hXn, hΔ, hD] with ω hXω hΔω hDω
+  set q : ℕ → ℝ := fun k ↦ w (unifPart T n k) ω
+    * (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω) ^ 2
+  set r : ℕ → ℝ := fun k ↦ w (unifPart T n k) ω * σ (unifPart T n k) ω ^ 2
+    * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
+  rw [show ∀ x : ℝ, ∑ k ∈ Finset.range n, q k - x
+      = ∑ k ∈ (Finset.range n).attach, (q k - r k) + (∑ k ∈ Finset.range n, r k - x) from
+    fun x ↦ by
+      rw [Finset.sum_sub_distrib, Finset.sum_attach (Finset.range n) q,
+        Finset.sum_attach (Finset.range n) r]
+      ring]
+  refine (abs_add_le _ _).trans (add_le_add ((Finset.abs_sum_le_sum_abs _ _).trans
+    (Finset.sum_le_sum fun k _ ↦ ?_)) le_rfl)
+  have hk := Finset.mem_range.mp k.2
+  have ha : |A (unifPart T n (k + 1)) ω - A (unifPart T n k) ω| ≤ Ca * (T / n) := by
+    simpa only [unifPart_succ_sub] using hA (unifPart_mono T n (Nat.le_succ k)) ω
+  rw [hΔω, hDω]
+  refine Eq.trans_le ?_ (abs_mul_sq_sub_le (hw_bdd (unifPart T n k) ω) ha)
+  simp only [q, r]
+  rw [hXω (k + 1) hk, hXω k hk.le]
+  ring_nf
+
+include hw_adap hw_cont hw_bdd hA hX in
+/-- **The `L¹` bound.** Integrating the pathwise bound, with Cauchy–Schwarz on each cell and then
+across the cells. -/
+theorem integral_abs_weighted_qv_sub_le {n : ℕ} (hn : n ≠ 0) :
+    ∫ ω, |∑ k ∈ Finset.range n, w (unifPart T n k) ω
+          * (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω) ^ 2
+        - ∫ s in Set.Ioc 0 T, w s ω * σ s ω ^ 2 ∂ItoIntegralL2.timeMeasure| ∂μ
+      ≤ Cw * (n * ((Ca * (T / n)) ^ 2 + 2 * (Ca * (T / n)) * √(C ^ 2 * (T / n)))
+          + (2 * (√(∑ k ∈ (Finset.range n).attach,
+                ‖freezingDefect hB T hBmeas hadap hcont hbdd n k‖ ^ 2) * √(C ^ 2 * T))
+            + ∑ k ∈ (Finset.range n).attach, ‖freezingDefect hB T hBmeas hadap hcont hbdd n k‖ ^ 2))
+        + ∫ ω, |∑ k ∈ Finset.range n, w (unifPart T n k) ω * σ (unifPart T n k) ω ^ 2
+              * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
+            - ∫ s in Set.Ioc 0 T, w s ω * σ s ω ^ 2 ∂ItoIntegralL2.timeMeasure| ∂μ := by
+  obtain ⟨ω₀⟩ := nonempty_of_isProbabilityMeasure μ
+  have hCw : 0 ≤ Cw := (abs_nonneg _).trans (hw_bdd 0 ω₀)
+  have hCa : 0 ≤ Ca := by
+    have h := hA (zero_le_one' ℝ≥0) ω₀
+    simp only [NNReal.coe_one, NNReal.coe_zero, sub_zero, mul_one] at h
+    exact (abs_nonneg _).trans h
+  have hv_bdd (s : ℝ≥0) (ω : Ω) : |w s ω * σ s ω ^ 2| ≤ Cw * C ^ 2 := by
+    rw [abs_mul, abs_pow]
+    exact mul_le_mul (hw_bdd s ω) (pow_le_pow_left₀ (abs_nonneg _) (hbdd s ω) 2) (by positivity)
+      hCw
+  have hT4 := ((memLp_weighted_qv_sub hB T (v := fun s ω ↦ w s ω * σ s ω ^ 2)
+    (fun s ↦ (((hw_adap s).mul ((hadap s).pow 2)).mono ((natFiltration hBmeas).le s)).measurable)
+    (fun ω ↦ (hw_cont ω).mul ((hcont ω).pow 2)) (by positivity) hv_bdd n).integrable
+    one_le_two).abs
+  set ε : ℝ := Ca * (T / n)
+  set q : ℝ := C ^ 2 * (T / n) with hq
+  set Δ := cellIncrement hB T hBmeas hadap hcont hbdd n
+  set D := freezingDefect hB T hBmeas hadap hcont hbdd n
+  have hε0 : 0 ≤ ε := by positivity
+  have hΔ_le (k : {x // x ∈ Finset.range n}) : ‖Δ k‖ ^ 2 ≤ q :=
+    norm_sq_cellIncrement_le hB T hBmeas hadap hcont hbdd (Finset.mem_range.mp k.2)
+  have hΔi (k : ℕ) : Integrable (fun ω ↦ |Δ k ω|) μ :=
+    ((Lp.memLp (Δ k)).integrable one_le_two).abs
+  have hDΔi (k : {x // x ∈ Finset.range n}) : Integrable (fun ω ↦ |D k ω * Δ k ω|) μ :=
+    ((Lp.memLp (D k)).integrable_mul (Lp.memLp (Δ k))).abs
+  have hi1 (k : {x // x ∈ Finset.range n}) :
+      Integrable (fun ω ↦ ε ^ 2 + 2 * ε * |Δ k ω|) μ :=
+    (integrable_const _).add ((hΔi k).const_mul _)
+  have hi2 (k : {x // x ∈ Finset.range n}) :
+      Integrable (fun ω ↦ ε ^ 2 + 2 * ε * |Δ k ω| + 2 * |D k ω * Δ k ω|) μ :=
+    (hi1 k).add ((hDΔi k).const_mul _)
+  have hcell_i (k : {x // x ∈ Finset.range n}) : Integrable (fun ω ↦
+      Cw * (ε ^ 2 + 2 * ε * |Δ k ω| + 2 * |D k ω * Δ k ω| + D k ω ^ 2)) μ :=
+    ((hi2 k).add (Lp.memLp (D k)).integrable_sq).const_mul _
+  -- each cell: Cauchy–Schwarz in expectation
+  have hcell (k : {x // x ∈ Finset.range n}) :
+      ∫ ω, Cw * (ε ^ 2 + 2 * ε * |Δ k ω| + 2 * |D k ω * Δ k ω| + D k ω ^ 2) ∂μ
+        ≤ Cw * (ε ^ 2 + 2 * ε * √q + (2 * (‖D k‖ * ‖Δ k‖) + ‖D k‖ ^ 2)) := by
+    have h1 : ∫ ω, |Δ k ω| ∂μ ≤ √q := (integral_abs_le_sqrt (Lp.memLp _)).trans (by
+      rw [← lp_two_norm_sq]; exact Real.sqrt_le_sqrt (hΔ_le k))
+    have h2 : ∫ ω, |D k ω * Δ k ω| ∂μ ≤ ‖D k‖ * ‖Δ k‖ :=
+      (integral_abs_mul_le (Lp.memLp _) (Lp.memLp _)).trans_eq (by
+        rw [← lp_two_norm_sq, ← lp_two_norm_sq, Real.sqrt_sq (norm_nonneg _),
+          Real.sqrt_sq (norm_nonneg _)])
+    rw [integral_const_mul, integral_add (hi2 k) (Lp.memLp (D k)).integrable_sq,
+      integral_add (hi1 k) ((hDΔi k).const_mul _), integral_add (integrable_const _)
+        ((hΔi k).const_mul _), integral_const, integral_const_mul, integral_const_mul,
+      ← lp_two_norm_sq, probReal_univ, one_smul]
+    refine mul_le_mul_of_nonneg_left ?_ hCw
+    linarith [mul_le_mul_of_nonneg_left h1 (by positivity : (0 : ℝ) ≤ 2 * ε)]
+  -- across the cells: Cauchy–Schwarz for sums, with `∑ ‖ΔMₖ‖² ≤ C²T`
+  have hΔsq : ∑ k ∈ (Finset.range n).attach, ‖Δ k‖ ^ 2 ≤ C ^ 2 * T := by
+    calc _ ≤ ∑ _k ∈ (Finset.range n).attach, q := Finset.sum_le_sum fun k _ ↦ hΔ_le k
+      _ = C ^ 2 * T := by
+        rw [Finset.sum_const, Finset.card_attach, Finset.card_range, nsmul_eq_mul, hq]
+        field_simp
+  have hDΔ : ∑ k ∈ (Finset.range n).attach, ‖D k‖ * ‖Δ k‖
+      ≤ √(∑ k ∈ (Finset.range n).attach, ‖D k‖ ^ 2) * √(C ^ 2 * T) :=
+    (Real.sum_mul_le_sqrt_mul_sqrt _ _ _).trans
+      (mul_le_mul_of_nonneg_left (Real.sqrt_le_sqrt hΔsq) (Real.sqrt_nonneg _))
+  calc _ ≤ ∫ ω, (∑ k ∈ (Finset.range n).attach,
+          Cw * (ε ^ 2 + 2 * ε * |Δ k ω| + 2 * |D k ω * Δ k ω| + D k ω ^ 2)
+          + |∑ k ∈ Finset.range n, w (unifPart T n k) ω * σ (unifPart T n k) ω ^ 2
+              * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
+            - ∫ s in Set.Ioc 0 T, w s ω * σ s ω ^ 2 ∂ItoIntegralL2.timeMeasure|) ∂μ :=
+        integral_mono_of_nonneg (ae_of_all _ fun _ ↦ abs_nonneg _)
+          ((integrable_finsetSum _ fun k _ ↦ hcell_i k).add hT4)
+          (ae_abs_weighted_qv_sub_le hB T hBmeas hadap hcont hbdd hw_bdd hA hX n)
+    _ = ∑ k ∈ (Finset.range n).attach,
+          ∫ ω, Cw * (ε ^ 2 + 2 * ε * |Δ k ω| + 2 * |D k ω * Δ k ω| + D k ω ^ 2) ∂μ
+        + ∫ ω, |∑ k ∈ Finset.range n, w (unifPart T n k) ω * σ (unifPart T n k) ω ^ 2
+              * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
+            - ∫ s in Set.Ioc 0 T, w s ω * σ s ω ^ 2 ∂ItoIntegralL2.timeMeasure| ∂μ := by
+        rw [integral_add (integrable_finsetSum _ fun k _ ↦ hcell_i k) hT4,
+          integral_finsetSum _ fun k _ ↦ hcell_i k]
+    _ ≤ ∑ k ∈ (Finset.range n).attach,
+          Cw * (ε ^ 2 + 2 * ε * √q + (2 * (‖D k‖ * ‖Δ k‖) + ‖D k‖ ^ 2))
+        + ∫ ω, |∑ k ∈ Finset.range n, w (unifPart T n k) ω * σ (unifPart T n k) ω ^ 2
+              * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
+            - ∫ s in Set.Ioc 0 T, w s ω * σ s ω ^ 2 ∂ItoIntegralL2.timeMeasure| ∂μ := by
+        gcongr with k
+        exact hcell k
+    _ = Cw * (n * (ε ^ 2 + 2 * ε * √q) + (2 * ∑ k ∈ (Finset.range n).attach, ‖D k‖ * ‖Δ k‖
+          + ∑ k ∈ (Finset.range n).attach, ‖D k‖ ^ 2))
+        + ∫ ω, |∑ k ∈ Finset.range n, w (unifPart T n k) ω * σ (unifPart T n k) ω ^ 2
+              * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
+            - ∫ s in Set.Ioc 0 T, w s ω * σ s ω ^ 2 ∂ItoIntegralL2.timeMeasure| ∂μ := by
+        rw [← Finset.mul_sum, Finset.sum_add_distrib, Finset.sum_const, Finset.card_attach,
+          Finset.card_range, nsmul_eq_mul, Finset.sum_add_distrib, ← Finset.mul_sum]
+    _ ≤ _ := by gcongr
+
+include hw_adap hw_cont hw_bdd hA hX in
+/-- **Quadratic variation of an Itô process with adapted coefficients, weighted.** Let
+`X = X₀ + A + σ●B`, with `σ` bounded, adapted and path-continuous and the drift path `A`
+`Cₐ`-Lipschitz in time, and let `w` be a bounded adapted weight with continuous paths. Along the
+uniform partition of `[0, T]`, `∑ₖ w(tₖ)(ΔXₖ)² → ∫₀ᵀ w σ² ds` in `L¹(μ)`.
+
+Each `(ΔXₖ)²` splits (`abs_mul_sq_sub_le`) into a drift part, at most `Cₐ²(T/n)²`; a cross part
+`2ΔAₖΔMₖ`, at most `2Cₐ(T/n)|ΔMₖ|`; the freezing part `2DₖΔMₖ − Dₖ²` for the defect
+`Dₖ = ΔMₖ − σ(tₖ)ΔBₖ`; and the frozen square `σ(tₖ)²(ΔBₖ)²`. Summed over the cells, the drift
+part is `O(1/n)` and the cross part `O(1/√n)` in `L¹`, since `‖ΔMₖ‖² ≤ C²T/n`; the freezing part
+tends to `0` because `∑ₖ ‖Dₖ‖² → 0` (`tendsto_sum_norm_sq_freezingDefect`); the frozen squares
+carry the weighted quadratic variation of `B` with weight `w σ²` (`tendsto_weighted_qv_process`).
+-/
+theorem tendsto_weighted_qv_adapted :
+    Tendsto (fun n : ℕ ↦ ∫ ω, |∑ k ∈ Finset.range n, w (unifPart T n k) ω
+          * (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω) ^ 2
+        - ∫ s in Set.Ioc 0 T, w s ω * σ s ω ^ 2 ∂ItoIntegralL2.timeMeasure| ∂μ) atTop (𝓝 0) := by
+  obtain ⟨ω₀⟩ := nonempty_of_isProbabilityMeasure μ
+  have hCw : 0 ≤ Cw := (abs_nonneg _).trans (hw_bdd 0 ω₀)
+  have hTn : Tendsto (fun n : ℕ ↦ (T : ℝ) / n) atTop (𝓝 0) :=
+    tendsto_const_div_atTop_nhds_zero_nat _
+  -- the drift and cross terms
+  have hdc : Tendsto (fun n : ℕ ↦ (n : ℝ)
+      * ((Ca * (T / n)) ^ 2 + 2 * (Ca * (T / n)) * √(C ^ 2 * (T / n)))) atTop (𝓝 0) := by
+    have h : Tendsto (fun n : ℕ ↦ Ca * T * (Ca * (T / n)) + 2 * (Ca * T) * √(C ^ 2 * (T / n)))
+        atTop (𝓝 0) := by
+      simpa using ((hTn.const_mul Ca).const_mul (Ca * T)).add
+        (((hTn.const_mul (C ^ 2)).sqrt).const_mul (2 * (Ca * T)))
+    refine h.congr' ?_
+    filter_upwards [eventually_ne_atTop 0] with n hn
+    have hnT : (n : ℝ) * (T / n) = T := by field_simp
+    linear_combination (-(Ca ^ 2 * (T / n) + 2 * Ca * √(C ^ 2 * (T / n)))) * hnT
+  -- the freezing term
+  have hd := tendsto_sum_norm_sq_freezingDefect hB T hBmeas hadap hcont hbdd
+  have hfr := ((hd.sqrt.mul_const (√(C ^ 2 * T))).const_mul 2).add hd
+  -- the Brownian term
+  have hbr := tendsto_integral_abs_weighted_qv hB T hBmeas (v := fun s ω ↦ w s ω * σ s ω ^ 2)
+    (fun s ↦ (hw_adap s).mul ((hadap s).pow 2)) (fun ω ↦ (hw_cont ω).mul ((hcont ω).pow 2))
+    (by positivity : 0 ≤ Cw * C ^ 2) fun s ω ↦ by
+      rw [abs_mul, abs_pow]
+      exact mul_le_mul (hw_bdd s ω) (pow_le_pow_left₀ (abs_nonneg _) (hbdd s ω) 2)
+        (by positivity) hCw
+  have hlim := ((hdc.add hfr).const_mul Cw).add hbr
+  simp only [Real.sqrt_zero, zero_mul, mul_zero, add_zero] at hlim
+  refine squeeze_zero' (Eventually.of_forall fun n ↦ integral_nonneg fun ω ↦ abs_nonneg _) ?_ hlim
+  filter_upwards [eventually_ne_atTop 0] with n hn
+  exact integral_abs_weighted_qv_sub_le hB T hBmeas hadap hcont hbdd hw_adap hw_cont hw_bdd hA hX hn
+
+end QV
+
+/-- **Quadratic variation of an Itô process with adapted coefficients.** For
+`X = X₀ + A + σ●B` with `σ` bounded, adapted and path-continuous and the drift path `A`
+`Cₐ`-Lipschitz in time, `∑ₖ (ΔXₖ)² → ∫₀ᵀ σ² ds` in `L¹(μ)` along the uniform partition of
+`[0, T]`: the drift contributes nothing, and the martingale part contributes its bracket. The
+`w ≡ 1` case of `tendsto_weighted_qv_adapted`. -/
+theorem tendsto_qv_adapted {X A : ℝ≥0 → Ω → ℝ} {X₀ : Ω → ℝ} {Ca : ℝ}
+    (hA : ∀ ⦃s t : ℝ≥0⦄, s ≤ t → ∀ ω, |A t ω - A s ω| ≤ Ca * ((t : ℝ) - s))
+    (hX : ∀ t ≤ T, X t =ᵐ[μ] fun ω ↦ X₀ ω + A t ω
+      + itoProcessCLM hB T t hBmeas (processToLp T hBmeas hadap hcont hbdd) ω) :
+    Tendsto (fun n : ℕ ↦ ∫ ω, |∑ k ∈ Finset.range n,
+          (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω) ^ 2
+        - ∫ s in Set.Ioc 0 T, σ s ω ^ 2 ∂ItoIntegralL2.timeMeasure| ∂μ) atTop (𝓝 0) := by
+  simpa using tendsto_weighted_qv_adapted hB T hBmeas hadap hcont hbdd (w := fun _ _ ↦ (1 : ℝ))
+    (fun _ ↦ stronglyMeasurable_const) (fun _ ↦ continuous_const) (Cw := 1) (fun _ _ ↦ by simp)
+    hA hX
 
 end AdaptedQuadraticVariation
 

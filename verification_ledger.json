@@ -3034,6 +3034,13 @@
       "input_hash": "3c102a232b22a7c30207a8907f8868e4926586cfb09ef3eed05ddd936e0a1af3",
       "verified_at_commit": "fdfecac"
     },
+    "sc-thm-7.4.5-adapted": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-10-03",
+      "elapsed_s": 5.2,
+      "input_hash": "5e764b9e4560aa739ba797e0687b881cacc3dad9b82d8610f24d841edbce45cb",
+      "verified_at_commit": "4076c36"
+    },
     "sc-thm-7.5.2": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-02",

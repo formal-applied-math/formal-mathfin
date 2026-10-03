@@ -271,6 +271,10 @@ The crown-jewel conversions build on assets that already exist (`waldExponential
 `itoIntegralCLM_T` + its isometry, `withDensity` change-of-measure, the static `GaussianGirsanov`
 Esscher tilt). They do **not** depend on the one genuinely upstream-gated frontier (general
 adapted-coefficient Itô, blocked on Degenne's continuous-modification π-system). Ranked by value × feasibility:
+*(2026-10-03: no longer upstream-gated. The tower has its own continuous modification
+(`ItoIntegralProcessContinuousModification`), and the design spec's status of 2026-10-03 re-sequences
+the formula on bricks the library already had. Steps B1 and B2, the quadratic variation with adapted
+`σ`, have landed as `sc-thm-7.4.5-adapted`; the assembly B5 and the localization B6 remain.)*
 
 | # | Conversion (reduced_core → full) | Value | Difficulty | Unlocks |
 |---|---|---|---|---|
