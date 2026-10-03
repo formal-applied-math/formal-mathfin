@@ -125,6 +125,135 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-03 — corpus 441 — the quadratic variation of an Itô process with adapted σ (B1, B2)
+
+Scope: steps B1 and B2 of the adapted-coefficient Itô formula
+(`docs/specs/2026-07-05-adapted-ito-formula-design.md`).
+- `Foundations/AdaptedStochasticIntegralFreezing.lean` (B1): the freezing defects
+  `Dₖ = ΔMₖ − σ(tₖ)ΔBₖ` of `M = σ●B` are orthogonal and sum to the error of the frozen Riemann–Itô
+  sum, so `∑ₖ ‖Dₖ‖² → 0`.
+- `Foundations/AdaptedQuadraticVariation.lean` (B2): `∑ₖ w(tₖ)(ΔXₖ)² → ∫₀ᵀ wσ² ds` in `L¹` for
+  `X = X₀ + A + σ●B`, and the unweighted `∑ₖ (ΔXₖ)² → ∫₀ᵀ σ² ds`. One entry,
+  `sc-thm-7.4.5-adapted`; corpus 440 → 441.
+
+Three read-only review agents split the lenses: (1, 5, 7) plus the standing first pass; (2, 3, 6);
+and (4, 8). The parent adjudicated and executed the fixes below before opening the PR.
+
+### The standing first pass — prose against statement
+
+Nine findings, all fixed:
+- The spec's open question for B5 had its premise backwards. It said the continuous modification of
+  `σ●B` is not adapted to the natural filtration. `itoContinuousMod_isStronglyPredictable` proves it
+  predictable for that filtration; what it lacks is continuity on every path
+  (`itoContinuousMod_continuousOn` gives almost-sure continuity on `[0, T]`). So B5 needs the
+  weighted quadratic variation relaxed to almost-sure continuity, not an augmented filtration. The
+  error came from `ItoProcessPredictable`'s module docstring, which contradicted the theorem seventy
+  lines below it; fixed there too.
+- The snippet and `coverage.md` called the weighted form the input of the Itô formula's
+  second-order term. Its own hypotheses exclude that formula's weight `f''(X)`, for the reason
+  above. Both now say so.
+- The spec's plan said one estimate serves both B2 and B5's first-order term. B1 landed unweighted,
+  and `∑ₖ ‖Dₖ‖² → 0` gives only `‖∑ₖ wₖDₖ‖ ≤ C_w√n·(∑ₖ ‖Dₖ‖²)^{1/2}`; B2 escapes this because each
+  of its freezing terms carries a factor `ΔMₖ`. The status section now says what B5 needs instead.
+  The plan's integrand also had `w²` for `w_{⌊s⌋ₙ}²`.
+- The roadmap's dated note gave the continuous modification as the reason adapted Itô is no longer
+  gated, without saying that B5 still needs the relaxation. It now does.
+- "A Lipschitz drift path" in the description, the module docstring and `coverage.md`: `hA` has one
+  constant for every `ω`, a bounded drift rate. Said so in all three.
+- `A` is not assumed measurable. For a non-measurable drift the Bochner integrals take the junk
+  value `0` and the theorem says nothing. Now disclosed in the module docstring, the entry's scope
+  and `coverage.md`. Adding the hypothesis would make it dead in both theorems; it belongs with the
+  `TendstoInMeasure` interface that uses it (backlog 1).
+- `sc-thm-7.4.5` pointed to the new entry as "the form ⟨X⟩_T = ∫σ²". That entry builds no bracket,
+  so it now says "the equipartition limit".
+- The spec's B3 row said "mostly done", citing `pricePathDrift`, whose Itô part is the `Lp`
+  representative at each time, with no path regularity. It now says "partly done" and names
+  `itoContinuousMod`.
+- The spec said `docs/hjm-program.md` §5 assumes this formula. §5 names the constant-coefficient
+  `ito_formula_expBrownian`, which does not reach D1's adapted `Y`. Reworded.
+
+### Upgrades executed
+
+- **Coherence (lens 2).** Cauchy–Schwarz in expectation is now one lemma in
+  `FiniteMeasureCauchySchwarz.lean`, `integral_abs_mul_le_sqrt_mul_sqrt`, read off Mathlib's
+  `integral_mul_norm_le_Lp_mul_Lq`. `sq_integral_le_measureReal_mul` (six call sites) and the
+  probability form `integral_abs_le_sqrt_integral_sq` are its `g ≡ 1` cases, which retires a
+  separate 25-line Hölder assembly. `disjoint_cells` was Mathlib's
+  `Monotone.pairwise_disjoint_on_Ioc_succ` and is deleted. The bounded-weight-times-`L²` step is
+  Mathlib's `memLp_top_of_bound` with `MemLp.mul'`. `‖g‖² = ∫ g²` is the library's
+  `lp_two_norm_sq`, not a fourth copy.
+- **Zero slop (lens 3).** `sum_cellIntegrand` and its a.e. computation are gone: `sum_freezingDefect`
+  telescopes the process (`Finset.sum_range_sub`, `itoProcessCLM_zero_time`,
+  `itoProcessCLM_terminal_eq`) and assembles the frozen increments by linearity. The weight bound
+  `|wσ²| ≤ C_w C²`, proved twice, is one lemma. The Brownian term is no longer restated through the
+  `L¹` bound's calc, a terminal `ring_nf` is `congr 1; ring`, and the rate algebra moved into the
+  bound lemma, so the limit needs no `congr'`. Redundant `0 ≤ C` hypotheses left the two
+  Brownian-term lemmas.
+- **Idiom (lens 6).** Bare terms for the square and product bounds, `trans_eq` for two-step calcs,
+  `simpa … using` for the sign of the drift constant, `Finset.sum_le_card_nsmul`,
+  `NNReal.coe_le_coe` in place of a cast, one `variable` block in the freezing module, the drift
+  hypotheses in an outer section that the unweighted corollary reuses, and unused `open scoped`
+  dropped.
+- **Inspired math and clarity (lenses 1, 7).** The identity `∑ₖ ‖Dₖ‖² = ‖∫σ dB − ∑ₖ σ(tₖ)ΔBₖ‖²` is a
+  named theorem (`sum_norm_sq_freezingDefect`) rather than a rewrite inside the limit. The module
+  docstring says which hypotheses each part uses: only the Brownian term needs the weight's
+  adaptedness and path continuity, which puts B5's relaxation in one lemma.
+
+Adjudicated rather than executed: one agent asked for `hA_meas` plus a `TendstoInMeasure` corollary
+now. The hypothesis would be dead in the two `L¹` theorems, so the corollary waits for B5, which
+will fix the form it consumes (backlog 1). Exposing `coe_stepSP` and adding the `unifPart`
+endpoint lemmas edit core modules that restale about thirty entries, so they are one sweep
+(backlog 4), not part of this PR.
+
+### Exemplars
+
+- `sum_norm_sq_freezingDefect` with `tendsto_sum_norm_sq_freezingDefect`: the freezing estimate is
+  recognised rather than proved. Orthogonality makes the defect energy equal to the frozen
+  Riemann–Itô error, and B4 finishes.
+- The B2 split: the martingale's quadratic variation becomes the Brownian weighted quadratic
+  variation with weight `wσ²`, whose fourth moments are Gaussian, so no BDG bound is needed.
+- `abs_mul_sq_sub_le`: the pointwise algebra done once, with an explicit `linarith` certificate.
+
+### Ranked backlog
+
+1. **B2 by difference of squares, with the interface B5 consumes** (lenses 8, 3, 5). Write
+   `aₖ = ΔXₖ`, `bₖ = σ(tₖ)ΔBₖ`, `eₖ = aₖ − bₖ = ΔAₖ + Dₖ`. Then
+   `E|∑ₖ wₖ(aₖ² − bₖ²)| ≤ C_w(∑ₖ ‖eₖ‖²)^{1/2}(∑ₖ ‖aₖ + bₖ‖²)^{1/2}`, with
+   `∑ₖ ‖eₖ‖² ≤ 2Cₐ²T²/n + 2∑ₖ ‖Dₖ‖² → 0` and the second factor bounded. The drift stops being a
+   special case, `abs_mul_sq_sub_le` and most of the integrability bookkeeping go, and the general
+   lemma (weighted quadratic variation is stable under an `ℓ²(L²)`-negligible perturbation) also
+   serves B6 and covariation. It needs `A` measurable, so it is where `hA_meas` and the
+   `TendstoInMeasure` form arrive.
+2. **Relax the weight's path hypothesis** to almost-sure continuity, or almost-sure continuity at
+   almost every time, in `tendsto_weighted_qv_process`, B2 and B4 (lens 4). The fluctuation term
+   never uses continuity and the Riemann term is dominated convergence. This admits B5's weight
+   `f''(X₀ + A + itoContinuousMod)` and B6's stopped integrands `𝟙_{[0,τ]}σ`.
+3. **B5's first-order term through the integral against `M`** (lens 4).
+   `∑ₖ f'(X_{tₖ})ΔMₖ = ∫ (step) dM` (`itoIntegralAgainst_simpleProcess`), and the isometry against
+   `M` with dominated convergence in `L²(⟨M⟩)` gives `∫ f'(X) dM = ∫ f'(X)σ dB`. That is B4 for the
+   measure `⟨M⟩` in place of `trim_T`, and `simpleAssemblyOfMeasure ν` already takes a general `ν`.
+   The alternative is orthogonality of the weighted defects `wₖDₖ` via
+   `itoIntegralCLM_T_smulAdapted`.
+4. **The partition and step-process API** (lenses 2, 3). `unifPart_zero`,
+   `unifPart_self (hn : n ≠ 0)` and `unifPart_succ_sub` beside `unifPart`, replacing about sixteen
+   inline copies of the endpoint facts and five of the cell length. And one public `coe_stepSP`
+   beside `stepSP`: it is private in `ItoIntegralLocality`, verbatim in
+   `ItoIntegralRiemannBridgeAdapted`, and `uncurry_cellStep` is a third copy.
+5. **One "bounded weight × `L²`" step** (lens 3). `WeightedQuadraticVariation` (twice),
+   `ItoFormulaC2`, `ItoFormulaTD` and `ItoIntegralRiemannBridgeAdapted` repeat what
+   `memLp_top_of_bound` with `MemLp.mul'` gives in a line.
+   `GirsanovPredictableTheta.integral_sqrt_le_sqrt_integral` is `integral_abs_le_sqrt_integral_sq`
+   at `f = √D`.
+6. **Generalities proved at call sites** (lens 4). `norm_sq_increment_le` holds for any a.e.-bounded
+   integrand and belongs beside `norm_sq_increment_eq_bracket`; its band computation is item 6 of
+   the previous review. `inner_freezingDefect_eq_zero` is an instance of "Itô integrals of
+   disjointly supported integrands are orthogonal". Pythagoras for a finite orthogonal family
+   belongs in a general module, or Mathlib. `cellIncrement` belongs in the freezing module, where
+   the defect statements could use it.
+7. **Index by `Fin n`** (lens 6). `(Finset.range n).attach`, inherited from `stepσ`, leaks into
+   public statements and forces the `sum_attach` shuffles.
+8. **Carried.** The 2026-10-03 (corpus 440) backlog stands; nothing on it was touched.
+
 ## 2026-10-03 — corpus 440 — the BrownianMotion bump, the IsStochasticIntegral instance, and stale gap claims
 
 Scope: three merged PRs.
