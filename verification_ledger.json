@@ -328,9 +328,9 @@
     "gir-thm-9.1.8-predictable": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-10-03",
-      "elapsed_s": 57.5,
-      "input_hash": "44328d87bd89ec0c493641a54882a6a20fb1990ce5b67b468bb167e4c2316da4",
-      "verified_at_commit": "f61a5e8"
+      "elapsed_s": 68.7,
+      "input_hash": "21108e30126592e9caf45dc2a086b21c6b47d58a64048156e7cbc463f7f121e3",
+      "verified_at_commit": "68cd169"
     },
     "gir-thm-9.3.4": {
       "benchmark_file": "girsanov_finance.json",
@@ -2911,9 +2911,9 @@
     "sc-ito-integral-against-drifted-price": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-03",
-      "elapsed_s": 168.9,
-      "input_hash": "2ccc717130118da6c041adb4ae2caa6e9f1a3e56921a78b086f02710f033d000",
-      "verified_at_commit": "f61a5e8"
+      "elapsed_s": 113.1,
+      "input_hash": "092385147175f9825a2c880331bf7ccfabf735533ff3f6488f2b559d3836e945",
+      "verified_at_commit": "68cd169"
     },
     "sc-ito-integral-band": {
       "benchmark_file": "stochastic_calculus.json",
@@ -3037,9 +3037,9 @@
     "sc-thm-7.4.5-adapted": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-03",
-      "elapsed_s": 5.2,
-      "input_hash": "5e764b9e4560aa739ba797e0687b881cacc3dad9b82d8610f24d841edbce45cb",
-      "verified_at_commit": "4076c36"
+      "elapsed_s": 18.7,
+      "input_hash": "abae94dee52d020843ff35628062f29c2d318d1a601dca7cd305967628bf9d89",
+      "verified_at_commit": "68cd169"
     },
     "sc-thm-7.5.2": {
       "benchmark_file": "stochastic_calculus.json",
@@ -3050,10 +3050,10 @@
     },
     "sc-thm-8.2.5": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-02",
-      "elapsed_s": 3.6,
-      "input_hash": "4fe3758703632683088f07cbaad082e0f3ed50f6647ca202f690648ca302f829",
-      "verified_at_commit": "fdfecac"
+      "date": "2026-10-03",
+      "elapsed_s": 84.4,
+      "input_hash": "86cf75d1e0bbb196cf117aa51fc65a6322ca432f4a2ec96e404d3efed02b8d7f",
+      "verified_at_commit": "68cd169"
     },
     "sc-thm-9.1.1": {
       "benchmark_file": "stochastic_calculus.json",
@@ -3086,9 +3086,9 @@
     "sde-picard-existence-uniqueness": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-03",
-      "elapsed_s": 67.9,
-      "input_hash": "6b2036b39bd9df8d7ee78a066f4f7c3a51efddf58a87841cdc84e7d7cd039aaf",
-      "verified_at_commit": "f61a5e8"
+      "elapsed_s": 66.7,
+      "input_hash": "cdba5b1ab7d4dc588cc26d3d2662a3a2c4a9da7aecde04dffa80ec078b511231",
+      "verified_at_commit": "68cd169"
     }
   }
 }

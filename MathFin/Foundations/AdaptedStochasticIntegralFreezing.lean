@@ -26,16 +26,18 @@ are small in the sense the quadratic variation needs: `∑ₖ ‖Dₖ‖²_{L²}
 The proof is short because its pieces exist. Each `Dₖ` is the Itô integral of
 `𝟙_{(tₖ,tₖ₊₁]}·(σ − σ(tₖ))` (`freezingDefect_eq`: the band identity minus the elementary integral),
 so defects on distinct cells are orthogonal (`inner_freezingDefect_eq_zero`: disjoint supports, and
-an isometry preserves inner products). By Pythagoras the sum of their squared norms is the squared
-norm of their sum. That sum telescopes to the error of the frozen Riemann–Itô sum,
-`∫σ dB − ∑ σ(tₖ)·ΔBₖ` (`sum_freezingDefect`), which tends to `0` by
-`itoIntegralCLM_T_of_bdd_adapted_cont`.
+an isometry preserves inner products). Their sum is the error of the frozen Riemann–Itô sum,
+`∫σ dB − ∑ σ(tₖ)·ΔBₖ` (`sum_freezingDefect`): the increments of `M` telescope to `M_T = ∫σ dB`, and
+the frozen increments assemble into the elementary integral of the step process. By Pythagoras the
+squared norms of the defects sum to the squared norm of that error (`sum_norm_sq_freezingDefect`),
+which tends to `0` by `itoIntegralCLM_T_of_bdd_adapted_cont`.
 
 ## Result
 
 * `tendsto_sum_norm_sq_freezingDefect` — `∑ₖ ‖ΔMₖ − σ(tₖ)·ΔBₖ‖² → 0`.
 * `coeFn_freezingDefect` — the defect, pointwise.
 * `inner_freezingDefect_eq_zero`, `sum_freezingDefect` — orthogonality and telescoping.
+* `sum_norm_sq_freezingDefect` — `∑ₖ ‖Dₖ‖² = ‖∫σ dB − ∑ σ(tₖ)·ΔBₖ‖²`.
 * `norm_sum_sq_of_pairwise_inner_eq_zero` — Pythagoras for a finite orthogonal family, from
   `OrthogonalFamily.norm_sum`.
 -/
@@ -48,7 +50,7 @@ namespace AdaptedStochasticIntegralFreezing
 open MeasureTheory ProbabilityTheory Filter Topology
 open ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessGeneral ItoIntegralRiemannBridge
   ItoIntegralAgainstMartingale ItoIntegralBrownian ItoIntegralCovariation QuadraticVariationL2
-open scoped NNReal ENNReal InnerProductSpace
+open scoped NNReal InnerProductSpace
 
 /-! ### Pythagoras for a finite orthogonal family -/
 
@@ -70,15 +72,12 @@ theorem norm_sum_sq_of_pairwise_inner_eq_zero (s : Finset ι) (f : ι → E)
 end Pythagoras
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ}
+  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+  {σ : ℝ≥0 → Ω → ℝ}
+  (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (σ t))
+  (hcont : ∀ ω, Continuous (fun t : ℝ≥0 ↦ σ t ω)) {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C)
 
 /-! ### The cells of the uniform partition -/
-
-section Cells
-
-variable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {σ : ℝ≥0 → Ω → ℝ}
-  (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (σ t))
-  {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C)
 
 /-- The frozen step on the `k`-th cell of the uniform partition, `σ(tₖ)·𝟙_{(tₖ, tₖ₊₁]}`: the
 summands of `stepσ`. -/
@@ -103,16 +102,7 @@ theorem uncurry_cellStep (n : ℕ) (k : {x // x ∈ Finset.range n}) (z : ℝ≥
   rw [Finsupp.sum_single_index (by simp)]
   simp
 
-end Cells
-
 /-! ### The freezing defect -/
-
-section Freezing
-
-variable (hB : IsPreBrownianReal B μ) (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-  {σ : ℝ≥0 → Ω → ℝ}
-  (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (σ t))
-  (hcont : ∀ ω, Continuous (fun t : ℝ≥0 ↦ σ t ω)) {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C)
 
 /-- The integrand of the freezing defect on the `k`-th cell, `𝟙_{(tₖ, tₖ₊₁]}·(σ − σ(tₖ))`, as a
 class in the Itô-integrand space. -/
@@ -177,16 +167,6 @@ theorem coeFn_freezingDefect (n : ℕ) (k : {x // x ∈ Finset.range n}) :
   congr 1
   exact h3.trans (itoSimple_stepSP hBmeas _ _ _ _ ω)
 
-/-- Distinct cells of the uniform partition are disjoint. -/
-theorem disjoint_cells {n : ℕ} {j k : ℕ} (hjk : j ≠ k) :
-    Disjoint (Set.Ioc (unifPart T n j) (unifPart T n (j + 1)))
-      (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))) := by
-  rcases lt_or_gt_of_ne hjk with h | h
-  · exact Set.disjoint_left.2 fun s hs hs' ↦
-      absurd (hs.2.trans (unifPart_mono T n (Nat.succ_le_of_lt h))) (not_le.2 hs'.1)
-  · exact Set.disjoint_left.2 fun s hs hs' ↦
-      absurd (hs'.2.trans (unifPart_mono T n (Nat.succ_le_of_lt h))) (not_le.2 hs.1)
-
 /-- **Defects on distinct cells are orthogonal.** Their integrands live on disjoint cells, and the
 Itô integral preserves inner products. -/
 theorem inner_freezingDefect_eq_zero {n : ℕ} {j k : {x // x ∈ Finset.range n}} (hjk : j ≠ k) :
@@ -197,46 +177,40 @@ theorem inner_freezingDefect_eq_zero {n : ℕ} {j k : {x // x ∈ Finset.range n
   filter_upwards [coeFn_cellIntegrand T hBmeas hadap hcont hbdd n j,
     coeFn_cellIntegrand T hBmeas hadap hcont hbdd n k] with z hj hk
   rw [hj, hk]
-  have hd := disjoint_cells T (n := n) (Subtype.coe_injective.ne hjk)
+  have hd := (unifPart_mono T n).pairwise_disjoint_on_Ioc_succ (Subtype.coe_injective.ne hjk)
   by_cases hz : z.1 ∈ Set.Ioc (unifPart T n j.1) (unifPart T n (j.1 + 1))
   · have hz' : z.1 ∉ Set.Ioc (unifPart T n k.1) (unifPart T n (k.1 + 1)) :=
       Set.disjoint_left.1 hd hz
     simp [Set.indicator_of_notMem hz']
   · simp [Set.indicator_of_notMem hz]
 
-/-- **The cell integrands telescope** to the whole freezing error `σ − stepσ`. -/
-theorem sum_cellIntegrand {n : ℕ} (hn : n ≠ 0) :
-    ∑ k ∈ (Finset.range n).attach, cellIntegrand (μ := μ) T hBmeas hadap hcont hbdd n k
-      = processToLp T hBmeas hadap hcont hbdd
-        - simpleAssembly_T T hBmeas (stepσ hBmeas hadap hbdd T n) := by
-  rw [stepσ_eq_sum_cellStep, map_sum]
-  simp only [cellIntegrand, Finset.sum_sub_distrib]
-  congr 1
-  rw [Finset.sum_attach (Finset.range n) (fun k ↦ bandRestrict T (unifPart T n k)
-    (unifPart T n (k + 1)) hBmeas (processToLp T hBmeas hadap hcont hbdd))]
-  simp only [bandRestrict]
-  rw [Finset.sum_range_sub' (fun k ↦ restrictAfterCLM T (unifPart T n k) hBmeas
-    (processToLp T hBmeas hadap hcont hbdd)) n]
-  have h0 : unifPart T n 0 = 0 := by simp [unifPart]
-  have hT : unifPart T n n = T := by simp [unifPart, hn]
-  rw [h0, hT]
-  refine Lp.ext ?_
-  filter_upwards [Lp.coeFn_sub (restrictAfterCLM T 0 hBmeas (processToLp T hBmeas hadap hcont hbdd))
-      (restrictAfterCLM T T hBmeas (processToLp T hBmeas hadap hcont hbdd)),
-    coeFn_restrictAfterCLM T 0 hBmeas (processToLp T hBmeas hadap hcont hbdd),
-    coeFn_restrictAfterCLM T T hBmeas (processToLp T hBmeas hadap hcont hbdd),
-    ae_fst_mem_Ioc_trimMeasure_T T hBmeas] with z h1 h2 h3 hz
-  rw [h1, Pi.sub_apply, h2, h3, if_pos hz.1, if_neg (not_lt.2 hz.2), sub_zero]
-
 /-- **The defects sum to the Itô integral of the freezing error**: `∫σ dB` minus the frozen
-Riemann–Itô sum `∑ σ(tₖ)·ΔBₖ`. -/
+Riemann–Itô sum `∑ σ(tₖ)·ΔBₖ`. The increments of `M` telescope to `M_T − M_0 = ∫σ dB`, and the
+frozen increments assemble into the elementary integral of `stepσ`. -/
 theorem sum_freezingDefect {n : ℕ} (hn : n ≠ 0) :
     ∑ k ∈ (Finset.range n).attach, freezingDefect hB T hBmeas hadap hcont hbdd n k
       = itoIntegralCLM_T hB T hBmeas (processToLp T hBmeas hadap hcont hbdd)
         - (memLp_riemannσ hB hBmeas hadap hbdd T n).toLp (riemannσ (B := B) σ T n) := by
-  simp only [freezingDefect]
-  rw [← map_sum, sum_cellIntegrand T hBmeas hadap hcont hbdd hn, map_sub,
-    itoIntegralCLM_T_stepσ hB hBmeas hadap hbdd T n]
+  simp only [freezingDefect_eq]
+  rw [Finset.sum_sub_distrib, Finset.sum_attach (Finset.range n) fun k ↦
+      itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas (processToLp T hBmeas hadap hcont hbdd)
+        - itoProcessCLM hB T (unifPart T n k) hBmeas (processToLp T hBmeas hadap hcont hbdd),
+    Finset.sum_range_sub (fun k ↦
+      itoProcessCLM hB T (unifPart T n k) hBmeas (processToLp T hBmeas hadap hcont hbdd)) n,
+    ← map_sum, ← map_sum, ← stepσ_eq_sum_cellStep, itoIntegralCLM_T_stepσ hB hBmeas hadap hbdd T n]
+  have h0 : unifPart T n 0 = 0 := by simp [unifPart]
+  have hT : unifPart T n n = T := by simp [unifPart, hn]
+  rw [h0, hT, itoProcessCLM_zero_time, sub_zero, itoProcessCLM_terminal_eq]
+
+/-- **The defects carry the whole freezing error**: their squared norms sum to the squared norm of
+`∫σ dB − ∑ σ(tₖ)·ΔBₖ`, since they are orthogonal and sum to it. -/
+theorem sum_norm_sq_freezingDefect {n : ℕ} (hn : n ≠ 0) :
+    ∑ k ∈ (Finset.range n).attach, ‖freezingDefect hB T hBmeas hadap hcont hbdd n k‖ ^ 2
+      = ‖itoIntegralCLM_T hB T hBmeas (processToLp T hBmeas hadap hcont hbdd)
+          - (memLp_riemannσ hB hBmeas hadap hbdd T n).toLp (riemannσ (B := B) σ T n)‖ ^ 2 := by
+  rw [← sum_freezingDefect hB T hBmeas hadap hcont hbdd hn,
+    norm_sum_sq_of_pairwise_inner_eq_zero _ _
+      fun j k hjk ↦ inner_freezingDefect_eq_zero hB T hBmeas hadap hcont hbdd hjk]
 
 /-- **Freezing.** For a bounded adapted continuous `σ` and `M = σ●B`, the squared `L²` norms of
 the defects `ΔMₖ − σ(tₖ)·ΔBₖ` over the cells of the uniform partition sum to something tending
@@ -251,15 +225,9 @@ theorem tendsto_sum_norm_sq_freezingDefect :
       atTop (𝓝 0) := by
     simpa [norm_sub_rev] using tendsto_iff_norm_sub_tendsto_zero.1
       (itoIntegralCLM_T_of_bdd_adapted_cont hB hBmeas hadap hcont hbdd T)
-  have hsq := hnorm.pow 2
-  rw [zero_pow two_ne_zero] at hsq
-  refine hsq.congr' ?_
+  refine Tendsto.congr' ?_ (by simpa using hnorm.pow 2)
   filter_upwards [eventually_ne_atTop 0] with n hn
-  rw [← sum_freezingDefect hB T hBmeas hadap hcont hbdd hn,
-    norm_sum_sq_of_pairwise_inner_eq_zero _ _
-      fun j k hjk ↦ inner_freezingDefect_eq_zero hB T hBmeas hadap hcont hbdd hjk]
-
-end Freezing
+  exact (sum_norm_sq_freezingDefect hB T hBmeas hadap hcont hbdd hn).symm
 
 end AdaptedStochasticIntegralFreezing
 

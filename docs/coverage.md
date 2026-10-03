@@ -32,10 +32,12 @@ One entry added, `sc-thm-7.4.5-adapted` (`full`). Corpus 440 → 441.
 
 `sc-thm-7.4.5` proves Theorem 7.4.5 for constant `σ`. The new entry proves it for `σ` bounded,
 adapted to the natural Brownian filtration and continuous in time: for `X = X₀ + A + σ●B` with a
-Lipschitz drift path `A`, the squared-increment sums of `X` along the uniform partition of `[0, T]`
-converge in `L¹` to `∫₀ᵀ σ_s² ds`. The weighted form, `∑ₖ w(tₖ)(ΔXₖ)² → ∫₀ᵀ w σ² ds` for a bounded
-adapted weight with continuous paths, is re-exported alongside; it is what the second-order term of
-the planned adapted Itô formula needs. These are steps B1 and B2 of that formula
+drift path `A` Lipschitz in time with one constant for every path, the squared-increment sums of `X`
+along the uniform partition of `[0, T]` converge in `L¹` to `∫₀ᵀ σ_s² ds`. The weighted form,
+`∑ₖ w(tₖ)(ΔXₖ)² → ∫₀ᵀ w σ² ds` for a bounded adapted weight with continuous paths, is re-exported
+alongside. It has the shape of the second-order term of the planned adapted Itô formula, but that
+formula's weight `f''(X)` has paths continuous only almost surely, so the weight hypothesis must be
+relaxed first. These are steps B1 and B2 of that formula
 (`docs/specs/2026-07-05-adapted-ito-formula-design.md`).
 
 The proof splits `(ΔXₖ)²` around the frozen increment `σ(tₖ)ΔBₖ`. The freezing defects
@@ -46,8 +48,9 @@ had (`tendsto_weighted_qv_process`).
 
 Scope. The convergence is in `L¹`, where `sc-thm-7.4.5` has `L²`: an `L²` bound on the freezing part
 would need fourth moments of `σ●B`, which the tower does not have. Only uniform partitions are
-covered, and the drift rate must be bounded. `X` need only agree with `X₀ + A + σ●B` almost surely
-at each time of `[0, T]`.
+covered, and the drift rate must be bounded. The drift is not assumed measurable; the integrals are
+Bochner integrals, so the statement has content when its increments are. `X` need only agree with
+`X₀ + A + σ●B` almost surely at each time of `[0, T]`.
 
 ### The integral against an Itô integral is a stochastic integral, in BrownianMotion's sense (2026-10-02)
 

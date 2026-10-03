@@ -17,7 +17,7 @@ stopped at SP0. Other work has since built most of what SP0, B3 and B4 asked for
 |---|---|---|
 | SP0 (i), σ-realization | done | `AdaptedProcessToLp.processToLp` (bounded adapted continuous), `processToLpPredictable` (bounded predictable) |
 | SP0 (ii) = B1a, sub-interval increments | done | `ItoIntegralAgainstMartingale.itoIntegralCLM_T_bandRestrict` (`∫ 𝟙_{(a,b]}·φ dB = M_b − M_a`), with `ItoIntegralLocality.itoIntegralCLM_T_smulAdapted` for a bounded `𝓕_a`-measurable factor |
-| B3, the process | mostly done | `PricePathDrift.pricePathDrift` (`S₀ + ∫b ds + σ●B`, identified by `pricePathDrift_eq_setIntegral`); `ItoIntegralProcessContinuousModification` |
+| B3, the process | partly done | `ItoIntegralProcessContinuousModification.itoContinuousMod`, predictable for the natural filtration (`itoContinuousMod_isStronglyPredictable`) with paths continuous almost surely on `[0, T]` (`itoContinuousMod_continuousOn`). `PricePathDrift.pricePathDrift` (`S₀ + ∫b ds + σ●B`) has the drift, but its Itô part is the `Lp` representative at each time, with no path regularity |
 | B4, the adapted Riemann bridge | done | `ItoIntegralRiemannBridge.itoIntegralCLM_T_of_bdd_adapted_cont` |
 | B1, freezing | done | `AdaptedStochasticIntegralFreezing.tendsto_sum_norm_sq_freezingDefect` (`∑ₖ ‖ΔMₖ − σ_{tₖ}ΔBₖ‖² → 0`) |
 | B2, adapted quadratic variation (SP1 headline) | done | `AdaptedQuadraticVariation.tendsto_weighted_qv_adapted` and `tendsto_qv_adapted`, corpus entry `sc-thm-7.4.5-adapted` |
@@ -25,14 +25,16 @@ stopped at SP0. Other work has since built most of what SP0, B3 and B4 asked for
 | B6, localization | open | |
 
 Waiting on it, from the 2026-10-02 triage: #48 (the two-process formula; `sc-thm-7.5.2` is a
-reduced core), #24 (variable-coefficient Feynman–Kac), steps D1 and C1 of the HJM plan
-(`docs/hjm-program.md` §5 assumes this formula), and the Itô-integral case of #179.
+reduced core), #24 (variable-coefficient Feynman–Kac), step D1 of the HJM plan and C1 after it (D1
+applies Itô's formula for `exp` to `Y`, whose coefficients are adapted; the constant-coefficient
+`ito_formula_expBrownian` that `docs/hjm-program.md` §5 names does not reach it), and the
+Itô-integral case of #179.
 
 **Re-sequenced.** SP1 is B1 and B2, one milestone with one `full` entry, `⟨X⟩ = ∫σ² ds`. B1 is
 cheaper than §4 estimated because B1a exists. On a cell `(tₖ, tₖ₊₁]`, `ΔMₖ − σ_{tₖ}ΔBₖ` is the Itô
 integral of `𝟙_{cell}·(φ − σ_{tₖ})`: the band identity minus the elementary integral. So a whole
 weighted sum `∑ wₖ(ΔMₖ − σ_{tₖ}ΔBₖ)` is one Itô integral, and the isometry gives its squared `L²`
-norm as `𝔼∫₀ᵀ w² (σ_s − σ_{⌊s⌋ₙ})² ds`, which tends to `0` by dominated convergence. This one
+norm as `𝔼∫₀ᵀ w_{⌊s⌋ₙ}² (σ_s − σ_{⌊s⌋ₙ})² ds`, which tends to `0` by dominated convergence. This one
 estimate serves both the second-order term of B2 and the first-order term of B5. SP2 is then B5
 and B6, as planned.
 
@@ -41,15 +43,24 @@ are orthogonal, so B1 is `∑ₖ ‖Dₖ‖² → 0` read off the frozen Riemann
 weighted Itô integral. And B2 converges in `L¹`, not `L²`. Its freezing part `∑ₖ wₖ Dₖ(2ΔMₖ − Dₖ)`
 is bounded by Cauchy–Schwarz in `L¹`, while an `L²` bound would need fourth moments of `σ●B` (a BDG
 bound), which the tower does not have. `L¹` convergence gives convergence in probability, which is
-all the assembly needs to identify limits almost surely.
+all the assembly needs to identify limits almost surely. One consequence for B5: the claim above
+that one estimate serves the first-order term no longer holds. B1 as landed is unweighted, and
+`∑ₖ ‖Dₖ‖² → 0` gives only `‖∑ₖ wₖDₖ‖ ≤ C_w√n·(∑ₖ ‖Dₖ‖²)^{1/2}`, which need not tend to `0`. B2
+escapes this because each of its freezing terms carries a factor `ΔMₖ`. B5's first-order term
+needs either the weighted defects `wₖDₖ` to be orthogonal (`itoIntegralCLM_T_smulAdapted`, for an
+`𝓕_{tₖ}`-measurable `wₖ`), or the route through the integral against `M`:
+`∑ₖ wₖΔMₖ = ∫ (step) dM` (`itoIntegralAgainst_simpleProcess`), then the isometry against `M` and
+dominated convergence in `L²(⟨M⟩)`.
 
 **Open question for B5.** B2's weight, like `tendsto_weighted_qv_process`'s, must be adapted to the
-natural filtration and have continuous paths for every `ω`. The Itô-formula weight is `f''(X_s)`, and
-the continuous modification of `σ●B` (`ItoIntegralProcessContinuousModification`) is not adapted to
-the uncompleted natural filtration. So B5 has to either build an adapted version of `X` whose paths
-are continuous almost surely, and relax the two weighted-QV statements to almost-sure path
-continuity (their Riemann term already goes through dominated convergence), or move to an augmented
-filtration. The first is the smaller change.
+natural filtration and have continuous paths for every `ω`. The natural `X` for the formula is
+`X₀ + A + itoContinuousMod`, and the weight is `f''(X)`. When every Brownian path is continuous,
+that weight is adapted, because `itoContinuousMod` is then predictable for the natural filtration
+(`itoContinuousMod_isStronglyPredictable`). But its paths are continuous only almost surely
+(`itoContinuousMod_continuousOn`). So B5 has to relax
+the two weighted-QV statements to almost-sure path continuity. Their Riemann term already goes
+through dominated convergence, and the fluctuation term never uses continuity. No augmented
+filtration is needed.
 
 ## 1. Goal
 

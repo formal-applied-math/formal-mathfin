@@ -23,14 +23,15 @@ fixed time (into `Lp μ`), never jointly predictable in `(t, ω)`.
 Mathlib's `Probability/Process/Predictable.lean` supplies only the easy
 direction (predictable ⟹ adapted). The hard direction — a left-continuous
 adapted process is predictable — is **Degenne's**
-`StronglyAdapted.isStronglyPredictable_of_leftContinuous`. We apply it not to
-the continuous modification `itoContinuousMod` directly (that is only
-`∀ᵐ ω`-continuous and only adapted to the *augmented* filtration), but to each
-*elementary* Itô integral `itoSimpleProcess V`, which is genuinely continuous
-for **every** `ω` (from Brownian path continuity) and genuinely adapted (its
-martingale property). Predictability of the general process then lifts through
-the pointwise `limUnder` that *defines* `itoContinuousMod`
-(`StronglyMeasurable.limUnder`).
+`StronglyAdapted.isStronglyPredictable_of_leftContinuous`, which needs left-continuity on
+every path. We apply it not to the continuous modification `itoContinuousMod`
+directly, whose paths are continuous only almost surely, but to each *elementary*
+Itô integral `itoSimpleProcess V`, which is genuinely continuous for **every** `ω`
+(from Brownian path continuity) and genuinely adapted (its martingale property).
+Predictability of the general process then lifts through the pointwise `limUnder`
+that *defines* `itoContinuousMod` (`StronglyMeasurable.limUnder`), so
+`itoContinuousMod` is predictable, and in particular adapted, for the natural
+filtration itself; no augmentation is needed.
 
 * `itoSimpleProcess_continuous` — every path `t ↦ (V ● B)_t ω` is continuous.
 * `itoSimpleProcess_isStronglyPredictable` — the elementary integral is predictable.
