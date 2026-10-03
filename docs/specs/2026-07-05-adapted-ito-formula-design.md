@@ -7,6 +7,35 @@
   coefficients, `X_t = X₀ + ∫₀ᵗ b_s ds + ∫₀ᵗ σ_s dB_s`; the analytic keystone is
   the quadratic variation of a stochastic integral, `⟨X⟩_t = ∫₀ᵗ σ_s² ds`.
 
+## Status update (2026-10-03) — what has landed since, and what is left
+
+Track α (below) delivered Girsanov without this formula (`gir-thm-9.1.8`,
+`gir-thm-9.1.8-predictable`, and the jointly independent increments of 2026-09-25), so Track β
+stopped at SP0. Other work has since built most of what SP0, B3 and B4 asked for:
+
+| brick | status | where |
+|---|---|---|
+| SP0 (i), σ-realization | done | `AdaptedProcessToLp.processToLp` (bounded adapted continuous), `processToLpPredictable` (bounded predictable) |
+| SP0 (ii) = B1a, sub-interval increments | done | `ItoIntegralAgainstMartingale.itoIntegralCLM_T_bandRestrict` (`∫ 𝟙_{(a,b]}·φ dB = M_b − M_a`), with `ItoIntegralLocality.itoIntegralCLM_T_smulAdapted` for a bounded `𝓕_a`-measurable factor |
+| B3, the process | mostly done | `PricePathDrift.pricePathDrift` (`S₀ + ∫b ds + σ●B`, identified by `pricePathDrift_eq_setIntegral`); `ItoIntegralProcessContinuousModification` |
+| B4, the adapted Riemann bridge | done | `ItoIntegralRiemannBridge.itoIntegralCLM_T_of_bdd_adapted_cont` |
+| B1, freezing | open | |
+| B2, adapted quadratic variation (SP1 headline) | open | |
+| B5, assembly for bounded `f''` | open | |
+| B6, localization | open | |
+
+Waiting on it, from the 2026-10-02 triage: #48 (the two-process formula; `sc-thm-7.5.2` is a
+reduced core), #24 (variable-coefficient Feynman–Kac), steps D1 and C1 of the HJM plan
+(`docs/hjm-program.md` §5 assumes this formula), and the Itô-integral case of #179.
+
+**Re-sequenced.** SP1 is B1 and B2, one milestone with one `full` entry, `⟨X⟩ = ∫σ² ds`. B1 is
+cheaper than §4 estimated because B1a exists. On a cell `(tₖ, tₖ₊₁]`, `ΔMₖ − σ_{tₖ}ΔBₖ` is the Itô
+integral of `𝟙_{cell}·(φ − σ_{tₖ})`: the band identity minus the elementary integral. So a whole
+weighted sum `∑ wₖ(ΔMₖ − σ_{tₖ}ΔBₖ)` is one Itô integral, and the isometry gives its squared `L²`
+norm as `𝔼∫₀ᵀ w² (σ_s − σ_{⌊s⌋ₙ})² ds`, which tends to `0` by dominated convergence. This one
+estimate serves both the second-order term of B2 and the first-order term of B5. SP2 is then B5
+and B6, as planned.
+
 ## 1. Goal
 
 Formalise Itô's formula against a general **adapted-coefficient** Itô process:
