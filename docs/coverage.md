@@ -26,7 +26,7 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-### The integral against an Itô integral is a stochastic integral, in Degenne's sense (2026-10-02)
+### The integral against an Itô integral is a stochastic integral, in BrownianMotion's sense (2026-10-02)
 
 One entry added, `sc-ito-is-stochastic-integral` (`full`). Corpus 439 → 440.
 
@@ -39,16 +39,19 @@ filtration. BrownianMotion does not instantiate the predicate anywhere at the pi
 
 The domain is the processes indistinguishable from a predictable process square-integrable against
 the bracket. That is forced rather than chosen: the predicate asks for a domain closed under
-indistinguishability, and the natural filtration is not complete, so such a process need not be
-predictable itself. The uniqueness clause is the substantive part. An extension in the upstream
-sense need not be `L²`-continuous, so `itoIntegralAgainst_unique` does not reach it; the proof is a
-monotone-class argument from dominated convergence, through a Dynkin argument over the predictable
-rectangles. Dominated convergence in `L^p`, which Mathlib at the pin has only through uniform
-integrability, is proved in general on the way (`tendsto_eLpNorm_sub_of_dominated`).
+indistinguishability, and a process indistinguishable from a predictable one need not be
+predictable, or even jointly measurable, whatever the filtration. The uniqueness clause is the
+substantive part. An extension in the upstream sense is not assumed `L²`-continuous, so
+`itoIntegralAgainst_unique` does not reach it; the proof is a monotone-class argument from
+dominated convergence, through a Dynkin argument over the predictable rectangles, and it uses
+nothing about `M`. Dominated convergence in `L^p`, which Mathlib at the pin has only for `p = 1`,
+is proved on the way for every `p < ∞` and every measure
+(`tendsto_eLpNorm_sub_of_dominated_convergence`).
 
 Scope. The integrator is an Itô integral against a Brownian motion, not a general semimartingale.
 As in the upstream `SIntegral`, the integral is the terminal value; the process `t ↦ ∫₀ᵗ` is not
-part of the statement. `itoIntegralAgainst_unique`, uniqueness among continuous linear maps on
+part of the statement. The driver and the domain are `L²` objects: the localised domain
+(`∫ X² d⟨M⟩ < ∞` almost surely) is not covered, and no maximality of the domain is claimed. `itoIntegralAgainst_unique`, uniqueness among continuous linear maps on
 `L²(⟨M⟩)`, stays as a separate theorem with a different hypothesis.
 
 ### Quantitative risk management: quantiles, VaR for every law, ES for every integrable loss (2026-10-01)

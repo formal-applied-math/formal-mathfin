@@ -11,10 +11,14 @@ public import MathFin.Foundations.PoissonPgf
 /-!
 # The compound-Poisson aggregate-loss MGF
 
-For a Poisson claim count `N ∼ Poisson(λ)` and i.i.d. claim sizes `Xᵢ` with common moment
-generating function `M_X(t)`, the compound-Poisson aggregate loss `S = ∑_{i<N} Xᵢ` has MGF
+For i.i.d. claim sizes `Xᵢ` with common moment generating function `M_X(t)`, integrating the MGF
+of the `n`-claim sum `∑_{i<n} Xᵢ` against the Poisson(λ) law of `n` gives
 
-  `𝔼[exp(tS)] = exp(λ·(M_X(t) − 1))`.
+  `∫ n, M_{∑_{i<n} Xᵢ}(t) dPoisson(λ) = exp(λ·(M_X(t) − 1))`,
+
+the compound-Poisson aggregate-loss MGF in mixture form. For a claim count `N ∼ Poisson(λ)`
+independent of the `Xᵢ` the left side is `𝔼[exp(tS)]` with `S = ∑_{i<N} Xᵢ`; that conditioning
+step is not formalised here.
 
 This composes two genuine theorems rather than positing the algebraic shell
 `e^{−λ}·e^{λM} = e^{λ(M−1)}` (`Actuarial/Mortality.compoundPoisson_mgf_identity`):
@@ -25,8 +29,6 @@ This composes two genuine theorems rather than positing the algebraic shell
 * the **Poisson probability generating function** `𝔼[xᴺ] = e^{λ(x−1)}`
   (`Foundations/PoissonPgf.integral_pow_poissonMeasure`), evaluated at `x = M_X(t)`.
 
-Integrating the `n`-claim MGF against the Poisson claim-count law is the standard actuarial
-mixed-distribution derivation `𝔼_N[𝔼_X[exp(t·S_N)]] = 𝔼[exp(tS)]` under `N ⟂ (Xᵢ)`.
 
 ## Main result
 
@@ -57,9 +59,9 @@ lemma mgf_range_sum_of_iid (t : ℝ) (X : ℕ → Ω → ℝ)
   rw [hsum, hindep.mgf_sum hmeas (Finset.range n),
     Finset.prod_congr rfl (fun i _ ↦ hmgf i), Finset.prod_const, Finset.card_range]
 
-/-- **The compound-Poisson aggregate-loss MGF.** For a Poisson claim count `N ∼ Poisson(λ)`
-and i.i.d. claim sizes `Xᵢ`, the aggregate loss `S = ∑_{i<N} Xᵢ` has moment generating
-function `exp(λ·(M_X(t) − 1))` — the Poisson PGF evaluated at the common claim MGF. -/
+/-- **The compound-Poisson aggregate-loss MGF, in mixture form.** For i.i.d. claim sizes `Xᵢ`,
+the MGF of the `n`-claim sum integrated against the Poisson(λ) law of `n` is
+`exp(λ·(M_X(t) − 1))`, the Poisson PGF evaluated at the common claim MGF. -/
 theorem compoundPoisson_mgf (lam : ℝ≥0) (t : ℝ) (X : ℕ → Ω → ℝ)
     (hindep : iIndepFun X μ) (hmeas : ∀ i, Measurable (X i))
     (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) :

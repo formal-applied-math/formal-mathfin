@@ -125,6 +125,117 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-03 — corpus 440 — the BrownianMotion bump, the IsStochasticIntegral instance, and stale gap claims
+
+Scope: three merged PRs.
+- #230 bumps BrownianMotion 314f04a → 0d5b6eb. Lean and Mathlib are unchanged and no source
+  changed. It corrects prose the bump made false (the continuous-modification docstring) and five
+  places that still said #196 waited for a stable pin.
+- #231 corrects the `mf-compound-poisson-mgf` description, which understated its proof, and the
+  market-making docstrings and `docs/patterns.md`, which said Mathlib has no matrix `tanh`, no
+  matrix-valued differentiation and no matrix-exponential calculus.
+- #232 adds `Foundations/StochasticIntegralCharacterisation.lean`: the integral against `M = φ●B`
+  is an `IsStochasticIntegral` (BrownianMotion, J. van Winden) for `M` stopped at `T`. One entry,
+  `sc-ito-is-stochastic-integral`; corpus 439 → 440; closes #196.
+
+Three read-only review agents split the lenses: (1, 2, 4); (5, 7) plus the standing first pass;
+and (3, 6, 8). The parent adjudicated and executed the fixes below in one follow-up PR.
+
+### The standing first pass — prose against statement
+
+Ten findings, all fixed:
+- "An extension in the upstream sense need not be `L²`-continuous", in six places. The uniqueness
+  theorem itself shows every extension agrees with the isometric integral on the common domain.
+  What is true, and what defeats the density argument, is that continuity is not *assumed*. The
+  prose now says so.
+- The reason given for defining the domain up to indistinguishability was the incompleteness of
+  the natural filtration. That is wrong: `𝟙_{V×N}`, with `V` not Borel and `N` a nonempty null set,
+  is indistinguishable from `0` and not jointly measurable, whatever the filtration. Incompleteness
+  matters only in `ae_bracketMeasure_of_ae_forall`, whose docstring had it right. Fixed in the
+  module doc, `IsPredictableVersion`, `coverage.md` and the entry's scope.
+- The module paraphrased `IsStochasticIntegral` as "any two extensions agree". It says that `I`
+  agrees with each extension.
+- "Degenne's characterisation" in the entry's name, the module title and the docs. The predicate
+  is J. van Winden's, in Degenne's package; it is now "BrownianMotion's". The entry's `reference`
+  already named van Winden.
+- "Bounded predictable processes by uniform approximation": `approxBounded` converges pointwise
+  under a bound. Now "bounded pointwise approximation".
+- "Mathlib has no dominated form" of `L^p` convergence holds only for `p ≠ 1`
+  (`tendsto_lintegral_norm_of_dominated_convergence`), and the library already reaches `L²` through
+  BrownianMotion's `uniformIntegrable_of_dominated_singleton` and Vitali. Both are now said, with
+  what the new lemma adds: `p < 1` and infinite measures.
+- `CompoundPoissonMGF`'s module and theorem docstrings still claimed `𝔼[exp(tS)]` for a random `N`
+  and called the conditioning step "standard"; #231 had fixed only the corpus description. Both now
+  state the mixture form and say that the conditioning on `N` is not formalised.
+- A stale sentence in `MatrixMarketMakingRiccati` ("the pin carrying none") contradicted #231's own
+  correction.
+- The entry's scope did not say that the domain and the driver are `L²` objects, the textbook
+  localised domain not covered, and that no maximality of the domain is claimed. Added.
+- `cadlagModif` is adapted only if its right-continuous filtration is also complete (a nit).
+
+### Upgrades executed
+
+- **Coherence and zero slop (lenses 2, 3).** Seven re-derivations now consume the library's own
+  lemmas: `ae_fst_mem_Ioc_trimMeasure_T` (the hand-computed time bound and the separate time-origin
+  argument become one `ae_fst_mem_Ioc_bracketMeasure`), `MemLp.toLp_congr`, `MemLp.toLp_add` and
+  `MemLp.toLp_const_smul` (both definitional), `Lp.tendsto_Lp_iff_tendsto_eLpNorm''`,
+  `tendstoInMeasure_of_tendsto_Lp`, and BrownianMotion's `measurableSet_predictable_univ_prod` with
+  `Measurable.indicator` for the initial band.
+- **Zero slop (lens 3).** Gone: a `toMeasurable` detour (`Measure.prod_prod` takes arbitrary sets),
+  an unused `with` binding, a duplicate filter, a no-op `omit`, and the `|·|`/`‖·‖` round trips (the
+  band lemmas now take a norm bound). The opaque `all_goals first` discharge in the truncation step
+  is now an indicator truncation, bounded by `norm_indicator_le_norm_self` twice.
+- **Elegance (lens 8).** The initial-band identity is derived from the band identity at `i = 0`,
+  the two integrands agreeing `⟨M⟩`-a.e., instead of being re-proved.
+- **Idiom (lens 6).** The `L^p` lemma is `tendsto_eLpNorm_sub_of_dominated_convergence`, with
+  Mathlib's hypothesis names, and no longer assumes `p ≠ 0`.
+- **Concept clarity (lens 7).** The uniqueness section says the argument never uses `M`, and why
+  the indicators are cut at a time `K`. `integrator` says the predicate reads it only through
+  increments, almost surely, so its representatives do not matter. `sIntegral` says its name echoes
+  upstream `SIntegral`.
+
+### Exemplars
+
+- `Agree.of_tendsto`: both extensions pass to the limit in measure, and limits in measure are a.e.
+  unique. These few lines are why no `L²` continuity is needed.
+- `ae_bracketMeasure_of_ae_forall`: one bridge from "indistinguishable" to "`⟨M⟩`-a.e.", its
+  predictable-set hypothesis sitting exactly where the uncompleted filtration bites.
+- `sIntegral_ae_eq_of_isRiemannStieltjesExtension`: the version dominates its own truncations.
+- `domain`: the smallest set the predicate allows, closed under indistinguishability by
+  construction and under nothing else.
+
+### Ranked backlog
+
+1. **Lift the uniqueness half to BrownianMotion** (lenses 4, 2, 5; all three agents). The
+   `Uniqueness` section uses only the extension fields of both integrals and the generation of the
+   predictable σ-algebra by rectangles. The general theorem: two Riemann–Stieltjes extensions for
+   the same `Y` and `𝓕` agree a.s. on every common-domain process with a predictable version.
+   Corollary: an extension whose domain consists of such processes is an `IsStochasticIntegral`.
+   It needs `Filtration.generateFrom_predictableRectangles` upstream, of which MathFin's
+   `generateFrom_predictableRect` is the natural-filtration case. `isStochasticIntegral` then
+   shrinks to a few lines and `IsOtherExtension` disappears.
+2. **Modification invariance, and the instance for the continuous `M`** (lenses 1, 7).
+   `IsStochasticIntegral` sees `Y` only through a.e. increments at fixed times, so it is unchanged
+   when `Y` is replaced by a modification (a short BrownianMotion lemma). Then restate the headline
+   for `t ↦ itoContinuousMod … (min t T)`, the `M` a probabilist means.
+3. **Upstream the `L^p` dominated convergence to Mathlib** (lens 2), generalised to countably
+   generated filters as `tendsto_integral_filter_of_dominated_convergence` is. Route Mathlib's
+   `tendsto_approxOn_Lp_eLpNorm` and MathFin's two Vitali call sites (`L2MartingaleConvergence`,
+   `LpContinuousMartingaleConvergence`) through it.
+4. **A functional monotone-class theorem** (lenses 8, 4). Mathlib has none, and the Dynkin →
+   simple → bounded chain here is its proof specialised. State it once — a submodule containing
+   the π-system's indicators and closed under bounded pointwise limits — with or after item 1.
+5. **Structure and names** (lens 6), folded into item 1: `IsPredictableVersion` as a structure over
+   Mathlib's `IsStronglyPredictable`; `Agree` as a `Submodule`; `band` and `bottomBand`
+   abbreviations; `cut` renamed `restrictIic`; `induction … using MeasurableSpace.induction_on_inter`
+   syntax; partial unions through `Set.accumulate`.
+6. **One "trim → product null set" lemma** (lens 3). The trim-then-`prod_prod` computation is
+   written out by hand across the Itô tower (`ItoIntegralLocality`, `ItoIntegralL2Dense` twice,
+   `ItoIntegralCLM`, `DriftProcessModification`), and the time-origin fact twice.
+7. **#231 follow-through** (lens 2): define `matrixRiccatiCoeff` as `hÂ.cfc (riccatiCoeff · T t)`.
+8. **Carried.** The 2026-10-01 backlog stands. The next depth leap is the adapted-coefficient Itô
+   formula (#48; the 2026-07-05 spec's B1, B2, B5 and B6, the rest of it having landed since).
+
 ## 2026-10-01 — corpus 438 — quantitative risk management: quantiles, VaR for every law, ES for every integrable loss, copulas, extremes, the ASRF limit
 
 Scope: 30 new modules and `benchmarks/quantitative_risk_management.json` (65 entries, all `full`).

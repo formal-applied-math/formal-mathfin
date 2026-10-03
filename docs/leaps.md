@@ -275,8 +275,8 @@ Only `complete ⟹ unique` is delivered; the converse still needs Jacod–Yor. A
 `Q = μ` is **on `𝓕ᴮ_T`** — it says nothing off that σ-algebra. Finally, the uniqueness clause is
 stated in the `L²` frame. The band identity is summed over a simple process
 (`itoIntegralAgainst_simpleProcess`), so the clause takes agreement with the written-out
-Riemann–Stieltjes sums. Degenne's axiomatic `IsStochasticIntegral` is the wider frame for it, and
-the integral is an instance of it (`StochasticIntegralCharacterisation.isStochasticIntegral`,
+Riemann–Stieltjes sums. BrownianMotion's axiomatic `IsStochasticIntegral` is the wider frame for
+it, and the integral is an instance of it (`StochasticIntegralCharacterisation.isStochasticIntegral`,
 corpus `sc-ito-is-stochastic-integral`, #196). That instance is not a corollary of the density
-proof: an extension in its sense need not be `L²`-continuous, so its uniqueness clause is proved by
-a monotone-class argument.
+proof: an extension in its sense is not assumed `L²`-continuous, so its uniqueness clause is proved
+by a monotone-class argument.
