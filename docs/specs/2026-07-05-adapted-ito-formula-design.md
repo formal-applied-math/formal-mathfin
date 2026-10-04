@@ -52,15 +52,16 @@ needs either the weighted defects `wₖDₖ` to be orthogonal (`itoIntegralCLM_T
 `∑ₖ wₖΔMₖ = ∫ (step) dM` (`itoIntegralAgainst_simpleProcess`), then the isometry against `M` and
 dominated convergence in `L²(⟨M⟩)`.
 
-**Open question for B5.** B2's weight, like `tendsto_weighted_qv_process`'s, must be adapted to the
-natural filtration and have continuous paths for every `ω`. The natural `X` for the formula is
-`X₀ + A + itoContinuousMod`, and the weight is `f''(X)`. When every Brownian path is continuous,
-that weight is adapted, because `itoContinuousMod` is then predictable for the natural filtration
-(`itoContinuousMod_isStronglyPredictable`). But its paths are continuous only almost surely
-(`itoContinuousMod_continuousOn`). So B5 has to relax
-the two weighted-QV statements to almost-sure path continuity. Their Riemann term already goes
-through dominated convergence, and the fluctuation term never uses continuity. No augmented
-filtration is needed.
+**B5's weight, settled (2026-10-04).** The natural `X` for the formula is
+`X₀ + A + itoContinuousMod`, and the second-order weight is `f''(X)`. When every Brownian path is
+continuous that weight is adapted, because `itoContinuousMod` is predictable for the natural
+filtration (`itoContinuousMod_isStronglyPredictable`), but its paths are continuous only almost
+surely (`itoContinuousMod_continuousOn`). B2 now asks the weight for exactly that:
+`tendsto_weighted_qv_process_of_ae_continuous` and `tendsto_weighted_qv_adapted` take almost surely
+continuous paths. The fluctuation term never used continuity, and for the Riemann term the weight
+is replaced by a version continuous on every path
+(`exists_continuous_version_of_ae_continuous`). No augmented filtration is needed. What B5 still
+lacks is the first-order term, by one of the two routes above, and the Taylor remainder.
 
 ## 1. Goal
 

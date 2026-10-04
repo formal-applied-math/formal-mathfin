@@ -34,10 +34,10 @@ One entry added, `sc-thm-7.4.5-adapted` (`full`). Corpus 440 → 441.
 adapted to the natural Brownian filtration and continuous in time: for `X = X₀ + A + σ●B` with a
 drift path `A` Lipschitz in time with one constant for every path, the squared-increment sums of `X`
 along the uniform partition of `[0, T]` converge in `L¹` to `∫₀ᵀ σ_s² ds`. The weighted form,
-`∑ₖ w(tₖ)(ΔXₖ)² → ∫₀ᵀ w σ² ds` for a bounded adapted weight with continuous paths, is re-exported
-alongside. It has the shape of the second-order term of the planned adapted Itô formula, but that
-formula's weight `f''(X)` has paths continuous only almost surely, so the weight hypothesis must be
-relaxed first. These are steps B1 and B2 of that formula
+`∑ₖ w(tₖ)(ΔXₖ)² → ∫₀ᵀ w σ² ds` for a bounded adapted weight whose paths are continuous almost
+surely, is re-exported alongside. It has the shape of the second-order term of the planned adapted
+Itô formula, and since 2026-10-04 its weight hypothesis is the one that formula's weight `f''(X)`
+meets: adapted, with paths continuous almost surely. These are steps B1 and B2 of that formula
 (`docs/specs/2026-07-05-adapted-ito-formula-design.md`).
 
 The proof splits `(ΔXₖ)²` around the frozen increment `σ(tₖ)ΔBₖ`. The freezing defects
