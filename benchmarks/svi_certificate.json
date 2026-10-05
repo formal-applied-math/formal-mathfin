@@ -1,0 +1,68 @@
+{
+  "description": "A finite polynomial-sign certificate for Durrleman's condition and strike-convexity of five-parameter raw SVI; issue #174.",
+  "theorems": [
+    {
+      "id": "mf-svi-durrleman-sign-formula",
+      "name": "Durrleman's Condition for Raw SVI as a Finite Polynomial-Sign Formula",
+      "description": "For the five-parameter raw SVI total variance, a fixed finite Boolean combination of signs of polynomials in (a, b, rho, m, sigma) holds exactly when sigma > 0, b >= 0, rho^2 <= 1, the variance is positive at every log-strike, and Durrleman's function g is nonnegative at every log-strike. Repeated roots, constant and degenerate numerator polynomials, b = 0 and rho = +-1 are covered. The formula is defined structurally, as the expansion of a finite sign program, and is not written out as a list of inequalities; the zero-scale case sigma = 0 is in mf-svi-strike-convexity-sign-formula.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.SVI.ExtendedFormula\n\nopen MathFin MathFin.SVI Set\n\n/-- **Durrleman's condition for raw SVI as a finite sign formula.** `fullCertificateFormula`, a\n    fixed finite Boolean combination of signs of polynomials in the five parameters, holds at `p`\n    exactly when `σ > 0`, `b ≥ 0`, `ρ² ≤ 1`, the total variance is positive at every log-strike,\n    and Durrleman's function is nonnegative at every log-strike. Re-export of\n    `MathFin.SVI.fullCertificateFormula_iff`. -/\ntheorem svi_durrleman_sign_formula (p : Params) :\n    fullCertificateFormula.eval p = true ↔\n      0 < p.sigma ∧ 0 ≤ p.b ∧ 0 ≤ 1 - p.rho ^ 2 ∧\n        (∀ k : ℝ, 0 < variance p k) ∧ (∀ k : ℝ, 0 ≤ durrleman p k) :=\n  fullCertificateFormula_iff p\n"
+      },
+      "metadata": {
+        "alignment_source": "Robert Martin, ButterflyFreeSVI, https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a",
+        "reference": "Robert Martin, A polynomial-sign certificate for butterfly-free raw SVI; source development https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a; MathFin issue #174.",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Re-export of MathFin.SVI.fullCertificateFormula_iff. The raw SVI total variance is w(k) = a + b(rho(k-m) + sqrt((k-m)^2 + sigma^2)) and Durrleman's function g is built from its actual first and second derivatives (Derivatives.lean). The formula is a SignFormula over MvPolynomial (Fin 5) R, defined structurally as the expansion of a finite sign program (degree branch, four Hermite-matrix signatures by characteristic sign variations); it is not printed as an expanded list of inequalities. Proof route: rationalise g to a degree-ten polynomial on (0, infinity); nonnegativity there iff endpoint signs and no negative critical value; count those by four Tarski queries; evaluate each by Hermite's trace-form signature identity, proved for arbitrary nonzero f without squarefreeness; clear denominators. SCOPE. Smooth case sigma > 0 only. Strictly positive variance at every finite log-strike is part of the characterised domain; slices with zero variance somewhere are excluded. No statement about calendar-spread arbitrage or about surfaces.",
+        "provenance": {
+          "source": "butterfly-free-svi",
+          "revision": "eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a",
+          "note": "Ported from Robert Martin's ButterflyFreeSVI development (Lean v4.32.0) to MathFin's module system and pin; statements unchanged. Contributed to MathFin under Apache-2.0 by the author's agreement in issue #174 (2026-10-03); the upstream repository carries no licence file at this revision. Verification evidence for this port is recorded in the repository's generated axiom audit and verification ledger."
+        }
+      }
+    },
+    {
+      "id": "mf-svi-call-convex-iff-durrleman",
+      "name": "Durrleman's Condition is Convexity of the SVI-Smiled Call in Strike",
+      "description": "For raw SVI with sigma > 0 and total variance positive at every log-strike, the Black–Scholes call price with the SVI volatility substituted strike by strike (spot, maturity and discount factor normalised to one) is convex in strike on (0, infinity) if and only if Durrleman's function g is nonnegative at every log-strike. The price is MathFin's bsV evaluated at the smile, not a constant-volatility derivative.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.SVI.ExtendedFormula\n\nopen MathFin MathFin.SVI Set\n\n/-- **Durrleman's condition is convexity of the call in strike.** For raw SVI with `σ > 0` and\n    positive total variance, the Black–Scholes call with the SVI volatility substituted strike by\n    strike (spot, maturity and discount factor one) is convex on `(0, ∞)` exactly when Durrleman's\n    function is nonnegative at every log-strike. Re-export of `MathFin.SVI.bsSmile_convex_iff`. -/\ntheorem svi_call_convex_iff_durrleman (p : Params) (hs : 0 < p.sigma)\n    (hw : ∀ k : ℝ, 0 < variance p k) :\n    ConvexOn ℝ (Ioi 0) (bsSmile p) ↔ ∀ k : ℝ, 0 ≤ durrleman p k :=\n  bsSmile_convex_iff p hs hw\n"
+      },
+      "metadata": {
+        "alignment_source": "Robert Martin, ButterflyFreeSVI, https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a",
+        "reference": "Robert Martin, A polynomial-sign certificate for butterfly-free raw SVI; source development https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a; MathFin issue #174.",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Re-export of MathFin.SVI.bsSmile_convex_iff. The second strike derivative of the smiled call is computed with the smile's first and second derivatives (blackCall_deriv2) and its sign identified with that of g; bsSmile is MathFin.bsV K 0 (sqrt w(log K)) 1 1. SCOPE. sigma > 0 and positive variance are hypotheses. Normalised spot, maturity and discount; convexity on (0, infinity) only, with no statement about limits at 0 or infinity or about the call being a price under a measure.",
+        "provenance": {
+          "source": "butterfly-free-svi",
+          "revision": "eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a",
+          "note": "Ported from Robert Martin's ButterflyFreeSVI development (Lean v4.32.0) to MathFin's module system and pin; statements unchanged. Contributed to MathFin under Apache-2.0 by the author's agreement in issue #174 (2026-10-03); the upstream repository carries no licence file at this revision. Verification evidence for this port is recorded in the repository's generated axiom audit and verification ledger."
+        }
+      }
+    },
+    {
+      "id": "mf-svi-strike-convexity-sign-formula",
+      "name": "The Durrleman / Strike-Convexity Domain of Raw SVI as a Finite Polynomial-Sign Formula",
+      "description": "For the five-parameter raw SVI total variance with sigma >= 0, a fixed finite Boolean combination of signs of polynomials in (a, b, rho, m, sigma) holds exactly when b >= 0, rho^2 <= 1, the variance is positive at every log-strike, and the Black–Scholes call with the SVI volatility substituted strike by strike is convex in strike on (0, infinity). The kinked zero-scale slice sigma = 0 is included. This is an explicit quantifier-free construction of the domain MathFin issue #174 recorded as open: its atoms are signs of the coefficients of the degree-at-most-ten numerator polynomial and of the characteristic coefficients of four Hermite matrices (up to 9 by 9) over R[a, b, rho, m, sigma], per degree branch, plus two quadratic tests at sigma = 0. The formula is defined structurally and is not written out as a list of inequalities. No tail condition is included: the large-strike limit of the call (the strict wing slope b(1+rho) < 2) and an atom at zero are not addressed, so the set is the Durrleman / strike-convexity domain, which is how #174 states the problem, and not full butterfly-freeness.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.SVI.ExtendedFormula\n\nopen MathFin MathFin.SVI Set\n\n/-- **The strike-convexity domain of raw SVI as a finite sign formula.**\n    `extendedCertificateFormula`, a fixed finite Boolean combination of signs of polynomials in the\n    five parameters, holds at `p` exactly when `σ ≥ 0`, `b ≥ 0`, `ρ² ≤ 1`, the total variance is\n    positive at every log-strike, and the SVI-smiled Black–Scholes call is convex in strike on\n    `(0, ∞)`. Re-export of `MathFin.SVI.extendedCertificateFormula_iff_bsSmile_convex`. -/\ntheorem svi_strike_convexity_sign_formula (p : Params) :\n    extendedCertificateFormula.eval p = true ↔\n      0 ≤ p.sigma ∧ 0 ≤ p.b ∧ 0 ≤ 1 - p.rho ^ 2 ∧\n        (∀ k : ℝ, 0 < variance p k) ∧ ConvexOn ℝ (Ioi 0) (bsSmile p) :=\n  extendedCertificateFormula_iff_bsSmile_convex p\n"
+      },
+      "metadata": {
+        "alignment_source": "Robert Martin, ButterflyFreeSVI, https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a",
+        "reference": "Robert Martin, A polynomial-sign certificate for butterfly-free raw SVI; source development https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a; MathFin issue #174.",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Re-export of MathFin.SVI.extendedCertificateFormula_iff_bsSmile_convex, the disjunction of the smooth formula (mf-svi-durrleman-sign-formula, through mf-svi-call-convex-iff-durrleman) and the zero-scale formula. The raw SVI total variance is w(k) = a + b(rho(k-m) + sqrt((k-m)^2 + sigma^2)) and Durrleman's function g is built from its actual first and second derivatives (Derivatives.lean). The formula is a SignFormula over MvPolynomial (Fin 5) R, defined structurally as the expansion of a finite sign program (degree branch, four Hermite-matrix signatures by characteristic sign variations); it is not printed as an expanded list of inequalities. Proof route: rationalise g to a degree-ten polynomial on (0, infinity); nonnegativity there iff endpoint signs and no negative critical value; count those by four Tarski queries; evaluate each by Hermite's trace-form signature identity, proved for arbitrary nonzero f without squarefreeness; clear denominators. For sigma = 0 the slice is piecewise linear; each branch reduces to a quadratic nonnegative on a ray, and convexity across the kink follows from the upward jump of the one-sided derivative. SCOPE. The characterised set is positive variance together with convexity in strike of the normalised smiled call on (0, infinity). It is not full butterfly-freeness: no tail condition is proved (the call tending to 0 at large strikes, i.e. the strict wing slope b(1+rho) < 2, or the absence of an atom at zero), and monotonicity of the call is not stated. Slices with zero variance at some log-strike are excluded (for sigma = 0 that means a > 0). Whether the formula is minimal, or how large its expansion is, is not addressed. No statement about calendar-spread arbitrage.",
+        "provenance": {
+          "source": "butterfly-free-svi",
+          "revision": "eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a",
+          "note": "Ported from Robert Martin's ButterflyFreeSVI development (Lean v4.32.0) to MathFin's module system and pin; statements unchanged. Contributed to MathFin under Apache-2.0 by the author's agreement in issue #174 (2026-10-03); the upstream repository carries no licence file at this revision. Verification evidence for this port is recorded in the repository's generated axiom audit and verification ledger."
+        }
+      }
+    }
+  ]
+}

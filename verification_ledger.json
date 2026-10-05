@@ -2103,6 +2103,34 @@
       "input_hash": "70ed2dafe561090c2448865af4a62eaee69af166c0e9a16ddb72e13a899e2fb5",
       "verified_at_commit": "fdfecac"
     },
+    "mf-svi-butterfly-free-sign-formula": {
+      "benchmark_file": "svi_certificate.json",
+      "date": "2026-10-04",
+      "elapsed_s": 108.4,
+      "input_hash": "e3ce114a75f270000b33cc22ca055c1081b86624a5999505584df389bf764184",
+      "verified_at_commit": "ab2153d"
+    },
+    "mf-svi-call-convex-iff-durrleman": {
+      "benchmark_file": "svi_certificate.json",
+      "date": "2026-10-04",
+      "elapsed_s": 2.6,
+      "input_hash": "f9dde5044a4d7627af7fe3bbfb5e6b6f9e9865011090371a7b61fccb8a928895",
+      "verified_at_commit": "65fdc5e"
+    },
+    "mf-svi-durrleman-sign-formula": {
+      "benchmark_file": "svi_certificate.json",
+      "date": "2026-10-04",
+      "elapsed_s": 77.3,
+      "input_hash": "f81fcb2fbe47099c45901e9bfd052114b5cdcc0fce6bd87ac0874494730566e0",
+      "verified_at_commit": "65fdc5e"
+    },
+    "mf-svi-strike-convexity-sign-formula": {
+      "benchmark_file": "svi_certificate.json",
+      "date": "2026-10-04",
+      "elapsed_s": 61.9,
+      "input_hash": "db3d3614b6ffc6fe1b87f67dd72c0da780b352c5a3defe17602d327f6faa0c6e",
+      "verified_at_commit": "65fdc5e"
+    },
     "mf-swaption-parity": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-02",
