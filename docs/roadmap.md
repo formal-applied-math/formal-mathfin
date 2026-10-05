@@ -1733,3 +1733,18 @@ Still open on this seam:
 - independence of its increments from the past filtration, which the deterministic conditional MGF
   already implies but no entry states;
 - unbounded θ under Novikov's condition (`sc-thm-9.1.8`).
+
+## phase: Itô's formula for adapted coefficients (2026-10-05, corpus 446→447)
+
+B5 of the adapted Itô tower (`docs/specs/2026-07-05-adapted-ito-formula-design.md`) landed:
+`ItoFormulaAdapted.ito_formula_adapted`, for `X = x₀ + ∫ b ds + ∫ σ dB` with bounded adapted
+path-continuous coefficients and `f ∈ C²` with `f'`, `f''` bounded, at the terminal time. Corpus
+entry `sc-ito-formula-adapted`.
+
+The proof separates cleanly. The probability is three limits in measure and one subsequence. The
+analysis is `ito_formula_of_tendsto`, a statement about one continuous path whose four partition
+sums converge, and it is what a version at every time or for a stopped process would reuse.
+
+Next, in order of what the consumers need: B6 (unbounded `f'`, `f''`, by stopping `X` at its exit
+from `[−N, N]`), since Girsanov's exponential and Black–Scholes both apply `exp`; then every
+`t ≤ T` and the identity of processes; then `f(t, x)`.

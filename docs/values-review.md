@@ -125,6 +125,76 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-05 — corpus 447 — Itô's formula for adapted coefficients (B5)
+
+Scope: `Foundations/ItoFormulaAdapted.lean` and the entry `sc-ito-formula-adapted`; corpus
+446 → 447. Also `Foundations/AdaptedDrift.lean` (#237), which was owed a panel.
+
+Three read-only agents: prose against statement, proof quality, and the mathematics. They read a
+first version that asked for `f ∈ C³` with `f‴` bounded and stated the stochastic integral
+through an existential.
+
+### Standing first pass: prose against statement
+
+- The description and docstrings said "a Brownian motion with continuous paths" and coefficients
+  "continuous in time". The hypotheses are continuity of every path, of `B`, `σ` and `b`. Now
+  said in the description, the snippet, the module docstring and the scope.
+- The module's proof sketch named in-measure lemmas for "mean square" and "`L¹`" convergence.
+  Reworded: in measure, from the stronger mode proved upstream.
+- `adaptedItoProcess`'s docstring promised continuous paths with no hypotheses. It now names the
+  lemma and its hypotheses, and says the process is meant for `t ≤ T`.
+- The reference cited Karatzas–Shreve 3.3.3 bare. It now says which special case.
+- The remainder lemma's docstring said "finite quadratic variation" and "`f ∈ C³`" for a
+  statement about one sequence of partitions and pointwise derivatives. Rewritten with the lemma.
+- `AdaptedDrift`: "on every path where the weight is continuous" hid that the weight is a bounded
+  deterministic function. Reworded. Its module docstring cited a spec step; removed.
+- The spec still listed B5 as in progress and a `ito_formula_adapted_local` that does not exist.
+
+### Upgrades executed
+
+- **`C²` instead of `C³`.** The remainder is bounded through the modulus of continuity of `f''`
+  on the compact range of the path (`abs_discreteTaylorRemainder_le_of_abs_sub_le`), which is
+  what the spec had planned. `f‴` and two hypotheses are gone.
+- **No existential in the headline.** The integrand is `processToLpPredictable` of the bounded
+  predictable process `f'(X)·σ`; the form against `M` is kept as `ito_formula_adapted_against`.
+- **A path-level lemma, `ito_formula_of_tendsto`**, carries the discrete formula, the remainder
+  and the uniqueness of limits. The main proof is three limits in measure, one extraction, and
+  an application.
+- `adaptedItoProcess` takes the integrand class, not `σ` and three proofs about it.
+- `tendstoInMeasure_riemannStieltjes` takes the process up to modification, as the quadratic
+  variation lemma already did; integrability on `(0, T]` comes from compactness, with no bound.
+
+### Lens gradients
+
+- **Inspired math / first principles.** Exemplar: nothing probabilistic happens after the
+  subsequence is chosen. Next: B6. Every consumer named in the spec applies `exp`, so this
+  theorem alone unblocks none of them.
+- **Concept clarity.** Exemplar: the statement reads as the textbook's at time `T`. Next: every
+  `t ≤ T`, then indistinguishability. The horizon is built into `itoContinuousMod T`, so this is
+  not an application of the theorem at horizon `t`.
+- **Coherence / architecture.** The in-measure forms of B2 and of the Riemann–Stieltjes brick,
+  and three small helpers, sit in the new module. They belong with their bricks.
+- **Honesty of B2.** `tendsto_weighted_qv_adapted` asserts `∫|…| → 0` with no measurability of
+  `X`, so for a non-measurable `X` it says nothing. `hX_meas` belongs in that statement.
+
+### Ranked backlog
+
+1. **B6**: stop `X` at its exit from `[−N, N]` and apply `ito_formula_of_tendsto` on the stopped
+   path.
+2. **Every `t ≤ T`, then the identity of processes**: decouple the partition endpoint from the
+   horizon in the bricks.
+3. **Time-dependent `f(t, x)`** through `discrete_ito_formula_2d`.
+4. **Relocate**: the in-measure lemmas into `AdaptedQuadraticVariation` (with `hX_meas` added to
+   the `L¹` statement) and `AdaptedRiemannStieltjes`; the remainder lemmas into
+   `ItoFormulaRemainder`; one home for the three copies of "subsequence converging almost
+   surely" and of "`L¹` gives in measure" (`GirsanovPredictableTheta`).
+5. **`unifPart_self` and `unifPart_zero`** as lemmas; they are re-proved inline about twenty
+   times.
+6. `AdaptedDrift`: split the path-level section from the adapted one (six `omit mΩ`), prove the
+   Riemann–Stieltjes limit once in `DriftRiemannConvergence`, and say how `driftPath` relates to
+   `driftContinuousMod`.
+7. The SVI backlog of the block below, unchanged.
+
 ## 2026-10-05 — corpus 446 — the SVI tail condition and butterfly-freeness
 
 Scope: `BlackScholes/SVI/TailCondition.lean`, `BlackScholes/CallPriceFunction.lean`,

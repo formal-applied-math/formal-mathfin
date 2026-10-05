@@ -21,7 +21,7 @@ stopped at SP0. Other work has since built most of what SP0, B3 and B4 asked for
 | B4, the adapted Riemann bridge | done | `ItoIntegralRiemannBridge.itoIntegralCLM_T_of_bdd_adapted_cont` |
 | B1, freezing | done | `AdaptedStochasticIntegralFreezing.tendsto_sum_norm_sq_freezingDefect` (`∑ₖ ‖ΔMₖ − σ_{tₖ}ΔBₖ‖² → 0`) |
 | B2, adapted quadratic variation (SP1 headline) | done | `AdaptedQuadraticVariation.tendsto_weighted_qv_adapted` and `tendsto_qv_adapted`, corpus entry `sc-thm-7.4.5-adapted` |
-| B5, assembly for bounded `f''` | in progress | weight hypothesis relaxed to paths almost surely continuous on `[0, T]` (`tendsto_weighted_qv_process_of_ae_continuous`); martingale part of the first-order term, `AdaptedRiemannStieltjes.tendsto_integral_sq_riemannStieltjes_sub` (`sc-riemann-stieltjes-against-ito`). drift `AdaptedDrift` (Lipschitz, predictable, `tendsto_sum_mul_driftPath_sub`). Open: the Taylor remainder, the assembly |
+| B5, assembly for bounded `f'`, `f''` | done (2026-10-05) | `ItoFormulaAdapted.ito_formula_adapted`, corpus entry `sc-ito-formula-adapted`: `f ∈ C²` with `f'`, `f''` bounded, at the terminal time `T`, deterministic start. Bricks: `AdaptedRiemannStieltjes` (martingale part), `AdaptedDrift`, `tendsto_weighted_qv_adapted`, and the path-level `ito_formula_of_tendsto` |
 | B6, localization | open | |
 
 Waiting on it, from the 2026-10-02 triage: #48 (the two-process formula; `sc-thm-7.5.2` is a
@@ -76,9 +76,14 @@ needed: it is Lipschitz on every path (`abs_driftPath_sub_le`, B2's hypothesis),
 (`driftPath_isStronglyPredictable`), and its Riemann–Stieltjes sums converge on every path where the
 weight is continuous (`tendsto_sum_mul_driftPath_sub`), the drift half of the first-order term.
 
-What B5 still lacks, in order: the Taylor remainder, in probability, from `∑|Rₖ| ≤ ρ(maxₖ|ΔXₖ|)·∑(ΔXₖ)²` with
-`tendsto_qv_adapted`; and the assembly, three limits in measure identified by
-`tendstoInMeasure_ae_unique`. `X₀` must be `𝓕₀`-measurable for `f'(X)` to be predictable.
+**B5 landed (2026-10-05).** `ItoFormulaAdapted.ito_formula_adapted`. The three probabilistic
+limits are taken in measure and made almost sure along one subsequence of partitions; the rest is
+a statement about a single path (`ito_formula_of_tendsto`): the discrete formula on each
+partition, with Taylor remainders at most `ρ(maxₖ|ΔXₖ|)·∑(ΔXₖ)²` for `ρ` the modulus of
+continuity of `f''` on the range of the path. So `f ∈ C²` suffices, as planned. The start is a
+deterministic `x₀`: `𝓕₀ = σ(B₀)` is trivial for the natural filtration, so a random start needs a
+larger filtration first. Still open after B5: every `t ≤ T` and the identity of processes (the
+horizon is built into `itoContinuousMod T`), and B6.
 
 ## 1. Goal
 
@@ -279,7 +284,7 @@ Summit C), apply B5 to the stopped process (bounded weight on `[−N, N]`), and 
 | `AdaptedQuadraticVariation.lean` | B2 | `tendsto_weighted_qv_ito_process`, `tendsto_qv_ito_process_adapted` |
 | `AdaptedItoProcess.lean` | B3 | `X` as a continuous adapted process + its increment lemmas |
 | `ItoIntegralRiemannBridgeAdapted.lean` | B4 | `itoIntegralCLM_T_of_bdd_cont_adapted` |
-| `ItoFormulaAdapted.lean` | B5, B6 | `ito_formula_adapted` (bounded `f''`) + `ito_formula_adapted_local` |
+| `ItoFormulaAdapted.lean` | B5 | `ito_formula_adapted` (bounded `f'`, `f''`); B6's `ito_formula_adapted_local` is not written |
 
 Module-system rule applies to every file (`@[expose] public section` after the
 docstring). Keep files small (one theorem + private helpers) for

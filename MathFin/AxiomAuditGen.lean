@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (437 MathFin constants, 29 upstream). Citations
+  corpus (441 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -133,6 +133,15 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.IsL2SolutionPair.uniqueness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.IsL2SolutionPair.uniqueness
+
+/-- info: 'MathFin.ItoFormulaAdapted.adaptedItoProcess_ae_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoFormulaAdapted.adaptedItoProcess_ae_eq
+
+/-- info: 'MathFin.ItoFormulaAdapted.ae_continuousOn_adaptedItoProcess' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoFormulaAdapted.ae_continuousOn_adaptedItoProcess
+
+/-- info: 'MathFin.ItoFormulaAdapted.ito_formula_adapted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoFormulaAdapted.ito_formula_adapted
 
 /-- info: 'MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_elementary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralAgainstMartingale.itoIntegralAgainst_elementary
@@ -1120,6 +1129,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.premium_ge_mean' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.premium_ge_mean
+
+/-- info: 'MathFin.processToLpPredictable_coeFn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.processToLpPredictable_coeFn
 
 /-- info: 'MathFin.putCall_parity_from_no_arbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.putCall_parity_from_no_arbitrage
