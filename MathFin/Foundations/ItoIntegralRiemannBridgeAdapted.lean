@@ -132,6 +132,43 @@ lemma uncurry_stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω →
   rw [Finsupp.sum_single_index (by simp)]
   simp
 
+omit hB in
+/-- On `(0, T]` the step process is `0` or a value of `θ`, so it inherits the bound `C`. -/
+lemma abs_uncurry_stepσ_le (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) {s : ℝ≥0} (hs : s ∈ Set.Ioc 0 T)
+    (ω : Ω) : |Function.uncurry ⇑(stepσ hBmeas hadap hbdd T n).val (s, ω)| ≤ C := by
+  rw [uncurry_stepσ]
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · simpa using (abs_nonneg _).trans (hbdd 0 ω)
+  · obtain ⟨k, _, hval, _⟩ := cell_collapse T n hn s hs (fun j ↦ θ (unifPart T n j) ω)
+    rw [hval]
+    exact hbdd _ _
+
+omit hB in
+/-- **The step processes converge where the path is continuous**: at a time `s ∈ (0, T]` at which
+`s ↦ θ_s ω` is continuous within `[0, T]`, `stepσ n (s, ω) → θ_s ω`. The cell containing `s` has
+its left endpoint in `[0, T]`, within `T/n` of `s`. -/
+lemma tendsto_uncurry_stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) {s : ℝ≥0} (hs : s ∈ Set.Ioc 0 T) {ω : Ω}
+    (hcont : ContinuousWithinAt (fun s : ℝ≥0 ↦ θ s ω) (Set.Icc 0 T) s) :
+    Tendsto (fun n ↦ Function.uncurry ⇑(stepσ hBmeas hadap hbdd T n).val (s, ω)) atTop
+      (𝓝 (θ s ω)) := by
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  obtain ⟨δ, hδ, hδc⟩ := Metric.continuousWithinAt_iff.mp hcont ε hε
+  obtain ⟨N, hN⟩ := exists_nat_gt ((T : ℝ) / δ)
+  refine ⟨max N 1, fun n hn ↦ ?_⟩
+  have hn1 : 0 < n := one_pos.trans_le ((le_max_right _ _).trans hn)
+  obtain ⟨k, hk, hval, hclose⟩ := cell_collapse T n hn1 s hs (fun j ↦ θ (unifPart T n j) ω)
+  rw [uncurry_stepσ, hval]
+  refine hδc ⟨zero_le, unifPart_le_T hk.le⟩ ?_
+  rw [NNReal.dist_eq]
+  refine hclose.trans_lt ?_
+  rw [div_lt_iff₀ (Nat.cast_pos.2 hn1), mul_comm]
+  exact (div_lt_iff₀ hδ).mp (hN.trans_le (Nat.cast_le.2 ((le_max_left _ _).trans hn)))
+
 /-- **Riemann ↔ CLM bridge, adapted case.** For a bounded (`|θ| ≤ C`) adapted (`𝓕`-measurable in
 each `t`) continuous (every path `s ↦ θ_s ω`) integrand, the uniform-partition Riemann–Itô sums
 `∑ θ(tₖ)·ΔBₖ` converge in `L²(μ)` to `itoIntegralCLM_T (processToLp θ)`. -/
@@ -155,44 +192,11 @@ theorem itoIntegralCLM_T_of_bdd_adapted_cont (hBmeas : ∀ t, Measurable (B t))
   have hae_conv : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas),
       Tendsto (fun n ↦ f n z) atTop (𝓝 (gθ_fn z)) := by
     filter_upwards [hsupp] with z hz
-    rw [Metric.tendsto_atTop]
-    intro ε hε
-    obtain ⟨δ, hδ, hδc⟩ := Metric.continuousAt_iff.mp (hcont z.2).continuousAt ε hε
-    obtain ⟨N, hN⟩ := exists_nat_gt ((T : ℝ) / δ)
-    refine ⟨max N 1, fun n hn ↦ ?_⟩
-    have hn1 : 0 < n := lt_of_lt_of_le one_pos (le_trans (le_max_right _ _) hn)
-    have hnN : N ≤ n := le_trans (le_max_left _ _) hn
-    obtain ⟨k, _, hval, hclose⟩ :=
-      cell_collapse T n hn1 z.1 hz (fun j ↦ θ (unifPart T n j) z.2)
-    rw [show f n z = ∑ j ∈ Finset.range n,
-          (Set.Ioc (unifPart T n j) (unifPart T n (j + 1))).indicator
-            (fun _ ↦ θ (unifPart T n j) z.2) z.1
-        from uncurry_stepσ hBmeas hadap hbdd T n z.1 z.2, hval]
-    refine hδc ?_
-    rw [NNReal.dist_eq]
-    have hn_gt : (T : ℝ) / δ < n := lt_of_lt_of_le hN (by exact_mod_cast hnN)
-    calc |(unifPart T n k : ℝ) - (z.1 : ℝ)| ≤ (T : ℝ) / n := hclose
-      _ < δ := by
-          rw [div_lt_iff₀ (by exact_mod_cast hn1 : (0 : ℝ) < (n : ℝ)), mul_comm]
-          exact (div_lt_iff₀ hδ).mp hn_gt
+    exact tendsto_uncurry_stepσ hBmeas hadap hbdd T hz (hcont z.2).continuousWithinAt
   -- uniform bound `|f n| ≤ C` a.e.
-  have hf_bdd : ∀ n, ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), |f n z| ≤ C := by
-    intro n
+  have hf_bdd : ∀ n, ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), |f n z| ≤ C := fun n ↦ by
     filter_upwards [hsupp] with z hz
-    have hC0 : (0 : ℝ) ≤ C := (abs_nonneg _).trans (hbdd 0 z.2)
-    rcases Nat.eq_zero_or_pos n with hn0 | hn
-    · simp only [hf, hn0]
-      rw [show Function.uncurry ⇑(stepσ hBmeas hadap hbdd T 0).val (z.1, z.2)
-            = ∑ j ∈ Finset.range 0, (Set.Ioc (unifPart T 0 j) (unifPart T 0 (j + 1))).indicator
-                (fun _ ↦ θ (unifPart T 0 j) z.2) z.1 from uncurry_stepσ hBmeas hadap hbdd T 0 z.1 z.2]
-      simpa using hC0
-    · obtain ⟨k, _, hval, _⟩ :=
-        cell_collapse T n hn z.1 hz (fun j ↦ θ (unifPart T n j) z.2)
-      rw [show f n z = ∑ j ∈ Finset.range n,
-            (Set.Ioc (unifPart T n j) (unifPart T n (j + 1))).indicator
-              (fun _ ↦ θ (unifPart T n j) z.2) z.1
-          from uncurry_stepσ hBmeas hadap hbdd T n z.1 z.2, hval]
-      exact hbdd _ _
+    exact abs_uncurry_stepσ_le hBmeas hadap hbdd T n hz z.2
   -- L² convergence of the integrals (dominated convergence, bound `(2C)²`)
   have hint : Tendsto (fun n ↦ ∫ z, (f n z - gθ_fn z) ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas))
       atTop (𝓝 0) := by

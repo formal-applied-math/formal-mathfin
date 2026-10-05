@@ -453,44 +453,57 @@ theorem integrable_riemann_defect_sq [IsFiniteMeasure μ]
   exact sq_le_sq' (by nlinarith [h1.1, h2.2]) (by nlinarith [h1.2, h2.1])
 
 omit hB in
-/-- **A weight with almost surely continuous paths has a version continuous on every path.** Set
-it to `0` off a measurable set of full measure on which the paths are continuous. Measurability and
-the bound survive; adaptedness need not, so this serves the pathwise integral and not the
+/-- **A weight whose paths are almost surely continuous on `[0, T]` has a version continuous on
+every path**, agreeing with it on `[0, T]` almost surely. Stop the weight at `T`, and set it to `0`
+off a measurable set of full measure on which the paths are continuous on `[0, T]`. Measurability
+and the bound survive; adaptedness need not, so this serves the pathwise integral and not the
 fluctuation term. -/
-theorem exists_continuous_version_of_ae_continuous
-    {w : ℝ≥0 → Ω → ℝ} (hw_meas : ∀ s, Measurable (w s))
-    (hw_cont : ∀ᵐ ω ∂μ, Continuous fun s ↦ w s ω)
+theorem exists_continuous_version_of_ae_continuousOn
+    {w : ℝ≥0 → Ω → ℝ} (hw_meas : ∀ s, Measurable (w s)) (T : ℝ≥0)
+    (hw_cont : ∀ᵐ ω ∂μ, ContinuousOn (fun s ↦ w s ω) (Set.Icc 0 T))
     {C : ℝ} (hC0 : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) :
     ∃ v : ℝ≥0 → Ω → ℝ, (∀ s, Measurable (v s)) ∧ (∀ ω, Continuous fun s ↦ v s ω)
-      ∧ (∀ s ω, |v s ω| ≤ C) ∧ ∀ᵐ ω ∂μ, ∀ s, v s ω = w s ω := by
-  obtain ⟨S, hS, hSc, hμS⟩ : ∃ S, MeasurableSet S ∧ (∀ ω ∈ S, Continuous fun s ↦ w s ω)
-      ∧ μ Sᶜ = 0 :=
-    ⟨(toMeasurable μ {ω | ¬ Continuous fun s ↦ w s ω})ᶜ, (measurableSet_toMeasurable _ _).compl,
+      ∧ (∀ s ω, |v s ω| ≤ C) ∧ ∀ᵐ ω ∂μ, ∀ s ≤ T, v s ω = w s ω := by
+  obtain ⟨S, hS, hSc, hμS⟩ : ∃ S, MeasurableSet S
+      ∧ (∀ ω ∈ S, ContinuousOn (fun s ↦ w s ω) (Set.Icc 0 T)) ∧ μ Sᶜ = 0 :=
+    ⟨(toMeasurable μ {ω | ¬ ContinuousOn (fun s ↦ w s ω) (Set.Icc 0 T)})ᶜ,
+      (measurableSet_toMeasurable _ _).compl,
       fun ω hω ↦ not_not.1 fun h ↦ hω (subset_toMeasurable _ _ h),
       by rw [compl_compl, measure_toMeasurable]; exact ae_iff.1 hw_cont⟩
-  refine ⟨fun s ↦ S.indicator (w s), fun s ↦ (hw_meas s).indicator hS, fun ω ↦ ?_, fun s ω ↦ ?_,
-    (measure_eq_zero_iff_ae_notMem.1 hμS).mono fun ω hω s ↦
-      Set.indicator_of_mem (not_not.1 hω) _⟩
+  refine ⟨fun s ↦ S.indicator (w (min s T)), fun s ↦ (hw_meas _).indicator hS, fun ω ↦ ?_,
+    fun s ω ↦ ?_, (measure_eq_zero_iff_ae_notMem.1 hμS).mono fun ω hω s hs ↦ by
+      simp only [Set.indicator_of_mem (not_not.1 hω), min_eq_left hs]⟩
   · by_cases hω : ω ∈ S
-    · simpa only [Set.indicator_of_mem hω] using hSc ω hω
+    · simpa only [Set.indicator_of_mem hω, Function.comp_def, id] using
+        (hSc ω hω).comp_continuous (continuous_id.min continuous_const)
+          fun s ↦ ⟨zero_le, min_le_right s T⟩
     · simpa only [Set.indicator_of_notMem hω] using continuous_const
   · by_cases hω : ω ∈ S
-    · simpa only [Set.indicator_of_mem hω] using hw_bdd s ω
+    · simpa only [Set.indicator_of_mem hω] using hw_bdd _ ω
     · simpa only [Set.indicator_of_notMem hω, abs_zero] using hC0
 
+omit hB in
+/-- A partition point is at most `T`. -/
+private theorem unifPart_le {T : ℝ≥0} {n k : ℕ} (hk : k ≤ n) : unifPart T n k ≤ T := by
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · simp [unifPart]
+  · exact mul_le_of_le_one_left zero_le
+      ((div_le_one (Nat.cast_pos.2 hn)).2 (Nat.cast_le.2 hk))
+
 /-- **Weighted quadratic variation, process-weight form, for almost surely continuous paths.**
-For a bounded adapted weight process `w` whose paths are continuous almost surely, the
+For a bounded adapted weight process `w` whose paths are almost surely continuous on `[0,T]`, the
 `w`-weighted sum of squared increments along the uniform partition of `[0,T]` converges in `L²(μ)`
 to `∫₀ᵀ w_s ds`. The fluctuation engine (Term I) needs only adaptedness and boundedness of the
 weight. The Riemann term (Term II) needs only measurability, boundedness and path continuity, so
-there the weight may be replaced by `0` off a measurable set of full measure on which its paths are
-continuous: that keeps every hypothesis of `tendsto_riemann_L2_process` and changes nothing almost
-surely. Adaptedness would not survive that replacement, which is why it is done for Term II only. -/
+there the weight is replaced by a version continuous on every path
+(`exists_continuous_version_of_ae_continuousOn`): that keeps every hypothesis of
+`tendsto_riemann_L2_process` and changes nothing on `[0,T]` almost surely. Adaptedness would not
+survive that replacement, which is why it is done for Term II only. -/
 theorem tendsto_weighted_qv_process_of_ae_continuous
     (hBmeas : ∀ t, Measurable (B t))
     {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, AdaptedAt B s (w s))
-    (hw_cont : ∀ᵐ ω ∂μ, Continuous fun s ↦ w s ω)
-    {C : ℝ} (hC0 : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0) :
+    {C : ℝ} (hC0 : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0)
+    (hw_cont : ∀ᵐ ω ∂μ, ContinuousOn (fun s ↦ w s ω) (Set.Icc 0 T)) :
     Tendsto (fun n : ℕ ↦
         ∫ ω, (∑ k ∈ Finset.range n,
                 w (unifPart T n k) ω
@@ -523,12 +536,14 @@ theorem tendsto_weighted_qv_process_of_ae_continuous
   -- **Term II**: the Riemann remainder `Rsum − Ipath → 0` in `L²` (the standalone lemma)
   -- for the Riemann term, pass to a version `v` of the weight that is continuous on every path
   obtain ⟨v, hv_meas, hv_cont, hv_bdd, hv⟩ :=
-    exists_continuous_version_of_ae_continuous hw_meas hw_cont hC0 hw_bdd
+    exists_continuous_version_of_ae_continuousOn hw_meas T hw_cont hC0 hw_bdd
   have hvw : ∀ᵐ ω ∂μ, ∀ n, (∑ k ∈ Finset.range n,
         v (unifPart T n k) ω * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)
       - ∫ s in Set.Ioc 0 T, v s ω ∂ItoIntegralL2.timeMeasure) ^ 2 = (Rsum n ω - Ipath ω) ^ 2 := by
     filter_upwards [hv] with ω hω n
-    simp only [hω, hRsum, hIpath]
+    rw [Finset.sum_congr rfl fun k hk ↦ by
+        rw [hω _ (unifPart_le (Finset.mem_range.mp hk).le)],
+      setIntegral_congr_fun measurableSet_Ioc fun s hs ↦ hω s hs.2]
   have hTermII : Tendsto (fun n ↦ ∫ ω, (Rsum n ω - Ipath ω) ^ 2 ∂μ) atTop (𝓝 0) :=
     (tendsto_riemann_L2_process hv_meas hv_cont hC0 hv_bdd T).congr fun n ↦
       integral_congr_ae (hvw.mono fun ω h ↦ h n)
@@ -593,8 +608,8 @@ theorem tendsto_weighted_qv_process
                   * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
               - ∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure) ^ 2 ∂μ)
       atTop (𝓝 0) :=
-  tendsto_weighted_qv_process_of_ae_continuous hB hBmeas hw_adapt (Eventually.of_forall hw_cont)
-    hC0 hw_bdd T
+  tendsto_weighted_qv_process_of_ae_continuous hB hBmeas hw_adapt hC0 hw_bdd T
+    (Eventually.of_forall fun ω ↦ (hw_cont ω).continuousOn)
 
 /-- **Weighted quadratic variation.** For bounded continuous `g`, the `g(B)`-weighted sum
 of squared increments along the uniform partition of `[0,T]` converges in `L²(μ)` to
@@ -645,16 +660,17 @@ theorem memLp_pathIntegral (hBmeas : ∀ t, Measurable (B t))
     (fun _s _ω ↦ hg_bdd _) T
 
 omit hB in
-/-- `memLp_pathIntegral_process` for a weight whose paths are continuous only almost surely: the
-pathwise integral agrees almost surely with that of a version continuous on every path. -/
+/-- `memLp_pathIntegral_process` for a weight whose paths are continuous on `[0, T]` only almost
+surely: the pathwise integral agrees almost surely with that of a version continuous on every
+path. -/
 theorem memLp_pathIntegral_process_of_ae_continuous [IsFiniteMeasure μ]
     {w : ℝ≥0 → Ω → ℝ} (hw_meas : ∀ s, Measurable (w s))
-    (hw_cont : ∀ᵐ ω ∂μ, Continuous fun s ↦ w s ω)
-    {C : ℝ} (hC0 : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0) :
+    {C : ℝ} (hC0 : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0)
+    (hw_cont : ∀ᵐ ω ∂μ, ContinuousOn (fun s ↦ w s ω) (Set.Icc 0 T)) :
     MemLp (fun ω ↦ ∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure) 2 μ := by
   obtain ⟨v, hv_meas, hv_cont, hv_bdd, hv⟩ :=
-    exists_continuous_version_of_ae_continuous hw_meas hw_cont hC0 hw_bdd
+    exists_continuous_version_of_ae_continuousOn hw_meas T hw_cont hC0 hw_bdd
   exact (memLp_pathIntegral_process hv_meas hv_cont hC0 hv_bdd T).ae_eq
-    (hv.mono fun ω hω ↦ by simp only [hω])
+    (hv.mono fun ω hω ↦ setIntegral_congr_fun measurableSet_Ioc fun s hs ↦ hω s hs.2)
 
 end MathFin

@@ -26,6 +26,28 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Riemann–Stieltjes sums against an Itô integral (2026-10-04)
+
+One entry added, `sc-riemann-stieltjes-against-ito` (`full`). Corpus 441 → 442.
+
+For `M = φ●B` and a bounded predictable weight `w` whose paths are almost surely continuous on
+`[0, T]`, the sums `∑ₖ w(tₖ)(M_{tₖ₊₁} − M_{tₖ})` along the uniform partition of `[0, T]` converge
+in mean square to `∫ w dM`, and `∫ w dM` is the Itô integral against `B` of a class equal to `φ·w`
+almost everywhere (`Foundations/AdaptedRiemannStieltjes.lean`). This is the martingale part of the
+first-order term of the planned adapted Itô formula, with `w = f'(X)`.
+
+The route goes through `L²(⟨M⟩)` and does not freeze the driver. Each sum is the integral against
+`M` of the left-endpoint step process of `w`. The step processes converge to `w` in `L²(⟨M⟩)` by
+dominated convergence, and the isometry against `M` carries that to the integrals. So `φ` needs no
+path regularity. Two lemmas of the adapted Riemann bridge, the step process's bound and its
+convergence along a continuous path, were extracted so that both proofs share them.
+
+Scope. Only uniform partitions and bounded weights are covered, and `M` is an `L²` class at each
+time. The same change relaxes `sc-thm-7.4.5-adapted` and
+`tendsto_weighted_qv_process_of_ae_continuous` once more, to weights whose paths are almost surely
+continuous on `[0, T]` only: the library proves `itoContinuousMod` continuous on `[0, T]`, not
+beyond.
+
 ### Quadratic variation of an Itô process with adapted coefficients (2026-10-03)
 
 One entry added, `sc-thm-7.4.5-adapted` (`full`). Corpus 440 → 441.
@@ -34,10 +56,11 @@ One entry added, `sc-thm-7.4.5-adapted` (`full`). Corpus 440 → 441.
 adapted to the natural Brownian filtration and continuous in time: for `X = X₀ + A + σ●B` with a
 drift path `A` Lipschitz in time with one constant for every path, the squared-increment sums of `X`
 along the uniform partition of `[0, T]` converge in `L¹` to `∫₀ᵀ σ_s² ds`. The weighted form,
-`∑ₖ w(tₖ)(ΔXₖ)² → ∫₀ᵀ w σ² ds` for a bounded adapted weight whose paths are continuous almost
-surely, is re-exported alongside. It has the shape of the second-order term of the planned adapted
+`∑ₖ w(tₖ)(ΔXₖ)² → ∫₀ᵀ w σ² ds` for a bounded adapted weight whose paths are almost surely
+continuous on `[0, T]`, is re-exported alongside. It has the shape of the second-order term of the planned adapted
 Itô formula, and since 2026-10-04 its weight hypothesis is the one that formula's weight `f''(X)`
-meets: adapted, with paths continuous almost surely. These are steps B1 and B2 of that formula
+meets: adapted, with paths almost surely continuous on `[0, T]`. These are steps B1 and B2 of that
+formula
 (`docs/specs/2026-07-05-adapted-ito-formula-design.md`).
 
 The proof splits `(ΔXₖ)²` around the frozen increment `σ(tₖ)ΔBₖ`. The freezing defects

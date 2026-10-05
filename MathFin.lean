@@ -221,6 +221,8 @@ import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
 import MathFin.Foundations.AdaptedStochasticIntegralFreezing
 -- Step B2: the quadratic variation of an Itô process with adapted σ, ∑ w(ΔX)² → ∫ wσ² ds in L¹
 import MathFin.Foundations.AdaptedQuadraticVariation
+-- First-order term of the adapted Itô formula (martingale part): ∑ w(tₖ)ΔMₖ → ∫ w dM in L²
+import MathFin.Foundations.AdaptedRiemannStieltjes
 -- Deterministic drift Riemann-convergence (α4 brick b-tail): ∑θ(tₖ)²·Δτ → ∫₀ᵀθ²ds
 import MathFin.Foundations.DriftRiemannConvergence
 -- Continuous adapted-θ Girsanov assembly (α4 (c)): convergence core toward Btheta_isQBrownianMotion_adapted
