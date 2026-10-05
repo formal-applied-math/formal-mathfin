@@ -125,6 +125,71 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-05 — corpus 446 — the SVI tail condition and butterfly-freeness
+
+Scope: `BlackScholes/SVI/TailCondition.lean`, `BlackScholes/CallPriceFunction.lean`,
+`Foundations/NormalTail.lean`, and the entry `mf-svi-butterfly-free-sign-formula`; corpus
+445 → 446.
+
+Two panels of three read-only agents. The first read a version that proved only `d₊ → −∞ ⟺
+b(1+ρ) < 2` and one direction of the call limit, and found that the name "butterfly-free" was not
+earned. The module was then extended and the second panel (prose against statement, proof
+quality, the mathematics) read the result.
+
+### Standing first pass: prose against statement
+
+- First version: the entry and three docs attributed "butterfly-freeness as in Gatheral–Jacquier's
+  Lemma 2.2" to a statement with convexity of the call where the lemma has `g ≥ 0`; the two are
+  proved equivalent only for `σ > 0`. Now said in the entry scope, the coverage note and the
+  README limitations, and the theorem heading no longer names the lemma.
+- A README limitations line still said the converse of the large-strike limit was unproved after
+  it was proved. Rewritten to the gap that remains: the law is not constructed.
+- The module docstring said the large-strike limit "is" the condition `d₊ → −∞`. The file proves
+  both equivalent to `b(1+ρ) < 2` for raw SVI and nothing more general. Reworded.
+- A sentence I added, that a left-wing slope above `2` is allowed because it puts mass at zero,
+  was false: a slope above `2` forces `C ≡ 1`, and only equality gives an atom. Removed; the
+  docstring now says only that the left wing gets no atom of its own.
+- `docs/open-problems.md` dropped the parameter conjuncts of `fullCertificateFormula_iff` and
+  called the `σ = 0` formula "equivalent" to `g ≥ 0`. Both fixed.
+- `IsNormalizedCallPrice` was described as "the properties of the map `K ↦ 𝔼[(S − K)⁺]`".
+  Neither direction of that correspondence is proved, and the docstring now says so.
+
+### Upgrades executed
+
+- **The entry now proves what its name says.** Added: `(1 − K)⁺ ≤ C ≤ 1`, `C → 1` at strike `0`,
+  monotonicity, the converse `C → 0 ⟹ b(1+ρ) < 2` by the Mills bound, and the capstone
+  `butterflyFreeFormula_iff_isNormalizedCallPrice`.
+- **General facts lifted out of the SVI file**: `ConvexOn.antitoneOn_Ioi_of_le`,
+  `IsNormalizedCallPrice` with the constructor `of_convexOn` (from Roper's conditions alone), and
+  the normal-tail lemmas. Three `Φ` lemmas that duplicated `Foundations/NormalQuantile.lean` were
+  deleted.
+- `σ ≥ 0` dropped from the tail theorems (the bound uses `b|σ|`); the slope-at-least-two case is an
+  eventual lower bound on `d₊`, reused by both converses.
+
+### Lens gradients
+
+- **Inspired math / first principles.** Exemplar: the boundary slope `b(1+ρ) = 2` is settled by
+  the same two-line bound as the interior, with no appeal to Lee's moment formula. Next: the tail
+  lemma is not about SVI. For any positive total variance, `C → 0 ⟺ d₊ → −∞`, since
+  `−d₋ ≥ √(2k)`; SVI should be a corollary.
+- **Concept clarity.** Exemplar: `IsNormalizedCallPrice.of_convexOn` separates Roper's conditions
+  from their consequences. Next: the structure has no instance from a random variable.
+- **Coherence / architecture.** The normal-tail lemmas sit in a new module because moving them
+  into `StandardNormal.lean` and `RockafellarUryasev.lean` restales most of the corpus.
+
+### Ranked backlog
+
+1. **Finish B5** (unchanged): Taylor remainder, assembly, and the review of `AdaptedDrift`.
+2. **Lift the tail lemma off SVI**: generalise `blackPlus` / `logBlackCall` over `w : ℝ → ℝ` and
+   prove `C → 0 ⟺ d₊ → −∞` for any positive variance.
+3. **Ground `IsNormalizedCallPrice`**: the easy direction (`S ≥ 0`, `𝔼 S = 1` gives the
+   structure), then Roper's converse through `StieltjesFunction` on `−C'₊`.
+4. **The left wing**: `IsNormalizedCallPrice (bsSmile p) → b(1 − ρ) ≤ 2`, and the mass at zero.
+5. **Fold `NormalTail` into its natural homes** at the next toolchain bump, when the whole ledger
+   re-verifies anyway; move `strictAntiOn_of_convex_antitone_no_flat_tail` next to
+   `ConvexOn.antitoneOn_Ioi_of_le`.
+6. Split `eventually_le_blackPlus` into its two conclusions; SSVI as an evaluation of the formula.
+
 ## 2026-10-04 — corpus 445 — the SVI polynomial-sign certificate, ported (#174)
 
 Scope: Robert Martin's ButterflyFreeSVI development, 42 modules ported to

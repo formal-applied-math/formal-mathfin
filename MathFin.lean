@@ -99,6 +99,7 @@ import MathFin.Foundations.Bisection
 -- probability integral transform, equivariance; and the standard normal quantile Φ⁻¹
 import MathFin.Foundations.Quantile
 import MathFin.Foundations.NormalQuantile
+import MathFin.Foundations.NormalTail
 -- QRM foundations: quantile convergence, copulas and Sklar's theorem, Hoeffding's covariance
 -- identity, Marshall–Olkin common shocks, correlation fallacies, extreme value theory (GEV, GPD,
 -- maxima of Poisson-many losses)
@@ -329,6 +330,7 @@ import MathFin.BlackScholes.BisectionIV
 import MathFin.BlackScholes.StrikeConvexity
 import MathFin.BlackScholes.SpotConvexity
 import MathFin.BlackScholes.PriceBounds
+import MathFin.BlackScholes.CallPriceFunction
 -- Phase 13 additions:
 import MathFin.BlackScholes.Quanto
 -- Quanto correction derived from a joint-Gaussian FX model (Girsanov-grounded)
@@ -587,3 +589,5 @@ import MathFin.BlackScholes.SVI.SignVariations
 import MathFin.BlackScholes.SVI.SignatureProgram
 import MathFin.BlackScholes.SVI.TraceForm
 import MathFin.BlackScholes.SVI.TraceSignature
+-- The SVI tail condition d₊ → −∞ iff b(1+ρ) < 2, and the butterfly-free sign formula
+import MathFin.BlackScholes.SVI.TailCondition

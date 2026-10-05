@@ -2105,10 +2105,10 @@
     },
     "mf-svi-butterfly-free-sign-formula": {
       "benchmark_file": "svi_certificate.json",
-      "date": "2026-10-04",
-      "elapsed_s": 108.4,
-      "input_hash": "e3ce114a75f270000b33cc22ca055c1081b86624a5999505584df389bf764184",
-      "verified_at_commit": "ab2153d"
+      "date": "2026-10-05",
+      "elapsed_s": 2.7,
+      "input_hash": "7a359287d04557caa9ec5f3e83ff36729cf6b859bd16dea7f0635cb8ada7b98c",
+      "verified_at_commit": "4b60b9c"
     },
     "mf-svi-call-convex-iff-durrleman": {
       "benchmark_file": "svi_certificate.json",
