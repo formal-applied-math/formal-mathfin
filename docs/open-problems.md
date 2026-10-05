@@ -5,10 +5,11 @@ scouting report for the other activity: genuinely unsolved problems, and which
 of them our existing formalization actually gives us leverage on.
 
 **Tracking issue:** [#177](https://github.com/formal-applied-math/formal-mathfin/issues/177)
-(umbrella). Active targets: [#174](https://github.com/formal-applied-math/formal-mathfin/issues/174)
-SVI domain · [#176](https://github.com/formal-applied-math/formal-mathfin/issues/176)
+(umbrella). Active target: [#176](https://github.com/formal-applied-math/formal-mathfin/issues/176)
 impact propagator. Solved: [#175](https://github.com/formal-applied-math/formal-mathfin/issues/175)
-American convexity, by Robert Martin in [#212](https://github.com/formal-applied-math/formal-mathfin/pull/212).
+American convexity, by Robert Martin in [#212](https://github.com/formal-applied-math/formal-mathfin/pull/212);
+and [#174](https://github.com/formal-applied-math/formal-mathfin/issues/174) SVI domain, by Robert
+Martin, ported in `MathFin/BlackScholes/SVI/` (§2 below).
 
 ## How this list was built, and why it is organized by evidence
 
@@ -132,6 +133,16 @@ closed forms exist only for sub-SVIs, and the most recent refinement
 domain as polynomial inequalities in `(a,b,ρ,m,σ)`. Substituting `y = (k−m)/σ`,
 `z = √(y²+1)` makes this positivity of a polynomial on a real algebraic curve:
 a quantifier-elimination problem.
+
+**Solved (2026-10-04), as stated.** Robert Martin's certificate, ported in
+`MathFin/BlackScholes/SVI/`, gives a fixed finite Boolean combination of signs of polynomials in
+`(a,b,ρ,m,σ)` that holds exactly when the variance is positive and `g(k) ≥ 0` for every `k`
+(`fullCertificateFormula_iff`), equivalently when the SVI-smiled Black–Scholes call is convex in
+strike, with `σ = 0` included (`extendedCertificateFormula_iff_bsSmile_convex`). The formula is an
+explicit quantifier-free construction, by Hermite's trace-form signatures, and is not expanded into
+a list of inequalities. It carries no tail condition, so it is the Durrleman / strike-convexity
+domain stated here, not full butterfly-freeness: the large-strike limit of the call and an atom at
+zero are not addressed.
 
 ### 3. Multidimensional shadow prices under transaction costs
 **Class A · "has remained elusive", restated 2024–25**

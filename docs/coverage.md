@@ -26,6 +26,31 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### A polynomial-sign certificate for raw SVI (2026-10-04)
+
+New benchmark file `benchmarks/svi_certificate.json`, three entries, all `full`. Corpus 442 → 445.
+The development is Robert Martin's
+[ButterflyFreeSVI](https://github.com/robertmartin8/ButterflyFreeSVI), ported to
+`MathFin/BlackScholes/SVI/` (42 modules) with statements unchanged; it answers #174.
+
+| Benchmark ID | Mathematical conclusion | Lean declaration |
+|---|---|---|
+| `mf-svi-durrleman-sign-formula` | For `σ > 0`: a fixed finite Boolean combination of signs of polynomials in `(a, b, ρ, m, σ)` holds exactly when `b ≥ 0`, `ρ² ≤ 1`, the variance is positive everywhere and Durrleman's `g ≥ 0` everywhere. | `MathFin.SVI.fullCertificateFormula_iff` |
+| `mf-svi-call-convex-iff-durrleman` | For `σ > 0` and positive variance: the Black–Scholes call with the SVI volatility substituted strike by strike is convex in strike iff `g ≥ 0` everywhere. | `MathFin.SVI.bsSmile_convex_iff` |
+| `mf-svi-strike-convexity-sign-formula` | For `σ ≥ 0`: a fixed finite sign formula holds exactly when `b ≥ 0`, `ρ² ≤ 1`, the variance is positive everywhere and that call is convex in strike. | `MathFin.SVI.extendedCertificateFormula_iff_bsSmile_convex` |
+
+The route: rationalise `g` to a polynomial of degree at most ten on `(0, ∞)`; nonnegativity there
+is two endpoint signs and no positive critical point with a negative value; four Tarski queries
+count those; each query is a signature of a Hermite matrix, by Hermite's trace-form identity,
+proved here for any nonzero polynomial with no squarefreeness assumed.
+
+What is not covered:
+- No tail condition: the large-strike limit of the call and an atom at zero are not addressed, so
+  the characterised set is the Durrleman / strike-convexity domain, not full butterfly-freeness.
+- Slices with zero variance at some log-strike are excluded.
+- The formula is defined structurally and never expanded; its size is not stated.
+- Nothing about calendar-spread arbitrage or surfaces.
+
 ### Riemann–Stieltjes sums against an Itô integral (2026-10-04)
 
 One entry added, `sc-riemann-stieltjes-against-ito` (`full`). Corpus 441 → 442.

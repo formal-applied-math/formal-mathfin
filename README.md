@@ -233,7 +233,9 @@ stochastic integration led by Rémy Degenne. Much of the benchmark follows Yuri 
 Bilokon's *The Contract Is Not the Model* (2026), and the survival models draw on Yosuke Ito's
 Archive of Formal Proofs entry on actuarial mathematics ([`docs/sources.md`](docs/sources.md)). The
 American put results are ported from Robert Martin's
-[AmericanPutConvexity](https://github.com/robertmartin8/AmericanPutConvexity).
+[AmericanPutConvexity](https://github.com/robertmartin8/AmericanPutConvexity), and the SVI
+polynomial-sign certificate from his
+[ButterflyFreeSVI](https://github.com/robertmartin8/ButterflyFreeSVI).
 
 ## License
 

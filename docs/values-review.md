@@ -125,6 +125,63 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-04 — corpus 445 — the SVI polynomial-sign certificate, ported (#174)
+
+Scope: Robert Martin's ButterflyFreeSVI development, 42 modules ported to
+`MathFin/BlackScholes/SVI/` with statements unchanged, and three entries in
+`benchmarks/svi_certificate.json`; corpus 442 → 445. Also `Foundations/AdaptedDrift.lean` (#237),
+which had no panel of its own and is covered by the B5 backlog below.
+
+Three read-only review agents: two read every module docstring against its file (A–M, N–Z); the
+third read the corpus entries against their theorems, checked Durrleman's formula, the fixity of
+the sign formula, hygiene, conventions and the licence. The parent adjudicated.
+
+### The standing first pass — prose against statement
+
+- Sixteen of the 38 module docstrings the port added outran or misdescribed their statements, and
+  all are corrected. The pattern was dropped hypotheses: "no critical point with a negative value"
+  for "no critical point `c > 0`", missing "nonconstant" and `f ≠ 0`, degree bounds, and twice a
+  sign-variation difference called a signature. They had been written from declaration names.
+- "Butterfly-free" in the headline entry's name, id and description outran the theorem, which
+  proves positive variance and convexity in strike with no tail condition. The source's own proof
+  review says to call it the Durrleman / strike-convexity certificate. Renamed
+  `mf-svi-strike-convexity-sign-formula`, with the missing tail condition stated.
+- "The semialgebraic description #174 recorded as open": existence is Tarski–Seidenberg, so the
+  claim is the explicit quantifier-free construction. The description now names its atoms and says
+  the formula is not expanded.
+- The provenance note called the upstream repository Apache-2.0. It carries no licence file; the
+  grant is the author's comment on #174. Reworded.
+- `docs/open-problems.md` still listed #174 as active, and `coverage.md` and the README did not
+  mention the port. Updated.
+
+### Upgrades executed
+
+- The definitions the corpus rests on (`Params`, `variance`, `slope`, `curvature`, `durrleman`)
+  have docstrings; `durrleman` says it is meaningful only where the variance is positive.
+- Six proofs adapted to the pin without changing a statement: Mathlib's `sigNeg` is no longer
+  unfoldable from outside, so its uses go through `sigPos_neg`; two `simp` closes became explicit.
+
+### Exemplars
+
+- `weightedTraceForm_signature`: Hermite's identity for any nonzero real polynomial, repeated
+  roots and conjugate pairs handled on the quotient, with no squarefreeness.
+- `SignFormula` with `SignProgram.toFormula`: the certificate is a tree over
+  `MvPolynomial (Fin 5) ℝ` with no parameter argument, so "fixed finite formula" is a type fact.
+
+### Ranked backlog
+
+1. **Finish B5**: the Taylor remainder in probability and the assembly, as in the previous block;
+   review `AdaptedDrift` with it.
+2. **The tail condition** on top of the strike-convexity formula: the call tends to `0` at large
+   strikes iff the strict wing slope `b(1+ρ) < 2`, which would make the set butterfly-free.
+3. **Make the formula inspectable**: a theorem listing or bounding its atoms, or a computable
+   mirror of `certificateFormula`.
+4. **Port hygiene** (lens 6): scope `maxHeartbeats`, `maxRecDepth` and `open scoped Classical` to
+   the declarations that need them; drop the redundant `public import Mathlib` lines; docstrings
+   for the remaining definitions (`numerator`, `rootVariance`, `blackPlus`, `blackMinus`).
+5. **Ask upstream for a LICENSE file.**
+6. **Carried.** The earlier 2026-10-04 and 2026-10-03 backlogs stand.
+
 ## 2026-10-04 — corpus 442 — B5's first-order term: Riemann–Stieltjes sums against an Itô integral
 
 Scope: two steps toward B5 of the adapted-coefficient Itô formula.
