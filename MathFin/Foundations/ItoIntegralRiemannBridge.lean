@@ -171,6 +171,43 @@ lemma cell_collapse (T : ℝ≥0) (n : ℕ) (hn : 0 < n) (s : ℝ≥0) (hs : s �
     exact ⟨by nlinarith [hcoe_low, hcoe_hi, hg], by nlinarith [hcoe_low, hTn]⟩
 
 omit hB in
+/-- **The left-endpoint step functions converge where the function is continuous.** At a time
+`s ∈ (0, T]` at which `g` is continuous within `[0, T]`, the cell-indicator sums
+`∑ⱼ 𝟙_{(tⱼ, tⱼ₊₁]}(s)·g(tⱼ)` tend to `g s`: the cell containing `s` has its left endpoint in
+`[0, T]`, within `T/n` of `s` (`cell_collapse`). -/
+lemma tendsto_sum_indicator_unifPart (T : ℝ≥0) {s : ℝ≥0} (hs : s ∈ Set.Ioc 0 T) {g : ℝ≥0 → ℝ}
+    (hg : ContinuousWithinAt g (Set.Icc 0 T) s) :
+    Tendsto (fun n ↦ ∑ j ∈ Finset.range n,
+      (Set.Ioc (unifPart T n j) (unifPart T n (j + 1))).indicator (fun _ ↦ g (unifPart T n j)) s)
+      atTop (𝓝 (g s)) := by
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  obtain ⟨δ, hδ, hδc⟩ := Metric.continuousWithinAt_iff.mp hg ε hε
+  obtain ⟨N, hN⟩ := exists_nat_gt ((T : ℝ) / δ)
+  refine ⟨max N 1, fun n hn ↦ ?_⟩
+  have hn1 : 0 < n := one_pos.trans_le ((le_max_right _ _).trans hn)
+  obtain ⟨k, hk, hval, hclose⟩ := cell_collapse T n hn1 s hs (fun j ↦ g (unifPart T n j))
+  rw [hval]
+  refine hδc ⟨zero_le, unifPart_le_T hk.le⟩ ?_
+  rw [NNReal.dist_eq]
+  refine hclose.trans_lt ?_
+  rw [div_lt_iff₀ (Nat.cast_pos.2 hn1), mul_comm]
+  exact (div_lt_iff₀ hδ).mp (hN.trans_le (Nat.cast_le.2 ((le_max_left _ _).trans hn)))
+
+omit hB in
+/-- On `(0, T]` the left-endpoint step function is `0` or a value of `g`, so a bound on `g`
+bounds it. -/
+lemma abs_sum_indicator_unifPart_le (T : ℝ≥0) (n : ℕ) {s : ℝ≥0} (hs : s ∈ Set.Ioc 0 T)
+    {g : ℝ≥0 → ℝ} {C : ℝ} (hC : 0 ≤ C) (hg : ∀ t, |g t| ≤ C) :
+    |∑ j ∈ Finset.range n,
+      (Set.Ioc (unifPart T n j) (unifPart T n (j + 1))).indicator (fun _ ↦ g (unifPart T n j)) s|
+      ≤ C := by
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · simpa using hC
+  · obtain ⟨k, _, hval, _⟩ := cell_collapse T n hn s hs (fun j ↦ g (unifPart T n j))
+    exact hval ▸ hg _
+
+omit hB in
 /-- If `∫ (Fₙ − G)² → 0` then `‖⟦Fₙ⟧ − ⟦G⟧‖ → 0`, any measure. The single-fixed-limit
 variant of `ItoIntegralBrownian.tendsto_norm_toLp_sub` (which compares two *sequences*
 `Fₙ, Gₙ`); kept as a separate lemma because the `G`-shape genuinely differs. The generic
