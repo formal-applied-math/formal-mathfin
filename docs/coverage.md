@@ -26,6 +26,21 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Itô's formula for adapted coefficients (2026-10-05)
+
+One entry added, `sc-ito-formula-adapted` (`full`). Corpus 446 → 447.
+
+For `X_t = x₀ + ∫₀ᵗ b ds + ∫₀ᵗ σ dB` with `σ`, `b` bounded, adapted to the natural filtration of
+`B` and with every path continuous, and `f ∈ C²` with `f'`, `f''` bounded,
+`f(X_T) − f(x₀) = ∫₀ᵀ f'(X)σ dB + ∫₀ᵀ (f'(X) b + ½ f''(X) σ²) ds` almost surely
+(`ItoFormulaAdapted.ito_formula_adapted`). This is the first Itô formula in the library for a
+process that is not a function of `(t, B_t)`.
+
+Safe wording: "Itô's formula at a fixed time for an Itô process with bounded adapted continuous
+coefficients and `f` with bounded first and second derivatives". Not covered: unbounded `f'` or
+`f''` (so not `exp` or `x²`), unbounded coefficients, time-dependent `f`, a random start, every
+`t ≤ T` at once, a Brownian motion continuous only almost surely.
+
 ### The SVI tail condition (2026-10-05)
 
 One entry added, `mf-svi-butterfly-free-sign-formula` (`full`). Corpus 445 → 446.

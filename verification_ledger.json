@@ -2838,6 +2838,13 @@
       "input_hash": "ba09d4f1fc1aba8f986d74b66d3ddecba34b2565bce259924fa8cbc38fa3fe62",
       "verified_at_commit": "fdfecac"
     },
+    "sc-ito-formula-adapted": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-10-05",
+      "elapsed_s": 53.2,
+      "input_hash": "5728ff9e55788a04a04e67f7e8df528f502631684508ef9d68e34d15085e3c50",
+      "verified_at_commit": "73d059d"
+    },
     "sc-ito-formula-gbm": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-05",

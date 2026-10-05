@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 446 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 415 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 447 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 416 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 13 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -43,7 +43,12 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   ([`ito_formula_unrestricted`](MathFin/Foundations/ItoFormulaUnrestrictedLocMart.lean)). When the
   partial derivatives of $`f`$ are bounded, its value at time $`T`$ is the Itô integral
   $`\int_0^T \partial_x f(s,B_s)\,dB_s`$
-  ([`ito_formula_td_L2_bddDeriv`](MathFin/Foundations/ItoFormulaTD.lean)).
+  ([`ito_formula_td_L2_bddDeriv`](MathFin/Foundations/ItoFormulaTD.lean)). For an Itô process
+  $`X_t = x_0 + \int_0^t b_s\,ds + \int_0^t \sigma_s\,dB_s`$ with bounded adapted continuous
+  coefficients, and $`f \in C^2`$ with $`f'`$ and $`f''`$ bounded,
+  $`f(X_T) - f(x_0) = \int_0^T f'(X_s)\sigma_s\,dB_s
+  + \int_0^T \big(f'(X_s) b_s + \tfrac12 f''(X_s)\sigma_s^2\big)\,ds`$ almost surely
+  ([`ito_formula_adapted`](MathFin/Foundations/ItoFormulaAdapted.lean)).
 
 - **Girsanov's theorem.** For bounded predictable $`\theta`$, let
   $`dQ = \exp\big(-\int_0^T \theta\,dB - \tfrac12 \int_0^T \theta^2\,dt\big)\,dP`$. On $`[0,T]`$,
@@ -121,7 +126,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Thirteen of the 446 results are reduced cores. Twelve assume a structure whose fields include the
+- Thirteen of the 447 results are reduced cores. Twelve assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, Lévy's characterization, the two-dimensional Itô formula,
@@ -141,6 +146,9 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   inequalities. Butterfly-freeness is proved as a list of properties of the call price as a
   function of the strike; the risk-neutral law is not constructed from them. At $`\sigma = 0`$
   convexity of the call is not tied to Durrleman's condition.
+- Itô's formula for an Itô process is proved at a fixed time, for bounded adapted continuous
+  coefficients and $`f`$ with bounded $`f'`$ and $`f''`$. It does not yet cover
+  $`f(x) = e^x`$ or $`x^2`$, or coefficients of an SDE solution.
 - Existence for SDEs with Lipschitz coefficients is proved only on horizons with
   $`T L_b + \sqrt{T} L_\sigma < 1`$.
 - The binomial limit is proved for call prices and for the law of the terminal log-return.

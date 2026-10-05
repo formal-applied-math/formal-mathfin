@@ -10,9 +10,8 @@ public import MathFin.Foundations.ItoProcessPredictable
 
 /-! # The drift of an Itô process with adapted coefficients
 
-The drift part of the adapted-coefficient Itô formula
-(`docs/specs/2026-07-05-adapted-ito-formula-design.md`, step B5). For a bounded adapted drift rate
-`b` with continuous paths, the pathwise integral `A_t = ∫₀ᵗ b_s ds` is taken as it stands, with no
+The drift part of the adapted-coefficient Itô formula (`ItoFormulaAdapted`). For a bounded adapted
+drift rate `b` with continuous paths, the pathwise integral `A_t = ∫₀ᵗ b_s ds` is taken as it stands, with no
 modification:
 
 * it is Lipschitz in time with the bound of `b` as constant, on every path
@@ -20,9 +19,9 @@ modification:
   `AdaptedQuadraticVariation.tendsto_qv_adapted` asks of a drift;
 * it is adapted, as a limit of Riemann sums of `𝓕_t`-measurable values, and so predictable, being
   continuous (`driftPath_isStronglyPredictable`);
-* its Riemann–Stieltjes sums against a weight converge on every path where the weight is
-  continuous: `∑ₖ g(tₖ)·(A_{tₖ₊₁} − A_{tₖ}) → ∫₀ᵀ g_s b_s ds` (`tendsto_sum_mul_driftPath_sub`), the
-  drift half of the formula's first-order term.
+* for each `ω` and each bounded `g : ℝ≥0 → ℝ` continuous on `[0, T]`, its Riemann–Stieltjes
+  sums converge: `∑ₖ g(tₖ)·(A_{tₖ₊₁} − A_{tₖ}) → ∫₀ᵀ g_s b_s ds`
+  (`tendsto_sum_mul_driftPath_sub`), the drift half of the formula's first-order term.
 -/
 
 @[expose] public section
@@ -110,8 +109,8 @@ theorem driftPath_isStronglyPredictable :
 
 omit mΩ in
 include hb_cont hb_bdd in
-/-- **Riemann–Stieltjes sums against the drift path converge**, on a path of the rate and for a
-bounded weight `g` continuous on `[0, T]`: `∑ₖ g(tₖ)·(A_{tₖ₊₁} − A_{tₖ}) → ∫₀ᵀ g_s b_s ds`. The
+/-- **Riemann–Stieltjes sums against the drift path converge**, for each `ω` and each bounded
+`g : ℝ≥0 → ℝ` continuous on `[0, T]`: `∑ₖ g(tₖ)·(A_{tₖ₊₁} − A_{tₖ}) → ∫₀ᵀ g_s b_s ds`. The
 sum is the integral of the left-endpoint step function of `g` against `b ds`, and the step
 functions converge on `(0, T]` under the bound of `g` (`tendsto_sum_indicator_unifPart`). -/
 theorem tendsto_sum_mul_driftPath_sub (T : ℝ≥0) (ω : Ω) {g : ℝ≥0 → ℝ}
