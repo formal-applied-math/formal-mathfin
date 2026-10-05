@@ -21,7 +21,7 @@ stopped at SP0. Other work has since built most of what SP0, B3 and B4 asked for
 | B4, the adapted Riemann bridge | done | `ItoIntegralRiemannBridge.itoIntegralCLM_T_of_bdd_adapted_cont` |
 | B1, freezing | done | `AdaptedStochasticIntegralFreezing.tendsto_sum_norm_sq_freezingDefect` (`∑ₖ ‖ΔMₖ − σ_{tₖ}ΔBₖ‖² → 0`) |
 | B2, adapted quadratic variation (SP1 headline) | done | `AdaptedQuadraticVariation.tendsto_weighted_qv_adapted` and `tendsto_qv_adapted`, corpus entry `sc-thm-7.4.5-adapted` |
-| B5, assembly for bounded `f''` | in progress | weight hypothesis relaxed to paths almost surely continuous on `[0, T]` (`tendsto_weighted_qv_process_of_ae_continuous`); martingale part of the first-order term, `AdaptedRiemannStieltjes.tendsto_integral_sq_riemannStieltjes_sub` (`sc-riemann-stieltjes-against-ito`). Open: continuity of the drift modification, the drift Riemann sum, the Taylor remainder, the assembly |
+| B5, assembly for bounded `f''` | in progress | weight hypothesis relaxed to paths almost surely continuous on `[0, T]` (`tendsto_weighted_qv_process_of_ae_continuous`); martingale part of the first-order term, `AdaptedRiemannStieltjes.tendsto_integral_sq_riemannStieltjes_sub` (`sc-riemann-stieltjes-against-ito`). drift `AdaptedDrift` (Lipschitz, predictable, `tendsto_sum_mul_driftPath_sub`). Open: the Taylor remainder, the assembly |
 | B6, localization | open | |
 
 Waiting on it, from the 2026-10-02 triage: #48 (the two-process formula; `sc-thm-7.5.2` is a
@@ -70,10 +70,13 @@ identity on each cell (`itoIntegralAgainst_stepσ`). `coeFn_mulLI_weightLp` show
 Itô integral against `B` of a class equal to `φ·w` almost everywhere. The driver needs no path
 regularity on this route, and the freezing estimate of B1 is not used.
 
-What B5 still lacks, in order: `driftContinuousMod` continuous on `[0, T]` almost surely (the
-library has no such lemma; copy `itoContinuousMod_continuousOn` over
-`drift_ae_eventually_sup_lt`), so that `X` is; the drift part of the first-order term, a pathwise
-Riemann sum; the Taylor remainder, in probability, from `∑|Rₖ| ≤ ρ(maxₖ|ΔXₖ|)·∑(ΔXₖ)²` with
+**B5's drift, landed (2026-10-04).** `AdaptedDrift` takes the drift as the honest pathwise integral
+`A_t = ∫₀ᵗ b ds` of a bounded adapted rate with continuous paths, so no modification of the drift is
+needed: it is Lipschitz on every path (`abs_driftPath_sub_le`, B2's hypothesis), predictable
+(`driftPath_isStronglyPredictable`), and its Riemann–Stieltjes sums converge on every path where the
+weight is continuous (`tendsto_sum_mul_driftPath_sub`), the drift half of the first-order term.
+
+What B5 still lacks, in order: the Taylor remainder, in probability, from `∑|Rₖ| ≤ ρ(maxₖ|ΔXₖ|)·∑(ΔXₖ)²` with
 `tendsto_qv_adapted`; and the assembly, three limits in measure identified by
 `tendstoInMeasure_ae_unique`. `X₀` must be `𝓕₀`-measurable for `f'(X)` to be predictable.
 

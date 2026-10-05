@@ -223,6 +223,8 @@ import MathFin.Foundations.AdaptedStochasticIntegralFreezing
 import MathFin.Foundations.AdaptedQuadraticVariation
 -- First-order term of the adapted Itô formula (martingale part): ∑ w(tₖ)ΔMₖ → ∫ w dM in L²
 import MathFin.Foundations.AdaptedRiemannStieltjes
+-- The drift of the adapted Itô formula: A = ∫b ds is Lipschitz, predictable, and ∑ g(tₖ)ΔAₖ → ∫ g·b ds
+import MathFin.Foundations.AdaptedDrift
 -- Deterministic drift Riemann-convergence (α4 brick b-tail): ∑θ(tₖ)²·Δτ → ∫₀ᵀθ²ds
 import MathFin.Foundations.DriftRiemannConvergence
 -- Continuous adapted-θ Girsanov assembly (α4 (c)): convergence core toward Btheta_isQBrownianMotion_adapted
