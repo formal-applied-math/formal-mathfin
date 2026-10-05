@@ -275,8 +275,8 @@ adapted-coefficient Itô, blocked on Degenne's continuous-modification π-system
 (`ItoIntegralProcessContinuousModification`), predictable for the natural filtration, and the design
 spec's status of 2026-10-03 re-sequences the formula on bricks the library already had. Steps B1 and
 B2, the quadratic variation with adapted `σ`, have landed as `sc-thm-7.4.5-adapted`; the assembly B5
-and the localization B6 remain. B5 still has to relax the weighted quadratic variation to paths that
-are continuous only almost surely, which is the spec's open question for B5.)*
+and the localization B6 remain. On 2026-10-04 the weighted quadratic variation was relaxed to paths
+that are continuous only almost surely, which is what B5's weight needs.)*
 
 | # | Conversion (reduced_core → full) | Value | Difficulty | Unlocks |
 |---|---|---|---|---|
