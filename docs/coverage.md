@@ -26,6 +26,28 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The SVI tail condition (2026-10-05)
+
+One entry added, `mf-svi-butterfly-free-sign-formula` (`full`). Corpus 445 → 446.
+
+The strike-convexity certificate left out the large-strike behaviour. For raw SVI with `b ≥ 0`
+and positive variance, `d₊(k) → −∞` as `k → ∞` exactly when the right wing slope `b(1+ρ)` is below
+`2` (`tendsto_blackPlus_atBot_iff`), and the smiled call tends to `0` at large strikes exactly
+when it is (`tendsto_bsSmile_zero_iff`). The call is also between `(1 − K)⁺` and `1`, tends to `1`
+at strike `0`, and is nonincreasing once it is convex. So the strike-convexity formula with the
+one further atom `2 − b(1+ρ) > 0` holds exactly when `σ ≥ 0`, `b ≥ 0`, `ρ² ≤ 1`, the variance is
+positive and the smiled call is a normalised call price function (`IsNormalizedCallPrice`,
+`butterflyFreeFormula_iff_isNormalizedCallPrice`). In the terms of Gatheral–Jacquier's Lemma 2.2
+that is convexity of the call together with `d₊ → −∞` (`butterflyFreeFormula_iff`); convexity is
+Durrleman's `g ≥ 0` for `σ > 0`, and at `σ = 0` only the convexity statement is proved.
+
+The general pieces are in `BlackScholes/CallPriceFunction.lean` (the structure, and that a convex
+function bounded above on a right-infinite interval is nonincreasing) and
+`Foundations/NormalTail.lean` (the Mills bound).
+
+Not proved: that a normalised call price function is the call price of a nonnegative random
+variable of mean one, the last step of Roper's Theorem 2.1.
+
 ### A polynomial-sign certificate for raw SVI (2026-10-04)
 
 New benchmark file `benchmarks/svi_certificate.json`, three entries, all `full`. Corpus 442 → 445.
@@ -45,8 +67,8 @@ count those; each query is a signature of a Hermite matrix, by Hermite's trace-f
 proved here for any nonzero polynomial with no squarefreeness assumed.
 
 What is not covered:
-- No tail condition: the large-strike limit of the call and an atom at zero are not addressed, so
-  the characterised set is the Durrleman / strike-convexity domain, not full butterfly-freeness.
+- No tail condition in these three entries: they characterise the Durrleman / strike-convexity
+  domain. The tail condition is `mf-svi-butterfly-free-sign-formula`, above.
 - Slices with zero variance at some log-strike are excluded.
 - The formula is defined structurally and never expanded; its size is not stated.
 - Nothing about calendar-spread arbitrage or surfaces.

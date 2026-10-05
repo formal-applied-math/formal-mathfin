@@ -136,13 +136,20 @@ a quantifier-elimination problem.
 
 **Solved (2026-10-04), as stated.** Robert Martin's certificate, ported in
 `MathFin/BlackScholes/SVI/`, gives a fixed finite Boolean combination of signs of polynomials in
-`(a,b,ρ,m,σ)` that holds exactly when the variance is positive and `g(k) ≥ 0` for every `k`
-(`fullCertificateFormula_iff`), equivalently when the SVI-smiled Black–Scholes call is convex in
-strike, with `σ = 0` included (`extendedCertificateFormula_iff_bsSmile_convex`). The formula is an
+`(a,b,ρ,m,σ)` that holds exactly when `σ > 0`, `b ≥ 0`, `ρ² ≤ 1`, the variance is positive and
+`g(k) ≥ 0` for every `k` (`fullCertificateFormula_iff`). A second formula, which also admits
+`σ = 0`, holds exactly when `σ ≥ 0`, `b ≥ 0`, `ρ² ≤ 1`, the variance is positive and the
+SVI-smiled Black–Scholes call is convex in strike
+(`extendedCertificateFormula_iff_bsSmile_convex`); for `σ > 0` the two agree. The formula is an
 explicit quantifier-free construction, by Hermite's trace-form signatures, and is not expanded into
-a list of inequalities. It carries no tail condition, so it is the Durrleman / strike-convexity
-domain stated here, not full butterfly-freeness: the large-strike limit of the call and an atom at
-zero are not addressed.
+a list of inequalities. On its own it is the Durrleman / strike-convexity domain stated here. The
+tail condition was added on 2026-10-05 (`MathFin/BlackScholes/SVI/TailCondition.lean`):
+for `b ≥ 0` and positive variance, `d₊(k) → −∞` exactly when `b(1+ρ) < 2`, and the smiled call
+vanishes at large strikes exactly then. One more sign atom therefore gives a formula that holds
+exactly when `σ ≥ 0`, `b ≥ 0`, `ρ² ≤ 1`, the variance is positive and the smiled call is
+convex, nonincreasing, between `(1 − K)⁺` and `1`, with limits `1` at strike `0` and `0` at large
+strikes (`butterflyFreeFormula_iff_isNormalizedCallPrice`). Constructing the risk-neutral law from
+such a call price function is not formalised.
 
 ### 3. Multidimensional shadow prices under transaction costs
 **Class A · "has remained elusive", restated 2024–25**

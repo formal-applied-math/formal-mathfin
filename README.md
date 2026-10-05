@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 445 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 414 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 446 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 415 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 13 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -91,10 +91,15 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 - **Raw SVI.** A fixed finite Boolean combination of signs of polynomials in the five parameters
   $`(a, b, \rho, m, \sigma)`$ holds exactly when $`\sigma \ge 0`$, $`b \ge 0`$,
-  $`\rho^2 \le 1`$, the SVI total variance is positive at every strike, and the Black–Scholes call
+  $`\rho^2 \le 1`$, the SVI total variance is positive at every log-strike, and the Black–Scholes call
   with the SVI volatility substituted strike by strike is convex in the strike. For
   $`\sigma > 0`$ that convexity is Durrleman's condition
-  ([`extendedCertificateFormula_iff_bsSmile_convex`](MathFin/BlackScholes/SVI/ExtendedFormula.lean)).
+  ([`extendedCertificateFormula_iff_bsSmile_convex`](MathFin/BlackScholes/SVI/ExtendedFormula.lean),
+  [`bsSmile_convex_iff`](MathFin/BlackScholes/SVI/BlackScholesBridge.lean)).
+  With one more sign, $`b(1+\rho) < 2`$, the formula holds exactly when, in addition, that call
+  is nonincreasing in the strike, lies between $`(1-K)^+`$ and $`1`$, and tends to $`1`$ at
+  strike $`0`$ and to $`0`$ at large strikes
+  ([`butterflyFreeFormula_iff_isNormalizedCallPrice`](MathFin/BlackScholes/SVI/TailCondition.lean)).
 
 ## Contents
 
@@ -116,7 +121,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Thirteen of the 445 results are reduced cores. Twelve assume a structure whose fields include the
+- Thirteen of the 446 results are reduced cores. Twelve assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, Lévy's characterization, the two-dimensional Itô formula,
@@ -132,9 +137,10 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 - Martingale representation proves that a hedge exists and is unique, but does not identify it;
   that needs the Clark–Ocone formula
   ([#182](https://github.com/formal-applied-math/formal-mathfin/issues/182), open).
-- The SVI certificate characterises positive variance and convexity of the call in the strike. It
-  proves no tail condition, so it is not full butterfly-freeness, and the formula is defined
-  structurally, not written out as a list of inequalities.
+- The SVI certificate's formula is defined structurally, not written out as a list of
+  inequalities. Butterfly-freeness is proved as a list of properties of the call price as a
+  function of the strike; the risk-neutral law is not constructed from them. At $`\sigma = 0`$
+  convexity of the call is not tied to Durrleman's condition.
 - Existence for SDEs with Lipschitz coefficients is proved only on horizons with
   $`T L_b + \sqrt{T} L_\sigma < 1`$.
 - The binomial limit is proved for call prices and for the law of the terminal log-return.

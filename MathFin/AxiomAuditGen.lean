@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (433 MathFin constants, 29 upstream). Citations
+  corpus (437 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -233,11 +233,23 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.SVI.bsSmile_convex_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.SVI.bsSmile_convex_iff
 
+/-- info: 'MathFin.SVI.butterflyFreeFormula_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.SVI.butterflyFreeFormula_iff
+
+/-- info: 'MathFin.SVI.butterflyFreeFormula_iff_isNormalizedCallPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.SVI.butterflyFreeFormula_iff_isNormalizedCallPrice
+
 /-- info: 'MathFin.SVI.extendedCertificateFormula_iff_bsSmile_convex' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.SVI.extendedCertificateFormula_iff_bsSmile_convex
 
 /-- info: 'MathFin.SVI.fullCertificateFormula_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.SVI.fullCertificateFormula_iff
+
+/-- info: 'MathFin.SVI.tendsto_blackPlus_atBot_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.SVI.tendsto_blackPlus_atBot_iff
+
+/-- info: 'MathFin.SVI.tendsto_bsSmile_zero_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.SVI.tendsto_bsSmile_zero_iff
 
 /-- info: 'MathFin.StochasticIntegralCharacterisation.isStochasticIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.StochasticIntegralCharacterisation.isStochasticIntegral
