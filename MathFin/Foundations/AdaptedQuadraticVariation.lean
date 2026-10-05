@@ -15,7 +15,7 @@ Step B2 of the adapted-coefficient Itô formula
 (`docs/specs/2026-07-05-adapted-ito-formula-design.md`, status of 2026-10-03). Let
 `X = X₀ + A + σ●B`, with `σ` bounded, adapted and path-continuous and the drift path `A`
 Lipschitz in time with one constant for every path, and let `w` be a bounded adapted weight whose
-paths are continuous almost surely. Along the uniform partition `tₖ = kT/n` of `[0, T]`,
+paths are almost surely continuous on `[0, T]`. Along the uniform partition `tₖ = kT/n` of `[0, T]`,
 
   `∑ₖ w(tₖ)(ΔXₖ)² → ∫₀ᵀ w σ² ds` in `L¹(μ)`.
 
@@ -35,7 +35,7 @@ into a bound, and
 The first three parts use only `|w| ≤ C_w`. The weight's adaptedness and the continuity of its
 paths enter only through the last. Almost sure continuity is enough
 (`tendsto_weighted_qv_process_of_ae_continuous`), which is what admits the Itô formula's weight
-`f''(X)` for an adapted `X` whose paths are continuous only almost surely.
+`f''(X)` for an adapted `X` whose paths are continuous only almost surely, and only on `[0, T]`.
 
 The limit is in `L¹`, where `ItoProcessQV` has `L²`: an `L²` bound on the freezing part would need
 fourth moments of `σ●B`, which the tower does not have. The integrals are Bochner integrals, so the
@@ -101,7 +101,8 @@ include hB in
 /-- The Brownian term `∑ₖ v(tₖ)(ΔBₖ)² − ∫₀ᵀ v ds` of a bounded measurable weight with almost surely
 continuous paths is in `L²`. -/
 theorem memLp_weighted_qv_sub {v : ℝ≥0 → Ω → ℝ} (hv_meas : ∀ s, Measurable (v s))
-    (hv_cont : ∀ᵐ ω ∂μ, Continuous fun s ↦ v s ω) {Cv : ℝ} (hv_bdd : ∀ s ω, |v s ω| ≤ Cv) (n : ℕ) :
+    (hv_cont : ∀ᵐ ω ∂μ, ContinuousOn (fun s ↦ v s ω) (Set.Icc 0 T)) {Cv : ℝ}
+    (hv_bdd : ∀ s ω, |v s ω| ≤ Cv) (n : ℕ) :
     MemLp (fun ω ↦ ∑ k ∈ Finset.range n,
         v (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
       - ∫ s in Set.Ioc 0 T, v s ω ∂ItoIntegralL2.timeMeasure) 2 μ := by
@@ -112,15 +113,16 @@ theorem memLp_weighted_qv_sub {v : ℝ≥0 → Ω → ℝ} (hv_meas : ∀ s, Mea
       simpa using memLp_increment_sq_centered_two hB (unifPart T n k) (unifPart T n (k + 1)) 0
     exact hZ.mul' (memLp_top_of_bound (hv_meas _).aestronglyMeasurable Cv
       (ae_of_all _ fun ω ↦ hv_bdd _ ω))
-  exact hsum.sub (memLp_pathIntegral_process_of_ae_continuous hv_meas hv_cont
-    ((abs_nonneg _).trans (hv_bdd 0 (nonempty_of_isProbabilityMeasure μ).some)) hv_bdd T)
+  exact hsum.sub (memLp_pathIntegral_process_of_ae_continuous hv_meas
+    ((abs_nonneg _).trans (hv_bdd 0 (nonempty_of_isProbabilityMeasure μ).some)) hv_bdd T hv_cont)
 
 include hB in
 /-- **The weighted quadratic variation of `B`, in `L¹`**:
 `tendsto_weighted_qv_process_of_ae_continuous` read through `∫|f| ≤ √(∫f²)`. -/
 theorem tendsto_integral_abs_weighted_qv {v : ℝ≥0 → Ω → ℝ}
     (hv_adap : ∀ s, StronglyMeasurable[(natFiltration hBmeas s : MeasurableSpace Ω)] (v s))
-    (hv_cont : ∀ᵐ ω ∂μ, Continuous fun s ↦ v s ω) {Cv : ℝ} (hv_bdd : ∀ s ω, |v s ω| ≤ Cv) :
+    (hv_cont : ∀ᵐ ω ∂μ, ContinuousOn (fun s ↦ v s ω) (Set.Icc 0 T)) {Cv : ℝ}
+    (hv_bdd : ∀ s ω, |v s ω| ≤ Cv) :
     Tendsto (fun n : ℕ ↦ ∫ ω, |∑ k ∈ Finset.range n,
         v (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
       - ∫ s in Set.Ioc 0 T, v s ω ∂ItoIntegralL2.timeMeasure| ∂μ) atTop (𝓝 0) :=
@@ -128,8 +130,9 @@ theorem tendsto_integral_abs_weighted_qv {v : ℝ≥0 → Ω → ℝ}
     (fun n ↦ integral_abs_le_sqrt_integral_sq (memLp_weighted_qv_sub hB T
       (fun s ↦ ((hv_adap s).mono ((natFiltration hBmeas).le s)).measurable) hv_cont hv_bdd n))
     (by simpa using (tendsto_weighted_qv_process_of_ae_continuous hB hBmeas
-      (fun s ↦ adaptedAt_of_measurable_natural hBmeas (hv_adap s).measurable) hv_cont
-      ((abs_nonneg _).trans (hv_bdd 0 (nonempty_of_isProbabilityMeasure μ).some)) hv_bdd T).sqrt)
+      (fun s ↦ adaptedAt_of_measurable_natural hBmeas (hv_adap s).measurable)
+      ((abs_nonneg _).trans (hv_bdd 0 (nonempty_of_isProbabilityMeasure μ).some)) hv_bdd T
+      hv_cont).sqrt)
 
 /-! ### The increments of `M = σ●B` -/
 
@@ -190,7 +193,8 @@ section Weighted
 
 variable {w : ℝ≥0 → Ω → ℝ}
   (hw_adap : ∀ s, StronglyMeasurable[(natFiltration hBmeas s : MeasurableSpace Ω)] (w s))
-  (hw_cont : ∀ᵐ ω ∂μ, Continuous fun s ↦ w s ω) {Cw : ℝ} (hw_bdd : ∀ s ω, |w s ω| ≤ Cw)
+  (hw_cont : ∀ᵐ ω ∂μ, ContinuousOn (fun s ↦ w s ω) (Set.Icc 0 T)) {Cw : ℝ}
+  (hw_bdd : ∀ s ω, |w s ω| ≤ Cw)
 
 omit mΩ in
 include hbdd hw_bdd in
@@ -269,7 +273,7 @@ theorem integral_abs_weighted_qv_sub_le {n : ℕ} (hn : n ≠ 0) :
   have hCa : 0 ≤ Ca := by simpa using (abs_nonneg _).trans (hA (zero_le_one' ℝ≥0) ω₀)
   have hbr_int := ((memLp_weighted_qv_sub hB T (v := fun s ω ↦ w s ω * σ s ω ^ 2)
     (fun s ↦ (((hw_adap s).mul ((hadap s).pow 2)).mono ((natFiltration hBmeas).le s)).measurable)
-    (hw_cont.mono fun ω h ↦ h.mul ((hcont ω).pow 2)) (abs_mul_sq_le hbdd hw_bdd) n).integrable
+    (hw_cont.mono fun ω h ↦ h.mul ((hcont ω).pow 2).continuousOn) (abs_mul_sq_le hbdd hw_bdd) n).integrable
     one_le_two).abs
   have hrate : (n : ℝ) * ((Ca * (T / n)) ^ 2 + 2 * (Ca * (T / n)) * √(C ^ 2 * (T / n)))
       = (Ca * T) ^ 2 / n + 2 * (Ca * T) * √(C ^ 2 * (T / n)) := by
@@ -337,8 +341,8 @@ theorem integral_abs_weighted_qv_sub_le {n : ℕ} (hn : n ≠ 0) :
 include hA hX hw_adap hw_cont hw_bdd in
 /-- **Quadratic variation of an Itô process with adapted coefficients, weighted.** Let
 `X = X₀ + A + σ●B`, with `σ` bounded, adapted and path-continuous and the drift path `A`
-`Cₐ`-Lipschitz in time, and let `w` be a bounded adapted weight whose paths are continuous almost
-surely. Along the
+`Cₐ`-Lipschitz in time, and let `w` be a bounded adapted weight whose paths are almost surely
+continuous on `[0, T]`. Along the
 uniform partition of `[0, T]`, `∑ₖ w(tₖ)(ΔXₖ)² → ∫₀ᵀ w σ² ds` in `L¹(μ)`.
 
 Each `(ΔXₖ)²` splits (`abs_mul_sq_sub_le`) into a drift part, at most `Cₐ²(T/n)²`; a cross part
@@ -362,7 +366,7 @@ theorem tendsto_weighted_qv_adapted :
   have hfr := ((hd.sqrt.mul_const (√(C ^ 2 * T))).const_mul 2).add hd
   -- the Brownian term
   have hbr := tendsto_integral_abs_weighted_qv hB T hBmeas (v := fun s ω ↦ w s ω * σ s ω ^ 2)
-    (fun s ↦ (hw_adap s).mul ((hadap s).pow 2)) (hw_cont.mono fun ω h ↦ h.mul ((hcont ω).pow 2))
+    (fun s ↦ (hw_adap s).mul ((hadap s).pow 2)) (hw_cont.mono fun ω h ↦ h.mul ((hcont ω).pow 2).continuousOn)
     (abs_mul_sq_le hbdd hw_bdd)
   have hlim := ((hdc.add hfr).const_mul Cw).add hbr
   simp only [mul_zero, Real.sqrt_zero, zero_mul, add_zero] at hlim
@@ -383,7 +387,7 @@ theorem tendsto_qv_adapted :
           (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω) ^ 2
         - ∫ s in Set.Ioc 0 T, σ s ω ^ 2 ∂ItoIntegralL2.timeMeasure| ∂μ) atTop (𝓝 0) := by
   simpa using tendsto_weighted_qv_adapted hB T hBmeas hadap hcont hbdd hA hX
-    (w := fun _ _ ↦ (1 : ℝ)) (fun _ ↦ stronglyMeasurable_const) (Eventually.of_forall fun _ ↦ continuous_const)
+    (w := fun _ _ ↦ (1 : ℝ)) (fun _ ↦ stronglyMeasurable_const) (Eventually.of_forall fun _ ↦ continuousOn_const)
     (Cw := 1) fun _ _ ↦ abs_one.le
 
 end QV

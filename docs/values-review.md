@@ -125,6 +125,82 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-04 — corpus 442 — B5's first-order term: Riemann–Stieltjes sums against an Itô integral
+
+Scope: two steps toward B5 of the adapted-coefficient Itô formula.
+- #235 relaxed `tendsto_weighted_qv_process` and B2 to weights with almost surely continuous
+  paths (`tendsto_weighted_qv_process_of_ae_continuous`).
+- `Foundations/AdaptedRiemannStieltjes.lean`: for `M = φ●B` and a bounded predictable weight `w`,
+  `∑ₖ w(tₖ)ΔMₖ → ∫ w dM` in mean square, through dominated convergence in `L²(⟨M⟩)`. One entry,
+  `sc-riemann-stieltjes-against-ito`; corpus 441 → 442.
+
+Three read-only review agents: (1, 5, 7) plus the standing first pass; (2, 3, 6, 4, 8); and one
+asked only whether B5's assembly can consume the two results as stated. The parent adjudicated and
+executed the fixes below before opening the PR.
+
+### The standing first pass — prose against statement
+
+Six findings, all fixed:
+- Both results asked the weight for almost sure continuity on all of `ℝ≥0`. The library proves
+  `itoContinuousMod` continuous on `[0, T]` only, so B5's weight `f'(X)`, `f''(X)` did not meet the
+  hypothesis the spec said it met. Both now ask for continuity on `[0, T]`
+  (`ContinuousOn … (Set.Icc 0 T)`), which is all the proofs use: `tendsto_uncurry_stepσ` takes
+  `ContinuousWithinAt`, and `exists_continuous_version_of_ae_continuousOn` stops the weight at `T`.
+- "`∫ w dM = ∫ φ·w dB`" was stated outright in the module header, `coverage.md` and the spec, while
+  the theorem took the class `χ` of `φ·w` as a hypothesis nobody discharged.
+  `coeFn_mulLI_weightLp` now constructs it.
+- "The sums converge" was no single statement: it took the convergence of step integrals composed
+  with their identification as sums. `tendsto_integral_sq_riemannStieltjes_sub` states it, in the
+  mean-square form B2 uses, and the entry's scope item disclosing the gap is gone.
+- The description read as if the limit lived in `L²(⟨M⟩)`. Reworded.
+- `reference` said "against a continuous `L²` martingale". `M` is `φ●B`, one class per time.
+- `abs_uncurry_stepσ_le` said the step process "takes a value of `θ`", false at `n = 0`.
+
+### Upgrades executed
+
+- **Zero slop (lens 3).** The ε–δ block of the adapted Riemann bridge is two lemmas,
+  `abs_uncurry_stepσ_le` and `tendsto_uncurry_stepσ`, shared by the bridge and the new module.
+- **Idiom (lens 6).** `MeasurableSet.himp` for the implication set, `coeFn_weightLp` in place of
+  unfolding the definition, dot notation and `trans_lt` in the extracted lemma.
+- **First principles (lens 5).** `tendsto_uncurry_stepσ` assumes continuity at the one point it
+  uses, within `[0, T]`.
+
+Adjudicated rather than executed: the same ε–δ block sits in four more files, and the right home
+for it is beside `cell_collapse` (backlog 2). That touches core modules, so it is a sweep.
+
+### Exemplars
+
+- The route through `L²(⟨M⟩)`: continuity of the integral against `M` plus dominated convergence
+  removes freezing, and with it every regularity demand on the driver.
+- `ae_bracketMeasure_of_ae_forall` consumed with `measurableSet_tendsto_fun`: the convergence set
+  is predictable, which is exactly what moves "almost every path" to "`⟨M⟩`-almost everywhere".
+
+### Ranked backlog
+
+1. **Finish B5** (lens 4), in this order. `driftContinuousMod` continuous on `[0, T]` almost
+   surely, copying `itoContinuousMod_continuousOn` over `drift_ae_eventually_sup_lt`. The drift
+   part of the first-order term, a pathwise Riemann sum. The Taylor remainder in probability, from
+   `∑|Rₖ| ≤ ρ(maxₖ|ΔXₖ|)·∑(ΔXₖ)²` and `tendsto_qv_adapted`; `tendsto_ito_remainder` is for `B`
+   only, but `abs_discreteTaylorRemainder_le` is reusable. The assembly, with
+   `itoContinuousMod_modification` at the partition times and `tendstoInMeasure_ae_unique`.
+   `X₀` must be `𝓕₀`-measurable.
+2. **One cell-sum convergence lemma beside `cell_collapse`** (lenses 4, 8):
+   `∑ⱼ 𝟙_{(tⱼ,tⱼ₊₁]}(s)·g(tⱼ) → g(s)` for `g` continuous at `s` from the left, by squeezing the left
+   endpoint. `ItoIntegralRiemannBridge`, `ItoIntegralRiemannBridgeTD`, `WeightedQuadraticVariation`
+   and `DriftRiemannConvergence` each carry the ε–δ block. Left-continuity is the natural class for
+   a predictable weight.
+3. **`weightLp` and `integrandLp`** (lens 2). Two constructors for the class of a process in
+   `L²(⟨M⟩)`; bridge them through `integrandLp_eq`, or state the limit as `sIntegral`, so the
+   first-order term joins the characterised integral.
+4. **Lift three repeated steps** (lens 3): `Lp` convergence from dominated convergence
+   (`tendsto_toLp_of_dominated_convergence`, also in `StochasticIntegralCharacterisation`);
+   "cross the weight, split on `φ = 0`" into `LpMulIsometry`; and `MemLp.of_bound` for a bounded
+   predictable process against any finite predictable measure.
+5. **`itoIntegralAgainst_stepSP`** beside `itoIntegralAgainst_elementary` (lens 8), and the cell
+   decomposition of `stepσ` beside `stepσ`, so the new module stops importing the freezing module.
+6. **Carried.** The 2026-10-03 backlogs stand, except item 2 of the corpus-441 one, done in #235
+   and here.
+
 ## 2026-10-03 — corpus 441 — the quadratic variation of an Itô process with adapted σ (B1, B2)
 
 Scope: steps B1 and B2 of the adapted-coefficient Itô formula
