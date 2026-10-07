@@ -26,6 +26,38 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The Merton Greeks (2026-10-07)
+
+Five entries added, all `full`: `mf-merton-delta`, `mf-merton-gamma`, `mf-merton-vega`,
+`mf-merton-call-convex-in-spot` and `mf-merton-call-increasing-in-vol`. Corpus 452 → 457. These
+are the statements issue #129 asks for.
+
+`BlackScholes/MertonGreeks.lean` differentiates the Poisson series of Black–Scholes prices
+`C(S) = ∑ₙ wₙ C_BS(S·cₙ, σₙ)` term by term (`hasDerivAt_tsum_of_isPreconnected`), with
+`wₙ = e^{−Λ}Λⁿ/n!`, `cₙ = e^{−kΛ}(1 + k)ⁿ` and `σₙ = √(σ² + nδ²/T)`. For `K, σ, T > 0`, `k > −1`
+and `S > 0`:
+
+- delta: `∂C/∂S = ∑ₙ wₙ cₙ Φ(d₁ⁿ)`, with `0 < Δ < 1` (`hasDerivAt_mertonCallPrice_spot`,
+  `mertonDelta_pos`, `mertonDelta_lt_one`). The upper bound is the compensation identity
+  `∑ₙ wₙcₙ = 1` together with `Φ < 1`.
+- gamma, stated for the price as the derivative of `deriv C`: `∑ₙ wₙ cₙ ϕ(d₁ⁿ)/(S σₙ √T) > 0`
+  (`hasDerivAt_deriv_mertonCallPrice_spot`, `mertonGamma_pos`).
+- vega: `∂C/∂σ = ∑ₙ wₙ S cₙ ϕ(d₁ⁿ) √T · σ/σₙ > 0` (`hasDerivAt_mertonCallPrice_sigma`,
+  `mertonVega_pos`).
+- shape: on `(0, ∞)` the price strictly increases and is strictly convex in `S`, and strictly
+  increases in `σ` (`mertonCallPrice_strictMonoOn_spot`, `mertonCallPrice_strictConvexOn_spot`,
+  `mertonCallPrice_strictMonoOn_sigma`).
+
+Each term's derivative is dominated by `wₙcₙ` (delta), by `wₙcₙ/((S/2)σ√T)` near `S` (gamma,
+since `ϕ ≤ 1` and `σₙ ≥ σ`), or by `wₙ S cₙ √T` (vega). These bounds are summable because the
+weights `wₙcₙ` sum to one.
+
+Safe wording: "the Merton call's delta, gamma and vega as Poisson mixtures of Black–Scholes Greeks,
+with their signs and the shape of the price they imply". The Greeks are stated for
+`mertonCallPrice`, which `merton_call_formula` identifies with the model's expectation at each
+spot. Not covered: the put Greeks, theta and rho, and sensitivities to the jump parameters `k`,
+`δ`, `Λ`.
+
 ### Merton's formula derived from the jump-diffusion (2026-10-07)
 
 Five entries added, all `full`: `mf-merton-call-formula`, `mf-merton-put-formula`,

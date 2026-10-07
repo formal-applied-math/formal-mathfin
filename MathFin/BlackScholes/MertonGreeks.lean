@@ -17,10 +17,12 @@ public import MathFin.Foundations.NormalTail
 The Merton call price is a Poisson mixture of Black–Scholes prices,
 `C(S) = ∑ₙ wₙ · C_BS(S·cₙ, σₙ)`, with Poisson weights `wₙ = e^{−Λ}Λⁿ/n!`, jump factors
 `cₙ = e^{−kΛ}(1 + k)ⁿ` (the conditional spot is `mertonSpot S n = S·cₙ`) and conditional
-volatilities `σₙ = mertonVol n = √(σ² + nδ²/T)`. Its Greeks are the same Poisson mixtures of the
-Black–Scholes Greeks. The series can be differentiated term by term because the Black–Scholes
-delta and the normal density are bounded and the weights `wₙcₙ` sum to one, which is the
-compensation identity `E[mertonSpot(N)] = S` at `S = 1`.
+volatilities `σₙ = mertonVol n = √(σ² + nδ²/T)`. Its Greeks are Poisson mixtures of the
+Black–Scholes Greeks at the conditional spots and volatilities, each carrying its chain-rule
+factor: `cₙ` per derivative in the spot, `σ/σₙ` for the volatility. The series can be
+differentiated term by term because the Black–Scholes delta and the normal density are bounded
+and the weights `wₙcₙ` sum to one, which is the compensation identity `E[mertonSpot(N)] = S` at
+`S = 1`.
 
 ## Main results
 
@@ -35,6 +37,10 @@ compensation identity `E[mertonSpot(N)] = S` at `S = 1`.
 * `hasDerivAt_mertonCallPrice_sigma`, `mertonVega_pos`: the vega is
   `mertonVega = ∑ₙ wₙ S cₙ ϕ(d₁ⁿ) √T · σ/σₙ`, and it is positive. The factor `σ/σₙ` is the
   derivative of `σₙ` in `σ`.
+* `mertonCallPrice_strictMonoOn_spot`, `mertonCallPrice_strictConvexOn_spot`,
+  `mertonCallPrice_strictMonoOn_sigma`: the signs of the Greeks as the shape of the price. On
+  `(0, ∞)` the call price strictly increases and is strictly convex in the spot, and strictly
+  increases in the diffusion volatility.
 -/
 
 @[expose] public section
@@ -379,8 +385,8 @@ theorem hasDerivAt_mertonCallPrice_sigma {S : ℝ} (hS : 0 < S) (hK : 0 < K) (hT
     hσ).congr_of_eventuallyEq
     (Eventually.of_forall fun s ↦ mertonCallPrice_eq_tsum S K r s T k δ Λ)
 
-/-- **The Merton vega is positive**: jump-diffusion option value increases with the diffusion
-volatility. -/
+/-- **The Merton vega is positive.** Every term is nonnegative and the no-jump term is
+positive. -/
 theorem mertonVega_pos {S : ℝ} (hS : 0 < S) (hT : 0 < T) (hk : -1 < k) (hσ : 0 < σ) :
     0 < mertonVega S K r σ T k δ Λ := by
   have hspot (n : ℕ) : 0 < mertonSpot S k Λ n := mertonSpot_pos hS hk Λ n
@@ -415,5 +421,47 @@ theorem mertonVega_pos {S : ℝ} (hS : 0 < S) (hT : 0 < T) (hk : -1 < k) (hσ : 
   exact mul_pos (Real.exp_pos _) (mul_pos (mul_pos (mul_pos (hspot 0)
     (gaussianPDFReal_pos 0 1 _ one_ne_zero)) (Real.sqrt_pos.mpr hT))
     (div_pos hσ (mertonVol_pos hσ hT 0)))
+
+/-! ### The shape of the price -/
+
+/-- **The Merton call price strictly increases in the spot**, its delta being positive. -/
+theorem mertonCallPrice_strictMonoOn_spot (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T)
+    (hk : -1 < k) : StrictMonoOn (fun s ↦ mertonCallPrice s K r σ T k δ Λ) (Ioi 0) := by
+  have h (s : ℝ) (hs : 0 < s) :=
+    hasDerivAt_mertonCallPrice_spot (r := r) (δ := δ) (Λ := Λ) hK hσ hT hk hs
+  refine strictMonoOn_of_deriv_pos (convex_Ioi 0)
+    (fun s hs ↦ (h s hs).continuousAt.continuousWithinAt) fun s hs ↦ ?_
+  rw [interior_Ioi] at hs
+  rw [(h s hs).deriv]
+  exact mertonDelta_pos hk s
+
+/-- **The Merton call price is strictly convex in the spot**: its delta strictly increases, the
+gamma being positive. -/
+theorem mertonCallPrice_strictConvexOn_spot (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T)
+    (hk : -1 < k) : StrictConvexOn ℝ (Ioi 0) fun s ↦ mertonCallPrice s K r σ T k δ Λ := by
+  have h (s : ℝ) (hs : 0 < s) :=
+    hasDerivAt_mertonCallPrice_spot (r := r) (δ := δ) (Λ := Λ) hK hσ hT hk hs
+  have h2 (s : ℝ) (hs : 0 < s) :=
+    hasDerivAt_deriv_mertonCallPrice_spot (r := r) (δ := δ) (Λ := Λ) hK hσ hT hk hs
+  refine StrictMonoOn.strictConvexOn_of_deriv (convex_Ioi 0)
+    (fun s hs ↦ (h s hs).continuousAt.continuousWithinAt) ?_
+  rw [interior_Ioi]
+  refine strictMonoOn_of_deriv_pos (convex_Ioi 0)
+    (fun s hs ↦ (h2 s hs).continuousAt.continuousWithinAt) fun s hs ↦ ?_
+  rw [interior_Ioi] at hs
+  rw [(h2 s hs).deriv]
+  exact mertonGamma_pos hσ hT hk hs
+
+/-- **The Merton call price strictly increases in the diffusion volatility**, its vega being
+positive. -/
+theorem mertonCallPrice_strictMonoOn_sigma {S : ℝ} (hS : 0 < S) (hK : 0 < K) (hT : 0 < T)
+    (hk : -1 < k) : StrictMonoOn (fun s ↦ mertonCallPrice S K r s T k δ Λ) (Ioi 0) := by
+  have h (s : ℝ) (hs : 0 < s) :=
+    hasDerivAt_mertonCallPrice_sigma (r := r) (δ := δ) (Λ := Λ) hS hK hT hk hs
+  refine strictMonoOn_of_deriv_pos (convex_Ioi 0)
+    (fun s hs ↦ (h s hs).continuousAt.continuousWithinAt) fun s hs ↦ ?_
+  rw [interior_Ioi] at hs
+  rw [(h s hs).deriv]
+  exact mertonVega_pos hS hT hk hs
 
 end MathFin

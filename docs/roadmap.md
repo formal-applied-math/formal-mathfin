@@ -1779,3 +1779,23 @@ termwise differentiation of the mixture, with delta in `[0, 1]` from the compens
 Lévy–Khintchine form for Brownian motion plus compound Poisson, and through it jump laws other than
 lognormal (Kou's double exponential); (3) Poisson random measure existence, the Summit the Lévy
 tower still assumes.
+
+## phase: the Merton Greeks (2026-10-07, corpus 452→457)
+
+Issue [#129](https://github.com/formal-applied-math/formal-mathfin/issues/129). The Greeks of the
+mixture are the mixtures of the Black–Scholes Greeks, each with its chain-rule factor (`cₙ` per
+spot derivative, `σ/σₙ` for the volatility). The work is the domination that lets the series be
+differentiated term by term. The Black–Scholes delta and the normal density are bounded, and the
+weights `wₙcₙ` sum to one: the compensation identity again, at `S = 1`. So `∑ₙ wₙcₙ` dominates
+the delta series, `∑ₙ wₙcₙ/((S/2)σ√T)` dominates the gamma series near `S`, and the same identity
+bounds the delta below one. The gamma is stated as the derivative of `deriv C`, per the values
+rule for higher derivatives. The signs then become shape theorems: on `(0, ∞)` the price strictly
+increases and is strictly convex in the spot, and strictly increases in the volatility. Those
+names state what is proved.
+
+**Next on the jump axis:** (1) jump laws other than lognormal: the mixing formula
+`𝔼[e^{−rT}(S_T − K)⁺] = 𝔼[C_BS(S₀e^Y)]` for a jump part `Y` independent of the diffusion, and the
+compound-Poisson compensator `Λ(𝔼[e^J] − 1)` that makes the discounted terminal price average to
+`S₀`; (2) the jump-diffusion characteristic function (Lévy–Khintchine for Brownian motion plus
+compound Poisson); (3) Poisson random measure existence.
+
