@@ -54,7 +54,7 @@ property of `e^{−rt}S_t` at intermediate dates are not constructed.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal Nat
+open scoped NNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}
 
@@ -164,7 +164,7 @@ structure MertonHyp (Q : Measure Ω) (k δ : ℝ) (Λ : ℝ≥0) (Z : Ω → ℝ
   N_indep : IndepFun N (fun ω ↦ (Z ω, fun i ↦ J i ω)) Q
 
 /-- `mertonVol n² · T = σ²T + nδ²`: the conditional log-variance over the horizon. -/
-lemma mertonVol_sq_mul {σ T : ℝ} (δ : ℝ) (hT : 0 < T) (n : ℕ) :
+lemma mertonVol_sq_mul (σ δ : ℝ) {T : ℝ} (hT : 0 < T) (n : ℕ) :
     mertonVol σ δ T n ^ 2 * T = σ ^ 2 * T + n * δ ^ 2 := by
   have h0 : 0 ≤ σ ^ 2 + (n : ℝ) * δ ^ 2 / T := by positivity
   rw [mertonVol, Real.sq_sqrt h0, add_mul, div_mul_cancel₀ _ hT.ne']
@@ -189,7 +189,7 @@ theorem mertonTerminal_eq_bsTerminal {S_0 r σ T k : ℝ} (δ : ℝ) (Λ : ℝ�
             + mertonVol σ δ T n * Real.sqrt T * mertonStd σ T k δ z n j))) := by
         rw [← Real.exp_add, ← Real.exp_add, mertonTerminal]
         congr 2
-        linear_combination (1 / 2 : ℝ) * mertonVol_sq_mul δ hT n - hvs
+        linear_combination (1 / 2 : ℝ) * mertonVol_sq_mul σ δ hT n - hvs
     _ = bsTerminal (mertonSpot S_0 k Λ n) r (mertonVol σ δ T n) T
           (mertonStd σ T k δ z n j) := by
         rw [bsTerminal, mertonSpot, hpow]
@@ -217,7 +217,7 @@ theorem MertonHyp.hasLaw_mertonStd [IsProbabilityMeasure Q] {k δ : ℝ} {Λ : �
   simp only [NNReal.coe_add, NNReal.coe_mul, NNReal.coe_mk, NNReal.coe_one, NNReal.coe_natCast,
     Real.coe_toNNReal _ (sq_nonneg δ)]
   linear_combination (σ ^ 2 - mertonVol σ δ T n ^ 2) * Real.sq_sqrt hT.le
-    - mertonVol_sq_mul δ hT n
+    - mertonVol_sq_mul σ δ hT n
 
 /-! ### Freezing the jump count -/
 
@@ -310,12 +310,10 @@ theorem merton_call_formula [IsProbabilityMeasure Q] {S_0 K r σ T k δ : ℝ} {
   h.integral_eq_poisson_mixture
     (F := fun n z j ↦ rexp (-r * T) * max (mertonTerminal S_0 r σ T k Λ z n j - K) 0)
     (fun n ↦ by
-      beta_reduce
       unfold mertonTerminal
       fun_prop)
     (fun _ _ _ ↦ mul_nonneg (Real.exp_pos _).le (le_max_right _ _))
     (fun n ↦ by
-      beta_reduce
       simp_rw [mertonTerminal_eq_bsTerminal δ Λ hσ hT hk]
       exact integrable_bsCall_payoff (h.hasLaw_mertonStd hσ hT n)
         (mertonSpot_pos hS_0 hk Λ n).le hK.le r _ T)
@@ -332,12 +330,10 @@ theorem merton_put_formula [IsProbabilityMeasure Q] {S_0 K r σ T k δ : ℝ} {�
   h.integral_eq_poisson_mixture
     (F := fun n z j ↦ rexp (-r * T) * max (K - mertonTerminal S_0 r σ T k Λ z n j) 0)
     (fun n ↦ by
-      beta_reduce
       unfold mertonTerminal
       fun_prop)
     (fun _ _ _ ↦ mul_nonneg (Real.exp_pos _).le (le_max_right _ _))
     (fun n ↦ by
-      beta_reduce
       simp_rw [mertonTerminal_eq_bsTerminal δ Λ hσ hT hk]
       exact integrable_bsPut_payoff (h.hasLaw_mertonStd hσ hT n)
         (mertonSpot_pos hS_0 hk Λ n).le hK.le r _ T)
@@ -354,12 +350,10 @@ theorem merton_discounted_terminal [IsProbabilityMeasure Q] {S_0 r σ T k δ : �
   (h.integral_eq_poisson_mixture
     (F := fun n z j ↦ rexp (-r * T) * mertonTerminal S_0 r σ T k Λ z n j)
     (fun n ↦ by
-      beta_reduce
       unfold mertonTerminal
       fun_prop)
     (fun _ _ _ ↦ mul_nonneg (Real.exp_pos _).le (mul_nonneg hS_0.le (Real.exp_pos _).le))
     (fun n ↦ by
-      beta_reduce
       simp_rw [mertonTerminal_eq_bsTerminal δ Λ hσ hT hk]
       exact (integrable_bsTerminal (h.hasLaw_mertonStd hσ hT n) _ r _ T).const_mul _)
     (merton_discounted_given_jumps h hσ hT hk)

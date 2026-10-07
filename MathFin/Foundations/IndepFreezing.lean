@@ -42,7 +42,7 @@ namespace MathFin
 open MeasureTheory ProbabilityTheory
 
 variable {Ω α β E : Type*} {mΩ : MeasurableSpace Ω} {mα : MeasurableSpace α}
-  {mβ : MeasurableSpace β} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {mβ : MeasurableSpace β} [NormedAddCommGroup E]
   {P : Measure Ω} [IsFiniteMeasure P] {X : Ω → α} {Y : Ω → β}
 
 /-- For independent `X` and `Y`, `g(X, Y)` is integrable exactly when `g` is integrable against
@@ -56,8 +56,9 @@ theorem integrable_comp_prodMk_iff_of_indepFun (hXY : X ⟂ᵢ[P] Y) (hX : AEMea
 
 /-- **The freezing lemma.** For independent `X` and `Y`, and `g` integrable against the product
 of their laws, `𝔼[g(X, Y)] = ∫ x, 𝔼[g(x, Y)] d(law X)`. -/
-theorem integral_comp_prodMk_of_indepFun (hXY : X ⟂ᵢ[P] Y) (hX : AEMeasurable X P)
-    (hY : AEMeasurable Y P) {g : α × β → E} (hg : Integrable g ((P.map X).prod (P.map Y))) :
+theorem integral_comp_prodMk_of_indepFun [NormedSpace ℝ E] (hXY : X ⟂ᵢ[P] Y)
+    (hX : AEMeasurable X P) (hY : AEMeasurable Y P) {g : α × β → E}
+    (hg : Integrable g ((P.map X).prod (P.map Y))) :
     ∫ ω, g (X ω, Y ω) ∂P = ∫ x, ∫ ω, g (x, Y ω) ∂P ∂(P.map X) := by
   have hmap := hXY.map_prod_eq_prod_map_map hX hY
   have hgm : AEStronglyMeasurable g (P.map fun ω ↦ (X ω, Y ω)) := by
