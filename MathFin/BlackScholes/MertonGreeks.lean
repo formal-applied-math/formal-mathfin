@@ -58,12 +58,17 @@ lemma mertonSpot_eq_mul_one (S k : ℝ) (Λ : ℝ≥0) (n : ℕ) :
 `E[mertonSpot(N)] = S₀` at `S₀ = 1`. -/
 lemma hasSum_weights_mul_mertonSpot_one (k : ℝ) (Λ : ℝ≥0) :
     HasSum (fun n : ℕ ↦ rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * mertonSpot 1 k Λ n) 1 := by
-  convert (PoissonPgf.hasSum_poisson_weights_mul_pow Λ (1 + k)).mul_left
-    (rexp (-(k * (Λ : ℝ)))) using 1
-  · funext n
+  have h := (PoissonPgf.hasSum_poisson_weights_mul_pow Λ (1 + k)).mul_left
+    (rexp (-(k * (Λ : ℝ))))
+  rw [← Real.exp_add, show -(k * (Λ : ℝ)) + (Λ : ℝ) * (1 + k - 1) = 0 by ring,
+    Real.exp_zero] at h
+  have hfun : (fun n : ℕ ↦ rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * mertonSpot 1 k Λ n)
+      = fun n ↦ rexp (-(k * (Λ : ℝ))) * (rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * (1 + k) ^ n) := by
+    funext n
     unfold mertonSpot
     ring
-  · rw [← Real.exp_add, show -(k * (Λ : ℝ)) + (Λ : ℝ) * (1 + k - 1) = 0 by ring, Real.exp_zero]
+  rw [hfun]
+  exact h
 
 /-- The Poisson-weighted call values form a convergent series: each lies in `[0, spot_n]`. -/
 lemma summable_weights_mul_mertonCallTerm {S : ℝ} (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ)
@@ -106,17 +111,16 @@ theorem hasDerivAt_mertonCallPrice_spot (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T)
         (fun y ↦ rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * mertonCallTerm y K r σ T k δ Λ n)
         (rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! *
           (mertonSpot 1 k Λ n * Phi (bsd1 (mertonSpot s k Λ n) K r (mertonVol σ δ T n) T))) s := by
-    have hbs : HasDerivAt (fun y ↦ bsV K r (mertonVol σ δ T n) (y * mertonSpot 1 k Λ n) T)
-        (Phi (bsd1 (s * mertonSpot 1 k Λ n) K r (mertonVol σ δ T n) T) * mertonSpot 1 k Λ n) s :=
-      (hasDerivAt_bsV_S (r := r) hK (mertonVol_pos (δ := δ) hσ hT n) (mul_pos hs (hc n)) hT).comp
-        s (hasDerivAt_mul_const (mertonSpot 1 k Λ n))
+    have hs0 : 0 < s := hs
+    have hbs := (hasDerivAt_bsV_S (r := r) hK (mertonVol_pos (δ := δ) hσ hT n)
+      (mul_pos hs0 (hc n)) hT).comp s (hasDerivAt_mul_const (mertonSpot 1 k Λ n))
     have hfun : (fun y ↦ rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * mertonCallTerm y K r σ T k δ Λ n)
         = fun y ↦ rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n !
           * bsV K r (mertonVol σ δ T n) (y * mertonSpot 1 k Λ n) T := by
       funext y
       rw [mertonCallTerm_eq_bsV, mertonSpot_eq_mul_one y]
     rw [hfun]
-    convert hbs.const_mul (rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n !) using 1
+    refine (hbs.const_mul (rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n !)).congr_deriv ?_
     rw [mertonSpot_eq_mul_one s]
     ring
   have hbound (n : ℕ) (s : ℝ) (_ : s ∈ Ioi (0 : ℝ)) :
@@ -180,11 +184,8 @@ theorem hasDerivAt_mertonDelta (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hk : -1
               * gaussianPDFReal 0 1 (bsd1 (mertonSpot s k Λ n) K r (mertonVol σ δ T n) T)
             / (s * mertonVol σ δ T n * Real.sqrt T))) s := by
     have hs0 : 0 < s := hS2.trans hs
-    have hphi : HasDerivAt (fun y ↦ Phi (bsd1 (y * mertonSpot 1 k Λ n) K r (mertonVol σ δ T n) T))
-        (gaussianPDFReal 0 1 (bsd1 (s * mertonSpot 1 k Λ n) K r (mertonVol σ δ T n) T)
-          / (s * mertonSpot 1 k Λ n * mertonVol σ δ T n * Real.sqrt T) * mertonSpot 1 k Λ n) s :=
-      (hasDerivAt_Phi_bsd1_S (r := r) hK (hv n) (mul_pos hs0 (hc n)) hT).comp s
-        (hasDerivAt_mul_const (mertonSpot 1 k Λ n))
+    have hphi := (hasDerivAt_Phi_bsd1_S (r := r) hK (hv n) (mul_pos hs0 (hc n)) hT).comp s
+      (hasDerivAt_mul_const (mertonSpot 1 k Λ n))
     have hfun : (fun y ↦ rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! *
           (mertonSpot 1 k Λ n * Phi (bsd1 (mertonSpot y k Λ n) K r (mertonVol σ δ T n) T)))
         = fun y ↦ rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! *
