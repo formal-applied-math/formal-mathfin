@@ -1844,6 +1844,13 @@
       "input_hash": "81f0fd7d86b72b7c4f6524ea1e80eddf97f7d7a340c35eed0a780c9e0f605602",
       "verified_at_commit": "fdfecac"
     },
+    "mf-merton-jd-delta": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-07",
+      "elapsed_s": 6.1,
+      "input_hash": "fd1a8a05c852b4c3efeb7d5977eca52bdc21b3eddebf61cddd6dabfa2f83eedc",
+      "verified_at_commit": "unknown"
+    },
     "mf-merton-put-call-parity": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-02",
