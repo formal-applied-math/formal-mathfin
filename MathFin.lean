@@ -322,6 +322,8 @@ import MathFin.BlackScholes.MertonClassicDisplay
 -- Merton's model derived: the jump-diffusion terminal price (Gaussian diffusion,
 -- Poisson count, i.i.d. lognormal jumps) prices to the Poisson mixture
 import MathFin.BlackScholes.MertonModel
+-- Merton Greeks: delta, gamma, vega as Poisson mixtures of Black–Scholes Greeks
+import MathFin.BlackScholes.MertonGreeks
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser

@@ -2450,6 +2450,54 @@
       }
     },
     {
+      "id": "mf-merton-delta",
+      "name": "Merton Jump-Diffusion Delta",
+      "description": "For the Merton jump-diffusion call price C(S) = ∑ₙ wₙ C_BS(S·cₙ, σₙ) (mertonCallPrice), with Poisson weights wₙ = e^{-Λ}Λⁿ/n!, jump factors cₙ = e^{-kΛ}(1+k)ⁿ and conditional volatilities σₙ = √(σ² + nδ²/T), and K, σ, T > 0, k > −1: at every spot S > 0 the price is differentiable in S with delta ∂C/∂S = ∑ₙ wₙ cₙ Φ(d₁ⁿ) (mertonDelta), d₁ⁿ the Black–Scholes d₁ at spot S·cₙ and volatility σₙ, and 0 < Δ < 1. The upper bound is ∑ₙ wₙcₙ = 1, the compensation identity at S = 1, together with Φ < 1.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.MertonGreeks\n\nopen scoped NNReal\n\n/-- **The Merton delta.** The Merton call price has spot derivative `∑ₙ wₙ cₙ Φ(d₁ⁿ)`, strictly\nbetween `0` and `1`. -/\ntheorem merton_delta_thm {K r σ T k δ : ℝ} {Λ : ℝ≥0} (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T)\n    (hk : -1 < k) {S : ℝ} (hS : 0 < S) :\n    HasDerivAt (fun s ↦ MathFin.mertonCallPrice s K r σ T k δ Λ)\n        (MathFin.mertonDelta S K r σ T k δ Λ) S ∧\n      0 < MathFin.mertonDelta S K r σ T k δ Λ ∧ MathFin.mertonDelta S K r σ T k δ Λ < 1 :=\n  ⟨MathFin.hasDerivAt_mertonCallPrice_spot hK hσ hT hk hS, MathFin.mertonDelta_pos hk S,\n    MathFin.mertonDelta_lt_one hk S⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; issue #129",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: the Poisson series of Black–Scholes prices is differentiated term by term on S > 0 (hasDerivAt_tsum_of_isPreconnected); each term is the Black–Scholes delta (hasDerivAt_bsV_S) through the chain rule S ↦ S·cₙ, bounded by wₙcₙ, and ∑ₙ wₙcₙ = 1 (hasSum_weights_mul_mertonSpot_one, the Poisson pgf at 1 + k). The bounds are Summable.tsum_pos and Summable.tsum_lt_tsum with Φ ∈ (0, 1) on the no-jump term. Lives in MathFin/BlackScholes/MertonGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-merton-gamma",
+      "name": "Merton Jump-Diffusion Gamma",
+      "description": "For the Merton jump-diffusion call price C(S) = ∑ₙ wₙ C_BS(S·cₙ, σₙ) (mertonCallPrice), with Poisson weights wₙ = e^{-Λ}Λⁿ/n!, jump factors cₙ = e^{-kΛ}(1+k)ⁿ and conditional volatilities σₙ = √(σ² + nδ²/T), and K, σ, T > 0, k > −1: at every spot S > 0 the second spot derivative of the price, stated for the price itself as the derivative of deriv C, is ∑ₙ wₙ cₙ ϕ(d₁ⁿ)/(S σₙ √T) (mertonGamma), and it is positive. Convexity of C in S is not derived from it here.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.MertonGreeks\n\nopen scoped NNReal\n\n/-- **The Merton gamma.** The spot derivative of `∂C/∂S` is `∑ₙ wₙ cₙ ϕ(d₁ⁿ)/(S σₙ √T)`, and it\nis positive. -/\ntheorem merton_gamma_thm {K r σ T k δ : ℝ} {Λ : ℝ≥0} (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T)\n    (hk : -1 < k) {S : ℝ} (hS : 0 < S) :\n    HasDerivAt (deriv fun s ↦ MathFin.mertonCallPrice s K r σ T k δ Λ)\n        (MathFin.mertonGamma S K r σ T k δ Λ) S ∧\n      0 < MathFin.mertonGamma S K r σ T k δ Λ :=\n  ⟨MathFin.hasDerivAt_deriv_mertonCallPrice_spot hK hσ hT hk hS,\n    MathFin.mertonGamma_pos hσ hT hk hS⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; issue #129",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: the delta series is differentiated term by term on (S/2, ∞), each term being the Black–Scholes gamma formula (hasDerivAt_Phi_bsd1_S) through S ↦ S·cₙ, bounded by wₙcₙ/((S/2)σ√T) since ϕ ≤ 1 and σₙ ≥ σ (hasDerivAt_mertonDelta). The delta series is ∂C/∂S on all of S > 0, so hasDerivAt_deriv_of_eventually states the result for deriv C. Positivity: every term is nonnegative and the no-jump term is positive. Lives in MathFin/BlackScholes/MertonGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-merton-vega",
+      "name": "Merton Jump-Diffusion Vega",
+      "description": "For the Merton jump-diffusion call price C(S) = ∑ₙ wₙ C_BS(S·cₙ, σₙ) (mertonCallPrice), with Poisson weights wₙ = e^{-Λ}Λⁿ/n!, jump factors cₙ = e^{-kΛ}(1+k)ⁿ and conditional volatilities σₙ = √(σ² + nδ²/T), and K, σ, T > 0, k > −1, and S > 0: the price is differentiable in the diffusion volatility σ with vega ∂C/∂σ = ∑ₙ wₙ S cₙ ϕ(d₁ⁿ) √T · σ/σₙ (mertonVega), where σ/σₙ = ∂σₙ/∂σ, and the vega is positive.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.MertonGreeks\n\nopen scoped NNReal\n\n/-- **The Merton vega.** The Merton call price has `σ`-derivative `∑ₙ wₙ S cₙ ϕ(d₁ⁿ) √T · σ/σₙ`,\nand it is positive. -/\ntheorem merton_vega_thm {K r σ T k δ : ℝ} {Λ : ℝ≥0} {S : ℝ} (hS : 0 < S) (hK : 0 < K)\n    (hT : 0 < T) (hk : -1 < k) (hσ : 0 < σ) :\n    HasDerivAt (fun s ↦ MathFin.mertonCallPrice S K r s T k δ Λ)\n        (MathFin.mertonVega S K r σ T k δ Λ) σ ∧\n      0 < MathFin.mertonVega S K r σ T k δ Λ :=\n  ⟨MathFin.hasDerivAt_mertonCallPrice_sigma hS hK hT hk hσ,\n    MathFin.mertonVega_pos hS hT hk hσ⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; issue #129",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: each term is the Black–Scholes vega (hasDerivAt_bsV_sigma) composed with σ ↦ σₙ = √(σ² + nδ²/T), whose derivative is σ/σₙ (hasDerivAt_mertonVol_sigma); on σ > 0 each term's derivative is at most wₙ S cₙ √T, since ϕ ≤ 1 and σ ≤ σₙ, and those sum to S√T, so the series is differentiated term by term. Lives in MathFin/BlackScholes/MertonGreeks.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-gaussianPDF-symmetry",
       "name": "Standard Normal PDF Symmetry",
       "description": "ϕ(-z) = ϕ(z) for the standard normal density, since the gaussian is symmetric around 0.",
