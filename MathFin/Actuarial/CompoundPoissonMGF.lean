@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Foundations.IndepFreezing
 public import MathFin.Foundations.PoissonPgf
 
 /-!
@@ -17,8 +18,9 @@ of the `n`-claim sum `∑_{i<n} Xᵢ` against the Poisson(λ) law of `n` gives
   `∫ n, M_{∑_{i<n} Xᵢ}(t) dPoisson(λ) = exp(λ·(M_X(t) − 1))`,
 
 the compound-Poisson aggregate-loss MGF in mixture form. For a claim count `N ∼ Poisson(λ)`
-independent of the `Xᵢ` the left side is `𝔼[exp(tS)]` with `S = ∑_{i<N} Xᵢ`; that conditioning
-step is not formalised here.
+independent of the `Xᵢ` the left side is `𝔼[exp(tS)]` with `S = ∑_{i<N} Xᵢ`
+(`compoundPoisson_mgf_of_indepFun`): freezing the count (`Foundations/IndepFreezing.lean`) turns
+the expectation over the random count into the mixture.
 
 This composes two genuine theorems rather than positing the algebraic shell
 `e^{−λ}·e^{λM} = e^{λ(M−1)}` (`Actuarial/Mortality.compoundPoisson_mgf_identity`):
@@ -30,9 +32,11 @@ This composes two genuine theorems rather than positing the algebraic shell
   (`Foundations/PoissonPgf.integral_pow_poissonMeasure`), evaluated at `x = M_X(t)`.
 
 
-## Main result
+## Main results
 
 * `compoundPoisson_mgf` — `∫ n, mgf (∑_{i<n} Xᵢ) t ∂Poisson(λ) = exp(λ·(mgf X₀ t − 1))`.
+* `compoundPoisson_mgf_of_indepFun` — for a count `N ∼ Poisson(λ)` independent of the claims and
+  `t` where the claim MGF is finite, `𝔼[exp(t·∑_{i<N} Xᵢ)] = exp(λ·(M_X(t) − 1))`.
 -/
 
 @[expose] public section
@@ -69,5 +73,44 @@ theorem compoundPoisson_mgf (lam : ℝ≥0) (t : ℝ) (X : ℕ → Ω → ℝ)
       = Real.exp ((lam : ℝ) * (mgf (X 0) μ t - 1)) := by
   simp_rw [mgf_range_sum_of_iid t X hindep hmeas hident]
   exact PoissonPgf.integral_pow_poissonMeasure lam (mgf (X 0) μ t)
+
+/-- **The compound-Poisson aggregate-loss MGF.** For a claim count `N ∼ Poisson(λ)` independent of
+i.i.d. claim sizes `Xᵢ` whose MGF is finite at `t`, the aggregate loss `S = ∑_{i<N} Xᵢ` has
+`𝔼[exp(t·S)] = exp(λ·(M_X(t) − 1))`. Freezing the count (`integral_comp_prodMk_of_indepFun`)
+reduces it to the mixture form `compoundPoisson_mgf`. -/
+theorem compoundPoisson_mgf_of_indepFun (lam : ℝ≥0) (t : ℝ) {N : Ω → ℕ} (X : ℕ → Ω → ℝ)
+    (hN : HasLaw N (poissonMeasure lam) μ) (hindep : iIndepFun X μ)
+    (hmeas : ∀ i, Measurable (X i)) (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ)
+    (hNX : IndepFun N (fun ω i ↦ X i ω) μ)
+    (hint : Integrable (fun ω ↦ Real.exp (t * X 0 ω)) μ) :
+    mgf (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ t
+      = Real.exp ((lam : ℝ) * (mgf (X 0) μ t - 1)) := by
+  have := hindep.isProbabilityMeasure
+  have hY : AEMeasurable (fun ω i ↦ X i ω) μ := (measurable_pi_lambda _ hmeas).aemeasurable
+  have hgm (n : ℕ) : Measurable fun x : ℕ → ℝ ↦ Real.exp (t * ∑ i ∈ Finset.range n, x i) := by
+    fun_prop
+  have hint_n (n : ℕ) :
+      Integrable (fun ω ↦ Real.exp (t * ∑ i ∈ Finset.range n, X i ω)) μ := by
+    simpa only [Finset.sum_apply] using hindep.integrable_exp_mul_sum hmeas
+      (s := Finset.range n) fun i _ ↦
+        ((hident i).comp (measurable_const_mul t).exp).integrable_iff.mpr hint
+  have hint' : Integrable (fun n ↦ ∫ ω, ‖Real.exp (t * ∑ i ∈ Finset.range n, X i ω)‖ ∂μ)
+      (μ.map N) := by
+    have hM : 0 ≤ mgf (X 0) μ t := mgf_nonneg
+    have hnorm (n : ℕ) :
+        ∫ ω, ‖Real.exp (t * ∑ i ∈ Finset.range n, X i ω)‖ ∂μ = mgf (X 0) μ t ^ n := by
+      simp_rw [Real.norm_eq_abs, Real.abs_exp]
+      exact mgf_range_sum_of_iid t X hindep hmeas hident n
+    simp_rw [hN.map_eq, integrable_poissonMeasure_iff, hnorm, Real.norm_eq_abs, abs_pow,
+      abs_of_nonneg hM]
+    exact (PoissonPgf.hasSum_poisson_weights_mul_pow lam _).summable
+  have hprod := integrable_prod_map_of_countable (X := N)
+    (g := fun p : ℕ × (ℕ → ℝ) ↦ Real.exp (t * ∑ i ∈ Finset.range p.1, p.2 i)) hY hgm hint_n hint'
+  calc mgf (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ t
+      = ∫ n, mgf (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ t ∂(μ.map N) :=
+        integral_comp_prodMk_of_indepFun hNX hN.aemeasurable hY hprod
+    _ = Real.exp ((lam : ℝ) * (mgf (X 0) μ t - 1)) := by
+        rw [hN.map_eq]
+        exact compoundPoisson_mgf lam t X hindep hmeas hident
 
 end MathFin

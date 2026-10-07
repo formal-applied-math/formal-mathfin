@@ -2402,6 +2402,54 @@
       }
     },
     {
+      "id": "mf-merton-call-formula",
+      "name": "Merton (1976) Call Formula Derived from the Jump-Diffusion Model",
+      "description": "Under a pricing measure where Z ~ N(0,1), the jump count N ~ Poisson(Λ) and the log-jump sizes Jᵢ ~ N(log(1+k) − δ²/2, δ²) are mutually independent (N of (Z, J), Z of J, the Jᵢ of each other), the jump-diffusion terminal price is S_T = S₀ exp((r − σ²/2)T − kΛ + σ√T·Z + ∑_{i<N} Jᵢ). Its discounted expected call payoff is E[e^{-rT}(S_T − K)⁺] = ∑_n e^{-Λ}Λⁿ/n! · C_BS(S₀e^{-kΛ}(1+k)ⁿ, √(σ² + nδ²/T)), the Poisson mixture of Black–Scholes prices (mertonCallPrice). Given n jumps, S_T is a Black–Scholes terminal price at that spot and volatility. Only the law of S_T is modelled; the price process and its martingale property at intermediate dates are not constructed.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.MertonModel\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Merton's call formula, derived from the jump-diffusion.** The discounted expected call\npayoff of `S_T = S₀ exp((r − σ²/2)T − kΛ + σ√T·Z + ∑_{i<N} Jᵢ)` is the Poisson mixture of\nBlack–Scholes prices `mertonCallPrice`. -/\ntheorem merton_call_formula_thm {Ω : Type*} [MeasurableSpace Ω] {Q : Measure Ω}\n    [IsProbabilityMeasure Q] {S_0 K r σ T k δ : ℝ} {Λ : ℝ≥0} {Z : Ω → ℝ} {N : Ω → ℕ}\n    {J : ℕ → Ω → ℝ} (h : MathFin.MertonHyp Q k δ Λ Z N J) (hS_0 : 0 < S_0) (hK : 0 < K)\n    (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) :\n    ∫ ω, Real.exp (-r * T) * max (S_0 * Real.exp ((r - σ ^ 2 / 2) * T - k * Λ\n        + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω) - K) 0 ∂Q\n      = MathFin.mertonCallPrice S_0 K r σ T k δ Λ :=\n  MathFin.merton_call_formula h hS_0 hK hσ hT hk\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from the model's terminal law. With n jumps, σ√T·Z + ∑_{i<n} Jᵢ is N(n(log(1+k) − δ²/2), σ²T + nδ²) (a sum of independent Gaussians, hasLaw_sum_range_gaussianReal + gaussianReal_conv_gaussianReal), so its standardization mertonStd is N(0,1) (MertonHyp.hasLaw_mertonStd) and S_T is the Black–Scholes terminal price at spot mertonSpot n and volatility mertonVol n (mertonTerminal_eq_bsTerminal); bs_call_formula then gives mertonCallTerm n (merton_call_given_jumps). Freezing the independent count (integral_comp_prodMk_of_indepFun, MertonHyp.integral_eq_poisson_mixture) turns the expectation into ∫ n, mertonCallTerm n ∂Poisson(Λ) = mertonCallPrice. Terminal-law scope: the compound-Poisson price process and the martingale property at intermediate dates are not constructed. Lives in MathFin/BlackScholes/MertonModel.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-merton-put-formula",
+      "name": "Merton (1976) Put Formula Derived from the Jump-Diffusion Model",
+      "description": "Under a pricing measure where Z ~ N(0,1), the jump count N ~ Poisson(Λ) and the log-jump sizes Jᵢ ~ N(log(1+k) − δ²/2, δ²) are mutually independent (N of (Z, J), Z of J, the Jᵢ of each other), the jump-diffusion terminal price is S_T = S₀ exp((r − σ²/2)T − kΛ + σ√T·Z + ∑_{i<N} Jᵢ). Its discounted expected put payoff is E[e^{-rT}(K − S_T)⁺] = ∑_n e^{-Λ}Λⁿ/n! · P_BS(S₀e^{-kΛ}(1+k)ⁿ, √(σ² + nδ²/T)) (mertonPutPrice). Only the law of S_T is modelled; the price process is not constructed.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.MertonModel\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Merton's put formula, derived from the jump-diffusion.** -/\ntheorem merton_put_formula_thm {Ω : Type*} [MeasurableSpace Ω] {Q : Measure Ω}\n    [IsProbabilityMeasure Q] {S_0 K r σ T k δ : ℝ} {Λ : ℝ≥0} {Z : Ω → ℝ} {N : Ω → ℕ}\n    {J : ℕ → Ω → ℝ} (h : MathFin.MertonHyp Q k δ Λ Z N J) (hS_0 : 0 < S_0) (hK : 0 < K)\n    (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) :\n    ∫ ω, Real.exp (-r * T) * max (K - S_0 * Real.exp ((r - σ ^ 2 / 2) * T - k * Λ\n        + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω)) 0 ∂Q\n      = MathFin.mertonPutPrice S_0 K r σ T k δ Λ :=\n  MathFin.merton_put_formula h hS_0 hK hσ hT hk\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, the put companion of mf-merton-call-formula: the same conditional Black–Scholes reduction with bs_put_formula (merton_put_given_jumps), then freezing the count. Terminal-law scope. Lives in MathFin/BlackScholes/MertonModel.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-merton-discounted-terminal",
+      "name": "Merton Jump-Diffusion: the Compensator Is the Risk-Neutral Drift",
+      "description": "Under a pricing measure where Z ~ N(0,1), the jump count N ~ Poisson(Λ) and the log-jump sizes Jᵢ ~ N(log(1+k) − δ²/2, δ²) are mutually independent (N of (Z, J), Z of J, the Jᵢ of each other), the jump-diffusion terminal price is S_T = S₀ exp((r − σ²/2)T − kΛ + σ√T·Z + ∑_{i<N} Jᵢ). Then E[e^{-rT}S_T] = S₀: given n jumps the discounted terminal price has mean S₀e^{-kΛ}(1+k)ⁿ, and the compensator e^{-kΛ} makes these average back to S₀. This is the expectation at maturity only; the martingale property of e^{-rt}S_t at intermediate dates is not proved.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.MertonModel\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The compensator is the risk-neutral drift.** The discounted jump-diffusion terminal price\nhas mean `S₀`. -/\ntheorem merton_discounted_terminal_thm {Ω : Type*} [MeasurableSpace Ω] {Q : Measure Ω}\n    [IsProbabilityMeasure Q] {S_0 r σ T k δ : ℝ} {Λ : ℝ≥0} {Z : Ω → ℝ} {N : Ω → ℕ}\n    {J : ℕ → Ω → ℝ} (h : MathFin.MertonHyp Q k δ Λ Z N J) (hS_0 : 0 < S_0)\n    (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) :\n    ∫ ω, Real.exp (-r * T) * (S_0 * Real.exp ((r - σ ^ 2 / 2) * T - k * Λ\n        + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω)) ∂Q = S_0 :=\n  MathFin.merton_discounted_terminal h hS_0 hσ hT hk\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: given n jumps, the conditional Black–Scholes forward E[S_T] = mertonSpot n · e^{rT} (merton_discounted_given_jumps, via integral_bsTerminal_eq_forward), then freezing the count and the compensation identity integral_mertonSpot (the Poisson pgf at 1+k). The terminal-date expectation only. Lives in MathFin/BlackScholes/MertonModel.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-gaussianPDF-symmetry",
       "name": "Standard Normal PDF Symmetry",
       "description": "ϕ(-z) = ϕ(z) for the standard normal density, since the gaussian is symmetric around 0.",
@@ -3087,6 +3135,22 @@
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: n-claim iid-sum MGF (iIndepFun.mgf_sum) composed with the Poisson pgf (integral_pow_poissonMeasure). Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-compound-poisson-mgf-random-count",
+      "name": "Compound-Poisson Aggregate-Loss MGF with a Random Claim Count",
+      "description": "For a claim count N ~ Poisson(λ) independent of i.i.d. claim sizes Xᵢ with E[exp(tX₀)] finite, the aggregate loss S = ∑_{i<N} Xᵢ has E[exp(tS)] = exp(λ(M_X(t) − 1)). The count is a random variable on the same probability space as the claims; the expectation over it is computed by freezing the count, which reduces it to the mixture form mf-compound-poisson-mgf.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Actuarial.CompoundPoissonMGF\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Compound-Poisson aggregate-loss MGF.** For `N ∼ Poisson(λ)` independent of i.i.d. claim\nsizes `Xᵢ` whose MGF is finite at `t`, `𝔼[exp(t·∑_{i<N} Xᵢ)] = exp(λ·(M_X(t) − 1))`. -/\ntheorem compound_poisson_mgf_random_count_thm {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}\n    (lam : ℝ≥0) (t : ℝ) {N : Ω → ℕ} (X : ℕ → Ω → ℝ)\n    (hN : HasLaw N (poissonMeasure lam) μ) (hindep : iIndepFun X μ)\n    (hmeas : ∀ i, Measurable (X i)) (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ)\n    (hNX : IndepFun N (fun ω i ↦ X i ω) μ)\n    (hint : Integrable (fun ω ↦ Real.exp (t * X 0 ω)) μ) :\n    mgf (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ t\n      = Real.exp ((lam : ℝ) * (mgf (X 0) μ t - 1)) :=\n  MathFin.compoundPoisson_mgf_of_indepFun lam t X hN hindep hmeas hident hNX hint\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Compound Poisson MGF (Cramér-Lundberg actuarial theory); e.g. Klugman-Panjer-Willmot, Loss Models, Thm 9.3",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: the freezing lemma (integral_comp_prodMk_of_indepFun) with the count frozen, the product integrability checked one count at a time (iIndepFun.integrable_exp_mul_sum for each n, the Poisson pgf series for the sum over n), then the mixture form compoundPoisson_mgf. The MGF of the claims must be finite at t (hint); without it the expectation is not defined. Lives in MathFin/Actuarial/CompoundPoissonMGF.lean, on MathFin/Foundations/IndepFreezing.lean. Axioms-clean."
       }
     },
     {

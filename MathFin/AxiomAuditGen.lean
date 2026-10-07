@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (441 MathFin constants, 29 upstream). Citations
+  corpus (446 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -476,6 +476,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.compoundPoisson_mgf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.compoundPoisson_mgf
 
+/-- info: 'MathFin.compoundPoisson_mgf_of_indepFun' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.compoundPoisson_mgf_of_indepFun
+
 /-- info: 'MathFin.copulaOf_comp_strictMono' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.copulaOf_comp_strictMono
 
@@ -899,6 +902,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.integral_bilinear_pairing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.integral_bilinear_pairing
 
+/-- info: 'MathFin.integral_comp_prodMk_of_indepFun' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_comp_prodMk_of_indepFun
+
 /-- info: 'MathFin.integral_log_forward_div_bsTerminal_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.integral_log_forward_div_bsTerminal_eq
 
@@ -1043,8 +1049,17 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.mertonCallPrice_eq_tsum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.mertonCallPrice_eq_tsum
 
+/-- info: 'MathFin.merton_call_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.merton_call_formula
+
+/-- info: 'MathFin.merton_discounted_terminal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.merton_discounted_terminal
+
 /-- info: 'MathFin.merton_put_call_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.merton_put_call_parity
+
+/-- info: 'MathFin.merton_put_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.merton_put_formula
 
 /-- info: 'MathFin.minPortfolioVarTwo_perfect_anticorr' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.minPortfolioVarTwo_perfect_anticorr

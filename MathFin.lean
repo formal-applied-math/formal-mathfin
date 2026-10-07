@@ -50,6 +50,8 @@ import MathFin.Foundations.PoissonInterarrival
 -- Poisson probability generating function E[x^N] = e^{r(x−1)} (absent from
 -- Mathlib); the engine behind Merton-mixture compensation identities
 import MathFin.Foundations.PoissonPgf
+-- The freezing lemma: E[g(X, Y)] = ∫ x, E[g(x, Y)] d(law X) for independent X, Y
+import MathFin.Foundations.IndepFreezing
 import MathFin.Foundations.PoissonRandomMeasure
 import MathFin.Foundations.PoissonCompensatedIsometryAdapted
 import MathFin.Foundations.PoissonCompensatedBilinear
@@ -317,6 +319,9 @@ import MathFin.BlackScholes.MertonJumpDiffusion
 -- and the classic Λ′ = Λ(1+k) display (rate-shift identity)
 import MathFin.BlackScholes.MertonDominance
 import MathFin.BlackScholes.MertonClassicDisplay
+-- Merton's model derived: the jump-diffusion terminal price (Gaussian diffusion,
+-- Poisson count, i.i.d. lognormal jumps) prices to the Poisson mixture
+import MathFin.BlackScholes.MertonModel
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser
