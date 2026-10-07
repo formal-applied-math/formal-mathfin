@@ -26,6 +26,35 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Merton's formula derived from the jump-diffusion (2026-10-07)
+
+Five entries added, all `full`: `mf-merton-call-formula`, `mf-merton-put-formula`,
+`mf-merton-discounted-terminal`, `mf-compound-poisson-mgf-random-count` and `ce-freezing-lemma`.
+Corpus 447 → 452.
+
+`mertonCallPrice` was a definition: the Poisson mixture `∫ n, C_BS(spot_n, vol_n) ∂Poisson(Λ)`.
+`BlackScholes/MertonModel.lean` proves it is the price of the model. Under `MertonHyp`, a standard
+normal `Z`, a jump count `N ∼ Poisson(Λ)` and i.i.d. log-jumps `Jᵢ ∼ N(log(1+k) − δ²/2, δ²)`,
+mutually independent, the terminal price
+`S_T = S₀ exp((r − σ²/2)T − kΛ + σ√T·Z + ∑_{i<N} Jᵢ)` has
+`𝔼[e^{−rT}(S_T − K)⁺] = mertonCallPrice` (`merton_call_formula`), the put analogue
+(`merton_put_formula`) and `𝔼[e^{−rT}S_T] = S₀` (`merton_discounted_terminal`). With `n` jumps the
+total log-shock is a sum of independent Gaussians, so `S_T` is a Black–Scholes terminal price at
+`mertonSpot n` and `mertonVol n` (`mertonTerminal_eq_bsTerminal`, `MertonHyp.hasLaw_mertonStd`);
+the jump count is then integrated out by the freezing lemma.
+
+The freezing lemma is `Foundations/IndepFreezing.integral_comp_prodMk_of_indepFun`:
+`𝔼[g(X, Y)] = ∫ x, 𝔼[g(x, Y)] d(law X)` for independent `X`, `Y`, from Mathlib's
+`IndepFun.map_prod_eq_prod_map_map` and `integral_prod`. Its second consumer closes a gap
+`Actuarial/CompoundPoissonMGF.lean` used to declare: `compoundPoisson_mgf_of_indepFun` computes
+`𝔼[exp(t·∑_{i<N} Xᵢ)] = exp(λ(M_X(t) − 1))` for a claim count that is a random variable
+independent of the claims, where `mf-compound-poisson-mgf` integrated against the Poisson weights.
+
+Safe wording: "Merton's 1976 option prices derived from the terminal law of the jump-diffusion".
+Not covered: the price process `(S_t)` (a Brownian motion plus a compound-Poisson process) and the
+martingale property of `e^{−rt}S_t` at intermediate dates; the conditional form of the freezing
+lemma; jump laws other than lognormal.
+
 ### Itô's formula for adapted coefficients (2026-10-05)
 
 One entry added, `sc-ito-formula-adapted` (`full`). Corpus 446 → 447.

@@ -1748,3 +1748,34 @@ sums converge, and it is what a version at every time or for a stopped process w
 Next, in order of what the consumers need: B6 (unbounded `f'`, `f''`, by stopping `X` at its exit
 from `[−N, N]`), since Girsanov's exponential and Black–Scholes both apply `exp`; then every
 `t ≤ T` and the identity of processes; then `f(t, x)`.
+
+## phase: Merton's model, derived — the jump-diffusion prices to the Poisson mixture (2026-10-07, corpus 447→452)
+
+Since 2026-06-06 the Merton layer has stood on a definition: `mertonCallPrice` *is* the Poisson
+mixture of Black–Scholes prices, and the series, parity, dominance and the classic display were
+theorems about that mixture. Whether the mixture is what the jump-diffusion model prices was not
+asked. `BlackScholes/MertonModel.lean` asks and answers it at maturity. Under `MertonHyp` (a
+standard normal diffusion sample, a Poisson jump count, i.i.d. Gaussian log-jumps, mutually
+independent) the terminal price `S_T = S₀ exp((r − σ²/2)T − kΛ + σ√T·Z + ∑_{i<N} Jᵢ)` has call
+and put prices `mertonCallPrice` and `mertonPutPrice`, and `𝔼[e^{−rT}S_T] = S₀`, the compensator
+`−kΛ` being exactly the drift correction that makes the discounted terminal price average to `S₀`.
+
+The derivation is two moves, and the second is the reusable one. Given `n` jumps, the log-shock is
+a sum of independent Gaussians, so `S_T` *is* a Black–Scholes terminal price at the conditional
+spot and volatility the mixture already used, and `bs_call_formula` prices it. Then the jump count
+is integrated out by the freezing lemma `Foundations/IndepFreezing.integral_comp_prodMk_of_indepFun`
+(independence = product law, then Fubini), a general fact Mathlib does not state. Its second
+consumer is the compound-Poisson MGF with a random claim count, the conditioning step
+`Actuarial/CompoundPoissonMGF` had recorded as missing, and `Foundations/PoissonMaxima` conditions
+on its Poisson count the same way by hand.
+
+**Honest scope.** The law at one date. The price process (Brownian motion plus a compound-Poisson
+process) and the martingale property of `e^{−rt}S_t` for all `t` are not built; the Lévy tower's
+Poisson random measure is still a hypothesis structure without an existence theorem.
+
+**Next on the jump axis:** (1) the Merton Greeks ([#129](https://github.com/formal-applied-math/formal-mathfin/issues/129)):
+termwise differentiation of the mixture, with delta in `[0, 1]` from the compensation identity;
+(2) the jump-diffusion characteristic function `exp(T(iuμ − σ²u²/2 + λ(φ_J(u) − 1)))`, the
+Lévy–Khintchine form for Brownian motion plus compound Poisson, and through it jump laws other than
+lognormal (Kou's double exponential); (3) Poisson random measure existence, the Summit the Lévy
+tower still assumes.
