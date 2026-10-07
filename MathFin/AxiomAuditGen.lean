@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (456 MathFin constants, 29 upstream). Citations
+  corpus (460 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -193,6 +193,15 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.ItoProcessQV.tendsto_qv_ito_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ItoProcessQV.tendsto_qv_ito_process
+
+/-- info: 'MathFin.JumpDiffusionHyp.call_poisson_mixture' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionHyp.call_poisson_mixture
+
+/-- info: 'MathFin.JumpDiffusionHyp.discounted_terminal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionHyp.discounted_terminal
+
+/-- info: 'MathFin.JumpDiffusionHyp.discounted_terminal_eq_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionHyp.discounted_terminal_eq_iff
 
 /-- info: 'MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price
@@ -979,6 +988,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.joint_stdev_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.joint_stdev_le
+
+/-- info: 'MathFin.jumpDiffusion_call_eq_integral_bsV' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_call_eq_integral_bsV
 
 /-- info: 'MathFin.kellyFraction_eq_zero_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.kellyFraction_eq_zero_iff

@@ -33,6 +33,10 @@ is an iterated integral (`integral_prod`).
 * `integral_comp_prodMk_of_indepFun`: the freezing lemma.
 * `integrable_prod_map_of_countable`: for a countable-valued `X`, integrability against the
   product of the laws is checked one value of `X` at a time.
+* `integral_comp_prodMk_of_indepFun_of_countable`: the freezing lemma for a countable-valued `X`
+  and a nonnegative `g`, with integrability checked one value of `X` at a time.
+* `integral_comp_of_hasLaw_poissonMeasure`: conditioning on a Poisson count. For
+  `N ∼ Poisson(Λ)` independent of `Y`, `𝔼[F(N, Y)] = ∫ n, 𝔼[F(n, Y)] ∂Poisson(Λ)`.
 -/
 
 @[expose] public section
@@ -40,6 +44,7 @@ is an iterated integral (`integral_prod`).
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory
+open scoped NNReal
 
 variable {Ω α β E : Type*} {mΩ : MeasurableSpace Ω} {mα : MeasurableSpace α}
   {mβ : MeasurableSpace β} [NormedAddCommGroup E]
@@ -84,5 +89,37 @@ theorem integrable_prod_map_of_countable [Countable α] [MeasurableSingletonClas
     ⟨ae_of_all _ fun a ↦ (integrable_map_measure (hgm a).aestronglyMeasurable hY).mpr (hint a),
       hint'.congr (ae_of_all _ fun a ↦ ?_)⟩
   exact (integral_map hY (hgm a).norm.aestronglyMeasurable).symm
+
+/-- **The freezing lemma for a countable variable.** For a countable-valued `X` independent of `Y`
+and a nonnegative `g`, if each `g(a, Y)` is integrable and `a ↦ 𝔼[g(a, Y)]` is integrable against
+the law of `X`, then `𝔼[g(X, Y)] = ∫ a, 𝔼[g(a, Y)] d(law X)`. -/
+theorem integral_comp_prodMk_of_indepFun_of_countable [Countable α]
+    [MeasurableSingletonClass α] (hXY : X ⟂ᵢ[P] Y) (hX : AEMeasurable X P)
+    (hY : AEMeasurable Y P) {g : α × β → ℝ} (hgm : ∀ a, Measurable fun b ↦ g (a, b))
+    (hg0 : ∀ p, 0 ≤ g p) (hint : ∀ a, Integrable (fun ω ↦ g (a, Y ω)) P)
+    (hint' : Integrable (fun a ↦ ∫ ω, g (a, Y ω) ∂P) (P.map X)) :
+    ∫ ω, g (X ω, Y ω) ∂P = ∫ a, ∫ ω, g (a, Y ω) ∂P ∂(P.map X) :=
+  integral_comp_prodMk_of_indepFun hXY hX hY <| integrable_prod_map_of_countable hY hgm hint <|
+    hint'.congr <| ae_of_all _ fun a ↦ integral_congr_ae <| ae_of_all _ fun ω ↦
+      (Real.norm_of_nonneg (hg0 (a, Y ω))).symm
+
+/-- **Conditioning on a Poisson count.** For `N ∼ Poisson(Λ)` independent of `Y` and a nonnegative
+`F`, if each `F(n, Y)` is integrable with expectation `c n`, and `c` is integrable against
+`Poisson(Λ)`, then `𝔼[F(N, Y)] = ∫ n, c n ∂Poisson(Λ)`. -/
+theorem integral_comp_of_hasLaw_poissonMeasure {Λ : ℝ≥0} {N : Ω → ℕ}
+    (hN : HasLaw N (poissonMeasure Λ) P) (hY : AEMeasurable Y P) (hNY : N ⟂ᵢ[P] Y)
+    {F : ℕ → β → ℝ} (hFm : ∀ n, Measurable fun y ↦ F n y) (hF0 : ∀ n y, 0 ≤ F n y)
+    {c : ℕ → ℝ} (hint : ∀ n, Integrable (fun ω ↦ F n (Y ω)) P)
+    (hc : ∀ n, ∫ ω, F n (Y ω) ∂P = c n) (hcint : Integrable c (poissonMeasure Λ)) :
+    ∫ ω, F (N ω) (Y ω) ∂P = ∫ n, c n ∂(poissonMeasure Λ) := by
+  have hint' : Integrable (fun n ↦ ∫ ω, F n (Y ω) ∂P) (P.map N) := by
+    rw [hN.map_eq]
+    exact hcint.congr (ae_of_all _ fun n ↦ (hc n).symm)
+  calc ∫ ω, F (N ω) (Y ω) ∂P = ∫ n, ∫ ω, F n (Y ω) ∂P ∂(P.map N) :=
+        integral_comp_prodMk_of_indepFun_of_countable (g := fun p ↦ F p.1 p.2) hNY
+          hN.aemeasurable hY hFm (fun p ↦ hF0 p.1 p.2) hint hint'
+    _ = ∫ n, c n ∂(poissonMeasure Λ) := by
+        rw [hN.map_eq]
+        exact integral_congr_ae (ae_of_all _ hc)
 
 end MathFin

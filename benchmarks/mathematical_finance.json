@@ -2530,6 +2530,54 @@
       }
     },
     {
+      "id": "mf-jump-diffusion-mixing-formula",
+      "name": "Jump-Diffusion Mixing Formula",
+      "description": "Let Z ~ N(0,1) and let Y be a jump part independent of Z, with an arbitrary law and E[e^Y] < ∞. For S₀, K, σ, T > 0 the discounted expected call payoff on S_T = S₀ exp((r − σ²/2)T + σ√T·Z + Y) is E[e^{-rT}(S_T − K)⁺] = E[C_BS(S₀e^Y)], the Black–Scholes call price (bsV, volatility σ, maturity T) at the spot S₀e^Y, averaged over the jump part. With Y frozen at y, S_T is a Black–Scholes terminal price at the spot S₀e^y. Only the law of S_T is modelled.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionMixing\n\nopen MeasureTheory ProbabilityTheory\n\n/-- **The mixing formula.** For a log-price made of a Gaussian diffusion part and an independent\njump part `Y` with `𝔼[e^Y] < ∞`, the discounted expected call payoff is the Black–Scholes price\naveraged over the jump part. -/\ntheorem jump_diffusion_mixing_formula_thm {Ω : Type*} [MeasurableSpace Ω] {Q : Measure Ω}\n    [IsProbabilityMeasure Q] {S_0 K r σ T : ℝ} {Z Y : Ω → ℝ}\n    (hZ : HasLaw Z (gaussianReal 0 1) Q) (hY : AEMeasurable Y Q) (hYZ : IndepFun Y Z Q)\n    (hexp : Integrable (fun ω ↦ Real.exp (Y ω)) Q) (hS_0 : 0 < S_0) (hK : 0 < K)\n    (hσ : 0 < σ) (hT : 0 < T) :\n    ∫ ω, Real.exp (-r * T)\n        * max (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω + Y ω) - K) 0 ∂Q\n      = ∫ ω, MathFin.bsV K r σ (S_0 * Real.exp (Y ω)) T ∂Q :=\n  MathFin.jumpDiffusion_call_eq_integral_bsV hZ hY hYZ hexp hS_0 hK hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The payoff is integrable because it is dominated by the discounted terminal price, a constant times e^{σ√T·Z}·e^Y, a product of independent integrable factors (integrable_jumpDiffusion_terminal). Independence makes the joint law the product of the marginals, so the freezing lemma (integral_comp_prodMk_of_indepFun) integrates over Z first. With Y frozen at y the terminal price is bsTerminal (S₀e^y) (mul_exp_add_eq_bsTerminal), and bs_call_formula prices it as bsV K r σ (S₀e^y) T (integral_bsCall_payoff_eq_bsV). Terminal-law scope. Lives in MathFin/BlackScholes/JumpDiffusionMixing.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-compensator",
+      "name": "Compound-Poisson Jump Compensator",
+      "description": "Under a pricing measure where Z ~ N(0,1), the jump count N ~ Poisson(Λ), and the log-jump sizes Jᵢ are measurable and i.i.d. with an arbitrary common law satisfying E[e^{J₀}] < ∞, with N independent of (Z, J), Z independent of J and the Jᵢ mutually independent, the terminal price with drift correction κ is S_T = S₀ exp((r − σ²/2)T − κ + σ√T·Z + ∑_{i<N} Jᵢ). For S₀ > 0 and T ≥ 0, E[e^{-rT}S_T] = S₀·e^{−κ + Λ(E[e^{J₀}] − 1)}. Hence E[e^{-rT}S_T] = S₀ holds exactly when κ = Λ(E[e^{J₀}] − 1), the expected number of jumps times the mean relative jump E[e^{J₀} − 1]. This is the expectation at maturity only; the martingale property of e^{-rt}S_t at intermediate dates is not proved.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionMixing\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The jump compensator.** For a jump-diffusion with a Poisson number of i.i.d. log-jumps of\nany law with `𝔼[e^J] < ∞`, the discounted terminal price has mean `S₀·e^{−κ + Λ(𝔼[e^J] − 1)}`,\nwhich is `S₀` exactly when `κ = Λ(𝔼[e^J] − 1)`. -/\ntheorem jump_diffusion_compensator_thm {Ω : Type*} [MeasurableSpace Ω] {Q : Measure Ω}\n    [IsProbabilityMeasure Q] {Λ : ℝ≥0} {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ}\n    (h : MathFin.JumpDiffusionHyp Q Λ Z N J) (hJ : Integrable (fun ω ↦ Real.exp (J 0 ω)) Q)\n    {S_0 : ℝ} (hS_0 : 0 < S_0) (r σ : ℝ) {T : ℝ} (hT : 0 ≤ T) (κ : ℝ) :\n    (∫ ω, Real.exp (-r * T) * (S_0 * Real.exp ((r - σ ^ 2 / 2) * T - κ\n        + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω)) ∂Q\n      = S_0 * Real.exp (-κ + Λ * (∫ ω, Real.exp (J 0 ω) ∂Q - 1))) ∧\n    (∫ ω, Real.exp (-r * T) * (S_0 * Real.exp ((r - σ ^ 2 / 2) * T - κ\n        + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω)) ∂Q = S_0\n      ↔ κ = Λ * (∫ ω, Real.exp (J 0 ω) ∂Q - 1)) :=\n  ⟨h.discounted_terminal hJ hS_0.le r σ hT κ, h.discounted_terminal_eq_iff hJ hS_0 r σ hT κ⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Given n jumps the jump part −κ + ∑_{i<n} Jᵢ is independent of Z, so the discounted terminal price has mean S₀·E[e^{−κ + ∑_{i<n} Jᵢ}] = S₀e^{−κ}E[e^{J₀}]ⁿ (jumpDiffusion_discounted_terminal, and mgf_range_sum_of_iid for the i.i.d. sum). Conditioning on the independent Poisson count (integral_comp_of_hasLaw_poissonMeasure) and the Poisson probability generating function (PoissonPgf.integral_pow_poissonMeasure) sum these to S₀e^{−κ + Λ(E[e^{J₀}] − 1)}, which is S₀ iff the exponent vanishes. Terminal-date expectation only. Lives in MathFin/BlackScholes/JumpDiffusionMixing.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-merton-general-jump-law",
+      "name": "Merton's Formula for a General Jump Law",
+      "description": "Under a pricing measure where Z ~ N(0,1), the jump count N ~ Poisson(Λ), and the log-jump sizes Jᵢ are measurable and i.i.d. with an arbitrary common law satisfying E[e^{J₀}] < ∞, with N independent of (Z, J), Z independent of J and the Jᵢ mutually independent, the terminal price with drift correction κ is S_T = S₀ exp((r − σ²/2)T − κ + σ√T·Z + ∑_{i<N} Jᵢ). For S₀, K, σ, T > 0 and any κ, the discounted expected call payoff is the Poisson mixture over the jump count n of Black–Scholes prices averaged over the jump sizes: E[e^{-rT}(S_T − K)⁺] = ∑_n e^{-Λ}Λⁿ/n! · E[C_BS(S₀e^{−κ + ∑_{i<n} Jᵢ})], stated as an integral against Poisson(Λ). This is Merton's (1976) equation (16); the averages over the jump sizes are not evaluated in closed form, which needs a specific jump law (for Gaussian jumps see mf-merton-call-formula). Only the law of S_T is modelled.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionMixing\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Merton's formula for a general jump law** (Merton 1976, eq. (16)). The discounted expected\ncall payoff of the jump-diffusion is the Poisson mixture, over the jump count, of Black–Scholes\nprices averaged over the jump sizes. -/\ntheorem merton_general_jump_law_thm {Ω : Type*} [MeasurableSpace Ω] {Q : Measure Ω}\n    [IsProbabilityMeasure Q] {Λ : ℝ≥0} {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ}\n    (h : MathFin.JumpDiffusionHyp Q Λ Z N J) (hJ : Integrable (fun ω ↦ Real.exp (J 0 ω)) Q)\n    {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (κ : ℝ) :\n    ∫ ω, Real.exp (-r * T) * max (S_0 * Real.exp ((r - σ ^ 2 / 2) * T - κ\n        + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω) - K) 0 ∂Q\n      = ∫ n, ∫ ω, MathFin.bsV K r σ (S_0 * Real.exp (-κ + ∑ i ∈ Finset.range n, J i ω)) T ∂Q\n          ∂(poissonMeasure Λ) :=\n  h.call_poisson_mixture hJ hS_0 hK hσ hT κ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144, eq. (16); Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Conditioning on the Poisson count (integral_comp_of_hasLaw_poissonMeasure, the freezing lemma for a countable variable) reduces the price to the payoffs given n jumps. Each is priced by the mixing formula (jumpDiffusion_call_eq_integral_bsV) for the jump part −κ + ∑_{i<n} Jᵢ, which is independent of Z (JumpDiffusionHyp.call_given_jumps). The resulting averages lie between 0 and S₀e^{−κ}E[e^{J₀}]ⁿ, so they are integrable against Poisson(Λ) (JumpDiffusionHyp.integrable_call_given_jumps, PoissonPgf.integrable_pow_poissonMeasure). Terminal-law scope. Lives in MathFin/BlackScholes/JumpDiffusionMixing.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-gaussianPDF-symmetry",
       "name": "Standard Normal PDF Symmetry",
       "description": "ϕ(-z) = ϕ(z) for the standard normal density, since the gaussian is symmetric around 0.",

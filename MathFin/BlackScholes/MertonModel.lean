@@ -35,9 +35,9 @@ log-jump sizes `Jᵢ ∼ N(log(1 + k) − δ²/2, δ²)` are i.i.d., so each jum
   A sum of independent Gaussians is Gaussian (`hasLaw_sum_range_gaussianReal`).
 * `merton_call_given_jumps`: the discounted call payoff with the jump count frozen at `n` has
   expectation `mertonCallTerm n`.
-* `merton_call_formula`: `𝔼[e^{−rT}(S_T − K)⁺] = mertonCallPrice`. Freezing the jump count
-  (`integral_comp_prodMk_of_indepFun`) turns the expectation into the Poisson mixture of the
-  conditional prices.
+* `merton_call_formula`: `𝔼[e^{−rT}(S_T − K)⁺] = mertonCallPrice`. Conditioning on the jump
+  count (`integral_comp_of_hasLaw_poissonMeasure`, the freezing lemma for a Poisson count) turns
+  the expectation into the Poisson mixture of the conditional prices.
 * `merton_put_formula`: `𝔼[e^{−rT}(K − S_T)⁺] = mertonPutPrice`.
 * `merton_discounted_terminal`: `𝔼[e^{−rT}S_T] = S₀`. The compensator `−kΛ` is the drift
   correction that gives the discounted terminal price mean `S₀`.
@@ -232,23 +232,10 @@ theorem MertonHyp.integral_eq_poisson_mixture [IsProbabilityMeasure Q] {k δ : �
     (hint : ∀ n, Integrable (fun ω ↦ F n (Z ω) fun i ↦ J i ω) Q)
     (hc : ∀ n, ∫ ω, F n (Z ω) (fun i ↦ J i ω) ∂Q = c n)
     (hcint : Integrable c (poissonMeasure Λ)) :
-    ∫ ω, F (N ω) (Z ω) (fun i ↦ J i ω) ∂Q = ∫ n, c n ∂(poissonMeasure Λ) := by
-  have hY : AEMeasurable (fun ω ↦ (Z ω, fun i ↦ J i ω)) Q :=
-    h.Z_law.aemeasurable.prodMk (aemeasurable_pi_lambda _ fun i ↦ (h.J_law i).aemeasurable)
-  have hint' : Integrable (fun n ↦ ∫ ω, ‖F n (Z ω) fun i ↦ J i ω‖ ∂Q) (Q.map N) := by
-    rw [h.N_law.map_eq]
-    refine hcint.congr (ae_of_all _ fun n ↦ ?_)
-    rw [← hc n]
-    exact integral_congr_ae (ae_of_all _ fun ω ↦ (Real.norm_of_nonneg (hF0 _ _ _)).symm)
-  have hprod : Integrable (fun p : ℕ × (ℝ × (ℕ → ℝ)) ↦ F p.1 p.2.1 p.2.2)
-      ((Q.map N).prod (Q.map fun ω ↦ (Z ω, fun i ↦ J i ω))) :=
-    integrable_prod_map_of_countable (g := fun p : ℕ × (ℝ × (ℕ → ℝ)) ↦ F p.1 p.2.1 p.2.2)
-      hY hFm hint hint'
-  calc ∫ ω, F (N ω) (Z ω) (fun i ↦ J i ω) ∂Q
-      = ∫ n, ∫ ω, F n (Z ω) (fun i ↦ J i ω) ∂Q ∂(Q.map N) :=
-        integral_comp_prodMk_of_indepFun h.N_indep h.N_law.aemeasurable hY hprod
-    _ = ∫ n, c n ∂(Q.map N) := integral_congr_ae (ae_of_all _ hc)
-    _ = ∫ n, c n ∂(poissonMeasure Λ) := by rw [h.N_law.map_eq]
+    ∫ ω, F (N ω) (Z ω) (fun i ↦ J i ω) ∂Q = ∫ n, c n ∂(poissonMeasure Λ) :=
+  integral_comp_of_hasLaw_poissonMeasure (F := fun n y ↦ F n y.1 y.2) h.N_law
+    (h.Z_law.aemeasurable.prodMk (aemeasurable_pi_lambda _ fun i ↦ (h.J_law i).aemeasurable))
+    h.N_indep hFm (fun n y ↦ hF0 n y.1 y.2) hint hc hcint
 
 /-! ### The prices -/
 

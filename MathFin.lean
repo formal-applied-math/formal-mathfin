@@ -324,6 +324,9 @@ import MathFin.BlackScholes.MertonClassicDisplay
 import MathFin.BlackScholes.MertonModel
 -- Merton Greeks: delta, gamma, vega as Poisson mixtures of Black–Scholes Greeks
 import MathFin.BlackScholes.MertonGreeks
+-- Jump-diffusions with an arbitrary jump law: the mixing formula, the
+-- compound-Poisson compensator, and Merton's general formula (his eq. (16))
+import MathFin.BlackScholes.JumpDiffusionMixing
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser
