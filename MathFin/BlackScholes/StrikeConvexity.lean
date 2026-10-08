@@ -38,7 +38,7 @@ resolution:
 The scales are one principle realised at different levels of integration:
 scale 4 is scale 2 for the standard normal law, and scale 3, proved in
 `ConvexPricingFunctional.lean` by summing convex functions, is scale 2 for a
-finitely supported law.
+finitely supported measure.
 
 ## Downstream consequences (one principle, many faces)
 

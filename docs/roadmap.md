@@ -2169,16 +2169,31 @@ level of the law at one date):
    the strict-convexity criterion; `IsNormalizedCallPrice.of_integral`, Roper's conditions for
    any nonnegative law of mean one, which links this line to `CallPriceFunction`; and the
    lognormal law as a Gaussian change of variables (`gaussianReal_map_mul_exp`). Also done
-   (corpus 528): variance swaps with jumps. Under any law the log contract prices `rτ − E[Y]` when
-   the forward is the mean (`integral_logContract`); the jump-diffusion log-return has mean
-   `(b + ΛE[J])τ` and variance `(σ² + ΛE[J²])τ`, read off its cumulant generating function
-   (`integral_id_jumpDiffusionIncrementLaw`, `variance_id_jumpDiffusionIncrementLaw`); so at the
-   compensated drift the log contract is `σ² + 2ΛE[e^J − 1 − J]` (`jumpDiffusion_logContract`),
-   off the variance per unit time by `2ΛE[e^J − 1 − J − J²/2]`, `≤ 0` for downward jumps
-   (`jumpDiffusion_logContract_le_variance`). Next on this line: the expected realized variance of a
-   `JumpDiffusionProcess` along equipartitions, `(σ² + ΛE[J²])T + (b + ΛE[J])²T²/(n + 1)`, and its
-   limit, the jump-diffusion counterpart of `VarianceSwapEquipartition` and `VarianceSwapLimit`,
-   which would make `σ² + ΛE[J²]` the fair strike of the swap and not only the variance rate.
+   (corpus 530): variance swaps with jumps. Under any law the log contract has expected payoff
+   `rτ − E[Y]` when the forward is the mean (`integral_logContract_of_integral_exp`); the first two
+   cumulants per unit time are `κ'(0) = b + ΛE[J]` and `κ''(0) = σ² + ΛE[J²]`
+   (`deriv_jumpDiffusionExponent_zero`, `iteratedDeriv_two_jumpDiffusionExponent_zero`), so the
+   jump-diffusion log-return has mean `(b + ΛE[J])τ` and variance `(σ² + ΛE[J²])τ`
+   (`integral_id_jumpDiffusionIncrementLaw`, `variance_id_jumpDiffusionIncrementLaw`, through
+   Mathlib's `deriv_cgf_zero` and `variance_tilted_mul`); so at the compensated drift the log
+   contract is `σ² + 2ΛE[e^J − 1 − J]` (`jumpDiffusion_logContract`), which differs from the
+   variance per unit time by the jump bias `2ΛE[e^J − 1 − J − J²/2]`, `≤ 0` for jumps `≤ 0`
+   (`jumpDiffusion_logContract_le_variance`) and `< 0` if moreover `Λ > 0` and `ν{J < 0} ≠ 0`
+   (`jumpDiffusion_logContract_lt_variance`). Along equipartitions the expected sum of any function
+   of increments whose laws depend only on their length is `n + 1` times its mean over one step
+   (`integral_sum_comp_increment_equipartition`), so the expected realized variance of a
+   `JumpDiffusionProcess` tends to `(σ² + ΛE[J²])T` (`tendsto_integral_sum_sq_increment_equipartition`),
+   and the log contract minus it per unit time tends to the jump bias
+   (`tendsto_logContract_sub_realizedVariance`). Next on this line: the log contract on the process
+   itself (`S_T = Se^{X_T}` under `P`, with the discounted price a martingale hypothesis that
+   `martingale_iff` turns into the drift); the `Λ = 0` and Merton corollaries in Lean (Brownian
+   motion through `IsFilteredPreBrownian.jumpDiffusionProcess`, and `ν = N(m, δ²)`, where the log
+   contract is `σ² + 2Λ(e^{m+δ²/2} − 1 − m)` against `σ² + Λ(m² + δ²)`); the non-concentration of
+   the realized variance with jumps, `Var[RV_n] → ΛE[J⁴]T`, through the fourth cumulant and the
+   independence of the increments, whose `L²` limit is the random quadratic variation
+   `σ²T + Σ J²` rather than the constant of `VarianceSwapDriftImmunity`; the mean and the variance
+   from `E|J| < ∞` and `E[J²] < ∞` alone; and the expectation of the existing Carr–Madan strip
+   (`carrMadan_log_spanning`) under the jump-diffusion law.
 5. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
    `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style
    characterization used for constant `θ` (`ExpMartingaleQBrownian`) to independent increments

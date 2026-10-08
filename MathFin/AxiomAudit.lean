@@ -910,13 +910,26 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.mertonCallPrice_strictConvexOn_strike
 
 -- Variance swaps with jumps (2026-10-08): under any law the log contract prices rτ − E[Y] when the
--- forward is the mean; the jump-diffusion log-return has mean (b + ΛE[J])τ and variance
--- (σ² + ΛE[J²])τ, read off its cumulant generating function; at the compensated drift the log
--- contract is σ² + 2ΛE[eᴶ − 1 − J], above the variance per unit time by 2ΛE[eᴶ − 1 − J − J²/2],
--- which is ≤ 0 for downward jumps
+-- forward is the mean; the first two cumulants per unit time of the jump-diffusion log-return,
+-- κ'(0) = b + ΛE[J] and κ''(0) = σ² + ΛE[J²], give its mean, variance and second moment; at the
+-- compensated drift the log contract is σ² + 2ΛE[eᴶ − 1 − J], which differs from the variance per
+-- unit time by the jump bias 2ΛE[eᴶ − 1 − J − J²/2], ≤ 0 for jumps ≤ 0 and < 0 if moreover Λ > 0
+-- and the jumps are negative with positive probability; along equipartitions the expected sum of
+-- any function of increments whose laws depend only on their length is n + 1 times its mean over
+-- one step, so the expected realized variance of the process tends to the variance, and the log
+-- contract minus it per unit time tends to the jump bias
 
 /-- info: 'MathFin.integral_logContract' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.integral_logContract
+
+/-- info: 'MathFin.integral_logContract_of_integral_exp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_logContract_of_integral_exp
+
+/-- info: 'MathFin.deriv_jumpDiffusionExponent_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.deriv_jumpDiffusionExponent_zero
+
+/-- info: 'MathFin.iteratedDeriv_two_jumpDiffusionExponent_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.iteratedDeriv_two_jumpDiffusionExponent_zero
 
 /-- info: 'MathFin.integral_id_jumpDiffusionIncrementLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.integral_id_jumpDiffusionIncrementLaw
@@ -933,11 +946,29 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.jumpDiffusion_logContract_sub_variance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_logContract_sub_variance
 
+/-- info: 'Real.exp_lt_quadratic_of_neg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Real.exp_lt_quadratic_of_neg
+
 /-- info: 'Real.exp_le_quadratic_of_nonpos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Real.exp_le_quadratic_of_nonpos
 
 /-- info: 'MathFin.jumpDiffusion_logContract_le_variance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_logContract_le_variance
+
+/-- info: 'MathFin.jumpDiffusion_logContract_lt_variance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_logContract_lt_variance
+
+/-- info: 'MathFin.integral_sum_comp_increment_equipartition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_sum_comp_increment_equipartition
+
+/-- info: 'MathFin.JumpDiffusionProcess.integral_sum_sq_increment_equipartition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.integral_sum_sq_increment_equipartition
+
+/-- info: 'MathFin.JumpDiffusionProcess.tendsto_integral_sum_sq_increment_equipartition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.tendsto_integral_sum_sq_increment_equipartition
+
+/-- info: 'MathFin.JumpDiffusionProcess.tendsto_logContract_sub_realizedVariance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.tendsto_logContract_sub_realizedVariance
 
 -- Blueprint-spine closure (2026-06-06): every spine node is axiom-pinned.
 -- Gap found by tests/test_values.py::test_blueprint_spine_is_audited on its

@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (559 MathFin constants, 29 upstream). Citations
+  corpus (564 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -242,11 +242,20 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.JumpDiffusionProcess.condExp_rpow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.condExp_rpow
 
+/-- info: 'MathFin.JumpDiffusionProcess.integral_sum_sq_increment_equipartition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.integral_sum_sq_increment_equipartition
+
 /-- info: 'MathFin.JumpDiffusionProcess.martingale_exp_const_mul_sub' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.martingale_exp_const_mul_sub
 
 /-- info: 'MathFin.JumpDiffusionProcess.martingale_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.martingale_iff
+
+/-- info: 'MathFin.JumpDiffusionProcess.tendsto_integral_sum_sq_increment_equipartition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.tendsto_integral_sum_sq_increment_equipartition
+
+/-- info: 'MathFin.JumpDiffusionProcess.tendsto_logContract_sub_realizedVariance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.tendsto_logContract_sub_realizedVariance
 
 /-- info: 'MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price
@@ -1064,6 +1073,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.integral_logContract' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.integral_logContract
 
+/-- info: 'MathFin.integral_logContract_of_integral_exp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_logContract_of_integral_exp
+
 /-- info: 'MathFin.integral_log_forward_div_bsTerminal_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.integral_log_forward_div_bsTerminal_eq
 
@@ -1219,6 +1231,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.jumpDiffusion_logContract_le_variance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_logContract_le_variance
+
+/-- info: 'MathFin.jumpDiffusion_logContract_lt_variance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_logContract_lt_variance
 
 /-- info: 'MathFin.jumpDiffusion_logContract_sub_variance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_logContract_sub_variance

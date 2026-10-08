@@ -40,6 +40,14 @@ martingale has constant mean, and the mean at time `1` is `S₀e^{b + σ²/2 + �
 * `jumpDiffusionIncrementLaw`: the law of a jump-diffusion log-return over a time `τ`.
 * `integral_exp_const_mul_jumpDiffusionIncrementLaw`, `mgf_id_jumpDiffusionIncrementLaw`,
   `cgf_id_jumpDiffusionIncrementLaw`: its moment-generating function `e^{κ(θ)τ}`.
+* `integrableExpSet_id_subset_jumpDiffusionIncrementLaw`,
+  `zero_mem_interior_integrableExpSet_jumpDiffusionIncrementLaw`,
+  `cgf_id_jumpDiffusionIncrementLaw_eventuallyEq`: the jumps' exponential moments pass to the
+  log-return, and near `0` its cumulant generating function is `κ(θ)τ`.
+* `hasDerivAt_jumpDiffusionExponent`: `κ'(θ) = b + σ²θ + ΛM'(θ)`, with `M` the jump law's
+  moment-generating function.
+* `integral_exp_jumpDiffusionIncrementLaw_of_compensated`: at the compensated drift the forward is
+  the mean, `∫ eʸ = e^{rτ}`.
 * `JumpDiffusionProcess.martingale_iff`: the discounted price is a martingale if and only if the
   drift is compensated.
 -/
@@ -189,6 +197,40 @@ lemma integrable_exp_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν :
   simpa only [one_mul] using integrable_exp_mul_jumpDiffusionIncrementLaw b σ Λ (ν := ν) (θ := 1)
     (by simpa only [one_mul] using hν) τ
 
+/-- **At the compensated drift the forward is the mean**: when `b = r − σ²/2 − Λ(𝔼[e^J] − 1)` and
+`𝔼[e^J] < ∞`, `∫ eʸ d(law over τ) = e^{rτ}` (`integral_exp_jumpDiffusionIncrementLaw`). -/
+lemma integral_exp_jumpDiffusionIncrementLaw_of_compensated {b r σ : ℝ} {Λ : ℝ≥0}
+    {ν : Measure ℝ} [IsProbabilityMeasure ν] (hν : Integrable rexp ν)
+    (hb : b = r - σ ^ 2 / 2 - Λ * (∫ x, rexp x ∂ν - 1)) (τ : ℝ≥0) :
+    ∫ x, rexp x ∂(jumpDiffusionIncrementLaw b σ Λ ν τ) = rexp (r * τ) := by
+  rw [integral_exp_jumpDiffusionIncrementLaw b σ Λ hν τ, hb]
+  congr 1
+  ring
+
+/-- **The jumps' exponential moments pass to the log-return**: wherever `∫ e^{θx} dν < ∞`, also
+`∫ e^{θy} < ∞` under the log-return law (`integrable_exp_mul_jumpDiffusionIncrementLaw`). -/
+lemma integrableExpSet_id_subset_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ)
+    [IsProbabilityMeasure ν] (τ : ℝ≥0) :
+    integrableExpSet id ν ⊆ integrableExpSet id (jumpDiffusionIncrementLaw b σ Λ ν τ) :=
+  fun θ hθ ↦ integrable_exp_mul_jumpDiffusionIncrementLaw (ν := ν) (θ := θ) b σ Λ hθ τ
+
+/-- **A moment-generating function finite near `0` passes from the jumps to the log-return**
+(`integrableExpSet_id_subset_jumpDiffusionIncrementLaw`). -/
+lemma zero_mem_interior_integrableExpSet_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0)
+    {ν : Measure ℝ} [IsProbabilityMeasure ν] (hν : 0 ∈ interior (integrableExpSet id ν))
+    (τ : ℝ≥0) : 0 ∈ interior (integrableExpSet id (jumpDiffusionIncrementLaw b σ Λ ν τ)) :=
+  interior_mono (integrableExpSet_id_subset_jumpDiffusionIncrementLaw b σ Λ ν τ) hν
+
+open Filter Topology in
+/-- **Near `0` the cumulant generating function of the log-return is `κ(θ)τ`**
+(`cgf_id_jumpDiffusionIncrementLaw`, wherever the jump law has the exponential moment). -/
+lemma cgf_id_jumpDiffusionIncrementLaw_eventuallyEq (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
+    [IsProbabilityMeasure ν] (hν : 0 ∈ interior (integrableExpSet id ν)) (τ : ℝ≥0) :
+    cgf id (jumpDiffusionIncrementLaw b σ Λ ν τ) =ᶠ[𝓝 0]
+      fun θ ↦ jumpDiffusionExponent b σ Λ ν θ * τ := by
+  filter_upwards [mem_interior_iff_mem_nhds.1 hν] with θ hθ
+    using cgf_id_jumpDiffusionIncrementLaw (ν := ν) (θ := θ) b σ Λ hθ τ
+
 /-- With every exponential moment of the jump law, the Laplace exponent is continuous: Mathlib's
 `continuous_mgf` for the jump part. -/
 lemma continuous_jumpDiffusionExponent (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
@@ -196,6 +238,16 @@ lemma continuous_jumpDiffusionExponent (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure
     Continuous (jumpDiffusionExponent b σ Λ ν) := by
   have h : Continuous (mgf id ν) := continuous_mgf hν
   exact (by fun_prop : Continuous fun θ ↦ b * θ + σ ^ 2 * θ ^ 2 / 2 + Λ * (mgf id ν θ - 1))
+
+/-- **The derivative of the Laplace exponent**: where the jump law has exponential moments,
+`κ'(θ) = b + σ²θ + ΛM'(θ)`, with `M` the moment-generating function of the jump law (Mathlib's
+`differentiableAt_mgf`). -/
+lemma hasDerivAt_jumpDiffusionExponent (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ} {θ : ℝ}
+    (hθ : θ ∈ interior (integrableExpSet id ν)) :
+    HasDerivAt (jumpDiffusionExponent b σ Λ ν) (b + σ ^ 2 * θ + Λ * deriv (mgf id ν) θ) θ := by
+  have hsq : HasDerivAt (fun θ : ℝ ↦ θ ^ 2) (2 * θ) θ := by simpa using hasDerivAt_pow 2 θ
+  exact ((((hasDerivAt_id' θ).const_mul b).fun_add ((hsq.const_mul (σ ^ 2)).div_const 2)).fun_add
+    (((differentiableAt_mgf hθ).hasDerivAt.sub_const 1).const_mul (Λ : ℝ))).congr_deriv (by ring)
 
 /-- **The compensated drift is `κ(1) = r`**: `b = r − σ²/2 − Λ(∫ eˣ dν − 1)` exactly when the
 Laplace exponent at `1` is the rate. It is the form in which the discounted-price criterion

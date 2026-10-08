@@ -40,12 +40,16 @@ Results:
 * `varianceSwap_fairStrike`: the full Demeterfi-Derman-Kamal identity
   `(2/T) · E[log(F/S_T) + (S_T − F)/F] = σ²`.
 
-Model-free, for any law of the log-return `Y` with `E|Y| < ∞` and `E[e^Y] < ∞`:
+Model-free, for any law of the log-return `Y` with `S_T = S_0e^Y`, `S_0 > 0`, `E|Y| < ∞` and
+`E[e^Y] < ∞`:
 
-* `integral_logContract`: `E[log(F/S_T) + (S_T − F)/F] = rT − E[Y] + (e^{−rT}E[e^Y] − 1)`.
-  When the forward is the mean of `S_T` the last term vanishes and the log contract prices the
-  gap `log F − E[log S_T]`. With jumps that gap is no longer half the variance
-  (`jumpDiffusion_logContract`, `JumpDiffusionVarianceSwap.lean`).
+* `integral_logContract`: the expected payoff is
+  `E[log(F/S_T) + (S_T − F)/F] = rT − E[Y] + (e^{−rT}E[e^Y] − 1)`.
+* `integral_logContract_of_integral_exp`: when the forward is the mean of `S_T`, it is the gap
+  `rT − E[Y] = log F − E[log S_T]`. In Black–Scholes that gap is half the variance of `Y`; for a
+  jump-diffusion at the compensated drift it differs from half the variance by
+  `ΛT·E[e^J − 1 − J − J²/2]` (`jumpDiffusion_logContract_sub_variance`,
+  `JumpDiffusionVarianceSwap.lean`).
 -/
 
 @[expose] public section
@@ -57,27 +61,40 @@ open scoped NNReal ENNReal
 
 /-- **The log contract under any law of the log-return.** For `S > 0`, the forward
 `F = Se^{rτ}` and a law `μ` of the log-return `Y`, with `S_τ = Se^Y`, `𝔼|Y| < ∞` and
-`𝔼[e^Y] < ∞`, the Demeterfi–Derman–Kamal–Zou log contract is worth
-`𝔼[log(F/S_τ) + (S_τ − F)/F] = rτ − 𝔼[Y] + (e^{−rτ}𝔼[e^Y] − 1)`: pointwise the payoff is
-`rτ − Y + (e^{Y − rτ} − 1)`. When the forward is the mean of `S_τ` the last term vanishes. -/
+`𝔼[e^Y] < ∞`, the Demeterfi–Derman–Kamal–Zou log contract has the expected payoff
+`𝔼[log(F/S_τ) + (S_τ − F)/F] = rτ − 𝔼[Y] + (e^{−rτ}𝔼[e^Y] − 1)`: pointwise, `log(F/S_τ) = rτ − Y`
+and `(S_τ − F)/F = e^{Y − rτ} − 1`. -/
 lemma integral_logContract {μ : Measure ℝ} [IsProbabilityMeasure μ] {S : ℝ} (hS : 0 < S)
     (r τ : ℝ) (hY : Integrable (fun y ↦ y) μ) (hE : Integrable rexp μ) :
     ∫ y, (Real.log (S * rexp (r * τ) / (S * rexp y))
         + (S * rexp y - S * rexp (r * τ)) / (S * rexp (r * τ))) ∂μ
       = r * τ - ∫ y, y ∂μ + (rexp (-(r * τ)) * ∫ y, rexp y ∂μ - 1) := by
-  have hpt (y : ℝ) : Real.log (S * rexp (r * τ) / (S * rexp y))
-        + (S * rexp y - S * rexp (r * τ)) / (S * rexp (r * τ))
-      = r * τ - y + (rexp (-(r * τ)) * rexp y - 1) := by
-    rw [mul_div_mul_left _ _ hS.ne', ← Real.exp_sub, Real.log_exp, sub_div,
-      mul_div_mul_left _ _ hS.ne', div_self (mul_pos hS (Real.exp_pos _)).ne', div_eq_inv_mul,
-      ← Real.exp_neg]
+  have hlog (y : ℝ) : Real.log (S * rexp (r * τ) / (S * rexp y)) = r * τ - y := by
+    rw [mul_div_mul_left _ _ hS.ne', ← Real.exp_sub, Real.log_exp]
+  have hfwd (y : ℝ) : (S * rexp y - S * rexp (r * τ)) / (S * rexp (r * τ))
+      = rexp (-(r * τ)) * rexp y - 1 := by
+    rw [sub_div, mul_div_mul_left _ _ hS.ne', div_self (mul_pos hS (Real.exp_pos _)).ne',
+      Real.exp_neg, inv_mul_eq_div]
   have hA : Integrable (fun y ↦ r * τ - y) μ := (integrable_const _).sub hY
   have hB : Integrable (fun y ↦ rexp (-(r * τ)) * rexp y - 1) μ :=
     (hE.const_mul _).sub (integrable_const _)
-  simp only [hpt]
+  simp only [hlog, hfwd]
   rw [integral_add hA hB, integral_sub (integrable_const _) hY,
     integral_sub (hE.const_mul _) (integrable_const _), integral_const_mul (rexp (-(r * τ))) rexp]
   simp
+
+/-- **When the forward is the mean, the log contract's expected payoff is the gap** `rτ − 𝔼[Y]`: if
+`𝔼[e^Y] = e^{rτ}`, the forward `F = Se^{rτ}` is the mean of `S_τ = Se^Y`, and the expected payoff of
+the log contract is `rτ − 𝔼[Y] = log F − 𝔼[log S_τ]` (`integral_logContract`). -/
+lemma integral_logContract_of_integral_exp {μ : Measure ℝ} [IsProbabilityMeasure μ] {S : ℝ}
+    (hS : 0 < S) (r τ : ℝ) (hY : Integrable (fun y ↦ y) μ)
+    (hF : ∫ y, rexp y ∂μ = rexp (r * τ)) :
+    ∫ y, (Real.log (S * rexp (r * τ) / (S * rexp y))
+        + (S * rexp y - S * rexp (r * τ)) / (S * rexp (r * τ))) ∂μ = r * τ - ∫ y, y ∂μ := by
+  have hE : Integrable rexp μ :=
+    Integrable.of_integral_ne_zero (by rw [hF]; exact (Real.exp_pos _).ne')
+  rw [integral_logContract hS r τ hY hE, hF, ← Real.exp_add, neg_add_cancel, Real.exp_zero,
+    sub_self, add_zero]
 
 /-- **Log-moment integrand identity**: after the `S_0` cancellation,
 `log((S_0 · e^{rT}) / (S_0 · exp((r − σ²/2)T + σ√T·z))) = σ²T/2 − σ√T·z`. -/

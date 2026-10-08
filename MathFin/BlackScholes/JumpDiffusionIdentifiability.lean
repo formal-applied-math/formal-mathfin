@@ -314,10 +314,8 @@ theorem jumpDiffusionIncrementLaw_eq_iff {b₁ b₂ σ₁ σ₂ : ℝ} {Λ₁ Λ
     have h2 : (b₁ - b₂) * (ε / 2) = 0 := by linear_combination e - (ε / 2) ^ 2 / 2 * hσ
     exact sub_eq_zero.1 ((mul_eq_zero.1 h2).resolve_right hs)
   · rintro ⟨hb, hσ, hLevy⟩
-    have hint : ∀ᶠ u in 𝓝 (0 : ℝ),
-        Integrable (fun y ↦ rexp (u * y)) (jumpDiffusionIncrementLaw b₁ σ₁ Λ₁ ν₁ τ) :=
-      hD₁.mono fun u hu ↦ integrable_exp_mul_jumpDiffusionIncrementLaw _ _ _ hu τ
-    refine measure_eq_of_mgf_id_eventuallyEq (mem_interior_iff_mem_nhds.2 hint)
+    refine measure_eq_of_mgf_id_eventuallyEq
+      (zero_mem_interior_integrableExpSet_jumpDiffusionIncrementLaw _ _ _ h₁ τ)
       ((hD₁.and hD₂).mono fun u hu ↦ ?_)
     rw [mgf_id_jumpDiffusionIncrementLaw _ _ _ hu.1, mgf_id_jumpDiffusionIncrementLaw _ _ _ hu.2,
       jumpDiffusionExponent_eq_levy _ _ _ hu.1, jumpDiffusionExponent_eq_levy _ _ _ hu.2, hLevy, hb,

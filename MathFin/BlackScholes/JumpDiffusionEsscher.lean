@@ -100,12 +100,9 @@ theorem jumpDiffusionIncrementLaw_tilted (b σ : ℝ) (Λ : ℝ≥0) {ν : Measu
   have : IsProbabilityMeasure (ν.tilted (θ * ·)) := isProbabilityMeasure_tilted hθν
   -- near `0`, the jump law has the exponential moments of the orders `u + θ`
   have hU := eventually_integrable_exp_add_mul hθ
-  have hint : ∀ᶠ u in 𝓝 (0 : ℝ), Integrable (fun y ↦ rexp (u * y))
-      (jumpDiffusionIncrementLaw (b + θ * σ ^ 2) σ (Λ * jumpMoment ν θ) (ν.tilted (θ * ·)) τ) :=
-    hU.mono fun u hu ↦ integrable_exp_mul_jumpDiffusionIncrementLaw _ _ _
-      (integrable_exp_mul_tilted_const_mul hθν hu) τ
-  refine Eq.symm (measure_eq_of_mgf_id_eventuallyEq (mem_interior_iff_mem_nhds.2 hint)
-    (hU.mono fun u hu ↦ ?_))
+  refine Eq.symm (measure_eq_of_mgf_id_eventuallyEq
+    (zero_mem_interior_integrableExpSet_jumpDiffusionIncrementLaw _ _ _
+      (zero_mem_interior_integrableExpSet_tilted hθ) τ) (hU.mono fun u hu ↦ ?_))
   rw [mgf_id_jumpDiffusionIncrementLaw _ _ _ (integrable_exp_mul_tilted_const_mul hθν hu),
     jumpDiffusionExponent_tilted b σ Λ hθν u, mgf_id_tilted_const_mul,
     mgf_id_jumpDiffusionIncrementLaw b σ Λ hu, mgf_id_jumpDiffusionIncrementLaw b σ Λ hθν,

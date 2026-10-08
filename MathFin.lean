@@ -380,10 +380,15 @@ import MathFin.BlackScholes.JumpDiffusionDigital
 -- positive, so with S > 0 and a finite forward the call price is strictly convex on (0, ∞) for
 -- any jump law, and so are the Black–Scholes price and Merton's series
 import MathFin.BlackScholes.JumpDiffusionStrikeConvexity
--- Variance swaps with jumps: the mean, variance and second moment of the log-return from its
--- cumulant generating function; at the compensated drift the log contract is worth
--- σ² + 2ΛE[eᴶ − 1 − J], which differs from the variance per unit time σ² + ΛE[J²] by
--- 2ΛE[eᴶ − 1 − J − J²/2], nonpositive for downward jumps
+-- The mean, variance and second moment of the jump-diffusion log-return, from the first two
+-- derivatives at 0 of its cumulant generating function κ(θ)τ
+import MathFin.BlackScholes.JumpDiffusionMoments
+-- Variance swaps with jumps: at the compensated drift the log contract is worth
+-- σ² + 2ΛE[eᴶ − 1 − J], which differs from the variance per unit time σ² + ΛE[J²] by the jump
+-- bias 2ΛE[eᴶ − 1 − J − J²/2], ≤ 0 for jumps ≤ 0 and < 0 if moreover Λ > 0 and the jumps are
+-- negative with positive probability; the expected realized variance of the process along
+-- equipartitions of [0, T] tends to (σ² + ΛE[J²])T, so the log contract minus it per unit time
+-- tends to the jump bias
 import MathFin.BlackScholes.JumpDiffusionVarianceSwap
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks

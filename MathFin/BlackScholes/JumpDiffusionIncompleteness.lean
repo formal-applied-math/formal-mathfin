@@ -122,9 +122,7 @@ theorem exists_call_esscher_ne_merton {S r b c σ : ℝ} (hS : 0 < S) (hσ : σ 
     congr 1
     linear_combination (τ : ℝ) * (compensated_tilted_iff b σ r Λ hθ').2 hθ
   · -- and so is the Merton measure's law, by construction
-    rw [integral_exp_jumpDiffusionIncrementLaw _ _ _ h1, hc]
-    congr 1
-    ring
+    exact integral_exp_jumpDiffusionIncrementLaw_of_compensated h1 hc τ
   subst hc
   -- `θ ≠ 0`: at `θ = 0` the Esscher condition says that the physical drift is compensated
   have hθ0 : θ ≠ 0 := by

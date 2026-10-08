@@ -176,9 +176,8 @@ lemma hasDerivAt_bsP_K {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
 /-- **Strike derivative of the cash-or-nothing digital**: `∂_K (e^{-rτ} Φ(d₂)) =
 −e^{-rτ} · ϕ(d₂) / (K σ √τ)`, minus `e^{-rτ}` times the lognormal density formula
 `lognormalTerminalPDF` at `K` (`BreedenLitzenberger.lean`). The digital is minus the strike
-derivative of the call price (`hasDerivAt_bsV_K`), so this is the second strike derivative of the
-call, up to sign; its sign is that of the convexity in `K` (`bsV_strike_convexOn`, proved from the
-payoff). -/
+derivative of the call price (`hasDerivAt_bsV_K`), so this is minus the second strike derivative of
+the call, and `≤ 0` by the convexity in `K` (`bsV_strike_convexOn`, proved from the payoff). -/
 lemma hasDerivAt_bsCashDigital_K {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
     {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :
     HasDerivAt (fun k ↦ bsCashDigital k r σ S τ)

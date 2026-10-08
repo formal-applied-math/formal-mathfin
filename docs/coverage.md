@@ -28,37 +28,75 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ### Variance swaps with jumps: the log contract against the variance (2026-10-08)
 
-Six entries added, all `full`: `mf-log-contract-any-law`, `mf-jump-diffusion-log-return-mean`,
+Eight entries added, all `full`: `mf-log-contract-any-law`, `mf-jump-diffusion-log-return-mean`,
 `mf-jump-diffusion-log-return-variance`, `mf-jump-diffusion-log-contract`,
-`mf-jump-diffusion-log-contract-jump-bias` and `mf-jump-diffusion-log-contract-downward-jumps`.
-Corpus 522 → 528. New file `BlackScholes/JumpDiffusionVarianceSwap.lean`;
-`BlackScholes/VarianceSwap.lean` gains the model-free log contract.
+`mf-jump-diffusion-log-contract-jump-bias`, `mf-jump-diffusion-log-contract-downward-jumps`,
+`mf-jump-diffusion-realized-variance` and `mf-jump-diffusion-variance-swap-vs-log-contract`.
+Corpus 522 → 530. New files `BlackScholes/JumpDiffusionMoments.lean` (the moments of the law) and
+`BlackScholes/JumpDiffusionVarianceSwap.lean`; `BlackScholes/VarianceSwap.lean` gains the
+model-free log contract, and `BlackScholes/JumpDiffusionProcess.lean` the law-level facts the
+moments need (the exponential moments pass from the jumps to the log-return, the cgf is `κ(θ)τ`
+near `0`, `κ` is differentiable, and the forward is the mean at the compensated drift), which
+`JumpDiffusionIdentifiability`, `JumpDiffusionEsscher` and `JumpDiffusionIncompleteness` now use
+in place of inline copies.
 
-- Under any law. For a log-return `Y` with `E|Y| < ∞` and `E[e^Y] < ∞` the log contract on the
-  forward `F = Se^{rτ}` is worth `rτ − E[Y] + (e^{−rτ}E[e^Y] − 1)` (`integral_logContract`); when
-  the forward is the mean of `S_τ` it prices `log F − E[log S_τ]`.
+- Under any law. For a log-return `Y` with `E|Y| < ∞` and `E[e^Y] < ∞`, and `S > 0`, the log
+  contract on the forward `F = Se^{rτ}` has expected payoff `rτ − E[Y] + (e^{−rτ}E[e^Y] − 1)`
+  (`integral_logContract`); when the forward is the mean of `S_τ` the expected payoff is the gap
+  `rτ − E[Y] = log F − E[log S_τ]` (`integral_logContract_of_integral_exp`).
 - The moments of the jump-diffusion log-return, for a jump law with a moment-generating function
-  finite near `0`: `E[Y] = (b + ΛE[J])τ` (`integral_id_jumpDiffusionIncrementLaw`),
-  `Var[Y] = (σ² + ΛE[J²])τ` in Mathlib's `Var` (`variance_id_jumpDiffusionIncrementLaw`) and the
-  second moment (`integral_sq_jumpDiffusionIncrementLaw`). They are the first two derivatives at `0`
-  of the cumulant generating function `κ(θ)τ` (Mathlib's `deriv_cgf_zero`, `iteratedDeriv_two_cgf`,
-  `iteratedDeriv_two_cgf_eq_integral`), with `κ'` from `hasDerivAt_jumpDiffusionExponent`.
+  finite near `0`. The first two cumulants per unit time are `κ'(0) = b + ΛE[J]`
+  (`deriv_jumpDiffusionExponent_zero`) and `κ''(0) = σ² + ΛE[J²]`
+  (`iteratedDeriv_two_jumpDiffusionExponent_zero`). The mean and the variance are the first two
+  derivatives at `0` of the cumulant generating function `κ(θ)τ` (Mathlib's `deriv_cgf_zero` and
+  `variance_tilted_mul`): `E[Y] = (b + ΛE[J])τ` (`integral_id_jumpDiffusionIncrementLaw`) and
+  `Var[Y] = (σ² + ΛE[J²])τ` in Mathlib's `Var` (`variance_id_jumpDiffusionIncrementLaw`); the
+  second moment follows as the variance plus the squared mean (`integral_sq_jumpDiffusionIncrementLaw`,
+  Mathlib's `variance_eq_sub`).
 - The log contract. At the compensated drift, with `E[e^J] < ∞`, `S > 0` and `τ > 0`,
   `(2/τ)·E[log(F/S_τ) + (S_τ − F)/F] = σ² + 2ΛE[e^J − 1 − J]` (`jumpDiffusion_logContract`); it
-  exceeds `Var[Y]/τ = σ² + ΛE[J²]` by `2ΛE[e^J − 1 − J − J²/2]`
+  differs from `Var[Y]/τ = σ² + ΛE[J²]` by the jump bias `2ΛE[e^J − 1 − J − J²/2]`
   (`jumpDiffusion_logContract_sub_variance`), which is `≤ 0` when the jumps are `≤ 0`
   (`jumpDiffusion_logContract_le_variance`, from `Real.exp_le_quadratic_of_nonpos`, the reverse of
-  Mathlib's `Real.quadratic_le_exp_of_nonneg`).
+  Mathlib's `Real.quadratic_le_exp_of_nonneg`; `E[e^J] < ∞` then follows), and `< 0` if moreover
+  `Λ > 0` and `ν{J < 0} ≠ 0` (`jumpDiffusion_logContract_lt_variance`, from
+  `Real.exp_lt_quadratic_of_neg`).
+- The realized variance. For any process whose increments have laws that depend only on their
+  length, the expected sum of `f` of the increments along `n + 1` equal steps of `[0, T]` is `n + 1`
+  times the mean of `f` over one step (`integral_sum_comp_increment_equipartition`). For a
+  `JumpDiffusionProcess` the expected realized variance is
+  `(σ² + ΛE[J²])T + (b + ΛE[J])²T²/(n + 1)`
+  (`JumpDiffusionProcess.integral_sum_sq_increment_equipartition`), which tends to `(σ² + ΛE[J²])T`
+  whatever the drift (`tendsto_integral_sum_sq_increment_equipartition`), the jump-diffusion
+  counterparts of `VarianceSwapEquipartition` and `VarianceSwapLimit`. So the log contract minus the
+  expected realized variance per unit time tends to the jump bias
+  (`tendsto_logContract_sub_realizedVariance`), where Black–Scholes has `0`
+  (`VarianceSwapEquivalence`).
 
-Safe wording: "with jumps the log contract no longer prices the variance of the log-return: at the
-compensated drift it is worth `σ² + 2ΛE[e^J − 1 − J]` against a variance of `σ² + ΛE[J²]` per unit
-time, below it for downward jumps". Not covered:
-- that `Var[Y]/τ` is the fair strike of the variance swap: the expected realized variance of the
-  jump-diffusion along fine partitions is not taken to its limit, so the comparison is with the
-  variance of the log-return, not with the swap;
-- the replication of the log contract by options (Carr–Madan) and the hedging error of the
-  replication with jumps;
-- jump laws whose moment-generating function is infinite on one side of `0`.
+Safe wording: "for a jump law whose moment-generating function is finite near `0` and at `1`, the
+log contract at the compensated drift has expected payoff `σ² + 2ΛE[e^J − 1 − J]` per unit time,
+while the expected realized variance per unit time of a jump-diffusion process (a hypothesis
+structure) along equipartitions tends to `σ² + ΛE[J²]` whatever the drift; the log contract misses
+that limit by the jump bias `2ΛE[e^J − 1 − J − J²/2]`, is at most it for jumps `≤ 0`, and is
+strictly below it when moreover `Λ > 0` and the jumps are negative with positive probability".
+Not covered:
+- the existence of a `JumpDiffusionProcess` with jumps: the structure is a hypothesis, satisfied
+  without jumps by Brownian motion with drift;
+- the log contract stated on the process (`S_T = Se^{X_T}` under `P`, with the discounted price a
+  martingale): it is stated for the law of the log-return, which is the law of `X_T` at that drift;
+- pricing measures that change `Λ` or `ν`, such as the Esscher transform: the comparison keeps the
+  jump characteristics of `X`;
+- that the jump bias is nonzero for a general jump law: its integrand has the sign of `x`, so a
+  two-sided jump law can cancel it;
+- realized variance along arbitrary partitions, and its `L²` limit: with jumps that limit is the
+  random quadratic variation `σ²T + Σ_{i≤N_T} J_i²`, not the constant `(σ² + ΛE[J²])T`
+  (`E[(RV_n − (σ² + ΛE[J²])T)²] → ΛE[J⁴]T`), unlike Black–Scholes (`VarianceSwapDriftImmunity`);
+- the pricing of the log contract by options: the pointwise Carr–Madan strip exists
+  (`carrMadan_log_spanning`, `mf-carr-madan-log-contract`), but neither its expectation under the
+  jump-diffusion law nor the hedging error with jumps is formalized;
+- jump laws whose moment-generating function is infinite on one side of `0`: the mean needs only
+  `E|J| < ∞` and the variance `E[J²] < ∞`, but the cumulant route needs the moment-generating
+  function near `0`.
 
 ### Convexity in the strike under any law, strictly with a Gaussian part (2026-10-08)
 

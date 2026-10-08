@@ -125,6 +125,188 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-08 — corpus 530 — convexity in the strike, and variance swaps with jumps
+
+Scope: corpus 517 → 530, two rungs.
+- Convexity in the strike (corpus 522): `mf-call-price-convex-in-strike`,
+  `mf-jump-diffusion-density-positive`, `mf-jump-diffusion-call-convex-strike`,
+  `mf-black-scholes-call-strictly-convex-strike` and `mf-merton-call-strictly-convex-strike`. New
+  file `BlackScholes/JumpDiffusionStrikeConvexity.lean`.
+- Variance swaps with jumps (corpus 530): `mf-log-contract-any-law`,
+  `mf-jump-diffusion-log-return-mean`, `mf-jump-diffusion-log-return-variance`,
+  `mf-jump-diffusion-log-contract`, `mf-jump-diffusion-log-contract-jump-bias`,
+  `mf-jump-diffusion-log-contract-downward-jumps`, `mf-jump-diffusion-realized-variance` and
+  `mf-jump-diffusion-variance-swap-vs-log-contract`. New files `BlackScholes/JumpDiffusionMoments.lean`
+  and `BlackScholes/JumpDiffusionVarianceSwap.lean`.
+
+Four read-only reviewers: one on the strict-convexity rung, acted on in its own commit, and three on
+the variance-swap rung (lenses 1, 3 and 8 with a mathematical-finance referee; lenses 2, 4 and 6;
+the prose against the statements, which also read the strict-convexity fixes). None found an error
+in a Lean statement; each identity was re-derived by hand. One CI run went red in the period, on a
+dot chain missing an opening parenthesis; `docs/patterns.md` records it.
+
+### Standing first pass: prose against statement
+
+All findings are applied.
+- **"Disagree" was claimed and not proved.** The headline entry was named "With Jumps the Variance
+  Swap and the Log Contract Disagree"; its docstring said the swap "is not the log contract", the
+  module title said the log contract "no longer prices the variance", and `VarianceSwap.lean` said
+  the gap is "no longer half the variance". The statement gives the limit `2ΛE[g(J)]`,
+  `g(x) = eˣ − 1 − x − x²/2`, which is `0` when `Λ = 0`, and, `g` having the sign of `x`, also
+  for some two-sided jump laws with `Λ > 0` (`ν = pδ₁ + (1 − p)δ₋₁` at `p ≈ 0.377`). The entry is
+  now "With Jumps the Log Contract Misses the Variance Swap by the Jump Bias", the prose says
+  "differs by", and the strict claim is proved where it holds (below).
+- **"Exceeds by" and "above by" a quantity that is `≤ 0` in the main case**, crash jumps: two
+  docstrings, a description, coverage, and the curated audit, whose comment contradicted itself.
+  Now "differs from … by" or "minus … is".
+- **"Below" for a `≤`**, in the coverage safe wording and the headline description. Now "at most",
+  and "strictly below" only under the hypotheses of the strict theorem.
+- **"Fine partitions" where only equipartitions are proved**, and the module doc did not say that
+  `JumpDiffusionProcess` is a hypothesis structure.
+- **Which measure.** "The law of `X_T` under a pricing measure" passed over incompleteness: a
+  pricing measure that moves `Λ` or `ν`, such as Esscher's, is not covered, since `X` shares `σ`,
+  `Λ` and `ν` with the contract. And "the realized variance does not depend on the drift" is false
+  at finite `n`; only the limit is drift-free. Both are now said.
+- **"No replication argument is formalized"** overlooked the pointwise Carr–Madan strip
+  (`carrMadan_log_spanning`). Now: the strip exists, its expectation under the jump law does not.
+- **The roadmap's next step was false.** "Realized variance in `L²` as in
+  `VarianceSwapDriftImmunity`": with jumps `E[(RV_n − c)²] → ΛE[J⁴]T > 0` for every constant `c`,
+  since `Var[RV_n] = (n + 1)·Var[Y_h²]` and `Var[Y_h²] = ΛE[J⁴]h + O(h²)`. The `L²` limit is the
+  random quadratic variation `σ²T + Σ_{i≤N_T} J_i²`. Coverage and the roadmap now say so, instead
+  of sending a session after a false statement.
+- **"Is worth" and "prices" under an arbitrary law**, in an entry that says no model is assumed.
+  Now "expected payoff", the forward value when the law is a pricing law.
+- **Cumulants are not moments.** "The moments are the derivatives of the cumulant generating
+  function": the mean and the variance are; the second moment follows from them.
+- **"A term of third order in the jump sizes"** is a gloss that fails for large jumps. Now "whose
+  integrand vanishes to third order at `0`".
+- **Bridges** cited row labels that exist nowhere ("Lévy-exponent rung", "Process row") and dropped
+  hypotheses (`E|Y|` and `E[e^Y]` finite, `S > 0`, the moment-generating function near `0`).
+- **The strict-convexity rung.** Its reviewer found that the two proofs of the sign of the
+  lognormal density, presented as independent, share their root (`ϕ ≥ 0`, inside
+  `bs_call_formula`), that `StrikeGreeks` claimed a dependency that does not exist, and stale
+  prose; all fixed in that rung's commit. Left over, and fixed here: `ConvexPricingFunctional`
+  still derived implied-PDF nonnegativity "in the limit" of its finite-state statements and called
+  the state prices a law (they are a finite measure, so is `StrikeConvexity`'s "finitely supported
+  law"); `StrikeGreeks` had the sign of the digital's strike derivative backwards;
+  `architecture.md` listed Breeden–Litzenberger as load-bearing on `ConvexPricingFunctional`,
+  which only `PricingKernel` imports; `docs/patterns.md` said "three" scales twice beside "four".
+- **A correction to the corpus-517 record.** Its first-principles gradient said that integration
+  against a law preserving convexity was "formalized nowhere". Mathlib's
+  `integral_convexOn_of_integrand_ae` existed; `convexOn_integral_call` is now that lemma applied
+  to the payoff.
+
+### Upgrades executed
+
+- **The strict claim, where it is true.** `Real.exp_lt_quadratic_of_neg` (`strictMonoOn_of_deriv_pos`
+  with `Real.add_one_lt_exp`) and `jumpDiffusion_logContract_lt_variance`: if `Λ > 0`, `J ≤ 0` and
+  `ν{J < 0} ≠ 0`, the log contract is strictly below the variance per unit time
+  (`integral_pos_iff_support_of_nonneg_ae`). The downward-jumps entry states both inequalities.
+- **Law-level facts in the law's file.** The transfer of exponential moments (an inclusion of
+  `integrableExpSet`s, with `interior_mono` for the interior), the cgf near `0`,
+  `hasDerivAt_jumpDiffusionExponent` and the forward at the compensated drift
+  (`integral_exp_jumpDiffusionIncrementLaw_of_compensated`) moved to `JumpDiffusionProcess.lean`.
+  `JumpDiffusionIdentifiability` and `JumpDiffusionEsscher` dropped their inline copies of the
+  transfer, which they could not import from the swap file, and `JumpDiffusionIncompleteness` its
+  copy of the forward computation.
+- **The moments in their own file, on Mathlib's tools.** `JumpDiffusionMoments.lean` states the
+  cumulants per unit time as facts about `κ` (`deriv_jumpDiffusionExponent_zero`,
+  `iteratedDeriv_two_jumpDiffusionExponent_zero`), with `τ` taken out by Mathlib's
+  `deriv_mul_const_field` and `iteratedDeriv_mul_const_field`. The variance is
+  `variance_tilted_mul` at `0` and the second moment `variance_eq_sub`, replacing two routes that
+  ran the same rewrite chain through `iteratedDeriv_two_cgf` and `iteratedDeriv_two_cgf_eq_integral`.
+- **The gap as a lemma.** `integral_logContract_of_integral_exp`: when the forward is the mean, the
+  log contract's expected payoff is `rτ − E[Y]`, which the prose had claimed;
+  `jumpDiffusion_logContract` is that plus the mean.
+- **The library's hypothesis convention.** `hb : b = r − σ²/2 − Λ(E[eᴶ] − 1)` (and `hc` in the
+  process theorem), as in `JumpDiffusionOptionPrices`, instead of the compensated drift written
+  into the law eight times; `r` and `σ` are now inferred. `hν1` is dropped where `J ≤ 0` implies it
+  (`integrable_exp_of_ae_nonpos`).
+- **The equipartition skeleton, lifted.** `integral_sum_comp_increment_equipartition`: for any
+  process whose increment laws depend only on their length, `E[∑ f(ΔX)] = (n + 1)·∫ f dμ(T/(n + 1))`.
+  The realized variance is the case `f = y²`. Only the increment laws are used, which the old proof
+  showed and its statement hid. One `hstep` serves the two order facts, and a dead `have` is gone.
+- **Register.** `simpa using` for `have`, `norm_num at`, `exact` (twice); `filter_upwards` and
+  `interior_mono` for the eventually-membership boilerplate; `Tendsto.const_add` for a
+  constant-limit `have`; the two pointwise facts of `integral_logContract` stated as its docstring
+  names them.
+- **Sources.** Broadie & Jain (2008), on jumps and discrete sampling in variance swaps, is cited by
+  the realized-variance and swap entries.
+- Declined, with reasons:
+  - `unifPart` as the partition: `QuadraticVariationL2` is a heavy import for a law-level file. Its
+    API goes to a light Foundations file first (backlog).
+  - A `MathFin/ForMathlib/` staging for the root-namespace `Real.exp_*_quadratic_*` and
+    `StrictConvexOn.smul`: the directory does not exist yet (backlog).
+  - `HasLaw.integrable_comp`, a Mathlib gap with five hand-rolled uses: a change of its own across
+    those five files (backlog).
+  - A `logContract` definition: the corpus statements would stop being self-contained.
+
+### Lens gradients
+
+- **Inspired math.**
+  - Exemplar: one mechanism, `κ` as the cumulant generating function per unit time, gives the mean
+    and the variance as `κ'(0)τ` and `κ''(0)τ`, the jump-diffusion form of
+    `variance_id_gaussianReal`.
+  - Next: the non-concentration `Var[RV_n] → ΛE[J⁴]T`, the reason the Black–Scholes `L²` theorem
+    has no constant counterpart with jumps.
+- **Coherence.**
+  - Exemplar: `variance_tilted_mul` and `variance_eq_sub` consumed instead of a re-derived chain.
+  - Next: the `Λ = 0` and Merton cases in Lean, which today are prose links to
+    `VarianceSwapEquivalence` and Merton's model.
+- **Zero slop.**
+  - Exemplar: the lifted skeleton; three upstream files lost inline copies.
+  - Next: `HasLaw.integrable_comp`.
+- **Architecture.**
+  - Exemplar: facts about the law live in the law's file, where every consumer can import them.
+  - Next: one uniform partition for the Black–Scholes and jump-diffusion realized variances.
+- **First principles.**
+  - Exemplar: the forward-mean defect `e^{−rτ}E[e^Y] − 1` is a term of the model-free formula, not
+    a hypothesis.
+  - Next: the log contract on the process, with the martingale property of the discounted price as
+    the hypothesis and `martingale_iff` deriving the drift; "which measure" then becomes a
+    hypothesis instead of prose.
+- **Idiomatic register.**
+  - Exemplar: the hypothesis convention matched across the jump layer.
+  - Next: deep dot chains written with `|>.`, the remedy `docs/patterns.md` gives for the red run.
+- **Concept clarity.**
+  - Exemplar: the realized-variance description: the finite-`n` formula, the limit, the drift, the
+    Black–Scholes case and the hypothesis disclosure each trace to the statement.
+  - Next: the sign of the bias for two-sided jump laws, whose leading term `(Λ/3)E[J³]` ties the
+    log contract to the skew.
+- **Beautiful math.**
+  - Exemplar: `jumpDiffusion_logContract_le_variance`: the bias identity, a pointwise inequality and
+    `integral_nonpos_of_ae`. The argument is the statement.
+  - Next: the headline for one process under one measure (backlog 1).
+
+### Ranked backlog
+
+1. **The log contract on the process.** Hypothesis: `t ↦ e^{−rt}Se^{X_t}` is a `P`-martingale.
+   `martingale_iff` gives the drift; `h.law 0 T` and `h.zero` give the law of `X_T`. The headline
+   becomes "log contract − `E_P[RV_n]/T` → bias, `< 0` for crash jumps" for one process under one
+   measure.
+2. **The `Λ = 0` and Merton cases in Lean.** For Brownian motion, through
+   `IsFilteredPreBrownian.jumpDiffusionProcess`: the realized variance, and log contract minus
+   realized variance → `0`. For `ν = N(m, δ²)`: `σ² + 2Λ(e^{m+δ²/2} − 1 − m)` against
+   `σ² + Λ(m² + δ²)`.
+3. **Non-concentration.** `Var[RV_n] → ΛE[J⁴]T` from the independence of the increments
+   (`IndepFun.variance_sum`, `HasLaw.variance_eq`) and `κ⁽⁴⁾(0) = ΛE[J⁴]`; hence no constant `L²`
+   limit when `Λ > 0` and `ν ≠ δ₀`.
+4. **One partition.** `unifPart` and its API in a light Foundations file. The Black–Scholes
+   equipartition files and this one are then restated on it through
+   `integral_sum_comp_increment_equipartition`.
+5. **`HasLaw.integrable_comp`** and its five consumers.
+6. **Weaker hypotheses.** The mean from `E|J| < ∞` and the variance from `E[J²] < ∞` (Wald and
+   compound-Poisson moments). This admits heavy-tailed crash laws in the downward-jumps theorem.
+7. **Carr–Madan under the law.** The expectation of `carrMadan_log_spanning` under the
+   jump-diffusion law: the price of the log contract as an option portfolio.
+8. Carried over from corpus 517:
+   - the lognormal law first class (`gaussianReal_map_mul_exp`);
+   - Merton's density in log-return form;
+   - pricing any claim against the density;
+   - `0 < mertonTerminalPDF` and an open-set positivity instance;
+   - upstream to Mathlib through a ForMathlib staging, now also with
+     `Real.exp_le_quadratic_of_nonpos`, `Real.exp_lt_quadratic_of_neg` and `StrictConvexOn.smul`.
+
 ## 2026-10-08 — corpus 517 — Merton's series in the strike, kinks, and the law of the price
 
 Scope: corpus 506 → 517, three rungs.

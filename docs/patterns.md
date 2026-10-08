@@ -38,14 +38,15 @@ on the closed form, `convexOn_of_deriv2_nonneg'`, which used the sign of the
 density it was later used to derive. The positivity of the standard normal law
 still enters the current proof, through `bs_call_formula`.)
 
-Before this session, the three lived as essentially independent claims.
-Now `BreedenLitzenberger.lean`'s
-`lognormalTerminalPDF_nonneg_via_strike_convexity` reads the density's sign as
-"the infinitesimal face of the same convexity," and `Spreads.lean` reads it as
-"the discrete face."
+When the pattern was first recorded, the payoff, the finite-state and the
+Black–Scholes scales lived as essentially independent claims. Now
+`BreedenLitzenberger.lean`'s `lognormalTerminalPDF_nonneg_via_strike_convexity`
+reads the density's sign as "the infinitesimal face of the same convexity,"
+and `Spreads.lean` reads it as "the discrete face."
 
 The pattern generalises. Wherever a property holds at a payoff level and
-is preserved by a non-negative pricing functional, three scales suffice.
+is preserved by a non-negative pricing functional, the payoff and one
+preservation lemma suffice: every other scale is a corollary for its law.
 
 ### One-period inequality + induction → multi-step theorem
 
@@ -1944,6 +1945,39 @@ derivative by transporting `breedenLitzenberger` back through `deriv`.
   it against `x ∈ {ω | K ≤ X ω}` unfolds both sides and gets stuck on the instance. Fix the
   arguments, `(le_iff_lt_or_eq (a := K) (b := X ω))`, and the membership unfolds to `K ≤ X ω`
   (`differentiableAt_integral_call_iff`).
+
+### Moments from the cumulant generating function
+
+When a law's moment-generating function is known in closed form near `0`, read its mean and variance
+off the cumulant generating function rather than integrating, and state the closed form's
+derivatives as lemmas about the exponent itself, without the time factor.
+`cgf_id_jumpDiffusionIncrementLaw_eventuallyEq` says `cgf id μ =ᶠ[𝓝 0] fun θ ↦ κ(θ)τ`;
+`Filter.EventuallyEq.deriv_eq` and `Filter.EventuallyEq.iteratedDeriv_eq` move Mathlib's
+`deriv_cgf_zero` (the mean) and `variance_tilted_mul` at `0` (the variance; `tilted_const'` makes the
+tilt at `0` the law itself) onto the closed form, and Mathlib's `deriv_mul_const_field` and
+`iteratedDeriv_mul_const_field` take out `τ`. What is left is `κ'(0)` and `κ''(0)`
+(`deriv_jumpDiffusionExponent_zero`, `iteratedDeriv_two_jumpDiffusionExponent_zero`), computed by
+`HasDerivAt` algebra; the second needs `deriv κ` near `0`, an `EventuallyEq` built with
+`Filter.eventuallyEq_of_mem (isOpen_interior.mem_nhds h)`, and the jump part's `M''(0) = 𝔼[J²]` is
+`hasDerivAt_iteratedDeriv_mgf h 1`. The second moment is not a cumulant: take it as the variance plus
+the squared mean (Mathlib's `variance_eq_sub`, with `memLp_of_mem_interior_integrableExpSet`). The
+hypothesis is Mathlib's, `0 ∈ interior (integrableExpSet id ν)`, and it transfers to the image law as
+the `interior_mono` of an inclusion of the sets themselves
+(`integrableExpSet_id_subset_jumpDiffusionIncrementLaw`). State such law-level facts in the file of
+the law, not in their first consumer: while the transfer lived in the variance-swap file, two files
+upstream of it (`JumpDiffusionIdentifiability`, `JumpDiffusionEsscher`) kept inline copies, since
+they could not import it; it now lives in `JumpDiffusionProcess.lean`.
+
+### Pointwise sums of derivatives at the pin
+
+`HasDerivAt.add` and `HasDerivAt.sub` conclude `HasDerivAt (f + g) …` with the pointwise sum `f + g`,
+not a lambda. Their `@[to_fun]` twins `HasDerivAt.fun_add` and `HasDerivAt.fun_sub` conclude
+`HasDerivAt (fun x ↦ f x + g x) …`. Use the `fun_` forms when the result feeds `rw [h.deriv]` or
+must match a lambda in the goal: `rw` will not see `(f + g) x` as `f x + g x`. The constant forms
+`const_add`, `sub_const`, `const_mul`, `mul_const` and `div_const` already conclude with lambdas.
+Deep dot-notation chains are easy to unbalance: one missing `(` in
+`(((((h.const_mul c).const_add b).fun_add h₂).mul_const τ).deriv` was a parse error that stopped the
+file at CI. Count the brackets, or write the chain with `|>.`.
 
 ### The law of an image, by change of variables
 
