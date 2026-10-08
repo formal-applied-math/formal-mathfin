@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.GaussianMoments
+public import MathFin.Foundations.ExpMartingaleIndepIncrements
 
 /-!
 # Martingale properties of Brownian motion
@@ -16,7 +17,10 @@ For a filtered pre-Brownian motion `X`, the following are martingales w.r.t. the
 
 * `X` itself (already provided as `IsPreBrownianReal.isMartingale` in `Gaussian/BrownianMotion.lean`)
 * `t ↦ (X t)² − t`
-* `t ↦ exp(α X_t − α² t / 2)` (Wald exponential), for any `α : ℝ`
+* `t ↦ exp(α X_t − α² t / 2)` (Wald exponential), for any `α : ℝ`: the exponential martingale of
+  the process `αX`, whose increments are independent of the past with Gaussian exponential
+  moments (`MathFin.martingale_exp_sub_of_indep_increments`,
+  `Foundations/ExpMartingaleIndepIncrements`)
 
 ## Main results
 
@@ -60,6 +64,16 @@ lemma integrable_exp_mul_of_hasLaw {Ω : Type*} {mΩ : MeasurableSpace Ω}
 namespace IsFilteredPreBrownian
 
 variable [hX : IsFilteredPreBrownian X 𝓕 P] [IsFiniteMeasure P]
+
+omit [IsFiniteMeasure P] in
+/-- A measurable function of the increment `X_t − X_s` is independent of `𝓕_s`. The shared step
+behind the Wald martingale (`α(X_t − X_s)`) and Brownian motion with drift as a jump-diffusion
+(`IsFilteredPreBrownian.jumpDiffusionProcess`, increment `b(t − s) + σ(X_t − X_s)`). -/
+lemma indep_comap_of_eq_comp_increment {s t : ℝ≥0} (hst : s ≤ t) {Z : Ω → ℝ} {f : ℝ → ℝ}
+    (hf : Measurable f) (hZ : ∀ ω, Z ω = f (X t ω - X s ω)) :
+    Indep (MeasurableSpace.comap Z inferInstance) (𝓕 s) P :=
+  indep_of_indep_of_le_left (hX.indep s t hst)
+    (MeasurableSpace.comap_le_comap_of_eq_comp f hf (funext hZ))
 
 /-- For a Borel-measurable `φ : ℝ → ℝ` with `∫ φ (X_t ω − X_s ω) ∂P = c`, the
 conditional expectation of `φ ∘ (X_t − X_s)` given `𝓕 s` is a.e. the constant
@@ -244,112 +258,32 @@ theorem squareSubTime_isMartingale :
   linear_combination hs1 + hs2 + hs3 + hs4 + 2 * hcross + hdiffsq
 
 /-- **Wald exponential martingale.** For a filtered pre-Brownian motion `X` and `α : ℝ`,
-the process `t ↦ exp(α X_t − α² t / 2)` is a martingale w.r.t. `𝓕`.
-
-Decomposition: `α X_t − α²t/2 = (α X_s − α²s/2) + (α (X_t − X_s) − α²(t−s)/2)`. Setting
-`M_s := exp(α X_s − α²s/2)` (which is `𝓕_s`-measurable) and
-`D_{st} := exp(α (X_t − X_s) − α²(t−s)/2)` (which is independent of `𝓕_s`),
-pointwise `M_t = M_s · D_{st}` and `E[D_{st}] = 1` (Gaussian MGF at `α`). Pull-out yields
-`E[M_t | 𝓕_s] = M_s · E[D_{st} | 𝓕_s] = M_s`. -/
+the process `t ↦ exp(α X_t − α² t / 2)` is a martingale w.r.t. `𝓕`. It is the exponential
+martingale of the process `αX` (`MathFin.martingale_exp_sub_of_indep_increments`): the increment
+`α(X_t − X_s)` is a function of `X_t − X_s`, so it is independent of `𝓕_s`, and since
+`X_t − X_s ∼ N(0, t − s)` its exponential moment is `e^{α²(t − s)/2}` (the Gaussian MGF). -/
 theorem waldExponential_isMartingale (α : ℝ) :
     Martingale (fun t ω ↦ Real.exp (α * X t ω - α ^ 2 * (t : ℝ) / 2)) 𝓕 P := by
-  refine ⟨fun u ↦ ?_, fun s t hst ↦ ?_⟩
-  -- Adaptedness.
-  · have hB : StronglyMeasurable[𝓕 u] (X u) := hX.stronglyAdapted u
-    have hinner : StronglyMeasurable[𝓕 u]
-        (fun ω ↦ α * X u ω - α ^ 2 * (u : ℝ) / 2) :=
-      (hB.const_mul α).sub stronglyMeasurable_const
-    exact Real.continuous_exp.comp_stronglyMeasurable hinner
-  -- Conditional-expectation step.
-  have h_meas_t : Measurable (X t) := ((hX.stronglyAdapted t).mono (𝓕.le t)).measurable
-  have h_meas_s : Measurable (X s) := ((hX.stronglyAdapted s).mono (𝓕.le s)).measurable
-  have h_meas_diff : Measurable (fun ω ↦ X t ω - X s ω) := h_meas_t.sub h_meas_s
-  have h_eq_diff : (fun ω ↦ X t ω - X s ω) = (X t - X s : Ω → ℝ) := rfl
-  have hL_diff : HasLaw (X t - X s) (gaussianReal 0 (t - s)) P :=
-    MathFin.hasLaw_increment hX.toIsPreBrownianReal hst
-  -- Integrability of `exp(α (X_t − X_s))`.
-  have h_int_exp_diff : Integrable (fun ω ↦ Real.exp (α * (X t ω - X s ω))) P := by
-    have := integrable_exp_mul_of_hasLaw (h_eq_diff ▸ hL_diff) α
-    convert this
-  -- Mean of `exp(α (X_t − X_s))` (Gaussian MGF at `α`).
-  have h_int_exp_diff_eq :
-      ∫ ω, Real.exp (α * (X t ω - X s ω)) ∂P
-        = Real.exp (α ^ 2 * ((t - s : ℝ≥0) : ℝ) / 2) := by
-    have hf : AEStronglyMeasurable (fun x : ℝ ↦ Real.exp (α * x))
-                (gaussianReal 0 (t - s)) := by fun_prop
-    have h := hL_diff.integral_comp hf
-    have h_lhs : ((fun x ↦ Real.exp (α * x)) ∘ (X t - X s))
-               = (fun ω ↦ Real.exp (α * (X t ω - X s ω))) := rfl
-    rw [h_lhs, integral_exp_mul_gaussianReal_zero] at h
-    exact h
-  -- Define `M_s` (𝓕_s-measurable factor) and the increment exponential `D_{st}`.
-  set Ms : Ω → ℝ := fun ω ↦ Real.exp (α * X s ω - α ^ 2 * (s : ℝ) / 2)
-  set Dst : Ω → ℝ := fun ω ↦
-    Real.exp (α * (X t ω - X s ω) - α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2) with hDst_def
-  have hMs_meas : StronglyMeasurable[𝓕 s] Ms := by
-    have hB_s : StronglyMeasurable[𝓕 s] (X s) := hX.stronglyAdapted s
-    have hinner_s : StronglyMeasurable[𝓕 s] (fun ω ↦ α * X s ω - α ^ 2 * (s : ℝ) / 2) :=
-      (hB_s.const_mul α).sub stronglyMeasurable_const
-    exact Real.continuous_exp.comp_stronglyMeasurable hinner_s
-  -- Pointwise: `exp(α X_t − α²t/2) = M_s · D_{st}`.
-  have h_decomp : ∀ ω, Real.exp (α * X t ω - α ^ 2 * (t : ℝ) / 2) = Ms ω * Dst ω := by
-    intro ω
-    change _ = Real.exp _ * Real.exp _
-    rw [← Real.exp_add]
-    congr 1
-    ring
-  -- Factor `D_{st} = exp(-α²(t−s)/2) · exp(α(X_t−X_s))`.
-  have hDst_factor : Dst = (fun ω ↦ Real.exp (-(α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2))
-                                 * Real.exp (α * (X t ω - X s ω))) := by
-    funext ω
-    change Real.exp _ = _ * Real.exp _
-    rw [← Real.exp_add]; congr 1; ring
-  -- Integrability of `D_{st}`.
-  have h_int_Dst : Integrable Dst P := hDst_factor ▸ h_int_exp_diff.const_mul _
-  -- Mean of `D_{st}` is 1.
-  have h_int_Dst_eq_one : ∫ ω, Dst ω ∂P = 1 := by
-    rw [hDst_factor, integral_const_mul, h_int_exp_diff_eq, NNReal.coe_sub hst,
-        ← Real.exp_add]
-    rw [show -(α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2) + α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2 = 0
-        from by ring, Real.exp_zero]
-  -- `E[D_{st} | 𝓕_s] =ᵐ 1` (the increment is independent of `𝓕 s`).
-  have h_condDst : P[Dst | (𝓕 s : MeasurableSpace Ω)] =ᵐ[P] fun _ ↦ (1 : ℝ) :=
-    condExp_func_increment hst h_meas_diff
-      (Real.continuous_exp.comp
-        ((continuous_const.mul continuous_id).sub continuous_const)).measurable
-      h_int_Dst_eq_one
-  -- Pull-out: `E[M_s · D_{st} | 𝓕_s] =ᵐ M_s · E[D_{st} | 𝓕_s] =ᵐ M_s · 1 = M_s`.
-  have h_int_Ms : Integrable Ms P := by
-    have hMs_factor : Ms = (fun ω ↦ Real.exp (-(α ^ 2 * (s : ℝ) / 2))
-                                * Real.exp (α * X s ω)) := by
-      funext ω
-      change Real.exp _ = _ * Real.exp _
-      rw [← Real.exp_add]; congr 1; ring
-    rw [hMs_factor]
-    exact (integrable_exp_mul_of_hasLaw (hX.hasLaw_eval s) α).const_mul _
-  have h_int_MsDst : Integrable (fun ω ↦ Ms ω * Dst ω) P := by
-    rw [← funext h_decomp]
-    have h_eq : (fun ω ↦ Real.exp (α * X t ω - α ^ 2 * (t : ℝ) / 2))
-              = (fun ω ↦ Real.exp (-(α ^ 2 * (t : ℝ) / 2)) * Real.exp (α * X t ω)) := by
-      funext ω
-      rw [← Real.exp_add]; congr 1; ring
-    rw [h_eq]
-    exact (integrable_exp_mul_of_hasLaw (hX.hasLaw_eval t) α).const_mul _
-  have h_pullout :
-      P[fun ω ↦ Ms ω * Dst ω | (𝓕 s : MeasurableSpace Ω)]
-        =ᵐ[P] Ms * (P[Dst | (𝓕 s : MeasurableSpace Ω)]) := by
-    have h_eq : (fun ω ↦ Ms ω * Dst ω) = Ms * Dst := rfl
-    rw [h_eq]
-    exact condExp_mul_of_stronglyMeasurable_left hMs_meas
-      (by rw [← h_eq]; exact h_int_MsDst) h_int_Dst
-  have h_decomp_ae :
-      (fun u ↦ Real.exp (α * X t u - α ^ 2 * (t : ℝ) / 2)) =ᵐ[P] fun ω ↦ Ms ω * Dst ω :=
-    Filter.Eventually.of_forall h_decomp
-  refine (condExp_congr_ae h_decomp_ae).trans ?_
-  refine h_pullout.trans ?_
-  filter_upwards [h_condDst] with ω hω
-  change (Ms * P[Dst | (𝓕 s : MeasurableSpace Ω)]) ω = Ms ω
-  simp [Pi.mul_apply, hω]
+  refine MathFin.martingale_exp_sub_of_indep_increments (X := fun t ω ↦ α * X t ω)
+    (ψ := fun t : ℝ≥0 ↦ α ^ 2 * (t : ℝ) / 2) (fun t ↦ (hX.stronglyAdapted t).const_mul α)
+    (fun s t hst ↦ ?_) (fun t ↦ integrable_exp_mul_of_hasLaw (hX.hasLaw_eval t) α)
+    (fun s t hst ↦ ?_)
+  · -- `α(X_t − X_s)` is a function of the increment, which is independent of `𝓕_s`
+    exact hX.indep_comap_of_eq_comp_increment hst (f := fun y ↦ α * y) (by fun_prop)
+      fun ω ↦ (mul_sub α (X t ω) (X s ω)).symm
+  · -- the increment is `N(0, t − s)`, whose exponential moment at `α` is `e^{α²(t − s)/2}`
+    have hf : AEStronglyMeasurable (fun x : ℝ ↦ Real.exp (α * x)) (gaussianReal 0 (t - s)) := by
+      fun_prop
+    have h := (MathFin.hasLaw_increment hX.toIsPreBrownianReal hst).integral_comp hf
+    rw [integral_exp_mul_gaussianReal_zero, NNReal.coe_sub hst] at h
+    show ∫ ω, Real.exp (α * X t ω - α * X s ω) ∂P
+      = Real.exp (α ^ 2 * (t : ℝ) / 2 - α ^ 2 * (s : ℝ) / 2)
+    calc ∫ ω, Real.exp (α * X t ω - α * X s ω) ∂P
+        = ∫ ω, Real.exp (α * (X t ω - X s ω)) ∂P := by simp_rw [mul_sub]
+      _ = Real.exp (α ^ 2 * ((t : ℝ) - s) / 2) := h
+      _ = Real.exp (α ^ 2 * (t : ℝ) / 2 - α ^ 2 * (s : ℝ) / 2) := by
+        congr 1
+        ring
 
 end IsFilteredPreBrownian
 

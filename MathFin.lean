@@ -50,6 +50,12 @@ import MathFin.Foundations.PoissonInterarrival
 -- Poisson probability generating function E[x^N] = e^{r(x−1)} (absent from
 -- Mathlib); the engine behind Merton-mixture compensation identities
 import MathFin.Foundations.PoissonPgf
+-- The freezing lemma: E[g(X, Y)] = ∫ x, E[g(x, Y)] d(law X) for independent X, Y
+import MathFin.Foundations.IndepFreezing
+-- Jensen's inequality through a supporting line (no closed domain needed)
+import MathFin.Foundations.AffineMinorant
+-- The exponential martingale of a process with independent increments
+import MathFin.Foundations.ExpMartingaleIndepIncrements
 import MathFin.Foundations.PoissonRandomMeasure
 import MathFin.Foundations.PoissonCompensatedIsometryAdapted
 import MathFin.Foundations.PoissonCompensatedBilinear
@@ -62,6 +68,9 @@ import MathFin.Foundations.ItoProcessQV
 import MathFin.Foundations.GaussianMoments
 import MathFin.Foundations.BivariateGaussian
 import MathFin.Foundations.GaussianCDFDeriv
+-- The Esscher transform of a law on ℝ (Mathlib's `Measure.tilted`): tilted moments, a law with
+-- every exponential moment is fixed by its MGF, and the Gaussian tilt N(m, v) ↦ N(m + θv, v)
+import MathFin.Foundations.Esscher
 import MathFin.Foundations.GaussianGirsanov
 import MathFin.Foundations.FeynmanKacHeatEquation
 import MathFin.Foundations.BrownianMartingale
@@ -317,11 +326,81 @@ import MathFin.BlackScholes.MertonJumpDiffusion
 -- and the classic Λ′ = Λ(1+k) display (rate-shift identity)
 import MathFin.BlackScholes.MertonDominance
 import MathFin.BlackScholes.MertonClassicDisplay
+-- Merton's model derived: the jump-diffusion terminal price (Gaussian diffusion,
+-- Poisson count, i.i.d. lognormal jumps) prices to the Poisson mixture
+import MathFin.BlackScholes.MertonModel
+-- Merton Greeks: delta, gamma, vega as Poisson mixtures of Black–Scholes Greeks
+import MathFin.BlackScholes.MertonGreeks
+-- Merton's strike derivatives: the digital series and the density series (Poisson mixtures of
+-- Black–Scholes digitals and of lognormal density formulas), and Merton's Breeden–Litzenberger
+import MathFin.BlackScholes.MertonStrikeGreeks
+-- Jump-diffusions with an arbitrary jump law: the mixing formula, the
+-- compound-Poisson compensator, and Merton's formula for a general jump law
+import MathFin.BlackScholes.JumpDiffusionMixing
+-- Compensated jumps lift the Black–Scholes implied volatility strictly above σ
+import MathFin.BlackScholes.JumpImpliedVol
+-- The canonical jump-diffusion model: the hypotheses are satisfiable for every
+-- expected jump count and jump law, and the call depends only on these two
+import MathFin.BlackScholes.JumpDiffusionCanonical
+-- The jump-diffusion price process: discounted, a martingale exactly at the compensated drift
+import MathFin.BlackScholes.JumpDiffusionProcess
+-- Option prices at intermediate dates: a function of the current price and the
+-- remaining maturity
+import MathFin.BlackScholes.JumpDiffusionOptionPrices
+import MathFin.BlackScholes.GaussianSmoothing
+import MathFin.BlackScholes.JumpDiffusionMerton
+import MathFin.BlackScholes.JumpDiffusionBrownian
+-- Scaling a jump-diffusion; the exponential martingales e^{θX_t − κ(θ)t} for the Laplace
+-- exponent κ (where the jump law has the moment of order θ); power claims at each date
+import MathFin.BlackScholes.JumpDiffusionExponent
+-- The Esscher transform of a jump-diffusion log-return law: again a jump-diffusion law when the
+-- jump law's moment-generating function is finite near θ; Esscher pricing is Merton's formula for
+-- the tilted jumps, and Black–Scholes without jumps
+import MathFin.BlackScholes.JumpDiffusionEsscher
+-- The law at one date determines the drift, σ² and the Lévy measure off 0 (Lévy–Khintchine
+-- uniqueness for jump laws whose moment-generating function is finite near 0)
+import MathFin.BlackScholes.JumpDiffusionIdentifiability
+-- Incompleteness at one date: for σ ≠ 0 the Esscher law and the Merton measure are both
+-- equivalent to the physical law (with any drift) and compensated, yet price some call
+-- differently when the jumps are nontrivial
+import MathFin.BlackScholes.JumpDiffusionIncompleteness
+-- The log-return law is a Gaussian mixture; with σ ≠ 0 and τ > 0 it has a continuous density, so
+-- no atoms, and with σ = 0 it has an atom at bτ; the tail of a law with a density is
+-- differentiable where the density is continuous; the law of the price Seʸ has the density
+-- f(log(K/S))/K
+import MathFin.BlackScholes.JumpDiffusionDensity
+-- Digital options and Breeden–Litzenberger with jumps: for σ ≠ 0 and τ > 0 the strike derivative
+-- of the call price is minus the digital price and the second one is the discounted density of the
+-- price; without jumps, at the drift r − σ²/2, these are e^{−rτ}Φ(d₂) and lognormalTerminalPDF;
+-- with Gaussian log-jumps, Merton's digital and density series; with σ = 0 the call price has a
+-- kink at the strike Se^{bτ}; lognormalTerminalPDF and mertonTerminalPDF as densities of the price
+import MathFin.BlackScholes.JumpDiffusionDigital
+-- Strict convexity in the strike: the call price is convex under any law, and strictly convex
+-- where the law charges every interval; with σ ≠ 0 and τ > 0 the jump-diffusion density is
+-- positive, so with S > 0 and a finite forward the call price is strictly convex on (0, ∞) for
+-- any jump law, and so are the Black–Scholes price and Merton's series
+import MathFin.BlackScholes.JumpDiffusionStrikeConvexity
+-- The mean, variance and second moment of the jump-diffusion log-return, from the first two
+-- derivatives at 0 of its cumulant generating function κ(θ)τ
+import MathFin.BlackScholes.JumpDiffusionMoments
+-- Variance swaps with jumps: at the compensated drift the log contract has expected payoff
+-- σ² + 2ΛE[eᴶ − 1 − J], which differs from the variance per unit time σ² + ΛE[J²] by the jump
+-- bias 2ΛE[eᴶ − 1 − J − J²/2], ≤ 0 for jumps ≤ 0 and < 0 if moreover Λ > 0 and the jumps are
+-- negative with positive probability. On the process, under a measure that makes the discounted
+-- price a martingale, the log contract minus the expected realized variance per unit time along
+-- n + 1 equal steps of [0, T] is the jump bias less (b + ΛE[J])²T/(n + 1), at every n, so it tends
+-- to the jump bias; Black–Scholes (Brownian motion) is a corollary on the process, and Merton's
+-- Gaussian jumps a corollary at the level of the law (log contract against Var[Y]/τ)
+import MathFin.BlackScholes.JumpDiffusionVarianceSwap
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser
 import MathFin.BlackScholes.CappedCall
 import MathFin.BlackScholes.Spreads
+-- Call spreads tend to the digital, so call prices at every strike determine the law (the first-
+-- order Breeden–Litzenberger, for any law with a finite mean); the call price is differentiable
+-- in the strike exactly where the law has no atom, and there its derivative is minus the digital
+import MathFin.BlackScholes.CallSpreadDigital
 import MathFin.BlackScholes.Lookback
 import MathFin.BlackScholes.BarrierParity
 import MathFin.BlackScholes.PowerOption

@@ -20,24 +20,33 @@ linear combination), continuous price (calculus). The cleanliness payoff of
 formalisation is naming the principle once and writing the three scales as
 corollaries.
 
-Example: **K-convexity** of the call now lives at three scales in
+Example: **K-convexity** of the call lives at four scales, three of them in
 `BlackScholes/StrikeConvexity.lean`:
 
 * `convexOn_call_payoff` — payoff `K ↦ max(S − K, 0)` convex (combinatorial:
   `sup` of an affine function and zero).
+* `convexOn_integral_call` — the price under any law with a finite mean,
+  Mathlib's `integral_convexOn_of_integrand_ae` applied to the payoff.
 * `callPrice_finiteState_convexOn_K` (in `ConvexPricingFunctional.lean`) —
-  pricing under non-negative state prices preserves convexity.
-* `bsV_strike_convexOn` — continuous BS price convex on `(0, ∞)` via
-  `convexOn_of_deriv2_nonneg'` and the closed-form second derivative.
+  pricing under non-negative state prices preserves convexity: the finitely
+  supported case, proved by summing convex functions.
+* `bsV_strike_convexOn` — continuous BS price convex on `(0, ∞)`: the second
+  scale for the standard normal law (`integral_bsCall_payoff_eq_bsV`).
 
-Before this session, the three lived as essentially independent claims.
-Now `BreedenLitzenberger.lean`'s
-`lognormalTerminalPDF_nonneg_via_strike_convexity` reads the density's sign as
-"the infinitesimal face of the same convexity," and `Spreads.lean` reads it as
-"the discrete face."
+(Until 2026-10-08 `bsV_strike_convexOn` was proved by the second-derivative test
+on the closed form, `convexOn_of_deriv2_nonneg'`, which used the sign of the
+density it was later used to derive. The positivity of the standard normal law
+still enters the current proof, through `bs_call_formula`.)
+
+When the pattern was first recorded, the payoff, the finite-state and the
+Black–Scholes scales lived as essentially independent claims. Now
+`BreedenLitzenberger.lean`'s `lognormalTerminalPDF_nonneg_via_strike_convexity`
+reads the density's sign as "the infinitesimal face of the same convexity,"
+and `Spreads.lean` reads it as "the discrete face."
 
 The pattern generalises. Wherever a property holds at a payoff level and
-is preserved by a non-negative pricing functional, three scales suffice.
+is preserved by a non-negative pricing functional, the payoff and one
+preservation lemma suffice: every other scale is a corollary for its law.
 
 ### One-period inequality + induction → multi-step theorem
 
@@ -136,8 +145,9 @@ Mathlib has two variants:
 * `convexOn_of_deriv2_nonneg'` — wants differentiability on the set
   itself. For *open* sets like `Set.Ioi 0`.
 
-`bsV_strike_convexOn` uses the `'` variant since BS is only defined for
-`K > 0`. Choose the variant by domain openness.
+`bsV_spot_strictConvexOn` uses the strict `'` variant,
+`strictConvexOn_of_deriv2_pos'`, on the open `Set.Ioi 0`, since the price is only
+defined for `S > 0`. Choose the variant by domain openness.
 
 ### `hasDerivAt_deriv_of_eventually` for second derivatives
 
@@ -1795,3 +1805,229 @@ print("MISSED:", missed or "none")
 
 One stale pattern (a `·` bullet where the script expected spaces) cost a full build cycle before
 this was changed.
+
+## The Esscher and incompleteness rungs (2026-10-08 batch)
+
+### Name the set when `interior_subset` meets an `Integrable` goal
+
+`have h : Integrable (fun x ↦ rexp (θ * x)) ν := interior_subset hθ` (with
+`hθ : θ ∈ interior (integrableExpSet id ν)`) fails. The expected type is unified with `?a ∈ ?s`
+before `hθ` fixes `?s`, and first-order approximation solves it at the type `Prop`, which carries a
+topology: the error reads
+`HasFiniteIntegral … ∈ interior (And (AEStronglyMeasurable …))`. Name the set, as Mathlib's
+`MGFAnalytic` does: `interior_subset (s := integrableExpSet id ν) hθ`.
+
+### `₊`, `₋` and `Π` cannot appear in identifiers
+
+Subscript digits are identifier characters; `₊` and `₋` are not. `have e₊ := …` ends the
+declaration at `e` with *"unexpected token '₊'; expected command"*. `Π` is the pi-type token, so
+`hΠ` parses as `h` followed by `Π`. In both cases every later goal of the proof is then reported
+as unsolved. The parse error is the diagnostic one; the "unsolved goals" errors are its echo.
+
+### A change of one product factor, carried through a pushforward
+
+To show that two laws `L_* (μ₁ ⊗ ρ)` and `L_* (μ₂ ⊗ ρ)` are related (equal, or one absolutely
+continuous with respect to the other), write the change as a map on the factor that moves, not as
+a computation on the law. `jumpDiffusionIncrementLaw_absolutelyContinuous` handles a change of drift
+in four steps:
+- it is a move of the Gaussian coordinate, `L_{b'} = L_b ∘ Prod.map (· + m) id`, proved
+  pointwise by `linear_combination`;
+- `Measure.map_map` turns the composite into a pushforward of the pushforward;
+- `← Measure.map_prod_map` with `Measure.map_id` moves the shift onto the factor, where
+  `gaussianReal_map_add_const` and `gaussianReal_tilted_const_mul` name the moved factor as an
+  Esscher tilt;
+- `(tilted_absolutelyContinuous _ _).prod Measure.AbsolutelyContinuous.rfl` and then `.map` finish.
+
+Two details:
+- `rw [← Measure.map_prod_map _ _ hf measurable_id]` cannot elaborate `measurable_id` before it
+  knows the type of `id`. State `have hid : Measurable (@id (ℕ × (ℕ → ℝ))) := measurable_id` first,
+  as `jumpDiffusionMeasure_map_jumps` does.
+- `unfold` a definition that occurs twice with different arguments. A `rw [f]` rewrites only the
+  instances of its first match.
+
+### Differentiate a price in the strike under the integral sign
+
+`hasDerivAt_integral_of_dominated_loc_of_lip` differentiates `k ↦ ∫ F k ω dμ` at `K`. It needs:
+- `F k` measurable near `K`, and `F K` integrable;
+- `F · ω` Lipschitz on a fixed neighbourhood of `K`, with an integrable constant;
+- `F · ω` differentiable at `K` for almost every `ω`.
+
+A call payoff `(X − k)⁺` is `1`-Lipschitz in `k` (`abs_call_payoff_sub_le`, from Mathlib's
+`abs_max_sub_max_le_abs`), and it is differentiable at `K` off the event `X = K`. So the price is
+differentiable wherever the law has no atom at the strike, with no closed form needed. Pass the
+integrand, its derivative and the bound as named arguments
+(`(F := …) (F' := …) (bound := fun _ ↦ 1)`) and take `.2`. The Lipschitz goal then has the constant
+`Real.nnabs 1`; `simpa only [map_one, NNReal.coe_one, one_mul, Real.dist_eq] using
+abs_call_payoff_sub_le …` clears it. Two smaller points:
+- Mathlib renamed `NoAtoms` to `NullSingletonClass` (2026-06-09). A law with no atoms is an
+  instance of that, and `Set.Subsingleton.measure_zero` is the tool for affine preimages.
+- `congr 1` closes `c * ∫ f = c * ∫ g` outright when `f` and `g` are definitionally equal, as two
+  indicators of the same set written as `Ioi K` and as `{y | K < Seʸ}` are. A case split after it
+  then fails with "no goals".
+
+### The body of `∫` absorbs a following subtraction
+
+`∫ y, f y - ∫ y in Iic a, f y - ∫ y in a..x, f y` is one integral: the body of `∫ y,` extends as
+far right as it can, so it reads `∫ y, (f y - (∫ y in Iic a, (f y - ∫ y in a..x, f y)))`. The
+statement elaborates, and the failure surfaces later: `linarith` cannot combine it with
+`integral_add_compl`, and `HasDerivAt.congr_of_eventuallyEq` reports a function mismatch.
+Parenthesize every integral that is followed by an operator, `(∫ y, f y) - ∫ y in Iic a, f y`, as
+Mathlib does (`intervalIntegral.integral_Iic_sub_Iic` states
+`(∫ x in Iic b, f x ∂μ) - ∫ x in Iic a, f x ∂μ`). Then state the integral identities as `have`s in
+the notation of the goal, so that `linarith` sees the same atoms
+(`hasDerivAt_measureReal_Ioi_withDensity`).
+
+### An implicit argument that occurs only in the conclusion
+
+An implicit argument that no explicit argument determines is assigned only by the expected type,
+and `have h := …` has none. In `hasDerivAt_jumpDiffusionDigitalPrice_strike hS hσ hτ hK` the
+implicits `r`, `b`, `Λ` and `ν` occur only in the conclusion: `(…).neg` then fails on the stuck
+instance `IsProbabilityMeasure ?ν`. In `breedenLitzenberger_jumpDiffusion hS hσ hY hτ hK` the
+hypothesis `hY` fixes the law and only `r` is left, reported as "don't know how to synthesize
+implicit argument". Pass the arguments by name (`(r := r) (b := b) (Λ := Λ) (ν := ν)`), or give
+`have` the type. Used as a term against a known type, as a benchmark snippet's `⟨…, …⟩` is, the
+lemma needs neither.
+
+### Read a closed form off the uniqueness of derivatives
+
+When a function agrees near the point with one whose derivative is known, transport that
+derivative with `HasDerivAt.congr_of_eventuallyEq` and compare it with the function's own
+derivative by `HasDerivAt.unique`; no integral is computed. `jumpDiffusionDigitalPrice_zero` gets
+the Black–Scholes digital this way: without jumps the call price is `bsV` on `k > 0`, so
+`hasDerivAt_bsV_K` gives another derivative of the same function at `K`. For second derivatives,
+compare the `deriv`s: functions equal near `k` have equal `deriv` at `k`
+(`Filter.EventuallyEq.deriv_eq`), so `deriv C = deriv bsV` near `K`, and
+`jumpDiffusionDensity_div_eq_lognormalTerminalPDF` reads `lognormalTerminalPDF` off
+`breedenLitzenberger`.
+
+### `rw` matches up to instances, not definitions
+
+`rw [Real.norm_of_nonneg (mul_nonneg hw (mul_nonneg (Real.exp_pos _).le (Phi_nonneg _)))]` does not
+rewrite `‖w * bsCashDigital x r σ S T‖`: the lemma's left side mentions the unfolded
+`rexp (-(r * T)) * Phi (…)`, and `rw` unifies at instance transparency, so it never unfolds
+`bsCashDigital`. Term elaboration (`exact`, a `have` with a type) unfolds definitions, `rw` does
+not. Give the side condition the folded type first:
+`have h0 : 0 ≤ w * bsCashDigital x r σ S T := mul_nonneg hw (mul_nonneg (Real.exp_pos _).le
+(Phi_nonneg _))`, then `rw [Real.norm_of_nonneg h0]` (`hasDerivAt_mertonCallPrice_strike`).
+
+### A kink from the one-sided slopes
+
+To show that a function is not differentiable at a point, or that differentiability forces an
+identity, compare its one-sided slope limits with a derivative's. `HasDerivAt.tendsto_slope_zero_right`
+and `HasDerivAt.tendsto_slope_zero_left` give the slopes `t⁻¹ • (f (x + t) − f x)` along `𝓝[>] 0`
+and `𝓝[<] 0`; compose the left one with `t ↦ −t`, whose map `𝓝[>] 0 → 𝓝[<] 0` is Mathlib's
+`tendsto_neg_nhdsGT` (`simpa only [neg_zero] using tendsto_neg_nhdsGT (a := (0 : ℝ))`; the first
+draft assembled it from `continuous_neg` and `eventually_nhdsWithin_of_forall`), and finish with
+`tendsto_nhds_unique`. `differentiableAt_integral_call_iff` gets the right
+and left strike derivatives `−μ{X > K}` and `−μ{X ≥ K}` of the call price this way, so a derivative
+forces `μ{X = K} = 0`.
+
+### Build a series on the named summand
+
+When a series mixes a quantity the library already names, sum the name, not its formula.
+`mertonDigitalPrice` is `∑ₙ wₙ · bsCashDigital K r σₙ Sₙ T`, as `mertonCallTerm_eq_bsV` makes the call
+series a mixture of `bsV`. Term by term, the strike derivative of the call series is then
+`hasDerivAt_bsV_K` up to defeq, and that of the digital series is the named Greek
+`hasDerivAt_bsCashDigital_K`. The first draft inlined `e^{−rT}Φ(d₂)` and had to reach the digital's
+derivative by transporting `breedenLitzenberger` back through `deriv`.
+
+### Three elaboration details at the pin
+
+- An anonymous constructor under a type ascription keeps the structure's own type:
+  `(⟨(0 : ℝ) ^ 2, sq_nonneg 0⟩ : ℝ≥0) * τ` elaborates the left factor at
+  `{ r // 0 ≤ r }`, and the multiplication with `τ : ℝ≥0` finds no instance. Write the term where
+  `ℝ≥0` is the expected type of the whole product, as `jumpDiffusionIncrementLaw_apply` does:
+  `gaussianReal m (.mk ((0 : ℝ) ^ 2) (sq_nonneg _) * τ)`.
+- `zero_le` takes its argument implicitly: `exact zero_le`, not `zero_le _`.
+- A lemma whose type is still open cannot be unified against a set membership. In
+  `Set.ext fun _ ↦ le_iff_lt_or_eq.trans (or_congr_right eq_comm)` the order lemma is elaborated
+  first, for the dot notation, so its type `?a ≤ ?b` has an unknown carrier and instance; matching
+  it against `x ∈ {ω | K ≤ X ω}` unfolds both sides and gets stuck on the instance. Fix the
+  arguments, `(le_iff_lt_or_eq (a := K) (b := X ω))`, and the membership unfolds to `K ≤ X ω`
+  (`differentiableAt_integral_call_iff`).
+
+### Moments from the cumulant generating function
+
+When a law's moment-generating function is known in closed form near `0`, read its mean and variance
+off the cumulant generating function rather than integrating, and state the closed form's
+derivatives as lemmas about the exponent itself, without the time factor.
+`cgf_id_jumpDiffusionIncrementLaw_eventuallyEq` says `cgf id μ =ᶠ[𝓝 0] fun θ ↦ κ(θ)τ`;
+`Filter.EventuallyEq.deriv_eq` and `Filter.EventuallyEq.iteratedDeriv_eq` move Mathlib's
+`deriv_cgf_zero` (the mean) and `variance_tilted_mul` at `0` (the variance; `tilted_const'` makes the
+tilt at `0` the law itself) onto the closed form, and Mathlib's `deriv_mul_const_field` and
+`iteratedDeriv_mul_const_field` take out `τ`. What is left is `κ'(0)` and `κ''(0)`
+(`deriv_jumpDiffusionExponent_zero`, `iteratedDeriv_two_jumpDiffusionExponent_zero`), computed by
+`HasDerivAt` algebra; the second needs `deriv κ` near `0`, an `EventuallyEq` built with
+`Filter.eventuallyEq_of_mem (isOpen_interior.mem_nhds h)`, and the jump part's `M''(0) = 𝔼[J²]` is
+`hasDerivAt_iteratedDeriv_mgf h 1`. The second moment is not a cumulant: take it as the variance plus
+the squared mean (Mathlib's `variance_eq_sub`, with `memLp_of_mem_interior_integrableExpSet`). The
+hypothesis is Mathlib's, `0 ∈ interior (integrableExpSet id ν)`, and it transfers to the image law as
+the `interior_mono` of an inclusion of the sets themselves
+(`integrableExpSet_id_subset_jumpDiffusionIncrementLaw`). State such law-level facts in the file of
+the law, not in their first consumer: while the transfer lived in the variance-swap file, two files
+upstream of it (`JumpDiffusionIdentifiability`, `JumpDiffusionEsscher`) kept inline copies, since
+they could not import it; it now lives in `JumpDiffusionProcess.lean`.
+
+### From the law to the process, under the measure that prices
+
+A statement about the log-return law becomes a statement about the process in two steps. First the
+law of `X_t` (`JumpDiffusionProcess.hasLaw`): the increment over `[0, t]` has the law, and `X_0 = 0`
+almost surely, so Mathlib's `HasLaw.congr` moves it to `X_t`. Then `HasLaw.integral_comp` turns
+`𝔼_P[f(X_T)]` into `∫ f` under the law; give `f` explicitly (`(f := fun y ↦ …)`), since `f (X T ω)`
+is not a pattern the unifier can invert, and discharge measurability with
+`Measurable.aestronglyMeasurable (by fun_prop)` (`Real.log` and `Real.exp` are `fun_prop`). A pricing
+measure enters as a hypothesis on the process, not as prose: "the discounted price is a
+`P`-martingale" is turned into the drift by the criterion (`JumpDiffusionProcess.martingale_iff`), so
+the law-level theorem at the compensated drift applies under `P`
+(`JumpDiffusionProcess.integral_logContract_of_martingale`). State the finite-`n` identity, not only
+the limit: the limit is then a one-line corollary, and the identity carries the sign arguments at
+every `n` (`logContract_le_realizedVariance_of_martingale`).
+
+### Two elaboration traps: `ℝ≥0` leaves and omitted section parameters
+
+A product such as `2 * Λ * ∫ x, f x ∂ν` with `Λ : ℝ≥0` and no real-valued leaf is elaborated in
+`ℝ≥0` when nothing fixes the expected type (an argument of `Tendsto.const_sub`, say): the integral is
+then asked for in `ℝ≥0` and fails with `NormedAddCommGroup ℝ≥0`. Ascribe the type,
+`(2 * Λ * ∫ x, f x ∂ν : ℝ)`. A section's instance variable, `[hB : IsFilteredPreBrownian B 𝓕 P]`, is
+included in a theorem only if every parameter it mentions is; when the statement omits one (the
+filtration `𝓕`, which the conclusion never names), the instance is silently left out and the proof
+sees no `hB`. Bind such a parameter in the theorem itself, explicitly, as Mathlib does for arguments
+the conclusion does not determine (`IsFilteredPreBrownian.logContract_realizedVariance`).
+
+### Pointwise sums of derivatives at the pin
+
+`HasDerivAt.add` and `HasDerivAt.sub` conclude `HasDerivAt (f + g) …` with the pointwise sum `f + g`,
+not a lambda. Their `@[to_fun]` twins `HasDerivAt.fun_add` and `HasDerivAt.fun_sub` conclude
+`HasDerivAt (fun x ↦ f x + g x) …`. Use the `fun_` forms when the result feeds `rw [h.deriv]` or
+must match a lambda in the goal: `rw` will not see `(f + g) x` as `f x + g x`. The constant forms
+`const_add`, `sub_const`, `const_mul`, `mul_const` and `div_const` already conclude with lambdas.
+Deep dot-notation chains are easy to unbalance: one missing `(` in
+`(((((h.const_mul c).const_add b).fun_add h₂).mul_const τ).deriv` was a parse error that stopped the
+file at CI. Count the brackets, or write the chain with `|>.`.
+
+### The law of an image, by change of variables
+
+To identify `μ.map g` for `μ = f(y) dy` and a smooth injective `g`, fix a measurable set `A`, write
+both sides as set integrals (`Measure.map_apply`, `withDensity_apply`, `Measure.restrict_restrict`),
+and turn the image side `∫_{g '' (g ⁻¹' A)}` into an integral over the preimage with Mathlib's
+`lintegral_image_eq_lintegral_abs_deriv_mul` (it needs `HasDerivWithinAt` on the set and `InjOn`).
+`Set.image_preimage_eq_inter_range` gives `g '' (g ⁻¹' A) = A ∩ range g`. The pointwise step is then
+`ofReal (f y) = ofReal |g' y| * ofReal (density (g y))` (`ENNReal.ofReal_mul`, `mul_div_cancel₀`).
+`map_mul_exp_withDensity` does this for `g y = Seʸ`. To transfer a pointwise identity of densities
+on `(0, ∞)` to the measures, use `withDensity_congr_ae (ae_restrict_of_forall_mem measurableSet_Ioi …)`.
+- `withDensity_congr_ae (ae_restrict_of_forall_mem … fun K hK ↦ ?_)` leaves the goal as
+  `(fun K ↦ …) K = (fun K ↦ …) K`, unreduced; `rw` cannot see inside a beta-redex. `dsimp only`
+  first.
+
+### Strict convexity of an integral: one ordering, one weight, one support
+
+To prove `StrictConvexOn ℝ s fun k ↦ ∫ ω, F k ω ∂μ`, reduce to `k₁ < k₂` with Mathlib's
+`LinearOrder.strictConvexOn_of_lt`, and substitute the second weight (`obtain rfl : b = 1 - a`) so
+every inequality is linear in the monomials `linarith` sees. Then write the gap
+`a F k₁ + (1 − a) F k₂ − F (a k₁ + (1 − a) k₂)` as one integrable function: it is nonnegative by
+the pointwise convexity, and `integral_pos_iff_support_of_nonneg` makes its integral positive as
+soon as its support has positive measure. `strictConvexOn_integral_call` does this for the call
+payoff, whose gap is a butterfly spread, positive between the outer strikes. Mathlib has
+`ConvexOn.smul` but no strict counterpart; `StrictConvexOn.smul` (`StrikeConvexity.lean`)
+supplies it, an upstream candidate. The convex case needs no such argument: it is Mathlib's
+`integral_convexOn_of_integrand_ae` (`convexOn_integral_call`).

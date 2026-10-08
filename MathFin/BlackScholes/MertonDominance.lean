@@ -9,6 +9,7 @@ public import Mathlib
 public import MathFin.BlackScholes.MertonJumpDiffusion
 public import MathFin.BlackScholes.SpotConvexity
 public import MathFin.BlackScholes.ImpliedVolatility
+public import MathFin.Foundations.AffineMinorant
 
 /-!
 # Merton dominance: jump risk is never free
@@ -94,39 +95,16 @@ integrates to zero *because* the conditional forwards recombine. -/
 lemma bsV_le_mertonCallPrice_delta_zero {S_0 K r σ T k : ℝ} (Λ : ℝ≥0)
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) :
     bsV K r σ S_0 T ≤ mertonCallPrice S_0 K r σ T k 0 Λ := by
-  have h_spot_int : Integrable (mertonSpot S_0 k Λ) (poissonMeasure Λ) :=
-    integrable_mertonSpot Λ hS_0 hk
-  -- the affine tangent minorant …
-  have h_lin_int : Integrable
-      (fun n ↦ Phi (bsd1 S_0 K r σ T) * (mertonSpot S_0 k Λ n - S_0))
-      (poissonMeasure Λ) :=
-    (h_spot_int.sub (integrable_const _)).const_mul _
-  have h_tan_int : Integrable (fun n ↦
-      bsV K r σ S_0 T + Phi (bsd1 S_0 K r σ T) * (mertonSpot S_0 k Λ n - S_0))
-      (poissonMeasure Λ) :=
-    (integrable_const _).add h_lin_int
-  -- … lies below every conditional value (tangent bound at each spot_n) …
-  have h_tan_le : ∀ n, bsV K r σ S_0 T
-      + Phi (bsd1 S_0 K r σ T) * (mertonSpot S_0 k Λ n - S_0)
-      ≤ mertonCallTerm S_0 K r σ T k 0 Λ n := fun n ↦ by
+  have hterm (n : ℕ) :
+      mertonCallTerm S_0 K r σ T k 0 Λ n = bsV K r σ (mertonSpot S_0 k Λ n) T := by
     rw [mertonCallTerm_eq_bsV, mertonVol_delta_zero hσ.le]
-    exact bsV_spot_tangent_le hK hσ hT hS_0 (mertonSpot_pos hS_0 hk Λ n)
-  -- … and integrates to exactly `bsV` by the compensation identity.
-  have h_tan_integral : ∫ n, (bsV K r σ S_0 T
-      + Phi (bsd1 S_0 K r σ T) * (mertonSpot S_0 k Λ n - S_0))
-      ∂(poissonMeasure Λ) = bsV K r σ S_0 T := by
-    rw [integral_add (integrable_const _) h_lin_int,
-      integral_const_mul, integral_sub h_spot_int (integrable_const _),
-      integral_mertonSpot, integral_const, integral_const, probReal_univ,
-      one_smul, one_smul, sub_self, mul_zero, add_zero]
   calc bsV K r σ S_0 T
-      = ∫ n, (bsV K r σ S_0 T
-          + Phi (bsd1 S_0 K r σ T) * (mertonSpot S_0 k Λ n - S_0))
-          ∂(poissonMeasure Λ) := h_tan_integral.symm
-    _ ≤ ∫ n, mertonCallTerm S_0 K r σ T k 0 Λ n ∂(poissonMeasure Λ) :=
-        integral_mono h_tan_int
-          (integrable_mertonCallTerm 0 Λ hS_0 hK hσ hT hk) h_tan_le
-    _ = mertonCallPrice S_0 K r σ T k 0 Λ := rfl
+      ≤ ∫ n, bsV K r σ (mertonSpot S_0 k Λ n) T ∂(poissonMeasure Λ) :=
+        le_integral_of_affine_le (f := fun s ↦ bsV K r σ s T) (c := Phi (bsd1 S_0 K r σ T))
+          (integrable_mertonSpot Λ hS_0 hk) (integral_mertonSpot S_0 k Λ)
+          ((integrable_mertonCallTerm 0 Λ hS_0 hK hσ hT hk).congr (ae_of_all _ hterm))
+          (ae_of_all _ fun n ↦ bsV_spot_tangent_le hK hσ hT hS_0 (mertonSpot_pos hS_0 hk Λ n))
+    _ = mertonCallPrice S_0 K r σ T k 0 Λ := (integral_congr_ae (ae_of_all _ hterm)).symm
 
 /-- **Merton dominance — jump risk is never free.** The Merton (1976)
 jump-diffusion call price dominates the Black–Scholes price at the diffusion

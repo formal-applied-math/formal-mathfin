@@ -18,15 +18,22 @@ The substantive theorem this file packages:
   `q_i` are non-negative, then `K ↦ Σ q_i · g_i(K)` is convex in `K`.**
 
 This is the structural reason that — in a finite-state market with
-non-negative state prices — **call-price convexity in the strike**,
-**butterfly non-negativity at the price level**, and (in the limit)
-**implied-PDF non-negativity** all hold. None of these is an
+non-negative state prices — **call-price convexity in the strike** and
+**butterfly non-negativity at the price level** hold. Neither is an
 independent fact; each is a consequence of *payoff convexity* passing
-through a *non-negative linear operator*.
+through a *non-negative linear operator*. **Implied-PDF non-negativity** is
+the same principle for the standard normal law (`convexOn_integral_call`,
+`lognormalTerminalPDF_nonneg_via_strike_convexity`), not a limit of this file.
 
-In the library currently, four facts touch this principle:
+In the library, these facts touch this principle:
 
 * **Payoff** convex (`convexOn_call_payoff` in `BlackScholes/StrikeConvexity`).
+* **Price under any law** convex (`convexOn_integral_call` in
+  `BlackScholes/StrikeConvexity`): the principle for an arbitrary law with a finite
+  mean, Mathlib's `integral_convexOn_of_integrand_ae` applied to the call payoff.
+  The finite-state statements below are, mathematically, its finitely supported
+  case, with the state prices as a finite measure; they are proved here directly,
+  by summing convex functions.
 * **Price** has `∂²_K bsV ≥ 0` (`hasDerivAt_deriv_bsV_K` in `BlackScholes/StrikeGreeks`,
   with the sign `bsV_partial_KK_nonneg`).
 * **Discrete second-difference of payoff ≥ 0** (`butterfly_payoff_nonneg`
@@ -34,10 +41,8 @@ In the library currently, four facts touch this principle:
 * **Implied PDF ≥ 0** (`lognormalTerminalPDF_nonneg` in
   `BlackScholes/BreedenLitzenberger`).
 
-These are connected by the convexity-preservation principle but the library
-previously did not write that principle down. This file states and proves it,
-turning four independent observations into a single structural fact with
-three corollaries.
+This file states the principle for a finite-state market, where the pricing
+functional is a finite sum, and derives three corollaries from it.
 
 ## Why this matters (the "math genius" point)
 
@@ -57,9 +62,8 @@ kind. This module is one example of the second kind.
 * `callPrice_finiteState_convexOn_K`: in a finite-state market, the call
   price is convex in the strike.
 * `callPrice_finiteState_butterfly_nonneg`: butterfly non-negativity at
-  the *price* level (discrete second-difference of the price), the
-  infinitesimal face of which is `∂²_K ≥ 0` and (passing to a continuous
-  density) the implied-PDF positivity.
+  the *price* level (discrete second-difference of the price), whose
+  infinitesimal face is `∂²_K ≥ 0`.
 -/
 
 @[expose] public section
@@ -129,12 +133,12 @@ for any strikes `K₁, K₃` and the midpoint `K₂ = (K₁+K₃)/2`,
 
 where `C(K) := Σ q_i · max(S_i − K, 0)` is the finite-state call price.
 
-This is the *infinitesimal* face of `butterfly_payoff_nonneg` (which gives
+This is the price-level face of `butterfly_payoff_nonneg` (which gives
 the same inequality at the *payoff* level): butterfly non-negativity is
 preserved when passing from payoff to price via the (non-negative) linear
-pricing functional. Passing further to a continuous-density limit yields
-the **Breeden-Litzenberger non-negativity** of the implied PDF — the same
-fact at three scales (discrete payoff, discrete price, continuous density). -/
+pricing functional. Its continuous-law counterpart, through
+`convexOn_integral_call`, is the **Breeden-Litzenberger non-negativity** of
+the implied PDF (`lognormalTerminalPDF_nonneg_via_strike_convexity`). -/
 theorem callPrice_finiteState_butterfly_nonneg (s : Finset ι)
     (S : ι → ℝ) (q : ι → ℝ) (hq : ∀ i ∈ s, 0 ≤ q i) (K₁ K₃ : ℝ) :
     0 ≤ (∑ i ∈ s, q i * max (S i - K₁) 0)

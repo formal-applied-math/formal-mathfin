@@ -82,6 +82,38 @@
         "formalization_status": "library_wrapper",
         "formalization_scope": "Direct Lean wrapper around Mathlib's conditional Jensen (ConvexOn.map_condExp_le_of_finiteDimensional), statement-identical to the textbook proposition. Relabeled full->library_wrapper in the 2026-06-03 audit; the library does the real work."
       }
+    },
+    {
+      "id": "ce-freezing-lemma",
+      "name": "The Freezing Lemma (Independence Lemma, Unconditional Form)",
+      "description": "For independent random variables X and Y on a finite measure space and g integrable against the product of their laws, E[g(X, Y)] = ∫ E[g(x, Y)] d(law X)(x): X can be frozen at a value x, g(x, Y) averaged over Y alone, and the result averaged over the law of X. This is the unconditional form; the conditional statement E[g(X, Y) | 𝒢] = G(X), for X 𝒢-measurable and Y independent of 𝒢, is ce-conditional-freezing-lemma.",
+      "domain": "measure_theory",
+      "code": {
+        "lean": "import MathFin.Foundations.IndepFreezing\n\nopen MeasureTheory ProbabilityTheory\n\n/-- **The freezing lemma.** For independent `X` and `Y` and `g` integrable against the product\nof their laws, `𝔼[g(X, Y)] = ∫ x, 𝔼[g(x, Y)] d(law X)`. -/\ntheorem freezing_lemma_thm {Ω α β : Type*} {mΩ : MeasurableSpace Ω} {mα : MeasurableSpace α}\n    {mβ : MeasurableSpace β} {P : Measure Ω} [IsFiniteMeasure P] {X : Ω → α} {Y : Ω → β}\n    (hXY : IndepFun X Y P) (hX : AEMeasurable X P) (hY : AEMeasurable Y P) {g : α × β → ℝ}\n    (hg : Integrable g ((P.map X).prod (P.map Y))) :\n    ∫ ω, g (X ω, Y ω) ∂P = ∫ x, ∫ ω, g (x, Y ω) ∂P ∂(P.map X) :=\n  MathFin.integral_comp_prodMk_of_indepFun hXY hX hY hg\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "Shreve, Stochastic Calculus for Finance II, Lemma 2.3.4 (independence lemma), unconditional form",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: independence makes the joint law the product of the marginal laws (Mathlib's IndepFun.map_prod_eq_prod_map_map), then the integral against the product measure is an iterated integral (integral_prod), and the inner integral is transported back along Y (integral_map). Holds for any value space of X; integrable_prod_map_of_countable checks the product integrability one value at a time when X is countable-valued. The conditional form is ce-conditional-freezing-lemma. Lives in MathFin/Foundations/IndepFreezing.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "ce-conditional-freezing-lemma",
+      "name": "The Independence Lemma (Conditional Freezing Lemma)",
+      "description": "Let 𝒢 be a sub-σ-algebra, X a 𝒢-measurable random variable with values in a measurable space, and Y a random variable independent of 𝒢 (a.e.-measurable, with values in another measurable space), on a finite measure space. For g strongly measurable, with values in a Banach space, and g(X, Y) integrable, E[g(X, Y) | 𝒢] = G(X) almost surely, where G(x) = ∫ g(x, y) d(law Y)(y): given 𝒢, X is known and Y keeps its law. With vector-valued X and Y this is Shreve's independence lemma. It is the step that prices an option at an intermediate date: the state is known, and the increment to maturity is independent of the past (the American put's Brownian transitions, and the jump-diffusion prices of mf-jump-diffusion-payoff-every-date).",
+      "domain": "measure_theory",
+      "code": {
+        "lean": "import MathFin.Foundations.IndepFreezing\n\nopen MeasureTheory ProbabilityTheory\n\n/-- **The independence lemma** (conditional freezing lemma): for `X` measurable for `m` and `Y`\nindependent of `m`, `𝔼[g(X, Y) | m] = G(X)` with `G(x) = ∫ g(x, y) d(law Y)(y)`. -/\ntheorem conditional_freezing_lemma_thm {Ω α β E : Type*} {m mΩ : MeasurableSpace Ω}\n    {mα : MeasurableSpace α} {mβ : MeasurableSpace β} [NormedAddCommGroup E] [NormedSpace ℝ E]\n    [CompleteSpace E] {P : Measure Ω} [IsFiniteMeasure P] (hm : m ≤ mΩ) {X : Ω → α} {Y : Ω → β}\n    (hX : Measurable[m] X) (hY : AEMeasurable Y P)\n    (hi : Indep (MeasurableSpace.comap Y mβ) m P) {g : α × β → E} (hg : StronglyMeasurable g)\n    (hgi : Integrable (fun ω ↦ g (X ω, Y ω)) P) :\n    P[fun ω ↦ g (X ω, Y ω) | m] =ᵐ[P] fun ω ↦ ∫ y, g (X ω, y) ∂(P.map Y) :=\n  MathFin.condExp_comp_prodMk_of_indep hm hX hY hi hg hgi\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "Shreve, Stochastic Calculus for Finance II, Lemma 2.3.4 (independence lemma)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. On each event s ∈ 𝒢 the joint law of (X, Y) under P restricted to s is the law of X there times the law of Y: on rectangles, P(s ∩ X⁻¹A ∩ Y⁻¹B) = P(s ∩ X⁻¹A)·P(Y⁻¹B) because s ∩ X⁻¹A ∈ 𝒢 is independent of Y⁻¹B, and a measure on a product is determined by rectangles (Measure.prod_eq; map_restrict_prodMk_of_indep). So g is integrable against that product, and Fubini (integral_prod) with integral_map gives ∫_s g(X, Y) dP = ∫_s G(X) dP on every s ∈ 𝒢. G(X) is 𝒢-measurable (the section integral of a strongly measurable g is strongly measurable, StronglyMeasurable.integral_prod_right'), so it is the conditional expectation (ae_eq_condExp_of_forall_setIntegral_eq). Mathlib's condExp_prod_ae_eq_integral_condDistrib conditions on σ(X) through the conditional distribution; here the σ-algebra is any 𝒢 for which X is measurable and of which Y is independent, and the kernel is the law of Y. Lives in MathFin/Foundations/IndepFreezing.lean. Axioms-clean."
+      }
     }
   ]
 }

@@ -26,6 +26,831 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The variance swap on one process, under one measure (2026-10-08)
+
+Five entries added and one restated, all `full`: `mf-jump-diffusion-terminal-law`,
+`mf-jump-diffusion-log-contract-on-process`, `mf-jump-diffusion-log-contract-below-discrete-swap`,
+`mf-black-scholes-log-contract-discrete-swap` and `mf-merton-log-contract-variance`; the headline
+`mf-jump-diffusion-variance-swap-vs-log-contract` now states the log contract and the realized
+variance of the same process under the same measure, at every sampling frequency. Corpus 530 → 535.
+`BlackScholes/JumpDiffusionProcess.lean` gains the law of `X_t`, and
+`BlackScholes/JumpDiffusionVarianceSwap.lean` the process section and the two models.
+
+- The law of the process. `X_t` has the log-return law over `t`
+  (`JumpDiffusionProcess.hasLaw`, Mathlib's `HasLaw.congr`), so statements about the law become
+  statements about the process (`HasLaw.integral_comp`); `JumpDiffusionProcess.integral_exp` is
+  now read off it.
+- The log contract on the process. For a jump law whose moment-generating function is finite near
+  `0` and at `1`, `S > 0` and `T > 0`, if `e^{−rt}Se^{X_t}` is a `P`-martingale, the log contract on
+  `S_T = Se^{X_T}`, scaled as a variance rate, has expected payoff `σ² + 2ΛE[e^J − 1 − J]` under `P`
+  (`JumpDiffusionProcess.integral_logContract_of_martingale`): the martingale forces the
+  compensated drift (`martingale_iff`), and the law of `X_T` does the rest.
+- At every sampling frequency. Under the same hypotheses, along `n + 1` equal steps of `[0, T]`,
+  the log contract minus the expected realized variance per unit time, both under `P`, is
+  `2ΛE[e^J − 1 − J − J²/2] − (b + ΛE[J])²T/(n + 1)`
+  (`JumpDiffusionProcess.logContract_sub_realizedVariance_of_martingale`): the jump bias less a
+  discrete-sampling term `≥ 0`. It tends to the jump bias
+  (`tendsto_logContract_sub_realizedVariance_of_martingale`).
+- The sign of `E[e^J − 1 − J − J²/2]`, the bias per unit of `2Λ`, as a fact about the jump law:
+  `≤ 0` for jumps `≤ 0` (`integral_jumpBias_nonpos`), `< 0` if moreover `ν{J < 0} ≠ 0` and the
+  moment-generating function is finite near `0` (`integral_jumpBias_neg`). So for
+  downward jumps the log contract is at most the expected realized variance per unit time at every
+  `n`, strictly if `Λ > 0` and `ν{J < 0} ≠ 0`
+  (`logContract_le_realizedVariance_of_martingale`, `logContract_lt_realizedVariance_of_martingale`).
+- Black–Scholes. For a filtered pre-Brownian motion and `S_t = Se^{(r − σ²/2)t + σB_t}`, the log
+  contract is `σ²` and the difference is `−(r − σ²/2)²T/(n + 1)`
+  (`IsFilteredPreBrownian.logContract_realizedVariance`), the case `Λ = 0` through
+  `IsFilteredPreBrownian.jumpDiffusionProcess`.
+- Merton, at the level of the law. With log-jumps `N(log(1 + k) − δ²/2, δ²)`, `k > −1`, at the drift
+  `r − σ²/2 − Λk`, `S > 0` and `τ > 0`, the log contract is `σ² + 2Λ(k − log(1 + k) + δ²/2)` and the
+  variance per unit time `σ² + Λ((log(1 + k) − δ²/2)² + δ²)` (`mertonJump_logContract_variance`); a
+  Merton `JumpDiffusionProcess` is not constructed.
+
+Safe wording: "for a jump-diffusion process (a hypothesis structure) under a measure that makes the
+discounted price a martingale, with a jump law whose moment-generating function is finite near `0`
+and at `1`, the log contract on the terminal price minus the expected realized variance per unit
+time along `n + 1` equal steps is the jump bias `2ΛE[e^J − 1 − J − J²/2]` less
+`(b + ΛE[J])²T/(n + 1)`, at every `n`; for downward jumps the log contract is at most the discretely
+sampled swap at every `n`".
+Not covered:
+- the existence of a `JumpDiffusionProcess` with jumps;
+- measures that move `Λ` or `ν`: `P` keeps the characteristics of `X`;
+- the realized variance itself rather than its expectation;
+- the Black–Scholes files on `ℝ` time (`expected_bsLogPrice_equipartition_sum`, for a
+  `BrownianQuadraticVariation` driver) as corollaries: the corollary here is on `ℝ≥0` for a filtered
+  pre-Brownian motion, and the two partitions are not unified.
+
+### Variance swaps with jumps: the log contract against the variance (2026-10-08)
+
+Eight entries added, all `full`: `mf-log-contract-any-law`, `mf-jump-diffusion-log-return-mean`,
+`mf-jump-diffusion-log-return-variance`, `mf-jump-diffusion-log-contract`,
+`mf-jump-diffusion-log-contract-jump-bias`, `mf-jump-diffusion-log-contract-downward-jumps`,
+`mf-jump-diffusion-realized-variance` and `mf-jump-diffusion-variance-swap-vs-log-contract`.
+Corpus 522 → 530. New files `BlackScholes/JumpDiffusionMoments.lean` (the moments of the law) and
+`BlackScholes/JumpDiffusionVarianceSwap.lean`; `BlackScholes/VarianceSwap.lean` gains the
+model-free log contract, and `BlackScholes/JumpDiffusionProcess.lean` the law-level facts the
+moments need (the exponential moments pass from the jumps to the log-return, the cgf is `κ(θ)τ`
+near `0`, `κ` is differentiable, and the forward is the mean at the compensated drift), which
+`JumpDiffusionIdentifiability`, `JumpDiffusionEsscher` and `JumpDiffusionIncompleteness` now use
+in place of inline copies.
+
+- Under any law. For a log-return `Y` with `E|Y| < ∞` and `E[e^Y] < ∞`, and `S > 0`, the log
+  contract on the forward `F = Se^{rτ}` has expected payoff `rτ − E[Y] + (e^{−rτ}E[e^Y] − 1)`
+  (`integral_logContract`); when the forward is the mean of `S_τ` the expected payoff is the gap
+  `rτ − E[Y] = log F − E[log S_τ]` (`integral_logContract_of_integral_exp`).
+- The moments of the jump-diffusion log-return, for a jump law with a moment-generating function
+  finite near `0`. The first two cumulants per unit time are `κ'(0) = b + ΛE[J]`
+  (`deriv_jumpDiffusionExponent_zero`) and `κ''(0) = σ² + ΛE[J²]`
+  (`iteratedDeriv_two_jumpDiffusionExponent_zero`). The mean and the variance are the first two
+  derivatives at `0` of the cumulant generating function `κ(θ)τ` (Mathlib's `deriv_cgf_zero` and
+  `variance_tilted_mul`): `E[Y] = (b + ΛE[J])τ` (`integral_id_jumpDiffusionIncrementLaw`) and
+  `Var[Y] = (σ² + ΛE[J²])τ` in Mathlib's `Var` (`variance_id_jumpDiffusionIncrementLaw`); the
+  second moment follows as the variance plus the squared mean (`integral_sq_jumpDiffusionIncrementLaw`,
+  Mathlib's `variance_eq_sub`).
+- The log contract. At the compensated drift, with `E[e^J] < ∞`, `S > 0` and `τ > 0`,
+  `(2/τ)·E[log(F/S_τ) + (S_τ − F)/F] = σ² + 2ΛE[e^J − 1 − J]` (`jumpDiffusion_logContract`); it
+  differs from `Var[Y]/τ = σ² + ΛE[J²]` by the jump bias `2ΛE[e^J − 1 − J − J²/2]`
+  (`jumpDiffusion_logContract_sub_variance`), which is `≤ 0` when the jumps are `≤ 0`
+  (`jumpDiffusion_logContract_le_variance`, from `Real.exp_le_quadratic_of_nonpos`, the reverse of
+  Mathlib's `Real.quadratic_le_exp_of_nonneg`; `E[e^J] < ∞` then follows), and `< 0` if moreover
+  `Λ > 0` and `ν{J < 0} ≠ 0` (`jumpDiffusion_logContract_lt_variance`, from
+  `Real.exp_lt_quadratic_of_neg`).
+- The realized variance. For any process whose increments have laws that depend only on their
+  length, the expected sum of `f` of the increments along `n + 1` equal steps of `[0, T]` is `n + 1`
+  times the mean of `f` over one step (`integral_sum_comp_increment_equipartition`). For a
+  `JumpDiffusionProcess` the expected realized variance is
+  `(σ² + ΛE[J²])T + (b + ΛE[J])²T²/(n + 1)`
+  (`JumpDiffusionProcess.integral_sum_sq_increment_equipartition`), which tends to `(σ² + ΛE[J²])T`
+  whatever the drift (`tendsto_integral_sum_sq_increment_equipartition`), the jump-diffusion
+  counterparts of `VarianceSwapEquipartition` and `VarianceSwapLimit`. So the log contract minus the
+  expected realized variance per unit time tends to the jump bias, where Black–Scholes has `0`
+  (`VarianceSwapEquivalence`); since corpus 535 this is stated on the process under one measure
+  (the section above).
+
+Safe wording: "for a jump law whose moment-generating function is finite near `0` and at `1`, the
+log contract at the compensated drift has expected payoff `σ² + 2ΛE[e^J − 1 − J]` per unit time,
+while the expected realized variance per unit time of a jump-diffusion process (a hypothesis
+structure) along equipartitions tends to `σ² + ΛE[J²]` whatever the drift; the log contract misses
+that limit by the jump bias `2ΛE[e^J − 1 − J − J²/2]`, is at most it for jumps `≤ 0`, and is
+strictly below it when moreover `Λ > 0` and the jumps are negative with positive probability".
+Not covered:
+- the existence of a `JumpDiffusionProcess` with jumps: the structure is a hypothesis, satisfied
+  without jumps by Brownian motion with drift;
+- the log contract stated on the process (`S_T = Se^{X_T}` under `P`, with the discounted price a
+  martingale): done at corpus 535 (the section above);
+- pricing measures that change `Λ` or `ν`, such as the Esscher transform: the comparison keeps the
+  jump characteristics of `X`;
+- that the jump bias is nonzero for a general jump law: its integrand has the sign of `x`, so a
+  two-sided jump law can cancel it;
+- realized variance along arbitrary partitions, and its `L²` limit: with jumps that limit is the
+  random quadratic variation `σ²T + Σ_{i≤N_T} J_i²`, not the constant `(σ² + ΛE[J²])T`
+  (`E[(RV_n − (σ² + ΛE[J²])T)²] → ΛE[J⁴]T`), unlike Black–Scholes (`VarianceSwapDriftImmunity`);
+- the pricing of the log contract by options: the pointwise Carr–Madan strip exists
+  (`carrMadan_log_spanning`, `mf-carr-madan-log-contract`), but neither its expectation under the
+  jump-diffusion law nor the hedging error with jumps is formalized;
+- jump laws whose moment-generating function is infinite on one side of `0`: the mean needs only
+  `E|J| < ∞` and the variance `E[J²] < ∞`, but the cumulant route needs the moment-generating
+  function near `0`.
+
+### Convexity in the strike under any law, strictly with a Gaussian part (2026-10-08)
+
+Five entries added, all `full`: `mf-call-price-convex-in-strike`,
+`mf-jump-diffusion-density-positive`, `mf-jump-diffusion-call-convex-strike`,
+`mf-black-scholes-call-strictly-convex-strike` and `mf-merton-call-strictly-convex-strike`. Corpus
+517 → 522. New file `BlackScholes/JumpDiffusionStrikeConvexity.lean`;
+`BlackScholes/StrikeConvexity.lean`, `BlackScholes/JumpDiffusionDensity.lean` and
+`BlackScholes/Call.lean` gain the general facts.
+
+- Under any law. For an integrable `X` under a finite measure, `k ↦ ∫ (X − k)⁺ dμ` is convex
+  (`convexOn_integral_call`, Mathlib's `integral_convexOn_of_integrand_ae` for the call payoff):
+  the convexity of the payoff (`convexOn_call_payoff`) survives integration. It is strictly convex
+  on a convex set of strikes `s` where `μ{k₁ < X < k₂} ≠ 0` for `k₁ < k₂` in `s`
+  (`strictConvexOn_integral_call`): the butterfly payoff with distinct strikes is nonnegative and
+  positive between its outer strikes.
+- The Breeden–Litzenberger chain, no longer a loop through the closed-form sign.
+  `bsV_strike_convexOn` is now the first lemma for the standard normal law
+  (`integral_bsCall_payoff_eq_bsV`, `integrable_bsTerminal_gaussianReal`), not the second-derivative
+  test. So `lognormalTerminalPDF_nonneg_via_strike_convexity` derives the sign of the lognormal
+  density from the convexity of the payoff and the positivity of the standard normal law (used as
+  `ϕ ≥ 0` inside `bs_call_formula`); before, the convexity was proved from that sign. The direct
+  proof `lognormalTerminalPDF_nonneg` uses the same positivity, so the two routes share their
+  root.
+- A positive density. With `σ ≠ 0` and `τ > 0` the log-return density of a jump-diffusion is
+  positive, for any jump law (`jumpDiffusionDensity_pos`), so the price charges every interval of
+  positive strikes (`jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero`).
+- The jump-diffusion call. With a finite forward it is convex in the strike for every `σ`
+  (`convexOn_jumpDiffusionCallPrice_strike`), and with `σ ≠ 0`, `τ > 0` and `S > 0` strictly convex
+  on `(0, ∞)` (`strictConvexOn_jumpDiffusionCallPrice_strike`). The Black–Scholes price
+  (`bsV_strike_strictConvexOn`) and Merton's series at every expected jump count
+  (`mertonCallPrice_strictConvexOn_strike`) inherit it through `jumpDiffusionCallPrice_zero` and
+  `jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice`. `StrictConvexOn.smul`, the strict
+  counterpart of Mathlib's `ConvexOn.smul`, carries the discount factor.
+
+Safe wording: "for any law with a finite mean the call price is convex in the strike, and strictly
+convex where the law charges every interval of strikes; a jump-diffusion with a Gaussian part has a
+positive density at every horizon `τ > 0`, so with a positive spot and a finite forward its call
+price is strictly convex in the strike on `(0, ∞)` for any jump law, and so are the Black–Scholes
+price and Merton's series". Not covered:
+- the converse, that strict convexity on an interval forces the law to charge each subinterval;
+- strict convexity without a Gaussian part (`σ = 0`), which depends on the jump law;
+- the signs of the digital price, `0 < D < e^{−rτ}`.
+
+### The law of the price, as a measure (2026-10-08)
+
+Four entries added, all `full`: `mf-price-law-change-of-variables`, `mf-jump-diffusion-price-law`,
+`mf-black-scholes-price-law` and `mf-merton-price-law`. Corpus 513 → 517. Files:
+`BlackScholes/JumpDiffusionDensity.lean` and `BlackScholes/JumpDiffusionDigital.lean`.
+
+- The change of variables. For any `f` and `S > 0`, the image of `f(y) dy` under `y ↦ Seʸ` is
+  `f(log(K/S))/K dK` on `(0, ∞)` (`map_mul_exp_withDensity`, from Mathlib's
+  `lintegral_image_eq_lintegral_abs_deriv_mul`; `y ↦ Seʸ` is a bijection of `ℝ` onto `(0, ∞)`
+  with derivative `Seʸ`). Negative values of `f` count as density `0` on both sides.
+- The jump-diffusion price. With `σ ≠ 0`, `τ > 0` and `S > 0` the price `Seʸ` has the law
+  `f(log(K/S))/K dK` on `(0, ∞)` (`jumpDiffusionIncrementLaw_map_mul_exp`). The density of the
+  price that the second strike derivative of the call reads off, strike by strike, is the density
+  of the law of the price.
+- Black–Scholes. Without jumps, at the drift `r − σ²/2` and with `σ > 0`, the price has the law
+  `lognormalTerminalPDF(K) dK` on `(0, ∞)`, and the formula, nonnegative there, integrates to one
+  (`jumpDiffusionIncrementLaw_zero_map_mul_exp`, `lognormalTerminalPDF_nonneg`,
+  `lintegral_lognormalTerminalPDF_eq_one`). These are the two facts `BreedenLitzenberger.lean`
+  states it does not prove.
+- Merton. With Gaussian log-jumps (`k > −1`), `σ > 0` and any drift `b`, the price has the law
+  `mertonTerminalPDF(K) dK` on `(0, ∞)` at the parameter `r = b + σ²/2 + Λk`, and the mixture,
+  nonnegative there, integrates to one (`jumpDiffusionIncrementLaw_gaussian_map_mul_exp`,
+  `mertonTerminalPDF_nonneg`, `lintegral_mertonTerminalPDF_eq_one`).
+
+Each identification of densities is pointwise on `(0, ∞)` (the earlier sections), and two
+`withDensity` measures agree when their densities agree almost everywhere (Mathlib's
+`withDensity_congr_ae`); integrating to one is the mass of the image of a probability measure
+(`lintegral_eq_one_of_map_eq_withDensity`). Each "integrates to one" is a lower Lebesgue integral
+of `ofReal` of the formula, which is the integral of the formula because the formula is
+nonnegative on `(0, ∞)`.
+
+Safe wording: "the price `Seʸ` of a jump-diffusion with a Gaussian part has the density
+`f(log(K/S))/K` on `(0, ∞)`; without jumps, at the drift `r − σ²/2`, this is the lognormal density
+`lognormalTerminalPDF`, and with Gaussian log-jumps it is Merton's Poisson mixture
+`mertonTerminalPDF` at `r = b + σ²/2 + Λk`, each a probability density". Not covered: moments of the price computed from these densities (the library computes
+them from the log-return law, `mgf_id_jumpDiffusionIncrementLaw`).
+
+### Kinks: the call price is differentiable in the strike exactly where the law has no atom (2026-10-08)
+
+Four entries added, all `full`: `mf-call-strike-differentiable-iff-no-atom`,
+`mf-jump-diffusion-call-differentiable-iff`, `mf-jump-diffusion-call-kink` and
+`mf-cash-digital-strike`. Corpus 509 → 513. `BlackScholes/CallSpreadDigital.lean`,
+`BlackScholes/JumpDiffusionDensity.lean`, `BlackScholes/JumpDiffusionDigital.lean` and
+`BlackScholes/StrikeGreeks.lean` gain the results.
+
+- The left spread. For a measurable, integrable `X` under a finite measure, the call spread just
+  below the strike, `(C(K − h) − C(K))/h`, tends to `μ{X ≥ K}` as `h ↓ 0`
+  (`tendsto_call_spread_left`, dominated convergence as for `tendsto_call_spread`). So the left
+  strike derivative is `−μ{X ≥ K}` and the right one `−μ{X > K}`.
+- Differentiability iff no atom. The call price `C(k) = ∫ (X − k)⁺ dμ` is differentiable at `K` iff
+  `μ{X = K} = 0` (`differentiableAt_integral_call_iff`): a derivative makes the two one-sided
+  slopes equal (Mathlib's `HasDerivAt.tendsto_slope_zero_right` and `tendsto_slope_zero_left`),
+  and they differ by the mass of the atom.
+- The jump-diffusion call. For `S, K > 0` and a finite forward, the call price function is
+  differentiable at `K` iff the log-return law has no atom at `log(K/S)`
+  (`differentiableAt_jumpDiffusionCallPrice_strike_iff`; the call price is `e^{−rτ}` times the
+  undiscounted call price of `Seʸ`, `jumpDiffusionCallPrice_eq_mul_integral`). Without a Gaussian part the law has an
+  atom at `bτ` of mass at least `e^{−Λτ}`, the probability of no jump
+  (`ofReal_exp_le_jumpDiffusionIncrementLaw_singleton`: given the jumps the law is a point mass,
+  Mathlib's `gaussianReal_zero_var`). So with `σ = 0` the call price has a kink at the strike
+  `Se^{bτ}` (`not_differentiableAt_jumpDiffusionCallPrice_strike`).
+- The Black–Scholes digital in the strike. `∂_K (e^{−rτ}Φ(d₂)) = −e^{−rτ}ϕ(d₂)/(Kσ√τ)`
+  (`hasDerivAt_bsCashDigital_K`), the strike Greek missing from `DigitalGreeks`. The second strike
+  derivative of the call, `hasDerivAt_deriv_bsV_K`, is now this lemma negated, and Merton's
+  digital series is the Poisson mixture of `bsCashDigital` (section below).
+
+Safe wording: "for an underlying with a finite mean, the call price is differentiable in the
+strike exactly where the law of the underlying has no atom, its one-sided strike derivatives being
+minus the digitals of `X > K` and `X ≥ K`; a jump-diffusion with a finite forward and without a
+Gaussian part has an atom at the no-jump outcome, so its call price has a kink at the strike
+`Se^{bτ}`". Not covered:
+- the other atoms of a law with `σ = 0` (at `bτ` plus the atoms of the convolution powers of `ν`);
+- the size of the kink as a statement about the jump-diffusion call price (it follows from the
+  general one-sided limits, applied to `Seʸ`).
+
+### Merton's digital and Merton's density: the strike derivatives of Merton's series (2026-10-08)
+
+Three entries added, all `full`: `mf-merton-strike-derivatives`, `mf-jump-diffusion-merton-digital`
+and `mf-jump-diffusion-merton-density`. Corpus 506 → 509. New file
+`BlackScholes/MertonStrikeGreeks.lean`; `BlackScholes/JumpDiffusionDigital.lean` gains the
+identifications.
+
+- The series in the strike. Merton's call series `C(K) = ∑ₙ wₙ C_BS(S·cₙ, K, σₙ)` is
+  differentiated term by term in the strike, as the Merton Greeks differentiate it in the spot
+  (`hasDerivAt_tsum_of_isPreconnected`). For `S, σ, T, K > 0` and `k > −1`:
+  `∂C/∂K = −mertonDigitalPrice`, with `mertonDigitalPrice = ∑ₙ wₙ e^{−rT}Φ(d₂ⁿ)`
+  (`hasDerivAt_mertonCallPrice_strike`, each term by `hasDerivAt_bsV_K`), the Poisson mixture of
+  the Black–Scholes digitals `bsCashDigital`; and `∂²C/∂K² = e^{−rT}·mertonTerminalPDF`, with
+  `mertonTerminalPDF = ∑ₙ wₙ·lognormalTerminalPDF(S·cₙ, r, σₙ, T, K)`
+  (`hasDerivAt_mertonDigitalPrice_strike`, `hasDerivAt_deriv_mertonCallPrice_strike`, each term
+  by `hasDerivAt_bsCashDigital_K`). The derivative bounds are `wₙe^{−rT}` and, on `(K/2, ∞)`,
+  `wₙe^{−rT}/((K/2)σ√T)`; the Poisson weights sum to one (Mathlib's `hasSum_one_poissonMeasure`).
+- Merton's digital. For `σ > 0`, `k > −1`, `S, K > 0` and `τ > 0`, with Gaussian log-jumps
+  `N(log(1 + k) − δ²/2, δ²)` at the compensated drift `b = r − σ²/2 − Λk`, the jump-diffusion
+  digital price is `mertonDigitalPrice` at the expected jump count `Λτ`
+  (`jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice`). The digital price
+  is minus the strike derivative of the call price, and near `K` the call price is Merton's series
+  (`jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice`); `HasDerivAt.unique` compares the two
+  derivatives.
+- Merton's density. With the same jumps and any drift `b`, the density of the price at `K`,
+  `f(log(K/S))/K`, is `mertonTerminalPDF` at the parameter `r = b + σ²/2 + Λk`
+  (`jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF`): the strike derivative of the digital
+  price discounted at `r` is `−e^{−rτ}f(log(K/S))/K`, and near `K` that digital price is Merton's
+  digital series. The density does not involve `r`, and every drift `b` is the compensated drift
+  for `r = b + σ²/2 + Λk`, so the identity holds at every drift; `r` is the interest rate only when
+  `b` is the model's compensated drift.
+
+Neither identification integrates a payoff against a Gaussian or convolves Gaussians: both are read
+off Merton's call series. The only Gaussian computation in the chain is the Gaussian smoothing
+behind that series, which the library had derived from the general jump-diffusion.
+
+Safe wording: "Merton's call series has strike derivative minus the Poisson mixture of
+Black–Scholes digitals and second strike derivative the discounted Poisson mixture of lognormal
+density formulas; with Gaussian log-jumps `N(log(1 + k) − δ²/2, δ²)` (`k > −1`) and `σ > 0`, these
+mixtures at maturity `τ` and expected jump count `Λτ` are the digital price (at the compensated
+drift) and the density of the price (at every drift) of the jump-diffusion". Not covered:
+- the put's strike derivatives and the put digital;
+- strike derivatives for jump laws other than Gaussian, beyond the general
+  `breedenLitzenberger_jumpDiffusion`.
+
+### The density of a jump-diffusion log-return; Breeden–Litzenberger with jumps (2026-10-08)
+
+Three entries added, all `full`: `mf-jump-diffusion-density`, `mf-breeden-litzenberger-jump-diffusion`
+and `mf-black-scholes-lognormal-density`. Corpus 503 → 506. New file
+`BlackScholes/JumpDiffusionDensity.lean`, which holds the facts about the law; the option prices
+are in `BlackScholes/JumpDiffusionDigital.lean`. The no-atom lemma of the digital rung moved to the
+density file, where it is a corollary of the density, and `mf-jump-diffusion-digital-strike-derivative`
+now states it.
+
+- The law is a Gaussian mixture. Given the jump count `n` and the jump sizes `j`, the log-return
+  is `N(bτ + ∑_{i<n} jᵢ, σ²τ)` (Mathlib's `gaussianReal_map_const_mul` and
+  `gaussianReal_map_const_add`). So the law is the mixture of these Gaussian laws over
+  `Poisson(Λτ) ⊗ ν^ℕ` (`jumpDiffusionIncrementLaw_apply`, for every `σ`).
+- The density. For `σ ≠ 0` and `τ > 0` the law is `f(y) dy`, with `f` the mixture of the normal
+  densities (`jumpDiffusionDensity`, `jumpDiffusionIncrementLaw_eq_withDensity`, by Tonelli). `f`
+  is continuous by dominated convergence, since a normal density is at most `1/√(2πv)`
+  (`continuous_jumpDiffusionDensity`). The jump law is arbitrary and needs no moment condition; for
+  lognormal jumps `f` is Merton's (1976) Poisson mixture of normal densities (stated in price form,
+  `jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF`). So the law has no
+  atoms (`nullSingletonClass_jumpDiffusionIncrementLaw`, from Mathlib's
+  `nullSingletonClass_withDensity`).
+- The tail of a law with a density. For any law `f(y) dy` with `f ≥ 0` integrable, `x ↦ P(Y > x)`
+  has derivative `−f(a)` at every `a` where `f` is continuous
+  (`hasDerivAt_measureReal_Ioi_withDensity`, from Mathlib's
+  `intervalIntegral.integral_hasDerivAt_right`).
+- Breeden–Litzenberger with jumps. For `S > 0` and `K > 0` the digital price has strike derivative
+  `−e^{−rτ}f(log(K/S))/K` (`hasDerivAt_jumpDiffusionDigitalPrice_strike`). So `f(log(K/S))/K` is
+  the derivative at `K` of the distribution function of the price `Seʸ`. With a finite forward the
+  strike derivative of the call is `−D` at every strike, so
+  `∂²C/∂K² = e^{−rτ}f(log(K/S))/K` (`breedenLitzenberger_jumpDiffusion`).
+- The lognormal density, read off. Without jumps, at the drift `r − σ²/2` and with `σ > 0`, the call
+  price function is `bsV` near `K` (`jumpDiffusionCallPrice_zero`), so its second strike
+  derivative is also `e^{−rτ}·lognormalTerminalPDF` (`breedenLitzenberger`). The two derivatives
+  are equal (`HasDerivAt.unique`), so `f(log(K/S))/K = lognormalTerminalPDF`
+  (`jumpDiffusionDensity_div_eq_lognormalTerminalPDF`). The formula of `BreedenLitzenberger.lean`
+  is therefore the density of the price, which `breedenLitzenberger` alone does not show.
+
+Safe wording: "with a Gaussian part, the log-return law of a jump-diffusion has a continuous
+density, the mixture over the jumps of normal densities, for any jump law; the strike derivative of
+the digital price is minus the discounted density of the price, and with a finite forward the
+second strike derivative of the call price is the discounted density of the price
+(Breeden–Litzenberger with jumps); without jumps, at the drift `r − σ²/2`, that density is the
+lognormal density of `breedenLitzenberger`". Not covered:
+- smoothness of the density beyond continuity;
+- `σ = 0` beyond the atom at `bτ` and the kink it causes (kinks section above).
+
+### Digital options: minus the strike derivative of the call (2026-10-08)
+
+Three entries added, all `full`: `mf-call-strike-derivative`,
+`mf-jump-diffusion-digital-strike-derivative` and `mf-jump-diffusion-digital-black-scholes`. Corpus
+500 → 503. New file `BlackScholes/JumpDiffusionDigital.lean`; `BlackScholes/CallSpreadDigital.lean`
+gains the general strike derivative.
+
+- The strike derivative in general. Where a measurable, integrable `X` has no atom at `K`, the
+  undiscounted call price `C(k) = ∫ (X − k)⁺ dμ` is differentiable at `K`, and
+  `C'(K) = −μ{X > K}` (`hasDerivAt_integral_call`, by Mathlib's
+  `hasDerivAt_integral_of_dominated_loc_of_lip`). At an atom only the right derivative is claimed
+  here (`tendsto_call_spread`); the left one and the kink came later (kink section above).
+- No atoms with a Gaussian part. For `σ ≠ 0` and `τ > 0` the jump-diffusion log-return law has no
+  atoms (`nullSingletonClass_jumpDiffusionIncrementLaw`). Since the density rung (above) this is a
+  corollary of the density; the first proof used that, given the jumps, the log-return is affine
+  in the standard normal sample with slope `σ√τ`.
+- The jump-diffusion digital. With a finite forward the call price function is therefore
+  differentiable in the strike at every `K`, and `∂C/∂K = −D`
+  (`hasDerivAt_jumpDiffusionCallPrice_strike`). Here `D = e^{−rτ}P(Se^Y > K)` is the price of the
+  cash-or-nothing digital (`jumpDiffusionDigitalPrice`).
+- Black–Scholes from the strike derivative. Without jumps, `D = e^{−rτ}Φ(d₂)`
+  (`jumpDiffusionDigitalPrice_zero`). The function has two derivatives at `K`, `−D` and
+  `−e^{−rτ}Φ(d₂)` (from `hasDerivAt_bsV_K`), and they are equal. `bs_cash_or_nothing_formula`
+  computes the same value as a Gaussian integral, and the two derivations agree.
+
+Safe wording: "where the law of the underlying has no atom at the strike, minus the strike
+derivative of the call price is the digital price; a jump-diffusion with a Gaussian part has no
+atoms, so with a finite forward its digital price is minus the strike derivative of its call price
+at every strike; without jumps this gives the Black–Scholes digital `e^{−rτ}Φ(d₂)`". Merton's
+series for the jump-diffusion digital came later (Merton section above).
+
+### Incompleteness at one date: call prices determine the law, the law determines the characteristics (2026-10-08)
+
+Four entries added, all `full`: `mf-call-spread-digital`, `mf-call-prices-determine-law`,
+`mf-jump-diffusion-identifiability` and `mf-jump-diffusion-incompleteness`. Corpus 496 → 500.
+Files: `BlackScholes/CallSpreadDigital.lean`, `BlackScholes/JumpDiffusionIdentifiability.lean` and
+`BlackScholes/JumpDiffusionIncompleteness.lean`. The local uniqueness lemma of
+`Foundations/Esscher.lean` now holds for finite measures, not only probability laws, and the same
+file has the unnormalized Esscher transform `(∫ e^f dμ)·μ.tilted f = e^f·μ`
+(`ofReal_integral_exp_smul_tilted`).
+
+- Call spreads and the digital. For a measurable, integrable `X` under a finite measure, the
+  bull-call spread `(C(K) − C(K + h))/h` tends to `μ{X > K}` as `h ↓ 0` (`tendsto_call_spread`).
+  The spread payoff is at most `1` in absolute value, because the call payoff is `1`-Lipschitz in
+  the strike (`abs_call_payoff_sub_le`, from Mathlib's `abs_max_sub_max_le_abs`), and tends
+  pointwise to the digital payoff. So
+  call prices at every strike `K > 0` determine the law of a log-return with a finite forward
+  (`measure_eq_of_integral_call_eq`): the first-order Breeden–Litzenberger, for any law with a
+  finite forward. The second-order form is `breedenLitzenberger_jumpDiffusion` for jump-diffusions
+  with a Gaussian part (density rung, above) and `breedenLitzenberger` for Black–Scholes.
+- The law determines the drift, the Gaussian variance and the Lévy measure. Wherever
+  `∫ e^{ux} dν < ∞`, `κ(u) = bu + σ²u²/2 + ∫ (e^{ux} − 1) Π(dx)`, with `Π` the Lévy measure `Λν`
+  restricted off `0` (`jumpDiffusionExponent_eq_levy`). For jump laws whose moment-generating
+  functions are finite near `0`, two log-return laws at one date `τ > 0` are equal iff their drifts
+  agree, their Gaussian variances `σ²` agree and their Lévy measures agree off `0`
+  (`jumpDiffusionIncrementLaw_eq_iff`). The sign of `σ`, the rate and the jump law are not
+  determined separately. Second differences of `κ` are the moment-generating function of the
+  finite measure `σ²s²·δ₀ + 2(cosh(sx) − 1)·Λν` (`secondDifferenceMeasure`), so the local
+  uniqueness of the Esscher layer identifies that measure. Its atom at `0` gives `σ²`, and off `0`
+  dividing by the kernel gives `Π`. This is the Lévy–Khintchine uniqueness for compound-Poisson
+  jumps with exponential moments near `0`.
+- A change of drift gives an equivalent law. For `σ ≠ 0` and `τ > 0`, log-return laws that differ
+  only in the drift are equivalent (`jumpDiffusionIncrementLaw_absolutelyContinuous`): on the
+  canonical model a change of drift is a move of the standard normal sample, and the moved
+  Gaussian `N(m, 1)` is the Esscher tilt of `N(0, 1)` (`gaussianReal_tilted_const_mul`), equivalent
+  to it. This is static Girsanov on the Gaussian factor (`Foundations/GaussianGirsanov.lean`).
+- Incompleteness at one date. The Esscher transform multiplies the Lévy measure by `e^{θx}`
+  (`smul_tilted_eq_withDensity`). Suppose `σ ≠ 0`, the jumps are nontrivial (`Λ > 0`, `ν` not the
+  point mass at `0`), the jump law's moment-generating function is finite near `0` and near `θ`
+  with finite exponential moments `∫ eˣ dν` and `∫ e^{(1+θ)x} dν`, and the physical drift is off the
+  compensated one. Then the Esscher law and the Merton measure's law (the same `σ`, `Λ`, `ν` and
+  the compensated drift) are both equivalent to the physical law and both have the forward
+  `∫ eʸ = e^{rτ}`, yet at some strike their call prices differ (`exists_call_esscher_ne_merton`).
+  Equal prices at every strike would make the two laws equal, hence their Lévy measures, but
+  `θ ≠ 0` and `e^{θx} ≠ 1` off `0`.
+
+Safe wording: "call prices at every strike determine the law of the log-return; the law at one
+date of a jump-diffusion determines its drift, its Gaussian variance and its Lévy measure off `0`
+(for jump laws with exponential moments near `0`); and with
+`σ ≠ 0`, nontrivial jumps and a physical drift off the compensated one, the Esscher law and the
+Merton measure's law are two compensated laws, both equivalent to the physical law at one date,
+that price some call differently". Not covered:
+- the Lévy–Khintchine uniqueness without moment conditions (by characteristic functions);
+- the process-level changes of measure (equivalent martingale measures for the price process)
+  behind the two laws; for `σ = 0` the Merton law need not be equivalent to the physical one (the
+  physical law has an atom at `bτ`, which a change of drift moves);
+- the set of all arbitrage-free call prices, or superreplication bounds.
+
+### The Esscher transform: one tilt for static Girsanov and the jumps, one MGF identification shared with Brownian motion (2026-10-08)
+
+Six entries added, all `full`: `mf-jump-diffusion-esscher-transform`,
+`mf-jump-diffusion-esscher-pricing`, `mf-jump-diffusion-esscher-parameter`,
+`mf-merton-esscher-pricing`, `mf-black-scholes-esscher-pricing` and `gir-gaussian-esscher-tilt`.
+Corpus 490 → 496. The tilt lives in `Foundations/Esscher.lean`, the jump-diffusion results in
+`BlackScholes/JumpDiffusionEsscher.lean`.
+
+- One tilt. The Esscher transform with parameter `θ` of a law `μ` on `ℝ` is Mathlib's
+  `μ.tilted (θ * ·)`. Its exponential moments are ratios of those of `μ`
+  (`integral_exp_mul_tilted_const_mul`, Mathlib's `integral_exp_tilted` at linear exponents).
+  A law is determined by its moment-generating function on a neighbourhood of `0`, when that
+  function is finite there (`measure_eq_of_mgf_id_eventuallyEq`). The proof is the identity
+  theorem on a vertical strip for Mathlib's complex moment-generating function, then the
+  characteristic function on the imaginary axis. `measure_eq_of_mgf_id_eq` is the case of every
+  exponential moment. A Gaussian law has its mean shifted: `N(m, v)` tilted is `N(m + θv, v)`
+  (`gaussianReal_tilted_const_mul`).
+- One file, three users. The static Girsanov change of measure
+  `gaussianReal_withDensity_esscher` (behind `BSCallHyp.exists_of_physical`) is the case `N(0, 1)`
+  of the Gaussian tilt; its pdf proof `gaussian_esscher_pdf`, used nowhere else, is removed. The
+  exponential-martingale characterization of Brownian motion (`ExpMartingaleQBrownian`)
+  identifies the Gaussian increment law with `measure_eq_of_mgf_id_eq` instead of its own copy of
+  the complex-MGF argument. The jump layer is the third user.
+- The jump-diffusion law. When the moment-generating function of the jump law `ν` is finite near
+  `θ`, the tilted log-return law over `τ` is the jump-diffusion law with drift `b + θσ²`, the same
+  `σ`, rate `Λ·∫e^{θx}dν` and the tilted jump law (`jumpDiffusionIncrementLaw_tilted`). Near
+  `0`, both laws have the moment-generating function `u ↦ e^{(κ(u + θ) − κ(θ))τ}`
+  (`jumpDiffusionExponent_tilted`). This covers jump laws whose moment-generating function is
+  finite only on an interval, such as Kou's double-exponential jumps.
+- Esscher pricing. The tilted characteristics are at their compensated drift exactly when
+  `κ(θ + 1) − κ(θ) = r` (`compensated_tilted_iff`): the criterion `κ(1) = r`
+  (`compensated_iff_exponent_one`, shared with the discounted-price martingale criterion) for the
+  tilted Laplace exponent. The call against the tilted law is the call price function of the
+  tilted characteristics (`integral_call_tilted_eq_jumpDiffusionCallPrice`). So at such a `θ`,
+  with the moment at `1 + θ` finite, it is Merton's formula for the tilted jump law
+  (`integral_call_tilted_eq_merton`). Tilting keeps Merton's jumps lognormal with the jump mean
+  `(1 + k)e^{θδ²} − 1` (`mertonJump_tilted`), so in Merton's model it is Merton's 1976 series
+  (`integral_call_tilted_eq_mertonCallPrice`).
+- The Esscher parameter exists and is unique when `σ ≠ 0` and the jump law has every exponential
+  moment (`existsUnique_esscher`). `θ ↦ κ(1 + θ) − κ(θ)` is the line `b + σ²/2 + σ²θ` plus `Λ`
+  times the jump part `∫ e^{θx}(eˣ − 1) dν`, which is nondecreasing because
+  `(e^{θ'x} − e^{θx})(eˣ − 1) ≥ 0` for `θ ≤ θ'`. So the map is strictly increasing, continuous
+  (Mathlib's `continuous_mgf`) and unbounded both ways, and `Continuous.surjective` applies.
+  Without jumps the parameter is `θ = (r − b − σ²/2)/σ²` (`jumpDiffusionExponent_zero_esscher`).
+  The tilt there gives the risk-neutral law and the Black–Scholes price for every drift
+  (`integral_call_tilted_zero_eq_bsV`, through `jumpDiffusionIncrementLaw_zero_tilted`).
+
+Safe wording: "where the jump law's moment-generating function is finite near `θ`, the Esscher
+transform of the log-return law at one date is again a jump-diffusion law, and at an Esscher
+parameter with a finite moment of order `1 + θ` the call against it is Merton's formula for the
+tilted jumps". The Esscher law is equivalent to the physical law at one date, but with
+nontrivial jumps and `σ ≠ 0` it is not the only compensated law that is: when the physical drift is
+not already compensated, the Merton measure's law is another, and the two price some call
+differently (`exists_call_esscher_ne_merton`, section above, under its moment conditions); without
+jumps the model is Black–Scholes. Not covered:
+- the existence of an Esscher parameter without a Gaussian part (`σ = 0`), or when the jump law's
+  moment-generating function is finite only on an interval;
+- the Esscher measure on the process, a change of measure on `Ω` under which `X` is again a
+  jump-diffusion;
+- optimality properties of the Esscher measure.
+
+### The Laplace exponent: the moment-generating function, exponential martingales, power claims (2026-10-08)
+
+Four entries added, all `full`: `mf-jump-diffusion-scaling`, `mf-jump-diffusion-levy-exponent`,
+`mf-jump-diffusion-exponential-martingales` and `mf-jump-diffusion-power-claim-every-date`.
+Corpus 486 → 490. They live in `BlackScholes/JumpDiffusionProcess.lean` (the moment-generating
+function) and `BlackScholes/JumpDiffusionExponent.lean` (scaling, martingales, power claims).
+
+- The moment-generating function, at every `θ` with `∫ e^{θx} dν < ∞`:
+  `∫ e^{θy} dμ_τ(y) = e^{κ(θ)τ}` with the Laplace exponent
+  `κ(θ) = bθ + σ²θ²/2 + Λ(∫ e^{θx} dν − 1)` (`jumpDiffusionExponent`,
+  `integral_exp_const_mul_jumpDiffusionIncrementLaw`). On the canonical model it is the Gaussian
+  moment-generating function times the compound-Poisson one, by independence
+  (`JumpDiffusionHyp.mgf_logReturn`: Mathlib's `mgf_gaussianReal` and `IndepFun.mgf_add'`, and
+  `compoundPoisson_mgf_of_indepFun` from `Actuarial/CompoundPoissonMGF.lean`). In Mathlib's terms
+  `κ(θ)τ` is the cumulant generating function (`cgf_id_jumpDiffusionIncrementLaw`). The moment at
+  `1`, which the discounted-price criterion uses, is now its corollary; it was derived from the
+  pricing identity `discounted_terminal`.
+- Scaling, `jumpDiffusionIncrementLaw_map_const_mul`: `θ` times a jump-diffusion log-return over
+  `τ` is one with drift `θb`, volatility coefficient `θσ`, the same rate, and the jump law pushed
+  forward by `x ↦ θx`. This is an identity of laws, with no integrability hypothesis. On the
+  canonical model the drift and the Gaussian coefficient scale inside the log-return, and the
+  jumps change only the jump law (`jumpDiffusionMeasure_map_jumps`, from Mathlib's
+  `Measure.map_prod_map` and `Measure.infinitePi_map_pi`). On the process, `θX` is a
+  `JumpDiffusionProcess` (`JumpDiffusionProcess.const_mul`).
+- The exponential martingales `e^{θX_t − κ(θ)t}` (`JumpDiffusionProcess.martingale_exp_const_mul_sub`)
+  are the discounted-price criterion `martingale_iff` applied to `θX` at the rate `κ(θ)`. The
+  criterion itself reads `κ(1) = r` (`JumpDiffusionProcess.martingale_iff_exponent_one`). For
+  `b = 0`, `σ = 1` and no jumps `κ(θ) = θ²/2`, the exponent of Wald's martingales; both families
+  rest on `martingale_exp_sub_of_indep_increments`.
+- Power claims at each date before maturity, `JumpDiffusionProcess.condExp_rpow`: for `S₀ > 0`,
+  `∫ e^{px} dν < ∞` and `t ≤ T`, `𝔼[e^{−r(T−t)}S_T^p | 𝓕_t] = S_t^p e^{(κ(p) − r)(T − t)}`, almost
+  surely. It goes through `condExp_comp`, as the put and the call do.
+
+Safe wording: "where the jump law has the exponential moment of order `θ`, the log-return over `τ`
+has moment-generating function `e^{κ(θ)τ}`, and `e^{θX_t − κ(θ)t}` is a martingale". "Price" for
+the power claim holds only when `P` is a martingale measure for the discounted price
+(`κ(1) = r`), and then it is an arbitrage-free price. With jumps it is in general not the
+only one, which is not formalized for the process; at one date, compensated laws are already not
+unique (`exists_call_esscher_ne_merton`). Not covered: `θ` with
+`∫ e^{θx} dν = ∞`; the Esscher change of measure on the process (the transform of the law at
+one date is in the section above); the convolution semigroup `μ_s ∗ μ_t = μ_{s+t}`; the existence of the process with
+jumps.
+
+### One conditional freezing lemma; European payoffs at every date (2026-10-08)
+
+Two entries added, both `full`: `ce-conditional-freezing-lemma` and
+`mf-jump-diffusion-payoff-every-date`. Corpus 484 → 486.
+
+- The conditional freezing lemma (Shreve's independence lemma), `condExp_comp_prodMk_of_indep`
+  (`Foundations/IndepFreezing.lean`): for `X` measurable for a σ-algebra `𝒢` and `Y` independent
+  of `𝒢`, `𝔼[g(X, Y) | 𝒢] = G(X)` with `G(x) = ∫ g(x, y) d(law Y)(y)`, for `g` strongly measurable
+  with `g(X, Y)` integrable. On each event of `𝒢` the joint law of `(X, Y)` is a product
+  (`map_restrict_prodMk_of_indep`), so Fubini gives the same integral over every such event. It
+  replaces the bounded, real-valued case (`AmericanPut/Stopping/IndependentKernel.lean`, deleted):
+  the American put's Brownian transitions and the jump-diffusion prices now use the same lemma.
+- European payoffs at every date, `JumpDiffusionProcess.condExp_comp`:
+  `𝔼[f(X_T) | 𝓕_t] = ∫ f(X_t + y) dμ_{T−t}(y)` for measurable `f` with `f(X_T)` integrable, with
+  `μ_{T−t}` the log-return law over the remaining time. The put (for `S₀ ≥ 0`, any strike) and the
+  call (for `∫ eˣ dν < ∞`, any `S₀` and `K`) are instances. The call no longer goes through
+  put–call parity, the put no longer needs `K ≥ 0`, and the call no longer needs `S₀, K ≥ 0`.
+- Coherence: put–call parity of the price functions comes from the payoff identity
+  `max_sub_max_neg` of the finite-state parity (`Foundations/NoArbitrageDerivations.lean`). The
+  canonical model's count–size independence comes from Mathlib's
+  `indepFun_iff_hasLaw_prodMk_prod`; the repo's measure-preserving pull-back lemma is deleted.
+  `[IsProbabilityMeasure P]` is derived from the process (`JumpDiffusionProcess.isProbabilityMeasure`)
+  on six statements, and the log-return is a named function (`jumpDiffusionLogReturn`).
+
+Safe wording: "given the information at `t`, a European payoff at `T` is the payoff averaged over
+the remaining log-return, started from the current state; the step is Shreve's independence lemma,
+proved for integrable payoffs". Not covered: path-dependent payoffs and random times (the strong
+Markov property); the existence of the process with jumps.
+
+### Coherence bridges: Brownian motion without jumps; Merton's model exists (2026-10-08)
+
+Four entries added, all `full`: `mf-jump-diffusion-brownian-no-jumps`, `mf-bs-formulas-every-date`,
+`gir-risk-neutral-drift-unique` and `mf-merton-model-exists`. Corpus 480 → 484.
+
+- With rate `0` the jump-diffusion log-return is `N(bτ, σ²τ)` (`jumpDiffusionIncrementLaw_zero`),
+  so for a filtered pre-Brownian motion `B` the log-price `bt + σB_t` is a `JumpDiffusionProcess`
+  (`IsFilteredPreBrownian.jumpDiffusionProcess`, `BlackScholes/JumpDiffusionBrownian.lean`). The
+  Brownian motion constructed on path space for the American-put development
+  (`brownian_filtered`) makes the structure satisfiable without jumps
+  (`jumpDiffusionProcess_brownian`).
+- The process-level jump results then specialize to the Black–Scholes model driven by a Brownian
+  motion: the discounted price is a martingale if and only if `b = r − σ²/2`
+  (`IsFilteredPreBrownian.martingale_discounted_iff`, whose "if" direction is
+  `discountedGBM_isMartingale` of `gir-continuous-ftap`), and the conditional values of the call
+  and the put before maturity are the Black–Scholes formulas at the current price and the
+  remaining maturity (`IsFilteredPreBrownian.condExp_call_eq_bsV`,
+  `IsFilteredPreBrownian.condExp_put_eq_bsPut`).
+- A `JumpDiffusionHyp` model whose first log-jump is `N(log(1 + k) − δ²/2, δ²)` is a Merton model
+  (`JumpDiffusionHyp.toMertonHyp`), and the canonical model with that jump law gives a `MertonHyp`
+  (`mertonHyp_canonical`), so the Merton entries' hypotheses can be met.
+
+Safe wording: "Brownian motion with drift is a jump-diffusion process without jumps, so the
+jump-diffusion process results contain the Black–Scholes model at every date before maturity, and
+Merton's model exists". Not covered: a jump-diffusion process with jumps (`Λ > 0`); `MertonHyp` as
+an instance of `JumpDiffusionHyp` (its jumps are only a.e.-measurable).
+
+### Gaussian smoothing; Merton's 1976 series from the general route, at every date (2026-10-08)
+
+Three entries added, all `full`: `mf-bs-gaussian-smoothing`, `mf-merton-from-general-jump-law` and
+`mf-jump-diffusion-merton-1976-every-date`. Corpus 477 → 480.
+
+- Gaussian smoothing of the Black–Scholes price (`BlackScholes/GaussianSmoothing.lean`): for
+  `G ∼ N(m, v)`, `𝔼[C_BS(Se^G; σ)] = C_BS(Se^{m + v/2}; √(σ² + v/T))`
+  (`integral_bsV_mul_exp_gaussianReal`, with the volatility characterised by `σ'²T = σ²T + v` in
+  `integral_bsV_mul_exp_gaussianReal_of_sq`). The proof reads the average as a call through the
+  mixing formula and adds the Gaussian log-shocks.
+- Merton's series from the general route (`BlackScholes/JumpDiffusionMerton.lean`): with
+  log-jumps `N(log(1 + k) − δ²/2, δ²)` and the compensator `kΛ`, the general-law formula and
+  Gaussian smoothing give `mertonCallPrice` (`JumpDiffusionHyp.call_eq_mertonCallPrice`). The two
+  Merton towers now reach the same series. `MertonHyp` is still not an instance of
+  `JumpDiffusionHyp` (its jumps are only a.e.-measurable), so `merton_call_formula` keeps its own
+  proof.
+- Merton's 1976 formula at every date: with Gaussian jumps at the compensated drift
+  `b = r − σ²/2 − Λk`, the call price function is `mertonCallPrice` at the expected jump count
+  `Λτ` (`jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice`), and for `t < T` the conditional
+  call value given `𝓕_t` is `mertonCallPrice` at `S_t`, `T − t` and `Λ(T − t)`
+  (`JumpDiffusionProcess.condExp_call_eq_mertonCallPrice`). The put follows from the two
+  put–call parities: `jumpDiffusionPutPrice_gaussian_eq_mertonPutPrice` and
+  `JumpDiffusionProcess.condExp_put_eq_mertonPutPrice` give `mertonPutPrice`.
+
+Safe wording: "averaging a Black–Scholes call over a lognormal spot factor is a Black–Scholes call
+at the shifted spot and the enlarged volatility; with lognormal jumps the general jump-diffusion
+formula is Merton's 1976 series, and in a log-price process with independent jump-diffusion
+increments, at the compensated drift `b = r − σ²/2 − Λk`, it is the conditional value of the call
+and the put at every date before maturity". Not covered: the existence of the process with jumps;
+`MertonHyp` as an instance of `JumpDiffusionHyp`.
+
+### Prices at every date; Merton's formula and the implied-volatility lift at every date (2026-10-08)
+
+Five entries added, all `full`: `mf-jump-diffusion-price-parity`,
+`mf-jump-diffusion-put-intermediate-date`, `mf-jump-diffusion-call-intermediate-date`,
+`mf-jump-diffusion-merton-intermediate-date` and `mf-jump-diffusion-implied-vol-every-date`.
+Corpus 472 → 477.
+
+- The price functions (`BlackScholes/JumpDiffusionOptionPrices.lean`): `jumpDiffusionPutPrice` and
+  `jumpDiffusionCallPrice` are the discounted expected payoffs `e^{−rτ}(K − Se^Y)⁺` and
+  `e^{−rτ}(Se^Y − K)⁺` against the log-return law over `τ`. They satisfy put–call parity
+  `C = P + S·e^{(b + σ²/2 + Λ(𝔼[e^J] − 1) − r)τ} − Ke^{−rτ}` (`jumpDiffusionCallPrice_eq`), which
+  is `C = P + S − Ke^{−rτ}` at the compensated drift (`jumpDiffusionCallPrice_eq_of_compensated`).
+- Prices at an intermediate date, for any drift: given `𝓕_t`, the discounted put and call payoffs
+  at `T` have conditional expectations `P(S_t, T − t)` and `C(S_t, T − t)`
+  (`JumpDiffusionProcess.condExp_put`, `JumpDiffusionProcess.condExp_call`). Both are instances
+  of `JumpDiffusionProcess.condExp_comp`, the conditional freezing lemma applied to the process
+  (see the 484 → 486 section): `X_t` is known at `t`, and the increment is independent of `𝓕_t`.
+  At the compensated drift `P` is a martingale measure, so these are arbitrage-free prices, the
+  ones under `P`. With jumps they are in general not the only ones, which is not formalized for
+  the process; at one date, compensated laws are already not unique
+  (`exists_call_esscher_ne_merton`). At any other drift they are only
+  `P`-conditional expectations.
+- Merton's formula at every date: at the compensated drift the call price function is the call of
+  the canonical model with expected jump count `Λτ` (`jumpDiffusionCallPrice_eq_canonical`), so it
+  is the
+  `Poisson(Λτ)` mixture of Black–Scholes prices averaged over `ν^ℕ`
+  (`jumpDiffusionCallPrice_eq_merton`). For `t < T`, `𝔼[e^{−r(T−t)}(S_T − K)⁺ | 𝓕_t]` is that
+  formula at `S_t` and `T − t` (`JumpDiffusionProcess.condExp_call_eq_merton`).
+- The implied-volatility lift at every date: with `Λ > 0` and a jump law other than `δ₀`, the
+  price function has a unique Black–Scholes implied volatility, above `σ`
+  (`jumpDiffusionCallPrice_impliedVol_gt`, from `JumpDiffusionHyp.impliedVol_gt` on the canonical
+  model). So for `t < T`, almost surely, the conditional call value has a unique implied
+  volatility at `S_t` and `T − t`, above `σ` (`JumpDiffusionProcess.condExp_call_impliedVol_gt`).
+
+Safe wording: "for a log-price process with independent jump-diffusion increments, the
+conditional value of a European put or call at any date is its price function at the current
+spot and the remaining maturity; at the compensated drift the call's is Merton's formula for the
+jump law, and once jumps occur and move the price its implied volatility is almost surely above
+`σ` at each date before maturity and each positive strike". Not covered: the existence of such a
+process with jumps, its path regularity, and a measurable choice of the implied volatility as a
+random variable (the statement holds path by path, almost surely, with a null set that may depend
+on the strike and the dates).
+
+### The jump-diffusion model exists; its price process (2026-10-08)
+
+Five entries added, all `full`: `mf-jump-diffusion-model-exists`,
+`mf-jump-diffusion-call-law-invariance`, `mf-jump-diffusion-log-return-mgf`,
+`mf-jump-diffusion-discounted-price-martingale` and `mart-exp-indep-increments`. Corpus 467 → 472.
+
+- The model exists, `jumpDiffusionHyp_canonical` (`BlackScholes/JumpDiffusionCanonical.lean`):
+  for every expected jump count `Λ` and every jump law `ν`, the coordinates of `ℝ × ℕ × (ℕ → ℝ)`
+  under `N(0, 1) ⊗ Poisson(Λ) ⊗ ν^ℕ` satisfy `JumpDiffusionHyp`, with jumps of law `ν`.
+  `JumpDiffusionHyp` can therefore be discharged for any `Λ` and `ν`; the remaining hypotheses on
+  the model are `∫ eˣ dν < ∞` (`integrable_exp_canonical_jump`) and, for the implied-volatility
+  result, `Λ > 0` and `ν ≠ δ₀`. `MertonHyp` was witnessed later (`mertonHyp_canonical`).
+- The call depends only on `Λ` and the jump law, `JumpDiffusionHyp.call_eq_integral_infinitePi`:
+  on any model with `𝔼[e^{J₀}] < ∞`, for `S₀, K, σ, T > 0`, it is
+  `∫ n, ∫ x, C_BS(S₀e^{−κ + ∑_{i<n} xᵢ}) dν^ℕ dPoisson(Λ)`, with `ν` the law of `J₀`.
+- The price process, `BlackScholes/JumpDiffusionProcess.lean`: a log-price `X` on `[0, ∞)`,
+  adapted, started at `0`, with increments independent of the past and distributed as a
+  jump-diffusion log-return over the elapsed time (`JumpDiffusionProcess`). The log-return's
+  exponential moment is `e^{(b + σ²/2 + Λ(𝔼[e^J] − 1))τ}`
+  (`integral_exp_jumpDiffusionIncrementLaw`), and the discounted price `e^{−rt}S₀e^{X_t}` is a
+  martingale if and only if `b = r − σ²/2 − Λ(𝔼[e^J] − 1)` (`JumpDiffusionProcess.martingale_iff`).
+  The engine is `Foundations/ExpMartingaleIndepIncrements.martingale_exp_sub_of_indep_increments`:
+  `e^{X_t − ψ(t)}` is a martingale when the increments are independent of the past with
+  `𝔼[e^{X_t − X_s}] = e^{ψ(t) − ψ(s)}`.
+
+Safe wording: "the compound-Poisson jump-diffusion model exists for every expected jump count and
+jump law, its call price depends only on the expected jump count and the jump law, and a log-price process with
+independent jump-diffusion increments has a martingale discounted price exactly at the compensated
+drift". Not covered: the existence of such a process (a Lévy process up to path regularity;
+constructing it needs a Kolmogorov extension or a construction from a Brownian motion and a
+compound Poisson process) and its path regularity. Prices at intermediate dates came in the next
+phase.
+
+### Jumps lift the implied volatility (2026-10-08)
+
+Six entries added, all `full`: `mf-bs-call-strictly-convex-in-spot`,
+`mf-bs-call-tends-to-spot-high-vol`, `mf-implied-vol-exists-above-reference`,
+`mf-jump-diffusion-call-strict-bounds`, `mf-jump-diffusion-implied-vol-above-sigma` and
+`mf-compound-poisson-implied-vol-above-sigma`. Corpus 461 → 467.
+
+- Strict bounds, `bsV_lt_jumpDiffusion_call` and `jumpDiffusion_call_lt`: a compensated jump part
+  `Y` (`𝔼[e^Y] = 1`) that is not almost surely `0` puts the call strictly between `C_BS(S₀; σ)`
+  and `S₀`. The lower bound is Jensen's inequality made strict
+  (`Foundations/AffineMinorant.lt_integral_of_affine_lt`): the Black–Scholes price is strictly
+  convex in the spot (`bsV_spot_strictConvexOn`, from positive gamma), so it lies strictly above
+  its tangent away from `S₀` (`bsV_spot_tangent_lt`).
+- The Black–Scholes side, in `BlackScholes/ImpliedVolatility.lean`: the call tends to the spot as
+  `σ → ∞` (`tendsto_bsV_sigma_atTop`), so a price strictly between the Black–Scholes price at
+  some `σ₀ > 0` and the spot has a unique positive implied volatility, and it is above `σ₀`
+  (`exists_impliedVol_gt_of_bsV_lt`).
+- Together, `jumpDiffusion_impliedVol_gt`: the jump-diffusion call has a unique Black–Scholes
+  implied volatility, and it exceeds `σ`, at every positive strike and maturity, for any
+  compensated jump part that is not almost surely `0`. For the compound-Poisson model at the
+  compensator, `JumpDiffusionHyp.impliedVol_gt` needs, beyond `𝔼[e^J] < ∞`, only a positive
+  expected jump count and a jump law that is not the point mass at `0`; under these the jump part
+  is not almost surely `0` (`JumpDiffusionHyp.not_jumpPart_ae_eq_zero`).
+
+Safe wording: "for a compensated jump-diffusion whose jump part is not almost surely zero, with
+any jump law, the call has a unique Black–Scholes implied volatility, and it is strictly above the
+diffusion volatility, at every strike and maturity". Not covered: how the implied volatility
+varies with the strike (the shape of the smile); the `σ → 0` limit of the Black–Scholes price,
+and with it implied-volatility existence across the whole no-arbitrage range; the put's implied
+volatility (parity holds for the price functions, `jumpDiffusionCallPrice_eq_of_compensated`, but
+the put's implied volatility is not stated).
+
+### Jump-diffusions with an arbitrary jump law (2026-10-07)
+
+Four entries added, all `full`: `mf-jump-diffusion-mixing-formula`,
+`mf-jump-diffusion-call-dominates-bs`, `mf-jump-diffusion-compensator` and
+`mf-merton-general-jump-law`. Corpus 457 → 461.
+
+`BlackScholes/JumpDiffusionMixing.lean` drops the Gaussian jump law of `MertonModel`:
+
+- the mixing formula, `jumpDiffusion_call_eq_integral_bsV`: for `Z ∼ N(0, 1)` and a jump part `Y`
+  independent of `Z` with `𝔼[e^Y] < ∞`,
+  `𝔼[e^{−rT}(S₀e^{(r−σ²/2)T + σ√T·Z + Y} − K)⁺] = 𝔼[C_BS(S₀e^Y)]`. With `Y` frozen at `y` the
+  terminal price is a Black–Scholes terminal price at the spot `S₀e^y`, so the freezing lemma
+  reduces the call to `bs_call_formula`.
+- jump risk is never free, `bsV_le_jumpDiffusion_call` and `jumpDiffusion_call_le`: if
+  `𝔼[e^Y] = 1`, the call lies between `C_BS(S₀)` and `S₀`, whatever the law of `Y`. The lower
+  bound is Jensen's inequality for the Black–Scholes price, which is convex in the spot. Merton's
+  lognormal case, `bsV_le_mertonCallPrice`, had needed a second (volatility) channel.
+- the compensator, `JumpDiffusionHyp.discounted_terminal` and `discounted_terminal_eq_iff`: for
+  the compound-Poisson jump part `−κ + ∑_{i<N} Jᵢ`, with i.i.d. `Jᵢ` of any law with
+  `𝔼[e^J] < ∞`, `𝔼[e^{−rT}S_T] = S₀e^{−κ + Λ(𝔼[e^J] − 1)}`. This equals `S₀` exactly when
+  `κ = Λ(𝔼[e^J] − 1)`.
+- Merton's formula for a general jump law, `JumpDiffusionHyp.call_eq_integral_bsV` and
+  `call_poisson_mixture`: the call is `𝔼[C_BS(S₀e^{−κ + ∑_{i<N} Jᵢ})]`, and with the count
+  integrated out, `∫ n, 𝔼[C_BS(S₀e^{−κ + ∑_{i<n} Jᵢ})] ∂Poisson(Λ)`.
+
+The model assumes the count independent of the diffusion sample and the jump sizes, and the
+diffusion sample independent of the sizes. `Foundations/IndepFreezing.indepFun_prodMk_of_indepFun_prodMk`
+re-associates this to "the diffusion sample is independent of the count and the sizes", so each
+model-level statement is the single-jump-part theorem at `Y = −κ + ∑_{i<N} Jᵢ`. Integrating out a
+countable variable is one lemma, `integral_comp_of_hasLaw_of_countable`, which the Merton prices,
+the compound-Poisson MGF and the general-law formula all use (`Foundations/PoissonMaxima` still
+conditions on its count by hand).
+
+Safe wording: "the mixing formula, Black–Scholes and spot bounds for a compensated jump-diffusion
+call, the compound-Poisson compensator, and Merton's Poisson-mixture formula for i.i.d. jumps of
+any law with a finite exponential moment, at maturity". Not covered: closed forms for specific
+non-Gaussian jump laws (Kou's double-exponential model needs its own integrals), the put and
+put–call parity, the price process, and Lévy processes beyond compound Poisson. `MertonModel` is
+not derived from this file: a `MertonHyp` is not a `JumpDiffusionHyp` as stated, because its jumps
+are only a.e.-measurable.
+
+### The Merton Greeks (2026-10-07)
+
+Five entries added, all `full`: `mf-merton-delta`, `mf-merton-gamma`, `mf-merton-vega`,
+`mf-merton-call-convex-in-spot` and `mf-merton-call-increasing-in-vol`. Corpus 452 → 457. These
+are the statements issue #129 asks for.
+
+`BlackScholes/MertonGreeks.lean` differentiates the Poisson series of Black–Scholes prices
+`C(S) = ∑ₙ wₙ C_BS(S·cₙ, σₙ)` term by term (`hasDerivAt_tsum_of_isPreconnected`), with
+`wₙ = e^{−Λ}Λⁿ/n!`, `cₙ = e^{−kΛ}(1 + k)ⁿ` and `σₙ = √(σ² + nδ²/T)`. For `K, σ, T > 0`, `k > −1`
+and `S > 0`:
+
+- delta: `∂C/∂S = ∑ₙ wₙ cₙ Φ(d₁ⁿ)`, with `0 < Δ < 1` (`hasDerivAt_mertonCallPrice_spot`,
+  `mertonDelta_pos`, `mertonDelta_lt_one`). The upper bound is the compensation identity
+  `∑ₙ wₙcₙ = 1` together with `Φ < 1`.
+- gamma, stated for the price as the derivative of `deriv C`: `∑ₙ wₙ cₙ ϕ(d₁ⁿ)/(S σₙ √T) > 0`
+  (`hasDerivAt_deriv_mertonCallPrice_spot`, `mertonGamma_pos`).
+- vega: `∂C/∂σ = ∑ₙ wₙ S cₙ ϕ(d₁ⁿ) √T · σ/σₙ > 0` (`hasDerivAt_mertonCallPrice_sigma`,
+  `mertonVega_pos`).
+- shape: on `(0, ∞)` the price strictly increases and is strictly convex in `S`, and strictly
+  increases in `σ` (`mertonCallPrice_strictMonoOn_spot`, `mertonCallPrice_strictConvexOn_spot`,
+  `mertonCallPrice_strictMonoOn_sigma`).
+
+Each term's derivative is dominated by `wₙcₙ` (delta), by `wₙcₙ/((S/2)σ√T)` near `S` (gamma,
+since `ϕ ≤ 1` and `σₙ ≥ σ`), or by `wₙ S cₙ √T` (vega). These bounds are summable because the
+weights `wₙcₙ` sum to one.
+
+Safe wording: "the Merton call's delta, gamma and vega as Poisson mixtures of Black–Scholes Greeks,
+with their signs and the shape of the price they imply". The Greeks are stated for
+`mertonCallPrice`, which `merton_call_formula` identifies with the model's expectation at each
+spot. Not covered: the put Greeks, theta and rho, and sensitivities to the jump parameters `k`,
+`δ`, `Λ`.
+
+### Merton's formula derived from the jump-diffusion (2026-10-07)
+
+Five entries added, all `full`: `mf-merton-call-formula`, `mf-merton-put-formula`,
+`mf-merton-discounted-terminal`, `mf-compound-poisson-mgf-random-count` and `ce-freezing-lemma`.
+Corpus 447 → 452.
+
+`mertonCallPrice` was a definition: the Poisson mixture `∫ n, C_BS(spot_n, vol_n) ∂Poisson(Λ)`.
+`BlackScholes/MertonModel.lean` proves it is the price of the model. Under `MertonHyp`, a standard
+normal `Z`, a jump count `N ∼ Poisson(Λ)` and i.i.d. log-jumps `Jᵢ ∼ N(log(1+k) − δ²/2, δ²)`,
+mutually independent, the terminal price
+`S_T = S₀ exp((r − σ²/2)T − kΛ + σ√T·Z + ∑_{i<N} Jᵢ)` has
+`𝔼[e^{−rT}(S_T − K)⁺] = mertonCallPrice` (`merton_call_formula`), the put analogue
+(`merton_put_formula`) and `𝔼[e^{−rT}S_T] = S₀` (`merton_discounted_terminal`). With `n` jumps the
+total log-shock is a sum of independent Gaussians, so `S_T` is a Black–Scholes terminal price at
+`mertonSpot n` and `mertonVol n` (`mertonTerminal_eq_bsTerminal`, `MertonHyp.hasLaw_mertonStd`);
+the jump count is then integrated out by the freezing lemma.
+
+The freezing lemma is `Foundations/IndepFreezing.integral_comp_prodMk_of_indepFun`:
+`𝔼[g(X, Y)] = ∫ x, 𝔼[g(x, Y)] d(law X)` for independent `X`, `Y`, from Mathlib's
+`IndepFun.map_prod_eq_prod_map_map` and `integral_prod`. Its second consumer closes a gap
+`Actuarial/CompoundPoissonMGF.lean` used to declare: `compoundPoisson_mgf_of_indepFun` computes
+`𝔼[exp(t·∑_{i<N} Xᵢ)] = exp(λ(M_X(t) − 1))` for a claim count that is a random variable
+independent of the claims, where `mf-compound-poisson-mgf` integrated against the Poisson weights.
+
+Safe wording: "Merton's 1976 option prices derived from the terminal law of the jump-diffusion".
+Not covered: the price process `(S_t)` (a Brownian motion plus a compound-Poisson process) and the
+martingale property of `e^{−rt}S_t` at intermediate dates; the conditional form of the freezing
+lemma; closed forms for jump laws other than lognormal (the Poisson mixture for any law is
+`mf-merton-general-jump-law`).
+
 ### Itô's formula for adapted coefficients (2026-10-05)
 
 One entry added, `sc-ito-formula-adapted` (`full`). Corpus 446 → 447.

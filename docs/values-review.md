@@ -125,6 +125,1206 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-08 — corpus 535 — the variance swap on one process, under one measure
+
+Scope: corpus 530 → 535, one rung, the first two items of the corpus-530 backlog.
+`mf-jump-diffusion-terminal-law`, `mf-jump-diffusion-log-contract-on-process`,
+`mf-jump-diffusion-log-contract-below-discrete-swap`, `mf-black-scholes-log-contract-discrete-swap`
+and `mf-merton-log-contract-variance` added; `mf-jump-diffusion-variance-swap-vs-log-contract`
+restated on the process. One read-only reviewer read the prose against the statements and
+re-derived the five formulas by hand; all hold. One CI run went red, on two elaboration details
+recorded below.
+
+### Standing first pass: prose against statement
+
+All findings are applied.
+- **A cross-reference to the wrong statement.** The Black–Scholes entry cited
+  `mf-variance-swap-equivalence` for the finite-`n` realized variance, which that entry does not
+  state; it now cites `expected_bsLogPrice_equipartition_sum`, proved separately on `ℝ` time, and
+  the limit.
+- **The sign of the bias without `Λ > 0`.** `integral_jumpBias_nonpos` and `integral_jumpBias_neg`
+  bound `E[e^J − 1 − J − J²/2]`, the bias per unit of `2Λ`; the module doc and coverage called it
+  the bias, which is `0` at `Λ = 0`, and dropped the moment-generating-function hypothesis of the
+  strict lemma.
+- **Merton called a corollary on the process.** `mertonJump_logContract_variance` is a statement
+  about the law; no Merton `JumpDiffusionProcess` is constructed. Umbrella, curated audit, roadmap
+  and bridges now say "at the level of the law".
+- **A pointer in the wrong direction**: coverage sent readers to the next section for one above,
+  and still listed the log contract on the process as not covered.
+- Wording: "agree" for "agree in the limit"; "the fair strike" now disclosed as an interpretation
+  with no swap contract formalized; `F` defined where used; "crash jumps" replaced by
+  `Λ > 0` and `ν{J < 0} ≠ 0` wherever it was a claim; "per unit time" for "scaled as a variance
+  rate"; "the measure `P`" for "a measure `P`" in an incomplete market.
+
+### Upgrades executed
+
+- **One process, one measure.** The pricing measure is a hypothesis, the martingale property of
+  `e^{−rt}Se^{X_t}`, which `martingale_iff` turns into the drift; the law of `X_T`
+  (`JumpDiffusionProcess.hasLaw`) carries the law-level log contract to the process. The
+  corpus-530 headline mixed a law-level contract with the realized variance of a process of free
+  drift; that theorem is gone, replaced by the process statements.
+- **The identity at every `n`, not only the limit.** The log contract minus the expected realized
+  variance per unit time is the jump bias less `(b + ΛE[J])²T/(n + 1)`; the limit and the sign
+  results at every sampling frequency are corollaries of it.
+- **The sign of the bias as facts about `ν`** (`integral_jumpBias_nonpos`, `integral_jumpBias_neg`),
+  which `jumpDiffusion_logContract_le_variance` and `_lt_variance` now consume instead of proving
+  it inline.
+- **The two models in Lean.** Black–Scholes through the Brownian bridge (`Λ = 0`), and Merton's
+  Gaussian jumps through `integral_exp_mertonJump` and `mertonJump_compensated`.
+- `JumpDiffusionProcess.integral_exp` is read off the law of `X_t` instead of its own a.e.
+  argument.
+- **Red run, recorded in `docs/patterns.md`.** A constant `2 * Λ * ∫ …` with no real-valued leaf
+  elaborated in `ℝ≥0`; and a section's instance variable is not included in a theorem whose
+  statement omits one of its parameters (the filtration), so that parameter is now explicit.
+
+### Lens gradients
+
+- **First principles.** Exemplar: the pricing measure as a hypothesis on the process.
+  Next: the Esscher measure on the process, the case this rung discloses as not covered.
+- **Coherence.** Exemplar: Black–Scholes as the `Λ = 0` case on the process. Next: one partition
+  shared with the Black–Scholes files on `ℝ` time, so `expected_bsLogPrice_equipartition_sum`
+  becomes a corollary too.
+- **Concept clarity.** Exemplar: the finite-`n` identity names both biases, the jumps' and the
+  sampling's. Next: the realized variance itself, not only its expectation.
+
+### Ranked backlog
+
+1. **Non-concentration.** `Var[RV_n] → ΛE[J⁴]T` (independence of the increments, `κ⁽⁴⁾(0)`), the
+   reason the `L²` theorem of `VarianceSwapDriftImmunity` has no constant counterpart with jumps.
+2. **One partition** for both realized variances (`unifPart` in a light Foundations file).
+3. **The Esscher measure on the process**, after which the variance swap under it follows from
+   this rung with the tilted characteristics.
+4. Carried over from corpus 530: `HasLaw.integrable_comp`; weaker moment hypotheses; Carr–Madan
+   under the law; the ForMathlib staging.
+
+## 2026-10-08 — corpus 530 — convexity in the strike, and variance swaps with jumps
+
+Scope: corpus 517 → 530, two rungs.
+- Convexity in the strike (corpus 522): `mf-call-price-convex-in-strike`,
+  `mf-jump-diffusion-density-positive`, `mf-jump-diffusion-call-convex-strike`,
+  `mf-black-scholes-call-strictly-convex-strike` and `mf-merton-call-strictly-convex-strike`. New
+  file `BlackScholes/JumpDiffusionStrikeConvexity.lean`.
+- Variance swaps with jumps (corpus 530): `mf-log-contract-any-law`,
+  `mf-jump-diffusion-log-return-mean`, `mf-jump-diffusion-log-return-variance`,
+  `mf-jump-diffusion-log-contract`, `mf-jump-diffusion-log-contract-jump-bias`,
+  `mf-jump-diffusion-log-contract-downward-jumps`, `mf-jump-diffusion-realized-variance` and
+  `mf-jump-diffusion-variance-swap-vs-log-contract`. New files `BlackScholes/JumpDiffusionMoments.lean`
+  and `BlackScholes/JumpDiffusionVarianceSwap.lean`.
+
+Four read-only reviewers: one on the strict-convexity rung, acted on in its own commit, and three on
+the variance-swap rung (lenses 1, 3 and 8 with a mathematical-finance referee; lenses 2, 4 and 6;
+the prose against the statements, which also read the strict-convexity fixes). None found an error
+in a Lean statement; each identity was re-derived by hand. One CI run went red in the period, on a
+dot chain missing an opening parenthesis; `docs/patterns.md` records it.
+
+### Standing first pass: prose against statement
+
+All findings are applied.
+- **"Disagree" was claimed and not proved.** The headline entry was named "With Jumps the Variance
+  Swap and the Log Contract Disagree"; its docstring said the swap "is not the log contract", the
+  module title said the log contract "no longer prices the variance", and `VarianceSwap.lean` said
+  the gap is "no longer half the variance". The statement gives the limit `2ΛE[g(J)]`,
+  `g(x) = eˣ − 1 − x − x²/2`, which is `0` when `Λ = 0`, and, `g` having the sign of `x`, also
+  for some two-sided jump laws with `Λ > 0` (`ν = pδ₁ + (1 − p)δ₋₁` at `p ≈ 0.377`). The entry is
+  now "With Jumps the Log Contract Misses the Variance Swap by the Jump Bias", the prose says
+  "differs by", and the strict claim is proved where it holds (below).
+- **"Exceeds by" and "above by" a quantity that is `≤ 0` in the main case**, crash jumps: two
+  docstrings, a description, coverage, and the curated audit, whose comment contradicted itself.
+  Now "differs from … by" or "minus … is".
+- **"Below" for a `≤`**, in the coverage safe wording and the headline description. Now "at most",
+  and "strictly below" only under the hypotheses of the strict theorem.
+- **"Fine partitions" where only equipartitions are proved**, and the module doc did not say that
+  `JumpDiffusionProcess` is a hypothesis structure.
+- **Which measure.** "The law of `X_T` under a pricing measure" passed over incompleteness: a
+  pricing measure that moves `Λ` or `ν`, such as Esscher's, is not covered, since `X` shares `σ`,
+  `Λ` and `ν` with the contract. And "the realized variance does not depend on the drift" is false
+  at finite `n`; only the limit is drift-free. Both are now said.
+- **"No replication argument is formalized"** overlooked the pointwise Carr–Madan strip
+  (`carrMadan_log_spanning`). Now: the strip exists, its expectation under the jump law does not.
+- **The roadmap's next step was false.** "Realized variance in `L²` as in
+  `VarianceSwapDriftImmunity`": with jumps `E[(RV_n − c)²] → ΛE[J⁴]T > 0` for every constant `c`,
+  since `Var[RV_n] = (n + 1)·Var[Y_h²]` and `Var[Y_h²] = ΛE[J⁴]h + O(h²)`. The `L²` limit is the
+  random quadratic variation `σ²T + Σ_{i≤N_T} J_i²`. Coverage and the roadmap now say so, instead
+  of sending a session after a false statement.
+- **"Is worth" and "prices" under an arbitrary law**, in an entry that says no model is assumed.
+  Now "expected payoff", the forward value when the law is a pricing law.
+- **Cumulants are not moments.** "The moments are the derivatives of the cumulant generating
+  function": the mean and the variance are; the second moment follows from them.
+- **"A term of third order in the jump sizes"** is a gloss that fails for large jumps. Now "whose
+  integrand vanishes to third order at `0`".
+- **Bridges** cited row labels that exist nowhere ("Lévy-exponent rung", "Process row") and dropped
+  hypotheses (`E|Y|` and `E[e^Y]` finite, `S > 0`, the moment-generating function near `0`).
+- **The strict-convexity rung.** Its reviewer found that the two proofs of the sign of the
+  lognormal density, presented as independent, share their root (`ϕ ≥ 0`, inside
+  `bs_call_formula`), that `StrikeGreeks` claimed a dependency that does not exist, and stale
+  prose; all fixed in that rung's commit. Left over, and fixed here: `ConvexPricingFunctional`
+  still derived implied-PDF nonnegativity "in the limit" of its finite-state statements and called
+  the state prices a law (they are a finite measure, so is `StrikeConvexity`'s "finitely supported
+  law"); `StrikeGreeks` had the sign of the digital's strike derivative backwards;
+  `architecture.md` listed Breeden–Litzenberger as load-bearing on `ConvexPricingFunctional`,
+  which only `PricingKernel` imports; `docs/patterns.md` said "three" scales twice beside "four".
+- **A correction to the corpus-517 record.** Its first-principles gradient said that integration
+  against a law preserving convexity was "formalized nowhere". Mathlib's
+  `integral_convexOn_of_integrand_ae` existed; `convexOn_integral_call` is now that lemma applied
+  to the payoff.
+
+### Upgrades executed
+
+- **The strict claim, where it is true.** `Real.exp_lt_quadratic_of_neg` (`strictMonoOn_of_deriv_pos`
+  with `Real.add_one_lt_exp`) and `jumpDiffusion_logContract_lt_variance`: if `Λ > 0`, `J ≤ 0` and
+  `ν{J < 0} ≠ 0`, the log contract is strictly below the variance per unit time
+  (`integral_pos_iff_support_of_nonneg_ae`). The downward-jumps entry states both inequalities.
+- **Law-level facts in the law's file.** The transfer of exponential moments (an inclusion of
+  `integrableExpSet`s, with `interior_mono` for the interior), the cgf near `0`,
+  `hasDerivAt_jumpDiffusionExponent` and the forward at the compensated drift
+  (`integral_exp_jumpDiffusionIncrementLaw_of_compensated`) moved to `JumpDiffusionProcess.lean`.
+  `JumpDiffusionIdentifiability` and `JumpDiffusionEsscher` dropped their inline copies of the
+  transfer, which they could not import from the swap file, and `JumpDiffusionIncompleteness` its
+  copy of the forward computation.
+- **The moments in their own file, on Mathlib's tools.** `JumpDiffusionMoments.lean` states the
+  cumulants per unit time as facts about `κ` (`deriv_jumpDiffusionExponent_zero`,
+  `iteratedDeriv_two_jumpDiffusionExponent_zero`), with `τ` taken out by Mathlib's
+  `deriv_mul_const_field` and `iteratedDeriv_mul_const_field`. The variance is
+  `variance_tilted_mul` at `0` and the second moment `variance_eq_sub`, replacing two routes that
+  ran the same rewrite chain through `iteratedDeriv_two_cgf` and `iteratedDeriv_two_cgf_eq_integral`.
+- **The gap as a lemma.** `integral_logContract_of_integral_exp`: when the forward is the mean, the
+  log contract's expected payoff is `rτ − E[Y]`, which the prose had claimed;
+  `jumpDiffusion_logContract` is that plus the mean.
+- **The library's hypothesis convention.** `hb : b = r − σ²/2 − Λ(E[eᴶ] − 1)` (and `hc` in the
+  process theorem), as in `JumpDiffusionOptionPrices`, instead of the compensated drift written
+  into the law eight times; `r` and `σ` are now inferred. `hν1` is dropped where `J ≤ 0` implies it
+  (`integrable_exp_of_ae_nonpos`).
+- **The equipartition skeleton, lifted.** `integral_sum_comp_increment_equipartition`: for any
+  process whose increment laws depend only on their length, `E[∑ f(ΔX)] = (n + 1)·∫ f dμ(T/(n + 1))`.
+  The realized variance is the case `f = y²`. Only the increment laws are used, which the old proof
+  showed and its statement hid. One `hstep` serves the two order facts, and a dead `have` is gone.
+- **Register.** `simpa using` for `have`, `norm_num at`, `exact` (twice); `filter_upwards` and
+  `interior_mono` for the eventually-membership boilerplate; `Tendsto.const_add` for a
+  constant-limit `have`; the two pointwise facts of `integral_logContract` stated as its docstring
+  names them.
+- **Sources.** Broadie & Jain (2008), on jumps and discrete sampling in variance swaps, is cited by
+  the realized-variance and swap entries.
+- Declined, with reasons:
+  - `unifPart` as the partition: `QuadraticVariationL2` is a heavy import for a law-level file. Its
+    API goes to a light Foundations file first (backlog).
+  - A `MathFin/ForMathlib/` staging for the root-namespace `Real.exp_*_quadratic_*` and
+    `StrictConvexOn.smul`: the directory does not exist yet (backlog).
+  - `HasLaw.integrable_comp`, a Mathlib gap with five hand-rolled uses: a change of its own across
+    those five files (backlog).
+  - A `logContract` definition: the corpus statements would stop being self-contained.
+
+### Lens gradients
+
+- **Inspired math.**
+  - Exemplar: one mechanism, `κ` as the cumulant generating function per unit time, gives the mean
+    and the variance as `κ'(0)τ` and `κ''(0)τ`, the jump-diffusion form of
+    `variance_id_gaussianReal`.
+  - Next: the non-concentration `Var[RV_n] → ΛE[J⁴]T`, the reason the Black–Scholes `L²` theorem
+    has no constant counterpart with jumps.
+- **Coherence.**
+  - Exemplar: `variance_tilted_mul` and `variance_eq_sub` consumed instead of a re-derived chain.
+  - Next: the `Λ = 0` and Merton cases in Lean, which today are prose links to
+    `VarianceSwapEquivalence` and Merton's model.
+- **Zero slop.**
+  - Exemplar: the lifted skeleton; three upstream files lost inline copies.
+  - Next: `HasLaw.integrable_comp`.
+- **Architecture.**
+  - Exemplar: facts about the law live in the law's file, where every consumer can import them.
+  - Next: one uniform partition for the Black–Scholes and jump-diffusion realized variances.
+- **First principles.**
+  - Exemplar: the forward-mean defect `e^{−rτ}E[e^Y] − 1` is a term of the model-free formula, not
+    a hypothesis.
+  - Next: the log contract on the process, with the martingale property of the discounted price as
+    the hypothesis and `martingale_iff` deriving the drift; "which measure" then becomes a
+    hypothesis instead of prose.
+- **Idiomatic register.**
+  - Exemplar: the hypothesis convention matched across the jump layer.
+  - Next: deep dot chains written with `|>.`, the remedy `docs/patterns.md` gives for the red run.
+- **Concept clarity.**
+  - Exemplar: the realized-variance description: the finite-`n` formula, the limit, the drift, the
+    Black–Scholes case and the hypothesis disclosure each trace to the statement.
+  - Next: the sign of the bias for two-sided jump laws, whose leading term `(Λ/3)E[J³]` ties the
+    log contract to the skew.
+- **Beautiful math.**
+  - Exemplar: `jumpDiffusion_logContract_le_variance`: the bias identity, a pointwise inequality and
+    `integral_nonpos_of_ae`. The argument is the statement.
+  - Next: the headline for one process under one measure (backlog 1).
+
+### Ranked backlog
+
+1. **The log contract on the process.** Hypothesis: `t ↦ e^{−rt}Se^{X_t}` is a `P`-martingale.
+   `martingale_iff` gives the drift; `h.law 0 T` and `h.zero` give the law of `X_T`. The headline
+   becomes "log contract − `E_P[RV_n]/T` → bias, `< 0` for crash jumps" for one process under one
+   measure.
+2. **The `Λ = 0` and Merton cases in Lean.** For Brownian motion, through
+   `IsFilteredPreBrownian.jumpDiffusionProcess`: the realized variance, and log contract minus
+   realized variance → `0`. For `ν = N(m, δ²)`: `σ² + 2Λ(e^{m+δ²/2} − 1 − m)` against
+   `σ² + Λ(m² + δ²)`.
+3. **Non-concentration.** `Var[RV_n] → ΛE[J⁴]T` from the independence of the increments
+   (`IndepFun.variance_sum`, `HasLaw.variance_eq`) and `κ⁽⁴⁾(0) = ΛE[J⁴]`; hence no constant `L²`
+   limit when `Λ > 0` and `ν ≠ δ₀`.
+4. **One partition.** `unifPart` and its API in a light Foundations file. The Black–Scholes
+   equipartition files and this one are then restated on it through
+   `integral_sum_comp_increment_equipartition`.
+5. **`HasLaw.integrable_comp`** and its five consumers.
+6. **Weaker hypotheses.** The mean from `E|J| < ∞` and the variance from `E[J²] < ∞` (Wald and
+   compound-Poisson moments). This admits heavy-tailed crash laws in the downward-jumps theorem.
+7. **Carr–Madan under the law.** The expectation of `carrMadan_log_spanning` under the
+   jump-diffusion law: the price of the log contract as an option portfolio.
+8. Carried over from corpus 517:
+   - the lognormal law first class (`gaussianReal_map_mul_exp`);
+   - Merton's density in log-return form;
+   - pricing any claim against the density;
+   - `0 < mertonTerminalPDF` and an open-set positivity instance;
+   - upstream to Mathlib through a ForMathlib staging, now also with
+     `Real.exp_le_quadratic_of_nonpos`, `Real.exp_lt_quadratic_of_neg` and `StrictConvexOn.smul`.
+
+## 2026-10-08 — corpus 517 — Merton's series in the strike, kinks, and the law of the price
+
+Scope: corpus 506 → 517, three rungs.
+- Merton's digital and density (corpus 509): `mf-merton-strike-derivatives`,
+  `mf-jump-diffusion-merton-digital` and `mf-jump-diffusion-merton-density`. New file
+  `BlackScholes/MertonStrikeGreeks.lean`.
+- Kinks (corpus 513): `mf-call-strike-differentiable-iff-no-atom`,
+  `mf-jump-diffusion-call-differentiable-iff`, `mf-jump-diffusion-call-kink` and
+  `mf-cash-digital-strike`.
+- The law of the price as a measure (corpus 517): `mf-price-law-change-of-variables`,
+  `mf-jump-diffusion-price-law`, `mf-black-scholes-price-law` and `mf-merton-price-law`.
+
+Three read-only reviewers, one per rung; the third also read the prose of the fixes made for the
+second. None found an error in the Lean. Five CI runs went red in the period, all on elaboration
+details, each now in `docs/patterns.md`: a `:= by` followed by a term, an anonymous constructor
+under a type ascription, `zero_le` taking its argument implicitly, `rw` blind inside a
+beta-redex, and an order lemma elaborated for dot notation before its carrier was known.
+
+### Standing first pass: prose against statement
+
+All findings are applied unless marked otherwise.
+- **Merton's digital needs the compensated drift; the prose named none.** The module doc of
+  `MertonStrikeGreeks.lean` and the description of `mf-merton-strike-derivatives` read as if the
+  digital identity held at any drift. They now say which identity needs which drift.
+- **Two docstrings dropped `k > −1`**, which their statements require.
+- **A bare definition carried a model claim.** The docstring of the Poisson mixture of lognormal
+  formulas called it "the density of the price"; that is a theorem about Gaussian jumps, so the
+  docstring now points to it, and the definition is `mertonTerminalPDF` after its summands.
+- **"On the neighbourhood k > 0 of K"** used the jump mean `k` for the strike variable. Now
+  "(0, ∞)".
+- **A scope cited a lemma its entry did not state.** `mf-merton-strike-derivatives` now states the
+  strike derivative of the digital series as a conjunct.
+- **Four outward-facing descriptions became false when the kink rung landed.** "With `σ ≠ 0` there
+  are no atoms" fails at `τ = 0`, where the law is `δ₀` and the call has a kink at `S`. And the
+  left strike derivative, described as "not formalized", now is. All four now state `τ > 0` or
+  point to the kink entries.
+- **A non sequitur.** "The identity holds at every drift because `r` enters the series only through
+  `d₂`" gave the wrong reason. The density does not involve `r`, and every drift is the
+  compensated drift for `r = b + σ²/2 + Λk`. Fixed in the docstring, the description and coverage.
+- **The kink safe wording dropped the finite mean.** Without it the Bochner call price is
+  identically `0` and both claims fail.
+- **"A kink there" pointed at `bτ`**; the kink is at the strike `Se^{bτ}`. The same paragraph
+  implied one-sided strike derivatives stated for `jumpDiffusionCallPrice`. They follow from the
+  general lemmas applied to `Seʸ` and are not stated; a description in the digital entry made the
+  same slip and is fixed.
+- **"Merton's density integrates to one" rested on a fact proved nowhere.** The Lean integrates
+  `ofReal` of the formula, which reads negative values as `0`. `mertonTerminalPDF_nonneg` now
+  exists, and both price-law entries state nonnegativity as a conjunct.
+- **A stale pointer.** `BreedenLitzenberger.lean` still said the integration to one was not
+  stated; it points to `lintegral_lognormalTerminalPDF_eq_one`.
+- **"The change of variables back to the log-return is not formalized"** read as contradicting the
+  change-of-variables entry. What is missing is the log-return form of Merton's mixture.
+- **Hypotheses dropped in the docs**: `τ > 0`, `σ > 0` and the drift–rate relation, in coverage,
+  bridges, the roadmap, the curated audit and the umbrella comment.
+
+### Upgrades executed
+
+- **Breeden–Litzenberger for Merton's series, by uniqueness of derivatives.** The series is
+  differentiated twice in the strike, and the digital, the density and the law of the price are
+  read off the jump-diffusion's derivatives. No Gaussian convolution is computed.
+- **The series is built on the named summand.** `mertonDigitalPrice` mixes `bsCashDigital`, whose
+  strike Greek `hasDerivAt_bsCashDigital_K` is new. The private `hasDerivAt_bsV_KK` is gone:
+  `hasDerivAt_deriv_bsV_K` is that Greek negated.
+- **The density identity holds at every drift**, not only at the compensated one.
+- **One tool per idea.**
+  - The call price factors once, `jumpDiffusionCallPrice_eq_mul_integral`; it was restated
+    inside two proofs.
+  - The call payoff's `1`-Lipschitz bound is one lemma, `abs_call_payoff_sub_le`; it was derived
+    three times in one file.
+  - The mass of an image law is one lemma, `lintegral_eq_one_of_map_eq_withDensity`; it was two
+    `calc` blocks.
+- **Consumed rather than rebuilt.** `tendsto_neg_nhdsGT`, `generalize` and a term for
+  `{X ≥ K} = {X > K} ∪ {X = K}`. `map_mul_exp_withDensity` dropped a sign hypothesis it never
+  used, so it holds for any `f`.
+- **Mathlib's naming.** `lintegral_lognormalTerminalPDF_eq_one` and
+  `lintegral_mertonTerminalPDF_eq_one`, as `lintegral_gaussianPDF_eq_one`.
+- Declined, with reasons:
+  - `differentiableAt_smul_iff` for the discount factor. It needs the function in `c • f` form
+    and an `Invertible` instance, and Mathlib never consumes it.
+  - A golf of the atom lemma. Its `by_cases` reads clearly and the golf would cost a CI cycle.
+
+### Lens gradients
+
+- **First principles.**
+  - Exemplar: the kink comes from the law, the no-jump atom, not from a formula.
+  - Next: `BreedenLitzenberger.lean` calls its convexity chain (payoff convex, so price convex,
+    so density nonnegative) a consistency loop. Its second step, that integration against a law
+    preserves convexity, is formalized nowhere. Formalized for every law, the sign of the density
+    follows from the payoff instead of the closed form.
+- **Coherence.**
+  - Exemplar: the digital, the density and the law of the price are read off one call series.
+  - Next: the lognormal law as a Gaussian change of variables (`gaussianReal_map_mul_exp`), so the
+    Black–Scholes law stops depending on option pricing. `lognormalTerminalPDF_change_of_variables`
+    would then be its cross-check.
+- **Generality.**
+  - Exemplar: differentiability in the strike iff no atom, for any law.
+  - Next: strict convexity in the strike wherever the law charges every interval. Positivity of
+    the jump-diffusion density then gives it for any jump law.
+- **Idiomatic register.** The five elaboration details above are recorded in `docs/patterns.md`.
+
+### Ranked backlog
+
+1. **Strict convexity in the strike, and convexity for every law** (started this session).
+   - Integration preserves the convexity of the payoff, for every law: this closes the loop above.
+   - Strictly convex wherever the law charges every interval.
+   - For the jump-diffusion with `σ ≠ 0` and `τ > 0`, for any jump law; for Black–Scholes and
+     Merton through the existing identifications.
+2. **The lognormal law, first class.** `gaussianReal_map_mul_exp`, its pointwise identity with
+   `lognormalTerminalPDF`, and the law of `bsTerminal ∘ Z` under `BSCallHyp`.
+3. **Merton's density in log-return form**, from `jumpDiffusionIncrementLaw_apply` and
+   `gaussianReal_conv_gaussianReal`. This is an independent check of the uniqueness-of-derivatives
+   identification, and the density half of the corpus-506 backlog item 1.
+4. **Pricing any claim against the density**, then Carr–Madan replication of a `C²` payoff from
+   calls and puts weighted by `g''(K)`.
+5. **The price law on the process** (`hasLaw_price`), in Mathlib's `HasPDF` vocabulary; with it,
+   the lognormal marginal of Brownian motion through `jumpDiffusionProcess_brownian`.
+6. **Parameters.** `lintegral_mertonTerminalPDF_eq_one` stated in the formula's own parameters (any
+   `r`, any jump count), and one time type across the `lognormalTerminalPDF` siblings.
+7. Carried over:
+   - characteristic functions instead of moment-generating functions;
+   - the Esscher parameter for steep jump laws;
+   - upstream to Mathlib, now with `differentiableAt_integral_call_iff` and
+     `lintegral_eq_one_of_map_eq_withDensity`;
+   - the process-level Esscher measure, `compoundPoissonMeasure` and the semigroup.
+
+## 2026-10-08 — corpus 506 — digital options and Breeden–Litzenberger with jumps
+
+Scope: corpus 500 → 506, two rungs.
+- Digital options (corpus 503): `mf-call-strike-derivative`,
+  `mf-jump-diffusion-digital-strike-derivative` and `mf-jump-diffusion-digital-black-scholes`. New
+  file `BlackScholes/JumpDiffusionDigital.lean`; `BlackScholes/CallSpreadDigital.lean` gains the
+  general strike derivative `hasDerivAt_integral_call`.
+- The density (corpus 506): `mf-jump-diffusion-density`, `mf-breeden-litzenberger-jump-diffusion`
+  and `mf-black-scholes-lognormal-density`. New file `BlackScholes/JumpDiffusionDensity.lean`.
+
+One read-only reviewer read both rungs: prose against statement, coherence and the mathematics. It
+found no error in the Lean proofs. The density rung's first build failed in four places, on the
+parsing of integral notation and on implicit arguments (see Idiomatic register below).
+
+### Standing first pass: prose against statement
+
+All findings are applied.
+- **The digital entry's description said the law has no atoms; its statement did not.** The
+  no-atom lemma is now a conjunct of the statement.
+- **"At an atom the left derivative is `−μ{X ≥ K}`"** (module doc of `CallSpreadDigital.lean`) is
+  not formalized, and is now marked so.
+- **The second-difference identity was stated without its hypotheses** in the module bullet and
+  the docstring of `secondDifferenceMeasure`. It holds where `ν` has the exponential moments of
+  orders `u ± s` and `u`.
+- **"`Λ` and `ν` are not determined separately"** read as a non-identifiability theorem. The iff
+  says what is proved: `Λ` and `ν` enter only through `Λν` off `0`.
+- **The Black–Scholes readings dropped the drift.** The digital `e^{−rτ}Φ(d₂)` and the lognormal
+  density hold at the drift `r − σ²/2`; two entry names, two docstrings and an umbrella comment
+  now say so.
+- **"The pricing law" at the compensated drift** is now "a pricing law (Merton's measure)": the
+  incompleteness entry shows that compensated laws are not unique.
+- **"One fact in the library"** (the strike derivative and the Gaussian integral of the digital)
+  overstated what is proved: two derivations of one value, which agree.
+- **The Breeden–Litzenberger entry called `f(log(K/S))/K` the density of the price** while stating
+  only the second strike derivative of the call. It now also states the strike derivative of the
+  digital, which says that `f(log(K/S))/K` is the derivative of the distribution function of the
+  price at `K`. That is the sense of "density" here; the coverage section lists the measure
+  identity as not covered.
+- **"The Poisson mixture of normal densities of Merton (1976), for any jump law."** For a general
+  jump law the mixture is over the jump count and the jump sizes; the Poisson mixture of normal
+  densities is the lognormal case.
+- **The identifiability qualifier was missing** in the curated audit comment, the bridges row and
+  the roadmap: the theorem is for jump laws whose moment-generating function is finite near `0`.
+- **The corpus-500 backlog item 1 recorded a factoring that was not done.** Corrected in place.
+
+### Upgrades executed
+
+- **One module per kind of fact.** `JumpDiffusionDensity.lean` holds the facts about the law and
+  imports only the price process. `JumpDiffusionDigital.lean` holds the option prices and imports
+  it. The first draft put Breeden–Litzenberger in the density file, which then imported the option
+  layer it did not need.
+- **No atoms as a corollary of the density.** The digital rung proved it directly: given the
+  jumps, at most one Gaussian sample gives a value (`Measure.prod_apply_symm`, subsingleton
+  preimages). With the density it is Mathlib's `nullSingletonClass_withDensity`.
+- **The Black–Scholes values are derived, not computed.** The digital `e^{−rτ}Φ(d₂)` and
+  `lognormalTerminalPDF` are read off `HasDerivAt.unique` against `hasDerivAt_bsV_K` and
+  `breedenLitzenberger`. So `breedenLitzenberger`'s formula is now known to be the density of the
+  price, which that theorem alone did not show.
+- **One strike-derivative lemma.** `hasDerivAt_integral_call` (any law with no atom at the
+  strike) serves the jump-diffusion call, and through it the Black–Scholes digital.
+  `hasDerivAt_measureReal_Ioi_withDensity` (any law with a density) serves the second derivative.
+
+### Lens gradients
+
+- **First principles.**
+  - Exemplar: the density is derived from the canonical model. Given the jumps, the log-return is
+    an affine image of the Gaussian sample, so the law is a mixture of Gaussian laws.
+  - Next: the law of the price as a measure with a density on `(0, ∞)`, so that "the density of
+    the price" is a statement about a measure and not a derivative strike by strike.
+- **Coherence.**
+  - Exemplar: `breedenLitzenberger` and `breedenLitzenberger_jumpDiffusion` are second
+    derivatives of one call price function, compared by uniqueness.
+  - Next: Merton's series for the digital and the density, from the Gaussian mixture
+    `jumpDiffusionIncrementLaw_apply`, mirroring the call's series.
+- **Generality.**
+  - Exemplar: the two lemmas behind the rung hold for any law, not only for jump-diffusions.
+  - Next: the call price is differentiable at `K` iff the law has no atom there. Then with
+    `σ = 0` the jump-diffusion call price has a kink at `K = Se^{bτ}`.
+- **Idiomatic register.**
+  - The body of `∫` absorbs a following subtraction, and an implicit argument that occurs only in
+    the conclusion is not assigned by `have h := …`. Both are recorded in `docs/patterns.md`, with
+    the uniqueness-of-derivatives pattern.
+  - `push Not` replaces the deprecated `push_neg`.
+
+### Ranked backlog
+
+1. **Merton's series for the digital and the density.** For Gaussian jumps,
+   `D = e^{−rτ}∑ₙ pₙ Φ(d₂ⁿ)` and `f = ∑ₙ pₙ φ(·; bτ + nm, σ²τ + nδ²)`, from
+   `jumpDiffusionIncrementLaw_apply` and the Gaussian sums of `MertonModel`.
+2. **The left derivative and the kink.** `C` is differentiable at `K` iff `μ{X = K} = 0`; with
+   `σ = 0` the jump-diffusion call price is not differentiable at `Se^{bτ}`.
+3. **The law of the price has the density `K ↦ f(log(K/S))/K` on `(0, ∞)`.**
+4. Carried over from the corpus-500 review:
+   - characteristic functions instead of moment-generating functions;
+   - the Esscher parameter for steep jump laws;
+   - `secondDifferenceMeasure_eq_of_eventuallyEq`, once a second proof needs it;
+   - upstream to Mathlib: `measure_eq_of_mgf_id_eventuallyEq` and
+     `ofReal_integral_exp_smul_tilted`, now with `hasDerivAt_integral_call` and
+     `hasDerivAt_measureReal_Ioi_withDensity`;
+   - the process-level Esscher measure, `compoundPoissonMeasure` and the semigroup.
+
+## 2026-10-08 — corpus 500 — incompleteness at one date: two equivalent compensated laws, two call prices
+
+Scope: corpus 496 → 500. Three new files: `BlackScholes/CallSpreadDigital.lean`,
+`BlackScholes/JumpDiffusionIdentifiability.lean` and `BlackScholes/JumpDiffusionIncompleteness.lean`.
+`Foundations/Esscher.lean` gains:
+- the finite-measure form of local MGF uniqueness;
+- two lemmas on the tilted domain;
+- the unnormalized Esscher transform.
+
+`BlackScholes/JumpDiffusionEsscher.lean` gains the Lévy-measure form of the transform. The new
+entries are:
+- `mf-call-spread-digital`;
+- `mf-call-prices-determine-law`;
+- `mf-jump-diffusion-identifiability`;
+- `mf-jump-diffusion-incompleteness`.
+
+Five existing jump entries now point at the incompleteness entry instead of saying incompleteness
+is not formalized.
+
+One read-only reviewer looked at the first green state. It covered prose against statement, plus
+the coherence and mathematics lenses. It found no error in the Lean. These check out:
+- the second-difference identity;
+- the direction "drift off compensated ⇒ `θ ≠ 0`";
+- every cited Mathlib name.
+
+Three CI rounds failed before that state, on parse and elaboration details (see Idiomatic
+register below).
+
+### Standing first pass: prose against statement
+
+Eleven findings; three were must-fix. All are applied, and the first is fixed by proof:
+
+- **"The Merton measure's law is equivalent to the physical law (not formalized)" is false at
+  `σ = 0`.** The theorem allowed `σ = 0`. There the physical law has an atom at `bτ` (no jumps),
+  and a change of drift moves that atom. The theorem now assumes `σ ≠ 0` and concludes that both
+  laws are equivalent to the physical law (`jumpDiffusionIncrementLaw_absolutelyContinuous`, below).
+- **Two coverage sentences dropped the hypothesis that the physical drift is off the compensated
+  one.** When the drift is compensated, `θ = 0` is the only Esscher parameter, because the Esscher
+  map is strictly increasing. The two laws then coincide.
+- **A corpus scope stated a false lemma**: "two finite measures whose moment-generating functions
+  agree near 0 are equal". Mathlib's `mgf` is `0` outside the integrable set. So `Cauchy(0, 1)` and
+  `Cauchy(0, 2)` have the same `mgf` everywhere. The lemma needs the function finite near `0`.
+- **"Finite moments of orders 1 and 1 + θ"** reads as `E|J|` and `E|J|^{1+θ}`. The Lean uses the
+  exponential moments `∫ eˣ dν` and `∫ e^{(1+θ)x} dν`.
+- **The intermediate-date and power-claim entries** said that at one date two compensated laws
+  price a call differently. These entries are set at the compensated physical drift. There the
+  theorem's hypothesis fails, and both laws are the physical one. They now say two things:
+  non-uniqueness for the process is not formalized; and compensated laws at one date are already
+  not unique.
+- **"The law determines the jumps" and "the uniqueness half of Lévy–Khintchine"** claimed more than
+  the `(b, Π)` part for a given `σ`. The full uniqueness also gives `σ²` and needs no moment
+  conditions. And `Λ` and `ν` are not determined separately.
+- **"With jumps, the compensated drift does not determine option prices."** For given
+  `(σ, Λ, ν)` it does. Now: the martingale condition on the forward does not determine option
+  prices, since it can be met by moving the drift or by tilting the jumps.
+- **The bridges row** had three faults:
+  - its `[0, 1]` attribution was half wrong: `bull_call_spread_payoff_le` gives only `≥ 0`;
+  - it had two cells in a four-column table;
+  - it cited MRT.2 for a uniqueness that MRT.2 itself disclaims. CHAIN.2 delivers it, under a
+    square-integrable density.
+- Smaller fixes:
+  - the one-sided-derivative wording of `mf-call-spread-digital`;
+  - missing hypotheses: `∫ e^{ux} dν < ∞` for the Lévy–Khintchine form of `κ`, the three moments
+    of `mgf_id_withDensity_coshKernel`, and "with a finite forward";
+  - two stale lists of users, in `Esscher.lean` and `JumpDiffusionEsscher.lean`.
+
+### Upgrades executed
+
+- **Roadmap item 2, by two identification theorems rather than by comparing mixtures.** The
+  roadmap expected a strict comparison of the two Merton mixtures. Instead, two reusable facts are
+  proved and composed:
+  - call prices determine the law: the first-order Breeden–Litzenberger, for any law with a finite
+    forward;
+  - the law at one date determines the drift and the Lévy measure off `0`, for a given `σ`.
+
+  The Esscher transform multiplies the Lévy measure by `e^{θx}`, so the two compensated laws
+  differ once `θ ≠ 0`.
+- **Incompleteness about equivalent laws.** The theorem now says what incompleteness means at one
+  date: there are two laws that price a call differently, each equivalent to the physical law and
+  each with forward `e^{rτ}`.
+  - The Merton law's equivalence is static Girsanov on the Gaussian factor. On the canonical model
+    a change of drift moves the standard normal sample, and the moved Gaussian is the Esscher tilt
+    of `N(0, 1)` (`gaussianReal_tilted_const_mul`, the tilt behind
+    `gaussianReal_withDensity_esscher`).
+  - Compensation is stated on the laws, as `∫ eʸ = e^{rτ}`, not on their characteristics.
+- **One uniqueness lemma, now for finite measures.** `measure_eq_of_mgf_id_eventuallyEq` now has
+  three users: the Esscher transform, the Brownian characterization (through
+  `measure_eq_of_mgf_id_eq`) and the kernel measures `2(cosh(sx) − 1)·Λν` of the identifiability
+  proof. The zero measure is the only new case.
+- **The unnormalized Esscher transform, lifted.** `ofReal_integral_exp_smul_tilted` states
+  `(∫ e^f dμ)·μ.tilted f = e^f·μ` for a measure on any space; Mathlib does not have it. The
+  Lévy-measure form `smul_tilted_eq_withDensity` is now `Λ` times it, a one-line rewrite.
+- **The spread bound is one Mathlib lemma.** `abs_max_sub_max_le_abs` (the call payoff is
+  `1`-Lipschitz in the strike) replaces a hand-rolled two-sided bound. The first draft cited the
+  strike-antitone face `bull_call_spread_payoff_le` for half of the bound. `CallSpreadDigital.lean`
+  no longer imports `Spreads.lean`.
+- **One encoding of nontrivial jumps.** The incompleteness theorem takes `0 < Λ` and `ν ≠ δ₀`, as
+  `jumpDiffusionCallPrice_impliedVol_gt` does. It derives `ν{0}ᶜ ≠ 0` inside, with Mathlib's
+  `hasLaw_dirac_of_ae_eq`.
+- **The tilted domain is named once.** `eventually_integrable_exp_add_mul` and
+  `zero_mem_interior_integrableExpSet_tilted` replace the inline neighbourhood argument in
+  `jumpDiffusionIncrementLaw_tilted`, and they also serve the incompleteness proof.
+
+### Lens gradients
+
+- **First principles.**
+  - Exemplar: incompleteness is derived, not asserted. Call prices determine the law. The law
+    determines the Lévy measure. The Esscher transform visibly changes the Lévy measure. A change
+    of drift is a Gaussian tilt.
+  - Next: the `σ²` half of identifiability.
+- **Coherence.**
+  - Exemplar: the local-uniqueness lemma has three users, and the static Girsanov tilt of
+    `GaussianGirsanov` returns as the change of drift of a jump-diffusion law.
+  - Next: the Black–Scholes strike derivative `hasDerivAt_bsV_K` and the cash-or-nothing price
+    `bs_cash_or_nothing_formula` are two closed-form computations of one fact.
+    `tendsto_call_spread` states that fact in general, once it has a left limit and a derivative
+    where `μ{X = K} = 0`.
+- **Generality.**
+  - Exemplar: `tendsto_call_spread` holds for any integrable random variable under a finite
+    measure, and `ofReal_integral_exp_smul_tilted` holds on any space.
+  - Next: identifiability is stated for one `σ` and for jump laws with exponential moments near
+    `0`. Characteristic functions would remove the moment conditions.
+- **Idiomatic register.**
+  - `interior_subset (s := integrableExpSet id ν)` follows Mathlib's own idiom. Without the named
+    set, first-order approximation solved the membership at the type `Prop`.
+  - Two parse errors this round: `e₊` and `hΠ`. The characters `₊`, `₋` and `Π` cannot appear in
+    identifiers.
+  - All three are recorded in `docs/patterns.md`.
+
+### Ranked backlog
+
+1. **The law determines `σ²` too.** The second differences of `κ` equal `σ²s²` plus the
+   moment-generating function of the kernel measure. Adding the point mass `σ²s²·δ₀` to the kernel
+   measure makes both sides moment-generating functions of finite measures. Evaluating the
+   identified measures at `{0}` then gives `σ₁² = σ₂²`. With that,
+   `jumpDiffusionIncrementLaw_eq_iff` holds with different `σ`'s. First factor out the step "the
+   kernel measures agree" as its own lemma, which both halves use. Executed after this review:
+   `secondDifferenceMeasure` carries the atom, and the one identification gives `σ²` (at `{0}`)
+   and `Π` (off `0`); `mf-jump-diffusion-identifiability` now states `b₁ = b₂ ∧ σ₁² = σ₂² ∧ Π₁ = Π₂`.
+   The factoring was not done: the identification is one `have` (`hM`) inside the proof, used by
+   both halves, and it has no other user yet. It becomes a lemma
+   (`secondDifferenceMeasure_eq_of_eventuallyEq`) when a second proof needs it.
+2. **The left limit and the strike derivative.** Show that `(C(K) − C(K + h))/h → μ{X ≥ K}` as
+   `h ↑ 0`. Then `C` is differentiable at `K`, with derivative `−μ{X > K}`, when `μ{X = K} = 0`.
+   Together with `hasDerivAt_bsV_K` this gives the Black–Scholes digital without the closed form.
+3. **Characteristic functions instead of moment-generating functions.** The characteristic
+   function of the law is `exp(τψ)`. Its second differences give the characteristic function of
+   `2(1 − cos(sx))·Λν`, and `Measure.ext_of_charFun` finishes. This is the full compound-Poisson
+   Lévy–Khintchine uniqueness, and the incompleteness theorem would no longer need `h0`.
+4. **The existence of the Esscher parameter for steep jump laws.** Suppose the moment-generating
+   function of `ν` is finite on an open interval and blows up at its ends (Kou). Then the Esscher
+   map is unbounded at the ends of its domain, and the intermediate value theorem applies there.
+5. **The integrable set of a tilt.**
+   `integrableExpSet id (μ.tilted (θ * ·)) = (· + θ) ⁻¹' integrableExpSet id μ`, by Mathlib's
+   `integrable_tilted_iff`. Then `zero_mem_interior_integrableExpSet_tilted` is a preimage.
+6. **Upstream to Mathlib:** `measure_eq_of_mgf_id_eventuallyEq` (Mathlib's `ComplexMGF.lean` has a
+   TODO for it) and `ofReal_integral_exp_smul_tilted`.
+7. Carried over:
+   - the process-level Esscher measure;
+   - one Gaussian exponential-moment lemma;
+   - `WienerExponentialTotality`'s fibres;
+   - `compoundPoissonMeasure` and the semigroup.
+
+## 2026-10-08 — corpus 495 — the Esscher transform: one tilt, one identification, three users
+
+Scope: corpus 490 → 495. `Foundations/Esscher.lean` and `BlackScholes/JumpDiffusionEsscher.lean`
+are new. Two refactors make existing code consume them: `gaussianReal_withDensity_esscher` in
+`Foundations/GaussianGirsanov.lean`, and the Gaussian identification in
+`Foundations/ExpMartingaleQBrownian.lean`. One compensated-drift criterion was lifted into
+`BlackScholes/JumpDiffusionProcess.lean`. Entries: `mf-jump-diffusion-esscher-transform`,
+`mf-jump-diffusion-esscher-pricing`, `mf-merton-esscher-pricing`,
+`mf-black-scholes-esscher-pricing` and `gir-gaussian-esscher-tilt`.
+
+Two read-only reviewers looked at the first green state: one on prose against statement, one on
+proof quality with the coherence and mathematics lenses. Neither found a mathematical error or a
+dishonest hypothesis. One CI round failed: `simp` could not split the cast
+`↑(Λ * jumpMoment ν θ)`. The cause was the anonymous constructor in `jumpMoment` (below).
+
+### Standing first pass: prose against statement
+
+Twelve findings, all applied:
+
+- **An Esscher parameter "exists without jumps" was asserted with no Lean statement.** Lean only
+  showed that the tilt at `θ₀ = (r − b − σ²/2)/σ²` moves the drift to `r − σ²/2`. Now
+  `jumpDiffusionExponent_zero_esscher` proves `κ(θ₀ + 1) − κ(θ₀) = r` at jump rate `0`, and
+  `mf-black-scholes-esscher-pricing` exports it together with the price.
+- **"One exponential tilt for Girsanov, Brownian motion and jumps"** was wrong for Brownian motion:
+  the characterization shares only the identification by moment-generating function, not the
+  tilt. The headings now say so.
+- **An identity claim without a proof-term edge.** The audit comment and `leaps.md` said the
+  jump-diffusion transform uses the Gaussian tilt. `jumpDiffusionIncrementLaw_tilted` does not;
+  the tilt's users in the jump layer are the no-jump tilt and Merton's tilted jumps.
+  `gir-gaussian-esscher-tilt` said two results derive from it; there are three.
+- **The incompleteness caveat** was attached to statements that allow `Λ = 0`, which is
+  Black–Scholes. It is now qualified with `Λ > 0`, as in the Laplace-exponent review.
+- **`κ` outside its domain.** The tilted exponent is `jumpDiffusionExponent` at every `u`, and it
+  is the Laplace exponent where `∫ e^{(u+θ)x} dν < ∞`. `jumpMoment` is the Bochner integral.
+- Smaller fixes:
+  - the Merton entry now defines `ν`;
+  - in the no-jump entry, the tilted law is now marked as a step in the proof;
+  - `Esscher.lean` names, for each user, the lemma it uses;
+  - Gerber–Shiu is phrased as choosing a pricing measure, not as a change of measure on a
+    process;
+  - `GaussianGirsanov`'s docstring named a nonexistent `BSCallHyp.of_physical`, and still called
+    process-level Girsanov "gated on Itô" although the library has had it since 2026-07;
+  - the roadmap's incompleteness item needs `θ ≠ 0`: at `θ = 0` the Esscher law is the physical
+    law.
+
+### Upgrades executed
+
+- **One home for the tilt.** `Foundations/Esscher.lean` holds:
+  - the tilted moments: Mathlib's `integral_exp_tilted` at linear exponents, also in `mgf` form;
+  - identification by moment-generating function, `measure_eq_of_mgf_id_eq`, lifted to a
+    probability law against any finite measure;
+  - the Gaussian tilt `N(m, v) ↦ N(m + θv, v)`.
+
+  The static Girsanov change of measure is now the case `N(0, 1)` of the Gaussian tilt. Its
+  separate pdf proof (`gaussian_esscher_pdf`) was used nowhere else and is removed. The
+  Brownian characterization's inline complex-MGF argument became one call.
+- **The jump-diffusion transform.** When the jump law has every exponential moment, the tilted
+  log-return law is the jump-diffusion law of the tilted characteristics; their Laplace exponent is
+  `κ(u + θ) − κ(θ)`. The Esscher condition is the criterion `κ(1) = r` for that exponent.
+  `compensated_iff_exponent_one` is now the one copy of that criterion; the discounted-price
+  martingale criterion uses it as well. The Esscher price is a price function of the tilted
+  characteristics (`integral_call_tilted_eq_jumpDiffusionCallPrice`), so Merton's formula, and
+  Merton's 1976 series for lognormal jumps (`mertonJump_tilted`), come from existing results.
+  Without jumps it is the Black–Scholes price at an explicit Esscher parameter.
+- **Build hygiene and register.** `jumpMoment` now uses `NNReal.mk`. Built with `⟨_, _⟩`, it
+  unfolded to a bare subtype term, which `ℝ≥0` simp lemmas (`NNReal.coe_mul`, `NNReal.coe_mk`)
+  cannot match; Mathlib's NNReal docstring warns about exactly this. A `coe_jumpMoment` simp
+  lemma replaces the local `rfl` workaround. Other changes:
+  - minimal typeclasses: `[IsFiniteMeasure μ']`, `[NeZero ν]`;
+  - `integrable_exp_mul_tilted_const_mul` takes only the two moments it uses;
+  - `Eq.symm` puts the measure with known moments in the identifying slot, so three `have`s
+    disappear.
+
+### Lens gradients
+
+- **Coherence.** Exemplar: three consumers of one identification lemma, and static Girsanov as
+  literally the `N(0, 1)` case of the tilt the jump layer uses. Next: the pdf twin
+  `exp_mul_gaussianPDFReal_zero_one` (`Foundations/StandardNormal.lean`) feeds the Black–Scholes
+  `Φ(d₁)` through the stock numéraire. That is the Gaussian tilt on a half-line: under `Q^(S)`,
+  `Z ~ N(σ√T, 1)`, the tilt at `θ = 1`.
+- **First principles.** Exemplar: the Esscher condition is a structural identity (the
+  compensated drift of the tilted characteristics), not a computation. Next: existence and
+  uniqueness of the Esscher parameter for `σ ≠ 0`. `θ ↦ κ(θ + 1) − κ(θ)` is continuous
+  (`continuous_mgf`), strictly increasing and unbounded both ways, so `Continuous.surjective`
+  applies.
+- **Generality.** The every-moment hypothesis is forced by global MGF uniqueness and excludes
+  Kou's double-exponential jumps. Next: local uniqueness (`Measure.ext_of_mgf_id_eq` from
+  `0 ∈ interior (integrableExpSet id μ)` and equality of the MGFs near `0`, by the identity
+  theorem on the common strip). Mathlib's `ComplexMGF.lean` anticipates it in a TODO; it would
+  admit every `θ` in the interior of the jump law's MGF domain.
+
+### Ranked backlog
+
+1. **The Esscher parameter exists and is unique** for `σ ≠ 0` and jump laws with every
+   exponential moment. Executed after this review: `existsUnique_esscher`,
+   `mf-jump-diffusion-esscher-parameter` (corpus 496).
+2. **Local MGF uniqueness**, upstreamable: Kou's jumps enter the Esscher layer and the corpus
+   disclaimer goes. Executed after this review: `measure_eq_of_mgf_id_eventuallyEq`; the transform
+   and pricing entries now assume only a moment-generating function finite near `θ` (and, for
+   pricing, at `1 + θ`).
+3. **Formal incompleteness at one date**: the Esscher law and the Merton measure (same jump law,
+   compensated drift) are both compensated but give different call prices for some strike when
+   `θ ≠ 0`. Executed after this review: `exists_call_esscher_ne_merton`,
+   `mf-jump-diffusion-incompleteness` (corpus 500), with both laws equivalent to the physical law
+   for `σ ≠ 0`.
+4. **One Gaussian exponential-moment lemma.** `∫ e^{sx} dN(m, v)` is still read off
+   `mgf_id_gaussianReal` by hand in `BrownianMartingale`, `GaussianSmoothing`, `CRRCharFun` and
+   `GaussianGirsanov`. Then the pdf twin above.
+5. **`WienerExponentialTotality`'s one-dimensional fibres** could consume
+   `measure_eq_of_mgf_id_eq` (finite measures on both sides, `mgf_id_map`).
+6. Carried over: the process-level Esscher measure; `compoundPoissonMeasure` and the convolution
+   semigroup; `κ` in Mathlib's `mgf` vocabulary (it would restale the jump corpus).
+
+## 2026-10-08 — corpus 490 — the Laplace exponent: one moment-generating function, from first principles
+
+Scope: corpus 486 → 490, `BlackScholes/JumpDiffusionExponent.lean` (new) and the moment section of
+`BlackScholes/JumpDiffusionProcess.lean`; entries `mf-jump-diffusion-{scaling,levy-exponent,
+exponential-martingales,power-claim-every-date}`. One read-only reviewer covered compile risk,
+prose against statement and the mathematical and coherence lenses. It found no mathematical error,
+no open compile risk (the one CI failure, a stuck `Mul` instance in a measurability term, was
+already fixed) and no dishonest hypothesis.
+
+### Standing first pass: prose against statement
+
+- **"The market is incomplete"** was attached to statements that allow `Λ = 0`, the complete
+  Black–Scholes model, and nothing about incompleteness is formalized. In the power-claim and the
+  put and call intermediate-date descriptions, in coverage and in the roadmap (two of the
+  sentences predate this phase), it now says that with jumps the market is in general incomplete
+  (not formalized here), and without jumps it is Black–Scholes.
+- **"These are Wald's martingales"** had no proof-term edge, and the bridges row dropped `b = 0`,
+  `σ = 1`. The text now says `κ(θ) = θ²/2` is the exponent of the Wald martingales and both
+  families rest on `martingale_exp_sub_of_indep_increments`, which is a proof-term fact.
+- **`κ` outside its domain.** The definition's docstring and the bridges row presented
+  `𝔼[e^{θY}] = e^{κ(θ)τ}` without `∫ e^{θx} dν < ∞`; where that integral is infinite the Bochner
+  integral is `0` and `κ(θ)` is junk. "Moments of every order" is now qualified everywhere.
+- **"Lévy exponent"** names the Fourier exponent `ψ` in the usual terminology; the real-argument
+  `κ` is the Laplace exponent, the cumulant generating function per unit time. Renamed in prose
+  and in the entry name (the id stays).
+- Smaller: `dμ_τ(y)` written out; "every date" → "each date `t ≤ T`, almost surely"; the
+  power-claim entry cited `κ(1) = r` to an entry that states the drift condition (now
+  `martingale_iff_exponent_one`); "the jumps change only the jump law" replaces "changes the
+  jump sizes alone", which hid that `b` and `σ` scale too; the roadmap's Next list had dropped
+  the open `compoundPoissonMeasure` item.
+
+### Upgrades executed
+
+- **The moment re-rooted.** The θ = 1 moment of the log-return was derived from the pricing
+  identity `discounted_terminal`, and the first version of this phase recovered every other order
+  from it by scaling. Now `JumpDiffusionHyp.mgf_logReturn` computes the moment-generating function
+  at every `θ` directly: the Gaussian one (Mathlib's `mgf_gaussianReal`, `mgf_const_mul`) times the
+  compound-Poisson one (`compoundPoisson_mgf_of_indepFun`, the actuarial aggregate-loss MGF,
+  stated at every order and until now used only at `1`), by independence (`IndepFun.mgf_add'`).
+  The θ = 1 lemmas, at the law level and on the canonical model, are corollaries, and
+  `integral_exp_logReturn` is deleted.
+- **Mathlib's vocabulary.** `mgf_id_jumpDiffusionIncrementLaw` and
+  `cgf_id_jumpDiffusionIncrementLaw` (`cgf id μ_τ θ = κ(θ)τ`) make "cumulant generating function
+  per unit time" a theorem.
+- **Scaling** (`jumpDiffusionMeasure_map_jumps`, any measurable map of the jumps, from
+  `Measure.map_prod_map` and `Measure.infinitePi_map_pi`) carries the process statement
+  `JumpDiffusionProcess.const_mul`, and through it the exponential martingales as the
+  discounted-price criterion of `θX`: one lemma for Wald, the discounted price and the family.
+- **Power claims** go through `condExp_comp`, the one route for payoffs at a date.
+- Build hygiene: a `Mul` instance stuck because `measurable_pi_apply`'s domain was not yet known
+  (fixed by composing through `measurable_const_mul θ`); two no-op `beta_reduce`s and an unused
+  simp argument removed; `infinitePi_map_pi`'s measure pinned.
+
+### Lens gradients
+
+- **First principles.** Exemplar: `mgf_logReturn`, a moment from the model's independence
+  structure instead of from a price. Next: a `compoundPoissonMeasure` so that the law is a
+  convolution and the semigroup `μ_s ∗ μ_t = μ_{s+t}` can be stated.
+- **Coherence.** Exemplar: the actuarial compound-Poisson MGF now feeds the jump-diffusion law at
+  every order. Next: the Esscher transform through Mathlib's `Measure.tilted`.
+- **Concept clarity.** Exemplar: `κ` named as what it is, the Laplace exponent, with its domain
+  stated. Next: a proof-term edge from the `Λ = 0` bridge to Wald's statement, if it can be made
+  without proving Wald twice.
+
+### Ranked backlog
+
+1. **The Esscher transform** at the law level: `(μ_τ).tilted (θ * ·)` is the jump-diffusion law
+   with drift `b + θσ²`, rate `Λ∫e^{θx}dν` and jump law `ν.tilted (θ * ·)`, identified by the
+   moment-generating function (a law with every exponential moment is determined by it, Mathlib's
+   complex MGF); then the Esscher condition `κ(θ + 1) − κ(θ) = r` and Esscher prices as Merton's
+   formula for the tilted jump law. Drafted.
+2. **Formal incompleteness**: tilting the Gaussian and jump parts separately under the one
+   compensator constraint gives a family of martingale laws with different call prices.
+3. **`compoundPoissonMeasure` and the convolution semigroup** (carried from backlog 2 of the
+   corpus-486 review), then the construction of the process with jumps.
+4. A Wald proof-term edge from `IsFilteredPreBrownian.jumpDiffusionProcess 0 1`, weighed against
+   proving Wald twice.
+
+## 2026-10-08 — corpus 486 — the jump-diffusion process: prices at every date, and one tool per idea
+
+Scope: corpus 461 → 486, in two rounds.
+
+- First round (461 → 480):
+  - `BlackScholes/JumpImpliedVol.lean` (jumps lift the implied volatility);
+  - `BlackScholes/JumpDiffusionCanonical.lean` (the model exists; the price depends only on the
+    expected jump count and the jump law);
+  - `BlackScholes/JumpDiffusionProcess.lean` and `Foundations/ExpMartingaleIndepIncrements.lean`
+    (the price process; martingale exactly at the compensated drift);
+  - `BlackScholes/JumpDiffusionOptionPrices.lean` (prices at every date);
+  - `BlackScholes/GaussianSmoothing.lean` and `BlackScholes/JumpDiffusionMerton.lean` (Merton's
+    series from the general route).
+  - 19 entries: `mf-bs-call-strictly-convex-in-spot`, `mf-bs-call-tends-to-spot-high-vol`,
+    `mf-implied-vol-exists-above-reference`, `mf-jump-diffusion-call-strict-bounds`,
+    `mf-jump-diffusion-implied-vol-above-sigma`, `mf-compound-poisson-implied-vol-above-sigma`,
+    `mf-jump-diffusion-{model-exists,call-law-invariance,log-return-mgf}`,
+    `mf-jump-diffusion-discounted-price-martingale`, `mart-exp-indep-increments`,
+    `mf-jump-diffusion-{price-parity,put-intermediate-date,call-intermediate-date}`,
+    `mf-jump-diffusion-{merton-intermediate-date,implied-vol-every-date}`,
+    `mf-bs-gaussian-smoothing`, `mf-merton-from-general-jump-law`,
+    `mf-jump-diffusion-merton-1976-every-date`.
+- Coherence round (480 → 486), after the request to link the new jump work to the rest of the
+  library:
+  - `BlackScholes/JumpDiffusionBrownian.lean` (new): Brownian motion with drift is the process
+    without jumps;
+  - Merton's model exists (`mertonHyp_canonical`);
+  - one conditional freezing lemma in `Foundations/IndepFreezing.lean`, consumed by the American
+    put and by the jump process;
+  - the Wald martingale derived from the exponential-martingale lemma.
+  - 6 entries: `mf-jump-diffusion-brownian-no-jumps`, `mf-bs-formulas-every-date`,
+    `gir-risk-neutral-drift-unique`, `mf-merton-model-exists`, `ce-conditional-freezing-lemma`,
+    `mf-jump-diffusion-payoff-every-date`.
+
+Two panels of three read-only agents each, split as prose against statement, proof quality
+(lenses 2, 3, 6) and mathematics (lenses 1, 4, 5, 8): the first at corpus 480, the second at 486 on
+the coherence round. Neither found a mathematical error or a dishonest hypothesis.
+
+### Standing first pass: prose against statement
+
+First panel (18 items, applied in the coherence round's first commit):
+
+- **"Lévy process"** was claimed for `JumpDiffusionProcess`, whose fields carry no path regularity.
+  It now says the increments are those of a Lévy process, with no path regularity assumed.
+- **"Price" at every drift.** At a drift other than the compensated one, `P` is not a martingale
+  measure, so the conditional value is only a `P`-conditional expectation. Every price claim now
+  names the compensated drift. The second panel sharpened this: the jump-diffusion market is
+  incomplete, so even there it is an arbitrage-free price under `P`, not *the* price.
+- **"Every model-level result can be met"**, while `MertonHyp` had no witness and every
+  `JumpDiffusionHyp` theorem needs `∫ eˣ dν < ∞`. Narrowed then; `MertonHyp` is now witnessed
+  (`mertonHyp_canonical`).
+- **`Λ` meant two things**, the expected jump count of the single-date model and the rate of the
+  process. Both were called "intensity". Single-date prose says "expected jump count", process
+  prose says "rate".
+- **"At every date"** read as one null set for all dates and strikes. The statements are per
+  strike and per date `t < T`, almost surely; the prose says so.
+- Also: "any jump law" without non-degeneracy; unverifiable "ch. 11" citations; the Wald martingale
+  called "the Gaussian case" of the exponential-martingale lemma with no proof-term edge (true now,
+  by derivation); stale "not covered" lines.
+
+Second panel (6 fix-now, 7 nits, all applied):
+
+- **"No such process is constructed"** survived in three scopes after the Brownian bridge
+  constructed it without jumps. Those entries allow `Λ = 0`, so it was false. Each now says it is
+  constructed only without jumps.
+- **"Continuous-time FTAP, converse"** named the entry proving that the risk-neutral drift is the
+  only martingale drift. The FTAP's converse is a different theorem (an equivalent martingale
+  measure implies no arbitrage). Renamed.
+- The roadmap called the Wald martingale "proved separately" after it was derived. It said the
+  every-date put and call each lost their sign hypotheses (the put keeps `S₀ ≥ 0`). It said the
+  Girsanov change of measure shares the exponential-martingale lemma (only for constant `θ`).
+- **`map_restrict_prodMk_of_indep`'s docstring** said restricting to `s` keeps the law of `Y`. On
+  `s` it is `P(s)` times that law; normalized by `P(s)`, i.e. given `s`, the claim holds. The
+  docstring now says that.
+- "Conditions on `Λ` and `ν` alone" left out the hypotheses on `S₀, K, σ, T`; two safe wordings
+  dropped the compensated drift or `t < T`; "intensity" leftovers (two more, in the older
+  `mf-merton-dominance` and `mf-merton-classic-display` descriptions, went with the build repair);
+  the Brownian Black–Scholes entry claimed the put price function's formula "also proved" without
+  stating it (now stated); "Theorem 5.1.6" for Saporito's Remark 5.1.6; a citation of a
+  never-existing `condExp_payoff`.
+
+### Upgrades executed
+
+- **One conditional freezing lemma.** `condExp_comp_prodMk_of_indep` (Shreve's independence
+  lemma) in `Foundations/IndepFreezing.lean`: for `X` measurable for `𝒢` and `Y` independent of
+  `𝒢`, `𝔼[g(X, Y) | 𝒢] = ∫ g(X, y) d(law Y)(y)` for integrable, Banach-valued `g`. On each event
+  of `𝒢` the joint law is a product (`map_restrict_prodMk_of_indep`), so Fubini gives the same
+  integral over every such event. Mathlib conditions only on `σ(X)` (through `condDistrib`).
+  - The bounded, real-valued `AmericanPut/Stopping/IndependentKernel.lean` is deleted, and the
+    American put's Brownian transitions consume the general lemma.
+  - On the process, `JumpDiffusionProcess.condExp_comp_prodMk`:
+    `𝔼[g(X_t, X_T − X_t) | 𝓕_t] = ∫ g(X_t, y) dμ_{T−t}(y)`. Its case `condExp_comp` covers
+    European payoffs. The put and call are instances: the call's 50-line put–call detour through
+    linearity of `condExp` is gone, the put drops `K ≥ 0`, and the call drops `S₀, K ≥ 0`.
+- **The Brownian bridge.** Brownian motion with drift is a `JumpDiffusionProcess` without jumps,
+  witnessed on the constructed Brownian motion. The process results then give the Black–Scholes
+  formulas at every date before maturity, and "only `r − σ²/2` is a martingale drift" (the converse
+  of `discountedGBM_isMartingale`).
+- **Merton's model exists** (`JumpDiffusionHyp.toMertonHyp`, `mertonHyp_canonical`). Merton's
+  series comes from the general route (Gaussian smoothing), with the put series.
+- **The Wald martingale is derived**: the exponential martingale of `αB`
+  (`martingale_exp_sub_of_indep_increments`), so 75 lines of hand-rolled pull-out go. The first
+  FTAP, constant-`θ` Girsanov and the jump-diffusion martingale property now rest on one lemma.
+- **Mathlib consumed instead of re-proved:**
+  - count–size independence of the canonical model by `indepFun_iff_hasLaw_prodMk_prod`; the
+    repo's `indepFun_comp_of_measurePreserving` is deleted;
+  - `HasLaw.identDistrib`;
+  - `IsPreBrownianReal.eval_zero_ae_eq_zero` for `B₀ = 0` in the Brownian bridge, as the American
+    put already does.
+- **Duplication removed:**
+  - "a function of the Brownian increment is independent of the past" stated once
+    (`IsFilteredPreBrownian.indep_comap_of_eq_comp_increment`, on Mathlib's
+    `comap_le_comap_of_eq_comp`), for the Wald martingale and the Brownian bridge;
+  - price-function parity from the finite-state payoff identity `max_sub_max_neg`;
+  - `JumpDiffusionProcess.isProbabilityMeasure` and `integral_exp` derived, so six statements drop
+    `[IsProbabilityMeasure P]`;
+  - `jumpDiffusionLogReturn` named;
+  - `measurable_sum_range_prod`, `integral_exp_compensatedJumpPart` and
+    `integral_lt_integral_of_ae_le_of_not_ae_eq` stated once;
+  - the non-strict spot convexity and tangent bound follow from the strict ones;
+  - `mertonTerminal_eq_jumpDiffusionTerminal` (`rfl`) checks the docstring claim "Merton's
+    terminal price is the `κ = kΛ` case". Nothing consumes it yet, so it is not a proof-term edge;
+    a single definition is backlog 1.
+- **Second panel, proof quality** (13 findings on the coherence round):
+  - It found a build break first. Brownian independence is stated for the function difference
+    `X t - X s`, so `ring` saw `(X t - X s) ω` as an atom at both new "function of the
+    increment" sites. The lifted lemma takes the pointwise identity `Z ω = f (X_t ω − X_s ω)`, so
+    the difference never appears.
+  - Applied: the lifted lemma; Mathlib's `eval_zero_ae_eq_zero`; the `simpa … using` fold in
+    `condExp_comp`.
+  - Kept: price-function parity cites `max_sub_max_neg`, the finance name of Mathlib's
+    `max_zero_sub_max_neg_zero_eq_self`, so the jump-diffusion parity and the finite-state parity
+    cite one identity. The real unification is one model-free parity (backlog 8).
+  - Deferred (backlog 8): a `bsTerminal_standardize` step shared by the two no-jump price
+    functions; `show`s that restate the goal; orienting `hi` in `map_restrict_prodMk_of_indep`;
+    `Integrable.of_bound`; `mertonJump_compensated`'s `b = X → b = Y` shape; the put via `bsP`.
+
+### Lens gradients
+
+- **Inspired math.**
+  - Exemplar: `jumpDiffusion_impliedVol_gt`. Strict Jensen over the strictly convex Black–Scholes
+    price, plus implied-volatility existence: compensated non-degenerate jumps lift the implied
+    volatility above `σ`, at every strike, for any such jump law.
+  - Next: the Lévy exponent at every `θ` and the convolution semigroup, so that the jump-diffusion
+    is a process and not a family of single-date laws.
+- **Coherence.**
+  - Exemplar: `condExp_comp_prodMk_of_indep`, one lemma feeding the American put and the jump
+    process, filling a gap next to Mathlib's `condDistrib` version.
+  - Next: route the remaining hand-frozen conditional expectations through it (backlog 4), and
+    upstream it.
+- **Zero slop.**
+  - Exemplar: `condExp_call`, now a payoff and its integrability.
+  - Remaining:
+    - two private `condExp_func_increment`s (BrownianMartingale, PointwiseBracket);
+    - put–call parity proved four ways;
+    - Merton's series proved twice (backlog 1).
+- **Architecture.**
+  - Exemplar: put and call as instances of `condExp_comp`, which is the process case of the
+    Foundations lemma; Wald from the general exponential martingale.
+  - Next: one law-level model (`JumpDiffusionHyp` as a `HasLaw` against the canonical measure),
+    and the law and process layer moved below `BlackScholes/`.
+- **First principles.**
+  - Exemplar: `martingale_iff` derives the compensated drift as the only martingale drift; the
+    process structure is witnessed without jumps, and `MertonHyp` is witnessed.
+  - Next: the process with jumps (`Λ > 0`), a witness for `PoissonRandomMeasure`, and a jump
+    pricing measure derived from the physical one, as `BSCallHyp.exists_of_physical` does.
+- **Idiomatic register.**
+  - Exemplar: the section order `{m mΩ : MeasurableSpace Ω}`, Mathlib's `{m m0}` convention. It
+    was learned the hard way: a later-declared `m` became the preferred instance.
+  - Next: `IsJumpDiffusion`-style naming for the Prop-valued structure, strict-implicit `⦃s t⦄`
+    binders, and splitting `jumpDiffusionHyp_canonical`'s conjunction.
+- **Concept clarity.**
+  - Exemplar: `mf-jump-diffusion-implied-vol-every-date`, which pins the quantifier scope, the
+    domain of uniqueness and the existence gap in the outward-facing field.
+  - Next: an implied-volatility function, so that the smile can be stated.
+- **Elegance.**
+  - Exemplar: `map_restrict_prodMk_of_indep`. Restricting to an event keeps the product
+    structure, and the conditional lemma follows in about twenty lines.
+  - Next: `squareSubTime_isMartingale` as freezing plus the Gaussian second moment, about 15 lines
+    in place of 150.
+
+### Ranked backlog
+
+1. **One model.** Drop `JumpDiffusionHyp.J_meas` (`IdentDistrib` gives a.e.-measurability;
+   `iIndepFun.map_fun_eq_infinitePi_map₀'`, `mgf_sum_of_identDistrib₀`) and prove
+   `JumpDiffusionHyp ↔ HasLaw (Z, N, J) (jumpDiffusionMeasure Λ ν) Q`. `MertonHyp` becomes the
+   Gaussian case, `merton_{call,put}_formula` and `merton_discounted_terminal` become corollaries,
+   and `mertonStd` and the per-count lemmas go.
+2. **The Lévy exponent and the semigroup.**
+   - A `compoundPoissonMeasure Λ ν` in Foundations, with
+     `μ_τ = N(bτ, σ²τ) ∗ compoundPoissonMeasure (Λτ) ν` and `mgf μ_τ θ = exp(τκ(θ))`. This
+     replaces the inverted `integral_exp_logReturn ← discounted_terminal` dependency.
+   - The Esscher–Wald family `exp(θX_t − tκ(θ))` as martingales for every `θ`.
+   - `μ_s ∗ μ_t = μ_{s+t}`, pushed from Mathlib's `poissonMeasure_conv_poissonMeasure`.
+3. **Construct the process with jumps.**
+   - Kolmogorov extension of the semigroup, independent of the Brownian motion, plus "independent
+     increments ⇒ `JumpDiffusionProcess` for the natural filtration".
+   - This witnesses `Λ > 0` and, for finite `ν`, the Poisson random measure.
+4. **Route the hand-frozen conditional expectations** through `condExp_comp_prodMk_of_indep`:
+   - `squareSubTime_isMartingale` and both `condExp_func_increment`s;
+   - the pointwise bracket, the simple Doléans exponential (about 110 lines re-proving the
+     freezing of `exp(c·Δ)`, with one domination bound proved twice) and the `Q`-Brownian
+     exponential martingale;
+   - `condExp_exp_eq_of_indep_increment`, which then drops `hD_int` (it follows from the other
+     hypotheses).
+   - Then a `HasLaw Y μ P` form of the freezing lemma (the process-level lemma becomes one line),
+     and one Fubini step for `integral_comp_prodMk_of_indepFun` and the freezing lemma.
+5. **An exponential-Lévy abstraction** carrying the generic results:
+   - `condExp_comp`, the martingale criterion and the restart property;
+   - a bridge to Mathlib's `HasIndepIncrements`;
+   - the converse bridge `JumpDiffusionProcess … 0 1 0 ν ⇒ IsFilteredPreBrownian`.
+6. **Esscher for jumps.**
+   - `JumpDiffusionHyp` under a pricing measure derived from the physical measure.
+   - The compensator condition gives a one-parameter family of martingale measures, which is
+     incompleteness made formal.
+7. **The smile.** The `σ → 0` limit, then an `impliedVol` function, then Lee's moment formula.
+8. **Smaller items:**
+   - one model-free put–call parity, from which the four existing parities follow;
+   - "American put ≥ Black–Scholes put" at `q = 0`, a cheap edge between the two towers;
+   - the American put's `brownianLogState_condExp_transition` as the rate-0 `condExp_comp`, and
+     `brownian_condExp_transition` taking integrability and measurability as hypotheses (its
+     bound and continuity supply only those);
+   - the second panel's deferred proof nits (above);
+   - upstream candidates: the conditional freezing lemma,
+     `integral_lt_integral_of_ae_le_of_not_ae_eq`, tangent-line forms of convexity,
+     `indepFun_prodMk_of_indepFun_prodMk`, `poissonMeasure_zero` (out of `BlackScholes/`
+     meanwhile).
+
+## 2026-10-08 — corpus 461 — the jump-diffusion axis: Merton derived, its Greeks, any jump law
+
+Scope: the session's jump-diffusion work, corpus 447 → 461.
+
+- `Foundations/IndepFreezing.lean` (new): the freezing lemma, its countable form, integrating out
+  a countable variable, re-associating mutual independence.
+- `Foundations/AffineMinorant.lean` (new): Jensen's inequality through a supporting line.
+- `Actuarial/CompoundPoissonMGF.lean`: the MGF with a random claim count.
+- `BlackScholes/MertonModel.lean` (new): Merton's prices derived from the terminal law.
+- `BlackScholes/MertonGreeks.lean` (new): delta, gamma, vega and the shape of the price (#129).
+- `BlackScholes/JumpDiffusionMixing.lean` (new): the mixing formula, dominance, the compensator,
+  Merton's formula for a general jump law.
+- 14 entries: `ce-freezing-lemma`, `mf-compound-poisson-mgf-random-count`,
+  `mf-merton-{call,put}-formula`, `mf-merton-discounted-terminal`,
+  `mf-merton-{delta,gamma,vega}`, `mf-merton-call-convex-in-spot`,
+  `mf-merton-call-increasing-in-vol`, `mf-jump-diffusion-{mixing-formula,call-dominates-bs,compensator}`,
+  `mf-merton-general-jump-law`.
+
+Three read-only agents: prose against statement; proof quality (lenses 2, 3, 6); the mathematics
+(lenses 1, 4, 5, 8). The prose and mathematics reviewers read `JumpDiffusionMixing` before its
+restructure, the proof-quality reviewer read the working tree during it. None found a
+mathematical error or a dishonest hypothesis.
+
+### Standing first pass: prose against statement
+
+- `mf-merton-discounted-terminal` was named "the Compensator Is the Risk-Neutral Drift", and its
+  docstring said the same. The theorem is `𝔼[e^{−rT}S_T] = S₀` at maturity with `−kΛ` built in:
+  no martingale property, no uniqueness. It is now "the Compensated Discounted Terminal Price Has
+  Mean S₀", and uniqueness, for any jump law, is cited to `discounted_terminal_eq_iff`.
+- Coverage and roadmap said the compound-Poisson MGF went through the Poisson-count lemma, and
+  that conditioning on a count, once written out "in three places", was now one lemma. The MGF
+  did not use it, and `PoissonMaxima` still conditions by hand. The first is now true (the MGF
+  goes through the generalized lemma); the second is stated.
+- The general-law prose called `Q` "the pricing measure" for every drift correction `κ`; it is one
+  only at the compensator. Now "a probability measure `Q`", with the compensator case named.
+- `JumpDiffusionHyp`'s docstring called its fields "`MertonHyp`'s independence hypotheses", and
+  the module called Merton "the Gaussian case". `MertonHyp`'s jumps are only a.e.-measurable, so
+  it is not an instance and no lemma connects the two. Both now say so.
+- An equation number. The new prose called the general formula Merton (1976), eq. (16), while
+  `mf-merton-classic-display` gives eq. (16) to the `Λ′ = Λ(1 + k)` series. The paper could not
+  be retrieved here to settle it, so the new prose cites no number (backlog 8).
+- Smaller. The vega docstring never stated its conclusion. `mertonStd` and
+  `mertonTerminal_eq_bsTerminal` claimed a law for a definition and for a pointwise identity. The
+  put description showed a series proved only for the call. Three `MertonModel` descriptions
+  lacked their hypotheses. The compound-Poisson scope said the expectation "is not defined"
+  without `hint` (it is `+∞`, which the Bochner `mgf` records as `0`). Coverage still listed "jump
+  laws other than lognormal" as not covered. `ce-freezing-lemma` said the conditional form is not
+  proved, while `condExp_independent_kernel` proves a bounded case; that is now disclosed.
+
+### Upgrades executed
+
+- **One route through the jump part.** `indepFun_prodMk_of_indepFun_prodMk` (a rotation of the
+  triple product of laws) turns the model's `N ⟂ (Z, J)` and `Z ⟂ J` into `Z ⟂ (N, J)`. Each
+  model-level result is then the single-jump-part theorem at `Y = −κ + ∑_{i<N} Jᵢ`: the
+  compensator in two rewrites (through the compound-Poisson MGF at 1), and Merton's general
+  formula as the freezing lemma on jointly integrable data. Four per-count lemmas and a sign
+  hypothesis on `S₀` went away.
+- **Jump risk is never free, for any compensated jump law, in one Jensen step.**
+  `le_integral_of_affine_le` with `bsV_spot_tangent_le`; Mathlib's `ConvexOn.map_integral_le`
+  needs a closed domain. `MertonDominance`'s 13-rewrite Jensen floor is now one application of it.
+  With `jumpDiffusion_call_le`, `C_BS(S₀) ≤ C ≤ S₀`.
+- `integral_comp_of_hasLaw_of_countable` replaces the Poisson-named lemma: nothing in it used the
+  Poisson law.
+- Payoff integrability as positive parts of integrable functions (`Integrable.pos_part`),
+  dropping `hS_0`, `hK`, `hY` and an `IsFiniteMeasure`.
+- `integral_discounted_bsTerminal`: the discounted forward computed once.
+- Probability instances derived from the law hypotheses on fifteen statements.
+- Greeks: strict monotonicity and convexity in the spot and monotonicity in `σ` became theorems
+  (`mertonVega_pos` had claimed monotonicity in its docstring).
+- Small: `mgf_range_sum_of_iid` through `mgf_congr_of_identDistrib`; the Merton call series
+  summable by `hasSum_integral_poissonMeasure`; `congr_deriv` for a `convert`.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: the mixing formula; a jump is a change of spot. Next: strict
+  Black–Scholes convexity in the spot, so that for non-degenerate jumps every implied volatility
+  exceeds `σ`, the smile's first consequence.
+- **Coherence.** Exemplar: `indepFun_prodMk_of_indepFun_prodMk`, law algebra on
+  `indepFun_iff_map_prod_eq_prod_map_map` filling a Mathlib gap. Next: upstream it, with the
+  Poisson pgf and a Tonelli form of the freezing lemma.
+- **Zero slop.** The Greeks prove each term bound twice, and the Merton layer has three copies of
+  the pgf at `1 + k` (backlog 3).
+- **Architecture.** `MertonModel` and the general route share no code (backlog 1).
+- **First principles.** Exemplar: `JumpDiffusionHyp` leaves `κ` free and derives the compensator
+  as the only root. Gap: nothing shows the hypotheses are satisfiable (backlog 5).
+- **Idiomatic register.** The Greeks' hypothesis orders differ (`_spot` against `_sigma`);
+  `PoissonPgf.` is a topic namespace; the Poisson weight `rexp (-Λ) * Λ ^ n / n !` is written out
+  about fifty times.
+- **Concept clarity.** Exemplar: `MertonHyp`'s "(N of (Z, J), Z of J, the Jᵢ of each other)".
+  Next: proof-term edges for the cross-file prose, starting with "Merton is the Gaussian case".
+- **Elegance.** Exemplar: `JumpDiffusionHyp.discounted_terminal`, the compensator read off the
+  compound-Poisson MGF at 1 in three rewrites.
+
+### Ranked backlog
+
+1. **Collapse the Merton towers.** Weaken `JumpDiffusionHyp.J_meas` to a.e.-measurability
+   (`mgf_sum₀`, the measurability `IdentDistrib` carries) so that `MertonHyp` is an instance, and
+   prove Gaussian smoothing of a Black–Scholes price, `𝔼[C_BS(Se^G; σ)] = C_BS(Se^{m+v/2};
+   √(σ² + v/T))` for `G ∼ N(m, v)`. `merton_call_formula` and `merton_discounted_terminal` become
+   corollaries, and `mertonStd` goes.
+2. `bsV_spot_strictConvexOn`, then implied volatility above `σ` for non-degenerate compensated
+   jumps. The Greeks' shape theorems then hold for any jump law by integrating the Black–Scholes
+   shape.
+3. MertonGreeks: extract the gamma and vega term bounds (each proved twice), `gcongr` for the
+   `mul_le_mul` chains, `positivity` for the `n = 0` terms; one `hasSum_weights_mul_mertonSpot` in
+   MertonJumpDiffusion for the three pgf-at-`1 + k` copies.
+4. The put, and put–call parity for any jump law:
+   `C − P = S₀e^{−κ + Λ(𝔼[e^J] − 1)} − Ke^{−rT}`.
+5. A witness that `JumpDiffusionHyp` and `MertonHyp` are satisfiable (`exists_hasLaw_indepFun`).
+   It is also how model-level theorems transfer to `mertonCallPrice` as a function.
+6. Foundations housekeeping:
+   - the compound-Poisson random sum as one structure (assumed three times: CompoundPoissonMGF,
+     PoissonMaxima, JumpDiffusionHyp);
+   - `hasLaw_sum_range_gaussianReal` and the i.i.d. and compound MGFs moved to Foundations;
+   - a Tonelli freezing lemma (a nonnegative `F` needs only section integrability);
+   - `PoissonMaxima` routed through `integral_comp_of_hasLaw_of_countable`;
+   - the bounded conditional freezing lemma (`IndependentKernel`) generalized into Foundations,
+     with `integral_pair_of_indep_bounded` onto `integral_comp_prodMk_of_indepFun`.
+7. Black–Scholes bridges:
+   - one public `bsV`-expectation bridge in PriceBounds, replacing its private one and
+     `integral_bsCall_payoff_eq_bsV`;
+   - `bsV_nonneg_of_pos` into PriceBounds and `measurable_bsV_spot` into PDE;
+   - `continuous_Phi` tagged `@[fun_prop]`.
+
+   Deferred: PDE and PriceBounds re-verify most of the corpus.
+8. Check Merton (1976)'s equation numbers against the paper. `mf-merton-classic-display` cites
+   eq. (16) for the `Λ′` series; recollection puts that at (19) and the general formula at (16).
+9. The characteristic function of the log-price (Lévy–Khintchine at a fixed date) and Kou's
+   compensator: lower value per effort until a Fourier-pricing consumer exists.
+
+Dissolved:
+
+- `Pi.le_def.mpr fun n ↦ …` → `fun n ↦ …`. Definitionally equal, but a lambda against a
+  non-syntactic `≤` is an elaboration risk for no gain.
+- `hasLaw_sub_div_of_gaussianReal` through `gaussianReal_div_const`. The same length, and its
+  `.mk` proof terms would have to match syntactically.
+- The vega `hfun` through `simp_rw`: style only.
+
 ## 2026-10-05 — corpus 447 — Itô's formula for adapted coefficients (B5)
 
 Scope: `Foundations/ItoFormulaAdapted.lean` and the entry `sc-ito-formula-adapted`; corpus

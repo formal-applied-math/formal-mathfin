@@ -272,6 +272,12 @@ discounted asset is a martingale and the call price is the discounted
 risk-neutral expectation (`bs_call_formula_of_physical`).
 → *Finance:* **the risk-neutral measure is not an axiom — it is constructed from
 the physical measure.** `BSCallHyp` stops being a hypothesis.
+The tilt is the case `N(0,1)` of the Gaussian Esscher transform
+`gaussianReal_tilted_const_mul` ([`Foundations/Esscher.lean`](../MathFin/Foundations/Esscher.lean)).
+The same lemma gives the Esscher transform of a jump-diffusion without jumps
+(`jumpDiffusionIncrementLaw_zero_tilted`). The same file's tilted moments and identification of
+a law by its moment-generating function give the case with jumps
+(`jumpDiffusionIncrementLaw_tilted`).
 [`Foundations/GaussianGirsanov.lean`](../MathFin/Foundations/GaussianGirsanov.lean)
 
 ### BSCallHyp from a Brownian model ✅

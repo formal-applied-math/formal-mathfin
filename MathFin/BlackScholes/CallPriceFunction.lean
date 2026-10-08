@@ -17,7 +17,9 @@ free of butterfly arbitrage. `IsNormalizedCallPrice` records them, with two cons
 such a function is nonincreasing and tends to `1` at strike `0`
 (`IsNormalizedCallPrice.of_convexOn`).
 
-Neither direction of the correspondence with random variables is proved here.
+Neither direction of the correspondence with random variables is proved here. Of the forward
+direction, the convexity holds for any law with a finite mean (`convexOn_integral_call`, in
+`StrikeConvexity.lean`).
 -/
 
 @[expose] public section

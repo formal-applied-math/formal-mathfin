@@ -5,7 +5,7 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.IndependentKernel
+public import MathFin.Foundations.IndepFreezing
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianHeatFlow
 
 /-! # Conditional Brownian transitions in the raw natural filtration 
@@ -53,8 +53,12 @@ theorem brownian_condExp_transition {f : ℝ → ℝ} (hf : Continuous f) {C : �
   have hY : Measurable (fun ω => brownian j ω-brownian i ω) :=
     (measurable_brownian j).sub (measurable_brownian i)
   have hH : Continuous (fun z : ℝ × ℝ => f (z.1+σ*z.2)) := by fun_prop
-  have he := condExp_independent_kernel (brownianFiltration.le i) hX hY
-    (brownian_filtered.indep i j hij) hH.measurable (fun z => hb (z.1+σ*z.2))
+  have hint : Integrable (fun ω => f (X ω+σ*(brownian j ω-brownian i ω))) gaussianLimit :=
+    (integrable_const C).mono' (hH.measurable.comp
+      ((hX.mono (brownianFiltration.le i) le_rfl).prodMk hY)).aestronglyMeasurable
+      (Eventually.of_forall fun ω => hb _)
+  have he := condExp_comp_prodMk_of_indep (brownianFiltration.le i) hX hY.aemeasurable
+    (brownian_filtered.indep i j hij) hH.stronglyMeasurable hint
   filter_upwards [he] with ω hω
   rw [hω]
   have hmap := integral_map (μ := gaussianLimit) hY.aemeasurable

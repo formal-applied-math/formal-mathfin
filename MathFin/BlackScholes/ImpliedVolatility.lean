@@ -7,9 +7,10 @@ module
 
 public import Mathlib
 public import MathFin.BlackScholes.PDE
+public import MathFin.Foundations.NormalTail
 
 /-!
-# Implied volatility uniqueness
+# Implied volatility: uniqueness, and existence above a reference volatility
 
 The **implied volatility** of a market option price `c` is the value of `σ`
 for which the Black–Scholes price equals `c`. Existence requires the option
@@ -21,19 +22,29 @@ Strict monotonicity in `σ` follows from **positive vega**: by
 is strictly positive (since `ϕ > 0`). A function with positive derivative
 on an interval is strictly monotone there, hence injective.
 
-## Main result
+As `σ → ∞` the call price tends to the spot. So a price above the Black–Scholes
+price at some `σ₀ > 0` and below the spot has an implied volatility, above `σ₀`.
+This is the existence result `JumpImpliedVol.lean` needs. Existence for every
+price in the no-arbitrage range would also need the `σ → 0` limit, which is not
+proved.
+
+## Main results
 
 * `bsV_strictMonoOn_sigma`: the BS call price `σ ↦ V(K, r, σ, S, T)` is
   strictly monotone on `(0, ∞)` for `K, S, T > 0`.
 * `implied_volatility_unique`: as a corollary, the implied volatility is
   unique whenever it exists.
+* `tendsto_bsV_sigma_atTop`: the call price tends to the spot as `σ → ∞`.
+* `exists_impliedVol_gt_of_bsV_lt`: a price strictly between the Black–Scholes
+  price at `σ₀ > 0` and the spot has a unique positive implied volatility, and it
+  exceeds `σ₀`.
 -/
 
 @[expose] public section
 
 namespace MathFin
 
-open MeasureTheory ProbabilityTheory Real
+open Filter MeasureTheory ProbabilityTheory Real
 open scoped NNReal ENNReal Topology
 
 /-- **Vega is strictly positive** for `S > 0, T > 0` and any `σ > 0`. -/
@@ -74,6 +85,76 @@ theorem implied_volatility_unique {K r T : ℝ} (hK : 0 < K) (hT : 0 < T)
     (h_eq : bsV K r σ₁ S T = bsV K r σ₂ S T) :
     σ₁ = σ₂ := by
   exact (bsV_strictMonoOn_sigma hK hT hS).injOn hσ₁ hσ₂ h_eq
+
+/-! ## Existence above a reference volatility
+
+As `σ → ∞`, `d₁ = (log(S/K) + rT)/(σ√T) + σ√T/2 → ∞` and `d₂ = d₁ − σ√T → −∞`, so the call
+price tends to the spot. A price strictly between the Black–Scholes price at some `σ₀ > 0` and
+the spot is therefore attained at a volatility above `σ₀` (intermediate value theorem), and at no
+other positive volatility (`implied_volatility_unique`). -/
+
+/-- `d₁` with the volatility split out, at the maturity `s²`, where `√(s²) = s`. -/
+lemma bsd1_sq_eq (S K r : ℝ) {σ s : ℝ} (hσ : σ ≠ 0) (hs : 0 < s) :
+    bsd1 S K r σ (s ^ 2) = (Real.log (S / K) + r * s ^ 2) / s * σ⁻¹ + s / 2 * σ := by
+  have hs' : s ≠ 0 := hs.ne'
+  rw [bsd1, Real.sqrt_sq hs.le]
+  generalize Real.log (S / K) = L
+  field_simp
+  ring
+
+/-- `d₁ = (log(S/K) + rT)/√T · σ⁻¹ + √T/2 · σ`. -/
+lemma bsd1_eq_inv_add (S K r : ℝ) {σ T : ℝ} (hσ : σ ≠ 0) (hT : 0 < T) :
+    bsd1 S K r σ T = (Real.log (S / K) + r * T) / Real.sqrt T * σ⁻¹ + Real.sqrt T / 2 * σ := by
+  have h := bsd1_sq_eq S K r hσ (Real.sqrt_pos.2 hT)
+  rwa [Real.sq_sqrt hT.le] at h
+
+/-- `d₁ → ∞` as `σ → ∞`. -/
+lemma tendsto_bsd1_sigma_atTop (S K r : ℝ) {T : ℝ} (hT : 0 < T) :
+    Tendsto (fun σ ↦ bsd1 S K r σ T) atTop atTop := by
+  have h : Tendsto (fun σ : ℝ ↦ (Real.log (S / K) + r * T) / Real.sqrt T * σ⁻¹
+      + Real.sqrt T / 2 * σ) atTop atTop :=
+    (tendsto_inv_atTop_zero.const_mul _).add_atTop
+      (tendsto_id.const_mul_atTop (half_pos (Real.sqrt_pos.2 hT)))
+  refine h.congr' ?_
+  filter_upwards [eventually_gt_atTop 0] with σ hσ
+  exact (bsd1_eq_inv_add S K r hσ.ne' hT).symm
+
+/-- `d₂ → −∞` as `σ → ∞`. -/
+lemma tendsto_bsd2_sigma_atTop (S K r : ℝ) {T : ℝ} (hT : 0 < T) :
+    Tendsto (fun σ ↦ bsd2 S K r σ T) atTop atBot := by
+  have h : Tendsto (fun σ : ℝ ↦ (Real.log (S / K) + r * T) / Real.sqrt T * σ⁻¹
+      + -(Real.sqrt T / 2 * σ)) atTop atBot :=
+    (tendsto_inv_atTop_zero.const_mul _).add_atBot (tendsto_neg_atTop_atBot.comp
+      (tendsto_id.const_mul_atTop (half_pos (Real.sqrt_pos.2 hT))))
+  refine h.congr' ?_
+  filter_upwards [eventually_gt_atTop 0] with σ hσ
+  rw [bsd2, bsd1_eq_inv_add S K r hσ.ne' hT]
+  ring
+
+/-- **The Black–Scholes call tends to the spot as `σ → ∞`**: `S·Φ(d₁) − Ke^{−rT}·Φ(d₂) → S`,
+since `d₁ → ∞` and `d₂ → −∞`. -/
+theorem tendsto_bsV_sigma_atTop (S K r : ℝ) {T : ℝ} (hT : 0 < T) :
+    Tendsto (fun σ ↦ bsV K r σ S T) atTop (𝓝 S) := by
+  have h := ((tendsto_Phi_atTop.comp (tendsto_bsd1_sigma_atTop S K r hT)).const_mul S).sub
+    ((tendsto_Phi_atBot.comp (tendsto_bsd2_sigma_atTop S K r hT)).const_mul
+      (K * Real.exp (-(r * T))))
+  rw [mul_one, mul_zero, sub_zero] at h
+  exact h
+
+/-- **Implied volatility above a reference volatility.** A price `C` strictly between the
+Black–Scholes price at a volatility `σ₀ > 0` and the spot has an implied volatility `σ > σ₀`,
+and no other positive volatility prices to `C`. -/
+theorem exists_impliedVol_gt_of_bsV_lt {K r T S σ₀ C : ℝ} (hK : 0 < K) (hT : 0 < T)
+    (hS : 0 < S) (hσ₀ : 0 < σ₀) (hlo : bsV K r σ₀ S T < C) (hhi : C < S) :
+    ∃ σ, σ₀ < σ ∧ bsV K r σ S T = C ∧ ∀ σ' > 0, bsV K r σ' S T = C → σ' = σ := by
+  obtain ⟨σ₁, hC, hσ₁⟩ := (((tendsto_bsV_sigma_atTop S K r hT).eventually
+    (lt_mem_nhds hhi)).and (eventually_gt_atTop σ₀)).exists
+  have hpos : Set.Icc σ₀ σ₁ ⊆ Set.Ioi 0 := fun v hv ↦ hσ₀.trans_le hv.1
+  have hCmem : C ∈ Set.Ioo (bsV K r σ₀ S T) (bsV K r σ₁ S T) := ⟨hlo, hC⟩
+  obtain ⟨σ, hσ, hσC⟩ := intermediate_value_Ioo hσ₁.le
+    ((bsV_continuousOn_sigma (r := r) hK hT hS).mono hpos) hCmem
+  exact ⟨σ, hσ.1, hσC, fun σ' hσ' h ↦
+    implied_volatility_unique hK hT hS hσ' (hσ₀.trans hσ.1) (h.trans hσC.symm)⟩
 
 /-! ## Newton-Raphson iteration (folded from `NewtonRaphsonIV.lean`)
 

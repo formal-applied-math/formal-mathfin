@@ -78,7 +78,23 @@
         "reference": "Risk-neutral pricing / first FTAP, continuous time (Saporito Ch 9; Shreve II Ch 5)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. The discounted price e^{−rt}·S_t = S₀·exp(σX_t − σ²t/2) is S₀ • (Wald exponential), and IsFilteredPreBrownian.waldExponential_isMartingale (MathFin/Foundations/BrownianMartingale.lean: pull-out + condExp_indep_eq + Gaussian MGF) plus Martingale.smul give the martingale property — no further stochastic-calculus machinery. Continuous-time analogue of the discrete binomial EMM (Binomial/SecondFTAP.lean). Lives in MathFin/Foundations/ContinuousFTAP.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. The discounted price e^{−rt}·S_t = S₀·exp(σX_t − σ²t/2) is S₀ • (Wald exponential), and IsFilteredPreBrownian.waldExponential_isMartingale (MathFin/Foundations/BrownianMartingale.lean, the exponential martingale of independent increments, martingale_exp_sub_of_indep_increments, with the Gaussian MGF) plus Martingale.smul give the martingale property — no further stochastic-calculus machinery. Continuous-time analogue of the discrete binomial EMM (Binomial/SecondFTAP.lean). Lives in MathFin/Foundations/ContinuousFTAP.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "gir-risk-neutral-drift-unique",
+      "name": "Risk-Neutral Drift Uniqueness: Only b = r − σ²/2 Makes the Discounted Price a Martingale",
+      "description": "For a filtered pre-Brownian motion B (IsFilteredPreBrownian B 𝓕 P), S₀ ≠ 0 and any rate r, volatility σ and drift b, the discounted price e^{−rt}S₀e^{bt + σB_t} is an 𝓕-martingale if and only if b = r − σ²/2. The 'if' direction is gir-continuous-ftap; the converse says that no other drift makes the discounted price a P-martingale. It is the jump-free case of the jump-diffusion martingale criterion (mf-jump-diffusion-discounted-price-martingale): Brownian motion with drift is a jump-diffusion process with jump rate 0 (mf-jump-diffusion-brownian-no-jumps).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionBrownian\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The risk-neutral drift is the only martingale drift.** -/\ntheorem risk_neutral_drift_unique_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {𝓕 : Filtration ℝ≥0 mΩ} {B : ℝ≥0 → Ω → ℝ} [IsFilteredPreBrownian B 𝓕 P] (b σ : ℝ)\n    {S_0 : ℝ} (hS_0 : S_0 ≠ 0) (r : ℝ) :\n    Martingale (fun (t : ℝ≥0) ω ↦ Real.exp (-r * t) * (S_0 * Real.exp (b * t + σ * B t ω)))\n        𝓕 P ↔\n      b = r - σ ^ 2 / 2 :=\n  IsFilteredPreBrownian.martingale_discounted_iff b σ hS_0 r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Risk-neutral pricing / first FTAP, continuous time (Saporito Ch 9; Shreve II Ch 5)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. X_t = bt + σB_t is a JumpDiffusionProcess with rate 0 (IsFilteredPreBrownian.jumpDiffusionProcess), so JumpDiffusionProcess.martingale_iff applies with Λ = 0, where the compensated drift r − σ²/2 − Λ(∫eˣdν − 1) is r − σ²/2 (IsFilteredPreBrownian.martingale_discounted_iff). The 'if' direction is also discountedGBM_isMartingale (Foundations/ContinuousFTAP.lean), proved there from the Wald martingale; this entry adds the converse. Lives in MathFin/BlackScholes/JumpDiffusionBrownian.lean. Axioms-clean."
       }
     },
     {
@@ -319,6 +335,22 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.PricingMeasureL2Density.measure_eq_of_density. This STRENGTHENS gir-pricing-measure-unique, which assumed PricesGainsAtZero: here that condition is a CONSEQUENCE of the price being a Q-martingale plus a square-integrable density, so the hypothesis is discharged. Derivation: the functional psi -> E_Q[integral of psi against S] is an inner product against the density composed with an isometry, hence continuous; it vanishes on a band because that integral is Z.(S_b - S_a), a bounded predictable weight against a Q-martingale increment; hence on simple processes by linearity and the Lp band decomposition; hence everywhere by density; then the existing measure_eq_of_pricesGainsAtZero applies. SCOPE, stated honestly. (1) The density hypothesis is Q = mu.withDensity (ENNReal.ofReal . D) with D in L^2(mu) and D >= 0 a.e. — square integrability is what makes the functional continuous and is not removable by this argument. (2) sigma != 0 a.e. is used, to convert gains against S into gains against B. (3) The price is driftless. (4) Only the direction complete implies unique is delivered; the converse needs the Jacod-Yor extreme-point characterisation and is untouched. (5) This is uniqueness ON THE BROWNIAN SIGMA-ALGEBRA 𝓕^B_T, i.e. Q agrees with mu there; it says nothing about Q off that sigma-algebra. (6) The martingale hypothesis is on an ABSTRACT adapted S agreeing a.e. with pricePath at each time up to T, not on pricePath itself: Martingale requires adaptedness on the nose and pricePath, being built from Lp classes, is only a.e. adapted. MarketCompletenessInPrice.pricePathCondExp is the witness, so the hypothesis is satisfiable rather than empty."
+      }
+    },
+    {
+      "id": "gir-gaussian-esscher-tilt",
+      "name": "The Esscher Transform of a Gaussian Law Shifts Its Mean: N(m, v) Tilted by e^{θx} Is N(m + θv, v)",
+      "description": "For every real m, variance v ≥ 0 and real θ, the Gaussian law N(m, v) tilted by e^{θx} and renormalized (the Esscher transform, Mathlib's Measure.tilted) is N(m + θv, v). Three results in the library are derived from it. The static Girsanov change of measure of N(0, 1) by the density exp(cx − c²/2) (gaussianReal_withDensity_esscher, behind BSCallHyp.exists_of_physical) is its case m = 0, v = 1, θ = c. The tilt of the log-return law at jump rate 0 (jumpDiffusionIncrementLaw_zero_tilted, behind mf-black-scholes-esscher-pricing) is the case m = bτ, v = σ²τ. Merton's log-jump law tilted by e^{θx} (mertonJump_tilted, behind mf-merton-esscher-pricing) is the case m = log(1 + k) − δ²/2, v = δ². The proof compares moment-generating functions: a law with exponential moments of every order is determined by its moment-generating function.",
+      "domain": "measure_theory",
+      "code": {
+        "lean": "import MathFin.Foundations.Esscher\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The Esscher transform of a Gaussian law shifts its mean.** -/\ntheorem gaussian_esscher_tilt_thm (m : ℝ) (v : ℝ≥0) (θ : ℝ) :\n    (gaussianReal m v).tilted (θ * ·) = gaussianReal (m + θ * v) v :=\n  MathFin.gaussianReal_tilted_const_mul m v θ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Esscher (1932), On the probability function in the collective theory of risk, Skandinavisk Aktuarietidskrift 15, 175-195; Gerber & Shiu (1994), Option pricing by Esscher transforms, Transactions of the Society of Actuaries 46, 99-191",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The Gaussian N(m + θv, v) has every exponential moment (Mathlib's integrable_exp_mul_gaussianReal), and a probability law on ℝ with that property equals each finite measure with the same moment-generating function (measure_eq_of_mgf_id_eq, from Mathlib's eqOn_complexMGF_of_mgf and Measure.ext_of_complexMGF_id_eq); the tilted law is finite (Mathlib's isZeroOrProbabilityMeasure_tilted). The tilted moment of order u is ∫ e^{(u + θ)x} / ∫ e^{θx} (mgf_id_tilted_const_mul, which is Mathlib's integral_exp_tilted at linear exponents), and with Mathlib's mgf_id_gaussianReal both moment-generating functions are e^{(m + θv)u + vu²/2}. The same MGF identification gives the Gaussian increments of the exponential-martingale characterization of Brownian motion (ExpMartingaleQBrownian). Lives in MathFin/Foundations/Esscher.lean. Axioms-clean."
       }
     }
   ]

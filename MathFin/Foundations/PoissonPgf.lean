@@ -32,6 +32,7 @@ the jump-compensated conditional spots average back to the true spot
 * `PoissonPgf.hasSum_poisson_weights_mul_pow` — the `HasSum` form.
 * `PoissonPgf.tsum_poisson_weights_mul_pow` — the `tsum` form.
 * `PoissonPgf.integral_pow_poissonMeasure` — the pgf `E[x^N] = e^{r(x−1)}`.
+* `PoissonPgf.integrable_pow_poissonMeasure` — `n ↦ xⁿ` is integrable against `Poisson(r)`.
 -/
 
 @[expose] public section
@@ -71,6 +72,14 @@ theorem integral_pow_poissonMeasure (r : ℝ≥0) (x : ℝ) :
   rw [integral_poissonMeasure r (fun n ↦ x ^ n)]
   simp_rw [smul_eq_mul]
   exact tsum_poisson_weights_mul_pow r x
+
+/-- `n ↦ xⁿ` is integrable against `Poisson(r)` for every `x : ℝ`: the weighted absolute values
+`∑ₙ e^{−r} rⁿ/n! · |x|ⁿ` sum to `e^{r(|x|−1)}`. -/
+lemma integrable_pow_poissonMeasure (r : ℝ≥0) (x : ℝ) :
+    Integrable (fun n : ℕ ↦ x ^ n) (poissonMeasure r) := by
+  rw [integrable_poissonMeasure_iff]
+  simp_rw [norm_pow, Real.norm_eq_abs]
+  exact (hasSum_poisson_weights_mul_pow r |x|).summable
 
 end PoissonPgf
 

@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.BrownianMartingale
+public import MathFin.Foundations.Esscher
 
 /-!
 # Brownian increment laws from an exponential martingale
@@ -86,19 +87,15 @@ variable {Q : Measure Ω} [IsProbabilityMeasure Q] {𝓕 : Filtration ℝ≥0 m�
   {Y : ℝ≥0 → Ω → ℝ} {T : ℝ≥0}
 
 /-- **A Gaussian MGF identifies the Gaussian law.** If a real random variable has the
-moment-generating function `a ↦ exp(v·a²/2)` of `N(0,v)` under `Q`, its law is `N(0,v)`: the MGF
-is then finite on all of `ℝ`, so the complex MGFs agree, and they determine the law. -/
+moment-generating function `a ↦ exp(v·a²/2)` of `N(0,v)` under `Q`, its law is `N(0,v)`:
+`N(0,v)` has every exponential moment, so its moment-generating function determines it
+(`measure_eq_of_mgf_id_eq`). -/
 private theorem map_eq_gaussianReal_of_mgf {X : Ω → ℝ} (hX : AEMeasurable X Q) {v : ℝ≥0}
     (hmgf : ∀ a, mgf X Q a = Real.exp (v * a ^ 2 / 2)) : Q.map X = gaussianReal 0 v := by
-  have hXv : mgf X Q = mgf id (gaussianReal 0 v) := by
-    rw [mgf_id_gaussianReal]
-    funext a
-    rw [hmgf, zero_mul, zero_add]
-  have hIES : integrableExpSet X Q = Set.univ := by
-    rw [integrableExpSet_eq_of_mgf hXv, Set.eq_univ_iff_forall]
-    exact fun a ↦ integrable_exp_mul_gaussianReal a
-  simpa using Measure.ext_of_complexMGF_eq (μ' := gaussianReal 0 v) hX aemeasurable_id
-    (funext fun z ↦ eqOn_complexMGF_of_mgf hXv (by simp [hIES]))
+  refine Eq.symm (measure_eq_of_mgf_id_eq integrable_exp_mul_gaussianReal ?_)
+  rw [mgf_id_gaussianReal, mgf_id_map hX]
+  funext a
+  rw [hmgf, zero_mul, zero_add]
 
 /-- **Marginal `Q`-MGF.** `𝔼_Q[exp(a·Y_t)] = exp(½ t a²)`: read off from the exponential
 martingale at `s = 0` (the `Q`-integral of `exp(a·Y_t − ½a²t)` equals its value at `0`, which is
