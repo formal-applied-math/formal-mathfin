@@ -411,7 +411,7 @@ theorem tendsto_logContract_sub_realizedVariance_of_martingale
       (𝓝 0) := by
     simpa only [mul_one_div, mul_zero] using
       tendsto_one_div_add_atTop_nhds_zero_nat.const_mul ((b + Λ * ∫ x, x ∂ν) ^ 2 * (T : ℝ))
-  simpa only [sub_zero] using h0.const_sub (2 * Λ * ∫ x, (rexp x - 1 - x - x ^ 2 / 2) ∂ν)
+  simpa only [sub_zero] using h0.const_sub (2 * Λ * ∫ x, (rexp x - 1 - x - x ^ 2 / 2) ∂ν : ℝ)
 
 /-- **With downward jumps the log contract is below the variance swap at every sampling
 frequency.** Under the hypotheses of `integral_logContract_of_martingale`, except finiteness of
@@ -462,20 +462,20 @@ namespace ProbabilityTheory.IsFilteredPreBrownian
 open MeasureTheory MathFin Real
 open scoped NNReal
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsFilteredPreBrownian B 𝓕 P]
-
 /-- **Black–Scholes: the log contract against the discretely sampled variance swap.** For a
-filtered pre-Brownian motion `B`, the price `S_t = Se^{(r − σ²/2)t + σB_t}` with `S > 0` and
-`T > 0`: the log contract on `S_T` has expected payoff `σ²` per unit time, and minus the expected
-realized variance per unit time along `n + 1` equal steps of `[0, T]` it is
+pre-Brownian motion `B` for a filtration `𝓕`, the price `S_t = Se^{(r − σ²/2)t + σB_t}` with
+`S > 0` and `T > 0`: the log contract on `S_T` has expected payoff `σ²` per unit time, and minus
+the expected realized variance per unit time along `n + 1` equal steps of `[0, T]` it is
 `−(r − σ²/2)²T/(n + 1)`: no jump bias, only the discrete-sampling term, which vanishes as
-`n → ∞`. It is the case `Λ = 0` of `JumpDiffusionProcess.integral_logContract_of_martingale` and
+`n → ∞`. The filtration is explicit, since the statement does not mention it. It is the case
+`Λ = 0` of `JumpDiffusionProcess.integral_logContract_of_martingale` and
 `JumpDiffusionProcess.logContract_sub_realizedVariance_of_martingale`, through
 `IsFilteredPreBrownian.jumpDiffusionProcess`, and the expected realized variance
 `σ²T + (r − σ²/2)²T²/(n + 1)` it implies is the form on `ℝ≥0` of
 `expected_bsLogPrice_equipartition_sum`. -/
-theorem logContract_realizedVariance {S r σ : ℝ} (hS : 0 < S) {T : ℝ≥0} (hT : 0 < T) :
+theorem logContract_realizedVariance {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+    (𝓕 : Filtration ℝ≥0 mΩ) {B : ℝ≥0 → Ω → ℝ} [hB : IsFilteredPreBrownian B 𝓕 P] {S r σ : ℝ}
+    (hS : 0 < S) {T : ℝ≥0} (hT : 0 < T) :
     2 / T * ∫ ω, (Real.log (S * rexp (r * T) / (S * rexp ((r - σ ^ 2 / 2) * T + σ * B T ω)))
         + (S * rexp ((r - σ ^ 2 / 2) * T + σ * B T ω) - S * rexp (r * T)) / (S * rexp (r * T)))
           ∂P = σ ^ 2 ∧
