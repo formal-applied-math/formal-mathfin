@@ -173,10 +173,11 @@ lemma hasDerivAt_bsP_K {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
   exact hval ▸ h1
 
 /-- **Strike derivative of the cash-or-nothing digital**: `∂_K (e^{-rτ} Φ(d₂)) =
-−e^{-rτ} · ϕ(d₂) / (K σ √τ)`, minus the discounted lognormal density at `K`
-(`breedenLitzenberger`). The digital is minus the strike derivative of the call price
-(`hasDerivAt_bsV_K`), so this is the second strike derivative of the call, up to sign; the
-convexity in `K` it yields (butterfly-spread non-negativity) is `bsV_strike_convexOn`. -/
+−e^{-rτ} · ϕ(d₂) / (K σ √τ)`, minus `e^{-rτ}` times the lognormal density formula
+`lognormalTerminalPDF` at `K` (`BreedenLitzenberger.lean`). The digital is minus the strike
+derivative of the call price (`hasDerivAt_bsV_K`), so this is the second strike derivative of the
+call, up to sign; the convexity in `K` it yields (butterfly-spread non-negativity) is
+`bsV_strike_convexOn`. -/
 lemma hasDerivAt_bsCashDigital_K {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
     {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :
     HasDerivAt (fun k ↦ bsCashDigital k r σ S τ)

@@ -207,10 +207,8 @@ theorem differentiableAt_integral_call_iff {Ω : Type*} {mΩ : MeasurableSpace �
     DifferentiableAt ℝ (fun k ↦ ∫ ω, max (X ω - k) 0 ∂μ) K ↔ μ {ω | X ω = K} = 0 := by
   refine ⟨fun hd ↦ ?_, fun hK ↦ (hasDerivAt_integral_call hXm hX hK).differentiableAt⟩
   have h := hd.hasDerivAt
-  have hneg : Tendsto (fun t : ℝ ↦ -t) (𝓝[>] 0) (𝓝[<] 0) :=
-    tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _
-      ((continuous_neg.tendsto' 0 0 neg_zero).mono_left nhdsWithin_le_nhds)
-      (eventually_nhdsWithin_of_forall fun t (ht : 0 < t) ↦ neg_lt_zero.2 ht)
+  have hneg : Tendsto (fun t : ℝ ↦ -t) (𝓝[>] 0) (𝓝[<] 0) := by
+    simpa only [neg_zero] using tendsto_neg_nhdsGT (a := (0 : ℝ))
   -- the right slopes tend to `−μ {X > K}`, the left ones to `−μ {X ≥ K}`
   have hR := tendsto_nhds_unique h.tendsto_slope_zero_right
     ((tendsto_call_spread hXm hX K).neg.congr' (Eventually.of_forall fun t ↦ by
@@ -221,10 +219,8 @@ theorem differentiableAt_integral_call_iff {Ω : Type*} {mΩ : MeasurableSpace �
       simp only [Function.comp_apply, smul_eq_mul, ← sub_eq_add_neg]
       ring))
   -- `{X ≥ K}` is `{X > K}` and the atom
-  have hunion : {ω | K ≤ X ω} = {ω | K < X ω} ∪ {ω | X ω = K} := by
-    ext ω
-    simp only [mem_ofPred_eq, mem_union]
-    exact ⟨fun h ↦ h.lt_or_eq.imp id Eq.symm, fun h ↦ h.elim le_of_lt fun h ↦ h.symm.le⟩
+  have hunion : {ω | K ≤ X ω} = {ω | K < X ω} ∪ {ω | X ω = K} :=
+    Set.ext fun _ ↦ le_iff_lt_or_eq.trans (or_congr_right eq_comm)
   have hsum := measureReal_union (μ := μ) (s₁ := {ω | K < X ω}) (s₂ := {ω | X ω = K})
     (Set.disjoint_left.2 fun ω (h₁ : K < X ω) (h₂ : X ω = K) ↦ h₁.ne' h₂)
     (hXm (measurableSet_singleton K))

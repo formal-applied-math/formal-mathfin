@@ -405,7 +405,7 @@ and `Binomial/PathReflection.lean`:
 2. **Continuous convexity of `K ↦ bsV K r σ S τ` on `(0, ∞)`** — DONE
    (`BlackScholes/StrikeConvexity.lean`). Bridges `ConvexPricingFunctional`
    (finite-state) to the actual BS formula via
-   `convexOn_of_deriv2_nonneg'` + `hasDerivAt_bsV_KK`. K-convexity now
+   `convexOn_of_deriv2_nonneg'` + `hasDerivAt_deriv_bsV_K`. K-convexity now
    visible at **three scales** in the library: payoff
    (`convexOn_call_payoff`), finite-state price
    (`callPrice_finiteState_convexOn_K`), continuous BS price
@@ -2142,11 +2142,10 @@ level of the law at one date):
    (`jumpDiffusionDensity_div_eq_lognormalTerminalPDF`). Also done (corpus 509): Merton's series
    for the digital and the density. Merton's call series, differentiated term by term in the strike,
    gives the Poisson mixtures of Black–Scholes digitals and of lognormal densities
-   (`MertonStrikeGreeks.lean`), and with Gaussian log-jumps at the compensated drift they are the
-   digital price and the density of the price
-   (`jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice`,
-   `jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF`, at every drift), read off the
-   uniqueness of derivatives. Also done (corpus 513): kinks. The spread below the strike tends to
+   (`MertonStrikeGreeks.lean`), and with Gaussian log-jumps they are the digital price at the
+   compensated drift (`jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice`) and the density
+   of the price at every drift (`jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF`), read off
+   the uniqueness of derivatives. Also done (corpus 513): kinks. The spread below the strike tends to
    `μ{X ≥ K}` (`tendsto_call_spread_left`), so the call price is differentiable at `K` iff the law
    has no atom there (`differentiableAt_integral_call_iff`); without a Gaussian part the
    jump-diffusion law has an atom at `bτ` and the call price a kink at `Se^{bτ}`
@@ -2155,8 +2154,8 @@ level of the law at one date):
    (`map_mul_exp_withDensity`), so `lognormalTerminalPDF` and `mertonTerminalPDF` are the densities
    of the price and integrate to one (`lintegral_lognormalTerminalPDF`,
    `lintegral_mertonTerminalPDF`). Next on this line: the signs and shape of Merton's series in the
-   strike (`0 < mertonTerminalPDF`, strict convexity of the call in `K`),
-   as `MertonGreeks` has them in the spot.
+   strike (`0 < mertonTerminalPDF`, strict convexity of the call in `K`), as `MertonGreeks` has
+   them in the spot.
 5. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
    `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style
    characterization used for constant `θ` (`ExpMartingaleQBrownian`) to independent increments

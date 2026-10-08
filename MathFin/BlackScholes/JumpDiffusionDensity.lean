@@ -242,8 +242,9 @@ theorem hasDerivAt_measureReal_Ioi_withDensity {f : ℝ → ℝ} (hf : Integrabl
 /-- **The law of `Seʸ` when `Y` has a density.** If `Y` has the law `f(y) dy` and `S > 0`, the
 price `Seʸ` has the law `f(log(K/S))/K dK` on `(0, ∞)`: the change of variables `K = Seʸ`,
 `dK = K dy` (Mathlib's `lintegral_image_eq_lintegral_abs_deriv_mul`), `y ↦ Seʸ` being a bijection
-of `ℝ` onto `(0, ∞)`. -/
-theorem map_mul_exp_withDensity {f : ℝ → ℝ} (hf0 : ∀ y, 0 ≤ f y) {S : ℝ} (hS : 0 < S) :
+of `ℝ` onto `(0, ∞)`. No sign or measurability condition on `f` is needed: `ENNReal.ofReal` reads
+negative values as `0` on both sides. -/
+theorem map_mul_exp_withDensity (f : ℝ → ℝ) {S : ℝ} (hS : 0 < S) :
     (volume.withDensity fun y ↦ ENNReal.ofReal (f y)).map (fun y ↦ S * rexp y)
       = (volume.restrict (Ioi 0)).withDensity
           fun K ↦ ENNReal.ofReal (f (Real.log (K / S)) / K) := by
@@ -278,6 +279,6 @@ theorem jumpDiffusionIncrementLaw_map_mul_exp (b : ℝ) {σ : ℝ} (hσ : σ ≠
       = (volume.restrict (Ioi 0)).withDensity
           fun K ↦ ENNReal.ofReal (jumpDiffusionDensity b σ Λ ν τ (Real.log (K / S)) / K) := by
   rw [jumpDiffusionIncrementLaw_eq_withDensity b hσ Λ ν hτ]
-  exact map_mul_exp_withDensity (jumpDiffusionDensity_nonneg b σ Λ ν τ) hS
+  exact map_mul_exp_withDensity _ hS
 
 end MathFin

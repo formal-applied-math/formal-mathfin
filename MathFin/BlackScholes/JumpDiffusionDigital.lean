@@ -49,11 +49,12 @@ The law of the price itself, as a measure: `jumpDiffusionIncrementLaw_zero_map_m
 jumps) and `mertonTerminalPDF` (Gaussian log-jumps) on `(0, ∞)`, and both formulas integrate to one
 (`lintegral_lognormalTerminalPDF`, `lintegral_mertonTerminalPDF`).
 
-Without a Gaussian part the law has an atom at `bτ`, the no-jump outcome, and the call price has a
-kink there: `differentiableAt_jumpDiffusionCallPrice_strike_iff` (differentiable at `K` iff the law
-has no atom at `log(K/S)`) and `not_differentiableAt_jumpDiffusionCallPrice_strike` (`σ = 0`, the
-strike `Se^{bτ}`). The one-sided strike derivatives are those of `tendsto_call_spread` and
-`tendsto_call_spread_left`.
+Without a Gaussian part (`σ = 0`) the law has an atom at `bτ`, the no-jump outcome, so the call
+price has a kink at the strike `Se^{bτ}`: `differentiableAt_jumpDiffusionCallPrice_strike_iff`
+(differentiable at `K` iff the law has no atom at `log(K/S)`) and
+`not_differentiableAt_jumpDiffusionCallPrice_strike`. The one-sided strike derivatives there follow
+from `tendsto_call_spread` and `tendsto_call_spread_left` applied to `Seʸ`; they are not stated for
+`jumpDiffusionCallPrice`.
 -/
 
 @[expose] public section
@@ -82,6 +83,13 @@ lemma jumpDiffusionDigitalPrice_eq (S K r b σ : ℝ) (Λ : ℝ≥0) (ν : Measu
   -- the two indicators agree pointwise by definition
   congr 1
 
+/-- The call price is the discount factor times the undiscounted call price of `Seʸ`. -/
+lemma jumpDiffusionCallPrice_eq_mul_integral (S K r b σ : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ)
+    (τ : ℝ≥0) :
+    jumpDiffusionCallPrice S K r b σ Λ ν τ
+      = rexp (-r * τ) * ∫ y, max (S * rexp y - K) 0 ∂(jumpDiffusionIncrementLaw b σ Λ ν τ) :=
+  integral_const_mul _ _
+
 /-- **The strike derivative of the jump-diffusion call price is minus the digital price.** With a
 Gaussian part (`σ ≠ 0`, `τ > 0`), a spot `S > 0` and a finite forward, the call price function is
 differentiable in the strike at every `K`, and `∂C/∂K = −D`. The law has no atoms
@@ -101,9 +109,8 @@ theorem hasDerivAt_jumpDiffusionCallPrice_strike {S r b σ : ℝ} (hS : 0 < S) (
     (hY.const_mul S) hK).const_mul (rexp (-r * τ))
   have hC : (fun k ↦ jumpDiffusionCallPrice S k r b σ Λ ν τ)
       = fun k ↦ rexp (-r * τ)
-          * ∫ y, max (S * rexp y - k) 0 ∂(jumpDiffusionIncrementLaw b σ Λ ν τ) := by
-    funext k
-    rw [jumpDiffusionCallPrice, integral_const_mul]
+          * ∫ y, max (S * rexp y - k) 0 ∂(jumpDiffusionIncrementLaw b σ Λ ν τ) :=
+    funext fun k ↦ jumpDiffusionCallPrice_eq_mul_integral S k r b σ Λ ν τ
   rw [hC, jumpDiffusionDigitalPrice_eq, ← mul_neg]
   exact h
 
@@ -236,9 +243,10 @@ theorem jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice {S K r b σ k �
 /-- **Merton's density.** With log-jumps `N(log(1 + k) − δ²/2, δ²)`, for `σ > 0`, `k > −1`,
 `S, K > 0`, `τ > 0` and any drift `b`, the density of the price at `K`, `f(log(K/S))/K`, is
 Merton's series `mertonTerminalPDF` at the expected jump count `Λτ` and the parameter
-`r = b + σ²/2 + Λk`, a Poisson mixture of lognormal density formulas. At the compensated drift `r`
-is the interest rate; the identity holds at every drift because `r` enters the series only through
-`d₂`. It is read off the uniqueness of derivatives: the digital price discounted at `r` has strike
+`r = b + σ²/2 + Λk`, a Poisson mixture of lognormal density formulas. The density does not involve
+`r`, and every drift `b` is the compensated drift for `r = b + σ²/2 + Λk`, so the identity holds at
+every drift; `r` is the interest rate only when `b` is the model's compensated drift. It is read
+off the uniqueness of derivatives: the digital price discounted at `r` has strike
 derivative `−e^{−rτ}f(log(K/S))/K` (`hasDerivAt_jumpDiffusionDigitalPrice_strike`), and near `K` it
 is Merton's digital series (`jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice`, `b` being
 the compensated drift for this `r`), whose strike derivative is `−e^{−rτ}·mertonTerminalPDF`
@@ -248,8 +256,7 @@ theorem jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF (b : ℝ) {S K σ
     jumpDiffusionDensity b σ Λ (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) τ
         (Real.log (K / S)) / K
       = mertonTerminalPDF S (b + σ ^ 2 / 2 + Λ * k) σ τ k δ (Λ * τ) K := by
-  obtain ⟨r, hr⟩ : ∃ r, b + σ ^ 2 / 2 + Λ * k = r := ⟨_, rfl⟩
-  rw [hr]
+  generalize hr : b + σ ^ 2 / 2 + Λ * k = r
   have hb : b = r - σ ^ 2 / 2 - Λ * k := by rw [← hr]; ring
   have h₁ := hasDerivAt_jumpDiffusionDigitalPrice_strike (r := r) (b := b) (Λ := Λ)
     (ν := gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) hS hσ.ne' hτ hK
@@ -271,7 +278,9 @@ theorem jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF (b : ℝ) {S K σ
 spot `S > 0`, a strike `K > 0` and a finite forward, the call price function of a jump-diffusion is
 differentiable at `K` iff the log-return law has no atom at `log(K/S)`: this is
 `differentiableAt_integral_call_iff` for the price `Seʸ`, which equals `K` only at `y = log(K/S)`.
-With a Gaussian part there are no atoms (`hasDerivAt_jumpDiffusionCallPrice_strike`). -/
+With a Gaussian part (`σ ≠ 0`, `τ > 0`) there are no atoms
+(`nullSingletonClass_jumpDiffusionIncrementLaw`), and the derivative is minus the digital price
+(`hasDerivAt_jumpDiffusionCallPrice_strike`). -/
 theorem differentiableAt_jumpDiffusionCallPrice_strike_iff {S K r b σ : ℝ} (hS : 0 < S)
     (hK : 0 < K) {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν] {τ : ℝ≥0}
     (hY : Integrable rexp (jumpDiffusionIncrementLaw b σ Λ ν τ)) :
@@ -285,14 +294,11 @@ theorem differentiableAt_jumpDiffusionCallPrice_strike_iff {S K r b σ : ℝ} (h
     · rintro rfl
       rw [mul_div_cancel_left₀ _ hS.ne', Real.log_exp]
     · rintro rfl
-      have hS' := hS.ne'
-      rw [Real.exp_log (div_pos hK hS)]
-      field_simp
+      rw [Real.exp_log (div_pos hK hS), mul_div_cancel₀ _ hS.ne']
   have hC : (fun k ↦ jumpDiffusionCallPrice S k r b σ Λ ν τ)
       = fun k ↦ rexp (-r * τ)
-          * ∫ y, max (S * rexp y - k) 0 ∂(jumpDiffusionIncrementLaw b σ Λ ν τ) := by
-    funext k
-    rw [jumpDiffusionCallPrice, integral_const_mul]
+          * ∫ y, max (S * rexp y - k) 0 ∂(jumpDiffusionIncrementLaw b σ Λ ν τ) :=
+    funext fun k ↦ jumpDiffusionCallPrice_eq_mul_integral S k r b σ Λ ν τ
   rw [← hset, ← differentiableAt_integral_call_iff (by fun_prop : Measurable fun y ↦ S * rexp y)
     (hY.const_mul S) K, hC]
   -- a nonzero discount factor does not change differentiability

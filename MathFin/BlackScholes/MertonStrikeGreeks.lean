@@ -156,7 +156,7 @@ theorem hasDerivAt_deriv_mertonCallPrice_strike {S : ℝ} (hS : 0 < S) (hσ : 0 
       (rexp (-(r * T)) * mertonTerminalPDF S r σ T k δ Λ K) K :=
   hasDerivAt_deriv_of_eventually
     ((eventually_gt_nhds hK).mono fun _ hx ↦ hasDerivAt_mertonCallPrice_strike hS hσ hT hk hx)
-    ((hasDerivAt_mertonDigitalPrice_strike (r := r) (δ := δ) (Λ := Λ) hS hσ hT hk hK).fun_neg
-      |>.congr_deriv (neg_neg _))
+    ((hasDerivAt_mertonDigitalPrice_strike (r := r) (δ := δ) (Λ := Λ) hS hσ hT hk
+      hK).fun_neg.congr_deriv (neg_neg _))
 
 end MathFin

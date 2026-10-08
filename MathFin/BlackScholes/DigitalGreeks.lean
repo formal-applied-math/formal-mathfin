@@ -28,6 +28,9 @@ We derive their deltas and gammas:
 γ_cash via `d₂ + σ√τ = d₁`. Each gamma differentiates its delta's formula
 (`hasDerivAt_bsAssetDigital_SS`, `hasDerivAt_bsCashDigital_SS`) before
 `hasDerivAt_deriv_of_eventually` makes it a statement about the price.)
+
+The strike derivative of the cash digital, `−e^{-rτ} ϕ(d₂) / (K σ √τ)`, is
+`hasDerivAt_bsCashDigital_K` in `StrikeGreeks.lean`.
 -/
 
 @[expose] public section

@@ -364,9 +364,10 @@ import MathFin.BlackScholes.JumpDiffusionIdentifiability
 -- equivalent to the physical law (with any drift) and compensated, yet price some call
 -- differently when the jumps are nontrivial
 import MathFin.BlackScholes.JumpDiffusionIncompleteness
--- The log-return law with σ ≠ 0 is a Gaussian mixture with a continuous density, so it has no
--- atoms, and with σ = 0 it has the atom bτ; the tail of a law with a density is differentiable
--- where the density is continuous; the law of the price Seʸ has the density f(log(K/S))/K
+-- The log-return law is a Gaussian mixture; with σ ≠ 0 and τ > 0 it has a continuous density, so
+-- no atoms, and with σ = 0 it has an atom at bτ; the tail of a law with a density is
+-- differentiable where the density is continuous; the law of the price Seʸ has the density
+-- f(log(K/S))/K
 import MathFin.BlackScholes.JumpDiffusionDensity
 -- Digital options and Breeden–Litzenberger with jumps: for σ ≠ 0 the strike derivative of the
 -- call price is minus the digital price and the second one is the discounted density of the

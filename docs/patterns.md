@@ -1904,10 +1904,10 @@ not. Give the side condition the folded type first:
 To show that a function is not differentiable at a point, or that differentiability forces an
 identity, compare its one-sided slope limits with a derivative's. `HasDerivAt.tendsto_slope_zero_right`
 and `HasDerivAt.tendsto_slope_zero_left` give the slopes `t⁻¹ • (f (x + t) − f x)` along `𝓝[>] 0`
-and `𝓝[<] 0`; compose the left one with `t ↦ −t`, whose map `𝓝[>] 0 → 𝓝[<] 0` is
-`tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _ ((continuous_neg.tendsto' 0 0
-neg_zero).mono_left nhdsWithin_le_nhds) (eventually_nhdsWithin_of_forall fun t ht ↦ neg_lt_zero.2
-ht)`, and finish with `tendsto_nhds_unique`. `differentiableAt_integral_call_iff` gets the right
+and `𝓝[<] 0`; compose the left one with `t ↦ −t`, whose map `𝓝[>] 0 → 𝓝[<] 0` is Mathlib's
+`tendsto_neg_nhdsGT` (`simpa only [neg_zero] using tendsto_neg_nhdsGT (a := (0 : ℝ))`; the first
+draft assembled it from `continuous_neg` and `eventually_nhdsWithin_of_forall`), and finish with
+`tendsto_nhds_unique`. `differentiableAt_integral_call_iff` gets the right
 and left strike derivatives `−μ{X > K}` and `−μ{X ≥ K}` of the call price this way, so a derivative
 forces `μ{X = K} = 0`.
 
