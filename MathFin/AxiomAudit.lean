@@ -841,6 +841,20 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.jumpDiffusionDensity_div_eq_lognormalTerminalPDF' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionDensity_div_eq_lognormalTerminalPDF
 
+-- Merton's digital and density (2026-10-08): Merton's call series differentiated term by term in
+-- the strike gives the Poisson mixtures of Black–Scholes digitals and of lognormal densities; with
+-- Gaussian log-jumps at the compensated drift they are the digital price and the density of the
+-- price, read off the uniqueness of derivatives
+
+/-- info: 'MathFin.hasDerivAt_deriv_mertonCallPrice_strike' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_deriv_mertonCallPrice_strike
+
+/-- info: 'MathFin.jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice
+
+/-- info: 'MathFin.jumpDiffusionDensity_gaussian_div_eq_mertonDensity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionDensity_gaussian_div_eq_mertonDensity
+
 -- Blueprint-spine closure (2026-06-06): every spine node is axiom-pinned.
 -- Gap found by tests/test_values.py::test_blueprint_spine_is_audited on its
 -- first run — seven tagged headliners (including bs_identity, the magic

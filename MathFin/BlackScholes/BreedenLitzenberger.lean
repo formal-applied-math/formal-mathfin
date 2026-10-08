@@ -27,7 +27,11 @@ Specialising to the BS model: `∂²_K bsV = e^{-rT} · ϕ(d_2)/(K σ √T)`
 which is the lognormal density at `K` (parameters
 `log S_0 + (r − σ²/2)T, σ² T`). This file defines `lognormalTerminalPDF` as that
 formula. It proves neither that `S_T` has it as its density nor, beyond the
-differential identity at the end, that it integrates to 1.
+differential identity at the end, that it integrates to 1. That it is the density
+of the price at `K`, in the sense of the derivative of the distribution function,
+is `jumpDiffusionDensity_div_eq_lognormalTerminalPDF` (`JumpDiffusionDigital.lean`),
+and Merton's Poisson mixture of these densities is `mertonDensity`
+(`MertonStrikeGreeks.lean`).
 
 ## Structural connection: PDF positivity = strike-convexity of the price
 

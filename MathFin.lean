@@ -331,6 +331,9 @@ import MathFin.BlackScholes.MertonClassicDisplay
 import MathFin.BlackScholes.MertonModel
 -- Merton Greeks: delta, gamma, vega as Poisson mixtures of Black–Scholes Greeks
 import MathFin.BlackScholes.MertonGreeks
+-- Merton's strike derivatives: the digital series and the density series (Poisson mixtures of
+-- Black–Scholes digitals and of lognormal densities), and Merton's Breeden–Litzenberger
+import MathFin.BlackScholes.MertonStrikeGreeks
 -- Jump-diffusions with an arbitrary jump law: the mixing formula, the
 -- compound-Poisson compensator, and Merton's formula for a general jump law
 import MathFin.BlackScholes.JumpDiffusionMixing
@@ -366,7 +369,8 @@ import MathFin.BlackScholes.JumpDiffusionIncompleteness
 import MathFin.BlackScholes.JumpDiffusionDensity
 -- Digital options and Breeden–Litzenberger with jumps: for σ ≠ 0 the strike derivative of the
 -- call price is minus the digital price and the second one is the discounted density of the
--- price; without jumps, at the drift r − σ²/2, these are e^{−rτ}Φ(d₂) and lognormalTerminalPDF
+-- price; without jumps, at the drift r − σ²/2, these are e^{−rτ}Φ(d₂) and lognormalTerminalPDF;
+-- with Gaussian log-jumps at the compensated drift, Merton's digital and density series
 import MathFin.BlackScholes.JumpDiffusionDigital
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
