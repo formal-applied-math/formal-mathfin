@@ -26,6 +26,46 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Prices at every date; Merton's formula and the implied-volatility lift at every date (2026-10-08)
+
+Five entries added, all `full`: `mf-jump-diffusion-price-parity`,
+`mf-jump-diffusion-put-intermediate-date`, `mf-jump-diffusion-call-intermediate-date`,
+`mf-jump-diffusion-merton-intermediate-date` and `mf-jump-diffusion-implied-vol-every-date`.
+Corpus 472 → 477.
+
+- The price functions (`BlackScholes/JumpDiffusionOptionPrices.lean`): `jumpDiffusionPutPrice` and
+  `jumpDiffusionCallPrice` are the discounted expected payoffs `e^{−rτ}(K − Se^Y)⁺` and
+  `e^{−rτ}(Se^Y − K)⁺` against the log-return law over `τ`. They satisfy put–call parity
+  `C = P + S·e^{(b + σ²/2 + Λ(𝔼[e^J] − 1) − r)τ} − Ke^{−rτ}` (`jumpDiffusionCallPrice_eq`), which
+  is `C = P + S − Ke^{−rτ}` at the compensated drift (`jumpDiffusionCallPrice_eq_of_compensated`).
+- Prices at an intermediate date, for any drift: given `𝓕_t`, the discounted put and call payoffs
+  at `T` have conditional expectations `P(S_t, T − t)` and `C(S_t, T − t)`
+  (`JumpDiffusionProcess.condExp_put`, `JumpDiffusionProcess.condExp_call`). The put is the
+  freezing lemma `condExp_independent_kernel`: the payoff is bounded, `X_t` is known at `t`, and
+  the increment is independent of `𝓕_t`. The call is the put plus a forward, whose conditional
+  expectation is `e^{X_t}·𝔼[e^{X_T − X_t}]`
+  (`Foundations/ExpMartingaleIndepIncrements.condExp_exp_eq_of_indep_increment`, lifted out of the
+  martingale proof of the previous phase).
+- Merton's formula at every date: at the compensated drift the call price function is the call of
+  the canonical model at intensity `Λτ` (`jumpDiffusionCallPrice_eq_canonical`), so it is the
+  `Poisson(Λτ)` mixture of Black–Scholes prices averaged over `ν^ℕ`
+  (`jumpDiffusionCallPrice_eq_merton`). For `t < T`, `𝔼[e^{−r(T−t)}(S_T − K)⁺ | 𝓕_t]` is that
+  formula at `S_t` and `T − t` (`JumpDiffusionProcess.condExp_call_eq_merton`).
+- The implied-volatility lift at every date: with `Λ > 0` and a jump law other than `δ₀`, the
+  price function has a unique Black–Scholes implied volatility, above `σ`
+  (`jumpDiffusionCallPrice_impliedVol_gt`, from `JumpDiffusionHyp.impliedVol_gt` on the canonical
+  model). So for `t < T`, almost surely, the conditional call value has a unique implied
+  volatility at `S_t` and `T − t`, above `σ` (`JumpDiffusionProcess.condExp_call_impliedVol_gt`).
+
+Safe wording: "for a log-price process with independent jump-diffusion increments, the
+conditional value of a European put or call at any date is its price function at the current
+spot and the remaining maturity; at the compensated drift the call's is Merton's formula for the
+jump law, and once jumps occur and move the price its implied volatility is above `σ` at every
+date and strike". Not covered: the existence of such a process, its path regularity, a
+measurable choice of the implied volatility as a random variable (the statement holds path by
+path, almost surely), and the specialisation of the general-law formula to Merton's Poisson
+series of Black–Scholes prices for Gaussian jumps.
+
 ### The jump-diffusion model exists; its price process (2026-10-08)
 
 Five entries added, all `full`: `mf-jump-diffusion-model-exists`,

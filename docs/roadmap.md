@@ -1888,3 +1888,39 @@ behind `gir-continuous-ftap`.
    smoothing of a Black–Scholes price is proved.
 4. The put and put–call parity for any jump law; the `σ → 0` limit of the Black–Scholes price.
 5. The smile (Lee's moment formula); the characteristic function; Kou's compensator.
+
+## phase: prices at every date (2026-10-08, corpus 472→477)
+
+The previous phase's process carried only its martingale property. This phase prices options on
+it. The conditional value of a European payoff at `T` given `𝓕_t` depends on the past only
+through `S_t`: `X_t` is known at `t`, and the increment `X_T − X_t` is independent of `𝓕_t`, so the
+payoff is averaged over the increment with `X_t` frozen. For the put this is the freezing lemma of
+the American-put development (`condExp_independent_kernel`), which needs a bounded payoff. The
+call is the put plus a forward, and the forward's conditional expectation is
+`e^{X_t}·𝔼[e^{X_T − X_t}]` (`condExp_exp_eq_of_indep_increment`, lifted out of the martingale
+proof). The price functions satisfy put–call parity, and both prices hold for any drift
+(`BlackScholes/JumpDiffusionOptionPrices.lean`).
+
+At the compensated drift the process meets the single-date results. The log-return law over `τ`
+is by definition the image of the canonical model at intensity `Λτ`, so the call price function is
+that model's call (`jumpDiffusionCallPrice_eq_canonical`). Two earlier results then apply: the
+law-level Merton formula, which makes the conditional call value Merton's formula at `S_t` and
+`T − t`, and the implied-volatility lift, which puts its implied volatility above `σ` at every
+date once jumps occur and move the price. Two canonical-model facts used three times (the first
+jump's exponential moment and its integrability) became lemmas of
+`BlackScholes/JumpDiffusionCanonical.lean`.
+
+**Next on the jump axis:**
+
+1. Construct the price process: a Brownian motion and an independent compound Poisson process
+   (or a Kolmogorov extension of the increment laws), so `JumpDiffusionProcess` is shown
+   satisfiable as the single-date model is.
+2. Collapse the two Merton towers onto the general route: with Gaussian jumps the general-law
+   formula reduces to `mertonCallPrice` once the Gaussian smoothing of a Black–Scholes price is
+   proved.
+3. The put's implied volatility: Black–Scholes parity and `jumpDiffusionCallPrice_eq_of_compensated`
+   give the put the call's implied volatility; then the `σ → 0` limit of the Black–Scholes price
+   for implied-volatility existence across the whole no-arbitrage range.
+4. The smile: how the implied volatility varies with the strike (Lee's moment formula ties its
+   large-strike slope to the moments of `S_T`); the characteristic function of the log-price;
+   Kou's double-exponential compensator.
