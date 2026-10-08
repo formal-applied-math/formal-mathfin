@@ -25,11 +25,15 @@ determine the law of the underlying. This is the first-order form of Breeden and
 * `measure_eq_of_integral_call_eq`: two probability laws of a log-return, each with `∫ eʸ < ∞`,
   that give the same undiscounted call price `∫ (Seʸ − K)⁺` at every strike `K > 0` (for one
   `S > 0`) are equal. The digital at the strike `Seᵃ` is the tail `P(Y > a)`.
+* `hasDerivAt_integral_call`: where `X` has no atom at `K`, the call price is differentiable at
+  `K` and `C'(K) = −μ {X > K}` (Mathlib's `hasDerivAt_integral_of_dominated_loc_of_lip`). At an
+  atom the left derivative is `−μ {X ≥ K}` instead, which is why the limit above is one-sided.
 
-In Black–Scholes the right strike derivative is `−e^{−rτ}Φ(d₂)` (`hasDerivAt_bsV_K`) and the
-cash-or-nothing price is `e^{−rτ}Φ(d₂)` (`bs_cash_or_nothing_formula`). Both are proved from the
-closed forms, not from this file. The second-order form, the lognormal density as the second
-strike derivative of `bsV`, is in `BlackScholes/BreedenLitzenberger.lean`.
+In Black–Scholes the strike derivative is `−e^{−rτ}Φ(d₂)` (`hasDerivAt_bsV_K`), from the closed
+form. The digital price `e^{−rτ}Φ(d₂)` follows from it through `hasDerivAt_integral_call`
+(`jumpDiffusionDigitalPrice_zero`), the same value that `bs_cash_or_nothing_formula` computes as a
+Gaussian integral. The second-order form, the lognormal density as the second strike derivative of
+`bsV`, is in `BlackScholes/BreedenLitzenberger.lean`.
 -/
 
 @[expose] public section
@@ -109,5 +113,43 @@ theorem measure_eq_of_integral_call_eq {μ μ' : Measure ℝ} [IsProbabilityMeas
   refine Measure.ext_of_Iic μ μ' fun a ↦ ?_
   rw [← compl_Ioi, prob_compl_eq_one_sub measurableSet_Ioi,
     prob_compl_eq_one_sub measurableSet_Ioi, htail]
+
+/-- **The strike derivative of the call price is minus the digital.** For a measurable, integrable
+`X` under a finite measure `μ` with no atom at `K` (`μ {X = K} = 0`), the undiscounted call price
+`C(k) = ∫ (X − k)⁺ dμ` is differentiable at `K` and `C'(K) = −μ {X > K}`. The call payoff is
+`1`-Lipschitz in the strike and, off the atom, differentiable at `K` with derivative `−1_{X > K}`,
+so Mathlib's `hasDerivAt_integral_of_dominated_loc_of_lip` applies. -/
+theorem hasDerivAt_integral_call {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+    [IsFiniteMeasure μ] {X : Ω → ℝ} (hXm : Measurable X) (hX : Integrable X μ) {K : ℝ}
+    (hK : μ {ω | X ω = K} = 0) :
+    HasDerivAt (fun k ↦ ∫ ω, max (X ω - k) 0 ∂μ) (-μ.real {ω | K < X ω}) K := by
+  have hset : MeasurableSet {ω | K < X ω} := measurableSet_lt measurable_const hXm
+  have hae : ∀ᵐ ω ∂μ, X ω ≠ K := by
+    rw [ae_iff]
+    simpa only [ne_eq, not_not] using hK
+  rw [← integral_indicator_one hset, ← integral_neg]
+  refine (hasDerivAt_integral_of_dominated_loc_of_lip (F := fun k ω ↦ max (X ω - k) 0)
+    (F' := fun ω ↦ -{ω | K < X ω}.indicator 1 ω) (bound := fun _ ↦ 1) univ_mem
+    (Eventually.of_forall fun k ↦ ?_) (hX.sub (integrable_const K)).pos_part
+    (measurable_one.indicator hset).neg.aestronglyMeasurable
+    (ae_of_all _ fun ω ↦ (LipschitzWith.of_dist_le_mul fun k₁ k₂ ↦ ?_).lipschitzOnWith)
+    (integrable_const 1) ?_).2
+  · exact (by fun_prop : Measurable fun ω ↦ max (X ω - k) 0).aestronglyMeasurable
+  · -- the call payoff is `1`-Lipschitz in the strike
+    simp only [map_one, NNReal.coe_one, one_mul, Real.dist_eq]
+    calc |max (X ω - k₁) 0 - max (X ω - k₂) 0| ≤ |X ω - k₁ - (X ω - k₂)| :=
+          abs_max_sub_max_le_abs _ _ _
+      _ = |k₁ - k₂| := by rw [show X ω - k₁ - (X ω - k₂) = -(k₁ - k₂) by ring, abs_neg]
+  · -- and, off the atom, differentiable at `K` with derivative `−1_{X > K}`
+    filter_upwards [hae] with ω hω
+    rcases lt_or_gt_of_ne hω with h | h
+    · rw [indicator_of_notMem (show ω ∉ {ω | K < X ω} from fun h' ↦ lt_asymm h h'), neg_zero]
+      refine (hasDerivAt_const K (0 : ℝ)).congr_of_eventuallyEq ?_
+      filter_upwards [Ioi_mem_nhds h] with k hk
+      exact max_eq_right (by linarith [mem_Ioi.1 hk])
+    · rw [indicator_of_mem (show ω ∈ {ω | K < X ω} from h), Pi.one_apply]
+      refine ((hasDerivAt_id' K).const_sub (X ω)).congr_of_eventuallyEq ?_
+      filter_upwards [Iio_mem_nhds h] with k hk
+      exact max_eq_left (by linarith [mem_Iio.1 hk])
 
 end MathFin

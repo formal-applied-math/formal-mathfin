@@ -2930,6 +2930,38 @@
       }
     },
     {
+      "id": "mf-jump-diffusion-digital-strike-derivative",
+      "name": "The Jump-Diffusion Digital Price Is Minus the Strike Derivative of the Call",
+      "description": "Take a jump-diffusion log-return law over τ > 0 with drift b, volatility coefficient σ ≠ 0, jump rate Λ ≥ 0 and jump law ν (mf-jump-diffusion-log-return-mgf), with a finite forward ∫ eʸ < ∞ (which holds when ∫ eˣ dν < ∞). Then the law has no atoms, and for S > 0 and a rate r the call price function k ↦ C(S, k, τ) = ∫ e^{−rτ}(Seʸ − k)⁺ (jumpDiffusionCallPrice) is differentiable at every strike K, with ∂C/∂K = −D(S, K, τ). Here D = ∫ e^{−rτ}1_{Seʸ > K} = e^{−rτ}P(Se^Y > K) is the price of the cash-or-nothing digital paying 1 when the price ends above the strike (jumpDiffusionDigitalPrice). The drift is arbitrary: at the compensated drift these are the prices under the pricing law, at any other drift they are discounted expectations under the physical law. Without a Gaussian part (σ = 0) the law has an atom at bτ (no jumps), and nothing is claimed at the strike Se^{bτ}.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionDigital\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The jump-diffusion digital price is minus the strike derivative of the call price.** -/\ntheorem jump_diffusion_digital_strike_derivative_thm {S r b σ : ℝ} (hS : 0 < S) (hσ : σ ≠ 0)\n    {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν] {τ : ℝ≥0}\n    (hY : Integrable Real.exp (MathFin.jumpDiffusionIncrementLaw b σ Λ ν τ)) (hτ : 0 < τ)\n    (K : ℝ) :\n    HasDerivAt (fun k ↦ MathFin.jumpDiffusionCallPrice S k r b σ Λ ν τ)\n      (-MathFin.jumpDiffusionDigitalPrice S K r b σ Λ ν τ) K :=\n  MathFin.hasDerivAt_jumpDiffusionCallPrice_strike hS hσ hY hτ K\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes; Merton (1976), Option pricing when underlying stock returns are discontinuous, Journal of Financial Economics 3, 125-144",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. No atoms (nullSingletonClass_jumpDiffusionIncrementLaw): on the canonical model the log-return is bτ + σ√τ·z + ∑_{i<n} jᵢ, and for fixed jumps (n, j) at most one standard normal sample z gives a value y, since σ√τ ≠ 0. By Mathlib's Measure.prod_apply_symm the probability of y is then an integral of Gaussian measures of subsingletons, which vanish (nullSingletonClass_gaussianReal, Set.Subsingleton.measure_zero). The price Seʸ is injective in y, so it has no atom at K, and the general strike derivative applies (hasDerivAt_integral_call, mf-call-strike-derivative) with the discount factor carried along (HasDerivAt.const_mul). The digital price is e^{−rτ}P(Se^Y > K) (jumpDiffusionDigitalPrice_eq). Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-digital-black-scholes",
+      "name": "Without Jumps the Digital Price Is e^{−rτ}Φ(d₂), Read Off the Strike Derivative",
+      "description": "At jump rate Λ = 0, drift r − σ²/2 and volatility σ > 0, for S, K > 0, τ > 0 and any jump law ν, the jump-diffusion digital price (mf-jump-diffusion-digital-strike-derivative) is the Black–Scholes cash-or-nothing price: D(S, K, τ) = e^{−rτ}Φ(d₂), with d₂ = (log(S/K) + (r − σ²/2)τ)/(σ√τ). The value is derived rather than computed. D is minus the strike derivative of the call price; near K the call price is the Black–Scholes price (mf-bs-formulas-every-date); and the strike derivative of the Black–Scholes price is −e^{−rτ}Φ(d₂) (mf-bsV-K-deriv). The same value is computed as a Gaussian integral in mf-cash-or-nothing, so the strike derivative of the call and the digital price are one fact.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionDigital\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Without jumps the digital price is `e^{−rτ}Φ(d₂)`**, read off the strike derivative of the\ncall price. -/\ntheorem jump_diffusion_digital_black_scholes_thm {S K r σ : ℝ} (hS : 0 < S) (hK : 0 < K)\n    (hσ : 0 < σ) (ν : Measure ℝ) [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) :\n    MathFin.jumpDiffusionDigitalPrice S K r (r - σ ^ 2 / 2) σ 0 ν τ\n      = Real.exp (-r * τ) * MathFin.Phi (MathFin.bsd2 S K r σ τ) :=\n  MathFin.jumpDiffusionDigitalPrice_zero hS hK hσ ν hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hull, Options, Futures, and Other Derivatives; Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Two derivatives of one function at K are compared (Mathlib's HasDerivAt.unique). One is −D, from hasDerivAt_jumpDiffusionCallPrice_strike (mf-jump-diffusion-digital-strike-derivative); the forward is finite because without jumps the law is Gaussian (jumpDiffusionIncrementLaw_zero, Mathlib's integrable_exp_mul_gaussianReal). The other is −e^{−rτ}Φ(d₂), from hasDerivAt_bsV_K (mf-bsV-K-deriv), transported by HasDerivAt.congr_of_eventuallyEq because on the neighbourhood k > 0 of K the call price function is bsV (jumpDiffusionCallPrice_zero). No Gaussian integral of the indicator is computed. Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-jump-diffusion-price-parity",
       "name": "Jump-Diffusion Put–Call Parity for the Price Functions",
       "description": "For a drift b, a volatility σ, a jump rate Λ ≥ 0, a jump law ν with ∫ eˣ dν < ∞, a rate r, a time τ ≥ 0 and any S, K, let C(S, τ) and P(S, τ) be the discounted expected payoffs e^{−rτ}(Se^Y − K)⁺ and e^{−rτ}(K − Se^Y)⁺ with Y a jump-diffusion log-return over τ (jumpDiffusionCallPrice, jumpDiffusionPutPrice). Then C(S, τ) = P(S, τ) + S·e^{(b + σ²/2 + Λ(∫ eˣ dν − 1) − r)τ} − Ke^{−rτ}. At the compensated drift b = r − σ²/2 − Λ(∫ eˣ dν − 1) the forward is worth S and C(S, τ) = P(S, τ) + S − Ke^{−rτ}, the usual put–call parity.",
@@ -3423,6 +3455,22 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. For a ∈ ℝ the strike K = Seᵃ gives {y : K < Seʸ} = (a, ∞). The call spreads at K are equal under μ and μ' for every h > 0, both strikes K and K + h being positive, so their limits μ(a, ∞) and μ'(a, ∞) agree (tendsto_call_spread, mf-call-spread-digital; tendsto_nhds_unique). Complements give μ(−∞, a] = μ'(−∞, a] for every a, and Mathlib's Measure.ext_of_Iic concludes. Lives in MathFin/BlackScholes/CallSpreadDigital.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-call-strike-derivative",
+      "name": "The Strike Derivative of a Call Price Is Minus the Digital",
+      "description": "Let X be a measurable real random variable with finite mean under a finite measure μ, let C(k) = ∫ (X − k)⁺ dμ be the undiscounted call price at strike k, and suppose X has no atom at K: μ{X = K} = 0. Then C is differentiable at K and C'(K) = −μ{X > K}: minus the strike derivative of the call price is the undiscounted price of the digital paying 1 when X > K. No model or discounting is assumed. Without the no-atom condition only the right derivative is claimed (mf-call-spread-digital).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.CallSpreadDigital\n\nopen MeasureTheory\n\n/-- **The strike derivative of the call price is minus the digital**: `C'(K) = −μ {X > K}` where\n`X` has no atom at `K`. -/\ntheorem call_strike_derivative_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsFiniteMeasure μ] {X : Ω → ℝ} (hXm : Measurable X) (hX : Integrable X μ) {K : ℝ}\n    (hK : μ {ω | X ω = K} = 0) :\n    HasDerivAt (fun k ↦ ∫ ω, max (X ω - k) 0 ∂μ) (-μ.real {ω | K < X ω}) K :=\n  MathFin.hasDerivAt_integral_call hXm hX hK\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Mathlib's hasDerivAt_integral_of_dominated_loc_of_lip (differentiation under the integral sign). The call payoff k ↦ (X − k)⁺ is 1-Lipschitz in the strike (Mathlib's abs_max_sub_max_le_abs), with the constant bound 1 integrable under the finite measure. Off the atom, so for μ-almost every ω, it is differentiable at K with derivative −1_{X > K}: near K it is X − k when X > K and 0 when X < K. The derivative of the integral is ∫ −1_{X > K} dμ = −μ{X > K} (integral_indicator_one). Lives in MathFin/BlackScholes/CallSpreadDigital.lean. Axioms-clean."
       }
     },
     {

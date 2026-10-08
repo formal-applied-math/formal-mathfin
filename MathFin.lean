@@ -354,19 +354,24 @@ import MathFin.BlackScholes.JumpDiffusionExponent
 -- jump law's moment-generating function is finite near θ; Esscher pricing is Merton's formula for
 -- the tilted jumps, and Black–Scholes without jumps
 import MathFin.BlackScholes.JumpDiffusionEsscher
--- The law at one date determines the drift and the Lévy measure off 0, for a given σ (uniqueness
--- in the Lévy–Khintchine form, finitely many jumps)
+-- The law at one date determines the drift, σ² and the Lévy measure off 0 (Lévy–Khintchine
+-- uniqueness for compound-Poisson jumps with exponential moments near 0)
 import MathFin.BlackScholes.JumpDiffusionIdentifiability
--- Incompleteness at one date: the Esscher law and the Merton measure are both compensated, yet
--- price some call differently when the jumps are nontrivial
+-- Incompleteness at one date: for σ ≠ 0 the Esscher law and the Merton measure are both
+-- equivalent to the physical law and compensated, yet price some call differently when the jumps
+-- are nontrivial
 import MathFin.BlackScholes.JumpDiffusionIncompleteness
+-- Digital options: with σ ≠ 0 the law has no atoms, so the strike derivative of the call price is
+-- minus the digital price; without jumps that is e^{−rτ}Φ(d₂)
+import MathFin.BlackScholes.JumpDiffusionDigital
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser
 import MathFin.BlackScholes.CappedCall
 import MathFin.BlackScholes.Spreads
 -- Call spreads tend to the digital, so call prices at every strike determine the law (the first-
--- order Breeden–Litzenberger, for any law with a finite mean)
+-- order Breeden–Litzenberger, for any law with a finite mean); where the law has no atom at the
+-- strike the call price is differentiable and its strike derivative is minus the digital
 import MathFin.BlackScholes.CallSpreadDigital
 import MathFin.BlackScholes.Lookback
 import MathFin.BlackScholes.BarrierParity
