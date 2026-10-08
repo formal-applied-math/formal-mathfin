@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (529 MathFin constants, 29 upstream). Citations
+  corpus (536 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -599,6 +599,12 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.defaultCorrelation_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.defaultCorrelation_eq
 
+/-- info: 'MathFin.differentiableAt_integral_call_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.differentiableAt_integral_call_iff
+
+/-- info: 'MathFin.differentiableAt_jumpDiffusionCallPrice_strike_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.differentiableAt_jumpDiffusionCallPrice_strike_iff
+
 /-- info: 'MathFin.discountedGBM_eq_itoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.discountedGBM_eq_itoIntegral
 
@@ -839,6 +845,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.hasDerivAt_bsAssetDigital_tau' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsAssetDigital_tau
 
+/-- info: 'MathFin.hasDerivAt_bsCashDigital_K' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsCashDigital_K
+
 /-- info: 'MathFin.hasDerivAt_bsCashDigital_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsCashDigital_S
 
@@ -967,6 +976,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.hasDerivAt_mertonCallPrice_strike' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_mertonCallPrice_strike
+
+/-- info: 'MathFin.hasDerivAt_mertonDigitalPrice_strike' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_mertonDigitalPrice_strike
 
 /-- info: 'MathFin.hasDerivAt_mmMatrixValueCoeff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_mmMatrixValueCoeff
@@ -1118,8 +1130,8 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.jumpDiffusionDensity_div_eq_lognormalTerminalPDF' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionDensity_div_eq_lognormalTerminalPDF
 
-/-- info: 'MathFin.jumpDiffusionDensity_gaussian_div_eq_mertonDensity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionDensity_gaussian_div_eq_mertonDensity
+/-- info: 'MathFin.jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF
 
 /-- info: 'MathFin.jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice
@@ -1316,6 +1328,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.noArbitrage_of_emm_multi' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.noArbitrage_of_emm_multi
 
+/-- info: 'MathFin.not_differentiableAt_jumpDiffusionCallPrice_strike' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.not_differentiableAt_jumpDiffusionCallPrice_strike
+
 /-- info: 'MathFin.not_exists_isCopula_frechetLower' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.not_exists_isCopula_frechetLower
 
@@ -1327,6 +1342,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.nullSingletonClass_jumpDiffusionIncrementLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.nullSingletonClass_jumpDiffusionIncrementLaw
+
+/-- info: 'MathFin.ofReal_exp_le_jumpDiffusionIncrementLaw_singleton' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ofReal_exp_le_jumpDiffusionIncrementLaw_singleton
 
 /-- info: 'MathFin.oneFactor_measureReal_default' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.oneFactor_measureReal_default
@@ -1495,6 +1513,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.tendsto_call_spread' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.tendsto_call_spread
+
+/-- info: 'MathFin.tendsto_call_spread_left' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.tendsto_call_spread_left
 
 /-- info: 'MathFin.tendsto_claytonCopulaFun_diag_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.tendsto_claytonCopulaFun_diag_div

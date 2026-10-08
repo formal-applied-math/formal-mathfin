@@ -14,14 +14,18 @@ Given the jump count `n` and the jump sizes `j₀, j₁, …`, the log-return ov
 `N(bτ + ∑_{i<n} jᵢ, σ²τ)`. So its law is a mixture of Gaussian laws over `Poisson(Λτ) ⊗ ν^ℕ`
 (`jumpDiffusionIncrementLaw_apply`, for every `σ`). With a Gaussian part (`σ ≠ 0`, `τ > 0`) the
 law therefore has a density, the mixture of the normal densities (`jumpDiffusionDensity`). For
-lognormal jumps this is the Poisson mixture of normal densities of Merton (1976); here the jump law
-is arbitrary and needs no moment condition.
+lognormal jumps this is the Poisson mixture of normal densities of Merton (1976), which the library
+states in price form (`jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF`; the change of
+variables back to the log-return is not formalized). Here the jump law is arbitrary and needs no
+moment condition.
 
 * `jumpDiffusionIncrementLaw_eq_withDensity`: the law is `f(y) dy` (Tonelli).
 * `continuous_jumpDiffusionDensity`: `f` is continuous, by dominated convergence, since a normal
   density is at most `1/√(2πv)` (`gaussianPDFReal_le_inv_sqrt`).
 * `nullSingletonClass_jumpDiffusionIncrementLaw`: so the law has no atoms (Mathlib's
   `nullSingletonClass_withDensity`).
+* `ofReal_exp_le_jumpDiffusionIncrementLaw_singleton`: without a Gaussian part (`σ = 0`) the law
+  has an atom at `bτ`, of mass at least `e^{−Λτ}`, the probability of no jump.
 * `hasDerivAt_measureReal_Ioi_withDensity`: for any law `f(y) dy` with `f` integrable, the tail
   `x ↦ P(Y > x)` has derivative `−f(a)` at every `a` where `f` is continuous.
 
@@ -159,6 +163,35 @@ lemma nullSingletonClass_jumpDiffusionIncrementLaw (b : ℝ) {σ : ℝ} (hσ : �
     NullSingletonClass (jumpDiffusionIncrementLaw b σ Λ ν τ) := by
   rw [jumpDiffusionIncrementLaw_eq_withDensity b hσ Λ ν hτ]
   infer_instance
+
+/-- **Without a Gaussian part the log-return law has an atom at `bτ`**: with `σ = 0` and no jump,
+which has probability `e^{−Λτ}`, the log-return is `bτ`. Each Gaussian law of the mixture
+(`jumpDiffusionIncrementLaw_apply`) is then a point mass (Mathlib's `gaussianReal_zero_var`), and
+the one for the jump count `0` sits at `bτ`. -/
+lemma ofReal_exp_le_jumpDiffusionIncrementLaw_singleton (b : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ)
+    [IsProbabilityMeasure ν] (τ : ℝ≥0) :
+    ENNReal.ofReal (rexp (-((Λ * τ : ℝ≥0) : ℝ))) ≤ jumpDiffusionIncrementLaw b 0 Λ ν τ {b * τ} := by
+  have hv : (⟨(0 : ℝ) ^ 2, sq_nonneg 0⟩ : ℝ≥0) * τ = 0 := by
+    ext
+    simp
+  rw [jumpDiffusionIncrementLaw_apply b 0 Λ ν τ (measurableSet_singleton _)]
+  simp_rw [hv, gaussianReal_zero_var]
+  calc ENNReal.ofReal (rexp (-((Λ * τ : ℝ≥0) : ℝ)))
+      = ((poissonMeasure (Λ * τ)).prod (Measure.infinitePi fun _ : ℕ ↦ ν)) ({0} ×ˢ univ) := by
+        rw [Measure.prod_prod, measure_univ, mul_one, poissonMeasure_singleton]
+        simp
+    _ = ∫⁻ ω, ({0} ×ˢ univ : Set (ℕ × (ℕ → ℝ))).indicator 1 ω
+          ∂((poissonMeasure (Λ * τ)).prod (Measure.infinitePi fun _ : ℕ ↦ ν)) :=
+        (lintegral_indicator_one ((measurableSet_singleton 0).prod MeasurableSet.univ)).symm
+    _ ≤ _ := lintegral_mono fun ω ↦ ?_
+  -- with no jump the point mass sits at `bτ`
+  by_cases hω : ω.1 = 0
+  · have h0 : ω ∈ ({0} ×ˢ univ : Set (ℕ × (ℕ → ℝ))) := by simpa using hω
+    rw [indicator_of_mem h0, Pi.one_apply, hω, Finset.range_zero, Finset.sum_empty, add_zero]
+    exact (Measure.dirac_apply_of_mem (mem_singleton _)).symm.le
+  · have h0 : ω ∉ ({0} ×ˢ univ : Set (ℕ × (ℕ → ℝ))) := by simpa using hω
+    rw [indicator_of_notMem h0]
+    exact zero_le _
 
 /-- The density integrates to `1`, so it is integrable. -/
 lemma integrable_jumpDiffusionDensity (b : ℝ) {σ : ℝ} (hσ : σ ≠ 0) (Λ : ℝ≥0) (ν : Measure ℝ)

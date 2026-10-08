@@ -898,6 +898,22 @@
       }
     },
     {
+      "id": "mf-cash-digital-strike",
+      "name": "Cash-or-Nothing Digital Strike Derivative",
+      "domain": "mathematical_finance",
+      "description": "Cash digital strike derivative: ∂_K V_cash = −e^{-rτ}·ϕ(d₂)/(K σ √τ), minus the discounted lognormal density formula at K (lognormalTerminalPDF, mf-breeden-litzenberger). Chain rule on Φ(d₂(K)) with ∂_K d₂ = −1/(K σ √τ). The cash digital is minus the strike derivative of the call price (mf-bsV-K-deriv), so this is also the second strike derivative of the call (mf-bsV-KK-deriv) with the sign reversed.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.StrikeGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem cash_digital_strike_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => MathFin.bsCashDigital k r σ S τ)\n      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ))) K :=\n  MathFin.hasDerivAt_bsCashDigital_K hS hσ hK hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cash-or-nothing strike sensitivity (Hull 26.1)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Chain rule on e^{-rτ} · Φ(d₂(K)): hasDerivAt_Phi with ∂_K d₂ = −1/(K σ √τ) (hasDerivAt_bsd2_K). The second strike derivative of the call price, hasDerivAt_deriv_bsV_K, is this lemma negated. Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-black76-rho",
       "name": "Black-76 Rho",
       "description": "Black-76 rho: ∂_r V_B = -T · V_B. Clean form because the inner bsV is r-independent (zero drift in futures setup) — only the e^{-rT} discount contributes.",
@@ -2126,7 +2142,7 @@
         "reference": "Call price convexity in strike (butterfly spread non-negativity; Hull Ch 12.8)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof, stated for the call price itself: the K-derivative of the strike sensitivity -e^{-rτ}·Phi(d_2(K)) (hasDerivAt_bsV_KK, chaining via Phi' = ϕ and ∂_K d_2) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since -e^{-rτ}·Phi(d_2) is ∂_K bsV on all of K > 0 (hasDerivAt_bsV_K). Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the call price itself: minus the K-derivative of the cash digital e^{-rτ}·Phi(d_2(K)) (hasDerivAt_bsCashDigital_K, mf-cash-digital-strike, chaining via Phi' = ϕ and ∂_K d_2) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since -e^{-rτ}·Phi(d_2) is ∂_K bsV on all of K > 0 (hasDerivAt_bsV_K). Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -2964,7 +2980,7 @@
     {
       "id": "mf-jump-diffusion-density",
       "name": "The Jump-Diffusion Log-Return Has a Continuous Density, a Mixture of Normal Densities",
-      "description": "Take a jump-diffusion log-return law over τ > 0 with drift b, volatility coefficient σ ≠ 0, jump rate Λ ≥ 0 and jump law ν (mf-jump-diffusion-log-return-mgf). Then the law is f(y) dy, where f(y) = ∫ φ(y; bτ + ∑_{i<n} jᵢ, σ²τ) d(Poisson(Λτ) ⊗ ν^ℕ)(n, j) is the mixture, over the jump count n and the jump sizes j, of the normal densities φ(·; m, v) (jumpDiffusionDensity). f is continuous. For lognormal jumps f is the Poisson mixture of normal densities of Merton (1976); here the jump law is arbitrary and no moment condition on ν is needed.",
+      "description": "Take a jump-diffusion log-return law over τ > 0 with drift b, volatility coefficient σ ≠ 0, jump rate Λ ≥ 0 and jump law ν (mf-jump-diffusion-log-return-mgf). Then the law is f(y) dy, where f(y) = ∫ φ(y; bτ + ∑_{i<n} jᵢ, σ²τ) d(Poisson(Λτ) ⊗ ν^ℕ)(n, j) is the mixture, over the jump count n and the jump sizes j, of the normal densities φ(·; m, v) (jumpDiffusionDensity). f is continuous. For lognormal jumps this is the Poisson mixture of Merton (1976), stated in price form in mf-jump-diffusion-merton-density (the change of variables back to f is not formalized); here the jump law is arbitrary and no moment condition on ν is needed.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.JumpDiffusionDensity\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The jump-diffusion log-return law has a continuous density**, the mixture of normal\ndensities. -/\ntheorem jump_diffusion_density_thm (b : ℝ) {σ : ℝ} (hσ : σ ≠ 0) (Λ : ℝ≥0) (ν : Measure ℝ)\n    [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) :\n    MathFin.jumpDiffusionIncrementLaw b σ Λ ν τ\n        = volume.withDensity (fun y ↦ ENNReal.ofReal (MathFin.jumpDiffusionDensity b σ Λ ν τ y)) ∧\n      Continuous (MathFin.jumpDiffusionDensity b σ Λ ν τ) :=\n  ⟨MathFin.jumpDiffusionIncrementLaw_eq_withDensity b hσ Λ ν hτ,\n    MathFin.continuous_jumpDiffusionDensity b σ Λ ν τ⟩\n"
@@ -3477,21 +3493,21 @@
       "id": "mf-merton-strike-derivatives",
       "name": "The Strike Derivatives of Merton's Call Price: Merton's Digital Series and Merton's Density Series",
       "domain": "mathematical_finance",
-      "description": "Let C(K) = mertonCallPrice = ∑ₙ wₙ C_BS(S·cₙ, K, σₙ) be Merton's (1976) call price (mf-merton-call-series), with Poisson weights wₙ = e^{−Λ}Λⁿ/n!, jump factors cₙ = e^{−kΛ}(1 + k)ⁿ and volatilities σₙ = √(σ² + nδ²/T). For S, σ, T, K > 0 and k > −1, C is differentiable in the strike at K with ∂C/∂K = −mertonDigitalPrice, where mertonDigitalPrice = ∑ₙ wₙ e^{−rT}Φ(d₂ⁿ) is the Poisson mixture of the Black–Scholes cash-or-nothing prices at the spots S·cₙ and volatilities σₙ; and ∂C/∂K is differentiable at K with ∂²C/∂K² = e^{−rT}·mertonDensity, where mertonDensity = ∑ₙ wₙ·lognormalTerminalPDF(S·cₙ, r, σₙ, T, K) is the Poisson mixture of the lognormal densities of mf-breeden-litzenberger. This is Breeden–Litzenberger for Merton's series as a function of the strike; that the two series are the digital price and the density of the price of a jump-diffusion is mf-jump-diffusion-merton-digital and mf-jump-diffusion-merton-density.",
+      "description": "Let C(K) = mertonCallPrice = ∑ₙ wₙ C_BS(S·cₙ, K, σₙ) be Merton's (1976) call price (mf-merton-call-series), with Poisson weights wₙ = e^{−Λ}Λⁿ/n!, jump factors cₙ = e^{−kΛ}(1 + k)ⁿ and volatilities σₙ = √(σ² + nδ²/T). For S, σ, T, K > 0 and k > −1: C is differentiable in the strike at K with ∂C/∂K = −D, where D = mertonDigitalPrice = ∑ₙ wₙ e^{−rT}Φ(d₂ⁿ) is the Poisson mixture of the Black–Scholes cash-or-nothing prices at the spots S·cₙ and volatilities σₙ; D is differentiable at K with ∂D/∂K = −e^{−rT}·mertonTerminalPDF, where mertonTerminalPDF = ∑ₙ wₙ·lognormalTerminalPDF(S·cₙ, r, σₙ, T, K) is the Poisson mixture of the lognormal density formula lognormalTerminalPDF of mf-breeden-litzenberger; and ∂C/∂K is differentiable at K with ∂²C/∂K² = e^{−rT}·mertonTerminalPDF. This is Breeden–Litzenberger for Merton's series as a function of the strike. That, with Gaussian log-jumps N(log(1 + k) − δ²/2, δ²) at the compensated drift b = r − σ²/2 − Λk, the two series at maturity τ and expected jump count Λτ are the digital price and the density of the price of the jump-diffusion is mf-jump-diffusion-merton-digital and mf-jump-diffusion-merton-density.",
       "code": {
-        "lean": "import MathFin.BlackScholes.MertonStrikeGreeks\n\nopen scoped NNReal\n\n/-- **The strike derivatives of Merton's call price**: `∂C/∂K = −mertonDigitalPrice` and\n`∂²C/∂K² = e^{−rT}·mertonDensity`. -/\ntheorem merton_strike_derivatives_thm {S K r σ T k δ : ℝ} {Λ : ℝ≥0} (hS : 0 < S) (hσ : 0 < σ)\n    (hT : 0 < T) (hk : -1 < k) (hK : 0 < K) :\n    HasDerivAt (fun x ↦ MathFin.mertonCallPrice S x r σ T k δ Λ)\n        (-MathFin.mertonDigitalPrice S K r σ T k δ Λ) K ∧\n      HasDerivAt (deriv fun x ↦ MathFin.mertonCallPrice S x r σ T k δ Λ)\n        (Real.exp (-r * T) * MathFin.mertonDensity S K r σ T k δ Λ) K :=\n  ⟨MathFin.hasDerivAt_mertonCallPrice_strike hS hσ hT hk hK,\n    MathFin.hasDerivAt_deriv_mertonCallPrice_strike hS hσ hT hk hK⟩\n"
+        "lean": "import MathFin.BlackScholes.MertonStrikeGreeks\n\nopen scoped NNReal\n\n/-- **The strike derivatives of Merton's call price**: `∂C/∂K = −mertonDigitalPrice`,\n`∂D/∂K = −e^{−rT}·mertonTerminalPDF` and `∂²C/∂K² = e^{−rT}·mertonTerminalPDF`. -/\ntheorem merton_strike_derivatives_thm {S K r σ T k δ : ℝ} {Λ : ℝ≥0} (hS : 0 < S) (hσ : 0 < σ)\n    (hT : 0 < T) (hk : -1 < k) (hK : 0 < K) :\n    HasDerivAt (fun x ↦ MathFin.mertonCallPrice S x r σ T k δ Λ)\n        (-MathFin.mertonDigitalPrice S K r σ T k δ Λ) K ∧\n      HasDerivAt (fun x ↦ MathFin.mertonDigitalPrice S x r σ T k δ Λ)\n        (-(Real.exp (-(r * T)) * MathFin.mertonTerminalPDF S r σ T k δ Λ K)) K ∧\n      HasDerivAt (deriv fun x ↦ MathFin.mertonCallPrice S x r σ T k δ Λ)\n        (Real.exp (-(r * T)) * MathFin.mertonTerminalPDF S r σ T k δ Λ K) K :=\n  ⟨MathFin.hasDerivAt_mertonCallPrice_strike hS hσ hT hk hK,\n    MathFin.hasDerivAt_mertonDigitalPrice_strike hS hσ hT hk hK,\n    MathFin.hasDerivAt_deriv_mertonCallPrice_strike hS hσ hT hk hK⟩\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. The Poisson series of Black–Scholes prices is differentiated term by term on K > 0 (Mathlib's hasDerivAt_tsum_of_isPreconnected): each term's strike derivative is minus a Black–Scholes digital (hasDerivAt_bsV_K, mf-bsV-K-deriv), at most wₙe^{−rT} in absolute value, and the Poisson weights sum to one (Mathlib's hasSum_one_poissonMeasure). The digital series is differentiated the same way on (K/2, ∞): near each strike a Black–Scholes digital is minus the strike derivative of a Black–Scholes price, so its derivative is the Black–Scholes Breeden–Litzenberger formula (breedenLitzenberger, mf-breeden-litzenberger), and each term is at most wₙe^{−rT}/((K/2)σ√T) because ϕ ≤ 1 and σₙ ≥ σ (le_mertonVol). The digital series is −∂C/∂K on all of K > 0, so hasDerivAt_deriv_of_eventually gives the second derivative of the price, as for the Merton gamma (mf-merton-gamma). Lives in MathFin/BlackScholes/MertonStrikeGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. The Poisson series of Black–Scholes prices is differentiated term by term on K > 0 (Mathlib's hasDerivAt_tsum_of_isPreconnected): each term's strike derivative is minus wₙ times a Black–Scholes digital bsCashDigital (hasDerivAt_bsV_K, mf-bsV-K-deriv), at most wₙe^{−rT} in absolute value, and the Poisson weights sum to one (Mathlib's hasSum_one_poissonMeasure). The digital series mertonDigitalPrice = ∑ₙ wₙ·bsCashDigital is differentiated the same way on (K/2, ∞): each term's strike derivative is minus wₙ times the discounted lognormal density formula (hasDerivAt_bsCashDigital_K, mf-cash-digital-strike), and each term's derivative is at most wₙe^{−rT}/((K/2)σ√T) in absolute value because ϕ ≤ 1 and σₙ ≥ σ (le_mertonVol). The digital series is −∂C/∂K on all of K > 0, so hasDerivAt_deriv_of_eventually gives the second derivative of the price, as for the Merton gamma (mf-merton-gamma). Lives in MathFin/BlackScholes/MertonStrikeGreeks.lean. Axioms-clean."
       }
     },
     {
       "id": "mf-jump-diffusion-merton-digital",
-      "name": "Merton's Digital Formula: With Gaussian Jumps the Digital Price Is a Poisson Mixture of Black–Scholes Digitals",
+      "name": "Merton's Digital Formula: With Gaussian Jumps at the Compensated Drift the Digital Price Is a Poisson Mixture of Black–Scholes Digitals",
       "domain": "mathematical_finance",
       "description": "Take the jump-diffusion log-return law over τ > 0 with volatility coefficient σ > 0, jump rate Λ ≥ 0, Gaussian log-jumps N(log(1 + k) − δ²/2, δ²) with k > −1, and the compensated drift b = r − σ²/2 − Λk. For S, K > 0 the digital price D(S, K, τ) = e^{−rτ}P(Seʸ > K) (jumpDiffusionDigitalPrice, mf-jump-diffusion-digital-strike-derivative) is Merton's series mertonDigitalPrice at the expected jump count Λτ: ∑ₙ wₙ e^{−rτ}Φ(d₂ⁿ), with Poisson(Λτ) weights wₙ and the Black–Scholes d₂ at the spot S·e^{−kΛτ}(1 + k)ⁿ and the volatility √(σ² + nδ²/τ) (mf-merton-strike-derivatives). The value is derived rather than computed: no Gaussian integral of the indicator is taken.",
       "code": {
@@ -3502,23 +3518,55 @@
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Two derivatives of one function at K are compared (Mathlib's HasDerivAt.unique). One is −D, from hasDerivAt_jumpDiffusionCallPrice_strike (mf-jump-diffusion-digital-strike-derivative); the forward is finite because the Gaussian jump law has an exponential moment (integrable_exp_jumpDiffusionIncrementLaw, integrable_exp_gaussianReal). The other is −mertonDigitalPrice, from hasDerivAt_mertonCallPrice_strike (mf-merton-strike-derivatives), transported by HasDerivAt.congr_of_eventuallyEq because on the neighbourhood k > 0 of K the call price function is Merton's series (jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice, mf-jump-diffusion-merton-1976-every-date). Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Two derivatives of one function at K are compared (Mathlib's HasDerivAt.unique). One is −D, from hasDerivAt_jumpDiffusionCallPrice_strike (mf-jump-diffusion-digital-strike-derivative); the forward is finite because the Gaussian jump law has an exponential moment (integrable_exp_jumpDiffusionIncrementLaw, integrable_exp_gaussianReal). The other is −mertonDigitalPrice, from hasDerivAt_mertonCallPrice_strike (mf-merton-strike-derivatives), transported by HasDerivAt.congr_of_eventuallyEq because on the neighbourhood (0, ∞) of K the call price function is Merton's series (jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice, mf-jump-diffusion-merton-1976-every-date). Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
       }
     },
     {
       "id": "mf-jump-diffusion-merton-density",
       "name": "Merton's Density: With Gaussian Jumps the Density of the Price Is a Poisson Mixture of Lognormal Densities",
       "domain": "mathematical_finance",
-      "description": "In the setting of mf-jump-diffusion-merton-digital (σ > 0, Gaussian log-jumps N(log(1 + k) − δ²/2, δ²) with k > −1, the compensated drift b = r − σ²/2 − Λk, τ > 0), for S, K > 0 the density of the price Seʸ at K, f(log(K/S))/K with f the density of the log-return (mf-jump-diffusion-density; the derivative at K of the distribution function of the price, mf-breeden-litzenberger-jump-diffusion), is Merton's series mertonDensity at the expected jump count Λτ: ∑ₙ wₙ·lognormalTerminalPDF(S·e^{−kΛτ}(1 + k)ⁿ, r, √(σ² + nδ²/τ), τ, K), the Poisson mixture, with Poisson(Λτ) weights wₙ, of the lognormal densities of mf-breeden-litzenberger.",
+      "description": "Take the jump-diffusion log-return law over τ > 0 with any drift b, volatility coefficient σ > 0, jump rate Λ ≥ 0 and Gaussian log-jumps N(log(1 + k) − δ²/2, δ²) with k > −1, and let S, K > 0. The density of the price Seʸ at K, f(log(K/S))/K with f the density of the log-return (mf-jump-diffusion-density; the derivative at K of the distribution function of the price, mf-breeden-litzenberger-jump-diffusion), is Merton's series mertonTerminalPDF at the expected jump count Λτ and the parameter r = b + σ²/2 + Λk: ∑ₙ wₙ·lognormalTerminalPDF(S·e^{−kΛτ}(1 + k)ⁿ, r, √(σ² + nδ²/τ), τ, K), the Poisson mixture, with Poisson(Λτ) weights wₙ, of the lognormal density formula of mf-breeden-litzenberger. At the compensated drift r is the interest rate; the identity holds at every drift because r enters the series only through d₂.",
       "code": {
-        "lean": "import MathFin.BlackScholes.JumpDiffusionDigital\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Merton's density**: with Gaussian log-jumps at the compensated drift, the density of the\nprice is Merton's Poisson mixture of lognormal densities. -/\ntheorem jump_diffusion_merton_density_thm {S K r b σ k δ : ℝ} (hS : 0 < S) (hK : 0 < K)\n    (hσ : 0 < σ) (hk : -1 < k) {Λ : ℝ≥0} (hb : b = r - σ ^ 2 / 2 - Λ * k) {τ : ℝ≥0}\n    (hτ : 0 < τ) :\n    MathFin.jumpDiffusionDensity b σ Λ\n        (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) τ (Real.log (K / S)) / K\n      = MathFin.mertonDensity S K r σ τ k δ (Λ * τ) :=\n  MathFin.jumpDiffusionDensity_gaussian_div_eq_mertonDensity hS hK hσ hk hb hτ\n"
+        "lean": "import MathFin.BlackScholes.JumpDiffusionDigital\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Merton's density**: with Gaussian log-jumps, at any drift `b`, the density of the price is\nMerton's Poisson mixture of lognormal density formulas at the parameter `r = b + σ²/2 + Λk`. -/\ntheorem jump_diffusion_merton_density_thm (b : ℝ) {S K σ k δ : ℝ} (hS : 0 < S) (hK : 0 < K)\n    (hσ : 0 < σ) (hk : -1 < k) (Λ : ℝ≥0) {τ : ℝ≥0} (hτ : 0 < τ) :\n    MathFin.jumpDiffusionDensity b σ Λ\n        (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) τ (Real.log (K / S)) / K\n      = MathFin.mertonTerminalPDF S (b + σ ^ 2 / 2 + Λ * k) σ τ k δ (Λ * τ) K :=\n  MathFin.jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF b hS hK hσ hk Λ hτ\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Two derivatives at K of the digital price function are compared (Mathlib's HasDerivAt.unique). One is −e^{−rτ}f(log(K/S))/K, from hasDerivAt_jumpDiffusionDigitalPrice_strike (mf-breeden-litzenberger-jump-diffusion). The other is −e^{−rτ}·mertonDensity, from hasDerivAt_mertonDigitalPrice_strike (mf-merton-strike-derivatives), transported because on the neighbourhood k > 0 of K the digital price function is Merton's digital series (jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice, mf-jump-diffusion-merton-digital). Cancelling e^{−rτ} gives the identity; no Gaussian convolution is computed. Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Set r = b + σ²/2 + Λk, so that b is the compensated drift for r. Two derivatives at K of the digital price function discounted at r are compared (Mathlib's HasDerivAt.unique). One is −e^{−rτ}f(log(K/S))/K, from hasDerivAt_jumpDiffusionDigitalPrice_strike (mf-breeden-litzenberger-jump-diffusion). The other is −e^{−rτ}·mertonTerminalPDF, from hasDerivAt_mertonDigitalPrice_strike (mf-merton-strike-derivatives), transported because on the neighbourhood (0, ∞) of K the digital price function is Merton's digital series (jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice, mf-jump-diffusion-merton-digital). Cancelling e^{−rτ} gives the identity; no Gaussian convolution is computed. Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-call-differentiable-iff",
+      "name": "The Jump-Diffusion Call Price Is Differentiable in the Strike Exactly Where the Log-Return Law Has No Atom",
+      "domain": "mathematical_finance",
+      "description": "Take a jump-diffusion log-return law over τ with drift b, volatility coefficient σ, jump rate Λ ≥ 0 and jump law ν (mf-jump-diffusion-log-return-mgf), with a finite forward ∫ eʸ < ∞, and let S, K > 0. The call price function k ↦ C(S, k, τ) = ∫ e^{−rτ}(Seʸ − k)⁺ (jumpDiffusionCallPrice) is differentiable at K if and only if the law has no atom at log(K/S): the general criterion mf-call-strike-differentiable-iff-no-atom for the price Seʸ, which equals K only at y = log(K/S), with the discount factor e^{−rτ} ≠ 0 carried along. With σ ≠ 0 there are no atoms (mf-jump-diffusion-digital-strike-derivative); with σ = 0 there is one at bτ (mf-jump-diffusion-call-kink).",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionDigital\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The jump-diffusion call price is differentiable in the strike exactly where the log-return law\nhas no atom.** -/\ntheorem jump_diffusion_call_differentiable_iff_thm {S K r b σ : ℝ} (hS : 0 < S) (hK : 0 < K)\n    {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν] {τ : ℝ≥0}\n    (hY : Integrable Real.exp (MathFin.jumpDiffusionIncrementLaw b σ Λ ν τ)) :\n    DifferentiableAt ℝ (fun k ↦ MathFin.jumpDiffusionCallPrice S k r b σ Λ ν τ) K ↔\n      MathFin.jumpDiffusionIncrementLaw b σ Λ ν τ {Real.log (K / S)} = 0 :=\n  MathFin.differentiableAt_jumpDiffusionCallPrice_strike_iff hS hK hY\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The call price function is e^{−rτ} times the undiscounted call price of the price Seʸ (integral_const_mul), and multiplying by e^{−rτ} ≠ 0 does not change differentiability (DifferentiableAt.const_mul, both ways). The undiscounted call price is differentiable at K iff the price has no atom at K (differentiableAt_integral_call_iff, mf-call-strike-differentiable-iff-no-atom), and {y : Seʸ = K} = {log(K/S)}. Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-call-kink",
+      "name": "Without a Gaussian Part the Jump-Diffusion Call Price Has a Kink at the Strike Se^{bτ}",
+      "domain": "mathematical_finance",
+      "description": "Take a jump-diffusion log-return law over τ with drift b, no Gaussian part (σ = 0), jump rate Λ ≥ 0 and jump law ν (mf-jump-diffusion-log-return-mgf), with a finite forward ∫ eʸ < ∞, and let S > 0. With no jump, which has probability e^{−Λτ}, the log-return is bτ, so the law has an atom at bτ of mass at least e^{−Λτ} > 0. Hence the call price function k ↦ C(S, k, τ) = ∫ e^{−rτ}(Seʸ − k)⁺ (jumpDiffusionCallPrice) is not differentiable in the strike at K = Se^{bτ}, the price reached without jumps (mf-jump-diffusion-call-differentiable-iff). With a Gaussian part the law has no atoms and the call price is differentiable at every strike (mf-jump-diffusion-digital-strike-derivative).",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionDigital\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Without a Gaussian part the call price has a kink at `Se^{bτ}`**: the law has an atom of mass\nat least `e^{−Λτ}` at `bτ`. -/\ntheorem jump_diffusion_call_kink_thm {S r b : ℝ} (hS : 0 < S) {Λ : ℝ≥0} {ν : Measure ℝ}\n    [IsProbabilityMeasure ν] {τ : ℝ≥0}\n    (hY : Integrable Real.exp (MathFin.jumpDiffusionIncrementLaw b 0 Λ ν τ)) :\n    ENNReal.ofReal (Real.exp (-((Λ * τ : ℝ≥0) : ℝ)))\n        ≤ MathFin.jumpDiffusionIncrementLaw b 0 Λ ν τ {b * τ} ∧\n      ¬ DifferentiableAt ℝ (fun k ↦ MathFin.jumpDiffusionCallPrice S k r b 0 Λ ν τ)\n        (S * Real.exp (b * τ)) :=\n  ⟨MathFin.ofReal_exp_le_jumpDiffusionIncrementLaw_singleton b Λ ν τ,\n    MathFin.not_differentiableAt_jumpDiffusionCallPrice_strike hS hY⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes; Merton (1976), Option pricing when underlying stock returns are discontinuous, Journal of Financial Economics 3, 125-144",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The atom: given the jumps the log-return law is N(bτ + ∑_{i<n} jᵢ, σ²τ) (jumpDiffusionIncrementLaw_apply), a point mass when σ = 0 (Mathlib's gaussianReal_zero_var); on the event {n = 0}, of Poisson(Λτ) ⊗ ν^ℕ-measure e^{−Λτ} (Measure.prod_prod, poissonMeasure_singleton), the point mass sits at bτ, and lintegral_mono bounds the mixture below (ofReal_exp_le_jumpDiffusionIncrementLaw_singleton). The kink: the call price function is differentiable at K exactly when the law has no atom at log(K/S) (differentiableAt_jumpDiffusionCallPrice_strike_iff, mf-jump-diffusion-call-differentiable-iff), and at K = Se^{bτ} that point is bτ. Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean, the atom in MathFin/BlackScholes/JumpDiffusionDensity.lean. Axioms-clean."
       }
     },
     {
@@ -3567,6 +3615,22 @@
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Mathlib's hasDerivAt_integral_of_dominated_loc_of_lip (differentiation under the integral sign). The call payoff k ↦ (X − k)⁺ is 1-Lipschitz in the strike (Mathlib's abs_max_sub_max_le_abs), with the constant bound 1 integrable under the finite measure. Off the atom, so for μ-almost every ω, it is differentiable at K with derivative −1_{X > K}: near K it is X − k when X > K and 0 when X < K. The derivative of the integral is ∫ −1_{X > K} dμ = −μ{X > K} (integral_indicator_one). Lives in MathFin/BlackScholes/CallSpreadDigital.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-call-strike-differentiable-iff-no-atom",
+      "name": "The Call Price Is Differentiable in the Strike Exactly Where the Law Has No Atom",
+      "domain": "mathematical_finance",
+      "description": "Let X be a measurable real random variable with finite mean under a finite measure μ, and let C(k) = ∫ (X − k)⁺ dμ be the undiscounted call price at strike k. As h ↓ 0 the call spread just below the strike, (C(K − h) − C(K))/h, tends to μ{X ≥ K}, so the left strike derivative of C is −μ{X ≥ K}; the right one is −μ{X > K} (mf-call-spread-digital). And C is differentiable at K if and only if μ{X = K} = 0: at an atom the two one-sided derivatives differ by its mass, and the call price has a kink. No model or discounting is assumed.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.CallSpreadDigital\n\nopen MeasureTheory Filter\nopen scoped Topology\n\n/-- **The call price is differentiable in the strike exactly where the law has no atom**; the call\nspread below the strike tends to `μ {X ≥ K}`. -/\ntheorem call_strike_differentiable_iff_no_atom_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsFiniteMeasure μ] {X : Ω → ℝ} (hXm : Measurable X) (hX : Integrable X μ)\n    (K : ℝ) :\n    Tendsto (fun h ↦ (∫ ω, max (X ω - (K - h)) 0 ∂μ - ∫ ω, max (X ω - K) 0 ∂μ) / h) (𝓝[>] 0)\n        (𝓝 (μ.real {ω | K ≤ X ω})) ∧\n      (DifferentiableAt ℝ (fun k ↦ ∫ ω, max (X ω - k) 0 ∂μ) K ↔ μ {ω | X ω = K} = 0) :=\n  ⟨MathFin.tendsto_call_spread_left hXm hX K, MathFin.differentiableAt_integral_call_iff hXm hX K⟩\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The left spread: dominated convergence, as for mf-call-spread-digital; the spread payoff ((X − K + h)⁺ − (X − K)⁺)/h is at most 1 in absolute value (Mathlib's abs_max_sub_max_le_abs), equal to 1 when X ≥ K and to 0 once h < K − X. Off an atom C is differentiable (hasDerivAt_integral_call, mf-call-strike-derivative). Conversely, if C is differentiable at K its right and left slopes both tend to C'(K) (Mathlib's HasDerivAt.tendsto_slope_zero_right and tendsto_slope_zero_left, the latter composed with h ↦ −h), so tendsto_nhds_unique gives C'(K) = −μ{X > K} = −μ{X ≥ K}; and μ{X ≥ K} = μ{X > K} + μ{X = K} (measureReal_union). Lives in MathFin/BlackScholes/CallSpreadDigital.lean. Axioms-clean."
       }
     },
     {

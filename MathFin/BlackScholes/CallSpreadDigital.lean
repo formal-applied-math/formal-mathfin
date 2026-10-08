@@ -26,9 +26,12 @@ determine the law of the underlying. This is the first-order form of Breeden and
   that give the same undiscounted call price `∫ (Seʸ − K)⁺` at every strike `K > 0` (for one
   `S > 0`) are equal. The digital at the strike `Seᵃ` is the tail `P(Y > a)`.
 * `hasDerivAt_integral_call`: where `X` has no atom at `K`, the call price is differentiable at
-  `K` and `C'(K) = −μ {X > K}` (Mathlib's `hasDerivAt_integral_of_dominated_loc_of_lip`). At an
-  atom the derivative does not exist, since the left one is `−μ {X ≥ K}` (not formalized); this is
-  why the limit above is one-sided.
+  `K` and `C'(K) = −μ {X > K}` (Mathlib's `hasDerivAt_integral_of_dominated_loc_of_lip`).
+* `tendsto_call_spread_left`: the spread just below the strike, `(C(K − h) − C(K))/h`, tends to
+  `μ {X ≥ K}`. So the left strike derivative is `−μ {X ≥ K}` and the right one `−μ {X > K}`.
+* `differentiableAt_integral_call_iff`: the call price is differentiable at `K` iff `X` has no atom
+  at `K`. At an atom the two one-sided derivatives differ by its mass, and the call price has a
+  kink.
 
 In Black–Scholes the strike derivative is `−e^{−rτ}Φ(d₂)` (`hasDerivAt_bsV_K`), from the closed
 form. The digital price `e^{−rτ}Φ(d₂)` follows from it through `hasDerivAt_integral_call`
@@ -115,6 +118,48 @@ theorem measure_eq_of_integral_call_eq {μ μ' : Measure ℝ} [IsProbabilityMeas
   rw [← compl_Ioi, prob_compl_eq_one_sub measurableSet_Ioi,
     prob_compl_eq_one_sub measurableSet_Ioi, htail]
 
+/-- **The call spread below the strike tends to the digital at or above it.** For a measurable,
+integrable `X` under a finite measure `μ`, `(C(K − h) − C(K))/h → μ {X ≥ K}` as `h ↓ 0`, where
+`C(k) = ∫ (X − k)⁺ dμ`: minus the left strike derivative of the call price is the price of the
+event `X ≥ K`. As in `tendsto_call_spread`, the spread payoff is at most `1` in absolute value; it
+is `1` when `X ≥ K` and `0` once `h < K − X`. -/
+theorem tendsto_call_spread_left {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+    [IsFiniteMeasure μ] {X : Ω → ℝ} (hXm : Measurable X) (hX : Integrable X μ) (K : ℝ) :
+    Tendsto (fun h ↦ (∫ ω, max (X ω - (K - h)) 0 ∂μ - ∫ ω, max (X ω - K) 0 ∂μ) / h) (𝓝[>] 0)
+      (𝓝 (μ.real {ω | K ≤ X ω})) := by
+  have hcall (k : ℝ) : Integrable (fun ω ↦ max (X ω - k) 0) μ :=
+    (hX.sub (integrable_const k)).pos_part
+  have hspread : (fun h ↦ (∫ ω, max (X ω - (K - h)) 0 ∂μ - ∫ ω, max (X ω - K) 0 ∂μ) / h)
+      = fun h ↦ ∫ ω, (max (X ω - (K - h)) 0 - max (X ω - K) 0) / h ∂μ := by
+    funext h
+    rw [integral_div, integral_sub (hcall (K - h)) (hcall K)]
+  rw [hspread, ← integral_indicator_one (measurableSet_le measurable_const hXm)]
+  refine tendsto_integral_filter_of_dominated_convergence (fun _ ↦ 1)
+    (Eventually.of_forall fun h ↦ ?_) ?_ (integrable_const 1) (ae_of_all _ fun ω ↦ ?_)
+  · exact (by fun_prop : Measurable fun ω ↦
+      (max (X ω - (K - h)) 0 - max (X ω - K) 0) / h).aestronglyMeasurable
+  · -- the call payoff is `1`-Lipschitz in the strike, so the spread payoff is at most `1`
+    filter_upwards [self_mem_nhdsWithin] with h hh
+    refine ae_of_all _ fun ω ↦ ?_
+    have hh : 0 < h := hh
+    have hlip := abs_max_sub_max_le_abs (X ω - (K - h)) (X ω - K) 0
+    rw [show X ω - (K - h) - (X ω - K) = h by ring, abs_of_pos hh] at hlip
+    show ‖(max (X ω - (K - h)) 0 - max (X ω - K) 0) / h‖ ≤ 1
+    rwa [Real.norm_eq_abs, abs_div, abs_of_pos hh, div_le_one hh]
+  · -- and tends to the digital payoff `1_{X ≥ K}`
+    by_cases hω : K ≤ X ω
+    · rw [indicator_of_mem (show ω ∈ {ω | K ≤ X ω} from hω), Pi.one_apply]
+      refine tendsto_const_nhds.congr' ?_
+      filter_upwards [self_mem_nhdsWithin] with h hh
+      have hh : 0 < h := hh
+      rw [max_eq_left (by linarith), max_eq_left (by linarith),
+        show X ω - (K - h) - (X ω - K) = h by ring, div_self hh.ne']
+    · rw [indicator_of_notMem (show ω ∉ {ω | K ≤ X ω} from hω)]
+      refine tendsto_const_nhds.congr' ?_
+      filter_upwards [Ioo_mem_nhdsGT (sub_pos.2 (not_le.1 hω))] with h hh
+      rw [max_eq_right (by linarith [hh.2, not_le.1 hω]),
+        max_eq_right (by linarith [hh.2, not_le.1 hω]), sub_self, zero_div]
+
 /-- **The strike derivative of the call price is minus the digital.** For a measurable, integrable
 `X` under a finite measure `μ` with no atom at `K` (`μ {X = K} = 0`), the undiscounted call price
 `C(k) = ∫ (X − k)⁺ dμ` is differentiable at `K` and `C'(K) = −μ {X > K}`. The call payoff is
@@ -150,5 +195,40 @@ theorem hasDerivAt_integral_call {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : M
       refine ((hasDerivAt_id' K).const_sub (X ω)).congr_of_eventuallyEq ?_
       filter_upwards [Iio_mem_nhds h] with k hk
       exact max_eq_left (by linarith [mem_Iio.1 hk])
+
+/-- **The call price is differentiable in the strike exactly off the atoms.** For a measurable,
+integrable `X` under a finite measure `μ`, the call price `C(k) = ∫ (X − k)⁺ dμ` is
+differentiable at `K` iff `X` has no atom at `K`. Off an atom this is `hasDerivAt_integral_call`.
+Conversely the right slopes tend to `−μ {X > K}` (`tendsto_call_spread`) and the left ones to
+`−μ {X ≥ K}` (`tendsto_call_spread_left`), so a derivative makes the two equal, and they differ by
+`μ {X = K}`. -/
+theorem differentiableAt_integral_call_iff {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+    [IsFiniteMeasure μ] {X : Ω → ℝ} (hXm : Measurable X) (hX : Integrable X μ) (K : ℝ) :
+    DifferentiableAt ℝ (fun k ↦ ∫ ω, max (X ω - k) 0 ∂μ) K ↔ μ {ω | X ω = K} = 0 := by
+  refine ⟨fun hd ↦ ?_, fun hK ↦ (hasDerivAt_integral_call hXm hX hK).differentiableAt⟩
+  have h := hd.hasDerivAt
+  have hneg : Tendsto (fun t : ℝ ↦ -t) (𝓝[>] 0) (𝓝[<] 0) :=
+    tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _
+      ((continuous_neg.tendsto' 0 0 neg_zero).mono_left nhdsWithin_le_nhds)
+      (eventually_nhdsWithin_of_forall fun t (ht : 0 < t) ↦ neg_lt_zero.2 ht)
+  -- the right slopes tend to `−μ {X > K}`, the left ones to `−μ {X ≥ K}`
+  have hR := tendsto_nhds_unique h.tendsto_slope_zero_right
+    ((tendsto_call_spread hXm hX K).neg.congr' (Eventually.of_forall fun t ↦ by
+      simp only [smul_eq_mul]
+      ring))
+  have hL := tendsto_nhds_unique (h.tendsto_slope_zero_left.comp hneg)
+    ((tendsto_call_spread_left hXm hX K).neg.congr' (Eventually.of_forall fun t ↦ by
+      simp only [Function.comp_apply, smul_eq_mul, ← sub_eq_add_neg]
+      ring))
+  -- `{X ≥ K}` is `{X > K}` and the atom
+  have hunion : {ω | K ≤ X ω} = {ω | K < X ω} ∪ {ω | X ω = K} := by
+    ext ω
+    simp only [mem_setOf_eq, mem_union]
+    exact ⟨fun h ↦ h.lt_or_eq.imp id Eq.symm, fun h ↦ h.elim le_of_lt fun h ↦ h.symm.le⟩
+  have hsum := measureReal_union (μ := μ) (s₁ := {ω | K < X ω}) (s₂ := {ω | X ω = K})
+    (Set.disjoint_left.2 fun ω (h₁ : K < X ω) (h₂ : X ω = K) ↦ h₁.ne' h₂)
+    (hXm (measurableSet_singleton K))
+  rw [← hunion] at hsum
+  exact (measureReal_eq_zero_iff (measure_ne_top μ _)).1 (by linarith)
 
 end MathFin

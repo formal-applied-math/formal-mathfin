@@ -9,6 +9,7 @@ public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.PDE
 public import MathFin.BlackScholes.PutGreeks
+public import MathFin.BlackScholes.DigitalGreeks
 
 /-!
 # Black-Scholes strike derivatives
@@ -30,8 +31,10 @@ Results:
 * `hasDerivAt_bsd1_K`, `hasDerivAt_bsd2_K`: `∂_K d_i = −1/(K σ √τ)`.
 * `hasDerivAt_bsV_K`: `∂_K bsV = −e^{-rτ} · Φ(d₂)`.
 * `hasDerivAt_bsP_K`: `∂_K bsP = e^{-rτ} · Φ(-d₂)`.
-* `hasDerivAt_bsV_KK`: the K-derivative of `−e^{-rτ} · Φ(d₂)` is `e^{-rτ} · ϕ(d₂) / (K σ √τ)`.
-* `hasDerivAt_deriv_bsV_K`: `∂²_K bsV = e^{-rτ} · ϕ(d₂) / (K σ √τ)`, for the price itself.
+* `hasDerivAt_bsCashDigital_K`: the strike derivative of the cash-or-nothing digital
+  `bsCashDigital = e^{-rτ} · Φ(d₂)` is `−e^{-rτ} · ϕ(d₂) / (K σ √τ)`.
+* `hasDerivAt_deriv_bsV_K`: `∂²_K bsV = e^{-rτ} · ϕ(d₂) / (K σ √τ)`, for the price itself: the
+  first strike derivative is minus the digital.
 -/
 
 @[expose] public section
@@ -169,34 +172,28 @@ lemma hasDerivAt_bsP_K {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
     linarith [mul_comm (Real.exp (-(r * τ))) (Phi (bsd2 S K r σ τ))]
   exact hval ▸ h1
 
-/-- **The second strike-derivative formula** (Greek `∂²_K bsV`): the K-derivative of
-`∂_K bsV = -e^{-rτ} Φ(d₂)` is `e^{-rτ} · ϕ(d₂) / (K σ √τ)`. The second derivative of the price
-itself is `hasDerivAt_deriv_bsV_K`; the convexity in `K` it yields — butterfly-spread
-non-negativity — is `bsV_strike_convexOn`. -/
-private lemma hasDerivAt_bsV_KK {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
+/-- **Strike derivative of the cash-or-nothing digital**: `∂_K (e^{-rτ} Φ(d₂)) =
+−e^{-rτ} · ϕ(d₂) / (K σ √τ)`, minus the discounted lognormal density at `K`
+(`breedenLitzenberger`). The digital is minus the strike derivative of the call price
+(`hasDerivAt_bsV_K`), so this is the second strike derivative of the call, up to sign; the
+convexity in `K` it yields (butterfly-spread non-negativity) is `bsV_strike_convexOn`. -/
+lemma hasDerivAt_bsCashDigital_K {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
     {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :
-    HasDerivAt (fun k ↦ -(Real.exp (-(r * τ)) * Phi (bsd2 S k r σ τ)))
-      (Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (bsd2 S K r σ τ) /
-        (K * σ * Real.sqrt τ)) K := by
-  have h_d2_K := hasDerivAt_bsd2_K S r σ τ hS hσ hτ hK
-  have h_Phi_d2 := (hasDerivAt_Phi (bsd2 S K r σ τ)).comp K h_d2_K
-  have h := (h_Phi_d2.const_mul (Real.exp (-(r * τ)))).neg
-  have h_sqrt_τ_ne : Real.sqrt τ ≠ 0 := (Real.sqrt_pos.mpr hτ).ne'
-  have hσ_ne : σ ≠ 0 := hσ.ne'
-  have hK_ne : K ≠ 0 := hK.ne'
-  refine h.congr_deriv ?_
-  -- value: -(e^{-rτ}·(ϕ(d_2)·(-1/(K·σ·√τ)))) = e^{-rτ}·ϕ(d_2)/(K·σ·√τ)
-  field_simp
+    HasDerivAt (fun k ↦ bsCashDigital k r σ S τ)
+      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (bsd2 S K r σ τ) /
+        (K * σ * Real.sqrt τ))) K :=
+  (((hasDerivAt_Phi (bsd2 S K r σ τ)).comp K (hasDerivAt_bsd2_K S r σ τ hS hσ hτ hK)).const_mul
+    (Real.exp (-(r * τ)))).congr_deriv (by ring)
 
 /-- **Second strike-derivative of the call**: `∂²C/∂K² = e^{-rτ} · ϕ(d₂) / (K σ √τ)`, for the
-price itself: `∂_K bsV = -e^{-rτ} Φ(d₂)` on all of `K > 0` (`hasDerivAt_bsV_K`), and its
-derivative is the formula of `hasDerivAt_bsV_KK`. -/
+price itself: `∂_K bsV` is minus the digital on all of `K > 0` (`hasDerivAt_bsV_K`), and the
+digital's strike derivative is `hasDerivAt_bsCashDigital_K`. -/
 theorem hasDerivAt_deriv_bsV_K {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
     {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :
     HasDerivAt (deriv fun k ↦ bsV k r σ S τ)
       (Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (bsd2 S K r σ τ) / (K * σ * Real.sqrt τ)) K :=
   hasDerivAt_deriv_of_eventually
     ((eventually_gt_nhds hK).mono fun _ hk ↦ hasDerivAt_bsV_K hS hσ hk hτ)
-    (hasDerivAt_bsV_KK hS hσ hK hτ)
+    ((hasDerivAt_bsCashDigital_K (r := r) hS hσ hK hτ).fun_neg.congr_deriv (neg_neg _))
 
 end MathFin

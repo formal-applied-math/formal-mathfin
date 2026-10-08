@@ -852,8 +852,18 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice
 
-/-- info: 'MathFin.jumpDiffusionDensity_gaussian_div_eq_mertonDensity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionDensity_gaussian_div_eq_mertonDensity
+/-- info: 'MathFin.jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF
+
+-- Kinks (2026-10-08): the call price is differentiable in the strike exactly where the law has no
+-- atom (the spread below the strike tends to the digital at or above it); without a Gaussian part
+-- the jump-diffusion law has an atom at bτ, so the call price has a kink at the strike Se^{bτ}
+
+/-- info: 'MathFin.differentiableAt_integral_call_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.differentiableAt_integral_call_iff
+
+/-- info: 'MathFin.not_differentiableAt_jumpDiffusionCallPrice_strike' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.not_differentiableAt_jumpDiffusionCallPrice_strike
 
 -- Blueprint-spine closure (2026-06-06): every spine node is axiom-pinned.
 -- Gap found by tests/test_values.py::test_blueprint_spine_is_audited on its

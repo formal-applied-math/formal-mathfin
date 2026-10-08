@@ -332,7 +332,7 @@ import MathFin.BlackScholes.MertonModel
 -- Merton Greeks: delta, gamma, vega as Poisson mixtures of Black–Scholes Greeks
 import MathFin.BlackScholes.MertonGreeks
 -- Merton's strike derivatives: the digital series and the density series (Poisson mixtures of
--- Black–Scholes digitals and of lognormal densities), and Merton's Breeden–Litzenberger
+-- Black–Scholes digitals and of lognormal density formulas), and Merton's Breeden–Litzenberger
 import MathFin.BlackScholes.MertonStrikeGreeks
 -- Jump-diffusions with an arbitrary jump law: the mixing formula, the
 -- compound-Poisson compensator, and Merton's formula for a general jump law
@@ -365,12 +365,14 @@ import MathFin.BlackScholes.JumpDiffusionIdentifiability
 -- differently when the jumps are nontrivial
 import MathFin.BlackScholes.JumpDiffusionIncompleteness
 -- The log-return law with σ ≠ 0 is a Gaussian mixture with a continuous density, so it has no
--- atoms; the tail of a law with a density is differentiable where the density is continuous
+-- atoms, and with σ = 0 it has the atom bτ; the tail of a law with a density is differentiable
+-- where the density is continuous
 import MathFin.BlackScholes.JumpDiffusionDensity
 -- Digital options and Breeden–Litzenberger with jumps: for σ ≠ 0 the strike derivative of the
 -- call price is minus the digital price and the second one is the discounted density of the
 -- price; without jumps, at the drift r − σ²/2, these are e^{−rτ}Φ(d₂) and lognormalTerminalPDF;
--- with Gaussian log-jumps at the compensated drift, Merton's digital and density series
+-- with Gaussian log-jumps, Merton's digital and density series; with σ = 0 the call price has a
+-- kink at the strike Se^{bτ}
 import MathFin.BlackScholes.JumpDiffusionDigital
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
@@ -378,8 +380,8 @@ import MathFin.BlackScholes.Chooser
 import MathFin.BlackScholes.CappedCall
 import MathFin.BlackScholes.Spreads
 -- Call spreads tend to the digital, so call prices at every strike determine the law (the first-
--- order Breeden–Litzenberger, for any law with a finite mean); where the law has no atom at the
--- strike the call price is differentiable and its strike derivative is minus the digital
+-- order Breeden–Litzenberger, for any law with a finite mean); the call price is differentiable
+-- in the strike exactly where the law has no atom, and there its derivative is minus the digital
 import MathFin.BlackScholes.CallSpreadDigital
 import MathFin.BlackScholes.Lookback
 import MathFin.BlackScholes.BarrierParity
