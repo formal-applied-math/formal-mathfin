@@ -1,0 +1,66 @@
+name: release
+
+# Publish a GitHub release of main. Zenodo archives every published release as
+# a new version under the concept DOI in CITATION.cff, copying .zenodo.json onto
+# the version record, so a release is permanent: this workflow is
+# dispatch-only and never runs on its own.
+#
+# The notes are an input rather than a file in the tree: they are prose written
+# for the occasion, and the release page is where they live.
+#
+#   gh workflow run release.yml -f tag=v1.5.0 \
+#     -f title="formal-mathfin v1.5.0" -f notes="$(cat notes.md)"
+#
+# The inputs reach the shell only through env, never through ${{ }} inside a
+# `run` script, so no input is ever executed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to create, vX.Y.Z. CITATION.cff on main must already carry version X.Y.Z.'
+        required: true
+      title:
+        description: 'Release title'
+        required: true
+      notes:
+        description: 'Release notes (Markdown)'
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # The tag and the citation metadata must name the same version: a citation
+      # made from CITATION.cff should resolve to the release it describes.
+      - name: Check the tag against CITATION.cff
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::the tag must look like vX.Y.Z, got '$TAG'"
+            exit 1
+          fi
+          if ! grep -qx "version: \"${TAG#v}\"" CITATION.cff; then
+            echo "::error::CITATION.cff does not carry version ${TAG#v}; bump it on main first"
+            exit 1
+          fi
+
+      - name: Create the tag and the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          TITLE: ${{ inputs.title }}
+          NOTES: ${{ inputs.notes }}
+        run: gh release create "$TAG" --target "$GITHUB_SHA" --title "$TITLE" --notes "$NOTES"
