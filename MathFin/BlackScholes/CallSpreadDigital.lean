@@ -21,7 +21,7 @@ form of Breeden and Litzenberger (1978), for any law with a finite mean, not onl
 one.
 
 * `tendsto_call_spread`: `(C(K) − C(K + h))/h → μ {X > K}` as `h ↓ 0`, where
-  `C(k) = ∫ (X − k)⁺ dμ`, for an integrable `X` under a finite measure `μ` (dominated
+  `C(k) = ∫ (X − k)⁺ dμ`, for a measurable, integrable `X` under a finite measure `μ` (dominated
   convergence).
 * `measure_eq_of_integral_call_eq`: two probability laws of a log-return, each with `∫ eʸ < ∞`,
   that give the same undiscounted call price `∫ (Seʸ − K)⁺` at every strike `K > 0` (for one
@@ -40,11 +40,11 @@ namespace MathFin
 open MeasureTheory Filter Set
 open scoped Topology
 
-/-- **A digital is a limit of call spreads.** For an integrable `X` under a finite measure `μ`,
-the bull-call spread `(C(K) − C(K + h))/h`, where `C(k) = ∫ (X − k)⁺ dμ`, tends to `μ {X > K}` as
-`h ↓ 0`: minus the right strike derivative of the undiscounted call price is the price of the
-event `X > K`. The spread payoff lies in `[0, 1]` and tends to `1_{X > K}` pointwise, so dominated
-convergence applies. -/
+/-- **A digital is a limit of call spreads.** For a measurable, integrable `X` under a finite
+measure `μ`, the bull-call spread `(C(K) − C(K + h))/h`, where `C(k) = ∫ (X − k)⁺ dμ`, tends to
+`μ {X > K}` as `h ↓ 0`: minus the right strike derivative of the undiscounted call price is the
+price of the event `X > K`. The spread payoff lies in `[0, 1]` and tends to `1_{X > K}` pointwise,
+so dominated convergence applies. -/
 theorem tendsto_call_spread {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
     [IsFiniteMeasure μ] {X : Ω → ℝ} (hXm : Measurable X) (hX : Integrable X μ) (K : ℝ) :
     Tendsto (fun h ↦ (∫ ω, max (X ω - K) 0 ∂μ - ∫ ω, max (X ω - (K + h)) 0 ∂μ) / h) (𝓝[>] 0)

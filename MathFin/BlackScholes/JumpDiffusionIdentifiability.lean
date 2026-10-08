@@ -11,11 +11,12 @@ public import MathFin.Foundations.Esscher
 /-!
 # The law at one date determines the drift and the jumps
 
-The log-return law over a time `τ > 0` of a jump-diffusion with drift `b`, volatility coefficient
-`σ`, jump rate `Λ` and jump law `ν` (`jumpDiffusionIncrementLaw`) determines, for a given `σ`, the
-drift `b` and the Lévy measure `Λν` away from `0`, and nothing more: jumps of size `0` do not move
-the log-price. This is the uniqueness half of the Lévy–Khintchine representation, for finitely many
-jumps, read off a single date.
+When the jump laws' moment-generating functions are finite near `0`, the log-return law over a time
+`τ > 0` of a jump-diffusion with drift `b`, volatility coefficient `σ`, jump rate `Λ` and jump law
+`ν` (`jumpDiffusionIncrementLaw`) determines, for a given `σ`, the drift `b` and the Lévy measure
+`Λν` away from `0`, and nothing more: jumps of size `0` do not move the log-price. This is the
+uniqueness half of the Lévy–Khintchine representation, for finitely many jumps, read off a single
+date.
 
 * `jumpDiffusionExponent_eq_levy`: `κ(u) = bu + σ²u²/2 + ∫ (e^{ux} − 1) Π(dx)` wherever
   `∫ e^{ux} dν < ∞`, where `Π` is `Λν` restricted to `x ≠ 0`. The Laplace exponent sees the jumps
@@ -212,24 +213,24 @@ theorem jumpDiffusionIncrementLaw_eq_iff {b₁ b₂ σ : ℝ} {Λ₁ Λ₂ : ℝ
         simp only [jumpDiffusionExponent] at ep em e0
         linear_combination ep + em - 2 * e0
     -- dividing by the kernel gives the Lévy measures off `0`
-    have hΠ : (Λ₁ • ν₁).restrict {0}ᶜ = (Λ₂ • ν₂).restrict {0}ᶜ := by
+    have hLevy : (Λ₁ • ν₁).restrict {0}ᶜ = (Λ₂ • ν₂).restrict {0}ᶜ := by
       rw [restrict_compl_zero_eq_withDensity_inv hs (Λ₁ • ν₁),
         restrict_compl_zero_eq_withDensity_inv hs (Λ₂ • ν₂), hM]
     -- and then `κ` gives the drift
-    refine ⟨?_, hΠ⟩
+    refine ⟨?_, hLevy⟩
     have e := (hin (ε / 2) (by linarith) (by linarith)).2.2
     rw [jumpDiffusionExponent_eq_levy b₁ σ Λ₁ (hin (ε / 2) (by linarith) (by linarith)).1,
       jumpDiffusionExponent_eq_levy b₂ σ Λ₂ (hin (ε / 2) (by linarith) (by linarith)).2.1,
-      hΠ] at e
+      hLevy] at e
     have h2 : (b₁ - b₂) * (ε / 2) = 0 := by linear_combination e
     exact sub_eq_zero.1 ((mul_eq_zero.1 h2).resolve_right hs)
-  · rintro ⟨rfl, hΠ⟩
+  · rintro ⟨hb, hLevy⟩
     have hint : ∀ᶠ u in 𝓝 (0 : ℝ),
         Integrable (fun y ↦ rexp (u * y)) (jumpDiffusionIncrementLaw b₁ σ Λ₁ ν₁ τ) :=
       hD₁.mono fun u hu ↦ integrable_exp_mul_jumpDiffusionIncrementLaw _ _ _ hu τ
     refine measure_eq_of_mgf_id_eventuallyEq (mem_interior_iff_mem_nhds.2 hint)
       ((hD₁.and hD₂).mono fun u hu ↦ ?_)
     rw [mgf_id_jumpDiffusionIncrementLaw _ _ _ hu.1, mgf_id_jumpDiffusionIncrementLaw _ _ _ hu.2,
-      jumpDiffusionExponent_eq_levy _ _ _ hu.1, jumpDiffusionExponent_eq_levy _ _ _ hu.2, hΠ]
+      jumpDiffusionExponent_eq_levy _ _ _ hu.1, jumpDiffusionExponent_eq_levy _ _ _ hu.2, hLevy, hb]
 
 end MathFin
