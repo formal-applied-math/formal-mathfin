@@ -346,6 +346,13 @@
       "input_hash": "277297d2d227d710244e9ac876c048185d63ea4d15cd79aa532cbdcc4fdd32cc",
       "verified_at_commit": "cd55288"
     },
+    "mart-exp-indep-increments": {
+      "benchmark_file": "martingales.json",
+      "date": "2026-10-08",
+      "elapsed_s": 4.1,
+      "input_hash": "69de6d210c3a4c2e8a35dd0fc3cd413693d03caa2368ca69973ff21791664993",
+      "verified_at_commit": "5ffd8a4"
+    },
     "mart-prop-2.5.5": {
       "benchmark_file": "martingales.json",
       "date": "2026-10-02",
@@ -1711,6 +1718,13 @@
       "input_hash": "004628eeddcbbf407e09dd1f4c846a0fcda37a09f9ba595cb5674f1d8c46f832",
       "verified_at_commit": "637e2f6"
     },
+    "mf-jump-diffusion-call-law-invariance": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-08",
+      "elapsed_s": 5.7,
+      "input_hash": "5c11d35c1baccf6622b911c3a7ce943a52ef602ed14c77e35228211c73311081",
+      "verified_at_commit": "5ffd8a4"
+    },
     "mf-jump-diffusion-call-strict-bounds": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-08",
@@ -1732,12 +1746,26 @@
       "input_hash": "5e9e8fffa496a2755d2b4e22103edd698af5ec41f6c90ac02bf688a441ac3688",
       "verified_at_commit": "637e2f6"
     },
+    "mf-jump-diffusion-log-return-mgf": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-08",
+      "elapsed_s": 4.0,
+      "input_hash": "6aad81937d7f13294a333536a31dca608f92e8815abdd7e0ce106d45cd8606de",
+      "verified_at_commit": "5ffd8a4"
+    },
     "mf-jump-diffusion-mixing-formula": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-08",
       "elapsed_s": 4.5,
       "input_hash": "4fedf08cfd864f70c7f6fac2a0e60559ca4c0662a1c0e022908e0db537bfbee9",
       "verified_at_commit": "637e2f6"
+    },
+    "mf-jump-diffusion-model-exists": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-08",
+      "elapsed_s": 5.3,
+      "input_hash": "0043d3bc901d99585a1826a74658d359d80bfde1d013f5f15a661aed10f78a94",
+      "verified_at_commit": "5ffd8a4"
     },
     "mf-kelly-foc": {
       "benchmark_file": "mathematical_finance.json",
