@@ -3646,7 +3646,7 @@
         "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. For h > 0 the spread payoff ((X − K)⁺ − (X − K − h)⁺)/h has absolute value at most 1, because the call payoff is 1-Lipschitz in the strike (Mathlib's abs_max_sub_max_le_abs); it is also nonnegative (bull_call_spread_payoff_le, mf-bull-call-spread-payoff-le), which the bound does not need. It tends pointwise to the indicator of {X > K}: it equals 1 once h < X − K, and 0 when X ≤ K. Mathlib's tendsto_integral_filter_of_dominated_convergence along 𝓝[>] 0 with the constant bound 1, then integral_indicator_one. Lives in MathFin/BlackScholes/CallSpreadDigital.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. For h > 0 the spread payoff ((X − K)⁺ − (X − K − h)⁺)/h has absolute value at most 1, because the call payoff is 1-Lipschitz in the strike (abs_call_payoff_sub_le, from Mathlib's abs_max_sub_max_le_abs); it is also nonnegative (bull_call_spread_payoff_le, mf-bull-call-spread-payoff-le), which the bound does not need. It tends pointwise to the indicator of {X > K}: it equals 1 once h < X − K, and 0 when X ≤ K. Mathlib's tendsto_integral_filter_of_dominated_convergence along 𝓝[>] 0 with the constant bound 1, then integral_indicator_one. Lives in MathFin/BlackScholes/CallSpreadDigital.lean. Axioms-clean."
       }
     },
     {
@@ -3678,7 +3678,7 @@
         "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Mathlib's hasDerivAt_integral_of_dominated_loc_of_lip (differentiation under the integral sign). The call payoff k ↦ (X − k)⁺ is 1-Lipschitz in the strike (Mathlib's abs_max_sub_max_le_abs), with the constant bound 1 integrable under the finite measure. Off the atom, so for μ-almost every ω, it is differentiable at K with derivative −1_{X > K}: near K it is X − k when X > K and 0 when X < K. The derivative of the integral is ∫ −1_{X > K} dμ = −μ{X > K} (integral_indicator_one). Lives in MathFin/BlackScholes/CallSpreadDigital.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Mathlib's hasDerivAt_integral_of_dominated_loc_of_lip (differentiation under the integral sign). The call payoff k ↦ (X − k)⁺ is 1-Lipschitz in the strike (abs_call_payoff_sub_le, from Mathlib's abs_max_sub_max_le_abs), with the constant bound 1 integrable under the finite measure. Off the atom, so for μ-almost every ω, it is differentiable at K with derivative −1_{X > K}: near K it is X − k when X > K and 0 when X < K. The derivative of the integral is ∫ −1_{X > K} dμ = −μ{X > K} (integral_indicator_one). Lives in MathFin/BlackScholes/CallSpreadDigital.lean. Axioms-clean."
       }
     },
     {
@@ -3694,7 +3694,7 @@
         "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. The left spread: dominated convergence, as for mf-call-spread-digital; the spread payoff ((X − K + h)⁺ − (X − K)⁺)/h is at most 1 in absolute value (Mathlib's abs_max_sub_max_le_abs), equal to 1 when X ≥ K and to 0 once h < K − X. Off an atom C is differentiable (hasDerivAt_integral_call, mf-call-strike-derivative). Conversely, if C is differentiable at K its right and left slopes both tend to C'(K) (Mathlib's HasDerivAt.tendsto_slope_zero_right and tendsto_slope_zero_left, the latter composed with h ↦ −h), so tendsto_nhds_unique gives C'(K) = −μ{X > K} = −μ{X ≥ K}; and μ{X ≥ K} = μ{X > K} + μ{X = K} (measureReal_union). Lives in MathFin/BlackScholes/CallSpreadDigital.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. The left spread: dominated convergence, as for mf-call-spread-digital; the spread payoff ((X − K + h)⁺ − (X − K)⁺)/h is at most 1 in absolute value (abs_call_payoff_sub_le, from Mathlib's abs_max_sub_max_le_abs), equal to 1 when X ≥ K and to 0 once h < K − X. Off an atom C is differentiable (hasDerivAt_integral_call, mf-call-strike-derivative). Conversely, if C is differentiable at K its right and left slopes both tend to C'(K) (Mathlib's HasDerivAt.tendsto_slope_zero_right and tendsto_slope_zero_left, the latter composed with h ↦ −h), so tendsto_nhds_unique gives C'(K) = −μ{X > K} = −μ{X ≥ K}; and μ{X ≥ K} = μ{X > K} + μ{X = K} (measureReal_union). Lives in MathFin/BlackScholes/CallSpreadDigital.lean. Axioms-clean."
       }
     },
     {

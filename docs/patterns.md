@@ -1842,12 +1842,13 @@ Two details:
 - `F · ω` Lipschitz on a fixed neighbourhood of `K`, with an integrable constant;
 - `F · ω` differentiable at `K` for almost every `ω`.
 
-A call payoff `(X − k)⁺` is `1`-Lipschitz in `k` (`abs_max_sub_max_le_abs`), and it is
-differentiable at `K` off the event `X = K`. So the price is differentiable wherever the law has no
-atom at the strike, with no closed form needed. Pass the integrand, its derivative and the bound as
-named arguments (`(F := …) (F' := …) (bound := fun _ ↦ 1)`) and take `.2`. The Lipschitz goal then
-has the constant `Real.nnabs 1`; `simp only [map_one, NNReal.coe_one, one_mul, Real.dist_eq]`
-clears it. Two smaller points:
+A call payoff `(X − k)⁺` is `1`-Lipschitz in `k` (`abs_call_payoff_sub_le`, from Mathlib's
+`abs_max_sub_max_le_abs`), and it is differentiable at `K` off the event `X = K`. So the price is
+differentiable wherever the law has no atom at the strike, with no closed form needed. Pass the
+integrand, its derivative and the bound as named arguments
+(`(F := …) (F' := …) (bound := fun _ ↦ 1)`) and take `.2`. The Lipschitz goal then has the constant
+`Real.nnabs 1`; `simpa only [map_one, NNReal.coe_one, one_mul, Real.dist_eq] using
+abs_call_payoff_sub_le …` clears it. Two smaller points:
 - Mathlib renamed `NoAtoms` to `NullSingletonClass` (2026-06-09). A law with no atoms is an
   instance of that, and `Set.Subsingleton.measure_zero` is the tool for affine preimages.
 - `congr 1` closes `c * ∫ f = c * ∫ g` outright when `f` and `g` are definitionally equal, as two
@@ -1928,6 +1929,12 @@ derivative by transporting `breedenLitzenberger` back through `deriv`.
   `ℝ≥0` is the expected type of the whole product, as `jumpDiffusionIncrementLaw_apply` does:
   `gaussianReal m (.mk ((0 : ℝ) ^ 2) (sq_nonneg _) * τ)`.
 - `zero_le` takes its argument implicitly: `exact zero_le`, not `zero_le _`.
+- A lemma whose type is still open cannot be unified against a set membership. In
+  `Set.ext fun _ ↦ le_iff_lt_or_eq.trans (or_congr_right eq_comm)` the order lemma is elaborated
+  first, for the dot notation, so its type `?a ≤ ?b` has an unknown carrier and instance; matching
+  it against `x ∈ {ω | K ≤ X ω}` unfolds both sides and gets stuck on the instance. Fix the
+  arguments, `(le_iff_lt_or_eq (a := K) (b := X ω))`, and the membership unfolds to `K ≤ X ω`
+  (`differentiableAt_integral_call_iff`).
 
 ### The law of an image, by change of variables
 

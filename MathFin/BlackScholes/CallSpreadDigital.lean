@@ -13,12 +13,14 @@ public import Mathlib
 A bull-call spread long `1/h` calls struck at `K` and short `1/h` calls struck at `K + h` pays
 `((X − K)⁺ − (X − K − h)⁺)/h`. The payoff lies in `[0, 1]` (it is nonnegative because the call
 payoff is antitone in the strike, `bull_call_spread_payoff_le`), and its absolute value is at most
-`1` because the call payoff is `1`-Lipschitz in the strike (Mathlib's `abs_max_sub_max_le_abs`).
-As `h ↓ 0` it tends to the digital payoff `1_{X > K}`. So in any model, minus the right strike
-derivative of the call price is the price of the event `X > K`, and the call prices at every strike
-determine the law of the underlying. This is the first-order form of Breeden and Litzenberger
-(1978), for any law with a finite mean, not only the lognormal one.
+`1` because the call payoff is `1`-Lipschitz in the strike (`abs_call_payoff_sub_le`). As `h ↓ 0`
+it tends to the digital payoff `1_{X > K}`. So in any model, minus the right strike derivative of
+the call price is the price of the event `X > K`, and the call prices at every strike determine
+the law of the underlying. This is the first-order form of Breeden and Litzenberger (1978), for any
+law with a finite mean, not only the lognormal one.
 
+* `abs_call_payoff_sub_le`: `|(x − k₁)⁺ − (x − k₂)⁺| ≤ |k₁ − k₂|`, the bound that dominates every
+  call spread and every strike difference quotient below.
 * `tendsto_call_spread`: `(C(K) − C(K + h))/h → μ {X > K}` as `h ↓ 0`, where
   `C(k) = ∫ (X − k)⁺ dμ`, for a measurable, integrable `X` under a finite measure `μ` (dominated
   convergence).
@@ -47,6 +49,12 @@ namespace MathFin
 open MeasureTheory Filter Set
 open scoped Topology
 
+/-- **The call payoff is `1`-Lipschitz in the strike**: `|(x − k₁)⁺ − (x − k₂)⁺| ≤ |k₁ − k₂|`
+(Mathlib's `abs_max_sub_max_le_abs`). -/
+lemma abs_call_payoff_sub_le (x k₁ k₂ : ℝ) :
+    |max (x - k₁) 0 - max (x - k₂) 0| ≤ |k₁ - k₂| :=
+  (abs_max_sub_max_le_abs _ _ _).trans_eq (by rw [sub_sub_sub_cancel_left, abs_sub_comm])
+
 /-- **A digital is a limit of call spreads.** For a measurable, integrable `X` under a finite
 measure `μ`, the bull-call spread `(C(K) − C(K + h))/h`, where `C(k) = ∫ (X − k)⁺ dμ`, tends to
 `μ {X > K}` as `h ↓ 0`: minus the right strike derivative of the undiscounted call price is the
@@ -72,8 +80,8 @@ theorem tendsto_call_spread {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measur
     filter_upwards [self_mem_nhdsWithin] with h hh
     refine ae_of_all _ fun ω ↦ ?_
     have hh : 0 < h := hh
-    have hlip := abs_max_sub_max_le_abs (X ω - K) (X ω - (K + h)) 0
-    rw [show X ω - K - (X ω - (K + h)) = h by ring, abs_of_pos hh] at hlip
+    have hlip := abs_call_payoff_sub_le (X ω) K (K + h)
+    rw [sub_add_cancel_left, abs_neg, abs_of_pos hh] at hlip
     show ‖(max (X ω - K) 0 - max (X ω - (K + h)) 0) / h‖ ≤ 1
     rwa [Real.norm_eq_abs, abs_div, abs_of_pos hh, div_le_one hh]
   · -- and tends to the digital payoff `1_{X > K}`
@@ -142,8 +150,8 @@ theorem tendsto_call_spread_left {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : M
     filter_upwards [self_mem_nhdsWithin] with h hh
     refine ae_of_all _ fun ω ↦ ?_
     have hh : 0 < h := hh
-    have hlip := abs_max_sub_max_le_abs (X ω - (K - h)) (X ω - K) 0
-    rw [show X ω - (K - h) - (X ω - K) = h by ring, abs_of_pos hh] at hlip
+    have hlip := abs_call_payoff_sub_le (X ω) (K - h) K
+    rw [sub_sub_cancel_left, abs_neg, abs_of_pos hh] at hlip
     show ‖(max (X ω - (K - h)) 0 - max (X ω - K) 0) / h‖ ≤ 1
     rwa [Real.norm_eq_abs, abs_div, abs_of_pos hh, div_le_one hh]
   · -- and tends to the digital payoff `1_{X ≥ K}`
@@ -180,10 +188,8 @@ theorem hasDerivAt_integral_call {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : M
     (integrable_const 1) ?_).2
   · exact (by fun_prop : Measurable fun ω ↦ max (X ω - k) 0).aestronglyMeasurable
   · -- the call payoff is `1`-Lipschitz in the strike
-    simp only [map_one, NNReal.coe_one, one_mul, Real.dist_eq]
-    calc |max (X ω - k₁) 0 - max (X ω - k₂) 0| ≤ |X ω - k₁ - (X ω - k₂)| :=
-          abs_max_sub_max_le_abs _ _ _
-      _ = |k₁ - k₂| := by rw [show X ω - k₁ - (X ω - k₂) = -(k₁ - k₂) by ring, abs_neg]
+    simpa only [map_one, NNReal.coe_one, one_mul, Real.dist_eq] using
+      abs_call_payoff_sub_le (X ω) k₁ k₂
   · -- and, off the atom, differentiable at `K` with derivative `−1_{X > K}`
     filter_upwards [hae] with ω hω
     rcases hω.lt_or_gt with h | h
@@ -220,7 +226,7 @@ theorem differentiableAt_integral_call_iff {Ω : Type*} {mΩ : MeasurableSpace �
       ring))
   -- `{X ≥ K}` is `{X > K}` and the atom
   have hunion : {ω | K ≤ X ω} = {ω | K < X ω} ∪ {ω | X ω = K} :=
-    Set.ext fun _ ↦ le_iff_lt_or_eq.trans (or_congr_right eq_comm)
+    Set.ext fun ω ↦ (le_iff_lt_or_eq (a := K) (b := X ω)).trans (or_congr_right eq_comm)
   have hsum := measureReal_union (μ := μ) (s₁ := {ω | K < X ω}) (s₂ := {ω | X ω = K})
     (Set.disjoint_left.2 fun ω (h₁ : K < X ω) (h₂ : X ω = K) ↦ h₁.ne' h₂)
     (hXm (measurableSet_singleton K))

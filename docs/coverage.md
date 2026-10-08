@@ -229,7 +229,8 @@ file has the unnormalized Esscher transform `(∫ e^f dμ)·μ.tilted f = e^f·�
 - Call spreads and the digital. For a measurable, integrable `X` under a finite measure, the
   bull-call spread `(C(K) − C(K + h))/h` tends to `μ{X > K}` as `h ↓ 0` (`tendsto_call_spread`).
   The spread payoff is at most `1` in absolute value, because the call payoff is `1`-Lipschitz in
-  the strike (Mathlib's `abs_max_sub_max_le_abs`), and tends pointwise to the digital payoff. So
+  the strike (`abs_call_payoff_sub_le`, from Mathlib's `abs_max_sub_max_le_abs`), and tends
+  pointwise to the digital payoff. So
   call prices at every strike `K > 0` determine the law of a log-return with a finite forward
   (`measure_eq_of_integral_call_eq`): the first-order Breeden–Litzenberger, for any law with a
   finite forward. The second-order form is `breedenLitzenberger_jumpDiffusion` for jump-diffusions
