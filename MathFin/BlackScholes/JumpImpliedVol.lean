@@ -90,9 +90,9 @@ theorem jumpDiffusion_call_lt {S_0 K r σ T : ℝ} {Z Y : Ω → ℝ}
       < rexp (-r * T) * (S_0 * rexp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω + Y ω)) :=
     mul_lt_mul_of_pos_left (max_lt (by linarith) (mul_pos hS_0 (Real.exp_pos _)))
       (Real.exp_pos _)
-  refine (integral_mono_ae hf hg (ae_of_all _ fun ω ↦ (hlt ω).le)).lt_of_ne fun h_eq ↦ ?_
-  obtain ⟨ω, hω⟩ := Filter.Eventually.exists
-    ((integral_eq_iff_of_ae_le hf hg (ae_of_all _ fun ω ↦ (hlt ω).le)).1 h_eq)
+  refine integral_lt_integral_of_ae_le_of_not_ae_eq hf hg (ae_of_all _ fun ω ↦ (hlt ω).le)
+    fun h_eq ↦ ?_
+  obtain ⟨ω, hω⟩ := Filter.Eventually.exists h_eq
   exact (hlt ω).ne hω
 
 /-- **Jumps lift the implied volatility.** If the jump part is compensated, `𝔼[e^Y] = 1`, and
@@ -162,11 +162,10 @@ theorem impliedVol_gt (h : JumpDiffusionHyp Q Λ Z N J) (hJ : Integrable (fun ω
       ∀ σ' > 0, bsV K r σ' S_0 T = ∫ ω, rexp (-r * T) * max (jumpDiffusionTerminal
         S_0 r σ T (Λ * (∫ x, rexp (J 0 x) ∂Q - 1)) (Z ω) (N ω) (fun i ↦ J i ω) - K) 0 ∂Q →
         σ' = σ_imp := by
-  have hmean := h.integral_exp_jumpPart hJ (Λ * (∫ x, rexp (J 0 x) ∂Q - 1))
-  rw [neg_add_cancel, Real.exp_zero] at hmean
   simp_rw [jumpDiffusionTerminal_eq]
   exact jumpDiffusion_impliedVol_gt h.Z_law (h.aemeasurable_jumpPart _) (h.indepFun_jumpPart _)
-    (h.integrable_exp_jumpPart hJ _) hmean (h.not_jumpPart_ae_eq_zero hΛ hJ0 _) hS_0 hK hσ hT
+    (h.integrable_exp_jumpPart hJ _) (h.integral_exp_compensatedJumpPart hJ)
+    (h.not_jumpPart_ae_eq_zero hΛ hJ0 _) hS_0 hK hσ hT
 
 end JumpDiffusionHyp
 

@@ -77,23 +77,24 @@ lemma integral_exp_logReturn (h : JumpDiffusionHyp Q Λ Z N J)
 
 end JumpDiffusionHyp
 
+/-- The jump-diffusion log-return over a time `τ` on the canonical space `ℝ × ℕ × (ℕ → ℝ)`: the
+drift `bτ`, the Gaussian part `σ√τ·ω₁` and the jumps `∑_{i<ω₂} ω₃ᵢ`. -/
+noncomputable def jumpDiffusionLogReturn (b σ : ℝ) (τ : ℝ≥0) (ω : ℝ × ℕ × (ℕ → ℝ)) : ℝ :=
+  b * τ + σ * Real.sqrt τ * ω.1 + ∑ i ∈ Finset.range ω.2.1, ω.2.2 i
+
+/-- The log-return is measurable on the canonical space. -/
+lemma measurable_jumpDiffusionLogReturn (b σ : ℝ) (τ : ℝ≥0) :
+    Measurable (jumpDiffusionLogReturn b σ τ) :=
+  (measurable_const.add (measurable_const.mul measurable_fst)).add
+    (measurable_sum_range_prod.comp measurable_snd)
+
 /-- The law of a jump-diffusion log-return over a time `τ`: the drift `bτ`, a Gaussian part
 `σ√τ·Z` and a compound-Poisson part, a `Poisson(Λτ)` number of independent jumps of law `ν`, all
-independent. It is the law of `bτ + σ√τ·ω₁ + ∑_{i<ω₂} ω₃ᵢ` under the canonical model
+independent. It is the law of `jumpDiffusionLogReturn` under the canonical model
 `jumpDiffusionMeasure (Λτ) ν`. -/
 noncomputable def jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ) (τ : ℝ≥0) :
     Measure ℝ :=
-  (jumpDiffusionMeasure (Λ * τ) ν).map fun ω ↦
-    b * τ + σ * Real.sqrt τ * ω.1 + ∑ i ∈ Finset.range ω.2.1, ω.2.2 i
-
-/-- The log-return `bτ + σ√τ·ω₁ + ∑_{i<ω₂} ω₃ᵢ` is measurable on the canonical space. -/
-lemma measurable_jumpDiffusionLogReturn (b σ : ℝ) (τ : ℝ≥0) :
-    Measurable fun ω : ℝ × ℕ × (ℕ → ℝ) ↦
-      b * τ + σ * Real.sqrt τ * ω.1 + ∑ i ∈ Finset.range ω.2.1, ω.2.2 i := by
-  have hsum : Measurable fun p : ℕ × (ℕ → ℝ) ↦ ∑ i ∈ Finset.range p.1, p.2 i :=
-    measurable_from_prod_countable_right fun n ↦
-      show Measurable fun j : ℕ → ℝ ↦ ∑ i ∈ Finset.range n, j i by fun_prop
-  exact (measurable_const.add (measurable_const.mul measurable_fst)).add (hsum.comp measurable_snd)
+  (jumpDiffusionMeasure (Λ * τ) ν).map (jumpDiffusionLogReturn b σ τ)
 
 instance isProbabilityMeasure_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ)
     [IsProbabilityMeasure ν] (τ : ℝ≥0) :
@@ -107,9 +108,10 @@ theorem integral_exp_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν :
     [IsProbabilityMeasure ν] (hν : Integrable rexp ν) (τ : ℝ≥0) :
     ∫ x, rexp x ∂(jumpDiffusionIncrementLaw b σ Λ ν τ)
       = rexp ((b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1)) * τ) := by
-  have hφ := measurable_jumpDiffusionLogReturn b σ τ
-  rw [jumpDiffusionIncrementLaw, integral_map hφ.aemeasurable measurable_exp.aestronglyMeasurable,
-    (jumpDiffusionHyp_canonical (Λ * τ) ν).1.integral_exp_logReturn
+  rw [jumpDiffusionIncrementLaw, integral_map
+    (measurable_jumpDiffusionLogReturn b σ τ).aemeasurable measurable_exp.aestronglyMeasurable]
+  unfold jumpDiffusionLogReturn
+  rw [(jumpDiffusionHyp_canonical (Λ * τ) ν).1.integral_exp_logReturn
       (integrable_exp_canonical_jump hν) b σ (NNReal.coe_nonneg τ),
     integral_exp_canonical_jump (Λ * τ) ν, NNReal.coe_mul]
   congr 1
@@ -147,6 +149,12 @@ namespace JumpDiffusionProcess
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}
   {X : ℝ≥0 → Ω → ℝ} {b σ : ℝ} {Λ : ℝ≥0} {ν : Measure ℝ}
 
+/-- A jump-diffusion lives on a probability space: the law of each increment is a probability
+measure. -/
+lemma isProbabilityMeasure (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabilityMeasure ν] :
+    IsProbabilityMeasure P :=
+  (h.law 0 0 le_rfl).isProbabilityMeasure
+
 /-- The increment over `[s, t]` has exponential moment
 `e^{(b + σ²/2 + Λ(𝔼[e^J] − 1))(t − s)}`. -/
 lemma integral_exp_increment (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabilityMeasure ν]
@@ -156,53 +164,48 @@ lemma integral_exp_increment (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsP
   rw [← integral_exp_jumpDiffusionIncrementLaw b σ Λ hν (t - s)]
   exact (h.law s t hst).integral_comp measurable_exp.aestronglyMeasurable
 
-/-- `e^{X_t}` is integrable: `X_t = X_t − X_0` almost surely, and the increment has a finite
-exponential moment. -/
+/-- `𝔼[e^{X_t}] = e^{(b + σ²/2 + Λ(𝔼[e^J] − 1))t}`: `X_t = X_t − X_0` almost surely. -/
+lemma integral_exp (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabilityMeasure ν]
+    (hν : Integrable rexp ν) (t : ℝ≥0) :
+    ∫ ω, rexp (X t ω) ∂P = rexp ((b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1)) * t) := by
+  have h0 : (fun ω ↦ rexp (X t ω - X 0 ω)) =ᵐ[P] fun ω ↦ rexp (X t ω) := by
+    filter_upwards [h.zero] with ω hω
+    rw [hω, sub_zero]
+  rw [← integral_congr_ae h0, h.integral_exp_increment hν (zero_le : (0 : ℝ≥0) ≤ t), tsub_zero]
+
+/-- `e^{X_t}` is integrable: its integral is positive (`integral_exp`). -/
 lemma integrable_exp (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabilityMeasure ν]
-    (hν : Integrable rexp ν) (t : ℝ≥0) : Integrable (fun ω ↦ rexp (X t ω)) P := by
-  have h0 : Integrable (fun ω ↦ rexp (X t ω - X 0 ω)) P :=
-    Integrable.of_integral_ne_zero (by
-      rw [h.integral_exp_increment hν (zero_le : (0 : ℝ≥0) ≤ t)]
-      exact (Real.exp_pos _).ne')
-  refine h0.congr ?_
-  filter_upwards [h.zero] with ω hω
-  rw [hω, sub_zero]
+    (hν : Integrable rexp ν) (t : ℝ≥0) : Integrable (fun ω ↦ rexp (X t ω)) P :=
+  Integrable.of_integral_ne_zero (by rw [h.integral_exp hν t]; exact (Real.exp_pos _).ne')
 
 /-- **The discounted jump-diffusion price is a martingale exactly at the compensated drift.** For
 a jump law with `𝔼[e^J] < ∞` and `S₀ ≠ 0`, `t ↦ e^{−rt}S₀e^{X_t}` is an `𝓕`-martingale if and
 only if `b = r − σ²/2 − Λ(𝔼[e^J] − 1)`. -/
-theorem martingale_iff (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabilityMeasure P]
-    [IsProbabilityMeasure ν] (hν : Integrable rexp ν) {S_0 : ℝ} (hS_0 : S_0 ≠ 0) (r : ℝ) :
+theorem martingale_iff (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabilityMeasure ν]
+    (hν : Integrable rexp ν) {S_0 : ℝ} (hS_0 : S_0 ≠ 0) (r : ℝ) :
     Martingale (fun (t : ℝ≥0) ω ↦ rexp (-r * t) * (S_0 * rexp (X t ω))) 𝓕 P ↔
       b = r - σ ^ 2 / 2 - Λ * (∫ x, rexp x ∂ν - 1) := by
+  have := h.isProbabilityMeasure
   constructor
   · -- a martingale has constant mean; at time `1` it is `S₀e^{b + σ²/2 + Λ(𝔼[e^J] − 1) − r}`
     intro hM
     have hmean : ∫ ω, rexp (-r * ((0 : ℝ≥0) : ℝ)) * (S_0 * rexp (X 0 ω)) ∂P
         = ∫ ω, rexp (-r * ((1 : ℝ≥0) : ℝ)) * (S_0 * rexp (X 1 ω)) ∂P :=
-      (integral_congr_ae (hM.2 0 1 zero_le_one)).symm.trans (integral_condExp (𝓕.le 0))
+      (integral_congr_ae (hM.condExp_ae_eq zero_le_one)).symm.trans (integral_condExp (𝓕.le 0))
     have h0 : ∫ ω, rexp (-r * ((0 : ℝ≥0) : ℝ)) * (S_0 * rexp (X 0 ω)) ∂P = S_0 := by
       have hS : (fun ω ↦ rexp (-r * ((0 : ℝ≥0) : ℝ)) * (S_0 * rexp (X 0 ω))) =ᵐ[P]
           fun _ ↦ S_0 := by
         filter_upwards [h.zero] with ω hω
         simp [hω]
       rw [integral_congr_ae hS, integral_const, probReal_univ, one_smul]
-    have hX1 : ∫ ω, rexp (X 1 ω) ∂P = rexp (b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1)) := by
-      have hX : (fun ω ↦ rexp (X 1 ω - X 0 ω)) =ᵐ[P] fun ω ↦ rexp (X 1 ω) := by
-        filter_upwards [h.zero] with ω hω
-        rw [hω, sub_zero]
-      rw [← integral_congr_ae hX, h.integral_exp_increment hν zero_le_one, tsub_zero,
-        NNReal.coe_one, mul_one]
     have h1 : ∫ ω, rexp (-r * ((1 : ℝ≥0) : ℝ)) * (S_0 * rexp (X 1 ω)) ∂P
         = S_0 * rexp (b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1) - r) := by
-      rw [integral_const_mul, integral_const_mul, hX1, NNReal.coe_one, mul_one, mul_left_comm,
-        ← Real.exp_add]
+      rw [integral_const_mul, integral_const_mul, h.integral_exp hν 1, mul_left_comm,
+        ← Real.exp_add, NNReal.coe_one]
       congr 2
       ring
     rw [h0, h1] at hmean
-    have hexp : rexp (b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1) - r) = 1 :=
-      mul_left_cancel₀ hS_0 (hmean.symm.trans (mul_one S_0).symm)
-    have := (Real.exp_eq_one_iff _).1 hexp
+    have := (Real.exp_eq_one_iff _).1 ((mul_eq_left₀ hS_0).1 hmean.symm)
     linarith
   · -- at the compensated drift the increment exponentials have mean `e^{r(t − s)}`
     intro hb

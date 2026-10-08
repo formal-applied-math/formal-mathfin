@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (498 MathFin constants, 29 upstream). Citations
+  corpus (500 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -229,6 +229,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.JumpDiffusionProcess.condExp_call_impliedVol_gt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.condExp_call_impliedVol_gt
+
+/-- info: 'MathFin.JumpDiffusionProcess.condExp_comp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.condExp_comp
 
 /-- info: 'MathFin.JumpDiffusionProcess.condExp_put' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.condExp_put
@@ -535,6 +538,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.compoundPoisson_mgf_of_indepFun' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.compoundPoisson_mgf_of_indepFun
+
+/-- info: 'MathFin.condExp_comp_prodMk_of_indep' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.condExp_comp_prodMk_of_indep
 
 /-- info: 'MathFin.copulaOf_comp_strictMono' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.copulaOf_comp_strictMono

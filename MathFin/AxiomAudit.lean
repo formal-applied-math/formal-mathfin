@@ -661,9 +661,6 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 -- depends only on them, and the discounted price process is a martingale exactly
 -- at the compensated drift (2026-10-08)
 
-/-- info: 'MathFin.indepFun_comp_of_measurePreserving' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.indepFun_comp_of_measurePreserving
-
 /-- info: 'MathFin.jumpDiffusionHyp_canonical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionHyp_canonical
 
@@ -679,12 +676,20 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.JumpDiffusionProcess.martingale_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.martingale_iff
 
--- Prices at every date (2026-10-08): given 𝓕_t the put and the call are their
--- price functions at S_t and T − t; at the compensated drift the call price
--- function is Merton's formula, with implied volatility above σ at every date
+-- Prices at every date (2026-10-08): given 𝓕_t a payoff at T is the payoff averaged
+-- over the increment with X_t frozen (the conditional freezing lemma, also behind the
+-- American put's Brownian transitions); the put and the call are their price
+-- functions at S_t and T − t; at the compensated drift the call price function is
+-- Merton's formula, with implied volatility above σ at every date
 
 /-- info: 'MathFin.condExp_exp_eq_of_indep_increment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.condExp_exp_eq_of_indep_increment
+
+/-- info: 'MathFin.condExp_comp_prodMk_of_indep' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.condExp_comp_prodMk_of_indep
+
+/-- info: 'MathFin.JumpDiffusionProcess.condExp_comp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.condExp_comp
 
 /-- info: 'MathFin.JumpDiffusionProcess.condExp_put' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.condExp_put

@@ -250,12 +250,18 @@ lemma jumpDiffusionTerminal_eq (S_0 r σ T κ z : ℝ) (n : ℕ) (j : ℕ → �
   congr 2
   ring
 
+/-- The sum of the first `n` jump sizes is measurable as a function of the count `n` and the
+jump sizes: the count takes countably many values. -/
+lemma measurable_sum_range_prod :
+    Measurable fun p : ℕ × (ℕ → ℝ) ↦ ∑ i ∈ Finset.range p.1, p.2 i :=
+  measurable_from_prod_countable_right fun n ↦
+    show Measurable fun j : ℕ → ℝ ↦ ∑ i ∈ Finset.range n, j i by fun_prop
+
 /-- The jump part `−κ + ∑_{i<n} jᵢ` is measurable as a function of the count and the jump
 sizes. -/
 lemma measurable_neg_add_sum_range (κ : ℝ) :
     Measurable fun p : ℕ × (ℕ → ℝ) ↦ -κ + ∑ i ∈ Finset.range p.1, p.2 i :=
-  measurable_from_prod_countable_right fun n ↦
-    show Measurable fun j : ℕ → ℝ ↦ -κ + ∑ i ∈ Finset.range n, j i by fun_prop
+  measurable_const.add measurable_sum_range_prod
 
 /-- **A jump-diffusion with an arbitrary jump law**: a standard normal diffusion sample `Z`, a
 jump count `N ∼ Poisson(Λ)` and i.i.d. log-jump sizes `Jᵢ`, with the count independent of the
@@ -322,6 +328,12 @@ lemma integrable_exp_jumpPart (h : JumpDiffusionHyp Q Λ Z N J)
     rw [h.integral_exp_jumpPart hJ κ]
     exact (Real.exp_pos _).ne'
 
+/-- At the compensator `κ = Λ(𝔼[e^J] − 1)` the jump part has `𝔼[e^{−κ + ∑_{i<N} Jᵢ}] = 1`. -/
+lemma integral_exp_compensatedJumpPart (h : JumpDiffusionHyp Q Λ Z N J)
+    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) :
+    ∫ ω, rexp (-(Λ * (∫ x, rexp (J 0 x) ∂Q - 1)) + ∑ i ∈ Finset.range (N ω), J i ω) ∂Q = 1 := by
+  rw [h.integral_exp_jumpPart hJ, neg_add_cancel, Real.exp_zero]
+
 /-- **The mixing formula for the jump-diffusion.** The discounted expected call payoff is the
 Black–Scholes price averaged over the jump part `−κ + ∑_{i<N} Jᵢ`. -/
 theorem call_eq_integral_bsV (h : JumpDiffusionHyp Q Λ Z N J)
@@ -363,11 +375,9 @@ theorem bsV_le_call (h : JumpDiffusionHyp Q Λ Z N J) (hJ : Integrable (fun ω �
     {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     bsV K r σ S_0 T ≤ ∫ ω, rexp (-r * T) * max (jumpDiffusionTerminal S_0 r σ T
         (Λ * (∫ x, rexp (J 0 x) ∂Q - 1)) (Z ω) (N ω) (fun i ↦ J i ω) - K) 0 ∂Q := by
-  have hmean := h.integral_exp_jumpPart hJ (Λ * (∫ x, rexp (J 0 x) ∂Q - 1))
-  rw [neg_add_cancel, Real.exp_zero] at hmean
   simp_rw [jumpDiffusionTerminal_eq]
   exact bsV_le_jumpDiffusion_call h.Z_law (h.aemeasurable_jumpPart _) (h.indepFun_jumpPart _)
-    (h.integrable_exp_jumpPart hJ _) hmean hS_0 hK hσ hT
+    (h.integrable_exp_jumpPart hJ _) (h.integral_exp_compensatedJumpPart hJ) hS_0 hK hσ hT
 
 /-- **Merton's formula for a general jump law** (Merton 1976). The discounted expected call payoff
 of the jump-diffusion is the Poisson mixture, over the jump count `n`, of the Black–Scholes price

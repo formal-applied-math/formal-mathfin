@@ -16,17 +16,29 @@ a value `x`, averaging `g(x, Y)` over `Y` alone, and then averaging the result o
 
   `𝔼[g(X, Y)] = ∫ x, 𝔼[g(x, Y)] d(law X)`.
 
-This is the *freezing lemma* (Shreve's *independence lemma*, *Stochastic Calculus for Finance II*,
-Lemma 2.3.4, in its unconditional form). When `X = N` is a count it is the law of total
-expectation over the number of jumps, the step every Poisson-mixture computation takes: the
-Merton jump-diffusion price (`BlackScholes/MertonModel.lean`) and the compound-Poisson moment
-generating function (`Actuarial/CompoundPoissonMGF.lean`) both go through it. With `X` a jump part
-of any law it is the mixing formula of `BlackScholes/JumpDiffusionMixing.lean`: a jump-diffusion
-call is the Black–Scholes price averaged over the jumps.
+This is the *freezing lemma*. When `X = N` is a count it is the law of total expectation over the
+number of jumps, the step every Poisson-mixture computation takes: the Merton jump-diffusion price
+(`BlackScholes/MertonModel.lean`) and the compound-Poisson moment generating function
+(`Actuarial/CompoundPoissonMGF.lean`) both go through it. With `X` a jump part of any law it is
+the mixing formula of `BlackScholes/JumpDiffusionMixing.lean`: a jump-diffusion call is the
+Black–Scholes price averaged over the jumps.
 
 The proof composes two Mathlib facts: independence makes the joint law the product of the
 marginal laws (`IndepFun.map_prod_eq_prod_map_map`), and an integral against a product measure
 is an iterated integral (`integral_prod`).
+
+Its conditional form is Shreve's *independence lemma* (*Stochastic Calculus for Finance II*,
+Lemma 2.3.4): if `X` is measurable for a σ-algebra `𝓜` and `Y` is independent of `𝓜`, then
+
+  `𝔼[g(X, Y) | 𝓜] = G(X)`, with `G(x) = 𝔼[g(x, Y)]`.
+
+Given `𝓜`, `X` is known and `Y` keeps its law. On an event `s ∈ 𝓜` the joint law of `(X, Y)`
+is the law of `X` on `s` times the law of `Y` (`map_restrict_prodMk_of_indep`), so the
+unconditional computation runs on every such event, which characterizes the conditional
+expectation. This is the step that prices an option at an intermediate date: the state at `t` is
+known, and the increment to maturity is independent of the past (the American put's Brownian
+transitions, `BlackScholes/AmericanPut/Stopping/BrownianTransition.lean`, and the jump-diffusion
+prices of `BlackScholes/JumpDiffusionOptionPrices.lean`).
 
 ## Main results
 
@@ -41,11 +53,11 @@ is an iterated integral (`integral_prod`).
   a countable law `ν`, independent of `Y`, and a nonnegative `F` whose expectations
   `c a = 𝔼[F(a, Y)]` are finite and integrable against `ν`, `𝔼[F(X, Y)] = ∫ a, c a ∂ν`. With
   `ν = Poisson(Λ)` this is the Poisson-mixture step.
+* `condExp_comp_prodMk_of_indep`: the conditional freezing lemma (Shreve's independence lemma),
+  `𝔼[g(X, Y) | 𝓜] = G(X)` for `X` measurable for `𝓜` and `Y` independent of `𝓜`.
 * `indepFun_prodMk_of_indepFun_prodMk`: if `X` is independent of `(Y, W)` and `Y` of `W`, then
   `Y` is independent of `(X, W)`. Mutual independence of three variables can be stated with any
   of them split off first.
-* `indepFun_comp_of_measurePreserving`: independence pulls back along a measure-preserving map,
-  so variables on one factor of a product space keep their independence on the product.
 -/
 
 @[expose] public section
@@ -131,6 +143,54 @@ theorem integral_comp_of_hasLaw_of_countable [Countable α] [MeasurableSingleton
         rw [hX.map_eq]
         exact integral_congr_ae (ae_of_all _ hc)
 
+/-! ### The conditional freezing lemma -/
+
+/-- On an event `s` of a σ-algebra `m` for which `X` is measurable and of which `Y` is independent,
+the joint law of `(X, Y)` is the law of `X` on `s` times the law of `Y`: restricting to `s` changes
+neither the law of `Y` nor its independence from `X`. -/
+theorem map_restrict_prodMk_of_indep {m : MeasurableSpace Ω} (hm : m ≤ mΩ) (hX : Measurable[m] X)
+    (hY : AEMeasurable Y P) (hi : Indep (MeasurableSpace.comap Y mβ) m P) {s : Set Ω}
+    (hs : MeasurableSet[m] s) :
+    (P.restrict s).map (fun ω ↦ (X ω, Y ω)) = ((P.restrict s).map X).prod (P.map Y) := by
+  have hX' : Measurable X := hX.mono hm le_rfl
+  refine (Measure.prod_eq fun A B hA hB ↦ ?_).symm
+  rw [Measure.map_apply_of_aemeasurable (hX'.aemeasurable.prodMk hY).restrict (hA.prod hB),
+    Measure.map_apply hX' hA, Measure.map_apply_of_aemeasurable hY hB,
+    Measure.restrict_apply' (hm s hs), Measure.restrict_apply' (hm s hs), Set.mk_preimage_prod,
+    Set.inter_right_comm, Set.inter_comm _ (Y ⁻¹' B), mul_comm]
+  exact (Indep_iff _ _ _).1 hi _ _ ⟨B, hB, rfl⟩ ((hX hA).inter hs)
+
+/-- **The conditional freezing lemma** (Shreve's independence lemma). If `X` is measurable for a
+σ-algebra `m` and `Y` is independent of `m`, then `𝔼[g(X, Y) | m] = G(X)` almost surely, with
+`G(x) = ∫ g(x, y) d(law Y)(y)`, for `g` strongly measurable and `g(X, Y)` integrable: given `m`,
+`X` is known and `Y` keeps its law. On each event of `m` the joint law of `(X, Y)` is a product
+(`map_restrict_prodMk_of_indep`), so both sides have the same integral over it. -/
+theorem condExp_comp_prodMk_of_indep [NormedSpace ℝ E] [CompleteSpace E]
+    {m : MeasurableSpace Ω} (hm : m ≤ mΩ) (hX : Measurable[m] X) (hY : AEMeasurable Y P)
+    (hi : Indep (MeasurableSpace.comap Y mβ) m P) {g : α × β → E} (hg : StronglyMeasurable g)
+    (hgi : Integrable (fun ω ↦ g (X ω, Y ω)) P) :
+    P[fun ω ↦ g (X ω, Y ω) | m] =ᵐ[P] fun ω ↦ ∫ y, g (X ω, y) ∂(P.map Y) := by
+  have hX' : Measurable X := hX.mono hm le_rfl
+  have hG : StronglyMeasurable fun x ↦ ∫ y, g (x, y) ∂(P.map Y) := hg.integral_prod_right'
+  -- on each event of `m`, `g` is integrable against the product law
+  have hgs (s : Set Ω) (hs : MeasurableSet[m] s) :
+      Integrable g (((P.restrict s).map X).prod (P.map Y)) := by
+    rw [← map_restrict_prodMk_of_indep hm hX hY hi hs]
+    exact (integrable_map_measure hg.aestronglyMeasurable
+      (hX'.aemeasurable.prodMk hY).restrict).2 hgi.restrict
+  refine (ae_eq_condExp_of_forall_setIntegral_eq hm hgi (fun _ _ _ ↦ ?_) (fun s hs _ ↦ ?_)
+    (hG.comp_measurable hX).aestronglyMeasurable).symm
+  · have hGi := (hgs Set.univ MeasurableSet.univ).integral_prod_left
+    rw [Measure.restrict_univ] at hGi
+    exact (hGi.comp_measurable hX').integrableOn
+  · calc ∫ ω in s, ∫ y, g (X ω, y) ∂(P.map Y) ∂P
+        = ∫ x, ∫ y, g (x, y) ∂(P.map Y) ∂((P.restrict s).map X) :=
+          (integral_map hX'.aemeasurable hG.aestronglyMeasurable).symm
+      _ = ∫ p, g p ∂((P.restrict s).map fun ω ↦ (X ω, Y ω)) := by
+          rw [map_restrict_prodMk_of_indep hm hX hY hi hs, integral_prod g (hgs s hs)]
+      _ = ∫ ω in s, g (X ω, Y ω) ∂P :=
+          integral_map (hX'.aemeasurable.prodMk hY).restrict hg.aestronglyMeasurable
+
 /-! ### Re-associating independence -/
 
 /-- Moving the middle factor of a triple product measure to the front:
@@ -165,22 +225,5 @@ theorem indepFun_prodMk_of_indepFun_prodMk {γ : Type*} {mγ : MeasurableSpace �
     ← AEMeasurable.map_map_of_aemeasurable hrot.aemeasurable (hX.prodMk (hY.prodMk hW)),
     hXYW.map_prod_eq_prod_map_map hX (hY.prodMk hW), hYW.map_prod_eq_prod_map_map hY hW]
   exact map_prod_prod_rotate _ _ _
-
-/-- **Independence pulls back along a measure-preserving map.** If `f` and `g` are independent
-under `ν` and `φ` carries `μ` to `ν`, then `f ∘ φ` and `g ∘ φ` are independent under `μ`: each
-event about them is the preimage under `φ` of an event about `f` and `g`. -/
-theorem indepFun_comp_of_measurePreserving {Ω' γ : Type*} {mΩ' : MeasurableSpace Ω'}
-    {mγ : MeasurableSpace γ} {μ : Measure Ω} {ν : Measure Ω'} {φ : Ω → Ω'}
-    (hφ : MeasurePreserving φ μ ν) {f : Ω' → β} {g : Ω' → γ} (hf : Measurable f)
-    (hg : Measurable g) (hfg : f ⟂ᵢ[ν] g) :
-    (fun ω ↦ f (φ ω)) ⟂ᵢ[μ] fun ω ↦ g (φ ω) := by
-  rw [indepFun_iff_measure_inter_preimage_eq_mul] at hfg ⊢
-  intro s t hs ht
-  calc μ ((fun ω ↦ f (φ ω)) ⁻¹' s ∩ (fun ω ↦ g (φ ω)) ⁻¹' t)
-      = ν (f ⁻¹' s ∩ g ⁻¹' t) := hφ.measure_preimage ((hf hs).inter (hg ht)).nullMeasurableSet
-    _ = ν (f ⁻¹' s) * ν (g ⁻¹' t) := hfg s t hs ht
-    _ = μ ((fun ω ↦ f (φ ω)) ⁻¹' s) * μ ((fun ω ↦ g (φ ω)) ⁻¹' t) :=
-        (congrArg₂ (· * ·) (hφ.measure_preimage (hf hs).nullMeasurableSet)
-          (hφ.measure_preimage (hg ht).nullMeasurableSet)).symm
 
 end MathFin

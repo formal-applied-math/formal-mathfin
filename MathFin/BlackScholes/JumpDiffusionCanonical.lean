@@ -80,14 +80,12 @@ theorem jumpDiffusionHyp_canonical (Λ : ℝ≥0) (ν : Measure ℝ) [IsProbabil
     indepFun_prod (μ := gaussianReal 0 1)
       (ν := (poissonMeasure Λ).prod (Measure.infinitePi fun _ : ℕ ↦ ν)) measurable_id
       measurable_id
-  -- the count is independent of the sizes
+  -- the count is independent of the sizes: their joint law is the product of their laws
   have hNJ : (fun ω : ℝ × ℕ × (ℕ → ℝ) ↦ ω.2.1) ⟂ᵢ[jumpDiffusionMeasure Λ ν] fun ω ↦ ω.2.2 :=
-    indepFun_comp_of_measurePreserving hsnd measurable_fst measurable_snd
-      (indepFun_prod (μ := poissonMeasure Λ) (ν := Measure.infinitePi fun _ : ℕ ↦ ν)
-        measurable_id measurable_id)
+    (indepFun_iff_hasLaw_prodMk_prod (measurePreserving_fst.comp hsnd).hasLaw
+      hsizes.hasLaw).2 hsnd.hasLaw
   refine ⟨⟨(measurePreserving_fst (μ := gaussianReal 0 1)).hasLaw,
-    (measurePreserving_fst.comp hsnd).hasLaw, hJm, ?_,
-    fun i ↦ ⟨(hJ i).aemeasurable, (hJ 0).aemeasurable, (hJ i).map_eq.trans (hJ 0).map_eq.symm⟩,
+    (measurePreserving_fst.comp hsnd).hasLaw, hJm, ?_, fun i ↦ (hJ i).identDistrib (hJ 0),
     hZ.comp measurable_id measurable_snd,
     indepFun_prodMk_of_indepFun_prodMk measurable_fst.aemeasurable
       (measurable_fst.comp measurable_snd).aemeasurable

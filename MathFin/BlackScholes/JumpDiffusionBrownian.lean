@@ -66,11 +66,10 @@ lemma jumpDiffusionIncrementLaw_zero (b σ : ℝ) (ν : Measure ℝ) [IsProbabil
     have hlaw := h.N_law
     rw [poissonMeasure_zero] at hlaw
     exact hlaw.ae_eq_of_dirac
-  have hX : (fun ω : ℝ × ℕ × (ℕ → ℝ) ↦
-        b * τ + σ * Real.sqrt τ * ω.1 + ∑ i ∈ Finset.range ω.2.1, ω.2.2 i)
+  have hX : jumpDiffusionLogReturn b σ τ
       =ᵐ[jumpDiffusionMeasure 0 ν] fun ω ↦ b * τ + σ * Real.sqrt τ * ω.1 :=
     Filter.Eventually.mono hN fun ω (hω : ω.2.1 = 0) ↦ by
-      simp only [hω, Finset.range_zero, Finset.sum_empty, add_zero]
+      simp only [jumpDiffusionLogReturn, hω, Finset.range_zero, Finset.sum_empty, add_zero]
   rw [Measure.map_congr hX,
     (gaussianReal_const_add (gaussianReal_const_mul h.Z_law (σ * Real.sqrt τ)) (b * τ)).map_eq]
   congr 1
@@ -184,7 +183,6 @@ if `b = r − σ²/2`: `JumpDiffusionProcess.martingale_iff` at rate `0`. The "i
 theorem martingale_discounted_iff (b σ : ℝ) {S_0 : ℝ} (hS_0 : S_0 ≠ 0) (r : ℝ) :
     Martingale (fun (t : ℝ≥0) ω ↦ rexp (-r * t) * (S_0 * rexp (b * t + σ * B t ω))) 𝓕 P ↔
       b = r - σ ^ 2 / 2 := by
-  have := (hB.hasLaw_eval 0).isProbabilityMeasure
   rw [(hB.jumpDiffusionProcess b σ (gaussianReal 0 1)).martingale_iff
     (integrable_exp_gaussianReal 0 1) hS_0 r, NNReal.coe_zero, zero_mul, sub_zero]
 
@@ -197,10 +195,9 @@ theorem condExp_call_eq_bsV {r σ S_0 K : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K) (h�
     {t T : ℝ≥0} (htT : t < T) :
     P[fun ω ↦ rexp (-r * (T - t : ℝ≥0)) * max (S_0 * rexp ((r - σ ^ 2 / 2) * T + σ * B T ω) - K) 0
         | 𝓕 t]
-      =ᵐ[P] fun ω ↦ bsV K r σ (S_0 * rexp ((r - σ ^ 2 / 2) * t + σ * B t ω)) (T - t : ℝ≥0) := by
-  have := (hB.hasLaw_eval 0).isProbabilityMeasure
-  exact ((hB.jumpDiffusionProcess (r - σ ^ 2 / 2) σ (gaussianReal 0 1)).condExp_call
-    (integrable_exp_gaussianReal 0 1) hS_0.le hK.le r htT.le).trans <|
+      =ᵐ[P] fun ω ↦ bsV K r σ (S_0 * rexp ((r - σ ^ 2 / 2) * t + σ * B t ω)) (T - t : ℝ≥0) :=
+  ((hB.jumpDiffusionProcess (r - σ ^ 2 / 2) σ (gaussianReal 0 1)).condExp_call
+    (integrable_exp_gaussianReal 0 1) S_0 K r htT.le).trans <|
       ae_of_all _ fun _ ↦ jumpDiffusionCallPrice_zero (mul_pos hS_0 (Real.exp_pos _)) hK hσ _
         (tsub_pos_of_lt htT)
 
@@ -218,7 +215,7 @@ theorem condExp_put_eq_bsPut {r σ S_0 K : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K) (h
           * Phi (-(bsd1 (S_0 * rexp ((r - σ ^ 2 / 2) * t + σ * B t ω)) K r σ (T - t : ℝ≥0))) := by
   have := (hB.hasLaw_eval 0).isProbabilityMeasure
   exact ((hB.jumpDiffusionProcess (r - σ ^ 2 / 2) σ (gaussianReal 0 1)).condExp_put
-    hS_0.le hK.le r htT.le).trans <|
+    hS_0.le K r htT.le).trans <|
       ae_of_all _ fun _ ↦ jumpDiffusionPutPrice_zero (mul_pos hS_0 (Real.exp_pos _)) hK hσ _
         (tsub_pos_of_lt htT)
 

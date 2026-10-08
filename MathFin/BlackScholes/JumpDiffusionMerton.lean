@@ -190,12 +190,12 @@ price `S_t = S₀e^{X_t}`, the remaining maturity `T − t` and the expected num
 theorem condExp_call_eq_mertonCallPrice {k δ : ℝ}
     (h : JumpDiffusionProcess P 𝓕 X b σ Λ
       (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal))
-    [IsProbabilityMeasure P] (hk : -1 < k) {r : ℝ} (hb : b = r - σ ^ 2 / 2 - Λ * k)
+    (hk : -1 < k) {r : ℝ} (hb : b = r - σ ^ 2 / 2 - Λ * k)
     {S_0 K : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) {t T : ℝ≥0} (htT : t < T) :
     P[fun ω ↦ rexp (-r * (T - t : ℝ≥0)) * max (S_0 * rexp (X T ω) - K) 0 | 𝓕 t]
       =ᵐ[P] fun ω ↦ mertonCallPrice (S_0 * rexp (X t ω)) K r σ (T - t : ℝ≥0) k δ
         (Λ * (T - t)) :=
-  (h.condExp_call (integrable_exp_gaussianReal _ _) hS_0.le hK.le r htT.le).trans <|
+  (h.condExp_call (integrable_exp_gaussianReal _ _) S_0 K r htT.le).trans <|
     ae_of_all _ fun _ ↦ jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice
       (mul_pos hS_0 (Real.exp_pos _)) hK hσ hk hb (tsub_pos_of_lt htT)
 
@@ -206,12 +206,13 @@ series `mertonPutPrice` at `S_t`, `T − t` and `Λ(T − t)` (`condExp_put`,
 theorem condExp_put_eq_mertonPutPrice {k δ : ℝ}
     (h : JumpDiffusionProcess P 𝓕 X b σ Λ
       (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal))
-    [IsProbabilityMeasure P] (hk : -1 < k) {r : ℝ} (hb : b = r - σ ^ 2 / 2 - Λ * k)
+    (hk : -1 < k) {r : ℝ} (hb : b = r - σ ^ 2 / 2 - Λ * k)
     {S_0 K : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) {t T : ℝ≥0} (htT : t < T) :
     P[fun ω ↦ rexp (-r * (T - t : ℝ≥0)) * max (K - S_0 * rexp (X T ω)) 0 | 𝓕 t]
       =ᵐ[P] fun ω ↦ mertonPutPrice (S_0 * rexp (X t ω)) K r σ (T - t : ℝ≥0) k δ
         (Λ * (T - t)) :=
-  (h.condExp_put hS_0.le hK.le r htT.le).trans <|
+  have := h.isProbabilityMeasure
+  (h.condExp_put hS_0.le K r htT.le).trans <|
     ae_of_all _ fun _ ↦ jumpDiffusionPutPrice_gaussian_eq_mertonPutPrice
       (mul_pos hS_0 (Real.exp_pos _)) hK hσ hk hb (tsub_pos_of_lt htT)
 

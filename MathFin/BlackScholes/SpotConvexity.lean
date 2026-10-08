@@ -17,9 +17,9 @@ is its spot-direction dual at the two scales that make sense for `S`:
 
 1. **Payoff level**, `S ↦ max(S − K, 0)`: the positive part of an affine
    function is convex.
-2. **Continuous price level**, `S ↦ bsV K r σ S τ`: convex on `(0, ∞)` by
-   the second-derivative test — gamma is non-negative
-   (`hasDerivAt_deriv_bsV_S` + `convexOn_of_deriv2_nonneg'`).
+2. **Continuous price level**, `S ↦ bsV K r σ S τ`: strictly convex on `(0, ∞)`
+   by the second-derivative test — gamma is positive
+   (`hasDerivAt_deriv_bsV_S` + `strictConvexOn_of_deriv2_pos'`).
 
 Financially: pricing preserves the convexity of the payoff. Gamma-positivity
 (`bsV_gamma_pos`) is the infinitesimal face of the same fact, and makes the
@@ -32,12 +32,11 @@ consumes the strict form (`bsV_spot_tangent_lt`) to make the domination strict.
 ## Results
 
 * `convexOn_call_payoff_spot`: `S ↦ max(S − K, 0)` is convex (payoff level).
-* `bsV_spot_convexOn`: `S ↦ bsV K r σ S τ` is convex on `(0, ∞)`
-  (continuous price level).
-* `bsV_spot_tangent_le`: the price lies above its tangent at any `S₀ > 0`,
-  with slope delta: `bsV(S₀) + Φ(d₁(S₀))·(s − S₀) ≤ bsV(s)`.
-* `bsV_spot_strictConvexOn`, `bsV_spot_tangent_lt`: the convexity is strict, and
-  the price lies strictly above its tangent away from the point of tangency.
+* `bsV_spot_strictConvexOn`, `bsV_spot_convexOn`: `S ↦ bsV K r σ S τ` is strictly convex, hence
+  convex, on `(0, ∞)` (continuous price level).
+* `bsV_spot_tangent_lt`, `bsV_spot_tangent_le`: the price lies above its tangent at any
+  `S₀ > 0`, with slope delta, `bsV(S₀) + Φ(d₁(S₀))·(s − S₀) ≤ bsV(s)`, strictly away from the
+  point of tangency.
 -/
 
 @[expose] public section
@@ -60,48 +59,11 @@ lemma convexOn_call_payoff_spot (K : ℝ) :
 
 /-! ## The continuous-price face
 
-The proof is the second-derivative test, exactly parallel to
-`bsV_strike_convexOn`:
+The proof is the second-derivative test, parallel to `bsV_strike_convexOn`:
 
 * `hasDerivAt_bsV_S`: `∂_S bsV = Φ(d₁)` (delta) exists at every `S > 0`.
 * `hasDerivAt_deriv_bsV_S`: `∂²_S bsV = ϕ(d₁)/(S σ √τ)` (gamma) exists at every
   `S > 0`, and it is positive (`bsV_gamma_pos`). -/
-
-/-- **BS call price is convex in the spot on `(0, ∞)`** — the continuous-
-price face of S-convexity: at every `S > 0`,
-`∂²_S bsV = ϕ(d₁)/(S σ √τ) ≥ 0` (gamma). -/
-theorem bsV_spot_convexOn {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ) :
-    ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun s ↦ bsV K r σ s τ) :=
-  convexOn_of_deriv2_nonneg' (convex_Ioi 0)
-    (fun _ hS ↦ (hasDerivAt_bsV_S hK hσ hS hτ).differentiableAt.differentiableWithinAt)
-    (fun _ hS ↦ (hasDerivAt_deriv_bsV_S hK hσ hS hτ).differentiableAt.differentiableWithinAt)
-    -- gamma-nonneg *is* the named sign fact `bsV_gamma_pos` (`GreekSigns`)
-    fun _ hS ↦ (bsV_gamma_pos (r := r) hK hσ hS hτ).le.trans_eq
-      (hasDerivAt_deriv_bsV_S hK hσ hS hτ).deriv.symm
-
-/-- **The price lies above its tangent at any `S₀ > 0`, with slope delta**:
-`bsV(S₀) + Φ(d₁(S₀))·(s − S₀) ≤ bsV(s)`. The supporting-hyperplane form of
-`bsV_spot_convexOn` — convexity plus the closed-form delta
-(`hasDerivAt_bsV_S`) via the slope comparison lemmas. -/
-theorem bsV_spot_tangent_le {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
-    (hτ : 0 < τ) {S₀ s : ℝ} (hS₀ : 0 < S₀) (hs : 0 < s) :
-    bsV K r σ S₀ τ + Phi (bsd1 S₀ K r σ τ) * (s - S₀) ≤ bsV K r σ s τ := by
-  have hconv := bsV_spot_convexOn (K := K) (r := r) (σ := σ) (τ := τ) hK hσ hτ
-  have hder := hasDerivAt_bsV_S (K := K) (r := r) (σ := σ) hK hσ hS₀ hτ
-  rcases lt_trichotomy S₀ s with hlt | heq | hgt
-  · -- to the right of S₀: delta ≤ slope S₀ s.
-    have h := hconv.le_slope_of_hasDerivAt (Set.mem_Ioi.mpr hS₀)
-      (Set.mem_Ioi.mpr hs) hlt hder
-    rw [slope_def_field] at h
-    have h' := (le_div_iff₀ (sub_pos.mpr hlt)).mp h
-    linarith
-  · simp [heq]
-  · -- to the left of S₀: slope s S₀ ≤ delta.
-    have h := hconv.slope_le_of_hasDerivAt (Set.mem_Ioi.mpr hs)
-      (Set.mem_Ioi.mpr hS₀) hgt hder
-    rw [slope_def_field] at h
-    have h' := (div_le_iff₀ (sub_pos.mpr hgt)).mp h
-    nlinarith [h']
 
 /-- **BS call price is strictly convex in the spot on `(0, ∞)`**: at every `S > 0` the gamma
 `∂²_S bsV = ϕ(d₁)/(S σ √τ)` is positive (`bsV_gamma_pos`). -/
@@ -112,9 +74,15 @@ theorem bsV_spot_strictConvexOn {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (h
     fun _ hS ↦ (bsV_gamma_pos (r := r) hK hσ hS hτ).trans_eq
       (hasDerivAt_deriv_bsV_S hK hσ hS hτ).deriv.symm
 
+/-- **BS call price is convex in the spot on `(0, ∞)`** — the continuous-price face of
+S-convexity; the strict form is `bsV_spot_strictConvexOn`. -/
+theorem bsV_spot_convexOn {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ) :
+    ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun s ↦ bsV K r σ s τ) :=
+  (bsV_spot_strictConvexOn hK hσ hτ).convexOn
+
 /-- **The price lies strictly above its tangent away from `S₀`**: for `s ≠ S₀`,
-`bsV(S₀) + Φ(d₁(S₀))·(s − S₀) < bsV(s)`. The strict form of `bsV_spot_tangent_le`, from strict
-convexity (`bsV_spot_strictConvexOn`). -/
+`bsV(S₀) + Φ(d₁(S₀))·(s − S₀) < bsV(s)`. Strict convexity (`bsV_spot_strictConvexOn`) plus the
+closed-form delta (`hasDerivAt_bsV_S`), through the slope comparison lemmas. -/
 theorem bsV_spot_tangent_lt {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     (hτ : 0 < τ) {S₀ s : ℝ} (hS₀ : 0 < S₀) (hs : 0 < s) (hne : s ≠ S₀) :
     bsV K r σ S₀ τ + Phi (bsd1 S₀ K r σ τ) * (s - S₀) < bsV K r σ s τ := by
@@ -125,11 +93,21 @@ theorem bsV_spot_tangent_lt {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     have h := hconv.slope_lt_of_hasDerivAt (Set.mem_Ioi.mpr hs) (Set.mem_Ioi.mpr hS₀) hlt hder
     rw [slope_def_field] at h
     have h' := (div_lt_iff₀ (sub_pos.mpr hlt)).mp h
-    nlinarith [h']
+    linarith
   · -- to the right of S₀: delta < slope S₀ s.
     have h := hconv.lt_slope_of_hasDerivAt (Set.mem_Ioi.mpr hS₀) (Set.mem_Ioi.mpr hs) hgt hder
     rw [slope_def_field] at h
     have h' := (lt_div_iff₀ (sub_pos.mpr hgt)).mp h
     linarith
+
+/-- **The price lies above its tangent at any `S₀ > 0`, with slope delta**:
+`bsV(S₀) + Φ(d₁(S₀))·(s − S₀) ≤ bsV(s)`, the supporting-hyperplane form of `bsV_spot_convexOn`;
+away from `S₀` it is `bsV_spot_tangent_lt`. -/
+theorem bsV_spot_tangent_le {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    (hτ : 0 < τ) {S₀ s : ℝ} (hS₀ : 0 < S₀) (hs : 0 < s) :
+    bsV K r σ S₀ τ + Phi (bsd1 S₀ K r σ τ) * (s - S₀) ≤ bsV K r σ s τ := by
+  rcases eq_or_ne s S₀ with rfl | hne
+  · simp
+  · exact (bsV_spot_tangent_lt hK hσ hτ hS₀ hs hne).le
 
 end MathFin
