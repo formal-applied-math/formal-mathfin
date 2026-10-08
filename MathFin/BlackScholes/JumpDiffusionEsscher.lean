@@ -91,7 +91,7 @@ theorem jumpDiffusionIncrementLaw_tilted (b σ : ℝ) (Λ : ℝ≥0) {ν : Measu
     [IsProbabilityMeasure ν] {θ : ℝ} (hθ : θ ∈ interior (integrableExpSet id ν)) (τ : ℝ≥0) :
     (jumpDiffusionIncrementLaw b σ Λ ν τ).tilted (θ * ·)
       = jumpDiffusionIncrementLaw (b + θ * σ ^ 2) σ (Λ * jumpMoment ν θ) (ν.tilted (θ * ·)) τ := by
-  have hθν : Integrable (fun x ↦ rexp (θ * x)) ν := interior_subset hθ
+  have hθν : Integrable (fun x ↦ rexp (θ * x)) ν := interior_subset (s := integrableExpSet id ν) hθ
   have : IsProbabilityMeasure (ν.tilted (θ * ·)) := isProbabilityMeasure_tilted hθν
   -- near `0`, the jump law has the exponential moments of the orders `u + θ`
   have hU : ∀ᶠ u in 𝓝 (0 : ℝ), Integrable (fun x ↦ rexp ((u + θ) * x)) ν :=
@@ -212,7 +212,7 @@ theorem integral_call_tilted_eq_merton {S K r b σ : ℝ} (hS : 0 < S) (hK : 0 <
           * (∫ x, rexp x ∂(ν.tilted (θ * ·)) - 1)) + ∑ i ∈ Finset.range n, j i)) τ
           ∂(Measure.infinitePi fun _ : ℕ ↦ ν.tilted (θ * ·))
           ∂(poissonMeasure (Λ * jumpMoment ν θ * τ)) := by
-  have hθ' : Integrable (fun x ↦ rexp (θ * x)) ν := interior_subset hθν
+  have hθ' : Integrable (fun x ↦ rexp (θ * x)) ν := interior_subset (s := integrableExpSet id ν) hθν
   have : IsProbabilityMeasure (ν.tilted (θ * ·)) := isProbabilityMeasure_tilted hθ'
   rw [integral_call_tilted_eq_jumpDiffusionCallPrice S K r b σ Λ hθν τ]
   exact jumpDiffusionCallPrice_eq_merton hS hK hσ
