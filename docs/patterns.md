@@ -1928,3 +1928,17 @@ derivative by transporting `breedenLitzenberger` back through `deriv`.
   `ℝ≥0` is the expected type of the whole product, as `jumpDiffusionIncrementLaw_apply` does:
   `gaussianReal m (.mk ((0 : ℝ) ^ 2) (sq_nonneg _) * τ)`.
 - `zero_le` takes its argument implicitly: `exact zero_le`, not `zero_le _`.
+
+### The law of an image, by change of variables
+
+To identify `μ.map g` for `μ = f(y) dy` and a smooth injective `g`, fix a measurable set `A`, write
+both sides as set integrals (`Measure.map_apply`, `withDensity_apply`, `Measure.restrict_restrict`),
+and turn the image side `∫_{g '' (g ⁻¹' A)}` into an integral over the preimage with Mathlib's
+`lintegral_image_eq_lintegral_abs_deriv_mul` (it needs `HasDerivWithinAt` on the set and `InjOn`).
+`Set.image_preimage_eq_inter_range` gives `g '' (g ⁻¹' A) = A ∩ range g`. The pointwise step is then
+`ofReal (f y) = ofReal |g' y| * ofReal (density (g y))` (`ENNReal.ofReal_mul`, `mul_div_cancel₀`).
+`map_mul_exp_withDensity` does this for `g y = Seʸ`. To transfer a pointwise identity of densities
+on `(0, ∞)` to the measures, use `withDensity_congr_ae (ae_restrict_of_forall_mem measurableSet_Ioi …)`.
+- `withDensity_congr_ae (ae_restrict_of_forall_mem … fun K hK ↦ ?_)` leaves the goal as
+  `(fun K ↦ …) K = (fun K ↦ …) K`, unreduced; `rw` cannot see inside a beta-redex. `dsimp only`
+  first.

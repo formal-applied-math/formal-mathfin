@@ -26,6 +26,37 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The law of the price, as a measure (2026-10-08)
+
+Four entries added, all `full`: `mf-price-law-change-of-variables`, `mf-jump-diffusion-price-law`,
+`mf-black-scholes-price-law` and `mf-merton-price-law`. Corpus 513 → 517. Files:
+`BlackScholes/JumpDiffusionDensity.lean` and `BlackScholes/JumpDiffusionDigital.lean`.
+
+- The change of variables. For `f ≥ 0` and `S > 0`, the image of `f(y) dy` under `y ↦ Seʸ` is
+  `f(log(K/S))/K dK` on `(0, ∞)` (`map_mul_exp_withDensity`, from Mathlib's
+  `lintegral_image_eq_lintegral_abs_deriv_mul`; `y ↦ Seʸ` is a bijection of `ℝ` onto `(0, ∞)`
+  with derivative `Seʸ`).
+- The jump-diffusion price. With `σ ≠ 0` the price `Seʸ` has the law `f(log(K/S))/K dK` on
+  `(0, ∞)` (`jumpDiffusionIncrementLaw_map_mul_exp`). The density of the price that the second
+  strike derivative of the call reads off, strike by strike, is the density of the law of the price.
+- Black–Scholes. Without jumps, at the drift `r − σ²/2`, the price has the law
+  `lognormalTerminalPDF(K) dK` on `(0, ∞)` and the formula integrates to one
+  (`jumpDiffusionIncrementLaw_zero_map_mul_exp`, `lintegral_lognormalTerminalPDF`). These are the
+  two facts `BreedenLitzenberger.lean` states it does not prove.
+- Merton. With Gaussian log-jumps and any drift, the price has the law `mertonTerminalPDF(K) dK` on
+  `(0, ∞)` and the mixture integrates to one (`jumpDiffusionIncrementLaw_gaussian_map_mul_exp`,
+  `lintegral_mertonTerminalPDF`).
+
+Each identification of densities is pointwise on `(0, ∞)` (the earlier sections), and two
+`withDensity` measures agree when their densities agree almost everywhere (Mathlib's
+`withDensity_congr_ae`); integrating to one is the mass of the image of a probability measure.
+
+Safe wording: "the price `Seʸ` of a jump-diffusion with a Gaussian part has the density
+`f(log(K/S))/K` on `(0, ∞)`; without jumps this is the lognormal density `lognormalTerminalPDF`, and
+with Gaussian log-jumps it is Merton's Poisson mixture `mertonTerminalPDF`, each a probability
+density". Not covered: moments of the price computed from these densities (the library computes
+them from the log-return law, `mgf_id_jumpDiffusionIncrementLaw`).
+
 ### Kinks: the call price is differentiable in the strike exactly where the law has no atom (2026-10-08)
 
 Four entries added, all `full`: `mf-call-strike-differentiable-iff-no-atom`,
@@ -103,8 +134,6 @@ density formulas; with Gaussian log-jumps `N(log(1 + k) − δ²/2, δ²)` (`k >
 mixtures at maturity `τ` and expected jump count `Λτ` are the digital price (at the compensated
 drift) and the density of the price (at every drift) of the jump-diffusion". Not covered:
 - the put's strike derivatives and the put digital;
-- that `mertonTerminalPDF` integrates to one (the law of the price as `mertonTerminalPDF(K) dK` on
-  `(0, ∞)`);
 - strike derivatives for jump laws other than Gaussian, beyond the general
   `breedenLitzenberger_jumpDiffusion`.
 
@@ -150,8 +179,6 @@ the digital price is minus the discounted density of the price, and with a finit
 second strike derivative of the call price is the discounted density of the price
 (Breeden–Litzenberger with jumps); without jumps, at the drift `r − σ²/2`, that density is the
 lognormal density of `breedenLitzenberger`". Not covered:
-- the law of the price as a measure with a density on `(0, ∞)` (the statements are derivatives of
-  its distribution function, strike by strike);
 - smoothness of the density beyond continuity;
 - `σ = 0`, where the law has an atom at `bτ` (the no-jump event; not formalized);
 

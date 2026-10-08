@@ -2150,8 +2150,12 @@ level of the law at one date):
    `μ{X ≥ K}` (`tendsto_call_spread_left`), so the call price is differentiable at `K` iff the law
    has no atom there (`differentiableAt_integral_call_iff`); without a Gaussian part the
    jump-diffusion law has an atom at `bτ` and the call price a kink at `Se^{bτ}`
-   (`not_differentiableAt_jumpDiffusionCallPrice_strike`). Next on this line: the signs and shape
-   of Merton's series in the strike (`0 < mertonTerminalPDF`, strict convexity of the call in `K`),
+   (`not_differentiableAt_jumpDiffusionCallPrice_strike`). Also done (corpus 517): the law of the
+   price as a measure. `y ↦ Seʸ` maps `f(y) dy` to `f(log(K/S))/K dK` on `(0, ∞)`
+   (`map_mul_exp_withDensity`), so `lognormalTerminalPDF` and `mertonTerminalPDF` are the densities
+   of the price and integrate to one (`lintegral_lognormalTerminalPDF`,
+   `lintegral_mertonTerminalPDF`). Next on this line: the signs and shape of Merton's series in the
+   strike (`0 < mertonTerminalPDF`, strict convexity of the call in `K`),
    as `MertonGreeks` has them in the spot.
 5. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
    `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style

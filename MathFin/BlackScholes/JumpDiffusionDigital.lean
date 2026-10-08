@@ -329,6 +329,7 @@ theorem jumpDiffusionIncrementLaw_zero_map_mul_exp {S r σ : ℝ} (hS : 0 < S) (
           fun K ↦ ENNReal.ofReal (lognormalTerminalPDF S r σ τ K) := by
   rw [jumpDiffusionIncrementLaw_map_mul_exp _ hσ.ne' 0 ν hτ hS]
   refine withDensity_congr_ae (ae_restrict_of_forall_mem measurableSet_Ioi fun K hK ↦ ?_)
+  dsimp only
   rw [jumpDiffusionDensity_div_eq_lognormalTerminalPDF hS hK hσ ν hτ]
 
 /-- **The lognormal density formula integrates to one** over `(0, ∞)`, for `σ > 0`, `S > 0` and
@@ -357,6 +358,7 @@ theorem jumpDiffusionIncrementLaw_gaussian_map_mul_exp (b : ℝ) {S σ k δ : �
           ENNReal.ofReal (mertonTerminalPDF S (b + σ ^ 2 / 2 + Λ * k) σ τ k δ (Λ * τ) K) := by
   rw [jumpDiffusionIncrementLaw_map_mul_exp b hσ.ne' Λ _ hτ hS]
   refine withDensity_congr_ae (ae_restrict_of_forall_mem measurableSet_Ioi fun K hK ↦ ?_)
+  dsimp only
   rw [jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF b hS hK hσ hk Λ hτ]
 
 /-- **Merton's density integrates to one** over `(0, ∞)`: it is the density of the law of the
