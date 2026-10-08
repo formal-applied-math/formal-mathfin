@@ -1983,6 +1983,17 @@ the law-level theorem at the compensated drift applies under `P`
 the limit: the limit is then a one-line corollary, and the identity carries the sign arguments at
 every `n` (`logContract_le_realizedVariance_of_martingale`).
 
+### Two elaboration traps: `ℝ≥0` leaves and omitted section parameters
+
+A product such as `2 * Λ * ∫ x, f x ∂ν` with `Λ : ℝ≥0` and no real-valued leaf is elaborated in
+`ℝ≥0` when nothing fixes the expected type (an argument of `Tendsto.const_sub`, say): the integral is
+then asked for in `ℝ≥0` and fails with `NormedAddCommGroup ℝ≥0`. Ascribe the type,
+`(2 * Λ * ∫ x, f x ∂ν : ℝ)`. A section's instance variable, `[hB : IsFilteredPreBrownian B 𝓕 P]`, is
+included in a theorem only if every parameter it mentions is; when the statement omits one (the
+filtration `𝓕`, which the conclusion never names), the instance is silently left out and the proof
+sees no `hB`. Bind such a parameter in the theorem itself, explicitly, as Mathlib does for arguments
+the conclusion does not determine (`IsFilteredPreBrownian.logContract_realizedVariance`).
+
 ### Pointwise sums of derivatives at the pin
 
 `HasDerivAt.add` and `HasDerivAt.sub` conclude `HasDerivAt (f + g) …` with the pointwise sum `f + g`,

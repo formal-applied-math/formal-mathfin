@@ -125,6 +125,78 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-08 — corpus 535 — the variance swap on one process, under one measure
+
+Scope: corpus 530 → 535, one rung, the first two items of the corpus-530 backlog.
+`mf-jump-diffusion-terminal-law`, `mf-jump-diffusion-log-contract-on-process`,
+`mf-jump-diffusion-log-contract-below-discrete-swap`, `mf-black-scholes-log-contract-discrete-swap`
+and `mf-merton-log-contract-variance` added; `mf-jump-diffusion-variance-swap-vs-log-contract`
+restated on the process. One read-only reviewer read the prose against the statements and
+re-derived the five formulas by hand; all hold. One CI run went red, on two elaboration details
+recorded below.
+
+### Standing first pass: prose against statement
+
+All findings are applied.
+- **A cross-reference to the wrong statement.** The Black–Scholes entry cited
+  `mf-variance-swap-equivalence` for the finite-`n` realized variance, which that entry does not
+  state; it now cites `expected_bsLogPrice_equipartition_sum`, proved separately on `ℝ` time, and
+  the limit.
+- **The sign of the bias without `Λ > 0`.** `integral_jumpBias_nonpos` and `integral_jumpBias_neg`
+  bound `E[e^J − 1 − J − J²/2]`, the bias per unit of `2Λ`; the module doc and coverage called it
+  the bias, which is `0` at `Λ = 0`, and dropped the moment-generating-function hypothesis of the
+  strict lemma.
+- **Merton called a corollary on the process.** `mertonJump_logContract_variance` is a statement
+  about the law; no Merton `JumpDiffusionProcess` is constructed. Umbrella, curated audit, roadmap
+  and bridges now say "at the level of the law".
+- **A pointer in the wrong direction**: coverage sent readers to the next section for one above,
+  and still listed the log contract on the process as not covered.
+- Wording: "agree" for "agree in the limit"; "the fair strike" now disclosed as an interpretation
+  with no swap contract formalized; `F` defined where used; "crash jumps" replaced by
+  `Λ > 0` and `ν{J < 0} ≠ 0` wherever it was a claim; "per unit time" for "scaled as a variance
+  rate"; "the measure `P`" for "a measure `P`" in an incomplete market.
+
+### Upgrades executed
+
+- **One process, one measure.** The pricing measure is a hypothesis, the martingale property of
+  `e^{−rt}Se^{X_t}`, which `martingale_iff` turns into the drift; the law of `X_T`
+  (`JumpDiffusionProcess.hasLaw`) carries the law-level log contract to the process. The
+  corpus-530 headline mixed a law-level contract with the realized variance of a process of free
+  drift; that theorem is gone, replaced by the process statements.
+- **The identity at every `n`, not only the limit.** The log contract minus the expected realized
+  variance per unit time is the jump bias less `(b + ΛE[J])²T/(n + 1)`; the limit and the sign
+  results at every sampling frequency are corollaries of it.
+- **The sign of the bias as facts about `ν`** (`integral_jumpBias_nonpos`, `integral_jumpBias_neg`),
+  which `jumpDiffusion_logContract_le_variance` and `_lt_variance` now consume instead of proving
+  it inline.
+- **The two models in Lean.** Black–Scholes through the Brownian bridge (`Λ = 0`), and Merton's
+  Gaussian jumps through `integral_exp_mertonJump` and `mertonJump_compensated`.
+- `JumpDiffusionProcess.integral_exp` is read off the law of `X_t` instead of its own a.e.
+  argument.
+- **Red run, recorded in `docs/patterns.md`.** A constant `2 * Λ * ∫ …` with no real-valued leaf
+  elaborated in `ℝ≥0`; and a section's instance variable is not included in a theorem whose
+  statement omits one of its parameters (the filtration), so that parameter is now explicit.
+
+### Lens gradients
+
+- **First principles.** Exemplar: the pricing measure as a hypothesis on the process.
+  Next: the Esscher measure on the process, the case this rung discloses as not covered.
+- **Coherence.** Exemplar: Black–Scholes as the `Λ = 0` case on the process. Next: one partition
+  shared with the Black–Scholes files on `ℝ` time, so `expected_bsLogPrice_equipartition_sum`
+  becomes a corollary too.
+- **Concept clarity.** Exemplar: the finite-`n` identity names both biases, the jumps' and the
+  sampling's. Next: the realized variance itself, not only its expectation.
+
+### Ranked backlog
+
+1. **Non-concentration.** `Var[RV_n] → ΛE[J⁴]T` (independence of the increments, `κ⁽⁴⁾(0)`), the
+   reason the `L²` theorem of `VarianceSwapDriftImmunity` has no constant counterpart with jumps.
+2. **One partition** for both realized variances (`unifPart` in a light Foundations file).
+3. **The Esscher measure on the process**, after which the variance swap under it follows from
+   this rung with the tilted characteristics.
+4. Carried over from corpus 530: `HasLaw.integrable_comp`; weaker moment hypotheses; Carr–Madan
+   under the law; the ForMathlib staging.
+
 ## 2026-10-08 — corpus 530 — convexity in the strike, and variance swaps with jumps
 
 Scope: corpus 517 → 530, two rungs.
