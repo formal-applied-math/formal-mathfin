@@ -25,8 +25,8 @@ of measure.
   near `0` is determined by that function near `0` (the identity theorem for Mathlib's complex
   moment-generating function); `measure_eq_of_mgf_id_eq` is the case of every exponential moment.
 * `ofReal_integral_exp_smul_tilted`: before it is normalized the transform is a density,
-  `(∫ e^f dμ)·μ.tilted f = e^f·μ`, for a measure on any space. On a Lévy measure this is how the
-  transform acts on the jumps (`smul_tilted_eq_withDensity`).
+  `(∫ e^f dμ)·μ.tilted f = e^f·μ` when `e^f` is integrable, for a measure on any space. On a Lévy
+  measure this is how the transform acts on the jumps (`smul_tilted_eq_withDensity`).
 * `gaussianReal_tilted_const_mul`: the transform shifts the mean of a Gaussian law, `N(m, v)`
   tilted by `e^{θx}` is `N(m + θv, v)`.
 
@@ -119,9 +119,9 @@ lemma mgf_id_tilted_const_mul (μ : Measure ℝ) (θ u : ℝ) :
     mgf id (μ.tilted (θ * ·)) u = mgf id μ (u + θ) / mgf id μ θ :=
   integral_exp_mul_tilted_const_mul μ θ u
 
-/-- **The Esscher transform before normalization**: `μ` tilted by `f` and scaled back by its
-normalizing constant `∫ e^f dμ` is `μ` with density `e^f`. On a Lévy measure this is how the
-transform acts on the jumps (`smul_tilted_eq_withDensity`). -/
+/-- **The Esscher transform before normalization**: when `e^f` is `μ`-integrable, `μ` tilted by `f`
+and scaled back by its normalizing constant `∫ e^f dμ` is `μ` with density `e^f`. On a Lévy measure
+this is how the transform acts on the jumps (`smul_tilted_eq_withDensity`). -/
 lemma ofReal_integral_exp_smul_tilted {α : Type*} {mα : MeasurableSpace α} {μ : Measure α}
     {f : α → ℝ} (hf : Integrable (fun x ↦ rexp (f x)) μ) :
     ENNReal.ofReal (∫ x, rexp (f x) ∂μ) • μ.tilted f

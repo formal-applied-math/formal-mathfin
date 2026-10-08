@@ -87,9 +87,10 @@ lemma jumpDiffusionIncrementLaw_absolutelyContinuous (b b' : ℝ) {σ : ℝ} (h�
 the point mass at `0`), let the jump law's moment-generating function be finite near `0` and near
 `θ`, with finite exponential moments `∫ eˣ dν` and `∫ e^{(1+θ)x} dν`, and let `θ` be an Esscher
 parameter, `κ(1 + θ) − κ(θ) = r`. If the physical drift `b` is not the compensated drift `c`, then
-the Esscher law and the Merton measure's law (the same `σ`, `Λ`, `ν` and the drift `c`) are both
-equivalent to the physical law and both compensated, `∫ eʸ = e^{rτ}`, and there is a strike
-`K > 0` at which the discounted call prices under them differ. -/
+at every date `τ > 0` the Esscher law and the Merton measure's law (the same `σ`, `Λ`, `ν` and the
+drift `c`) are both equivalent to the physical law and both compensated, `∫ eʸ = e^{rτ}`, and for
+every spot `S > 0` there is a strike `K > 0` at which the discounted call prices under them
+differ. -/
 theorem exists_call_esscher_ne_merton {S r b c σ : ℝ} (hS : 0 < S) (hσ : σ ≠ 0) {Λ : ℝ≥0}
     (hΛ : 0 < Λ) {ν : Measure ℝ} [IsProbabilityMeasure ν] (hν0 : ν ≠ Measure.dirac 0)
     (h0 : 0 ∈ interior (integrableExpSet id ν)) (h1 : Integrable rexp ν) {θ : ℝ}

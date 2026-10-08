@@ -1813,3 +1813,24 @@ Subscript digits are identifier characters; `₊` and `₋` are not. `have e₊ 
 declaration at `e` with *"unexpected token '₊'; expected command"*. `Π` is the pi-type token, so
 `hΠ` parses as `h` followed by `Π`. In both cases every later goal of the proof is then reported
 as unsolved. The parse error is the diagnostic one; the "unsolved goals" errors are its echo.
+
+### A change of one product factor, carried through a pushforward
+
+To show that two laws `L_* (μ₁ ⊗ ρ)` and `L_* (μ₂ ⊗ ρ)` are related (equal, or one absolutely
+continuous with respect to the other), write the change as a map on the factor that moves, not as
+a computation on the law. `jumpDiffusionIncrementLaw_absolutelyContinuous` handles a change of drift
+in four steps:
+- it is a move of the Gaussian coordinate, `L_{b'} = L_b ∘ Prod.map (· + m) id`, proved
+  pointwise by `linear_combination`;
+- `Measure.map_map` turns the composite into a pushforward of the pushforward;
+- `← Measure.map_prod_map` with `Measure.map_id` moves the shift onto the factor, where
+  `gaussianReal_map_add_const` and `gaussianReal_tilted_const_mul` name the moved factor as an
+  Esscher tilt;
+- `(tilted_absolutelyContinuous _ _).prod Measure.AbsolutelyContinuous.rfl` and then `.map` finish.
+
+Two details:
+- `rw [← Measure.map_prod_map _ _ hf measurable_id]` cannot elaborate `measurable_id` before it
+  knows the type of `id`. State `have hid : Measurable (@id (ℕ × (ℕ → ℝ))) := measurable_id` first,
+  as `jumpDiffusionMeasure_map_jumps` does.
+- `unfold` a definition that occurs twice with different arguments. A `rw [f]` rewrites only the
+  instances of its first match.

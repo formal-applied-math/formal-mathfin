@@ -125,6 +125,164 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-08 — corpus 500 — incompleteness at one date: two equivalent compensated laws, two call prices
+
+Scope: corpus 496 → 500. Three new files: `BlackScholes/CallSpreadDigital.lean`,
+`BlackScholes/JumpDiffusionIdentifiability.lean` and `BlackScholes/JumpDiffusionIncompleteness.lean`.
+`Foundations/Esscher.lean` gains:
+- the finite-measure form of local MGF uniqueness;
+- two lemmas on the tilted domain;
+- the unnormalized Esscher transform.
+
+`BlackScholes/JumpDiffusionEsscher.lean` gains the Lévy-measure form of the transform. The new
+entries are:
+- `mf-call-spread-digital`;
+- `mf-call-prices-determine-law`;
+- `mf-jump-diffusion-identifiability`;
+- `mf-jump-diffusion-incompleteness`.
+
+Five existing jump entries now point at the incompleteness entry instead of saying incompleteness
+is not formalized.
+
+One read-only reviewer looked at the first green state. It covered prose against statement, plus
+the coherence and mathematics lenses. It found no error in the Lean. These check out:
+- the second-difference identity;
+- the direction "drift off compensated ⇒ `θ ≠ 0`";
+- every cited Mathlib name.
+
+Three CI rounds failed before that state, on parse and elaboration details (see Idiomatic
+register below).
+
+### Standing first pass: prose against statement
+
+Eleven findings; three were must-fix. All are applied, and the first is fixed by proof:
+
+- **"The Merton measure's law is equivalent to the physical law (not formalized)" is false at
+  `σ = 0`.** The theorem allowed `σ = 0`. There the physical law has an atom at `bτ` (no jumps),
+  and a change of drift moves that atom. The theorem now assumes `σ ≠ 0` and concludes that both
+  laws are equivalent to the physical law (`jumpDiffusionIncrementLaw_absolutelyContinuous`, below).
+- **Two coverage sentences dropped the hypothesis that the physical drift is off the compensated
+  one.** When the drift is compensated, `θ = 0` is the only Esscher parameter, because the Esscher
+  map is strictly increasing. The two laws then coincide.
+- **A corpus scope stated a false lemma**: "two finite measures whose moment-generating functions
+  agree near 0 are equal". Mathlib's `mgf` is `0` outside the integrable set. So `Cauchy(0, 1)` and
+  `Cauchy(0, 2)` have the same `mgf` everywhere. The lemma needs the function finite near `0`.
+- **"Finite moments of orders 1 and 1 + θ"** reads as `E|J|` and `E|J|^{1+θ}`. The Lean uses the
+  exponential moments `∫ eˣ dν` and `∫ e^{(1+θ)x} dν`.
+- **The intermediate-date and power-claim entries** said that at one date two compensated laws
+  price a call differently. These entries are set at the compensated physical drift. There the
+  theorem's hypothesis fails, and both laws are the physical one. They now say two things:
+  non-uniqueness for the process is not formalized; and compensated laws at one date are already
+  not unique.
+- **"The law determines the jumps" and "the uniqueness half of Lévy–Khintchine"** claimed more than
+  the `(b, Π)` part for a given `σ`. The full uniqueness also gives `σ²` and needs no moment
+  conditions. And `Λ` and `ν` are not determined separately.
+- **"With jumps, the compensated drift does not determine option prices."** For given
+  `(σ, Λ, ν)` it does. Now: the martingale condition on the forward does not determine option
+  prices, since it can be met by moving the drift or by tilting the jumps.
+- **The bridges row** had three faults:
+  - its `[0, 1]` attribution was half wrong: `bull_call_spread_payoff_le` gives only `≥ 0`;
+  - it had two cells in a four-column table;
+  - it cited MRT.2 for a uniqueness that MRT.2 itself disclaims. CHAIN.2 delivers it, under a
+    square-integrable density.
+- Smaller fixes:
+  - the one-sided-derivative wording of `mf-call-spread-digital`;
+  - missing hypotheses: `∫ e^{ux} dν < ∞` for the Lévy–Khintchine form of `κ`, the three moments
+    of `mgf_id_withDensity_coshKernel`, and "with a finite forward";
+  - two stale lists of users, in `Esscher.lean` and `JumpDiffusionEsscher.lean`.
+
+### Upgrades executed
+
+- **Roadmap item 2, by two identification theorems rather than by comparing mixtures.** The
+  roadmap expected a strict comparison of the two Merton mixtures. Instead, two reusable facts are
+  proved and composed:
+  - call prices determine the law: the first-order Breeden–Litzenberger, for any law with a finite
+    forward;
+  - the law at one date determines the drift and the Lévy measure off `0`, for a given `σ`.
+
+  The Esscher transform multiplies the Lévy measure by `e^{θx}`, so the two compensated laws
+  differ once `θ ≠ 0`.
+- **Incompleteness about equivalent laws.** The theorem now says what incompleteness means at one
+  date: there are two laws that price a call differently, each equivalent to the physical law and
+  each with forward `e^{rτ}`.
+  - The Merton law's equivalence is static Girsanov on the Gaussian factor. On the canonical model
+    a change of drift moves the standard normal sample, and the moved Gaussian is the Esscher tilt
+    of `N(0, 1)` (`gaussianReal_tilted_const_mul`, the tilt behind
+    `gaussianReal_withDensity_esscher`).
+  - Compensation is stated on the laws, as `∫ eʸ = e^{rτ}`, not on their characteristics.
+- **One uniqueness lemma, now for finite measures.** `measure_eq_of_mgf_id_eventuallyEq` now has
+  three users: the Esscher transform, the Brownian characterization (through
+  `measure_eq_of_mgf_id_eq`) and the kernel measures `2(cosh(sx) − 1)·Λν` of the identifiability
+  proof. The zero measure is the only new case.
+- **The unnormalized Esscher transform, lifted.** `ofReal_integral_exp_smul_tilted` states
+  `(∫ e^f dμ)·μ.tilted f = e^f·μ` for a measure on any space; Mathlib does not have it. The
+  Lévy-measure form `smul_tilted_eq_withDensity` is now `Λ` times it, a one-line rewrite.
+- **The spread bound is one Mathlib lemma.** `abs_max_sub_max_le_abs` (the call payoff is
+  `1`-Lipschitz in the strike) replaces a hand-rolled two-sided bound. The first draft cited the
+  strike-antitone face `bull_call_spread_payoff_le` for half of the bound. `CallSpreadDigital.lean`
+  no longer imports `Spreads.lean`.
+- **One encoding of nontrivial jumps.** The incompleteness theorem takes `0 < Λ` and `ν ≠ δ₀`, as
+  `jumpDiffusionCallPrice_impliedVol_gt` does. It derives `ν{0}ᶜ ≠ 0` inside, with Mathlib's
+  `hasLaw_dirac_of_ae_eq`.
+- **The tilted domain is named once.** `eventually_integrable_exp_add_mul` and
+  `zero_mem_interior_integrableExpSet_tilted` replace the inline neighbourhood argument in
+  `jumpDiffusionIncrementLaw_tilted`, and they also serve the incompleteness proof.
+
+### Lens gradients
+
+- **First principles.**
+  - Exemplar: incompleteness is derived, not asserted. Call prices determine the law. The law
+    determines the Lévy measure. The Esscher transform visibly changes the Lévy measure. A change
+    of drift is a Gaussian tilt.
+  - Next: the `σ²` half of identifiability.
+- **Coherence.**
+  - Exemplar: the local-uniqueness lemma has three users, and the static Girsanov tilt of
+    `GaussianGirsanov` returns as the change of drift of a jump-diffusion law.
+  - Next: the Black–Scholes strike derivative `hasDerivAt_bsV_K` and the cash-or-nothing price
+    `bs_cash_or_nothing_formula` are two closed-form computations of one fact.
+    `tendsto_call_spread` states that fact in general, once it has a left limit and a derivative
+    where `μ{X = K} = 0`.
+- **Generality.**
+  - Exemplar: `tendsto_call_spread` holds for any integrable random variable under a finite
+    measure, and `ofReal_integral_exp_smul_tilted` holds on any space.
+  - Next: identifiability is stated for one `σ` and for jump laws with exponential moments near
+    `0`. Characteristic functions would remove the moment conditions.
+- **Idiomatic register.**
+  - `interior_subset (s := integrableExpSet id ν)` follows Mathlib's own idiom. Without the named
+    set, first-order approximation solved the membership at the type `Prop`.
+  - Two parse errors this round: `e₊` and `hΠ`. The characters `₊`, `₋` and `Π` cannot appear in
+    identifiers.
+  - All three are recorded in `docs/patterns.md`.
+
+### Ranked backlog
+
+1. **The law determines `σ²` too.** The second differences of `κ` equal `σ²s²` plus the
+   moment-generating function of the kernel measure. Adding the point mass `σ²s²·δ₀` to the kernel
+   measure makes both sides moment-generating functions of finite measures. Evaluating the
+   identified measures at `{0}` then gives `σ₁² = σ₂²`. With that,
+   `jumpDiffusionIncrementLaw_eq_iff` holds with different `σ`'s. First factor out the step "the
+   kernel measures agree" as its own lemma, which both halves use.
+2. **The left limit and the strike derivative.** Show that `(C(K) − C(K + h))/h → μ{X ≥ K}` as
+   `h ↑ 0`. Then `C` is differentiable at `K`, with derivative `−μ{X > K}`, when `μ{X = K} = 0`.
+   Together with `hasDerivAt_bsV_K` this gives the Black–Scholes digital without the closed form.
+3. **Characteristic functions instead of moment-generating functions.** The characteristic
+   function of the law is `exp(τψ)`. Its second differences give the characteristic function of
+   `2(1 − cos(sx))·Λν`, and `Measure.ext_of_charFun` finishes. This is the full compound-Poisson
+   Lévy–Khintchine uniqueness, and the incompleteness theorem would no longer need `h0`.
+4. **The existence of the Esscher parameter for steep jump laws.** Suppose the moment-generating
+   function of `ν` is finite on an open interval and blows up at its ends (Kou). Then the Esscher
+   map is unbounded at the ends of its domain, and the intermediate value theorem applies there.
+5. **The integrable set of a tilt.**
+   `integrableExpSet id (μ.tilted (θ * ·)) = (· + θ) ⁻¹' integrableExpSet id μ`, by Mathlib's
+   `integrable_tilted_iff`. Then `zero_mem_interior_integrableExpSet_tilted` is a preimage.
+6. **Upstream to Mathlib:** `measure_eq_of_mgf_id_eventuallyEq` (Mathlib's `ComplexMGF.lean` has a
+   TODO for it) and `ofReal_integral_exp_smul_tilted`.
+7. Carried over:
+   - the process-level Esscher measure;
+   - one Gaussian exponential-moment lemma;
+   - `WienerExponentialTotality`'s fibres;
+   - `compoundPoissonMeasure` and the semigroup.
+
 ## 2026-10-08 — corpus 495 — the Esscher transform: one tilt, one identification, three users
 
 Scope: corpus 490 → 495. `Foundations/Esscher.lean` and `BlackScholes/JumpDiffusionEsscher.lean`
@@ -227,7 +385,9 @@ Twelve findings, all applied:
    pricing, at `1 + θ`).
 3. **Formal incompleteness at one date**: the Esscher law and the Merton measure (same jump law,
    compensated drift) are both compensated but give different call prices for some strike when
-   `θ ≠ 0`.
+   `θ ≠ 0`. Executed after this review: `exists_call_esscher_ne_merton`,
+   `mf-jump-diffusion-incompleteness` (corpus 500), with both laws equivalent to the physical law
+   for `σ ≠ 0`.
 4. **One Gaussian exponential-moment lemma.** `∫ e^{sx} dN(m, v)` is still read off
    `mgf_id_gaussianReal` by hand in `BrownianMartingale`, `GaussianSmoothing`, `CRRCharFun` and
    `GaussianGirsanov`. Then the pdf twin above.
