@@ -2071,3 +2071,49 @@ and re-rooted the moment):
    convolutions), then the construction of the process with jumps.
 3. The items carried over from the previous phase: the implied-volatility function and the smile;
    routing the hand-frozen conditional expectations through `condExp_comp_prodMk_of_indep`.
+
+## phase: the Esscher transform (2026-10-08, corpus 490→495)
+
+The Esscher transform reweights a law by `e^{θy}` and renormalizes it, Mathlib's `Measure.tilted`.
+It now has one home, `Foundations/Esscher.lean`. Tilted moments are ratios of moments
+(`integral_exp_mul_tilted_const_mul`). A law with every exponential moment is determined by its
+moment-generating function (`measure_eq_of_mgf_id_eq`, from Mathlib's complex moment-generating
+function). And the tilt shifts a Gaussian mean, `N(m, v) ↦ N(m + θv, v)`
+(`gaussianReal_tilted_const_mul`).
+
+Three parts of the library now run through it:
+- The static Girsanov theorem: `gaussianReal_withDensity_esscher` is the case `N(0, 1)` of the
+  Gaussian tilt. Its separate pdf proof (`gaussian_esscher_pdf`) is removed.
+- The exponential-martingale characterization of Brownian motion (`ExpMartingaleQBrownian`): it
+  identifies the Gaussian increment law with `measure_eq_of_mgf_id_eq`.
+- The jump layer (`BlackScholes/JumpDiffusionEsscher.lean`).
+
+For a jump law with every exponential moment, the tilted log-return law is the jump-diffusion law
+with drift `b + θσ²`, rate `Λ∫e^{θx}dν` and the tilted jump law (`jumpDiffusionIncrementLaw_tilted`).
+Its Laplace exponent is `u ↦ κ(u + θ) − κ(θ)`. The Esscher condition `κ(θ + 1) − κ(θ) = r` is the
+compensated drift of the tilted characteristics (`compensated_tilted_iff`). At such a `θ` the call
+against the tilted law is Merton's formula for the tilted jumps (`integral_call_tilted_eq_merton`).
+In Merton's model it is Merton's 1976 series with the jump mean `(1 + k)e^{θδ²} − 1`
+(`mertonJump_tilted`, `integral_call_tilted_eq_mertonCallPrice`). Without jumps, the tilt at
+`θ = (r − b − σ²/2)/σ²` gives the risk-neutral law and the Black–Scholes price for every drift
+(`integral_call_tilted_zero_eq_bsV`).
+
+**Next on the jump axis** (this phase did item 1 of the previous list, at the level of the law at
+one date):
+
+1. The Esscher parameter exists and is unique when `σ > 0`. `κ` is convex and strictly so with a
+   Gaussian part, so `θ ↦ κ(θ + 1) − κ(θ)` is strictly increasing. It tends to `±∞` with `θ`, and
+   it is continuous where `ν` has every exponential moment (Mathlib's analyticity of `mgf` on the
+   interior of `integrableExpSet`). The intermediate value theorem then gives one root.
+2. Formal incompleteness at one date. Show that the Esscher law and the law that keeps the jump
+   law and changes only the drift (the "Merton measure") are both compensated, yet give different
+   call prices when the jumps are nontrivial. This needs a strict comparison of the two Merton
+   mixtures, or two distinct martingale laws equivalent to the physical one.
+3. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
+   `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style
+   characterization used for constant `θ` (`ExpMartingaleQBrownian`) to independent increments
+   with jumps.
+4. Carried over: `compoundPoissonMeasure Λ ν`, with the convolution semigroup
+   `μ_s ∗ μ_t = μ_{s+t}`, then the construction of the process with jumps. Also the
+   implied-volatility function and the smile, and routing the hand-frozen conditional
+   expectations through `condExp_comp_prodMk_of_indep`.

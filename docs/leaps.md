@@ -23,8 +23,8 @@ it. The deductive chain, bottom-up:
 
 | Step | Theorem | Content |
 |---|---|---|
-| 1 | `gaussian_esscher_pdf` | Completing the square: `exp(c·x − c²/2)·φ₀,₁(x) = φ_c,₁(x)`. |
-| 2 | `gaussianReal_withDensity_esscher` | Measure level: tilting `N(0,1)` by the Esscher density gives exactly `N(c,1)` — mean shift `c`, variance fixed. The static (single-Gaussian) Girsanov theorem. |
+| 1 | `gaussianReal_tilted_const_mul` | The Gaussian Esscher transform (`Foundations/Esscher.lean`): `N(m, v)` tilted by `e^{θx}` is `N(m + θv, v)`, by comparing moment-generating functions. Until 2026-10-08 this step was the pdf identity `gaussian_esscher_pdf` (completing the square); the general tilt replaced it because the jump-diffusion Esscher transform needs the same lemma. |
+| 2 | `gaussianReal_withDensity_esscher` | Measure level: tilting `N(0,1)` by the Esscher density gives exactly `N(c,1)` — mean shift `c`, variance fixed. The static (single-Gaussian) Girsanov theorem: the case `m = 0`, `v = 1`, `θ = c` of step 1, with the normalizer `e^{c²/2}` written into the density. |
 | 3 | `map_withDensity_comp` | Pushforward commutes with a density factoring through the map: `(P.withDensity (g∘W)).map W = (P.map W).withDensity g`. Proved from `Measure.ext` + `setLIntegral_map`; **upstreamable to Mathlib**. |
 | 4 | `hasLaw_esscher_tilt` | Girsanov for a random variable: if `W ~ N(0,1)` under `P`, then `W ~ N(c,1)` under `Q := P.withDensity(exp(c·W − c²/2))`. |
 | 5 | `hasLaw_sub_const` | Recentring: `W − c ~ N(0,1)` under `Q`. |

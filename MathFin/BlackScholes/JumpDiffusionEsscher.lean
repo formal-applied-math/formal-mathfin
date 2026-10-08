@@ -60,8 +60,8 @@ lemma jumpDiffusionExponent_tilted (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ
     jumpDiffusionExponent (b + θ * σ ^ 2) σ (Λ * jumpMoment ν θ) (ν.tilted (θ * ·)) u
       = jumpDiffusionExponent b σ Λ ν (u + θ) - jumpDiffusionExponent b σ Λ ν θ := by
   have hm : (∫ x, rexp (θ * x) ∂ν) ≠ 0 := (integral_exp_pos hθ).ne'
-  simp only [jumpDiffusionExponent, integral_exp_mul_tilted_const_mul, NNReal.coe_mul, jumpMoment,
-    NNReal.coe_mk]
+  have hΛm : ((Λ * jumpMoment ν θ : ℝ≥0) : ℝ) = Λ * ∫ x, rexp (θ * x) ∂ν := rfl
+  simp only [jumpDiffusionExponent, integral_exp_mul_tilted_const_mul, hΛm]
   field_simp
   ring
 

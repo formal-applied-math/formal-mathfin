@@ -26,6 +26,50 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The Esscher transform: one exponential tilt for Girsanov, Brownian motion and jumps (2026-10-08)
+
+Five entries added, all `full`: `mf-jump-diffusion-esscher-transform`,
+`mf-jump-diffusion-esscher-pricing`, `mf-merton-esscher-pricing`,
+`mf-black-scholes-esscher-pricing` and `gir-gaussian-esscher-tilt`. Corpus 490 → 495. The tilt
+lives in `Foundations/Esscher.lean`, the jump-diffusion results in
+`BlackScholes/JumpDiffusionEsscher.lean`.
+
+- One tilt. The Esscher transform with parameter `θ` of a law `μ` on `ℝ` is Mathlib's
+  `μ.tilted (θ * ·)`. Its exponential moments are ratios of those of `μ`
+  (`integral_exp_mul_tilted_const_mul`). A law with every exponential moment is determined by its
+  moment-generating function (`measure_eq_of_mgf_id_eq`, from Mathlib's complex moment-generating
+  function). A Gaussian law has its mean shifted: `N(m, v)` tilted is `N(m + θv, v)`
+  (`gaussianReal_tilted_const_mul`).
+- The same tilt, three users. The static Girsanov change of measure
+  `gaussianReal_withDensity_esscher` (behind `BSCallHyp.exists_of_physical`) is the case `N(0, 1)`
+  of the Gaussian tilt; its pdf proof `gaussian_esscher_pdf`, used nowhere else, is removed. The
+  exponential-martingale characterization of Brownian motion (`ExpMartingaleQBrownian`)
+  identifies the Gaussian increment law with `measure_eq_of_mgf_id_eq` instead of its own copy of
+  the complex-MGF argument. The jump layer is the third user.
+- The jump-diffusion law. When the jump law `ν` has exponential moments of every order, the tilted
+  log-return law over `τ` is the jump-diffusion law with drift `b + θσ²`, the same `σ`, rate
+  `Λ·∫e^{θx}dν` and the tilted jump law (`jumpDiffusionIncrementLaw_tilted`). Both laws have the
+  moment-generating function `u ↦ e^{(κ(u + θ) − κ(θ))τ}` (`jumpDiffusionExponent_tilted`).
+- Esscher pricing. The tilted characteristics are at their compensated drift exactly when
+  `κ(θ + 1) − κ(θ) = r` (`compensated_tilted_iff`). At such a `θ` the call against the tilted law
+  is Merton's formula for the tilted jump law (`integral_call_tilted_eq_merton`). Tilting keeps
+  Merton's jumps lognormal with the jump mean `(1 + k)e^{θδ²} − 1` (`mertonJump_tilted`), so in
+  Merton's model it is Merton's 1976 series (`integral_call_tilted_eq_mertonCallPrice`). Without
+  jumps the tilt at `θ = (r − b − σ²/2)/σ²` gives the risk-neutral law, and the Black–Scholes
+  price for every drift (`integral_call_tilted_zero_eq_bsV`, through
+  `jumpDiffusionIncrementLaw_zero_tilted`).
+
+Safe wording: "where the jump law has every exponential moment, the Esscher transform of the
+log-return law at one date is again a jump-diffusion law, and at an Esscher parameter the call
+against it is Merton's formula for the tilted jumps". The Esscher law is one choice of pricing law.
+With jumps the market is in general incomplete (not formalized), and other choices give other
+prices. Not covered:
+- the existence of an Esscher parameter with jumps;
+- jump laws with only some exponential moments, such as Kou's double-exponential jumps;
+- the Esscher measure on the process, a change of measure on `Ω` under which `X` is again a
+  jump-diffusion;
+- optimality properties of the Esscher measure.
+
 ### The Laplace exponent: the moment-generating function, exponential martingales, power claims (2026-10-08)
 
 Four entries added, all `full`: `mf-jump-diffusion-scaling`, `mf-jump-diffusion-levy-exponent`,
@@ -64,8 +108,8 @@ has moment-generating function `e^{κ(θ)τ}`, and `e^{θX_t − κ(θ)t}` is a 
 the power claim holds only when `P` is a martingale measure for the discounted price
 (`κ(1) = r`), and then it is an arbitrage-free price; with jumps the market is in general
 incomplete, so it need not be the only one (not formalized). Not covered: `θ` with
-`∫ e^{θx} dν = ∞`; the Esscher change of measure (the pricing measure built from these
-martingales); the convolution semigroup `μ_s ∗ μ_t = μ_{s+t}`; the existence of the process with
+`∫ e^{θx} dν = ∞`; the Esscher change of measure on the process (the transform of the law at
+one date is in the section above); the convolution semigroup `μ_s ∗ μ_t = μ_{s+t}`; the existence of the process with
 jumps.
 
 ### One conditional freezing lemma; European payoffs at every date (2026-10-08)
