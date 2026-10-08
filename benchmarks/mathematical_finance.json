@@ -2754,6 +2754,70 @@
       }
     },
     {
+      "id": "mf-jump-diffusion-price-parity",
+      "name": "Jump-Diffusion Put–Call Parity for the Price Functions",
+      "description": "For a drift b, a volatility σ, a jump intensity Λ ≥ 0, a jump law ν with ∫ eˣ dν < ∞, a rate r, a time τ ≥ 0 and any S, K, let C(S, τ) and P(S, τ) be the discounted expected payoffs e^{−rτ}(Se^Y − K)⁺ and e^{−rτ}(K − Se^Y)⁺ with Y a jump-diffusion log-return over τ (jumpDiffusionCallPrice, jumpDiffusionPutPrice). Then C(S, τ) = P(S, τ) + S·e^{(b + σ²/2 + Λ(∫ eˣ dν − 1) − r)τ} − Ke^{−rτ}. At the compensated drift b = r − σ²/2 − Λ(∫ eˣ dν − 1) the forward is worth S and C(S, τ) = P(S, τ) + S − Ke^{−rτ}, the usual put–call parity.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionOptionPrices\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Put–call parity for the jump-diffusion price functions.** -/\ntheorem jump_diffusion_price_parity_thm (S K r b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}\n    [IsProbabilityMeasure ν] (hν : Integrable Real.exp ν) (τ : ℝ≥0) :\n    MathFin.jumpDiffusionCallPrice S K r b σ Λ ν τ\n      = MathFin.jumpDiffusionPutPrice S K r b σ Λ ν τ\n        + S * Real.exp ((b + σ ^ 2 / 2 + Λ * (∫ x, Real.exp x ∂ν - 1) - r) * τ)\n        - K * Real.exp (-r * τ) :=\n  MathFin.jumpDiffusionCallPrice_eq S K r b σ Λ hν τ\n\n/-- At the compensated drift the parity is `C = P + S − Ke^{−rτ}`. -/\ntheorem jump_diffusion_price_parity_compensated_thm {S K r b σ : ℝ} {Λ : ℝ≥0} {ν : Measure ℝ}\n    [IsProbabilityMeasure ν] (hν : Integrable Real.exp ν)\n    (hb : b = r - σ ^ 2 / 2 - Λ * (∫ x, Real.exp x ∂ν - 1)) (τ : ℝ≥0) :\n    MathFin.jumpDiffusionCallPrice S K r b σ Λ ν τ\n      = MathFin.jumpDiffusionPutPrice S K r b σ Λ ν τ + S - K * Real.exp (-r * τ) :=\n  MathFin.jumpDiffusionCallPrice_eq_of_compensated hν hb τ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models); Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Pointwise c(x − K)⁺ = c(K − x)⁺ + (cx − cK) (mul_max_sub_zero_parity). Integrated against the log-return law, the forward term has mean S·e^{(b + σ²/2 + Λ(∫ eˣ dν − 1) − r)τ} (integral_exp_jumpDiffusionIncrementLaw), and every term is integrable because e^Y is (integrable_exp_jumpDiffusionIncrementLaw) (jumpDiffusionCallPrice_eq). At the compensated drift the exponent is 0 (jumpDiffusionCallPrice_eq_of_compensated). Lives in MathFin/BlackScholes/JumpDiffusionOptionPrices.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-put-intermediate-date",
+      "name": "Jump-Diffusion: The Put at an Intermediate Date Is the Put Price at the Current Spot",
+      "description": "Let X be a jump-diffusion log-price process on [0, ∞): adapted to a filtration 𝓕, X₀ = 0 almost surely, and each increment X_t − X_s (s ≤ t) independent of 𝓕_s with the law of bτ + σ√τ·Z + ∑_{i<N} Jᵢ, where τ = t − s, Z ~ N(0,1), N ~ Poisson(Λτ) and the Jᵢ are i.i.d. of law ν, all independent (JumpDiffusionProcess). For S₀ ≥ 0, K ≥ 0, a rate r and dates t ≤ T, E[e^{−r(T−t)}(K − S₀e^{X_T})⁺ | 𝓕_t] = P(S₀e^{X_t}, T − t) almost surely, where P is the jump-diffusion put price function (jumpDiffusionPutPrice, see mf-jump-diffusion-price-parity): the conditional value of the put given 𝓕_t is its price at the current spot S_t = S₀e^{X_t} and the remaining maturity. No drift condition is used. The process is described by these properties; its existence is not proved.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionOptionPrices\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The put at an intermediate date** is the put price function at the current spot and the\nremaining maturity. -/\ntheorem jump_diffusion_put_intermediate_date_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}\n    {b σ : ℝ} {Λ : ℝ≥0} {ν : Measure ℝ} (h : MathFin.JumpDiffusionProcess P 𝓕 X b σ Λ ν)\n    {S_0 K : ℝ} (hS_0 : 0 ≤ S_0) (hK : 0 ≤ K) (r : ℝ) {t T : ℝ≥0} (htT : t ≤ T) :\n    P[fun ω ↦ Real.exp (-r * (T - t : ℝ≥0)) * max (K - S_0 * Real.exp (X T ω)) 0 | 𝓕 t]\n      =ᵐ[P] fun ω ↦ MathFin.jumpDiffusionPutPrice (S_0 * Real.exp (X t ω)) K r b σ Λ ν (T - t) :=\n  h.condExp_put hS_0 hK r htT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The payoff is H(X_t, X_T − X_t) with H(x, y) = e^{−r(T−t)}(K − S₀e^{x+y})⁺, measurable and bounded by e^{−r(T−t)}K since S₀ ≥ 0. X_t is 𝓕_t-measurable and the increment is independent of 𝓕_t, so the conditional expectation averages the increment with X_t frozen (condExp_independent_kernel, BlackScholes/AmericanPut/Stopping/IndependentKernel.lean); the increment has the log-return law over T − t (JumpDiffusionProcess.law), which gives the put price function at S₀e^{X_t} (JumpDiffusionProcess.condExp_put). The process is assumed through its defining properties; path regularity is not used, and no such process is constructed. Lives in MathFin/BlackScholes/JumpDiffusionOptionPrices.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-call-intermediate-date",
+      "name": "Jump-Diffusion: The Call at an Intermediate Date Is the Call Price at the Current Spot",
+      "description": "Let X be a jump-diffusion log-price process on [0, ∞): adapted to a filtration 𝓕, X₀ = 0 almost surely, and each increment X_t − X_s (s ≤ t) independent of 𝓕_s with the law of bτ + σ√τ·Z + ∑_{i<N} Jᵢ, where τ = t − s, Z ~ N(0,1), N ~ Poisson(Λτ) and the Jᵢ are i.i.d. of law ν, all independent (JumpDiffusionProcess). For a jump law with ∫ eˣ dν < ∞, S₀ ≥ 0, K ≥ 0, a rate r and dates t ≤ T, E[e^{−r(T−t)}(S₀e^{X_T} − K)⁺ | 𝓕_t] = C(S₀e^{X_t}, T − t) almost surely, where C is the jump-diffusion call price function (jumpDiffusionCallPrice, see mf-jump-diffusion-price-parity): the conditional value of the call given 𝓕_t is its price at the current spot S_t = S₀e^{X_t} and the remaining maturity. No drift condition is used. The process is described by these properties; its existence is not proved.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionOptionPrices\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The call at an intermediate date** is the call price function at the current spot and the\nremaining maturity. -/\ntheorem jump_diffusion_call_intermediate_date_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}\n    {b σ : ℝ} {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν]\n    (h : MathFin.JumpDiffusionProcess P 𝓕 X b σ Λ ν) (hν : Integrable Real.exp ν)\n    {S_0 K : ℝ} (hS_0 : 0 ≤ S_0) (hK : 0 ≤ K) (r : ℝ) {t T : ℝ≥0} (htT : t ≤ T) :\n    P[fun ω ↦ Real.exp (-r * (T - t : ℝ≥0)) * max (S_0 * Real.exp (X T ω) - K) 0 | 𝓕 t]\n      =ᵐ[P] fun ω ↦ MathFin.jumpDiffusionCallPrice (S_0 * Real.exp (X t ω)) K r b σ Λ ν (T - t) :=\n  h.condExp_call hν hS_0 hK r htT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The call payoff is the put payoff plus the forward e^{−r(T−t)}S₀e^{X_T} − e^{−r(T−t)}K (mul_max_sub_zero_parity). Conditional expectations are linear (condExp_add, condExp_sub, condExp_smul, condExp_const); the put part is JumpDiffusionProcess.condExp_put (mf-jump-diffusion-put-intermediate-date), and E[e^{X_T} | 𝓕_t] = e^{X_t}·E[e^{X_T − X_t}] (condExp_exp_eq_of_indep_increment, Foundations/ExpMartingaleIndepIncrements.lean), with E[e^{X_T − X_t}] from the increment law (JumpDiffusionProcess.integral_exp_increment). Put–call parity of the price functions (jumpDiffusionCallPrice_eq) assembles the pieces into C(S₀e^{X_t}, T − t) (JumpDiffusionProcess.condExp_call). The process is assumed through its defining properties; no such process is constructed. Lives in MathFin/BlackScholes/JumpDiffusionOptionPrices.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-merton-intermediate-date",
+      "name": "Jump-Diffusion: Merton's Formula Prices the Call at Every Date",
+      "description": "Let X be a jump-diffusion log-price process on [0, ∞): adapted to a filtration 𝓕, X₀ = 0 almost surely, and each increment X_t − X_s (s ≤ t) independent of 𝓕_s with the law of bτ + σ√τ·Z + ∑_{i<N} Jᵢ, where τ = t − s, Z ~ N(0,1), N ~ Poisson(Λτ) and the Jᵢ are i.i.d. of law ν, all independent (JumpDiffusionProcess). Suppose the drift is compensated, b = r − σ²/2 − Λ(∫ eˣ dν − 1), for a rate r and a jump law with ∫ eˣ dν < ∞. For S₀ > 0, K > 0, σ > 0 and dates t < T, almost surely E[e^{−r(T−t)}(S₀e^{X_T} − K)⁺ | 𝓕_t] = ∫ n, ∫ j, C_BS(S_t·e^{−Λ(T−t)(∫ eˣ dν − 1) + ∑_{i<n} jᵢ}, T − t) dν^ℕ(j) dPoisson(Λ(T − t))(n), where S_t = S₀e^{X_t}, ν^ℕ is the infinite product of the jump law and C_BS is the Black–Scholes call price (bsV) at volatility σ and rate r: Merton's formula for a general jump law, at the current spot and the remaining maturity. The process is described by these properties; its existence is not proved.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionOptionPrices\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Merton's formula at intermediate dates**: at the compensated drift, the conditional value\nof the call is Merton's formula at the current spot and the remaining maturity. -/\ntheorem jump_diffusion_merton_intermediate_date_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}\n    {b σ : ℝ} {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν]\n    (h : MathFin.JumpDiffusionProcess P 𝓕 X b σ Λ ν) (hν : Integrable Real.exp ν) {r : ℝ}\n    (hb : b = r - σ ^ 2 / 2 - Λ * (∫ x, Real.exp x ∂ν - 1)) {S_0 K : ℝ} (hS_0 : 0 < S_0)\n    (hK : 0 < K) (hσ : 0 < σ) {t T : ℝ≥0} (htT : t < T) :\n    P[fun ω ↦ Real.exp (-r * (T - t : ℝ≥0)) * max (S_0 * Real.exp (X T ω) - K) 0 | 𝓕 t]\n      =ᵐ[P] fun ω ↦ ∫ n, ∫ j, MathFin.bsV K r σ (S_0 * Real.exp (X t ω)\n          * Real.exp (-(Λ * (T - t : ℝ≥0) * (∫ x, Real.exp x ∂ν - 1))\n            + ∑ i ∈ Finset.range n, j i))\n          (T - t : ℝ≥0) ∂(Measure.infinitePi fun _ : ℕ ↦ ν) ∂(poissonMeasure (Λ * (T - t))) :=\n  h.condExp_call_eq_merton hν hb hS_0 hK hσ htT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The conditional value of the call is the call price function C(S_t, T − t) for any drift (JumpDiffusionProcess.condExp_call, mf-jump-diffusion-call-intermediate-date). The price function integrates the payoff against the log-return law over τ = T − t, which is by definition the image of the canonical model N(0,1) ⊗ Poisson(Λτ) ⊗ ν^ℕ (jumpDiffusionIncrementLaw, integral_map). The canonical coordinates satisfy JumpDiffusionHyp (jumpDiffusionHyp_canonical, mf-jump-diffusion-model-exists); at the compensated drift the log-return is the exponent of jumpDiffusionTerminal with κ = Λτ(∫ eˣ dν − 1), so JumpDiffusionHyp.call_eq_integral_infinitePi (mf-jump-diffusion-call-law-invariance) turns the price function into the Poisson(Λτ) mixture of Black–Scholes prices (jumpDiffusionCallPrice_eq_merton). The positivity hypotheses are those of the Black–Scholes mixing formula. The process is assumed through its defining properties; no such process is constructed. Lives in MathFin/BlackScholes/JumpDiffusionOptionPrices.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-gaussianPDF-symmetry",
       "name": "Standard Normal PDF Symmetry",
       "description": "ϕ(-z) = ϕ(z) for the standard normal density, since the gaussian is symmetric around 0.",
