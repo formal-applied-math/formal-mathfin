@@ -54,6 +54,8 @@ import MathFin.Foundations.PoissonPgf
 import MathFin.Foundations.IndepFreezing
 -- Jensen's inequality through a supporting line (no closed domain needed)
 import MathFin.Foundations.AffineMinorant
+-- The exponential martingale of a process with independent increments
+import MathFin.Foundations.ExpMartingaleIndepIncrements
 import MathFin.Foundations.PoissonRandomMeasure
 import MathFin.Foundations.PoissonCompensatedIsometryAdapted
 import MathFin.Foundations.PoissonCompensatedBilinear
@@ -334,6 +336,8 @@ import MathFin.BlackScholes.JumpImpliedVol
 -- The canonical jump-diffusion model: the hypotheses are satisfiable for every
 -- intensity and jump law, and the call depends only on the intensity and the jump law
 import MathFin.BlackScholes.JumpDiffusionCanonical
+-- The jump-diffusion price process: discounted, a martingale exactly at the compensated drift
+import MathFin.BlackScholes.JumpDiffusionProcess
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser
