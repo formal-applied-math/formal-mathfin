@@ -19,9 +19,9 @@ mean, `1` (`condExp_indep_eq`); the factor `e^{X_s − ψ(s)}` is known at time 
 the conditional expectation (`condExp_mul_of_stronglyMeasurable_left`).
 
 For a Lévy process started at `0`, `ψ(t) = t·log 𝔼[e^{X_1}]` is linear in `t`. The Wald
-martingale of Brownian motion (`IsFilteredPreBrownian.waldExponential_isMartingale`) is,
-mathematically, the case of Gaussian increments; it is proved separately.
-`BlackScholes/JumpDiffusionProcess.lean` applies the lemma to the log-price of a jump-diffusion.
+martingale of Brownian motion is the case `αX`, `ψ(t) = α²t/2`, and is derived from this lemma
+(`IsFilteredPreBrownian.waldExponential_isMartingale`, `Foundations/BrownianMartingale.lean`);
+`BlackScholes/JumpDiffusionProcess.lean` applies it to the log-price of a jump-diffusion.
 
 ## Main results
 

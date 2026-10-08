@@ -78,7 +78,7 @@
         "reference": "Risk-neutral pricing / first FTAP, continuous time (Saporito Ch 9; Shreve II Ch 5)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. The discounted price e^{−rt}·S_t = S₀·exp(σX_t − σ²t/2) is S₀ • (Wald exponential), and IsFilteredPreBrownian.waldExponential_isMartingale (MathFin/Foundations/BrownianMartingale.lean: pull-out + condExp_indep_eq + Gaussian MGF) plus Martingale.smul give the martingale property — no further stochastic-calculus machinery. Continuous-time analogue of the discrete binomial EMM (Binomial/SecondFTAP.lean). Lives in MathFin/Foundations/ContinuousFTAP.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. The discounted price e^{−rt}·S_t = S₀·exp(σX_t − σ²t/2) is S₀ • (Wald exponential), and IsFilteredPreBrownian.waldExponential_isMartingale (MathFin/Foundations/BrownianMartingale.lean, the exponential martingale of independent increments, martingale_exp_sub_of_indep_increments, with the Gaussian MGF) plus Martingale.smul give the martingale property — no further stochastic-calculus machinery. Continuous-time analogue of the discrete binomial EMM (Binomial/SecondFTAP.lean). Lives in MathFin/Foundations/ContinuousFTAP.lean. Axioms-clean."
       }
     },
     {

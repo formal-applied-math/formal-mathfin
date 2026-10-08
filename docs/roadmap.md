@@ -2005,11 +2005,19 @@ detour is gone. The same pass removed duplication the values panel found:
   (`integral_lt_integral_of_ae_le_of_not_ae_eq`);
 - the compensated jump part's moment is one lemma (`integral_exp_compensatedJumpPart`).
 
+The Wald martingale of Brownian motion, proved by hand since the Brownian foundations, is now the
+exponential martingale of the process `αB` (`martingale_exp_sub_of_indep_increments`, with the
+Gaussian moment `𝔼[e^{α(B_t − B_s)}] = e^{α²(t − s)/2}`), so the continuous-time first FTAP, the
+Girsanov change of measure and the jump-diffusion martingale property share one lemma.
+
 **Next on the jump axis:**
 
-1. The Wald martingale as a corollary of `martingale_exp_sub_of_indep_increments`.
-2. Construct the price process with jumps: a compound Poisson process independent of the Brownian
+1. Construct the price process with jumps: a compound Poisson process independent of the Brownian
    motion, or a Poisson random measure (`Foundations/PoissonRandomMeasure.lean` is a
    hypothesis-bundling structure, not yet witnessed).
-3. An implied-volatility function, after the `σ → 0` limit, so the smile can be stated as a
+2. An implied-volatility function, after the `σ → 0` limit, so the smile can be stated as a
    function of the strike; Lee's moment formula; the characteristic function; Kou's compensator.
+3. The pull-out-plus-independence step (`condExp_mul_of_stronglyMeasurable_left` with
+   `condExp_indep_eq`) is still written by hand in the square-minus-time martingale, the
+   pointwise bracket, the simple Doléans exponential and the `Q`-Brownian exponential martingale;
+   one `condExp_mul_of_indep` would serve them all.
