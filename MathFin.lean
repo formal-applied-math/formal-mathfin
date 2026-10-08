@@ -334,7 +334,7 @@ import MathFin.BlackScholes.JumpDiffusionMixing
 -- Compensated jumps lift the Black–Scholes implied volatility strictly above σ
 import MathFin.BlackScholes.JumpImpliedVol
 -- The canonical jump-diffusion model: the hypotheses are satisfiable for every
--- intensity and jump law, and the call depends only on the intensity and the jump law
+-- expected jump count and jump law, and the call depends only on these two
 import MathFin.BlackScholes.JumpDiffusionCanonical
 -- The jump-diffusion price process: discounted, a martingale exactly at the compensated drift
 import MathFin.BlackScholes.JumpDiffusionProcess
@@ -344,6 +344,9 @@ import MathFin.BlackScholes.JumpDiffusionOptionPrices
 import MathFin.BlackScholes.GaussianSmoothing
 import MathFin.BlackScholes.JumpDiffusionMerton
 import MathFin.BlackScholes.JumpDiffusionBrownian
+-- The Lévy exponent: scaling, exponential moments at every order, the exponential
+-- martingales e^{θX_t − κ(θ)t}, power claims at every date
+import MathFin.BlackScholes.JumpDiffusionExponent
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser

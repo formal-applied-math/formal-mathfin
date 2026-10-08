@@ -749,6 +749,19 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.markovPathMeasure_cylinder' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.markovPathMeasure_cylinder
 
+-- The Lévy exponent (2026-10-08): scaling a jump-diffusion scales its characteristics,
+-- so the moment of order θ is the moment at 1 of θX; e^{θX_t − κ(θ)t} is the
+-- discounted-price martingale of θX at the rate κ(θ); power claims at every date
+
+/-- info: 'MathFin.jumpDiffusionMeasure_map_jumps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionMeasure_map_jumps
+
+/-- info: 'MathFin.JumpDiffusionProcess.const_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.const_mul
+
+/-- info: 'MathFin.JumpDiffusionProcess.martingale_iff_exponent_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.martingale_iff_exponent_one
+
 -- Blueprint-spine closure (2026-06-06): every spine node is axiom-pinned.
 -- Gap found by tests/test_values.py::test_blueprint_spine_is_audited on its
 -- first run — seven tagged headliners (including bs_identity, the magic

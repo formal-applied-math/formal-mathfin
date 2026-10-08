@@ -2754,6 +2754,70 @@
       }
     },
     {
+      "id": "mf-jump-diffusion-scaling",
+      "name": "Scaling a Jump-Diffusion Log-Return Scales Its Characteristics",
+      "description": "Let the log-return law over a time τ ≥ 0 be the law of bτ + σ√τ·Z + ∑_{i<N} Jᵢ with Z ~ N(0,1), N ~ Poisson(Λτ) and the Jᵢ i.i.d. of law ν (a probability measure), all independent (jumpDiffusionIncrementLaw). For every real θ, its push-forward under y ↦ θy is the log-return law over τ with drift θb, volatility coefficient θσ, the same rate Λ, and the jump law ν pushed forward by x ↦ θx. It is an identity of laws, with no integrability hypothesis.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionExponent\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Scaling a jump-diffusion log-return** scales its characteristics. -/\ntheorem jump_diffusion_scaling_thm (θ b σ : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ)\n    [IsProbabilityMeasure ν] (τ : ℝ≥0) :\n    (MathFin.jumpDiffusionIncrementLaw b σ Λ ν τ).map (θ * ·)\n      = MathFin.jumpDiffusionIncrementLaw (θ * b) (θ * σ) Λ (ν.map (θ * ·)) τ :=\n  MathFin.jumpDiffusionIncrementLaw_map_const_mul θ b σ Λ ν τ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. On the canonical model (jumpDiffusionMeasure: a standard normal sample, a Poisson count and i.i.d. jump sizes) the log-return is a function of the three coordinates. θ times it is the log-return with characteristics (θb, θσ) at the jump sizes multiplied by θ (const_mul_jumpDiffusionLogReturn), and multiplying every jump size of the canonical model by θ gives the canonical model with jump law ν ∘ (θ·)⁻¹ (jumpDiffusionMeasure_map_jumps, stated for any measurable map of the jumps, from Mathlib's Measure.map_prod_map and Measure.infinitePi_map_pi). On the process the same scaling makes θX a JumpDiffusionProcess with the scaled characteristics (JumpDiffusionProcess.const_mul). Lives in MathFin/BlackScholes/JumpDiffusionExponent.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-levy-exponent",
+      "name": "The Lévy Exponent: Exponential Moments of a Jump-Diffusion Log-Return at Every Order",
+      "description": "With the log-return law over τ ≥ 0 as in mf-jump-diffusion-log-return-mgf (drift b, volatility σ, jump rate Λ ≥ 0, jump law ν a probability measure): for every real θ with ∫ e^{θx} dν < ∞, ∫ e^{θy} = e^{κ(θ)τ}, where κ(θ) = bθ + σ²θ²/2 + Λ(∫ e^{θx} dν − 1) is the Lévy exponent, the cumulant per unit time. At θ = 1 this is mf-jump-diffusion-log-return-mgf. Nothing is claimed for θ with ∫ e^{θx} dν = ∞.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionExponent\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The Lévy exponent**: the exponential moment of a jump-diffusion log-return at every order\n`θ` with `∫ e^{θx} dν < ∞`. -/\ntheorem jump_diffusion_levy_exponent_thm (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}\n    [IsProbabilityMeasure ν] {θ : ℝ} (hν : Integrable (fun x ↦ Real.exp (θ * x)) ν)\n    (τ : ℝ≥0) :\n    ∫ y, Real.exp (θ * y) ∂(MathFin.jumpDiffusionIncrementLaw b σ Λ ν τ)\n      = Real.exp ((b * θ + σ ^ 2 * θ ^ 2 / 2 + Λ * (∫ x, Real.exp (θ * x) ∂ν - 1)) * τ) :=\n  MathFin.integral_exp_const_mul_jumpDiffusionIncrementLaw b σ Λ hν τ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The moment at θ is the moment at 1 of the scaled log-return θY (integral_map), and θY is a jump-diffusion log-return with drift θb, volatility coefficient θσ and jump law ν ∘ (θ·)⁻¹ (jumpDiffusionIncrementLaw_map_const_mul, mf-jump-diffusion-scaling). Its moment at 1 is integral_exp_jumpDiffusionIncrementLaw, whose jump term ∫ eˣ d(ν ∘ (θ·)⁻¹) is ∫ e^{θx} dν. The exponent is the definition jumpDiffusionExponent, which the statement writes out. Lives in MathFin/BlackScholes/JumpDiffusionExponent.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-exponential-martingales",
+      "name": "Jump-Diffusion Exponential Martingales exp(θX_t − κ(θ)t)",
+      "description": "Let X be a jump-diffusion log-price process (JumpDiffusionProcess: adapted to a filtration 𝓕, X₀ = 0 almost surely, each increment X_t − X_s (s ≤ t) independent of 𝓕_s with the log-return law over t − s of drift b, volatility σ, jump rate Λ and jump law ν). For every real θ with ∫ e^{θx} dν < ∞, t ↦ exp(θX_t − κ(θ)t) is an 𝓕-martingale, where κ(θ) = bθ + σ²θ²/2 + Λ(∫ e^{θx} dν − 1). At θ = 1 with κ(1) = r it is the discounted price e^{−rt}e^{X_t} (mf-jump-diffusion-discounted-price-martingale). With Λ = 0, b = 0 and σ = 1, κ(θ) = θ²/2, the exponent of the Wald martingales of Brownian motion (bm-rmk-5.1.6-exp), which rest on the same exponential-martingale lemma. The process is assumed through its defining properties; it is constructed only without jumps (mf-jump-diffusion-brownian-no-jumps).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionExponent\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The exponential martingales of a jump-diffusion**: `t ↦ e^{θX_t − κ(θ)t}`. -/\ntheorem jump_diffusion_exponential_martingales_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}\n    {b σ : ℝ} {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν]\n    (h : MathFin.JumpDiffusionProcess P 𝓕 X b σ Λ ν) {θ : ℝ}\n    (hν : Integrable (fun x ↦ Real.exp (θ * x)) ν) :\n    Martingale (fun (t : ℝ≥0) ω ↦ Real.exp (θ * X t ω\n      - (b * θ + σ ^ 2 * θ ^ 2 / 2 + Λ * (∫ x, Real.exp (θ * x) ∂ν - 1)) * t)) 𝓕 P :=\n  h.martingale_exp_const_mul_sub hν\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. θX is a jump-diffusion with drift θb, volatility coefficient θσ, the same rate and jump law ν ∘ (θ·)⁻¹ (JumpDiffusionProcess.const_mul, from jumpDiffusionIncrementLaw_map_const_mul). For it the discounted-price criterion (JumpDiffusionProcess.martingale_iff) at S₀ = 1 and the rate κ(θ) holds, since κ(θ) − (θσ)²/2 − Λ(∫ eˣ d(ν ∘ (θ·)⁻¹) − 1) = θb. So e^{−κ(θ)t}e^{θX_t} is a martingale (JumpDiffusionProcess.martingale_exp_const_mul_sub). The same file restates the discounted-price criterion as κ(1) = r (JumpDiffusionProcess.martingale_iff_exponent_one). The process is assumed through its defining properties; path regularity is not used; such a process is constructed only without jumps (jumpDiffusionProcess_brownian). Lives in MathFin/BlackScholes/JumpDiffusionExponent.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-power-claim-every-date",
+      "name": "Jump-Diffusion: Power Claims at Every Date Before Maturity",
+      "description": "Let X be a jump-diffusion log-price process (as in mf-jump-diffusion-exponential-martingales) and S_t = S₀e^{X_t} with S₀ > 0. For a real p with ∫ e^{px} dν < ∞, a rate r and dates t ≤ T, almost surely E[e^{−r(T−t)}S_T^p | 𝓕_t] = S_t^p·e^{(κ(p) − r)(T − t)}, where κ(p) = bp + σ²p²/2 + Λ(∫ e^{px} dν − 1). This P-conditional expectation is an arbitrage-free price of the claim paying S_T^p when P is a martingale measure for the discounted price, at the compensated drift κ(1) = r (mf-jump-diffusion-discounted-price-martingale); the jump-diffusion market is incomplete, so it is not the only one. The identity holds for each pair of dates, almost surely. The process is assumed through its defining properties; it is constructed only without jumps (mf-jump-diffusion-brownian-no-jumps).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionExponent\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Power claims at every date before maturity** in a jump-diffusion. -/\ntheorem jump_diffusion_power_claim_every_date_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}\n    {b σ : ℝ} {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν]\n    (h : MathFin.JumpDiffusionProcess P 𝓕 X b σ Λ ν) {p : ℝ}\n    (hν : Integrable (fun x ↦ Real.exp (p * x)) ν) {S_0 : ℝ} (hS_0 : 0 < S_0) (r : ℝ)\n    {t T : ℝ≥0} (htT : t ≤ T) :\n    P[fun ω ↦ Real.exp (-r * (T - t : ℝ≥0)) * (S_0 * Real.exp (X T ω)) ^ p | 𝓕 t]\n      =ᵐ[P] fun ω ↦ (S_0 * Real.exp (X t ω)) ^ p\n        * Real.exp ((b * p + σ ^ 2 * p ^ 2 / 2 + Λ * (∫ x, Real.exp (p * x) ∂ν - 1) - r)\n          * (T - t : ℝ≥0)) :=\n  h.condExp_rpow hν hS_0 r htT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The payoff is f(X_T) with f(x) = e^{−r(T−t)}(S₀eˣ)^p, so its conditional expectation is ∫ f(X_t + y) dμ_{T−t}(y) over the remaining log-return law (JumpDiffusionProcess.condExp_comp, mf-jump-diffusion-payoff-every-date). (S₀e^{x+y})^p = (S₀eˣ)^p·e^{py} (Real.mul_rpow, Real.exp_mul), and ∫ e^{py} dμ_{T−t} = e^{κ(p)(T−t)} (integral_exp_const_mul_jumpDiffusionIncrementLaw, mf-jump-diffusion-levy-exponent). The payoff is integrable because e^{pX_T} is (JumpDiffusionProcess.integrable_exp_const_mul, through the scaled process). The p-th power is Real.rpow, and S₀ > 0 keeps its base positive. The process is assumed through its defining properties; such a process is constructed only without jumps (jumpDiffusionProcess_brownian). Lives in MathFin/BlackScholes/JumpDiffusionExponent.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-jump-diffusion-price-parity",
       "name": "Jump-Diffusion Put–Call Parity for the Price Functions",
       "description": "For a drift b, a volatility σ, a jump rate Λ ≥ 0, a jump law ν with ∫ eˣ dν < ∞, a rate r, a time τ ≥ 0 and any S, K, let C(S, τ) and P(S, τ) be the discounted expected payoffs e^{−rτ}(Se^Y − K)⁺ and e^{−rτ}(K − Se^Y)⁺ with Y a jump-diffusion log-return over τ (jumpDiffusionCallPrice, jumpDiffusionPutPrice). Then C(S, τ) = P(S, τ) + S·e^{(b + σ²/2 + Λ(∫ eˣ dν − 1) − r)τ} − Ke^{−rτ}. At the compensated drift b = r − σ²/2 − Λ(∫ eˣ dν − 1) the forward is worth S and C(S, τ) = P(S, τ) + S − Ke^{−rτ}, the usual put–call parity.",

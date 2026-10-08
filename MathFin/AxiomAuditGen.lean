@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (501 MathFin constants, 29 upstream). Citations
+  corpus (505 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -238,6 +238,12 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.JumpDiffusionProcess.condExp_put_eq_mertonPutPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.condExp_put_eq_mertonPutPrice
+
+/-- info: 'MathFin.JumpDiffusionProcess.condExp_rpow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.condExp_rpow
+
+/-- info: 'MathFin.JumpDiffusionProcess.martingale_exp_const_mul_sub' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.martingale_exp_const_mul_sub
 
 /-- info: 'MathFin.JumpDiffusionProcess.martingale_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.martingale_iff
@@ -983,6 +989,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.integral_comp_prodMk_of_indepFun' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.integral_comp_prodMk_of_indepFun
 
+/-- info: 'MathFin.integral_exp_const_mul_jumpDiffusionIncrementLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_exp_const_mul_jumpDiffusionIncrementLaw
+
 /-- info: 'MathFin.integral_exp_gaussianReal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.integral_exp_gaussianReal
 
@@ -1069,6 +1078,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.jumpDiffusionHyp_canonical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionHyp_canonical
+
+/-- info: 'MathFin.jumpDiffusionIncrementLaw_map_const_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionIncrementLaw_map_const_mul
 
 /-- info: 'MathFin.jumpDiffusionIncrementLaw_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionIncrementLaw_zero
