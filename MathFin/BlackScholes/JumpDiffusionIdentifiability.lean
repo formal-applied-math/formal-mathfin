@@ -201,16 +201,16 @@ theorem jumpDiffusionIncrementLaw_eq_iff {b₁ b₂ σ : ℝ} {Λ₁ Λ₂ : ℝ
       · exact integrable_exp_mul_withDensity_coshKernel Λ₁
           (hin (u + ε / 2) (by linarith) (by linarith)).1
           (hin (u - ε / 2) (by linarith) (by linarith)).1 (hin u (by linarith) (by linarith)).1
-      · have e₊ := (hin (u + ε / 2) (by linarith) (by linarith)).2.2
-        have e₋ := (hin (u - ε / 2) (by linarith) (by linarith)).2.2
-        have e₀ := (hin u (by linarith) (by linarith)).2.2
+      · have ep := (hin (u + ε / 2) (by linarith) (by linarith)).2.2
+        have em := (hin (u - ε / 2) (by linarith) (by linarith)).2.2
+        have e0 := (hin u (by linarith) (by linarith)).2.2
         rw [mgf_id_withDensity_coshKernel Λ₁ (hin (u + ε / 2) (by linarith) (by linarith)).1
             (hin (u - ε / 2) (by linarith) (by linarith)).1 (hin u (by linarith) (by linarith)).1,
           mgf_id_withDensity_coshKernel Λ₂ (hin (u + ε / 2) (by linarith) (by linarith)).2.1
             (hin (u - ε / 2) (by linarith) (by linarith)).2.1
             (hin u (by linarith) (by linarith)).2.1]
-        simp only [jumpDiffusionExponent] at e₊ e₋ e₀
-        linear_combination e₊ + e₋ - 2 * e₀
+        simp only [jumpDiffusionExponent] at ep em e0
+        linear_combination ep + em - 2 * e0
     -- dividing by the kernel gives the Lévy measures off `0`
     have hΠ : (Λ₁ • ν₁).restrict {0}ᶜ = (Λ₂ • ν₂).restrict {0}ᶜ := by
       rw [restrict_compl_zero_eq_withDensity_inv hs (Λ₁ • ν₁),

@@ -101,7 +101,7 @@ theorem measure_eq_of_integral_call_eq {μ μ' : Measure ℝ} [IsProbabilityMeas
   have htail (a : ℝ) : μ (Ioi a) = μ' (Ioi a) := by
     have hset : {y | S * Real.exp a < S * Real.exp y} = Ioi a := by
       ext y
-      rw [mem_setOf_eq, mem_Ioi, mul_lt_mul_iff_right₀ hS, Real.exp_lt_exp]
+      rw [mem_ofPred_eq, mem_Ioi, mul_lt_mul_iff_right₀ hS, Real.exp_lt_exp]
     have hlim := tendsto_call_spread hX (hμ.const_mul S) (S * Real.exp a)
     have hlim' := tendsto_call_spread hX (hμ'.const_mul S) (S * Real.exp a)
     rw [hset] at hlim hlim'
