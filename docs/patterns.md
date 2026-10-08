@@ -1795,3 +1795,21 @@ print("MISSED:", missed or "none")
 
 One stale pattern (a `·` bullet where the script expected spaces) cost a full build cycle before
 this was changed.
+
+## The Esscher and incompleteness rungs (2026-10-08 batch)
+
+### Name the set when `interior_subset` meets an `Integrable` goal
+
+`have h : Integrable (fun x ↦ rexp (θ * x)) ν := interior_subset hθ` (with
+`hθ : θ ∈ interior (integrableExpSet id ν)`) fails. The expected type is unified with `?a ∈ ?s`
+before `hθ` fixes `?s`, and first-order approximation solves it at the type `Prop`, which carries a
+topology: the error reads
+`HasFiniteIntegral … ∈ interior (And (AEStronglyMeasurable …))`. Name the set, as Mathlib's
+`MGFAnalytic` does: `interior_subset (s := integrableExpSet id ν) hθ`.
+
+### `₊`, `₋` and `Π` cannot appear in identifiers
+
+Subscript digits are identifier characters; `₊` and `₋` are not. `have e₊ := …` ends the
+declaration at `e` with *"unexpected token '₊'; expected command"*. `Π` is the pi-type token, so
+`hΠ` parses as `h` followed by `Π`. In both cases every later goal of the proof is then reported
+as unsolved. The parse error is the diagnostic one; the "unsolved goals" errors are its echo.

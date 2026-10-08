@@ -2112,11 +2112,15 @@ level of the law at one date):
    pricing now need only the jump law's moment-generating function finite near `θ` (and at
    `1 + θ`), so Kou's double-exponential jumps are covered. The parameter's existence in that case
    (an MGF finite only on an interval) is still open.
-2. Formal incompleteness at one date. Show that the Esscher law and the law that keeps the jump
-   law and changes only the drift (the "Merton measure") are both compensated, yet give different
-   call prices for some strike when the jumps are nontrivial and the Esscher parameter is not 0.
-   This needs a strict comparison of the two Merton mixtures, or two distinct martingale laws
-   equivalent to the physical one.
+2. Done (corpus 500): formal incompleteness at one date, `exists_call_esscher_ne_merton`. The
+   route is not a comparison of the two Merton mixtures but two identification theorems. Call
+   prices at every strike determine the law (`measure_eq_of_integral_call_eq`, from
+   `tendsto_call_spread`: call spreads tend to the digital). The law at one date determines the drift
+   and the Lévy measure off `0` (`jumpDiffusionIncrementLaw_eq_iff`, second differences of `κ` and
+   local MGF uniqueness for finite measures). The Esscher transform multiplies the Lévy measure by
+   `e^{θx}` (`smul_tilted_eq_withDensity`), so the two laws differ when `θ ≠ 0`; and `θ ≠ 0`
+   whenever the physical drift is off the compensated one. Still open: that the law also determines
+   `σ²`, and that the Merton measure's law is equivalent to the physical one.
 3. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
    `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style
    characterization used for constant `θ` (`ExpMartingaleQBrownian`) to independent increments

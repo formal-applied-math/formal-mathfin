@@ -801,6 +801,23 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.integral_call_tilted_zero_eq_bsV' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.integral_call_tilted_zero_eq_bsV
 
+-- Incompleteness at one date (2026-10-08): call spreads tend to the digital, so call prices at
+-- every strike determine the law; the law at one date determines the drift and the Lévy measure
+-- off 0; so with nontrivial jumps the Esscher law and the Merton measure price some call
+-- differently
+
+/-- info: 'MathFin.tendsto_call_spread' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.tendsto_call_spread
+
+/-- info: 'MathFin.measure_eq_of_integral_call_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.measure_eq_of_integral_call_eq
+
+/-- info: 'MathFin.jumpDiffusionIncrementLaw_eq_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionIncrementLaw_eq_iff
+
+/-- info: 'MathFin.exists_call_esscher_ne_merton' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.exists_call_esscher_ne_merton
+
 -- Blueprint-spine closure (2026-06-06): every spine node is axiom-pinned.
 -- Gap found by tests/test_values.py::test_blueprint_spine_is_audited on its
 -- first run — seven tagged headliners (including bs_identity, the magic

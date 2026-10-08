@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (512 MathFin constants, 29 upstream). Citations
+  corpus (516 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -638,6 +638,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.existsUnique_expectileGap_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.existsUnique_expectileGap_eq_zero
 
+/-- info: 'MathFin.exists_call_esscher_ne_merton' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.exists_call_esscher_ne_merton
+
 /-- info: 'MathFin.exists_gaussian_uncorrelated_not_indepFun' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.exists_gaussian_uncorrelated_not_indepFun
 
@@ -1097,6 +1100,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.jumpDiffusionHyp_canonical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionHyp_canonical
 
+/-- info: 'MathFin.jumpDiffusionIncrementLaw_eq_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionIncrementLaw_eq_iff
+
 /-- info: 'MathFin.jumpDiffusionIncrementLaw_map_const_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionIncrementLaw_map_const_mul
 
@@ -1195,6 +1201,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.measureReal_poisson_max_gpd' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.measureReal_poisson_max_gpd
+
+/-- info: 'MathFin.measure_eq_of_integral_call_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.measure_eq_of_integral_call_eq
 
 /-- info: 'MathFin.measure_eq_of_pricesGainsAtZero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.measure_eq_of_pricesGainsAtZero
@@ -1444,6 +1453,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.tendsto_bsV_sigma_atTop' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.tendsto_bsV_sigma_atTop
+
+/-- info: 'MathFin.tendsto_call_spread' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.tendsto_call_spread
 
 /-- info: 'MathFin.tendsto_claytonCopulaFun_diag_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.tendsto_claytonCopulaFun_diag_div

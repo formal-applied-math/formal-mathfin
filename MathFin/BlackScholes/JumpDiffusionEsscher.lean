@@ -45,9 +45,10 @@ law `ν` (`jumpDiffusionIncrementLaw`), whose Laplace exponent is `κ` (`jumpDif
   Black–Scholes formula.
 
 The statements are about the law at one date, not about the process under a changed measure. With
-jumps (`Λ > 0`) the market is in general incomplete (not formalized here), and the Esscher law is
-then one pricing law among others. Without a Gaussian part (`σ = 0`) the existence of an Esscher
-parameter is not proved.
+nontrivial jumps the Esscher law is one pricing law among others: when the physical drift is not
+already compensated, the Merton measure is compensated too and prices some call differently
+(`exists_call_esscher_ne_merton`, under its moment conditions). Without a Gaussian part (`σ = 0`)
+the existence of an Esscher parameter is not proved.
 -/
 
 @[expose] public section
