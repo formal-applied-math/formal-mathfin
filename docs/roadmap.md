@@ -2028,3 +2028,39 @@ constant-θ Girsanov change of measure and the jump-diffusion martingale propert
    bracket, the simple Doléans exponential (its private freezing of `exp(c·Δ)` for an adapted `c`)
    and the `Q`-Brownian exponential martingale. `condExp_comp_prodMk_of_indep` already covers all
    of them (the product form is its case `g(x, y) = x·h(y)`), so this is routing, not a new lemma.
+
+## phase: the Lévy exponent (2026-10-08, corpus 486→490)
+
+The process layer computed one exponential moment, at `θ = 1`, because the discounted price needs
+no other. This phase gets every order from that one moment, by scaling instead of a second
+computation. `θ` times a jump-diffusion log-return is again one, with drift `θb`, volatility
+coefficient `θσ`, the same rate and the jumps multiplied by `θ`
+(`jumpDiffusionIncrementLaw_map_const_mul`). On the canonical model this changes the jump sizes
+alone: transforming every jump by a measurable map pushes the jump law forward and leaves the rest
+of the model alone (`jumpDiffusionMeasure_map_jumps`, from Mathlib's `Measure.map_prod_map` and
+`Measure.infinitePi_map_pi`). So the moment of order `θ` is the moment at `1` of the scaled law, and
+the Lévy exponent `κ(θ) = bθ + σ²θ²/2 + Λ(∫ e^{θx} dν − 1)` falls out
+(`integral_exp_const_mul_jumpDiffusionIncrementLaw`).
+
+On the process, `θX` is a jump-diffusion (`JumpDiffusionProcess.const_mul`), and its
+discounted-price criterion at the rate `κ(θ)` is the exponential martingale `e^{θX_t − κ(θ)t}`
+(`martingale_exp_const_mul_sub`). The family contains the discounted price (`θ = 1`, where the
+criterion reads `κ(1) = r`, `martingale_iff_exponent_one`) and, without jumps, Wald's martingales
+(`κ(θ) = θ²/2` for Brownian motion). All of them rest on `martingale_exp_sub_of_indep_increments`.
+As a pricing use, power claims at every date before maturity
+(`condExp_rpow`): `𝔼[e^{−r(T−t)}S_T^p | 𝓕_t] = S_t^p e^{(κ(p) − r)(T − t)}`, through
+`condExp_comp` like the put and the call.
+
+**Next on the jump axis** (this phase did the values-review backlog's exponential-martingale item):
+
+1. The Esscher change of measure. `e^{θX_T − κ(θ)T}` is a density of mean `1`; under it `X` should
+   be a jump-diffusion with drift `b + θσ²`, rate `Λ∫e^{θx}dν` and the tilted jump law
+   `e^{θx}ν(dx)/∫e^{θx}dν`. The exponent condition `κ(θ + 1) − κ(θ) = r` picks the Esscher pricing
+   measure, one of the many martingale measures of the incomplete market. The law-level tilt (a
+   Gaussian tilt and a Poisson tilt) comes first; the process level needs the Girsanov-style
+   characterization the constant-θ Brownian case uses (`ExpMartingaleQBrownian`).
+2. The convolution semigroup `μ_s ∗ μ_t = μ_{s+t}` (Mathlib's `gaussianReal` and
+   `poissonMeasure` convolutions plus the compound-Poisson part), then the construction of the
+   process with jumps.
+3. The items carried over from the previous phase: the implied-volatility function and the smile;
+   routing the hand-frozen conditional expectations through `condExp_comp_prodMk_of_indep`.

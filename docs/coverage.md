@@ -26,6 +26,39 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The Lévy exponent: moments of every order, exponential martingales, power claims (2026-10-08)
+
+Four entries added, all `full`: `mf-jump-diffusion-scaling`, `mf-jump-diffusion-levy-exponent`,
+`mf-jump-diffusion-exponential-martingales` and `mf-jump-diffusion-power-claim-every-date`.
+Corpus 486 → 490. All live in `BlackScholes/JumpDiffusionExponent.lean`.
+
+- Scaling, `jumpDiffusionIncrementLaw_map_const_mul`: `θ` times a jump-diffusion log-return over
+  `τ` is one with drift `θb`, volatility coefficient `θσ`, the same rate, and the jump law pushed
+  forward by `x ↦ θx`. This is an identity of laws, with no integrability hypothesis. On the
+  canonical model it changes the jump sizes alone (`jumpDiffusionMeasure_map_jumps`, from Mathlib's
+  `Measure.map_prod_map` and `Measure.infinitePi_map_pi`). On the process, `θX` is a
+  `JumpDiffusionProcess` (`JumpDiffusionProcess.const_mul`).
+- The Lévy exponent `κ(θ) = bθ + σ²θ²/2 + Λ(∫ e^{θx} dν − 1)` (`jumpDiffusionExponent`):
+  `𝔼[e^{θY}] = e^{κ(θ)τ}` for every `θ` with `∫ e^{θx} dν < ∞`
+  (`integral_exp_const_mul_jumpDiffusionIncrementLaw`). It is the moment at `1` of the scaled law,
+  so the canonical-model computation is not repeated.
+- The exponential martingales `e^{θX_t − κ(θ)t}` (`JumpDiffusionProcess.martingale_exp_const_mul_sub`)
+  are the discounted-price criterion `martingale_iff` applied to `θX` at the rate `κ(θ)`. The
+  criterion itself reads `κ(1) = r` (`JumpDiffusionProcess.martingale_iff_exponent_one`). Without
+  jumps and for Brownian motion, `κ(θ) = θ²/2`: Wald's martingales, which rest on the same
+  exponential-martingale lemma.
+- Power claims at every date before maturity, `JumpDiffusionProcess.condExp_rpow`: for `S₀ > 0`
+  and `∫ e^{px} dν < ∞`, `𝔼[e^{−r(T−t)}S_T^p | 𝓕_t] = S_t^p e^{(κ(p) − r)(T − t)}` almost surely,
+  for each pair of dates. It goes through `condExp_comp`, as the put and the call do.
+
+Safe wording: "the exponential moments of a jump-diffusion log-return are `e^{κ(θ)τ}` wherever
+the jump law has them, and `e^{θX_t − κ(θ)t}` is a martingale for each such `θ`". "Price" for the
+power claim holds only when `P` is a martingale measure for the discounted price (`κ(1) = r`), and
+then it is an arbitrage-free price, not the only one (the market is incomplete). Not covered:
+moments where `∫ e^{θx} dν = ∞`; the Esscher change of measure (the pricing measure built from
+these martingales); the convolution semigroup `μ_s ∗ μ_t = μ_{s+t}`; the existence of the process
+with jumps.
+
 ### One conditional freezing lemma; European payoffs at every date (2026-10-08)
 
 Two entries added, both `full`: `ce-conditional-freezing-lemma` and
