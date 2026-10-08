@@ -68,6 +68,9 @@ import MathFin.Foundations.ItoProcessQV
 import MathFin.Foundations.GaussianMoments
 import MathFin.Foundations.BivariateGaussian
 import MathFin.Foundations.GaussianCDFDeriv
+-- The Esscher transform of a law on ℝ (Mathlib's `Measure.tilted`): tilted moments, a law with
+-- every exponential moment is fixed by its MGF, and the Gaussian tilt N(m, v) ↦ N(m + θv, v)
+import MathFin.Foundations.Esscher
 import MathFin.Foundations.GaussianGirsanov
 import MathFin.Foundations.FeynmanKacHeatEquation
 import MathFin.Foundations.BrownianMartingale
@@ -347,6 +350,9 @@ import MathFin.BlackScholes.JumpDiffusionBrownian
 -- Scaling a jump-diffusion; the exponential martingales e^{θX_t − κ(θ)t} for the Laplace
 -- exponent κ (where the jump law has the moment of order θ); power claims at each date
 import MathFin.BlackScholes.JumpDiffusionExponent
+-- The Esscher transform of a jump-diffusion log-return law: again a jump-diffusion law; Esscher
+-- pricing is Merton's formula for the tilted jumps, and Black–Scholes without jumps
+import MathFin.BlackScholes.JumpDiffusionEsscher
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser

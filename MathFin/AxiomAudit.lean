@@ -101,8 +101,15 @@ namespace MathFin.AxiomAudit
 
 /-! ## Static Girsanov: the risk-neutral measure derived -/
 
-/-- info: 'MathFin.gaussian_esscher_pdf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms MathFin.gaussian_esscher_pdf
+-- The Gaussian Esscher transform (Foundations/Esscher, 2026-10-08) is the one tilt behind the
+-- static Girsanov theorem and the jump-diffusion Esscher transform; a law with every
+-- exponential moment is fixed by its moment-generating function.
+
+/-- info: 'MathFin.measure_eq_of_mgf_id_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.measure_eq_of_mgf_id_eq
+
+/-- info: 'MathFin.gaussianReal_tilted_const_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.gaussianReal_tilted_const_mul
 
 /-- info: 'MathFin.gaussianReal_withDensity_esscher' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms MathFin.gaussianReal_withDensity_esscher
@@ -768,6 +775,23 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 /-- info: 'MathFin.JumpDiffusionProcess.martingale_iff_exponent_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.martingale_iff_exponent_one
+
+-- The Esscher transform of a jump-diffusion (2026-10-08): the tilted log-return law is the
+-- log-return law of the tilted characteristics; at the Esscher condition the call is Merton's
+-- formula for the tilted jumps (Merton's 1976 series for lognormal jumps), and without jumps
+-- the Black–Scholes price at an explicit Esscher parameter
+
+/-- info: 'MathFin.jumpDiffusionIncrementLaw_tilted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionIncrementLaw_tilted
+
+/-- info: 'MathFin.integral_call_tilted_eq_merton' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_call_tilted_eq_merton
+
+/-- info: 'MathFin.integral_call_tilted_eq_mertonCallPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_call_tilted_eq_mertonCallPrice
+
+/-- info: 'MathFin.integral_call_tilted_zero_eq_bsV' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_call_tilted_zero_eq_bsV
 
 -- Blueprint-spine closure (2026-06-06): every spine node is axiom-pinned.
 -- Gap found by tests/test_values.py::test_blueprint_spine_is_audited on its

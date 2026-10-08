@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.Forward
+public import MathFin.Foundations.Esscher
 
 /-!
 # Static Girsanov: the risk-neutral measure as a Gaussian change of measure
@@ -21,18 +22,19 @@ EMM stops being an axiom.
 
 The deductive chain:
 
-1. `gaussian_esscher_pdf` — completing the square: `exp(c·x − c²/2)·φ₀,₁(x)
-   = φ_c,₁(x)`.
-2. `gaussianReal_withDensity_esscher` — measure level: tilting `N(0,1)` by
-   the Esscher density gives `N(c,1)` (mean-shift by `c`, variance fixed).
-3. `map_withDensity_comp` — pushforward commutes with a density factoring
+1. `gaussianReal_withDensity_esscher` — measure level: tilting `N(0,1)` by
+   the Esscher density `exp(c·x − c²/2)` gives `N(c,1)` (mean-shift by `c`,
+   variance fixed). It is the case `N(0,1)` of the Gaussian Esscher transform
+   `gaussianReal_tilted_const_mul` (`Foundations/Esscher.lean`), whose
+   normalizing constant is `𝔼[e^{cZ}] = e^{c²/2}`.
+2. `map_withDensity_comp` — pushforward commutes with a density factoring
    through the map (so the change of measure can be read at the level of the
    driver's law).
-4. `hasLaw_esscher_tilt` — static Girsanov for a random variable: if `W` is
+3. `hasLaw_esscher_tilt` — static Girsanov for a random variable: if `W` is
    standard normal under `P`, then under `Q := P.withDensity(exp(c·W−c²/2))`
    the same `W` has law `N(c,1)`.
-5. `hasLaw_sub_const` — recentring: `W − c ~ N(0,1)` under `Q`.
-6. `BSCallHyp.of_physical` — the capstone: `BSCallHyp` holds for `Q` and the
+4. `hasLaw_sub_const` — recentring: `W − c ~ N(0,1)` under `Q`.
+5. `BSCallHyp.of_physical` — the capstone: `BSCallHyp` holds for `Q` and the
    recentred driver, with `Q` and the driver both *constructed* from the
    physical data. The economic instantiation is `c = (r − μ)·√T / σ`, i.e.
    the market price of risk `θ = (μ − r)/σ` enters as `c = −θ√T`; then the
@@ -52,34 +54,22 @@ namespace MathFin
 open MeasureTheory ProbabilityTheory Real
 open scoped NNReal ENNReal
 
-/-- **Gaussian Esscher identity** (completing the square): tilting the
-standard-normal density by the normalised exponential `exp(c·x − c²/2)`
-yields the `N(c, 1)` density. This is the pointwise heart of the static
-Girsanov change of measure. -/
-theorem gaussian_esscher_pdf (c x : ℝ) :
-    Real.exp (c * x - c ^ 2 / 2) * gaussianPDFReal 0 1 x = gaussianPDFReal c 1 x := by
-  simp only [gaussianPDFReal, NNReal.coe_one, mul_one, sub_zero]
-  rw [← mul_assoc, mul_comm (Real.exp (c * x - c ^ 2 / 2)) _, mul_assoc,
-      ← Real.exp_add]
-  congr 2
-  ring
-
 /-- **Gaussian Esscher change of measure** (measure level): tilting the
 standard normal `N(0,1)` by the Radon-Nikodym density `exp(c·x − c²/2)`
 produces exactly `N(c, 1)`. The mean shifts by the tilt parameter `c`; the
 variance is unchanged. This is the static (single-Gaussian) Girsanov
-theorem. -/
+theorem: the case `N(0, 1)` of the Gaussian Esscher transform
+`gaussianReal_tilted_const_mul`, with the normalizing constant
+`𝔼[e^{cZ}] = e^{c²/2}` written into the density. -/
 theorem gaussianReal_withDensity_esscher (c : ℝ) :
     (gaussianReal 0 1).withDensity
       (fun x ↦ ENNReal.ofReal (Real.exp (c * x - c ^ 2 / 2))) = gaussianReal c 1 := by
-  rw [gaussianReal_of_var_ne_zero 0 (one_ne_zero), gaussianReal_of_var_ne_zero c (one_ne_zero)]
-  rw [← withDensity_mul _ (by fun_prop) (by fun_prop)]
-  congr 1
-  funext x
-  show gaussianPDF 0 1 x * ENNReal.ofReal (Real.exp (c * x - c ^ 2 / 2)) = gaussianPDF c 1 x
-  rw [gaussianPDF_def, gaussianPDF_def,
-      ← ENNReal.ofReal_mul (gaussianPDFReal_nonneg 0 1 x), mul_comm,
-      gaussian_esscher_pdf]
+  have hZ : ∫ x, rexp (c * x) ∂(gaussianReal 0 1) = rexp (c ^ 2 / 2) := by
+    simpa only [mgf, id_eq, zero_mul, zero_add, NNReal.coe_one, one_mul] using
+      congr_fun (mgf_id_gaussianReal (μ := 0) (v := 1)) c
+  have h := gaussianReal_tilted_const_mul 0 1 c
+  rw [Measure.tilted, hZ, NNReal.coe_one, mul_one, zero_add] at h
+  simpa only [← Real.exp_sub] using h
 
 /-- **Pushforward commutes with a density that factors through the map**:
 for measurable `W : Ω → ℝ` and `g : ℝ → ℝ≥0∞`, the law of `W` under
