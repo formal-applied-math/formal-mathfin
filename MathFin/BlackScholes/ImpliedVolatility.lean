@@ -24,8 +24,9 @@ on an interval is strictly monotone there, hence injective.
 
 As `σ → ∞` the call price tends to the spot. So a price above the Black–Scholes
 price at some `σ₀ > 0` and below the spot has an implied volatility, above `σ₀`.
-This is the half of the no-arbitrage range that `JumpImpliedVol.lean` needs; the
-`σ → 0` limit, which would give existence across the whole range, is not proved.
+This is the existence result `JumpImpliedVol.lean` needs. Existence for every
+price in the no-arbitrage range would also need the `σ → 0` limit, which is not
+proved.
 
 ## Main results
 

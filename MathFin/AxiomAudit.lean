@@ -630,6 +630,32 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.le_integral_of_affine_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.le_integral_of_affine_le
 
+-- Jumps lift the implied volatility (2026-10-08): strict Jensen through a
+-- supporting line and strict spot convexity make jump risk strictly priced;
+-- the call tends to the spot as σ → ∞, so the jump-diffusion call has a
+-- unique Black–Scholes implied volatility, above σ, for any jump law
+
+/-- info: 'MathFin.lt_integral_of_affine_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.lt_integral_of_affine_lt
+
+/-- info: 'MathFin.bsV_spot_strictConvexOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bsV_spot_strictConvexOn
+
+/-- info: 'MathFin.tendsto_bsV_sigma_atTop' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.tendsto_bsV_sigma_atTop
+
+/-- info: 'MathFin.exists_impliedVol_gt_of_bsV_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.exists_impliedVol_gt_of_bsV_lt
+
+/-- info: 'MathFin.bsV_lt_jumpDiffusion_call' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bsV_lt_jumpDiffusion_call
+
+/-- info: 'MathFin.jumpDiffusion_impliedVol_gt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_impliedVol_gt
+
+/-- info: 'MathFin.JumpDiffusionHyp.impliedVol_gt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionHyp.impliedVol_gt
+
 /-- info: 'MathFin.markovPathMeasure_cylinder' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.markovPathMeasure_cylinder
 

@@ -26,6 +26,37 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Jumps lift the implied volatility (2026-10-08)
+
+Six entries added, all `full`: `mf-bs-call-strictly-convex-in-spot`,
+`mf-bs-call-tends-to-spot-high-vol`, `mf-implied-vol-exists-above-reference`,
+`mf-jump-diffusion-call-strict-bounds`, `mf-jump-diffusion-implied-vol-above-sigma` and
+`mf-compound-poisson-implied-vol-above-sigma`. Corpus 461 → 467.
+
+- Strict bounds, `bsV_lt_jumpDiffusion_call` and `jumpDiffusion_call_lt`: a compensated jump part
+  `Y` (`𝔼[e^Y] = 1`) that is not almost surely `0` puts the call strictly between `C_BS(S₀; σ)`
+  and `S₀`. The lower bound is Jensen's inequality made strict
+  (`Foundations/AffineMinorant.lt_integral_of_affine_lt`): the Black–Scholes price is strictly
+  convex in the spot (`bsV_spot_strictConvexOn`, from positive gamma), so it lies strictly above
+  its tangent away from `S₀` (`bsV_spot_tangent_lt`).
+- The Black–Scholes side, in `BlackScholes/ImpliedVolatility.lean`: the call tends to the spot as
+  `σ → ∞` (`tendsto_bsV_sigma_atTop`), so a price strictly between the Black–Scholes price at
+  some `σ₀ > 0` and the spot has a unique positive implied volatility, and it is above `σ₀`
+  (`exists_impliedVol_gt_of_bsV_lt`).
+- Together, `jumpDiffusion_impliedVol_gt`: the jump-diffusion call has a unique Black–Scholes
+  implied volatility, and it exceeds `σ`, at every strike and maturity and for any jump law. For
+  the compound-Poisson model at the compensator, `JumpDiffusionHyp.impliedVol_gt` needs only a
+  positive intensity and a jump law that is not the point mass at `0`; under these the jump part
+  is not almost surely `0` (`JumpDiffusionHyp.not_jumpPart_ae_eq_zero`).
+
+Safe wording: "for a compensated jump-diffusion whose jump part is not almost surely zero, with
+any jump law, the call has a unique Black–Scholes implied volatility, and it is strictly above the
+diffusion volatility, at every strike and maturity". Not covered: how the implied volatility
+varies with the strike (the shape of the smile); the `σ → 0` limit of the Black–Scholes price,
+and with it implied-volatility existence across the whole no-arbitrage range; the put, whose
+implied volatility would equal the call's by put–call parity, which is not proved for
+jump-diffusions.
+
 ### Jump-diffusions with an arbitrary jump law (2026-10-07)
 
 Four entries added, all `full`: `mf-jump-diffusion-mixing-formula`,

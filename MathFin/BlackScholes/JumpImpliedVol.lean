@@ -14,11 +14,12 @@ public import MathFin.BlackScholes.JumpDiffusionMixing
 
 If the log-price is a Gaussian diffusion part plus an independent jump part `Y` with
 `𝔼[e^Y] = 1`, the call is worth at least the Black–Scholes call at the diffusion volatility `σ`
-(`bsV_le_jumpDiffusion_call`) and at most the spot. Here both bounds are strict when `Y` is not
-almost surely `0`. Read through the Black–Scholes price as a function of the volatility, which
-increases strictly from below the call price at `σ` towards the spot, they say that the call has
-a unique Black–Scholes implied volatility and that it lies strictly above `σ`. This holds at
-every strike and maturity, whatever the law of the jump part.
+(`bsV_le_jumpDiffusion_call`) and at most the spot. Here the lower bound is strict when `Y` is not
+almost surely `0`, and the upper bound is strict for a positive strike. Read through the
+Black–Scholes price as a function of the volatility, which increases strictly from below the call
+price at `σ` towards the spot, the two bounds say that the call has a unique Black–Scholes implied
+volatility and that it lies strictly above `σ`. This holds at every strike and maturity, whatever
+the law of the jump part.
 
 ## Main results
 

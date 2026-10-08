@@ -1825,7 +1825,36 @@ the compound-Poisson MGF and the general-law formula all use it.
    which needs `J_meas` weakened to a.e.-measurability, and the Gaussian smoothing of a
    Black–Scholes price as one lemma.
 2. Strict convexity of the Black–Scholes price in the spot, then implied volatility above `σ`
-   for any compensated jump law.
+   for any compensated jump law. (Done in the next phase.)
 3. The put and put–call parity for any jump law.
 4. The characteristic function of the log-price (Lévy–Khintchine at a fixed date).
 5. Kou's double-exponential compensator.
+
+## phase: jumps lift the implied volatility (2026-10-08, corpus 461→467)
+
+The dominance `C_BS(S₀; σ) ≤ C` of the previous phase is Jensen's inequality. It becomes strict
+once two things hold: the Black–Scholes price is strictly convex in the spot (positive gamma), and
+the jump part is not almost surely zero. The other bound, `C < S₀`, is the payoff bound
+`(S_T − K)⁺ ≤ S_T`, made strict by a positive strike. The Black–Scholes price increases strictly
+and continuously in the volatility and tends to the spot as `σ → ∞`. So a price strictly between
+`C_BS(S₀; σ)` and `S₀` is the Black–Scholes price at exactly one volatility, and that volatility is
+above `σ` (`BlackScholes/JumpImpliedVol.lean`). This is the classical statement that compensated
+jumps lift the implied volatility above the diffusion volatility, here proved at every strike and
+for every jump law. For the compound-Poisson model at the compensator it holds as soon as jumps
+occur (`Λ > 0`) and move the price (`J₀` not almost surely `0`).
+
+Three pieces are reusable outside the jump axis: strict Jensen through a supporting line
+(`lt_integral_of_affine_lt`), strict spot convexity of the Black–Scholes price
+(`bsV_spot_strictConvexOn`, `bsV_spot_tangent_lt`), and implied-volatility existence above a
+reference volatility (`tendsto_bsV_sigma_atTop`, `exists_impliedVol_gt_of_bsV_lt`).
+
+**Next on the jump axis:**
+
+1. Collapse the two Merton towers onto the general route (unchanged from the previous phase).
+2. The put and put–call parity for any jump law; with Black–Scholes parity the put then has the
+   call's implied volatility.
+3. The `σ → 0` limit of the Black–Scholes price, giving implied-volatility existence across the
+   whole no-arbitrage range `((S − Ke^{−rT})⁺, S)`.
+4. The smile: how a jump-diffusion's implied volatility varies with the strike, for instance its
+   large-strike behaviour, which Lee's moment formula ties to the moments of `S_T`.
+5. The characteristic function of the log-price; Kou's double-exponential compensator.

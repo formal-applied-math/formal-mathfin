@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (463 MathFin constants, 29 upstream). Citations
+  corpus (471 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -206,6 +206,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.JumpDiffusionHyp.discounted_terminal_eq_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionHyp.discounted_terminal_eq_iff
 
+/-- info: 'MathFin.JumpDiffusionHyp.impliedVol_gt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionHyp.impliedVol_gt
+
 /-- info: 'MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price
 
@@ -401,8 +404,17 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.bsV_le_mertonCallPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.bsV_le_mertonCallPrice
 
+/-- info: 'MathFin.bsV_lt_jumpDiffusion_call' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bsV_lt_jumpDiffusion_call
+
 /-- info: 'MathFin.bsV_satisfies_bs_pde_via_feynmanKac' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.bsV_satisfies_bs_pde_via_feynmanKac
+
+/-- info: 'MathFin.bsV_spot_strictConvexOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bsV_spot_strictConvexOn
+
+/-- info: 'MathFin.bsV_spot_tangent_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bsV_spot_tangent_lt
 
 /-- info: 'MathFin.bsV_strict_gt_immediate_exercise' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.bsV_strict_gt_immediate_exercise
@@ -583,6 +595,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.exists_gaussian_uncorrelated_not_indepFun' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.exists_gaussian_uncorrelated_not_indepFun
+
+/-- info: 'MathFin.exists_impliedVol_gt_of_bsV_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.exists_impliedVol_gt_of_bsV_lt
 
 /-- info: 'MathFin.exists_isCopula_fgm_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.exists_isCopula_fgm_iff
@@ -1001,6 +1016,12 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.jumpDiffusion_call_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_call_le
 
+/-- info: 'MathFin.jumpDiffusion_call_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_call_lt
+
+/-- info: 'MathFin.jumpDiffusion_impliedVol_gt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_impliedVol_gt
+
 /-- info: 'MathFin.kellyFraction_eq_zero_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.kellyFraction_eq_zero_iff
 
@@ -1309,6 +1330,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.tendsto_bisectMid_valueAtRisk' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.tendsto_bisectMid_valueAtRisk
+
+/-- info: 'MathFin.tendsto_bsV_sigma_atTop' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.tendsto_bsV_sigma_atTop
 
 /-- info: 'MathFin.tendsto_claytonCopulaFun_diag_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.tendsto_claytonCopulaFun_diag_div

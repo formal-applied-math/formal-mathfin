@@ -146,6 +146,54 @@
       }
     },
     {
+      "id": "mf-bs-call-strictly-convex-in-spot",
+      "name": "Black–Scholes Call Is Strictly Convex in the Spot",
+      "description": "For K, σ, τ > 0 and any rate r, the Black–Scholes call price S ↦ bsV K r σ S τ = S·Φ(d₁) − Ke^{−rτ}·Φ(d₂) is strictly convex on (0, ∞), and for S₀, s > 0 with s ≠ S₀ it lies strictly above its tangent at S₀, whose slope is the delta Φ(d₁(S₀)): bsV(S₀) + Φ(d₁(S₀))·(s − S₀) < bsV(s). The proof is the second-derivative test: the gamma φ(d₁)/(Sσ√τ) is positive.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.SpotConvexity\n\n/-- **The Black–Scholes call is strictly convex in the spot**, and lies strictly above its delta\ntangent away from the point of tangency. -/\ntheorem bs_call_strictly_convex_in_spot_thm {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    (hτ : 0 < τ) {S₀ s : ℝ} (hS₀ : 0 < S₀) (hs : 0 < s) (hne : s ≠ S₀) :\n    StrictConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun S ↦ MathFin.bsV K r σ S τ) ∧\n      MathFin.bsV K r σ S₀ τ + MathFin.Phi (MathFin.bsd1 S₀ K r σ τ) * (s - S₀)\n        < MathFin.bsV K r σ s τ :=\n  ⟨MathFin.bsV_spot_strictConvexOn hK hσ hτ, MathFin.bsV_spot_tangent_lt hK hσ hτ hS₀ hs hne⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hull, Options, Futures, and Other Derivatives (gamma); Shreve (2004), Stochastic Calculus for Finance II, §4.5",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Strict convexity by the second-derivative test (strictConvexOn_of_deriv2_pos'): the second spot derivative is the gamma φ(d₁)/(Sσ√τ) (hasDerivAt_deriv_bsV_S), positive by bsV_gamma_pos (bsV_spot_strictConvexOn). The strict tangent inequality compares secant slopes with the delta Φ(d₁(S₀)) (hasDerivAt_bsV_S) through StrictConvexOn.slope_lt_of_hasDerivAt and StrictConvexOn.lt_slope_of_hasDerivAt (bsV_spot_tangent_lt). Lives in MathFin/BlackScholes/SpotConvexity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-call-tends-to-spot-high-vol",
+      "name": "Black–Scholes Call Tends to the Spot as the Volatility Grows",
+      "description": "For T > 0 and any S, K, r, the Black–Scholes call price bsV K r σ S T = S·Φ(d₁) − Ke^{−rT}·Φ(d₂) tends to S as σ → ∞. For σ ≠ 0, d₁ = (log(S/K) + rT)/(σ√T) + σ√T/2, so d₁ → ∞ and d₂ = d₁ − σ√T → −∞, while Φ tends to 1 at ∞ and to 0 at −∞.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.ImpliedVolatility\n\nopen Filter Topology\n\n/-- **The Black–Scholes call tends to the spot as `σ → ∞`.** -/\ntheorem bs_call_tends_to_spot_high_vol_thm (S K r : ℝ) {T : ℝ} (hT : 0 < T) :\n    Tendsto (fun σ ↦ MathFin.bsV K r σ S T) atTop (𝓝 S) :=\n  MathFin.tendsto_bsV_sigma_atTop S K r hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hull, Options, Futures, and Other Derivatives (implied volatility); Gatheral (2006), The Volatility Surface",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. For σ ≠ 0, d₁ = (log(S/K) + rT)/√T · σ⁻¹ + √T/2 · σ (bsd1_eq_inv_add, from the same identity at the maturity s², where √(s²) = s), so d₁ → ∞ and d₂ = d₁ − σ√T → −∞ (tendsto_bsd1_sigma_atTop, tendsto_bsd2_sigma_atTop). Φ → 1 at ∞ and Φ → 0 at −∞ (tendsto_Phi_atTop, tendsto_Phi_atBot, Foundations/NormalTail.lean). Lives in MathFin/BlackScholes/ImpliedVolatility.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-implied-vol-exists-above-reference",
+      "name": "Implied Volatility Exists Above a Reference Volatility",
+      "description": "For K, S, T > 0, any rate r and a volatility σ₀ > 0, a call price C strictly between the Black–Scholes price at σ₀ and the spot, bsV K r σ₀ S T < C < S, has an implied volatility σ > σ₀ (bsV K r σ S T = C), and every positive σ' with bsV K r σ' S T = C equals σ. The Black–Scholes price is continuous and strictly increasing in the volatility and tends to S as σ → ∞, so the intermediate value theorem applies. A volatility σ₀ with bsV(σ₀) < C is a hypothesis: existence for every price in the no-arbitrage range ((S − Ke^{−rT})⁺, S) would also need the σ → 0 limit, which is not proved.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.ImpliedVolatility\n\n/-- **Implied volatility above a reference volatility.** A price strictly between the\nBlack–Scholes price at `σ₀ > 0` and the spot has an implied volatility above `σ₀`, and it is the\nonly positive one. -/\ntheorem implied_vol_exists_above_reference_thm {K r T S σ₀ C : ℝ} (hK : 0 < K) (hT : 0 < T)\n    (hS : 0 < S) (hσ₀ : 0 < σ₀) (hlo : MathFin.bsV K r σ₀ S T < C) (hhi : C < S) :\n    ∃ σ, σ₀ < σ ∧ MathFin.bsV K r σ S T = C ∧\n      ∀ σ' > 0, MathFin.bsV K r σ' S T = C → σ' = σ :=\n  MathFin.exists_impliedVol_gt_of_bsV_lt hK hT hS hσ₀ hlo hhi\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hull, Options, Futures, and Other Derivatives (implied volatility); Gatheral (2006), The Volatility Surface",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The limit σ → ∞ (tendsto_bsV_sigma_atTop) gives σ₁ > σ₀ with C < bsV(σ₁); the intermediate value theorem on [σ₀, σ₁] (intermediate_value_Ioo, with bsV_continuousOn_sigma) gives σ ∈ (σ₀, σ₁) with bsV(σ) = C, and strict monotonicity in σ (implied_volatility_unique) makes it the only positive solution (exists_impliedVol_gt_of_bsV_lt). The σ → 0 limit, which would remove the hypothesis on σ₀, is not proved. Lives in MathFin/BlackScholes/ImpliedVolatility.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-black-futures",
       "name": "Black-76 Formula for Futures Options",
       "description": "European call on a futures contract: V = e^{-rT} [F Phi(d_1) - K Phi(d_2)] where d_1 = (log(F/K) + sigma^2 T/2) / (sigma sqrt(T)) and d_2 = d_1 - sigma sqrt(T). Specialization of BS to zero-drift futures + independent discount rate.",
@@ -2591,6 +2639,54 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Lower bound: the mixing formula (jumpDiffusion_call_eq_integral_bsV) rewrites the price as E[C_BS(S₀e^Y)]; the tangent of the convex Black–Scholes price at S₀ (bsV_spot_tangent_le, from bsV_spot_convexOn) lies below it, and S₀e^Y has mean S₀, so Jensen's inequality through a supporting line (le_integral_of_affine_le, Foundations/AffineMinorant.lean) gives C_BS(S₀) ≤ E[C_BS(S₀e^Y)] (bsV_le_jumpDiffusion_call). Upper bound: (S_T − K)⁺ ≤ S_T pointwise and E[e^{-rT}S_T] = S₀E[e^Y] (jumpDiffusion_call_le, jumpDiffusion_discounted_terminal). Merton's lognormal case, with the volatility and the spot channels separated, is bsV_le_mertonCallPrice (mf-merton-dominance), whose spot channel now uses the same lemma. Lives in MathFin/BlackScholes/JumpDiffusionMixing.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-call-strict-bounds",
+      "name": "Jump Risk Is Strictly Priced: Strict Black–Scholes and Spot Bounds for a Jump-Diffusion Call",
+      "description": "Let Z ~ N(0,1) and let Y be a jump part independent of Z, of arbitrary law, compensated (E[e^Y] = 1) and not almost surely 0. For S₀, K, σ, T > 0 the discounted expected call payoff C on S_T = S₀ exp((r − σ²/2)T + σ√T·Z + Y) satisfies C_BS(S₀) < C < S₀, where C_BS is the Black–Scholes price (bsV) at the diffusion volatility σ. By the mixing formula C = E[C_BS(S₀e^Y)]; the Black–Scholes price lies strictly above its tangent at S₀ away from S₀, and S₀e^Y, whose mean is S₀, differs from S₀ with positive probability, so Jensen's inequality is strict. For the upper bound, (S_T − K)⁺ < S_T everywhere since K > 0 and S_T > 0, and E[e^{-rT}S_T] = S₀. Only the law of S_T is modelled.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpImpliedVol\n\nopen MeasureTheory ProbabilityTheory\n\n/-- **Jump risk is strictly priced.** If an independent jump part `Y` is compensated,\n`𝔼[e^Y] = 1`, and not almost surely `0`, the jump-diffusion call lies strictly between the\nBlack–Scholes call at the diffusion volatility and the spot. -/\ntheorem jump_diffusion_call_strict_bounds_thm {Ω : Type*} [MeasurableSpace Ω] {Q : Measure Ω}\n    {S_0 K r σ T : ℝ} {Z Y : Ω → ℝ}\n    (hZ : HasLaw Z (gaussianReal 0 1) Q) (hY : AEMeasurable Y Q) (hYZ : IndepFun Y Z Q)\n    (hexp : Integrable (fun ω ↦ Real.exp (Y ω)) Q) (hmean : ∫ ω, Real.exp (Y ω) ∂Q = 1)\n    (hY0 : ¬Y =ᵐ[Q] 0) (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :\n    MathFin.bsV K r σ S_0 T < ∫ ω, Real.exp (-r * T)\n        * max (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω + Y ω) - K) 0 ∂Q ∧\n      ∫ ω, Real.exp (-r * T)\n        * max (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω + Y ω) - K) 0 ∂Q\n        < S_0 :=\n  ⟨MathFin.bsV_lt_jumpDiffusion_call hZ hY hYZ hexp hmean hY0 hS_0 hK hσ hT,\n    (MathFin.jumpDiffusion_call_lt hZ hY hYZ hexp hS_0 hK hT.le).trans_eq\n      (by rw [hmean, mul_one])⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes, ch. 11",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Lower bound: the mixing formula (jumpDiffusion_call_eq_integral_bsV) rewrites C as E[C_BS(S₀e^Y)]; the Black–Scholes price lies strictly above its tangent at S₀ away from S₀ (bsV_spot_tangent_lt, from bsV_spot_strictConvexOn), and S₀e^Y = S₀ exactly where Y = 0, which fails with positive probability; strict Jensen through a supporting line (lt_integral_of_affine_lt, Foundations/AffineMinorant.lean) gives C_BS(S₀) < C (bsV_lt_jumpDiffusion_call). Upper bound: e^{-rT}(S_T − K)⁺ < e^{-rT}S_T everywhere, so the two integrals, which would be equal only if the integrands agreed almost everywhere (integral_eq_iff_of_ae_le), differ, and E[e^{-rT}S_T] = S₀E[e^Y] = S₀ (jumpDiffusion_call_lt, jumpDiffusion_discounted_terminal). The strict form of mf-jump-diffusion-call-dominates-bs. Lives in MathFin/BlackScholes/JumpImpliedVol.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-implied-vol-above-sigma",
+      "name": "Compensated Jumps Lift the Black–Scholes Implied Volatility Above σ",
+      "description": "Let Z ~ N(0,1) and let Y be a jump part independent of Z, of arbitrary law, compensated (E[e^Y] = 1) and not almost surely 0. For S₀, K, σ, T > 0 the discounted expected call payoff C on S_T = S₀ exp((r − σ²/2)T + σ√T·Z + Y) has a Black–Scholes implied volatility σ_imp strictly above the diffusion volatility σ: bsV K r σ_imp S₀ T = C, and every positive σ' with bsV K r σ' S₀ T = C equals σ_imp. C lies strictly between the Black–Scholes price at σ and the spot (mf-jump-diffusion-call-strict-bounds), and the Black–Scholes price increases strictly and continuously in the volatility and tends to the spot. This holds at every strike and maturity; how the implied volatility varies across strikes (the shape of the smile) is not addressed. Only the law of S_T is modelled.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpImpliedVol\n\nopen MeasureTheory ProbabilityTheory\n\n/-- **Compensated jumps lift the implied volatility.** The jump-diffusion call has a\nBlack–Scholes implied volatility strictly above the diffusion volatility, and it is the only\npositive one. -/\ntheorem jump_diffusion_implied_vol_above_sigma_thm {Ω : Type*} [MeasurableSpace Ω]\n    {Q : Measure Ω} {S_0 K r σ T : ℝ} {Z Y : Ω → ℝ}\n    (hZ : HasLaw Z (gaussianReal 0 1) Q) (hY : AEMeasurable Y Q) (hYZ : IndepFun Y Z Q)\n    (hexp : Integrable (fun ω ↦ Real.exp (Y ω)) Q) (hmean : ∫ ω, Real.exp (Y ω) ∂Q = 1)\n    (hY0 : ¬Y =ᵐ[Q] 0) (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :\n    ∃ σ_imp, σ < σ_imp ∧ MathFin.bsV K r σ_imp S_0 T = ∫ ω, Real.exp (-r * T)\n        * max (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω + Y ω) - K) 0 ∂Q ∧\n      ∀ σ' > 0, MathFin.bsV K r σ' S_0 T = ∫ ω, Real.exp (-r * T)\n        * max (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω + Y ω) - K) 0 ∂Q →\n        σ' = σ_imp :=\n  MathFin.jumpDiffusion_impliedVol_gt hZ hY hYZ hexp hmean hY0 hS_0 hK hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes, ch. 11",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The strict bounds C_BS(S₀; σ) < C < S₀ (bsV_lt_jumpDiffusion_call, jumpDiffusion_call_lt) put C where exists_impliedVol_gt_of_bsV_lt applies: the Black–Scholes price is continuous and strictly increasing in the volatility and tends to S₀ as σ → ∞ (tendsto_bsV_sigma_atTop), so C = bsV(σ_imp) for exactly one positive σ_imp, and σ_imp > σ (jumpDiffusion_impliedVol_gt). Each statement concerns one strike and one maturity. Lives in MathFin/BlackScholes/JumpImpliedVol.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-compound-poisson-implied-vol-above-sigma",
+      "name": "Compound-Poisson Jump-Diffusion: Implied Volatility Above σ for Any Jump Law",
+      "description": "Under a probability measure Q where Z ~ N(0,1), the jump count N ~ Poisson(Λ), and the log-jump sizes Jᵢ are measurable and i.i.d. with an arbitrary common law satisfying E[e^{J₀}] < ∞, with N independent of (Z, J), Z independent of J and the Jᵢ mutually independent, let S_T = S₀ exp((r − σ²/2)T − κ + σ√T·Z + ∑_{i<N} Jᵢ) with the compensator κ = Λ(E[e^{J₀}] − 1). If Λ > 0 and J₀ is not almost surely 0, then for S₀, K, σ, T > 0 the call price C = E[e^{-rT}(S_T − K)⁺] has a Black–Scholes implied volatility σ_imp > σ (bsV K r σ_imp S₀ T = C), and every positive σ' with bsV K r σ' S₀ T = C equals σ_imp. The jump part −κ + ∑_{i<N} Jᵢ is not almost surely 0: with no jump, an event of probability e^{−Λ} > 0, it equals −κ, and with one jump it equals J₀ − κ. This holds at every strike, whatever the jump law; how the implied volatility varies across strikes is not addressed. Only the law of S_T is modelled.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpImpliedVol\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Implied volatility above `σ` for any jump law.** At the compensator, with a positive jump\nintensity and a jump law that is not the point mass at `0`, the jump-diffusion call has a\nBlack–Scholes implied volatility strictly above `σ`, and it is the only positive one. -/\ntheorem compound_poisson_implied_vol_above_sigma_thm {Ω : Type*} [MeasurableSpace Ω]\n    {Q : Measure Ω} {Λ : ℝ≥0} {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ}\n    (h : MathFin.JumpDiffusionHyp Q Λ Z N J) (hJ : Integrable (fun ω ↦ Real.exp (J 0 ω)) Q)\n    (hΛ : 0 < Λ) (hJ0 : ¬J 0 =ᵐ[Q] 0) {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K)\n    (hσ : 0 < σ) (hT : 0 < T) :\n    ∃ σ_imp, σ < σ_imp ∧ MathFin.bsV K r σ_imp S_0 T = ∫ ω, Real.exp (-r * T)\n        * max (S_0 * Real.exp ((r - σ ^ 2 / 2) * T - Λ * (∫ x, Real.exp (J 0 x) ∂Q - 1)\n          + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω) - K) 0 ∂Q ∧\n      ∀ σ' > 0, MathFin.bsV K r σ' S_0 T = ∫ ω, Real.exp (-r * T)\n        * max (S_0 * Real.exp ((r - σ ^ 2 / 2) * T - Λ * (∫ x, Real.exp (J 0 x) ∂Q - 1)\n          + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω) - K) 0 ∂Q →\n        σ' = σ_imp :=\n  h.impliedVol_gt hJ hΛ hJ0 hS_0 hK hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes, ch. 11",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. At the compensator the jump part Y = −κ + ∑_{i<N} Jᵢ has E[e^Y] = 1 (JumpDiffusionHyp.integral_exp_jumpPart) and is independent of Z (JumpDiffusionHyp.indepFun_jumpPart). It is not almost surely 0 (JumpDiffusionHyp.not_jumpPart_ae_eq_zero): if it were, the event {N = 0}, of probability e^{−Λ} > 0, would force κ = 0, and then the event {N = 1} ∩ {J₀ ≠ 0}, of probability Λe^{−Λ}·Q(J₀ ≠ 0) because N is independent of the jump sizes, would be null, so J₀ = 0 almost surely. The single-jump-part theorem (jumpDiffusion_impliedVol_gt, mf-jump-diffusion-implied-vol-above-sigma) then applies (JumpDiffusionHyp.impliedVol_gt). Terminal-law scope. Lives in MathFin/BlackScholes/JumpImpliedVol.lean. Axioms-clean."
       }
     },
     {
