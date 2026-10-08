@@ -27,7 +27,8 @@ determine the law of the underlying. This is the first-order form of Breeden and
   `S > 0`) are equal. The digital at the strike `Seᵃ` is the tail `P(Y > a)`.
 * `hasDerivAt_integral_call`: where `X` has no atom at `K`, the call price is differentiable at
   `K` and `C'(K) = −μ {X > K}` (Mathlib's `hasDerivAt_integral_of_dominated_loc_of_lip`). At an
-  atom the left derivative is `−μ {X ≥ K}` instead, which is why the limit above is one-sided.
+  atom the derivative does not exist, since the left one is `−μ {X ≥ K}` (not formalized); this is
+  why the limit above is one-sided.
 
 In Black–Scholes the strike derivative is `−e^{−rτ}Φ(d₂)` (`hasDerivAt_bsV_K`), from the closed
 form. The digital price `e^{−rτ}Φ(d₂)` follows from it through `hasDerivAt_integral_call`
@@ -124,9 +125,7 @@ theorem hasDerivAt_integral_call {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : M
     (hK : μ {ω | X ω = K} = 0) :
     HasDerivAt (fun k ↦ ∫ ω, max (X ω - k) 0 ∂μ) (-μ.real {ω | K < X ω}) K := by
   have hset : MeasurableSet {ω | K < X ω} := measurableSet_lt measurable_const hXm
-  have hae : ∀ᵐ ω ∂μ, X ω ≠ K := by
-    rw [ae_iff]
-    simpa only [ne_eq, not_not] using hK
+  have hae : ∀ᵐ ω ∂μ, X ω ≠ K := ae_iff.2 (by simpa using hK)
   rw [← integral_indicator_one hset, ← integral_neg]
   refine (hasDerivAt_integral_of_dominated_loc_of_lip (F := fun k ω ↦ max (X ω - k) 0)
     (F' := fun ω ↦ -{ω | K < X ω}.indicator 1 ω) (bound := fun _ ↦ 1) univ_mem
@@ -142,7 +141,7 @@ theorem hasDerivAt_integral_call {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : M
       _ = |k₁ - k₂| := by rw [show X ω - k₁ - (X ω - k₂) = -(k₁ - k₂) by ring, abs_neg]
   · -- and, off the atom, differentiable at `K` with derivative `−1_{X > K}`
     filter_upwards [hae] with ω hω
-    rcases lt_or_gt_of_ne hω with h | h
+    rcases hω.lt_or_gt with h | h
     · rw [indicator_of_notMem (show ω ∉ {ω | K < X ω} from fun h' ↦ lt_asymm h h'), neg_zero]
       refine (hasDerivAt_const K (0 : ℝ)).congr_of_eventuallyEq ?_
       filter_upwards [Ioi_mem_nhds h] with k hk

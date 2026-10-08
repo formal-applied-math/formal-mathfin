@@ -355,19 +355,19 @@ import MathFin.BlackScholes.JumpDiffusionExponent
 -- the tilted jumps, and Black–Scholes without jumps
 import MathFin.BlackScholes.JumpDiffusionEsscher
 -- The law at one date determines the drift, σ² and the Lévy measure off 0 (Lévy–Khintchine
--- uniqueness for compound-Poisson jumps with exponential moments near 0)
+-- uniqueness for jump laws whose moment-generating function is finite near 0)
 import MathFin.BlackScholes.JumpDiffusionIdentifiability
 -- Incompleteness at one date: for σ ≠ 0 the Esscher law and the Merton measure are both
--- equivalent to the physical law and compensated, yet price some call differently when the jumps
--- are nontrivial
+-- equivalent to the physical law (with any drift) and compensated, yet price some call
+-- differently when the jumps are nontrivial
 import MathFin.BlackScholes.JumpDiffusionIncompleteness
--- Digital options: with σ ≠ 0 the law has no atoms, so the strike derivative of the call price is
--- minus the digital price; without jumps that is e^{−rτ}Φ(d₂)
-import MathFin.BlackScholes.JumpDiffusionDigital
--- The log-return law with σ ≠ 0 is a Gaussian mixture with a continuous density; Breeden–
--- Litzenberger with jumps (the second strike derivative of the call is the discounted density);
--- without jumps the density of the price is lognormalTerminalPDF
+-- The log-return law with σ ≠ 0 is a Gaussian mixture with a continuous density, so it has no
+-- atoms; the tail of a law with a density is differentiable where the density is continuous
 import MathFin.BlackScholes.JumpDiffusionDensity
+-- Digital options and Breeden–Litzenberger with jumps: for σ ≠ 0 the strike derivative of the
+-- call price is minus the digital price and the second one is the discounted density of the
+-- price; without jumps, at the drift r − σ²/2, these are e^{−rτ}Φ(d₂) and lognormalTerminalPDF
+import MathFin.BlackScholes.JumpDiffusionDigital
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser

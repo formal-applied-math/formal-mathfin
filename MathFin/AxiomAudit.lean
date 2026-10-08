@@ -803,9 +803,10 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 -- Incompleteness at one date (2026-10-08): call spreads tend to the digital, so call prices at
 -- every strike determine the law; the law at one date determines the drift, σ² and the Lévy
--- measure off 0; a change of drift is static Girsanov on the Gaussian factor; so with σ ≠ 0, nontrivial
--- jumps and a physical drift off the compensated one, the Esscher law and the Merton measure's
--- law, both equivalent to the physical law and compensated, price some call differently
+-- measure off 0 (for jump laws whose moment-generating function is finite near 0); a change of
+-- drift is static Girsanov on the Gaussian factor; so with σ ≠ 0, nontrivial jumps and a physical
+-- drift off the compensated one, the Esscher law and the Merton measure's law, both equivalent to
+-- the physical law and compensated, price some call differently
 
 /-- info: 'MathFin.tendsto_call_spread' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.tendsto_call_spread
@@ -821,6 +822,24 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 /-- info: 'MathFin.exists_call_esscher_ne_merton' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.exists_call_esscher_ne_merton
+
+-- Digital options and Breeden–Litzenberger with jumps (2026-10-08): where a law has no atom at
+-- the strike, the strike derivative of the call price is minus the digital; with σ ≠ 0 the
+-- jump-diffusion log-return law is a Gaussian mixture with a continuous density, so the second
+-- strike derivative of the call is the discounted density of the price; without jumps that density
+-- is lognormalTerminalPDF, read off the uniqueness of derivatives
+
+/-- info: 'MathFin.hasDerivAt_integral_call' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_integral_call
+
+/-- info: 'MathFin.jumpDiffusionIncrementLaw_eq_withDensity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionIncrementLaw_eq_withDensity
+
+/-- info: 'MathFin.breedenLitzenberger_jumpDiffusion' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.breedenLitzenberger_jumpDiffusion
+
+/-- info: 'MathFin.jumpDiffusionDensity_div_eq_lognormalTerminalPDF' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionDensity_div_eq_lognormalTerminalPDF
 
 -- Blueprint-spine closure (2026-06-06): every spine node is axiom-pinned.
 -- Gap found by tests/test_values.py::test_blueprint_spine_is_audited on its

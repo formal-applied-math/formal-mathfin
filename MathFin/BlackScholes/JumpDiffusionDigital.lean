@@ -5,28 +5,37 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.BlackScholes.JumpDiffusionDensity
 public import MathFin.BlackScholes.JumpDiffusionBrownian
 public import MathFin.BlackScholes.CallSpreadDigital
 public import MathFin.BlackScholes.StrikeGreeks
+public import MathFin.BlackScholes.BreedenLitzenberger
 
 /-!
-# Digital options in a jump-diffusion: minus the strike derivative of the call
+# Digital options in a jump-diffusion, and Breeden–Litzenberger with jumps
 
 The cash-or-nothing digital pays `1` when the price ends above the strike. Its price function,
 `D(S, K, τ) = e^{−rτ}P(Se^Y > K)` with `Y` the log-return over `τ`, is `jumpDiffusionDigitalPrice`.
+With a Gaussian part (`σ ≠ 0`, `τ > 0`) the log-return law has a continuous density `f` and no
+atoms (`BlackScholes/JumpDiffusionDensity.lean`). So, for a spot `S > 0`:
 
-* `nullSingletonClass_jumpDiffusionIncrementLaw`: with a Gaussian part (`σ ≠ 0`, `τ > 0`) the
-  log-return law has no atoms. Given the jumps, the log-return is an affine function of the
-  standard normal sample with slope `σ√τ ≠ 0`.
-* `hasDerivAt_jumpDiffusionCallPrice_strike`: so the call price function is differentiable in the
-  strike at every `K`, and `∂C/∂K = −D`. This is the general strike derivative
-  `hasDerivAt_integral_call`, for any law with no atom at the strike, applied to the price `Se^Y`.
-* `jumpDiffusionDigitalPrice_zero`: without jumps the digital price is `e^{−rτ}Φ(d₂)`, read off the
-  strike derivative of the Black–Scholes price (`hasDerivAt_bsV_K`) instead of computed. It is the
-  value of `bs_cash_or_nothing_formula`, which computes it as a Gaussian integral.
+* `hasDerivAt_jumpDiffusionCallPrice_strike`: with a finite forward, the call price function is
+  differentiable in the strike at every `K`, and `∂C/∂K = −D`. This is the general strike
+  derivative `hasDerivAt_integral_call` (any law with no atom at the strike) for the price `Seʸ`.
+* `hasDerivAt_jumpDiffusionDigitalPrice_strike`: at a strike `K > 0`,
+  `∂D/∂K = −e^{−rτ}f(log(K/S))/K`. Here `f(log(K/S))/K` is minus the strike derivative of
+  `P(Seʸ > K)`, the density of the price at `K`.
+* `breedenLitzenberger_jumpDiffusion`: Breeden–Litzenberger with jumps. With a finite forward,
+  `∂²C/∂K² = e^{−rτ}f(log(K/S))/K`, the discounted density of the price.
+* `jumpDiffusionDigitalPrice_zero` and `jumpDiffusionDensity_div_eq_lognormalTerminalPDF`: without
+  jumps, at the drift `r − σ²/2` and `σ > 0`, the digital price is `e^{−rτ}Φ(d₂)` and the density
+  of the price is `lognormalTerminalPDF`. Both are read off derivatives of the Black–Scholes price
+  (`hasDerivAt_bsV_K`, `breedenLitzenberger`) through the uniqueness of derivatives, not computed.
+  The first agrees with `bs_cash_or_nothing_formula`, which computes it as a Gaussian integral; the
+  second shows that the formula of `BreedenLitzenberger.lean` is the density of the price.
 
-Without a Gaussian part the law has the atom `bτ` (no jumps), and at the strike `Se^{bτ}` only the
-one-sided derivatives exist (`tendsto_call_spread`).
+Without a Gaussian part the law has the atom `bτ` (no jumps) and none of this is claimed. There
+only one-sided strike derivatives exist (not formalized; `tendsto_call_spread` gives the right one).
 -/
 
 @[expose] public section
@@ -35,27 +44,6 @@ namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real Filter Set
 open scoped NNReal Topology
-
-/-- **With a Gaussian part the log-return law has no atoms**: for `σ ≠ 0` and `τ > 0` every point
-has probability `0`. Given the jumps, the log-return is an affine function of the standard normal
-sample with slope `σ√τ ≠ 0`, and the standard normal has no atoms
-(`nullSingletonClass_gaussianReal`). -/
-lemma nullSingletonClass_jumpDiffusionIncrementLaw (b : ℝ) {σ : ℝ} (hσ : σ ≠ 0) (Λ : ℝ≥0)
-    (ν : Measure ℝ) [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) :
-    NullSingletonClass (jumpDiffusionIncrementLaw b σ Λ ν τ) := by
-  have hs : σ * Real.sqrt τ ≠ 0 := mul_ne_zero hσ (Real.sqrt_pos.2 (NNReal.coe_pos.2 hτ)).ne'
-  have := nullSingletonClass_gaussianReal (μ := 0) (v := 1) one_ne_zero
-  refine ⟨fun y ↦ ?_⟩
-  have hL := measurable_jumpDiffusionLogReturn b σ τ (measurableSet_singleton y)
-  -- given the jumps, at most one Gaussian sample gives the log-return `y`
-  have h0 (ω' : ℕ × (ℕ → ℝ)) :
-      gaussianReal 0 1 ((fun z ↦ (z, ω')) ⁻¹' (jumpDiffusionLogReturn b σ τ ⁻¹' {y})) = 0 := by
-    refine Set.Subsingleton.measure_zero (fun z₁ h₁ z₂ h₂ ↦ ?_) _
-    simp only [mem_preimage, mem_singleton_iff, jumpDiffusionLogReturn] at h₁ h₂
-    exact mul_left_cancel₀ hs (by linear_combination h₁ - h₂)
-  rw [jumpDiffusionIncrementLaw, Measure.map_apply (measurable_jumpDiffusionLogReturn b σ τ)
-    (measurableSet_singleton y), jumpDiffusionMeasure, Measure.prod_apply_symm hL]
-  simp only [h0, lintegral_zero]
 
 /-- **The digital price function** of a jump-diffusion: the cash-or-nothing digital paying `1`
 when the price ends above the strike, discounted at the rate `r` and integrated against the
@@ -77,10 +65,10 @@ lemma jumpDiffusionDigitalPrice_eq (S K r b σ : ℝ) (Λ : ℝ≥0) (ν : Measu
   congr 1
 
 /-- **The strike derivative of the jump-diffusion call price is minus the digital price.** With a
-Gaussian part (`σ ≠ 0`, `τ > 0`) and a finite forward, the call price function is differentiable
-in the strike at every `K`, and `∂C/∂K = −D`. The law has no atoms
+Gaussian part (`σ ≠ 0`, `τ > 0`), a spot `S > 0` and a finite forward, the call price function is
+differentiable in the strike at every `K`, and `∂C/∂K = −D`. The law has no atoms
 (`nullSingletonClass_jumpDiffusionIncrementLaw`), so the general strike derivative
-`hasDerivAt_integral_call` applies to the price `Se^Y`. -/
+`hasDerivAt_integral_call` applies to the price `Seʸ`. -/
 theorem hasDerivAt_jumpDiffusionCallPrice_strike {S r b σ : ℝ} (hS : 0 < S) (hσ : σ ≠ 0)
     {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν] {τ : ℝ≥0}
     (hY : Integrable rexp (jumpDiffusionIncrementLaw b σ Λ ν τ)) (hτ : 0 < τ) (K : ℝ) :
@@ -101,23 +89,106 @@ theorem hasDerivAt_jumpDiffusionCallPrice_strike {S r b σ : ℝ} (hS : 0 < S) (
   rw [hC, jumpDiffusionDigitalPrice_eq, ← mul_neg]
   exact h
 
-/-- **Without jumps the digital price is `e^{−rτ}Φ(d₂)`**, read off the strike derivative of the
-call. The digital price is minus the strike derivative of the call price
+/-- Without jumps the log-return is Gaussian (`jumpDiffusionIncrementLaw_zero`), so its forward is
+finite. -/
+lemma integrable_exp_jumpDiffusionIncrementLaw_zero (b σ : ℝ) (ν : Measure ℝ)
+    [IsProbabilityMeasure ν] (τ : ℝ≥0) : Integrable rexp (jumpDiffusionIncrementLaw b σ 0 ν τ) := by
+  rw [jumpDiffusionIncrementLaw_zero]
+  exact integrable_exp_gaussianReal _ _
+
+/-- **Without jumps, at the drift `r − σ²/2`, the digital price is `e^{−rτ}Φ(d₂)`** (for `σ > 0`,
+`S, K > 0` and `τ > 0`), read off the strike derivative of the call. The digital price is minus
+the strike derivative of the call price
 (`hasDerivAt_jumpDiffusionCallPrice_strike`). Near `K` the call price is the Black–Scholes price
 (`jumpDiffusionCallPrice_zero`), whose strike derivative is `−e^{−rτ}Φ(d₂)` (`hasDerivAt_bsV_K`).
-This is the value that `bs_cash_or_nothing_formula` computes as a Gaussian integral. -/
+It agrees with `bs_cash_or_nothing_formula`, which computes the value as a Gaussian integral. -/
 theorem jumpDiffusionDigitalPrice_zero {S K r σ : ℝ} (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ)
     (ν : Measure ℝ) [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) :
     jumpDiffusionDigitalPrice S K r (r - σ ^ 2 / 2) σ 0 ν τ
       = rexp (-r * τ) * Phi (bsd2 S K r σ τ) := by
-  have hY : Integrable rexp (jumpDiffusionIncrementLaw (r - σ ^ 2 / 2) σ 0 ν τ) := by
-    rw [jumpDiffusionIncrementLaw_zero]
-    exact (integrable_exp_mul_gaussianReal 1).congr (ae_of_all _ fun x ↦ by simp)
+  have hY := integrable_exp_jumpDiffusionIncrementLaw_zero (r - σ ^ 2 / 2) σ ν τ
   have h₂ : HasDerivAt (fun k ↦ jumpDiffusionCallPrice S k r (r - σ ^ 2 / 2) σ 0 ν τ)
       (-(rexp (-(r * τ)) * Phi (bsd2 S K r σ τ))) K :=
     (hasDerivAt_bsV_K hS hσ hK (NNReal.coe_pos.2 hτ)).congr_of_eventuallyEq
       (eventually_of_mem (Ioi_mem_nhds hK) fun k hk ↦ jumpDiffusionCallPrice_zero hS hk hσ ν hτ)
   rw [neg_mul]
   exact neg_injective ((hasDerivAt_jumpDiffusionCallPrice_strike hS hσ.ne' hY hτ K).unique h₂)
+
+/-- **The strike derivative of the digital price is minus the discounted density of the price.**
+With a Gaussian part (`σ ≠ 0`, `τ > 0`), a spot `S > 0` and a strike `K > 0`,
+`∂D/∂K = −e^{−rτ}f(log(K/S))/K`, with `f` the density of the log-return. Here `f(log(K/S))/K` is
+minus the strike derivative of `P(Seʸ > K) = P(Y > log(K/S))`, the density of the price at `K`:
+the tail of a law with a continuous density (`hasDerivAt_measureReal_Ioi_withDensity`) composed
+with `k ↦ log(k/S)`. -/
+theorem hasDerivAt_jumpDiffusionDigitalPrice_strike {S r b σ : ℝ} (hS : 0 < S) (hσ : σ ≠ 0)
+    {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) {K : ℝ}
+    (hK : 0 < K) :
+    HasDerivAt (fun k ↦ jumpDiffusionDigitalPrice S k r b σ Λ ν τ)
+      (-(rexp (-r * τ) * (jumpDiffusionDensity b σ Λ ν τ (Real.log (K / S)) / K))) K := by
+  have hlaw := jumpDiffusionIncrementLaw_eq_withDensity b hσ Λ ν hτ
+  have htail := hasDerivAt_measureReal_Ioi_withDensity
+    (integrable_jumpDiffusionDensity b hσ Λ ν hτ) (jumpDiffusionDensity_nonneg b σ Λ ν τ)
+    (a := Real.log (K / S)) (continuous_jumpDiffusionDensity b σ Λ ν τ).continuousAt
+  have hlog : HasDerivAt (fun k ↦ Real.log (k / S)) (1 / K) K := by
+    have h := ((hasDerivAt_id' K).div_const S).log (div_pos hK hS).ne'
+    have hS' := hS.ne'
+    have hK' := hK.ne'
+    convert h using 1
+    field_simp
+  -- `P(Seʸ > k) = P(Y > log(k/S))` for `k > 0`
+  have hset (k : ℝ) (hk : 0 < k) : {y | k < S * rexp y} = Ioi (Real.log (k / S)) := by
+    ext y
+    rw [mem_ofPred_eq, mem_Ioi, Real.log_lt_iff_lt_exp (div_pos hk hS), div_lt_iff₀ hS,
+      mul_comm]
+  have heq : ∀ᶠ k in 𝓝 K, jumpDiffusionDigitalPrice S k r b σ Λ ν τ
+      = rexp (-r * τ) * (volume.withDensity fun y ↦
+          ENNReal.ofReal (jumpDiffusionDensity b σ Λ ν τ y)).real (Ioi (Real.log (k / S))) := by
+    filter_upwards [Ioi_mem_nhds hK] with k hk
+    rw [jumpDiffusionDigitalPrice_eq, hset k hk, hlaw]
+  exact (((htail.comp K hlog).const_mul (rexp (-r * τ))).congr_of_eventuallyEq heq).congr_deriv
+    (by ring)
+
+/-- **Breeden–Litzenberger with jumps.** With a Gaussian part (`σ ≠ 0`, `τ > 0`), a spot `S > 0`
+and a finite forward, the second strike derivative of the call price at `K > 0` is the discounted
+density of the price, `∂²C/∂K² = e^{−rτ}f(log(K/S))/K`. The first derivative is minus the digital
+price (`hasDerivAt_jumpDiffusionCallPrice_strike`), and the digital's derivative is minus the
+discounted density (`hasDerivAt_jumpDiffusionDigitalPrice_strike`). -/
+theorem breedenLitzenberger_jumpDiffusion {S r b σ : ℝ} (hS : 0 < S) (hσ : σ ≠ 0)
+    {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν] {τ : ℝ≥0}
+    (hY : Integrable rexp (jumpDiffusionIncrementLaw b σ Λ ν τ)) (hτ : 0 < τ) {K : ℝ}
+    (hK : 0 < K) :
+    HasDerivAt (deriv fun k ↦ jumpDiffusionCallPrice S k r b σ Λ ν τ)
+      (rexp (-r * τ) * (jumpDiffusionDensity b σ Λ ν τ (Real.log (K / S)) / K)) K := by
+  have hderiv : (deriv fun k ↦ jumpDiffusionCallPrice S k r b σ Λ ν τ)
+      = fun k ↦ -jumpDiffusionDigitalPrice S k r b σ Λ ν τ :=
+    funext fun k ↦ (hasDerivAt_jumpDiffusionCallPrice_strike hS hσ hY hτ k).deriv
+  have h := (hasDerivAt_jumpDiffusionDigitalPrice_strike (r := r) (b := b) (Λ := Λ) (ν := ν) hS hσ
+    hτ hK).neg
+  rw [neg_neg] at h
+  rw [hderiv]
+  exact h
+
+/-- **Without jumps, at the drift `r − σ²/2`, the density of the price is the lognormal density**
+`lognormalTerminalPDF` (for `σ > 0`, `S, K > 0` and `τ > 0`). The second strike derivative of the
+call price is `e^{−rτ}f(log(K/S))/K` (`breedenLitzenberger_jumpDiffusion`) and also
+`e^{−rτ}·lognormalTerminalPDF` (`breedenLitzenberger`, the call price being `bsV` near `K`,
+`jumpDiffusionCallPrice_zero`). So the lognormal formula of `BreedenLitzenberger.lean` is the
+density of the price at `K`, read off the uniqueness of derivatives rather than computed. -/
+theorem jumpDiffusionDensity_div_eq_lognormalTerminalPDF {S K r σ : ℝ} (hS : 0 < S)
+    (hK : 0 < K) (hσ : 0 < σ) (ν : Measure ℝ) [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) :
+    jumpDiffusionDensity (r - σ ^ 2 / 2) σ 0 ν τ (Real.log (K / S)) / K
+      = lognormalTerminalPDF S r σ τ K := by
+  have hY := integrable_exp_jumpDiffusionIncrementLaw_zero (r - σ ^ 2 / 2) σ ν τ
+  have h₁ := breedenLitzenberger_jumpDiffusion (r := r) hS hσ.ne' hY hτ hK
+  -- near `K` the call price function is `bsV`, so the two first derivatives agree near `K`
+  have h₂ : HasDerivAt (deriv fun k ↦ jumpDiffusionCallPrice S k r (r - σ ^ 2 / 2) σ 0 ν τ)
+      (rexp (-(r * τ)) * lognormalTerminalPDF S r σ τ K) K := by
+    refine (breedenLitzenberger hS hσ hK (NNReal.coe_pos.2 hτ)).congr_of_eventuallyEq ?_
+    filter_upwards [Ioi_mem_nhds hK] with k hk
+    exact Filter.EventuallyEq.deriv_eq (eventually_of_mem (Ioi_mem_nhds hk) fun k' hk' ↦
+      jumpDiffusionCallPrice_zero hS hk' hσ ν hτ)
+  have h := h₁.unique h₂
+  rw [neg_mul] at h
+  exact mul_left_cancel₀ (Real.exp_pos _).ne' h
 
 end MathFin

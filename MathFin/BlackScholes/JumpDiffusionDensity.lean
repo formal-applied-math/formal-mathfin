@@ -5,31 +5,28 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.BlackScholes.JumpDiffusionDigital
-public import MathFin.BlackScholes.BreedenLitzenberger
+public import MathFin.BlackScholes.JumpDiffusionProcess
 
 /-!
-# The density of a jump-diffusion log-return, and Breeden–Litzenberger with jumps
+# The density of a jump-diffusion log-return
 
 Given the jump count `n` and the jump sizes `j₀, j₁, …`, the log-return over `τ` is Gaussian,
-`N(bτ + ∑_{i<n} jᵢ, σ²τ)` (`jumpDiffusionIncrementLaw_apply`). With a Gaussian part (`σ ≠ 0`,
-`τ > 0`) the law is therefore `f(y) dy`, with `f` the mixture of the Gaussian densities over
-`Poisson(Λτ) ⊗ ν^ℕ` (`jumpDiffusionDensity`), the Poisson mixture of normal densities of
-Merton (1976) for any jump law.
+`N(bτ + ∑_{i<n} jᵢ, σ²τ)`. So its law is a mixture of Gaussian laws over `Poisson(Λτ) ⊗ ν^ℕ`
+(`jumpDiffusionIncrementLaw_apply`, for every `σ`). With a Gaussian part (`σ ≠ 0`, `τ > 0`) the
+law therefore has a density, the mixture of the normal densities (`jumpDiffusionDensity`). For
+lognormal jumps this is the Poisson mixture of normal densities of Merton (1976); here the jump law
+is arbitrary and needs no moment condition.
 
 * `jumpDiffusionIncrementLaw_eq_withDensity`: the law is `f(y) dy` (Tonelli).
-* `continuous_jumpDiffusionDensity`: `f` is continuous, by dominated convergence, since a Gaussian
+* `continuous_jumpDiffusionDensity`: `f` is continuous, by dominated convergence, since a normal
   density is at most `1/√(2πv)` (`gaussianPDFReal_le_inv_sqrt`).
-* `hasDerivAt_measureReal_Ioi_withDensity`: for any law `f(y) dy`, the tail `x ↦ P(Y > x)` is
-  differentiable wherever `f` is continuous, with derivative `−f`.
-* `hasDerivAt_jumpDiffusionDigitalPrice_strike`: so the digital price has strike derivative
-  `−e^{−rτ}f(log(K/S))/K`. Here `f(log(K/S))/K` is minus the strike derivative of `P(Se^Y > K)`,
-  the density of the price at `K`.
-* `breedenLitzenberger_jumpDiffusion`: Breeden–Litzenberger with jumps. The second strike
-  derivative of the call price is `e^{−rτ}f(log(K/S))/K`, the discounted density of the price.
-* `jumpDiffusionDensity_div_eq_lognormalTerminalPDF`: without jumps the density of the price at `K`
-  is `lognormalTerminalPDF`. The two second derivatives, this file's and `breedenLitzenberger`'s,
-  are equal, so the lognormal formula of `BreedenLitzenberger.lean` is the density of the price.
+* `nullSingletonClass_jumpDiffusionIncrementLaw`: so the law has no atoms (Mathlib's
+  `nullSingletonClass_withDensity`).
+* `hasDerivAt_measureReal_Ioi_withDensity`: for any law `f(y) dy` with `f` integrable, the tail
+  `x ↦ P(Y > x)` has derivative `−f(a)` at every `a` where `f` is continuous.
+
+The option prices built on these facts are in `BlackScholes/JumpDiffusionDigital.lean`: the strike
+derivatives of the call and the digital, and Breeden–Litzenberger with jumps.
 -/
 
 @[expose] public section
@@ -154,6 +151,27 @@ theorem continuous_jumpDiffusionDensity (b σ : ℝ) (Λ : ℝ≥0) (ν : Measur
       exact gaussianPDFReal_le_inv_sqrt _ _ _)
     (integrable_const _) (ae_of_all _ fun ω ↦ continuous_gaussianPDFReal _ _)
 
+/-- **With a Gaussian part the log-return law has no atoms**: it has a density
+(`jumpDiffusionIncrementLaw_eq_withDensity`), and Lebesgue measure has none (Mathlib's
+`nullSingletonClass_withDensity`). -/
+lemma nullSingletonClass_jumpDiffusionIncrementLaw (b : ℝ) {σ : ℝ} (hσ : σ ≠ 0) (Λ : ℝ≥0)
+    (ν : Measure ℝ) [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) :
+    NullSingletonClass (jumpDiffusionIncrementLaw b σ Λ ν τ) := by
+  rw [jumpDiffusionIncrementLaw_eq_withDensity b hσ Λ ν hτ]
+  infer_instance
+
+/-- The density integrates to `1`, so it is integrable. -/
+lemma integrable_jumpDiffusionDensity (b : ℝ) {σ : ℝ} (hσ : σ ≠ 0) (Λ : ℝ≥0) (ν : Measure ℝ)
+    [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) :
+    Integrable (jumpDiffusionDensity b σ Λ ν τ) := by
+  refine ⟨(continuous_jumpDiffusionDensity b σ Λ ν τ).aestronglyMeasurable, ?_⟩
+  have h1 : (volume.withDensity fun y ↦ ENNReal.ofReal (jumpDiffusionDensity b σ Λ ν τ y))
+      univ = 1 := by
+    rw [← jumpDiffusionIncrementLaw_eq_withDensity b hσ Λ ν hτ, measure_univ]
+  rw [withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ] at h1
+  rw [hasFiniteIntegral_iff_ofReal (ae_of_all _ (jumpDiffusionDensity_nonneg b σ Λ ν τ)), h1]
+  exact ENNReal.one_lt_top
+
 /-- **The tail of a law with a density is differentiable where the density is continuous**: for
 the law `f(y) dy`, with `f ≥ 0` integrable and continuous at `a`, `x ↦ P(Y > x)` has derivative
 `−f(a)` at `a` (the fundamental theorem of calculus, Mathlib's
@@ -162,103 +180,24 @@ theorem hasDerivAt_measureReal_Ioi_withDensity {f : ℝ → ℝ} (hf : Integrabl
     (hf0 : ∀ y, 0 ≤ f y) {a : ℝ} (hfa : ContinuousAt f a) :
     HasDerivAt (fun x ↦ (volume.withDensity fun y ↦ ENNReal.ofReal (f y)).real (Ioi x))
       (-f a) a := by
+  -- the integrals of `f`, stated in the notation of the goal
+  have h1 (x : ℝ) : (∫ y in Iic x, f y) + ∫ y in Ioi x, f y = ∫ y, f y := by
+    rw [← compl_Iic]
+    exact integral_add_compl measurableSet_Iic hf
+  have h2 (x : ℝ) : (∫ y in Iic x, f y) - ∫ y in Iic a, f y = ∫ y in a..x, f y :=
+    intervalIntegral.integral_Iic_sub_Iic hf.integrableOn hf.integrableOn
   have hIoi (x : ℝ) : (volume.withDensity fun y ↦ ENNReal.ofReal (f y)).real (Ioi x)
-      = ∫ y, f y - ∫ y in Iic a, f y - ∫ y in a..x, f y := by
-    have h1 := integral_add_compl (measurableSet_Iic (a := x)) hf
-    have h2 := intervalIntegral.integral_Iic_sub_Iic (a := a) (b := x) hf.integrableOn
-      hf.integrableOn
-    rw [compl_Iic] at h1
-    rw [Measure.real, withDensity_apply _ measurableSet_Ioi,
-      ← ofReal_integral_eq_lintegral_ofReal hf.integrableOn (ae_of_all _ fun y ↦ hf0 y),
-      ENNReal.toReal_ofReal (setIntegral_nonneg measurableSet_Ioi fun y _ ↦ hf0 y)]
-    linarith
-  exact ((intervalIntegral.integral_hasDerivAt_right hf.intervalIntegrable
-    hf.aestronglyMeasurable.stronglyMeasurableAtFilter hfa).const_sub _).congr_of_eventuallyEq
-    (Eventually.of_forall hIoi)
-
-/-- **The strike derivative of the digital price is minus the discounted density of the price.**
-With a Gaussian part (`σ ≠ 0`, `τ > 0`), at a strike `K > 0`,
-`∂D/∂K = −e^{−rτ}f(log(K/S))/K`. Here `f(log(K/S))/K` is minus the strike derivative of
-`P(Se^Y > K) = P(Y > log(K/S))`, the density of the price `Se^Y` at `K`. -/
-theorem hasDerivAt_jumpDiffusionDigitalPrice_strike {S r b σ : ℝ} (hS : 0 < S) (hσ : σ ≠ 0)
-    {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) {K : ℝ}
-    (hK : 0 < K) :
-    HasDerivAt (fun k ↦ jumpDiffusionDigitalPrice S k r b σ Λ ν τ)
-      (-(rexp (-r * τ) * (jumpDiffusionDensity b σ Λ ν τ (Real.log (K / S)) / K))) K := by
-  have hlaw := jumpDiffusionIncrementLaw_eq_withDensity b hσ Λ ν hτ
-  have hf := continuous_jumpDiffusionDensity b σ Λ ν τ
-  -- the density integrates to `1`, so it is integrable
-  have hfint : Integrable (jumpDiffusionDensity b σ Λ ν τ) := by
-    refine ⟨hf.aestronglyMeasurable, ?_⟩
-    have h1 : (volume.withDensity fun y ↦ ENNReal.ofReal (jumpDiffusionDensity b σ Λ ν τ y))
-        univ = 1 := by
-      rw [← hlaw, measure_univ]
-    rw [withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ] at h1
-    rw [hasFiniteIntegral_iff_ofReal (ae_of_all _ (jumpDiffusionDensity_nonneg b σ Λ ν τ)), h1]
-    exact ENNReal.one_lt_top
-  have htail := hasDerivAt_measureReal_Ioi_withDensity hfint
-    (jumpDiffusionDensity_nonneg b σ Λ ν τ) (a := Real.log (K / S)) hf.continuousAt
-  have hlog : HasDerivAt (fun k ↦ Real.log (k / S)) (1 / K) K := by
-    have h := ((hasDerivAt_id' K).div_const S).log (div_pos hK hS).ne'
-    have hS' := hS.ne'
-    have hK' := hK.ne'
-    convert h using 1
-    field_simp
-  -- `P(Seʸ > k) = P(Y > log(k/S))` for `k > 0`
-  have hset (k : ℝ) (hk : 0 < k) : {y | k < S * rexp y} = Ioi (Real.log (k / S)) := by
-    ext y
-    rw [mem_ofPred_eq, mem_Ioi, Real.log_lt_iff_lt_exp (div_pos hk hS), div_lt_iff₀ hS,
-      mul_comm]
-  have heq : ∀ᶠ k in 𝓝 K, jumpDiffusionDigitalPrice S k r b σ Λ ν τ
-      = rexp (-r * τ) * (volume.withDensity fun y ↦
-          ENNReal.ofReal (jumpDiffusionDensity b σ Λ ν τ y)).real (Ioi (Real.log (k / S))) := by
-    filter_upwards [Ioi_mem_nhds hK] with k hk
-    rw [jumpDiffusionDigitalPrice_eq, hset k hk, hlaw]
-  exact (((htail.comp K hlog).const_mul (rexp (-r * τ))).congr_of_eventuallyEq heq).congr_deriv
-    (by ring)
-
-/-- **Breeden–Litzenberger with jumps.** With a Gaussian part (`σ ≠ 0`, `τ > 0`) and a finite
-forward, the second strike derivative of the call price at `K > 0` is the discounted density of
-the price, `∂²C/∂K² = e^{−rτ}f(log(K/S))/K`. The first derivative is minus the digital price
-(`hasDerivAt_jumpDiffusionCallPrice_strike`), and the digital's derivative is minus the discounted
-density (`hasDerivAt_jumpDiffusionDigitalPrice_strike`). -/
-theorem breedenLitzenberger_jumpDiffusion {S r b σ : ℝ} (hS : 0 < S) (hσ : σ ≠ 0)
-    {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν] {τ : ℝ≥0}
-    (hY : Integrable rexp (jumpDiffusionIncrementLaw b σ Λ ν τ)) (hτ : 0 < τ) {K : ℝ}
-    (hK : 0 < K) :
-    HasDerivAt (deriv fun k ↦ jumpDiffusionCallPrice S k r b σ Λ ν τ)
-      (rexp (-r * τ) * (jumpDiffusionDensity b σ Λ ν τ (Real.log (K / S)) / K)) K := by
-  have hderiv : (deriv fun k ↦ jumpDiffusionCallPrice S k r b σ Λ ν τ)
-      = fun k ↦ -jumpDiffusionDigitalPrice S k r b σ Λ ν τ :=
-    funext fun k ↦ (hasDerivAt_jumpDiffusionCallPrice_strike hS hσ hY hτ k).deriv
-  have h := (hasDerivAt_jumpDiffusionDigitalPrice_strike hS hσ hτ hK).neg
-  rw [neg_neg] at h
-  rw [hderiv]
-  exact h
-
-/-- **Without jumps the density of the price is the lognormal density** `lognormalTerminalPDF`.
-The second strike derivative of the call price is `e^{−rτ}f(log(K/S))/K`
-(`breedenLitzenberger_jumpDiffusion`) and also `e^{−rτ}·lognormalTerminalPDF`
-(`breedenLitzenberger`, the call price being `bsV` near `K`, `jumpDiffusionCallPrice_zero`). So the
-lognormal formula of `BreedenLitzenberger.lean` is the density of the price at `K`, read off the
-uniqueness of derivatives rather than computed. -/
-theorem jumpDiffusionDensity_div_eq_lognormalTerminalPDF {S K r σ : ℝ} (hS : 0 < S)
-    (hK : 0 < K) (hσ : 0 < σ) (ν : Measure ℝ) [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) :
-    jumpDiffusionDensity (r - σ ^ 2 / 2) σ 0 ν τ (Real.log (K / S)) / K
-      = lognormalTerminalPDF S r σ τ K := by
-  have hY : Integrable rexp (jumpDiffusionIncrementLaw (r - σ ^ 2 / 2) σ 0 ν τ) := by
-    rw [jumpDiffusionIncrementLaw_zero]
-    exact (integrable_exp_mul_gaussianReal 1).congr (ae_of_all _ fun x ↦ by simp)
-  have h₁ := breedenLitzenberger_jumpDiffusion hS hσ.ne' hY hτ hK
-  -- near `K` the call price function is `bsV`, so the two first derivatives agree near `K`
-  have h₂ : HasDerivAt (deriv fun k ↦ jumpDiffusionCallPrice S k r (r - σ ^ 2 / 2) σ 0 ν τ)
-      (rexp (-(r * τ)) * lognormalTerminalPDF S r σ τ K) K := by
-    refine (breedenLitzenberger hS hσ hK (NNReal.coe_pos.2 hτ)).congr_of_eventuallyEq ?_
-    filter_upwards [Ioi_mem_nhds hK] with k hk
-    exact Filter.EventuallyEq.deriv_eq (eventually_of_mem (Ioi_mem_nhds hk) fun k' hk' ↦
-      jumpDiffusionCallPrice_zero hS hk' hσ ν hτ)
-  have h := h₁.unique h₂
-  rw [neg_mul] at h
-  exact mul_left_cancel₀ (Real.exp_pos _).ne' h
+      = ((∫ y, f y) - ∫ y in Iic a, f y) - ∫ y in a..x, f y := by
+    have h3 : (volume.withDensity fun y ↦ ENNReal.ofReal (f y)).real (Ioi x)
+        = ∫ y in Ioi x, f y := by
+      rw [Measure.real, withDensity_apply _ measurableSet_Ioi,
+        ← ofReal_integral_eq_lintegral_ofReal hf.integrableOn (ae_of_all _ fun y ↦ hf0 y),
+        ENNReal.toReal_ofReal (setIntegral_nonneg measurableSet_Ioi fun y _ ↦ hf0 y)] <;> rfl
+    linarith [h1 x, h2 x]
+  have hii : IntervalIntegrable f volume a a := hf.intervalIntegrable
+  have hD : HasDerivAt (fun x ↦ ((∫ y, f y) - ∫ y in Iic a, f y) - ∫ y in a..x, f y) (-f a) a :=
+    (intervalIntegral.integral_hasDerivAt_right hii
+      hf.aestronglyMeasurable.stronglyMeasurableAtFilter hfa).const_sub _
+  exact hD.congr_of_eventuallyEq (Eventually.of_forall hIoi)
 
 end MathFin

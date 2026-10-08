@@ -15,18 +15,19 @@ When the jump laws' moment-generating functions are finite near `0`, the log-ret
 `τ > 0` of a jump-diffusion with drift `b`, volatility coefficient `σ`, jump rate `Λ` and jump law
 `ν` (`jumpDiffusionIncrementLaw`) determines the drift `b`, the Gaussian variance `σ²` and the Lévy
 measure `Λν` away from `0`. The sign of `σ` is not determined, since the Gaussian part is
-symmetric. The rate `Λ` and the jump law `ν` are not determined separately either, only their
-product off `0`: jumps of size `0` do not move the log-price. This is the uniqueness in the
+symmetric, and the rate `Λ` and the jump law `ν` enter only through their product off `0`: jumps
+of size `0` do not move the log-price. This is the uniqueness in the
 Lévy–Khintchine representation for compound-Poisson jumps with exponential moments near `0`, read
 off a single date. The full uniqueness needs no moment conditions.
 
 * `jumpDiffusionExponent_eq_levy`: `κ(u) = bu + σ²u²/2 + ∫ (e^{ux} − 1) Π(dx)` wherever
   `∫ e^{ux} dν < ∞`, where `Π` is `Λν` restricted to `x ≠ 0`. The Laplace exponent sees the jumps
   only through `Π`.
-* `mgf_id_secondDifferenceMeasure`: the second difference `κ(u + s) + κ(u − s) − 2κ(u)` is the
-  moment-generating function at `u` of the finite measure `σ²s²·δ₀ + 2(cosh(sx) − 1)·Λν`
-  (`secondDifferenceMeasure`). Its atom at `0` is the Gaussian part and off `0` it is the jumps,
-  as in Kolmogorov's canonical measure `σ²δ₀ + x²Π(dx)`.
+* `mgf_id_secondDifferenceMeasure`: where `ν` has the exponential moments of orders `u ± s` and
+  `u`, the second difference `κ(u + s) + κ(u − s) − 2κ(u)` is the moment-generating function at
+  `u` of the finite measure `σ²s²·δ₀ + 2(cosh(sx) − 1)·Λν` (`secondDifferenceMeasure`). Its atom
+  at `0` is the Gaussian part and off `0` it is the jumps, as in Kolmogorov's canonical measure
+  `σ²δ₀ + x²Π(dx)`.
 * `jumpDiffusionIncrementLaw_eq_iff`: for jump laws whose moment-generating functions are finite
   near `0`, two log-return laws at the same date `τ > 0` are equal iff their drifts agree, their
   Gaussian variances agree and their Lévy measures agree off `0`.
@@ -135,10 +136,10 @@ lemma restrict_compl_zero_eq_withDensity_inv {s : ℝ} (hs : s ≠ 0) (μ : Meas
   exact ENNReal.coe_ne_zero.2 ((coshKernel_eq_zero_iff hs).not.2 (mem_compl_singleton_iff.1 hx))
 
 /-- **The second-difference measure** `σ²s²·δ₀ + 2(cosh(sx) − 1)·Λν`. Its moment-generating
-function is the second difference of the Laplace exponent with step `s`
-(`mgf_id_secondDifferenceMeasure`). Its atom at `0` is the Gaussian part `σ²s²`
-(`secondDifferenceMeasure_singleton_zero`), and off `0` it is the kernel times the Lévy measure
-(`restrict_compl_zero_secondDifferenceMeasure`). -/
+function at `u` is the second difference of the Laplace exponent with step `s`, where `ν` has the
+exponential moments of orders `u ± s` and `u` (`mgf_id_secondDifferenceMeasure`). Its atom at `0`
+is the Gaussian part `σ²s²` (`secondDifferenceMeasure_singleton_zero`), and off `0` it is the
+kernel times the Lévy measure (`restrict_compl_zero_secondDifferenceMeasure`). -/
 noncomputable def secondDifferenceMeasure (σ s : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ) : Measure ℝ :=
   (σ ^ 2 * s ^ 2).toNNReal • Measure.dirac 0 + (Λ • ν).withDensity fun x ↦ coshKernel s x
 
