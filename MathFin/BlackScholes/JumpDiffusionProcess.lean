@@ -105,16 +105,11 @@ theorem integral_exp_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν :
     [IsProbabilityMeasure ν] (hν : Integrable rexp ν) (τ : ℝ≥0) :
     ∫ x, rexp x ∂(jumpDiffusionIncrementLaw b σ Λ ν τ)
       = rexp ((b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1)) * τ) := by
-  obtain ⟨h, hJ⟩ := jumpDiffusionHyp_canonical (Λ * τ) ν
   have hφ := measurable_jumpDiffusionLogReturn b σ τ
-  have hJ0 : Integrable (fun ω : ℝ × ℕ × (ℕ → ℝ) ↦ rexp (ω.2.2 0))
-      (jumpDiffusionMeasure (Λ * τ) ν) := by
-    rw [← (hJ 0).map_eq] at hν
-    exact (integrable_map_measure measurable_exp.aestronglyMeasurable (hJ 0).aemeasurable).1 hν
-  have hM : ∫ ω, rexp (ω.2.2 0) ∂(jumpDiffusionMeasure (Λ * τ) ν) = ∫ x, rexp x ∂ν :=
-    (hJ 0).integral_comp measurable_exp.aestronglyMeasurable
   rw [jumpDiffusionIncrementLaw, integral_map hφ.aemeasurable measurable_exp.aestronglyMeasurable,
-    h.integral_exp_logReturn hJ0 b σ (NNReal.coe_nonneg τ), hM, NNReal.coe_mul]
+    (jumpDiffusionHyp_canonical (Λ * τ) ν).1.integral_exp_logReturn
+      (integrable_exp_canonical_jump hν) b σ (NNReal.coe_nonneg τ),
+    integral_exp_canonical_jump (Λ * τ) ν, NNReal.coe_mul]
   congr 1
   ring
 
