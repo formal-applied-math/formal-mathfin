@@ -1,0 +1,132 @@
+/-
+Copyright (c) 2026 Raphael Coelho. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Raphael Coelho
+-/
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.JumpDiffusionMixing
+
+/-!
+# The canonical jump-diffusion model
+
+`JumpDiffusionHyp` lists what the jump-diffusion results assume of a probability space: a
+standard normal diffusion sample `Z`, a jump count `N ∼ Poisson(Λ)` and i.i.d. log-jump sizes
+`Jᵢ`, with the count independent of the diffusion sample and the sizes, and the diffusion sample
+independent of the sizes. This file shows that the assumptions can be met for every intensity `Λ`
+and every jump law `ν`: on `ℝ × ℕ × (ℕ → ℝ)` with the product of `N(0, 1)`, `Poisson(Λ)` and the
+infinite product `ν^ℕ` (`jumpDiffusionMeasure`), the coordinates satisfy them
+(`jumpDiffusionHyp_canonical`). So the model-level theorems are not vacuous.
+
+It also shows that the call depends on the model only through `Λ` and the law of the jumps. On
+any probability space satisfying `JumpDiffusionHyp`, the jump sizes are i.i.d., so their sequence
+has law `ν^ℕ`, with `ν` the law of `J₀`, and the call is
+
+  `∫ n, ∫ x, C_BS(S₀e^{−κ + ∑_{i<n} xᵢ}) dν^ℕ(x) dPoisson(Λ)(n)`
+
+(`JumpDiffusionHyp.call_eq_integral_infinitePi`), Merton's formula for a general jump law with
+the expectation over the jump sizes written against their law.
+
+## Main results
+
+* `jumpDiffusionHyp_canonical`: the coordinates of `ℝ × ℕ × (ℕ → ℝ)` under
+  `N(0, 1) ⊗ Poisson(Λ) ⊗ ν^ℕ` satisfy `JumpDiffusionHyp`, and each jump size has law `ν`.
+* `JumpDiffusionHyp.call_eq_integral_infinitePi`: the call as an integral against `Poisson(Λ)`
+  and `ν^ℕ`.
+-/
+
+@[expose] public section
+
+namespace MathFin
+
+open MeasureTheory ProbabilityTheory Real
+open scoped NNReal
+
+/-- The canonical jump-diffusion law on `ℝ × ℕ × (ℕ → ℝ)`: a standard normal diffusion sample,
+a `Poisson(Λ)` jump count and a sequence of log-jump sizes, i.i.d. of law `ν`, all independent. -/
+noncomputable def jumpDiffusionMeasure (Λ : ℝ≥0) (ν : Measure ℝ) : Measure (ℝ × ℕ × (ℕ → ℝ)) :=
+  (gaussianReal 0 1).prod ((poissonMeasure Λ).prod (Measure.infinitePi fun _ : ℕ ↦ ν))
+
+instance isProbabilityMeasure_jumpDiffusionMeasure (Λ : ℝ≥0) (ν : Measure ℝ)
+    [IsProbabilityMeasure ν] : IsProbabilityMeasure (jumpDiffusionMeasure Λ ν) := by
+  unfold jumpDiffusionMeasure
+  infer_instance
+
+/-- **The jump-diffusion model exists**, for every jump intensity `Λ` and every jump law `ν`:
+under `jumpDiffusionMeasure Λ ν` the coordinates (the diffusion sample, the jump count and the
+log-jump sizes) satisfy `JumpDiffusionHyp`, and each jump size has law `ν`. -/
+theorem jumpDiffusionHyp_canonical (Λ : ℝ≥0) (ν : Measure ℝ) [IsProbabilityMeasure ν] :
+    JumpDiffusionHyp (jumpDiffusionMeasure Λ ν) Λ (fun ω ↦ ω.1) (fun ω ↦ ω.2.1)
+        (fun i ω ↦ ω.2.2 i) ∧
+      ∀ i, HasLaw (fun ω : ℝ × ℕ × (ℕ → ℝ) ↦ ω.2.2 i) ν (jumpDiffusionMeasure Λ ν) := by
+  have hsnd : MeasurePreserving (fun ω : ℝ × ℕ × (ℕ → ℝ) ↦ ω.2) (jumpDiffusionMeasure Λ ν)
+      ((poissonMeasure Λ).prod (Measure.infinitePi fun _ : ℕ ↦ ν)) :=
+    measurePreserving_snd
+  have hsizes : MeasurePreserving (fun ω : ℝ × ℕ × (ℕ → ℝ) ↦ ω.2.2) (jumpDiffusionMeasure Λ ν)
+      (Measure.infinitePi fun _ : ℕ ↦ ν) :=
+    measurePreserving_snd.comp hsnd
+  have hJm (i : ℕ) : Measurable fun ω : ℝ × ℕ × (ℕ → ℝ) ↦ ω.2.2 i :=
+    (measurable_pi_apply i).comp (measurable_snd.comp measurable_snd)
+  have hJ (i : ℕ) : HasLaw (fun ω : ℝ × ℕ × (ℕ → ℝ) ↦ ω.2.2 i) ν (jumpDiffusionMeasure Λ ν) :=
+    ((measurePreserving_eval_infinitePi (fun _ : ℕ ↦ ν) i).comp hsizes).hasLaw
+  -- the diffusion sample is independent of the count and the sizes together
+  have hZ : (fun ω : ℝ × ℕ × (ℕ → ℝ) ↦ ω.1) ⟂ᵢ[jumpDiffusionMeasure Λ ν]
+      fun ω ↦ (ω.2.1, ω.2.2) :=
+    indepFun_prod (μ := gaussianReal 0 1)
+      (ν := (poissonMeasure Λ).prod (Measure.infinitePi fun _ : ℕ ↦ ν)) measurable_id
+      measurable_id
+  -- the count is independent of the sizes
+  have hNJ : (fun ω : ℝ × ℕ × (ℕ → ℝ) ↦ ω.2.1) ⟂ᵢ[jumpDiffusionMeasure Λ ν] fun ω ↦ ω.2.2 :=
+    indepFun_comp_of_measurePreserving hsnd measurable_fst measurable_snd
+      (indepFun_prod (μ := poissonMeasure Λ) (ν := Measure.infinitePi fun _ : ℕ ↦ ν)
+        measurable_id measurable_id)
+  refine ⟨⟨(measurePreserving_fst (μ := gaussianReal 0 1)).hasLaw,
+    (measurePreserving_fst.comp hsnd).hasLaw, hJm, ?_,
+    fun i ↦ ⟨(hJ i).aemeasurable, (hJ 0).aemeasurable, (hJ i).map_eq.trans (hJ 0).map_eq.symm⟩,
+    hZ.comp measurable_id measurable_snd,
+    indepFun_prodMk_of_indepFun_prodMk measurable_fst.aemeasurable
+      (measurable_fst.comp measurable_snd).aemeasurable
+      (measurable_snd.comp measurable_snd).aemeasurable hZ hNJ⟩, hJ⟩
+  rw [iIndepFun_iff_map_fun_eq_infinitePi_map hJm]
+  refine hsizes.map_eq.trans ?_
+  congr 1
+  funext i
+  exact (hJ i).map_eq.symm
+
+namespace JumpDiffusionHyp
+
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} {Λ : ℝ≥0} {Z : Ω → ℝ}
+  {N : Ω → ℕ} {J : ℕ → Ω → ℝ}
+
+/-- The jump sizes of a jump-diffusion form an i.i.d. sequence: their joint law is `ν^ℕ`, with
+`ν` the law of `J₀`. -/
+lemma map_jumps (h : JumpDiffusionHyp Q Λ Z N J) :
+    Q.map (fun ω i ↦ J i ω) = Measure.infinitePi fun _ : ℕ ↦ Q.map (J 0) := by
+  rw [h.J_indep.map_fun_eq_infinitePi_map h.J_meas]
+  congr 1
+  funext i
+  exact (h.J_ident i).map_eq
+
+/-- **The call depends only on the intensity and the jump law.** For a jump-diffusion whose jump
+sizes have law `ν = Q.map (J 0)`, the discounted expected call payoff is the integral, against
+`Poisson(Λ)` for the count and `ν^ℕ` for the jump sizes, of the Black–Scholes price at the spot
+`S₀e^{−κ + ∑_{i<n} xᵢ}`: Merton's formula for a general jump law (`call_poisson_mixture`) with
+the expectation over the jump sizes written against their law (`map_jumps`). -/
+theorem call_eq_integral_infinitePi (h : JumpDiffusionHyp Q Λ Z N J)
+    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K)
+    (hσ : 0 < σ) (hT : 0 < T) (κ : ℝ) :
+    ∫ ω, rexp (-r * T)
+        * max (jumpDiffusionTerminal S_0 r σ T κ (Z ω) (N ω) (fun i ↦ J i ω) - K) 0 ∂Q
+      = ∫ n, ∫ x, bsV K r σ (S_0 * rexp (-κ + ∑ i ∈ Finset.range n, x i)) T
+          ∂(Measure.infinitePi fun _ : ℕ ↦ Q.map (J 0)) ∂(poissonMeasure Λ) := by
+  rw [h.call_poisson_mixture hJ hS_0 hK hσ hT κ, ← h.map_jumps]
+  refine integral_congr_ae (ae_of_all _ fun n ↦ ?_)
+  have hg : Measurable fun x : ℕ → ℝ ↦ bsV K r σ (S_0 * rexp (-κ + ∑ i ∈ Finset.range n, x i)) T :=
+    (measurable_bsV_spot K r σ T).comp (by fun_prop)
+  exact (integral_map (measurable_pi_lambda _ h.J_meas).aemeasurable
+    hg.aestronglyMeasurable).symm
+
+end JumpDiffusionHyp
+
+end MathFin

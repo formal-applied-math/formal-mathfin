@@ -44,6 +44,8 @@ is an iterated integral (`integral_prod`).
 * `indepFun_prodMk_of_indepFun_prodMk`: if `X` is independent of `(Y, W)` and `Y` of `W`, then
   `Y` is independent of `(X, W)`. Mutual independence of three variables can be stated with any
   of them split off first.
+* `indepFun_comp_of_measurePreserving`: independence pulls back along a measure-preserving map,
+  so variables on one factor of a product space keep their independence on the product.
 -/
 
 @[expose] public section
@@ -163,5 +165,22 @@ theorem indepFun_prodMk_of_indepFun_prodMk {γ : Type*} {mγ : MeasurableSpace �
     ← AEMeasurable.map_map_of_aemeasurable hrot.aemeasurable (hX.prodMk (hY.prodMk hW)),
     hXYW.map_prod_eq_prod_map_map hX (hY.prodMk hW), hYW.map_prod_eq_prod_map_map hY hW]
   exact map_prod_prod_rotate _ _ _
+
+/-- **Independence pulls back along a measure-preserving map.** If `f` and `g` are independent
+under `ν` and `φ` carries `μ` to `ν`, then `f ∘ φ` and `g ∘ φ` are independent under `μ`: each
+event about them is the preimage under `φ` of an event about `f` and `g`. -/
+theorem indepFun_comp_of_measurePreserving {Ω' γ : Type*} {mΩ' : MeasurableSpace Ω'}
+    {mγ : MeasurableSpace γ} {μ : Measure Ω} {ν : Measure Ω'} {φ : Ω → Ω'}
+    (hφ : MeasurePreserving φ μ ν) {f : Ω' → β} {g : Ω' → γ} (hf : Measurable f)
+    (hg : Measurable g) (hfg : f ⟂ᵢ[ν] g) :
+    (fun ω ↦ f (φ ω)) ⟂ᵢ[μ] fun ω ↦ g (φ ω) := by
+  rw [indepFun_iff_measure_inter_preimage_eq_mul] at hfg ⊢
+  intro s t hs ht
+  calc μ ((fun ω ↦ f (φ ω)) ⁻¹' s ∩ (fun ω ↦ g (φ ω)) ⁻¹' t)
+      = ν (f ⁻¹' s ∩ g ⁻¹' t) := hφ.measure_preimage ((hf hs).inter (hg ht)).nullMeasurableSet
+    _ = ν (f ⁻¹' s) * ν (g ⁻¹' t) := hfg s t hs ht
+    _ = μ ((fun ω ↦ f (φ ω)) ⁻¹' s) * μ ((fun ω ↦ g (φ ω)) ⁻¹' t) :=
+        (congrArg₂ (· * ·) (hφ.measure_preimage (hf hs).nullMeasurableSet)
+          (hφ.measure_preimage (hg ht).nullMeasurableSet)).symm
 
 end MathFin
