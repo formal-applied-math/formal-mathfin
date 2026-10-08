@@ -19,8 +19,9 @@ of measure.
   tilted law are ratios of those of `μ`, `∫ e^{ux} dμ_θ = ∫ e^{(u + θ)x} dμ / ∫ e^{θx} dμ`
   (Mathlib's `integral_exp_tilted` at linear exponents).
 * `integrable_exp_mul_tilted_const_mul`: `μ_θ` has the exponential moment of order `u` when `μ` has
-  those of orders `θ` and `u + θ`.
-* `measure_eq_of_mgf_id_eventuallyEq`: a probability law whose moment-generating function is finite
+  those of orders `θ` and `u + θ`; so where the moment-generating function of `μ` is finite near
+  `θ`, that of `μ_θ` is finite near `0` (`zero_mem_interior_integrableExpSet_tilted`).
+* `measure_eq_of_mgf_id_eventuallyEq`: a finite measure whose moment-generating function is finite
   near `0` is determined by that function near `0` (the identity theorem for Mathlib's complex
   moment-generating function); `measure_eq_of_mgf_id_eq` is the case of every exponential moment.
 * `gaussianReal_tilted_const_mul`: the transform shifts the mean of a Gaussian law, `N(m, v)`
@@ -41,17 +42,23 @@ namespace MathFin
 open MeasureTheory ProbabilityTheory Real Filter
 open scoped NNReal Topology
 
-/-- **A law is determined by its moment-generating function near `0`**: if the moment-generating
-function of a probability law `μ` on `ℝ` is finite on a neighbourhood of `0`, every finite measure
-`μ'` with the same moment-generating function on a neighbourhood of `0` is `μ`. On an interval
-`(-ε, ε)` of exponential moments of both, the complex moment-generating functions are analytic in
-the vertical strip `|Re z| < ε` (Mathlib's `analyticOnNhd_complexMGF`) and agree at its real
-points, hence on the whole strip (the identity theorem). On the imaginary axis they are the
-characteristic functions (`complexMGF_id_mul_I`), which determine the measure
+/-- **A measure is determined by its moment-generating function near `0`**: if the
+moment-generating function of a finite measure `μ` on `ℝ` is finite on a neighbourhood of `0`,
+every finite measure `μ'` with the same moment-generating function on a neighbourhood of `0` is
+`μ`. On an interval `(-ε, ε)` of exponential moments of both, the complex moment-generating
+functions are analytic in the vertical strip `|Re z| < ε` (Mathlib's `analyticOnNhd_complexMGF`)
+and agree at its real points, hence on the whole strip (the identity theorem). On the imaginary
+axis they are the characteristic functions (`complexMGF_id_mul_I`), which determine the measure
 (`Measure.ext_of_charFun`). -/
-lemma measure_eq_of_mgf_id_eventuallyEq {μ μ' : Measure ℝ} [IsProbabilityMeasure μ]
+lemma measure_eq_of_mgf_id_eventuallyEq {μ μ' : Measure ℝ} [IsFiniteMeasure μ]
     [IsFiniteMeasure μ'] (h0 : 0 ∈ interior (integrableExpSet id μ))
     (h : mgf id μ =ᶠ[𝓝 0] mgf id μ') : μ = μ' := by
+  -- the zero measure: `μ'` has total mass `mgf id μ' 0 = 0`
+  rcases eq_or_ne μ 0 with rfl | hμ0
+  · have h00 : μ'.real Set.univ = 0 := by
+      rw [← mgf_zero' (X := id), ← h.eq_of_nhds, mgf_zero_measure, Pi.zero_apply]
+    rw [measureReal_eq_zero_iff, Measure.measure_univ_eq_zero] at h00
+    exact h00.symm
   obtain ⟨ε, hε, hball⟩ := Metric.eventually_nhds_iff_ball.1
     ((eventually_mem_set.2 (mem_interior_iff_mem_nhds.1 h0)).and h)
   -- both measures have the exponential moments of the orders in `(-ε, ε)`
@@ -59,7 +66,7 @@ lemma measure_eq_of_mgf_id_eventuallyEq {μ μ' : Measure ℝ} [IsProbabilityMea
     interior_maximal (fun t ht ↦ (hball t ht).1) Metric.isOpen_ball
   have hμ' : Metric.ball (0 : ℝ) ε ⊆ interior (integrableExpSet id μ') := by
     refine interior_maximal (fun t ht ↦ ?_) Metric.isOpen_ball
-    have hpos : mgf id μ' t ≠ 0 := (hball t ht).2 ▸ (mgf_pos (X := id) (hball t ht).1).ne'
+    have hpos : mgf id μ' t ≠ 0 := (hball t ht).2 ▸ (mgf_pos' (X := id) hμ0 (hball t ht).1).ne'
     by_contra hint
     exact hpos (mgf_undef (X := id) hint)
   -- so their complex moment-generating functions agree on the strip `|Re z| < ε`
@@ -84,10 +91,10 @@ lemma measure_eq_of_mgf_id_eventuallyEq {μ μ' : Measure ℝ} [IsProbabilityMea
   rw [← complexMGF_id_mul_I, ← complexMGF_id_mul_I]
   exact hEq (by simpa using hε)
 
-/-- **A law with exponential moments of every order is determined by its moment-generating
-function**: a probability law `μ` on `ℝ` with every exponential moment equals each finite measure
+/-- **A measure with exponential moments of every order is determined by its moment-generating
+function**: a finite measure `μ` on `ℝ` with every exponential moment equals each finite measure
 `μ'` with the same moment-generating function (`measure_eq_of_mgf_id_eventuallyEq`). -/
-lemma measure_eq_of_mgf_id_eq {μ μ' : Measure ℝ} [IsProbabilityMeasure μ] [IsFiniteMeasure μ']
+lemma measure_eq_of_mgf_id_eq {μ μ' : Measure ℝ} [IsFiniteMeasure μ] [IsFiniteMeasure μ']
     (hμ : ∀ u, Integrable (fun x ↦ rexp (u * x)) μ) (h : mgf id μ = mgf id μ') : μ = μ' := by
   have hset : integrableExpSet id μ = Set.univ := Set.eq_univ_of_forall hμ
   exact measure_eq_of_mgf_id_eventuallyEq (by simp [hset]) (Eventually.of_forall (congr_fun h))
@@ -113,6 +120,24 @@ lemma integrable_exp_mul_tilted_const_mul {μ : Measure ℝ} {θ u : ℝ}
     Integrable (fun x ↦ rexp (u * x)) (μ.tilted (θ * ·)) := by
   rw [integrable_tilted_iff hθ]
   simpa only [smul_eq_mul, ← Real.exp_add, ← add_mul, add_comm θ u] using hu
+
+/-- Where the moment-generating function of `μ` is finite near `θ`, `μ` has the exponential
+moments of the orders `u + θ` for `u` near `0`. -/
+lemma eventually_integrable_exp_add_mul {μ : Measure ℝ} {θ : ℝ}
+    (hθ : θ ∈ interior (integrableExpSet id μ)) :
+    ∀ᶠ u in 𝓝 (0 : ℝ), Integrable (fun x ↦ rexp ((u + θ) * x)) μ :=
+  ((continuous_add_const θ).tendsto' 0 θ (zero_add θ)).eventually_mem
+    (mem_interior_iff_mem_nhds.1 hθ)
+
+/-- Where the moment-generating function of `μ` is finite near `θ`, that of the tilted law
+`μ.tilted (θ * ·)` is finite near `0` (`integrable_exp_mul_tilted_const_mul`). -/
+lemma zero_mem_interior_integrableExpSet_tilted {μ : Measure ℝ} {θ : ℝ}
+    (hθ : θ ∈ interior (integrableExpSet id μ)) :
+    0 ∈ interior (integrableExpSet id (μ.tilted (θ * ·))) := by
+  have hint : ∀ᶠ u in 𝓝 (0 : ℝ), Integrable (fun x ↦ rexp (u * x)) (μ.tilted (θ * ·)) :=
+    (eventually_integrable_exp_add_mul hθ).mono fun u hu ↦
+      integrable_exp_mul_tilted_const_mul (interior_subset (s := integrableExpSet id μ) hθ) hu
+  exact mem_interior_iff_mem_nhds.2 hint
 
 /-- **The Esscher transform of a Gaussian law shifts its mean**: `N(m, v)` tilted by `e^{θx}` is
 `N(m + θv, v)`. The Gaussian `N(m + θv, v)` has every exponential moment, and the two

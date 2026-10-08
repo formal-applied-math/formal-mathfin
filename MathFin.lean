@@ -351,14 +351,23 @@ import MathFin.BlackScholes.JumpDiffusionBrownian
 -- exponent κ (where the jump law has the moment of order θ); power claims at each date
 import MathFin.BlackScholes.JumpDiffusionExponent
 -- The Esscher transform of a jump-diffusion log-return law: again a jump-diffusion law when the
--- jump law has every exponential moment; Esscher pricing is Merton's formula for the tilted jumps,
--- and Black–Scholes without jumps
+-- jump law's moment-generating function is finite near θ; Esscher pricing is Merton's formula for
+-- the tilted jumps, and Black–Scholes without jumps
 import MathFin.BlackScholes.JumpDiffusionEsscher
+-- The law at one date determines the drift and the Lévy measure off 0, for a given σ (uniqueness
+-- in the Lévy–Khintchine form, finitely many jumps)
+import MathFin.BlackScholes.JumpDiffusionIdentifiability
+-- Incompleteness at one date: the Esscher law and the Merton measure are both compensated, yet
+-- price some call differently when the jumps are nontrivial
+import MathFin.BlackScholes.JumpDiffusionIncompleteness
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser
 import MathFin.BlackScholes.CappedCall
 import MathFin.BlackScholes.Spreads
+-- Call spreads tend to the digital, so call prices at every strike determine the law (the first-
+-- order Breeden–Litzenberger, for any law with a finite mean)
+import MathFin.BlackScholes.CallSpreadDigital
 import MathFin.BlackScholes.Lookback
 import MathFin.BlackScholes.BarrierParity
 import MathFin.BlackScholes.PowerOption

@@ -94,9 +94,7 @@ theorem jumpDiffusionIncrementLaw_tilted (b σ : ℝ) (Λ : ℝ≥0) {ν : Measu
   have hθν : Integrable (fun x ↦ rexp (θ * x)) ν := interior_subset (s := integrableExpSet id ν) hθ
   have : IsProbabilityMeasure (ν.tilted (θ * ·)) := isProbabilityMeasure_tilted hθν
   -- near `0`, the jump law has the exponential moments of the orders `u + θ`
-  have hU : ∀ᶠ u in 𝓝 (0 : ℝ), Integrable (fun x ↦ rexp ((u + θ) * x)) ν :=
-    ((continuous_add_const θ).tendsto' 0 θ (zero_add θ)).eventually_mem
-      (mem_interior_iff_mem_nhds.1 hθ)
+  have hU := eventually_integrable_exp_add_mul hθ
   have hint : ∀ᶠ u in 𝓝 (0 : ℝ), Integrable (fun y ↦ rexp (u * y))
       (jumpDiffusionIncrementLaw (b + θ * σ ^ 2) σ (Λ * jumpMoment ν θ) (ν.tilted (θ * ·)) τ) :=
     hU.mono fun u hu ↦ integrable_exp_mul_jumpDiffusionIncrementLaw _ _ _
@@ -107,6 +105,19 @@ theorem jumpDiffusionIncrementLaw_tilted (b σ : ℝ) (Λ : ℝ≥0) {ν : Measu
     jumpDiffusionExponent_tilted b σ Λ hθν u, mgf_id_tilted_const_mul,
     mgf_id_jumpDiffusionIncrementLaw b σ Λ hu, mgf_id_jumpDiffusionIncrementLaw b σ Λ hθν,
     ← Real.exp_sub, sub_mul]
+
+/-- **The Esscher transform multiplies the Lévy measure by `e^{θx}`**: the tilted
+characteristics have the Lévy measure `Λm(θ)·ν_θ = e^{θx}·Λν`, where `m(θ) = ∫ e^{θx} dν`. -/
+lemma smul_tilted_eq_withDensity (Λ : ℝ≥0) {ν : Measure ℝ} [NeZero ν] {θ : ℝ}
+    (hθ : Integrable (fun x ↦ rexp (θ * x)) ν) :
+    (Λ * jumpMoment ν θ) • ν.tilted (θ * ·)
+      = Λ • ν.withDensity fun x ↦ ENNReal.ofReal (rexp (θ * x)) := by
+  have hm : 0 < ∫ x, rexp (θ * x) ∂ν := integral_exp_pos hθ
+  rw [mul_smul, Measure.tilted, ENNReal.smul_def (jumpMoment ν θ),
+    ← withDensity_smul' _ _ ENNReal.coe_ne_top]
+  refine congrArg (Λ • ·) (congrArg ν.withDensity (funext fun x ↦ ?_))
+  rw [Pi.smul_apply, smul_eq_mul, ← ENNReal.ofReal_coe_nnreal, coe_jumpMoment,
+    ← ENNReal.ofReal_mul hm.le, mul_div_cancel₀ _ hm.ne']
 
 /-- **The Esscher condition.** The tilted characteristics are at their compensated drift,
 `b + θσ² = r − σ²/2 − Λm(θ)(∫ eˣ d(ν tilted) − 1)`, exactly when `κ(θ + 1) − κ(θ) = r`: the
