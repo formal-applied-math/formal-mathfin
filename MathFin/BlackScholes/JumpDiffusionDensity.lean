@@ -192,7 +192,7 @@ theorem hasDerivAt_measureReal_Ioi_withDensity {f : ℝ → ℝ} (hf : Integrabl
         = ∫ y in Ioi x, f y := by
       rw [Measure.real, withDensity_apply _ measurableSet_Ioi,
         ← ofReal_integral_eq_lintegral_ofReal hf.integrableOn (ae_of_all _ fun y ↦ hf0 y),
-        ENNReal.toReal_ofReal (setIntegral_nonneg measurableSet_Ioi fun y _ ↦ hf0 y)] <;> rfl
+        ENNReal.toReal_ofReal (setIntegral_nonneg measurableSet_Ioi fun y _ ↦ hf0 y)]
     linarith [h1 x, h2 x]
   have hii : IntervalIntegrable f volume a a := hf.intervalIntegrable
   have hD : HasDerivAt (fun x ↦ ((∫ y, f y) - ∫ y in Iic a, f y) - ∫ y in a..x, f y) (-f a) a :=

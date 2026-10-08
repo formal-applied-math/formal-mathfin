@@ -166,7 +166,7 @@ theorem breedenLitzenberger_jumpDiffusion {S r b σ : ℝ} (hS : 0 < S) (hσ : �
     (hY : Integrable rexp (jumpDiffusionIncrementLaw b σ Λ ν τ)) (hτ : 0 < τ) {K : ℝ}
     (hK : 0 < K) :
     HasDerivAt (deriv fun k ↦ jumpDiffusionCallPrice S k r b σ Λ ν τ)
-      (rexp (-r * τ) * (jumpDiffusionDensity b σ Λ ν τ (Real.log (K / S)) / K)) K := by
+      (rexp (-r * τ) * (jumpDiffusionDensity b σ Λ ν τ (Real.log (K / S)) / K)) K :=
   hasDerivAt_deriv_of_eventually
     (Eventually.of_forall fun x ↦ hasDerivAt_jumpDiffusionCallPrice_strike (r := r) hS hσ hY hτ x)
     ((hasDerivAt_jumpDiffusionDigitalPrice_strike (r := r) (b := b) (Λ := Λ) (ν := ν) hS hσ hτ

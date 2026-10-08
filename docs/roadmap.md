@@ -2139,9 +2139,15 @@ level of the law at one date):
    `∂²C/∂K² = e^{−rτ}f(log(K/S))/K` (`breedenLitzenberger_jumpDiffusion`). Without jumps, at the
    drift `r − σ²/2`, this and `breedenLitzenberger`'s are second strike derivatives of one call
    price, so `lognormalTerminalPDF` is the density of the price
-   (`jumpDiffusionDensity_div_eq_lognormalTerminalPDF`). Next on this line: the left derivative at
-   an atom, so that the call price is differentiable at `K` iff the law has no atom there; Merton's
-   series for the digital and the density.
+   (`jumpDiffusionDensity_div_eq_lognormalTerminalPDF`). Also done (corpus 509): Merton's series
+   for the digital and the density. Merton's call series, differentiated term by term in the strike,
+   gives the Poisson mixtures of Black–Scholes digitals and of lognormal densities
+   (`MertonStrikeGreeks.lean`), and with Gaussian log-jumps at the compensated drift they are the
+   digital price and the density of the price
+   (`jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice`,
+   `jumpDiffusionDensity_gaussian_div_eq_mertonDensity`), read off the uniqueness of derivatives.
+   Next on this line: the left derivative at an atom, so that the call price is differentiable at
+   `K` iff the law has no atom there.
 5. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
    `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style
    characterization used for constant `θ` (`ExpMartingaleQBrownian`) to independent increments

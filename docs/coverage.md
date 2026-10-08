@@ -26,6 +26,45 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Merton's digital and Merton's density: the strike derivatives of Merton's series (2026-10-08)
+
+Three entries added, all `full`: `mf-merton-strike-derivatives`, `mf-jump-diffusion-merton-digital`
+and `mf-jump-diffusion-merton-density`. Corpus 506 → 509. New file
+`BlackScholes/MertonStrikeGreeks.lean`; `BlackScholes/JumpDiffusionDigital.lean` gains the
+identifications.
+
+- The series in the strike. Merton's call series `C(K) = ∑ₙ wₙ C_BS(S·cₙ, K, σₙ)` is
+  differentiated term by term in the strike, as the Merton Greeks differentiate it in the spot
+  (`hasDerivAt_tsum_of_isPreconnected`). For `S, σ, T, K > 0` and `k > −1`:
+  `∂C/∂K = −mertonDigitalPrice`, with `mertonDigitalPrice = ∑ₙ wₙ e^{−rT}Φ(d₂ⁿ)`
+  (`hasDerivAt_mertonCallPrice_strike`, each term by `hasDerivAt_bsV_K`); and
+  `∂²C/∂K² = e^{−rT}·mertonDensity`, with `mertonDensity = ∑ₙ wₙ·lognormalTerminalPDF(S·cₙ, r, σₙ,
+  T, K)` (`hasDerivAt_mertonDigitalPrice_strike`, `hasDerivAt_deriv_mertonCallPrice_strike`, each
+  term by `breedenLitzenberger`). The derivative bounds are `wₙe^{−rT}` and, on `(K/2, ∞)`,
+  `wₙe^{−rT}/((K/2)σ√T)`; the Poisson weights sum to one (Mathlib's `hasSum_one_poissonMeasure`).
+- Merton's digital. With Gaussian log-jumps `N(log(1 + k) − δ²/2, δ²)` at the compensated drift
+  `b = r − σ²/2 − Λk`, the jump-diffusion digital price is `mertonDigitalPrice` at the expected
+  jump count `Λτ` (`jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice`). The digital price
+  is minus the strike derivative of the call price, and near `K` the call price is Merton's series
+  (`jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice`); `HasDerivAt.unique` compares the two
+  derivatives.
+- Merton's density. In the same model the density of the price at `K`, `f(log(K/S))/K`, is
+  `mertonDensity` (`jumpDiffusionDensity_gaussian_div_eq_mertonDensity`): the strike derivative of
+  the digital price is `−e^{−rτ}f(log(K/S))/K`, and near `K` the digital price is Merton's
+  digital series.
+
+Neither identification computes a Gaussian integral or a convolution of Gaussians: both are read
+off Merton's call series, which the library had derived from the general jump-diffusion.
+
+Safe wording: "Merton's call series has strike derivative minus the Poisson mixture of
+Black–Scholes digitals and second strike derivative the discounted Poisson mixture of lognormal
+densities; with Gaussian log-jumps at the compensated drift these mixtures are the digital price
+and the density of the price of the jump-diffusion". Not covered:
+- the put's strike derivatives and the put digital;
+- the mixtures as measures (the density of the price as a measure on `(0, ∞)`);
+- strike derivatives for jump laws other than Gaussian, beyond the general
+  `breedenLitzenberger_jumpDiffusion`.
+
 ### The density of a jump-diffusion log-return; Breeden–Litzenberger with jumps (2026-10-08)
 
 Three entries added, all `full`: `mf-jump-diffusion-density`, `mf-breeden-litzenberger-jump-diffusion`
@@ -73,7 +112,7 @@ lognormal density of `breedenLitzenberger`". Not covered:
 - smoothness of the density beyond continuity;
 - `σ = 0`, where the law has an atom at `bτ` (the no-jump event; not formalized);
 - Merton's series for the density or the digital (Poisson mixtures of Black–Scholes terms for
-  lognormal jumps).
+  lognormal jumps); done in the section above.
 
 ### Digital options: minus the strike derivative of the call (2026-10-08)
 
