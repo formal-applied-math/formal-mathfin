@@ -194,7 +194,7 @@ lemma ofReal_exp_le_jumpDiffusionIncrementLaw_singleton (b : ℝ) (Λ : ℝ≥0)
     exact (Measure.dirac_apply_of_mem (mem_singleton _)).symm.le
   · have h0 : ω ∉ ({0} ×ˢ univ : Set (ℕ × (ℕ → ℝ))) := by simpa using hω
     rw [indicator_of_notMem h0]
-    exact zero_le _
+    exact zero_le
 
 /-- The density integrates to `1`, so it is integrable. -/
 lemma integrable_jumpDiffusionDensity (b : ℝ) {σ : ℝ} (hσ : σ ≠ 0) (Λ : ℝ≥0) (ν : Measure ℝ)
