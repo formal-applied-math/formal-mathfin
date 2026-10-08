@@ -2962,6 +2962,22 @@
       }
     },
     {
+      "id": "mf-jump-diffusion-density",
+      "name": "The Jump-Diffusion Log-Return Has a Continuous Density, a Mixture of Normal Densities",
+      "description": "Take a jump-diffusion log-return law over τ > 0 with drift b, volatility coefficient σ ≠ 0, jump rate Λ ≥ 0 and jump law ν (mf-jump-diffusion-log-return-mgf). Then the law is f(y) dy, where f(y) = ∫ φ(y; bτ + ∑_{i<n} jᵢ, σ²τ) d(Poisson(Λτ) ⊗ ν^ℕ)(n, j) is the mixture, over the jump count n and the jump sizes j, of the normal densities φ(·; m, v) (jumpDiffusionDensity). This is the Poisson mixture of normal densities of Merton (1976), for any jump law; f is continuous. No moment condition on ν is needed.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionDensity\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The jump-diffusion log-return law has a continuous density**, the mixture of normal\ndensities. -/\ntheorem jump_diffusion_density_thm (b : ℝ) {σ : ℝ} (hσ : σ ≠ 0) (Λ : ℝ≥0) (ν : Measure ℝ)\n    [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) :\n    MathFin.jumpDiffusionIncrementLaw b σ Λ ν τ\n        = volume.withDensity (fun y ↦ ENNReal.ofReal (MathFin.jumpDiffusionDensity b σ Λ ν τ y)) ∧\n      Continuous (MathFin.jumpDiffusionDensity b σ Λ ν τ) :=\n  ⟨MathFin.jumpDiffusionIncrementLaw_eq_withDensity b hσ Λ ν hτ,\n    MathFin.continuous_jumpDiffusionDensity b σ Λ ν τ⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, Journal of Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Given the jumps (n, j), the log-return bτ + σ√τ·z + ∑_{i<n} jᵢ is an affine image of the standard normal sample z, so its law is N(bτ + ∑_{i<n} jᵢ, σ²τ) (Mathlib's gaussianReal_map_const_mul and gaussianReal_map_const_add); by Measure.prod_apply_symm the log-return law is the mixture of these Gaussian laws over Poisson(Λτ) ⊗ ν^ℕ (jumpDiffusionIncrementLaw_apply, valid for every σ). For σ ≠ 0 each Gaussian law is φ(y) dy (gaussianReal_apply), and Tonelli (lintegral_lintegral_swap) moves the mixture inside, giving the density f; the mixed densities are bounded by 1/√(2πσ²τ) (gaussianPDFReal_le_inv_sqrt), hence integrable, so the lower integral is ofReal of the integral (ofReal_integral_eq_lintegral_ofReal). Continuity is dominated convergence with the same bound (continuous_of_dominated). Lives in MathFin/BlackScholes/JumpDiffusionDensity.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-jump-diffusion-price-parity",
       "name": "Jump-Diffusion Put–Call Parity for the Price Functions",
       "description": "For a drift b, a volatility σ, a jump rate Λ ≥ 0, a jump law ν with ∫ eˣ dν < ∞, a rate r, a time τ ≥ 0 and any S, K, let C(S, τ) and P(S, τ) be the discounted expected payoffs e^{−rτ}(Se^Y − K)⁺ and e^{−rτ}(K − Se^Y)⁺ with Y a jump-diffusion log-return over τ (jumpDiffusionCallPrice, jumpDiffusionPutPrice). Then C(S, τ) = P(S, τ) + S·e^{(b + σ²/2 + Λ(∫ eˣ dν − 1) − r)τ} − Ke^{−rτ}. At the compensated drift b = r − σ²/2 − Λ(∫ eˣ dν − 1) the forward is worth S and C(S, τ) = P(S, τ) + S − Ke^{−rτ}, the usual put–call parity.",
@@ -3423,6 +3439,38 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: the call's second strike-derivative (hasDerivAt_deriv_bsV_K) with its value read as the density lognormalTerminalPDF, which unfolds to ϕ(d_2)/(K σ √T). Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-breeden-litzenberger-jump-diffusion",
+      "name": "Breeden–Litzenberger With Jumps: The Second Strike Derivative of the Call Is the Discounted Density",
+      "description": "Take a jump-diffusion log-return law over τ > 0 with σ ≠ 0 and a finite forward ∫ eʸ < ∞, let S > 0 and a rate r, and let C(S, k, τ) = ∫ e^{−rτ}(Seʸ − k)⁺ be the call price function (jumpDiffusionCallPrice). Then at every strike K > 0 the strike derivative ∂C/∂K is itself differentiable, with ∂²C/∂K² = e^{−rτ}f(log(K/S))/K, where f is the density of the log-return (mf-jump-diffusion-density). Here f(log(K/S))/K is minus the strike derivative of P(Seʸ > K), the density of the price Seʸ at K: option prices at all strikes reveal the density of the price, with jumps as without (mf-breeden-litzenberger for Black–Scholes). The general step is that for a law f(y) dy, the tail x ↦ P(Y > x) has derivative −f(a) wherever f is continuous at a.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionDensity\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Breeden–Litzenberger with jumps**: `∂²C/∂K² = e^{−rτ}f(log(K/S))/K`. -/\ntheorem breeden_litzenberger_jump_diffusion_thm {S r b σ : ℝ} (hS : 0 < S) (hσ : σ ≠ 0)\n    {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν] {τ : ℝ≥0}\n    (hY : Integrable Real.exp (MathFin.jumpDiffusionIncrementLaw b σ Λ ν τ)) (hτ : 0 < τ)\n    {K : ℝ} (hK : 0 < K) :\n    HasDerivAt (deriv fun k ↦ MathFin.jumpDiffusionCallPrice S k r b σ Λ ν τ)\n      (Real.exp (-r * τ) * (MathFin.jumpDiffusionDensity b σ Λ ν τ (Real.log (K / S)) / K)) K :=\n  MathFin.breedenLitzenberger_jumpDiffusion hS hσ hY hτ hK\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The first strike derivative is minus the digital price at every strike (hasDerivAt_jumpDiffusionCallPrice_strike, mf-jump-diffusion-digital-strike-derivative), so deriv C = −D. For k > 0 the digital price is e^{−rτ}P(Y > log(k/S)) (jumpDiffusionDigitalPrice_eq). For a law f(y) dy with f ≥ 0 integrable and continuous at a, the tail x ↦ P(Y > x) = ∫ f − ∫_{(−∞, a]} f − ∫_a^x f has derivative −f(a) (hasDerivAt_measureReal_Ioi_withDensity, from Mathlib's intervalIntegral.integral_hasDerivAt_right). Applied with the continuous density of the log-return (jumpDiffusionIncrementLaw_eq_withDensity, continuous_jumpDiffusionDensity; f integrates to 1) and the chain rule through k ↦ log(k/S), whose derivative is 1/K, it gives ∂D/∂K = −e^{−rτ}f(log(K/S))/K (hasDerivAt_jumpDiffusionDigitalPrice_strike). Lives in MathFin/BlackScholes/JumpDiffusionDensity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black-scholes-lognormal-density",
+      "name": "Without Jumps the Density of the Price Is the Lognormal Density, Read Off Breeden–Litzenberger",
+      "description": "At jump rate Λ = 0, drift r − σ²/2 and σ > 0, for S, K > 0, τ > 0 and any jump law ν, the density of the price Seʸ at K, f(log(K/S))/K with f the density of the log-return (mf-breeden-litzenberger-jump-diffusion), equals lognormalTerminalPDF(S, r, σ, τ, K) = φ(d₂)/(Kσ√τ), the formula of mf-breeden-litzenberger. That entry proves only the differential identity ∂²bsV/∂K² = e^{−rτ}·lognormalTerminalPDF and does not show that the formula is the density of the price; this entry does, by equating the two second strike derivatives of one call price.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionDensity\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Without jumps the density of the price is the lognormal density.** -/\ntheorem black_scholes_lognormal_density_thm {S K r σ : ℝ} (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ)\n    (ν : Measure ℝ) [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) :\n    MathFin.jumpDiffusionDensity (r - σ ^ 2 / 2) σ 0 ν τ (Real.log (K / S)) / K\n      = MathFin.lognormalTerminalPDF S r σ τ K :=\n  MathFin.jumpDiffusionDensity_div_eq_lognormalTerminalPDF hS hK hσ ν hτ\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Two derivatives at K of the function deriv C, with C the call price function, are compared (Mathlib's HasDerivAt.unique). One is e^{−rτ}f(log(K/S))/K, from breedenLitzenberger_jumpDiffusion (mf-breeden-litzenberger-jump-diffusion); the forward is finite because without jumps the law is Gaussian (jumpDiffusionIncrementLaw_zero). The other is e^{−rτ}·lognormalTerminalPDF, from breedenLitzenberger (mf-breeden-litzenberger), transported because on the neighbourhood k > 0 of K the call price is bsV (jumpDiffusionCallPrice_zero), so the first derivatives agree near K (Mathlib's Filter.EventuallyEq.deriv_eq). Cancelling e^{−rτ} gives the identity; no Gaussian algebra is done. Lives in MathFin/BlackScholes/JumpDiffusionDensity.lean. Axioms-clean."
       }
     },
     {

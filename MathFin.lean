@@ -364,6 +364,10 @@ import MathFin.BlackScholes.JumpDiffusionIncompleteness
 -- Digital options: with σ ≠ 0 the law has no atoms, so the strike derivative of the call price is
 -- minus the digital price; without jumps that is e^{−rτ}Φ(d₂)
 import MathFin.BlackScholes.JumpDiffusionDigital
+-- The log-return law with σ ≠ 0 is a Gaussian mixture with a continuous density; Breeden–
+-- Litzenberger with jumps (the second strike derivative of the call is the discounted density);
+-- without jumps the density of the price is lognormalTerminalPDF
+import MathFin.BlackScholes.JumpDiffusionDensity
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser
