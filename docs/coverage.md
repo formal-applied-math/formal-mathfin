@@ -26,6 +26,34 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Jump-diffusions with an arbitrary jump law (2026-10-07)
+
+Three entries added, all `full`: `mf-jump-diffusion-mixing-formula`,
+`mf-jump-diffusion-compensator` and `mf-merton-general-jump-law`. Corpus 457 → 460.
+
+`BlackScholes/JumpDiffusionMixing.lean` drops the Gaussian jump law of `MertonModel`:
+
+- the mixing formula, `jumpDiffusion_call_eq_integral_bsV`: for `Z ∼ N(0, 1)` and a jump part `Y`
+  independent of `Z` with `𝔼[e^Y] < ∞`,
+  `𝔼[e^{−rT}(S₀e^{(r−σ²/2)T + σ√T·Z + Y} − K)⁺] = 𝔼[C_BS(S₀e^Y)]`. With `Y` frozen at `y` the
+  terminal price is a Black–Scholes terminal price at the spot `S₀e^y`, so the freezing lemma
+  reduces the call to `bs_call_formula`.
+- the compensator, `JumpDiffusionHyp.discounted_terminal` and `discounted_terminal_eq_iff`: for
+  the compound-Poisson jump part `−κ + ∑_{i<N} Jᵢ`, with i.i.d. `Jᵢ` of any law with
+  `𝔼[e^J] < ∞`, `𝔼[e^{−rT}S_T] = S₀e^{−κ + Λ(𝔼[e^J] − 1)}`. This equals `S₀` exactly when
+  `κ = Λ(𝔼[e^J] − 1)`.
+- Merton's general formula (his eq. (16)), `JumpDiffusionHyp.call_poisson_mixture`:
+  `𝔼[e^{−rT}(S_T − K)⁺] = ∫ n, 𝔼[C_BS(S₀e^{−κ + ∑_{i<n} Jᵢ})] ∂Poisson(Λ)`.
+
+Conditioning on the jump count is now one lemma,
+`Foundations/IndepFreezing.integral_comp_of_hasLaw_poissonMeasure`, and the Merton prices and
+the compound-Poisson MGF go through it too.
+
+Safe wording: "the mixing formula, the compound-Poisson compensator, and Merton's Poisson-mixture
+formula for i.i.d. jumps of any law with a finite exponential moment, at maturity". Not covered:
+closed forms for specific non-Gaussian jump laws (Kou's double-exponential model needs its own
+integrals), the put, the price process, and Lévy processes beyond compound Poisson.
+
 ### The Merton Greeks (2026-10-07)
 
 Five entries added, all `full`: `mf-merton-delta`, `mf-merton-gamma`, `mf-merton-vega`,

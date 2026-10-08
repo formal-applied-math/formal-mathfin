@@ -151,7 +151,8 @@ theorem jumpDiffusion_call_eq_integral_bsV [IsProbabilityMeasure Q] {S_0 K r σ 
 
 /-- **The discounted terminal price** of a jump-diffusion with an independent jump part `Y` has
 mean `S₀ · 𝔼[e^Y]`: the diffusion factor has mean `e^{rT}` and is independent of the jump
-part. -/
+part. No integrability is assumed: when `𝔼[e^Y] = ∞` both sides are the Bochner integral's
+`0`. -/
 theorem jumpDiffusion_discounted_terminal {S_0 r σ T : ℝ} {Z Y : Ω → ℝ}
     (hZ : HasLaw Z (gaussianReal 0 1) Q) (hY : AEMeasurable Y Q) (hYZ : IndepFun Y Z Q)
     (hT : 0 ≤ T) :

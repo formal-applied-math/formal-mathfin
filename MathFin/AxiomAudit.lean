@@ -602,6 +602,23 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.mertonCallPrice_strictConvexOn_spot' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.mertonCallPrice_strictConvexOn_spot
 
+-- Jump-diffusions with an arbitrary jump law (2026-10-07): the mixing formula
+-- (the call is the Black–Scholes price averaged over an independent jump
+-- part), the compound-Poisson compensator as the unique drift correction, and
+-- Merton's eq. (16); conditioning on a Poisson count as one lemma
+
+/-- info: 'MathFin.integral_comp_of_hasLaw_poissonMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_comp_of_hasLaw_poissonMeasure
+
+/-- info: 'MathFin.jumpDiffusion_call_eq_integral_bsV' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_call_eq_integral_bsV
+
+/-- info: 'MathFin.JumpDiffusionHyp.discounted_terminal_eq_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionHyp.discounted_terminal_eq_iff
+
+/-- info: 'MathFin.JumpDiffusionHyp.call_poisson_mixture' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionHyp.call_poisson_mixture
+
 /-- info: 'MathFin.markovPathMeasure_cylinder' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.markovPathMeasure_cylinder
 

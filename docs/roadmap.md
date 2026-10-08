@@ -1799,3 +1799,21 @@ compound-Poisson compensator `Λ(𝔼[e^J] − 1)` that makes the discounted ter
 `S₀`; (2) the jump-diffusion characteristic function (Lévy–Khintchine for Brownian motion plus
 compound Poisson); (3) Poisson random measure existence.
 
+## phase: jump-diffusions with an arbitrary jump law (2026-10-07, corpus 457→460)
+
+`MertonModel` needs the Gaussian jump law at one step: with `n` jumps the log-shock is Gaussian,
+so the terminal price is a Black–Scholes terminal price. Condition on the whole jump part instead
+and that step no longer needs a jump law. With the jump part frozen, the price is a Black–Scholes
+price at a shifted spot, so the call is the Black–Scholes price averaged over the jump part (the
+mixing formula, `BlackScholes/JumpDiffusionMixing.lean`). Merton's eq. (16), the Poisson mixture
+of averaged Black–Scholes prices, follows for any jump law with a finite exponential moment. So
+does the compensator: `κ = Λ(𝔼[e^J] − 1)` is the one drift correction that makes the discounted
+terminal price average to `S₀`. Conditioning on a Poisson count had been written out by hand in
+three places, and is now one lemma, `integral_comp_of_hasLaw_poissonMeasure`.
+
+**Next on the jump axis:** (1) a non-Gaussian closed form. For Kou's double-exponential jumps
+the exponential moment `pη₁/(η₁ − 1) + qη₂/(η₂ + 1)` gives the compensator directly. (2) The
+jump-diffusion characteristic function (Lévy–Khintchine for Brownian motion plus compound Poisson
+at a fixed time), the entry point for Fourier pricing. (3) The put, and put–call parity for any
+jump law. (4) Poisson random measure existence.
+

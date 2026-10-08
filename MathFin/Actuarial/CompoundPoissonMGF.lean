@@ -81,6 +81,7 @@ lemma integrable_exp_mul_sum_range_of_iid (t : ℝ) (X : ℕ → Ω → ℝ) (hi
     (hmeas : ∀ i, Measurable (X i)) (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ)
     (hint : Integrable (fun ω ↦ Real.exp (t * X 0 ω)) μ) (n : ℕ) :
     Integrable (fun ω ↦ Real.exp (t * ∑ i ∈ Finset.range n, X i ω)) μ := by
+  have := hindep.isProbabilityMeasure
   simpa only [Finset.sum_apply] using hindep.integrable_exp_mul_sum hmeas
     (s := Finset.range n) fun i _ ↦
       ((hident i).comp (measurable_const_mul t).exp).integrable_iff.mpr hint
