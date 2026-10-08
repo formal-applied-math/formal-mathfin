@@ -1919,3 +1919,12 @@ series a mixture of `bsV`. Term by term, the strike derivative of the call serie
 `hasDerivAt_bsV_K` up to defeq, and that of the digital series is the named Greek
 `hasDerivAt_bsCashDigital_K`. The first draft inlined `e^{−rT}Φ(d₂)` and had to reach the digital's
 derivative by transporting `breedenLitzenberger` back through `deriv`.
+
+### Two elaboration details at the pin
+
+- An anonymous constructor under a type ascription keeps the structure's own type:
+  `(⟨(0 : ℝ) ^ 2, sq_nonneg 0⟩ : ℝ≥0) * τ` elaborates the left factor at
+  `{ r // 0 ≤ r }`, and the multiplication with `τ : ℝ≥0` finds no instance. Write the term where
+  `ℝ≥0` is the expected type of the whole product, as `jumpDiffusionIncrementLaw_apply` does:
+  `gaussianReal m (.mk ((0 : ℝ) ^ 2) (sq_nonneg _) * τ)`.
+- `zero_le` takes its argument implicitly: `exact zero_le`, not `zero_le _`.
