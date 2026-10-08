@@ -237,16 +237,16 @@
     "gir-const-theta-marginal": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-10-08",
-      "elapsed_s": 4.0,
-      "input_hash": "78bc1d0347a28c061f588723b41bf45ff092a677948e931d0816b219c43290cd",
-      "verified_at_commit": "58eebc3"
+      "elapsed_s": 3.8,
+      "input_hash": "364449ca6b94047756e3f9954389143154bf9caca41047061710d6b96efaa209",
+      "verified_at_commit": "d7f132f"
     },
     "gir-const-theta-qbm": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-10-08",
-      "elapsed_s": 5.8,
-      "input_hash": "dec69a38b068d7f27c946dd2b822dd6a45e90217c9a49b1a64b177888f06afeb",
-      "verified_at_commit": "58eebc3"
+      "elapsed_s": 5.5,
+      "input_hash": "e72d53bf606a230ed42008ae2585389d7b361e6ddf7b3b3baca51aadfabe63db",
+      "verified_at_commit": "d7f132f"
     },
     "gir-continuous-emm-forward": {
       "benchmark_file": "girsanov_finance.json",
@@ -279,9 +279,9 @@
     "gir-gaussian-esscher-tilt": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "5558e52068155da11081b8004cb0a793782d4def4d6931d4d3304893cea53278",
-      "verified_at_commit": "58eebc3"
+      "elapsed_s": 3.9,
+      "input_hash": "9207e5f135704e1fdedc4255bd576a7e438887b59471d14089329ff9daf7a902",
+      "verified_at_commit": "d7f132f"
     },
     "gir-market-completeness": {
       "benchmark_file": "girsanov_finance.json",
@@ -335,9 +335,9 @@
     "gir-simple-adapted": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "1018ea8689341d65287236881eed590237947226611872f300c3d03f2a61f2a9",
-      "verified_at_commit": "58eebc3"
+      "elapsed_s": 5.3,
+      "input_hash": "132c037c96aa79d4579a176b2cb35adbd69d414e0f44a256d5edeb94b69da3dd",
+      "verified_at_commit": "d7f132f"
     },
     "gir-thm-9.1.7": {
       "benchmark_file": "girsanov_finance.json",
@@ -349,16 +349,16 @@
     "gir-thm-9.1.8": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-10-08",
-      "elapsed_s": 4.0,
-      "input_hash": "94324e562d41944f2dd16eb0e641fd1cf689ae1874c68ad341d87a90a01def52",
-      "verified_at_commit": "58eebc3"
+      "elapsed_s": 5.3,
+      "input_hash": "1eaea82d1285605052abf1ec797e0cb1b75deae6ce975d6c0b15539ff9b52410",
+      "verified_at_commit": "d7f132f"
     },
     "gir-thm-9.1.8-predictable": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "2c973a9ca0857aea23966634de9a7f4a353eabe8efcab71cb650051e0659e54d",
-      "verified_at_commit": "58eebc3"
+      "elapsed_s": 5.3,
+      "input_hash": "10d9eabb4120d0ada57b1fa8b802cfc17ee5ec18f91bce07bdd10d8c40cf0085",
+      "verified_at_commit": "d7f132f"
     },
     "gir-thm-9.3.4": {
       "benchmark_file": "girsanov_finance.json",
@@ -742,8 +742,8 @@
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-08",
       "elapsed_s": 5.5,
-      "input_hash": "afd8f2955f148b02f1aca99faa84e028d5911387a45148c691432dff1f32fba5",
-      "verified_at_commit": "58eebc3"
+      "input_hash": "d94ce8ca30629101435126a41481a52361779955838b6947fda408ec39ad021b",
+      "verified_at_commit": "d7f132f"
     },
     "mf-black76-delta": {
       "benchmark_file": "mathematical_finance.json",
@@ -1805,16 +1805,16 @@
     "mf-jump-diffusion-esscher-pricing": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-08",
-      "elapsed_s": 4.3,
-      "input_hash": "a7e714dfa5f0bf6bf5be664cac387130e5094d72d9a3b06560ad1e4267d60817",
-      "verified_at_commit": "58eebc3"
+      "elapsed_s": 5.3,
+      "input_hash": "bedfde3f27e20ac7620ca376f41322c68d94ceb7face1b55bb7b8f5aff367236",
+      "verified_at_commit": "d7f132f"
     },
     "mf-jump-diffusion-esscher-transform": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-08",
-      "elapsed_s": 5.4,
-      "input_hash": "9e491a8dfe1827680ceb9c8dd348c9ba64d4ef740993514d31faa74cec823e36",
-      "verified_at_commit": "58eebc3"
+      "elapsed_s": 5.5,
+      "input_hash": "aa16fb07076e9852f4f5a19575aa185a3681d5d9ab6f9ac9b91c58c4b41d41bd",
+      "verified_at_commit": "d7f132f"
     },
     "mf-jump-diffusion-exponential-martingales": {
       "benchmark_file": "mathematical_finance.json",
@@ -2134,9 +2134,9 @@
     "mf-merton-esscher-pricing": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-08",
-      "elapsed_s": 4.0,
-      "input_hash": "d8125caddfee1847c4343429ed48f133ffd1d013b2294d60f07c6b19bd1cdade",
-      "verified_at_commit": "58eebc3"
+      "elapsed_s": 5.9,
+      "input_hash": "0c399e93203bacc0661b307f4c8d7806b07c34f8801f1a86746c51d2d084e358",
+      "verified_at_commit": "d7f132f"
     },
     "mf-merton-from-general-jump-law": {
       "benchmark_file": "mathematical_finance.json",
