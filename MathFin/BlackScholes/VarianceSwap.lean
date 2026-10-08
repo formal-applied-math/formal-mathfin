@@ -39,6 +39,13 @@ Results:
 * `integral_excess_return_eq_zero`: `E[(S_T − F)/F] = 0`.
 * `varianceSwap_fairStrike`: the full Demeterfi-Derman-Kamal identity
   `(2/T) · E[log(F/S_T) + (S_T − F)/F] = σ²`.
+
+Model-free, for any law of the log-return `Y` with `E|Y| < ∞` and `E[e^Y] < ∞`:
+
+* `integral_logContract`: `E[log(F/S_T) + (S_T − F)/F] = rT − E[Y] + (e^{−rT}E[e^Y] − 1)`.
+  When the forward is the mean of `S_T` the last term vanishes and the log contract prices the
+  gap `log F − E[log S_T]`. With jumps that gap is no longer half the variance
+  (`jumpDiffusion_logContract`, `JumpDiffusionVarianceSwap.lean`).
 -/
 
 @[expose] public section
@@ -47,6 +54,30 @@ namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
 open scoped NNReal ENNReal
+
+/-- **The log contract under any law of the log-return.** For `S > 0`, the forward
+`F = Se^{rτ}` and a law `μ` of the log-return `Y`, with `S_τ = Se^Y`, `𝔼|Y| < ∞` and
+`𝔼[e^Y] < ∞`, the Demeterfi–Derman–Kamal–Zou log contract is worth
+`𝔼[log(F/S_τ) + (S_τ − F)/F] = rτ − 𝔼[Y] + (e^{−rτ}𝔼[e^Y] − 1)`: pointwise the payoff is
+`rτ − Y + (e^{Y − rτ} − 1)`. When the forward is the mean of `S_τ` the last term vanishes. -/
+lemma integral_logContract {μ : Measure ℝ} [IsProbabilityMeasure μ] {S : ℝ} (hS : 0 < S)
+    (r τ : ℝ) (hY : Integrable (fun y ↦ y) μ) (hE : Integrable rexp μ) :
+    ∫ y, (Real.log (S * rexp (r * τ) / (S * rexp y))
+        + (S * rexp y - S * rexp (r * τ)) / (S * rexp (r * τ))) ∂μ
+      = r * τ - ∫ y, y ∂μ + (rexp (-(r * τ)) * ∫ y, rexp y ∂μ - 1) := by
+  have hpt (y : ℝ) : Real.log (S * rexp (r * τ) / (S * rexp y))
+        + (S * rexp y - S * rexp (r * τ)) / (S * rexp (r * τ))
+      = r * τ - y + (rexp (-(r * τ)) * rexp y - 1) := by
+    rw [mul_div_mul_left _ _ hS.ne', ← Real.exp_sub, Real.log_exp, sub_div,
+      mul_div_mul_left _ _ hS.ne', div_self (mul_pos hS (Real.exp_pos _)).ne', div_eq_inv_mul,
+      ← Real.exp_neg]
+  have hA : Integrable (fun y ↦ r * τ - y) μ := (integrable_const _).sub hY
+  have hB : Integrable (fun y ↦ rexp (-(r * τ)) * rexp y - 1) μ :=
+    (hE.const_mul _).sub (integrable_const _)
+  simp only [hpt]
+  rw [integral_add hA hB, integral_sub (integrable_const _) hY,
+    integral_sub (hE.const_mul _) (integrable_const _), integral_const_mul (rexp (-(r * τ))) rexp]
+  simp
 
 /-- **Log-moment integrand identity**: after the `S_0` cancellation,
 `log((S_0 · e^{rT}) / (S_0 · exp((r − σ²/2)T + σ√T·z))) = σ²T/2 − σ√T·z`. -/

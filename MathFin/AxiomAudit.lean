@@ -909,6 +909,36 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.mertonCallPrice_strictConvexOn_strike' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.mertonCallPrice_strictConvexOn_strike
 
+-- Variance swaps with jumps (2026-10-08): under any law the log contract prices rτ − E[Y] when the
+-- forward is the mean; the jump-diffusion log-return has mean (b + ΛE[J])τ and variance
+-- (σ² + ΛE[J²])τ, read off its cumulant generating function; at the compensated drift the log
+-- contract is σ² + 2ΛE[eᴶ − 1 − J], above the variance per unit time by 2ΛE[eᴶ − 1 − J − J²/2],
+-- which is ≤ 0 for downward jumps
+
+/-- info: 'MathFin.integral_logContract' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_logContract
+
+/-- info: 'MathFin.integral_id_jumpDiffusionIncrementLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_id_jumpDiffusionIncrementLaw
+
+/-- info: 'MathFin.variance_id_jumpDiffusionIncrementLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.variance_id_jumpDiffusionIncrementLaw
+
+/-- info: 'MathFin.integral_sq_jumpDiffusionIncrementLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_sq_jumpDiffusionIncrementLaw
+
+/-- info: 'MathFin.jumpDiffusion_logContract' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_logContract
+
+/-- info: 'MathFin.jumpDiffusion_logContract_sub_variance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_logContract_sub_variance
+
+/-- info: 'Real.exp_le_quadratic_of_nonpos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Real.exp_le_quadratic_of_nonpos
+
+/-- info: 'MathFin.jumpDiffusion_logContract_le_variance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_logContract_le_variance
+
 -- Blueprint-spine closure (2026-06-06): every spine node is axiom-pinned.
 -- Gap found by tests/test_values.py::test_blueprint_spine_is_audited on its
 -- first run — seven tagged headliners (including bs_identity, the magic

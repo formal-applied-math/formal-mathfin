@@ -3714,6 +3714,102 @@
       }
     },
     {
+      "id": "mf-log-contract-any-law",
+      "name": "The Log Contract Under Any Law of the Log-Return",
+      "domain": "mathematical_finance",
+      "description": "Let μ be the law of the log-return Y of a price S_τ = Se^Y over a time τ, with S > 0, E|Y| < ∞ and E[e^Y] < ∞, and let F = Se^{rτ} be the forward at the rate r. Then the Demeterfi–Derman–Kamal–Zou log contract is worth E[log(F/S_τ) + (S_τ − F)/F] = rτ − E[Y] + (e^{−rτ}E[e^Y] − 1): pointwise its payoff is rτ − Y + (e^{Y − rτ} − 1). No model is assumed. When the forward is the mean of S_τ (E[e^Y] = e^{rτ}) the last term vanishes and the contract prices the gap rτ − E[Y] = log F − E[log S_τ]. In Black–Scholes that gap is σ²τ/2 (mf-variance-swap-log); with jumps it is not half the variance (mf-jump-diffusion-log-contract).",
+      "metadata": {
+        "chapter": 9,
+        "reference": "Demeterfi, Derman, Kamal & Zou (1999), More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes; Carr & Wu (2009), Variance risk premiums, Review of Financial Studies 22, 1311-1341; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Pointwise, log(Se^{rτ}/(Se^y)) = rτ − y (Mathlib's mul_div_mul_left, Real.exp_sub, Real.log_exp) and (Se^y − Se^{rτ})/(Se^{rτ}) = e^{−rτ}e^y − 1 (sub_div, div_self, Real.exp_neg); the expectation splits by linearity (integral_add, integral_sub, integral_const_mul, integral_const) (integral_logContract). Lives in MathFin/BlackScholes/VarianceSwap.lean, beside the Black–Scholes identity varianceSwap_fairStrike. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.BlackScholes.VarianceSwap\n\nopen MeasureTheory\n\n/-- **The log contract under any law of the log-return.** -/\ntheorem log_contract_any_law_thm {μ : Measure ℝ} [IsProbabilityMeasure μ] {S : ℝ} (hS : 0 < S)\n    (r τ : ℝ) (hY : Integrable (fun y ↦ y) μ) (hE : Integrable Real.exp μ) :\n    ∫ y, (Real.log (S * Real.exp (r * τ) / (S * Real.exp y))\n        + (S * Real.exp y - S * Real.exp (r * τ)) / (S * Real.exp (r * τ))) ∂μ\n      = r * τ - ∫ y, y ∂μ + (Real.exp (-(r * τ)) * ∫ y, Real.exp y ∂μ - 1) :=\n  MathFin.integral_logContract hS r τ hY hE\n"
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-log-return-mean",
+      "name": "The Mean of a Jump-Diffusion Log-Return",
+      "domain": "mathematical_finance",
+      "description": "For a jump-diffusion log-return law over τ ≥ 0 with drift b, volatility coefficient σ, jump rate Λ ≥ 0 and a jump law ν whose moment-generating function is finite near 0 (0 lies in the interior of {θ : E[e^{θJ}] < ∞}), the log-return Y has mean E[Y] = (b + ΛE[J])τ: the drift plus the expected jump per unit time (mf-jump-diffusion-log-return-mgf). It is the derivative at 0 of the cumulant generating function κ(θ)τ (mf-jump-diffusion-levy-exponent).",
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The log-return law inherits the exponential moments of the jumps (zero_mem_interior_integrableExpSet_jumpDiffusionIncrementLaw), and near 0 its cumulant generating function is κ(θ)τ (cgf_id_jumpDiffusionIncrementLaw_eventuallyEq, from cgf_id_jumpDiffusionIncrementLaw). The mean is the derivative of the cgf at 0 (Mathlib's deriv_cgf_zero); κ'(θ) = b + σ²θ + ΛM'(θ), with M the jump law's moment-generating function (hasDerivAt_jumpDiffusionExponent, Mathlib's differentiableAt_mgf), and M'(0) = E[J] (deriv_mgf_zero) (integral_id_jumpDiffusionIncrementLaw). Lives in MathFin/BlackScholes/JumpDiffusionVarianceSwap.lean. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionVarianceSwap\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The mean of a jump-diffusion log-return.** -/\ntheorem jump_diffusion_log_return_mean_thm (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}\n    [IsProbabilityMeasure ν] (hν : 0 ∈ interior (integrableExpSet id ν)) (τ : ℝ≥0) :\n    ∫ y, y ∂(MathFin.jumpDiffusionIncrementLaw b σ Λ ν τ) = (b + Λ * ∫ x, x ∂ν) * τ :=\n  MathFin.integral_id_jumpDiffusionIncrementLaw b σ Λ hν τ\n"
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-log-return-variance",
+      "name": "The Variance of a Jump-Diffusion Log-Return",
+      "domain": "mathematical_finance",
+      "description": "Under the hypotheses of mf-jump-diffusion-log-return-mean, the log-return Y over τ has variance Var[Y] = (σ² + ΛE[J²])τ, Mathlib's variance of the identity under the log-return law: the Gaussian part contributes σ²τ and the jumps ΛE[J²]τ, whatever the drift. The second moment is E[Y²] = (σ² + ΛE[J²])τ + ((b + ΛE[J])τ)².",
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The variance is the second derivative of the cumulant generating function at 0 (Mathlib's iteratedDeriv_two_cgf_eq_integral, with variance_eq_integral), and near 0 the cgf is κ(θ)τ (cgf_id_jumpDiffusionIncrementLaw_eventuallyEq, Filter.EventuallyEq.iteratedDeriv_eq); κ''(0) = σ² + ΛM''(0) and M''(0) = E[J²] (iteratedDeriv_two_jumpDiffusionExponent_mul, Mathlib's hasDerivAt_iteratedDeriv_mgf) (variance_id_jumpDiffusionIncrementLaw). The second moment is the same computation through Mathlib's iteratedDeriv_two_cgf, with the mean of mf-jump-diffusion-log-return-mean (integral_sq_jumpDiffusionIncrementLaw). Lives in MathFin/BlackScholes/JumpDiffusionVarianceSwap.lean. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionVarianceSwap\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The variance and the second moment of a jump-diffusion log-return.** -/\ntheorem jump_diffusion_log_return_variance_thm (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}\n    [IsProbabilityMeasure ν] (hν : 0 ∈ interior (integrableExpSet id ν)) (τ : ℝ≥0) :\n    Var[id; MathFin.jumpDiffusionIncrementLaw b σ Λ ν τ] = (σ ^ 2 + Λ * ∫ x, x ^ 2 ∂ν) * τ ∧\n      ∫ y, y ^ 2 ∂(MathFin.jumpDiffusionIncrementLaw b σ Λ ν τ)\n        = (σ ^ 2 + Λ * ∫ x, x ^ 2 ∂ν) * τ + ((b + Λ * ∫ x, x ∂ν) * τ) ^ 2 :=\n  ⟨MathFin.variance_id_jumpDiffusionIncrementLaw b σ Λ hν τ,\n    MathFin.integral_sq_jumpDiffusionIncrementLaw b σ Λ hν τ⟩\n"
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-log-contract",
+      "name": "With Jumps the Log Contract Prices σ² + 2ΛE[eᴶ − 1 − J]",
+      "domain": "mathematical_finance",
+      "description": "Take a jump-diffusion at the compensated drift b = r − σ²/2 − Λ(E[e^J] − 1), with a jump law whose moment-generating function is finite near 0 and at 1, a spot S > 0, a rate r and a horizon τ > 0, and let S_τ = Se^Y. The Demeterfi–Derman–Kamal–Zou log contract on the forward F = Se^{rτ}, scaled as a variance rate, is worth (2/τ)·E[log(F/S_τ) + (S_τ − F)/F] = σ² + 2ΛE[e^J − 1 − J]. Without jumps this is σ², the Black–Scholes value (mf-variance-swap-log). With jumps the jump term is 2ΛE[e^J − 1 − J], not ΛE[J²], the jumps' contribution to the variance of the log-return (mf-jump-diffusion-log-contract-jump-bias). The expectation is under the pricing law at the compensated drift; no replication argument is formalized.",
+      "metadata": {
+        "chapter": 9,
+        "reference": "Demeterfi, Derman, Kamal & Zou (1999), More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes; Carr & Wu (2009), Variance risk premiums, Review of Financial Studies 22, 1311-1341; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Under any law the log contract is rτ − E[Y] + (e^{−rτ}E[e^Y] − 1) (integral_logContract, mf-log-contract-any-law). At the compensated drift the forward is the mean of S_τ, E[e^Y] = e^{rτ} (integral_exp_jumpDiffusionIncrementLaw, mf-jump-diffusion-log-return-mgf), and E[Y] = (b + ΛE[J])τ (integral_id_jumpDiffusionIncrementLaw, mf-jump-diffusion-log-return-mean), so (2/τ)(rτ − E[Y]) = σ² + 2Λ(E[e^J] − 1 − E[J]) (jumpDiffusion_logContract). Lives in MathFin/BlackScholes/JumpDiffusionVarianceSwap.lean. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionVarianceSwap\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **With jumps the log contract prices `σ² + 2Λ𝔼[eᴶ − 1 − J]`.** -/\ntheorem jump_diffusion_log_contract_thm {S r σ : ℝ} (hS : 0 < S) (Λ : ℝ≥0) {ν : Measure ℝ}\n    [IsProbabilityMeasure ν] (hν : 0 ∈ interior (integrableExpSet id ν))\n    (hν1 : Integrable Real.exp ν) {τ : ℝ≥0} (hτ : 0 < τ) :\n    2 / τ * ∫ y, (Real.log (S * Real.exp (r * τ) / (S * Real.exp y))\n        + (S * Real.exp y - S * Real.exp (r * τ)) / (S * Real.exp (r * τ)))\n      ∂(MathFin.jumpDiffusionIncrementLaw (r - σ ^ 2 / 2 - Λ * (∫ x, Real.exp x ∂ν - 1)) σ Λ ν τ)\n      = σ ^ 2 + 2 * Λ * ∫ x, (Real.exp x - 1 - x) ∂ν :=\n  MathFin.jumpDiffusion_logContract hS Λ hν hν1 hτ\n"
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-log-contract-jump-bias",
+      "name": "The Jump Bias of the Log Contract",
+      "domain": "mathematical_finance",
+      "description": "Under the hypotheses of mf-jump-diffusion-log-contract, the log contract exceeds the variance of the log-return per unit time, Var[Y]/τ = σ² + ΛE[J²] (mf-jump-diffusion-log-return-variance), by 2ΛE[e^J − 1 − J − J²/2], a term of third order in the jump sizes; the two agree without jumps. In Black–Scholes the log contract and the expected realized variance give the same σ² (mf-variance-swap-equivalence). Here the comparison is with the variance of the log-return: that it is the expected realized variance in the limit of fine partitions is not formalized.",
+      "metadata": {
+        "chapter": 9,
+        "reference": "Demeterfi, Derman, Kamal & Zou (1999), More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes; Carr & Wu (2009), Variance risk premiums, Review of Financial Studies 22, 1311-1341; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Subtract the variance (variance_id_jumpDiffusionIncrementLaw, mf-jump-diffusion-log-return-variance) from the log contract (jumpDiffusion_logContract, mf-jump-diffusion-log-contract) and split the jump integral (Mathlib's integral_sub, integral_div), the jump law having moments of every order (integrable_pow_of_mem_interior_integrableExpSet) (jumpDiffusion_logContract_sub_variance). Lives in MathFin/BlackScholes/JumpDiffusionVarianceSwap.lean. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionVarianceSwap\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The jump bias of the log contract.** -/\ntheorem jump_diffusion_log_contract_jump_bias_thm {S r σ : ℝ} (hS : 0 < S) (Λ : ℝ≥0) {ν : Measure ℝ}\n    [IsProbabilityMeasure ν] (hν : 0 ∈ interior (integrableExpSet id ν))\n    (hν1 : Integrable Real.exp ν) {τ : ℝ≥0} (hτ : 0 < τ) :\n    2 / τ * ∫ y, (Real.log (S * Real.exp (r * τ) / (S * Real.exp y))\n        + (S * Real.exp y - S * Real.exp (r * τ)) / (S * Real.exp (r * τ)))\n      ∂(MathFin.jumpDiffusionIncrementLaw (r - σ ^ 2 / 2 - Λ * (∫ x, Real.exp x ∂ν - 1)) σ Λ ν τ)\n      - Var[id; MathFin.jumpDiffusionIncrementLaw (r - σ ^ 2 / 2 - Λ * (∫ x, Real.exp x ∂ν - 1)) σ Λ ν τ] / τ\n      = 2 * Λ * ∫ x, (Real.exp x - 1 - x - x ^ 2 / 2) ∂ν :=\n  MathFin.jumpDiffusion_logContract_sub_variance hS Λ hν hν1 hτ\n"
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-log-contract-downward-jumps",
+      "name": "With Downward Jumps the Log Contract Is at Most the Variance",
+      "domain": "mathematical_finance",
+      "description": "Under the hypotheses of mf-jump-diffusion-log-contract, if the jumps are nonpositive (J ≤ 0 ν-almost surely, a crash-only jump law), the log contract is at most the variance of the log-return per unit time: (2/τ)·E[log(F/S_τ) + (S_τ − F)/F] ≤ Var[Y]/τ. The jump bias 2ΛE[e^J − 1 − J − J²/2] (mf-jump-diffusion-log-contract-jump-bias) is nonpositive because eˣ ≤ 1 + x + x²/2 for x ≤ 0.",
+      "metadata": {
+        "chapter": 9,
+        "reference": "Demeterfi, Derman, Kamal & Zou (1999), More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes; Carr & Wu (2009), Variance risk premiums, Review of Financial Studies 22, 1311-1341; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. eˣ − (1 + x + x²/2) is nondecreasing, its derivative eˣ − (1 + x) being nonnegative (Mathlib's Real.add_one_le_exp, monotone_of_deriv_nonneg), and vanishes at 0, so eˣ ≤ 1 + x + x²/2 for x ≤ 0 (Real.exp_le_quadratic_of_nonpos, the reverse of Mathlib's Real.quadratic_le_exp_of_nonneg). The jump bias (jumpDiffusion_logContract_sub_variance) is then 2Λ times the integral of a function that is ≤ 0 ν-almost everywhere (Mathlib's integral_nonpos_of_ae) (jumpDiffusion_logContract_le_variance). Lives in MathFin/BlackScholes/JumpDiffusionVarianceSwap.lean. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionVarianceSwap\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **With downward jumps the log contract is at most the variance.** -/\ntheorem jump_diffusion_log_contract_downward_jumps_thm {S r σ : ℝ} (hS : 0 < S) (Λ : ℝ≥0) {ν : Measure ℝ}\n    [IsProbabilityMeasure ν] (hν : 0 ∈ interior (integrableExpSet id ν))\n    (hν1 : Integrable Real.exp ν)\n    (hJ : ∀ᵐ x ∂ν, x ≤ 0) {τ : ℝ≥0} (hτ : 0 < τ) :\n    2 / τ * ∫ y, (Real.log (S * Real.exp (r * τ) / (S * Real.exp y))\n        + (S * Real.exp y - S * Real.exp (r * τ)) / (S * Real.exp (r * τ)))\n      ∂(MathFin.jumpDiffusionIncrementLaw (r - σ ^ 2 / 2 - Λ * (∫ x, Real.exp x ∂ν - 1)) σ Λ ν τ)\n      ≤ Var[id; MathFin.jumpDiffusionIncrementLaw (r - σ ^ 2 / 2 - Λ * (∫ x, Real.exp x ∂ν - 1)) σ Λ ν τ] / τ :=\n  MathFin.jumpDiffusion_logContract_le_variance hS Λ hν hν1 hJ hτ\n"
+      }
+    },
+    {
       "id": "mf-call-spread-digital",
       "name": "A Digital Is the Limit of Call Spreads",
       "description": "Let X be a measurable real random variable with finite mean under a finite measure μ (for instance a terminal price under a pricing measure), and let C(k) = ∫ (X − k)⁺ dμ be the undiscounted call price at strike k. Then the call spread (C(K) − C(K + h))/h, long 1/h calls struck at K and short 1/h struck at K + h, tends to μ{X > K} as h decreases to 0. So minus the right derivative of the call price in the strike is the undiscounted price of the digital paying 1 when X > K. The statement is one one-sided limit for one law: no model or discounting is assumed, and only the right derivative is claimed (the left one, −μ{X ≥ K}, and differentiability exactly off the atoms are mf-call-strike-differentiable-iff-no-atom).",

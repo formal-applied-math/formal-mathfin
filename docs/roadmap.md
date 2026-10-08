@@ -2168,7 +2168,17 @@ level of the law at one date):
    gives the digital bounds `0 < D < e^{−rτ}` and strict convexity on `[0, ∞)`; the converse of
    the strict-convexity criterion; `IsNormalizedCallPrice.of_integral`, Roper's conditions for
    any nonnegative law of mean one, which links this line to `CallPriceFunction`; and the
-   lognormal law as a Gaussian change of variables (`gaussianReal_map_mul_exp`).
+   lognormal law as a Gaussian change of variables (`gaussianReal_map_mul_exp`). Also done
+   (corpus 528): variance swaps with jumps. Under any law the log contract prices `rτ − E[Y]` when
+   the forward is the mean (`integral_logContract`); the jump-diffusion log-return has mean
+   `(b + ΛE[J])τ` and variance `(σ² + ΛE[J²])τ`, read off its cumulant generating function
+   (`integral_id_jumpDiffusionIncrementLaw`, `variance_id_jumpDiffusionIncrementLaw`); so at the
+   compensated drift the log contract is `σ² + 2ΛE[e^J − 1 − J]` (`jumpDiffusion_logContract`),
+   off the variance per unit time by `2ΛE[e^J − 1 − J − J²/2]`, `≤ 0` for downward jumps
+   (`jumpDiffusion_logContract_le_variance`). Next on this line: the expected realized variance of a
+   `JumpDiffusionProcess` along equipartitions, `(σ² + ΛE[J²])T + (b + ΛE[J])²T²/(n + 1)`, and its
+   limit, the jump-diffusion counterpart of `VarianceSwapEquipartition` and `VarianceSwapLimit`,
+   which would make `σ² + ΛE[J²]` the fair strike of the swap and not only the variance rate.
 5. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
    `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style
    characterization used for constant `θ` (`ExpMartingaleQBrownian`) to independent increments

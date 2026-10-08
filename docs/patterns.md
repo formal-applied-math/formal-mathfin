@@ -1968,5 +1968,6 @@ every inequality is linear in the monomials `linarith` sees. Then write the gap
 the pointwise convexity, and `integral_pos_iff_support_of_nonneg` makes its integral positive as
 soon as its support has positive measure. `strictConvexOn_integral_call` does this for the call
 payoff, whose gap is a butterfly spread, positive between the outer strikes. Mathlib has
-`ConvexOn.smul` but no strict counterpart; `StrictConvexOn.smul`
-(`JumpDiffusionStrikeConvexity.lean`) supplies it, an upstream candidate.
+`ConvexOn.smul` but no strict counterpart; `StrictConvexOn.smul` (`StrikeConvexity.lean`)
+supplies it, an upstream candidate. The convex case needs no such argument: it is Mathlib's
+`integral_convexOn_of_integrand_ae` (`convexOn_integral_call`).

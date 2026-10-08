@@ -26,6 +26,40 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Variance swaps with jumps: the log contract against the variance (2026-10-08)
+
+Six entries added, all `full`: `mf-log-contract-any-law`, `mf-jump-diffusion-log-return-mean`,
+`mf-jump-diffusion-log-return-variance`, `mf-jump-diffusion-log-contract`,
+`mf-jump-diffusion-log-contract-jump-bias` and `mf-jump-diffusion-log-contract-downward-jumps`.
+Corpus 522 → 528. New file `BlackScholes/JumpDiffusionVarianceSwap.lean`;
+`BlackScholes/VarianceSwap.lean` gains the model-free log contract.
+
+- Under any law. For a log-return `Y` with `E|Y| < ∞` and `E[e^Y] < ∞` the log contract on the
+  forward `F = Se^{rτ}` is worth `rτ − E[Y] + (e^{−rτ}E[e^Y] − 1)` (`integral_logContract`); when
+  the forward is the mean of `S_τ` it prices `log F − E[log S_τ]`.
+- The moments of the jump-diffusion log-return, for a jump law with a moment-generating function
+  finite near `0`: `E[Y] = (b + ΛE[J])τ` (`integral_id_jumpDiffusionIncrementLaw`),
+  `Var[Y] = (σ² + ΛE[J²])τ` in Mathlib's `Var` (`variance_id_jumpDiffusionIncrementLaw`) and the
+  second moment (`integral_sq_jumpDiffusionIncrementLaw`). They are the first two derivatives at `0`
+  of the cumulant generating function `κ(θ)τ` (Mathlib's `deriv_cgf_zero`, `iteratedDeriv_two_cgf`,
+  `iteratedDeriv_two_cgf_eq_integral`), with `κ'` from `hasDerivAt_jumpDiffusionExponent`.
+- The log contract. At the compensated drift, with `E[e^J] < ∞`, `S > 0` and `τ > 0`,
+  `(2/τ)·E[log(F/S_τ) + (S_τ − F)/F] = σ² + 2ΛE[e^J − 1 − J]` (`jumpDiffusion_logContract`); it
+  exceeds `Var[Y]/τ = σ² + ΛE[J²]` by `2ΛE[e^J − 1 − J − J²/2]`
+  (`jumpDiffusion_logContract_sub_variance`), which is `≤ 0` when the jumps are `≤ 0`
+  (`jumpDiffusion_logContract_le_variance`, from `Real.exp_le_quadratic_of_nonpos`, the reverse of
+  Mathlib's `Real.quadratic_le_exp_of_nonneg`).
+
+Safe wording: "with jumps the log contract no longer prices the variance of the log-return: at the
+compensated drift it is worth `σ² + 2ΛE[e^J − 1 − J]` against a variance of `σ² + ΛE[J²]` per unit
+time, below it for downward jumps". Not covered:
+- that `Var[Y]/τ` is the fair strike of the variance swap: the expected realized variance of the
+  jump-diffusion along fine partitions is not taken to its limit, so the comparison is with the
+  variance of the log-return, not with the swap;
+- the replication of the log contract by options (Carr–Madan) and the hedging error of the
+  replication with jumps;
+- jump laws whose moment-generating function is infinite on one side of `0`.
+
 ### Convexity in the strike under any law, strictly with a Gaussian part (2026-10-08)
 
 Five entries added, all `full`: `mf-call-price-convex-in-strike`,
