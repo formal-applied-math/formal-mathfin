@@ -12,21 +12,24 @@ public import Mathlib
 
 Let a real process `X` be adapted to a filtration `𝓕`, with each increment `X_t − X_s` (`s ≤ t`)
 independent of `𝓕_s` and with exponential moment `𝔼[e^{X_t − X_s}] = e^{ψ(t) − ψ(s)}` for a
-deterministic `ψ`. Then `t ↦ e^{X_t − ψ(t)}` is an `𝓕`-martingale. The increment factor
+deterministic `ψ`, and with each `e^{X_t}` integrable. Then `t ↦ e^{X_t − ψ(t)}` is an
+`𝓕`-martingale. The increment factor
 `e^{ψ(s) − ψ(t)}·e^{X_t − X_s}` is independent of `𝓕_s`, so its conditional expectation is its
 mean, `1` (`condExp_indep_eq`); the factor `e^{X_s − ψ(s)}` is known at time `s` and comes out of
 the conditional expectation (`condExp_mul_of_stronglyMeasurable_left`).
 
-For a Lévy process `ψ(t) = tκ(1)` is linear in `t`, with `κ` the cumulant generating function of
-`X_1`. The Wald martingale of Brownian motion
-(`Foundations/BrownianMartingale.waldExponential_isMartingale`) is the case of Gaussian increments;
+For a Lévy process started at `0`, `ψ(t) = t·log 𝔼[e^{X_1}]` is linear in `t`. The Wald
+martingale of Brownian motion (`IsFilteredPreBrownian.waldExponential_isMartingale`) is,
+mathematically, the case of Gaussian increments; it is proved separately.
 `BlackScholes/JumpDiffusionProcess.lean` applies the lemma to the log-price of a jump-diffusion.
 
 ## Main results
 
 * `condExp_exp_eq_of_indep_increment`: `𝔼[e^{X_t} | 𝓕_s] = e^{X_s}·𝔼[e^{X_t − X_s}]` for an
   increment independent of `𝓕_s`.
-* `martingale_exp_sub_of_indep_increments`.
+* `martingale_exp_sub_of_indep_increments`: `t ↦ e^{X_t − ψ(t)}` is an `𝓕`-martingale when each
+  increment is independent of the past with `𝔼[e^{X_t − X_s}] = e^{ψ(t) − ψ(s)}` and each
+  `e^{X_t}` is integrable.
 -/
 
 @[expose] public section

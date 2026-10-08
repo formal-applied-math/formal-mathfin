@@ -633,7 +633,8 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 -- Jumps lift the implied volatility (2026-10-08): strict Jensen through a
 -- supporting line and strict spot convexity make jump risk strictly priced;
 -- the call tends to the spot as σ → ∞, so the jump-diffusion call has a
--- unique Black–Scholes implied volatility, above σ, for any jump law
+-- unique Black–Scholes implied volatility, above σ, for any non-degenerate
+-- compensated jump law
 
 /-- info: 'MathFin.lt_integral_of_affine_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.lt_integral_of_affine_lt
@@ -656,7 +657,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.JumpDiffusionHyp.impliedVol_gt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionHyp.impliedVol_gt
 
--- The jump-diffusion model exists for every intensity and jump law, its call
+-- The jump-diffusion model exists for every expected jump count and jump law, its call
 -- depends only on them, and the discounted price process is a martingale exactly
 -- at the compensated drift (2026-10-08)
 
@@ -702,6 +703,40 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 /-- info: 'MathFin.JumpDiffusionProcess.condExp_call_impliedVol_gt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.condExp_call_impliedVol_gt
+
+-- Gaussian smoothing of the Black–Scholes price; Merton's 1976 series from the
+-- general jump-diffusion, and at every date of the price process (2026-10-08)
+
+/-- info: 'MathFin.integral_bsV_mul_exp_gaussianReal_of_sq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_bsV_mul_exp_gaussianReal_of_sq
+
+/-- info: 'MathFin.JumpDiffusionHyp.call_eq_mertonCallPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionHyp.call_eq_mertonCallPrice
+
+/-- info: 'MathFin.JumpDiffusionProcess.condExp_call_eq_mertonCallPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.condExp_call_eq_mertonCallPrice
+
+/-- info: 'MathFin.JumpDiffusionProcess.condExp_put_eq_mertonPutPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.condExp_put_eq_mertonPutPrice
+
+-- Coherence bridges (2026-10-08): Brownian motion with drift is a jump-diffusion
+-- without jumps (witnessed on the constructed Brownian motion), so the process
+-- results contain Black–Scholes at every date; Merton's model exists
+
+/-- info: 'MathFin.jumpDiffusionProcess_brownian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionProcess_brownian
+
+/-- info: 'ProbabilityTheory.IsFilteredPreBrownian.martingale_discounted_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms ProbabilityTheory.IsFilteredPreBrownian.martingale_discounted_iff
+
+/-- info: 'ProbabilityTheory.IsFilteredPreBrownian.condExp_call_eq_bsV' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms ProbabilityTheory.IsFilteredPreBrownian.condExp_call_eq_bsV
+
+/-- info: 'ProbabilityTheory.IsFilteredPreBrownian.condExp_put_eq_bsPut' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms ProbabilityTheory.IsFilteredPreBrownian.condExp_put_eq_bsPut
+
+/-- info: 'MathFin.mertonHyp_canonical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.mertonHyp_canonical
 
 /-- info: 'MathFin.markovPathMeasure_cylinder' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.markovPathMeasure_cylinder

@@ -18,8 +18,8 @@ If the log-price is a Gaussian diffusion part plus an independent jump part `Y` 
 almost surely `0`, and the upper bound is strict for a positive strike. Read through the
 Black–Scholes price as a function of the volatility, which increases strictly from below the call
 price at `σ` towards the spot, the two bounds say that the call has a unique Black–Scholes implied
-volatility and that it lies strictly above `σ`. This holds at every strike and maturity, whatever
-the law of the jump part.
+volatility and that it lies strictly above `σ`. This holds at every positive strike and maturity,
+whatever the law of a compensated jump part that is not almost surely `0`.
 
 ## Main results
 
@@ -31,7 +31,8 @@ the law of the jump part.
 * `jumpDiffusion_impliedVol_gt`: the call has a Black–Scholes implied volatility above `σ`, and
   no other positive volatility prices to it (`exists_impliedVol_gt_of_bsV_lt`).
 * `JumpDiffusionHyp.impliedVol_gt`: the same for the compound-Poisson model at the compensator
-  `κ = Λ(𝔼[e^J] − 1)`, when the jump intensity `Λ` is positive and the jump law is not the
+  `κ = Λ(𝔼[e^J] − 1)`, when `𝔼[e^J] < ∞`, the expected jump count `Λ` is positive and the jump
+  law is not the
   point mass at `0` (`JumpDiffusionHyp.not_jumpPart_ae_eq_zero`).
 
 ## Scope
@@ -116,9 +117,9 @@ namespace JumpDiffusionHyp
 
 variable {Λ : ℝ≥0} {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ}
 
-/-- **The jump part is not deterministic.** With a positive jump intensity and a jump law that is
-not the point mass at `0`, the jump part `−κ + ∑_{i<N} Jᵢ` is not almost surely `0`, whatever
-`κ`: with no jump (probability `e^{−Λ}`) it is `−κ`, and with one jump it is `J₀ − κ`. -/
+/-- **The jump part is not deterministic.** With a positive expected jump count and a jump law
+that is not the point mass at `0`, the jump part `−κ + ∑_{i<N} Jᵢ` is not almost surely `0`,
+whatever `κ`: with no jump (probability `e^{−Λ}`) it is `−κ`, and with one jump it is `J₀ − κ`. -/
 lemma not_jumpPart_ae_eq_zero (h : JumpDiffusionHyp Q Λ Z N J) (hΛ : 0 < Λ)
     (hJ0 : ¬J 0 =ᵐ[Q] 0) (κ : ℝ) :
     ¬(fun ω ↦ -κ + ∑ i ∈ Finset.range (N ω), J i ω) =ᵐ[Q] 0 := by
@@ -147,8 +148,9 @@ lemma not_jumpPart_ae_eq_zero (h : JumpDiffusionHyp Q Λ Z N J) (hΛ : 0 < Λ)
   refine hJ0 (ae_iff.2 (measure_mono_null (fun ω hω ↦ ?_) (hnull.resolve_left (hN 1))))
   simpa using hω
 
-/-- **Jumps lift the implied volatility, for any jump law.** With a positive jump intensity, a jump
-law that is not the point mass at `0` and the compensator `κ = Λ(𝔼[e^J] − 1)`, the
+/-- **Jumps lift the implied volatility, for any non-degenerate jump law.** With `𝔼[e^J] < ∞`, a
+positive expected jump count, a jump law that is not the point mass at `0` and the compensator
+`κ = Λ(𝔼[e^J] − 1)`, the
 jump-diffusion call has a Black–Scholes implied volatility strictly above the diffusion
 volatility `σ`, and no other positive volatility gives the Black–Scholes price equal to the
 call. -/

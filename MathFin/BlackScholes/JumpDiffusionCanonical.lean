@@ -14,14 +14,18 @@ public import MathFin.BlackScholes.JumpDiffusionMixing
 `JumpDiffusionHyp` lists what the jump-diffusion results assume of a probability space: a
 standard normal diffusion sample `Z`, a jump count `N ∼ Poisson(Λ)` and i.i.d. log-jump sizes
 `Jᵢ`, with the count independent of the diffusion sample and the sizes, and the diffusion sample
-independent of the sizes. This file shows that the assumptions can be met for every intensity `Λ`
-and every jump law `ν`: on `ℝ × ℕ × (ℕ → ℝ)` with the product of `N(0, 1)`, `Poisson(Λ)` and the
-infinite product `ν^ℕ` (`jumpDiffusionMeasure`), the coordinates satisfy them
-(`jumpDiffusionHyp_canonical`). So the model-level theorems are not vacuous.
+independent of the sizes. Here `Λ` is the expected number of jumps to maturity (`λT` for a jump
+rate `λ`). This file shows that the assumptions can be met for every `Λ` and every jump law `ν`:
+on `ℝ × ℕ × (ℕ → ℝ)` with the product of `N(0, 1)`, `Poisson(Λ)` and the infinite product `ν^ℕ`
+(`jumpDiffusionMeasure`), the coordinates satisfy them (`jumpDiffusionHyp_canonical`). So the
+`JumpDiffusionHyp` theorems are not vacuous; their remaining hypotheses are conditions on `Λ` and
+`ν`, such as `∫ eˣ dν < ∞` (`integrable_exp_canonical_jump`). With Gaussian jumps the same model
+is a Merton model (`mertonHyp_canonical`).
 
 It also shows that the call depends on the model only through `Λ` and the law of the jumps. On
 any probability space satisfying `JumpDiffusionHyp`, the jump sizes are i.i.d., so their sequence
-has law `ν^ℕ`, with `ν` the law of `J₀`, and the call is
+has law `ν^ℕ`, with `ν` the law of `J₀`, and for `𝔼[e^{J₀}] < ∞` and `S₀, K, σ, T > 0` the call
+is
 
   `∫ n, ∫ x, C_BS(S₀e^{−κ + ∑_{i<n} xᵢ}) dν^ℕ(x) dPoisson(Λ)(n)`
 
@@ -53,7 +57,7 @@ instance isProbabilityMeasure_jumpDiffusionMeasure (Λ : ℝ≥0) (ν : Measure 
   unfold jumpDiffusionMeasure
   infer_instance
 
-/-- **The jump-diffusion model exists**, for every jump intensity `Λ` and every jump law `ν`:
+/-- **The jump-diffusion model exists**, for every expected jump count `Λ` and every jump law `ν`:
 under `jumpDiffusionMeasure Λ ν` the coordinates (the diffusion sample, the jump count and the
 log-jump sizes) satisfy `JumpDiffusionHyp`, and each jump size has law `ν`. -/
 theorem jumpDiffusionHyp_canonical (Λ : ℝ≥0) (ν : Measure ℝ) [IsProbabilityMeasure ν] :
@@ -121,7 +125,7 @@ lemma map_jumps (h : JumpDiffusionHyp Q Λ Z N J) :
   funext i
   exact (h.J_ident i).map_eq
 
-/-- **The call depends only on the intensity and the jump law.** For a jump-diffusion whose jump
+/-- **The call depends only on `Λ` and the jump law.** For a jump-diffusion whose jump
 sizes have law `ν = Q.map (J 0)`, the discounted expected call payoff is the integral, against
 `Poisson(Λ)` for the count and `ν^ℕ` for the jump sizes, of the Black–Scholes price at the spot
 `S₀e^{−κ + ∑_{i<n} xᵢ}`: Merton's formula for a general jump law (`call_poisson_mixture`) with

@@ -16,8 +16,10 @@ The other jump-diffusion files model only the price at maturity. Here the log-pr
 `X` on `[0, ∞)`, adapted to a filtration `𝓕`, starting at `0`, whose increment `X_t − X_s` over
 `[s, t]` is independent of `𝓕_s` and has the law of a jump-diffusion log-return over `t − s`: a
 drift `b(t − s)`, a Gaussian part of variance `σ²(t − s)` and a compound-Poisson part with
-`Poisson(Λ(t − s))` jumps of law `ν` (`JumpDiffusionProcess`). This is a Lévy process with these
-characteristics; its existence is not proved here.
+`Poisson(Λ(t − s))` jumps of law `ν` (`JumpDiffusionProcess`); here `Λ` is a jump rate. The
+increments are those of a Lévy process with these characteristics; no path regularity is assumed.
+Without jumps, Brownian motion with drift is such a process
+(`IsFilteredPreBrownian.jumpDiffusionProcess`); with jumps its existence is not proved.
 
 The price `S_t = S₀e^{X_t}` discounted at the rate `r` is a martingale exactly at the compensated
 drift `b = r − σ²/2 − Λ(𝔼[e^J] − 1)` (`JumpDiffusionProcess.martingale_iff`). The increment's
@@ -128,7 +130,9 @@ lemma integrable_exp_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν :
 and each increment `X_t − X_s` (`s ≤ t`) is independent of `𝓕_s` and has the law of a
 jump-diffusion log-return over `t − s` (`jumpDiffusionIncrementLaw`): drift `b(t − s)`, a
 Gaussian part of variance `σ²(t − s)`, and a compound-Poisson part with `Poisson(Λ(t − s))` jumps
-of law `ν`. The price is `S_t = S₀e^{X_t}`. -/
+of law `ν`. The price is `S_t = S₀e^{X_t}`. The structure is a hypothesis: it is satisfied
+without jumps (`IsFilteredPreBrownian.jumpDiffusionProcess`), and its existence with jumps is not
+proved. -/
 structure JumpDiffusionProcess {Ω : Type*} {mΩ : MeasurableSpace Ω} (P : Measure Ω)
     (𝓕 : Filtration ℝ≥0 mΩ) (X : ℝ≥0 → Ω → ℝ) (b σ : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ) : Prop where
   adapted : StronglyAdapted 𝓕 X

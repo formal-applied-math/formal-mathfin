@@ -48,15 +48,18 @@ the jumps together, and the diffusion sample is independent of the jumps (`JumpD
   1976): integrating out the count, the call is a Poisson mixture of Black–Scholes prices
   averaged over the jump sizes, `∫ n, 𝔼[C_BS(S₀e^{−κ + ∑_{i<n} Jᵢ})] ∂Poisson(Λ)`.
 
-Merton's model is this one in substance: Gaussian jumps with `𝔼[e^J] = 1 + k`, so the
-compensator is `κ = kΛ`. There `merton_call_given_jumps` prices the call with the count frozen at
-`n` in closed form and `merton_call_formula` sums the series; no lemma here derives
-`MertonModel`'s results from this file's.
+Merton's model is this one with Gaussian jumps, `𝔼[e^J] = 1 + k`, and the compensator `κ = kΛ`
+(`JumpDiffusionHyp.toMertonHyp`). There `merton_call_given_jumps` prices the call with the count
+frozen at `n` in closed form and `merton_call_formula` sums the series;
+`BlackScholes/JumpDiffusionMerton.lean` reaches the same series from this file's general formula
+and Gaussian smoothing (`JumpDiffusionHyp.call_eq_mertonCallPrice`).
 
 ## Scope
 
-As in `MertonModel`, only the law of the price at maturity is modelled. The price process and
-the martingale property of `e^{−rt}S_t` at intermediate dates are not constructed.
+As in `MertonModel`, only the law of the price at maturity is modelled here. A price process
+with independent jump-diffusion increments, its martingale property and its prices at
+intermediate dates are in `BlackScholes/JumpDiffusionProcess.lean` and
+`BlackScholes/JumpDiffusionOptionPrices.lean`; such a process is constructed only without jumps.
 -/
 
 @[expose] public section

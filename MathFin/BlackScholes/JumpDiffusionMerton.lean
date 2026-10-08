@@ -32,11 +32,16 @@ date is Merton's 1976 formula at the current price and the remaining maturity.
 
 * `JumpDiffusionHyp.call_eq_mertonCallPrice`: with Gaussian log-jumps and the compensator `kΛ`,
   the call is `mertonCallPrice`.
+* `JumpDiffusionHyp.toMertonHyp`, `mertonHyp_canonical`: a jump-diffusion with Gaussian log-jumps
+  is a Merton model, and Merton's model exists.
 * `jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice`: with Gaussian jumps and the compensated
   drift `b = r − σ²/2 − Λk`, the call price function over `τ` is `mertonCallPrice` at the expected
   jump count `Λτ`.
 * `JumpDiffusionProcess.condExp_call_eq_mertonCallPrice`: for `t < T`, the conditional value of
   the call given `𝓕_t` is `mertonCallPrice` at `S_t`, `T − t` and `Λ(T − t)`.
+* `jumpDiffusionPutPrice_gaussian_eq_mertonPutPrice` and
+  `JumpDiffusionProcess.condExp_put_eq_mertonPutPrice`: the same for the put and `mertonPutPrice`,
+  through the two put–call parities.
 -/
 
 @[expose] public section
@@ -55,22 +60,24 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} {Λ : ℝ≥0}
 `Jᵢ ∼ N(log(1 + k) − δ²/2, δ²)` and the compensator `κ = kΛ`, the call is Merton's series
 `mertonCallPrice`. With `n` jumps the jump part is `N(n(log(1 + k) − δ²/2), nδ²)`, and Gaussian
 smoothing of the Black–Scholes price gives the `n`-th term
-(`integral_bsV_mul_exp_gaussianReal_of_sq`). -/
+(`integral_bsV_mul_exp_gaussianReal_of_sq`). The model is also a Merton model (`toMertonHyp`),
+for which `merton_call_formula` reaches the same series by standardizing the total log-shock;
+this proof takes the general route instead. -/
 theorem call_eq_mertonCallPrice (h : JumpDiffusionHyp Q Λ Z N J) {k δ : ℝ} (hk : -1 < k)
-    (hJ : ∀ i, HasLaw (J i) (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) Q)
+    (hJ : HasLaw (J 0) (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) Q)
     {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     ∫ ω, rexp (-r * T) * max (jumpDiffusionTerminal S_0 r σ T (k * Λ) (Z ω) (N ω)
         (fun i ↦ J i ω) - K) 0 ∂Q
       = mertonCallPrice S_0 K r σ T k δ Λ := by
   have hJexp : Integrable (fun ω ↦ rexp (J 0 ω)) Q := by
-    simpa only [one_mul] using integrable_exp_mul_of_hasLaw (hJ 0) 1
+    simpa only [one_mul] using integrable_exp_mul_of_hasLaw hJ 1
   have h1k : (0 : ℝ) < 1 + k := by linarith
   rw [h.call_poisson_mixture hJexp hS_0 hK hσ hT (k * Λ), mertonCallPrice]
   refine integral_congr_ae (ae_of_all _ fun n ↦ ?_)
   -- with `n` jumps the jump part is Gaussian
   have hsum : HasLaw (fun ω ↦ ∑ i ∈ Finset.range n, J i ω)
       (gaussianReal (n * (Real.log (1 + k) - δ ^ 2 / 2)) (n * (δ ^ 2).toNNReal)) Q :=
-    (hasLaw_sum_range_gaussianReal hJ h.J_indep n).congr
+    (hasLaw_sum_range_gaussianReal (fun i ↦ (h.J_ident i).symm.hasLaw hJ) h.J_indep n).congr
       (ae_of_all _ fun ω ↦ (Finset.sum_apply ω _ _).symm)
   have hvar : mertonVol σ δ T n ^ 2 * T = σ ^ 2 * T + ((n * (δ ^ 2).toNNReal : ℝ≥0) : ℝ) := by
     rw [mertonVol_sq_mul σ δ hT n, NNReal.coe_mul, NNReal.coe_natCast,
@@ -95,33 +102,80 @@ theorem call_eq_mertonCallPrice (h : JumpDiffusionHyp Q Λ Z N J) {k δ : ℝ} (
             by ring,
           Real.exp_nat_mul, Real.exp_log h1k]
 
+/-- **A jump-diffusion with Gaussian log-jumps is a Merton model.** With
+`J₀ ∼ N(log(1 + k) − δ²/2, δ²)` every jump has that law (`J_ident`), and `MertonHyp` asks for the
+same independence structure as `JumpDiffusionHyp`. So `merton_call_formula` applies too, and
+reaches the series of `call_eq_mertonCallPrice` by standardizing the total log-shock. -/
+theorem toMertonHyp (h : JumpDiffusionHyp Q Λ Z N J) {k δ : ℝ}
+    (hJ : HasLaw (J 0) (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) Q) :
+    MertonHyp Q k δ Λ Z N J where
+  Z_law := h.Z_law
+  N_law := h.N_law
+  J_law i := (h.J_ident i).symm.hasLaw hJ
+  J_indep := h.J_indep
+  Z_indep_J := h.Z_indep_J
+  N_indep := h.N_indep
+
 end JumpDiffusionHyp
+
+/-- **Merton's model exists**: for every expected jump count `Λ` and every `k`, `δ`, the
+coordinates of the canonical model with log-jumps `N(log(1 + k) − δ²/2, δ²)` satisfy `MertonHyp`.
+So the hypotheses of Merton's call, put and discounted-terminal formulas can be met. -/
+theorem mertonHyp_canonical (Λ : ℝ≥0) (k δ : ℝ) :
+    MertonHyp (jumpDiffusionMeasure Λ (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2)
+        (δ ^ 2).toNNReal)) k δ Λ (fun ω ↦ ω.1) (fun ω ↦ ω.2.1) (fun i ω ↦ ω.2.2 i) :=
+  (jumpDiffusionHyp_canonical Λ _).1.toMertonHyp ((jumpDiffusionHyp_canonical Λ _).2 0)
+
+/-- Merton's log-jump law `N(log(1 + k) − δ²/2, δ²)` has `𝔼[e^J] = 1 + k`: the jump multipliers
+have mean `1 + k` (the lognormal mean, `integral_exp_gaussianReal`). -/
+lemma integral_exp_mertonJump {k : ℝ} (hk : -1 < k) (δ : ℝ) :
+    ∫ x, rexp x ∂(gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) = 1 + k := by
+  rw [integral_exp_gaussianReal, Real.coe_toNNReal _ (sq_nonneg δ), sub_add_cancel,
+    Real.exp_log (show (0 : ℝ) < 1 + k by linarith)]
+
+/-- With Merton's log-jumps the compensated drift `r − σ²/2 − Λ(𝔼[e^J] − 1)` is
+`r − σ²/2 − Λk`. -/
+lemma mertonJump_compensated {k : ℝ} (hk : -1 < k) (δ : ℝ) {r b σ : ℝ} {Λ : ℝ≥0}
+    (hb : b = r - σ ^ 2 / 2 - Λ * k) :
+    b = r - σ ^ 2 / 2 - Λ * (∫ x, rexp x
+      ∂(gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) - 1) := by
+  rw [integral_exp_mertonJump hk δ, hb]
+  ring
 
 /-- **Merton's 1976 formula for the call price function.** With log-jumps
 `N(log(1 + k) − δ²/2, δ²)` and the compensated drift `b = r − σ²/2 − Λk`, the call price
 function over a time `τ > 0` is Merton's series `mertonCallPrice` at the expected jump count
 `Λτ`: the price function is the call of the canonical model at intensity `Λτ`
 (`jumpDiffusionCallPrice_eq_canonical`), with `𝔼[e^J] = 1 + k`
-(`integral_exp_gaussianReal`). -/
+(`integral_exp_mertonJump`). -/
 theorem jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice {S K r b σ k δ : ℝ} (hS : 0 < S)
     (hK : 0 < K) (hσ : 0 < σ) (hk : -1 < k) {Λ : ℝ≥0} (hb : b = r - σ ^ 2 / 2 - Λ * k)
     {τ : ℝ≥0} (hτ : 0 < τ) :
     jumpDiffusionCallPrice S K r b σ Λ
         (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) τ
       = mertonCallPrice S K r σ τ k δ (Λ * τ) := by
-  have hM : ∫ x, rexp x ∂(gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal)
-      = 1 + k := by
-    rw [integral_exp_gaussianReal, Real.coe_toNNReal _ (sq_nonneg δ), sub_add_cancel,
-      Real.exp_log (show (0 : ℝ) < 1 + k by linarith)]
-  have hb' : b = r - σ ^ 2 / 2 - Λ * (∫ x, rexp x
-      ∂(gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) - 1) := by
-    rw [hM, hb]
-    ring
   obtain ⟨h, hJ⟩ := jumpDiffusionHyp_canonical (Λ * τ)
     (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal)
-  rw [jumpDiffusionCallPrice_eq_canonical S K hb' τ, hM,
+  rw [jumpDiffusionCallPrice_eq_canonical S K (mertonJump_compensated hk δ hb) τ,
+    integral_exp_mertonJump hk δ,
     show (Λ : ℝ) * τ * (1 + k - 1) = k * (Λ * τ : ℝ≥0) by push_cast; ring]
-  exact h.call_eq_mertonCallPrice hk hJ hS hK hσ (NNReal.coe_pos.2 hτ)
+  exact h.call_eq_mertonCallPrice hk (hJ 0) hS hK hσ (NNReal.coe_pos.2 hτ)
+
+/-- **Merton's 1976 put formula for the put price function.** With log-jumps
+`N(log(1 + k) − δ²/2, δ²)` and the compensated drift `b = r − σ²/2 − Λk`, the put price function
+over a time `τ > 0` is Merton's put series `mertonPutPrice` at the expected jump count `Λτ`: both
+satisfy put–call parity with the same right side `S − Ke^{−rτ}`
+(`jumpDiffusionCallPrice_eq_of_compensated`, `merton_put_call_parity`), and the calls agree. -/
+theorem jumpDiffusionPutPrice_gaussian_eq_mertonPutPrice {S K r b σ k δ : ℝ} (hS : 0 < S)
+    (hK : 0 < K) (hσ : 0 < σ) (hk : -1 < k) {Λ : ℝ≥0} (hb : b = r - σ ^ 2 / 2 - Λ * k)
+    {τ : ℝ≥0} (hτ : 0 < τ) :
+    jumpDiffusionPutPrice S K r b σ Λ
+        (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) τ
+      = mertonPutPrice S K r σ τ k δ (Λ * τ) := by
+  have hpar := jumpDiffusionCallPrice_eq_of_compensated (S := S) (K := K)
+    (integrable_exp_gaussianReal _ _) (mertonJump_compensated hk δ hb) τ
+  rw [jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice hS hK hσ hk hb hτ] at hpar
+  linarith [merton_put_call_parity (r := r) δ (Λ * τ) hS hK hσ (NNReal.coe_pos.2 hτ) hk]
 
 namespace JumpDiffusionProcess
 
@@ -143,6 +197,22 @@ theorem condExp_call_eq_mertonCallPrice {k δ : ℝ}
         (Λ * (T - t)) :=
   (h.condExp_call (integrable_exp_gaussianReal _ _) hS_0.le hK.le r htT.le).trans <|
     ae_of_all _ fun _ ↦ jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice
+      (mul_pos hS_0 (Real.exp_pos _)) hK hσ hk hb (tsub_pos_of_lt htT)
+
+/-- **Merton's 1976 put formula at every date.** Under the hypotheses of
+`condExp_call_eq_mertonCallPrice`, the conditional value of the put given `𝓕_t` is Merton's put
+series `mertonPutPrice` at `S_t`, `T − t` and `Λ(T − t)` (`condExp_put`,
+`jumpDiffusionPutPrice_gaussian_eq_mertonPutPrice`). -/
+theorem condExp_put_eq_mertonPutPrice {k δ : ℝ}
+    (h : JumpDiffusionProcess P 𝓕 X b σ Λ
+      (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal))
+    [IsProbabilityMeasure P] (hk : -1 < k) {r : ℝ} (hb : b = r - σ ^ 2 / 2 - Λ * k)
+    {S_0 K : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) {t T : ℝ≥0} (htT : t < T) :
+    P[fun ω ↦ rexp (-r * (T - t : ℝ≥0)) * max (K - S_0 * rexp (X T ω)) 0 | 𝓕 t]
+      =ᵐ[P] fun ω ↦ mertonPutPrice (S_0 * rexp (X t ω)) K r σ (T - t : ℝ≥0) k δ
+        (Λ * (T - t)) :=
+  (h.condExp_put hS_0.le hK.le r htT.le).trans <|
+    ae_of_all _ fun _ ↦ jumpDiffusionPutPrice_gaussian_eq_mertonPutPrice
       (mul_pos hS_0 (Real.exp_pos _)) hK hσ hk hb (tsub_pos_of_lt htT)
 
 end JumpDiffusionProcess
