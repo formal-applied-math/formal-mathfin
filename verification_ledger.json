@@ -349,9 +349,9 @@
     "mart-exp-indep-increments": {
       "benchmark_file": "martingales.json",
       "date": "2026-10-08",
-      "elapsed_s": 4.1,
-      "input_hash": "69de6d210c3a4c2e8a35dd0fc3cd413693d03caa2368ca69973ff21791664993",
-      "verified_at_commit": "5ffd8a4"
+      "elapsed_s": 5.5,
+      "input_hash": "83de49a1d5baa18b7a9323090dbec549e545847622a1594c39f8cb62744ca92a",
+      "verified_at_commit": "b18847b"
     },
     "mart-prop-2.5.5": {
       "benchmark_file": "martingales.json",
@@ -1739,6 +1739,13 @@
       "input_hash": "326828334ec6ba0a127642ee26413f1804cb4a718f1c524f7f4a94280228ca7e",
       "verified_at_commit": "637e2f6"
     },
+    "mf-jump-diffusion-discounted-price-martingale": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-08",
+      "elapsed_s": 5.4,
+      "input_hash": "d85230d1fc36cc812c5fa17b110d62b6cd05941ac58eada3200da577c6dd442f",
+      "verified_at_commit": "b18847b"
+    },
     "mf-jump-diffusion-implied-vol-above-sigma": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-08",
@@ -1749,9 +1756,9 @@
     "mf-jump-diffusion-log-return-mgf": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-08",
-      "elapsed_s": 4.0,
-      "input_hash": "6aad81937d7f13294a333536a31dca608f92e8815abdd7e0ce106d45cd8606de",
-      "verified_at_commit": "5ffd8a4"
+      "elapsed_s": 5.4,
+      "input_hash": "baca8c4b12476d226213c011f5d20db6760c1df9f9a969595a7c182728e23ac9",
+      "verified_at_commit": "b18847b"
     },
     "mf-jump-diffusion-mixing-formula": {
       "benchmark_file": "mathematical_finance.json",
