@@ -145,7 +145,7 @@ lemma integrable_exp (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabili
     (hν : Integrable rexp ν) (t : ℝ≥0) : Integrable (fun ω ↦ rexp (X t ω)) P := by
   have h0 : Integrable (fun ω ↦ rexp (X t ω - X 0 ω)) P :=
     Integrable.of_integral_ne_zero (by
-      rw [h.integral_exp_increment hν (zero_le t)]
+      rw [h.integral_exp_increment hν (zero_le : (0 : ℝ≥0) ≤ t)]
       exact (Real.exp_pos _).ne')
   refine h0.congr ?_
   filter_upwards [h.zero] with ω hω
@@ -156,7 +156,7 @@ a jump law with `𝔼[e^J] < ∞` and `S₀ ≠ 0`, `t ↦ e^{−rt}S₀e^{X_t}`
 only if `b = r − σ²/2 − Λ(𝔼[e^J] − 1)`. -/
 theorem martingale_iff (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabilityMeasure P]
     [IsProbabilityMeasure ν] (hν : Integrable rexp ν) {S_0 : ℝ} (hS_0 : S_0 ≠ 0) (r : ℝ) :
-    Martingale (fun t ω ↦ rexp (-r * t) * (S_0 * rexp (X t ω))) 𝓕 P ↔
+    Martingale (fun (t : ℝ≥0) ω ↦ rexp (-r * t) * (S_0 * rexp (X t ω))) 𝓕 P ↔
       b = r - σ ^ 2 / 2 - Λ * (∫ x, rexp x ∂ν - 1) := by
   constructor
   · -- a martingale has constant mean; at time `1` it is `S₀e^{b + σ²/2 + Λ(𝔼[e^J] − 1) − r}`
@@ -189,7 +189,7 @@ theorem martingale_iff (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabi
     linarith
   · -- at the compensated drift the increment exponentials have mean `e^{r(t − s)}`
     intro hb
-    have hfun : (fun t ω ↦ rexp (-r * t) * (S_0 * rexp (X t ω)))
+    have hfun : (fun (t : ℝ≥0) ω ↦ rexp (-r * t) * (S_0 * rexp (X t ω)))
         = S_0 • fun (t : ℝ≥0) ω ↦ rexp (X t ω - r * t) := by
       funext t ω
       simp only [Pi.smul_apply, smul_eq_mul]
