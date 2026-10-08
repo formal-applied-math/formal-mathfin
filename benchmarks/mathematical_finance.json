@@ -2690,6 +2690,70 @@
       }
     },
     {
+      "id": "mf-jump-diffusion-model-exists",
+      "name": "The Compound-Poisson Jump-Diffusion Model Exists for Every Intensity and Jump Law",
+      "description": "For every jump intensity Λ ≥ 0 and every probability law ν on ℝ, the coordinates of ℝ × ℕ × (ℕ → ℝ) under the product of N(0,1), Poisson(Λ) and the infinite product ν^ℕ satisfy the jump-diffusion hypotheses (JumpDiffusionHyp): the first coordinate Z ~ N(0,1), the second N ~ Poisson(Λ), the jump sizes Jᵢ measurable, mutually independent and identically distributed, N independent of (Z, J) and Z independent of J; and each Jᵢ has law ν. So the hypotheses of the model-level jump-diffusion theorems can be met, whatever the intensity and the jump law. The model is at a single date: Z is a standard normal sample, not a Brownian path.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionCanonical\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The jump-diffusion model exists.** For every intensity and every jump law, the coordinates\nof the canonical product space satisfy the model's hypotheses, with jumps of the given law. -/\ntheorem jump_diffusion_model_exists_thm (Λ : ℝ≥0) (ν : Measure ℝ) [IsProbabilityMeasure ν] :\n    MathFin.JumpDiffusionHyp (MathFin.jumpDiffusionMeasure Λ ν) Λ (fun ω ↦ ω.1)\n        (fun ω ↦ ω.2.1) (fun i ω ↦ ω.2.2 i) ∧\n      ∀ i, HasLaw (fun ω : ℝ × ℕ × (ℕ → ℝ) ↦ ω.2.2 i) ν (MathFin.jumpDiffusionMeasure Λ ν) :=\n  MathFin.jumpDiffusionHyp_canonical Λ ν\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The coordinates have the factor laws (measurePreserving_fst, measurePreserving_snd, measurePreserving_eval_infinitePi). The first coordinate is independent of the other two (indepFun_prod); the count is independent of the sizes on the second factor, and that independence pulls back to the product (indepFun_comp_of_measurePreserving, Foundations/IndepFreezing.lean); indepFun_prodMk_of_indepFun_prodMk re-associates the two into the model's form. The jump sizes are mutually independent because their joint law is the product ν^ℕ of their laws (iIndepFun_iff_map_fun_eq_infinitePi_map). Single-date model. Lives in MathFin/BlackScholes/JumpDiffusionCanonical.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-call-law-invariance",
+      "name": "The Jump-Diffusion Call Depends Only on the Intensity and the Jump Law",
+      "description": "Under a probability measure Q where Z ~ N(0,1), the jump count N ~ Poisson(Λ), and the log-jump sizes Jᵢ are measurable and i.i.d. with an arbitrary common law satisfying E[e^{J₀}] < ∞, with N independent of (Z, J), Z independent of J and the Jᵢ mutually independent, let S_T = S₀ exp((r − σ²/2)T − κ + σ√T·Z + ∑_{i<N} Jᵢ). For S₀, K, σ, T > 0 and any κ, the discounted expected call payoff is ∫ n, ∫ x, C_BS(S₀e^{−κ + ∑_{i<n} xᵢ}) dν^ℕ(x) dPoisson(Λ)(n), where ν is the law of J₀, ν^ℕ its infinite product and C_BS the Black–Scholes price (bsV) at volatility σ and maturity T: Merton's formula for a general jump law with the average over the jump sizes written against their law. Two models with the same intensity and jump law give the same call price. Only the law of S_T is modelled.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionCanonical\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The call depends only on the intensity and the jump law.** The jump-diffusion call is the\nintegral, against `Poisson(Λ)` for the count and `ν^ℕ` for the jump sizes (`ν` the law of `J₀`),\nof the Black–Scholes price at the spot `S₀e^{−κ + ∑_{i<n} xᵢ}`. -/\ntheorem jump_diffusion_call_law_invariance_thm {Ω : Type*} [MeasurableSpace Ω]\n    {Q : Measure Ω} {Λ : ℝ≥0} {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ}\n    (h : MathFin.JumpDiffusionHyp Q Λ Z N J) (hJ : Integrable (fun ω ↦ Real.exp (J 0 ω)) Q)\n    {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (κ : ℝ) :\n    ∫ ω, Real.exp (-r * T) * max (S_0 * Real.exp ((r - σ ^ 2 / 2) * T - κ\n        + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω) - K) 0 ∂Q\n      = ∫ n, ∫ x, MathFin.bsV K r σ (S_0 * Real.exp (-κ + ∑ i ∈ Finset.range n, x i)) T\n          ∂(Measure.infinitePi fun _ : ℕ ↦ Q.map (J 0)) ∂(poissonMeasure Λ) :=\n  h.call_eq_integral_infinitePi hJ hS_0 hK hσ hT κ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The jump sizes are i.i.d., so their joint law is the infinite product of their common law (JumpDiffusionHyp.map_jumps, from iIndepFun.map_fun_eq_infinitePi_map and IdentDistrib.map_eq). Merton's formula for a general jump law (JumpDiffusionHyp.call_poisson_mixture, mf-merton-general-jump-law) then has its inner expectation over the jump sizes rewritten as an integral against that law (integral_map) (JumpDiffusionHyp.call_eq_integral_infinitePi). Terminal-law scope. Lives in MathFin/BlackScholes/JumpDiffusionCanonical.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-log-return-mgf",
+      "name": "The Exponential Moment of a Jump-Diffusion Log-Return",
+      "description": "For a drift b, a volatility σ, a jump intensity Λ ≥ 0, a jump law ν with ∫ eˣ dν < ∞ and a time τ ≥ 0, let the log-return law over τ be the law of bτ + σ√τ·Z + ∑_{i<N} Jᵢ with Z ~ N(0,1), N ~ Poisson(Λτ) and Jᵢ i.i.d. of law ν, all independent (jumpDiffusionIncrementLaw, defined on the canonical product space). Its exponential moment is ∫ eˣ = e^{(b + σ²/2 + Λ(∫ eˣ dν − 1))τ}: the drift, the Gaussian term σ²/2 and the compound-Poisson term Λ(E[e^J] − 1) add up per unit time.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionProcess\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The exponential moment of a jump-diffusion log-return** over a time `τ`. -/\ntheorem jump_diffusion_log_return_mgf_thm (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}\n    [IsProbabilityMeasure ν] (hν : Integrable Real.exp ν) (τ : ℝ≥0) :\n    ∫ x, Real.exp x ∂(MathFin.jumpDiffusionIncrementLaw b σ Λ ν τ)\n      = Real.exp ((b + σ ^ 2 / 2 + Λ * (∫ x, Real.exp x ∂ν - 1)) * τ) :=\n  MathFin.integral_exp_jumpDiffusionIncrementLaw b σ Λ hν τ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. On the canonical model (jumpDiffusionHyp_canonical, at intensity Λτ) the log-return is the log of the jump-diffusion terminal price with spot 1, rate b + σ²/2 and no drift correction, so its exponential moment is that terminal price's discounted mean undiscounted (JumpDiffusionHyp.integral_exp_logReturn, from JumpDiffusionHyp.discounted_terminal): the Gaussian factor contributes e^{σ²τ/2} and the compound-Poisson factor the MGF at 1, e^{Λτ(E[e^J] − 1)}. Lives in MathFin/BlackScholes/JumpDiffusionProcess.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-discounted-price-martingale",
+      "name": "Jump-Diffusion: The Discounted Price Is a Martingale Exactly at the Compensated Drift",
+      "description": "Let X be a jump-diffusion log-price process on [0, ∞): adapted to a filtration 𝓕, X₀ = 0 almost surely, and each increment X_t − X_s (s ≤ t) independent of 𝓕_s with the law of bτ + σ√τ·Z + ∑_{i<N} Jᵢ, where τ = t − s, Z ~ N(0,1), N ~ Poisson(Λτ) and the Jᵢ are i.i.d. of law ν, all independent (JumpDiffusionProcess). For a jump law with ∫ eˣ dν < ∞, S₀ ≠ 0 and any rate r, the discounted price t ↦ e^{−rt}S₀e^{X_t} is an 𝓕-martingale if and only if b = r − σ²/2 − Λ(∫ eˣ dν − 1). With Λ = 0 the condition is the Black–Scholes risk-neutral drift b = r − σ²/2 (compare gir-continuous-ftap). The process is described by these properties, which make it a Lévy process; its existence is not proved.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionProcess\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **The discounted jump-diffusion price is a martingale exactly at the compensated drift.** -/\ntheorem jump_diffusion_discounted_price_martingale_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}\n    {b σ : ℝ} {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν]\n    (h : MathFin.JumpDiffusionProcess P 𝓕 X b σ Λ ν) (hν : Integrable Real.exp ν)\n    {S_0 : ℝ} (hS_0 : S_0 ≠ 0) (r : ℝ) :\n    Martingale (fun t ω ↦ Real.exp (-r * t) * (S_0 * Real.exp (X t ω))) 𝓕 P ↔\n      b = r - σ ^ 2 / 2 - Λ * (∫ x, Real.exp x ∂ν - 1) :=\n  h.martingale_iff hν hS_0 r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models); Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The increment over [s, t] has exponential moment e^{(b + σ²/2 + Λ(E[e^J] − 1))(t − s)} (JumpDiffusionProcess.integral_exp_increment, from integral_exp_jumpDiffusionIncrementLaw). At the compensated drift this is e^{r(t − s)}, and the exponential martingale of independent increments (martingale_exp_sub_of_indep_increments, Foundations/ExpMartingaleIndepIncrements.lean) makes e^{X_t − rt} a martingale; scaling by S₀ gives the discounted price (Martingale.smul). Conversely a martingale has constant mean (integral_condExp), and the mean at t = 1 is S₀e^{b + σ²/2 + Λ(E[e^J] − 1) − r}, so the exponent vanishes. The process is assumed through its defining properties (adapted, started at 0, increments independent of the past with the stated law); path regularity is not used, and no such process is constructed. Lives in MathFin/BlackScholes/JumpDiffusionProcess.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-gaussianPDF-symmetry",
       "name": "Standard Normal PDF Symmetry",
       "description": "ϕ(-z) = ϕ(z) for the standard normal density, since the gaussian is symmetric around 0.",

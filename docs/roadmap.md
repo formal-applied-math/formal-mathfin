@@ -1858,3 +1858,33 @@ reference volatility (`tendsto_bsV_sigma_atTop`, `exists_impliedVol_gt_of_bsV_lt
 4. The smile: how a jump-diffusion's implied volatility varies with the strike, for instance its
    large-strike behaviour, which Lee's moment formula ties to the moments of `S_T`.
 5. The characteristic function of the log-price; Kou's double-exponential compensator.
+
+## phase: the model exists; the price process (2026-10-08, corpus 467→472)
+
+Every model-level jump result so far assumed `JumpDiffusionHyp` without showing it could hold. On
+`ℝ × ℕ × (ℕ → ℝ)` with `N(0, 1) ⊗ Poisson(Λ) ⊗ ν^ℕ` the coordinates satisfy it, for every intensity
+and jump law (`BlackScholes/JumpDiffusionCanonical.lean`). The same file shows the call depends on
+a model only through `Λ` and the jump law: the jump sizes are i.i.d., so their joint law is `ν^ℕ`,
+and Merton's general formula becomes an integral against `Poisson(Λ) ⊗ ν^ℕ`.
+
+The price process (`BlackScholes/JumpDiffusionProcess.lean`) is a log-price with increments
+independent of the past and distributed as a jump-diffusion log-return over the elapsed time. Its
+discounted price is a martingale exactly at the compensated drift
+`b = r − σ²/2 − Λ(𝔼[e^J] − 1)`. One general lemma does the work
+(`Foundations/ExpMartingaleIndepIncrements.lean`): the exponential of a process with independent
+increments, normalised by its mean, is a martingale. With no jumps this is the Wald martingale
+behind `gir-continuous-ftap`.
+
+**Next on the jump axis:**
+
+1. Construct the price process: a Brownian motion and an independent compound Poisson process
+   (or a Kolmogorov extension of the increment laws, `kolmogorov_extension4` is a dependency), so
+   `JumpDiffusionProcess` is shown satisfiable as the single-date model now is.
+2. Prices at intermediate dates: under the compensated drift,
+   `𝔼[e^{−r(T−t)}(S_T − K)⁺ | 𝓕_t]` is the general-law formula at spot `S_t` and maturity
+   `T − t`, by the freezing lemma in its conditional form.
+3. Collapse the two Merton towers onto the general route: with Gaussian jumps the law-level
+   formula `call_eq_integral_infinitePi` reduces to `mertonCallPrice` once the Gaussian
+   smoothing of a Black–Scholes price is proved.
+4. The put and put–call parity for any jump law; the `σ → 0` limit of the Black–Scholes price.
+5. The smile (Lee's moment formula); the characteristic function; Kou's compensator.

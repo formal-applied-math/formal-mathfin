@@ -26,6 +26,36 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The jump-diffusion model exists; its price process (2026-10-08)
+
+Five entries added, all `full`: `mf-jump-diffusion-model-exists`,
+`mf-jump-diffusion-call-law-invariance`, `mf-jump-diffusion-log-return-mgf`,
+`mf-jump-diffusion-discounted-price-martingale` and `mart-exp-indep-increments`. Corpus 467 → 472.
+
+- The model exists, `jumpDiffusionHyp_canonical` (`BlackScholes/JumpDiffusionCanonical.lean`):
+  for every intensity `Λ` and every jump law `ν`, the coordinates of `ℝ × ℕ × (ℕ → ℝ)` under
+  `N(0, 1) ⊗ Poisson(Λ) ⊗ ν^ℕ` satisfy `JumpDiffusionHyp`, with jumps of law `ν`. The hypotheses
+  of every model-level jump result can therefore be met.
+- The call depends only on `Λ` and the jump law, `JumpDiffusionHyp.call_eq_integral_infinitePi`:
+  on any model it is `∫ n, ∫ x, C_BS(S₀e^{−κ + ∑_{i<n} xᵢ}) dν^ℕ dPoisson(Λ)`, with `ν` the law of
+  `J₀`.
+- The price process, `BlackScholes/JumpDiffusionProcess.lean`: a log-price `X` on `[0, ∞)`,
+  adapted, started at `0`, with increments independent of the past and distributed as a
+  jump-diffusion log-return over the elapsed time (`JumpDiffusionProcess`). The log-return's
+  exponential moment is `e^{(b + σ²/2 + Λ(𝔼[e^J] − 1))τ}`
+  (`integral_exp_jumpDiffusionIncrementLaw`), and the discounted price `e^{−rt}S₀e^{X_t}` is a
+  martingale if and only if `b = r − σ²/2 − Λ(𝔼[e^J] − 1)` (`JumpDiffusionProcess.martingale_iff`).
+  The engine is `Foundations/ExpMartingaleIndepIncrements.martingale_exp_sub_of_indep_increments`:
+  `e^{X_t − ψ(t)}` is a martingale when the increments are independent of the past with
+  `𝔼[e^{X_t − X_s}] = e^{ψ(t) − ψ(s)}`.
+
+Safe wording: "the compound-Poisson jump-diffusion model exists for every intensity and jump law,
+its call price depends only on the intensity and the jump law, and a log-price process with
+independent jump-diffusion increments has a martingale discounted price exactly at the compensated
+drift". Not covered: the existence of such a process (it is a Lévy process; constructing it needs
+a Kolmogorov extension or a construction from a Brownian motion and a compound Poisson process),
+its path regularity, and prices at intermediate dates.
+
 ### Jumps lift the implied volatility (2026-10-08)
 
 Six entries added, all `full`: `mf-bs-call-strictly-convex-in-spot`,
