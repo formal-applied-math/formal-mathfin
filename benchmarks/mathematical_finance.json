@@ -2834,6 +2834,54 @@
       }
     },
     {
+      "id": "mf-bs-gaussian-smoothing",
+      "name": "Gaussian Smoothing of the Black–Scholes Call",
+      "description": "For S, K, σ, T > 0, a mean m and a variance v ≥ 0, the Black–Scholes call price C_BS(S; σ) (bsV, at strike K, rate r and maturity T) at the spot Se^x, averaged over x ~ N(m, v), is the Black–Scholes call at the spot Se^{m + v/2} and the volatility √(σ² + v/T): ∫ C_BS(Se^x; σ) dN(m, v)(x) = C_BS(Se^{m + v/2}; √(σ² + v/T)). The spot is multiplied by the lognormal mean E[e^x] = e^{m + v/2} (also proved) and the log-return variance σ²T gains v.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.GaussianSmoothing\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Gaussian smoothing of the Black–Scholes call.** -/\ntheorem bs_gaussian_smoothing_thm {S K r σ T : ℝ} (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ)\n    (hT : 0 < T) (m : ℝ) (v : ℝ≥0) :\n    ∫ x, MathFin.bsV K r σ (S * Real.exp x) T ∂(gaussianReal m v)\n      = MathFin.bsV K r (Real.sqrt (σ ^ 2 + v / T)) (S * Real.exp (m + v / 2)) T :=\n  MathFin.integral_bsV_mul_exp_gaussianReal hS hK hσ hT m v\n\n/-- The lognormal mean `∫ eˣ dN(m, v) = e^{m + v/2}`. -/\ntheorem lognormal_mean_thm (m : ℝ) (v : ℝ≥0) :\n    ∫ x, Real.exp x ∂(gaussianReal m v) = Real.exp (m + v / 2) :=\n  MathFin.integral_exp_gaussianReal m v\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. On N(0,1) ⊗ N(m, v) with coordinates Z and G, the mixing formula (jumpDiffusion_call_eq_integral_bsV, mf-jump-diffusion-mixing-formula) makes the average the expected discounted payoff of the terminal price S·e^{(r − σ²/2)T + σ√T·Z + G}. The total log-shock σ√T·Z + G is N(m, σ²T + v) (gaussianReal_const_mul, IndepFun.hasLaw_fun_add, gaussianReal_conv_gaussianReal); standardized it is N(0,1) (hasLaw_sub_div_of_gaussianReal), and the terminal price is a Black–Scholes terminal price at the spot Se^{m + v/2} and a volatility σ' with σ'²T = σ²T + v, priced by the Black–Scholes formula (integral_bsCall_payoff_eq_bsV) (integral_bsV_mul_exp_gaussianReal_of_sq). The lognormal mean is Mathlib's Gaussian moment generating function at 1 (mgf_fun_id_gaussianReal, integral_exp_gaussianReal). Lives in MathFin/BlackScholes/GaussianSmoothing.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-merton-from-general-jump-law",
+      "name": "Merton's 1976 Formula from the General Jump-Diffusion",
+      "description": "Under a probability measure Q where Z ~ N(0,1), the jump count N ~ Poisson(Λ) and the log-jump sizes Jᵢ are measurable, i.i.d. and N(log(1+k) − δ²/2, δ²) with k > −1, with N independent of (Z, J), Z independent of J and the Jᵢ mutually independent (JumpDiffusionHyp with Gaussian jumps), let S_T = S₀ exp((r − σ²/2)T − kΛ + σ√T·Z + ∑_{i<N} Jᵢ). For S₀, K, σ, T > 0 the discounted expected call payoff E[e^{−rT}(S_T − K)⁺] is Merton's series mertonCallPrice: the integral against Poisson(Λ) over the jump count n of the Black–Scholes price at the spot S₀e^{−kΛ}(1+k)ⁿ and the volatility √(σ² + nδ²/T). This is the conclusion of mf-merton-call-formula, reached through the general-law formula (mf-merton-general-jump-law) and Gaussian smoothing (mf-bs-gaussian-smoothing); the hypotheses are JumpDiffusionHyp's, which ask for measurable jumps where MertonHyp asks for a.e.-measurable ones. Only the law of S_T is modelled.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionMerton\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Merton's 1976 formula from the general jump-diffusion.** -/\ntheorem merton_from_general_jump_law_thm {Ω : Type*} [MeasurableSpace Ω] {Q : Measure Ω}\n    {Λ : ℝ≥0} {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ}\n    (h : MathFin.JumpDiffusionHyp Q Λ Z N J) {k δ : ℝ} (hk : -1 < k)\n    (hJ : ∀ i, HasLaw (J i) (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) Q)\n    {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :\n    ∫ ω, Real.exp (-r * T) * max (S_0 * Real.exp ((r - σ ^ 2 / 2) * T - k * Λ\n        + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω) - K) 0 ∂Q\n      = MathFin.mertonCallPrice S_0 K r σ T k δ Λ :=\n  h.call_eq_mertonCallPrice hk hJ hS_0 hK hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The general-law formula (JumpDiffusionHyp.call_poisson_mixture) writes the call as the Poisson(Λ) mixture of the Black–Scholes price averaged over the jump part −kΛ + ∑_{i<n} Jᵢ. With Gaussian jumps the sum of n of them is N(n(log(1+k) − δ²/2), nδ²) (hasLaw_sum_range_gaussianReal), and Gaussian smoothing (integral_bsV_mul_exp_gaussianReal_of_sq, mf-bs-gaussian-smoothing) with mertonVol_sq_mul turns each average into the Black–Scholes price at mertonSpot n and mertonVol n, which is mertonCallTerm n (mertonCallTerm_eq_bsV) (JumpDiffusionHyp.call_eq_mertonCallPrice). MertonHyp is not an instance of JumpDiffusionHyp (its jumps are only a.e.-measurable), so merton_call_formula is not replaced; the two routes reach the same series. Terminal-law scope. Lives in MathFin/BlackScholes/JumpDiffusionMerton.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-merton-1976-every-date",
+      "name": "Jump-Diffusion: Merton's 1976 Formula at Every Date",
+      "description": "Let X be a jump-diffusion log-price process on [0, ∞) with Gaussian jumps: adapted to a filtration 𝓕, X₀ = 0 almost surely, and each increment X_t − X_s (s ≤ t) independent of 𝓕_s with the law of bτ + σ√τ·Z + ∑_{i<N} Jᵢ, where τ = t − s, Z ~ N(0,1), N ~ Poisson(Λτ) and the Jᵢ are i.i.d. N(log(1+k) − δ²/2, δ²) with k > −1, all independent (JumpDiffusionProcess). Suppose the drift is compensated, b = r − σ²/2 − Λk (the jump multipliers e^{Jᵢ} have mean 1 + k). For S₀, K, σ > 0 and dates t < T, almost surely E[e^{−r(T−t)}(S₀e^{X_T} − K)⁺ | 𝓕_t] is Merton's series mertonCallPrice at the current spot S_t = S₀e^{X_t}, the remaining maturity T − t and the expected number of jumps Λ(T − t): the integral against Poisson(Λ(T − t)) over n of the Black–Scholes price at the spot S_t e^{−kΛ(T−t)}(1+k)ⁿ and the volatility √(σ² + nδ²/(T − t)). The call price function over any τ > 0 is likewise Merton's series at the expected jump count Λτ. The process is described by these properties; its existence is not proved.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionMerton\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Merton's 1976 formula at every date.** -/\ntheorem jump_diffusion_merton_1976_every_date_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}\n    {b σ k δ : ℝ} {Λ : ℝ≥0}\n    (h : MathFin.JumpDiffusionProcess P 𝓕 X b σ Λ\n      (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal))\n    (hk : -1 < k) {r : ℝ} (hb : b = r - σ ^ 2 / 2 - Λ * k) {S_0 K : ℝ} (hS_0 : 0 < S_0)\n    (hK : 0 < K) (hσ : 0 < σ) {t T : ℝ≥0} (htT : t < T) :\n    P[fun ω ↦ Real.exp (-r * (T - t : ℝ≥0)) * max (S_0 * Real.exp (X T ω) - K) 0 | 𝓕 t]\n      =ᵐ[P] fun ω ↦ MathFin.mertonCallPrice (S_0 * Real.exp (X t ω)) K r σ (T - t : ℝ≥0) k δ\n        (Λ * (T - t)) :=\n  h.condExp_call_eq_mertonCallPrice hk hb hS_0 hK hσ htT\n\n/-- The call price function with Gaussian jumps at the compensated drift is Merton's series. -/\ntheorem jump_diffusion_price_function_merton_thm {S K r b σ k δ : ℝ} (hS : 0 < S) (hK : 0 < K)\n    (hσ : 0 < σ) (hk : -1 < k) {Λ : ℝ≥0} (hb : b = r - σ ^ 2 / 2 - Λ * k) {τ : ℝ≥0}\n    (hτ : 0 < τ) :\n    MathFin.jumpDiffusionCallPrice S K r b σ Λ\n        (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) τ\n      = MathFin.mertonCallPrice S K r σ τ k δ (Λ * τ) :=\n  MathFin.jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice hS hK hσ hk hb hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The conditional value of the call is the call price function at S_t and T − t (JumpDiffusionProcess.condExp_call, mf-jump-diffusion-call-intermediate-date). At the compensated drift the price function is the call of the canonical model at intensity Λτ (jumpDiffusionCallPrice_eq_canonical); the jump law has E[e^J] = 1 + k (integral_exp_gaussianReal), so the compensator is kΛτ and Merton's formula from the general jump-diffusion (JumpDiffusionHyp.call_eq_mertonCallPrice, mf-merton-from-general-jump-law) gives mertonCallPrice (jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice, JumpDiffusionProcess.condExp_call_eq_mertonCallPrice). The process is assumed through its defining properties; no such process is constructed. Lives in MathFin/BlackScholes/JumpDiffusionMerton.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-gaussianPDF-symmetry",
       "name": "Standard Normal PDF Symmetry",
       "description": "ϕ(-z) = ϕ(z) for the standard normal density, since the gaussian is symmetric around 0.",

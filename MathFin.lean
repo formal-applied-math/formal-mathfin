@@ -341,6 +341,8 @@ import MathFin.BlackScholes.JumpDiffusionProcess
 -- Option prices at intermediate dates: a function of the current price and the
 -- remaining maturity
 import MathFin.BlackScholes.JumpDiffusionOptionPrices
+import MathFin.BlackScholes.GaussianSmoothing
+import MathFin.BlackScholes.JumpDiffusionMerton
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser
