@@ -1834,3 +1834,22 @@ Two details:
   as `jumpDiffusionMeasure_map_jumps` does.
 - `unfold` a definition that occurs twice with different arguments. A `rw [f]` rewrites only the
   instances of its first match.
+
+### Differentiate a price in the strike under the integral sign
+
+`hasDerivAt_integral_of_dominated_loc_of_lip` differentiates `k ↦ ∫ F k ω dμ` at `K`. It needs:
+- `F k` measurable near `K`, and `F K` integrable;
+- `F · ω` Lipschitz on a fixed neighbourhood of `K`, with an integrable constant;
+- `F · ω` differentiable at `K` for almost every `ω`.
+
+A call payoff `(X − k)⁺` is `1`-Lipschitz in `k` (`abs_max_sub_max_le_abs`), and it is
+differentiable at `K` off the event `X = K`. So the price is differentiable wherever the law has no
+atom at the strike, with no closed form needed. Pass the integrand, its derivative and the bound as
+named arguments (`(F := …) (F' := …) (bound := fun _ ↦ 1)`) and take `.2`. The Lipschitz goal then
+has the constant `Real.nnabs 1`; `simp only [map_one, NNReal.coe_one, one_mul, Real.dist_eq]`
+clears it. Two smaller points:
+- Mathlib renamed `NoAtoms` to `NullSingletonClass` (2026-06-09). A law with no atoms is an
+  instance of that, and `Set.Subsingleton.measure_zero` is the tool for affine preimages.
+- `congr 1` closes `c * ∫ f = c * ∫ g` outright when `f` and `g` are definitionally equal, as two
+  indicators of the same set written as `Ioi K` and as `{y | K < Seʸ}` are. A case split after it
+  then fails with "no goals".

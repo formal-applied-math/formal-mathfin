@@ -26,6 +26,40 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Digital options: minus the strike derivative of the call (2026-10-08)
+
+Three entries added, all `full`: `mf-call-strike-derivative`,
+`mf-jump-diffusion-digital-strike-derivative` and `mf-jump-diffusion-digital-black-scholes`. Corpus
+500 → 503. New file `BlackScholes/JumpDiffusionDigital.lean`; `BlackScholes/CallSpreadDigital.lean`
+gains the general strike derivative.
+
+- The strike derivative in general. Where a measurable, integrable `X` has no atom at `K`, the
+  undiscounted call price `C(k) = ∫ (X − k)⁺ dμ` is differentiable at `K`, and
+  `C'(K) = −μ{X > K}` (`hasDerivAt_integral_call`, by Mathlib's
+  `hasDerivAt_integral_of_dominated_loc_of_lip`). At an atom only the right derivative is claimed
+  (`tendsto_call_spread`).
+- No atoms with a Gaussian part. For `σ ≠ 0` and `τ > 0` the jump-diffusion log-return law has no
+  atoms (`nullSingletonClass_jumpDiffusionIncrementLaw`): given the jumps, the log-return is
+  affine in the standard normal sample with slope `σ√τ`.
+- The jump-diffusion digital. With a finite forward the call price function is therefore
+  differentiable in the strike at every `K`, and `∂C/∂K = −D`
+  (`hasDerivAt_jumpDiffusionCallPrice_strike`). Here `D = e^{−rτ}P(Se^Y > K)` is the price of the
+  cash-or-nothing digital (`jumpDiffusionDigitalPrice`).
+- Black–Scholes from the strike derivative. Without jumps, `D = e^{−rτ}Φ(d₂)`
+  (`jumpDiffusionDigitalPrice_zero`). The function has two derivatives at `K`, `−D` and
+  `−e^{−rτ}Φ(d₂)` (from `hasDerivAt_bsV_K`), and they are equal. The same value is the Gaussian
+  integral of `bs_cash_or_nothing_formula`, so the strike derivative of the call and the digital
+  price are one fact in the library.
+
+Safe wording: "where the law of the underlying has no atom at the strike, minus the strike
+derivative of the call price is the digital price; a jump-diffusion with a Gaussian part has no
+atoms, so with a finite forward its digital price is minus the strike derivative of its call price
+at every strike; without jumps this gives the Black–Scholes digital `e^{−rτ}Φ(d₂)`". Not covered:
+- the left derivative at an atom (it is `−μ{X ≥ K}`);
+- the second strike derivative, the density of the price (the Black–Scholes case is
+  `breedenLitzenberger`);
+- a series formula for the jump-diffusion digital (Merton's mixture of Black–Scholes digitals).
+
 ### Incompleteness at one date: call prices determine the law, the law determines the characteristics (2026-10-08)
 
 Four entries added, all `full`: `mf-call-spread-digital`, `mf-call-prices-determine-law`,

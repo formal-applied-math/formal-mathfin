@@ -2125,11 +2125,17 @@ level of the law at one date):
    `σ²`: the second differences of `κ` are the moment-generating function of
    `σ²s²·δ₀ + 2(cosh(sx) − 1)·Λν` (`secondDifferenceMeasure`), whose atom at `0` is `σ²s²`. Still
    open: the process-level equivalent martingale measures.
-3. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
+3. Done (corpus 503): digital options. Minus the strike derivative of the call price is the
+   digital price wherever the law has no atom at the strike (`hasDerivAt_integral_call`). A
+   jump-diffusion with `σ ≠ 0` has no atoms, so `∂C/∂K = −D` at every strike
+   (`hasDerivAt_jumpDiffusionCallPrice_strike`). Without jumps this reads the Black–Scholes digital
+   `e^{−rτ}Φ(d₂)` off `hasDerivAt_bsV_K` (`jumpDiffusionDigitalPrice_zero`). Next: the second
+   strike derivative, a density for the jump-diffusion law and Breeden–Litzenberger with jumps.
+4. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
    `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style
    characterization used for constant `θ` (`ExpMartingaleQBrownian`) to independent increments
    with jumps.
-4. Carried over: `compoundPoissonMeasure Λ ν`, with the convolution semigroup
+5. Carried over: `compoundPoissonMeasure Λ ν`, with the convolution semigroup
    `μ_s ∗ μ_t = μ_{s+t}`, then the construction of the process with jumps. Also the
    implied-volatility function and the smile, and routing the hand-frozen conditional
    expectations through `condExp_comp_prodMk_of_indep`.
