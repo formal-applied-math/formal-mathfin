@@ -84,6 +84,20 @@ noncomputable def jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) (ν : Me
   (jumpDiffusionMeasure (Λ * τ) ν).map fun ω ↦
     b * τ + σ * Real.sqrt τ * ω.1 + ∑ i ∈ Finset.range ω.2.1, ω.2.2 i
 
+/-- The log-return `bτ + σ√τ·ω₁ + ∑_{i<ω₂} ω₃ᵢ` is measurable on the canonical space. -/
+lemma measurable_jumpDiffusionLogReturn (b σ : ℝ) (τ : ℝ≥0) :
+    Measurable fun ω : ℝ × ℕ × (ℕ → ℝ) ↦
+      b * τ + σ * Real.sqrt τ * ω.1 + ∑ i ∈ Finset.range ω.2.1, ω.2.2 i := by
+  have hsum : Measurable fun p : ℕ × (ℕ → ℝ) ↦ ∑ i ∈ Finset.range p.1, p.2 i :=
+    measurable_from_prod_countable_right fun n ↦
+      show Measurable fun j : ℕ → ℝ ↦ ∑ i ∈ Finset.range n, j i by fun_prop
+  exact (measurable_const.add (measurable_const.mul measurable_fst)).add (hsum.comp measurable_snd)
+
+instance isProbabilityMeasure_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ)
+    [IsProbabilityMeasure ν] (τ : ℝ≥0) :
+    IsProbabilityMeasure (jumpDiffusionIncrementLaw b σ Λ ν τ) :=
+  Measure.isProbabilityMeasure_map (measurable_jumpDiffusionLogReturn b σ τ).aemeasurable
+
 /-- **The exponential moment of the jump-diffusion increment law**:
 `∫ e^x d(law over τ) = e^{(b + σ²/2 + Λ(𝔼[e^J] − 1))τ}` when `𝔼[e^J] < ∞` under the jump law `ν`.
 On the canonical model this is `JumpDiffusionHyp.integral_exp_logReturn`. -/
@@ -92,12 +106,7 @@ theorem integral_exp_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν :
     ∫ x, rexp x ∂(jumpDiffusionIncrementLaw b σ Λ ν τ)
       = rexp ((b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1)) * τ) := by
   obtain ⟨h, hJ⟩ := jumpDiffusionHyp_canonical (Λ * τ) ν
-  have hsum : Measurable fun p : ℕ × (ℕ → ℝ) ↦ ∑ i ∈ Finset.range p.1, p.2 i :=
-    measurable_from_prod_countable_right fun n ↦
-      show Measurable fun j : ℕ → ℝ ↦ ∑ i ∈ Finset.range n, j i by fun_prop
-  have hφ : Measurable fun ω : ℝ × ℕ × (ℕ → ℝ) ↦
-      b * τ + σ * Real.sqrt τ * ω.1 + ∑ i ∈ Finset.range ω.2.1, ω.2.2 i :=
-    (measurable_const.add (measurable_const.mul measurable_fst)).add (hsum.comp measurable_snd)
+  have hφ := measurable_jumpDiffusionLogReturn b σ τ
   have hJ0 : Integrable (fun ω : ℝ × ℕ × (ℕ → ℝ) ↦ rexp (ω.2.2 0))
       (jumpDiffusionMeasure (Λ * τ) ν) := by
     rw [← (hJ 0).map_eq] at hν
@@ -108,6 +117,15 @@ theorem integral_exp_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν :
     h.integral_exp_logReturn hJ0 b σ (NNReal.coe_nonneg τ), hM, NNReal.coe_mul]
   congr 1
   ring
+
+/-- The exponential of the log-return is integrable when `𝔼[e^J] < ∞`: its integral is
+positive. -/
+lemma integrable_exp_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
+    [IsProbabilityMeasure ν] (hν : Integrable rexp ν) (τ : ℝ≥0) :
+    Integrable rexp (jumpDiffusionIncrementLaw b σ Λ ν τ) :=
+  Integrable.of_integral_ne_zero (by
+    rw [integral_exp_jumpDiffusionIncrementLaw b σ Λ hν τ]
+    exact (Real.exp_pos _).ne')
 
 /-! ### The process -/
 

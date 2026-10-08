@@ -338,6 +338,9 @@ import MathFin.BlackScholes.JumpImpliedVol
 import MathFin.BlackScholes.JumpDiffusionCanonical
 -- The jump-diffusion price process: discounted, a martingale exactly at the compensated drift
 import MathFin.BlackScholes.JumpDiffusionProcess
+-- Option prices at intermediate dates: a function of the current price and the
+-- remaining maturity
+import MathFin.BlackScholes.JumpDiffusionOptionPrices
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser
