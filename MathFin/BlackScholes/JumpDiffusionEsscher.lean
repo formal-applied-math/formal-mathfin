@@ -18,12 +18,14 @@ The Esscher transform with parameter `θ` reweights a law by `e^{θy}` and renor
 over `τ` of a jump-diffusion with drift `b`, volatility coefficient `σ`, jump rate `Λ` and jump
 law `ν` (`jumpDiffusionIncrementLaw`), whose Laplace exponent is `κ` (`jumpDiffusionExponent`).
 
-* `jumpDiffusionIncrementLaw_tilted`: when `ν` has exponential moments of every order, the tilted
-  law is again a jump-diffusion log-return law. The drift becomes `b + θσ²`, `σ` is unchanged, the
-  rate becomes `Λ·m(θ)` with `m(θ) = ∫ e^{θx} dν` (`jumpMoment`), and the jump law is tilted the
-  same way. The proof compares moment-generating functions (`measure_eq_of_mgf_id_eq`): both laws
-  have the moment-generating function `u ↦ e^{(κ(u + θ) − κ(θ))τ}`, since `κ(u + θ) − κ(θ)` is the
-  Laplace exponent of the tilted characteristics (`jumpDiffusionExponent_tilted`).
+* `jumpDiffusionIncrementLaw_tilted`: when the moment-generating function of `ν` is finite near
+  `θ`, the tilted law is again a jump-diffusion log-return law. The drift becomes `b + θσ²`, `σ`
+  is unchanged, the rate becomes `Λ·m(θ)` with `m(θ) = ∫ e^{θx} dν` (`jumpMoment`), and the jump
+  law is tilted the same way. The proof compares moment-generating functions near `0`
+  (`measure_eq_of_mgf_id_eventuallyEq`): both laws have the moment-generating function
+  `u ↦ e^{(κ(u + θ) − κ(θ))τ}` there, since `κ(u + θ) − κ(θ)` is the Laplace exponent of the tilted
+  characteristics (`jumpDiffusionExponent_tilted`). Jump laws whose moment-generating function is
+  finite only on an interval, such as Kou's double-exponential jumps, are covered.
 * `compensated_tilted_iff`: the tilted characteristics are at their compensated drift exactly
   when `κ(θ + 1) − κ(θ) = r`, the Esscher condition: the criterion `κ(1) = r`
   (`compensated_iff_exponent_one`) for the tilted Laplace exponent `u ↦ κ(u + θ) − κ(θ)`.
@@ -78,21 +80,33 @@ lemma jumpDiffusionExponent_tilted (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ
   field_simp
   ring
 
-/-- **The Esscher transform of a jump-diffusion log-return law.** When the jump law has
-exponential moments of every order, tilting the log-return law over `τ` by `e^{θy}` gives the
-log-return law with drift `b + θσ²`, the same volatility coefficient, the rate `Λ·m(θ)` and the
-tilted jump law `ν.tilted (θ * ·)`. -/
+open Filter Topology in
+/-- **The Esscher transform of a jump-diffusion log-return law.** When the moment-generating
+function of the jump law is finite near `θ` (`θ` in the interior of `integrableExpSet id ν`),
+tilting the log-return law over `τ` by `e^{θy}` gives the log-return law with drift `b + θσ²`, the
+same volatility coefficient, the rate `Λ·m(θ)` and the tilted jump law `ν.tilted (θ * ·)`. Both
+laws have the moment-generating function `u ↦ e^{(κ(u + θ) − κ(θ))τ}` near `0`, which determines
+them (`measure_eq_of_mgf_id_eventuallyEq`). -/
 theorem jumpDiffusionIncrementLaw_tilted (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
-    [IsProbabilityMeasure ν] (hν : ∀ u, Integrable (fun x ↦ rexp (u * x)) ν) (θ : ℝ) (τ : ℝ≥0) :
+    [IsProbabilityMeasure ν] {θ : ℝ} (hθ : θ ∈ interior (integrableExpSet id ν)) (τ : ℝ≥0) :
     (jumpDiffusionIncrementLaw b σ Λ ν τ).tilted (θ * ·)
       = jumpDiffusionIncrementLaw (b + θ * σ ^ 2) σ (Λ * jumpMoment ν θ) (ν.tilted (θ * ·)) τ := by
-  have : IsProbabilityMeasure (ν.tilted (θ * ·)) := isProbabilityMeasure_tilted (hν θ)
-  have hνθ (u : ℝ) := integrable_exp_mul_tilted_const_mul (hν θ) (hν (u + θ))
-  refine Eq.symm (measure_eq_of_mgf_id_eq
-    (fun u ↦ integrable_exp_mul_jumpDiffusionIncrementLaw _ _ _ (hνθ u) τ) (funext fun u ↦ ?_))
-  rw [mgf_id_jumpDiffusionIncrementLaw _ _ _ (hνθ u), jumpDiffusionExponent_tilted b σ Λ (hν θ) u,
-    mgf_id_tilted_const_mul, mgf_id_jumpDiffusionIncrementLaw b σ Λ (hν (u + θ)),
-    mgf_id_jumpDiffusionIncrementLaw b σ Λ (hν θ), ← Real.exp_sub, sub_mul]
+  have hθν : Integrable (fun x ↦ rexp (θ * x)) ν := interior_subset hθ
+  have : IsProbabilityMeasure (ν.tilted (θ * ·)) := isProbabilityMeasure_tilted hθν
+  -- near `0`, the jump law has the exponential moments of the orders `u + θ`
+  have hU : ∀ᶠ u in 𝓝 (0 : ℝ), Integrable (fun x ↦ rexp ((u + θ) * x)) ν :=
+    ((continuous_add_const θ).tendsto' 0 θ (zero_add θ)).eventually_mem
+      (mem_interior_iff_mem_nhds.1 hθ)
+  have hint : ∀ᶠ u in 𝓝 (0 : ℝ), Integrable (fun y ↦ rexp (u * y))
+      (jumpDiffusionIncrementLaw (b + θ * σ ^ 2) σ (Λ * jumpMoment ν θ) (ν.tilted (θ * ·)) τ) :=
+    hU.mono fun u hu ↦ integrable_exp_mul_jumpDiffusionIncrementLaw _ _ _
+      (integrable_exp_mul_tilted_const_mul hθν hu) τ
+  refine Eq.symm (measure_eq_of_mgf_id_eventuallyEq (mem_interior_iff_mem_nhds.2 hint)
+    (hU.mono fun u hu ↦ ?_))
+  rw [mgf_id_jumpDiffusionIncrementLaw _ _ _ (integrable_exp_mul_tilted_const_mul hθν hu),
+    jumpDiffusionExponent_tilted b σ Λ hθν u, mgf_id_tilted_const_mul,
+    mgf_id_jumpDiffusionIncrementLaw b σ Λ hu, mgf_id_jumpDiffusionIncrementLaw b σ Λ hθν,
+    ← Real.exp_sub, sub_mul]
 
 /-- **The Esscher condition.** The tilted characteristics are at their compensated drift,
 `b + θσ² = r − σ²/2 − Λm(θ)(∫ eˣ d(ν tilted) − 1)`, exactly when `κ(θ + 1) − κ(θ) = r`: the
@@ -168,27 +182,28 @@ theorem existsUnique_esscher (b σ r : ℝ) (hσ : σ ≠ 0) (Λ : ℝ≥0) {ν 
   obtain ⟨θ, hθ⟩ := hcont.surjective htop hbot r
   exact ⟨θ, (hF θ).trans hθ, fun θ' h ↦ hmono.injective (((hF θ').symm.trans h).trans hθ.symm)⟩
 
-/-- **The Esscher price is a price function of the tilted characteristics.** When the jump law has
-every exponential moment, the discounted call payoff integrated against the Esscher-tilted
-log-return law is the call price function `jumpDiffusionCallPrice` of the characteristics
-`(b + θσ², σ, Λ·m(θ), ν.tilted (θ * ·))` (`jumpDiffusionIncrementLaw_tilted`), so results about
-price functions apply to it, such as Merton's formula at the compensated drift. -/
+/-- **The Esscher price is a price function of the tilted characteristics.** When the
+moment-generating function of the jump law is finite near `θ`, the discounted call payoff integrated
+against the Esscher-tilted log-return law is the call price function `jumpDiffusionCallPrice` of
+the characteristics `(b + θσ², σ, Λ·m(θ), ν.tilted (θ * ·))` (`jumpDiffusionIncrementLaw_tilted`),
+so results about price functions apply to it, such as Merton's formula at the compensated drift. -/
 lemma integral_call_tilted_eq_jumpDiffusionCallPrice (S K r b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
-    [IsProbabilityMeasure ν] (hν : ∀ u, Integrable (fun x ↦ rexp (u * x)) ν) (θ : ℝ) (τ : ℝ≥0) :
+    [IsProbabilityMeasure ν] {θ : ℝ} (hθ : θ ∈ interior (integrableExpSet id ν)) (τ : ℝ≥0) :
     ∫ y, rexp (-r * τ) * max (S * rexp y - K) 0
         ∂((jumpDiffusionIncrementLaw b σ Λ ν τ).tilted (θ * ·))
       = jumpDiffusionCallPrice S K r (b + θ * σ ^ 2) σ (Λ * jumpMoment ν θ) (ν.tilted (θ * ·))
           τ := by
-  rw [jumpDiffusionIncrementLaw_tilted b σ Λ hν θ τ, jumpDiffusionCallPrice]
+  rw [jumpDiffusionIncrementLaw_tilted b σ Λ hθ τ, jumpDiffusionCallPrice]
 
-/-- **Esscher pricing of the call.** When the jump law has every exponential moment, at an
-Esscher parameter, `κ(θ + 1) − κ(θ) = r`, the discounted call payoff integrated against the
-Esscher-tilted log-return law is Merton's formula for the tilted characteristics: the
-`Poisson(Λm(θ)τ)` mixture of Black–Scholes prices over jumps of law `ν.tilted (θ * ·)`
-(`integral_call_tilted_eq_jumpDiffusionCallPrice`, `jumpDiffusionCallPrice_eq_merton`). -/
+/-- **Esscher pricing of the call.** When the moment-generating function of the jump law is finite
+near `θ` and at `1 + θ`, at an Esscher parameter, `κ(θ + 1) − κ(θ) = r`, the discounted call payoff
+integrated against the Esscher-tilted log-return law is Merton's formula for the tilted
+characteristics: the `Poisson(Λm(θ)τ)` mixture of Black–Scholes prices over jumps of law
+`ν.tilted (θ * ·)` (`integral_call_tilted_eq_jumpDiffusionCallPrice`,
+`jumpDiffusionCallPrice_eq_merton`). -/
 theorem integral_call_tilted_eq_merton {S K r b σ : ℝ} (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ)
-    {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν]
-    (hν : ∀ u, Integrable (fun x ↦ rexp (u * x)) ν) {θ : ℝ}
+    {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν] {θ : ℝ}
+    (hθν : θ ∈ interior (integrableExpSet id ν)) (h1 : Integrable (fun x ↦ rexp ((1 + θ) * x)) ν)
     (hθ : jumpDiffusionExponent b σ Λ ν (1 + θ) - jumpDiffusionExponent b σ Λ ν θ = r)
     {τ : ℝ≥0} (hτ : 0 < τ) :
     ∫ y, rexp (-r * τ) * max (S * rexp y - K) 0
@@ -197,11 +212,12 @@ theorem integral_call_tilted_eq_merton {S K r b σ : ℝ} (hS : 0 < S) (hK : 0 <
           * (∫ x, rexp x ∂(ν.tilted (θ * ·)) - 1)) + ∑ i ∈ Finset.range n, j i)) τ
           ∂(Measure.infinitePi fun _ : ℕ ↦ ν.tilted (θ * ·))
           ∂(poissonMeasure (Λ * jumpMoment ν θ * τ)) := by
-  have : IsProbabilityMeasure (ν.tilted (θ * ·)) := isProbabilityMeasure_tilted (hν θ)
-  rw [integral_call_tilted_eq_jumpDiffusionCallPrice S K r b σ Λ hν θ τ]
+  have hθ' : Integrable (fun x ↦ rexp (θ * x)) ν := interior_subset hθν
+  have : IsProbabilityMeasure (ν.tilted (θ * ·)) := isProbabilityMeasure_tilted hθ'
+  rw [integral_call_tilted_eq_jumpDiffusionCallPrice S K r b σ Λ hθν τ]
   exact jumpDiffusionCallPrice_eq_merton hS hK hσ
-    (by simpa only [one_mul] using integrable_exp_mul_tilted_const_mul (hν θ) (hν (1 + θ)))
-    ((compensated_tilted_iff b σ r Λ (hν θ)).2 hθ) hτ
+    (by simpa only [one_mul] using integrable_exp_mul_tilted_const_mul hθ' h1)
+    ((compensated_tilted_iff b σ r Λ hθ').2 hθ) hτ
 
 /-- **Tilting keeps Merton's jumps lognormal**: Merton's log-jump law `N(log(1 + k) − δ²/2, δ²)`
 tilted by `e^{θx}` is Merton's log-jump law with the jump mean `(1 + k)e^{θδ²} − 1`
@@ -241,7 +257,8 @@ theorem integral_call_tilted_eq_mertonCallPrice {S K r b σ k δ : ℝ} (hS : 0 
   -- the Esscher condition is the compensated drift of the tilted Merton model
   have hb := (compensated_tilted_iff b σ r Λ (hν θ)).2 hθ
   rw [mertonJump_tilted hk δ θ, integral_exp_mertonJump hk' δ] at hb
-  rw [integral_call_tilted_eq_jumpDiffusionCallPrice S K r b σ Λ hν θ τ, mertonJump_tilted hk δ θ]
+  rw [integral_call_tilted_eq_jumpDiffusionCallPrice S K r b σ Λ (by simp) τ,
+    mertonJump_tilted hk δ θ]
   exact jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice hS hK hσ hk'
     (by linear_combination hb) hτ
 

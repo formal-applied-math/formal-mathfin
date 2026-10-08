@@ -31,15 +31,17 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 Six entries added, all `full`: `mf-jump-diffusion-esscher-transform`,
 `mf-jump-diffusion-esscher-pricing`, `mf-jump-diffusion-esscher-parameter`,
 `mf-merton-esscher-pricing`, `mf-black-scholes-esscher-pricing` and `gir-gaussian-esscher-tilt`.
-Corpus 490 → 496. The tilt
-lives in `Foundations/Esscher.lean`, the jump-diffusion results in
+Corpus 490 → 496. The tilt lives in `Foundations/Esscher.lean`, the jump-diffusion results in
 `BlackScholes/JumpDiffusionEsscher.lean`.
 
 - One tilt. The Esscher transform with parameter `θ` of a law `μ` on `ℝ` is Mathlib's
   `μ.tilted (θ * ·)`. Its exponential moments are ratios of those of `μ`
-  (`integral_exp_mul_tilted_const_mul`). A law with every exponential moment is determined by its
-  moment-generating function (`measure_eq_of_mgf_id_eq`, from Mathlib's complex moment-generating
-  function). A Gaussian law has its mean shifted: `N(m, v)` tilted is `N(m + θv, v)`
+  (`integral_exp_mul_tilted_const_mul`, Mathlib's `integral_exp_tilted` at linear exponents).
+  A law is determined by its moment-generating function on a neighbourhood of `0`, when that
+  function is finite there (`measure_eq_of_mgf_id_eventuallyEq`). The proof is the identity
+  theorem on a vertical strip for Mathlib's complex moment-generating function, then the
+  characteristic function on the imaginary axis. `measure_eq_of_mgf_id_eq` is the case of every
+  exponential moment. A Gaussian law has its mean shifted: `N(m, v)` tilted is `N(m + θv, v)`
   (`gaussianReal_tilted_const_mul`).
 - One file, three users. The static Girsanov change of measure
   `gaussianReal_withDensity_esscher` (behind `BSCallHyp.exists_of_physical`) is the case `N(0, 1)`
@@ -47,34 +49,38 @@ lives in `Foundations/Esscher.lean`, the jump-diffusion results in
   exponential-martingale characterization of Brownian motion (`ExpMartingaleQBrownian`)
   identifies the Gaussian increment law with `measure_eq_of_mgf_id_eq` instead of its own copy of
   the complex-MGF argument. The jump layer is the third user.
-- The jump-diffusion law. When the jump law `ν` has exponential moments of every order, the tilted
-  log-return law over `τ` is the jump-diffusion law with drift `b + θσ²`, the same `σ`, rate
-  `Λ·∫e^{θx}dν` and the tilted jump law (`jumpDiffusionIncrementLaw_tilted`). Both laws have the
-  moment-generating function `u ↦ e^{(κ(u + θ) − κ(θ))τ}` (`jumpDiffusionExponent_tilted`).
+- The jump-diffusion law. When the moment-generating function of the jump law `ν` is finite near
+  `θ`, the tilted log-return law over `τ` is the jump-diffusion law with drift `b + θσ²`, the same
+  `σ`, rate `Λ·∫e^{θx}dν` and the tilted jump law (`jumpDiffusionIncrementLaw_tilted`). Near
+  `0`, both laws have the moment-generating function `u ↦ e^{(κ(u + θ) − κ(θ))τ}`
+  (`jumpDiffusionExponent_tilted`). This covers jump laws whose moment-generating function is
+  finite only on an interval, such as Kou's double-exponential jumps.
 - Esscher pricing. The tilted characteristics are at their compensated drift exactly when
   `κ(θ + 1) − κ(θ) = r` (`compensated_tilted_iff`): the criterion `κ(1) = r`
   (`compensated_iff_exponent_one`, shared with the discounted-price martingale criterion) for the
   tilted Laplace exponent. The call against the tilted law is the call price function of the
-  tilted characteristics (`integral_call_tilted_eq_jumpDiffusionCallPrice`), so at such a `θ` it
-  is Merton's formula for the tilted jump law (`integral_call_tilted_eq_merton`).
+  tilted characteristics (`integral_call_tilted_eq_jumpDiffusionCallPrice`). So at such a `θ`,
+  with the moment at `1 + θ` finite, it is Merton's formula for the tilted jump law
+  (`integral_call_tilted_eq_merton`). Tilting keeps Merton's jumps lognormal with the jump mean
+  `(1 + k)e^{θδ²} − 1` (`mertonJump_tilted`), so in Merton's model it is Merton's 1976 series
+  (`integral_call_tilted_eq_mertonCallPrice`).
 - The Esscher parameter exists and is unique when `σ ≠ 0` and the jump law has every exponential
   moment (`existsUnique_esscher`). `θ ↦ κ(1 + θ) − κ(θ)` is the line `b + σ²/2 + σ²θ` plus `Λ`
   times the jump part `∫ e^{θx}(eˣ − 1) dν`, which is nondecreasing because
   `(e^{θ'x} − e^{θx})(eˣ − 1) ≥ 0` for `θ ≤ θ'`. So the map is strictly increasing, continuous
-  (Mathlib's `continuous_mgf`) and unbounded both ways, and `Continuous.surjective` applies. Tilting keeps
-  Merton's jumps lognormal with the jump mean `(1 + k)e^{θδ²} − 1` (`mertonJump_tilted`), so in
-  Merton's model it is Merton's 1976 series (`integral_call_tilted_eq_mertonCallPrice`). Without
-  jumps the tilt at `θ = (r − b − σ²/2)/σ²` gives the risk-neutral law, and the Black–Scholes
-  price for every drift (`integral_call_tilted_zero_eq_bsV`, through
-  `jumpDiffusionIncrementLaw_zero_tilted`).
+  (Mathlib's `continuous_mgf`) and unbounded both ways, and `Continuous.surjective` applies.
+  Without jumps the parameter is `θ = (r − b − σ²/2)/σ²` (`jumpDiffusionExponent_zero_esscher`).
+  The tilt there gives the risk-neutral law and the Black–Scholes price for every drift
+  (`integral_call_tilted_zero_eq_bsV`, through `jumpDiffusionIncrementLaw_zero_tilted`).
 
-Safe wording: "where the jump law has every exponential moment, the Esscher transform of the
-log-return law at one date is again a jump-diffusion law, and at an Esscher parameter the call
-against it is Merton's formula for the tilted jumps". The Esscher law is one choice of pricing law.
-With jumps (`Λ > 0`) the market is in general incomplete (not formalized), and other choices can
-give other prices; without jumps the model is Black–Scholes. Not covered:
-- the existence of an Esscher parameter without a Gaussian part (`σ = 0`);
-- jump laws with only some exponential moments, such as Kou's double-exponential jumps;
+Safe wording: "where the jump law's moment-generating function is finite near `θ`, the Esscher
+transform of the log-return law at one date is again a jump-diffusion law, and at an Esscher
+parameter with a finite moment of order `1 + θ` the call against it is Merton's formula for the
+tilted jumps". The Esscher law is one
+choice of pricing law. With jumps (`Λ > 0`) the market is in general incomplete (not formalized),
+and other choices can give other prices; without jumps the model is Black–Scholes. Not covered:
+- the existence of an Esscher parameter without a Gaussian part (`σ = 0`), or when the jump law's
+  moment-generating function is finite only on an interval;
 - the Esscher measure on the process, a change of measure on `Ω` under which `X` is again a
   jump-diffusion;
 - optimality properties of the Esscher measure.

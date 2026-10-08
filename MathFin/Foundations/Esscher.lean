@@ -20,9 +20,9 @@ of measure.
   (Mathlib's `integral_exp_tilted` at linear exponents).
 * `integrable_exp_mul_tilted_const_mul`: `μ_θ` has the exponential moment of order `u` when `μ` has
   those of orders `θ` and `u + θ`.
-* `measure_eq_of_mgf_id_eq`: a probability law with exponential moments of every order is
-  determined by its moment-generating function (through Mathlib's complex moment-generating
-  function).
+* `measure_eq_of_mgf_id_eventuallyEq`: a probability law whose moment-generating function is finite
+  near `0` is determined by that function near `0` (the identity theorem for Mathlib's complex
+  moment-generating function); `measure_eq_of_mgf_id_eq` is the case of every exponential moment.
 * `gaussianReal_tilted_const_mul`: the transform shifts the mean of a Gaussian law, `N(m, v)`
   tilted by `e^{θx}` is `N(m + θv, v)`.
 
@@ -38,19 +38,59 @@ and the Gaussian increments of `isQBrownianMotion_of_expMartingale` are identifi
 
 namespace MathFin
 
-open MeasureTheory ProbabilityTheory Real
-open scoped NNReal
+open MeasureTheory ProbabilityTheory Real Filter
+open scoped NNReal Topology
+
+/-- **A law is determined by its moment-generating function near `0`**: if the moment-generating
+function of a probability law `μ` on `ℝ` is finite on a neighbourhood of `0`, every finite measure
+`μ'` with the same moment-generating function on a neighbourhood of `0` is `μ`. On an interval
+`(-ε, ε)` of exponential moments of both, the complex moment-generating functions are analytic in
+the vertical strip `|Re z| < ε` (Mathlib's `analyticOnNhd_complexMGF`) and agree at its real
+points, hence on the whole strip (the identity theorem). On the imaginary axis they are the
+characteristic functions (`complexMGF_id_mul_I`), which determine the measure
+(`Measure.ext_of_charFun`). -/
+lemma measure_eq_of_mgf_id_eventuallyEq {μ μ' : Measure ℝ} [IsProbabilityMeasure μ]
+    [IsFiniteMeasure μ'] (h0 : 0 ∈ interior (integrableExpSet id μ))
+    (h : mgf id μ =ᶠ[𝓝 0] mgf id μ') : μ = μ' := by
+  obtain ⟨ε, hε, hball⟩ := Metric.eventually_nhds_iff_ball.1
+    ((eventually_mem_set.2 (mem_interior_iff_mem_nhds.1 h0)).and h)
+  -- both measures have the exponential moments of the orders in `(-ε, ε)`
+  have hμ : Metric.ball (0 : ℝ) ε ⊆ interior (integrableExpSet id μ) :=
+    interior_maximal (fun t ht ↦ (hball t ht).1) Metric.isOpen_ball
+  have hμ' : Metric.ball (0 : ℝ) ε ⊆ interior (integrableExpSet id μ') := by
+    refine interior_maximal (fun t ht ↦ ?_) Metric.isOpen_ball
+    have hpos : mgf id μ' t ≠ 0 := (hball t ht).2 ▸ (mgf_pos (X := id) (hball t ht).1).ne'
+    by_contra hint
+    exact hpos (mgf_undef (X := id) hint)
+  -- so their complex moment-generating functions agree on the strip `|Re z| < ε`
+  have hS : IsPreconnected {z : ℂ | z.re ∈ Metric.ball (0 : ℝ) ε} :=
+    ((convex_ball (0 : ℝ) ε).linear_preimage Complex.reLm).isPreconnected
+  have hEq : Set.EqOn (complexMGF id μ) (complexMGF id μ')
+      {z : ℂ | z.re ∈ Metric.ball (0 : ℝ) ε} := by
+    refine AnalyticOnNhd.eqOn_of_preconnected_of_frequently_eq
+      (analyticOnNhd_complexMGF.mono fun z hz ↦ hμ hz)
+      (analyticOnNhd_complexMGF.mono fun z hz ↦ hμ' hz) hS (z₀ := ((0 : ℝ) : ℂ))
+      (by simpa using hε) ?_
+    have h_real : ∃ᶠ x : ℝ in 𝓝[≠] 0, complexMGF id μ x = complexMGF id μ' x :=
+      (Eventually.frequently (h.filter_mono nhdsWithin_le_nhds)).mono fun y hy ↦ by
+        rw [complexMGF_ofReal, complexMGF_ofReal, hy]
+    rw [frequently_iff_seq_forall] at h_real ⊢
+    obtain ⟨xs, hx_tendsto, hx_eq⟩ := h_real
+    refine ⟨fun n ↦ xs n, ?_, hx_eq⟩
+    rw [tendsto_nhdsWithin_iff] at hx_tendsto ⊢
+    exact ⟨tendsto_ofReal_iff.2 hx_tendsto.1, by simpa using hx_tendsto.2⟩
+  -- on the imaginary axis they are the characteristic functions
+  refine Measure.ext_of_charFun (funext fun t ↦ ?_)
+  rw [← complexMGF_id_mul_I, ← complexMGF_id_mul_I]
+  exact hEq (by simpa using hε)
 
 /-- **A law with exponential moments of every order is determined by its moment-generating
 function**: a probability law `μ` on `ℝ` with every exponential moment equals each finite measure
-`μ'` with the same moment-generating function. Their complex moment-generating functions then
-agree on the whole plane (Mathlib's `eqOn_complexMGF_of_mgf`), and these determine the measure
-(`Measure.ext_of_complexMGF_id_eq`). -/
+`μ'` with the same moment-generating function (`measure_eq_of_mgf_id_eventuallyEq`). -/
 lemma measure_eq_of_mgf_id_eq {μ μ' : Measure ℝ} [IsProbabilityMeasure μ] [IsFiniteMeasure μ']
     (hμ : ∀ u, Integrable (fun x ↦ rexp (u * x)) μ) (h : mgf id μ = mgf id μ') : μ = μ' := by
   have hset : integrableExpSet id μ = Set.univ := Set.eq_univ_of_forall hμ
-  refine Measure.ext_of_complexMGF_id_eq (funext fun z ↦ eqOn_complexMGF_of_mgf h ?_)
-  simp [hset]
+  exact measure_eq_of_mgf_id_eventuallyEq (by simp [hset]) (Eventually.of_forall (congr_fun h))
 
 /-- **The exponential moments of an Esscher-tilted law** are ratios of those of the law:
 `∫ e^{ux} dμ_θ = ∫ e^{(u + θ)x} dμ / ∫ e^{θx} dμ`, for `μ_θ = μ.tilted (θ * ·)`. This is Mathlib's

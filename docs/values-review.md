@@ -222,7 +222,9 @@ Twelve findings, all applied:
    exponential moment. Executed after this review: `existsUnique_esscher`,
    `mf-jump-diffusion-esscher-parameter` (corpus 496).
 2. **Local MGF uniqueness**, upstreamable: Kou's jumps enter the Esscher layer and the corpus
-   disclaimer goes.
+   disclaimer goes. Executed after this review: `measure_eq_of_mgf_id_eventuallyEq`; the transform
+   and pricing entries now assume only a moment-generating function finite near `θ` (and, for
+   pricing, at `1 + θ`).
 3. **Formal incompleteness at one date**: the Esscher law and the Merton measure (same jump law,
    compensated drift) are both compensated but give different call prices for some strike when
    `θ ≠ 0`.

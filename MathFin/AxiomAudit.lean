@@ -103,8 +103,12 @@ namespace MathFin.AxiomAudit
 
 -- The Gaussian Esscher transform (Foundations/Esscher, 2026-10-08): the static Girsanov change of
 -- measure is its case N(0,1), and the jump layer uses it without jumps and for Merton's lognormal
--- jumps. A law with every exponential moment is fixed by its moment-generating function (also used
--- by the exponential-martingale characterization of Brownian motion).
+-- jumps. A law whose moment-generating function is finite near 0 is fixed by that function near 0;
+-- the case of every exponential moment also serves the exponential-martingale characterization of
+-- Brownian motion.
+
+/-- info: 'MathFin.measure_eq_of_mgf_id_eventuallyEq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.measure_eq_of_mgf_id_eventuallyEq
 
 /-- info: 'MathFin.measure_eq_of_mgf_id_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.measure_eq_of_mgf_id_eq

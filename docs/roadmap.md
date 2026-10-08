@@ -2076,9 +2076,9 @@ and re-rooted the moment):
 
 The Esscher transform reweights a law by `e^{θy}` and renormalizes it, Mathlib's `Measure.tilted`.
 It now has one home, `Foundations/Esscher.lean`. Tilted moments are ratios of moments
-(`integral_exp_mul_tilted_const_mul`). A law with every exponential moment is determined by its
-moment-generating function (`measure_eq_of_mgf_id_eq`, from Mathlib's complex moment-generating
-function). And the tilt shifts a Gaussian mean, `N(m, v) ↦ N(m + θv, v)`
+(`integral_exp_mul_tilted_const_mul`). A law is determined by its moment-generating function near
+`0` when that function is finite there (`measure_eq_of_mgf_id_eventuallyEq`, from Mathlib's complex
+moment-generating function; `measure_eq_of_mgf_id_eq` is the case of every exponential moment). And the tilt shifts a Gaussian mean, `N(m, v) ↦ N(m + θv, v)`
 (`gaussianReal_tilted_const_mul`).
 
 Three parts of the library now run through it:
@@ -2088,9 +2088,10 @@ Three parts of the library now run through it:
   identifies the Gaussian increment law with `measure_eq_of_mgf_id_eq`.
 - The jump layer (`BlackScholes/JumpDiffusionEsscher.lean`).
 
-For a jump law with every exponential moment, the tilted log-return law is the jump-diffusion law
-with drift `b + θσ²`, rate `Λ∫e^{θx}dν` and the tilted jump law (`jumpDiffusionIncrementLaw_tilted`).
-It has the moment-generating function `u ↦ e^{(κ(u + θ) − κ(θ))τ}`. The Esscher condition `κ(θ + 1) − κ(θ) = r` is the
+When the jump law's moment-generating function is finite near `θ`, the tilted log-return law is the
+jump-diffusion law with drift `b + θσ²`, rate `Λ∫e^{θx}dν` and the tilted jump law
+(`jumpDiffusionIncrementLaw_tilted`). Near `0` it has the moment-generating function
+`u ↦ e^{(κ(u + θ) − κ(θ))τ}`. The Esscher condition `κ(θ + 1) − κ(θ) = r` is the
 compensated drift of the tilted characteristics (`compensated_tilted_iff`). At such a `θ` the call
 against the tilted law is Merton's formula for the tilted jumps (`integral_call_tilted_eq_merton`).
 In Merton's model it is Merton's 1976 series with the jump mean `(1 + k)e^{θδ²} − 1`
@@ -2107,8 +2108,10 @@ level of the law at one date):
    `(e^{θ'x} − e^{θx})(eˣ − 1) ≥ 0` for `θ ≤ θ'`, so the map is strictly increasing and unbounded
    both ways. It is continuous where `ν` has every exponential moment (Mathlib's `continuous_mgf`),
    so `Continuous.surjective` gives exactly one root.
-   Local MGF uniqueness would then let the transform reach jump laws whose MGF is finite only near
-   `θ`, such as Kou's double-exponential jumps (values review, corpus 495).
+   Also done: local MGF uniqueness (`measure_eq_of_mgf_id_eventuallyEq`). The transform and Esscher
+   pricing now need only the jump law's moment-generating function finite near `θ` (and at
+   `1 + θ`), so Kou's double-exponential jumps are covered. The parameter's existence in that case
+   (an MGF finite only on an interval) is still open.
 2. Formal incompleteness at one date. Show that the Esscher law and the law that keeps the jump
    law and changes only the drift (the "Merton measure") are both compensated, yet give different
    call prices for some strike when the jumps are nontrivial and the Esscher parameter is not 0.
