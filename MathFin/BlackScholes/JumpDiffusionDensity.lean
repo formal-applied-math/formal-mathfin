@@ -171,11 +171,14 @@ the one for the jump count `0` sits at `bτ`. -/
 lemma ofReal_exp_le_jumpDiffusionIncrementLaw_singleton (b : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ)
     [IsProbabilityMeasure ν] (τ : ℝ≥0) :
     ENNReal.ofReal (rexp (-((Λ * τ : ℝ≥0) : ℝ))) ≤ jumpDiffusionIncrementLaw b 0 Λ ν τ {b * τ} := by
-  have hv : (⟨(0 : ℝ) ^ 2, sq_nonneg 0⟩ : ℝ≥0) * τ = 0 := by
+  -- with `σ = 0` each Gaussian law of the mixture is a point mass
+  have hv (m : ℝ) : gaussianReal m (.mk ((0 : ℝ) ^ 2) (sq_nonneg _) * τ) = Measure.dirac m := by
+    rw [← gaussianReal_zero_var m]
+    congr 1
     ext
     simp
   rw [jumpDiffusionIncrementLaw_apply b 0 Λ ν τ (measurableSet_singleton _)]
-  simp_rw [hv, gaussianReal_zero_var]
+  simp_rw [hv]
   calc ENNReal.ofReal (rexp (-((Λ * τ : ℝ≥0) : ℝ)))
       = ((poissonMeasure (Λ * τ)).prod (Measure.infinitePi fun _ : ℕ ↦ ν)) ({0} ×ˢ univ) := by
         rw [Measure.prod_prod, measure_univ, mul_one, poissonMeasure_singleton]

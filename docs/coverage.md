@@ -26,6 +26,42 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Kinks: the call price is differentiable in the strike exactly where the law has no atom (2026-10-08)
+
+Four entries added, all `full`: `mf-call-strike-differentiable-iff-no-atom`,
+`mf-jump-diffusion-call-differentiable-iff`, `mf-jump-diffusion-call-kink` and
+`mf-cash-digital-strike`. Corpus 509 → 513. `BlackScholes/CallSpreadDigital.lean`,
+`BlackScholes/JumpDiffusionDensity.lean`, `BlackScholes/JumpDiffusionDigital.lean` and
+`BlackScholes/StrikeGreeks.lean` gain the results.
+
+- The left spread. For a measurable, integrable `X` under a finite measure, the call spread just
+  below the strike, `(C(K − h) − C(K))/h`, tends to `μ{X ≥ K}` as `h ↓ 0`
+  (`tendsto_call_spread_left`, dominated convergence as for `tendsto_call_spread`). So the left
+  strike derivative is `−μ{X ≥ K}` and the right one `−μ{X > K}`.
+- Differentiability iff no atom. The call price `C(k) = ∫ (X − k)⁺ dμ` is differentiable at `K` iff
+  `μ{X = K} = 0` (`differentiableAt_integral_call_iff`): a derivative makes the two one-sided
+  slopes equal (Mathlib's `HasDerivAt.tendsto_slope_zero_right` and `tendsto_slope_zero_left`),
+  and they differ by the mass of the atom.
+- The jump-diffusion call. For `S, K > 0` and a finite forward, the call price function is
+  differentiable at `K` iff the log-return law has no atom at `log(K/S)`
+  (`differentiableAt_jumpDiffusionCallPrice_strike_iff`). Without a Gaussian part the law has an
+  atom at `bτ` of mass at least `e^{−Λτ}`, the probability of no jump
+  (`ofReal_exp_le_jumpDiffusionIncrementLaw_singleton`: given the jumps the law is a point mass,
+  Mathlib's `gaussianReal_zero_var`). So with `σ = 0` the call price has a kink at the strike
+  `Se^{bτ}` (`not_differentiableAt_jumpDiffusionCallPrice_strike`).
+- The Black–Scholes digital in the strike. `∂_K (e^{−rτ}Φ(d₂)) = −e^{−rτ}ϕ(d₂)/(Kσ√τ)`
+  (`hasDerivAt_bsCashDigital_K`), the strike Greek missing from `DigitalGreeks`. The second strike
+  derivative of the call, `hasDerivAt_deriv_bsV_K`, is now this lemma negated, and Merton's
+  digital series is the Poisson mixture of `bsCashDigital` (section below).
+
+Safe wording: "the call price is differentiable in the strike exactly where the law of the
+underlying has no atom, its one-sided strike derivatives being minus the digitals of `X > K` and
+`X ≥ K`; a jump-diffusion without a Gaussian part has an atom at the no-jump outcome, so its call
+price has a kink at the strike `Se^{bτ}`". Not covered:
+- the other atoms of a law with `σ = 0` (at `bτ` plus the atoms of the convolution powers of `ν`);
+- the size of the kink as a statement about the jump-diffusion call price (it follows from the
+  general one-sided limits, applied to `Seʸ`).
+
 ### Merton's digital and Merton's density: the strike derivatives of Merton's series (2026-10-08)
 
 Three entries added, all `full`: `mf-merton-strike-derivatives`, `mf-jump-diffusion-merton-digital`
@@ -37,31 +73,38 @@ identifications.
   differentiated term by term in the strike, as the Merton Greeks differentiate it in the spot
   (`hasDerivAt_tsum_of_isPreconnected`). For `S, σ, T, K > 0` and `k > −1`:
   `∂C/∂K = −mertonDigitalPrice`, with `mertonDigitalPrice = ∑ₙ wₙ e^{−rT}Φ(d₂ⁿ)`
-  (`hasDerivAt_mertonCallPrice_strike`, each term by `hasDerivAt_bsV_K`); and
-  `∂²C/∂K² = e^{−rT}·mertonDensity`, with `mertonDensity = ∑ₙ wₙ·lognormalTerminalPDF(S·cₙ, r, σₙ,
-  T, K)` (`hasDerivAt_mertonDigitalPrice_strike`, `hasDerivAt_deriv_mertonCallPrice_strike`, each
-  term by `breedenLitzenberger`). The derivative bounds are `wₙe^{−rT}` and, on `(K/2, ∞)`,
+  (`hasDerivAt_mertonCallPrice_strike`, each term by `hasDerivAt_bsV_K`), the Poisson mixture of
+  the Black–Scholes digitals `bsCashDigital`; and `∂²C/∂K² = e^{−rT}·mertonTerminalPDF`, with
+  `mertonTerminalPDF = ∑ₙ wₙ·lognormalTerminalPDF(S·cₙ, r, σₙ, T, K)`
+  (`hasDerivAt_mertonDigitalPrice_strike`, `hasDerivAt_deriv_mertonCallPrice_strike`, each term
+  by `hasDerivAt_bsCashDigital_K`). The derivative bounds are `wₙe^{−rT}` and, on `(K/2, ∞)`,
   `wₙe^{−rT}/((K/2)σ√T)`; the Poisson weights sum to one (Mathlib's `hasSum_one_poissonMeasure`).
-- Merton's digital. With Gaussian log-jumps `N(log(1 + k) − δ²/2, δ²)` at the compensated drift
-  `b = r − σ²/2 − Λk`, the jump-diffusion digital price is `mertonDigitalPrice` at the expected
+- Merton's digital. For `σ > 0`, `k > −1`, `S, K > 0` and `τ > 0`, with Gaussian log-jumps
+  `N(log(1 + k) − δ²/2, δ²)` at the compensated drift `b = r − σ²/2 − Λk`, the jump-diffusion
+  digital price is `mertonDigitalPrice` at the expected
   jump count `Λτ` (`jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice`). The digital price
   is minus the strike derivative of the call price, and near `K` the call price is Merton's series
   (`jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice`); `HasDerivAt.unique` compares the two
   derivatives.
-- Merton's density. In the same model the density of the price at `K`, `f(log(K/S))/K`, is
-  `mertonDensity` (`jumpDiffusionDensity_gaussian_div_eq_mertonDensity`): the strike derivative of
-  the digital price is `−e^{−rτ}f(log(K/S))/K`, and near `K` the digital price is Merton's
-  digital series.
+- Merton's density. With the same jumps and any drift `b`, the density of the price at `K`,
+  `f(log(K/S))/K`, is `mertonTerminalPDF` at the parameter `r = b + σ²/2 + Λk`
+  (`jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF`): the strike derivative of the digital
+  price discounted at `r` is `−e^{−rτ}f(log(K/S))/K`, and near `K` that digital price is Merton's
+  digital series. At the compensated drift `r` is the interest rate; `r` enters the series only
+  through `d₂`, which is why every drift is covered.
 
-Neither identification computes a Gaussian integral or a convolution of Gaussians: both are read
-off Merton's call series, which the library had derived from the general jump-diffusion.
+Neither identification integrates a payoff against a Gaussian or convolves Gaussians: both are read
+off Merton's call series. The only Gaussian computation in the chain is the Gaussian smoothing
+behind that series, which the library had derived from the general jump-diffusion.
 
 Safe wording: "Merton's call series has strike derivative minus the Poisson mixture of
 Black–Scholes digitals and second strike derivative the discounted Poisson mixture of lognormal
-densities; with Gaussian log-jumps at the compensated drift these mixtures are the digital price
-and the density of the price of the jump-diffusion". Not covered:
+density formulas; with Gaussian log-jumps `N(log(1 + k) − δ²/2, δ²)` (`k > −1`) and `σ > 0`, these
+mixtures at maturity `τ` and expected jump count `Λτ` are the digital price (at the compensated
+drift) and the density of the price (at every drift) of the jump-diffusion". Not covered:
 - the put's strike derivatives and the put digital;
-- the mixtures as measures (the density of the price as a measure on `(0, ∞)`);
+- that `mertonTerminalPDF` integrates to one (the law of the price as `mertonTerminalPDF(K) dK` on
+  `(0, ∞)`);
 - strike derivatives for jump laws other than Gaussian, beyond the general
   `breedenLitzenberger_jumpDiffusion`.
 
@@ -111,8 +154,6 @@ lognormal density of `breedenLitzenberger`". Not covered:
   its distribution function, strike by strike);
 - smoothness of the density beyond continuity;
 - `σ = 0`, where the law has an atom at `bτ` (the no-jump event; not formalized);
-- Merton's series for the density or the digital (Poisson mixtures of Black–Scholes terms for
-  lognormal jumps); done in the section above.
 
 ### Digital options: minus the strike derivative of the call (2026-10-08)
 
@@ -125,7 +166,7 @@ gains the general strike derivative.
   undiscounted call price `C(k) = ∫ (X − k)⁺ dμ` is differentiable at `K`, and
   `C'(K) = −μ{X > K}` (`hasDerivAt_integral_call`, by Mathlib's
   `hasDerivAt_integral_of_dominated_loc_of_lip`). At an atom only the right derivative is claimed
-  (`tendsto_call_spread`).
+  here (`tendsto_call_spread`); the left one and the kink came later (kink section above).
 - No atoms with a Gaussian part. For `σ ≠ 0` and `τ > 0` the jump-diffusion log-return law has no
   atoms (`nullSingletonClass_jumpDiffusionIncrementLaw`). Since the density rung (above) this is a
   corollary of the density; the first proof used that, given the jumps, the log-return is affine
@@ -142,9 +183,8 @@ gains the general strike derivative.
 Safe wording: "where the law of the underlying has no atom at the strike, minus the strike
 derivative of the call price is the digital price; a jump-diffusion with a Gaussian part has no
 atoms, so with a finite forward its digital price is minus the strike derivative of its call price
-at every strike; without jumps this gives the Black–Scholes digital `e^{−rτ}Φ(d₂)`". Not covered:
-- the left derivative at an atom (it is `−μ{X ≥ K}`; not formalized);
-- a series formula for the jump-diffusion digital (Merton's mixture of Black–Scholes digitals).
+at every strike; without jumps this gives the Black–Scholes digital `e^{−rτ}Φ(d₂)`". Merton's
+series for the jump-diffusion digital came later (Merton section above).
 
 ### Incompleteness at one date: call prices determine the law, the law determines the characteristics (2026-10-08)
 

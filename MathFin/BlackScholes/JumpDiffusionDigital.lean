@@ -275,7 +275,7 @@ theorem differentiableAt_jumpDiffusionCallPrice_strike_iff {S K r b σ : ℝ} (h
   -- the price `Seʸ` is `K` exactly at `y = log(K/S)`
   have hset : {y | S * rexp y = K} = {Real.log (K / S)} := by
     ext y
-    rw [mem_setOf_eq, mem_singleton_iff]
+    rw [mem_ofPred_eq, mem_singleton_iff]
     constructor
     · rintro rfl
       rw [mul_div_cancel_left₀ _ hS.ne', Real.log_exp]

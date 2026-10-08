@@ -2145,9 +2145,14 @@ level of the law at one date):
    (`MertonStrikeGreeks.lean`), and with Gaussian log-jumps at the compensated drift they are the
    digital price and the density of the price
    (`jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice`,
-   `jumpDiffusionDensity_gaussian_div_eq_mertonDensity`), read off the uniqueness of derivatives.
-   Next on this line: the left derivative at an atom, so that the call price is differentiable at
-   `K` iff the law has no atom there.
+   `jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF`, at every drift), read off the
+   uniqueness of derivatives. Also done (corpus 513): kinks. The spread below the strike tends to
+   `μ{X ≥ K}` (`tendsto_call_spread_left`), so the call price is differentiable at `K` iff the law
+   has no atom there (`differentiableAt_integral_call_iff`); without a Gaussian part the
+   jump-diffusion law has an atom at `bτ` and the call price a kink at `Se^{bτ}`
+   (`not_differentiableAt_jumpDiffusionCallPrice_strike`). Next on this line: the signs and shape
+   of Merton's series in the strike (`0 < mertonTerminalPDF`, strict convexity of the call in `K`),
+   as `MertonGreeks` has them in the spot.
 5. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
    `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style
    characterization used for constant `θ` (`ExpMartingaleQBrownian`) to independent increments

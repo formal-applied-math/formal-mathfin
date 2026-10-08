@@ -1888,3 +1888,34 @@ compare the `deriv`s: functions equal near `k` have equal `deriv` at `k`
 (`Filter.EventuallyEq.deriv_eq`), so `deriv C = deriv bsV` near `K`, and
 `jumpDiffusionDensity_div_eq_lognormalTerminalPDF` reads `lognormalTerminalPDF` off
 `breedenLitzenberger`.
+
+### `rw` matches up to instances, not definitions
+
+`rw [Real.norm_of_nonneg (mul_nonneg hw (mul_nonneg (Real.exp_pos _).le (Phi_nonneg _)))]` does not
+rewrite `‖w * bsCashDigital x r σ S T‖`: the lemma's left side mentions the unfolded
+`rexp (-(r * T)) * Phi (…)`, and `rw` unifies at instance transparency, so it never unfolds
+`bsCashDigital`. Term elaboration (`exact`, a `have` with a type) unfolds definitions, `rw` does
+not. Give the side condition the folded type first:
+`have h0 : 0 ≤ w * bsCashDigital x r σ S T := mul_nonneg hw (mul_nonneg (Real.exp_pos _).le
+(Phi_nonneg _))`, then `rw [Real.norm_of_nonneg h0]` (`hasDerivAt_mertonCallPrice_strike`).
+
+### A kink from the one-sided slopes
+
+To show that a function is not differentiable at a point, or that differentiability forces an
+identity, compare its one-sided slope limits with a derivative's. `HasDerivAt.tendsto_slope_zero_right`
+and `HasDerivAt.tendsto_slope_zero_left` give the slopes `t⁻¹ • (f (x + t) − f x)` along `𝓝[>] 0`
+and `𝓝[<] 0`; compose the left one with `t ↦ −t`, whose map `𝓝[>] 0 → 𝓝[<] 0` is
+`tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _ ((continuous_neg.tendsto' 0 0
+neg_zero).mono_left nhdsWithin_le_nhds) (eventually_nhdsWithin_of_forall fun t ht ↦ neg_lt_zero.2
+ht)`, and finish with `tendsto_nhds_unique`. `differentiableAt_integral_call_iff` gets the right
+and left strike derivatives `−μ{X > K}` and `−μ{X ≥ K}` of the call price this way, so a derivative
+forces `μ{X = K} = 0`.
+
+### Build a series on the named summand
+
+When a series mixes a quantity the library already names, sum the name, not its formula.
+`mertonDigitalPrice` is `∑ₙ wₙ · bsCashDigital K r σₙ Sₙ T`, as `mertonCallTerm_eq_bsV` makes the call
+series a mixture of `bsV`. Term by term, the strike derivative of the call series is then
+`hasDerivAt_bsV_K` up to defeq, and that of the digital series is the named Greek
+`hasDerivAt_bsCashDigital_K`. The first draft inlined `e^{−rT}Φ(d₂)` and had to reach the digital's
+derivative by transporting `breedenLitzenberger` back through `deriv`.

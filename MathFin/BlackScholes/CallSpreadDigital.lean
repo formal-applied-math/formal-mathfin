@@ -223,7 +223,7 @@ theorem differentiableAt_integral_call_iff {Ω : Type*} {mΩ : MeasurableSpace �
   -- `{X ≥ K}` is `{X > K}` and the atom
   have hunion : {ω | K ≤ X ω} = {ω | K < X ω} ∪ {ω | X ω = K} := by
     ext ω
-    simp only [mem_setOf_eq, mem_union]
+    simp only [mem_ofPred_eq, mem_union]
     exact ⟨fun h ↦ h.lt_or_eq.imp id Eq.symm, fun h ↦ h.elim le_of_lt fun h ↦ h.symm.le⟩
   have hsum := measureReal_union (μ := μ) (s₁ := {ω | K < X ω}) (s₂ := {ω | X ω = K})
     (Set.disjoint_left.2 fun ω (h₁ : K < X ω) (h₂ : X ω = K) ↦ h₁.ne' h₂)
