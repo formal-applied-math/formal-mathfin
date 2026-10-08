@@ -12,7 +12,7 @@ public import MathFin.BlackScholes.GreekSigns
 /-!
 # Spot-direction convexity of the Black–Scholes call
 
-`StrikeConvexity.lean` packages convexity-in-`K` at three scales; this file
+`StrikeConvexity.lean` packages convexity-in-`K` at four scales; this file
 is its spot-direction dual at the two scales that make sense for `S`:
 
 1. **Payoff level**, `S ↦ max(S − K, 0)`: the positive part of an affine
@@ -59,7 +59,8 @@ lemma convexOn_call_payoff_spot (K : ℝ) :
 
 /-! ## The continuous-price face
 
-The proof is the second-derivative test, parallel to `bsV_strike_convexOn`:
+The proof is the second-derivative test; the strike side instead integrates the payoff against
+the standard normal law (`bsV_strike_convexOn`):
 
 * `hasDerivAt_bsV_S`: `∂_S bsV = Φ(d₁)` (delta) exists at every `S > 0`.
 * `hasDerivAt_deriv_bsV_S`: `∂²_S bsV = ϕ(d₁)/(S σ √τ)` (gamma) exists at every

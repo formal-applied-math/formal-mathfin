@@ -20,21 +20,23 @@ linear combination), continuous price (calculus). The cleanliness payoff of
 formalisation is naming the principle once and writing the three scales as
 corollaries.
 
-Example: **K-convexity** of the call now lives at three scales in
+Example: **K-convexity** of the call lives at four scales, three of them in
 `BlackScholes/StrikeConvexity.lean`:
 
 * `convexOn_call_payoff` — payoff `K ↦ max(S − K, 0)` convex (combinatorial:
   `sup` of an affine function and zero).
+* `convexOn_integral_call` — the price under any law with a finite mean,
+  Mathlib's `integral_convexOn_of_integrand_ae` applied to the payoff.
 * `callPrice_finiteState_convexOn_K` (in `ConvexPricingFunctional.lean`) —
-  pricing under non-negative state prices preserves convexity.
-* `bsV_strike_convexOn` — continuous BS price convex on `(0, ∞)` via
-  `convexOn_of_deriv2_nonneg'` and the closed-form second derivative.
+  pricing under non-negative state prices preserves convexity: the finitely
+  supported case, proved by summing convex functions.
+* `bsV_strike_convexOn` — continuous BS price convex on `(0, ∞)`: the second
+  scale for the standard normal law (`integral_bsCall_payoff_eq_bsV`).
 
-(Since 2026-10-08 a fourth scale sits between the payoff and the closed form:
-`convexOn_integral_call`, the price under any law with a finite mean, and
-`bsV_strike_convexOn` is that lemma for the standard normal law. The
-second-derivative proof above used the sign of the density it was later used to
-derive.)
+(Until 2026-10-08 `bsV_strike_convexOn` was proved by the second-derivative test
+on the closed form, `convexOn_of_deriv2_nonneg'`, which used the sign of the
+density it was later used to derive. The positivity of the standard normal law
+still enters the current proof, through `bs_call_formula`.)
 
 Before this session, the three lived as essentially independent claims.
 Now `BreedenLitzenberger.lean`'s
@@ -142,8 +144,9 @@ Mathlib has two variants:
 * `convexOn_of_deriv2_nonneg'` — wants differentiability on the set
   itself. For *open* sets like `Set.Ioi 0`.
 
-`bsV_strike_convexOn` uses the `'` variant since BS is only defined for
-`K > 0`. Choose the variant by domain openness.
+`bsV_spot_strictConvexOn` uses the strict `'` variant,
+`strictConvexOn_of_deriv2_pos'`, on the open `Set.Ioi 0`, since the price is only
+defined for `S > 0`. Choose the variant by domain openness.
 
 ### `hasDerivAt_deriv_of_eventually` for second derivatives
 

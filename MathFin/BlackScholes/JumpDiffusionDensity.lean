@@ -127,9 +127,8 @@ lemma integrable_gaussianPDFReal_jumps (b : ℝ) (v : ℝ≥0) (Λ : ℝ≥0) (�
 /-- With a Gaussian part (`σ ≠ 0`, `τ > 0`) the conditional variance `σ²τ` of the log-return given
 the jumps is nonzero. -/
 lemma jumpDiffusionVariance_ne_zero {σ : ℝ} (hσ : σ ≠ 0) {τ : ℝ≥0} (hτ : 0 < τ) :
-    (.mk (σ ^ 2) (sq_nonneg _) * τ : ℝ≥0) ≠ 0 := by
-  rw [← NNReal.coe_ne_zero, NNReal.coe_mul, NNReal.coe_mk]
-  exact mul_ne_zero (pow_ne_zero 2 hσ) (NNReal.coe_ne_zero.2 hτ.ne')
+    (.mk (σ ^ 2) (sq_nonneg _) * τ : ℝ≥0) ≠ 0 :=
+  mul_ne_zero (NNReal.coe_ne_zero.1 (pow_ne_zero 2 hσ)) hτ.ne'
 
 /-- **The log-return law has the density `f`** when `σ ≠ 0` and `τ > 0`: each Gaussian law of the
 mixture is `φ(y) dy`, and the mixture of the densities is the density of the mixture (Tonelli,

@@ -2160,9 +2160,14 @@ level of the law at one date):
    price is convex under any law (`convexOn_integral_call`), which makes the Breeden–Litzenberger
    sign of the lognormal density a derivation, and strictly convex where the law charges every
    interval (`strictConvexOn_integral_call`). With a Gaussian part the jump-diffusion density is
-   positive, so the call price is strictly convex on `(0, ∞)` for any jump law
-   (`strictConvexOn_jumpDiffusionCallPrice_strike`), and so are the Black–Scholes price and
-   Merton's series. Next on this line: the converse of the strict-convexity criterion, and the
+   positive, so with a finite forward and `S > 0` the call price is strictly convex on `(0, ∞)`
+   for any jump law (`strictConvexOn_jumpDiffusionCallPrice_strike`), and so are the
+   Black–Scholes price and Merton's series. Next on this line: `0 < mertonTerminalPDF` and
+   `0 < lognormalTerminalPDF` as corollaries of `jumpDiffusionDensity_pos`, with the call strictly
+   decreasing in the strike; an open-set positivity instance for the jump-diffusion law, which
+   gives the digital bounds `0 < D < e^{−rτ}` and strict convexity on `[0, ∞)`; the converse of
+   the strict-convexity criterion; `IsNormalizedCallPrice.of_integral`, Roper's conditions for
+   any nonnegative law of mean one, which links this line to `CallPriceFunction`; and the
    lognormal law as a Gaussian change of variables (`gaussianReal_map_mul_exp`).
 5. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
    `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style

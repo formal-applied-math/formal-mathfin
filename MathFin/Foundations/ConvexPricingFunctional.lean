@@ -24,9 +24,14 @@ non-negative state prices — **call-price convexity in the strike**,
 independent fact; each is a consequence of *payoff convexity* passing
 through a *non-negative linear operator*.
 
-In the library currently, four facts touch this principle:
+In the library, these facts touch this principle:
 
 * **Payoff** convex (`convexOn_call_payoff` in `BlackScholes/StrikeConvexity`).
+* **Price under any law** convex (`convexOn_integral_call` in
+  `BlackScholes/StrikeConvexity`): the principle for an arbitrary law with a finite
+  mean, Mathlib's `integral_convexOn_of_integrand_ae` applied to the call payoff.
+  The finite-state statements below are its finitely supported case, with the
+  state prices as the law.
 * **Price** has `∂²_K bsV ≥ 0` (`hasDerivAt_deriv_bsV_K` in `BlackScholes/StrikeGreeks`,
   with the sign `bsV_partial_KK_nonneg`).
 * **Discrete second-difference of payoff ≥ 0** (`butterfly_payoff_nonneg`
@@ -34,10 +39,8 @@ In the library currently, four facts touch this principle:
 * **Implied PDF ≥ 0** (`lognormalTerminalPDF_nonneg` in
   `BlackScholes/BreedenLitzenberger`).
 
-These are connected by the convexity-preservation principle but the library
-previously did not write that principle down. This file states and proves it,
-turning four independent observations into a single structural fact with
-three corollaries.
+This file states the principle for a finite-state market, where the pricing
+functional is a finite sum, and derives three corollaries from it.
 
 ## Why this matters (the "math genius" point)
 

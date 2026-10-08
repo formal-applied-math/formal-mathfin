@@ -20,22 +20,25 @@ resolution:
    `0`).
 2. **Price level, under any law**, `K ↦ ∫ (X − K)⁺ dμ`. Convex because
    integration against a positive measure preserves the convexity of the
-   payoff (`convexOn_integral_call`). Strictly convex wherever the law
+   payoff (`convexOn_integral_call`, Mathlib's
+   `integral_convexOn_of_integrand_ae`). Strictly convex wherever the law
    charges every interval of strikes (`strictConvexOn_integral_call`): a
-   butterfly spread pays a positive amount when `X` ends strictly between
-   its outer strikes.
+   butterfly spread with distinct strikes pays a positive amount when `X`
+   ends strictly between its outer strikes.
 3. **Finite-state price level**, `K ↦ Σ q_i · max(S_i − K, 0)`. Convex
    because non-negative linear combinations of convex functions are convex
    (`ConvexPricingFunctional.callPrice_finiteState_convexOn_K`).
 4. **Continuous BS price level**, `K ↦ bsV K r σ S τ`. Convex on `(0, ∞)`
-   as scale 2 for the standard normal law, the Black–Scholes price being the
-   discounted expected payoff (`bs_call_formula`). Strictly convex: the
-   jump-diffusion without jumps, `bsV_strike_strictConvexOn` in
+   for `S, σ, τ > 0`, as scale 2 for the standard normal law, the
+   Black–Scholes price being the discounted expected payoff
+   (`integral_bsCall_payoff_eq_bsV`). Strictly convex: the jump-diffusion
+   without jumps, `bsV_strike_strictConvexOn` in
    `JumpDiffusionStrikeConvexity.lean`.
 
-The scales are not separate theorems; they are one principle realised at
-different levels of integration. This file packages them so the hierarchy is
-visible.
+The scales are one principle realised at different levels of integration:
+scale 4 is scale 2 for the standard normal law, and scale 3, proved in
+`ConvexPricingFunctional.lean` by summing convex functions, is scale 2 for a
+finitely supported law.
 
 ## Downstream consequences (one principle, many faces)
 
@@ -51,10 +54,14 @@ visible.
   manifestation of price-level convexity, from `bsV_strike_convexOn` below via
   `deriv_deriv_nonneg_of_convexOn`. That convexity comes from the payoff through
   integration (`convexOn_integral_call`), not from the sign of the closed form, so
-  this derives the sign of the density from the convexity of the payoff.
+  this derives the sign of the density from the convexity of the payoff and the
+  positivity of the standard normal law (used as `ϕ ≥ 0` inside
+  `bs_call_formula`).
 
 ## Results
 
+* `StrictConvexOn.smul`: a strictly convex function scaled by a positive
+  constant is strictly convex.
 * `convexOn_sub_const_id`: `K ↦ a − K` is convex.
 * `convexOn_call_payoff`: `K ↦ max(S − K, 0)` is convex in K (payoff level).
 * `antitone_call_payoff`: `K ↦ max(S − K, 0)` is antitone in K.
@@ -67,6 +74,17 @@ visible.
 -/
 
 @[expose] public section
+
+/-- A strictly convex function scaled by a positive constant is strictly convex: the strict
+counterpart of Mathlib's `ConvexOn.smul`. -/
+theorem StrictConvexOn.smul {𝕜 E β : Type*} [CommSemiring 𝕜] [PartialOrder 𝕜] [AddCommMonoid E]
+    [AddCommMonoid β] [PartialOrder β] [SMul 𝕜 E] [Module 𝕜 β] [PosSMulStrictMono 𝕜 β]
+    {s : Set E} {f : E → β} {c : 𝕜} (hc : 0 < c) (hf : StrictConvexOn 𝕜 s f) :
+    StrictConvexOn 𝕜 s fun x ↦ c • f x :=
+  ⟨hf.1, fun x hx y hy hxy a b ha hb hab ↦
+    calc c • f (a • x + b • y) < c • (a • f x + b • f y) :=
+          smul_lt_smul_of_pos_left (hf.2 hx hy hxy ha hb hab) hc
+      _ = a • c • f x + b • c • f y := by rw [smul_add, smul_comm c, smul_comm c]⟩
 
 namespace MathFin
 
@@ -110,25 +128,19 @@ law is assumed beyond a finite mean. -/
 
 /-- **The call price is convex in the strike, under any law.** For an integrable `X` under a finite
 measure `μ`, `k ↦ ∫ (X − k)⁺ dμ` is convex: integration against a positive measure preserves the
-convexity of the payoff (`convexOn_call_payoff`). -/
+convexity of the payoff (`convexOn_call_payoff`), which is Mathlib's
+`integral_convexOn_of_integrand_ae`. -/
 theorem convexOn_integral_call {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
     [IsFiniteMeasure μ] {X : Ω → ℝ} (hX : Integrable X μ) :
-    ConvexOn ℝ univ fun k ↦ ∫ ω, max (X ω - k) 0 ∂μ := by
-  have hcall (k : ℝ) : Integrable (fun ω ↦ max (X ω - k) 0) μ :=
-    (hX.sub (integrable_const k)).pos_part
-  refine ⟨convex_univ, fun k₁ _ k₂ _ a b ha hb hab ↦ ?_⟩
-  simp only [smul_eq_mul]
-  rw [← integral_const_mul, ← integral_const_mul,
-    ← integral_add ((hcall k₁).const_mul a) ((hcall k₂).const_mul b)]
-  exact integral_mono (hcall _) (((hcall k₁).const_mul a).add ((hcall k₂).const_mul b))
-    fun ω ↦ by simpa only [smul_eq_mul] using
-      (convexOn_call_payoff (X ω)).2 (mem_univ k₁) (mem_univ k₂) ha hb hab
+    ConvexOn ℝ univ fun k ↦ ∫ ω, max (X ω - k) 0 ∂μ :=
+  integral_convexOn_of_integrand_ae convex_univ (ae_of_all _ fun ω ↦ convexOn_call_payoff (X ω))
+    fun k _ ↦ (hX.sub (integrable_const k)).pos_part
 
 /-- **The call price is strictly convex in the strike wherever the law charges every interval.**
 For an integrable `X` under a finite measure `μ` and a convex set `s` of strikes such that
 `μ {k₁ < X < k₂} ≠ 0` whenever `k₁ < k₂` lie in `s`, `k ↦ ∫ (X − k)⁺ dμ` is strictly convex on
 `s`: every butterfly spread `a C(k₁) + b C(k₂) − C(a k₁ + b k₂)` (`a, b > 0`, `a + b = 1`) with
-strikes in `s` has a positive price. Its payoff is nonnegative (`convexOn_call_payoff`), and
+distinct strikes `k₁ ≠ k₂` in `s` has a positive price. Its payoff is nonnegative (`convexOn_call_payoff`), and
 positive when `k₁ < X < k₂`, where the call struck at `k₂` pays nothing. -/
 theorem strictConvexOn_integral_call {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
     [IsFiniteMeasure μ] {X : Ω → ℝ} (hX : Integrable X μ) {s : Set ℝ} (hs : Convex ℝ s)
@@ -162,25 +174,26 @@ theorem strictConvexOn_integral_call {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ
 /-! ## The continuous-price face
 
 The Black–Scholes price is the discounted call payoff integrated against the
-standard normal law (`bs_call_formula`), so it inherits the convexity of the
-payoff through `convexOn_integral_call`. The second strike derivative
-`e^{-rτ} · ϕ(d_2) / (K σ √τ)` (`hasDerivAt_deriv_bsV_K`) is then nonnegative as
-a consequence (`lognormalTerminalPDF_nonneg_via_strike_convexity`), and also by
-its sign (`bsV_partial_KK_nonneg`). -/
+standard normal law (`integral_bsCall_payoff_eq_bsV`), so it inherits the
+convexity of the payoff through `convexOn_integral_call`. The second strike
+derivative `e^{-rτ} · ϕ(d_2) / (K σ √τ)` (`hasDerivAt_deriv_bsV_K`) is then
+nonnegative as a consequence (`lognormalTerminalPDF_nonneg_via_strike_convexity`),
+and also by its sign (`bsV_partial_KK_nonneg`). Both routes use the positivity of
+the standard normal density: this one inside `bs_call_formula`. -/
 
 /-- **BS call price is convex in the strike on `(0, ∞)`** — the continuous-
 price face of the K-convexity principle.
 
 The Black–Scholes price is the discounted expected call payoff under the standard normal law
-(`bs_call_formula`), so this is `convexOn_integral_call` for that law. The sign of the second
-strike derivative is not used. -/
+(`integral_bsCall_payoff_eq_bsV`), so this is `convexOn_integral_call` for that law. The sign of
+the second strike derivative is not used. -/
 theorem bsV_strike_convexOn {S r σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :
     ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun K ↦ bsV K r σ S τ) :=
   (((convexOn_integral_call (integrable_bsTerminal_gaussianReal S r σ τ)).subset
       (subset_univ _) (convex_Ioi 0)).smul (Real.exp_pos (-r * τ)).le).congr fun K hK ↦ by
     simp only [smul_eq_mul]
-    rw [← integral_const_mul, bsV, ← neg_mul]
-    exact bs_call_formula (Q := gaussianReal 0 1) (Z := id)
+    rw [← integral_const_mul]
+    exact integral_bsCall_payoff_eq_bsV (Q := gaussianReal 0 1) (Z := id)
       ⟨hS, mem_Ioi.1 hK, hσ, hτ, HasLaw.id⟩
 
 /-- **Put price is convex in the strike on `(0, ∞)`** — free from the call's

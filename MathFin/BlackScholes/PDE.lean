@@ -303,6 +303,13 @@ lemma hasDerivAt_bsd2_r (S K σ τ : ℝ) (hσ : 0 < σ) (hτ : 0 < τ)
 noncomputable def bsV (K r σ : ℝ) (S τ : ℝ) : ℝ :=
   S * Phi (bsd1 S K r σ τ) - K * Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ)
 
+/-- The Black–Scholes call price is the discounted expected call payoff: `bs_call_formula`,
+stated for `bsV`. -/
+lemma integral_bsCall_payoff_eq_bsV {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}
+    [IsProbabilityMeasure Q] {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :
+    ∫ ω, rexp (-r * T) * max (bsTerminal S_0 r σ T (Z ω) - K) 0 ∂Q = bsV K r σ S_0 T := by
+  rw [bs_call_formula h, bsV, neg_mul]
+
 /-- **Delta**: `∂_S V = Φ(d₁)` — the magic identity makes everything else cancel. -/
 lemma hasDerivAt_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :

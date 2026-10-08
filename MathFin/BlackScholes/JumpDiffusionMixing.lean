@@ -93,13 +93,6 @@ lemma bsV_nonneg_of_pos {S K r σ T : ℝ} (hS : 0 < S) (hK : 0 < K) (hσ : 0 < 
     0 ≤ bsV K r σ S T :=
   bsV_nonneg (Q := gaussianReal 0 1) (Z := id) ⟨hS, hK, hσ, hT, HasLaw.id⟩
 
-/-- The Black–Scholes call price is the discounted expected call payoff: `bs_call_formula`,
-stated for `bsV`. -/
-lemma integral_bsCall_payoff_eq_bsV [IsProbabilityMeasure Q] {S_0 K r σ T : ℝ} {Z : Ω → ℝ}
-    (h : BSCallHyp Q S_0 K r σ T Z) :
-    ∫ ω, rexp (-r * T) * max (bsTerminal S_0 r σ T (Z ω) - K) 0 ∂Q = bsV K r σ S_0 T := by
-  rw [bs_call_formula h, bsV, neg_mul]
-
 /-- The terminal price of a jump-diffusion with an independent jump part `Y` is integrable when
 `𝔼[e^Y] < ∞`: it is a constant times `e^{σ√T·Z}·e^Y`, a product of independent integrable
 factors. -/

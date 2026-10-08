@@ -377,8 +377,8 @@ import MathFin.BlackScholes.JumpDiffusionDensity
 import MathFin.BlackScholes.JumpDiffusionDigital
 -- Strict convexity in the strike: the call price is convex under any law, and strictly convex
 -- where the law charges every interval; with σ ≠ 0 and τ > 0 the jump-diffusion density is
--- positive, so the call price is strictly convex on (0, ∞) for any jump law, and so are the
--- Black–Scholes price and Merton's series
+-- positive, so with S > 0 and a finite forward the call price is strictly convex on (0, ∞) for
+-- any jump law, and so are the Black–Scholes price and Merton's series
 import MathFin.BlackScholes.JumpDiffusionStrikeConvexity
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks

@@ -16,13 +16,14 @@ convex wherever the law charges every interval of strikes (`strictConvexOn_integ
 butterfly spread pays a positive amount when the price ends strictly between its outer strikes.
 
 With a Gaussian part (`σ ≠ 0`, `τ > 0`) the log-return density of a jump-diffusion is positive
-(`jumpDiffusionDensity_pos`), so the price `Seʸ` charges every interval of positive strikes
-(`jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero`), whatever the jump law.
+(`jumpDiffusionDensity_pos`), so for a spot `S > 0` the price `Seʸ` charges every interval of
+positive strikes (`jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero`), whatever the jump law.
 
 * `convexOn_jumpDiffusionCallPrice_strike`: the call price is convex in the strike, for every
   jump-diffusion with a finite forward, `σ = 0` included.
-* `strictConvexOn_jumpDiffusionCallPrice_strike`: with a Gaussian part it is strictly convex on
-  `(0, ∞)`, for any jump law: every butterfly spread with positive strikes has a positive price.
+* `strictConvexOn_jumpDiffusionCallPrice_strike`: with a Gaussian part and `S > 0` it is strictly
+  convex on `(0, ∞)`, for any jump law: every butterfly spread with distinct positive strikes has
+  a positive price.
 * `bsV_strike_strictConvexOn`: so is the Black–Scholes call price, the jump-diffusion call price
   without jumps (`jumpDiffusionCallPrice_zero`).
 * `mertonCallPrice_strictConvexOn_strike`: so is Merton's series, the jump-diffusion call price
@@ -40,17 +41,6 @@ from the second spot derivative.
 open MeasureTheory ProbabilityTheory Real Set
 open scoped NNReal
 
-/-- A strictly convex function scaled by a positive constant is strictly convex: the strict
-counterpart of Mathlib's `ConvexOn.smul`. -/
-theorem StrictConvexOn.smul {𝕜 E β : Type*} [CommSemiring 𝕜] [PartialOrder 𝕜] [AddCommMonoid E]
-    [AddCommMonoid β] [PartialOrder β] [SMul 𝕜 E] [Module 𝕜 β] [PosSMulStrictMono 𝕜 β]
-    {s : Set E} {f : E → β} {c : 𝕜} (hc : 0 < c) (hf : StrictConvexOn 𝕜 s f) :
-    StrictConvexOn 𝕜 s fun x ↦ c • f x :=
-  ⟨hf.1, fun x hx y hy hxy a b ha hb hab ↦
-    calc c • f (a • x + b • y) < c • (a • f x + b • f y) :=
-          smul_lt_smul_of_pos_left (hf.2 hx hy hxy ha hb hab) hc
-      _ = a • c • f x + b • c • f y := by rw [smul_add, smul_comm c, smul_comm c]⟩
-
 namespace MathFin
 
 /-- **The jump-diffusion call price is convex in the strike.** For any drift, any `σ` (`σ = 0`
@@ -66,10 +56,10 @@ theorem convexOn_jumpDiffusionCallPrice_strike (S r b σ : ℝ) (Λ : ℝ≥0) {
 
 /-- **With a Gaussian part the call price is strictly convex in the strike.** For `σ ≠ 0`, `τ > 0`,
 a spot `S > 0` and a finite forward, `k ↦ C(S, k, τ)` is strictly convex on `(0, ∞)`, for any jump
-law: every butterfly spread with positive strikes has a positive price. The price `Seʸ` charges
+law: every butterfly spread with distinct positive strikes has a positive price. The price `Seʸ` charges
 every interval of positive strikes (`jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero`), so its
 undiscounted call price is strictly convex there (`strictConvexOn_integral_call`), and the discount
-factor is positive. -/
+factor is positive (`StrictConvexOn.smul`). -/
 theorem strictConvexOn_jumpDiffusionCallPrice_strike {S r b σ : ℝ} (hS : 0 < S) (hσ : σ ≠ 0)
     {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν] {τ : ℝ≥0}
     (hY : Integrable rexp (jumpDiffusionIncrementLaw b σ Λ ν τ)) (hτ : 0 < τ) :

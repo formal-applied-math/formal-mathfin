@@ -880,11 +880,19 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 -- Convexity in the strike (2026-10-08): the call price is convex under any law with a finite mean,
 -- and strictly convex where the law charges every interval; with σ ≠ 0 and τ > 0 the jump-diffusion
--- density is positive, so the call price is strictly convex on (0, ∞) for any jump law, and so are
--- the Black–Scholes price and Merton's series
+-- density is positive, so with S > 0 and a finite forward the call price is strictly convex on
+-- (0, ∞) for any jump law, and so are the Black–Scholes price and Merton's series. The
+-- Black–Scholes convexity is the standard normal case, and gives back the sign of the lognormal
+-- density through Breeden–Litzenberger
 
 /-- info: 'MathFin.convexOn_integral_call' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.convexOn_integral_call
+
+/-- info: 'MathFin.bsV_strike_convexOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bsV_strike_convexOn
+
+/-- info: 'MathFin.lognormalTerminalPDF_nonneg_via_strike_convexity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.lognormalTerminalPDF_nonneg_via_strike_convexity
 
 /-- info: 'MathFin.strictConvexOn_integral_call' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.strictConvexOn_integral_call

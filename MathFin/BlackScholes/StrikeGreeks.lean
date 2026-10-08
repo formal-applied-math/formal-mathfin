@@ -18,9 +18,10 @@ Standard derivative-Greek identities in the strike direction:
 
 * `∂_K bsV = -e^{-rτ} · Φ(d₂)`; its sign, `≤ 0`, is `bsV_partial_K_nonpos`.
 * `∂_K bsP = e^{-rτ} · Φ(-d₂)`, via put-call parity `bsP = bsV - S + K · e^{-rτ}`.
-* `∂²_K bsV = e^{-rτ} · ϕ(d₂) / (K σ √τ)`; its sign, `≥ 0` (`bsV_partial_KK_nonneg`), is
-  what `StrikeConvexity.bsV_strike_convexOn` turns into convexity of the call price in `K`
-  (butterfly-spread non-negativity).
+* `∂²_K bsV = e^{-rτ} · ϕ(d₂) / (K σ √τ)`; its sign, `≥ 0`, is `bsV_partial_KK_nonneg`. The
+  convexity of the price in `K` (`StrikeConvexity.bsV_strike_convexOn`) is proved from the
+  payoff, not from this sign, and gives the sign back
+  (`lognormalTerminalPDF_nonneg_via_strike_convexity`).
 
 The clean closed forms come from the magic identity
 `S · ϕ(d₁) = K · e^{-rτ} · ϕ(d₂)` (`bs_identity`) which collapses the
@@ -176,8 +177,8 @@ lemma hasDerivAt_bsP_K {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
 −e^{-rτ} · ϕ(d₂) / (K σ √τ)`, minus `e^{-rτ}` times the lognormal density formula
 `lognormalTerminalPDF` at `K` (`BreedenLitzenberger.lean`). The digital is minus the strike
 derivative of the call price (`hasDerivAt_bsV_K`), so this is the second strike derivative of the
-call, up to sign; the convexity in `K` it yields (butterfly-spread non-negativity) is
-`bsV_strike_convexOn`. -/
+call, up to sign; its sign is that of the convexity in `K` (`bsV_strike_convexOn`, proved from the
+payoff). -/
 lemma hasDerivAt_bsCashDigital_K {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
     {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :
     HasDerivAt (fun k ↦ bsCashDigital k r σ S τ)

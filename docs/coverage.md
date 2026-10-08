@@ -36,15 +36,19 @@ Five entries added, all `full`: `mf-call-price-convex-in-strike`,
 `BlackScholes/Call.lean` gain the general facts.
 
 - Under any law. For an integrable `X` under a finite measure, `k ↦ ∫ (X − k)⁺ dμ` is convex
-  (`convexOn_integral_call`): the convexity of the payoff (`convexOn_call_payoff`) survives
-  integration. It is strictly convex on a convex set of strikes `s` where `μ{k₁ < X < k₂} ≠ 0` for
-  `k₁ < k₂` in `s` (`strictConvexOn_integral_call`): the butterfly payoff is nonnegative and
+  (`convexOn_integral_call`, Mathlib's `integral_convexOn_of_integrand_ae` for the call payoff):
+  the convexity of the payoff (`convexOn_call_payoff`) survives integration. It is strictly convex
+  on a convex set of strikes `s` where `μ{k₁ < X < k₂} ≠ 0` for `k₁ < k₂` in `s`
+  (`strictConvexOn_integral_call`): the butterfly payoff with distinct strikes is nonnegative and
   positive between its outer strikes.
-- The Breeden–Litzenberger chain, no longer circular. `bsV_strike_convexOn` is now the first
-  lemma for the standard normal law (`bs_call_formula`, `integrable_bsTerminal_gaussianReal`), not
-  the second-derivative test. So `lognormalTerminalPDF_nonneg_via_strike_convexity` derives the sign
-  of the lognormal density from the convexity of the payoff; before, the convexity was proved
-  from that sign.
+- The Breeden–Litzenberger chain, no longer a loop through the closed-form sign.
+  `bsV_strike_convexOn` is now the first lemma for the standard normal law
+  (`integral_bsCall_payoff_eq_bsV`, `integrable_bsTerminal_gaussianReal`), not the second-derivative
+  test. So `lognormalTerminalPDF_nonneg_via_strike_convexity` derives the sign of the lognormal
+  density from the convexity of the payoff and the positivity of the standard normal law (used as
+  `ϕ ≥ 0` inside `bs_call_formula`); before, the convexity was proved from that sign. The direct
+  proof `lognormalTerminalPDF_nonneg` uses the same positivity, so the two routes share their
+  root.
 - A positive density. With `σ ≠ 0` and `τ > 0` the log-return density of a jump-diffusion is
   positive, for any jump law (`jumpDiffusionDensity_pos`), so the price charges every interval of
   positive strikes (`jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero`).
@@ -58,8 +62,9 @@ Five entries added, all `full`: `mf-call-price-convex-in-strike`,
 
 Safe wording: "for any law with a finite mean the call price is convex in the strike, and strictly
 convex where the law charges every interval of strikes; a jump-diffusion with a Gaussian part has a
-positive density, so with a finite forward its call price is strictly convex in the strike on
-`(0, ∞)` for any jump law, and so are the Black–Scholes price and Merton's series". Not covered:
+positive density at every horizon `τ > 0`, so with a positive spot and a finite forward its call
+price is strictly convex in the strike on `(0, ∞)` for any jump law, and so are the Black–Scholes
+price and Merton's series". Not covered:
 - the converse, that strict convexity on an interval forces the law to charge each subinterval;
 - strict convexity without a Gaussian part (`σ = 0`), which depends on the jump law;
 - the signs of the digital price, `0 < D < e^{−rτ}`.

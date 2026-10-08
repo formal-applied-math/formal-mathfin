@@ -51,10 +51,13 @@ infinitesimal manifestation of a convexity chain:
 
 Every step is formal. Step 3 is step 2 for the standard normal law, the
 Black–Scholes price being the discounted expected payoff (`bs_call_formula`,
-`bsV_strike_convexOn`); it does not use the sign of the closed form. So
-`lognormalTerminalPDF_nonneg_via_strike_convexity`, steps 3 → 4 → 5, derives the
-sign of the density from the convexity of the payoff, and
-`lognormalTerminalPDF_nonneg` proves it directly from the formula.
+`bsV_strike_convexOn`); it does not use the sign of the closed form. The
+positivity of the standard normal law still enters, as `ϕ ≥ 0` inside
+`bs_call_formula` (Mathlib's `integral_gaussianReal_eq_integral_smul`), and that
+is also the fact `lognormalTerminalPDF_nonneg` uses. So the two proofs of the
+sign of the density share their root: `lognormalTerminalPDF_nonneg` reads it off
+the formula, and `lognormalTerminalPDF_nonneg_via_strike_convexity`, steps
+3 → 4 → 5, explains it by the convexity of the payoff.
 
 Results:
 
@@ -122,10 +125,13 @@ The derivation chain made explicit:
 
 The complementary `lognormalTerminalPDF_nonneg` proof above is shorter
 (direct gaussian-PDF positivity); this proof takes the sign from
-`bsV`-convexity alone. `bsV_strike_convexOn` comes from the convexity of the
+`bsV`-convexity. `bsV_strike_convexOn` comes from the convexity of the
 payoff integrated against the standard normal law (`convexOn_integral_call`,
-`bs_call_formula`), not from the sign of the closed form, so the two routes are
-independent sources for the sign. -/
+`bs_call_formula`), not from the sign of the closed form. The positivity of that
+law still enters: `bs_call_formula` evaluates the Gaussian integral through
+Mathlib's `integral_gaussianReal_eq_integral_smul`, which uses `ϕ ≥ 0`
+(`toReal_gaussianPDF`), the fact the direct proof uses. So the two routes share
+their root; this one explains the sign rather than reading it off the formula. -/
 theorem lognormalTerminalPDF_nonneg_via_strike_convexity
     {S_0 r σ T K : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     0 ≤ lognormalTerminalPDF S_0 r σ T K := by

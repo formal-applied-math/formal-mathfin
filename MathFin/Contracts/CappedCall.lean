@@ -40,8 +40,8 @@ via `cappedCall_eq_bull_spread`.
   linearity of `Contract.value` alone; the proof never unfolds `Contract.value` or touches
   an integral. The discounted payoff's integrability, which `Contract.value_both` needs, is
   discharged internally (`integrable_europeanCall_pathPV`) by domination against the
-  terminal asset price, whose exponential moment is `integrable_exp_mul_of_hasLaw`'s
-  Gaussian MGF transfer; the payoff's measurability step is `Adapted.lean`'s
+  terminal asset price, integrable as a function of a standard normal
+  (`integrable_bsTerminal`); the payoff's measurability step is `Adapted.lean`'s
   `Payoff.aemeasurable_eval`, applied to the reified `europeanCall` payoff rather than
   hand-rolled against `bsTerminal` directly.
 
@@ -84,8 +84,8 @@ noncomputable def cappedCall (K₁ K₂ : ℝ) (T : ℝ≥0) : Contract Unit :=
   .both (europeanCall K₁ T) (.scale (-1) (europeanCall K₂ T))
 
 /-- The discounted payoff of a reified European call is integrable under `BSCallHyp`: it is
-dominated by the terminal asset price `bsTerminal`, itself integrable via the Gaussian MGF
-transfer `integrable_exp_mul_of_hasLaw`. This is what lets `value_cappedCall` below drop the
+dominated by the terminal asset price `bsTerminal`, itself integrable as a function of a standard
+normal (`integrable_bsTerminal`). This is what lets `value_cappedCall` below drop the
 integrability hypotheses `Contract.value_both` would otherwise need supplied by hand.
 Measurability of the payoff comes from `Payoff.aemeasurable_eval` applied to `europeanCall`'s
 own payoff data, not from a bespoke argument against `bsTerminal`: `BSCallHyp`'s `Z_law`
@@ -96,12 +96,8 @@ private theorem integrable_europeanCall_pathPV {Q : Measure Ω} [IsProbabilityMe
       (fun _ ↦ Real.exp (-r * T)) (scenarioAt (bsAssets S_0 r σ T Z) ω)) Q := by
   obtain ⟨hS_0, hK, _, _, hZ⟩ := h
   have h_asset_meas : Measurable (bsTerminal S_0 r σ T) := by unfold bsTerminal; fun_prop
-  have h_asset_int : Integrable (fun ω ↦ bsTerminal S_0 r σ T (Z ω)) Q := by
-    have h_split : bsTerminal S_0 r σ T = fun z ↦
-        (S_0 * Real.exp ((r - σ ^ 2 / 2) * (T : ℝ))) * Real.exp (σ * Real.sqrt T * z) := by
-      funext z; unfold bsTerminal; rw [Real.exp_add]; ring
-    rw [h_split]
-    exact (integrable_exp_mul_of_hasLaw hZ (σ * Real.sqrt T)).const_mul _
+  have h_asset_int : Integrable (fun ω ↦ bsTerminal S_0 r σ T (Z ω)) Q :=
+    integrable_bsTerminal hZ S_0 r σ T
   have h_asset_pos (ω : Ω) : 0 < bsTerminal S_0 r σ T (Z ω) :=
     mul_pos hS_0 (Real.exp_pos _)
   have hX : ∀ (i : Unit) (t : ℝ≥0), AEMeasurable (bsAssets S_0 r σ T Z i t) Q :=
