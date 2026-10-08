@@ -389,7 +389,8 @@ import MathFin.BlackScholes.JumpDiffusionMoments
 -- negative with positive probability. On the process, under a measure that makes the discounted
 -- price a martingale, the log contract minus the expected realized variance per unit time along
 -- n + 1 equal steps of [0, T] is the jump bias less (b + ΛE[J])²T/(n + 1), at every n, so it tends
--- to the jump bias; Black–Scholes (Brownian motion) and Merton's Gaussian jumps as corollaries
+-- to the jump bias; Black–Scholes (Brownian motion) is a corollary on the process, and Merton's
+-- Gaussian jumps a corollary at the level of the law (log contract against Var[Y]/τ)
 import MathFin.BlackScholes.JumpDiffusionVarianceSwap
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks

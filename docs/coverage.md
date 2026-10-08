@@ -40,8 +40,9 @@ variance of the same process under the same measure, at every sampling frequency
   (`JumpDiffusionProcess.hasLaw`, Mathlib's `HasLaw.congr`), so statements about the law become
   statements about the process (`HasLaw.integral_comp`); `JumpDiffusionProcess.integral_exp` is
   now read off it.
-- The log contract on the process. If `e^{−rt}Se^{X_t}` is a `P`-martingale, the log contract on
-  `S_T = Se^{X_T}` has expected payoff `σ² + 2ΛE[e^J − 1 − J]` per unit time under `P`
+- The log contract on the process. For a jump law whose moment-generating function is finite near
+  `0` and at `1`, `S > 0` and `T > 0`, if `e^{−rt}Se^{X_t}` is a `P`-martingale, the log contract on
+  `S_T = Se^{X_T}`, scaled as a variance rate, has expected payoff `σ² + 2ΛE[e^J − 1 − J]` under `P`
   (`JumpDiffusionProcess.integral_logContract_of_martingale`): the martingale forces the
   compensated drift (`martingale_iff`), and the law of `X_T` does the rest.
 - At every sampling frequency. Under the same hypotheses, along `n + 1` equal steps of `[0, T]`,
@@ -50,8 +51,9 @@ variance of the same process under the same measure, at every sampling frequency
   (`JumpDiffusionProcess.logContract_sub_realizedVariance_of_martingale`): the jump bias less a
   discrete-sampling term `≥ 0`. It tends to the jump bias
   (`tendsto_logContract_sub_realizedVariance_of_martingale`).
-- The sign of the bias as a fact about the jump law: `≤ 0` for jumps `≤ 0`
-  (`integral_jumpBias_nonpos`), `< 0` if moreover `ν{J < 0} ≠ 0` (`integral_jumpBias_neg`). So for
+- The sign of `E[e^J − 1 − J − J²/2]`, the bias per unit of `2Λ`, as a fact about the jump law:
+  `≤ 0` for jumps `≤ 0` (`integral_jumpBias_nonpos`), `< 0` if moreover `ν{J < 0} ≠ 0` and the
+  moment-generating function is finite near `0` (`integral_jumpBias_neg`). So for
   downward jumps the log contract is at most the expected realized variance per unit time at every
   `n`, strictly if `Λ > 0` and `ν{J < 0} ≠ 0`
   (`logContract_le_realizedVariance_of_martingale`, `logContract_lt_realizedVariance_of_martingale`).
@@ -59,9 +61,10 @@ variance of the same process under the same measure, at every sampling frequency
   contract is `σ²` and the difference is `−(r − σ²/2)²T/(n + 1)`
   (`IsFilteredPreBrownian.logContract_realizedVariance`), the case `Λ = 0` through
   `IsFilteredPreBrownian.jumpDiffusionProcess`.
-- Merton. With log-jumps `N(log(1 + k) − δ²/2, δ²)` at the drift `r − σ²/2 − Λk`, the log contract is
-  `σ² + 2Λ(k − log(1 + k) + δ²/2)` and the variance per unit time `σ² + Λ((log(1 + k) − δ²/2)² + δ²)`
-  (`mertonJump_logContract_variance`).
+- Merton, at the level of the law. With log-jumps `N(log(1 + k) − δ²/2, δ²)`, `k > −1`, at the drift
+  `r − σ²/2 − Λk`, `S > 0` and `τ > 0`, the log contract is `σ² + 2Λ(k − log(1 + k) + δ²/2)` and the
+  variance per unit time `σ² + Λ((log(1 + k) − δ²/2)² + δ²)` (`mertonJump_logContract_variance`); a
+  Merton `JumpDiffusionProcess` is not constructed.
 
 Safe wording: "for a jump-diffusion process (a hypothesis structure) under a measure that makes the
 discounted price a martingale, with a jump law whose moment-generating function is finite near `0`
@@ -122,7 +125,7 @@ in place of inline copies.
   counterparts of `VarianceSwapEquipartition` and `VarianceSwapLimit`. So the log contract minus the
   expected realized variance per unit time tends to the jump bias, where Black–Scholes has `0`
   (`VarianceSwapEquivalence`); since corpus 535 this is stated on the process under one measure
-  (next section).
+  (the section above).
 
 Safe wording: "for a jump law whose moment-generating function is finite near `0` and at `1`, the
 log contract at the compensated drift has expected payoff `σ² + 2ΛE[e^J − 1 − J]` per unit time,
@@ -134,7 +137,7 @@ Not covered:
 - the existence of a `JumpDiffusionProcess` with jumps: the structure is a hypothesis, satisfied
   without jumps by Brownian motion with drift;
 - the log contract stated on the process (`S_T = Se^{X_T}` under `P`, with the discounted price a
-  martingale): it is stated for the law of the log-return, which is the law of `X_T` at that drift;
+  martingale): done at corpus 535 (the section above);
 - pricing measures that change `Λ` or `ν`, such as the Esscher transform: the comparison keeps the
   jump characteristics of `X`;
 - that the jump bias is nonzero for a general jump law: its integrand has the sign of `x`, so a

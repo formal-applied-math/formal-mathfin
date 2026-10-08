@@ -2189,9 +2189,11 @@ level of the law at one date):
    `Se^{X_T}` is `σ² + 2ΛE[e^J − 1 − J]` under `P` (`integral_logContract_of_martingale`), and at
    every sampling frequency it differs from the expected realized variance per unit time by the jump
    bias less `(b + ΛE[J])²T/(n + 1)` (`logContract_sub_realizedVariance_of_martingale`), so for
-   downward jumps it is at most the discretely sampled swap at every `n`, strictly with crash jumps;
-   Black–Scholes (`IsFilteredPreBrownian.logContract_realizedVariance`) and Merton
-   (`mertonJump_logContract_variance`) are corollaries. Next on this line: the non-concentration of
+   downward jumps it is at most the discretely sampled swap at every `n`, strictly if moreover
+   `Λ > 0` and `ν{J < 0} ≠ 0`. Black–Scholes (`IsFilteredPreBrownian.logContract_realizedVariance`)
+   is a corollary on the process, and Merton (`mertonJump_logContract_variance`) a corollary at the
+   level of the law (log contract against `Var[Y]/τ`); a Merton `JumpDiffusionProcess` is not
+   constructed. Next on this line: the non-concentration of
    the realized variance with jumps, `Var[RV_n] → ΛE[J⁴]T`, through the fourth cumulant and the
    independence of the increments, whose `L²` limit is the random quadratic variation
    `σ²T + Σ J²` rather than the constant of `VarianceSwapDriftImmunity`; one uniform partition shared

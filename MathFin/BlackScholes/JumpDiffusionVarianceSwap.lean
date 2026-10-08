@@ -29,10 +29,11 @@ function is finite near `0` and at `1`, `S > 0` and `τ > 0`:
   with jumps it differs from half the variance by `Λτ𝔼[e^J − 1 − J − J²/2]`;
 * `jumpDiffusion_logContract_sub_variance`: the log contract minus the variance of the log-return
   per unit time, `σ² + Λ𝔼[J²]`, is the jump bias;
-* `integral_jumpBias_nonpos`, `integral_jumpBias_neg`: the sign of the bias is a fact about the
-  jump law: `≤ 0` for jumps `≤ 0`, as `e^x ≤ 1 + x + x²/2` for `x ≤ 0`, and `< 0` if moreover the
-  jumps are negative with positive probability, as the inequality is strict for `x < 0`
-  (`Real.exp_le_quadratic_of_nonpos`, `Real.exp_lt_quadratic_of_neg`);
+* `integral_jumpBias_nonpos`, `integral_jumpBias_neg`: the sign of `𝔼[e^J − 1 − J − J²/2]`, the
+  bias per unit of `2Λ`, is a fact about the jump law: `≤ 0` for jumps `≤ 0`, as
+  `e^x ≤ 1 + x + x²/2` for `x ≤ 0`, and `< 0` if moreover the jumps are negative with positive
+  probability and the moment-generating function is finite near `0`, as the inequality is strict
+  for `x < 0` (`Real.exp_le_quadratic_of_nonpos`, `Real.exp_lt_quadratic_of_neg`);
 * `jumpDiffusion_logContract_le_variance`, `jumpDiffusion_logContract_lt_variance`: so for jumps
   `≤ 0` the log contract is at most the variance, and strictly below it if `Λ > 0` and the jumps
   are negative with positive probability;
@@ -68,7 +69,7 @@ jumps is not proved), both functionals are taken under one measure `P`:
 * `IsFilteredPreBrownian.logContract_realizedVariance`: without jumps, for Brownian motion with
   the risk-neutral drift, the log contract is `σ²` and the difference is `−(r − σ²/2)²T/(n + 1)`.
 
-The expectations are under the measure `P` that makes the discounted price a martingale and keeps
+The expectations are under a measure `P` that makes the discounted price a martingale and keeps
 the characteristics `σ`, `Λ` and `ν` of `X`. A change of measure that moves `Λ` or `ν`, such as the
 Esscher transform, is not covered.
 -/
@@ -108,7 +109,7 @@ lemma integrable_exp_of_ae_nonpos {ν : Measure ℝ} [IsFiniteMeasure ν] (hJ : 
   .of_bound measurable_exp.aestronglyMeasurable 1 (hJ.mono fun x hx ↦ by
     rwa [Real.norm_eq_abs, abs_of_pos (Real.exp_pos x), Real.exp_le_one_iff])
 
-/-- **The jump bias is `≤ 0` for downward jumps**: if `J ≤ 0` almost surely,
+/-- **The jump-bias integral is `≤ 0` for downward jumps**: if `J ≤ 0` almost surely,
 `𝔼[e^J − 1 − J − J²/2] ≤ 0`, since `e^x ≤ 1 + x + x²/2` for `x ≤ 0`
 (`Real.exp_le_quadratic_of_nonpos`). -/
 lemma integral_jumpBias_nonpos {ν : Measure ℝ} (hJ : ∀ᵐ x ∂ν, x ≤ 0) :
@@ -117,10 +118,10 @@ lemma integral_jumpBias_nonpos {ν : Measure ℝ} (hJ : ∀ᵐ x ∂ν, x ≤ 0)
     hJ.mono fun x hx ↦ by linarith [Real.exp_le_quadratic_of_nonpos hx]
   exact integral_nonpos_of_ae hle
 
-/-- **The jump bias is `< 0` for crash jumps**: if moreover the jumps are negative with positive
-probability, for a jump law with exponential moments near `0` (so that `J` and `J²` are
-integrable), `𝔼[e^J − 1 − J − J²/2] < 0`: the integrand is `< 0` where `J < 0`
-(`Real.exp_lt_quadratic_of_neg`). -/
+/-- **The jump-bias integral is `< 0` for crash jumps**: if `J ≤ 0` almost surely and moreover
+the jumps are negative with positive probability, for a jump law with exponential moments near `0`
+(so that `J` and `J²` are integrable), `𝔼[e^J − 1 − J − J²/2] < 0`: the integrand is `< 0` where
+`J < 0` (`Real.exp_lt_quadratic_of_neg`). -/
 lemma integral_jumpBias_neg {ν : Measure ℝ} [IsFiniteMeasure ν]
     (hν : 0 ∈ interior (integrableExpSet id ν)) (hJ : ∀ᵐ x ∂ν, x ≤ 0) (hJ' : ν {x | x < 0} ≠ 0) :
     ∫ x, (rexp x - 1 - x - x ^ 2 / 2) ∂ν < 0 := by
@@ -367,8 +368,9 @@ theorem integral_logContract_of_martingale (h : JumpDiffusionProcess P 𝓕 X b 
 `integral_logContract_of_martingale`, along `n + 1` equal steps of `[0, T]` the log contract minus
 the expected realized variance of `X` per unit time is
 `2Λ𝔼[e^J − 1 − J − J²/2] − (b + Λ𝔼[J])²T/(n + 1)`: the jump bias, less a discrete-sampling term
-that is `≥ 0` and vanishes as `n → ∞` (`integral_sum_sq_increment_equipartition`). The drift `b` is
-the compensated drift, which the martingale property forces. -/
+that is `≥ 0` (from `integral_sum_sq_increment_equipartition`) and vanishes as `n → ∞`
+(`tendsto_logContract_sub_realizedVariance_of_martingale`). The drift `b` is the compensated
+drift, which the martingale property forces. -/
 theorem logContract_sub_realizedVariance_of_martingale (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν)
     [IsProbabilityMeasure ν] (hν : 0 ∈ interior (integrableExpSet id ν))
     (hν1 : Integrable rexp ν) {S r : ℝ} (hS : 0 < S)
@@ -464,15 +466,15 @@ open scoped NNReal
 
 /-- **Black–Scholes: the log contract against the discretely sampled variance swap.** For a
 pre-Brownian motion `B` for a filtration `𝓕`, the price `S_t = Se^{(r − σ²/2)t + σB_t}` with
-`S > 0` and `T > 0`: the log contract on `S_T` has expected payoff `σ²` per unit time, and minus
-the expected realized variance per unit time along `n + 1` equal steps of `[0, T]` it is
-`−(r − σ²/2)²T/(n + 1)`: no jump bias, only the discrete-sampling term, which vanishes as
+`S > 0` and `T > 0`: the log contract on `S_T`, scaled as a variance rate, has expected payoff
+`σ²`, and minus the expected realized variance per unit time along `n + 1` equal steps of `[0, T]`
+it is `−(r − σ²/2)²T/(n + 1)`: no jump bias, only the discrete-sampling term, which vanishes as
 `n → ∞`. The filtration is explicit, since the statement does not mention it. It is the case
 `Λ = 0` of `JumpDiffusionProcess.integral_logContract_of_martingale` and
 `JumpDiffusionProcess.logContract_sub_realizedVariance_of_martingale`, through
-`IsFilteredPreBrownian.jumpDiffusionProcess`, and the expected realized variance
-`σ²T + (r − σ²/2)²T²/(n + 1)` it implies is the form on `ℝ≥0` of
-`expected_bsLogPrice_equipartition_sum`. -/
+`IsFilteredPreBrownian.jumpDiffusionProcess`. The expected realized variance it implies,
+`σ²T + (r − σ²/2)²T²/(n + 1)`, is the formula that `expected_bsLogPrice_equipartition_sum` proves
+separately on `ℝ` time. -/
 theorem logContract_realizedVariance {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
     (𝓕 : Filtration ℝ≥0 mΩ) {B : ℝ≥0 → Ω → ℝ} [hB : IsFilteredPreBrownian B 𝓕 P] {S r σ : ℝ}
     (hS : 0 < S) {T : ℝ≥0} (hT : 0 < T) :
