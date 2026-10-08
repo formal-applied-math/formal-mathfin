@@ -865,6 +865,19 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.not_differentiableAt_jumpDiffusionCallPrice_strike' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.not_differentiableAt_jumpDiffusionCallPrice_strike
 
+-- The law of the price (2026-10-08): a law f(y) dy maps under y ↦ Seʸ to f(log(K/S))/K dK on
+-- (0, ∞); so lognormalTerminalPDF and mertonTerminalPDF are densities of the price as measures and
+-- integrate to one
+
+/-- info: 'MathFin.map_mul_exp_withDensity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.map_mul_exp_withDensity
+
+/-- info: 'MathFin.lintegral_lognormalTerminalPDF' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.lintegral_lognormalTerminalPDF
+
+/-- info: 'MathFin.lintegral_mertonTerminalPDF' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.lintegral_mertonTerminalPDF
+
 -- Blueprint-spine closure (2026-06-06): every spine node is axiom-pinned.
 -- Gap found by tests/test_values.py::test_blueprint_spine_is_audited on its
 -- first run — seven tagged headliners (including bs_identity, the magic

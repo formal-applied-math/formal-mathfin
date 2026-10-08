@@ -366,13 +366,13 @@ import MathFin.BlackScholes.JumpDiffusionIdentifiability
 import MathFin.BlackScholes.JumpDiffusionIncompleteness
 -- The log-return law with σ ≠ 0 is a Gaussian mixture with a continuous density, so it has no
 -- atoms, and with σ = 0 it has the atom bτ; the tail of a law with a density is differentiable
--- where the density is continuous
+-- where the density is continuous; the law of the price Seʸ has the density f(log(K/S))/K
 import MathFin.BlackScholes.JumpDiffusionDensity
 -- Digital options and Breeden–Litzenberger with jumps: for σ ≠ 0 the strike derivative of the
 -- call price is minus the digital price and the second one is the discounted density of the
 -- price; without jumps, at the drift r − σ²/2, these are e^{−rτ}Φ(d₂) and lognormalTerminalPDF;
 -- with Gaussian log-jumps, Merton's digital and density series; with σ = 0 the call price has a
--- kink at the strike Se^{bτ}
+-- kink at the strike Se^{bτ}; lognormalTerminalPDF and mertonTerminalPDF as densities of the price
 import MathFin.BlackScholes.JumpDiffusionDigital
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks

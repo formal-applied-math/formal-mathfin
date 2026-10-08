@@ -3444,7 +3444,7 @@
     {
       "id": "mf-breeden-litzenberger",
       "name": "Breeden-Litzenberger under Black-Scholes: Second Strike-Derivative of the Call",
-      "description": "Breeden-Litzenberger under Black-Scholes: the second strike-derivative of the call price is the discounted lognormal density with risk-neutral parameters at K, ∂²V/∂K² = e^{-rT}·ϕ(d_2)/(K σ √T) (lognormalTerminalPDF). That this function is a probability density, or the density of S_T under a pricing measure, is not part of this entry's statement; mf-black-scholes-lognormal-density identifies it with the density of the price at K.",
+      "description": "Breeden-Litzenberger under Black-Scholes: the second strike-derivative of the call price is the discounted lognormal density with risk-neutral parameters at K, ∂²V/∂K² = e^{-rT}·ϕ(d_2)/(K σ √T) (lognormalTerminalPDF). That this function is a probability density, or the density of S_T under a pricing measure, is not part of this entry's statement; mf-black-scholes-lognormal-density identifies it with the density of the price at K, and mf-black-scholes-price-law shows that it is the density of the law of the price and integrates to one.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.BreedenLitzenberger\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem breedenLitzenberger_thm {S_0 r σ : ℝ} (hS : 0 < S_0) (hσ : 0 < σ)\n    {K T : ℝ} (hK : 0 < K) (hT : 0 < T) :\n    HasDerivAt (deriv fun k => bsV k r σ S_0 T)\n      (Real.exp (-(r * T)) * MathFin.lognormalTerminalPDF S_0 r σ T K) K :=\n  MathFin.breedenLitzenberger hS hσ hK hT\n"
@@ -3567,6 +3567,70 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The atom: given the jumps the log-return law is N(bτ + ∑_{i<n} jᵢ, σ²τ) (jumpDiffusionIncrementLaw_apply), a point mass when σ = 0 (Mathlib's gaussianReal_zero_var); on the event {n = 0}, of Poisson(Λτ) ⊗ ν^ℕ-measure e^{−Λτ} (Measure.prod_prod, poissonMeasure_singleton), the point mass sits at bτ, and lintegral_mono bounds the mixture below (ofReal_exp_le_jumpDiffusionIncrementLaw_singleton). The kink: the call price function is differentiable at K exactly when the law has no atom at log(K/S) (differentiableAt_jumpDiffusionCallPrice_strike_iff, mf-jump-diffusion-call-differentiable-iff), and at K = Se^{bτ} that point is bτ. Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean, the atom in MathFin/BlackScholes/JumpDiffusionDensity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-price-law-change-of-variables",
+      "name": "The Law of the Price Se^Y When the Log-Return Has a Density",
+      "domain": "mathematical_finance",
+      "description": "Let f ≥ 0 and S > 0. The image of the measure f(y) dy under y ↦ Seʸ is the measure f(log(K/S))/K dK on (0, ∞) (Lebesgue measure restricted to (0, ∞), with that density). So if the log-return Y has the law f(y) dy, the price Seʸ has the density K ↦ f(log(K/S))/K. This is the change of variables K = Seʸ, dK = K dy.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionDensity\n\nopen MeasureTheory Set\n\n/-- **The law of `Seʸ` when `Y` has a density**: `f(y) dy` maps to `f(log(K/S))/K dK` on\n`(0, ∞)`. -/\ntheorem price_law_change_of_variables_thm {f : ℝ → ℝ} (hf0 : ∀ y, 0 ≤ f y) {S : ℝ} (hS : 0 < S) :\n    (volume.withDensity fun y ↦ ENNReal.ofReal (f y)).map (fun y ↦ S * Real.exp y)\n      = (volume.restrict (Ioi 0)).withDensity\n          fun K ↦ ENNReal.ofReal (f (Real.log (K / S)) / K) :=\n  MathFin.map_mul_exp_withDensity hf0 hS\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. On a measurable set A, the left side is ∫ over the preimage of A of f(y) dy. The map y ↦ Seʸ is injective with derivative Seʸ and maps that preimage onto A ∩ (0, ∞) (Set.image_preimage_eq_inter_range, the range being (0, ∞)), so Mathlib's lintegral_image_eq_lintegral_abs_deriv_mul turns the right side ∫_{A ∩ (0, ∞)} f(log(K/S))/K dK into ∫ over the preimage of Seʸ · f(y)/(Seʸ) dy. Lives in MathFin/BlackScholes/JumpDiffusionDensity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-price-law",
+      "name": "The Jump-Diffusion Price Has the Density f(log(K/S))/K",
+      "domain": "mathematical_finance",
+      "description": "Take a jump-diffusion log-return law over τ > 0 with drift b, volatility coefficient σ ≠ 0, jump rate Λ ≥ 0 and jump law ν, and let f be its density (mf-jump-diffusion-density) and S > 0. Then the price Seʸ has the law f(log(K/S))/K dK on (0, ∞). So the density of the price, which mf-breeden-litzenberger-jump-diffusion reads off the second strike derivative of the call price as the derivative of the distribution function, is the density of the law of the price as a measure.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionDensity\n\nopen MeasureTheory ProbabilityTheory Set\nopen scoped NNReal\n\n/-- **The law of the jump-diffusion price**: `f(log(K/S))/K dK` on `(0, ∞)`. -/\ntheorem jump_diffusion_price_law_thm (b : ℝ) {σ : ℝ} (hσ : σ ≠ 0) (Λ : ℝ≥0) (ν : Measure ℝ)\n    [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) {S : ℝ} (hS : 0 < S) :\n    (MathFin.jumpDiffusionIncrementLaw b σ Λ ν τ).map (fun y ↦ S * Real.exp y)\n      = (volume.restrict (Ioi 0)).withDensity\n          fun K ↦ ENNReal.ofReal (MathFin.jumpDiffusionDensity b σ Λ ν τ (Real.log (K / S)) / K) :=\n  MathFin.jumpDiffusionIncrementLaw_map_mul_exp b hσ Λ ν hτ hS\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes; Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The log-return law is f(y) dy (jumpDiffusionIncrementLaw_eq_withDensity, mf-jump-diffusion-density) and the change of variables y ↦ Seʸ maps it to f(log(K/S))/K dK on (0, ∞) (map_mul_exp_withDensity, mf-price-law-change-of-variables). Lives in MathFin/BlackScholes/JumpDiffusionDensity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black-scholes-price-law",
+      "name": "lognormalTerminalPDF Is the Density of the Black–Scholes Price and Integrates to One",
+      "domain": "mathematical_finance",
+      "description": "At jump rate Λ = 0, drift r − σ²/2 and σ > 0, for S > 0, τ > 0 and any jump law ν, the price Seʸ has the law lognormalTerminalPDF(S, r, σ, τ, K) dK on (0, ∞), and ∫_{(0, ∞)} lognormalTerminalPDF(S, r, σ, τ, K) dK = 1. This proves the two facts mf-breeden-litzenberger says it does not: that lognormalTerminalPDF is the density of the price when the log-return is N((r − σ²/2)τ, σ²τ), its law under the Black–Scholes pricing measure, and that it is a probability density.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionDigital\n\nopen MeasureTheory ProbabilityTheory Set\nopen scoped NNReal\n\n/-- **`lognormalTerminalPDF` is the density of the Black–Scholes price, and integrates to one.** -/\ntheorem black_scholes_price_law_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (ν : Measure ℝ)\n    [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) :\n    (MathFin.jumpDiffusionIncrementLaw (r - σ ^ 2 / 2) σ 0 ν τ).map (fun y ↦ S * Real.exp y)\n        = (volume.restrict (Ioi 0)).withDensity\n            (fun K ↦ ENNReal.ofReal (MathFin.lognormalTerminalPDF S r σ τ K)) ∧\n      ∫⁻ K in Ioi 0, ENNReal.ofReal (MathFin.lognormalTerminalPDF S r σ τ K) = 1 :=\n  ⟨MathFin.jumpDiffusionIncrementLaw_zero_map_mul_exp hS hσ ν hτ,\n    MathFin.lintegral_lognormalTerminalPDF hS hσ hτ⟩\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The law of the price has the density f(log(K/S))/K on (0, ∞) (jumpDiffusionIncrementLaw_map_mul_exp, mf-jump-diffusion-price-law), and at every K > 0 that density is lognormalTerminalPDF (jumpDiffusionDensity_div_eq_lognormalTerminalPDF, mf-black-scholes-lognormal-density), so the two measures agree (Mathlib's withDensity_congr_ae). The integral is the mass of the image of a probability measure (Measure.map_apply, measure_univ). Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-merton-price-law",
+      "name": "Merton's Density Is the Density of the Price and Integrates to One",
+      "domain": "mathematical_finance",
+      "description": "Take the jump-diffusion log-return law over τ > 0 with any drift b, volatility coefficient σ > 0, jump rate Λ ≥ 0 and Gaussian log-jumps N(log(1 + k) − δ²/2, δ²) with k > −1, and let S > 0. Then the price Seʸ has the law mertonTerminalPDF(K) dK on (0, ∞), Merton's Poisson mixture of lognormal density formulas at the expected jump count Λτ and the parameter r = b + σ²/2 + Λk (mf-jump-diffusion-merton-density), and that mixture integrates to one over (0, ∞).",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionDigital\n\nopen MeasureTheory ProbabilityTheory Set\nopen scoped NNReal\n\n/-- **Merton's density is the density of the price, and integrates to one.** -/\ntheorem merton_price_law_thm (b : ℝ) {S σ k δ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hk : -1 < k)\n    (Λ : ℝ≥0) {τ : ℝ≥0} (hτ : 0 < τ) :\n    (MathFin.jumpDiffusionIncrementLaw b σ Λ\n          (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) τ).map\n        (fun y ↦ S * Real.exp y)\n        = (volume.restrict (Ioi 0)).withDensity (fun K ↦ ENNReal.ofReal\n            (MathFin.mertonTerminalPDF S (b + σ ^ 2 / 2 + Λ * k) σ τ k δ (Λ * τ) K)) ∧\n      ∫⁻ K in Ioi 0, ENNReal.ofReal\n          (MathFin.mertonTerminalPDF S (b + σ ^ 2 / 2 + Λ * k) σ τ k δ (Λ * τ) K) = 1 :=\n  ⟨MathFin.jumpDiffusionIncrementLaw_gaussian_map_mul_exp b hS hσ hk Λ hτ,\n    MathFin.lintegral_mertonTerminalPDF b hS hσ hk Λ hτ⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The law of the price has the density f(log(K/S))/K on (0, ∞) (jumpDiffusionIncrementLaw_map_mul_exp, mf-jump-diffusion-price-law), and at every K > 0 that density is mertonTerminalPDF (jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF, mf-jump-diffusion-merton-density), so the two measures agree (Mathlib's withDensity_congr_ae). The integral is the mass of the image of a probability measure. Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
       }
     },
     {

@@ -44,6 +44,11 @@ atoms (`BlackScholes/JumpDiffusionDensity.lean`). So, for a spot `S > 0`:
   at the parameter `r = b + σ²/2 + Λk`. Both are read off the strike derivatives of Merton's call
   series (`MertonStrikeGreeks.lean`) through the uniqueness of derivatives.
 
+The law of the price itself, as a measure: `jumpDiffusionIncrementLaw_zero_map_mul_exp` and
+`jumpDiffusionIncrementLaw_gaussian_map_mul_exp` give it the densities `lognormalTerminalPDF` (no
+jumps) and `mertonTerminalPDF` (Gaussian log-jumps) on `(0, ∞)`, and both formulas integrate to one
+(`lintegral_lognormalTerminalPDF`, `lintegral_mertonTerminalPDF`).
+
 Without a Gaussian part the law has an atom at `bτ`, the no-jump outcome, and the call price has a
 kink there: `differentiableAt_jumpDiffusionCallPrice_strike_iff` (differentiable at `K` iff the law
 has no atom at `log(K/S)`) and `not_differentiableAt_jumpDiffusionCallPrice_strike` (`σ = 0`, the
@@ -309,5 +314,64 @@ theorem not_differentiableAt_jumpDiffusionCallPrice_strike {S r b : ℝ} (hS : 0
     mul_div_cancel_left₀ _ hS.ne', Real.log_exp]
   exact ((ENNReal.ofReal_pos.2 (Real.exp_pos _)).trans_le
     (ofReal_exp_le_jumpDiffusionIncrementLaw_singleton b Λ ν τ)).ne'
+
+/-! ### The law of the price, as a measure -/
+
+/-- **`lognormalTerminalPDF` is the density of the Black–Scholes price.** Without jumps, at the
+drift `r − σ²/2`, for `σ > 0`, `S > 0` and `τ > 0`, the price `Seʸ` has the law
+`lognormalTerminalPDF(K) dK` on `(0, ∞)`. The law of the price has the density `f(log(K/S))/K`
+(`jumpDiffusionIncrementLaw_map_mul_exp`), which is `lognormalTerminalPDF` at every `K > 0`
+(`jumpDiffusionDensity_div_eq_lognormalTerminalPDF`). -/
+theorem jumpDiffusionIncrementLaw_zero_map_mul_exp {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
+    (ν : Measure ℝ) [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) :
+    (jumpDiffusionIncrementLaw (r - σ ^ 2 / 2) σ 0 ν τ).map (fun y ↦ S * rexp y)
+      = (volume.restrict (Ioi 0)).withDensity
+          fun K ↦ ENNReal.ofReal (lognormalTerminalPDF S r σ τ K) := by
+  rw [jumpDiffusionIncrementLaw_map_mul_exp _ hσ.ne' 0 ν hτ hS]
+  refine withDensity_congr_ae (ae_restrict_of_forall_mem measurableSet_Ioi fun K hK ↦ ?_)
+  rw [jumpDiffusionDensity_div_eq_lognormalTerminalPDF hS hK hσ ν hτ]
+
+/-- **The lognormal density formula integrates to one** over `(0, ∞)`, for `σ > 0`, `S > 0` and
+`τ > 0`: it is the density of the law of the Black–Scholes price, a probability measure
+(`jumpDiffusionIncrementLaw_zero_map_mul_exp`). -/
+theorem lintegral_lognormalTerminalPDF {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ) {τ : ℝ≥0}
+    (hτ : 0 < τ) : ∫⁻ K in Ioi 0, ENNReal.ofReal (lognormalTerminalPDF S r σ τ K) = 1 :=
+  calc ∫⁻ K in Ioi 0, ENNReal.ofReal (lognormalTerminalPDF S r σ τ K)
+      = ((volume.restrict (Ioi 0)).withDensity
+          fun K ↦ ENNReal.ofReal (lognormalTerminalPDF S r σ τ K)) univ := by
+        rw [withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ]
+    _ = 1 := by
+        rw [← jumpDiffusionIncrementLaw_zero_map_mul_exp (r := r) hS hσ (Measure.dirac (0 : ℝ)) hτ,
+          Measure.map_apply (by fun_prop) MeasurableSet.univ, preimage_univ, measure_univ]
+
+/-- **Merton's density is the density of the price.** With log-jumps `N(log(1 + k) − δ²/2, δ²)`,
+for `σ > 0`, `k > −1`, `S > 0`, `τ > 0` and any drift `b`, the price `Seʸ` has the law
+`mertonTerminalPDF(K) dK` on `(0, ∞)`, at the parameter `r = b + σ²/2 + Λk`
+(`jumpDiffusionIncrementLaw_map_mul_exp`, `jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF`).
+-/
+theorem jumpDiffusionIncrementLaw_gaussian_map_mul_exp (b : ℝ) {S σ k δ : ℝ} (hS : 0 < S)
+    (hσ : 0 < σ) (hk : -1 < k) (Λ : ℝ≥0) {τ : ℝ≥0} (hτ : 0 < τ) :
+    (jumpDiffusionIncrementLaw b σ Λ (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal)
+        τ).map (fun y ↦ S * rexp y)
+      = (volume.restrict (Ioi 0)).withDensity fun K ↦
+          ENNReal.ofReal (mertonTerminalPDF S (b + σ ^ 2 / 2 + Λ * k) σ τ k δ (Λ * τ) K) := by
+  rw [jumpDiffusionIncrementLaw_map_mul_exp b hσ.ne' Λ _ hτ hS]
+  refine withDensity_congr_ae (ae_restrict_of_forall_mem measurableSet_Ioi fun K hK ↦ ?_)
+  rw [jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF b hS hK hσ hk Λ hτ]
+
+/-- **Merton's density integrates to one** over `(0, ∞)`: it is the density of the law of the
+price (`jumpDiffusionIncrementLaw_gaussian_map_mul_exp`), a probability measure. -/
+theorem lintegral_mertonTerminalPDF (b : ℝ) {S σ k δ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hk : -1 < k)
+    (Λ : ℝ≥0) {τ : ℝ≥0} (hτ : 0 < τ) :
+    ∫⁻ K in Ioi 0, ENNReal.ofReal (mertonTerminalPDF S (b + σ ^ 2 / 2 + Λ * k) σ τ k δ (Λ * τ) K)
+      = 1 :=
+  calc ∫⁻ K in Ioi 0,
+        ENNReal.ofReal (mertonTerminalPDF S (b + σ ^ 2 / 2 + Λ * k) σ τ k δ (Λ * τ) K)
+      = ((volume.restrict (Ioi 0)).withDensity fun K ↦
+          ENNReal.ofReal (mertonTerminalPDF S (b + σ ^ 2 / 2 + Λ * k) σ τ k δ (Λ * τ) K)) univ := by
+        rw [withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ]
+    _ = 1 := by
+        rw [← jumpDiffusionIncrementLaw_gaussian_map_mul_exp b (δ := δ) hS hσ hk Λ hτ,
+          Measure.map_apply (by fun_prop) MeasurableSet.univ, preimage_univ, measure_univ]
 
 end MathFin

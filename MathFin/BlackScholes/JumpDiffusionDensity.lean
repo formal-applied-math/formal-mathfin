@@ -28,6 +28,9 @@ moment condition.
   has an atom at `bτ`, of mass at least `e^{−Λτ}`, the probability of no jump.
 * `hasDerivAt_measureReal_Ioi_withDensity`: for any law `f(y) dy` with `f` integrable, the tail
   `x ↦ P(Y > x)` has derivative `−f(a)` at every `a` where `f` is continuous.
+* `map_mul_exp_withDensity`: for any law `f(y) dy` and `S > 0`, the price `Seʸ` has on `(0, ∞)` the
+  density `K ↦ f(log(K/S))/K` (change of variables `K = Seʸ`, `dK = K dy`), and
+  `jumpDiffusionIncrementLaw_map_mul_exp` is the jump-diffusion case.
 
 The option prices built on these facts are in `BlackScholes/JumpDiffusionDigital.lean`: the strike
 derivatives of the call and the digital, and Breeden–Litzenberger with jumps.
@@ -235,5 +238,46 @@ theorem hasDerivAt_measureReal_Ioi_withDensity {f : ℝ → ℝ} (hf : Integrabl
     (intervalIntegral.integral_hasDerivAt_right hii
       hf.aestronglyMeasurable.stronglyMeasurableAtFilter hfa).const_sub _
   exact hD.congr_of_eventuallyEq (Eventually.of_forall hIoi)
+
+/-- **The law of `Seʸ` when `Y` has a density.** If `Y` has the law `f(y) dy` and `S > 0`, the
+price `Seʸ` has the law `f(log(K/S))/K dK` on `(0, ∞)`: the change of variables `K = Seʸ`,
+`dK = K dy` (Mathlib's `lintegral_image_eq_lintegral_abs_deriv_mul`), `y ↦ Seʸ` being a bijection
+of `ℝ` onto `(0, ∞)`. -/
+theorem map_mul_exp_withDensity {f : ℝ → ℝ} (hf0 : ∀ y, 0 ≤ f y) {S : ℝ} (hS : 0 < S) :
+    (volume.withDensity fun y ↦ ENNReal.ofReal (f y)).map (fun y ↦ S * rexp y)
+      = (volume.restrict (Ioi 0)).withDensity
+          fun K ↦ ENNReal.ofReal (f (Real.log (K / S)) / K) := by
+  have hg : Measurable fun y ↦ S * rexp y := by fun_prop
+  ext A hA
+  rw [Measure.map_apply hg hA, withDensity_apply _ (hg hA), withDensity_apply _ hA,
+    Measure.restrict_restrict hA]
+  -- `y ↦ Seʸ` maps the preimage of `A` onto `A ∩ (0, ∞)`
+  have himage : (fun y ↦ S * rexp y) '' ((fun y ↦ S * rexp y) ⁻¹' A) = A ∩ Ioi 0 := by
+    rw [image_preimage_eq_inter_range]
+    congr 1
+    ext K
+    simp only [mem_range, mem_Ioi]
+    refine ⟨?_, fun hK ↦ ⟨Real.log (K / S), ?_⟩⟩
+    · rintro ⟨y, rfl⟩
+      positivity
+    · rw [Real.exp_log (div_pos hK hS), mul_div_cancel₀ _ hS.ne']
+  rw [← himage, lintegral_image_eq_lintegral_abs_deriv_mul (hg hA)
+    (fun y _ ↦ ((Real.hasDerivAt_exp y).const_mul S).hasDerivWithinAt)
+    (fun y₁ _ y₂ _ h ↦ Real.exp_injective (mul_left_cancel₀ hS.ne' h))]
+  refine setLIntegral_congr_fun (hg hA) fun y _ ↦ ?_
+  have hSy : 0 < S * rexp y := mul_pos hS (Real.exp_pos y)
+  rw [abs_of_pos hSy, ← ENNReal.ofReal_mul hSy.le, mul_div_cancel_left₀ _ hS.ne', Real.log_exp,
+    mul_div_cancel₀ _ hSy.ne']
+
+/-- **The law of the jump-diffusion price.** With a Gaussian part (`σ ≠ 0`, `τ > 0`) and `S > 0`,
+the price `Seʸ` has the law `f(log(K/S))/K dK` on `(0, ∞)`, with `f` the density of the log-return
+(`jumpDiffusionIncrementLaw_eq_withDensity`, `map_mul_exp_withDensity`). -/
+theorem jumpDiffusionIncrementLaw_map_mul_exp (b : ℝ) {σ : ℝ} (hσ : σ ≠ 0) (Λ : ℝ≥0)
+    (ν : Measure ℝ) [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) {S : ℝ} (hS : 0 < S) :
+    (jumpDiffusionIncrementLaw b σ Λ ν τ).map (fun y ↦ S * rexp y)
+      = (volume.restrict (Ioi 0)).withDensity
+          fun K ↦ ENNReal.ofReal (jumpDiffusionDensity b σ Λ ν τ (Real.log (K / S)) / K) := by
+  rw [jumpDiffusionIncrementLaw_eq_withDensity b hσ Λ ν hτ]
+  exact map_mul_exp_withDensity (jumpDiffusionDensity_nonneg b σ Λ ν τ) hS
 
 end MathFin

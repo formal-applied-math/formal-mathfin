@@ -27,13 +27,12 @@ Specialising to the BS model: `∂²_K bsV = e^{-rT} · ϕ(d_2)/(K σ √T)`
 which is the lognormal density at `K` (parameters
 `log S_0 + (r − σ²/2)T, σ² T`). This file defines `lognormalTerminalPDF` as that
 formula. It proves neither that `S_T` has it as its density nor, beyond the
-differential identity at the end, that it integrates to 1. That it is the density
-at `K` of the Black–Scholes price (the jump-diffusion without jumps at the drift
-`r − σ²/2`), in the sense of the derivative of the distribution function, is
-`jumpDiffusionDensity_div_eq_lognormalTerminalPDF` with
-`hasDerivAt_jumpDiffusionDigitalPrice_strike` (`JumpDiffusionDigital.lean`), and
-Merton's Poisson mixture of these formulas is `mertonTerminalPDF`
-(`MertonStrikeGreeks.lean`).
+differential identity at the end, that it integrates to 1. Both are proved
+downstream, for the Black–Scholes price (the jump-diffusion without jumps at the
+drift `r − σ²/2`): the law of the price is `lognormalTerminalPDF(K) dK` on `(0, ∞)`
+(`jumpDiffusionIncrementLaw_zero_map_mul_exp`) and the formula integrates to one
+(`lintegral_lognormalTerminalPDF`), in `JumpDiffusionDigital.lean`. Merton's
+Poisson mixture of these formulas is `mertonTerminalPDF` (`MertonStrikeGreeks.lean`).
 
 ## Structural connection: PDF positivity = strike-convexity of the price
 
@@ -89,7 +88,8 @@ theorem breedenLitzenberger {S_0 r σ : ℝ} (hS : 0 < S_0) (hσ : 0 < σ)
 
 /-- **Implied PDF non-negativity**, directly: `ϕ ≥ 0` and `K σ √T > 0`. The route through the
 strike convexity of the price is `lognormalTerminalPDF_nonneg_via_strike_convexity`. That
-`lognormalTerminalPDF` is a probability density is not proved here. -/
+`lognormalTerminalPDF` is a probability density is not proved here; it is
+`lintegral_lognormalTerminalPDF` (`JumpDiffusionDigital.lean`). -/
 theorem lognormalTerminalPDF_nonneg
     {S_0 r σ T K : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     0 ≤ lognormalTerminalPDF S_0 r σ T K := by
