@@ -885,6 +885,13 @@
       "input_hash": "b8b70bcf86502a71f7419ee35132776892a684181e06ed35cab37eac3816773c",
       "verified_at_commit": "fdfecac"
     },
+    "mf-bs-gaussian-smoothing": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-08",
+      "elapsed_s": 4.4,
+      "input_hash": "bc886fc182f018afb1d1f9203e8581f3abedb32b9ce50577ba153e54b7740a2b",
+      "verified_at_commit": "08f5abc"
+    },
     "mf-bs-merton-delta": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-02",
@@ -1774,6 +1781,13 @@
       "input_hash": "429e67a5e8a64c823587c9c347a9ba8ec5b977401578552aaf8317fbb8c4e90e",
       "verified_at_commit": "f2e93b5"
     },
+    "mf-jump-diffusion-merton-1976-every-date": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-08",
+      "elapsed_s": 4.9,
+      "input_hash": "96cad410acc51fc296c9957783c4da9ea3c32a20e15684c87479a504ce2b3235",
+      "verified_at_commit": "08f5abc"
+    },
     "mf-jump-diffusion-merton-intermediate-date": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-08",
@@ -2025,6 +2039,13 @@
       "elapsed_s": 4.6,
       "input_hash": "13db61604be75e07f1a26e28b5601d3c8fa67f0b2035f109f0d49de05dc1696e",
       "verified_at_commit": "157ff02"
+    },
+    "mf-merton-from-general-jump-law": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-08",
+      "elapsed_s": 5.4,
+      "input_hash": "b9aebf3f8fccfc58b351d80aa3408b5998a074cbf7a028fbc77793b91481872d",
+      "verified_at_commit": "08f5abc"
     },
     "mf-merton-gamma": {
       "benchmark_file": "mathematical_finance.json",
