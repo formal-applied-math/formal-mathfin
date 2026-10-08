@@ -73,13 +73,8 @@ lemma jumpDiffusionDigitalPrice_eq (S K r b σ : ℝ) (Λ : ℝ≥0) (ν : Measu
   have hset : MeasurableSet {y : ℝ | K < S * rexp y} :=
     measurableSet_lt measurable_const (by fun_prop)
   rw [jumpDiffusionDigitalPrice, integral_const_mul, ← integral_indicator_one hset]
+  -- the two indicators agree pointwise by definition
   congr 1
-  refine integral_congr_ae (ae_of_all _ fun y ↦ ?_)
-  by_cases hy : K < S * rexp y
-  · rw [indicator_of_mem (show S * rexp y ∈ Ioi K from hy),
-      indicator_of_mem (show y ∈ {y | K < S * rexp y} from hy), Pi.one_apply]
-  · rw [indicator_of_notMem (show S * rexp y ∉ Ioi K from hy),
-      indicator_of_notMem (show y ∉ {y | K < S * rexp y} from hy)]
 
 /-- **The strike derivative of the jump-diffusion call price is minus the digital price.** With a
 Gaussian part (`σ ≠ 0`, `τ > 0`) and a finite forward, the call price function is differentiable

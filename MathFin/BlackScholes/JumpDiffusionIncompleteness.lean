@@ -140,7 +140,7 @@ theorem exists_call_esscher_ne_merton {S r b c σ : ℝ} (hS : 0 < S) (hσ : σ 
       simpa using hx
     simpa using (hasLaw_dirac_of_ae_eq hae).map_eq
   by_contra hall
-  push_neg at hall
+  push Not at hall
   -- equal call prices at every strike make the Esscher law the Merton measure's law
   have hlaw : jumpDiffusionIncrementLaw (b + θ * σ ^ 2) σ (Λ * jumpMoment ν θ) (ν.tilted (θ * ·)) τ
       = jumpDiffusionIncrementLaw (r - σ ^ 2 / 2 - Λ * (∫ x, rexp x ∂ν - 1)) σ Λ ν τ := by
