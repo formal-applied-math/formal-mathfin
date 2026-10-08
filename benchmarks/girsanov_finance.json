@@ -83,7 +83,7 @@
     },
     {
       "id": "gir-risk-neutral-drift-unique",
-      "name": "Continuous-Time FTAP, Converse: The Risk-Neutral Drift Is the Only Martingale Drift",
+      "name": "Risk-Neutral Drift Uniqueness: Only b = r − σ²/2 Makes the Discounted Price a Martingale",
       "description": "For a filtered pre-Brownian motion B (IsFilteredPreBrownian B 𝓕 P), S₀ ≠ 0 and any rate r, volatility σ and drift b, the discounted price e^{−rt}S₀e^{bt + σB_t} is an 𝓕-martingale if and only if b = r − σ²/2. The 'if' direction is gir-continuous-ftap; the converse says that no other drift makes the discounted price a P-martingale. It is the jump-free case of the jump-diffusion martingale criterion (mf-jump-diffusion-discounted-price-martingale): Brownian motion with drift is a jump-diffusion process with jump rate 0 (mf-jump-diffusion-brownian-no-jumps).",
       "domain": "mathematical_finance",
       "code": {

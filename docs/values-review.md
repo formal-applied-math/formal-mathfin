@@ -125,6 +125,208 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-08 — corpus 486 — the jump-diffusion process: prices at every date, and one tool per idea
+
+Scope: corpus 461 → 486, in two rounds.
+
+- First round (461 → 480):
+  - `BlackScholes/JumpImpliedVol.lean` (jumps lift the implied volatility);
+  - `BlackScholes/JumpDiffusionCanonical.lean` (the model exists; the price depends only on the
+    expected jump count and the jump law);
+  - `BlackScholes/JumpDiffusionProcess.lean` and `Foundations/ExpMartingaleIndepIncrements.lean`
+    (the price process; martingale exactly at the compensated drift);
+  - `BlackScholes/JumpDiffusionOptionPrices.lean` (prices at every date);
+  - `BlackScholes/GaussianSmoothing.lean` and `BlackScholes/JumpDiffusionMerton.lean` (Merton's
+    series from the general route).
+  - 19 entries: `mf-bs-call-strictly-convex-in-spot`, `mf-bs-call-tends-to-spot-high-vol`,
+    `mf-implied-vol-exists-above-reference`, `mf-jump-diffusion-call-strict-bounds`,
+    `mf-jump-diffusion-implied-vol-above-sigma`, `mf-compound-poisson-implied-vol-above-sigma`,
+    `mf-jump-diffusion-{model-exists,call-law-invariance,log-return-mgf}`,
+    `mf-jump-diffusion-discounted-price-martingale`, `mart-exp-indep-increments`,
+    `mf-jump-diffusion-{price-parity,put-intermediate-date,call-intermediate-date}`,
+    `mf-jump-diffusion-{merton-intermediate-date,implied-vol-every-date}`,
+    `mf-bs-gaussian-smoothing`, `mf-merton-from-general-jump-law`,
+    `mf-jump-diffusion-merton-1976-every-date`.
+- Coherence round (480 → 486), after the request to link the new jump work to the rest of the
+  library:
+  - `BlackScholes/JumpDiffusionBrownian.lean` (new): Brownian motion with drift is the process
+    without jumps;
+  - Merton's model exists (`mertonHyp_canonical`);
+  - one conditional freezing lemma in `Foundations/IndepFreezing.lean`, consumed by the American
+    put and by the jump process;
+  - the Wald martingale derived from the exponential-martingale lemma.
+  - 6 entries: `mf-jump-diffusion-brownian-no-jumps`, `mf-bs-formulas-every-date`,
+    `gir-risk-neutral-drift-unique`, `mf-merton-model-exists`, `ce-conditional-freezing-lemma`,
+    `mf-jump-diffusion-payoff-every-date`.
+
+Two panels of three read-only agents each, split as prose against statement, proof quality
+(lenses 2, 3, 6) and mathematics (lenses 1, 4, 5, 8): the first at corpus 480, the second at 486 on
+the coherence round. Neither found a mathematical error or a dishonest hypothesis.
+
+### Standing first pass: prose against statement
+
+First panel (18 items, applied in the coherence round's first commit):
+
+- **"Lévy process"** was claimed for `JumpDiffusionProcess`, whose fields carry no path regularity.
+  It now says the increments are those of a Lévy process, with no path regularity assumed.
+- **"Price" at every drift.** At a drift other than the compensated one, `P` is not a martingale
+  measure, so the conditional value is only a `P`-conditional expectation. Every price claim now
+  names the compensated drift. The second panel sharpened this: the jump-diffusion market is
+  incomplete, so even there it is an arbitrage-free price under `P`, not *the* price.
+- **"Every model-level result can be met"**, while `MertonHyp` had no witness and every
+  `JumpDiffusionHyp` theorem needs `∫ eˣ dν < ∞`. Narrowed then; `MertonHyp` is now witnessed
+  (`mertonHyp_canonical`).
+- **`Λ` meant two things**, the expected jump count of the single-date model and the rate of the
+  process. Both were called "intensity". Single-date prose says "expected jump count", process
+  prose says "rate".
+- **"At every date"** read as one null set for all dates and strikes. The statements are per
+  strike and per date `t < T`, almost surely; the prose says so.
+- Also: "any jump law" without non-degeneracy; unverifiable "ch. 11" citations; the Wald martingale
+  called "the Gaussian case" of the exponential-martingale lemma with no proof-term edge (true now,
+  by derivation); stale "not covered" lines.
+
+Second panel (6 fix-now, 7 nits, all applied):
+
+- **"No such process is constructed"** survived in three scopes after the Brownian bridge
+  constructed it without jumps. Those entries allow `Λ = 0`, so it was false. Each now says it is
+  constructed only without jumps.
+- **"Continuous-time FTAP, converse"** named the entry proving that the risk-neutral drift is the
+  only martingale drift. The FTAP's converse is a different theorem (an equivalent martingale
+  measure implies no arbitrage). Renamed.
+- The roadmap called the Wald martingale "proved separately" after it was derived. It said the
+  every-date put and call each lost their sign hypotheses (the put keeps `S₀ ≥ 0`). It said the
+  Girsanov change of measure shares the exponential-martingale lemma (only for constant `θ`).
+- **`map_restrict_prodMk_of_indep`'s docstring** said restricting to `s` keeps the law of `Y`. On
+  `s` it is `P(s)` times that law; normalized by `P(s)`, i.e. given `s`, the claim holds. The
+  docstring now says that.
+- "Conditions on `Λ` and `ν` alone" left out the hypotheses on `S₀, K, σ, T`; two safe wordings
+  dropped the compensated drift or `t < T`; "intensity" leftovers; the Brownian Black–Scholes
+  entry claimed the put price function's formula "also proved" without stating it (now stated);
+  "Theorem 5.1.6" for Saporito's Remark 5.1.6; a citation of a never-existing
+  `condExp_payoff`.
+
+### Upgrades executed
+
+- **One conditional freezing lemma.** `condExp_comp_prodMk_of_indep` (Shreve's independence
+  lemma) in `Foundations/IndepFreezing.lean`: for `X` measurable for `𝒢` and `Y` independent of
+  `𝒢`, `𝔼[g(X, Y) | 𝒢] = ∫ g(X, y) d(law Y)(y)` for integrable, Banach-valued `g`. On each event
+  of `𝒢` the joint law is a product (`map_restrict_prodMk_of_indep`), so Fubini gives the same
+  integral over every such event. Mathlib conditions only on `σ(X)` (through `condDistrib`).
+  - The bounded, real-valued `AmericanPut/Stopping/IndependentKernel.lean` is deleted, and the
+    American put's Brownian transitions consume the general lemma.
+  - On the process, `JumpDiffusionProcess.condExp_comp_prodMk`:
+    `𝔼[g(X_t, X_T − X_t) | 𝓕_t] = ∫ g(X_t, y) dμ_{T−t}(y)`. Its case `condExp_comp` covers
+    European payoffs. The put and call are instances: the call's 50-line put–call detour through
+    linearity of `condExp` is gone, the put drops `K ≥ 0`, and the call drops `S₀, K ≥ 0`.
+- **The Brownian bridge.** Brownian motion with drift is a `JumpDiffusionProcess` without jumps,
+  witnessed on the constructed Brownian motion. The process results then give the Black–Scholes
+  formulas at every date before maturity, and "only `r − σ²/2` is a martingale drift" (the converse
+  of `discountedGBM_isMartingale`).
+- **Merton's model exists** (`JumpDiffusionHyp.toMertonHyp`, `mertonHyp_canonical`). Merton's
+  series comes from the general route (Gaussian smoothing), with the put series.
+- **The Wald martingale is derived**: the exponential martingale of `αB`
+  (`martingale_exp_sub_of_indep_increments`), so 75 lines of hand-rolled pull-out go. The first
+  FTAP, constant-`θ` Girsanov and the jump-diffusion martingale property now rest on one lemma.
+- **Mathlib consumed instead of re-proved:**
+  - count–size independence of the canonical model by `indepFun_iff_hasLaw_prodMk_prod`; the
+    repo's `indepFun_comp_of_measurePreserving` is deleted;
+  - `HasLaw.identDistrib`;
+  - `MeasurableSpace.comap_le_comap_of_eq_comp` for "a function of the increment is independent",
+    twice.
+- **Duplication removed:**
+  - price-function parity from the finite-state payoff identity `max_sub_max_neg`;
+  - `JumpDiffusionProcess.isProbabilityMeasure` and `integral_exp` derived, so six statements drop
+    `[IsProbabilityMeasure P]`;
+  - `jumpDiffusionLogReturn` named;
+  - `measurable_sum_range_prod`, `integral_exp_compensatedJumpPart` and
+    `integral_lt_integral_of_ae_le_of_not_ae_eq` stated once;
+  - the non-strict spot convexity and tangent bound follow from the strict ones;
+  - `mertonTerminal_eq_jumpDiffusionTerminal` (`rfl`) turns "Merton's terminal price is the
+    `κ = kΛ` case" into a proof-term edge.
+
+### Lens gradients
+
+- **Inspired math.**
+  - Exemplar: `jumpDiffusion_impliedVol_gt`. Strict Jensen over the strictly convex Black–Scholes
+    price, plus implied-volatility existence: compensated non-degenerate jumps lift the implied
+    volatility above `σ`, at every strike, for any such jump law.
+  - Next: the Lévy exponent at every `θ` and the convolution semigroup, so that the jump-diffusion
+    is a process and not a family of single-date laws.
+- **Coherence.**
+  - Exemplar: `condExp_comp_prodMk_of_indep`, one lemma feeding the American put and the jump
+    process, filling a gap next to Mathlib's `condDistrib` version.
+  - Next: route the remaining hand-frozen conditional expectations through it (backlog 4), and
+    upstream it.
+- **Zero slop.**
+  - Exemplar: `condExp_call`, now a payoff and its integrability.
+  - Remaining:
+    - two private `condExp_func_increment`s (BrownianMartingale, PointwiseBracket);
+    - put–call parity proved four ways;
+    - Merton's series proved twice (backlog 1).
+- **Architecture.**
+  - Exemplar: put and call as instances of `condExp_comp`, which is the process case of the
+    Foundations lemma; Wald from the general exponential martingale.
+  - Next: one law-level model (`JumpDiffusionHyp` as a `HasLaw` against the canonical measure),
+    and the law and process layer moved below `BlackScholes/`.
+- **First principles.**
+  - Exemplar: `martingale_iff` derives the compensated drift as the only martingale drift; the
+    process structure is witnessed without jumps, and `MertonHyp` is witnessed.
+  - Next: the process with jumps (`Λ > 0`), a witness for `PoissonRandomMeasure`, and a jump
+    pricing measure derived from the physical one, as `BSCallHyp.exists_of_physical` does.
+- **Idiomatic register.**
+  - Exemplar: the section order `{m mΩ : MeasurableSpace Ω}`, Mathlib's `{m m0}` convention. It
+    was learned the hard way: a later-declared `m` became the preferred instance.
+  - Next: `IsJumpDiffusion`-style naming for the Prop-valued structure, strict-implicit `⦃s t⦄`
+    binders, and splitting `jumpDiffusionHyp_canonical`'s conjunction.
+- **Concept clarity.**
+  - Exemplar: `mf-jump-diffusion-implied-vol-every-date`, which pins the quantifier scope, the
+    domain of uniqueness and the existence gap in the outward-facing field.
+  - Next: an implied-volatility function, so that the smile can be stated.
+- **Elegance.**
+  - Exemplar: `map_restrict_prodMk_of_indep`. Restricting to an event keeps the product
+    structure, and the conditional lemma follows in about twenty lines.
+  - Next: `squareSubTime_isMartingale` as freezing plus the Gaussian second moment, about 15 lines
+    in place of 150.
+
+### Ranked backlog
+
+1. **One model.** Drop `JumpDiffusionHyp.J_meas` (`IdentDistrib` gives a.e.-measurability;
+   `iIndepFun.map_fun_eq_infinitePi_map₀'`, `mgf_sum_of_identDistrib₀`) and prove
+   `JumpDiffusionHyp ↔ HasLaw (Z, N, J) (jumpDiffusionMeasure Λ ν) Q`. `MertonHyp` becomes the
+   Gaussian case, `merton_{call,put}_formula` and `merton_discounted_terminal` become corollaries,
+   and `mertonStd` and the per-count lemmas go.
+2. **The Lévy exponent and the semigroup.**
+   - A `compoundPoissonMeasure Λ ν` in Foundations, with
+     `μ_τ = N(bτ, σ²τ) ∗ compoundPoissonMeasure (Λτ) ν` and `mgf μ_τ θ = exp(τκ(θ))`. This
+     replaces the inverted `integral_exp_logReturn ← discounted_terminal` dependency.
+   - The Esscher–Wald family `exp(θX_t − tκ(θ))` as martingales for every `θ`.
+   - `μ_s ∗ μ_t = μ_{s+t}`, pushed from Mathlib's `poissonMeasure_conv_poissonMeasure`.
+3. **Construct the process with jumps.**
+   - Kolmogorov extension of the semigroup, independent of the Brownian motion, plus "independent
+     increments ⇒ `JumpDiffusionProcess` for the natural filtration".
+   - This witnesses `Λ > 0` and, for finite `ν`, the Poisson random measure.
+4. **Route the hand-frozen conditional expectations** through `condExp_comp_prodMk_of_indep`:
+   - `squareSubTime_isMartingale` and both `condExp_func_increment`s;
+   - the pointwise bracket, the simple Doléans exponential (its private freezing of `exp(c·Δ)`)
+     and the `Q`-Brownian exponential martingale;
+   - `condExp_exp_eq_of_indep_increment`.
+5. **An exponential-Lévy abstraction** carrying the generic results:
+   - `condExp_comp`, the martingale criterion and the restart property;
+   - a bridge to Mathlib's `HasIndepIncrements`;
+   - the converse bridge `JumpDiffusionProcess … 0 1 0 ν ⇒ IsFilteredPreBrownian`.
+6. **Esscher for jumps.**
+   - `JumpDiffusionHyp` under a pricing measure derived from the physical measure.
+   - The compensator condition gives a one-parameter family of martingale measures, which is
+     incompleteness made formal.
+7. **The smile.** The `σ → 0` limit, then an `impliedVol` function, then Lee's moment formula.
+8. **Smaller items:**
+   - one model-free put–call parity, from which the four existing parities follow;
+   - "American put ≥ Black–Scholes put" at `q = 0`, a cheap edge between the two towers;
+   - the American put's `brownianLogState_condExp_transition` as the rate-0 `condExp_comp`;
+   - upstream candidates: the conditional freezing lemma,
+     `integral_lt_integral_of_ae_le_of_not_ae_eq`, tangent-line forms of convexity,
+     `indepFun_prodMk_of_indepFun_prodMk`.
+
 ## 2026-10-08 — corpus 461 — the jump-diffusion axis: Merton derived, its Greeks, any jump law
 
 Scope: the session's jump-diffusion work, corpus 447 → 461.

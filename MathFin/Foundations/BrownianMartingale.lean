@@ -259,15 +259,12 @@ theorem waldExponential_isMartingale (α : ℝ) :
     (fun s t hst ↦ ?_) (fun t ↦ integrable_exp_mul_of_hasLaw (hX.hasLaw_eval t) α)
     (fun s t hst ↦ ?_)
   · -- `α(X_t − X_s)` is a function of the increment, which is independent of `𝓕_s`
-    have hfun : (fun ω ↦ α * X t ω - α * X s ω) = (fun y ↦ α * y) ∘ fun ω ↦ X t ω - X s ω := by
-      funext ω
-      simp only [Function.comp_apply]
-      ring
-    have hm : Measurable[MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) (borel ℝ)]
-        (fun ω ↦ α * X t ω - α * X s ω) := by
-      rw [hfun]
-      exact (by fun_prop : Measurable fun y : ℝ ↦ α * y).comp (Measurable.of_comap_le le_rfl)
-    exact indep_of_indep_of_le_left (hX.indep s t hst) hm.comap_le
+    refine indep_of_indep_of_le_left (hX.indep s t hst)
+      (MeasurableSpace.comap_le_comap_of_eq_comp (fun y ↦ α * y)
+        (by fun_prop : Measurable fun y : ℝ ↦ α * y) ?_)
+    funext ω
+    simp only [Function.comp_apply]
+    ring
   · -- the increment is `N(0, t − s)`, whose exponential moment at `α` is `e^{α²(t − s)/2}`
     have hf : AEStronglyMeasurable (fun x : ℝ ↦ Real.exp (α * x)) (gaussianReal 0 (t - s)) := by
       fun_prop

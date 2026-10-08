@@ -26,7 +26,7 @@ series.
 The same computation prices the call in the price process. At the compensated drift the call
 price function is the call of the canonical model (`jumpDiffusionCallPrice_eq_canonical`). With
 Gaussian jumps it is therefore Merton's series, and the conditional value of the call at every
-date is Merton's 1976 formula at the current price and the remaining maturity.
+date before maturity is Merton's 1976 formula at the current price and the remaining maturity.
 
 ## Main results
 
@@ -145,7 +145,7 @@ lemma mertonJump_compensated {k : ℝ} (hk : -1 < k) (δ : ℝ) {r b σ : ℝ} {
 /-- **Merton's 1976 formula for the call price function.** With log-jumps
 `N(log(1 + k) − δ²/2, δ²)` and the compensated drift `b = r − σ²/2 − Λk`, the call price
 function over a time `τ > 0` is Merton's series `mertonCallPrice` at the expected jump count
-`Λτ`: the price function is the call of the canonical model at intensity `Λτ`
+`Λτ`: the price function is the call of the canonical model with that expected jump count
 (`jumpDiffusionCallPrice_eq_canonical`), with `𝔼[e^J] = 1 + k`
 (`integral_exp_mertonJump`). -/
 theorem jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice {S K r b σ k δ : ℝ} (hS : 0 < S)
@@ -182,7 +182,7 @@ namespace JumpDiffusionProcess
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}
   {X : ℝ≥0 → Ω → ℝ} {b σ : ℝ} {Λ : ℝ≥0}
 
-/-- **Merton's 1976 formula at every date.** In a jump-diffusion with log-jumps
+/-- **Merton's 1976 formula at every date before maturity.** In a jump-diffusion with log-jumps
 `N(log(1 + k) − δ²/2, δ²)` at the compensated drift `b = r − σ²/2 − Λk`, for `t < T` the
 conditional value of the call given `𝓕_t` is Merton's series `mertonCallPrice` at the current
 price `S_t = S₀e^{X_t}`, the remaining maturity `T − t` and the expected number of jumps
@@ -199,7 +199,7 @@ theorem condExp_call_eq_mertonCallPrice {k δ : ℝ}
     ae_of_all _ fun _ ↦ jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice
       (mul_pos hS_0 (Real.exp_pos _)) hK hσ hk hb (tsub_pos_of_lt htT)
 
-/-- **Merton's 1976 put formula at every date.** Under the hypotheses of
+/-- **Merton's 1976 put formula at every date before maturity.** Under the hypotheses of
 `condExp_call_eq_mertonCallPrice`, the conditional value of the put given `𝓕_t` is Merton's put
 series `mertonPutPrice` at `S_t`, `T − t` and `Λ(T − t)` (`condExp_put`,
 `jumpDiffusionPutPrice_gaussian_eq_mertonPutPrice`). -/

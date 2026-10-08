@@ -237,9 +237,17 @@ theorem jumpDiffusion_call_le {S_0 K r σ T : ℝ} {Z Y : Ω → ℝ}
 
 /-- The terminal price of a jump-diffusion at a diffusion sample `z`, a jump count `n` and log-jump
 sizes `j`, with drift correction `κ`: `S₀ · exp((r − σ²/2)T − κ + σ√T·z + ∑_{i<n} jᵢ)`.
-Merton's `mertonTerminal` is this price with `κ = kΛ`. -/
+Merton's `mertonTerminal` is this price with `κ = kΛ`
+(`mertonTerminal_eq_jumpDiffusionTerminal`). -/
 noncomputable def jumpDiffusionTerminal (S_0 r σ T κ z : ℝ) (n : ℕ) (j : ℕ → ℝ) : ℝ :=
   S_0 * rexp ((r - σ ^ 2 / 2) * T - κ + σ * Real.sqrt T * z + ∑ i ∈ Finset.range n, j i)
+
+/-- Merton's terminal price is the jump-diffusion terminal price with the drift correction
+`κ = kΛ`. -/
+lemma mertonTerminal_eq_jumpDiffusionTerminal (S_0 r σ T k : ℝ) (Λ : ℝ≥0) (z : ℝ) (n : ℕ)
+    (j : ℕ → ℝ) :
+    mertonTerminal S_0 r σ T k Λ z n j = jumpDiffusionTerminal S_0 r σ T (k * Λ) z n j :=
+  rfl
 
 /-- The jump-diffusion terminal price with the jump part `−κ + ∑_{i<n} jᵢ` split off. -/
 lemma jumpDiffusionTerminal_eq (S_0 r σ T κ z : ℝ) (n : ℕ) (j : ℕ → ℝ) :

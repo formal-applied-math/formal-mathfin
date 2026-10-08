@@ -28,18 +28,20 @@ The price functions satisfy put–call parity (`jumpDiffusionCallPrice_eq`): the
 `(x − K)⁺ − (K − x)⁺ = x − K` (`max_sub_max_neg`) integrated against the log-return law.
 
 At the compensated drift `b = r − σ²/2 − Λ(𝔼[e^J] − 1)` the call price function is Merton's
-formula for the jump law: the log-return law over `τ` is the law of the canonical model at
-intensity `Λτ`, on which the call is the `Poisson(Λτ)` mixture of Black–Scholes prices
-(`JumpDiffusionHyp.call_eq_integral_infinitePi`). So Merton's formula prices the call at every
-date, at the current spot and the remaining maturity. On the same canonical model the call has a
-Black–Scholes implied volatility above `σ` once jumps occur and move the price
-(`JumpDiffusionHyp.impliedVol_gt`), so the implied volatility of the conditional call value is
-above `σ` at every date.
+formula for the jump law: the log-return law over `τ` is the law of the canonical model with
+expected jump count `Λτ`, on which the call is the `Poisson(Λτ)` mixture of Black–Scholes prices
+(`JumpDiffusionHyp.call_eq_integral_infinitePi`). So Merton's formula is the conditional value of
+the call at every date before maturity, at the current spot and the remaining maturity. On the
+same canonical model the call has a Black–Scholes implied volatility above `σ` once jumps occur
+and move the price (`JumpDiffusionHyp.impliedVol_gt`), so the implied volatility of the
+conditional call value is above `σ` at every date before maturity, almost surely.
 
 ## Main results
 
-* `JumpDiffusionProcess.condExp_comp`: `𝔼[f(X_T) | 𝓕_t] = ∫ f(X_t + y) dμ_{T−t}(y)`, with
-  `μ_{T−t}` the log-return law over `T − t`, for measurable `f` with `f(X_T)` integrable.
+* `JumpDiffusionProcess.condExp_comp_prodMk`:
+  `𝔼[g(X_t, X_T − X_t) | 𝓕_t] = ∫ g(X_t, y) dμ_{T−t}(y)`, with `μ_{T−t}` the log-return law over
+  `T − t`, for Banach-valued `g`; and its case `JumpDiffusionProcess.condExp_comp`,
+  `𝔼[f(X_T) | 𝓕_t] = ∫ f(X_t + y) dμ_{T−t}(y)`.
 * `jumpDiffusionCallPrice_eq`, put–call parity of the price functions:
   `C(S, τ) = P(S, τ) + S·e^{(b + σ²/2 + Λ(𝔼[e^J] − 1) − r)τ} − Ke^{−rτ}`; at the compensated
   drift, `C − P = S − Ke^{−rτ}` (`jumpDiffusionCallPrice_eq_of_compensated`).
@@ -65,13 +67,16 @@ open MeasureTheory ProbabilityTheory Real
 open scoped NNReal
 
 /-- The jump-diffusion put price function: the discounted expected payoff `e^{−rτ}(K − Se^Y)⁺`
-over a time `τ`, with `Y` a jump-diffusion log-return over `τ` (`jumpDiffusionIncrementLaw`). -/
+over a time `τ`, with `Y` a jump-diffusion log-return over `τ` (`jumpDiffusionIncrementLaw`). It
+is an arbitrage-free price only at the compensated drift, where the discounted price is a
+martingale (`JumpDiffusionProcess.martingale_iff`). -/
 noncomputable def jumpDiffusionPutPrice (S K r b σ : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ) (τ : ℝ≥0) :
     ℝ :=
   ∫ y, rexp (-r * τ) * max (K - S * rexp y) 0 ∂(jumpDiffusionIncrementLaw b σ Λ ν τ)
 
 /-- The jump-diffusion call price function: the discounted expected payoff `e^{−rτ}(Se^Y − K)⁺`
-over a time `τ`, with `Y` a jump-diffusion log-return over `τ`. -/
+over a time `τ`, with `Y` a jump-diffusion log-return over `τ`. Like the put's, it is an
+arbitrage-free price only at the compensated drift. -/
 noncomputable def jumpDiffusionCallPrice (S K r b σ : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ) (τ : ℝ≥0) :
     ℝ :=
   ∫ y, rexp (-r * τ) * max (S * rexp y - K) 0 ∂(jumpDiffusionIncrementLaw b σ Λ ν τ)
@@ -127,8 +132,8 @@ theorem jumpDiffusionCallPrice_eq_of_compensated {S K r b σ : ℝ} {Λ : ℝ≥
     ring
   rw [jumpDiffusionCallPrice_eq S K r b σ Λ hν τ, h0, Real.exp_zero, mul_one]
 
-/-- At the compensated drift the call price function is the call of the canonical model at
-intensity `Λτ`: the log-return over `τ` (`jumpDiffusionLogReturn`) is the exponent of
+/-- At the compensated drift the call price function is the call of the canonical model with
+expected jump count `Λτ`: the log-return over `τ` (`jumpDiffusionLogReturn`) is the exponent of
 `jumpDiffusionTerminal` with the compensator `κ = Λτ(𝔼[e^J] − 1)`. -/
 lemma jumpDiffusionCallPrice_eq_canonical (S K : ℝ) {r b σ : ℝ} {Λ : ℝ≥0} {ν : Measure ℝ}
     (hb : b = r - σ ^ 2 / 2 - Λ * (∫ x, rexp x ∂ν - 1)) (τ : ℝ≥0) :
@@ -149,8 +154,9 @@ lemma jumpDiffusionCallPrice_eq_canonical (S K : ℝ) {r b σ : ℝ} {Λ : ℝ�
 `b = r − σ²/2 − Λ(𝔼[e^J] − 1)`, the call price function is Merton's formula for the jump law `ν`:
 the `Poisson(Λτ)` mixture, over the jump count `n`, of the Black–Scholes price at the spot
 `Se^{−Λτ(𝔼[e^J] − 1) + ∑_{i<n} jᵢ}`, averaged over the jump sizes `j ∼ ν^ℕ`. The price function is
-the call of the canonical model at intensity `Λτ` (`jumpDiffusionCallPrice_eq_canonical`), on
-which the call is `JumpDiffusionHyp.call_eq_integral_infinitePi`. -/
+the call of the canonical model with expected jump count `Λτ`
+(`jumpDiffusionCallPrice_eq_canonical`), on which the call is
+`JumpDiffusionHyp.call_eq_integral_infinitePi`. -/
 theorem jumpDiffusionCallPrice_eq_merton {S K r b σ : ℝ} (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ)
     {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν] (hν : Integrable rexp ν)
     (hb : b = r - σ ^ 2 / 2 - Λ * (∫ x, rexp x ∂ν - 1)) {τ : ℝ≥0} (hτ : 0 < τ) :
@@ -166,9 +172,9 @@ theorem jumpDiffusionCallPrice_eq_merton {S K r b σ : ℝ} (hS : 0 < S) (hK : 0
 
 /-- **Jumps lift the implied volatility of the call price function.** At the compensated drift,
 if jumps occur (`Λ > 0`, `τ > 0`) and move the price (the jump law is not the point mass at `0`),
-the call price function `C(S, τ)` is the Black–Scholes price at exactly one volatility, and that
-volatility is above `σ`: `JumpDiffusionHyp.impliedVol_gt` on the canonical model at intensity
-`Λτ`. -/
+the call price function `C(S, τ)` is the Black–Scholes price at exactly one positive volatility,
+and that volatility is above `σ`: `JumpDiffusionHyp.impliedVol_gt` on the canonical model with
+expected jump count `Λτ`. -/
 theorem jumpDiffusionCallPrice_impliedVol_gt {S K r b σ : ℝ} (hS : 0 < S) (hK : 0 < K)
     (hσ : 0 < σ) {Λ : ℝ≥0} (hΛ : 0 < Λ) {ν : Measure ℝ} [IsProbabilityMeasure ν]
     (hν : Integrable rexp ν) (hν0 : ν ≠ Measure.dirac 0)
@@ -194,20 +200,34 @@ namespace JumpDiffusionProcess
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}
   {X : ℝ≥0 → Ω → ℝ} {b σ : ℝ} {Λ : ℝ≥0} {ν : Measure ℝ}
 
+/-- **Payoffs of the current state and the increment.** Given `𝓕_t`, a payoff
+`g(X_t, X_T − X_t)` at `T ≥ t`, with values in any Banach space, `g` strongly measurable and the
+payoff integrable, has conditional expectation `∫ g(X_t, y) dμ(y)`, with `μ` the log-return law
+over the remaining time `T − t` (`jumpDiffusionIncrementLaw`): the conditional freezing lemma
+(`condExp_comp_prodMk_of_indep`) on the process, since `X_t` is known at `t` and the increment is
+independent of `𝓕_t` with law `μ`. A payoff of the increment alone is a forward-start payoff. -/
+theorem condExp_comp_prodMk {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [CompleteSpace E] (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsFiniteMeasure P]
+    {g : ℝ × ℝ → E} (hg : StronglyMeasurable g) {t T : ℝ≥0} (htT : t ≤ T)
+    (hgi : Integrable (fun ω ↦ g (X t ω, X T ω - X t ω)) P) :
+    P[fun ω ↦ g (X t ω, X T ω - X t ω) | 𝓕 t]
+      =ᵐ[P] fun ω ↦ ∫ y, g (X t ω, y) ∂(jumpDiffusionIncrementLaw b σ Λ ν (T - t)) := by
+  rw [← (h.law t T htT).map_eq]
+  exact condExp_comp_prodMk_of_indep (𝓕.le t) (h.adapted t).measurable
+    (h.law t T htT).aemeasurable (h.indep t T htT) hg hgi
+
 /-- **European payoffs at intermediate dates.** Given `𝓕_t`, a payoff `f(X_T)` at `T ≥ t`, with
 `f` measurable and `f(X_T)` integrable, has conditional expectation `F(X_t)`, where
 `F(x) = ∫ f(x + y) dμ(y)` averages over the log-return law `μ` over the remaining time `T − t`
-(`jumpDiffusionIncrementLaw`): `X_t` is known at `t`, and the increment `X_T − X_t` is independent
-of `𝓕_t` with law `μ` (`condExp_comp_prodMk_of_indep`). -/
+(`jumpDiffusionIncrementLaw`): the case `g(x, y) = f(x + y)` of `condExp_comp_prodMk`. -/
 theorem condExp_comp (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsFiniteMeasure P] {f : ℝ → ℝ}
     (hf : Measurable f) {t T : ℝ≥0} (htT : t ≤ T) (hfi : Integrable (fun ω ↦ f (X T ω)) P) :
     P[fun ω ↦ f (X T ω) | 𝓕 t]
       =ᵐ[P] fun ω ↦ ∫ y, f (X t ω + y) ∂(jumpDiffusionIncrementLaw b σ Λ ν (T - t)) := by
-  have key := condExp_comp_prodMk_of_indep (𝓕.le t) (h.adapted t).measurable
-    (h.law t T htT).aemeasurable (h.indep t T htT) (g := fun z : ℝ × ℝ ↦ f (z.1 + z.2))
-    (hf.comp measurable_add).stronglyMeasurable (by simpa only [add_sub_cancel] using hfi)
+  have key := h.condExp_comp_prodMk (g := fun z : ℝ × ℝ ↦ f (z.1 + z.2))
+    (hf.comp measurable_add).stronglyMeasurable htT (by simpa only [add_sub_cancel] using hfi)
   simp only [add_sub_cancel] at key
-  rwa [(h.law t T htT).map_eq] at key
+  exact key
 
 /-- **The put at an intermediate date.** Given `𝓕_t`, the discounted put payoff at `T` has
 conditional expectation `P(S_t, T − t)`, the put price function at the current price and the
@@ -261,11 +281,11 @@ theorem condExp_call_eq_merton (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν)
     jumpDiffusionCallPrice_eq_merton (mul_pos hS_0 (Real.exp_pos _)) hK hσ hν hb
       (tsub_pos_of_lt htT)
 
-/-- **Jumps lift the implied volatility at every date.** At the compensated drift, if jumps occur
-(`Λ > 0`) and move the price (the jump law is not the point mass at `0`), then for `t < T`, almost
-surely, the conditional value of the call given `𝓕_t` is the Black–Scholes price, at the current
-price `S_t` and the remaining maturity `T − t`, of exactly one volatility, and that volatility is
-above `σ` (`condExp_call`, `jumpDiffusionCallPrice_impliedVol_gt`). -/
+/-- **Jumps lift the implied volatility at every date before maturity.** At the compensated drift,
+if jumps occur (`Λ > 0`) and move the price (the jump law is not the point mass at `0`), then for
+`t < T`, almost surely, the conditional value of the call given `𝓕_t` is the Black–Scholes price,
+at the current price `S_t` and the remaining maturity `T − t`, of exactly one positive volatility,
+and that volatility is above `σ` (`condExp_call`, `jumpDiffusionCallPrice_impliedVol_gt`). -/
 theorem condExp_call_impliedVol_gt (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν)
     [IsProbabilityMeasure ν] (hν : Integrable rexp ν)
     (hν0 : ν ≠ Measure.dirac 0) (hΛ : 0 < Λ) {r : ℝ}

@@ -109,8 +109,9 @@ Three entries added, all `full`: `mf-bs-gaussian-smoothing`, `mf-merton-from-gen
 Safe wording: "averaging a Black–Scholes call over a lognormal spot factor is a Black–Scholes call
 at the shifted spot and the enlarged volatility; with lognormal jumps the general jump-diffusion
 formula is Merton's 1976 series, and in a log-price process with independent jump-diffusion
-increments it prices the call and the put at every date". Not covered: the existence of the
-process; `MertonHyp` as an instance of `JumpDiffusionHyp`.
+increments, at the compensated drift `b = r − σ²/2 − Λk`, it is the conditional value of the call
+and the put at every date before maturity". Not covered: the existence of the process with jumps;
+`MertonHyp` as an instance of `JumpDiffusionHyp`.
 
 ### Prices at every date; Merton's formula and the implied-volatility lift at every date (2026-10-08)
 
@@ -129,8 +130,9 @@ Corpus 472 → 477.
   (`JumpDiffusionProcess.condExp_put`, `JumpDiffusionProcess.condExp_call`). Both are instances
   of `JumpDiffusionProcess.condExp_comp`, the conditional freezing lemma applied to the process
   (see the 484 → 486 section): `X_t` is known at `t`, and the increment is independent of `𝓕_t`.
-  At the compensated drift these are prices (`P` is then a martingale measure); at any other drift
-  they are `P`-conditional expectations.
+  At the compensated drift `P` is a martingale measure, so these are arbitrage-free prices, the
+  ones under `P` (the market is incomplete, so not the only ones); at any other drift they are only
+  `P`-conditional expectations.
 - Merton's formula at every date: at the compensated drift the call price function is the call of
   the canonical model with expected jump count `Λτ` (`jumpDiffusionCallPrice_eq_canonical`), so it
   is the
@@ -160,10 +162,10 @@ Five entries added, all `full`: `mf-jump-diffusion-model-exists`,
 
 - The model exists, `jumpDiffusionHyp_canonical` (`BlackScholes/JumpDiffusionCanonical.lean`):
   for every expected jump count `Λ` and every jump law `ν`, the coordinates of `ℝ × ℕ × (ℕ → ℝ)`
-  under `N(0, 1) ⊗ Poisson(Λ) ⊗ ν^ℕ` satisfy `JumpDiffusionHyp`, with jumps of law `ν`. Every
-  `JumpDiffusionHyp` result can therefore be instantiated, for any `Λ` and any `ν` with
-  `∫ eˣ dν < ∞` (`integrable_exp_canonical_jump`); `MertonHyp` was witnessed later
-  (`mertonHyp_canonical`).
+  under `N(0, 1) ⊗ Poisson(Λ) ⊗ ν^ℕ` satisfy `JumpDiffusionHyp`, with jumps of law `ν`.
+  `JumpDiffusionHyp` can therefore be discharged for any `Λ` and `ν`; the remaining hypotheses on
+  the model are `∫ eˣ dν < ∞` (`integrable_exp_canonical_jump`) and, for the implied-volatility
+  result, `Λ > 0` and `ν ≠ δ₀`. `MertonHyp` was witnessed later (`mertonHyp_canonical`).
 - The call depends only on `Λ` and the jump law, `JumpDiffusionHyp.call_eq_integral_infinitePi`:
   on any model with `𝔼[e^{J₀}] < ∞`, for `S₀, K, σ, T > 0`, it is
   `∫ n, ∫ x, C_BS(S₀e^{−κ + ∑_{i<n} xᵢ}) dν^ℕ dPoisson(Λ)`, with `ν` the law of `J₀`.
@@ -177,8 +179,8 @@ Five entries added, all `full`: `mf-jump-diffusion-model-exists`,
   `e^{X_t − ψ(t)}` is a martingale when the increments are independent of the past with
   `𝔼[e^{X_t − X_s}] = e^{ψ(t) − ψ(s)}`.
 
-Safe wording: "the compound-Poisson jump-diffusion model exists for every intensity and jump law,
-its call price depends only on the intensity and the jump law, and a log-price process with
+Safe wording: "the compound-Poisson jump-diffusion model exists for every expected jump count and
+jump law, its call price depends only on the expected jump count and the jump law, and a log-price process with
 independent jump-diffusion increments has a martingale discounted price exactly at the compensated
 drift". Not covered: the existence of such a process (a Lévy process up to path regularity;
 constructing it needs a Kolmogorov extension or a construction from a Brownian motion and a

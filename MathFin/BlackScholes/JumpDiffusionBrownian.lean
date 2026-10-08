@@ -153,17 +153,13 @@ theorem jumpDiffusionProcess (b σ : ℝ) (ν : Measure ℝ) [IsProbabilityMeasu
     filter_upwards [h0.ae_eq_of_dirac] with ω (hω : B 0 ω = 0)
     simp [hω]
   indep s t hst := by
-    have hfun : (fun ω ↦ (b * (t : ℝ) + σ * B t ω) - (b * s + σ * B s ω))
-        = (fun y ↦ b * ((t : ℝ) - s) + σ * y) ∘ fun ω ↦ B t ω - B s ω := by
-      funext ω
-      simp only [Function.comp_apply]
-      ring
-    have hm : Measurable[MeasurableSpace.comap (fun ω ↦ B t ω - B s ω) (borel ℝ)]
-        (fun ω ↦ (b * (t : ℝ) + σ * B t ω) - (b * s + σ * B s ω)) := by
-      rw [hfun]
-      exact (by fun_prop : Measurable fun y : ℝ ↦ b * ((t : ℝ) - s) + σ * y).comp
-        (Measurable.of_comap_le le_rfl)
-    exact indep_of_indep_of_le_left (hB.indep s t hst) hm.comap_le
+    -- the increment of `X` is an affine function of the Brownian increment
+    refine indep_of_indep_of_le_left (hB.indep s t hst)
+      (MeasurableSpace.comap_le_comap_of_eq_comp (fun y ↦ b * ((t : ℝ) - s) + σ * y)
+        (by fun_prop : Measurable fun y : ℝ ↦ b * ((t : ℝ) - s) + σ * y) ?_)
+    funext ω
+    simp only [Function.comp_apply]
+    ring
   law s t hst := by
     rw [jumpDiffusionIncrementLaw_zero]
     have h := gaussianReal_const_add

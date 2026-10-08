@@ -18,9 +18,9 @@ independent of the sizes. Here `Λ` is the expected number of jumps to maturity 
 rate `λ`). This file shows that the assumptions can be met for every `Λ` and every jump law `ν`:
 on `ℝ × ℕ × (ℕ → ℝ)` with the product of `N(0, 1)`, `Poisson(Λ)` and the infinite product `ν^ℕ`
 (`jumpDiffusionMeasure`), the coordinates satisfy them (`jumpDiffusionHyp_canonical`). So the
-`JumpDiffusionHyp` theorems are not vacuous; their remaining hypotheses are conditions on `Λ` and
-`ν`, such as `∫ eˣ dν < ∞` (`integrable_exp_canonical_jump`). With Gaussian jumps the same model
-is a Merton model (`mertonHyp_canonical`).
+`JumpDiffusionHyp` theorems are not vacuous; their remaining hypotheses on the model are
+conditions on `Λ` and `ν`, such as `∫ eˣ dν < ∞` (`integrable_exp_canonical_jump`). With Gaussian
+jumps the same model is a Merton model (`mertonHyp_canonical`).
 
 It also shows that the call depends on the model only through `Λ` and the law of the jumps. On
 any probability space satisfying `JumpDiffusionHyp`, the jump sizes are i.i.d., so their sequence

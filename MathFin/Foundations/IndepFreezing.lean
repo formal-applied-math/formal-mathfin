@@ -148,8 +148,9 @@ theorem integral_comp_of_hasLaw_of_countable [Countable α] [MeasurableSingleton
 /-! ### The conditional freezing lemma -/
 
 /-- On an event `s` of a σ-algebra `m` for which `X` is measurable and of which `Y` is independent,
-the joint law of `(X, Y)` is the law of `X` on `s` times the law of `Y`: restricting to `s` changes
-neither the law of `Y` nor its independence from `X`. -/
+the joint law of `(X, Y)` under `P` restricted to `s` is the law of `X` on `s` times the law of `Y`
+under `P`. Normalized by `P(s)`, it says that given `s`, `Y` keeps its law and stays independent of
+`X`. -/
 theorem map_restrict_prodMk_of_indep (hm : m ≤ mΩ) (hX : Measurable[m] X) (hY : AEMeasurable Y P)
     (hi : Indep (MeasurableSpace.comap Y mβ) m P) {s : Set Ω} (hs : MeasurableSet[m] s) :
     (P.restrict s).map (fun ω ↦ (X ω, Y ω)) = ((P.restrict s).map X).prod (P.map Y) := by

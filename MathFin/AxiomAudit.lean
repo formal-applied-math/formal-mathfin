@@ -680,13 +680,16 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 -- over the increment with X_t frozen (the conditional freezing lemma, also behind the
 -- American put's Brownian transitions); the put and the call are their price
 -- functions at S_t and T − t; at the compensated drift the call price function is
--- Merton's formula, with implied volatility above σ at every date
+-- Merton's formula, with implied volatility above σ at every date before maturity
 
 /-- info: 'MathFin.condExp_exp_eq_of_indep_increment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.condExp_exp_eq_of_indep_increment
 
 /-- info: 'MathFin.condExp_comp_prodMk_of_indep' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.condExp_comp_prodMk_of_indep
+
+/-- info: 'MathFin.JumpDiffusionProcess.condExp_comp_prodMk' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.condExp_comp_prodMk
 
 /-- info: 'MathFin.JumpDiffusionProcess.condExp_comp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.condExp_comp
@@ -710,7 +713,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.condExp_call_impliedVol_gt
 
 -- Gaussian smoothing of the Black–Scholes price; Merton's 1976 series from the
--- general jump-diffusion, and at every date of the price process (2026-10-08)
+-- general jump-diffusion, and at every date before maturity of the price process (2026-10-08)
 
 /-- info: 'MathFin.integral_bsV_mul_exp_gaussianReal_of_sq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.integral_bsV_mul_exp_gaussianReal_of_sq
@@ -726,7 +729,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 -- Coherence bridges (2026-10-08): Brownian motion with drift is a jump-diffusion
 -- without jumps (witnessed on the constructed Brownian motion), so the process
--- results contain Black–Scholes at every date; Merton's model exists
+-- results contain Black–Scholes at every date before maturity; Merton's model exists
 
 /-- info: 'MathFin.jumpDiffusionProcess_brownian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionProcess_brownian

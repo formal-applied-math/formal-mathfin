@@ -1874,7 +1874,7 @@ discounted price is a martingale exactly at the compensated drift
 `b = r − σ²/2 − Λ(𝔼[e^J] − 1)`. One general lemma does the work
 (`Foundations/ExpMartingaleIndepIncrements.lean`): the exponential of a process with independent
 increments, normalised by its mean, is a martingale. With no jumps it is, mathematically, the
-Wald martingale behind `gir-continuous-ftap`, which is proved separately.
+Wald martingale behind `gir-continuous-ftap`, which is derived from it since the 484→486 phase.
 
 **Next on the jump axis:**
 
@@ -1897,12 +1897,15 @@ The previous phase's process carried only its martingale property. This phase pr
 it. The conditional value of a put or call payoff at `T` given `𝓕_t` depends on the past only
 through `S_t` (the argument covers any bounded payoff; only these two are stated): `X_t` is known at `t`, and the increment `X_T − X_t` is independent of `𝓕_t`, so the
 payoff is averaged over the increment with `X_t` frozen. For the put this is the freezing lemma of
-the American-put development (`condExp_independent_kernel`), which needs a bounded payoff. The
+the American-put development (`condExp_independent_kernel`), which needs a bounded payoff
+(superseded in the 484→486 phase: both options are now instances of
+`JumpDiffusionProcess.condExp_comp`, and the bounded lemma is deleted). The
 call is the put plus a forward, whose random part `e^{X_T}` has conditional expectation
 `e^{X_t}·𝔼[e^{X_T − X_t}]` (`condExp_exp_eq_of_indep_increment`, lifted out of the martingale
 proof). The price functions satisfy put–call parity, and both identities hold for any drift
-(`BlackScholes/JumpDiffusionOptionPrices.lean`): at the compensated drift they are prices, at any
-other drift `P`-conditional expectations.
+(`BlackScholes/JumpDiffusionOptionPrices.lean`): at the compensated drift they are arbitrage-free
+prices under `P` (the market is incomplete, so not the only ones), at any other drift
+`P`-conditional expectations.
 
 At the compensated drift the process meets the single-date results. The log-return law over `τ`
 is by definition the image of the canonical model with expected jump count `Λτ`, so the call
@@ -1940,9 +1943,9 @@ smoothing: averaging a Black–Scholes call over a lognormal factor `e^G` on the
 backwards: the average is the call of a model whose log-shock `σ√T·Z + G` is Gaussian. With `G` the
 sum of `n` Gaussian log-jumps, it is the `n`-th term of Merton's series, so the general route now
 reaches `mertonCallPrice` (`JumpDiffusionHyp.call_eq_mertonCallPrice`). Through the canonical model
-the same identity holds for the price function of the process, so with Gaussian jumps the
-conditional call value at every date is Merton's 1976 series at the current price and the
-remaining maturity (`BlackScholes/JumpDiffusionMerton.lean`). The put follows from the two
+the same identity holds for the price function of the process, so with Gaussian jumps, at the
+compensated drift, the conditional call value at every date before maturity is Merton's 1976
+series at the current price and the remaining maturity (`BlackScholes/JumpDiffusionMerton.lean`). The put follows from the two
 put–call parities, the price functions' and Merton's.
 
 **Next on the jump axis:**
@@ -1961,8 +1964,8 @@ is Gaussian, so Brownian motion with drift, built from a filtered pre-Brownian m
 `JumpDiffusionProcess` (`BlackScholes/JumpDiffusionBrownian.lean`). The Brownian motion
 constructed for the American-put development then makes the structure satisfiable without jumps.
 The process-level jump results specialize to the Black–Scholes model: the discounted price is a
-martingale exactly at the risk-neutral drift, which adds the converse of the continuous-time
-first FTAP (`gir-continuous-ftap`), and the Black–Scholes call and put formulas hold at every date
+martingale exactly at the risk-neutral drift, which adds the converse of
+`discountedGBM_isMartingale` (`gir-continuous-ftap`): no other drift gives a martingale, and the Black–Scholes call and put formulas hold at every date
 before maturity, at the current price and the remaining maturity. On the Merton side, a
 jump-diffusion with Gaussian log-jumps is a Merton model (`JumpDiffusionHyp.toMertonHyp`), so the
 canonical model witnesses `MertonHyp` and the Merton entries' hypotheses can be met.
@@ -1971,8 +1974,10 @@ canonical model witnesses `MertonHyp` and the Merton entries' hypotheses can be 
 
 1. One integrable conditional freezing lemma in `Foundations/IndepFreezing`, consumed by the
    American-put development and by a single `JumpDiffusionProcess.condExp_payoff`, so put, call
-   and parity follow without the bounded-payoff detour.
-2. The Wald martingale as a corollary of `martingale_exp_sub_of_indep_increments`.
+   and parity follow without the bounded-payoff detour. (Done in the next phase, as
+   `JumpDiffusionProcess.condExp_comp`.)
+2. The Wald martingale as a corollary of `martingale_exp_sub_of_indep_increments`. (Done in the
+   next phase.)
 3. Construct the price process with jumps: a compound Poisson process independent of the Brownian
    motion, or a Poisson random measure (`Foundations/PoissonRandomMeasure.lean` is a
    hypothesis-bundling structure, not yet witnessed).
@@ -1993,8 +1998,8 @@ Brownian transitions consume the general one.
 
 On the process this gives `JumpDiffusionProcess.condExp_comp`: given `𝓕_t`, a payoff `f(X_T)` is
 `f` averaged over the remaining log-return, started from `X_t`, the Markov property at two fixed
-dates. The put and the call are instances, each losing its sign hypotheses, and the call's parity
-detour is gone. The same pass removed duplication the values panel found:
+dates. The put and the call are instances: the put drops `K ≥ 0` (it keeps `S₀ ≥ 0`, which bounds
+its payoff), and the call drops `S₀, K ≥ 0` and its parity detour. The same pass removed duplication the values panel found:
 - price-function parity cites the finite-state payoff identity `max_sub_max_neg`;
 - the canonical model's count–size independence is Mathlib's `indepFun_iff_hasLaw_prodMk_prod`,
   so the repo's pull-back lemma `indepFun_comp_of_measurePreserving` is deleted;
@@ -2008,7 +2013,8 @@ detour is gone. The same pass removed duplication the values panel found:
 The Wald martingale of Brownian motion, proved by hand since the Brownian foundations, is now the
 exponential martingale of the process `αB` (`martingale_exp_sub_of_indep_increments`, with the
 Gaussian moment `𝔼[e^{α(B_t − B_s)}] = e^{α²(t − s)/2}`), so the continuous-time first FTAP, the
-Girsanov change of measure and the jump-diffusion martingale property share one lemma.
+constant-θ Girsanov change of measure and the jump-diffusion martingale property share one lemma
+(adapted and predictable θ still freeze by hand, in `SimpleDoleansExponential`).
 
 **Next on the jump axis:**
 
@@ -2017,7 +2023,8 @@ Girsanov change of measure and the jump-diffusion martingale property share one 
    hypothesis-bundling structure, not yet witnessed).
 2. An implied-volatility function, after the `σ → 0` limit, so the smile can be stated as a
    function of the strike; Lee's moment formula; the characteristic function; Kou's compensator.
-3. The pull-out-plus-independence step (`condExp_mul_of_stronglyMeasurable_left` with
-   `condExp_indep_eq`) is still written by hand in the square-minus-time martingale, the
-   pointwise bracket, the simple Doléans exponential and the `Q`-Brownian exponential martingale;
-   one `condExp_mul_of_indep` would serve them all.
+3. The freezing step is still written by hand (pull-out with `condExp_mul_of_stronglyMeasurable_left`,
+   independence with `condExp_indep_eq`) in the square-minus-time martingale, the pointwise
+   bracket, the simple Doléans exponential (its private freezing of `exp(c·Δ)` for an adapted `c`)
+   and the `Q`-Brownian exponential martingale. `condExp_comp_prodMk_of_indep` already covers all
+   of them (the product form is its case `g(x, y) = x·h(y)`), so this is routing, not a new lemma.
