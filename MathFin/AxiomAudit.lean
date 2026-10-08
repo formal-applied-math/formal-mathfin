@@ -785,6 +785,9 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.jumpDiffusionIncrementLaw_tilted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionIncrementLaw_tilted
 
+/-- info: 'MathFin.existsUnique_esscher' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.existsUnique_esscher
+
 /-- info: 'MathFin.integral_call_tilted_eq_merton' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.integral_call_tilted_eq_merton
 

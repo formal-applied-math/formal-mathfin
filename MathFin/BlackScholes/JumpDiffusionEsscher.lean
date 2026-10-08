@@ -27,6 +27,8 @@ law `ν` (`jumpDiffusionIncrementLaw`), whose Laplace exponent is `κ` (`jumpDif
 * `compensated_tilted_iff`: the tilted characteristics are at their compensated drift exactly
   when `κ(θ + 1) − κ(θ) = r`, the Esscher condition: the criterion `κ(1) = r`
   (`compensated_iff_exponent_one`) for the tilted Laplace exponent `u ↦ κ(u + θ) − κ(θ)`.
+* `existsUnique_esscher`: with a Gaussian part (`σ ≠ 0`) and every exponential moment of `ν`, the
+  Esscher condition has exactly one solution, the Esscher parameter.
 * `integral_call_tilted_eq_jumpDiffusionCallPrice`: the call integrated against the tilted law is
   the call price function of the tilted characteristics, so results about price functions apply.
 * `integral_call_tilted_eq_merton`: at an Esscher parameter it is Merton's formula for the tilted
@@ -42,8 +44,8 @@ law `ν` (`jumpDiffusionIncrementLaw`), whose Laplace exponent is `κ` (`jumpDif
 
 The statements are about the law at one date, not about the process under a changed measure. With
 jumps (`Λ > 0`) the market is in general incomplete (not formalized here), and the Esscher law is
-then one pricing law among others. The existence of an Esscher parameter is proved only without
-jumps.
+then one pricing law among others. Without a Gaussian part (`σ = 0`) the existence of an Esscher
+parameter is not proved.
 -/
 
 @[expose] public section
@@ -102,6 +104,69 @@ lemma compensated_tilted_iff (b σ r : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ} [N
         - (Λ * jumpMoment ν θ : ℝ≥0) * (∫ x, rexp x ∂(ν.tilted (θ * ·)) - 1)
       ↔ jumpDiffusionExponent b σ Λ ν (1 + θ) - jumpDiffusionExponent b σ Λ ν θ = r := by
   rw [compensated_iff_exponent_one, jumpDiffusionExponent_tilted b σ Λ hθ 1]
+
+/-! ### The Esscher parameter -/
+
+/-- **The Esscher map written out**: `κ(1 + θ) − κ(θ) = b + σ²/2 + σ²θ + Λ(m(1 + θ) − m(θ))`, with
+`m(θ) = ∫ e^{θx} dν`. -/
+lemma jumpDiffusionExponent_one_add_sub (b σ : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ) (θ : ℝ) :
+    jumpDiffusionExponent b σ Λ ν (1 + θ) - jumpDiffusionExponent b σ Λ ν θ
+      = b + σ ^ 2 / 2 + σ ^ 2 * θ + Λ * (∫ x, rexp ((1 + θ) * x) ∂ν - ∫ x, rexp (θ * x) ∂ν) := by
+  simp only [jumpDiffusionExponent]
+  ring
+
+/-- The jump part of the Esscher map, `θ ↦ ∫ e^{(1 + θ)x} dν − ∫ e^{θx} dν = ∫ e^{θx}(eˣ − 1) dν`,
+is nondecreasing: for `θ ≤ θ'` the difference of integrands `(e^{θ'x} − e^{θx})(eˣ − 1)` is
+nonnegative, both factors having the sign of `x`. -/
+lemma monotone_integral_exp_one_add_sub {ν : Measure ℝ}
+    (hν : ∀ u, Integrable (fun x ↦ rexp (u * x)) ν) :
+    Monotone fun θ ↦ ∫ x, rexp ((1 + θ) * x) ∂ν - ∫ x, rexp (θ * x) ∂ν := by
+  intro θ θ' hθ
+  show ∫ x, rexp ((1 + θ) * x) ∂ν - ∫ x, rexp (θ * x) ∂ν
+      ≤ ∫ x, rexp ((1 + θ') * x) ∂ν - ∫ x, rexp (θ' * x) ∂ν
+  rw [← integral_sub (hν _) (hν _), ← integral_sub (hν _) (hν _)]
+  refine integral_mono ((hν _).sub (hν _)) ((hν _).sub (hν _)) fun x ↦ ?_
+  show rexp ((1 + θ) * x) - rexp (θ * x) ≤ rexp ((1 + θ') * x) - rexp (θ' * x)
+  have key : 0 ≤ (rexp (θ' * x) - rexp (θ * x)) * (rexp x - 1) := by
+    rcases le_total 0 x with hx | hx
+    · exact mul_nonneg (sub_nonneg.2 (Real.exp_le_exp.2 (mul_le_mul_of_nonneg_right hθ hx)))
+        (sub_nonneg.2 (Real.one_le_exp hx))
+    · exact mul_nonneg_of_nonpos_of_nonpos
+        (sub_nonpos.2 (Real.exp_le_exp.2 (mul_le_mul_of_nonpos_right hθ hx)))
+        (sub_nonpos.2 (Real.exp_le_one_iff.2 hx))
+  rw [add_mul, add_mul, one_mul, Real.exp_add, Real.exp_add]
+  linarith
+
+open Filter in
+/-- **The Esscher parameter exists and is unique** when there is a Gaussian part, `σ ≠ 0`, and the
+jump law has every exponential moment: exactly one `θ` satisfies `κ(θ + 1) − κ(θ) = r`. The map
+`θ ↦ κ(1 + θ) − κ(θ)` is the strictly increasing line `b + σ²/2 + σ²θ` plus `Λ` times a
+nondecreasing jump part (`monotone_integral_exp_one_add_sub`). It is continuous
+(`continuous_jumpDiffusionExponent`) and unbounded in both directions, so it takes the value `r`
+(`Continuous.surjective`) exactly once. -/
+theorem existsUnique_esscher (b σ r : ℝ) (hσ : σ ≠ 0) (Λ : ℝ≥0) {ν : Measure ℝ}
+    (hν : ∀ u, Integrable (fun x ↦ rexp (u * x)) ν) :
+    ∃! θ, jumpDiffusionExponent b σ Λ ν (1 + θ) - jumpDiffusionExponent b σ Λ ν θ = r := by
+  have hσ2 : 0 < σ ^ 2 := sq_pos_iff.2 hσ
+  obtain ⟨g, hg, hF⟩ : ∃ g : ℝ → ℝ, Monotone g ∧ ∀ θ, jumpDiffusionExponent b σ Λ ν (1 + θ)
+      - jumpDiffusionExponent b σ Λ ν θ = b + σ ^ 2 / 2 + σ ^ 2 * θ + Λ * g θ :=
+    ⟨_, monotone_integral_exp_one_add_sub hν, jumpDiffusionExponent_one_add_sub b σ Λ ν⟩
+  have hκ := continuous_jumpDiffusionExponent b σ Λ hν
+  have hκ1 : Continuous fun θ ↦ jumpDiffusionExponent b σ Λ ν (1 + θ) :=
+    hκ.comp (continuous_const.add continuous_id)
+  have hcont : Continuous fun θ ↦ b + σ ^ 2 / 2 + σ ^ 2 * θ + Λ * g θ := (hκ1.sub hκ).congr hF
+  have hmono : StrictMono fun θ ↦ b + σ ^ 2 / 2 + σ ^ 2 * θ + Λ * g θ :=
+    ((strictMono_mul_left_of_pos hσ2).const_add _).add_monotone (hg.const_mul Λ.coe_nonneg)
+  have htop : Tendsto (fun θ ↦ b + σ ^ 2 / 2 + σ ^ 2 * θ + Λ * g θ) atTop atTop :=
+    tendsto_atTop_add_right_of_le' _ (Λ * g 0)
+      (tendsto_atTop_add_const_left _ _ (tendsto_id.const_mul_atTop hσ2))
+      ((eventually_ge_atTop 0).mono fun θ hθ ↦ mul_le_mul_of_nonneg_left (hg hθ) Λ.coe_nonneg)
+  have hbot : Tendsto (fun θ ↦ b + σ ^ 2 / 2 + σ ^ 2 * θ + Λ * g θ) atBot atBot :=
+    tendsto_atBot_add_right_of_ge' _ (Λ * g 0)
+      (tendsto_atBot_add_const_left _ _ (tendsto_id.const_mul_atBot hσ2))
+      ((eventually_le_atBot 0).mono fun θ hθ ↦ mul_le_mul_of_nonneg_left (hg hθ) Λ.coe_nonneg)
+  obtain ⟨θ, hθ⟩ := hcont.surjective htop hbot r
+  exact ⟨θ, (hF θ).trans hθ, fun θ' h ↦ hmono.injective (((hF θ').symm.trans h).trans hθ.symm)⟩
 
 /-- **The Esscher price is a price function of the tilted characteristics.** When the jump law has
 every exponential moment, the discounted call payoff integrated against the Esscher-tilted

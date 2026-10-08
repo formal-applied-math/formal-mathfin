@@ -2072,7 +2072,7 @@ and re-rooted the moment):
 3. The items carried over from the previous phase: the implied-volatility function and the smile;
    routing the hand-frozen conditional expectations through `condExp_comp_prodMk_of_indep`.
 
-## phase: the Esscher transform (2026-10-08, corpus 490→495)
+## phase: the Esscher transform (2026-10-08, corpus 490→496)
 
 The Esscher transform reweights a law by `e^{θy}` and renormalizes it, Mathlib's `Measure.tilted`.
 It now has one home, `Foundations/Esscher.lean`. Tilted moments are ratios of moments
@@ -2101,7 +2101,8 @@ In Merton's model it is Merton's 1976 series with the jump mean `(1 + k)e^{θδ�
 **Next on the jump axis** (this phase did the first half of item 1 of the previous list, at the
 level of the law at one date):
 
-1. The Esscher parameter exists and is unique when `σ ≠ 0`. `θ ↦ κ(θ + 1) − κ(θ)` is
+1. Done (corpus 496): `existsUnique_esscher`. The Esscher parameter exists and is unique when
+   `σ ≠ 0`. `θ ↦ κ(θ + 1) − κ(θ)` is
    `b + σ²/2 + σ²θ + Λ∫ e^{θx}(eˣ − 1) dν`. The jump part is nondecreasing, since
    `(e^{θ'x} − e^{θx})(eˣ − 1) ≥ 0` for `θ ≤ θ'`, so the map is strictly increasing and unbounded
    both ways. It is continuous where `ν` has every exponential moment (Mathlib's `continuous_mgf`),

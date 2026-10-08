@@ -189,6 +189,14 @@ lemma integrable_exp_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν :
   simpa only [one_mul] using integrable_exp_mul_jumpDiffusionIncrementLaw b σ Λ (ν := ν) (θ := 1)
     (by simpa only [one_mul] using hν) τ
 
+/-- With every exponential moment of the jump law, the Laplace exponent is continuous: Mathlib's
+`continuous_mgf` for the jump part. -/
+lemma continuous_jumpDiffusionExponent (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
+    (hν : ∀ u, Integrable (fun x ↦ rexp (u * x)) ν) :
+    Continuous (jumpDiffusionExponent b σ Λ ν) := by
+  have h : Continuous (mgf id ν) := continuous_mgf hν
+  exact (by fun_prop : Continuous fun θ ↦ b * θ + σ ^ 2 * θ ^ 2 / 2 + Λ * (mgf id ν θ - 1))
+
 /-- **The compensated drift is `κ(1) = r`**: `b = r − σ²/2 − Λ(∫ eˣ dν − 1)` exactly when the
 Laplace exponent at `1` is the rate. It is the form in which the discounted-price criterion
 (`JumpDiffusionProcess.martingale_iff_exponent_one`) and the Esscher condition

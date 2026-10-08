@@ -219,7 +219,8 @@ Twelve findings, all applied:
 ### Ranked backlog
 
 1. **The Esscher parameter exists and is unique** for `σ ≠ 0` and jump laws with every
-   exponential moment; drafted.
+   exponential moment. Executed after this review: `existsUnique_esscher`,
+   `mf-jump-diffusion-esscher-parameter` (corpus 496).
 2. **Local MGF uniqueness**, upstreamable: Kou's jumps enter the Esscher layer and the corpus
    disclaimer goes.
 3. **Formal incompleteness at one date**: the Esscher law and the Merton measure (same jump law,
