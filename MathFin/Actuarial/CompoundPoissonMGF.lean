@@ -18,9 +18,10 @@ of the `n`-claim sum `∑_{i<n} Xᵢ` against the Poisson(λ) law of `n` gives
   `∫ n, M_{∑_{i<n} Xᵢ}(t) dPoisson(λ) = exp(λ·(M_X(t) − 1))`,
 
 the compound-Poisson aggregate-loss MGF in mixture form. For a claim count `N ∼ Poisson(λ)`
-independent of the `Xᵢ` the left side is `𝔼[exp(tS)]` with `S = ∑_{i<N} Xᵢ`
-(`compoundPoisson_mgf_of_indepFun`): freezing the count (`Foundations/IndepFreezing.lean`) turns
-the expectation over the random count into the mixture.
+independent of the `Xᵢ`, and `t` with `M_X(t) < ∞`, the left side is `𝔼[exp(tS)]` with
+`S = ∑_{i<N} Xᵢ` (`compoundPoisson_mgf_of_indepFun`): integrating out the count
+(`integral_comp_of_hasLaw_of_countable`, `Foundations/IndepFreezing.lean`) turns the expectation
+over the random count into the mixture.
 
 This composes two genuine theorems rather than positing the algebraic shell
 `e^{−λ}·e^{λM} = e^{λ(M−1)}` (`Actuarial/Mortality.compoundPoisson_mgf_identity`):
@@ -57,13 +58,10 @@ lemma mgf_range_sum_of_iid (t : ℝ) (X : ℕ → Ω → ℝ)
     (hindep : iIndepFun X μ) (hmeas : ∀ i, Measurable (X i))
     (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) (n : ℕ) :
     mgf (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ t = (mgf (X 0) μ t) ^ n := by
-  have hu : Measurable (fun x : ℝ ↦ Real.exp (t * x)) := by fun_prop
-  have hmgf : ∀ i, mgf (X i) μ t = mgf (X 0) μ t := fun i ↦
-    ((hident i).comp hu).integral_eq
   have hsum : (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) = ∑ i ∈ Finset.range n, X i := by
     funext ω; rw [Finset.sum_apply]
-  rw [hsum, hindep.mgf_sum hmeas (Finset.range n),
-    Finset.prod_congr rfl (fun i _ ↦ hmgf i), Finset.prod_const, Finset.card_range]
+  rw [hsum, hindep.mgf_sum hmeas (Finset.range n), Finset.prod_eq_pow_card fun i _ ↦
+    mgf_congr_of_identDistrib _ _ (hident i) t, Finset.card_range]
 
 /-- **The compound-Poisson aggregate-loss MGF, in mixture form.** For i.i.d. claim sizes `Xᵢ`,
 the MGF of the `n`-claim sum integrated against the Poisson(λ) law of `n` is
@@ -88,9 +86,8 @@ lemma integrable_exp_mul_sum_range_of_iid (t : ℝ) (X : ℕ → Ω → ℝ) (hi
 
 /-- **The compound-Poisson aggregate-loss MGF.** For a claim count `N ∼ Poisson(λ)` independent of
 i.i.d. claim sizes `Xᵢ` whose MGF is finite at `t`, the aggregate loss `S = ∑_{i<N} Xᵢ` has
-`𝔼[exp(t·S)] = exp(λ·(M_X(t) − 1))`. Freezing the count
-(`integral_comp_prodMk_of_indepFun_of_countable`) reduces it to the mixture form
-`compoundPoisson_mgf`. -/
+`𝔼[exp(t·S)] = exp(λ·(M_X(t) − 1))`. Integrating out the count
+(`integral_comp_of_hasLaw_of_countable`) reduces it to the mixture form `compoundPoisson_mgf`. -/
 theorem compoundPoisson_mgf_of_indepFun (lam : ℝ≥0) (t : ℝ) {N : Ω → ℕ} (X : ℕ → Ω → ℝ)
     (hN : HasLaw N (poissonMeasure lam) μ) (hindep : iIndepFun X μ)
     (hmeas : ∀ i, Measurable (X i)) (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ)
@@ -101,18 +98,18 @@ theorem compoundPoisson_mgf_of_indepFun (lam : ℝ≥0) (t : ℝ) {N : Ω → �
   have := hindep.isProbabilityMeasure
   have hgm (n : ℕ) : Measurable fun x : ℕ → ℝ ↦ Real.exp (t * ∑ i ∈ Finset.range n, x i) := by
     fun_prop
-  have hint' : Integrable (fun n ↦ mgf (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ t) (μ.map N) := by
-    simp_rw [hN.map_eq, mgf_range_sum_of_iid t X hindep hmeas hident]
+  have hcint : Integrable (fun n ↦ mgf (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ t)
+      (poissonMeasure lam) := by
+    simp_rw [mgf_range_sum_of_iid t X hindep hmeas hident]
     exact PoissonPgf.integrable_pow_poissonMeasure lam _
   calc mgf (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ t
-      = ∫ n, mgf (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ t ∂(μ.map N) :=
-        integral_comp_prodMk_of_indepFun_of_countable
-          (g := fun p : ℕ × (ℕ → ℝ) ↦ Real.exp (t * ∑ i ∈ Finset.range p.1, p.2 i)) hNX
-          hN.aemeasurable (measurable_pi_lambda _ hmeas).aemeasurable hgm
-          (fun _ ↦ (Real.exp_pos _).le)
-          (integrable_exp_mul_sum_range_of_iid t X hindep hmeas hident hint) hint'
-    _ = Real.exp ((lam : ℝ) * (mgf (X 0) μ t - 1)) := by
-        rw [hN.map_eq]
-        exact compoundPoisson_mgf lam t X hindep hmeas hident
+      = ∫ n, mgf (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ t ∂(poissonMeasure lam) :=
+        integral_comp_of_hasLaw_of_countable
+          (F := fun n x ↦ Real.exp (t * ∑ i ∈ Finset.range n, x i))
+          (c := fun n ↦ mgf (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ t) hN
+          (measurable_pi_lambda _ hmeas).aemeasurable hNX hgm (fun _ _ ↦ (Real.exp_pos _).le)
+          (integrable_exp_mul_sum_range_of_iid t X hindep hmeas hident hint) (fun _ ↦ rfl) hcint
+    _ = Real.exp ((lam : ℝ) * (mgf (X 0) μ t - 1)) :=
+        compoundPoisson_mgf lam t X hindep hmeas hident
 
 end MathFin

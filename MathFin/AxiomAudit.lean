@@ -604,11 +604,13 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 -- Jump-diffusions with an arbitrary jump law (2026-10-07): the mixing formula
 -- (the call is the Black–Scholes price averaged over an independent jump
--- part), the compound-Poisson compensator as the unique drift correction, and
--- Merton's eq. (16); conditioning on a Poisson count as one lemma
+-- part), the compound-Poisson compensator as the unique drift correction,
+-- Merton's general formula, and jump risk is never free (Jensen through a
+-- supporting line); integrating out a countable variable and re-associating
+-- mutual independence as one lemma each
 
-/-- info: 'MathFin.integral_comp_of_hasLaw_poissonMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_comp_of_hasLaw_poissonMeasure
+/-- info: 'MathFin.integral_comp_of_hasLaw_of_countable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_comp_of_hasLaw_of_countable
 
 /-- info: 'MathFin.jumpDiffusion_call_eq_integral_bsV' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_call_eq_integral_bsV
@@ -618,6 +620,15 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 /-- info: 'MathFin.JumpDiffusionHyp.call_poisson_mixture' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionHyp.call_poisson_mixture
+
+/-- info: 'MathFin.bsV_le_jumpDiffusion_call' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bsV_le_jumpDiffusion_call
+
+/-- info: 'MathFin.indepFun_prodMk_of_indepFun_prodMk' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.indepFun_prodMk_of_indepFun_prodMk
+
+/-- info: 'MathFin.le_integral_of_affine_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.le_integral_of_affine_le
 
 /-- info: 'MathFin.markovPathMeasure_cylinder' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.markovPathMeasure_cylinder

@@ -32,15 +32,18 @@ log-jump sizes `Jᵢ ∼ N(log(1 + k) − δ²/2, δ²)` are i.i.d., so each jum
 * `mertonTerminal_eq_bsTerminal`, `MertonHyp.hasLaw_mertonStd`: with `n` jumps, `S_T` is the
   Black–Scholes terminal price at spot `mertonSpot n` and volatility `mertonVol n`, driven by the
   standard normal `mertonStd`, which is the total log-shock `σ√T·Z + ∑_{i<n} Jᵢ` standardized.
-  A sum of independent Gaussians is Gaussian (`hasLaw_sum_range_gaussianReal`).
+  A sum of `n` i.i.d. Gaussians is Gaussian (`hasLaw_sum_range_gaussianReal`), and so is its sum
+  with the independent `σ√T·Z` (`gaussianReal_conv_gaussianReal`).
 * `merton_call_given_jumps`: the discounted call payoff with the jump count frozen at `n` has
   expectation `mertonCallTerm n`.
 * `merton_call_formula`: `𝔼[e^{−rT}(S_T − K)⁺] = mertonCallPrice`. Conditioning on the jump
-  count (`integral_comp_of_hasLaw_poissonMeasure`, the freezing lemma for a Poisson count) turns
+  count (`integral_comp_of_hasLaw_of_countable`, at the Poisson law of the count) turns
   the expectation into the Poisson mixture of the conditional prices.
 * `merton_put_formula`: `𝔼[e^{−rT}(K − S_T)⁺] = mertonPutPrice`.
-* `merton_discounted_terminal`: `𝔼[e^{−rT}S_T] = S₀`. The compensator `−kΛ` is the drift
-  correction that gives the discounted terminal price mean `S₀`.
+* `merton_discounted_terminal`: `𝔼[e^{−rT}S_T] = S₀`. With the compensator `−kΛ` in the
+  exponent the discounted terminal price has mean `S₀`. That it is the only drift correction
+  doing so is `JumpDiffusionHyp.discounted_terminal_eq_iff`, for i.i.d. measurable jumps of any
+  law with `𝔼[e^J] < ∞`.
 
 ## Scope
 
@@ -61,9 +64,10 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}
 /-! ### Sums and standardization of Gaussian variables -/
 
 /-- A sum of `n` independent `N(m, v)` variables is `N(n·m, n·v)`. -/
-theorem hasLaw_sum_range_gaussianReal [IsProbabilityMeasure Q] {J : ℕ → Ω → ℝ} {m : ℝ}
-    {v : ℝ≥0} (hJ : ∀ i, HasLaw (J i) (gaussianReal m v) Q) (hind : iIndepFun J Q) (n : ℕ) :
+theorem hasLaw_sum_range_gaussianReal {J : ℕ → Ω → ℝ} {m : ℝ} {v : ℝ≥0}
+    (hJ : ∀ i, HasLaw (J i) (gaussianReal m v) Q) (hind : iIndepFun J Q) (n : ℕ) :
     HasLaw (∑ i ∈ Finset.range n, J i) (gaussianReal (n * m) (n * v)) Q := by
+  have := (hJ 0).isProbabilityMeasure
   induction n with
   | zero =>
     simp only [Finset.sum_range_zero, Nat.cast_zero, zero_mul, gaussianReal_zero_var]
@@ -104,34 +108,38 @@ theorem integrable_bsTerminal {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1)
   rw [h_split]
   exact (integrable_exp_mul_of_hasLaw hZ (σ * Real.sqrt T)).const_mul _
 
-/-- The discounted Black–Scholes call payoff driven by a standard normal is integrable: it is
-dominated by the discounted terminal price. -/
-theorem integrable_bsCall_payoff {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) Q) {S_0 K : ℝ}
-    (hS_0 : 0 ≤ S_0) (hK : 0 ≤ K) (r σ T : ℝ) :
-    Integrable (fun ω ↦ rexp (-r * T) * max (bsTerminal S_0 r σ T (Z ω) - K) 0) Q := by
-  have hmeas : Measurable fun z ↦ rexp (-r * T) * max (bsTerminal S_0 r σ T z - K) 0 := by
+/-- The discounted Black–Scholes terminal price driven by a standard normal has mean `S₀`: the
+forward `𝔼[S_T] = S₀e^{rT}` (`integral_bsTerminal_eq_forward`), discounted. -/
+theorem integral_discounted_bsTerminal {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) Q)
+    (S_0 r σ : ℝ) {T : ℝ} (hT : 0 ≤ T) :
+    ∫ ω, rexp (-r * T) * bsTerminal S_0 r σ T (Z ω) ∂Q = S_0 := by
+  have hmeas : Measurable (bsTerminal S_0 r σ T) := by
     unfold bsTerminal
     fun_prop
-  refine ((integrable_bsTerminal hZ S_0 r σ T).const_mul (rexp (-r * T))).mono'
-    (hmeas.comp_aemeasurable hZ.aemeasurable).aestronglyMeasurable (ae_of_all _ fun ω ↦ ?_)
-  have hS : 0 ≤ bsTerminal S_0 r σ T (Z ω) := mul_nonneg hS_0 (Real.exp_pos _).le
-  exact (Real.norm_of_nonneg (mul_nonneg (Real.exp_pos _).le (le_max_right _ _))).trans_le
-    (mul_le_mul_of_nonneg_left (max_le (by linarith) hS) (Real.exp_pos _).le)
+  have hfwd : ∫ ω, bsTerminal S_0 r σ T (Z ω) ∂Q = S_0 * rexp (r * T) :=
+    (hZ.integral_comp hmeas.aestronglyMeasurable).trans
+      (integral_bsTerminal_eq_forward S_0 r σ T hT)
+  rw [integral_const_mul, hfwd]
+  calc rexp (-r * T) * (S_0 * rexp (r * T)) = S_0 * rexp (-r * T + r * T) := by
+        rw [Real.exp_add]
+        ring
+    _ = S_0 := by rw [show -r * T + r * T = 0 by ring, Real.exp_zero, mul_one]
 
-/-- The discounted Black–Scholes put payoff driven by a standard normal is integrable: it is
-bounded by the discounted strike. -/
-theorem integrable_bsPut_payoff [IsFiniteMeasure Q] {Z : Ω → ℝ}
-    (hZ : HasLaw Z (gaussianReal 0 1) Q) {S_0 K : ℝ} (hS_0 : 0 ≤ S_0) (hK : 0 ≤ K)
-    (r σ T : ℝ) :
-    Integrable (fun ω ↦ rexp (-r * T) * max (K - bsTerminal S_0 r σ T (Z ω)) 0) Q := by
-  have hmeas : Measurable fun z ↦ rexp (-r * T) * max (K - bsTerminal S_0 r σ T z) 0 := by
-    unfold bsTerminal
-    fun_prop
-  refine (integrable_const (rexp (-r * T) * K)).mono'
-    (hmeas.comp_aemeasurable hZ.aemeasurable).aestronglyMeasurable (ae_of_all _ fun ω ↦ ?_)
-  have hS : 0 ≤ bsTerminal S_0 r σ T (Z ω) := mul_nonneg hS_0 (Real.exp_pos _).le
-  exact (Real.norm_of_nonneg (mul_nonneg (Real.exp_pos _).le (le_max_right _ _))).trans_le
-    (mul_le_mul_of_nonneg_left (max_le (by linarith) hK) (Real.exp_pos _).le)
+/-- The discounted Black–Scholes call payoff driven by a standard normal is integrable: it is the
+positive part of an integrable function. -/
+theorem integrable_bsCall_payoff {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) Q)
+    (S_0 K r σ T : ℝ) :
+    Integrable (fun ω ↦ rexp (-r * T) * max (bsTerminal S_0 r σ T (Z ω) - K) 0) Q :=
+  have := hZ.isProbabilityMeasure
+  ((integrable_bsTerminal hZ S_0 r σ T).sub' (integrable_const K)).pos_part.const_mul _
+
+/-- The discounted Black–Scholes put payoff driven by a standard normal is integrable: it is the
+positive part of an integrable function. -/
+theorem integrable_bsPut_payoff {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) Q)
+    (S_0 K r σ T : ℝ) :
+    Integrable (fun ω ↦ rexp (-r * T) * max (K - bsTerminal S_0 r σ T (Z ω)) 0) Q :=
+  have := hZ.isProbabilityMeasure
+  ((integrable_const K).sub' (integrable_bsTerminal hZ S_0 r σ T)).pos_part.const_mul _
 
 /-! ### The model -/
 
@@ -141,9 +149,9 @@ noncomputable def mertonTerminal (S_0 r σ T k : ℝ) (Λ : ℝ≥0) (z : ℝ) (
     ℝ :=
   S_0 * rexp ((r - σ ^ 2 / 2) * T - k * Λ + σ * Real.sqrt T * z + ∑ i ∈ Finset.range n, j i)
 
-/-- The standard normal of the `n`-jump conditional economy: the total log-shock
-`σ√T·z + ∑_{i<n} jᵢ`, centred at its mean `n(log(1 + k) − δ²/2)` and divided by its standard
-deviation `mertonVol n · √T`. -/
+/-- The standardized total log-shock with `n` jumps: `σ√T·z + ∑_{i<n} jᵢ`, centred at its mean
+`n(log(1 + k) − δ²/2)` and divided by its standard deviation `mertonVol n · √T`. Under `MertonHyp`
+it is standard normal (`MertonHyp.hasLaw_mertonStd`). -/
 noncomputable def mertonStd (σ T k δ z : ℝ) (n : ℕ) (j : ℕ → ℝ) : ℝ :=
   (σ * Real.sqrt T * z + ∑ i ∈ Finset.range n, j i - n * (Real.log (1 + k) - δ ^ 2 / 2))
     / (mertonVol σ δ T n * Real.sqrt T)
@@ -169,9 +177,10 @@ lemma mertonVol_sq_mul (σ δ : ℝ) {T : ℝ} (hT : 0 < T) (n : ℕ) :
   have h0 : 0 ≤ σ ^ 2 + (n : ℝ) * δ ^ 2 / T := by positivity
   rw [mertonVol, Real.sq_sqrt h0, add_mul, div_mul_cancel₀ _ hT.ne']
 
-/-- **Given `n` jumps, the jump-diffusion is a Black–Scholes economy.** The terminal price is the
-Black–Scholes terminal price at the conditional spot `mertonSpot n` and volatility `mertonVol n`,
-driven by `mertonStd`. -/
+/-- **Given `n` jumps, the terminal price is a Black–Scholes terminal price**, pointwise in the
+diffusion sample and the jump sizes: at the conditional spot `mertonSpot n` and volatility
+`mertonVol n`, driven by `mertonStd` (standard normal under `MertonHyp`, by
+`MertonHyp.hasLaw_mertonStd`). -/
 theorem mertonTerminal_eq_bsTerminal {S_0 r σ T k : ℝ} (δ : ℝ) (Λ : ℝ≥0) (hσ : 0 < σ)
     (hT : 0 < T) (hk : -1 < k) (z : ℝ) (n : ℕ) (j : ℕ → ℝ) :
     mertonTerminal S_0 r σ T k Λ z n j
@@ -198,7 +207,7 @@ theorem mertonTerminal_eq_bsTerminal {S_0 r σ T k : ℝ} (δ : ℝ) (Λ : ℝ�
 /-- **The total log-shock, standardized, is standard normal.** With `n` jumps, `σ√T·Z` is
 `N(0, σ²T)`, the sum of `n` log-jumps is `N(n(log(1 + k) − δ²/2), nδ²)`, and they are
 independent, so `mertonStd` is `N(0, 1)`. -/
-theorem MertonHyp.hasLaw_mertonStd [IsProbabilityMeasure Q] {k δ : ℝ} {Λ : ℝ≥0}
+theorem MertonHyp.hasLaw_mertonStd {k δ : ℝ} {Λ : ℝ≥0}
     {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ} (h : MertonHyp Q k δ Λ Z N J) {σ T : ℝ}
     (hσ : 0 < σ) (hT : 0 < T) (n : ℕ) :
     HasLaw (fun ω ↦ mertonStd σ T k δ (Z ω) n fun i ↦ J i ω) (gaussianReal 0 1) Q := by
@@ -225,7 +234,7 @@ theorem MertonHyp.hasLaw_mertonStd [IsProbabilityMeasure Q] {k δ : ℝ} {Λ : �
 the diffusion sample and the log-jumps, whose expectations `c n` with the count frozen at `n` are
 integrable against `Poisson(Λ)`, the expectation of `F` at the random count is the Poisson mixture
 `∫ n, c n ∂Poisson(Λ)`. -/
-theorem MertonHyp.integral_eq_poisson_mixture [IsProbabilityMeasure Q] {k δ : ℝ} {Λ : ℝ≥0}
+theorem MertonHyp.integral_eq_poisson_mixture {k δ : ℝ} {Λ : ℝ≥0}
     {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ} (h : MertonHyp Q k δ Λ Z N J)
     {F : ℕ → ℝ → (ℕ → ℝ) → ℝ} (hFm : ∀ n, Measurable fun y : ℝ × (ℕ → ℝ) ↦ F n y.1 y.2)
     (hF0 : ∀ n z j, 0 ≤ F n z j) {c : ℕ → ℝ}
@@ -233,7 +242,8 @@ theorem MertonHyp.integral_eq_poisson_mixture [IsProbabilityMeasure Q] {k δ : �
     (hc : ∀ n, ∫ ω, F n (Z ω) (fun i ↦ J i ω) ∂Q = c n)
     (hcint : Integrable c (poissonMeasure Λ)) :
     ∫ ω, F (N ω) (Z ω) (fun i ↦ J i ω) ∂Q = ∫ n, c n ∂(poissonMeasure Λ) :=
-  integral_comp_of_hasLaw_poissonMeasure (F := fun n y ↦ F n y.1 y.2) h.N_law
+  have := h.Z_law.isProbabilityMeasure
+  integral_comp_of_hasLaw_of_countable (F := fun n y ↦ F n y.1 y.2) h.N_law
     (h.Z_law.aemeasurable.prodMk (aemeasurable_pi_lambda _ fun i ↦ (h.J_law i).aemeasurable))
     h.N_indep hFm (fun n y ↦ hF0 n y.1 y.2) hint hc hcint
 
@@ -242,54 +252,42 @@ theorem MertonHyp.integral_eq_poisson_mixture [IsProbabilityMeasure Q] {k δ : �
 /-- **The call, given `n` jumps.** With the jump count frozen at `n`, the discounted call payoff
 has expectation `mertonCallTerm n`, the Black–Scholes price at spot `mertonSpot n` and
 volatility `mertonVol n`. -/
-theorem merton_call_given_jumps [IsProbabilityMeasure Q] {S_0 K r σ T k δ : ℝ} {Λ : ℝ≥0}
+theorem merton_call_given_jumps {S_0 K r σ T k δ : ℝ} {Λ : ℝ≥0}
     {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ} (h : MertonHyp Q k δ Λ Z N J) (hS_0 : 0 < S_0)
     (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) (n : ℕ) :
     ∫ ω, rexp (-r * T) * max (mertonTerminal S_0 r σ T k Λ (Z ω) n (fun i ↦ J i ω) - K) 0 ∂Q
       = mertonCallTerm S_0 K r σ T k δ Λ n := by
+  have := h.Z_law.isProbabilityMeasure
   simp_rw [mertonTerminal_eq_bsTerminal δ Λ hσ hT hk]
   exact bs_call_formula ⟨mertonSpot_pos hS_0 hk Λ n, hK, mertonVol_pos (δ := δ) hσ hT n, hT,
     h.hasLaw_mertonStd hσ hT n⟩
 
 /-- **The put, given `n` jumps.** With the jump count frozen at `n`, the discounted put payoff
 has expectation `mertonPutTerm n`. -/
-theorem merton_put_given_jumps [IsProbabilityMeasure Q] {S_0 K r σ T k δ : ℝ} {Λ : ℝ≥0}
+theorem merton_put_given_jumps {S_0 K r σ T k δ : ℝ} {Λ : ℝ≥0}
     {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ} (h : MertonHyp Q k δ Λ Z N J) (hS_0 : 0 < S_0)
     (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) (n : ℕ) :
     ∫ ω, rexp (-r * T) * max (K - mertonTerminal S_0 r σ T k Λ (Z ω) n (fun i ↦ J i ω)) 0 ∂Q
       = mertonPutTerm S_0 K r σ T k δ Λ n := by
+  have := h.Z_law.isProbabilityMeasure
   simp_rw [mertonTerminal_eq_bsTerminal δ Λ hσ hT hk]
   exact bs_put_formula ⟨mertonSpot_pos hS_0 hk Λ n, hK, mertonVol_pos (δ := δ) hσ hT n, hT,
     h.hasLaw_mertonStd hσ hT n⟩
 
 /-- **The discounted terminal price, given `n` jumps**, has expectation `mertonSpot n`: the
 Black–Scholes forward `E[S_T] = spot·e^{rT}` at the conditional spot. -/
-theorem merton_discounted_given_jumps [IsProbabilityMeasure Q] {S_0 r σ T k δ : ℝ} {Λ : ℝ≥0}
+theorem merton_discounted_given_jumps {S_0 r σ T k δ : ℝ} {Λ : ℝ≥0}
     {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ} (h : MertonHyp Q k δ Λ Z N J) (hσ : 0 < σ)
     (hT : 0 < T) (hk : -1 < k) (n : ℕ) :
     ∫ ω, rexp (-r * T) * mertonTerminal S_0 r σ T k Λ (Z ω) n (fun i ↦ J i ω) ∂Q
       = mertonSpot S_0 k Λ n := by
-  have hmeas : Measurable (bsTerminal (mertonSpot S_0 k Λ n) r (mertonVol σ δ T n) T) := by
-    unfold bsTerminal
-    fun_prop
-  have hfwd : ∫ ω, bsTerminal (mertonSpot S_0 k Λ n) r (mertonVol σ δ T n) T
-        (mertonStd σ T k δ (Z ω) n fun i ↦ J i ω) ∂Q
-      = mertonSpot S_0 k Λ n * rexp (r * T) :=
-    ((h.hasLaw_mertonStd hσ hT n).integral_comp hmeas.aestronglyMeasurable).trans
-      (integral_bsTerminal_eq_forward (mertonSpot S_0 k Λ n) r (mertonVol σ δ T n) T hT.le)
   simp_rw [mertonTerminal_eq_bsTerminal δ Λ hσ hT hk]
-  rw [integral_const_mul, hfwd]
-  calc rexp (-r * T) * (mertonSpot S_0 k Λ n * rexp (r * T))
-      = mertonSpot S_0 k Λ n * rexp (-r * T + r * T) := by
-        rw [Real.exp_add]
-        ring
-    _ = mertonSpot S_0 k Λ n := by
-        rw [show -r * T + r * T = 0 by ring, Real.exp_zero, mul_one]
+  exact integral_discounted_bsTerminal (h.hasLaw_mertonStd hσ hT n) _ r _ hT.le
 
 /-- **Merton's call formula, derived from the model.** The discounted expected call payoff of
 the jump-diffusion terminal price is `mertonCallPrice`, the Poisson mixture of Black–Scholes
 prices: `𝔼[e^{−rT}(S_T − K)⁺] = ∑ₙ e^{−Λ}Λⁿ/n! · C_BS(mertonSpot n, mertonVol n)`. -/
-theorem merton_call_formula [IsProbabilityMeasure Q] {S_0 K r σ T k δ : ℝ} {Λ : ℝ≥0}
+theorem merton_call_formula {S_0 K r σ T k δ : ℝ} {Λ : ℝ≥0}
     {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ} (h : MertonHyp Q k δ Λ Z N J) (hS_0 : 0 < S_0)
     (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) :
     ∫ ω, rexp (-r * T) * max (mertonTerminal S_0 r σ T k Λ (Z ω) (N ω) (fun i ↦ J i ω) - K) 0 ∂Q
@@ -302,14 +300,13 @@ theorem merton_call_formula [IsProbabilityMeasure Q] {S_0 K r σ T k δ : ℝ} {
     (fun _ _ _ ↦ mul_nonneg (Real.exp_pos _).le (le_max_right _ _))
     (fun n ↦ by
       simp_rw [mertonTerminal_eq_bsTerminal δ Λ hσ hT hk]
-      exact integrable_bsCall_payoff (h.hasLaw_mertonStd hσ hT n)
-        (mertonSpot_pos hS_0 hk Λ n).le hK.le r _ T)
+      exact integrable_bsCall_payoff (h.hasLaw_mertonStd hσ hT n) _ K r _ T)
     (merton_call_given_jumps h hS_0 hK hσ hT hk)
     (integrable_mertonCallTerm δ Λ hS_0 hK hσ hT hk)
 
 /-- **Merton's put formula, derived from the model.** The discounted expected put payoff of the
 jump-diffusion terminal price is `mertonPutPrice`. -/
-theorem merton_put_formula [IsProbabilityMeasure Q] {S_0 K r σ T k δ : ℝ} {Λ : ℝ≥0}
+theorem merton_put_formula {S_0 K r σ T k δ : ℝ} {Λ : ℝ≥0}
     {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ} (h : MertonHyp Q k δ Λ Z N J) (hS_0 : 0 < S_0)
     (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) :
     ∫ ω, rexp (-r * T) * max (K - mertonTerminal S_0 r σ T k Λ (Z ω) (N ω) (fun i ↦ J i ω)) 0 ∂Q
@@ -322,15 +319,14 @@ theorem merton_put_formula [IsProbabilityMeasure Q] {S_0 K r σ T k δ : ℝ} {�
     (fun _ _ _ ↦ mul_nonneg (Real.exp_pos _).le (le_max_right _ _))
     (fun n ↦ by
       simp_rw [mertonTerminal_eq_bsTerminal δ Λ hσ hT hk]
-      exact integrable_bsPut_payoff (h.hasLaw_mertonStd hσ hT n)
-        (mertonSpot_pos hS_0 hk Λ n).le hK.le r _ T)
+      exact integrable_bsPut_payoff (h.hasLaw_mertonStd hσ hT n) _ K r _ T)
     (merton_put_given_jumps h hS_0 hK hσ hT hk)
     (integrable_mertonPutTerm δ Λ hS_0 hK hσ hT hk)
 
-/-- **The compensator is the risk-neutral drift.** The discounted terminal price of the
-jump-diffusion has mean `S₀`: given `n` jumps its mean is `mertonSpot n`, and the compensator
+/-- **The compensator centres the discounted terminal price.** The discounted terminal price of
+the jump-diffusion has mean `S₀`: given `n` jumps its mean is `mertonSpot n`, and the compensator
 `e^{−kΛ}` makes those average back to `S₀` (`integral_mertonSpot`). -/
-theorem merton_discounted_terminal [IsProbabilityMeasure Q] {S_0 r σ T k δ : ℝ} {Λ : ℝ≥0}
+theorem merton_discounted_terminal {S_0 r σ T k δ : ℝ} {Λ : ℝ≥0}
     {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ} (h : MertonHyp Q k δ Λ Z N J) (hS_0 : 0 < S_0)
     (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) :
     ∫ ω, rexp (-r * T) * mertonTerminal S_0 r σ T k Λ (Z ω) (N ω) (fun i ↦ J i ω) ∂Q = S_0 :=

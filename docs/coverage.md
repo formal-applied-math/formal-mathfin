@@ -28,8 +28,9 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ### Jump-diffusions with an arbitrary jump law (2026-10-07)
 
-Three entries added, all `full`: `mf-jump-diffusion-mixing-formula`,
-`mf-jump-diffusion-compensator` and `mf-merton-general-jump-law`. Corpus 457 → 460.
+Four entries added, all `full`: `mf-jump-diffusion-mixing-formula`,
+`mf-jump-diffusion-call-dominates-bs`, `mf-jump-diffusion-compensator` and
+`mf-merton-general-jump-law`. Corpus 457 → 461.
 
 `BlackScholes/JumpDiffusionMixing.lean` drops the Gaussian jump law of `MertonModel`:
 
@@ -38,21 +39,33 @@ Three entries added, all `full`: `mf-jump-diffusion-mixing-formula`,
   `𝔼[e^{−rT}(S₀e^{(r−σ²/2)T + σ√T·Z + Y} − K)⁺] = 𝔼[C_BS(S₀e^Y)]`. With `Y` frozen at `y` the
   terminal price is a Black–Scholes terminal price at the spot `S₀e^y`, so the freezing lemma
   reduces the call to `bs_call_formula`.
+- jump risk is never free, `bsV_le_jumpDiffusion_call` and `jumpDiffusion_call_le`: if
+  `𝔼[e^Y] = 1`, the call lies between `C_BS(S₀)` and `S₀`, whatever the law of `Y`. The lower
+  bound is Jensen's inequality for the Black–Scholes price, which is convex in the spot. Merton's
+  lognormal case, `bsV_le_mertonCallPrice`, had needed a second (volatility) channel.
 - the compensator, `JumpDiffusionHyp.discounted_terminal` and `discounted_terminal_eq_iff`: for
   the compound-Poisson jump part `−κ + ∑_{i<N} Jᵢ`, with i.i.d. `Jᵢ` of any law with
   `𝔼[e^J] < ∞`, `𝔼[e^{−rT}S_T] = S₀e^{−κ + Λ(𝔼[e^J] − 1)}`. This equals `S₀` exactly when
   `κ = Λ(𝔼[e^J] − 1)`.
-- Merton's general formula (his eq. (16)), `JumpDiffusionHyp.call_poisson_mixture`:
-  `𝔼[e^{−rT}(S_T − K)⁺] = ∫ n, 𝔼[C_BS(S₀e^{−κ + ∑_{i<n} Jᵢ})] ∂Poisson(Λ)`.
+- Merton's formula for a general jump law, `JumpDiffusionHyp.call_eq_integral_bsV` and
+  `call_poisson_mixture`: the call is `𝔼[C_BS(S₀e^{−κ + ∑_{i<N} Jᵢ})]`, and with the count
+  integrated out, `∫ n, 𝔼[C_BS(S₀e^{−κ + ∑_{i<n} Jᵢ})] ∂Poisson(Λ)`.
 
-Conditioning on the jump count is now one lemma,
-`Foundations/IndepFreezing.integral_comp_of_hasLaw_poissonMeasure`, and the Merton prices and
-the compound-Poisson MGF go through it too.
+The model assumes the count independent of the diffusion sample and the jump sizes, and the
+diffusion sample independent of the sizes. `Foundations/IndepFreezing.indepFun_prodMk_of_indepFun_prodMk`
+re-associates this to "the diffusion sample is independent of the count and the sizes", so each
+model-level statement is the single-jump-part theorem at `Y = −κ + ∑_{i<N} Jᵢ`. Integrating out a
+countable variable is one lemma, `integral_comp_of_hasLaw_of_countable`, which the Merton prices,
+the compound-Poisson MGF and the general-law formula all use (`Foundations/PoissonMaxima` still
+conditions on its count by hand).
 
-Safe wording: "the mixing formula, the compound-Poisson compensator, and Merton's Poisson-mixture
-formula for i.i.d. jumps of any law with a finite exponential moment, at maturity". Not covered:
-closed forms for specific non-Gaussian jump laws (Kou's double-exponential model needs its own
-integrals), the put, the price process, and Lévy processes beyond compound Poisson.
+Safe wording: "the mixing formula, Black–Scholes and spot bounds for a compensated jump-diffusion
+call, the compound-Poisson compensator, and Merton's Poisson-mixture formula for i.i.d. jumps of
+any law with a finite exponential moment, at maturity". Not covered: closed forms for specific
+non-Gaussian jump laws (Kou's double-exponential model needs its own integrals), the put and
+put–call parity, the price process, and Lévy processes beyond compound Poisson. `MertonModel` is
+not derived from this file: a `MertonHyp` is not a `JumpDiffusionHyp` as stated, because its jumps
+are only a.e.-measurable.
 
 ### The Merton Greeks (2026-10-07)
 
@@ -113,7 +126,8 @@ independent of the claims, where `mf-compound-poisson-mgf` integrated against th
 Safe wording: "Merton's 1976 option prices derived from the terminal law of the jump-diffusion".
 Not covered: the price process `(S_t)` (a Brownian motion plus a compound-Poisson process) and the
 martingale property of `e^{−rt}S_t` at intermediate dates; the conditional form of the freezing
-lemma; jump laws other than lognormal.
+lemma; closed forms for jump laws other than lognormal (the Poisson mixture for any law is
+`mf-merton-general-jump-law`).
 
 ### Itô's formula for adapted coefficients (2026-10-05)
 

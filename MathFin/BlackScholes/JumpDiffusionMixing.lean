@@ -9,6 +9,8 @@ public import Mathlib
 public import MathFin.Actuarial.CompoundPoissonMGF
 public import MathFin.BlackScholes.MertonModel
 public import MathFin.BlackScholes.PriceBounds
+public import MathFin.BlackScholes.SpotConvexity
+public import MathFin.Foundations.AffineMinorant
 public import MathFin.Foundations.NormalQuantile
 
 /-!
@@ -16,7 +18,7 @@ public import MathFin.Foundations.NormalQuantile
 
 `BlackScholes/MertonModel.lean` prices Merton's jump-diffusion, whose log-jumps are Gaussian, so
 that with `n` jumps the terminal price is again a Black–Scholes terminal price. This file drops
-the Gaussian law. Under the pricing measure the terminal price is
+the Gaussian law. Under a probability measure `Q` the terminal price is
 
   `S_T = S₀ · exp((r − σ²/2)T − κ + σ√T·Z + ∑_{i<N} Jᵢ)`  (`jumpDiffusionTerminal`),
 
@@ -31,16 +33,25 @@ the jumps together, and the diffusion sample is independent of the jumps (`JumpD
   `𝔼[e^{−rT}(S₀e^{(r−σ²/2)T + σ√T·Z + Y} − K)⁺] = 𝔼[C_BS(S₀e^Y)]`. With `Y` frozen at `y`,
   the terminal price is a Black–Scholes terminal price at the spot `S₀e^y`.
 * `jumpDiffusion_discounted_terminal`: the discounted terminal price has mean `S₀·𝔼[e^Y]`.
-* `JumpDiffusionHyp.discounted_terminal`: for the compound-Poisson jump part `−κ + ∑_{i<N} Jᵢ`,
-  `𝔼[e^{−rT}S_T] = S₀·e^{−κ + Λ(𝔼[e^J] − 1)}`.
-* `JumpDiffusionHyp.discounted_terminal_eq_iff`, **the compensator**: `𝔼[e^{−rT}S_T] = S₀`
-  exactly when `κ = Λ(𝔼[e^J] − 1)`.
+* `bsV_le_jumpDiffusion_call`, **jump risk is never free**: if `𝔼[e^Y] = 1`, the call is worth
+  at least the Black–Scholes call at the diffusion volatility, whatever the law of `Y`. The
+  Black–Scholes price is convex in the spot, so it lies above its tangent at `S₀`, and the
+  tangent averages to `C_BS(S₀)`. `jumpDiffusion_call_le` is the upper bound `S₀·𝔼[e^Y]`.
+* `JumpDiffusionHyp.call_eq_integral_bsV`: for the compound-Poisson model the call is
+  `𝔼[C_BS(S₀e^{−κ + ∑_{i<N} Jᵢ})]`. The hypotheses make `Z` independent of the count and the
+  jump sizes together (`JumpDiffusionHyp.Z_indep_jumps`).
+* `JumpDiffusionHyp.discounted_terminal`: `𝔼[e^{−rT}S_T] = S₀·e^{−κ + Λ(𝔼[e^J] − 1)}`, and
+  `JumpDiffusionHyp.discounted_terminal_eq_iff`, **the compensator**: this is `S₀` exactly when
+  `κ = Λ(𝔼[e^J] − 1)`.
+* `JumpDiffusionHyp.bsV_le_call`: at the compensator the call dominates the Black–Scholes call.
 * `JumpDiffusionHyp.call_poisson_mixture`, **Merton's formula for a general jump law** (Merton
-  1976, eq. (16)): the call price is a Poisson mixture over the jump count `n` of Black–Scholes
-  prices averaged over the jump sizes, `∫ n, 𝔼[C_BS(S₀e^{−κ + ∑_{i<n} Jᵢ})] ∂Poisson(Λ)`.
+  1976): integrating out the count, the call is a Poisson mixture of Black–Scholes prices
+  averaged over the jump sizes, `∫ n, 𝔼[C_BS(S₀e^{−κ + ∑_{i<n} Jᵢ})] ∂Poisson(Λ)`.
 
-Merton's lognormal model is the Gaussian case. There `merton_call_given_jumps` prices the call
-with the count frozen at `n` in closed form, and `merton_call_formula` sums the series.
+Merton's model is this one in substance: Gaussian jumps with `𝔼[e^J] = 1 + k`, so the
+compensator is `κ = kΛ`. There `merton_call_given_jumps` prices the call with the count frozen at
+`n` in closed form and `merton_call_formula` sums the series; no lemma here derives
+`MertonModel`'s results from this file's.
 
 ## Scope
 
@@ -73,6 +84,12 @@ lemma measurable_bsV_spot (K r σ T : ℝ) : Measurable fun S ↦ bsV K r σ S T
   unfold bsV bsd2 bsd1
   fun_prop
 
+/-- The Black–Scholes call price is nonnegative: it is a discounted expected call payoff
+(`bsV_nonneg` on the standard Gaussian space). -/
+lemma bsV_nonneg_of_pos {S K r σ T : ℝ} (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
+    0 ≤ bsV K r σ S T :=
+  bsV_nonneg (Q := gaussianReal 0 1) (Z := id) ⟨hS, hK, hσ, hT, HasLaw.id⟩
+
 /-- The Black–Scholes call price is the discounted expected call payoff: `bs_call_formula`,
 stated for `bsV`. -/
 lemma integral_bsCall_payoff_eq_bsV [IsProbabilityMeasure Q] {S_0 K r σ T : ℝ} {Z : Ω → ℝ}
@@ -100,23 +117,27 @@ lemma integrable_jumpDiffusion_terminal {S_0 r σ T : ℝ} {Z Y : Ω → ℝ}
   exact (hind.integrable_mul (integrable_exp_mul_of_hasLaw hZ _) hexp).const_mul _
 
 /-- The discounted call payoff of a jump-diffusion with an independent jump part `Y` is
-integrable when `𝔼[e^Y] < ∞`: it is dominated by the discounted terminal price. -/
+integrable when `𝔼[e^Y] < ∞`: it is the positive part of an integrable function. -/
 lemma integrable_jumpDiffusion_call_payoff {S_0 K r σ T : ℝ} {Z Y : Ω → ℝ}
-    (hZ : HasLaw Z (gaussianReal 0 1) Q) (hY : AEMeasurable Y Q) (hYZ : IndepFun Y Z Q)
-    (hexp : Integrable (fun ω ↦ rexp (Y ω)) Q) (hS_0 : 0 ≤ S_0) (hK : 0 ≤ K) :
+    (hZ : HasLaw Z (gaussianReal 0 1) Q) (hYZ : IndepFun Y Z Q)
+    (hexp : Integrable (fun ω ↦ rexp (Y ω)) Q) :
     Integrable (fun ω ↦ rexp (-r * T)
-      * max (S_0 * rexp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω + Y ω) - K) 0) Q := by
-  have hmeas : Measurable fun p : ℝ × ℝ ↦ rexp (-r * T)
-      * max (S_0 * rexp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * p.1 + p.2) - K) 0 := by
-    fun_prop
-  refine ((integrable_jumpDiffusion_terminal (S_0 := S_0) (r := r) (σ := σ) (T := T) hZ hYZ
-    hexp).const_mul (rexp (-r * T))).mono'
-    (hmeas.comp_aemeasurable (hZ.aemeasurable.prodMk hY)).aestronglyMeasurable
-    (ae_of_all _ fun ω ↦ ?_)
-  have hS : 0 ≤ S_0 * rexp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω + Y ω) :=
-    mul_nonneg hS_0 (Real.exp_pos _).le
-  exact (Real.norm_of_nonneg (mul_nonneg (Real.exp_pos _).le (le_max_right _ _))).trans_le
-    (mul_le_mul_of_nonneg_left (max_le (by linarith) hS) (Real.exp_pos _).le)
+      * max (S_0 * rexp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω + Y ω) - K) 0) Q :=
+  have := hZ.isProbabilityMeasure
+  ((integrable_jumpDiffusion_terminal (S_0 := S_0) (r := r) (σ := σ) (T := T) hZ hYZ
+    hexp).sub' (integrable_const K)).pos_part.const_mul _
+
+/-- `C_BS(S₀e^Y)` is integrable when `𝔼[e^Y] < ∞`: it lies between `0` and `S₀e^Y`. -/
+lemma integrable_bsV_mul_exp {S_0 K r σ T : ℝ} {Y : Ω → ℝ} (hY : AEMeasurable Y Q)
+    (hexp : Integrable (fun ω ↦ rexp (Y ω)) Q) (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ)
+    (hT : 0 < T) :
+    Integrable (fun ω ↦ bsV K r σ (S_0 * rexp (Y ω)) T) Q := by
+  refine (hexp.const_mul S_0).mono'
+    ((measurable_bsV_spot K r σ T).comp_aemeasurable
+      (hY.exp.const_mul S_0)).aestronglyMeasurable (ae_of_all _ fun ω ↦ ?_)
+  have hS : 0 < S_0 * rexp (Y ω) := mul_pos hS_0 (Real.exp_pos _)
+  exact (Real.norm_of_nonneg (bsV_nonneg_of_pos (r := r) hS hK hσ hT)).trans_le
+    (bsV_le_S K r σ _ T hS.le hK.le)
 
 /-- **The mixing formula.** If the log-price is a Gaussian diffusion part plus an independent
 jump part `Y` with `𝔼[e^Y] < ∞`, the discounted expected call payoff is the Black–Scholes price
@@ -124,19 +145,20 @@ averaged over the jump part:
 `𝔼[e^{−rT}(S₀e^{(r−σ²/2)T + σ√T·Z + Y} − K)⁺] = 𝔼[C_BS(S₀e^Y)]`.
 With `Y` frozen at `y` (`integral_comp_prodMk_of_indepFun`) the terminal price is a Black–Scholes
 terminal price at the spot `S₀e^y`, which `bs_call_formula` prices. -/
-theorem jumpDiffusion_call_eq_integral_bsV [IsProbabilityMeasure Q] {S_0 K r σ T : ℝ}
-    {Z Y : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) Q) (hY : AEMeasurable Y Q)
-    (hYZ : IndepFun Y Z Q) (hexp : Integrable (fun ω ↦ rexp (Y ω)) Q) (hS_0 : 0 < S_0)
-    (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
+theorem jumpDiffusion_call_eq_integral_bsV {S_0 K r σ T : ℝ} {Z Y : Ω → ℝ}
+    (hZ : HasLaw Z (gaussianReal 0 1) Q) (hY : AEMeasurable Y Q) (hYZ : IndepFun Y Z Q)
+    (hexp : Integrable (fun ω ↦ rexp (Y ω)) Q) (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ)
+    (hT : 0 < T) :
     ∫ ω, rexp (-r * T)
         * max (S_0 * rexp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω + Y ω) - K) 0 ∂Q
       = ∫ ω, bsV K r σ (S_0 * rexp (Y ω)) T ∂Q := by
+  have := hZ.isProbabilityMeasure
   have hgm : Measurable fun p : ℝ × ℝ ↦
       rexp (-r * T) * max (bsTerminal (S_0 * rexp p.1) r σ T p.2 - K) 0 := by
     unfold bsTerminal
     fun_prop
-  have hint := integrable_jumpDiffusion_call_payoff (r := r) (σ := σ) (T := T) hZ hY hYZ hexp
-    hS_0.le hK.le
+  have hint := integrable_jumpDiffusion_call_payoff (S_0 := S_0) (K := K) (r := r) (σ := σ)
+    (T := T) hZ hYZ hexp
   simp_rw [mul_exp_add_eq_bsTerminal] at hint ⊢
   have hprod := (integrable_comp_prodMk_iff_of_indepFun hYZ hY hZ.aemeasurable
     hgm.aestronglyMeasurable).mp hint
@@ -150,37 +172,63 @@ theorem jumpDiffusion_call_eq_integral_bsV [IsProbabilityMeasure Q] {S_0 K r σ 
     _ = ∫ ω, bsV K r σ (S_0 * rexp (Y ω)) T ∂Q := integral_map hY hbsV.aestronglyMeasurable
 
 /-- **The discounted terminal price** of a jump-diffusion with an independent jump part `Y` has
-mean `S₀ · 𝔼[e^Y]`: the diffusion factor has mean `e^{rT}` and is independent of the jump
-part. No integrability is assumed: when `𝔼[e^Y] = ∞` both sides are the Bochner integral's
-`0`. -/
+mean `S₀ · 𝔼[e^Y]`: the discounted diffusion factor has mean `S₀`
+(`integral_discounted_bsTerminal`) and is independent of the jump part. No integrability is
+assumed: when `𝔼[e^Y] = ∞` both sides are the Bochner integral's `0`. -/
 theorem jumpDiffusion_discounted_terminal {S_0 r σ T : ℝ} {Z Y : Ω → ℝ}
     (hZ : HasLaw Z (gaussianReal 0 1) Q) (hY : AEMeasurable Y Q) (hYZ : IndepFun Y Z Q)
     (hT : 0 ≤ T) :
     ∫ ω, rexp (-r * T) * (S_0 * rexp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω + Y ω)) ∂Q
       = S_0 * ∫ ω, rexp (Y ω) ∂Q := by
-  have hmeas : Measurable (bsTerminal S_0 r σ T) := by
+  have hmeas : Measurable fun z ↦ rexp (-r * T) * bsTerminal S_0 r σ T z := by
     unfold bsTerminal
     fun_prop
-  have hind : IndepFun (fun ω ↦ bsTerminal S_0 r σ T (Z ω)) (fun ω ↦ rexp (Y ω)) Q :=
-    hYZ.symm.comp (φ := bsTerminal S_0 r σ T) (ψ := rexp) hmeas measurable_exp
-  have hfwd : ∫ ω, bsTerminal S_0 r σ T (Z ω) ∂Q = S_0 * rexp (r * T) :=
-    (hZ.integral_comp hmeas.aestronglyMeasurable).trans
-      (integral_bsTerminal_eq_forward S_0 r σ T hT)
+  have hind : IndepFun (fun ω ↦ rexp (-r * T) * bsTerminal S_0 r σ T (Z ω))
+      (fun ω ↦ rexp (Y ω)) Q :=
+    hYZ.symm.comp (φ := fun z ↦ rexp (-r * T) * bsTerminal S_0 r σ T z) (ψ := rexp) hmeas
+      measurable_exp
   have hfun : (fun ω ↦ rexp (-r * T)
         * (S_0 * rexp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω + Y ω)))
-      = fun ω ↦ rexp (-r * T) * (bsTerminal S_0 r σ T (Z ω) * rexp (Y ω)) := by
+      = fun ω ↦ rexp (-r * T) * bsTerminal S_0 r σ T (Z ω) * rexp (Y ω) := by
     funext ω
     rw [Real.exp_add _ (Y ω), bsTerminal]
     ring
-  rw [hfun, integral_const_mul, hind.integral_fun_mul_eq_mul_integral
+  rw [hfun, hind.integral_fun_mul_eq_mul_integral
     (hmeas.comp_aemeasurable hZ.aemeasurable).aestronglyMeasurable
-    (measurable_exp.comp_aemeasurable hY).aestronglyMeasurable, hfwd]
-  calc rexp (-r * T) * (S_0 * rexp (r * T) * ∫ ω, rexp (Y ω) ∂Q)
-      = S_0 * (∫ ω, rexp (Y ω) ∂Q) * rexp (-r * T + r * T) := by
-        rw [Real.exp_add]
-        ring
-    _ = S_0 * ∫ ω, rexp (Y ω) ∂Q := by
-        rw [show -r * T + r * T = 0 by ring, Real.exp_zero, mul_one]
+    (measurable_exp.comp_aemeasurable hY).aestronglyMeasurable,
+    integral_discounted_bsTerminal hZ S_0 r σ hT]
+
+/-- **Jump risk is never free.** If the jump part is compensated, `𝔼[e^Y] = 1`, the
+jump-diffusion call is worth at least the Black–Scholes call at the diffusion volatility, whatever
+the law of `Y`: `C_BS(S₀) ≤ 𝔼[C_BS(S₀e^Y)]`. The Black–Scholes price is convex in the spot, so it
+lies above its tangent at `S₀` (`bsV_spot_tangent_le`), and `S₀e^Y` has mean `S₀`
+(`le_integral_of_affine_le`). -/
+theorem bsV_le_jumpDiffusion_call {S_0 K r σ T : ℝ} {Z Y : Ω → ℝ}
+    (hZ : HasLaw Z (gaussianReal 0 1) Q) (hY : AEMeasurable Y Q) (hYZ : IndepFun Y Z Q)
+    (hexp : Integrable (fun ω ↦ rexp (Y ω)) Q) (hmean : ∫ ω, rexp (Y ω) ∂Q = 1)
+    (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
+    bsV K r σ S_0 T ≤ ∫ ω, rexp (-r * T)
+        * max (S_0 * rexp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω + Y ω) - K) 0 ∂Q := by
+  have := hZ.isProbabilityMeasure
+  have hm : ∫ ω, S_0 * rexp (Y ω) ∂Q = S_0 := by rw [integral_const_mul, hmean, mul_one]
+  rw [jumpDiffusion_call_eq_integral_bsV hZ hY hYZ hexp hS_0 hK hσ hT]
+  exact le_integral_of_affine_le (f := fun s ↦ bsV K r σ s T) (c := Phi (bsd1 S_0 K r σ T))
+    (hexp.const_mul S_0) hm (integrable_bsV_mul_exp hY hexp hS_0 hK hσ hT)
+    (ae_of_all _ fun ω ↦ bsV_spot_tangent_le hK hσ hT hS_0 (mul_pos hS_0 (Real.exp_pos _)))
+
+/-- **The upper bound.** The jump-diffusion call is worth at most `S₀·𝔼[e^Y]`, the discounted
+mean of the terminal price, since `(S_T − K)⁺ ≤ S_T`. With `𝔼[e^Y] = 1` this is `C ≤ S₀`. -/
+theorem jumpDiffusion_call_le {S_0 K r σ T : ℝ} {Z Y : Ω → ℝ}
+    (hZ : HasLaw Z (gaussianReal 0 1) Q) (hY : AEMeasurable Y Q) (hYZ : IndepFun Y Z Q)
+    (hexp : Integrable (fun ω ↦ rexp (Y ω)) Q) (hS_0 : 0 ≤ S_0) (hK : 0 ≤ K) (hT : 0 ≤ T) :
+    ∫ ω, rexp (-r * T)
+        * max (S_0 * rexp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω + Y ω) - K) 0 ∂Q
+      ≤ S_0 * ∫ ω, rexp (Y ω) ∂Q := by
+  rw [← jumpDiffusion_discounted_terminal (r := r) (σ := σ) hZ hY hYZ hT]
+  refine integral_mono (integrable_jumpDiffusion_call_payoff hZ hYZ hexp)
+    ((integrable_jumpDiffusion_terminal hZ hYZ hexp).const_mul _) fun ω ↦ ?_
+  exact mul_le_mul_of_nonneg_left
+    (max_le (by linarith) (mul_nonneg hS_0 (Real.exp_pos _).le)) (Real.exp_pos _).le
 
 /-! ### Compound-Poisson jumps -/
 
@@ -199,10 +247,20 @@ lemma jumpDiffusionTerminal_eq (S_0 r σ T κ z : ℝ) (n : ℕ) (j : ℕ → �
   congr 2
   ring
 
+/-- The jump part `−κ + ∑_{i<n} jᵢ` is measurable as a function of the count and the jump
+sizes. -/
+lemma measurable_neg_add_sum_range (κ : ℝ) :
+    Measurable fun p : ℕ × (ℕ → ℝ) ↦ -κ + ∑ i ∈ Finset.range p.1, p.2 i :=
+  measurable_from_prod_countable_right fun n ↦
+    show Measurable fun j : ℕ → ℝ ↦ -κ + ∑ i ∈ Finset.range n, j i by fun_prop
+
 /-- **A jump-diffusion with an arbitrary jump law**: a standard normal diffusion sample `Z`, a
 jump count `N ∼ Poisson(Λ)` and i.i.d. log-jump sizes `Jᵢ`, with the count independent of the
 diffusion sample and the sizes together, and the diffusion sample independent of the sizes.
-These are `MertonHyp`'s independence hypotheses, without its Gaussian jump law. -/
+This is `MertonHyp`'s independence structure with i.i.d. measurable jumps of any law in place
+of its Gaussian jumps (a `MertonHyp` is not an instance as stated: its jumps are only
+a.e.-measurable). Together the two independences say that `Z`, `N` and the jump sizes are
+mutually independent. -/
 structure JumpDiffusionHyp (Q : Measure Ω) (Λ : ℝ≥0) (Z : Ω → ℝ) (N : Ω → ℕ)
     (J : ℕ → Ω → ℝ) : Prop where
   Z_law : HasLaw Z (gaussianReal 0 1) Q
@@ -217,175 +275,121 @@ namespace JumpDiffusionHyp
 
 variable {Λ : ℝ≥0} {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ}
 
-/-- The diffusion sample and the jump sizes, taken together, form a measurable random element. -/
-lemma aemeasurable_diffusion_jumps (h : JumpDiffusionHyp Q Λ Z N J) :
-    AEMeasurable (fun ω ↦ (Z ω, fun i ↦ J i ω)) Q :=
-  h.Z_law.aemeasurable.prodMk (measurable_pi_lambda _ h.J_meas).aemeasurable
+/-- The jump count is independent of the jump sizes. -/
+lemma N_indep_J (h : JumpDiffusionHyp Q Λ Z N J) : IndepFun N (fun ω i ↦ J i ω) Q :=
+  h.N_indep.comp measurable_id measurable_snd
 
-/-- With the count frozen at `n`, the jump part `−κ + ∑_{i<n} Jᵢ` is measurable. -/
-lemma measurable_jumps (h : JumpDiffusionHyp Q Λ Z N J) (κ : ℝ) (n : ℕ) :
-    Measurable fun ω ↦ -κ + ∑ i ∈ Finset.range n, J i ω :=
-  (show Measurable fun j : ℕ → ℝ ↦ -κ + ∑ i ∈ Finset.range n, j i by fun_prop).comp
-    (measurable_pi_lambda _ h.J_meas)
+/-- The diffusion sample is independent of the jump count and the jump sizes together:
+`indepFun_prodMk_of_indepFun_prodMk` re-associates the model's mutual independence. -/
+lemma Z_indep_jumps (h : JumpDiffusionHyp Q Λ Z N J) :
+    IndepFun Z (fun ω ↦ (N ω, fun i ↦ J i ω)) Q :=
+  have := h.J_indep.isProbabilityMeasure
+  indepFun_prodMk_of_indepFun_prodMk h.N_law.aemeasurable h.Z_law.aemeasurable
+    (measurable_pi_lambda _ h.J_meas).aemeasurable h.N_indep h.Z_indep_J
 
-/-- With the count frozen at `n`, the jump part `−κ + ∑_{i<n} Jᵢ` is independent of the
-diffusion sample. -/
-lemma indepFun_jumps (h : JumpDiffusionHyp Q Λ Z N J) (κ : ℝ) (n : ℕ) :
-    IndepFun (fun ω ↦ -κ + ∑ i ∈ Finset.range n, J i ω) Z Q :=
-  h.Z_indep_J.symm.comp (φ := fun j : ℕ → ℝ ↦ -κ + ∑ i ∈ Finset.range n, j i) (ψ := id)
-    (by fun_prop) measurable_id
+/-- The jump part `−κ + ∑_{i<N} Jᵢ` is measurable. -/
+lemma aemeasurable_jumpPart (h : JumpDiffusionHyp Q Λ Z N J) (κ : ℝ) :
+    AEMeasurable (fun ω ↦ -κ + ∑ i ∈ Finset.range (N ω), J i ω) Q :=
+  (measurable_neg_add_sum_range κ).comp_aemeasurable
+    (h.N_law.aemeasurable.prodMk (measurable_pi_lambda _ h.J_meas).aemeasurable)
 
-/-- With the count frozen at `n`, `e^{−κ + ∑_{i<n} Jᵢ}` is integrable when `𝔼[e^J] < ∞`. -/
-lemma integrable_exp_jumps (h : JumpDiffusionHyp Q Λ Z N J)
-    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) (κ : ℝ) (n : ℕ) :
-    Integrable (fun ω ↦ rexp (-κ + ∑ i ∈ Finset.range n, J i ω)) Q := by
-  have h1 := integrable_exp_mul_sum_range_of_iid 1 J h.J_indep h.J_meas h.J_ident
-    (by simpa only [one_mul] using hJ) n
-  simp_rw [one_mul] at h1
-  simp_rw [Real.exp_add]
-  exact h1.const_mul _
+/-- The jump part `−κ + ∑_{i<N} Jᵢ` is independent of the diffusion sample. -/
+lemma indepFun_jumpPart (h : JumpDiffusionHyp Q Λ Z N J) (κ : ℝ) :
+    IndepFun (fun ω ↦ -κ + ∑ i ∈ Finset.range (N ω), J i ω) Z Q :=
+  h.Z_indep_jumps.symm.comp (measurable_neg_add_sum_range κ) measurable_id
 
-/-- With the count frozen at `n`, `𝔼[e^{−κ + ∑_{i<n} Jᵢ}] = e^{−κ}·𝔼[e^J]ⁿ`. -/
-lemma integral_exp_jumps (h : JumpDiffusionHyp Q Λ Z N J) (κ : ℝ) (n : ℕ) :
-    ∫ ω, rexp (-κ + ∑ i ∈ Finset.range n, J i ω) ∂Q
-      = rexp (-κ) * (∫ ω, rexp (J 0 ω) ∂Q) ^ n := by
-  have h1 := mgf_range_sum_of_iid 1 J h.J_indep h.J_meas h.J_ident n
+/-- **The exponential moment of the jump part**,
+`𝔼[e^{−κ + ∑_{i<N} Jᵢ}] = e^{−κ + Λ(𝔼[e^J] − 1)}`: the compound-Poisson moment generating
+function at `1`. -/
+lemma integral_exp_jumpPart (h : JumpDiffusionHyp Q Λ Z N J)
+    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) (κ : ℝ) :
+    ∫ ω, rexp (-κ + ∑ i ∈ Finset.range (N ω), J i ω) ∂Q
+      = rexp (-κ + Λ * (∫ ω, rexp (J 0 ω) ∂Q - 1)) := by
+  have h1 := compoundPoisson_mgf_of_indepFun Λ 1 J h.N_law h.J_indep h.J_meas h.J_ident
+    h.N_indep_J (by simpa only [one_mul] using hJ)
   simp only [mgf, one_mul] at h1
   simp_rw [Real.exp_add]
   rw [integral_const_mul, h1]
 
-/-- **The discounted terminal price, given `n` jumps**, has mean `S₀e^{−κ}𝔼[e^J]ⁿ`. -/
-theorem discounted_terminal_given_jumps (h : JumpDiffusionHyp Q Λ Z N J) (S_0 r σ : ℝ)
-    {T : ℝ} (hT : 0 ≤ T) (κ : ℝ) (n : ℕ) :
-    ∫ ω, rexp (-r * T) * jumpDiffusionTerminal S_0 r σ T κ (Z ω) n (fun i ↦ J i ω) ∂Q
-      = S_0 * (rexp (-κ) * (∫ ω, rexp (J 0 ω) ∂Q) ^ n) := by
-  simp_rw [jumpDiffusionTerminal_eq]
-  rw [jumpDiffusion_discounted_terminal h.Z_law (h.measurable_jumps κ n).aemeasurable
-    (h.indepFun_jumps κ n) hT, h.integral_exp_jumps κ n]
+/-- The exponential of the jump part is integrable: its integral is positive. -/
+lemma integrable_exp_jumpPart (h : JumpDiffusionHyp Q Λ Z N J)
+    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) (κ : ℝ) :
+    Integrable (fun ω ↦ rexp (-κ + ∑ i ∈ Finset.range (N ω), J i ω)) Q :=
+  Integrable.of_integral_ne_zero <| by
+    rw [h.integral_exp_jumpPart hJ κ]
+    exact (Real.exp_pos _).ne'
 
-/-- With the count frozen at `n`, the discounted terminal price is integrable when
-`𝔼[e^J] < ∞`. -/
-lemma integrable_discounted_terminal_given_jumps (h : JumpDiffusionHyp Q Λ Z N J)
-    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) (S_0 r σ T κ : ℝ) (n : ℕ) :
-    Integrable (fun ω ↦ rexp (-r * T)
-      * jumpDiffusionTerminal S_0 r σ T κ (Z ω) n (fun i ↦ J i ω)) Q := by
+/-- **The mixing formula for the jump-diffusion.** The discounted expected call payoff is the
+Black–Scholes price averaged over the jump part `−κ + ∑_{i<N} Jᵢ`. -/
+theorem call_eq_integral_bsV (h : JumpDiffusionHyp Q Λ Z N J)
+    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K)
+    (hσ : 0 < σ) (hT : 0 < T) (κ : ℝ) :
+    ∫ ω, rexp (-r * T)
+        * max (jumpDiffusionTerminal S_0 r σ T κ (Z ω) (N ω) (fun i ↦ J i ω) - K) 0 ∂Q
+      = ∫ ω, bsV K r σ (S_0 * rexp (-κ + ∑ i ∈ Finset.range (N ω), J i ω)) T ∂Q := by
   simp_rw [jumpDiffusionTerminal_eq]
-  exact (integrable_jumpDiffusion_terminal h.Z_law (h.indepFun_jumps κ n)
-    (h.integrable_exp_jumps hJ κ n)).const_mul _
+  exact jumpDiffusion_call_eq_integral_bsV h.Z_law (h.aemeasurable_jumpPart κ)
+    (h.indepFun_jumpPart κ) (h.integrable_exp_jumpPart hJ κ) hS_0 hK hσ hT
 
-/-- **The discounted terminal price** has mean `S₀·e^{−κ + Λ(𝔼[e^J] − 1)}`. Given `n` jumps the
-mean is `S₀e^{−κ}𝔼[e^J]ⁿ` (`discounted_terminal_given_jumps`), and the Poisson probability
-generating function sums these. -/
-theorem discounted_terminal [IsProbabilityMeasure Q] (h : JumpDiffusionHyp Q Λ Z N J)
-    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) {S_0 : ℝ} (hS_0 : 0 ≤ S_0) (r σ : ℝ) {T : ℝ}
-    (hT : 0 ≤ T) (κ : ℝ) :
+/-- **The discounted terminal price** has mean `S₀·e^{−κ + Λ(𝔼[e^J] − 1)}`: `S₀` times the
+exponential moment of the jump part (`jumpDiffusion_discounted_terminal`,
+`integral_exp_jumpPart`). -/
+theorem discounted_terminal (h : JumpDiffusionHyp Q Λ Z N J)
+    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) (S_0 r σ : ℝ) {T : ℝ} (hT : 0 ≤ T) (κ : ℝ) :
     ∫ ω, rexp (-r * T) * jumpDiffusionTerminal S_0 r σ T κ (Z ω) (N ω) (fun i ↦ J i ω) ∂Q
       = S_0 * rexp (-κ + Λ * (∫ ω, rexp (J 0 ω) ∂Q - 1)) := by
-  calc ∫ ω, rexp (-r * T) * jumpDiffusionTerminal S_0 r σ T κ (Z ω) (N ω) (fun i ↦ J i ω) ∂Q
-      = ∫ n, S_0 * (rexp (-κ) * (∫ ω, rexp (J 0 ω) ∂Q) ^ n) ∂(poissonMeasure Λ) :=
-        integral_comp_of_hasLaw_poissonMeasure
-          (F := fun n p ↦ rexp (-r * T) * jumpDiffusionTerminal S_0 r σ T κ p.1 n p.2)
-          h.N_law h.aemeasurable_diffusion_jumps h.N_indep
-          (fun n ↦ by
-            unfold jumpDiffusionTerminal
-            fun_prop)
-          (fun _ _ ↦ mul_nonneg (Real.exp_pos _).le (mul_nonneg hS_0 (Real.exp_pos _).le))
-          (fun n ↦ h.integrable_discounted_terminal_given_jumps hJ S_0 r σ T κ n)
-          (fun n ↦ h.discounted_terminal_given_jumps S_0 r σ hT κ n)
-          (((PoissonPgf.integrable_pow_poissonMeasure Λ _).const_mul _).const_mul _)
-    _ = S_0 * rexp (-κ + Λ * (∫ ω, rexp (J 0 ω) ∂Q - 1)) := by
-        rw [integral_const_mul, integral_const_mul, PoissonPgf.integral_pow_poissonMeasure,
-          ← Real.exp_add]
+  simp_rw [jumpDiffusionTerminal_eq]
+  rw [jumpDiffusion_discounted_terminal h.Z_law (h.aemeasurable_jumpPart κ)
+    (h.indepFun_jumpPart κ) hT, h.integral_exp_jumpPart hJ κ]
 
 /-- **The compensator.** The discounted terminal price has mean `S₀` exactly when the drift
 correction is `κ = Λ(𝔼[e^J] − 1)`, the expected number of jumps times the mean relative jump
 `𝔼[e^J − 1]`. -/
-theorem discounted_terminal_eq_iff [IsProbabilityMeasure Q] (h : JumpDiffusionHyp Q Λ Z N J)
-    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) {S_0 : ℝ} (hS_0 : 0 < S_0) (r σ : ℝ) {T : ℝ}
+theorem discounted_terminal_eq_iff (h : JumpDiffusionHyp Q Λ Z N J)
+    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) {S_0 : ℝ} (hS_0 : S_0 ≠ 0) (r σ : ℝ) {T : ℝ}
     (hT : 0 ≤ T) (κ : ℝ) :
     ∫ ω, rexp (-r * T) * jumpDiffusionTerminal S_0 r σ T κ (Z ω) (N ω) (fun i ↦ J i ω) ∂Q = S_0
       ↔ κ = Λ * (∫ ω, rexp (J 0 ω) ∂Q - 1) := by
-  rw [h.discounted_terminal hJ hS_0.le r σ hT κ, mul_eq_left₀ hS_0.ne', Real.exp_eq_one_iff,
+  rw [h.discounted_terminal hJ S_0 r σ hT κ, mul_eq_left₀ hS_0, Real.exp_eq_one_iff,
     neg_add_eq_zero]
 
-/-- **The call, given `n` jumps.** With the count frozen at `n`, the discounted call payoff has
-expectation `𝔼[C_BS(S₀e^{−κ + ∑_{i<n} Jᵢ})]`: the mixing formula for the jump part
-`−κ + ∑_{i<n} Jᵢ`. -/
-theorem call_given_jumps [IsProbabilityMeasure Q] (h : JumpDiffusionHyp Q Λ Z N J)
-    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K)
-    (hσ : 0 < σ) (hT : 0 < T) (κ : ℝ) (n : ℕ) :
-    ∫ ω, rexp (-r * T) * max (jumpDiffusionTerminal S_0 r σ T κ (Z ω) n (fun i ↦ J i ω) - K) 0 ∂Q
-      = ∫ ω, bsV K r σ (S_0 * rexp (-κ + ∑ i ∈ Finset.range n, J i ω)) T ∂Q := by
+/-- **Jump risk is never free, for any jump law.** With the compensator
+`κ = Λ(𝔼[e^J] − 1)`, the jump-diffusion call is worth at least the Black–Scholes call at the
+diffusion volatility (`bsV_le_jumpDiffusion_call`). -/
+theorem bsV_le_call (h : JumpDiffusionHyp Q Λ Z N J) (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q)
+    {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
+    bsV K r σ S_0 T ≤ ∫ ω, rexp (-r * T) * max (jumpDiffusionTerminal S_0 r σ T
+        (Λ * (∫ x, rexp (J 0 x) ∂Q - 1)) (Z ω) (N ω) (fun i ↦ J i ω) - K) 0 ∂Q := by
+  have hmean := h.integral_exp_jumpPart hJ (Λ * (∫ x, rexp (J 0 x) ∂Q - 1))
+  rw [neg_add_cancel, Real.exp_zero] at hmean
   simp_rw [jumpDiffusionTerminal_eq]
-  exact jumpDiffusion_call_eq_integral_bsV h.Z_law (h.measurable_jumps κ n).aemeasurable
-    (h.indepFun_jumps κ n) (h.integrable_exp_jumps hJ κ n) hS_0 hK hσ hT
+  exact bsV_le_jumpDiffusion_call h.Z_law (h.aemeasurable_jumpPart _) (h.indepFun_jumpPart _)
+    (h.integrable_exp_jumpPart hJ _) hmean hS_0 hK hσ hT
 
-/-- With the count frozen at `n`, the discounted call payoff is integrable when `𝔼[e^J] < ∞`. -/
-lemma integrable_call_payoff_given_jumps (h : JumpDiffusionHyp Q Λ Z N J)
-    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) {S_0 K : ℝ} (hS_0 : 0 ≤ S_0) (hK : 0 ≤ K)
-    (r σ T κ : ℝ) (n : ℕ) :
-    Integrable (fun ω ↦ rexp (-r * T)
-      * max (jumpDiffusionTerminal S_0 r σ T κ (Z ω) n (fun i ↦ J i ω) - K) 0) Q := by
-  simp_rw [jumpDiffusionTerminal_eq]
-  exact integrable_jumpDiffusion_call_payoff h.Z_law (h.measurable_jumps κ n).aemeasurable
-    (h.indepFun_jumps κ n) (h.integrable_exp_jumps hJ κ n) hS_0 hK
-
-/-- With the count frozen at `n`, `C_BS(S₀e^{−κ + ∑_{i<n} Jᵢ})` is integrable: it lies between
-`0` and `S₀e^{−κ + ∑_{i<n} Jᵢ}`. -/
-lemma integrable_bsV_given_jumps [IsProbabilityMeasure Q] (h : JumpDiffusionHyp Q Λ Z N J)
-    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K)
-    (hσ : 0 < σ) (hT : 0 < T) (κ : ℝ) (n : ℕ) :
-    Integrable (fun ω ↦ bsV K r σ (S_0 * rexp (-κ + ∑ i ∈ Finset.range n, J i ω)) T) Q := by
-  refine ((h.integrable_exp_jumps hJ κ n).const_mul S_0).mono'
-    ((measurable_bsV_spot K r σ T).comp
-      ((h.measurable_jumps κ n).exp.const_mul S_0)).aestronglyMeasurable
-    (ae_of_all _ fun ω ↦ ?_)
-  have hS : 0 < S_0 * rexp (-κ + ∑ i ∈ Finset.range n, J i ω) := mul_pos hS_0 (Real.exp_pos _)
-  exact (Real.norm_of_nonneg (bsV_nonneg (r := r) ⟨hS, hK, hσ, hT, h.Z_law⟩)).trans_le
-    (bsV_le_S K r σ _ T hS.le hK.le)
-
-/-- The averaged Black–Scholes prices given `n` jumps are integrable against `Poisson(Λ)`: the
-`n`-th lies between `0` and `S₀e^{−κ}𝔼[e^J]ⁿ`. -/
-lemma integrable_call_given_jumps [IsProbabilityMeasure Q] (h : JumpDiffusionHyp Q Λ Z N J)
-    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K)
-    (hσ : 0 < σ) (hT : 0 < T) (κ : ℝ) :
-    Integrable (fun n ↦ ∫ ω, bsV K r σ (S_0 * rexp (-κ + ∑ i ∈ Finset.range n, J i ω)) T ∂Q)
-      (poissonMeasure Λ) := by
-  refine (((PoissonPgf.integrable_pow_poissonMeasure Λ (∫ ω, rexp (J 0 ω) ∂Q)).const_mul
-    (rexp (-κ))).const_mul S_0).mono' Measurable.of_discrete.aestronglyMeasurable
-    (ae_of_all _ fun n ↦ ?_)
-  have hnonneg : 0 ≤ ∫ ω, bsV K r σ (S_0 * rexp (-κ + ∑ i ∈ Finset.range n, J i ω)) T ∂Q :=
-    integral_nonneg fun ω ↦
-      bsV_nonneg (r := r) ⟨mul_pos hS_0 (Real.exp_pos _), hK, hσ, hT, h.Z_law⟩
-  have hle : ∫ ω, bsV K r σ (S_0 * rexp (-κ + ∑ i ∈ Finset.range n, J i ω)) T ∂Q
-      ≤ S_0 * (rexp (-κ) * (∫ ω, rexp (J 0 ω) ∂Q) ^ n) := by
-    rw [← h.integral_exp_jumps κ n, ← integral_const_mul]
-    exact integral_mono (h.integrable_bsV_given_jumps hJ hS_0 hK hσ hT κ n)
-      ((h.integrable_exp_jumps hJ κ n).const_mul S_0) fun ω ↦
-        bsV_le_S K r σ _ T (mul_pos hS_0 (Real.exp_pos _)).le hK.le
-  exact (Real.norm_of_nonneg hnonneg).trans_le hle
-
-/-- **Merton's formula for a general jump law** (Merton 1976, eq. (16)). The discounted expected
-call payoff of the jump-diffusion is the Poisson mixture, over the jump count `n`, of the
-Black–Scholes price averaged over the jump sizes:
-`𝔼[e^{−rT}(S_T − K)⁺] = ∫ n, 𝔼[C_BS(S₀e^{−κ + ∑_{i<n} Jᵢ})] ∂Poisson(Λ)`. -/
-theorem call_poisson_mixture [IsProbabilityMeasure Q] (h : JumpDiffusionHyp Q Λ Z N J)
+/-- **Merton's formula for a general jump law** (Merton 1976). The discounted expected call payoff
+of the jump-diffusion is the Poisson mixture, over the jump count `n`, of the Black–Scholes price
+averaged over the jump sizes:
+`𝔼[e^{−rT}(S_T − K)⁺] = ∫ n, 𝔼[C_BS(S₀e^{−κ + ∑_{i<n} Jᵢ})] ∂Poisson(Λ)`. This is the mixing
+formula `call_eq_integral_bsV` with the count integrated out: the count is independent of the
+jump sizes, and the averaged price is integrable against the product of their laws. -/
+theorem call_poisson_mixture (h : JumpDiffusionHyp Q Λ Z N J)
     (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K)
     (hσ : 0 < σ) (hT : 0 < T) (κ : ℝ) :
     ∫ ω, rexp (-r * T)
         * max (jumpDiffusionTerminal S_0 r σ T κ (Z ω) (N ω) (fun i ↦ J i ω) - K) 0 ∂Q
       = ∫ n, ∫ ω, bsV K r σ (S_0 * rexp (-κ + ∑ i ∈ Finset.range n, J i ω)) T ∂Q
-          ∂(poissonMeasure Λ) :=
-  integral_comp_of_hasLaw_poissonMeasure
-    (F := fun n p ↦ rexp (-r * T) * max (jumpDiffusionTerminal S_0 r σ T κ p.1 n p.2 - K) 0)
-    h.N_law h.aemeasurable_diffusion_jumps h.N_indep
-    (fun n ↦ by
-      unfold jumpDiffusionTerminal
-      fun_prop)
-    (fun _ _ ↦ mul_nonneg (Real.exp_pos _).le (le_max_right _ _))
-    (fun n ↦ h.integrable_call_payoff_given_jumps hJ hS_0.le hK.le r σ T κ n)
-    (fun n ↦ h.call_given_jumps hJ hS_0 hK hσ hT κ n)
-    (h.integrable_call_given_jumps hJ hS_0 hK hσ hT κ)
+          ∂(poissonMeasure Λ) := by
+  have := h.J_indep.isProbabilityMeasure
+  have hJm : AEMeasurable (fun ω i ↦ J i ω) Q := (measurable_pi_lambda _ h.J_meas).aemeasurable
+  have hg : Measurable fun p : ℕ × (ℕ → ℝ) ↦
+      bsV K r σ (S_0 * rexp (-κ + ∑ i ∈ Finset.range p.1, p.2 i)) T :=
+    (measurable_bsV_spot K r σ T).comp ((measurable_neg_add_sum_range κ).exp.const_mul S_0)
+  rw [h.call_eq_integral_bsV hJ hS_0 hK hσ hT κ, ← h.N_law.map_eq]
+  exact integral_comp_prodMk_of_indepFun h.N_indep_J h.N_law.aemeasurable hJm <|
+    (integrable_comp_prodMk_iff_of_indepFun h.N_indep_J h.N_law.aemeasurable hJm
+      hg.aestronglyMeasurable).mp
+      (integrable_bsV_mul_exp (h.aemeasurable_jumpPart κ) (h.integrable_exp_jumpPart hJ κ)
+        hS_0 hK hσ hT)
 
 end JumpDiffusionHyp
 

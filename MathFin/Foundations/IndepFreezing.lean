@@ -20,7 +20,9 @@ This is the *freezing lemma* (Shreve's *independence lemma*, *Stochastic Calculu
 Lemma 2.3.4, in its unconditional form). When `X = N` is a count it is the law of total
 expectation over the number of jumps, the step every Poisson-mixture computation takes: the
 Merton jump-diffusion price (`BlackScholes/MertonModel.lean`) and the compound-Poisson moment
-generating function (`Actuarial/CompoundPoissonMGF.lean`) both go through it.
+generating function (`Actuarial/CompoundPoissonMGF.lean`) both go through it. With `X` a jump part
+of any law it is the mixing formula of `BlackScholes/JumpDiffusionMixing.lean`: a jump-diffusion
+call is the Black–Scholes price averaged over the jumps.
 
 The proof composes two Mathlib facts: independence makes the joint law the product of the
 marginal laws (`IndepFun.map_prod_eq_prod_map_map`), and an integral against a product measure
@@ -35,8 +37,13 @@ is an iterated integral (`integral_prod`).
   product of the laws is checked one value of `X` at a time.
 * `integral_comp_prodMk_of_indepFun_of_countable`: the freezing lemma for a countable-valued `X`
   and a nonnegative `g`, with integrability checked one value of `X` at a time.
-* `integral_comp_of_hasLaw_poissonMeasure`: conditioning on a Poisson count. For
-  `N ∼ Poisson(Λ)` independent of `Y`, `𝔼[F(N, Y)] = ∫ n, 𝔼[F(n, Y)] ∂Poisson(Λ)`.
+* `integral_comp_of_hasLaw_of_countable`: integrating out a countable variable. For `X` with
+  a countable law `ν`, independent of `Y`, and a nonnegative `F` whose expectations
+  `c a = 𝔼[F(a, Y)]` are finite and integrable against `ν`, `𝔼[F(X, Y)] = ∫ a, c a ∂ν`. With
+  `ν = Poisson(Λ)` this is the Poisson-mixture step.
+* `indepFun_prodMk_of_indepFun_prodMk`: if `X` is independent of `(Y, W)` and `Y` of `W`, then
+  `Y` is independent of `(X, W)`. Mutual independence of three variables can be stated with any
+  of them split off first.
 -/
 
 @[expose] public section
@@ -44,7 +51,6 @@ is an iterated integral (`integral_prod`).
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory
-open scoped NNReal
 
 variable {Ω α β E : Type*} {mΩ : MeasurableSpace Ω} {mα : MeasurableSpace α}
   {mβ : MeasurableSpace β} [NormedAddCommGroup E]
@@ -103,23 +109,59 @@ theorem integral_comp_prodMk_of_indepFun_of_countable [Countable α]
     hint'.congr <| ae_of_all _ fun a ↦ integral_congr_ae <| ae_of_all _ fun ω ↦
       (Real.norm_of_nonneg (hg0 (a, Y ω))).symm
 
-/-- **Conditioning on a Poisson count.** For `N ∼ Poisson(Λ)` independent of `Y` and a nonnegative
-`F`, if each `F(n, Y)` is integrable with expectation `c n`, and `c` is integrable against
-`Poisson(Λ)`, then `𝔼[F(N, Y)] = ∫ n, c n ∂Poisson(Λ)`. -/
-theorem integral_comp_of_hasLaw_poissonMeasure {Λ : ℝ≥0} {N : Ω → ℕ}
-    (hN : HasLaw N (poissonMeasure Λ) P) (hY : AEMeasurable Y P) (hNY : N ⟂ᵢ[P] Y)
-    {F : ℕ → β → ℝ} (hFm : ∀ n, Measurable fun y ↦ F n y) (hF0 : ∀ n y, 0 ≤ F n y)
-    {c : ℕ → ℝ} (hint : ∀ n, Integrable (fun ω ↦ F n (Y ω)) P)
-    (hc : ∀ n, ∫ ω, F n (Y ω) ∂P = c n) (hcint : Integrable c (poissonMeasure Λ)) :
-    ∫ ω, F (N ω) (Y ω) ∂P = ∫ n, c n ∂(poissonMeasure Λ) := by
-  have hint' : Integrable (fun n ↦ ∫ ω, F n (Y ω) ∂P) (P.map N) := by
-    rw [hN.map_eq]
-    exact hcint.congr (ae_of_all _ fun n ↦ (hc n).symm)
-  calc ∫ ω, F (N ω) (Y ω) ∂P = ∫ n, ∫ ω, F n (Y ω) ∂P ∂(P.map N) :=
-        integral_comp_prodMk_of_indepFun_of_countable (g := fun p ↦ F p.1 p.2) hNY
-          hN.aemeasurable hY hFm (fun p ↦ hF0 p.1 p.2) hint hint'
-    _ = ∫ n, c n ∂(poissonMeasure Λ) := by
-        rw [hN.map_eq]
+/-- **Integrating out a countable variable.** For `X` with a countable law `ν`, independent of
+`Y`, and a nonnegative `F`, if each `F(a, Y)` is integrable with expectation `c a` and `c` is
+integrable against `ν`, then `𝔼[F(X, Y)] = ∫ a, c a ∂ν`. For a Poisson count this is the
+Poisson-mixture step of a compound-Poisson computation. -/
+theorem integral_comp_of_hasLaw_of_countable [Countable α] [MeasurableSingletonClass α]
+    {ν : Measure α} (hX : HasLaw X ν P) (hY : AEMeasurable Y P) (hXY : X ⟂ᵢ[P] Y)
+    {F : α → β → ℝ} (hFm : ∀ a, Measurable fun y ↦ F a y) (hF0 : ∀ a y, 0 ≤ F a y)
+    {c : α → ℝ} (hint : ∀ a, Integrable (fun ω ↦ F a (Y ω)) P)
+    (hc : ∀ a, ∫ ω, F a (Y ω) ∂P = c a) (hcint : Integrable c ν) :
+    ∫ ω, F (X ω) (Y ω) ∂P = ∫ a, c a ∂ν := by
+  have hint' : Integrable (fun a ↦ ∫ ω, F a (Y ω) ∂P) (P.map X) := by
+    rw [hX.map_eq]
+    exact hcint.congr (ae_of_all _ fun a ↦ (hc a).symm)
+  calc ∫ ω, F (X ω) (Y ω) ∂P = ∫ a, ∫ ω, F a (Y ω) ∂P ∂(P.map X) :=
+        integral_comp_prodMk_of_indepFun_of_countable (g := fun p ↦ F p.1 p.2) hXY
+          hX.aemeasurable hY hFm (fun p ↦ hF0 p.1 p.2) hint hint'
+    _ = ∫ a, c a ∂ν := by
+        rw [hX.map_eq]
         exact integral_congr_ae (ae_of_all _ hc)
+
+/-! ### Re-associating independence -/
+
+/-- Moving the middle factor of a triple product measure to the front:
+`(μ ⊗ (ν ⊗ ρ)).map ((a, b, c) ↦ (b, a, c)) = ν ⊗ (μ ⊗ ρ)`. -/
+theorem map_prod_prod_rotate {γ : Type*} {mγ : MeasurableSpace γ} (μ : Measure α)
+    (ν : Measure β) (ρ : Measure γ) [SFinite μ] [SFinite ν] [SFinite ρ] :
+    (μ.prod (ν.prod ρ)).map (fun p : α × β × γ ↦ (p.2.1, p.1, p.2.2)) = ν.prod (μ.prod ρ) := by
+  have hrot : (fun p : α × β × γ ↦ (p.2.1, p.1, p.2.2))
+      = MeasurableEquiv.prodAssoc ∘ Prod.map Prod.swap id ∘ MeasurableEquiv.prodAssoc.symm :=
+    rfl
+  rw [hrot, ← Measure.map_map MeasurableEquiv.prodAssoc.measurable
+      ((measurable_swap.prodMap measurable_id).comp MeasurableEquiv.prodAssoc.symm.measurable),
+    ← Measure.map_map (measurable_swap.prodMap measurable_id)
+      MeasurableEquiv.prodAssoc.symm.measurable,
+    ← Measure.prodAssoc_prod (μ := μ), MeasurableEquiv.map_symm_map,
+    ← Measure.map_prod_map (μ.prod ν) ρ measurable_swap measurable_id, Measure.prod_swap,
+    Measure.map_id, Measure.prodAssoc_prod]
+
+/-- **Re-associating independence.** If `X` is independent of `(Y, W)` and `Y` of `W`, then `Y`
+is independent of `(X, W)`. Either pair of hypotheses says that `X`, `Y` and `W` are mutually
+independent: the joint law is the product of the three marginal laws. -/
+theorem indepFun_prodMk_of_indepFun_prodMk {γ : Type*} {mγ : MeasurableSpace γ} {W : Ω → γ}
+    (hX : AEMeasurable X P) (hY : AEMeasurable Y P) (hW : AEMeasurable W P)
+    (hXYW : X ⟂ᵢ[P] fun ω ↦ (Y ω, W ω)) (hYW : Y ⟂ᵢ[P] W) :
+    Y ⟂ᵢ[P] fun ω ↦ (X ω, W ω) := by
+  have hXW : X ⟂ᵢ[P] W := hXYW.comp measurable_id measurable_snd
+  have hrot : Measurable fun p : α × β × γ ↦ (p.2.1, p.1, p.2.2) := by fun_prop
+  rw [indepFun_iff_map_prod_eq_prod_map_map hY (hX.prodMk hW),
+    hXW.map_prod_eq_prod_map_map hX hW,
+    show (fun ω ↦ (Y ω, X ω, W ω))
+      = (fun p : α × β × γ ↦ (p.2.1, p.1, p.2.2)) ∘ fun ω ↦ (X ω, Y ω, W ω) from rfl,
+    ← AEMeasurable.map_map_of_aemeasurable hrot.aemeasurable (hX.prodMk (hY.prodMk hW)),
+    hXYW.map_prod_eq_prod_map_map hX (hY.prodMk hW), hYW.map_prod_eq_prod_map_map hY hW]
+  exact map_prod_prod_rotate _ _ _
 
 end MathFin

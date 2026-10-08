@@ -76,15 +76,15 @@ lemma hasSum_weights_mul_mertonSpot_one (k : ℝ) (Λ : ℝ≥0) :
   rw [hfun]
   exact h
 
-/-- The Poisson-weighted call values form a convergent series: each lies in `[0, spot_n]`. -/
+/-- The Poisson-weighted call values form a convergent series: the call terms are integrable
+against `Poisson(Λ)` (`integrable_mertonCallTerm`). -/
 lemma summable_weights_mul_mertonCallTerm {S : ℝ} (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ)
     (hT : 0 < T) (hk : -1 < k) :
     Summable fun n : ℕ ↦
-      rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * mertonCallTerm S K r σ T k δ Λ n :=
-  Summable.of_nonneg_of_le
-    (fun n ↦ mul_nonneg (by positivity) (mertonCallTerm_nonneg δ Λ hS hK hσ hT hk n))
-    (fun n ↦ mul_le_mul_of_nonneg_left (mertonCallTerm_le_spot δ Λ hS hK hk n) (by positivity))
-    (summable_weights_mul_mertonSpot S k Λ)
+      rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * mertonCallTerm S K r σ T k δ Λ n := by
+  simpa only [smul_eq_mul] using
+    (hasSum_integral_poissonMeasure
+      (integrable_mertonCallTerm (r := r) δ Λ hS hK hσ hT hk)).summable
 
 /-! ### Delta -/
 
@@ -309,7 +309,7 @@ lemma hasDerivAt_mertonVol_sigma (δ : ℝ) (hT : 0 < T) (n : ℕ) (hσ : 0 < σ
   have h0 : σ ^ 2 + (n : ℝ) * δ ^ 2 / T ≠ 0 := by positivity
   have h := ((hasDerivAt_pow 2 σ).add_const ((n : ℝ) * δ ^ 2 / T)).sqrt h0
   unfold mertonVol
-  convert h using 1
+  refine h.congr_deriv ?_
   rw [show ((2 : ℕ) : ℝ) * σ ^ (2 - 1) = 2 * σ by norm_num, mul_div_mul_left σ _ two_ne_zero]
 
 /-- **The Merton vega**: `∑ₙ wₙ S cₙ ϕ(d₁ⁿ) √T · σ/σₙ`, the Poisson mixture of the Black–Scholes
@@ -319,8 +319,9 @@ noncomputable def mertonVega (S K r σ T k δ : ℝ) (Λ : ℝ≥0) : ℝ :=
     (mertonSpot S k Λ n * gaussianPDFReal 0 1 (bsd1 (mertonSpot S k Λ n) K r (mertonVol σ δ T n) T)
       * Real.sqrt T * (σ / mertonVol σ δ T n))
 
-/-- **Vega of the Merton call.** Each term's `σ`-derivative is at most `wₙ · S cₙ √T`, since
-`ϕ ≤ 1` and `σ ≤ σₙ`, and those bounds sum to `S√T`. -/
+/-- **Vega of the Merton call.** `∂C/∂σ = mertonVega = ∑ₙ wₙ S cₙ ϕ(d₁ⁿ) √T · σ/σₙ` at every
+`σ > 0`. The series is differentiated term by term: each term's `σ`-derivative is at most
+`wₙ · S cₙ √T`, since `ϕ ≤ 1` and `σ ≤ σₙ`, and those bounds sum to `S√T`. -/
 theorem hasDerivAt_mertonCallPrice_sigma {S : ℝ} (hS : 0 < S) (hK : 0 < K) (hT : 0 < T)
     (hk : -1 < k) (hσ : 0 < σ) :
     HasDerivAt (fun s ↦ mertonCallPrice S K r s T k δ Λ) (mertonVega S K r σ T k δ Λ) σ := by

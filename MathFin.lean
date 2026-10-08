@@ -52,6 +52,8 @@ import MathFin.Foundations.PoissonInterarrival
 import MathFin.Foundations.PoissonPgf
 -- The freezing lemma: E[g(X, Y)] = ∫ x, E[g(x, Y)] d(law X) for independent X, Y
 import MathFin.Foundations.IndepFreezing
+-- Jensen's inequality through a supporting line (no closed domain needed)
+import MathFin.Foundations.AffineMinorant
 import MathFin.Foundations.PoissonRandomMeasure
 import MathFin.Foundations.PoissonCompensatedIsometryAdapted
 import MathFin.Foundations.PoissonCompensatedBilinear
@@ -325,7 +327,7 @@ import MathFin.BlackScholes.MertonModel
 -- Merton Greeks: delta, gamma, vega as Poisson mixtures of Black–Scholes Greeks
 import MathFin.BlackScholes.MertonGreeks
 -- Jump-diffusions with an arbitrary jump law: the mixing formula, the
--- compound-Poisson compensator, and Merton's general formula (his eq. (16))
+-- compound-Poisson compensator, and Merton's formula for a general jump law
 import MathFin.BlackScholes.JumpDiffusionMixing
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
