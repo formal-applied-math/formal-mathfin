@@ -224,10 +224,8 @@ theorem condExp_comp (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsFiniteMea
     (hf : Measurable f) {t T : ℝ≥0} (htT : t ≤ T) (hfi : Integrable (fun ω ↦ f (X T ω)) P) :
     P[fun ω ↦ f (X T ω) | 𝓕 t]
       =ᵐ[P] fun ω ↦ ∫ y, f (X t ω + y) ∂(jumpDiffusionIncrementLaw b σ Λ ν (T - t)) := by
-  have key := h.condExp_comp_prodMk (g := fun z : ℝ × ℝ ↦ f (z.1 + z.2))
+  simpa only [add_sub_cancel] using h.condExp_comp_prodMk (g := fun z : ℝ × ℝ ↦ f (z.1 + z.2))
     (hf.comp measurable_add).stronglyMeasurable htT (by simpa only [add_sub_cancel] using hfi)
-  simp only [add_sub_cancel] at key
-  exact key
 
 /-- **The put at an intermediate date.** Given `𝓕_t`, the discounted put payoff at `T` has
 conditional expectation `P(S_t, T − t)`, the put price function at the current price and the

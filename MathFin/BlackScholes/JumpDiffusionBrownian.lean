@@ -147,19 +147,10 @@ theorem jumpDiffusionProcess (b σ : ℝ) (ν : Measure ℝ) [IsProbabilityMeasu
     JumpDiffusionProcess P 𝓕 (fun t ω ↦ b * t + σ * B t ω) b σ 0 ν where
   adapted t :=
     (((hB.stronglyAdapted t).measurable.const_mul σ).const_add (b * t)).stronglyMeasurable
-  zero := by
-    have h0 := hB.hasLaw_eval 0
-    rw [gaussianReal_zero_var] at h0
-    filter_upwards [h0.ae_eq_of_dirac] with ω (hω : B 0 ω = 0)
-    simp [hω]
-  indep s t hst := by
-    -- the increment of `X` is an affine function of the Brownian increment
-    refine indep_of_indep_of_le_left (hB.indep s t hst)
-      (MeasurableSpace.comap_le_comap_of_eq_comp (fun y ↦ b * ((t : ℝ) - s) + σ * y)
-        (by fun_prop : Measurable fun y : ℝ ↦ b * ((t : ℝ) - s) + σ * y) ?_)
-    funext ω
-    simp only [Function.comp_apply]
-    ring
+  zero := hB.eval_zero_ae_eq_zero.mono fun ω hω ↦ by simp [hω]
+  -- the increment of `X` is an affine function of the Brownian increment
+  indep s t hst := hB.indep_comap_of_eq_comp_increment hst
+    (f := fun y ↦ b * ((t : ℝ) - s) + σ * y) (by fun_prop) fun ω ↦ by beta_reduce; ring
   law s t hst := by
     rw [jumpDiffusionIncrementLaw_zero]
     have h := gaussianReal_const_add

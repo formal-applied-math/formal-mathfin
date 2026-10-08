@@ -2420,7 +2420,7 @@
     {
       "id": "mf-merton-dominance",
       "name": "Merton Jump-Diffusion Dominance: Jump Risk Is Never Free",
-      "description": "C_BS(S₀, σ) ≤ C_Merton(S₀, σ, k, δ, Λ) for every jump intensity Λ, mean jump size k > −1, and jump vol δ: the option value under jump risk dominates the Black-Scholes value at the diffusion vol. The two jump channels are separately priced: conditional vols exceed σ (vega), and the compensated conditional spots are a mean-preserving spread of S₀ (gamma convexity + Jensen via the compensation identity).",
+      "description": "C_BS(S₀, σ) ≤ C_Merton(S₀, σ, k, δ, Λ) for every expected jump count Λ, mean jump size k > −1, and jump vol δ: the option value under jump risk dominates the Black-Scholes value at the diffusion vol. The two jump channels are separately priced: conditional vols exceed σ (vega), and the compensated conditional spots are a mean-preserving spread of S₀ (gamma convexity + Jensen via the compensation identity).",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.MertonDominance\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen scoped NNReal\n\ntheorem merton_dominance_thm {S_0 K r σ T k : ℝ} (δ : ℝ) (Λ : ℝ≥0)\n    (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) :\n    MathFin.bsV K r σ S_0 T ≤ MathFin.mertonCallPrice S_0 K r σ T k δ Λ :=\n  MathFin.bsV_le_mertonCallPrice δ Λ hS_0 hK hσ hT hk\n"
@@ -2436,7 +2436,7 @@
     {
       "id": "mf-merton-classic-display",
       "name": "Merton Series in Classic Form: Adjusted Intensity Λ′ = Λ(1+k)",
-      "description": "The Merton mixture regroups into the textbook display C_Merton = Σ_n e^{−Λ′}Λ′ⁿ/n! · C_BS(S₀, K, r_n, vol_n, T) with adjusted intensity Λ′ = Λ(1+k) and shifted rates r_n = r − kΛ/T + n·log(1+k)/T: the jump factor (1+k)ⁿ migrates from the conditional spot into the Poisson weight.",
+      "description": "The Merton mixture regroups into the textbook display C_Merton = Σ_n e^{−Λ′}Λ′ⁿ/n! · C_BS(S₀, K, r_n, vol_n, T) with adjusted expected jump count Λ′ = Λ(1+k) and shifted rates r_n = r − kΛ/T + n·log(1+k)/T: the jump factor (1+k)ⁿ migrates from the conditional spot into the Poisson weight.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.MertonClassicDisplay\n\nopen MeasureTheory ProbabilityTheory Real MathFin\nopen scoped NNReal Nat\n\ntheorem merton_classic_display_thm {S_0 K k T : ℝ} (r σ δ : ℝ) (Λ : ℝ≥0)\n    (hS_0 : 0 < S_0) (hK : 0 < K) (hT : 0 < T) (hk : -1 < k) :\n    MathFin.mertonCallPrice S_0 K r σ T k δ Λ\n      = ∑' n : ℕ, Real.exp (-((Λ : ℝ) * (1 + k))) * ((Λ : ℝ) * (1 + k)) ^ n / n !\n          * MathFin.bsV K (MathFin.mertonRate r k T Λ n) (MathFin.mertonVol σ δ T n) S_0 T :=\n  MathFin.mertonCallPrice_eq_classic_tsum r σ δ Λ hS_0 hK hT hk\n"
@@ -2846,7 +2846,7 @@
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models); Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. The conditional value of the call is the call price function C(S_t, T − t) (JumpDiffusionProcess.condExp_call, mf-jump-diffusion-call-intermediate-date). At the compensated drift the price function is the call of the canonical model at intensity Λ(T − t) (jumpDiffusionCallPrice_eq_canonical), whose first jump size has law ν and so is not almost surely 0 when ν is not δ₀ (hasLaw_dirac_of_ae_eq). The compound-Poisson implied-volatility theorem (JumpDiffusionHyp.impliedVol_gt, mf-compound-poisson-implied-vol-above-sigma) then gives the unique implied volatility above σ (jumpDiffusionCallPrice_impliedVol_gt). The statement holds path by path, almost surely; a measurable choice of the implied volatility as a random variable is not constructed. The process is assumed through its defining properties; no such process is constructed. Lives in MathFin/BlackScholes/JumpDiffusionOptionPrices.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. The conditional value of the call is the call price function C(S_t, T − t) (JumpDiffusionProcess.condExp_call, mf-jump-diffusion-call-intermediate-date). At the compensated drift the price function is the call of the canonical model with expected jump count Λ(T − t) (jumpDiffusionCallPrice_eq_canonical), whose first jump size has law ν and so is not almost surely 0 when ν is not δ₀ (hasLaw_dirac_of_ae_eq). The compound-Poisson implied-volatility theorem (JumpDiffusionHyp.impliedVol_gt, mf-compound-poisson-implied-vol-above-sigma) then gives the unique implied volatility above σ (jumpDiffusionCallPrice_impliedVol_gt). The statement holds path by path, almost surely; a measurable choice of the implied volatility as a random variable is not constructed. The process is assumed through its defining properties; no such process is constructed. Lives in MathFin/BlackScholes/JumpDiffusionOptionPrices.lean. Axioms-clean."
       }
     },
     {

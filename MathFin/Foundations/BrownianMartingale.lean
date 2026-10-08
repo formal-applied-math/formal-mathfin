@@ -65,6 +65,16 @@ namespace IsFilteredPreBrownian
 
 variable [hX : IsFilteredPreBrownian X 𝓕 P] [IsFiniteMeasure P]
 
+omit [IsFiniteMeasure P] in
+/-- A measurable function of the increment `X_t − X_s` is independent of `𝓕_s`. The shared step
+behind the Wald martingale (`α(X_t − X_s)`) and Brownian motion with drift as a jump-diffusion
+(`IsFilteredPreBrownian.jumpDiffusionProcess`, increment `b(t − s) + σ(X_t − X_s)`). -/
+lemma indep_comap_of_eq_comp_increment {s t : ℝ≥0} (hst : s ≤ t) {Z : Ω → ℝ} {f : ℝ → ℝ}
+    (hf : Measurable f) (hZ : ∀ ω, Z ω = f (X t ω - X s ω)) :
+    Indep (MeasurableSpace.comap Z inferInstance) (𝓕 s) P :=
+  indep_of_indep_of_le_left (hX.indep s t hst)
+    (MeasurableSpace.comap_le_comap_of_eq_comp f hf (funext hZ))
+
 /-- For a Borel-measurable `φ : ℝ → ℝ` with `∫ φ (X_t ω − X_s ω) ∂P = c`, the
 conditional expectation of `φ ∘ (X_t − X_s)` given `𝓕 s` is a.e. the constant
 `c`. Captures the "increment is independent of the past, so functions of it
@@ -259,12 +269,8 @@ theorem waldExponential_isMartingale (α : ℝ) :
     (fun s t hst ↦ ?_) (fun t ↦ integrable_exp_mul_of_hasLaw (hX.hasLaw_eval t) α)
     (fun s t hst ↦ ?_)
   · -- `α(X_t − X_s)` is a function of the increment, which is independent of `𝓕_s`
-    refine indep_of_indep_of_le_left (hX.indep s t hst)
-      (MeasurableSpace.comap_le_comap_of_eq_comp (fun y ↦ α * y)
-        (by fun_prop : Measurable fun y : ℝ ↦ α * y) ?_)
-    funext ω
-    simp only [Function.comp_apply]
-    ring
+    exact hX.indep_comap_of_eq_comp_increment hst (f := fun y ↦ α * y) (by fun_prop)
+      fun ω ↦ (mul_sub α (X t ω) (X s ω)).symm
   · -- the increment is `N(0, t − s)`, whose exponential moment at `α` is `e^{α²(t − s)/2}`
     have hf : AEStronglyMeasurable (fun x : ℝ ↦ Real.exp (α * x)) (gaussianReal 0 (t - s)) := by
       fun_prop

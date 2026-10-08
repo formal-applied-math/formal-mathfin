@@ -200,10 +200,11 @@ Second panel (6 fix-now, 7 nits, all applied):
   `s` it is `P(s)` times that law; normalized by `P(s)`, i.e. given `s`, the claim holds. The
   docstring now says that.
 - "Conditions on `Λ` and `ν` alone" left out the hypotheses on `S₀, K, σ, T`; two safe wordings
-  dropped the compensated drift or `t < T`; "intensity" leftovers; the Brownian Black–Scholes
-  entry claimed the put price function's formula "also proved" without stating it (now stated);
-  "Theorem 5.1.6" for Saporito's Remark 5.1.6; a citation of a never-existing
-  `condExp_payoff`.
+  dropped the compensated drift or `t < T`; "intensity" leftovers (two more, in the older
+  `mf-merton-dominance` and `mf-merton-classic-display` descriptions, went with the build repair);
+  the Brownian Black–Scholes entry claimed the put price function's formula "also proved" without
+  stating it (now stated); "Theorem 5.1.6" for Saporito's Remark 5.1.6; a citation of a
+  never-existing `condExp_payoff`.
 
 ### Upgrades executed
 
@@ -231,9 +232,12 @@ Second panel (6 fix-now, 7 nits, all applied):
   - count–size independence of the canonical model by `indepFun_iff_hasLaw_prodMk_prod`; the
     repo's `indepFun_comp_of_measurePreserving` is deleted;
   - `HasLaw.identDistrib`;
-  - `MeasurableSpace.comap_le_comap_of_eq_comp` for "a function of the increment is independent",
-    twice.
+  - `IsPreBrownianReal.eval_zero_ae_eq_zero` for `B₀ = 0` in the Brownian bridge, as the American
+    put already does.
 - **Duplication removed:**
+  - "a function of the Brownian increment is independent of the past" stated once
+    (`IsFilteredPreBrownian.indep_comap_of_eq_comp_increment`, on Mathlib's
+    `comap_le_comap_of_eq_comp`), for the Wald martingale and the Brownian bridge;
   - price-function parity from the finite-state payoff identity `max_sub_max_neg`;
   - `JumpDiffusionProcess.isProbabilityMeasure` and `integral_exp` derived, so six statements drop
     `[IsProbabilityMeasure P]`;
@@ -241,8 +245,22 @@ Second panel (6 fix-now, 7 nits, all applied):
   - `measurable_sum_range_prod`, `integral_exp_compensatedJumpPart` and
     `integral_lt_integral_of_ae_le_of_not_ae_eq` stated once;
   - the non-strict spot convexity and tangent bound follow from the strict ones;
-  - `mertonTerminal_eq_jumpDiffusionTerminal` (`rfl`) turns "Merton's terminal price is the
-    `κ = kΛ` case" into a proof-term edge.
+  - `mertonTerminal_eq_jumpDiffusionTerminal` (`rfl`) checks the docstring claim "Merton's
+    terminal price is the `κ = kΛ` case". Nothing consumes it yet, so it is not a proof-term edge;
+    a single definition is backlog 1.
+- **Second panel, proof quality** (13 findings on the coherence round):
+  - It found a build break first. Brownian independence is stated for the function difference
+    `X t - X s`, so `ring` saw `(X t - X s) ω` as an atom at both new "function of the
+    increment" sites. The lifted lemma takes the pointwise identity `Z ω = f (X_t ω − X_s ω)`, so
+    the difference never appears.
+  - Applied: the lifted lemma; Mathlib's `eval_zero_ae_eq_zero`; the `simpa … using` fold in
+    `condExp_comp`.
+  - Kept: price-function parity cites `max_sub_max_neg`, the finance name of Mathlib's
+    `max_zero_sub_max_neg_zero_eq_self`, so the jump-diffusion parity and the finite-state parity
+    cite one identity. The real unification is one model-free parity (backlog 8).
+  - Deferred (backlog 8): a `bsTerminal_standardize` step shared by the two no-jump price
+    functions; `show`s that restate the goal; orienting `hi` in `map_restrict_prodMk_of_indep`;
+    `Integrable.of_bound`; `mertonJump_compensated`'s `b = X → b = Y` shape; the put via `bsP`.
 
 ### Lens gradients
 
@@ -307,9 +325,13 @@ Second panel (6 fix-now, 7 nits, all applied):
    - This witnesses `Λ > 0` and, for finite `ν`, the Poisson random measure.
 4. **Route the hand-frozen conditional expectations** through `condExp_comp_prodMk_of_indep`:
    - `squareSubTime_isMartingale` and both `condExp_func_increment`s;
-   - the pointwise bracket, the simple Doléans exponential (its private freezing of `exp(c·Δ)`)
-     and the `Q`-Brownian exponential martingale;
-   - `condExp_exp_eq_of_indep_increment`.
+   - the pointwise bracket, the simple Doléans exponential (about 110 lines re-proving the
+     freezing of `exp(c·Δ)`, with one domination bound proved twice) and the `Q`-Brownian
+     exponential martingale;
+   - `condExp_exp_eq_of_indep_increment`, which then drops `hD_int` (it follows from the other
+     hypotheses).
+   - Then a `HasLaw Y μ P` form of the freezing lemma (the process-level lemma becomes one line),
+     and one Fubini step for `integral_comp_prodMk_of_indepFun` and the freezing lemma.
 5. **An exponential-Lévy abstraction** carrying the generic results:
    - `condExp_comp`, the martingale criterion and the restart property;
    - a bridge to Mathlib's `HasIndepIncrements`;
@@ -322,10 +344,14 @@ Second panel (6 fix-now, 7 nits, all applied):
 8. **Smaller items:**
    - one model-free put–call parity, from which the four existing parities follow;
    - "American put ≥ Black–Scholes put" at `q = 0`, a cheap edge between the two towers;
-   - the American put's `brownianLogState_condExp_transition` as the rate-0 `condExp_comp`;
+   - the American put's `brownianLogState_condExp_transition` as the rate-0 `condExp_comp`, and
+     `brownian_condExp_transition` taking integrability and measurability as hypotheses (its
+     bound and continuity supply only those);
+   - the second panel's deferred proof nits (above);
    - upstream candidates: the conditional freezing lemma,
      `integral_lt_integral_of_ae_le_of_not_ae_eq`, tangent-line forms of convexity,
-     `indepFun_prodMk_of_indepFun_prodMk`.
+     `indepFun_prodMk_of_indepFun_prodMk`, `poissonMeasure_zero` (out of `BlackScholes/`
+     meanwhile).
 
 ## 2026-10-08 — corpus 461 — the jump-diffusion axis: Merton derived, its Greeks, any jump law
 
