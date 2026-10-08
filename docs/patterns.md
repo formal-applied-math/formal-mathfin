@@ -1921,7 +1921,7 @@ series a mixture of `bsV`. Term by term, the strike derivative of the call serie
 `hasDerivAt_bsCashDigital_K`. The first draft inlined `e^{−rT}Φ(d₂)` and had to reach the digital's
 derivative by transporting `breedenLitzenberger` back through `deriv`.
 
-### Two elaboration details at the pin
+### Three elaboration details at the pin
 
 - An anonymous constructor under a type ascription keeps the structure's own type:
   `(⟨(0 : ℝ) ^ 2, sq_nonneg 0⟩ : ℝ≥0) * τ` elaborates the left factor at

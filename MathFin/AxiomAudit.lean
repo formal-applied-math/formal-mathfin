@@ -824,8 +824,8 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.exists_call_esscher_ne_merton
 
 -- Digital options and Breeden–Litzenberger with jumps (2026-10-08): where a law has no atom at
--- the strike, the strike derivative of the call price is minus the digital; with σ ≠ 0 the
--- jump-diffusion log-return law is a Gaussian mixture with a continuous density, so the second
+-- the strike, the strike derivative of the call price is minus the digital; with σ ≠ 0 and τ > 0
+-- the jump-diffusion log-return law is a Gaussian mixture with a continuous density, so the second
 -- strike derivative of the call is the discounted density of the price; without jumps that density
 -- is lognormalTerminalPDF, read off the uniqueness of derivatives
 
@@ -872,11 +872,11 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.map_mul_exp_withDensity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.map_mul_exp_withDensity
 
-/-- info: 'MathFin.lintegral_lognormalTerminalPDF' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.lintegral_lognormalTerminalPDF
+/-- info: 'MathFin.lintegral_lognormalTerminalPDF_eq_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.lintegral_lognormalTerminalPDF_eq_one
 
-/-- info: 'MathFin.lintegral_mertonTerminalPDF' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.lintegral_mertonTerminalPDF
+/-- info: 'MathFin.lintegral_mertonTerminalPDF_eq_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.lintegral_mertonTerminalPDF_eq_one
 
 -- Blueprint-spine closure (2026-06-06): every spine node is axiom-pinned.
 -- Gap found by tests/test_values.py::test_blueprint_spine_is_audited on its

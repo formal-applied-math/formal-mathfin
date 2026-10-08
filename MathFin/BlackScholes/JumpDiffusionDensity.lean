@@ -15,9 +15,9 @@ Given the jump count `n` and the jump sizes `j₀, j₁, …`, the log-return ov
 (`jumpDiffusionIncrementLaw_apply`, for every `σ`). With a Gaussian part (`σ ≠ 0`, `τ > 0`) the
 law therefore has a density, the mixture of the normal densities (`jumpDiffusionDensity`). For
 lognormal jumps this is the Poisson mixture of normal densities of Merton (1976), which the library
-states in price form (`jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF`; the change of
-variables back to the log-return is not formalized). Here the jump law is arbitrary and needs no
-moment condition.
+states in price form (`jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF`; the log-return form
+`f(y) = ∑ₙ wₙ φ(y; bτ + n(log(1 + k) − δ²/2), σ²τ + nδ²)` is not stated). Here the jump law is
+arbitrary and needs no moment condition.
 
 * `jumpDiffusionIncrementLaw_eq_withDensity`: the law is `f(y) dy` (Tonelli).
 * `continuous_jumpDiffusionDensity`: `f` is continuous, by dominated convergence, since a normal
@@ -26,11 +26,12 @@ moment condition.
   `nullSingletonClass_withDensity`).
 * `ofReal_exp_le_jumpDiffusionIncrementLaw_singleton`: without a Gaussian part (`σ = 0`) the law
   has an atom at `bτ`, of mass at least `e^{−Λτ}`, the probability of no jump.
-* `hasDerivAt_measureReal_Ioi_withDensity`: for any law `f(y) dy` with `f` integrable, the tail
+* `hasDerivAt_measureReal_Ioi_withDensity`: for any law `f(y) dy` with `f ≥ 0` integrable, the tail
   `x ↦ P(Y > x)` has derivative `−f(a)` at every `a` where `f` is continuous.
 * `map_mul_exp_withDensity`: for any law `f(y) dy` and `S > 0`, the price `Seʸ` has on `(0, ∞)` the
   density `K ↦ f(log(K/S))/K` (change of variables `K = Seʸ`, `dK = K dy`), and
-  `jumpDiffusionIncrementLaw_map_mul_exp` is the jump-diffusion case.
+  `jumpDiffusionIncrementLaw_map_mul_exp` is the jump-diffusion case. A density obtained this way
+  integrates to one, the mass of a probability law (`lintegral_eq_one_of_map_eq_withDensity`).
 
 The option prices built on these facts are in `BlackScholes/JumpDiffusionDigital.lean`: the strike
 derivatives of the call and the digital, and Breeden–Litzenberger with jumps.
@@ -280,5 +281,13 @@ theorem jumpDiffusionIncrementLaw_map_mul_exp (b : ℝ) {σ : ℝ} (hσ : σ ≠
           fun K ↦ ENNReal.ofReal (jumpDiffusionDensity b σ Λ ν τ (Real.log (K / S)) / K) := by
   rw [jumpDiffusionIncrementLaw_eq_withDensity b hσ Λ ν hτ]
   exact map_mul_exp_withDensity _ hS
+
+/-- **The density of an image law integrates to one.** If a probability law `μ` is mapped by `g`
+to `d · ν`, then `∫⁻ d dν = 1`: it is the mass of `μ`. -/
+lemma lintegral_eq_one_of_map_eq_withDensity {α β : Type*} {mα : MeasurableSpace α}
+    {mβ : MeasurableSpace β} {μ : Measure α} [IsProbabilityMeasure μ] {ν : Measure β} {g : α → β}
+    (hg : Measurable g) {d : β → ℝ≥0∞} (h : μ.map g = ν.withDensity d) : ∫⁻ x, d x ∂ν = 1 := by
+  rw [← setLIntegral_univ, ← withDensity_apply _ MeasurableSet.univ, ← h,
+    Measure.map_apply hg MeasurableSet.univ, preimage_univ, measure_univ]
 
 end MathFin

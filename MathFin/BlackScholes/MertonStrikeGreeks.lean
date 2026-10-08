@@ -60,6 +60,13 @@ noncomputable def mertonTerminalPDF (S r σ T k δ : ℝ) (Λ : ℝ≥0) (K : �
   ∑' n : ℕ, rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! *
     lognormalTerminalPDF (mertonSpot S k Λ n) r (mertonVol σ δ T n) T K
 
+/-- Merton's density formula is nonnegative at `K > 0`: a Poisson mixture of the nonnegative
+lognormal density formulas (`lognormalTerminalPDF_nonneg`). -/
+lemma mertonTerminalPDF_nonneg {S : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
+    0 ≤ mertonTerminalPDF S r σ T k δ Λ K :=
+  tsum_nonneg fun n ↦ mul_nonneg (by positivity)
+    (lognormalTerminalPDF_nonneg hK (mertonVol_pos hσ hT n) hT)
+
 /-- The digital series converges: its terms lie in `[0, wₙe^{−rT}]`. -/
 lemma summable_mertonDigitalPrice_terms (S K : ℝ) :
     Summable fun n : ℕ ↦ rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! *

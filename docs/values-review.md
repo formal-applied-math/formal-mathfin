@@ -125,6 +125,131 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-08 — corpus 517 — Merton's series in the strike, kinks, and the law of the price
+
+Scope: corpus 506 → 517, three rungs.
+- Merton's digital and density (corpus 509): `mf-merton-strike-derivatives`,
+  `mf-jump-diffusion-merton-digital` and `mf-jump-diffusion-merton-density`. New file
+  `BlackScholes/MertonStrikeGreeks.lean`.
+- Kinks (corpus 513): `mf-call-strike-differentiable-iff-no-atom`,
+  `mf-jump-diffusion-call-differentiable-iff`, `mf-jump-diffusion-call-kink` and
+  `mf-cash-digital-strike`.
+- The law of the price as a measure (corpus 517): `mf-price-law-change-of-variables`,
+  `mf-jump-diffusion-price-law`, `mf-black-scholes-price-law` and `mf-merton-price-law`.
+
+Three read-only reviewers, one per rung; the third also read the prose of the fixes made for the
+second. None found an error in the Lean. Five CI runs went red in the period, all on elaboration
+details, each now in `docs/patterns.md`: a `:= by` followed by a term, an anonymous constructor
+under a type ascription, `zero_le` taking its argument implicitly, `rw` blind inside a
+beta-redex, and an order lemma elaborated for dot notation before its carrier was known.
+
+### Standing first pass: prose against statement
+
+All findings are applied unless marked otherwise.
+- **Merton's digital needs the compensated drift; the prose named none.** The module doc of
+  `MertonStrikeGreeks.lean` and the description of `mf-merton-strike-derivatives` read as if the
+  digital identity held at any drift. They now say which identity needs which drift.
+- **Two docstrings dropped `k > −1`**, which their statements require.
+- **A bare definition carried a model claim.** The docstring of the Poisson mixture of lognormal
+  formulas called it "the density of the price"; that is a theorem about Gaussian jumps, so the
+  docstring now points to it, and the definition is `mertonTerminalPDF` after its summands.
+- **"On the neighbourhood k > 0 of K"** used the jump mean `k` for the strike variable. Now
+  "(0, ∞)".
+- **A scope cited a lemma its entry did not state.** `mf-merton-strike-derivatives` now states the
+  strike derivative of the digital series as a conjunct.
+- **Four outward-facing descriptions became false when the kink rung landed.** "With `σ ≠ 0` there
+  are no atoms" fails at `τ = 0`, where the law is `δ₀` and the call has a kink at `S`. And the
+  left strike derivative, described as "not formalized", now is. All four now state `τ > 0` or
+  point to the kink entries.
+- **A non sequitur.** "The identity holds at every drift because `r` enters the series only through
+  `d₂`" gave the wrong reason. The density does not involve `r`, and every drift is the
+  compensated drift for `r = b + σ²/2 + Λk`. Fixed in the docstring, the description and coverage.
+- **The kink safe wording dropped the finite mean.** Without it the Bochner call price is
+  identically `0` and both claims fail.
+- **"A kink there" pointed at `bτ`**; the kink is at the strike `Se^{bτ}`. The same paragraph
+  implied one-sided strike derivatives stated for `jumpDiffusionCallPrice`. They follow from the
+  general lemmas applied to `Seʸ` and are not stated; a description in the digital entry made the
+  same slip and is fixed.
+- **"Merton's density integrates to one" rested on a fact proved nowhere.** The Lean integrates
+  `ofReal` of the formula, which reads negative values as `0`. `mertonTerminalPDF_nonneg` now
+  exists, and both price-law entries state nonnegativity as a conjunct.
+- **A stale pointer.** `BreedenLitzenberger.lean` still said the integration to one was not
+  stated; it points to `lintegral_lognormalTerminalPDF_eq_one`.
+- **"The change of variables back to the log-return is not formalized"** read as contradicting the
+  change-of-variables entry. What is missing is the log-return form of Merton's mixture.
+- **Hypotheses dropped in the docs**: `τ > 0`, `σ > 0` and the drift–rate relation, in coverage,
+  bridges, the roadmap, the curated audit and the umbrella comment.
+
+### Upgrades executed
+
+- **Breeden–Litzenberger for Merton's series, by uniqueness of derivatives.** The series is
+  differentiated twice in the strike, and the digital, the density and the law of the price are
+  read off the jump-diffusion's derivatives. No Gaussian convolution is computed.
+- **The series is built on the named summand.** `mertonDigitalPrice` mixes `bsCashDigital`, whose
+  strike Greek `hasDerivAt_bsCashDigital_K` is new. The private `hasDerivAt_bsV_KK` is gone:
+  `hasDerivAt_deriv_bsV_K` is that Greek negated.
+- **The density identity holds at every drift**, not only at the compensated one.
+- **One tool per idea.**
+  - The call price factors once, `jumpDiffusionCallPrice_eq_mul_integral`; it was restated
+    inside two proofs.
+  - The call payoff's `1`-Lipschitz bound is one lemma, `abs_call_payoff_sub_le`; it was derived
+    three times in one file.
+  - The mass of an image law is one lemma, `lintegral_eq_one_of_map_eq_withDensity`; it was two
+    `calc` blocks.
+- **Consumed rather than rebuilt.** `tendsto_neg_nhdsGT`, `generalize` and a term for
+  `{X ≥ K} = {X > K} ∪ {X = K}`. `map_mul_exp_withDensity` dropped a sign hypothesis it never
+  used, so it holds for any `f`.
+- **Mathlib's naming.** `lintegral_lognormalTerminalPDF_eq_one` and
+  `lintegral_mertonTerminalPDF_eq_one`, as `lintegral_gaussianPDF_eq_one`.
+- Declined, with reasons:
+  - `differentiableAt_smul_iff` for the discount factor. It needs the function in `c • f` form
+    and an `Invertible` instance, and Mathlib never consumes it.
+  - A golf of the atom lemma. Its `by_cases` reads clearly and the golf would cost a CI cycle.
+
+### Lens gradients
+
+- **First principles.**
+  - Exemplar: the kink comes from the law, the no-jump atom, not from a formula.
+  - Next: `BreedenLitzenberger.lean` calls its convexity chain (payoff convex, so price convex,
+    so density nonnegative) a consistency loop. Its second step, that integration against a law
+    preserves convexity, is formalized nowhere. Formalized for every law, the sign of the density
+    follows from the payoff instead of the closed form.
+- **Coherence.**
+  - Exemplar: the digital, the density and the law of the price are read off one call series.
+  - Next: the lognormal law as a Gaussian change of variables (`gaussianReal_map_mul_exp`), so the
+    Black–Scholes law stops depending on option pricing. `lognormalTerminalPDF_change_of_variables`
+    would then be its cross-check.
+- **Generality.**
+  - Exemplar: differentiability in the strike iff no atom, for any law.
+  - Next: strict convexity in the strike wherever the law charges every interval. Positivity of
+    the jump-diffusion density then gives it for any jump law.
+- **Idiomatic register.** The five elaboration details above are recorded in `docs/patterns.md`.
+
+### Ranked backlog
+
+1. **Strict convexity in the strike, and convexity for every law** (started this session).
+   - Integration preserves the convexity of the payoff, for every law: this closes the loop above.
+   - Strictly convex wherever the law charges every interval.
+   - For the jump-diffusion with `σ ≠ 0` and `τ > 0`, for any jump law; for Black–Scholes and
+     Merton through the existing identifications.
+2. **The lognormal law, first class.** `gaussianReal_map_mul_exp`, its pointwise identity with
+   `lognormalTerminalPDF`, and the law of `bsTerminal ∘ Z` under `BSCallHyp`.
+3. **Merton's density in log-return form**, from `jumpDiffusionIncrementLaw_apply` and
+   `gaussianReal_conv_gaussianReal`. This is an independent check of the uniqueness-of-derivatives
+   identification, and the density half of the corpus-506 backlog item 1.
+4. **Pricing any claim against the density**, then Carr–Madan replication of a `C²` payoff from
+   calls and puts weighted by `g''(K)`.
+5. **The price law on the process** (`hasLaw_price`), in Mathlib's `HasPDF` vocabulary; with it,
+   the lognormal marginal of Brownian motion through `jumpDiffusionProcess_brownian`.
+6. **Parameters.** `lintegral_mertonTerminalPDF_eq_one` stated in the formula's own parameters (any
+   `r`, any jump count), and one time type across the `lognormalTerminalPDF` siblings.
+7. Carried over:
+   - characteristic functions instead of moment-generating functions;
+   - the Esscher parameter for steep jump laws;
+   - upstream to Mathlib, now with `differentiableAt_integral_call_iff` and
+     `lintegral_eq_one_of_map_eq_withDensity`;
+   - the process-level Esscher measure, `compoundPoissonMeasure` and the semigroup.
+
 ## 2026-10-08 — corpus 506 — digital options and Breeden–Litzenberger with jumps
 
 Scope: corpus 500 → 506, two rungs.

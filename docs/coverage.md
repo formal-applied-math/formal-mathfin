@@ -36,25 +36,30 @@ Four entries added, all `full`: `mf-price-law-change-of-variables`, `mf-jump-dif
   `f(log(K/S))/K dK` on `(0, ∞)` (`map_mul_exp_withDensity`, from Mathlib's
   `lintegral_image_eq_lintegral_abs_deriv_mul`; `y ↦ Seʸ` is a bijection of `ℝ` onto `(0, ∞)`
   with derivative `Seʸ`). Negative values of `f` count as density `0` on both sides.
-- The jump-diffusion price. With `σ ≠ 0` the price `Seʸ` has the law `f(log(K/S))/K dK` on
-  `(0, ∞)` (`jumpDiffusionIncrementLaw_map_mul_exp`). The density of the price that the second
+- The jump-diffusion price. With `σ ≠ 0`, `τ > 0` and `S > 0` the price `Seʸ` has the law
+  `f(log(K/S))/K dK` on `(0, ∞)` (`jumpDiffusionIncrementLaw_map_mul_exp`). The density of the price that the second
   strike derivative of the call reads off, strike by strike, is the density of the law of the price.
-- Black–Scholes. Without jumps, at the drift `r − σ²/2`, the price has the law
-  `lognormalTerminalPDF(K) dK` on `(0, ∞)` and the formula integrates to one
-  (`jumpDiffusionIncrementLaw_zero_map_mul_exp`, `lintegral_lognormalTerminalPDF`). These are the
-  two facts `BreedenLitzenberger.lean` states it does not prove.
-- Merton. With Gaussian log-jumps and any drift, the price has the law `mertonTerminalPDF(K) dK` on
-  `(0, ∞)` and the mixture integrates to one (`jumpDiffusionIncrementLaw_gaussian_map_mul_exp`,
-  `lintegral_mertonTerminalPDF`).
+- Black–Scholes. Without jumps, at the drift `r − σ²/2` and with `σ > 0`, the price has the law
+  `lognormalTerminalPDF(K) dK` on `(0, ∞)`, and the formula, nonnegative there, integrates to one
+  (`jumpDiffusionIncrementLaw_zero_map_mul_exp`, `lognormalTerminalPDF_nonneg`,
+  `lintegral_lognormalTerminalPDF_eq_one`). These are the two facts `BreedenLitzenberger.lean`
+  states it does not prove.
+- Merton. With Gaussian log-jumps (`k > −1`), `σ > 0` and any drift `b`, the price has the law
+  `mertonTerminalPDF(K) dK` on `(0, ∞)` at the parameter `r = b + σ²/2 + Λk`, and the mixture,
+  nonnegative there, integrates to one (`jumpDiffusionIncrementLaw_gaussian_map_mul_exp`,
+  `mertonTerminalPDF_nonneg`, `lintegral_mertonTerminalPDF_eq_one`).
 
 Each identification of densities is pointwise on `(0, ∞)` (the earlier sections), and two
 `withDensity` measures agree when their densities agree almost everywhere (Mathlib's
-`withDensity_congr_ae`); integrating to one is the mass of the image of a probability measure.
+`withDensity_congr_ae`); integrating to one is the mass of the image of a probability measure
+(`lintegral_eq_one_of_map_eq_withDensity`). Each "integrates to one" is a lower Lebesgue integral
+of `ofReal` of the formula, which is the integral of the formula because the formula is
+nonnegative on `(0, ∞)`.
 
 Safe wording: "the price `Seʸ` of a jump-diffusion with a Gaussian part has the density
-`f(log(K/S))/K` on `(0, ∞)`; without jumps this is the lognormal density `lognormalTerminalPDF`, and
-with Gaussian log-jumps it is Merton's Poisson mixture `mertonTerminalPDF`, each a probability
-density". Not covered: moments of the price computed from these densities (the library computes
+`f(log(K/S))/K` on `(0, ∞)`; without jumps, at the drift `r − σ²/2`, this is the lognormal density
+`lognormalTerminalPDF`, and with Gaussian log-jumps it is Merton's Poisson mixture
+`mertonTerminalPDF` at `r = b + σ²/2 + Λk`, each a probability density". Not covered: moments of the price computed from these densities (the library computes
 them from the log-return law, `mgf_id_jumpDiffusionIncrementLaw`).
 
 ### Kinks: the call price is differentiable in the strike exactly where the law has no atom (2026-10-08)
@@ -157,7 +162,8 @@ now states it.
   densities (`jumpDiffusionDensity`, `jumpDiffusionIncrementLaw_eq_withDensity`, by Tonelli). `f`
   is continuous by dominated convergence, since a normal density is at most `1/√(2πv)`
   (`continuous_jumpDiffusionDensity`). The jump law is arbitrary and needs no moment condition; for
-  lognormal jumps `f` is Merton's (1976) Poisson mixture of normal densities. So the law has no
+  lognormal jumps `f` is Merton's (1976) Poisson mixture of normal densities (stated in price form,
+  `jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF`). So the law has no
   atoms (`nullSingletonClass_jumpDiffusionIncrementLaw`, from Mathlib's
   `nullSingletonClass_withDensity`).
 - The tail of a law with a density. For any law `f(y) dy` with `f ≥ 0` integrable, `x ↦ P(Y > x)`

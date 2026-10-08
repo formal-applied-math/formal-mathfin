@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (542 MathFin constants, 29 upstream). Citations
+  corpus (544 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -1217,17 +1217,20 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.knockIn_add_knockOut_eq_vanilla' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.knockIn_add_knockOut_eq_vanilla
 
-/-- info: 'MathFin.lintegral_lognormalTerminalPDF' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.lintegral_lognormalTerminalPDF
+/-- info: 'MathFin.lintegral_lognormalTerminalPDF_eq_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.lintegral_lognormalTerminalPDF_eq_one
 
-/-- info: 'MathFin.lintegral_mertonTerminalPDF' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.lintegral_mertonTerminalPDF
+/-- info: 'MathFin.lintegral_mertonTerminalPDF_eq_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.lintegral_mertonTerminalPDF_eq_one
 
 /-- info: 'MathFin.log_forward_div_bsTerminal_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.log_forward_div_bsTerminal_eq
 
 /-- info: 'MathFin.lognormalTerminalPDF_change_of_variables' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.lognormalTerminalPDF_change_of_variables
+
+/-- info: 'MathFin.lognormalTerminalPDF_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.lognormalTerminalPDF_nonneg
 
 /-- info: 'MathFin.lookback_payoff_ge_vanilla' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.lookback_payoff_ge_vanilla
@@ -1303,6 +1306,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.mertonHyp_canonical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.mertonHyp_canonical
+
+/-- info: 'MathFin.mertonTerminalPDF_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.mertonTerminalPDF_nonneg
 
 /-- info: 'MathFin.mertonVega_pos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.mertonVega_pos

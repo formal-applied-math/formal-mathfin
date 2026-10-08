@@ -31,7 +31,7 @@ differential identity at the end, that it integrates to 1. Both are proved
 downstream, for the Black–Scholes price (the jump-diffusion without jumps at the
 drift `r − σ²/2`): the law of the price is `lognormalTerminalPDF(K) dK` on `(0, ∞)`
 (`jumpDiffusionIncrementLaw_zero_map_mul_exp`) and the formula integrates to one
-(`lintegral_lognormalTerminalPDF`), in `JumpDiffusionDigital.lean`. Merton's
+(`lintegral_lognormalTerminalPDF_eq_one`), in `JumpDiffusionDigital.lean`. Merton's
 Poisson mixture of these formulas is `mertonTerminalPDF` (`MertonStrikeGreeks.lean`).
 
 ## Structural connection: PDF positivity = strike-convexity of the price
@@ -89,7 +89,7 @@ theorem breedenLitzenberger {S_0 r σ : ℝ} (hS : 0 < S_0) (hσ : 0 < σ)
 /-- **Implied PDF non-negativity**, directly: `ϕ ≥ 0` and `K σ √T > 0`. The route through the
 strike convexity of the price is `lognormalTerminalPDF_nonneg_via_strike_convexity`. That
 `lognormalTerminalPDF` is a probability density is not proved here; it is
-`lintegral_lognormalTerminalPDF` (`JumpDiffusionDigital.lean`). -/
+`lintegral_lognormalTerminalPDF_eq_one` (`JumpDiffusionDigital.lean`). -/
 theorem lognormalTerminalPDF_nonneg
     {S_0 r σ T K : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     0 ≤ lognormalTerminalPDF S_0 r σ T K := by
@@ -139,10 +139,10 @@ The implied PDF and the standard-normal PDF are related by the substitution
 `K ↦ z = −bsd2(K)`, whose Jacobian is `dz/dK = −1/(K σ √T)`. The
 differential identity below packages this.
 
-The integration-to-1 claim
-`∫_0^∞ lognormalTerminalPDF dK = 1` follows from the gaussian PDF
-integrating to 1 over `ℝ` plus Mathlib's change-of-variables formula; we
-state only the differential. -/
+The integration-to-1 claim is `lintegral_lognormalTerminalPDF_eq_one`
+(`JumpDiffusionDigital.lean`), the mass of the law of the price, through the
+measure-level change of variables `y ↦ Seʸ` (`map_mul_exp_withDensity`); this file
+states only the differential. -/
 
 /-- **Differential change-of-variables identity** between the lognormal PDF
 of `S_T` and the standard-normal PDF:

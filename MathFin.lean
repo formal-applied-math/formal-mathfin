@@ -369,8 +369,8 @@ import MathFin.BlackScholes.JumpDiffusionIncompleteness
 -- differentiable where the density is continuous; the law of the price Seʸ has the density
 -- f(log(K/S))/K
 import MathFin.BlackScholes.JumpDiffusionDensity
--- Digital options and Breeden–Litzenberger with jumps: for σ ≠ 0 the strike derivative of the
--- call price is minus the digital price and the second one is the discounted density of the
+-- Digital options and Breeden–Litzenberger with jumps: for σ ≠ 0 and τ > 0 the strike derivative
+-- of the call price is minus the digital price and the second one is the discounted density of the
 -- price; without jumps, at the drift r − σ²/2, these are e^{−rτ}Φ(d₂) and lognormalTerminalPDF;
 -- with Gaussian log-jumps, Merton's digital and density series; with σ = 0 the call price has a
 -- kink at the strike Se^{bτ}; lognormalTerminalPDF and mertonTerminalPDF as densities of the price
