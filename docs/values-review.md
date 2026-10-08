@@ -261,7 +261,9 @@ Eleven findings; three were must-fix. All are applied, and the first is fixed by
    measure makes both sides moment-generating functions of finite measures. Evaluating the
    identified measures at `{0}` then gives `σ₁² = σ₂²`. With that,
    `jumpDiffusionIncrementLaw_eq_iff` holds with different `σ`'s. First factor out the step "the
-   kernel measures agree" as its own lemma, which both halves use.
+   kernel measures agree" as its own lemma, which both halves use. Executed after this review:
+   `secondDifferenceMeasure` carries the atom, and the one identification gives `σ²` (at `{0}`)
+   and `Π` (off `0`); `mf-jump-diffusion-identifiability` now states `b₁ = b₂ ∧ σ₁² = σ₂² ∧ Π₁ = Π₂`.
 2. **The left limit and the strike derivative.** Show that `(C(K) − C(K + h))/h → μ{X ≥ K}` as
    `h ↑ 0`. Then `C` is differentiable at `K`, with derivative `−μ{X > K}`, when `μ{X = K} = 0`.
    Together with `hasDerivAt_bsV_K` this gives the Black–Scholes digital without the closed form.

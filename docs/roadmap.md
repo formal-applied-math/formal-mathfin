@@ -2121,8 +2121,10 @@ level of the law at one date):
    `e^{θx}` (`smul_tilted_eq_withDensity`), so the two laws differ when `θ ≠ 0`; and `θ ≠ 0`
    whenever the physical drift is off the compensated one. For `σ ≠ 0` both laws are equivalent to
    the physical law: a tilt for the Esscher law, and for the Merton measure static Girsanov on the
-   Gaussian factor (`jumpDiffusionIncrementLaw_absolutelyContinuous`). Still open: that the law
-   also determines `σ²`, and the process-level equivalent martingale measures.
+   Gaussian factor (`jumpDiffusionIncrementLaw_absolutelyContinuous`). The law also determines
+   `σ²`: the second differences of `κ` are the moment-generating function of
+   `σ²s²·δ₀ + 2(cosh(sx) − 1)·Λν` (`secondDifferenceMeasure`), whose atom at `0` is `σ²s²`. Still
+   open: the process-level equivalent martingale measures.
 3. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
    `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style
    characterization used for constant `θ` (`ExpMartingaleQBrownian`) to independent increments

@@ -802,8 +802,8 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.integral_call_tilted_zero_eq_bsV
 
 -- Incompleteness at one date (2026-10-08): call spreads tend to the digital, so call prices at
--- every strike determine the law; the law at one date determines the drift and the Lévy measure
--- off 0; a change of drift is static Girsanov on the Gaussian factor; so with σ ≠ 0, nontrivial
+-- every strike determine the law; the law at one date determines the drift, σ² and the Lévy
+-- measure off 0; a change of drift is static Girsanov on the Gaussian factor; so with σ ≠ 0, nontrivial
 -- jumps and a physical drift off the compensated one, the Esscher law and the Merton measure's
 -- law, both equivalent to the physical law and compensated, price some call differently
 

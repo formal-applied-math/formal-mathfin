@@ -152,7 +152,7 @@ theorem exists_call_esscher_ne_merton {S r b c σ : ℝ} (hS : 0 < S) (hσ : σ 
     exact mul_left_cancel₀ (Real.exp_pos _).ne' h
   -- so the Lévy measures agree off `0`: `e^{θx}·Λν = Λν` there
   have hLevy := ((jumpDiffusionIncrementLaw_eq_iff (zero_mem_interior_integrableExpSet_tilted hθν)
-    h0 hτ).1 hlaw).2
+    h0 hτ).1 hlaw).2.2
   rw [smul_tilted_eq_withDensity Λ hθ', Measure.restrict_smul, Measure.restrict_smul,
     restrict_withDensity (measurableSet_singleton (0 : ℝ)).compl] at hLevy
   have hLevy' : (ν.restrict {0}ᶜ).withDensity (fun x ↦ ENNReal.ofReal (rexp (θ * x)))

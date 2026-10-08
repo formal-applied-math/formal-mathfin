@@ -26,7 +26,7 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-### Incompleteness at one date: call prices determine the law, the law determines the Lévy measure (2026-10-08)
+### Incompleteness at one date: call prices determine the law, the law determines the characteristics (2026-10-08)
 
 Four entries added, all `full`: `mf-call-spread-digital`, `mf-call-prices-determine-law`,
 `mf-jump-diffusion-identifiability` and `mf-jump-diffusion-incompleteness`. Corpus 496 → 500.
@@ -43,16 +43,17 @@ file has the unnormalized Esscher transform `(∫ e^f dμ)·μ.tilted f = e^f·�
   call prices at every strike `K > 0` determine the law of a log-return with a finite forward
   (`measure_eq_of_integral_call_eq`): the first-order Breeden–Litzenberger, for any law with a
   finite forward. The Black–Scholes second-order form is still `breedenLitzenberger`.
-- The law determines the Lévy measure. Wherever `∫ e^{ux} dν < ∞`,
-  `κ(u) = bu + σ²u²/2 + ∫ (e^{ux} − 1) Π(dx)`, with `Π` the Lévy measure `Λν` restricted off `0`
-  (`jumpDiffusionExponent_eq_levy`). For jump laws whose moment-generating functions are finite
-  near `0` and a common `σ`, two log-return laws at one date `τ > 0` are equal iff their drifts
-  agree and their Lévy measures agree off `0` (`jumpDiffusionIncrementLaw_eq_iff`). The rate and
-  the jump law are not determined separately, only `Π`. Second differences of `κ` are the constant
-  `σ²s²` plus the moment-generating function of the finite measure `2(cosh(sx) − 1)·Λν`, so the
-  local uniqueness of the Esscher layer identifies that measure, and dividing by the kernel gives
-  `Π`. This is the `(b, Π)` part of the Lévy–Khintchine uniqueness, for compound-Poisson jumps
-  with exponential moments near `0`.
+- The law determines the drift, the Gaussian variance and the Lévy measure. Wherever
+  `∫ e^{ux} dν < ∞`, `κ(u) = bu + σ²u²/2 + ∫ (e^{ux} − 1) Π(dx)`, with `Π` the Lévy measure `Λν`
+  restricted off `0` (`jumpDiffusionExponent_eq_levy`). For jump laws whose moment-generating
+  functions are finite near `0`, two log-return laws at one date `τ > 0` are equal iff their drifts
+  agree, their Gaussian variances `σ²` agree and their Lévy measures agree off `0`
+  (`jumpDiffusionIncrementLaw_eq_iff`). The sign of `σ`, the rate and the jump law are not
+  determined separately. Second differences of `κ` are the moment-generating function of the
+  finite measure `σ²s²·δ₀ + 2(cosh(sx) − 1)·Λν` (`secondDifferenceMeasure`), so the local
+  uniqueness of the Esscher layer identifies that measure. Its atom at `0` gives `σ²`, and off `0`
+  dividing by the kernel gives `Π`. This is the Lévy–Khintchine uniqueness for compound-Poisson
+  jumps with exponential moments near `0`.
 - A change of drift gives an equivalent law. For `σ ≠ 0` and `τ > 0`, log-return laws that differ
   only in the drift are equivalent (`jumpDiffusionIncrementLaw_absolutelyContinuous`): on the
   canonical model a change of drift is a move of the standard normal sample, and the moved
@@ -68,13 +69,13 @@ file has the unnormalized Esscher transform `(∫ e^f dμ)·μ.tilted f = e^f·�
   Equal prices at every strike would make the two laws equal, hence their Lévy measures, but
   `θ ≠ 0` and `e^{θx} ≠ 1` off `0`.
 
-Safe wording: "call prices at every strike determine the law of the log-return; for a given `σ`,
-the law at one date of a jump-diffusion determines its drift and its Lévy measure off `0`; and with
+Safe wording: "call prices at every strike determine the law of the log-return; the law at one
+date of a jump-diffusion determines its drift, its Gaussian variance and its Lévy measure off `0`
+(for jump laws with exponential moments near `0`); and with
 `σ ≠ 0`, nontrivial jumps and a physical drift off the compensated one, the Esscher law and the
 Merton measure's law are two compensated laws, both equivalent to the physical law at one date,
 that price some call differently". Not covered:
-- whether the law also determines `σ²` (it does; the second differences give `σ²s²` as a point mass
-  at `0`, not formalized);
+- the Lévy–Khintchine uniqueness without moment conditions (by characteristic functions);
 - the process-level changes of measure (equivalent martingale measures for the price process)
   behind the two laws; for `σ = 0` the Merton law need not be equivalent to the physical one (the
   physical law has an atom at `bτ`, which a change of drift moves);

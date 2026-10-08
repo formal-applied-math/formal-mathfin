@@ -9,30 +9,34 @@ public import MathFin.BlackScholes.JumpDiffusionProcess
 public import MathFin.Foundations.Esscher
 
 /-!
-# The law at one date determines the drift and the Lévy measure
+# The law at one date determines the drift, the Gaussian variance and the Lévy measure
 
 When the jump laws' moment-generating functions are finite near `0`, the log-return law over a time
 `τ > 0` of a jump-diffusion with drift `b`, volatility coefficient `σ`, jump rate `Λ` and jump law
-`ν` (`jumpDiffusionIncrementLaw`) determines, for a given `σ`, the drift `b` and the Lévy measure
-`Λν` away from `0`. The rate `Λ` and the jump law `ν` are not determined separately, only their
-product off `0`: jumps of size `0` do not move the log-price. This is the `(b, Π)` part of the
-uniqueness in the Lévy–Khintchine representation, for compound-Poisson jumps with exponential
-moments near `0`, read off a single date. The full uniqueness also determines `σ²` and needs no
-moment conditions.
+`ν` (`jumpDiffusionIncrementLaw`) determines the drift `b`, the Gaussian variance `σ²` and the Lévy
+measure `Λν` away from `0`. The sign of `σ` is not determined, since the Gaussian part is
+symmetric. The rate `Λ` and the jump law `ν` are not determined separately either, only their
+product off `0`: jumps of size `0` do not move the log-price. This is the uniqueness in the
+Lévy–Khintchine representation for compound-Poisson jumps with exponential moments near `0`, read
+off a single date. The full uniqueness needs no moment conditions.
 
 * `jumpDiffusionExponent_eq_levy`: `κ(u) = bu + σ²u²/2 + ∫ (e^{ux} − 1) Π(dx)` wherever
   `∫ e^{ux} dν < ∞`, where `Π` is `Λν` restricted to `x ≠ 0`. The Laplace exponent sees the jumps
   only through `Π`.
+* `mgf_id_secondDifferenceMeasure`: the second difference `κ(u + s) + κ(u − s) − 2κ(u)` is the
+  moment-generating function at `u` of the finite measure `σ²s²·δ₀ + 2(cosh(sx) − 1)·Λν`
+  (`secondDifferenceMeasure`). Its atom at `0` is the Gaussian part and off `0` it is the jumps,
+  as in Kolmogorov's canonical measure `σ²δ₀ + x²Π(dx)`.
 * `jumpDiffusionIncrementLaw_eq_iff`: for jump laws whose moment-generating functions are finite
-  near `0`, two log-return laws with the same `σ` at the same date `τ > 0` are equal iff their
-  drifts agree and their Lévy measures agree off `0`.
+  near `0`, two log-return laws at the same date `τ > 0` are equal iff their drifts agree, their
+  Gaussian variances agree and their Lévy measures agree off `0`.
 
 The proof reads `κ` off the law near `0` (`mgf_id_jumpDiffusionIncrementLaw`) and takes second
-differences in `u`: `κ(u + s) + κ(u − s) − 2κ(u) = σ²s² + ∫ e^{ux}·2(cosh(sx) − 1) Λν(dx)`. The
-drift cancels and the Gaussian part is the same constant for both laws. So the finite measures
-`2(cosh(sx) − 1)·Λν` have the same moment-generating function near `0`, hence are equal
-(`measure_eq_of_mgf_id_eventuallyEq`). Dividing by `2(cosh(sx) − 1)`, which vanishes only at `0`,
-gives `Π`, and then `κ` gives `b`. Whether the law also determines `σ²` is not formalized here.
+differences in `u`, which cancel the drift. Equal laws give second-difference measures with the
+same moment-generating function near `0`, hence equal measures
+(`measure_eq_of_mgf_id_eventuallyEq`).
+Their atoms at `0` give `σ²`. Off `0`, dividing by `2(cosh(sx) − 1)`, which vanishes only at `0`,
+gives `Π`. Then `κ` at one point gives `b`.
 -/
 
 @[expose] public section
@@ -130,6 +134,80 @@ lemma restrict_compl_zero_eq_withDensity_inv {s : ℝ} (hs : s ≠ 0) (μ : Meas
   filter_upwards [ae_restrict_mem (measurableSet_singleton (0 : ℝ)).compl] with x hx
   exact ENNReal.coe_ne_zero.2 ((coshKernel_eq_zero_iff hs).not.2 (mem_compl_singleton_iff.1 hx))
 
+/-- **The second-difference measure** `σ²s²·δ₀ + 2(cosh(sx) − 1)·Λν`. Its moment-generating
+function is the second difference of the Laplace exponent with step `s`
+(`mgf_id_secondDifferenceMeasure`). Its atom at `0` is the Gaussian part `σ²s²`
+(`secondDifferenceMeasure_singleton_zero`), and off `0` it is the kernel times the Lévy measure
+(`restrict_compl_zero_secondDifferenceMeasure`). -/
+noncomputable def secondDifferenceMeasure (σ s : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ) : Measure ℝ :=
+  (σ ^ 2 * s ^ 2).toNNReal • Measure.dirac 0 + (Λ • ν).withDensity fun x ↦ coshKernel s x
+
+/-- The second-difference measure is finite when `ν` has the exponential moments of orders `s` and
+`−s`. -/
+lemma isFiniteMeasure_secondDifferenceMeasure (σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
+    [IsFiniteMeasure ν] {s : ℝ} (hp : Integrable (fun x ↦ rexp (s * x)) ν)
+    (hm : Integrable (fun x ↦ rexp (-s * x)) ν) :
+    IsFiniteMeasure (secondDifferenceMeasure σ s Λ ν) := by
+  have := isFiniteMeasure_withDensity_coshKernel Λ hp hm
+  unfold secondDifferenceMeasure
+  infer_instance
+
+/-- The second-difference measure has the exponential moment of order `u` when `ν` has those of
+orders `u + s`, `u − s` and `u`. -/
+lemma integrable_exp_mul_secondDifferenceMeasure (σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ} {s u : ℝ}
+    (hp : Integrable (fun x ↦ rexp ((u + s) * x)) ν)
+    (hm : Integrable (fun x ↦ rexp ((u - s) * x)) ν) (h0 : Integrable (fun x ↦ rexp (u * x)) ν) :
+    Integrable (fun x ↦ rexp (u * x)) (secondDifferenceMeasure σ s Λ ν) :=
+  (integrable_dirac (f := fun x : ℝ ↦ rexp (u * x)) (a := 0) enorm_lt_top).smul_measure_nnreal
+    |>.add_measure (integrable_exp_mul_withDensity_coshKernel Λ hp hm h0)
+
+/-- **The second difference of the Laplace exponent is a moment-generating function**:
+`κ(u + s) + κ(u − s) − 2κ(u) = σ²s² + Λ(m(u + s) + m(u − s) − 2m(u))`, the moment-generating
+function at `u` of `σ²s²·δ₀ + 2(cosh(sx) − 1)·Λν`, when `ν` has the exponential moments of orders
+`u + s`, `u − s` and `u`. The drift cancels. -/
+lemma mgf_id_secondDifferenceMeasure (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ} {s u : ℝ}
+    (hp : Integrable (fun x ↦ rexp ((u + s) * x)) ν)
+    (hm : Integrable (fun x ↦ rexp ((u - s) * x)) ν) (h0 : Integrable (fun x ↦ rexp (u * x)) ν) :
+    mgf id (secondDifferenceMeasure σ s Λ ν) u
+      = jumpDiffusionExponent b σ Λ ν (u + s) + jumpDiffusionExponent b σ Λ ν (u - s)
+        - 2 * jumpDiffusionExponent b σ Λ ν u := by
+  have hW : ∫ x, rexp (u * x) ∂((Λ • ν).withDensity fun x ↦ coshKernel s x)
+      = Λ * (∫ x, rexp ((u + s) * x) ∂ν + ∫ x, rexp ((u - s) * x) ∂ν
+          - 2 * ∫ x, rexp (u * x) ∂ν) :=
+    mgf_id_withDensity_coshKernel Λ hp hm h0
+  show ∫ x, rexp (u * x) ∂(secondDifferenceMeasure σ s Λ ν) = _
+  rw [secondDifferenceMeasure, integral_add_measure
+      (integrable_dirac (f := fun x : ℝ ↦ rexp (u * x)) (a := 0) enorm_lt_top).smul_measure_nnreal
+      (integrable_exp_mul_withDensity_coshKernel Λ hp hm h0),
+    integral_smul_nnreal_measure, integral_dirac, hW, mul_zero, Real.exp_zero, NNReal.smul_def,
+    smul_eq_mul, mul_one, Real.coe_toNNReal _ (by positivity)]
+  simp only [jumpDiffusionExponent]
+  ring
+
+/-- **The atom of the second-difference measure at `0` is the Gaussian part** `σ²s²`: the kernel
+vanishes at `0`. -/
+lemma secondDifferenceMeasure_singleton_zero (σ s : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ) :
+    secondDifferenceMeasure σ s Λ ν {0} = ENNReal.ofReal (σ ^ 2 * s ^ 2) := by
+  have hW : ((Λ • ν).withDensity fun x ↦ coshKernel s x) {0} = 0 := by
+    rw [withDensity_apply_eq_zero (measurable_coshKernel s).coe_nnreal_ennreal]
+    refine measure_mono_null (fun x ⟨hx0, hx1⟩ ↦ ?_) measure_empty
+    rw [mem_singleton_iff.1 hx1] at hx0
+    simp [coshKernel] at hx0
+  rw [show ENNReal.ofReal (σ ^ 2 * s ^ 2) = ((σ ^ 2 * s ^ 2).toNNReal : ℝ≥0∞) from rfl,
+    secondDifferenceMeasure, Measure.add_apply, hW, add_zero, Measure.coe_nnreal_smul_apply,
+    Measure.dirac_apply_of_mem (mem_singleton (0 : ℝ)), mul_one]
+
+/-- **Off `0` the second-difference measure is the kernel times the Lévy measure**: the atom
+lives at `0`. -/
+lemma restrict_compl_zero_secondDifferenceMeasure (σ s : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ) :
+    (secondDifferenceMeasure σ s Λ ν).restrict {0}ᶜ
+      = ((Λ • ν).withDensity fun x ↦ coshKernel s x).restrict {0}ᶜ := by
+  have hδ : (Measure.dirac (0 : ℝ)).restrict {0}ᶜ = 0 :=
+    Measure.restrict_eq_zero.2 ((dirac_eq_zero_iff_not_mem (measurableSet_singleton 0).compl).2
+      (by simp))
+  rw [secondDifferenceMeasure, Measure.restrict_add, Measure.restrict_smul, hδ, smul_zero,
+    zero_add]
+
 /-- **The Lévy–Khintchine form of the Laplace exponent**: wherever `∫ e^{ux} dν < ∞`,
 `κ(u) = bu + σ²u²/2 + ∫ (e^{ux} − 1) Π(dx)`, where `Π` is the Lévy measure `Λν` restricted to
 `x ≠ 0`. Jumps of size `0` contribute nothing. -/
@@ -164,16 +242,16 @@ lemma eventually_jumpDiffusionExponent_eq {b₁ b₂ σ₁ σ₂ : ℝ} {Λ₁ �
     Real.exp_eq_exp] at e
   exact mul_right_cancel₀ (NNReal.coe_ne_zero.2 hτ.ne') e
 
-/-- **The law at one date determines the drift and the Lévy measure.** For jump laws whose
-moment-generating functions are finite near `0`, two jump-diffusion log-return laws with the same
-volatility coefficient `σ` at the same date `τ > 0` are equal iff their drifts agree and their
-Lévy measures `Λν` agree off `0`. -/
-theorem jumpDiffusionIncrementLaw_eq_iff {b₁ b₂ σ : ℝ} {Λ₁ Λ₂ : ℝ≥0} {ν₁ ν₂ : Measure ℝ}
+/-- **The law at one date determines the drift, the Gaussian variance and the Lévy measure.**
+For jump laws whose moment-generating functions are finite near `0`, two jump-diffusion log-return
+laws at the same date `τ > 0` are equal iff their drifts agree, their Gaussian variances `σ²` agree
+and their Lévy measures `Λν` agree off `0`. -/
+theorem jumpDiffusionIncrementLaw_eq_iff {b₁ b₂ σ₁ σ₂ : ℝ} {Λ₁ Λ₂ : ℝ≥0} {ν₁ ν₂ : Measure ℝ}
     [IsProbabilityMeasure ν₁] [IsProbabilityMeasure ν₂]
     (h₁ : 0 ∈ interior (integrableExpSet id ν₁)) (h₂ : 0 ∈ interior (integrableExpSet id ν₂))
     {τ : ℝ≥0} (hτ : 0 < τ) :
-    jumpDiffusionIncrementLaw b₁ σ Λ₁ ν₁ τ = jumpDiffusionIncrementLaw b₂ σ Λ₂ ν₂ τ ↔
-      b₁ = b₂ ∧ (Λ₁ • ν₁).restrict {0}ᶜ = (Λ₂ • ν₂).restrict {0}ᶜ := by
+    jumpDiffusionIncrementLaw b₁ σ₁ Λ₁ ν₁ τ = jumpDiffusionIncrementLaw b₂ σ₂ Λ₂ ν₂ τ ↔
+      b₁ = b₂ ∧ σ₁ ^ 2 = σ₂ ^ 2 ∧ (Λ₁ • ν₁).restrict {0}ᶜ = (Λ₂ • ν₂).restrict {0}ᶜ := by
   -- near `0` both jump laws have exponential moments
   have hD₁ : ∀ᶠ u in 𝓝 (0 : ℝ), Integrable (fun x ↦ rexp (u * x)) ν₁ :=
     eventually_mem_set.2 (mem_interior_iff_mem_nhds.1 h₁)
@@ -187,14 +265,14 @@ theorem jumpDiffusionIncrementLaw_eq_iff {b₁ b₂ σ : ℝ} {Λ₁ Λ₂ : ℝ
       rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_lt]
       exact ⟨hy₁, hy₂⟩)
     have hs : ε / 2 ≠ 0 := (half_pos hε).ne'
-    haveI := isFiniteMeasure_withDensity_coshKernel Λ₁ (s := ε / 2)
+    haveI := isFiniteMeasure_secondDifferenceMeasure σ₁ Λ₁ (s := ε / 2)
       (hin (ε / 2) (by linarith) (by linarith)).1 (hin (-(ε / 2)) (by linarith) (by linarith)).1
-    haveI := isFiniteMeasure_withDensity_coshKernel Λ₂ (s := ε / 2)
+    haveI := isFiniteMeasure_secondDifferenceMeasure σ₂ Λ₂ (s := ε / 2)
       (hin (ε / 2) (by linarith) (by linarith)).2.1
       (hin (-(ε / 2)) (by linarith) (by linarith)).2.1
-    -- the kernel measures have the same moment-generating function on `(-ε/2, ε/2)`
-    have hM : (Λ₁ • ν₁).withDensity (fun x ↦ coshKernel (ε / 2) x)
-        = (Λ₂ • ν₂).withDensity fun x ↦ coshKernel (ε / 2) x := by
+    -- the second-difference measures have the same moment-generating function on `(-ε/2, ε/2)`
+    have hM : secondDifferenceMeasure σ₁ (ε / 2) Λ₁ ν₁
+        = secondDifferenceMeasure σ₂ (ε / 2) Λ₂ ν₂ := by
       have hU : Metric.ball (0 : ℝ) (ε / 2) ∈ 𝓝 0 := Metric.ball_mem_nhds 0 (half_pos hε)
       refine measure_eq_of_mgf_id_eventuallyEq
         (mem_interior_iff_mem_nhds.2 (mem_of_superset hU fun u hu ↦ ?_))
@@ -202,38 +280,46 @@ theorem jumpDiffusionIncrementLaw_eq_iff {b₁ b₂ σ : ℝ} {Λ₁ Λ₂ : ℝ
       all_goals
         rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_lt] at hu
         obtain ⟨hu₁, hu₂⟩ := hu
-      · exact integrable_exp_mul_withDensity_coshKernel Λ₁
+      · exact integrable_exp_mul_secondDifferenceMeasure σ₁ Λ₁
           (hin (u + ε / 2) (by linarith) (by linarith)).1
           (hin (u - ε / 2) (by linarith) (by linarith)).1 (hin u (by linarith) (by linarith)).1
-      · have ep := (hin (u + ε / 2) (by linarith) (by linarith)).2.2
-        have em := (hin (u - ε / 2) (by linarith) (by linarith)).2.2
-        have e0 := (hin u (by linarith) (by linarith)).2.2
-        rw [mgf_id_withDensity_coshKernel Λ₁ (hin (u + ε / 2) (by linarith) (by linarith)).1
+      · rw [mgf_id_secondDifferenceMeasure b₁ σ₁ Λ₁ (hin (u + ε / 2) (by linarith) (by linarith)).1
             (hin (u - ε / 2) (by linarith) (by linarith)).1 (hin u (by linarith) (by linarith)).1,
-          mgf_id_withDensity_coshKernel Λ₂ (hin (u + ε / 2) (by linarith) (by linarith)).2.1
+          mgf_id_secondDifferenceMeasure b₂ σ₂ Λ₂ (hin (u + ε / 2) (by linarith) (by linarith)).2.1
             (hin (u - ε / 2) (by linarith) (by linarith)).2.1
-            (hin u (by linarith) (by linarith)).2.1]
-        simp only [jumpDiffusionExponent] at ep em e0
-        linear_combination ep + em - 2 * e0
-    -- dividing by the kernel gives the Lévy measures off `0`
+            (hin u (by linarith) (by linarith)).2.1,
+          (hin (u + ε / 2) (by linarith) (by linarith)).2.2,
+          (hin (u - ε / 2) (by linarith) (by linarith)).2.2,
+          (hin u (by linarith) (by linarith)).2.2]
+    -- their atoms at `0` give `σ²`
+    have hσ : σ₁ ^ 2 = σ₂ ^ 2 := by
+      have h0 : secondDifferenceMeasure σ₁ (ε / 2) Λ₁ ν₁ {0}
+          = secondDifferenceMeasure σ₂ (ε / 2) Λ₂ ν₂ {0} := by rw [hM]
+      rw [secondDifferenceMeasure_singleton_zero, secondDifferenceMeasure_singleton_zero,
+        ENNReal.ofReal_eq_ofReal_iff (by positivity) (by positivity)] at h0
+      exact mul_right_cancel₀ (pow_ne_zero 2 hs) h0
+    -- off `0` they are the kernel times the Lévy measures, and dividing by the kernel gives those
     have hLevy : (Λ₁ • ν₁).restrict {0}ᶜ = (Λ₂ • ν₂).restrict {0}ᶜ := by
       rw [restrict_compl_zero_eq_withDensity_inv hs (Λ₁ • ν₁),
-        restrict_compl_zero_eq_withDensity_inv hs (Λ₂ • ν₂), hM]
+        restrict_compl_zero_eq_withDensity_inv hs (Λ₂ • ν₂),
+        ← restrict_compl_zero_secondDifferenceMeasure σ₁ (ε / 2) Λ₁ ν₁,
+        ← restrict_compl_zero_secondDifferenceMeasure σ₂ (ε / 2) Λ₂ ν₂, hM]
     -- and then `κ` gives the drift
-    refine ⟨?_, hLevy⟩
+    refine ⟨?_, hσ, hLevy⟩
     have e := (hin (ε / 2) (by linarith) (by linarith)).2.2
-    rw [jumpDiffusionExponent_eq_levy b₁ σ Λ₁ (hin (ε / 2) (by linarith) (by linarith)).1,
-      jumpDiffusionExponent_eq_levy b₂ σ Λ₂ (hin (ε / 2) (by linarith) (by linarith)).2.1,
+    rw [jumpDiffusionExponent_eq_levy b₁ σ₁ Λ₁ (hin (ε / 2) (by linarith) (by linarith)).1,
+      jumpDiffusionExponent_eq_levy b₂ σ₂ Λ₂ (hin (ε / 2) (by linarith) (by linarith)).2.1,
       hLevy] at e
-    have h2 : (b₁ - b₂) * (ε / 2) = 0 := by linear_combination e
+    have h2 : (b₁ - b₂) * (ε / 2) = 0 := by linear_combination e - (ε / 2) ^ 2 / 2 * hσ
     exact sub_eq_zero.1 ((mul_eq_zero.1 h2).resolve_right hs)
-  · rintro ⟨hb, hLevy⟩
+  · rintro ⟨hb, hσ, hLevy⟩
     have hint : ∀ᶠ u in 𝓝 (0 : ℝ),
-        Integrable (fun y ↦ rexp (u * y)) (jumpDiffusionIncrementLaw b₁ σ Λ₁ ν₁ τ) :=
+        Integrable (fun y ↦ rexp (u * y)) (jumpDiffusionIncrementLaw b₁ σ₁ Λ₁ ν₁ τ) :=
       hD₁.mono fun u hu ↦ integrable_exp_mul_jumpDiffusionIncrementLaw _ _ _ hu τ
     refine measure_eq_of_mgf_id_eventuallyEq (mem_interior_iff_mem_nhds.2 hint)
       ((hD₁.and hD₂).mono fun u hu ↦ ?_)
     rw [mgf_id_jumpDiffusionIncrementLaw _ _ _ hu.1, mgf_id_jumpDiffusionIncrementLaw _ _ _ hu.2,
-      jumpDiffusionExponent_eq_levy _ _ _ hu.1, jumpDiffusionExponent_eq_levy _ _ _ hu.2, hLevy, hb]
+      jumpDiffusionExponent_eq_levy _ _ _ hu.1, jumpDiffusionExponent_eq_levy _ _ _ hu.2, hLevy, hb,
+      hσ]
 
 end MathFin
