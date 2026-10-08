@@ -749,9 +749,16 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.markovPathMeasure_cylinder' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.markovPathMeasure_cylinder
 
--- The Lévy exponent (2026-10-08): scaling a jump-diffusion scales its characteristics,
--- so the moment of order θ is the moment at 1 of θX; e^{θX_t − κ(θ)t} is the
--- discounted-price martingale of θX at the rate κ(θ); power claims at every date
+-- The Laplace exponent (2026-10-08): the log-return's moment-generating function is the
+-- Gaussian one times the compound-Poisson one (the actuarial MGF at every order), κ(θ)τ is
+-- its cgf; scaling a jump-diffusion scales its characteristics; e^{θX_t − κ(θ)t} is the
+-- discounted-price martingale of θX at the rate κ(θ); power claims at each date
+
+/-- info: 'MathFin.JumpDiffusionHyp.mgf_logReturn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionHyp.mgf_logReturn
+
+/-- info: 'MathFin.cgf_id_jumpDiffusionIncrementLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.cgf_id_jumpDiffusionIncrementLaw
 
 /-- info: 'MathFin.jumpDiffusionMeasure_map_jumps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionMeasure_map_jumps

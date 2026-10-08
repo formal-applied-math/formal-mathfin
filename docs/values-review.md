@@ -125,6 +125,84 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-08 — corpus 490 — the Laplace exponent: one moment-generating function, from first principles
+
+Scope: corpus 486 → 490, `BlackScholes/JumpDiffusionExponent.lean` (new) and the moment section of
+`BlackScholes/JumpDiffusionProcess.lean`; entries `mf-jump-diffusion-{scaling,levy-exponent,
+exponential-martingales,power-claim-every-date}`. One read-only reviewer covered compile risk,
+prose against statement and the mathematical and coherence lenses. It found no mathematical error,
+no open compile risk (the one CI failure, a stuck `Mul` instance in a measurability term, was
+already fixed) and no dishonest hypothesis.
+
+### Standing first pass: prose against statement
+
+- **"The market is incomplete"** was attached to statements that allow `Λ = 0`, the complete
+  Black–Scholes model, and nothing about incompleteness is formalized. In the power-claim and the
+  put and call intermediate-date descriptions, in coverage and in the roadmap (two of the
+  sentences predate this phase), it now says that with jumps the market is in general incomplete
+  (not formalized here), and without jumps it is Black–Scholes.
+- **"These are Wald's martingales"** had no proof-term edge, and the bridges row dropped `b = 0`,
+  `σ = 1`. The text now says `κ(θ) = θ²/2` is the exponent of the Wald martingales and both
+  families rest on `martingale_exp_sub_of_indep_increments`, which is a proof-term fact.
+- **`κ` outside its domain.** The definition's docstring and the bridges row presented
+  `𝔼[e^{θY}] = e^{κ(θ)τ}` without `∫ e^{θx} dν < ∞`; where that integral is infinite the Bochner
+  integral is `0` and `κ(θ)` is junk. "Moments of every order" is now qualified everywhere.
+- **"Lévy exponent"** names the Fourier exponent `ψ` in the usual terminology; the real-argument
+  `κ` is the Laplace exponent, the cumulant generating function per unit time. Renamed in prose
+  and in the entry name (the id stays).
+- Smaller: `dμ_τ(y)` written out; "every date" → "each date `t ≤ T`, almost surely"; the
+  power-claim entry cited `κ(1) = r` to an entry that states the drift condition (now
+  `martingale_iff_exponent_one`); "the jumps change only the jump law" replaces "changes the
+  jump sizes alone", which hid that `b` and `σ` scale too; the roadmap's Next list had dropped
+  the open `compoundPoissonMeasure` item.
+
+### Upgrades executed
+
+- **The moment re-rooted.** The θ = 1 moment of the log-return was derived from the pricing
+  identity `discounted_terminal`, and the first version of this phase recovered every other order
+  from it by scaling. Now `JumpDiffusionHyp.mgf_logReturn` computes the moment-generating function
+  at every `θ` directly: the Gaussian one (Mathlib's `mgf_gaussianReal`, `mgf_const_mul`) times the
+  compound-Poisson one (`compoundPoisson_mgf_of_indepFun`, the actuarial aggregate-loss MGF,
+  stated at every order and until now used only at `1`), by independence (`IndepFun.mgf_add'`).
+  The θ = 1 lemmas, at the law level and on the canonical model, are corollaries, and
+  `integral_exp_logReturn` is deleted.
+- **Mathlib's vocabulary.** `mgf_id_jumpDiffusionIncrementLaw` and
+  `cgf_id_jumpDiffusionIncrementLaw` (`cgf id μ_τ θ = κ(θ)τ`) make "cumulant generating function
+  per unit time" a theorem.
+- **Scaling** (`jumpDiffusionMeasure_map_jumps`, any measurable map of the jumps, from
+  `Measure.map_prod_map` and `Measure.infinitePi_map_pi`) carries the process statement
+  `JumpDiffusionProcess.const_mul`, and through it the exponential martingales as the
+  discounted-price criterion of `θX`: one lemma for Wald, the discounted price and the family.
+- **Power claims** go through `condExp_comp`, the one route for payoffs at a date.
+- Build hygiene: a `Mul` instance stuck because `measurable_pi_apply`'s domain was not yet known
+  (fixed by composing through `measurable_const_mul θ`); two no-op `beta_reduce`s and an unused
+  simp argument removed; `infinitePi_map_pi`'s measure pinned.
+
+### Lens gradients
+
+- **First principles.** Exemplar: `mgf_logReturn`, a moment from the model's independence
+  structure instead of from a price. Next: a `compoundPoissonMeasure` so that the law is a
+  convolution and the semigroup `μ_s ∗ μ_t = μ_{s+t}` can be stated.
+- **Coherence.** Exemplar: the actuarial compound-Poisson MGF now feeds the jump-diffusion law at
+  every order. Next: the Esscher transform through Mathlib's `Measure.tilted`.
+- **Concept clarity.** Exemplar: `κ` named as what it is, the Laplace exponent, with its domain
+  stated. Next: a proof-term edge from the `Λ = 0` bridge to Wald's statement, if it can be made
+  without proving Wald twice.
+
+### Ranked backlog
+
+1. **The Esscher transform** at the law level: `(μ_τ).tilted (θ * ·)` is the jump-diffusion law
+   with drift `b + θσ²`, rate `Λ∫e^{θx}dν` and jump law `ν.tilted (θ * ·)`, identified by the
+   moment-generating function (a law with every exponential moment is determined by it, Mathlib's
+   complex MGF); then the Esscher condition `κ(θ + 1) − κ(θ) = r` and Esscher prices as Merton's
+   formula for the tilted jump law. Drafted.
+2. **Formal incompleteness**: tilting the Gaussian and jump parts separately under the one
+   compensator constraint gives a family of martingale laws with different call prices.
+3. **`compoundPoissonMeasure` and the convolution semigroup** (carried from backlog 2 of the
+   corpus-486 review), then the construction of the process with jumps.
+4. A Wald proof-term edge from `IsFilteredPreBrownian.jumpDiffusionProcess 0 1`, weighed against
+   proving Wald twice.
+
 ## 2026-10-08 — corpus 486 — the jump-diffusion process: prices at every date, and one tool per idea
 
 Scope: corpus 461 → 486, in two rounds.

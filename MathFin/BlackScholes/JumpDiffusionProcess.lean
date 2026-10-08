@@ -21,18 +21,25 @@ increments are those of a Lévy process with these characteristics; no path regu
 Without jumps, Brownian motion with drift is such a process
 (`IsFilteredPreBrownian.jumpDiffusionProcess`); with jumps its existence is not proved.
 
+The log-return over `τ` has the moment-generating function `e^{κ(θ)τ}` at every `θ` with
+`∫ e^{θx} dν < ∞`, where `κ(θ) = bθ + σ²θ²/2 + Λ(∫ e^{θx} dν − 1)` is the Laplace exponent
+(`jumpDiffusionExponent`). On the canonical model it is the Gaussian moment-generating function
+times the compound-Poisson one (`JumpDiffusionHyp.mgf_logReturn`, `compoundPoisson_mgf_of_indepFun`
+from `Actuarial/CompoundPoissonMGF.lean`), by independence; in Mathlib's terms `κ(θ)τ` is the
+cumulant generating function (`cgf_id_jumpDiffusionIncrementLaw`).
+
 The price `S_t = S₀e^{X_t}` discounted at the rate `r` is a martingale exactly at the compensated
 drift `b = r − σ²/2 − Λ(𝔼[e^J] − 1)` (`JumpDiffusionProcess.martingale_iff`). The increment's
 exponential moment is `e^{(b + σ²/2 + Λ(𝔼[e^J] − 1))(t − s)}`
-(`integral_exp_jumpDiffusionIncrementLaw`, computed on the canonical model), so the exponential
-martingale of independent increments (`martingale_exp_sub_of_indep_increments`) gives the "if";
-conversely a martingale has constant mean, and the mean at time `1` is
-`S₀e^{b + σ²/2 + Λ(𝔼[e^J] − 1) − r}`.
+(`integral_exp_jumpDiffusionIncrementLaw`, the case `θ = 1`), so the exponential martingale of
+independent increments (`martingale_exp_sub_of_indep_increments`) gives the "if"; conversely a
+martingale has constant mean, and the mean at time `1` is `S₀e^{b + σ²/2 + Λ(𝔼[e^J] − 1) − r}`.
 
 ## Main results
 
-* `jumpDiffusionIncrementLaw`, `integral_exp_jumpDiffusionIncrementLaw`: the law of a
-  jump-diffusion log-return over a time `τ`, and its exponential moment.
+* `jumpDiffusionIncrementLaw`: the law of a jump-diffusion log-return over a time `τ`.
+* `integral_exp_const_mul_jumpDiffusionIncrementLaw`, `mgf_id_jumpDiffusionIncrementLaw`,
+  `cgf_id_jumpDiffusionIncrementLaw`: its moment-generating function `e^{κ(θ)τ}`.
 * `JumpDiffusionProcess.martingale_iff`: the discounted price is a martingale if and only if the
   drift is compensated.
 -/
@@ -51,29 +58,42 @@ namespace JumpDiffusionHyp
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} {Λ : ℝ≥0} {Z : Ω → ℝ}
   {N : Ω → ℕ} {J : ℕ → Ω → ℝ}
 
-/-- **The exponential moment of a jump-diffusion log-return**:
-`𝔼[e^{bT + σ√T·Z + ∑_{i<N} Jᵢ}] = e^{(b + σ²/2)T + Λ(𝔼[e^J] − 1)}`. It is the discounted
-terminal price (`discounted_terminal`) of the model with spot `1`, rate `b + σ²/2` and no drift
-correction, undiscounted. -/
-lemma integral_exp_logReturn (h : JumpDiffusionHyp Q Λ Z N J)
-    (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) (b σ : ℝ) {T : ℝ} (hT : 0 ≤ T) :
-    ∫ ω, rexp (b * T + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω) ∂Q
-      = rexp ((b + σ ^ 2 / 2) * T + Λ * (∫ ω, rexp (J 0 ω) ∂Q - 1)) := by
-  have hpt (ω : Ω) : rexp (b * T + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω)
-      = rexp ((b + σ ^ 2 / 2) * T) * (rexp (-(b + σ ^ 2 / 2) * T)
-        * jumpDiffusionTerminal 1 (b + σ ^ 2 / 2) σ T 0 (Z ω) (N ω) (fun i ↦ J i ω)) := by
-    rw [jumpDiffusionTerminal, one_mul, ← Real.exp_add, ← Real.exp_add]
-    congr 1
+/-- **The moment-generating function of a jump-diffusion log-return.** For `θ` with
+`𝔼[e^{θJ}] < ∞`, `𝔼[e^{θ(bT + σ√T·Z + ∑_{i<N} Jᵢ)}] = e^{(bθ + σ²θ²/2)T + Λ(𝔼[e^{θJ}] − 1)}`. The
+drift contributes `e^{θbT}`; the Gaussian part its moment-generating function `e^{σ²θ²T/2}`
+(`mgf_gaussianReal`); and, independently of it (`IndepFun.mgf_add'`), the compound-Poisson part
+its moment-generating function `e^{Λ(𝔼[e^{θJ}] − 1)}` (`compoundPoisson_mgf_of_indepFun`, the
+aggregate-loss MGF of `Actuarial/CompoundPoissonMGF.lean`). -/
+lemma mgf_logReturn (h : JumpDiffusionHyp Q Λ Z N J) {θ : ℝ}
+    (hJ : Integrable (fun ω ↦ rexp (θ * J 0 ω)) Q) (b σ : ℝ) {T : ℝ} (hT : 0 ≤ T) :
+    mgf (fun ω ↦ b * T + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω) Q θ
+      = rexp ((b * θ + σ ^ 2 * θ ^ 2 / 2) * T + Λ * (mgf (J 0) Q θ - 1)) := by
+  have hind : IndepFun (fun ω ↦ σ * Real.sqrt T * Z ω)
+      (fun ω ↦ ∑ i ∈ Finset.range (N ω), J i ω) Q :=
+    h.Z_indep_jumps.comp (measurable_const_mul (σ * Real.sqrt T)) measurable_sum_range_prod
+  have hS : AEMeasurable (fun ω ↦ ∑ i ∈ Finset.range (N ω), J i ω) Q :=
+    measurable_sum_range_prod.comp_aemeasurable
+      (h.N_law.aemeasurable.prodMk (measurable_pi_lambda _ h.J_meas).aemeasurable)
+  have hsplit : (fun ω ↦ b * T + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω)
+      = fun ω ↦ b * T + ((fun ω ↦ σ * Real.sqrt T * Z ω)
+          + fun ω ↦ ∑ i ∈ Finset.range (N ω), J i ω) ω := by
+    funext ω
+    simp only [Pi.add_apply]
     ring
-  calc ∫ ω, rexp (b * T + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω) ∂Q
-      = rexp ((b + σ ^ 2 / 2) * T) * ∫ ω, rexp (-(b + σ ^ 2 / 2) * T)
-          * jumpDiffusionTerminal 1 (b + σ ^ 2 / 2) σ T 0 (Z ω) (N ω) (fun i ↦ J i ω) ∂Q := by
-        rw [← integral_const_mul]
-        exact integral_congr_ae (ae_of_all _ hpt)
-    _ = rexp ((b + σ ^ 2 / 2) * T) * (1 * rexp (-0 + Λ * (∫ ω, rexp (J 0 ω) ∂Q - 1))) := by
-        rw [h.discounted_terminal hJ 1 (b + σ ^ 2 / 2) σ hT 0]
-    _ = rexp ((b + σ ^ 2 / 2) * T + Λ * (∫ ω, rexp (J 0 ω) ∂Q - 1)) := by
-        rw [one_mul, neg_zero, zero_add, Real.exp_add]
+  rw [hsplit, mgf_const_add, hind.mgf_add' (h.Z_law.aemeasurable.const_mul _).aestronglyMeasurable
+      hS.aestronglyMeasurable, mgf_const_mul, mgf_gaussianReal h.Z_law.map_eq,
+    compoundPoisson_mgf_of_indepFun Λ θ J h.N_law h.J_indep h.J_meas h.J_ident h.N_indep_J hJ,
+    ← Real.exp_add, ← Real.exp_add]
+  congr 1
+  simp only [mul_pow, Real.sq_sqrt hT, NNReal.coe_one]
+  ring
+
+/-- `JumpDiffusionHyp.mgf_logReturn` as an integral. -/
+lemma integral_exp_mul_logReturn (h : JumpDiffusionHyp Q Λ Z N J) {θ : ℝ}
+    (hJ : Integrable (fun ω ↦ rexp (θ * J 0 ω)) Q) (b σ : ℝ) {T : ℝ} (hT : 0 ≤ T) :
+    ∫ ω, rexp (θ * (b * T + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω)) ∂Q
+      = rexp ((b * θ + σ ^ 2 * θ ^ 2 / 2) * T + Λ * (∫ ω, rexp (θ * J 0 ω) ∂Q - 1)) :=
+  h.mgf_logReturn hJ b σ hT
 
 end JumpDiffusionHyp
 
@@ -101,30 +121,73 @@ instance isProbabilityMeasure_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ�
     IsProbabilityMeasure (jumpDiffusionIncrementLaw b σ Λ ν τ) :=
   Measure.isProbabilityMeasure_map (measurable_jumpDiffusionLogReturn b σ τ).aemeasurable
 
+/-- **The Laplace exponent of a jump-diffusion**, `κ(θ) = bθ + σ²θ²/2 + Λ(∫ e^{θx} dν − 1)`. For
+`θ` with `∫ e^{θx} dν < ∞` it is the cumulant generating function of the log-return per unit
+time: `𝔼[e^{θY}] = e^{κ(θ)τ}` (`integral_exp_const_mul_jumpDiffusionIncrementLaw`,
+`cgf_id_jumpDiffusionIncrementLaw`). Where `∫ e^{θx} dν = ∞` the Bochner integral is `0` by
+convention and `κ(θ)` is not a cumulant. -/
+noncomputable def jumpDiffusionExponent (b σ : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ) (θ : ℝ) : ℝ :=
+  b * θ + σ ^ 2 * θ ^ 2 / 2 + Λ * (∫ x, rexp (θ * x) ∂ν - 1)
+
+/-- **The exponential moments of the jump-diffusion increment law.** For `θ` with
+`∫ e^{θx} dν < ∞`, `∫ e^{θy} dμ_τ(y) = e^{κ(θ)τ}`, with `μ_τ` the log-return law over `τ`. On the
+canonical model this is `JumpDiffusionHyp.mgf_logReturn`: the Gaussian moment-generating function
+times the compound-Poisson one. -/
+theorem integral_exp_const_mul_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
+    [IsProbabilityMeasure ν] {θ : ℝ} (hν : Integrable (fun x ↦ rexp (θ * x)) ν) (τ : ℝ≥0) :
+    ∫ y, rexp (θ * y) ∂(jumpDiffusionIncrementLaw b σ Λ ν τ)
+      = rexp (jumpDiffusionExponent b σ Λ ν θ * τ) := by
+  rw [jumpDiffusionIncrementLaw, integral_map
+    (measurable_jumpDiffusionLogReturn b σ τ).aemeasurable
+    (measurable_const_mul θ).exp.aestronglyMeasurable]
+  unfold jumpDiffusionLogReturn
+  rw [(jumpDiffusionHyp_canonical (Λ * τ) ν).1.integral_exp_mul_logReturn
+      (integrable_exp_mul_canonical_jump hν) b σ (NNReal.coe_nonneg τ),
+    integral_exp_mul_canonical_jump (Λ * τ) ν θ, jumpDiffusionExponent, NNReal.coe_mul]
+  congr 1
+  ring
+
+/-- The log-return law has the exponential moment of order `θ` when the jump law does: its
+integral is positive. -/
+lemma integrable_exp_mul_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
+    [IsProbabilityMeasure ν] {θ : ℝ} (hν : Integrable (fun x ↦ rexp (θ * x)) ν) (τ : ℝ≥0) :
+    Integrable (fun y ↦ rexp (θ * y)) (jumpDiffusionIncrementLaw b σ Λ ν τ) :=
+  Integrable.of_integral_ne_zero (by
+    rw [integral_exp_const_mul_jumpDiffusionIncrementLaw b σ Λ hν τ]
+    exact (Real.exp_pos _).ne')
+
+/-- The moment-generating function of the log-return law, in Mathlib's terms:
+`mgf id μ_τ θ = e^{κ(θ)τ}`. -/
+lemma mgf_id_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
+    [IsProbabilityMeasure ν] {θ : ℝ} (hν : Integrable (fun x ↦ rexp (θ * x)) ν) (τ : ℝ≥0) :
+    mgf id (jumpDiffusionIncrementLaw b σ Λ ν τ) θ = rexp (jumpDiffusionExponent b σ Λ ν θ * τ) :=
+  integral_exp_const_mul_jumpDiffusionIncrementLaw b σ Λ hν τ
+
+/-- **`κ` is the cumulant generating function per unit time**: `cgf id μ_τ θ = κ(θ)τ` (Mathlib's
+`cgf`), for `θ` with `∫ e^{θx} dν < ∞`. -/
+lemma cgf_id_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
+    [IsProbabilityMeasure ν] {θ : ℝ} (hν : Integrable (fun x ↦ rexp (θ * x)) ν) (τ : ℝ≥0) :
+    cgf id (jumpDiffusionIncrementLaw b σ Λ ν τ) θ = jumpDiffusionExponent b σ Λ ν θ * τ := by
+  rw [cgf, mgf_id_jumpDiffusionIncrementLaw b σ Λ hν τ, Real.log_exp]
+
 /-- **The exponential moment of the jump-diffusion increment law**:
-`∫ e^x d(law over τ) = e^{(b + σ²/2 + Λ(𝔼[e^J] − 1))τ}` when `𝔼[e^J] < ∞` under the jump law `ν`.
-On the canonical model this is `JumpDiffusionHyp.integral_exp_logReturn`. -/
+`∫ e^x d(law over τ) = e^{(b + σ²/2 + Λ(𝔼[e^J] − 1))τ}` when `𝔼[e^J] < ∞` under the jump law `ν`;
+the case `θ = 1` of `integral_exp_const_mul_jumpDiffusionIncrementLaw`. -/
 theorem integral_exp_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
     [IsProbabilityMeasure ν] (hν : Integrable rexp ν) (τ : ℝ≥0) :
     ∫ x, rexp x ∂(jumpDiffusionIncrementLaw b σ Λ ν τ)
       = rexp ((b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1)) * τ) := by
-  rw [jumpDiffusionIncrementLaw, integral_map
-    (measurable_jumpDiffusionLogReturn b σ τ).aemeasurable measurable_exp.aestronglyMeasurable]
-  unfold jumpDiffusionLogReturn
-  rw [(jumpDiffusionHyp_canonical (Λ * τ) ν).1.integral_exp_logReturn
-      (integrable_exp_canonical_jump hν) b σ (NNReal.coe_nonneg τ),
-    integral_exp_canonical_jump (Λ * τ) ν, NNReal.coe_mul]
-  congr 1
-  ring
+  simpa only [jumpDiffusionExponent, one_mul, mul_one, one_pow] using
+    integral_exp_const_mul_jumpDiffusionIncrementLaw b σ Λ (ν := ν) (θ := 1)
+      (by simpa only [one_mul] using hν) τ
 
-/-- The exponential of the log-return is integrable when `𝔼[e^J] < ∞`: its integral is
-positive. -/
+/-- The exponential of the log-return is integrable when `𝔼[e^J] < ∞`
+(`integrable_exp_mul_jumpDiffusionIncrementLaw` at `θ = 1`). -/
 lemma integrable_exp_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
     [IsProbabilityMeasure ν] (hν : Integrable rexp ν) (τ : ℝ≥0) :
-    Integrable rexp (jumpDiffusionIncrementLaw b σ Λ ν τ) :=
-  Integrable.of_integral_ne_zero (by
-    rw [integral_exp_jumpDiffusionIncrementLaw b σ Λ hν τ]
-    exact (Real.exp_pos _).ne')
+    Integrable rexp (jumpDiffusionIncrementLaw b σ Λ ν τ) := by
+  simpa only [one_mul] using integrable_exp_mul_jumpDiffusionIncrementLaw b σ Λ (ν := ν) (θ := 1)
+    (by simpa only [one_mul] using hν) τ
 
 /-! ### The process -/
 

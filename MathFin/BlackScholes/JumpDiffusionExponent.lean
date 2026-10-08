@@ -9,33 +9,30 @@ public import Mathlib
 public import MathFin.BlackScholes.JumpDiffusionOptionPrices
 
 /-!
-# The Lévy exponent of a jump-diffusion
+# Scaling a jump-diffusion; its exponential martingales
 
-A jump-diffusion log-return `Y` over a time `τ` has the exponential moment `𝔼[e^{θY}] = e^{κ(θ)τ}`
-at every `θ` with `∫ e^{θx} dν < ∞`, where
-
-  `κ(θ) = bθ + σ²θ²/2 + Λ(∫ e^{θx} dν − 1)`
-
-is the Lévy exponent (`jumpDiffusionExponent`): the cumulant of the log-return per unit time. The
-moment at `θ` is the moment at `1` of `θY`, which is again a jump-diffusion log-return, with drift
-`θb`, volatility coefficient `θσ`, the same rate and every jump multiplied by `θ`
-(`jumpDiffusionIncrementLaw_map_const_mul`). On the canonical model this is a change of the jump
-sizes alone (`jumpDiffusionMeasure_map_jumps`), and on the process `θX` is a jump-diffusion
+`θ` times a jump-diffusion log-return over a time `τ` is again one, with drift `θb`, volatility
+coefficient `θσ`, the same rate and every jump multiplied by `θ`
+(`jumpDiffusionIncrementLaw_map_const_mul`). On the canonical model the drift and the Gaussian
+coefficient scale inside the log-return, and multiplying the jumps by `θ` changes only the jump
+law (`jumpDiffusionMeasure_map_jumps`). On the process, `θX` is a jump-diffusion
 (`JumpDiffusionProcess.const_mul`).
 
-For the price `S_t = S₀e^{X_t}`:
+The Laplace exponent `κ(θ) = bθ + σ²θ²/2 + Λ(∫ e^{θx} dν − 1)` (`jumpDiffusionExponent`, the
+cumulant generating function of the log-return per unit time where `∫ e^{θx} dν < ∞`,
+`cgf_id_jumpDiffusionIncrementLaw`) then gives, for the price `S_t = S₀e^{X_t}`:
 
 * `JumpDiffusionProcess.martingale_exp_const_mul_sub`: `t ↦ e^{θX_t − κ(θ)t}` is a martingale for
-  every such `θ`. It is the discounted price martingale (`JumpDiffusionProcess.martingale_iff`) of
-  `θX` at the rate `κ(θ)`. Without jumps, for Brownian motion (`b = 0`, `σ = 1`), `κ(θ) = θ²/2`,
-  and these are the Wald martingales (`IsFilteredPreBrownian.waldExponential_isMartingale`); both
-  come from the exponential martingale of independent increments
-  (`martingale_exp_sub_of_indep_increments`).
+  every `θ` with `∫ e^{θx} dν < ∞`. It is the discounted price criterion
+  (`JumpDiffusionProcess.martingale_iff`) for `θX` at the rate `κ(θ)`. For `b = 0`, `σ = 1` and no
+  jumps `κ(θ) = θ²/2`, the exponent of the Wald martingales
+  (`IsFilteredPreBrownian.waldExponential_isMartingale`); both families rest on the exponential
+  martingale of independent increments (`martingale_exp_sub_of_indep_increments`).
 * `JumpDiffusionProcess.martingale_iff_exponent_one`: the discounted price is a martingale if and
   only if `κ(1) = r`.
-* `JumpDiffusionProcess.condExp_rpow`, power claims at every date before maturity: given `𝓕_t`,
-  the discounted payoff `e^{−r(T−t)}S_T^p` has conditional expectation
-  `S_t^p e^{(κ(p) − r)(T − t)}`.
+* `JumpDiffusionProcess.condExp_rpow`, power claims at each date `t ≤ T`: given `𝓕_t`, the
+  discounted payoff `e^{−r(T−t)}S_T^p` has conditional expectation `S_t^p e^{(κ(p) − r)(T − t)}`,
+  almost surely.
 -/
 
 @[expose] public section
@@ -73,7 +70,7 @@ lemma jumpDiffusionMeasure_map_jumps (Λ : ℝ≥0) (ν : Measure ℝ) [IsProbab
   unfold jumpDiffusionMeasure
   rw [← Measure.map_prod_map _ _ (hid ℝ) ((hid ℕ).prodMap hj),
     ← Measure.map_prod_map _ _ (hid ℕ) hj, Measure.map_id, Measure.map_id,
-    Measure.infinitePi_map_pi _ fun _ ↦ hg]
+    Measure.infinitePi_map_pi (fun _ : ℕ ↦ ν) fun _ ↦ hg]
 
 /-- `θ` times the log-return with drift `b` and volatility coefficient `σ` is the log-return with
 drift `θb` and volatility coefficient `θσ` at the jump sizes multiplied by `θ`. -/
@@ -99,30 +96,7 @@ theorem jumpDiffusionIncrementLaw_map_const_mul (θ b σ : ℝ) (Λ : ℝ≥0) (
     Measure.map_map (measurable_jumpDiffusionLogReturn (θ * b) (θ * σ) τ) hj,
     Measure.map_map (measurable_const_mul θ) (measurable_jumpDiffusionLogReturn b σ τ)]
   congr 1
-  funext ω
-  exact const_mul_jumpDiffusionLogReturn θ b σ τ ω
-
-/-! ### The Lévy exponent -/
-
-/-- **The Lévy exponent of a jump-diffusion**, its cumulant per unit time:
-`κ(θ) = bθ + σ²θ²/2 + Λ(∫ e^{θx} dν − 1)`. -/
-noncomputable def jumpDiffusionExponent (b σ : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ) (θ : ℝ) : ℝ :=
-  b * θ + σ ^ 2 * θ ^ 2 / 2 + Λ * (∫ x, rexp (θ * x) ∂ν - 1)
-
-/-- **The exponential moment at every order.** When `∫ e^{θx} dν < ∞`, the log-return over `τ`
-has `𝔼[e^{θY}] = e^{κ(θ)τ}`: the moment at `1` (`integral_exp_jumpDiffusionIncrementLaw`) of the
-scaled log-return `θY` (`jumpDiffusionIncrementLaw_map_const_mul`). -/
-theorem integral_exp_const_mul_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
-    [IsProbabilityMeasure ν] {θ : ℝ} (hν : Integrable (fun x ↦ rexp (θ * x)) ν) (τ : ℝ≥0) :
-    ∫ y, rexp (θ * y) ∂(jumpDiffusionIncrementLaw b σ Λ ν τ)
-      = rexp (jumpDiffusionExponent b σ Λ ν θ * τ) := by
-  have hθ : Measurable fun x : ℝ ↦ θ * x := measurable_const_mul θ
-  rw [← integral_map hθ.aemeasurable measurable_exp.aestronglyMeasurable,
-    jumpDiffusionIncrementLaw_map_const_mul,
-    integral_exp_jumpDiffusionIncrementLaw _ _ _ (integrable_exp_map_const_mul hν),
-    integral_map hθ.aemeasurable measurable_exp.aestronglyMeasurable, jumpDiffusionExponent]
-  congr 1
-  ring
+  exact funext (const_mul_jumpDiffusionLogReturn θ b σ τ)
 
 /-! ### The process -/
 
@@ -156,7 +130,7 @@ lemma integrable_exp_const_mul (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [I
   (h.const_mul θ).integrable_exp (integrable_exp_map_const_mul hν) t
 
 /-- **The exponential martingales of a jump-diffusion.** For `θ` with `∫ e^{θx} dν < ∞`,
-`t ↦ e^{θX_t − κ(θ)t}` is an `𝓕`-martingale, `κ` the Lévy exponent: the discounted price
+`t ↦ e^{θX_t − κ(θ)t}` is an `𝓕`-martingale, `κ` the Laplace exponent: the discounted price
 martingale (`martingale_iff`) of the scaled process `θX` (`const_mul`) at the rate `κ(θ)`. -/
 theorem martingale_exp_const_mul_sub (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν)
     [IsProbabilityMeasure ν] {θ : ℝ} (hν : Integrable (fun x ↦ rexp (θ * x)) ν) :
@@ -174,7 +148,7 @@ theorem martingale_exp_const_mul_sub (h : JumpDiffusionProcess P 𝓕 X b σ Λ 
   ring
 
 /-- **The martingale condition is `κ(1) = r`.** The discounted price `e^{−rt}S₀e^{X_t}` (`S₀ ≠ 0`)
-is a martingale if and only if the Lévy exponent at `1` is the rate (`martingale_iff`:
+is a martingale if and only if the Laplace exponent at `1` is the rate (`martingale_iff`:
 `κ(1) = b + σ²/2 + Λ(𝔼[e^J] − 1)`). -/
 theorem martingale_iff_exponent_one (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν)
     [IsProbabilityMeasure ν] (hν : Integrable rexp ν) {S_0 : ℝ} (hS_0 : S_0 ≠ 0) (r : ℝ) :
@@ -184,9 +158,10 @@ theorem martingale_iff_exponent_one (h : JumpDiffusionProcess P 𝓕 X b σ Λ �
   simp only [one_mul, mul_one, one_pow]
   constructor <;> intro h' <;> linarith
 
-/-- **Power claims at every date before maturity.** For `S₀ > 0` and `p` with `∫ e^{px} dν < ∞`,
-given `𝓕_t` the discounted payoff `e^{−r(T−t)}S_T^p` of the claim paying the `p`-th power of the
-price `S_T = S₀e^{X_T}` has conditional expectation `S_t^p e^{(κ(p) − r)(T − t)}`: the payoff
+/-- **Power claims at each date before maturity.** For `S₀ > 0`, `p` with `∫ e^{px} dν < ∞` and
+`t ≤ T`, given `𝓕_t` the discounted payoff `e^{−r(T−t)}S_T^p` of the claim paying the `p`-th power
+of the price `S_T = S₀e^{X_T}` has conditional expectation `S_t^p e^{(κ(p) − r)(T − t)}`, almost
+surely: the payoff
 averaged over the remaining log-return (`condExp_comp`), whose exponential moment at `p` is
 `e^{κ(p)(T − t)}` (`integral_exp_const_mul_jumpDiffusionIncrementLaw`). -/
 theorem condExp_rpow (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabilityMeasure ν]

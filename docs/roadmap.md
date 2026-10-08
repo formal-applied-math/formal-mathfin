@@ -1904,7 +1904,8 @@ call is the put plus a forward, whose random part `e^{X_T}` has conditional expe
 `e^{X_t}·𝔼[e^{X_T − X_t}]` (`condExp_exp_eq_of_indep_increment`, lifted out of the martingale
 proof). The price functions satisfy put–call parity, and both identities hold for any drift
 (`BlackScholes/JumpDiffusionOptionPrices.lean`): at the compensated drift they are arbitrage-free
-prices under `P` (the market is incomplete, so not the only ones), at any other drift
+prices under `P` (with jumps the market is in general incomplete, so not necessarily the only
+ones), at any other drift
 `P`-conditional expectations.
 
 At the compensated drift the process meets the single-date results. The log-return law over `τ`
@@ -2029,38 +2030,44 @@ constant-θ Girsanov change of measure and the jump-diffusion martingale propert
    and the `Q`-Brownian exponential martingale. `condExp_comp_prodMk_of_indep` already covers all
    of them (the product form is its case `g(x, y) = x·h(y)`), so this is routing, not a new lemma.
 
-## phase: the Lévy exponent (2026-10-08, corpus 486→490)
+## phase: the Laplace exponent (2026-10-08, corpus 486→490)
 
-The process layer computed one exponential moment, at `θ = 1`, because the discounted price needs
-no other. This phase gets every order from that one moment, by scaling instead of a second
-computation. `θ` times a jump-diffusion log-return is again one, with drift `θb`, volatility
-coefficient `θσ`, the same rate and the jumps multiplied by `θ`
-(`jumpDiffusionIncrementLaw_map_const_mul`). On the canonical model this changes the jump sizes
-alone: transforming every jump by a measurable map pushes the jump law forward and leaves the rest
-of the model alone (`jumpDiffusionMeasure_map_jumps`, from Mathlib's `Measure.map_prod_map` and
-`Measure.infinitePi_map_pi`). So the moment of order `θ` is the moment at `1` of the scaled law, and
-the Lévy exponent `κ(θ) = bθ + σ²θ²/2 + Λ(∫ e^{θx} dν − 1)` falls out
-(`integral_exp_const_mul_jumpDiffusionIncrementLaw`).
+The process layer used one exponential moment, at `θ = 1`, and derived it from the pricing
+identity `discounted_terminal`. This phase computes the moment-generating function at every `θ`
+with `∫ e^{θx} dν < ∞` from first principles. On the canonical model the log-return is a drift
+plus a Gaussian part plus a compound sum independent of it, so its moment-generating function is
+the Gaussian one times the compound-Poisson one (`JumpDiffusionHyp.mgf_logReturn`, from Mathlib's
+`mgf_gaussianReal` and `IndepFun.mgf_add'` and the actuarial `compoundPoisson_mgf_of_indepFun`,
+which was stated at every order and used only at `1`). This gives the Laplace exponent
+`κ(θ) = bθ + σ²θ²/2 + Λ(∫ e^{θx} dν − 1)`, the cumulant generating function per unit time
+(`cgf_id_jumpDiffusionIncrementLaw`). The moment at `1` is now its corollary, so the moment no
+longer depends on a pricing identity.
 
-On the process, `θX` is a jump-diffusion (`JumpDiffusionProcess.const_mul`), and its
-discounted-price criterion at the rate `κ(θ)` is the exponential martingale `e^{θX_t − κ(θ)t}`
-(`martingale_exp_const_mul_sub`). The family contains the discounted price (`θ = 1`, where the
-criterion reads `κ(1) = r`, `martingale_iff_exponent_one`) and, without jumps, Wald's martingales
-(`κ(θ) = θ²/2` for Brownian motion). All of them rest on `martingale_exp_sub_of_indep_increments`.
-As a pricing use, power claims at every date before maturity
-(`condExp_rpow`): `𝔼[e^{−r(T−t)}S_T^p | 𝓕_t] = S_t^p e^{(κ(p) − r)(T − t)}`, through
-`condExp_comp` like the put and the call.
+Scaling is the structural fact: `θ` times a jump-diffusion log-return is again one
+(`jumpDiffusionIncrementLaw_map_const_mul`). On the canonical model the drift and the Gaussian
+coefficient scale inside the log-return, and the jumps change only the jump law
+(`jumpDiffusionMeasure_map_jumps`, from Mathlib's `Measure.map_prod_map` and
+`Measure.infinitePi_map_pi`). On the process `θX` is a jump-diffusion
+(`JumpDiffusionProcess.const_mul`), and its discounted-price criterion at the rate `κ(θ)` is the
+exponential martingale `e^{θX_t − κ(θ)t}` (`martingale_exp_const_mul_sub`). At `θ = 1` the
+criterion reads `κ(1) = r` (`martingale_iff_exponent_one`). For `b = 0`, `σ = 1` and no jumps,
+`κ(θ) = θ²/2` is the exponent of Wald's martingales, and both families rest on
+`martingale_exp_sub_of_indep_increments`. As a pricing use, power claims at each date before
+maturity (`condExp_rpow`): `𝔼[e^{−r(T−t)}S_T^p | 𝓕_t] = S_t^p e^{(κ(p) − r)(T − t)}` almost surely,
+through `condExp_comp` like the put and the call.
 
-**Next on the jump axis** (this phase did the values-review backlog's exponential-martingale item):
+**Next on the jump axis** (this phase did the values-review backlog's exponential-martingale item
+and re-rooted the moment):
 
-1. The Esscher change of measure. `e^{θX_T − κ(θ)T}` is a density of mean `1`; under it `X` should
-   be a jump-diffusion with drift `b + θσ²`, rate `Λ∫e^{θx}dν` and the tilted jump law
-   `e^{θx}ν(dx)/∫e^{θx}dν`. The exponent condition `κ(θ + 1) − κ(θ) = r` picks the Esscher pricing
-   measure, one of the many martingale measures of the incomplete market. The law-level tilt (a
-   Gaussian tilt and a Poisson tilt) comes first; the process level needs the Girsanov-style
-   characterization the constant-θ Brownian case uses (`ExpMartingaleQBrownian`).
-2. The convolution semigroup `μ_s ∗ μ_t = μ_{s+t}` (Mathlib's `gaussianReal` and
-   `poissonMeasure` convolutions plus the compound-Poisson part), then the construction of the
-   process with jumps.
+1. The Esscher change of measure. Tilting the log-return law by `e^{θy}` (Mathlib's
+   `Measure.tilted`) should give the jump-diffusion law with drift `b + θσ²`, rate `Λ∫e^{θx}dν` and
+   the tilted jump law `e^{θx}ν(dx)/∫e^{θx}dν`; the condition `κ(θ + 1) − κ(θ) = r` picks the
+   Esscher pricing measure. Tilting the Gaussian and the jump parts separately, under the one
+   compensator constraint, gives a family of martingale laws, which would make the market's
+   incompleteness formal. The process level needs the Girsanov-style characterization the
+   constant-θ Brownian case uses (`ExpMartingaleQBrownian`).
+2. A `compoundPoissonMeasure Λ ν` with `μ_τ = N(bτ, σ²τ) ∗ compoundPoissonMeasure (Λτ) ν`, and the
+   convolution semigroup `μ_s ∗ μ_t = μ_{s+t}` (Mathlib's `gaussianReal` and `poissonMeasure`
+   convolutions), then the construction of the process with jumps.
 3. The items carried over from the previous phase: the implied-volatility function and the smile;
    routing the hand-frozen conditional expectations through `condExp_comp_prodMk_of_indep`.

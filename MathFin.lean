@@ -344,8 +344,8 @@ import MathFin.BlackScholes.JumpDiffusionOptionPrices
 import MathFin.BlackScholes.GaussianSmoothing
 import MathFin.BlackScholes.JumpDiffusionMerton
 import MathFin.BlackScholes.JumpDiffusionBrownian
--- The Lévy exponent: scaling, exponential moments at every order, the exponential
--- martingales e^{θX_t − κ(θ)t}, power claims at every date
+-- Scaling a jump-diffusion; the exponential martingales e^{θX_t − κ(θ)t} for the Laplace
+-- exponent κ (where the jump law has the moment of order θ); power claims at each date
 import MathFin.BlackScholes.JumpDiffusionExponent
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks

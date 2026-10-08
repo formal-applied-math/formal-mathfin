@@ -96,18 +96,37 @@ theorem jumpDiffusionHyp_canonical (Λ : ℝ≥0) (ν : Measure ℝ) [IsProbabil
   funext i
   exact (hJ i).map_eq.symm
 
-/-- On the canonical model the first log-jump size has exponential moment `∫ eˣ dν`. -/
-lemma integral_exp_canonical_jump (Λ : ℝ≥0) (ν : Measure ℝ) [IsProbabilityMeasure ν] :
-    ∫ ω, rexp (ω.2.2 0) ∂(jumpDiffusionMeasure Λ ν) = ∫ x, rexp x ∂ν :=
-  ((jumpDiffusionHyp_canonical Λ ν).2 0).integral_comp measurable_exp.aestronglyMeasurable
+/-- On the canonical model the first log-jump size has exponential moment `∫ e^{θx} dν` at every
+`θ`: it has law `ν`. -/
+lemma integral_exp_mul_canonical_jump (Λ : ℝ≥0) (ν : Measure ℝ) [IsProbabilityMeasure ν]
+    (θ : ℝ) :
+    ∫ ω, rexp (θ * ω.2.2 0) ∂(jumpDiffusionMeasure Λ ν) = ∫ x, rexp (θ * x) ∂ν :=
+  ((jumpDiffusionHyp_canonical Λ ν).2 0).integral_comp
+    (measurable_const_mul θ).exp.aestronglyMeasurable
 
-/-- On the canonical model `e^{J₀}` is integrable when `eˣ` is integrable under the jump law. -/
+/-- On the canonical model `e^{θJ₀}` is integrable when `e^{θx}` is integrable under the jump
+law. -/
+lemma integrable_exp_mul_canonical_jump {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν]
+    {θ : ℝ} (hν : Integrable (fun x ↦ rexp (θ * x)) ν) :
+    Integrable (fun ω : ℝ × ℕ × (ℕ → ℝ) ↦ rexp (θ * ω.2.2 0)) (jumpDiffusionMeasure Λ ν) := by
+  have hJ := (jumpDiffusionHyp_canonical Λ ν).2 0
+  rw [← hJ.map_eq] at hν
+  exact (integrable_map_measure (measurable_const_mul θ).exp.aestronglyMeasurable
+    hJ.aemeasurable).1 hν
+
+/-- On the canonical model the first log-jump size has exponential moment `∫ eˣ dν`
+(`integral_exp_mul_canonical_jump` at `θ = 1`). -/
+lemma integral_exp_canonical_jump (Λ : ℝ≥0) (ν : Measure ℝ) [IsProbabilityMeasure ν] :
+    ∫ ω, rexp (ω.2.2 0) ∂(jumpDiffusionMeasure Λ ν) = ∫ x, rexp x ∂ν := by
+  simpa only [one_mul] using integral_exp_mul_canonical_jump Λ ν 1
+
+/-- On the canonical model `e^{J₀}` is integrable when `eˣ` is integrable under the jump law
+(`integrable_exp_mul_canonical_jump` at `θ = 1`). -/
 lemma integrable_exp_canonical_jump {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν]
     (hν : Integrable rexp ν) :
     Integrable (fun ω : ℝ × ℕ × (ℕ → ℝ) ↦ rexp (ω.2.2 0)) (jumpDiffusionMeasure Λ ν) := by
-  have hJ := (jumpDiffusionHyp_canonical Λ ν).2 0
-  rw [← hJ.map_eq] at hν
-  exact (integrable_map_measure measurable_exp.aestronglyMeasurable hJ.aemeasurable).1 hν
+  simpa only [one_mul] using
+    integrable_exp_mul_canonical_jump (Λ := Λ) (ν := ν) (θ := 1) (by simpa only [one_mul] using hν)
 
 namespace JumpDiffusionHyp
 
