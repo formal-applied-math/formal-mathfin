@@ -329,6 +329,8 @@ import MathFin.BlackScholes.MertonGreeks
 -- Jump-diffusions with an arbitrary jump law: the mixing formula, the
 -- compound-Poisson compensator, and Merton's formula for a general jump law
 import MathFin.BlackScholes.JumpDiffusionMixing
+-- Compensated jumps lift the Black–Scholes implied volatility strictly above σ
+import MathFin.BlackScholes.JumpImpliedVol
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser

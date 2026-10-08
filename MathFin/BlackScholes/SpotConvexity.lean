@@ -22,10 +22,12 @@ is its spot-direction dual at the two scales that make sense for `S`:
    (`hasDerivAt_deriv_bsV_S` + `convexOn_of_deriv2_nonneg'`).
 
 Financially: pricing preserves the convexity of the payoff. Gamma-positivity
-(`bsV_gamma_pos`) is the infinitesimal face of the same fact; the
-supporting-tangent form below (`bsV_spot_tangent_le`, slope = delta) is the
-workhorse for Jensen-type mixture bounds — `MertonDominance.lean` consumes
-it to prove the jump-diffusion price dominates Black–Scholes.
+(`bsV_gamma_pos`) is the infinitesimal face of the same fact, and makes the
+convexity strict. The supporting-tangent form below (`bsV_spot_tangent_le`,
+slope = delta) is the workhorse for Jensen-type mixture bounds:
+`MertonDominance.lean` and `JumpDiffusionMixing.lean` consume it to prove that a
+jump-diffusion call dominates the Black–Scholes call, and `JumpImpliedVol.lean`
+consumes the strict form (`bsV_spot_tangent_lt`) to make the domination strict.
 
 ## Results
 
@@ -34,6 +36,8 @@ it to prove the jump-diffusion price dominates Black–Scholes.
   (continuous price level).
 * `bsV_spot_tangent_le`: the price lies above its tangent at any `S₀ > 0`,
   with slope delta: `bsV(S₀) + Φ(d₁(S₀))·(s − S₀) ≤ bsV(s)`.
+* `bsV_spot_strictConvexOn`, `bsV_spot_tangent_lt`: the convexity is strict, and
+  the price lies strictly above its tangent away from the point of tangency.
 -/
 
 @[expose] public section
@@ -98,5 +102,34 @@ theorem bsV_spot_tangent_le {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     rw [slope_def_field] at h
     have h' := (div_le_iff₀ (sub_pos.mpr hgt)).mp h
     nlinarith [h']
+
+/-- **BS call price is strictly convex in the spot on `(0, ∞)`**: at every `S > 0` the gamma
+`∂²_S bsV = ϕ(d₁)/(S σ √τ)` is positive (`bsV_gamma_pos`). -/
+theorem bsV_spot_strictConvexOn {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ) :
+    StrictConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun s ↦ bsV K r σ s τ) :=
+  strictConvexOn_of_deriv2_pos' (convex_Ioi 0)
+    (fun _ hS ↦ (hasDerivAt_bsV_S hK hσ hS hτ).continuousAt.continuousWithinAt)
+    fun _ hS ↦ (bsV_gamma_pos (r := r) hK hσ hS hτ).trans_eq
+      (hasDerivAt_deriv_bsV_S hK hσ hS hτ).deriv.symm
+
+/-- **The price lies strictly above its tangent away from `S₀`**: for `s ≠ S₀`,
+`bsV(S₀) + Φ(d₁(S₀))·(s − S₀) < bsV(s)`. The strict form of `bsV_spot_tangent_le`, from strict
+convexity (`bsV_spot_strictConvexOn`). -/
+theorem bsV_spot_tangent_lt {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    (hτ : 0 < τ) {S₀ s : ℝ} (hS₀ : 0 < S₀) (hs : 0 < s) (hne : s ≠ S₀) :
+    bsV K r σ S₀ τ + Phi (bsd1 S₀ K r σ τ) * (s - S₀) < bsV K r σ s τ := by
+  have hconv := bsV_spot_strictConvexOn (K := K) (r := r) (σ := σ) (τ := τ) hK hσ hτ
+  have hder := hasDerivAt_bsV_S (K := K) (r := r) (σ := σ) hK hσ hS₀ hτ
+  rcases hne.lt_or_gt with hlt | hgt
+  · -- to the left of S₀: slope s S₀ < delta.
+    have h := hconv.slope_lt_of_hasDerivAt (Set.mem_Ioi.mpr hs) (Set.mem_Ioi.mpr hS₀) hlt hder
+    rw [slope_def_field] at h
+    have h' := (div_lt_iff₀ (sub_pos.mpr hlt)).mp h
+    nlinarith [h']
+  · -- to the right of S₀: delta < slope S₀ s.
+    have h := hconv.lt_slope_of_hasDerivAt (Set.mem_Ioi.mpr hS₀) (Set.mem_Ioi.mpr hs) hgt hder
+    rw [slope_def_field] at h
+    have h' := (lt_div_iff₀ (sub_pos.mpr hgt)).mp h
+    linarith
 
 end MathFin
