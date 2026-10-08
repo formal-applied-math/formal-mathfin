@@ -2183,16 +2183,20 @@ level of the law at one date):
    of increments whose laws depend only on their length is `n + 1` times its mean over one step
    (`integral_sum_comp_increment_equipartition`), so the expected realized variance of a
    `JumpDiffusionProcess` tends to `(σ² + ΛE[J²])T` (`tendsto_integral_sum_sq_increment_equipartition`),
-   and the log contract minus it per unit time tends to the jump bias
-   (`tendsto_logContract_sub_realizedVariance`). Next on this line: the log contract on the process
-   itself (`S_T = Se^{X_T}` under `P`, with the discounted price a martingale hypothesis that
-   `martingale_iff` turns into the drift); the `Λ = 0` and Merton corollaries in Lean (Brownian
-   motion through `IsFilteredPreBrownian.jumpDiffusionProcess`, and `ν = N(m, δ²)`, where the log
-   contract is `σ² + 2Λ(e^{m+δ²/2} − 1 − m)` against `σ² + Λ(m² + δ²)`); the non-concentration of
+   and the log contract minus it per unit time tends to the jump bias. Also done (corpus 535): the
+   variance swap on one process under one measure. `X_t` has the log-return law
+   (`JumpDiffusionProcess.hasLaw`); if the discounted price is a `P`-martingale, the log contract on
+   `Se^{X_T}` is `σ² + 2ΛE[e^J − 1 − J]` under `P` (`integral_logContract_of_martingale`), and at
+   every sampling frequency it differs from the expected realized variance per unit time by the jump
+   bias less `(b + ΛE[J])²T/(n + 1)` (`logContract_sub_realizedVariance_of_martingale`), so for
+   downward jumps it is at most the discretely sampled swap at every `n`, strictly with crash jumps;
+   Black–Scholes (`IsFilteredPreBrownian.logContract_realizedVariance`) and Merton
+   (`mertonJump_logContract_variance`) are corollaries. Next on this line: the non-concentration of
    the realized variance with jumps, `Var[RV_n] → ΛE[J⁴]T`, through the fourth cumulant and the
    independence of the increments, whose `L²` limit is the random quadratic variation
-   `σ²T + Σ J²` rather than the constant of `VarianceSwapDriftImmunity`; the mean and the variance
-   from `E|J| < ∞` and `E[J²] < ∞` alone; and the expectation of the existing Carr–Madan strip
+   `σ²T + Σ J²` rather than the constant of `VarianceSwapDriftImmunity`; one uniform partition shared
+   with the Black–Scholes files on `ℝ` time; the mean and the variance from `E|J| < ∞` and
+   `E[J²] < ∞` alone; and the expectation of the existing Carr–Madan strip
    (`carrMadan_log_spanning`) under the jump-diffusion law.
 5. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
    `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style

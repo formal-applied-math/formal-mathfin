@@ -1968,6 +1968,21 @@ the law, not in their first consumer: while the transfer lived in the variance-s
 upstream of it (`JumpDiffusionIdentifiability`, `JumpDiffusionEsscher`) kept inline copies, since
 they could not import it; it now lives in `JumpDiffusionProcess.lean`.
 
+### From the law to the process, under the measure that prices
+
+A statement about the log-return law becomes a statement about the process in two steps. First the
+law of `X_t` (`JumpDiffusionProcess.hasLaw`): the increment over `[0, t]` has the law, and `X_0 = 0`
+almost surely, so Mathlib's `HasLaw.congr` moves it to `X_t`. Then `HasLaw.integral_comp` turns
+`𝔼_P[f(X_T)]` into `∫ f` under the law; give `f` explicitly (`(f := fun y ↦ …)`), since `f (X T ω)`
+is not a pattern the unifier can invert, and discharge measurability with
+`Measurable.aestronglyMeasurable (by fun_prop)` (`Real.log` and `Real.exp` are `fun_prop`). A pricing
+measure enters as a hypothesis on the process, not as prose: "the discounted price is a
+`P`-martingale" is turned into the drift by the criterion (`JumpDiffusionProcess.martingale_iff`), so
+the law-level theorem at the compensated drift applies under `P`
+(`JumpDiffusionProcess.integral_logContract_of_martingale`). State the finite-`n` identity, not only
+the limit: the limit is then a one-line corollary, and the identity carries the sign arguments at
+every `n` (`logContract_le_realizedVariance_of_martingale`).
+
 ### Pointwise sums of derivatives at the pin
 
 `HasDerivAt.add` and `HasDerivAt.sub` conclude `HasDerivAt (f + g) …` with the pointwise sum `f + g`,

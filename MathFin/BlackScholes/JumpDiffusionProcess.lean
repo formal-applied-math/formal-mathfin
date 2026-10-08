@@ -48,6 +48,7 @@ martingale has constant mean, and the mean at time `1` is `S₀e^{b + σ²/2 + �
   moment-generating function.
 * `integral_exp_jumpDiffusionIncrementLaw_of_compensated`: at the compensated drift the forward is
   the mean, `∫ eʸ = e^{rτ}`.
+* `JumpDiffusionProcess.hasLaw`: `X_t` has the log-return law over `t`.
 * `JumpDiffusionProcess.martingale_iff`: the discounted price is a martingale if and only if the
   drift is compensated.
 -/
@@ -297,14 +298,22 @@ lemma integral_exp_increment (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsP
   rw [← integral_exp_jumpDiffusionIncrementLaw b σ Λ hν (t - s)]
   exact (h.law s t hst).integral_comp measurable_exp.aestronglyMeasurable
 
-/-- `𝔼[e^{X_t}] = e^{(b + σ²/2 + Λ(𝔼[e^J] − 1))t}`: `X_t = X_t − X_0` almost surely. -/
+/-- **The law of `X_t`** is the log-return law over `t`: `X_t = X_t − X_0` almost surely. -/
+lemma hasLaw (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) (t : ℝ≥0) :
+    HasLaw (X t) (jumpDiffusionIncrementLaw b σ Λ ν t) P := by
+  have h0 := h.law 0 t (zero_le : (0 : ℝ≥0) ≤ t)
+  rw [tsub_zero] at h0
+  refine h0.congr ?_
+  filter_upwards [h.zero] with ω hω
+  rw [hω, sub_zero]
+
+/-- `𝔼[e^{X_t}] = e^{(b + σ²/2 + Λ(𝔼[e^J] − 1))t}`, the exponential moment of the law of `X_t`
+(`hasLaw`). -/
 lemma integral_exp (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabilityMeasure ν]
     (hν : Integrable rexp ν) (t : ℝ≥0) :
     ∫ ω, rexp (X t ω) ∂P = rexp ((b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1)) * t) := by
-  have h0 : (fun ω ↦ rexp (X t ω - X 0 ω)) =ᵐ[P] fun ω ↦ rexp (X t ω) := by
-    filter_upwards [h.zero] with ω hω
-    rw [hω, sub_zero]
-  rw [← integral_congr_ae h0, h.integral_exp_increment hν (zero_le : (0 : ℝ≥0) ≤ t), tsub_zero]
+  rw [← integral_exp_jumpDiffusionIncrementLaw b σ Λ hν t]
+  exact (h.hasLaw t).integral_comp measurable_exp.aestronglyMeasurable
 
 /-- `e^{X_t}` is integrable: its integral is positive (`integral_exp`). -/
 lemma integrable_exp (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabilityMeasure ν]

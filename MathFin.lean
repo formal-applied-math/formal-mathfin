@@ -383,12 +383,13 @@ import MathFin.BlackScholes.JumpDiffusionStrikeConvexity
 -- The mean, variance and second moment of the jump-diffusion log-return, from the first two
 -- derivatives at 0 of its cumulant generating function κ(θ)τ
 import MathFin.BlackScholes.JumpDiffusionMoments
--- Variance swaps with jumps: at the compensated drift the log contract is worth
+-- Variance swaps with jumps: at the compensated drift the log contract has expected payoff
 -- σ² + 2ΛE[eᴶ − 1 − J], which differs from the variance per unit time σ² + ΛE[J²] by the jump
 -- bias 2ΛE[eᴶ − 1 − J − J²/2], ≤ 0 for jumps ≤ 0 and < 0 if moreover Λ > 0 and the jumps are
--- negative with positive probability; the expected realized variance of the process along
--- equipartitions of [0, T] tends to (σ² + ΛE[J²])T, so the log contract minus it per unit time
--- tends to the jump bias
+-- negative with positive probability. On the process, under a measure that makes the discounted
+-- price a martingale, the log contract minus the expected realized variance per unit time along
+-- n + 1 equal steps of [0, T] is the jump bias less (b + ΛE[J])²T/(n + 1), at every n, so it tends
+-- to the jump bias; Black–Scholes (Brownian motion) and Merton's Gaussian jumps as corollaries
 import MathFin.BlackScholes.JumpDiffusionVarianceSwap
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks

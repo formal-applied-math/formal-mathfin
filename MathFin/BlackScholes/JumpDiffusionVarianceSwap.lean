@@ -7,6 +7,8 @@ module
 
 public import MathFin.BlackScholes.JumpDiffusionMoments
 public import MathFin.BlackScholes.VarianceSwap
+public import MathFin.BlackScholes.JumpDiffusionMerton
+public import MathFin.BlackScholes.JumpDiffusionBrownian
 
 /-!
 # Variance swaps with jumps: the log contract against the variance
@@ -27,32 +29,49 @@ function is finite near `0` and at `1`, `S > 0` and `τ > 0`:
   with jumps it differs from half the variance by `Λτ𝔼[e^J − 1 − J − J²/2]`;
 * `jumpDiffusion_logContract_sub_variance`: the log contract minus the variance of the log-return
   per unit time, `σ² + Λ𝔼[J²]`, is the jump bias;
-* `jumpDiffusion_logContract_le_variance` and `jumpDiffusion_logContract_lt_variance`: for jumps
+* `integral_jumpBias_nonpos`, `integral_jumpBias_neg`: the sign of the bias is a fact about the
+  jump law: `≤ 0` for jumps `≤ 0`, as `e^x ≤ 1 + x + x²/2` for `x ≤ 0`, and `< 0` if moreover the
+  jumps are negative with positive probability, as the inequality is strict for `x < 0`
+  (`Real.exp_le_quadratic_of_nonpos`, `Real.exp_lt_quadratic_of_neg`);
+* `jumpDiffusion_logContract_le_variance`, `jumpDiffusion_logContract_lt_variance`: so for jumps
   `≤ 0` the log contract is at most the variance, and strictly below it if `Λ > 0` and the jumps
-  are negative with positive probability: `e^x ≤ 1 + x + x²/2` for `x ≤ 0`, strictly for `x < 0`
-  (`Real.exp_le_quadratic_of_nonpos`, `Real.exp_lt_quadratic_of_neg`).
+  are negative with positive probability;
+* `mertonJump_logContract_variance`: with Merton's log-jumps `N(log(1 + k) − δ²/2, δ²)`, the log
+  contract is `σ² + 2Λ(k − log(1 + k) + δ²/2)` and the variance per unit time is
+  `σ² + Λ((log(1 + k) − δ²/2)² + δ²)`.
 
-For a jump-diffusion process `X` (`JumpDiffusionProcess`, a hypothesis structure whose existence
-with jumps is not proved), the expected realized variance along equipartitions of `[0, T]` tends to
-the variance of the log-return over `T`, whatever the drift, as in Black–Scholes
-(`expected_bsLogPrice_equipartition_sum`, `tendsto_expected_bsLogPrice_equipartition_sum`):
+On a jump-diffusion process `X` (`JumpDiffusionProcess`, a hypothesis structure whose existence with
+jumps is not proved), both functionals are taken under one measure `P`:
 
 * `integral_sum_comp_increment_equipartition`: for any process whose increments have laws that
   depend only on their length, `𝔼[∑ f(ΔX)]` along `n + 1` equal steps is `n + 1` times the mean of
   `f` under the law of one step;
-* `JumpDiffusionProcess.integral_sum_sq_increment_equipartition`: so the expected realized variance
-  is `(σ² + Λ𝔼[J²])T + (b + Λ𝔼[J])²T²/(n + 1)`;
-* `JumpDiffusionProcess.tendsto_integral_sum_sq_increment_equipartition`: it tends to
-  `(σ² + Λ𝔼[J²])T`;
-* `JumpDiffusionProcess.tendsto_logContract_sub_realizedVariance`: so the log contract minus the
-  expected realized variance per unit time tends to the jump bias, where Black–Scholes has `0`
-  (`varianceSwap_log_eq_QV_limit_value`).
+* `JumpDiffusionProcess.integral_sum_sq_increment_equipartition`,
+  `JumpDiffusionProcess.tendsto_integral_sum_sq_increment_equipartition`: so the expected realized
+  variance is `(σ² + Λ𝔼[J²])T + (b + Λ𝔼[J])²T²/(n + 1)`, which tends to `(σ² + Λ𝔼[J²])T` whatever
+  the drift, as in Black–Scholes (`expected_bsLogPrice_equipartition_sum`,
+  `tendsto_expected_bsLogPrice_equipartition_sum`);
+* `JumpDiffusionProcess.integral_logContract_of_martingale`: if the discounted price
+  `e^{−rt}Se^{X_t}` is a `P`-martingale, the log contract on `S_T = Se^{X_T}` has expected payoff
+  `σ² + 2Λ𝔼[e^J − 1 − J]` under `P` (the martingale forces the compensated drift,
+  `JumpDiffusionProcess.martingale_iff`, and `X_T` has the log-return law,
+  `JumpDiffusionProcess.hasLaw`);
+* `JumpDiffusionProcess.logContract_sub_realizedVariance_of_martingale`: then at every sampling
+  frequency the log contract minus the expected realized variance per unit time is
+  `2Λ𝔼[e^J − 1 − J − J²/2] − (b + Λ𝔼[J])²T/(n + 1)`, the jump bias less a discrete-sampling term;
+* `JumpDiffusionProcess.tendsto_logContract_sub_realizedVariance_of_martingale`: so the difference
+  tends to the jump bias;
+* `JumpDiffusionProcess.logContract_le_realizedVariance_of_martingale` and
+  `JumpDiffusionProcess.logContract_lt_realizedVariance_of_martingale`: for jumps `≤ 0` the log
+  contract is at most the expected realized variance per unit time at every sampling frequency,
+  strictly if `Λ > 0` and the jumps are negative with positive probability;
+* `IsFilteredPreBrownian.logContract_realizedVariance`: without jumps, for Brownian motion with
+  the risk-neutral drift, the log contract is `σ²` and the difference is `−(r − σ²/2)²T/(n + 1)`.
 
-The limit per unit time is the swap's fair strike when `σ`, `Λ` and `ν` are the characteristics
-under a pricing measure: the drift of `X` drops out of the limit, but a change of measure that
-moves `Λ` or `ν`, such as the Esscher transform, is not covered.
+The expectations are under the measure `P` that makes the discounted price a martingale and keeps
+the characteristics `σ`, `Λ` and `ν` of `X`. A change of measure that moves `Λ` or `ν`, such as the
+Esscher transform, is not covered.
 -/
-
 @[expose] public section
 
 open MeasureTheory ProbabilityTheory Real Filter Set
@@ -88,6 +107,36 @@ lemma integrable_exp_of_ae_nonpos {ν : Measure ℝ} [IsFiniteMeasure ν] (hJ : 
     Integrable rexp ν :=
   .of_bound measurable_exp.aestronglyMeasurable 1 (hJ.mono fun x hx ↦ by
     rwa [Real.norm_eq_abs, abs_of_pos (Real.exp_pos x), Real.exp_le_one_iff])
+
+/-- **The jump bias is `≤ 0` for downward jumps**: if `J ≤ 0` almost surely,
+`𝔼[e^J − 1 − J − J²/2] ≤ 0`, since `e^x ≤ 1 + x + x²/2` for `x ≤ 0`
+(`Real.exp_le_quadratic_of_nonpos`). -/
+lemma integral_jumpBias_nonpos {ν : Measure ℝ} (hJ : ∀ᵐ x ∂ν, x ≤ 0) :
+    ∫ x, (rexp x - 1 - x - x ^ 2 / 2) ∂ν ≤ 0 := by
+  have hle : ∀ᵐ x ∂ν, rexp x - 1 - x - x ^ 2 / 2 ≤ 0 :=
+    hJ.mono fun x hx ↦ by linarith [Real.exp_le_quadratic_of_nonpos hx]
+  exact integral_nonpos_of_ae hle
+
+/-- **The jump bias is `< 0` for crash jumps**: if moreover the jumps are negative with positive
+probability, for a jump law with exponential moments near `0` (so that `J` and `J²` are
+integrable), `𝔼[e^J − 1 − J − J²/2] < 0`: the integrand is `< 0` where `J < 0`
+(`Real.exp_lt_quadratic_of_neg`). -/
+lemma integral_jumpBias_neg {ν : Measure ℝ} [IsFiniteMeasure ν]
+    (hν : 0 ∈ interior (integrableExpSet id ν)) (hJ : ∀ᵐ x ∂ν, x ≤ 0) (hJ' : ν {x | x < 0} ≠ 0) :
+    ∫ x, (rexp x - 1 - x - x ^ 2 / 2) ∂ν < 0 := by
+  have hJ1 : Integrable (fun x ↦ x) ν := integrable_of_mem_interior_integrableExpSet hν
+  have hJ2 : Integrable (fun x ↦ x ^ 2) ν := integrable_pow_of_mem_interior_integrableExpSet hν 2
+  have hg : Integrable (fun x ↦ -(rexp x - 1 - x - x ^ 2 / 2)) ν :=
+    ((((integrable_exp_of_ae_nonpos hJ).sub (integrable_const 1)).sub hJ1).sub
+      (hJ2.div_const 2)).neg
+  have hle : ∀ᵐ x ∂ν, 0 ≤ -(rexp x - 1 - x - x ^ 2 / 2) :=
+    hJ.mono fun x hx ↦ by linarith [Real.exp_le_quadratic_of_nonpos hx]
+  -- the negated integrand is positive where the jumps are negative
+  have hpos : 0 < ∫ x, -(rexp x - 1 - x - x ^ 2 / 2) ∂ν := by
+    refine (integral_pos_iff_support_of_nonneg_ae hle hg).2 (pos_iff_ne_zero.2 fun h0 ↦
+      hJ' (measure_mono_null (fun x (hx : x < 0) ↦ ?_) h0))
+    exact Function.mem_support.2 (ne_of_gt (by linarith [Real.exp_lt_quadratic_of_neg hx]))
+  rwa [integral_neg, neg_pos] at hpos
 
 /-! ### The log contract -/
 
@@ -142,8 +191,7 @@ theorem jumpDiffusion_logContract_sub_variance {S r b σ : ℝ} (hS : 0 < S) {Λ
 nonpositive (`J ≤ 0` `ν`-a.e.; then `𝔼[e^J] ≤ 1` is finite, `integrable_exp_of_ae_nonpos`), at the
 compensated drift, for a jump law with exponential moments near `0`, `S > 0` and `τ > 0`, the log
 contract is at most the variance of the log-return per unit time: the jump bias
-(`jumpDiffusion_logContract_sub_variance`) is `≤ 0`, as `e^x ≤ 1 + x + x²/2` for `x ≤ 0`
-(`Real.exp_le_quadratic_of_nonpos`). -/
+(`jumpDiffusion_logContract_sub_variance`) is `≤ 0` (`integral_jumpBias_nonpos`). -/
 theorem jumpDiffusion_logContract_le_variance {S r b σ : ℝ} (hS : 0 < S) {Λ : ℝ≥0}
     {ν : Measure ℝ} [IsProbabilityMeasure ν] (hν : 0 ∈ interior (integrableExpSet id ν))
     (hJ : ∀ᵐ x ∂ν, x ≤ 0) (hb : b = r - σ ^ 2 / 2 - Λ * (∫ x, rexp x ∂ν - 1)) {τ : ℝ≥0}
@@ -152,16 +200,14 @@ theorem jumpDiffusion_logContract_le_variance {S r b σ : ℝ} (hS : 0 < S) {Λ 
         + (S * rexp y - S * rexp (r * τ)) / (S * rexp (r * τ)))
       ∂(jumpDiffusionIncrementLaw b σ Λ ν τ)
       ≤ Var[id; jumpDiffusionIncrementLaw b σ Λ ν τ] / τ := by
-  have hle : ∀ᵐ x ∂ν, rexp x - 1 - x - x ^ 2 / 2 ≤ 0 :=
-    hJ.mono fun x hx ↦ by linarith [Real.exp_le_quadratic_of_nonpos hx]
   rw [← sub_nonpos,
     jumpDiffusion_logContract_sub_variance hS hν (integrable_exp_of_ae_nonpos hJ) hb hτ]
-  exact mul_nonpos_of_nonneg_of_nonpos (by positivity) (integral_nonpos_of_ae hle)
+  exact mul_nonpos_of_nonneg_of_nonpos (by positivity) (integral_jumpBias_nonpos hJ)
 
 /-- **With crash jumps the log contract is strictly below the variance.** If moreover `Λ > 0` and
 the jumps are negative with positive probability (`ν {J < 0} ≠ 0`), the inequality of
-`jumpDiffusion_logContract_le_variance` is strict: `e^x < 1 + x + x²/2` for `x < 0`
-(`Real.exp_lt_quadratic_of_neg`), so the jump bias is negative. -/
+`jumpDiffusion_logContract_le_variance` is strict: the jump bias is negative
+(`integral_jumpBias_neg`). -/
 theorem jumpDiffusion_logContract_lt_variance {S r b σ : ℝ} (hS : 0 < S) {Λ : ℝ≥0} (hΛ : 0 < Λ)
     {ν : Measure ℝ} [IsProbabilityMeasure ν] (hν : 0 ∈ interior (integrableExpSet id ν))
     (hJ : ∀ᵐ x ∂ν, x ≤ 0) (hJ' : ν {x | x < 0} ≠ 0)
@@ -170,21 +216,56 @@ theorem jumpDiffusion_logContract_lt_variance {S r b σ : ℝ} (hS : 0 < S) {Λ 
         + (S * rexp y - S * rexp (r * τ)) / (S * rexp (r * τ)))
       ∂(jumpDiffusionIncrementLaw b σ Λ ν τ)
       < Var[id; jumpDiffusionIncrementLaw b σ Λ ν τ] / τ := by
-  have hν1 := integrable_exp_of_ae_nonpos hJ
-  have hJ1 : Integrable (fun x ↦ x) ν := integrable_of_mem_interior_integrableExpSet hν
-  have hJ2 : Integrable (fun x ↦ x ^ 2) ν := integrable_pow_of_mem_interior_integrableExpSet hν 2
-  have hg : Integrable (fun x ↦ -(rexp x - 1 - x - x ^ 2 / 2)) ν :=
-    (((hν1.sub (integrable_const 1)).sub hJ1).sub (hJ2.div_const 2)).neg
-  have hle : ∀ᵐ x ∂ν, 0 ≤ -(rexp x - 1 - x - x ^ 2 / 2) :=
-    hJ.mono fun x hx ↦ by linarith [Real.exp_le_quadratic_of_nonpos hx]
-  -- the negated bias integrand is positive where the jumps are negative
-  have hpos : 0 < ∫ x, -(rexp x - 1 - x - x ^ 2 / 2) ∂ν := by
-    refine (integral_pos_iff_support_of_nonneg_ae hle hg).2 (pos_iff_ne_zero.2 fun h0 ↦
-      hJ' (measure_mono_null (fun x (hx : x < 0) ↦ ?_) h0))
-    exact Function.mem_support.2 (ne_of_gt (by linarith [Real.exp_lt_quadratic_of_neg hx]))
-  rw [integral_neg, neg_pos] at hpos
-  rw [← sub_neg, jumpDiffusion_logContract_sub_variance hS hν hν1 hb hτ]
-  exact mul_neg_of_pos_of_neg (mul_pos two_pos (NNReal.coe_pos.2 hΛ)) hpos
+  rw [← sub_neg,
+    jumpDiffusion_logContract_sub_variance hS hν (integrable_exp_of_ae_nonpos hJ) hb hτ]
+  exact mul_neg_of_pos_of_neg (mul_pos two_pos (NNReal.coe_pos.2 hΛ))
+    (integral_jumpBias_neg hν hJ hJ')
+
+/-- **Merton's model: the log contract against the variance.** With Merton's log-jumps
+`N(log(1 + k) − δ²/2, δ²)` (`k > −1`) at the compensated drift `b = r − σ²/2 − Λk`
+(`mertonJump_compensated`), `S > 0` and `τ > 0`, the log contract is
+`σ² + 2Λ(k − log(1 + k) + δ²/2)` and the variance of the log-return per unit time is
+`σ² + Λ((log(1 + k) − δ²/2)² + δ²)`: the jump multipliers have mean `1 + k`
+(`integral_exp_mertonJump`), and the log-jumps mean `log(1 + k) − δ²/2` and variance `δ²` (Mathlib's
+`integral_id_gaussianReal`, `variance_id_gaussianReal`). The jump bias, their difference, is
+`2Λ(k − log(1 + k)) − Λ(log(1 + k) − δ²/2)²`. -/
+theorem mertonJump_logContract_variance {S r b σ k δ : ℝ} (hS : 0 < S) (hk : -1 < k) {Λ : ℝ≥0}
+    (hb : b = r - σ ^ 2 / 2 - Λ * k) {τ : ℝ≥0} (hτ : 0 < τ) :
+    2 / τ * ∫ y, (Real.log (S * rexp (r * τ) / (S * rexp y))
+        + (S * rexp y - S * rexp (r * τ)) / (S * rexp (r * τ)))
+      ∂(jumpDiffusionIncrementLaw b σ Λ
+        (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) τ)
+      = σ ^ 2 + 2 * Λ * (k - Real.log (1 + k) + δ ^ 2 / 2) ∧
+    Var[id; jumpDiffusionIncrementLaw b σ Λ
+        (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) τ] / τ
+      = σ ^ 2 + Λ * ((Real.log (1 + k) - δ ^ 2 / 2) ^ 2 + δ ^ 2) := by
+  have hν : 0 ∈ interior
+      (integrableExpSet id (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal)) := by
+    rw [integrableExpSet_id_gaussianReal, interior_univ]
+    exact mem_univ 0
+  have hE : Integrable rexp (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) :=
+    integrable_exp_gaussianReal _ _
+  have hE1 : Integrable (fun x ↦ rexp x - 1)
+      (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) :=
+    hE.sub (integrable_const 1)
+  have hJ : Integrable (fun x ↦ x)
+      (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) :=
+    integrable_of_mem_interior_integrableExpSet hν
+  -- the second moment of the log-jumps: the variance plus the squared mean
+  have h2 : ∫ x, x ^ 2 ∂(gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal)
+      = (Real.log (1 + k) - δ ^ 2 / 2) ^ 2 + δ ^ 2 := by
+    have h := variance_eq_sub (memLp_of_mem_interior_integrableExpSet hν 2)
+    rw [variance_id_gaussianReal, Real.coe_toNNReal _ (sq_nonneg δ)] at h
+    simp only [Pi.pow_apply, id_eq] at h
+    rw [integral_id_gaussianReal] at h
+    linarith
+  refine ⟨?_, ?_⟩
+  · rw [jumpDiffusion_logContract hS hν hE (mertonJump_compensated hk δ hb) hτ,
+      integral_sub hE1 hJ, integral_sub hE (integrable_const 1), integral_exp_mertonJump hk δ,
+      integral_const, probReal_univ, one_smul, integral_id_gaussianReal]
+    ring
+  · rw [variance_id_jumpDiffusionIncrementLaw b σ Λ hν τ,
+      mul_div_cancel_right₀ _ (NNReal.coe_ne_zero.2 hτ.ne'), h2]
 
 /-! ### The realized variance of the process -/
 
@@ -260,36 +341,166 @@ theorem tendsto_integral_sum_sq_increment_equipartition (h : JumpDiffusionProces
       tendsto_one_div_add_atTop_nhds_zero_nat.const_mul ((b + Λ * ∫ x, x ∂ν) ^ 2 * (T : ℝ) ^ 2)
   simpa only [add_zero] using h0.const_add ((σ ^ 2 + Λ * ∫ x, x ^ 2 ∂ν) * (T : ℝ))
 
-/-- **With jumps the log contract misses the variance swap by the jump bias.** For a jump-diffusion
-process `X` with a jump law whose moment-generating function is finite near `0` and at `1`, a spot
-`S > 0` and `T > 0`, the log contract over `T` at the compensated drift `c` minus the expected
-realized variance of `X` per unit time along equipartitions of `[0, T]` tends to the jump bias
-`2Λ𝔼[e^J − 1 − J − J²/2]`: the expected realized variance tends to the variance of the log-return
-over `T` (`tendsto_integral_sum_sq_increment_equipartition`), and the log contract differs from
-that by the bias (`jumpDiffusion_logContract_sub_variance`). The log contract is stated for the law
-of the log-return at the compensated drift, which is the law of `X_T` when `X` has that drift, that
-is, when the discounted price is a martingale (`JumpDiffusionProcess.martingale_iff`); the limit of
-the expected realized variance does not depend on the drift `b` of `X`. In Black–Scholes the limit
-is `0` (`varianceSwap_log_eq_QV_limit_value`). -/
-theorem tendsto_logContract_sub_realizedVariance (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν)
+/-! ### The log contract on the process -/
+
+/-- **The log contract on the process.** If the discounted price `e^{−rt}Se^{X_t}` is a
+`P`-martingale, with `S > 0`, `T > 0` and a jump law whose moment-generating function is finite near
+`0` and at `1`, the log contract on `S_T = Se^{X_T}` with the forward `F = Se^{rT}` has, under `P`,
+the expected payoff `(2/T)·𝔼_P[log(F/S_T) + (S_T − F)/F] = σ² + 2Λ𝔼[e^J − 1 − J]`: the martingale
+property forces the compensated drift (`martingale_iff`), `X_T` has the log-return law over `T`
+(`hasLaw`), and the law gives `jumpDiffusion_logContract`. -/
+theorem integral_logContract_of_martingale (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν)
     [IsProbabilityMeasure ν] (hν : 0 ∈ interior (integrableExpSet id ν))
-    (hν1 : Integrable rexp ν) {S r c : ℝ} (hS : 0 < S)
-    (hc : c = r - σ ^ 2 / 2 - Λ * (∫ x, rexp x ∂ν - 1)) {T : ℝ≥0} (hT : 0 < T) :
+    (hν1 : Integrable rexp ν) {S r : ℝ} (hS : 0 < S)
+    (hM : Martingale (fun (t : ℝ≥0) ω ↦ rexp (-r * t) * (S * rexp (X t ω))) 𝓕 P) {T : ℝ≥0}
+    (hT : 0 < T) :
+    2 / T * ∫ ω, (Real.log (S * rexp (r * T) / (S * rexp (X T ω)))
+        + (S * rexp (X T ω) - S * rexp (r * T)) / (S * rexp (r * T))) ∂P
+      = σ ^ 2 + 2 * Λ * ∫ x, (rexp x - 1 - x) ∂ν := by
+  rw [← jumpDiffusion_logContract hS hν hν1 ((h.martingale_iff hν1 hS.ne' r).1 hM) hT]
+  congr 1
+  exact (h.hasLaw T).integral_comp (f := fun y ↦ Real.log (S * rexp (r * T) / (S * rexp y))
+    + (S * rexp y - S * rexp (r * T)) / (S * rexp (r * T))) (Measurable.aestronglyMeasurable
+      (by fun_prop))
+
+/-- **The log contract against the discretely sampled variance swap.** Under the hypotheses of
+`integral_logContract_of_martingale`, along `n + 1` equal steps of `[0, T]` the log contract minus
+the expected realized variance of `X` per unit time is
+`2Λ𝔼[e^J − 1 − J − J²/2] − (b + Λ𝔼[J])²T/(n + 1)`: the jump bias, less a discrete-sampling term
+that is `≥ 0` and vanishes as `n → ∞` (`integral_sum_sq_increment_equipartition`). The drift `b` is
+the compensated drift, which the martingale property forces. -/
+theorem logContract_sub_realizedVariance_of_martingale (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν)
+    [IsProbabilityMeasure ν] (hν : 0 ∈ interior (integrableExpSet id ν))
+    (hν1 : Integrable rexp ν) {S r : ℝ} (hS : 0 < S)
+    (hM : Martingale (fun (t : ℝ≥0) ω ↦ rexp (-r * t) * (S * rexp (X t ω))) 𝓕 P) {T : ℝ≥0}
+    (hT : 0 < T) (n : ℕ) :
+    2 / T * ∫ ω, (Real.log (S * rexp (r * T) / (S * rexp (X T ω)))
+        + (S * rexp (X T ω) - S * rexp (r * T)) / (S * rexp (r * T))) ∂P
+      - (∫ ω, ∑ k ∈ Finset.range (n + 1),
+          (X ((k + 1) * T / (n + 1)) ω - X (k * T / (n + 1)) ω) ^ 2 ∂P) / T
+      = 2 * Λ * ∫ x, (rexp x - 1 - x - x ^ 2 / 2) ∂ν - (b + Λ * ∫ x, x ∂ν) ^ 2 * T / (n + 1) := by
+  have hJ : Integrable (fun x ↦ x) ν := integrable_of_mem_interior_integrableExpSet hν
+  have hJ2 : Integrable (fun x ↦ x ^ 2) ν := integrable_pow_of_mem_interior_integrableExpSet hν 2
+  have hE1 : Integrable (fun x ↦ rexp x - 1 - x) ν := (hν1.sub (integrable_const 1)).sub hJ
+  have hT' : (T : ℝ) ≠ 0 := NNReal.coe_ne_zero.2 hT.ne'
+  rw [h.integral_logContract_of_martingale hν hν1 hS hM hT,
+    h.integral_sum_sq_increment_equipartition hν T n, integral_sub hE1 (hJ2.div_const 2),
+    integral_div]
+  field_simp
+  ring
+
+/-- **With jumps the log contract misses the variance swap by the jump bias.** Under the
+hypotheses of `integral_logContract_of_martingale`, the log contract minus the expected realized
+variance of `X` per unit time along equipartitions of `[0, T]` tends to the jump bias
+`2Λ𝔼[e^J − 1 − J − J²/2]`: the discrete-sampling term of
+`logContract_sub_realizedVariance_of_martingale` vanishes. In Black–Scholes the limit is `0`
+(`varianceSwap_log_eq_QV_limit_value`, `IsFilteredPreBrownian.logContract_realizedVariance`). -/
+theorem tendsto_logContract_sub_realizedVariance_of_martingale
+    (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabilityMeasure ν]
+    (hν : 0 ∈ interior (integrableExpSet id ν)) (hν1 : Integrable rexp ν) {S r : ℝ} (hS : 0 < S)
+    (hM : Martingale (fun (t : ℝ≥0) ω ↦ rexp (-r * t) * (S * rexp (X t ω))) 𝓕 P) {T : ℝ≥0}
+    (hT : 0 < T) :
     Tendsto (fun n : ℕ ↦
-        2 / T * ∫ y, (Real.log (S * rexp (r * T) / (S * rexp y))
-            + (S * rexp y - S * rexp (r * T)) / (S * rexp (r * T)))
-          ∂(jumpDiffusionIncrementLaw c σ Λ ν T)
+        2 / T * ∫ ω, (Real.log (S * rexp (r * T) / (S * rexp (X T ω)))
+            + (S * rexp (X T ω) - S * rexp (r * T)) / (S * rexp (r * T))) ∂P
         - (∫ ω, ∑ k ∈ Finset.range (n + 1),
             (X ((k + 1) * T / (n + 1)) ω - X (k * T / (n + 1)) ω) ^ 2 ∂P) / T)
       atTop (𝓝 (2 * Λ * ∫ x, (rexp x - 1 - x - x ^ 2 / 2) ∂ν)) := by
-  have h1 : Tendsto (fun n : ℕ ↦ (∫ ω, ∑ k ∈ Finset.range (n + 1),
-        (X ((k + 1) * T / (n + 1)) ω - X (k * T / (n + 1)) ω) ^ 2 ∂P) / T) atTop
-      (𝓝 (Var[id; jumpDiffusionIncrementLaw c σ Λ ν T] / T)) := by
-    rw [variance_id_jumpDiffusionIncrementLaw c σ Λ hν T]
-    exact (h.tendsto_integral_sum_sq_increment_equipartition hν T).div_const _
-  rw [← jumpDiffusion_logContract_sub_variance hS hν hν1 hc hT]
-  exact h1.const_sub _
+  simp only [h.logContract_sub_realizedVariance_of_martingale hν hν1 hS hM hT]
+  have h0 : Tendsto (fun n : ℕ ↦ (b + Λ * ∫ x, x ∂ν) ^ 2 * (T : ℝ) / ((n : ℝ) + 1)) atTop
+      (𝓝 0) := by
+    simpa only [mul_one_div, mul_zero] using
+      tendsto_one_div_add_atTop_nhds_zero_nat.const_mul ((b + Λ * ∫ x, x ∂ν) ^ 2 * (T : ℝ))
+  simpa only [sub_zero] using h0.const_sub (2 * Λ * ∫ x, (rexp x - 1 - x - x ^ 2 / 2) ∂ν)
+
+/-- **With downward jumps the log contract is below the variance swap at every sampling
+frequency.** Under the hypotheses of `integral_logContract_of_martingale`, except finiteness of
+`𝔼[e^J]`, which follows, if the jumps are `≤ 0` then along `n + 1` equal steps of `[0, T]` the log
+contract is at most the expected realized variance of `X` per unit time, for every `n`: the jump
+bias is `≤ 0` (`integral_jumpBias_nonpos`) and the discrete-sampling term `≥ 0`
+(`logContract_sub_realizedVariance_of_martingale`). -/
+theorem logContract_le_realizedVariance_of_martingale (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν)
+    [IsProbabilityMeasure ν] (hν : 0 ∈ interior (integrableExpSet id ν)) (hJ : ∀ᵐ x ∂ν, x ≤ 0)
+    {S r : ℝ} (hS : 0 < S)
+    (hM : Martingale (fun (t : ℝ≥0) ω ↦ rexp (-r * t) * (S * rexp (X t ω))) 𝓕 P) {T : ℝ≥0}
+    (hT : 0 < T) (n : ℕ) :
+    2 / T * ∫ ω, (Real.log (S * rexp (r * T) / (S * rexp (X T ω)))
+        + (S * rexp (X T ω) - S * rexp (r * T)) / (S * rexp (r * T))) ∂P
+      ≤ (∫ ω, ∑ k ∈ Finset.range (n + 1),
+          (X ((k + 1) * T / (n + 1)) ω - X (k * T / (n + 1)) ω) ^ 2 ∂P) / T := by
+  have hdisc : 0 ≤ (b + Λ * ∫ x, x ∂ν) ^ 2 * T / (n + 1) := by positivity
+  rw [← sub_nonpos, h.logContract_sub_realizedVariance_of_martingale hν
+    (integrable_exp_of_ae_nonpos hJ) hS hM hT n]
+  linarith [mul_nonpos_of_nonneg_of_nonpos (by positivity : (0 : ℝ) ≤ 2 * Λ)
+    (integral_jumpBias_nonpos hJ)]
+
+/-- **With crash jumps the log contract is strictly below the variance swap at every sampling
+frequency.** If moreover `Λ > 0` and the jumps are negative with positive probability, the
+inequality of `logContract_le_realizedVariance_of_martingale` is strict for every `n`: the jump
+bias is `< 0` (`integral_jumpBias_neg`). -/
+theorem logContract_lt_realizedVariance_of_martingale (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν)
+    [IsProbabilityMeasure ν] (hν : 0 ∈ interior (integrableExpSet id ν)) (hΛ : 0 < Λ)
+    (hJ : ∀ᵐ x ∂ν, x ≤ 0) (hJ' : ν {x | x < 0} ≠ 0) {S r : ℝ} (hS : 0 < S)
+    (hM : Martingale (fun (t : ℝ≥0) ω ↦ rexp (-r * t) * (S * rexp (X t ω))) 𝓕 P) {T : ℝ≥0}
+    (hT : 0 < T) (n : ℕ) :
+    2 / T * ∫ ω, (Real.log (S * rexp (r * T) / (S * rexp (X T ω)))
+        + (S * rexp (X T ω) - S * rexp (r * T)) / (S * rexp (r * T))) ∂P
+      < (∫ ω, ∑ k ∈ Finset.range (n + 1),
+          (X ((k + 1) * T / (n + 1)) ω - X (k * T / (n + 1)) ω) ^ 2 ∂P) / T := by
+  have hdisc : 0 ≤ (b + Λ * ∫ x, x ∂ν) ^ 2 * T / (n + 1) := by positivity
+  rw [← sub_neg, h.logContract_sub_realizedVariance_of_martingale hν
+    (integrable_exp_of_ae_nonpos hJ) hS hM hT n]
+  linarith [mul_neg_of_pos_of_neg (mul_pos two_pos (NNReal.coe_pos.2 hΛ))
+    (integral_jumpBias_neg hν hJ hJ')]
 
 end JumpDiffusionProcess
 
 end MathFin
+
+namespace ProbabilityTheory.IsFilteredPreBrownian
+
+open MeasureTheory MathFin Real
+open scoped NNReal
+
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}
+  {B : ℝ≥0 → Ω → ℝ} [hB : IsFilteredPreBrownian B 𝓕 P]
+
+/-- **Black–Scholes: the log contract against the discretely sampled variance swap.** For a
+filtered pre-Brownian motion `B`, the price `S_t = Se^{(r − σ²/2)t + σB_t}` with `S > 0` and
+`T > 0`: the log contract on `S_T` has expected payoff `σ²` per unit time, and minus the expected
+realized variance per unit time along `n + 1` equal steps of `[0, T]` it is
+`−(r − σ²/2)²T/(n + 1)`: no jump bias, only the discrete-sampling term, which vanishes as
+`n → ∞`. It is the case `Λ = 0` of `JumpDiffusionProcess.integral_logContract_of_martingale` and
+`JumpDiffusionProcess.logContract_sub_realizedVariance_of_martingale`, through
+`IsFilteredPreBrownian.jumpDiffusionProcess`, and the expected realized variance
+`σ²T + (r − σ²/2)²T²/(n + 1)` it implies is the form on `ℝ≥0` of
+`expected_bsLogPrice_equipartition_sum`. -/
+theorem logContract_realizedVariance {S r σ : ℝ} (hS : 0 < S) {T : ℝ≥0} (hT : 0 < T) :
+    2 / T * ∫ ω, (Real.log (S * rexp (r * T) / (S * rexp ((r - σ ^ 2 / 2) * T + σ * B T ω)))
+        + (S * rexp ((r - σ ^ 2 / 2) * T + σ * B T ω) - S * rexp (r * T)) / (S * rexp (r * T)))
+          ∂P = σ ^ 2 ∧
+    ∀ n : ℕ, 2 / T * ∫ ω, (Real.log (S * rexp (r * T) / (S * rexp ((r - σ ^ 2 / 2) * T
+          + σ * B T ω)))
+        + (S * rexp ((r - σ ^ 2 / 2) * T + σ * B T ω) - S * rexp (r * T)) / (S * rexp (r * T)))
+          ∂P
+      - (∫ ω, ∑ k ∈ Finset.range (n + 1),
+          ((r - σ ^ 2 / 2) * ((k + 1) * T / (n + 1) : ℝ≥0) + σ * B ((k + 1) * T / (n + 1)) ω
+            - ((r - σ ^ 2 / 2) * (k * T / (n + 1) : ℝ≥0) + σ * B (k * T / (n + 1)) ω)) ^ 2 ∂P)
+          / T
+      = -((r - σ ^ 2 / 2) ^ 2 * T / (n + 1)) := by
+  have h := hB.jumpDiffusionProcess (r - σ ^ 2 / 2) σ (gaussianReal 0 1)
+  have hν : 0 ∈ interior (integrableExpSet id (gaussianReal 0 1)) := by
+    rw [integrableExpSet_id_gaussianReal, interior_univ]
+    exact Set.mem_univ 0
+  have hM := (h.martingale_iff (integrable_exp_gaussianReal 0 1) hS.ne' r).2
+    (by rw [NNReal.coe_zero, zero_mul, sub_zero])
+  refine ⟨?_, fun n ↦ ?_⟩
+  · have h1 := h.integral_logContract_of_martingale hν (integrable_exp_gaussianReal 0 1) hS hM hT
+    simp only [NNReal.coe_zero, mul_zero, zero_mul, add_zero] at h1
+    exact h1
+  · have h2 := h.logContract_sub_realizedVariance_of_martingale hν (integrable_exp_gaussianReal 0 1)
+      hS hM hT n
+    simp only [NNReal.coe_zero, mul_zero, zero_mul, add_zero, zero_sub] at h2
+    exact h2
+
+end ProbabilityTheory.IsFilteredPreBrownian

@@ -909,15 +909,19 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.mertonCallPrice_strictConvexOn_strike' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.mertonCallPrice_strictConvexOn_strike
 
--- Variance swaps with jumps (2026-10-08): under any law the log contract prices rτ − E[Y] when the
--- forward is the mean; the first two cumulants per unit time of the jump-diffusion log-return,
+-- Variance swaps with jumps (2026-10-08): under any law the log contract's expected payoff is
+-- rτ − E[Y] when the forward is the mean; the first two cumulants per unit time of the jump-diffusion log-return,
 -- κ'(0) = b + ΛE[J] and κ''(0) = σ² + ΛE[J²], give its mean, variance and second moment; at the
 -- compensated drift the log contract is σ² + 2ΛE[eᴶ − 1 − J], which differs from the variance per
 -- unit time by the jump bias 2ΛE[eᴶ − 1 − J − J²/2], ≤ 0 for jumps ≤ 0 and < 0 if moreover Λ > 0
 -- and the jumps are negative with positive probability; along equipartitions the expected sum of
 -- any function of increments whose laws depend only on their length is n + 1 times its mean over
--- one step, so the expected realized variance of the process tends to the variance, and the log
--- contract minus it per unit time tends to the jump bias
+-- one step, so the expected realized variance of the process tends to the variance. On the process
+-- under a measure that makes the discounted price a martingale, X_T has the log-return law, the log
+-- contract on Se^{X_T} is σ² + 2ΛE[eᴶ − 1 − J], and at every sampling frequency it differs from the
+-- expected realized variance per unit time by the jump bias less (b + ΛE[J])²T/(n + 1), so for
+-- downward jumps it is at most the discretely sampled swap at every n, strictly with crash jumps;
+-- Black–Scholes (Λ = 0, Brownian motion) and Merton's Gaussian jumps are corollaries
 
 /-- info: 'MathFin.integral_logContract' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.integral_logContract
@@ -952,6 +956,12 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'Real.exp_le_quadratic_of_nonpos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Real.exp_le_quadratic_of_nonpos
 
+/-- info: 'MathFin.integral_jumpBias_nonpos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_jumpBias_nonpos
+
+/-- info: 'MathFin.integral_jumpBias_neg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_jumpBias_neg
+
 /-- info: 'MathFin.jumpDiffusion_logContract_le_variance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusion_logContract_le_variance
 
@@ -967,8 +977,29 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.JumpDiffusionProcess.tendsto_integral_sum_sq_increment_equipartition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.tendsto_integral_sum_sq_increment_equipartition
 
-/-- info: 'MathFin.JumpDiffusionProcess.tendsto_logContract_sub_realizedVariance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.tendsto_logContract_sub_realizedVariance
+/-- info: 'MathFin.JumpDiffusionProcess.hasLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.hasLaw
+
+/-- info: 'MathFin.JumpDiffusionProcess.integral_logContract_of_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.integral_logContract_of_martingale
+
+/-- info: 'MathFin.JumpDiffusionProcess.logContract_sub_realizedVariance_of_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.logContract_sub_realizedVariance_of_martingale
+
+/-- info: 'MathFin.JumpDiffusionProcess.tendsto_logContract_sub_realizedVariance_of_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.tendsto_logContract_sub_realizedVariance_of_martingale
+
+/-- info: 'MathFin.JumpDiffusionProcess.logContract_le_realizedVariance_of_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.logContract_le_realizedVariance_of_martingale
+
+/-- info: 'MathFin.JumpDiffusionProcess.logContract_lt_realizedVariance_of_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.JumpDiffusionProcess.logContract_lt_realizedVariance_of_martingale
+
+/-- info: 'ProbabilityTheory.IsFilteredPreBrownian.logContract_realizedVariance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms ProbabilityTheory.IsFilteredPreBrownian.logContract_realizedVariance
+
+/-- info: 'MathFin.mertonJump_logContract_variance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.mertonJump_logContract_variance
 
 -- Blueprint-spine closure (2026-06-06): every spine node is axiom-pinned.
 -- Gap found by tests/test_values.py::test_blueprint_spine_is_audited on its

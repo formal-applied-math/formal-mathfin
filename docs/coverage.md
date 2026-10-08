@@ -26,6 +26,57 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The variance swap on one process, under one measure (2026-10-08)
+
+Five entries added and one restated, all `full`: `mf-jump-diffusion-terminal-law`,
+`mf-jump-diffusion-log-contract-on-process`, `mf-jump-diffusion-log-contract-below-discrete-swap`,
+`mf-black-scholes-log-contract-discrete-swap` and `mf-merton-log-contract-variance`; the headline
+`mf-jump-diffusion-variance-swap-vs-log-contract` now states the log contract and the realized
+variance of the same process under the same measure, at every sampling frequency. Corpus 530 → 535.
+`BlackScholes/JumpDiffusionProcess.lean` gains the law of `X_t`, and
+`BlackScholes/JumpDiffusionVarianceSwap.lean` the process section and the two models.
+
+- The law of the process. `X_t` has the log-return law over `t`
+  (`JumpDiffusionProcess.hasLaw`, Mathlib's `HasLaw.congr`), so statements about the law become
+  statements about the process (`HasLaw.integral_comp`); `JumpDiffusionProcess.integral_exp` is
+  now read off it.
+- The log contract on the process. If `e^{−rt}Se^{X_t}` is a `P`-martingale, the log contract on
+  `S_T = Se^{X_T}` has expected payoff `σ² + 2ΛE[e^J − 1 − J]` per unit time under `P`
+  (`JumpDiffusionProcess.integral_logContract_of_martingale`): the martingale forces the
+  compensated drift (`martingale_iff`), and the law of `X_T` does the rest.
+- At every sampling frequency. Under the same hypotheses, along `n + 1` equal steps of `[0, T]`,
+  the log contract minus the expected realized variance per unit time, both under `P`, is
+  `2ΛE[e^J − 1 − J − J²/2] − (b + ΛE[J])²T/(n + 1)`
+  (`JumpDiffusionProcess.logContract_sub_realizedVariance_of_martingale`): the jump bias less a
+  discrete-sampling term `≥ 0`. It tends to the jump bias
+  (`tendsto_logContract_sub_realizedVariance_of_martingale`).
+- The sign of the bias as a fact about the jump law: `≤ 0` for jumps `≤ 0`
+  (`integral_jumpBias_nonpos`), `< 0` if moreover `ν{J < 0} ≠ 0` (`integral_jumpBias_neg`). So for
+  downward jumps the log contract is at most the expected realized variance per unit time at every
+  `n`, strictly if `Λ > 0` and `ν{J < 0} ≠ 0`
+  (`logContract_le_realizedVariance_of_martingale`, `logContract_lt_realizedVariance_of_martingale`).
+- Black–Scholes. For a filtered pre-Brownian motion and `S_t = Se^{(r − σ²/2)t + σB_t}`, the log
+  contract is `σ²` and the difference is `−(r − σ²/2)²T/(n + 1)`
+  (`IsFilteredPreBrownian.logContract_realizedVariance`), the case `Λ = 0` through
+  `IsFilteredPreBrownian.jumpDiffusionProcess`.
+- Merton. With log-jumps `N(log(1 + k) − δ²/2, δ²)` at the drift `r − σ²/2 − Λk`, the log contract is
+  `σ² + 2Λ(k − log(1 + k) + δ²/2)` and the variance per unit time `σ² + Λ((log(1 + k) − δ²/2)² + δ²)`
+  (`mertonJump_logContract_variance`).
+
+Safe wording: "for a jump-diffusion process (a hypothesis structure) under a measure that makes the
+discounted price a martingale, with a jump law whose moment-generating function is finite near `0`
+and at `1`, the log contract on the terminal price minus the expected realized variance per unit
+time along `n + 1` equal steps is the jump bias `2ΛE[e^J − 1 − J − J²/2]` less
+`(b + ΛE[J])²T/(n + 1)`, at every `n`; for downward jumps the log contract is at most the discretely
+sampled swap at every `n`".
+Not covered:
+- the existence of a `JumpDiffusionProcess` with jumps;
+- measures that move `Λ` or `ν`: `P` keeps the characteristics of `X`;
+- the realized variance itself rather than its expectation;
+- the Black–Scholes files on `ℝ` time (`expected_bsLogPrice_equipartition_sum`, for a
+  `BrownianQuadraticVariation` driver) as corollaries: the corollary here is on `ℝ≥0` for a filtered
+  pre-Brownian motion, and the two partitions are not unified.
+
 ### Variance swaps with jumps: the log contract against the variance (2026-10-08)
 
 Eight entries added, all `full`: `mf-log-contract-any-law`, `mf-jump-diffusion-log-return-mean`,
@@ -69,9 +120,9 @@ in place of inline copies.
   (`JumpDiffusionProcess.integral_sum_sq_increment_equipartition`), which tends to `(σ² + ΛE[J²])T`
   whatever the drift (`tendsto_integral_sum_sq_increment_equipartition`), the jump-diffusion
   counterparts of `VarianceSwapEquipartition` and `VarianceSwapLimit`. So the log contract minus the
-  expected realized variance per unit time tends to the jump bias
-  (`tendsto_logContract_sub_realizedVariance`), where Black–Scholes has `0`
-  (`VarianceSwapEquivalence`).
+  expected realized variance per unit time tends to the jump bias, where Black–Scholes has `0`
+  (`VarianceSwapEquivalence`); since corpus 535 this is stated on the process under one measure
+  (next section).
 
 Safe wording: "for a jump law whose moment-generating function is finite near `0` and at `1`, the
 log contract at the compensated drift has expected payoff `σ² + 2ΛE[e^J − 1 − J]` per unit time,
