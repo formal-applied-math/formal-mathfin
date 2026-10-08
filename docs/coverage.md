@@ -51,7 +51,10 @@ lives in `Foundations/Esscher.lean`, the jump-diffusion results in
   `Λ·∫e^{θx}dν` and the tilted jump law (`jumpDiffusionIncrementLaw_tilted`). Both laws have the
   moment-generating function `u ↦ e^{(κ(u + θ) − κ(θ))τ}` (`jumpDiffusionExponent_tilted`).
 - Esscher pricing. The tilted characteristics are at their compensated drift exactly when
-  `κ(θ + 1) − κ(θ) = r` (`compensated_tilted_iff`). At such a `θ` the call against the tilted law
+  `κ(θ + 1) − κ(θ) = r` (`compensated_tilted_iff`): the criterion `κ(1) = r`
+  (`compensated_iff_exponent_one`, shared with the discounted-price martingale criterion) for the
+  tilted Laplace exponent. The call against the tilted law is the call price function of the
+  tilted characteristics (`integral_call_tilted_eq_jumpDiffusionCallPrice`), so at such a `θ` it
   is Merton's formula for the tilted jump law (`integral_call_tilted_eq_merton`). Tilting keeps
   Merton's jumps lognormal with the jump mean `(1 + k)e^{θδ²} − 1` (`mertonJump_tilted`), so in
   Merton's model it is Merton's 1976 series (`integral_call_tilted_eq_mertonCallPrice`). Without

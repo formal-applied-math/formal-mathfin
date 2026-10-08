@@ -125,6 +125,114 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-08 — corpus 495 — the Esscher transform: one tilt, one identification, three users
+
+Scope: corpus 490 → 495. `Foundations/Esscher.lean` and `BlackScholes/JumpDiffusionEsscher.lean`
+are new. Two refactors make existing code consume them: `gaussianReal_withDensity_esscher` in
+`Foundations/GaussianGirsanov.lean`, and the Gaussian identification in
+`Foundations/ExpMartingaleQBrownian.lean`. One compensated-drift criterion was lifted into
+`BlackScholes/JumpDiffusionProcess.lean`. Entries: `mf-jump-diffusion-esscher-transform`,
+`mf-jump-diffusion-esscher-pricing`, `mf-merton-esscher-pricing`,
+`mf-black-scholes-esscher-pricing` and `gir-gaussian-esscher-tilt`.
+
+Two read-only reviewers looked at the first green state: one on prose against statement, one on
+proof quality with the coherence and mathematics lenses. Neither found a mathematical error or a
+dishonest hypothesis. One CI round failed: `simp` could not split the cast
+`↑(Λ * jumpMoment ν θ)`. The cause was the anonymous constructor in `jumpMoment` (below).
+
+### Standing first pass: prose against statement
+
+Twelve findings, all applied:
+
+- **An Esscher parameter "exists without jumps" was asserted with no Lean statement.** Lean only
+  showed that the tilt at `θ₀ = (r − b − σ²/2)/σ²` moves the drift to `r − σ²/2`. Now
+  `jumpDiffusionExponent_zero_esscher` proves `κ(θ₀ + 1) − κ(θ₀) = r` at jump rate `0`, and
+  `mf-black-scholes-esscher-pricing` exports it together with the price.
+- **"One exponential tilt for Girsanov, Brownian motion and jumps"** was wrong for Brownian motion:
+  the characterization shares only the identification by moment-generating function, not the
+  tilt. The headings now say so.
+- **An identity claim without a proof-term edge.** The audit comment and `leaps.md` said the
+  jump-diffusion transform uses the Gaussian tilt. `jumpDiffusionIncrementLaw_tilted` does not;
+  the tilt's users in the jump layer are the no-jump tilt and Merton's tilted jumps.
+  `gir-gaussian-esscher-tilt` said two results derive from it; there are three.
+- **The incompleteness caveat** was attached to statements that allow `Λ = 0`, which is
+  Black–Scholes. It is now qualified with `Λ > 0`, as in the Laplace-exponent review.
+- **`κ` outside its domain.** The tilted exponent is `jumpDiffusionExponent` at every `u`, and it
+  is the Laplace exponent where `∫ e^{(u+θ)x} dν < ∞`. `jumpMoment` is the Bochner integral.
+- Smaller fixes:
+  - the Merton entry now defines `ν`;
+  - in the no-jump entry, the tilted law is now marked as a step in the proof;
+  - `Esscher.lean` names, for each user, the lemma it uses;
+  - Gerber–Shiu is phrased as choosing a pricing measure, not as a change of measure on a
+    process;
+  - `GaussianGirsanov`'s docstring named a nonexistent `BSCallHyp.of_physical`, and still called
+    process-level Girsanov "gated on Itô" although the library has had it since 2026-07;
+  - the roadmap's incompleteness item needs `θ ≠ 0`: at `θ = 0` the Esscher law is the physical
+    law.
+
+### Upgrades executed
+
+- **One home for the tilt.** `Foundations/Esscher.lean` holds:
+  - the tilted moments: Mathlib's `integral_exp_tilted` at linear exponents, also in `mgf` form;
+  - identification by moment-generating function, `measure_eq_of_mgf_id_eq`, lifted to a
+    probability law against any finite measure;
+  - the Gaussian tilt `N(m, v) ↦ N(m + θv, v)`.
+
+  The static Girsanov change of measure is now the case `N(0, 1)` of the Gaussian tilt. Its
+  separate pdf proof (`gaussian_esscher_pdf`) was used nowhere else and is removed. The
+  Brownian characterization's inline complex-MGF argument became one call.
+- **The jump-diffusion transform.** When the jump law has every exponential moment, the tilted
+  log-return law is the jump-diffusion law of the tilted characteristics; their Laplace exponent is
+  `κ(u + θ) − κ(θ)`. The Esscher condition is the criterion `κ(1) = r` for that exponent.
+  `compensated_iff_exponent_one` is now the one copy of that criterion; the discounted-price
+  martingale criterion uses it as well. The Esscher price is a price function of the tilted
+  characteristics (`integral_call_tilted_eq_jumpDiffusionCallPrice`), so Merton's formula, and
+  Merton's 1976 series for lognormal jumps (`mertonJump_tilted`), come from existing results.
+  Without jumps it is the Black–Scholes price at an explicit Esscher parameter.
+- **Build hygiene and register.** `jumpMoment` now uses `NNReal.mk`. Built with `⟨_, _⟩`, it
+  unfolded to a bare subtype term, which `ℝ≥0` simp lemmas (`NNReal.coe_mul`, `NNReal.coe_mk`)
+  cannot match; Mathlib's NNReal docstring warns about exactly this. A `coe_jumpMoment` simp
+  lemma replaces the local `rfl` workaround. Other changes:
+  - minimal typeclasses: `[IsFiniteMeasure μ']`, `[NeZero ν]`;
+  - `integrable_exp_mul_tilted_const_mul` takes only the two moments it uses;
+  - `Eq.symm` puts the measure with known moments in the identifying slot, so three `have`s
+    disappear.
+
+### Lens gradients
+
+- **Coherence.** Exemplar: three consumers of one identification lemma, and static Girsanov as
+  literally the `N(0, 1)` case of the tilt the jump layer uses. Next: the pdf twin
+  `exp_mul_gaussianPDFReal_zero_one` (`Foundations/StandardNormal.lean`) feeds the Black–Scholes
+  `Φ(d₁)` through the stock numéraire. That is the Gaussian tilt on a half-line: under `Q^(S)`,
+  `Z ~ N(σ√T, 1)`, the tilt at `θ = 1`.
+- **First principles.** Exemplar: the Esscher condition is a structural identity (the
+  compensated drift of the tilted characteristics), not a computation. Next: existence and
+  uniqueness of the Esscher parameter for `σ ≠ 0`. `θ ↦ κ(θ + 1) − κ(θ)` is continuous
+  (`continuous_mgf`), strictly increasing and unbounded both ways, so `Continuous.surjective`
+  applies.
+- **Generality.** The every-moment hypothesis is forced by global MGF uniqueness and excludes
+  Kou's double-exponential jumps. Next: local uniqueness (`Measure.ext_of_mgf_id_eq` from
+  `0 ∈ interior (integrableExpSet id μ)` and equality of the MGFs near `0`, by the identity
+  theorem on the common strip). Mathlib's `ComplexMGF.lean` anticipates it in a TODO; it would
+  admit every `θ` in the interior of the jump law's MGF domain.
+
+### Ranked backlog
+
+1. **The Esscher parameter exists and is unique** for `σ ≠ 0` and jump laws with every
+   exponential moment; drafted.
+2. **Local MGF uniqueness**, upstreamable: Kou's jumps enter the Esscher layer and the corpus
+   disclaimer goes.
+3. **Formal incompleteness at one date**: the Esscher law and the Merton measure (same jump law,
+   compensated drift) are both compensated but give different call prices for some strike when
+   `θ ≠ 0`.
+4. **One Gaussian exponential-moment lemma.** `∫ e^{sx} dN(m, v)` is still read off
+   `mgf_id_gaussianReal` by hand in `BrownianMartingale`, `GaussianSmoothing`, `CRRCharFun` and
+   `GaussianGirsanov`. Then the pdf twin above.
+5. **`WienerExponentialTotality`'s one-dimensional fibres** could consume
+   `measure_eq_of_mgf_id_eq` (finite measures on both sides, `mgf_id_map`).
+6. Carried over: the process-level Esscher measure; `compoundPoissonMeasure` and the convolution
+   semigroup; `κ` in Mathlib's `mgf` vocabulary (it would restale the jump corpus).
+
 ## 2026-10-08 — corpus 490 — the Laplace exponent: one moment-generating function, from first principles
 
 Scope: corpus 486 → 490, `BlackScholes/JumpDiffusionExponent.lean` (new) and the moment section of

@@ -2101,10 +2101,13 @@ In Merton's model it is Merton's 1976 series with the jump mean `(1 + k)e^{θδ�
 **Next on the jump axis** (this phase did the first half of item 1 of the previous list, at the
 level of the law at one date):
 
-1. The Esscher parameter exists and is unique when `σ > 0`. `κ` is convex and strictly so with a
-   Gaussian part, so `θ ↦ κ(θ + 1) − κ(θ)` is strictly increasing. It tends to `±∞` with `θ`, and
-   it is continuous where `ν` has every exponential moment (Mathlib's analyticity of `mgf` on the
-   interior of `integrableExpSet`). The intermediate value theorem then gives one root.
+1. The Esscher parameter exists and is unique when `σ ≠ 0`. `θ ↦ κ(θ + 1) − κ(θ)` is
+   `b + σ²/2 + σ²θ + Λ∫ e^{θx}(eˣ − 1) dν`. The jump part is nondecreasing, since
+   `(e^{θ'x} − e^{θx})(eˣ − 1) ≥ 0` for `θ ≤ θ'`, so the map is strictly increasing and unbounded
+   both ways. It is continuous where `ν` has every exponential moment (Mathlib's `continuous_mgf`),
+   so `Continuous.surjective` gives exactly one root.
+   Local MGF uniqueness would then let the transform reach jump laws whose MGF is finite only near
+   `θ`, such as Kou's double-exponential jumps (values review, corpus 495).
 2. Formal incompleteness at one date. Show that the Esscher law and the law that keeps the jump
    law and changes only the drift (the "Merton measure") are both compensated, yet give different
    call prices for some strike when the jumps are nontrivial and the Esscher parameter is not 0.
