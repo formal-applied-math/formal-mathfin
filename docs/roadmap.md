@@ -2134,8 +2134,9 @@ level of the law at one date):
 4. Done (corpus 506): the density and Breeden–Litzenberger with jumps. With `σ ≠ 0`, `τ > 0` the
    log-return law is `f(y) dy`, where `f` is the mixture over the jumps of normal densities,
    continuous by dominated convergence, for any jump law
-   (`jumpDiffusionIncrementLaw_eq_withDensity`, `continuous_jumpDiffusionDensity`). The tail of any law with a density is differentiable where
-   the density is continuous (`hasDerivAt_measureReal_Ioi_withDensity`), so
+   (`jumpDiffusionIncrementLaw_eq_withDensity`, `continuous_jumpDiffusionDensity`). The tail of any
+   law with a density is differentiable where the density is continuous
+   (`hasDerivAt_measureReal_Ioi_withDensity`), so
    `∂²C/∂K² = e^{−rτ}f(log(K/S))/K` (`breedenLitzenberger_jumpDiffusion`). Without jumps, at the
    drift `r − σ²/2`, this and `breedenLitzenberger`'s are second strike derivatives of one call
    price, so `lognormalTerminalPDF` is the density of the price
@@ -2155,9 +2156,14 @@ level of the law at one date):
    (`map_mul_exp_withDensity`), so `lognormalTerminalPDF` (no jumps, drift `r − σ²/2`, `σ > 0`) and
    `mertonTerminalPDF` (Gaussian log-jumps, `σ > 0`, `r = b + σ²/2 + Λk`) are the densities of the
    price, nonnegative and of mass one (`lintegral_lognormalTerminalPDF_eq_one`,
-   `lintegral_mertonTerminalPDF_eq_one`). Next on this line: the signs and shape of Merton's series
-   in the strike (`0 < mertonTerminalPDF`, strict convexity of the call in `K`), as `MertonGreeks`
-   has them in the spot.
+   `lintegral_mertonTerminalPDF_eq_one`). Also done (corpus 522): convexity in the strike. The call
+   price is convex under any law (`convexOn_integral_call`), which makes the Breeden–Litzenberger
+   sign of the lognormal density a derivation, and strictly convex where the law charges every
+   interval (`strictConvexOn_integral_call`). With a Gaussian part the jump-diffusion density is
+   positive, so the call price is strictly convex on `(0, ∞)` for any jump law
+   (`strictConvexOn_jumpDiffusionCallPrice_strike`), and so are the Black–Scholes price and
+   Merton's series. Next on this line: the converse of the strict-convexity criterion, and the
+   lognormal law as a Gaussian change of variables (`gaussianReal_map_mul_exp`).
 5. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
    `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style
    characterization used for constant `θ` (`ExpMartingaleQBrownian`) to independent increments

@@ -24,6 +24,8 @@ arbitrary and needs no moment condition.
   density is at most `1/√(2πv)` (`gaussianPDFReal_le_inv_sqrt`).
 * `nullSingletonClass_jumpDiffusionIncrementLaw`: so the law has no atoms (Mathlib's
   `nullSingletonClass_withDensity`).
+* `jumpDiffusionDensity_pos`: `f` is positive, and so the price charges every interval of
+  positive strikes (`jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero`), for any jump law.
 * `ofReal_exp_le_jumpDiffusionIncrementLaw_singleton`: without a Gaussian part (`σ = 0`) the law
   has an atom at `bτ`, of mass at least `e^{−Λτ}`, the probability of no jump.
 * `hasDerivAt_measureReal_Ioi_withDensity`: for any law `f(y) dy` with `f ≥ 0` integrable, the tail
@@ -122,6 +124,13 @@ lemma integrable_gaussianPDFReal_jumps (b : ℝ) (v : ℝ≥0) (Λ : ℝ≥0) (�
       rw [Real.norm_of_nonneg (gaussianPDFReal_nonneg _ _ _)]
       exact gaussianPDFReal_le_inv_sqrt _ _ _)
 
+/-- With a Gaussian part (`σ ≠ 0`, `τ > 0`) the conditional variance `σ²τ` of the log-return given
+the jumps is nonzero. -/
+lemma jumpDiffusionVariance_ne_zero {σ : ℝ} (hσ : σ ≠ 0) {τ : ℝ≥0} (hτ : 0 < τ) :
+    (.mk (σ ^ 2) (sq_nonneg _) * τ : ℝ≥0) ≠ 0 := by
+  rw [← NNReal.coe_ne_zero, NNReal.coe_mul, NNReal.coe_mk]
+  exact mul_ne_zero (pow_ne_zero 2 hσ) (NNReal.coe_ne_zero.2 hτ.ne')
+
 /-- **The log-return law has the density `f`** when `σ ≠ 0` and `τ > 0`: each Gaussian law of the
 mixture is `φ(y) dy`, and the mixture of the densities is the density of the mixture (Tonelli,
 Mathlib's `lintegral_lintegral_swap`). -/
@@ -129,9 +138,7 @@ theorem jumpDiffusionIncrementLaw_eq_withDensity (b : ℝ) {σ : ℝ} (hσ : σ 
     (ν : Measure ℝ) [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) :
     jumpDiffusionIncrementLaw b σ Λ ν τ
       = volume.withDensity fun y ↦ ENNReal.ofReal (jumpDiffusionDensity b σ Λ ν τ y) := by
-  have hv : (.mk (σ ^ 2) (sq_nonneg _) * τ : ℝ≥0) ≠ 0 := by
-    rw [← NNReal.coe_ne_zero, NNReal.coe_mul, NNReal.coe_mk]
-    exact mul_ne_zero (pow_ne_zero 2 hσ) (NNReal.coe_ne_zero.2 hτ.ne')
+  have hv := jumpDiffusionVariance_ne_zero hσ hτ
   ext A hA
   have hmeas : AEMeasurable (Function.uncurry fun (ω : ℕ × (ℕ → ℝ)) (x : ℝ) ↦
       gaussianPDF (b * τ + ∑ i ∈ Finset.range ω.1, ω.2 i) (.mk (σ ^ 2) (sq_nonneg _) * τ) x)
@@ -158,6 +165,21 @@ theorem continuous_jumpDiffusionDensity (b σ : ℝ) (Λ : ℝ≥0) (ν : Measur
       rw [Real.norm_of_nonneg (gaussianPDFReal_nonneg _ _ _)]
       exact gaussianPDFReal_le_inv_sqrt _ _ _)
     (integrable_const _) (ae_of_all _ fun ω ↦ continuous_gaussianPDFReal _ _)
+
+/-- **With a Gaussian part the density is positive**: each normal density of the mixture is
+(`gaussianPDFReal_pos`), and the mixing law `Poisson(Λτ) ⊗ ν^ℕ` has mass one. -/
+lemma jumpDiffusionDensity_pos (b : ℝ) {σ : ℝ} (hσ : σ ≠ 0) (Λ : ℝ≥0) (ν : Measure ℝ)
+    [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) (y : ℝ) :
+    0 < jumpDiffusionDensity b σ Λ ν τ y := by
+  refine (integral_pos_iff_support_of_nonneg ?_ (integrable_gaussianPDFReal_jumps b _ Λ ν τ y)).2 ?_
+  · exact fun _ ↦ gaussianPDFReal_nonneg _ _ _
+  have hsupp : Function.support (fun ω : ℕ × (ℕ → ℝ) ↦
+      gaussianPDFReal (b * τ + ∑ i ∈ Finset.range ω.1, ω.2 i) (.mk (σ ^ 2) (sq_nonneg _) * τ) y)
+      = univ :=
+    eq_univ_of_forall fun ω ↦ (gaussianPDFReal_pos (b * τ + ∑ i ∈ Finset.range ω.1, ω.2 i) _ y
+      (jumpDiffusionVariance_ne_zero hσ hτ)).ne'
+  rw [hsupp, measure_univ]
+  exact zero_lt_one
 
 /-- **With a Gaussian part the log-return law has no atoms**: it has a density
 (`jumpDiffusionIncrementLaw_eq_withDensity`), and Lebesgue measure has none (Mathlib's
@@ -281,6 +303,31 @@ theorem jumpDiffusionIncrementLaw_map_mul_exp (b : ℝ) {σ : ℝ} (hσ : σ ≠
           fun K ↦ ENNReal.ofReal (jumpDiffusionDensity b σ Λ ν τ (Real.log (K / S)) / K) := by
   rw [jumpDiffusionIncrementLaw_eq_withDensity b hσ Λ ν hτ]
   exact map_mul_exp_withDensity _ hS
+
+/-- **With a Gaussian part the price charges every interval of strikes**: for `S > 0` and
+`0 ≤ k₁ < k₂`, `P(k₁ < Seʸ < k₂) > 0`. The law of the price has the density `f(log(K/S))/K` on
+`(0, ∞)` (`jumpDiffusionIncrementLaw_map_mul_exp`), positive there (`jumpDiffusionDensity_pos`). -/
+lemma jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero (b : ℝ) {σ : ℝ} (hσ : σ ≠ 0) (Λ : ℝ≥0)
+    (ν : Measure ℝ) [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) {S : ℝ} (hS : 0 < S)
+    {k₁ k₂ : ℝ} (hk₁ : 0 ≤ k₁) (hk : k₁ < k₂) :
+    jumpDiffusionIncrementLaw b σ Λ ν τ {y | k₁ < S * rexp y ∧ S * rexp y < k₂} ≠ 0 := by
+  have hf := (continuous_jumpDiffusionDensity b σ Λ ν τ).measurable
+  have hm : Measurable fun K ↦
+      ENNReal.ofReal (jumpDiffusionDensity b σ Λ ν τ (Real.log (K / S)) / K) := by
+    fun_prop
+  have hsupp : Function.support (fun K ↦
+      ENNReal.ofReal (jumpDiffusionDensity b σ Λ ν τ (Real.log (K / S)) / K)) ∩ Ioo k₁ k₂
+      = Ioo k₁ k₂ :=
+    inter_eq_right.2 fun K hK ↦ (ENNReal.ofReal_pos.2 (div_pos
+      (jumpDiffusionDensity_pos b hσ Λ ν hτ (Real.log (K / S))) (hk₁.trans_lt hK.1))).ne'
+  rw [show {y | k₁ < S * rexp y ∧ S * rexp y < k₂} = (fun y ↦ S * rexp y) ⁻¹' Ioo k₁ k₂ from rfl,
+    ← Measure.map_apply (by fun_prop) measurableSet_Ioo,
+    jumpDiffusionIncrementLaw_map_mul_exp b hσ Λ ν hτ hS, withDensity_apply _ measurableSet_Ioo,
+    Measure.restrict_restrict measurableSet_Ioo,
+    inter_eq_left.2 (Ioo_subset_Ioi_self.trans (Ioi_subset_Ioi hk₁))]
+  refine ((setLIntegral_pos_iff hm).2 ?_).ne'
+  rw [hsupp, Real.volume_Ioo]
+  exact ENNReal.ofReal_pos.2 (sub_pos.2 hk)
 
 /-- **The density of an image law integrates to one.** If a probability law `μ` is mapped by `g`
 to `d · ν`, then `∫⁻ d dν = 1`: it is the mass of `μ`. -/

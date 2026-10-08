@@ -878,6 +878,29 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.lintegral_mertonTerminalPDF_eq_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.lintegral_mertonTerminalPDF_eq_one
 
+-- Convexity in the strike (2026-10-08): the call price is convex under any law with a finite mean,
+-- and strictly convex where the law charges every interval; with σ ≠ 0 and τ > 0 the jump-diffusion
+-- density is positive, so the call price is strictly convex on (0, ∞) for any jump law, and so are
+-- the Black–Scholes price and Merton's series
+
+/-- info: 'MathFin.convexOn_integral_call' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.convexOn_integral_call
+
+/-- info: 'MathFin.strictConvexOn_integral_call' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.strictConvexOn_integral_call
+
+/-- info: 'MathFin.jumpDiffusionDensity_pos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.jumpDiffusionDensity_pos
+
+/-- info: 'MathFin.strictConvexOn_jumpDiffusionCallPrice_strike' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.strictConvexOn_jumpDiffusionCallPrice_strike
+
+/-- info: 'MathFin.bsV_strike_strictConvexOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bsV_strike_strictConvexOn
+
+/-- info: 'MathFin.mertonCallPrice_strictConvexOn_strike' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.mertonCallPrice_strictConvexOn_strike
+
 -- Blueprint-spine closure (2026-06-06): every spine node is axiom-pinned.
 -- Gap found by tests/test_values.py::test_blueprint_spine_is_audited on its
 -- first run — seven tagged headliners (including bs_identity, the magic

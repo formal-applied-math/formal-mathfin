@@ -95,18 +95,13 @@ theorem hasLaw_sub_div_of_gaussianReal {X : Ω → ℝ} {μ s : ℝ} {v : ℝ≥
 
 /-! ### Black–Scholes payoffs driven by a standard normal are integrable -/
 
-/-- The Black–Scholes terminal price driven by a standard normal is integrable: it is a constant
-times the exponential of a Gaussian. -/
+/-- The Black–Scholes terminal price driven by a standard normal is integrable: it is integrable
+against the standard normal law (`integrable_bsTerminal_gaussianReal`), the law of `Z`. -/
 theorem integrable_bsTerminal {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) Q)
     (S_0 r σ T : ℝ) : Integrable (fun ω ↦ bsTerminal S_0 r σ T (Z ω)) Q := by
-  have h_split : (fun ω ↦ bsTerminal S_0 r σ T (Z ω)) = fun ω ↦
-      S_0 * rexp ((r - σ ^ 2 / 2) * T) * rexp (σ * Real.sqrt T * Z ω) := by
-    funext ω
-    unfold bsTerminal
-    rw [Real.exp_add]
-    ring
-  rw [h_split]
-  exact (integrable_exp_mul_of_hasLaw hZ (σ * Real.sqrt T)).const_mul _
+  refine Integrable.comp_aemeasurable (g := bsTerminal S_0 r σ T) ?_ hZ.aemeasurable
+  rw [hZ.map_eq]
+  exact integrable_bsTerminal_gaussianReal S_0 r σ T
 
 /-- The discounted Black–Scholes terminal price driven by a standard normal has mean `S₀`: the
 forward `𝔼[S_T] = S₀e^{rT}` (`integral_bsTerminal_eq_forward`), discounted. -/

@@ -375,6 +375,11 @@ import MathFin.BlackScholes.JumpDiffusionDensity
 -- with Gaussian log-jumps, Merton's digital and density series; with σ = 0 the call price has a
 -- kink at the strike Se^{bτ}; lognormalTerminalPDF and mertonTerminalPDF as densities of the price
 import MathFin.BlackScholes.JumpDiffusionDigital
+-- Strict convexity in the strike: the call price is convex under any law, and strictly convex
+-- where the law charges every interval; with σ ≠ 0 and τ > 0 the jump-diffusion density is
+-- positive, so the call price is strictly convex on (0, ∞) for any jump law, and so are the
+-- Black–Scholes price and Merton's series
+import MathFin.BlackScholes.JumpDiffusionStrikeConvexity
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser

@@ -42,19 +42,19 @@ infinitesimal manifestation of a convexity chain:
 1. The call **payoff** is convex in `K` (`convexOn_call_payoff` in
    `StrikeConvexity.lean`).
 2. Risk-neutral expectation preserves convexity: integration against a positive
-   measure does (the finite-state form is `callPrice_finiteState_convexOn_K`).
+   measure does, for any law with a finite mean (`convexOn_integral_call`; the
+   finite-state form is `callPrice_finiteState_convexOn_K`).
 3. So the call **price** `K ↦ bsV K r σ S T` is convex in `K`.
 4. So `∂²_K bsV ≥ 0`.
 5. By Breeden-Litzenberger, `∂²_K bsV = e^{-rT} · f_{S_T}(K)`, so
    `f_{S_T}(K) ≥ 0`.
 
-Step 1 is formal. Step 2 is not formalized for the lognormal law, so step 3 is
-proved instead by the second-derivative test (`bsV_strike_convexOn`), whose
-input is the sign of the closed form in step 4. In this library the chain is
-therefore a consistency loop, not an independent source of the sign. Steps
-3 → 4 → 5 are formal: `lognormalTerminalPDF_nonneg_via_strike_convexity`
-derives step 5 from step 3, and `lognormalTerminalPDF_nonneg` proves it
-directly.
+Every step is formal. Step 3 is step 2 for the standard normal law, the
+Black–Scholes price being the discounted expected payoff (`bs_call_formula`,
+`bsV_strike_convexOn`); it does not use the sign of the closed form. So
+`lognormalTerminalPDF_nonneg_via_strike_convexity`, steps 3 → 4 → 5, derives the
+sign of the density from the convexity of the payoff, and
+`lognormalTerminalPDF_nonneg` proves it directly from the formula.
 
 Results:
 
@@ -100,7 +100,7 @@ theorem lognormalTerminalPDF_nonneg
     mul_pos (mul_pos hK hσ) (Real.sqrt_pos.mpr hT)
   exact div_nonneg h_pdf_nn h_den_pos.le
 
-/-! ## Three-scale loop closure: PDF non-negativity ⟸ strike convexity
+/-! ## PDF non-negativity ⟸ strike convexity
 
 The proof of `lognormalTerminalPDF_nonneg` above uses direct positivity of the
 gaussian PDF (one-line). This section records the **structural derivation**
@@ -109,8 +109,8 @@ infinitesimal face of the K-convexity principle: convexity makes
 `0 ≤ ∂²_K bsV` (`deriv_deriv_nonneg_of_convexOn`), and Breeden-Litzenberger
 identifies `∂²_K bsV` with `e^{-rT} · PDF(K)`. -/
 
-/-- **PDF non-negativity as a corollary of strike convexity** (structural
-derivation closing the three-scale loop).
+/-- **PDF non-negativity as a corollary of strike convexity**, the sign of the density derived
+from the convexity of the payoff.
 
 The derivation chain made explicit:
 
@@ -122,8 +122,9 @@ The derivation chain made explicit:
 
 The complementary `lognormalTerminalPDF_nonneg` proof above is shorter
 (direct gaussian-PDF positivity); this proof takes the sign from
-`bsV`-convexity alone. Since `bsV_strike_convexOn` is itself proved by the
-second-derivative test, the two routes close a loop rather than giving
+`bsV`-convexity alone. `bsV_strike_convexOn` comes from the convexity of the
+payoff integrated against the standard normal law (`convexOn_integral_call`,
+`bs_call_formula`), not from the sign of the closed form, so the two routes are
 independent sources for the sign. -/
 theorem lognormalTerminalPDF_nonneg_via_strike_convexity
     {S_0 r σ T K : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :

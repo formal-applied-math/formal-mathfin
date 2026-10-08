@@ -30,6 +30,12 @@ Example: **K-convexity** of the call now lives at three scales in
 * `bsV_strike_convexOn` — continuous BS price convex on `(0, ∞)` via
   `convexOn_of_deriv2_nonneg'` and the closed-form second derivative.
 
+(Since 2026-10-08 a fourth scale sits between the payoff and the closed form:
+`convexOn_integral_call`, the price under any law with a finite mean, and
+`bsV_strike_convexOn` is that lemma for the standard normal law. The
+second-derivative proof above used the sign of the density it was later used to
+derive.)
+
 Before this session, the three lived as essentially independent claims.
 Now `BreedenLitzenberger.lean`'s
 `lognormalTerminalPDF_nonneg_via_strike_convexity` reads the density's sign as
@@ -1949,3 +1955,15 @@ on `(0, ∞)` to the measures, use `withDensity_congr_ae (ae_restrict_of_forall_
 - `withDensity_congr_ae (ae_restrict_of_forall_mem … fun K hK ↦ ?_)` leaves the goal as
   `(fun K ↦ …) K = (fun K ↦ …) K`, unreduced; `rw` cannot see inside a beta-redex. `dsimp only`
   first.
+
+### Strict convexity of an integral: one ordering, one weight, one support
+
+To prove `StrictConvexOn ℝ s fun k ↦ ∫ ω, F k ω ∂μ`, reduce to `k₁ < k₂` with Mathlib's
+`LinearOrder.strictConvexOn_of_lt`, and substitute the second weight (`obtain rfl : b = 1 - a`) so
+every inequality is linear in the monomials `linarith` sees. Then write the gap
+`a F k₁ + (1 − a) F k₂ − F (a k₁ + (1 − a) k₂)` as one integrable function: it is nonnegative by
+the pointwise convexity, and `integral_pos_iff_support_of_nonneg` makes its integral positive as
+soon as its support has positive measure. `strictConvexOn_integral_call` does this for the call
+payoff, whose gap is a butterfly spread, positive between the outer strikes. Mathlib has
+`ConvexOn.smul` but no strict counterpart; `StrictConvexOn.smul`
+(`JumpDiffusionStrikeConvexity.lean`) supplies it, an upstream candidate.

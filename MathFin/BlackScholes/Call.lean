@@ -107,6 +107,16 @@ function of the standard-normal sample. -/
 noncomputable def bsTerminal (S_0 r σ T z : ℝ) : ℝ :=
   S_0 * Real.exp ((r - σ^2 / 2) * T + σ * Real.sqrt T * z)
 
+/-- The terminal price is integrable against the standard normal law: a constant times
+`exp(σ√T · z)` (Mathlib's `integrable_exp_mul_gaussianReal`). -/
+lemma integrable_bsTerminal_gaussianReal (S_0 r σ T : ℝ) :
+    Integrable (bsTerminal S_0 r σ T) (gaussianReal 0 1) := by
+  have h : bsTerminal S_0 r σ T = fun z ↦
+      S_0 * Real.exp ((r - σ ^ 2 / 2) * T) * Real.exp (σ * Real.sqrt T * z) :=
+    funext fun z ↦ by rw [bsTerminal, Real.exp_add]; ring
+  rw [h]
+  exact (integrable_exp_mul_gaussianReal _).const_mul _
+
 /-- Alternative form for `d₂`: `bsd2 = (log(S_0/K) + (r − σ²/2)T) / (σ√T)`. -/
 lemma bsd2_eq {S_0 K r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     bsd2 S_0 K r σ T = (Real.log (S_0 / K) + (r - σ^2 / 2) * T) / (σ * Real.sqrt T) := by

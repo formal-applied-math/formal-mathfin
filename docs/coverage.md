@@ -26,6 +26,44 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Convexity in the strike under any law, strictly with a Gaussian part (2026-10-08)
+
+Five entries added, all `full`: `mf-call-price-convex-in-strike`,
+`mf-jump-diffusion-density-positive`, `mf-jump-diffusion-call-convex-strike`,
+`mf-black-scholes-call-strictly-convex-strike` and `mf-merton-call-strictly-convex-strike`. Corpus
+517 → 522. New file `BlackScholes/JumpDiffusionStrikeConvexity.lean`;
+`BlackScholes/StrikeConvexity.lean`, `BlackScholes/JumpDiffusionDensity.lean` and
+`BlackScholes/Call.lean` gain the general facts.
+
+- Under any law. For an integrable `X` under a finite measure, `k ↦ ∫ (X − k)⁺ dμ` is convex
+  (`convexOn_integral_call`): the convexity of the payoff (`convexOn_call_payoff`) survives
+  integration. It is strictly convex on a convex set of strikes `s` where `μ{k₁ < X < k₂} ≠ 0` for
+  `k₁ < k₂` in `s` (`strictConvexOn_integral_call`): the butterfly payoff is nonnegative and
+  positive between its outer strikes.
+- The Breeden–Litzenberger chain, no longer circular. `bsV_strike_convexOn` is now the first
+  lemma for the standard normal law (`bs_call_formula`, `integrable_bsTerminal_gaussianReal`), not
+  the second-derivative test. So `lognormalTerminalPDF_nonneg_via_strike_convexity` derives the sign
+  of the lognormal density from the convexity of the payoff; before, the convexity was proved
+  from that sign.
+- A positive density. With `σ ≠ 0` and `τ > 0` the log-return density of a jump-diffusion is
+  positive, for any jump law (`jumpDiffusionDensity_pos`), so the price charges every interval of
+  positive strikes (`jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero`).
+- The jump-diffusion call. With a finite forward it is convex in the strike for every `σ`
+  (`convexOn_jumpDiffusionCallPrice_strike`), and with `σ ≠ 0`, `τ > 0` and `S > 0` strictly convex
+  on `(0, ∞)` (`strictConvexOn_jumpDiffusionCallPrice_strike`). The Black–Scholes price
+  (`bsV_strike_strictConvexOn`) and Merton's series at every expected jump count
+  (`mertonCallPrice_strictConvexOn_strike`) inherit it through `jumpDiffusionCallPrice_zero` and
+  `jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice`. `StrictConvexOn.smul`, the strict
+  counterpart of Mathlib's `ConvexOn.smul`, carries the discount factor.
+
+Safe wording: "for any law with a finite mean the call price is convex in the strike, and strictly
+convex where the law charges every interval of strikes; a jump-diffusion with a Gaussian part has a
+positive density, so with a finite forward its call price is strictly convex in the strike on
+`(0, ∞)` for any jump law, and so are the Black–Scholes price and Merton's series". Not covered:
+- the converse, that strict convexity on an interval forces the law to charge each subinterval;
+- strict convexity without a Gaussian part (`σ = 0`), which depends on the jump law;
+- the signs of the digital price, `0 < D < e^{−rτ}`.
+
 ### The law of the price, as a measure (2026-10-08)
 
 Four entries added, all `full`: `mf-price-law-change-of-variables`, `mf-jump-diffusion-price-law`,
@@ -37,8 +75,9 @@ Four entries added, all `full`: `mf-price-law-change-of-variables`, `mf-jump-dif
   `lintegral_image_eq_lintegral_abs_deriv_mul`; `y ↦ Seʸ` is a bijection of `ℝ` onto `(0, ∞)`
   with derivative `Seʸ`). Negative values of `f` count as density `0` on both sides.
 - The jump-diffusion price. With `σ ≠ 0`, `τ > 0` and `S > 0` the price `Seʸ` has the law
-  `f(log(K/S))/K dK` on `(0, ∞)` (`jumpDiffusionIncrementLaw_map_mul_exp`). The density of the price that the second
-  strike derivative of the call reads off, strike by strike, is the density of the law of the price.
+  `f(log(K/S))/K dK` on `(0, ∞)` (`jumpDiffusionIncrementLaw_map_mul_exp`). The density of the
+  price that the second strike derivative of the call reads off, strike by strike, is the density
+  of the law of the price.
 - Black–Scholes. Without jumps, at the drift `r − σ²/2` and with `σ > 0`, the price has the law
   `lognormalTerminalPDF(K) dK` on `(0, ∞)`, and the formula, nonnegative there, integrates to one
   (`jumpDiffusionIncrementLaw_zero_map_mul_exp`, `lognormalTerminalPDF_nonneg`,

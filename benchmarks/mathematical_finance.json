@@ -3634,6 +3634,86 @@
       }
     },
     {
+      "id": "mf-call-price-convex-in-strike",
+      "name": "The Call Price Is Convex in the Strike Under Any Law, Strictly Where the Law Charges Every Interval",
+      "domain": "mathematical_finance",
+      "description": "Let X be a real random variable with finite mean under a finite measure μ, and let C(k) = ∫ (X − k)⁺ dμ be the undiscounted call price at strike k. Then C is convex in k: integrating the convex payoff against a positive measure keeps it convex. If moreover s is a convex set of strikes and μ{k₁ < X < k₂} ≠ 0 whenever k₁ < k₂ lie in s, then C is strictly convex on s: every butterfly spread a·C(k₁) + b·C(k₂) − C(a·k₁ + b·k₂), with a, b > 0, a + b = 1 and strikes in s, has a positive price. Its payoff is nonnegative, and positive when k₁ < X < k₂. No model or discounting is assumed. Only this direction is proved: that strict convexity on s forces the law to charge every interval of s is not formalized.",
+      "metadata": {
+        "chapter": 14,
+        "reference": "Merton (1973), Theory of rational option pricing, Bell Journal of Economics and Management Science 4, 141-183; Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Convexity: for weights a, b ≥ 0 with a + b = 1 the payoff inequality (X − (a k₁ + b k₂))⁺ ≤ a(X − k₁)⁺ + b(X − k₂)⁺ (convexOn_call_payoff) is integrated (Mathlib's integral_mono, integral_add, integral_const_mul), the call payoffs being integrable because X is (convexOn_integral_call). Strict convexity: Mathlib's LinearOrder.strictConvexOn_of_lt reduces to k₁ < k₂. The butterfly payoff is nonnegative, and on {k₁ < X < k₂} the call struck at k₂ pays nothing while the one struck at k₁ pays more than the one at a k₁ + b k₂, so the payoff is positive there; a nonnegative integrable function whose support has positive measure has a positive integral (Mathlib's integral_pos_iff_support_of_nonneg) (strictConvexOn_integral_call). Lives in MathFin/BlackScholes/StrikeConvexity.lean, where the Black–Scholes strike convexity bsV_strike_convexOn is now this lemma for the standard normal law (bs_call_formula). Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.BlackScholes.StrikeConvexity\n\nopen MeasureTheory\n\n/-- **The call price is convex in the strike under any law, and strictly convex where the law\ncharges every interval of strikes.** -/\ntheorem call_price_convex_in_strike_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsFiniteMeasure μ] {X : Ω → ℝ} (hX : Integrable X μ) :\n    ConvexOn ℝ Set.univ (fun k ↦ ∫ ω, max (X ω - k) 0 ∂μ) ∧\n      ∀ s : Set ℝ, Convex ℝ s →\n        (∀ k₁ ∈ s, ∀ k₂ ∈ s, k₁ < k₂ → μ {ω | k₁ < X ω ∧ X ω < k₂} ≠ 0) →\n          StrictConvexOn ℝ s (fun k ↦ ∫ ω, max (X ω - k) 0 ∂μ) :=\n  ⟨MathFin.convexOn_integral_call hX, fun _ hs hμ ↦ MathFin.strictConvexOn_integral_call hX hs hμ⟩\n"
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-density-positive",
+      "name": "With a Gaussian Part the Jump-Diffusion Density Is Positive and the Price Charges Every Interval",
+      "domain": "mathematical_finance",
+      "description": "Take a jump-diffusion log-return law over τ > 0 with drift b, volatility coefficient σ ≠ 0, jump rate Λ ≥ 0 and any jump law ν, and let f be its density (mf-jump-diffusion-density). Then f(y) > 0 at every y: f is the mixture over the jumps of normal densities, each positive. So for S > 0 and 0 ≤ k₁ < k₂ the price Seʸ ends strictly between k₁ and k₂ with nonzero probability: P(k₁ < Seʸ < k₂) ≠ 0, the law of the price having the density f(log(K/S))/K on (0, ∞) (mf-jump-diffusion-price-law).",
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Positivity: the density is the integral, against the probability measure Poisson(Λτ) ⊗ ν^ℕ, of a normal density with variance σ²τ ≠ 0 (jumpDiffusionVariance_ne_zero), positive everywhere (Mathlib's gaussianPDFReal_pos); its support is everything, so Mathlib's integral_pos_iff_support_of_nonneg applies (jumpDiffusionDensity_pos). The interval: the event is the preimage of (k₁, k₂) under y ↦ Seʸ, so its probability is the mass of (k₁, k₂) under the law of the price (jumpDiffusionIncrementLaw_map_mul_exp), the integral over (k₁, k₂) ⊆ (0, ∞) of the positive density f(log(K/S))/K (Mathlib's setLIntegral_pos_iff, Real.volume_Ioo) (jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero). Lives in MathFin/BlackScholes/JumpDiffusionDensity.lean. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionDensity\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **With a Gaussian part the density is positive, and the price charges every interval of\npositive strikes.** -/\ntheorem jump_diffusion_density_positive_thm (b : ℝ) {σ : ℝ} (hσ : σ ≠ 0) (Λ : ℝ≥0)\n    (ν : Measure ℝ) [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) :\n    (∀ y, 0 < MathFin.jumpDiffusionDensity b σ Λ ν τ y) ∧\n      ∀ S k₁ k₂ : ℝ, 0 < S → 0 ≤ k₁ → k₁ < k₂ →\n        MathFin.jumpDiffusionIncrementLaw b σ Λ ν τ\n          {y | k₁ < S * Real.exp y ∧ S * Real.exp y < k₂} ≠ 0 :=\n  ⟨MathFin.jumpDiffusionDensity_pos b hσ Λ ν hτ, fun _ _ _ hS hk₁ hk ↦\n    MathFin.jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero b hσ Λ ν hτ hS hk₁ hk⟩\n"
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-call-convex-strike",
+      "name": "The Jump-Diffusion Call Price Is Convex in the Strike, Strictly with a Gaussian Part",
+      "domain": "mathematical_finance",
+      "description": "Take a jump-diffusion log-return law over τ with drift b, volatility coefficient σ, jump rate Λ ≥ 0 and jump law ν (mf-jump-diffusion-log-return-mgf), with a finite forward ∫ eʸ < ∞, a spot S and a rate r. The call price function k ↦ C(S, k, τ) = ∫ e^{−rτ}(Seʸ − k)⁺ (jumpDiffusionCallPrice) is convex in the strike for every σ, σ = 0 included, where it also has a kink at Se^{bτ} (mf-jump-diffusion-call-kink). With a Gaussian part (σ ≠ 0, τ > 0) and S > 0 it is strictly convex on (0, ∞), for any jump law: every butterfly spread with positive strikes has a positive price, because the price charges every interval of positive strikes (mf-jump-diffusion-density-positive). The drift is arbitrary: at the compensated drift these are prices under a pricing law, at any other drift discounted expectations under the physical law.",
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1973), Theory of rational option pricing, Bell Journal of Economics and Management Science 4, 141-183; Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The call price is e^{−rτ} times the undiscounted call price of the price Seʸ (jumpDiffusionCallPrice_eq_mul_integral), which is convex under any law with a finite mean (convexOn_integral_call, mf-call-price-convex-in-strike) and strictly convex on (0, ∞) when the law charges every interval of positive strikes (strictConvexOn_integral_call, with jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero). A positive multiple of a strictly convex function is strictly convex (StrictConvexOn.smul, stated in the library: Mathlib has only ConvexOn.smul). No strike derivative is taken (convexOn_jumpDiffusionCallPrice_strike, strictConvexOn_jumpDiffusionCallPrice_strike). Lives in MathFin/BlackScholes/JumpDiffusionStrikeConvexity.lean. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionStrikeConvexity\n\nopen MeasureTheory Set\nopen scoped NNReal\n\n/-- **The jump-diffusion call price is convex in the strike, and strictly convex on `(0, ∞)` with a\nGaussian part.** -/\ntheorem jump_diffusion_call_convex_strike_thm (S r b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}\n    [IsProbabilityMeasure ν] (τ : ℝ≥0)\n    (hY : Integrable Real.exp (MathFin.jumpDiffusionIncrementLaw b σ Λ ν τ)) :\n    ConvexOn ℝ univ (fun k ↦ MathFin.jumpDiffusionCallPrice S k r b σ Λ ν τ) ∧\n      (0 < S → σ ≠ 0 → 0 < τ →\n        StrictConvexOn ℝ (Ioi 0) (fun k ↦ MathFin.jumpDiffusionCallPrice S k r b σ Λ ν τ)) :=\n  ⟨MathFin.convexOn_jumpDiffusionCallPrice_strike S r b σ Λ τ hY,\n    fun hS hσ hτ ↦ MathFin.strictConvexOn_jumpDiffusionCallPrice_strike hS hσ hY hτ⟩\n"
+      }
+    },
+    {
+      "id": "mf-black-scholes-call-strictly-convex-strike",
+      "name": "The Black–Scholes Call Price Is Strictly Convex in the Strike",
+      "domain": "mathematical_finance",
+      "description": "For S, σ, τ > 0 and any rate r, the Black–Scholes call price K ↦ bsV K r σ S τ = S·Φ(d₁) − Ke^{−rτ}·Φ(d₂) is strictly convex on (0, ∞): every butterfly spread with positive strikes has a positive price. It is the jump-diffusion call price without jumps at the drift r − σ²/2, which is strictly convex in the strike (mf-jump-diffusion-call-convex-strike). The spot-side statement is mf-bs-call-strictly-convex-in-spot.",
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black & Scholes (1973), The pricing of options and corporate liabilities, J. Political Economy 81, 637-654; Merton (1973), Theory of rational option pricing, Bell Journal of Economics and Management Science 4, 141-183",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. On (0, ∞) the jump-diffusion call price with jump rate 0 and drift r − σ²/2 is bsV (jumpDiffusionCallPrice_zero), and it is strictly convex there (strictConvexOn_jumpDiffusionCallPrice_strike, mf-jump-diffusion-call-convex-strike); Mathlib's StrictConvexOn.congr transfers it (bsV_strike_strictConvexOn). No strike derivative is taken. The spot side, mf-bs-call-strictly-convex-in-spot, is the second-derivative test. Lives in MathFin/BlackScholes/JumpDiffusionStrikeConvexity.lean. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionStrikeConvexity\n\nopen Set\n\n/-- **The Black–Scholes call price is strictly convex in the strike.** -/\ntheorem black_scholes_call_strictly_convex_strike_thm {S r σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    (hτ : 0 < τ) : StrictConvexOn ℝ (Ioi 0) fun K ↦ MathFin.bsV K r σ S τ :=\n  MathFin.bsV_strike_strictConvexOn hS hσ hτ\n"
+      }
+    },
+    {
+      "id": "mf-merton-call-strictly-convex-strike",
+      "name": "Merton's Call Series Is Strictly Convex in the Strike",
+      "domain": "mathematical_finance",
+      "description": "Let C(K) = mertonCallPrice be Merton's (1976) call price (mf-merton-call-series), for S, σ, T > 0, k > −1, any rate r, jump-size volatility δ and expected jump count Λ. Then K ↦ C(K) is strictly convex on (0, ∞): every butterfly spread with positive strikes has a positive price. The series is the call price of the jump-diffusion over T with Gaussian log-jumps N(log(1 + k) − δ²/2, δ²), the jump rate Λ/T and the compensated drift (mf-jump-diffusion-merton-1976-every-date), which is strictly convex in the strike (mf-jump-diffusion-call-convex-strike). The spot-side statement is mf-merton-call-convex-in-spot.",
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. With τ = T and the jump rate Λ/T the expected jump count is (Λ/T)·T = Λ, and on (0, ∞) the jump-diffusion call price is Merton's series (jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice); the forward is finite because the Gaussian jump law has an exponential moment (integrable_exp_jumpDiffusionIncrementLaw, integrable_exp_gaussianReal). So strictConvexOn_jumpDiffusionCallPrice_strike (mf-jump-diffusion-call-convex-strike) transfers through StrictConvexOn.congr (mertonCallPrice_strictConvexOn_strike). No derivative of the series is taken. Lives in MathFin/BlackScholes/JumpDiffusionStrikeConvexity.lean. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionStrikeConvexity\n\nopen Set\nopen scoped NNReal\n\n/-- **Merton's call series is strictly convex in the strike.** -/\ntheorem merton_call_strictly_convex_strike_thm {S r σ T k δ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    (hT : 0 < T) (hk : -1 < k) (Λ : ℝ≥0) :\n    StrictConvexOn ℝ (Ioi 0) fun K ↦ MathFin.mertonCallPrice S K r σ T k δ Λ :=\n  MathFin.mertonCallPrice_strictConvexOn_strike hS hσ hT hk Λ\n"
+      }
+    },
+    {
       "id": "mf-call-spread-digital",
       "name": "A Digital Is the Limit of Call Spreads",
       "description": "Let X be a measurable real random variable with finite mean under a finite measure μ (for instance a terminal price under a pricing measure), and let C(k) = ∫ (X − k)⁺ dμ be the undiscounted call price at strike k. Then the call spread (C(K) − C(K + h))/h, long 1/h calls struck at K and short 1/h struck at K + h, tends to μ{X > K} as h decreases to 0. So minus the right derivative of the call price in the strike is the undiscounted price of the digital paying 1 when X > K. The statement is one one-sided limit for one law: no model or discounting is assumed, and only the right derivative is claimed (the left one, −μ{X ≥ K}, and differentiability exactly off the atoms are mf-call-strike-differentiable-iff-no-atom).",
