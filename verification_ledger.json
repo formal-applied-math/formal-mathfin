@@ -1847,9 +1847,9 @@
     "mf-jump-diffusion-identifiability": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "5521bbef871ba8d46f871b5b57026e46dc90c0120795814d8ead89028df3165e",
-      "verified_at_commit": "a04d4fe"
+      "elapsed_s": 5.6,
+      "input_hash": "228ed68542bf2d07b8ae408eba28eef519a1935427530048f30a7a49e18b3c0e",
+      "verified_at_commit": "f6a9843"
     },
     "mf-jump-diffusion-implied-vol-above-sigma": {
       "benchmark_file": "mathematical_finance.json",
@@ -1868,9 +1868,9 @@
     "mf-jump-diffusion-incompleteness": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-08",
-      "elapsed_s": 5.3,
-      "input_hash": "94002f89ed6da5c692cff6d4409c48504a51cf73cccb80ac8c31324e65891013",
-      "verified_at_commit": "a04d4fe"
+      "elapsed_s": 5.4,
+      "input_hash": "82b022c43e9ad66e5063638ccf77d46ac930b60de22d208ea5a1da42d66f5b5e",
+      "verified_at_commit": "f6a9843"
     },
     "mf-jump-diffusion-levy-exponent": {
       "benchmark_file": "mathematical_finance.json",
