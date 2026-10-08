@@ -26,6 +26,55 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The density of a jump-diffusion log-return; Breeden–Litzenberger with jumps (2026-10-08)
+
+Three entries added, all `full`: `mf-jump-diffusion-density`, `mf-breeden-litzenberger-jump-diffusion`
+and `mf-black-scholes-lognormal-density`. Corpus 503 → 506. New file
+`BlackScholes/JumpDiffusionDensity.lean`, which holds the facts about the law; the option prices
+are in `BlackScholes/JumpDiffusionDigital.lean`. The no-atom lemma of the digital rung moved to the
+density file, where it is a corollary of the density, and `mf-jump-diffusion-digital-strike-derivative`
+now states it.
+
+- The law is a Gaussian mixture. Given the jump count `n` and the jump sizes `j`, the log-return
+  is `N(bτ + ∑_{i<n} jᵢ, σ²τ)` (Mathlib's `gaussianReal_map_const_mul` and
+  `gaussianReal_map_const_add`). So the law is the mixture of these Gaussian laws over
+  `Poisson(Λτ) ⊗ ν^ℕ` (`jumpDiffusionIncrementLaw_apply`, for every `σ`).
+- The density. For `σ ≠ 0` and `τ > 0` the law is `f(y) dy`, with `f` the mixture of the normal
+  densities (`jumpDiffusionDensity`, `jumpDiffusionIncrementLaw_eq_withDensity`, by Tonelli). `f`
+  is continuous by dominated convergence, since a normal density is at most `1/√(2πv)`
+  (`continuous_jumpDiffusionDensity`). The jump law is arbitrary and needs no moment condition; for
+  lognormal jumps `f` is Merton's (1976) Poisson mixture of normal densities. So the law has no
+  atoms (`nullSingletonClass_jumpDiffusionIncrementLaw`, from Mathlib's
+  `nullSingletonClass_withDensity`).
+- The tail of a law with a density. For any law `f(y) dy` with `f ≥ 0` integrable, `x ↦ P(Y > x)`
+  has derivative `−f(a)` at every `a` where `f` is continuous
+  (`hasDerivAt_measureReal_Ioi_withDensity`, from Mathlib's
+  `intervalIntegral.integral_hasDerivAt_right`).
+- Breeden–Litzenberger with jumps. For `S > 0` and `K > 0` the digital price has strike derivative
+  `−e^{−rτ}f(log(K/S))/K` (`hasDerivAt_jumpDiffusionDigitalPrice_strike`). So `f(log(K/S))/K` is
+  the derivative at `K` of the distribution function of the price `Seʸ`. With a finite forward the
+  strike derivative of the call is `−D` at every strike, so
+  `∂²C/∂K² = e^{−rτ}f(log(K/S))/K` (`breedenLitzenberger_jumpDiffusion`).
+- The lognormal density, read off. Without jumps, at the drift `r − σ²/2` and with `σ > 0`, the call
+  price function is `bsV` near `K` (`jumpDiffusionCallPrice_zero`), so its second strike
+  derivative is also `e^{−rτ}·lognormalTerminalPDF` (`breedenLitzenberger`). The two derivatives
+  are equal (`HasDerivAt.unique`), so `f(log(K/S))/K = lognormalTerminalPDF`
+  (`jumpDiffusionDensity_div_eq_lognormalTerminalPDF`). The formula of `BreedenLitzenberger.lean`
+  is therefore the density of the price, which `breedenLitzenberger` alone does not show.
+
+Safe wording: "with a Gaussian part, the log-return law of a jump-diffusion has a continuous
+density, the mixture over the jumps of normal densities, for any jump law; the strike derivative of
+the digital price is minus the discounted density of the price, and with a finite forward the
+second strike derivative of the call price is the discounted density of the price
+(Breeden–Litzenberger with jumps); without jumps, at the drift `r − σ²/2`, that density is the
+lognormal density of `breedenLitzenberger`". Not covered:
+- the law of the price as a measure with a density on `(0, ∞)` (the statements are derivatives of
+  its distribution function, strike by strike);
+- smoothness of the density beyond continuity;
+- `σ = 0`, where the law has an atom at `bτ` (the no-jump event; not formalized);
+- Merton's series for the density or the digital (Poisson mixtures of Black–Scholes terms for
+  lognormal jumps).
+
 ### Digital options: minus the strike derivative of the call (2026-10-08)
 
 Three entries added, all `full`: `mf-call-strike-derivative`,
@@ -39,25 +88,23 @@ gains the general strike derivative.
   `hasDerivAt_integral_of_dominated_loc_of_lip`). At an atom only the right derivative is claimed
   (`tendsto_call_spread`).
 - No atoms with a Gaussian part. For `σ ≠ 0` and `τ > 0` the jump-diffusion log-return law has no
-  atoms (`nullSingletonClass_jumpDiffusionIncrementLaw`): given the jumps, the log-return is
-  affine in the standard normal sample with slope `σ√τ`.
+  atoms (`nullSingletonClass_jumpDiffusionIncrementLaw`). Since the density rung (above) this is a
+  corollary of the density; the first proof used that, given the jumps, the log-return is affine
+  in the standard normal sample with slope `σ√τ`.
 - The jump-diffusion digital. With a finite forward the call price function is therefore
   differentiable in the strike at every `K`, and `∂C/∂K = −D`
   (`hasDerivAt_jumpDiffusionCallPrice_strike`). Here `D = e^{−rτ}P(Se^Y > K)` is the price of the
   cash-or-nothing digital (`jumpDiffusionDigitalPrice`).
 - Black–Scholes from the strike derivative. Without jumps, `D = e^{−rτ}Φ(d₂)`
   (`jumpDiffusionDigitalPrice_zero`). The function has two derivatives at `K`, `−D` and
-  `−e^{−rτ}Φ(d₂)` (from `hasDerivAt_bsV_K`), and they are equal. The same value is the Gaussian
-  integral of `bs_cash_or_nothing_formula`, so the strike derivative of the call and the digital
-  price are one fact in the library.
+  `−e^{−rτ}Φ(d₂)` (from `hasDerivAt_bsV_K`), and they are equal. `bs_cash_or_nothing_formula`
+  computes the same value as a Gaussian integral, and the two derivations agree.
 
 Safe wording: "where the law of the underlying has no atom at the strike, minus the strike
 derivative of the call price is the digital price; a jump-diffusion with a Gaussian part has no
 atoms, so with a finite forward its digital price is minus the strike derivative of its call price
 at every strike; without jumps this gives the Black–Scholes digital `e^{−rτ}Φ(d₂)`". Not covered:
-- the left derivative at an atom (it is `−μ{X ≥ K}`);
-- the second strike derivative, the density of the price (the Black–Scholes case is
-  `breedenLitzenberger`);
+- the left derivative at an atom (it is `−μ{X ≥ K}`; not formalized);
 - a series formula for the jump-diffusion digital (Merton's mixture of Black–Scholes digitals).
 
 ### Incompleteness at one date: call prices determine the law, the law determines the characteristics (2026-10-08)
@@ -76,7 +123,8 @@ file has the unnormalized Esscher transform `(∫ e^f dμ)·μ.tilted f = e^f·�
   the strike (Mathlib's `abs_max_sub_max_le_abs`), and tends pointwise to the digital payoff. So
   call prices at every strike `K > 0` determine the law of a log-return with a finite forward
   (`measure_eq_of_integral_call_eq`): the first-order Breeden–Litzenberger, for any law with a
-  finite forward. The Black–Scholes second-order form is still `breedenLitzenberger`.
+  finite forward. The second-order form is `breedenLitzenberger_jumpDiffusion` for jump-diffusions
+  with a Gaussian part (density rung, above) and `breedenLitzenberger` for Black–Scholes.
 - The law determines the drift, the Gaussian variance and the Lévy measure. Wherever
   `∫ e^{ux} dν < ∞`, `κ(u) = bu + σ²u²/2 + ∫ (e^{ux} − 1) Π(dx)`, with `Π` the Lévy measure `Λν`
   restricted off `0` (`jumpDiffusionExponent_eq_levy`). For jump laws whose moment-generating

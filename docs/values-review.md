@@ -125,6 +125,107 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-08 — corpus 506 — digital options and Breeden–Litzenberger with jumps
+
+Scope: corpus 500 → 506, two rungs.
+- Digital options (corpus 503): `mf-call-strike-derivative`,
+  `mf-jump-diffusion-digital-strike-derivative` and `mf-jump-diffusion-digital-black-scholes`. New
+  file `BlackScholes/JumpDiffusionDigital.lean`; `BlackScholes/CallSpreadDigital.lean` gains the
+  general strike derivative `hasDerivAt_integral_call`.
+- The density (corpus 506): `mf-jump-diffusion-density`, `mf-breeden-litzenberger-jump-diffusion`
+  and `mf-black-scholes-lognormal-density`. New file `BlackScholes/JumpDiffusionDensity.lean`.
+
+One read-only reviewer read both rungs: prose against statement, coherence and the mathematics. It
+found no error in the Lean proofs. The density rung's first build failed in four places, on the
+parsing of integral notation and on implicit arguments (see Idiomatic register below).
+
+### Standing first pass: prose against statement
+
+All findings are applied.
+- **The digital entry's description said the law has no atoms; its statement did not.** The
+  no-atom lemma is now a conjunct of the statement.
+- **"At an atom the left derivative is `−μ{X ≥ K}`"** (module doc of `CallSpreadDigital.lean`) is
+  not formalized, and is now marked so.
+- **The second-difference identity was stated without its hypotheses** in the module bullet and
+  the docstring of `secondDifferenceMeasure`. It holds where `ν` has the exponential moments of
+  orders `u ± s` and `u`.
+- **"`Λ` and `ν` are not determined separately"** read as a non-identifiability theorem. The iff
+  says what is proved: `Λ` and `ν` enter only through `Λν` off `0`.
+- **The Black–Scholes readings dropped the drift.** The digital `e^{−rτ}Φ(d₂)` and the lognormal
+  density hold at the drift `r − σ²/2`; two entry names, two docstrings and an umbrella comment
+  now say so.
+- **"The pricing law" at the compensated drift** is now "a pricing law (Merton's measure)": the
+  incompleteness entry shows that compensated laws are not unique.
+- **"One fact in the library"** (the strike derivative and the Gaussian integral of the digital)
+  overstated what is proved: two derivations of one value, which agree.
+- **The Breeden–Litzenberger entry called `f(log(K/S))/K` the density of the price** while stating
+  only the second strike derivative of the call. It now also states the strike derivative of the
+  digital, which says that `f(log(K/S))/K` is the derivative of the distribution function of the
+  price at `K`. That is the sense of "density" here; the coverage section lists the measure
+  identity as not covered.
+- **"The Poisson mixture of normal densities of Merton (1976), for any jump law."** For a general
+  jump law the mixture is over the jump count and the jump sizes; the Poisson mixture of normal
+  densities is the lognormal case.
+- **The identifiability qualifier was missing** in the curated audit comment, the bridges row and
+  the roadmap: the theorem is for jump laws whose moment-generating function is finite near `0`.
+- **The corpus-500 backlog item 1 recorded a factoring that was not done.** Corrected in place.
+
+### Upgrades executed
+
+- **One module per kind of fact.** `JumpDiffusionDensity.lean` holds the facts about the law and
+  imports only the price process. `JumpDiffusionDigital.lean` holds the option prices and imports
+  it. The first draft put Breeden–Litzenberger in the density file, which then imported the option
+  layer it did not need.
+- **No atoms as a corollary of the density.** The digital rung proved it directly: given the
+  jumps, at most one Gaussian sample gives a value (`Measure.prod_apply_symm`, subsingleton
+  preimages). With the density it is Mathlib's `nullSingletonClass_withDensity`.
+- **The Black–Scholes values are derived, not computed.** The digital `e^{−rτ}Φ(d₂)` and
+  `lognormalTerminalPDF` are read off `HasDerivAt.unique` against `hasDerivAt_bsV_K` and
+  `breedenLitzenberger`. So `breedenLitzenberger`'s formula is now known to be the density of the
+  price, which that theorem alone did not show.
+- **One strike-derivative lemma.** `hasDerivAt_integral_call` (any law with no atom at the
+  strike) serves the jump-diffusion call, and through it the Black–Scholes digital.
+  `hasDerivAt_measureReal_Ioi_withDensity` (any law with a density) serves the second derivative.
+
+### Lens gradients
+
+- **First principles.**
+  - Exemplar: the density is derived from the canonical model. Given the jumps, the log-return is
+    an affine image of the Gaussian sample, so the law is a mixture of Gaussian laws.
+  - Next: the law of the price as a measure with a density on `(0, ∞)`, so that "the density of
+    the price" is a statement about a measure and not a derivative strike by strike.
+- **Coherence.**
+  - Exemplar: `breedenLitzenberger` and `breedenLitzenberger_jumpDiffusion` are second
+    derivatives of one call price function, compared by uniqueness.
+  - Next: Merton's series for the digital and the density, from the Gaussian mixture
+    `jumpDiffusionIncrementLaw_apply`, mirroring the call's series.
+- **Generality.**
+  - Exemplar: the two lemmas behind the rung hold for any law, not only for jump-diffusions.
+  - Next: the call price is differentiable at `K` iff the law has no atom there. Then with
+    `σ = 0` the jump-diffusion call price has a kink at `K = Se^{bτ}`.
+- **Idiomatic register.**
+  - The body of `∫` absorbs a following subtraction, and an implicit argument that occurs only in
+    the conclusion is not assigned by `have h := …`. Both are recorded in `docs/patterns.md`, with
+    the uniqueness-of-derivatives pattern.
+  - `push Not` replaces the deprecated `push_neg`.
+
+### Ranked backlog
+
+1. **Merton's series for the digital and the density.** For Gaussian jumps,
+   `D = e^{−rτ}∑ₙ pₙ Φ(d₂ⁿ)` and `f = ∑ₙ pₙ φ(·; bτ + nm, σ²τ + nδ²)`, from
+   `jumpDiffusionIncrementLaw_apply` and the Gaussian sums of `MertonModel`.
+2. **The left derivative and the kink.** `C` is differentiable at `K` iff `μ{X = K} = 0`; with
+   `σ = 0` the jump-diffusion call price is not differentiable at `Se^{bτ}`.
+3. **The law of the price has the density `K ↦ f(log(K/S))/K` on `(0, ∞)`.**
+4. Carried over from the corpus-500 review:
+   - characteristic functions instead of moment-generating functions;
+   - the Esscher parameter for steep jump laws;
+   - `secondDifferenceMeasure_eq_of_eventuallyEq`, once a second proof needs it;
+   - upstream to Mathlib: `measure_eq_of_mgf_id_eventuallyEq` and
+     `ofReal_integral_exp_smul_tilted`, now with `hasDerivAt_integral_call` and
+     `hasDerivAt_measureReal_Ioi_withDensity`;
+   - the process-level Esscher measure, `compoundPoissonMeasure` and the semigroup.
+
 ## 2026-10-08 — corpus 500 — incompleteness at one date: two equivalent compensated laws, two call prices
 
 Scope: corpus 496 → 500. Three new files: `BlackScholes/CallSpreadDigital.lean`,
@@ -264,6 +365,9 @@ Eleven findings; three were must-fix. All are applied, and the first is fixed by
    kernel measures agree" as its own lemma, which both halves use. Executed after this review:
    `secondDifferenceMeasure` carries the atom, and the one identification gives `σ²` (at `{0}`)
    and `Π` (off `0`); `mf-jump-diffusion-identifiability` now states `b₁ = b₂ ∧ σ₁² = σ₂² ∧ Π₁ = Π₂`.
+   The factoring was not done: the identification is one `have` (`hM`) inside the proof, used by
+   both halves, and it has no other user yet. It becomes a lemma
+   (`secondDifferenceMeasure_eq_of_eventuallyEq`) when a second proof needs it.
 2. **The left limit and the strike derivative.** Show that `(C(K) − C(K + h))/h → μ{X ≥ K}` as
    `h ↑ 0`. Then `C` is differentiable at `K`, with derivative `−μ{X > K}`, when `μ{X = K} = 0`.
    Together with `hasDerivAt_bsV_K` this gives the Black–Scholes digital without the closed form.

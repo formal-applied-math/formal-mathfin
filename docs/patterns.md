@@ -1853,3 +1853,38 @@ clears it. Two smaller points:
 - `congr 1` closes `c * ∫ f = c * ∫ g` outright when `f` and `g` are definitionally equal, as two
   indicators of the same set written as `Ioi K` and as `{y | K < Seʸ}` are. A case split after it
   then fails with "no goals".
+
+### The body of `∫` absorbs a following subtraction
+
+`∫ y, f y - ∫ y in Iic a, f y - ∫ y in a..x, f y` is one integral: the body of `∫ y,` extends as
+far right as it can, so it reads `∫ y, (f y - (∫ y in Iic a, (f y - ∫ y in a..x, f y)))`. The
+statement elaborates, and the failure surfaces later: `linarith` cannot combine it with
+`integral_add_compl`, and `HasDerivAt.congr_of_eventuallyEq` reports a function mismatch.
+Parenthesize every integral that is followed by an operator, `(∫ y, f y) - ∫ y in Iic a, f y`, as
+Mathlib does (`intervalIntegral.integral_Iic_sub_Iic` states
+`(∫ x in Iic b, f x ∂μ) - ∫ x in Iic a, f x ∂μ`). Then state the integral identities as `have`s in
+the notation of the goal, so that `linarith` sees the same atoms
+(`hasDerivAt_measureReal_Ioi_withDensity`).
+
+### An implicit argument that occurs only in the conclusion
+
+An implicit argument that no explicit argument determines is assigned only by the expected type,
+and `have h := …` has none. In `hasDerivAt_jumpDiffusionDigitalPrice_strike hS hσ hτ hK` the
+implicits `r`, `b`, `Λ` and `ν` occur only in the conclusion: `(…).neg` then fails on the stuck
+instance `IsProbabilityMeasure ?ν`. In `breedenLitzenberger_jumpDiffusion hS hσ hY hτ hK` the
+hypothesis `hY` fixes the law and only `r` is left, reported as "don't know how to synthesize
+implicit argument". Pass the arguments by name (`(r := r) (b := b) (Λ := Λ) (ν := ν)`), or give
+`have` the type. Used as a term against a known type, as a benchmark snippet's `⟨…, …⟩` is, the
+lemma needs neither.
+
+### Read a closed form off the uniqueness of derivatives
+
+When a function agrees near the point with one whose derivative is known, transport that
+derivative with `HasDerivAt.congr_of_eventuallyEq` and compare it with the function's own
+derivative by `HasDerivAt.unique`; no integral is computed. `jumpDiffusionDigitalPrice_zero` gets
+the Black–Scholes digital this way: without jumps the call price is `bsV` on `k > 0`, so
+`hasDerivAt_bsV_K` gives another derivative of the same function at `K`. For second derivatives,
+compare the `deriv`s: functions equal near `k` have equal `deriv` at `k`
+(`Filter.EventuallyEq.deriv_eq`), so `deriv C = deriv bsV` near `K`, and
+`jumpDiffusionDensity_div_eq_lognormalTerminalPDF` reads `lognormalTerminalPDF` off
+`breedenLitzenberger`.

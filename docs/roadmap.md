@@ -2115,9 +2115,10 @@ level of the law at one date):
 2. Done (corpus 500): formal incompleteness at one date, `exists_call_esscher_ne_merton`. The
    route is not a comparison of the two Merton mixtures but two identification theorems. Call
    prices at every strike determine the law (`measure_eq_of_integral_call_eq`, from
-   `tendsto_call_spread`: call spreads tend to the digital). The law at one date determines the drift
-   and the Lévy measure off `0` (`jumpDiffusionIncrementLaw_eq_iff`, second differences of `κ` and
-   local MGF uniqueness for finite measures). The Esscher transform multiplies the Lévy measure by
+   `tendsto_call_spread`: call spreads tend to the digital). For jump laws whose moment-generating
+   function is finite near `0`, the law at one date determines the drift and the Lévy measure off
+   `0` (`jumpDiffusionIncrementLaw_eq_iff`, second differences of `κ` and local MGF uniqueness for
+   finite measures). The Esscher transform multiplies the Lévy measure by
    `e^{θx}` (`smul_tilted_eq_withDensity`), so the two laws differ when `θ ≠ 0`; and `θ ≠ 0`
    whenever the physical drift is off the compensated one. For `σ ≠ 0` both laws are equivalent to
    the physical law: a tilt for the Esscher law, and for the Merton measure static Girsanov on the
@@ -2129,13 +2130,23 @@ level of the law at one date):
    digital price wherever the law has no atom at the strike (`hasDerivAt_integral_call`). A
    jump-diffusion with `σ ≠ 0` has no atoms, so `∂C/∂K = −D` at every strike
    (`hasDerivAt_jumpDiffusionCallPrice_strike`). Without jumps this reads the Black–Scholes digital
-   `e^{−rτ}Φ(d₂)` off `hasDerivAt_bsV_K` (`jumpDiffusionDigitalPrice_zero`). Next: the second
-   strike derivative, a density for the jump-diffusion law and Breeden–Litzenberger with jumps.
-4. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
+   `e^{−rτ}Φ(d₂)` off `hasDerivAt_bsV_K` (`jumpDiffusionDigitalPrice_zero`).
+4. Done (corpus 506): the density and Breeden–Litzenberger with jumps. With `σ ≠ 0` the log-return
+   law is `f(y) dy`, where `f` is the mixture over the jumps of normal densities, continuous by
+   dominated convergence, for any jump law (`jumpDiffusionIncrementLaw_eq_withDensity`,
+   `continuous_jumpDiffusionDensity`). The tail of any law with a density is differentiable where
+   the density is continuous (`hasDerivAt_measureReal_Ioi_withDensity`), so
+   `∂²C/∂K² = e^{−rτ}f(log(K/S))/K` (`breedenLitzenberger_jumpDiffusion`). Without jumps, at the
+   drift `r − σ²/2`, this and `breedenLitzenberger`'s are second strike derivatives of one call
+   price, so `lognormalTerminalPDF` is the density of the price
+   (`jumpDiffusionDensity_div_eq_lognormalTerminalPDF`). Next on this line: the left derivative at
+   an atom, so that the call price is differentiable at `K` iff the law has no atom there; Merton's
+   series for the digital and the density.
+5. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
    `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style
    characterization used for constant `θ` (`ExpMartingaleQBrownian`) to independent increments
    with jumps.
-5. Carried over: `compoundPoissonMeasure Λ ν`, with the convolution semigroup
+6. Carried over: `compoundPoissonMeasure Λ ν`, with the convolution semigroup
    `μ_s ∗ μ_t = μ_{s+t}`, then the construction of the process with jumps. Also the
    implied-volatility function and the smile, and routing the hand-frozen conditional
    expectations through `condExp_comp_prodMk_of_indep`.
