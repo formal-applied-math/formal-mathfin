@@ -6,19 +6,18 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
-public import MathFin.BlackScholes.Spreads
 
 /-!
 # Call spreads tend to the digital, so call prices determine the law
 
 A bull-call spread long `1/h` calls struck at `K` and short `1/h` calls struck at `K + h` pays
-`((X − K)⁺ − (X − K − h)⁺)/h`. The payoff lies in `[0, 1]`: it is nonnegative because the call
-payoff is antitone in the strike (`bull_call_spread_payoff_le`), and at most `1` because the call
-payoff is `1`-Lipschitz in the strike. As `h ↓ 0` it tends to the digital payoff `1_{X > K}`. So in
-any model, minus the right strike derivative of the call price is the price of the event `X > K`,
-and the call prices at every strike determine the law of the underlying. This is the first-order
-form of Breeden and Litzenberger (1978), for any law with a finite mean, not only the lognormal
-one.
+`((X − K)⁺ − (X − K − h)⁺)/h`. The payoff lies in `[0, 1]` (it is nonnegative because the call
+payoff is antitone in the strike, `bull_call_spread_payoff_le`), and its absolute value is at most
+`1` because the call payoff is `1`-Lipschitz in the strike (Mathlib's `abs_max_sub_max_le_abs`).
+As `h ↓ 0` it tends to the digital payoff `1_{X > K}`. So in any model, minus the right strike
+derivative of the call price is the price of the event `X > K`, and the call prices at every strike
+determine the law of the underlying. This is the first-order form of Breeden and Litzenberger
+(1978), for any law with a finite mean, not only the lognormal one.
 
 * `tendsto_call_spread`: `(C(K) − C(K + h))/h → μ {X > K}` as `h ↓ 0`, where
   `C(k) = ∫ (X − k)⁺ dμ`, for a measurable, integrable `X` under a finite measure `μ` (dominated
@@ -43,8 +42,9 @@ open scoped Topology
 /-- **A digital is a limit of call spreads.** For a measurable, integrable `X` under a finite
 measure `μ`, the bull-call spread `(C(K) − C(K + h))/h`, where `C(k) = ∫ (X − k)⁺ dμ`, tends to
 `μ {X > K}` as `h ↓ 0`: minus the right strike derivative of the undiscounted call price is the
-price of the event `X > K`. The spread payoff lies in `[0, 1]` and tends to `1_{X > K}` pointwise,
-so dominated convergence applies. -/
+price of the event `X > K`. The spread payoff is at most `1` in absolute value (the call payoff is
+`1`-Lipschitz in the strike) and tends to `1_{X > K}` pointwise, so dominated convergence
+applies. -/
 theorem tendsto_call_spread {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
     [IsFiniteMeasure μ] {X : Ω → ℝ} (hXm : Measurable X) (hX : Integrable X μ) (K : ℝ) :
     Tendsto (fun h ↦ (∫ ω, max (X ω - K) 0 ∂μ - ∫ ω, max (X ω - (K + h)) 0 ∂μ) / h) (𝓝[>] 0)
@@ -60,18 +60,14 @@ theorem tendsto_call_spread {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measur
     (Eventually.of_forall fun h ↦ ?_) ?_ (integrable_const 1) (ae_of_all _ fun ω ↦ ?_)
   · exact (by fun_prop : Measurable fun ω ↦
       (max (X ω - K) 0 - max (X ω - (K + h)) 0) / h).aestronglyMeasurable
-  · -- the spread payoff lies in `[0, 1]`
+  · -- the call payoff is `1`-Lipschitz in the strike, so the spread payoff is at most `1`
     filter_upwards [self_mem_nhdsWithin] with h hh
     refine ae_of_all _ fun ω ↦ ?_
     have hh : 0 < h := hh
-    have hlo := bull_call_spread_payoff_le (X ω) K (K + h) (by linarith)
-    have hhi : max (X ω - K) 0 ≤ max (X ω - (K + h)) 0 + h :=
-      max_le (by linarith [le_max_left (X ω - (K + h)) 0])
-        (by linarith [le_max_right (X ω - (K + h)) 0])
+    have hlip := abs_max_sub_max_le_abs (X ω - K) (X ω - (K + h)) 0
+    rw [show X ω - K - (X ω - (K + h)) = h by ring, abs_of_pos hh] at hlip
     show ‖(max (X ω - K) 0 - max (X ω - (K + h)) 0) / h‖ ≤ 1
-    rw [Real.norm_eq_abs, abs_div, abs_of_nonneg (sub_nonneg.2 hlo), abs_of_pos hh,
-      div_le_one hh]
-    linarith
+    rwa [Real.norm_eq_abs, abs_div, abs_of_pos hh, div_le_one hh]
   · -- and tends to the digital payoff `1_{X > K}`
     by_cases hω : K < X ω
     · rw [indicator_of_mem (show ω ∈ {ω | K < X ω} from hω), Pi.one_apply]

@@ -2119,8 +2119,10 @@ level of the law at one date):
    and the Lévy measure off `0` (`jumpDiffusionIncrementLaw_eq_iff`, second differences of `κ` and
    local MGF uniqueness for finite measures). The Esscher transform multiplies the Lévy measure by
    `e^{θx}` (`smul_tilted_eq_withDensity`), so the two laws differ when `θ ≠ 0`; and `θ ≠ 0`
-   whenever the physical drift is off the compensated one. Still open: that the law also determines
-   `σ²`, and that the Merton measure's law is equivalent to the physical one.
+   whenever the physical drift is off the compensated one. For `σ ≠ 0` both laws are equivalent to
+   the physical law: a tilt for the Esscher law, and for the Merton measure static Girsanov on the
+   Gaussian factor (`jumpDiffusionIncrementLaw_absolutelyContinuous`). Still open: that the law
+   also determines `σ²`, and the process-level equivalent martingale measures.
 3. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
    `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style
    characterization used for constant `θ` (`ExpMartingaleQBrownian`) to independent increments

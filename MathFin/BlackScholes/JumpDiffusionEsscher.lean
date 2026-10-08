@@ -26,6 +26,8 @@ law `ν` (`jumpDiffusionIncrementLaw`), whose Laplace exponent is `κ` (`jumpDif
   `u ↦ e^{(κ(u + θ) − κ(θ))τ}` there, since `κ(u + θ) − κ(θ)` is the Laplace exponent of the tilted
   characteristics (`jumpDiffusionExponent_tilted`). Jump laws whose moment-generating function is
   finite only on an interval, such as Kou's double-exponential jumps, are covered.
+* `smul_tilted_eq_withDensity`: the transform multiplies the Lévy measure `Λν` by `e^{θx}`, the
+  unnormalized transform of the Esscher layer (`ofReal_integral_exp_smul_tilted`).
 * `compensated_tilted_iff`: the tilted characteristics are at their compensated drift exactly
   when `κ(θ + 1) − κ(θ) = r`, the Esscher condition: the criterion `κ(1) = r`
   (`compensated_iff_exponent_one`) for the tilted Laplace exponent `u ↦ κ(u + θ) − κ(θ)`.
@@ -44,11 +46,13 @@ law `ν` (`jumpDiffusionIncrementLaw`), whose Laplace exponent is `κ` (`jumpDif
   parameter is `θ = (r − b − σ²/2)/σ²` (`jumpDiffusionExponent_zero_esscher`), and the price is the
   Black–Scholes formula.
 
-The statements are about the law at one date, not about the process under a changed measure. With
-nontrivial jumps the Esscher law is one pricing law among others: when the physical drift is not
-already compensated, the Merton measure is compensated too and prices some call differently
-(`exists_call_esscher_ne_merton`, under its moment conditions). Without a Gaussian part (`σ = 0`)
-the existence of an Esscher parameter is not proved.
+The statements are about the law at one date, not about the process under a changed measure. The
+Esscher law is equivalent to the physical law (Mathlib's `tilted_absolutelyContinuous` and
+`absolutelyContinuous_tilted`), but with nontrivial jumps it is not the only compensated law
+equivalent to it: for `σ ≠ 0`, when the physical drift is not already compensated, the Merton
+measure's law is another, and the two price some call differently (`exists_call_esscher_ne_merton`,
+under its moment conditions). Without a Gaussian part (`σ = 0`) the existence of an Esscher
+parameter is not proved.
 -/
 
 @[expose] public section
@@ -108,17 +112,14 @@ theorem jumpDiffusionIncrementLaw_tilted (b σ : ℝ) (Λ : ℝ≥0) {ν : Measu
     ← Real.exp_sub, sub_mul]
 
 /-- **The Esscher transform multiplies the Lévy measure by `e^{θx}`**: the tilted
-characteristics have the Lévy measure `Λm(θ)·ν_θ = e^{θx}·Λν`, where `m(θ) = ∫ e^{θx} dν`. -/
-lemma smul_tilted_eq_withDensity (Λ : ℝ≥0) {ν : Measure ℝ} [NeZero ν] {θ : ℝ}
+characteristics have the Lévy measure `Λm(θ)·ν_θ = e^{θx}·Λν`, where `m(θ) = ∫ e^{θx} dν`. It is
+`Λ` times the unnormalized transform `m(θ)·ν_θ = e^{θx}·ν` (`ofReal_integral_exp_smul_tilted`). -/
+lemma smul_tilted_eq_withDensity (Λ : ℝ≥0) {ν : Measure ℝ} {θ : ℝ}
     (hθ : Integrable (fun x ↦ rexp (θ * x)) ν) :
     (Λ * jumpMoment ν θ) • ν.tilted (θ * ·)
       = Λ • ν.withDensity fun x ↦ ENNReal.ofReal (rexp (θ * x)) := by
-  have hm : 0 < ∫ x, rexp (θ * x) ∂ν := integral_exp_pos hθ
-  rw [mul_smul, Measure.tilted, ENNReal.smul_def (jumpMoment ν θ),
-    ← withDensity_smul' _ _ ENNReal.coe_ne_top]
-  refine congrArg (Λ • ·) (congrArg ν.withDensity (funext fun x ↦ ?_))
-  rw [Pi.smul_apply, smul_eq_mul, ← ENNReal.ofReal_coe_nnreal, coe_jumpMoment,
-    ← ENNReal.ofReal_mul hm.le, mul_div_cancel₀ _ hm.ne']
+  rw [mul_smul, ENNReal.smul_def (jumpMoment ν θ), ← ENNReal.ofReal_coe_nnreal, coe_jumpMoment,
+    ofReal_integral_exp_smul_tilted hθ]
 
 /-- **The Esscher condition.** The tilted characteristics are at their compensated drift,
 `b + θσ² = r − σ²/2 − Λm(θ)(∫ eˣ d(ν tilted) − 1)`, exactly when `κ(θ + 1) − κ(θ) = r`: the

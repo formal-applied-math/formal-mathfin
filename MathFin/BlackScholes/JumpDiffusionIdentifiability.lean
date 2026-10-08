@@ -9,14 +9,16 @@ public import MathFin.BlackScholes.JumpDiffusionProcess
 public import MathFin.Foundations.Esscher
 
 /-!
-# The law at one date determines the drift and the jumps
+# The law at one date determines the drift and the Lévy measure
 
 When the jump laws' moment-generating functions are finite near `0`, the log-return law over a time
 `τ > 0` of a jump-diffusion with drift `b`, volatility coefficient `σ`, jump rate `Λ` and jump law
 `ν` (`jumpDiffusionIncrementLaw`) determines, for a given `σ`, the drift `b` and the Lévy measure
-`Λν` away from `0`, and nothing more: jumps of size `0` do not move the log-price. This is the
-uniqueness half of the Lévy–Khintchine representation, for finitely many jumps, read off a single
-date.
+`Λν` away from `0`. The rate `Λ` and the jump law `ν` are not determined separately, only their
+product off `0`: jumps of size `0` do not move the log-price. This is the `(b, Π)` part of the
+uniqueness in the Lévy–Khintchine representation, for compound-Poisson jumps with exponential
+moments near `0`, read off a single date. The full uniqueness also determines `σ²` and needs no
+moment conditions.
 
 * `jumpDiffusionExponent_eq_levy`: `κ(u) = bu + σ²u²/2 + ∫ (e^{ux} − 1) Π(dx)` wherever
   `∫ e^{ux} dν < ∞`, where `Π` is `Λν` restricted to `x ≠ 0`. The Laplace exponent sees the jumps
@@ -93,8 +95,9 @@ lemma integrable_exp_mul_withDensity_coshKernel (Λ : ℝ≥0) {ν : Measure ℝ
   (integrable_withDensity_iff_integrable_smul (measurable_coshKernel s)).2
     (integrable_coshKernel_smul_exp hp hm h0).smul_measure_nnreal
 
-/-- **The moment-generating function of the kernel measure** is `Λ` times the second difference
-of the moment-generating function of `ν`. -/
+/-- **The moment-generating function of the kernel measure** at `u` is `Λ` times the second
+difference of the moment-generating function of `ν`, when `ν` has the exponential moments of
+orders `u + s`, `u − s` and `u`. -/
 lemma mgf_id_withDensity_coshKernel (Λ : ℝ≥0) {ν : Measure ℝ} {s u : ℝ}
     (hp : Integrable (fun x ↦ rexp ((u + s) * x)) ν)
     (hm : Integrable (fun x ↦ rexp ((u - s) * x)) ν) (h0 : Integrable (fun x ↦ rexp (u * x)) ν) :
@@ -161,7 +164,7 @@ lemma eventually_jumpDiffusionExponent_eq {b₁ b₂ σ₁ σ₂ : ℝ} {Λ₁ �
     Real.exp_eq_exp] at e
   exact mul_right_cancel₀ (NNReal.coe_ne_zero.2 hτ.ne') e
 
-/-- **The law at one date determines the drift and the jumps.** For jump laws whose
+/-- **The law at one date determines the drift and the Lévy measure.** For jump laws whose
 moment-generating functions are finite near `0`, two jump-diffusion log-return laws with the same
 volatility coefficient `σ` at the same date `τ > 0` are equal iff their drifts agree and their
 Lévy measures `Λν` agree off `0`. -/

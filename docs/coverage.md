@@ -26,45 +26,58 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-### Incompleteness at one date: call prices determine the law, the law determines the jumps (2026-10-08)
+### Incompleteness at one date: call prices determine the law, the law determines the Lévy measure (2026-10-08)
 
 Four entries added, all `full`: `mf-call-spread-digital`, `mf-call-prices-determine-law`,
 `mf-jump-diffusion-identifiability` and `mf-jump-diffusion-incompleteness`. Corpus 496 → 500.
 Files: `BlackScholes/CallSpreadDigital.lean`, `BlackScholes/JumpDiffusionIdentifiability.lean` and
 `BlackScholes/JumpDiffusionIncompleteness.lean`. The local uniqueness lemma of
-`Foundations/Esscher.lean` now holds for finite measures, not only probability laws.
+`Foundations/Esscher.lean` now holds for finite measures, not only probability laws, and the same
+file has the unnormalized Esscher transform `(∫ e^f dμ)·μ.tilted f = e^f·μ`
+(`ofReal_integral_exp_smul_tilted`).
 
 - Call spreads and the digital. For a measurable, integrable `X` under a finite measure, the
   bull-call spread `(C(K) − C(K + h))/h` tends to `μ{X > K}` as `h ↓ 0` (`tendsto_call_spread`).
-  The spread payoff lies in `[0, 1]`: it is nonnegative by `bull_call_spread_payoff_le` and tends
-  pointwise to the digital payoff. So call prices at every strike `K > 0` determine the law of a
-  log-return with a finite forward (`measure_eq_of_integral_call_eq`): the first-order
-  Breeden–Litzenberger, for any law. The Black–Scholes second-order form is still
-  `breedenLitzenberger`.
-- The law determines the jumps. `κ(u) = bu + σ²u²/2 + ∫ (e^{ux} − 1) Π(dx)`, with `Π` the Lévy
-  measure `Λν` restricted off `0` (`jumpDiffusionExponent_eq_levy`). For jump laws whose
-  moment-generating functions are finite near `0` and a common `σ`, two log-return laws at one date
-  `τ > 0` are equal iff their drifts agree and their Lévy measures agree off `0`
-  (`jumpDiffusionIncrementLaw_eq_iff`). Second differences of `κ` are the constant `σ²s²` plus the
-  moment-generating function of the finite measure `2(cosh(sx) − 1)·Λν`, so the local uniqueness
-  of the Esscher layer identifies that measure, and dividing by the kernel gives `Π`.
+  The spread payoff is at most `1` in absolute value, because the call payoff is `1`-Lipschitz in
+  the strike (Mathlib's `abs_max_sub_max_le_abs`), and tends pointwise to the digital payoff. So
+  call prices at every strike `K > 0` determine the law of a log-return with a finite forward
+  (`measure_eq_of_integral_call_eq`): the first-order Breeden–Litzenberger, for any law with a
+  finite forward. The Black–Scholes second-order form is still `breedenLitzenberger`.
+- The law determines the Lévy measure. Wherever `∫ e^{ux} dν < ∞`,
+  `κ(u) = bu + σ²u²/2 + ∫ (e^{ux} − 1) Π(dx)`, with `Π` the Lévy measure `Λν` restricted off `0`
+  (`jumpDiffusionExponent_eq_levy`). For jump laws whose moment-generating functions are finite
+  near `0` and a common `σ`, two log-return laws at one date `τ > 0` are equal iff their drifts
+  agree and their Lévy measures agree off `0` (`jumpDiffusionIncrementLaw_eq_iff`). The rate and
+  the jump law are not determined separately, only `Π`. Second differences of `κ` are the constant
+  `σ²s²` plus the moment-generating function of the finite measure `2(cosh(sx) − 1)·Λν`, so the
+  local uniqueness of the Esscher layer identifies that measure, and dividing by the kernel gives
+  `Π`. This is the `(b, Π)` part of the Lévy–Khintchine uniqueness, for compound-Poisson jumps
+  with exponential moments near `0`.
+- A change of drift gives an equivalent law. For `σ ≠ 0` and `τ > 0`, log-return laws that differ
+  only in the drift are equivalent (`jumpDiffusionIncrementLaw_absolutelyContinuous`): on the
+  canonical model a change of drift is a move of the standard normal sample, and the moved
+  Gaussian `N(m, 1)` is the Esscher tilt of `N(0, 1)` (`gaussianReal_tilted_const_mul`), equivalent
+  to it. This is static Girsanov on the Gaussian factor (`Foundations/GaussianGirsanov.lean`).
 - Incompleteness at one date. The Esscher transform multiplies the Lévy measure by `e^{θx}`
-  (`smul_tilted_eq_withDensity`). Suppose the jumps are nontrivial (`Λ ≠ 0`, `ν` not concentrated at
-  `0`), the jump law's moment-generating function is finite near `0` and near `θ` with finite
-  moments of orders `1` and `1 + θ`, and the physical drift is off the compensated one. Then the
-  Esscher law is compensated, yet at some strike its call price differs from the price under the
-  Merton measure, which has the same `σ`, `Λ`, `ν` and the compensated drift
-  (`exists_call_esscher_ne_merton`). Equal prices at every strike would make the two laws equal,
-  hence their Lévy measures, but `θ ≠ 0` and `e^{θx} ≠ 1` off `0`.
+  (`smul_tilted_eq_withDensity`). Suppose `σ ≠ 0`, the jumps are nontrivial (`Λ > 0`, `ν` not the
+  point mass at `0`), the jump law's moment-generating function is finite near `0` and near `θ`
+  with finite exponential moments `∫ eˣ dν` and `∫ e^{(1+θ)x} dν`, and the physical drift is off the
+  compensated one. Then the Esscher law and the Merton measure's law (the same `σ`, `Λ`, `ν` and
+  the compensated drift) are both equivalent to the physical law and both have the forward
+  `∫ eʸ = e^{rτ}`, yet at some strike their call prices differ (`exists_call_esscher_ne_merton`).
+  Equal prices at every strike would make the two laws equal, hence their Lévy measures, but
+  `θ ≠ 0` and `e^{θx} ≠ 1` off `0`.
 
 Safe wording: "call prices at every strike determine the law of the log-return; for a given `σ`,
 the law at one date of a jump-diffusion determines its drift and its Lévy measure off `0`; and with
-nontrivial jumps, two compensated laws built from the same physical characteristics, the Esscher
-law and the Merton measure, price some call differently". Not covered:
+`σ ≠ 0`, nontrivial jumps and a physical drift off the compensated one, the Esscher law and the
+Merton measure's law are two compensated laws, both equivalent to the physical law at one date,
+that price some call differently". Not covered:
 - whether the law also determines `σ²` (it does; the second differences give `σ²s²` as a point mass
   at `0`, not formalized);
-- that the Merton measure's law is equivalent to the physical law, and the process-level changes
-  of measure (equivalent martingale measures) behind the two laws;
+- the process-level changes of measure (equivalent martingale measures for the price process)
+  behind the two laws; for `σ = 0` the Merton law need not be equivalent to the physical one (the
+  physical law has an atom at `bτ`, which a change of drift moves);
 - the set of all arbitrage-free call prices, or superreplication bounds.
 
 ### The Esscher transform: one tilt for static Girsanov and the jumps, one MGF identification shared with Brownian motion (2026-10-08)
@@ -117,10 +130,11 @@ Corpus 490 → 496. The tilt lives in `Foundations/Esscher.lean`, the jump-diffu
 Safe wording: "where the jump law's moment-generating function is finite near `θ`, the Esscher
 transform of the log-return law at one date is again a jump-diffusion law, and at an Esscher
 parameter with a finite moment of order `1 + θ` the call against it is Merton's formula for the
-tilted jumps". The Esscher law is one
-choice of pricing law: with nontrivial jumps the Merton measure is compensated too and prices some
-call differently (`exists_call_esscher_ne_merton`, section above); without jumps the model is
-Black–Scholes. Not covered:
+tilted jumps". The Esscher law is equivalent to the physical law at one date, but with
+nontrivial jumps and `σ ≠ 0` it is not the only compensated law that is: when the physical drift is
+not already compensated, the Merton measure's law is another, and the two price some call
+differently (`exists_call_esscher_ne_merton`, section above, under its moment conditions); without
+jumps the model is Black–Scholes. Not covered:
 - the existence of an Esscher parameter without a Gaussian part (`σ = 0`), or when the jump law's
   moment-generating function is finite only on an interval;
 - the Esscher measure on the process, a change of measure on `Ω` under which `X` is again a
@@ -163,9 +177,9 @@ function) and `BlackScholes/JumpDiffusionExponent.lean` (scaling, martingales, p
 Safe wording: "where the jump law has the exponential moment of order `θ`, the log-return over `τ`
 has moment-generating function `e^{κ(θ)τ}`, and `e^{θX_t − κ(θ)t}` is a martingale". "Price" for
 the power claim holds only when `P` is a martingale measure for the discounted price
-(`κ(1) = r`), and then it is an arbitrage-free price. With jumps it need not be the only
-one: at one date, two compensated laws price a call differently (`exists_call_esscher_ne_merton`);
-other martingale measures for the process are not formalized. Not covered: `θ` with
+(`κ(1) = r`), and then it is an arbitrage-free price. With jumps it is in general not the
+only one, which is not formalized for the process; at one date, compensated laws are already not
+unique (`exists_call_esscher_ne_merton`). Not covered: `θ` with
 `∫ e^{θx} dν = ∞`; the Esscher change of measure on the process (the transform of the law at
 one date is in the section above); the convolution semigroup `μ_s ∗ μ_t = μ_{s+t}`; the existence of the process with
 jumps.
@@ -275,9 +289,9 @@ Corpus 472 → 477.
   of `JumpDiffusionProcess.condExp_comp`, the conditional freezing lemma applied to the process
   (see the 484 → 486 section): `X_t` is known at `t`, and the increment is independent of `𝓕_t`.
   At the compensated drift `P` is a martingale measure, so these are arbitrage-free prices, the
-  ones under `P`. With jumps they are not necessarily the only ones: at one date two compensated
-  laws price a call differently (`exists_call_esscher_ne_merton`); other martingale measures for
-  the process are not formalized. At any other drift they are only
+  ones under `P`. With jumps they are in general not the only ones, which is not formalized for
+  the process; at one date, compensated laws are already not unique
+  (`exists_call_esscher_ne_merton`). At any other drift they are only
   `P`-conditional expectations.
 - Merton's formula at every date: at the compensated drift the call price function is the call of
   the canonical model with expected jump count `Λτ` (`jumpDiffusionCallPrice_eq_canonical`), so it

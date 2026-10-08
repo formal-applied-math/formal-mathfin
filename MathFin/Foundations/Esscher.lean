@@ -24,14 +24,20 @@ of measure.
 * `measure_eq_of_mgf_id_eventuallyEq`: a finite measure whose moment-generating function is finite
   near `0` is determined by that function near `0` (the identity theorem for Mathlib's complex
   moment-generating function); `measure_eq_of_mgf_id_eq` is the case of every exponential moment.
+* `ofReal_integral_exp_smul_tilted`: before it is normalized the transform is a density,
+  `(∫ e^f dμ)·μ.tilted f = e^f·μ`, for a measure on any space. On a Lévy measure this is how the
+  transform acts on the jumps (`smul_tilted_eq_withDensity`).
 * `gaussianReal_tilted_const_mul`: the transform shifts the mean of a Gaussian law, `N(m, v)`
   tilted by `e^{θx}` is `N(m + θv, v)`.
 
 The first three identify a tilted law by computing one function. Their users: the Esscher
-transform of the jump-diffusion log-return law (`jumpDiffusionIncrementLaw_tilted`) uses all three,
-and the Gaussian increments of `isQBrownianMotion_of_expMartingale` are identified by
-`measure_eq_of_mgf_id_eq`. The Gaussian tilt gives the static Girsanov change of measure
-(`gaussianReal_withDensity_esscher`, its case `N(0, 1)`), the no-jump tilt
+transform of the jump-diffusion log-return law (`jumpDiffusionIncrementLaw_tilted`) uses all three;
+the Gaussian increments of `isQBrownianMotion_of_expMartingale` are identified by
+`measure_eq_of_mgf_id_eq`; and the identification of the Lévy measure from the law
+(`jumpDiffusionIncrementLaw_eq_iff`) applies `measure_eq_of_mgf_id_eventuallyEq` to finite measures
+that are not probability laws. The Gaussian tilt gives the static Girsanov change of measure
+(`gaussianReal_withDensity_esscher`, its case `N(0, 1)`), the change of drift of a jump-diffusion
+law (`jumpDiffusionIncrementLaw_absolutelyContinuous`), the no-jump tilt
 (`jumpDiffusionIncrementLaw_zero_tilted`) and Merton's tilted jumps (`mertonJump_tilted`).
 -/
 
@@ -112,6 +118,20 @@ lemma integral_exp_mul_tilted_const_mul (μ : Measure ℝ) (θ u : ℝ) :
 lemma mgf_id_tilted_const_mul (μ : Measure ℝ) (θ u : ℝ) :
     mgf id (μ.tilted (θ * ·)) u = mgf id μ (u + θ) / mgf id μ θ :=
   integral_exp_mul_tilted_const_mul μ θ u
+
+/-- **The Esscher transform before normalization**: `μ` tilted by `f` and scaled back by its
+normalizing constant `∫ e^f dμ` is `μ` with density `e^f`. On a Lévy measure this is how the
+transform acts on the jumps (`smul_tilted_eq_withDensity`). -/
+lemma ofReal_integral_exp_smul_tilted {α : Type*} {mα : MeasurableSpace α} {μ : Measure α}
+    {f : α → ℝ} (hf : Integrable (fun x ↦ rexp (f x)) μ) :
+    ENNReal.ofReal (∫ x, rexp (f x) ∂μ) • μ.tilted f
+      = μ.withDensity fun x ↦ ENNReal.ofReal (rexp (f x)) := by
+  rcases eq_zero_or_neZero μ with rfl | _
+  · simp
+  have hm : 0 < ∫ x, rexp (f x) ∂μ := integral_exp_pos hf
+  rw [Measure.tilted, ← withDensity_smul' _ _ ENNReal.ofReal_ne_top]
+  refine congrArg μ.withDensity (funext fun x ↦ ?_)
+  rw [Pi.smul_apply, smul_eq_mul, ← ENNReal.ofReal_mul hm.le, mul_div_cancel₀ _ hm.ne']
 
 /-- An Esscher-tilted law has the exponential moment of order `u` when the law has those of orders
 `θ` and `u + θ`. -/
