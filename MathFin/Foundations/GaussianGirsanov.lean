@@ -34,7 +34,7 @@ The deductive chain:
    standard normal under `P`, then under `Q := P.withDensity(exp(c·W−c²/2))`
    the same `W` has law `N(c,1)`.
 4. `hasLaw_sub_const` — recentring: `W − c ~ N(0,1)` under `Q`.
-5. `BSCallHyp.of_physical` — the capstone: `BSCallHyp` holds for `Q` and the
+5. `BSCallHyp.exists_of_physical` — the capstone: `BSCallHyp` holds for `Q` and the
    recentred driver, with `Q` and the driver both *constructed* from the
    physical data. The economic instantiation is `c = (r − μ)·√T / σ`, i.e.
    the market price of risk `θ = (μ − r)/σ` enters as `c = −θ√T`; then the
@@ -42,9 +42,10 @@ The deductive chain:
    and `bsTerminal` driven by it reprices the *same* asset with drift `μ → r`
    (see `bsTerminal_physical_eq_riskNeutral`).
 
-This is the static (single-Gaussian) Girsanov theorem — the slice tractable
-without the path-wise stochastic integral. The path-wise version is gated on
-Mathlib's Itô integral (WIP in Degenne's BrownianMotion package).
+This is the static (single-Gaussian) Girsanov theorem, at one date. The
+process-level Girsanov theorem, for constant, simple, bounded adapted and
+bounded predictable `θ`, is in `Foundations/GirsanovConstantTheta.lean`
+through `Foundations/GirsanovPredictableTheta.lean`.
 -/
 
 @[expose] public section

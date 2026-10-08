@@ -26,7 +26,7 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-### The Esscher transform: one exponential tilt for Girsanov, Brownian motion and jumps (2026-10-08)
+### The Esscher transform: one tilt for static Girsanov and the jumps, one MGF identification shared with Brownian motion (2026-10-08)
 
 Five entries added, all `full`: `mf-jump-diffusion-esscher-transform`,
 `mf-jump-diffusion-esscher-pricing`, `mf-merton-esscher-pricing`,
@@ -40,7 +40,7 @@ lives in `Foundations/Esscher.lean`, the jump-diffusion results in
   moment-generating function (`measure_eq_of_mgf_id_eq`, from Mathlib's complex moment-generating
   function). A Gaussian law has its mean shifted: `N(m, v)` tilted is `N(m + θv, v)`
   (`gaussianReal_tilted_const_mul`).
-- The same tilt, three users. The static Girsanov change of measure
+- One file, three users. The static Girsanov change of measure
   `gaussianReal_withDensity_esscher` (behind `BSCallHyp.exists_of_physical`) is the case `N(0, 1)`
   of the Gaussian tilt; its pdf proof `gaussian_esscher_pdf`, used nowhere else, is removed. The
   exponential-martingale characterization of Brownian motion (`ExpMartingaleQBrownian`)
@@ -62,8 +62,8 @@ lives in `Foundations/Esscher.lean`, the jump-diffusion results in
 Safe wording: "where the jump law has every exponential moment, the Esscher transform of the
 log-return law at one date is again a jump-diffusion law, and at an Esscher parameter the call
 against it is Merton's formula for the tilted jumps". The Esscher law is one choice of pricing law.
-With jumps the market is in general incomplete (not formalized), and other choices give other
-prices. Not covered:
+With jumps (`Λ > 0`) the market is in general incomplete (not formalized), and other choices can
+give other prices; without jumps the model is Black–Scholes. Not covered:
 - the existence of an Esscher parameter with jumps;
 - jump laws with only some exponential moments, such as Kou's double-exponential jumps;
 - the Esscher measure on the process, a change of measure on `Ω` under which `X` is again a

@@ -350,8 +350,9 @@ import MathFin.BlackScholes.JumpDiffusionBrownian
 -- Scaling a jump-diffusion; the exponential martingales e^{θX_t − κ(θ)t} for the Laplace
 -- exponent κ (where the jump law has the moment of order θ); power claims at each date
 import MathFin.BlackScholes.JumpDiffusionExponent
--- The Esscher transform of a jump-diffusion log-return law: again a jump-diffusion law; Esscher
--- pricing is Merton's formula for the tilted jumps, and Black–Scholes without jumps
+-- The Esscher transform of a jump-diffusion log-return law: again a jump-diffusion law when the
+-- jump law has every exponential moment; Esscher pricing is Merton's formula for the tilted jumps,
+-- and Black–Scholes without jumps
 import MathFin.BlackScholes.JumpDiffusionEsscher
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks

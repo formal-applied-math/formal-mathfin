@@ -2090,7 +2090,7 @@ Three parts of the library now run through it:
 
 For a jump law with every exponential moment, the tilted log-return law is the jump-diffusion law
 with drift `b + θσ²`, rate `Λ∫e^{θx}dν` and the tilted jump law (`jumpDiffusionIncrementLaw_tilted`).
-Its Laplace exponent is `u ↦ κ(u + θ) − κ(θ)`. The Esscher condition `κ(θ + 1) − κ(θ) = r` is the
+It has the moment-generating function `u ↦ e^{(κ(u + θ) − κ(θ))τ}`. The Esscher condition `κ(θ + 1) − κ(θ) = r` is the
 compensated drift of the tilted characteristics (`compensated_tilted_iff`). At such a `θ` the call
 against the tilted law is Merton's formula for the tilted jumps (`integral_call_tilted_eq_merton`).
 In Merton's model it is Merton's 1976 series with the jump mean `(1 + k)e^{θδ²} − 1`
@@ -2098,8 +2098,8 @@ In Merton's model it is Merton's 1976 series with the jump mean `(1 + k)e^{θδ�
 `θ = (r − b − σ²/2)/σ²` gives the risk-neutral law and the Black–Scholes price for every drift
 (`integral_call_tilted_zero_eq_bsV`).
 
-**Next on the jump axis** (this phase did item 1 of the previous list, at the level of the law at
-one date):
+**Next on the jump axis** (this phase did the first half of item 1 of the previous list, at the
+level of the law at one date):
 
 1. The Esscher parameter exists and is unique when `σ > 0`. `κ` is convex and strictly so with a
    Gaussian part, so `θ ↦ κ(θ + 1) − κ(θ)` is strictly increasing. It tends to `±∞` with `θ`, and
@@ -2107,8 +2107,9 @@ one date):
    interior of `integrableExpSet`). The intermediate value theorem then gives one root.
 2. Formal incompleteness at one date. Show that the Esscher law and the law that keeps the jump
    law and changes only the drift (the "Merton measure") are both compensated, yet give different
-   call prices when the jumps are nontrivial. This needs a strict comparison of the two Merton
-   mixtures, or two distinct martingale laws equivalent to the physical one.
+   call prices for some strike when the jumps are nontrivial and the Esscher parameter is not 0.
+   This needs a strict comparison of the two Merton mixtures, or two distinct martingale laws
+   equivalent to the physical one.
 3. The Esscher measure on the process: a change of measure on `Ω` under which `X` is again a
    `JumpDiffusionProcess` with the tilted characteristics. This takes the Girsanov-style
    characterization used for constant `θ` (`ExpMartingaleQBrownian`) to independent increments

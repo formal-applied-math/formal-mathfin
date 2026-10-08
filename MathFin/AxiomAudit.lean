@@ -101,9 +101,10 @@ namespace MathFin.AxiomAudit
 
 /-! ## Static Girsanov: the risk-neutral measure derived -/
 
--- The Gaussian Esscher transform (Foundations/Esscher, 2026-10-08) is the one tilt behind the
--- static Girsanov theorem and the jump-diffusion Esscher transform; a law with every
--- exponential moment is fixed by its moment-generating function.
+-- The Gaussian Esscher transform (Foundations/Esscher, 2026-10-08): the static Girsanov change of
+-- measure is its case N(0,1), and the jump layer uses it without jumps and for Merton's lognormal
+-- jumps. A law with every exponential moment is fixed by its moment-generating function (also used
+-- by the exponential-martingale characterization of Brownian motion).
 
 /-- info: 'MathFin.measure_eq_of_mgf_id_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.measure_eq_of_mgf_id_eq

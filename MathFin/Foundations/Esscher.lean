@@ -11,8 +11,9 @@ public import Mathlib
 # The Esscher transform of a law on `ℝ`
 
 The Esscher transform with parameter `θ` reweights a law `μ` on `ℝ` by `e^{θx}` and renormalizes
-it: Mathlib's exponentially tilted measure `μ.tilted (θ * ·)`. In finance it is the change of
-measure of Gerber and Shiu; for a Gaussian law it is the static Girsanov theorem.
+it: Mathlib's exponentially tilted measure `μ.tilted (θ * ·)`. Gerber and Shiu use it to choose a
+pricing measure; here it acts on one law on `ℝ`. For a Gaussian law it is the static Girsanov change
+of measure.
 
 * `integral_exp_mul_tilted_const_mul`: the exponential moments of the tilted law are ratios of
   those of `μ`, `∫ e^{ux} dμ_θ = ∫ e^{(u + θ)x} dμ / ∫ e^{θx} dμ`.
@@ -24,10 +25,12 @@ measure of Gerber and Shiu; for a Gaussian law it is the static Girsanov theorem
 * `gaussianReal_tilted_const_mul`: the transform shifts the mean of a Gaussian law, `N(m, v)`
   tilted by `e^{θx}` is `N(m + θv, v)`.
 
-The first three identify a tilted law by computing one function. They are used by the static
-Girsanov theorem (`gaussianReal_withDensity_esscher`, the case `N(0, 1)`), by the Gaussian
-increments of `isQBrownianMotion_of_expMartingale`, and by the Esscher transform of a
-jump-diffusion (`jumpDiffusionIncrementLaw_tilted`).
+The first three identify a tilted law by computing one function. Their users: the Esscher
+transform of the jump-diffusion log-return law (`jumpDiffusionIncrementLaw_tilted`) uses all three,
+and the Gaussian increments of `isQBrownianMotion_of_expMartingale` are identified by
+`measure_eq_of_mgf_id_eq`. The Gaussian tilt gives the static Girsanov change of measure
+(`gaussianReal_withDensity_esscher`, its case `N(0, 1)`), the no-jump tilt
+(`jumpDiffusionIncrementLaw_zero_tilted`) and Merton's tilted jumps (`mertonJump_tilted`).
 -/
 
 @[expose] public section

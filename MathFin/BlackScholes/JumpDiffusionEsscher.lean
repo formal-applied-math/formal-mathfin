@@ -21,9 +21,9 @@ law `ν` (`jumpDiffusionIncrementLaw`), whose Laplace exponent is `κ` (`jumpDif
 * `jumpDiffusionIncrementLaw_tilted`: when `ν` has exponential moments of every order, the tilted
   law is again a jump-diffusion log-return law. The drift becomes `b + θσ²`, `σ` is unchanged, the
   rate becomes `Λ·m(θ)` with `m(θ) = ∫ e^{θx} dν` (`jumpMoment`), and the jump law is tilted the
-  same way. The proof compares moment-generating functions (`measure_eq_of_mgf_id_eq`): the
-  tilted characteristics have the Laplace exponent `u ↦ κ(u + θ) − κ(θ)`
-  (`jumpDiffusionExponent_tilted`), and so does the tilted law.
+  same way. The proof compares moment-generating functions (`measure_eq_of_mgf_id_eq`): both laws
+  have the moment-generating function `u ↦ e^{(κ(u + θ) − κ(θ))τ}`, since `κ(u + θ) − κ(θ)` is the
+  Laplace exponent of the tilted characteristics (`jumpDiffusionExponent_tilted`).
 * `compensated_tilted_iff`: the tilted characteristics are at their compensated drift exactly
   when `κ(θ + 1) − κ(θ) = r`, the Esscher condition.
 * `integral_call_tilted_eq_merton`: at such a `θ`, the call integrated against the tilted law is
@@ -34,11 +34,13 @@ law `ν` (`jumpDiffusionIncrementLaw`), whose Laplace exponent is `κ` (`jumpDif
 * `integral_call_tilted_zero_eq_bsV`: with no jumps the log-return law is Gaussian, and its
   Esscher transform is the Gaussian tilt that also gives the static Girsanov theorem
   (`gaussianReal_tilted_const_mul`, behind `gaussianReal_withDensity_esscher`). The Esscher
-  parameter `θ = (r − b − σ²/2)/σ²` exists, and the price is the Black–Scholes formula.
+  parameter is `θ = (r − b − σ²/2)/σ²` (`jumpDiffusionExponent_zero_esscher`), and the price is the
+  Black–Scholes formula.
 
-The statements are about the law at one date, not about the process under a changed measure. The
-Esscher law is one pricing law among others: with jumps the market is in general incomplete (not
-formalized here). The existence of an Esscher parameter is proved only without jumps.
+The statements are about the law at one date, not about the process under a changed measure. With
+jumps (`Λ > 0`) the market is in general incomplete (not formalized here), and the Esscher law is
+then one pricing law among others. The existence of an Esscher parameter is proved only without
+jumps.
 -/
 
 @[expose] public section
@@ -48,13 +50,15 @@ namespace MathFin
 open MeasureTheory ProbabilityTheory Real
 open scoped NNReal
 
-/-- The exponential moment `m(θ) = ∫ e^{θx} dν` of a jump law, as a nonnegative real. -/
+/-- The exponential moment `m(θ) = ∫ e^{θx} dν` of a jump law, as a nonnegative real (the Bochner
+integral, so `0` where the moment is infinite). -/
 noncomputable def jumpMoment (ν : Measure ℝ) (θ : ℝ) : ℝ≥0 :=
   ⟨∫ x, rexp (θ * x) ∂ν, integral_nonneg fun _ ↦ (Real.exp_pos _).le⟩
 
 /-- **The Laplace exponent of the Esscher-tilted characteristics.** Tilting turns the
-characteristics `(b, σ, Λ, ν)` into `(b + θσ², σ, Λ·m(θ), ν.tilted (θ * ·))`, whose Laplace
-exponent at `u` is `κ(u + θ) − κ(θ)`. -/
+characteristics `(b, σ, Λ, ν)` into `(b + θσ², σ, Λ·m(θ), ν.tilted (θ * ·))`, whose
+`jumpDiffusionExponent` at every `u` is `κ(u + θ) − κ(θ)`. It is their Laplace exponent at `u`
+where `∫ e^{(u + θ)x} dν < ∞`. -/
 lemma jumpDiffusionExponent_tilted (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ} [IsProbabilityMeasure ν]
     {θ : ℝ} (hθ : Integrable (fun x ↦ rexp (θ * x)) ν) (u : ℝ) :
     jumpDiffusionExponent (b + θ * σ ^ 2) σ (Λ * jumpMoment ν θ) (ν.tilted (θ * ·)) u
@@ -173,11 +177,21 @@ lemma jumpDiffusionIncrementLaw_zero_tilted (b σ : ℝ) (ν : Measure ℝ) [IsP
   simp only [NNReal.coe_mul, NNReal.coe_mk]
   ring
 
+/-- **Without jumps the Esscher parameter is explicit.** At jump rate `0`, `κ(θ) = bθ + σ²θ²/2`, so
+`κ(θ + 1) − κ(θ) = b + σ²/2 + σ²θ`, and `θ = (r − b − σ²/2)/σ²` satisfies the Esscher condition
+`κ(θ + 1) − κ(θ) = r`. -/
+lemma jumpDiffusionExponent_zero_esscher (b σ r : ℝ) (hσ : σ ≠ 0) (ν : Measure ℝ) :
+    jumpDiffusionExponent b σ 0 ν (1 + (r - b - σ ^ 2 / 2) / σ ^ 2)
+      - jumpDiffusionExponent b σ 0 ν ((r - b - σ ^ 2 / 2) / σ ^ 2) = r := by
+  have h0 : ((0 : ℝ≥0) : ℝ) = 0 := rfl
+  simp only [jumpDiffusionExponent, h0, zero_mul, add_zero]
+  linear_combination div_mul_cancel₀ (r - b - σ ^ 2 / 2) (pow_ne_zero 2 hσ)
+
 /-- **With no jumps, Esscher pricing is Black–Scholes pricing.** For any drift `b`, the Esscher
-parameter `θ = (r − b − σ²/2)/σ²` moves the log-return law `N(bτ, σ²τ)` to the risk-neutral
-`N((r − σ²/2)τ, σ²τ)` (`jumpDiffusionIncrementLaw_zero_tilted`), and the discounted call
-integrated against it is the Black–Scholes price `C_BS(S, τ)` (`jumpDiffusionCallPrice_zero`), for
-`S, K, σ, τ > 0`. -/
+parameter `θ = (r − b − σ²/2)/σ²` (`jumpDiffusionExponent_zero_esscher`) moves the log-return law
+`N(bτ, σ²τ)` to the risk-neutral `N((r − σ²/2)τ, σ²τ)` (`jumpDiffusionIncrementLaw_zero_tilted`),
+and the discounted call integrated against it is the Black–Scholes price `C_BS(S, τ)`
+(`jumpDiffusionCallPrice_zero`), for `S, K, σ, τ > 0`. -/
 theorem integral_call_tilted_zero_eq_bsV {S K r b σ : ℝ} (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ)
     (ν : Measure ℝ) [IsProbabilityMeasure ν] {τ : ℝ≥0} (hτ : 0 < τ) :
     ∫ y, rexp (-r * τ) * max (S * rexp y - K) 0
