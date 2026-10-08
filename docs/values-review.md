@@ -125,6 +125,144 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-08 — corpus 461 — the jump-diffusion axis: Merton derived, its Greeks, any jump law
+
+Scope: the session's jump-diffusion work, corpus 447 → 461.
+
+- `Foundations/IndepFreezing.lean` (new): the freezing lemma, its countable form, integrating out
+  a countable variable, re-associating mutual independence.
+- `Foundations/AffineMinorant.lean` (new): Jensen's inequality through a supporting line.
+- `Actuarial/CompoundPoissonMGF.lean`: the MGF with a random claim count.
+- `BlackScholes/MertonModel.lean` (new): Merton's prices derived from the terminal law.
+- `BlackScholes/MertonGreeks.lean` (new): delta, gamma, vega and the shape of the price (#129).
+- `BlackScholes/JumpDiffusionMixing.lean` (new): the mixing formula, dominance, the compensator,
+  Merton's formula for a general jump law.
+- 14 entries: `ce-freezing-lemma`, `mf-compound-poisson-mgf-random-count`,
+  `mf-merton-{call,put}-formula`, `mf-merton-discounted-terminal`,
+  `mf-merton-{delta,gamma,vega}`, `mf-merton-call-convex-in-spot`,
+  `mf-merton-call-increasing-in-vol`, `mf-jump-diffusion-{mixing-formula,call-dominates-bs,compensator}`,
+  `mf-merton-general-jump-law`.
+
+Three read-only agents: prose against statement; proof quality (lenses 2, 3, 6); the mathematics
+(lenses 1, 4, 5, 8). The prose and mathematics reviewers read `JumpDiffusionMixing` before its
+restructure, the proof-quality reviewer read the working tree during it. None found a
+mathematical error or a dishonest hypothesis.
+
+### Standing first pass: prose against statement
+
+- `mf-merton-discounted-terminal` was named "the Compensator Is the Risk-Neutral Drift", and its
+  docstring said the same. The theorem is `𝔼[e^{−rT}S_T] = S₀` at maturity with `−kΛ` built in:
+  no martingale property, no uniqueness. It is now "the Compensated Discounted Terminal Price Has
+  Mean S₀", and uniqueness, for any jump law, is cited to `discounted_terminal_eq_iff`.
+- Coverage and roadmap said the compound-Poisson MGF went through the Poisson-count lemma, and
+  that conditioning on a count, once written out "in three places", was now one lemma. The MGF
+  did not use it, and `PoissonMaxima` still conditions by hand. The first is now true (the MGF
+  goes through the generalized lemma); the second is stated.
+- The general-law prose called `Q` "the pricing measure" for every drift correction `κ`; it is one
+  only at the compensator. Now "a probability measure `Q`", with the compensator case named.
+- `JumpDiffusionHyp`'s docstring called its fields "`MertonHyp`'s independence hypotheses", and
+  the module called Merton "the Gaussian case". `MertonHyp`'s jumps are only a.e.-measurable, so
+  it is not an instance and no lemma connects the two. Both now say so.
+- An equation number. The new prose called the general formula Merton (1976), eq. (16), while
+  `mf-merton-classic-display` gives eq. (16) to the `Λ′ = Λ(1 + k)` series. The paper could not
+  be retrieved here to settle it, so the new prose cites no number (backlog 8).
+- Smaller. The vega docstring never stated its conclusion. `mertonStd` and
+  `mertonTerminal_eq_bsTerminal` claimed a law for a definition and for a pointwise identity. The
+  put description showed a series proved only for the call. Three `MertonModel` descriptions
+  lacked their hypotheses. The compound-Poisson scope said the expectation "is not defined"
+  without `hint` (it is `+∞`, which the Bochner `mgf` records as `0`). Coverage still listed "jump
+  laws other than lognormal" as not covered. `ce-freezing-lemma` said the conditional form is not
+  proved, while `condExp_independent_kernel` proves a bounded case; that is now disclosed.
+
+### Upgrades executed
+
+- **One route through the jump part.** `indepFun_prodMk_of_indepFun_prodMk` (a rotation of the
+  triple product of laws) turns the model's `N ⟂ (Z, J)` and `Z ⟂ J` into `Z ⟂ (N, J)`. Each
+  model-level result is then the single-jump-part theorem at `Y = −κ + ∑_{i<N} Jᵢ`: the
+  compensator in two rewrites (through the compound-Poisson MGF at 1), and Merton's general
+  formula as the freezing lemma on jointly integrable data. Four per-count lemmas and a sign
+  hypothesis on `S₀` went away.
+- **Jump risk is never free, for any compensated jump law, in one Jensen step.**
+  `le_integral_of_affine_le` with `bsV_spot_tangent_le`; Mathlib's `ConvexOn.map_integral_le`
+  needs a closed domain. `MertonDominance`'s 13-rewrite Jensen floor is now one application of it.
+  With `jumpDiffusion_call_le`, `C_BS(S₀) ≤ C ≤ S₀`.
+- `integral_comp_of_hasLaw_of_countable` replaces the Poisson-named lemma: nothing in it used the
+  Poisson law.
+- Payoff integrability as positive parts of integrable functions (`Integrable.pos_part`),
+  dropping `hS_0`, `hK`, `hY` and an `IsFiniteMeasure`.
+- `integral_discounted_bsTerminal`: the discounted forward computed once.
+- Probability instances derived from the law hypotheses on fifteen statements.
+- Greeks: strict monotonicity and convexity in the spot and monotonicity in `σ` became theorems
+  (`mertonVega_pos` had claimed monotonicity in its docstring).
+- Small: `mgf_range_sum_of_iid` through `mgf_congr_of_identDistrib`; the Merton call series
+  summable by `hasSum_integral_poissonMeasure`; `congr_deriv` for a `convert`.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: the mixing formula; a jump is a change of spot. Next: strict
+  Black–Scholes convexity in the spot, so that for non-degenerate jumps every implied volatility
+  exceeds `σ`, the smile's first consequence.
+- **Coherence.** Exemplar: `indepFun_prodMk_of_indepFun_prodMk`, law algebra on
+  `indepFun_iff_map_prod_eq_prod_map_map` filling a Mathlib gap. Next: upstream it, with the
+  Poisson pgf and a Tonelli form of the freezing lemma.
+- **Zero slop.** The Greeks prove each term bound twice, and the Merton layer has three copies of
+  the pgf at `1 + k` (backlog 3).
+- **Architecture.** `MertonModel` and the general route share no code (backlog 1).
+- **First principles.** Exemplar: `JumpDiffusionHyp` leaves `κ` free and derives the compensator
+  as the only root. Gap: nothing shows the hypotheses are satisfiable (backlog 5).
+- **Idiomatic register.** The Greeks' hypothesis orders differ (`_spot` against `_sigma`);
+  `PoissonPgf.` is a topic namespace; the Poisson weight `rexp (-Λ) * Λ ^ n / n !` is written out
+  about fifty times.
+- **Concept clarity.** Exemplar: `MertonHyp`'s "(N of (Z, J), Z of J, the Jᵢ of each other)".
+  Next: proof-term edges for the cross-file prose, starting with "Merton is the Gaussian case".
+- **Elegance.** Exemplar: `JumpDiffusionHyp.discounted_terminal`, the compensator read off the
+  compound-Poisson MGF at 1 in three rewrites.
+
+### Ranked backlog
+
+1. **Collapse the Merton towers.** Weaken `JumpDiffusionHyp.J_meas` to a.e.-measurability
+   (`mgf_sum₀`, the measurability `IdentDistrib` carries) so that `MertonHyp` is an instance, and
+   prove Gaussian smoothing of a Black–Scholes price, `𝔼[C_BS(Se^G; σ)] = C_BS(Se^{m+v/2};
+   √(σ² + v/T))` for `G ∼ N(m, v)`. `merton_call_formula` and `merton_discounted_terminal` become
+   corollaries, and `mertonStd` goes.
+2. `bsV_spot_strictConvexOn`, then implied volatility above `σ` for non-degenerate compensated
+   jumps. The Greeks' shape theorems then hold for any jump law by integrating the Black–Scholes
+   shape.
+3. MertonGreeks: extract the gamma and vega term bounds (each proved twice), `gcongr` for the
+   `mul_le_mul` chains, `positivity` for the `n = 0` terms; one `hasSum_weights_mul_mertonSpot` in
+   MertonJumpDiffusion for the three pgf-at-`1 + k` copies.
+4. The put, and put–call parity for any jump law:
+   `C − P = S₀e^{−κ + Λ(𝔼[e^J] − 1)} − Ke^{−rT}`.
+5. A witness that `JumpDiffusionHyp` and `MertonHyp` are satisfiable (`exists_hasLaw_indepFun`).
+   It is also how model-level theorems transfer to `mertonCallPrice` as a function.
+6. Foundations housekeeping:
+   - the compound-Poisson random sum as one structure (assumed three times: CompoundPoissonMGF,
+     PoissonMaxima, JumpDiffusionHyp);
+   - `hasLaw_sum_range_gaussianReal` and the i.i.d. and compound MGFs moved to Foundations;
+   - a Tonelli freezing lemma (a nonnegative `F` needs only section integrability);
+   - `PoissonMaxima` routed through `integral_comp_of_hasLaw_of_countable`;
+   - the bounded conditional freezing lemma (`IndependentKernel`) generalized into Foundations,
+     with `integral_pair_of_indep_bounded` onto `integral_comp_prodMk_of_indepFun`.
+7. Black–Scholes bridges:
+   - one public `bsV`-expectation bridge in PriceBounds, replacing its private one and
+     `integral_bsCall_payoff_eq_bsV`;
+   - `bsV_nonneg_of_pos` into PriceBounds and `measurable_bsV_spot` into PDE;
+   - `continuous_Phi` tagged `@[fun_prop]`.
+
+   Deferred: PDE and PriceBounds re-verify most of the corpus.
+8. Check Merton (1976)'s equation numbers against the paper. `mf-merton-classic-display` cites
+   eq. (16) for the `Λ′` series; recollection puts that at (19) and the general formula at (16).
+9. The characteristic function of the log-price (Lévy–Khintchine at a fixed date) and Kou's
+   compensator: lower value per effort until a Fourier-pricing consumer exists.
+
+Dissolved:
+
+- `Pi.le_def.mpr fun n ↦ …` → `fun n ↦ …`. Definitionally equal, but a lambda against a
+  non-syntactic `≤` is an elaboration risk for no gain.
+- `hasLaw_sub_div_of_gaussianReal` through `gaussianReal_div_const`. The same length, and its
+  `.mk` proof terms would have to match syntactically.
+- The vega `hfun` through `simp_rw`: style only.
+
 ## 2026-10-05 — corpus 447 — Itô's formula for adapted coefficients (B5)
 
 Scope: `Foundations/ItoFormulaAdapted.lean` and the entry `sc-ito-formula-adapted`; corpus

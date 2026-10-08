@@ -1811,7 +1811,7 @@ with a finite exponential moment:
 - Jensen's inequality for the convex Black–Scholes price gives the dominance `C_BS(S₀) ≤ C` in
   one step once the jump part is compensated. Merton's lognormal case had needed two channels.
 - The compensator `κ = Λ(𝔼[e^J] − 1)` is the one drift correction that makes the discounted
-  terminal price average to `S₀`. It is the compound-Poisson MGF at `1`.
+  terminal price average to `S₀`. It is the logarithm of the compound-Poisson MGF at `1`.
 - Integrating out the count gives Merton's Poisson mixture of averaged Black–Scholes prices.
 
 Two lemmas carry the structure. `indepFun_prodMk_of_indepFun_prodMk` re-associates the model's

@@ -299,8 +299,8 @@ lemma indepFun_jumpPart (h : JumpDiffusionHyp Q Λ Z N J) (κ : ℝ) :
   h.Z_indep_jumps.symm.comp (measurable_neg_add_sum_range κ) measurable_id
 
 /-- **The exponential moment of the jump part**,
-`𝔼[e^{−κ + ∑_{i<N} Jᵢ}] = e^{−κ + Λ(𝔼[e^J] − 1)}`: the compound-Poisson moment generating
-function at `1`. -/
+`𝔼[e^{−κ + ∑_{i<N} Jᵢ}] = e^{−κ + Λ(𝔼[e^J] − 1)}`: `e^{−κ}` times the compound-Poisson moment
+generating function at `1`. -/
 lemma integral_exp_jumpPart (h : JumpDiffusionHyp Q Λ Z N J)
     (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) (κ : ℝ) :
     ∫ ω, rexp (-κ + ∑ i ∈ Finset.range (N ω), J i ω) ∂Q
