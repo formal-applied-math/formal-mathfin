@@ -93,7 +93,7 @@ theorem jumpDiffusionIncrementLaw_map_const_mul (θ b σ : ℝ) (Λ : ℝ≥0) (
       = jumpDiffusionIncrementLaw (θ * b) (θ * σ) Λ (ν.map (θ * ·)) τ := by
   have hj : Measurable (Prod.map (@id ℝ) (Prod.map (@id ℕ) fun (j : ℕ → ℝ) i ↦ θ * j i)) :=
     measurable_id.prodMap (measurable_id.prodMap
-      (measurable_pi_lambda _ fun i ↦ (measurable_pi_apply i).const_mul θ))
+      (measurable_pi_lambda _ fun i ↦ (measurable_const_mul θ).comp (measurable_pi_apply i)))
   unfold jumpDiffusionIncrementLaw
   rw [← jumpDiffusionMeasure_map_jumps (Λ * τ) ν (measurable_const_mul θ),
     Measure.map_map (measurable_jumpDiffusionLogReturn (θ * b) (θ * σ) τ) hj,
@@ -169,7 +169,6 @@ theorem martingale_exp_const_mul_sub (h : JumpDiffusionProcess P 𝓕 X b σ Λ 
       ring)
   convert hM using 1
   funext t ω
-  beta_reduce
   rw [one_mul, ← Real.exp_add]
   congr 1
   ring

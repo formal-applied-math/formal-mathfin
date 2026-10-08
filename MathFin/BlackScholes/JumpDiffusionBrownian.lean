@@ -75,7 +75,7 @@ lemma jumpDiffusionIncrementLaw_zero (b σ : ℝ) (ν : Measure ℝ) [IsProbabil
   congr 1
   · ring
   · ext
-    simp only [NNReal.coe_mul, NNReal.coe_mk, NNReal.coe_one, mul_one]
+    simp only [NNReal.coe_mul, NNReal.coe_mk, mul_one]
     rw [mul_pow, Real.sq_sqrt (NNReal.coe_nonneg τ)]
 
 /-- With no jumps and the risk-neutral drift `r − σ²/2`, the log-return over `τ > 0`, standardized,
@@ -150,7 +150,7 @@ theorem jumpDiffusionProcess (b σ : ℝ) (ν : Measure ℝ) [IsProbabilityMeasu
   zero := hB.eval_zero_ae_eq_zero.mono fun ω hω ↦ by simp [hω]
   -- the increment of `X` is an affine function of the Brownian increment
   indep s t hst := hB.indep_comap_of_eq_comp_increment hst
-    (f := fun y ↦ b * ((t : ℝ) - s) + σ * y) (by fun_prop) fun ω ↦ by beta_reduce; ring
+    (f := fun y ↦ b * ((t : ℝ) - s) + σ * y) (by fun_prop) fun ω ↦ by ring
   law s t hst := by
     rw [jumpDiffusionIncrementLaw_zero]
     have h := gaussianReal_const_add
