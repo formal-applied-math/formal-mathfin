@@ -66,7 +66,9 @@ namespace MathFin
 
 open MeasureTheory ProbabilityTheory
 
-variable {Ω α β E : Type*} {mΩ : MeasurableSpace Ω} {mα : MeasurableSpace α}
+-- `m` (a sub-σ-algebra, used by the conditional lemmas) precedes `mΩ`, so that `mΩ` is the
+-- measurable-space instance in force
+variable {Ω α β E : Type*} {m mΩ : MeasurableSpace Ω} {mα : MeasurableSpace α}
   {mβ : MeasurableSpace β} [NormedAddCommGroup E]
   {P : Measure Ω} [IsFiniteMeasure P] {X : Ω → α} {Y : Ω → β}
 
@@ -148,9 +150,8 @@ theorem integral_comp_of_hasLaw_of_countable [Countable α] [MeasurableSingleton
 /-- On an event `s` of a σ-algebra `m` for which `X` is measurable and of which `Y` is independent,
 the joint law of `(X, Y)` is the law of `X` on `s` times the law of `Y`: restricting to `s` changes
 neither the law of `Y` nor its independence from `X`. -/
-theorem map_restrict_prodMk_of_indep {m : MeasurableSpace Ω} (hm : m ≤ mΩ) (hX : Measurable[m] X)
-    (hY : AEMeasurable Y P) (hi : Indep (MeasurableSpace.comap Y mβ) m P) {s : Set Ω}
-    (hs : MeasurableSet[m] s) :
+theorem map_restrict_prodMk_of_indep (hm : m ≤ mΩ) (hX : Measurable[m] X) (hY : AEMeasurable Y P)
+    (hi : Indep (MeasurableSpace.comap Y mβ) m P) {s : Set Ω} (hs : MeasurableSet[m] s) :
     (P.restrict s).map (fun ω ↦ (X ω, Y ω)) = ((P.restrict s).map X).prod (P.map Y) := by
   have hX' : Measurable X := hX.mono hm le_rfl
   refine (Measure.prod_eq fun A B hA hB ↦ ?_).symm
@@ -165,8 +166,8 @@ theorem map_restrict_prodMk_of_indep {m : MeasurableSpace Ω} (hm : m ≤ mΩ) (
 `G(x) = ∫ g(x, y) d(law Y)(y)`, for `g` strongly measurable and `g(X, Y)` integrable: given `m`,
 `X` is known and `Y` keeps its law. On each event of `m` the joint law of `(X, Y)` is a product
 (`map_restrict_prodMk_of_indep`), so both sides have the same integral over it. -/
-theorem condExp_comp_prodMk_of_indep [NormedSpace ℝ E] [CompleteSpace E]
-    {m : MeasurableSpace Ω} (hm : m ≤ mΩ) (hX : Measurable[m] X) (hY : AEMeasurable Y P)
+theorem condExp_comp_prodMk_of_indep [NormedSpace ℝ E] [CompleteSpace E] (hm : m ≤ mΩ)
+    (hX : Measurable[m] X) (hY : AEMeasurable Y P)
     (hi : Indep (MeasurableSpace.comap Y mβ) m P) {g : α × β → E} (hg : StronglyMeasurable g)
     (hgi : Integrable (fun ω ↦ g (X ω, Y ω)) P) :
     P[fun ω ↦ g (X ω, Y ω) | m] =ᵐ[P] fun ω ↦ ∫ y, g (X ω, y) ∂(P.map Y) := by

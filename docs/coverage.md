@@ -26,6 +26,35 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### One conditional freezing lemma; European payoffs at every date (2026-10-08)
+
+Two entries added, both `full`: `ce-conditional-freezing-lemma` and
+`mf-jump-diffusion-payoff-every-date`. Corpus 484 → 486.
+
+- The conditional freezing lemma (Shreve's independence lemma), `condExp_comp_prodMk_of_indep`
+  (`Foundations/IndepFreezing.lean`): for `X` measurable for a σ-algebra `𝒢` and `Y` independent
+  of `𝒢`, `𝔼[g(X, Y) | 𝒢] = G(X)` with `G(x) = ∫ g(x, y) d(law Y)(y)`, for `g` strongly measurable
+  with `g(X, Y)` integrable. On each event of `𝒢` the joint law of `(X, Y)` is a product
+  (`map_restrict_prodMk_of_indep`), so Fubini gives the same integral over every such event. It
+  replaces the bounded, real-valued case (`AmericanPut/Stopping/IndependentKernel.lean`, deleted):
+  the American put's Brownian transitions and the jump-diffusion prices now use the same lemma.
+- European payoffs at every date, `JumpDiffusionProcess.condExp_comp`:
+  `𝔼[f(X_T) | 𝓕_t] = ∫ f(X_t + y) dμ_{T−t}(y)` for measurable `f` with `f(X_T)` integrable, with
+  `μ_{T−t}` the log-return law over the remaining time. The put (for `S₀ ≥ 0`, any strike) and the
+  call (for `∫ eˣ dν < ∞`, any `S₀` and `K`) are instances. The call no longer goes through
+  put–call parity, the put no longer needs `K ≥ 0`, and the call no longer needs `S₀, K ≥ 0`.
+- Coherence: put–call parity of the price functions comes from the payoff identity
+  `max_sub_max_neg` of the finite-state parity (`Foundations/NoArbitrageDerivations.lean`). The
+  canonical model's count–size independence comes from Mathlib's
+  `indepFun_iff_hasLaw_prodMk_prod`; the repo's measure-preserving pull-back lemma is deleted.
+  `[IsProbabilityMeasure P]` is derived from the process (`JumpDiffusionProcess.isProbabilityMeasure`)
+  on six statements, and the log-return is a named function (`jumpDiffusionLogReturn`).
+
+Safe wording: "given the information at `t`, a European payoff at `T` is the payoff averaged over
+the remaining log-return, started from the current state; the step is Shreve's independence lemma,
+proved for integrable payoffs". Not covered: path-dependent payoffs and random times (the strong
+Markov property); the existence of the process with jumps.
+
 ### Coherence bridges: Brownian motion without jumps; Merton's model exists (2026-10-08)
 
 Four entries added, all `full`: `mf-jump-diffusion-brownian-no-jumps`, `mf-bs-formulas-every-date`,
@@ -97,13 +126,11 @@ Corpus 472 → 477.
   is `C = P + S − Ke^{−rτ}` at the compensated drift (`jumpDiffusionCallPrice_eq_of_compensated`).
 - Prices at an intermediate date, for any drift: given `𝓕_t`, the discounted put and call payoffs
   at `T` have conditional expectations `P(S_t, T − t)` and `C(S_t, T − t)`
-  (`JumpDiffusionProcess.condExp_put`, `JumpDiffusionProcess.condExp_call`). The put is the
-  freezing lemma `condExp_independent_kernel`: the payoff is bounded, `X_t` is known at `t`, and
-  the increment is independent of `𝓕_t`. The call is the put plus a forward, whose random part
-  `e^{X_T}` has conditional expectation `e^{X_t}·𝔼[e^{X_T − X_t}]`
-  (`Foundations/ExpMartingaleIndepIncrements.condExp_exp_eq_of_indep_increment`, lifted out of the
-  martingale proof of the previous phase). At the compensated drift these are prices (`P` is then
-  a martingale measure); at any other drift they are `P`-conditional expectations.
+  (`JumpDiffusionProcess.condExp_put`, `JumpDiffusionProcess.condExp_call`). Both are instances
+  of `JumpDiffusionProcess.condExp_comp`, the conditional freezing lemma applied to the process
+  (see the 484 → 486 section): `X_t` is known at `t`, and the increment is independent of `𝓕_t`.
+  At the compensated drift these are prices (`P` is then a martingale measure); at any other drift
+  they are `P`-conditional expectations.
 - Merton's formula at every date: at the compensated drift the call price function is the call of
   the canonical model with expected jump count `Λτ` (`jumpDiffusionCallPrice_eq_canonical`), so it
   is the

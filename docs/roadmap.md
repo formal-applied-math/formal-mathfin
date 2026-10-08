@@ -1978,3 +1978,38 @@ canonical model witnesses `MertonHyp` and the Merton entries' hypotheses can be 
    hypothesis-bundling structure, not yet witnessed).
 4. An implied-volatility function, after the `σ → 0` limit, so the smile can be stated as a
    function of the strike; Lee's moment formula; the characteristic function; Kou's compensator.
+
+## phase: one conditional freezing lemma (2026-10-08, corpus 484→486)
+
+The American-put development and the jump-diffusion prices each conditioned on an independent
+increment, through a lemma that only took bounded real payoffs (`IndependentKernel`), and the
+jump-diffusion call worked around the bound with a put–call detour through linearity of the
+conditional expectation. This phase states the step once, in `Foundations/IndepFreezing.lean`:
+Shreve's independence lemma for integrable payoffs, `condExp_comp_prodMk_of_indep`. The proof is
+measure-theoretic rather than a monotone-class argument: on each event of the conditioning
+σ-algebra the joint law of `(X, Y)` is a product (`map_restrict_prodMk_of_indep`), so the two sides
+have the same integral over every such event. The bounded lemma is deleted, and the American put's
+Brownian transitions consume the general one.
+
+On the process this gives `JumpDiffusionProcess.condExp_comp`: given `𝓕_t`, a payoff `f(X_T)` is
+`f` averaged over the remaining log-return, started from `X_t`, the Markov property at two fixed
+dates. The put and the call are instances, each losing its sign hypotheses, and the call's parity
+detour is gone. The same pass removed duplication the values panel found:
+- price-function parity cites the finite-state payoff identity `max_sub_max_neg`;
+- the canonical model's count–size independence is Mathlib's `indepFun_iff_hasLaw_prodMk_prod`,
+  so the repo's pull-back lemma `indepFun_comp_of_measurePreserving` is deleted;
+- the probability instance on `P` is derived from the process;
+- the log-return is a named function (`jumpDiffusionLogReturn`);
+- the non-strict spot convexity of the Black–Scholes price follows from the strict one;
+- the strict monotonicity of the integral is one lemma
+  (`integral_lt_integral_of_ae_le_of_not_ae_eq`);
+- the compensated jump part's moment is one lemma (`integral_exp_compensatedJumpPart`).
+
+**Next on the jump axis:**
+
+1. The Wald martingale as a corollary of `martingale_exp_sub_of_indep_increments`.
+2. Construct the price process with jumps: a compound Poisson process independent of the Brownian
+   motion, or a Poisson random measure (`Foundations/PoissonRandomMeasure.lean` is a
+   hypothesis-bundling structure, not yet witnessed).
+3. An implied-volatility function, after the `σ → 0` limit, so the smile can be stated as a
+   function of the strike; Lee's moment formula; the characteristic function; Kou's compensator.
