@@ -92,9 +92,7 @@ moment-generating function `a ↦ exp(v·a²/2)` of `N(0,v)` under `Q`, its law 
 (`measure_eq_of_mgf_id_eq`). -/
 private theorem map_eq_gaussianReal_of_mgf {X : Ω → ℝ} (hX : AEMeasurable X Q) {v : ℝ≥0}
     (hmgf : ∀ a, mgf X Q a = Real.exp (v * a ^ 2 / 2)) : Q.map X = gaussianReal 0 v := by
-  have := Measure.isProbabilityMeasure_map hX
-  refine (measure_eq_of_mgf_id_eq (μ := gaussianReal 0 v) (μ' := Q.map X)
-    integrable_exp_mul_gaussianReal ?_).symm
+  refine Eq.symm (measure_eq_of_mgf_id_eq integrable_exp_mul_gaussianReal ?_)
   rw [mgf_id_gaussianReal, mgf_id_map hX]
   funext a
   rw [hmgf, zero_mul, zero_add]

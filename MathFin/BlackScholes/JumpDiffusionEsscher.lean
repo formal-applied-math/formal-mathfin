@@ -25,9 +25,12 @@ law `ν` (`jumpDiffusionIncrementLaw`), whose Laplace exponent is `κ` (`jumpDif
   have the moment-generating function `u ↦ e^{(κ(u + θ) − κ(θ))τ}`, since `κ(u + θ) − κ(θ)` is the
   Laplace exponent of the tilted characteristics (`jumpDiffusionExponent_tilted`).
 * `compensated_tilted_iff`: the tilted characteristics are at their compensated drift exactly
-  when `κ(θ + 1) − κ(θ) = r`, the Esscher condition.
-* `integral_call_tilted_eq_merton`: at such a `θ`, the call integrated against the tilted law is
-  Merton's formula for the tilted jump law (`jumpDiffusionCallPrice_eq_merton`).
+  when `κ(θ + 1) − κ(θ) = r`, the Esscher condition: the criterion `κ(1) = r`
+  (`compensated_iff_exponent_one`) for the tilted Laplace exponent `u ↦ κ(u + θ) − κ(θ)`.
+* `integral_call_tilted_eq_jumpDiffusionCallPrice`: the call integrated against the tilted law is
+  the call price function of the tilted characteristics, so results about price functions apply.
+* `integral_call_tilted_eq_merton`: at an Esscher parameter it is Merton's formula for the tilted
+  jump law (`jumpDiffusionCallPrice_eq_merton`).
 * `integral_call_tilted_eq_mertonCallPrice`: tilting keeps Merton's lognormal jumps lognormal
   (`mertonJump_tilted`), so in Merton's model the same integral is Merton's 1976 series with a
   shifted jump mean.
@@ -53,19 +56,23 @@ open scoped NNReal
 /-- The exponential moment `m(θ) = ∫ e^{θx} dν` of a jump law, as a nonnegative real (the Bochner
 integral, so `0` where the moment is infinite). -/
 noncomputable def jumpMoment (ν : Measure ℝ) (θ : ℝ) : ℝ≥0 :=
-  ⟨∫ x, rexp (θ * x) ∂ν, integral_nonneg fun _ ↦ (Real.exp_pos _).le⟩
+  .mk (∫ x, rexp (θ * x) ∂ν) (integral_nonneg fun _ ↦ (Real.exp_pos _).le)
 
-/-- **The Laplace exponent of the Esscher-tilted characteristics.** Tilting turns the
-characteristics `(b, σ, Λ, ν)` into `(b + θσ², σ, Λ·m(θ), ν.tilted (θ * ·))`, whose
-`jumpDiffusionExponent` at every `u` is `κ(u + θ) − κ(θ)`. It is their Laplace exponent at `u`
-where `∫ e^{(u + θ)x} dν < ∞`. -/
-lemma jumpDiffusionExponent_tilted (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ} [IsProbabilityMeasure ν]
-    {θ : ℝ} (hθ : Integrable (fun x ↦ rexp (θ * x)) ν) (u : ℝ) :
+@[simp] lemma coe_jumpMoment (ν : Measure ℝ) (θ : ℝ) :
+    (jumpMoment ν θ : ℝ) = ∫ x, rexp (θ * x) ∂ν :=
+  rfl
+
+/-- **The Laplace exponent of the tilted characteristics.** For the characteristics
+`(b + θσ², σ, Λ·m(θ), ν.tilted (θ * ·))`, which `jumpDiffusionIncrementLaw_tilted` shows are those
+of the tilted law, `jumpDiffusionExponent` at every `u` is `κ(u + θ) − κ(θ)`. It is their Laplace
+exponent at `u` where `∫ e^{(u + θ)x} dν < ∞`. -/
+lemma jumpDiffusionExponent_tilted (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ} [NeZero ν] {θ : ℝ}
+    (hθ : Integrable (fun x ↦ rexp (θ * x)) ν) (u : ℝ) :
     jumpDiffusionExponent (b + θ * σ ^ 2) σ (Λ * jumpMoment ν θ) (ν.tilted (θ * ·)) u
       = jumpDiffusionExponent b σ Λ ν (u + θ) - jumpDiffusionExponent b σ Λ ν θ := by
   have hm : (∫ x, rexp (θ * x) ∂ν) ≠ 0 := (integral_exp_pos hθ).ne'
-  have hΛm : ((Λ * jumpMoment ν θ : ℝ≥0) : ℝ) = Λ * ∫ x, rexp (θ * x) ∂ν := rfl
-  simp only [jumpDiffusionExponent, integral_exp_mul_tilted_const_mul, hΛm]
+  simp only [jumpDiffusionExponent, integral_exp_mul_tilted_const_mul, NNReal.coe_mul,
+    coe_jumpMoment]
   field_simp
   ring
 
@@ -77,33 +84,43 @@ theorem jumpDiffusionIncrementLaw_tilted (b σ : ℝ) (Λ : ℝ≥0) {ν : Measu
     [IsProbabilityMeasure ν] (hν : ∀ u, Integrable (fun x ↦ rexp (u * x)) ν) (θ : ℝ) (τ : ℝ≥0) :
     (jumpDiffusionIncrementLaw b σ Λ ν τ).tilted (θ * ·)
       = jumpDiffusionIncrementLaw (b + θ * σ ^ 2) σ (Λ * jumpMoment ν θ) (ν.tilted (θ * ·)) τ := by
-  have hμ (u : ℝ) := integrable_exp_mul_jumpDiffusionIncrementLaw b σ Λ (hν u) τ
-  have : IsProbabilityMeasure ((jumpDiffusionIncrementLaw b σ Λ ν τ).tilted (θ * ·)) :=
-    isProbabilityMeasure_tilted (hμ θ)
   have : IsProbabilityMeasure (ν.tilted (θ * ·)) := isProbabilityMeasure_tilted (hν θ)
-  refine measure_eq_of_mgf_id_eq (integrable_exp_mul_tilted_const_mul hμ θ) (funext fun u ↦ ?_)
-  rw [mgf_id_jumpDiffusionIncrementLaw _ _ _ (integrable_exp_mul_tilted_const_mul hν θ u),
-    jumpDiffusionExponent_tilted b σ Λ (hν θ) u]
-  simp only [mgf, id_eq]
-  rw [integral_exp_mul_tilted_const_mul,
-    integral_exp_const_mul_jumpDiffusionIncrementLaw b σ Λ (hν (u + θ)),
-    integral_exp_const_mul_jumpDiffusionIncrementLaw b σ Λ (hν θ), ← Real.exp_sub, sub_mul]
+  have hνθ (u : ℝ) := integrable_exp_mul_tilted_const_mul (hν θ) (hν (u + θ))
+  refine Eq.symm (measure_eq_of_mgf_id_eq
+    (fun u ↦ integrable_exp_mul_jumpDiffusionIncrementLaw _ _ _ (hνθ u) τ) (funext fun u ↦ ?_))
+  rw [mgf_id_jumpDiffusionIncrementLaw _ _ _ (hνθ u), jumpDiffusionExponent_tilted b σ Λ (hν θ) u,
+    mgf_id_tilted_const_mul, mgf_id_jumpDiffusionIncrementLaw b σ Λ (hν (u + θ)),
+    mgf_id_jumpDiffusionIncrementLaw b σ Λ (hν θ), ← Real.exp_sub, sub_mul]
 
 /-- **The Esscher condition.** The tilted characteristics are at their compensated drift,
-`b + θσ² = r − σ²/2 − Λm(θ)(∫ eˣ d(ν tilted) − 1)`, exactly when `κ(θ + 1) − κ(θ) = r`. -/
-lemma compensated_tilted_iff (b σ r : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ} [IsProbabilityMeasure ν]
-    {θ : ℝ} (hθ : Integrable (fun x ↦ rexp (θ * x)) ν) :
+`b + θσ² = r − σ²/2 − Λm(θ)(∫ eˣ d(ν tilted) − 1)`, exactly when `κ(θ + 1) − κ(θ) = r`: the
+criterion `κ(1) = r` (`compensated_iff_exponent_one`) for their Laplace exponent
+`u ↦ κ(u + θ) − κ(θ)` (`jumpDiffusionExponent_tilted`). -/
+lemma compensated_tilted_iff (b σ r : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ} [NeZero ν] {θ : ℝ}
+    (hθ : Integrable (fun x ↦ rexp (θ * x)) ν) :
     b + θ * σ ^ 2 = r - σ ^ 2 / 2
         - (Λ * jumpMoment ν θ : ℝ≥0) * (∫ x, rexp x ∂(ν.tilted (θ * ·)) - 1)
       ↔ jumpDiffusionExponent b σ Λ ν (1 + θ) - jumpDiffusionExponent b σ Λ ν θ = r := by
-  rw [← jumpDiffusionExponent_tilted b σ Λ hθ 1, jumpDiffusionExponent]
-  simp only [one_mul, mul_one, one_pow]
-  constructor <;> intro h <;> linarith
+  rw [compensated_iff_exponent_one, jumpDiffusionExponent_tilted b σ Λ hθ 1]
 
-/-- **Esscher pricing of the call.** At an Esscher parameter, `κ(θ + 1) − κ(θ) = r`, the
-discounted call payoff integrated against the Esscher-tilted log-return law is Merton's formula
-for the tilted characteristics: the `Poisson(Λm(θ)τ)` mixture of Black–Scholes prices over jumps
-of law `ν.tilted (θ * ·)` (`jumpDiffusionCallPrice_eq_merton`). -/
+/-- **The Esscher price is a price function of the tilted characteristics.** When the jump law has
+every exponential moment, the discounted call payoff integrated against the Esscher-tilted
+log-return law is the call price function `jumpDiffusionCallPrice` of the characteristics
+`(b + θσ², σ, Λ·m(θ), ν.tilted (θ * ·))` (`jumpDiffusionIncrementLaw_tilted`), so results about
+price functions apply to it, such as Merton's formula at the compensated drift. -/
+lemma integral_call_tilted_eq_jumpDiffusionCallPrice (S K r b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
+    [IsProbabilityMeasure ν] (hν : ∀ u, Integrable (fun x ↦ rexp (u * x)) ν) (θ : ℝ) (τ : ℝ≥0) :
+    ∫ y, rexp (-r * τ) * max (S * rexp y - K) 0
+        ∂((jumpDiffusionIncrementLaw b σ Λ ν τ).tilted (θ * ·))
+      = jumpDiffusionCallPrice S K r (b + θ * σ ^ 2) σ (Λ * jumpMoment ν θ) (ν.tilted (θ * ·))
+          τ := by
+  rw [jumpDiffusionIncrementLaw_tilted b σ Λ hν θ τ, jumpDiffusionCallPrice]
+
+/-- **Esscher pricing of the call.** When the jump law has every exponential moment, at an
+Esscher parameter, `κ(θ + 1) − κ(θ) = r`, the discounted call payoff integrated against the
+Esscher-tilted log-return law is Merton's formula for the tilted characteristics: the
+`Poisson(Λm(θ)τ)` mixture of Black–Scholes prices over jumps of law `ν.tilted (θ * ·)`
+(`integral_call_tilted_eq_jumpDiffusionCallPrice`, `jumpDiffusionCallPrice_eq_merton`). -/
 theorem integral_call_tilted_eq_merton {S K r b σ : ℝ} (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ)
     {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν]
     (hν : ∀ u, Integrable (fun x ↦ rexp (u * x)) ν) {θ : ℝ}
@@ -116,9 +133,9 @@ theorem integral_call_tilted_eq_merton {S K r b σ : ℝ} (hS : 0 < S) (hK : 0 <
           ∂(Measure.infinitePi fun _ : ℕ ↦ ν.tilted (θ * ·))
           ∂(poissonMeasure (Λ * jumpMoment ν θ * τ)) := by
   have : IsProbabilityMeasure (ν.tilted (θ * ·)) := isProbabilityMeasure_tilted (hν θ)
-  rw [jumpDiffusionIncrementLaw_tilted b σ Λ hν θ τ]
+  rw [integral_call_tilted_eq_jumpDiffusionCallPrice S K r b σ Λ hν θ τ]
   exact jumpDiffusionCallPrice_eq_merton hS hK hσ
-    (by simpa only [one_mul] using integrable_exp_mul_tilted_const_mul hν θ 1)
+    (by simpa only [one_mul] using integrable_exp_mul_tilted_const_mul (hν θ) (hν (1 + θ)))
     ((compensated_tilted_iff b σ r Λ (hν θ)).2 hθ) hτ
 
 /-- **Tilting keeps Merton's jumps lognormal**: Merton's log-jump law `N(log(1 + k) − δ²/2, δ²)`
@@ -159,7 +176,7 @@ theorem integral_call_tilted_eq_mertonCallPrice {S K r b σ k δ : ℝ} (hS : 0 
   -- the Esscher condition is the compensated drift of the tilted Merton model
   have hb := (compensated_tilted_iff b σ r Λ (hν θ)).2 hθ
   rw [mertonJump_tilted hk δ θ, integral_exp_mertonJump hk' δ] at hb
-  rw [jumpDiffusionIncrementLaw_tilted b σ Λ hν θ τ, mertonJump_tilted hk δ θ]
+  rw [integral_call_tilted_eq_jumpDiffusionCallPrice S K r b σ Λ hν θ τ, mertonJump_tilted hk δ θ]
   exact jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice hS hK hσ hk'
     (by linear_combination hb) hτ
 

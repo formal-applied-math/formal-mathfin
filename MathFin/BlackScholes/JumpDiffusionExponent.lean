@@ -148,15 +148,13 @@ theorem martingale_exp_const_mul_sub (h : JumpDiffusionProcess P 𝓕 X b σ Λ 
   ring
 
 /-- **The martingale condition is `κ(1) = r`.** The discounted price `e^{−rt}S₀e^{X_t}` (`S₀ ≠ 0`)
-is a martingale if and only if the Laplace exponent at `1` is the rate (`martingale_iff`:
-`κ(1) = b + σ²/2 + Λ(𝔼[e^J] − 1)`). -/
+is a martingale if and only if the Laplace exponent at `1` is the rate: the drift criterion
+`martingale_iff`, read through `compensated_iff_exponent_one`. -/
 theorem martingale_iff_exponent_one (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν)
     [IsProbabilityMeasure ν] (hν : Integrable rexp ν) {S_0 : ℝ} (hS_0 : S_0 ≠ 0) (r : ℝ) :
     Martingale (fun (t : ℝ≥0) ω ↦ rexp (-r * t) * (S_0 * rexp (X t ω))) 𝓕 P ↔
-      jumpDiffusionExponent b σ Λ ν 1 = r := by
-  rw [h.martingale_iff hν hS_0 r, jumpDiffusionExponent]
-  simp only [one_mul, mul_one, one_pow]
-  constructor <;> intro h' <;> linarith
+      jumpDiffusionExponent b σ Λ ν 1 = r :=
+  (h.martingale_iff hν hS_0 r).trans (compensated_iff_exponent_one b σ r Λ ν)
 
 /-- **Power claims at each date before maturity.** For `S₀ > 0`, `p` with `∫ e^{px} dν < ∞` and
 `t ≤ T`, given `𝓕_t` the discounted payoff `e^{−r(T−t)}S_T^p` of the claim paying the `p`-th power

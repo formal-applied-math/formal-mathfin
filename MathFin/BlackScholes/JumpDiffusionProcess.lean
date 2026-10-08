@@ -189,6 +189,16 @@ lemma integrable_exp_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) {ν :
   simpa only [one_mul] using integrable_exp_mul_jumpDiffusionIncrementLaw b σ Λ (ν := ν) (θ := 1)
     (by simpa only [one_mul] using hν) τ
 
+/-- **The compensated drift is `κ(1) = r`**: `b = r − σ²/2 − Λ(∫ eˣ dν − 1)` exactly when the
+Laplace exponent at `1` is the rate. It is the form in which the discounted-price criterion
+(`JumpDiffusionProcess.martingale_iff_exponent_one`) and the Esscher condition
+(`compensated_tilted_iff`) read the drift. -/
+lemma compensated_iff_exponent_one (b σ r : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ) :
+    b = r - σ ^ 2 / 2 - Λ * (∫ x, rexp x ∂ν - 1) ↔ jumpDiffusionExponent b σ Λ ν 1 = r := by
+  rw [jumpDiffusionExponent]
+  simp only [one_mul, mul_one, one_pow]
+  constructor <;> intro h <;> linarith
+
 /-! ### The process -/
 
 /-- **A jump-diffusion log-price process.** `X` is adapted to the filtration `𝓕`, starts at `0`,
