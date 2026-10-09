@@ -17,7 +17,8 @@ probability measure (total mass `∫ g = 1`) and mutually absolutely continuous 
 
 This is the change-of-measure ritual shared by the equivalent-martingale-measure constructions
 in the one-period FTAP files (`FTAPOnePeriod.lean`, `FTAPOnePeriodVector.lean`): each builds its
-fair density (a logistic Esscher weight, or a `(1+‖Y‖)⁻¹` tempering for the `L¹` reduction),
+fair density (a two-region balancing density, or a logistic weight — the softplus analogue of
+an Esscher weight — and a `(1+‖Y‖)⁻¹` tempering for the `L¹` reduction),
 normalises it, and then needs exactly these three facts.
 -/
 

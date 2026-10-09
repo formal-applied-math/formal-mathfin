@@ -19,8 +19,11 @@ credit hazard, and exponential discounting are three faces of one
 of two known textbook facts — **not** new finance.
 
 This is one of the library's two illustrative *certified cross-domain bridges*
-(the other being `Bridges/ConcentrationVariance.lean`): a machine-checked identity
-showing that two independently-developed modules denote the same mathematics.
+(the other being `Bridges/ConcentrationVariance.lean`). Here the identity holds by
+`rfl`: both modules define their survival function through the shared
+`survivalFromIntensity`, and it is that shared definition, not this theorem, that
+records the unification. The theorem pins the agreement, so a change to either
+definition that broke it would fail the build.
 -/
 
 @[expose] public section

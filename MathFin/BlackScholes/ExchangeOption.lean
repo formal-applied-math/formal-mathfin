@@ -103,8 +103,11 @@ theorem exchange_payoff_eq_ratio (a b : ℝ) (hb : 0 < b) :
 The exchange-option closed form is the *one* BS-family formula
 `V = A·Φ(d₁) − K·DF·Φ(d₂)` at `A = S¹₀`, `K = S²₀`, `DF = 1` (the
 S²-numeraire / forward measure carries no discounting), and effective vol
-`σ = √(σ₁² + σ₂² − 2ρσ₁σ₂)`. So Margrabe joins Black-Scholes, Black-76,
-BS-Merton, Garman-Kohlhagen, and KMV-Merton as instances of `bsVGarman`. -/
+`σ = √(σ₁² + σ₂² − 2ρσ₁σ₂)`. So Margrabe joins standard Black-Scholes (and through
+it the KMV-Merton equity value), Black-76, BS-Merton (and through it
+Garman-Kohlhagen, at `q = r_f`) and the Black-model payer swaption as instances of
+`bsVGarman`; the quanto call has the same shape but no instance theorem (see the
+table in `GarmanNormalForm`). -/
 
 /-- **Margrabe `d₁`**: `(log(S¹₀/S²₀) + σ²T/2) / (σ√T)`, with `σ` the
 effective volatility of the log-spread. -/

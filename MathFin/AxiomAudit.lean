@@ -1219,9 +1219,10 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.OnePeriod.ftap_one_period
 
 -- General-Ω one-period FTAP, d assets (`FTAPOnePeriodVector.lean`): NoArbitrage ⟺ ∃ EMM
--- for a non-redundant ℝᵈ-valued L⁰ return on an arbitrary probability space. Backward via
--- the explicit Esscher / minimal-divergence density z = σ⟪θ₀,Y⟫ minimising the softplus
--- potential — no Hahn–Banach, no L⁰-cone closedness, no measurable selection.
+-- for an L⁰ return valued in a finite-dimensional space, redundant assets allowed, on an
+-- arbitrary probability space. Backward via the logistic density z = σ⟪θ₀,Y⟫ at a minimiser
+-- of the softplus potential (the softplus analogue of the Esscher measure, not the Esscher
+-- measure itself) — no Hahn–Banach, no L⁰-cone closedness, no measurable selection.
 /-- info: 'MathFin.OnePeriodVector.ftap_one_period_vector' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.OnePeriodVector.ftap_one_period_vector
 

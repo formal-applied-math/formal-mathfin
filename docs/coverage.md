@@ -2255,8 +2255,8 @@ prior corpus audit, not a verification of this addition.
 > (`Foundations/FTAPOnePeriodVector.lean`, entry `mf-ftap-one-period-vector`, **`full`**)
 > is the unrestricted Föllmer–Schied 1.6 for a discounted excess return valued in any
 > **finite-dimensional** inner-product space `F` (the `ℝᵈ` market is `F = EuclideanSpace ℝ
-> (Fin d)`) — **no non-redundancy hypothesis**. The explicit **Esscher / minimal-divergence**
-> EMM minimises the convex softplus potential `θ ↦ ∫ log(1 + exp⟪θ,Y⟫)`; it is constant
+> (Fin d)`) — **no non-redundancy hypothesis**. The explicit **logistic** EMM (the softplus
+> analogue of the Esscher measure, not the Esscher measure itself) comes from minimising the convex softplus potential `θ ↦ ∫ log(1 + exp⟪θ,Y⟫)`; it is constant
 > along the **gains kernel** `N = {θ : ⟪θ,Y⟫ = 0 a.e.}` and coercive on `Nᗮ`, so a
 > minimiser on `Nᗮ` is automatically global (redundant directions are absorbed, dropping
 > the earlier non-redundancy assumption), and its first-order condition (differentiation
@@ -2704,8 +2704,8 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > dichotomy, and a two-region balancing `withDensity` — no Hahn–Banach, no
 > Kreps–Yan (`Foundations/FTAPOnePeriod.lean`). (3) **D-asset one-period FTAP**
 > `ftap_one_period_vector` (`mf-ftap-one-period-vector`) — Föllmer–Schied 1.6 for
-> any finite-dimensional inner-product space `F`; the Esscher/minimal-divergence
-> EMM minimises the convex softplus potential `θ ↦ ∫ log(1 + exp⟪θ,Y⟫)`, which
+> any finite-dimensional inner-product space `F`; the logistic EMM (the softplus
+> analogue of the Esscher measure) comes from minimising the convex softplus potential `θ ↦ ∫ log(1 + exp⟪θ,Y⟫)`, which
 > is coercive on `Nᗮ` (the orthogonal complement of the gains kernel `N = {θ :
 > ⟪θ,Y⟫ = 0 a.e.}`), so its minimiser on `Nᗮ` is automatically global; the
 > first-order condition (differentiation under the integral) produces the

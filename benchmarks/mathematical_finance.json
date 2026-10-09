@@ -4753,7 +4753,7 @@
     },
     {
       "id": "mf-ftap-one-period-vector",
-      "name": "d-Asset One-Period FTAP (Esscher EMM, finite-dimensional market)",
+      "name": "d-Asset One-Period FTAP (logistic EMM, finite-dimensional market)",
       "description": "On an arbitrary probability space, for a ℝᵈ-valued discounted excess return Y, no arbitrage ⟺ there is an equivalent martingale measure Q ~ P with Y integrable and E_Q[Y] = 0 ∈ ℝᵈ — with no non-redundancy hypothesis. The backward direction is an explicit logistic-tilt construction (the softplus analogue of the Esscher measure, not the Esscher measure itself): minimise the smooth convex potential θ ↦ E[log(1 + exp⟪θ,Y⟫)]. The potential is constant along the gains kernel N = {θ : ⟪θ,Y⟫ = 0 a.e.} and coercive on its orthogonal complement Nᗮ, so a minimiser on Nᗮ is automatically global (redundant directions absorbed); its first-order condition E[Y·σ⟪θ₀,Y⟫] = 0 (σ logistic) yields a strictly-positive bounded density.",
       "domain": "mathematical_finance",
       "code": {
@@ -4761,7 +4761,7 @@
       },
       "metadata": {
         "chapter": 14,
-        "reference": "d-asset one-period Fundamental Theorem of Asset Pricing (Föllmer–Schied Thm 1.6; Esscher / minimal-entropy martingale measure)",
+        "reference": "d-asset one-period Fundamental Theorem of Asset Pricing (Föllmer–Schied Thm 1.6)",
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Honest derivation of the biconditional NoArbitrage ⟺ ∃ EMM re-exported from MathFin/Foundations/FTAPOnePeriodVector.lean, the FULL unrestricted one-period d-asset FTAP — no non-redundancy hypothesis. The MathFin theorem is stated for a discounted excess return valued in any finite-dimensional real inner-product space F (the ℝᵈ market is F = EuclideanSpace ℝ (Fin d)). Scope: one trading period, finite-dimensional market, trivial ℱ₀ (constant θ), arbitrary probability space. Backward direction (NA ⟹ EMM): minimise the smooth convex softplus potential θ ↦ ∫ log(1+exp⟪θ,Y⟫); it is constant along the gains kernel N = {θ : ⟪θ,Y⟫ = 0 a.e.} and, under no arbitrage, coercive on Nᗮ (via the unit-sphere minimum of g(θ)=∫⟪θ,Y⟫⁺ together with N ⊓ Nᗮ = ⊥), so a minimiser on Nᗮ exists and — because the potential is N-translation-invariant — is global over all of F; its first-order condition (differentiation under the integral) is ∫ Y·σ⟪θ₀,Y⟫ = 0, so z = σ⟪θ₀,Y⟫ ∈ (0,1) is a strictly-positive bounded fair density and Q = P.withDensity(z/∫z) is the EMM; integrability is dropped by a bounded-density reduction P̃ = P.withDensity((1+‖Y‖)⁻¹/κ). Redundant assets are thereby absorbed (no quotient by the gains kernel or measurable selection needed). No Hahn–Banach, no L⁰-cone closedness, no measurable selection. Only the general-Ω multi-period DMW remains out of scope. No axioms beyond Mathlib defaults."

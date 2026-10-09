@@ -12,7 +12,7 @@ public import MathFin.BlackScholes.PDE
 /-!
 # The Garman normal form: every BS-family closed form is one formula
 
-Every European-call closed form in the library has the shape
+The Black–Scholes-family European-call closed forms in the library have the shape
 
   `V = A · Φ(d_1) − K · DF · Φ(d_2)`,
   `d_1 = log(A / (K · DF)) / (σ · √T) + σ · √T / 2`,
@@ -22,18 +22,19 @@ where `A` is the **present value of receiving one unit of the asset at
 maturity** under the chosen numéraire and `DF` is the **discount factor for
 cash received at maturity**.
 
-Specialisations:
+Specialisations. The last column names the theorem that proves the closed form equal to
+`bsVGarman`; rows marked *shape only* have the same form but no such theorem.
 
-| Variant | `A` | `DF` | What changes |
-|---|---|---|---|
-| Standard BS (`bsV` in `PDE.lean`) | `S` | `e^{−rτ}` | (baseline) |
-| Black-76 (`black_futures_formula`) | `F · e^{−rT}` | `e^{−rT}` | underlying is the *forward* |
-| BS-Merton dividends | `S · e^{−qT}` | `e^{−rT}` | continuous dividend yield `q` |
-| Garman-Kohlhagen FX | `S · e^{−r_f T}` | `e^{−r_d T}` | foreign-rate-discounted asset |
-| KMV-Merton credit | `V` (firm) | `e^{−rT}` (debt) | strike = face debt; `d_2` is distance to default |
-| Swaption (Black model) | `A_annuity · F` | `A_annuity` | annuity numéraire |
-| Quanto-adjusted | drift-shifted | `e^{−r_dom T}` | correlation adjustment in drift |
-| Margrabe exchange (`margrabe_eq_bsVGarman`) | `S¹₀` | `1` | 2nd asset is the strike; `σ` = effective vol `√(σ₁²+σ₂²−2ρσ₁σ₂)`; no discounting (S²-numeraire) |
+| Variant | `A` | `DF` | What changes | Instance theorem |
+|---|---|---|---|---|
+| Standard BS (`bsV` in `PDE.lean`) | `S` | `e^{−rτ}` | (baseline) | `bsV_eq_bsVGarman_standard` |
+| Black-76 (`black_futures_formula`) | `F · e^{−rT}` | `e^{−rT}` | underlying is the *forward* | `black76_RHS_eq_bsVGarman`, `black_futures_price_eq_bsVGarman` |
+| BS-Merton dividends | `S · e^{−qT}` | `e^{−rT}` | continuous dividend yield `q` | `bs_dividends_RHS_eq_bsVGarman`, `bs_dividends_price_eq_bsVGarman` |
+| Garman-Kohlhagen FX | `S · e^{−r_f T}` | `e^{−r_d T}` | foreign-rate-discounted asset | the BS-Merton row at `q = r_f` (`garman_kohlhagen_call_formula` is `bs_dividends_call_formula (q := r_f)`); no theorem of its own |
+| KMV-Merton credit | `V` (firm) | `e^{−rT}` (debt) | strike = face debt; `d_2` is distance to default | the standard row at `(S, K, σ) = (V, F, σ_V)` (`merton_equity_eq_bs_call` is `bs_call_formula`; `kmvDistanceToDefault_eq_bsd2` identifies the distance to default with `d_2`); no theorem of its own |
+| Swaption (Black model) | `A_annuity · F` | `A_annuity` | annuity numéraire | `blackPayerSwaption_eq_bsVGarman` |
+| Quanto-adjusted | drift-shifted | `e^{−r_dom T}` | correlation adjustment in drift | *shape only*: the library proves the quanto forward (`quantoForward_of_gaussian`), not a quanto call |
+| Margrabe exchange | `S¹₀` | `1` | 2nd asset is the strike; `σ` = effective vol `√(σ₁²+σ₂²−2ρσ₁σ₂)`; no discounting (S²-numeraire) | `margrabe_eq_bsVGarman` |
 
 This is the **change-of-numéraire** principle in elementary form: BS pricing
 is a single computation, parameterised by what the underlying and the
@@ -43,9 +44,9 @@ discount factor mean.
 
 This file is **load-bearing**: we prove the BS closed form `bsV` and the
 Black-76 / BS-Merton closed-form right-hand sides are *equal* (as real
-numbers) to `bsVGarman` at the appropriate `(A, DF)`. Each existing
-specialisation file becomes a one-line corollary instead of a separate
-chain-rule + integral derivation.
+numbers) to `bsVGarman` at the appropriate `(A, DF)`. Each specialisation
+with an instance theorem in the table above is a one-line corollary instead of a
+separate chain-rule + integral derivation.
 
 This is what was missing in the previously-shipped `KMVMerton.lean`,
 `Quanto.lean`, `Swaption.lean`: those files redefined the same formula in

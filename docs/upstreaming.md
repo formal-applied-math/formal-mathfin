@@ -19,13 +19,15 @@ intervals), is **MERGED** — it is in BrownianMotion as
 `BrownianMotion/StochasticIntegral/StochasticInterval.lean` (commit `eaa4391`,
 "feat: stochastic intervals (#446)"), and has been in every pin we have used
 since. Upstream renamed the defs on the way in: our `stochasticIcc/Ico/Ioc/Ioo`
-and `stochasticGraph` are their `stochIcc/Ico/Ioc/Ioo` and `stochGraph`.
+and `stochasticGraph` are their `stochIcc/Ico/Ioc/Ioo` and `stochGraph`. A second
+submission, **PR #484** (issue #451, Doob–Meyer), was merged on 2026-09-20.
 
 ## Submitted contributions
 
 | target | contribution | PR | status |
 |---|---|---|---|
 | brownian-motion | stochastic intervals; `]]σ,τ]]` predictable + an elementary predictable set (issue #440) | [#446](https://github.com/RemyDegenne/brownian-motion/pull/446) | **merged** — upstream `eaa4391`, landed as `stochIcc`/`stochIoc`/… (confirmed 2026-07-27) |
+| brownian-motion | Doob–Meyer (issue #451): the two `sorry`s in `uniformIntegrable_predictableSeqTop` closed, the `sorry`'d `isStoppingTime_tauMeshLift` proved, plus the reusable `UniformIntegrable.eLpNorm_tendsto_zero_of_iSup_measure_tendsto_zero` | [#484](https://github.com/RemyDegenne/brownian-motion/pull/484) | **merged** — upstream merge commit `100b7b6` (2026-09-20); contained in the current pin `0d5b6eb`. Its maintainer review is distilled in `docs/patterns.md` → "Mathlib house-style golf" |
 
 Staged but not yet submitted (drafts only, under `upstream/`): `brownian-motion/Martingale.lean`,
 `mathlib/RealTail.lean`. Both re-checked against the 2026-07-27 pins and still absent upstream
