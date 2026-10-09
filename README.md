@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 447 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 416 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 535 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 504 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 13 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -88,6 +88,17 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   the closed-form price
   ([`bsV_satisfies_bs_pde_via_feynmanKac`](MathFin/BlackScholes/PDEFromFeynmanKac.lean)).
 
+- **Jump-diffusions.** Let $`X`$ be adapted and start at $`0`$, with each increment $`X_t - X_s`$
+  independent of the past and distributed as $`b\tau + \sigma\sqrt{\tau}\,Z + \sum_{i<N} J_i`$,
+  where $`\tau = t - s`$, $`Z \sim \mathcal{N}(0,1)`$, $`N \sim \mathrm{Poisson}(\Lambda\tau)`$ and
+  the jumps $`J_i`$ are i.i.d. with law $`\nu`$, all independent. If $`S_0 \neq 0`$ and
+  $`\int e^x\,d\nu < \infty`$, the discounted price $`e^{-rt} S_0 e^{X_t}`$ is a martingale exactly
+  when $`b = r - \sigma^2/2 - \Lambda\big(\int e^x\,d\nu - 1\big)`$
+  ([`JumpDiffusionProcess.martingale_iff`](MathFin/BlackScholes/JumpDiffusionProcess.lean)). At that
+  drift, with Gaussian jumps and $`\sigma, S_0, K > 0`$, the conditional expectation of the
+  discounted call payoff at every date before maturity is Merton's 1976 series
+  ([`condExp_call_eq_mertonCallPrice`](MathFin/BlackScholes/JumpDiffusionMerton.lean)).
+
 - **The American put.** In the Black–Scholes model with interest rate $`r > 0`$ and dividend yield
   $`0 \le q \le r`$, the early-exercise boundary $`B(\tau)`$ of the American put is strictly convex
   in the time to expiry, and $`\log(B(\tau)/K)`$ is convex
@@ -113,7 +124,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 | Probability | conditional expectation, martingales and stopping times, Brownian motion, Poisson processes, Markov chains |
 | Stochastic calculus | Itô integral and isometry, quadratic variation, Itô's formula, Girsanov's theorem, martingale representation, SDEs, Feynman–Kac, compensated Poisson integral |
 | No-arbitrage | fundamental theorems, equivalent martingale measures, change of numéraire, market completeness, superreplication |
-| Option pricing | Black–Scholes prices and Greeks, the Black–Scholes PDE, implied volatility, dividends, FX (Garman–Kohlhagen), Bachelier, Black-76, Merton jump-diffusion, Breeden–Litzenberger, a polynomial-sign certificate for strike-convexity of raw SVI |
+| Option pricing | Black–Scholes prices and Greeks, the Black–Scholes PDE, implied volatility, dividends, FX (Garman–Kohlhagen), Bachelier, Black-76, jump-diffusions (Merton's formula and Greeks, Esscher pricing, incompleteness at one date), Breeden–Litzenberger, a polynomial-sign certificate for strike-convexity of raw SVI |
 | Exotic options | digital, exchange (Margrabe), chooser, barrier, lookback, geometric Asian, power and quanto options; spreads; variance swaps |
 | Lattice models | binomial replication, American and Bermudan options via the Snell envelope, Cox–Ross–Rubinstein convergence, André's reflection principle |
 | Fixed income and credit | bonds, duration and convexity, immunization, yield curves, forward rates, FRAs, swaps and swaptions, the forward measure, Vasicek, hazard rates, CDS, first-to-default, KMV–Merton |
@@ -126,7 +137,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Thirteen of the 447 results are reduced cores. Twelve assume a structure whose fields include the
+- Thirteen of the 535 results are reduced cores. Twelve assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, Lévy's characterization, the two-dimensional Itô formula,
@@ -149,6 +160,10 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 - Itô's formula for an Itô process is proved at a fixed time, for bounded adapted continuous
   coefficients and $`f`$ with bounded $`f'`$ and $`f''`$. It does not yet cover
   $`f(x) = e^x`$ or $`x^2`$, or coefficients of an SDE solution.
+- The jump-diffusion results on a process assume the properties listed above
+  (`JumpDiffusionProcess`). A process with them is constructed only without jumps, as Brownian
+  motion with drift. A change of measure on the process that alters the jump rate or the jump law
+  is not covered.
 - Existence for SDEs with Lipschitz coefficients is proved only on horizons with
   $`T L_b + \sqrt{T} L_\sigma < 1`$.
 - The binomial limit is proved for call prices and for the law of the terminal log-return.
