@@ -1,0 +1,665 @@
+\pdfoutput=1
+\documentclass[11pt]{article}
+\usepackage{mathfin-paper}
+
+\title{The Fundamental Theorem of Asset Pricing,\\ Formalized in Lean~4}
+\author{Raphael Coelho\thanks{Independent researcher. ORCID
+  \href{https://orcid.org/0009-0001-6601-1023}{0009-0001-6601-1023}.
+  Correspondence: \href{mailto:raphaelrrcoelho@gmail.com}{\texttt{raphaelrrcoelho@gmail.com}}.
+  Artifact: \url{https://github.com/formal-applied-math/formal-mathfin}, release \texttt{v1.5.0}.}}
+\date{October 2026}
+
+\hypersetup{pdftitle={The Fundamental Theorem of Asset Pricing, Formalized in Lean 4},
+  pdfauthor={Raphael Coelho}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+The Fundamental Theorem of Asset Pricing states that a market is free of arbitrage exactly when it
+admits an equivalent martingale measure. We formalize it in Lean~4 over Mathlib in three settings: a
+finite-state market with one risky asset over a finite horizon (Harrison--Pliska), a one-period market with one risky asset
+on an arbitrary probability space, and a one-period market with finitely many assets on an arbitrary
+probability space. The finite case is the geometry of a separating hyperplane; the scalar one-period
+case is an elementary change of density. In the $d$-asset case the proof builds the equivalent martingale
+measure from a minimiser of the potential $\theta\mapsto\E[\log(1+e^{\langle\theta,Y\rangle})]$: absence of
+arbitrage makes the potential coercive off the redundant directions, its first-order condition is the
+martingale property, and for integrable returns the logistic weight of the minimiser, normalised, is the
+density; a bounded tempering removes the integrability assumption, so the return need only be measurable. The
+construction uses no Hahn--Banach theorem, no $L^0$-closedness argument, no measurable selection and no
+non-redundancy hypothesis. The separation lemma behind the finite
+case has a companion, built from the same two helper lemmas, that yields the Artzner--Delbaen--Eber--Heath
+representation of coherent risk measures on a finite state space. The boundary is explicit. The general multi-period
+theorem of Dalang, Morton and Willinger is formalized only in its forward direction, and so is the
+continuous-time theorem, for simple strategies.
+Every theorem is \texttt{sorry}-free, the axioms of each result discussed are pinned to Lean's three
+standard axioms by a build-enforced gate, and the development is reproducible from a pinned
+toolchain.
+\end{abstract}
+
+%======================================================================
+\section{Introduction}
+
+A market offers an \emph{arbitrage} if some admissible strategy turns no initial wealth into a payoff
+that is non-negative almost surely and strictly positive with positive probability. The Fundamental
+Theorem of Asset Pricing identifies the absence of such opportunities with a single analytic object: a
+probability measure $Q$, equivalent to the physical measure $P$, under which discounted asset prices
+are martingales. No arbitrage holds if and only if such an \emph{equivalent martingale measure}
+exists. The equivalence was made precise by Harrison and Kreps~\cite{HarrisonKreps1979} and Harrison
+and Pliska~\cite{HarrisonPliska1981}, established for general discrete-time models by Dalang, Morton
+and Willinger~\cite{DMW1990}, and carried to continuous time in the no-free-lunch form of Delbaen and
+Schachermayer~\cite{DelbaenSchachermayer1994}. It is the result on which arbitrage-free pricing rests:
+a price is the $Q$-expectation of a discounted payoff.
+
+The theorem is also a natural test for formal mathematics, because its content is analytic rather than
+computational. In the finite case it hides a separating-hyperplane argument; in general it asserts the
+existence of a change of measure that is usually obtained non-constructively, by separating a cone in
+$L^1$ with a Hahn--Banach functional after proving the cone closed in $L^0$. Fixing exactly which
+hypotheses each direction needs, and checking the measure-theoretic details against a kernel, is a task
+at which formalization is decisive.
+
+Formalized probability has grown substantially, and with it the measure theory on which pricing
+depends. Echenim, Guiol and Peltier verified Cox--Ross--Rubinstein pricing in
+Isabelle/HOL~\cite{EchenimGuiolPeltier2020}, Keskin formalized discrete- and continuous-time
+martingales~\cite{Keskin2023}, Avigad, H\"olzl and Serafin the central limit
+theorem~\cite{AvigadHolzlSerafin2017}, and Degenne and collaborators constructed Brownian motion in
+Lean~\cite{DegenneEtAl2025,BrownianMotionRepo}. The nearest precedent for the present paper is
+Nagy's Lean~4 derivation from It\^o's lemma to Black--Scholes~\cite{Nagy2026}, which contains the
+theorem for a one-period market with one asset and two states. A search in October 2026 of the Lean
+ecosystem, the Isabelle Archive of Formal Proofs and the Coq/Rocq ecosystem found no machine-checked
+proof beyond that case: none on an arbitrary probability space, none with several assets on an
+arbitrary space, and none over several periods.
+
+\paragraph{What this paper does}
+We formalize the theorem in three settings of increasing generality and, in the most general of them,
+give the equivalent martingale measure by a formula.
+\begin{enumerate}[label=(\arabic*)]
+\item \emph{Finite states, finitely many periods} (\cref{sec:finite}). For one risky asset, the backward
+  direction is the geometry of a hyperplane separating the attainable gains from the standard simplex
+  (\lean{ftap_discrete}); in one period the same separation handles finitely many assets.
+\item \emph{One period, one asset, arbitrary probability space} (\cref{sec:scalar}). Integrability is
+  no longer free, and the measure is built by an elementary change of density
+  (\lean{ftap_one_period}).
+\item \emph{One period, $d$ assets, arbitrary probability space} (\cref{sec:vector}). For integrable
+  returns the proof takes as density of the equivalent martingale measure the normalised logistic weight of
+  a minimiser of the softplus potential $\E[\log(1+e^{\langle\theta,Y\rangle})]$; a bounded tempering removes
+  integrability.
+  Redundant assets are absorbed rather than excluded, and the return need only be measurable
+  (\lean{ftap_one_period_vector}).
+\item \emph{One separation for pricing and risk} (\cref{sec:separation}). The separation lemma of the
+  finite case and the one behind the representation of coherent risk measures on a finite state space
+  (\lean{coherentRisk_isLUB}) are two faces of one finite-dimensional separation, proved side by side
+  from shared helper lemmas.
+\item \emph{A precise boundary} (\cref{sec:boundary}). The general multi-period theorem and the
+  continuous-time theorem are formalized only in their forward directions; we say exactly what is
+  proved.
+\end{enumerate}
+
+This paper is part of a Lean~4~\cite{deMouraUllrich2021} library of formalized mathematical finance
+built on Mathlib~\cite{Mathlib2020}; the library is described in a companion
+overview~\cite{CoelhoLibrary} and its It\^o calculus in a second companion~\cite{CoelhoIto}. The
+results developed here live entirely within Mathlib's measure theory and convex analysis, on its
+\lean{withDensity} change of measure and its finite-dimensional separation theorems; they stand
+alongside, but do not depend on, the library's Brownian-motion layer.
+
+\paragraph{Changes from the first version}
+This version corrects three statements of the first. The two-state case was formalized
+earlier~\cite{Nagy2026}, so the claim of priority is narrowed. The $d$-asset density is the softplus
+analogue of the Esscher measure, not the Esscher measure itself (\cref{sec:why-softplus}). And only one
+direction of the correspondence between no arbitrage and coercivity is proved, so the text no longer
+calls them equivalent. The version adds the separation shared with coherent risk measures
+(\cref{sec:separation}), the finite-state $d$-asset theorem and the forward directions that border the
+development (\cref{sec:finite,sec:boundary}), and updates the artifact to the current release
+(\cref{sec:artifact}).
+
+%======================================================================
+\section{The market and the two easy facts}\label{sec:market}
+
+In each setting a position in the traded assets produces a discounted gain, and an arbitrage is a
+position whose gain is non-negative almost surely without being almost surely zero. The settings differ
+only in what a position is and how its gain is formed.
+\begin{itemize}
+\item In the \emph{finite-state} model a filtration $\F=(\F_t)_{t\le T}$ on a finite probability space
+  carries an adapted discounted price $S_0,\dots,S_T$ of one risky asset. A strategy $\varphi$ is
+  predictable, with $\varphi_{t+1}$ measurable for $\F_t$, and its discounted gain is the martingale
+  transform $(\varphi\cdot S)_T=\sum_{t<T}\varphi_{t+1}(S_{t+1}-S_t)$.
+\item In the \emph{scalar one-period} model a discounted excess return $Y\colon\Omega\to\R$ is held in
+  position $\theta\in\R$, with gain $\theta Y$.
+\item In the \emph{$d$-asset one-period} model the return $Y\colon\Omega\to F$ takes values in a
+  finite-dimensional real inner-product space $F$ (the $d$-asset market is $F=\R^d$), a constant
+  position $\theta\in F$ is held, and the gain is $\langle\theta,Y\rangle$. (In Mathlib the $d$-asset
+  space is \lean{EuclideanSpace ℝ (Fin d)}, not the product $\R^d$ with its sup norm.)
+\end{itemize}
+Write $G$ for the discounted gain of a position. \emph{No arbitrage} says that a gain which is
+non-negative is null:
+\[
+  G\ge 0 \quad P\text{-a.s.} \qquad\Longrightarrow\qquad G=0\quad P\text{-a.s.},
+\]
+which is the textbook ``no $G\ge0$ with $P(G>0)>0$'' in contrapositive form. The condition is stated
+under $P$ alone and names no second measure. An \emph{equivalent martingale measure} is a probability
+measure $Q$ with $Q\ll P$ and $P\ll Q$ under which discounted prices are fair: in the one-period
+settings $Y$ is $Q$-integrable with $\E_Q[Y]=0$ (vector-valued in the $d$-asset case); in the
+finite-state setting $S_t=\E_Q[S_{t+1}\mid\F_t]$ for every $t<T$. Recording equivalence as the pair
+of absolute continuities is what lets a $Q$-almost-sure statement transfer back to $P$.
+\Cref{lst:defs} shows the $d$-asset definitions; the other two settings differ only in the gain.
+
+\begin{leancode}[caption={No arbitrage and the equivalent martingale measure, $d$-asset one-period market (\texttt{Foundations/FTAPOnePeriodVector}).},label=lst:defs]
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
+  (P : Measure Ω) [IsProbabilityMeasure P]
+  {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
+  [FiniteDimensional ℝ F] [MeasurableSpace F] [BorelSpace F] (Y : Ω → F)
+
+def NoArbitrage : Prop :=
+  ∀ θ : F, 0 ≤ᵐ[P] (fun ω ↦ inner ℝ θ (Y ω)) →
+    (fun ω ↦ inner ℝ θ (Y ω)) =ᵐ[P] 0
+
+structure IsEMM (Q : Measure Ω) : Prop where
+  prob : IsProbabilityMeasure Q
+  absP : Q ≪ P
+  Pabs : P ≪ Q
+  int  : Integrable Y Q
+  fair : ∫ ω, Y ω ∂Q = 0
+\end{leancode}
+
+One direction of the theorem is uniform and elementary. If an equivalent martingale measure $Q$
+exists, the expected discounted gain of every position vanishes under $Q$: in the one-period settings
+$\E_Q[\theta Y]=\theta\,\E_Q[Y]=0$ and $\E_Q[\langle\theta,Y\rangle]=\langle\theta,\E_Q[Y]\rangle=0$, and
+in the finite-state setting $\E_Q[(\varphi\cdot S)_T]=0$ because each term $\varphi_{t+1}(S_{t+1}-S_t)$ has
+zero $\F_t$-conditional mean. A gain
+with $G\ge0$ and $\E_Q[G]=0$ is zero $Q$-almost surely, hence $P$-almost surely by equivalence, so the
+position is not an arbitrage. This is \lean{noArbitrage_of_isEMM} in each development. The content of
+the theorem is the converse, which the next three sections supply in rising generality.
+
+%======================================================================
+\section{Finite markets: the geometric theorem}\label{sec:finite}
+
+In a finite-state market the equivalent martingale measure is, almost literally, a separating
+hyperplane. Fix a finite probability space $(\Omega,P)$ with full support, a filtration $\F$, an adapted
+scalar discounted price $S$ and a horizon $T$. The discounted gains attainable by predictable strategies
+form a linear subspace of $\R^\Omega$, the span of the one-period gains
+$\ind_A(S_{t+1}-S_t)$ with $t<T$ and $A\in\F_t$; call it the \emph{gains subspace}. No arbitrage says
+exactly that this subspace meets the non-negative cone only at the origin, equivalently that it is
+disjoint from the standard simplex of probability vectors on $\Omega$.
+
+The simplex is compact and convex and the gains subspace is closed, being finite-dimensional, so the
+geometric Hahn--Banach theorem separates them strictly. The library takes this one level higher, in a
+form that serves more than pricing. Its root (\cref{lst:cone}) is stated for a closed convex
+\emph{cone} $C\subseteq\R^\iota$ disjoint from the simplex, and produces a strictly positive functional
+$q$ that is non-positive on $C$. A subspace is a cone closed under negation, so applied to the gains
+subspace the one-sided bound becomes two-sided: $q$ annihilates every attainable gain
+(\lean{exists_pos_dual_of_disjoint_stdSimplex}). Read as a measure, $q$ makes every martingale transform
+have zero expectation.
+
+\begin{leancode}[caption={The cone-separation root (\texttt{Foundations/ConvexDuality}).},label=lst:cone]
+theorem exists_pos_separating_of_cone_disjoint_simplex
+    {ι : Type*} [Fintype ι]
+    (C : Set (ι → ℝ)) (hCconv : Convex ℝ C) (hCclosed : IsClosed C)
+    (hCcone : ∀ ⦃x⦄, x ∈ C → ∀ ⦃c : ℝ⦄, 0 ≤ c → c • x ∈ C)
+    (hdisj : Disjoint (stdSimplex ℝ ι) C) :
+    ∃ q : ι → ℝ, (∀ i, 0 < q i) ∧ ∀ v ∈ C, ∑ i, q i * v i ≤ 0
+\end{leancode}
+
+The cone form is not needed for the market, whose gains form a subspace; it is stated for the sake
+of \cref{sec:separation}, where a genuine cone appears. The market reaches the theorem in two steps. Under no arbitrage the gains subspace misses the simplex
+(\lean{gains_disjoint_stdSimplex}): a non-negative gain is null, and on a full-support space a null
+vector has no positive coordinate, while every point of the simplex has one. The strictly positive
+annihilator, normalised to a probability vector, is a measure $Q\sim P$; it annihilates each generator
+$\ind_A(S_{t+1}-S_t)$, which is the defining property of the conditional expectation, so $S$ is a
+$Q$-martingale up to $T$. With the forward direction of \cref{sec:market} this is the biconditional
+(\cref{lst:discrete}).
+
+\begin{leancode}[caption={The finite-state theorem (\texttt{Foundations/FTAPDiscrete}). $\Omega$ is a \texttt{Fintype} with \texttt{MeasurableSingletonClass}, $\mathcal{F}$ a filtration indexed by $\mathbb{N}$, $S:\mathbb{N}\to\Omega\to\mathbb{R}$.},label=lst:discrete]
+theorem ftap_discrete (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :
+    NoArbitrage 𝓕 P S T ↔ ∃ Q, IsEMM 𝓕 P S T Q
+\end{leancode}
+
+This is the theorem of Harrison and Pliska, the finite case of Dalang, Morton and Willinger. The
+statement is slightly stronger than the textbook one: $P$ need only be a measure of full support on the
+finite space, not a probability measure, and strategies are unbounded. The same
+kernel gives the one-period theorem for finitely many assets on a finite state space: the gains
+subspace is then the span of the assets' excess-return vectors, and the statement is the biconditional
+\lean{hasEMM_multi_iff_not_hasArbitrage} (\file{Foundations/FTAPMultiState}). The multi-period theorem
+is stated for one risky asset; with several assets only the generators of the gains subspace would
+change, but that version is not in the library. The restriction to finitely many states is what keeps
+the separating functional elementary and the measure a genuine probability vector; the next two
+sections give it up.
+
+%======================================================================
+\section{One period, one asset: the elementary theorem}\label{sec:scalar}
+
+Leaving finitely many states changes the problem. On an arbitrary probability space the attainable gains
+need not form a closed set, and the separation argument of \cref{sec:finite} has nothing compact to
+grip. For a single scalar return, though, the equivalent martingale measure can still be written down
+directly, with no separation at all.
+
+Fix a measurable $Y\colon\Omega\to\R$ on an arbitrary $(\Omega,P)$. Two difficulties replace the single
+one of the finite case. First, $Y$ need not be integrable, so $\E_Q[Y]$ may fail even to make sense.
+Second, a fair measure must be produced from $P$ rather than chosen from a simplex. Both yield to changes
+of density.
+
+Integrability is bought by \emph{tempering}. The bounded strictly positive weight $w=(1+\abs{Y})^{-1}$,
+normalised by $\kappa=\E[w]\in(0,1]$, defines $\tilde P=w/\kappa\cdot P$, equivalent to $P$, under which
+$Y$ is integrable because $\abs{Y}w/\kappa\le\kappa^{-1}$. No arbitrage is an almost-sure notion, so it
+survives the passage to the equivalent $\tilde P$. Over $\tilde P$ the construction is a dichotomy on
+the sign of $Y$: if $Y\ge0$ almost surely and is not almost surely zero then $\theta=1$ is an
+arbitrage, and symmetrically for $Y\le0$, so under no arbitrage the positive and negative parts of $Y$
+both carry mass. A two-region density that re-weights the two sides,
+\[
+  Z=\lambda\,\ind_{\{Y\ge0\}}+\mu\,\ind_{\{Y<0\}},\qquad \lambda,\mu>0,
+\]
+can then be balanced so that $\E[ZY]=0$ and normalised so that $\E[Z]=1$; one choice of $\lambda,\mu$,
+explicit in the two tail integrals of $Y$, does both at once. If $Y=0$ almost surely, $Q=P$ will do. The
+balancing core is \lean{exists_isEMM_of_pos_tails}; removing the integrability assumption by the tempering
+above gives \lean{exists_isEMM_of_noArbitrage}, whose measure has $P$-density proportional to
+$Z\,(1+\abs{Y})^{-1}$, with $Z$ computed under $\tilde P$. The forward direction closes the biconditional
+(\cref{lst:scalar}).
+
+\begin{leancode}[caption={The scalar one-period theorem (\texttt{Foundations/FTAPOnePeriod}); $Y:\Omega\to\mathbb{R}$ on an arbitrary probability space.},label=lst:scalar]
+theorem ftap_one_period (hY : Measurable Y) :
+    NoArbitrage P Y ↔ ∃ Q, IsEMM P Y Q
+\end{leancode}
+
+This is the one-asset case of the one-period theorem of Dalang, Morton and Willinger, in the form found
+in Föllmer and Schied~\cite[Ch.~1]{FollmerSchied2016}. No Hahn--Banach theorem and no Kreps--Yan
+argument enter; the measure is built rather than selected. What the argument leaves open is dimension.
+A single asset has only two sides to balance, and the dichotomy that drives the construction does not
+by itself reach a market of several assets.
+
+%======================================================================
+\section{One period, many assets: the variational construction}\label{sec:vector}
+
+The $d$-asset one-period theorem is where the construction leaves the textbook proof furthest behind.
+The return is now $Y\colon\Omega\to F$ with $F$ a finite-dimensional inner-product space, and a position
+is a constant vector $\theta\in F$. The classical route separates the cone of attainable claims from the
+non-negative payoffs in $L^1$ by a Hahn--Banach functional, an argument whose infinite-dimensional
+duality and cone-closedness are heavy to formalize. We replace it: the equivalent martingale measure is
+the minimiser of one smooth convex function on the finite-dimensional space $F$, and every step is a
+finite-dimensional or elementary-integral fact. Throughout, the Lean spelling of the gain
+$\langle\theta,Y\rangle$ is \lstinline|inner ℝ θ (Y ω)|.
+
+\subsection{The potential}
+For $\theta\in F$ set
+\[
+  f(\theta)=\E\bigl[\log\bigl(1+e^{\langle\theta,Y\rangle}\bigr)\bigr],
+\]
+the expected \emph{softplus} of the gain. The softplus $u\mapsto\log(1+e^u)$ is smooth and convex, with
+derivative the logistic function $\sigma(u)=e^u/(1+e^u)\in(0,1)$, and it satisfies
+\[
+  u^+\;\le\;\log(1+e^u)\;\le\;\abs{u}+\log 2 .
+\]
+The upper bound dominates the integrand by $\norm{\theta}\norm{Y}+\log2$, so $f$ is finite and continuous
+whenever $Y$ is integrable; the lower bound will give coercivity. Because $\sigma$ is bounded,
+differentiation under the integral sign is dominated by $\norm{u}\norm{Y}$, and the derivative in a direction
+$u$ is
+\[
+  \frac{\dd}{\dd t}\Big|_{t=0} f(\theta+tu)=\E\bigl[\sigma(\langle\theta,Y\rangle)\,\langle u,Y\rangle\bigr]
+  \qquad(\text{\lean{hasDerivAt_potential_dir}}),
+\]
+the directional form of the gradient $\E[\sigma(\langle\theta,Y\rangle)\,Y]$, the $Y$-average weighted by the
+logistic of the current gain (\cref{lst:potential}). The potential is also convex, but the proof never
+uses that: existence of a minimiser needs only continuity and coercivity, and the first-order condition
+holds at any minimiser.
+
+\begin{leancode}[caption={The softplus potential (\texttt{Foundations/FTAPOnePeriodVector}).},label=lst:potential]
+noncomputable def softplus (u : ℝ) : ℝ := Real.log (1 + Real.exp u)
+noncomputable def logistic (u : ℝ) : ℝ := Real.exp u / (1 + Real.exp u)
+noncomputable def potential (θ : F) : ℝ :=
+  ∫ ω, softplus (inner ℝ θ (Y ω)) ∂P
+\end{leancode}
+
+\subsection{No arbitrage gives coercivity}
+No arbitrage is what makes $f$ attain a minimum. Redundant directions are set aside first. The \emph{gains kernel}
+\[
+  N=\{\theta\in F:\ \langle\theta,Y\rangle=0\ \ P\text{-a.s.}\}
+\]
+collects the positions with almost surely zero gain. It is a linear subspace, and $f$ is constant along
+it, since adding an element of $N$ changes no gain. On the orthogonal complement $N^\perp$ the picture is
+rigid. The positive-gain average $g(\theta)=\E[\langle\theta,Y\rangle^+]$ is continuous and positively
+homogeneous, and under no arbitrage it is strictly positive on $N^\perp\setminus\{0\}$: if $g(\theta)=0$
+then $\langle-\theta,Y\rangle\ge0$ almost surely, so no arbitrage puts $\theta$ in $N$, while
+$N\cap N^\perp=\{0\}$. Its minimum $c$ over the unit sphere of $N^\perp$ is therefore positive, and since
+the softplus dominates the positive part,
+\[
+  f(\theta)\;\ge\;g(\theta)\;\ge\;c\,\norm{\theta}\qquad(\theta\in N^\perp).
+\]
+No arbitrage makes $f$ coercive on $N^\perp$ (\cref{lst:coercive}). The converse holds as well,
+though the theorem does not need it and it is not formalized: if $\theta$ is an arbitrage, then at every
+point $\eta$ the derivative of $f$ in the direction $-\theta$ is
+$-\E[\sigma(\langle\eta,Y\rangle)\langle\theta,Y\rangle]<0$, so $f$ has no minimiser.
+
+\begin{leancode}[caption={Coercivity from no arbitrage (\texttt{Foundations/FTAPOnePeriodVector}).},label=lst:coercive]
+lemma exists_pos_lower_bound (hYint : Integrable Y P) (hNA : NoArbitrage P Y)
+    (hNbot : (gainsKernel P Y)ᗮ ≠ ⊥) :
+    ∃ c > 0, ∀ θ ∈ (gainsKernel P Y)ᗮ, c * ‖θ‖ ≤ potential P Y θ
+\end{leancode}
+
+\subsection{The minimiser and its measure}
+Coercivity and continuity give a minimiser $\theta_0$ of $f$ on the closed subspace $N^\perp$, by
+compactness of a closed ball (\lean{exists_global_min_potential}); because
+$f$ is flat along $N$ and $F=N\oplus N^\perp$, the same $\theta_0$ minimises $f$ over all of $F$. At a
+global minimiser every directional derivative vanishes, so
+\[
+  \E\bigl[\sigma(\langle\theta_0,Y\rangle)\,Y\bigr]=0
+\]
+(\cref{lst:foc}). The weight $z=\sigma(\langle\theta_0,Y\rangle)$ lies strictly between $0$ and $1$: it is
+bounded, strictly positive, and makes $Y$ fair. The measure $Q$ with $P$-density $z/\E[z]$ is therefore a
+probability measure equivalent to $P$, under which $Y$ is integrable with $\E_Q[Y]=0$. If $N^\perp$ is
+trivial, every direction is redundant, $Y=0$ almost surely, and $Q=P$ will do.
+
+\begin{leancode}[caption={The first-order condition (\texttt{Foundations/FTAPOnePeriodVector}).},label=lst:foc]
+lemma integral_logistic_smul_eq_zero (hY : Measurable Y) (hYint : Integrable Y P)
+    {θ₀ : F} (hmin : ∀ θ, potential P Y θ₀ ≤ potential P Y θ) :
+    ∫ ω, logistic (inner ℝ θ₀ (Y ω)) • Y ω ∂P = 0
+\end{leancode}
+
+Two features set this apart from the textbook proof. No non-redundancy hypothesis is needed: redundant
+assets live in $N$, the minimisation takes place on $N^\perp$, and the kernel is absorbed rather than
+assumed away. And integrability of $Y$ is not assumed: as in \cref{sec:scalar}, the bounded tempering
+$(1+\norm{Y})^{-1}$ reduces to the integrable case, and equivalence of measures carries the result back.
+The minimisation then takes place under the tempered measure $\tilde P$, so in general the density
+of $Q$ with respect to $P$ is proportional to $\sigma(\langle\theta_0,Y\rangle)\,(1+\norm{Y})^{-1}$, with $\theta_0$
+a minimiser of the potential under $\tilde P$.
+The backward direction is \lean{exists_isEMM_of_noArbitrage}; with the forward direction it is the
+biconditional (\cref{lst:vector}).
+
+\begin{leancode}[caption={The $d$-asset one-period theorem (\texttt{Foundations/FTAPOnePeriodVector}); the context is that of \cref{lst:defs}.},label=lst:vector]
+theorem ftap_one_period_vector (hY : Measurable Y) :
+    NoArbitrage P Y ↔ ∃ Q, IsEMM P Y Q
+\end{leancode}
+
+Where the classical proof invokes the dual of $L^\infty$ and the closedness of a cone in $L^0$, this one
+invokes coercivity, a minimum over a sphere, and differentiation under an integral, each already in
+Mathlib. The reward is an equivalent martingale measure given by a formula in $\theta_0$,
+$\sigma(\langle\theta_0,Y\rangle)$ up to normalisation and tempering, rather than produced by a separating
+functional. The minimiser itself is obtained by compactness, not computed; ``explicit'' here means a
+formula in $\theta_0$, not a closed form. The formula lives in the proof: the theorem asserts existence,
+and what the library states about the formula is the first-order condition of \cref{lst:foc}, from which
+the martingale property of $Q$ follows by normalisation.
+
+\subsection{Why the softplus}\label{sec:why-softplus}
+Variational proofs of the one-period theorem are not new: Rogers~\cite{Rogers1994} obtains the
+equivalent martingale measure from a minimisation argument rather than a separation. What matters for a
+formalization is the choice of potential, and the softplus is chosen for what the argument asks of it.
+For a convex $C^1$ function $\phi$ in place of the softplus, the proof uses four properties:
+\begin{enumerate}[label=(\roman*)]
+\item $\phi(u)\ge u^+$, which turns no arbitrage into coercivity;
+\item $\abs{\phi(u)}\le a\abs{u}+b$, which makes $\E[\phi(\langle\theta,Y\rangle)]$ finite for integrable $Y$;
+\item $\phi'$ bounded, which dominates the derivative under the integral by an $L^1$ function;
+\item $\phi'>0$, which makes the weight $\phi'(\langle\theta_0,Y\rangle)$ a strictly positive density.
+\end{enumerate}
+The softplus has all four, with $\phi'=\sigma\in(0,1)$. The exponential $\phi(u)=e^u$ has (i) and (iv)
+but neither (ii) nor (iii): its minimiser gives the Esscher density proportional to
+$e^{\langle\theta_0,Y\rangle}$, which needs exponential moments of $Y$, and the bounded tempering
+$(1+\norm{Y})^{-1}$ supplies only integrability. The logistic density is thus the softplus analogue of
+the Esscher measure, not the Esscher measure itself (the first version of this paper conflated the
+two). It is bounded, and it exists whenever $Y$ is integrable.
+
+\begin{remark}[interpretation, not formalized]
+The convex conjugate of the softplus is $q\log q+(1-q)\log(1-q)$ on $[0,1]$, minus the binary entropy
+$H(q)$. Interchanging the minimum over $\theta$ with the supremum over weights, which convex duality
+justifies but we do not formalize, identifies $\min_\theta f(\theta)$ with
+$\max\{\E[H(z)]:\ 0\le z\le1,\ \E[zY]=0\}$, attained at $z=\sigma(\langle\theta_0,Y\rangle)$. The density
+the construction produces is, up to normalisation, the fair weight of maximal expected binary entropy.
+\end{remark}
+
+%======================================================================
+\section{A worked example}\label{sec:example}
+
+A two-state market makes the construction concrete and shows the gains kernel at work. The example is
+computed by hand; it illustrates the Lean argument and is not itself a Lean theorem. Let
+$\Omega=\{+,-\}$ with $P(+)=P(-)=\tfrac12$, and take two assets whose discounted excess returns are
+\[
+  Y_1(+)=a,\quad Y_1(-)=-b\quad(a,b>0),\qquad Y_2=c\,Y_1\quad(c\neq0),
+\]
+so the second asset is redundant. A position $\theta=(\theta_1,\theta_2)$ has gain
+$\langle\theta,Y\rangle=(\theta_1+c\,\theta_2)\,Y_1$, which depends on $\theta$ only through the scalar
+$s=\theta_1+c\,\theta_2$. The gains kernel is the line $N=\{\theta:\theta_1+c\,\theta_2=0\}$, and the
+potential collapses to a function of $s$ alone,
+\[
+  f(\theta)=\tfrac12\log(1+e^{sa})+\tfrac12\log(1+e^{-sb}).
+\]
+Its derivative in $s$ is $\tfrac12\bigl(a\,\sigma(sa)-b\,\sigma(-sb)\bigr)$, strictly increasing in $s$,
+negative for $s\to-\infty$ and positive for $s\to+\infty$, so it vanishes at a unique $s_0$. The logistic
+weight $z=\sigma(s_0Y_1)$, normalised, is the density, and the first-order condition
+$a\,\sigma(s_0a)=b\,\sigma(-s_0b)$ is $\E_Q[Y_1]=0$. In two states that pins the measure to
+\[
+  Q(+)=\frac{b}{a+b},\qquad Q(-)=\frac{a}{a+b},
+\]
+the classical risk-neutral probability, which is also the explicit weight of the two-state module
+(\lean{emmWeightUp}, after~\cite{Nagy2026}). The redundant asset adds no constraint: once $Y_1$ is fair,
+$Y_2=c\,Y_1$ is fair automatically, as the minimisation over $N^\perp$ predicts. In higher dimension the
+first-order condition is no longer a scalar equation, but the structure is the same: the kernel absorbs
+the redundant directions, and for integrable returns the logistic of the minimising gain is the density.
+
+%======================================================================
+\section{One separation for pricing and risk}\label{sec:separation}
+
+The root of \cref{lst:cone} has a sibling. A single point $x_0$ outside a closed convex cone $C$ that
+contains the origin is separated from it by a functional $p$ with $\sum_ip_iv_i\le0$ on $C$ and
+$\sum_ip_ix_{0,i}>0$ (\lean{exists_separating_of_not_mem_cone}). Both are derived in the same file from
+Mathlib's geometric Hahn--Banach theorems through two shared lemmas, a basis expansion of a functional and
+the fact that a functional bounded below on a cone is non-negative on it. The first is the pricing
+reading of separation; the second is the risk reading.
+
+\paragraph{Risk}
+A risk measure $\rho$ on a finite state space is \emph{coherent} if it is monotone, cash-invariant,
+positively homogeneous and subadditive~\cite{ADEH1999}. Its acceptance set $\{X:\rho(X)\le0\}$ is then a
+closed convex cone, and a position that is not acceptable is a point outside it. Separating the rejected
+position $X+(\rho(X)-\varepsilon)\ind$ from the acceptance cone and normalising the separating functional
+yields a probability vector that prices every acceptable position non-negatively; letting
+$\varepsilon\downarrow0$ gives the representation of Artzner, Delbaen, Eber and Heath
+(\cref{lst:risk}): $\rho(X)$ is the least upper bound of the expected losses $\E_q[-X]$ over the
+representing set.
+
+\begin{leancode}[caption={The coherent-risk representation on a finite state space (\texttt{RiskMeasures/AcceptanceSet}).},label=lst:risk]
+def representingSet {ι : Type*} [Fintype ι] (ρ : (ι → ℝ) → ℝ) :
+    Set (ι → ℝ) :=
+  {q | (∀ i, 0 ≤ q i) ∧ (∑ i, q i = 1) ∧
+    ∀ Z ∈ {Y : ι → ℝ | ρ Y ≤ 0}, 0 ≤ ∑ i, q i * Z i}
+
+theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] {ρ : (ι → ℝ) → ℝ}
+    (hρ : IsCoherentRisk ρ) (X : ι → ℝ) :
+    IsLUB ((fun q ↦ ∑ i, q i * (- X i)) '' representingSet ρ) (ρ X)
+\end{leancode}
+
+So the equivalent martingale measure of a finite market and the representing scenarios of a coherent risk
+measure are the same kind of object, produced the same way: a strictly positive (respectively
+non-negative) normalised functional that separates a cone. In the library this is more than an analogy.
+Both theorems import the one module, and the two separations they rest on, cone from simplex and point
+from cone, are proved from the same two helper lemmas; they are siblings, not one lemma applied twice. The statement of \lean{coherentRisk_isLUB} is also
+restated with Mathlib alone and checked against the library by an external tool (\cref{sec:artifact}).
+
+\paragraph{Superhedging}
+Superhedging shows where the separation has not yet been carried. Weak duality needs none: every
+martingale measure, equivalent or not, prices a claim below the cost of any portfolio that dominates it
+(\lean{emm_le_superReplication}), by a direct calculation. Strong duality, that the superhedging price
+equals the supremum of martingale prices, is the separation-based converse. It needs the cone of
+super-replicable payoffs to be closed, which for a finitely generated cone is classical but is not
+available in Mathlib at the library's pin; Mathlib's cone-separation theorem itself is. Strong duality is
+not formalized.
+
+%======================================================================
+\section{What is proved, and what is not}\label{sec:boundary}
+
+The theorems above are complete and machine-checked: the finite-state one-period theorem with several
+assets, the finite-state multi-period theorem with one asset, and the one-period theorem on an arbitrary
+probability space with one asset and with several. Each is a biconditional between no arbitrage and the
+existence of an equivalent martingale measure (\cref{fig:ladder}).
+
+\begin{figure}[tbp]
+\centering
+\begin{tikzpicture}[
+  node distance=7mm and 6mm,
+  box/.style={draw=mfaccent!70, fill=mfbg, rounded corners=2pt, align=center,
+    text width=64mm, inner sep=4pt, font=\small},
+  open/.style={box, dashed, fill=white},
+  arr/.style={-{Stealth[length=2.2mm]}, draw=mfaccent},
+  lab/.style={font=\footnotesize\itshape, text=mfmuted}]
+\node[box] (a) {Finite states, one period, $d$ assets\\[1pt]
+  \texttt{\footnotesize hasEMM\_multi\_iff\_not\_hasArbitrage}};
+\node[box, below=of a] (b) {Finite states, $T$ periods, one asset\\[1pt]
+  Harrison--Pliska $\cdot$ \texttt{\footnotesize ftap\_discrete}};
+\node[box, below=of b] (c) {Arbitrary $\Omega$, one period, one asset\\[1pt]
+  \texttt{\footnotesize ftap\_one\_period}};
+\node[box, below=of c] (d) {Arbitrary $\Omega$, one period, $d$ assets\\[1pt]
+  variational EMM $\cdot$ \texttt{\footnotesize ftap\_one\_period\_vector}};
+\node[open, below=of d] (e) {Arbitrary $\Omega$, $T$ periods\\[1pt]
+  Dalang--Morton--Willinger $\cdot$ forward direction only};
+\node[open, below=of e] (f) {Continuous time\\[1pt]
+  Delbaen--Schachermayer $\cdot$ forward direction only};
+\draw[arr] (a) -- node[right, lab] {add periods} (b);
+\draw[arr] (b) -- node[right, lab] {drop finiteness} (c);
+\draw[arr] (c) -- node[right, lab] {add assets} (d);
+\draw[arr, dashed] (d) -- node[right, lab] {add dynamics} (e);
+\draw[arr, dashed] (e) -- node[right, lab] {continuous trading} (f);
+\end{tikzpicture}
+\caption{The settings formalized here (solid) and those that remain open or partial (dashed). Each solid
+box is a machine-checked biconditional between no arbitrage and an equivalent martingale measure.}
+\label{fig:ladder}
+\end{figure}
+
+\paragraph{The general multi-period theorem}
+One rung of the ladder is missing its converse. The forward direction holds on an arbitrary probability
+space over several periods: an equivalent martingale measure excludes arbitrage by bounded predictable
+strategies in one risky asset (\lean{emm_implies_no_arbitrage}). The theorem of Dalang, Morton and Willinger places a
+multi-period market on an arbitrary probability space: trading is dynamic, strategies are predictable
+processes, and the attainable gains live in $L^0$ rather than in a finite-dimensional space. Its classical
+proofs need two ingredients that the cases here sidestep: the closedness of the cone of attainable claims
+in $L^0$ under no arbitrage, and a measurable selection that assembles the one-period conditional
+measures into a single density across time~\cite{DMW1990,KabanovStricker2001}. Both are substantial, and
+neither is formalized; the backward direction is open. So is the finite-state multi-period theorem with
+several assets. The finite-state case captures the multi-period structure when the sample space is
+finite; the one-period cases capture the measure-theoretic difficulty in a single step. A natural route
+to the general theorem through the present construction would apply the softplus minimisation
+conditionally on $\F_{t}$, one period at a time; making the conditional minimiser measurable in $\omega$
+is where a measurable-selection argument re-enters, and it is not attempted here.
+
+\paragraph{Continuous time}
+In continuous time the library proves the forward direction for simple strategies: if $Q\sim P$ and the
+discounted price is a $Q$-martingale, then no strategy with finitely many trading dates and bounded
+predictable holdings is an arbitrage (\lean{isEMM_noArbitrageSimple}, \file{Foundations/ContinuousMarket}).
+For the Black--Scholes model the equivalent martingale measure is not assumed but constructed, by a
+Girsanov change of measure~\cite{CoelhoLibrary,CoelhoIto}. The converse, that no free lunch with
+vanishing risk yields an equivalent ($\sigma$-)martingale measure~\cite{DelbaenSchachermayer1994}, is not
+formalized.
+
+\paragraph{The second theorem}
+Around these results the library carries the uniqueness half of first-course arbitrage theory. In the
+Brownian market with a driftless price $S=S_0+\int\sigma\,\dd B$, $\sigma\neq0$ almost everywhere, a
+probability measure with square-integrable density under which $S$ is a martingale agrees with $P$ on
+$\F^B_T$ (\lean{measure_eq_of_density}, \file{Foundations/PricingMeasureL2Density}). Its proof runs
+through martingale representation and belongs to the It\^o calculus~\cite{CoelhoIto}. It is the direction
+from completeness to uniqueness; the converse, which needs the extreme-point characterisation of Jacod and
+Yor, is not formalized.
+
+%======================================================================
+\section{The artifact}\label{sec:artifact}
+
+The development is part of a Lean~4 library that builds against pinned versions of its dependencies:
+the Lean toolchain \texttt{v4.33.0-rc1}, Mathlib at revision \texttt{0434c03}, and the
+\texttt{BrownianMotion} package~\cite{BrownianMotionRepo} at \texttt{0d5b6eb}, which the results of this
+paper do not use. The state described here is release \texttt{v1.5.0} (commit \texttt{c0180c8}),
+archived on Zenodo~\cite{Zenodo}. A plain \texttt{lake build} from a clean checkout is the canonical
+check.
+
+Honesty about what the kernel accepts is enforced rather than asserted. Two files run
+\texttt{\#print axioms} under \texttt{\#guard\_msgs}: a curated audit of headline results, and a generated one
+that pins every library constant a benchmark proof cites, resolved by declaration rather than by name.
+Each theorem discussed here depends only on \texttt{propext}, \texttt{Classical.choice} and
+\texttt{Quot.sound}; a \texttt{sorry} or an additional axiom anywhere beneath one of them fails the build.
+A verification ledger records, for every benchmark entry, a hash of the exact sources and toolchain pins it
+was last checked against, so that an entry whose inputs change cannot keep a stale verdict. For the
+coherent-risk theorem of \cref{sec:separation} the repository also carries a Mathlib-only restatement,
+paired with a witness that its hypothesis is satisfiable, and a proof of both from the library that every
+build re-checks; the external checker Comparator~\cite{Comparator} is configured to confirm that the proved
+statements are exactly the restated ones and that only the three standard axioms are used. The results discussed are collected in
+\cref{tab:results}.
+
+\begin{table}[tbp]
+\centering\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.40\linewidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.26\linewidth}@{}}
+\toprule
+Lean declaration & Module & Benchmark entry \\
+\midrule
+\lean{MathFin.ftap_discrete} & \file{Foundations/FTAPDiscrete} & \bench{mf-ftap-discrete-complete} \\
+\lean{MathFin.hasEMM_multi_iff_not_hasArbitrage} & \file{Foundations/FTAPMultiState} & \bench{mf-ftap-single-period-complete} \\
+\lean{MathFin.OnePeriod.ftap_one_period} & \file{Foundations/FTAPOnePeriod} & \bench{mf-ftap-one-period-general} \\
+\lean{MathFin.OnePeriodVector.ftap_one_period_vector} & \file{Foundations/FTAPOnePeriodVector} & \bench{mf-ftap-one-period-vector} \\
+\lean{MathFin.exists_pos_separating_of_cone_disjoint_simplex} & \file{Foundations/ConvexDuality} & \bench{mf-convex-duality-root} \\
+\lean{MathFin.coherentRisk_isLUB} & \file{RiskMeasures/AcceptanceSet} & \bench{mf-coherent-risk-representation} \\
+\lean{MathFin.emm_le_superReplication} & \file{Foundations/SuperhedgingDuality} & \bench{mf-superhedging-emm-bound} \\
+\lean{MathFin.emm_implies_no_arbitrage} & \file{Foundations/FTAP} & \bench{mart-thm-2.6.7} \\
+\lean{MathFin.ContinuousMarket.isEMM_noArbitrageSimple} & \file{Foundations/ContinuousMarket} & \bench{gir-continuous-emm-forward} \\
+\lean{MathFin.PricingMeasureL2Density.measure_eq_of_density} & \file{Foundations/PricingMeasureL2Density} & \bench{gir-pricing-measure-density} \\
+\bottomrule
+\end{tabularx}
+\caption{The results discussed in this paper, their modules under \texttt{MathFin/}, and their benchmark
+entries. Every declaration is pinned by the axiom audits to \texttt{propext}, \texttt{Classical.choice} and
+\texttt{Quot.sound}.}
+\label{tab:results}
+\end{table}
+
+Within the wider library these sit among 535 catalogued results: 504 complete formalizations, 18 thin
+wrappers over Mathlib or \texttt{BrownianMotion} theorems, and 13 reduced cores that prove less than the
+result they are named after, with the 522 complete-or-wrapper entries counting as delivered. The catalogue
+is published as a dataset in which every entry carries its statement, its status and a description of
+what its formalization leaves out~\cite{HFDataset}. The library is released under the Apache~2.0
+licence.
+
+\paragraph{Provenance}
+The Lean development was written by the author with an AI coding assistant (Claude Code), as recorded in
+the repository's provenance file; every proof is checked by the Lean kernel, and the gates above apply
+to it unchanged. This manuscript was revised with the same assistant, and its statements were checked
+against the Lean sources of release \texttt{v1.5.0}.
+
+%======================================================================
+\begin{thebibliography}{99}
+\small
+\bibitem{ADEH1999} P.~Artzner, F.~Delbaen, J.-M.~Eber, D.~Heath. Coherent measures of risk.
+  \emph{Mathematical Finance}, 9(3):203--228, 1999.
+\bibitem{AvigadHolzlSerafin2017} J.~Avigad, J.~H\"olzl, L.~Serafin. A formally verified proof of the
+  central limit theorem. \emph{Journal of Automated Reasoning}, 59(4):389--423, 2017.
+\bibitem{BrownianMotionRepo} R.~Degenne et al. \emph{brownian-motion}: a Lean~4 development of Brownian
+  motion and stochastic integrals. \url{https://github.com/RemyDegenne/brownian-motion}, 2024--2026.
+\bibitem{CoelhoIto} R.~Coelho. A machine-checked It\^o calculus for Brownian motion.
+  arXiv:2606.15089, 2026.
+\bibitem{CoelhoLibrary} R.~Coelho. A formally verified library of mathematical finance in Lean~4.
+  arXiv:2606.01356, 2026.
+\bibitem{Comparator} \emph{Comparator}: a checker for Lean proofs against Mathlib-only statements.
+  \url{https://github.com/leanprover/comparator}, 2026.
+\bibitem{DMW1990} R.~C.~Dalang, A.~Morton, W.~Willinger. Equivalent martingale measures and no-arbitrage
+  in stochastic securities market models. \emph{Stochastics and Stochastic Reports}, 29(2):185--201,
+  1990.
+\bibitem{DegenneEtAl2025} R.~Degenne, D.~Ledvinka, E.~Marion, P.~Pfaffelhuber. Formalization of Brownian
+  motion in Lean. arXiv:2511.20118, 2025.
+\bibitem{DelbaenSchachermayer1994} F.~Delbaen, W.~Schachermayer. A general version of the fundamental
+  theorem of asset pricing. \emph{Mathematische Annalen}, 300(1):463--520, 1994.
+\bibitem{deMouraUllrich2021} L.~de~Moura, S.~Ullrich. The Lean~4 theorem prover and programming
+  language. In \emph{CADE~28}, LNCS 12699, pp.~625--635, 2021.
+\bibitem{EchenimGuiolPeltier2020} M.~Echenim, H.~Guiol, N.~Peltier. Formalizing the Cox--Ross--Rubinstein
+  pricing of European derivatives in Isabelle/HOL. \emph{Journal of Automated Reasoning}, 64:737--765,
+  2020.
+\bibitem{FollmerSchied2016} H.~F\"ollmer, A.~Schied. \emph{Stochastic Finance: An Introduction in
+  Discrete Time}, 4th ed. De Gruyter, 2016.
+\bibitem{HarrisonKreps1979} J.~M.~Harrison, D.~M.~Kreps. Martingales and arbitrage in multiperiod
+  securities markets. \emph{Journal of Economic Theory}, 20(3):381--408, 1979.
+\bibitem{HarrisonPliska1981} J.~M.~Harrison, S.~R.~Pliska. Martingales and stochastic integrals in the
+  theory of continuous trading. \emph{Stochastic Processes and their Applications}, 11(3):215--260,
+  1981.
+\bibitem{HFDataset} R.~Coelho. \emph{formal-mathfin-theorems} (dataset).
+  \url{https://huggingface.co/datasets/formal-applied-math/formal-mathfin-theorems}, 2026.
+\bibitem{KabanovStricker2001} Y.~Kabanov, C.~Stricker. A teachers' note on no-arbitrage criteria. In
+  \emph{S\'eminaire de Probabilit\'es XXXV}, LNM 1755, pp.~149--152. Springer, 2001.
+\bibitem{Keskin2023} A.~Keskin. A formalization of martingales in Isabelle/HOL. arXiv:2311.06188, 2023.
+\bibitem{Mathlib2020} The mathlib Community. The Lean mathematical library. In \emph{CPP 2020},
+  pp.~367--381, 2020.
+\bibitem{Nagy2026} T.~Nagy. From It\^o to Black--Scholes: a machine-verified derivation in Lean~4. SSRN
+  Working Paper 6336503, 2026.
+\bibitem{Rogers1994} L.~C.~G.~Rogers. Equivalent martingale measures and no-arbitrage.
+  \emph{Stochastics and Stochastic Reports}, 51(1--2):41--49, 1994.
+\bibitem{Zenodo} R.~Coelho. \emph{formal-mathfin: a formally verified library of mathematical finance in
+  Lean~4} (software). Zenodo, \url{https://doi.org/10.5281/zenodo.20477781}, 2026.
+\end{thebibliography}
+
+\end{document}

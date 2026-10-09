@@ -1,0 +1,1171 @@
+\pdfoutput=1
+\documentclass[11pt]{article}
+\usepackage{mathfin-paper}
+
+\title{A Machine-Checked It\^o Calculus\\ for Brownian Motion}
+\author{Raphael Coelho\thanks{Independent researcher. ORCID
+  \href{https://orcid.org/0009-0001-6601-1023}{0009-0001-6601-1023}.
+  Correspondence: \href{mailto:raphaelrrcoelho@gmail.com}{\texttt{raphaelrrcoelho@gmail.com}}.
+  Artifact: \url{https://github.com/formal-applied-math/formal-mathfin}, release \texttt{v1.5.0}.}}
+\date{October 2026}
+
+\hypersetup{pdftitle={A Machine-Checked Ito Calculus for Brownian Motion},
+  pdfauthor={Raphael Coelho}}
+
+\newcommand{\HT}{H_T}
+\newcommand{\bulletB}{\mathbin{\bullet}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+We develop the It\^o calculus of Brownian motion, machine-checked in Lean~4 over Mathlib and the
+\texttt{BrownianMotion} package. On a bounded interval $[0,T]$ the It\^o integral is built as a
+Hilbert-space isometry, from a predictable-rectangle $\pi$-system through the density of simple adapted
+processes. One identity, that the integral at time $t$ is the conditional-expectation projection of its
+terminal value onto $\F_t$, makes it an $L^2$ martingale, continuous in $L^2$, with its time-indexed
+isometry; a maximal inequality then gives it a modification with continuous paths, a local martingale on the
+half-line. Two theorems pin the
+operator down. Its range together with the constants is all of $L^2(\F^B_T)$, which is martingale
+representation, proved by totality of Dol\'eans exponentials with no Malliavin calculus; and it
+satisfies the \texttt{BrownianMotion} package's axiomatic characterisation of a stochastic integral.
+It\^o's formula for $f(t,B_t)$ is proved in $L^2$ for $f\in C^3$ whose derivatives grow at most
+exponentially, with the stochastic term the It\^o integral of the named integrand
+$\partial_xf(s,B_s)$; for every $f\in C^3$, with no growth condition, as a continuous local martingale,
+by localization at exit times; and at a fixed time for It\^o processes with bounded adapted continuous
+coefficients and $f\in C^2$ with bounded derivatives. To our knowledge these are the first machine-checked constructions of the It\^o
+integral and proofs of It\^o's formula in any proof assistant. The boundary is explicit: the
+integrator is Brownian motion or an It\^o integral against it, integrands are square-integrable, and
+quadratic variation is established in mean, not pathwise. The development is about 27,000 lines of Lean
+in 81 modules, \texttt{sorry}-free, with the axioms of each headline result pinned to Lean's three
+standard axioms by a build-enforced gate.
+\end{abstract}
+
+%======================================================================
+\section{Introduction}
+
+Stochastic calculus sits oddly in the formalization landscape. Its prerequisites (measure-theoretic
+probability, conditional expectation, $L^p$ spaces, Gaussian measures) are well represented in the major
+proof-assistant libraries. Its consumers (mathematical finance, stochastic control, stochastic partial
+differential equations) are fields with strong correctness cultures that cite formal methods as an
+aspiration. Yet the calculus itself long remained unformalized. Martingales in discrete and continuous
+time were formalized in Isabelle/HOL by Keskin~\cite{Keskin2023}; the central limit theorem was
+machine-checked a decade ago~\cite{AvigadHolzlSerafin2017}; and in 2025 Degenne, Ledvinka, Marion and
+Pfaffelhuber completed the first formal construction of Brownian motion, in
+Lean~4~\cite{DegenneEtAl2025,BrownianMotionRepo}. Their package is the foundation this work builds on,
+and it is now growing a general theory of stochastic integration: an axiomatic characterisation of the
+stochastic integral, local martingales, and the Doob--Meyer decomposition. The It\^o integral of
+Brownian motion, It\^o's formula and the martingale theory of the integral are the layer this paper
+supplies.
+
+The development is the stochastic-calculus core of a larger library of formalized mathematical
+finance~\cite{CoelhoLibrary}, in which it carries the continuous-time results: Girsanov's theorem,
+martingale representation and market completeness, stochastic differential equations, and the
+Black--Scholes pricing that rests on them; the library's no-arbitrage theory is treated
+separately~\cite{CoelhoFTAP}. Where the library overview surveys breadth, this paper is for readers who
+want to know exactly what was proved about the calculus, under which hypotheses, and by which proof
+architecture.
+
+\paragraph{Setting}
+All results are stated over a probability space $(\Omega,\F,\mu)$ carrying a process
+$B\colon\R_{\ge0}\to\Omega\to\R$ whose finite-dimensional laws are those of Brownian motion (the
+pre-Brownian interface \lean{IsPreBrownianReal}, developed in the \texttt{BrownianMotion} package and now
+part of Mathlib), with measurable coordinates and, where stated, continuous paths. $(\F_t)$ is the natural filtration of $B$
+(\lean{natFiltration}).
+
+\paragraph{Contributions}
+\begin{enumerate}[label=(\arabic*)]
+\item \emph{The It\^o integral as an isometry} (\cref{sec:integral}). The integrand space $\HT$ is the
+  $L^2$ space of the product measure on $(0,T]\times\Omega$ trimmed to the predictable $\sigma$-algebra;
+  simple adapted processes are dense in it, and the It\^o integral $\ito_T$ (\lean{itoIntegralCLM_T}) is
+  the unique continuous linear extension of the elementary integral, an isometry.
+\item \emph{The integral as a process} (\cref{sec:process}). The load-bearing identity
+  $(\varphi\bulletB B)_t=\E[\ito_T(\varphi)\mid\F_t]$ in $L^2$ makes adaptedness, the martingale property,
+  the contraction bound, the terminal and time-indexed It\^o isometries and $L^2$-continuity in $t$
+  corollaries.
+\item \emph{It\^o's formula in $L^2$} (\cref{sec:ito}). For $f(t,x)$ whose partial derivatives
+  $f_t,f_x,f_{xx},f_{tt},f_{tx},f_{xxx}$ are bounded, and then for those growing at most like
+  $e^{\lambda\abs{x}}$,
+  \[
+    f(T,B_T)-f(0,B_0)=\ito_T\bigl(f_x(\cdot,B)\bigr)+\int_0^T\bigl(f_t+\tfrac12f_{xx}\bigr)(s,B_s)\,\dd s
+    \quad\mu\text{-a.s.},
+  \]
+  with the integrand of $\ito_T$ named as the class of $(s,\omega)\mapsto f_x(s,B_s(\omega))$, by a
+  discrete-to-continuous argument through weighted quadratic variation with explicit $L^2$ remainder
+  bounds and, for the growth case, a cutoff limit carried by the isometry.
+\item \emph{The pathwise integral} (\cref{sec:pathwise}). The integral process has an almost surely
+  continuous modification whose everywhere-continuous representative is a local martingale for the
+  null-augmented filtration, on $[0,T]$ and on all of $\R_{\ge0}$.
+\item \emph{It\^o's formula without growth conditions} (\cref{sec:unrestricted}). For every $f$ whose
+  six partial derivatives above are continuous, with no bound of any kind,
+  $f(t,B_t)-f(0,B_0)-\int_0^t(f_t+\tfrac12f_{xx})(s,B_s)\,\dd s$ is a continuous local martingale, by
+  localization at exit times.
+\item \emph{It\^o processes} (\cref{sec:itoprocess}). Quadratic variation of an It\^o process with adapted
+  volatility, Riemann--Stieltjes sums against an It\^o integral, and It\^o's formula for
+  $X=x_0+\int b\,\dd s+\int\sigma\,\dd B$ with bounded adapted continuous coefficients.
+\item \emph{The range and the uniqueness of the integral} (\cref{sec:operator}). Martingale
+  representation: every square-integrable $\F^B_T$-measurable $F$ is $\E[F]+\ito_T(\varphi)$ for a
+  unique $\varphi\in\HT$. Integration against $M=\varphi\bulletB B$ with its bracket. And agreement with
+  the \texttt{BrownianMotion} package's axiomatic stochastic integral.
+\item \emph{What the calculus carries} (\cref{sec:consumers}). Girsanov's theorem for bounded
+  predictable drifts, and existence and uniqueness for Lipschitz stochastic differential equations on
+  short horizons.
+\end{enumerate}
+\Cref{sec:scope} sets the boundary precisely: which parts of the classical theory are present, which are
+absent, and why the title says ``a'' calculus rather than ``the'' calculus.
+
+\paragraph{Changes from the second version}
+Sections~\ref{sec:unrestricted}--\ref{sec:consumers} are new, as are the growth-condition and process
+forms of It\^o's formula in \cref{sec:ito}. The bounded-derivative formula now names its integrand
+(the second version displayed an existentially quantified $g_{f'}$ whose prose described more than the
+statement said). For the same reason the keystone $\int_0^TB\,\dd B$ is now stated as what the Lean proves,
+with the named form derived from the growth-condition formula (\cref{sec:keystone}). The pre-Brownian
+interface is \lean{IsPreBrownianReal}, now in Mathlib; the predictable rectangles are consumed from the
+upstream package; and the artifact, pins and sizes are those of release \texttt{v1.5.0}. Smaller
+descriptions are corrected against the source: the $\sigma$-algebra the rectangles generate is identified
+here, not by an upstream lemma; the maximal inequality is Doob's weak-type inequality applied to simple
+processes; and the closed form of $\int B\,\dd B$ preceded the general Riemann bridge rather than consuming
+it. The scope section is rewritten. Of the limitations it recorded, the restriction of It\^o's formula to
+bounded derivatives is lifted; the unrestricted formula, which the second version placed beyond the development in
+its $C^2$ form, is now proved for $C^3$ functions in local-martingale form, while the unrestricted $C^2$ formula
+for $f(t,B_t)$ remains open.
+
+%======================================================================
+\section{Setting and verification discipline}\label{sec:setting}
+
+\subsection{Foundations consumed}
+The development is built in Lean~4~\cite{deMouraUllrich2021} over Mathlib~\cite{Mathlib2020} and the
+\texttt{BrownianMotion} package~\cite{BrownianMotionRepo,DegenneEtAl2025}, whose construction of Brownian
+motion this work consumes rather than reproves; the artifact pins the package at commit
+\texttt{0d5b6eb}. The pre-Brownian interface itself now lives in Mathlib. From the package the development
+takes the continuous modification of Brownian motion, the simple processes (\lean{SimpleProcess}) and
+elementary predictable sets, the predictable rectangles of a filtration and the proof that they form a
+semiring of sets, the local-martingale predicate \lean{IsLocalMartingale}, Doob's maximal inequality, and
+the axiomatic stochastic integral of \cref{sec:characterisation}. Time is indexed by $\R_{\ge0}$ (Lean's
+\lean{NNReal}); Lebesgue measure on time enters through \lean{timeMeasure}, restricted to $(0,T]$.
+
+\subsection{Auditability and reproducibility}
+Verification follows the library's standing contract~\cite{CoelhoLibrary}. No \texttt{sorry} or
+\texttt{admit} occurs anywhere in the development. Two build-enforced audits run \texttt{\#print axioms}
+under \texttt{\#guard\_msgs}: a curated one over headline results, and a generated one that pins every
+library constant a benchmark proof cites. Every numbered theorem of this paper, and every result it names
+as a headline, is pinned by one of them to \texttt{propext}, \texttt{Classical.choice} and
+\texttt{Quot.sound}, and a \texttt{sorry} or extra axiom beneath any of them fails the build. The \texttt{BrownianMotion} package has \texttt{sorry}s of its own at the pin; the
+audit is what certifies that none lies beneath a result reported here. A hash ledger records the exact
+source inputs and toolchain pins each benchmark entry was last verified under, so a result cannot go
+stale silently when a dependency changes. The statements displayed below are transcriptions of the Lean
+statements; where a hypothesis package is abbreviated in prose, the Lean declaration is the authority,
+and \cref{app:names} maps every displayed result to its declaration, module and benchmark entry.
+
+\subsection{Scale}
+Counted as the import closure of its headline modules within the library, less the finance vocabulary
+that closure draws in, the It\^o tower is 81 modules and about 27,000 lines of Lean, with some 830
+theorems and lemmas; it lies downstream of Mathlib and \texttt{BrownianMotion} and upstream of the
+library's pricing layers. The 26 modules of the second version account for about 8,100 of those lines.
+\Cref{tab:modules} groups the principal modules by role.
+
+\begin{table}[!t]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.21\linewidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Role & Principal modules \\
+\midrule
+Discrete engine & \file{DiscreteIto}, \file{DiscreteItoPolynomial}, \file{ItoSquaringIdentity} \\
+Quadratic variation & \file{QuadraticVariationL2}, \file{WeightedQuadraticVariation},
+  \file{BrownianQuadraticVariation}, \file{ItoProcessQV}, \file{AdaptedQuadraticVariation} \\
+Integral (isometry) & \file{ItoIntegralL2}, \file{ItoIntegralCLM}, \file{ItoIsometryAdapted},
+  \file{ItoIntegralBrownian}, \file{ItoIntegralL2Dense}, \file{ItoIntegralCovariation},
+  \file{ItoIntegralLocality} \\
+Riemann bridges & \file{ItoIntegralRiemannBridge}, \file{ItoIntegralRiemannBridgeTD},
+  \file{ItoIntegralRiemannBridgeAdapted}, \file{AdaptedProcessToLp} \\
+Integral as process & \file{ItoIntegralProcess}, \file{ItoIntegralProcessGeneral},
+  \file{ItoIntegralProcessMartingale}, \file{ItoIntegralProcessIsometry} \\
+It\^o's formula in $L^2$ & \file{ItoFormulaC2}, \file{ItoFormulaCLM}, \file{ItoFormulaRemainder},
+  \file{ItoFormulaSquaredL2}, \file{ItoFormulaTD}, \file{ItoFormulaTDRemainder},
+  \file{ItoFormulaProcess}, \file{ItoFormulaLocalized}, \file{ItoFormulaGBM} \\
+Pathwise regularity & \file{ItoIntegralProcessContinuousModification},
+  \file{ItoIntegralProcessLocalMartingale}, \file{ItoIntegralProcessLocalMartingaleGeneral},
+  \file{ItoIntegralProcessL2Infinite}, \file{ItoIntegralProcessLocalMartingaleInfinite} \\
+Localization & \file{ExitTime}, \file{ItoFormulaUnrestricted}, \file{ItoFormulaUnrestrictedLocMart} \\
+It\^o processes & \file{AdaptedStochasticIntegralFreezing}, \file{AdaptedRiemannStieltjes},
+  \file{ItoFormulaItoProcess}, \file{ItoFormulaAdapted}, \file{DriftProcessModification} \\
+Representation & \file{MartingaleRepresentation}, \file{DoleansStepRepresentation},
+  \file{WienerExponentialTotality}, \file{BrownianCylinderGeneration} \\
+Integration against $\varphi\bulletB B$ & \file{ItoIntegralAgainstMartingale}, \file{LpMulIsometry},
+  \file{PointwiseBracket}, \file{BracketCompensator}, \file{StochasticIntegralCharacterisation} \\
+Girsanov & \file{ExpMartingaleQBrownian}, \file{GirsanovConstantTheta}, \file{GirsanovSimpleTheta},
+  \file{GirsanovAdaptedTheta}, \file{GirsanovPredictableTheta} \\
+SDEs & \file{ItoProcessPredictable}, \file{SDEExistence}, \file{SDEPathwise}, \file{SDEUniqueness} \\
+\bottomrule
+\end{tabularx}
+\caption{The It\^o tower by role: principal modules, all under \texttt{MathFin/Foundations/}. The full
+tower, the import closure of these modules less the finance vocabulary, is 81 modules and about 27,000
+lines.}
+\label{tab:modules}
+\end{table}
+
+%======================================================================
+\section{The classical theory}\label{sec:classical}
+
+We recall the objects the formalization reproduces, in the form they take in the standard
+references~\cite{KaratzasShreve1991,Ito1944}, so that the theorems below can be read against them.
+
+Let $(B_t)_{t\ge0}$ be a Brownian motion on $(\Omega,\F,\mu)$ with natural filtration $(\F_t)$. For a simple
+adapted process $\varphi_s=\sum_k\xi_k\ind_{(t_k,t_{k+1}]}(s)$, with $\xi_k$ bounded and
+$\F_{t_k}$-measurable, the It\^o integral is the finite sum
+$\int_0^T\varphi\,\dd B=\sum_k\xi_k(B_{t_{k+1}}-B_{t_k})$. The defining computation is the \emph{It\^o
+isometry}: because each $\xi_k$ is independent of the forward increment and increments over disjoint
+intervals are independent,
+\[
+  \E\Bigl[\Bigl(\sum_k\xi_k(B_{t_{k+1}}-B_{t_k})\Bigr)^2\Bigr]=\sum_k\E[\xi_k^2]\,(t_{k+1}-t_k)
+  =\E\int_0^T\varphi_s^2\,\dd s,
+\]
+the cross terms vanishing by adaptedness and the diagonal contributing $\E[\xi_k^2](t_{k+1}-t_k)$ because
+$\E[(B_{t_{k+1}}-B_{t_k})^2\mid\F_{t_k}]=t_{k+1}-t_k$. The map $\varphi\mapsto\int_0^T\varphi\,\dd B$ is
+thus an isometry from the simple processes, carrying the $L^2(\lambda\otimes\mu)$ norm on the predictable
+side, into $L^2(\mu)$; as the simple processes are dense in the predictable $L^2$ space, it extends to a
+linear isometry on all of it (\cref{sec:integral}).
+
+As a function of its upper limit, $t\mapsto\int_0^t\varphi\,\dd B$ is a continuous $L^2$ martingale with
+$\E[(\int_0^t\varphi\,\dd B)^2]=\E\int_0^t\varphi_s^2\,\dd s$ (\cref{sec:process,sec:pathwise}). The
+quadratic variation of Brownian motion is $[B]_t=t$: along partitions of $[0,t]$ with mesh tending to
+zero, $\sum_k(B_{t_{k+1}}-B_{t_k})^2\to t$. It\^o's formula states that for $f\in C^{1,2}$
+\[
+  f(t,B_t)-f(0,B_0)=\int_0^tf_x(s,B_s)\,\dd B_s+\int_0^t\bigl(f_t+\tfrac12f_{xx}\bigr)(s,B_s)\,\dd s,
+\]
+the second-order term surviving because $(\dd B)^2=\dd t$ in the mean-square sense made exact by
+$[B]_t=t$. When $f_x(\cdot,B)$ is not square-integrable the stochastic integral is a local martingale,
+obtained by stopping at the exit times of compact sets (\cref{sec:unrestricted}). Finally, the integral
+is onto: every centred square-integrable $\F^B_T$-measurable random variable is
+$\int_0^T\varphi\,\dd B$ for a unique predictable $\varphi$, the martingale representation theorem
+(\cref{sec:operator}).
+
+%======================================================================
+\section{Design of the formalization}\label{sec:design}
+
+Four representation choices shape the development and are worth stating before the theorems that rest on
+them.
+
+\paragraph{The integrand, after the upstream package}
+The simple integrands are not re-encoded here. \texttt{BrownianMotion} provides \lean{SimpleProcess}, a
+bounded value at time zero together with finitely many bounded values on intervals, each measurable at the
+interval's left endpoint, and the predictable rectangles of a filtration together with the proof that they
+form a semiring of sets. This work consumes both: the elementary It\^o integral is defined on
+\lean{SimpleProcess}, the rectangle family is the upstream one, and the $\pi$-system property needed for
+Dynkin's theorem is projected from the upstream semiring. What is built here is the layer above: the
+identification of the $\sigma$-algebra the rectangles generate, the orthogonal-complement density and the
+isometric extension.
+
+\paragraph{Time as \texttt{NNReal}}
+The time axis is $\R_{\ge0}$, not $\R$ with a positivity side condition. Increments $B_t-B_s$ then carry
+$s\le t$ in their type-level data rather than as a hypothesis to discharge, and the bounded horizon
+enters through a single finite measure (\lean{timeMeasure_T}, of total mass $T$) rather than through
+interval hypotheses threaded across lemmas.
+
+\paragraph{A trimmed measure}
+The integrand space is the $L^2$ space of a measure that has already been restricted to the predictable
+$\sigma$-algebra, rather than an ambient $L^2$ space with a sub-$\sigma$-algebra measurability side
+condition. Predictability is then a property of membership in $\HT$, not a hypothesis threaded through
+every limit: a Cauchy sequence in $\HT$ has its limit in $\HT$, so when It\^o's formula realizes
+$s\mapsto f'(B_s)$ as an $L^2$ limit of step processes the limit's predictability is free. The cost is a
+one-time investment in the trimmed-measure $L^2$ API; the saving recurs at every density and convergence
+argument downstream.
+
+\paragraph{One construction pattern, used throughout}
+The integral, the integral as a process and the integral against an It\^o integral are built by the same
+idiom: a norm-preserving linear map on a dense subspace, then its unique continuous linear extension
+(Mathlib's \lean{LinearMap.extendOfNorm}). Every identity proved on simple processes then transfers to
+all of $\HT$ by continuity and density, through the equalizer property of dense ranges
+(\lean{DenseRange.equalizer}). That mechanism is what turns \cref{sec:process} into a sequence of short
+arguments.
+
+%======================================================================
+\section{The \texorpdfstring{$L^2$}{L2} It\^o integral}\label{sec:integral}
+
+\subsection{The integrand space}
+Fix $T\in\R_{\ge0}$ and write $\lambda_T$ for Lebesgue measure on time restricted to $(0,T]$. The
+predictable rectangles
+\[
+  \mathcal R=\bigl\{(s,t]\times A:\ s<t,\ A\in\F_s\bigr\}\cup\bigl\{\{0\}\times A_0:\ A_0\in\F_0\bigr\}
+\]
+of the natural filtration form a $\pi$-system (\lean{isPiSystem_predictableRect}) that generates the
+predictable $\sigma$-algebra $\mathcal P$ (\lean{generateFrom_predictableRect}, proved here directly);
+\cref{lst:rect} shows the definition, which is now the upstream one. The integrand space is
+\[
+  \HT=L^2\bigl((0,T]\times\Omega,\ \mathcal P,\ (\lambda_T\otimes\mu)\restriction_{\mathcal P}\bigr),
+\]
+realized as the $L^2$ space of the product measure trimmed to $\mathcal P$ (\lean{trimMeasure_T}), and
+the It\^o integral is a continuous linear map out of it (\cref{lst:clm}).
+
+\begin{leancode}[caption={The predictable rectangles, consumed from \texttt{BrownianMotion} (\texttt{Foundations/ItoIntegralCLM}).},label=lst:rect]
+def predictableRect (hBmeas : ∀ t, Measurable (B t)) :
+    Set (Set (ℝ≥0 × Ω)) :=
+  (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictableRectangles
+
+lemma isPiSystem_predictableRect (hBmeas : ∀ t, Measurable (B t)) :
+    IsPiSystem (predictableRect (mΩ := mΩ) hBmeas) :=
+  (MeasureTheory.Filtration.isSetSemiring_predictableRectangles _).isPiSystem
+\end{leancode}
+
+\begin{leancode}[caption={The It\^o integral and its isometry (\texttt{Foundations/ItoIntegralCLM}).},label=lst:clm]
+noncomputable def itoIntegralCLM_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t)) :
+    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) →L[ℝ] Lp ℝ 2 μ :=
+  (itoAssembly_T hB T hBmeas).extendOfNorm (simpleAssembly_T (μ := μ) T hBmeas)
+
+theorem itoIntegralCLM_T_norm (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t))
+    (f : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    ‖itoIntegralCLM_T hB T hBmeas f‖ = ‖f‖
+\end{leancode}
+
+\subsection{Simple processes, density, isometry}
+A simple adapted process is a finite combination of indicator rectangles $\xi_s\cdot\ind_{(s,t]}$ with
+$\xi_s$ bounded and $\F_s$-measurable; \lean{TBoundedSP} is the submodule of those supported in $[0,T]$ and
+\lean{simpleProcessL2_T} sends it into $\HT$. The elementary integral maps such a process to
+$\sum\xi_s(B_t-B_s)$ (\lean{itoAssembly_T}); independence and the Gaussian increment moments give the
+elementary It\^o isometry (\lean{assembly_isometry_T}).
+
+Density of the simple processes in $\HT$ (\lean{simpleAssembly_T_denseRange}) is the technical core of
+the construction and the part of it not inherited from the upstream package. It is proved by the
+orthogonal-complement method. Take $\psi\in\HT$ orthogonal to every elementary integrand. Testing against
+the indicator of a rectangle $(a,b]\times F$ shows that the integral of $\psi$ over that rectangle
+vanishes; the measurable sets on which $\int\psi=0$ form a $\lambda$-system containing the rectangle
+$\pi$-system, so Dynkin's theorem extends the vanishing to all of $\mathcal P$
+(\lean{setIntegral_eq_zero_of_orthogonal_pred}), forcing $\psi=0$ almost everywhere. The It\^o integral
+$\ito_T$ (\lean{itoIntegralCLM_T}) is then the unique isometric continuous linear extension of the
+elementary integral. The same density, run over the $\sigma$-finite time axis by exhaustion, gives the
+unbounded-horizon isometry on $L^2(\R_{\ge0}\times\Omega)$ (\lean{itoIntegralL2_norm}).
+
+\subsection{The keystone example}\label{sec:keystone}
+The integral's first consumer was the closed form of $\int_0^TB\,\dd B$: there is an integrand $g_B\in\HT$,
+built as the $\HT$-limit of truncated left-endpoint step processes of $s\mapsto B_s$, with
+\[
+  \ito_T(g_B)=\tfrac12\bigl(B_T^2-B_0^2-T\bigr)\qquad(\text{\lean{itoIntegralCLM_T_brownian}}).
+\]
+The It\^o correction $-T/2$ emerges as follows: the summation-by-parts identity
+\lean{discrete_squaring_identity} writes
+\[
+  \sum_kB_{s_k}(B_{s_{k+1}}-B_{s_k})=\tfrac12\Bigl(B_T^2-B_0^2-\sum_k(B_{s_{k+1}}-B_{s_k})^2\Bigr),
+\]
+whose left side is the discretized $\int_0^TB\,\dd B$ and whose squared-increment sum converges in $L^2$ to
+$T$ (\cref{sec:qv}); what is left is $\frac12(B_T^2-B_0^2-T)$. Because the left-endpoint coefficients
+$B_{s_k}$ are unbounded Gaussians, the sums are not elementary integrals of simple processes; the proof
+truncates them to $[-M,M]$ and removes the truncation in the $L^2$ limit, which is how the It\^o integral is
+defined for unbounded integrands in any case. The general Riemann bridge, which identifies $\ito_T$ of a
+step-process realization of a bounded continuous function of $B$ with the classical partial sums and feeds
+It\^o's formula, came afterwards and builds on this file.
+
+The statement records the integral, not the integrand. The construction makes $g_B$ the class of $B$, but
+the theorem does not say so, and by martingale representation (\cref{thm:mrt}) the bare existence of
+\emph{some} integrand would hold for any centred square-integrable $\F^B_T$-measurable target. The named
+form, $\ito_T(B)=\frac12(B_T^2-B_0^2-T)$ with $B$ the class of $(s,\omega)\mapsto B_s(\omega)$, is the instance
+$f(t,x)=x^2$ of the growth-condition formula (\cref{thm:ito-growth}), whose statement names its integrand:
+it gives $g$ equal to $2B$ almost everywhere with $B_T^2-B_0^2=\ito_T(g)+T$. That instance is a few lines
+from \cref{thm:ito-growth} but is not stated separately in the library. The identity remains the smallest
+statement in which the calculus is visibly non-classical, and it anchors the remainder analysis of
+\cref{sec:ito}.
+
+\subsection{Design note: two isometries}
+The library separately maintains a Wiener-integral isometry for deterministic integrands. The two are
+deliberately distinct: the Wiener integral needs no filtration and serves the Gaussian-process and
+distributional layers, while $\ito_T$ is the adapted object the martingale theory of \cref{sec:process}
+requires. Collapsing them would shorten the code and damage the mathematics; the duplication is the
+design, and it is recorded as such in the library's dependency blueprint.
+
+%======================================================================
+\section{The integral as a process}\label{sec:process}
+
+\subsection{The simple layer}
+For a simple process $V$ and $t\le T$, the partially summed elementary integral $(V\bulletB B)_t$ is
+adapted (\lean{itoSimpleProcess_adaptedAt}) and a martingale (\lean{itoSimpleProcess_isMartingale}). The
+martingale step is the conditional vanishing of adapted-weighted future increments: by the characterizing
+property of conditional expectation it suffices that $\int_A\xi(B_{t_1}-B_{t_0})\,\dd\mu=0$ for every
+$A\in\F_{t_0}$, and $\xi\ind_A$ is again bounded and $\F_{t_0}$-measurable, so the increment, independent of
+$\F_{t_0}$ with mean zero, factors the integral as $\E[\xi\ind_A]\,\E[B_{t_1}-B_{t_0}]=0$. The martingale proof
+runs this argument set by set; the conditional statement it amounts to is recorded on its own in
+\cref{lst:condexp}. The simple layer also carries the per-time isometry
+$\E[(V\bulletB B)_t^2]=\int_0^t\E[V_s^2]\,\dd s$ (\lean{itoSimpleProcess_isometry_time}) and
+$L^2$-continuity in $t$ (\lean{itoSimpleProcessLp_l2_continuous}); the next subsection lifts all three to
+general integrands at once.
+
+\begin{leancode}[caption={Adapted weights kill future increments (\texttt{Foundations/ItoIntegralProcessMartingale}).},label=lst:condexp]
+theorem condExp_adapted_mul_increment (hBmeas : ∀ t, Measurable (B t))
+    {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) {φ : Ω → ℝ}
+    (hφ : ItoIsometryAdapted.AdaptedAt B t₀ φ) {C : ℝ} (hC : ∀ ω, |φ ω| ≤ C) :
+    μ[fun ω ↦ φ ω * (B t₁ ω - B t₀ ω) | ItoIntegralL2.natFiltration hBmeas t₀]
+      =ᵐ[μ] 0
+\end{leancode}
+
+\subsection{The key identity}
+For general $\varphi\in\HT$ the process is a continuous linear map (\lean{itoProcessCLM}, the extension of
+the simple layer), and the development's central structural fact is the following.
+
+\begin{theorem}[\lean{itoProcessCLM_eq_condExpL2}]\label{thm:key}
+For every $t\ge0$ and $\varphi\in\HT$, as elements of $L^2(\Omega,\mu)$,
+\[
+  (\varphi\bulletB B)_t=\E\bigl[\ito_T(\varphi)\bigm|\F_t\bigr],
+\]
+the right side realized by Mathlib's $L^2$ conditional-expectation projection \lean{condExpL2}.
+\end{theorem}
+
+\begin{leancode}[caption={The integral process is the conditional projection of its terminal value (\texttt{Foundations/ItoIntegralProcessGeneral}).},label=lst:key]
+theorem itoProcessCLM_eq_condExpL2 (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    itoProcessCLM hB T t hBmeas φ
+      = (condExpL2 ℝ ℝ ((natFiltration hBmeas).le t)
+          (itoIntegralCLM_T hB T hBmeas φ) : Lp ℝ 2 μ)
+\end{leancode}
+
+The proof is two lines of mathematics: both sides are continuous linear in $\varphi$; on the dense simple
+subspace they agree, because there the identity is the simple layer's martingale property; conclude by the
+equalizer property of dense ranges. Everything else about the process is a corollary of
+\cref{thm:key} and standard properties of conditional expectation:
+\begin{itemize}
+\item \emph{adaptedness}, since a \lean{condExpL2} projection lands in the $\F_t$-measurable subspace;
+\item the \emph{martingale property} (\lean{itoIntegralProcessGen_isMartingale}), by the tower property;
+\item the \emph{contraction bound} $\norm{(\varphi\bulletB B)_t}_{L^2}\le\norm{\varphi}_{\HT}$
+  (\lean{itoProcessCLM_norm_le}), since conditional expectation is a contraction;
+\item the \emph{terminal isometry} at $t=T$ (\lean{itoProcessCLM_norm_terminal});
+\item \emph{$L^2$-continuity} of $t\mapsto(\varphi\bulletB B)_t$ (\lean{itoIntegralProcessGen_l2_continuous}),
+  by a $t$-uniform contraction estimate against an approximating simple sequence.
+\end{itemize}
+Defining the process as a projection of its terminal value is what turns the martingale theory of the
+It\^o integral into a sequence of corollaries rather than a sequence of constructions. Two further
+structural facts follow the same pattern. The isometry polarizes:
+$\E[\ito_T(\varphi)\,\ito_T(\psi)]=\int\varphi\psi\,\dd(\lambda_T\otimes\mu)$, the covariation of two It\^o
+integrals (\file{ItoIntegralCovariation}). And the integral is local in time: if $\varphi$ vanishes on
+$[0,a]$ and $Z$ is $\F_a$-measurable, then $\ito_T(Z\varphi)=Z\,\ito_T(\varphi)$ (\file{ItoIntegralLocality}),
+the ``freeze the past, integrate the future'' step behind the Dol\'eans exponentials of
+\cref{sec:representation}.
+
+\subsection{The time-indexed It\^o isometry}
+The terminal isometry is the classical $\norm{\ito_T(\varphi)}^2_{L^2}=\norm{\varphi}^2_{\HT}$. Its
+refinement to intermediate times, the energy law of the integral as a process, is the second fact every
+textbook calls ``the It\^o isometry''.
+
+\begin{theorem}[\lean{itoProcessCLM_norm_sq}]
+For every $t\le T$ and $\varphi\in\HT$,
+\[
+  \E\bigl[(\varphi\bulletB B)_t^2\bigr]=\int_{(0,t]\times\Omega}\varphi^2\,\dd(\lambda_T\otimes\mu)\restriction_{\mathcal P}
+  =\int_0^t\E[\varphi_s^2]\,\dd s .
+\]
+\end{theorem}
+
+\begin{leancode}[caption={The time-indexed It\^o isometry (\texttt{Foundations/ItoIntegralProcessIsometry}).},label=lst:timeiso]
+theorem itoProcessCLM_norm_sq {t T : ℝ≥0} (htT : t ≤ T) (hBmeas : ∀ u, Measurable (B u))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    ‖itoProcessCLM hB T t hBmeas φ‖ ^ 2
+      = ∫ z in (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)), (φ z) ^ 2
+          ∂(trimMeasure_T (μ := μ) T hBmeas)
+\end{leancode}
+
+The proof is again the equalizer pattern, against a different pair of continuous functionals:
+$\varphi\mapsto\norm{(\varphi\bulletB B)_t}^2$ and $\varphi\mapsto\int_{(0,t]}\varphi^2$ agree on simple
+processes by a band reconciliation that splits the trimmed measure across $(0,t]\cup(t,T]$
+(\lean{itoSimpleProcessLp_band_isometry}, \lean{integral_rectTerm_mul_band}). Stating it for general
+integrands at every $t$, not only at $t=T$ and not only for simple processes, is what makes the integral
+as a process a complete object rather than a martingale with a missing variance law.
+
+%======================================================================
+\section{It\^o's formula in \texorpdfstring{$L^2$}{L2}}\label{sec:ito}
+
+\subsection{Architecture}
+The route to It\^o's formula is discrete-to-continuous (\cref{fig:arch}).
+\begin{enumerate}
+\item \emph{Discrete identity.} For any partition, second-order Taylor expansion of $f$ along the
+  increments gives an exact discrete It\^o identity (\file{DiscreteIto}) with an explicit Lagrange
+  remainder.
+\item \emph{Weighted quadratic variation.} The term $\sum_kf''(B_{t_k})(\Delta_kB)^2$ converges in $L^2$
+  to $\int_0^Tf''(B_s)\,\dd s$; this is proved for adapted weight processes
+  (\file{WeightedQuadraticVariation}), reusing the Gaussian moment estimates of the unweighted limit.
+\item \emph{Remainder.} The third-order remainder is $O(1/n)$ in $L^2$ under a bound on $f'''$
+  (\file{ItoFormulaRemainder}); the time-dependent variant needs a two-dimensional remainder with mixed
+  partials, also $O(1/n)$ (\file{ItoFormulaTDRemainder}).
+\item \emph{Riemann bridge.} The discretized stochastic term is $\ito_T$ applied to a step-process
+  realization of $f'(B)$.
+\item \emph{Limit.} The step integrands converge in $\HT$ to the class of $s\mapsto f'(B_s)$. Predictability
+  of the limit is free (the limit is taken inside $\HT$); its existence for bounded continuous data is
+  \lean{itoIntegralCLM_T_of_bdd_cont}, a dominated-convergence argument on the trimmed measure.
+\end{enumerate}
+
+\begin{figure}[tbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw=mfaccent!70, fill=mfbg, rounded corners=2pt, align=center,
+    inner sep=3pt, font=\footnotesize, minimum height=9mm, text width=26mm,
+    execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000}},
+  wide/.style={box, text width=29mm},
+  arr/.style={-{Stealth[length=2mm]}, draw=mfaccent}]
+\node[box]  (pi)   at (0,0)      {predictable $\pi$-system and density};
+\node[box]  (int)  at (3.75,0)    {$L^2$ It\^o integral $\ito_T$};
+\node[box]  (proc) at (7.5,0)    {integral as a process};
+\node[wide] (path) at (11.4,0)   {continuous local-martingale modification};
+\node[box]  (ito)  at (3.75,-2.1) {It\^o's formula in $L^2$};
+\node[wide] (loc)  at (11.4,-2.1) {exit-time localization: no growth condition};
+\node[box]  (disc) at (0,-4.1)   {discrete It\^o identity};
+\node[box]  (qv)   at (2.95,-4.1) {QV in $L^2$ ($2t^2/n$)};
+\node[box]  (wqv)  at (5.9,-4.1) {weighted QV in $L^2$};
+\node[box]  (rem)  at (8.85,-4.1) {remainder $O(1/n)$};
+\draw[arr] (pi) -- (int);
+\draw[arr] (int) -- (proc);
+\draw[arr] (proc) -- (path);
+\draw[arr] (int) -- (ito);
+\draw[arr] (qv) -- (wqv);
+\draw[arr] (disc.north) -- (ito.south west);
+\draw[arr] (wqv.north) -- (ito.south);
+\draw[arr] (rem.north) -- (ito.south east);
+\draw[arr] (ito) -- (loc);
+\draw[arr] (path) -- (loc);
+\end{tikzpicture}
+\caption{Proof architecture. The isometry layer (top) builds the integral, the process and its continuous
+modification; the discrete-to-continuous layer (bottom) supplies the vanishing terms, which meet at It\^o's
+formula; localization combines the formula with the pathwise process to remove every growth condition.}
+\label{fig:arch}
+\end{figure}
+
+\subsection{The fluctuation engine: quadratic variation in \texorpdfstring{$L^2$}{L2}}\label{sec:qv}
+The second-order term of It\^o's formula is deterministic in the limit for one reason: the squared
+increments of Brownian motion have vanishing fluctuation in $L^2$. Along the uniform partition of $[0,t]$
+into $n$ pieces of width $\Delta=t/n$,
+\[
+  \Bigl\lVert\sum_k(B_{s_{k+1}}-B_{s_k})^2-t\Bigr\rVert_{L^2(\mu)}^2=\frac{2t^2}{n}\longrightarrow0
+  \qquad(\text{\lean{tendsto_qv}}).
+\]
+The value is exact, not asymptotic: for any partition $0=s_0\le\dots\le s_n$ the mean-square error is
+$\sum_k2(s_{k+1}-s_k)^2$ (\lean{sum_increment_sq_sub_sq_integral}), which is $2t^2/n$ for the uniform one. Writing $Y_k=(B_{s_{k+1}}-B_{s_k})^2-\Delta$ for the centred squared
+increment, the $Y_k$ over disjoint intervals are independent, so the cross terms vanish and
+$\E[(\sum_kY_k)^2]=\sum_k\E[Y_k^2]$. Each term is the Gaussian kurtosis,
+$\E[Y_k^2]=\E[(B_{s_{k+1}}-B_{s_k})^4]-\Delta^2=3\Delta^2-\Delta^2=2\Delta^2$, using $\E[X^4]=3(\operatorname{Var}X)^2$ for
+a centred Gaussian (\lean{integral_pow4_gaussianReal}, transported to the increment law by
+\lean{integral_increment_pow4}). Summing, $n\cdot2\Delta^2=2t^2/n$. The fourth-moment constant $3$, and nothing
+else, is the reason the quadratic variation is $t$ rather than $0$; this is the formal content of
+$(\dd B)^2=\dd t$.
+
+\subsection{The weighted second-order term}
+It\^o's formula needs this limit carrying a weight: for a bounded adapted process $w$ with continuous
+paths,
+\[
+  \sum_kw_{t_k}(B_{t_{k+1}}-B_{t_k})^2\longrightarrow\int_0^Tw_s\,\dd s\quad\text{in }L^2
+  \qquad(\text{\lean{tendsto_weighted_qv_process}}),
+\]
+instantiated at $w_s=f''(B_s)$ for the autonomous formula and $w_s=f_{xx}(s,B_s)$ for the time-dependent
+one. The proof splits the difference into a fluctuation term and a Riemann term. The fluctuation term
+$\sum_kw_{t_k}((B_{t_{k+1}}-B_{t_k})^2-\Delta_k)$ vanishes in $L^2$ by the orthogonality-plus-kurtosis estimate
+above, now carrying the $\F_{t_k}$-measurable bounded weight: adaptedness of $w_{t_k}$ is exactly what keeps the
+cross terms zero (\lean{integral_adapted_mul_centered_sq}). The Riemann term vanishes pathwise by continuity
+of $s\mapsto w_s(\omega)$, then in $L^2$ by dominated convergence against the bound on $w$. Neither half uses
+where the weight came from, only that it is adapted, bounded and path-continuous, which is why one lemma
+serves the autonomous, the time-dependent, and later the It\^o-process formula.
+
+\subsection{The remainder}
+What survives after the first- and second-order terms is a sum of cubic Taylor remainders, and it must vanish
+in $L^2$. The per-step remainder $R_k$ obeys $\abs{R_k}\le C_3\abs{B_{s_{k+1}}-B_{s_k}}^3$ under
+$\abs{f'''}\le C_3$ (\lean{abs_discreteTaylorRemainder_le}). Hence $\E[R_k^2]=O(\E[(\Delta_kB)^6])=O(\Delta^3)$ by the
+Gaussian sixth moment (\lean{integral_pow6_gaussianReal}), and Cauchy--Schwarz across the $n$ terms gives
+\[
+  \E\Bigl[\Bigl(\sum_kR_k\Bigr)^2\Bigr]\le n\sum_k\E[R_k^2]=O\bigl(n\cdot n\cdot(T/n)^3\bigr)=O(1/n)\longrightarrow0 .
+\]
+The third order is the only place a third derivative is used. The time-dependent variant runs the same
+estimate on a two-dimensional Taylor remainder with mixed partials.
+
+\subsection{The bounded-derivative formula}
+
+\begin{theorem}[\lean{ito_formula_L2_bddDeriv}]\label{thm:ito-bdd}
+Let $B$ have measurable coordinates and continuous paths, and let $f\colon\R\to\R$ be three times
+differentiable with $\abs{f'}\le C_1$, $\abs{f''}\le C_2$, $\abs{f'''}\le C_3$. Then there is
+$g\in\HT$ with $g=f'(B_s(\omega))$ for $(\lambda_T\otimes\mu)\restriction_{\mathcal P}$-almost every $(s,\omega)$,
+such that $\mu$-almost surely
+\[
+  f(B_T)-f(B_0)=\ito_T(g)+\tfrac12\int_{(0,T]}f''(B_s)\,\dd s .
+\]
+\end{theorem}
+
+\begin{leancode}[caption={It\^o's formula, bounded-derivative class (\texttt{Foundations/ItoFormulaCLM}).},label=lst:itobdd]
+theorem ito_formula_L2_bddDeriv
+    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ B s ω))
+    (T : ℝ≥0) {f f' f'' f''' : ℝ → ℝ}
+    (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
+    (hf'' : ∀ x, HasDerivAt f'' (f''' x) x)
+    {C1 : ℝ} (hf1 : ∀ x, |f' x| ≤ C1) {C2 : ℝ} (hf2 : ∀ x, |f'' x| ≤ C2)
+    {C3 : ℝ} (hf3 : ∀ x, |f''' x| ≤ C3) :
+    ∃ gf' : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+      (⇑gf' =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ f' (B z.1 z.2)) ∧
+      (fun ω ↦ f (B T ω) - f (B 0 ω)) =ᵐ[μ]
+        (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gf') ω
+          + (1 / 2) * ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure)
+\end{leancode}
+
+The first conjunct is what makes the second It\^o's \emph{formula} rather than a decomposition into some
+It\^o integral: the stochastic term is the integral of the class of $f'(B)$, not of an unnamed element of
+$\HT$.
+
+\begin{proof}[Proof sketch]
+Fix the uniform partition of $[0,T]$ into $n$ pieces and expand $f$ to second order along each increment.
+The telescoping sum gives the exact discrete identity $f(B_T)-f(B_0)=S_n+\frac12Q_n+R_n$, with
+$S_n=\sum_kf'(B_{s_k})(B_{s_{k+1}}-B_{s_k})$, $Q_n=\sum_kf''(B_{s_k})(B_{s_{k+1}}-B_{s_k})^2$ and $R_n$ the cubic
+remainder. Each term has a limit: $S_n\to\ito_T(g)$ in $L^2$ because the step integrands converge to $g$ in
+$\HT$ and $\ito_T$ is isometric; $Q_n\to\int_0^Tf''(B_s)\,\dd s$ by the weighted quadratic variation; and
+$R_n\to0$ by the remainder estimate. The elementary inequality $(a+b+c)^2\le3a^2+3b^2+3c^2$ sends the total
+error to zero in $L^2$, so the two sides agree in $L^2$, hence almost surely.
+\end{proof}
+
+Path continuity is supplied by the package's continuous modification and is genuinely used: the Riemann
+limits run along refining partitions evaluated on paths.
+
+\subsection{The time-dependent formula, and the formula as a process}
+
+\begin{theorem}[\lean{ito_formula_td_L2_bddDeriv}]\label{thm:ito-td}
+Let $f\colon\R\times\R\to\R$ have everywhere partial derivatives $f_t,f_x,f_{xx},f_{tt},f_{tx},f_{xxx}$, all
+bounded, with $f_x$ and $f_{xx}$ jointly continuous. Then there is $g\in\HT$ equal to
+$f_x(s,B_s(\omega))$ almost everywhere such that, $\mu$-almost surely,
+\[
+  f(T,B_T)-f(0,B_0)=\ito_T(g)+\int_{(0,T]}\bigl(f_t+\tfrac12f_{xx}\bigr)(s,B_s)\,\dd s .
+\]
+\end{theorem}
+
+Two formalization points. First, joint continuity of $f_t$ is not assumed: it is \emph{derived} from the
+bounded mixed partials (\lean{continuous_uncurry_of_bdd_partials}), keeping the hypothesis package at what a
+user can check. Second, the time-direction Taylor terms are handled by a boundary-cancellation decomposition
+in which three telescoping error sums vanish separately, glued by the three-term Cauchy--Schwarz estimate.
+
+The formula also holds as a process. Under the same hypotheses there is an integrand $F$ on the
+half-line such that, for every $t\le T$, $f(t,B_t)-f(0,B_0)=(F\bulletB B)_t+\int_0^t(f_t+\frac12f_{xx})(s,B_s)\,\dd s$
+almost surely, the integral process being a martingale with a continuous local-martingale modification
+(\lean{ito_formula_td_process}). This statement, unlike \cref{thm:ito-td}, does not name $F$.
+
+\subsection{Exponential growth}\label{sec:growth}
+Bounded derivatives exclude the textbook's first examples: $x^2$ has an unbounded first derivative, and the
+geometric Brownian motion value function $S_0\exp((r-\sigma^2/2)t+\sigma x)$ has all its derivatives
+proportional to $e^{\sigma x}$. The formula is lifted to them by a cutoff localization that reuses the
+bounded engine.
+
+\begin{theorem}[\lean{ito_formula_td_localized}]\label{thm:ito-growth}
+The conclusion of \cref{thm:ito-td} holds when the six partial derivatives, instead of being bounded,
+satisfy $\abs{f_\bullet(t,x)}\le Ce^{\lambda\abs{x}}$ for some $C$ and $\lambda\ge0$, and $f_t$, $f_x$, $f_{xx}$
+are jointly continuous.
+\end{theorem}
+
+A smooth truncation $\phi_n$, equal to the identity on $[-n,n]$ with bounded derivatives, makes
+$f_n(t,x)=f(t,\phi_n(x))$ satisfy the bounded hypotheses, so \cref{thm:ito-td} applies to each $f_n$, with
+integrands $g_n$. The boundary and drift terms converge in $L^2(\mu)$ by dominated convergence, the
+exponential dominators being integrable because Brownian marginals have all exponential moments. Hence the
+integrals $\ito_T(g_n)$ converge and are Cauchy; the isometry transfers Cauchy-ness back to the $g_n$, which
+converge in the complete space $\HT$ to some $g$; continuity of $\ito_T$ identifies the limit, and the
+almost-everywhere identification of $g$ with $f_x(s,B_s)$ passes to the limit along a subsequence. The
+truncation is the antiderivative of a smooth bump, so every derivative bound comes from Mathlib rather than
+from explicit calculus. Applied to the exponential, the theorem gives the It\^o decomposition of geometric
+Brownian motion (\lean{ito_formula_gbm}) and, for the discounted price, the representation
+$e^{-rt}S_t=S_0+\ito_t(\sigma e^{-r\cdot}S)$ with its integrand named (\lean{discountedGBM_eq_itoIntegral}),
+which is where the library's Black--Scholes layer meets the It\^o integral.
+
+\subsection{Supporting results}
+\paragraph{Quadratic variation}
+For a process with measurable coordinates and centred Gaussian increments of variance $t-s$ (neither
+independence of increments nor path continuity is assumed), the expected squared-increment sums along
+equipartitions of $[0,t]$ converge to $t$ (\lean{qv_equals_t}); the $L^2$ form along uniform partitions is
+\lean{tendsto_qv}, and convergence in probability is \lean{tendstoInMeasure_qv}. The $L^1$ statement needs only the second moment of the increments, and so strictly
+strengthens the classical claim.
+
+\paragraph{Expectation-level It\^o}
+For $f$ with $f$, $f'$ and $f''$ bounded and $f''$ continuous,
+$\E[f(B_t)]=f(0)+\frac12\int_0^t\E[f''(B_s)]\,\dd s$ for $t>0$ (\lean{expectation_ito}). It is the bridge between the stochastic tower of this paper and the heat-kernel
+tower of the parent library, where the Black--Scholes equation is derived through Feynman--Kac.
+
+\subsection{Notes on the proof engineering}
+The density argument is the only place a monotone-class induction was unavoidable in the construction of the
+integral; expressing it against a trimmed measure, so that the inductively built sets live in the right
+$\sigma$-algebra by construction, is what kept it tractable. The dominated-convergence step that produces the
+integrand of It\^o's formula is delicate because the dominating function must itself be predictable; the
+trimmed-measure design is what makes the domination land inside $\HT$ without a separate measurability
+obligation.
+
+%======================================================================
+\section{From \texorpdfstring{$L^2$}{L2} to pathwise: the continuous local martingale}\label{sec:pathwise}
+
+\Cref{sec:process,sec:ito} are an $L^2$ theory: the process $t\mapsto(\varphi\bulletB B)_t$ is continuous
+\emph{as a curve in $L^2(\mu)$}, and its laws are identities of $L^2$ elements. The classical object is
+sharper: for almost every $\omega$ it has a continuous path, and it is a continuous local martingale in the
+pathwise sense. This section builds that object, first on $[0,T]$ and then on the half-line.
+
+\subsection{The pathwise gap and the maximal inequality}
+$L^2$-continuity in $t$ does not by itself give a continuous path: it controls each time separately, not the
+trajectory. The bridge is a maximal inequality. \texttt{BrownianMotion} supplies Doob's weak-type maximal
+inequality for right-continuous martingales; applied to the simple integral processes, with the $L^1$ norm
+bounded by the $L^2$ norm and the isometry, it gives
+$\mu\{\sup_{t\le T}\abs{(V\bulletB B)_t}\ge\varepsilon\}\le\varepsilon^{-1}\norm{V}_{\HT}$
+(\lean{itoSimpleProcess_maximal_prob}). A geometric subsequence makes these tails summable, and Borel--Cantelli
+makes the approximating step-process integrals converge uniformly on $[0,T]$ for almost every $\omega$. A uniform limit of continuous functions is continuous, so the limit path is
+continuous off a null set.
+
+\subsection{The continuous modification}
+
+\begin{theorem}[\lean{exists_continuous_modification_itoProcess}]
+Let $B$ have every path continuous. For every $\varphi\in\HT$ there is a process $\widetilde X\colon\R_{\ge0}\times\Omega\to\R$ with $\mu$-almost
+surely continuous paths such that $\widetilde X_t=(\varphi\bulletB B)_t$ in $L^2(\mu)$ for every $t\le T$.
+\end{theorem}
+
+The representative \lean{itoContinuousMod} is the pointwise limit of the approximating step integrals on the
+good set where they converge uniformly. It equals $(\varphi\bulletB B)_t$ almost surely at each $t$ by uniqueness of
+limits in measure, and its paths are continuous by the uniform-convergence theorem; the supporting bound on the
+running supremum over $[0,t]$ is \lean{norm_le_iSup_Iic}.
+
+\subsection{The local martingale on the null-augmented filtration}
+A modification fixes the paths but can break adaptedness, since the continuous representative is defined
+through a limit taken off a null set. The remedy is to complete the filtration: adjoining the $\mu$-null sets
+to each $\F_t$ gives $\F^\mu_t=\F_t\vee\mathcal N$ (\lean{augFiltration}). Completeness is all that is added;
+right-continuity, the other half of the usual conditions, is neither added nor needed.
+
+\begin{theorem}[\lean{exists_continuous_localMartingale_modification}]
+Let $B$ have every path continuous. For every $\varphi\in\HT$ there is a process $X$, adapted to
+$(\F^\mu_t)$ and with everywhere-continuous paths, such that $X_t=(\varphi\bulletB B)_t$ in $L^2(\mu)$ for each
+$t\le T$, and $X$ is a local martingale for $(\F^\mu_t)$.
+\end{theorem}
+
+Two points fix the content. The underlying $L^2$ process is a \emph{true} martingale (\cref{sec:process}); what
+the theorem adds is an everywhere-continuous representative, in the form the local-martingale interface of
+\texttt{BrownianMotion} takes, whose requirement of paths continuous for \emph{every} $\omega$ is what forces an
+everywhere-defined representative. And the martingale property survives the completion, because a conditional
+expectation is unchanged when the filtration is enlarged by null sets (\lean{condExp_sup_nulls}).
+
+\subsection{The unbounded horizon}
+The bounded-horizon representatives are consistent: for $m\le n$ the horizon-$m$ and horizon-$n$ continuous
+processes agree, almost surely and pathwise, on $[0,m)$, because both are continuous and both modify the same
+$L^2$ process there. Gluing them gives a single process on the half-line, reading at time $t$ the horizon
+$\lceil t\rceil+1$.
+
+\begin{theorem}[\lean{exists_continuous_localMartingale_modification_infinite}]
+For every $\varphi$ in the unbounded-horizon integrand space there is a process $X$ with everywhere-continuous
+paths such that $X_t=(\varphi\bulletB B)_t$ in $L^2(\mu)$ for every $t$, and $X$ is a local martingale for
+$(\F^\mu_t)$ on $\R_{\ge0}$.
+\end{theorem}
+
+This is the It\^o integral in the form the classical theory gives it: a continuous local martingale on the
+half-line. The glued process is in fact a true martingale with continuous paths
+(\lean{exists_continuous_martingale_modification_infinite}), which is what the localization of
+\cref{sec:unrestricted} uses.
+
+%======================================================================
+\section{It\^o's formula without growth conditions}\label{sec:unrestricted}
+
+The $L^2$ formulas of \cref{sec:ito} need the integrand $f_x(\cdot,B)$ to lie in $\HT$, which is what the
+derivative bounds and growth bounds secure. Without them the stochastic term is no longer an $L^2$ integral,
+and the classical statement is that the compensated process is a continuous local martingale. That is the
+statement proved here.
+
+\begin{theorem}[\lean{ito_formula_unrestricted}]\label{thm:unrestricted}
+Let $B$ have measurable coordinates and continuous paths, and let $f\colon\R\times\R\to\R$ have everywhere
+partial derivatives $f_t,f_x,f_{xx},f_{tt},f_{tx},f_{xxx}$ which, together with $f$, are jointly continuous.
+No growth or boundedness condition is imposed. Then there is a process $M$ with every path continuous, which
+is a local martingale for the null-augmented filtration $(\F^\mu_t)$, such that for every $t\ge0$, almost
+surely,
+\[
+  f(t,B_t)-f(0,B_0)=M_t+\int_{(0,t]}\bigl(f_t+\tfrac12f_{xx}\bigr)(s,B_s)\,\dd s .
+\]
+\end{theorem}
+
+\begin{leancode}[caption={It\^o's formula without growth conditions (\texttt{Foundations/ItoFormulaUnrestrictedLocMart}); five of the six derivative hypotheses and five of the seven continuity hypotheses are abbreviated.},label=lst:unrestricted]
+theorem ito_formula_unrestricted (hB : IsPreBrownianReal B μ)
+    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
+    {f f_t f_x f_xx f_tt f_tx f_xxx : ℝ → ℝ → ℝ}
+    (hf_t : ∀ t x, HasDerivAt (fun s ↦ f s x) (f_t t x) t)
+    -- ... hf_tt, hf_tx, hf_x, hf_xx, hf_xxx: the other five partial derivatives
+    (hf_cont : Continuous fun p : ℝ × ℝ ↦ f p.1 p.2)
+    -- ... joint continuity of f_t, f_x, f_xx, f_tt, f_tx
+    (hf_xxx_cont : Continuous fun p : ℝ × ℝ ↦ f_xxx p.1 p.2) :
+    ∃ M : ℝ≥0 → Ω → ℝ,
+      (∀ ω, Continuous fun t ↦ M t ω) ∧
+      IsLocalMartingale M (augFiltration (μ := μ) hBmeas) μ ∧
+      (∀ t : ℝ≥0, (fun ω ↦ f (t : ℝ) (B t ω) - f 0 (B 0 ω)) =ᵐ[μ]
+        (fun ω ↦ M t ω + ∫ s in Set.Ioc 0 t,
+          (f_t (s : ℝ) (B s ω) + (1 / 2) * f_xx (s : ℝ) (B s ω)) ∂timeMeasure))
+\end{leancode}
+
+\subsection{Exit times as localizers}
+The localizing sequence is the exit time of the closed exterior $\{\abs{x}\ge N\}$,
+$\tau_N=\inf\{t:\abs{B_t}\ge N\}$ (\lean{exitTime}). Because the hit set is closed and the paths continuous,
+$\{\tau_N\le i\}$ is the event $\{\exists s\in[0,i]:\abs{B_s}\ge N\}$, which is measurable for $\F_i$ through a
+countable rational description. So $\tau_N$ is a stopping time for the raw natural filtration, with no
+right-continuity required; the open exterior $\{\abs{x}>N\}$ would characterise only $\{\tau_N<i\}$, an event of
+$\F_{i+}$. The package's own localizing sequence of hitting times needs a complete and right-continuous
+filtration, which the natural filtration is not; the exit time does not. For continuous paths the exit times
+escape to infinity, since each path is bounded on compacts.
+
+\subsection{Double truncation and agreement on stochastic intervals}
+Localizing in space is not enough: a general $f$ has $t$-derivatives unbounded over $t\in\R$. The proof therefore
+truncates both arguments, $f^N(t,x)=f(\mathrm{cut}_N(t),\mathrm{cut}_N(x))$, with a smooth cutoff onto a compact
+square on which the continuous partials of $f$ are bounded. The chain rule gives the six partials of $f^N$ in
+closed form, each globally bounded, so the process form of the bounded formula applies and yields a truncated
+It\^o identity with a continuous \emph{true}-martingale modification $M^N$ on the half-line. On the stochastic
+interval $\{t\le\sigma_N\}$ with $\sigma_N=\min(\tau_N,N)$ both cuts are inert ($t\le N$ and $\abs{B_s}\le N$ for
+$s\le t$), so $f^N=f$ there and $M^N_t=M_t$ almost surely on $\{t\le\sigma_N\}$. Capping the localizer at $N$ is
+what keeps the time cut inert exactly where the agreement is used.
+
+\subsection{From per-time agreement to a local martingale}
+Agreement at each fixed $t$ is lifted to agreement of whole paths on the stochastic interval, almost surely,
+by continuity and a countable dense set of times (\lean{indistinguishable_on_stochInterval}). The
+compensated process $M$ is adapted, because its drift primitive $\int_0^t(f_t+\frac12f_{xx})(s,B_s)\,\dd s$
+is $\F_t$-measurable: after clamping the integrand's time to $[0,t]$ the integrand is a Carath\'eodory
+function (continuous in $s$, $\F_t$-measurable in $\omega$), hence jointly measurable, and its integral is
+measurable (\lean{StronglyMeasurable.integral_prod_right}). With $M$ adapted, the stopped indicator processes
+are martingales, and they assemble into the package's \lean{IsLocalMartingale} with localizing sequence
+$\sigma_N$.
+
+\subsection{What the theorem says, and what it does not}
+\Cref{thm:unrestricted} removes the growth conditions of \cref{sec:ito} entirely, but it says less than the
+classical formula in one respect: $M$ is not identified as a stochastic integral $\int_0^tf_x(s,B_s)\,\dd B_s$,
+because the library's integral is defined for square-integrable integrands and $f_x(\cdot,B)$ need not be one.
+Where it is, the identification is \cref{thm:ito-growth}. The theorem covers every $C^3$ function, including
+those that grow faster than any exponential: applied to $f(t,x)=e^{x^2}$, for instance, it gives a continuous
+local martingale with no integrability of $f(t,B_t)$ assumed. The smoothness hypothesis is the one the bounded
+engine needs; the $C^{1,2}$ statement would require an additional approximation of $f$ and is not formalized.
+
+%======================================================================
+\section{It\^o processes}\label{sec:itoprocess}
+
+Every model in continuous-time finance is an It\^o process $X=x_0+\int b\,\dd s+\int\sigma\,\dd B$, so the
+formula must reach functions of $X$, not only of $(t,B_t)$. Three results lead there.
+
+\paragraph{Quadratic variation of an It\^o process}
+For $X=X_0+A+\sigma\bulletB B$ with a drift path $A$ Lipschitz in time uniformly in $\omega$, the squared-increment
+sums along the uniform partition converge to $\int_0^T\sigma_s^2\,\dd s$: in $L^2$ for constant $\sigma$
+(\file{ItoProcessQV}), and in $L^1$ for $\sigma$ bounded, adapted and continuous in time, with the weighted
+form $\sum_kw(t_k)(\Delta X_k)^2\to\int_0^Tw\sigma^2\,\dd s$ for bounded adapted weights with almost surely
+continuous paths. The drift contributes nothing. The proof splits $(\Delta X_k)^2$ around the frozen increment
+$\sigma(t_k)\Delta B_k$: the freezing defects $D_k=\Delta M_k-\sigma(t_k)\Delta B_k$ of $M=\sigma\bulletB B$ are
+orthogonal It\^o integrals whose sum is the error of the frozen Riemann sum, so $\sum_k\norm{D_k}^2\to0$
+(\file{AdaptedStochasticIntegralFreezing}), and what remains is the weighted quadratic variation of $B$. The
+$L^1$ mode is a limitation of the method: an $L^2$ bound on the freezing part would need fourth moments of
+$\sigma\bulletB B$.
+
+\paragraph{Riemann--Stieltjes sums against an It\^o integral}
+For $M=\varphi\bulletB B$ and a bounded predictable weight $w$ whose paths are almost surely continuous on $[0,T]$,
+the sums $\sum_kw(t_k)(M_{t_{k+1}}-M_{t_k})$ converge in mean square to the integral of $w$ against $M$
+(\cref{sec:against}), which is the It\^o integral against $B$ of the class of $\varphi w$
+(\file{AdaptedRiemannStieltjes}). The route goes through $L^2(\langle M\rangle)$: each sum is the integral
+against $M$ of a left-endpoint step process, the step processes converge to $w$ by dominated convergence, and
+the isometry against $M$ carries the convergence over. No path regularity of $\varphi$ is needed.
+
+\paragraph{Constant coefficients}
+For $X_t=X_0+bt+\sigma B_t$ and $f$ whose first three derivatives grow at most exponentially, the formula
+$f(X_T)-f(X_0)=\ito_T(\sigma f'(X))+\int_0^T(f'(X_s)b+\frac12f''(X_s)\sigma^2)\,\dd s$ holds with the integrand
+named (\lean{ito_formula_itoProcess}); this is the form the geometric Brownian motion needs.
+
+\begin{theorem}[\lean{ito_formula_adapted}]\label{thm:adapted}
+Let $B$ have every path continuous, let $\sigma$ and $b$ be bounded, adapted to the natural filtration of $B$,
+with every path continuous, and let $X=x_0+\int_0^\cdot b\,\dd s+\int_0^\cdot\sigma\,\dd B$. For $f$ twice
+differentiable with $f'$, $f''$ bounded and $f''$ continuous, almost surely
+\[
+  f(X_T)-f(x_0)=\ito_T\bigl(f'(X)\,\sigma\bigr)+\int_0^T\Bigl(f'(X_s)\,b_s+\tfrac12f''(X_s)\,\sigma_s^2\Bigr)\dd s ,
+\]
+the stochastic integral being the It\^o integral at horizon $T$ of the class of the bounded predictable process
+$f'(X)\sigma$.
+\end{theorem}
+
+The process $X$ is defined (\lean{adaptedItoProcess}) as $x_0$ plus the pathwise drift integral plus the
+continuous modification of the It\^o integral process of $\sigma$. The proof applies the discrete It\^o formula
+on the uniform partition, which splits $f(X_T)-f(x_0)$ into drift sums, Riemann--Stieltjes sums against
+$M=\sigma\bulletB B$, weighted quadratic variation and a remainder. The three random limits hold in measure; a
+common subsequence along which all three converge almost surely is extracted, and on such a path, where $X$ is
+also continuous, a deterministic lemma (\lean{ito_formula_of_tendsto}) passes the discrete identity to the
+limit. Writing the stochastic term as an integral against $M$ and then, by the chain rule of
+\cref{sec:against}, against $B$ gives the displayed form. Because the limit is taken almost surely along a
+subsequence rather than in $L^2$ at a rate, the Taylor remainder is controlled by the modulus of continuity of $f''$
+times the quadratic variation, and no third derivative is needed: this is the library's first It\^o formula for
+$C^2$ functions, as well as its first for a process that is not a function of $(t,B_t)$. Its scope is recorded in
+\cref{sec:scope}.
+
+%======================================================================
+\section{The integral as an operator: its range and its uniqueness}\label{sec:operator}
+
+Two theorems characterise $\ito_T$ as an operator. Its range is as large as it can be, and it is the only
+reasonable integral.
+
+\subsection{Martingale representation}\label{sec:representation}
+
+\begin{theorem}[\lean{exists_itoIntegral_representation}]\label{thm:mrt}
+Let $B$ have every path continuous. For every $F\in L^2(\mu)$ that is $\F^B_T$-measurable there is a unique
+$\varphi\in\HT$ with
+\[
+  F=\E[F]+\ito_T(\varphi)\qquad\mu\text{-a.s.}
+\]
+Equivalently, the range of $\ito_T$ together with the constants is the whole of $L^2(\F^B_T)$
+(\lean{itoIntegralCLM_T_surjective_onto_centered}), and $\ito_T$ is an isometric isomorphism of $\HT$ onto the
+centred part of $L^2(\F^B_T)$ (\lean{itoIsometryEquiv}).
+\end{theorem}
+
+\begin{leancode}[caption={Martingale representation, terminal form (\texttt{Foundations/MartingaleRepresentation}).},label=lst:mrt]
+theorem exists_itoIntegral_representation (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0)
+    (F : Lp ℝ 2 μ)
+    (hFmeas : AEStronglyMeasurable[ItoIntegralL2.natFiltration hBmeas T] (⇑F) μ) :
+    ∃! φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+      (⇑F) =ᵐ[μ] fun ω ↦ (∫ x, F x ∂μ) + itoIntegralCLM_T hB T hBmeas φ ω
+\end{leancode}
+
+The process form follows from \cref{thm:key}: every square-integrable martingale for the natural filtration is
+$M_t=M_0+(\varphi\bulletB B)_t$ for $t\le T$ (\lean{martingale_representation}), because $(\varphi\bulletB B)_t$ is the
+$\F_t$-conditional expectation of $\ito_T(\varphi)$.
+
+The proof uses no Malliavin calculus, no Clark--Ocone formula and no It\^o formula for an adapted integrand. The
+range of $\ito_T$ is closed, being the image of an isometry, so it suffices to show that a centred $\xi\in L^2(\F^B_T)$
+orthogonal to the range is zero. Two facts do this. First, for every step function $h$ the Dol\'eans exponential
+$\mathcal E(h)=\exp(\int h\,\dd B-\frac12\int h^2\,\dd s)$ satisfies $\mathcal E(h)-1\in\operatorname{range}\ito_T$
+(\lean{stepDoleans_sub_one_mem_range}), starting from the constant step, which is the discounted geometric Brownian
+motion of \cref{sec:growth}, and adding one step at a time with the locality of the integral. Second, an element
+orthogonal to every $\mathcal E(h)$ vanishes (\lean{eq_zero_of_orthogonal_stepDoleans}). Abel summation turns the step
+exponentials into the exponentials $\exp(\sum_i\lambda_iB_{t_i})$ of finitely many coordinates; on each dyadic
+cylinder $\sigma$-algebra the conditional expectation of an orthogonal element then has a vanishing Laplace transform,
+which forces it to zero by analytic continuation of the complex moment-generating function and uniqueness of
+characteristic functions; and by path continuity the dyadic cylinder $\sigma$-algebras increase to $\F^B_T$
+(\lean{iSup_cylinderFiltration_eq_natFiltration}), so L\'evy's upward theorem sends the conditional expectations to
+$\xi$ itself. Centring,
+$\E[\ito_T(\varphi)]=0$, is proved a floor down (\lean{integral_itoIntegralCLM_T}).
+
+In the parent library this theorem is market completeness: every square-integrable $\F^B_T$-measurable claim is
+attained from initial wealth $\E[H]$ by a unique strategy (\lean{exists_replicating_strategy}). What is not
+proved is the explicit form of $\varphi$, which is the Clark--Ocone formula and needs the Malliavin derivative.
+
+\subsection{Integration against an It\^o integral}\label{sec:against}
+For $\varphi\in\HT$ let $M=\varphi\bulletB B$. The bracket of $M$ is the measure $\langle M\rangle=\varphi^2\cdot(\lambda_T\otimes\mu)$
+on the predictable $\sigma$-algebra (\lean{bracketMeasure}), and the integral against $M$ is defined on
+$L^2(\langle M\rangle)$ by composing $\ito_T$ with the multiplication isometry $\psi\mapsto\psi\varphi$ from
+$L^2(\langle M\rangle)$ to $\HT$:
+\[
+  \int\psi\,\dd M=\ito_T(\psi\varphi),\qquad\Bigl\lVert\int\psi\,\dd M\Bigr\rVert_{L^2(\mu)}=\norm{\psi}_{L^2(\langle M\rangle)}
+\]
+(\lean{itoIntegralAgainstCLM}, \lean{norm_itoIntegralAgainstCLM}). The chain rule is thus how the object is built; Mathlib has the multiplication isometry only for $p=1$, so the
+$p=2$ case is proved here (\file{LpMulIsometry}). What identifies the result as \emph{the} integral against $M$ is the
+Riemann--Stieltjes value on elementary integrands, $\int Z\ind_{(a,b]}\,\dd M=Z(M_b-M_a)$ for bounded
+$\F_a$-measurable $Z$ (\lean{itoIntegralAgainst_elementary}), together with uniqueness among continuous linear maps
+with those values (\lean{itoIntegralAgainst_unique}).
+
+The bracket earns its name. The second moment of an increment is its mass,
+$\E[(M_b-M_a)^2]=\langle M\rangle((a,b]\times\Omega)$ (\lean{norm_sq_increment_eq_bracket}); conditionally,
+$\E[(M_b-M_a)^2\mid\F_a]=\E[\int_a^b\varphi_u^2\,\dd u\mid\F_a]$ against the pathwise increment of the bracket
+(\lean{condExp_band_second_moment}); and that increment is adapted (\lean{bracketProcess_adapted}), so
+$\E[M_b^2-\langle M\rangle_b\mid\F_a]=M_a^2-\langle M\rangle_a$ (\lean{condExp_sq_sub_bracket}): the bracket is the
+compensator of $M^2$. Not formalized are any
+pathwise quadratic variation of $M$, a bundled martingale structure for $M^2-\langle M\rangle$, and the Doob--Meyer
+decomposition of a general submartingale.
+
+\subsection{Agreement with the upstream characterisation}\label{sec:characterisation}
+\texttt{BrownianMotion} characterises a stochastic integral axiomatically~\cite{BrownianMotionRepo}. A map $I$ from
+processes to random variables, defined on a domain $S$, is a \emph{Riemann--Stieltjes extension} if it returns
+$X(Y_j-Y_i)$ on every elementary process $\ind_{(i,j]}X$ with simple $\F_i$-measurable $X$, is linear, respects
+indistinguishability, and passes to the limit under dominated convergence; it is a \emph{stochastic integral} if,
+in addition, it agrees almost surely with every Riemann--Stieltjes extension on the intersection of their domains.
+
+\begin{theorem}[\lean{isStochasticIntegral}]\label{thm:char}
+For every $\varphi\in\HT$, the integral against $M=\varphi\bulletB B$, with integrator $M$ stopped at $T$, the natural
+filtration, and as domain the processes indistinguishable from a predictable process square-integrable against
+$\langle M\rangle$, is a stochastic integral in the sense of \texttt{BrownianMotion}.
+\end{theorem}
+
+\begin{leancode}[caption={The characterisation (\texttt{Foundations/StochasticIntegralCharacterisation}).},label=lst:char]
+theorem isStochasticIntegral (hB : IsPreBrownianReal B μ) :
+    IsStochasticIntegral μ (integrator T hBmeas φ hB) (natFiltration hBmeas)
+      (sIntegral T hBmeas φ hB) (domain T hBmeas φ)
+\end{leancode}
+
+Taking $\varphi=1$ makes $M$ the Brownian motion stopped at $T$, so the theorem says in particular that $\ito_T$ is a
+stochastic integral against $B$ in the upstream sense. Two features of the proof are worth recording. The domain is forced
+rather than chosen: the predicate asks for closure under indistinguishability, and a process indistinguishable
+from a predictable one need not be predictable, or even jointly measurable, so the domain is the processes with a
+predictable square-integrable version, and the integral reads the class of any version. And the uniqueness clause is
+the substantive part. An extension in the upstream sense is not assumed to be $L^2$-continuous, so uniqueness among
+continuous linear maps does not reach it; the proof is a monotone-class argument from dominated convergence alone,
+through a Dynkin argument over the predictable rectangles, then simple functions, bounded processes, and finally the
+whole common domain by truncation. Dominated convergence in $L^p$, which Mathlib at the pin has only for $p=1$, is
+proved on the way for every $p<\infty$ and every measure (\lean{tendsto_eLpNorm_sub_of_dominated_convergence}).
+
+%======================================================================
+\section{What the calculus carries}\label{sec:consumers}
+
+The integral and the formula are consumed downstream. Two consumers belong to stochastic analysis proper.
+
+\paragraph{Girsanov's theorem}
+For a bounded predictable drift $\theta$, $\abs{\theta}\le C$, let
+$\frac{\dd Q}{\dd\mu}=\exp\bigl(-\ito_T(\theta)-\frac12\int_0^T\theta_s^2\,\dd s\bigr)$. Under $Q$ the process
+$B^\theta_t=B_t+\int_0^t\theta_s\,\dd s$ starts at $0$, has increments $B^\theta_t-B^\theta_s\sim N(0,t-s)$ for
+$s\le t\le T$, and has jointly independent increments on $[0,T]$
+(\lean{Btheta_isQBrownianMotion_predictable_of_bdd}); these fix every finite-dimensional law of $B^\theta$ on
+$[0,T]$ to that of a Brownian motion. Path continuity of $B^\theta$ and independence of its increments from the
+past are not stated. The theorem is the last rung of a ladder (constant, simple adapted, continuous adapted, bounded
+predictable $\theta$) whose rungs share one lemma: any process supplying its own exponential martingale under $Q$
+has the Brownian finite-dimensional laws (\lean{isQBrownianMotion_of_expMartingale}), by characteristic functions,
+with no adapted-integrand It\^o formula. The bounded-predictable statement is made for an adapted modification of
+$B^\theta$, which has the same finite-dimensional laws. The general case under Novikov's condition is not
+formalized.
+
+\paragraph{Stochastic differential equations}
+For Lipschitz $b$ and $\sigma$, with constants $L_b$ and $L_\sigma$, the Picard map
+$X\mapsto\eta+\int_0^\cdot b(X)\,\dd s+\int_0^\cdot\sigma(X)\,\dd B$ is a contraction of $\HT$ with constant
+$TL_b+\sqrt T\,L_\sigma$, so when that constant is below $1$ it has a unique fixed point
+(\lean{picardMap_exists_unique_fixedPoint}). The diffusion term is the It\^o integral of this paper; the fixed point
+is realized as a sample-path process, $X_t=\eta+\int_0^tb(X_s)\,\dd s+(\sigma(X)\bulletB B)_t$ with the drift identified
+as a pathwise Lebesgue integral (\lean{sde_pathwise_decomposition},
+\lean{driftContinuousMod_eq_setIntegral}). Pathwise uniqueness of $L^2$ strong solutions
+follows from an energy estimate and Gr\"onwall's inequality (\lean{sde_pathwise_uniqueness}); in that statement the
+diffusion term is an abstract operator whose only assumed property is the It\^o isometry bound. Existence on
+arbitrary horizons, which needs a weighted norm, is not formalized.
+
+%======================================================================
+\section{Scope: what is, and is not, an It\^o calculus here}\label{sec:scope}
+
+The title claims ``a'' calculus, and the indefinite article is doing deliberate work. What earns the noun is that the
+canonical objects and theorems are present and \emph{compose}: the stochastic term of It\^o's formula is the isometric
+integral of \cref{sec:integral}, whose energy law is the isometry of \cref{sec:process}, whose conditional projection is
+the martingale of \cref{thm:key}, whose continuous representative is the local martingale of \cref{sec:pathwise}, whose
+range is characterised by \cref{thm:mrt}, and which is the upstream package's stochastic integral by \cref{thm:char}. One
+object, a single chain of theorems, no re-derivation gluing them. What the indefinite article concedes is equally
+concrete.
+
+\paragraph{The integrator}
+The integrator is Brownian motion, or an It\^o integral against it. Integration against a general continuous local
+martingale or semimartingale is not formalized; \cref{thm:char} places the present integral inside the upstream
+package's axiomatic characterisation of a stochastic integral.
+
+\paragraph{Square-integrable integrands}
+Integrands live in $L^2$: in $\HT$ on $[0,T]$, or in its unbounded-horizon analogue. The localized class
+$\{\varphi:\int_0^T\varphi_s^2\,\dd s<\infty\text{ a.s.}\}$ is not covered, which is why the local martingale of
+\cref{thm:unrestricted} is not identified as a stochastic integral.
+
+\paragraph{The scope of each It\^o formula}
+In $L^2$, the formula for $f(t,B_t)$ needs the six partial derivatives bounded or of exponential growth in $x$. In
+local-martingale form it needs them continuous and nothing else. For It\^o processes with adapted coefficients it is
+proved at a fixed time $T$, for bounded coefficients with every path continuous, and for $f$ with bounded $f'$ and
+$f''$; so it does not yet cover $e^x$ or $x^2$ of such a process, time-dependent $f$, a random initial value, or
+coefficients of a stochastic differential equation. The multi-dimensional formula is recorded in the library only as
+a reduced core, whose hypotheses include its conclusion.
+
+\paragraph{Completeness, not the usual conditions}
+The pathwise local martingales live on the null-augmented filtration: completeness, which the continuous modification
+needs, is added, but right-continuity, the other half of the usual conditions, is neither assumed nor used.
+
+\paragraph{Quadratic variation in mean, not pathwise}
+Quadratic variation is established in $L^1$ and $L^2$ along uniform or refining partitions, for Brownian motion and
+for It\^o processes, and the bracket of $\varphi\bulletB B$ is identified in conditional mean. No pathwise (almost sure)
+quadratic variation is formalized, and L\'evy's characterisation of Brownian motion is recorded only as a reduced
+core.
+
+None of these boundaries qualifies a statement made in \cref{sec:integral,sec:process,sec:ito,sec:pathwise,sec:unrestricted,sec:itoprocess,sec:operator,sec:consumers};
+they bound the \emph{reach} of the development, not the \emph{validity} of any theorem in it.
+
+%======================================================================
+\section{Related work}\label{sec:related}
+
+Keskin's Isabelle/HOL martingale library~\cite{Keskin2023} is the closest prior art in the probabilistic direction;
+it develops sub- and supermartingales in discrete and continuous time and stops below stochastic integration. Degenne,
+Ledvinka, Marion and Pfaffelhuber~\cite{DegenneEtAl2025,BrownianMotionRepo} construct Brownian motion in Lean, through
+the Kolmogorov extension theorem, Gaussian measures and a Kolmogorov--Chentsov theorem; their package is the foundation
+of this work, and its stochastic-integration programme (an axiomatic characterisation of the integral, local
+martingales, quadratic variation of locally square-integrable martingales, and the Doob--Meyer decomposition) is
+complementary to it: a general theory under construction, against which \cref{thm:char} certifies the concrete
+Brownian integral built here. Nagy's Lean derivation from It\^o's lemma to Black--Scholes~\cite{Nagy2026} formalizes the
+structural drift computation of It\^o's lemma and, on its own account, leaves the continuous It\^o integral
+structurally verified rather than constructed. Avigad, H\"olzl and Serafin's central limit theorem~\cite{AvigadHolzlSerafin2017}
+remains the historical anchor for deep measure-theoretic probability in proof assistants, and Echenim, Guiol and
+Peltier formalized discrete-time replication pricing in Isabelle/HOL~\cite{EchenimGuiolPeltier2020}. StochBench~\cite{StochBench2026}
+is a recent Lean benchmark of graduate stochastic-process problems which, lacking infrastructure such as the It\^o
+integral, states many of its targets with the required properties as hypotheses. A search in October 2026 of the
+Isabelle Archive of Formal Proofs and the Lean and Coq/Rocq ecosystems found no other completed machine-checked
+construction of the It\^o integral, proof of It\^o's formula, or martingale representation theorem.
+
+%======================================================================
+\section{Conclusion}\label{sec:conclusion}
+
+The development formalizes the It\^o calculus of Brownian motion: on $[0,T]$ the integral as an isometry, the integral as
+a continuous $L^2$ martingale with its full second-moment structure, its range (martingale representation) and its
+uniqueness (agreement with the upstream axiomatic integral); It\^o's formula in $L^2$ under bounded or exponentially
+growing derivatives, as a process, and for It\^o processes with adapted coefficients; and the pathwise object, a
+continuous local martingale on the half-line, to which It\^o's formula extends without any growth condition. To our
+knowledge it is the first machine-checked It\^o calculus in any proof assistant. It is also the layer the parent
+library~\cite{CoelhoLibrary} stands on, where the integral and the formula are consumed to construct, rather than assume,
+objects of continuous-time pricing: the dynamic change of measure, the replicating hedge, and the discounted price
+as an It\^o integral. The boundaries of \cref{sec:scope} (general semimartingale integrators, the
+localized integrand class, pathwise quadratic variation, and the multi-dimensional formula) mark where the formalized
+theory currently ends.
+
+\paragraph{Provenance}
+The Lean development was written by the author with an AI coding assistant (Claude Code), as recorded in the
+repository's provenance file; every proof is checked by the Lean kernel and passes the gates of \cref{sec:setting}
+unchanged. This manuscript was revised with the same assistant, and its statements were checked against the Lean
+sources of release \texttt{v1.5.0}.
+
+%======================================================================
+\appendix
+\section{Displayed results and their Lean names}\label{app:names}
+
+\begin{center}
+\scriptsize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.21\linewidth}>{\raggedright\arraybackslash}p{0.33\linewidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Result & Lean name & Module / benchmark entry \\
+\midrule
+Rectangle $\pi$-system & \lean{isPiSystem_predictableRect} & \file{ItoIntegralCLM} \\
+Generation & \lean{generateFrom_predictableRect} & \file{ItoIntegralCLM} \\
+Density & \lean{simpleAssembly_T_denseRange} & \file{ItoIntegralCLM} \\
+The It\^o integral, isometry & \lean{itoIntegralCLM_T}, \lean{itoIntegralCLM_T_norm} & \file{ItoIntegralCLM} \\
+Unbounded horizon & \lean{itoIntegralL2_norm} & \file{ItoIntegralL2Dense} \\
+Keystone $\ito_T(g_B)$ & \lean{itoIntegralCLM_T_brownian} & \file{ItoIntegralBrownian} \\
+Conditional increments & \lean{condExp_adapted_mul_increment} & \file{ItoIntegralProcessMartingale} \\
+Key identity (\cref{thm:key}) & \lean{itoProcessCLM_eq_condExpL2} & \file{ItoIntegralProcessGeneral} \\
+Martingale property & \lean{itoIntegralProcessGen_isMartingale} & \file{ItoIntegralProcessGeneral} \\
+Time-indexed isometry & \lean{itoProcessCLM_norm_sq} & \file{ItoIntegralProcessIsometry} / \bench{sc-ito-general-time-isometry} \\
+QV in $L^2$, in $L^1$ & \lean{tendsto_qv}, \lean{qv_equals_t} & \file{QuadraticVariationL2}, \file{BrownianQuadraticVariation} / \bench{sc-thm-6.1.1} \\
+Weighted QV & \lean{tendsto_weighted_qv_process} & \file{WeightedQuadraticVariation} \\
+It\^o, bounded (\cref{thm:ito-bdd}) & \lean{ito_formula_L2_bddDeriv} & \file{ItoFormulaCLM} / \bench{sc-thm-7.1.1} \\
+It\^o, time-dependent (\cref{thm:ito-td}) & \lean{ito_formula_td_L2_bddDeriv} & \file{ItoFormulaTD} / \bench{sc-thm-7.1.2} \\
+It\^o as a process & \lean{ito_formula_td_process} & \file{ItoFormulaProcess} / \bench{sc-ito-formula-td-process} \\
+It\^o, exponential growth (\cref{thm:ito-growth}) & \lean{ito_formula_td_localized} & \file{ItoFormulaLocalized} / \bench{sc-ito-formula-localized} \\
+GBM; discounted GBM & \lean{ito_formula_gbm}, \lean{discountedGBM_eq_itoIntegral} & \file{ItoFormulaGBM} / \bench{sc-ito-formula-gbm}, \bench{sc-discounted-gbm-ito} \\
+Expectation It\^o & \lean{expectation_ito} & \file{FeynmanKacHeatEquation} \\
+Continuous modification & \lean{exists_continuous_modification_itoProcess} & \file{ItoIntegralProcessContinuousModification} \\
+Local martingale on $[0,T]$ & \lean{exists_continuous_localMartingale_modification} & \file{ItoIntegralProcessLocalMartingaleGeneral} \\
+Local martingale on $\R_{\ge0}$ & \lean{exists_continuous_localMartingale_modification_infinite} & \file{ItoIntegralProcessLocalMartingaleInfinite} / \bench{sc-ito-infinite-local-martingale} \\
+It\^o, no growth (\cref{thm:unrestricted}) & \lean{ito_formula_unrestricted} & \file{ItoFormulaUnrestrictedLocMart} / \bench{sc-ito-formula-unrestricted-islocalmartingale} \\
+Exit times & \lean{exitTime} & \file{ExitTime} \\
+It\^o, constant coefficients & \lean{ito_formula_itoProcess} & \file{ItoFormulaItoProcess} / \bench{sc-ito-formula-ito-process} \\
+It\^o, adapted coefficients (\cref{thm:adapted}) & \lean{ito_formula_adapted} & \file{ItoFormulaAdapted} / \bench{sc-ito-formula-adapted} \\
+Representation (\cref{thm:mrt}) & \lean{exists_itoIntegral_representation}, \lean{itoIntegralCLM_T_surjective_onto_centered}, \lean{itoIsometryEquiv} & \file{MartingaleRepresentation} \\
+Representation, process form & \lean{martingale_representation} & \file{MartingaleRepresentation} / \bench{gir-thm-9.3.4} \\
+Integral against $\varphi\bulletB B$ & \lean{itoIntegralAgainstCLM}, \lean{itoIntegralAgainst_elementary} & \file{ItoIntegralAgainstMartingale} / \bench{sc-ito-integral-band} \\
+Bracket, conditional & \lean{condExp_band_second_moment} & \file{PointwiseBracket} / \bench{sc-bracket-conditional} \\
+Characterisation (\cref{thm:char}) & \lean{isStochasticIntegral} & \file{StochasticIntegralCharacterisation} / \bench{sc-ito-is-stochastic-integral} \\
+Girsanov, bounded predictable & \lean{Btheta_isQBrownianMotion_predictable_of_bdd} & \file{GirsanovPredictableTheta} / \bench{gir-thm-9.1.8-predictable} \\
+SDE existence and uniqueness & \lean{picardMap_exists_unique_fixedPoint} & \file{SDEExistence} / \bench{sde-picard-existence-uniqueness} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+All modules are under \file{MathFin/Foundations/}. The library contains no \texttt{sorry}. Every theorem in the table is pinned
+directly by one of the two axiom audits to the three standard axioms, except the supporting lemma \lean{isPiSystem_predictableRect},
+which is used in the proofs of pinned theorems; definitions are not pinned separately.
+
+%======================================================================
+\begin{thebibliography}{99}
+\small
+\bibitem{AvigadHolzlSerafin2017} J.~Avigad, J.~H\"olzl, L.~Serafin. A formally verified proof of the central limit theorem.
+  \emph{Journal of Automated Reasoning}, 59(4):389--423, 2017.
+\bibitem{BrownianMotionRepo} R.~Degenne et al. \emph{brownian-motion}: a Lean~4 development of Brownian motion and stochastic
+  integrals. \url{https://github.com/RemyDegenne/brownian-motion}, 2024--2026. Consumed at commit \texttt{0d5b6eb}.
+\bibitem{CoelhoFTAP} R.~Coelho. The fundamental theorem of asset pricing, formalized in Lean~4. arXiv:2606.28990, 2026.
+\bibitem{CoelhoLibrary} R.~Coelho. A formally verified library of mathematical finance in Lean~4. arXiv:2606.01356, 2026.
+\bibitem{DegenneEtAl2025} R.~Degenne, D.~Ledvinka, E.~Marion, P.~Pfaffelhuber. Formalization of Brownian motion in Lean.
+  arXiv:2511.20118, 2025.
+\bibitem{deMouraUllrich2021} L.~de~Moura, S.~Ullrich. The Lean~4 theorem prover and programming language. In \emph{CADE~28},
+  LNCS 12699, pp.~625--635, 2021.
+\bibitem{EchenimGuiolPeltier2020} M.~Echenim, H.~Guiol, N.~Peltier. Formalizing the Cox--Ross--Rubinstein pricing of European
+  derivatives in Isabelle/HOL. \emph{Journal of Automated Reasoning}, 64:737--765, 2020.
+\bibitem{Ito1944} K.~It\^o. Stochastic integral. \emph{Proceedings of the Imperial Academy, Tokyo}, 20(8):519--524, 1944.
+\bibitem{KaratzasShreve1991} I.~Karatzas, S.~E.~Shreve. \emph{Brownian Motion and Stochastic Calculus}, 2nd ed. Springer, 1991.
+\bibitem{Keskin2023} A.~Keskin. A formalization of martingales in Isabelle/HOL. arXiv:2311.06188, 2023.
+\bibitem{Mathlib2020} The mathlib Community. The Lean mathematical library. In \emph{CPP 2020}, pp.~367--381, 2020.
+\bibitem{Nagy2026} T.~Nagy. From It\^o to Black--Scholes: a machine-verified derivation in Lean~4. SSRN Working Paper 6336503,
+  2026.
+\bibitem{StochBench2026} I.~Davidovich, D.~Ganguly, V.~Singh, V.~Chaudhary. StochBench: a domain-specific benchmark for
+  stochastic processes in Lean. arXiv:2609.09264, 2026.
+\end{thebibliography}
+
+\end{document}

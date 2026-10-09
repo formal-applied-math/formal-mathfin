@@ -1,0 +1,5 @@
+# LaTeX intermediates (the PDFs are committed)
+*.aux
+*.log
+*.out
+*.toc

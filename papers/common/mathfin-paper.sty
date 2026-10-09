@@ -1,0 +1,164 @@
+%% mathfin-paper.sty -- shared house style for the formal-mathfin papers.
+%% pdfLaTeX only (arXiv compiles with pdfLaTeX). Palatino text and math,
+%% small-caps headings, Lean listings with Unicode mapped to math glyphs.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{mathfin-paper}[2026/10/09 formal-mathfin paper style]
+
+\RequirePackage[T1]{fontenc}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[sc]{mathpazo}
+\RequirePackage[scaled=0.93]{newtxtt}
+\RequirePackage{amsmath,amssymb,amsthm,mathtools}
+\RequirePackage[a4paper,margin=1.15in,headheight=14pt]{geometry}
+\RequirePackage[protrusion=true,expansion=true]{microtype}
+\RequirePackage{xcolor}
+\RequirePackage{booktabs,tabularx,array}
+\RequirePackage{enumitem}
+\RequirePackage{titlesec}
+\RequirePackage{caption}
+\RequirePackage{listings}
+\RequirePackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,backgrounds}
+\RequirePackage[hyphens]{url}
+\RequirePackage[hidelinks,pdfusetitle,bookmarksnumbered]{hyperref}
+\RequirePackage[nameinlink,capitalise,noabbrev]{cleveref}
+
+\linespread{1.04}
+\setlength{\parindent}{1.4em}
+\frenchspacing
+\setlist{itemsep=2pt,topsep=4pt,leftmargin=1.6em}
+\emergencystretch=2.5em
+\tolerance=800
+
+%% ---------- colours ----------
+\definecolor{mfaccent}{HTML}{7A5C2E}   % warm brown: rules, captions, figure strokes
+\definecolor{mflink}{HTML}{1F4E79}
+\definecolor{mfbg}{HTML}{F7F4EC}
+\definecolor{mfrule}{HTML}{CFC5AE}
+\definecolor{mfkw}{HTML}{2B4C7E}
+\definecolor{mfcomment}{HTML}{7D7466}
+\definecolor{mfmuted}{HTML}{6B6457}
+\hypersetup{colorlinks=true,linkcolor=mflink,citecolor=mflink,urlcolor=mflink}
+
+%% ---------- headings ----------
+\titleformat{\section}{\normalfont\large\scshape}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\normalfont\normalsize\scshape}{\thesubsection}{0.8em}{}
+\titleformat{\paragraph}[runin]{\normalfont\normalsize\bfseries}{}{0pt}{}[.]
+\titlespacing*{\section}{0pt}{2.0ex plus .6ex minus .2ex}{1.0ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{1.6ex plus .5ex minus .2ex}{0.8ex plus .2ex}
+\titlespacing*{\paragraph}{0pt}{1.0ex plus .4ex minus .2ex}{0.6em}
+
+%% ---------- Lean identifiers in running text ----------
+%% \lean{name} typesets a Lean identifier in typewriter and allows line breaks
+%% after `_' and `.', so long names never run into the margin.
+\DeclareUrlCommand\lean{\def\UrlFont{\ttfamily}%
+  \def\UrlBreaks{\do\_\do\.\do\/}\def\UrlBigBreaks{}\def\UrlNoBreaks{}}
+\DeclareUrlCommand\file{\def\UrlFont{\ttfamily}%
+  \def\UrlBreaks{\do\_\do\.\do\/}\def\UrlBigBreaks{}\def\UrlNoBreaks{}}
+%% \bench{id} typesets a benchmark-entry id, breakable after `-' and `.'.
+\DeclareUrlCommand\bench{\def\UrlFont{\ttfamily}%
+  \def\UrlBreaks{\do\-\do\.}\def\UrlBigBreaks{}\def\UrlNoBreaks{}}
+
+%% ---------- theorem-like environments ----------
+\newtheoremstyle{mfthm}{0.9ex}{0.9ex}{\itshape}{}{\scshape}{.}{0.5em}%
+  {\thmname{#1}\thmnumber{ #2}\thmnote{ \normalfont(#3)}}
+\newtheoremstyle{mfrem}{0.9ex}{0.9ex}{\normalfont}{}{\scshape}{.}{0.5em}%
+  {\thmname{#1}\thmnumber{ #2}\thmnote{ \normalfont(#3)}}
+\theoremstyle{mfthm}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{mfrem}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\crefname{listing}{Listing}{Listings}
+
+%% ---------- captions ----------
+\captionsetup{font=small,labelfont={sc},labelsep=period,skip=4pt}
+\captionsetup[lstlisting]{font={small,it},labelfont={small,it},labelsep=period,
+  singlelinecheck=false,justification=raggedright,skip=3pt}
+\renewcommand{\lstlistingname}{Listing}
+
+%% ---------- Lean listings ----------
+\lstdefinelanguage{lean}{%
+  morekeywords={theorem,lemma,def,noncomputable,structure,class,instance,abbrev,
+    where,fun,by,with,let,have,show,from,at,if,then,else,match,open,namespace,
+    section,end,variable,extends,Prop,Type,Sort,calc,exact,refine,obtain,intro,
+    private,protected,local,scoped},
+  sensitive=true,
+  morecomment=[l]{--},
+  morecomment=[s]{/-}{-/},
+  morestring=[b]",
+}
+\lstset{
+  language=lean,
+  basicstyle=\ttfamily\small\linespread{1.0}\selectfont,
+  keywordstyle=\color{mfkw}\bfseries,
+  commentstyle=\color{mfcomment}\itshape,
+  stringstyle=\color{mfmuted},
+  backgroundcolor=\color{mfbg},
+  frame=single, framerule=0.4pt, rulecolor=\color{mfrule},
+  xleftmargin=0.6em, xrightmargin=0.6em, framexleftmargin=0.4em,
+  framexrightmargin=0.4em, framextopmargin=3pt, framexbottommargin=3pt,
+  aboveskip=0.3ex, belowskip=0.3ex,
+  columns=fullflexible, keepspaces=true, breaklines=true,
+  breakatwhitespace=true, postbreak=\mbox{\textcolor{mfmuted}{$\hookrightarrow$}\space},
+  showstringspaces=false, tabsize=2, upquote=true,
+  extendedchars=true, inputencoding=utf8,
+  literate=
+    {ℝ}{{$\mathbb{R}$}}1 {ℕ}{{$\mathbb{N}$}}1 {ℤ}{{$\mathbb{Z}$}}1 {ℚ}{{$\mathbb{Q}$}}1
+    {ℂ}{{$\mathbb{C}$}}1 {𝔼}{{$\mathbb{E}$}}1 {𝟙}{{$\mathbb{1}$}}1
+    {∀}{{$\forall$}}1 {∃}{{$\exists$}}1 {¬}{{$\neg$}}1 {∧}{{$\wedge$}}1 {∨}{{$\vee$}}1
+    {→}{{$\to$}}1 {←}{{$\leftarrow$}}1 {↔}{{$\leftrightarrow$}}1 {↦}{{$\mapsto$}}1
+    {⇒}{{$\Rightarrow$}}1 {⟶}{{$\longrightarrow$}}2 {⇑}{{$\Uparrow$}}1 {↑}{{$\uparrow$}}1
+    {ℓ}{{$\ell$}}1 {∗}{{$*$}}1 {≃}{{$\simeq$}}1 {≈}{{$\approx$}}1 {∼}{{$\sim$}}1 {⊗}{{$\otimes$}}1
+    {⋂}{{$\bigcap$}}1 {⋃}{{$\bigcup$}}1 {⌈}{{$\lceil$}}1 {⌉}{{$\rceil$}}1 {⌊}{{$\lfloor$}}1 {⌋}{{$\rfloor$}}1
+    {⟦}{{$[\![$}}1 {⟧}{{$]\!]$}}1 {▸}{{$\triangleright$}}1 {⊢}{{$\vdash$}}1 {⁅}{{$[$}}1 {⁆}{{$]$}}1
+    {≤}{{$\le$}}1 {≥}{{$\ge$}}1 {≠}{{$\ne$}}1 {≡}{{$\equiv$}}1 {≪}{{$\ll$}}1
+    {∈}{{$\in$}}1 {∉}{{$\notin$}}1 {⊆}{{$\subseteq$}}1 {⊂}{{$\subset$}}1
+    {∩}{{$\cap$}}1 {∪}{{$\cup$}}1 {∅}{{$\emptyset$}}1 {⊥}{{$\bot$}}1 {⊤}{{$\top$}}1
+    {⊓}{{$\sqcap$}}1 {⊔}{{$\sqcup$}}1 {⨆}{{$\bigsqcup$}}1
+    {∘}{{$\circ$}}1 {•}{{$\bullet$}}1 {·}{{$\cdot$}}1 {×}{{$\times$}}1 {⁻¹}{{$^{-1}$}}2
+    {∑}{{$\sum$}}1 {∏}{{$\prod$}}1 {∫}{{$\int$}}1 {∂}{{$\partial$}}1 {∞}{{$\infty$}}1
+    {‖}{{$\|$}}1 {⟨}{{$\langle$}}1 {⟩}{{$\rangle$}}1 {⦃}{{$\{\!|$}}2 {⦄}{{$|\!\}$}}2
+    {ᗮ}{{$^{\perp}$}}1 {⟂}{{$\perp$}}1 {●}{{$\bullet$}}1 {√}{{$\surd$}}1
+    {α}{{$\alpha$}}1 {β}{{$\beta$}}1 {γ}{{$\gamma$}}1 {δ}{{$\delta$}}1 {ε}{{$\varepsilon$}}1
+    {η}{{$\eta$}}1 {θ}{{$\theta$}}1 {ι}{{$\iota$}}1 {κ}{{$\kappa$}}1 {λ}{{$\lambda$}}1
+    {μ}{{$\mu$}}1 {ν}{{$\nu$}}1 {ξ}{{$\xi$}}1 {π}{{$\pi$}}1 {ρ}{{$\rho$}}1 {σ}{{$\sigma$}}1
+    {τ}{{$\tau$}}1 {φ}{{$\varphi$}}1 {ϕ}{{$\phi$}}1 {χ}{{$\chi$}}1 {ψ}{{$\psi$}}1 {ω}{{$\omega$}}1
+    {Γ}{{$\Gamma$}}1 {Δ}{{$\Delta$}}1 {Λ}{{$\Lambda$}}1 {Σ}{{$\Sigma$}}1 {Φ}{{$\Phi$}}1
+    {Ω}{{$\Omega$}}1 {Π}{{$\Pi$}}1
+    {𝓕}{{$\mathcal{F}$}}1 {𝓝}{{$\mathcal{N}$}}1 {𝓖}{{$\mathcal{G}$}}1 {ℱ}{{$\mathcal{F}$}}1
+    {₀}{{$_0$}}1 {₁}{{$_1$}}1 {₂}{{$_2$}}1 {₃}{{$_3$}}1 {ₙ}{{$_n$}}1 {ᵢ}{{$_i$}}1
+    {ₘ}{{$_m$}}1 {ₜ}{{$_t$}}1
+    {²}{{$^2$}}1 {³}{{$^3$}}1 {⁴}{{$^4$}}1 {⁺}{{$^+$}}1 {ᵐ}{{$^{m}$}}1 {ᵀ}{{$^{T}$}}1
+    {ᴮ}{{$^{B}$}}1 {ˢ}{{$^{s}$}}1 {ᶜ}{{$^{c}$}}1
+    {−}{{$-$}}1 {…}{{$\ldots$}}1 {–}{{--}}1 {—}{{---}}1 {′}{{$'$}}1
+    {≥0}{{$_{\ge0}$}}2
+}
+
+%% ---------- misc ----------
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\ind}{\mathbf{1}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\ip}[2]{\langle #1,\,#2\rangle}
+\newcommand{\norm}[1]{\lVert #1\rVert}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+\newcommand{\ito}{\mathcal{I}}
+\newcommand{\status}[1]{\texttt{#1}}
+
+%% Non-breaking Lean listing: an lstlisting inside a full-width minipage, so a
+%% short listing never splits across pages. Use \begin{leancode}[caption=...,label=...].
+\newcommand\mf@leancodebegin{\par\addvspace{0.6ex}\noindent\minipage{\linewidth}}
+\newcommand\mf@leancodeend{\endminipage\par\addvspace{0.9ex}}
+\lstnewenvironment{leancode}[1][]
+  {\mf@leancodebegin\lstset{#1}}
+  {\mf@leancodeend}
+
+\endinput
