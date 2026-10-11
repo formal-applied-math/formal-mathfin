@@ -216,6 +216,14 @@ import MathFin.Foundations.BrownianExpMoment
 import MathFin.Foundations.ItoFormulaLocalized
 import MathFin.Foundations.ItoFormulaItoProcess
 import MathFin.Foundations.ItoFormulaGBM
+import MathFin.Foundations.ItoDriftExpectation
+-- The integrated Itô–drift identity for adapted coefficients (the general bounded-adapted
+-- case of ItoDriftExpectation: the expectation form of Itô's formula along
+-- `X_t = c + ∫β + M`)
+import MathFin.Foundations.ItoFormulaAdaptedDrift
+-- Cross-horizon consistency of the CLM Itô integral: one pinned `M` (`hMeq`) represents
+-- the CLM integral at every horizon `τ ≤ T` (band-transfer kernel + freeze law)
+import MathFin.Foundations.ItoIntegralCrossHorizon
 -- Martingale representation, step 3: the Doléans exponential of a deterministic step
 -- integrand is an Itô integral (time locality of `∫·dB` + unbounded `𝓕_a`-scaling)
 import MathFin.Foundations.DoleansStepRepresentation
