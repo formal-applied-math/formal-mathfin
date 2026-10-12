@@ -224,6 +224,8 @@ import MathFin.Foundations.ItoFormulaAdaptedDrift
 -- Cross-horizon consistency of the CLM Itô integral: one pinned `M` (`hMeq`) represents
 -- the CLM integral at every horizon `τ ≤ T` (band-transfer kernel + freeze law)
 import MathFin.Foundations.ItoIntegralCrossHorizon
+import MathFin.Foundations.HullWhiteCalibration
+import MathFin.Foundations.MonteCarloPricer
 -- Martingale representation, step 3: the Doléans exponential of a deterministic step
 -- integrand is an Itô integral (time locality of `∫·dB` + unbounded `𝓕_a`-scaling)
 import MathFin.Foundations.DoleansStepRepresentation
