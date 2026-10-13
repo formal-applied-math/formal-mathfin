@@ -56,9 +56,9 @@ Public definitions: `deterministic`, `kernel`, `kernelV`, `kernelLp`, `integrate
 Public lemmas (all in `namespace MathFin.HullWhite`):
 
 * `deterministic_at_zero`, `deterministic_solves_ODE`, `deterministic_const`,
-  `deterministic_const_tendsto`, `deterministic_add_exponential`,
-  `deterministic_eq_of_solves_ODE`, `mean` — the deterministic part and the mean
-  identity;
+  `deterministic_const_closed_form`, `deterministic_const_tendsto`,
+  `deterministic_add_exponential`, `deterministic_eq_of_solves_ODE`, `mean` —
+  the deterministic part and the mean identity;
 * `kernel_memLp`, `kernel_integral_sq`, `integratedRate_hasLaw_gaussian` — the short
   rate's Gaussian law with the Vasicek variance;
 * `integral_exp_pos_const`, `integral_exp_neg_eq_bondB`, `beta_integral`,
@@ -66,9 +66,10 @@ Public lemmas (all in `namespace MathFin.HullWhite`):
   affine coefficients;
 * `bondPrice_eq`, `bondPrice_affine` — the exponential-Gaussian bond moment and the
   affine term structure with `vasicekBondB` reused verbatim;
-* `theta_continuous`, `calibAlpha_solves_ODE`, `calibMean`, `calibMean_eq_forward`,
-  `var_eq_interval`, `calibIntegratedMean`, `reprices_curve` — the calibration
-  `θ`-formula and the exact repricing of the initial forward curve.
+* `theta_continuous`, `calibAlpha_solves_ODE`, `mean_eq_forward`, `calibMean`,
+  `calibMean_eq_forward`, `var_eq_interval`, `calibCorrection_integral`,
+  `calibIntegratedMean`, `reprices_curve` — the calibration `θ`-formula and the
+  exact repricing of the initial forward curve.
 
 Supporting lemmas (`kernelLp_integral_sq`, `kernelV_nonneg`, `kernelWienerLaw`,
 `forcing_integral_continuous`, `vasKernelLp_integral_sq`, `vasKernelV_nonneg`,
@@ -159,6 +160,17 @@ lemma deterministic_const (Θ κ r₀ t : ℝ) (hκ : κ ≠ 0) :
   simp only [deterministic, hint, vasicekDeterministic]
   field_simp [hexpmul]
   linear_combination Θ * hexpmul
+
+/-- **Vasicek's closed form for constant θ**: `deterministic (fun _ ↦ Θ) κ r₀ t
+= Θ/κ + (r₀ − Θ/κ)·e^{−κt}` — the mean-reversion solution to level `θ_v = Θ/κ`
+in explicit form (reached through the bridge `deterministic_const`;
+`vasicekDeterministic`'s definition body): constant HW forcing `Θ` is Vasicek
+with long-run mean `Θ/κ` — *not* HW forcing `Θ/κ`, which would be Vasicek with
+mean `Θ/κ²`. -/
+theorem deterministic_const_closed_form (Θ κ r₀ t : ℝ) (hκ : κ ≠ 0) :
+    deterministic (fun _ ↦ Θ) κ r₀ t = Θ / κ + (r₀ - Θ / κ) * Real.exp (-(κ * t)) := by
+  rw [deterministic_const Θ κ r₀ t hκ]
+  rfl
 
 /-- **Mean reversion for constant θ**: the deterministic part tends to `Θ/κ`,
 mirroring `vasicekDeterministic_tendsto_mean`. -/
@@ -673,6 +685,23 @@ theorem calibAlpha_solves_ODE (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ �
   rw [hval]
   exact hfd.add hcm
 
+/-- **The mean identity**: the HW particular solution driven by `theta` and
+started at the initial forward `r₀ = f(0,0)` is exactly
+`β(t) = f(0,t) + (σ²/2κ²)(1 − e^{−κt})²` — the initial forward plus the convexity
+correction, so the expected short rate is the forward curve plus a known,
+explicitly integrable correction. Route: `calibAlpha_solves_ODE` (verified by
+differentiation) + ODE uniqueness (`deterministic_eq_of_solves_ODE`; note
+`β(0) = f(0,0)` automatically, since `(1 − e^{−κ·0})² = 0`). Only `κ ≠ 0` is
+needed — the θ-formula divides by κ; no positivity enters the deterministic
+identity. -/
+theorem mean_eq_forward (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ : ℝ) (hκ : κ ≠ 0) (t : ℝ) :
+    deterministic (theta f0 κ σ) κ (f0 0) t
+      = f0 t + (σ ^ 2 / (2 * κ ^ 2)) * (1 - Real.exp (-(κ * t))) ^ 2 := by
+  have h := deterministic_eq_of_solves_ODE (theta f0 κ σ)
+    (theta_continuous f0 hf0 κ σ) κ (calibAlpha f0 κ σ)
+    (fun s ↦ calibAlpha_solves_ODE f0 hf0 κ σ hκ s) t
+  rwa [show calibAlpha f0 κ σ 0 = f0 0 from by simp [calibAlpha]] at h
+
 /-- **The calibrated mean**: the HW particular solution driven by `theta` and
 started at the initial forward `r₀ = f(0,0)` is exactly
 `β(t) = f(0,t) + (σ²/2κ²)(1 − e^{−κt})²` — `calibAlpha_solves_ODE` + ODE
@@ -680,11 +709,8 @@ uniqueness (`deterministic_eq_of_solves_ODE`; note `β(0) = f(0,0)`
 automatically, since `(1 − e^{−κ·0})² = 0`). -/
 theorem calibMean (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ : ℝ) (hκ : 0 < κ) (t : ℝ) :
     deterministic (theta f0 κ σ) κ (f0 0) t
-      = f0 t + (σ ^ 2 / (2 * κ ^ 2)) * (1 - Real.exp (-(κ * t))) ^ 2 := by
-  have h := deterministic_eq_of_solves_ODE (theta f0 κ σ)
-    (theta_continuous f0 hf0 κ σ) κ (calibAlpha f0 κ σ)
-    (fun s ↦ calibAlpha_solves_ODE f0 hf0 κ σ hκ.ne' s) t
-  rwa [show calibAlpha f0 κ σ 0 = f0 0 from by simp [calibAlpha]] at h
+      = f0 t + (σ ^ 2 / (2 * κ ^ 2)) * (1 - Real.exp (-(κ * t))) ^ 2 :=
+  mean_eq_forward f0 hf0 κ σ hκ.ne' t
 
 /-- **The mean identity at the law level**: `𝔼[r_t] = f(0,t) +
 (σ²/2κ²)(1 − e^{−κt})²` — the expected HW short rate under calibration is the
@@ -734,6 +760,19 @@ private lemma calibVar_key (κ : ℝ) (hκ : κ ≠ 0) (𝕋 : ℝ≥0) :
       (fun s : ℝ ↦ (1 - Real.exp (-(κ * s))) ^ 2) (Set.uIcc (0 : ℝ) (𝕋 : ℝ))
       from fun s _ ↦ ?_)
   show κ ^ 2 * ((1 - Real.exp (-(κ * s))) / κ) ^ 2 = (1 - Real.exp (-(κ * s))) ^ 2
+  field_simp
+
+/-- **The convexity-correction integral in isolation**:
+`∫₀ᵀ (σ²/2κ²)(1 − e^{−κs})² ds = (σ²/2)·V(T)` — the mean-correction term of
+`mean_eq_forward`, integrated, equals half the integrated-rate variance: the
+exact quantity the Gaussian bond moment's `σ²V/2` cancels, which is why
+`reprices_curve` is exact (`calibIntegratedMean` = `∫₀ᵀ f0` + this). -/
+theorem calibCorrection_integral (κ σ : ℝ) (hκ : κ ≠ 0) (𝕋 : ℝ≥0) :
+    ∫ s in (0 : ℝ)..(𝕋 : ℝ), (σ ^ 2 / (2 * κ ^ 2)) * (1 - Real.exp (-(κ * s))) ^ 2
+      = σ ^ 2 / 2 * vasicekBondV κ (𝕋 : ℝ) := by
+  rw [intervalIntegral.integral_const_mul (r := (σ ^ 2 / (2 * κ ^ 2)))
+      (f := fun s : ℝ ↦ (1 - Real.exp (-(κ * s))) ^ 2),
+    ← calibVar_key κ hκ 𝕋, ← var_eq_interval κ hκ 𝕋]
   field_simp
 
 /-- **The calibrated integrated mean**: `∫₀ᵀ α(s) ds = ∫₀ᵀ f(0,s) ds +
