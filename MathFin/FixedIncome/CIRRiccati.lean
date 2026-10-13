@@ -1,0 +1,81 @@
+/-
+Copyright (c) 2026 Raphael Coelho. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Alfredo Garcia
+-/
+module
+
+public import Mathlib
+
+/-!
+# The CIR rate loading solves its Riccati equation
+
+The Cox–Ingersoll–Ross bond price has the affine form `P(0, T) = exp(A(T) − B(T) · r₀)`. With
+`γ = √(κ² + 2σ²)` and `D(T) = (γ + κ)(e^{γT} − 1) + 2γ`, the closed form
+`B(T) = 2(e^{γT} − 1) / D(T)` solves `B' = 1 − κB − ½σ²B²` with `B(0) = 0`.
+
+After differentiating the quotient, the equation is the identity
+`D² − 2κ(e^{γT} − 1) D − 2σ²(e^{γT} − 1)² = 4γ² e^{γT}`, which holds because
+`γ² = κ² + 2σ²`. The hypothesis `κ² + 2σ² > 0` is the weakest that keeps `γ > 0`; at
+`κ = σ = 0` the denominator is identically zero. Since `|κ| ≤ γ`, `D(T) > 0` for every
+real `T`, so no `T ≥ 0` hypothesis is needed.
+
+Only this equation is proved. The bond price `𝔼[exp(−∫₀ᵀ r_s ds)]` needs the affine
+(Feynman–Kac) framework, which is not formalized.
+
+## Main results
+
+* `cirBondB_zero`: `B(0) = 0`.
+* `cirBondB_hasDerivAt`: `B' = 1 − κB − ½σ²B²` at every `T`, for `κ² + 2σ² > 0`.
+-/
+
+@[expose] public section
+
+namespace MathFin
+
+/-- `γ = √(κ² + 2σ²)`. -/
+noncomputable def cirGamma (κ σ : ℝ) : ℝ := Real.sqrt (κ ^ 2 + 2 * σ ^ 2)
+
+/-- `D(T) = (γ + κ)(e^{γT} − 1) + 2γ`. -/
+noncomputable def cirDenom (κ σ T : ℝ) : ℝ :=
+  (cirGamma κ σ + κ) * (Real.exp (cirGamma κ σ * T) - 1) + 2 * cirGamma κ σ
+
+/-- The CIR rate loading `B(T) = 2(e^{γT} − 1) / D(T)`. -/
+noncomputable def cirBondB (κ σ T : ℝ) : ℝ :=
+  2 * (Real.exp (cirGamma κ σ * T) - 1) / cirDenom κ σ T
+
+/-- `D(T) > 0` at every `T`, since `|κ| ≤ γ`. -/
+lemma cirDenom_pos {κ σ : ℝ} (h : 0 < κ ^ 2 + 2 * σ ^ 2) (T : ℝ) : 0 < cirDenom κ σ T := by
+  have hγ : 0 < cirGamma κ σ := Real.sqrt_pos.mpr h
+  have hκ : |κ| ≤ cirGamma κ σ := Real.abs_le_sqrt (by nlinarith [sq_nonneg σ])
+  have hE := Real.exp_pos (cirGamma κ σ * T)
+  unfold cirDenom
+  nlinarith [le_abs_self κ, neg_abs_le κ,
+    mul_nonneg (by linarith [neg_abs_le κ] : 0 ≤ cirGamma κ σ + κ) hE.le]
+
+lemma cirBondB_zero (κ σ : ℝ) : cirBondB κ σ 0 = 0 := by
+  simp [cirBondB]
+
+/-- **The CIR rate loading solves the Riccati equation** `B' = 1 − κB − ½σ²B²`. The proof
+reduces it to `D² − 2κ(e^{γT} − 1) D − 2σ²(e^{γT} − 1)² = 4γ² e^{γT}`, using `γ² = κ² + 2σ²`. -/
+theorem cirBondB_hasDerivAt {κ σ : ℝ} (h : 0 < κ ^ 2 + 2 * σ ^ 2) (T : ℝ) :
+    HasDerivAt (cirBondB κ σ)
+      (1 - κ * cirBondB κ σ T - σ ^ 2 / 2 * cirBondB κ σ T ^ 2) T := by
+  have hγ : cirGamma κ σ ^ 2 = κ ^ 2 + 2 * σ ^ 2 := Real.sq_sqrt (by positivity)
+  have hE : HasDerivAt (fun t ↦ Real.exp (cirGamma κ σ * t))
+      (Real.exp (cirGamma κ σ * T) * cirGamma κ σ) T := by
+    simpa using ((hasDerivAt_id T).const_mul (cirGamma κ σ)).exp
+  have hB := ((hE.sub_const 1).const_mul 2).div
+    (((hE.sub_const 1).const_mul (cirGamma κ σ + κ)).add_const (2 * cirGamma κ σ))
+    (cirDenom_pos h T).ne'
+  have hfun : cirBondB κ σ =
+      (fun t ↦ 2 * (Real.exp (cirGamma κ σ * t) - 1)) / fun t ↦ cirDenom κ σ t := rfl
+  have hD := (cirDenom_pos h T).ne'
+  rw [hfun]
+  refine hB.congr_deriv ?_
+  simp only [Pi.div_apply]
+  unfold cirDenom at *
+  field_simp
+  linear_combination -(Real.exp (cirGamma κ σ * T) - 1) ^ 2 * hγ
+
+end MathFin

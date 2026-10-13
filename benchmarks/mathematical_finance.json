@@ -4880,6 +4880,22 @@
       }
     },
     {
+      "id": "mf-cir-bond-loading-riccati",
+      "name": "CIR Affine Loading B(T) Solves the Riccati Equation",
+      "domain": "mathematical_finance",
+      "description": "For the Cox–Ingersoll–Ross short rate dr = κ(θ − r)dt + σ√r dW, in the affine form P(0,T) = exp(A(T) − B(T)·r₀) of its bond price, the closed-form rate loading B(T) = 2(e^{γT} − 1)/((γ + κ)(e^{γT} − 1) + 2γ), γ = √(κ² + 2σ²), solves the Riccati equation B'(T) = 1 − κB(T) − ½σ²B(T)² with B(0) = 0, at every real T, whenever κ² + 2σ² > 0. Only this equation is verified: the bond price itself is not derived.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.CIRRiccati\n\nopen MathFin\n\n/-- **The CIR rate loading solves the Riccati equation.** With `γ = √(κ² + 2σ²)`, the closed\nform `B(T) = 2(e^{γT} − 1) / ((γ + κ)(e^{γT} − 1) + 2γ)` of the CIR affine bond price\n`P(0,T) = exp(A(T) − B(T)·r₀)` satisfies `B(0) = 0` and `B'(T) = 1 − κB(T) − ½σ²B(T)²` at every\n`T`, whenever `κ² + 2σ² > 0`. Re-exports `MathFin.cirBondB_zero` and\n`MathFin.cirBondB_hasDerivAt`. -/\ntheorem cir_bond_B_solves_riccati {κ σ : ℝ} (h : 0 < κ ^ 2 + 2 * σ ^ 2) :\n    cirBondB κ σ 0 = 0 ∧\n      ∀ T : ℝ, HasDerivAt (cirBondB κ σ)\n        (1 - κ * cirBondB κ σ T - σ ^ 2 / 2 * cirBondB κ σ T ^ 2) T :=\n  ⟨cirBondB_zero κ σ, cirBondB_hasDerivAt h⟩\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Cox, Ingersoll and Ross 1985, A Theory of the Term Structure of Interest Rates; the affine loadings (Brigo–Mercurio §3.2.3)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.cirBondB_zero and MathFin.cirBondB_hasDerivAt (FixedIncome/CIRRiccati.lean). SCOPE. Only the term-structure equation is verified; the bond price P = E[exp(-int_0^T r_s ds)] needs the affine (Feynman-Kac) framework, which is not formalized."
+      }
+    },
+    {
       "id": "mf-forward-measure-spot",
       "name": "Forward Price under the T-Forward Measure",
       "domain": "mathematical_finance",

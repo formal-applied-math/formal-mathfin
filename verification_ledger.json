@@ -1312,6 +1312,13 @@
       "input_hash": "7e690e63f549b13508e49fb8a56cef749e3ffa55ae6baed1c4a57250e6989c22",
       "verified_at_commit": "fdfecac"
     },
+    "mf-cir-bond-loading-riccati": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-14",
+      "elapsed_s": 4.8,
+      "input_hash": "fd3dfc74dbc16519511b774e78b5ec434fdb27de05f07b9ede81f58efef3f100",
+      "verified_at_commit": "55a3c4f"
+    },
     "mf-cml-decomposition-unique": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-02",

@@ -26,6 +26,16 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The CIR rate loading solves its Riccati equation (2026-10-14)
+
+One entry added, `mf-cir-bond-loading-riccati` (`full`). Corpus 535 → 536.
+
+`FixedIncome/CIRRiccati.lean`: with `γ = √(κ² + 2σ²)`, the closed form
+`B(T) = 2(e^{γT} − 1)/((γ + κ)(e^{γT} − 1) + 2γ)` satisfies `B(0) = 0` and
+`B' = 1 − κB − ½σ²B²` at every `T`, for `κ² + 2σ² > 0`. This parallels
+`vasicekDeterministic_solves_ODE`. Only the ODE is proved; the bond price needs the affine
+(Feynman–Kac) framework.
+
 ### The variance swap on one process, under one measure (2026-10-08)
 
 Five entries added and one restated, all `full`: `mf-jump-diffusion-terminal-law`,
