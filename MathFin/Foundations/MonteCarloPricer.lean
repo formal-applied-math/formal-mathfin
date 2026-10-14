@@ -127,7 +127,7 @@ noncomputable def payoff (S_0 K r σ T z : ℝ) : ℝ :=
   Real.exp (-r * T) * max (K - bsTerminal S_0 r σ T z) 0
 
 /-- The terminal map is nonnegative (it is `S₀ · exp(·)`). -/
-private lemma terminal_nonneg (hS_0 : 0 ≤ S_0) (r σ T z : ℝ) :
+private lemma terminal_nonneg {S_0 : ℝ} (hS_0 : 0 ≤ S_0) (r σ T z : ℝ) :
     0 ≤ bsTerminal S_0 r σ T z := by
   unfold bsTerminal
   exact mul_nonneg hS_0 (Real.exp_pos _).le
@@ -140,7 +140,7 @@ private lemma payoff_nonneg (S_0 K r σ T z : ℝ) : 0 ≤ payoff S_0 K r σ T z
 /-- **The put payoff is bounded above** by the discounted strike: `H ≤ e^{-rT}·K`.
 This boundedness (a put is the easy case of integrability) is what licenses the
 strong law and the CLT. -/
-theorem payoff_le (hS_0 : 0 < S_0) (hK : 0 ≤ K) (r σ T z : ℝ) :
+theorem payoff_le {S_0 K : ℝ} (hS_0 : 0 < S_0) (hK : 0 ≤ K) (r σ T z : ℝ) :
     payoff S_0 K r σ T z ≤ Real.exp (-r * T) * K := by
   unfold payoff
   refine mul_le_mul_of_nonneg_left ?_ (Real.exp_pos _).le
@@ -585,7 +585,8 @@ private lemma mcCallPayoff_nonneg (S_0 K r σ T z : ℝ) :
 
 /-- **The call payoff is dominated by the discounted terminal**: `C ≤ e^{-rT}·S_T`.
 The unbounded-but-integrable envelope that replaces the put's constant bound. -/
-private lemma mcCallPayoff_le_terminal (hS_0 : 0 < S_0) (hK : 0 ≤ K) (r σ T z : ℝ) :
+private lemma mcCallPayoff_le_terminal {S_0 K : ℝ} (hS_0 : 0 < S_0) (hK : 0 ≤ K)
+    (r σ T z : ℝ) :
     mcCallPayoff S_0 K r σ T z ≤ Real.exp (-r * T) * bsTerminal S_0 r σ T z := by
   unfold mcCallPayoff
   refine mul_le_mul_of_nonneg_left ?_ (Real.exp_pos _).le

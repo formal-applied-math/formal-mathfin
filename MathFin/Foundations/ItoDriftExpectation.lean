@@ -183,7 +183,7 @@ Itô integral of `σ·f'(X_·)`; integrating kills the stochastic term by center
 `expectation_pathIntegral_eq`. The `C³`-with-bounded-derivatives class instantiates the
 exponential-growth hypotheses of `ito_formula_itoProcess` at `λ = 0`. -/
 theorem ito_drift_expectation_identity
-    (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
+    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
     (T : ℝ≥0) (X₀ b σ : ℝ) {f f' f'' f''' : ℝ → ℝ}
     (hf' : ∀ x, HasDerivAt f (f' x) x) (hf'' : ∀ x, HasDerivAt f' (f'' x) x)

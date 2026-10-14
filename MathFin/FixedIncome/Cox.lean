@@ -181,7 +181,7 @@ theorem protectionLeg_const (r lam R T : ℝ) :
     intro s
     rw [mul_left_comm, ← Real.exp_add]
     congr 1
-    ring
+    ring_nf
   rw [intervalIntegral.integral_congr
       (f := fun s : ℝ ↦ rexp (-(r * s)) * (lam * rexp (-(lam * s))))
       (g := fun s : ℝ ↦ lam * rexp (-((r + lam) * s))) (fun s _ ↦ hpt s),
@@ -545,7 +545,7 @@ theorem cdsLosses_eq_riskyAnnuity_mul (r lam T : ℝ) :
     show rexp (-(r * s)) * lam * rexp (-(lam * s)) = lam * rexp (-((r + lam) * s))
     rw [mul_comm (rexp (-(r * s))) lam, mul_assoc, ← Real.exp_add]
     congr 1
-    ring
+    ring_nf
   rw [cdsLosses, riskyAnnuity, intervalIntegral.integral_congr
     (f := fun s : ℝ ↦ rexp (-(r * s)) * (fun _ ↦ lam) s * hazardSurvival (fun _ ↦ lam) s)
     (g := fun s : ℝ ↦ lam * rexp (-((r + lam) * s))) (fun s _ ↦ hpt s),

@@ -1078,7 +1078,7 @@ private lemma uniform_band_split (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0
 /-- **Per-cell step identification at CLM level**: the increment over cell `k` of the
 uniform partition of the step-approximant CLM process is a.e. the single rectangle
 `δ(tₖ)·ΔBₖ`. -/
-private theorem stepIncr_stepCLM_ae (hBmeas : ∀ t, Measurable (B t))
+private theorem stepIncr_stepCLM_ae (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
     (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
     (hδbdd : ∀ t ω, |δ t ω| ≤ Dd) {n k : ℕ} (hk : k < n) :
@@ -1533,7 +1533,7 @@ set_option linter.unusedSectionVars false in
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- Generic weighted-square transfer: if `f =ᵐ g`, `g²` is integrable with energy `E`,
 and `|w| ≤ C`, then `𝔼[(w·f)²] ≤ C²·E`. -/
-private theorem weighted_sq_le_of_congr {f g w : Ω → ℝ} {C : ℝ}
+private theorem weighted_sq_le_of_congr {f g w : Ω → ℝ} {C E : ℝ}
     (hwb : ∀ ω, |w ω| ≤ C) (hcongr : f =ᵐ[μ] g)
     (hint2 : Integrable (fun ω ↦ g ω ^ 2) μ) (hE : ∫ ω, g ω ^ 2 ∂μ = E) :
     ∫ ω, (w ω * f ω) ^ 2 ∂μ ≤ C ^ 2 * E := by
