@@ -4896,6 +4896,22 @@
       }
     },
     {
+      "id": "mf-cir-bond-level-loading",
+      "name": "CIR Affine Loading A(T) Solves A' = −κθB",
+      "domain": "mathematical_finance",
+      "description": "For the Cox–Ingersoll–Ross short rate, in the affine form P(0,T) = exp(A(T) − B(T)·r₀) of its bond price, the closed-form level loading A(T) = (2κθ/σ²)·log(2γe^{(κ+γ)T/2} / ((γ + κ)(e^{γT} − 1) + 2γ)), γ = √(κ² + 2σ²), satisfies A(0) = 0 and A'(T) = −κθB(T) at every real T, whenever σ ≠ 0. Only this equation is verified: the bond price itself is not derived.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.CIRRiccati\n\nopen MathFin\n\n/-- **The CIR level loading solves its equation.** In the affine form\n`P(0,T) = exp(A(T) − B(T)·r₀)`, the closed form `A(T) = (2κθ/σ²)·log(2γ e^{(κ+γ)T/2} / D(T))`,\nwith `γ = √(κ² + 2σ²)` and `D(T) = (γ + κ)(e^{γT} − 1) + 2γ`, satisfies `A(0) = 0` and\n`A'(T) = −κθ B(T)` at every `T`, whenever `σ ≠ 0`. Re-exports `MathFin.cirBondA_zero` and\n`MathFin.cirBondA_hasDerivAt`. -/\ntheorem cir_bond_A_solves_equation {κ σ : ℝ} (θ : ℝ) (hσ : σ ≠ 0) :\n    cirBondA κ θ σ 0 = 0 ∧\n      ∀ T : ℝ, HasDerivAt (cirBondA κ θ σ) (-(κ * θ) * cirBondB κ σ T) T :=\n  ⟨cirBondA_zero κ θ σ, cirBondA_hasDerivAt θ hσ⟩\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Cox, Ingersoll and Ross 1985, A Theory of the Term Structure of Interest Rates; the affine loadings (Brigo–Mercurio §3.2.3)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.cirBondA_zero and MathFin.cirBondA_hasDerivAt (FixedIncome/CIRRiccati.lean). A is the log-form level loading of P = exp(A - B*r0), so A(0) = 0. SCOPE. sigma != 0 is needed because the factor 2*kappa*theta/sigma^2 divides by sigma^2. Only the term-structure equation is verified; the bond price needs the affine (Feynman-Kac) framework, which is not formalized."
+      }
+    },
+    {
       "id": "mf-forward-measure-spot",
       "name": "Forward Price under the T-Forward Measure",
       "domain": "mathematical_finance",

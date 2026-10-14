@@ -8,7 +8,7 @@ module
 public import Mathlib
 
 /-!
-# The CIR rate loading solves its Riccati equation
+# The CIR loadings solve their term-structure equations
 
 The Cox–Ingersoll–Ross bond price has the affine form `P(0, T) = exp(A(T) − B(T) · r₀)`. With
 `γ = √(κ² + 2σ²)` and `D(T) = (γ + κ)(e^{γT} − 1) + 2γ`, the closed form
@@ -20,13 +20,19 @@ After differentiating the quotient, the equation is the identity
 `κ = σ = 0` the denominator is identically zero. Since `|κ| ≤ γ`, `D(T) > 0` for every
 real `T`, so no `T ≥ 0` hypothesis is needed.
 
-Only this equation is proved. The bond price `𝔼[exp(−∫₀ᵀ r_s ds)]` needs the affine
+The level loading `A(T) = (2κθ/σ²) · log(2γ e^{(κ+γ)T/2} / D(T))` solves `A' = −κθB` with
+`A(0) = 0`, for `σ ≠ 0`. Its equation reduces to
+`(κ + γ) D / 2 − (γ + κ) γ e^{γT} = −σ² (e^{γT} − 1)`, again because `γ² = κ² + 2σ²`.
+
+Only these equations are proved. The bond price `𝔼[exp(−∫₀ᵀ r_s ds)]` needs the affine
 (Feynman–Kac) framework, which is not formalized.
 
 ## Main results
 
 * `cirBondB_zero`: `B(0) = 0`.
 * `cirBondB_hasDerivAt`: `B' = 1 − κB − ½σ²B²` at every `T`, for `κ² + 2σ² > 0`.
+* `cirBondA_zero`: `A(0) = 0`.
+* `cirBondA_hasDerivAt`: `A' = −κθB` at every `T`, for `σ ≠ 0`.
 -/
 
 @[expose] public section
@@ -77,5 +83,43 @@ theorem cirBondB_hasDerivAt {κ σ : ℝ} (h : 0 < κ ^ 2 + 2 * σ ^ 2) (T : ℝ
   unfold cirDenom at *
   field_simp
   linear_combination -(Real.exp (cirGamma κ σ * T) - 1) ^ 2 * hγ
+
+/-- The CIR level loading `A(T) = (2κθ/σ²) · log(2γ e^{(κ+γ)T/2} / D(T))`. -/
+noncomputable def cirBondA (κ θ σ T : ℝ) : ℝ :=
+  2 * κ * θ / σ ^ 2 *
+    Real.log (2 * cirGamma κ σ * Real.exp ((κ + cirGamma κ σ) * T / 2) / cirDenom κ σ T)
+
+lemma cirBondA_zero (κ θ σ : ℝ) : cirBondA κ θ σ 0 = 0 := by
+  by_cases hγ : cirGamma κ σ = 0 <;> simp [cirBondA, cirDenom, hγ]
+
+/-- **The CIR level loading solves `A' = −κθB`.** The proof reduces it to
+`(κ + γ) D / 2 − (γ + κ) γ e^{γT} = −σ² (e^{γT} − 1)`, using `γ² = κ² + 2σ²`. -/
+theorem cirBondA_hasDerivAt {κ σ : ℝ} (θ : ℝ) (hσ : σ ≠ 0) (T : ℝ) :
+    HasDerivAt (cirBondA κ θ σ) (-(κ * θ) * cirBondB κ σ T) T := by
+  have h : 0 < κ ^ 2 + 2 * σ ^ 2 := by positivity
+  have hγ : cirGamma κ σ ^ 2 = κ ^ 2 + 2 * σ ^ 2 := Real.sq_sqrt (by positivity)
+  have hγpos : 0 < cirGamma κ σ := Real.sqrt_pos.mpr h
+  have hD := cirDenom_pos h T
+  have hE : HasDerivAt (fun t ↦ Real.exp (cirGamma κ σ * t))
+      (Real.exp (cirGamma κ σ * T) * cirGamma κ σ) T := by
+    simpa using ((hasDerivAt_id T).const_mul (cirGamma κ σ)).exp
+  have hF : HasDerivAt (fun t ↦ 2 * cirGamma κ σ * Real.exp ((κ + cirGamma κ σ) * t / 2))
+      (2 * cirGamma κ σ * (Real.exp ((κ + cirGamma κ σ) * T / 2) * ((κ + cirGamma κ σ) / 2))) T := by
+    have := (((hasDerivAt_id T).const_mul (κ + cirGamma κ σ)).div_const 2).exp.const_mul
+      (2 * cirGamma κ σ)
+    simpa using this
+  have hg := hF.div (((hE.sub_const 1).const_mul (cirGamma κ σ + κ)).add_const (2 * cirGamma κ σ))
+    hD.ne'
+  have hA := (hg.log (div_pos (by positivity) hD).ne').const_mul (2 * κ * θ / σ ^ 2)
+  have hfun : cirBondA κ θ σ = fun t ↦ 2 * κ * θ / σ ^ 2 *
+      Real.log (((fun t ↦ 2 * cirGamma κ σ * Real.exp ((κ + cirGamma κ σ) * t / 2)) /
+        fun t ↦ cirDenom κ σ t) t) := rfl
+  rw [hfun]
+  refine hA.congr_deriv ?_
+  have hF0 := (Real.exp_pos ((κ + cirGamma κ σ) * T / 2)).ne'
+  simp only [Pi.div_apply, cirBondB]
+  unfold cirDenom at *
+  field_simp
+  linear_combination κ * θ * (1 - Real.exp (cirGamma κ σ * T)) * hγ
 
 end MathFin
