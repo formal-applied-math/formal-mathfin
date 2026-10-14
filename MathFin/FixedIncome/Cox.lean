@@ -14,12 +14,15 @@ public import MathFin.FixedIncome.CDSTimeVarying
 /-!
 # Cox-intensity credit: survival, default density, CDS legs and fair spread
 
-The Cox construction of a default time: a nonnegative intensity with cumulative
-hazard `Λ = cumHazard h` drives a first arrival built by inverting a
-unit-exponential clock through `Λ`. Everything reduces to two facts — survival
-`P(τ > t) = e^{−Λ(t)}` and density pricing `P(τ ≤ T) = ∫₀ᵀ h(s)·e^{−Λ(s)} ds` —
-and a CDS prices as premium leg (`c ·` risky annuity) against protection leg
-(`(1−R) ·` default-density integral), with the fair spread equating them.
+The Cox construction of a default time, for a deterministic intensity: for `h`
+continuous and strictly positive on all of `ℝ`, with `Λ = cumHazard h → ∞`, the
+time obtained by inverting a unit-exponential clock through `Λ` satisfies, for
+`t, T ≥ 0`, the survival law `P(τ > t) = e^{−Λ(t)}` and the density-pricing
+identity `P(τ ≤ T) = ∫₀ᵀ h(s)·e^{−Λ(s)} ds`. The CDS legs are *defined* as the
+deterministic integrals `c·∫₀ᵀ e^{−rs}S(s) ds` (premium) and
+`(1−R)·∫₀ᵀ e^{−rs}h(s)S(s) ds` (protection); no theorem here identifies them with
+expectations over `τ`, and the fair spread is the algebraic solution of
+`c·A = (1−R)·L` for `A > 0`.
 
 The module layers:
 
@@ -36,18 +39,18 @@ The module layers:
   identities. The mechanism is an a.e. set equality between the survival event
   and the clock-tail event, so no inverse continuity or inverse measurability
   is ever needed.
-* **The CDS upgrade under `λ(t)`** — the risky annuity and default-density
+* **The CDS legs under `λ(t)`** — the risky annuity and default-density
   integrals (`cdsAnnuity`, `cdsLosses`), the explicit legs (`premiumLeg`,
   `protectionLeg`), the balance theorem `cdsFairSpreadTV_balances`, the
-  constant-`λ` regression to `cdsFairSpread`, and the density-pricing identity
-  at zero discount.
-* **Restricted Cox mixing** — on the product of an intensity-path space with
-  the clock space, the joint measure of the survival event equals the
-  path-average of the pathwise survivals (the tower property at the Fubini
-  level), with the intensity a random cumulative process.
+  constant-`λ` case `cdsFairSpread`, and the default probability as the integral
+  of the default density (undiscounted).
+* **Restricted Cox mixing** — on the product of a path space with the clock
+  space, `(μ₁ ⊗ Exp(1)){Λ_t < ξ} = ∫ e^{−Λ_t} dμ₁` for any `Λ ≥ 0` with
+  measurable time sections; a default time enters only when hypothesized
+  (`cox_mixed_survival`).
 
 Faithfulness note: `cdsFairSpreadTV_balances` is a direct instantiation of the
-in-tree cash-flow balance `cdsFairSpread_TV_cash_flow_balance`
+cash-flow balance `cdsFairSpread_TV_cash_flow_balance`
 (`FixedIncome/CDSTimeVarying.lean`) at the concrete integrals, with
 annuity-positivity discharged by `cdsAnnuity_pos`; its own docstring discloses
 this.
@@ -104,10 +107,9 @@ theorem defaultSurvival_const {rate : ℝ≥0} {N : ℝ → Ω → ℕ}
     (hincr : ∀ ⦃s t : ℝ⦄, 0 ≤ s → (hst : s ≤ t) →
       Measure.map (fun ω ↦ N t ω - N s ω) μ
         = poissonMeasure (rate * ⟨t - s, sub_nonneg.mpr hst⟩))
-    {_τ : Ω → ℝ} (_hτmeas : Measurable _τ) (_hτnn : ∀ ω, 0 ≤ _τ ω)
-    (hτfirst : ∀ ⦃t : ℝ⦄, 0 ≤ t → {ω | t < _τ ω} = {ω | N t ω = 0})
+    {τ : Ω → ℝ} (hτfirst : ∀ ⦃t : ℝ⦄, 0 ≤ t → {ω | t < τ ω} = {ω | N t ω = 0})
     {t : ℝ} (ht : 0 ≤ t) :
-    μ {ω | t < _τ ω} = ENNReal.ofReal (rexp (-((rate : ℝ) * t))) := by
+    μ {ω | t < τ ω} = ENNReal.ofReal (rexp (-((rate : ℝ) * t))) := by
   rw [hτfirst ht]
   exact PoissonInterarrival.survival_eq hmeas hzero hincr ht
 
@@ -199,7 +201,7 @@ theorem cdsLegs_balance_const (r lam R T c : ℝ) (hT : 0 < T) :
     (ne_of_gt (riskyAnnuity_pos r lam T hT))
 
 /-- The fair spread balances the legs (the "if" direction of the balance,
-checked against the in-tree `cdsFairSpread`). -/
+checked against `cdsFairSpread`). -/
 theorem cdsFairSpread_const_balances (r lam R T : ℝ) (hT : 0 < T) :
     cdsFairSpread lam R * riskyAnnuity r lam T = (1 - R) * lam * riskyAnnuity r lam T := by
   rw [cdsLegs_balance_const r lam R T (cdsFairSpread lam R) hT]
@@ -240,14 +242,15 @@ private theorem cumHazard_deriv {h : ℝ → ℝ} (hh : Continuous h) (s : ℝ) 
 private theorem cumHazard_continuous {h : ℝ → ℝ} (hh : Continuous h) : Continuous (cumHazard h) :=
   Differentiable.continuous fun s => (cumHazard_deriv hh s).differentiableAt
 
-/-- Under a strictly positive hazard intensity (for all calendar time) the
-cumulative hazard is strictly increasing. -/
+/-- Under a continuous hazard intensity, strictly positive for all calendar time,
+the cumulative hazard is strictly increasing. -/
 theorem cumHazard_strictMono {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s, 0 < h s) :
     StrictMono (cumHazard h) :=
   strictMono_of_hasDerivAt_pos (fun s => cumHazard_deriv hh s) hpos
 
-/-- Under a divergent cumulative hazard, `Λ` maps the half-line onto the
-half-line (IVT from `Λ 0 = 0` and `Λ → ∞`). -/
+/-- Under a continuous, strictly positive intensity with divergent cumulative
+hazard, `Λ` maps the half-line onto the half-line (IVT from `Λ 0 = 0` and
+`Λ → ∞`). -/
 theorem cumHazard_surjOn_Ici {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s, 0 < h s)
     (hdiv : Filter.Tendsto (cumHazard h) Filter.atTop Filter.atTop) (y : ℝ) (hy : 0 ≤ y) :
     ∃ s : ℝ, 0 ≤ s ∧ cumHazard h s = y := by
@@ -293,7 +296,7 @@ private theorem expClock_Ioi {x : ℝ} (hx : 0 ≤ x) :
   congr 1
   ring
 
-/-- The unit exponential clock is almost surely positive. -/
+/-- The unit exponential clock is almost surely nonnegative. -/
 private theorem expClock_null_neg {ξ : Ω → ℝ} (hξmeas : Measurable ξ)
     (hξlaw : Measure.map ξ μ = expMeasure 1) : μ {ω | ξ ω < 0} = 0 := by
   haveI : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
@@ -383,9 +386,9 @@ private theorem coxDefaultTime_cdfSet {h : ℝ → ℝ} (hh : Continuous h)
 
 /-- **The Cox survival identity, deterministic-intensity layer.** With `h`
 continuous, strictly positive, and `∫₀ᵗ h → ∞`, the default time built by
-inverting a unit-exponential clock through `Λ = cumHazard h` satisfies
-`P(τ > t) = e^{−Λ(t)} = hazardSurvival h t` — the first-arrival survival law
-at a deterministic time-varying intensity. -/
+inverting a unit-exponential clock through `Λ = cumHazard h` satisfies, for
+`t ≥ 0`, `P(τ > t) = e^{−Λ(t)} = hazardSurvival h t` — the first-arrival survival
+law at a deterministic time-varying intensity. -/
 theorem cox_survival_timeVarying {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s, 0 < h s)
     (hdiv : Filter.Tendsto (cumHazard h) Filter.atTop Filter.atTop)
     {ξ : Ω → ℝ} (hξmeas : Measurable ξ) (hξlaw : Measure.map ξ μ = expMeasure 1)
@@ -399,7 +402,7 @@ theorem cox_survival_timeVarying {h : ℝ → ℝ} (hh : Continuous h) (hpos : �
   rfl
 
 /-- **The Cox CDF identity, deterministic-intensity layer**: the same model
-satisfies `P(τ ≤ a) = 1 − e^{−Λ(a)}`. -/
+satisfies `P(τ ≤ a) = 1 − e^{−Λ(a)}` for `a ≥ 0`. -/
 theorem cox_cdf_timeVarying {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s, 0 < h s)
     (hdiv : Filter.Tendsto (cumHazard h) Filter.atTop Filter.atTop)
     {ξ : Ω → ℝ} (hξmeas : Measurable ξ) (hξlaw : Measure.map ξ μ = expMeasure 1)
@@ -416,7 +419,7 @@ theorem cox_cdf_timeVarying {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s,
 
 end TimeVarying
 
-/-! ### The CDS upgrade: legs and fair spread under λ(t) -/
+/-! ### CDS legs and fair spread under λ(t) -/
 
 section CDSUpgrade
 
@@ -448,8 +451,8 @@ noncomputable def protectionLeg (R r : ℝ) (h : ℝ → ℝ) (T : ℝ) : ℝ :=
 noncomputable def cdsFairSpreadTV (r : ℝ) (h : ℝ → ℝ) (R T : ℝ) : ℝ :=
   (1 - R) * cdsLosses r h T / cdsAnnuity r h T
 
-/-- The risky annuity is positive for `T > 0` (discount × survival is strictly
-positive; `S > 0` unconditionally by `hazardSurvival_pos`). -/
+/-- For continuous `h`, the risky annuity is positive for `T > 0` (discount ×
+survival is strictly positive; `S > 0` unconditionally by `hazardSurvival_pos`). -/
 theorem cdsAnnuity_pos {r : ℝ} {h : ℝ → ℝ} (hh : Continuous h) {T : ℝ} (hT : 0 < T) :
     0 < cdsAnnuity r h T := by
   have hfc : ContinuousOn (fun s : ℝ ↦ rexp (-(r * s)) * hazardSurvival h s)
@@ -505,7 +508,7 @@ theorem clockTail_eq_defaultDensity {h : ℝ → ℝ} (hh : Continuous h) (a : �
 
 /-- **Balance of the CDS legs under a time-varying intensity** (the headline):
 the premium leg equals the protection leg iff the spread is the time-varying
-fair spread `(1−R) · losses / annuity` — a direct instantiation of the in-tree
+fair spread `(1−R) · losses / annuity` — a direct instantiation of the
 cash-flow balance `cdsFairSpread_TV_cash_flow_balance` at the concrete
 integrals, with annuity-positivity discharged via `cdsAnnuity_pos`. -/
 theorem cdsFairSpreadTV_balances {r : ℝ} {h : ℝ → ℝ} (hh : Continuous h) {T : ℝ}
@@ -551,7 +554,7 @@ theorem cdsLosses_eq_riskyAnnuity_mul (r lam T : ℝ) :
     (g := fun s : ℝ ↦ lam * rexp (-((r + lam) * s))) (fun s _ ↦ hpt s),
     intervalIntegral.integral_const_mul]
 
-/-- **The constant-`λ` regression test**: the time-varying fair spread at a
+/-- **The constant-`λ` case**: the time-varying fair spread at a
 constant intensity collapses to the constant-hazard fair spread
 `cdsFairSpread lam R = lam(1−R)`. -/
 theorem cdsFairSpreadTV_const (r lam R T : ℝ) (hT : 0 < T) :
@@ -563,11 +566,10 @@ theorem cdsFairSpreadTV_const (r lam R T : ℝ) (hT : 0 < T) :
     show cdsFairSpread lam R = lam * (1 - R) from rfl, div_eq_iff hA]
   ring
 
-/-- **The density-pricing identity at zero discount** (deterministic-intensity
-Cox): the constructed default time satisfies
-`P(τ ≤ a) = ∫₀^a h·S` — the default probability is the integral of the default
-density. The `r > 0` case (needs generalized-inverse continuity for the
-substitution inside the integrand) is the documented remaining gap. -/
+/-- **Default probability as the integral of the default density**
+(deterministic-intensity Cox): for `a ≥ 0` the constructed default time satisfies
+`P(τ ≤ a) = ∫₀^a h·S`. The discounted identity
+`E[e^{−rτ}·1{τ ≤ a}] = ∫₀^a e^{−rs}h(s)S(s) ds` (`r ≠ 0`) is not proved. -/
 theorem cox_defaultProb_density {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s, 0 < h s)
     (hdiv : Filter.Tendsto (cumHazard h) Filter.atTop Filter.atTop)
     {ξ : Ω → ℝ} (hξmeas : Measurable ξ) (hξlaw : Measure.map ξ μ = expMeasure 1)
@@ -589,13 +591,12 @@ section Mixing
 
 variable {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁} {μ₁ : Measure Ω₁}
 
-/-- **The restricted-Cox mixing identity** — the tower property at the Fubini
-level. On the product of an intensity-path space with the
-unit-exponential-clock space, the joint measure of the survival event
-`{(path, clock) : Λ(path, t) < clock}` equals the path-average of the pathwise
-survivals: `E[E[1{τ > t} | path]] = E[e^{−Λ_t}]`. The intensity here is a
-*random* cumulative process, nonnegative pathwise; only the measurability of
-its time sections is needed. -/
+/-- **The restricted-Cox mixing identity** — Fubini on the product of a path
+space with the unit-exponential-clock space:
+`(μ₁ ⊗ Exp(1)){(ω, ξ) : Λ_t(ω) < ξ} = ∫ e^{−Λ_t} dμ₁` (by `Measure.prod_apply`),
+for any `Λ ≥ 0` with measurable time sections. No default time, intensity or path
+regularity is involved; with `τ` hypothesized as the clock's crossing of `Λ`, it
+is the mixed survival `P(τ > t) = E[e^{−Λ_t}]` (`cox_mixed_survival`). -/
 theorem cox_mixing_survival {Λ : ℝ → Ω₁ → ℝ} (hΛmeas : ∀ t, Measurable fun ω => Λ t ω)
     (hΛnn : ∀ t ω, 0 ≤ Λ t ω) (t : ℝ) :
     (μ₁.prod (expMeasure 1)) {p : Ω₁ × ℝ | Λ t p.1 < p.2}
@@ -630,11 +631,12 @@ theorem cox_mixing_survival_le {μ₁ : Measure Ω₁} [IsProbabilityMeasure μ�
           _ = 1 := ENNReal.ofReal_one
     _ = 1 := by rw [lintegral_one, measure_univ]
 
-/-- **Mixed survival of a restricted-Cox default time**: a default time `τ` on
-the product space whose survival event is (pointwise) the clock beating the
-pathwise compensator has survival `P(τ > t) = E[e^{−Λ_t}]`. The per-path
-construction of such a `τ` (invert each path's `Λ(ω)`, a homeomorphism of the
-half-line) is the documented remaining step of the restricted-Cox scoping. -/
+/-- **Mixed survival of a restricted-Cox default time**: a `τ` on the product
+space whose survival event at the single time `t` is the clock beating `Λ_t`
+(hypothesis `hτ`) has survival `P(τ > t) = E[e^{−Λ_t}]` — `cox_mixing_survival`
+rewritten by `hτ`. Constructing such a `τ` would need paths of `Λ` that are
+continuous, strictly increasing and divergent with `Λ(0) = 0`; those are not
+assumed, and the construction is not done here. -/
 theorem cox_mixed_survival {τ : Ω₁ × ℝ → ℝ} {Λ : ℝ → Ω₁ → ℝ}
     (hΛmeas : ∀ t, Measurable fun ω => Λ t ω)
     (hΛnn : ∀ t ω, 0 ≤ Λ t ω)

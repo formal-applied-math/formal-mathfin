@@ -12,14 +12,15 @@ public import MathFin.Foundations.Numeraire
 public import MathFin.FixedIncome.ConvexitySensitivity
 
 /-!
-# CMS convexity adjustment: the par-rate functional under the annuity measure
+# The CMS par-rate functional: convexity, the annuity measure, a Jensen gap
 
 A constant-maturity swap leg pays, at the fixing date `T`, the *then-prevailing*
 par swap rate — a nonlinear functional of the curve state, discounted through an
-annuity that is itself random. Taking today's par rate as its price is wrong by
-the **convexity adjustment**. This module lands the model-free adjustment at
-statement level on the swap layer of `MathFin/FixedIncome/InterestRateSwap.lean`
-(`payerSwapValue` / `parSwapRate` / `annuity`):
+annuity that is itself random; the gap between its value and today's par rate is
+the **convexity adjustment**. This module formalizes ingredients of that
+adjustment on the swap layer of `MathFin/FixedIncome/InterestRateSwap.lean`
+(`payerSwapValue` / `parSwapRate` / `annuity`), but not the adjustment itself
+(see the scope note below):
 
 * **The par-rate functional.** `cmsCurveRate P₀ δ C x = (P₀ − x)/(δ·(C + x))` —
   the par rate of a curve whose final discount factor is `x`, other factors
@@ -27,45 +28,52 @@ statement level on the swap layer of `MathFin/FixedIncome/InterestRateSwap.lean`
   of an updated curve splits into fixed part + new factor) and
   `parSwapRate_update_eq` / `payerSwapValue_update_eq_zero_iff` (the par
   identity of `payerSwapValue_eq_zero_iff` transports verbatim).
-* **Convexity in the discount factor.** `cmsCurveRate_convexOn`: on `(0, ∞)`
-  the rate is convex given `0 ≤ P₀ + C` — via the shifted-inverse engine
+* **Convexity in the discount factor.** `cmsCurveRate_convexOn`: on `[0, ∞)`
+  the rate is convex given `δ > 0`, `C > 0` and `0 ≤ P₀ + C` — via the
+  shifted-inverse engine
   `convexOn_inv_shift` and the `ConvexOn.smul` / `.add_const` / `.congr`
   combination pattern. First and second derivatives are landed explicitly
   (`hasDerivAt_cmsCurveRate`, `hasDerivAt_cmsCurveRate'`):
-  `S''(x) = 2(P₀+C)/(δ(C+x)³) > 0`.
+  `S''(x) = 2(P₀+C)/(δ(C+x)³)`, positive when `P₀ + C > 0`.
 * **The annuity measure.** `annuityMeasure`: the change-of-numéraire measure
   with the annuity `A_T` in the numéraire seat against the money market
   `B_t = e^{rt}` — an execution of `MathFin.changeOfNumeraire`
   (`Foundations/Numeraire.lean`), alongside the stock and the `T`-bond (the
   forward measure of `FixedIncome/ForwardMeasure.lean`). `annuityMeasure_price`
-  proves the fair-value identity `A₀·𝔼^{Qᴬ}[S] = 𝔼^Q[e^{−rT}·S·A_T]`;
-  `annuityMeasure_isProbabilityMeasure` proves `Qᴬ` is a probability *given the
-  annuity repricing condition* `𝔼^Q[e^{−rT}A_T] = A₀` — that normalization is
-  where the martingale content enters, and it is taken as an explicit
-  hypothesis (the honest out; no model-free proof exists).
+  proves `A₀·𝔼^{Qᴬ}[S] = 𝔼^Q[e^{−rT}·S·A_T]` — `Qᴬ`-expectations price
+  annuity-settled payoffs `S·A_T`; `annuityMeasure_isProbabilityMeasure` proves
+  `Qᴬ` is a probability *given the annuity repricing condition*
+  `𝔼^Q[e^{−rT}A_T] = A₀` — that normalization is where the martingale content
+  enters, and it is taken as an explicit hypothesis. The money market is the
+  deterministic `e^{rT}` while the curve `P` is random, a simplification: a
+  stochastic-rate model would need a random `B_T`, which the numéraire engine
+  accepts.
 * **The headline.** `cms_adjustment_nonneg`: Jensen under the annuity measure
   (Mathlib's `ConvexOn.map_integral_le`) gives
 
     `S(x₀) ≤ 𝔼^{Qᴬ}[S(W)]` whenever `𝔼^{Qᴬ}[W] = x₀`,
 
-  i.e. the CMS forward dominates the rate evaluated at the annuity-measure mean
-  of the curve state: the convexity adjustment is nonnegative
-  (`cms_adjustment_delta_nonneg` states the adjustment itself).
+  for every nonnegative `W` with `W` and `S ∘ W` `Qᴬ`-integrable: the Jensen gap
+  of the rate functional is nonnegative (`cms_adjustment_delta_nonneg` states the
+  gap). `Qᴬ` enters only as a probability measure, `W` is not tied to the curve
+  `P` that defines `Qᴬ`, and `S(x₀)` is not shown to be today's par rate.
 * **The replication seed.** `cmsCurveRate_spanning`: Carr–Madan static
   replication of the rate functional — cash + forward + put strip + call strip
-  with strictly positive weights `2(P₀+C)/(δ(C+K)³)` (`cmsStrip_weight_pos`);
-  `cmsCurveRate_strip_nonneg` turns it into the model-free pointwise statement
-  that the rate minus its first-order expansion is nonnegative.
-* **The convexity tie-in.** `convexityNumerator_nonneg`: the bond convexity
-  `ConvNum` of `ConvexitySensitivity` — the quantity that weights the
-  adjustment's second-order term (`bondPriceDisc_secondDeriv_eq_convexity_times_price`)
-  — is nonnegative under honest hypotheses.
+  with weights `S''(K) = 2(P₀+C)/(δ(C+K)³)` (positive when `P₀ + C > 0`, which
+  the identity does not assume); `cmsCurveRate_strip_nonneg` turns it into the
+  tangent-line inequality: for `P₀ + C ≥ 0` the rate lies above its tangent at
+  the reference strike on `[L, U]`.
+* **A bond-convexity sign.** `convexityNumerator_nonneg`: the bond convexity
+  numerator `convexityNumerator` of `ConvexitySensitivity` is nonnegative when
+  `1 + y > 0` and the cash flows are nonnegative. It is a standalone bond fact;
+  nothing here connects it to the CMS rate.
 
-Structural note: the model-free adjustment is what lands here. The model-based
-adjustment (a calibrated-volatility input into `𝔼^{Qᴬ}[S_T]`) is not
-model-free and is out of scope; the spanning is the compact-strike-range
-version (`[L, U]` with `L > −C`), the unbounded-window passage (tail analysis)
-likewise. The swap-rate functional is *not* a log payoff, so the seed consumes
+Scope: what lands here is the convexity of the rate functional, the annuity
+measure, the Jensen gap under it, and the compact-range replication identity.
+The convexity adjustment itself — `𝔼^{T_p}[S_T] − S₀`, which needs the change of
+measure from `Qᴬ` to the payment-date forward measure and a model for the curve —
+is not formalized. The spanning is the compact-strike-range version (`[L, U]`
+with `L > −C`); the unbounded-window passage (tail analysis) is not here either. The swap-rate functional is *not* a log payoff, so the seed consumes
 `carrMadan_spanning` — the shared core of which `carrMadan_log_spanning` is the
 log instance (its proof is one instantiation).
 
@@ -81,15 +89,15 @@ Public lemmas (all in `namespace MathFin.CMS`):
   — first and second derivatives and convexity of the rate functional;
 * `annuityMeasure_isProbabilityMeasure`, `annuityMeasure_price` — the annuity
   measure and its fair-value identity;
-* `cms_adjustment_nonneg`, `cms_adjustment_delta_nonneg` — the convexity
-  adjustment is nonnegative;
+* `cms_adjustment_nonneg`, `cms_adjustment_delta_nonneg` — the Jensen gap of the
+  rate functional under `Qᴬ` is nonnegative;
 * `cmsCurveRate_spanning`, `cmsCurveRate_strip_nonneg`,
-  `convexityNumerator_nonneg` — the replication seed and the convexity tie-in.
+  `convexityNumerator_nonneg` — the replication identity, the tangent-line
+  inequality, and the bond-convexity sign.
 
 Supporting lemmas (`annuity_update_eq`, `cmsCurveRate_eq`,
 `differentiableOn_cmsCurveRate`, `continuousOn_cmsCurveRate`,
-`convexOn_inv_shift`, `annuityRandom_pos`, `cmsStrip_weight_pos`) are
-`private`.
+`convexOn_inv_shift`, `annuityRandom_pos`) are `private`.
 -/
 
 @[expose] public section
@@ -185,8 +193,8 @@ theorem hasDerivAt_cmsCurveRate (P0 δ C x : ℝ) (hx : C + x ≠ 0) (hδ : δ �
       ring]
   exact hdiv
 
-/-- **Second derivative**: `S''(x) = 2(P₀ + C)/(δ(C + x)³)` — strictly positive
-on the curve's domain whenever `P₀ + C > 0` (`cmsStrip_weight_pos`). -/
+/-- **Second derivative**: `S''(x) = 2(P₀ + C)/(δ(C + x)³)` — positive where
+`δ > 0`, `C + x > 0` and `P₀ + C > 0`. -/
 theorem hasDerivAt_cmsCurveRate' (P0 δ C t : ℝ) (ht : C + t ≠ 0) (hδ : δ ≠ 0) :
     HasDerivAt (fun y : ℝ ↦ -(P0 + C) / (δ * (C + y) ^ 2))
       (2 * (P0 + C) / (δ * (C + t) ^ 3)) t := by
@@ -258,7 +266,7 @@ private theorem convexOn_inv_shift (C : ℝ) (hC : 0 < C) :
   exact hkey
 
 /-- **The CMS rate is convex in the discount factor on the nonnegative
-half-line**. Hypotheses are the weakest honest ones: `δ > 0` (daycount),
+half-line**. Hypotheses: `δ > 0` (daycount),
 `C > 0` (the rate functional is defined on the whole half-line) and `P₀ + C ≥ 0`
 (the convexity coefficient `S'' = 2(P₀+C)/(δ(C+x)³)` has the right sign;
 economically `P₀` and every remaining discount factor are positive, so this is
@@ -307,8 +315,8 @@ noncomputable def annuityMeasure (Q : Measure Ω) (r T δ : ℝ) (P : Ω → ι 
 /-- **The annuity measure is a probability measure** under the annuity-repricing
 condition `𝔼^Q[e^{−rT}·A_T] = A₀` — the numéraire engine's normalization
 `𝔼^Q[N_T/B_T] = N₀/B₀` read with `N = A`, `B` the money market. This hypothesis
-is where the martingale content of the CMS construction enters and it is taken
-explicitly (the honest out — no model-free proof exists). -/
+is where the martingale content of the CMS construction enters; it is taken
+explicitly. -/
 theorem annuityMeasure_isProbabilityMeasure {Q : Measure Ω} (r T δ : ℝ)
     (P : Ω → ι → ℝ) (s : Finset ι) (A0 : ℝ) (hδ : 0 < δ) (hs : s.Nonempty)
     (hP : ∀ ω i, i ∈ s → 0 < P ω i) (hA0 : 0 < A0)
@@ -324,15 +332,14 @@ theorem annuityMeasure_isProbabilityMeasure {Q : Measure Ω} (r T δ : ℝ)
   refine numeraireMeasure_isProbabilityMeasure hpos (fun ω ↦ Real.exp_pos _) one_pos hA0
     (by rw [hdiv]; exact hint) (by rw [hdiv, hrepr]; simp)
 
-/-- **The CMS fair-value identity** — the annuity in the numéraire seat. For any
-rate claim `S` paid at the fixing date,
+/-- **The annuity-measure pricing identity** — the annuity in the numéraire seat.
+For any `S`,
 
   `A₀ · 𝔼^{Qᴬ}[S] = 𝔼^Q[e^{−rT} · S · A_T]`,
 
-an execution of `changeOfNumeraire`. (The constant-rate schematic
-`𝔼_Q[e^{−rT}S_T] = P(0,T)·𝔼^A[S_T]` is the degenerate case; the honest identity
-keeps the random `A_T` on the `Q` side — and that `A_T` is exactly where the
-convexity adjustment comes from.) -/
+an execution of `changeOfNumeraire`: `Qᴬ`-expectations price the annuity-settled
+payoff `S·A_T`. (A claim paying `S` itself at `T` would be priced through
+`S/A_T`; the random `A_T` stays on the `Q` side.) -/
 theorem annuityMeasure_price {Q : Measure Ω} (r T δ : ℝ) (P : Ω → ι → ℝ)
     (s : Finset ι) (A0 : ℝ) (S : Ω → ℝ) (hδ : 0 < δ) (hs : s.Nonempty)
     (hP : ∀ ω i, i ∈ s → 0 < P ω i) (hA0 : 0 < A0)
@@ -360,18 +367,18 @@ theorem annuityMeasure_price {Q : Measure Ω} (r T δ : ℝ) (P : Ω → ι → 
   rw [← h2]
   exact h
 
-/-! ### 4. The headline: the adjustment is nonnegative -/
+/-! ### 4. The headline: the Jensen gap under the annuity measure -/
 
 -- the Jensen application carries heavy higher-order unification
 set_option maxHeartbeats 1000000 in
-/-- **The CMS convexity-adjustment theorem** (the headline). Under the annuity
-measure `Qᴬ` of the previous section, with `W` the `T`-state of the final
-discount factor and `x₀` its `Qᴬ`-forward value, Jensen for the convex rate
-functional gives: today's par rate `S(x₀)` lower-bounds the annuity-measure
-expectation of the CMS rate. The martingale content enters through `hfwd`
-(`𝔼^{Qᴬ}[W] = x₀` — the curve state is a `Qᴬ`-martingale), taken explicitly per
-the honest-out rule; the integrability hypotheses `hWint`, `hSint` are the two
-measurability-sized prices of running Jensen on a general measure. -/
+/-- **The Jensen gap of the CMS rate functional under `Qᴬ`** (the headline). Let
+`S = cmsCurveRate P₀ δ C`, with `P₀` and `C` deterministic; it is convex on
+`[0, ∞)`. Every nonnegative `W` with `W` and `S ∘ W` integrable under the annuity
+measure `Qᴬ` of the previous section satisfies `S(𝔼^{Qᴬ}[W]) ≤ 𝔼^{Qᴬ}[S(W)]`;
+`hfwd` only names `x₀ = 𝔼^{Qᴬ}[W]`. `Qᴬ` is a probability measure by `hrepr` and
+is used only as one; `W` is not linked to the curve `P` that defines `Qᴬ`, and no
+martingale property is assumed. This is not the CMS convexity adjustment
+`𝔼^{T_p}[S_T] − S₀`. -/
 theorem cms_adjustment_nonneg {Q : Measure Ω} (r T δ P0 C A0 x₀ : ℝ)
     (P : Ω → ι → ℝ) (s : Finset ι) (W : Ω → ℝ) (hδ : 0 < δ) (hC : 0 < C)
     (hPC : 0 ≤ P0 + C) (hs : s.Nonempty) (hP : ∀ ω i, i ∈ s → 0 < P ω i)
@@ -393,7 +400,7 @@ theorem cms_adjustment_nonneg {Q : Measure Ω} (r T δ P0 C A0 x₀ : ℝ)
     (continuousOn_cmsCurveRate P0 δ C hδ hC) isClosed_Ici hfs hWint hSint
   rwa [hfwd] at hj
 
-/-- The adjustment itself: `𝔼^{Qᴬ}[CMS rate] − today's par rate ≥ 0`. -/
+/-- The Jensen gap itself: `𝔼^{Qᴬ}[S(W)] − S(𝔼^{Qᴬ}[W]) ≥ 0`. -/
 theorem cms_adjustment_delta_nonneg {Q : Measure Ω} (r T δ P0 C A0 x₀ : ℝ)
     (P : Ω → ι → ℝ) (s : Finset ι) (W : Ω → ℝ) (hδ : 0 < δ) (hC : 0 < C)
     (hPC : 0 ≤ P0 + C) (hs : s.Nonempty) (hP : ∀ ω i, i ∈ s → 0 < P ω i)
@@ -414,19 +421,13 @@ end Annuity
 
 /-! ### 5. The replication seed: Carr–Madan spanning of the rate functional -/
 
-/-- The CMS strip weight `S''(K) = 2(P₀+C)/(δ(C+K)³)` is strictly positive on
-the rate functional's domain — the replication face of the convexity. -/
-private theorem cmsStrip_weight_pos (P0 δ C K : ℝ) (hδ : 0 < δ) (hPC : 0 < P0 + C)
-    (hK : 0 < C + K) : 0 < 2 * (P0 + C) / (δ * (C + K) ^ 3) :=
-  div_pos (mul_pos two_pos hPC) (mul_pos hδ (pow_pos hK 3))
-
 -- the Carr–Madan instantiation carries heavy higher-order unification
 set_option maxHeartbeats 1000000 in
 /-- **The replication seed**: the CMS rate functional spanned as cash + forward
 + static OTM option strips on the discount factor (Carr–Madan, compact strike
-range `[L, U]` with `L > −C`). The strip weights are the strictly positive
-`S''` (`cmsStrip_weight_pos`) — the static-replication form of the convexity
-adjustment. The swap-rate functional is not a log payoff, so this consumes
+range `[L, U]` with `L > −C`). The strip weights are
+`S''(K) = 2(P₀+C)/(δ(C+K)³)`, positive when `P₀ + C > 0` (not assumed here). The
+swap-rate functional is not a log payoff, so this consumes
 `carrMadan_spanning`, the shared core of which `carrMadan_log_spanning` is the
 log instance. The unbounded-window limit (tail analysis) is outside the present
 scope. -/
@@ -452,9 +453,9 @@ theorem cmsCurveRate_spanning (P0 δ C : ℝ) (hδ : 0 < δ)
             ((continuous_const.add continuous_id).pow 3)).continuousOn)
         fun K hK ↦ mul_ne_zero hδ.ne' (pow_ne_zero 3 (ne_of_gt (hCK K hK))))
 
-/-- **The model-free pointwise adjustment**: the CMS rate dominates its
-first-order expansion around the reference point, and the excess is exactly the
-option strips — nonnegative because `S'' ≥ 0` (from `P₀ + C ≥ 0`). -/
+/-- **The tangent-line inequality**: on `[L, U]` the CMS rate lies above its
+tangent at `κ`, and the excess is exactly the option strips — nonnegative because
+`S'' ≥ 0` (from `P₀ + C ≥ 0`). -/
 theorem cmsCurveRate_strip_nonneg (P0 δ C : ℝ) (hδ : 0 < δ) (hPC : 0 ≤ P0 + C)
     {L U κ S : ℝ} (hL : -C < L) (hLκ : L ≤ κ) (hκU : κ ≤ U) (hS : S ∈ Set.Icc L U) :
     0 ≤ cmsCurveRate P0 δ C S - cmsCurveRate P0 δ C κ
@@ -480,13 +481,13 @@ theorem cmsCurveRate_strip_nonneg (P0 δ C : ℝ) (hδ : 0 < δ) (hPC : 0 ≤ P0
         (le_max_right (S - K) (0 : ℝ))
   linarith
 
-/-! ### 6. The convexity tie-in: the bond's second-order weight -/
+/-! ### 6. A bond-convexity sign -/
 
 /-- **The bond convexity is nonnegative**: each cashflow contributes
 `t_i(t_i+1)·c_i/(1+y)^{t_i+2} ≥ 0` for `y > −100%` and nonnegative coupons.
 This is the sign of the `P''` exhibited by
-`bondPriceDisc_secondDeriv_eq_convexity_times_price` — the quantity that
-weights the CMS adjustment's second-order term. -/
+`bondPriceDisc_secondDeriv_eq_convexity_times_price`; nothing here connects it
+to the CMS rate. -/
 theorem convexityNumerator_nonneg {ι : Type*} (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ)
     {y : ℝ} (hy : 0 < 1 + y) (hc : ∀ i ∈ s, 0 ≤ c i) :
     0 ≤ convexityNumerator s t c y := by
