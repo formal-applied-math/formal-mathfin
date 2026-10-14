@@ -38,7 +38,7 @@ The module layers:
   is ever needed.
 * **The CDS upgrade under `λ(t)`** — the risky annuity and default-density
   integrals (`cdsAnnuity`, `cdsLosses`), the explicit legs (`premiumLeg`,
-  `protectionLeg`), the balance theorem `cdsFairSpread_TV_balances`, the
+  `protectionLeg`), the balance theorem `cdsFairSpreadTV_balances`, the
   constant-`λ` regression to `cdsFairSpread`, and the density-pricing identity
   at zero discount.
 * **Restricted Cox mixing** — on the product of an intensity-path space with
@@ -46,7 +46,7 @@ The module layers:
   path-average of the pathwise survivals (the tower property at the Fubini
   level), with the intensity a random cumulative process.
 
-Faithfulness note: `cdsFairSpread_TV_balances` is a direct instantiation of the
+Faithfulness note: `cdsFairSpreadTV_balances` is a direct instantiation of the
 in-tree cash-flow balance `cdsFairSpread_TV_cash_flow_balance`
 (`FixedIncome/CDSTimeVarying.lean`) at the concrete integrals, with
 annuity-positivity discharged by `cdsAnnuity_pos`; its own docstring discloses
@@ -55,7 +55,7 @@ this.
 ## Result
 
 Public definitions: `riskyAnnuity`, `coxDefaultTime`, `cdsAnnuity`, `cdsLosses`,
-`premiumLeg`, `protectionLeg`, `cdsFairSpread_TV`.
+`premiumLeg`, `protectionLeg`, `cdsFairSpreadTV`.
 
 Public lemmas (all in `namespace MathFin.Cox`):
 
@@ -69,8 +69,8 @@ Public lemmas (all in `namespace MathFin.Cox`):
 * `cox_survival_timeVarying`, `cox_cdf_timeVarying` — the survival and CDF
   identities of the clock-inverted default time;
 * `cdsAnnuity_pos`, `defaultDensity_antideriv`, `clockTail_eq_defaultDensity`,
-  `cdsFairSpread_TV_balances`, `cdsAnnuity_eq_riskyAnnuity`,
-  `cdsLosses_eq_riskyAnnuity_mul`, `cdsFairSpread_TV_const`,
+  `cdsFairSpreadTV_balances`, `cdsAnnuity_eq_riskyAnnuity`,
+  `cdsLosses_eq_riskyAnnuity_mul`, `cdsFairSpreadTV_const`,
   `cox_defaultProb_density` — the time-varying CDS layer;
 * `cox_mixing_survival`, `cox_mixing_survival_le`, `cox_mixed_survival` — the
   restricted-Cox mixing identity.
@@ -445,7 +445,7 @@ noncomputable def protectionLeg (R r : ℝ) (h : ℝ → ℝ) (T : ℝ) : ℝ :=
   (1 - R) * cdsLosses r h T
 
 /-- The **time-varying fair spread**: `(1−R) · losses / annuity`. -/
-noncomputable def cdsFairSpread_TV (r : ℝ) (h : ℝ → ℝ) (R T : ℝ) : ℝ :=
+noncomputable def cdsFairSpreadTV (r : ℝ) (h : ℝ → ℝ) (R T : ℝ) : ℝ :=
   (1 - R) * cdsLosses r h T / cdsAnnuity r h T
 
 /-- The risky annuity is positive for `T > 0` (discount × survival is strictly
@@ -508,10 +508,10 @@ the premium leg equals the protection leg iff the spread is the time-varying
 fair spread `(1−R) · losses / annuity` — a direct instantiation of the in-tree
 cash-flow balance `cdsFairSpread_TV_cash_flow_balance` at the concrete
 integrals, with annuity-positivity discharged via `cdsAnnuity_pos`. -/
-theorem cdsFairSpread_TV_balances {r : ℝ} {h : ℝ → ℝ} (hh : Continuous h) {T : ℝ}
+theorem cdsFairSpreadTV_balances {r : ℝ} {h : ℝ → ℝ} (hh : Continuous h) {T : ℝ}
     (hT : 0 < T) (c R : ℝ) :
-    premiumLeg c r h T = protectionLeg R r h T ↔ c = cdsFairSpread_TV r h R T := by
-  unfold premiumLeg protectionLeg cdsFairSpread_TV
+    premiumLeg c r h T = protectionLeg R r h T ↔ c = cdsFairSpreadTV r h R T := by
+  unfold premiumLeg protectionLeg cdsFairSpreadTV
   exact cdsFairSpread_TV_cash_flow_balance c R _ _ (ne_of_gt (cdsAnnuity_pos hh hT))
 
 /-- At constant intensity the time-varying annuity is the constant-intensity
@@ -554,11 +554,11 @@ theorem cdsLosses_eq_riskyAnnuity_mul (r lam T : ℝ) :
 /-- **The constant-`λ` regression test**: the time-varying fair spread at a
 constant intensity collapses to the constant-hazard fair spread
 `cdsFairSpread lam R = lam(1−R)`. -/
-theorem cdsFairSpread_TV_const (r lam R T : ℝ) (hT : 0 < T) :
-    cdsFairSpread_TV r (fun _ ↦ lam) R T = cdsFairSpread lam R := by
+theorem cdsFairSpreadTV_const (r lam R T : ℝ) (hT : 0 < T) :
+    cdsFairSpreadTV r (fun _ ↦ lam) R T = cdsFairSpread lam R := by
   have hA : riskyAnnuity r lam T ≠ 0 :=
     ne_of_gt (riskyAnnuity_pos r lam T hT)
-  unfold cdsFairSpread_TV
+  unfold cdsFairSpreadTV
   rw [cdsAnnuity_eq_riskyAnnuity, cdsLosses_eq_riskyAnnuity_mul,
     show cdsFairSpread lam R = lam * (1 - R) from rfl, div_eq_iff hA]
   ring

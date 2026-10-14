@@ -23,9 +23,10 @@ this module proves, end to end:
 * **Consistency (strong law).** the sample-mean estimator converges almost surely to
   `𝔼[payoff]` — which, by `bs_put_formula`, is exactly the Black–Scholes put price
   `K·e^{-rT}·Φ(−d₂) − S₀·Φ(−d₁)`. The law used is Mathlib's Etemadi strong law
-  (`strong_law_ae_real`): only **pairwise** independence is hypothesised, so
-  antithetic-pair samplers keep consistency (`consistency`); full independence gives
-  the familiar specialization (`consistency_iid`).
+  (`strong_law_ae_real`): only **pairwise** independence is hypothesised
+  (`consistency`); full independence gives the familiar specialization
+  (`consistency_iid`). Antithetic pairs `Z (2k+1) = −Z (2k)` are not pairwise
+  independent, so they are not covered.
 * **Error bars (CLT).** `√n · (estimator n − P) ⇒ 𝓝(0, σ_H²)` in distribution via
   Mathlib's `tendstoInDistribution_inv_sqrt_mul_sum_sub` (`clt`, library form
   `clt_library`), with the limit variance **identified in closed form** (`variance`):
@@ -43,10 +44,11 @@ this module proves, end to end:
 
 Honest scoping: the ensemble is hypothesized, not constructed — `consistency` takes
 pairwise independence (`∀ i j, i ≠ j → Z i ⟂ᵢ[μ] Z j`) plus identical standard-normal
-laws, `consistency_iid`/`clt` take the i.i.d. bundle `iIndepFun Z μ`; the
-countable-product *construction* is future substrate (the multi-dimensional seed below
-builds on Mathlib's `Measure.pi` instead). Variance reduction and multi-dimensional
-closed forms are future layers.
+laws, `consistency_iid`/`clt` take the i.i.d. bundle `iIndepFun Z μ`. Such an
+ensemble exists (Mathlib constructs i.i.d. sequences on a countable product), but no
+theorem here instantiates one; the multi-dimensional seed below likewise hypothesizes
+its draws, `Measure.pi` giving only the law of one draw. Variance reduction and
+multi-dimensional closed forms are future layers.
 
 ## Result
 
@@ -92,18 +94,18 @@ constant bound is replaced by domination through the discounted terminal):
   in closed form (the `Ioi` mirror of `secondMoment_payoff`);
   `secondMoment_mcCallPayoff` — the discounted second moment `𝔼[C²]`;
   `mc_call_variance` — the call's CLT limit variance in closed form;
-* `mc_terminal_secondMoment`, `mc_terminal_variance` — cross-checks of the driving
-  terminal price against MathFin's lognormal moment layer (`secondMoment_terminal`,
-  `variance_terminal`).
+* `mc_terminal_secondMoment`, `mc_terminal_variance` — the lognormal moment layer's
+  `secondMoment_terminal` and `variance_terminal` for the driving terminal price,
+  re-exported under this module's names.
 
 Multi-dimensional seed:
 
 * `multiGauss` — the `d`-dimensional standard Gaussian as Mathlib's `Measure.pi`
   product of `d` standard normals (with an `IsProbabilityMeasure` instance);
-* `multiGauss_hasLaw_joint` — the joint bridge: `d` independent standard normals are
-  one Gaussian vector (Mathlib's `iIndepFun.hasLaw_pi`);
-* `multiD_consistency` — the Etemadi strong law for i.i.d. vector draws and any
-  measurable integrable payoff of the whole vector; `multiD_consistency_iid` — the
+* `multiGauss_hasLaw_joint` — the joint bridge: the joint vector of `d` independent
+  standard normals has the product law `multiGauss d` (Mathlib's `iIndepFun.hasLaw_pi`);
+* `multiD_consistency` — the Etemadi strong law for pairwise-independent vector draws
+  with law `multiGauss d` and any measurable integrable payoff of the whole vector; `multiD_consistency_iid` — the
   full-independence specialization;
 * `multiD_integrable_of_bounded` — the bounded-payoff instance of the seed's
   integrability hypothesis.
@@ -245,8 +247,8 @@ noncomputable def estimator (S_0 K r σ T : ℝ) {Ω : Type*} (Z : ℕ → Ω �
 /-- **Monte Carlo consistency for the put.**
 
 Under only **pairwise** independence of the standard-normal ensemble (Etemadi's
-strong law — the honest hypothesis, so negatively-correlated antithetic pairs
-keep consistency) and the risk-neutral lognormal model, the sample-mean estimator
+strong law; antithetic pairs, being dependent, are not covered) and the risk-neutral
+lognormal model, the sample-mean estimator
 converges almost surely to the Black–Scholes put price
 `K·e^{-rT}·Φ(−d₂) − S₀·Φ(−d₁)`. -/
 theorem consistency (h : BSCallHyp μ S_0 K r σ T (Z 0))
@@ -280,9 +282,9 @@ theorem consistency_iid (h : BSCallHyp μ S_0 K r σ T (Z 0))
 /-- **Monte Carlo error bars** — the library-form CLT:
 `(√n)⁻¹ · (∑_{i<n} H(Z i) − n·P) ⇒ 𝓝(0, σ_H²)` in distribution, where the limit
 variance `σ_H² = Var(H)` is identified by the theorem itself (the closed form is
-`variance` below). Full independence is genuinely needed here — this is the
-statement that variance-reduction schemes must re-prove for their dependent
-sequences. -/
+`variance` below). The Mathlib CLT consumed here hypothesizes full independence;
+unlike the strong law it does not weaken to pairwise in general, so variance-reduction
+schemes with dependent draws need a CLT of their own. -/
 theorem clt_library (h : BSCallHyp μ S_0 K r σ T (Z 0))
     (hlaw : ∀ i : ℕ, HasLaw (Z i) (gaussianReal 0 1) μ)
     (hindep : iIndepFun Z μ)
@@ -525,24 +527,24 @@ theorem variance (h : BSCallHyp μ S_0 K r σ T Z) :
 
 end Moments
 
-/-! ### Terminal-price moment cross-checks
+/-! ### Terminal-price moments
 
-Cross-checks against MathFin's lognormal moment layer (`LognormalMoments.lean`): the
-same ensemble that drives the estimator has, for its terminal price, the proved
-lognormal second moment and variance. Single-draw context: `Z : Ω → ℝ`. -/
+The lognormal moment layer (`LognormalMoments.lean`) re-exported for the terminal price
+the estimator is driven by: its second moment and variance, unchanged. Single-draw
+context: `Z : Ω → ℝ`. -/
 
 section TerminalMoments
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
   {S_0 K r σ T : ℝ} {Z : Ω → ℝ}
 
-/-- Cross-check with the lognormal moment layer: the terminal price has the proved
+/-- Re-export of the lognormal moment layer: the terminal price has the proved
 second moment `E_Q[S_T²] = S₀²·exp(2rT + σ²T)` (`secondMoment_terminal`). -/
 theorem mc_terminal_secondMoment (h : BSCallHyp μ S_0 K r σ T Z) :
     ∫ ω, (bsTerminal S_0 r σ T (Z ω)) ^ 2 ∂μ
       = S_0 ^ 2 * Real.exp (2 * r * T + σ ^ 2 * T) :=
   secondMoment_terminal h
 
-/-- Cross-check with the lognormal moment layer: the terminal-price variance
+/-- Re-export of the lognormal moment layer: the terminal-price variance
 `Var_Q[S_T] = S₀²·e^{2rT}·(e^{σ²T} − 1)` (`variance_terminal`). -/
 theorem mc_terminal_variance (h : BSCallHyp μ S_0 K r σ T Z) :
     ∫ ω, (bsTerminal S_0 r σ T (Z ω)) ^ 2 ∂μ
@@ -838,7 +840,7 @@ noncomputable def mcCallMean (S_0 K r σ T : ℝ) {Ω : Type*} (Z : ℕ → Ω �
 /-- **Monte Carlo consistency for the call.**
 
 Under only **pairwise** independence of the standard-normal ensemble (Etemadi's
-strong law — antithetic-pair samplers keep consistency) and the risk-neutral
+strong law; antithetic pairs, being dependent, are not covered) and the risk-neutral
 lognormal model, the sample-mean estimator converges almost surely to the
 Black–Scholes call price `S₀·Φ(d₁) − K·e^{-rT}·Φ(d₂)`. -/
 theorem mc_call_consistency (h : BSCallHyp μ S_0 K r σ T (Z 0))
@@ -870,9 +872,8 @@ theorem mc_call_consistency_iid (h : BSCallHyp μ S_0 K r σ T (Z 0))
 
 /-- **Monte Carlo error bars for the call** — the library-form CLT:
 `(√n)⁻¹ · (∑_{i<n} C(Z i) − n·C_BS) ⇒ 𝓝(0, σ_C²)` in distribution, with the limit
-variance identified as `Var(C)` (closed form: `mc_call_variance` below). Full
-independence is genuinely needed here — variance-reduction schemes must re-prove
-this for their dependent sequences. -/
+variance identified as `Var(C)` (closed form: `mc_call_variance` below). The Mathlib
+CLT consumed here hypothesizes full independence, as for the put. -/
 theorem mc_call_clt_library (h : BSCallHyp μ S_0 K r σ T (Z 0))
     (hlaw : ∀ i : ℕ, HasLaw (Z i) (gaussianReal 0 1) μ)
     (hindep : iIndepFun Z μ)
@@ -1090,17 +1091,19 @@ end CallMoments
 
 Mathlib's own product-measure layer carries the joint-vector bridge:
 `Measure.pi` (finite products, `Mathlib/MeasureTheory/Constructions/Pi.lean`) and
-`iIndepFun.hasLaw_pi` (`Mathlib/Probability/HasLaw.lean`): **d independent scalars
-ARE one d-dimensional vector with the product law**, and conversely. The seed
-theorem is the multi-D consistency statement: i.i.d. vector draws from the d-dim
-standard Gaussian, any measurable integrable payoff `H` of the whole vector, Etemadi
-strong law to `∫ H ∂(multiGauss d)`. What it deliberately does NOT do: a closed-form
-multi-D price (the 1-D closed forms are Gaussian-∫ specials; multi-D needs the
-multivariate-normal machinery MathFin grows elsewhere) and a multi-D CLT (the
-`Fin d → ℝ`-valued CLT composes coordinate-wise — future layer). -/
+`iIndepFun.hasLaw_pi` (`Mathlib/Probability/HasLaw.lean`): **the joint vector of d
+independent scalars has the product law**. The seed theorem is the multi-D consistency
+statement: pairwise-independent vector draws with law `multiGauss d`, any measurable
+integrable payoff `H` of the whole vector, Etemadi strong law to `∫ H ∂(multiGauss d)`.
+What it deliberately does NOT do: a closed-form multi-D price (the 1-D closed forms are
+Gaussian-∫ specials; a multi-D closed form needs the multivariate-normal layer, which is
+not bridged to `multiGauss` here) and a CLT for the multi-D estimator (for a scalar
+payoff the 1-D CLT applies to `H ∘ W i` as in `clt_library`, not yet stated; a
+vector-valued CLT would need the Cramér–Wold device, not coordinatewise limits). -/
 
 /-- The `d`-dimensional standard Gaussian: the product of `d` standard normals on
-`Fin d → ℝ` — the law of the joint vector `(Z 0, …, Z (d−1))`. -/
+`Fin d → ℝ` — the law of the joint vector of `d` independent standard normals
+(`multiGauss_hasLaw_joint`). -/
 noncomputable def multiGauss (d : ℕ) : Measure (Fin d → ℝ) :=
   Measure.pi fun _ => gaussianReal 0 1
 
@@ -1114,17 +1117,16 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
   {d : ℕ}
 
 omit [IsProbabilityMeasure μ] in
-/-- **The joint bridge**: `d` independent standard normals ARE one `d`-dimensional
-Gaussian vector — the joint vector `(Z 0, …, Z (d−1))` has law `multiGauss d`
-(Mathlib's `iIndepFun.hasLaw_pi`). -/
+/-- **The joint bridge**: the joint vector `(Z 0, …, Z (d−1))` of `d` independent
+standard normals has the product law `multiGauss d` (Mathlib's `iIndepFun.hasLaw_pi`). -/
 theorem multiGauss_hasLaw_joint {Z : Fin d → Ω → ℝ}
     (hlaw : ∀ j, HasLaw (Z j) (gaussianReal 0 1) μ) (hindep : iIndepFun Z μ) :
     HasLaw (fun ω j => Z j ω) (multiGauss d) μ :=
   hindep.hasLaw_pi hlaw
 
 omit [IsProbabilityMeasure μ] in
-/-- **Multi-D consistency seed**: i.i.d. draws `W i` from the `d`-dimensional
-standard Gaussian and any measurable integrable payoff `H` of the whole vector —
+/-- **Multi-D consistency seed**: pairwise-independent draws `W i` with law
+`multiGauss d` and any measurable integrable payoff `H` of the whole vector —
 the sample mean converges almost surely to `∫ H ∂(multiGauss d)`.
 
 This is the same Etemadi route as the 1-D theorems, applied to the composed

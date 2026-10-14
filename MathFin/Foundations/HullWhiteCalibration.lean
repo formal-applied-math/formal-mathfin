@@ -14,14 +14,21 @@ public import MathFin.FixedIncome.VasicekBondPrice
 
 The Hull–White model `dr_t = (θ(t) − κ·r_t) dt + σ·dB_t` with `κ > 0` and deterministic
 `θ` (continuity hypotheses stated where the FTC needs them), obtained by generalizing the
-proved Vasicek template of `MathFin/FixedIncome/VasicekBondPrice.lean`:
+proved Vasicek template of `MathFin/FixedIncome/VasicekBondPrice.lean`.
+
+Scope, as in that template: the short rate and its time integral are carried in their
+Wiener representations — `integratedRate` and `bondRate` are definitions. That
+`integratedRate` solves the SDE above, and that `bondRate T = ∫₀ᵀ integratedRate s ds`
+(the time-order swap), are the modelling bridges; neither is proved here. Everything below
+is derived from those representations.
 
 * **The deterministic part** — `deterministic` is the particular solution
   `α(t) = e^{−κt}·(r₀ + ∫₀ᵗ e^{κs}·θ(s) ds)` with `α(0) = r₀`. The ODE lemma
   `deterministic_solves_ODE` generalizes `vasicekDeterministic_solves_ODE`; constant `θ`
   reduces to Vasicek verbatim (`deterministic_const`); uniqueness of the ODE solution
-  (`deterministic_eq_of_solves_ODE`) gives the desk mean identity
-  `𝔼[r_t] = α(t) + (r₀ − α(0))·e^{−κt}` (`mean`).
+  (`deterministic_eq_of_solves_ODE`) writes the deterministic part through any other
+  solution `α` as `α(t) + (r₀ − α(0))·e^{−κt}` (`mean`). It is the centre of the law of
+  `r_t` (`integratedRate_hasLaw_gaussian`).
 * **The short rate in Wiener representation** — `integratedRate` (= `deterministic` +
   `σ·`Wiener integral of the kernel `e^{−κ(t−u)}`) is Gaussian with the Vasicek variance
   `(σ²/2κ)·(1 − e^{−2κt})` — `θ` shifts means, never variances
@@ -30,19 +37,22 @@ proved Vasicek template of `MathFin/FixedIncome/VasicekBondPrice.lean`:
   `vasicekIntegratedKernelLp` verbatim (integrating the diffusion kernel over
   `s ∈ [u, T]` is model-independent), so `bondPrice_eq` is the exponential-Gaussian
   moment with variance `vasicekBondV` again; `bondA` gains the `θ`-forcing integral and
-  `bondPrice_affine` closes the affine term structure with `vasicekBondB` reused
-  verbatim.
-* **Calibration** — `theta` is the verified identity
+  `bondPrice_affine` gives the time-0 affine form `A(T)·e^{−B(T)·r₀}`, `A` independent of
+  `r₀` and `B = vasicekBondB` reused verbatim. `P(t,T)` for `t > 0` is not formalized.
+* **Calibration** — `theta` is the calibration formula
   `θ(t) = ∂_t f(0,t) + κ·f(0,t) + (σ²/2κ)·(1 − e^{−2κt})`; `calibAlpha_solves_ODE`
   verifies by differentiation that the closed form
   `β(t) = f(0,t) + (σ²/2κ²)·(1 − e^{−κt})²` solves the HW ODE under this `θ`, uniqueness
-  (`deterministic_eq_of_solves_ODE`) gives the calibrated mean `calibMean`, and the
+  (`deterministic_eq_of_solves_ODE`) makes it the calibrated deterministic part
+  (`mean_eq_forward`; the expected short rate is `calibMean_eq_forward`), and the
   calibration integral lemma `∫₀ᵀ α = ∫₀ᵀ f0 + σ²V/2` (`calibIntegratedMean`, via the
-  kernel reflection `var_eq_interval`) makes `reprices_curve` exact:
-  `P^hw(0,T) = exp(−∫₀ᵀ f(0,s) ds)`.
+  kernel reflection `var_eq_interval`) makes `reprices_curve` exact: for `f0 ∈ C¹`,
+  `κ > 0` and the rate started at `r₀ = f(0,0)`,
+  `𝔼[exp(−bondRate T)] = exp(−∫₀ᵀ f(0,s) ds)`.
 
-Structural note: the pinned Mathlib has no Fubini theorem for interval integrals, so the
-`θ`-forcing integral is proved by an antiderivative (`beta_integral`: `G(s) =
+Structural note: the `θ`-forcing integral lives on the triangle `0 ≤ u ≤ s ≤ t`; rather
+than rewrite it over a rectangle for an interval-integral Fubini swap, it is proved by an
+antiderivative (`beta_integral`: `G(s) =
 (1/κ)·(∫₀ˢ θ − e^{−κs}·∫₀ˢ e^{κu}θ)` has `G' = e^{−κs}·I(s)`, `G(0) = 0`) plus a
 pointwise expansion of `θ(s)·B(t−s)` (`integral_theta_B`) — no Fubini anywhere, only
 pointwise congruences, linearity, and one `intervalIntegral.integral_comp_sub_left`
@@ -58,14 +68,14 @@ Public lemmas (all in `namespace MathFin.HullWhite`):
 * `deterministic_at_zero`, `deterministic_solves_ODE`, `deterministic_const`,
   `deterministic_const_closed_form`, `deterministic_const_tendsto`,
   `deterministic_add_exponential`, `deterministic_eq_of_solves_ODE`, `mean` —
-  the deterministic part and the mean identity;
+  the deterministic part;
 * `kernel_memLp`, `kernel_integral_sq`, `integratedRate_hasLaw_gaussian` — the short
   rate's Gaussian law with the Vasicek variance;
 * `integral_exp_pos_const`, `integral_exp_neg_eq_bondB`, `beta_integral`,
   `integral_theta_B`, `integratedMean_eq` — the scalar-integral identities behind the
   affine coefficients;
-* `bondPrice_eq`, `bondPrice_affine` — the exponential-Gaussian bond moment and the
-  affine term structure with `vasicekBondB` reused verbatim;
+* `bondPrice_eq`, `bondPrice_affine` — the exponential-Gaussian bond moment and its
+  time-0 affine form with `vasicekBondB` reused verbatim;
 * `theta_continuous`, `calibAlpha_solves_ODE`, `mean_eq_forward`, `calibMean`,
   `calibMean_eq_forward`, `var_eq_interval`, `calibCorrection_integral`,
   `calibIntegratedMean`, `reprices_curve` — the calibration `θ`-formula and the
@@ -231,10 +241,11 @@ theorem deterministic_eq_of_solves_ODE (θ : ℝ → ℝ) (hθ : Continuous θ) 
     exact hsub.symm
   exact (eq_of_sub_eq_zero hgap).symm
 
-/-- **The mean of the HW short rate** (the desk identity): with any `α`
-solving `α' = θ − κα` pointwise (θ continuous),
-`𝔼[r_t] = α(t) + (r₀ − α(0))·e^{−κt}` — the particular solution plus the
-exponentially decaying initial gap. -/
+/-- **The deterministic part through any ODE solution**: with any `α` solving
+`α' = θ − κα` pointwise (θ continuous), the deterministic part of the HW short rate is
+`α(t) + (r₀ − α(0))·e^{−κt}` — the particular solution plus the exponentially decaying
+initial gap. It is the centre of the law of `r_t` (`integratedRate_hasLaw_gaussian`);
+the expectation itself is stated under calibration, `calibMean_eq_forward`. -/
 theorem mean (θ : ℝ → ℝ) (κ : ℝ) (α : ℝ → ℝ)
     (hα : ∀ s, HasDerivAt α (θ s - κ * α s) s) (hθ : Continuous θ) (r₀ t : ℝ) :
     deterministic θ κ r₀ t = α t + (r₀ - α 0) * Real.exp (-(κ * t)) := by
@@ -249,8 +260,9 @@ theorem mean (θ : ℝ → ℝ) (κ : ℝ) (α : ℝ → ℝ)
 short rate's Wiener part `σ∫₀ᵗ e^{−κ(t−u)} dB_u`. -/
 noncomputable def kernel (κ t : ℝ) : ℝ → ℝ := fun u ↦ Real.exp (-(κ * (t - u)))
 
-/-- The kernel's L²-norm over `(0, t]`: `∫₀ᵗ e^{−2κ(t−u)} du = (1 − e^{−2κt})/(2κ)`
-— exactly the Vasicek variance factor `/2κ`. -/
+/-- The closed form `(1 − e^{−2κt})/(2κ)` of the kernel's squared `L²`-norm over
+`(0, t]`, `∫₀ᵗ e^{−2κ(t−u)} du`; it equals that integral for `κ ≠ 0`
+(`kernel_integral_sq`). The Vasicek variance factor `/2κ`. -/
 noncomputable def kernelV (κ t : ℝ) : ℝ := (1 - Real.exp (-(2 * κ * t))) / (2 * κ)
 
 /-- The HW kernel is in `L²((0, t])`: on the support it lies in `(0, 1]` for
@@ -332,9 +344,10 @@ private lemma kernelWienerLaw (hB : IsPreBrownianReal B μ) {κ : ℝ} (hκ : 0 
   have h0 := wienerIntegralLp_hasLaw_gaussian hB t (kernelLp hκ t)
   rwa [kernelLp_integral_sq hκ t] at h0
 
-/-- **The HW short rate in Wiener representation** (mirror of
-`vasicekIntegratedRate`): `r_t = α(t) + σ·∫₀ᵗ e^{−κ(t−u)} dB_u` with `α` the
-particular solution `deterministic θ κ r₀`. -/
+/-- **The HW short rate in Wiener representation** (the counterpart of the Vasicek
+short rate of `VasicekSDEGaussian`), defined as `r_t = α(t) + σ·∫₀ᵗ e^{−κ(t−u)} dB_u`
+with `α` the particular solution `deterministic θ κ r₀`. That it solves the HW SDE is
+the modelling bridge, not proved here. -/
 noncomputable def integratedRate (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ)
     (κ σ r₀ : ℝ) (hκ : 0 < κ) (t : ℝ≥0) (ω : Ω) : ℝ :=
   deterministic θ κ r₀ (t : ℝ)
@@ -343,7 +356,7 @@ noncomputable def integratedRate (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ
 /-- **The HW short rate is Gaussian**: `r_t ~ N(α(t), σ²(1 − e^{−2κt})/(2κ))` —
 θ(t) shifted the mean and left the Vasicek variance untouched (the affine-map
 argument `x ↦ α(t) + σx` applied to the centred Wiener integral, exactly as in
-`vasicekIntegratedRate_hasLaw_gaussian`). -/
+`vasicekShortRate_hasLaw_gaussian`). -/
 theorem integratedRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ)
     (κ σ r₀ : ℝ) (hκ : 0 < κ) (t : ℝ≥0) :
     HasLaw (integratedRate hB θ κ σ r₀ hκ t)
@@ -362,7 +375,7 @@ theorem integratedRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ) (θ : ℝ �
 
 /-! ### The affine bond price -/
 
-/-- The deterministic mean of the integrated HW short rate: `∫₀ᵗ α(s) ds`. -/
+/-- The deterministic part `∫₀ᵗ α(s) ds` of the integrated HW short rate (`bondRate`). -/
 noncomputable def integratedMean (θ : ℝ → ℝ) (κ r₀ t : ℝ) : ℝ :=
   ∫ s in (0 : ℝ)..t, deterministic θ κ r₀ s
 
@@ -403,8 +416,8 @@ private lemma forcing_integral_continuous (θ : ℝ → ℝ) (hθ : Continuous �
       (hfc.stronglyMeasurableAtFilter volume (nhds s)) hfc.continuousAt
   exact Differentiable.continuous (fun x ↦ (hI x).differentiableAt)
 
-/-- **The forcing integral** (the antiderivative route — the pinned
-Mathlib has no Fubini for interval integrals):
+/-- **The forcing integral** (the antiderivative route; the integral lives on the
+triangle `0 ≤ u ≤ s ≤ t`):
 `∫₀ᵗ e^{−κs}·(∫₀ˢ e^{κu}θ(u) du) ds = (1/κ)·(∫₀ᵗ θ − e^{−κt}·∫₀ᵗ e^{κu}θ(u) du)`.
 `G(s) = (1/κ)(∫₀ˢ θ − e^{−κs}·∫₀ˢ e^{κu}θ)` satisfies `G' = e^{−κs}·I(s)`,
 `G(0) = 0`. -/
@@ -517,7 +530,8 @@ lemma integratedMean_eq (θ : ℝ → ℝ) (hθ : Continuous θ) (κ r₀ t : �
     integral_exp_neg_eq_bondB κ t hκ, hbeta]
 
 /-- **The integrated HW short rate** in Wiener representation (mirror of
-`vasicekIntegratedRate`): `∫₀ᵗ r_s ds = ∫₀ᵗ α + σ·∫₀ᵗ g(u) dB_u` with `g` the
+`vasicekIntegratedRate`), defined as `∫₀ᵗ α + σ·∫₀ᵗ g(u) dB_u` — the representation of
+`∫₀ᵗ r_s ds` after the time-order swap, which is the modelling bridge — with `g` the
 **Vasicek integrated kernel reused verbatim** (`vasicekIntegratedKernelLp`):
 integrating the diffusion kernel `e^{−κ(s−u)}` over `s ∈ [u, T]` is
 model-independent, so kernel, L²-element and variance all carry over. -/
@@ -556,7 +570,7 @@ private lemma vasKernelWienerLaw (hB : IsPreBrownianReal B μ) {κ : ℝ} (hκ :
   rwa [vasKernelLp_integral_sq hκ T] at h0
 
 /-- **The HW zero-coupon bond price** — the exponential-Gaussian moment:
-`P(0,T) = 𝔼[exp(−∫₀ᵀ r_s ds)] = exp(−∫₀ᵀ α + σ²·V(T)/2)` with `V = vasicekBondV`
+`P(0,T) = 𝔼[exp(−bondRate T)] = exp(−∫₀ᵀ α + σ²·V(T)/2)` with `V = vasicekBondV`
 the Vasicek variance, unchanged — the exact analogue of `vasicekBondPrice_eq`. -/
 theorem bondPrice_eq (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ) (κ σ r₀ : ℝ)
     (hκ : 0 < κ) (T : ℝ≥0) :
@@ -591,15 +605,14 @@ theorem bondPrice_eq (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ) (κ σ r�
 /-- The HW affine coefficient `A(T) = exp(−∫₀ᵀ θ(s)·B(T−s) ds + σ²·V(T)/2)` —
 Vasicek's `vasicekBondA` with the constant-drift term `θ_v·(T − B(T))` replaced by
 the θ-forcing integral. (`∫₀ᵀ B(T−s)² ds = vasicekBondV κ T`, so the variance
-term is exactly `(σ²/2)·∫₀ᵀ B(τ)² dτ` — the mission's `A`-shape.) -/
+term is exactly `(σ²/2)·∫₀ᵀ B(τ)² dτ`, the standard Hull–White `A`.) -/
 noncomputable def bondA (θ : ℝ → ℝ) (σ κ t : ℝ) : ℝ :=
   Real.exp (-(∫ s in (0 : ℝ)..t, θ s * vasicekBondB κ (t - s))
     + σ ^ 2 * vasicekBondV κ t / 2)
 
-/-- **The affine term structure**: `P(0,T) = A(T)·exp(−B(T)·r₀)` with `B` the
-Vasicek coefficient **verbatim** and `A` carrying the θ-forcing — the defining
-shape of an affine term-structure model (the exact analogue of
-`vasicekBondPrice_affine`). -/
+/-- **The time-0 affine form**: `P(0,T) = A(T)·exp(−B(T)·r₀)` with `B` the Vasicek
+coefficient **verbatim** and `A` carrying the θ-forcing, independent of `r₀` (the exact
+analogue of `vasicekBondPrice_affine`). `P(t,T)` for `t > 0` is not formalized. -/
 theorem bondPrice_affine (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ) (κ σ r₀ : ℝ)
     (hθ : Continuous θ) (hκ : 0 < κ) (T : ℝ≥0) :
     ∫ ω, Real.exp (-(bondRate hB θ κ σ r₀ hκ T ω)) ∂μ
@@ -611,8 +624,9 @@ theorem bondPrice_affine (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ) (κ σ
 
 /-! ### Calibration — `θ` from the initial forward curve -/
 
-/-- **The calibrated drift** (the verified
-identity): `θ(t) = ∂_t f(0,t) + κ·f(0,t) + (σ²/2κ)·(1 − e^{−2κt})` — the initial
+/-- **The calibrated drift**, the calibration formula (justified by
+`calibAlpha_solves_ODE` and `reprices_curve`):
+`θ(t) = ∂_t f(0,t) + κ·f(0,t) + (σ²/2κ)·(1 − e^{−2κt})` — the initial
 instantaneous forward curve's slope, plus mean reversion, plus the HJM convexity
 correction. Defined with `deriv` (total, junk off-curve); every theorem below
 binds `hf0 : ContDiff ℝ 1 f0`, which packages differentiability of `f0` and
@@ -644,11 +658,11 @@ lemma theta_continuous (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ : ℝ
   exact (hdd.add (hf0.continuous.const_mul κ)).add
     (by fun_prop : Continuous fun t : ℝ ↦ (σ ^ 2 / (2 * κ)) * (1 - Real.exp (-(2 * κ * t))))
 
-/-- **The calibrated β solves the HW ODE** (the research addendum's identity,
-verified by differentiation): with `f0` a `C¹` curve,
+/-- **The calibrated β solves the HW ODE** (verified by differentiation): with `f0` a `C¹` curve,
 `β(t) = f(0,t) + (σ²/2κ²)(1 − e^{−κt})²` satisfies
 `β'(t) = θ(t) − κ·β(t)` pointwise for `θ = theta f0 κ σ`. Chain rule on β plus
-`calib_deriv_eq`; this is what makes the θ-formula *the* calibration. -/
+`calib_deriv_eq`; this is what makes the θ-formula a calibration (sufficient for exact
+repricing, `reprices_curve`; uniqueness of `θ` is not proved). -/
 theorem calibAlpha_solves_ODE (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ : ℝ)
     (hκ : κ ≠ 0) (t : ℝ) :
     HasDerivAt (calibAlpha f0 κ σ) (theta f0 κ σ t - κ * calibAlpha f0 κ σ t) t := by
@@ -685,11 +699,10 @@ theorem calibAlpha_solves_ODE (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ �
   rw [hval]
   exact hfd.add hcm
 
-/-- **The mean identity**: the HW particular solution driven by `theta` and
-started at the initial forward `r₀ = f(0,0)` is exactly
+/-- **The calibrated deterministic part**: the HW particular solution driven by `theta`
+and started at the initial forward `r₀ = f(0,0)` is exactly
 `β(t) = f(0,t) + (σ²/2κ²)(1 − e^{−κt})²` — the initial forward plus the convexity
-correction, so the expected short rate is the forward curve plus a known,
-explicitly integrable correction. Route: `calibAlpha_solves_ODE` (verified by
+correction (`calibMean_eq_forward` turns it into the expected short rate). Route: `calibAlpha_solves_ODE` (verified by
 differentiation) + ODE uniqueness (`deterministic_eq_of_solves_ODE`; note
 `β(0) = f(0,0)` automatically, since `(1 − e^{−κ·0})² = 0`). Only `κ ≠ 0` is
 needed — the θ-formula divides by κ; no positivity enters the deterministic
@@ -702,7 +715,8 @@ theorem mean_eq_forward (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ : �
     (fun s ↦ calibAlpha_solves_ODE f0 hf0 κ σ hκ s) t
   rwa [show calibAlpha f0 κ σ 0 = f0 0 from by simp [calibAlpha]] at h
 
-/-- **The calibrated mean**: the HW particular solution driven by `theta` and
+/-- **The calibrated deterministic part, for `κ > 0`** (`mean_eq_forward`): the HW
+particular solution driven by `theta` and
 started at the initial forward `r₀ = f(0,0)` is exactly
 `β(t) = f(0,t) + (σ²/2κ²)(1 − e^{−κt})²` — `calibAlpha_solves_ODE` + ODE
 uniqueness (`deterministic_eq_of_solves_ODE`; note `β(0) = f(0,0)`
@@ -808,10 +822,10 @@ theorem calibIntegratedMean (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ 
       (Set.uIcc (0 : ℝ) (𝕋 : ℝ)) from fun s _ ↦ calibMean f0 hf0 κ σ hκ s),
     hsplit, hkey, ← hV]
 
-/-- **The repricing identity** (the headline): with θ defined
-by the verified calibration formula, the HW model's initial bond curve exactly
+/-- **The repricing identity** (the headline): with `θ = theta f0 κ σ` and the short
+rate started at `r₀ = f(0,0)` (`f0 ∈ C¹`, `κ > 0`), the HW model's time-0 bond curve
 reprices the market curve read off the initial forwards:
-`P^hw(0,T) = 𝔼[exp(−∫₀ᵀ r_s ds)] = exp(−∫₀ᵀ f(0,s) ds) = P^mkt(0,T)`.
+`𝔼[exp(−bondRate T)] = exp(−∫₀ᵀ f(0,s) ds) = P^mkt(0,T)`.
 Route: `bondPrice_eq` (the exponential-Gaussian moment) +
 `calibIntegratedMean` (`∫₀ᵀ α = ∫₀ᵀ f0 + σ²V/2`) — the `σ²V/2` cancels. -/
 theorem reprices_curve (hB : IsPreBrownianReal B μ) (f0 : ℝ → ℝ)

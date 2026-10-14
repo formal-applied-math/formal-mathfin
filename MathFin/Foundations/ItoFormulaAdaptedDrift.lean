@@ -1281,6 +1281,7 @@ private theorem trueIncr_sq_le {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
         rw [sq Dd, hDsq2]
 
 set_option maxHeartbeats 1600000 in
+omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- **The convergence of the quadratic block** (the summed weighted increment isometry,
 conditional on the per-partition `L¹` gap decay): if the weighted second-moment sum along
 the uniform partition differs from the frozen rectangle sum by at most
@@ -1295,7 +1296,6 @@ theorem quadraticSqSum_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Me
     (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
     (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
     {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
     (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
       (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
     {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
@@ -2037,6 +2037,7 @@ theorem gapSum_le (n : ℕ) (hn : 0 < n) {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
               Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
         ∂(trimMeasure_T (μ := μ) T hBmeas)) := by ring
 
+omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- **The convergence of the quadratic block, unconditional** (the `hgap` hypothesis of
 `quadraticSqSum_tendsto` discharged by `gapSum_le` + `deltaStepLp_tendsto`). -/
 theorem quadraticSqSum_tendsto_uncond (hB : IsPreBrownianReal B μ)
@@ -2058,8 +2059,7 @@ theorem quadraticSqSum_tendsto_uncond (hB : IsPreBrownianReal B μ)
           * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)
       atTop (𝓝 (∫ s in Set.Ioc 0 T,
           (∫ ω, w s ω * (δ s ω * δ s ω) ∂μ) ∂ItoIntegralL2.timeMeasure)) := by
-  refine quadraticSqSum_tendsto hB hBmeas hδadap hδcont hδbdd hMadap hMeq
-    hB hBmeas hδadap hδcont hδbdd hMadap hMeq hwadap hwcont hwbdd
+  refine quadraticSqSum_tendsto hB hBmeas hδadap hδcont hδbdd hMeq hwadap hwcont hwbdd
     ⟨fun n ↦ Real.sqrt (∫ z in Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω),
       ((processToLp T hBmeas hδadap hδcont hδbdd
           - deltaStepLp hBmeas hδadap hδbdd n :
@@ -3178,6 +3178,7 @@ theorem trueIncr_pow4_integrable {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
     exact abs_of_nonneg (by positivity)
   exact (clmIncr_pow4_integrable hB hBmeas hδadap hδcont hδbdd hn k hk).congr hG4.symm
 
+omit hMadap in
 /-- **The fourth moment of the true increment** over a uniform cell:
 `𝔼[(M_{tₖ₊₁} − M_{tₖ})⁴] ≤ 3·(D_δ²·cell)²` — the a.e. transfer of the CLM ∫⁻-bound to the
 modifying process `M`, with the real integral recovered from the ∫⁻-bound by
@@ -3250,7 +3251,7 @@ theorem trueIncr_pow3_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
   have hint4 : ∫ ω, (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 4 ∂μ
       ≤ 3 * (Dd ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 2 := by
     refine le_trans (le_of_eq ?_)
-      (trueIncr_pow4_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq hn k hk)
+      (trueIncr_pow4_le hB hBmeas hδadap hδcont hδbdd hMeq hn k hk)
     exact integral_congr_ae (μ := μ)
       (Eventually.of_forall fun ω ↦ (abs4_eq_pow4 _).symm)
   -- `L²` membership of `X²`: from the `L⁴` integrability via `integrable_norm_rpow_iff`
@@ -3332,7 +3333,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
 include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
 
 /-- **The martingale-kill lemma** (the exact first-order cross-term zero of the adapted
-assembly): for `h` bounded and `𝓕_u`-measurable, `u ≤ v ≤ T`,
+assembly): for `h` bounded and `𝓕_u`-measurable, `u ≤ v`,
 
   `𝔼[h·(M_v − M_u)] = 0`.
 
@@ -3340,8 +3341,8 @@ Route: the conditional expectation of the increment dies
 (`μ[M_v | 𝓕_u] =ᵐ M_u` — the `incrementEnergy` martingale congruence, from
 `itoIntegralProcessGen_isMartingale` through the a.e. `hMeq` transfer; `condExp_sub`),
 then the tower pull-out `integral_mul_condExp_eq` and the vanishing integrand. -/
-theorem mul_trueIncr_expect_eq_zero {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T)
-    {h : Ω → ℝ} {Ch : ℝ} (hCh : 0 ≤ Ch)
+theorem mul_trueIncr_expect_eq_zero {u v : ℝ≥0} (huv : u ≤ v)
+    {h : Ω → ℝ} {Ch : ℝ}
     (hmadap : StronglyMeasurable[natFiltration hBmeas u] h)
     (hbdd : ∀ ω, |h ω| ≤ Ch) :
     ∫ ω, h ω * (M v ω - M u ω) ∂μ = 0 := by
@@ -3494,7 +3495,7 @@ theorem driftPrim_adapted {β : ℝ≥0 → Ω → ℝ}
   rw [hlim]
   exact (Measurable.liminf hsum).stronglyMeasurable
 
-omit hB hδadap hδcont hδbdd hMadap hMeq in
+omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- The drift primitive is `Db`-Lipschitz in `t` along every path
 (`abs_driftPath_sub_le`), hence continuous. -/
 theorem driftPrim_continuous {β : ℝ≥0 → Ω → ℝ}
@@ -4374,7 +4375,7 @@ private theorem tendsto_inv_sqrt_nat_add :
   show Real.sqrt ((1 : ℝ) / ((n : ℝ) + 1)) = (1 : ℝ) / Real.sqrt ((n : ℝ) + 1)
   rw [Real.sqrt_div (by norm_num : (0 : ℝ) ≤ 1), Real.sqrt_one]
 
-omit hB hδadap hδcont hδbdd hMadap hMeq in
+omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- **The drift² corrections of the quadratic block die** (`O(mesh)`): the summed absolute
 expectations of the frozen weight against the drift-increment squares are at most
 `2·C₂·D_β²·T²/(n+1)` — each drift increment is pointwise `D_β·cell`
@@ -4764,7 +4765,6 @@ decomposition), `(a+b)³ ≤ 4·(a³+b³)` (`pow3_add_le`), the drift increment 
 `|𝔼[∑ₖ Rₖ]| ≤ 4·C₃·(4·D_β³·T³/(n+1)² + 2·√(3·(D_δ²·T)³)/√(n+1)) → 0`. -/
 theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
     {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω → ℝ}
-    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
     {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + driftPrim β t ω + M t ω)
@@ -5387,7 +5387,7 @@ theorem itoDrift_expectation_identity_adapted
       ∫ ω, f'' (X (unifPart T n k) ω)
         * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ)
     atTop (𝓝 0) :=
-    quadDriftSqSum_tendsto hBmeas hBmeas T hβadap hβcont hβbdd hXadap hf''c hg2
+    quadDriftSqSum_tendsto hBmeas T hβadap hβcont hβbdd hXadap hf''c hg2
   have hC0 : Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
       ∫ ω, f'' (X (unifPart T n k) ω)
         * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
@@ -5399,14 +5399,13 @@ theorem itoDrift_expectation_identity_adapted
       discreteTaylorRemainder f f' f'' (X (unifPart T n k) ω)
         (X (unifPart T n (k + 1)) ω) ∂μ) atTop (𝓝 0) :=
     taylorRemainderSum_tendsto hB hBmeas hδadap hδcont hδbdd hMadap hMeq hBmeas c
-      hβadap hβcont hβbdd hXrel hXadap hf hf' hf'' hg3
+      hβcont hβbdd hXrel hXadap hf hf' hf'' hg3
   have hD0 : Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
       ∫ ω, f'' (X (unifPart T n k) ω)
         * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)
     atTop (𝓝 (∫ s in Set.Ioc (0 : ℝ≥0) T,
         (∫ ω, f'' (X s ω) * (δ s ω * δ s ω) ∂μ) ∂ItoIntegralL2.timeMeasure)) :=
     quadraticSqSum_tendsto_uncond hB hBmeas hδadap hδcont hδbdd hMadap hMeq
-      hB hBmeas hδadap hδcont hδbdd hMadap hMeq
       (w := fun s ω ↦ f'' (X s ω)) (Cw := C2)
       (fun t ↦ hf''c.measurable.comp (hXadap t).measurable)
       (fun ω ↦ hf''c.comp (hXcont ω))
@@ -5657,10 +5656,9 @@ theorem itoDrift_expectation_identity_adapted
     -- the first-order martingale terms die exactly
     have hzero1 : (∑ k ∈ Finset.range n, ∫ ω, f' (X (unifPart T n k) ω)
         * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ) = 0 := by
-      refine Finset.sum_eq_zero fun k hk ↦ ?_
+      refine Finset.sum_eq_zero fun k _ ↦ ?_
       exact mul_trueIncr_expect_eq_zero hB hBmeas hδadap hδcont hδbdd hMadap hMeq
         (unifPart_mono T n (Nat.le_succ k))
-        (unifPart_le_T (Nat.lt_iff_add_one_le.mp (Finset.mem_range.mp hk))) hC1
         ((hf'c.measurable.comp (hXadap (unifPart T n k)).measurable).stronglyMeasurable)
         (fun ω ↦ hg1 (X (unifPart T n k) ω))
     -- the per-cell integral splits
