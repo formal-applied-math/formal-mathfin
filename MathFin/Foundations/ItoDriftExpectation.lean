@@ -28,11 +28,10 @@ of that decomposition for the **constant-coefficient** Itô process `X_t = X₀ 
   instantiates the exponential-growth hypotheses of `ito_formula_itoProcess` at `λ = 0`.
 
 This is the constant-coefficient specialization of the *general* bounded-adapted integrated
-identity (`dX = β dt + δ dW`), which additionally needs the semimartingale Itô formula along
-`X` — the stochastic-integral machinery (`ItoIntegralProcessGeneral`, the adapted Riemann
-bridge `itoIntegralCLM_T_of_bdd_adapted_cont`, the adapted weighted QV
-`tendsto_weighted_qv_process`) already handles the adapted integrands; what is missing is the
-pathwise formula itself. That general case remains open here.
+identity (`dX = β dt + δ dW`), which `ItoFormulaAdaptedDrift` proves
+(`itoDrift_expectation_identity_adapted`) by taking expectations in the discrete Itô formula on
+the grid values of `X`, with no pathwise formula along the way. The pathwise formula for adapted
+coefficients is `ItoFormulaAdapted.ito_formula_adapted`.
 -/
 
 @[expose] public section
