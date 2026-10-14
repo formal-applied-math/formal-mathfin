@@ -255,6 +255,16 @@ import MathFin.Foundations.BrownianExpMoment
 import MathFin.Foundations.ItoFormulaLocalized
 import MathFin.Foundations.ItoFormulaItoProcess
 import MathFin.Foundations.ItoFormulaGBM
+import MathFin.Foundations.ItoDriftExpectation
+-- The integrated Itô–drift identity for adapted coefficients along `X_t = c + ∫β + M`,
+-- conditional on a hypothesized adapted, path-continuous version `M` of the Itô integral
+-- (the library does not construct one for general δ)
+import MathFin.Foundations.ItoFormulaAdaptedDrift
+-- Cross-horizon consistency of the CLM Itô integral: one pinned `M` (`hMeq`) represents
+-- the CLM integral at every horizon `τ ≤ T` (band-transfer kernel + freeze law)
+import MathFin.Foundations.ItoIntegralCrossHorizon
+import MathFin.Foundations.HullWhiteCalibration
+import MathFin.Foundations.MonteCarloPricer
 -- Martingale representation, step 3: the Doléans exponential of a deterministic step
 -- integrand is an Itô integral (time locality of `∫·dB` + unbounded `𝓕_a`-scaling)
 import MathFin.Foundations.DoleansStepRepresentation
@@ -482,6 +492,7 @@ import MathFin.FixedIncome.CouponBonds
 import MathFin.FixedIncome.Immunization
 import MathFin.FixedIncome.ConvexityImmunization
 import MathFin.FixedIncome.YieldCurve
+import MathFin.FixedIncome.Bootstrapping
 import MathFin.FixedIncome.Credit
 -- First-to-default: basket intensity = Σ single-name intensities
 -- (bridges Foundations.ExpMin into the Credit vocabulary)
@@ -502,6 +513,7 @@ import MathFin.FixedIncome.ConvexitySensitivity
 import MathFin.FixedIncome.KMVMertonStructural
 -- Phase 28: CDS fair spread under time-varying hazard (cash-flow balance)
 import MathFin.FixedIncome.CDSTimeVarying
+import MathFin.FixedIncome.Cox
 -- Phase 41: Vasicek SDE closed-form (full SDE, mean + variance)
 import MathFin.FixedIncome.VasicekSDE
 -- Itô→pricing bridge: Vasicek terminal law derived (Wiener integral is Gaussian)
@@ -602,6 +614,7 @@ import MathFin.Actuarial.SurvivalModel
 -- Foundations/LpContinuousMartingaleConvergence imports Degenne's DoobLp).
 import BrownianMotion.StochasticIntegral.LocalMartingale
 import MathFin.FixedIncome.InterestRateSwap
+import MathFin.FixedIncome.CMS
 import MathFin.FixedIncome.FRA
 import MathFin.Actuarial.ActuarialInsurance
 
