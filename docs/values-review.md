@@ -125,6 +125,101 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-14 — corpus 535 — #244: the Itô–drift expectation, Hull–White, Monte Carlo, Cox, CMS, bootstrapping
+
+Scope: the eight modules of #244 by Yang Ye (@leafyoung), merged with its three commits intact:
+`Foundations/ItoDriftExpectation`, `ItoFormulaAdaptedDrift`, `ItoIntegralCrossHorizon`,
+`HullWhiteCalibration`, `MonteCarloPricer`, and `FixedIncome/Cox`, `CMS`, `Bootstrapping` — about
+10.5k lines. No corpus entries; the corpus stays at 535. CI never ran on the pull request
+(workflows from a first-time contributor wait for approval), so `build.yml` was run on the merged
+tree. Three read-only agents read the prose against the statements (Hull–White and Monte Carlo;
+Cox, CMS and bootstrapping; the three Itô files) and checked usage and duplication by grep; each
+finding was confirmed against the source before it was applied.
+
+### Getting it to build
+
+- `ItoFormulaAdaptedDrift` declared `expectation_pathIntegral_eq` a second time and re-proved the
+  constant-coefficient identity as `itoDrift_expectation_identity`; the umbrella imports both
+  modules, so the root failed. It now imports `ItoDriftExpectation`.
+- Seven signatures relied on `autoImplicit` (`B`, `S_0`, `K`, `E`, `hB`), which this library turns
+  off. Each now binds what the elaborator used to insert.
+- `lake lint`: one underscore def (`cdsFairSpread_TV`, now `cdsFairSpreadTV`) and seven unused
+  arguments. Four theorems redeclared hypotheses their section already `include`d, so they took them
+  twice and their callers passed them twice; three binders were never used. Without `v ≤ T`,
+  `mul_trueIncr_expect_eq_zero` now holds for every `u ≤ v`.
+
+### Standing first pass: prose against statement
+
+All findings are applied.
+- **A conditional headline.** `itoDrift_expectation_identity_adapted` assumes `M`, a
+  `natFiltration`-adapted version of the Itô integral (`=ᵐ` at every `t`), and `X = c + ∫β + M` with
+  every path continuous, which forces every path of `M` to be continuous. No lemma in the library
+  supplies such an `M` for general `δ`: the continuous modification is continuous only almost surely,
+  and the everywhere-continuous one is adapted only to `augFiltration`. The prose called `X` "defined
+  (not hypothesized)" and the result the expectation form for "a genuine Itô process".
+- **Definitions read as theorems.** The Hull–White short rate and its integral are Wiener
+  representations by definition — the SDE and the time-order swap are modelling bridges, as
+  `VasicekBondPrice` says of its own. The Cox CDS legs are defined integrals, never tied to the default
+  time. The CMS headline is Jensen's inequality for any nonnegative `W` under `Qᴬ`, not the convexity
+  adjustment `𝔼^{T_p}[S_T] − S₀`.
+- **A false claim and a false mathematical aside.** Monte Carlo consistency was said to cover
+  antithetic pairs, which are not pairwise independent; a vector-valued CLT was said to "compose
+  coordinate-wise".
+- **A vacuity risk, disclosed.** The bootstrap induction quantifies its hypotheses over every prefix
+  list with fixed brackets; the file's FRA and swap roots move with the prefix, so no instrument here
+  is shown to meet them. The module had called the self-repricing of the curve machine-checked.
+- Smaller: Hull–White's `mean` states the deterministic part, not `𝔼[r_t]`; its affine form is the
+  time-0 one; `reprices_curve` needs `r₀ = f(0,0)`; Mathlib does have interval Fubini (the obstacle
+  was the triangle). CMS strip weights are positive only when `P₀ + C > 0`, which the identity does
+  not assume. Cox's results need a continuous, everywhere-positive intensity and `t ≥ 0`, and its
+  mixing identity is Fubini with no default time in it. The cross-horizon module's "no lemma relates
+  two horizons" overlooked the infinite-horizon process. "`f ∈ C³`" was three times differentiable
+  with bounded derivatives.
+- References outside the repository (a workspace pin, a "mission", a "research addendum", design
+  dispatches, `GyongyScratch.lean`), to names that do not exist (`itoProcX`, `stepIncrSq_le`, a
+  `DiscreteIto` namespace), and two "documented remaining gaps" documented nowhere are gone.
+
+### Upgrades executed
+
+- One copy of the stage-1 Fubini and of the constant-coefficient identity, in `ItoDriftExpectation`.
+- Dead code removed: `cmsStrip_weight_pos`, two threshold bridges and an unused `have` in
+  `Bootstrapping`, and two unused hypotheses of `Cox.defaultSurvival_const`.
+- `ring` → `ring_nf` where only `ring`'s fallback closed the goal.
+
+### Lens gradients
+
+- **Coherence.** Exemplar: `MonteCarloPricer` consumes Mathlib's strong law and CLT instead of
+  re-deriving them. Next: `Bootstrapping`'s bisection engine duplicates `Foundations/Bisection`
+  verbatim, so two `bisectMid` constants sit under the umbrella; Hull–White's kernel, its `L²` lemmas
+  and the short-rate law duplicate `VasicekSDEGaussian`; `driftPrim` and its lemmas duplicate
+  `AdaptedDrift.driftPath`, and `abs_driftPath_sub_le` is declared both in `MathFin` and in
+  `MathFin.AdaptedDrift`; Cox's `riskyAnnuity_eq` repeats Hull–White's `integral_exp_neg_eq_bondB`,
+  and its exponential tail is a fourth copy.
+- **Architecture.** `ItoFormulaAdaptedDrift` proves the expectation form from the discrete formula,
+  in about 6k lines; for the process the library constructs it would be a short corollary of
+  `ito_formula_adapted`, centering and Fubini. Its 26 public names sit in root `MathFin`.
+- **Zero slop.** Nine `maxHeartbeats` raises, six of them at 1.6M (main had two, at 1M and 800k); dead
+  private code in the adapted file (`crossTerminal_isometry`, `errorIncr_sq_eq_band`, …); put/call
+  pairs in Monte Carlo that one payoff-generic lemma would cover; `calibMean` is `mean_eq_forward`
+  under a stronger hypothesis.
+- **Idiomatic register.** `mconsist`, `mMeq_frozen`, theorem names in lowerCamelCase
+  (`incrementEnergy`, `calibMean`), `fraRoot_agrees_with_pin`; `taylorRemainderSum_tendsto` still
+  takes `hBmeas` twice.
+
+### Ranked backlog
+
+1. **Make the adapted headline unconditional**: construct a `natFiltration`-adapted, everywhere
+   continuous `M` (or restate over `augFiltration`), or prove the expectation form as a corollary of
+   `ItoFormulaAdapted.ito_formula_adapted` and retire the conditional route.
+2. **Bootstrapping**: state the induction's hypotheses at the prefix the recursion feeds in,
+   instantiate `boot` with the FRA and the swap, and switch to `Foundations/Bisection`.
+3. **Dedupe** against `VasicekSDEGaussian`, `AdaptedDrift`, a shared exponential-discount lemma, and
+   one payoff-generic Monte Carlo consistency and CLT.
+4. **CMS**: the change of measure from `Qᴬ` to the payment-date forward measure, for the adjustment
+   itself; until then, consider renaming `cms_adjustment_nonneg`.
+5. **The adapted file**: its own namespace, the dead code, and the heartbeat raises.
+6. **Benchmark entries** for the headline results — the contributor asked whether rows are wanted.
+
 ## 2026-10-08 — corpus 535 — the variance swap on one process, under one measure
 
 Scope: corpus 530 → 535, one rung, the first two items of the corpus-530 backlog.
