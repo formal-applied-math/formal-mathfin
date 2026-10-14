@@ -14,10 +14,13 @@ public import MathFin.Foundations.ItoIntegralLocality
 
 /-! # Cross-horizon consistency of the CLM Itô integral
 
-The pinned MathFin constructs the Itô integral per horizon: `itoIntegralCLM_T` and
-`itoProcessCLM` live over `trimMeasure_T T`, with no lemma relating two horizons. A
-process `M` that represents the CLM integral at horizon `T` should represent it at
-*every* smaller horizon `τ ≤ T` — this module proves that consistency:
+MathFin constructs the Itô integral per horizon: `itoIntegralCLM_T` and `itoProcessCLM`
+live over `trimMeasure_T T`. Each finite horizon is related to the infinite-horizon process
+(`ItoIntegralProcessL2Infinite.itoProcessL2Inf_eq_itoProcessCLM`), but there is no direct
+lemma between two *finite* horizons. A process `M` that represents the CLM integral at
+horizon `T` should represent it at *every* smaller horizon `τ ≤ T` — this module proves that
+consistency directly, for the σ-realization `processToLp δ` of a bounded, adapted,
+path-continuous `δ` in the process form:
 
 * `eLpNorm_band_transfer` — the `L²` norm of a function carried by `(0,τ] × Ω` is the
   same in `trimMeasure_T τ` and `trimMeasure_T T` (both trims are the full predictable
@@ -35,7 +38,7 @@ process `M` that represents the CLM integral at horizon `T` should represent it 
   T-class equals their `L²(trim_τ)` distance to the τ-class by the band-transfer — so
   both CLM extensions are limits of the *same* sequence;
 * `itoProcessCLM_consist` — the process form: for `t ≤ τ ≤ T` the T-horizon CLM
-  process at `t` and the τ-horizon CLM process at `t` agree (band-truncate the integrand
+  process of `processToLp δ` at `t` and the τ-horizon one agree (band-truncate the integrand
   to `(0,t]`, where `itoProcessCLM_eq_zero_of_vanishes_before` and
   `itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after` make the process value a
   terminal integral, then apply the kernel);
@@ -54,8 +57,9 @@ Public API (all in `namespace MathFin`):
 * `itoIntegralCLM_cross_horizon` — the consistency kernel: an integrand carried by
   `(0, τ] × Ω` integrates to the *same* `L²` random variable at horizon `τ` and at
   horizon `T ≥ τ`;
-* `itoProcessCLM_consist` — the process form: the τ- and T-horizon CLM processes agree
-  at every `t ≤ τ ≤ T`;
+* `itoProcessCLM_consist` — the process form: for the σ-realization `processToLp δ` of a
+  bounded, adapted, path-continuous `δ`, the τ- and T-horizon CLM processes agree at every
+  `t ≤ τ ≤ T`;
 * `mconsist`, `mconsist_frozen`, `mMeq_frozen` — the horizon-consistency corollaries for
   a process `M` pinned to the T-horizon CLM integral by an a.e. `hMeq`.
 
@@ -292,8 +296,9 @@ theorem itoIntegralCLM_cross_horizon (hB : IsPreBrownianReal B μ)
   rw [funext hval] at hlimT
   exact (tendsto_nhds_unique hlimT hlimτ).symm
 
-/-- **Cross-horizon consistency of the CLM process**: for `t ≤ τ ≤ T` the T-horizon CLM
-process at `t` and the τ-horizon CLM process at `t` agree as `L²` random variables.
+/-- **Cross-horizon consistency of the CLM process**: for the σ-realization `processToLp δ`
+of a bounded, adapted, path-continuous `δ` and `t ≤ τ ≤ T`, the T-horizon CLM process at `t`
+and the τ-horizon CLM process at `t` agree as `L²` random variables.
 Route: band-truncate the integrand to `(0,t]` — `itoProcessCLM_eq_zero_of_vanishes_before`
 kills the band tail in the process value and
 `itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after` makes the truncated process value a

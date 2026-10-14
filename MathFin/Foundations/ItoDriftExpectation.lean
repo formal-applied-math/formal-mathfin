@@ -11,11 +11,13 @@ public import MathFin.Foundations.ItoIntegralProcessGeneral
 /-! # The integrated Itô–drift identity (expectation form of Itô's formula)
 
 The pathwise Itô formula `ito_formula_itoProcess` decomposes `f(X_T) − f(X₀)` into a centered
-stochastic integral plus a `ds`-drift integral. This module draws the two classical corollaries
-of that decomposition for the **constant-coefficient** Itô process `X_t = X₀ + b·t + σ·B_t`:
+stochastic integral plus a `ds`-drift integral. This module proves a Fubini interchange and,
+with it, the expectation form of that decomposition for the **constant-coefficient** Itô
+process `X_t = X₀ + b·t + σ·B_t`:
 
 * `expectation_pathIntegral_eq` — the Fubini interchange `𝔼[∫₀ᵀ g(s,ω) ds] = ∫₀ᵀ 𝔼[g(s,·)] ds`
-  for a bounded path-continuous family, proved by pathwise Riemann sums
+  for a family with measurable sections, every path continuous, and `|g| ≤ C` everywhere,
+  proved by pathwise Riemann sums
   (`tendsto_riemann_continuous`) + dominated convergence on both sides — no product-measure
   machinery, no Tonelli: boundedness makes both DCTs one-liners;
 * `ito_drift_expectation_identity` — the integrated Itô–drift identity
@@ -24,14 +26,15 @@ of that decomposition for the **constant-coefficient** Itô process `X_t = X₀ 
 
   the expectation form of Itô's formula: integrating the pathwise formula kills the stochastic
   term by centering (`integral_itoIntegralCLM_T`) and interchanges the drift integral with the
-  expectation by `expectation_pathIntegral_eq`. The `C³`-with-bounded-derivatives class
-  instantiates the exponential-growth hypotheses of `ito_formula_itoProcess` at `λ = 0`.
+  expectation by `expectation_pathIntegral_eq`. For `f` three times differentiable with
+  `f'`, `f''`, `f'''` bounded, the exponential-growth hypotheses of `ito_formula_itoProcess`
+  hold at `λ = 0`.
 
-This is the constant-coefficient specialization of the *general* bounded-adapted integrated
-identity (`dX = β dt + δ dW`), which `ItoFormulaAdaptedDrift` proves
-(`itoDrift_expectation_identity_adapted`) by taking expectations in the discrete Itô formula on
-the grid values of `X`, with no pathwise formula along the way. The pathwise formula for adapted
-coefficients is `ItoFormulaAdapted.ito_formula_adapted`.
+An adapted-coefficient analogue, `itoDrift_expectation_identity_adapted`
+(`ItoFormulaAdaptedDrift`), assumes rather than constructs a `natFiltration`-adapted version
+`M` of the Itô integral of `δ` with every path continuous; it is not used to derive the
+constant-coefficient case here. For the process the library constructs, the pathwise formula
+for adapted coefficients is `ItoFormulaAdapted.ito_formula_adapted`.
 -/
 
 @[expose] public section
@@ -57,7 +60,8 @@ integrated Itô–drift identity needs):
 
   `𝔼[∫₀ᵀ g(s, ω) ds] = ∫₀ᵀ 𝔼[g(s, ·)] ds`
 
-for `g` bounded on `[0, T] × Ω` with every `ω`-path continuous. Proof shape: pathwise Riemann
+for `g` with measurable sections, every `ω`-path continuous, and `|g s ω| ≤ C` for all `s`
+and `ω`. Proof shape: pathwise Riemann
 sums (`tendsto_riemann_continuous` — deterministic, applied per `ω` and to the deterministic
 mean function `s ↦ 𝔼[g s]`) + dominated convergence (dominator `C·T`) for the expectation of
 the limit. No product measure, no Tonelli — boundedness makes both DCTs one-liners. -/
@@ -171,8 +175,8 @@ theorem expectation_pathIntegral_eq {w : ℝ≥0 → Ω → ℝ}
   exact (tendsto_nhds_unique hdet' hdct).symm
 
 /-- **The integrated Itô–drift identity, constant-coefficient case.** For the
-constant-coefficient Itô process `X_t = X₀ + b·t + σ·B_t` and `f ∈ C³` with bounded first
-three derivatives,
+constant-coefficient Itô process `X_t = X₀ + b·t + σ·B_t` and `f` three times differentiable
+with `f'`, `f''`, `f'''` bounded,
 
   `𝔼[f(X_T)] = 𝔼[f(X₀ + b·0 + σ·B₀)] + ∫₀ᵀ 𝔼[f'(X_s)·b + ½·f''(X_s)·σ²] ds`.
 
@@ -180,8 +184,8 @@ Route: `ito_formula_itoProcess` (the pathwise a.e. Itô formula) gives
 `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ g(s,·) ds` with the stochastic term the genuine
 Itô integral of `σ·f'(X_·)`; integrating kills the stochastic term by centering
 (`integral_itoIntegralCLM_T`) and interchanges the drift integral with the expectation by
-`expectation_pathIntegral_eq`. The `C³`-with-bounded-derivatives class instantiates the
-exponential-growth hypotheses of `ito_formula_itoProcess` at `λ = 0`. -/
+`expectation_pathIntegral_eq`. The derivative bounds instantiate the exponential-growth
+hypotheses of `ito_formula_itoProcess` at `λ = 0`. -/
 theorem ito_drift_expectation_identity
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)

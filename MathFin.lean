@@ -217,9 +217,9 @@ import MathFin.Foundations.ItoFormulaLocalized
 import MathFin.Foundations.ItoFormulaItoProcess
 import MathFin.Foundations.ItoFormulaGBM
 import MathFin.Foundations.ItoDriftExpectation
--- The integrated Itô–drift identity for adapted coefficients (the general bounded-adapted
--- case of ItoDriftExpectation: the expectation form of Itô's formula along
--- `X_t = c + ∫β + M`)
+-- The integrated Itô–drift identity for adapted coefficients along `X_t = c + ∫β + M`,
+-- conditional on a hypothesized adapted, path-continuous version `M` of the Itô integral
+-- (the library does not construct one for general δ)
 import MathFin.Foundations.ItoFormulaAdaptedDrift
 -- Cross-horizon consistency of the CLM Itô integral: one pinned `M` (`hMeq`) represents
 -- the CLM integral at every horizon `τ ≤ T` (band-transfer kernel + freeze law)

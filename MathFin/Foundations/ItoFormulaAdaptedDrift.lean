@@ -21,29 +21,38 @@ public import MathFin.Foundations.GaussianMoments
 
 /-! # The integrated Itô–drift identity for adapted coefficients
 
-The general bounded-adapted case of the integrated Itô–drift identity — the expectation form
-of Itô's formula for a genuine Itô process with random coefficients,
+The bounded-adapted case of the integrated Itô–drift identity — the expectation form of
+Itô's formula along an Itô process with random coefficients,
 
   `𝔼[f(X_T)] = 𝔼[f(X_0)] + ∫₀ᵀ (𝔼[f'(X_s)·β_s] + ½·𝔼[f''(X_s)·δ_s²]) ds`,
 
-for `X_t = c + ∫₀ᵗ β_s ds + M_t` with `β, δ` bounded adapted path-continuous, `M` an
-adapted version of the Itô integral of `δ` on `[0, T]` (`itoProcessCLM` at the σ-realization
-`processToLp δ`), and `f ∈ C³` with bounded first three derivatives. This is the *adapted*
-completion of `ItoDriftExpectation` (the constant-coefficient case).
+for `β, δ` bounded, `natFiltration`-adapted and path-continuous, and `f` three times
+differentiable with `f'`, `f''`, `f'''` bounded. `M` and `X` are hypotheses: a `natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every
+`t ≥ 0` (`hMeq`, the process values of `itoProcessCLM` at the σ-realization `processToLp δ`),
+and an `X` with `X t = c + ∫₀ᵗ β_s ds + M t` (`hXrel`) whose every path is continuous
+(`hXcont`), which forces every path of `M` to be continuous.
 
-Route: the per-path discrete Itô formula (`DiscreteIto.discrete_ito_formula`) at the grid
+That is a conditional theorem: no lemma in the library supplies such an `M` for general `δ`.
+`exists_continuous_modification_itoProcess` is continuous only almost surely, and the
+everywhere-continuous modification `exists_continuous_localMartingale_modification` is adapted
+only to the augmented filtration `augFiltration`. For the process the library does construct,
+the pathwise formula is `ItoFormulaAdapted.ito_formula_adapted`. The constant-coefficient case
+is `ItoDriftExpectation`, proved there separately.
+
+Route: the per-path discrete Itô formula (`MathFin.discrete_ito_formula`) at the grid
 values of `X`, integrated over `Ω`; the first-order martingale terms die exactly
 (`mul_trueIncr_expect_eq_zero`, the martingale property of the adapted Itô integral
 transferred along the a.e. `hMeq`); the drift block converges by pathwise Riemann–Stieltjes
 sums + DCT + the Fubini interchange (`driftBlock_tendsto`); the quadratic block converges by
 the summed weighted increment isometry (`quadraticSqSum_tendsto_uncond`, discharged from its
 conditional form by the step-approximant `L²` convergence `deltaStepLp_tendsto`); the
-drift² corrections die at `O(mesh)` (`quadDriftSqSum_tendsto`), the drift–martingale cross
-corrections at `O(√mesh)` (`quadCrossSum_tendsto`), and the Taylor remainder by the cubic
-bound + the third-moment estimate (`taylorRemainderSum_tendsto`, `trueIncr_pow3_le`).
+drift² corrections (`quadDriftSqSum_tendsto`), the drift–martingale cross corrections
+(`quadCrossSum_tendsto`) and the Taylor remainder (the cubic bound + the third-moment
+estimate, `taylorRemainderSum_tendsto`, `trueIncr_pow3_le`) tend to `0` — the proofs bound
+them by `O(mesh)`, `O(√mesh)` and `O(√mesh)`; only the limits are stated.
 
 Main result: `MathFin.itoDrift_expectation_identity_adapted`. Supporting layers, bottom-up:
-`bandIntegral_slice`/`crossTerminal_isometry` (the isometry foundations; the Fubini interchange
+`bandIntegral_slice` (the band-to-slice conversion; the Fubini interchange
 `expectation_pathIntegral_eq` comes from `ItoDriftExpectation`), `incrementEnergy` (the
 increment-energy law), `deltaStepLp`/`deltaStepLp_tendsto` (the step approximants), the per-cell
 weighted isometry (`weightedCellSq_step`, `clm_band_energy`, `stepIncr_stepCLM_ae`), the gap
@@ -55,21 +64,24 @@ block, the two quadratic corrections and the Taylor-remainder convergence.
 ## Result
 
 Headline: `itoDrift_expectation_identity_adapted` — the integrated Itô–drift identity
-stated above, for bounded adapted path-continuous coefficients. Public supporting layers
-(all `MathFin.*`):
+stated above, for bounded adapted path-continuous coefficients, under the hypotheses on `M`
+and `X` above. Public supporting layers (all `MathFin.*`):
 
 * foundations: `integral_mul_condExp_eq`, `memLp_M`, `incrementEnergy` (the increment
   isometry), `weightedCellSq_step` (the per-cell weighted isometry), the step approximants
   `deltaStepLp` / `deltaStepLp_tendsto`;
 * convergence blocks: `driftBlock_tendsto` (with the drift primitive `driftPrim`,
-  `driftPrim_adapted`, `driftPrim_continuous`, `driftSum_expect_tendsto`,
-  `driftOscSum_tendsto`), `quadraticSqSum_tendsto` / `quadraticSqSum_tendsto_uncond`
+  `driftPrim_adapted`, `driftSum_expect_tendsto`), `quadraticSqSum_tendsto` /
+  `quadraticSqSum_tendsto_uncond`
   (via `gapSum_le`), the exact martingale kill `mul_trueIncr_expect_eq_zero`, the
   Taylor bound `taylorRemainderSum_tendsto` (`trueIncr_pow3_le`, `trueIncr_pow4_le`,
   `trueIncr_pow4_integrable`), and the dying corrections `quadDriftSqSum_tendsto` /
   `quadCrossSum_tendsto`.
 
-The deterministic-coefficient case and the Fubini interchange are `ito_drift_expectation_identity`
+Also public, and not used by the headline: `driftPrim_continuous`, `driftOscSum_tendsto`,
+`driftPath_add`, `abs_driftPath_sub_le`, `frozenRiemann_tendsto`.
+
+The constant-coefficient case and the Fubini interchange are `ito_drift_expectation_identity`
 and `expectation_pathIntegral_eq` in `ItoDriftExpectation`.
 
 Everything else in the file is `private` scaffolding.
@@ -96,29 +108,26 @@ private theorem sum_telescope (a : ℕ → ℝ) (n : ℕ) :
 
 /-! ### Stage 2 — the bounded *adapted* coefficients (`β`, `δ` random)
 
-The integrated Itô–drift identity for a genuine Itô process with random adapted coefficients.
-The data: a pre-Brownian motion `B` (with measurable sections and continuous paths), bounded
-adapted path-continuous `β, δ`, and `M` — a path-continuous adapted *version* of the Itô
-integral of `δ` on `[0, T]` (`∀ t, M t =ᵐ (δ●B)_t`, the process-values of
-`ItoIntegralProcessGeneral.itoProcessCLM` at the σ-realization `processToLp δ`). The process
-under test is defined from the data by
+The integrated Itô–drift identity for an Itô process with random adapted coefficients.
+The data: a pre-Brownian motion `B` with measurable sections (path continuity of `B` is not
+assumed), bounded adapted path-continuous `β, δ`, and, as hypotheses, `M` and `X` are hypotheses: a `natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every
+`t ≥ 0` (`hMeq`, the process values of `itoProcessCLM` at the σ-realization `processToLp δ`),
+and an `X` with `X t = c + ∫₀ᵗ β_s ds + M t` (`hXrel`) whose every path is continuous
+(`hXcont`), which forces every path of `M` to be continuous.
+No lemma in the library supplies such an `M` for general `δ` (see the module docstring).
 
-  `X_t := X₀ + ∫₀ᵗ β_s ds + M_t`,
-
-so its paths are continuous and `ΔX` over a cell splits into the drift increment plus the
-martingale increment. The proof is the partition/Taylor skeleton of `ItoFormulaC2` at the
-path `k ↦ X_{tₖ}` (`DiscreteIto.discrete_ito_formula` — an exact per-path identity), with the
-three terms dispatched by: pathwise Riemann convergence (drift), the stack's weighted
-quadratic variation at the adapted weight `f''(X)·δ²` plus an `L¹` cell-correction
-(martingale-square), and a cubic-moment bound (Taylor remainder). Taking expectations turns
+`ΔX` over a cell splits into the drift increment plus the martingale increment. The proof is
+the partition/Taylor skeleton of `ItoFormulaC2` at the path `k ↦ X_{tₖ}`
+(`MathFin.discrete_ito_formula` — an exact per-path identity), with the three terms
+dispatched by: pathwise Riemann sums (drift), the summed weighted increment isometry at the
+adapted weight `f''(X)` (martingale square), and a cubic-moment bound (Taylor remainder). Taking expectations turns
 the pathwise identity into the integrated one; the drift integral crosses the expectation by
 the stage-1 Fubini lemma `expectation_pathIntegral_eq`.
 
-The per-cell moment facts (`E[(M_v−M_u)²]`, `E[(M_v−M_u)(B_v−B_u)]`) come from the
-martingale property of `M` (inherited a.e. from `itoProcessCLM`), the time-indexed Itô
-isometry `itoProcessCLM_norm_sq`, and the terminal cross-isometry `crossTerminal_isometry`
-(polarization of `itoIntegralCLM_T_norm`) — no pathwise statement about `(δ●B)_t` is needed,
-so the modification a.e.-friction never enters. -/
+The per-cell second moments `E[(M_v−M_u)²]` come from the martingale property of `M`
+(inherited a.e. from `itoProcessCLM`) and the time-indexed Itô isometry
+`itoProcessCLM_norm_sq`. The blocks use `M` through `hMeq` and `hMadap`; path continuity
+enters through the hypothesis `hXcont`. -/
 
 section Adapted
 
@@ -383,21 +392,17 @@ private theorem bandIntegral_slice (ψ : ℝ≥0 → Ω → ℝ)
 /-! ### Stages 3–5 — the weighted increment isometry, the third-moment bound, and the
 assembly of the adapted drift identity
 
-The data (per the designed route): a pre-Brownian `B` with measurable sections; bounded
-adapted path-continuous `β, δ`; and `M` — a path-continuous strongly-adapted *version* of
-the Itô integral of `δ` on `[0,T]` (`M t =ᵐ (δ●B)_t`, the CLM process values of the
-σ-realization `processToLp δ`). The Itô process under test is *defined* (not hypothesized)
-by `X t ω := X₀ + ∫₀ᵗ β_s ds + M t ω`, so its paths are continuous by construction.
+The data: a pre-Brownian `B` with measurable sections; bounded adapted path-continuous
+`β, δ`; and the hypothesized `M` — a `natFiltration`-strongly-adapted *version* of the Itô
+integral of `δ` (`M t =ᵐ (δ●B)_t` for every `t`, the CLM process values of the σ-realization
+`processToLp δ`). The process under test, `X t = c + ∫₀ᵗ β_s ds + M t`, is likewise a
+hypothesis (`hXrel`), and its path continuity is assumed (`hXcont`).
 
-* `driftPath` / `itoProcX` — the data section: path continuity, strong adaptedness and
-  `L²`-boundedness of the constructed process;
 * `integral_mul_condExp_eq` — the expectation pull-out `𝔼[h · g] = 𝔼[h · 𝔼[g | 𝓕]]`;
 * `incrementEnergy` — the unweighted increment isometry `𝔼[(M_v − M_u)²] = ∫_{(u,v]} δ² d(trim)`
   (`= ∫_u^v 𝔼[δ_s²] ds`), by the martingale pull-out `𝔼[M_u M_v] = 𝔼[M_u²]` plus the
-  time-indexed isometry `itoProcessCLM_norm_sq` and the stage-2 `bandIntegral_slice`. No
-  pathwise statement about the modification `M` is used anywhere — only its a.e. agreement
-  with the CLM process, which makes the whole stage-3/4/5 build immune to the
-  version-selection friction. -/
+  time-indexed isometry `itoProcessCLM_norm_sq` and the stage-2 `bandIntegral_slice`. It
+  uses `M` only through `hMeq` and the adaptedness `hMadap`. -/
 
 end Adapted
 
@@ -541,8 +546,8 @@ by the martingale pull-out `𝔼[M_u M_v] = 𝔼[M_u²]` (the Itô integral is a
 `𝓕_u`-martingale and `M_u` is `𝓕_u`-measurable), read the two second moments as
 band energies by the time-indexed isometry `itoProcessCLM_norm_sq`, split the nested
 bands `(0,u]` ⊔ `(u,v]` = `(0,v]`, and convert the band to the slice integral by the
-stage-2 `bandIntegral_slice`. No pathwise statement about the modification `M` is
-used anywhere — only its a.e. agreement with the CLM process. -/
+stage-2 `bandIntegral_slice`. It uses `M` only through its a.e. agreement with the CLM
+process (`hMeq`) and its adaptedness (`hMadap`). -/
 theorem incrementEnergy {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
     ∫ ω, (M v ω - M u ω) ^ 2 ∂μ
       = ∫ s in Set.Ioc u v, (∫ ω, δ s ω * δ s ω ∂μ)
@@ -680,7 +685,7 @@ theorem incrementEnergy {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
 
 /-! #### Stage 3 — the weighted increment isometry via left-endpoint step approximants
 
-The designed route: for the left-endpoint step approximant `δⁿ` of `δ` on the uniform
+The route: for the left-endpoint step approximant `δⁿ` of `δ` on the uniform
 partition, the per-cell increment of the approximant integral is the single-rectangle
 integral `δ(tₖ)·ΔBₖ`, so the weighted second-moment identity is independence algebra
 (`integral_adapted_mul_increment_sq`); the passage `n → ∞` is the `L²`-contraction
@@ -746,9 +751,9 @@ theorem deltaStepLp_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measu
 end AdaptedData
 
 /-! #### Stage 4 — the weighted increment isometry (per-cell step identification, the
-`L¹` gap decay, and the summed isometry)
+gap decay, and the summed isometry)
 
-The route (per the dispatch-3 design): for the left-endpoint step approximant `δⁿ` of `δ`
+The route: for the left-endpoint step approximant `δⁿ` of `δ`
 on the uniform partition, the per-cell increment of the approximant process is the single
 rectangle `δ(tₖ)·ΔBₖ` (min-algebra on `itoSimpleProcess_apply`), so the weighted
 second-moment identity on the approximant is the independence isometry kernel
@@ -982,7 +987,7 @@ private theorem clm_band_energy {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownian
 
 end StageFour
 
-/-! #### Stage 4 (headline) — the per-cell weighted identity, the `L¹` gap decay, and the
+/-! #### Stage 4 (headline) — the per-cell weighted identity, the gap decay, and the
 summed weighted increment isometry -/
 
 section StageFourB
@@ -1143,7 +1148,7 @@ theorem weightedCellSq_step {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal
 
 end StageFourB
 
-/-! #### Stage 4 (headline) — the `L¹` gap decay, the summed weighted increment isometry,
+/-! #### Stage 4 (headline) — the gap decay, the summed weighted increment isometry,
 and the convergence of the quadratic block -/
 
 section StageFourC
@@ -1283,13 +1288,11 @@ private theorem trueIncr_sq_le {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
 set_option maxHeartbeats 1600000 in
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- **The convergence of the quadratic block** (the summed weighted increment isometry,
-conditional on the per-partition `L¹` gap decay): if the weighted second-moment sum along
-the uniform partition differs from the frozen rectangle sum by at most
-`2·|C_w|·|D_δ|·√T·‖φ − δⁿ‖_{L²(trim)}` — the per-cell Cauchy–Schwarz pairing of the error
-increment against the cell energy, each factor bounded via `clm_band_energy`,
-`trueIncr_sq_le` and `stepIncrSq_le`, and the cell bands paired by
-`Finset.sum`-Cauchy–Schwarz against `deltaStepLp_tendsto` — then the sum converges to the
-quadratic block `∫₀ᵀ 𝔼[w·δ²] ds`. -/
+conditional on a gap bound): if for some null sequence `r` the weighted second-moment sum
+along the uniform partition differs from the frozen rectangle sum by at most
+`2·|C_w|·|D_δ|·√T·r n` for `n > 0` (`gapSum_le` supplies one, with
+`r n = ‖φ − δⁿ‖_{L²(trim)}`), then the sum converges to the quadratic block
+`∫₀ᵀ 𝔼[w·δ²] ds`. -/
 theorem quadraticSqSum_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
     (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
@@ -1413,7 +1416,7 @@ theorem quadraticSqSum_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Me
 
 end StageFourC
 
-/-! #### Stage 5a — the `L¹` gap decay, unconditional
+/-! #### Stage 5a — the gap decay, unconditional
 
 The per-cell Cauchy–Schwarz pairing of the error increment `δεₖ = ΔMₖ − δ(tₖ)·ΔBₖ`
 against the cell energy. The error increment is the band increment of the CLM process of
@@ -1563,8 +1566,7 @@ private theorem weighted_sq_le_of_congr {f g w : Ω → ℝ} {C E : ℝ}
 
 include hB hMadap hMeq in
 /-- **Weighted error energy**: the second moment of `w·δεₖ` is at most `C_w²` cell-band
-energies of the integrand error (`|w| ≤ C_w` pointwise, the error increment paired with the
-band energy through `errorIncr_sq_eq_band`). -/
+energies of the integrand error (`|w| ≤ C_w` pointwise). -/
 private theorem weightedErrorIncr_sq_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
     (hwm : Measurable[natFiltration hBmeas (unifPart T n k)] w)
     (hwb : ∀ ω, |w ω| ≤ Cw) :
@@ -1645,8 +1647,8 @@ private theorem sqrtIntegral_sq_add_le {a b : Ω → ℝ}
     _ = Real.sqrt (∫ ω, a ω ^ 2 ∂μ) + Real.sqrt (∫ ω, b ω ^ 2 ∂μ) :=
         Real.sqrt_sq (add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _))
 
-/-- **Per-cell gap bound**: the `L¹` distance over one cell between the weighted
-true-increment square and the weighted rectangle square — the Cauchy–Schwarz pairing of the
+/-- **Per-cell gap bound**: the absolute difference over one cell between the expectations
+of the weighted true-increment square and of the weighted rectangle square — the Cauchy–Schwarz pairing of the
 error increment `δεₖ` against the cell energy `ΔMₖ + δ(tₖ)ΔBₖ`, each factor bounded by the
 weighted error energy (`weightedErrorIncr_sq_le`) and the `2·|D_δ|·√cell` cell energy
 (`trueIncr_sq_le` + the rectangle second moment). -/
@@ -1894,7 +1896,8 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
             ∂(trimMeasure_T (μ := μ) T hBmeas)) := by ring
 
 /-- **The summed gap bound** (the `hgap` witness of `quadraticSqSum_tendsto`, made
-unconditional): the summed per-cell `L¹` gap is at most `2·|C_w|·|D_δ|·√T` times the `L²`
+unconditional): the absolute difference between the summed weighted second moments and
+the frozen rectangle sum is at most `2·|C_w|·|D_δ|·√T` times the `L²`
 norm of the integrand error `φ − δⁿ` — per-cell Cauchy–Schwarz (`cellGap_le`), then
 finite-sum Cauchy–Schwarz against the cell lengths (telescoping to `T`) and the summed band
 energies of the error class (telescoping to `‖φ − δⁿ‖²` via `uniform_band_split` and the
@@ -3296,21 +3299,20 @@ theorem trueIncr_pow3_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
 
 end StageFiveB
 
-/-! #### Stage 5c — the adapted assembly
+/-! #### Stage 5c — the martingale kill
 
-The integrated Itô–drift identity for the Itô process `X_t = X₀ + ∫₀ᵗ β + M_t` with
-bounded adapted path-continuous `β, δ`. Route: the per-path discrete Itô formula
+Toward the integrated Itô–drift identity for `X_t = c + ∫₀ᵗ β + M_t` (`hXrel`) with bounded
+adapted path-continuous `β, δ` and the hypothesized `M`. Route of the assembly: the per-path discrete Itô formula
 (`MathFin.discrete_ito_formula`) at the grid values of `X`, integrated over `Ω`; the
 first-order martingale terms die **exactly** (the martingale-kill lemma
 `mul_trueIncr_expect_eq_zero` below — the discrete-assembly replacement for "the
 stochastic integral has zero mean"); the drift block is the pathwise left-endpoint
-Riemann sum (`tendsto_riemann_continuous` + DCT + the stage-1 Fubini
-`expectation_pathIntegral_eq`, with the cell-oscillation comparison
-`∫cell β ↔ β(tₖ)·cell`); the quadratic block is `quadraticSqSum_tendsto_uncond` at the
+Riemann–Stieltjes sum (uniform continuity of `f'∘X` along each path + DCT + the stage-1
+Fubini `expectation_pathIntegral_eq`); the quadratic block is `quadraticSqSum_tendsto_uncond` at the
 weight `f″∘X` plus the `O(mesh)` drift corrections (`𝔼|ΔM·driftIncr| ≤ 2D_βD_δ·cell^{3/2}`,
 `𝔼[driftIncr²] ≤ (D_β·cell)²`, both summed to `O(√mesh)`, `O(mesh)`); the Taylor
 remainder dies by `abs_discreteTaylorRemainder_le` + `trueIncr_pow3_le`
-(`|𝔼[Rₙ]| ≤ C₃·8·(D_β³T·mesh² + √3·D_δ³·T·√mesh) → 0`). -/
+(`taylorRemainderSum_tendsto`). -/
 
 section StageFiveC
 
@@ -3400,20 +3402,18 @@ end StageFiveC
 
 /-! #### Stage 5d — the adapted assembly (`itoDrift_expectation_identity_adapted`)
 
-The integrated Itô–drift identity for the Itô process `X_t = c + ∫₀ᵗ β + M_t` with
-bounded adapted path-continuous `β, δ` and `M` a path-continuous adapted version of the
-Itô integral of `δ` on `[0, T]`:
+The integrated Itô–drift identity for `X_t = c + ∫₀ᵗ β + M_t` with bounded adapted
+path-continuous `β, δ`, under the hypotheses on `M` and `X` of the module docstring:
 
   `𝔼[f(X_T)] = 𝔼[f(X_0)] + ∫₀ᵀ 𝔼[f'(X_s)·β_s + ½·f''(X_s)·δ_s²] ds`,
 
-for `f ∈ C³` with bounded first three derivatives. Route: the per-path discrete Itô
-formula (`MathFin.discrete_ito_formula`) at the grid values of `X`, integrated over `Ω`;
-the first-order martingale terms die exactly (`mul_trueIncr_expect_eq_zero`); the drift
-block converges by pathwise Riemann sums + per-path uniform continuity of `β` + DCT
-(`driftBlock_tendsto`); the quadratic block converges by `quadraticSqSum_tendsto_uncond`
-at the weight `f''∘X`, with the drift–martingale cross terms `O(√mesh)`
-(`quadCrossSum_tendsto`) and the drift² corrections `O(mesh)`
-(`quadDriftSqSum_tendsto`); the Taylor remainder dies by
+for `f` three times differentiable with `f'`, `f''`, `f'''` bounded. Route: the per-path
+discrete Itô formula (`MathFin.discrete_ito_formula`) at the grid values of `X`, integrated
+over `Ω`; the first-order martingale terms die exactly (`mul_trueIncr_expect_eq_zero`); the
+drift block converges by pathwise Riemann–Stieltjes sums (uniform continuity of `f'∘X` along
+each path) + DCT (`driftBlock_tendsto`); the quadratic block converges by `quadraticSqSum_tendsto_uncond`
+at the weight `f''∘X`, with the drift–martingale cross terms (`quadCrossSum_tendsto`)
+and the drift² corrections (`quadDriftSqSum_tendsto`) tending to `0`; the Taylor remainder dies by
 `abs_discreteTaylorRemainder_le` + `trueIncr_pow3_le` (`taylorRemainderSum_tendsto`).
 The two drift integrals cross the expectation by the stage-1 Fubini lemma
 `expectation_pathIntegral_eq`. -/
@@ -3470,9 +3470,9 @@ filtration at `t`. Route: it is the pointwise limit of the left-endpoint Riemann
 (`tendsto_riemann_continuous`, applied per path), each of which is `natFiltration`-measurable
 (finitely many grid values, each adapted at an earlier time via the filtration monotonicity),
 and measurability is closed under sequential `liminf` (`Measurable.liminf` +
-`Filter.Tendsto.liminf_eq`). This is the one genuinely new measurability fact of stage 5d:
-the time-integral of adapted coefficients is adapted, because the natural filtration is
-closed under pointwise limits. -/
+`Filter.Tendsto.liminf_eq`): the time-integral of adapted coefficients is adapted, because
+the natural filtration is closed under pointwise limits (compare
+`AdaptedDrift.stronglyMeasurable_driftPath`). -/
 theorem driftPrim_adapted {β : ℝ≥0 → Ω → ℝ}
     (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
@@ -3630,7 +3630,7 @@ private theorem continuous_jointMeanAbsDiff {β : ℝ≥0 → Ω → ℝ}
 omit hB hδadap hδcont hδbdd hMadap hMeq in
 /-- **The drift-cell oscillation sum dies**: the summed mean-oscillation of `β` over the
 uniform cells, `∑_{k<n} ∫_{cellₖ} 𝔼|β_s − β_{tₖ}| ds`, tends to `0` as the mesh `T/n → 0`.
-This is the analytic engine of the drift block's cell comparison.
+Not used by the headline, whose drift block goes through `driftSum_expect_tendsto`.
 
 Route: the joint mean function `(s, u) ↦ 𝔼|β s − β u|` is continuous
 (`continuous_jointMeanAbsDiff`), hence uniformly continuous on the compact square `[0,T]²`
@@ -4320,9 +4320,10 @@ theorem driftBlock_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω →
   rw [← hEq]
   exact hB
 
-/-! #### Stage 5c — the dying blocks of the assembly
+/-! #### Stage 5e — the dying blocks of the assembly
 
-Three corollary convergences consumed by `itoDrift_expectation_identity_adapted`:
+Three convergences consumed by `itoDrift_expectation_identity_adapted`; each statement gives
+only the limit `0`, and the bounds below are what the proofs establish:
 
 * `quadDriftSqSum_tendsto` — the drift² corrections `O(mesh)`:
   `∑ₖ |𝔼[g (X tₖ)·(Δ(driftPrim β))ₖ²]| ≤ 2·C₂·D_β²·T²/(n+1) → 0`;
@@ -5281,16 +5282,16 @@ private theorem remainderCell_integrable {n : ℕ} (hn : 0 < n) {k : ℕ} (hk : 
 
 
 set_option maxHeartbeats 1600000 in
-/-- **The integrated Itô–drift identity for adapted coefficients** (stage 5d, the assembly
-of the whole stage-3/4/5 program). For the Itô process
+/-- **The integrated Itô–drift identity for adapted coefficients**, conditional on the
+process `M`. For `β, δ` bounded, `natFiltration`-adapted and path-continuous, a hypothesized
+`natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every `t` (`hMeq`), and a hypothesized
+`X` with `X_t = c + ∫₀ᵗ β_s ds + M_t` (`hXrel`, the `driftPrim β` decomposition) and every
+path continuous (`hXcont`, which forces every path of `M` to be continuous), and `f` three
+times differentiable with `f'`, `f''`, `f'''` bounded,
 
-  `X_t = c + ∫₀ᵗ β_s ds + M_t`  (the `driftPrim β` decomposition; `β, δ` bounded adapted
-  path-continuous, `M` an adapted version of the Itô integral of `δ` on `[0, T]`, `X`
-  path-continuous)
+  `𝔼[f(X_T)] = 𝔼[f(X_0)] + ∫₀ᵀ (𝔼[f'(X_s)·β_s] + ½·𝔼[f''(X_s)·δ_s²]) ds`.
 
-and `f ∈ C³` with bounded first three derivatives,
-
-  `𝔼[f(X_T)] = 𝔼[f(X_0)] + ∫₀ᵀ 𝔼[f'(X_s)·β_s] ds + ½·∫₀ᵀ 𝔼[f''(X_s)·δ_s²] ds`.
+No lemma in the library supplies such an `M` for general `δ` (see the module docstring).
 
 Route: the per-path discrete Itô formula (`MathFin.discrete_ito_formula`) at the grid
 values of `X`, integrated over `Ω`; the first-order martingale terms die exactly
@@ -5376,7 +5377,7 @@ theorem itoDrift_expectation_identity_adapted
       _ ≤ |f 0| + C1 * (|c| + |Db| * ((t : ℝ) + 1) + |M t ω|) :=
           add_le_add le_rfl (mul_le_mul_of_nonneg_left harg hC1)
       _ = (|f 0| + C1 * (|c| + |Db| * ((t : ℝ) + 1))) + C1 * |M t ω| := by ring
-  -- the five block convergences (all landed instruments)
+  -- the five block convergences
   have hA : Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
       ∫ ω, f' (X (unifPart T n k) ω)
         * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ∂μ)
