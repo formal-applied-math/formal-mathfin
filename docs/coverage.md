@@ -32,11 +32,13 @@ Two entries added, `mf-cir-bond-loading-riccati` and `mf-cir-bond-level-loading`
 Corpus 535 → 537.
 
 `FixedIncome/CIRRiccati.lean`, in the affine form `P(0,T) = exp(A(T) − B(T)·r₀)`: with
-`γ = √(κ² + 2σ²)`, the closed form `B(T) = 2(e^{γT} − 1)/((γ + κ)(e^{γT} − 1) + 2γ)` satisfies
-`B(0) = 0` and `B' = 1 − κB − ½σ²B²` at every `T`, for `κ² + 2σ² > 0`, and
-`A(T) = (2κθ/σ²)·log(2γe^{(κ+γ)T/2}/D(T))` satisfies `A(0) = 0` and `A' = −κθB`, for `σ ≠ 0`.
-This parallels `vasicekDeterministic_solves_ODE`. Only these equations are proved; the bond price
-needs the affine (Feynman–Kac) framework.
+`γ = √(κ² + 2σ²)` and `D(T) = (γ + κ)(e^{γT} − 1) + 2γ`, the closed form `B(T) = 2(e^{γT} − 1)/D(T)`
+satisfies `B(0) = 0` and `B' = 1 − κB − ½σ²B²` at every `T`, for `κ² + 2σ² > 0`
+(`hasDerivAt_cirBondB`), and `A(T) = (2κθ/σ²)·log(2γe^{(κ+γ)T/2}/D(T))` satisfies `A(0) = 0` and
+`A' = −κθB`, for `σ ≠ 0` (`hasDerivAt_cirBondA`). `A` is the log of the factor that `vasicekBondA`
+calls `A`. Like `vasicekDeterministic_solves_ODE`, this checks a closed form against its equation;
+the Vasicek counterpart of `B` is `vasicekBondB`, which it equals at `σ = 0` (not yet stated). Only
+these equations are proved; the bond price needs the affine (Feynman–Kac) framework.
 
 ### The variance swap on one process, under one measure (2026-10-08)
 
