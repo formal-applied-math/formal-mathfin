@@ -30,6 +30,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Full history: tests/test_attribution.py reads who added each file.
+          fetch-depth: 0
 
       # Fail-fast values/honesty gates (stdlib + pytest, seconds): routing +
       # status declarations + module exposure (test_router), ledger rows

@@ -104,7 +104,15 @@ The CI pipeline runs `pytest tests/ -q` → `python3 -m tools.verify.ledger stat
   hidden invariant, a workaround for a specific Mathlib bug, behaviour that
   would surprise a reader). Identifiers should carry the *what*.
 - File headers follow Mathlib convention: copyright + license + authors +
-  short docstring + `## Result` section listing the public lemmas.
+  short docstring + `## Result` section listing the public lemmas. Put your
+  own name on both the `Copyright` and the `Authors:` line: the copyright to
+  your contribution is yours, and a header copied from a neighbouring module
+  carries someone else's name.
+- Commit under your own name. Contributions are merged with a merge commit,
+  never squashed, so your commits reach `main` as you wrote them and the
+  history credits you. If your git name differs from the one in your headers,
+  add a line to `.mailmap`. Add yourself to the Contributors list in
+  `README.md` in your first pull request (CI checks it).
 - Match the surrounding code's tactic style. `field_simp; ring` for
   algebraic close-outs. `bs_identity` for BS-family derivations. See
   `docs/patterns.md` for the distilled pattern catalogue.

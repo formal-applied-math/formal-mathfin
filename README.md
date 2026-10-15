@@ -248,6 +248,23 @@ Contributions are welcome. [`CONTRIBUTING.md`](CONTRIBUTING.md) explains how to 
 [good first issue](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 are the usual starting point.
 
+## Contributors
+
+Raphael Coelho maintains the library, with contributions from:
+
+- [Godstime Aburu](https://github.com/BboyGT): the issue-label taxonomy.
+- [Alfredo Garcia](https://github.com/oxarbitrage): Glosten–Milgrom adverse selection and a drift
+  term in the Itô-process price.
+- [Robert Martin](https://github.com/robertmartin8): log-convexity of the American put exercise
+  boundary.
+- [Aleksey Salkutsan](https://github.com/kernelpanic888): forward rate agreements and downside
+  performance metrics.
+- [Mert Unsal](https://github.com/mertunsall): the Black–Scholes charm.
+- [Yang Ye](https://github.com/leafyoung): the integrated Itô–drift identity, Hull–White
+  calibration, a Monte Carlo pricer, Cox credit, CMS rates and curve bootstrapping.
+
+Each module's header names its authors.
+
 ## Citation
 
 ```bibtex
