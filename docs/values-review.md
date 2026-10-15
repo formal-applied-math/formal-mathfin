@@ -125,6 +125,45 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
+
+Scope: `FixedIncome/CIRRiccati` by Alfredo Garcia (@oxarbitrage), merged with its two commits
+intact, and its two `full` entries, `mf-cir-bond-loading-riccati` and `mf-cir-bond-level-loading`.
+CI ran green on the pull request, and `build.yml` ran on the merged tree. The module is 125 lines,
+so one reader went through it.
+
+### Standing first pass: prose against statement
+
+No findings. The module docstring, the four docstrings, both descriptions and both scopes say what
+the Lean proves: the two equations, `B(0) = A(0) = 0`, the hypotheses (`κ² + 2σ² > 0` for `B`,
+`σ ≠ 0` for `A`), and that the bond price `𝔼[exp(−∫₀ᵀ r_s ds)]` is not derived. The two reductions
+the docstrings name hold: with `x = e^{γT} − 1`, `D² − 2κxD − 2σ²x² = (γ² − κ² − 2σ²)x² + 4γ²(x + 1)
+= 4γ²e^{γT}`, and `(κ + γ)D/2 − (γ + κ)γe^{γT} = (κ² − γ²)x/2 = −σ²x`.
+
+### Upgrades executed
+
+- The copyright line of `CIRRiccati` named the maintainer, copied from a neighbouring header, and so
+  did `PricePathDrift`'s from #228. Both now name their author, which `tests/test_attribution.py`
+  checks.
+
+### Lens gradients
+
+- **Coherence.** Exemplar: the loadings are stated in the `exp(A − B·r₀)` form of the affine system
+  of #63 (`b₀ = κθ`, `b₁ = −κ`, `a₀ = 0`, `a₁ = σ²`), so CIR is ready to be an instance. Next: at
+  `σ = 0`, `cirBondB κ 0 = vasicekBondB κ` for every `κ`; stating it ties the two models' loadings.
+- **First principles.** The closed form is verified, not derived. Next: the substitution
+  `B = (2/σ²)·u'/u` turns the Riccati equation into `u'' + κu' − ½σ²u = 0`, whose characteristic
+  roots `(−κ ± γ)/2` are where `γ` and `D` come from.
+- **Architecture.** Next: #63 itself, with CIR as its first non-Gaussian instance.
+- **Idiomatic register.** `hF`'s `have := …; simpa using this` folds to `simpa using …`.
+
+### Ranked backlog
+
+1. CIR as an instance of the affine framework (#63).
+2. The `σ = 0` bridge to `vasicekBondB`.
+3. Derive the closed form from the linearizing substitution.
+4. The `hF` golf.
+
 ## 2026-10-14 — corpus 535 — #244: the Itô–drift expectation, Hull–White, Monte Carlo, Cox, CMS, bootstrapping
 
 Scope: the eight modules of #244 by Yang Ye (@leafyoung), merged with its three commits intact:
