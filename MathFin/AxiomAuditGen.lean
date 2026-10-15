@@ -545,14 +545,8 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.chooser_via_pcp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.chooser_via_pcp
 
-/-- info: 'MathFin.cirBondA_hasDerivAt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.cirBondA_hasDerivAt
-
 /-- info: 'MathFin.cirBondA_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.cirBondA_zero
-
-/-- info: 'MathFin.cirBondB_hasDerivAt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.cirBondB_hasDerivAt
 
 /-- info: 'MathFin.cirBondB_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.cirBondB_zero
@@ -955,6 +949,12 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.hasDerivAt_bsd2_K' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_bsd2_K
+
+/-- info: 'MathFin.hasDerivAt_cirBondA' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_cirBondA
+
+/-- info: 'MathFin.hasDerivAt_cirBondB' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_cirBondB
 
 /-- info: 'MathFin.hasDerivAt_deriv_bachelierV_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_deriv_bachelierV_S
