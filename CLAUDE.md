@@ -236,7 +236,8 @@ merged eight modules whose headers named the maintainer. The review saw it and l
   <noreply@anthropic.com>`, the cloud container's default identity. GitHub ignores `.mailmap`,
   so such a commit shows as Claude's on github.com. Before the first commit, set
   `git config user.name` and `user.email` to the user's (the maintainer's are
-  `Raphael Coelho <raphaelrrcoelho@gmail.com>`).
+  `Raphael Coelho <raphaelrrcoelho@gmail.com>`). The maintainer's commits carry no
+  `Co-Authored-By: Claude` trailer either (their call, 2026-10-15).
 
 ## Memory doctrine — this box is a 10 GB client, not a build server
 
