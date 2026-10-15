@@ -319,6 +319,8 @@ import MathFin.BlackScholes.DividendsGreeks
 import MathFin.BlackScholes.Forward
 import MathFin.BlackScholes.HigherGreeks
 import MathFin.BlackScholes.StrikeGreeks
+-- The forward smile: Dupire's ratio on a tilted smile surface (eq 10.8)
+import MathFin.BlackScholes.ForwardSmile
 import MathFin.BlackScholes.PutStrikeConvexity
 import MathFin.BlackScholes.StaticBounds
 import MathFin.BlackScholes.AsianInequality
