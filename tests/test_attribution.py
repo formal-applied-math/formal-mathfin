@@ -49,10 +49,6 @@ MAINTAINERS = frozenset({"Raphael Coelho"})
 #: Files whose contributor-written header names another copyright holder,
 #: pending the contributor's answer. Path → the open question.
 PENDING: dict[str, str] = {
-    "MathFin/Foundations/PricePathDrift.lean": (
-        "Alfredo Garcia wrote `Copyright (c) 2026 Raphael Coelho` with "
-        "`Authors: Alfredo Garcia`; asking which copyright holder they intend"
-    ),
     "MathFin/Performance/DownsideMetrics.lean": (
         "Aleksey Salkutsan wrote `Copyright (c) 2026 Raphael Coelho` with "
         "`Authors: Aleksey Salkutsan`; asking which copyright holder they intend"
