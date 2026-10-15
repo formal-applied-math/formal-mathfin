@@ -157,9 +157,9 @@ theorem finiteVaR_filtered_image_nonempty {ι : Type*} [Fintype ι] [Nonempty ι
   rw [hfull, hq.2]
   exact hα1
 
-/-- **Item 2 — attainment.** The infimum over ℝ collapses to a `Finset.inf'`
-over the loss *values* `Finset.image L univ` that carry `q`-mass ≥ α (the
-memo's "Finset.inf"; `Finset.inf'` because ℝ carries no order bot). Every VaR
+/-- **Attainment.** The infimum over ℝ collapses to a `Finset.inf'`
+over the loss *values* `Finset.image L univ` that carry `q`-mass ≥ α (a
+"Finset.inf"; `Finset.inf'` because ℝ carries no order bot). Every VaR
 at a finite law is attained at a loss value. -/
 theorem finiteVaR_eq_value_inf {ι : Type*} [Fintype ι] [Nonempty ι] {q L : ι → ℝ}
     (hq : q ∈ stdSimplex ℝ ι) {α : ℝ} (hα0 : 0 < α) (hα1 : α ≤ 1) :
