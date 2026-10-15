@@ -1315,16 +1315,16 @@
     "mf-cir-bond-level-loading": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-15",
-      "elapsed_s": 5.3,
-      "input_hash": "d2ed4c2d6d97d2151e4c0ae9b54643838ac9d35982515c9c0911b5cadb700e3c",
-      "verified_at_commit": "618d173"
+      "elapsed_s": 4.3,
+      "input_hash": "d75deb99a81d2b31bee1118d0c62ef2e79922e0140f32b9ec490fd4771fbfb1a",
+      "verified_at_commit": "ce69512"
     },
     "mf-cir-bond-loading-riccati": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-15",
-      "elapsed_s": 4.6,
-      "input_hash": "15ecf3214789d6fb1ac0e2443bf6fd6d62fc70613c3b2cf585d3b413d4620866",
-      "verified_at_commit": "618d173"
+      "elapsed_s": 5.8,
+      "input_hash": "5f74a3aa2f3600f3a07a9cdd04171d3f267ea1d476b1f056c5a972e527bb9d5e",
+      "verified_at_commit": "ce69512"
     },
     "mf-cml-decomposition-unique": {
       "benchmark_file": "mathematical_finance.json",
