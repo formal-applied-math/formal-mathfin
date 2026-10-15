@@ -1312,6 +1312,20 @@
       "input_hash": "7e690e63f549b13508e49fb8a56cef749e3ffa55ae6baed1c4a57250e6989c22",
       "verified_at_commit": "fdfecac"
     },
+    "mf-cir-bond-level-loading": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-14",
+      "elapsed_s": 4.4,
+      "input_hash": "1c6a6a42b82a92c6bf3026d298e6cb7aa13efb8228cbbd19fb67ff1a1f6d4a76",
+      "verified_at_commit": "55a3c4f"
+    },
+    "mf-cir-bond-loading-riccati": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-14",
+      "elapsed_s": 35.3,
+      "input_hash": "b8aa6c65e4771d916b622cf5273deaef4f44648dccb9a8cd53eef8f0476217a4",
+      "verified_at_commit": "55a3c4f"
+    },
     "mf-cml-decomposition-unique": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-02",
