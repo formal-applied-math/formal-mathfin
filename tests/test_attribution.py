@@ -129,6 +129,15 @@ def header_holders(source: str) -> tuple[set[str], set[str]]:
     )
 
 
+def _source(ref: str, path: str) -> str | None:
+    """The file at `ref`; at `HEAD`, the working copy, so a fixed header counts before
+    it is committed."""
+    if ref != "HEAD":
+        return _git("show", f"{ref}:{path}")
+    file = REPO_ROOT / path
+    return file.read_text(encoding="utf-8") if file.is_file() else None
+
+
 def misattributed(ref: str = "HEAD") -> dict[str, str]:
     """Contributor-added `MathFin/` files whose header does not name the contributor."""
     added_by = first_authors(ref)
@@ -138,7 +147,10 @@ def misattributed(ref: str = "HEAD") -> dict[str, str]:
         who = added_by.get(path)
         if not path.endswith(".lean") or who is None or _is_maintainer(who):
             continue
-        holders, authors = header_holders(_git("show", f"{ref}:{path}"))
+        source = _source(ref, path)
+        if source is None:
+            continue
+        holders, authors = header_holders(source)
         missing = [line for line, names in (("Copyright", holders), ("Authors", authors))
                    if who not in names]
         if missing:
