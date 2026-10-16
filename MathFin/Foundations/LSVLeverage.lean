@@ -377,9 +377,9 @@ private theorem cointoss_posterior_limit_aux {F σ_lo σ_hi : ℝ} (hF : 0 < F) 
     exact (cointoss_posterior_eq hlo hσhi hK).symm)
 
 /-- **Upper wing limit (Ex. 11.2's table, `K → ∞`):** the posterior weight on the wide
-branch tends to `1` — the chapter's `0.96` at `K = 160`, as a limit statement. The
-log-density ratio is a downward parabola in `ln(K/F)`, so the branch densities separate
-exponentially in the wing. -/
+branch tends to `1` — the qualitative content behind the chapter's `0.96` at `K = 160`
+(the finite-strike decimal itself is not proved). The log-density ratio is a downward
+parabola in `ln(K/F)`, so the branch densities separate exponentially in the wing. -/
 theorem cointoss_posterior_wing_limit_atTop {F σ_lo σ_hi : ℝ} (hF : 0 < F) (hlo : 0 < σ_lo)
     (hhi : σ_lo < σ_hi) :
     Tendsto (cointossPostHi F σ_lo σ_hi) atTop (𝓝 1) := by
@@ -389,8 +389,9 @@ theorem cointoss_posterior_wing_limit_atTop {F σ_lo σ_hi : ℝ} (hF : 0 < F) (
     (eventually_gt_atTop 0)
 
 /-- **Lower wing limit (Ex. 11.2's table, `K → 0⁺`):** the posterior weight on the wide
-branch tends to `1` in the lower wing as well — the chapter's `0.98` at `K = 60`. Same
-parabola, read at `ln(K/F) → −∞`. -/
+branch tends to `1` in the lower wing as well — the qualitative content behind the
+chapter's `0.98` at `K = 60` (the decimal itself is not proved). Same parabola, read
+at `ln(K/F) → −∞`. -/
 theorem cointoss_posterior_wing_limit_atZero {F σ_lo σ_hi : ℝ} (hF : 0 < F) (hlo : 0 < σ_lo)
     (hhi : σ_lo < σ_hi) :
     Tendsto (cointossPostHi F σ_lo σ_hi) (𝓝[>] 0) (𝓝 1) := by
