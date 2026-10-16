@@ -133,7 +133,7 @@ theorem finiteVaR_eq_of_forall {ι : Type*} [Fintype ι] {q L : ι → ℝ} {α 
     finiteVaR q L α = v₀ := by
   have hge : ∀ x ∈ {x | ∑ i ∈ Finset.univ.filter (fun i => L i ≤ x), q i ≥ α}, v₀ ≤ x := by
     intro x hx
-    simp only [Set.mem_setOf_eq] at hx
+    simp only [Set.mem_ofPred_eq] at hx
     by_contra h
     linarith [hbelow x (by linarith), hx]
   refine le_antisymm ?_ (le_csInf ⟨v₀, hmem⟩ hge)
@@ -178,7 +178,7 @@ theorem finiteVaR_eq_value_inf {ι : Type*} [Fintype ι] [Nonempty ι] {q L : ι
       ∃ v ∈ (Finset.univ.image L).filter
         (fun v => ∑ i ∈ Finset.univ.filter (fun i => L i ≤ v), q i ≥ α), v ≤ x := by
     intro x hx
-    simp only [Set.mem_setOf_eq] at hx
+    simp only [Set.mem_ofPred_eq] at hx
     have hIx : (Finset.univ.filter (fun i => L i ≤ x)).Nonempty := by
       by_contra he
       rw [Finset.not_nonempty_iff_eq_empty] at he
@@ -356,10 +356,11 @@ private lemma joint_half1_tail (x : ℝ) :
   by_cases h50 : (50:ℝ) ≤ x
   · by_cases h0 : (0:ℝ) ≤ x
     · have hf : Finset.univ.filter (fun p => halfL₁ p ≤ x) = Finset.univ := by
-        ext p
+        refine Finset.eq_univ_of_forall fun p => Finset.mem_filter.2 ⟨Finset.mem_univ p, ?_⟩
         rcases p with ⟨a, b⟩
-        rcases a <;> simp only [Finset.mem_filter, Finset.mem_univ, true_and, halfL₁]
-          <;> simp [h50, h0]
+        rcases a
+        · exact h0
+        · exact h50
       rw [hf, jointQ_mem_simplex.2]
       simp only [if_pos h50, if_pos h0]; norm_num
     · exact absurd (by linarith : (0:ℝ) ≤ x) h0
@@ -377,10 +378,11 @@ private lemma joint_half2_tail (x : ℝ) :
   by_cases h50 : (50:ℝ) ≤ x
   · by_cases h0 : (0:ℝ) ≤ x
     · have hf : Finset.univ.filter (fun p => halfL₂ p ≤ x) = Finset.univ := by
-        ext p
+        refine Finset.eq_univ_of_forall fun p => Finset.mem_filter.2 ⟨Finset.mem_univ p, ?_⟩
         rcases p with ⟨a, b⟩
-        rcases b <;> simp only [Finset.mem_filter, Finset.mem_univ, true_and, halfL₂]
-          <;> simp [h50, h0]
+        rcases b
+        · exact h0
+        · exact h50
       rw [hf, jointQ_mem_simplex.2]
       simp only [if_pos h50, if_pos h0]; norm_num
     · exact absurd (by linarith : (0:ℝ) ≤ x) h0
