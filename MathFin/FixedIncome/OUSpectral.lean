@@ -24,14 +24,13 @@ This file proves that polynomial core by induction on `Polynomial.hermite_succ`
 * the commutator identities that drive the induction (`ouGen_derivative`, `ouGen_X_mul`);
 * the Gaussian stationary no-flux condition of Calc 14.13 (`gaussianScore_ou`,
   `gaussianNoFlux_ou`) — the one-dimensional reversibility mechanism, at eval level;
-* the two-mode weighted-average gap inequality (`twoMode_rate_ge_gap`): the effective
+* the two-mode weighted-average gap inequality (`twoMode_rate_ge_slowest`): the effective
   decay rate of a two-mode mixture sits above the slowest rate, so a one-exponential fit
   overstates mean reversion.
 
 ## Status
 
-* **Proved here:** every declaration in this file, no proof holes; the `#print axioms`
-  lines show the standard three for every public theorem.
+* **Proved here:** every declaration in this file, no proof holes.
 * **Note on the commutator forms (stated in their general, true form):** the
   commutator identities, `ouGen_{κ,σ} p' = (ouGen_{κ,σ} p)' + κ • p'` and
   `ouGen_{κ,σ} (X*p) = X * ouGen_{κ,σ} p + σ² • p' - κ • (X*p)`, carry the κ and σ²
@@ -63,7 +62,7 @@ open Polynomial Filter Topology Matrix
 /-- **The OU generator as a map on real polynomials** (eq. 14.16's operator, OU case):
 `L p = -(κ • X) * p.derivative + (σ²/2) • p.derivative.derivative` — drift term `-κx·p'`
 plus diffusion term `(σ²/2)·p''`. Polynomial algebra only: on `Polynomial ℝ` this map is
-triangular degree by degree (the drift lowers degree by one, the diffusion by two) —
+triangular degree by degree (the drift preserves degree, the diffusion lowers it by two) —
 which is why the polynomial moment ladder sees its diagonal eigenvalues before any
 eigenvectors exist. -/
 noncomputable def ouGen (κ σ : ℝ) (p : Polynomial ℝ) : Polynomial ℝ :=
@@ -278,7 +277,7 @@ theorem hermiteReal_two : hermiteReal 2 = X * X - 1 := by
 
 /-- **The `n = 2` mechanism of Calc 14.14, verbatim.** With `f = (x/s)² - 1` (the
 evaluated `He_2(x/s)`), the generator output evaluates to `-(2κ) · f` — the drift term
-lowers the degree, the diffusion term supplies exactly the constant that closes the
+preserves the degree, the diffusion term supplies exactly the constant that closes the
 polynomial back on itself, and the arithmetic uses `σ²/s² = 2κ` (via the stationary-scale
 hypothesis). -/
 theorem ouGen_heigen_two {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2) (x : ℝ) :
@@ -336,17 +335,17 @@ average sits above the slowest rate `λ₁` for every `t` — so fitting a singl
 to a two-mode decay reads off a rate above `λ₁` and overstates mean reversion (the
 chapter's second, independent route to the ch. 20 estimation bias). -/
 
-/-- **The two-mode gap inequality.** For rates `0 ≤ λ₁ ≤ λ₂`, positive mode weights
-`0 < c₁, c₂` and any `t ≥ 0`, the effective decay rate of the two-mode mixture — the
+/-- **The two-mode gap inequality.** For rates `λ₁ ≤ λ₂`, positive mode weights
+`0 < c₁, c₂` and any `t`, the effective decay rate of the two-mode mixture — the
 weighted average of the rates, weighted by the surviving mode masses — is at least the
 slowest rate `λ₁`. The gap `λ₂ - λ₁` shows up as the excess carried by the fast mode;
 the chapter's one-exponential-fit warning is exactly this inequality read backwards. -/
-theorem twoMode_rate_ge_gap {l₁ l₂ c₁ c₂ t : ℝ} (_hl₁ : 0 ≤ l₁) (hl₂ : l₁ ≤ l₂)
-    (hc₁ : 0 < c₁) (hc₂ : 0 < c₂) (_ht : 0 ≤ t) :
+theorem twoMode_rate_ge_slowest {l₁ l₂ c₁ c₂ t : ℝ} (hl₂ : l₁ ≤ l₂)
+    (hc₁ : 0 < c₁) (hc₂ : 0 < c₂) :
     (l₁ * c₁ * Real.exp (-(l₁ * t)) + l₂ * c₂ * Real.exp (-(l₂ * t)))
       / (c₁ * Real.exp (-(l₁ * t)) + c₂ * Real.exp (-(l₂ * t))) ≥ l₁ := by
-  set E₁ := Real.exp (-(l₁ * t)) with hE₁
-  set E₂ := Real.exp (-(l₂ * t)) with hE₂
+  set E₁ := Real.exp (-(l₁ * t))
+  set E₂ := Real.exp (-(l₂ * t))
   have hE₁pos : 0 < E₁ := Real.exp_pos _
   have hE₂pos : 0 < E₂ := Real.exp_pos _
   have hD : (c₁ * E₁ + c₂ * E₂) ≠ 0 :=
@@ -442,4 +441,6 @@ theorem ouStationaryVariance_tendsto {k s : ℝ} (hk : 0 < k) :
     Real.tendsto_exp_atBot.comp hn
   have hsub := (tendsto_const_nhds (x := (1 : ℝ))).sub he
   simpa using (tendsto_const_nhds (x := s ^ 2 / k)).mul hsub
+
+end MathFin.OUSpectral
 
