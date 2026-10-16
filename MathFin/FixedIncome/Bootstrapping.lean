@@ -91,12 +91,14 @@ strips as `boot` instruments, under those standing conditions. The bracket
 condition stays a hypothesis: the root moves with the prefix, so which bracket
 is adequate depends on the factors the run produced, and the theorems ask for
 exactly that, at the step that uses it. The pointwise per-`n` error bound is the
-curve-level statement (the prefix stabilizes only under an extra
-constant-threshold hypothesis). Excluded: instruments whose *already-fixed* legs
-contain the new factor (forward-starting fixed/floating exchanges — the value is
-still affine in the bracket but with a slope of unknown sign, possibly zero, so
-no bracketing sign change is guaranteed), and joint solves for several new
-factors at once.
+curve-level statement (convergence of the factors as `n → ∞` would follow by
+induction on `i` when the hypotheses hold for every `n` and each threshold is
+continuous in the prefix — as for `fraChain` / `swapChain`, whose roots are
+affine in it — but is not formalized). Excluded: instruments whose
+*already-fixed* legs contain the new factor (forward-starting fixed/floating
+exchanges — the value is still affine in the bracket but with a slope of unknown
+sign, possibly zero, so no bracketing sign change is guaranteed), and joint
+solves for several new factors at once.
 
 Boundary: `MathFin/FixedIncome/YieldCurve.lean` owns the closed-form
 `bootstrap_solve*` names; this module owns the search-based bootstrap.
@@ -482,8 +484,9 @@ there: each step consumes only its own instrument's shape, on its own
 bracket, at the factors the run produced. The prefix itself depends on `n`,
 so the hypotheses are per-`n`: if they hold for every `n`, the gap to the
 prefix-dependent threshold tends to `0` (not stated as a theorem);
-convergence of the factors themselves is not stated either (the prefix
-stabilizes only under an extra constant-threshold hypothesis). -/
+convergence of the factors themselves is not stated either (it would follow
+by induction on `i` when, in addition, each `σ i` is continuous in the
+prefix). -/
 theorem boot_step_err (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ) (σ : ℕ → List ℝ → ℝ)
     (i n : ℕ)
     (hthr : ∀ x ∈ Set.Icc (lo i) (hi i),
