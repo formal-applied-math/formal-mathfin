@@ -26,8 +26,9 @@ sampling frequency (`rvExpectation_withNoise`, eq. 21.4) — and the square-root
 estimator of a nondegenerate volatility target is biased low, `E[σ̂] < σ`
 (`sqrtBias_oneSided` + `sqrtBias_absGaussianSample`, the sign of eq. 21.3). The drift
 estimator, by contrast, sees only the endpoints: its variance is `σ²/T` whatever the
-sampling frequency (`drift_se_endpoint_var`, Calc 21.4's flat column). The source
-prints this variance as `σ²·T`; that is a typo for `σ²/T`, and the Lean statement uses `σ²/T`.
+sampling frequency (`drift_se_endpoint_var`, Calc 21.4's flat column). Spec correction:
+the dispatch memo wrote this variance slot as `σ²·T`, contradicting its own `σ/√T`
+conclusion; the chapter-consistent and proved form is `σ²/T`.
 
 ## Scope
 
@@ -225,12 +226,9 @@ the noisy realised sum has expectation `σ²T + 2nη²` where `T = n·Δt`: each
 contributes its signal second moment plus **two** noise second moments, and all
 cross-terms vanish by independence + mean-zero (`IndepFun.integral_mul_eq_mul_integral`,
 the chapter's "noise, dependence, scale" obstruction, §21.3 p. 361). No probability
-hypothesis on `μ` is needed; under a finite measure the first-moment hypotheses
-`hdXi`/`hei` follow from the square-integrability ones (`L² ⊆ L¹`), but all are kept
-explicit. -/
+hypothesis on `μ` is needed; the integrability hypotheses are kept explicit. -/
 theorem rvExpectation_withNoise {n : ℕ} {dt T sigma eta : ℝ} (hT : T = (n : ℝ) * dt)
     (dX : ℕ → α → ℝ) (e : ℕ → α → ℝ)
-    (hdXm : ∀ i, Measurable (dX i)) (hem : ∀ j, Measurable (e j))
     (hdXi : ∀ i ∈ Finset.range n, Integrable (dX i) μ)
     (hei : ∀ j ∈ Finset.range (n + 1), Integrable (e j) μ)
     (hdXsq : ∀ i ∈ Finset.range n, Integrable (fun x ↦ dX i x * dX i x) μ)
@@ -295,16 +293,16 @@ theorem rvExpectation_withNoise {n : ℕ} {dt T sigma eta : ℝ} (hT : T = (n : 
     -- split into the six integrals
     have z1 : ∫ x : α, dX i x * e i x ∂μ = (∫ x, dX i x ∂μ) * (∫ x, e i x ∂μ) :=
       (h_cross i hi i (hmem _ (by omega))).integral_mul_eq_mul_integral
-        (hdXm i).aestronglyMeasurable (hem i).aestronglyMeasurable
+        (hdXi i hi).1 (hei i (hmem _ (by omega))).1
     have z2 : ∫ x : α, dX i x * e (i + 1) x ∂μ
         = (∫ x, dX i x ∂μ) * (∫ x, e (i + 1) x ∂μ) :=
       (h_cross i hi (i + 1) (hmem _ (by omega))).integral_mul_eq_mul_integral
-        (hdXm i).aestronglyMeasurable (hem (i + 1)).aestronglyMeasurable
+        (hdXi i hi).1 (hei (i + 1) (hmem _ (by omega))).1
     have z3 : ∫ x : α, e i x * e (i + 1) x ∂μ
         = (∫ x, e i x ∂μ) * (∫ x, e (i + 1) x ∂μ) :=
       (h_noise_indep i (hmem _ (by omega)) (i + 1) (hmem _ (by omega)) (by omega)
-        ).integral_mul_eq_mul_integral (hem i).aestronglyMeasurable
-        (hem (i + 1)).aestronglyMeasurable
+        ).integral_mul_eq_mul_integral (hei i (hmem _ (by omega))).1
+        (hei (i + 1) (hmem _ (by omega))).1
     rw [integral_sub i12345 c3', integral_sub i1234 c2', integral_add i123 c1',
       integral_add i12 i3, integral_add i1 i2,
       h_mom i hi, h_noise_sq i (hmem _ (by omega)), h_noise_sq (i + 1) (hmem _ (by omega)),
@@ -337,7 +335,7 @@ of a nondegenerate volatility is **biased low**. Strictness comes from the tange
 identity at `σ²`: `√y = (y + σ²)/(2σ) − (√y − σ)²/(2σ)`, whose remainder is strictly
 positive on `{Y ≠ σ²}`, a set of positive measure by nondegeneracy. The exact
 `√(2/n)·Γ((n+1)/2)/Γ(n/2)` constant of the chapter stays gated (Gamma machinery). -/
-theorem sqrtBias_oneSided {Y : α → ℝ} (hYm : Measurable Y) (hYnn : ∀ ω, 0 ≤ Y ω)
+theorem sqrtBias_oneSided {Y : α → ℝ} (hYnn : ∀ ω, 0 ≤ Y ω)
     {sigma : ℝ} (hsig : 0 < sigma) (hint : Integrable Y μ)
     (hmean : ∫ ω, Y ω ∂μ = sigma * sigma) (hnd : μ {ω | Y ω ≠ sigma * sigma} ≠ 0) :
     ∫ ω, Real.sqrt (Y ω) ∂μ < sigma := by
@@ -379,8 +377,8 @@ theorem sqrtBias_oneSided {Y : α → ℝ} (hYm : Measurable Y) (hYnn : ∀ ω, 
     ring
   have hintg : Integrable (fun ω ↦ c * (Real.sqrt (Y ω) - Real.sqrt (sigma * sigma)) ^ 2) μ := by
     refine Integrable.mono hintD ?_ ?_
-    · exact (by fun_prop : AEStronglyMeasurable
-        (fun ω ↦ c * (Real.sqrt (Y ω) - Real.sqrt (sigma * sigma)) ^ 2) μ)
+    · have := hint.1
+      fun_prop
     · filter_upwards [] with ω
       show |c * (Real.sqrt (Y ω) - Real.sqrt (sigma * sigma)) ^ 2|
           ≤ |2 * c * Y ω + 2 * c * (sigma * sigma)|
@@ -418,9 +416,7 @@ theorem sqrtBias_oneSided {Y : α → ℝ} (hYm : Measurable Y) (hYnn : ∀ ω, 
     have hlint0 : ∫⁻ ω, ENNReal.ofReal
         (c * (Real.sqrt (Y ω) - Real.sqrt (sigma * sigma)) ^ 2) ∂μ = 0 := by
       rw [← ofReal_integral_eq_lintegral_ofReal hintg hnn2, h0, ENNReal.ofReal_zero]
-    have hae := (lintegral_eq_zero_iff'
-      (by fun_prop : AEMeasurable (fun ω ↦ ENNReal.ofReal
-        (c * (Real.sqrt (Y ω) - Real.sqrt (sigma * sigma)) ^ 2)) μ)).mp hlint0
+    have hae := (lintegral_eq_zero_iff' hintg.1.aemeasurable.ennreal_ofReal).mp hlint0
     have hsub : {ω | Y ω ≠ sigma * sigma}
         ⊆ {ω | ¬(ENNReal.ofReal (c * (Real.sqrt (Y ω) - Real.sqrt (sigma * sigma)) ^ 2) = 0)} := by
       intro ω hω
@@ -444,7 +440,7 @@ theorem sqrtBias_absGaussianSample {v : ℝ≥0} (hv : v ≠ 0) :
     ∫ x, |x| ∂(gaussianReal 0 v) < Real.sqrt (v : ℝ) := by
   have hvpc : 0 < v := hv.bot_lt
   have hvpos : (0 : ℝ) < v := by exact_mod_cast hvpc
-  haveI : NullSingletonClass (gaussianReal 0 v) := nullSingletonClass_gaussianReal hv
+  have : NullSingletonClass (gaussianReal 0 v) := nullSingletonClass_gaussianReal hv
   have hsqrtpos : (0 : ℝ) < Real.sqrt v := Real.sqrt_pos.2 hvpos
   have hsqrtsq : Real.sqrt (v : ℝ) * Real.sqrt (v : ℝ) = (v : ℝ) :=
     Real.mul_self_sqrt (le_of_lt hvpos)
@@ -470,8 +466,7 @@ theorem sqrtBias_absGaussianSample {v : ℝ≥0} (hv : v ≠ 0) :
           rw [← abs_of_neg (not_le.mp hx0)]
           exact habsx
         show x = -Real.sqrt (v : ℝ)
-        rw [← hxneg]
-        ring
+        linarith
     refine measure_mono_null hsub ?_
     rw [measure_union_null (measure_singleton _) (measure_singleton _)]
   have hnd : (gaussianReal 0 v)
@@ -486,7 +481,7 @@ theorem sqrtBias_absGaussianSample {v : ℝ≥0} (hv : v ≠ 0) :
     rw [hcompl, measure_compl hmeas (measure_ne_top _ _), hsetzero, measure_univ]
     simp
   have hmain := sqrtBias_oneSided (μ := gaussianReal 0 v) (Y := fun x : ℝ ↦ x ^ 2)
-    (sigma := Real.sqrt (v : ℝ)) (by fun_prop) (fun _ ↦ sq_nonneg _) hsqrtpos
+    (sigma := Real.sqrt (v : ℝ)) (fun _ ↦ sq_nonneg _) hsqrtpos
     (@memLp_id_gaussianReal 0 v (2 : ℝ≥0)).integrable_sq
     (by rw [MathFin.integral_sq_gaussianReal v]; exact hsqrtsq.symm) hnd
   rw [show (fun x : ℝ ↦ |x|) = fun x : ℝ ↦ Real.sqrt (x ^ 2) from funext habs]
@@ -504,8 +499,7 @@ variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
 the endpoint drift estimator `(X_T − X_0)/T = μ + (σ/T)·B_T` has law `N(μ, σ²/T)` — an
 affine pushforward of the gaussianReal sample (`gaussianReal_const_mul` then
 `gaussianReal_const_add`, the `hasLaw_eval`-style route). The variance slot is `σ²/T`,
-giving the chapter's flat-in-`n` drift standard error `σ/√T` (p. 363); the source's
-`σ²·T` here is the typo noted in the module docstring. -/
+giving the chapter's flat-in-`n` drift standard error `σ/√T` (p. 363). -/
 theorem drift_se_endpoint_hasLaw {T : ℝ} (hT : 0 < T) (mu sigma : ℝ) {B : Ω → ℝ}
     (hB : HasLaw B (gaussianReal 0 T.toNNReal) P) :
     HasLaw (fun ω ↦ (mu * T + sigma * B ω) / T)
