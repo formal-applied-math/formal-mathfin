@@ -225,7 +225,7 @@ the observed increment is `ΔY_i = ΔX_i + (ε_{i+1} − ε_i)` (the chapter's `
 p. 366), the noisy realised sum has expectation `σ²T + 2nη²` where `T = n·Δt`: each
 increment contributes its signal second moment plus **two** noise second moments, and
 all cross-terms vanish by independence + mean-zero
-(`IndepFun.integral_mul_eq_mul_integral`, the chapter's "noise, dependence, scale"
+(`IndepFun.integral_mul_eq_mul_integral`, the chapter's "noise, dependence, and scale"
 obstruction, §21.3 p. 361). Only the independences the cross-terms use are assumed —
 each increment against its two noise draws, and adjacent noise draws pairwise — so iid
 noise independent of the signal is a special case. No probability hypothesis on `μ` is
@@ -317,8 +317,8 @@ section SqrtBias
 variable {α : Type*} [MeasurableSpace α] {μ : Measure α} [IsProbabilityMeasure μ]
 
 /-- **Eq. (21.3)'s sign: `E[σ̂] < σ`.** If `Y ≥ 0` is a nondegenerate target with
-`E[Y] = σ²` (the sample reading: `Y = RV/n`, the realised-variance average whose square
-root is the volatility estimator `σ̂ = √Y`), then `E[√Y] < σ` — the square-root estimator
+`E[Y] = σ²` (the sample reading: `Y = RV/T`, the noise-free annualised realised variance
+whose square root is the volatility estimator `σ̂ = √Y`), then `E[√Y] < σ` — the square-root estimator
 of a nondegenerate volatility is **biased low**. Strictness comes from the tangent-line
 identity at `σ²`: `√y = (y + σ²)/(2σ) − (√y − σ)²/(2σ)`, whose remainder is strictly
 positive on `{Y ≠ σ²}`, a set of positive measure by nondegeneracy. The exact
