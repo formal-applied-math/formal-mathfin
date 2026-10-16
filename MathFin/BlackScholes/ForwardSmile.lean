@@ -215,8 +215,8 @@ private theorem hasDerivAt_totalVar_t {σ ψ₁ T₀ ε k T : ℝ} (hS : 0 < T +
     ring
   have hsq : HasDerivAt (fun t : ℝ ↦ (σ + ε * ψ₁ * k * (Real.sqrt (t + T₀))⁻¹) ^ 2)
       (2 * (σ + ε * ψ₁ * k * (Real.sqrt (T + T₀))⁻¹)
-        * (ε * ψ₁ * k * (-(Real.sqrt (T + T₀))⁻¹ ^ 2 * (1 / (2 * Real.sqrt (T + T₀)))))) T := by
-    exact (hsigt.fun_pow 2).congr_deriv (by ring)
+        * (ε * ψ₁ * k * (-(Real.sqrt (T + T₀))⁻¹ ^ 2 * (1 / (2 * Real.sqrt (T + T₀)))))) T :=
+    (hsigt.fun_pow 2).congr_deriv (by ring)
   have hid : HasDerivAt (fun t : ℝ ↦ t) 1 T := hasDerivAt_id T
   have hmul := hsq.mul hid
   have hfun : (fun t : ℝ ↦ (σ + ε * ψ₁ * k * (Real.sqrt (t + T₀))⁻¹) ^ 2 * t)
@@ -673,8 +673,7 @@ private theorem hasDerivAt_smileN_k {σ ψ₁ T₀ ε T : ℝ} :
     ring
 
 /-- The `k`-chain of the Gatheral deformation `δ` at the money. -/
-private theorem hasDerivAt_smileDelta_k {σ ψ₁ T₀ ε T : ℝ} (hσ : 0 < σ) (hT : 0 < T)
-    (hS : 0 < T + T₀) :
+private theorem hasDerivAt_smileDelta_k {σ ψ₁ T₀ ε T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     HasDerivAt (fun k ↦ smileDelta σ ψ₁ T₀ ε k T) (smileDk σ ψ₁ T₀ ε T) 0 := by
   have hw0 : 0 < totalVar σ ψ₁ T₀ ε 0 T := by rw [totalVar_zero]; positivity
   have hw0ne := hw0.ne'
@@ -723,7 +722,7 @@ private theorem hasDerivAt_dupireRatio_k_zero {F σ ψ₁ T₀ ε T : ℝ} (hF :
   have hN : HasDerivAt (fun k ↦ smileN σ ψ₁ T₀ ε k T) (smileNk σ ψ₁ T₀ ε T) 0 :=
     hasDerivAt_smileN_k
   have hD : HasDerivAt (fun k ↦ smileDelta σ ψ₁ T₀ ε k T) (smileDk σ ψ₁ T₀ ε T) 0 :=
-    hasDerivAt_smileDelta_k hσ hT hS
+    hasDerivAt_smileDelta_k hσ hT
   have hD1 := hD.const_add 1
   have hQ := hN.div hD1 hD0ne
   refine hQ.congr_of_eventuallyEq ?_
@@ -785,8 +784,7 @@ private theorem hasDerivAt_one_add_smileDelta_eps {σ ψ₁ T₀ T : ℝ} :
 
 /-- The `ε`-chain of the ATM deformation slope `δ'(0; ε)`: tilt-linear part from the
 `−k·w_k/w` term; every other term is `O(ε²)` at the money. -/
-private theorem hasDerivAt_smileDk_eps {σ ψ₁ T₀ T : ℝ} (hσ : 0 < σ) (hT : 0 < T)
-    (hS : 0 < T + T₀) :
+private theorem hasDerivAt_smileDk_eps {σ ψ₁ T₀ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     HasDerivAt (fun ε ↦ smileDk σ ψ₁ T₀ ε T)
       (-(2 * σ * (ψ₁ / Real.sqrt (T + T₀)) * T / (σ ^ 2 * T))) 0 := by
   have hWne : σ ^ 2 * T ≠ 0 := mul_ne_zero (pow_ne_zero 2 hσ.ne') hT.ne'
@@ -833,7 +831,7 @@ private theorem hasDerivAt_slopeNum {σ ψ₁ T₀ T : ℝ} (hσ : 0 < σ) (hT :
     hasDerivAt_smileN_zero_eps
   have h4 : HasDerivAt (fun ε ↦ smileDk σ ψ₁ T₀ ε T)
       (-(2 * σ * (ψ₁ / Real.sqrt (T + T₀)) * T / (σ ^ 2 * T))) 0 :=
-    hasDerivAt_smileDk_eps hσ hT hS
+    hasDerivAt_smileDk_eps hσ hT
   have hcomb := (h1.mul h2).sub (h3.mul h4)
   refine (hcomb.congr_of_eventuallyEq ?_).congr_deriv ?_
   · filter_upwards with ε
@@ -956,9 +954,7 @@ theorem localSkew_tendsto (ψ₁ T₀ : ℝ) :
       ((tendsto_const_nhds (x := T₀)).mul hinv))
   have hM : Filter.Tendsto (fun T : ℝ ↦ Real.sqrt (1 - T₀ * (T + T₀)⁻¹)) Filter.atTop
       (nhds (1 : ℝ)) := by
-    have hc := (Real.continuous_sqrt.tendsto (1 : ℝ)).comp hM0
-    rw [Function.comp_def, Real.sqrt_one] at hc
-    exact hc
+    simpa using hM0.sqrt
   have hfin := (tendsto_const_nhds (x := ψ₁)).mul (hA.mul hM)
   rw [mul_one] at hfin
   rw [show ψ₁ * ((3 : ℝ) / 2) = (3 / 2) * ψ₁ from by ring] at hfin
