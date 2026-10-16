@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.Foundations.WienerIntegralGaussian
 public import MathFin.FixedIncome.VasicekBondPrice
+public import MathFin.FixedIncome.VasicekSDEGaussian
 
 /-!
 # Hull–White short rates: deterministic part, Gaussian law, affine bonds, calibration
@@ -60,8 +61,9 @@ reflection.
 
 ## Result
 
-Public definitions: `deterministic`, `kernel`, `kernelV`, `kernelLp`, `integratedRate`,
-`integratedMean`, `bondRate`, `bondA`, `theta`, `calibAlpha`.
+Public definitions: `deterministic`, `kernelV`, `integratedRate`,
+`integratedMean`, `bondRate`, `bondA`, `theta`, `calibAlpha` (the diffusion kernel
+is `vasicekKernel`/`vasicekKernelLp` of `VasicekSDEGaussian`, reused, not redefined).
 
 Public lemmas (all in `namespace MathFin.HullWhite`):
 
@@ -69,7 +71,7 @@ Public lemmas (all in `namespace MathFin.HullWhite`):
   `deterministic_const_closed_form`, `deterministic_const_tendsto`,
   `deterministic_add_exponential`, `deterministic_eq_of_solves_ODE`, `mean` —
   the deterministic part;
-* `kernel_memLp`, `kernel_integral_sq`, `integratedRate_hasLaw_gaussian` — the short
+* `integratedRate_hasLaw_gaussian` — the short
   rate's Gaussian law with the Vasicek variance;
 * `integral_exp_pos_const`, `integral_exp_neg_eq_bondB`, `beta_integral`,
   `integral_theta_B`, `integratedMean_eq` — the scalar-integral identities behind the
@@ -256,77 +258,30 @@ theorem mean (θ : ℝ → ℝ) (κ : ℝ) (α : ℝ → ℝ)
 
 /-! ### The short rate and its Gaussian law -/
 
-/-- The HW diffusion kernel `e^{−κ(t−u)}` — the deterministic integrand of the
-short rate's Wiener part `σ∫₀ᵗ e^{−κ(t−u)} dB_u`. -/
-noncomputable def kernel (κ t : ℝ) : ℝ → ℝ := fun u ↦ Real.exp (-(κ * (t - u)))
+/- The HW diffusion kernel `e^{−κ(t−u)}` — the deterministic integrand of the
+short rate's Wiener part `σ∫₀ᵗ e^{−κ(t−u)} dB_u` — is the Vasicek kernel
+`vasicekKernel` of `FixedIncome/VasicekSDEGaussian` verbatim, and is used through its
+`L²` element `vasicekKernelLp` there; nothing kernel-specific is redefined here. -/
 
-/-- The closed form `(1 − e^{−2κt})/(2κ)` of the kernel's squared `L²`-norm over
-`(0, t]`, `∫₀ᵗ e^{−2κ(t−u)} du`; it equals that integral for `κ ≠ 0`
-(`kernel_integral_sq`). The Vasicek variance factor `/2κ`. -/
+/-- The closed form `(1 − e^{−2κt})/(2κ)` of the Vasicek diffusion kernel's squared
+`L²`-norm over `(0, t]`, `∫₀ᵗ e^{−2κ(t−u)} du` (`vasicekKernel_integral_sq` in
+`VasicekSDEGaussian`); the Vasicek variance factor `/2κ`, named for the HW short
+rate's law (`integratedRate_hasLaw_gaussian`). -/
 noncomputable def kernelV (κ t : ℝ) : ℝ := (1 - Real.exp (-(2 * κ * t))) / (2 * κ)
 
-/-- The HW kernel is in `L²((0, t])`: on the support it lies in `(0, 1]` for
-`κ > 0` (mirrors `vasicekIntegratedKernel_memLp` with bound `1`). -/
-lemma kernel_memLp {κ : ℝ} (hκ : 0 < κ) (t : ℝ≥0) :
-    MemLp (kernel κ (t : ℝ)) 2 (volume.restrict (Set.Ioc (0 : ℝ) (t : ℝ))) := by
-  refine (memLp_top_of_bound (by unfold kernel; fun_prop) 1 ?_).mono_exponent le_top
-  refine (ae_restrict_iff' measurableSet_Ioc).mpr (ae_of_all _ ?_)
-  intro u hu
-  rw [kernel, Real.norm_eq_abs]
-  have htu : 0 ≤ (t : ℝ) - u := by linarith [hu.2]
-  rw [abs_of_nonneg (Real.exp_pos _).le]
-  exact Real.exp_le_one_iff.mpr (by nlinarith [mul_nonneg hκ.le htu])
-
-/-- The HW kernel as an element of `L²((0, t])`. -/
-noncomputable def kernelLp {κ : ℝ} (hκ : 0 < κ) (t : ℝ≥0) :
-    Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (t : ℝ))) :=
-  (kernel_memLp hκ t).toLp _
-
-/-- **The variance-fixing integral** (mirrors `vasicekIntegratedKernel_integral_sq`):
-`∫₀ᵗ e^{−2κ(t−u)} du = (1 − e^{−2κt})/(2κ)`, by the FTC with antiderivative
-`F(u) = e^{−2κ(t−u)}/(2κ)`. -/
-lemma kernel_integral_sq {κ : ℝ} (hκ : κ ≠ 0) (t : ℝ≥0) :
-    ∫ u in Set.Ioc (0 : ℝ) (t : ℝ), (kernel κ (t : ℝ) u) ^ 2 ∂volume
-      = kernelV κ (t : ℝ) := by
-  rw [← intervalIntegral.integral_of_le (by positivity : (0 : ℝ) ≤ (t : ℝ))]
-  have hderiv : ∀ u ∈ Set.uIcc (0 : ℝ) (t : ℝ),
-      HasDerivAt (fun u : ℝ ↦ Real.exp (-(2 * κ * ((t : ℝ) - u))) / (2 * κ))
-        ((kernel κ (t : ℝ) u) ^ 2) u := by
-    intro u _
-    have hsq : Real.exp (-(2 * κ * ((t : ℝ) - u)))
-        = (Real.exp (-(κ * ((t : ℝ) - u)))) ^ 2 := by
-      rw [pow_two, ← Real.exp_add]
-      congr 1
-      ring
-    have harg : HasDerivAt (fun u : ℝ ↦ -(2 * κ * ((t : ℝ) - u))) (2 * κ) u := by
-      have h : HasDerivAt (fun u : ℝ ↦ -(2 * κ * ((t : ℝ) - u))) (-(2 * κ * (-1))) u := by
-        apply HasDerivAt.neg
-        apply HasDerivAt.const_mul
-        simpa using (hasDerivAt_id u).const_sub (t : ℝ)
-      simpa using h
-    have hcomb := harg.exp.div_const (2 * κ)
-    have hval : Real.exp (-(2 * κ * ((t : ℝ) - u))) * (2 * κ) / (2 * κ)
-        = (kernel κ (t : ℝ) u) ^ 2 := by
-      rw [hsq, kernel]
-      field_simp
-    rw [hval] at hcomb
-    exact hcomb
-  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv
-    (by apply Continuous.intervalIntegrable; unfold kernel; fun_prop)]
-  simp only [sub_self, mul_zero, neg_zero, Real.exp_zero, sub_zero]
-  rw [kernelV]
-  ring
-
-/-- `∫₀ᵗ kernel² = kernelV` for the `L²`-representative (a.e. the honest kernel). -/
+/-- `∫₀ᵗ kernel² = kernelV` for the `L²`-representative (a.e. the honest kernel):
+the a.e.-congruence step that `VasicekSDEGaussian` performs inline in
+`vasicekShortRate_hasLaw_gaussian`, reconstructed here from that module's public
+pieces because the HW law is stated at the closed-form variance. -/
 private lemma kernelLp_integral_sq {κ : ℝ} (hκ : 0 < κ) (t : ℝ≥0) :
-    (∫ u in Set.Ioc (0 : ℝ) (t : ℝ), (kernelLp hκ t u) ^ 2 ∂volume)
+    (∫ u in Set.Ioc (0 : ℝ) (t : ℝ), (vasicekKernelLp κ hκ.le t u) ^ 2 ∂volume)
       = kernelV κ (t : ℝ) := by
-  rw [show (∫ u in Set.Ioc (0 : ℝ) (t : ℝ), (kernelLp hκ t u) ^ 2 ∂volume)
-        = ∫ u in Set.Ioc (0 : ℝ) (t : ℝ), (kernel κ (t : ℝ) u) ^ 2 ∂volume by
+  rw [show (∫ u in Set.Ioc (0 : ℝ) (t : ℝ), (vasicekKernelLp κ hκ.le t u) ^ 2 ∂volume)
+        = ∫ u in Set.Ioc (0 : ℝ) (t : ℝ), (vasicekKernel κ (t : ℝ) u) ^ 2 ∂volume by
       refine integral_congr_ae ?_
-      filter_upwards [(kernel_memLp hκ t).coeFn_toLp] with u hu
-      rw [kernelLp, hu]]
-  exact kernel_integral_sq hκ.ne' t
+      filter_upwards [(vasicekKernel_memLp κ hκ.le t).coeFn_toLp] with u hu
+      rw [vasicekKernelLp, hu]]
+  exact vasicekKernel_integral_sq κ hκ.ne' t
 
 /-- `kernelV ≥ 0` (an integral of a square). -/
 private lemma kernelV_nonneg {κ : ℝ} (hκ : 0 < κ) (t : ℝ≥0) :
@@ -335,23 +290,24 @@ private lemma kernelV_nonneg {κ : ℝ} (hκ : 0 < κ) (t : ℝ≥0) :
   exact integral_nonneg fun u ↦ sq_nonneg _
 
 /-- The centred diffusion law for the HW kernel: `σ∫₀ᵗ e^{−κ(t−u)} dB_u`'s core is
-centred Gaussian with variance `kernelV κ t` (mirrors the private
-`vasicekWienerLaw` of the template). -/
+centred Gaussian with variance `kernelV κ t` — the kernel being `vasicekKernelLp`
+reused, this is that module's inline step lifted to the HW variance name. -/
 private lemma kernelWienerLaw (hB : IsPreBrownianReal B μ) {κ : ℝ} (hκ : 0 < κ)
     (t : ℝ≥0) :
-    HasLaw (fun ω ↦ wienerIntegralLp B hB t (kernelLp hκ t) ω)
+    HasLaw (fun ω ↦ wienerIntegralLp B hB t (vasicekKernelLp κ hκ.le t) ω)
       (gaussianReal 0 (kernelV κ (t : ℝ)).toNNReal) μ := by
-  have h0 := wienerIntegralLp_hasLaw_gaussian hB t (kernelLp hκ t)
+  have h0 := wienerIntegralLp_hasLaw_gaussian hB t (vasicekKernelLp κ hκ.le t)
   rwa [kernelLp_integral_sq hκ t] at h0
 
 /-- **The HW short rate in Wiener representation** (the counterpart of the Vasicek
 short rate of `VasicekSDEGaussian`), defined as `r_t = α(t) + σ·∫₀ᵗ e^{−κ(t−u)} dB_u`
-with `α` the particular solution `deterministic θ κ r₀`. That it solves the HW SDE is
+with `α` the particular solution `deterministic θ κ r₀` and the diffusion kernel the
+Vasicek `vasicekKernelLp` reused verbatim. That it solves the HW SDE is
 the modelling bridge, not proved here. -/
 noncomputable def integratedRate (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ)
     (κ σ r₀ : ℝ) (hκ : 0 < κ) (t : ℝ≥0) (ω : Ω) : ℝ :=
   deterministic θ κ r₀ (t : ℝ)
-    + σ * (wienerIntegralLp B hB t (kernelLp hκ t) ω)
+    + σ * (wienerIntegralLp B hB t (vasicekKernelLp κ hκ.le t) ω)
 
 /-- **The HW short rate is Gaussian**: `r_t ~ N(α(t), σ²(1 − e^{−2κt})/(2κ))` —
 θ(t) shifted the mean and left the Vasicek variance untouched (the affine-map
