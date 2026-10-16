@@ -3,8 +3,10 @@ Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yang Ye
 -/
-import Mathlib
-import MathFin.Foundations.GaussianMoments
+module
+
+public import Mathlib
+public import MathFin.Foundations.GaussianMoments
 
 /-!
 # Estimation in practice: detection D-terms and realised-volatility bias
@@ -26,6 +28,8 @@ estimator of a nondegenerate volatility target is biased low, `E[σ̂] < σ`
 estimator, by contrast, sees only the endpoints: its variance is `σ²/T` whatever the
 sampling frequency (`drift_se_endpoint_var`, Calc 21.4's flat column).
 -/
+
+@[expose] public section
 
 open MeasureTheory ProbabilityTheory Real
 
