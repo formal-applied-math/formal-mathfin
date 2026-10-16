@@ -64,7 +64,9 @@ The module layers:
   spot deposit, anchored at the valuation-date factor `1`), and `swapChain`
   with `boot_reprices_swapChain` does the same for the spot-starting swap
   strip (fixed rate `K i` per maturity, last-coupon annuity over the prefix)
-  — both leaving only the per-step bracket condition as a hypothesis.
+  — both discharging every hypothesis of `boot_reprices_all` except the
+  per-step bracket condition, under the instrument layer's standing
+  conditions.
 * **Flat-curve capstone** — `fraBootstrap_flatCurve`: if the fixed rate
   equals the flat-curve forward rate, bisection from any positive bracket
   around the true later discount factor recovers it to within
@@ -76,24 +78,25 @@ step — `boot V c lo hi n i`, the factors the earlier steps produced — and, o
 that prefix, on the step's own bracket `[lo i, hi i]` (bisection evaluates the
 instrument nowhere else). Each step assumes only what it consumes: the
 instrument's threshold shape and affine identity at the run's actual earlier
-factors, and a bracket containing the root computed from them. The first two
-are exactly the facts the instrument layers provide at any prefix — the FRA by
-`fraValue_affine_of_newUnknown` + `fraThreshold` (under `δ ≠ 0`,
-`1 + δ·K > 0`, on a positive bracket), the known-schedule swap by
+factors, and a bracket containing the root computed from them. The first two are
+exactly the facts the instrument layers provide at any prefix — the FRA by
+`fraValue_affine_of_newUnknown` + `fraThreshold` (under `δ ≠ 0`, `1 + δ·K > 0`,
+on a positive bracket), the known-schedule swap by
 `payerSwapValue_affine_of_newUnknown` + `swapThreshold` (no slope condition),
 the last-coupon swap by `payerSwapValue_affine_lastCoupon` +
-`swapLastCouponThreshold` (under `1 + K·δ > 0`) — and `boot_reprices_fraChain`
-/ `boot_reprices_swapChain` discharge every hypothesis except the bracket
-condition for `fraChain` / `swapChain`, the FRA and swap strips as `boot`
-instruments. The bracket condition stays a hypothesis: the root moves with the
-prefix, so which bracket is adequate depends on the factors the run produced,
-and the theorems ask for exactly that, at the step that uses it. The
-pointwise per-`n` error bound is the curve-level statement (the prefix
-stabilizes only under an extra constant-threshold hypothesis). Excluded:
-instruments whose *already-fixed* legs contain the new factor
-(forward-starting fixed/floating exchanges — the value is still affine in the
-bracket but with a slope of unknown sign, possibly zero, so no bracketing sign
-change is guaranteed), and joint solves for several new factors at once.
+`swapLastCouponThreshold` (under `1 + K·δ > 0`) — and `boot_reprices_fraChain` /
+`boot_reprices_swapChain` discharge every hypothesis of `boot_reprices_all`
+except the bracket condition for `fraChain` / `swapChain`, the FRA and swap
+strips as `boot` instruments, under those standing conditions. The bracket
+condition stays a hypothesis: the root moves with the prefix, so which bracket
+is adequate depends on the factors the run produced, and the theorems ask for
+exactly that, at the step that uses it. The pointwise per-`n` error bound is the
+curve-level statement (the prefix stabilizes only under an extra
+constant-threshold hypothesis). Excluded: instruments whose *already-fixed* legs
+contain the new factor (forward-starting fixed/floating exchanges — the value is
+still affine in the bracket but with a slope of unknown sign, possibly zero, so
+no bracketing sign change is guaranteed), and joint solves for several new
+factors at once.
 
 Boundary: `MathFin/FixedIncome/YieldCurve.lean` owns the closed-form
 `bootstrap_solve*` names; this module owns the search-based bootstrap.
@@ -476,22 +479,19 @@ where `p` is the prefix the recursion actually feeds step `i` — the factors
 the earlier steps produced (`boot V c lo hi n i`), not an arbitrary list. The
 threshold hypothesis and the root-in-bracket condition are assumed exactly
 there: each step consumes only its own instrument's shape, on its own
-bracket, at the factors the run produced. Since `n` is arbitrary, the gap to
-the prefix-dependent threshold tends to `0`; convergence of the factors
-themselves is not stated (the prefix stabilizes only under an extra
-constant-threshold hypothesis). -/
+bracket, at the factors the run produced. The prefix itself depends on `n`,
+so the hypotheses are per-`n`: if they hold for every `n`, the gap to the
+prefix-dependent threshold tends to `0` (not stated as a theorem);
+convergence of the factors themselves is not stated either (the prefix
+stabilizes only under an extra constant-threshold hypothesis). -/
 theorem boot_step_err (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ) (σ : ℕ → List ℝ → ℝ)
     (i n : ℕ)
     (hthr : ∀ x ∈ Set.Icc (lo i) (hi i),
       -(V i (x :: boot V c lo hi n i)) < -(c i) ↔ x < σ i (boot V c lo hi n i))
     (hσ : σ i (boot V c lo hi n i) ∈ Set.Icc (lo i) (hi i)) :
     |(boot V c lo hi n (i + 1)).head (boot_succ_ne_nil V c lo hi n i)
-      - σ i (boot V c lo hi n i)| ≤ (hi i - lo i) / 2 ^ (n + 1) := by
-  have h := abs_bisectMid_sub_le
-    (f := fun x : ℝ ↦ -(V i (x :: boot V c lo hi n i))) (C := -(c i))
-    (lo := lo i) (hi := hi i) (σ := σ i (boot V c lo hi n i)) hthr hσ n
-  simp only [boot_succ, List.head_cons]
-  exact h
+      - σ i (boot V c lo hi n i)| ≤ (hi i - lo i) / 2 ^ (n + 1) :=
+  abs_bisectMid_sub_le hthr hσ n
 
 /-- **The bootstrap repricing theorem, at the fed-in prefix.** Given
 instrument `i`'s affine shape `V i (x :: p) = a i p − b i p · x` on the step's
@@ -499,14 +499,15 @@ own bracket (bisection evaluates the instrument only there), slope
 `b i p > 0`, and the root `(a i p − c i)/b i p` in the bracket — all at the
 prefix `p` the recursion feeds step `i` — the bootstrapped factor reprices
 instrument `i`'s quote up to the slope-weighted half-interval
-`b i p · (hi i − lo i)/2^{n+1}`. These are exactly the facts the instrument
-layers of this file provide at whatever prefix is fed in (FRA:
+`b i p · (hi i − lo i)/2^{n+1}`. The shape and slope are exactly the facts the
+instrument layers of this file provide at whatever prefix is fed in (FRA:
 `fraValue_affine_of_newUnknown` + `fraThreshold`; known-schedule swap:
 `payerSwapValue_affine_of_newUnknown` + `swapThreshold`; last-coupon swap:
 `payerSwapValue_affine_lastCoupon` + `swapLastCouponThreshold`), so the only
 run-dependent input left is the per-step bracket choice;
-`boot_reprices_fraChain` / `boot_reprices_swapChain` discharge everything but
-it end to end for the FRA and swap strips. -/
+`boot_reprices_fraChain` / `boot_reprices_swapChain` discharge every
+hypothesis but it for the FRA and swap strips, under the FRA / swap standing
+conditions. -/
 theorem boot_reprices_all (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ) (a b : ℕ → List ℝ → ℝ)
     (i n : ℕ) (hb : 0 < b i (boot V c lo hi n i))
     (hV : ∀ x ∈ Set.Icc (lo i) (hi i),
