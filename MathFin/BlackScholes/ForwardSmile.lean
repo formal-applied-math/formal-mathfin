@@ -186,14 +186,8 @@ private theorem hasDerivAt_smileSurface_k {σ ψ₁ T₀ ε T x : ℝ} :
 /-- `∂_k w = 2·σ̃·(ε·ψ₁/√(T+T₀))·T` — the `k`-chain of the total variance. -/
 private theorem hasDerivAt_totalVar_k {σ ψ₁ T₀ ε T x : ℝ} :
     HasDerivAt (fun y ↦ totalVar σ ψ₁ T₀ ε y T)
-      (2 * smileSurface σ ψ₁ T₀ ε x T * (ε * ψ₁ / Real.sqrt (T + T₀)) * T) x := by
-  have hu := hasDerivAt_smileSurface_k (σ := σ) (ψ₁ := ψ₁) (T₀ := T₀) (ε := ε) (T := T) (x := x)
-  have h2 : HasDerivAt (fun y ↦ smileSurface σ ψ₁ T₀ ε y T ^ 2)
-      (2 * smileSurface σ ψ₁ T₀ ε x T * (ε * ψ₁ / Real.sqrt (T + T₀))) x := by
-    have hcp := (hasDerivAt_pow 2 (smileSurface σ ψ₁ T₀ ε x T)).comp x hu
-    refine hcp.congr_deriv ?_
-    ring
-  exact h2.mul_const T
+      (2 * smileSurface σ ψ₁ T₀ ε x T * (ε * ψ₁ / Real.sqrt (T + T₀)) * T) x :=
+  ((hasDerivAt_smileSurface_k.fun_pow 2).mul_const T).congr_deriv (by ring)
 
 /-- `∂_T w = σ̃² − σ̃·(ε·ψ₁·k)·T/(T+T₀)^{3/2}` — the `T`-chain of the total
 variance (both `T`-channels of `w = σ̃²T` move: `σ̃` carries `√(T+T₀)` in the
@@ -205,8 +199,7 @@ private theorem hasDerivAt_totalVar_t {σ ψ₁ T₀ ε k T : ℝ} (hS : 0 < T +
   have hs : Real.sqrt (T + T₀) ≠ 0 := (Real.sqrt_pos.mpr hS).ne'
   have hT₀ne : T + T₀ ≠ 0 := by linarith
   have hssq : Real.sqrt (T + T₀) ^ 2 = T + T₀ := Real.sq_sqrt hS.le
-  have h1 : HasDerivAt (fun t : ℝ ↦ t + T₀) 1 T := by
-    simpa using (hasDerivAt_id T).add_const T₀
+  have h1 : HasDerivAt (fun t : ℝ ↦ t + T₀) 1 T := (hasDerivAt_id' T).add_const T₀
   have h2 : HasDerivAt (fun t : ℝ ↦ Real.sqrt (t + T₀)) (1 / (2 * Real.sqrt (T + T₀))) T :=
     h1.sqrt hT₀ne
   have hinv : HasDerivAt (fun t : ℝ ↦ (Real.sqrt (t + T₀))⁻¹)
@@ -223,9 +216,7 @@ private theorem hasDerivAt_totalVar_t {σ ψ₁ T₀ ε k T : ℝ} (hS : 0 < T +
   have hsq : HasDerivAt (fun t : ℝ ↦ (σ + ε * ψ₁ * k * (Real.sqrt (t + T₀))⁻¹) ^ 2)
       (2 * (σ + ε * ψ₁ * k * (Real.sqrt (T + T₀))⁻¹)
         * (ε * ψ₁ * k * (-(Real.sqrt (T + T₀))⁻¹ ^ 2 * (1 / (2 * Real.sqrt (T + T₀)))))) T := by
-    have hc := (hasDerivAt_pow 2 _).comp T hsigt
-    refine hc.congr_deriv ?_
-    ring
+    exact (hsigt.fun_pow 2).congr_deriv (by ring)
   have hid : HasDerivAt (fun t : ℝ ↦ t) 1 T := hasDerivAt_id T
   have hmul := hsq.mul hid
   have hfun : (fun t : ℝ ↦ (σ + ε * ψ₁ * k * (Real.sqrt (t + T₀))⁻¹) ^ 2 * t)
@@ -320,12 +311,8 @@ private theorem hasDerivAt_blackForm_w {k w : ℝ} (hw : 0 < w) :
   have hsq : Real.sqrt w ^ 2 = w := Real.sq_sqrt hw.le
   have hden : HasDerivAt (fun z : ℝ ↦ Real.sqrt z) (1 / (2 * Real.sqrt w)) w :=
     Real.hasDerivAt_sqrt hw.ne'
-  have hnP : HasDerivAt (fun z : ℝ ↦ -k + z / 2) (1 / 2) w := by
-    have h0 : HasDerivAt (fun z : ℝ ↦ z / 2 + -k) (1 / 2) w :=
-      ((hasDerivAt_id w).div_const 2).add_const (-k)
-    refine h0.congr_of_eventuallyEq ?_
-    filter_upwards with z
-    ring
+  have hnP : HasDerivAt (fun z : ℝ ↦ -k + z / 2) (1 / 2) w :=
+    ((hasDerivAt_id' w).div_const 2).const_add (-k)
   have hnM : HasDerivAt (fun z : ℝ ↦ -k - z / 2) (-(1 / 2)) w := by
     have h1 : HasDerivAt (fun z : ℝ ↦ z / 2) (1 / 2) w := (hasDerivAt_id w).div_const 2
     exact h1.const_sub (-k)
@@ -459,20 +446,8 @@ noncomputable def wSlope (σ ψ₁ T₀ ε T y : ℝ) : ℝ :=
 /-- Its chain: `w'' = 2·(εψ₁/√(T+T₀))²·T`, constant in `y`. -/
 private theorem hasDerivAt_wSlope {σ ψ₁ T₀ ε T k : ℝ} :
     HasDerivAt (fun y ↦ wSlope σ ψ₁ T₀ ε T y)
-      (2 * (ε * ψ₁ / Real.sqrt (T + T₀)) ^ 2 * T) k := by
-  have h1 : HasDerivAt (fun y : ℝ ↦ smileSurface σ ψ₁ T₀ ε y T)
-      (ε * ψ₁ / Real.sqrt (T + T₀)) k := hasDerivAt_smileSurface_k
-  have h2 : HasDerivAt (fun y : ℝ ↦
-      2 * T * (ε * ψ₁ / Real.sqrt (T + T₀)) * smileSurface σ ψ₁ T₀ ε y T)
-      (2 * T * (ε * ψ₁ / Real.sqrt (T + T₀)) * (ε * ψ₁ / Real.sqrt (T + T₀))) k :=
-    h1.const_mul _
-  have hfun : (fun y : ℝ ↦ wSlope σ ψ₁ T₀ ε T y)
-      = fun y ↦ 2 * T * (ε * ψ₁ / Real.sqrt (T + T₀)) * smileSurface σ ψ₁ T₀ ε y T := by
-    funext y
-    unfold wSlope
-    ring
-  exact (h2.congr_of_eventuallyEq (Filter.Eventually.of_forall (congrFun hfun))).congr_deriv
-    (by ring)
+      (2 * (ε * ψ₁ / Real.sqrt (T + T₀)) ^ 2 * T) k :=
+  (((hasDerivAt_smileSurface_k.const_mul 2).mul_const _).mul_const T).congr_deriv (by ring)
 
 /-! ## The second `k`-chain: `C_kk` and the Gatheral form of the ratio -/
 
@@ -749,9 +724,7 @@ private theorem hasDerivAt_dupireRatio_k_zero {F σ ψ₁ T₀ ε T : ℝ} (hF :
     hasDerivAt_smileN_k
   have hD : HasDerivAt (fun k ↦ smileDelta σ ψ₁ T₀ ε k T) (smileDk σ ψ₁ T₀ ε T) 0 :=
     hasDerivAt_smileDelta_k hσ hT hS
-  have hcone : HasDerivAt (fun k : ℝ ↦ (1 : ℝ)) 0 0 := hasDerivAt_const 0 (1 : ℝ)
-  have hD1 : HasDerivAt (fun k ↦ 1 + smileDelta σ ψ₁ T₀ ε k T) (smileDk σ ψ₁ T₀ ε T) 0 :=
-    (hcone.add hD).congr_deriv (by ring)
+  have hD1 := hD.const_add 1
   have hQ := hN.div hD1 hD0ne
   refine hQ.congr_of_eventuallyEq ?_
   filter_upwards [smileSurface_eventually_pos_k hS hst] with k hk
@@ -818,21 +791,11 @@ private theorem hasDerivAt_smileDk_eps {σ ψ₁ T₀ T : ℝ} (hσ : 0 < σ) (h
       (-(2 * σ * (ψ₁ / Real.sqrt (T + T₀)) * T / (σ ^ 2 * T))) 0 := by
   have hWne : σ ^ 2 * T ≠ 0 := mul_ne_zero (pow_ne_zero 2 hσ.ne') hT.ne'
   have hDENne : (4 * (σ ^ 2 * T) ^ 2) ^ 2 ≠ 0 := by positivity
-  have hM : HasDerivAt (fun ε ↦ 2 * σ * (ε * ψ₁ / Real.sqrt (T + T₀)) * T)
-      (2 * σ * (ψ₁ / Real.sqrt (T + T₀)) * T) 0 := by
-    have hcore := (hasDerivAt_id 0).const_mul (2 * σ * (ψ₁ / Real.sqrt (T + T₀)) * T)
-    refine (hcore.congr_of_eventuallyEq ?_).congr_deriv (by ring)
-    filter_upwards with ε
-    simp only [id_eq]
-    ring
-  have hM2 := hM.fun_pow 2
   have hid : HasDerivAt (fun ε ↦ ε * ψ₁ / Real.sqrt (T + T₀))
-      (ψ₁ / Real.sqrt (T + T₀)) 0 := by
-    have hcore := (hasDerivAt_id 0).const_mul (ψ₁ / Real.sqrt (T + T₀))
-    refine (hcore.congr_of_eventuallyEq ?_).congr_deriv (by ring)
-    filter_upwards with ε
-    simp only [id_eq]
-    ring
+      (ψ₁ / Real.sqrt (T + T₀)) 0 :=
+    (((hasDerivAt_id' 0).mul_const ψ₁).div_const _).congr_deriv (by ring)
+  have hM := (hid.const_mul (2 * σ)).mul_const T
+  have hM2 := hM.fun_pow 2
   have hq := hid.fun_pow 2
   have hq2 := (hq.const_mul 2).const_mul T
   have hW : HasDerivAt (fun _ : ℝ ↦ σ ^ 2 * T) 0 0 := hasDerivAt_const 0 (σ ^ 2 * T)
@@ -1000,9 +963,7 @@ theorem localSkew_tendsto (ψ₁ T₀ : ℝ) :
   rw [mul_one] at hfin
   rw [show ψ₁ * ((3 : ℝ) / 2) = (3 / 2) * ψ₁ from by ring] at hfin
   refine hfin.congr' ?_
-  filter_upwards [(Filter.tendsto_id (α := ℝ)).eventually_gt_atTop (-T₀),
-    (Filter.tendsto_id (α := ℝ)).eventually_ge_atTop 0] with T hT hT0
-  simp only [id_eq] at hT hT0
+  filter_upwards [Filter.eventually_gt_atTop (-T₀), Filter.eventually_ge_atTop 0] with T hT hT0
   have hne : T + T₀ ≠ 0 := by linarith
   have hpos : 0 < T + T₀ := by linarith
   have hinner : 1 - T₀ * (T + T₀)⁻¹ = T / (T + T₀) := by
@@ -1032,8 +993,7 @@ theorem forwardSkew_tendsto (ψ₁ T₀ : ℝ) :
   have hhalf := (tendsto_const_nhds (x := (1 / 2 : ℝ))).mul h
   rw [show (1 / 2 : ℝ) * ((3 / 2) * ψ₁) = (3 / 4) * ψ₁ from by ring] at hhalf
   refine hhalf.congr' ?_
-  filter_upwards [(Filter.tendsto_id (α := ℝ)).eventually_gt_atTop (-T₀)] with t ht
-  simp only [id_eq] at ht
+  filter_upwards [Filter.eventually_gt_atTop (-T₀)] with t ht
   have hpos : 0 < t + T₀ := by linarith
   field_simp [hpos.ne', (Real.sqrt_pos.mpr hpos).ne']
 
