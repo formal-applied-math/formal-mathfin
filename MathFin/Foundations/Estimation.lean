@@ -318,11 +318,12 @@ variable {α : Type*} [MeasurableSpace α] {μ : Measure α} [IsProbabilityMeasu
 
 /-- **Eq. (21.3)'s sign: `E[σ̂] < σ`.** If `Y ≥ 0` is a nondegenerate target with
 `E[Y] = σ²` (the sample reading: `Y = RV/T`, the noise-free annualised realised variance
-whose square root is the volatility estimator `σ̂ = √Y`), then `E[√Y] < σ` — the square-root estimator
-of a nondegenerate volatility is **biased low**. Strictness comes from the tangent-line
-identity at `σ²`: `√y = (y + σ²)/(2σ) − (√y − σ)²/(2σ)`, whose remainder is strictly
-positive on `{Y ≠ σ²}`, a set of positive measure by nondegeneracy. The exact
-`√(2/n)·Γ((n+1)/2)/Γ(n/2)` constant of the chapter stays gated (Gamma machinery). -/
+whose square root is the volatility estimator `σ̂ = √Y`), then `E[√Y] < σ` — the
+square-root estimator of a nondegenerate volatility is **biased low**. Strictness comes
+from the tangent-line identity at `σ²`: `√y = (y + σ²)/(2σ) − (√y − σ)²/(2σ)`, whose
+remainder is strictly positive on `{Y ≠ σ²}`, a set of positive measure by nondegeneracy.
+The exact `√(2/n)·Γ((n+1)/2)/Γ(n/2)` constant of the chapter stays gated (Gamma
+machinery). -/
 theorem sqrtBias_oneSided {Y : α → ℝ} (hYnn : ∀ ω, 0 ≤ Y ω)
     {sigma : ℝ} (hsig : 0 < sigma) (hint : Integrable Y μ)
     (hmean : ∫ ω, Y ω ∂μ = sigma * sigma) (hnd : μ {ω | Y ω ≠ sigma * sigma} ≠ 0) :
