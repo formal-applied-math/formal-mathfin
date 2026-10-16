@@ -108,6 +108,8 @@ average, and the exact α-window).
   α-decomposition is the only proved "aggregation" content here.
 -/
 
+@[expose] public section
+
 namespace MathFin.DiscreteVaR
 
 open MeasureTheory intervalIntegral
