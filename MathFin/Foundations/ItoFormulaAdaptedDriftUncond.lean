@@ -57,7 +57,7 @@ conditional route** (`itoDrift_expectation_identity_adapted`, the roughly 5.7k-l
 `ItoFormulaAdaptedDrift`). This module does the first part only; both theorems are kept as
 co-headlines. The reason for keeping the conditional one is technical: the library cannot
 supply its hypothesized `M` (Route B). `itoContinuousMod` is continuous only almost surely,
-modifying it on the null failure set destroys `natFiltration`-adaptedness (the natural
+modifying it on the null failure set need not preserve `natFiltration`-adaptedness (the natural
 filtration is not complete), and the everywhere-continuous modification is adapted only to
 `augFiltration`; so the conditional theorem is the only statement here that covers an `X`
 other than the constructed one. Whether that is worth keeping, and whether to demote,
