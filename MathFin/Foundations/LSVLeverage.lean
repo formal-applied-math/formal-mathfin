@@ -202,8 +202,8 @@ theorem cointossPhi_atm_prod {F σ : ℝ} (hF : 0 < F) (hσ : 0 < σ) :
   congr 1
   ring
 
-/-- **The ATM density ratio** — the engine of every ATM comparison that follows: for any
-positive branch volatilities, `φ_lo(F)/φ_hi(F) = (σ_hi/σ_lo) · exp((σ_hi² − σ_lo²)/8)`.
+/-- **The ATM density ratio** — the engine of every ATM comparison that follows: for `F > 0`
+and positive branch volatilities, `φ_lo(F)/φ_hi(F) = (σ_hi/σ_lo) · exp((σ_hi² − σ_lo²)/8)`.
 For `σ_lo < σ_hi` this exceeds `1` (`cointoss_pdf_atm_lt`). -/
 theorem cointoss_pdf_ratio_atm {F σ_lo σ_hi : ℝ} (hF : 0 < F) (hlo : 0 < σ_lo)
     (hσhi : 0 < σ_hi) :
@@ -279,7 +279,7 @@ theorem cointoss_bsd2_log {F σ K : ℝ} (hF : 0 < F) (hσ : 0 < σ) (hK : 0 < K
 
 /-- **The log-density ratio is a quadratic in log-moneyness** — the engine of both wing
 limits: `log(φ_lo/φ_hi) = b − a·(ln(K/F))²` with `a = (σ_hi² − σ_lo²)/(2σ_lo²σ_hi²)` and
-intercept `b = ln(σ_hi/σ_lo) + (σ_hi² − σ_lo²)/8`, for any positive branch volatilities.
+intercept `b = ln(σ_hi/σ_lo) + (σ_hi² − σ_lo²)/8`, for `F, K > 0` and positive branch vols.
 For `σ_lo < σ_hi`, `a > 0` (a downward parabola), so `|ln(K/F)| → ∞` drives `φ_lo/φ_hi` to
 `0`, i.e. the posterior piles onto the wide branch. -/
 theorem cointoss_pdf_ratio_log {F σ_lo σ_hi K : ℝ} (hF : 0 < F) (hlo : 0 < σ_lo)
@@ -469,8 +469,8 @@ two branches (`integral_add`, real `smul`, `integral_map`) and transported to `I
 pushforward above, where the defining identity `cointossM · (φ_lo + φ_hi) = v_lo φ_lo + v_hi φ_hi`
 (the definition of `cointossM`, with `φ_lo + φ_hi > 0`) closes it.
 
-**What is nevertheless proved here:** every *analytic property* of the posterior that the
-characterization would transport — the ATM inequalities, the posterior's two wing limits, the
+**What is nevertheless proved here:** the analytic properties of the posterior listed here,
+which the characterization would transport — the ATM inequalities, the posterior's two wing limits, the
 posterior variance's upper-wing limit, and nonconstancy. The gap is only the
 measure-theoretic *interpretation* of `cointossM ∘ S_T` as the condExp on the mixture; that
 interpretation stays chapter-sourced (Ex. 11.2's Bayes computation). -/
