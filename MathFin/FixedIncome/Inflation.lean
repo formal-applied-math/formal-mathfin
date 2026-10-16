@@ -117,7 +117,8 @@ breakeven identity
 
   `(1+b)^T = Pʳ(0,T) / Pⁿ(0,T)`,
 
-with `T` the swap's maturity in years. The breakeven is a *ratio of bond prices*, not a
+with `T : ℕ` the swap's maturity in whole years (only the `(1+b)^T` exponent; `B_T`, `I_T`
+are simply terminal random variables). The breakeven is a *ratio of bond prices*, not a
 physical-measure expectation of inflation — the chapter's central warning. -/
 theorem breakeven_eq (BT : Ω → ℝ) (Pn0T Pr0T I0 b : ℝ) (T : ℕ) (IT : Ω → ℝ)
     (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T) (hI0 : 0 < I0)
