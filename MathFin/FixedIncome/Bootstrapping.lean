@@ -444,8 +444,8 @@ each step literally inherits the previous factors. The step theorems below
 state their hypotheses at exactly this fed-in prefix (`boot V c lo hi n i`),
 not at every prefix list whatever: each step assumes only what it consumes.
 The parameter `n` is the bisection step count used at *every* instrument
-(uniform budget; a per-instrument budget `n : ℕ → ℕ` is a trivial
-reindexing). -/
+(uniform budget; a per-instrument budget `n : ℕ → ℕ` would need `boot` to
+use `n i` at step `i` — not formalized). -/
 
 /-- The **bootstrapped curve**: after the first `i` instruments, a list of
 discount factors, the head being the newest. -/
@@ -587,7 +587,7 @@ noncomputable def fraChain (δ : ℝ) (K : ℕ → ℝ) : ℕ → List ℝ → �
     | x :: p => fraValue δ x (fraForwardRate (p.head?.getD 1) x δ) (K i)
     | [] => 0
 
-/-- The unfolding equation: on `x :: p :: rest` the strip instrument is the
+/-- The unfolding equation: on `x :: p :: r` the strip instrument is the
 FRA value function of the instrument layer. -/
 theorem fraChain_eq (δ : ℝ) (K : ℕ → ℝ) (x p : ℝ) (r : List ℝ) (i : ℕ) :
     fraChain δ K i (x :: p :: r) = fraValue δ x (fraForwardRate p x δ) (K i) := rfl
