@@ -6,8 +6,6 @@ Authors: Yang Ye
 import Mathlib
 import MathFin.Foundations.GaussianMoments
 
-namespace MathFin.Estimation
-
 /-!
 # Estimation in practice: detection D-terms and realised-volatility bias
 
@@ -35,7 +33,7 @@ open scoped ENNReal NNReal
 
 /-! ## The D-term of eq. (21.2): KL divergence between variance-ratio Gaussians -/
 
-namespace MathFin.Estimation.KL
+section KL
 
 /-- Pointwise identity: the log of the pdf ratio between `N(0, r·v)` and `N(0, v)` is
 the quadratic `−½·ln r + x²(r−1)/(2rv)` (completing-the-square algebra, the
@@ -203,7 +201,7 @@ theorem kl_gaussianReal_small_shift :
 
 /-! ## Eq. (21.4): realised variance under iid mean-zero noise -/
 
-namespace MathFin.Estimation.RealizedVol
+section RealizedVol
 
 variable {α : Type*} [MeasurableSpace α] {μ : Measure α} [IsProbabilityMeasure μ]
 
@@ -313,11 +311,11 @@ theorem rvExpectation_withNoise {n : ℕ} {dt T sigma eta : ℝ} (hT : T = (n : 
         ring
 
 
-end MathFin.Estimation.RealizedVol
+end RealizedVol
 
 /-! ## Eq. (21.3)'s sign: the square-root estimator is biased low -/
 
-namespace MathFin.Estimation.SqrtBias
+section SqrtBias
 
 variable {α : Type*} [MeasurableSpace α] {μ : Measure α} [IsProbabilityMeasure μ]
 
@@ -531,11 +529,11 @@ theorem sqrtBias_absGaussianSample {v : ℝ≥0} (hv : v ≠ 0) :
   exact hmain
 
 
-end MathFin.Estimation.SqrtBias
+end SqrtBias
 
 /-! ## Calc 21.4's bad column: the drift estimator sees only the endpoints -/
 
-namespace MathFin.Estimation.DriftSE
+section DriftSE
 
 variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
 
@@ -546,43 +544,38 @@ affine pushforward of the gaussianReal sample (`gaussianReal_const_mul` then
 giving the chapter's flat-in-`n` drift standard error `σ/√T` (p. 363); the memo's
 `σ²·T` slot spelling is the header-documented typo. -/
 theorem drift_se_endpoint_hasLaw {T : ℝ} (hT : 0 < T) (mu sigma : ℝ) {B : Ω → ℝ}
-    (hB : HasLaw B (gaussianReal 0 (⟨T, hT.le⟩ : ℝ≥0)) P) :
+    (hB : HasLaw B (gaussianReal 0 T.toNNReal) P) :
     HasLaw (fun ω => (mu * T + sigma * B ω) / T)
-      (gaussianReal mu (⟨sigma ^ 2 / T, by positivity⟩ : ℝ≥0)) P := by
+      (gaussianReal mu (sigma ^ 2 / T).toNNReal) P := by
   have h1 := gaussianReal_const_mul hB (sigma / T)
   have h2 := gaussianReal_const_add h1 mu
-  have hAff : HasLaw (fun ω => mu + sigma / T * B ω)
-      (gaussianReal mu (⟨sigma ^ 2 / T, by positivity⟩ : ℝ≥0)) P := by
-    convert h2 using 3
-    · simp
-    · apply NNReal.eq
-      show sigma ^ 2 / T = (sigma / T) ^ 2 * T
-      field_simp
-  exact hAff.congr (ae_of_all P fun ω => by
-    field_simp)
+  have hcong : (fun ω => (mu * T + sigma * B ω) / T)
+      = (fun ω => mu + sigma / T * B ω) := by
+    funext ω
+    field_simp
+  rw [hcong]
+  convert h2 using 2
+  · ring
+  · refine NNReal.coe_injective ?_
+    rw [Real.coe_toNNReal _ (by positivity), NNReal.coe_mul, NNReal.coe_mk,
+      Real.coe_toNNReal _ hT.le]
+    field_simp
 
-
-/-- **Calc 21.4's drift column (the variance).** `Var[(X_T − X_0)/T] = σ²/T`: the drift
-estimator's standard error is `σ/√T`, **independent of the sampling frequency `n`** —
-"the estimator sees only the endpoints" (p. 363), unlike the volatility column's
-`√(2/n)` decay. Via `HasLaw.variance_eq` and `variance_id_gaussianReal`. -/
 theorem drift_se_endpoint_var {T : ℝ} (hT : 0 < T) (mu sigma : ℝ) {B : Ω → ℝ}
-    (hB : HasLaw B (gaussianReal 0 (⟨T, hT.le⟩ : ℝ≥0)) P) :
+    (hB : HasLaw B (gaussianReal 0 T.toNNReal) P) :
     Var[fun ω => (mu * T + sigma * B ω) / T; P] = sigma ^ 2 / T := by
-  rw [(drift_se_endpoint_hasLaw hT mu sigma hB).variance_eq, variance_id_gaussianReal]
-  rfl
+  rw [(drift_se_endpoint_hasLaw hT mu sigma hB).variance_eq, variance_id_gaussianReal,
+    Real.coe_toNNReal _ (by positivity)]
 
 
 /-- The pure-sample reading, on the gaussianReal space itself (`Z = id ~ N(0, T)`):
 `Var[(μT + σZ)/T] = σ²/T` with `n` nowhere in sight. -/
 theorem drift_se_endpoint_var_id {T : ℝ} (hT : 0 < T) (mu sigma : ℝ) :
     Var[(fun z : ℝ => (mu * T + sigma * z) / T);
-      gaussianReal 0 (⟨T, hT.le⟩ : ℝ≥0)] = sigma ^ 2 / T :=
+      gaussianReal 0 T.toNNReal] = sigma ^ 2 / T :=
   drift_se_endpoint_var hT mu sigma HasLaw.id
 
 
-end MathFin.Estimation.DriftSE
+end DriftSE
 
-end MathFin.Estimation.KL
-
-end MathFin.Estimation
+end KL
