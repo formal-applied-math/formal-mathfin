@@ -60,10 +60,11 @@ The module layers:
   theorem over all instruments (the `Finset.range` form is
   `boot_reprices_range`) — both with hypotheses stated at the fed-in prefix
   (see the scope note). `fraChain` with `boot_reprices_fraChain` runs the
-  FRA strip through the induction end to end (step `0` is the spot deposit,
-  anchored at the valuation-date factor `1`), and `swapChain` with
-  `boot_reprices_swapChain` does the same for the spot-starting swap strip
-  (fixed rate `K i` per maturity, last-coupon annuity over the prefix).
+  FRA strip through the induction (fixed rate `K i` per FRA; step `0` is the
+  spot deposit, anchored at the valuation-date factor `1`), and `swapChain`
+  with `boot_reprices_swapChain` does the same for the spot-starting swap
+  strip (fixed rate `K i` per maturity, last-coupon annuity over the prefix)
+  — both leaving only the per-step bracket condition as a hypothesis.
 * **Flat-curve capstone** — `fraBootstrap_flatCurve`: if the fixed rate
   equals the flat-curve forward rate, bisection from any positive bracket
   around the true later discount factor recovers it to within
@@ -75,24 +76,24 @@ step — `boot V c lo hi n i`, the factors the earlier steps produced — and, o
 that prefix, on the step's own bracket `[lo i, hi i]` (bisection evaluates the
 instrument nowhere else). Each step assumes only what it consumes: the
 instrument's threshold shape and affine identity at the run's actual earlier
-factors, and a bracket containing the root computed from them. These are
-exactly the facts the instrument layers provide at any prefix — the FRA by
+factors, and a bracket containing the root computed from them. The first two
+are exactly the facts the instrument layers provide at any prefix — the FRA by
 `fraValue_affine_of_newUnknown` + `fraThreshold` (under `δ ≠ 0`,
 `1 + δ·K > 0`, on a positive bracket), the known-schedule swap by
 `payerSwapValue_affine_of_newUnknown` + `swapThreshold` (no slope condition),
 the last-coupon swap by `payerSwapValue_affine_lastCoupon` +
 `swapLastCouponThreshold` (under `1 + K·δ > 0`) — and `boot_reprices_fraChain`
-/ `boot_reprices_swapChain` discharge them end to end for `fraChain` /
-`swapChain`, the FRA and swap strips as `boot` instruments. What genuinely remains is the per-step bracket choice: the root
-moves with the prefix, so which bracket is adequate depends on the factors
-the run produced, and the theorems ask for exactly that, at the step that
-uses it. The pointwise per-`n` error bound is the curve-level statement (the
-prefix stabilizes only under an extra constant-threshold hypothesis).
-Excluded: instruments whose *already-fixed* legs contain the
-new factor (forward-starting fixed/floating exchanges — the value is still
-affine in the bracket but with a slope of unknown sign, possibly zero, so no
-bracketing sign change is guaranteed), and joint solves for several new
-factors at once.
+/ `boot_reprices_swapChain` discharge every hypothesis except the bracket
+condition for `fraChain` / `swapChain`, the FRA and swap strips as `boot`
+instruments. The bracket condition stays a hypothesis: the root moves with the
+prefix, so which bracket is adequate depends on the factors the run produced,
+and the theorems ask for exactly that, at the step that uses it. The
+pointwise per-`n` error bound is the curve-level statement (the prefix
+stabilizes only under an extra constant-threshold hypothesis). Excluded:
+instruments whose *already-fixed* legs contain the new factor
+(forward-starting fixed/floating exchanges — the value is still affine in the
+bracket but with a slope of unknown sign, possibly zero, so no bracketing sign
+change is guaranteed), and joint solves for several new factors at once.
 
 Boundary: `MathFin/FixedIncome/YieldCurve.lean` owns the closed-form
 `bootstrap_solve*` names; this module owns the search-based bootstrap.
@@ -100,8 +101,9 @@ Boundary: `MathFin/FixedIncome/YieldCurve.lean` owns the closed-form
 ## Result
 
 Public definitions: `boot` (the bootstrapped curve), `fraChain` and
-`swapChain` (the FRA and swap strips as `boot` instruments). The bisection engine (`bisectStep`, `bisect`,
-`bisectMid`) is imported from `MathFin.Foundations.Bisection`.
+`swapChain` (the FRA and swap strips as `boot` instruments). The bisection
+engine (`bisectStep`, `bisect`, `bisectMid`) is imported from
+`MathFin.Foundations.Bisection`.
 
 Public lemmas (all in `namespace MathFin.Bootstrapping`):
 
@@ -556,7 +558,7 @@ theorem boot_reprices_range (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → �
       |V i ((boot V c lo hi n (i + 1)).head (boot_succ_ne_nil V c lo hi n i)
           :: boot V c lo hi n i) - c i|
         ≤ b i (boot V c lo hi n i) * ((hi i - lo i) / 2 ^ (n + 1)) :=
-  fun i hiM => boot_reprices_all V c lo hi a b i n (hb i hiM) (hV i hiM) (hσ i hiM)
+  fun i hiM ↦ boot_reprices_all V c lo hi a b i n (hb i hiM) (hV i hiM) (hσ i hiM)
 
 /-! #### The file's instruments inside the induction
 
@@ -565,50 +567,51 @@ the new factor `x` at the head of the fed-in list, the already-bootstrapped
 factors behind it. Both are anchored at every step, including the first: the
 discount factor at the valuation date is `1`, so step `0` of the FRA strip is
 the spot deposit (an FRA whose earlier factor is `1`), and every swap step is a
-spot-starting swap (`P0 = 1`). They discharge `boot_reprices_all`'s hypotheses
-end to end: everything but the bracket condition is the instrument layer's
-standing assumptions. -/
+spot-starting swap (`P0 = 1`). Each instrument `i` carries its own fixed rate
+`K i`. They discharge every hypothesis of `boot_reprices_all` except the
+bracket condition, which stays a hypothesis; what they add is only the
+instrument layer's standing assumptions. -/
 
-/-- The **FRA strip as a `boot` instrument**: instrument `i`'s value reads the
-new factor `x` and the previous factor off the fed-in list; on the empty
-prefix (step `0`) the previous factor is the valuation-date factor `1`, so the
-first instrument is the spot deposit. (The `[]` branch is never fed by `boot`,
-which always passes `x :: prefix`.) -/
-noncomputable def fraChain (δ K : ℝ) : ℕ → List ℝ → ℝ :=
-  fun _ l =>
+/-- The **FRA strip as a `boot` instrument**: instrument `i` is the FRA with
+fixed rate `K i`, reading the new factor `x` and the previous factor off the
+fed-in list; on the empty prefix (step `0`) the previous factor is the
+valuation-date factor `1`, so the first instrument is the spot deposit. (The
+`[]` branch is never fed by `boot`, which always passes `x :: prefix`.) -/
+noncomputable def fraChain (δ : ℝ) (K : ℕ → ℝ) : ℕ → List ℝ → ℝ :=
+  fun i l ↦
     match l with
-    | x :: p => fraValue δ x (fraForwardRate (p.head?.getD 1) x δ) K
+    | x :: p => fraValue δ x (fraForwardRate (p.head?.getD 1) x δ) (K i)
     | [] => 0
 
 /-- The unfolding equation: on `x :: p :: rest` the strip instrument is the
 FRA value function of the instrument layer. -/
-theorem fraChain_eq (δ K x p : ℝ) (r : List ℝ) (i : ℕ) :
-    fraChain δ K i (x :: p :: r) = fraValue δ x (fraForwardRate p x δ) K := rfl
+theorem fraChain_eq (δ : ℝ) (K : ℕ → ℝ) (x p : ℝ) (r : List ℝ) (i : ℕ) :
+    fraChain δ K i (x :: p :: r) = fraValue δ x (fraForwardRate p x δ) (K i) := rfl
 
 /-- The anchor: on the empty prefix the strip instrument is the spot deposit,
 the FRA whose earlier discount factor is the valuation-date factor `1`. -/
-theorem fraChain_spot (δ K x : ℝ) (i : ℕ) :
-    fraChain δ K i [x] = fraValue δ x (fraForwardRate 1 x δ) K := rfl
+theorem fraChain_spot (δ : ℝ) (K : ℕ → ℝ) (x : ℝ) (i : ℕ) :
+    fraChain δ K i [x] = fraValue δ x (fraForwardRate 1 x δ) (K i) := rfl
 
 /-- **The FRA strip reprices inside the induction.** At every step `i`
 (step `0` is the spot deposit, anchored at the valuation-date factor `1`),
-under the FRA layer's standing conditions — `δ ≠ 0`, `1 + δ·K > 0`, a positive
-bracket — the only hypothesis left is the bracket condition at the fed-in
-prefix: `[lo i, hi i]` must contain the root computed from the *actual*
+under the FRA layer's standing conditions — `δ ≠ 0`, `1 + δ·K i > 0`, a
+positive bracket — the only hypothesis left is the bracket condition at the
+fed-in prefix: `[lo i, hi i]` must contain the root computed from the *actual*
 previous factor `((boot (fraChain δ K) c lo hi n i).head?.getD 1 − c i) /
-(1 + δ·K)`. Then the bootstrapped factor reprices instrument `i`'s quote to
-within `(1 + δ·K)·(hi i − lo i)/2^{n+1}`. -/
-theorem boot_reprices_fraChain (δ K : ℝ) (c lo hi : ℕ → ℝ) (n i : ℕ) (hδ : δ ≠ 0)
-    (hpos : 0 < 1 + δ * K) (hlo : 0 < lo i)
-    (hσ : ((boot (fraChain δ K) c lo hi n i).head?.getD 1 - c i) / (1 + δ * K)
+(1 + δ·K i)`. Then the bootstrapped factor reprices instrument `i`'s quote to
+within `(1 + δ·K i)·(hi i − lo i)/2^{n+1}`. -/
+theorem boot_reprices_fraChain (δ : ℝ) (K c lo hi : ℕ → ℝ) (n i : ℕ) (hδ : δ ≠ 0)
+    (hpos : 0 < 1 + δ * K i) (hlo : 0 < lo i)
+    (hσ : ((boot (fraChain δ K) c lo hi n i).head?.getD 1 - c i) / (1 + δ * K i)
       ∈ Set.Icc (lo i) (hi i)) :
     |fraChain δ K i ((boot (fraChain δ K) c lo hi n (i + 1)).head
         (boot_succ_ne_nil (fraChain δ K) c lo hi n i)
         :: boot (fraChain δ K) c lo hi n i) - c i|
-      ≤ (1 + δ * K) * ((hi i - lo i) / 2 ^ (n + 1)) :=
-  boot_reprices_all (fraChain δ K) c lo hi (fun _ p => p.head?.getD 1)
-    (fun _ _ => 1 + δ * K) i n hpos
-    (fun x hx => fraValue_affine_of_newUnknown _ δ K x hδ (lt_of_lt_of_le hlo hx.1).ne') hσ
+      ≤ (1 + δ * K i) * ((hi i - lo i) / 2 ^ (n + 1)) :=
+  boot_reprices_all (fraChain δ K) c lo hi (fun _ p ↦ p.head?.getD 1)
+    (fun j _ ↦ 1 + δ * K j) i n hpos
+    (fun x hx ↦ fraValue_affine_of_newUnknown _ δ (K i) x hδ (lt_of_lt_of_le hlo hx.1).ne') hσ
 
 /-- The **swap strip as a `boot` instrument**: instrument `i` is the
 spot-starting payer swap (`P0 = 1`) maturing at the new factor `x`, with fixed
@@ -617,7 +620,7 @@ the new one — annuity `δ·(Σ prefix) + δ·x`, the last-coupon form of the s
 layer. Every step, including the first (empty prefix: the one-period swap), is
 a genuine swap; the `[]` branch is never fed by `boot`. -/
 noncomputable def swapChain (δ : ℝ) (K : ℕ → ℝ) : ℕ → List ℝ → ℝ :=
-  fun i l =>
+  fun i l ↦
     match l with
     | x :: p => payerSwapValue 1 x (K i) (δ * p.sum + δ * x)
     | [] => 0
@@ -642,9 +645,9 @@ theorem boot_reprices_swapChain (δ : ℝ) (K c lo hi : ℕ → ℝ) (n i : ℕ)
         (boot_succ_ne_nil (swapChain δ K) c lo hi n i)
         :: boot (swapChain δ K) c lo hi n i) - c i|
       ≤ (1 + K i * δ) * ((hi i - lo i) / 2 ^ (n + 1)) :=
-  boot_reprices_all (swapChain δ K) c lo hi (fun j p => 1 - K j * (δ * p.sum))
-    (fun j _ => 1 + K j * δ) i n hpos
-    (fun x _ => payerSwapValue_affine_lastCoupon 1 (K i) _ δ x) hσ
+  boot_reprices_all (swapChain δ K) c lo hi (fun j p ↦ 1 - K j * (δ * p.sum))
+    (fun j _ ↦ 1 + K j * δ) i n hpos
+    (fun x _ ↦ payerSwapValue_affine_lastCoupon 1 (K i) _ δ x) hσ
 
 /-! ### Flat-curve capstone: the bootstrap recovers the flat-curve factor -/
 
