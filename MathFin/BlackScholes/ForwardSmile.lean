@@ -21,7 +21,7 @@ zero-rates ratio
   `R(ε, k, T) = 2·∂_T C / (K²·∂²_K C)`  (in `k`-form: `K²·∂²_K C = C_kk − C_k`)
 
 enters **as a definition** (`dupireRatio`) — the derivation of the ratio itself
-from a local-vol model stays gated (lessons 0021/0058). The headline results:
+from a local-vol model is not developed here. The headline results:
 
 * `dupireRatio_k_slope` — eq 10.8: the ATM k-slope of `R` has ε-slope
   `2σψ₁·((3/2)T + 2T₀)/(T+T₀)^{3/2}` (with `(T+T₀)^{3/2}` rendered as
@@ -115,8 +115,8 @@ noncomputable def bsCallSmile (F σ ψ₁ T₀ ε k T : ℝ) : ℝ :=
   bsV (F * Real.exp k) 0 (smileSurface σ ψ₁ T₀ ε k T) F T
 
 /-- **Dupire's zero-rates ratio in k-form** (the ratio as a
-definition — its derivation from a local-vol model stays gated, lessons
-0021/0058): `R = 2·C_T/(C_kk − C_k)`, using `K²·∂²_K C = C_kk − C_k` for
+definition — its derivation from a local-vol model is not developed here):
+`R = 2·C_T/(C_kk − C_k)`, using `K²·∂²_K C = C_kk − C_k` for
 `K = F·e^k`. -/
 noncomputable def dupireRatio (F σ ψ₁ T₀ ε k T : ℝ) : ℝ :=
   2 * deriv (fun t => bsCallSmile F σ ψ₁ T₀ ε k t) T
@@ -598,7 +598,8 @@ private theorem deriv_bsCallSmile_k_value {F σ ψ₁ T₀ ε k T : ℝ} (hF : 0
   field_simp [hw.ne', (Real.sqrt_pos.mpr hw).ne', (Real.sqrt_pos.mpr hS).ne']
   ring
 
-/-- **The second `k`-chain `C_kk`** (the resumption blocker of the previous run):
+/-- **The second `k`-chain `C_kk`** (the second `k`-derivative of the call
+price, the remaining ingredient Dupire's ratio needs beyond `C_k`):
 the `k`-derivative of the `k`-derivative of the call price, assembled from the
 `B_w` composite chain (`hasDerivAt_Bw_comp`), the variance-slope chain
 (`hasDerivAt_wSlope`) and the exercise-side chain
