@@ -25,10 +25,10 @@ from measure theory and exact real arithmetic, with no stochastic-process hypoth
   pure local vol, `m = σ_loc²` switches the leverage off (Ex. 11.1);
 * the coin-toss λ-dial family (§11.4 / Calc 11.3): branch variances `29/400 ∓ λ/20` keep
   `E[v^λ]` pinned at `29/400` for every λ; the λ = 0 endpoint is flat leverage with
-  squared value `25/29` at `σ_loc = 1/4` — the chapter's "0.93", exact;
+  squared value `25/29` at `σ_loc = 1/4` (the exact square of the chapter's "0.93");
 * the coin-toss posterior of Ex. 11.2 as exact inequalities and limits: ATM posterior on the
-  high branch `< 1/2`; ATM posterior variance `m(F)` below the unconditional mean (so the ATM
-  leverage `σ_loc/√m(F)` sits above the flat λ = 0 value); posterior on the high branch → 1
+  high branch `< 1/2`; ATM posterior variance `m(F)` below the unconditional mean; posterior
+  on the high branch → 1
   in BOTH wings (the log-density ratio is a downward parabola in `ln(K/F)`); and
   nonconstancy of the posterior variance `m`.
 
@@ -50,7 +50,6 @@ from measure theory and exact real arithmetic, with no stochastic-process hypoth
 namespace MathFin.LSV
 
 open MeasureTheory ProbabilityTheory Filter Topology
-open scoped NNReal
 
 /-! ## B1–B2: the conditioning layer -/
 
@@ -95,8 +94,8 @@ theorem lsv_condExp_pullout {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
 
 /-- **B3 — the pinned product (eq. 11.6 shape), at one strike.** The leverage of an LSV model
 is `L = σ_loc / √m`, where `m` is the posterior mean of the stochastic variance at the strike;
-the defining product `L² · m = σ_loc²` is an identity as soon as `m > 0`. Everything
-downstream (the λ-family, the endpoint values) is this telescope plus arithmetic. -/
+the defining product `L² · m = σ_loc²` is an identity as soon as `m > 0`. The λ = 0
+endpoint (`cointoss_endpoint_l0_pinned`) is this telescope at `m = 29/400`. -/
 theorem lsv_pinned_product (σ_loc m : ℝ) (hm : 0 < m) :
     (σ_loc / Real.sqrt m) ^ 2 * m = σ_loc ^ 2 := by
   rw [div_pow, Real.sq_sqrt hm.le, div_mul_cancel₀ _ hm.ne']
@@ -154,8 +153,8 @@ theorem cointoss_endpoint_l0_pinned (σ_loc : ℝ) :
     (σ_loc / Real.sqrt (29 / 400)) ^ 2 * (29 / 400) = σ_loc ^ 2 :=
   lsv_pinned_product σ_loc _ (by norm_num)
 
-/-- **The chapter's flat "0.93", exact:** at `σ_loc = 1/4` the λ = 0 squared leverage is
-`L⁰² = 25/29` (Calc 11.3's `L⁰ ≈ 0.93` is the square root of this rational). -/
+/-- **The exact square of the chapter's flat "0.93":** at `σ_loc = 1/4` the λ = 0 squared
+leverage is `L⁰² = 25/29` (Calc 11.3's `L⁰ ≈ 0.93` is the square root of this rational). -/
 theorem cointoss_endpoint_l0_quarter :
     ((1:ℝ) / 4 / Real.sqrt (29 / 400)) ^ 2 = 25 / 29 := by
   rw [cointoss_endpoint_l0_sq]; norm_num
@@ -190,14 +189,13 @@ theorem cointoss_bsd2_atm {F σ : ℝ} (hF : 0 < F) (hσ : 0 < σ) :
 Jacobian telescope to `exp(−σ²/8)`. (Auxiliary engine for the ATM comparisons; the
 `√(2π)` is the normalization constant of `gaussianPDFReal 0 1`.) -/
 theorem cointossPhi_atm_prod {F σ : ℝ} (hF : 0 < F) (hσ : 0 < σ) :
-    cointossPhi F σ F * (F * σ) * Real.sqrt (2 * Real.pi * ((1:ℝ≥0) : ℝ)) =
+    cointossPhi F σ F * (F * σ) * Real.sqrt (2 * Real.pi) =
       Real.exp (-(σ ^ 2 / 8)) := by
   unfold cointossPhi lognormalTerminalPDF
   rw [cointoss_bsd2_atm hF hσ, Real.sqrt_one]
-  simp only [gaussianPDFReal, sub_zero, mul_one]
-  push_cast
+  simp only [gaussianPDFReal, sub_zero, NNReal.coe_one, mul_one]
   have hFs : (F * σ : ℝ) ≠ 0 := mul_ne_zero hF.ne' hσ.ne'
-  have hS : Real.sqrt (2 * Real.pi * (1:ℝ)) ≠ 0 := by positivity
+  have hS : Real.sqrt (2 * Real.pi) ≠ 0 := by positivity
   have hcan (c x : ℝ) (hc : c ≠ 0) : c⁻¹ * x * c = x := by
     rw [mul_comm c⁻¹ x, mul_assoc, inv_mul_cancel₀ hc, mul_one]
   rw [div_mul_cancel₀ _ hFs, hcan _ _ hS]
@@ -236,9 +234,9 @@ Ex. 11.2's Bayes ratio `P(hi | S_T = K) = φ_hi(K)/(φ_lo(K) + φ_hi(K))`. -/
 noncomputable def cointossPostHi (F σ_lo σ_hi K : ℝ) : ℝ :=
   cointossPhi F σ_hi K / (cointossPhi F σ_lo K + cointossPhi F σ_hi K)
 
-/-- **The ATM posterior on the high branch is below one half** (the chapter's table entry
-`P(hi | S_T = F) = 0.30 < 1/2`, exact). Engine: `cointoss_pdf_atm_lt` plus the positivity
-of both densities. -/
+/-- **The ATM posterior on the high branch is below one half** (the strict inequality behind the
+chapter's table entry `P(hi | S_T = F) = 0.30`; the decimal itself is not proved).
+Engine: `cointoss_pdf_atm_lt` plus the positivity of both densities. -/
 theorem cointoss_posterior_atm_lt_half {F σ_lo σ_hi : ℝ} (hF : 0 < F) (hlo : 0 < σ_lo)
     (hhi : σ_lo < σ_hi) :
     cointossPostHi F σ_lo σ_hi F < 1 / 2 := by
@@ -256,8 +254,8 @@ noncomputable def cointossM (F σ_lo σ_hi v_lo v_hi K : ℝ) : ℝ :=
     (cointossPhi F σ_lo K + cointossPhi F σ_hi K)
 
 /-- **The ATM posterior variance sits below the unconditional mean:**
-`m(F) < (v_lo + v_hi)/2`, so the ATM leverage `σ_loc/√m(F)` sits *above* the flat value
-`σ_loc/√E[v]` that calibrating to the unconditional variance would give. Engine: the pinned
+`m(F) < (v_lo + v_hi)/2`. For `σ_loc > 0` and `m(F) > 0` this transfers to the leverage,
+`σ_loc/√m(F) > σ_loc/√((v_lo + v_hi)/2)`; that transfer is not stated here. Engine: the pinned
 algebra `(v_hi − v_lo)(φ_lo(F) − φ_hi(F)) > 0`. -/
 theorem cointossM_atm_lt_uncond {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F)
     (hlo : 0 < σ_lo) (hhi : σ_lo < σ_hi) (hvhi : v_lo < v_hi) :
@@ -332,12 +330,12 @@ theorem cointoss_pdf_ratio_log {F σ_lo σ_hi K : ℝ} (hF : 0 < F) (hlo : 0 < �
 
 /-- The posterior weight rewrites as `1/(1 + φ_lo/φ_hi)` — the form the wing limits feed
 into. -/
-theorem cointoss_posterior_eq {F σ_lo σ_hi K : ℝ} (hlo : 0 < σ_lo) (hlo' : 0 < σ_hi)
+theorem cointoss_posterior_eq {F σ_lo σ_hi K : ℝ} (hlo : 0 < σ_lo) (hσhi : 0 < σ_hi)
     (hK : 0 < K) :
     cointossPostHi F σ_lo σ_hi K =
       1 / (1 + cointossPhi F σ_lo K / cointossPhi F σ_hi K) := by
   have hφlo : 0 < cointossPhi F σ_lo K := cointossPhi_pos hlo hK
-  have hφhi : 0 < cointossPhi F σ_hi K := cointossPhi_pos hlo' hK
+  have hφhi : 0 < cointossPhi F σ_hi K := cointossPhi_pos hσhi hK
   unfold cointossPostHi
   field_simp
   ring
@@ -350,7 +348,7 @@ private theorem cointoss_posterior_limit_aux {F σ_lo σ_hi : ℝ} (hF : 0 < F) 
     (hu2 : Tendsto (fun K : ℝ ↦ (Real.log (K / F)) ^ 2) l atTop)
     (hpos : ∀ᶠ K in l, (0:ℝ) < K) :
     Tendsto (cointossPostHi F σ_lo σ_hi) l (𝓝 1) := by
-  have hlo' : 0 < σ_hi := hlo.trans hhi
+  have hσhi : 0 < σ_hi := hlo.trans hhi
   set a : ℝ := (σ_hi ^ 2 - σ_lo ^ 2) / (2 * σ_lo ^ 2 * σ_hi ^ 2)
   set b : ℝ := Real.log (σ_hi / σ_lo) + (σ_hi ^ 2 - σ_lo ^ 2) / 8
   have hA : 0 < a := div_pos (by nlinarith) (by positivity)
@@ -363,11 +361,11 @@ private theorem cointoss_posterior_limit_aux {F σ_lo σ_hi : ℝ} (hF : 0 < F) 
       Real.log (cointossPhi F σ_lo K / cointossPhi F σ_hi K)) l atBot :=
     (hlin.comp hu2).congr' (by
       filter_upwards [hpos] with K hK
-      exact (cointoss_pdf_ratio_log hF hlo hlo' hK).symm)
+      exact (cointoss_pdf_ratio_log hF hlo hσhi hK).symm)
   have hR : Tendsto (fun K : ℝ ↦ cointossPhi F σ_lo K / cointossPhi F σ_hi K) l (𝓝 0) := by
     refine (Real.tendsto_exp_atBot.comp hlogR).congr' ?_
     filter_upwards [hpos] with K hK
-    exact Real.exp_log (div_pos (cointossPhi_pos hlo hK) (cointossPhi_pos hlo' hK))
+    exact Real.exp_log (div_pos (cointossPhi_pos hlo hK) (cointossPhi_pos hσhi hK))
   -- and `1/(1 + ·)` is continuous at `0` with value `1`
   have hcont : Tendsto (fun t : ℝ ↦ 1 / (1 + t)) (𝓝 0) (𝓝 1) := by
     have h : Tendsto (fun t : ℝ ↦ 1 / (1 + t)) (𝓝 0) (𝓝 ((1:ℝ) / ((1:ℝ) + 0))) :=
@@ -376,7 +374,7 @@ private theorem cointoss_posterior_limit_aux {F σ_lo σ_hi : ℝ} (hF : 0 < F) 
     simpa using h
   exact (hcont.comp hR).congr' (by
     filter_upwards [hpos] with K hK
-    exact (cointoss_posterior_eq hlo hlo' hK).symm)
+    exact (cointoss_posterior_eq hlo hσhi hK).symm)
 
 /-- **Upper wing limit (Ex. 11.2's table, `K → ∞`):** the posterior weight on the wide
 branch tends to `1` — the chapter's `0.96` at `K = 160`, as a limit statement. The
@@ -407,12 +405,12 @@ theorem cointoss_posterior_wing_limit_atZero {F σ_lo σ_hi : ℝ} (hF : 0 < F) 
 /-- For positive strikes the posterior mean is the flat branch mix
 `m(K) = v_lo + (v_hi − v_lo) · P(hi | K)` — the leverage-relevant reading of the posterior
 weight. -/
-theorem cointossM_eq_of_pos {F σ_lo σ_hi v_lo v_hi K : ℝ} (hlo : 0 < σ_lo) (hlo' : 0 < σ_hi)
+theorem cointossM_eq_of_pos {F σ_lo σ_hi v_lo v_hi K : ℝ} (hlo : 0 < σ_lo) (hσhi : 0 < σ_hi)
     (hK : 0 < K) :
     cointossM F σ_lo σ_hi v_lo v_hi K =
       v_lo + (v_hi - v_lo) * cointossPostHi F σ_lo σ_hi K := by
   have hφlo : 0 < cointossPhi F σ_lo K := cointossPhi_pos hlo hK
-  have hφhi : 0 < cointossPhi F σ_hi K := cointossPhi_pos hlo' hK
+  have hφhi : 0 < cointossPhi F σ_hi K := cointossPhi_pos hσhi hK
   unfold cointossM cointossPostHi
   field_simp
   ring
@@ -431,7 +429,8 @@ theorem cointossM_wing_limit_atTop {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F) 
   exact (cointossM_eq_of_pos hlo (hlo.trans hhi) hK).symm
 
 /-- **The posterior variance is not constant** (Ex. 11.2's punchline: the posterior `m` is a
-genuine function of the strike, so the leverage `σ_loc/√m` of a flat `σ_loc` is not flat).
+genuine function of the strike; for a flat `σ_loc > 0` and `m > 0` the leverage `σ_loc/√m`
+is then not flat either, a transfer not stated here).
 If `m` were constant it would equal its own upper-wing limit `v_hi`; but at the money
 `m(F) < (v_lo + v_hi)/2 < v_hi`. -/
 theorem cointossM_nonconstant {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F)
@@ -451,7 +450,8 @@ theorem cointossM_nonconstant {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F)
 and branch variance `v (Sum.inl _) = v_lo`, `v (Sum.inr _) = v_hi`, the posterior function
 of B5 *is* the conditional expectation:
 
-  `μ_mix[v | Real.measurableSpace.comap S_T] =ᵐ[μ_mix] (fun p => cointossM F σ_lo σ_hi v_lo v_hi (S_T p))`.
+  `μ_mix[v | Real.measurableSpace.comap S_T] =ᵐ[μ_mix]
+    (fun p ↦ cointossM F σ_lo σ_hi v_lo v_hi (S_T p))`.
 
 **What is already available.** The single-branch pushforward is in the library:
 `jumpDiffusionIncrementLaw_zero` identifies the zero-jump increment law with
