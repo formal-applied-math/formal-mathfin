@@ -264,9 +264,9 @@ short rate's Wiener part `σ∫₀ᵗ e^{−κ(t−u)} dB_u` — is the Vasicek 
 `L²` element `vasicekKernelLp` there; nothing kernel-specific is redefined here. -/
 
 /-- The closed form `(1 − e^{−2κt})/(2κ)` of the Vasicek diffusion kernel's squared
-`L²`-norm over `(0, t]`, `∫₀ᵗ e^{−2κ(t−u)} du` (`vasicekKernel_integral_sq` in
-`VasicekSDEGaussian`); the Vasicek variance factor `/2κ`, named for the HW short
-rate's law (`integratedRate_hasLaw_gaussian`). -/
+`L²`-norm over `(0, t]`, `∫₀ᵗ e^{−2κ(t−u)} du`; it equals that integral for `κ ≠ 0`
+(`vasicekKernel_integral_sq` in `VasicekSDEGaussian`). The Vasicek variance factor
+`/2κ`, named for the HW short rate's law (`integratedRate_hasLaw_gaussian`). -/
 noncomputable def kernelV (κ t : ℝ) : ℝ := (1 - Real.exp (-(2 * κ * t))) / (2 * κ)
 
 /-- `∫₀ᵗ kernel² = kernelV` for the `L²`-representative (a.e. the honest kernel):

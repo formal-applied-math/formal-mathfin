@@ -3222,7 +3222,8 @@ adapted path-continuous `β, δ` and the hypothesized `M`. Route of the assembly
 first-order martingale terms die **exactly** (the martingale-kill lemma
 `mul_trueIncr_expect_eq_zero` below — the discrete-assembly replacement for "the
 stochastic integral has zero mean"); the drift block is the pathwise left-endpoint
-Riemann–Stieltjes sum (uniform continuity of `f'∘X` along each path + DCT + the stage-1
+Riemann–Stieltjes sum (`AdaptedDrift.tendsto_sum_mul_driftPath_sub` along each path at the
+weight `f'∘X` + DCT + the stage-1
 Fubini `expectation_pathIntegral_eq`); the quadratic block is `quadraticSqSum_tendsto_uncond` at the
 weight `f″∘X` plus the `O(mesh)` drift corrections (`𝔼|ΔM·driftIncr| ≤ 2D_βD_δ·cell^{3/2}`,
 `𝔼[driftIncr²] ≤ (D_β·cell)²`, both summed to `O(√mesh)`, `O(mesh)`); the Taylor
@@ -3325,8 +3326,9 @@ path-continuous `β, δ`, under the hypotheses on `M` and `X` of the module docs
 for `f` three times differentiable with `f'`, `f''`, `f'''` bounded. Route: the per-path
 discrete Itô formula (`MathFin.discrete_ito_formula`) at the grid values of `X`, integrated
 over `Ω`; the first-order martingale terms die exactly (`mul_trueIncr_expect_eq_zero`); the
-drift block converges by pathwise Riemann–Stieltjes sums (uniform continuity of `f'∘X` along
-each path) + DCT (`driftBlock_tendsto`); the quadratic block converges by `quadraticSqSum_tendsto_uncond`
+drift block converges by pathwise Riemann–Stieltjes sums
+(`AdaptedDrift.tendsto_sum_mul_driftPath_sub` along each path at the weight `f'∘X`) + DCT
+(`driftBlock_tendsto`); the quadratic block converges by `quadraticSqSum_tendsto_uncond`
 at the weight `f''∘X`, with the drift–martingale cross terms (`quadCrossSum_tendsto`)
 and the drift² corrections (`quadDriftSqSum_tendsto`) tending to `0`; the Taylor remainder dies by
 `abs_discreteTaylorRemainder_le` + `trueIncr_pow3_le` (`taylorRemainderSum_tendsto`).
