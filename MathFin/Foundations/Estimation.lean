@@ -14,11 +14,11 @@ public import MathFin.Foundations.GaussianMoments
 A regime is a state, not a parameter: between two centered Gaussian regimes with
 variance ratio `r = σ²_high/σ²_low`, the per-observation discrimination information is
 the Kullback–Leibler D-term `D = ½(r − 1 − ln r)` of eq. (21.2). `llr` (the log
-likelihood ratio, `LogLikelihoodRatio.lean:37`) is the object; the computation here
+likelihood ratio, `MeasureTheory.llr`) is the object; the computation here
 makes it a quadratic integral against the high-variance law
 (`kl_gaussianReal_var_ratio`), via the `withDensity` structure of `gaussianReal`
 (`gaussianReal_of_var_ne_zero`) and the `rnDeriv` ratio identity
-`Measure.rnDeriv_withDensity_right` (`RadonNikodym.lean:168`).
+`MeasureTheory.Measure.rnDeriv_withDensity_right`.
 
 Sampling obstructions are the chapter's second half: iid mean-zero noise of scale `η`
 turns the realised-variance estimator's expectation into `σ²T + 2nη²` — bias linear in
@@ -61,7 +61,6 @@ private lemma log_ratio_gaussianPDFReal_eq {r v : ℝ≥0} (hv : v ≠ 0) (hr : 
       -(Real.log (r : ℝ)) / 2 + x ^ 2 * ((r : ℝ) - 1) / (2 * (r : ℝ) * (v : ℝ)) := by
   have hvpc : 0 < v := hv.bot_lt
   have hrpc : 0 < r := hr.bot_lt
-  have hrvpc : 0 < r * v := mul_pos hrpc hvpc
   have hposP : 0 < gaussianPDFReal 0 (r * v) x := gaussianPDFReal_pos _ _ _ (mul_ne_zero hr hv)
   have hposQ : 0 < gaussianPDFReal 0 v x := gaussianPDFReal_pos _ _ _ hv
   have h2piv : (0 : ℝ) < 2 * π * v := by exact_mod_cast mul_pos two_pi_pos hvpc
@@ -113,8 +112,8 @@ likelihood ratio `llr` against `N(0, r·v)` (the high-variance law when `r > 1`)
 the chapter's detection-delay arithmetic (delay ≈ ln(1/α)/D observations, p. 360).
 The proof writes both laws in `withDensity` form, computes the RN derivative as the
 pdf ratio via `Measure.rnDeriv_withDensity_right` and `Measure.rnDeriv_withDensity`,
-and integrates the resulting quadratic termwise with `integral_id_gaussianReal`-family
-moments (`MathFin.integral_sq_gaussianReal`). -/
+and integrates the resulting quadratic termwise with the second moment
+`MathFin.integral_sq_gaussianReal`. -/
 theorem kl_gaussianReal_var_ratio {r v : ℝ≥0} (hv : v ≠ 0) (hr : r ≠ 0) :
     ∫ x, llr (gaussianReal 0 (r * v)) (gaussianReal 0 v) x ∂(gaussianReal 0 (r * v)) =
       ((r : ℝ) - 1 - Real.log (r : ℝ)) / 2 := by
@@ -171,9 +170,10 @@ theorem kl_gaussianReal_var_ratio {r v : ℝ≥0} (hv : v ≠ 0) (hr : r ≠ 0) 
   have hsplit : ∫ x : ℝ, -(Real.log (r : ℝ)) / 2 + x ^ 2 * ((r : ℝ) - 1) / (2 * (r : ℝ) * (v : ℝ))
         ∂(gaussianReal 0 (r * v))
       = -(Real.log (r : ℝ)) / 2
-        + (∫ x : ℝ, x ^ 2 ∂(gaussianReal 0 (r * v))) * (((r : ℝ) - 1) / (2 * (r : ℝ) * (v : ℝ))) := by
+        + (∫ x : ℝ, x ^ 2 ∂(gaussianReal 0 (r * v)))
+          * (((r : ℝ) - 1) / (2 * (r : ℝ) * (v : ℝ))) := by
     have h0 : Integrable (fun x : ℝ ↦ x ^ 2) (gaussianReal 0 (r * v)) :=
-      (@memLp_id_gaussianReal 0 (r * v) (2 : ℝ≥0)).integrable_sq
+      (memLp_id_gaussianReal 2).integrable_sq
     have hint1 : Integrable (fun _ : ℝ ↦ -(Real.log (r : ℝ)) / 2) (gaussianReal 0 (r * v)) :=
       integrable_const _
     have hshape : ∀ x : ℝ, -(Real.log (r : ℝ)) / 2 + x ^ 2 * ((r : ℝ) - 1) / (2 * (r : ℝ) * (v : ℝ))
@@ -182,8 +182,6 @@ theorem kl_gaussianReal_var_ratio {r v : ℝ≥0} (hv : v ≠ 0) (hr : r ≠ 0) 
     rw [integral_congr_ae (ae_of_all _ hshape),
       integral_add hint1 (h0.mul_const _),
       integral_const, integral_mul_const, probReal_univ, one_smul]
-  have hcoev : ((v : ℝ)) ≠ 0 := by exact_mod_cast hv
-  have hcoer : ((r : ℝ)) ≠ 0 := by exact_mod_cast hr
   rw [hsplit, MathFin.integral_sq_gaussianReal]
   push_cast
   field_simp
@@ -221,12 +219,16 @@ variable {α : Type*} [MeasurableSpace α] {μ : Measure α}
 /-- **Eq. (21.4): the realised-variance noise bias is linear in sampling frequency.**
 Over `n` increments `ΔX_i` with second moment `E[(ΔX_i)²] = σ²·Δt` (the
 `integral_sq_increment` / `integral_sq_gaussianReal` moment in the Gaussian instance)
-observed through iid mean-zero noise `ε_j` of scale `η` (`E[ε_j] = 0`, `E[ε_j²] = η²`),
-the noisy realised sum has expectation `σ²T + 2nη²` where `T = n·Δt`: each increment
-contributes its signal second moment plus **two** noise second moments, and all
-cross-terms vanish by independence + mean-zero (`IndepFun.integral_mul_eq_mul_integral`,
-the chapter's "noise, dependence, scale" obstruction, §21.3 p. 361). No probability
-hypothesis on `μ` is needed; the integrability hypotheses are kept explicit. -/
+observed through mean-zero noise `ε_j` of scale `η` (`E[ε_j] = 0`, `E[ε_j²] = η²`), so that
+the observed increment is `ΔY_i = ΔX_i + (ε_{i+1} − ε_i)` (the chapter's `Y = X + ε`,
+p. 366), the noisy realised sum has expectation `σ²T + 2nη²` where `T = n·Δt`: each
+increment contributes its signal second moment plus **two** noise second moments, and
+all cross-terms vanish by independence + mean-zero
+(`IndepFun.integral_mul_eq_mul_integral`, the chapter's "noise, dependence, scale"
+obstruction, §21.3 p. 361). Only the independences the cross-terms use are assumed —
+each increment against its two noise draws, and adjacent noise draws pairwise — so iid
+noise independent of the signal is a special case. No probability hypothesis on `μ` is
+needed; the integrability hypotheses are kept explicit. -/
 theorem rvExpectation_withNoise {n : ℕ} {dt T sigma eta : ℝ} (hT : T = (n : ℝ) * dt)
     (dX : ℕ → α → ℝ) (e : ℕ → α → ℝ)
     (hdXi : ∀ i ∈ Finset.range n, Integrable (dX i) μ)
@@ -236,83 +238,68 @@ theorem rvExpectation_withNoise {n : ℕ} {dt T sigma eta : ℝ} (hT : T = (n : 
     (h_mom : ∀ i ∈ Finset.range n, ∫ x, dX i x * dX i x ∂μ = sigma * sigma * dt)
     (h_noise_sq : ∀ j ∈ Finset.range (n + 1), ∫ x, e j x * e j x ∂μ = eta * eta)
     (h_noise_mean : ∀ j ∈ Finset.range (n + 1), ∫ x, e j x ∂μ = 0)
-    (h_noise_indep : ∀ i ∈ Finset.range (n + 1), ∀ j ∈ Finset.range (n + 1),
-      i ≠ j → e i ⟂ᵢ[μ] e j)
-    (h_cross : ∀ i ∈ Finset.range n, ∀ j ∈ Finset.range (n + 1), dX i ⟂ᵢ[μ] e j) :
-    ∫ x, ∑ i ∈ Finset.range n, (dX i x + e i x - e (i + 1) x) ^ 2 ∂μ
+    (h_noise_indep : ∀ i ∈ Finset.range n, e i ⟂ᵢ[μ] e (i + 1))
+    (h_cross : ∀ i ∈ Finset.range n, dX i ⟂ᵢ[μ] e i ∧ dX i ⟂ᵢ[μ] e (i + 1)) :
+    ∫ x, ∑ i ∈ Finset.range n, (dX i x + (e (i + 1) x - e i x)) ^ 2 ∂μ
       = sigma * sigma * T + 2 * (n : ℝ) * eta * eta := by
-  have hexp : ∀ (i : ℕ) (x : α), (dX i x + e i x - e (i + 1) x) ^ 2 =
+  have hexp : ∀ (i : ℕ) (x : α), (dX i x + (e (i + 1) x - e i x)) ^ 2 =
       dX i x * dX i x + e i x * e i x + e (i + 1) x * e (i + 1) x
-        + 2 * (dX i x * e i x) - 2 * (dX i x * e (i + 1) x)
+        + 2 * (dX i x * e (i + 1) x) - 2 * (dX i x * e i x)
         - 2 * (e i x * e (i + 1) x) :=
     fun _ _ ↦ by ring
   have key : ∀ i ∈ Finset.range n,
-      (∫ x : α, (dX i x + e i x - e (i + 1) x) ^ 2 ∂μ = sigma * sigma * dt + 2 * eta * eta)
-        ∧ Integrable (fun x : α ↦ (dX i x + e i x - e (i + 1) x) ^ 2) μ := by
+      (∫ x : α, (dX i x + (e (i + 1) x - e i x)) ^ 2 ∂μ = sigma * sigma * dt + 2 * eta * eta)
+        ∧ Integrable (fun x : α ↦ (dX i x + (e (i + 1) x - e i x)) ^ 2) μ := by
     intro i hi
-    have hi' : i < n := Finset.mem_range.mp hi
-    have hmem : ∀ k, k < n + 1 → k ∈ Finset.range (n + 1) :=
-      fun k hk ↦ Finset.mem_range.mpr hk
+    have h0 : i ∈ Finset.range (n + 1) := by simp at hi ⊢; omega
+    have h1 : i + 1 ∈ Finset.range (n + 1) := by simp at hi ⊢; omega
     -- the six integrable pieces
     have i1 : Integrable (fun x : α ↦ dX i x * dX i x) μ := hdXsq i hi
-    have i2 : Integrable (fun x : α ↦ e i x * e i x) μ := hesq i (hmem _ (by omega))
-    have i3 : Integrable (fun x : α ↦ e (i + 1) x * e (i + 1) x) μ :=
-      hesq (i + 1) (hmem _ (by omega))
+    have i2 : Integrable (fun x : α ↦ e i x * e i x) μ := hesq i h0
+    have i3 : Integrable (fun x : α ↦ e (i + 1) x * e (i + 1) x) μ := hesq (i + 1) h1
     have c1 : Integrable (fun x : α ↦ dX i x * e i x) μ :=
-      IndepFun.integrable_mul (h_cross i hi i (hmem _ (by omega))) (hdXi i hi)
-        (hei i (hmem _ (by omega)))
+      (h_cross i hi).1.integrable_mul (hdXi i hi) (hei i h0)
     have c2 : Integrable (fun x : α ↦ dX i x * e (i + 1) x) μ :=
-      IndepFun.integrable_mul (h_cross i hi (i + 1) (hmem _ (by omega))) (hdXi i hi)
-        (hei (i + 1) (hmem _ (by omega)))
+      (h_cross i hi).2.integrable_mul (hdXi i hi) (hei (i + 1) h1)
     have c3 : Integrable (fun x : α ↦ e i x * e (i + 1) x) μ :=
-      IndepFun.integrable_mul
-        (h_noise_indep i (hmem _ (by omega)) (i + 1) (hmem _ (by omega)) (by omega))
-        (hei i (hmem _ (by omega))) (hei (i + 1) (hmem _ (by omega)))
-    have c1' : Integrable (fun x : α ↦ 2 * (dX i x * e i x)) μ :=
-      (c1.add c1).congr (ae_of_all μ fun x ↦ by simp only [Pi.add_apply]; ring)
-    have c2' : Integrable (fun x : α ↦ 2 * (dX i x * e (i + 1) x)) μ :=
-      (c2.add c2).congr (ae_of_all μ fun x ↦ by simp only [Pi.add_apply]; ring)
-    have c3' : Integrable (fun x : α ↦ 2 * (e i x * e (i + 1) x)) μ :=
-      (c3.add c3).congr (ae_of_all μ fun x ↦ by simp only [Pi.add_apply]; ring)
+      (h_noise_indep i hi).integrable_mul (hei i h0) (hei (i + 1) h1)
+    have c1' : Integrable (fun x : α ↦ 2 * (dX i x * e i x)) μ := c1.const_mul 2
+    have c2' : Integrable (fun x : α ↦ 2 * (dX i x * e (i + 1) x)) μ := c2.const_mul 2
+    have c3' : Integrable (fun x : α ↦ 2 * (e i x * e (i + 1) x)) μ := c3.const_mul 2
     have i12 : Integrable (fun x : α ↦ dX i x * dX i x + e i x * e i x) μ := i1.add i2
     have i123 : Integrable
         (fun x : α ↦ dX i x * dX i x + e i x * e i x + e (i + 1) x * e (i + 1) x) μ :=
       i12.add i3
     have i1234 : Integrable
         (fun x : α ↦ dX i x * dX i x + e i x * e i x + e (i + 1) x * e (i + 1) x
-          + 2 * (dX i x * e i x)) μ := i123.add c1'
+          + 2 * (dX i x * e (i + 1) x)) μ := i123.add c2'
     have i12345 : Integrable
         (fun x : α ↦ dX i x * dX i x + e i x * e i x + e (i + 1) x * e (i + 1) x
-          + 2 * (dX i x * e i x) - 2 * (dX i x * e (i + 1) x)) μ := i1234.sub c2'
+          + 2 * (dX i x * e (i + 1) x) - 2 * (dX i x * e i x)) μ := i1234.sub c1'
     have p6 : Integrable
         (fun x : α ↦ dX i x * dX i x + e i x * e i x + e (i + 1) x * e (i + 1) x
-          + 2 * (dX i x * e i x) - 2 * (dX i x * e (i + 1) x)
+          + 2 * (dX i x * e (i + 1) x) - 2 * (dX i x * e i x)
           - 2 * (e i x * e (i + 1) x)) μ := i12345.sub c3'
     refine ⟨?_, p6.congr (ae_of_all μ fun x ↦ (hexp i x).symm)⟩
     rw [integral_congr_ae (ae_of_all μ fun x ↦ hexp i x)]
-    -- split into the six integrals
+    -- split into the six integrals; each cross-term factors and vanishes
     have z1 : ∫ x : α, dX i x * e i x ∂μ = (∫ x, dX i x ∂μ) * (∫ x, e i x ∂μ) :=
-      (h_cross i hi i (hmem _ (by omega))).integral_mul_eq_mul_integral
-        (hdXi i hi).1 (hei i (hmem _ (by omega))).1
+      (h_cross i hi).1.integral_mul_eq_mul_integral (hdXi i hi).1 (hei i h0).1
     have z2 : ∫ x : α, dX i x * e (i + 1) x ∂μ
         = (∫ x, dX i x ∂μ) * (∫ x, e (i + 1) x ∂μ) :=
-      (h_cross i hi (i + 1) (hmem _ (by omega))).integral_mul_eq_mul_integral
-        (hdXi i hi).1 (hei (i + 1) (hmem _ (by omega))).1
+      (h_cross i hi).2.integral_mul_eq_mul_integral (hdXi i hi).1 (hei (i + 1) h1).1
     have z3 : ∫ x : α, e i x * e (i + 1) x ∂μ
         = (∫ x, e i x ∂μ) * (∫ x, e (i + 1) x ∂μ) :=
-      (h_noise_indep i (hmem _ (by omega)) (i + 1) (hmem _ (by omega)) (by omega)
-        ).integral_mul_eq_mul_integral (hei i (hmem _ (by omega))).1
-        (hei (i + 1) (hmem _ (by omega))).1
-    rw [integral_sub i12345 c3', integral_sub i1234 c2', integral_add i123 c1',
+      (h_noise_indep i hi).integral_mul_eq_mul_integral (hei i h0).1 (hei (i + 1) h1).1
+    rw [integral_sub i12345 c3', integral_sub i1234 c1', integral_add i123 c2',
       integral_add i12 i3, integral_add i1 i2,
-      h_mom i hi, h_noise_sq i (hmem _ (by omega)), h_noise_sq (i + 1) (hmem _ (by omega)),
-      integral_const_mul, z1, h_noise_mean i (hmem _ (by omega)), mul_zero,
-      integral_const_mul, z2, h_noise_mean (i + 1) (hmem _ (by omega)), mul_zero,
-      integral_const_mul, z3, h_noise_mean i (hmem _ (by omega)),
-      h_noise_mean (i + 1) (hmem _ (by omega)), mul_zero, mul_zero]
+      h_mom i hi, h_noise_sq i h0, h_noise_sq (i + 1) h1,
+      integral_const_mul, z2, h_noise_mean (i + 1) h1, mul_zero,
+      integral_const_mul, z1, h_noise_mean i h0, mul_zero,
+      integral_const_mul, z3, h_noise_mean i h0, h_noise_mean (i + 1) h1, mul_zero, mul_zero]
     ring
-  calc ∫ x, ∑ i ∈ Finset.range n, (dX i x + e i x - e (i + 1) x) ^ 2 ∂μ
-      = ∑ i ∈ Finset.range n, ∫ x : α, (dX i x + e i x - e (i + 1) x) ^ 2 ∂μ :=
+  calc ∫ x, ∑ i ∈ Finset.range n, (dX i x + (e (i + 1) x - e i x)) ^ 2 ∂μ
+      = ∑ i ∈ Finset.range n, ∫ x : α, (dX i x + (e (i + 1) x - e i x)) ^ 2 ∂μ :=
         integral_finsetSum (Finset.range n) fun i hi ↦ (key i hi).2
     _ = ∑ i ∈ Finset.range n, (sigma * sigma * dt + 2 * eta * eta) :=
         Finset.sum_congr rfl fun i hi ↦ (key i hi).1
@@ -339,7 +326,6 @@ theorem sqrtBias_oneSided {Y : α → ℝ} (hYnn : ∀ ω, 0 ≤ Y ω)
     {sigma : ℝ} (hsig : 0 < sigma) (hint : Integrable Y μ)
     (hmean : ∫ ω, Y ω ∂μ = sigma * sigma) (hnd : μ {ω | Y ω ≠ sigma * sigma} ≠ 0) :
     ∫ ω, Real.sqrt (Y ω) ∂μ < sigma := by
-  have hm : 0 < sigma * sigma := by positivity
   have hsqrtsig : Real.sqrt (sigma * sigma) = sigma := Real.sqrt_mul_self (le_of_lt hsig)
   set c : ℝ := (2 * Real.sqrt (sigma * sigma))⁻¹ with hc
   have hcpos : 0 < c := by positivity
@@ -350,7 +336,6 @@ theorem sqrtBias_oneSided {Y : α → ℝ} (hYnn : ∀ ω, 0 ≤ Y ω)
     intro ω
     have e1 : (Real.sqrt (Y ω)) ^ 2 = Y ω := Real.sq_sqrt (hYnn ω)
     have e2 : (Real.sqrt (sigma * sigma)) ^ 2 = sigma * sigma := Real.sq_sqrt (by positivity)
-    have hbpos : (0 : ℝ) < Real.sqrt (sigma * sigma) := by positivity
     have hkey : (Real.sqrt (Y ω) - Real.sqrt (sigma * sigma)) ^ 2
         = Y ω + sigma * sigma - 2 * Real.sqrt (Y ω) * Real.sqrt (sigma * sigma) := by
       rw [sub_sq, e1, e2]
@@ -393,7 +378,6 @@ theorem sqrtBias_oneSided {Y : α → ℝ} (hYnn : ∀ ω, 0 ≤ Y ω)
       = Real.sqrt (sigma * sigma) := by
     have h1 : Integrable (fun ω : α ↦ c * Y ω) μ :=
       (hint.mul_const c).congr (ae_of_all μ fun ω ↦ mul_comm _ _)
-    have h2sqrt : (2 * Real.sqrt (sigma * sigma)) ≠ 0 := by positivity
     have hconst : ∫ ω : α, c * (sigma * sigma) ∂μ = c * (sigma * sigma) := by
       have h := integral_const (c * (sigma * sigma)) (μ := μ)
       rw [h]
@@ -482,7 +466,7 @@ theorem sqrtBias_absGaussianSample {v : ℝ≥0} (hv : v ≠ 0) :
     simp
   have hmain := sqrtBias_oneSided (μ := gaussianReal 0 v) (Y := fun x : ℝ ↦ x ^ 2)
     (sigma := Real.sqrt (v : ℝ)) (fun _ ↦ sq_nonneg _) hsqrtpos
-    (@memLp_id_gaussianReal 0 v (2 : ℝ≥0)).integrable_sq
+    (memLp_id_gaussianReal 2).integrable_sq
     (by rw [MathFin.integral_sq_gaussianReal v]; exact hsqrtsq.symm) hnd
   rw [show (fun x : ℝ ↦ |x|) = fun x : ℝ ↦ Real.sqrt (x ^ 2) from funext habs]
   exact hmain
@@ -498,7 +482,7 @@ variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
 /-- **Calc 21.4's drift column (the law).** For `X_t = μt + σB_t` with `B_T ~ N(0, T)`,
 the endpoint drift estimator `(X_T − X_0)/T = μ + (σ/T)·B_T` has law `N(μ, σ²/T)` — an
 affine pushforward of the gaussianReal sample (`gaussianReal_const_mul` then
-`gaussianReal_const_add`, the `hasLaw_eval`-style route). The variance slot is `σ²/T`,
+`gaussianReal_const_add`). The variance slot is `σ²/T`,
 giving the chapter's flat-in-`n` drift standard error `σ/√T` (p. 363). -/
 theorem drift_se_endpoint_hasLaw {T : ℝ} (hT : 0 < T) (mu sigma : ℝ) {B : Ω → ℝ}
     (hB : HasLaw B (gaussianReal 0 T.toNNReal) P) :
