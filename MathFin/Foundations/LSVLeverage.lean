@@ -47,6 +47,8 @@ from measure theory and exact real arithmetic, with no stochastic-process hypoth
   face carries only the differential identity. Details recorded below.
 -/
 
+@[expose] public section
+
 namespace MathFin.LSV
 
 open MeasureTheory ProbabilityTheory Filter Topology
