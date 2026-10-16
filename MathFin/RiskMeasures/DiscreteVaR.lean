@@ -117,17 +117,17 @@ section Evaluation
 
 variable {ι : Type*} [Fintype ι] {q L : ι → ℝ} {α : ℝ}
 
-/-- **The evaluation principle**: if `v₀` is a loss level carrying `q`-mass ≥ α and every strictly
-lower level carries mass < α, then `finiteVaR q L α = v₀`. Pure order arithmetic, with no
-hypotheses on `q` or `α`. -/
+/-- **The evaluation principle**: if the `q`-mass of `{L ≤ v₀}` reaches α and the mass of
+`{L ≤ x}` stays below α for every `x < v₀`, then `finiteVaR q L α = v₀`. Pure order arithmetic,
+with no hypotheses on `q` or `α`. -/
 theorem finiteVaR_eq_of_mem_of_forall_lt {v₀ : ℝ}
     (hmem : ∑ i ∈ Finset.univ.filter (L · ≤ v₀), q i ≥ α)
     (hbelow : ∀ x < v₀, ∑ i ∈ Finset.univ.filter (L · ≤ x), q i < α) :
     finiteVaR q L α = v₀ :=
   IsLeast.csInf_eq ⟨hmem, fun x hx ↦ not_lt.1 fun h ↦ (hbelow x h).not_ge hx⟩
 
-/-- The loss values carrying mass ≥ α form a nonempty finite set: the largest loss value carries
-the full mass `1 ≥ α`. -/
+/-- The loss values `v` at which the mass of `{L ≤ v}` is at least α form a nonempty finite set:
+at the largest loss value that mass is the full mass `1 ≥ α`. -/
 theorem nonempty_values_mass_ge (hq : q ∈ stdSimplex ℝ ι) (hα1 : α ≤ 1) :
     ((Finset.univ.image L).filter
       (fun v ↦ ∑ i ∈ Finset.univ.filter (L · ≤ v), q i ≥ α)).Nonempty := by
@@ -137,7 +137,8 @@ theorem nonempty_values_mass_ge (hq : q ∈ stdSimplex ℝ ι) (hα1 : α ≤ 1)
   exact ⟨_, Finset.mem_filter.2 ⟨Finset.max'_mem _ hne, by rwa [hfull, hq.2]⟩⟩
 
 /-- **Attainment.** For `α ∈ (0, 1]`, the infimum over `ℝ` is the minimum over the loss values
-`Finset.image L univ` that carry `q`-mass ≥ α, so VaR is attained at a loss value. -/
+`v ∈ Finset.image L univ` at which the `q`-mass of `{L ≤ v}` is at least α, so VaR is attained at
+a loss value. -/
 theorem finiteVaR_eq_value_min (hq : q ∈ stdSimplex ℝ ι) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR q L α = ((Finset.univ.image L).filter
       (fun v ↦ ∑ i ∈ Finset.univ.filter (L · ≤ v), q i ≥ α)).min'
@@ -161,7 +162,7 @@ theorem finiteVaR_two_point {a b c : ℝ} (hab : a + b = 1) (hc : 0 < c)
       = (if 0 ≤ x then a else 0) + (if c ≤ x then b else 0))
     (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR q L α = if α ≤ a then 0 else c := by
-  split_ifs with h <;> refine finiteVaR_eq_of_mem_of_forall_lt ?_ fun x hx ↦ ?_ <;> rw [hcdf] <;>
+  split_ifs <;> refine finiteVaR_eq_of_mem_of_forall_lt ?_ fun x hx ↦ ?_ <;> rw [hcdf] <;>
     split_ifs <;> linarith
 
 end Evaluation
@@ -218,13 +219,15 @@ private lemma joint_half₁_cdf (x : ℝ) :
     ∑ p ∈ Finset.univ.filter (halfL₁ · ≤ x), jointQ p
       = (if 0 ≤ x then 24/25 else 0) + (if 50 ≤ x then 1/25 else 0) := by
   rw [Finset.sum_filter, Fintype.sum_prod_type]
-  norm_num [halfL₁, jointQ]; split_ifs <;> norm_num
+  norm_num [halfL₁, jointQ]
+  split_ifs <;> norm_num
 
 private lemma joint_half₂_cdf (x : ℝ) :
     ∑ p ∈ Finset.univ.filter (halfL₂ · ≤ x), jointQ p
       = (if 0 ≤ x then 24/25 else 0) + (if 50 ≤ x then 1/25 else 0) := by
   rw [Finset.sum_filter, Fintype.sum_prod_type]
-  norm_num [halfL₂, jointQ]; split_ifs <;> norm_num
+  norm_num [halfL₂, jointQ]
+  split_ifs <;> norm_num
 
 /-- Mass of `{halfL₁ + halfL₂ ≤ x}` under the joint law: no default w.p. `9216/10000 = (24/25)²`,
 one default w.p. `768/10000 = 2·(24/25)(1/25)`, two w.p. `16/10000 = (1/25)²`. -/
@@ -233,7 +236,8 @@ private lemma joint_cdf (x : ℝ) :
       = (if 0 ≤ x then 9216/10000 else 0) + (if 50 ≤ x then 768/10000 else 0)
         + (if 100 ≤ x then 16/10000 else 0) := by
   rw [Finset.sum_filter, Fintype.sum_prod_type]
-  norm_num [halfL₁, halfL₂, jointQ]; split_ifs <;> norm_num
+  norm_num [halfL₁, halfL₂, jointQ]
+  split_ifs <;> norm_num
 
 /-- The first half-bond's VaR as a function of the level `α ∈ (0, 1]`. -/
 theorem vaR_half₁_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
