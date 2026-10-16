@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.Foundations.WienerIntegralGaussian
 public import MathFin.FixedIncome.VasicekBondPrice
+public import MathFin.FixedIncome.VasicekSDEGaussian
 
 /-!
 # Hull–White short rates: deterministic part, Gaussian law, affine bonds, calibration
@@ -60,8 +61,9 @@ reflection.
 
 ## Result
 
-Public definitions: `deterministic`, `kernel`, `kernelV`, `kernelLp`, `integratedRate`,
-`integratedMean`, `bondRate`, `bondA`, `theta`, `calibAlpha`.
+Public definitions: `deterministic`, `integratedRate`,
+`integratedMean`, `bondRate`, `bondA`, `theta`, `calibAlpha` (the diffusion kernel
+is `vasicekKernel`/`vasicekKernelLp` of `VasicekSDEGaussian`, reused, not redefined).
 
 Public lemmas (all in `namespace MathFin.HullWhite`):
 
@@ -69,8 +71,8 @@ Public lemmas (all in `namespace MathFin.HullWhite`):
   `deterministic_const_closed_form`, `deterministic_const_tendsto`,
   `deterministic_add_exponential`, `deterministic_eq_of_solves_ODE`, `mean` —
   the deterministic part;
-* `kernel_memLp`, `kernel_integral_sq`, `integratedRate_hasLaw_gaussian` — the short
-  rate's Gaussian law with the Vasicek variance;
+* `integratedRate_hasLaw_gaussian` — the short rate's Gaussian law with the Vasicek
+  variance;
 * `integral_exp_pos_const`, `integral_exp_neg_eq_bondB`, `beta_integral`,
   `integral_theta_B`, `integratedMean_eq` — the scalar-integral identities behind the
   affine coefficients;
@@ -81,9 +83,7 @@ Public lemmas (all in `namespace MathFin.HullWhite`):
   `calibIntegratedMean`, `reprices_curve` — the calibration `θ`-formula and the
   exact repricing of the initial forward curve.
 
-Supporting lemmas (`kernelLp_integral_sq`, `kernelV_nonneg`, `kernelWienerLaw`,
-`forcing_integral_continuous`, `vasKernelLp_integral_sq`, `vasKernelV_nonneg`,
-`vasKernelWienerLaw`, `calib_deriv_eq`, `calibVar_key`) are `private`.
+Supporting lemmas (`forcing_integral_continuous`, `calib_deriv_eq`, `calibVar_key`) are `private`.
 -/
 
 @[expose] public section
@@ -256,122 +256,33 @@ theorem mean (θ : ℝ → ℝ) (κ : ℝ) (α : ℝ → ℝ)
 
 /-! ### The short rate and its Gaussian law -/
 
-/-- The HW diffusion kernel `e^{−κ(t−u)}` — the deterministic integrand of the
-short rate's Wiener part `σ∫₀ᵗ e^{−κ(t−u)} dB_u`. -/
-noncomputable def kernel (κ t : ℝ) : ℝ → ℝ := fun u ↦ Real.exp (-(κ * (t - u)))
-
-/-- The closed form `(1 − e^{−2κt})/(2κ)` of the kernel's squared `L²`-norm over
-`(0, t]`, `∫₀ᵗ e^{−2κ(t−u)} du`; it equals that integral for `κ ≠ 0`
-(`kernel_integral_sq`). The Vasicek variance factor `/2κ`. -/
-noncomputable def kernelV (κ t : ℝ) : ℝ := (1 - Real.exp (-(2 * κ * t))) / (2 * κ)
-
-/-- The HW kernel is in `L²((0, t])`: on the support it lies in `(0, 1]` for
-`κ > 0` (mirrors `vasicekIntegratedKernel_memLp` with bound `1`). -/
-lemma kernel_memLp {κ : ℝ} (hκ : 0 < κ) (t : ℝ≥0) :
-    MemLp (kernel κ (t : ℝ)) 2 (volume.restrict (Set.Ioc (0 : ℝ) (t : ℝ))) := by
-  refine (memLp_top_of_bound (by unfold kernel; fun_prop) 1 ?_).mono_exponent le_top
-  refine (ae_restrict_iff' measurableSet_Ioc).mpr (ae_of_all _ ?_)
-  intro u hu
-  rw [kernel, Real.norm_eq_abs]
-  have htu : 0 ≤ (t : ℝ) - u := by linarith [hu.2]
-  rw [abs_of_nonneg (Real.exp_pos _).le]
-  exact Real.exp_le_one_iff.mpr (by nlinarith [mul_nonneg hκ.le htu])
-
-/-- The HW kernel as an element of `L²((0, t])`. -/
-noncomputable def kernelLp {κ : ℝ} (hκ : 0 < κ) (t : ℝ≥0) :
-    Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (t : ℝ))) :=
-  (kernel_memLp hκ t).toLp _
-
-/-- **The variance-fixing integral** (mirrors `vasicekIntegratedKernel_integral_sq`):
-`∫₀ᵗ e^{−2κ(t−u)} du = (1 − e^{−2κt})/(2κ)`, by the FTC with antiderivative
-`F(u) = e^{−2κ(t−u)}/(2κ)`. -/
-lemma kernel_integral_sq {κ : ℝ} (hκ : κ ≠ 0) (t : ℝ≥0) :
-    ∫ u in Set.Ioc (0 : ℝ) (t : ℝ), (kernel κ (t : ℝ) u) ^ 2 ∂volume
-      = kernelV κ (t : ℝ) := by
-  rw [← intervalIntegral.integral_of_le (by positivity : (0 : ℝ) ≤ (t : ℝ))]
-  have hderiv : ∀ u ∈ Set.uIcc (0 : ℝ) (t : ℝ),
-      HasDerivAt (fun u : ℝ ↦ Real.exp (-(2 * κ * ((t : ℝ) - u))) / (2 * κ))
-        ((kernel κ (t : ℝ) u) ^ 2) u := by
-    intro u _
-    have hsq : Real.exp (-(2 * κ * ((t : ℝ) - u)))
-        = (Real.exp (-(κ * ((t : ℝ) - u)))) ^ 2 := by
-      rw [pow_two, ← Real.exp_add]
-      congr 1
-      ring
-    have harg : HasDerivAt (fun u : ℝ ↦ -(2 * κ * ((t : ℝ) - u))) (2 * κ) u := by
-      have h : HasDerivAt (fun u : ℝ ↦ -(2 * κ * ((t : ℝ) - u))) (-(2 * κ * (-1))) u := by
-        apply HasDerivAt.neg
-        apply HasDerivAt.const_mul
-        simpa using (hasDerivAt_id u).const_sub (t : ℝ)
-      simpa using h
-    have hcomb := harg.exp.div_const (2 * κ)
-    have hval : Real.exp (-(2 * κ * ((t : ℝ) - u))) * (2 * κ) / (2 * κ)
-        = (kernel κ (t : ℝ) u) ^ 2 := by
-      rw [hsq, kernel]
-      field_simp
-    rw [hval] at hcomb
-    exact hcomb
-  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv
-    (by apply Continuous.intervalIntegrable; unfold kernel; fun_prop)]
-  simp only [sub_self, mul_zero, neg_zero, Real.exp_zero, sub_zero]
-  rw [kernelV]
-  ring
-
-/-- `∫₀ᵗ kernel² = kernelV` for the `L²`-representative (a.e. the honest kernel). -/
-private lemma kernelLp_integral_sq {κ : ℝ} (hκ : 0 < κ) (t : ℝ≥0) :
-    (∫ u in Set.Ioc (0 : ℝ) (t : ℝ), (kernelLp hκ t u) ^ 2 ∂volume)
-      = kernelV κ (t : ℝ) := by
-  rw [show (∫ u in Set.Ioc (0 : ℝ) (t : ℝ), (kernelLp hκ t u) ^ 2 ∂volume)
-        = ∫ u in Set.Ioc (0 : ℝ) (t : ℝ), (kernel κ (t : ℝ) u) ^ 2 ∂volume by
-      refine integral_congr_ae ?_
-      filter_upwards [(kernel_memLp hκ t).coeFn_toLp] with u hu
-      rw [kernelLp, hu]]
-  exact kernel_integral_sq hκ.ne' t
-
-/-- `kernelV ≥ 0` (an integral of a square). -/
-private lemma kernelV_nonneg {κ : ℝ} (hκ : 0 < κ) (t : ℝ≥0) :
-    (0 : ℝ) ≤ kernelV κ (t : ℝ) := by
-  rw [← kernelLp_integral_sq hκ t]
-  exact integral_nonneg fun u ↦ sq_nonneg _
-
-/-- The centred diffusion law for the HW kernel: `σ∫₀ᵗ e^{−κ(t−u)} dB_u`'s core is
-centred Gaussian with variance `kernelV κ t` (mirrors the private
-`vasicekWienerLaw` of the template). -/
-private lemma kernelWienerLaw (hB : IsPreBrownianReal B μ) {κ : ℝ} (hκ : 0 < κ)
-    (t : ℝ≥0) :
-    HasLaw (fun ω ↦ wienerIntegralLp B hB t (kernelLp hκ t) ω)
-      (gaussianReal 0 (kernelV κ (t : ℝ)).toNNReal) μ := by
-  have h0 := wienerIntegralLp_hasLaw_gaussian hB t (kernelLp hκ t)
-  rwa [kernelLp_integral_sq hκ t] at h0
+/- The HW diffusion kernel `e^{−κ(t−u)}` — the deterministic integrand of the
+short rate's Wiener part `σ∫₀ᵗ e^{−κ(t−u)} dB_u` — is the Vasicek kernel
+`vasicekKernel` of `FixedIncome/VasicekSDEGaussian` verbatim, and is used through its
+`L²` element `vasicekKernelLp` there; nothing kernel-specific is redefined here. -/
 
 /-- **The HW short rate in Wiener representation** (the counterpart of the Vasicek
 short rate of `VasicekSDEGaussian`), defined as `r_t = α(t) + σ·∫₀ᵗ e^{−κ(t−u)} dB_u`
-with `α` the particular solution `deterministic θ κ r₀`. That it solves the HW SDE is
+with `α` the particular solution `deterministic θ κ r₀` and the diffusion kernel the
+Vasicek `vasicekKernelLp` reused verbatim. That it solves the HW SDE is
 the modelling bridge, not proved here. -/
 noncomputable def integratedRate (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ)
     (κ σ r₀ : ℝ) (hκ : 0 < κ) (t : ℝ≥0) (ω : Ω) : ℝ :=
   deterministic θ κ r₀ (t : ℝ)
-    + σ * (wienerIntegralLp B hB t (kernelLp hκ t) ω)
+    + σ * (wienerIntegralLp B hB t (vasicekKernelLp κ hκ.le t) ω)
 
 /-- **The HW short rate is Gaussian**: `r_t ~ N(α(t), σ²(1 − e^{−2κt})/(2κ))` —
-θ(t) shifted the mean and left the Vasicek variance untouched (the affine-map
-argument `x ↦ α(t) + σx` applied to the centred Wiener integral, exactly as in
-`vasicekShortRate_hasLaw_gaussian`). -/
+θ(t) shifted the mean and left the Vasicek variance untouched: the zero-mean Vasicek law
+(`vasicekShortRate_hasLaw_gaussian` at `r₀ = θ = 0`) shifted by `α(t)`. -/
 theorem integratedRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ)
     (κ σ r₀ : ℝ) (hκ : 0 < κ) (t : ℝ≥0) :
     HasLaw (integratedRate hB θ κ σ r₀ hκ t)
       (gaussianReal (deterministic θ κ r₀ (t : ℝ))
-        ((σ ^ 2 * kernelV κ (t : ℝ)).toNNReal)) μ := by
-  have hW := kernelWienerLaw hB hκ t
-  have hV_nonneg : (0 : ℝ) ≤ kernelV κ (t : ℝ) := kernelV_nonneg hκ t
-  have hShift := gaussianReal_const_add (gaussianReal_const_mul hW σ)
-    (deterministic θ κ r₀ (t : ℝ))
-  convert hShift using 2
-  · rfl
-  · ring
-  · refine NNReal.coe_injective ?_
-    rw [Real.coe_toNNReal _ (mul_nonneg (sq_nonneg σ) hV_nonneg), NNReal.coe_mul,
-      NNReal.coe_mk, Real.coe_toNNReal _ hV_nonneg]
+        ((vasicekSDEVariance σ κ (t : ℝ)).toNNReal)) μ := by
+  unfold integratedRate
+  simpa only [vasicekSDEMean, zero_mul, zero_add, add_zero] using
+    gaussianReal_const_add (vasicekShortRate_hasLaw_gaussian hB 0 0 σ hκ t)
+      (deterministic θ κ r₀ (t : ℝ))
 
 /-! ### The affine bond price -/
 
@@ -540,67 +451,19 @@ noncomputable def bondRate (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ) (κ 
   integratedMean θ κ r₀ (T : ℝ)
     + σ * (wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
 
-/-- `∫₀ᵀ g² = vasicekBondV κ T` for the `L²`-representative integrated kernel
-(reconstructs the template's private `vasicekIntegratedKernelLp_integral_sq`
-from public pieces). -/
-private lemma vasKernelLp_integral_sq {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
-    (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernelLp hκ T u) ^ 2 ∂volume)
-      = vasicekBondV κ (T : ℝ) := by
-  rw [show (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernelLp hκ T u) ^ 2 ∂volume)
-        = ∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernel κ T u) ^ 2 ∂volume by
-      refine integral_congr_ae ?_
-      filter_upwards [(vasicekIntegratedKernel_memLp hκ T).coeFn_toLp] with u hu
-      rw [vasicekIntegratedKernelLp, hu]]
-  exact vasicekIntegratedKernel_integral_sq hκ.ne' T
-
-/-- `vasicekBondV ≥ 0` (an integral of a square; reconstructs the template's
-private `vasicekBondV_nonneg`). -/
-private lemma vasKernelV_nonneg {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
-    (0 : ℝ) ≤ vasicekBondV κ (T : ℝ) := by
-  rw [← vasKernelLp_integral_sq hκ T]
-  exact integral_nonneg fun u ↦ sq_nonneg _
-
-/-- The centred Wiener law for the Vasicek integrated kernel (reconstructs the
-template's private `vasicekWienerLaw`). -/
-private lemma vasKernelWienerLaw (hB : IsPreBrownianReal B μ) {κ : ℝ} (hκ : 0 < κ)
-    (T : ℝ≥0) :
-    HasLaw (fun ω ↦ wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
-      (gaussianReal 0 (vasicekBondV κ (T : ℝ)).toNNReal) μ := by
-  have h0 := wienerIntegralLp_hasLaw_gaussian hB T (vasicekIntegratedKernelLp hκ T)
-  rwa [vasKernelLp_integral_sq hκ T] at h0
-
 /-- **The HW zero-coupon bond price** — the exponential-Gaussian moment:
 `P(0,T) = 𝔼[exp(−bondRate T)] = exp(−∫₀ᵀ α + σ²·V(T)/2)` with `V = vasicekBondV`
-the Vasicek variance, unchanged — the exact analogue of `vasicekBondPrice_eq`. -/
+the Vasicek variance, unchanged: the zero-mean `vasicekBondPrice_eq` (`r₀ = θ = 0`)
+times the deterministic discount `exp(−∫₀ᵀ α)`. -/
 theorem bondPrice_eq (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ) (κ σ r₀ : ℝ)
     (hκ : 0 < κ) (T : ℝ≥0) :
     ∫ ω, Real.exp (-(bondRate hB θ κ σ r₀ hκ T ω)) ∂μ
       = Real.exp (-(integratedMean θ κ r₀ (T : ℝ))
           + σ ^ 2 * vasicekBondV κ (T : ℝ) / 2) := by
-  set M : ℝ := integratedMean θ κ r₀ (T : ℝ) with hM
-  set V : ℝ := vasicekBondV κ (T : ℝ) with hV
-  have hV_nonneg : (0 : ℝ) ≤ V := hV ▸ vasKernelV_nonneg hκ T
-  have hW : HasLaw (fun ω ↦ wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
-      (gaussianReal 0 V.toNNReal) μ := hV ▸ vasKernelWienerLaw hB hκ T
-  -- Factor the integrand: exp(−(M + σW)) = exp(−M)·exp((−σ)·W).
-  have hfactor : ∀ ω, Real.exp (-(bondRate hB θ κ σ r₀ hκ T ω))
-      = Real.exp (-M) * Real.exp ((-σ) *
-          (wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)) := by
-    intro ω
-    rw [bondRate, ← hM, ← Real.exp_add]
-    congr 1
-    ring
-  simp_rw [hfactor]
-  rw [integral_const_mul,
-    show (fun ω ↦ Real.exp ((-σ) * (wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)))
-        = (fun x ↦ Real.exp ((-σ) * x))
-          ∘ (fun ω ↦ wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω) from rfl,
-    hW.integral_comp (by fun_prop : AEStronglyMeasurable (fun x ↦ Real.exp ((-σ) * x))
-      (gaussianReal 0 V.toNNReal)),
-    integral_exp_mul_gaussianReal_zero (-σ) V.toNNReal,
-    Real.coe_toNNReal _ hV_nonneg, ← Real.exp_add]
-  congr 1
-  ring
+  have h := vasicekBondPrice_eq hB 0 0 σ hκ T
+  simp only [vasicekIntegratedRate, vasicekIntegratedMean, zero_mul, add_zero, zero_add,
+    neg_zero] at h
+  simp_rw [bondRate, neg_add, Real.exp_add, integral_const_mul, h]
 
 /-- The HW affine coefficient `A(T) = exp(−∫₀ᵀ θ(s)·B(T−s) ds + σ²·V(T)/2)` —
 Vasicek's `vasicekBondA` with the constant-drift term `θ_v·(T − B(T))` replaced by
@@ -702,8 +565,9 @@ theorem calibAlpha_solves_ODE (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ �
 /-- **The calibrated deterministic part**: the HW particular solution driven by `theta`
 and started at the initial forward `r₀ = f(0,0)` is exactly
 `β(t) = f(0,t) + (σ²/2κ²)(1 − e^{−κt})²` — the initial forward plus the convexity
-correction (`calibMean_eq_forward` turns it into the expected short rate). Route: `calibAlpha_solves_ODE` (verified by
-differentiation) + ODE uniqueness (`deterministic_eq_of_solves_ODE`; note
+correction (`calibMean_eq_forward` turns it into the expected short rate). Route:
+`calibAlpha_solves_ODE` (verified by differentiation) + ODE uniqueness
+(`deterministic_eq_of_solves_ODE`; note
 `β(0) = f(0,0)` automatically, since `(1 − e^{−κ·0})² = 0`). Only `κ ≠ 0` is
 needed — the θ-formula divides by κ; no positivity enters the deterministic
 identity. -/
