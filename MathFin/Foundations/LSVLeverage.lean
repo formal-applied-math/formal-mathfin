@@ -22,7 +22,7 @@ from measure theory and exact real arithmetic, with no stochastic-process hypoth
   and `L²(S)` crosses the conditional expectation (`lsv_condExp_factors_through_state`,
   `lsv_condExp_pullout`);
 * the pinned product and its extremes (`lsv_pinned_product`, eq. 11.6): `m = 1` recovers
-  pure local vol, `m = σ_loc²` switches the leverage off (Ex. 11.1);
+  pure local vol, `m = σ_loc²` (with `σ_loc > 0`) switches the leverage off (Ex. 11.1);
 * the coin-toss λ-dial family (§11.4 / Calc 11.3): branch variances `29/400 ∓ λ/20` keep
   `E[v^λ]` pinned at `29/400` for every λ; the λ = 0 endpoint is flat leverage with
   squared value `25/29` at `σ_loc = 1/4` (the exact square of the chapter's "0.93");
@@ -106,8 +106,8 @@ theorem lsv_leverage_of_m_one (σ_loc m : ℝ) (h : m = 1) :
     σ_loc / Real.sqrt m = σ_loc := by
   simp [h]
 
-/-- **Second extreme (Ex. 11.1): `m = σ_loc²` ⇒ `L = 1`.** When the stochastic part already
-fits the surface, `E[v | S = K] = σ_loc²(K)` and the leverage "switches itself off". -/
+/-- **Second extreme (Ex. 11.1): for `σ_loc > 0`, `m = σ_loc²` ⇒ `L = 1`.** When the stochastic
+part already fits the surface, `E[v | S = K] = σ_loc²(K)` and the leverage "switches itself off". -/
 theorem lsv_leverage_switches_off (σ_loc m : ℝ) (hσ : 0 < σ_loc) (h : m = σ_loc ^ 2) :
     σ_loc / Real.sqrt m = 1 := by
   rw [h, Real.sqrt_sq hσ.le, div_self hσ.ne']
@@ -185,8 +185,8 @@ theorem cointoss_bsd2_atm {F σ : ℝ} (hF : 0 < F) (hσ : 0 < σ) :
   rw [bsd2_eq hσ one_pos, h1, Real.sqrt_one, mul_one, zero_add, zero_sub]
   field_simp
 
-/-- The ATM branch density in product form: the Gaussian normalization constant times the
-Jacobian telescope to `exp(−σ²/8)`. (Auxiliary engine for the ATM comparisons; the
+/-- The ATM branch density in product form (for `F, σ > 0`): the Gaussian normalization constant
+times the Jacobian telescope to `exp(−σ²/8)`. (Auxiliary engine for the ATM comparisons; the
 `√(2π)` is the normalization constant of `gaussianPDFReal 0 1`.) -/
 theorem cointossPhi_atm_prod {F σ : ℝ} (hF : 0 < F) (hσ : 0 < σ) :
     cointossPhi F σ F * (F * σ) * Real.sqrt (2 * Real.pi) =
@@ -253,10 +253,10 @@ noncomputable def cointossM (F σ_lo σ_hi v_lo v_hi K : ℝ) : ℝ :=
   (v_lo * cointossPhi F σ_lo K + v_hi * cointossPhi F σ_hi K) /
     (cointossPhi F σ_lo K + cointossPhi F σ_hi K)
 
-/-- **The ATM posterior variance sits below the unconditional mean:**
-`m(F) < (v_lo + v_hi)/2`. For `σ_loc > 0` and `m(F) > 0` this transfers to the leverage,
-`σ_loc/√m(F) > σ_loc/√((v_lo + v_hi)/2)`; that transfer is not stated here. Engine: the pinned
-algebra `(v_hi − v_lo)(φ_lo(F) − φ_hi(F)) > 0`. -/
+/-- **The ATM posterior variance sits below the unconditional mean:** for `F, σ_lo > 0`,
+`σ_lo < σ_hi` and `v_lo < v_hi`, `m(F) < (v_lo + v_hi)/2`. For `σ_loc > 0` and `m(F) > 0`
+this transfers to the leverage, `σ_loc/√m(F) > σ_loc/√((v_lo + v_hi)/2)`; that transfer is
+not stated here. Engine: the pinned algebra `(v_hi − v_lo)(φ_lo(F) − φ_hi(F)) > 0`. -/
 theorem cointossM_atm_lt_uncond {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F)
     (hlo : 0 < σ_lo) (hhi : σ_lo < σ_hi) (hvhi : v_lo < v_hi) :
     cointossM F σ_lo σ_hi v_lo v_hi F < (v_lo + v_hi) / 2 := by
@@ -429,7 +429,8 @@ theorem cointossM_wing_limit_atTop {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F) 
   filter_upwards [eventually_gt_atTop (0:ℝ)] with K hK
   exact (cointossM_eq_of_pos hlo (hlo.trans hhi) hK).symm
 
-/-- **The posterior variance is not constant** (Ex. 11.2's punchline: the posterior `m` is a
+/-- **The posterior variance is not constant** for `F, σ_lo > 0`, `σ_lo < σ_hi` and
+`v_lo < v_hi` (Ex. 11.2's punchline: the posterior `m` is a
 genuine function of the strike; for a flat `σ_loc > 0` and `m > 0` the leverage `σ_loc/√m`
 is then not flat either, a transfer not stated here).
 If `m` were constant it would equal its own upper-wing limit `v_hi`; but at the money
