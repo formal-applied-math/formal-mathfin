@@ -34,9 +34,11 @@ from a local-vol model is not developed here. The headline results:
   `(T+T₀)·√(T+T₀)`). The numerator `(3/2)T + 2T₀` is the one consistent with the
   rule of two (`ruleOfTwo`).
 * `dupireRatio_sqrt_slope` — the σ_loc reading: the same slope for `√R` is
-  `ψ₁·((3/2)T + 2T₀)/(T+T₀)^{3/2}` — the local-vol ATM skew implied by the
-  surface (for `T > 0`); its closed form at `T = 0` is `2ψ₁/√T₀`, and it behaves
-  like `(3/2)ψ₁/√T` as `T → ∞` (`localSkew_tendsto`).
+  `ψ₁·((3/2)T + 2T₀)/(T+T₀)^{3/2}` — a first-order-in-ε reading of the local-vol
+  ATM skew implied by the surface (for `T > 0`), not the actual skew of the
+  `ε = 1` surface, which carries `O(ψ₁³)` corrections; its closed form at
+  `T = 0` is `2ψ₁/√T₀`, and it behaves like `(3/2)ψ₁/√T` as `T → ∞`
+  (`localSkew_tendsto`).
 * `forwardSkew_eq_half` / `forwardSkew_tendsto` — eq 10.9 as chapter math
   anchored on the proved slope (the rule-of-two-in-reverse half-step), with the
   closed-form ratio of forward skew to today's implied skew `ψ₁/√T₀` at
@@ -368,15 +370,12 @@ private noncomputable def dminus (k w m : ℝ) : ℝ :=
 
 /-- The smile surface is affine in `k`, so positivity at one point spreads to a
 neighborhood. -/
-private theorem smileSurface_eventually_pos_k {σ ψ₁ T₀ ε T k : ℝ} (hS : 0 < T + T₀)
+private theorem smileSurface_eventually_pos_k {σ ψ₁ T₀ ε T k : ℝ}
     (hk : 0 < smileSurface σ ψ₁ T₀ ε k T) :
     ∀ᶠ y in nhds k, 0 < smileSurface σ ψ₁ T₀ ε y T := by
   have hcont : Continuous (fun y : ℝ ↦ smileSurface σ ψ₁ T₀ ε y T) := by
-    unfold smileSurface
-    exact continuous_const.add (((continuous_const).mul continuous_id).div
-      continuous_const (fun _ ↦ (Real.sqrt_pos.mpr hS).ne'))
-  exact (show ContinuousAt (fun _ : ℝ ↦ (0:ℝ)) k from continuousAt_const).eventually_lt
-    hcont.continuousAt hk
+    unfold smileSurface; fun_prop
+  exact hcont.continuousAt.eventually_const_lt hk
 
 /-- Same along the maturity axis: `σ̃(t) = σ + εψ₁k/√(t+T₀)` is continuous at
 `T`, and `t > 0` holds eventually at `T > 0`. -/
@@ -391,14 +390,13 @@ private theorem smileSurface_eventually_pos_t {σ ψ₁ T₀ ε k T : ℝ} (hT :
   have hca : ContinuousAt (fun t : ℝ ↦ smileSurface σ ψ₁ T₀ ε k t) T := by
     unfold smileSurface
     exact continuousAt_const.add (hcst.div hsca (Real.sqrt_pos.mpr hS).ne')
-  filter_upwards [(show ContinuousAt (fun _ : ℝ ↦ (0:ℝ)) T from continuousAt_const).eventually_lt
-    hca hk, eventually_gt_nhds hT] with t h1t h2t
+  filter_upwards [hca.eventually_const_lt hk, eventually_gt_nhds hT] with t h1t h2t
   exact ⟨h1t, h2t⟩
 
 /-- **The `k`-chain of the call price** (both `k`-channels: strike `F·e^k` and
 surface tilt), from `hasDerivAt_blackForm_comp` at the variance composite. -/
 private theorem hasDerivAt_bsCallSmile_k {F σ ψ₁ T₀ ε k T : ℝ} (hF : 0 < F) (hT : 0 < T)
-    (hS : 0 < T + T₀) (hst : 0 < smileSurface σ ψ₁ T₀ ε k T) :
+    (hst : 0 < smileSurface σ ψ₁ T₀ ε k T) :
     HasDerivAt (fun y ↦ bsCallSmile F σ ψ₁ T₀ ε y T)
       (F * (gaussianPDFReal 0 1 (dpl k (totalVar σ ψ₁ T₀ ε k T))
             * (-(1 / Real.sqrt (totalVar σ ψ₁ T₀ ε k T))
@@ -416,7 +414,7 @@ private theorem hasDerivAt_bsCallSmile_k {F σ ψ₁ T₀ ε k T : ℝ} (hF : 0 
   have huc := hasDerivAt_totalVar_k (σ := σ) (ψ₁ := ψ₁) (T₀ := T₀) (ε := ε) (T := T) (x := k)
   have hcore := hasDerivAt_blackForm_comp huc hwpos
   refine (hcore.const_mul F).congr_of_eventuallyEq ?_
-  filter_upwards [smileSurface_eventually_pos_k hS hst] with y hy
+  filter_upwards [smileSurface_eventually_pos_k hst] with y hy
   exact bsCallSmile_eq hF hT hy
 
 /-- **The `T`-chain of the call price** (single `(k,w)` slot: the maturity moves
@@ -462,7 +460,7 @@ private theorem deriv_bsCallSmile_k_value {F σ ψ₁ T₀ ε k T : ℝ} (hF : 0
             / (2 * Real.sqrt (totalVar σ ψ₁ T₀ ε k T)) * wSlope σ ψ₁ T₀ ε T k
           - Real.exp k * Phi (dmi k (totalVar σ ψ₁ T₀ ε k T))) := by
   have hw : 0 < totalVar σ ψ₁ T₀ ε k T := mul_pos (pow_pos hst 2) hT
-  rw [(hasDerivAt_bsCallSmile_k hF hT hS hst).deriv]
+  rw [(hasDerivAt_bsCallSmile_k hF hT hst).deriv]
   rw [show Real.exp k * (gaussianPDFReal 0 1 (dmi k (totalVar σ ψ₁ T₀ ε k T))
         * (-(1 / Real.sqrt (totalVar σ ψ₁ T₀ ε k T))
           + (k - totalVar σ ψ₁ T₀ ε k T / 2)
@@ -511,7 +509,7 @@ private theorem hasDerivAt_deriv_bsCallSmile_k {F σ ψ₁ T₀ ε k T : ℝ} (h
   have hprod := hBw.mul hm
   have hexp := hasDerivAt_exp_Phi_dmi_comp hu hwpos
   refine ((hprod.sub hexp).const_mul F).congr_of_eventuallyEq ?_
-  filter_upwards [smileSurface_eventually_pos_k hS hst] with y hy
+  filter_upwards [smileSurface_eventually_pos_k hst] with y hy
   exact deriv_bsCallSmile_k_value hF hT hS hy
 
 /-! ## The Gatheral form of the ratio -/
@@ -526,7 +524,12 @@ noncomputable def smileN (σ ψ₁ T₀ ε k T : ℝ) : ℝ :=
 /-- **The Gatheral denominator deformation** of Dupire's ratio,
 `δ = −k·w_k/w + w_k²·(k²−w−w²/4)/(4w²) + w_kk/2`, specialized to this surface (so
 `w_kk/2 = (εψ₁/√(T+T₀))²·T` is spelled out); Dupire's ratio is `w_T/(1 + δ)`
-(`dupireRatio_eq`). -/
+(`dupireRatio_eq`). The `1 + smileDelta` form is Durrleman's function `g`
+(`MathFin.SVI.durrleman`, `SVI/Reduction.lean`) for this surface's variance, and
+`dpl`/`dmi`/`blackForm`/`exp_mul_pdf_dmi` above mirror `SVI.blackPlus`/`blackMinus`/
+`logBlackCall`/`black_density_identity` (`MathFin.SVI.BlackSmile`,
+`SVI/BlackSmile.lean`) with an abstract total variance `w` standing in for
+`SVI.variance p k`; see those modules for the fully worked SVI case. -/
 noncomputable def smileDelta (σ ψ₁ T₀ ε k T : ℝ) : ℝ :=
   -k * wSlope σ ψ₁ T₀ ε T k / totalVar σ ψ₁ T₀ ε k T
     + wSlope σ ψ₁ T₀ ε T k ^ 2 * (k ^ 2 - totalVar σ ψ₁ T₀ ε k T
@@ -726,7 +729,7 @@ private theorem hasDerivAt_dupireRatio_k_zero {F σ ψ₁ T₀ ε T : ℝ} (hF :
   have hD1 := hD.const_add 1
   have hQ := hN.div hD1 hD0ne
   refine hQ.congr_of_eventuallyEq ?_
-  filter_upwards [smileSurface_eventually_pos_k hS hst] with k hk
+  filter_upwards [smileSurface_eventually_pos_k hst] with k hk
   exact dupireRatio_eq hF hT hS hk
 
 /-! ## The `ε`-extraction at zero tilt -/
@@ -864,10 +867,11 @@ theorem dupireRatio_k_slope {F σ ψ₁ T₀ T : ℝ} (hF : 0 < F) (hσ : 0 < σ
 /-! ## The `σ_loc` reading -/
 
 /-- **The local-vol ATM skew** (eq 10.8's square-root reading): the ε-slope of the
-ATM `k`-slope of `√R` — the local vol implied by the surface — is
-`ψ₁·((3/2)T + 2T₀)/(T+T₀)^{3/2}` for every `T > 0`. The closed form at `T = 0` is twice
-the implied ATM skew (`ruleOfTwo`); as `T → ∞` it behaves like `(3/2)ψ₁/√T`
-(`localSkew_tendsto`). -/
+ATM `k`-slope of `√R` — a first-order-in-ε reading of the local vol implied by the
+surface, not the actual skew of the `ε = 1` surface (which carries `O(ψ₁³)`
+corrections) — is `ψ₁·((3/2)T + 2T₀)/(T+T₀)^{3/2}` for every `T > 0`. The closed
+form at `T = 0` is twice the implied ATM skew (`ruleOfTwo`); as `T → ∞` it behaves
+like `(3/2)ψ₁/√T` (`localSkew_tendsto`). -/
 theorem dupireRatio_sqrt_slope {F σ ψ₁ T₀ T : ℝ} (hF : 0 < F) (hσ : 0 < σ) (hT : 0 < T)
     (h₀ : 0 < T₀) :
     deriv (fun ε ↦ deriv (fun k ↦ Real.sqrt (dupireRatio F σ ψ₁ T₀ ε k T)) 0) 0
@@ -937,6 +941,18 @@ theorem ruleOfTwo (ψ₁ T₀ : ℝ) (h₀ : 0 < T₀) :
       = 2 * (ψ₁ / Real.sqrt T₀) := by
   norm_num
   field_simp [(Real.sqrt_pos.mpr h₀).ne']
+
+/-- **The rule of two as a limit**: the `dupireRatio_sqrt_slope` closed form tends,
+as `T → 0`, to `2·(ψ₁/√T₀)` — the `ruleOfTwo` value, now as a genuine `Tendsto`
+rather than a literal substitution into the `T = 0` closed form. -/
+theorem ruleOfTwo_tendsto (ψ₁ T₀ : ℝ) (h₀ : 0 < T₀) :
+    Filter.Tendsto (fun T ↦ ψ₁ * ((3 / 2) * T + 2 * T₀) / ((T + T₀) * Real.sqrt (T + T₀)))
+      (nhds 0) (nhds (2 * (ψ₁ / Real.sqrt T₀))) := by
+  have h : ContinuousAt
+      (fun T : ℝ ↦ ψ₁ * ((3 / 2) * T + 2 * T₀) / ((T + T₀) * Real.sqrt (T + T₀))) 0 :=
+    ContinuousAt.div (by fun_prop) (by fun_prop) (by simp only [zero_add]; positivity)
+  rw [← ruleOfTwo ψ₁ T₀ h₀]
+  exact h.tendsto
 
 /-- **The calendar-time asymptotic** of the local skew: `√T` times the
 `dupireRatio_sqrt_slope` closed form tends to `(3/2)ψ₁`. -/
