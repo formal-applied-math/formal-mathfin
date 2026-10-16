@@ -86,10 +86,8 @@ theorem forwardIndex_eq (BT : Ω → ℝ) (Pn0T Pr0T I0 : ℝ) (IT : Ω → ℝ)
     ∫ ω, IT ω ∂(MathFin.numeraireMeasure Qn BT (fun _ ↦ 1) 1 Pn0T) = I0 * Pr0T / Pn0T := by
   have h := MathFin.changeOfNumeraire (Q := Qn) (BT := BT) (NT := fun _ ↦ 1) (B0 := 1)
     (N0 := Pn0T) IT measurable_const hBTmeas (fun _ ↦ zero_lt_one) hBTpos zero_le_one hPn0T
-  simp only [div_one, one_mul] at h
-  rw [hident] at h
   rw [eq_div_iff hPn0T.ne', mul_comm]
-  exact h
+  simpa [hident] using h
 
 /-- **The spot price of the index-linked bond** — for contrast with
 `forwardIndex_eq`. The numéraire-measure instantiation
@@ -150,11 +148,8 @@ backed by `integral_exp_mul_gaussianReal_zero`. -/
 private lemma integral_exp_mul_stdNormal {Z : Ω → ℝ}
     (hZ : HasLaw Z (gaussianReal 0 1) μ) (a : ℝ) :
     ∫ ω, Real.exp (a * Z ω) ∂μ = Real.exp (a ^ 2 / 2) := by
-  have h := hZ.integral_comp
-    (by fun_prop : AEStronglyMeasurable (fun x : ℝ ↦ Real.exp (a * x)) (gaussianReal 0 1))
-  simp only [Function.comp] at h
-  rw [h, integral_exp_mul_gaussianReal_zero a 1]
-  simp
+  simpa using (hZ.integral_comp (f := fun x : ℝ ↦ Real.exp (a * x)) (by fun_prop)).trans
+    (integral_exp_mul_gaussianReal_zero a 1)
 
 /-- **The two-rate exponential moment (eq. 17.10's Gaussian core).** For independent
 standard normals `Z₁, Z₂` and Gaussian rate deviations `yⁿ = mⁿ + √Vⁿ·Z₁` and
@@ -170,13 +165,13 @@ theorem yoyRatioExp_gaussian (mn mr Vn Vr ρ Bn Br : ℝ)
     (hVn : 0 ≤ Vn) (hVr : 0 ≤ Vr) (hρ : ρ ^ 2 ≤ 1)
     {Z1 Z2 : Ω → ℝ}
     (hZ1 : HasLaw Z1 (gaussianReal 0 1) μ) (hZ2 : HasLaw Z2 (gaussianReal 0 1) μ)
-    (hZ1m : Measurable Z1) (hZ2m : Measurable Z2) (hindep : IndepFun Z1 Z2 μ) :
+    (hindep : IndepFun Z1 Z2 μ) :
     ∫ ω, Real.exp (Bn * (mn + Real.sqrt Vn * Z1 ω)
         - Br * (mr + Real.sqrt Vr * (ρ * Z1 ω + Real.sqrt (1 - ρ ^ 2) * Z2 ω))) ∂μ
       = Real.exp (Bn * mn - Br * mr
           + (Bn ^ 2 * Vn + Br ^ 2 * Vr - 2 * Bn * Br * ρ * Real.sqrt (Vn * Vr)) / 2) := by
   have h1r2 : (0 : ℝ) ≤ 1 - ρ ^ 2 := by linarith
-  set E : ℝ := Bn * mn - Br * mr with hE
+  set E : ℝ := Bn * mn - Br * mr
   set a : ℝ := Bn * Real.sqrt Vn - Br * ρ * Real.sqrt Vr with ha
   set b : ℝ := -(Br * Real.sqrt (1 - ρ ^ 2)) * Real.sqrt Vr with hb
   -- Pointwise: the integrand is the constant `exp E` times the two single-driver exponentials.
@@ -184,11 +179,9 @@ theorem yoyRatioExp_gaussian (mn mr Vn Vr ρ Bn Br : ℝ)
         - Br * (mr + Real.sqrt Vr * (ρ * Z1 ω + Real.sqrt (1 - ρ ^ 2) * Z2 ω))))
       = fun ω ↦ Real.exp E * (Real.exp (a * Z1 ω) * Real.exp (b * Z2 ω)) := by
     funext ω
-    have hR : Real.exp E * (Real.exp (a * Z1 ω) * Real.exp (b * Z2 ω))
-        = Real.exp (E + (a * Z1 ω + b * Z2 ω)) := by
-      rw [← Real.exp_add, ← Real.exp_add]
-    rw [hR, hE, ha, hb]
+    rw [← Real.exp_add, ← Real.exp_add]
     congr 1
+    simp only [E, a, b]
     ring
   -- Independence factorization of the two single-driver exponentials.
   have hindep_exp : IndepFun (fun ω ↦ Real.exp (a * Z1 ω)) (fun ω ↦ Real.exp (b * Z2 ω)) μ :=
@@ -197,7 +190,8 @@ theorem yoyRatioExp_gaussian (mn mr Vn Vr ρ Bn Br : ℝ)
   have hprod : ∫ ω, Real.exp (a * Z1 ω) * Real.exp (b * Z2 ω) ∂μ
       = Real.exp (a ^ 2 / 2) * Real.exp (b ^ 2 / 2) := by
     rw [← integral_exp_mul_stdNormal hZ1 a, ← integral_exp_mul_stdNormal hZ2 b]
-    exact hindep_exp.integral_mul_eq_mul_integral (by fun_prop) (by fun_prop)
+    exact hindep_exp.integral_mul_eq_mul_integral
+      (by have := hZ1.aemeasurable; fun_prop) (by have := hZ2.aemeasurable; fun_prop)
   rw [hpt, integral_const_mul, hprod, ← Real.exp_add, ← Real.exp_add]
   -- The `a²` algebra: the cross term `−2·Bⁿ·Bʳ·ρ·√(VⁿVʳ)` emerges from `(Bⁿ√Vⁿ − Bʳρ√Vʳ)²`.
   have hcross : Bn * Real.sqrt Vn * (Br * ρ * Real.sqrt Vr)
@@ -234,12 +228,12 @@ theorem yoyRatioExp_gaussian_cov (mn mr Vn Vr ρ Bn Br Cov : ℝ)
     (hVn : 0 ≤ Vn) (hVr : 0 ≤ Vr) (hρ : ρ ^ 2 ≤ 1) (hCov : Cov = ρ * Real.sqrt (Vn * Vr))
     {Z1 Z2 : Ω → ℝ}
     (hZ1 : HasLaw Z1 (gaussianReal 0 1) μ) (hZ2 : HasLaw Z2 (gaussianReal 0 1) μ)
-    (hZ1m : Measurable Z1) (hZ2m : Measurable Z2) (hindep : IndepFun Z1 Z2 μ) :
+    (hindep : IndepFun Z1 Z2 μ) :
     ∫ ω, Real.exp (Bn * (mn + Real.sqrt Vn * Z1 ω)
         - Br * (mr + Real.sqrt Vr * (ρ * Z1 ω + Real.sqrt (1 - ρ ^ 2) * Z2 ω))) ∂μ
       = Real.exp (Bn * mn - Br * mr
           + (Bn ^ 2 * Vn + Br ^ 2 * Vr - 2 * Bn * Br * Cov) / 2) := by
-  rw [hCov, yoyRatioExp_gaussian mn mr Vn Vr ρ Bn Br hVn hVr hρ hZ1 hZ2 hZ1m hZ2m hindep]
+  rw [hCov, yoyRatioExp_gaussian mn mr Vn Vr ρ Bn Br hVn hVr hρ hZ1 hZ2 hindep]
   congr 1
   ring
 
@@ -282,14 +276,14 @@ theorem yoyConvexity_eq (mn mr Vn Vr ρ Bn Br Pn0T Pn0S Pr0T Pr0S Cov : ℝ)
     (hVn : 0 ≤ Vn) (hVr : 0 ≤ Vr) (hρ : ρ ^ 2 ≤ 1) (hCov : Cov = ρ * Real.sqrt (Vn * Vr))
     {Z1 Z2 : Ω → ℝ}
     (hZ1 : HasLaw Z1 (gaussianReal 0 1) μ) (hZ2 : HasLaw Z2 (gaussianReal 0 1) μ)
-    (hZ1m : Measurable Z1) (hZ2m : Measurable Z2) (hindep : IndepFun Z1 Z2 μ) :
+    (hindep : IndepFun Z1 Z2 μ) :
     ∫ ω, (Pr0T * Pn0S / (Pr0S * Pn0T)) * Real.exp (hwD Br Vr - hwD Bn Vn
         + (Bn * (mn + Real.sqrt Vn * Z1 ω)
           - Br * (mr + Real.sqrt Vr * (ρ * Z1 ω + Real.sqrt (1 - ρ ^ 2) * Z2 ω)))) ∂μ
       = (Pr0T * Pn0S / (Pr0S * Pn0T))
         * Real.exp (Bn * mn - Br * mr + Bn ^ 2 * Vn - Br * Bn * Cov) := by
   have hkey := Gaussian.yoyRatioExp_gaussian_cov mn mr Vn Vr ρ Bn Br Cov hVn hVr hρ hCov
-    hZ1 hZ2 hZ1m hZ2m hindep
+    hZ1 hZ2 hindep
   -- Pointwise: the naive ratio times the full factor = (ratio · e^{Dʳ−Dⁿ}) · e^{−Bʳyʳ+Bⁿyⁿ}.
   have hpt : (fun ω ↦ (Pr0T * Pn0S / (Pr0S * Pn0T)) * Real.exp (hwD Br Vr - hwD Bn Vn
           + (Bn * (mn + Real.sqrt Vn * Z1 ω)
@@ -319,7 +313,7 @@ theorem yoyConvexity_delta (mn mrBase Δ Vn Vr ρ Bn Br Pn0T Pn0S Pr0T Pr0S Cov 
     (hVn : 0 ≤ Vn) (hVr : 0 ≤ Vr) (hρ : ρ ^ 2 ≤ 1) (hCov : Cov = ρ * Real.sqrt (Vn * Vr))
     {Z1 Z2 : Ω → ℝ}
     (hZ1 : HasLaw Z1 (gaussianReal 0 1) μ) (hZ2 : HasLaw Z2 (gaussianReal 0 1) μ)
-    (hZ1m : Measurable Z1) (hZ2m : Measurable Z2) (hindep : IndepFun Z1 Z2 μ) :
+    (hindep : IndepFun Z1 Z2 μ) :
     ∫ ω, (Pr0T * Pn0S / (Pr0S * Pn0T)) * Real.exp (hwD Br Vr - hwD Bn Vn
         + (Bn * (mn + Real.sqrt Vn * Z1 ω)
           - Br * (mrBase + Δ + Real.sqrt Vr * (ρ * Z1 ω
@@ -327,7 +321,7 @@ theorem yoyConvexity_delta (mn mrBase Δ Vn Vr ρ Bn Br Pn0T Pn0S Pr0T Pr0S Cov 
       = (Pr0T * Pn0S / (Pr0S * Pn0T))
         * Real.exp (Bn * mn - Br * mrBase + Bn ^ 2 * Vn - Br * Bn * Cov - Br * Δ) := by
   rw [yoyConvexity_eq mn (mrBase + Δ) Vn Vr ρ Bn Br Pn0T Pn0S Pr0T Pr0S Cov
-    hVn hVr hρ hCov hZ1 hZ2 hZ1m hZ2m hindep]
+    hVn hVr hρ hCov hZ1 hZ2 hindep]
   congr 2
   ring
 
@@ -341,7 +335,7 @@ theorem yoyConvexity_quanto_deleted (mn mrBase Δ Vn Vr ρ Bn Br Pn0T Pn0S Pr0T 
     (hΔ : Δ = 0)
     {Z1 Z2 : Ω → ℝ}
     (hZ1 : HasLaw Z1 (gaussianReal 0 1) μ) (hZ2 : HasLaw Z2 (gaussianReal 0 1) μ)
-    (hZ1m : Measurable Z1) (hZ2m : Measurable Z2) (hindep : IndepFun Z1 Z2 μ) :
+    (hindep : IndepFun Z1 Z2 μ) :
     ∫ ω, (Pr0T * Pn0S / (Pr0S * Pn0T)) * Real.exp (hwD Br Vr - hwD Bn Vn
         + (Bn * (mn + Real.sqrt Vn * Z1 ω)
           - Br * (mrBase + Δ + Real.sqrt Vr * (ρ * Z1 ω
@@ -349,6 +343,6 @@ theorem yoyConvexity_quanto_deleted (mn mrBase Δ Vn Vr ρ Bn Br Pn0T Pn0S Pr0T 
       = (Pr0T * Pn0S / (Pr0S * Pn0T))
         * Real.exp (Bn * mn - Br * mrBase + Bn ^ 2 * Vn - Br * Bn * Cov) := by
   rw [yoyConvexity_delta mn mrBase Δ Vn Vr ρ Bn Br Pn0T Pn0S Pr0T Pr0S Cov
-    hVn hVr hρ hCov hZ1 hZ2 hZ1m hZ2m hindep, hΔ, mul_zero, sub_zero]
+    hVn hVr hρ hCov hZ1 hZ2 hindep, hΔ, mul_zero, sub_zero]
 
 end MathFin.Inflation.Convexity
