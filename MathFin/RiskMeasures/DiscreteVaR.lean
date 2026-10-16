@@ -18,9 +18,9 @@ the quantile average `ES_α = (1 − α)⁻¹ ∫_α^1 VaR_u du` (`finiteES`). F
 `∑ i, q i • δ_i` (`finiteVaR_eq_valueAtRisk`, `finiteES_eq_expectedShortfall`), written as
 `Finset` sums so that concrete laws evaluate by case analysis on the loss level.
 
-The file works the two-bond example. A single $100 bond defaulting with probability `1/25` has
+The file works the two-bond example. A single `$100` bond defaulting with probability `1/25` has
 `VaR₀.₉₅ = 0`: the loss is 0 with probability `24/25 ≥ 0.95`. The same exposure split into two
-$50 bonds defaulting independently has `VaR₀.₉₅ = 50`, so VaR penalises the diversified position.
+`$50` bonds defaulting independently has `VaR₀.₉₅ = 50`, so VaR penalises the diversified position.
 At the single bond, expected shortfall is `80` while the conditional tail mean `E[L | L ≥ VaR₀.₉₅]`
 is the unconditional mean `4`.
 
@@ -33,7 +33,7 @@ is `isGreatest_integral_mul_expectedShortfall` (`RiskMeasures/ExpectedShortfall.
 
 * `finiteVaR_eq_valueAtRisk`, `finiteES_eq_expectedShortfall`: the finite forms agree with the
   general definitions at the law `∑ i, q i • δ_i`.
-* `finiteVaR_eq_value_inf`: VaR at a finite law is attained at a loss value.
+* `finiteVaR_eq_value_min`: VaR at a finite law is attained at a loss value.
 * `finiteVaR_two_point`: VaR of a loss that is `0` with mass `a` and `c > 0` with mass `1 - a`.
 * `vaR_one_bond`, `vaR_two_halves`: `VaR₀.₉₅` is `0` for the single bond and `50` for the split
   position.
@@ -76,13 +76,12 @@ variable {ι : Type*} [Fintype ι] [MeasurableSpace ι] {q : ι → ℝ}
 
 /-- The law of a probability vector is a probability measure. -/
 lemma isProbabilityMeasure_finiteLaw (hq : q ∈ stdSimplex ℝ ι) :
-    IsProbabilityMeasure (finiteLaw q) := by
-  refine ⟨?_⟩
-  simp [finiteLaw, ← ENNReal.ofReal_sum_of_nonneg fun i _ ↦ hq.1 i, hq.2]
+    IsProbabilityMeasure (finiteLaw q) :=
+  ⟨by simp [finiteLaw, ← ENNReal.ofReal_sum_of_nonneg fun i _ ↦ hq.1 i, hq.2]⟩
 
 variable [MeasurableSingletonClass ι]
 
-/-- Under `finiteLaw q`, the probability of `{L ≤ x}` is the tail mass in `finiteVaR`. -/
+/-- Under `finiteLaw q`, the probability of `{L ≤ x}` is the mass summed in `finiteVaR`. -/
 lemma finiteLaw_real_le (hq : ∀ i, 0 ≤ q i) (L : ι → ℝ) (x : ℝ) :
     (finiteLaw q).real {i | L i ≤ x} = ∑ i ∈ Finset.univ.filter (L · ≤ x), q i := by
   rw [measureReal_def, finiteLaw, Measure.coe_finsetSum, Finset.sum_apply]
@@ -121,7 +120,7 @@ variable {ι : Type*} [Fintype ι] {q L : ι → ℝ} {α : ℝ}
 /-- **The evaluation principle**: if `v₀` is a loss level carrying `q`-mass ≥ α and every strictly
 lower level carries mass < α, then `finiteVaR q L α = v₀`. Pure order arithmetic, with no
 hypotheses on `q` or `α`. -/
-theorem finiteVaR_eq_of_forall {v₀ : ℝ}
+theorem finiteVaR_eq_of_mem_of_forall_lt {v₀ : ℝ}
     (hmem : ∑ i ∈ Finset.univ.filter (L · ≤ v₀), q i ≥ α)
     (hbelow : ∀ x < v₀, ∑ i ∈ Finset.univ.filter (L · ≤ x), q i < α) :
     finiteVaR q L α = v₀ :=
@@ -132,67 +131,60 @@ the full mass `1 ≥ α`. -/
 theorem finiteVaR_filtered_image_nonempty [Nonempty ι] (hq : q ∈ stdSimplex ℝ ι) (hα1 : α ≤ 1) :
     ((Finset.univ.image L).filter
       (fun v ↦ ∑ i ∈ Finset.univ.filter (L · ≤ v), q i ≥ α)).Nonempty := by
-  obtain ⟨v₁, hv₁mem, hv₁sup⟩ := Finset.exists_mem_eq_sup' (Finset.univ_nonempty.image L) id
-  have hfull : Finset.univ.filter (L · ≤ v₁) = Finset.univ := Finset.filter_true_of_mem fun i _ ↦
-    (Finset.le_sup' id (Finset.mem_image_of_mem _ (Finset.mem_univ i))).trans_eq hv₁sup
-  exact ⟨v₁, Finset.mem_filter.2 ⟨hv₁mem, by rwa [hfull, hq.2]⟩⟩
+  have hne := Finset.univ_nonempty.image L
+  have hfull : Finset.univ.filter (L · ≤ (Finset.univ.image L).max' hne) = Finset.univ :=
+    Finset.filter_true_of_mem fun i _ ↦ Finset.le_max' _ _ (Finset.mem_image_of_mem _ (by simp))
+  exact ⟨_, Finset.mem_filter.2 ⟨Finset.max'_mem _ hne, by rwa [hfull, hq.2]⟩⟩
 
 /-- **Attainment.** The infimum over `ℝ` is the minimum over the loss values
-`Finset.image L univ` that carry `q`-mass ≥ α (`Finset.inf'`, since `ℝ` has no bottom element).
-Every VaR at a finite law is attained at a loss value. -/
-theorem finiteVaR_eq_value_inf [Nonempty ι] (hq : q ∈ stdSimplex ℝ ι) (hα0 : 0 < α)
+`Finset.image L univ` that carry `q`-mass ≥ α. Every VaR at a finite law is attained at a loss
+value. -/
+theorem finiteVaR_eq_value_min [Nonempty ι] (hq : q ∈ stdSimplex ℝ ι) (hα0 : 0 < α)
     (hα1 : α ≤ 1) :
     finiteVaR q L α = ((Finset.univ.image L).filter
-      (fun v ↦ ∑ i ∈ Finset.univ.filter (L · ≤ v), q i ≥ α)).inf'
-      (finiteVaR_filtered_image_nonempty hq hα1) id := by
-  obtain ⟨v₀, hv₀T, hv₀inf⟩ :=
-    Finset.exists_mem_eq_inf' (finiteVaR_filtered_image_nonempty hq hα1) id
-  rw [hv₀inf]
-  refine IsLeast.csInf_eq ⟨(Finset.mem_filter.1 hv₀T).2, fun x (hx : _ ≥ α) ↦ ?_⟩
-  -- the largest loss value `a₀ ≤ x` has the same tail mass as `x`, so it lies in the filter
+      (fun v ↦ ∑ i ∈ Finset.univ.filter (L · ≤ v), q i ≥ α)).min'
+      (finiteVaR_filtered_image_nonempty hq hα1) := by
+  refine IsLeast.csInf_eq ⟨(Finset.mem_filter.1 (Finset.min'_mem _ _)).2,
+    fun x (hx : _ ≥ α) ↦ ?_⟩
+  -- the largest loss value `a₀ ≤ x` carries the same mass as `x`, so it lies in the filter
   obtain ⟨i₀, hi₀⟩ : (Finset.univ.filter (L · ≤ x)).Nonempty :=
     Finset.nonempty_iff_ne_empty.2 fun he ↦ by simp [he] at hx; linarith
   have hA : ((Finset.univ.image L).filter (· ≤ x)).Nonempty :=
     ⟨L i₀, Finset.mem_filter.2 ⟨Finset.mem_image_of_mem _ (Finset.mem_univ i₀),
       (Finset.mem_filter.1 hi₀).2⟩⟩
-  obtain ⟨a₀, ha₀A, ha₀sup⟩ := Finset.exists_mem_eq_sup' hA id
-  have ha₀x : a₀ ≤ x := (Finset.mem_filter.1 ha₀A).2
-  have hfilt : Finset.univ.filter (L · ≤ a₀) = Finset.univ.filter (L · ≤ x) := by
-    ext i
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
-    exact ⟨fun h ↦ h.trans ha₀x, fun h ↦ (Finset.le_sup' id (Finset.mem_filter.2
-      ⟨Finset.mem_image_of_mem _ (Finset.mem_univ i), h⟩)).trans_eq ha₀sup⟩
-  have ha₀T : a₀ ∈ (Finset.univ.image L).filter
-      (fun v ↦ ∑ i ∈ Finset.univ.filter (L · ≤ v), q i ≥ α) :=
-    Finset.mem_filter.2 ⟨(Finset.mem_filter.1 ha₀A).1, hfilt ▸ hx⟩
-  exact (hv₀inf ▸ Finset.inf'_le id ha₀T).trans ha₀x
+  obtain ⟨ha₀img, ha₀x⟩ := Finset.mem_filter.1 (Finset.max'_mem _ hA)
+  have hfilt : Finset.univ.filter (L · ≤ _) = Finset.univ.filter (L · ≤ x) :=
+    Finset.filter_congr fun i _ ↦ ⟨fun h ↦ h.trans ha₀x, fun h ↦ Finset.le_max' _ _
+      (Finset.mem_filter.2 ⟨Finset.mem_image_of_mem _ (Finset.mem_univ i), h⟩)⟩
+  exact (Finset.min'_le _ _ (Finset.mem_filter.2 ⟨ha₀img, hfilt ▸ hx⟩)).trans ha₀x
 
-/-- **Two-point laws.** If the tail mass of `L` is `a` on `[0, c)` and `a + b = 1` on `[c, ∞)`,
-with `c > 0`, then `VaR_α` is `0` for `α ≤ a` and `c` above. -/
+/-- **Two-point laws.** If the mass of `{L ≤ x}` is `0` for `x < 0`, `a` for `0 ≤ x < c` and
+`a + b = 1` for `x ≥ c`, with `c > 0`, then at every level `α ∈ (0, 1]` the VaR is `0` for
+`α ≤ a` and `c` above. -/
 theorem finiteVaR_two_point {a b c : ℝ} (hab : a + b = 1) (hc : 0 < c)
-    (htail : ∀ x, ∑ i ∈ Finset.univ.filter (L · ≤ x), q i
+    (hcdf : ∀ x, ∑ i ∈ Finset.univ.filter (L · ≤ x), q i
       = (if 0 ≤ x then a else 0) + (if c ≤ x then b else 0))
     (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR q L α = if α ≤ a then 0 else c := by
-  split_ifs with h <;> refine finiteVaR_eq_of_forall ?_ fun x hx ↦ ?_ <;> rw [htail] <;>
+  split_ifs with h <;> refine finiteVaR_eq_of_mem_of_forall_lt ?_ fun x hx ↦ ?_ <;> rw [hcdf] <;>
     split_ifs <;> linarith
 
 end Evaluation
 
 /-! ## The single bond -/
 
-/-- Probability vector of the single $100 bond: default (`true`) with probability `1/25`,
+/-- Probability vector of the single `$100` bond: default (`true`) with probability `1/25`,
 survival (`false`) with probability `24/25`. -/
 noncomputable def oneQ : Bool → ℝ := fun b ↦ if b then 1/25 else 24/25
 
-/-- Loss of the single $100 bond: 100 on default, 0 on survival. -/
+/-- Loss of the single `$100` bond: 100 on default, 0 on survival. -/
 def oneL : Bool → ℝ := fun b ↦ if b then 100 else 0
 
 /-- `oneQ` is a probability vector. -/
 lemma oneQ_mem_simplex : oneQ ∈ stdSimplex ℝ Bool :=
   ⟨fun b ↦ by cases b <;> norm_num [oneQ], by norm_num [oneQ]⟩
 
-private lemma one_bond_tail (x : ℝ) :
+private lemma one_bond_cdf (x : ℝ) :
     ∑ b ∈ Finset.univ.filter (oneL · ≤ x), oneQ b
       = (if 0 ≤ x then 24/25 else 0) + (if 100 ≤ x then 1/25 else 0) := by
   rw [Finset.sum_filter, Fintype.sum_bool]
@@ -202,44 +194,16 @@ private lemma one_bond_tail (x : ℝ) :
 above. This is the quantile function integrated in `es_one_bond_eq_80`. -/
 theorem vaR_one_bond_window (u : ℝ) (h0 : 0 < u) (h1 : u ≤ 1) :
     finiteVaR oneQ oneL u = if u ≤ 24/25 then 0 else 100 :=
-  finiteVaR_two_point (by norm_num) (by norm_num) one_bond_tail h0 h1
+  finiteVaR_two_point (by norm_num) (by norm_num) one_bond_cdf h0 h1
 
-/-- The single $100 bond defaulting w.p. `1/25` has `VaR₀.₉₅ = 0`: the loss is 0 with probability
+/-- The single `$100` bond defaulting w.p. `1/25` has `VaR₀.₉₅ = 0`: the loss is 0 with probability
 `24/25 ≥ 19/20`. -/
 theorem vaR_one_bond : finiteVaR oneQ oneL (19/20) = 0 := by
   rw [vaR_one_bond_window _ (by norm_num) (by norm_num), if_pos (by norm_num)]
 
-/-! ## The split position, lumped into three states -/
-
-/-- Probability vector of the two $50 half-bonds' total loss, lumped into three states: neither
-defaults (`0`, w.p. `9216/10000 = (24/25)²`), exactly one (`1`, w.p.
-`768/10000 = 2·(24/25)(1/25)`), both (`2`, w.p. `16/10000 = (1/25)²`). -/
-noncomputable def splitQ : Fin 3 → ℝ := ![9216/10000, 768/10000, 16/10000]
-
-/-- Total loss of the two half-bonds at the lumped states: 0, 50, 100. -/
-def splitL : Fin 3 → ℝ := ![0, 50, 100]
-
-/-- `splitQ` is a probability vector. -/
-lemma splitQ_mem_simplex : splitQ ∈ stdSimplex ℝ (Fin 3) :=
-  ⟨fun i ↦ by fin_cases i <;> norm_num [splitQ],
-    by rw [Fin.sum_univ_three]; norm_num [splitQ, Matrix.cons_val_two]⟩
-
-private lemma split_tail (x : ℝ) :
-    ∑ i ∈ Finset.univ.filter (splitL · ≤ x), splitQ i
-      = (if 0 ≤ x then 9216/10000 else 0) + (if 50 ≤ x then 768/10000 else 0)
-        + (if 100 ≤ x then 16/10000 else 0) := by
-  rw [Finset.sum_filter, Fin.sum_univ_three]
-  norm_num [splitL, splitQ, Matrix.cons_val_two]
-
-/-- The same exposure split into two independent $50 bonds (lumped three-state law) has
-`VaR₀.₉₅ = 50`: `P(L = 0) = 0.9216 < 0.95` but `P(L ≤ 50) = 0.9984 ≥ 0.95`. -/
-theorem vaR_two_halves : finiteVaR splitQ splitL (19/20) = 50 :=
-  finiteVaR_eq_of_forall (by rw [split_tail]; norm_num) fun x hx ↦ by
-    rw [split_tail]; split_ifs <;> linarith
-
 /-! ## The two half-bonds on their joint space `Bool × Bool` -/
 
-/-- Joint law of the two independent $50 half-bonds (`true` = default): the product of the
+/-- Joint law of the two independent `$50` half-bonds (`true` = default): the product of the
 marginals `1/25` / `24/25`. -/
 noncomputable def jointQ : Bool × Bool → ℝ :=
   fun p ↦ (if p.1 then 1/25 else 24/25) * (if p.2 then 1/25 else 24/25)
@@ -255,21 +219,21 @@ lemma jointQ_mem_simplex : jointQ ∈ stdSimplex ℝ (Bool × Bool) :=
   ⟨fun ⟨a, b⟩ ↦ by cases a <;> cases b <;> norm_num [jointQ],
     by norm_num [jointQ, Fintype.sum_prod_type]⟩
 
-private lemma joint_half₁_tail (x : ℝ) :
+private lemma joint_half₁_cdf (x : ℝ) :
     ∑ p ∈ Finset.univ.filter (halfL₁ · ≤ x), jointQ p
       = (if 0 ≤ x then 24/25 else 0) + (if 50 ≤ x then 1/25 else 0) := by
   rw [Finset.sum_filter, Fintype.sum_prod_type]
   norm_num [halfL₁, jointQ]; split_ifs <;> norm_num
 
-private lemma joint_half₂_tail (x : ℝ) :
+private lemma joint_half₂_cdf (x : ℝ) :
     ∑ p ∈ Finset.univ.filter (halfL₂ · ≤ x), jointQ p
       = (if 0 ≤ x then 24/25 else 0) + (if 50 ≤ x then 1/25 else 0) := by
   rw [Finset.sum_filter, Fintype.sum_prod_type]
   norm_num [halfL₂, jointQ]; split_ifs <;> norm_num
 
-/-- Tail mass of the total loss `halfL₁ + halfL₂` under the joint law: the lumped split law's
-masses. -/
-private lemma joint_tail (x : ℝ) :
+/-- Mass of `{halfL₁ + halfL₂ ≤ x}` under the joint law: no default w.p. `9216/10000 = (24/25)²`,
+one default w.p. `768/10000 = 2·(24/25)(1/25)`, two w.p. `16/10000 = (1/25)²`. -/
+private lemma joint_cdf (x : ℝ) :
     ∑ p ∈ Finset.univ.filter ((halfL₁ + halfL₂) · ≤ x), jointQ p
       = (if 0 ≤ x then 9216/10000 else 0) + (if 50 ≤ x then 768/10000 else 0)
         + (if 100 ≤ x then 16/10000 else 0) := by
@@ -279,12 +243,12 @@ private lemma joint_tail (x : ℝ) :
 /-- The first half-bond's VaR as a function of the level `α ∈ (0, 1]`. -/
 theorem vaR_half₁_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR jointQ halfL₁ α = if α ≤ 24/25 then 0 else 50 :=
-  finiteVaR_two_point (by norm_num) (by norm_num) joint_half₁_tail hα0 hα1
+  finiteVaR_two_point (by norm_num) (by norm_num) joint_half₁_cdf hα0 hα1
 
 /-- The second half-bond's VaR as a function of the level `α ∈ (0, 1]`. -/
 theorem vaR_half₂_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR jointQ halfL₂ α = if α ≤ 24/25 then 0 else 50 :=
-  finiteVaR_two_point (by norm_num) (by norm_num) joint_half₂_tail hα0 hα1
+  finiteVaR_two_point (by norm_num) (by norm_num) joint_half₂_cdf hα0 hα1
 
 /-- The total VaR of the two half-bonds as a function of the level `α ∈ (0, 1]`: `0` up to the
 mass `9216/10000` of no default, `50` up to the mass `9984/10000` of at most one default, `100`
@@ -292,16 +256,22 @@ above. -/
 theorem vaR_joint_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR jointQ (halfL₁ + halfL₂) α
       = if α ≤ 9216/10000 then 0 else if α ≤ 9984/10000 then 50 else 100 := by
-  split_ifs <;> refine finiteVaR_eq_of_forall ?_ fun x hx ↦ ?_ <;> rw [joint_tail] <;>
+  split_ifs <;> refine finiteVaR_eq_of_mem_of_forall_lt ?_ fun x hx ↦ ?_ <;> rw [joint_cdf] <;>
     split_ifs <;> linarith
 
-/-- **Subadditivity fails at the 95% level** on one probability space: each $50 half-bond has
-`VaR₀.₉₅ = 0`, their sum has `VaR₀.₉₅ = 50` (the value of `vaR_two_halves`). -/
+/-- The same exposure split into two independent `$50` bonds has `VaR₀.₉₅ = 50`:
+`P(L = 0) = 0.9216 < 0.95` but `P(L ≤ 50) = 0.9984 ≥ 0.95`. -/
+theorem vaR_two_halves : finiteVaR jointQ (halfL₁ + halfL₂) (19/20) = 50 := by
+  rw [vaR_joint_window _ (by norm_num) (by norm_num)]
+  norm_num
+
+/-- **Subadditivity fails at the 95% level** on one probability space: each `$50` half-bond has
+`VaR₀.₉₅ = 0`, their sum has `VaR₀.₉₅ = 50` (`vaR_two_halves`). -/
 theorem vaR_subadditivity_fails :
     finiteVaR jointQ halfL₁ (19/20) + finiteVaR jointQ halfL₂ (19/20)
       < finiteVaR jointQ (halfL₁ + halfL₂) (19/20) := by
   rw [vaR_half₁_window _ (by norm_num) (by norm_num), vaR_half₂_window _ (by norm_num)
-    (by norm_num), vaR_joint_window _ (by norm_num) (by norm_num)]
+    (by norm_num), vaR_two_halves]
   norm_num
 
 /-- **The failure window.** Subadditivity fails exactly for `9216/10000 < α ≤ 24/25`, where
@@ -361,7 +331,7 @@ theorem condTailMean_one_bond :
     condTailMean oneQ oneL (19/20) = ∑ b, oneQ b * oneL b ∧ ∑ b, oneQ b * oneL b = 4 := by
   have hfilt : Finset.univ.filter (finiteVaR oneQ oneL (19/20) ≤ oneL ·) = Finset.univ :=
     Finset.filter_true_of_mem fun b _ ↦ by rw [vaR_one_bond]; cases b <;> norm_num [oneL]
-  refine ⟨by rw [condTailMean, hfilt, oneQ_mem_simplex.2, div_one], by norm_num [oneQ, oneL]⟩
+  exact ⟨by rw [condTailMean, hfilt, oneQ_mem_simplex.2, div_one], by norm_num [oneQ, oneL]⟩
 
 /-! ## The bounded-density representation of ES at the single bond -/
 
