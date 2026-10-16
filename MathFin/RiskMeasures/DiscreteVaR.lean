@@ -12,7 +12,7 @@ public import MathFin.RiskMeasures.ValueAtRisk
 # Value-at-risk and expected shortfall at a finite law
 
 For a loss `L : ι → ℝ` on a finite state space with probability vector `q ∈ stdSimplex ℝ ι`,
-value-at-risk is `VaR_α = inf {x | ∑_{L i ≤ x} q i ≥ α}` (`finiteVaR`) and expected shortfall is
+value-at-risk is `VaR_α = inf {x | α ≤ ∑_{L i ≤ x} q i}` (`finiteVaR`) and expected shortfall is
 the quantile average `ES_α = (1 − α)⁻¹ ∫_α^1 VaR_u du` (`finiteES`). For `α ∈ (0, 1)` these are
 `valueAtRisk` and `expectedShortfall` of `RiskMeasures/ValueAtRisk.lean` at the law
 `∑ i, q i • δ_i` (`finiteVaR_eq_valueAtRisk`, `finiteES_eq_expectedShortfall`), written as
@@ -59,7 +59,7 @@ open MeasureTheory Set
 `{i | L i ≤ x}` reaches `α`. The lemmas that need `q` to be a probability vector take
 `q ∈ stdSimplex ℝ ι` as a hypothesis. -/
 noncomputable def finiteVaR {ι : Type*} [Fintype ι] (q L : ι → ℝ) (α : ℝ) : ℝ :=
-  sInf {x | ∑ i ∈ Finset.univ.filter (L · ≤ x), q i ≥ α}
+  sInf {x | α ≤ ∑ i ∈ Finset.univ.filter (L · ≤ x), q i}
 
 /-- **ES at a finite law**: the quantile average, `(1 - α)⁻¹` times the integral of the quantile
 function `u ↦ finiteVaR q L u` over `[α, 1]`. -/
@@ -95,7 +95,7 @@ lemma finiteLaw_real_le (hq : ∀ i, 0 ≤ q i) (L : ι → ℝ) (x : ℝ) :
 theorem finiteVaR_eq_valueAtRisk (hq : q ∈ stdSimplex ℝ ι) {L : ι → ℝ} {α : ℝ}
     (hα : α ∈ Ioo 0 1) : finiteVaR q L α = valueAtRisk L (finiteLaw q) α := by
   have := isProbabilityMeasure_finiteLaw hq
-  have hset : {x | ∑ i ∈ Finset.univ.filter (L · ≤ x), q i ≥ α}
+  have hset : {x | α ≤ ∑ i ∈ Finset.univ.filter (L · ≤ x), q i}
       = Ici (valueAtRisk L (finiteLaw q) α) := by
     ext x
     simp [valueAtRisk_le_iff (measurable_of_finite L).aemeasurable hα, finiteLaw_real_le hq.1]
@@ -121,7 +121,7 @@ variable {ι : Type*} [Fintype ι] {q L : ι → ℝ} {α : ℝ}
 `{L ≤ x}` stays below α for every `x < v₀`, then `finiteVaR q L α = v₀`. Pure order arithmetic,
 with no hypotheses on `q` or `α`. -/
 theorem finiteVaR_eq_of_mem_of_forall_lt {v₀ : ℝ}
-    (hmem : ∑ i ∈ Finset.univ.filter (L · ≤ v₀), q i ≥ α)
+    (hmem : α ≤ ∑ i ∈ Finset.univ.filter (L · ≤ v₀), q i)
     (hbelow : ∀ x < v₀, ∑ i ∈ Finset.univ.filter (L · ≤ x), q i < α) :
     finiteVaR q L α = v₀ :=
   IsLeast.csInf_eq ⟨hmem, fun x hx ↦ not_lt.1 fun h ↦ (hbelow x h).not_ge hx⟩
@@ -130,10 +130,11 @@ theorem finiteVaR_eq_of_mem_of_forall_lt {v₀ : ℝ}
 at the largest loss value that mass is the full mass `1 ≥ α`. -/
 theorem nonempty_values_mass_ge (hq : q ∈ stdSimplex ℝ ι) (hα1 : α ≤ 1) :
     ((Finset.univ.image L).filter
-      (fun v ↦ ∑ i ∈ Finset.univ.filter (L · ≤ v), q i ≥ α)).Nonempty := by
+      (fun v ↦ α ≤ ∑ i ∈ Finset.univ.filter (L · ≤ v), q i)).Nonempty := by
   have hne := (Finset.nonempty_of_sum_ne_zero (by rw [hq.2]; norm_num)).image L
   have hfull : Finset.univ.filter (L · ≤ (Finset.univ.image L).max' hne) = Finset.univ :=
-    Finset.filter_true_of_mem fun i _ ↦ Finset.le_max' _ _ (Finset.mem_image_of_mem _ (by simp))
+    Finset.filter_true_of_mem fun i _ ↦
+      Finset.le_max' _ _ (Finset.mem_image_of_mem _ (Finset.mem_univ _))
   exact ⟨_, Finset.mem_filter.2 ⟨Finset.max'_mem _ hne, by rwa [hfull, hq.2]⟩⟩
 
 /-- **Attainment.** For `α ∈ (0, 1]`, the infimum over `ℝ` is the minimum over the loss values
@@ -141,10 +142,10 @@ theorem nonempty_values_mass_ge (hq : q ∈ stdSimplex ℝ ι) (hα1 : α ≤ 1)
 a loss value. -/
 theorem finiteVaR_eq_value_min (hq : q ∈ stdSimplex ℝ ι) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR q L α = ((Finset.univ.image L).filter
-      (fun v ↦ ∑ i ∈ Finset.univ.filter (L · ≤ v), q i ≥ α)).min'
+      (fun v ↦ α ≤ ∑ i ∈ Finset.univ.filter (L · ≤ v), q i)).min'
       (nonempty_values_mass_ge hq hα1) := by
   refine IsLeast.csInf_eq ⟨(Finset.mem_filter.1 (Finset.min'_mem _ _)).2,
-    fun x (hx : _ ≥ α) ↦ ?_⟩
+    fun x (hx : α ≤ _) ↦ ?_⟩
   -- the largest loss value `L j ≤ x` carries the same mass as `x`, so it lies in the filter
   obtain ⟨j, hj, hjmax⟩ :=
     Finset.exists_max_image _ L (Finset.nonempty_of_sum_ne_zero (hα0.trans_le hx).ne')
@@ -264,19 +265,9 @@ theorem vaR_two_halves : finiteVaR jointQ (halfL₁ + halfL₂) (19/20) = 50 := 
   rw [vaR_joint_window _ (by norm_num) (by norm_num)]
   norm_num
 
-/-- **Subadditivity fails at the 95% level** on one probability space: the two `$50` half-bonds'
-`VaR₀.₉₅` sum to less than the `VaR₀.₉₅` of their total. The values are `0` for each half
-(`vaR_half₁_window`, `vaR_half₂_window`) and `50` for the total (`vaR_two_halves`). -/
-theorem vaR_subadditivity_fails :
-    finiteVaR jointQ halfL₁ (19/20) + finiteVaR jointQ halfL₂ (19/20)
-      < finiteVaR jointQ (halfL₁ + halfL₂) (19/20) := by
-  rw [vaR_half₁_window _ (by norm_num) (by norm_num), vaR_half₂_window _ (by norm_num)
-    (by norm_num), vaR_two_halves]
-  norm_num
-
 /-- **The failure window.** Subadditivity fails exactly for `9216/10000 < α ≤ 24/25`, where
 `9216/10000 = (24/25)²`. The right endpoint is included because the definition uses
-`P(L ≤ x) ≥ α`: at `α = 24/25` each half keeps VaR `0` while the total has VaR `50`. At
+`α ≤ P(L ≤ x)`: at `α = 24/25` each half keeps VaR `0` while the total has VaR `50`. At
 `α = 9216/10000` the total VaR is still `0`, so the left endpoint is excluded. -/
 theorem vaR_counterexample_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR jointQ halfL₁ α + finiteVaR jointQ halfL₂ α
@@ -288,6 +279,14 @@ theorem vaR_counterexample_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     rw [if_pos h2, if_neg h1.not_ge, if_pos (by linarith)]
     norm_num
 
+/-- **Subadditivity fails at the 95% level** on one probability space: the two `$50` half-bonds'
+`VaR₀.₉₅` sum to less than the `VaR₀.₉₅` of their total. The values are `0` for each half
+(`vaR_half₁_window`, `vaR_half₂_window`) and `50` for the total (`vaR_two_halves`). -/
+theorem vaR_subadditivity_fails :
+    finiteVaR jointQ halfL₁ (19/20) + finiteVaR jointQ halfL₂ (19/20)
+      < finiteVaR jointQ (halfL₁ + halfL₂) (19/20) :=
+  (vaR_counterexample_window _ (by norm_num) (by norm_num)).2 ⟨by norm_num, by norm_num⟩
+
 /-! ## Expected shortfall at the single bond -/
 
 /-- `ES₀.₉₅ = 80` for the single bond: the quantile function is `0` on `[19/20, 24/25]` and `100`
@@ -297,14 +296,10 @@ theorem es_one_bond_eq_80 : finiteES oneQ oneL (19/20) = 80 := by
     rw [vaR_one_bond_window u (by linarith [hu.1]) (by linarith [hu.2]), if_pos hu.2]
   have hc1 (u) (hu : u ∈ Ioc (24/25 : ℝ) 1) : finiteVaR oneQ oneL u = 100 := by
     rw [vaR_one_bond_window u (by linarith [hu.1]) hu.2, if_neg (not_le.2 hu.1)]
-  -- the first piece vanishes pointwise on the closed interval; the second is a.e. the constant 100
+  -- the first piece vanishes pointwise on the closed interval, so it is integrable
   have h1int : IntervalIntegrable (finiteVaR oneQ oneL) volume (19/20 : ℝ) (24/25) :=
     ContinuousOn.intervalIntegrable <| continuousOn_const.congr fun u hu ↦
       hz1 u (by rwa [uIcc_of_le (by norm_num)] at hu)
-  have h2int : IntervalIntegrable (finiteVaR oneQ oneL) volume (24/25 : ℝ) 1 :=
-    (intervalIntegrable_const (c := (100 : ℝ))).congr_ae <| by
-      rw [uIoc_of_le (by norm_num)]
-      exact (ae_restrict_mem measurableSet_Ioc).mono fun u hu ↦ (hc1 u hu).symm
   have hval1 : ∫ u in (19/20 : ℝ)..(24/25), finiteVaR oneQ oneL u = 0 := by
     rw [intervalIntegral.integral_congr (g := fun _ ↦ (0 : ℝ)) fun u hu ↦
       hz1 u (by rwa [uIcc_of_le (by norm_num)] at hu)]
@@ -313,6 +308,7 @@ theorem es_one_bond_eq_80 : finiteES oneQ oneL (19/20) = 80 := by
     rw [intervalIntegral.integral_congr_ae (g := fun _ ↦ (100 : ℝ)) <|
       Filter.Eventually.of_forall fun u hu ↦ hc1 u (by rwa [uIoc_of_le (by norm_num)] at hu)]
     norm_num
+  have h2int := intervalIntegral.intervalIntegrable_of_integral_ne_zero (by rw [hval2]; norm_num)
   rw [finiteES, ← intervalIntegral.integral_add_adjacent_intervals h1int h2int, hval1, hval2]
   norm_num
 
