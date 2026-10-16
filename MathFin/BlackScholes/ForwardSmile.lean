@@ -173,7 +173,7 @@ theorem bsCallSmile_eq {F σ ψ₁ T₀ ε k T : ℝ} (hF : 0 < F) (hT : 0 < T)
   ring
 
 /-- `∂_k σ_BS = ε·ψ₁/√(T+T₀)` — the surface is affine in `k`. -/
-private theorem hasDerivAt_smileSurface_k {σ ψ₁ T₀ ε T x : ℝ} (hS : 0 < T + T₀) :
+private theorem hasDerivAt_smileSurface_k {σ ψ₁ T₀ ε T x : ℝ} :
     HasDerivAt (fun y ↦ smileSurface σ ψ₁ T₀ ε y T) (ε * ψ₁ / Real.sqrt (T + T₀)) x := by
   have h0 : HasDerivAt (fun y : ℝ ↦ σ + (ε * ψ₁ / Real.sqrt (T + T₀)) * y)
       (ε * ψ₁ / Real.sqrt (T + T₀)) x := by
@@ -184,10 +184,10 @@ private theorem hasDerivAt_smileSurface_k {σ ψ₁ T₀ ε T x : ℝ} (hS : 0 <
   field_simp
 
 /-- `∂_k w = 2·σ̃·(ε·ψ₁/√(T+T₀))·T` — the `k`-chain of the total variance. -/
-private theorem hasDerivAt_totalVar_k {σ ψ₁ T₀ ε T x : ℝ} (hS : 0 < T + T₀) :
+private theorem hasDerivAt_totalVar_k {σ ψ₁ T₀ ε T x : ℝ} :
     HasDerivAt (fun y ↦ totalVar σ ψ₁ T₀ ε y T)
       (2 * smileSurface σ ψ₁ T₀ ε x T * (ε * ψ₁ / Real.sqrt (T + T₀)) * T) x := by
-  have hu := hasDerivAt_smileSurface_k (σ := σ) (ψ₁ := ψ₁) (T₀ := T₀) (ε := ε) (T := T) (x := x) hS
+  have hu := hasDerivAt_smileSurface_k (σ := σ) (ψ₁ := ψ₁) (T₀ := T₀) (ε := ε) (T := T) (x := x)
   have h2 : HasDerivAt (fun y ↦ smileSurface σ ψ₁ T₀ ε y T ^ 2)
       (2 * smileSurface σ ψ₁ T₀ ε x T * (ε * ψ₁ / Real.sqrt (T + T₀))) x := by
     have hcp := (hasDerivAt_pow 2 (smileSurface σ ψ₁ T₀ ε x T)).comp x hu
@@ -236,12 +236,6 @@ private theorem hasDerivAt_totalVar_t {σ ψ₁ T₀ ε k T : ℝ} (hS : 0 < T +
   have hfin := hmul.congr_of_eventuallyEq (Filter.Eventually.of_forall (congrFun hfun))
   refine hfin.congr_deriv ?_
   have hne : (T + T₀) * Real.sqrt (T + T₀) ≠ 0 := mul_ne_zero hT₀ne hs
-  have hp3 : Real.sqrt (T + T₀) ^ 3 = (T + T₀) * Real.sqrt (T + T₀) := by
-    rw [show Real.sqrt (T + T₀) ^ 3 = Real.sqrt (T + T₀) * Real.sqrt (T + T₀) ^ 2 from by ring,
-      hssq]
-    ring
-  have hp4 : Real.sqrt (T + T₀) ^ 4 = (T + T₀) ^ 2 := by
-    rw [show Real.sqrt (T + T₀) ^ 4 = (Real.sqrt (T + T₀) ^ 2) ^ 2 from by ring, hssq]
   unfold smileSurface
   field_simp [hne, hs]
   simp only [hssq]
@@ -361,7 +355,6 @@ private theorem hasDerivAt_Bw_comp {u : ℝ → ℝ} {x ub : ℝ} (hu : HasDeriv
       (dpl x (u x) * gaussianPDFReal 0 1 (dpl x (u x)) / (2 * u x)
         + gaussianPDFReal 0 1 (dpl x (u x)) * (x ^ 2 - u x - u x ^ 2 / 4)
             / (4 * u x ^ 2 * Real.sqrt (u x)) * ub) x := by
-  have hne : Real.sqrt (u x) ≠ 0 := (Real.sqrt_pos.mpr hpos).ne'
   have hsq : Real.sqrt (u x) ^ 2 = u x := Real.sq_sqrt hpos.le
   have hdpl := hasDerivAt_dpl_comp hu hpos
   have hphi := (hasDerivAt_gaussianPDFReal_zero_one (dpl x (u x))).comp x hdpl
@@ -433,7 +426,7 @@ private theorem hasDerivAt_bsCallSmile_k {F σ ψ₁ T₀ ε k T : ℝ} (hF : 0 
                       * (2 * smileSurface σ ψ₁ T₀ ε k T * (ε * ψ₁ / Real.sqrt (T + T₀))
                         * T)))))) k := by
   have hwpos : 0 < totalVar σ ψ₁ T₀ ε k T := mul_pos (pow_pos hst 2) hT
-  have huc := hasDerivAt_totalVar_k (σ := σ) (ψ₁ := ψ₁) (T₀ := T₀) (ε := ε) (T := T) (x := k) hS
+  have huc := hasDerivAt_totalVar_k (σ := σ) (ψ₁ := ψ₁) (T₀ := T₀) (ε := ε) (T := T) (x := k)
   have hcore := hasDerivAt_blackForm_comp huc hwpos
   refine (hcore.const_mul F).congr_of_eventuallyEq ?_
   filter_upwards [smileSurface_eventually_pos_k hS hst] with y hy
@@ -464,11 +457,11 @@ noncomputable def wSlope (σ ψ₁ T₀ ε T y : ℝ) : ℝ :=
   2 * smileSurface σ ψ₁ T₀ ε y T * (ε * ψ₁ / Real.sqrt (T + T₀)) * T
 
 /-- Its chain: `w'' = 2·(εψ₁/√(T+T₀))²·T`, constant in `y`. -/
-private theorem hasDerivAt_wSlope {σ ψ₁ T₀ ε T k : ℝ} (hS : 0 < T + T₀) :
+private theorem hasDerivAt_wSlope {σ ψ₁ T₀ ε T k : ℝ} :
     HasDerivAt (fun y ↦ wSlope σ ψ₁ T₀ ε T y)
       (2 * (ε * ψ₁ / Real.sqrt (T + T₀)) ^ 2 * T) k := by
   have h1 : HasDerivAt (fun y : ℝ ↦ smileSurface σ ψ₁ T₀ ε y T)
-      (ε * ψ₁ / Real.sqrt (T + T₀)) k := hasDerivAt_smileSurface_k hS
+      (ε * ψ₁ / Real.sqrt (T + T₀)) k := hasDerivAt_smileSurface_k
   have h2 : HasDerivAt (fun y : ℝ ↦
       2 * T * (ε * ψ₁ / Real.sqrt (T + T₀)) * smileSurface σ ψ₁ T₀ ε y T)
       (2 * T * (ε * ψ₁ / Real.sqrt (T + T₀)) * (ε * ψ₁ / Real.sqrt (T + T₀))) k :=
@@ -536,10 +529,10 @@ private theorem hasDerivAt_deriv_bsCallSmile_k {F σ ψ₁ T₀ ε k T : ℝ} (h
               * dminus k (totalVar σ ψ₁ T₀ ε k T) (wSlope σ ψ₁ T₀ ε T k))))) k := by
   have hwpos : 0 < totalVar σ ψ₁ T₀ ε k T := mul_pos (pow_pos hst 2) hT
   have hu : HasDerivAt (fun y ↦ totalVar σ ψ₁ T₀ ε y T) (wSlope σ ψ₁ T₀ ε T k) k :=
-    hasDerivAt_totalVar_k hS
+    hasDerivAt_totalVar_k
   have hBw := hasDerivAt_Bw_comp hu hwpos
   have hm : HasDerivAt (fun y ↦ wSlope σ ψ₁ T₀ ε T y)
-      (2 * (ε * ψ₁ / Real.sqrt (T + T₀)) ^ 2 * T) k := hasDerivAt_wSlope hS
+      (2 * (ε * ψ₁ / Real.sqrt (T + T₀)) ^ 2 * T) k := hasDerivAt_wSlope
   have hprod := hBw.mul hm
   have hexp := hasDerivAt_exp_Phi_dmi_comp hu hwpos
   refine ((hprod.sub hexp).const_mul F).congr_of_eventuallyEq ?_
@@ -684,10 +677,10 @@ private theorem slopeNum_zero (σ ψ₁ T₀ T : ℝ) : slopeNum σ ψ₁ T₀ 0
   simp
 
 /-- The `k`-chain of the numerator `w_T` at the money. -/
-private theorem hasDerivAt_smileN_k {σ ψ₁ T₀ ε T : ℝ} (hS : 0 < T + T₀) :
+private theorem hasDerivAt_smileN_k {σ ψ₁ T₀ ε T : ℝ} :
     HasDerivAt (fun k ↦ smileN σ ψ₁ T₀ ε k T) (smileNk σ ψ₁ T₀ ε T) 0 := by
   have hs : HasDerivAt (fun k ↦ smileSurface σ ψ₁ T₀ ε k T) (ε * ψ₁ / Real.sqrt (T + T₀)) 0 :=
-    hasDerivAt_smileSurface_k hS
+    hasDerivAt_smileSurface_k
   have hs2 : HasDerivAt (fun k ↦ smileSurface σ ψ₁ T₀ ε k T ^ 2)
       (2 * smileSurface σ ψ₁ T₀ ε 0 T ^ (2 - 1) * (ε * ψ₁ / Real.sqrt (T + T₀))) 0 :=
     hs.fun_pow 2
@@ -711,9 +704,9 @@ private theorem hasDerivAt_smileDelta_k {σ ψ₁ T₀ ε T : ℝ} (hσ : 0 < σ
   have hw0 : 0 < totalVar σ ψ₁ T₀ ε 0 T := by rw [totalVar_zero]; positivity
   have hw0ne := hw0.ne'
   have hm : HasDerivAt (fun k ↦ wSlope σ ψ₁ T₀ ε T k)
-      (2 * (ε * ψ₁ / Real.sqrt (T + T₀)) ^ 2 * T) 0 := hasDerivAt_wSlope hS
+      (2 * (ε * ψ₁ / Real.sqrt (T + T₀)) ^ 2 * T) 0 := hasDerivAt_wSlope
   have hw : HasDerivAt (fun k ↦ totalVar σ ψ₁ T₀ ε k T) (wSlope σ ψ₁ T₀ ε T 0) 0 :=
-    hasDerivAt_totalVar_k hS
+    hasDerivAt_totalVar_k
   have hkm : HasDerivAt (fun k ↦ k * wSlope σ ψ₁ T₀ ε T k)
       (1 * wSlope σ ψ₁ T₀ ε T 0 + 0 * (2 * (ε * ψ₁ / Real.sqrt (T + T₀)) ^ 2 * T)) 0 :=
     (hasDerivAt_id 0).mul hm
@@ -753,7 +746,7 @@ private theorem hasDerivAt_dupireRatio_k_zero {F σ ψ₁ T₀ ε T : ℝ} (hF :
       (slopeNum σ ψ₁ T₀ ε T / (1 + smileDelta σ ψ₁ T₀ ε 0 T) ^ 2) 0 := by
   have hst : 0 < smileSurface σ ψ₁ T₀ ε 0 T := by rwa [smileSurface_atm]
   have hN : HasDerivAt (fun k ↦ smileN σ ψ₁ T₀ ε k T) (smileNk σ ψ₁ T₀ ε T) 0 :=
-    hasDerivAt_smileN_k hS
+    hasDerivAt_smileN_k
   have hD : HasDerivAt (fun k ↦ smileDelta σ ψ₁ T₀ ε k T) (smileDk σ ψ₁ T₀ ε T) 0 :=
     hasDerivAt_smileDelta_k hσ hT hS
   have hcone : HasDerivAt (fun k : ℝ ↦ (1 : ℝ)) 0 0 := hasDerivAt_const 0 (1 : ℝ)
