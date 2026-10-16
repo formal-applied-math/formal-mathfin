@@ -57,8 +57,7 @@ Gatheral form of the ratio specialized to this surface — after which the
 
 namespace MathFin.ForwardSmile
 
-open MeasureTheory ProbabilityTheory Real
-open scoped NNReal
+open ProbabilityTheory Real
 
 /-! ## The surface, the price, the ratio -/
 
@@ -490,11 +489,6 @@ private theorem hasDerivAt_wSlope {σ ψ₁ T₀ ε T k : ℝ} (hS : 0 < T + T�
 
 /-! ## The second `k`-chain: `C_kk` and the Gatheral form of the ratio -/
 
-/-- The standard normal density is strictly positive (needed to cancel the common
-vega-density factor between Dupire's numerator and denominator). -/
-private theorem gaussianPDFReal_zero_one_pos (x : ℝ) : 0 < gaussianPDFReal 0 1 x :=
-  gaussianPDFReal_pos 0 1 x one_ne_zero
-
 /-- **The `k`-derivative of the call price, collapsed**: the spelled chain value of
 `hasDerivAt_bsCallSmile_k` simplifies (via the magic identity `e^k·ϕ(d₋) = ϕ(d₊)`) to
 `C_k = F·(B_w·m − e^k·Φ(d₋))` with `B_w = ϕ(d₊)/(2√w)` and `m = w'` — the vega-density
@@ -524,13 +518,12 @@ private theorem deriv_bsCallSmile_k_value {F σ ψ₁ T₀ ε k T : ℝ} (hF : 0
   ring
 
 /-- **The second `k`-chain `C_kk`** (the second `k`-derivative of the call
-price, the remaining ingredient Dupire's ratio needs beyond `C_k`):
-the `k`-derivative of the `k`-derivative of the call price, assembled from the
+price, the remaining ingredient Dupire's ratio needs beyond `C_k`), assembled from the
 `B_w` composite chain (`hasDerivAt_Bw_comp`), the variance-slope chain
 (`hasDerivAt_wSlope`) and the exercise-side chain
 (`hasDerivAt_exp_Phi_dmi_comp`) — each factor evaluated on the *collapsed*
-first-derivative function of `deriv_bsCallSmile_k_value`, so the normalization
-stays at the level of one small `ring` congruence per `y`. -/
+first-derivative function of `deriv_bsCallSmile_k_value`, which closes the eventual
+congruence directly. -/
 private theorem hasDerivAt_deriv_bsCallSmile_k {F σ ψ₁ T₀ ε k T : ℝ} (hF : 0 < F) (hT : 0 < T)
     (hS : 0 < T + T₀) (hst : 0 < smileSurface σ ψ₁ T₀ ε k T) :
     HasDerivAt (fun y ↦ deriv (fun x ↦ bsCallSmile F σ ψ₁ T₀ ε x T) y)
@@ -622,7 +615,7 @@ theorem dupireRatio_eq {F σ ψ₁ T₀ ε k T : ℝ} (hF : 0 < F) (hT : 0 < T) 
     (hasDerivAt_deriv_bsCallSmile_k hF hT hS hst).deriv, hI]
   have hA : F * gaussianPDFReal 0 1 (dpl k (totalVar σ ψ₁ T₀ ε k T))
       / Real.sqrt (totalVar σ ψ₁ T₀ ε k T) ≠ 0 :=
-    div_ne_zero (mul_ne_zero hF.ne' (gaussianPDFReal_zero_one_pos _).ne') hsne
+    div_ne_zero (mul_ne_zero hF.ne' (gaussianPDFReal_pos 0 1 _ one_ne_zero).ne') hsne
   have htwo : 2 * (F * (gaussianPDFReal 0 1 (dpl k (totalVar σ ψ₁ T₀ ε k T))
         / (2 * Real.sqrt (totalVar σ ψ₁ T₀ ε k T)))
         * (smileSurface σ ψ₁ T₀ ε k T ^ 2
@@ -632,7 +625,7 @@ theorem dupireRatio_eq {F σ ψ₁ T₀ ε k T : ℝ} (hF : 0 < F) (hT : 0 < T) 
     unfold smileN
     field_simp
   rw [htwo]
-  field_simp [hA, (gaussianPDFReal_zero_one_pos _).ne']
+  field_simp [hA, (gaussianPDFReal_pos 0 1 _ one_ne_zero).ne']
 
 /-! ## The `k = 0` extraction -/
 
@@ -877,8 +870,8 @@ private theorem hasDerivAt_smileDk_eps {σ ψ₁ T₀ T : ℝ} (hσ : 0 < σ) (h
   · field_simp [hWne, hDENne]
     ring
 
-/-- **The `ε`-chain of the ATM slope numerator**: `∂_ε[slopeNum]|₀ = L`, the eq-10.8
-coefficient. -/
+/-- **The `ε`-chain of the ATM slope numerator**: `∂_ε[slopeNum]|₀ =
+2σψ₁((3/2)T + 2T₀)/(T+T₀)^{3/2}`, the eq-10.8 coefficient. -/
 private theorem hasDerivAt_slopeNum {σ ψ₁ T₀ T : ℝ} (hσ : 0 < σ) (hT : 0 < T)
     (hS : 0 < T + T₀) :
     HasDerivAt (fun ε ↦ slopeNum σ ψ₁ T₀ ε T)
@@ -995,18 +988,17 @@ theorem dupireRatio_sqrt_slope {F σ ψ₁ T₀ T : ℝ} (hF : 0 < F) (hσ : 0 <
 /-! ## Corollaries -/
 
 /-- **The rule of two, recovered**: the closed form of `dupireRatio_sqrt_slope`
-evaluated at `T = 0`, `ψ₁((3/2)·0 + 2T₀)/((0+T₀)√(0+T₀))`, rescaled by today's
-implied-skew yardstick `√T₀`, is exactly `2ψ₁` — twice the implied ATM skew `ψ₁/√T₀`.
-(An algebraic identity on the closed form; `dupireRatio_sqrt_slope` itself is
-stated for `T > 0`.) -/
+evaluated at `T = 0`, `ψ₁((3/2)·0 + 2T₀)/((0+T₀)√(0+T₀))`, is `2·(ψ₁/√T₀)` — twice the
+implied ATM skew `ψ₁/√T₀`. (An algebraic identity on the closed form;
+`dupireRatio_sqrt_slope` itself is stated for `T > 0`.) -/
 theorem ruleOfTwo (ψ₁ T₀ : ℝ) (h₀ : 0 < T₀) :
-    Real.sqrt T₀ * (ψ₁ * ((3 / 2) * 0 + 2 * T₀) / ((0 + T₀) * Real.sqrt (0 + T₀)))
-      = 2 * ψ₁ := by
+    ψ₁ * ((3 / 2) * 0 + 2 * T₀) / ((0 + T₀) * Real.sqrt (0 + T₀))
+      = 2 * (ψ₁ / Real.sqrt T₀) := by
   norm_num
   field_simp [(Real.sqrt_pos.mpr h₀).ne']
 
-/-- **The calendar-time asymptotic** of the local skew: `√T` times the eq-10.8
-value tends to `(3/2)ψ₁`. -/
+/-- **The calendar-time asymptotic** of the local skew: `√T` times the
+`dupireRatio_sqrt_slope` closed form tends to `(3/2)ψ₁`. -/
 theorem localSkew_tendsto (ψ₁ T₀ : ℝ) :
     Filter.Tendsto (fun T ↦ ψ₁ * ((3 / 2) * T + 2 * T₀) / ((T + T₀) * Real.sqrt (T + T₀))
         * Real.sqrt T) Filter.atTop (nhds ((3 / 2) * ψ₁)) := by
