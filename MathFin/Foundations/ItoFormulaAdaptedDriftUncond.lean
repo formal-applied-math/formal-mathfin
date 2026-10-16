@@ -6,7 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.Foundations.ItoFormulaAdapted
-public import MathFin.Foundations.ItoFormulaAdaptedDrift
+public import MathFin.Foundations.ItoFormulaTDRemainder
 
 /-! # The unconditional integrated Itô–drift identity (the constructed process)
 
@@ -121,6 +121,14 @@ private theorem band_fubini {w : ℝ≥0 → Ω → ℝ}
           MeasureTheory.integral_prod _ hint
     _ = ∫ s in Set.Ioc u v, (∫ ω, w s ω ∂μ) ∂ItoIntegralL2.timeMeasure := rfl
 
+/-- **The integrated Itô–drift identity, unconditionally, for the constructed process.** For
+`X = adaptedItoProcess T hBmeas (processToLp δ) c β` (so `X 0 = c` almost surely),
+`𝔼[f(X_T)] = f c + ∫₀ᵀ (𝔼[f'(X_s)·β_s] + ½·𝔼[f''(X_s)·δ_s²]) ds`, for `B` a pre-Brownian
+motion with every path continuous, `β, δ` bounded, `natFiltration`-adapted and path-continuous,
+and `f` twice differentiable with `f''` continuous and `f'`, `f''` bounded. No version `M` of
+`δ●B` and no hypothesis on `X` is assumed; unlike the conditional
+`itoDrift_expectation_identity_adapted`, `X` is fixed to the constructed process and `B` is
+assumed path-continuous (`hBcont`). -/
 theorem itoDrift_expectation_identity_adapted_uncond (hB : IsPreBrownianReal B μ)
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
     {β : ℝ≥0 → Ω → ℝ}
@@ -178,17 +186,6 @@ theorem itoDrift_expectation_identity_adapted_uncond (hB : IsPreBrownianReal B �
     rw [abs_mul]
     exact mul_le_mul (hg1 _) (le_trans (hβbdd s ω) (le_abs_self Db)) (abs_nonneg _)
       (le_trans (abs_nonneg _) (hg1 0))
-  have hgd2 : ∀ s ω, |1 / 2 * (f'' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap
-      hδcont hδbdd) c β s ω) * (δ s ω * δ s ω))| ≤ 1 / 2 * (C2 * (|Dd| * |Dd|)) := by
-    intro s ω
-    rw [abs_mul, abs_of_pos (show (0 : ℝ) < 1 / 2 by norm_num)]
-    refine mul_le_mul_of_nonneg_left ?_ (by norm_num : (0 : ℝ) ≤ 1 / 2)
-    have hd2 : |δ s ω * δ s ω| ≤ |Dd| * |Dd| := by
-      rw [abs_mul]
-      exact mul_le_mul (le_trans (hδbdd s ω) (le_abs_self Dd))
-        (le_trans (hδbdd s ω) (le_abs_self Dd)) (abs_nonneg _) (abs_nonneg Dd)
-    rw [abs_mul]
-    exact mul_le_mul (hg2 _) hd2 (abs_nonneg _) (le_trans (abs_nonneg _) (hg2 0))
   have hd2 : ∀ s ω, |δ s ω * δ s ω| ≤ |Dd| * |Dd| := by
     intro s ω
     rw [abs_mul]
@@ -199,6 +196,11 @@ theorem itoDrift_expectation_identity_adapted_uncond (hB : IsPreBrownianReal B �
     intro s ω
     rw [abs_mul]
     exact mul_le_mul (hg2 _) (hd2 s ω) (abs_nonneg _) (le_trans (abs_nonneg _) (hg2 0))
+  have hgd2 : ∀ s ω, |1 / 2 * (f'' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap
+      hδcont hδbdd) c β s ω) * (δ s ω * δ s ω))| ≤ 1 / 2 * (C2 * (|Dd| * |Dd|)) := by
+    intro s ω
+    rw [abs_mul, abs_of_pos (show (0 : ℝ) < 1 / 2 by norm_num)]
+    exact mul_le_mul_of_nonneg_left (hgd2' s ω) (by norm_num)
   have hg_bdd : ∀ s ω, |f' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont
       hδbdd) c β s ω) * β s ω + 1 / 2 * (f'' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas
       hδadap hδcont hδbdd) c β s ω) * (δ s ω * δ s ω))|
@@ -236,17 +238,7 @@ theorem itoDrift_expectation_identity_adapted_uncond (hB : IsPreBrownianReal B �
           c β s ω) * (δ s ω * δ s ω)) ∂ItoIntegralL2.timeMeasure := by
     refine (ito_formula_adapted hB T hBmeas hBcont hδadap hδcont hδbdd hβadap hβcont hβbdd
       c hf hf' hf''c hg1 hg2).trans (ae_of_all _ fun ω ↦ ?_)
-    have hD : (∫ s in Set.Ioc 0 T, f' (adaptedItoProcess T hBmeas (processToLp (μ := μ)
-          T hBmeas hδadap hδcont hδbdd) c β s ω) * β s ω
-        + 1 / 2 * (f'' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap
-          hδcont hδbdd) c β s ω) * δ s ω ^ 2) ∂ItoIntegralL2.timeMeasure)
-        = (∫ s in Set.Ioc 0 T, f' (adaptedItoProcess T hBmeas (processToLp (μ := μ)
-          T hBmeas hδadap hδcont hδbdd) c β s ω) * β s ω
-        + 1 / 2 * (f'' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap
-          hδcont hδbdd) c β s ω) * (δ s ω * δ s ω)) ∂ItoIntegralL2.timeMeasure) :=
-      setIntegral_congr_fun measurableSet_Ioc fun s _ ↦ by rw [pow_two]
-    simp only []
-    rw [hD]
+    simp only [pow_two]
   -- integrability of `f (X T)`: linear growth of `f` plus the decomposition of `X`
   have hfcont : Continuous f := Differentiable.continuous fun x ↦ (hf x).differentiableAt
   have hf_lin : ∀ x, |f x| ≤ |f 0| + C1 * |x| := by
@@ -348,58 +340,8 @@ theorem itoDrift_expectation_identity_adapted_uncond (hB : IsPreBrownianReal B �
       (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd) c β s ω) * (δ s ω * δ s ω)) μ := fun s ↦
     Integrable.of_bound (((hf''c.measurable.comp (hXm s)).mul
       ((hδm s).mul (hδm s))).aestronglyMeasurable) (C2 * (|Dd| * |Dd|)) (ae_of_all _ fun ω ↦ by
-        rw [Real.norm_eq_abs, abs_mul]
-        exact mul_le_mul (hg2 _) (by
-          rw [abs_mul]
-          exact mul_le_mul (le_trans (hδbdd s ω) (le_abs_self Dd))
-            (le_trans (hδbdd s ω) (le_abs_self Dd)) (abs_nonneg _) (abs_nonneg Dd))
-          (abs_nonneg _) (le_trans (abs_nonneg _) (hg2 0)))
-  -- the two mean functions: measurability (product Fubini) and integrability
-  have hmeanA : StronglyMeasurable (fun s : ℝ≥0 ↦ ∫ ω, f' (adaptedItoProcess T hBmeas
-      (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd) c β s ω) * β s ω ∂μ) :=
-    StronglyMeasurable.integral_prod_right' (ν := μ)
-      (f := fun p : ℝ≥0 × Ω ↦ f' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas
-        hδadap hδcont hδbdd) c β p.1 p.2) * β p.1 p.2)
-      ((hp1.mul hpβ).mono (natFiltration hBmeas).predictable_le_prod)
-  have hmeanB : StronglyMeasurable (fun s : ℝ≥0 ↦ ∫ ω, f'' (adaptedItoProcess T hBmeas
-      (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd) c β s ω) * (δ s ω * δ s ω) ∂μ) :=
-    StronglyMeasurable.integral_prod_right' (ν := μ)
-      (f := fun p : ℝ≥0 × Ω ↦ f'' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas
-        hδadap hδcont hδbdd) c β p.1 p.2) * (δ p.1 p.2 * δ p.1 p.2))
-      ((hp2.mul (hpδ.mul hpδ)).mono (natFiltration hBmeas).predictable_le_prod)
-  haveI : IsFiniteMeasure (ItoIntegralL2.timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) :=
-    ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
-      ItoIntegralL2.timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
-  have hIntA : Integrable (fun s : ℝ≥0 ↦ ∫ ω, f' (adaptedItoProcess T hBmeas
-      (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd) c β s ω) * β s ω ∂μ)
-      (ItoIntegralL2.timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) := by
-    refine Integrable.of_bound (μ := ItoIntegralL2.timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T))
-      (hmeanA.aestronglyMeasurable.mono_measure Measure.restrict_le_self) (C1 * |Db|) ?_
-    refine ae_of_all _ fun s ↦ ?_
-    rw [Real.norm_eq_abs]
-    calc |∫ ω, f' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)
-          c β s ω) * β s ω ∂μ|
-        ≤ ∫ ω, |f' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)
-          c β s ω) * β s ω| ∂μ := abs_integral_le_integral_abs
-      _ ≤ ∫ ω, C1 * |Db| ∂μ := integral_mono_of_nonneg
-          (ae_of_all _ fun ω ↦ abs_nonneg _) (integrable_const _)
-          (ae_of_all _ fun ω ↦ hgd1 s ω)
-      _ = C1 * |Db| := by rw [integral_const]; simp
-  have hIntB : Integrable (fun s : ℝ≥0 ↦ ∫ ω, f'' (adaptedItoProcess T hBmeas
-      (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd) c β s ω) * (δ s ω * δ s ω) ∂μ)
-      (ItoIntegralL2.timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) := by
-    refine Integrable.of_bound (μ := ItoIntegralL2.timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T))
-      (hmeanB.aestronglyMeasurable.mono_measure Measure.restrict_le_self) (C2 * (|Dd| * |Dd|)) ?_
-    refine ae_of_all _ fun s ↦ ?_
-    rw [Real.norm_eq_abs]
-    calc |∫ ω, f'' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)
-          c β s ω) * (δ s ω * δ s ω) ∂μ|
-        ≤ ∫ ω, |f'' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)
-          c β s ω) * (δ s ω * δ s ω)| ∂μ := abs_integral_le_integral_abs
-      _ ≤ ∫ ω, C2 * (|Dd| * |Dd|) ∂μ := integral_mono_of_nonneg
-          (ae_of_all _ fun ω ↦ abs_nonneg _) (integrable_const _)
-          (ae_of_all _ fun ω ↦ hgd2' s ω)
-      _ = C2 * (|Dd| * |Dd|) := by rw [integral_const]; simp
+        rw [Real.norm_eq_abs]
+        exact hgd2' s ω)
   -- the master identity
   have hmain : ∫ ω, f (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)
         c β T ω) ∂μ - f c
@@ -460,20 +402,6 @@ theorem itoDrift_expectation_identity_adapted_uncond (hB : IsPreBrownianReal B �
               hδcont hδbdd) c β s ω) * (δ s ω * δ s ω) ∂μ) := by
     intro s _
     rw [integral_add (hAs s) ((hBs s).const_mul (1 / 2)), integral_const_mul]
-  have hsplit : (∫ s in Set.Ioc (0 : ℝ≥0) T, (∫ ω, f' (adaptedItoProcess T hBmeas
-        (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd) c β s ω) * β s ω
-        + 1 / 2 * (f'' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)
-          c β s ω) * (δ s ω * δ s ω)) ∂μ) ∂ItoIntegralL2.timeMeasure)
-      = (∫ s in Set.Ioc (0 : ℝ≥0) T, (∫ ω, f' (adaptedItoProcess T hBmeas
-          (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd) c β s ω) * β s ω ∂μ)
-          ∂ItoIntegralL2.timeMeasure)
-        + (1 / 2) * (∫ s in Set.Ioc (0 : ℝ≥0) T, (∫ ω, f'' (adaptedItoProcess T hBmeas
-            (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd) c β s ω) * (δ s ω * δ s ω) ∂μ)
-          ∂ItoIntegralL2.timeMeasure) := by
-    rw [setIntegral_congr_fun measurableSet_Ioc hper,
-      integral_add (μ := ItoIntegralL2.timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) hIntA
-        (hIntB.const_mul (1 / 2)),
-      integral_const_mul]
   -- conclude
   have hfin : ∫ ω, f (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap
         hδcont hδbdd) c β T ω) ∂μ - f c
