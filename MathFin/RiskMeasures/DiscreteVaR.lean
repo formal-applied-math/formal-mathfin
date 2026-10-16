@@ -52,6 +52,7 @@ is `isGreatest_integral_mul_expectedShortfall` (`RiskMeasures/ExpectedShortfall.
 namespace MathFin.DiscreteVaR
 
 open MeasureTheory Set
+open scoped Interval
 
 variable {ι : Type*} [Fintype ι]
 
@@ -131,10 +132,10 @@ theorem finiteVaR_eq_of_mem_of_forall_lt {v₀ : ℝ}
 /-- The loss values `v` at which the mass of `{L ≤ v}` is at least α form a nonempty finite set:
 at the largest loss value that mass is the full mass `1 ≥ α`. -/
 theorem nonempty_values_mass_ge (hq : q ∈ stdSimplex ℝ ι) (hα1 : α ≤ 1) :
-    ((Finset.univ.image L).filter
-      (fun v ↦ α ≤ ∑ i with L i ≤ v, q i)).Nonempty := by
+    {v ∈ Finset.univ.image L | α ≤ ∑ i with L i ≤ v, q i}.Nonempty := by
   have hne := (Finset.nonempty_of_sum_ne_zero (by rw [hq.2]; norm_num)).image L
-  have hfull : Finset.univ.filter (L · ≤ (Finset.univ.image L).max' hne) = Finset.univ :=
+  have hfull : {i ∈ (Finset.univ : Finset ι) | L i ≤ (Finset.univ.image L).max' hne}
+      = Finset.univ :=
     Finset.filter_true_of_mem fun i _ ↦
       Finset.le_max' _ _ (Finset.mem_image_of_mem _ (Finset.mem_univ _))
   exact ⟨_, Finset.mem_filter.2 ⟨Finset.max'_mem _ hne, by rwa [hfull, hq.2]⟩⟩
@@ -143,8 +144,7 @@ theorem nonempty_values_mass_ge (hq : q ∈ stdSimplex ℝ ι) (hα1 : α ≤ 1)
 `v ∈ Finset.image L univ` at which the `q`-mass of `{L ≤ v}` is at least α, so VaR is attained at
 a loss value. -/
 theorem finiteVaR_eq_value_min (hq : q ∈ stdSimplex ℝ ι) (hα0 : 0 < α) (hα1 : α ≤ 1) :
-    finiteVaR q L α = ((Finset.univ.image L).filter
-      (fun v ↦ α ≤ ∑ i with L i ≤ v, q i)).min'
+    finiteVaR q L α = {v ∈ Finset.univ.image L | α ≤ ∑ i with L i ≤ v, q i}.min'
       (nonempty_values_mass_ge hq hα1) := by
   refine IsLeast.csInf_eq ⟨(Finset.mem_filter.1 (Finset.min'_mem _ _)).2,
     fun x (hx : α ≤ _) ↦ ?_⟩
@@ -152,7 +152,8 @@ theorem finiteVaR_eq_value_min (hq : q ∈ stdSimplex ℝ ι) (hα0 : 0 < α) (h
   obtain ⟨j, hj, hjmax⟩ :=
     Finset.exists_max_image _ L (Finset.nonempty_of_sum_ne_zero (hα0.trans_le hx).ne')
   have hjx := (Finset.mem_filter.1 hj).2
-  have hfilt : Finset.univ.filter (L · ≤ L j) = Finset.univ.filter (L · ≤ x) :=
+  have hfilt : {i ∈ (Finset.univ : Finset ι) | L i ≤ L j}
+      = {i ∈ (Finset.univ : Finset ι) | L i ≤ x} :=
     Finset.filter_congr fun i _ ↦ ⟨fun h ↦ h.trans hjx, fun h ↦ hjmax i (by simpa using h)⟩
   exact (Finset.min'_le _ _ (Finset.mem_filter.2 ⟨Finset.mem_image_of_mem _ (Finset.mem_univ j),
     hfilt ▸ hx⟩)).trans hjx
@@ -205,7 +206,7 @@ theorem vaR_one_bond : finiteVaR oneQ oneL (19 / 20) = 0 := by
 /-- Joint law of the two independent `$50` half-bonds (`true` = default): the product of the
 marginals `1/25` / `24/25`. -/
 noncomputable def jointQ : Bool × Bool → ℝ :=
-  fun p ↦ (if p.1 then 1 / 25 else 24 / 25) * (if p.2 then 1 / 25 else 24 / 25)
+  fun p ↦ oneQ p.1 * oneQ p.2
 
 /-- Loss of the first half-bond: 50 if it defaults, else 0. -/
 def halfL₁ : Bool × Bool → ℝ := fun p ↦ if p.1 then 50 else 0
@@ -215,21 +216,21 @@ def halfL₂ : Bool × Bool → ℝ := fun p ↦ if p.2 then 50 else 0
 
 /-- `jointQ` is a probability vector. -/
 lemma jointQ_mem_simplex : jointQ ∈ stdSimplex ℝ (Bool × Bool) :=
-  ⟨fun ⟨a, b⟩ ↦ by cases a <;> cases b <;> norm_num [jointQ],
-    by norm_num [jointQ, Fintype.sum_prod_type]⟩
+  ⟨fun ⟨a, b⟩ ↦ by cases a <;> cases b <;> norm_num [jointQ, oneQ],
+    by norm_num [jointQ, oneQ, Fintype.sum_prod_type]⟩
 
 private lemma joint_half₁_cdf (x : ℝ) :
     ∑ p with halfL₁ p ≤ x, jointQ p
       = (if 0 ≤ x then 24 / 25 else 0) + (if 50 ≤ x then 1 / 25 else 0) := by
   rw [Finset.sum_filter, Fintype.sum_prod_type]
-  norm_num [halfL₁, jointQ]
+  norm_num [halfL₁, jointQ, oneQ]
   split_ifs <;> norm_num
 
 private lemma joint_half₂_cdf (x : ℝ) :
     ∑ p with halfL₂ p ≤ x, jointQ p
       = (if 0 ≤ x then 24 / 25 else 0) + (if 50 ≤ x then 1 / 25 else 0) := by
   rw [Finset.sum_filter, Fintype.sum_prod_type]
-  norm_num [halfL₂, jointQ]
+  norm_num [halfL₂, jointQ, oneQ]
   split_ifs <;> norm_num
 
 /-- Mass of `{halfL₁ + halfL₂ ≤ x}` under the joint law: no default w.p. `9216/10000 = (24/25)²`,
@@ -239,7 +240,7 @@ private lemma joint_cdf (x : ℝ) :
       = (if 0 ≤ x then 9216 / 10000 else 0) + (if 50 ≤ x then 768 / 10000 else 0)
         + (if 100 ≤ x then 16 / 10000 else 0) := by
   rw [Finset.sum_filter, Fintype.sum_prod_type]
-  norm_num [halfL₁, halfL₂, jointQ]
+  norm_num [halfL₁, halfL₂, jointQ, oneQ]
   split_ifs <;> norm_num
 
 /-- The first half-bond's VaR as a function of the level `α ∈ (0, 1]`. -/
@@ -298,19 +299,25 @@ theorem es_one_bond_eq_80 : finiteES oneQ oneL (19 / 20) = 80 := by
     rw [vaR_one_bond_window u (by linarith [hu.1]) (by linarith [hu.2]), if_pos hu.2]
   have hc1 (u) (hu : u ∈ Ioc (24 / 25 : ℝ) 1) : finiteVaR oneQ oneL u = 100 := by
     rw [vaR_one_bond_window u (by linarith [hu.1]) hu.2, if_neg (not_le.2 hu.1)]
-  -- the first piece vanishes pointwise on the closed interval, so it is integrable
+  -- the quantile function agrees a.e. with a constant on each piece, which gives both
+  -- integrability and the value of the integral in one hypothesis
+  have hae1 : finiteVaR oneQ oneL =ᵐ[volume.restrict (Ι (19 / 20 : ℝ) (24 / 25))]
+      fun _ ↦ (0 : ℝ) :=
+    Set.EqOn.aeEq_restrict (fun u hu ↦ by
+      rw [uIoc_of_le (by norm_num : (19 / 20 : ℝ) ≤ 24 / 25)] at hu
+      exact hz1 u (Ioc_subset_Icc_self hu)) measurableSet_uIoc
+  have hae2 : finiteVaR oneQ oneL =ᵐ[volume.restrict (Ι (24 / 25 : ℝ) 1)] fun _ ↦ (100 : ℝ) :=
+    Set.EqOn.aeEq_restrict (fun u hu ↦ by
+      rw [uIoc_of_le (by norm_num : (24 / 25 : ℝ) ≤ 1)] at hu
+      exact hc1 u hu) measurableSet_uIoc
   have h1int : IntervalIntegrable (finiteVaR oneQ oneL) volume (19 / 20 : ℝ) (24 / 25) :=
-    ContinuousOn.intervalIntegrable <| continuousOn_const.congr fun u hu ↦
-      hz1 u (by rwa [uIcc_of_le (by norm_num)] at hu)
+    intervalIntegrable_const.congr_ae hae1.symm
+  have h2int : IntervalIntegrable (finiteVaR oneQ oneL) volume (24 / 25 : ℝ) 1 :=
+    intervalIntegrable_const.congr_ae hae2.symm
   have hval1 : ∫ u in (19 / 20 : ℝ)..(24 / 25), finiteVaR oneQ oneL u = 0 := by
-    rw [intervalIntegral.integral_congr (g := fun _ ↦ (0 : ℝ)) fun u hu ↦
-      hz1 u (by rwa [uIcc_of_le (by norm_num)] at hu)]
-    simp
+    rw [intervalIntegral.integral_congr_ae_restrict hae1]; simp
   have hval2 : ∫ u in (24 / 25 : ℝ)..1, finiteVaR oneQ oneL u = 4 := by
-    rw [intervalIntegral.integral_congr_ae (g := fun _ ↦ (100 : ℝ)) <|
-      Filter.Eventually.of_forall fun u hu ↦ hc1 u (by rwa [uIoc_of_le (by norm_num)] at hu)]
-    norm_num
-  have h2int := intervalIntegral.intervalIntegrable_of_integral_ne_zero (by rw [hval2]; norm_num)
+    rw [intervalIntegral.integral_congr_ae_restrict hae2]; norm_num
   rw [finiteES, ← intervalIntegral.integral_add_adjacent_intervals h1int h2int, hval1, hval2]
   norm_num
 
@@ -325,11 +332,12 @@ noncomputable def condTailMean (q L : ι → ℝ) (α : ℝ) : ℝ :=
 /-- At the single bond the tail event `{L ≥ VaR₀.₉₅} = {L ≥ 0}` is the whole state space, so the
 conditional tail mean is the unconditional expectation `E[L] = 4`, while `ES₀.₉₅ = 80`
 (`es_one_bond_eq_80`). -/
-theorem condTailMean_one_bond :
-    condTailMean oneQ oneL (19 / 20) = ∑ b, oneQ b * oneL b ∧ ∑ b, oneQ b * oneL b = 4 := by
-  have hfilt : Finset.univ.filter (finiteVaR oneQ oneL (19 / 20) ≤ oneL ·) = Finset.univ :=
+theorem condTailMean_one_bond : condTailMean oneQ oneL (19 / 20) = 4 := by
+  have hfilt : {b ∈ (Finset.univ : Finset Bool) | finiteVaR oneQ oneL (19 / 20) ≤ oneL b}
+      = Finset.univ :=
     Finset.filter_true_of_mem fun b _ ↦ by rw [vaR_one_bond]; cases b <;> norm_num [oneL]
-  exact ⟨by rw [condTailMean, hfilt, oneQ_mem_simplex.2, div_one], by norm_num [oneQ, oneL]⟩
+  rw [condTailMean, hfilt, oneQ_mem_simplex.2, div_one]
+  norm_num [oneQ, oneL]
 
 /-! ## The bounded-density representation of ES at the single bond -/
 
