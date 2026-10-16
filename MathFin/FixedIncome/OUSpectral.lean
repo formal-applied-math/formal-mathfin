@@ -69,8 +69,6 @@ eigenvectors exist. -/
 noncomputable def ouGen (κ σ : ℝ) (p : Polynomial ℝ) : Polynomial ℝ :=
   -(κ • Polynomial.X) * p.derivative + (σ ^ 2 / 2) • p.derivative.derivative
 
-#print axioms ouGen
-
 /-- Additivity of the generator (the polynomial derivative is additive). -/
 theorem ouGen_add (κ σ : ℝ) (p q : Polynomial ℝ) :
     ouGen κ σ (p + q) = ouGen κ σ p + ouGen κ σ q := by
@@ -83,16 +81,10 @@ theorem ouGen_sub (κ σ : ℝ) (p q : Polynomial ℝ) :
   simp only [ouGen, derivative_sub, ← Polynomial.C_mul']
   ring
 
-#print axioms ouGen_sub
-
-#print axioms ouGen_add
-
 /-- The generator kills constants (a constant has zero derivative). -/
 theorem ouGen_const (κ σ a : ℝ) :
     ouGen κ σ (Polynomial.C a) = 0 := by
   simp [ouGen]
-
-#print axioms ouGen_const
 
 /-! ## The commutator identities (the induction engine)
 
@@ -114,8 +106,6 @@ theorem ouGen_derivative (κ σ : ℝ) (p : Polynomial ℝ) :
   simp only [ouGen, derivative_add, derivative_mul, derivative_C, derivative_X, map_neg,
     mul_one, ← Polynomial.C_mul']
   ring
-
-#print axioms ouGen_derivative
 
 /-- **Commutator with multiplication by `X`.** `L (X p) = X • L p + σ² • p' - κ • (X p)`:
 multiplying by `X` and generating commute up to the creation term `σ² • p'` (the
@@ -141,16 +131,12 @@ theorem ouGen_X_mul (κ σ : ℝ) (p : Polynomial ℝ) :
   simp only [← Polynomial.C_mul']
   ring
 
-#print axioms ouGen_X_mul
-
 /-- The derivative-commutator display, verbatim at the unit point `κ = σ = 1`
 where it is true. (Not the parameter pair the eigeninduction runs at.) -/
 theorem ouGen_derivative_unit (p : Polynomial ℝ) :
     ouGen 1 1 p.derivative = (ouGen 1 1 p).derivative + p.derivative := by
   rw [ouGen_derivative]
   simp
-
-#print axioms ouGen_derivative_unit
 
 /-- The multiplication-commutator display, verbatim at the unit point
 `κ = σ = 1` where it is true. (The eigeninduction runs at `κ = 1, σ² = 2`, where the
@@ -159,8 +145,6 @@ theorem ouGen_X_mul_unit (p : Polynomial ℝ) :
     ouGen 1 1 (X * p) = X * ouGen 1 1 p + p.derivative - X * p := by
   rw [ouGen_X_mul]
   simp
-
-#print axioms ouGen_X_mul_unit
 
 /-! ## The Hermite eigenfunctions (Calc 14.14's identity)
 
@@ -177,20 +161,14 @@ value is `He_n(x)`. -/
 noncomputable def hermiteReal (n : ℕ) : Polynomial ℝ :=
   (Polynomial.hermite n).map (Int.castRingHom ℝ)
 
-#print axioms hermiteReal
-
 theorem hermiteReal_zero : hermiteReal 0 = 1 := by
   simp [hermiteReal, Polynomial.hermite_zero]
-
-#print axioms hermiteReal_zero
 
 theorem hermiteReal_succ (n : ℕ) :
     hermiteReal (n + 1) = X * hermiteReal n - (hermiteReal n).derivative := by
   rw [hermiteReal, Polynomial.hermite_succ, Polynomial.map_sub, Polynomial.map_mul,
     Polynomial.map_X, ← Polynomial.derivative_map]
   rfl
-
-#print axioms hermiteReal_succ
 
 /-- **The Hermite eigenidentity (eq. 14.16's OU case / Calc 14.14 at `κ = 1`, `s = 1`).**
 The unit-normalized OU generator `ouGen 1 (Real.sqrt 2) = -X·d/dx + d²/dx²` (stationary
@@ -213,8 +191,6 @@ theorem ouGen_hermite (n : ℕ) :
     rw [hC2]
     ring
 
-#print axioms ouGen_hermite
-
 /-! ## The stationary scale: `He_n(x/s)` (Calc 14.14 in general position)
 
 At the stationary scale `s² = σ²/2κ`, the eigenfunctions are the *rescaled* Hermite
@@ -228,15 +204,11 @@ scaling `X ↦ s⁻¹ • X`. -/
 noncomputable def scaledHermite (s : ℝ) (n : ℕ) : Polynomial ℝ :=
   (hermiteReal n).comp (s⁻¹ • X)
 
-#print axioms scaledHermite
-
 theorem scaledHermite_eval (n : ℕ) (x s : ℝ) :
     Polynomial.eval x (scaledHermite s n) = Polynomial.eval (x / s) (hermiteReal n) := by
   have hx : Polynomial.eval x (s⁻¹ • X) = x / s := by
     rw [Polynomial.eval_smul, smul_eq_mul, Polynomial.eval_X, div_eq_mul_inv, mul_comm]
   rw [scaledHermite, Polynomial.eval_comp, hx]
-
-#print axioms scaledHermite_eval
 
 /-- The unit generator spelled out: at `κ = 1`, `σ² = 2` the OU generator is the
 operator `p ↦ -(X * p') + p''` — the classical Hermite ODE operator. -/
@@ -244,8 +216,6 @@ theorem ouGen_sqrt2 (f : Polynomial ℝ) :
     ouGen 1 (Real.sqrt 2) f = -(X * f.derivative) + f.derivative.derivative := by
   rw [ouGen, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2), div_self two_ne_zero]
   simp
-
-#print axioms ouGen_sqrt2
 
 /-- **The scaling conjugation (the chain rule for `x ↦ x/s`).** Composing with the
 scaling `X ↦ s⁻¹ • X` conjugates the general generator into `κ` times the unit one:
@@ -281,8 +251,6 @@ theorem ouGen_comp_smulX (κ σ s : ℝ) (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ
     Polynomial.X_comp]
   ring
 
-#print axioms ouGen_comp_smulX
-
 /-- **The scaled eigenidentity, polynomial level (Calc 14.14 / Pearson-table OU row).**
 At the stationary scale `s² = σ²/2κ`, the generator maps the scaled Hermite polynomial
 `q_n = He_n(x/s)` to `-(nκ) • q_n`. The eigenvalue is `-nκ` — the OU row of the
@@ -293,8 +261,6 @@ theorem ouGen_heigen_scaled_poly {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s 
   rw [scaledHermite, ouGen_comp_smulX κ σ s hs h, ouGen_hermite, Polynomial.smul_comp,
     smul_smul, mul_comm]
 
-#print axioms ouGen_heigen_scaled_poly
-
 /-- **The scaled eigenidentity, eval level (the contract's display).** For
 `q_n(x) = He_n(x/s)`: `eval x (L q_n) = -(nκ) · eval x q_n` at every point `x`. -/
 theorem ouGen_heigen_scaled {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2)
@@ -303,16 +269,12 @@ theorem ouGen_heigen_scaled {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 =
       = -(n : ℝ) * κ * Polynomial.eval x (scaledHermite s n) := by
   rw [ouGen_heigen_scaled_poly hs h n, Polynomial.eval_smul, smul_eq_mul]
 
-#print axioms ouGen_heigen_scaled
-
 theorem hermiteReal_two : hermiteReal 2 = X * X - 1 := by
   have h2 : Polynomial.hermite 2 = (X : Polynomial ℤ) * X - 1 := by
     rw [show (2 : ℕ) = 1 + 1 from rfl, Polynomial.hermite_succ, Polynomial.hermite_one,
       derivative_X]
   rw [hermiteReal, h2]
   simp
-
-#print axioms hermiteReal_two
 
 /-- **The `n = 2` mechanism of Calc 14.14, verbatim.** With `f = (x/s)² - 1` (the
 evaluated `He_2(x/s)`), the generator output evaluates to `-(2κ) · f` — the drift term
@@ -326,8 +288,6 @@ theorem ouGen_heigen_two {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ
   simp only [Polynomial.eval_sub, Polynomial.eval_mul, Polynomial.eval_X,
     Polynomial.eval_one]
   ring
-
-#print axioms ouGen_heigen_two
 
 /-! ## The Gaussian no-flux condition (Calc 14.13, one dimension)
 
@@ -355,8 +315,6 @@ theorem gaussianScore_ou {s : ℝ} (hs : s ≠ 0) (x : ℝ) :
     exact h1.neg
   exact (h2.exp.deriv).trans (by ring)
 
-#print axioms gaussianScore_ou
-
 /-- **The no-flux condition (eq. 14.19's stationary Gaussian instance).** At the
 stationary scale `s² = σ²/2κ`, the drift flux `-κx·π` balances the diffusion flux
 `(σ²/2)·π'`: `μπ = ½(σ²π)'` of Calc 14.13, which is what makes the generator symmetric
@@ -369,8 +327,6 @@ theorem gaussianNoFlux_ou {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = �
   field_simp
   have hx : σ ^ 2 * x = 2 * x * s ^ 2 * κ := by rw [← h]; ring
   linarith
-
-#print axioms gaussianNoFlux_ou
 
 /-! ## The gap bias (the "asymptotic rate" remark, two modes)
 
@@ -401,8 +357,6 @@ theorem twoMode_rate_ge_gap {l₁ l₂ c₁ c₂ t : ℝ} (_hl₁ : 0 ≤ l₁) 
   field_simp
   nlinarith [hkey]
 
-#print axioms twoMode_rate_ge_gap
-
 /-! ## Stretch results (Ex. 14.2 fragments — the swirl, matrix algebra only)
 
 The chapter's two-dimensional counterexample — the swirl `dZ = -AZ dt + dW` with
@@ -428,8 +382,6 @@ theorem swirl_charpoly (θ : ℝ) :
   show (Matrix.charmatrix _).det = _
   rw [h, Matrix.det_fin_two_of, mul_neg, ← map_mul, sq θ]
   ring
-
-#print axioms swirl_charpoly
 
 /-- **Stretch — the swirl's stationary covariance is isotropic.** Any symmetric `Σ`
 solving the stationary-covariance equation `AΣ + ΣAᵀ = I` for the swirl matrix
@@ -474,8 +426,6 @@ theorem swirl_isotropy (θ a b d : ℝ)
   fin_cases i <;> fin_cases j <;>
     simp [ha, hb, hd]
 
-#print axioms swirl_isotropy
-
 /-- **Stretch — the stationary variance as a limit of the OU law.** The variance factor
 of the explicit OU law `N(x₀e^{-(k/2)t}, (s²/k)(1 - e^{-kt}))` (the same Gaussian-law
 computation as `VasicekSDEGaussian.vasicekShortRate_hasLaw_gaussian`) tends to `s²/k`
@@ -493,4 +443,3 @@ theorem ouStationaryVariance_tendsto {k s : ℝ} (hk : 0 < k) :
   have hsub := (tendsto_const_nhds (x := (1 : ℝ))).sub he
   simpa using (tendsto_const_nhds (x := s ^ 2 / k)).mul hsub
 
-#print axioms ouStationaryVariance_tendsto
