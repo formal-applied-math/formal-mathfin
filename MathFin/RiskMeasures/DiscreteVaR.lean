@@ -33,18 +33,18 @@ is `isGreatest_integral_mul_expectedShortfall` (`RiskMeasures/ExpectedShortfall.
 
 * `finiteVaR_eq_valueAtRisk`, `finiteES_eq_expectedShortfall`: the finite forms agree with the
   general definitions at the law `∑ i, q i • δ_i`.
-* `finiteVaR_eq_value_min`: VaR at a finite law is attained at a loss value.
+* `finiteVaR_eq_value_min`: for `α ∈ (0, 1]`, VaR at a finite law is attained at a loss value.
 * `finiteVaR_two_point`: VaR of a loss that is `0` with mass `a` and `c > 0` with mass `1 - a`.
 * `vaR_one_bond`, `vaR_two_halves`: `VaR₀.₉₅` is `0` for the single bond and `50` for the split
   position.
-* `vaR_subadditivity_fails`: on the joint space of the two half-bonds, each half has
-  `VaR₀.₉₅ = 0` and their sum has `VaR₀.₉₅ = 50`.
+* `vaR_subadditivity_fails`: on the joint space of the two half-bonds, the halves' `VaR₀.₉₅`
+  sum to less than the total's (the values are `0`, `0` and `50`).
 * `vaR_counterexample_window`: subadditivity fails exactly for `(24/25)² < α ≤ 24/25`.
 * `es_one_bond_eq_80`: `ES₀.₉₅ = 80` for the single bond.
 * `condTailMean_one_bond`: at the single bond the tail event `{L ≥ VaR₀.₉₅}` is the whole space,
   so the conditional tail mean is `E[L] = 4`.
-* `es_sup_representation_finite`: for the single bond, the greatest `E[Z·L]` over densities
-  `0 ≤ Z ≤ (1 − 19/20)⁻¹` with `E[Z] = 1` is `80`.
+* `es_sup_representation_finite`: for the single bond, `ES₀.₉₅` is the greatest `E[Z·L]` over
+  densities `0 ≤ Z ≤ (1 − 19/20)⁻¹` with `E[Z] = 1`.
 -/
 
 @[expose] public section
@@ -61,10 +61,10 @@ open MeasureTheory Set
 noncomputable def finiteVaR {ι : Type*} [Fintype ι] (q L : ι → ℝ) (α : ℝ) : ℝ :=
   sInf {x | ∑ i ∈ Finset.univ.filter (L · ≤ x), q i ≥ α}
 
-/-- **ES at a finite law**: the quantile average, `1/(1-α)` times the integral of the quantile
+/-- **ES at a finite law**: the quantile average, `(1 - α)⁻¹` times the integral of the quantile
 function `u ↦ finiteVaR q L u` over `[α, 1]`. -/
 noncomputable def finiteES {ι : Type*} [Fintype ι] (q L : ι → ℝ) (α : ℝ) : ℝ :=
-  (1 / (1 - α)) * ∫ u in α..1, finiteVaR q L u
+  (1 - α)⁻¹ * ∫ u in α..1, finiteVaR q L u
 
 /-- The law `∑ i, q i • δ_i` of a probability vector `q`. -/
 noncomputable def finiteLaw {ι : Type*} [Fintype ι] [MeasurableSpace ι] (q : ι → ℝ) : Measure ι :=
@@ -104,7 +104,7 @@ theorem finiteVaR_eq_valueAtRisk (hq : q ∈ stdSimplex ℝ ι) {L : ι → ℝ}
 /-- `finiteES` is `expectedShortfall` at the law `∑ i, q i • δ_i`. -/
 theorem finiteES_eq_expectedShortfall (hq : q ∈ stdSimplex ℝ ι) {L : ι → ℝ} {α : ℝ}
     (hα : α ∈ Ioo 0 1) : finiteES q L α = expectedShortfall L (finiteLaw q) α := by
-  rw [finiteES, expectedShortfall, one_div, intervalIntegral.integral_of_le hα.2.le,
+  rw [finiteES, expectedShortfall, intervalIntegral.integral_of_le hα.2.le,
     integral_Ioc_eq_integral_Ioo]
   exact congrArg _ <| setIntegral_congr_fun measurableSet_Ioo fun u hu ↦
     finiteVaR_eq_valueAtRisk hq ⟨hα.1.trans hu.1, hu.2⟩
@@ -128,35 +128,30 @@ theorem finiteVaR_eq_of_mem_of_forall_lt {v₀ : ℝ}
 
 /-- The loss values carrying mass ≥ α form a nonempty finite set: the largest loss value carries
 the full mass `1 ≥ α`. -/
-theorem finiteVaR_filtered_image_nonempty [Nonempty ι] (hq : q ∈ stdSimplex ℝ ι) (hα1 : α ≤ 1) :
+theorem nonempty_values_mass_ge (hq : q ∈ stdSimplex ℝ ι) (hα1 : α ≤ 1) :
     ((Finset.univ.image L).filter
       (fun v ↦ ∑ i ∈ Finset.univ.filter (L · ≤ v), q i ≥ α)).Nonempty := by
-  have hne := Finset.univ_nonempty.image L
+  have hne := (Finset.nonempty_of_sum_ne_zero (by rw [hq.2]; norm_num)).image L
   have hfull : Finset.univ.filter (L · ≤ (Finset.univ.image L).max' hne) = Finset.univ :=
     Finset.filter_true_of_mem fun i _ ↦ Finset.le_max' _ _ (Finset.mem_image_of_mem _ (by simp))
   exact ⟨_, Finset.mem_filter.2 ⟨Finset.max'_mem _ hne, by rwa [hfull, hq.2]⟩⟩
 
-/-- **Attainment.** The infimum over `ℝ` is the minimum over the loss values
-`Finset.image L univ` that carry `q`-mass ≥ α. Every VaR at a finite law is attained at a loss
-value. -/
-theorem finiteVaR_eq_value_min [Nonempty ι] (hq : q ∈ stdSimplex ℝ ι) (hα0 : 0 < α)
-    (hα1 : α ≤ 1) :
+/-- **Attainment.** For `α ∈ (0, 1]`, the infimum over `ℝ` is the minimum over the loss values
+`Finset.image L univ` that carry `q`-mass ≥ α, so VaR is attained at a loss value. -/
+theorem finiteVaR_eq_value_min (hq : q ∈ stdSimplex ℝ ι) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR q L α = ((Finset.univ.image L).filter
       (fun v ↦ ∑ i ∈ Finset.univ.filter (L · ≤ v), q i ≥ α)).min'
-      (finiteVaR_filtered_image_nonempty hq hα1) := by
+      (nonempty_values_mass_ge hq hα1) := by
   refine IsLeast.csInf_eq ⟨(Finset.mem_filter.1 (Finset.min'_mem _ _)).2,
     fun x (hx : _ ≥ α) ↦ ?_⟩
-  -- the largest loss value `a₀ ≤ x` carries the same mass as `x`, so it lies in the filter
-  obtain ⟨i₀, hi₀⟩ : (Finset.univ.filter (L · ≤ x)).Nonempty :=
-    Finset.nonempty_iff_ne_empty.2 fun he ↦ by simp [he] at hx; linarith
-  have hA : ((Finset.univ.image L).filter (· ≤ x)).Nonempty :=
-    ⟨L i₀, Finset.mem_filter.2 ⟨Finset.mem_image_of_mem _ (Finset.mem_univ i₀),
-      (Finset.mem_filter.1 hi₀).2⟩⟩
-  obtain ⟨ha₀img, ha₀x⟩ := Finset.mem_filter.1 (Finset.max'_mem _ hA)
-  have hfilt : Finset.univ.filter (L · ≤ _) = Finset.univ.filter (L · ≤ x) :=
-    Finset.filter_congr fun i _ ↦ ⟨fun h ↦ h.trans ha₀x, fun h ↦ Finset.le_max' _ _
-      (Finset.mem_filter.2 ⟨Finset.mem_image_of_mem _ (Finset.mem_univ i), h⟩)⟩
-  exact (Finset.min'_le _ _ (Finset.mem_filter.2 ⟨ha₀img, hfilt ▸ hx⟩)).trans ha₀x
+  -- the largest loss value `L j ≤ x` carries the same mass as `x`, so it lies in the filter
+  obtain ⟨j, hj, hjmax⟩ :=
+    Finset.exists_max_image _ L (Finset.nonempty_of_sum_ne_zero (hα0.trans_le hx).ne')
+  have hjx := (Finset.mem_filter.1 hj).2
+  have hfilt : Finset.univ.filter (L · ≤ L j) = Finset.univ.filter (L · ≤ x) :=
+    Finset.filter_congr fun i _ ↦ ⟨fun h ↦ h.trans hjx, fun h ↦ hjmax i (by simpa using h)⟩
+  exact (Finset.min'_le _ _ (Finset.mem_filter.2 ⟨Finset.mem_image_of_mem _ (Finset.mem_univ j),
+    hfilt ▸ hx⟩)).trans hjx
 
 /-- **Two-point laws.** If the mass of `{L ≤ x}` is `0` for `x < 0`, `a` for `0 ≤ x < c` and
 `a + b = 1` for `x ≥ c`, with `c > 0`, then at every level `α ∈ (0, 1]` the VaR is `0` for
@@ -190,11 +185,11 @@ private lemma one_bond_cdf (x : ℝ) :
   rw [Finset.sum_filter, Fintype.sum_bool]
   simp [oneL, oneQ, add_comm]
 
-/-- The single-bond VaR as a function of the level `u ∈ (0, 1]`: `0` for `u ≤ 24/25`, `100`
+/-- The single-bond VaR as a function of the level `α ∈ (0, 1]`: `0` for `α ≤ 24/25`, `100`
 above. This is the quantile function integrated in `es_one_bond_eq_80`. -/
-theorem vaR_one_bond_window (u : ℝ) (h0 : 0 < u) (h1 : u ≤ 1) :
-    finiteVaR oneQ oneL u = if u ≤ 24/25 then 0 else 100 :=
-  finiteVaR_two_point (by norm_num) (by norm_num) one_bond_cdf h0 h1
+theorem vaR_one_bond_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
+    finiteVaR oneQ oneL α = if α ≤ 24/25 then 0 else 100 :=
+  finiteVaR_two_point (by norm_num) (by norm_num) one_bond_cdf hα0 hα1
 
 /-- The single `$100` bond defaulting w.p. `1/25` has `VaR₀.₉₅ = 0`: the loss is 0 with probability
 `24/25 ≥ 19/20`. -/
@@ -265,8 +260,9 @@ theorem vaR_two_halves : finiteVaR jointQ (halfL₁ + halfL₂) (19/20) = 50 := 
   rw [vaR_joint_window _ (by norm_num) (by norm_num)]
   norm_num
 
-/-- **Subadditivity fails at the 95% level** on one probability space: each `$50` half-bond has
-`VaR₀.₉₅ = 0`, their sum has `VaR₀.₉₅ = 50` (`vaR_two_halves`). -/
+/-- **Subadditivity fails at the 95% level** on one probability space: the two `$50` half-bonds'
+`VaR₀.₉₅` sum to less than the `VaR₀.₉₅` of their total. The values are `0` for each half
+(`vaR_half₁_window`, `vaR_half₂_window`) and `50` for the total (`vaR_two_halves`). -/
 theorem vaR_subadditivity_fails :
     finiteVaR jointQ halfL₁ (19/20) + finiteVaR jointQ halfL₂ (19/20)
       < finiteVaR jointQ (halfL₁ + halfL₂) (19/20) := by
@@ -277,7 +273,7 @@ theorem vaR_subadditivity_fails :
 /-- **The failure window.** Subadditivity fails exactly for `9216/10000 < α ≤ 24/25`, where
 `9216/10000 = (24/25)²`. The right endpoint is included because the definition uses
 `P(L ≤ x) ≥ α`: at `α = 24/25` each half keeps VaR `0` while the total has VaR `50`. At
-`α = 9216/10000` the total VaR is already `0`. -/
+`α = 9216/10000` the total VaR is still `0`, so the left endpoint is excluded. -/
 theorem vaR_counterexample_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR jointQ halfL₁ α + finiteVaR jointQ halfL₂ α
       < finiteVaR jointQ (halfL₁ + halfL₂) α ↔ 9216/10000 < α ∧ α ≤ 24/25 := by
@@ -335,14 +331,16 @@ theorem condTailMean_one_bond :
 
 /-! ## The bounded-density representation of ES at the single bond -/
 
-/-- For the single bond, the greatest value of `E[Z·L]` over densities `Z` with
-`0 ≤ Z ≤ (1 - 19/20)⁻¹ = 20` and `E[Z] = 1` is `80`, the value of `es_one_bond_eq_80`. It is
-attained at `Z = 20` on default and `5/24` on survival. This is the two-state instance of
+/-- For the single bond, `ES₀.₉₅` is the greatest value of `E[Z·L]` over densities `Z` with
+`0 ≤ Z ≤ (1 - 19/20)⁻¹ = 20` and `E[Z] = 1`; both equal `80` (`es_one_bond_eq_80`). The maximum
+is attained at `Z = 20` on default and `5/24` on survival. This is the two-state analogue of
 `isGreatest_integral_mul_expectedShortfall`; here the objective is `E[Z·L] = 4·Z(default)`, so
 the bound is the cap. -/
 theorem es_sup_representation_finite :
     IsGreatest ((fun Z : Bool → ℝ ↦ ∑ b, oneQ b * Z b * oneL b) ''
-      {Z | (∀ b, 0 ≤ Z b ∧ Z b ≤ (1 - 19/20)⁻¹) ∧ ∑ b, oneQ b * Z b = 1}) 80 := by
+      {Z | (∀ b, 0 ≤ Z b ∧ Z b ≤ (1 - 19/20)⁻¹) ∧ ∑ b, oneQ b * Z b = 1})
+      (finiteES oneQ oneL (19/20)) := by
+  rw [es_one_bond_eq_80]
   refine ⟨⟨fun c ↦ if c then 20 else 5/24,
     ⟨fun c ↦ by cases c <;> norm_num, by norm_num [oneQ]⟩, by norm_num [oneQ, oneL]⟩, ?_⟩
   rintro v ⟨Z, ⟨hcap, -⟩, rfl⟩
