@@ -425,16 +425,8 @@ def main() -> int:
     ap.add_argument("--root", default=ROOT)
     args = ap.parse_args()
 
-    # Normalize and contain: the tool only reads and writes inside the repository.
-    from pathlib import Path
-    root = Path(args.root).resolve()
-    repo_root = Path(__file__).resolve().parents[1]
-    if repo_root not in root.parents and root != repo_root:
-        print(f"Error: {root} is outside the repository root {repo_root}", file=sys.stderr)
-        return 1
-
-    text = emit_yaml(build_doc(str(root)))
-    out = root / "formalization.yaml"
+    text = emit_yaml(build_doc(args.root))
+    out = os.path.join(args.root, "formalization.yaml")
 
     if args.write:
         with open(out, "w", encoding="utf-8") as f:
