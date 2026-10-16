@@ -3,9 +3,11 @@ Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yang Ye
 -/
-import Mathlib
-import MathFin.Foundations.Numeraire
-import MathFin.Foundations.BrownianMartingale
+module
+
+public import Mathlib
+public import MathFin.Foundations.Numeraire
+public import MathFin.Foundations.BrownianMartingale
 
 /-!
 # Inflation is FX: the zero-coupon inflation swap and the YoY convexity
@@ -27,6 +29,8 @@ deterministics `Dⁱ = −½Bⁱ²Vⁱ` collapses the exponent — the real-vari
 the nominal halves double — to the chapter's eq. (17.10) (`yoyConvexity_eq`), with the
 naive ratio of forwards carried as an explicit multiplicative constant.
 -/
+
+@[expose] public section
 
 open MeasureTheory ProbabilityTheory
 
