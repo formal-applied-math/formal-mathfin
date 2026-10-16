@@ -172,113 +172,6 @@ private theorem integral_sq_add {α : Type*} {mα : MeasurableSpace α} {ν : Me
     rw [integral_add ha2 (hab.const_mul 2), integral_const_mul]
   rw [h1, h2]
 
-set_option maxHeartbeats 1000000 in
-/-- **The terminal cross-isometry** (polarization of the terminal Itô isometry): the `L²`
-pairing of two predictable integrands equals the expectation of the product of their Itô
-integrals, `𝔼[(∫₀ᵀ p dB)·(∫₀ᵀ q dB)] = ⟨p, q⟩_{L²(trim)}`. Route: the Itô integral is
-linear, so `I(p+q)² = (Ip + Iq)²` a.e.; expanding that square under the expectation and the
-`L²` norm `‖p+q‖²` under the integral, and matching the two against the isometry
-`itoIntegralCLM_T_norm`, pins the cross term. -/
-private theorem crossTerminal_isometry (p q : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    ∫ ω, itoIntegralCLM_T hB T hBmeas p ω * itoIntegralCLM_T hB T hBmeas q ω ∂μ
-      = ∫ z, (p : ℝ≥0 × Ω → ℝ) z * (q : ℝ≥0 × Ω → ℝ) z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
-  have hpair : Integrable (fun z : ℝ≥0 × Ω ↦ (p : ℝ≥0 × Ω → ℝ) z * (q : ℝ≥0 × Ω → ℝ) z)
-      (trimMeasure_T (μ := μ) T hBmeas) := (Lp.memLp p).integrable_mul (Lp.memLp q)
-  -- the terminal isometry read as an integral identity, at `r` and at `p + q`
-  have hI2 : ∀ r : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      ∫ ω, itoIntegralCLM_T hB T hBmeas r ω ^ 2 ∂μ = ‖r‖ ^ 2 := by
-    intro r
-    rw [sqIntegral_of_Lp (itoIntegralCLM_T hB T hBmeas r),
-      itoIntegralCLM_T_norm hB T hBmeas r]
-  -- `I(p+q)` = `I p + I q` a.e. (linearity of the Itô integral as an Lp map)
-  have haddae : (fun ω ↦ itoIntegralCLM_T hB T hBmeas (p + q) ω)
-      =ᵐ[μ] (fun ω ↦ itoIntegralCLM_T hB T hBmeas p ω + itoIntegralCLM_T hB T hBmeas q ω) := by
-    filter_upwards [Lp.coeFn_add (itoIntegralCLM_T hB T hBmeas p)
-      (itoIntegralCLM_T hB T hBmeas q)] with ω hω
-    have h1 : itoIntegralCLM_T hB T hBmeas (p + q) ω
-        = (itoIntegralCLM_T hB T hBmeas p
-            + itoIntegralCLM_T hB T hBmeas q : Lp ℝ 2 μ) ω := by
-      rw [map_add]
-    rw [h1, hω]
-    simp only [Pi.add_apply]
-  -- expansion A: the expectation side
-  have hEexpand : ∫ ω, (itoIntegralCLM_T hB T hBmeas p ω
-        + itoIntegralCLM_T hB T hBmeas q ω) ^ 2 ∂μ
-      = ∫ ω, itoIntegralCLM_T hB T hBmeas p ω ^ 2 ∂μ
-        + 2 * ∫ ω, itoIntegralCLM_T hB T hBmeas p ω * itoIntegralCLM_T hB T hBmeas q ω ∂μ
-        + ∫ ω, itoIntegralCLM_T hB T hBmeas q ω ^ 2 ∂μ :=
-    integral_sq_add (a := fun ω ↦ itoIntegralCLM_T hB T hBmeas p ω)
-      (b := fun ω ↦ itoIntegralCLM_T hB T hBmeas q ω)
-      (Lp.memLp _).integrable_sq (Lp.memLp _).integrable_sq
-      ((Lp.memLp (itoIntegralCLM_T hB T hBmeas p)).integrable_mul
-        (Lp.memLp (itoIntegralCLM_T hB T hBmeas q)))
-  -- expansion B: the norm side
-  have hNexpand : ‖p + q‖ ^ 2
-      = ∫ z, (p : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas)
-        + 2 * ∫ z, (p : ℝ≥0 × Ω → ℝ) z * (q : ℝ≥0 × Ω → ℝ) z ∂(trimMeasure_T (μ := μ) T hBmeas)
-        + ∫ z, (q : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) := by
-    have hsquare : (fun z : ℝ≥0 × Ω ↦ (p : ℝ≥0 × Ω → ℝ) z + (q : ℝ≥0 × Ω → ℝ) z) ^ 2
-        = fun z ↦ (p : ℝ≥0 × Ω → ℝ) z ^ 2 + 2 * (p : ℝ≥0 × Ω → ℝ) z * (q : ℝ≥0 × Ω → ℝ) z
-            + (q : ℝ≥0 × Ω → ℝ) z ^ 2 := by
-      funext z
-      simp only [Pi.pow_apply]
-      ring
-    have hsqae : (fun z : ℝ≥0 × Ω ↦
-          ((p + q : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2)
-        =ᵐ[trimMeasure_T (μ := μ) T hBmeas]
-          (fun z : ℝ≥0 × Ω ↦
-            ((fun z : ℝ≥0 × Ω ↦ (p : ℝ≥0 × Ω → ℝ) z + (q : ℝ≥0 × Ω → ℝ) z) z) ^ 2) := by
-      filter_upwards [Lp.coeFn_add p q] with z hz
-      simp only [hz, Pi.add_apply]
-    calc ‖p + q‖ ^ 2
-        = ∫ z, ((p + q : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
-            ∂(trimMeasure_T (μ := μ) T hBmeas) := lp_two_norm_sq _
-      _ = ∫ z, ((fun z : ℝ≥0 × Ω ↦ (p : ℝ≥0 × Ω → ℝ) z + (q : ℝ≥0 × Ω → ℝ) z) z) ^ 2
-            ∂(trimMeasure_T (μ := μ) T hBmeas) := integral_congr_ae hsqae
-      _ = ∫ z, (p : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas)
-            + 2 * ∫ z, (p : ℝ≥0 × Ω → ℝ) z * (q : ℝ≥0 × Ω → ℝ) z
-                ∂(trimMeasure_T (μ := μ) T hBmeas)
-            + ∫ z, (q : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) :=
-            integral_sq_add (a := fun z ↦ (p : ℝ≥0 × Ω → ℝ) z)
-              (b := fun z ↦ (q : ℝ≥0 × Ω → ℝ) z)
-              (Lp.memLp p).integrable_sq (Lp.memLp q).integrable_sq hpair
-  -- match: `E[(Ip + Iq)²] = ‖p+q‖²` through the two expansions
-  have hEnorm : ∫ ω, itoIntegralCLM_T hB T hBmeas p ω ^ 2 ∂μ
-      + 2 * ∫ ω, itoIntegralCLM_T hB T hBmeas p ω * itoIntegralCLM_T hB T hBmeas q ω ∂μ
-      + ∫ ω, itoIntegralCLM_T hB T hBmeas q ω ^ 2 ∂μ
-      = ∫ z, (p : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas)
-        + 2 * ∫ z, (p : ℝ≥0 × Ω → ℝ) z * (q : ℝ≥0 × Ω → ℝ) z ∂(trimMeasure_T (μ := μ) T hBmeas)
-        + ∫ z, (q : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) := by
-    calc ∫ ω, itoIntegralCLM_T hB T hBmeas p ω ^ 2 ∂μ
-        + 2 * ∫ ω, itoIntegralCLM_T hB T hBmeas p ω * itoIntegralCLM_T hB T hBmeas q ω ∂μ
-        + ∫ ω, itoIntegralCLM_T hB T hBmeas q ω ^ 2 ∂μ
-        = ∫ ω, (itoIntegralCLM_T hB T hBmeas p ω
-            + itoIntegralCLM_T hB T hBmeas q ω) ^ 2 ∂μ := hEexpand.symm
-      _ = ∫ ω, itoIntegralCLM_T hB T hBmeas (p + q) ω ^ 2 ∂μ := by
-          have hsq : (fun ω ↦ (itoIntegralCLM_T hB T hBmeas p ω
-                + itoIntegralCLM_T hB T hBmeas q ω) ^ 2)
-              =ᵐ[μ] (fun ω ↦ itoIntegralCLM_T hB T hBmeas (p + q) ω ^ 2) := by
-            filter_upwards [haddae] with ω hω
-            show (itoIntegralCLM_T hB T hBmeas p ω + itoIntegralCLM_T hB T hBmeas q ω) ^ 2
-                = itoIntegralCLM_T hB T hBmeas (p + q) ω ^ 2
-            rw [hω]
-          exact integral_congr_ae hsq
-      _ = ‖p + q‖ ^ 2 := hI2 (p + q)
-      _ = ∫ z, (p : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas)
-            + 2 * ∫ z, (p : ℝ≥0 × Ω → ℝ) z * (q : ℝ≥0 × Ω → ℝ) z
-                ∂(trimMeasure_T (μ := μ) T hBmeas)
-            + ∫ z, (q : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) :=
-          hNexpand
-  -- the four isometries collapse the squares, leaving the cross terms equal
-  have hEp : ∫ ω, itoIntegralCLM_T hB T hBmeas p ω ^ 2 ∂μ = ‖p‖ ^ 2 := hI2 p
-  have hEq : ∫ ω, itoIntegralCLM_T hB T hBmeas q ω ^ 2 ∂μ = ‖q‖ ^ 2 := hI2 q
-  have hEpq : ∫ z, (p : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) = ‖p‖ ^ 2 :=
-    (lp_two_norm_sq p).symm
-  have hEqq : ∫ z, (q : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) = ‖q‖ ^ 2 :=
-    (lp_two_norm_sq q).symm
-  rw [hEp, hEq, hEpq, hEqq] at hEnorm
-  linarith [hEnorm]
-
 /-- **The band-slice conversion**: for a bounded adapted path-continuous `ψ`, the
 `(u,v]`-band integral of its uncurried form over the predictable trim measure equals the
 plain slice integral `∫_u^v 𝔼[ψ_s] ds`. Route: predictability of `(s,ω) ↦ ψ s ω`
@@ -1426,27 +1319,6 @@ private theorem errorIncr_ae {n k : ℕ} (hk : k < n) :
             - deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω := by
         rw [hsub1, hsub0]
 
-omit hMadap in
-/-- The second moment of the error increment is the band energy of the integrand error
-`ψₙ = φ − δⁿ` over the cell (the version-free `clm_band_energy` transferred along the a.e.
-identification). -/
-private theorem errorIncr_sq_eq_band {n k : ℕ} (hk : k < n) :
-    ∫ ω, (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω
-        - δ (unifPart T n k) ω
-          * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ∂μ
-      = ∫ z in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) ×ˢ (Set.univ : Set Ω),
-          ((processToLp T hBmeas hδadap hδcont hδbdd
-              - deltaStepLp hBmeas hδadap hδbdd n :
-                Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
-          ∂(trimMeasure_T (μ := μ) T hBmeas) := by
-  refine (integral_congr_ae ?_).trans
-    (clm_band_energy hB hBmeas T
-      (processToLp T hBmeas hδadap hδcont hδbdd - deltaStepLp hBmeas hδadap hδbdd n)
-      (unifPart_mono T n (Nat.le_succ k))
-      (unifPart_le_T hk))
-  filter_upwards [errorIncr_ae hB hBmeas hδadap hδcont hδbdd hMeq hk] with ω hω
-  rw [hω]
-
 set_option linter.unusedSectionVars false in
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- Generic weighted-square transfer: if `f =ᵐ g`, `g²` is integrable with energy `E`,
@@ -2127,11 +1999,6 @@ omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- Young's pointwise inequality, the symmetric instance `|a|·|b|³ ≤ a⁴/4 + 3b⁴/4`. -/
 private theorem young134 (a b : ℝ) : |a| * |b| ^ 3 ≤ a ^ 4 / 4 + 3 * b ^ 4 / 4 := by
   linarith [young34 b a, mul_comm (abs b ^ 3) (abs a)]
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- Pointwise nonnegativity of a product of squared terms. -/
-private theorem sqmul_nonneg {a b : ℝ} : (0:ℝ) ≤ a ^ 2 * b ^ 2 := by
-  positivity
 
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- Third moment of a centered real Gaussian (odd moment, by density symmetry). -/
@@ -4023,15 +3890,6 @@ theorem quadDriftSqSum_tendsto (hBmeas : ∀ t, Measurable (B t)) {β : ℝ≥0 
       ∫ ω, g (X (unifPart T n k) ω)
         * (AdaptedDrift.driftPath β (unifPart T n (k + 1)) ω - AdaptedDrift.driftPath β (unifPart T n k) ω) ^ 2 ∂μ) 0
   rw [Real.dist_eq, sub_zero]
-
-
-/-- `√(n+1) ≤ 2·√n` for `n ≥ 1` (real form). -/
-private theorem sqrt_succ_le_two_sqrt {n : ℕ} (hn : 0 < n) :
-    Real.sqrt (((n : ℝ)) + 1) ≤ 2 * Real.sqrt ((n : ℝ)) := by
-  have hnm : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
-  refine le_trans (Real.sqrt_le_sqrt (show ((n : ℝ)) + 1 ≤ 4 * (n : ℝ) from by nlinarith)) ?_
-  rw [show (2 : ℝ) * Real.sqrt ((n : ℝ)) = Real.sqrt (4 * (n : ℝ)) from by
-    rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 4)]; norm_num]
 
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- The `1/√n ≤ 2/√(n+1)` comparison for `n ≥ 1`. -/
