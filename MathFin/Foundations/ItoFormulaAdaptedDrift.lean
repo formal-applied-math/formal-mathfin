@@ -78,7 +78,7 @@ Headline (conditional, version-independent): `itoDrift_expectation_identity_adap
 integrated Itô–drift identity stated above, for bounded adapted path-continuous coefficients,
 under the hypotheses on `M` and `X` above. Its unconditional companion — the same identity for
 the process the library constructs, derived from `ItoFormulaAdapted.ito_formula_adapted` by
-centering and Fubini, with weaker hypotheses on `f` (C², not C³) but with `X` fixed to the
+centering and Fubini, with weaker hypotheses on `f` (C², no third derivative) but with `X` fixed to the
 constructed process and `B` additionally assumed path-continuous (`hBcont`) — is
 `itoDrift_expectation_identity_adapted_uncond` in `MathFin.Foundations.ItoFormulaAdaptedDriftUncond`.
 Public supporting layers (all `MathFin.*`):
