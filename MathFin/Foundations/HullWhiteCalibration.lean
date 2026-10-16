@@ -83,8 +83,7 @@ Public lemmas (all in `namespace MathFin.HullWhite`):
   `calibIntegratedMean`, `reprices_curve` — the calibration `θ`-formula and the
   exact repricing of the initial forward curve.
 
-Supporting lemmas (`forcing_integral_continuous`, `vasKernelLp_integral_sq`, `vasKernelV_nonneg`,
-`vasKernelWienerLaw`, `calib_deriv_eq`, `calibVar_key`) are `private`.
+Supporting lemmas (`forcing_integral_continuous`, `calib_deriv_eq`, `calibVar_key`) are `private`.
 -/
 
 @[expose] public section
@@ -459,67 +458,19 @@ noncomputable def bondRate (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ) (κ 
   integratedMean θ κ r₀ (T : ℝ)
     + σ * (wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
 
-/-- `∫₀ᵀ g² = vasicekBondV κ T` for the `L²`-representative integrated kernel
-(reconstructs the template's private `vasicekIntegratedKernelLp_integral_sq`
-from public pieces). -/
-private lemma vasKernelLp_integral_sq {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
-    (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernelLp hκ T u) ^ 2 ∂volume)
-      = vasicekBondV κ (T : ℝ) := by
-  rw [show (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernelLp hκ T u) ^ 2 ∂volume)
-        = ∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernel κ T u) ^ 2 ∂volume by
-      refine integral_congr_ae ?_
-      filter_upwards [(vasicekIntegratedKernel_memLp hκ T).coeFn_toLp] with u hu
-      rw [vasicekIntegratedKernelLp, hu]]
-  exact vasicekIntegratedKernel_integral_sq hκ.ne' T
-
-/-- `vasicekBondV ≥ 0` (an integral of a square; reconstructs the template's
-private `vasicekBondV_nonneg`). -/
-private lemma vasKernelV_nonneg {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
-    (0 : ℝ) ≤ vasicekBondV κ (T : ℝ) := by
-  rw [← vasKernelLp_integral_sq hκ T]
-  exact integral_nonneg fun u ↦ sq_nonneg _
-
-/-- The centred Wiener law for the Vasicek integrated kernel (reconstructs the
-template's private `vasicekWienerLaw`). -/
-private lemma vasKernelWienerLaw (hB : IsPreBrownianReal B μ) {κ : ℝ} (hκ : 0 < κ)
-    (T : ℝ≥0) :
-    HasLaw (fun ω ↦ wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
-      (gaussianReal 0 (vasicekBondV κ (T : ℝ)).toNNReal) μ := by
-  have h0 := wienerIntegralLp_hasLaw_gaussian hB T (vasicekIntegratedKernelLp hκ T)
-  rwa [vasKernelLp_integral_sq hκ T] at h0
-
 /-- **The HW zero-coupon bond price** — the exponential-Gaussian moment:
 `P(0,T) = 𝔼[exp(−bondRate T)] = exp(−∫₀ᵀ α + σ²·V(T)/2)` with `V = vasicekBondV`
-the Vasicek variance, unchanged — the exact analogue of `vasicekBondPrice_eq`. -/
+the Vasicek variance, unchanged: the zero-mean `vasicekBondPrice_eq` (`r₀ = θ = 0`)
+times the deterministic discount `exp(−∫₀ᵀ α)`. -/
 theorem bondPrice_eq (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ) (κ σ r₀ : ℝ)
     (hκ : 0 < κ) (T : ℝ≥0) :
     ∫ ω, Real.exp (-(bondRate hB θ κ σ r₀ hκ T ω)) ∂μ
       = Real.exp (-(integratedMean θ κ r₀ (T : ℝ))
           + σ ^ 2 * vasicekBondV κ (T : ℝ) / 2) := by
-  set M : ℝ := integratedMean θ κ r₀ (T : ℝ) with hM
-  set V : ℝ := vasicekBondV κ (T : ℝ) with hV
-  have hV_nonneg : (0 : ℝ) ≤ V := hV ▸ vasKernelV_nonneg hκ T
-  have hW : HasLaw (fun ω ↦ wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
-      (gaussianReal 0 V.toNNReal) μ := hV ▸ vasKernelWienerLaw hB hκ T
-  -- Factor the integrand: exp(−(M + σW)) = exp(−M)·exp((−σ)·W).
-  have hfactor : ∀ ω, Real.exp (-(bondRate hB θ κ σ r₀ hκ T ω))
-      = Real.exp (-M) * Real.exp ((-σ) *
-          (wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)) := by
-    intro ω
-    rw [bondRate, ← hM, ← Real.exp_add]
-    congr 1
-    ring
-  simp_rw [hfactor]
-  rw [integral_const_mul,
-    show (fun ω ↦ Real.exp ((-σ) * (wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)))
-        = (fun x ↦ Real.exp ((-σ) * x))
-          ∘ (fun ω ↦ wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω) from rfl,
-    hW.integral_comp (by fun_prop : AEStronglyMeasurable (fun x ↦ Real.exp ((-σ) * x))
-      (gaussianReal 0 V.toNNReal)),
-    integral_exp_mul_gaussianReal_zero (-σ) V.toNNReal,
-    Real.coe_toNNReal _ hV_nonneg, ← Real.exp_add]
-  congr 1
-  ring
+  have h := vasicekBondPrice_eq hB 0 0 σ hκ T
+  simp only [vasicekIntegratedRate, vasicekIntegratedMean, zero_mul, add_zero, zero_add,
+    neg_zero] at h
+  simp_rw [bondRate, neg_add, Real.exp_add, integral_const_mul, h]
 
 /-- The HW affine coefficient `A(T) = exp(−∫₀ᵀ θ(s)·B(T−s) ds + σ²·V(T)/2)` —
 Vasicek's `vasicekBondA` with the constant-drift term `θ_v·(T − B(T))` replaced by
