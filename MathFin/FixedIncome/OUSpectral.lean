@@ -52,6 +52,8 @@ This file proves that polynomial core by induction on `Polynomial.hermite_succ`
   (no Laguerre or Jacobi polynomials are available in the library).
 -/
 
+@[expose] public section
+
 namespace MathFin.OUSpectral
 
 open Polynomial Filter Topology Matrix
