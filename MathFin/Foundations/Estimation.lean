@@ -192,7 +192,8 @@ quarters the information and quadruples the delay).** Near `r = 1` the D-term pr
 above is `(r−1)²/4` up to a cubic remainder: `|D(r) − (r−1)²/4| ≤ |r−1|³` whenever
 `|r − 1| ≤ ½`. So the discrimination information vanishes quadratically as the two
 regimes coalesce, and the chapter's delay arithmetic `≈ ln(1/α)/D` grows like
-`1/(r−1)²`. From the second-order log-series bound `Real.abs_log_sub_add_sum_range_le` at `x = 1 − r`. -/
+`1/(r−1)²`. From the second-order log-series bound
+`Real.abs_log_sub_add_sum_range_le` at `x = 1 − r`. -/
 theorem kl_gaussianReal_small_shift {r : ℝ} (hr : |r - 1| ≤ 1 / 2) :
     |(r - 1 - Real.log r) / 2 - (r - 1) ^ 2 / 4| ≤ |r - 1| ^ 3 := by
   have h := abs_log_sub_add_sum_range_le (x := 1 - r) (by rw [abs_sub_comm]; linarith) 2
