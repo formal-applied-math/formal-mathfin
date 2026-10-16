@@ -34,11 +34,11 @@ skeleton) remains self-contained.
 Route: `ItoFormulaAdapted.ito_formula_adapted` gives the pathwise a.e. decomposition
 `f(X_T) − f c =ᵐ ∫₀ᵀ f'(X)·δ dB + ∫₀ᵀ (f'(X)·β + ½·f''(X)·δ²) ds`; integrating, the stochastic
 term dies by centering (`integral_itoIntegralCLM_T` — the Itô integral at any `L²` class has
-mean zero), and the drift integral crosses the expectation by a Fubini interchange at the
-bounded predictable weight `f'(X)·β + ½·f''(X)·δ²` (`band_fubini` below: predictability gives
-product-measurability, boundedness gives band-integrability, and `integral_integral_swap`
-exchanges the two iterated integrals — no path continuity of `X` is needed, which is
-what makes the a.e.-continuous constructed process reachable).
+mean zero), and the drift integral crosses the expectation by `integral_integral_swap` at the
+bounded predictable weight `f'(X)·β + ½·f''(X)·δ²`. Its product integrability is
+`band_integrable` below (predictability gives product-measurability, boundedness gives
+integrability on the finite band) — no path continuity of `X` is needed, which is what makes
+the a.e.-continuous constructed process reachable.
 
 Hypothesis comparison with the conditional theorem (neither statement implies the other):
 * weaker on `f`: `f ∈ C²` with continuous `f''` and bounded `f'`, `f''` (no third derivative),
@@ -56,18 +56,19 @@ The #244 review asked to prove the expectation form as a corollary **and retire 
 conditional route** (`itoDrift_expectation_identity_adapted`, the roughly 5.7k-line
 `ItoFormulaAdaptedDrift`). This module does the first part only; both theorems are kept as
 co-headlines. The reason for keeping the conditional one is technical: the library cannot
-supply its hypothesized `M` (Route B). `itoContinuousMod` is continuous only almost surely,
+supply its hypothesized `M`. `itoContinuousMod` is continuous only almost surely,
 modifying it on the null failure set need not preserve `natFiltration`-adaptedness (the natural
 filtration is not complete), and the everywhere-continuous modification is adapted only to
-`augFiltration`; so the conditional theorem is the only adapted-coefficient statement here that covers an
-`X` other than the constructed one. Whether that is worth keeping, and whether to demote,
+`augFiltration`; so the conditional theorem is the only adapted-coefficient statement here
+that covers an `X` other than the constructed one. Whether that is worth keeping, and whether to demote,
 deprecate or delete `ItoFormulaAdaptedDrift`, is left for the maintainer to decide; this
 module does not change it.
 
 ## Result
 
 * `itoDrift_expectation_identity_adapted_uncond` — the unconditional identity (headline);
-* `band_fubini` (private) — band-Fubini for bounded predictable weights.
+* `band_integrable` (private) — product integrability of a bounded predictable weight on a
+  time band (the hypothesis of the Fubini interchange).
 
 The constant-coefficient case is `ito_drift_expectation_identity` in `ItoDriftExpectation`;
 the conditional statement (for any `X` satisfying its hypotheses on a version `M`) is
@@ -90,25 +91,21 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
   (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
   (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
 
-/-- **Fubini for a bounded predictable weight on a time band**: the expectation of
-the path integral equals the time-integral of the slice expectations, for `w` strongly
-predictable for the natural filtration and bounded. No path continuity is needed (the headline
-below applies this at the drift weight of the constructed process, whose paths are continuous
-only almost surely): predictability makes the uncurried weight product-measurable
-(`predictable_le_prod`), boundedness makes it integrable on the finite band, and
-`integral_integral_swap` exchanges the two iterated integrals. -/
-private theorem band_fubini {w : ℝ≥0 → Ω → ℝ}
+/-- **Product integrability of a bounded predictable weight on a time band**: for `w` strongly
+predictable for the natural filtration and bounded, the uncurried weight is integrable for
+`timeMeasure` restricted to `(u, v]` times `μ` — the hypothesis of the Fubini interchange
+`integral_integral_swap`. No path continuity is needed (the headline below applies this at the
+drift weight of the constructed process, whose paths are continuous only almost surely):
+predictability makes the uncurried weight product-measurable (`predictable_le_prod`), and
+boundedness makes it integrable on the finite band. -/
+private theorem band_integrable {w : ℝ≥0 → Ω → ℝ}
     (hw_pred : IsStronglyPredictable (natFiltration hBmeas) w) {Cw : ℝ}
     (hw_bdd : ∀ s ω, |w s ω| ≤ Cw) (u v : ℝ≥0) :
-    ∫ ω, (∫ s in Set.Ioc u v, w s ω ∂ItoIntegralL2.timeMeasure) ∂μ
-      = ∫ s in Set.Ioc u v, (∫ ω, w s ω ∂μ) ∂ItoIntegralL2.timeMeasure := by
+    Integrable (Function.uncurry w) ((ItoIntegralL2.timeMeasure.restrict (Set.Ioc u v)).prod μ) :=
   have : IsFiniteMeasure (ItoIntegralL2.timeMeasure.restrict (Set.Ioc u v)) :=
     ⟨by simp [ItoIntegralL2.timeMeasure_Ioc]⟩
-  have hint : Integrable (Function.uncurry w)
-      ((ItoIntegralL2.timeMeasure.restrict (Set.Ioc u v)).prod μ) :=
-    .of_bound ((hw_pred.mono (natFiltration hBmeas).predictable_le_prod).aestronglyMeasurable)
+  .of_bound ((hw_pred.mono (natFiltration hBmeas).predictable_le_prod).aestronglyMeasurable)
       Cw (ae_of_all _ fun z ↦ (Real.norm_eq_abs _).trans_le (hw_bdd z.1 z.2))
-  exact integral_integral_swap hint.swap
 
 /-- **The integrated Itô–drift identity, unconditionally, for the constructed process.** For
 `X = adaptedItoProcess T hBmeas (processToLp δ) c β` (so `X 0 = c` almost surely),
@@ -168,15 +165,19 @@ theorem itoDrift_expectation_identity_adapted_uncond (hB : IsPreBrownianReal B �
   have hBs : ∀ s, Integrable (fun ω ↦ f'' (X s ω) * (δ s ω * δ s ω)) μ := fun s ↦
     .of_bound ((hf''c.measurable.comp (hXm s)).mul ((hδm s).mul (hδm s))).aestronglyMeasurable _
       (ae_of_all _ fun ω ↦ (Real.norm_eq_abs _).trans_le (hgd2 s ω))
+  -- product integrability of the drift weight; the Fubini interchange
+  have hgint := band_integrable (μ := μ) hBmeas (w := g)
+    (((comp_adaptedItoProcess_isStronglyPredictable hB T hBmeas hBcont φ hβadap hβcont hβbdd c
+      hf'c).mul (isStronglyPredictable_of_bdd_adapted_cont hBmeas hβadap hβcont)).add
+      (((comp_adaptedItoProcess_isStronglyPredictable hB T hBmeas hBcont φ hβadap hβcont hβbdd c
+        hf''c).mul ((isStronglyPredictable_of_bdd_adapted_cont hBmeas hδadap hδcont).mul
+          (isStronglyPredictable_of_bdd_adapted_cont hBmeas hδadap hδcont))).const_mul (1 / 2)))
+    hg_bdd 0 T
   have hDint : Integrable (fun ω ↦ ∫ s in Set.Ioc 0 T, g s ω ∂ItoIntegralL2.timeMeasure) μ :=
-    (memLp_pathIntegral_process_of_ae_continuous (w := g)
-      (fun s ↦ ((hf'c.measurable.comp (hXm s)).mul (hβm s)).add
-        (((hf''c.measurable.comp (hXm s)).mul ((hδm s).mul (hδm s))).const_mul (1 / 2)))
-      (by positivity) hg_bdd T
-      ((ae_continuousOn_adaptedItoProcess hB T hBmeas hBcont φ hβcont hβbdd c).mono fun ω h ↦
-        ((hf'c.comp_continuousOn h).mul (hβcont ω).continuousOn).add
-          (((hf''c.comp_continuousOn h).mul ((hδcont ω).mul (hδcont ω)).continuousOn).const_mul
-            (1 / 2)))).integrable one_le_two
+    hgint.swap.integral_prod_left
+  have hfub : ∫ ω, (∫ s in Set.Ioc 0 T, g s ω ∂ItoIntegralL2.timeMeasure) ∂μ
+      = ∫ s in Set.Ioc 0 T, (∫ ω, g s ω ∂μ) ∂ItoIntegralL2.timeMeasure :=
+    integral_integral_swap hgint.swap
   -- the stochastic integrand class
   set ψ := processToLpPredictable (μ := μ) T hBmeas
     (comp_adaptedItoProcess_mul_isStronglyPredictable hB T hBmeas hBcont hδadap hδcont φ hβadap
@@ -210,14 +211,6 @@ theorem itoDrift_expectation_identity_adapted_uncond (hB : IsPreBrownianReal B �
       mul_le_mul_of_nonneg_left (by rw [Real.norm_eq_abs]; exact h2.trans (by linarith)) hC1
     simp only [Real.norm_eq_abs, Pi.add_apply] at h4 ⊢
     linarith
-  -- the Fubini interchange at the drift weight
-  have hfub := band_fubini (μ := μ) hBmeas (w := g)
-    (((comp_adaptedItoProcess_isStronglyPredictable hB T hBmeas hBcont φ hβadap hβcont hβbdd c
-      hf'c).mul (isStronglyPredictable_of_bdd_adapted_cont hBmeas hβadap hβcont)).add
-      (((comp_adaptedItoProcess_isStronglyPredictable hB T hBmeas hBcont φ hβadap hβcont hβbdd c
-        hf''c).mul ((isStronglyPredictable_of_bdd_adapted_cont hBmeas hδadap hδcont).mul
-          (isStronglyPredictable_of_bdd_adapted_cont hBmeas hδadap hδcont))).const_mul (1 / 2)))
-    hg_bdd 0 T
   -- assemble
   have hmain : ∫ ω, f (X T ω) ∂μ - f c
       = ∫ s in Set.Ioc (0 : ℝ≥0) T, (∫ ω, g s ω ∂μ) ∂ItoIntegralL2.timeMeasure := by
