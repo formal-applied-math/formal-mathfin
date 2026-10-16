@@ -61,7 +61,7 @@ reflection.
 
 ## Result
 
-Public definitions: `deterministic`, `kernelV`, `integratedRate`,
+Public definitions: `deterministic`, `integratedRate`,
 `integratedMean`, `bondRate`, `bondA`, `theta`, `calibAlpha` (the diffusion kernel
 is `vasicekKernel`/`vasicekKernelLp` of `VasicekSDEGaussian`, reused, not redefined).
 
@@ -71,8 +71,8 @@ Public lemmas (all in `namespace MathFin.HullWhite`):
   `deterministic_const_closed_form`, `deterministic_const_tendsto`,
   `deterministic_add_exponential`, `deterministic_eq_of_solves_ODE`, `mean` —
   the deterministic part;
-* `integratedRate_hasLaw_gaussian` — the short
-  rate's Gaussian law with the Vasicek variance;
+* `integratedRate_hasLaw_gaussian` — the short rate's Gaussian law with the Vasicek
+  variance;
 * `integral_exp_pos_const`, `integral_exp_neg_eq_bondB`, `beta_integral`,
   `integral_theta_B`, `integratedMean_eq` — the scalar-integral identities behind the
   affine coefficients;
@@ -261,12 +261,6 @@ short rate's Wiener part `σ∫₀ᵗ e^{−κ(t−u)} dB_u` — is the Vasicek 
 `vasicekKernel` of `FixedIncome/VasicekSDEGaussian` verbatim, and is used through its
 `L²` element `vasicekKernelLp` there; nothing kernel-specific is redefined here. -/
 
-/-- The closed form `(1 − e^{−2κt})/(2κ)` of the Vasicek diffusion kernel's squared
-`L²`-norm over `(0, t]`, `∫₀ᵗ e^{−2κ(t−u)} du`; it equals that integral for `κ ≠ 0`
-(`vasicekKernel_integral_sq` in `VasicekSDEGaussian`). The Vasicek variance factor
-`/2κ`, named for the HW short rate's law (`integratedRate_hasLaw_gaussian`). -/
-noncomputable def kernelV (κ t : ℝ) : ℝ := (1 - Real.exp (-(2 * κ * t))) / (2 * κ)
-
 /-- **The HW short rate in Wiener representation** (the counterpart of the Vasicek
 short rate of `VasicekSDEGaussian`), defined as `r_t = α(t) + σ·∫₀ᵗ e^{−κ(t−u)} dB_u`
 with `α` the particular solution `deterministic θ κ r₀` and the diffusion kernel the
@@ -284,12 +278,11 @@ theorem integratedRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ) (θ : ℝ �
     (κ σ r₀ : ℝ) (hκ : 0 < κ) (t : ℝ≥0) :
     HasLaw (integratedRate hB θ κ σ r₀ hκ t)
       (gaussianReal (deterministic θ κ r₀ (t : ℝ))
-        ((σ ^ 2 * kernelV κ (t : ℝ)).toNNReal)) μ := by
-  have h := gaussianReal_const_add (vasicekShortRate_hasLaw_gaussian hB 0 0 σ hκ t)
-    (deterministic θ κ r₀ (t : ℝ))
-  simp only [vasicekSDEMean, vasicekSDEVariance, zero_mul, zero_add, add_zero,
-    mul_div_assoc] at h
-  exact h
+        ((vasicekSDEVariance σ κ (t : ℝ)).toNNReal)) μ := by
+  unfold integratedRate
+  simpa only [vasicekSDEMean, zero_mul, zero_add, add_zero] using
+    gaussianReal_const_add (vasicekShortRate_hasLaw_gaussian hB 0 0 σ hκ t)
+      (deterministic θ κ r₀ (t : ℝ))
 
 /-! ### The affine bond price -/
 
@@ -572,8 +565,9 @@ theorem calibAlpha_solves_ODE (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ �
 /-- **The calibrated deterministic part**: the HW particular solution driven by `theta`
 and started at the initial forward `r₀ = f(0,0)` is exactly
 `β(t) = f(0,t) + (σ²/2κ²)(1 − e^{−κt})²` — the initial forward plus the convexity
-correction (`calibMean_eq_forward` turns it into the expected short rate). Route: `calibAlpha_solves_ODE` (verified by
-differentiation) + ODE uniqueness (`deterministic_eq_of_solves_ODE`; note
+correction (`calibMean_eq_forward` turns it into the expected short rate). Route:
+`calibAlpha_solves_ODE` (verified by differentiation) + ODE uniqueness
+(`deterministic_eq_of_solves_ODE`; note
 `β(0) = f(0,0)` automatically, since `(1 − e^{−κ·0})² = 0`). Only `κ ≠ 0` is
 needed — the θ-formula divides by κ; no positivity enters the deterministic
 identity. -/
