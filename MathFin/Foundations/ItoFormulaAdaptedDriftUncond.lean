@@ -37,9 +37,31 @@ mean zero), and the drift integral crosses the expectation by a Fubini interchan
 bounded predictable weight `f'(X)·β + ½·f''(X)·δ²` (`band_fubini` below: predictability gives
 product-measurability, boundedness gives band-integrability, and the two iterated integrals of
 `integral_prod` / `integral_prod_symm` coincide — no path continuity of `X` is needed, which is
-what makes the a.e.-continuous constructed process reachable). The hypotheses are strictly
-weaker than the conditional theorem's: `f ∈ C²` with continuous `f''` and bounded `f'`, `f''`
-(no third derivative), and no `M`/`X`/path-continuity hypotheses beyond the construction's own.
+what makes the a.e.-continuous constructed process reachable).
+
+Hypothesis comparison with the conditional theorem (neither statement implies the other):
+* weaker on `f`: `f ∈ C²` with continuous `f''` and bounded `f'`, `f''` (no third derivative),
+  where the conditional theorem needs `f` three times differentiable with `f'''` bounded;
+* no `M` hypotheses (`hMadap`, `hMeq`) and no `hXcont`/`hXrel`, but `X` is not arbitrary: it
+  is fixed to the constructed process `adaptedItoProcess … (processToLp δ) c β`, whereas the
+  conditional theorem holds for any `X` satisfying its hypotheses;
+* stronger on `B`: it adds `hBcont` (every path of `B` continuous), which the conditional
+  theorem does not assume (`ito_formula_adapted` and the predictability lemmas for
+  `adaptedItoProcess` need it).
+
+## Open question for the maintainer: the conditional route
+
+The #244 review asked to prove the expectation form as a corollary **and retire the
+conditional route** (`itoDrift_expectation_identity_adapted`, the roughly 5.7k-line
+`ItoFormulaAdaptedDrift`). This module does the first part only; both theorems are kept as
+co-headlines. The reason for keeping the conditional one is technical: the library cannot
+supply its hypothesized `M` (Route B). `itoContinuousMod` is continuous only almost surely,
+modifying it on the null failure set destroys `natFiltration`-adaptedness (the natural
+filtration is not complete), and the everywhere-continuous modification is adapted only to
+`augFiltration`; so the conditional theorem is the only statement here that covers an `X`
+other than the constructed one. Whether that is worth keeping, and whether to demote,
+deprecate or delete `ItoFormulaAdaptedDrift`, is left for the maintainer to decide; this
+module does not change it.
 
 ## Result
 
