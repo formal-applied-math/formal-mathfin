@@ -584,6 +584,7 @@ import MathFin.RiskMeasures.ExpectedShortfall
 import MathFin.RiskMeasures.GaussianExpectedShortfall
 import MathFin.RiskMeasures.ValueAtRiskBisection
 import MathFin.RiskMeasures.VaRSuperadditivity
+import MathFin.RiskMeasures.DiscreteVaR
 import MathFin.RiskMeasures.RiskClosedForms
 import MathFin.RiskMeasures.Elicitability
 import MathFin.RiskMeasures.Expectile
