@@ -222,11 +222,11 @@ Over `n` increments `ΔX_i` with second moment `E[(ΔX_i)²] = σ²·Δt` (the
 `MathFin.integral_sq_gaussianReal` moment in the Gaussian instance)
 observed through mean-zero noise `ε_j` of scale `η` (`E[ε_j] = 0`, `E[ε_j²] = η²`), so that
 the observed increment is `ΔY_i = ΔX_i + (ε_{i+1} − ε_i)` (the chapter's `Y = X + ε`,
-p. 366), the noisy realised sum has expectation `σ²T + 2nη²` where `T = n·Δt`: each
-increment contributes its signal second moment plus **two** noise second moments, and
-all cross-terms vanish by independence + mean-zero
-(`IndepFun.integral_mul_eq_mul_integral`, the chapter's "noise, dependence, and scale"
-obstruction, §21.3 p. 361). Only the independences the cross-terms use are assumed —
+p. 366), the noisy realised sum has expectation `σ²T + 2nη²` where `T = n·Δt` (the
+noise leg of the chapter's "noise, dependence, and scale" obstructions, §21.3 p. 361):
+each increment contributes its signal second moment plus **two** noise second moments,
+and all cross-terms vanish by independence + mean-zero
+(`IndepFun.integral_mul_eq_mul_integral`). Only the independences the cross-terms use are assumed —
 each increment against its two noise draws, and adjacent noise draws pairwise — so iid
 noise independent of the signal is a special case. No probability hypothesis on `μ` is
 needed; the integrability hypotheses are kept explicit. -/
@@ -506,8 +506,8 @@ theorem drift_se_endpoint_hasLaw {T : ℝ} (hT : 0 < T) (mu sigma : ℝ) {B : Ω
     field_simp
 
 /-- **Calc 21.4's drift column (the variance).** `Var[(X_T − X_0)/T] = σ²/T`: the drift
-estimator's standard error is `σ/√T`, independent of the sampling frequency `n` — "the
-estimator sees only the endpoints" (p. 363). Via `HasLaw.variance_eq` and
+estimator's standard error is `σ/√T`, independent of the sampling frequency `n` — the
+estimator "is a function of the endpoints" (p. 363). Via `HasLaw.variance_eq` and
 `variance_id_gaussianReal`. -/
 theorem drift_se_endpoint_var {T : ℝ} (hT : 0 < T) (mu sigma : ℝ) {B : Ω → ℝ}
     (hB : HasLaw B (gaussianReal 0 T.toNNReal) P) :
