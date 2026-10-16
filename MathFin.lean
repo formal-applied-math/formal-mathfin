@@ -518,12 +518,12 @@ import MathFin.FixedIncome.Cox
 import MathFin.FixedIncome.VasicekSDE
 -- Itô→pricing bridge: Vasicek terminal law derived (Wiener integral is Gaussian)
 import MathFin.FixedIncome.VasicekSDEGaussian
--- Inflation is FX: the zero-coupon inflation swap and the YoY convexity (eqs 17.6–17.10)
-import MathFin.FixedIncome.Inflation
 -- Vasicek zero-coupon bond price: the affine term structure (Gaussian Laplace transform)
 import MathFin.FixedIncome.VasicekBondPrice
 -- The T-forward measure: the zero-coupon bond as numéraire (change-of-numéraire instance)
 import MathFin.FixedIncome.ForwardMeasure
+-- Inflation is FX: the zero-coupon inflation swap and the YoY convexity (eqs 17.6–17.10)
+import MathFin.FixedIncome.Inflation
 
 -- Portfolio
 import MathFin.Portfolio.Markowitz
