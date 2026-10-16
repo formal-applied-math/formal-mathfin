@@ -11,9 +11,10 @@ public import MathFin.BlackScholes.BreedenLitzenberger
 /-!
 # LSV leverage-posterior core
 
-Chapter 11's theorem *shape* is `L²(t,K) · E[v_t | S_t = K] = σ_loc²(t,K)` (eq. 11.1): the
-local-stochastic-volatility leverage function `L` is pinned by the posterior mean of the
-stochastic variance on the state, and everything about the fit flows through that equation.
+Chapter 11's theorem *shape* is `L²(t,K) · E[v_t | S_t = K] = σ_loc²(t,K)` (eq. 11.1; Bagaria,
+*Notes on Fixed Income Derivative Pricing*, ch. 11): the local-stochastic-volatility leverage
+function `L` is pinned by the posterior mean of the stochastic variance on the state, and
+everything about the fit flows through that equation.
 This file proves the **algebraic and analytic core behind the form** — the parts that follow
 from measure theory and exact real arithmetic, with no stochastic-process hypotheses:
 
@@ -38,7 +39,7 @@ from measure theory and exact real arithmetic, with no stochastic-process hypoth
 * **Not here (gated chapter mathematics, by design):** Thm 11.2's *iff* content (that the
   leverage-defined model reprices the market — needs Gyöngy-mimicry flow uniqueness, weak
   existence on the local-vol side, the Dupire surface formula on a non-Gaussian carrier,
-  and the McKean–Vlasov existence question, "not settled in general", PDF p. 200);
+  and the McKean–Vlasov existence question, "not settled in general");
   §11.3's grid and particle machinery; every decimal figure of the chapter tables
   (22.9%, 26.9%, 0.98, 1.09 → 0.71). The build proves exact statements, not decimals.
 * **Stretch (gated — see the record at the bottom of this file):** the condExp
@@ -75,7 +76,7 @@ theorem lsv_condExp_factors_through_state {Ω : Type*} [MeasurableSpace Ω] {μ 
 /-- **B2 — `L²` crosses the conditional expectation (the factoring step of Thm 11.2).**
 For Borel `L` (the leverage function) and integrable `v` with `L²(S) · v` integrable,
 `E[L²(S) · v | σ(S)] = L²(S) · E[v | σ(S)]` a.e. This is exactly the chapter's factoring
-sentence (PDF p. 197): "L²(t,S_t) comes out of the conditional expectation because … it
+sentence: "L²(t,S_t) comes out of the conditional expectation because … it
 is a deterministic function of the thing being conditioned on."
 
 Engine: `condExp_mul_of_stronglyMeasurable_left` (`PullOut.lean`); `L ∘ S` is
@@ -126,18 +127,18 @@ noncomputable def cointossVHi (lam : ℝ) : ℝ := 29 / 400 + lam / 20
 /-- **λ-invariance of the branch mean:** for every λ, the two-branch average of the variance
 is exactly `29/400`. The dial moves variance between the branches without moving the mean —
 "λ changes the answer, does not change the calibration, and therefore cannot be determined
-by it" (PDF p. 203). -/
+by it". -/
 theorem cointoss_family_mean (lam : ℝ) :
     (cointossVLo lam + cointossVHi lam) / 2 = 29 / 400 := by
   unfold cointossVLo cointossVHi; ring
 
 /-- The low branch stays positive across the whole dial `λ ∈ [0, 1]` (at `λ = 1` it is
 `9/400 > 0`). -/
-theorem cointoss_vLo_pos (lam : ℝ) (h1 : lam ≤ 1) : 0 < cointossVLo lam := by
+theorem cointossVLo_pos (lam : ℝ) (h1 : lam ≤ 1) : 0 < cointossVLo lam := by
   unfold cointossVLo; linarith
 
 /-- The high branch is positive for every nonnegative λ (at `λ = 0` it is `29/400 > 0`). -/
-theorem cointoss_vHi_pos (lam : ℝ) (h0 : 0 ≤ lam) : 0 < cointossVHi lam := by
+theorem cointossVHi_pos (lam : ℝ) (h0 : 0 ≤ lam) : 0 < cointossVHi lam := by
   unfold cointossVHi; linarith
 
 /-- **The λ = 0 endpoint in ratio form (Calc 11.3):** the dial collapses to a single
@@ -180,8 +181,7 @@ theorem cointossPhi_pos {F σ K : ℝ} (hσ : 0 < σ) (hK : 0 < K) :
 `K = S_0 = F`). -/
 theorem cointoss_bsd2_atm {F σ : ℝ} (hF : 0 < F) (hσ : 0 < σ) :
     bsd2 F F 0 σ 1 = -σ / 2 := by
-  have h1 : Real.log (F / F) = 0 := by
-    rw [Real.log_div hF.ne' hF.ne', sub_self]
+  have h1 : Real.log (F / F) = 0 := by rw [div_self hF.ne', Real.log_one]
   rw [bsd2_eq hσ one_pos, h1, Real.sqrt_one, mul_one, zero_add, zero_sub]
   field_simp
 
@@ -196,16 +196,14 @@ theorem cointossPhi_atm_prod {F σ : ℝ} (hF : 0 < F) (hσ : 0 < σ) :
   simp only [gaussianPDFReal, sub_zero, NNReal.coe_one, mul_one]
   have hFs : (F * σ : ℝ) ≠ 0 := mul_ne_zero hF.ne' hσ.ne'
   have hS : Real.sqrt (2 * Real.pi) ≠ 0 := by positivity
-  have hcan (c x : ℝ) (hc : c ≠ 0) : c⁻¹ * x * c = x := by
-    rw [mul_comm c⁻¹ x, mul_assoc, inv_mul_cancel₀ hc, mul_one]
-  rw [div_mul_cancel₀ _ hFs, hcan _ _ hS]
+  rw [div_mul_cancel₀ _ hFs, mul_comm (Real.sqrt (2 * Real.pi))⁻¹, inv_mul_cancel_right₀ hS]
   congr 1
   ring
 
 /-- **The ATM density ratio** — the engine of every ATM comparison that follows: for `F > 0`
 and positive branch volatilities, `φ_lo(F)/φ_hi(F) = (σ_hi/σ_lo) · exp((σ_hi² − σ_lo²)/8)`.
-For `σ_lo < σ_hi` this exceeds `1` (`cointoss_pdf_atm_lt`). -/
-theorem cointoss_pdf_ratio_atm {F σ_lo σ_hi : ℝ} (hF : 0 < F) (hlo : 0 < σ_lo)
+For `σ_lo < σ_hi` this exceeds `1` (`cointossPhi_atm_lt`). -/
+theorem cointossPhi_ratio_atm {F σ_lo σ_hi : ℝ} (hF : 0 < F) (hlo : 0 < σ_lo)
     (hσhi : 0 < σ_hi) :
     cointossPhi F σ_lo F / cointossPhi F σ_hi F =
       (σ_hi / σ_lo) * Real.exp ((σ_hi ^ 2 - σ_lo ^ 2) / 8) := by
@@ -219,11 +217,11 @@ theorem cointoss_pdf_ratio_atm {F σ_lo σ_hi : ℝ} (hF : 0 < F) (hlo : 0 < σ_
 
 /-- **At the money, the narrower (low-vol) branch is the denser branch:** `φ_hi(F) < φ_lo(F)`
 — the two-line chapter fact `ln(σ_lo/σ_hi) < 0 < (σ_hi²−σ_lo²)/8`, in exact form. -/
-theorem cointoss_pdf_atm_lt {F σ_lo σ_hi : ℝ} (hF : 0 < F) (hlo : 0 < σ_lo)
+theorem cointossPhi_atm_lt {F σ_lo σ_hi : ℝ} (hF : 0 < F) (hlo : 0 < σ_lo)
     (hhi : σ_lo < σ_hi) :
     cointossPhi F σ_hi F < cointossPhi F σ_lo F := by
   have hσhi : 0 < σ_hi := hlo.trans hhi
-  rw [← one_lt_div (cointossPhi_pos hσhi hF), cointoss_pdf_ratio_atm hF hlo hσhi]
+  rw [← one_lt_div (cointossPhi_pos hσhi hF), cointossPhi_ratio_atm hF hlo hσhi]
   refine one_lt_mul_of_le_of_lt ((one_lt_div hlo).2 hhi).le ?_
   rw [Real.one_lt_exp_iff]
   have hs2 : σ_lo ^ 2 < σ_hi ^ 2 := by nlinarith
@@ -236,7 +234,7 @@ noncomputable def cointossPostHi (F σ_lo σ_hi K : ℝ) : ℝ :=
 
 /-- **The ATM posterior on the high branch is below one half** (the strict inequality behind the
 chapter's table entry `P(hi | S_T = F) = 0.30`; the decimal itself is not proved).
-Engine: `cointoss_pdf_atm_lt` plus the positivity of both densities. -/
+Engine: `cointossPhi_atm_lt` plus the positivity of both densities. -/
 theorem cointoss_posterior_atm_lt_half {F σ_lo σ_hi : ℝ} (hF : 0 < F) (hlo : 0 < σ_lo)
     (hhi : σ_lo < σ_hi) :
     cointossPostHi F σ_lo σ_hi F < 1 / 2 := by
@@ -244,7 +242,7 @@ theorem cointoss_posterior_atm_lt_half {F σ_lo σ_hi : ℝ} (hF : 0 < F) (hlo :
     add_pos (cointossPhi_pos hlo hF) (cointossPhi_pos (hlo.trans hhi) hF)
   unfold cointossPostHi
   rw [div_lt_iff₀ hden]
-  linarith [cointoss_pdf_atm_lt hF hlo hhi]
+  linarith [cointossPhi_atm_lt hF hlo hhi]
 
 /-- The posterior mean of the variance at strike `K`,
 `m(K) = (v_lo φ_lo(K) + v_hi φ_hi(K))/(φ_lo(K) + φ_hi(K))` — the input of eq. 11.1's
@@ -262,7 +260,7 @@ theorem cointossM_atm_lt_uncond {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F)
     cointossM F σ_lo σ_hi v_lo v_hi F < (v_lo + v_hi) / 2 := by
   have hden : 0 < cointossPhi F σ_lo F + cointossPhi F σ_hi F :=
     add_pos (cointossPhi_pos hlo hF) (cointossPhi_pos (hlo.trans hhi) hF)
-  have halt := cointoss_pdf_atm_lt hF hlo hhi
+  have halt := cointossPhi_atm_lt hF hlo hhi
   unfold cointossM
   rw [div_lt_div_iff₀ hden zero_lt_two]
   nlinarith [mul_pos (sub_pos.mpr hvhi) (sub_pos.mpr halt)]
@@ -282,7 +280,7 @@ limits: `log(φ_lo/φ_hi) = b − a·(ln(K/F))²` with `a = (σ_hi² − σ_lo²
 intercept `b = ln(σ_hi/σ_lo) + (σ_hi² − σ_lo²)/8`, for `F, K > 0` and positive branch vols.
 For `σ_lo < σ_hi`, `a > 0` (a downward parabola), so `|ln(K/F)| → ∞` drives `φ_lo/φ_hi` to
 `0`, i.e. the posterior piles onto the wide branch. -/
-theorem cointoss_pdf_ratio_log {F σ_lo σ_hi K : ℝ} (hF : 0 < F) (hlo : 0 < σ_lo)
+theorem cointossPhi_ratio_log {F σ_lo σ_hi K : ℝ} (hF : 0 < F) (hlo : 0 < σ_lo)
     (hσhi : 0 < σ_hi) (hK : 0 < K) :
     Real.log (cointossPhi F σ_lo K / cointossPhi F σ_hi K) =
       (Real.log (σ_hi / σ_lo) + (σ_hi ^ 2 - σ_lo ^ 2) / 8) -
@@ -361,7 +359,7 @@ private theorem cointoss_posterior_limit_aux {F σ_lo σ_hi : ℝ} (hF : 0 < F) 
       Real.log (cointossPhi F σ_lo K / cointossPhi F σ_hi K)) l atBot :=
     (hlin.comp hu2).congr' (by
       filter_upwards [hpos] with K hK
-      exact (cointoss_pdf_ratio_log hF hlo hσhi hK).symm)
+      exact (cointossPhi_ratio_log hF hlo hσhi hK).symm)
   have hR : Tendsto (fun K : ℝ ↦ cointossPhi F σ_lo K / cointossPhi F σ_hi K) l (𝓝 0) := by
     refine (Real.tendsto_exp_atBot.comp hlogR).congr' ?_
     filter_upwards [hpos] with K hK
