@@ -43,35 +43,45 @@ the a.e.-continuous constructed process reachable.
 Hypothesis comparison with the conditional theorem (neither statement implies the other):
 * weaker on `f`: `f ∈ C²` with continuous `f''` and bounded `f'`, `f''` (no third derivative),
   where the conditional theorem needs `f` three times differentiable with `f'''` bounded;
-* no `M` hypotheses (`hMadap`, `hMeq`) and no `hXcont`/`hXrel`, but `X` is not arbitrary: it
-  is fixed to the constructed process `adaptedItoProcess … (processToLp δ) c β`, whereas the
-  conditional theorem holds for any `X` satisfying its hypotheses;
+* no `M` hypotheses (`hMadap`, `hMeq`) and no `hXcont`/`hXrel`: `X` is fixed to the
+  constructed process `adaptedItoProcess … (processToLp δ) c β`, whereas the conditional
+  theorem is stated for any `X = c + ∫₀• β ds + M` with `M` a version as above;
 * stronger on `B`: it adds `hBcont` (every path of `B` continuous), which the conditional
   theorem does not assume (`ito_formula_adapted` and the predictability lemmas for
   `adaptedItoProcess` need it).
+
+The `X`-generality is not extra reach once `hBcont` holds: every such `X` is, at each `t ≤ T`,
+a.s. equal to the constructed process, so the conditional theorem's exact conclusion follows
+from the unconditional one by a.e. congruence. That reduction is
+`itoDrift_expectation_identity_adapted_of_uncond` below — it needs only `hMeq` and `hXrel` (no
+`hMadap`, no `hXcont`) and `f ∈ C²`. The conditional theorem's only remaining extra reach is a
+`B` without everywhere-continuous paths.
 
 ## Open question for the maintainer: the conditional route
 
 The #244 review asked to prove the expectation form as a corollary **and retire the
 conditional route** (`itoDrift_expectation_identity_adapted`, the roughly 5.7k-line
 `ItoFormulaAdaptedDrift`). This module does the first part only; both theorems are kept as
-co-headlines. The reason for keeping the conditional one is technical: the library cannot
-supply its hypothesized `M`. `itoContinuousMod` is continuous only almost surely,
-modifying it on the null failure set need not preserve `natFiltration`-adaptedness (the natural
-filtration is not complete), and the everywhere-continuous modification is adapted only to
-`augFiltration`; so the conditional theorem is the only adapted-coefficient statement here
-that covers an `X` other than the constructed one. Whether that is worth keeping, and whether to demote,
-deprecate or delete `ItoFormulaAdaptedDrift`, is left for the maintainer to decide; this
-module does not change it.
+co-headlines. By `itoDrift_expectation_identity_adapted_of_uncond`, the conditional theorem's
+conclusion is implied by the unconditional one whenever every path of `B` is continuous; its
+only remaining reach is a `B` without that property. (Separately, the library cannot supply the
+hypothesized `M` itself: `itoContinuousMod` is continuous only almost surely, modifying it on
+the null failure set need not preserve `natFiltration`-adaptedness (the natural filtration is
+not complete), and the everywhere-continuous modification is adapted only to `augFiltration`.)
+Whether the no-`hBcont` case justifies keeping the roughly 5.7k-line route, and whether to
+demote, deprecate or delete `ItoFormulaAdaptedDrift`, is left for the maintainer to decide;
+this module does not change it.
 
 ## Result
 
 * `itoDrift_expectation_identity_adapted_uncond` — the unconditional identity (headline);
+* `itoDrift_expectation_identity_adapted_of_uncond` — the conditional theorem's conclusion
+  recovered from it under `hBcont`, for any version `M` and `X = c + ∫₀• β ds + M`;
 * `band_integrable` (private) — product integrability of a bounded predictable weight on a
   time band (the hypothesis of the Fubini interchange).
 
 The constant-coefficient case is `ito_drift_expectation_identity` in `ItoDriftExpectation`;
-the conditional statement (for any `X` satisfying its hypotheses on a version `M`) is
+the conditional statement (for `X` built from a version `M` satisfying its hypotheses) is
 `itoDrift_expectation_identity_adapted` in `ItoFormulaAdaptedDrift`.
 -/
 
@@ -222,5 +232,54 @@ theorem itoDrift_expectation_identity_adapted_uncond (hB : IsPreBrownianReal B �
   refine setIntegral_congr_fun measurableSet_Ioc fun s _ ↦ ?_
   simp only [g]
   rw [integral_add (hAs s) ((hBs s).const_mul _), integral_const_mul]
+
+/-- **The conditional theorem's conclusion, recovered from the unconditional one under
+`hBcont`.** If `M` is any version of the Itô process of `δ` (`hMeq`; no adaptedness or path
+continuity asked) and `X = c + ∫₀• β ds + M` (`hXrel`), then `X t` agrees almost surely with the
+constructed process at every `t ≤ T`, and the conclusion of the conditional
+`itoDrift_expectation_identity_adapted` follows from
+`itoDrift_expectation_identity_adapted_uncond` by a.e. congruence — for `f` twice differentiable
+with continuous `f''` and bounded `f'`, `f''`, and without `hMadap`, `hXcont` or a third
+derivative. The conditional theorem's remaining extra reach is a `B` without everywhere-continuous
+paths. -/
+theorem itoDrift_expectation_identity_adapted_of_uncond (hB : IsPreBrownianReal B μ)
+    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) {M : ℝ≥0 → Ω → ℝ}
+    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
+      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {β : ℝ≥0 → Ω → ℝ}
+    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
+    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
+    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
+    {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
+    {f f' f'' : ℝ → ℝ}
+    (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
+    (hf''c : Continuous f'')
+    {C1 C2 : ℝ} (hg1 : ∀ x, |f' x| ≤ C1) (hg2 : ∀ x, |f'' x| ≤ C2) :
+    ∫ ω, f (X T ω) ∂μ
+      = ∫ ω, f (X (0 : ℝ≥0) ω) ∂μ
+        + ∫ s in Set.Ioc (0 : ℝ≥0) T,
+            ((∫ ω, f' (X s ω) * β s ω ∂μ)
+              + (1 / 2) * (∫ ω, f'' (X s ω) * (δ s ω * δ s ω) ∂μ))
+          ∂ItoIntegralL2.timeMeasure := by
+  set φ := processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd
+  have hX (t : ℝ≥0) (ht : t ≤ T) : X t =ᵐ[μ] adaptedItoProcess T hBmeas φ c β t := by
+    filter_upwards [hMeq t, adaptedItoProcess_ae_eq hB T hBmeas hBcont φ c (b := β) ht]
+      with ω h1 h2
+    rw [h2, hXrel t]; simp only [h1]
+  have h0 : ∫ ω, f (X 0 ω) ∂μ = f c := by
+    rw [integral_congr_ae ((hX 0 zero_le).mono fun ω h ↦ congrArg f h),
+      integral_congr_ae ((adaptedItoProcess_zero hB T hBmeas hBcont φ c (b := β)).mono
+        fun ω h ↦ congrArg f h)]
+    simp
+  rw [h0, integral_congr_ae ((hX T le_rfl).mono fun ω h ↦ congrArg f h),
+    itoDrift_expectation_identity_adapted_uncond hBmeas hδadap hδcont hδbdd hB hBcont hβadap
+      hβcont hβbdd c hf hf' hf''c hg1 hg2]
+  congr 1
+  refine setIntegral_congr_fun measurableSet_Ioc fun s hs ↦ ?_
+  rw [integral_congr_ae ((hX s hs.2).mono fun ω h ↦ show f' (X s ω) * β s ω
+      = f' (adaptedItoProcess T hBmeas φ c β s ω) * β s ω by rw [h]),
+    integral_congr_ae ((hX s hs.2).mono fun ω h ↦ show f'' (X s ω) * (δ s ω * δ s ω)
+      = f'' (adaptedItoProcess T hBmeas φ c β s ω) * (δ s ω * δ s ω) by rw [h])]
 
 end MathFin

@@ -82,6 +82,10 @@ the process the library constructs, derived from `ItoFormulaAdapted.ito_formula_
 centering and Fubini, with weaker hypotheses on `f` (C², no third derivative) but with `X` fixed to the
 constructed process and `B` additionally assumed path-continuous (`hBcont`) — is
 `itoDrift_expectation_identity_adapted_uncond` in `MathFin.Foundations.ItoFormulaAdaptedDriftUncond`.
+Under `hBcont`, the headline's own conclusion follows from that companion by a.e. congruence
+(`itoDrift_expectation_identity_adapted_of_uncond`, same module, needing neither `hMadap` nor
+`hXcont` nor a third derivative), so this file's remaining extra reach is a `B` without
+everywhere-continuous paths.
 Public supporting layers (all `MathFin.*`):
 
 * foundations: `integral_mul_condExp_eq`, `memLp_M`, `incrementEnergy` (the increment
