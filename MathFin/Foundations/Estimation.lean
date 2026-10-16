@@ -26,9 +26,8 @@ independent of the signal, turns the realised-variance estimator's expectation i
 and the square-root estimator of a nondegenerate volatility target is biased low, `E[σ̂] < σ`
 (`sqrtBias_oneSided` + `sqrtBias_absGaussianSample`, the sign of eq. 21.3). The drift
 estimator, by contrast, sees only the endpoints: its variance is `σ²/T` whatever the
-sampling frequency (`drift_se_endpoint_var`, Calc 21.4's flat column). Spec correction:
-the dispatch memo wrote this variance slot as `σ²·T`, contradicting its own `σ/√T`
-conclusion; the chapter-consistent and proved form is `σ²/T`.
+sampling frequency (`drift_se_endpoint_var`, Calc 21.4's flat column), matching the
+chapter's `σ/√T` standard error — not `σ²·T`, which would contradict it.
 
 ## Scope
 
@@ -63,9 +62,9 @@ private lemma log_ratio_gaussianPDFReal_eq {r v : ℝ≥0} (hv : v ≠ 0) (hr : 
   have hrpc : 0 < r := hr.bot_lt
   have hposP : 0 < gaussianPDFReal 0 (r * v) x := gaussianPDFReal_pos _ _ _ (mul_ne_zero hr hv)
   have hposQ : 0 < gaussianPDFReal 0 v x := gaussianPDFReal_pos _ _ _ hv
-  have h2piv : (0 : ℝ) < 2 * π * v := by exact_mod_cast mul_pos two_pi_pos hvpc
-  have h2pirv : (0 : ℝ) < 2 * π * ((r : ℝ) * (v : ℝ)) := mul_pos two_pi_pos (by
-    exact_mod_cast mul_pos hrpc hvpc)
+  have h2piv : (0 : ℝ) < 2 * π * v := mul_pos two_pi_pos (NNReal.coe_pos.mpr hvpc)
+  have h2pirv : (0 : ℝ) < 2 * π * ((r : ℝ) * (v : ℝ)) :=
+    mul_pos two_pi_pos (mul_pos (NNReal.coe_pos.mpr hrpc) (NNReal.coe_pos.mpr hvpc))
   have hrvcoe : ((r * v : ℝ≥0) : ℝ) = (r : ℝ) * (v : ℝ) := by push_cast; ring
   have hlr : Real.log (2 * π * (v : ℝ)) - Real.log (2 * π * ((r : ℝ) * (v : ℝ))) =
       -(Real.log (r : ℝ)) := by
@@ -75,20 +74,20 @@ private lemma log_ratio_gaussianPDFReal_eq {r v : ℝ≥0} (hv : v ≠ 0) (hr : 
   have hA : Real.log (gaussianPDFReal 0 (r * v) x)
       = -(Real.log (2 * π * ((r : ℝ) * (v : ℝ)))) / 2
         - x ^ 2 / (2 * ((r : ℝ) * (v : ℝ))) := by
-    show Real.log ((√(2 * π * ((r * v : ℝ≥0) : ℝ)))⁻¹ *
+    show Real.log ((Real.sqrt (2 * π * ((r * v : ℝ≥0) : ℝ)))⁻¹ *
         Real.exp (-(x - 0) ^ 2 / (2 * ((r * v : ℝ≥0) : ℝ)))) = _
     rw [sub_zero, hrvcoe]
     rw [Real.log_mul (by positivity :
-        (0 : ℝ) < (√(2 * π * ((r : ℝ) * (v : ℝ))))⁻¹).ne' (Real.exp_pos _).ne',
+        (0 : ℝ) < (Real.sqrt (2 * π * ((r : ℝ) * (v : ℝ))))⁻¹).ne' (Real.exp_pos _).ne',
       Real.log_inv, Real.log_exp,
       Real.log_sqrt (by positivity : (0 : ℝ) ≤ 2 * π * ((r : ℝ) * (v : ℝ)))]
     ring
   have hB : Real.log (gaussianPDFReal 0 v x)
       = -(Real.log (2 * π * (v : ℝ))) / 2 - x ^ 2 / (2 * (v : ℝ)) := by
-    show Real.log ((√(2 * π * (v : ℝ≥0) : ℝ))⁻¹ *
+    show Real.log ((Real.sqrt (2 * π * (v : ℝ≥0) : ℝ))⁻¹ *
         Real.exp (-(x - 0) ^ 2 / (2 * (v : ℝ≥0) : ℝ))) = _
     rw [sub_zero]
-    rw [Real.log_mul (by positivity : (0 : ℝ) < (√(2 * π * (v : ℝ)))⁻¹).ne'
+    rw [Real.log_mul (by positivity : (0 : ℝ) < (Real.sqrt (2 * π * (v : ℝ)))⁻¹).ne'
       (Real.exp_pos _).ne', Real.log_inv, Real.log_exp,
       Real.log_sqrt (by positivity : (0 : ℝ) ≤ 2 * π * (v : ℝ))]
     ring
@@ -392,28 +391,13 @@ theorem sqrtBias_oneSided {Y : α → ℝ} (hYnn : ∀ ω, 0 ≤ Y ω)
     ring
   -- the remainder has strictly positive integral on the nondegeneracy set
   have hintgpos : 0 < ∫ ω, c * (Real.sqrt (Y ω) - Real.sqrt (sigma * sigma)) ^ 2 ∂μ := by
-    by_contra hcon
-    push Not at hcon
-    have h0 : ∫ ω, c * (Real.sqrt (Y ω) - Real.sqrt (sigma * sigma)) ^ 2 ∂μ = 0 :=
-      le_antisymm hcon (integral_nonneg fun ω ↦
-        mul_nonneg (le_of_lt hcpos) (sq_nonneg _))
-    have hnn2 : 0 ≤ᵐ[μ] fun ω ↦ c * (Real.sqrt (Y ω) - Real.sqrt (sigma * sigma)) ^ 2 :=
-      ae_of_all μ fun ω ↦ mul_nonneg (le_of_lt hcpos) (sq_nonneg _)
-    have hlint0 : ∫⁻ ω, ENNReal.ofReal
-        (c * (Real.sqrt (Y ω) - Real.sqrt (sigma * sigma)) ^ 2) ∂μ = 0 := by
-      rw [← ofReal_integral_eq_lintegral_ofReal hintg hnn2, h0, ENNReal.ofReal_zero]
-    have hae := (lintegral_eq_zero_iff' hintg.1.aemeasurable.ennreal_ofReal).mp hlint0
-    have hsub : {ω | Y ω ≠ sigma * sigma}
-        ⊆ {ω | ¬(ENNReal.ofReal (c * (Real.sqrt (Y ω) - Real.sqrt (sigma * sigma)) ^ 2) = 0)} := by
-      intro ω hω
-      have hsne : Real.sqrt (Y ω) ≠ Real.sqrt (sigma * sigma) := fun heq ↦ hω (by
-        rw [← Real.sq_sqrt (hYnn ω), ← Real.sq_sqrt (by positivity : (0 : ℝ) ≤ sigma * sigma), heq])
-      have hpos : 0 < c * (Real.sqrt (Y ω) - Real.sqrt (sigma * sigma)) ^ 2 :=
-        mul_pos hcpos (sq_pos_iff.mpr (sub_ne_zero.mpr hsne))
-      intro hzero
-      rw [ENNReal.ofReal_eq_zero] at hzero
-      linarith
-    exact hnd (measure_mono_null hsub (ae_iff.mp hae))
+    rw [integral_pos_iff_support_of_nonneg_ae
+      (ae_of_all μ fun ω ↦ mul_nonneg hcpos.le (sq_nonneg _)) hintg, pos_iff_ne_zero]
+    intro hzero
+    refine hnd (measure_mono_null (fun ω hω ↦ ?_) hzero)
+    have hsne : Real.sqrt (Y ω) ≠ Real.sqrt (sigma * sigma) := fun heq ↦ hω (by
+      rw [← Real.sq_sqrt (hYnn ω), ← Real.sq_sqrt (by positivity : (0 : ℝ) ≤ sigma * sigma), heq])
+    exact (mul_pos hcpos (sq_pos_iff.mpr (sub_ne_zero.mpr hsne))).ne'
   rw [integral_congr_ae (ae_of_all μ hid), integral_sub hintP hintg, hPint]
   linarith [hintgpos, hsqrtsig]
 
@@ -426,7 +410,7 @@ stays gated. -/
 theorem sqrtBias_absGaussianSample {v : ℝ≥0} (hv : v ≠ 0) :
     ∫ x, |x| ∂(gaussianReal 0 v) < Real.sqrt (v : ℝ) := by
   have hvpc : 0 < v := hv.bot_lt
-  have hvpos : (0 : ℝ) < v := by exact_mod_cast hvpc
+  have hvpos : (0 : ℝ) < v := NNReal.coe_pos.mpr hvpc
   have : NullSingletonClass (gaussianReal 0 v) := nullSingletonClass_gaussianReal hv
   have hsqrtpos : (0 : ℝ) < Real.sqrt v := Real.sqrt_pos.2 hvpos
   have hsqrtsq : Real.sqrt (v : ℝ) * Real.sqrt (v : ℝ) = (v : ℝ) :=
@@ -514,13 +498,6 @@ theorem drift_se_endpoint_var {T : ℝ} (hT : 0 < T) (mu sigma : ℝ) {B : Ω �
     Var[fun ω ↦ (mu * T + sigma * B ω) / T; P] = sigma ^ 2 / T := by
   rw [(drift_se_endpoint_hasLaw hT mu sigma hB).variance_eq, variance_id_gaussianReal,
     Real.coe_toNNReal _ (by positivity)]
-
-/-- The pure-sample reading, on the gaussianReal space itself (`Z = id ~ N(0, T)`):
-`Var[(μT + σZ)/T] = σ²/T` with `n` nowhere in sight. -/
-theorem drift_se_endpoint_var_id {T : ℝ} (hT : 0 < T) (mu sigma : ℝ) :
-    Var[(fun z : ℝ ↦ (mu * T + sigma * z) / T);
-      gaussianReal 0 T.toNNReal] = sigma ^ 2 / T :=
-  drift_se_endpoint_var hT mu sigma HasLaw.id
 
 end DriftSE
 
