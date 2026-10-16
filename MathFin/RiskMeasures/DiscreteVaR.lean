@@ -359,7 +359,7 @@ private lemma joint_half1_tail (x : ℝ) :
         ext p
         rcases p with ⟨a, b⟩
         rcases a <;> simp only [Finset.mem_filter, Finset.mem_univ, true_and, halfL₁]
-          <;> simp <;> linarith
+          <;> simp [h50, h0]
       rw [hf, jointQ_mem_simplex.2]
       simp only [if_pos h50, if_pos h0]; norm_num
     · exact absurd (by linarith : (0:ℝ) ≤ x) h0
@@ -380,7 +380,7 @@ private lemma joint_half2_tail (x : ℝ) :
         ext p
         rcases p with ⟨a, b⟩
         rcases b <;> simp only [Finset.mem_filter, Finset.mem_univ, true_and, halfL₂]
-          <;> simp <;> linarith
+          <;> simp [h50, h0]
       rw [hf, jointQ_mem_simplex.2]
       simp only [if_pos h50, if_pos h0]; norm_num
     · exact absurd (by linarith : (0:ℝ) ≤ x) h0
