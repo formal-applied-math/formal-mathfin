@@ -75,12 +75,12 @@ and `X` above. Public supporting layers (all `MathFin.*`):
 * convergence blocks: `driftBlock_tendsto` (with the drift primitive `AdaptedDrift.driftPath`
   and `driftSum_expect_tendsto`), `quadraticSqSum_tendsto` /
   `quadraticSqSum_tendsto_uncond`
-  (via `gapSum_le`), the exact martingale kill `mul_trueIncr_expect_eq_zero`, the
+  (via `gapSum_le` and the mean-function Riemann limit `frozenRiemann_tendsto`), the exact martingale kill `mul_trueIncr_expect_eq_zero`, the
   Taylor bound `taylorRemainderSum_tendsto` (`trueIncr_pow3_le`, `trueIncr_pow4_le`,
   `trueIncr_pow4_integrable`), and the dying corrections `quadDriftSqSum_tendsto` /
   `quadCrossSum_tendsto`.
 
-Also public, and not used by the headline: `driftOscSum_tendsto`, `frozenRiemann_tendsto`.
+Also public, and not used by the headline: `driftOscSum_tendsto`.
 
 The constant-coefficient case and the Fubini interchange are `ito_drift_expectation_identity`
 and `expectation_pathIntegral_eq` in `ItoDriftExpectation`.
@@ -318,7 +318,6 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
     (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
 
 include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
-
 
 /-! #### Stage 3 foundations — the expectation pull-out and the increment-energy law -/
 
@@ -3237,7 +3236,6 @@ private theorem pow3_add_le {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
   have hnn : (0 : ℝ) ≤ 3 * (a - b) ^ 2 * (a + b) :=
     mul_nonneg (by nlinarith) (add_nonneg ha hb)
   linarith
-
 
 omit hB hδadap hδcont hδbdd hMadap hMeq in
 /-- **Joint continuity of the mean absolute increment of `β`**: the two-variable mean
