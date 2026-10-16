@@ -152,6 +152,12 @@ private theorem threshold_affine (a b c x : ℝ) (hb : 0 < b) :
   rw [lt_div_iff₀ hb, mul_comm x b]
   constructor <;> intro h <;> linarith
 
+/-- The slope-weighted residual: for `b > 0`, `|a − b·m − c| = b · |m − (a − c)/b|`. -/
+theorem abs_affine_sub_eq (a b c m : ℝ) (hb : 0 < b) :
+    |a - b * m - c| = b * |m - (a - c) / b| := by
+  have : a - b * m - c = b * ((a - c) / b - m) := by field_simp; ring
+  rw [this, abs_mul, abs_of_pos hb, abs_sub_comm]
+
 /-! ### The affine bootstrap step -/
 
 /-- **Bootstrap step, affine form.** For a value function whose increasing
@@ -175,25 +181,8 @@ theorem affineStep_value_err (a b c lo hi : ℝ) (hb : 0 < b)
     (hσ : (a - c) / b ∈ Set.Icc lo hi) (n : ℕ) :
     |a - b * bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n - c|
       ≤ b * ((hi - lo) / 2 ^ (n + 1)) := by
-  have hb0 : b ≠ 0 := hb.ne'
-  have key := abs_bisectMid_sub_le (f := fun x : ℝ ↦ b * x - a) (C := -c)
-    (σ := (a - c) / b) (fun x _ => threshold_affine a b c x hb) hσ n
-  have hexp : a - b * bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n - c
-      = b * ((a - c) / b - bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n) := by
-    field_simp
-    ring
-  have hle : |(a - c) / b - bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n|
-      ≤ (hi - lo) / 2 ^ (n + 1) := by
-    rw [abs_sub_comm]
-    exact key
-  calc |a - b * bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n - c|
-      = |b * ((a - c) / b - bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n)| := by
-        rw [hexp]
-    _ = |b| * |(a - c) / b - bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n| := by
-          rw [abs_mul]
-    _ = b * |(a - c) / b - bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n| := by
-          rw [abs_of_pos hb]
-    _ ≤ b * ((hi - lo) / 2 ^ (n + 1)) := mul_le_mul_of_nonneg_left hle hb.le
+  rw [abs_affine_sub_eq _ _ _ _ hb]
+  exact mul_le_mul_of_nonneg_left (affineStep_err a b c lo hi hb hσ n) hb.le
 
 /-- **Step budget.** Some number `n ≤ ⌈log₂ (b·(hi − lo)/ε)⌉` of bisection steps
 achieves repricing accuracy `ε`. `Real.logb 2` is `log₂`; Mathlib states the log ladder over
@@ -531,18 +520,7 @@ theorem boot_reprices_all (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ)
   have hstep : |bisectMid (fun x : ℝ ↦ -(V i (x :: p))) (-(c i)) (lo i) (hi i) n
       - (a i p - c i) / b i p| ≤ (hi i - lo i) / 2 ^ (n + 1) :=
     abs_bisectMid_sub_le hthr hσ n
-  obtain ⟨⟨h1, h2⟩, h3, h4⟩ := bisect_mem hthr hσ n
-  have hmid : bisectMid (fun x : ℝ ↦ -(V i (x :: p))) (-(c i)) (lo i) (hi i) n
-      ∈ Set.Icc (lo i) (hi i) := by
-    refine ⟨?_, ?_⟩ <;> simp only [bisectMid] <;> linarith
-  rw [hV _ hmid]
-  have hbal : a i p
-      - b i p * bisectMid (fun x : ℝ ↦ -(V i (x :: p))) (-(c i)) (lo i) (hi i) n
-      - c i = b i p * ((a i p - c i) / b i p
-        - bisectMid (fun x : ℝ ↦ -(V i (x :: p))) (-(c i)) (lo i) (hi i) n) := by
-    field_simp
-    ring
-  rw [hbal, abs_mul, abs_of_pos hb, abs_sub_comm]
+  rw [hV _ (bisectMid_mem_Icc hthr hσ n), abs_affine_sub_eq _ _ _ _ hb]
   exact mul_le_mul_of_nonneg_left hstep hb.le
 
 /-- "Reprices all inputs": the repricing bound holds for every instrument index
@@ -587,9 +565,15 @@ noncomputable def fraChain (δ : ℝ) (K : ℕ → ℝ) : ℕ → List ℝ → �
     | x :: p => fraValue δ x (fraForwardRate (p.head?.getD 1) x δ) (K i)
     | [] => 0
 
-/-- The unfolding equation: on `x :: p :: r` the strip instrument is the
-FRA value function of the instrument layer. -/
-theorem fraChain_eq (δ : ℝ) (K : ℕ → ℝ) (x p : ℝ) (r : List ℝ) (i : ℕ) :
+/-- The unfolding equation: on `x :: p` the strip instrument is the FRA value
+function of the instrument layer, the earlier factor read off the head of `p`
+(defaulting to the valuation-date factor `1` when `p` is empty) — matching
+`swapChain_eq`'s general shape on the fed-in list. -/
+theorem fraChain_eq (δ : ℝ) (K : ℕ → ℝ) (x : ℝ) (p : List ℝ) (i : ℕ) :
+    fraChain δ K i (x :: p) = fraValue δ x (fraForwardRate (p.head?.getD 1) x δ) (K i) := rfl
+
+/-- Special case of `fraChain_eq`: on `x :: p :: r` the earlier factor is `p`. -/
+theorem fraChain_eq_cons (δ : ℝ) (K : ℕ → ℝ) (x p : ℝ) (r : List ℝ) (i : ℕ) :
     fraChain δ K i (x :: p :: r) = fraValue δ x (fraForwardRate p x δ) (K i) := rfl
 
 /-- The anchor: on the empty prefix the strip instrument is the spot deposit,

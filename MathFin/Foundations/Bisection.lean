@@ -117,6 +117,13 @@ theorem abs_bisectMid_sub_le (hC : ∀ x ∈ Set.Icc lo hi, f x < C ↔ x < σ)
   rw [pow_succ, ← div_div, ← bisect_snd_sub_fst f C, bisectMid, abs_sub_le_iff]
   constructor <;> linarith
 
+/-- **The estimate stays in the bracket**: the `n`-th bisection estimate lies
+in `[lo, hi]`, since it is the midpoint of a sub-bracket of `[lo, hi]`. -/
+theorem bisectMid_mem_Icc (hC : ∀ x ∈ Set.Icc lo hi, f x < C ↔ x < σ) (hσ : σ ∈ Set.Icc lo hi)
+    (n : ℕ) : bisectMid f C lo hi n ∈ Set.Icc lo hi := by
+  obtain ⟨⟨h1, h2⟩, h3, h4⟩ := bisect_mem hC hσ n
+  constructor <;> simp only [bisectMid] <;> linarith
+
 /-- **Convergence**: the bisection estimates converge to the threshold. -/
 theorem tendsto_bisectMid (hC : ∀ x ∈ Set.Icc lo hi, f x < C ↔ x < σ)
     (hσ : σ ∈ Set.Icc lo hi) : Tendsto (bisectMid f C lo hi) atTop (𝓝 σ) :=
