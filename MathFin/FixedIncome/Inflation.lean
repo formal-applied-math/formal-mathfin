@@ -19,12 +19,13 @@ index-linked bond `I_t·Pʳ(t,T)` is a nominal tradable, priced on the real curv
 everything else in the zero-coupon inflation swap is change-of-numéraire bookkeeping
 (`forwardIndex_eq`, `breakeven_eq`: eqs. 17.6/17.7 of the chapter).
 
-The year-on-year convexity is the quanto correction one dimension up: with both rates
-Gaussian, the expectation of the exponential of the two-rate deviation is computed by
-the same ρ-decomposition of a correlated driver into independent normals that powers
-`MathFin.quantoForward_of_gaussian` (`MathFin.BlackScholes.QuantoGrounding`), with the
-1-D Gaussian MGF `integral_exp_mul_gaussianReal_zero`
-(`MathFin.Foundations.BrownianMartingale`) applied twice (`yoyRatioExp_gaussian`).
+The year-on-year convexity is the quanto correction transplanted to the nominal/real
+rate pair: with both rates Gaussian, the expectation of the exponential of the two-rate
+deviation is computed by the same ρ-decomposition of a correlated driver into
+independent normals that powers `MathFin.quantoForward_of_gaussian`
+(`MathFin.BlackScholes.QuantoGrounding`), with the 1-D Gaussian MGF
+`integral_exp_mul_gaussianReal_zero` (`MathFin.Foundations.BrownianMartingale`) applied
+twice (`yoyRatioExp_gaussian`).
 Composing with the Hull–White bond-reconstitution deterministics `Dⁱ = −½Bⁱ²Vⁱ`
 collapses the exponent — the real-variance halves cancel, the nominal halves double — to
 the chapter's eq. (17.10) (`yoyConvexity_eq`), with the naive ratio of forwards carried
@@ -108,7 +109,8 @@ theorem indexLinkedPrice_eq (BT : Ω → ℝ) (Pn0T Pr0T I0 : ℝ) (IT : Ω → 
 
 /-- **The breakeven inflation rate (eq. 17.7).** A zero-coupon inflation swap pays
 `I_T/I₀ − (1+b)^T` at `T`; `b` is quoted as the breakeven. Fairness (`hfair`: under the
-nominal T-forward measure the fixed leg `I₀(1+b)^T` matches the floating leg `I_T`)
+T-bond numéraire measure — the nominal T-forward measure under the section's
+normalisation — the fixed leg `I₀(1+b)^T` matches the floating leg `I_T`)
 combined with eq. (17.6) — so under the identification `hident` — gives the curve-only
 breakeven identity
 
@@ -134,9 +136,8 @@ With both rates Gaussian, the year-on-year ratio's convexity is an expectation o
 exponential of a normal. `yoyRatioExp_gaussian` computes it: two rate deviations
 `yⁿ = mⁿ + √Vⁿ·Z₁` and `yʳ = mʳ + √Vʳ·(ρ·Z₁ + √(1−ρ²)·Z₂)` from independent standard
 normals — the ρ-decomposition of the correlated two-rate driver, exactly the shape of
-`MathFin.quantoForward_of_gaussian` one dimension up — with
-means `mⁿ, mʳ`, variances `Vⁿ, Vʳ`, correlation `ρ`, and Hull–White factors `Bⁿ, Bʳ`
-over `[S, T]`. -/
+`MathFin.quantoForward_of_gaussian` — with means `mⁿ, mʳ`, variances `Vⁿ, Vʳ`,
+correlation `ρ`, and Hull–White factors `Bⁿ, Bʳ` over `[S, T]`. -/
 namespace MathFin.Inflation.Gaussian
 
 variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
@@ -159,7 +160,7 @@ standard normals `Z₁, Z₂` and Gaussian rate deviations `yⁿ = mⁿ + √V�
 
   `𝔼[exp(Bⁿ·yⁿ − Bʳ·yʳ)] = exp(Bⁿ·mⁿ − Bʳ·mʳ + ½(Bⁿ²Vⁿ + Bʳ²Vʳ − 2·Bⁿ·Bʳ·ρ·√(VⁿVʳ)))`.
 
-The proof is the `quantoForward_of_gaussian` pattern one dimension up: pointwise
+The proof is the `quantoForward_of_gaussian` pattern: pointwise
 factorization into `exp(const)·exp(a·Z₁)·exp(b·Z₂)` with `a = Bⁿ√Vⁿ − Bʳρ√Vʳ` and
 `b = −Bʳ√(1−ρ²)√Vʳ`, independence factorization of the integral, and two applications
 of the 1-D Gaussian MGF; the cross term `−2BⁿBʳρ√(VⁿVʳ)` is the `a²` algebra. -/
@@ -256,9 +257,9 @@ variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
 
 /-- **The reconstitution deterministic** `Dⁱ = −½·Bⁱ²·Vⁱ` of the Hull–White bond
 reconstitution formula: the deterministic part of bond `i`'s [S,T]-factor, with `Bⁱ`
-the Hull–White factor and `Vⁱ` the integrated variance. That `Dʳ − Dⁿ` *exactly* cancels
-half of each variance in `yoyRatioExp_gaussian_cov`'s exponent is the collapse
-mechanism of `yoyConvexity_eq`. -/
+the Hull–White factor and `Vⁱ` the integrated variance. That `Dʳ − Dⁿ = (Bⁿ²Vⁿ − Bʳ²Vʳ)/2`
+exactly cancels the real variance's half and doubles the nominal variance's half in
+`yoyRatioExp_gaussian_cov`'s exponent is the collapse mechanism of `yoyConvexity_eq`. -/
 noncomputable def hwD (B V : ℝ) : ℝ := -(B ^ 2 * V) / 2
 
 /-- **The year-on-year convexity closed form (eq. 17.10, exact chapter shape).** With
@@ -271,10 +272,10 @@ below) — the Gaussian expectation collapses to the naive ratio times the corre
 the chapter's eq. (17.10) verbatim, with `Cov = ρ·√(VⁿVʳ)` the covariance of the two
 rate deviations. The exponent's composition is pure algebra on
 `yoyRatioExp_gaussian_cov`: `(Dʳ−Dⁿ) = (Bⁿ²Vⁿ − Bʳ²Vʳ)/2` cancels the *real*
-variance's half exactly and doubles the *nominal* variance's half. The means `mⁿ, mʳ`, variances and `Cov` are inputs:
-where they come from (two correlated Hull–White fits, the quanto parent `−ρ_{rI}σ_rσ_I`
-and the forward-measure parent `−ρ_{nr}σ_nσ_rBⁿ` inside them) is chapter-sourced
-interpretation, not proved here. -/
+variance's half exactly and doubles the *nominal* variance's half. The means `mⁿ, mʳ`,
+variances and `Cov` are inputs: where they come from (two correlated Hull–White fits, the
+quanto parent `−ρ_{rI}σ_rσ_I` and the forward-measure parent `−ρ_{nr}σ_nσ_rBⁿ` inside
+them) is chapter-sourced interpretation, not proved here. -/
 theorem yoyConvexity_eq (mn mr Vn Vr ρ Bn Br Pn0T Pn0S Pr0T Pr0S Cov : ℝ)
     (hVn : 0 ≤ Vn) (hVr : 0 ≤ Vr) (hρ : ρ ^ 2 ≤ 1) (hCov : Cov = ρ * Real.sqrt (Vn * Vr))
     {Z1 Z2 : Ω → ℝ}
