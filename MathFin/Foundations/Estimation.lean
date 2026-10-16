@@ -20,8 +20,8 @@ makes it a quadratic integral against the high-variance law
 (`gaussianReal_of_var_ne_zero`) and the `rnDeriv` ratio identity
 `MeasureTheory.Measure.rnDeriv_withDensity_right`.
 
-Sampling obstructions are the chapter's second half: iid mean-zero noise of scale `η`
-turns the realised-variance estimator's expectation into `σ²T + 2nη²` — bias linear in
+Sampling obstructions are the chapter's second half: iid mean-zero noise of scale `η`,
+independent of the signal, turns the realised-variance estimator's expectation into `σ²T + 2nη²` — bias linear in
 sampling frequency (`rvExpectation_withNoise`, eq. 21.4) — and the square-root
 estimator of a nondegenerate volatility target is biased low, `E[σ̂] < σ`
 (`sqrtBias_oneSided` + `sqrtBias_absGaussianSample`, the sign of eq. 21.3). The drift
@@ -187,8 +187,8 @@ theorem kl_gaussianReal_var_ratio {r v : ℝ≥0} (hv : v ≠ 0) (hr : r ≠ 0) 
   field_simp
   ring
 
-/-- **The small-shift quadratic (the chapter's "halving the gap quadruples the delay",
-§21.3 p. 361).** Near `r = 1` the D-term proved above is `(r−1)²/4` up to a cubic
+/-- **The small-shift quadratic (§21.3 p. 361: halving the gap between the regimes
+quarters the information and quadruples the delay).** Near `r = 1` the D-term proved above is `(r−1)²/4` up to a cubic
 remainder: `|D(r) − (r−1)²/4| ≤ |r−1|³` whenever `|r − 1| ≤ ½`. So the discrimination
 information vanishes quadratically as the two regimes coalesce, and the chapter's delay
 arithmetic `≈ ln(1/α)/D` grows like `1/(r−1)²`. From the second-order log-series bound
@@ -218,7 +218,7 @@ variable {α : Type*} [MeasurableSpace α] {μ : Measure α}
 
 /-- **Eq. (21.4): the realised-variance noise bias is linear in sampling frequency.**
 Over `n` increments `ΔX_i` with second moment `E[(ΔX_i)²] = σ²·Δt` (the
-`integral_sq_increment` / `integral_sq_gaussianReal` moment in the Gaussian instance)
+`MathFin.integral_sq_gaussianReal` moment in the Gaussian instance)
 observed through mean-zero noise `ε_j` of scale `η` (`E[ε_j] = 0`, `E[ε_j²] = η²`), so that
 the observed increment is `ΔY_i = ΔX_i + (ε_{i+1} − ε_i)` (the chapter's `Y = X + ε`,
 p. 366), the noisy realised sum has expectation `σ²T + 2nη²` where `T = n·Δt`: each
@@ -419,7 +419,8 @@ theorem sqrtBias_oneSided {Y : α → ℝ} (hYnn : ∀ ω, 0 ≤ Y ω)
 (`n = 1`) realised-volatility estimator is `σ̂ = |Z| = √(Z²)`, whose target
 `Y = Z²` is nondegenerate (`P(Z² = σ²) = 0` — a nondegenerate Gaussian has no atoms,
 `NullSingletonClass`) — so eq. (21.3)'s one-sided bias applies. The chapter's exact
-constant `√(2/n)·Γ((n+1)/2)/Γ(n/2) = √(2/π) ≈ 0.798σ` at `n = 1` stays gated. -/
+constant `√(2/n)·Γ((n+1)/2)/Γ(n/2) = √(2/π) ≈ 0.798` at `n = 1` (so `E|Z| ≈ 0.798σ`)
+stays gated. -/
 theorem sqrtBias_absGaussianSample {v : ℝ≥0} (hv : v ≠ 0) :
     ∫ x, |x| ∂(gaussianReal 0 v) < Real.sqrt (v : ℝ) := by
   have hvpc : 0 < v := hv.bot_lt
