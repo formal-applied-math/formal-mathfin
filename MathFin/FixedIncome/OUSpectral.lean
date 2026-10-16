@@ -30,18 +30,8 @@ This file proves that polynomial core by induction on `Polynomial.hermite_succ`
 
 ## Status
 
-* **Proved here:** every declaration in this file, no proof holes.
-* **Note on the commutator forms (stated in their general, true form):** the
-  commutator identities, `ouGen_{κ,σ} p' = (ouGen_{κ,σ} p)' + κ • p'` and
-  `ouGen_{κ,σ} (X*p) = X * ouGen_{κ,σ} p + σ² • p' - κ • (X*p)`, carry the κ and σ²
-  coefficients explicitly, and the eigeninduction closes
-  **iff `σ² = 2κ`** (the s = 1 stationary scale): at κ = σ = 1 the eigenidentity
-  already fails at n = 2, since `ouGen_{1,1}(X² - 1) = -2X² + 1 ≠ -2(X² - 1)`.
-  This file therefore states the commutators in their general form (with the κ and σ²
-  coefficients), records the κ = σ = 1 displays verbatim as the instances
-  (`ouGen_derivative_unit`, `ouGen_X_mul_unit`), and proves the eigenidentity at the
-  forced unit normalization `κ = 1, σ² = 2` (spelled `ouGen 1 (Real.sqrt 2)`), where the
-  eigenvalue display `-n` is true verbatim.
+* **Proved here:** every declaration in this file, no proof holes. The commutators carry
+  the κ and σ² coefficients explicitly, and the eigeninduction closes iff `σ² = 2κ`.
 * **Not here (gated chapter mathematics, by design):** the `L²(π)` operator theory —
   self-adjointness of the generator against the stationary law (Calc 14.13's pairing,
   eq. 14.18), the eigenfunction expansion `P_t f = Σ c_n e^{-λ_n t} φ_n` (eq. 14.17),
@@ -68,22 +58,11 @@ eigenvectors exist. -/
 noncomputable def ouGen (κ σ : ℝ) (p : Polynomial ℝ) : Polynomial ℝ :=
   -(κ • Polynomial.X) * p.derivative + (σ ^ 2 / 2) • p.derivative.derivative
 
-/-- Additivity of the generator (the polynomial derivative is additive). -/
-theorem ouGen_add (κ σ : ℝ) (p q : Polynomial ℝ) :
-    ouGen κ σ (p + q) = ouGen κ σ p + ouGen κ σ q := by
-  simp only [ouGen, derivative_add, ← Polynomial.C_mul']
-  ring
-
 /-- Subtraction variant (used by the eigeninduction: `He_{n+1} = X·He_n - He_n'`). -/
 theorem ouGen_sub (κ σ : ℝ) (p q : Polynomial ℝ) :
     ouGen κ σ (p - q) = ouGen κ σ p - ouGen κ σ q := by
   simp only [ouGen, derivative_sub, ← Polynomial.C_mul']
   ring
-
-/-- The generator kills constants (a constant has zero derivative). -/
-theorem ouGen_const (κ σ a : ℝ) :
-    ouGen κ σ (Polynomial.C a) = 0 := by
-  simp [ouGen]
 
 /-! ## The commutator identities (the induction engine)
 
@@ -91,15 +70,10 @@ The two identities below say how the generator commutes with `d/dx` and with
 multiplication by `X` — the only two operations the Hermite recursion
 `hermite (n+1) = X * hermite n - derivative (hermite n)` is built from. They are stated
 in their general form: the coefficients that appear are exactly `κ` and `σ²`, and the
-eigeninduction closes precisely when `σ² = 2κ` (the `s = 1` stationary scale). The
-unit-parameter displays, which lack these coefficients, hold only at
-`κ = σ = 1` and are recorded verbatim as `ouGen_derivative_unit` / `ouGen_X_mul_unit`
-below. -/
+eigeninduction closes precisely when `σ² = 2κ` (the `s = 1` stationary scale). -/
 
 /-- **Commutator with the derivative.** `L p' = (L p)' + κ • p'`: differentiating and
-generating commute up to the drift coefficient `κ` re-supplied to the derivative term.
-(At `κ = 1` this is the unit display `ouGen p' = (ouGen p)' + p'`, see
-`ouGen_derivative_unit`.) -/
+generating commute up to the drift coefficient `κ` re-supplied to the derivative term. -/
 theorem ouGen_derivative (κ σ : ℝ) (p : Polynomial ℝ) :
     ouGen κ σ p.derivative = (ouGen κ σ p).derivative + κ • p.derivative := by
   simp only [ouGen, derivative_add, derivative_mul, derivative_C, derivative_X, map_neg,
@@ -109,41 +83,13 @@ theorem ouGen_derivative (κ σ : ℝ) (p : Polynomial ℝ) :
 /-- **Commutator with multiplication by `X`.** `L (X p) = X • L p + σ² • p' - κ • (X p)`:
 multiplying by `X` and generating commute up to the creation term `σ² • p'` (the
 diffusion coefficient acting on one derivative) minus the drift acting on the new
-factor. (At `κ = σ = 1` this is the unit display
-`ouGen (X * p) = X • ouGen p + p' - X • p`, see `ouGen_X_mul_unit`. Note the eigenidentity
-`ouGen_hermite` below needs the *general* form at `σ² = 2κ`, where the creation
-coefficient is `2κ`, not `1` — the two unit displays do not hold at a common
-parameter pair; see the module header.) -/
+factor. -/
 theorem ouGen_X_mul (κ σ : ℝ) (p : Polynomial ℝ) :
     ouGen κ σ (X * p) = X * ouGen κ σ p + σ ^ 2 • p.derivative - κ • (X * p) := by
-  have h1 : (X * p).derivative = p + X * p.derivative := by
-    rw [derivative_mul, derivative_X, one_mul]
-  have h2 : (p + X * p.derivative).derivative
-      = p.derivative + (p.derivative + X * p.derivative.derivative) := by
-    rw [derivative_add, derivative_mul, derivative_X, one_mul]
-  have key : (σ ^ 2 / 2) • (p.derivative + (p.derivative + X * p.derivative.derivative))
-      = σ ^ 2 • p.derivative + (σ ^ 2 / 2) • (X * p.derivative.derivative) := by
-    rw [smul_add, smul_add, ← add_assoc, ← add_smul,
-      show σ ^ 2 / 2 + σ ^ 2 / 2 = σ ^ 2 from by ring]
-  simp only [ouGen, h1, h2]
-  rw [key]
-  simp only [← Polynomial.C_mul']
+  simp only [ouGen, derivative_mul, derivative_X, derivative_add, one_mul, ← Polynomial.C_mul']
+  rw [show Polynomial.C (σ ^ 2) = Polynomial.C (σ ^ 2 / 2) + Polynomial.C (σ ^ 2 / 2) from by
+    rw [← map_add]; ring_nf]
   ring
-
-/-- The derivative-commutator display, verbatim at the unit point `κ = σ = 1`
-where it is true. (Not the parameter pair the eigeninduction runs at.) -/
-theorem ouGen_derivative_unit (p : Polynomial ℝ) :
-    ouGen 1 1 p.derivative = (ouGen 1 1 p).derivative + p.derivative := by
-  rw [ouGen_derivative]
-  simp
-
-/-- The multiplication-commutator display, verbatim at the unit point
-`κ = σ = 1` where it is true. (The eigeninduction runs at `κ = 1, σ² = 2`, where the
-creation coefficient is `2`, not `1`.) -/
-theorem ouGen_X_mul_unit (p : Polynomial ℝ) :
-    ouGen 1 1 (X * p) = X * ouGen 1 1 p + p.derivative - X * p := by
-  rw [ouGen_X_mul]
-  simp
 
 /-! ## The Hermite eigenfunctions (Calc 14.14's identity)
 
@@ -181,13 +127,10 @@ theorem ouGen_hermite (n : ℕ) :
   induction n with
   | zero => simp [ouGen, hermiteReal_zero]
   | succ n ih =>
-    have hC2 : (Polynomial.C (2 : ℝ) : Polynomial ℝ) = 2 := by
-      rw [show (2 : ℝ) = 1 + 1 from by norm_num, map_add, map_one]
-      norm_num
     rw [hermiteReal_succ, ouGen_sub, ouGen_X_mul, ouGen_derivative, ih,
       Real.sq_sqrt (by norm_num), derivative_smul]
-    simp only [one_smul, ← Polynomial.C_mul', Nat.cast_succ, map_add, map_one, map_neg]
-    rw [hC2]
+    simp only [one_smul, ← Polynomial.C_mul', Nat.cast_succ, map_add, map_one, map_neg,
+      map_ofNat]
     ring
 
 /-! ## The stationary scale: `He_n(x/s)` (Calc 14.14 in general position)
@@ -260,7 +203,7 @@ theorem ouGen_heigen_scaled_poly {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s 
   rw [scaledHermite, ouGen_comp_smulX κ σ s hs h, ouGen_hermite, Polynomial.smul_comp,
     smul_smul, mul_comm]
 
-/-- **The scaled eigenidentity, eval level (the contract's display).** For
+/-- **The scaled eigenidentity, eval level.** For
 `q_n(x) = He_n(x/s)`: `eval x (L q_n) = -(nκ) · eval x q_n` at every point `x`. -/
 theorem ouGen_heigen_scaled {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2)
     (n : ℕ) (x : ℝ) :
@@ -302,14 +245,13 @@ footprint at the density level. -/
 /-- **The Gaussian score (Calc 14.13's derivative, eval level).** The stationary
 Gaussian density `π(x) = exp(-x²/(2s²))` satisfies `π'(x) = -(x/s²)·π(x)`: the log-density
 is `-(x/s)²/2`, whose gradient `-(x/s²)` is the score. `deriv_exp` + the chain rule. -/
-theorem gaussianScore_ou {s : ℝ} (hs : s ≠ 0) (x : ℝ) :
+theorem gaussianScore_ou (s : ℝ) (x : ℝ) :
     deriv (fun y => Real.exp (-(y ^ 2 / (2 * s ^ 2)))) x
       = -(x / s ^ 2) * Real.exp (-(x ^ 2 / (2 * s ^ 2))) := by
   have h2 : HasDerivAt (fun y => -(y ^ 2 / (2 * s ^ 2))) (-(x / s ^ 2)) x := by
     have h1 := (hasDerivAt_pow 2 x).div_const (2 * s ^ 2)
     have hval : ((2 : ℕ) * x ^ (2 - 1)) / (2 * s ^ 2) = x / s ^ 2 := by
-      norm_num
-      field_simp
+      rw [pow_one, Nat.cast_ofNat, mul_div_mul_left _ _ two_ne_zero]
     rw [hval] at h1
     exact h1.neg
   exact (h2.exp.deriv).trans (by ring)
@@ -321,11 +263,8 @@ on its polynomial domain. -/
 theorem gaussianNoFlux_ou {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2) (x : ℝ) :
     σ ^ 2 / 2 * deriv (fun y => Real.exp (-(y ^ 2 / (2 * s ^ 2)))) x
       = -(κ * x) * Real.exp (-(x ^ 2 / (2 * s ^ 2))) := by
-  have hE : Real.exp (-(x ^ 2 / (2 * s ^ 2))) ≠ 0 := (Real.exp_pos _).ne'
-  rw [gaussianScore_ou hs x]
+  rw [gaussianScore_ou s x, ← h]
   field_simp
-  have hx : σ ^ 2 * x = 2 * x * s ^ 2 * κ := by rw [← h]; ring
-  linarith
 
 /-! ## The gap bias (the "asymptotic rate" remark, two modes)
 
@@ -342,8 +281,8 @@ slowest rate `λ₁`. The gap `λ₂ - λ₁` shows up as the excess carried by 
 the chapter's one-exponential-fit warning is exactly this inequality read backwards. -/
 theorem twoMode_rate_ge_slowest {l₁ l₂ c₁ c₂ t : ℝ} (hl₂ : l₁ ≤ l₂)
     (hc₁ : 0 < c₁) (hc₂ : 0 < c₂) :
-    (l₁ * c₁ * Real.exp (-(l₁ * t)) + l₂ * c₂ * Real.exp (-(l₂ * t)))
-      / (c₁ * Real.exp (-(l₁ * t)) + c₂ * Real.exp (-(l₂ * t))) ≥ l₁ := by
+    l₁ ≤ (l₁ * c₁ * Real.exp (-(l₁ * t)) + l₂ * c₂ * Real.exp (-(l₂ * t)))
+      / (c₁ * Real.exp (-(l₁ * t)) + c₂ * Real.exp (-(l₂ * t))) := by
   set E₁ := Real.exp (-(l₁ * t))
   set E₂ := Real.exp (-(l₂ * t))
   have hE₁pos : 0 < E₁ := Real.exp_pos _
@@ -352,7 +291,6 @@ theorem twoMode_rate_ge_slowest {l₁ l₂ c₁ c₂ t : ℝ} (hl₂ : l₁ ≤ 
     (add_pos (mul_pos hc₁ hE₁pos) (mul_pos hc₂ hE₂pos)).ne'
   have hkey : 0 ≤ (l₂ - l₁) * (c₂ * E₂) :=
     mul_nonneg (sub_nonneg.2 hl₂) (mul_nonneg hc₂.le hE₂pos.le)
-  rw [ge_iff_le]
   field_simp
   nlinarith [hkey]
 
@@ -368,18 +306,13 @@ reversibility). Plus the stationary-variance limit of the OU law. -/
 
 /-- **Stretch — the swirl's characteristic polynomial.** The eigenvalues of `-A` are the
 roots of `(X + 1)² + θ²`, i.e. `-1 ± iθ` — off the real line for `θ ≠ 0`, the spectral
-signature of a non-reversible drift. (`Matrix.charpoly` at `Charpoly/Basic.lean:132`,
-determinant by `Matrix.det_fin_two_of`.) -/
+signature of a non-reversible drift. (`Matrix.charpoly_fin_two` at
+`Charpoly/Coeff.lean:229`.) -/
 theorem swirl_charpoly (θ : ℝ) :
     (Matrix.charpoly (!![-1, -θ; θ, -1] : Matrix (Fin 2) (Fin 2) ℝ))
       = (X + 1) ^ 2 + Polynomial.C (θ ^ 2) := by
-  have h : (Matrix.charmatrix (!![-1, -θ; θ, -1] : Matrix (Fin 2) (Fin 2) ℝ))
-      = !![(X : ℝ[X]) + 1, Polynomial.C θ; -Polynomial.C θ, (X : ℝ[X]) + 1] := by
-    ext i j
-    fin_cases i <;> fin_cases j <;>
-      simp [map_neg, map_one]
-  show (Matrix.charmatrix _).det = _
-  rw [h, Matrix.det_fin_two_of, mul_neg, ← map_mul, sq θ]
+  rw [Matrix.charpoly_fin_two]
+  simp [Matrix.trace_fin_two_of, Matrix.det_fin_two_of, map_add, map_neg, map_one, map_mul]
   ring
 
 /-- **Stretch — the swirl's stationary covariance is isotropic.** Any symmetric `Σ`
@@ -403,44 +336,26 @@ theorem swirl_isotropy (θ a b d : ℝ)
   have e00 : 2 * a + 2 * θ * b = 1 := by simpa using congrFun (congrFun h 0) 0
   have e01 : 2 * b + θ * d - θ * a = 0 := by simpa using congrFun (congrFun h 0) 1
   have e11 : 2 * d - 2 * θ * b = 1 := by simpa using congrFun (congrFun h 1) 1
-  have hda : d - a = 2 * θ * b := by linarith [e00, e11]
-  have hθ2 : θ * d - θ * a = 2 * θ * (θ * b) := by
-    have h1 : θ * d - θ * a = θ * (d - a) := by ring
-    rw [h1, hda]
-    ring
-  have hsum : 2 * b + 2 * θ * (θ * b) = 0 := by linarith [e01, hθ2]
-  have hkey : (1 + θ ^ 2) * b = 0 := by
-    have h2 : (1 + θ ^ 2) * b = b + θ * (θ * b) := by ring
-    linarith [hsum, h2]
-  have hb : b = 0 := by
-    rcases mul_eq_zero.1 hkey with h1 | h2
-    · exact absurd h1 (by nlinarith [sq_nonneg θ])
-    · exact h2
-  rw [hb] at e00 e11
-  simp only [mul_zero, add_zero] at e00 e11
+  have hkey : (1 + θ ^ 2) * b = 0 := by linear_combination (1 / 2) * e01 - (θ / 4) * (e11 - e00)
+  have hb : b = 0 := (mul_eq_zero.1 hkey).resolve_left (by positivity)
+  subst hb
   have ha : a = 1 / 2 := by linarith [e00]
   have hd : d = 1 / 2 := by linarith [e11]
   apply Matrix.ext
   intro i j
   fin_cases i <;> fin_cases j <;>
-    simp [ha, hb, hd]
+    simp [ha, hd]
 
 /-- **Stretch — the stationary variance as a limit of the OU law.** The variance factor
-of the explicit OU law `N(x₀e^{-(k/2)t}, (s²/k)(1 - e^{-kt}))` (the same Gaussian-law
-computation as `VasicekSDEGaussian.vasicekShortRate_hasLaw_gaussian`) tends to `s²/k`
-as the horizon grows — the stationary
-scale `s²/k` (i.e. `σ²/2κ` in generator parametrization) is the limit of a landed law,
-not a new object. -/
+`(s²/k)(1 - e^{-kt})` of the explicit OU law tends to `s²/k` as the horizon grows — the
+stationary scale `s²/k` is `σ²/2κ` in generator parametrization. -/
 theorem ouStationaryVariance_tendsto {k s : ℝ} (hk : 0 < k) :
     Tendsto (fun t : ℝ => s ^ 2 / k * (1 - Real.exp (-(k * t)))) atTop (𝓝 (s ^ 2 / k)) := by
-  have hkt : Tendsto (fun t : ℝ => k * t) atTop atTop :=
-    (tendsto_const_mul_atTop_of_pos hk).mpr tendsto_id
-  have hn : Tendsto (fun t : ℝ => -(k * t)) atTop atBot :=
-    tendsto_neg_atTop_atBot.comp hkt
   have he : Tendsto (fun t : ℝ => Real.exp (-(k * t))) atTop (𝓝 0) :=
-    Real.tendsto_exp_atBot.comp hn
-  have hsub := (tendsto_const_nhds (x := (1 : ℝ))).sub he
-  simpa using (tendsto_const_nhds (x := s ^ 2 / k)).mul hsub
+    Real.tendsto_exp_neg_atTop_nhds_zero.comp
+      ((tendsto_const_mul_atTop_of_pos hk).mpr tendsto_id)
+  simpa using (tendsto_const_nhds (x := s ^ 2 / k)).mul
+    ((tendsto_const_nhds (x := (1 : ℝ))).sub he)
 
 end MathFin.OUSpectral
 
