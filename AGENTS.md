@@ -22,6 +22,15 @@ Automation (grind / hammer / loogle) is a scout, not an author — see
 CLAUDE.md "Automation toolkit — and its values gate" before committing any
 machine-found proof.
 
+## PR discipline
+
+Before submitting any PR, run the `pr-roll` cycle (review → fix → verify →
+commit/push → review again, each round a fresh subagent) until it reaches
+**three consecutive zero-finding rounds against the same head commit** —
+not just one clean round. A single "No feedback to provide." can be luck of
+a shallow pass; three in a row, with a fresh reviewer each time and no new
+commits in between, is the actual bar.
+
 ## Codex-specific notes
 
 - Codex's user is the same as Claude's user — see `MEMORY.md`-class
