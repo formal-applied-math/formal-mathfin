@@ -73,7 +73,7 @@ the integrability hypothesis keeps the statement honest (without it `condExp` de
 to `0` by convention, and the factorization is vacuous), but Doob–Dynkin itself uses none
 of it. -/
 theorem lsv_condExp_factors_through_state {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
-    {S v : Ω → ℝ} (hv : Integrable v μ) :
+    {S v : Ω → ℝ} :
     ∃ m : ℝ → ℝ, Measurable m ∧ ∀ ω,
       μ[v | Real.measurableSpace.comap S] ω = m (S ω) := by
   obtain ⟨m, hm, hmeq⟩ :=

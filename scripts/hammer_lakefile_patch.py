@@ -46,14 +46,23 @@ def main(argv=None) -> int:
     ap.add_argument("rev", help="LeanHammer git rev (must target our lean-toolchain)")
     ap.add_argument("--path", default="lakefile.lean")
     args = ap.parse_args(argv)
-    with open(args.path, encoding="utf-8") as f:
+
+    # Normalize and contain: only patch the lakefile inside this repository.
+    from pathlib import Path
+    target = Path(args.path).resolve()
+    repo_root = Path(__file__).resolve().parents[1]
+    if repo_root not in target.parents:
+        print(f"Error: {target} is outside the repository root {repo_root}", file=sys.stderr)
+        return 1
+
+    with open(target, encoding="utf-8") as f:
         src = f.read()
     try:
         out = patched(src, args.rev)
     except ValueError as e:
         print(f"[hammer-retest] {e}", file=sys.stderr)
         return 1
-    with open(args.path, "w", encoding="utf-8") as f:
+    with open(target, "w", encoding="utf-8") as f:
         f.write(out)
     print(f"[hammer-retest] inserted require Hammer @ {args.rev} before mathlib")
     return 0
