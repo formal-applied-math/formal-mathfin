@@ -59,11 +59,12 @@ nominal and real T-bond prices, `I₀` today's index and `I_T` the terminal inde
 index-linked bond, paying `I_T` at `T`, is priced on the real curve, `𝔼^{Qⁿ}[I_T/B_T]
 = I₀·Pʳ(0,T)`.
 
-`Pⁿ₀T` enters only as the normalising constant `N₀` of the tilted measure
-`numeraireMeasure Qⁿ B_T 1 1 Pⁿ₀T`; the statements do **not** tie it to `𝔼^{Qⁿ}[1/B_T]`.
-That measure is the nominal T-forward (probability) measure exactly when they agree
-(`MathFin.numeraireMeasure_isProbabilityMeasure`); the identities themselves hold for
-any `Pⁿ₀T > 0`. -/
+In `forwardIndex_eq` and `breakeven_eq`, `Pⁿ₀T` enters only as the normalising constant
+`N₀` of the tilted measure `numeraireMeasure Qⁿ B_T 1 1 Pⁿ₀T`; the statements do **not**
+tie it to `𝔼^{Qⁿ}[1/B_T]`. When they agree and `1/B_T` is integrable, that measure is a
+probability measure — the nominal T-forward measure
+(`MathFin.numeraireMeasure_isProbabilityMeasure`); the identities themselves hold for any
+`Pⁿ₀T > 0`. -/
 namespace MathFin.Inflation.ZCSwap
 
 variable {Ω : Type*} [MeasurableSpace Ω] {Qn : Measure Ω}
@@ -309,9 +310,10 @@ theorem yoyConvexity_eq (mn mr Vn Vr ρ Bn Br Pn0T Pn0S Pr0T Pr0S Cov : ℝ)
 /-- **The quanto seat of the mean (the `Δ`-linearity).** Writing the real rate's mean as
 `mʳ = mʳbase + Δ`, the correction exponent carries `Δ` **exactly** as the additive piece
 `−Bʳ·Δ` and in no other way — pure specialization of `yoyConvexity_eq`. Reading `Δ` as
-the quanto parent (the `−ρ_{rI}σ_rσ_I` piece of eq. 17.9's drift, which the chapter, p. 295,
-places inside `mʳ` under the Jarrow–Yildirim identification) is chapter-sourced
-interpretation; `Δ` is an arbitrary real here. -/
+the quanto parent's contribution to `mʳ` (the mean shift induced by the `−ρ_{rI}σ_rσ_I`
+piece of eq. 17.9's drift, which the chapter, p. 295, places inside `mʳ` under the
+Jarrow–Yildirim identification) is chapter-sourced interpretation; `Δ` is an arbitrary
+real here. -/
 theorem yoyConvexity_delta (mn mrBase Δ Vn Vr ρ Bn Br Pn0T Pn0S Pr0T Pr0S Cov : ℝ)
     (hVn : 0 ≤ Vn) (hVr : 0 ≤ Vr) (hρ : ρ ^ 2 ≤ 1) (hCov : Cov = ρ * Real.sqrt (Vn * Vr))
     {Z1 Z2 : Ω → ℝ}
