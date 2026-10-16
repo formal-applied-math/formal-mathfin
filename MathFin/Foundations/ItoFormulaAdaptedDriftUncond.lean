@@ -24,7 +24,7 @@ the integrated Itô–drift identity holds **unconditionally**:
 for `B` a pre-Brownian motion with every path continuous, `β, δ` bounded,
 `natFiltration`-adapted and path-continuous, and `f` twice differentiable with `f''`
 continuous and `f'`, `f''` bounded. No `M` or `X` version is hypothesized — the conditional
-packaging of `ItoFormulaAdaptedDrift.itoDrift_expectation_identity_adapted` (a
+packaging of `itoDrift_expectation_identity_adapted` in `ItoFormulaAdaptedDrift` (a
 `natFiltration`-adapted, everywhere-path-continuous version of `δ●B`) is bypassed, not
 discharged: the identity is derived directly for the constructed process, without any version
 `M`. This module is separate from `ItoFormulaAdaptedDrift` so that that module
@@ -59,8 +59,8 @@ co-headlines. The reason for keeping the conditional one is technical: the libra
 supply its hypothesized `M` (Route B). `itoContinuousMod` is continuous only almost surely,
 modifying it on the null failure set need not preserve `natFiltration`-adaptedness (the natural
 filtration is not complete), and the everywhere-continuous modification is adapted only to
-`augFiltration`; so the conditional theorem is the only statement here that covers an `X`
-other than the constructed one. Whether that is worth keeping, and whether to demote,
+`augFiltration`; so the conditional theorem is the only adapted-coefficient statement here that covers an
+`X` other than the constructed one. Whether that is worth keeping, and whether to demote,
 deprecate or delete `ItoFormulaAdaptedDrift`, is left for the maintainer to decide; this
 module does not change it.
 
@@ -70,7 +70,7 @@ module does not change it.
 * `band_fubini` (private) — band-Fubini for bounded predictable weights.
 
 The constant-coefficient case is `ito_drift_expectation_identity` in `ItoDriftExpectation`;
-the conditional version-independent statement is
+the conditional statement (for any `X` satisfying its hypotheses on a version `M`) is
 `itoDrift_expectation_identity_adapted` in `ItoFormulaAdaptedDrift`.
 -/
 
@@ -109,7 +109,6 @@ private theorem band_fubini {w : ℝ≥0 → Ω → ℝ}
     .of_bound ((hw_pred.mono (natFiltration hBmeas).predictable_le_prod).aestronglyMeasurable)
       Cw (ae_of_all _ fun z ↦ (Real.norm_eq_abs _).trans_le (hw_bdd z.1 z.2))
   exact integral_integral_swap hint.swap
-
 
 /-- **The integrated Itô–drift identity, unconditionally, for the constructed process.** For
 `X = adaptedItoProcess T hBmeas (processToLp δ) c β` (so `X 0 = c` almost surely),

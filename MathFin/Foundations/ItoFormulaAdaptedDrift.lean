@@ -59,9 +59,10 @@ drift² corrections (`quadDriftSqSum_tendsto`), the drift–martingale cross cor
 estimate, `taylorRemainderSum_tendsto`, `trueIncr_pow3_le`) tend to `0` — the proofs bound
 them by `O(mesh)`, `O(√mesh)` and `O(√mesh)`; only the limits are stated.
 
-Main results: `MathFin.itoDrift_expectation_identity_adapted` (conditional, version-independent;
-this file) and `MathFin.itoDrift_expectation_identity_adapted_uncond` (unconditional, for the
-constructed process; `ItoFormulaAdaptedDriftUncond`). Supporting layers, bottom-up:
+Main results: `MathFin.itoDrift_expectation_identity_adapted` (conditional on a version `M`,
+for any `X` satisfying its hypotheses; this file) and
+`MathFin.itoDrift_expectation_identity_adapted_uncond` (unconditional, for the constructed
+process; `ItoFormulaAdaptedDriftUncond`). Supporting layers, bottom-up:
 `bandIntegral_slice` (the band-to-slice conversion; the Fubini interchange
 `expectation_pathIntegral_eq` comes from `ItoDriftExpectation`), `incrementEnergy` (the
 increment-energy law), `deltaStepLp`/`deltaStepLp_tendsto` (the step approximants), the per-cell
@@ -74,7 +75,7 @@ block, the two quadratic corrections and the Taylor-remainder convergence.
 
 ## Result
 
-Headline (conditional, version-independent): `itoDrift_expectation_identity_adapted` — the
+Headline (conditional on a version `M`): `itoDrift_expectation_identity_adapted` — the
 integrated Itô–drift identity stated above, for bounded adapted path-continuous coefficients,
 under the hypotheses on `M` and `X` above. Its unconditional companion — the same identity for
 the process the library constructs, derived from `ItoFormulaAdapted.ito_formula_adapted` by
