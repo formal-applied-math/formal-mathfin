@@ -22,8 +22,8 @@ makes it a quadratic integral against the high-variance law
 
 Sampling obstructions are the chapter's second half: iid mean-zero noise of scale `η`,
 independent of the signal, turns the realised-variance estimator's expectation into
-`σ²T + 2nη²` — bias linear in sampling frequency (`rvExpectation_withNoise`, eq. 21.4) — and the square-root
-estimator of a nondegenerate volatility target is biased low, `E[σ̂] < σ`
+`σ²T + 2nη²` — bias linear in sampling frequency (`rvExpectation_withNoise`, eq. 21.4) —
+and the square-root estimator of a nondegenerate volatility target is biased low, `E[σ̂] < σ`
 (`sqrtBias_oneSided` + `sqrtBias_absGaussianSample`, the sign of eq. 21.3). The drift
 estimator, by contrast, sees only the endpoints: its variance is `σ²/T` whatever the
 sampling frequency (`drift_se_endpoint_var`, Calc 21.4's flat column). Spec correction:
@@ -189,10 +189,10 @@ theorem kl_gaussianReal_var_ratio {r v : ℝ≥0} (hv : v ≠ 0) (hr : r ≠ 0) 
 
 /-- **The small-shift quadratic (§21.3 p. 361: halving the gap between the regimes
 quarters the information and quadruples the delay).** Near `r = 1` the D-term proved
-above is `(r−1)²/4` up to a cubic remainder: `|D(r) − (r−1)²/4| ≤ |r−1|³` whenever `|r − 1| ≤ ½`. So the discrimination
-information vanishes quadratically as the two regimes coalesce, and the chapter's delay
-arithmetic `≈ ln(1/α)/D` grows like `1/(r−1)²`. From the second-order log-series bound
-`Real.abs_log_sub_add_sum_range_le` at `x = 1 − r`. -/
+above is `(r−1)²/4` up to a cubic remainder: `|D(r) − (r−1)²/4| ≤ |r−1|³` whenever
+`|r − 1| ≤ ½`. So the discrimination information vanishes quadratically as the two
+regimes coalesce, and the chapter's delay arithmetic `≈ ln(1/α)/D` grows like
+`1/(r−1)²`. From the second-order log-series bound `Real.abs_log_sub_add_sum_range_le` at `x = 1 − r`. -/
 theorem kl_gaussianReal_small_shift {r : ℝ} (hr : |r - 1| ≤ 1 / 2) :
     |(r - 1 - Real.log r) / 2 - (r - 1) ^ 2 / 4| ≤ |r - 1| ^ 3 := by
   have h := abs_log_sub_add_sum_range_le (x := 1 - r) (by rw [abs_sub_comm]; linarith) 2
