@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2026 Raphael Coelho. All rights reserved.
+Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Yang Ye
 -/
 module
 
@@ -27,9 +27,16 @@ which this file states and threads through the Garman normal form
 "pseudo-asset" is not actually lognormal), so no claim is made that
 `kirkSpreadPrice` equals the true discounted expected payoff — only that it
 is literally the standard BS closed form at this particular `(A, K', σ_eff)`,
-and that it specialises to the *exact* Margrabe price when `K = 0`
+and that its **effective-variance parameter** collapses to exactly the
+Margrabe effective variance when `K = 0`
 (`kirkEffectiveVariance_zero_eq_margrabe`), where the pseudo-asset reduces to
-`S²` itself and the approximation becomes exact.
+`S²` itself and the volatility approximation becomes exact. This is a
+statement about the variance parameter only, not about `kirkSpreadPrice`
+itself: `kirkSpreadPrice` carries a discount factor `e^{-rT}`, while
+`margrabePrice` (`BlackScholes/ExchangeOption.lean`) is undiscounted in its
+`S²`-numeraire construction, so the *prices* coincide at `K = 0` only when
+`r = 0` (or after accounting for the numeraire convention) — no such
+price-level equality is claimed or proved here.
 
 ## Results
 
