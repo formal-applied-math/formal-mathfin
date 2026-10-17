@@ -198,7 +198,6 @@ when the stock pays a higher dividend yield. -/
 theorem bsVDiv_psi_nonpos {S τ : ℝ} (hS : 0 ≤ S) (hτ : 0 ≤ τ) (K r q σ : ℝ) :
     -(S * τ * Real.exp (-(q * τ)) * Phi (bsd1 S K (r - q) σ τ)) ≤ 0 := by
   have := Phi_nonneg (bsd1 S K (r - q) σ τ)
-  have := Real.exp_pos (-(q * τ))
   exact neg_nonpos.mpr (by positivity)
 
 /-- Dividends-adjusted BS put price: `P_q = e^{-qτ} · bsP(K, r-q, σ, S, τ)`
@@ -222,12 +221,10 @@ lemma hasDerivAt_bsPDiv_q {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0
     HasDerivAt (fun q' ↦ bsPDiv K r q' σ S τ)
       (S * τ * Real.exp (-(q * τ)) * Phi (-bsd1 S K (r - q) σ τ)) q := by
   have h_eq : (fun q' : ℝ ↦ bsPDiv K r q' σ S τ) = fun q' ↦
-      bsVDiv K r q' σ S τ - S * Real.exp (-(q' * τ)) + K * Real.exp (-(r * τ)) := by
-    funext q'; exact bsPDiv_eq_bsVDiv K r q' σ S τ
+      bsVDiv K r q' σ S τ - S * Real.exp (-(q' * τ)) + K * Real.exp (-(r * τ)) :=
+    funext fun q' ↦ bsPDiv_eq_bsVDiv K r q' σ S τ
   rw [h_eq]
-  have h_neg : HasDerivAt (fun q' : ℝ ↦ -(q' * τ)) (-τ) q := by
-    have := (hasDerivAt_id q).mul_const τ
-    convert this.neg using 1 <;> first | rfl | ring
+  have h_neg : HasDerivAt (fun q' : ℝ ↦ -(q' * τ)) (-τ) q := (hasDerivAt_mul_const τ).neg
   have h := ((hasDerivAt_bsVDiv_q (r := r) hK hσ hτ hS q).sub (h_neg.exp.const_mul S)).add_const
     (K * Real.exp (-(r * τ)))
   convert h using 1

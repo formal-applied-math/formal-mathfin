@@ -9,6 +9,7 @@ public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.PDE
 public import MathFin.BlackScholes.PriceBounds
+public import MathFin.BlackScholes.ImpliedVolatility
 
 /-!
 # Black-Scholes Greek sign constraints
@@ -136,18 +137,16 @@ theorem bsV_theta_tau_nonneg {S K r σ τ : ℝ} (hS : 0 ≤ S) (hK : 0 ≤ K) (
 theorem bsP_delta_nonpos (S K r σ τ : ℝ) : Phi (bsd1 S K r σ τ) - 1 ≤ 0 :=
   sub_nonpos.mpr (bsV_delta_le_one S K r σ τ)
 
-/-- **Put vega is strictly positive**: put and call vega coincide (`hasDerivAt_bsP_sigma`). -/
-theorem bsP_vega_pos {S σ τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) (K r : ℝ) :
-    0 < S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) * Real.sqrt τ := by
-  have := gaussianPDFReal_pos 0 1 (bsd1 S K r σ τ) one_ne_zero
-  have := Real.sqrt_pos.mpr hτ
-  positivity
+/-- **Put vega is strictly positive**: put and call vega coincide (`hasDerivAt_bsP_sigma`), so
+this is `bsV_vega_pos` under its put name. -/
+theorem bsP_vega_pos {K r : ℝ} (hK : 0 < K) {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :
+    0 < S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) * Real.sqrt τ :=
+  bsV_vega_pos hK hS hσ hτ
 
 /-- **Put rho is non-positive**: `∂_r P = −K τ e^{−rτ} Φ(−d₂) ≤ 0`. -/
 theorem bsP_rho_nonpos {K τ : ℝ} (hK : 0 ≤ K) (hτ : 0 ≤ τ) (S r σ : ℝ) :
     -(K * τ * Real.exp (-(r * τ)) * Phi (-bsd2 S K r σ τ)) ≤ 0 := by
   have := Phi_nonneg (-bsd2 S K r σ τ)
-  have := Real.exp_pos (-(r * τ))
   exact neg_nonpos.mpr (by positivity)
 
 end MathFin
