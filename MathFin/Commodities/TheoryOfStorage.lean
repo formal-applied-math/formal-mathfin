@@ -51,8 +51,6 @@ availability `a_ref`, reference price `p_ref`), the kink point `A*` where
 
 namespace MathFin
 
-open Real
-
 /-! ### Working storage and convenience yield -/
 
 /-- **Working storage**: stock sits at the irreducible floor `Sbar` when the

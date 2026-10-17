@@ -41,8 +41,6 @@ is treated as second-order-small and dropped.
 
 namespace MathFin
 
-open Real
-
 /-! ### Fisher's exact identity -/
 
 /-- **Fisher own rate of interest**: `r = (1+b)(1+i) − 1`, exactly solving

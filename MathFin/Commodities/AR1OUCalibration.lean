@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.FixedIncome.VasicekSDE
 
 /-!
 # AR(1) ↔ OU parameter inversion
@@ -33,13 +34,13 @@ factor appearing in `vasicekSDEMean`, and `ouSigmaSqFromVar` inverts
   residual variance.
 * `halfLife` : `ln 2 / k`, and `ouPhiFromK_halfLife` confirms it is indeed
   the time at which the decay factor hits `1/2`.
+* `ouSigmaSqFromVar_vasicekSDEVariance` : `ouSigmaSqFromVar` genuinely inverts
+  `vasicekSDEVariance`, closing the round-trip the module docstring claims.
 -/
 
 @[expose] public section
 
 namespace MathFin
-
-open Real
 
 /-! ### The `φ ↔ k` dictionary -/
 
@@ -54,6 +55,16 @@ noncomputable def kFromPhi (φ Δt : ℝ) : ℝ := -Real.log φ / Δt
 `σ²` given the AR(1) fit's residual variance at spacing `Δt`. -/
 noncomputable def ouSigmaSqFromVar (k residVar Δt : ℝ) : ℝ :=
   2 * k * residVar / (1 - Real.exp (-(2 * k * Δt)))
+
+/-- **`ouSigmaSqFromVar` genuinely inverts `vasicekSDEVariance`**: feeding it
+the exact Vasicek/OU variance at spacing `Δt` recovers the diffusion
+coefficient `σ²` it came from, for `k ≠ 0` and `1 − e^{−2kΔt} ≠ 0` (e.g.
+`k, Δt` both nonzero). -/
+theorem ouSigmaSqFromVar_vasicekSDEVariance (σ k Δt : ℝ) (hk : k ≠ 0)
+    (hden : 1 - Real.exp (-(2 * k * Δt)) ≠ 0) :
+    ouSigmaSqFromVar k (vasicekSDEVariance σ k Δt) Δt = σ ^ 2 := by
+  unfold ouSigmaSqFromVar vasicekSDEVariance
+  field_simp
 
 /-- **Half-life** of mean reversion: `ln 2 / k`. -/
 noncomputable def halfLife (k : ℝ) : ℝ := Real.log 2 / k
