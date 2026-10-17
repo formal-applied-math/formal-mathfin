@@ -13,19 +13,21 @@ public import Mathlib
 Finite-sample performance statistics for a backtest: the **Sharpe ratio**, **CAGR**,
 **annualized volatility** and **max drawdown** of a sequence of period returns / an equity
 curve `E : Fin n → ℝ`. These are sample statistics over a finite record of realized values,
-not probabilistic objects — a different kind of object from the reflected-Brownian-motion
-drawdown *law* already in the foundations layer (`Foundations/ReflectedBrownianMotion.lean`
-and friends), which is a distribution of a stochastic process, not a statistic of one
+not probabilistic objects — a different kind of object from a process-level drawdown
+*law* (the distribution of a stochastic process's drawdown, not formalized in this
+library), which would be a distribution over paths rather than a statistic of one
 realized path.
 
 ## Conventions
 
 Multiple conventions exist in the literature for these four quantities (sample vs.
 population standard deviation, trading days vs. calendar days for `N`, zero vs. nonzero
-risk-free rate). This file follows the plain zero-risk-free-rate, population-standard-
-deviation convention of Bacon, *Practical Portfolio Performance Measurement and
-Attribution* (2nd ed., 2008), §2 (Sharpe ratio, Ch. 2) and §6 (drawdown, Ch. 6), which
-matches the formulas:
+risk-free rate). This file follows a plain zero-risk-free-rate, population-standard-
+deviation convention, matching the way the Sharpe ratio, annualization and drawdown
+measures are presented (Ch. 4, "Risk") in Bacon, *Practical Portfolio Performance
+Measurement and Attribution* (2nd ed., 2008); the zero-risk-free-rate specialization
+and the Sharpe ratio's population- (not sample-) standard-deviation choice are this
+file's own, not Bacon's. The formulas:
 
 * **Sharpe ratio** (`sharpeRatio`): `√N · mean(r) / std(r)`, zero risk-free rate, `N`
   periods per year, `std` the *population* standard deviation of the sample `r`
@@ -50,8 +52,8 @@ Two other objects in the library are adjacent but distinct:
   from a finite sample of realized returns rather than supplied moments.
 * `MathFin.maximumDrawdown` (`Performance/DownsideMetrics.lean`) is the largest *absolute*
   price decline `max_{i ≤ j} (price i − price j)` over a finite path. `maxDrawdown` here is
-  the largest *relative* decline `1 − E_t / max_{s ≤ t} E_s`, the convention named in the
-  roadmap and in Bacon (2008) — a different normalization of the same running-maximum idea.
+  the largest *relative* decline `1 − E_t / max_{s ≤ t} E_s`, the convention used in
+  Bacon (2008) — a different normalization of the same running-maximum idea.
 
 ## Main results
 

@@ -578,7 +578,7 @@ import MathFin.RiskMeasures.WorstCaseRisk
 import MathFin.RiskMeasures.ValueAtRisk
 import MathFin.RiskMeasures.GaussianValueAtRisk
 -- Finite-sample backtest performance statistics (Sharpe ratio, CAGR, annualized volatility,
--- max drawdown) — a different object from the reflected-Brownian-motion drawdown law above
+-- max drawdown) — a sample statistic of one realized path, not a process-level drawdown law
 import MathFin.RiskMeasures.BacktestStatistics
 -- Expected shortfall: Rockafellar–Uryasev for every law, coherence, dual representation; the
 -- Gaussian ES closed form; VaR by bisection; VaR superadditivity; closed forms and tail ratios;
