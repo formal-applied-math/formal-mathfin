@@ -1144,6 +1144,13 @@
       "input_hash": "3c62666100dd52fa0b7036961bc54939e5fe28c9a63fa16ddd559f62467d1435",
       "verified_at_commit": "657ff70"
     },
+    "mf-calendar-arbitrage-total-variance": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-17",
+      "elapsed_s": 5.1,
+      "input_hash": "a7ce32aaa7e39d4b29bfaa61abd91e9bbbcf5a1509641413fb88d7d0bc602c33",
+      "verified_at_commit": "689c45e"
+    },
     "mf-call-price-convex-in-strike": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-08",
@@ -2739,6 +2746,13 @@
       "elapsed_s": 5.0,
       "input_hash": "ec0ccfb02a4cbb8e72c8b89a71eff8fc1de1cf3e337641c8f2036c1c8be86341",
       "verified_at_commit": "69c4a8c"
+    },
+    "mf-svi-calendar-free-iff": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-17",
+      "elapsed_s": 4.6,
+      "input_hash": "1559a4363a31ec5da2761263571b7da7a3727f0235a53f2ff6e37fc8258fbbbf",
+      "verified_at_commit": "689c45e"
     },
     "mf-svi-call-convex-iff-durrleman": {
       "benchmark_file": "svi_certificate.json",
