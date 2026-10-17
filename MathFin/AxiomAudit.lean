@@ -335,6 +335,12 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.sharpeRatio_affine_invariant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms MathFin.sharpeRatio_affine_invariant
 
+/-- info: 'MathFin.studentTPdf_pos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.studentTPdf_pos
+
+/-- info: 'MathFin.studentTExpectedShortfall_pos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.studentTExpectedShortfall_pos
+
 /-! ## Certified cross-domain bridges -/
 
 /-- info: 'MathFin.portfolioVarN_diag_eq_herfindahl' depends on axioms: [propext, Classical.choice, Quot.sound] -/
