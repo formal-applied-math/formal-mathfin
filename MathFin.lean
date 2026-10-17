@@ -477,6 +477,8 @@ import MathFin.BlackScholes.GarmanNormalForm
 import MathFin.BlackScholes.ExchangeOption
 -- Margrabe BSCallHyp grounding from a joint two-GBM gaussian model (leap-3 closure)
 import MathFin.BlackScholes.MargrabeGrounding
+-- Kirk's (1995) approximation for spread options (K ≠ 0), a Garman-normal-form instance
+import MathFin.BlackScholes.KirkSpreadApproximation
 -- Phase 25: chooser option as call + put portfolio via PCP at chooser date
 import MathFin.BlackScholes.ChooserComposition
 -- Phase 46: BS PDE derived from Itô drift + no-arbitrage
