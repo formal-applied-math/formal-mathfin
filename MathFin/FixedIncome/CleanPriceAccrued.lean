@@ -22,7 +22,11 @@ forward by `f` periods:
   `MacaulayModified`, with `t_i` the number of whole periods from the *last*
   coupon date to each cashflow, so the next coupon has `t_i = 1`): the
   `(1 + y)^f` factor carries the last-coupon-date present value forward by
-  the elapsed fraction `f` of the period that has since run.
+  the elapsed fraction `f` of the period that has since run. `(1 + y)^f`
+  here is `Real.rpow`; the formula is the intended compound-interest carry
+  only under the standard yield domain `1 + y > 0` (the proved results below
+  all fix `f = 0`, where `Real.rpow_zero` sidesteps the issue regardless of
+  `y`).
 
 Accrued interest on the next coupon (its amount supplied separately as
 `c1`, since it is not tied to the cashflow map `c`) is the simple-interest
