@@ -29,9 +29,16 @@ correlation `ρ`:
 
   `EffNotional = √(D² + (1 − ρ²) · (Σ Dᵢ² − D²_single))`
 
-reduces in the formalisation to the two-trade building block used repeatedly in the standard
-(`EffNotional ρ d₁ d₂ = √(d₁² + d₂² + 2ρ·d₁·d₂)`, the same quadratic-form combination as portfolio
-variance). We prove this two-trade aggregator is monotone in each notional's absolute value when
+(a single-systematic-factor combination: expanding it for two trades with equal supervisory
+correlation gives a cross term in `ρ²`, not `ρ`). We instead formalise the structurally analogous
+two-trade building block with a *linear* correlation cross term,
+
+  `EffNotional ρ d₁ d₂ = √(d₁² + d₂² + 2ρ·d₁·d₂)`,
+
+the same quadratic-form combination as the variance of a sum of two correlated random variables —
+useful on its own merits (it is this shape, not the Annex-4 one, that the diversification bounds
+below are about), but not a literal algebraic specialisation of the Annex-4 formula above. We
+prove this two-trade aggregator is monotone in each notional's absolute value when
 `ρ ∈ [-1, 1]`, and that it collapses to `|d₁ + d₂|` at `ρ = 1` (full correlation, no diversification
 benefit) and to `√(d₁² + d₂²)` at `ρ = 0` (independent add-ons).
 
@@ -55,6 +62,8 @@ benefit) and to `√(d₁² + d₂²)` at `ρ = 0` (independent add-ons).
   credit risk exposures* (BCBS 279), 2014, §​3 (EAD formula) and Annex 4 (effective notional).
 -/
 
+@[expose] public section
+
 namespace MathFin.RiskMeasures
 
 open Real
@@ -69,6 +78,10 @@ noncomputable def saccrEAD (α RC PFE : ℝ) : ℝ := α * (RC + PFE)
 
 /-- The regulatory value of `α` fixed by Basel SA-CCR (BCBS 279 §3). -/
 noncomputable def saccrAlpha : ℝ := 1.4
+
+/-- `saccrAlpha` is positive, so `saccrEAD saccrAlpha` inherits the monotonicity lemmas below at
+the regulatory value of `α`. -/
+theorem saccrAlpha_pos : 0 < saccrAlpha := by norm_num [saccrAlpha]
 
 /-- `EAD` is monotone increasing in the replacement cost `RC`, for any fixed `α ≥ 0`. -/
 theorem saccrEAD_mono_rc {α : ℝ} (hα : 0 ≤ α) {PFE : ℝ} :
