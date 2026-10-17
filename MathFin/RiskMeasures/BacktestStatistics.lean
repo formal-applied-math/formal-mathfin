@@ -25,9 +25,9 @@ population standard deviation, trading days vs. calendar days for `N`, zero vs. 
 risk-free rate). This file follows a plain zero-risk-free-rate, population-standard-
 deviation convention, matching the way the Sharpe ratio, annualization and drawdown
 measures are presented (Ch. 4, "Risk") in Bacon, *Practical Portfolio Performance
-Measurement and Attribution* (2nd ed., 2008); the zero-risk-free-rate specialization
-and the Sharpe ratio's population- (not sample-) standard-deviation choice are this
-file's own, not Bacon's. The formulas:
+Measurement and Attribution* (2nd ed., 2008); the zero-risk-free-rate specialization is
+this file's own choice — Bacon's Sharpe ratio carries a risk-free rate term. The
+formulas:
 
 * **Sharpe ratio** (`sharpeRatio`): `√N · mean(r) / std(r)`, zero risk-free rate, `N`
   periods per year, `std` the *population* standard deviation of the sample `r`
