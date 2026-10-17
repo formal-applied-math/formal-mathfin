@@ -6,7 +6,6 @@ Authors: Yang Ye
 module
 
 public import Mathlib
-public import MathFin.FixedIncome.DurationSensitivity
 
 /-!
 # Key-rate duration: the partition-of-unity identity
@@ -37,9 +36,10 @@ duration:
   `Σ_n KRD_n = Σ_i d i · (Σ_n w n i) = Σ_i d i · 1 = Σ_i d i`.
 
 This module states the identity abstractly, parametrized by an arbitrary
-dollar-duration contribution `d` (so it specializes to the discrete-yield
-`modifiedNumerator`/`bondPriceDisc` substrate of `DurationSensitivity`, or to
-any other per-cashflow duration contribution), under exactly the
+per-cashflow dollar-duration contribution `d : ι → ℝ` (a caller could instantiate
+`d` with the per-cashflow term of `modifiedNumerator`/`bondPriceDisc` from
+`DurationSensitivity`, or with any other per-cashflow duration contribution,
+without this module depending on that substrate), under exactly the
 partition-of-unity hypothesis above — making explicit that the identity is a
 genuine consequence of partition of unity, not a restatement of it.
 
