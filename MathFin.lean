@@ -289,7 +289,7 @@ import MathFin.Foundations.ItoFormulaUnrestrictedLocMart
 import MathFin.Foundations.FTAPTwoState
 -- Phase 38: Constant-product AMM (adapted from Pusceddu-Bartoletti FMBC 2024)
 import MathFin.DeFi.ConstantProductAMM
--- DeFi/AMM group: Uniswap v2/v3 + Curve mechanics (impermanent loss, TWAP, fee invariant, v3 virtual reserves)
+-- DeFi/AMM group: Uniswap v2/v3 mechanics (impermanent loss, TWAP, fee invariant, v3 virtual reserves)
 import MathFin.DeFi.UniswapCurveMechanics
 -- Phase 39: Itô structural drift formula + GBM log-drift (after Nagy 2026)
 import MathFin.Foundations.ItoLemma

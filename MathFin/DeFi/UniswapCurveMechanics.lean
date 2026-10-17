@@ -1,8 +1,8 @@
 /-
 This file extends the constant-product AMM formalization
 (`MathFin/DeFi/ConstantProductAMM.lean`, adapted from Pusceddu-Bartoletti
-2024) with further closed-form identities from the Uniswap v2/v3 and Curve
-Finance AMM designs:
+2024) with further closed-form identities from the Uniswap v2/v3 AMM
+designs:
 
   Hayden Adams, Noah Zinsmeister, Dan Robinson, "Uniswap v2 Core",
   Uniswap whitepaper, 2020. <https://uniswap.org/whitepaper.pdf>
@@ -10,9 +10,10 @@ Finance AMM designs:
   Hayden Adams et al., "Uniswap v3 Core", Uniswap whitepaper, 2021.
   <https://uniswap.org/whitepaper-v3.pdf>
 
-  Michael Egorov, "StableSwap - efficient mechanism for Stablecoin
-  liquidity", Curve Finance whitepaper, 2019.
-  <https://curve.fi/files/stableswap-paper.pdf>
+Curve Finance's StableSwap invariant (Michael Egorov, "StableSwap -
+efficient mechanism for Stablecoin liquidity", 2019,
+<https://curve.fi/files/stableswap-paper.pdf>) is not formalized in this
+file; no StableSwap-specific result appears below.
 
 Author of this MathFin Lean 4 adaptation: Yang Ye.
 Copyright (c) 2026 Yang Ye.
@@ -24,7 +25,7 @@ public import Mathlib
 public import MathFin.DeFi.ConstantProductAMM
 
 /-!
-# Uniswap v2/v3 and Curve AMM mechanics (DeFi/AMM group, items #25 + TWAP +
+# Uniswap v2/v3 AMM mechanics (DeFi/AMM group, items #25 + TWAP +
 fee invariant + v3 virtual reserves)
 
 This file formalises four further closed-form results about automated
@@ -45,7 +46,8 @@ market makers, building on the constant-product substrate in
 * `swapOutputWithFee`, `fee_invariant_growth`: the Uniswap v2 **fee
   invariant** `(x0 + Δx)(y0 - Δy) ≥ x0·y0`, where `Δy = swapOutput x0 y0
   (γ·Δx)` is computed from the fee-discounted input (γ the fee retention
-  rate), and `lpFeeShare`, the LP value-growth share `f = 1 - √(k1/k2)`.
+  rate), and `lpFeeShare`, the candidate LP value-growth share
+  `f = 1 - √(k1/k2)` (only shown nonnegative here, see its docstring).
 * `virtualReserveX/Y`, `virtual_reserve_curve`: the Uniswap v3
   **virtual-reserve curve** `(x + L/√p_b)(y + L√p_a) = L²`.
 * `tickPrice`, `tickPrice_ratio`: the v3 tick price `p(i) = 1.0001^i` and
@@ -215,11 +217,13 @@ theorem fee_invariant_growth
     _ ≤ (x0 + Δx) * (y0 - swapOutput x0 y0 (γ * Δx)) :=
         mul_le_mul_of_nonneg_right hle hy_pos.le
 
-/-- **LP fee share**: if the invariant grows from `k1` to `k2` purely from
-retained fees, and LP token value scales with `sqrt k` (the LP's claim on
-reserves scales reserves uniformly, so value scales with the geometric
-mean `sqrt(x*y)`), the LP's share of the resulting value growth is
-`f = 1 - sqrt(k1/k2)`. -/
+/-- **LP fee share candidate**: under the (unproved here) assumption that
+LP token value scales with `sqrt k` — the LP's claim on reserves scales
+reserves uniformly, so value scales with the geometric mean `sqrt(x*y)` —
+`f = 1 - sqrt(k1/k2)` would be the fraction of value growth attributable
+to the invariant moving from `k1` to `k2` purely from retained fees. This
+file only establishes the sanity property `lpFeeShare_nonneg` below; it
+does not prove `f` equals an actual LP value-growth ratio. -/
 noncomputable def lpFeeShare (k1 k2 : ℝ) : ℝ :=
   1 - Real.sqrt (k1 / k2)
 
