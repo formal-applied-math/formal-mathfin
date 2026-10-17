@@ -73,11 +73,7 @@ theorem vasicekShortRate_physical_eq_riskNeutral (hB : IsPreBrownianReal B μ)
     have h := vasicekShortRate_hasLaw_gaussian hB 0 0 1 hκ T
     simp only [vasicekSDEMean, zero_mul, add_zero, one_mul, zero_add] at h
     exact h
-  have hv : 0 < vasicekSDEVariance 1 κ T := by
-    unfold vasicekSDEVariance
-    have : Real.exp (-(2 * κ * T)) < 1 :=
-      Real.exp_lt_one_iff.mpr (by have : (0 : ℝ) < T := hT; nlinarith)
-    exact div_pos (by linarith) (by linarith)
+  have hv : 0 < vasicekSDEVariance 1 κ T := vasicekSDE_variance_pos 1 κ T hκ hT one_ne_zero
   have hs : 0 < s := Real.sqrt_pos.mpr hv
   have hss : s ^ 2 = vasicekSDEVariance 1 κ T := Real.sq_sqrt hv.le
   have hImeas : Measurable I := (Lp.stronglyMeasurable _).measurable
