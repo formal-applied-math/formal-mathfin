@@ -524,18 +524,6 @@ theorem variance (h : BSCallHyp μ S_0 K r σ T Z) :
 
 end Moments
 
-/-! ### Terminal-price moments
-
-The lognormal moment layer (`LognormalMoments.lean`) re-exported for the terminal price
-the estimator is driven by: its second moment and variance, unchanged. Single-draw
-context: `Z : Ω → ℝ`. -/
-
-section TerminalMoments
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {S_0 K r σ T : ℝ} {Z : Ω → ℝ}
-
-end TerminalMoments
-
 /-! ### The call variants
 
 The call is the honest case: the payoff `C(z) = e^{-rT}·max(S_T(z) − K, 0)` is
