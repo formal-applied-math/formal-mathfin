@@ -401,11 +401,9 @@ theorem payerSwapValue_affine_lastCoupon_annuity {ι : Type*} (P0 K δ x : ℝ) 
 the slope condition `1 + K·δ > 0`. -/
 theorem strictAnti_payerSwapValue_lastCoupon (P0 K A₀ δ : ℝ) (hpos : 0 < 1 + K * δ) :
     StrictAnti (fun x : ℝ ↦ payerSwapValue P0 x K (A₀ + δ * x)) := by
-  have h : ∀ z : ℝ, payerSwapValue P0 z K (A₀ + δ * z) = (P0 - K * A₀) - (1 + K * δ) * z :=
-    fun z => payerSwapValue_affine_lastCoupon P0 K A₀ δ z
   intro x y hxy
   show payerSwapValue P0 y K (A₀ + δ * y) < payerSwapValue P0 x K (A₀ + δ * x)
-  rw [h y, h x]
+  rw [payerSwapValue_affine_lastCoupon, payerSwapValue_affine_lastCoupon]
   linarith [mul_lt_mul_of_pos_right hxy hpos]
 
 /-- Threshold of the last-coupon swap. -/
@@ -626,23 +624,19 @@ theorem fraBootstrap_flatCurve (r δ K T1 T2 lo hi : ℝ) (hδ : δ ≠ 0)
     (hx : zcb r 0 T2 ∈ Set.Icc lo hi) (hlo : 0 < lo) (n : ℕ) :
     |bisectMid (fun x : ℝ ↦ -(fraValue δ x (fraForwardRate (zcb r 0 T1) x δ) K)) 0 lo hi n
       - zcb r 0 T2| ≤ (hi - lo) / 2 ^ (n + 1) := by
+  have h1 : δ * ((zcb r 0 T1 / zcb r 0 T2 - 1) / δ)
+      = zcb r 0 T1 / zcb r 0 T2 - 1 := by field_simp
   have hpos : 0 < 1 + δ * K := by
-    simp only [hK, fraForwardRate]
-    have h1 : δ * ((zcb r 0 T1 / zcb r 0 T2 - 1) / δ)
-        = zcb r 0 T1 / zcb r 0 T2 - 1 := by
-      field_simp
-    rw [h1]
+    simp only [hK, fraForwardRate, h1]
     linarith [div_pos (zcb_pos r 0 T1) (zcb_pos r 0 T2)]
   have hσeq : (zcb r 0 T1 - 0) / (1 + δ * K) = zcb r 0 T2 := by
     rw [hK, sub_zero]
     have hp : zcb r 0 T1 ≠ 0 := (zcb_pos r 0 T1).ne'
     have hx : zcb r 0 T2 ≠ 0 := (zcb_pos r 0 T2).ne'
-    have h1 : (1 : ℝ) + δ * ((zcb r 0 T1 / zcb r 0 T2 - 1) / δ)
-        = zcb r 0 T1 / zcb r 0 T2 := by
-      field_simp
-      ring
     unfold fraForwardRate
-    rw [h1, div_eq_iff (div_ne_zero hp hx)]
+    rw [show (1 : ℝ) + δ * ((zcb r 0 T1 / zcb r 0 T2 - 1) / δ)
+        = zcb r 0 T1 / zcb r 0 T2 from by rw [h1]; ring,
+      div_eq_iff (div_ne_zero hp hx)]
     field_simp
   have hthr : ∀ x ∈ Set.Icc lo hi,
       (fun x : ℝ ↦ -(fraValue δ x (fraForwardRate (zcb r 0 T1) x δ) K)) x < 0
