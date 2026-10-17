@@ -25,8 +25,8 @@ This file proves that polynomial core by induction on `Polynomial.hermite_succ`
 * the Gaussian stationary no-flux condition of Calc 14.13 (`gaussianScore_ou`,
   `gaussianNoFlux_ou`) — the one-dimensional reversibility mechanism, at eval level;
 * the two-mode weighted-average gap inequality (`twoMode_rate_ge_slowest`): the effective
-  decay rate of a two-mode mixture sits above the slowest rate, so a one-exponential fit
-  overstates mean reversion.
+  decay rate of a two-mode mixture is at least the slowest rate, so a one-exponential fit
+  never understates mean reversion.
 
 ## Status
 
@@ -275,9 +275,9 @@ theorem gaussianNoFlux_ou {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = �
 
 The chapter's effective decay rate of a multimodal expansion is the weighted average
 `Σ λ_n c_n e^{-λ_n t} / Σ c_n e^{-λ_n t}`. With two modes and positive weights, that
-average sits above the slowest rate `λ₁` for every `t` — so fitting a single exponential
-to a two-mode decay reads off a rate above `λ₁` and overstates mean reversion (the
-chapter's second, independent route to the ch. 20 estimation bias). -/
+average is at least the slowest rate `λ₁` for every `t` — so fitting a single exponential
+to a two-mode decay reads off a rate at least `λ₁` and never understates mean reversion
+(the chapter's second, independent route to the ch. 20 estimation bias). -/
 
 /-- **The two-mode gap inequality.** For rates `λ₁ ≤ λ₂`, positive mode weights
 `0 < c₁, c₂` and any `t`, the effective decay rate of the two-mode mixture — the
