@@ -15,9 +15,9 @@ efficient mechanism for Stablecoin liquidity", 2019,
 <https://curve.fi/files/stableswap-paper.pdf>) is not formalized in this
 file; no StableSwap-specific result appears below.
 
-Author of this MathFin Lean 4 adaptation: Yang Ye.
-Copyright (c) 2026 Yang Ye.
+Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yang Ye
 -/
 module
 
@@ -34,9 +34,12 @@ market makers, building on the constant-product substrate in
 
 ## Results
 
-* `impermanentLossReservesX/Y`, `impermanentLoss_eq`: the **impermanent
+* `impermanentLossReservesX/Y`, `impermanentLossReserves_invariant`,
+  `impermanentLossReserves_price`, `impermanentLoss_eq`: the **impermanent
   loss closed form** `IL(r) = 2√r/(1+r) - 1` for a constant-product LP,
-  derived (not merely asserted) from the post-price-move reserve split.
+  derived (not merely asserted) from the post-price-move reserve split —
+  both defining equations (`x1*y1 = x0*y0` and `y1/x1 = r*y0/x0`) are
+  proved, not just the first.
 * `twapAccumulator`, `twap_eq_average`: the **Uniswap v2 TWAP accumulator**
   telescoping-sum identity `p_{t1,t2} = (a_{t2} - a_{t1})/(t2 - t1)`.
 * `harmonicMean`, `harmonicMean_reciprocal_eq_arithmeticMean`: the
@@ -83,6 +86,19 @@ theorem impermanentLossReserves_invariant
   unfold impermanentLossReservesX impermanentLossReservesY
   rw [← Real.sqrt_mul (by positivity)]
   rw [show x0 ^ 2 / r * (y0 ^ 2 * r) = (x0 * y0) ^ 2 by field_simp]
+  exact Real.sqrt_sq (by positivity)
+
+/-- The rebalanced reserves sit at the new price `r * y0 / x0`: this is the
+second defining equation (alongside `impermanentLossReserves_invariant`)
+that pins down `x1, y1` as *the* solution of `x1 * y1 = x0 * y0` and
+`y1 / x1 = r * y0 / x0`, not merely one pair satisfying the invariant. -/
+theorem impermanentLossReserves_price
+    (x0 y0 r : ℝ) (hx0 : 0 < x0) (hy0 : 0 < y0) (hr : 0 < r) :
+    impermanentLossReservesY x0 y0 r / impermanentLossReservesX x0 y0 r
+      = r * y0 / x0 := by
+  unfold impermanentLossReservesX impermanentLossReservesY
+  rw [← Real.sqrt_div' _ (by positivity)]
+  rw [show y0 ^ 2 * r / (x0 ^ 2 / r) = (r * y0 / x0) ^ 2 by field_simp]
   exact Real.sqrt_sq (by positivity)
 
 /-- **LP portfolio value** at the new price `p1 = r * y0 / x0`, valued in
@@ -134,8 +150,10 @@ theorem impermanentLoss_eq (x0 y0 r : ℝ) (hx0 : 0 < x0) (hy0 : 0 < y0) (hr : 0
 /-! ## Uniswap v2 TWAP accumulator -/
 
 /-- **TWAP accumulator**: the running sum `a_t = Σ_{i ≤ t} p_i` of a
-discrete price series, as maintained on-chain by the Uniswap v2
-`price*CumulativeLast` storage slots. -/
+discrete price series with unit time steps — the special case of the
+Uniswap v2 `price*CumulativeLast` storage slots (which accumulate
+`p·Δt` over arbitrary block-timestamp gaps) where every step has
+`Δt = 1`. -/
 noncomputable def twapAccumulator (p : ℕ → ℝ) (t : ℕ) : ℝ :=
   ∑ i ∈ Finset.range (t + 1), p i
 
@@ -150,7 +168,8 @@ theorem twapAccumulator_sub_eq_sum
   have := Finset.sum_Ico_consecutive p (Nat.zero_le (t1 + 1)) (by omega : t1 + 1 ≤ t2 + 1)
   linarith [this]
 
-/-- **Time-weighted average price**, as Uniswap v2 oracles compute it:
+/-- **Time-weighted average price** over unit time steps, matching how
+Uniswap v2 oracles compute it in the equal-spacing case:
 `p_{t1,t2} = (a_{t2} - a_{t1}) / (t2 - t1)`. -/
 noncomputable def twap (p : ℕ → ℝ) (t1 t2 : ℕ) : ℝ :=
   (twapAccumulator p t2 - twapAccumulator p t1) / ((t2 : ℝ) - (t1 : ℝ))
@@ -174,7 +193,7 @@ the **reciprocal of the harmonic mean of `q` equals the arithmetic mean of
 caveat: naively averaging the reciprocal series and inverting gives the
 wrong (harmonic, not arithmetic) mean. -/
 theorem harmonicMean_reciprocal_eq_arithmeticMean
-    (s : Finset ℕ) (p : ℕ → ℝ) (_hp : ∀ i ∈ s, 0 < p i) (hs : s.Nonempty) :
+    (s : Finset ℕ) (p : ℕ → ℝ) (hs : s.Nonempty) :
     1 / harmonicMean s (fun i => 1 / p i) = (∑ i ∈ s, p i) / (s.card : ℝ) := by
   unfold harmonicMean
   have hcard : (0 : ℝ) < s.card := by
@@ -227,8 +246,8 @@ does not prove `f` equals an actual LP value-growth ratio. -/
 noncomputable def lpFeeShare (k1 k2 : ℝ) : ℝ :=
   1 - Real.sqrt (k1 / k2)
 
-/-- `lpFeeShare` is nonnegative precisely when the invariant has not
-shrunk, matching the fee economics (fees only grow `k`). -/
+/-- `lpFeeShare` is nonnegative when the invariant has not shrunk,
+matching the fee economics (fees only grow `k`). -/
 theorem lpFeeShare_nonneg (k1 k2 : ℝ) (_hk1 : 0 < k1) (hk2 : 0 < k2) (h : k1 ≤ k2) :
     0 ≤ lpFeeShare k1 k2 := by
   unfold lpFeeShare
@@ -254,7 +273,7 @@ pool with liquidity `L`:
 
   `(x + L/√p_b) * (y + L√p_a) = L²`. -/
 theorem virtual_reserve_curve
-    (L sqrtP sqrtPa sqrtPb : ℝ) (hL : 0 < L) (hP : 0 < sqrtP) (hPb : 0 < sqrtPb) :
+    (L sqrtP sqrtPa sqrtPb : ℝ) (hP : 0 < sqrtP) (hPb : 0 < sqrtPb) :
     (virtualReserveX L sqrtP sqrtPb + L / sqrtPb)
       * (virtualReserveY L sqrtP sqrtPa + L * sqrtPa) = L ^ 2 := by
   unfold virtualReserveX virtualReserveY
