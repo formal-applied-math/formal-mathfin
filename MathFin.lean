@@ -552,6 +552,10 @@ import MathFin.Performance.RatiosExtended
 import MathFin.Performance.DownsideMetrics
 import MathFin.Performance.Kelly
 import MathFin.Performance.KellyNumeraire
+import MathFin.Performance.FracDiffWeights
+import MathFin.Performance.AverageUniqueness
+import MathFin.Performance.BetSizeSigmoid
+import MathFin.Performance.PurgedCV
 
 -- RiskMeasures
 import MathFin.RiskMeasures.Gaussian
