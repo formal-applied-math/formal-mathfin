@@ -41,17 +41,16 @@ noncomputable def concurrency (t0 t1 : ι → ℝ) (t : ℝ) : ℝ :=
 noncomputable def uniqueness (t0 t1 : ι → ℝ) (t : ℝ) (i : ι) : ℝ :=
   (if t ∈ Set.Icc (t0 i) (t1 i) then (1 : ℝ) else 0) / concurrency t0 t1 t
 
-theorem concurrency_pos (t0 t1 : ι → ℝ) {t : ℝ} {i : ι}
-    (hi : t ∈ Set.Icc (t0 i) (t1 i)) : 0 < concurrency t0 t1 t := by
-  refine Finset.sum_pos' (fun j _ ↦ ?_) ⟨i, Finset.mem_univ i, by simp [hi]⟩
-  split <;> norm_num
-
 theorem one_le_concurrency (t0 t1 : ι → ℝ) {t : ℝ} {i : ι}
     (hi : t ∈ Set.Icc (t0 i) (t1 i)) : 1 ≤ concurrency t0 t1 t := by
   have h := Finset.single_le_sum
     (f := fun j ↦ if t ∈ Set.Icc (t0 j) (t1 j) then (1 : ℝ) else 0)
     (fun j _ ↦ by split <;> norm_num) (Finset.mem_univ i)
   rwa [if_pos hi] at h
+
+theorem concurrency_pos (t0 t1 : ι → ℝ) {t : ℝ} {i : ι}
+    (hi : t ∈ Set.Icc (t0 i) (t1 i)) : 0 < concurrency t0 t1 t :=
+  zero_lt_one.trans_le (one_le_concurrency t0 t1 hi)
 
 /-- The headline bound: an observation whose span contains `t` has uniqueness
 strictly positive and at most `1`. -/
