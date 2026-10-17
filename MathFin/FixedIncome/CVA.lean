@@ -20,9 +20,11 @@ Hull, *Options, Futures and Other Derivatives* ch. 24 (CVA, sl. 25–28) and Bag
 
 `EE(s) = E[V_s⁺]` the expected positive exposure.
 
-Independence is modelled as in `MathFin.Cox.cox_mixing_survival` (mathfin
-`FixedIncome/Cox.lean`): the exposure lives on `(Ω₁, ν)`, the default time on `(Ω₂, μ)`,
-and the pricing measure is `ν.prod μ`. The Fubini step reduces the claim to the kernel
+Independence uses the same two-factor product-space layout as `MathFin.Cox.cox_mixing_survival`
+(mathfin `FixedIncome/Cox.lean`), though not its mixing construction: the exposure lives on
+`(Ω₁, ν)`, the default time on `(Ω₂, μ)`, and the pricing measure is `ν.prod μ`, so τ is
+independent of the exposure by the product measure itself, with no mixing against the first
+factor's randomness. The Fubini step reduces the claim to the kernel
 `MathFin.DefaultDensity.integral_indicator_Iic_eq` with discount curve `D · EE`.
 
 * `integral_exposure_eq` — the general reduction (joint integrability hypothesized).
