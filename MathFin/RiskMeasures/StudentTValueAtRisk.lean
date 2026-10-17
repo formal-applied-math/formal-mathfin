@@ -28,12 +28,17 @@ where `g_ν` is the standard Student-t density. The personal-notes formula is th
 `α` itself the left-tail probability and `x_α < 0`: `-1/α · (1-ν)⁻¹ = 1/(α(ν-1))` there plays the
 role of `1/(1-α) · 1/(ν-1)` here, and the `-μ` plays the role of `+μ` for a loss defined with the
 opposite sign — an algebraically valid rewrite of the same closed form, not a second error. The
-one genuine transcription error is `ν - 2` where the source (in either sign convention) has `ν`.
-This file formalizes the two real closed forms directly, in the `(1-α)`-upper-tail loss
-convention of the source, rather than re-deriving the left-tail-return rewrite:
-`studentTValueAtRisk`, the honest (trivial) VaR quantile closed form, and
-`studentTExpectedShortfall`, the pdf-based closed form the notes were actually describing (minus
-the `ν - 2` bug).
+`ν - 2` in the notes is *not* itself a transcription error either: it is the unit-*variance*
+standardization used in Christoffersen's *Elements of Financial Risk Management* (the
+"Cornish-Fisher-style" chapter the roadmap item names). Writing `Y = T·√((ν-2)/ν)` rescales the
+standard `T ~ t_ν` to `Var Y = 1` (`ν > 2`), and substituting into the `g_ν`/`t_ν⁻¹(α)` form above
+turns the `ν + t_ν⁻¹(α)²` factor into `ν - 2 + y_α²` for the standardized quantile `y_α`, with a
+matching rescale of the density — the same closed form in a different scale convention, not a bug
+to fix. This file formalizes the two real closed forms directly, in the unit-*scale* `(1-α)`-
+upper-tail loss convention of the source (McNeil-Frey-Embrechts) rather than re-deriving the
+unit-*variance* rewrite: `studentTValueAtRisk`, the honest (trivial) VaR quantile closed form, and
+`studentTExpectedShortfall`, the pdf-based closed form the notes were actually describing, with
+the `ν` matching this file's own scale convention rather than the notes' `ν - 2`.
 
 Mathlib has no Student-t distribution at all (no pdf, no law, no quantile function) at the
 pinned version, so unlike `RiskMeasures/GaussianValueAtRisk.lean` there is no `HasLaw`-level
@@ -99,7 +104,8 @@ noncomputable def studentTValueAtRisk (μ σ xα : ℝ) : ℝ := μ + σ * xα
 /-- **Student-t expected shortfall** at quantile `x_α` and level `α` for a location-scale loss
 `L = μ + σ T`, `T ~ t_ν`: `ES_α(L) = μ + σ · g_ν(x_α)/(1-α) · (ν + x_α²)/(ν-1)`
 (McNeil-Frey-Embrechts, Example 2.15). This, not a VaR, is the closed form the roadmap's
-personal-notes transcription was corrupting. -/
+personal-notes formula was actually describing (in the unit-variance convention; see the module
+docstring). -/
 noncomputable def studentTExpectedShortfall (ν μ σ xα α : ℝ) : ℝ :=
   μ + σ * (studentTPdf ν xα / (1 - α)) * ((ν + xα ^ 2) / (ν - 1))
 
