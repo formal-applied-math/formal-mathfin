@@ -155,9 +155,8 @@ theorem vasicekShortRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ)
   have hden : (0 : ℝ) < 2 * κ := by linarith
   have hkernel_nonneg : (0 : ℝ) ≤ (1 - Real.exp (-(2 * κ * (T : ℝ)))) / (2 * κ) :=
     div_nonneg (by linarith) hden.le
-  have hvar_nonneg : (0 : ℝ) ≤ vasicekSDEVariance σ κ (T : ℝ) := by
-    unfold vasicekSDEVariance
-    exact div_nonneg (mul_nonneg (sq_nonneg σ) (by linarith)) hden.le
+  have hvar_nonneg : (0 : ℝ) ≤ vasicekSDEVariance σ κ (T : ℝ) :=
+    vasicekSDEVariance_nonneg σ hκ (NNReal.coe_nonneg T)
   have hShift := gaussianReal_const_add (gaussianReal_const_mul hW σ)
     (vasicekSDEMean r₀ θ κ (T : ℝ))
   convert hShift using 2

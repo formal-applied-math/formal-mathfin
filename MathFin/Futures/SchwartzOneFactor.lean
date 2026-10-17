@@ -28,6 +28,9 @@ function at `1`:
 As `T → ∞` the futures curve flattens to `exp(θ + σ² / (4κ))`, independent of
 the current spot.
 
+This formalizes only the constant-parameter Schwartz (1997) model; Hull's
+time-dependent convenience-yield extension `q(t)` is out of scope.
+
 ## Main results
 
 * `schwartzFuturesPrice` — the closed form `exp(m_T + v_T / 2)`.
@@ -48,13 +51,6 @@ log level `θ`, mean-reversion speed `κ`, volatility `σ` and maturity `T`:
 `exp(m_T + v_T / 2)`, the lognormal mean of the terminal spot. -/
 noncomputable def schwartzFuturesPrice (x₀ θ κ σ T : ℝ) : ℝ :=
   Real.exp (vasicekSDEMean x₀ θ κ T + vasicekSDEVariance σ κ T / 2)
-
-/-- The Ornstein–Uhlenbeck terminal variance is nonnegative for `κ > 0`, `t ≥ 0`. -/
-theorem vasicekSDEVariance_nonneg (σ : ℝ) {κ : ℝ} (hκ : 0 < κ) {t : ℝ} (ht : 0 ≤ t) :
-    0 ≤ vasicekSDEVariance σ κ t := by
-  unfold vasicekSDEVariance
-  have : Real.exp (-(2 * κ * t)) ≤ 1 := Real.exp_le_one_iff.2 (by nlinarith)
-  positivity
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
   {μ : Measure Ω} [IsProbabilityMeasure μ]
