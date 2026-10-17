@@ -246,9 +246,9 @@ footprint at the density level. -/
 Gaussian density `π(x) = exp(-x²/(2s²))` satisfies `π'(x) = -(x/s²)·π(x)`: the log-density
 is `-(x/s)²/2`, whose gradient `-(x/s²)` is the score. `deriv_exp` + the chain rule. -/
 theorem gaussianScore_ou (s : ℝ) (x : ℝ) :
-    deriv (fun y => Real.exp (-(y ^ 2 / (2 * s ^ 2)))) x
+    deriv (fun y ↦ Real.exp (-(y ^ 2 / (2 * s ^ 2)))) x
       = -(x / s ^ 2) * Real.exp (-(x ^ 2 / (2 * s ^ 2))) := by
-  have h2 : HasDerivAt (fun y => -(y ^ 2 / (2 * s ^ 2))) (-(x / s ^ 2)) x := by
+  have h2 : HasDerivAt (fun y ↦ -(y ^ 2 / (2 * s ^ 2))) (-(x / s ^ 2)) x := by
     have h1 := (hasDerivAt_pow 2 x).div_const (2 * s ^ 2)
     have hval : ((2 : ℕ) * x ^ (2 - 1)) / (2 * s ^ 2) = x / s ^ 2 := by
       rw [pow_one, Nat.cast_ofNat, mul_div_mul_left _ _ two_ne_zero]
@@ -261,7 +261,7 @@ stationary scale `s² = σ²/2κ`, the drift flux `-κx·π` balances the diffus
 `(σ²/2)·π'`: `μπ = ½(σ²π)'` of Calc 14.13, which is what makes the generator symmetric
 on its polynomial domain. -/
 theorem gaussianNoFlux_ou {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2) (x : ℝ) :
-    σ ^ 2 / 2 * deriv (fun y => Real.exp (-(y ^ 2 / (2 * s ^ 2)))) x
+    σ ^ 2 / 2 * deriv (fun y ↦ Real.exp (-(y ^ 2 / (2 * s ^ 2)))) x
       = -(κ * x) * Real.exp (-(x ^ 2 / (2 * s ^ 2))) := by
   rw [gaussianScore_ou s x, ← h]
   field_simp
@@ -350,8 +350,8 @@ theorem swirl_isotropy (θ a b d : ℝ)
 `(s²/k)(1 - e^{-kt})` of the explicit OU law tends to `s²/k` as the horizon grows — the
 stationary scale `s²/k` is `σ²/2κ` in generator parametrization. -/
 theorem ouStationaryVariance_tendsto {k s : ℝ} (hk : 0 < k) :
-    Tendsto (fun t : ℝ => s ^ 2 / k * (1 - Real.exp (-(k * t)))) atTop (𝓝 (s ^ 2 / k)) := by
-  have he : Tendsto (fun t : ℝ => Real.exp (-(k * t))) atTop (𝓝 0) :=
+    Tendsto (fun t : ℝ ↦ s ^ 2 / k * (1 - Real.exp (-(k * t)))) atTop (𝓝 (s ^ 2 / k)) := by
+  have he : Tendsto (fun t : ℝ ↦ Real.exp (-(k * t))) atTop (𝓝 0) :=
     Real.tendsto_exp_neg_atTop_nhds_zero.comp
       ((tendsto_const_mul_atTop_of_pos hk).mpr tendsto_id)
   simpa using (tendsto_const_nhds (x := s ^ 2 / k)).mul
