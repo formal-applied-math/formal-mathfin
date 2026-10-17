@@ -646,8 +646,6 @@ import MathFin.BlackScholes.SVI.Admissibility
 import MathFin.BlackScholes.SVI.Assembly
 import MathFin.BlackScholes.SVI.AssociatedTrace
 import MathFin.BlackScholes.SVI.BlackScholesBridge
--- Calendar-spread arbitrage (Gatheral–Jacquier Lemma 2.1) and its raw-SVI form
-import MathFin.BlackScholes.CalendarArbitrage
 import MathFin.BlackScholes.SVI.BlackSmile
 import MathFin.BlackScholes.SVI.CallConvexity
 import MathFin.BlackScholes.SVI.ClearedSignature
@@ -688,3 +686,5 @@ import MathFin.BlackScholes.SVI.TraceForm
 import MathFin.BlackScholes.SVI.TraceSignature
 -- The SVI tail condition d₊ → −∞ iff b(1+ρ) < 2, and the butterfly-free sign formula
 import MathFin.BlackScholes.SVI.TailCondition
+-- Calendar-spread arbitrage (Gatheral–Jacquier Lemma 2.1) and its raw-SVI form
+import MathFin.BlackScholes.CalendarArbitrage

@@ -5498,7 +5498,7 @@
         "lean": "import MathFin.BlackScholes.CalendarArbitrage\n\nopen MathFin MeasureTheory\n\n/-- **Calendar-spread arbitrage (Gatheral–Jacquier 2014, Lemma 2.1).** (1) Calls on a real\nmartingale are non-decreasing in maturity: `s ≤ t → ∫ (X_s − L)⁺ ≤ ∫ (X_t − L)⁺`. (2) For a\npositive total-variance surface `w(k, t)` priced by the zero-rate Black–Scholes formula at\nforward `S > 0`, call prices are non-decreasing in maturity at every strike iff `t ↦ w(k, t)` is\nnon-decreasing at every log-moneyness `k`. Re-exports\n`MathFin.integral_posPart_sub_mono_of_martingale` and `MathFin.calendar_free_iff`. -/\ntheorem calendar_arbitrage_gatheral_jacquier {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsFiniteMeasure μ] {ℱ : Filtration ℝ mΩ} {X : ℝ → Ω → ℝ}\n    (hX : Martingale X ℱ μ) {S : ℝ} (hS : 0 < S) (w : ℝ → ℝ → ℝ) (hw : ∀ k t, 0 < w k t) :\n    (∀ L : ℝ, Monotone fun t ↦ ∫ ω, (X t ω - L)⁺ ∂μ) ∧\n      ((∀ K, 0 < K → Monotone fun t ↦ totalVarianceCall K S (w (Real.log (K / S)) t)) ↔\n        ∀ k, Monotone (w k)) :=\n  ⟨fun L _ _ h ↦ integral_posPart_sub_mono_of_martingale hX L h, calendar_free_iff hS w hw⟩\n"
       },
       "metadata": {
-        "chapter": 10,
+        "chapter": 9,
         "reference": "Gatheral and Jacquier, Arbitrage-free SVI volatility surfaces, Quantitative Finance 14(1) (2014), Section 2.1, Lemma 2.1",
         "difficulty": "intermediate",
         "formalization_status": "full",
@@ -5514,7 +5514,7 @@
         "lean": "import MathFin.BlackScholes.CalendarArbitrage\n\nopen MathFin MathFin.SVI\n\n/-- **No calendar arbitrage for raw SVI slices.** For maturity-indexed raw SVI parameters `p t`\nwith positive variance, the SVI-smiled Black–Scholes call `bsSmile (p t) K` is non-decreasing in\nmaturity at every strike `K > 0` iff the SVI total variance `t ↦ variance (p t) k` is\nnon-decreasing at every log-moneyness `k`. Re-exports\n`MathFin.SVI.bsSmile_calendar_free_iff`. -/\ntheorem svi_calendar_free_iff (p : ℝ → Params) (hw : ∀ t k, 0 < variance (p t) k) :\n    (∀ K, 0 < K → Monotone fun t ↦ bsSmile (p t) K) ↔\n      ∀ k, Monotone fun t ↦ variance (p t) k :=\n  bsSmile_calendar_free_iff p hw\n"
       },
       "metadata": {
-        "chapter": 10,
+        "chapter": 9,
         "reference": "Gatheral and Jacquier, Arbitrage-free SVI volatility surfaces, Quantitative Finance 14(1) (2014), Section 2.1, Lemma 2.1; raw SVI, Section 3.1",
         "difficulty": "intermediate",
         "formalization_status": "full",

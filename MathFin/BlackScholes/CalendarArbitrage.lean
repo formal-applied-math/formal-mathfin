@@ -59,18 +59,11 @@ theorem integral_posPart_sub_mono_of_martingale {Ω ι : Type*} [Preorder ι] {m
     {μ : Measure Ω} [IsFiniteMeasure μ] {ℱ : Filtration ι mΩ} {X : ι → Ω → ℝ}
     (hX : Martingale X ℱ μ) (L : ℝ) {s t : ι} (hst : s ≤ t) :
     ∫ ω, (X s ω - L)⁺ ∂μ ≤ ∫ ω, (X t ω - L)⁺ ∂μ := by
-  set φ : ℝ → ℝ := fun x ↦ (x - L)⁺ with hφ
+  set φ : ℝ → ℝ := fun x ↦ (x - L)⁺
   have hφc : Continuous φ := by fun_prop
-  have hcvx : ConvexOn ℝ univ φ := by
-    refine ⟨convex_univ, fun x _ y _ a b ha hb hab ↦ ?_⟩
-    simp only [hφ, smul_eq_mul, posPart_def]
-    have hx := le_max_left (x - L) 0
-    have hx0 := le_max_right (x - L) 0
-    have hy := le_max_left (y - L) 0
-    have hy0 := le_max_right (y - L) 0
-    refine max_le ?_ (by positivity)
-    have hL : L = a * L + b * L := by rw [← add_mul, hab, one_mul]
-    nlinarith [mul_le_mul_of_nonneg_left hx ha, mul_le_mul_of_nonneg_left hy hb]
+  have hcvx : ConvexOn ℝ univ φ :=
+    ((convexOn_id convex_univ).sub (concaveOn_const L convex_univ)).sup
+      (convexOn_const 0 convex_univ)
   have hint : ∀ u, Integrable (X u) μ := fun u ↦ hX.integrable u
   have hφint : ∀ u, Integrable (φ ∘ X u) μ := fun u ↦
     ((hint u).sub (integrable_const L)).pos_part
@@ -125,7 +118,9 @@ theorem totalVarianceCall_strictMonoOn {K S : ℝ} (hK : 0 < K) (hS : 0 < S) :
 surface over log-moneyness `k` and maturity `t`, priced with zero rates at forward `S > 0`:
 the call at strike `K` and maturity `t` is `totalVarianceCall K S (w (log (K / S)) t)`. Call
 prices are non-decreasing in maturity at every strike iff `t ↦ w(k, t)` is non-decreasing at
-every `k`. -/
+every `k`. Maturity `t` ranges over all of `ℝ`; no `t > 0` restriction is imposed (the
+statement is honest but strictly more general than the economic setting, where only `t > 0`
+is meaningful). -/
 theorem calendar_free_iff {S : ℝ} (hS : 0 < S) (w : ℝ → ℝ → ℝ) (hw : ∀ k t, 0 < w k t) :
     (∀ K, 0 < K → Monotone fun t ↦ totalVarianceCall K S (w (Real.log (K / S)) t)) ↔
       ∀ k, Monotone (w k) := by
