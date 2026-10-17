@@ -473,3 +473,5 @@ which the characterization would transport — the ATM inequalities, the posteri
 limits, the posterior variance's upper-wing limit, and nonconstancy. The gap is only the
 measure-theoretic *interpretation* of `cointossM ∘ S_T` as the condExp on the mixture; that
 interpretation stays chapter-sourced (Ex. 11.2's Bayes computation). -/
+
+end MathFin.LSV
