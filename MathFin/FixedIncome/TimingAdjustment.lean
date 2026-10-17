@@ -32,8 +32,9 @@ decomposition `Y = n + u(ρ Z₁ + √(1−ρ²) Z₂)`, `ln V = m + s Z₁`, so
 
 **Exact vs. linearized.** Both statements here are exact under the Gaussian hypothesis.
 Hull's textbook presentation of the timing adjustment, with a `(1 + R_F/m)`-style
-simple-compounding denominator, is a first-order linearization of this exponential identity.
-That approximate form is not proved here and is not exact.
+simple-compounding denominator, replaces the exact covariance `Cov(ln V, Y)` with its
+first-order (bond-duration) approximation in the forward rate. That approximate form is
+not proved here and is not exact.
 
 ## Main results
 
@@ -94,7 +95,7 @@ expectation is
 This is exact; the textbook `(1 + R_F/m)`-style simple-compounding approximation is its
 linearization, not proved here. -/
 theorem timingAdjustment_gaussian (m s n u ρ B₀ N₀ : ℝ)
-    (hB₀ : 0 < B₀) (hN₀ : 0 < N₀)
+    (hB₀ : 0 ≤ B₀) (hN₀ : 0 < N₀)
     {Z₁ Z₂ : Ω → ℝ}
     (h₁ : HasLaw Z₁ (gaussianReal 0 1) μ) (h₂ : HasLaw Z₂ (gaussianReal 0 1) μ)
     (hm₁ : Measurable Z₁) (hm₂ : Measurable Z₂) (hindep : IndepFun Z₁ Z₂ μ)
@@ -108,7 +109,7 @@ theorem timingAdjustment_gaussian (m s n u ρ B₀ N₀ : ℝ)
   set V : Ω → ℝ := fun ω ↦ Real.exp (m + s * Z₁ ω)
   have hPm : Measurable P := by fun_prop
   have h := changeOfNumeraire (Q := μ) (fun ω ↦ V ω * P ω) hPm measurable_const
-    (fun ω ↦ Real.exp_pos _) (fun _ ↦ one_pos) hB₀.le hN₀
+    (fun ω ↦ Real.exp_pos _) (fun _ ↦ one_pos) hB₀ hN₀
   have hc : (fun ω ↦ V ω * P ω / P ω) = V := by
     funext ω; exact mul_div_cancel_right₀ _ (Real.exp_pos _).ne'
   simp only [hc, div_one] at h
