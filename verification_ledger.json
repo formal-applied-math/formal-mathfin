@@ -327,10 +327,10 @@
     },
     "gir-risk-neutral-drift-unique": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-10-08",
+      "date": "2026-10-17",
       "elapsed_s": 5.8,
-      "input_hash": "142b8b2fa19c63d22b7e60064695f2d61efab064026fe5d0c6e2c727b1c91f7c",
-      "verified_at_commit": "0c74d33"
+      "input_hash": "4c8fd7c826ef2697e616aa1c9866777e1b7211e2648c5bc0945671a20156d762",
+      "verified_at_commit": "c5bc6e8"
     },
     "gir-simple-adapted": {
       "benchmark_file": "girsanov_finance.json",
@@ -740,38 +740,38 @@
     },
     "mf-black-scholes-call-strictly-convex-strike": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "e1376c6a8a0590a752f2e4c0e94f9c4abdb9ec1b585252f9b7b266f004c5dac9",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.6,
+      "input_hash": "a0648ba377bac8571c2745418b68c38089aea7fa89d567376798bdcbb0fea01f",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-black-scholes-esscher-pricing": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.4,
-      "input_hash": "61deebd0b2bb968e249727d7a168c8fc1f4525b24aea34dee8766e5d1f1be652",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 6.1,
+      "input_hash": "959ef1e1086aee6b16ce4dbdcf8b46b6691e257ea7138222d0b1455b5893ec9d",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-black-scholes-log-contract-discrete-swap": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.8,
-      "input_hash": "6c7b4ac3a84120976894a5de0ff44d9019d956433bdd8246b214e7a507c14dac",
-      "verified_at_commit": "3c0b22f"
+      "date": "2026-10-17",
+      "elapsed_s": 4.4,
+      "input_hash": "8263075b0dfdd10710697cc6fe94f7d45e170e442e8e28dadd944b88aadb5138",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-black-scholes-lognormal-density": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.2,
-      "input_hash": "a09c87eba8632206955d3b4c0ddf251b81840deaf42cebef272665275f2738b9",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.5,
+      "input_hash": "85706b0ce5794ba5ae2dc40f9ceb9f098e97e163ddb85b294d4667d8865414b0",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-black-scholes-price-law": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.1,
-      "input_hash": "354bf008c88cd35f27a9b7f0104f3219f89ef41cfaccea130938f0774fbdc0d7",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.9,
+      "input_hash": "2a8c7c8c82e8e952860ec9a5bac419738ce09c6d48ac8e2a8c9a0a4c90c5155e",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-black76-delta": {
       "benchmark_file": "mathematical_finance.json",
@@ -908,31 +908,31 @@
     },
     "mf-breeden-litzenberger": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.0,
-      "input_hash": "894cd8fd73919cedd3efb75cee19a6f8611062ea07de67e39e1b51fa9ed29f8a",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 5.3,
+      "input_hash": "8c3faf0f79cd5673985b2345d0f18b848f291ea4b163feb2547d69610751fd19",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-breeden-litzenberger-jump-diffusion": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.4,
-      "input_hash": "ace3ee4c26e2b863f8981fc610e258c0683b8d5d4259a6b055f0c837dbe0775d",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 4.1,
+      "input_hash": "41ddeb9ea623d80cc6ae6b223762c5dda66e116a6dac4b2dd40d88e3d3d32c21",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-bs-call-strictly-convex-in-spot": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 3.9,
-      "input_hash": "fc69ad90cbba6a0e7cd2211210c773e760570ccf4b7de1fe3274bf872167717e",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 5.7,
+      "input_hash": "e82f7ae61aae4728567660b4b51a93cabc84f848436dce8bc2e7170efc837546",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-bs-call-tends-to-spot-high-vol": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 3.5,
-      "input_hash": "3d3c868b7664042e311839d339eb3b26015bfe960d0dad99f555df0d2571f2cc",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 5.6,
+      "input_hash": "7919859c8434b856455c8f813d1ea5835111be441e7466f74f919945fa1794b9",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-bs-charm": {
       "benchmark_file": "mathematical_finance.json",
@@ -950,59 +950,59 @@
     },
     "mf-bs-formulas-every-date": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.0,
-      "input_hash": "49f63b01c03c71d0f448cc5704f436c4296af7626cd189a5e0ec58f481431835",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.4,
+      "input_hash": "f9ea87d9ce6b249ec555c39886319f40dba5ab68a2bc97b97f22f60ccf70cef9",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-bs-gaussian-smoothing": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.9,
-      "input_hash": "b00fcd39098ce062384ecdb61452a6879e7687fcf02102a3d5b7c4ed8e08c22c",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 5.4,
+      "input_hash": "73b841b7d6dcdf2f86ad68ab1bced2a8b7e27a54355100cae889720633358246",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-bs-merton-delta": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.6,
-      "input_hash": "350d604c2d88102b31a8766671bcb185a765a4a01c6e2c52685828390b790543",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 5.3,
+      "input_hash": "f1855fa9412b14e1de7c379b1ce2b3eaefb2f47c21a0a543b04377ec464ade93",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-bs-merton-gamma": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 3.4,
-      "input_hash": "c442b9a79f5c49d8f322744c14c229572f747177a0880009c2d1fe6d940ef395",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 4.3,
+      "input_hash": "e1c79525dde360062bd6e0b566275ff1e3ff957bb65664b7a1c93bb525bd5b45",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-bs-merton-psi": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.9,
-      "input_hash": "c0597603a50c69f9a42e64389ec5be6996e8c01710f4116357f0418cc9f74978",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 5.2,
+      "input_hash": "8423de648bd9ac9637bf63ce3a0d5c1118522e71f2fcc6b0f0e3b082f9fea275",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-bs-merton-rho": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 3.9,
-      "input_hash": "affe54552fbc2c74aa3072e8e9b44fee4dee02e23b9a1f2140dd83dacc6058ab",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 4.2,
+      "input_hash": "adb09737e062353a14a44dda00c8988bf8e9697498958b219db25305db80ffe8",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-bs-merton-theta": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.1,
-      "input_hash": "9fa019eb405e3186294155929774d6884a37a8e5dd1b50aa865e70ad4c6849a8",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 5.2,
+      "input_hash": "4f8c7274d7e5d56ca9b56041fed2cf9b5211ca67848320859e409dd5b0b49981",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-bs-merton-vega": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "660a0e768b008cd81927138797e3997a33bb65cd8c93f10379c1917fbd18a277",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 6.1,
+      "input_hash": "22e0d1a3190cd26d02a53bbca1774b4d10e1a4070ce4ee9aa1859628cfad9134",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-bs-put-delta": {
       "benchmark_file": "mathematical_finance.json",
@@ -1132,24 +1132,24 @@
     },
     "mf-bull-call-spread-payoff-le": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.2,
-      "input_hash": "3a198b79b655e4b482bb009e2d8cf02cb08cf3804c23da26bbe0fe1e2e37c3ed",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 5.3,
+      "input_hash": "f6bf546cbb2c89db94ad7dc044a1bce06051d7b3c53320ee0820fc4436507cab",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-butterfly-payoff-nonneg": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.2,
-      "input_hash": "3c62666100dd52fa0b7036961bc54939e5fe28c9a63fa16ddd559f62467d1435",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 5.4,
+      "input_hash": "70c2d8544644c63872b2533621b32019d39154463bc2bcc9e7057b36f419a8f6",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-call-price-convex-in-strike": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.3,
-      "input_hash": "77934e4d1593ddcce8e7dbfe091e0c689ea0b1facf91e2f99f3c0fc4f82ab61f",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 4.2,
+      "input_hash": "387375fd6c5697705ab78a87c72fa1d5d7f91e8380806275b9cd485e2b22ba85",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-call-prices-determine-law": {
       "benchmark_file": "mathematical_finance.json",
@@ -1363,10 +1363,10 @@
     },
     "mf-compound-poisson-implied-vol-above-sigma": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.4,
-      "input_hash": "225b748649449d853ee7c0c7cec12df72102cc1f6c6ee857f6920dc7cabc1d82",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 5.8,
+      "input_hash": "40fed18c88d773c491d47ebc5774dfebc430dbc890d57cc84d45612da060e9c2",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-compound-poisson-mgf": {
       "benchmark_file": "mathematical_finance.json",
@@ -1790,31 +1790,31 @@
     },
     "mf-implied-vol-exists-above-reference": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.9,
-      "input_hash": "0713d8f3ba08dddd3c9acbc653a6d3b025b823ebd5cd22d47628555a73331d85",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 5.9,
+      "input_hash": "dd15e4e7ffc33f2893aa73d3dcc8ec6a71ae7903ff0fe3073f7184adb618b4c0",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-implied-vol-unique": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 3.9,
-      "input_hash": "5777de72781fbea231638b2f22a4593ebb9df596b6a0047a484e4651b6263d8b",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 4.1,
+      "input_hash": "ff2970080fd8feba1d702d8017a3ca7fb9f0f6df045c1f99f5d9dc4c5cf454a1",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-impliedvol-bisection": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.7,
-      "input_hash": "7eb84dc3e3efa476e6ddd1a1037764e3cbc928510454e7fe990cdd451969a882",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 4.2,
+      "input_hash": "7a526c1e1d5fdb6ecdadd4b13012b856c195eb2fadd1c35c4152de3b3b288af6",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-impliedvol-bracket": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.2,
-      "input_hash": "9d938759c1dfb5c354256313ca16f4ee34f6b46ad8ca23eaacdee272d48aa1ae",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 5.7,
+      "input_hash": "bbbdb72bb82cc416a9b6b9780c296fc1d74fe43425e24105f71c50aee8c07672",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-information-ratio-scale-invariant": {
       "benchmark_file": "mathematical_finance.json",
@@ -1846,325 +1846,325 @@
     },
     "mf-jump-diffusion-brownian-no-jumps": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 3.5,
-      "input_hash": "9e5fc67a43b4d41e1455be8d81fc02e36ee3f027472ce722a2063447522be94a",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.5,
+      "input_hash": "a30189ba867e2559497ecd8cb2d9fd97ae32c1cb54fcb5481457dfa8a59e4f58",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-call-convex-strike": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.0,
-      "input_hash": "faa2a5aca10c59c019233d9b9796dfe87fcfc20c7d9e40f79d3df2151a0d4049",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.3,
+      "input_hash": "fbd074cff74a229cd4daf8004873071371c9ac61e826cf239520b64a26bedc5f",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-call-differentiable-iff": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "a0223fb2af7f22dd03fbc76f73bcc5d1f85e6074ce75f9134617f73fe2ba43c0",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.8,
+      "input_hash": "fb62b141e1b35904a9c3acb664b3ff0848bc37ee6de8107cb9433a704bc12278",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-call-dominates-bs": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.6,
-      "input_hash": "ed766aaab49a454aa08d2a3b1852585b6af56d5b5a1b53d70293b8e28e08e84c",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 5.3,
+      "input_hash": "a785bb81f078590c3180b83fe80c7191e918ff299466459dc8963f7ff3c32e8d",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-call-intermediate-date": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.0,
-      "input_hash": "3b6d9b1e5e3da3dd5d646e7fb252af1a8d8e5d4c56d2e16e91a521404bdaffbf",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.3,
+      "input_hash": "81f06e98f9120bbefea7923ba0cf9bded2edd0fccdaf752c92e699e6f3545929",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-call-kink": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.8,
-      "input_hash": "c8841e546636dfcc264445007fe84af3e9ab5cee8e400455b4503e7e37846d1d",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.3,
+      "input_hash": "b030a36164aae5d76b79e80e2f288b019dac43874ba7e5b3451d2fd739f42d61",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-call-law-invariance": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.2,
-      "input_hash": "1b59e8441530b1ffa85ede1ffbb4e3f50cc03bd3e008a616d009924c48cae5c1",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 4.3,
+      "input_hash": "61bc69b19053ca64782c935e757b3f98e5ceacf9ab9ca20e9383ca883798f6a0",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-call-strict-bounds": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "34afe2159bacf844775e856e35cea113543cd6f27d491ac75dfec20dea47a5d5",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 5.3,
+      "input_hash": "dc326323cd1c2fc90f21c1b45630941d116106fe293a2d745a9878add7392b70",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-compensator": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.4,
-      "input_hash": "5f8f8a405a8f724a10a7b767e6a462006b72e5926429c5c4e2acce9766392805",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 5.7,
+      "input_hash": "98017ee60740f417d810700c9fb1b198bf23467fee73604ac6279f51cf38d1ba",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-density": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
+      "date": "2026-10-17",
       "elapsed_s": 4.2,
-      "input_hash": "272d62307c55c336270379267439a371cc21afed00f6ebe5d2dea7c7eac7f8ee",
-      "verified_at_commit": "0c74d33"
+      "input_hash": "0749fd58a2d5d2a0dd1ce4ca5a0fbf811bbb28ebc636f42d6cfcb075de89673d",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-density-positive": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 3.7,
-      "input_hash": "6d32f18f969c6e83ae60fbca937ef11eb1cc0e54bbfa612e0d4af177017f8692",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.1,
+      "input_hash": "9304682e78436e0b09025bdd796fb63fb659b233ef1cca361716e3a9cda4af8e",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-digital-black-scholes": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.6,
-      "input_hash": "9ee4ffde9fdbb3b2da43798b12db9e6c47ffcdcb646b4ca18ca6625015d77279",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.5,
+      "input_hash": "7b77022be270c6b899eca1a7d55f7d5c087150025678c69c1397d2acc97f2bd8",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-digital-strike-derivative": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.9,
-      "input_hash": "7ef31311f02bb2f4b92df043971442c3dfa6ded9aa7f946a5cf14dc9564823ab",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 4.2,
+      "input_hash": "963714f1b3097532c6181ce88a7144efc3ebafc81b002f2043db2e9ff08610a2",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-discounted-price-martingale": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 3.5,
-      "input_hash": "3057ae09681833560e8f184d72add91d8a52059a139fbac8c48621318371ab8f",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.3,
+      "input_hash": "8866fafcceb8ecc08f822a7b18ed991b2a12ce8e657fb611337d83155031f8cb",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-esscher-parameter": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "82bfb73333128620dcf8f9ea45582a70398fa0c9706d5dc760c306a62835e62e",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.3,
+      "input_hash": "0936642f47eb490ee3a5f6551f03e47c09025a04d7af31ca3cbd3eb849bd07dc",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-esscher-pricing": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.1,
-      "input_hash": "7c8e9d8c2d6d6bedff998dfa182dbc618bdeeb3c746903193d3fd8a7ede7c14d",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.6,
+      "input_hash": "15be234b74efbdd5099d5d2fa4102375d7f8155fecf090de4a304917ac26a9ba",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-esscher-transform": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.0,
-      "input_hash": "6d66900dff67dd06791a8ee04b954b09482c804cf5d601b909171e701fab3d9e",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.9,
+      "input_hash": "50446c18900075533611392dcc10b54f565f967c5acbf62a2e0393d24943608f",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-exponential-martingales": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "e6bf2249ceb0aa15fe5114eb9f954a371859e9615b8f6fb748c714325e7323e2",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.7,
+      "input_hash": "5c8f951bebc51feb60732a6141188b69d193a2847f93a9970ae7d2b2ba2ecbf5",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-identifiability": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.8,
-      "input_hash": "4ac7f1215c1bc1dc7a5e7e6a1041a0a90b1d9198b502d53c5c46e4d6470e316b",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 4.2,
+      "input_hash": "cfd9f720a931597e3440f5d4e1105935978bf9828c324c0c4976d005d96e5707",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-implied-vol-above-sigma": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
+      "date": "2026-10-17",
       "elapsed_s": 5.4,
-      "input_hash": "c8c5556d2df66bb092bb31f4c5638596cadbb511587d5cb429a0bbf567d287a0",
-      "verified_at_commit": "657ff70"
+      "input_hash": "4839d4266b1529d093d15ed420e2e08dfef7eb9e6a21f2080f05a6ef8449b6ee",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-implied-vol-every-date": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "ca1974133b066791626f1f67fef7cc3bc169172c6f16d43d1d1da4db80578053",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 4.3,
+      "input_hash": "15c77cabfe88e14b1058bb39058aa879a7dcc535c501a3f9380ed067903c8ac9",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-incompleteness": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 3.6,
-      "input_hash": "33dc113cf32b1c9f3b69817dfdba37ab3907d8675ecbdc17aae023ab624f217d",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.2,
+      "input_hash": "33d4db866b1585aad9312414c56264f80776f237497b3d14007bb993b477c7ea",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-levy-exponent": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.2,
-      "input_hash": "189ae9eeff82c1d6efa9fb0a47911c3ecf227e0e491d19290874ec2248faf6d1",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.6,
+      "input_hash": "28d12fc1dc5a8b0a562d9fee4239a94bd0ba21dc20d22f4698f39ed62339553c",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-log-contract": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "74abbef2484d970377cabf5442a27affdf54149f01993d010de8e69567b219d6",
-      "verified_at_commit": "3c0b22f"
+      "date": "2026-10-17",
+      "elapsed_s": 5.2,
+      "input_hash": "78ea3a36ad92d8eb140a7fbb355a8079a2a2d95e916e5854d75add12a397fb75",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-log-contract-below-discrete-swap": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.5,
-      "input_hash": "32b74921762e8220d778dfdc79f8b6efbefbe6b4f1a1acd2777bceb79e6744aa",
-      "verified_at_commit": "3c0b22f"
+      "date": "2026-10-17",
+      "elapsed_s": 4.1,
+      "input_hash": "1a432ce0c6857341d10c95bce4e0c71ae70a6de08fcf53a646338c6e14a67b49",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-log-contract-downward-jumps": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.3,
-      "input_hash": "e8c179475d1ee2f75bb5591ec5854363e373c11f218dd2bca7de1b359d7cb364",
-      "verified_at_commit": "3c0b22f"
+      "date": "2026-10-17",
+      "elapsed_s": 5.2,
+      "input_hash": "5385f785cc95a32bfb1b0fa34edf42ba6b3472988938439b6460f89165ae9f40",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-log-contract-jump-bias": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.3,
-      "input_hash": "629f7778ff029cee82f160d918bfcb050551c2b52f61c708aa50b9fd31d6f427",
-      "verified_at_commit": "3c0b22f"
+      "date": "2026-10-17",
+      "elapsed_s": 6.1,
+      "input_hash": "5581a204d62d0cb894ef9ec802d1d4967968de8ece8622e7345e9e11e0f34027",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-log-contract-on-process": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.2,
-      "input_hash": "044db6b172509c61f757e95acdfffad61646a2a313815a316accdb0871f23830",
-      "verified_at_commit": "3c0b22f"
+      "date": "2026-10-17",
+      "elapsed_s": 5.5,
+      "input_hash": "fa5de21720dfbb84c37877499ab90b359ebf08c98e16d585edd6dd2014adc97b",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-log-return-mean": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "3888cf92245640cd97c3438f4899671935b9c160aac186e5ce7792eb3ae2eb66",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.7,
+      "input_hash": "493f2bdde008256e298477c2e4e4bc02390a69c1b39977bd71278baeba66350a",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-log-return-mgf": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 3.8,
-      "input_hash": "a9778adeaee88b6b7de82cfec499a3edfee5e1478ced551dd4b058cbc460111e",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.9,
+      "input_hash": "6579107bfd2dbb7ac2ad380cf81bf60ce602f1ba9637e04c5ae4bc98260cbe88",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-log-return-variance": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.1,
-      "input_hash": "0fa610efcc20159c9ecafc23bbfd32c0bb316d9b73b39f200da56c1a7c1ef962",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.3,
+      "input_hash": "83c3173c8f565ef3e6792b0cbb09efa2102a0c3914ff72cccd845eab2b08946e",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-merton-1976-every-date": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.3,
-      "input_hash": "795789efef7a3598f929abda7698baf922ad09ec8622fddf4fe92e4f894eb151",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 4.2,
+      "input_hash": "1b7c56857ed4055ced38b7efc8d1b0e7b0406bf883a867cdb8d9a12f4102562e",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-merton-density": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 3.6,
-      "input_hash": "2240e2a9fc3a33337616e8753b160d3f555b80b68fa8fc335074a9eb5059a17e",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.2,
+      "input_hash": "90afdf37a5060bda8ab04c20cb1e169233a3c186718a91f4ffa12eb0d2d85ef3",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-merton-digital": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
+      "date": "2026-10-17",
       "elapsed_s": 4.2,
-      "input_hash": "7c39de20be50a37efa4aeb4e17b6f91ef29361911a4589e532c30f008bf7e70b",
-      "verified_at_commit": "0c74d33"
+      "input_hash": "ffc12ef73b0fe641672755a393a678f6e22accd9e087a00b3b191965652cf547",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-merton-intermediate-date": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "b07916de237edb1e0fb75268a2a51b990011a195e2a037167f6011fc32e647ec",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.2,
+      "input_hash": "20008896a4d820ab0d561094c25df9d77cb5bf9f90cfc62e0fd008f5e5d22f99",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-mixing-formula": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.9,
-      "input_hash": "ca7a03f31faf9b0c3afb0ca8ce6e6a9824568e63c1e9bfdb17ba5ccb248c4eaa",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 5.9,
+      "input_hash": "bd569374b30bbf72508dc2a8a2638fa4d46070f53d30d61fccf53f08a6b08f1f",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-model-exists": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.7,
-      "input_hash": "445be38116b0ef2c05e848e725d3feb5774db0b78cd0a66f2d074eedf8c9b91b",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 5.1,
+      "input_hash": "71d042ee91819e7a6459d0ab7c7d799a5d78e3ce975feaa496468339612644c7",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-payoff-every-date": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.8,
-      "input_hash": "6444c27dd385d2eea8d45f6c5d24de5e81c08ee4ec86ae9dae21af2548c7b796",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 4.3,
+      "input_hash": "2a93dae0dfd70906542152ac6d225d7db3417ee80d877be5756983323cf95ec1",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-power-claim-every-date": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.9,
-      "input_hash": "9a11896864d99557f6297f01564cf17c471ee808763d1cb9ecfd0b7fd1a0eb9a",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.3,
+      "input_hash": "658d4d8523c07598062a7abc95e247d2dd34d80bfd68eab79f641b41e6deb8a8",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-price-law": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.3,
-      "input_hash": "bf1e1278cf865d4ca149d0ebf1237d6ca6348e32b399d92cc4844db65840915a",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.9,
+      "input_hash": "67ef4e643ad3a0c6789d7b22473e777829b23cd1cbbc12baefab403303dca15d",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-price-parity": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.6,
-      "input_hash": "404ee35b3a91d6eb6e5ce7cb118401a349ac61c9c5220f0284fcaa03d4fc17cc",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.2,
+      "input_hash": "a196f91abdd0f37d9f6ee1eb9b4e51b3d6d85cdc15cef529a8fe43c64bd17fcf",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-put-intermediate-date": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.8,
-      "input_hash": "fc4383b875394bc78c8322f4382bf00154529ca95a8d12a9bfd6762ee226dce7",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 6.1,
+      "input_hash": "30dd08559fb563ca01e60788fe74c5c0a9e31ef766c2189688be5d13924c9257",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-realized-variance": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.1,
-      "input_hash": "8641f1ebef1a1dbee309d5fbe4b784057795e93357c8b8cf01906177a7ab3d3b",
-      "verified_at_commit": "3c0b22f"
+      "date": "2026-10-17",
+      "elapsed_s": 5.7,
+      "input_hash": "07bbf7338d431a95e6a6c1b75de266fbcdd73c3691bdc7bb53cb7834f8b3fcad",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-scaling": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "86293e3dceaed188e3f730d360ef8f2a65bf2710436b9bc48edf7034596a78f6",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.4,
+      "input_hash": "8c3d8eba6ec418d8bc7370f5f26e37d2646f4abaa594bf728b172968aaf0cdde",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-terminal-law": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.3,
-      "input_hash": "df2598047d5b24220290e4209d6193a582e89e5deb5c2933c0828c15b8f14016",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 4.2,
+      "input_hash": "137c7942454f582a451d0c7510b7343c9e5b69a7d94ad27a4011d98cd0522968",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-jump-diffusion-variance-swap-vs-log-contract": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.9,
-      "input_hash": "2dc5771074dab9e00b3dd18f93238b4cc7100650a68d2bd1583f86fd3121b99f",
-      "verified_at_commit": "3c0b22f"
+      "date": "2026-10-17",
+      "elapsed_s": 6.1,
+      "input_hash": "c45b8f5203f05df62ddff40018912c0d5ca857eeaf9acf5f38a04446da20c7b8",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-kelly-foc": {
       "benchmark_file": "mathematical_finance.json",
@@ -2245,10 +2245,10 @@
     },
     "mf-lognormal-cov-differential": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.9,
-      "input_hash": "cba83850e9a4d16918e30a25ccb11cdc606d274b35b307e56e8b4111fc6deffe",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 4.2,
+      "input_hash": "1349cd67195d484b8ff8564a7f8d04dce6fee5ca49d5189383083da0aab14e43",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-lookback-payoff-ge-vanilla": {
       "benchmark_file": "mathematical_finance.json",
@@ -2336,10 +2336,10 @@
     },
     "mf-merton-call-convex-in-spot": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.3,
-      "input_hash": "27f4c3f794fdc6c7699a714ed1f17db0213052a2320dbf2b95966f31dba7dcd7",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 4.1,
+      "input_hash": "5e193de29c8e6cfc93b4c8534bc2b55b9f756d08c58f266b2c32a0cc475878ca",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-merton-call-formula": {
       "benchmark_file": "mathematical_finance.json",
@@ -2350,10 +2350,10 @@
     },
     "mf-merton-call-increasing-in-vol": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.7,
-      "input_hash": "f347f762bc7752bb238b683cf4c1b4dbd1c6caf8c56c65334126ca15021e0aac",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 5.1,
+      "input_hash": "8099447de40c9dbb77bd5f61486970dbe37b0b4f4e95427f22a922837e734778",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-merton-call-series": {
       "benchmark_file": "mathematical_finance.json",
@@ -2364,10 +2364,10 @@
     },
     "mf-merton-call-strictly-convex-strike": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.0,
-      "input_hash": "416cb745d3c7bc689d98ba7b6dc177228d8f5b3b2e274cb8ab71669aba5a26ce",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.3,
+      "input_hash": "51608ae7097e72acfc2884f0a85b580682917dca7e36944bcc10bae7ce98f996",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-merton-classic-display": {
       "benchmark_file": "mathematical_finance.json",
@@ -2378,10 +2378,10 @@
     },
     "mf-merton-delta": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.1,
-      "input_hash": "a78edc8a57370c3cb98983b9af046b5623da4baf11ccd52679fd66e794fcb3ab",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 6.0,
+      "input_hash": "aabf86a436d9b4224c0aed7a8f07f04b148fcd41a853a0bd98b1a56a4c289b10",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-merton-discounted-terminal": {
       "benchmark_file": "mathematical_finance.json",
@@ -2392,59 +2392,59 @@
     },
     "mf-merton-dominance": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
+      "date": "2026-10-17",
       "elapsed_s": 5.2,
-      "input_hash": "54128c986b39253678c47e9b1442dd6a46cad80569a96faa17bd21e5c149ad88",
-      "verified_at_commit": "69c4a8c"
+      "input_hash": "5034ee0617ce0bc7af911fcc26ae068017f1715a8579e72094030e74a3051cb3",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-merton-esscher-pricing": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "6f3dc9b3094b84271df1590a17cfae6e2ff6fa7d20e9a0f69118f95e80da1f06",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 4.2,
+      "input_hash": "99e538d029b5d65365d52a97b10fb83b4a7740bcffb22e712f3df5b9fb45da29",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-merton-from-general-jump-law": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 3.7,
-      "input_hash": "4dafd1e6d601c12cb8240c0197d147dfcbee3b52f91368ca293b31e1ece398b5",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.2,
+      "input_hash": "f3d90d7e7df9b24134f9f4ff214b78859c5ea755b3408607ea0c87431af099b0",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-merton-gamma": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 4.9,
-      "input_hash": "8a20647dec07c79fd06fd6b0701e779c5a73b0f322efa2acae5f0b63da9078a4",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 5.5,
+      "input_hash": "0081e159b1c7f55272b53d62a515d835d9d2e1ecd0d9d9c983b03df0e24257d9",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-merton-general-jump-law": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.7,
-      "input_hash": "519a1c57d0aebc231df841198b8ce4a77430beece818f4ab3e2835257a6b328f",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 4.2,
+      "input_hash": "1889ca7114ffdd9e91f58620e75fba76f779471bec2bfd8d98494d25373a1e4f",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-merton-log-contract-variance": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.4,
-      "input_hash": "d47f0186908f0e84f258aa36cb3a236c1a265653181b7258d4453870bbc1330c",
-      "verified_at_commit": "3c0b22f"
+      "date": "2026-10-17",
+      "elapsed_s": 4.3,
+      "input_hash": "312e4e655e1cdbf85290ac049a6753d7f8f44179df814e7551f97307f2c24ff6",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-merton-model-exists": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.3,
-      "input_hash": "14da1418cb1f54d58fcb68c6038af1f0a5108c77afef7eb0cd3d48178dc9dc55",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.9,
+      "input_hash": "e56868a9f6260c1cab6a864fe81074df7fc48d9371a0b5111b0051b154fe0223",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-merton-price-law": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 3.8,
-      "input_hash": "a4625e632e80f4439e698f2a7a2a5bf7e1c16399c2bbb7092d835c14a09e2d78",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.2,
+      "input_hash": "33e2433d5bd5360c8a3c0c6d13517b31f4a66b5a4df1a5dc0c7ea26ca7147ced",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-merton-put-call-parity": {
       "benchmark_file": "mathematical_finance.json",
@@ -2469,17 +2469,17 @@
     },
     "mf-merton-strike-derivatives": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.0,
-      "input_hash": "cefd010ada9e6811205fa5bd2876ac975c36a97d5368164e88927c96caa60463",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 5.9,
+      "input_hash": "313f2d23a26e01233745c7d2e6403a61267db81cf8d2d420a7a445776ac4672f",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-merton-vega": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "af2a32150a7bf31f76cd2d32032963e45eedaabb13da666a7661ee369fafe1d5",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 5.6,
+      "input_hash": "c600c73cab21ce7a150fb687e29965f4d6fe8faeb18c5dd4517308fd1b71a26e",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-mm-matrix-riccati": {
       "benchmark_file": "mathematical_finance.json",
@@ -2518,10 +2518,10 @@
     },
     "mf-newton-raphson-fixed-at-root": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.6,
-      "input_hash": "788891a28c043fa1b0c12ffd391116cbb265d0eb4809b91264c4571ac74e3e98",
-      "verified_at_commit": "69c4a8c"
+      "date": "2026-10-17",
+      "elapsed_s": 4.1,
+      "input_hash": "7404c257fb5003c16318e502ea0480ec9c660d1c4e35389864ebc701f080fe71",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-no-arb-forward-price": {
       "benchmark_file": "mathematical_finance.json",
@@ -2574,17 +2574,17 @@
     },
     "mf-price-law-change-of-variables": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.6,
-      "input_hash": "3ba4b7cade1dbb7ead0420fcd2ad8cf704b0d4854a0806053d660e0faa9a82aa",
-      "verified_at_commit": "0c74d33"
+      "date": "2026-10-17",
+      "elapsed_s": 5.2,
+      "input_hash": "71b43d2a7d96b38e8a5fcb31b777cbac8e4736c1dbff97acf6e87f02d3ef2dc1",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-pricing-kernel-butterfly": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.3,
-      "input_hash": "779f9088b171b337ac89dde9b9ec2f0795f903824a873223dde151f447668fd4",
-      "verified_at_commit": "657ff70"
+      "date": "2026-10-17",
+      "elapsed_s": 5.1,
+      "input_hash": "6f8c2f17bfa320acd1412289429e4c90e97bad05525d6cbeddd57ca1cec53ac5",
+      "verified_at_commit": "c5bc6e8"
     },
     "mf-put-call-parity": {
       "benchmark_file": "mathematical_finance.json",
