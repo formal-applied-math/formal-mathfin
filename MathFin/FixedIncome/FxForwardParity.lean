@@ -50,8 +50,6 @@ the curve is internally consistent, with no re-anchoring to `S` needed once
 
 namespace MathFin
 
-open Real
-
 /-- Covered-interest-parity FX forward rate for maturity `T`, continuous
 compounding: `F(0, T) = S · exp((r_d - r_f) · T)`. -/
 noncomputable def fxForward (S r_d r_f T : ℝ) : ℝ := S * Real.exp ((r_d - r_f) * T)
