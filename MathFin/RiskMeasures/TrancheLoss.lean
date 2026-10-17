@@ -178,6 +178,7 @@ theorem integral_tranchePayoff_oneFactorPD {π ρ a d : ℝ} (hπ : π ∈ Ioo 0
 
 /-! ### From the finite pool to the LHP limit -/
 
+/-- The tranche payoff is continuous in the portfolio loss. -/
 lemma continuous_tranchePayoff (a d : ℝ) : Continuous (tranchePayoff a d) := by
   unfold tranchePayoff
   fun_prop
