@@ -27,10 +27,10 @@ substituted for `0`.
 * `collateralizedExposure`: `E_C(t) = max(V(t) - C(t), 0)`.
 * `laggedCollateral`: `C(t) = V(t - Δ)` under a margin period of risk `Δ`.
 * `thresholdCollateral`: `C_H(t) = max(V(t-Δ) - H, 0)`.
-* `collateralizedExposure_le_rawExposure`: more collateral never increases exposure,
+* `collateralizedExposure_antitone`: more collateral never increases exposure,
   `C₁ ≤ C₂ → E_{C₂} ≤ E_{C₁}`.
-* `collateralizedExposure_nonneg`, `collateralizedExposure_le_of_nonneg_collateral`: `E_C ≥ 0`, and
-  `E_C(t) ≤ V(t)` whenever collateral is nonnegative.
+* `collateralizedExposure_nonneg`, `collateralizedExposure_le_rawExposure`: `E_C ≥ 0`, and
+  `E_C(t) ≤ max(V(t), 0)` whenever collateral is nonnegative.
 * `marginAdjustedPositiveExposure` / `marginAdjustedNegativeExposure`: the collateralized
   positive/negative exposure pair, satisfying the same `V = MAPE - MANE` decomposition as the
   uncollateralized case.
