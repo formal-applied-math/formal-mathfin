@@ -177,10 +177,10 @@ noncomputable def twap (p : ℕ → ℝ) (t1 t2 : ℕ) : ℝ :=
 /-- The TWAP equals the arithmetic mean of the price series over the
 window `(t1, t2]`, i.e. the telescoping accumulator identity really does
 compute a time-weighted average. -/
-theorem twap_eq_average (p : ℕ → ℝ) (t1 t2 : ℕ) (h : t1 < t2) :
+theorem twap_eq_average (p : ℕ → ℝ) (t1 t2 : ℕ) (h : t1 ≤ t2) :
     twap p t1 t2 = (∑ i ∈ Finset.Ico (t1 + 1) (t2 + 1), p i) / ((t2 : ℝ) - (t1 : ℝ)) := by
   unfold twap
-  rw [twapAccumulator_sub_eq_sum p t1 t2 h.le]
+  rw [twapAccumulator_sub_eq_sum p t1 t2 h]
 
 /-- **Reciprocal caveat**: the harmonic mean of a finite nonempty family of
 strictly positive values `q`. -/
