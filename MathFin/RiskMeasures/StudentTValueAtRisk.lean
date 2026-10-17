@@ -6,7 +6,6 @@ Authors: Yang Ye
 module
 
 public import Mathlib
-public import MathFin.RiskMeasures.ValueAtRisk
 
 /-!
 # Student-t VaR and expected shortfall closed forms
@@ -24,14 +23,17 @@ in this file's sibling `RiskMeasures/RiskClosedForms.lean`, McNeil, Frey and Emb
   `VaR_α(L) = μ + σ · t_ν⁻¹(α)`                                              (just the quantile)
   `ES_α(L) = μ + σ · g_ν(t_ν⁻¹(α))/(1 - α) · (ν + t_ν⁻¹(α)²)/(ν - 1)`,  `ν > 1`
 
-where `g_ν` is the standard Student-t density. The personal-notes formula is a corrupted
-transcription of the **second** line (expected shortfall, not VaR): it has `1/α` where the
-source has `1/(1 - α)`, and `ν - 2` where the source has `ν`. (A `ν - 2` factor does appear in
-the *unit-variance* Student-t density normalization, which is a different, unrelated place for
-a `ν - 2` to show up — not evidence the roadmap's transcription is a second, consistent
-convention.) This file formalizes the two real closed forms instead of the corrupted one:
+where `g_ν` is the standard Student-t density. The personal-notes formula is the **second** line
+(expected shortfall, not VaR) rewritten for losses defined as the *negative* of a return, with
+`α` itself the left-tail probability and `x_α < 0`: `-1/α · (1-ν)⁻¹ = 1/(α(ν-1))` there plays the
+role of `1/(1-α) · 1/(ν-1)` here, and the `-μ` plays the role of `+μ` for a loss defined with the
+opposite sign — an algebraically valid rewrite of the same closed form, not a second error. The
+one genuine transcription error is `ν - 2` where the source (in either sign convention) has `ν`.
+This file formalizes the two real closed forms directly, in the `(1-α)`-upper-tail loss
+convention of the source, rather than re-deriving the left-tail-return rewrite:
 `studentTValueAtRisk`, the honest (trivial) VaR quantile closed form, and
-`studentTExpectedShortfall`, the pdf-based closed form the notes were actually describing.
+`studentTExpectedShortfall`, the pdf-based closed form the notes were actually describing (minus
+the `ν - 2` bug).
 
 Mathlib has no Student-t distribution at all (no pdf, no law, no quantile function) at the
 pinned version, so unlike `RiskMeasures/GaussianValueAtRisk.lean` there is no `HasLaw`-level
@@ -39,10 +41,13 @@ bridge here: nothing below is proved from a measure-theoretic tail-probability d
 VaR/ES for an actual Student-t-distributed random variable. `studentTPdf` is defined directly
 from `Real.Gamma`, matching the textbook density formula, and `studentTValueAtRisk` /
 `studentTExpectedShortfall` are *stated* closed forms (parametrized by the quantile `x_α`, as
-`RiskMeasures/Gaussian.lean` parametrizes on `z` rather than on `α` directly). What is proved
-is algebraic: positivity of the density, positivity of the ES closed form, and that both closed
-forms reduce to the Gaussian ones in the `ν → ∞` sense is NOT attempted (would need a limit
-argument on `Real.Gamma` ratios this file does not undertake) — left as a disclosed gap.
+`RiskMeasures/Gaussian.lean` parametrizes on `z` rather than on `α` directly). What is proved is
+purely algebraic: positivity of the density (`studentTPdf_pos`), affine invariance of both
+closed forms (`studentTValueAtRisk_affine`, `studentTExpectedShortfall_affine`), and positivity
+of the ES closed form (`studentTExpectedShortfall_pos`). NOT attempted: any measure-theoretic
+VaR/ES statement for an actual Student-t random variable (no Mathlib support to bridge to), and
+any `ν → ∞` Gaussian-limit statement (would need a limit argument on `Real.Gamma` ratios this
+file does not undertake) — both left as disclosed gaps.
 
 ## Main results
 
@@ -50,6 +55,8 @@ argument on `Real.Gamma` ratios this file does not undertake) — left as a disc
 * `studentTPdf_pos`: `g_ν(x) > 0` for `ν > 0`.
 * `studentTValueAtRisk`: the (trivial) VaR closed form `μ + σ x_α`.
 * `studentTExpectedShortfall`: the pdf-based ES closed form.
+* `studentTValueAtRisk_affine`, `studentTExpectedShortfall_affine`: affine invariance of each
+  closed form, `a ≥ 0`, matching `gaussianVaR_affine` / `gaussianCVaR_affine`.
 * `studentTExpectedShortfall_pos`: the ES closed form is positive for a centered, positively
   scaled loss (`μ = 0`, `σ > 0`) at any quantile `x_α` (the `x_α²` term needs no sign hypothesis).
 
@@ -111,9 +118,10 @@ theorem studentTValueAtRisk_affine (μ σ xα a b : ℝ) (ha : 0 ≤ a) :
   unfold studentTValueAtRisk
   rw [abs_of_nonneg ha]; ring
 
-/-- **The ES closed form is positive** for a centered, positively-scaled loss at a right-tail
-quantile with `ν > 1` and `0 < α < 1`: a sanity check standing in for a measure-theoretic
-positivity statement this file cannot derive (no `HasLaw` bridge is available). -/
+/-- **The ES closed form is positive** for a centered, positively-scaled loss (`μ = 0`, `σ > 0`)
+at any quantile `x_α`, with `ν > 1` and `α < 1`: a sanity check standing in for a
+measure-theoretic positivity statement this file cannot derive (no `HasLaw` bridge is
+available). -/
 theorem studentTExpectedShortfall_pos {ν σ xα α : ℝ} (hν : 1 < ν) (hσ : 0 < σ) (hα : α < 1) :
     0 < studentTExpectedShortfall ν 0 σ xα α := by
   have hνpos : 0 < ν := by linarith
