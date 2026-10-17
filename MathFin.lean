@@ -545,6 +545,8 @@ import MathFin.Portfolio.MarkowitzLagrangian
 import MathFin.Portfolio.RiskParityFOC
 -- Phase 29: N-dim Black-Litterman posterior (matrix form)
 import MathFin.Portfolio.BlackLittermanND
+-- Convex QP KKT sufficiency/uniqueness and a feasible-ratio-test step bound
+import MathFin.Portfolio.ConvexQPKKT
 
 -- Performance
 import MathFin.Performance.Ratios
