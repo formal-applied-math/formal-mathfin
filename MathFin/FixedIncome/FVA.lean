@@ -24,6 +24,12 @@ drop in the discount factor, `DF(tᵢ₋₁) - DF(tᵢ)`, rather than the produc
 a telescoping sum of discount-factor drops collapses to the two endpoints, independent of the
 exposure profile in between.
 
+Scope note: `EDPE`/`EDNE` are taken as free parameters (any `Fin n → ℝ` profiles) rather than
+imported from `GaussianExposureProfile.lean`. This is a deliberate loose coupling, matching
+`DVA.lean`: a caller can supply `gaussianEPE`/`gaussianENE` from that file, a collateralized
+profile from `CollateralizedExposure.lean`, or any other exposure model, without this file
+depending on their distributional assumptions.
+
 ## Main definitions and results
 
 * `discreteFVA`: the `FS·Δt` sum form, indexed over uniform buckets.
