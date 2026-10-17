@@ -60,7 +60,7 @@ from the unconditional one by a.e. congruence. That reduction is
 ## Open question for the maintainer: the conditional route
 
 The #244 review asked to prove the expectation form as a corollary **and retire the
-conditional route** (`itoDrift_expectation_identity_adapted`, the roughly 5.7k-line
+conditional route** (`itoDrift_expectation_identity_adapted`, the roughly 5.3k-line
 `ItoFormulaAdaptedDrift`). This module does the first part only; both theorems are kept as
 co-headlines. By `itoDrift_expectation_identity_adapted_of_uncond`, the conditional theorem's
 conclusion is implied by the unconditional one whenever every path of `B` is continuous; its
@@ -68,7 +68,7 @@ only remaining reach is a `B` without that property. (Separately, the library ca
 hypothesized `M` itself: `itoContinuousMod` is continuous only almost surely, modifying it on
 the null failure set need not preserve `natFiltration`-adaptedness (the natural filtration is
 not complete), and the everywhere-continuous modification is adapted only to `augFiltration`.)
-Whether the no-`hBcont` case justifies keeping the roughly 5.7k-line route, and whether to
+Whether the no-`hBcont` case justifies keeping the roughly 5.3k-line route, and whether to
 demote, deprecate or delete `ItoFormulaAdaptedDrift`, is left for the maintainer to decide;
 this module does not change it.
 
