@@ -26,6 +26,18 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Calendar-spread arbitrage (2026-10-17)
+
+Two entries added, `mf-calendar-arbitrage-total-variance` and `mf-svi-calendar-free-iff`
+(both `full`). Corpus 537 → 539.
+
+`BlackScholes/CalendarArbitrage.lean` (Gatheral–Jacquier 2014, Lemma 2.1): calls on a real
+martingale are non-decreasing in maturity (conditional Jensen, `ConvexOn.map_condExp_le`);
+with zero rates the Black–Scholes call depends only on total variance `σ²T` and is strictly
+increasing in it, so call prices rise with maturity at every strike iff `t ↦ w(k, t)` rises at
+every `k`. The raw-SVI form is stated on `SVI.bsSmile` for a maturity-indexed parameter family.
+Not proved: the local-variance characterisation, SSVI, and the slice-crossing quartic.
+
 ### The CIR loadings solve their term-structure equations (2026-10-14)
 
 Two entries added, `mf-cir-bond-loading-riccati` and `mf-cir-bond-level-loading` (both `full`).
