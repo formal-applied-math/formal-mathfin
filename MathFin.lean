@@ -12,7 +12,7 @@
   * `BlackScholes/`  — BS family (call, put, digitals, Greeks, PDE,
                        Asian / chooser / capped / power / lookback,
                        Breeden-Litzenberger, bisection IV, …).
-  * `Futures/`       — Black-76 model.
+  * `Futures/`       — Black-76 model, Schwartz one-factor commodity futures.
   * `Binomial/`      — discrete-time tree, CRR convergence, Bermudan
                        sandwich, Merton 1973 American-call dominance.
   * `FixedIncome/`   — ZCB, coupon bonds, duration, convexity, YTM,
@@ -432,6 +432,7 @@ import MathFin.BlackScholes.LognormalCOV
 -- Futures
 import MathFin.Futures.Black76
 import MathFin.Futures.Black76Greeks
+import MathFin.Futures.SchwartzOneFactor
 -- Phase 13 additions:
 import MathFin.Futures.Swaption
 
@@ -520,6 +521,8 @@ import MathFin.FixedIncome.VasicekSDE
 import MathFin.FixedIncome.VasicekSDEGaussian
 -- Vasicek zero-coupon bond price: the affine term structure (Gaussian Laplace transform)
 import MathFin.FixedIncome.VasicekBondPrice
+-- Vasicek real-world vs. risk-neutral terminal law (constant market price of risk)
+import MathFin.FixedIncome.VasicekMarketPriceOfRisk
 -- CIR loadings: B solves the Riccati equation, A solves A' = −κθB
 import MathFin.FixedIncome.CIRRiccati
 -- The T-forward measure: the zero-coupon bond as numéraire (change-of-numéraire instance)

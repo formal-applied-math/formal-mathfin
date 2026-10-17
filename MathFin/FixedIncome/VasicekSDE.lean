@@ -115,4 +115,12 @@ lemma vasicekSDE_variance_pos (σ κ t : ℝ)
     exact mul_self_pos.mpr hσ
   positivity
 
+/-- **Variance nonnegativity** for `κ > 0`, `t ≥ 0`, any `σ` (no sign hypothesis on `σ`
+needed, unlike `vasicekSDE_variance_pos`'s strict form). -/
+lemma vasicekSDEVariance_nonneg (σ : ℝ) {κ : ℝ} (hκ : 0 < κ) {t : ℝ} (ht : 0 ≤ t) :
+    0 ≤ vasicekSDEVariance σ κ t := by
+  unfold vasicekSDEVariance
+  have : Real.exp (-(2 * κ * t)) ≤ 1 := Real.exp_le_one_iff.2 (by nlinarith)
+  positivity
+
 end MathFin
