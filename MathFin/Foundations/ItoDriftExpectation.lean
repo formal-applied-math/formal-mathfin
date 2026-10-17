@@ -48,13 +48,6 @@ open ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessGeneral QuadraticVariationL2
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
 
-/-- Telescoping over a partition: `∑_{k<n} (a_{k+1} − a_k) = a_n − a_0`. -/
-private theorem sum_telescope (a : ℕ → ℝ) (n : ℕ) :
-    ∑ k ∈ Finset.range n, (a (k + 1) - a k) = a n - a 0 := by
-  induction n with
-  | zero => simp
-  | succ m ih => rw [Finset.sum_range_succ, ih]; ring
-
 /-- **Fubini for the path integral of a bounded path-continuous family** (the interchange the
 integrated Itô–drift identity needs):
 
@@ -143,7 +136,7 @@ theorem expectation_pathIntegral_eq {w : ℝ≥0 → Ω → ℝ}
             (Finset.mul_sum (Finset.range n)
               (fun k ↦ ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) C).symm
         _ = C * ((unifPart T n n : ℝ) - unifPart T n 0) := by
-            rw [sum_telescope (a := fun k ↦ ((unifPart T n k : ℝ)))]
+            rw [Finset.sum_range_sub (fun k ↦ ((unifPart T n k : ℝ)))]
         _ = C * (T : ℝ) := by
             rw [hnn]
             simp only [unifPart, Nat.cast_zero, zero_div, zero_mul, NNReal.coe_zero,

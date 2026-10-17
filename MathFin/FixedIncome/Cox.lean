@@ -42,8 +42,8 @@ The module layers:
 * **The CDS legs under `λ(t)`** — the risky annuity and default-density
   integrals (`cdsAnnuity`, `cdsLosses`), the explicit legs (`premiumLeg`,
   `protectionLeg`), the balance theorem `cdsFairSpreadTV_balances`, the
-  constant-`λ` case `cdsFairSpread`, and the default probability as the integral
-  of the default density (undiscounted).
+  constant-`λ` case `cdsFairSpreadTV_const` (collapsing to `cdsFairSpread`), and the default
+  probability as the integral of the default density (undiscounted).
 * **Restricted Cox mixing** — on the product of a path space with the clock
   space, `(μ₁ ⊗ Exp(1)){Λ_t < ξ} = ∫ e^{−Λ_t} dμ₁` for any `Λ ≥ 0` with
   measurable time sections; a default time enters only when hypothesized
@@ -75,8 +75,7 @@ Public lemmas (all in `namespace MathFin.Cox`):
   `cdsFairSpreadTV_balances`, `cdsAnnuity_eq_riskyAnnuity`,
   `cdsLosses_eq_riskyAnnuity_mul`, `cdsFairSpreadTV_const`,
   `cox_defaultProb_density` — the time-varying CDS layer;
-* `cox_mixing_survival`, `cox_mixing_survival_le`, `cox_mixed_survival` — the
-  restricted-Cox mixing identity.
+* `cox_mixing_survival`, `cox_mixed_survival` — the restricted-Cox mixing identity.
 
 Supporting lemmas (`hazardSurvival_eq_exp`, `cumHazard_zero`,
 `cumHazard_nonneg`, `cumHazard_deriv`, `cumHazard_continuous`,
@@ -240,13 +239,13 @@ private theorem cumHazard_deriv {h : ℝ → ℝ} (hh : Continuous h) (s : ℝ) 
 
 /-- Continuity of the cumulative hazard (via its differentiability). -/
 private theorem cumHazard_continuous {h : ℝ → ℝ} (hh : Continuous h) : Continuous (cumHazard h) :=
-  Differentiable.continuous fun s => (cumHazard_deriv hh s).differentiableAt
+  Differentiable.continuous fun s ↦ (cumHazard_deriv hh s).differentiableAt
 
 /-- Under a continuous hazard intensity, strictly positive for all calendar time,
 the cumulative hazard is strictly increasing. -/
 theorem cumHazard_strictMono {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s, 0 < h s) :
     StrictMono (cumHazard h) :=
-  strictMono_of_hasDerivAt_pos (fun s => cumHazard_deriv hh s) hpos
+  strictMono_of_hasDerivAt_pos (fun s ↦ cumHazard_deriv hh s) hpos
 
 /-- Under a continuous, strictly positive intensity with divergent cumulative
 hazard, `Λ` maps the half-line onto the half-line (IVT from `Λ 0 = 0` and
@@ -597,39 +596,22 @@ space with the unit-exponential-clock space:
 for any `Λ ≥ 0` with measurable time sections. No default time, intensity or path
 regularity is involved; with `τ` hypothesized as the clock's crossing of `Λ`, it
 is the mixed survival `P(τ > t) = E[e^{−Λ_t}]` (`cox_mixed_survival`). -/
-theorem cox_mixing_survival {Λ : ℝ → Ω₁ → ℝ} (hΛmeas : ∀ t, Measurable fun ω => Λ t ω)
+theorem cox_mixing_survival {Λ : ℝ → Ω₁ → ℝ} (hΛmeas : ∀ t, Measurable fun ω ↦ Λ t ω)
     (hΛnn : ∀ t ω, 0 ≤ Λ t ω) (t : ℝ) :
     (μ₁.prod (expMeasure 1)) {p : Ω₁ × ℝ | Λ t p.1 < p.2}
       = ∫⁻ ω : Ω₁, ENNReal.ofReal (rexp (-(Λ t ω))) ∂μ₁ := by
   haveI : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
-  have hmap : Measurable fun p : Ω₁ × ℝ => (Λ t p.1, p.2) :=
+  have hmap : Measurable fun p : Ω₁ × ℝ ↦ (Λ t p.1, p.2) :=
     ((hΛmeas t).comp measurable_fst).prodMk measurable_snd
   have hset : MeasurableSet {p : Ω₁ × ℝ | Λ t p.1 < p.2} :=
     hmap (measurableSet_lt measurable_fst measurable_snd)
   rw [Measure.prod_apply hset]
-  refine lintegral_congr fun ω => ?_
+  refine lintegral_congr fun ω ↦ ?_
   have hpre : Prod.mk ω ⁻¹' {p : Ω₁ × ℝ | Λ t p.1 < p.2} = Set.Ioi (Λ t ω) := by
     ext y
     simp
   rw [hpre]
   exact expClock_Ioi (hΛnn t ω)
-
-/-- The mixed survival event is a probability (`≤ 1`) — `e^{−Λ} ∈ [0,1]`
-pathwise. -/
-theorem cox_mixing_survival_le {μ₁ : Measure Ω₁} [IsProbabilityMeasure μ₁]
-    {Λ : ℝ → Ω₁ → ℝ} (hΛmeas : ∀ t, Measurable fun ω => Λ t ω)
-    (hΛnn : ∀ t ω, 0 ≤ Λ t ω) (t : ℝ) :
-    (μ₁.prod (expMeasure 1)) {p : Ω₁ × ℝ | Λ t p.1 < p.2} ≤ 1 := by
-  calc (μ₁.prod (expMeasure 1)) {p : Ω₁ × ℝ | Λ t p.1 < p.2}
-      = ∫⁻ ω : Ω₁, ENNReal.ofReal (rexp (-(Λ t ω))) ∂μ₁ :=
-        cox_mixing_survival hΛmeas hΛnn t
-    _ ≤ ∫⁻ _ : Ω₁, (1:ℝ≥0∞) ∂μ₁ := by
-        refine lintegral_mono fun ω => ?_
-        have hle : rexp (-(Λ t ω)) ≤ 1 :=
-          Real.exp_le_one_iff.mpr (by have := hΛnn t ω; linarith)
-        calc ENNReal.ofReal (rexp (-(Λ t ω))) ≤ ENNReal.ofReal 1 := ENNReal.ofReal_le_ofReal hle
-          _ = 1 := ENNReal.ofReal_one
-    _ = 1 := by rw [lintegral_one, measure_univ]
 
 /-- **Mixed survival of a restricted-Cox default time**: a `τ` on the product
 space whose survival event at the single time `t` is the clock beating `Λ_t`
@@ -638,7 +620,7 @@ rewritten by `hτ`. Constructing such a `τ` would need paths of `Λ` that are
 continuous, strictly increasing and divergent with `Λ(0) = 0`; those are not
 assumed, and the construction is not done here. -/
 theorem cox_mixed_survival {τ : Ω₁ × ℝ → ℝ} {Λ : ℝ → Ω₁ → ℝ}
-    (hΛmeas : ∀ t, Measurable fun ω => Λ t ω)
+    (hΛmeas : ∀ t, Measurable fun ω ↦ Λ t ω)
     (hΛnn : ∀ t ω, 0 ≤ Λ t ω)
     {t : ℝ} (hτ : ∀ p : Ω₁ × ℝ, t < τ p ↔ Λ t p.1 < p.2) :
     (μ₁.prod (expMeasure 1)) {p : Ω₁ × ℝ | t < τ p}

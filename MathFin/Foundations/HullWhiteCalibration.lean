@@ -27,8 +27,8 @@ is derived from those representations.
   `deterministic_solves_ODE` generalizes `vasicekDeterministic_solves_ODE`; constant `θ`
   reduces to Vasicek verbatim (`deterministic_const`); uniqueness of the ODE solution
   (`deterministic_eq_of_solves_ODE`) writes the deterministic part through any other
-  solution `α` as `α(t) + (r₀ − α(0))·e^{−κt}` (`mean`). It is the centre of the law of
-  `r_t` (`integratedRate_hasLaw_gaussian`).
+  solution `α` as `α(t) + (r₀ − α(0))·e^{−κt}` (`deterministic_eq_add_exp_of_solves_ODE`). It
+  is the centre of the law of `r_t` (`integratedRate_hasLaw_gaussian`).
 * **The short rate in Wiener representation** — `integratedRate` (= `deterministic` +
   `σ·`Wiener integral of the kernel `e^{−κ(t−u)}`) is Gaussian with the Vasicek variance
   `(σ²/2κ)·(1 − e^{−2κt})` — `θ` shifts means, never variances
@@ -67,7 +67,8 @@ Public lemmas (all in `namespace MathFin.HullWhite`):
 
 * `deterministic_at_zero`, `deterministic_solves_ODE`, `deterministic_const`,
   `deterministic_const_closed_form`, `deterministic_const_tendsto`,
-  `deterministic_add_exponential`, `deterministic_eq_of_solves_ODE`, `mean` —
+  `deterministic_add_exponential`, `deterministic_eq_of_solves_ODE`,
+  `deterministic_eq_add_exp_of_solves_ODE` —
   the deterministic part;
 * `kernel_memLp`, `kernel_integral_sq`, `integratedRate_hasLaw_gaussian` — the short
   rate's Gaussian law with the Vasicek variance;
@@ -246,7 +247,7 @@ theorem deterministic_eq_of_solves_ODE (θ : ℝ → ℝ) (hθ : Continuous θ) 
 `α(t) + (r₀ − α(0))·e^{−κt}` — the particular solution plus the exponentially decaying
 initial gap. It is the centre of the law of `r_t` (`integratedRate_hasLaw_gaussian`);
 the expectation itself is stated under calibration, `calibMean_eq_forward`. -/
-theorem mean (θ : ℝ → ℝ) (κ : ℝ) (α : ℝ → ℝ)
+theorem deterministic_eq_add_exp_of_solves_ODE (θ : ℝ → ℝ) (κ : ℝ) (α : ℝ → ℝ)
     (hα : ∀ s, HasDerivAt α (θ s - κ * α s) s) (hθ : Continuous θ) (r₀ t : ℝ) :
     deterministic θ κ r₀ t = α t + (r₀ - α 0) * Real.exp (-(κ * t)) := by
   have hsplit : α 0 + (r₀ - α 0) = r₀ := by ring
@@ -797,30 +798,18 @@ theorem calibIntegratedMean (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ 
     (hκ : 0 < κ) (𝕋 : ℝ≥0) :
     integratedMean (theta f0 κ σ) κ (f0 0) (𝕋 : ℝ)
       = (∫ s in (0 : ℝ)..(𝕋 : ℝ), f0 s) + σ ^ 2 / 2 * vasicekBondV κ (𝕋 : ℝ) := by
-  have hV := var_eq_interval κ hκ.ne' 𝕋
   have hfa : IntervalIntegrable f0 volume (0 : ℝ) (𝕋 : ℝ) :=
     hf0.continuous.intervalIntegrable _ _
   have hgb : IntervalIntegrable (fun s : ℝ ↦ (σ ^ 2 / (2 * κ ^ 2))
       * (1 - Real.exp (-(κ * s))) ^ 2) volume (0 : ℝ) (𝕋 : ℝ) :=
     (by fun_prop : Continuous fun s : ℝ ↦ (σ ^ 2 / (2 * κ ^ 2))
       * (1 - Real.exp (-(κ * s))) ^ 2).intervalIntegrable _ _
-  have hsplit : ∫ s in (0 : ℝ)..(𝕋 : ℝ),
-      (f0 s + (σ ^ 2 / (2 * κ ^ 2)) * (1 - Real.exp (-(κ * s))) ^ 2)
-      = (∫ s in (0 : ℝ)..(𝕋 : ℝ), f0 s)
-        + (σ ^ 2 / (2 * κ ^ 2)) * (∫ s in (0 : ℝ)..(𝕋 : ℝ), (1 - Real.exp (-(κ * s))) ^ 2) := by
-    refine Eq.trans (intervalIntegral.integral_add hfa hgb) ?_
-    rw [← intervalIntegral.integral_const_mul (r := (σ ^ 2 / (2 * κ ^ 2)))
-      (f := fun s : ℝ ↦ (1 - Real.exp (-(κ * s))) ^ 2)]
-  have hkey : (σ ^ 2 / (2 * κ ^ 2)) * (∫ s in (0 : ℝ)..(𝕋 : ℝ), (1 - Real.exp (-(κ * s))) ^ 2)
-      = σ ^ 2 / 2 * (∫ u in (0 : ℝ)..(𝕋 : ℝ), (vasicekBondB κ u) ^ 2) := by
-    rw [← calibVar_key κ hκ.ne' 𝕋]
-    field_simp
   unfold integratedMean
   rw [intervalIntegral.integral_congr
     (show EqOn (fun s : ℝ ↦ deterministic (theta f0 κ σ) κ (f0 0) s)
       (fun s : ℝ ↦ f0 s + (σ ^ 2 / (2 * κ ^ 2)) * (1 - Real.exp (-(κ * s))) ^ 2)
       (Set.uIcc (0 : ℝ) (𝕋 : ℝ)) from fun s _ ↦ calibMean f0 hf0 κ σ hκ s),
-    hsplit, hkey, ← hV]
+    intervalIntegral.integral_add hfa hgb, calibCorrection_integral κ σ hκ.ne' 𝕋]
 
 /-- **The repricing identity** (the headline): with `θ = theta f0 κ σ` and the short
 rate started at `r₀ = f(0,0)` (`f0 ∈ C¹`, `κ > 0`), the HW model's time-0 bond curve

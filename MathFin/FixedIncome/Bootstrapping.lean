@@ -55,8 +55,7 @@ The module layers:
   the prefix bootstrapped so far, so each step literally inherits the previous
   factors. `boot_step_err` bounds every step, `boot_length` (proved by
   induction) tracks the curve, and `boot_reprices_all` is the repricing
-  theorem over all instruments (the `Finset.range` form is
-  `boot_reprices_range`).
+  theorem over all instruments.
 * **Flat-curve capstone** — `fraBootstrap_flatCurve`: if the fixed rate
   equals the flat-curve forward rate, bisection from any positive bracket
   around the true later discount factor recovers it to within
@@ -80,7 +79,7 @@ bracketing sign change is guaranteed), and joint solves for several new
 factors at once.
 
 Disclosure: the bisection engine here duplicates
-`MathFin/Foundations/Bisection.lean` (this module was developed separately) —
+`MathFin/Foundations/Bisection.lean` —
 its three definitions are public because the module's statements name them,
 and its facts are private. Switching to the shared `Bisection` module is a
 follow-up.
@@ -108,8 +107,8 @@ Public lemmas (all in `namespace MathFin.Bootstrapping`):
   `payerSwapValue_affine_lastCoupon_annuity`,
   `strictAnti_payerSwapValue_lastCoupon`, `swapLastCouponThreshold`,
   `swapStep_lastCoupon_err` — the payer-swap layer;
-* `boot_length`, `boot_succ_ne_nil`, `boot_step_err`, `boot_reprices_all`,
-  `boot_reprices_range` — the induction over instruments;
+* `boot_length`, `boot_succ_ne_nil`, `boot_step_err`, `boot_reprices_all` —
+  the induction over instruments;
 * `fraBootstrap_flatCurve` — the flat-curve capstone.
 
 Supporting declarations (the engine facts `bisect_zero`, `bisect_succ`,
@@ -229,12 +228,12 @@ theorem affineStep_err (a b c lo hi : ℝ) (hb : 0 < b) (hσ : (a - c) / b ∈ S
     (n : ℕ) :
     |bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n - (a - c) / b|
       ≤ (hi - lo) / 2 ^ (n + 1) :=
-  abs_bisectMid_sub_le (fun x _ => threshold_affine a b c x hb) hσ n
+  abs_bisectMid_sub_le (fun x _ ↦ threshold_affine a b c x hb) hσ n
 
 /-- Convergence form of the affine bootstrap step. -/
 theorem affineStep_tendsto (a b c lo hi : ℝ) (hb : 0 < b) (hσ : (a - c) / b ∈ Set.Icc lo hi) :
     Tendsto (bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi) atTop (𝓝 ((a - c) / b)) :=
-  tendsto_bisectMid (fun x _ => threshold_affine a b c x hb) hσ
+  tendsto_bisectMid (fun x _ ↦ threshold_affine a b c x hb) hσ
 
 /-- **Repricing bound.** The instrument value `a − b·x` at the bisection
 estimate is within `b·(hi − lo)/2^{n+1}` of the quote `c` — the slope-weighed
@@ -245,7 +244,7 @@ theorem affineStep_value_err (a b c lo hi : ℝ) (hb : 0 < b)
       ≤ b * ((hi - lo) / 2 ^ (n + 1)) := by
   have hb0 : b ≠ 0 := hb.ne'
   have key := abs_bisectMid_sub_le (f := fun x : ℝ ↦ b * x - a) (C := -c)
-    (σ := (a - c) / b) (fun x _ => threshold_affine a b c x hb) hσ n
+    (σ := (a - c) / b) (fun x _ ↦ threshold_affine a b c x hb) hσ n
   have hexp : a - b * bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n - c
       = b * ((a - c) / b - bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n) := by
     field_simp
@@ -481,7 +480,7 @@ the slope condition `1 + K·δ > 0`. -/
 theorem strictAnti_payerSwapValue_lastCoupon (P0 K A₀ δ : ℝ) (hpos : 0 < 1 + K * δ) :
     StrictAnti (fun x : ℝ ↦ payerSwapValue P0 x K (A₀ + δ * x)) := by
   have h : ∀ z : ℝ, payerSwapValue P0 z K (A₀ + δ * z) = (P0 - K * A₀) - (1 + K * δ) * z :=
-    fun z => payerSwapValue_affine_lastCoupon P0 K A₀ δ z
+    fun z ↦ payerSwapValue_affine_lastCoupon P0 K A₀ δ z
   intro x y hxy
   show payerSwapValue P0 y K (A₀ + δ * y) < payerSwapValue P0 x K (A₀ + δ * x)
   rw [h y, h x]
@@ -557,7 +556,7 @@ theorem boot_step_err (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ) (σ
   have h := abs_bisectMid_sub_le
     (f := fun x : ℝ ↦ -(V i (x :: boot V c lo hi n i))) (C := -(c i))
     (lo := lo i) (hi := hi i) (σ := σ i (boot V c lo hi n i))
-    (fun x hx => (hthr i (boot V c lo hi n i)).1 x hx)
+    (fun x hx ↦ (hthr i (boot V c lo hi n i)).1 x hx)
     (hthr i (boot V c lo hi n i)).2 n
   simp only [boot_succ, List.head_cons]
   exact h
@@ -566,9 +565,8 @@ theorem boot_step_err (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ) (σ
 list `p`, the affine shape `V i (x :: p) = a i p − b i p · x` with slope
 `b i p > 0` and a fixed bracket containing the root, every bootstrapped factor
 reprices its own quote up to the slope-weighted half-interval
-`b i · (hi i − lo i)/2^{n+1}` — for every instrument `i`; `boot_reprices_range`
-is the "all inputs" form. The all-prefix hypotheses restrict which instruments
-qualify (see the module's scope note). -/
+`b i · (hi i − lo i)/2^{n+1}` — for every instrument `i`. The all-prefix hypotheses restrict
+which instruments qualify (see the module's scope note). -/
 theorem boot_reprices_all (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ) (a b : ℕ → List ℝ → ℝ)
     (hb : ∀ i p, 0 < b i p)
     (hV : ∀ (i : ℕ) (p : List ℝ) (x : ℝ), V i (x :: p) = a i p - b i p * x)
@@ -581,21 +579,6 @@ theorem boot_reprices_all (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ)
   exact affineStep_value_err (a i (boot V c lo hi n i)) (b i (boot V c lo hi n i)) (c i)
     (lo i) (hi i) (hb i _) (hσ i _) n
 
-/-- "Reprices all inputs": the repricing bound holds for every instrument index
-inside a budget of `m` instruments — the inheritance carried structurally by
-`boot` (each step consumes the previous factors), with the quantifier running
-over `Finset.range m`. -/
-theorem boot_reprices_range (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ) (a b : ℕ → List ℝ → ℝ)
-    (hb : ∀ i p, 0 < b i p)
-    (hV : ∀ (i : ℕ) (p : List ℝ) (x : ℝ), V i (x :: p) = a i p - b i p * x)
-    (hσ : ∀ i p, (a i p - c i) / b i p ∈ Set.Icc (lo i) (hi i))
-    (m n : ℕ) :
-    ∀ i ∈ Finset.range m,
-      |V i ((boot V c lo hi n (i + 1)).head (boot_succ_ne_nil V c lo hi n i)
-          :: boot V c lo hi n i) - c i|
-        ≤ b i (boot V c lo hi n i) * ((hi i - lo i) / 2 ^ (n + 1)) :=
-  fun i _ => boot_reprices_all V c lo hi a b hb hV hσ i n
-
 /-! ### Flat-curve capstone: the bootstrap recovers the flat-curve factor -/
 
 /-- **Flat-curve capstone.** If the fixed rate equals the flat-curve forward
@@ -605,7 +588,7 @@ bracket around it recovers the factor to within `(hi − lo)/2^{n+1}`. -/
 theorem fraBootstrap_flatCurve (r δ K T1 T2 lo hi : ℝ) (hδ : δ ≠ 0)
     (hK : K = fraForwardRate (zcb r 0 T1) (zcb r 0 T2) δ)
     (hx : zcb r 0 T2 ∈ Set.Icc lo hi) (hlo : 0 < lo) (n : ℕ) :
-    |bisectMid (fun x : ℝ ↦ -(fraValue δ x (fraForwardRate (zcb r 0 T1) x δ) K)) (-0) lo hi n
+    |bisectMid (fun x : ℝ ↦ -(fraValue δ x (fraForwardRate (zcb r 0 T1) x δ) K)) 0 lo hi n
       - zcb r 0 T2| ≤ (hi - lo) / 2 ^ (n + 1) := by
   have hpos : 0 < 1 + δ * K := by
     simp only [hK, fraForwardRate]
@@ -626,7 +609,7 @@ theorem fraBootstrap_flatCurve (r δ K T1 T2 lo hi : ℝ) (hδ : δ ≠ 0)
     rw [h1, div_eq_iff (div_ne_zero hp hx)]
     field_simp
   have hthr : ∀ x ∈ Set.Icc lo hi,
-      (fun x : ℝ ↦ -(fraValue δ x (fraForwardRate (zcb r 0 T1) x δ) K)) x < -0
+      (fun x : ℝ ↦ -(fraValue δ x (fraForwardRate (zcb r 0 T1) x δ) K)) x < 0
         ↔ x < zcb r 0 T2 := by
     intro x hx
     have hthr' := fraThreshold (zcb r 0 T1) δ K 0 lo hi hδ hpos hlo x hx

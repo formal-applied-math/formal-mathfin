@@ -365,7 +365,7 @@ theorem mconsist (hB : IsPreBrownianReal B μ)
       (processToLp τ hBmeas hδadap hδcont hδbdd) : Ω → ℝ) := by
   have hLp := itoProcessCLM_consist hB hBmeas htτ hτT hδadap hδcont hδbdd
   exact (hMeq t).trans (Eventually.of_forall
-    (congrFun (congrArg (fun z : Lp ℝ 2 μ => (z : Ω → ℝ)) hLp)))
+    (congrFun (congrArg (fun z : Lp ℝ 2 μ ↦ (z : Ω → ℝ)) hLp)))
 
 /-- **The frozen corollary**: past the horizon the CLM process freezes
 (`itoProcessCLM_eq_terminal_of_ge`), so `M τ` represents the τ-horizon CLM integral at
@@ -388,7 +388,7 @@ theorem mconsist_frozen (hB : IsPreBrownianReal B μ)
         (processToLp τ hBmeas hδadap hδcont hδbdd) : Lp ℝ 2 μ) := by
     rw [itoProcessCLM_eq_terminal_of_ge hB hBmeas hτt, itoProcessCLM_terminal_eq]
   exact (hMeq τ).trans (Eventually.of_forall
-    (congrFun (congrArg (fun z : Lp ℝ 2 μ => (z : Ω → ℝ)) (hLp.trans hfrz.symm))))
+    (congrFun (congrArg (fun z : Lp ℝ 2 μ ↦ (z : Ω → ℝ)) (hLp.trans hfrz.symm))))
 
 /-- **The frozen-reversion corollary**: the time-frozen reversion `t ↦ M (min t τ)`
 represents the τ-horizon CLM process at *every* time — at `t ≤ τ` by `mconsist`, past

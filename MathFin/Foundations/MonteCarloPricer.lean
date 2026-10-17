@@ -93,10 +93,7 @@ constant bound is replaced by domination through the discounted terminal):
 * `secondMoment_callPayoff` — the call-side truncated second moment of the lognormal
   in closed form (the `Ioi` mirror of `secondMoment_payoff`);
   `secondMoment_mcCallPayoff` — the discounted second moment `𝔼[C²]`;
-  `mc_call_variance` — the call's CLT limit variance in closed form;
-* `mc_terminal_secondMoment`, `mc_terminal_variance` — the lognormal moment layer's
-  `secondMoment_terminal` and `variance_terminal` for the driving terminal price,
-  re-exported under this module's names.
+  `mc_call_variance` — the call's CLT limit variance in closed form.
 
 Multi-dimensional seed:
 
@@ -161,7 +158,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
 /-- Single draw: the sampled payoff is a.e. strongly measurable. Its law is the
 pushforward of the standard normal through `payoff`. -/
 private theorem aestronglyMeasurable_payoff {Z : Ω → ℝ} (h : BSCallHyp μ S_0 K r σ T Z) :
-    AEStronglyMeasurable (fun ω => payoff S_0 K r σ T (Z ω)) μ :=
+    AEStronglyMeasurable (fun ω ↦ payoff S_0 K r σ T (Z ω)) μ :=
   ((HasLaw.comp (Y := payoff S_0 K r σ T)
       (⟨(measurable_payoff S_0 K r σ T).aemeasurable, rfl⟩ :
         HasLaw (payoff S_0 K r σ T) ((gaussianReal 0 1).map (payoff S_0 K r σ T))
@@ -171,7 +168,7 @@ private theorem aestronglyMeasurable_payoff {Z : Ω → ℝ} (h : BSCallHyp μ S
 /-- **Integrability**: the sampled put payoff is integrable, by the pointwise bound
 `0 ≤ H ≤ e^{-rT}·K` on a probability space. -/
 theorem integrable_payoff {Z : Ω → ℝ} (h : BSCallHyp μ S_0 K r σ T Z) :
-    Integrable (fun ω => payoff S_0 K r σ T (Z ω)) μ := by
+    Integrable (fun ω ↦ payoff S_0 K r σ T (Z ω)) μ := by
   refine memLp_one_iff_integrable.1 ?_
   refine MemLp.of_bound (C := Real.exp (-r * T) * K)
     (aestronglyMeasurable_payoff h) ?_
@@ -181,7 +178,7 @@ theorem integrable_payoff {Z : Ω → ℝ} (h : BSCallHyp μ S_0 K r σ T Z) :
 
 /-- The sampled payoff is in L² — the CLT hypothesis. -/
 theorem memLp2_payoff {Z : Ω → ℝ} (h : BSCallHyp μ S_0 K r σ T Z) :
-    MemLp (fun ω => payoff S_0 K r σ T (Z ω)) 2 μ := by
+    MemLp (fun ω ↦ payoff S_0 K r σ T (Z ω)) 2 μ := by
   refine MemLp.of_bound (C := Real.exp (-r * T) * K)
     (aestronglyMeasurable_payoff h) ?_
   filter_upwards with ω
@@ -203,7 +200,7 @@ variable {Z : ℕ → Ω → ℝ}
 omit [IsProbabilityMeasure μ] in
 /-- All sampled payoffs have the same pushforward law. -/
 private theorem hasLaw_payoff (hlaw : ∀ i : ℕ, HasLaw (Z i) (gaussianReal 0 1) μ) (i : ℕ) :
-    HasLaw (fun ω => payoff S_0 K r σ T (Z i ω))
+    HasLaw (fun ω ↦ payoff S_0 K r σ T (Z i ω))
       ((gaussianReal 0 1).map (payoff S_0 K r σ T)) μ :=
   HasLaw.comp (Y := payoff S_0 K r σ T)
     (⟨(measurable_payoff S_0 K r σ T).aemeasurable, rfl⟩ :
@@ -215,16 +212,16 @@ omit [IsProbabilityMeasure μ] in
 /-- The sampled payoffs are identically distributed. -/
 private theorem identDistrib_payoff (hlaw : ∀ i : ℕ, HasLaw (Z i) (gaussianReal 0 1) μ)
     (i : ℕ) :
-    IdentDistrib (fun ω => payoff S_0 K r σ T (Z i ω))
-      (fun ω => payoff S_0 K r σ T (Z 0 ω)) μ μ :=
+    IdentDistrib (fun ω ↦ payoff S_0 K r σ T (Z i ω))
+      (fun ω ↦ payoff S_0 K r σ T (Z 0 ω)) μ μ :=
   HasLaw.identDistrib (hasLaw_payoff hlaw i) (hasLaw_payoff hlaw 0)
 
 omit [IsProbabilityMeasure μ] in
 /-- Full independence of the ensemble transfers through the payoff map. -/
 private theorem iIndepFun_payoff (hindep : iIndepFun Z μ) :
-    iIndepFun (fun i => fun ω => payoff S_0 K r σ T (Z i ω)) μ :=
-  hindep.comp (fun _ => payoff S_0 K r σ T)
-    (fun _ => measurable_payoff S_0 K r σ T)
+    iIndepFun (fun i ↦ fun ω ↦ payoff S_0 K r σ T (Z i ω)) μ :=
+  hindep.comp (fun _ ↦ payoff S_0 K r σ T)
+    (fun _ ↦ measurable_payoff S_0 K r σ T)
 
 omit [IsProbabilityMeasure μ] in
 /-- Pairwise independence of the ensemble transfers through the payoff map — the
@@ -232,7 +229,7 @@ Etemadi hypothesis the strong law consumes. (Stated in unfolded `∀` form: `ope
 Filter` shadows the root `Pairwise`.) -/
 private theorem pairwise_payoff (hindep : _root_.Pairwise ((· ⟂ᵢ[μ] ·) on Z)) :
     ∀ i j : ℕ, i ≠ j →
-      (fun ω => payoff S_0 K r σ T (Z i ω)) ⟂ᵢ[μ] (fun ω => payoff S_0 K r σ T (Z j ω)) := by
+      (fun ω ↦ payoff S_0 K r σ T (Z i ω)) ⟂ᵢ[μ] (fun ω ↦ payoff S_0 K r σ T (Z j ω)) := by
   intro i j hij
   exact (hindep hij).comp (measurable_payoff S_0 K r σ T)
     (measurable_payoff S_0 K r σ T)
@@ -254,23 +251,23 @@ converges almost surely to the Black–Scholes put price
 theorem consistency (h : BSCallHyp μ S_0 K r σ T (Z 0))
     (hlaw : ∀ i : ℕ, HasLaw (Z i) (gaussianReal 0 1) μ)
     (hindep : _root_.Pairwise ((· ⟂ᵢ[μ] ·) on Z)) :
-    ∀ᵐ ω ∂μ, Tendsto (fun n => estimator S_0 K r σ T Z n ω) atTop
+    ∀ᵐ ω ∂μ, Tendsto (fun n ↦ estimator S_0 K r σ T Z n ω) atTop
       (𝓝 (K * Real.exp (-r * T) * Phi (-(bsd2 S_0 K r σ T))
         - S_0 * Phi (-(bsd1 S_0 K r σ T)))) := by
-  have hint : Integrable (fun ω => payoff S_0 K r σ T (Z 0 ω)) μ :=
+  have hint : Integrable (fun ω ↦ payoff S_0 K r σ T (Z 0 ω)) μ :=
     integrable_payoff h
   have hslln := strong_law_ae_real
-    (X := fun i => fun ω => payoff S_0 K r σ T (Z i ω))
-    hint (pairwise_payoff hindep) (fun i => identDistrib_payoff hlaw i)
+    (X := fun i ↦ fun ω ↦ payoff S_0 K r σ T (Z i ω))
+    hint (pairwise_payoff hindep) (fun i ↦ identDistrib_payoff hlaw i)
   filter_upwards [hslln] with ω hω
   rw [← mean_eq_bsPut (Z := Z 0) h]
-  exact hω.congr fun _ => rfl
+  exact hω.congr fun _ ↦ rfl
 
 /-- The i.i.d. specialization: full independence gives the pairwise hypothesis. -/
 theorem consistency_iid (h : BSCallHyp μ S_0 K r σ T (Z 0))
     (hlaw : ∀ i : ℕ, HasLaw (Z i) (gaussianReal 0 1) μ)
     (hindep : iIndepFun Z μ) :
-    ∀ᵐ ω ∂μ, Tendsto (fun n => estimator S_0 K r σ T Z n ω) atTop
+    ∀ᵐ ω ∂μ, Tendsto (fun n ↦ estimator S_0 K r σ T Z n ω) atTop
       (𝓝 (K * Real.exp (-r * T) * Phi (-(bsd2 S_0 K r σ T))
         - S_0 * Phi (-(bsd1 S_0 K r σ T)))) := by
   refine consistency h hlaw ?_
@@ -291,14 +288,14 @@ theorem clt_library (h : BSCallHyp μ S_0 K r σ T (Z 0))
     {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {μ' : Measure Ω'} [IsProbabilityMeasure μ']
     {Y : Ω' → ℝ}
     (hY : HasLaw Y
-      (gaussianReal 0 (Var[fun ω => payoff S_0 K r σ T (Z 0 ω); μ]).toNNReal) μ') :
+      (gaussianReal 0 (Var[fun ω ↦ payoff S_0 K r σ T (Z 0 ω); μ]).toNNReal) μ') :
     TendstoInDistribution
-      (fun (n : ℕ) (ω : Ω) => (Real.sqrt (n : ℝ))⁻¹ *
+      (fun (n : ℕ) (ω : Ω) ↦ (Real.sqrt (n : ℝ))⁻¹ *
         (∑ i ∈ Finset.range n, payoff S_0 K r σ T (Z i ω)
           - (n : ℝ) * ∫ ω', payoff S_0 K r σ T (Z 0 ω') ∂μ))
-      atTop Y (fun _ => μ) μ' :=
+      atTop Y (fun _ ↦ μ) μ' :=
   tendstoInDistribution_inv_sqrt_mul_sum_sub hY (memLp2_payoff h)
-    (iIndepFun_payoff hindep) (fun i => identDistrib_payoff hlaw i)
+    (iIndepFun_payoff hindep) (fun i ↦ identDistrib_payoff hlaw i)
 
 /-- The algebraic identity equating the library CLT integrand with the desk
 estimator: `(√n)⁻¹·(s − n·m) = √n·(s/n − m)`. -/
@@ -319,14 +316,14 @@ theorem clt (h : BSCallHyp μ S_0 K r σ T (Z 0))
     (hlaw : ∀ i : ℕ, HasLaw (Z i) (gaussianReal 0 1) μ)
     (hindep : iIndepFun Z μ) :
     TendstoInDistribution
-      (fun (n : ℕ) (ω : Ω) => Real.sqrt (n : ℝ) *
+      (fun (n : ℕ) (ω : Ω) ↦ Real.sqrt (n : ℝ) *
         (estimator S_0 K r σ T Z n ω - ∫ ω', payoff S_0 K r σ T (Z 0 ω') ∂μ))
-      atTop (id : ℝ → ℝ) (fun _ => μ)
-      (gaussianReal 0 (Var[fun ω => payoff S_0 K r σ T (Z 0 ω); μ]).toNNReal) := by
+      atTop (id : ℝ → ℝ) (fun _ ↦ μ)
+      (gaussianReal 0 (Var[fun ω ↦ payoff S_0 K r σ T (Z 0 ω); μ]).toNNReal) := by
   have hlib := clt_library (μ' := gaussianReal 0
-      (Var[fun ω => payoff S_0 K r σ T (Z 0 ω); μ]).toNNReal) (Y := (id : ℝ → ℝ))
+      (Var[fun ω ↦ payoff S_0 K r σ T (Z 0 ω); μ]).toNNReal) (Y := (id : ℝ → ℝ))
     h hlaw hindep ⟨by fun_prop, Measure.map_id⟩
-  refine TendstoInDistribution.congr (fun n => ?_) Filter.EventuallyEq.rfl hlib
+  refine TendstoInDistribution.congr (fun n ↦ ?_) Filter.EventuallyEq.rfl hlib
   filter_upwards with ω
   simp only [estimator]
   exact inv_sqrt_mul_sub_eq (∑ i ∈ Finset.range n, payoff S_0 K r σ T (Z i ω))
@@ -350,10 +347,10 @@ private lemma integral_lin_comb3 {s : Set ℝ} (_hs : MeasurableSet s)
     (h₃ : IntegrableOn f₃ s volume) (b₁ b₂ b₃ : ℝ) :
     ∫ z in s, (b₁ * f₁ z - b₂ * f₂ z + b₃ * f₃ z)
       = b₁ * (∫ i in s, f₁ i) - b₂ * (∫ i in s, f₂ i) + b₃ * (∫ i in s, f₃ i) := by
-  have hI1 : IntegrableOn (fun z => b₁ * f₁ z) s volume := h₁.const_mul b₁
-  have hI2 : IntegrableOn (fun z => b₂ * f₂ z) s volume := h₂.const_mul b₂
-  have hI3 : IntegrableOn (fun z => b₃ * f₃ z) s volume := h₃.const_mul b₃
-  have hI12 : IntegrableOn (fun z => b₁ * f₁ z - b₂ * f₂ z) s volume := hI1.sub hI2
+  have hI1 : IntegrableOn (fun z ↦ b₁ * f₁ z) s volume := h₁.const_mul b₁
+  have hI2 : IntegrableOn (fun z ↦ b₂ * f₂ z) s volume := h₂.const_mul b₂
+  have hI3 : IntegrableOn (fun z ↦ b₃ * f₃ z) s volume := h₃.const_mul b₃
+  have hI12 : IntegrableOn (fun z ↦ b₁ * f₁ z - b₂ * f₂ z) s volume := hI1.sub hI2
   have step1 := integral_add hI12 hI3
   have step2 := integral_sub hI1 hI2
   have step4 := integral_const_mul (μ := volume.restrict s) b₁ f₁
@@ -392,25 +389,25 @@ theorem secondMoment_payoff (h : BSCallHyp μ S_0 K r σ T Z) :
     field_simp
     ring
   have hmeas : AEStronglyMeasurable
-      (fun z : ℝ => (max (K - bsTerminal S_0 r σ T z) 0) ^ 2) (gaussianReal 0 1) := by
+      (fun z : ℝ ↦ (max (K - bsTerminal S_0 r σ T z) 0) ^ 2) (gaussianReal 0 1) := by
     unfold bsTerminal
     fun_prop
   -- Step 1-2: transfer to the standard normal, convert to the density
-  rw [show (fun ω => (max (K - bsTerminal S_0 r σ T (Z ω)) 0) ^ 2)
-        = (fun z => (max (K - bsTerminal S_0 r σ T z) 0) ^ 2) ∘ Z from rfl,
+  rw [show (fun ω ↦ (max (K - bsTerminal S_0 r σ T (Z ω)) 0) ^ 2)
+        = (fun z ↦ (max (K - bsTerminal S_0 r σ T z) 0) ^ 2) ∘ Z from rfl,
       hZ.integral_comp hmeas,
       integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0)]
   -- Step 3: the square lives on the exercise region `{z ≤ −d₂}`
-  rw [show (fun z : ℝ => gaussianPDFReal 0 1 z • (max (K - bsTerminal S_0 r σ T z) 0) ^ 2)
+  rw [show (fun z : ℝ ↦ gaussianPDFReal 0 1 z • (max (K - bsTerminal S_0 r σ T z) 0) ^ 2)
         = (Set.Iic (-d_2)).indicator
-            (fun z => gaussianPDFReal 0 1 z * (K - bsTerminal S_0 r σ T z) ^ 2) from
-      funext fun z => by
+            (fun z ↦ gaussianPDFReal 0 1 z * (K - bsTerminal S_0 r σ T z) ^ 2) from
+      funext fun z ↦ by
         rw [smul_eq_mul]
         by_cases hz : z ≤ -d_2
         · have h1 : K < bsTerminal S_0 r σ T z ↔ -d_2 < z :=
             bsTerminal_gt_K_iff hS_0 hK hσ hT z
           have hST : ¬ (K < bsTerminal S_0 r σ T z) :=
-            fun hc => not_lt.mpr hz (h1.mp hc)
+            fun hc ↦ not_lt.mpr hz (h1.mp hc)
           rw [Set.indicator_of_mem (by simpa using hz : z ∈ Set.Iic (-d_2)),
             max_eq_left (sub_nonneg.mpr (le_of_not_gt hST))]
         · have h1 : K < bsTerminal S_0 r σ T z ↔ -d_2 < z :=
@@ -449,13 +446,13 @@ theorem secondMoment_payoff (h : BSCallHyp μ S_0 K r σ T Z) :
   have hint_pdf : IntegrableOn (gaussianPDFReal 0 1) (Set.Iic (-d_2)) volume :=
     (integrable_gaussianPDFReal 0 1).integrableOn
   have hint_eν : IntegrableOn
-      (fun z : ℝ => Real.exp (ν_log * z) * gaussianPDFReal 0 1 z) (Set.Iic (-d_2)) volume := by
+      (fun z : ℝ ↦ Real.exp (ν_log * z) * gaussianPDFReal 0 1 z) (Set.Iic (-d_2)) volume := by
     refine (((integrable_gaussianPDFReal ν_log 1).const_mul
       (Real.exp (ν_log ^ 2 / 2))).integrableOn).congr_fun ?_ measurableSet_Iic
     intro z _
     exact (exp_mul_gaussianPDFReal_zero_one ν_log z).symm
   have hint_e2ν : IntegrableOn
-      (fun z : ℝ => Real.exp (2 * ν_log * z) * gaussianPDFReal 0 1 z)
+      (fun z : ℝ ↦ Real.exp (2 * ν_log * z) * gaussianPDFReal 0 1 z)
       (Set.Iic (-d_2)) volume := by
     refine (((integrable_gaussianPDFReal (2 * ν_log) 1).const_mul
       (Real.exp ((2 * ν_log) ^ 2 / 2))).integrableOn).congr_fun ?_ measurableSet_Iic
@@ -511,7 +508,7 @@ theorem secondMoment (h : BSCallHyp μ S_0 K r σ T Z) :
 put payoff, composed from `secondMoment` (the truncated second moment) and
 `mean_eq_bsPut` (the price `P`). -/
 theorem variance (h : BSCallHyp μ S_0 K r σ T Z) :
-    Var[fun ω => payoff S_0 K r σ T (Z ω); μ]
+    Var[fun ω ↦ payoff S_0 K r σ T (Z ω); μ]
       = Real.exp (-2 * r * T) *
           (K ^ 2 * Phi (-(bsd2 S_0 K r σ T))
             - 2 * K * (S_0 * Real.exp ((r - σ^2 / 2) * T + (σ * Real.sqrt T)^2 / 2))
@@ -526,33 +523,6 @@ theorem variance (h : BSCallHyp μ S_0 K r σ T Z) :
   rw [secondMoment h, mean_eq_bsPut h]
 
 end Moments
-
-/-! ### Terminal-price moments
-
-The lognormal moment layer (`LognormalMoments.lean`) re-exported for the terminal price
-the estimator is driven by: its second moment and variance, unchanged. Single-draw
-context: `Z : Ω → ℝ`. -/
-
-section TerminalMoments
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {S_0 K r σ T : ℝ} {Z : Ω → ℝ}
-
-/-- Re-export of the lognormal moment layer: the terminal price has the proved
-second moment `E_Q[S_T²] = S₀²·exp(2rT + σ²T)` (`secondMoment_terminal`). -/
-theorem mc_terminal_secondMoment (h : BSCallHyp μ S_0 K r σ T Z) :
-    ∫ ω, (bsTerminal S_0 r σ T (Z ω)) ^ 2 ∂μ
-      = S_0 ^ 2 * Real.exp (2 * r * T + σ ^ 2 * T) :=
-  secondMoment_terminal h
-
-/-- Re-export of the lognormal moment layer: the terminal-price variance
-`Var_Q[S_T] = S₀²·e^{2rT}·(e^{σ²T} − 1)` (`variance_terminal`). -/
-theorem mc_terminal_variance (h : BSCallHyp μ S_0 K r σ T Z) :
-    ∫ ω, (bsTerminal S_0 r σ T (Z ω)) ^ 2 ∂μ
-      - (∫ ω, bsTerminal S_0 r σ T (Z ω) ∂μ) ^ 2
-        = S_0 ^ 2 * Real.exp (2 * r * T) * (Real.exp (σ ^ 2 * T) - 1) :=
-  variance_terminal h
-
-end TerminalMoments
 
 /-! ### The call variants
 
@@ -609,7 +579,7 @@ omit [IsProbabilityMeasure μ] in
 strongly measurable for `ν`, then `g ∘ Z` is a.e. strongly measurable. -/
 private lemma aestronglyMeasurable_comp_of_hasLaw (hZ : HasLaw Z (gaussianReal 0 1) μ)
     {g : ℝ → ℝ} (hg : AEStronglyMeasurable g (gaussianReal 0 1)) :
-    AEStronglyMeasurable (fun ω => g (Z ω)) μ :=
+    AEStronglyMeasurable (fun ω ↦ g (Z ω)) μ :=
   ((HasLaw.comp (Y := g)
       (⟨hg.aemeasurable, rfl⟩ :
         HasLaw g ((gaussianReal 0 1).map g) (gaussianReal 0 1))
@@ -617,7 +587,7 @@ private lemma aestronglyMeasurable_comp_of_hasLaw (hZ : HasLaw Z (gaussianReal 0
 
 /-- Single draw: the sampled call payoff is a.e. strongly measurable. -/
 private theorem aestronglyMeasurable_mcCallPayoff (h : BSCallHyp μ S_0 K r σ T Z) :
-    AEStronglyMeasurable (fun ω => mcCallPayoff S_0 K r σ T (Z ω)) μ :=
+    AEStronglyMeasurable (fun ω ↦ mcCallPayoff S_0 K r σ T (Z ω)) μ :=
   aestronglyMeasurable_comp_of_hasLaw h.Z_law
     (by unfold mcCallPayoff bsTerminal; fun_prop)
 
@@ -626,8 +596,8 @@ omit [IsProbabilityMeasure μ] in
 whenever `Z` is standard normal — Mathlib's `integrable_exp_mul_gaussianReal`
 pulled through the law. This is the call variant's replacement for boundedness. -/
 theorem integrable_exp_of_hasLaw (hZ : HasLaw Z (gaussianReal 0 1) μ) (c : ℝ) :
-    Integrable (fun ω => Real.exp (c * Z ω)) μ := by
-  have hsrc : Integrable (fun x : ℝ => Real.exp (c * x)) (μ.map Z) := by
+    Integrable (fun ω ↦ Real.exp (c * Z ω)) μ := by
+  have hsrc : Integrable (fun x : ℝ ↦ Real.exp (c * x)) (μ.map Z) := by
     rw [hZ.map_eq]
     exact integrable_exp_mul_gaussianReal c
   exact (integrable_map_measure hsrc.aestronglyMeasurable hZ.aemeasurable).mp hsrc
@@ -635,16 +605,16 @@ theorem integrable_exp_of_hasLaw (hZ : HasLaw Z (gaussianReal 0 1) μ) (c : ℝ)
 /-- **Integrability of the squared terminal** — the L² envelope: `S_T²` is
 integrable, being `S₀²·e^{2μ_log}·exp(2ν·Z)` with `exp(2ν·Z)` Gaussian-integrable.
 (Facts not numbers: no closed form needed here — the closed form is
-`mc_terminal_secondMoment` above.) -/
+`secondMoment_terminal`.) -/
 theorem integrable_sq_terminal (h : BSCallHyp μ S_0 K r σ T Z) :
-    Integrable (fun ω => (bsTerminal S_0 r σ T (Z ω)) ^ 2) μ := by
+    Integrable (fun ω ↦ (bsTerminal S_0 r σ T (Z ω)) ^ 2) μ := by
   obtain ⟨hS_0, hK, hσ, hT, hZ⟩ := h
-  have hsrc : Integrable (fun x : ℝ => S_0 ^ 2 * Real.exp (2 * (r - σ^2 / 2) * T)
+  have hsrc : Integrable (fun x : ℝ ↦ S_0 ^ 2 * Real.exp (2 * (r - σ^2 / 2) * T)
       * Real.exp ((2 * σ * Real.sqrt T) * x)) (μ.map Z) := by
     rw [hZ.map_eq]
     exact (integrable_exp_mul_gaussianReal (2 * σ * Real.sqrt T)).const_mul _
   have hcomp := (integrable_map_measure hsrc.aestronglyMeasurable hZ.aemeasurable).mp hsrc
-  have hpt : ∀ ω : Ω, (fun x : ℝ => S_0 ^ 2 * Real.exp (2 * (r - σ^2 / 2) * T)
+  have hpt : ∀ ω : Ω, (fun x : ℝ ↦ S_0 ^ 2 * Real.exp (2 * (r - σ^2 / 2) * T)
       * Real.exp ((2 * σ * Real.sqrt T) * x)) (Z ω)
       = (bsTerminal S_0 r σ T (Z ω)) ^ 2 := by
     intro ω
@@ -666,24 +636,24 @@ theorem integrable_sq_terminal (h : BSCallHyp μ S_0 K r σ T Z) :
     unfold bsTerminal
     rw [mul_pow, e5, ← e2, e3, e1]
     ring
-  have hae : (fun x : ℝ => S_0 ^ 2 * Real.exp (2 * (r - σ^2 / 2) * T)
+  have hae : (fun x : ℝ ↦ S_0 ^ 2 * Real.exp (2 * (r - σ^2 / 2) * T)
       * Real.exp ((2 * σ * Real.sqrt T) * x)) ∘ Z
-      =ᵐ[μ] (fun ω => (bsTerminal S_0 r σ T (Z ω)) ^ 2) :=
-    Filter.Eventually.of_forall fun ω => hpt ω
+      =ᵐ[μ] (fun ω ↦ (bsTerminal S_0 r σ T (Z ω)) ^ 2) :=
+    Filter.Eventually.of_forall fun ω ↦ hpt ω
   exact (integrable_congr hae).mp hcomp
 
 /-- **Integrability of the discounted terminal** — the domination envelope
 `e^{-rT}·S_T` for the call payoff (the put used the constant `e^{-rT}·K`; the call's
 envelope is genuinely unbounded). -/
 theorem integrable_discountedTerminal (h : BSCallHyp μ S_0 K r σ T Z) :
-    Integrable (fun ω => Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω)) μ := by
+    Integrable (fun ω ↦ Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω)) μ := by
   obtain ⟨hS_0, hK, hσ, hT, hZ⟩ := h
-  have hsrc : Integrable (fun x : ℝ => S_0 * Real.exp ((r - σ^2 / 2) * T)
+  have hsrc : Integrable (fun x : ℝ ↦ S_0 * Real.exp ((r - σ^2 / 2) * T)
       * Real.exp (-r * T) * Real.exp (σ * Real.sqrt T * x)) (μ.map Z) := by
     rw [hZ.map_eq]
     exact (integrable_exp_mul_gaussianReal (σ * Real.sqrt T)).const_mul _
   have hcomp := (integrable_map_measure hsrc.aestronglyMeasurable hZ.aemeasurable).mp hsrc
-  have hpt : ∀ ω : Ω, (fun x : ℝ => S_0 * Real.exp ((r - σ^2 / 2) * T)
+  have hpt : ∀ ω : Ω, (fun x : ℝ ↦ S_0 * Real.exp ((r - σ^2 / 2) * T)
       * Real.exp (-r * T) * Real.exp (σ * Real.sqrt T * x)) (Z ω)
       = Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω) := by
     intro ω
@@ -693,10 +663,10 @@ theorem integrable_discountedTerminal (h : BSCallHyp μ S_0 K r σ T Z) :
     unfold bsTerminal
     rw [h1]
     ring
-  have hae : (fun x : ℝ => S_0 * Real.exp ((r - σ^2 / 2) * T)
+  have hae : (fun x : ℝ ↦ S_0 * Real.exp ((r - σ^2 / 2) * T)
       * Real.exp (-r * T) * Real.exp (σ * Real.sqrt T * x)) ∘ Z
-      =ᵐ[μ] (fun ω => Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω)) :=
-    Filter.Eventually.of_forall fun ω => hpt ω
+      =ᵐ[μ] (fun ω ↦ Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω)) :=
+    Filter.Eventually.of_forall fun ω ↦ hpt ω
   exact (integrable_congr hae).mp hcomp
 
 /-- **The discounted-forward identity**: `E[e^{-rT}·S_T] = S₀`. The risk-neutral
@@ -706,11 +676,11 @@ theorem integral_discountedTerminal_eq (h : BSCallHyp μ S_0 K r σ T Z) :
     ∫ ω, Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω) ∂μ = S_0 := by
   obtain ⟨hS_0, hK, hσ, hT, hZ⟩ := h
   have hmeas : AEStronglyMeasurable
-      (fun z : ℝ => Real.exp (-r * T) * bsTerminal S_0 r σ T z) (gaussianReal 0 1) := by
+      (fun z : ℝ ↦ Real.exp (-r * T) * bsTerminal S_0 r σ T z) (gaussianReal 0 1) := by
     unfold bsTerminal
     fun_prop
-  rw [show (fun ω => Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω))
-      = (fun z => Real.exp (-r * T) * bsTerminal S_0 r σ T z) ∘ Z from rfl,
+  rw [show (fun ω ↦ Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω))
+      = (fun z ↦ Real.exp (-r * T) * bsTerminal S_0 r σ T z) ∘ Z from rfl,
     hZ.integral_comp hmeas,
     integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0)]
   have hsplit : ∀ z : ℝ,
@@ -736,7 +706,7 @@ theorem integral_discountedTerminal_eq (h : BSCallHyp μ S_0 K r σ T Z) :
 `0 ≤ C ≤ e^{-rT}·S_T` with the discounted terminal integrable — the honest case,
 where boundedness fails and domination replaces it. -/
 theorem integrable_mcCallPayoff (h : BSCallHyp μ S_0 K r σ T Z) :
-    Integrable (fun ω => mcCallPayoff S_0 K r σ T (Z ω)) μ := by
+    Integrable (fun ω ↦ mcCallPayoff S_0 K r σ T (Z ω)) μ := by
   refine (integrable_discountedTerminal h).mono' (aestronglyMeasurable_mcCallPayoff h) ?_
   filter_upwards with ω
   rw [Real.norm_eq_abs, abs_of_nonneg (mcCallPayoff_nonneg S_0 K r σ T _)]
@@ -746,20 +716,20 @@ theorem integrable_mcCallPayoff (h : BSCallHyp μ S_0 K r σ T Z) :
 `‖C‖² ≤ (e^{-rT}·S_T)²` with `S_T²` integrable (`memLp_two_iff_integrable_sq_norm`
 is the bridge; no constant bound exists). -/
 theorem memLp2_mcCallPayoff (h : BSCallHyp μ S_0 K r σ T Z) :
-    MemLp (fun ω => mcCallPayoff S_0 K r σ T (Z ω)) 2 μ := by
+    MemLp (fun ω ↦ mcCallPayoff S_0 K r σ T (Z ω)) 2 μ := by
   have hdom : Integrable
-      (fun ω => (Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω)) ^ 2) μ := by
+      (fun ω ↦ (Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω)) ^ 2) μ := by
     have h0 : Integrable
-        (fun ω => Real.exp (-r * T) ^ 2 * (bsTerminal S_0 r σ T (Z ω)) ^ 2) μ :=
+        (fun ω ↦ Real.exp (-r * T) ^ 2 * (bsTerminal S_0 r σ T (Z ω)) ^ 2) μ :=
       (integrable_sq_terminal h).const_mul _
     refine (integrable_congr (Filter.Eventually.of_forall ?_)).mp h0
     intro ω
     exact (mul_pow (Real.exp (-r * T)) (bsTerminal S_0 r σ T (Z ω)) 2).symm
-  have haes2 : AEStronglyMeasurable (fun x => mcCallPayoff S_0 K r σ T (Z x) ^ 2) μ :=
+  have haes2 : AEStronglyMeasurable (fun x ↦ mcCallPayoff S_0 K r σ T (Z x) ^ 2) μ :=
     aestronglyMeasurable_comp_of_hasLaw
-      (g := fun z => mcCallPayoff S_0 K r σ T z ^ 2) h.Z_law
+      (g := fun z ↦ mcCallPayoff S_0 K r σ T z ^ 2) h.Z_law
       (by unfold mcCallPayoff bsTerminal; fun_prop)
-  have hint2 : Integrable (fun x => mcCallPayoff S_0 K r σ T (Z x) ^ 2) μ := by
+  have hint2 : Integrable (fun x ↦ mcCallPayoff S_0 K r σ T (Z x) ^ 2) μ := by
     refine hdom.mono' haes2 ?_
     filter_upwards with ω
     have hpos : 0 ≤ Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω) :=
@@ -797,7 +767,7 @@ omit [IsProbabilityMeasure μ] in
 /-- All sampled call payoffs have the same pushforward law. -/
 private theorem hasLaw_mcCallPayoff (hlaw : ∀ i : ℕ, HasLaw (Z i) (gaussianReal 0 1) μ)
     (i : ℕ) :
-    HasLaw (fun ω => mcCallPayoff S_0 K r σ T (Z i ω))
+    HasLaw (fun ω ↦ mcCallPayoff S_0 K r σ T (Z i ω))
       ((gaussianReal 0 1).map (mcCallPayoff S_0 K r σ T)) μ :=
   HasLaw.comp (Y := mcCallPayoff S_0 K r σ T)
     (⟨(measurable_mcCallPayoff S_0 K r σ T).aemeasurable, rfl⟩ :
@@ -809,24 +779,24 @@ omit [IsProbabilityMeasure μ] in
 /-- The sampled call payoffs are identically distributed. -/
 private theorem identDistrib_mcCallPayoff
     (hlaw : ∀ i : ℕ, HasLaw (Z i) (gaussianReal 0 1) μ) (i : ℕ) :
-    IdentDistrib (fun ω => mcCallPayoff S_0 K r σ T (Z i ω))
-      (fun ω => mcCallPayoff S_0 K r σ T (Z 0 ω)) μ μ :=
+    IdentDistrib (fun ω ↦ mcCallPayoff S_0 K r σ T (Z i ω))
+      (fun ω ↦ mcCallPayoff S_0 K r σ T (Z 0 ω)) μ μ :=
   HasLaw.identDistrib (hasLaw_mcCallPayoff hlaw i) (hasLaw_mcCallPayoff hlaw 0)
 
 omit [IsProbabilityMeasure μ] in
 /-- Full independence of the ensemble transfers through the call payoff map. -/
 private theorem iIndepFun_mcCallPayoff (hindep : iIndepFun Z μ) :
-    iIndepFun (fun i => fun ω => mcCallPayoff S_0 K r σ T (Z i ω)) μ :=
-  hindep.comp (fun _ => mcCallPayoff S_0 K r σ T)
-    (fun _ => measurable_mcCallPayoff S_0 K r σ T)
+    iIndepFun (fun i ↦ fun ω ↦ mcCallPayoff S_0 K r σ T (Z i ω)) μ :=
+  hindep.comp (fun _ ↦ mcCallPayoff S_0 K r σ T)
+    (fun _ ↦ measurable_mcCallPayoff S_0 K r σ T)
 
 omit [IsProbabilityMeasure μ] in
 /-- Pairwise independence of the ensemble transfers through the call payoff map —
 the Etemadi hypothesis the strong law consumes. -/
 private theorem pairwise_mcCallPayoff (hindep : _root_.Pairwise ((· ⟂ᵢ[μ] ·) on Z)) :
     ∀ i j : ℕ, i ≠ j →
-      (fun ω => mcCallPayoff S_0 K r σ T (Z i ω)) ⟂ᵢ[μ]
-        (fun ω => mcCallPayoff S_0 K r σ T (Z j ω)) := by
+      (fun ω ↦ mcCallPayoff S_0 K r σ T (Z i ω)) ⟂ᵢ[μ]
+        (fun ω ↦ mcCallPayoff S_0 K r σ T (Z j ω)) := by
   intro i j hij
   exact (hindep hij).comp (measurable_mcCallPayoff S_0 K r σ T)
     (measurable_mcCallPayoff S_0 K r σ T)
@@ -846,24 +816,24 @@ Black–Scholes call price `S₀·Φ(d₁) − K·e^{-rT}·Φ(d₂)`. -/
 theorem mc_call_consistency (h : BSCallHyp μ S_0 K r σ T (Z 0))
     (hlaw : ∀ i : ℕ, HasLaw (Z i) (gaussianReal 0 1) μ)
     (hindep : _root_.Pairwise ((· ⟂ᵢ[μ] ·) on Z)) :
-    ∀ᵐ ω ∂μ, Tendsto (fun n => mcCallMean S_0 K r σ T Z n ω) atTop
+    ∀ᵐ ω ∂μ, Tendsto (fun n ↦ mcCallMean S_0 K r σ T Z n ω) atTop
       (𝓝 (S_0 * Phi (bsd1 S_0 K r σ T)
         - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T))) := by
-  have hint : Integrable (fun ω => mcCallPayoff S_0 K r σ T (Z 0 ω)) μ :=
+  have hint : Integrable (fun ω ↦ mcCallPayoff S_0 K r σ T (Z 0 ω)) μ :=
     integrable_mcCallPayoff h
   have hslln := strong_law_ae_real
-    (X := fun i => fun ω => mcCallPayoff S_0 K r σ T (Z i ω))
-    hint (pairwise_mcCallPayoff hindep) (fun i => identDistrib_mcCallPayoff hlaw i)
+    (X := fun i ↦ fun ω ↦ mcCallPayoff S_0 K r σ T (Z i ω))
+    hint (pairwise_mcCallPayoff hindep) (fun i ↦ identDistrib_mcCallPayoff hlaw i)
   filter_upwards [hslln] with ω hω
   rw [← mean_mcCallPayoff_eq_bsCall (Z := Z 0) h]
-  exact hω.congr fun _ => rfl
+  exact hω.congr fun _ ↦ rfl
 
 /-- The i.i.d. specialization for the call: full independence gives the pairwise
 hypothesis. -/
 theorem mc_call_consistency_iid (h : BSCallHyp μ S_0 K r σ T (Z 0))
     (hlaw : ∀ i : ℕ, HasLaw (Z i) (gaussianReal 0 1) μ)
     (hindep : iIndepFun Z μ) :
-    ∀ᵐ ω ∂μ, Tendsto (fun n => mcCallMean S_0 K r σ T Z n ω) atTop
+    ∀ᵐ ω ∂μ, Tendsto (fun n ↦ mcCallMean S_0 K r σ T Z n ω) atTop
       (𝓝 (S_0 * Phi (bsd1 S_0 K r σ T)
         - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T))) := by
   refine mc_call_consistency h hlaw ?_
@@ -880,14 +850,14 @@ theorem mc_call_clt_library (h : BSCallHyp μ S_0 K r σ T (Z 0))
     {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {μ' : Measure Ω'} [IsProbabilityMeasure μ']
     {Y : Ω' → ℝ}
     (hY : HasLaw Y
-      (gaussianReal 0 (Var[fun ω => mcCallPayoff S_0 K r σ T (Z 0 ω); μ]).toNNReal) μ') :
+      (gaussianReal 0 (Var[fun ω ↦ mcCallPayoff S_0 K r σ T (Z 0 ω); μ]).toNNReal) μ') :
     TendstoInDistribution
-      (fun (n : ℕ) (ω : Ω) => (Real.sqrt (n : ℝ))⁻¹ *
+      (fun (n : ℕ) (ω : Ω) ↦ (Real.sqrt (n : ℝ))⁻¹ *
         (∑ i ∈ Finset.range n, mcCallPayoff S_0 K r σ T (Z i ω)
           - (n : ℝ) * ∫ ω', mcCallPayoff S_0 K r σ T (Z 0 ω') ∂μ))
-      atTop Y (fun _ => μ) μ' :=
+      atTop Y (fun _ ↦ μ) μ' :=
   tendstoInDistribution_inv_sqrt_mul_sum_sub hY (memLp2_mcCallPayoff h)
-    (iIndepFun_mcCallPayoff hindep) (fun i => identDistrib_mcCallPayoff hlaw i)
+    (iIndepFun_mcCallPayoff hindep) (fun i ↦ identDistrib_mcCallPayoff hlaw i)
 
 /-- **Monte Carlo error bars for the call, desk form**:
 `√n · (mcCallMean n − C_BS) ⇒ 𝓝(0, σ_C²)` in distribution, against the
@@ -896,14 +866,14 @@ theorem mc_call_clt (h : BSCallHyp μ S_0 K r σ T (Z 0))
     (hlaw : ∀ i : ℕ, HasLaw (Z i) (gaussianReal 0 1) μ)
     (hindep : iIndepFun Z μ) :
     TendstoInDistribution
-      (fun (n : ℕ) (ω : Ω) => Real.sqrt (n : ℝ) *
+      (fun (n : ℕ) (ω : Ω) ↦ Real.sqrt (n : ℝ) *
         (mcCallMean S_0 K r σ T Z n ω - ∫ ω', mcCallPayoff S_0 K r σ T (Z 0 ω') ∂μ))
-      atTop (id : ℝ → ℝ) (fun _ => μ)
-      (gaussianReal 0 (Var[fun ω => mcCallPayoff S_0 K r σ T (Z 0 ω); μ]).toNNReal) := by
+      atTop (id : ℝ → ℝ) (fun _ ↦ μ)
+      (gaussianReal 0 (Var[fun ω ↦ mcCallPayoff S_0 K r σ T (Z 0 ω); μ]).toNNReal) := by
   have hlib := mc_call_clt_library (μ' := gaussianReal 0
-      (Var[fun ω => mcCallPayoff S_0 K r σ T (Z 0 ω); μ]).toNNReal) (Y := (id : ℝ → ℝ))
+      (Var[fun ω ↦ mcCallPayoff S_0 K r σ T (Z 0 ω); μ]).toNNReal) (Y := (id : ℝ → ℝ))
     h hlaw hindep ⟨by fun_prop, Measure.map_id⟩
-  refine TendstoInDistribution.congr (fun n => ?_) Filter.EventuallyEq.rfl hlib
+  refine TendstoInDistribution.congr (fun n ↦ ?_) Filter.EventuallyEq.rfl hlib
   filter_upwards with ω
   simp only [mcCallMean]
   exact inv_sqrt_mul_sub_eq (∑ i ∈ Finset.range n, mcCallPayoff S_0 K r σ T (Z i ω))
@@ -948,19 +918,19 @@ theorem secondMoment_callPayoff (h : BSCallHyp μ S_0 K r σ T Z) :
     rw [ν_log_def, d_2_def, bsd2, bsd1]
     ring
   have hmeas : AEStronglyMeasurable
-      (fun z : ℝ => (max (bsTerminal S_0 r σ T z - K) 0) ^ 2) (gaussianReal 0 1) := by
+      (fun z : ℝ ↦ (max (bsTerminal S_0 r σ T z - K) 0) ^ 2) (gaussianReal 0 1) := by
     unfold bsTerminal
     fun_prop
   -- Step 1-2: transfer to the standard normal, convert to the density
-  rw [show (fun ω => (max (bsTerminal S_0 r σ T (Z ω) - K) 0) ^ 2)
-        = (fun z => (max (bsTerminal S_0 r σ T z - K) 0) ^ 2) ∘ Z from rfl,
+  rw [show (fun ω ↦ (max (bsTerminal S_0 r σ T (Z ω) - K) 0) ^ 2)
+        = (fun z ↦ (max (bsTerminal S_0 r σ T z - K) 0) ^ 2) ∘ Z from rfl,
       hZ.integral_comp hmeas,
       integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0)]
   -- Step 3: the square lives on the exercise region `{z > −d₂}`
-  rw [show (fun z : ℝ => gaussianPDFReal 0 1 z • (max (bsTerminal S_0 r σ T z - K) 0) ^ 2)
+  rw [show (fun z : ℝ ↦ gaussianPDFReal 0 1 z • (max (bsTerminal S_0 r σ T z - K) 0) ^ 2)
         = (Set.Ioi (-d_2)).indicator
-            (fun z => gaussianPDFReal 0 1 z * (bsTerminal S_0 r σ T z - K) ^ 2) from
-      funext fun z => by
+            (fun z ↦ gaussianPDFReal 0 1 z * (bsTerminal S_0 r σ T z - K) ^ 2) from
+      funext fun z ↦ by
         rw [smul_eq_mul]
         by_cases hz : z ∈ Set.Ioi (-d_2)
         · have h1 : K < bsTerminal S_0 r σ T z ↔ -d_2 < z :=
@@ -971,7 +941,7 @@ theorem secondMoment_callPayoff (h : BSCallHyp μ S_0 K r σ T Z) :
         · have h1 : K < bsTerminal S_0 r σ T z ↔ -d_2 < z :=
             bsTerminal_gt_K_iff hS_0 hK hσ hT z
           have hST : bsTerminal S_0 r σ T z ≤ K :=
-            le_of_not_gt fun hc => hz (h1.mp hc)
+            le_of_not_gt fun hc ↦ hz (h1.mp hc)
           rw [Set.indicator_of_notMem (by simpa using hz : z ∉ Set.Ioi (-d_2)),
             max_eq_right (sub_nonpos.mpr hST),
             zero_pow (by norm_num), mul_zero]]
@@ -1004,13 +974,13 @@ theorem secondMoment_callPayoff (h : BSCallHyp μ S_0 K r σ T Z) :
   have hint_pdf : IntegrableOn (gaussianPDFReal 0 1) (Set.Ioi (-d_2)) volume :=
     (integrable_gaussianPDFReal 0 1).integrableOn
   have hint_eν : IntegrableOn
-      (fun z : ℝ => Real.exp (ν_log * z) * gaussianPDFReal 0 1 z) (Set.Ioi (-d_2)) volume := by
+      (fun z : ℝ ↦ Real.exp (ν_log * z) * gaussianPDFReal 0 1 z) (Set.Ioi (-d_2)) volume := by
     refine (((integrable_gaussianPDFReal ν_log 1).const_mul
       (Real.exp (ν_log ^ 2 / 2))).integrableOn).congr_fun ?_ measurableSet_Ioi
     intro z _
     exact (exp_mul_gaussianPDFReal_zero_one ν_log z).symm
   have hint_e2ν : IntegrableOn
-      (fun z : ℝ => Real.exp (2 * ν_log * z) * gaussianPDFReal 0 1 z)
+      (fun z : ℝ ↦ Real.exp (2 * ν_log * z) * gaussianPDFReal 0 1 z)
       (Set.Ioi (-d_2)) volume := by
     refine (((integrable_gaussianPDFReal (2 * ν_log) 1).const_mul
       (Real.exp ((2 * ν_log) ^ 2 / 2))).integrableOn).congr_fun ?_ measurableSet_Ioi
@@ -1071,7 +1041,7 @@ theorem secondMoment_mcCallPayoff (h : BSCallHyp μ S_0 K r σ T Z) :
 `secondMoment_mcCallPayoff` (the truncated second moment) and `bs_call_formula`
 (the price `C_BS`). -/
 theorem mc_call_variance (h : BSCallHyp μ S_0 K r σ T Z) :
-    Var[fun ω => mcCallPayoff S_0 K r σ T (Z ω); μ]
+    Var[fun ω ↦ mcCallPayoff S_0 K r σ T (Z ω); μ]
       = Real.exp (-2 * r * T) *
           (S_0 ^ 2 * Real.exp (2 * (r - σ^2 / 2) * T + 2 * (σ * Real.sqrt T)^2)
               * Phi (bsd1 S_0 K r σ T + σ * Real.sqrt T)
@@ -1105,7 +1075,7 @@ vector-valued CLT would need the Cramér–Wold device, not coordinatewise limit
 `Fin d → ℝ` — the law of the joint vector of `d` independent standard normals
 (`multiGauss_hasLaw_joint`). -/
 noncomputable def multiGauss (d : ℕ) : Measure (Fin d → ℝ) :=
-  Measure.pi fun _ => gaussianReal 0 1
+  Measure.pi fun _ ↦ gaussianReal 0 1
 
 instance multiGauss_instIsProbabilityMeasure (d : ℕ) :
     IsProbabilityMeasure (multiGauss d) := by
@@ -1121,7 +1091,7 @@ omit [IsProbabilityMeasure μ] in
 standard normals has the product law `multiGauss d` (Mathlib's `iIndepFun.hasLaw_pi`). -/
 theorem multiGauss_hasLaw_joint {Z : Fin d → Ω → ℝ}
     (hlaw : ∀ j, HasLaw (Z j) (gaussianReal 0 1) μ) (hindep : iIndepFun Z μ) :
-    HasLaw (fun ω j => Z j ω) (multiGauss d) μ :=
+    HasLaw (fun ω j ↦ Z j ω) (multiGauss d) μ :=
   hindep.hasLaw_pi hlaw
 
 omit [IsProbabilityMeasure μ] in
@@ -1141,31 +1111,31 @@ theorem multiD_consistency {W : ℕ → Ω → (Fin d → ℝ)} {H : (Fin d → 
     (hHmeas : Measurable H) (hint : Integrable H (multiGauss d))
     (hlaw : ∀ i : ℕ, HasLaw (W i) (multiGauss d) μ)
     (hindep : _root_.Pairwise ((· ⟂ᵢ[μ] ·) on W)) :
-    ∀ᵐ ω ∂μ, Tendsto (fun n : ℕ => (∑ i ∈ Finset.range n, H (W i ω)) / (n : ℝ)) atTop
+    ∀ᵐ ω ∂μ, Tendsto (fun n : ℕ ↦ (∑ i ∈ Finset.range n, H (W i ω)) / (n : ℝ)) atTop
       (𝓝 (∫ w, H w ∂(multiGauss d))) := by
-  have hint0 : Integrable (fun ω => H (W 0 ω)) μ := by
+  have hint0 : Integrable (fun ω ↦ H (W 0 ω)) μ := by
     have hl0 := hlaw 0
     have hmap : Integrable H (μ.map (W 0)) := by
       rw [hl0.map_eq]
       exact hint
     exact (integrable_map_measure hmap.aestronglyMeasurable hl0.aemeasurable).mp hmap
   have hpair : ∀ i j : ℕ, i ≠ j →
-      (fun ω => H (W i ω)) ⟂ᵢ[μ] (fun ω => H (W j ω)) := by
+      (fun ω ↦ H (W i ω)) ⟂ᵢ[μ] (fun ω ↦ H (W j ω)) := by
     intro i j hij
     exact (hindep hij).comp hHmeas hHmeas
-  have hident : ∀ i : ℕ, IdentDistrib (fun ω => H (W i ω)) (fun ω => H (W 0 ω)) μ μ := by
+  have hident : ∀ i : ℕ, IdentDistrib (fun ω ↦ H (W i ω)) (fun ω ↦ H (W 0 ω)) μ μ := by
     intro i
     have hlawH : HasLaw H ((multiGauss d).map H) (multiGauss d) :=
       ⟨hHmeas.aemeasurable, rfl⟩
     exact HasLaw.identDistrib (hlawH.comp (hlaw i)) (hlawH.comp (hlaw 0))
-  have hslln := strong_law_ae_real (fun i => fun ω => H (W i ω)) hint0 hpair hident
+  have hslln := strong_law_ae_real (fun i ↦ fun ω ↦ H (W i ω)) hint0 hpair hident
   have heq : ∫ ω, H (W 0 ω) ∂μ = ∫ w, H w ∂(multiGauss d) := by
     have hAESM : AEStronglyMeasurable H (μ.map (W 0)) := by
       rw [(hlaw 0).map_eq]
       exact hint.aestronglyMeasurable
     rw [← integral_map (hlaw 0).aemeasurable hAESM, (hlaw 0).map_eq]
   filter_upwards [hslln] with ω hω
-  have hω' : Tendsto (fun n : ℕ => (∑ i ∈ Finset.range n, H (W i ω)) / (n : ℝ)) atTop
+  have hω' : Tendsto (fun n : ℕ ↦ (∑ i ∈ Finset.range n, H (W i ω)) / (n : ℝ)) atTop
       (𝓝 (∫ w, H w ∂(multiGauss d))) := by
     rw [← heq]
     exact hω
@@ -1177,7 +1147,7 @@ theorem multiD_consistency_iid {W : ℕ → Ω → (Fin d → ℝ)} {H : (Fin d 
     (hHmeas : Measurable H) (hint : Integrable H (multiGauss d))
     (hlaw : ∀ i : ℕ, HasLaw (W i) (multiGauss d) μ)
     (hindep : iIndepFun W μ) :
-    ∀ᵐ ω ∂μ, Tendsto (fun n : ℕ => (∑ i ∈ Finset.range n, H (W i ω)) / (n : ℝ)) atTop
+    ∀ᵐ ω ∂μ, Tendsto (fun n : ℕ ↦ (∑ i ∈ Finset.range n, H (W i ω)) / (n : ℝ)) atTop
       (𝓝 (∫ w, H w ∂(multiGauss d))) := by
   refine multiD_consistency hHmeas hint hlaw ?_
   intro i j hij
