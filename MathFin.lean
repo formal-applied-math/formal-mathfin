@@ -12,7 +12,7 @@
   * `BlackScholes/`  — BS family (call, put, digitals, Greeks, PDE,
                        Asian / chooser / capped / power / lookback,
                        Breeden-Litzenberger, bisection IV, …).
-  * `Futures/`       — Black-76 model.
+  * `Futures/`       — Black-76 model, Schwartz one-factor commodity futures.
   * `Binomial/`      — discrete-time tree, CRR convergence, Bermudan
                        sandwich, Merton 1973 American-call dominance.
   * `FixedIncome/`   — ZCB, coupon bonds, duration, convexity, YTM,
@@ -432,6 +432,7 @@ import MathFin.BlackScholes.LognormalCOV
 -- Futures
 import MathFin.Futures.Black76
 import MathFin.Futures.Black76Greeks
+import MathFin.Futures.SchwartzOneFactor
 -- Phase 13 additions:
 import MathFin.Futures.Swaption
 
