@@ -101,11 +101,13 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
 
 /-! ### Stage 2 — the bounded *adapted* coefficients (`β`, `δ` random)
 
-(Stage 1, the deterministic-coefficient identity, is `MathFin/Foundations/ItoDriftExpectation`.)
+(Stage 1, the constant-coefficient identity, is `ito_drift_expectation_identity` in
+`MathFin/Foundations/ItoDriftExpectation`.)
 
 The integrated Itô–drift identity for an Itô process with random adapted coefficients.
 The data: a pre-Brownian motion `B` with measurable sections (path continuity of `B` is not
-assumed), bounded adapted path-continuous `β, δ`, and two hypothesized processes: a `natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every
+assumed), bounded adapted path-continuous `β, δ`, and two hypothesized processes: a
+`natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every
 `t ≥ 0` (`hMeq`, the process values of `itoProcessCLM` at the σ-realization `processToLp δ`),
 and an `X` with `X t = c + ∫₀ᵗ β_s ds + M t` (`hXrel`) whose every path is continuous
 (`hXcont`), which forces every path of `M` to be continuous.

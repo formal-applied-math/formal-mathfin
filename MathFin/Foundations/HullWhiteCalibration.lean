@@ -27,8 +27,8 @@ is derived from those representations.
   `deterministic_solves_ODE` generalizes `vasicekDeterministic_solves_ODE`; constant `θ`
   reduces to Vasicek verbatim (`deterministic_const`); uniqueness of the ODE solution
   (`deterministic_eq_of_solves_ODE`) writes the deterministic part through any other
-  solution `α` as `α(t) + (r₀ − α(0))·e^{−κt}` (`deterministic_eq_add_exp_of_solves_ODE`). It is the centre of the law of
-  `r_t` (`integratedRate_hasLaw_gaussian`).
+  solution `α` as `α(t) + (r₀ − α(0))·e^{−κt}` (`deterministic_eq_add_exp_of_solves_ODE`). It
+  is the centre of the law of `r_t` (`integratedRate_hasLaw_gaussian`).
 * **The short rate in Wiener representation** — `integratedRate` (= `deterministic` +
   `σ·`Wiener integral of the kernel `e^{−κ(t−u)}`) is Gaussian with the Vasicek variance
   `(σ²/2κ)·(1 − e^{−2κt})` — `θ` shifts means, never variances

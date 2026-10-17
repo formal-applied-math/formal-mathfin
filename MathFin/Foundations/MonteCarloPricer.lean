@@ -93,7 +93,7 @@ constant bound is replaced by domination through the discounted terminal):
 * `secondMoment_callPayoff` — the call-side truncated second moment of the lognormal
   in closed form (the `Ioi` mirror of `secondMoment_payoff`);
   `secondMoment_mcCallPayoff` — the discounted second moment `𝔼[C²]`;
-  `mc_call_variance` — the call's CLT limit variance in closed form;
+  `mc_call_variance` — the call's CLT limit variance in closed form.
 
 Multi-dimensional seed:
 

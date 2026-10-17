@@ -42,8 +42,8 @@ The module layers:
 * **The CDS legs under `λ(t)`** — the risky annuity and default-density
   integrals (`cdsAnnuity`, `cdsLosses`), the explicit legs (`premiumLeg`,
   `protectionLeg`), the balance theorem `cdsFairSpreadTV_balances`, the
-  constant-`λ` case `cdsFairSpreadTV_const` (collapsing to `cdsFairSpread`), and the default probability as the integral
-  of the default density (undiscounted).
+  constant-`λ` case `cdsFairSpreadTV_const` (collapsing to `cdsFairSpread`), and the default
+  probability as the integral of the default density (undiscounted).
 * **Restricted Cox mixing** — on the product of a path space with the clock
   space, `(μ₁ ⊗ Exp(1)){Λ_t < ξ} = ∫ e^{−Λ_t} dμ₁` for any `Λ ≥ 0` with
   measurable time sections; a default time enters only when hypothesized
@@ -75,8 +75,7 @@ Public lemmas (all in `namespace MathFin.Cox`):
   `cdsFairSpreadTV_balances`, `cdsAnnuity_eq_riskyAnnuity`,
   `cdsLosses_eq_riskyAnnuity_mul`, `cdsFairSpreadTV_const`,
   `cox_defaultProb_density` — the time-varying CDS layer;
-* `cox_mixing_survival`, `cox_mixed_survival` — the
-  restricted-Cox mixing identity.
+* `cox_mixing_survival`, `cox_mixed_survival` — the restricted-Cox mixing identity.
 
 Supporting lemmas (`hazardSurvival_eq_exp`, `cumHazard_zero`,
 `cumHazard_nonneg`, `cumHazard_deriv`, `cumHazard_continuous`,

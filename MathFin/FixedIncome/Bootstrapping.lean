@@ -565,8 +565,8 @@ theorem boot_step_err (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ) (σ
 list `p`, the affine shape `V i (x :: p) = a i p − b i p · x` with slope
 `b i p > 0` and a fixed bracket containing the root, every bootstrapped factor
 reprices its own quote up to the slope-weighted half-interval
-`b i · (hi i − lo i)/2^{n+1}` — for every instrument `i`. The all-prefix hypotheses restrict which instruments
-qualify (see the module's scope note). -/
+`b i · (hi i − lo i)/2^{n+1}` — for every instrument `i`. The all-prefix hypotheses restrict
+which instruments qualify (see the module's scope note). -/
 theorem boot_reprices_all (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ) (a b : ℕ → List ℝ → ℝ)
     (hb : ∀ i p, 0 < b i p)
     (hV : ∀ (i : ℕ) (p : List ℝ) (x : ℝ), V i (x :: p) = a i p - b i p * x)
