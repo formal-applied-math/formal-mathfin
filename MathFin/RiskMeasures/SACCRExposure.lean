@@ -20,7 +20,7 @@ regulator fixes `α = 1.4`. This is almost entirely a regulatory bookkeeping def
 `PFE` are themselves built from supervisory add-on factors, maturity and supervisory-correlation
 parameters that have no mathematical content beyond their arithmetic combination. We record the
 formula and its one real structural fact: `EAD` is monotone increasing in each of `RC` and `PFE`
-for any fixed `α > 0`, so netting or hedging that lowers either component can only lower (never
+for any fixed `α ≥ 0`, so netting or hedging that lowers either component can only lower (never
 raise) the capital exposure.
 
 The other SA-CCR building block with actual algebraic content is the **effective notional**
@@ -37,10 +37,12 @@ two-trade building block with a *linear* correlation cross term,
 
 the same quadratic-form combination as the variance of a sum of two correlated random variables —
 useful on its own merits (it is this shape, not the Annex-4 one, that the diversification bounds
-below are about), but not a literal algebraic specialisation of the Annex-4 formula above. We
-prove this two-trade aggregator is monotone in each notional's absolute value when
-`ρ ∈ [-1, 1]`, and that it collapses to `|d₁ + d₂|` at `ρ = 1` (full correlation, no diversification
-benefit) and to `√(d₁² + d₂²)` at `ρ = 0` (independent add-ons).
+below are about), but not a literal algebraic specialisation of the Annex-4 formula above. We prove it collapses to
+`|d₁ + d₂|` at `ρ = 1` (full correlation, no diversification benefit) and to `√(d₁² + d₂²)` at
+`ρ = 0` (independent add-ons), that it never exceeds `|d₁| + |d₂|` for `ρ ∈ [-1, 1]` (no *negative*
+diversification), and that for `ρ ≥ 0` and both notionals nonnegative, growing `d₁`'s magnitude
+never shrinks the aggregate (`effNotionalPair_mono_left`; the formula is symmetric in `d₁, d₂`, so
+the same holds for `d₂` by relabelling).
 
 ## Main definitions
 
@@ -49,12 +51,14 @@ benefit) and to `√(d₁² + d₂²)` at `ρ = 0` (independent add-ons).
 
 ## Main results
 
-* `saccrEAD_mono_rc`, `saccrEAD_mono_pfe`: `EAD` is monotone in `RC` and in `PFE` for `α > 0`.
+* `saccrEAD_mono_rc`, `saccrEAD_mono_pfe`: `EAD` is monotone in `RC` and in `PFE` for `α ≥ 0`.
 * `effNotionalPair_nonneg`: the aggregated notional is nonnegative.
 * `effNotionalPair_eq_abs_add_of_corr_one`: at `ρ = 1`, `effNotionalPair = |d₁ + d₂|`.
 * `effNotionalPair_eq_hypot_of_corr_zero`: at `ρ = 0`, `effNotionalPair = √(d₁² + d₂²)`.
-* `effNotionalPair_le_abs_add`: for `ρ ≤ 1`, the aggregation never exceeds `|d₁| + |d₂|` (no
+* `effNotionalPair_le_abs_add`: for `ρ ∈ [-1, 1]`, the aggregation never exceeds `|d₁| + |d₂|` (no
   negative diversification).
+* `effNotionalPair_mono_left`: for `ρ ≥ 0` and `d₂ ≥ 0`, the aggregation is monotone in `d₁` on
+  `[0, ∞)`.
 
 ## References
 
