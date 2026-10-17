@@ -228,7 +228,8 @@ theorem strictlyJointlyElicits_fisslerZieglerExpScore (hα : α ∈ Ioo 0 1) :
     linarith [hsplit]
 
 /-- **`(VaR_α, ES_α)` is jointly elicitable** (Fissler–Ziegel 2016, Corollary 5.5) on the laws with
-finite mean and unique `α`-quantile, although `ES_α` alone is not. -/
+finite mean and unique `α`-quantile, although the (upper-tail, loss-convention) `expectedShortfall`
+alone is not (`not_isElicitable_expectedShortfall`). -/
 theorem isJointlyElicitable_valueAtRisk_lowerExpectedShortfall (hα : α ∈ Ioo 0 1) :
     IsJointlyElicitable (fun μ ↦ quantile μ α) (fun μ ↦ lowerExpectedShortfall μ α)
       {μ | IsProbabilityMeasure μ ∧ Integrable id μ ∧ ∀ x, quantile μ α < x → α < cdf μ x} :=
