@@ -140,14 +140,18 @@ lemma kkt_complementary_term_nonneg {a : κ → ι → ℝ} {b : κ → ℝ} {u 
 
 omit [DecidableEq ι] in
 /-- **KKT sufficiency** for the convex QP `min c ⬝ᵥ x + ½ x ⬝ᵥ (C *ᵥ x)` subject to
-`∀ k, a k ⬝ᵥ x ≤ b k`: a feasible point `x0` satisfying
+`∀ k, a k ⬝ᵥ x ≤ b k`: a point `x0` satisfying
 
 * stationarity: `c + C *ᵥ x0 = -∑ k, u k • a k` (`u` the multipliers),
 * dual feasibility: `u k ≥ 0`,
 * complementary slackness: `u k * (a k ⬝ᵥ x0 - b k) = 0`,
 
 is a global minimizer over the feasible set, provided `C` is symmetric
-positive semidefinite. No constraint qualification is needed. -/
+positive semidefinite. No constraint qualification is needed. Note `x0`'s own
+feasibility is *not* assumed: complementary slackness alone already forces
+`u k = 0` at every `k` where `a k ⬝ᵥ x0 > b k`, so the hypotheses above are
+in fact slightly more general than "`x0` is a feasible KKT point" — the usual
+application has `x0` feasible, but the proof never needs that fact. -/
 theorem kkt_sufficient {c : ι → ℝ} {C : Matrix ι ι ℝ} (hsym : Cᵀ = C) (hpsd : C.PosSemidef)
     {a : κ → ι → ℝ} {b : κ → ℝ} {x0 : ι → ℝ} {u : κ → ℝ} (hu_nonneg : ∀ k, 0 ≤ u k)
     (hstat : c + C *ᵥ x0 = -∑ k, u k • a k)
