@@ -13,7 +13,7 @@ public import MathFin.FixedIncome.DefaultDensity
 /-!
 # CVA under independent exposure (no wrong-way risk)
 
-Hull, *Options, Futures and Other Derivatives* ch. 24 (CVA, sl. 25–28) and Bagaria ch. 16
+Hull, *Options, Futures and Other Derivatives* ch. 24, §24.2 (CVA) and Bagaria ch. 16
 (eq. 16.2): with exposure independent of the counterparty's default time,
 
   `CVA = LGD · E[D(τ) · V_τ⁺ · 1{τ ≤ T}] = LGD · ∫₀ᵀ D(s) · EE(s) · λ(s) · Q(s) ds`,
@@ -52,6 +52,8 @@ noncomputable def cva (LGD : ℝ) (D : ℝ → ℝ) (V : ℝ → Ω₁ → ℝ) 
     (ν : Measure Ω₁) (μ : Measure Ω₂) : ℝ :=
   LGD * ∫ p, (Set.Iic T).indicator D (τ p.2) * max (V (τ p.2) p.1) 0 ∂(ν.prod μ)
 
+/-- `EE` is measurable in `s` when `V` is jointly measurable (Fubini measurability of the
+inner integral). -/
 theorem measurable_expectedExposure [SFinite ν] {V : ℝ → Ω₁ → ℝ}
     (hV : Measurable (Function.uncurry V)) : Measurable (expectedExposure V ν) :=
   (hV.max measurable_const).stronglyMeasurable.integral_prod_right'.measurable
@@ -88,7 +90,7 @@ theorem expectedExposure_gaussian [IsProbabilityMeasure ν] {Z : Ω₁ → ℝ}
   simpa only [add_right_comm a 1, add_sub_cancel_right] using this
 
 open ProbabilityTheory in
-/-- **CVA with Gaussian exposure, no wrong-way risk** (Hull ch. 24, sl. 25–28 and sl. 38;
+/-- **CVA with Gaussian exposure, no wrong-way risk** (Hull ch. 24, §24.2;
 Bagaria eq. 16.2). Exposure `V_s = m(s) + σ(s)√s·Z`, `Z ~ N(0,1)` on the exposure factor,
 independent (product measure) of a default time with continuous hazard `h ≥ 0`; `D`, `m`, `σ`
 measurable and bounded, `σ > 0`. Then
@@ -131,8 +133,8 @@ theorem cva_gaussian [IsProbabilityMeasure ν] [IsProbabilityMeasure μ]
             ≤ M + S * √T * |Z p.1| := by
           rw [abs_of_nonneg (le_max_right _ _)]
           refine max_le ?_ (hg _)
-          have := hσpos (τ p.2)
-          have := hσb (τ p.2)
+          have hσ0 : 0 ≤ σ (τ p.2) := (hσpos (τ p.2)).le
+          have hσS : σ (τ p.2) ≤ S := hσb (τ p.2)
           calc m (τ p.2) + σ (τ p.2) * √(τ p.2) * Z p.1
               ≤ |m (τ p.2)| + σ (τ p.2) * √(τ p.2) * |Z p.1| := by
                 rw [mul_assoc, mul_assoc]
@@ -140,7 +142,7 @@ theorem cva_gaussian [IsProbabilityMeasure ν] [IsProbabilityMeasure μ]
                 · exact le_abs_self _
                 exact le_abs_self _
             _ ≤ M + S * √T * |Z p.1| := add_le_add (hmb _)
-                (mul_le_mul_of_nonneg_right (mul_le_mul this hsq (Real.sqrt_nonneg _) hS)
+                (mul_le_mul_of_nonneg_right (mul_le_mul hσS hsq (Real.sqrt_nonneg _) hS)
                   (abs_nonneg _))
         exact mul_le_mul (hDb _) h1 (abs_nonneg _) hC
       · rw [Set.indicator_of_notMem hs, abs_zero, zero_mul]

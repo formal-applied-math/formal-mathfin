@@ -66,7 +66,7 @@ theorem hazardSurvival_hasDerivAt {h : ℝ → ℝ} (hloc : LocallyIntegrable h)
     intervalIntegral.integral_hasDerivAt_right
       ((hloc.integrableOn_isCompact isCompact_uIcc).intervalIntegrable)
       (hloc.aestronglyMeasurable.stronglyMeasurableAtFilter) ht
-  have h2 : HasDerivAt (fun s => rexp (-cumHazard h s)) (rexp (-cumHazard h t) * -h t) t :=
+  have h2 : HasDerivAt (fun s ↦ rexp (-cumHazard h s)) (rexp (-cumHazard h t) * -h t) t :=
     hH.neg.exp
   convert h2 using 1
   · rfl
@@ -81,17 +81,17 @@ theorem defaultDensity_nonneg {h : ℝ → ℝ} (hnn : ∀ s, 0 ≤ h s) (t : �
 /-- The density is continuous for a continuous hazard. -/
 theorem defaultDensity_continuous {h : ℝ → ℝ} (hh : Continuous h) :
     Continuous (defaultDensity h) :=
-  hh.mul (continuous_iff_continuousAt.2 fun _ =>
+  hh.mul (continuous_iff_continuousAt.2 fun _ ↦
     (hazardSurvival_hasDerivAt hh.locallyIntegrable hh.continuousAt).continuousAt)
 
 /-- **Interval default probability**: `∫ₐᵇ f = Q(a) − Q(b)` for a continuous hazard. -/
 theorem integral_defaultDensity {h : ℝ → ℝ} (hh : Continuous h) (a b : ℝ) :
     ∫ s in a..b, defaultDensity h s = hazardSurvival h a - hazardSurvival h b := by
-  have hd : ∀ s, HasDerivAt (fun u => -hazardSurvival h u) (defaultDensity h s) s := fun s => by
+  have hd : ∀ s, HasDerivAt (fun u ↦ -hazardSurvival h u) (defaultDensity h s) s := fun s ↦ by
     have := (hazardSurvival_hasDerivAt hh.locallyIntegrable hh.continuousAt (t := s)).neg
     rw [neg_neg] at this
     exact this
-  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun s _ => hd s)
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun s _ ↦ hd s)
     ((defaultDensity_continuous hh).intervalIntegrable a b)]
   ring
 
@@ -111,7 +111,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 /-- The density of `τ`'s law as an `ℝ≥0∞`-valued function: `f` on `[0, ∞)`, zero on
 `(−∞, 0)`. -/
 noncomputable def lawDensity (h : ℝ → ℝ) : ℝ → ℝ≥0∞ :=
-  (Set.Ici 0).indicator fun s => ENNReal.ofReal (defaultDensity h s)
+  (Set.Ici 0).indicator fun s ↦ ENNReal.ofReal (defaultDensity h s)
 
 /-- `lawDensity h` is measurable for a continuous hazard. -/
 theorem measurable_lawDensity {h : ℝ → ℝ} (hh : Continuous h) : Measurable (lawDensity h) :=
@@ -126,7 +126,7 @@ theorem withDensity_Iic {h : ℝ → ℝ} (hh : Continuous h) (hnn : ∀ s, 0 �
     Set.Ici_inter_Iic, ← integral_defaultDensity_zero hh a, intervalIntegral.integral_of_le ha,
     ← integral_Icc_eq_integral_Ioc, ofReal_integral_eq_lintegral_ofReal]
   · exact (defaultDensity_continuous hh).continuousOn.integrableOn_Icc
-  · exact Filter.Eventually.of_forall fun s => defaultDensity_nonneg hnn s
+  · exact Filter.Eventually.of_forall fun s ↦ defaultDensity_nonneg hnn s
 
 /-- `Leb.withDensity (lawDensity h)` puts no mass on `(−∞, a]` for `a < 0`. -/
 theorem withDensity_Iic_neg (h : ℝ → ℝ) {a : ℝ} (ha : a < 0) :
@@ -151,13 +151,13 @@ theorem map_eq_withDensity [IsFiniteMeasure μ] {h : ℝ → ℝ} (hh : Continuo
     (hnn : ∀ s, 0 ≤ h s) {τ : Ω → ℝ} (hτ : AEMeasurable τ μ)
     (hcdf : ∀ a, 0 ≤ a → μ {ω | τ ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival h a)) :
     μ.map τ = volume.withDensity (lawDensity h) := by
-  refine Measure.ext_of_Iic _ _ fun a => ?_
+  refine Measure.ext_of_Iic _ _ fun a ↦ ?_
   rw [Measure.map_apply_of_aemeasurable hτ measurableSet_Iic]
   rcases lt_or_ge a 0 with ha | ha
   · rw [withDensity_Iic_neg h ha]
     refine nonpos_iff_eq_zero.mp ?_
     calc μ (τ ⁻¹' Set.Iic a) ≤ μ {ω | τ ω ≤ 0} :=
-          measure_mono fun ω (hω : τ ω ≤ a) => show τ ω ≤ 0 by linarith
+          measure_mono fun ω (hω : τ ω ≤ a) ↦ show τ ω ≤ 0 by linarith
       _ = 0 := by rw [hcdf 0 le_rfl, hazardSurvival_at_zero, ENNReal.ofReal_one, tsub_self]
   · rw [withDensity_Iic hh hnn ha, show τ ⁻¹' Set.Iic a = {ω | τ ω ≤ a} from rfl, hcdf a ha,
       ENNReal.ofReal_sub _ (hazardSurvival_pos h a).le, ENNReal.ofReal_one]
@@ -172,7 +172,7 @@ theorem integral_comp_eq [IsFiniteMeasure μ] {h : ℝ → ℝ} (hh : Continuous
     ∫ ω, g (τ ω) ∂μ = ∫ s in Set.Ici 0, defaultDensity h s * g s := by
   rw [← integral_map hτ hg.aestronglyMeasurable, map_eq_withDensity hh hnn hτ hcdf,
     integral_withDensity_eq_integral_toReal_smul (measurable_lawDensity hh)
-      (Filter.Eventually.of_forall fun s => by
+      (Filter.Eventually.of_forall fun s ↦ by
         unfold lawDensity; by_cases hs : s ∈ Set.Ici (0:ℝ) <;> simp [hs]),
     ← integral_indicator measurableSet_Ici]
   congr 1
@@ -206,13 +206,13 @@ theorem integral_indicator_Iic_eq [IsFiniteMeasure μ] {h : ℝ → ℝ} (hh : C
 `PoissonInterarrival.map_firstArrival_eq_expMeasure` assigns to the first arrival of a
 rate-`λ` Poisson process. Obtained from `map_eq_withDensity` with `τ = id`. -/
 theorem expMeasure_eq_withDensity {r : ℝ} (hr : 0 < r) :
-    ProbabilityTheory.expMeasure r = volume.withDensity (lawDensity fun _ => r) := by
+    ProbabilityTheory.expMeasure r = volume.withDensity (lawDensity fun _ ↦ r) := by
   haveI := ProbabilityTheory.isProbabilityMeasure_expMeasure hr
-  have hS : ∀ a, hazardSurvival (fun _ => r) a = rexp (-(r * a)) := fun a => by
+  have hS : ∀ a, hazardSurvival (fun _ ↦ r) a = rexp (-(r * a)) := fun a ↦ by
     unfold hazardSurvival survivalFromIntensity
-    rw [show cumulativeIntensity (fun _ => r) a = r * a from cumHazard_const r a]
+    rw [show cumulativeIntensity (fun _ ↦ r) a = r * a from cumHazard_const r a]
   have := map_eq_withDensity (μ := ProbabilityTheory.expMeasure r) (τ := id) continuous_const
-    (fun _ => hr.le) aemeasurable_id fun a ha => by
+    (fun _ ↦ hr.le) aemeasurable_id fun a ha ↦ by
       rw [show {ω : ℝ | id ω ≤ a} = Set.Iic a from rfl, ← ProbabilityTheory.ofReal_cdf,
         ProbabilityTheory.cdf_expMeasure_eq hr, if_pos ha, hS,
         ENNReal.ofReal_sub _ (Real.exp_pos _).le, ENNReal.ofReal_one]
