@@ -25,7 +25,7 @@ We take the factors as a point `(z₀, z) : ℝ × (Fin n → ℝ)` under the pr
 laws (`stdNormalFactors`), with the systematic factor in the first slot, so that every name is
 treated symmetrically. (A common bivariate construction instead writes the pair as
 `(Z₁, ρ Z₁ + √(1 − ρ²) Z₂)`, correlation `ρ`; the symmetric model here always has pairwise
-correlation `ρ²` (never `ρ`), so even at `n = 2` it does not coincide with that bivariate
+correlation `ρ²` (not `ρ`), so even at `n = 2` it does not coincide with that bivariate
 construction for any `ρ < 0`, nor for `ρ ∈ (0, 1)` without reparametrising `ρ ↦ √ρ`.)
 
 The copula is defined via `copulaOf`, so being a copula is Sklar's theorem.
@@ -36,8 +36,10 @@ The copula is defined via `copulaOf`, so being a copula is Sklar's theorem.
 * `gaussianFactorCopula_zero`: `ρ = 0` gives the independence copula `Π`.
 * `gaussianFactorCopula_one`: `ρ = 1` gives the comonotonicity copula `M`.
 
-The countermonotonicity copula `W` is only a copula in dimension two and is not a member of the
-symmetric family (pairwise correlations `ρ²` are nonnegative), so there is no `ρ = −1` analogue.
+`ρ = −1` is in range (`ρ ∈ [−1, 1]`) and gives `M` again, same as `ρ = 1`: every name is then
+`−Z₀`, so the family depends on `ρ` only through `ρ²`. The countermonotonicity copula `W` is only
+a copula in dimension two and is not a member of this symmetric family at all (pairwise
+correlations here are `ρ²`, always nonnegative), so no choice of `ρ` recovers it.
 -/
 
 @[expose] public section
@@ -66,9 +68,8 @@ lemma map_stdNormal2_linComb {a b : ℝ} (hab : a ^ 2 + b ^ 2 = 1) :
   have h := gaussianReal_add_gaussianReal_of_indepFun
     (indepFun_prod (μ := gaussianReal 0 1) (ν := gaussianReal 0 1)
       (measurable_const_mul a) (measurable_const_mul b)) h1 h2
-  rw [show (⟨a ^ 2, sq_nonneg a⟩ + ⟨b ^ 2, sq_nonneg b⟩ : ℝ≥0) = 1 from NNReal.eq hab,
+  rwa [show (⟨a ^ 2, sq_nonneg a⟩ + ⟨b ^ 2, sq_nonneg b⟩ : ℝ≥0) = 1 from NNReal.eq hab,
     add_zero] at h
-  exact h
 
 variable {n : ℕ} {ρ : ℝ}
 
@@ -117,6 +118,8 @@ lemma map_Phi_gaussianReal : (gaussianReal 0 1).map Phi = volume.restrict (Ioo 0
 noncomputable def gaussianFactorCopula (n : ℕ) (ρ : ℝ) : Measure (Fin n → ℝ) :=
   copulaOf (gaussianFactorVec ρ) (stdNormalFactors n)
 
+/-- Each marginal CDF of the latent vector is `Φ`, hence continuous — the hypothesis Sklar's
+theorem needs. -/
 lemma continuous_cdf_gaussianFactorVec (hρ : ρ ∈ Icc (-1) 1) (i : Fin n) :
     Continuous (cdf ((stdNormalFactors n).map fun z ↦ gaussianFactorVec ρ z i)) := by
   rw [map_gaussianFactorVec hρ, cdf_gaussianReal_zero_one]
