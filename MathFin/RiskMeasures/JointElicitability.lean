@@ -181,7 +181,8 @@ theorem strictlyJointlyElicits_fisslerZieglerExpScore (hα : α ∈ Ioo 0 1) :
       Real.exp e * (e - ∫ y, y ∂μ + α⁻¹ * ∫ y, pinballLoss α v y ∂μ) - Real.exp e := by
     intro v e
     rw [hS, integral_sub ((hi v e).const_mul _) (integrable_const _), integral_const_mul,
-      integral_add (hA e) (hB v), integral_sub (integrable_const e) hint', integral_const, integral_const, integral_const_mul]
+      integral_add (hA e) (hB v), integral_sub (integrable_const e) hint', integral_const,
+      integral_const, integral_const_mul]
     simp
   refine ⟨fun v e ↦ hS v e ▸ ((hi v e).const_mul _).sub (integrable_const _), fun v e hne ↦ ?_⟩
   have hr := integral_sub_inv_mul_integral_pinballLoss hint hα
