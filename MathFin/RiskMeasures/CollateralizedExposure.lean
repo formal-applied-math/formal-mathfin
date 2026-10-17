@@ -70,10 +70,9 @@ theorem collateralizedExposure_le_rawExposure {C : ℝ} (hC : 0 ≤ C) (V : ℝ)
   unfold collateralizedExposure
   exact max_le_max (by linarith) le_rfl
 
-/-- Collateralization at the threshold `H` dominates full (zero-threshold) collateralization:
-`E_C(V, max(V_lag,0)) ≤ E_C(V, max(V_lag - H, 0))` fails in general, but the natural monotone
-statement holds: a **larger threshold** means **less** collateral called, hence **more** residual
-exposure. -/
+/-- **Threshold collateral is antitone in the threshold**: a larger threshold `H` means less
+collateral is called (`C_H = max(V_lag - H, 0)` shrinks as `H` grows), hence more residual
+exposure survives uncollateralized. -/
 theorem thresholdCollateral_antitone {Vlag H₁ H₂ : ℝ} (h : H₁ ≤ H₂) :
     thresholdCollateral Vlag H₂ ≤ thresholdCollateral Vlag H₁ :=
   max_le_max (by linarith) le_rfl
