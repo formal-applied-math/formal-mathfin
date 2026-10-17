@@ -80,20 +80,22 @@ is Gaussian with this mean and variance —
   `E[exp(-∫₀ᵀ(r_t+λ_t)dt)] = exp(-E[y] + ½Var[y])`,
 
 with `E[y] = (r₀+λ₀)T + (θ+μ)T²/2` and `Var[y] = (sigma_r²+2ρsigma_rsigma_lam+sigma_lam²)T³/3`. See the module
-docstring for the disclosed limitation that Gaussian `λ` can go negative. -/
+docstring for the disclosed limitation that Gaussian `λ` can go negative.
+
+`hT`, `hρ`, `hρ'` are not needed by the MGF step itself (`integral_exp_neg_gaussianReal` holds for
+*any* `m : ℝ` and `v : ℝ≥0`); they are exactly what is needed to certify that this model's
+`Var[y]` formula is a legitimate nonnegative variance, i.e. a genuine `ℝ≥0`, in the first place. -/
 theorem defaultableZeroCouponBond_price (T r0 lam0 θ μ sigr sigl ρ : ℝ)
     (hT : 0 ≤ T) (hρ : -1 ≤ ρ) (hρ' : ρ ≤ 1) :
-    ∃ (m : ℝ) (v : ℝ≥0),
-      m = (r0 + lam0) * T + (θ + μ) * T ^ 2 / 2 ∧
-      (v : ℝ) = (sigr ^ 2 + 2 * ρ * sigr * sigl + sigl ^ 2) * T ^ 3 / 3 ∧
-      ∫ y, rexp (-y) ∂(gaussianReal m v) = rexp (-m + (v : ℝ) / 2) := by
-  have hvnonneg : 0 ≤ (sigr ^ 2 + 2 * ρ * sigr * sigl + sigl ^ 2) * T ^ 3 / 3 := by
-    have hdisc : 0 ≤ sigr ^ 2 + 2 * ρ * sigr * sigl + sigl ^ 2 := by
-      nlinarith [sq_nonneg (sigr - sigl), sq_nonneg (sigr + sigl)]
-    positivity
-  refine ⟨(r0 + lam0) * T + (θ + μ) * T ^ 2 / 2,
-    ⟨(sigr ^ 2 + 2 * ρ * sigr * sigl + sigl ^ 2) * T ^ 3 / 3, hvnonneg⟩, rfl, rfl, ?_⟩
-  exact integral_exp_neg_gaussianReal _ _
+    ∫ y, rexp (-y) ∂(gaussianReal
+        ((r0 + lam0) * T + (θ + μ) * T ^ 2 / 2)
+        ⟨(sigr ^ 2 + 2 * ρ * sigr * sigl + sigl ^ 2) * T ^ 3 / 3, by
+          have hdisc : 0 ≤ sigr ^ 2 + 2 * ρ * sigr * sigl + sigl ^ 2 := by
+            nlinarith [sq_nonneg (sigr - sigl), sq_nonneg (sigr + sigl)]
+          positivity⟩)
+      = rexp (-((r0 + lam0) * T + (θ + μ) * T ^ 2 / 2)
+          + (sigr ^ 2 + 2 * ρ * sigr * sigl + sigl ^ 2) * T ^ 3 / 3 / 2) :=
+  integral_exp_neg_gaussianReal _ _
 
 end CorrelatedGaussianDefaultableBond
 

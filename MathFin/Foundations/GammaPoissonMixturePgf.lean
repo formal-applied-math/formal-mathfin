@@ -6,7 +6,6 @@ Authors: Yang Ye
 module
 
 public import Mathlib
-public import MathFin.Foundations.PoissonPgf
 
 /-!
 # CreditRisk+ sector probability-generating function (Poisson–Gamma mixture)
@@ -15,7 +14,10 @@ CreditRisk+ (Credit Suisse First Boston, 1997) models each sector's systematic
 risk factor as a random intensity `Λ ∼ Gamma(a, r)` (shape `a`, Mathlib's
 *rate* parametrisation `r = 1/β` for the technical document's scale `β`).
 Conditional on `Λ = λ`, the sector default count `N` is Poisson(`λ`), with
-conditional pgf `E[z^N | Λ = λ] = exp(λ(z−1))` (`PoissonPgf.integral_pow_poissonMeasure`).
+conditional pgf `E[z^N | Λ = λ] = exp(λ(z−1))` (the Poisson pgf of
+`Foundations/PoissonPgf.lean`, `integral_pow_poissonMeasure`; this file does not import it, since
+the mixing hypothesis below substitutes the pgf's closed form `exp(λ(z−1))` directly rather than
+invoking that lemma).
 
 **Mixing hypothesis.** This file does not build `N` and `Λ` as random
 variables on a common probability space with a measure-theoretic conditional
