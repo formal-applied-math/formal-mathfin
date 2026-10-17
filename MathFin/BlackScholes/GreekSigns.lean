@@ -9,6 +9,7 @@ public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.PDE
 public import MathFin.BlackScholes.PriceBounds
+public import MathFin.BlackScholes.ImpliedVolatility
 
 /-!
 # Black-Scholes Greek sign constraints
@@ -42,6 +43,11 @@ increasing in rate, decreasing in dividends.
 * `bsV_rho_nonneg`: `∂_r V ≥ 0` (call increasing in rate).
 * `bsV_partial_K_nonpos`: `∂_K V ≤ 0` (call decreasing in strike).
 * `bsV_partial_KK_nonneg`: `∂²_K V ≥ 0` (call convex in strike).
+* `bsV_theta_tau_nonneg`: for `r ≥ 0` the call gains value with time to expiry
+  (calendar theta `Θ = −∂_τ V ≤ 0`, Hull §19.5).
+* `bsP_delta_nonpos`, `bsP_vega_pos`, `bsP_rho_nonpos`: the put column of Hull Table 19.6
+  (put delta `Φ(d₁) − 1 ≤ 0`, put vega `> 0`, put rho `≤ 0`). Put theta has no
+  unconditional sign: a deep in-the-money put can have positive calendar theta.
 -/
 
 @[expose] public section
@@ -114,5 +120,33 @@ theorem bsV_partial_KK_nonneg {K σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ :
   have h_den_pos : 0 < K * σ * Real.sqrt τ :=
     mul_pos (mul_pos hK hσ) (Real.sqrt_pos.mpr hτ)
   exact div_nonneg h_num_nn h_den_pos.le
+
+/-! ## Theta and put-side sign constraints -/
+
+/-- **Call theta sign**: for `r ≥ 0`, `∂_τ V = σ S ϕ(d₁)/(2√τ) + r K e^{−rτ} Φ(d₂) ≥ 0`,
+i.e. the calendar theta `Θ = −∂_τ V` of a call on a non-dividend-paying stock is `≤ 0`. -/
+theorem bsV_theta_tau_nonneg {S K r σ τ : ℝ} (hS : 0 ≤ S) (hK : 0 ≤ K) (hr : 0 ≤ r)
+    (hσ : 0 ≤ σ) :
+    0 ≤ σ * S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (2 * Real.sqrt τ)
+        + r * K * Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ) := by
+  have := gaussianPDFReal_nonneg 0 1 (bsd1 S K r σ τ)
+  have := Phi_nonneg (bsd2 S K r σ τ)
+  positivity
+
+/-- **Put delta is non-positive**: `Φ(d₁) − 1 ≤ 0`. -/
+theorem bsP_delta_nonpos (S K r σ τ : ℝ) : Phi (bsd1 S K r σ τ) - 1 ≤ 0 :=
+  sub_nonpos.mpr (bsV_delta_le_one S K r σ τ)
+
+/-- **Put vega is strictly positive**: put and call vega coincide (`hasDerivAt_bsP_sigma`), so
+this is `bsV_vega_pos` under its put name. -/
+theorem bsP_vega_pos {K r : ℝ} (hK : 0 < K) {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :
+    0 < S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) * Real.sqrt τ :=
+  bsV_vega_pos hK hS hσ hτ
+
+/-- **Put rho is non-positive**: `∂_r P = −K τ e^{−rτ} Φ(−d₂) ≤ 0`. -/
+theorem bsP_rho_nonpos {K τ : ℝ} (hK : 0 ≤ K) (hτ : 0 ≤ τ) (S r σ : ℝ) :
+    -(K * τ * Real.exp (-(r * τ)) * Phi (-bsd2 S K r σ τ)) ≤ 0 := by
+  have := Phi_nonneg (-bsd2 S K r σ τ)
+  exact neg_nonpos.mpr (by positivity)
 
 end MathFin
