@@ -61,8 +61,7 @@ lemma integrable_exp_mul_of_hasLaw {Ω : Type*} {mΩ : MeasurableSpace Ω}
   rw [hZ.map_eq]
   exact integrable_exp_mul_gaussianReal α
 
-/-- **Standard-normal MGF** via `HasLaw` transfer: `𝔼[exp(a·Z)] = exp(a²/2)` for `Z ~ N(0,1)`.
-Shared by `BlackScholes.QuantoGrounding` and `FixedIncome.TimingAdjustment`. -/
+/-- **Standard-normal MGF** via `HasLaw` transfer: `𝔼[exp(a·Z)] = exp(a²/2)` for `Z ~ N(0,1)`. -/
 lemma integral_exp_mul_stdNormal {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
     {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) P) (a : ℝ) :
     ∫ ω, Real.exp (a * Z ω) ∂P = Real.exp (a ^ 2 / 2) := by
@@ -73,8 +72,7 @@ lemma integral_exp_mul_stdNormal {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Me
   simp
 
 /-- The MGF of an affine form in two independent standard normals:
-`𝔼[exp(c + a Z₁ + b Z₂)] = exp(c + a²/2 + b²/2)`. Shared by `BlackScholes.QuantoGrounding`
-and `FixedIncome.TimingAdjustment`. -/
+`𝔼[exp(c + a Z₁ + b Z₂)] = exp(c + a²/2 + b²/2)`. -/
 lemma integral_exp_affine_indep {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
     {Z₁ Z₂ : Ω → ℝ}
     (h₁ : HasLaw Z₁ (gaussianReal 0 1) P) (h₂ : HasLaw Z₂ (gaussianReal 0 1) P)
