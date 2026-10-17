@@ -70,15 +70,15 @@ integral `integral_rpow_mul_exp_neg_mul_Ioi` at rate `r − s`. -/
 theorem integral_exp_mul_gammaMeasure {a r s : ℝ} (ha : 0 < a) (hr : 0 < r) (hs : s < r) :
     ∫ lam, rexp (s * lam) ∂(gammaMeasure a r) = (r / (r - s)) ^ a := by
   have hrs : 0 < r - s := by linarith
-  have hmeasg : Measurable (fun lam : ℝ => ENNReal.ofReal (rexp (s * lam))) :=
+  have hmeasg : Measurable (fun lam : ℝ ↦ ENNReal.ofReal (rexp (s * lam))) :=
     ((measurable_id'.const_mul s).exp).ennreal_ofReal
   have hmeasf : Measurable (gammaPDF a r) :=
     (measurable_gammaPDFReal a r).ennreal_ofReal
   have hmeasF : Measurable
-      (fun lam : ℝ => r ^ a / Gamma a * lam ^ (a - 1) * exp (-((r - s) * lam))) :=
+      (fun lam : ℝ ↦ r ^ a / Gamma a * lam ^ (a - 1) * exp (-((r - s) * lam))) :=
     ((measurable_id'.pow_const (a - 1)).const_mul _).mul
       (measurable_id'.const_mul (r - s)).neg.exp
-  rw [integral_eq_lintegral_of_nonneg_ae (ae_of_all _ fun lam => (Real.exp_pos _).le)
+  rw [integral_eq_lintegral_of_nonneg_ae (ae_of_all _ fun lam ↦ (Real.exp_pos _).le)
       ((measurable_id'.const_mul s).exp.aestronglyMeasurable)]
   have hL : ∫⁻ lam, ENNReal.ofReal (rexp (s * lam)) ∂(gammaMeasure a r)
       = ∫⁻ lam in Ici (0 : ℝ), ENNReal.ofReal
@@ -86,16 +86,16 @@ theorem integral_exp_mul_gammaMeasure {a r s : ℝ} (ha : 0 < a) (hr : 0 < r) (h
     rw [gammaMeasure, lintegral_withDensity_eq_lintegral_mul _ hmeasf hmeasg,
       ← lintegral_add_compl _ measurableSet_Ici, compl_Ici]
     have hleft : ∫⁻ lam in Iio (0 : ℝ),
-        (gammaPDF a r * fun lam => ENNReal.ofReal (rexp (s * lam))) lam = 0 := by
-      rw [setLIntegral_congr_fun (g := fun _ => (0 : ℝ≥0∞)) measurableSet_Iio]
+        (gammaPDF a r * fun lam ↦ ENNReal.ofReal (rexp (s * lam))) lam = 0 := by
+      rw [setLIntegral_congr_fun (g := fun _ ↦ (0 : ℝ≥0∞)) measurableSet_Iio]
       · simp
       · intro lam (hlam : lam < 0)
         simp [Pi.mul_apply, gammaPDF_of_neg hlam]
     have hright : ∫⁻ lam in Ici (0 : ℝ),
-        (gammaPDF a r * fun lam => ENNReal.ofReal (rexp (s * lam))) lam
+        (gammaPDF a r * fun lam ↦ ENNReal.ofReal (rexp (s * lam))) lam
         = ∫⁻ lam in Ici (0 : ℝ), ENNReal.ofReal
             (r ^ a / Gamma a * lam ^ (a - 1) * exp (-((r - s) * lam))) := by
-      refine setLIntegral_congr_fun measurableSet_Ici (fun lam (hlam : 0 ≤ lam) => ?_)
+      refine setLIntegral_congr_fun measurableSet_Ici (fun lam (hlam : 0 ≤ lam) ↦ ?_)
       simp only [Pi.mul_apply, gammaPDF_of_nonneg hlam]
       rw [← ENNReal.ofReal_mul (by positivity)]
       congr 1
@@ -104,10 +104,10 @@ theorem integral_exp_mul_gammaMeasure {a r s : ℝ} (ha : 0 < a) (hr : 0 < r) (h
     rw [hright, hleft, add_zero]
   rw [hL, ← integral_eq_lintegral_of_nonneg_ae
       ((ae_restrict_iff' measurableSet_Ici).mpr
-        (ae_of_all _ fun lam (hlam : 0 ≤ lam) => by positivity))
+        (ae_of_all _ fun lam (hlam : 0 ≤ lam) ↦ by positivity))
       hmeasF.aestronglyMeasurable]
-  have hF : (fun lam : ℝ => r ^ a / Gamma a * lam ^ (a - 1) * exp (-((r - s) * lam)))
-      = fun lam : ℝ => (r ^ a / Gamma a) * (lam ^ (a - 1) * exp (-((r - s) * lam))) := by
+  have hF : (fun lam : ℝ ↦ r ^ a / Gamma a * lam ^ (a - 1) * exp (-((r - s) * lam)))
+      = fun lam : ℝ ↦ (r ^ a / Gamma a) * (lam ^ (a - 1) * exp (-((r - s) * lam))) := by
     funext lam; ring
   rw [hF, MeasureTheory.integral_const_mul, integral_Ici_eq_integral_Ioi,
     integral_rpow_mul_exp_neg_mul_Ioi ha hrs]
@@ -147,7 +147,7 @@ theorem portfolioPgf {ι : Type*} (sectors : Finset ι) (a r : ι → ℝ) (z : 
     (hz : ∀ i ∈ sectors, z < r i + 1) :
     ∏ i ∈ sectors, ∫ lam, rexp (lam * (z - 1)) ∂(gammaMeasure (a i) (r i))
       = ∏ i ∈ sectors, (r i / (r i - (z - 1))) ^ (a i) :=
-  Finset.prod_congr rfl fun i hi => sectorPgf (ha i hi) (hr i hi) (hz i hi)
+  Finset.prod_congr rfl fun i hi ↦ sectorPgf (ha i hi) (hr i hi) (hz i hi)
 
 /-- **`PD_i = 1 − e^{−λ_i}`**: for `N ∼ Poisson(λ)`, the default probability `P(N ≠ 0)` equals
 `1 − e^{−λ}`, since `P(N = 0) = e^{−λ}` and probabilities sum to `1`. -/
