@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.Foundations.GaussianGirsanov
+public import MathFin.FixedIncome.VasicekBondPrice
 public import MathFin.FixedIncome.VasicekSDEGaussian
 
 /-!
@@ -42,8 +43,8 @@ risk-neutral level `θ − lamσ/κ` lowers the terminal mean by `lamσ·(1 − 
 theorem vasicekSDEMean_physical_eq_riskNeutral (r₀ θ κ σ lam T : ℝ) (hκ : κ ≠ 0) :
     vasicekSDEMean r₀ θ κ T
       = vasicekSDEMean r₀ (θ - lam * σ / κ) κ T
-        + lam * σ * ((1 - Real.exp (-(κ * T))) / κ) := by
-  unfold vasicekSDEMean
+        + lam * σ * vasicekBondB κ T := by
+  unfold vasicekSDEMean vasicekBondB
   field_simp
   ring
 
@@ -61,9 +62,9 @@ theorem vasicekShortRate_physical_eq_riskNeutral (hB : IsPreBrownianReal B μ)
     (r₀ θ σ lam : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) (hT : 0 < T) :
     let I : Ω → ℝ := fun ω ↦ wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω
     let s : ℝ := Real.sqrt (vasicekSDEVariance 1 κ T)
-    let c : ℝ := -(lam * ((1 - Real.exp (-(κ * T))) / κ)) / s
+    let c : ℝ := -(lam * vasicekBondB κ T) / s
     HasLaw (fun ω ↦ vasicekSDEMean r₀ θ κ T + σ * I ω)
-      (gaussianReal (vasicekSDEMean r₀ θ κ T - lam * σ * ((1 - Real.exp (-(κ * T))) / κ))
+      (gaussianReal (vasicekSDEMean r₀ θ κ T - lam * σ * vasicekBondB κ T)
         (vasicekSDEVariance σ κ T).toNNReal)
       (μ.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (c * (I ω / s) - c ^ 2 / 2))) := by
   intro I s c
@@ -92,7 +93,7 @@ theorem vasicekShortRate_physical_eq_riskNeutral (hB : IsPreBrownianReal B μ)
   have h := gaussianReal_const_add (gaussianReal_const_mul hZQ (σ * s)) (vasicekSDEMean r₀ θ κ T)
   convert h using 2
   · field_simp
-  · simp only [c]; field_simp; ring
+  · simp only [c, vasicekBondB]; field_simp; ring
   · ext
     have hvσ : 0 ≤ vasicekSDEVariance σ κ T := by
       unfold vasicekSDEVariance
