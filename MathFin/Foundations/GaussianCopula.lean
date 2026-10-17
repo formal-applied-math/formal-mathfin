@@ -23,8 +23,9 @@ latent-variable model behind the Vasicek large-pool model and standard CDO tranc
 We take the factors as a point `(z₀, z) : ℝ × (Fin n → ℝ)` under the product of standard normal
 laws (`stdNormalFactors`), with the systematic factor in the first slot, so that every name is
 treated symmetrically. (A common bivariate construction instead writes the pair as
-`(Z₁, ρ Z₁ + √(1 − ρ²) Z₂)`, correlation `ρ`; the symmetric model here has pairwise correlation
-`ρ²`, and does not specialise to that pair at `n = 2` for `ρ < 0`.)
+`(Z₁, ρ Z₁ + √(1 − ρ²) Z₂)`, correlation `ρ`; the symmetric model here always has pairwise
+correlation `ρ²` (never `ρ`), so even at `n = 2` it does not coincide with that bivariate
+construction for any `ρ < 0`, nor for `ρ ∈ (0, 1)` without reparametrising `ρ ↦ √ρ`.)
 
 The copula is defined via `copulaOf`, so being a copula is Sklar's theorem.
 
