@@ -86,28 +86,28 @@ noncomputable def sampleStdDev (r : Fin n → ℝ) : ℝ := Real.sqrt (sampleVar
 
 /-- Sharpe ratio at zero risk-free rate: `√N · mean(r) / std(r)`, `N` periods per year. -/
 noncomputable def sharpeRatio (N : ℝ) (r : Fin n → ℝ) : ℝ :=
-    Real.sqrt N * sampleMean r / sampleStdDev r
+  Real.sqrt N * sampleMean r / sampleStdDev r
 
 /-- Annualized volatility: `√N · std(r)`, `N` periods per year. -/
 noncomputable def annualizedVolatility (N : ℝ) (r : Fin n → ℝ) : ℝ :=
-    Real.sqrt N * sampleStdDev r
+  Real.sqrt N * sampleStdDev r
 
 /-- Compound annual growth rate of an equity curve held for `n` periods, `N` periods per
 year: `(E_final / E_initial) ^ (N / n) - 1`. -/
 noncomputable def cagr (N : ℝ) (n : ℕ) (E_initial E_final : ℝ) : ℝ :=
-    (E_final / E_initial) ^ (N / n) - 1
+  (E_final / E_initial) ^ (N / n) - 1
 
 /-- Running maximum of an equity curve up to and including time `t`. -/
 noncomputable def runningMax (E : Fin n → ℝ) (t : Fin n) : ℝ :=
-    (univ.filter (· ≤ t)).sup' ⟨t, by simp⟩ E
+  (univ.filter (· ≤ t)).sup' ⟨t, by simp⟩ E
 
 /-- Drawdown at time `t`: the running-maximum-relative decline `1 - E_t / max_{s ≤ t} E_s`. -/
 noncomputable def drawdown (E : Fin n → ℝ) (t : Fin n) : ℝ := 1 - E t / runningMax E t
 
 /-- Max drawdown over the whole equity curve. -/
 noncomputable def maxDrawdown (hn : 0 < n) (E : Fin n → ℝ) : ℝ :=
-    haveI : NeZero n := ⟨hn.ne'⟩
-    univ.sup' univ_nonempty (drawdown E)
+  haveI : NeZero n := ⟨hn.ne'⟩
+  univ.sup' univ_nonempty (drawdown E)
 
 /-! ## Scale invariance -/
 
@@ -155,7 +155,7 @@ theorem cagr_scale_pos {c : ℝ} (hc : 0 < c) (N : ℝ) (n : ℕ) (E_initial E_f
 /-! ## Max drawdown lies in `[0, 1]` for a strictly positive equity curve -/
 
 theorem le_runningMax {E : Fin n → ℝ} (t : Fin n) : E t ≤ runningMax E t :=
-    Finset.le_sup' E (by simp : t ∈ univ.filter (· ≤ t))
+  Finset.le_sup' E (by simp : t ∈ univ.filter (· ≤ t))
 
 theorem runningMax_pos {E : Fin n → ℝ} (hE : ∀ t, 0 < E t) (t : Fin n) : 0 < runningMax E t := by
   obtain ⟨s, hs, hsE⟩ := Finset.exists_mem_eq_sup' (⟨t, by simp⟩ : (univ.filter (· ≤ t)).Nonempty) E
