@@ -10,7 +10,7 @@ public import Mathlib
 /-!
 # Theory of storage: convenience yield and the working/canonical storage kink
 
-The **theory of storage** (Working 1949, Kaldaru) models commodity stocks as
+The **theory of storage** (Working 1949, Kaldor) models commodity stocks as
 a kinked function of "availability" `A` (current stock plus expected supply):
 below the kink stocks sit at an irreducible pipeline-fill floor `Sbar`; above
 it they track the inverse demand-for-storage curve `f⁻¹`.
@@ -53,16 +53,6 @@ namespace MathFin
 
 open Real
 
-/-! ### A general real-number fact: the kinked max and its "excess" form -/
-
-/-- `max a b − b = max (a − b) 0`: shifting a two-way max by its second
-argument turns it into a max against zero. The algebraic engine behind
-`convenienceYield_eq_workingStorage_sub`. -/
-theorem max_sub_eq (a b : ℝ) : max a b - b = max (a - b) 0 := by
-  rcases le_total a b with h | h
-  · rw [max_eq_right h, sub_self, max_eq_right (by linarith : a - b ≤ 0)]
-  · rw [max_eq_left h, max_eq_left (by linarith : (0:ℝ) ≤ a - b)]
-
 /-! ### Working storage and convenience yield -/
 
 /-- **Working storage**: stock sits at the irreducible floor `Sbar` when the
@@ -80,7 +70,7 @@ floor `Sbar` — the two kinks are one and the same. -/
 theorem convenienceYield_eq_workingStorage_sub (Sbar : ℝ) (invDemand : ℝ → ℝ) (A : ℝ) :
     convenienceYield Sbar invDemand A = workingStorage Sbar invDemand A - Sbar := by
   unfold convenienceYield workingStorage
-  rw [max_comm Sbar (invDemand A), max_sub_eq]
+  rw [max_comm Sbar (invDemand A), ← max_sub_sub_right, sub_self]
 
 /-! ### Cost-of-carry identity -/
 
