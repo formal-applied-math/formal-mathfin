@@ -92,8 +92,8 @@ expectation is
 
   `𝔼^{T*}[V] = 𝔼^T[V] · exp(−ρ s u)`.
 
-This is exact; the textbook `(1 + R_F/m)`-style simple-compounding approximation is its
-linearization, not proved here. -/
+This is exact; the textbook `(1 + R_F/m)`-style simple-compounding form replaces the exact
+`Cov(ln V, Y)` with a first-order (bond-duration) approximation, not proved here. -/
 theorem timingAdjustment_gaussian (m s n u ρ B₀ N₀ : ℝ)
     (hB₀ : 0 ≤ B₀) (hN₀ : 0 < N₀)
     {Z₁ Z₂ : Ω → ℝ}
