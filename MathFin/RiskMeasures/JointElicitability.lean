@@ -97,7 +97,7 @@ theorem StrictlyJointlyElicits.apply_mixture {S : ℝ → ℝ → ℝ → ℝ} {
   have h3 := (hS _ hm).2 _ _ (Ne.symm hne')
   rw [← hT₁, ← hT₂] at h2
   rw [integral_mixture (hμi _ _) (hνi _ _) hc, integral_mixture (hμi _ _) (hνi _ _) hc] at h3
-  have hc1 : (0 : ℝ) ≤ 1 - c := sub_nonneg.2 (by exact_mod_cast hc)
+  have hc1 : (0 : ℝ) ≤ 1 - c := sub_nonneg.2 (mod_cast hc)
   nlinarith [mul_le_mul_of_nonneg_left h1 c.coe_nonneg, mul_le_mul_of_nonneg_left h2 hc1]
 
 /-! ### The Fissler–Ziegel scoring family -/
@@ -117,8 +117,8 @@ noncomputable def fisslerZieglerExpScore (α : ℝ) : ℝ → ℝ → ℝ → �
 /-- The exponential member through the pinball loss:
 `S(v, e, y) = exp e · (e − y + α⁻¹ S_α(v, y)) − exp e`. -/
 lemma fisslerZieglerExpScore_eq (hα : α ≠ 0) (v e y : ℝ) :
-    fisslerZieglerExpScore α v e y = Real.exp e * (e - y + α⁻¹ * pinballLoss α v y) - Real.exp e
-    := by
+    fisslerZieglerExpScore α v e y =
+      Real.exp e * (e - y + α⁻¹ * pinballLoss α v y) - Real.exp e := by
   rw [fisslerZieglerExpScore, fisslerZieglerScore, pinballLoss_eq_ite]
   simp only [Pi.zero_apply, mul_zero, sub_zero, add_zero]
   congr 2
@@ -196,18 +196,15 @@ theorem strictlyJointlyElicits_fisslerZieglerExpScore (hα : α ∈ Ioo 0 1) :
     · simp [D]
     · exact (sub_pos.2 (hplt v hv)).le
   have hαi : 0 < α⁻¹ := inv_pos.2 hα.1
-  have hexp : ∀ t : ℝ, Real.exp t * (t - 1) + 1 ≥ 0 ∧ (t ≠ 0 → Real.exp t * (t - 1) + 1 > 0) := by
-    intro t
-    have key : ∀ t : ℝ, 1 - t ≤ Real.exp (-t) := fun t ↦ by
-      linarith [Real.add_one_le_exp (-t)]
+  -- the strict convexity of `exp`: `1 + t < exp t` off `0` makes `exp t · (t − 1) + 1` strictly
+  -- positive, since `exp t · (t − 1) + 1 = exp t · (exp (−t) − (1 − t))`
+  have hexp : ∀ t : ℝ, t ≠ 0 → 0 < Real.exp t * (t - 1) + 1 := fun t ht ↦ by
     have hm : Real.exp t * (t - 1) + 1 = Real.exp t * (Real.exp (-t) - (1 - t)) := by
       have h1 : Real.exp t * Real.exp (-t) = 1 := by
         rw [← Real.exp_add, add_neg_cancel, Real.exp_zero]
       linear_combination (-1 : ℝ) * h1
-    refine ⟨hm ▸ mul_nonneg (Real.exp_pos t).le (sub_nonneg.2 (key t)), fun ht ↦ ?_⟩
     rw [hm]
-    refine mul_pos (Real.exp_pos t) (sub_pos.2 ?_)
-    linarith [Real.add_one_lt_exp (neg_ne_zero.2 ht)]
+    exact mul_pos (Real.exp_pos t) (by linarith [Real.add_one_lt_exp (neg_ne_zero.2 ht)])
   -- rewrite both sides through `r` and `D`
   have hLHS : Real.exp r * (r - ∫ y, y ∂μ + α⁻¹ * ∫ y, pinballLoss α q y ∂μ) - Real.exp r =
       -Real.exp r := by
@@ -226,7 +223,7 @@ theorem strictlyJointlyElicits_fisslerZieglerExpScore (hα : α ∈ Ioo 0 1) :
     have : 0 < Real.exp e * (α⁻¹ * D) := mul_pos (Real.exp_pos e) (mul_pos hαi hDpos)
     rw [he] at this ⊢
     linarith
-  · have h1 := (hexp (e - r)).2 (sub_ne_zero.2 he)
+  · have h1 := hexp (e - r) (sub_ne_zero.2 he)
     have h2 := mul_pos (Real.exp_pos r) h1
     linarith [hsplit]
 
