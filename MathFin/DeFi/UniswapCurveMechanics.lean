@@ -43,7 +43,8 @@ market makers, building on the constant-product substrate in
   the reciprocal of the *harmonic* mean of the B-in-A series, not of its
   arithmetic mean.
 * `swapOutputWithFee`, `fee_invariant_growth`: the Uniswap v2 **fee
-  invariant** `(x1 - γ'·xin)(y1 - γ'·yin) ≥ x0·y0` (γ' = 1 - γ the fee
+  invariant** `(x0 + Δx)(y0 - Δy) ≥ x0·y0`, where `Δy = swapOutput x0 y0
+  (γ·Δx)` is computed from the fee-discounted input (γ the fee retention
   rate), and `lpFeeShare`, the LP value-growth share `f = 1 - √(k1/k2)`.
 * `virtualReserveX/Y`, `virtual_reserve_curve`: the Uniswap v3
   **virtual-reserve curve** `(x + L/√p_b)(y + L√p_a) = L²`.
