@@ -12,8 +12,8 @@ public import Mathlib
 
 A forward contract on a coupon bond, struck at forward price `X`, maturing at
 the forward-expiry date `t_fe`, is replicated by buying the bond today and
-financing the purchase to `t_fe`, collecting (and reinvesting, or simply
-forgoing) every coupon `CF(t)` paid at `t ≤ t_fe` along the way. No-arbitrage
+financing the purchase to `t_fe`, keeping every coupon `CF(t)` paid at
+`t ≤ t_fe` along the way (worth `Df(t) · CF(t)` today). No-arbitrage
 forces the forward contract's value at inception to be zero: discounting the
 strike `X` paid at `t_fe` back to today must equal the bond's price net of the
 discounted coupons it sheds before `t_fe`,
@@ -40,8 +40,6 @@ contract's time-0 value zero — the no-arbitrage characterization.
 @[expose] public section
 
 namespace MathFin
-
-open Finset
 
 variable {ι : Type*}
 

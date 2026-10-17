@@ -22,23 +22,28 @@ formula (`MathFin/BlackScholes/QuantoGrounding.lean`): CIP prices the forward
 with no optionality involved.
 
 **Implied forward curve**: chaining CIP across two maturities gives the
-forward-starting FX forward rate between `T₁` and `T₂` purely from the two
-spot-dated forwards, with the spot rate canceling — the curve is internally
-consistent (no re-anchoring to `S` needed once `F(0,T₁)` and `F(0,T₂)` are
-known):
+**forward-forward factor** — the ratio `F(0,T₂)/F(0,T₁)`, i.e. the FX-swap
+points between `T₁` and `T₂` — purely from the two spot-dated forwards, with
+the spot rate canceling. This is *not itself* an exchange rate: the actual
+`T₁`-struck forward for delivery at `T₂` is the random
+`S_{T₁} · exp((r_d - r_f)·(T₂ - T₁))`, since the future spot `S_{T₁}` is
+unknown today. What the factor gives is the deterministic multiplier by
+which that future forward quote relates to today's two spot-dated quotes —
+the curve is internally consistent, with no re-anchoring to `S` needed once
+`F(0,T₁)` and `F(0,T₂)` are known:
 
-  `F(T₁, T₂) = F(0, T₂) / F(0, T₁) = exp((r_d - r_f) · (T₂ - T₁))`.
+  `F(0, T₂) / F(0, T₁) = exp((r_d - r_f) · (T₂ - T₁))`.
 
 ## Result
 
 * `fxForward`: the CIP forward rate `S · exp((r_d - r_f) · T)`.
 * `fxForward_at_zero`: `F(0, 0) = S` (the forward collapses to spot at
   immediate maturity).
-* `impliedForward_eq_ratio`: the forward-starting rate implied by two
-  spot-dated CIP forwards is their ratio, independent of `S`.
-* `impliedForward_eq_fxForward_diff`: that ratio equals the direct CIP
-  forward over the maturity gap `T₂ - T₁` — the curve is multiplicatively
-  consistent.
+* `fxForward_pos`: every CIP forward is positive whenever spot is.
+* `forwardForwardFactor`: the ratio `F(0,T₂)/F(0,T₁)` — the forward-forward
+  factor, independent of `S`.
+* `forwardForwardFactor_eq_exp_diff`: that ratio equals
+  `exp((r_d - r_f)·(T₂ - T₁))` — the curve is multiplicatively consistent.
 -/
 
 @[expose] public section
@@ -59,21 +64,21 @@ theorem fxForward_at_zero (S r_d r_f : ℝ) : fxForward S r_d r_f 0 = S := by
 theorem fxForward_pos {S : ℝ} (hS : 0 < S) (r_d r_f T : ℝ) : 0 < fxForward S r_d r_f T :=
   mul_pos hS (Real.exp_pos _)
 
-/-- The **implied forward rate** between `T₁` and `T₂`: the ratio of the two
-spot-dated CIP forwards. The spot rate `S` cancels, so this is exactly the
-quantity a forward curve built from market-quoted forwards would use, with no
-need to re-observe spot. -/
-noncomputable def impliedForward (S r_d r_f T1 T2 : ℝ) : ℝ :=
+/-- The **forward-forward factor** between `T₁` and `T₂`: the ratio of the
+two spot-dated CIP forwards. The spot rate `S` cancels, so this is exactly
+the deterministic FX-swap-points factor a forward curve built from
+market-quoted forwards would use, with no need to re-observe spot. It is a
+unitless ratio, not an exchange rate — see the module docstring. -/
+noncomputable def forwardForwardFactor (S r_d r_f T1 T2 : ℝ) : ℝ :=
   fxForward S r_d r_f T2 / fxForward S r_d r_f T1
 
-/-- The implied forward rate equals the direct CIP forward over the maturity
-gap `T₂ - T₁`: `F(T₁, T₂) = exp((r_d - r_f)·(T₂ - T₁))`, with no dependence on
-`S` left. This is the forward curve's self-consistency: chaining two
-spot-dated forwards agrees with pricing the forward-starting contract
-directly. -/
-theorem impliedForward_eq_exp_diff {S : ℝ} (hS : S ≠ 0) (r_d r_f T1 T2 : ℝ) :
-    impliedForward S r_d r_f T1 T2 = Real.exp ((r_d - r_f) * (T2 - T1)) := by
-  unfold impliedForward fxForward
+/-- The forward-forward factor equals `exp((r_d - r_f)·(T₂ - T₁))`, with no
+dependence on `S` left. This is the forward curve's self-consistency:
+chaining two spot-dated forwards agrees with the direct CIP exponential over
+the maturity gap. -/
+theorem forwardForwardFactor_eq_exp_diff {S : ℝ} (hS : S ≠ 0) (r_d r_f T1 T2 : ℝ) :
+    forwardForwardFactor S r_d r_f T1 T2 = Real.exp ((r_d - r_f) * (T2 - T1)) := by
+  unfold forwardForwardFactor fxForward
   rw [mul_div_mul_left _ _ hS, ← Real.exp_sub]
   congr 1
   ring
