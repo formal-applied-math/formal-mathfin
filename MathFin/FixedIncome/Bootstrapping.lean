@@ -130,8 +130,9 @@ Public lemmas (all in `namespace MathFin.Bootstrapping`):
   `boot_reprices_swapChain` — the FRA and swap strips inside the induction;
 * `fraBootstrap_flatCurve` — the flat-curve capstone.
 
-Supporting declarations (the threshold bridge `threshold_affine`; and the
-unfolding lemma `boot_succ`) are `private`.
+Supporting declarations (the threshold bridge `threshold_affine`; the
+slope-weighted residual `abs_affine_sub_eq`; and the unfolding lemma
+`boot_succ`) are `private`.
 -/
 
 set_option autoImplicit false
@@ -152,7 +153,7 @@ private theorem threshold_affine (a b c x : ℝ) (hb : 0 < b) :
   constructor <;> intro h <;> linarith
 
 /-- The slope-weighted residual: for `b > 0`, `|a − b·m − c| = b · |m − (a − c)/b|`. -/
-theorem abs_affine_sub_eq (a b c m : ℝ) (hb : 0 < b) :
+private theorem abs_affine_sub_eq (a b c m : ℝ) (hb : 0 < b) :
     |a - b * m - c| = b * |m - (a - c) / b| := by
   have : a - b * m - c = b * ((a - c) / b - m) := by field_simp; ring
   rw [this, abs_mul, abs_of_pos hb, abs_sub_comm]
@@ -552,9 +553,6 @@ function of the instrument layer, the earlier factor read off the head of `p`
 theorem fraChain_eq (δ : ℝ) (K : ℕ → ℝ) (x : ℝ) (p : List ℝ) (i : ℕ) :
     fraChain δ K i (x :: p) = fraValue δ x (fraForwardRate (p.head?.getD 1) x δ) (K i) := rfl
 
-/-- Special case of `fraChain_eq`: on `x :: p :: r` the earlier factor is `p`. -/
-theorem fraChain_eq_cons (δ : ℝ) (K : ℕ → ℝ) (x p : ℝ) (r : List ℝ) (i : ℕ) :
-    fraChain δ K i (x :: p :: r) = fraValue δ x (fraForwardRate p x δ) (K i) := rfl
 
 /-- The anchor: on the empty prefix the strip instrument is the spot deposit,
 the FRA whose earlier discount factor is the valuation-date factor `1`. -/
