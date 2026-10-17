@@ -47,7 +47,7 @@ is not formalised here.
 @[expose] public section
 
 namespace MathFin
-open MeasureTheory Real Set
+open MeasureTheory Set
 
 /-! ### Martingale step -/
 
