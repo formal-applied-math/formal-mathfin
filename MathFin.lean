@@ -589,6 +589,7 @@ import MathFin.RiskMeasures.Elicitability
 import MathFin.RiskMeasures.Expectile
 import MathFin.RiskMeasures.StandardDeviationPrinciple
 import MathFin.RiskMeasures.BernoulliMixture
+import MathFin.RiskMeasures.CreditMetrics
 import MathFin.RiskMeasures.VasicekIRB
 -- Phase 1 (convex-duality unification): fundamental superhedging bound — every EMM prices a claim
 -- at most its super-replication cost (the pricing-side companion of the coherent-risk representation)
