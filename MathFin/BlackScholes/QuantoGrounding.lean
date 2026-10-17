@@ -46,17 +46,6 @@ open scoped NNReal
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
 
 omit [IsProbabilityMeasure μ] in
-/-- **Standard-normal MGF** via `HasLaw` transfer: `𝔼[exp(a·Z)] = exp(a²/2)` for `Z ~ N(0,1)`. -/
-private lemma integral_exp_mul_stdNormal {Z : Ω → ℝ}
-    (hZ : HasLaw Z (gaussianReal 0 1) μ) (a : ℝ) :
-    ∫ ω, Real.exp (a * Z ω) ∂μ = Real.exp (a ^ 2 / 2) := by
-  have h := hZ.integral_comp
-    (by fun_prop : AEStronglyMeasurable (fun x : ℝ ↦ Real.exp (a * x)) (gaussianReal 0 1))
-  simp only [Function.comp] at h
-  rw [h, integral_exp_mul_gaussianReal_zero a 1]
-  simp
-
-omit [IsProbabilityMeasure μ] in
 /-- **The quanto forward, derived from a joint-Gaussian FX model.** With the foreign terminal
 `S_T = S₀·exp((r_dom − σ_S²/2)T + σ_S√T·Z_S)` and the correlated FX log-driver
 `Z_FX = ρ Z_S + √(1−ρ²) Z_⊥` (`Z_S`, `Z_⊥` independent `N(0,1)`), the FX-density-weighted

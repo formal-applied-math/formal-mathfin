@@ -50,16 +50,6 @@ open MeasureTheory ProbabilityTheory Real
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 
-/-- Standard-normal MGF via `HasLaw` transfer: `𝔼[exp(a·Z)] = exp(a²/2)`. -/
-private lemma integral_exp_mul_stdNormal' {Z : Ω → ℝ}
-    (hZ : HasLaw Z (gaussianReal 0 1) μ) (a : ℝ) :
-    ∫ ω, Real.exp (a * Z ω) ∂μ = Real.exp (a ^ 2 / 2) := by
-  have h := hZ.integral_comp
-    (by fun_prop : AEStronglyMeasurable (fun x : ℝ ↦ Real.exp (a * x)) (gaussianReal 0 1))
-  simp only [Function.comp] at h
-  rw [h, integral_exp_mul_gaussianReal_zero a 1]
-  simp
-
 /-- The MGF of an affine form in two independent standard normals:
 `𝔼[exp(c + a Z₁ + b Z₂)] = exp(c + a²/2 + b²/2)`. -/
 private lemma integral_exp_affine_indep {Z₁ Z₂ : Ω → ℝ}
@@ -74,7 +64,7 @@ private lemma integral_exp_affine_indep {Z₁ Z₂ : Ω → ℝ}
       (by fun_prop : Measurable fun x ↦ Real.exp (b * x))
   have hprod : ∫ ω, Real.exp (a * Z₁ ω) * Real.exp (b * Z₂ ω) ∂μ
       = Real.exp (a ^ 2 / 2) * Real.exp (b ^ 2 / 2) := by
-    rw [← integral_exp_mul_stdNormal' h₁ a, ← integral_exp_mul_stdNormal' h₂ b]
+    rw [← integral_exp_mul_stdNormal h₁ a, ← integral_exp_mul_stdNormal h₂ b]
     exact hind.integral_mul_eq_mul_integral (by fun_prop) (by fun_prop)
   rw [hpt, integral_const_mul, hprod, ← Real.exp_add, ← Real.exp_add, add_assoc]
 

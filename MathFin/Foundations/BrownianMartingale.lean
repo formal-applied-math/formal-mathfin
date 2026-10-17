@@ -61,6 +61,18 @@ lemma integrable_exp_mul_of_hasLaw {Ω : Type*} {mΩ : MeasurableSpace Ω}
   rw [hZ.map_eq]
   exact integrable_exp_mul_gaussianReal α
 
+/-- **Standard-normal MGF** via `HasLaw` transfer: `𝔼[exp(a·Z)] = exp(a²/2)` for `Z ~ N(0,1)`.
+Shared by `BlackScholes.QuantoGrounding` and `FixedIncome.TimingAdjustment` (previously
+duplicated privately in each). -/
+lemma integral_exp_mul_stdNormal {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+    {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) P) (a : ℝ) :
+    ∫ ω, Real.exp (a * Z ω) ∂P = Real.exp (a ^ 2 / 2) := by
+  have h := hZ.integral_comp
+    (by fun_prop : AEStronglyMeasurable (fun x : ℝ ↦ Real.exp (a * x)) (gaussianReal 0 1))
+  simp only [Function.comp] at h
+  rw [h, integral_exp_mul_gaussianReal_zero a 1]
+  simp
+
 namespace IsFilteredPreBrownian
 
 variable [hX : IsFilteredPreBrownian X 𝓕 P] [IsFiniteMeasure P]
