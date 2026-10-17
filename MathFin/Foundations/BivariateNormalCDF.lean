@@ -39,7 +39,6 @@ bivariate normal; every result that needs it carries the hypothesis `r ^ 2 ≤ 1
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real Set
-open scoped NNReal
 
 /-- The law of two independent standard normals, `N(0,1) ⊗ N(0,1)`. -/
 noncomputable abbrev stdNormalPair : Measure (ℝ × ℝ) := (gaussianReal 0 1).prod (gaussianReal 0 1)
@@ -62,8 +61,7 @@ instance (r : ℝ) : IsProbabilityMeasure (bivariateNormalLaw r) :=
 /-- **The standard bivariate normal CDF** `N₂(a, b; r) = P(X ≤ a, Y ≤ b)` for the Cholesky pair
 `X = r Z₂ + √(1 − r²) Z₁`, `Y = Z₂`. -/
 noncomputable def bivariateNormalCDF (a b r : ℝ) : ℝ :=
-  ((gaussianReal 0 1).prod (gaussianReal 0 1)).real
-    {p : ℝ × ℝ | r * p.2 + √(1 - r ^ 2) * p.1 ≤ a ∧ p.2 ≤ b}
+  stdNormalPair.real {p : ℝ × ℝ | r * p.2 + √(1 - r ^ 2) * p.1 ≤ a ∧ p.2 ≤ b}
 
 /-- `N₂(a, b; r)` is the `bivariateNormalLaw r`-measure of the quadrant `(-∞, a] × (-∞, b]`. -/
 lemma bivariateNormalCDF_eq_law (a b r : ℝ) :
@@ -99,6 +97,8 @@ lemma map_linear_bivariateNormalLaw {r : ℝ} (hr : r ^ 2 ≤ 1) (c d : ℝ) :
   congr 2
   rw [mul_pow, hs]; ring
 
+/-- The first margin `X ∼ N(0, 1)` (needs `r ^ 2 ≤ 1`: for `|r| > 1` the junk-valued root
+makes `X = r Y`, which is not `N(0, 1)`). -/
 lemma map_fst_bivariateNormalLaw {r : ℝ} (hr : r ^ 2 ≤ 1) :
     (bivariateNormalLaw r).map Prod.fst = gaussianReal 0 1 := by
   have e : (Prod.fst : ℝ × ℝ → ℝ) = fun q ↦ 1 * q.1 + 0 * q.2 := by ext; simp
@@ -106,16 +106,22 @@ lemma map_fst_bivariateNormalLaw {r : ℝ} (hr : r ^ 2 ≤ 1) :
   congr 1
   simp
 
+/-- The second margin `Y = Z₂ ∼ N(0, 1)`, for every `r` (unconditional: `Y` never involves
+the possibly-junk-valued root). -/
 lemma map_snd_bivariateNormalLaw (r : ℝ) :
     (bivariateNormalLaw r).map Prod.snd = gaussianReal 0 1 := by
   rw [bivariateNormalLaw, Measure.map_map measurable_snd (measurable_choleskyPair r)]
   exact Measure.map_snd_prod.trans (by simp)
 
+/-- `Var[c X + d Y] = c ^ 2 + 2 c d r + d ^ 2`, read off `map_linear_bivariateNormalLaw`'s
+pushforward. -/
 lemma variance_linear_bivariateNormalLaw {r : ℝ} (hr : r ^ 2 ≤ 1) (c d : ℝ) :
     Var[fun q ↦ c * q.1 + d * q.2; bivariateNormalLaw r] = c ^ 2 + 2 * c * d * r + d ^ 2 := by
   rw [← variance_id_map (by fun_prop), map_linear_bivariateNormalLaw hr, variance_id_gaussianReal,
     Real.coe_toNNReal _ (by nlinarith [sq_nonneg (c * r + d)])]
 
+/-- `c X + d Y ∈ L²(bivariateNormalLaw r)`, transported from the Gaussian `L²`-membership
+along `map_linear_bivariateNormalLaw`. -/
 lemma memLp_linear_bivariateNormalLaw {r : ℝ} (hr : r ^ 2 ≤ 1) (c d : ℝ) :
     MemLp (fun q : ℝ × ℝ ↦ c * q.1 + d * q.2) 2 (bivariateNormalLaw r) := by
   have h := memLp_id_gaussianReal (μ := 0)
