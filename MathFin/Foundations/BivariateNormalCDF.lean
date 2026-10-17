@@ -148,7 +148,7 @@ theorem bivariateNormalLaw_map_swap {r : ℝ} (hr : r ^ 2 ≤ 1) :
   refine Measure.ext_of_charFunDual (funext fun L ↦ ?_)
   rw [charFunDual_eq_charFun_map_one, charFunDual_eq_charFun_map_one,
     Measure.map_map L.continuous.measurable measurable_swap]
-  have hL : ∀ q : ℝ × ℝ, L q = L (1, 0) * q.1 + L (0, 1) * q.2 := fun q ↦ by
+  have hL (q : ℝ × ℝ) : L q = L (1, 0) * q.1 + L (0, 1) * q.2 := by
     have : q = q.1 • ((1 : ℝ), (0 : ℝ)) + q.2 • ((0 : ℝ), (1 : ℝ)) := by ext <;> simp
     conv_lhs => rw [this]
     simp only [map_add, map_smul, smul_eq_mul]; ring
@@ -174,8 +174,8 @@ private lemma bivariateNormalCDF_of_sqrt_eq_zero {a b r : ℝ} (h : √(1 - r ^ 
   have hset : {p : ℝ × ℝ | r * p.2 + √(1 - r ^ 2) * p.1 ≤ a ∧ p.2 ≤ b} =
       Prod.snd ⁻¹' {y | r * y ≤ a ∧ y ≤ b} := by ext p; simp [h]
   have hm : MeasurableSet {y : ℝ | r * y ≤ a ∧ y ≤ b} :=
-    (measurableSet_le (measurable_id.const_mul r) measurable_const).inter (measurableSet_le measurable_id
-      measurable_const)
+    (measurableSet_le (measurable_id.const_mul r) measurable_const).inter
+      (measurableSet_le measurable_id measurable_const)
   rw [bivariateNormalCDF, hset, ← map_measureReal_apply measurable_snd hm, Measure.map_snd_prod]
   simp
 
