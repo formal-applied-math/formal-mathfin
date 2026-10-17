@@ -593,6 +593,8 @@ import MathFin.RiskMeasures.VasicekIRB
 -- Phase 1 (convex-duality unification): fundamental superhedging bound — every EMM prices a claim
 -- at most its super-replication cost (the pricing-side companion of the coherent-risk representation)
 import MathFin.Foundations.SuperhedgingDuality
+-- Estimation in practice: detection D-terms and realised-volatility bias (eqs 21.2–21.4)
+import MathFin.Foundations.Estimation
 
 -- Bridges (certified cross-domain unifications)
 import MathFin.Bridges.ConcentrationVariance
