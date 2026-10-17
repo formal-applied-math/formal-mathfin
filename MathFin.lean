@@ -686,3 +686,13 @@ import MathFin.BlackScholes.SVI.TraceForm
 import MathFin.BlackScholes.SVI.TraceSignature
 -- The SVI tail condition d₊ → −∞ iff b(1+ρ) < 2, and the butterfly-free sign formula
 import MathFin.BlackScholes.SVI.TailCondition
+-- Clean/dirty price and accrued interest, on- and between-coupon dates
+import MathFin.FixedIncome.CleanPriceAccrued
+-- Bond forward price via cash-and-carry replication, no-arbitrage strike
+import MathFin.FixedIncome.BondForward
+-- FX forward via covered interest parity and the implied forward curve
+import MathFin.FixedIncome.FxForwardParity
+-- Bullet and equal-principal loan amortization recurrences
+import MathFin.FixedIncome.LoanAmortization
+-- Key-rate-duration partition-of-unity identity
+import MathFin.FixedIncome.KeyRateDuration
