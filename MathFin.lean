@@ -474,6 +474,8 @@ import MathFin.BlackScholes.PowerCall
 -- BS-family Garman normal form (`V = A·Φ(d_1) − K·DF·Φ(d_2)`): the single
 -- numéraire-parameterised template consumed by ExchangeOption, Black-76, KMVMerton
 import MathFin.BlackScholes.GarmanNormalForm
+-- Basket option pricing via moment-matching to a single lognormal (approximation)
+import MathFin.BlackScholes.BasketMomentMatching
 import MathFin.BlackScholes.ExchangeOption
 -- Margrabe BSCallHyp grounding from a joint two-GBM gaussian model (leap-3 closure)
 import MathFin.BlackScholes.MargrabeGrounding
