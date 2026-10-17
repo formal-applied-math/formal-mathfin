@@ -16,9 +16,10 @@ The **one-factor Gaussian copula** on `n` names with factor loading `ρ ∈ [−
 the latent vector
 `Xᵢ = ρ Z₀ + √(1 − ρ²) Zᵢ`, `i : Fin n`,
 where the systematic factor `Z₀` and the idiosyncratic factors `Z₁, …, Zₙ` are independent standard
-normals. Every `Xᵢ` is standard normal, and `Xᵢ, Xⱼ` (`i ≠ j`) have correlation `ρ²`. This is the
-latent-variable model behind the Vasicek large-pool model and standard CDO tranche pricing: name
-`i` defaults by time `t` when `Xᵢ ≤ Φ⁻¹(pᵢ(t))`.
+normals. Every `Xᵢ` is standard normal (`map_gaussianFactorVec`); by an easy unformalized
+calculation, `Cov(Xᵢ, Xⱼ) = ρ²` for `i ≠ j` (not proved as a lemma here — no covariance API is
+exercised in this file). This is the latent-variable model behind the Vasicek large-pool model and
+standard CDO tranche pricing: name `i` defaults by time `t` when `Xᵢ ≤ Φ⁻¹(pᵢ(t))`.
 
 We take the factors as a point `(z₀, z) : ℝ × (Fin n → ℝ)` under the product of standard normal
 laws (`stdNormalFactors`), with the systematic factor in the first slot, so that every name is
