@@ -25,7 +25,7 @@ counterparty in that bucket.
 
 Scope note: `EDNE` is taken as a free parameter (any `Fin n → ℝ` profile) rather than imported
 from `GaussianExposureProfile.lean`. This is a deliberate loose coupling — a caller can supply
-`gaussianENE` from that file, a collateralized `E_C`-style profile from
+`expectedNegativeExposure` from that file, a collateralized `E_C`-style profile from
 `CollateralizedExposure.lean`, or any other exposure model, without this file depending on their
 distributional assumptions.
 

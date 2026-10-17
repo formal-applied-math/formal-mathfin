@@ -17,7 +17,7 @@ For a mark-to-market value `V ~ N(μ, σ²)` at a future date, counterparty-expo
 closed forms in `Φ` and the standard normal density `φ`:
 
   `EPE = E[max(V,0)] = μΦ(μ/σ) + σφ(μ/σ)`,
-  `ENE = E[max(-V,0)] = μ - EPE`,
+  `ENE = E[max(-V,0)] = EPE - μ`,
   `PFE_α = μ + σΦ⁻¹(α)`.
 
 As in `RiskMeasures/Gaussian.lean`, we take the closed form as the *definition* of the exposure
@@ -31,8 +31,8 @@ profile, mirroring the positive-part pattern of `Performance/DownsideMetrics.lea
 
 * `expectedPositiveExposure` (EPE), `expectedNegativeExposure` (ENE), `potentialFutureExposure`
   (PFE_α): the Gaussian closed forms.
-* `expectedNegativeExposure_eq` / `gaussianExposure_epe_sub_ene`: `ENE = μ - EPE` and its
-  rearrangement `EPE - ENE = 2·EPE - μ`.
+* `expectedNegativeExposure_eq` / `gaussianExposure_epe_add_ene`: `ENE = EPE - μ` and its
+  rearrangement `EPE + ENE = 2·EPE - μ`; `gaussianExposure_epe_sub_ene`: `EPE - ENE = μ`.
 * `potentialFutureExposure_eq_gaussianVaR`: `PFE_α` is exactly `gaussianVaR μ σ (Φ⁻¹ α)`.
 * `averageExposure`: the trapezoid-weighted time-average of a discrete EPE profile.
 * `effectiveExposure`: the running maximum of a discrete EPE profile (monotone, by construction).
@@ -51,32 +51,32 @@ variable {μ σ α : ℝ}
 noncomputable def expectedPositiveExposure (μ σ : ℝ) : ℝ :=
   μ * Phi (μ / σ) + σ * gaussianPDFReal 0 1 (μ / σ)
 
-/-- **Expected negative exposure** `ENE = E[max(-V,0)] = μ - EPE` (since `max(V,0) - max(-V,0) =
-V`, so `E[max(-V,0)] = E[V] - E[max(V,0)] = μ - EPE`). -/
+/-- **Expected negative exposure** `ENE = E[max(-V,0)] = EPE - μ` (since `max(V,0) - max(-V,0) =
+V`, so `max(-V,0) = max(V,0) - V`, i.e. `E[max(-V,0)] = E[max(V,0)] - E[V] = EPE - μ`). -/
 noncomputable def expectedNegativeExposure (μ σ : ℝ) : ℝ :=
-  μ - expectedPositiveExposure μ σ
+  expectedPositiveExposure μ σ - μ
 
 /-- **Potential future exposure** at level `α`: `PFE_α = μ + σΦ⁻¹(α)`, the Gaussian value-at-risk
 of the mark-to-market value restated in exposure language. -/
 noncomputable def potentialFutureExposure (μ σ α : ℝ) : ℝ :=
   gaussianVaR μ σ (PhiInv α)
 
-/-- `ENE` unfolds immediately from its definition `ENE = μ - EPE` — stated as a standalone lemma
+/-- `ENE` unfolds immediately from its definition `ENE = EPE - μ` — stated as a standalone lemma
 for readability at call sites. -/
 @[simp] lemma expectedNegativeExposure_eq (μ σ : ℝ) :
-    expectedNegativeExposure μ σ = μ - expectedPositiveExposure μ σ := rfl
+    expectedNegativeExposure μ σ = expectedPositiveExposure μ σ - μ := rfl
 
-/-- `EPE + ENE = EPE - (EPE - μ) = μ`'s rearrangement: `EPE - ENE = 2·EPE - μ`. -/
+/-- `EPE - ENE = EPE - (EPE - μ) = μ`: the two exposures recover the expected mark-to-market value,
+directly from the definition `ENE = EPE - μ`. -/
 lemma gaussianExposure_epe_sub_ene (μ σ : ℝ) :
-    expectedPositiveExposure μ σ - expectedNegativeExposure μ σ =
-      2 * expectedPositiveExposure μ σ - μ := by
+    expectedPositiveExposure μ σ - expectedNegativeExposure μ σ = μ := by
   unfold expectedNegativeExposure
   ring
 
-/-- `EPE + ENE = μ`: the two exposures sum to the expected mark-to-market value, directly from the
-definition `ENE = μ - EPE`. -/
+/-- `EPE + ENE = EPE + (EPE - μ) = 2·EPE - μ`'s rearrangement of the definition. -/
 lemma gaussianExposure_epe_add_ene (μ σ : ℝ) :
-    expectedPositiveExposure μ σ + expectedNegativeExposure μ σ = μ := by
+    expectedPositiveExposure μ σ + expectedNegativeExposure μ σ =
+      2 * expectedPositiveExposure μ σ - μ := by
   unfold expectedNegativeExposure
   ring
 

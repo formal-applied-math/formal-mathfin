@@ -86,7 +86,7 @@ side, `max(C - V, 0)` (the bank's own collateralized shortfall). -/
 noncomputable def marginAdjustedNegativeExposure (V C : ℝ) : ℝ := max (C - V) 0
 
 /-- `MAPE - MANE = V - C`: the margin-adjusted exposure pair recovers the collateral-netted
-mark-to-market, mirroring `gaussianExposure_epe_add_ene`'s uncollateralized identity (there,
+mark-to-market, mirroring `gaussianExposure_epe_sub_ene`'s uncollateralized identity (there,
 `C = 0`). -/
 theorem marginAdjustedExposure_sub (V C : ℝ) :
     marginAdjustedPositiveExposure V C - marginAdjustedNegativeExposure V C = V - C := by

@@ -26,7 +26,7 @@ algebra once the marginal/component VaR are *defined* via the textbook closed fo
 * `marginalVaR`: `∂VaR/∂xᵢ = α(Σx)ᵢ/√(x'Σx)`.
 * `componentVaR`: `CVaRᵢ = xᵢ · marginalVaRᵢ`.
 * `sum_componentVaR_eq_portfolioVaRN`: **Euler decomposition** `∑ᵢ CVaRᵢ = VaR` (needs
-  `x'Σx ≠ 0`, i.e. the portfolio variance is not degenerate).
+  `0 < x'Σx`, i.e. the portfolio variance is strictly positive).
 * `minVarianceHedgeRatio`: the **min-variance hedge ratio** `a* = -W·Cov(Rp,Ri)/σᵢ²` for hedging a
   position against a single asset — a companion risk-reduction formula from the same source
   material, included here alongside the Euler decomposition rather than in its own file.
