@@ -590,6 +590,8 @@ import MathFin.RiskMeasures.Expectile
 import MathFin.RiskMeasures.StandardDeviationPrinciple
 import MathFin.RiskMeasures.BernoulliMixture
 import MathFin.RiskMeasures.VasicekIRB
+-- LHP tranche expected loss: the Vasicek (2002) stop-loss closed form and the finite-pool limit
+import MathFin.RiskMeasures.TrancheLoss
 -- Phase 1 (convex-duality unification): fundamental superhedging bound — every EMM prices a claim
 -- at most its super-replication cost (the pricing-side companion of the coherent-risk representation)
 import MathFin.Foundations.SuperhedgingDuality
