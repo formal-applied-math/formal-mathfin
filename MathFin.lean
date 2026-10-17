@@ -638,6 +638,7 @@ import MathFin.BlackScholes.AmericanPut.Stopping.AEHorizonValue
 -- QRM bridges: equicorrelation, Gaussian VaR/ES-optimal = Markowitz portfolios, the HHI
 -- systematic floor, and the square-root-of-time rule for GBM losses
 import MathFin.Portfolio.Equicorrelation
+import MathFin.Portfolio.ConvexQPKKT
 import MathFin.Bridges.GaussianRiskMarkowitz
 import MathFin.Bridges.EquicorrelationConcentration
 import MathFin.Bridges.SquareRootOfTime
