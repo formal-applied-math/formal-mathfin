@@ -13,7 +13,7 @@ public import Mathlib
 A reduced-form defaultable zero-coupon bond under a Gaussian short rate `r` and a Gaussian
 hazard rate `λ`,
 
-  `dr_t = θ dt + sigma_r dW_r`,  `dλ_t = μ dt + sigma_lam dW_λ`,  `Corr(dW_r, dW_λ) = ρ`,
+  `dr_t = θ dt + σ_r dW_r`,  `dλ_t = μ dt + σ_λ dW_λ`,  `Corr(dW_r, dW_λ) = ρ`,
 
 prices as `E[exp(-∫₀ᵀ (r_t + λ_t) dt)]`. Writing `y = ∫₀ᵀ (r_t + λ_t) dt`, `y` is Gaussian (an
 affine functional of jointly Gaussian processes), so the price is the Gaussian
@@ -21,13 +21,13 @@ moment-generating function of `y` at `-1`:
 
   `E[exp(-y)] = exp(-E[y] + ½ Var[y])`.
 
-**This file does not re-derive the Itô integral `∫₀ᵀ r_t dt` is Gaussian** — that is a
+**This file does not re-derive that the time integral `∫₀ᵀ r_t dt` is Gaussian** — that is a
 stochastic-calculus fact about the SDEs above, outside the scope of the existing
 `StandardGaussianMGF`/`GaussianMoments` substrate this file builds on. Instead `y`'s Gaussian
 law is the hypothesis (`y ~ gaussianReal m v`), and the mean/variance formulas
 
   `E[y] = (r₀ + λ₀) T + ∫₀ᵀ (T - t)(θ + μ) dt = (r₀ + λ₀) T + (θ + μ) T² / 2`,
-  `Var[y] = (sigma_r² + 2ρ sigma_r sigma_lam + sigma_lam²) T³ / 3`
+  `Var[y] = (σ_r² + 2ρ σ_r σ_λ + σ_λ²) T³ / 3`
 
 are packaged as the closed forms the model predicts, with the price identity proved for exactly
 those values. The underlying MGF step is already in Mathlib
@@ -79,7 +79,7 @@ is Gaussian with this mean and variance —
 
   `E[exp(-∫₀ᵀ(r_t+λ_t)dt)] = exp(-E[y] + ½Var[y])`,
 
-with `E[y] = (r₀+λ₀)T + (θ+μ)T²/2` and `Var[y] = (sigma_r²+2ρsigma_rsigma_lam+sigma_lam²)T³/3`. See the module
+with `E[y] = (r₀+λ₀)T + (θ+μ)T²/2` and `Var[y] = (σ_r²+2ρσ_rσ_λ+σ_λ²)T³/3`. See the module
 docstring for the disclosed limitation that Gaussian `λ` can go negative.
 
 `hT`, `hρ`, `hρ'` are not needed by the MGF step itself (`integral_exp_neg_gaussianReal` holds for

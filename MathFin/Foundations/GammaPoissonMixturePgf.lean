@@ -58,7 +58,7 @@ exact pre-banding pgf is proved.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real Set
-open scoped NNReal ENNReal Nat
+open scoped NNReal ENNReal
 
 namespace GammaPoissonMixturePgf
 
