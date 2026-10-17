@@ -7,7 +7,6 @@ module
 
 public import Mathlib
 public import MathFin.BlackScholes.GarmanNormalForm
-public import MathFin.BlackScholes.ExchangeOption
 
 /-!
 # Kirk's approximation for spread options (`K ≠ 0`)
