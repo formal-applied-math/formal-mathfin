@@ -91,11 +91,7 @@ theorem vasicekShortRate_physical_eq_riskNeutral (hB : IsPreBrownianReal B μ)
   · field_simp
   · simp only [c, vasicekBondB]; field_simp; ring
   · ext
-    have hvσ : 0 ≤ vasicekSDEVariance σ κ T := by
-      unfold vasicekSDEVariance
-      have : Real.exp (-(2 * κ * T)) ≤ 1 :=
-        Real.exp_le_one_iff.mpr (by have : (0 : ℝ) ≤ T := T.2; nlinarith)
-      exact div_nonneg (mul_nonneg (sq_nonneg σ) (by linarith)) (by linarith)
+    have hvσ : 0 ≤ vasicekSDEVariance σ κ T := vasicekSDEVariance_nonneg σ hκ T.2
     simp only [Real.coe_toNNReal _ hvσ, NNReal.coe_mk, mul_one]
     rw [mul_pow, hss]
     unfold vasicekSDEVariance
