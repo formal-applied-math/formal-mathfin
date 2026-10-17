@@ -133,6 +133,8 @@ theorem cva_gaussian [IsProbabilityMeasure ν] [IsProbabilityMeasure μ]
             ≤ M + S * √T * |Z p.1| := by
           rw [abs_of_nonneg (le_max_right _ _)]
           refine max_le ?_ (hg _)
+          -- `hσ0` is not referenced by name below: `gcongr`'s side-condition discharger
+          -- finds it in context to prove `0 ≤ σ (τ p.2)` for the `mul_le_mul'`-style step.
           have hσ0 : 0 ≤ σ (τ p.2) := (hσpos (τ p.2)).le
           have hσS : σ (τ p.2) ≤ S := hσb (τ p.2)
           calc m (τ p.2) + σ (τ p.2) * √(τ p.2) * Z p.1
