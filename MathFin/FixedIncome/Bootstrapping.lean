@@ -57,8 +57,7 @@ The module layers:
   the prefix bootstrapped so far, so each step literally inherits the previous
   factors. `boot_step_err` bounds every step, `boot_length` (proved by
   induction) tracks the curve, and `boot_reprices_all` is the repricing
-  theorem over all instruments (the `Finset.range` form is
-  `boot_reprices_range`) — both with hypotheses stated at the fed-in prefix
+  theorem over all instruments — with hypotheses stated at the fed-in prefix
   (see the scope note). `fraChain` with `boot_reprices_fraChain` runs the
   FRA strip through the induction (fixed rate `K i` per FRA; step `0` is the
   spot deposit, anchored at the valuation-date factor `1`), and `swapChain`
@@ -125,8 +124,8 @@ Public lemmas (all in `namespace MathFin.Bootstrapping`):
   `payerSwapValue_affine_lastCoupon_annuity`,
   `strictAnti_payerSwapValue_lastCoupon`, `swapLastCouponThreshold`,
   `swapStep_lastCoupon_err` — the payer-swap layer;
-* `boot_length`, `boot_succ_ne_nil`, `boot_step_err`, `boot_reprices_all`,
-  `boot_reprices_range` — the induction over instruments;
+* `boot_length`, `boot_succ_ne_nil`, `boot_step_err`, `boot_reprices_all` —
+  the induction over instruments;
 * `fraChain_eq`, `fraChain_spot`, `boot_reprices_fraChain`, `swapChain_eq`,
   `boot_reprices_swapChain` — the FRA and swap strips inside the induction;
 * `fraBootstrap_flatCurve` — the flat-curve capstone.
@@ -523,25 +522,6 @@ theorem boot_reprices_all (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ)
   rw [hV _ (bisectMid_mem_Icc hthr hσ n), abs_affine_sub_eq _ _ _ _ hb]
   exact mul_le_mul_of_nonneg_left hstep hb.le
 
-/-- "Reprices all inputs": the repricing bound holds for every instrument index
-inside a budget of `m` instruments, each with its affine shape, slope sign, and
-bracket condition at the prefix the run feeds it — the inheritance carried
-structurally by `boot` (each step consumes the previous factors), with the
-quantifier running over `Finset.range m`. -/
-theorem boot_reprices_range (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ) (a b : ℕ → List ℝ → ℝ)
-    (m n : ℕ) (hb : ∀ i ∈ Finset.range m, 0 < b i (boot V c lo hi n i))
-    (hV : ∀ i ∈ Finset.range m, ∀ x ∈ Set.Icc (lo i) (hi i),
-      V i (x :: boot V c lo hi n i)
-        = a i (boot V c lo hi n i) - b i (boot V c lo hi n i) * x)
-    (hσ : ∀ i ∈ Finset.range m,
-      (a i (boot V c lo hi n i) - c i) / b i (boot V c lo hi n i)
-        ∈ Set.Icc (lo i) (hi i)) :
-    ∀ i ∈ Finset.range m,
-      |V i ((boot V c lo hi n (i + 1)).head (boot_succ_ne_nil V c lo hi n i)
-          :: boot V c lo hi n i) - c i|
-        ≤ b i (boot V c lo hi n i) * ((hi i - lo i) / 2 ^ (n + 1)) :=
-  fun i hiM ↦ boot_reprices_all V c lo hi a b i n (hb i hiM) (hV i hiM) (hσ i hiM)
-
 /-! #### The file's instruments inside the induction
 
 `fraChain` and `swapChain` are the instrument layers in `boot`'s list form:
@@ -646,7 +626,7 @@ bracket around it recovers the factor to within `(hi − lo)/2^{n+1}`. -/
 theorem fraBootstrap_flatCurve (r δ K T1 T2 lo hi : ℝ) (hδ : δ ≠ 0)
     (hK : K = fraForwardRate (zcb r 0 T1) (zcb r 0 T2) δ)
     (hx : zcb r 0 T2 ∈ Set.Icc lo hi) (hlo : 0 < lo) (n : ℕ) :
-    |bisectMid (fun x : ℝ ↦ -(fraValue δ x (fraForwardRate (zcb r 0 T1) x δ) K)) (-0) lo hi n
+    |bisectMid (fun x : ℝ ↦ -(fraValue δ x (fraForwardRate (zcb r 0 T1) x δ) K)) 0 lo hi n
       - zcb r 0 T2| ≤ (hi - lo) / 2 ^ (n + 1) := by
   have hpos : 0 < 1 + δ * K := by
     simp only [hK, fraForwardRate]
@@ -667,7 +647,7 @@ theorem fraBootstrap_flatCurve (r δ K T1 T2 lo hi : ℝ) (hδ : δ ≠ 0)
     rw [h1, div_eq_iff (div_ne_zero hp hx)]
     field_simp
   have hthr : ∀ x ∈ Set.Icc lo hi,
-      (fun x : ℝ ↦ -(fraValue δ x (fraForwardRate (zcb r 0 T1) x δ) K)) x < -0
+      (fun x : ℝ ↦ -(fraValue δ x (fraForwardRate (zcb r 0 T1) x δ) K)) x < 0
         ↔ x < zcb r 0 T2 := by
     intro x hx
     have hthr' := fraThreshold (zcb r 0 T1) δ K 0 lo hi hδ hpos hlo x hx
