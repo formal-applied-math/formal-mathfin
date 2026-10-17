@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.BlackScholes.PDE
+public import MathFin.BlackScholes.PutGreeks
 
 /-!
 # Black-Scholes-Merton (continuous dividends) Greeks
@@ -22,6 +23,11 @@ and derive the Greeks via existing call Greeks at effective drift `r − q`.
 * `hasDerivAt_deriv_bsVDiv_S` — γ_q = e^{-qT} · ϕ(d₁') / (S σ √τ), from the
   formula-level `hasDerivAt_bsVDiv_SS`.
 * `hasDerivAt_bsVDiv_sigma` — vega_q = e^{-qT} · S · ϕ(d₁') · √τ.
+* `bsVDiv_pde` — Hull eq. (19.4) with dividend yield: `Θ + (r−q) S Δ + ½ σ² S² Γ = r V`.
+* `bsVDiv_psi_nonpos` — the call price is non-increasing in the dividend yield.
+* `bsPDiv`, `bsPDiv_eq_bsVDiv` — the dividend-adjusted put and put-call parity with yield `q`
+  (Hull §17.4): `P_q = V_q − S e^{-qτ} + K e^{-rτ}`.
+* `hasDerivAt_bsPDiv_q`, `bsPDiv_psi_nonneg` — the put price is non-decreasing in `q`.
 -/
 
 @[expose] public section
@@ -166,5 +172,72 @@ lemma hasDerivAt_bsVDiv_tau {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   unfold bsVDiv
   convert h_full using 1 <;> try rfl
   ring
+
+/-- **Black–Scholes–Merton PDE with dividend yield** (Hull eq. 19.4 with `q`): writing
+`Θ = −∂_τ V_q` (calendar theta, from `hasDerivAt_bsVDiv_tau`), `Δ = e^{-qτ} Φ(d₁')` and
+`Γ = e^{-qτ} ϕ(d₁')/(S σ √τ)`, one has `Θ + (r − q) S Δ + ½ σ² S² Γ = r V_q`. -/
+theorem bsVDiv_pde {K r q σ : ℝ} (hσ : 0 < σ) {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
+    -(-(q * bsVDiv K r q σ S τ) +
+        Real.exp (-(q * τ)) *
+          (σ * S * gaussianPDFReal 0 1 (bsd1 S K (r - q) σ τ) / (2 * Real.sqrt τ)
+            + (r - q) * K * Real.exp (-((r - q) * τ)) * Phi (bsd2 S K (r - q) σ τ))) +
+      (r - q) * S * (Real.exp (-(q * τ)) * Phi (bsd1 S K (r - q) σ τ)) +
+      (1 / 2 : ℝ) * σ ^ 2 * S ^ 2 *
+        (Real.exp (-(q * τ)) * gaussianPDFReal 0 1 (bsd1 S K (r - q) σ τ)
+          / (S * σ * Real.sqrt τ)) =
+      r * bsVDiv K r q σ S τ := by
+  have h_sqrt_ne : Real.sqrt τ ≠ 0 := (Real.sqrt_pos.mpr hτ).ne'
+  have hS_ne : S ≠ 0 := hS.ne'
+  have hσ_ne : σ ≠ 0 := hσ.ne'
+  rw [bsVDiv, bsV]
+  field_simp
+  ring
+
+/-- **BS-Merton psi sign**: `∂_q V_q = −S τ e^{-qτ} Φ(d₁') ≤ 0` — the call is worth less
+when the stock pays a higher dividend yield. -/
+theorem bsVDiv_psi_nonpos {S τ : ℝ} (hS : 0 ≤ S) (hτ : 0 ≤ τ) (K r q σ : ℝ) :
+    -(S * τ * Real.exp (-(q * τ)) * Phi (bsd1 S K (r - q) σ τ)) ≤ 0 := by
+  have := Phi_nonneg (bsd1 S K (r - q) σ τ)
+  have := Real.exp_pos (-(q * τ))
+  exact neg_nonpos.mpr (by positivity)
+
+/-- Dividends-adjusted BS put price: `P_q = e^{-qτ} · bsP(K, r-q, σ, S, τ)`
+`= K e^{-rτ} Φ(−d₂') − S e^{-qτ} Φ(−d₁')`. -/
+noncomputable def bsPDiv (K r q σ : ℝ) (S τ : ℝ) : ℝ :=
+  Real.exp (-(q * τ)) * bsP K (r - q) σ S τ
+
+/-- **Put-call parity with a continuous dividend yield**:
+`P_q = V_q − S e^{-qτ} + K e^{-rτ}`. -/
+theorem bsPDiv_eq_bsVDiv (K r q σ S τ : ℝ) :
+    bsPDiv K r q σ S τ = bsVDiv K r q σ S τ - S * Real.exp (-(q * τ))
+      + K * Real.exp (-(r * τ)) := by
+  have h : Real.exp (-(q * τ)) * Real.exp (-((r - q) * τ)) = Real.exp (-(r * τ)) := by
+    rw [← Real.exp_add]; congr 1; ring
+  rw [bsPDiv, bsVDiv, bsP_eq_bsV]
+  linear_combination K * h
+
+/-- **Put psi**: `∂_q P_q = S τ e^{-qτ} Φ(−d₁')`, via parity and `hasDerivAt_bsVDiv_q`. -/
+lemma hasDerivAt_bsPDiv_q {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)
+    {S : ℝ} (hS : 0 < S) (q : ℝ) :
+    HasDerivAt (fun q' ↦ bsPDiv K r q' σ S τ)
+      (S * τ * Real.exp (-(q * τ)) * Phi (-bsd1 S K (r - q) σ τ)) q := by
+  have h_eq : (fun q' : ℝ ↦ bsPDiv K r q' σ S τ) = fun q' ↦
+      bsVDiv K r q' σ S τ - S * Real.exp (-(q' * τ)) + K * Real.exp (-(r * τ)) := by
+    funext q'; exact bsPDiv_eq_bsVDiv K r q' σ S τ
+  rw [h_eq]
+  have h_neg : HasDerivAt (fun q' : ℝ ↦ -(q' * τ)) (-τ) q := by
+    have := (hasDerivAt_id q).mul_const τ
+    convert this.neg using 1 <;> first | rfl | ring
+  have h := ((hasDerivAt_bsVDiv_q (r := r) hK hσ hτ hS q).sub (h_neg.exp.const_mul S)).add_const
+    (K * Real.exp (-(r * τ)))
+  convert h using 1
+  all_goals try rfl
+  linear_combination S * τ * Real.exp (-(q * τ)) * Phi_add_Phi_neg (bsd1 S K (r - q) σ τ)
+
+/-- **Put psi sign**: `∂_q P_q ≥ 0` — the put is worth more under a higher dividend yield. -/
+theorem bsPDiv_psi_nonneg {S τ : ℝ} (hS : 0 ≤ S) (hτ : 0 ≤ τ) (K r q σ : ℝ) :
+    0 ≤ S * τ * Real.exp (-(q * τ)) * Phi (-bsd1 S K (r - q) σ τ) := by
+  have := Phi_nonneg (-bsd1 S K (r - q) σ τ)
+  positivity
 
 end MathFin
