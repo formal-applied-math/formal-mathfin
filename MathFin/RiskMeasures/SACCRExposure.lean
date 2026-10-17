@@ -23,21 +23,25 @@ formula and its one real structural fact: `EAD` is monotone increasing in each o
 for any fixed `α ≥ 0`, so netting or hedging that lowers either component can only lower (never
 raise) the capital exposure.
 
-The other SA-CCR building block with actual algebraic content is the **effective notional**
-aggregation of a netting set's trades into a single hedging-set number via the supervisory
-correlation `ρ`:
+The other SA-CCR building block with actual algebraic content is Annex 4's **add-on**
+aggregation, which combines the per-trade *effective notionals* `Dₖ` of a hedging set into a
+single asset-class add-on via a single-systematic-factor correlation `ρ`:
 
-  `EffNotional = √(D² + (1 − ρ²) · (Σ Dᵢ² − D²_single))`
+  `AddOn = √((Σₖ ρₖ · Dₖ)² + Σₖ (1 − ρₖ²) · Dₖ²)`
 
-(a single-systematic-factor combination: expanding it for two trades with equal supervisory
-correlation gives a cross term in `ρ²`, not `ρ`). We instead formalise the structurally analogous
-two-trade building block with a *linear* correlation cross term,
+(expanding this for two trades with equal supervisory correlation `ρ` gives a cross term in `ρ²`,
+not `ρ`: `√(D₁² + D₂² + 2ρ²·D₁·D₂)`). We instead formalise the structurally analogous two-trade
+building block with a *linear* correlation cross term, calling it `effNotionalPair` since it
+takes the same per-trade effective notionals as input (Basel's own term for the add-on formula's
+output would be "add-on", not "effective notional" — the formalised quantity below is named after
+its inputs, not after the Basel output it does not reproduce):
 
   `EffNotional ρ d₁ d₂ = √(d₁² + d₂² + 2ρ·d₁·d₂)`,
 
 the same quadratic-form combination as the variance of a sum of two correlated random variables —
 useful on its own merits (it is this shape, not the Annex-4 one, that the diversification bounds
-below are about), but not a literal algebraic specialisation of the Annex-4 formula above. We prove it collapses to
+below are about), but not a literal algebraic specialisation of the Annex-4 formula above. We
+prove it collapses to
 `|d₁ + d₂|` at `ρ = 1` (full correlation, no diversification benefit) and to `√(d₁² + d₂²)` at
 `ρ = 0` (independent add-ons), that it never exceeds `|d₁| + |d₂|` for `ρ ∈ [-1, 1]` (no *negative*
 diversification), and that for `ρ ≥ 0` and both notionals nonnegative, growing `d₁`'s magnitude
@@ -63,12 +67,12 @@ the same holds for `d₂` by relabelling).
 ## References
 
 * Basel Committee on Banking Supervision, *The standardised approach for measuring counterparty
-  credit risk exposures* (BCBS 279), 2014, §​3 (EAD formula) and Annex 4 (effective notional).
+  credit risk exposures* (BCBS 279), 2014 (the EAD formula, and the Annex 4 add-on aggregation).
 -/
 
 @[expose] public section
 
-namespace MathFin.RiskMeasures
+namespace MathFin
 
 open Real
 
@@ -80,7 +84,7 @@ replacement cost and `PFE` the potential future exposure add-on. The regulator f
 the arithmetic combination, not the specific constant. -/
 noncomputable def saccrEAD (α RC PFE : ℝ) : ℝ := α * (RC + PFE)
 
-/-- The regulatory value of `α` fixed by Basel SA-CCR (BCBS 279 §3). -/
+/-- The regulatory value of `α` fixed by Basel SA-CCR (BCBS 279). -/
 noncomputable def saccrAlpha : ℝ := 1.4
 
 /-- `saccrAlpha` is positive, so `saccrEAD saccrAlpha` inherits the monotonicity lemmas below at
@@ -111,13 +115,16 @@ theorem saccrEAD_mono {α : ℝ} (hα : 0 ≤ α) {RC₁ RC₂ PFE₁ PFE₂ : �
 
 /-! ## Effective notional aggregation
 
-SA-CCR aggregates the add-ons of trades sharing a hedging set using a supervisory correlation
-parameter `ρ`. The two-trade building block, applied repeatedly to combine a netting set's
-trades, is the quadratic-form combination below (identical in shape to the variance of a sum of
-two correlated random variables). -/
+SA-CCR's Annex 4 combines the per-trade effective notionals of a hedging set into an add-on using
+a supervisory correlation parameter `ρ`, with a cross term quadratic in `ρ` (see the module
+docstring). `effNotionalPair` below is the structurally analogous *two-trade, linear-in-`ρ`*
+building block — not a literal specialisation of the Annex-4 formula, as the module docstring
+explains — chosen because it is the shape the diversification bounds in this file are about
+(identical to the variance of a sum of two correlated random variables). -/
 
-/-- The SA-CCR two-trade effective notional: trade add-ons `d₁, d₂` combined with supervisory
-correlation `ρ` as `√(d₁² + d₂² + 2ρ·d₁·d₂)` (BCBS 279, Annex 4). -/
+/-- The two-trade correlated aggregation of effective notionals `d₁, d₂`, with a correlation `ρ`
+cross term linear in `ρ`: `√(d₁² + d₂² + 2ρ·d₁·d₂)`. Structurally analogous to, but not a literal
+specialisation of, the BCBS 279 Annex 4 add-on formula (see the module docstring). -/
 noncomputable def effNotionalPair (ρ d₁ d₂ : ℝ) : ℝ := √(d₁ ^ 2 + d₂ ^ 2 + 2 * ρ * d₁ * d₂)
 
 theorem effNotionalPair_nonneg (ρ d₁ d₂ : ℝ) : 0 ≤ effNotionalPair ρ d₁ d₂ :=
@@ -155,9 +162,9 @@ theorem effNotionalPair_le_abs_add {ρ : ℝ} (hρ1 : -1 ≤ ρ) (hρ2 : ρ ≤ 
     nlinarith [mul_nonneg (abs_nonneg d₁) (abs_nonneg d₂)]
   nlinarith [h1, h2, h3]
 
-/-- `effNotionalPair` is monotone in `|d₁|` when the correlation is nonnegative and `d₂` is held
-fixed with the same sign convention: increasing a trade's add-on magnitude (without flipping its
-sign relative to `d₂`) never decreases the aggregated notional, for `ρ ≥ 0` and `d₁, d₂ ≥ 0`. -/
+/-- `effNotionalPair` is monotone in `d₁` on `[0, ∞)`, for `ρ ≥ 0` and `d₂ ≥ 0`: increasing a
+nonnegative trade notional `d₁` never decreases the aggregate when the correlation and the other
+notional are both nonnegative. -/
 theorem effNotionalPair_mono_left {ρ : ℝ} (hρ : 0 ≤ ρ) {d₂ : ℝ} (hd₂ : 0 ≤ d₂) :
     MonotoneOn (fun d₁ => effNotionalPair ρ d₁ d₂) (Set.Ici (0 : ℝ)) := by
   intro d₁ hd₁ d₁' hd₁' h
@@ -166,4 +173,4 @@ theorem effNotionalPair_mono_left {ρ : ℝ} (hρ : 0 ≤ ρ) {d₂ : ℝ} (hd�
   apply Real.sqrt_le_sqrt
   nlinarith [mul_nonneg (mul_nonneg hρ hd₂) (sub_nonneg.mpr h), mul_le_mul h h hd₁ (hd₁.trans h)]
 
-end MathFin.RiskMeasures
+end MathFin
