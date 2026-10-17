@@ -646,6 +646,8 @@ import MathFin.BlackScholes.SVI.Admissibility
 import MathFin.BlackScholes.SVI.Assembly
 import MathFin.BlackScholes.SVI.AssociatedTrace
 import MathFin.BlackScholes.SVI.BlackScholesBridge
+-- Calendar-spread arbitrage (Gatheral–Jacquier Lemma 2.1) and its raw-SVI form
+import MathFin.BlackScholes.CalendarArbitrage
 import MathFin.BlackScholes.SVI.BlackSmile
 import MathFin.BlackScholes.SVI.CallConvexity
 import MathFin.BlackScholes.SVI.ClearedSignature

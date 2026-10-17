@@ -1849,4 +1849,25 @@ loading solves `A' = −κθB`. The bond price itself is not derived. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.hasDerivAt_cirBondA
 
+/-! ### Calendar-spread arbitrage
+
+Gatheral–Jacquier 2014, Lemma 2.1: martingale calls rise with maturity; prices rise with
+maturity iff total variance does; the raw-SVI family form. -/
+
+/-- info: 'MathFin.integral_posPart_sub_mono_of_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.integral_posPart_sub_mono_of_martingale
+
+/-- info: 'MathFin.calendar_free_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.calendar_free_iff
+
+/-- info: 'MathFin.monotone_totalVariance_of_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.monotone_totalVariance_of_martingale
+
+/-- info: 'MathFin.SVI.bsSmile_calendar_free_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.SVI.bsSmile_calendar_free_iff
+
 end MathFin.AxiomAudit
