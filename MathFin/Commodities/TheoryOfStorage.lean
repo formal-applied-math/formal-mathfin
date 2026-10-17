@@ -25,10 +25,10 @@ through the finance/storage cost `C` net of the convenience-yield benefit:
   `F − S = C − Y(A)`
 
 (convenience yield *reduces* net carry cost — high-yield, near-backwardation
-markets have `Y(A)` large relative to `C`; this is the sign convention the
-roadmap flagged for a double-check, and it is the standard one in the
-literature: convenience yield is a benefit to the holder of physical stock,
-so it subtracts from the holder's net financing cost, i.e. from `C`).
+markets have `Y(A)` large relative to `C`. This is the standard sign
+convention in the literature: convenience yield is a benefit to the holder
+of physical stock, so it subtracts from the holder's net financing cost,
+i.e. from `C`).
 
 For an isoelastic demand-for-storage curve
 `f⁻¹(A) = p_ref · (a_ref / A) ^ ε` (price elasticity `ε`, reference
