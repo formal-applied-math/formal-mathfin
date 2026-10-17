@@ -415,13 +415,7 @@ theorem sqrtBias_absGaussianSample {v : ℝ≥0} (hv : v ≠ 0) :
   have hsqrtpos : (0 : ℝ) < Real.sqrt v := Real.sqrt_pos.2 hvpos
   have hsqrtsq : Real.sqrt (v : ℝ) * Real.sqrt (v : ℝ) = (v : ℝ) :=
     Real.mul_self_sqrt (le_of_lt hvpos)
-  have habs : ∀ x : ℝ, |x| = Real.sqrt (x ^ 2) := by
-    intro x
-    by_cases hx : 0 ≤ x
-    · rw [abs_of_nonneg hx, Real.sqrt_sq hx]
-    · rw [abs_of_neg (not_le.mp hx),
-        show (x : ℝ) ^ 2 = (-x) ^ 2 from (neg_sq x).symm,
-        Real.sqrt_sq (neg_nonneg.mpr (le_of_lt (not_le.mp hx)))]
+  have habs : ∀ x : ℝ, |x| = Real.sqrt (x ^ 2) := fun x ↦ (Real.sqrt_sq_eq_abs x).symm
   -- nondegeneracy: P(Z² = σ²) = 0 since the set is a union of two singletons
   have hsetzero : (gaussianReal 0 v) {x : ℝ | x ^ 2 = Real.sqrt (v : ℝ) * Real.sqrt (v : ℝ)}
       = 0 := by
