@@ -19,11 +19,14 @@ is the flat-compounded present value of the remaining cashflows, carried
 forward by `f` periods:
 
   `Dirty(y, f) = (1 + y)^f · Σ c_i / (1 + y)^{t_i}`     (`bondPriceDisc` from
-  `MacaulayModified`, with `t_i` the number of *whole periods remaining* to
-  each cashflow from the next coupon date),
+  `MacaulayModified`, with `t_i` the number of whole periods from the *last*
+  coupon date to each cashflow, so the next coupon has `t_i = 1`): the
+  `(1 + y)^f` factor carries the last-coupon-date present value forward by
+  the elapsed fraction `f` of the period that has since run.
 
-and accrued interest on the next coupon `c₁` is the simple-interest share of
-that coupon already earned,
+Accrued interest on the next coupon (its amount supplied separately as
+`c1`, since it is not tied to the cashflow map `c`) is the simple-interest
+share of that coupon already earned,
 
   `Accrued(f) = f · c₁`,
 
@@ -44,8 +47,6 @@ accrued interest — the two pricing conventions agree exactly where they must.
 
 namespace MathFin
 
-open Finset
-
 variable {ι : Type*}
 
 /-- Dirty price between coupon dates: the flat-compounded present value of
@@ -54,11 +55,13 @@ current period. -/
 noncomputable def dirtyPrice (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (y f : ℝ) : ℝ :=
   (1 + y) ^ f * bondPriceDisc s t c y
 
-/-- Accrued interest on the next coupon `c1`, as a simple-interest share of
-the elapsed fraction `f` of the current period. -/
+/-- Accrued interest on the next coupon, as a simple-interest share of the
+elapsed fraction `f` of the current period. `c1` is the next coupon's
+amount, supplied directly by the caller rather than read off `c`. -/
 def accruedInterest (c1 f : ℝ) : ℝ := f * c1
 
-/-- Clean (quoted) price: dirty price minus accrued interest. -/
+/-- Clean (quoted) price: dirty price minus accrued interest. As with
+`accruedInterest`, `c1` is caller-supplied and not tied to `c`. -/
 noncomputable def cleanPrice (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (y f c1 : ℝ) : ℝ :=
   dirtyPrice s t c y f - accruedInterest c1 f
 

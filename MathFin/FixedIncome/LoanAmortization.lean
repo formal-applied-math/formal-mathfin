@@ -55,9 +55,10 @@ def balance (B0 : ℝ) (P : ℕ → ℝ) : ℕ → ℝ
 
 /-- Interest accrued in period `n ≥ 1` is the prior balance times the period
 rate: `I_n = B_{n-1} · i`. Shared by every amortization schedule. Periods are
-`n = 1, …, N`; `n - 1` is ℕ-truncated, so `interestAccrued` at `n = 0` is not
-a meaningful period and is left unspecified by convention (see
-`interestAccrued_succ` for the proved recurrence on actual periods). -/
+`n = 1, …, N`; `n - 1` is ℕ-truncated subtraction, so at `n = 0` this
+evaluates to `B₀ · i` (the same value as period 1) rather than being
+undefined — `n = 0` is not a meaningful period, and callers should use
+`interestAccrued_succ` for the proved recurrence on actual periods. -/
 def interestAccrued (B0 : ℝ) (P : ℕ → ℝ) (i : ℝ) (n : ℕ) : ℝ :=
   balance B0 P (n - 1) * i
 
@@ -65,8 +66,7 @@ def interestAccrued (B0 : ℝ) (P : ℕ → ℝ) (i : ℝ) (n : ℕ) : ℝ :=
 actual period `n + 1 ≥ 1`) to avoid the ℕ-truncated-subtraction pitfall at
 `n = 0`: `I_{n+1} = B_n · i`. -/
 @[simp] theorem interestAccrued_succ (B0 : ℝ) (P : ℕ → ℝ) (i : ℝ) (n : ℕ) :
-    interestAccrued B0 P i (n + 1) = balance B0 P n * i := by
-  unfold interestAccrued; rfl
+    interestAccrued B0 P i (n + 1) = balance B0 P n * i := rfl
 
 /-- The bullet schedule: no principal is repaid before maturity `N`, and the
 entire balance is repaid in period `N`. -/
