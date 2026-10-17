@@ -67,6 +67,7 @@ import MathFin.Foundations.PoissonCompensatedIntegralOperator
 import MathFin.Foundations.ItoProcessQV
 import MathFin.Foundations.GaussianMoments
 import MathFin.Foundations.BivariateGaussian
+import MathFin.Foundations.BivariateNormalCDF
 import MathFin.Foundations.GaussianCDFDeriv
 -- The Esscher transform of a law on ℝ (Mathlib's `Measure.tilted`): tilted moments, a law with
 -- every exponential moment is fixed by its MGF, and the Gaussian tilt N(m, v) ↦ N(m + θv, v)
