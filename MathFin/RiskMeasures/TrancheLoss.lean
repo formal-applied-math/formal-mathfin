@@ -23,7 +23,10 @@ the standard normal systematic factor `F` (`tendsto_oneFactorLossFraction_ae` in
 
   `E[(p(F) − K)⁺] = π − N₂(Φ⁻¹(π), Φ⁻¹(K); √(1 − ρ))`
 
-(`integral_posPart_oneFactorPD_sub`), where `N₂(·, ·; r)` is the standard bivariate normal CDF
+(`integral_posPart_oneFactorPD_sub`; Vasicek 2002, *Loan Portfolio Value*, the unnumbered
+stop-loss price — Hull's own tranche-pricing route, ch. 25 eqs. 25.9–25.11, is the discretized
+expected-tranche-principal recursion and never states this closed form), where `N₂(·, ·; r)`
+is the standard bivariate normal CDF
 with correlation `r` (`bivariateNormalCDF`). The proof writes `K = Φ(k)` and, with `ε` a
 standard normal independent of `F`, reads `(Φ(T) − Φ(k))⁺` as the conditional probability of
 `{k < ε ≤ T}` given `F`. Fubini on `N(0,1) ⊗ N(0,1)` turns the expectation into
@@ -97,9 +100,12 @@ lemma posPart_Phi_sub_Phi (k t : ℝ) :
       measureReal_sdiff (Iic_subset_Iic.2 h) measurableSet_Iic, ← cdf_eq_real, ← cdf_eq_real,
       cdf_gaussianReal_zero_one]
 
-/-- **The LHP stop-loss closed form** (Hull ch. 25; Bagaria ch. 18, §18.4.4): for a standard
-normal systematic factor, the large-pool loss fraction `p(F) = Φ((Φ⁻¹(π) − √ρ F)/√(1 − ρ))`
-satisfies
+/-- **The LHP stop-loss closed form** (Vasicek 2002, *Loan Portfolio Value*, the unnumbered
+stop-loss price; the one-factor model itself is Hull ch. 25, and the tranche payoff is
+Bagaria ch. 18, eq. 18.9/§18.4.4 — Hull's own tranche-pricing route, eqs. 25.9–25.11, is the
+discretized expected-tranche-principal recursion and never states this `N₂` closed form): for
+a standard normal systematic factor, the large-pool loss fraction
+`p(F) = Φ((Φ⁻¹(π) − √ρ F)/√(1 − ρ))` satisfies
 `E[(p(F) − K)⁺] = π − N₂(Φ⁻¹(π), Φ⁻¹(K); √(1 − ρ))`. -/
 theorem integral_posPart_oneFactorPD_sub {π ρ K : ℝ} (hπ : π ∈ Ioo 0 1) (hρ0 : 0 ≤ ρ)
     (hρ1 : ρ < 1) (hK : K ∈ Ioo 0 1) :
