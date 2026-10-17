@@ -1051,7 +1051,7 @@
       },
       "metadata": {
         "chapter": 11,
-        "reference": "CreditMetrics Technical Document (J.P. Morgan 1997), ch. 6; Hull, CreditMetrics section",
+        "reference": "CreditMetrics Technical Document (J.P. Morgan 1997), ch. 6",
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. P^k row-stochastic via Mathlib's rowStochastic submonoid; (P^(k+1)) i d ≥ (P^k) i d · P d d. Lives in MathFin/RiskMeasures/CreditMetrics.lean. Axioms-clean."
@@ -1067,7 +1067,7 @@
       },
       "metadata": {
         "chapter": 11,
-        "reference": "CreditMetrics Technical Document (J.P. Morgan 1997), ch. 6; Hull, CreditMetrics section",
+        "reference": "CreditMetrics Technical Document (J.P. Morgan 1997), ch. 6",
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof that the threshold buckets partition ℝ, so bucket probabilities under any probability law sum to one. Does not formalize calibration z = Φ⁻¹(cumulative row sums) or correlated multi-obligor migration. Lives in MathFin/RiskMeasures/CreditMetrics.lean. Axioms-clean."

@@ -10,9 +10,8 @@ public import Mathlib
 /-!
 # CreditMetrics rating transitions
 
-In the CreditMetrics methodology (J.P. Morgan, *CreditMetrics — Technical Document*, 1997, ch. 6;
-Hull, *Options, Futures, and Other Derivatives*, ch. on credit risk, CreditMetrics section) an
-obligor's credit rating moves between finitely many states `ι` (AAA, AA, …, CCC, Default) once per
+In the CreditMetrics methodology (J.P. Morgan, *CreditMetrics — Technical Document*, 1997, ch. 6)
+an obligor's credit rating moves between finitely many states `ι` (AAA, AA, …, CCC, Default) once per
 period, with migration probabilities given by a row-stochastic **transition matrix** `P`: the
 entry `P i j` is the probability of moving from rating `i` to rating `j`. Mathlib's
 `Matrix.rowStochastic ℝ ι` is exactly this object, and it is a submonoid of `Matrix ι ι ℝ`.
@@ -75,7 +74,7 @@ variable {m : ℕ}
 /-- The bucket `{x | z j < x ≤ z (j + 1)}` of latent returns that send the obligor to rating `j`,
 for thresholds `z : Fin (m + 1) → EReal`. -/
 def ratingBucket (z : Fin (m + 1) → EReal) (j : Fin m) : Set ℝ :=
-  {x | z j.castSucc < x ∧ (x : EReal) ≤ z j.succ}
+  {x | z j.castSucc < x ∧ x ≤ z j.succ}
 
 lemma measurableSet_ratingBucket (z : Fin (m + 1) → EReal) (j : Fin m) :
     MeasurableSet (ratingBucket z j) :=
@@ -85,23 +84,20 @@ lemma measurableSet_ratingBucket (z : Fin (m + 1) → EReal) (j : Fin m) :
 /-- Buckets of monotone thresholds are pairwise disjoint. -/
 lemma pairwise_disjoint_ratingBucket {z : Fin (m + 1) → EReal} (hz : Monotone z) :
     Pairwise fun j k ↦ Disjoint (ratingBucket z j) (ratingBucket z k) := by
-  have key : ∀ j k : Fin m, j < k → Disjoint (ratingBucket z j) (ratingBucket z k) :=
-    fun j k hjk ↦ Set.disjoint_left.2 fun x hj hk ↦
+  have key (j k : Fin m) (hjk : j < k) : Disjoint (ratingBucket z j) (ratingBucket z k) :=
+    Set.disjoint_left.2 fun x hj hk ↦
       (hj.2.trans (hz (Fin.succ_le_castSucc_iff.2 hjk))).not_gt hk.1
-  intro j k hjk
-  rcases hjk.lt_or_gt with h | h
-  · exact key j k h
-  · exact (key k j h).symm
+  exact fun j k hjk ↦ hjk.lt_or_gt.elim (key j k) fun h ↦ (key k j h).symm
 
 /-- With `z 0 = ⊥` and `z (last m) = ⊤`, the buckets cover `ℝ`. -/
 lemma iUnion_ratingBucket {z : Fin (m + 1) → EReal} (h0 : z 0 = ⊥) (hm : z (Fin.last m) = ⊤) :
     ⋃ j, ratingBucket z j = univ := by
   refine eq_univ_of_forall fun x ↦ mem_iUnion.2 ?_
   -- The first threshold at or above `x` closes the bucket containing `x`.
-  set s := Finset.univ.filter fun k : Fin (m + 1) ↦ (x : EReal) ≤ z k
+  set s := Finset.univ.filter fun k : Fin (m + 1) ↦ x ≤ z k
   have hs : s.Nonempty := ⟨Fin.last m, by simp [s, hm]⟩
   set k := s.min' hs
-  have hk : (x : EReal) ≤ z k := (Finset.mem_filter.1 (s.min'_mem hs)).2
+  have hk : x ≤ z k := (Finset.mem_filter.1 (s.min'_mem hs)).2
   have hk0 : k ≠ 0 := fun h ↦ by simp [h, h0] at hk
   obtain ⟨j, hj⟩ := Fin.exists_succ_eq.2 hk0
   refine ⟨j, not_le.1 fun hle ↦ ?_, hj ▸ hk⟩
