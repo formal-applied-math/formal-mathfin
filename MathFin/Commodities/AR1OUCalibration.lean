@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.FixedIncome.VasicekSDE
+public import MathFin.FixedIncome.Vasicek
 
 /-!
 # AR(1) ↔ OU parameter inversion
@@ -32,8 +33,8 @@ factor appearing in `vasicekSDEMean`, and `ouSigmaSqFromVar` inverts
   `Δt ≠ 0` (`kFromPhi_ouPhiFromK`) and on `φ > 0` (`ouPhiFromK_kFromPhi`).
 * `ouSigmaSqFromVar` : the implied diffusion coefficient from a fitted AR(1)
   residual variance.
-* `halfLife` : `ln 2 / k`, and `ouPhiFromK_halfLife` confirms it is indeed
-  the time at which the decay factor hits `1/2`.
+* `ouPhiFromK_halfLife` : `FixedIncome.Vasicek`'s existing `meanReversionHalfLife`
+  (`ln 2 / k`) is indeed the time at which the decay factor hits `1/2`.
 * `ouSigmaSqFromVar_vasicekSDEVariance` : `ouSigmaSqFromVar` genuinely inverts
   `vasicekSDEVariance`, closing the round-trip the module docstring claims.
 -/
@@ -66,9 +67,6 @@ theorem ouSigmaSqFromVar_vasicekSDEVariance (σ k Δt : ℝ) (hk : k ≠ 0)
   unfold ouSigmaSqFromVar vasicekSDEVariance
   field_simp
 
-/-- **Half-life** of mean reversion: `ln 2 / k`. -/
-noncomputable def halfLife (k : ℝ) : ℝ := Real.log 2 / k
-
 /-- Recovering `k` from the `φ` it generates: `kFromPhi (ouPhiFromK k Δt) Δt = k`,
 for any `Δt ≠ 0`. -/
 theorem kFromPhi_ouPhiFromK (k Δt : ℝ) (hΔt : Δt ≠ 0) :
@@ -84,10 +82,11 @@ theorem ouPhiFromK_kFromPhi (φ Δt : ℝ) (hφ : 0 < φ) (hΔt : Δt ≠ 0) :
   unfold ouPhiFromK kFromPhi
   rw [neg_div, neg_mul, neg_neg, div_mul_cancel₀ _ hΔt, Real.exp_log hφ]
 
-/-- The decay factor at the half-life is exactly `1/2`, for `k ≠ 0`. -/
+/-- The decay factor at `FixedIncome.Vasicek`'s existing `meanReversionHalfLife`
+is exactly `1/2`, for `k ≠ 0`. -/
 theorem ouPhiFromK_halfLife (k : ℝ) (hk : k ≠ 0) :
-    ouPhiFromK k (halfLife k) = 1 / 2 := by
-  unfold ouPhiFromK halfLife
+    ouPhiFromK k (meanReversionHalfLife k) = 1 / 2 := by
+  unfold ouPhiFromK meanReversionHalfLife
   rw [mul_div_cancel₀ _ hk, Real.exp_neg, Real.exp_log (by norm_num : (0:ℝ) < 2), one_div]
 
 end MathFin

@@ -8,21 +8,25 @@ module
 public import Mathlib
 
 /-!
-# Theory of storage: convenience yield and the working/canonical storage kink
+# Theory of storage: convenience yield and the canonical-storage price kink
 
-The **theory of storage** (Working 1949, Kaldor) models commodity stocks as
-a kinked function of "availability" `A` (current stock plus expected supply):
-below the kink stocks sit at an irreducible pipeline-fill floor `Sbar`; above
-it they track the inverse demand-for-storage curve `f⁻¹`.
+The **theory of storage** (Working 1949, Kaldor) models the commodity spot
+price as a kinked function of "availability" `A` (current stock plus expected
+supply). Above the kink, the price tracks the inverse demand-for-storage
+curve `f⁻¹(A)` (price falls as availability rises); below it — once price
+would fall to the point storage is no longer attractive — the market sits at
+the investment-regime price floor `Sbar = E[S_{t+1}] − C`:
 
-  `S(A) = max(Sbar, f⁻¹(A))`                         (working storage)
+  `S(A) = max(Sbar, f⁻¹(A))`                         (canonical-storage price)
   `Y(A) = max(f⁻¹(A) − Sbar, 0)`                      (convenience yield)
 
+The convenience yield is positive exactly where scarcity bites — below the
+kink (`A` small, so `f⁻¹(A)` would exceed `Sbar`) — and zero at and above it.
 The two are two faces of the same kink: `Y(A) = S(A) − Sbar` always. The
-cost-of-carry identity ties the futures price `F` to the spot price `S`
+cost-of-carry identity ties the futures price `F` to the spot price `S(A)`
 through the finance/storage cost `C` net of the convenience-yield benefit:
 
-  `F − S = C − Y(A)`
+  `F − S(A) = C − Y(A)`,  with `F = Sbar + C`
 
 (convenience yield *reduces* net carry cost — high-yield, near-backwardation
 markets have `Y(A)` large relative to `C`. This is the standard sign
@@ -31,18 +35,19 @@ of physical stock, so it subtracts from the holder's net financing cost,
 i.e. from `C`).
 
 For an isoelastic demand-for-storage curve
-`f⁻¹(A) = p_ref · (a_ref / A) ^ ε` (price elasticity `ε`, reference
-availability `a_ref`, reference price `p_ref`), the kink point `A*` where
-`f⁻¹(A*) = Sbar` is
+`f⁻¹(A) = p_ref · (a_ref / A) ^ ε` (flexibility `ε = −d ln p / d ln A`,
+reference availability `a_ref`, reference price `p_ref`), the kink point
+`A*` where `f⁻¹(A*) = Sbar` is
 
   `A* = a_ref · (p_ref / Sbar) ^ {1/ε}`.
 
 ## Main results
 
-* `workingStorage`, `convenienceYield`: the two kinked functions, generic in
-  the inverse demand-for-storage curve `f⁻¹ : ℝ → ℝ`.
-* `convenienceYield_eq_workingStorage_sub` : `Y(A) = S(A) − Sbar`.
-* `forwardPrice`, `carry_identity` : `F − S = C − Y(A)`.
+* `storageSpotPrice`, `convenienceYield`: the two kinked functions, generic
+  in the inverse demand-for-storage curve `f⁻¹ : ℝ → ℝ`.
+* `convenienceYield_eq_storageSpotPrice_sub` : `Y(A) = S(A) − Sbar`.
+* `carry_identity_at_availability` : `(Sbar + C) − S(A) = C − Y(A)`, the
+  cost-of-carry identity evaluated at the kink functions (`F := Sbar + C`).
 * `invDemandIsoelastic`, `kinkPoint`, `kinkPoint_spec` : the isoelastic
   demand-for-storage curve and the kink point solving `f⁻¹(A*) = Sbar`.
 -/
@@ -51,47 +56,49 @@ availability `a_ref`, reference price `p_ref`), the kink point `A*` where
 
 namespace MathFin
 
-/-! ### Working storage and convenience yield -/
+/-! ### Canonical-storage spot price and convenience yield -/
 
-/-- **Working storage**: stock sits at the irreducible floor `Sbar` when the
-inverse demand-for-storage curve `f⁻¹` would call for less, else tracks it. -/
-noncomputable def workingStorage (Sbar : ℝ) (invDemand : ℝ → ℝ) (A : ℝ) : ℝ :=
+/-- **Canonical-storage spot price**: the price sits at the investment-regime
+floor `Sbar` when the inverse demand-for-storage curve `f⁻¹` would call for
+less, else tracks it. -/
+noncomputable def storageSpotPrice (Sbar : ℝ) (invDemand : ℝ → ℝ) (A : ℝ) : ℝ :=
   max Sbar (invDemand A)
 
-/-- **Convenience yield**: the benefit of holding physical stock above the
-pipeline-fill floor, zero below it. -/
+/-- **Convenience yield**: positive exactly where scarcity pushes the
+demand-for-storage price above the investment-regime floor, zero at and
+above it. -/
 noncomputable def convenienceYield (Sbar : ℝ) (invDemand : ℝ → ℝ) (A : ℝ) : ℝ :=
   max (invDemand A - Sbar) 0
 
-/-- The convenience yield is exactly how far working storage sits above the
-floor `Sbar` — the two kinks are one and the same. -/
-theorem convenienceYield_eq_workingStorage_sub (Sbar : ℝ) (invDemand : ℝ → ℝ) (A : ℝ) :
-    convenienceYield Sbar invDemand A = workingStorage Sbar invDemand A - Sbar := by
-  unfold convenienceYield workingStorage
+/-- The convenience yield is exactly how far the canonical-storage price sits
+above the floor `Sbar` — the two kinks are one and the same. -/
+theorem convenienceYield_eq_storageSpotPrice_sub (Sbar : ℝ) (invDemand : ℝ → ℝ) (A : ℝ) :
+    convenienceYield Sbar invDemand A = storageSpotPrice Sbar invDemand A - Sbar := by
+  unfold convenienceYield storageSpotPrice
   rw [max_comm Sbar (invDemand A), ← max_sub_sub_right, sub_self]
 
 /-! ### Cost-of-carry identity -/
 
-/-- **Forward price under cost of carry**: spot plus net financing/storage
-cost `C`, minus the convenience-yield benefit `Y`. -/
-noncomputable def forwardPrice (S C Y : ℝ) : ℝ := S + C - Y
-
-/-- **Carry identity**: `F − S = C − Y(A)`. Convenience yield subtracts from
-the carry cost `C`, consistent with it being a benefit to the holder of
-physical stock (the standard theory-of-storage sign convention). -/
-theorem carry_identity (S C Y : ℝ) : forwardPrice S C Y - S = C - Y := by
-  unfold forwardPrice; ring
+/-- **Carry identity at a given availability**: with the futures price set by
+cost of carry off the investment-regime floor (`F = Sbar + C`), the carry
+spread against the canonical-storage spot price is exactly `C − Y(A)` —
+convenience yield subtracts from the carry cost `C`, the standard
+theory-of-storage sign convention (convenience yield is a benefit to the
+holder of physical stock). -/
+theorem carry_identity_at_availability (Sbar C : ℝ) (invDemand : ℝ → ℝ) (A : ℝ) :
+    (Sbar + C) - storageSpotPrice Sbar invDemand A = C - convenienceYield Sbar invDemand A := by
+  rw [convenienceYield_eq_storageSpotPrice_sub]; ring
 
 /-! ### Isoelastic demand for storage and its kink point -/
 
 /-- **Isoelastic inverse demand for storage**: `f⁻¹(A) = p_ref · (a_ref/A)^ε`,
-price elasticity `ε` against reference availability `a_ref` and price
-`p_ref`. -/
+flexibility `ε = −d ln p / d ln A` against reference availability `a_ref` and
+price `p_ref`. -/
 noncomputable def invDemandIsoelastic (a_ref p_ref ε A : ℝ) : ℝ :=
   p_ref * (a_ref / A) ^ ε
 
 /-- **Kink point**: the availability `A*` at which the isoelastic
-demand-for-storage curve meets the pipeline-fill floor `Sbar`. -/
+demand-for-storage curve meets the investment-regime floor `Sbar`. -/
 noncomputable def kinkPoint (a_ref p_ref Sbar ε : ℝ) : ℝ :=
   a_ref * (p_ref / Sbar) ^ (1 / ε)
 
@@ -108,3 +115,5 @@ theorem kinkPoint_spec (a_ref p_ref Sbar ε : ℝ)
     rw [← Real.rpow_mul (le_of_lt (div_pos hS hp)), one_div, inv_mul_cancel₀ hε, Real.rpow_one]
   rw [step1, step2]
   field_simp
+
+end MathFin

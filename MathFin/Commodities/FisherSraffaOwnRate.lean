@@ -10,9 +10,10 @@ public import Mathlib
 /-!
 # Fisher/Sraffa own-rate-of-interest identity
 
-The **own rate of interest** `r` of a commodity relates its **basis** (the
-convenience-adjusted real return) `b` and the inflation rate `i` through
-Fisher's exact identity
+A commodity's **own rate of interest** `b` (Keynes, *General Theory* ch. 17;
+Sraffa 1932) is the real return of holding and lending the commodity itself.
+Fisher's exact identity relates `b` to the inflation rate `i` and the
+resulting **money (nominal) rate** `r`:
 
   `1 + r = (1 + b)(1 + i)`,
 
@@ -28,11 +29,11 @@ is treated as second-order-small and dropped.
 
 ## Main results
 
-* `fisherOwnRate`: `r` defined as `(1+b)(1+i) − 1`.
-* `fisher_identity`: `1 + fisherOwnRate b i = (1+b)*(1+i)`.
-* `fisher_linear_approx_error`: `fisherOwnRate b i − (b + i) = b * i`, the
+* `fisherMoneyRate`: the money rate `r` defined as `(1+b)(1+i) − 1`.
+* `fisher_identity`: `1 + fisherMoneyRate b i = (1+b)*(1+i)`.
+* `fisher_linear_approx_error`: `fisherMoneyRate b i − (b + i) = b * i`, the
   exact statement underlying `r ≈ b + i` for small `b, i`.
-* `sraffaOwnRate`: Sraffa's implied own rate from spot/forward/financing/time.
+* `sraffaOwnRate`: Sraffa's implied own rate `b` from spot/forward/financing/time.
 * `sraffaOwnRate_spec`: `(1 + sraffaOwnRate m S F T)^T = (1+m)^T · S / F`,
   the defining equation Sraffa's formula inverts.
 -/
@@ -43,22 +44,22 @@ namespace MathFin
 
 /-! ### Fisher's exact identity -/
 
-/-- **Fisher own rate of interest**: `r = (1+b)(1+i) − 1`, exactly solving
-`1 + r = (1+b)(1+i)` for the real own-rate `r` given commodity basis `b` and
-inflation rate `i`. -/
-noncomputable def fisherOwnRate (b i : ℝ) : ℝ := (1 + b) * (1 + i) - 1
+/-- **Fisher money (nominal) rate**: `r = (1+b)(1+i) − 1`, exactly solving
+`1 + r = (1+b)(1+i)` for the nominal rate `r` given a commodity's own rate of
+interest `b` and the inflation rate `i`. -/
+noncomputable def fisherMoneyRate (b i : ℝ) : ℝ := (1 + b) * (1 + i) - 1
 
 /-- **Fisher's exact identity**: `1 + r = (1+b)(1+i)`. -/
 theorem fisher_identity (b i : ℝ) :
-    1 + fisherOwnRate b i = (1 + b) * (1 + i) := by
-  unfold fisherOwnRate; ring
+    1 + fisherMoneyRate b i = (1 + b) * (1 + i) := by
+  unfold fisherMoneyRate; ring
 
 /-- **Linear approximation error**: `r − (b+i) = b·i` exactly. The usual
 first-order approximation `r ≈ b + i` drops this cross term, which is
 genuinely second-order small when `b, i` are both small. -/
 theorem fisher_linear_approx_error (b i : ℝ) :
-    fisherOwnRate b i - (b + i) = b * i := by
-  unfold fisherOwnRate; ring
+    fisherMoneyRate b i - (b + i) = b * i := by
+  unfold fisherMoneyRate; ring
 
 /-! ### Sraffa's implied own rate -/
 
