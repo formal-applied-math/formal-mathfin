@@ -157,7 +157,9 @@ lemma integral_sub_inv_mul_integral_pinballLoss {μ : Measure ℝ} [IsProbabilit
 /-- **The exponential Fissler–Ziegel score strictly elicits `(VaR_α, ES_α)`** (Fissler–Ziegel 2016,
 Corollary 5.5, with `G₁ = 0` and `𝒢₂ = exp`) on the laws with finite mean whose `α`-quantile is
 unique: the true pair (lower `α`-quantile, lower-tail expected shortfall) is the unique minimizer
-of the expected score over all of `ℝ²`. -/
+of the expected score over all of `ℝ²`. The paper's own domain is `A₀ = {x₁ ≥ x₂}`; the extension
+to all of `ℝ²` is this file's own observation (see the module docstring), not the paper's claim —
+`G₁ = 0` removes the term that ties the two coordinates together. -/
 theorem strictlyJointlyElicits_fisslerZieglerExpScore (hα : α ∈ Ioo 0 1) :
     StrictlyJointlyElicits (fisslerZieglerExpScore α) (fun μ ↦ quantile μ α)
       (fun μ ↦ lowerExpectedShortfall μ α)
