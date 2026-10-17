@@ -1814,6 +1814,14 @@ than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen
 /-- info: 'MathFin.not_isElicitable_expectedShortfall_integrable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms MathFin.not_isElicitable_expectedShortfall_integrable
 
+/-- info: 'MathFin.strictlyJointlyElicits_fisslerZieglerExpScore' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.strictlyJointlyElicits_fisslerZieglerExpScore
+
+/-- info: 'MathFin.isJointlyElicitable_valueAtRisk_lowerExpectedShortfall' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms MathFin.isJointlyElicitable_valueAtRisk_lowerExpectedShortfall
+
 /-- info: 'MathFin.measureReal_le_eq_copulaOf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms MathFin.measureReal_le_eq_copulaOf
 
