@@ -68,8 +68,6 @@ Two other objects in the library are adjacent but distinct:
 
 @[expose] public section
 
-noncomputable section
-
 open Finset
 
 namespace MathFin.Backtest
@@ -77,34 +75,37 @@ namespace MathFin.Backtest
 variable {n : ℕ}
 
 /-- Sample mean of a finite sequence of period returns. -/
-def sampleMean (r : Fin n → ℝ) : ℝ := (∑ i, r i) / n
+noncomputable def sampleMean (r : Fin n → ℝ) : ℝ := (∑ i, r i) / n
 
 /-- Sample (population) variance of a finite sequence of period returns: the sum of squared
 deviations from the sample mean, divided by `n` (not `n - 1`). -/
-def sampleVariance (r : Fin n → ℝ) : ℝ := (∑ i, (r i - sampleMean r) ^ 2) / n
+noncomputable def sampleVariance (r : Fin n → ℝ) : ℝ := (∑ i, (r i - sampleMean r) ^ 2) / n
 
 /-- Sample (population) standard deviation. -/
-def sampleStdDev (r : Fin n → ℝ) : ℝ := Real.sqrt (sampleVariance r)
+noncomputable def sampleStdDev (r : Fin n → ℝ) : ℝ := Real.sqrt (sampleVariance r)
 
 /-- Sharpe ratio at zero risk-free rate: `√N · mean(r) / std(r)`, `N` periods per year. -/
-def sharpeRatio (N : ℝ) (r : Fin n → ℝ) : ℝ := Real.sqrt N * sampleMean r / sampleStdDev r
+noncomputable def sharpeRatio (N : ℝ) (r : Fin n → ℝ) : ℝ :=
+    Real.sqrt N * sampleMean r / sampleStdDev r
 
 /-- Annualized volatility: `√N · std(r)`, `N` periods per year. -/
-def annualizedVolatility (N : ℝ) (r : Fin n → ℝ) : ℝ := Real.sqrt N * sampleStdDev r
+noncomputable def annualizedVolatility (N : ℝ) (r : Fin n → ℝ) : ℝ :=
+    Real.sqrt N * sampleStdDev r
 
 /-- Compound annual growth rate of an equity curve held for `n` periods, `N` periods per
 year: `(E_final / E_initial) ^ (N / n) - 1`. -/
-def cagr (N : ℝ) (n : ℕ) (E_initial E_final : ℝ) : ℝ := (E_final / E_initial) ^ (N / n) - 1
+noncomputable def cagr (N : ℝ) (n : ℕ) (E_initial E_final : ℝ) : ℝ :=
+    (E_final / E_initial) ^ (N / n) - 1
 
 /-- Running maximum of an equity curve up to and including time `t`. -/
-def runningMax (E : Fin n → ℝ) (t : Fin n) : ℝ :=
+noncomputable def runningMax (E : Fin n → ℝ) (t : Fin n) : ℝ :=
     (univ.filter (· ≤ t)).sup' ⟨t, by simp⟩ E
 
 /-- Drawdown at time `t`: the running-maximum-relative decline `1 - E_t / max_{s ≤ t} E_s`. -/
-def drawdown (E : Fin n → ℝ) (t : Fin n) : ℝ := 1 - E t / runningMax E t
+noncomputable def drawdown (E : Fin n → ℝ) (t : Fin n) : ℝ := 1 - E t / runningMax E t
 
 /-- Max drawdown over the whole equity curve. -/
-def maxDrawdown (hn : 0 < n) (E : Fin n → ℝ) : ℝ :=
+noncomputable def maxDrawdown (hn : 0 < n) (E : Fin n → ℝ) : ℝ :=
     haveI : NeZero n := ⟨hn.ne'⟩
     univ.sup' univ_nonempty (drawdown E)
 
@@ -184,5 +185,3 @@ theorem maxDrawdown_le_one (hn : 0 < n) {E : Fin n → ℝ} (hE : ∀ t, 0 < E t
   exact Finset.sup'_le univ_nonempty (drawdown E) (fun t _ ↦ drawdown_le_one hE t)
 
 end MathFin.Backtest
-
-end
