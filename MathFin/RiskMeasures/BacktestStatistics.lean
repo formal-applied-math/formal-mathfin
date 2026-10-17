@@ -40,6 +40,19 @@ Drawdown *duration* (the length of the longest drawdown) is not formalized here:
 run-length statistic needs its own definition (longest interval over which the curve
 stays below a prior peak) and is left for a follow-up file if a concrete consumer needs it.
 
+## Relation to existing performance code
+
+Two other objects in the library are adjacent but distinct:
+
+* `MathFin.sharpeRatio` (`Performance/Ratios.lean`) is the *parametric* Sharpe ratio
+  `(μ − r_f) / σ` from already-known moments, with its own `√T` time-aggregation lemma
+  `sharpeRatio_scaleT`. The `sharpeRatio` here is the *empirical* counterpart, computed
+  from a finite sample of realized returns rather than supplied moments.
+* `MathFin.maximumDrawdown` (`Performance/DownsideMetrics.lean`) is the largest *absolute*
+  price decline `max_{i ≤ j} (price i − price j)` over a finite path. `maxDrawdown` here is
+  the largest *relative* decline `1 − E_t / max_{s ≤ t} E_s`, the convention named in the
+  roadmap and in Bacon (2008) — a different normalization of the same running-maximum idea.
+
 ## Main results
 
 * `sharpeRatio_scale_pos`, `annualizedVolatility_scale_pos`: both are invariant
@@ -50,6 +63,8 @@ stays below a prior peak) and is left for a follow-up file if a concrete consume
 * `drawdown_nonneg`, `drawdown_le_one`, `maxDrawdown_nonneg`, `maxDrawdown_le_one`: for a
   strictly positive equity curve, every drawdown — hence the max drawdown — lies in `[0, 1]`.
 -/
+
+@[expose] public section
 
 noncomputable section
 
