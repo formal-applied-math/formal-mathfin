@@ -686,3 +686,8 @@ import MathFin.BlackScholes.SVI.TraceForm
 import MathFin.BlackScholes.SVI.TraceSignature
 -- The SVI tail condition d₊ → −∞ iff b(1+ρ) < 2, and the butterfly-free sign formula
 import MathFin.BlackScholes.SVI.TailCondition
+import MathFin.FixedIncome.CleanPriceAccrued
+import MathFin.FixedIncome.BondForward
+import MathFin.FixedIncome.FxForwardParity
+import MathFin.FixedIncome.LoanAmortization
+import MathFin.FixedIncome.KeyRateDuration
