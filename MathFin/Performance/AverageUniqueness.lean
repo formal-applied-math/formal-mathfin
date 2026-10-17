@@ -8,7 +8,7 @@ module
 public import Mathlib
 
 /-!
-# Average-uniqueness bound for overlapping-label samples
+# Per-observation uniqueness bound for overlapping-label samples
 
 López de Prado (*Advances in Financial Machine Learning*, ch. 4) measures how
 much an overlapping-label observation `i` (with span `[t0 i, t1 i]`) overlaps

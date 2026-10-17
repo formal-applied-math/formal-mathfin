@@ -19,13 +19,15 @@ This file states the recursion as `fracDiffWeight` and proves it agrees with
 the closed-form alternating product `(-1)^k · ∏_{i<k} (d-i)/(i+1)` — the
 real-exponent generalized binomial coefficient `(-1)^k · C(d,k)` — by
 induction directly on the recursion. It also records the elementary
-magnitude-decay step relating consecutive weights.
+per-step magnitude ratio relating consecutive weights (the ratio `|d-k|/(k+1)`
+tends to `1`, so it drives `w_k → 0` only for `d > -1`; this file does not
+claim decay for every `d`).
 
 ## Main results
 
 * `fracDiffWeight_eq_prod`: `fracDiffWeight d k = (-1)^k * ∏ i ∈ range k, (d-i)/(i+1)`.
 * `abs_fracDiffWeight_succ`: `|fracDiffWeight d (k+1)| = |fracDiffWeight d k| * |d-k| / (k+1)`,
-  the per-step decay ratio driving the weights to `0` for fixed `d`.
+  the per-step magnitude ratio between consecutive weights.
 -/
 
 @[expose] public section
@@ -53,7 +55,7 @@ theorem fracDiffWeight_eq_prod (d : ℝ) (k : ℕ) :
     rw [fracDiffWeight_succ, ih, Finset.prod_range_succ]
     ring
 
-/-- Per-step magnitude decay: `|w_{k+1}| = |w_k| · |d-k| / (k+1)`. -/
+/-- Per-step magnitude ratio: `|w_{k+1}| = |w_k| · |d-k| / (k+1)`. -/
 theorem abs_fracDiffWeight_succ (d : ℝ) (k : ℕ) :
     |fracDiffWeight d (k + 1)| = |fracDiffWeight d k| * |d - k| / (k + 1) := by
   rw [fracDiffWeight_succ, abs_div, abs_mul, abs_neg,
