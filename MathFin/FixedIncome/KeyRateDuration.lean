@@ -55,8 +55,6 @@ genuine consequence of partition of unity, not a restatement of it.
 
 namespace MathFin
 
-open Finset
-
 variable {ι κ : Type*}
 
 /-- Key-rate duration at node `n`: the dollar-duration contributions `d i` of
