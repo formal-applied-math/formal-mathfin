@@ -97,8 +97,9 @@ lemma posPart_Phi_sub_Phi (k t : ℝ) :
       measureReal_sdiff (Iic_subset_Iic.2 h) measurableSet_Iic, ← cdf_eq_real, ← cdf_eq_real,
       cdf_gaussianReal_zero_one]
 
-/-- **The LHP stop-loss closed form** (Hull ch. 25; Bagaria ch. 18, §18.4.4): for a standard normal systematic factor, the
-large-pool loss fraction `p(F) = Φ((Φ⁻¹(π) − √ρ F)/√(1 − ρ))` satisfies
+/-- **The LHP stop-loss closed form** (Hull ch. 25; Bagaria ch. 18, §18.4.4): for a standard
+normal systematic factor, the large-pool loss fraction `p(F) = Φ((Φ⁻¹(π) − √ρ F)/√(1 − ρ))`
+satisfies
 `E[(p(F) − K)⁺] = π − N₂(Φ⁻¹(π), Φ⁻¹(K); √(1 − ρ))`. -/
 theorem integral_posPart_oneFactorPD_sub {π ρ K : ℝ} (hπ : π ∈ Ioo 0 1) (hρ0 : 0 ≤ ρ)
     (hρ1 : ρ < 1) (hK : K ∈ Ioo 0 1) :
@@ -129,8 +130,8 @@ theorem integral_posPart_oneFactorPD_sub {π ρ K : ℝ} (hπ : π ∈ Ioo 0 1) 
   have hA : MeasurableSet A := measurableSet_le (by fun_prop) measurable_const
   have hSA : S = A \ (A ∩ {p | p.2 ≤ k}) := by
     ext p
-    simp only [S, A, T, mem_ofPred_eq, Set.mem_sdiff, mem_inter_iff, oneFactor_asset_le_iff hρ1, not_and,
-      not_le]
+    simp only [S, A, T, mem_ofPred_eq, Set.mem_sdiff, mem_inter_iff,
+      oneFactor_asset_le_iff hρ1, not_and, not_le]
     tauto
   have hdef : (μ.prod μ).real A = π := by
     have hind : IndepFun Prod.fst Prod.snd (μ.prod μ) :=
