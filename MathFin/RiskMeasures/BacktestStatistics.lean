@@ -31,9 +31,13 @@ formulas:
 
 * **Sharpe ratio** (`sharpeRatio`): `√N · mean(r) / std(r)`, zero risk-free rate, `N`
   periods per year, `std` the *population* standard deviation of the sample `r`
-  (divide the sum of squared deviations by `n`, not `n - 1`).
+  (divide the sum of squared deviations by `n`, not `n - 1`). By Lean's `x / 0 = 0`
+  convention, a sample with zero (population) standard deviation — e.g. constant
+  returns — gives `sharpeRatio = 0` rather than an undefined value.
 * **CAGR** (`cagr`): `(E_final / E_initial) ^ (N / k) - 1` for an equity curve held over
-  `k` periods, `N` periods per year.
+  `k` periods, `N` periods per year. Degenerate inputs again fall out of Lean's
+  division/zero-power conventions rather than being excluded: `k = 0` gives `N / k = 0`
+  and hence `cagr = 0`; `E_initial = 0` with `N / k > 0` gives `cagr = -1`.
 * **Annualized volatility** (`annualizedVolatility`): `√N · std(r)`, same `std` as above.
 * **Max drawdown** (`maxDrawdown`): the largest running-maximum-relative decline
   `DD_t = 1 - E_t / max_{s ≤ t} E_s` of an equity curve `E`.
@@ -99,14 +103,13 @@ noncomputable def cagr (N : ℝ) (k : ℕ) (E_initial E_final : ℝ) : ℝ :=
 
 /-- Running maximum of an equity curve up to and including time `t`. -/
 noncomputable def runningMax (E : Fin n → ℝ) (t : Fin n) : ℝ :=
-  (univ.filter (· ≤ t)).sup' ⟨t, by simp⟩ E
+  (Finset.Iic t).sup' Finset.nonempty_Iic E
 
 /-- Drawdown at time `t`: the running-maximum-relative decline `1 - E_t / max_{s ≤ t} E_s`. -/
 noncomputable def drawdown (E : Fin n → ℝ) (t : Fin n) : ℝ := 1 - E t / runningMax E t
 
 /-- Max drawdown over the whole equity curve. -/
-noncomputable def maxDrawdown (hn : 0 < n) (E : Fin n → ℝ) : ℝ :=
-  haveI : NeZero n := ⟨hn.ne'⟩
+noncomputable def maxDrawdown [NeZero n] (E : Fin n → ℝ) : ℝ :=
   univ.sup' univ_nonempty (drawdown E)
 
 /-! ## Scale invariance -/
@@ -155,10 +158,10 @@ theorem cagr_scale_pos {c : ℝ} (hc : 0 < c) (N : ℝ) (k : ℕ) (E_initial E_f
 /-! ## Max drawdown lies in `[0, 1]` for a strictly positive equity curve -/
 
 theorem le_runningMax {E : Fin n → ℝ} (t : Fin n) : E t ≤ runningMax E t :=
-  Finset.le_sup' E (by simp : t ∈ univ.filter (· ≤ t))
+  Finset.le_sup' E (Finset.mem_Iic.2 le_rfl)
 
 theorem runningMax_pos {E : Fin n → ℝ} (hE : ∀ t, 0 < E t) (t : Fin n) : 0 < runningMax E t := by
-  obtain ⟨s, hs, hsE⟩ := Finset.exists_mem_eq_sup' (⟨t, by simp⟩ : (univ.filter (· ≤ t)).Nonempty) E
+  obtain ⟨s, -, hsE⟩ := Finset.exists_mem_eq_sup' (Finset.nonempty_Iic (a := t)) E
   rw [runningMax, hsE]
   exact hE s
 
@@ -172,16 +175,14 @@ theorem drawdown_le_one {E : Fin n → ℝ} (hE : ∀ t, 0 < E t) (t : Fin n) : 
   unfold drawdown; linarith
 
 /-- Max drawdown of a strictly positive equity curve is nonnegative. -/
-theorem maxDrawdown_nonneg (hn : 0 < n) {E : Fin n → ℝ} (hE : ∀ t, 0 < E t) :
-    0 ≤ maxDrawdown hn E := by
-  haveI : NeZero n := ⟨hn.ne'⟩
+theorem maxDrawdown_nonneg [NeZero n] {E : Fin n → ℝ} (hE : ∀ t, 0 < E t) :
+    0 ≤ maxDrawdown E := by
   obtain ⟨t, -⟩ := univ_nonempty (α := Fin n)
   exact le_trans (drawdown_nonneg hE t) (Finset.le_sup' (drawdown E) (mem_univ t))
 
 /-- Max drawdown of a strictly positive equity curve is at most `1`. -/
-theorem maxDrawdown_le_one (hn : 0 < n) {E : Fin n → ℝ} (hE : ∀ t, 0 < E t) :
-    maxDrawdown hn E ≤ 1 := by
-  haveI : NeZero n := ⟨hn.ne'⟩
+theorem maxDrawdown_le_one [NeZero n] {E : Fin n → ℝ} (hE : ∀ t, 0 < E t) :
+    maxDrawdown E ≤ 1 := by
   exact Finset.sup'_le univ_nonempty (drawdown E) (fun t _ ↦ drawdown_le_one hE t)
 
 end MathFin.Backtest
