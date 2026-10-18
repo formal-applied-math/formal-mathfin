@@ -25,8 +25,8 @@ public import Mathlib
 public import MathFin.DeFi.ConstantProductAMM
 
 /-!
-# Uniswap v2/v3 AMM mechanics (DeFi/AMM group, items #25 + TWAP +
-fee invariant + v3 virtual reserves)
+# Uniswap v2/v3 AMM mechanics: impermanent loss, TWAP, fee invariant,
+v3 virtual reserves
 
 This file formalises four further closed-form results about automated
 market makers, building on the constant-product substrate in
@@ -63,7 +63,7 @@ namespace MathFin
 
 namespace DeFi
 
-/-! ## #25: Impermanent loss closed form -/
+/-! ## Impermanent loss closed form -/
 
 /-- After the external price moves by factor `r` (new price = `r` times the
 price at deposit), a constant-product pool with invariant `k = x0 * y0` and
@@ -110,7 +110,7 @@ theorem lpPortfolioValue_eq
     impermanentLossReservesX x0 y0 r * (r * y0 / x0)
       + impermanentLossReservesY x0 y0 r = 2 * y0 * Real.sqrt r := by
   unfold impermanentLossReservesX impermanentLossReservesY
-  set s := Real.sqrt r with hs_def
+  set s := Real.sqrt r
   have hs_sq : s ^ 2 = r := Real.sq_sqrt hr.le
   have hs_pos : 0 < s := Real.sqrt_pos.mpr hr
   have hx0' : x0 ≠ 0 := hx0.ne'
@@ -176,7 +176,8 @@ noncomputable def twap (p : ℕ → ℝ) (t1 t2 : ℕ) : ℝ :=
 
 /-- The TWAP equals the arithmetic mean of the price series over the
 window `(t1, t2]`, i.e. the telescoping accumulator identity really does
-compute a time-weighted average. -/
+compute a time-weighted average — for `t1 < t2`; at `t1 = t2` both sides
+reduce to `_ / 0 = 0` by Lean's junk-value convention for division. -/
 theorem twap_eq_average (p : ℕ → ℝ) (t1 t2 : ℕ) (h : t1 ≤ t2) :
     twap p t1 t2 = (∑ i ∈ Finset.Ico (t1 + 1) (t2 + 1), p i) / ((t2 : ℝ) - (t1 : ℝ)) := by
   unfold twap
@@ -191,13 +192,13 @@ noncomputable def harmonicMean (s : Finset ℕ) (q : ℕ → ℝ) : ℝ :=
 the **reciprocal of the harmonic mean of `q` equals the arithmetic mean of
 `p`** — not the reciprocal of the arithmetic mean of `q`. This is the
 caveat: naively averaging the reciprocal series and inverting gives the
-wrong (harmonic, not arithmetic) mean. -/
+wrong (harmonic, not arithmetic) mean. Stated for a nonempty family of
+strictly positive values, the intended reading; the identity itself is a
+`div`/`div` junk-value tautology that also holds at `s = ∅`. -/
 theorem harmonicMean_reciprocal_eq_arithmeticMean
-    (s : Finset ℕ) (p : ℕ → ℝ) (hs : s.Nonempty) :
+    (s : Finset ℕ) (p : ℕ → ℝ) :
     1 / harmonicMean s (fun i => 1 / p i) = (∑ i ∈ s, p i) / (s.card : ℝ) := by
   unfold harmonicMean
-  have hcard : (0 : ℝ) < s.card := by
-    exact_mod_cast Finset.card_pos.mpr hs
   have hsum : ∑ i ∈ s, (1 / (1 / p i)) = ∑ i ∈ s, p i := by
     apply Finset.sum_congr rfl
     intro i hi

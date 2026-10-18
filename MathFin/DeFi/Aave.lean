@@ -16,8 +16,7 @@ Adapted from the Aave v2 whitepaper (Aave, "Aave Protocol V2", 2020,
 
 ## Results
 
-* `kinkedRate`: the piecewise-linear borrow-rate curve; the two branches
-  agree at the optimal-utilization kink `U_opt` (no jump there).
+* `kinkedRate`: the piecewise-linear borrow-rate curve.
 * `kinkedRate_apply_optimal`: the rate at the kink, `R₀ + slope1` — the
   common value both branches take at `U = U_opt` (this does not by itself
   establish `ContinuousAt`, which would additionally need `Uopt ≠ 1`).
@@ -25,7 +24,8 @@ Adapted from the Aave v2 whitepaper (Aave, "Aave Protocol V2", 2020,
   when both slopes are nonnegative.
 * `healthFactorV1`, `healthFactorV2`: the single-asset and multi-asset
   (summed) health-factor definitions.
-* `liquidityIndex`: the linear recurrence `LI_t = (R_t·U_t·ΔT/T_year + 1)·LI_{t-1}`
+* `liquidityIndexStep`, `liquidityIndex_closedForm`: the linear recurrence
+  `LI_t = (R_t·U_t·ΔT/T_year + 1)·LI_{t-1}`
   and its closed-form (product) solution. **Scope disclosure**: the
   whitepaper's per-period factor is `LiquidityRate_t·ΔT/T_year + 1`, where
   `LiquidityRate = BorrowRate·U·(1 − reserveFactor)`; `R` here stands for
