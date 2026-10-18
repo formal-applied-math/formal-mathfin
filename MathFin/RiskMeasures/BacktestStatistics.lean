@@ -123,8 +123,8 @@ theorem sampleVariance_scale (c : ℝ) (r : Fin n → ℝ) :
     sampleVariance (fun i ↦ c * r i) = c ^ 2 * sampleVariance r := by
   unfold sampleVariance
   rw [sampleMean_scale]
-  have hterm : ∀ i, (c * r i - c * sampleMean r) ^ 2 = c ^ 2 * (r i - sampleMean r) ^ 2 := by
-    intro i; ring
+  have hterm (i : Fin n) :
+      (c * r i - c * sampleMean r) ^ 2 = c ^ 2 * (r i - sampleMean r) ^ 2 := by ring
   simp_rw [hterm]
   rw [← Finset.mul_sum, mul_div_assoc]
 
@@ -160,10 +160,8 @@ theorem cagr_scale_pos {c : ℝ} (hc : 0 < c) (N : ℝ) (k : ℕ) (E_initial E_f
 theorem le_runningMax {E : Fin n → ℝ} (t : Fin n) : E t ≤ runningMax E t :=
   Finset.le_sup' E (Finset.mem_Iic.2 le_rfl)
 
-theorem runningMax_pos {E : Fin n → ℝ} (hE : ∀ t, 0 < E t) (t : Fin n) : 0 < runningMax E t := by
-  obtain ⟨s, -, hsE⟩ := Finset.exists_mem_eq_sup' (Finset.nonempty_Iic (a := t)) E
-  rw [runningMax, hsE]
-  exact hE s
+theorem runningMax_pos {E : Fin n → ℝ} (hE : ∀ t, 0 < E t) (t : Fin n) : 0 < runningMax E t :=
+  (hE t).trans_le (le_runningMax t)
 
 theorem drawdown_nonneg {E : Fin n → ℝ} (hE : ∀ t, 0 < E t) (t : Fin n) : 0 ≤ drawdown E t := by
   have h1 : E t / runningMax E t ≤ 1 :=
@@ -171,18 +169,17 @@ theorem drawdown_nonneg {E : Fin n → ℝ} (hE : ∀ t, 0 < E t) (t : Fin n) : 
   unfold drawdown; linarith
 
 theorem drawdown_le_one {E : Fin n → ℝ} (hE : ∀ t, 0 < E t) (t : Fin n) : drawdown E t ≤ 1 := by
-  have h1 : 0 ≤ E t / runningMax E t := le_of_lt (div_pos (hE t) (runningMax_pos hE t))
+  have h1 : 0 ≤ E t / runningMax E t := (div_pos (hE t) (runningMax_pos hE t)).le
   unfold drawdown; linarith
 
 /-- Max drawdown of a strictly positive equity curve is nonnegative. -/
 theorem maxDrawdown_nonneg [NeZero n] {E : Fin n → ℝ} (hE : ∀ t, 0 < E t) :
-    0 ≤ maxDrawdown E := by
-  obtain ⟨t, -⟩ := univ_nonempty (α := Fin n)
-  exact le_trans (drawdown_nonneg hE t) (Finset.le_sup' (drawdown E) (mem_univ t))
+    0 ≤ maxDrawdown E :=
+  Finset.le_sup'_of_le _ (mem_univ 0) (drawdown_nonneg hE 0)
 
 /-- Max drawdown of a strictly positive equity curve is at most `1`. -/
 theorem maxDrawdown_le_one [NeZero n] {E : Fin n → ℝ} (hE : ∀ t, 0 < E t) :
-    maxDrawdown E ≤ 1 := by
-  exact Finset.sup'_le univ_nonempty (drawdown E) (fun t _ ↦ drawdown_le_one hE t)
+    maxDrawdown E ≤ 1 :=
+  Finset.sup'_le _ _ fun t _ ↦ drawdown_le_one hE t
 
 end MathFin.Backtest
