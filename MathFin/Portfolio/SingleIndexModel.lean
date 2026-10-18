@@ -18,9 +18,9 @@ shocks `εᵢ` uncorrelated across assets and with the market. The implied covar
 
   `Var(Rp) = (w'β)² σ_M² + w'D_εw`,
 
-which, for a bounded idiosyncratic variance and the equal-weight portfolio, tends to `0` as the
-idiosyncratic term — i.e. idiosyncratic risk diversifies away, leaving only systematic risk
-`(β_p σ_M)²`.
+in which, for a bounded idiosyncratic variance and the equal-weight portfolio, the idiosyncratic
+term tends to `0` as `n → ∞` — i.e. idiosyncratic risk diversifies away, leaving only systematic
+risk `(β_p σ_M)²`.
 
 ## Main definitions and results
 

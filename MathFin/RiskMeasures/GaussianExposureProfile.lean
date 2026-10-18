@@ -89,12 +89,10 @@ lemma potentialFutureExposure_eq (μ σ α : ℝ) :
     potentialFutureExposure μ σ α = μ + σ * PhiInv α := rfl
 
 /-- At the `50%` level, `PFE` reduces to the expected mark-to-market `μ` (since `Φ⁻¹(1/2) = 0` by
-`Phi_zero` and `Phi_eq_iff`). -/
+`PhiInv_half`). -/
 lemma potentialFutureExposure_half (μ σ : ℝ) :
     potentialFutureExposure μ σ (1 / 2) = μ := by
-  have hhalf : (1:ℝ)/2 ∈ Ioo (0:ℝ) 1 := by constructor <;> norm_num
-  have hz : PhiInv (1/2 : ℝ) = 0 := ((Phi_eq_iff hhalf).mp Phi_zero).symm
-  rw [potentialFutureExposure_eq, hz]
+  rw [potentialFutureExposure_eq, PhiInv_half]
   ring
 
 /-- A discrete exposure profile `EPE(tᵢ)` at times `t`, weighted by the trapezoid rule over
