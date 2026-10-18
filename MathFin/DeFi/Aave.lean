@@ -29,9 +29,9 @@ Adapted from the Aave v2 whitepaper (Aave, "Aave Protocol V2", 2020,
   `LiquidityRate = BorrowRate·U·(1 − reserveFactor)`; `R` here stands for
   `BorrowRate` and the recurrence omits `(1 − reserveFactor)` (equivalently,
   the `reserveFactor = 0` simplification).
-* `stableRateUpdate`: the weighted-average new stable rate, shown to lie
-  between the old rate and the new borrower's rate (a weighted average is
-  a convex combination).
+* `stableRateUpdate`: the weighted-average new stable rate, shown (when the
+  new borrower's rate is at least the pool's prior average) to lie between
+  the two (a weighted average is a convex combination).
 -/
 
 @[expose] public section

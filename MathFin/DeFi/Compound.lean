@@ -11,25 +11,25 @@ public import Mathlib
 # Compound: utilization, affine borrow rate, cToken exchange-rate monotonicity
 
 Adapted from the Compound whitepaper (Compound Labs, "Compound: The Money
-Market Protocol", 2019, <https://compound.finance/documents/Compound.Whitepaper.pdf>),
-the utilization/interest-rate model (§"Interest Rate Model") and the cToken
-exchange-rate mechanics (§"The cToken Contracts").
+Market Protocol", 2019), §2.3 ("Interest Rate Model") and §3.2 ("The cToken
+Contracts").
 
 ## Results
 
-* `utilization`: `U = Borrows / (Cash + Borrows)` — the whitepaper's formula
-  is `Borrows / (Cash + Borrows − Reserves)`; we state the reserves-free
-  simplification (equivalent to `Reserves = 0`) and disclose it here rather
-  than silently dropping the term.
+* `utilization`: `U = Borrows / (Cash + Borrows)`, matching the whitepaper's
+  §2.3 definition exactly. (The deployed `BaseJumpRateModelV2` contract nets
+  reserves out of the denominator, `Borrows / (Cash + Borrows − Reserves)`;
+  this file follows the whitepaper, not that later on-chain refinement.)
 * `borrowRate`: the affine rate `r = base + slope · U`, monotone in `U` when
   `slope ≥ 0`.
 * `exchangeRate`: `(Cash + Borrows − Reserves) / TotalSupply`.
 * `exchangeRate_mono`: the exchange rate is monotone nondecreasing as
-  interest accrues, **under the explicit hypothesis that the reserve
-  factor cut does not exceed the accrued interest** (`reservesAdded ≤
-  interest`) — the whitepaper states the reserve factor is a fraction
-  `< 1` of interest but never spells out this inequality as a standalone
-  hypothesis, so we state it as one rather than assume it silently.
+  interest accrues, **under the explicit hypothesis that the reserve-factor
+  cut does not exceed the accrued interest** (`reservesAdded ≤ interest`) —
+  the whitepaper's §3.2.1 accrual equations give this directly
+  (`reservesAdded = interest · reserveFactor` with `reserveFactor ∈ [0,1]`),
+  but state it as a standalone hypothesis on the accrued amounts rather than
+  re-deriving it from `reserveFactor` each time.
 -/
 
 @[expose] public section
@@ -41,10 +41,10 @@ namespace DeFi
 namespace Compound
 
 /-- **Compound utilization rate**: the fraction of the pool's assets
-(cash + outstanding borrows) that is currently borrowed out. **Scope
-disclosure**: the whitepaper's formula nets out reserves,
-`Borrows / (Cash + Borrows − Reserves)`; this definition is the
-`Reserves = 0` simplification. -/
+(cash + outstanding borrows) that is currently borrowed out, per the
+whitepaper's §2.3 definition. (The deployed interest-rate-model contract
+additionally nets reserves out of the denominator; that refinement is not
+formalized here.) -/
 noncomputable def utilization (cash borrows : ℝ) : ℝ :=
   borrows / (cash + borrows)
 
@@ -66,15 +66,14 @@ noncomputable def exchangeRate (cash borrows reserves totalSupply : ℝ) : ℝ :
   (cash + borrows - reserves) / totalSupply
 
 /-- **cToken exchange-rate monotonicity under interest accrual.**
-Suppose a period accrues `interest ≥ 0` of new borrows, of which
-`reservesAdded ≥ 0` is cut to reserves. **Explicit hypothesis**
-`reservesAdded ≤ interest` — this is the fact that the reserve factor is a
-genuine *fraction* (`< 1`, in fact `≤ 1`) of the interest, which the
-Compound whitepaper states qualitatively ("a portion of the interest...
-is allocated to the Reserves") but never isolates as the standalone
-inequality this lemma depends on; we make it an explicit hypothesis rather
-than bake it into the model. Under it, and with cash and supply unchanged,
-the exchange rate after accrual is at least the rate before. -/
+Suppose a period accrues `interest` of new borrows, of which
+`reservesAdded` is cut to reserves. **Explicit hypothesis**
+`reservesAdded ≤ interest` — the whitepaper's §3.2.1 accrual equations give
+this directly (`reservesAdded = interest · reserveFactor` with
+`reserveFactor ∈ [0,1]`), but we state it as a standalone hypothesis on the
+accrued amounts rather than re-deriving it from `reserveFactor` here. Under
+it, and with cash and supply unchanged, the exchange rate after accrual is
+at least the rate before. -/
 theorem exchangeRate_mono
     {cash borrows reserves totalSupply interest reservesAdded : ℝ}
     (htotalSupply : 0 < totalSupply)
