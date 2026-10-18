@@ -22,7 +22,8 @@ rate, reserve-factor accrual).
   reserves out of the denominator, `Borrows / (Cash + Borrows − Reserves)`;
   this file follows the whitepaper, not that later on-chain refinement.)
 * `borrowRate`: the affine rate `r = base + slope · U`, monotone in `U` when
-  `slope ≥ 0`.
+  `slope ≥ 0`; `borrowRate_utilization` composes it with `utilization` to
+  give the whitepaper's §2.3 rate curve directly.
 * `exchangeRate`: `(Cash + Borrows − Reserves) / TotalSupply`.
 * `exchangeRate_mono`: the exchange rate is monotone nondecreasing as
   interest accrues, **under the explicit hypothesis that the reserve-factor
@@ -49,7 +50,10 @@ formalized here.) -/
 noncomputable def utilization (cash borrows : ℝ) : ℝ :=
   borrows / (cash + borrows)
 
-/-- **Compound affine borrow-rate model**: `r(U) = base + slope · U`. -/
+/-- **Compound affine borrow-rate model**: `r(U) = base + slope · U`. Takes
+`U` directly (rather than `cash`/`borrows`) so it applies uniformly whether
+`U` comes from `utilization` or from the on-chain reserves-netted refinement
+noted on `utilization`. -/
 def borrowRate (base slope U : ℝ) : ℝ :=
   base + slope * U
 
@@ -60,6 +64,13 @@ theorem borrowRate_monotone {base slope : ℝ} (hslope : 0 ≤ slope) :
   intro U V hUV
   unfold borrowRate
   gcongr
+
+/-- **Borrow rate applied to the whitepaper's utilization**: composing
+`borrowRate` with `utilization` gives the whitepaper's §2.3 rate curve
+`r = base + slope · Borrows/(Cash + Borrows)` directly. -/
+theorem borrowRate_utilization (base slope cash borrows : ℝ) :
+    borrowRate base slope (utilization cash borrows) =
+      base + slope * (borrows / (cash + borrows)) := rfl
 
 /-- **Compound cToken exchange rate**: the redeemable-underlying-per-cToken
 rate `(Cash + Borrows − Reserves) / TotalSupply`. -/

@@ -166,6 +166,13 @@ unchanged) and the two prose copies of the inequality updated to match.
   upgrade taken.
 - No `sorry`/`admit`/`axiom`/`native_decide`/`polyrith` anywhere in the diff.
 
+### Lens 4 (architectural ingenuity)
+
+A follow-up review round found `Compound.lean`'s `utilization` was an orphan definition —
+documented and faithful to the whitepaper, but never composed with `borrowRate` by any
+theorem, so the module stated the rate curve's two pieces (`U` and `r(U)`) without connecting
+them. Added `borrowRate_utilization`, a one-line `rfl` composing the two, closing the gap.
+
 ### Ranked backlog
 
 1. (low) Standardize `MathFin/DeFi/`'s namespace depth one way or the other — cosmetic,
