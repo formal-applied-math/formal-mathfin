@@ -40,11 +40,13 @@ and `e₁, e₂, e₃, e₄` the same four with `U` replaced by `L`. Writing `A�
 `A₂ = (L²/(SX))^{μ+½}`, `B₁ = (U²/(SX))^{μ−½}`, `B₂ = (L²/(SX))^{μ−½}` (as `exp(·log·)`, matching
 the `BinaryBarrierOption.lean` convention), `η = 1` for a call / `η = −1` for a put, and
 
-  `C₁ = ηS·e^{(b−r)T}·S^{−2μ}·(SX)^{μ+½} / (2(μ+½))`,
-  `C₂ = ηX·e^{−rT}·S^{−2(μ−1)}·(SX)^{μ−½} / (2(μ−1/2))`
+  `C₁ = S·e^{(b−r)T}·S^{−2μ}·(SX)^{μ+½} / (2(μ+½))`,
+  `C₂ = X·e^{−rT}·S^{−2(μ−1)}·(SX)^{μ−½} / (2(μ−1/2))`
 
-the two terms are `term₁ = C₁·(A₁Φ(ηd₁) − λ₁Φ(ηd₂) − A₂Φ(ηe₁) + λ₁Φ(ηe₂))` and
-`term₂ = C₂·(B₁Φ(ηd₃) − λ₂Φ(ηd₄) − B₂Φ(ηe₃) + λ₂Φ(ηe₄))`, with the knock-in value
+(note: `η` is **not** baked into `C₁, C₂` themselves — it is applied once, outside, below — matching
+`sbTerm1Coef`/`sbTerm2Coef`, which are exactly `C₁`/`C₂` with no `η` factor) the two terms are
+`term₁ = η·C₁·(A₁Φ(ηd₁) − λ₁Φ(ηd₂) − A₂Φ(ηe₁) + λ₁Φ(ηe₂))` and
+`term₂ = η·C₂·(B₁Φ(ηd₃) − λ₂Φ(ηd₄) − B₂Φ(ηe₃) + λ₂Φ(ηe₄))`, with the knock-in value
 `w = (term₁ − term₂)/(U − L)` (the knock-out value is `vanilla − w`, standard in–out parity, not
 separately formalized here for the same reason noted in `HeynenKatTwoAssetBarrier.lean`: it is
 the *definition* QuantLib itself uses, not an independent theorem).
