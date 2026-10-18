@@ -415,8 +415,9 @@ theorem cointossM_eq_of_pos {F σ_lo σ_hi v_lo v_hi K : ℝ} (hlo : 0 < σ_lo) 
   ring
 
 /-- **The posterior variance's upper-wing limit:** `m(K) → v_hi` as `K → ∞` — the posterior
-mean of the variance converges to the wide branch in the upper wing (the lower wing follows
-the same way from `cointoss_posterior_wing_limit_atZero`). -/
+mean of the variance converges to the wide branch in the upper wing (the analogous lower-wing
+statement, `m(K) → v_hi` as `K → 0⁺`, would follow the same way from
+`cointoss_posterior_wing_limit_atZero`; it is not stated here). -/
 theorem cointossM_wing_limit_atTop {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F) (hlo : 0 < σ_lo)
     (hhi : σ_lo < σ_hi) :
     Tendsto (fun K : ℝ ↦ cointossM F σ_lo σ_hi v_lo v_hi K) atTop (𝓝 v_hi) := by
@@ -431,15 +432,19 @@ theorem cointossM_wing_limit_atTop {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F) 
 `v_lo < v_hi` (Ex. 11.2's punchline: the posterior `m` is a
 genuine function of the strike; for a flat `σ_loc > 0` and `m > 0` the leverage `σ_loc/√m`
 is then not flat either, a transfer not stated here).
-If `m` were constant it would equal its own upper-wing limit `v_hi`; but at the money
-`m(F) < (v_lo + v_hi)/2 < v_hi`. -/
+If `m` were constant on the (economically meaningful) positive strikes it would equal its own
+upper-wing limit `v_hi`; but at the money `m(F) < (v_lo + v_hi)/2 < v_hi`. The quantifier is
+restricted to `K > 0`: `cointossM`'s `0/0` convention at `K = 0` makes an unrestricted statement
+true of functions that are genuinely non-constant on `(0, ∞)`, so it would not capture the
+intended content. -/
 theorem cointossM_nonconstant {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F)
     (hlo : 0 < σ_lo) (hhi : σ_lo < σ_hi) (hvhi : v_lo < v_hi) :
-    ¬ ∃ c : ℝ, ∀ K : ℝ, cointossM F σ_lo σ_hi v_lo v_hi K = c := by
+    ¬ ∃ c : ℝ, ∀ K : ℝ, 0 < K → cointossM F σ_lo σ_hi v_lo v_hi K = c := by
   rintro ⟨c, hc⟩
   have h : v_hi = c := tendsto_nhds_unique (cointossM_wing_limit_atTop hF hlo hhi)
-    (tendsto_const_nhds.congr fun K ↦ (hc K).symm)
-  linarith [cointossM_atm_lt_uncond hF hlo hhi hvhi, hc F]
+    (tendsto_const_nhds.congr' (by
+      filter_upwards [eventually_gt_atTop (0:ℝ)] with K hK using (hc K hK).symm))
+  linarith [cointossM_atm_lt_uncond hF hlo hhi hvhi, hc F hF]
 
 /-! ## Gated stretch: `cointoss_condExp_characterization` (recorded, not proved)
 
