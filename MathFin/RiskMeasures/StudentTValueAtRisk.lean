@@ -10,35 +10,36 @@ public import Mathlib
 /-!
 # Student-t VaR and expected shortfall closed forms
 
-Roadmap item #20 asked for a "Student-t (Cornish-Fisher-style) parametric VaR" transcribed
-from personal notes as
+A "Student-t (Cornish-Fisher-style) parametric VaR" was wanted in the closed form
 
   `VaR_t = -1/α · (1-ν)⁻¹ · (ν-2+x_α²) · t.pdf(x_α) · σ - μ`.
 
-**That transcription is not a VaR formula.** Checked against the primary source already cited
-in this file's sibling `RiskMeasures/RiskClosedForms.lean`, McNeil, Frey and Embrechts,
-*Quantitative Risk Management* (2015), Example 2.15: for a location-scale Student-t loss
+**That formula is not a VaR formula.** Checked against McNeil, Frey and Embrechts,
+*Quantitative Risk Management* (2015) — the same book this file's sibling
+`RiskMeasures/RiskClosedForms.lean` cites (there, Example 2.14) — Example 2.15 (the univariate
+Student-t density itself is Appendix A.2): for a location-scale Student-t loss
 `L = μ + σ T`, `T ~ t_ν` standard (unit scale, not unit variance),
 
   `VaR_α(L) = μ + σ · t_ν⁻¹(α)`                                              (just the quantile)
   `ES_α(L) = μ + σ · g_ν(t_ν⁻¹(α))/(1 - α) · (ν + t_ν⁻¹(α)²)/(ν - 1)`,  `ν > 1`
 
-where `g_ν` is the standard Student-t density. The personal-notes formula is the **second** line
+where `g_ν` is the standard Student-t density. The above formula is the **second** line
 (expected shortfall, not VaR) rewritten for losses defined as the *negative* of a return, with
 `α` itself the left-tail probability and `x_α < 0`: `-1/α · (1-ν)⁻¹ = 1/(α(ν-1))` there plays the
 role of `1/(1-α) · 1/(ν-1)` here, and the `-μ` plays the role of `+μ` for a loss defined with the
 opposite sign — an algebraically valid rewrite of the same closed form, not a second error. The
-`ν - 2` in the notes is *not* itself a transcription error either: it is the unit-*variance*
+`ν - 2` is *not* itself an error either: it is the unit-*variance*
 standardization used in Christoffersen's *Elements of Financial Risk Management* (the
-"Cornish-Fisher-style" chapter the roadmap item names). Writing `Y = T·√((ν-2)/ν)` rescales the
-standard `T ~ t_ν` to `Var Y = 1` (`ν > 2`), and substituting into the `g_ν`/`t_ν⁻¹(α)` form above
-turns the `ν + t_ν⁻¹(α)²` factor into `ν - 2 + y_α²` for the standardized quantile `y_α`, with a
-matching rescale of the density — the same closed form in a different scale convention, not a bug
+"Cornish-Fisher-style" chapter this formula is drawn from). Writing `Y = T·√((ν-2)/ν)` rescales the
+standard `T ~ t_ν` to `Var Y = 1` (`ν > 2`), with standardized density
+`f_Y(y) = √(ν/(ν-2)) · g_ν(y·√(ν/(ν-2)))`; substituting into the `g_ν`/`t_ν⁻¹(α)` form above
+turns the `ν + t_ν⁻¹(α)²` factor into `ν - 2 + y_α²` for the standardized quantile `y_α`, with
+`f_Y` in place of `g_ν` — the same closed form in a different scale convention, not a bug
 to fix. This file formalizes the two real closed forms directly, in the unit-*scale* `(1-α)`-
 upper-tail loss convention of the source (McNeil-Frey-Embrechts) rather than re-deriving the
 unit-*variance* rewrite: `studentTValueAtRisk`, the honest (trivial) VaR quantile closed form, and
-`studentTExpectedShortfall`, the pdf-based closed form the notes were actually describing, with
-the `ν` matching this file's own scale convention rather than the notes' `ν - 2`.
+`studentTExpectedShortfall`, the pdf-based closed form this formula was actually describing, with
+the `ν` matching this file's own scale convention rather than the unit-variance rewrite's `ν - 2`.
 
 Mathlib has no Student-t distribution at all (no pdf, no law, no quantile function) at the
 pinned version, so unlike `RiskMeasures/GaussianValueAtRisk.lean` there is no `HasLaw`-level
@@ -59,9 +60,12 @@ file does not undertake) — both left as disclosed gaps.
 * `studentTPdf`: the standard (unit-scale) Student-t density `g_ν`, built from `Real.Gamma`.
 * `studentTPdf_pos`: `g_ν(x) > 0` for `ν > 0`.
 * `studentTValueAtRisk`: the (trivial) VaR closed form `μ + σ x_α`.
-* `studentTExpectedShortfall`: the pdf-based ES closed form.
+* `studentTExpectedShortfall`: the pdf-based ES closed form, meaningful only for `ν > 1`, `α < 1`
+  (outside that range the Lean term is a junk value: e.g. `ν = 1` or `α = 1` collapses it to `μ`
+  via `x/0 = 0`, whereas the real ES diverges there).
 * `studentTValueAtRisk_affine`, `studentTExpectedShortfall_affine`: affine invariance of each
-  closed form, `a ≥ 0`, matching `gaussianVaR_affine` / `gaussianCVaR_affine`.
+  closed form, `a ≥ 0`, matching `gaussianVaR_affine` / `gaussianCVaR_affine` (volatility scales
+  by `|a|·σ`, so `0 ≤ a` is load-bearing).
 * `studentTExpectedShortfall_pos`: the ES closed form is positive for a centered, positively
   scaled loss (`μ = 0`, `σ > 0`) at any quantile `x_α` (the `x_α²` term needs no sign hypothesis).
 
@@ -81,7 +85,7 @@ open Real
 
 /-- The standard (unit-scale, *not* unit-variance) Student-t density with `ν` degrees of
 freedom, `g_ν(x) = Γ((ν+1)/2) / (√(νπ) Γ(ν/2)) · (1 + x²/ν)^(-(ν+1)/2)`
-(McNeil-Frey-Embrechts, *Quantitative Risk Management*, (A.5)). -/
+(McNeil-Frey-Embrechts, *Quantitative Risk Management*, Appendix A.2). -/
 noncomputable def studentTPdf (ν x : ℝ) : ℝ :=
   Gamma ((ν + 1) / 2) / (Real.sqrt (ν * π) * Gamma (ν / 2)) * (1 + x ^ 2 / ν) ^ (-(ν + 1) / 2)
 
@@ -103,14 +107,15 @@ noncomputable def studentTValueAtRisk (μ σ xα : ℝ) : ℝ := μ + σ * xα
 
 /-- **Student-t expected shortfall** at quantile `x_α` and level `α` for a location-scale loss
 `L = μ + σ T`, `T ~ t_ν`: `ES_α(L) = μ + σ · g_ν(x_α)/(1-α) · (ν + x_α²)/(ν-1)`
-(McNeil-Frey-Embrechts, Example 2.15). This, not a VaR, is the closed form the roadmap's
-personal-notes formula was actually describing (in the unit-variance convention; see the module
-docstring). -/
+(McNeil-Frey-Embrechts, Example 2.15). Meaningful only for `ν > 1`, `α < 1`: outside that range
+this is a junk value (`x/0 = 0` collapses it to `μ`), not the real (divergent) ES. This, not a
+VaR, is the closed form the formula in the module docstring was actually describing (in the
+unit-variance convention). -/
 noncomputable def studentTExpectedShortfall (ν μ σ xα α : ℝ) : ℝ :=
   μ + σ * (studentTPdf ν xα / (1 - α)) * ((ν + xα ^ 2) / (ν - 1))
 
 /-- **ES affine invariance**: `ES_α(a·L + b) = a·ES_α(L) + b` for `a ≥ 0`, matching
-`gaussianCVaR_affine`. -/
+`gaussianCVaR_affine` (volatility scales by `|a|·σ`, so `0 ≤ a` is load-bearing). -/
 theorem studentTExpectedShortfall_affine (ν μ σ xα α a b : ℝ) (ha : 0 ≤ a) :
     studentTExpectedShortfall ν (a * μ + b) (|a| * σ) xα α =
       a * studentTExpectedShortfall ν μ σ xα α + b := by
@@ -118,7 +123,7 @@ theorem studentTExpectedShortfall_affine (ν μ σ xα α a b : ℝ) (ha : 0 ≤
   rw [abs_of_nonneg ha]; ring
 
 /-- **VaR affine invariance**: `VaR_α(a·L + b) = a·VaR_α(L) + b` for `a ≥ 0`, matching
-`gaussianVaR_affine`. -/
+`gaussianVaR_affine` (volatility scales by `|a|·σ`, so `0 ≤ a` is load-bearing). -/
 theorem studentTValueAtRisk_affine (μ σ xα a b : ℝ) (ha : 0 ≤ a) :
     studentTValueAtRisk (a * μ + b) (|a| * σ) xα = a * studentTValueAtRisk μ σ xα + b := by
   unfold studentTValueAtRisk
