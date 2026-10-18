@@ -158,6 +158,11 @@ theorem heynenKat_downOut_add_upOut (S1 S2 X H T r b1 b2 σ1 σ2 : ℝ) {eta ρ 
   have h3 := bivariateNormalCDF_flip_snd (eta * d3) e3 heρ
   have h4 := bivariateNormalCDF_flip_snd (eta * d4) e4 heρ
   simp only [neg_neg] at h1 h2 h3 h4
+  -- Unfolding `heynenKatA` at the literal `phi := 1 / -1` substitutes `1 * e_i`, `-1 * e_i`,
+  -- `-eta * 1 * ρ`, `-eta * (-1) * ρ` for the bivariate-CDF arguments: these are only RING-equal
+  -- (not defeq) to the clean `e_i` / `-e_i` / `-(eta * ρ)` / `eta * ρ` forms in `h1`-`h4`, so the
+  -- explicit `← hd_i`/`← he_i` fold-back and sign-normalizing lemmas below are needed before
+  -- `linear_combination`'s atom matching can see the two sides as the same bivariate-CDF calls.
   simp only [heynenKatA, ← hd1, ← he1, neg_mul, one_mul, mul_neg, mul_one, neg_neg, hkMu, ← hd3,
     ← he3, ← hd2, ← he2, ← hd4, ← he4]
   linear_combination (eta * S1 * Real.exp ((b1 - r) * T)) * h1 +

@@ -18,9 +18,10 @@ Two Risky Assets*, Journal of Financial Economics 10 (1982), 161–185) — genu
 from `BasketMomentMatching.lean`'s `n`-asset moment-matching *approximation*: this is an exact
 closed form, but only for `n = 2`.
 
-Transcription verified against the Rmetrics `fExoticOptions::TwoRiskyAssetsOption` reference
-implementation (itself a transcription of Haug, *The Complete Guide to Option Pricing
-Formulas*, §2.8.1), using the cost-of-carry convention `bᵢ` (`bᵢ = r` for a non-dividend asset,
+Transcribed from, and cross-checked against, the Rmetrics `fExoticOptions::TwoRiskyAssetsOption`
+reference implementation (itself a transcription of Haug, *The Complete Guide to Option Pricing
+Formulas*, §2.8.1) — no independent numerical verification was run, only a side-by-side formula
+read. Uses the cost-of-carry convention `bᵢ` (`bᵢ = r` for a non-dividend asset,
 `bᵢ = r - qᵢ` under a continuous yield `qᵢ`, `bᵢ = 0` for a futures-style asset). With
 
   `v = √(σ₁² + σ₂² − 2ρσ₁σ₂)`                          (`stulzEffVol`, the Margrabe spread vol)
