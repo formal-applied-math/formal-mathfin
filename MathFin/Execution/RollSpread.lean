@@ -20,13 +20,15 @@ indicator (buy/sell), modelled as a fair random sign (`rademacher`, from
 `MathFin.Foundations.CorrelationFallacies`). Roll's economic assumptions — stated here as
 explicit, named hypotheses, since the original note leaves them implicit — are:
 
-* the signs `q_t` have the `rademacher` law (i.i.d. fair coin flips across time);
-* every pair of the five variables entering two consecutive price changes
-  (three signs, two mid-price increments) is pairwise independent, *except* the sign shared by
-  the two changes with itself.
+* the signs `q_t` have the `rademacher` law (pairwise independent fair coin flips across time —
+  joint independence is never used);
+* every pair of the five variables drawn from the two consecutive price changes that *splits
+  across* the two changes (one variable feeding `ΔP_t`, the other `ΔP_{t-1}`) is independent,
+  *except* the sign shared by the two changes with itself; independence *within* a single price
+  change is not assumed.
 
 Under these hypotheses the first-order autocovariance of the *trade-price change*
-`ΔP_t = P_t - P_{t-1}` is strictly negative:
+`ΔP_t = P_t - P_{t-1}` is `-(s/2)²`, nonpositive and strictly negative whenever `s ≠ 0`:
 
 `Cov(ΔP_t, ΔP_{t-1}) = -(s/2)²`.
 
