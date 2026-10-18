@@ -32,8 +32,8 @@ formulas:
 * **Sharpe ratio** (`sharpeRatio`): `√N · mean(r) / std(r)`, zero risk-free rate, `N`
   periods per year, `std` the *population* standard deviation of the sample `r`
   (divide the sum of squared deviations by `n`, not `n - 1`).
-* **CAGR** (`cagr`): `(E_final / E_initial) ^ (N / n) - 1` for an equity curve held over
-  `n` periods, `N` periods per year.
+* **CAGR** (`cagr`): `(E_final / E_initial) ^ (N / k) - 1` for an equity curve held over
+  `k` periods, `N` periods per year.
 * **Annualized volatility** (`annualizedVolatility`): `√N · std(r)`, same `std` as above.
 * **Max drawdown** (`maxDrawdown`): the largest running-maximum-relative decline
   `DD_t = 1 - E_t / max_{s ≤ t} E_s` of an equity curve `E`.
@@ -59,7 +59,7 @@ Two other objects in the library are adjacent but distinct:
 
 * `sharpeRatio_scale_pos`, `annualizedVolatility_scale_pos`: both are invariant
   (resp. equivariant) under scaling every return by a positive constant — rescaling the
-  unit returns are measured in (e.g. USD → cents) does not change the Sharpe ratio.
+  unit that returns are measured in (e.g. USD → cents) does not change the Sharpe ratio.
 * `cagr_scale_pos`: CAGR is invariant under scaling both endpoints of the equity curve by
   the same positive constant (e.g. a currency redenomination).
 * `drawdown_nonneg`, `drawdown_le_one`, `maxDrawdown_nonneg`, `maxDrawdown_le_one`: for a
@@ -92,10 +92,10 @@ noncomputable def sharpeRatio (N : ℝ) (r : Fin n → ℝ) : ℝ :=
 noncomputable def annualizedVolatility (N : ℝ) (r : Fin n → ℝ) : ℝ :=
   Real.sqrt N * sampleStdDev r
 
-/-- Compound annual growth rate of an equity curve held for `n` periods, `N` periods per
-year: `(E_final / E_initial) ^ (N / n) - 1`. -/
-noncomputable def cagr (N : ℝ) (n : ℕ) (E_initial E_final : ℝ) : ℝ :=
-  (E_final / E_initial) ^ (N / n) - 1
+/-- Compound annual growth rate of an equity curve held for `k` periods, `N` periods per
+year: `(E_final / E_initial) ^ (N / k) - 1`. -/
+noncomputable def cagr (N : ℝ) (k : ℕ) (E_initial E_final : ℝ) : ℝ :=
+  (E_final / E_initial) ^ (N / k) - 1
 
 /-- Running maximum of an equity curve up to and including time `t`. -/
 noncomputable def runningMax (E : Fin n → ℝ) (t : Fin n) : ℝ :=
@@ -139,7 +139,7 @@ theorem sharpeRatio_scale_pos {c : ℝ} (hc : 0 < c) (N : ℝ) (r : Fin n → �
     show Real.sqrt N * (c * sampleMean r) = c * (Real.sqrt N * sampleMean r) by ring,
     mul_div_mul_left _ _ hc.ne']
 
-/-- Annualized volatility scales linearly with the unit returns are measured in. -/
+/-- Annualized volatility scales linearly with the unit that returns are measured in. -/
 theorem annualizedVolatility_scale_pos {c : ℝ} (hc : 0 < c) (N : ℝ) (r : Fin n → ℝ) :
     annualizedVolatility N (fun i ↦ c * r i) = c * annualizedVolatility N r := by
   unfold annualizedVolatility
@@ -147,8 +147,8 @@ theorem annualizedVolatility_scale_pos {c : ℝ} (hc : 0 < c) (N : ℝ) (r : Fin
 
 /-- CAGR is unchanged by scaling both endpoints of the equity curve by the same positive
 constant (e.g. a currency redenomination): only the ratio `E_final / E_initial` matters. -/
-theorem cagr_scale_pos {c : ℝ} (hc : 0 < c) (N : ℝ) (n : ℕ) (E_initial E_final : ℝ) :
-    cagr N n (c * E_initial) (c * E_final) = cagr N n E_initial E_final := by
+theorem cagr_scale_pos {c : ℝ} (hc : 0 < c) (N : ℝ) (k : ℕ) (E_initial E_final : ℝ) :
+    cagr N k (c * E_initial) (c * E_final) = cagr N k E_initial E_final := by
   unfold cagr
   rw [mul_div_mul_left _ _ hc.ne']
 
