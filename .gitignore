@@ -40,3 +40,4 @@ docs/superpowers/
 
 # HF dataset build output (CI artifact, regenerated from benchmarks/)
 dist/
+uv.lock
