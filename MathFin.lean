@@ -291,6 +291,9 @@ import MathFin.Foundations.FTAPTwoState
 import MathFin.DeFi.ConstantProductAMM
 -- DeFi/AMM group: Uniswap v2/v3 mechanics (impermanent loss, TWAP, fee invariant, v3 virtual reserves)
 import MathFin.DeFi.UniswapCurveMechanics
+import MathFin.DeFi.Aave
+import MathFin.DeFi.Compound
+import MathFin.DeFi.Dai
 -- Phase 39: Itô structural drift formula + GBM log-drift (after Nagy 2026)
 import MathFin.Foundations.ItoLemma
 -- Time-dependent (2D) Itô formula + GBM-as-SDE-solution (genuine exp partials)
