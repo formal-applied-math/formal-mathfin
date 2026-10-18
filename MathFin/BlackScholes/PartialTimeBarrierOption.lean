@@ -9,12 +9,13 @@ public import Mathlib
 public import MathFin.Foundations.BivariateNormalCDF
 
 /-!
-# Partial-time barrier options (start window): Haug's closed form
+# Partial-time barrier options (start window, call): Haug's closed form
 
 A barrier that is monitored only on part of the option's life. This file covers the **start**
-window (QuantLib's `PartialBarrier::Start`): the barrier is live on `[0, t₁]` and switched off
-for the remainder `(t₁, T]` of the option's life (Haug, *The Complete Guide to Option Pricing
-Formulas*, §4.17.1 "Partial-Time Barrier Options"). Unlike the binary and soft barriers in this
+window, **call** side (QuantLib's `PartialBarrier::Start`, `Option::Call`): the barrier is live
+on `[0, t₁]` and switched off for the remainder `(t₁, T]` of the option's life (Haug, *The
+Complete Guide to Option Pricing Formulas*, §"Partial-Time Barrier Options"). Unlike the binary
+and soft barriers in this
 batch, this genuinely needs the **bivariate** normal CDF — the barrier-monitoring window
 `[0, t₁]` and the full life `[0, T]` are correlated (correlation `ρ = √(t₁/T)`, the two Brownian
 increments share the `[0, t₁]` leg) — which is exactly why the coverage-map note placed #65
@@ -28,17 +29,21 @@ the **end**-window case (`PartialBarrier::EndB1`/`EndB2`, barrier live only on `
 split with extra vanilla-minus-partial decompositions) and are genuinely harder — matching the
 coverage-map's own assessment that "#64–65 ... need more substrate or are genuinely harder," this
 file formalizes the **start**-window case (`CA`, QuantLib's simplest of the three) and leaves
-`EndB1`/`EndB2` out of scope. The knock-in case (`CIA = vanilla − CA`) is, as elsewhere in this
-batch, QuantLib's own *definition* via in–out parity rather than an independent closed form, so
-it is not separately formalized.
+`EndB1`/`EndB2` out of scope. **`CA` is also call-only**: QuantLib's `CA` is commented
+`// Partial-Time-Start-OUT Call Option calculation`, and the engine prices a *put* in
+`calculate()` via the put–call spot-reflection symmetry (strike `X ↦ S²/X`, barrier `H ↦ S²/H`,
+barrier direction mirrored, the `CA`-call result on the transformed inputs scaled by `X/S`) rather
+than a second closed form — that symmetry transform is not formalized here either. The knock-in
+case (`CIA = vanilla − CA`) is, as elsewhere in this batch, QuantLib's own *definition* via
+in–out parity rather than an independent closed form, so it is not separately formalized.
 
 Transcribed from, and cross-checked against, QuantLib's
 `ql/pricingengines/barrier/analyticpartialtimebarrieroptionengine.cpp` (`CA`, upstream commit
 `5f4811e`, 2026-10-16; contributed 2014 by Polytech'Nice Sophia Antipolis). We adopt a single
 constant volatility `σ` (QuantLib's engine reads a possibly term-structured Black vol evaluated
-at `t₁` for the `e`-terms and at `T` for the `d`/`f`-terms; Haug's original textbook closed form,
-which this transcribes, uses one constant `σ` throughout — the flat-vol case QuantLib's more
-general engine specializes to).
+at `t₁` for `μ` and the `e`-terms and at `T` for the `d`/`f`-terms; Haug's original textbook
+closed form, which this transcribes, uses one constant `σ` throughout — the flat-vol case
+QuantLib's more general engine specializes to).
 
 With cost-of-carry `b = r − q`, `ρ = √(t₁/T)`, `μ = (b − σ²/2)/σ²`, and
 
@@ -48,7 +53,7 @@ With cost-of-carry `b = r − q`, `ρ = √(t₁/T)`, `μ = (b − σ²/2)/σ²`
   `f₁ = (log(S/X) + 2log(H/S) + (b+σ²/2)T)/(σ√T)`,  `f₂ = f₁ − σ√T`,
 
 and `(H/S)^{2μ}`, `(H/S)^{2(μ+1)}` as `exp(·log·)` (as in the other two files of this batch), the
-start-window out-barrier value (`η = 1` down, `η = −1` up) is
+start-window out-barrier **call** value (`η = 1` down, `η = −1` up) is
 
   `CA(η) = S·e^{(b−r)T}·(N₂(d₁, ηe₁; ηρ) − (H/S)^{2(μ+1)}·N₂(f₁, ηe₃; ηρ))`
          `− X·e^{−rT}·(N₂(d₂, ηe₂; ηρ) − (H/S)^{2μ}·N₂(f₂, ηe₄; ηρ))`.
@@ -110,8 +115,9 @@ noncomputable def ptHSmu (S H b σ : ℝ) : ℝ := Real.exp (2 * ptMu b σ * Rea
 /-- **`(H/S)^{2(μ+1)}`**. -/
 noncomputable def ptHSmu1 (S H b σ : ℝ) : ℝ := Real.exp (2 * (ptMu b σ + 1) * Real.log (H / S))
 
-/-- **Partial-time-start barrier value** `CA(η)` (QuantLib's
-`AnalyticPartialTimeBarrierOptionEngine::CA`; `η = 1` down, `η = −1` up). -/
+/-- **Partial-time-start barrier call value** `CA(η)` (QuantLib's
+`AnalyticPartialTimeBarrierOptionEngine::CA`; `η = 1` down, `η = −1` up; call-only — see the
+module docstring's "Scope" paragraph for how QuantLib prices the put side instead). -/
 noncomputable def ptCA (eta S X H b r σ t1 T : ℝ) : ℝ :=
   S * Real.exp ((b - r) * T) *
       (bivariateNormalCDF (ptD1 S X b σ T) (eta * ptE1 S H b σ t1) (eta * ptRho t1 T)

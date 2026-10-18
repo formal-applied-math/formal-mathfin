@@ -14,7 +14,7 @@ public import MathFin.Foundations.StandardNormal
 A "soft" barrier option does not knock in/out at a single level but across a **corridor**
 `[L, U]`: the knock-in probability ramps linearly as the underlying's terminal log-price sweeps
 the band, rather than jumping at a single barrier (Hart & Ross 1994; Haug, *The Complete Guide
-to Option Pricing Formulas*, §4.17.6 "Soft Barrier Options"). Single-underlying, single-variable
+to Option Pricing Formulas*, §"Soft Barrier Options"). Single-underlying, single-variable
 Black–Scholes machinery — no bivariate normal CDF, matching the coverage-map note that #63 is
 one of the two simplest standalone wins in this batch.
 
@@ -178,7 +178,7 @@ theorem sb_eta_diff_helper (C A1 A2 lam d1 d2 e1 e2 : ℝ) :
   ring
 
 /-- **Call minus put, soft-barrier knock-in**: `w(1) − w(−1) = (C₁(A₁−A₂) − C₂(B₁−B₂))/(U−L)`,
-with every `Φ`/bivariate term gone — a clean cross-check (see the module docstring) that `η` is
+with every `Φ` term gone — a clean cross-check (see the module docstring) that `η` is
 threaded consistently through both the outer sign and all eight `Φ` arguments. -/
 theorem softBarrier_call_sub_put (S X U L b r σ T : ℝ) :
     softBarrierKnockIn 1 S X U L b r σ T - softBarrierKnockIn (-1) S X U L b r σ T

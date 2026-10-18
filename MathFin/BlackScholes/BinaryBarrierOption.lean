@@ -13,7 +13,7 @@ public import MathFin.Foundations.StandardNormal
 
 A digital (cash-or-nothing / asset-or-nothing) option that is additionally knocked in or
 knocked out by a single barrier `H` (Rubinstein & Reiner 1991; Haug, *The Complete Guide to
-Option Pricing Formulas*, §4.19.4 "Binary Barrier Options"). Unlike the two-asset barriers in
+Option Pricing Formulas*, §"Binary Barrier Options"). Unlike the two-asset barriers in
 `HeynenKatTwoAssetBarrier.lean`, this is single-underlying, single-variable Black–Scholes
 machinery — no bivariate normal CDF needed, matching the coverage-map note that #66 is one of
 the two simplest standalone wins in this batch.
@@ -62,8 +62,12 @@ The in–out identity here is a real check on the 16-branch table (a misplaced `
 one of the 16 QuantLib branches breaks it), but — like `HeynenKatTwoAssetBarrier.lean`'s
 down-out/up-out check — it holds by pure term cancellation once the table is fixed, so it does
 not independently re-derive `B₁, B₂, B₃, B₄` themselves from a stochastic argument. The `variance
-= 0` and `(H/S)^{2μ}` overflow/underflow edge cases QuantLib special-cases numerically are out of
-scope (continuous-volatility inputs only, as elsewhere in this library).
+= 0` and `(H/S)^{2μ}` overflow/underflow edge cases QuantLib special-cases numerically, and the
+already-knocked-in/knocked-out spot guards `AnalyticBinaryBarrierEngine::calculate()` applies
+*before* calling `payoffAtExpiry` (a `DownOut`/`UpOut` priced at `0` once the spot has already
+crossed the barrier, a `DownIn`/`UpIn` re-priced as a plain vanilla digital via
+`AnalyticEuropeanEngine` once it has), are all out of scope — this file formalizes exactly
+`payoffAtExpiry`'s own closed form, for a spot strictly on the live side of the barrier.
 -/
 
 @[expose] public section
@@ -96,7 +100,9 @@ noncomputable def bboY2 (S H mu σ T eta : ℝ) : ℝ :=
 over/underflows. -/
 noncomputable def bboHS2mu (S H mu : ℝ) : ℝ := Real.exp (2 * mu * Real.log (H / S))
 
-/-- **`B₁`**: the vanilla (barrier-free) cash-or-nothing digital value for the `isCall` side. -/
+/-- **`B₁`**: the vanilla (barrier-free) digital `α`-factor for the `isCall` side — cash-or-nothing
+or asset-or-nothing depending on which `mu`/`K` substitution is made (see the module docstring);
+the price itself is `discount·K·B₁`, not `B₁` alone. -/
 noncomputable def bboB1 (S X mu σ T : ℝ) (isCall : Bool) : ℝ :=
   Phi (bboX1 S X mu σ T (bboPhiOf isCall))
 
