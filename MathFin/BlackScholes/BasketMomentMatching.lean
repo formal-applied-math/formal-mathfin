@@ -29,9 +29,8 @@ matching the lognormal moments `𝔼[X] = m`, `𝔼[X²] = m² e^{σ_eff² T}` f
 the **effective variance** `σ_eff² = log(M₂ / M₁²) / T`. Feeding `(M₁,
 σ_eff)` into the Garman normal form (`GarmanNormalForm.lean`) at `A = DF·M₁`
 gives the moment-matched basket price — literally the ordinary BS closed
-form, parameterised by the matched moments, exactly as Kirk's spread
-approximation (`KirkSpreadApproximation.lean`) is BS parameterised by its
-pseudo-asset.
+form, parameterised by the matched moments, in the same spirit as Kirk's
+spread approximation, which is BS parameterised by its pseudo-asset.
 
 ## Results
 
