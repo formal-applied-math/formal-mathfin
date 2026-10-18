@@ -20,8 +20,8 @@ negative exposure `EDNE(tᵢ)`:
 
 This is the standard discrete CVA/DVA sum-over-default-buckets form (Gregory, *The xVA
 Challenge*): `Q_B(tᵢ₋₁) - Q_B(tᵢ)` is the probability the bank defaults in bucket `i`, so the sum
-is exactly the loss-given-own-default weighted by the (discrete) probability of owing money to the
-counterparty in that bucket.
+is the expected discounted negative exposure weighted by the bank's own default probability in
+each bucket, scaled outside the sum by the loss-given-own-default `1 - R_B`.
 
 Scope note: `EDNE` is taken as a free parameter (any `Fin n → ℝ` profile) rather than imported
 from `GaussianExposureProfile.lean`. This is a deliberate loose coupling — a caller can supply

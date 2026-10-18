@@ -20,20 +20,22 @@ risk `Δ`, the collateral posted at `t` tracks the mark-to-market with a lag,
 This file records the exposure algebra as plain real-valued identities/inequalities — the
 `max(·,0)` positive-part pattern of `Performance/DownsideMetrics.lean` — without re-deriving the
 Gaussian closed forms of `GaussianExposureProfile.lean`; those apply unchanged to `E_C` once `C` is
-substituted for `0`.
+substituted for `0`, for *deterministic* `C` (via the shift `μ ↦ μ - C`) — `laggedCollateral`'s
+own `C(t) = V(t - Δ)` is random, so `V - C` there has a different variance from `V` alone.
 
 ## Main definitions and results
 
 * `collateralizedExposure`: `E_C(t) = max(V(t) - C(t), 0)`.
-* `laggedCollateral`: `C(t) = V(t - Δ)` under a margin period of risk `Δ`.
+* `laggedCollateral`: models `C(t) = V(t - Δ)` under a margin period of risk `Δ` as the identity on
+  a caller-supplied pre-lagged value `Vlag := V(t - Δ)` (this file does not model the lag itself).
 * `thresholdCollateral`: `C_H(t) = max(V(t-Δ) - H, 0)`.
 * `collateralizedExposure_antitone`: more collateral never increases exposure,
   `C₁ ≤ C₂ → E_{C₂} ≤ E_{C₁}`.
 * `collateralizedExposure_nonneg`, `collateralizedExposure_le_rawExposure`: `E_C ≥ 0`, and
   `E_C(t) ≤ max(V(t), 0)` whenever collateral is nonnegative.
 * `marginAdjustedPositiveExposure` / `marginAdjustedNegativeExposure`: the collateralized
-  positive/negative exposure pair, satisfying the same `V = MAPE - MANE` decomposition as the
-  uncollateralized case.
+  positive/negative exposure pair, satisfying `MAPE - MANE = V - C` (the collateral-netted
+  mark-to-market), mirroring the uncollateralized `EPE - ENE = V` decomposition at `C = 0`.
 -/
 
 @[expose] public section

@@ -10,9 +10,11 @@ public import Mathlib
 /-!
 # Discrete Funding Valuation Adjustment (FVA) and telescoping discount factors
 
-Funding Valuation Adjustment nets a funding COST against a funding BENEFIT, the standard
-FCA − FBA split (Hull & White, "The FVA Debate", 2012; Hull, *Options, Futures and Other
-Derivatives*, XVA chapter). Over a discrete tenor with time step `Δt`, funding spreads `FS_B`
+Funding Valuation Adjustment nets a funding COST against a funding BENEFIT (Hull & White, "The
+FVA Debate", 2012; Hull, *Options, Futures and Other Derivatives*, XVA chapter). This file's
+`discreteFVA` is the additive value adjustment (negative = net cost to the bank); in Hull's own
+magnitude convention `FVA = FCA − FBA` (both ≥ 0), `discreteFVA` equals `-(FCA - FBA)`. Over a
+discrete tenor with time step `Δt`, funding spreads `FS_B`
 (borrowing, applied to the bank's positive exposure it must fund — a cost) and `FS_L` (lending,
 applied to negative exposure — the bank effectively holds the counterparty's money and earns a
 funding *benefit* from it), and expected discounted positive/negative exposure `EDPE(tᵢ)`,
@@ -27,11 +29,11 @@ dropped the funding-benefit netting and made `FVA ≤ 0` hold unconditionally �
 correct convention, since a large funding benefit can push net FVA non-negative.)
 
 The clean "telescoping" discount-factor form writes the funding-spread discount factor
-`DF(t) = exp(-FS(0,t)·t)`, so that over a single step the funding cost accrued is exactly the
-drop in the discount factor, `DF(tᵢ₋₁) - DF(tᵢ)`, rather than the product-rule approximation
-`FS·Δt`. Both forms are recorded; `fva_telescoping_sum_eq_endpoints` is the headline identity that
-a telescoping sum of discount-factor drops collapses to the two endpoints, independent of the
-exposure profile in between.
+`DF(t) = exp(-FS(0,t)·t)`, an alternative to the product-rule approximation `FS·Δt` above. Both
+forms are recorded; `fundingDiscountFactor_telescoping_sum` is the headline identity that the
+*unweighted* sum of discount-factor drops collapses to the two endpoints `DF(t₀) - DF(tₙ)` — this
+is a pure telescoping fact about `DF` and carries no exposure profile (the exposure-weighted sum
+`∑ᵢ EDPE(tᵢ)·[DF(tᵢ₋₁) - DF(tᵢ)]` does not telescope unless `EDPE` is constant).
 
 Scope note: `EDPE`/`EDNE` are taken as free parameters (any `Fin n → ℝ` profiles) rather than
 imported from `GaussianExposureProfile.lean`. This is a deliberate loose coupling, matching

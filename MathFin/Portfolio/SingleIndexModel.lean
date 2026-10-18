@@ -80,8 +80,8 @@ theorem portfolioVarN_singleIndex_eq [DecidableEq ι] :
   ring
 
 /-- **Idiosyncratic-term bound under equal weighting**: with weights `1/n` on an index set of
-cardinality `n` and nonnegative idiosyncratic variances bounded by `M`, the idiosyncratic term is
-at most `M / n`. -/
+cardinality `n` and idiosyncratic variances bounded by `M`, the idiosyncratic term is at most
+`M / n`. -/
 lemma idiosyncraticTerm_equalWeight_bound {n : ℕ} (M : ℝ)
     (hM : ∀ i ∈ s, Dε i ≤ M) (hcard : s.card = n) :
     ∑ i ∈ s, ((1 : ℝ) / n) ^ 2 * Dε i ≤ M / n := by
@@ -94,9 +94,8 @@ lemma idiosyncraticTerm_equalWeight_bound {n : ℕ} (M : ℝ)
   rwa [heq] at hbound
 
 /-- **Diversification**: the idiosyncratic term under equal weighting on an index set of
-cardinality `n` tends to `0` as `n → ∞`, for a uniformly bounded, nonnegative idiosyncratic
-variance `M` — idiosyncratic risk diversifies away, leaving only the systematic term
-`(β_p σ_M)²`. -/
+cardinality `n` tends to `0` as `n → ∞`, for nonnegative idiosyncratic variances uniformly bounded
+by `M` — idiosyncratic risk diversifies away, leaving only the systematic term `(β_p σ_M)²`. -/
 theorem idiosyncraticTerm_equalWeight_tendsto_zero
     (s : ℕ → Finset ι) (Dε : ℕ → ι → ℝ) (M : ℝ)
     (hM : ∀ n, ∀ i ∈ s n, Dε n i ≤ M) (hMnn : ∀ n, ∀ i ∈ s n, 0 ≤ Dε n i)

@@ -35,16 +35,15 @@ profile, mirroring the positive-part pattern of `Performance/DownsideMetrics.lea
   rearrangement `EPE + ENE = 2·EPE - μ`; `gaussianExposure_epe_sub_ene`: `EPE - ENE = μ`.
 * `potentialFutureExposure_eq_gaussianVaR`: `PFE_α` is exactly `gaussianVaR μ σ (Φ⁻¹ α)`.
 * `averageExposure`: the trapezoid-weighted time-average of a discrete EPE profile.
-* `effectiveExposure`: the running maximum of a discrete EPE profile (monotone, by construction).
+* `effectiveExposure`: the running maximum of a discrete EPE profile — Basel's *Effective EE*
+  (monotone, by construction); not to be confused with *Effective EPE*, its time-average.
 -/
 
 @[expose] public section
 
 namespace MathFin
 
-open Set ProbabilityTheory
-
-variable {μ σ α : ℝ}
+open ProbabilityTheory
 
 /-- **Expected positive exposure** of a Gaussian mark-to-market `V ~ N(μ,σ²)`:
 `EPE = μΦ(μ/σ) + σφ(μ/σ)`. -/
@@ -98,16 +97,17 @@ lemma potentialFutureExposure_half (μ σ : ℝ) :
 /-- A discrete exposure profile `EPE(tᵢ)` at times `t`, weighted by the trapezoid rule over
 consecutive gaps `t_{i+1} - t_i`: the **average EPE** over `[t_0, t_n]`. -/
 noncomputable def averageExposure {n : ℕ} (t : Fin (n + 1) → ℝ) (epe : Fin (n + 1) → ℝ) : ℝ :=
-  if t (Fin.last n) = t 0 then 0 else
-    (∑ i : Fin n, (epe i.castSucc + epe i.succ) / 2 * (t i.succ - t i.castSucc)) /
-      (t (Fin.last n) - t 0)
+  (∑ i : Fin n, (epe i.castSucc + epe i.succ) / 2 * (t i.succ - t i.castSucc)) /
+    (t (Fin.last n) - t 0)
 
-/-- **Effective EPE**: the running maximum of a discrete EPE profile, `EEPE(tₖ) = max_{i ≤ k}
-EPE(tᵢ)`, mirroring `maximumDrawdown`'s running-extremum pattern. -/
+/-- **Effective EE** (Basel terminology: *Effective Expected Exposure*, not to be confused with
+*Effective EPE*, its time-average over the first year): the running maximum of a discrete EPE
+profile, `EE_eff(tₖ) = max_{i ≤ k} EPE(tᵢ)`, mirroring `maximumDrawdown`'s running-extremum
+pattern. -/
 noncomputable def effectiveExposure {n : ℕ} (epe : Fin (n + 1) → ℝ) : Fin (n + 1) → ℝ :=
   fun k ↦ (Finset.univ.filter (· ≤ k)).sup' ⟨0, by simp⟩ epe
 
-/-- **Effective EPE is monotone** in the profile index: `i ≤ j → EEPE(tᵢ) ≤ EEPE(tⱼ)`, since the
+/-- **Effective EE is monotone** in the profile index: `i ≤ j → EE_eff(tᵢ) ≤ EE_eff(tⱼ)`, since the
 running-maximum window only grows. -/
 theorem effectiveExposure_monotone {n : ℕ} (epe : Fin (n + 1) → ℝ) :
     Monotone (effectiveExposure epe) := by
@@ -118,7 +118,7 @@ theorem effectiveExposure_monotone {n : ℕ} (epe : Fin (n + 1) → ℝ) :
   simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hk ⊢
   exact hk.trans hij
 
-/-- **Effective EPE dominates the raw exposure**: `EPE(tₖ) ≤ EEPE(tₖ)`, since `k` is itself one of
+/-- **Effective EE dominates the raw exposure**: `EPE(tₖ) ≤ EE_eff(tₖ)`, since `k` is itself one of
 the indices in the running-max window. -/
 theorem le_effectiveExposure {n : ℕ} (epe : Fin (n + 1) → ℝ) (k : Fin (n + 1)) :
     epe k ≤ effectiveExposure epe k := by
