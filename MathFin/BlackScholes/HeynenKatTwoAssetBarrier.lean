@@ -46,10 +46,13 @@ so `A` alone is the whole knock-out value.
 
 * `heynenKat_downOut_add_upOut`: **the down-out and up-out knock-out values, same option type,
   sum to a closed form with NO bivariate CDF left** — every `N₂(ηdᵢ, φeᵢ; −ηφρ)` pair (`φ = ±1`)
-  collapses via `bivariateNormalCDF_flip_snd` to a single `Φ(ηdᵢ)`, exactly the two-asset-barrier
-  analogue of `StulzTwoAssetRainbow.lean`'s `stulz_call_max_add_call_min`. This is a genuine
-  structural consistency check on the transcription: both exponential-correction terms and both
-  strike/asset legs collapse independently and simultaneously.
+  collapses via `bivariateNormalCDF_flip_snd` to a single `Φ(ηdᵢ)`. Unlike
+  `stulz_call_max_add_call_min`, this sum has **no payoff-level meaning** — the down-out and
+  up-out formulas price mutually exclusive regimes (`S₂ > H` vs. `S₂ < H`), so nothing is being
+  added as an option value. It is a narrower check than the name "analogue" might suggest: it
+  verifies only the `(φeᵢ, −ηφρ)` sign pattern is self-consistent across `φ = ±1`, not any other
+  part of the transcription (a sign error inside `d₃`'s `2ρ` term or `e₁`'s drift, say, would
+  survive it undetected).
 
 **Scope, disclosed honestly**: as with `StulzTwoAssetRainbow.lean`, this transcribes and checks
 the *closed form*'s internal consistency; it does not re-derive the formula from a joint

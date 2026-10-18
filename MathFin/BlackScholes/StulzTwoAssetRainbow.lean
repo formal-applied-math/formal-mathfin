@@ -92,7 +92,10 @@ noncomputable def stulzD (S1 S2 b1 b2 σ1 σ2 ρ T : ℝ) : ℝ :=
   (Real.log (S1 / S2) + (b1 - b2 + stulzEffVol σ1 σ2 ρ ^ 2 / 2) * T) /
     (stulzEffVol σ1 σ2 ρ * Real.sqrt T)
 
-/-- **Stulz's call on the maximum of two assets**, `𝔼[e^{−rT}max(max(S¹_T,S²_T)−K,0)]`. -/
+/-- **Stulz's closed form for a call on the maximum of two assets**, struck at `K` — the
+textbook interpretation is `𝔼[e^{−rT}max(max(S¹_T,S²_T)−K,0)]`, but that expectation identity is
+not proved here (see the module docstring's "Scope" note); this `def` is only the closed-form
+formula itself. -/
 noncomputable def stulzCallMax (S1 S2 K r b1 b2 σ1 σ2 ρ T : ℝ) : ℝ :=
   let v := stulzEffVol σ1 σ2 ρ
   let ρ1 := stulzRho1 σ1 σ2 ρ
@@ -105,7 +108,10 @@ noncomputable def stulzCallMax (S1 S2 K r b1 b2 σ1 σ2 ρ T : ℝ) : ℝ :=
     K * Real.exp (-(r * T)) *
       (1 - bivariateNormalCDF (-y1 + σ1 * Real.sqrt T) (-y2 + σ2 * Real.sqrt T) ρ)
 
-/-- **Stulz's call on the minimum of two assets**, `𝔼[e^{−rT}max(min(S¹_T,S²_T)−K,0)]`. -/
+/-- **Stulz's closed form for a call on the minimum of two assets**, struck at `K` — the
+textbook interpretation is `𝔼[e^{−rT}max(min(S¹_T,S²_T)−K,0)]`, but that expectation identity is
+not proved here (see the module docstring's "Scope" note); this `def` is only the closed-form
+formula itself. -/
 noncomputable def stulzCallMin (S1 S2 K r b1 b2 σ1 σ2 ρ T : ℝ) : ℝ :=
   let v := stulzEffVol σ1 σ2 ρ
   let ρ1 := stulzRho1 σ1 σ2 ρ
