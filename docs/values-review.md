@@ -125,6 +125,66 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-19 — pr-roll + Fable-gate audit record for PRs #264, #265, #281
+
+Not a values-review round — a durable record that the project's own local discipline (this
+workspace's `AGENTS.md` rules 7+8: 3 consecutive clean pr-roll rounds against an unchanged
+head, each a fresh read-only reviewer, then one independent Fable-model second-opinion pass)
+was actually run for three already-merged-into-`integration-244-family` branches that an audit
+found had no git-history evidence of it. All three branches are correct — the audit found real,
+fixable gaps in each (below), not any defect in the formalized mathematics itself.
+
+- **`schwartz-one-factor-futures`** (PR [#264](https://github.com/formal-applied-math/formal-mathfin/pull/264)).
+  Round 1 (head `4fb4324`) found the new theorems shipped with zero benchmark/ledger entry
+  (every sibling file in `MathFin/Futures/` has one) and an unappended `Authors:` line on two
+  substantively-edited pre-existing files — fixed in `eaee691`. The Fable-gate pass (on `eaee691`)
+  found 8 items: a partial dedup left two inline re-derivations of a fact the PR's own new shared
+  lemma should have replaced, two prose mislabels (Hull's `q(t)` called a "convenience-yield"
+  extension when it is the Hull-White-form level calibrated to the futures curve, OFOD ch. 35 —
+  independently re-verified against this workspace's own
+  `resources/hull-ofod-chapters/scans/ch35-scan.md`; and the SDE-solution claim overstated what's
+  proved vs. cited, against the sibling entry's own disclosure convention), plus smaller
+  style/slop items — 7 of 8 fixed in `1840ceb` (one optional lift left out, maintainer's call).
+  A transcription slip in the new coverage-trail paragraph ("10 reduced" vs. the actual 13) was
+  caught in the following pr-roll round and fixed in `907b914`. Reached 3-consecutive-clean +
+  1 Fable pass at final head **`907b914`**.
+- **`timing-adjustment-numeraire-cov`** (PR [#265](https://github.com/formal-applied-math/formal-mathfin/pull/265)).
+  Round 1 (head `ea12220`) found the same unappended-`Authors:` gap on two substantively-edited
+  pre-existing files, restaling 99 ledger entries on fix — fixed and re-verified in `0a8ba9a`.
+  The Fable-gate pass found two real mis-citations (`Bagaria, eq. 8.9` is the Ho–Lee basis
+  approximation, not the covariance identity this file proves — the correct citation is §8.4's
+  unnumbered identity preceding Worked case 8.5; `Hull eq. 30.3` was labelled "exact Gaussian
+  form" when eq. 30.3 is itself the file's own already-disclosed linearized approximation) and
+  one re-derivation of Mathlib machinery (`integral_exp_mul_stdNormal` re-proved the standard-
+  normal MGF instead of consuming `mgf_gaussianReal` directly) — all three fixed in `4eb940b`
+  (a fourth, optional hypothesis-trimming item was left alone; Fable itself flagged real
+  trade-offs). Reached 3-consecutive-clean + 1 Fable pass at final head **`4eb940b`**.
+- **`sabr-turnbull-wakeman`** (PR [#281](https://github.com/formal-applied-math/formal-mathfin/pull/281)).
+  No round-1 gaps (the diff was small and already clean). The Fable-gate pass (head `327a600`)
+  found a grammatically broken docstring sentence, a dead `open Real`, and two proofs ordering
+  their data arguments after their hypotheses against house style — all three fixed in `f2d9067`
+  (two further items — expanding the file's proof content with β=1/β=0 specializations, and a
+  commit-message wording note — were left as explicitly non-blocking/maintainer's-call and
+  "don't rewrite history for wording" respectively). Reached 3-consecutive-clean + 1 Fable pass
+  at final head **`f2d9067`**.
+
+Every fix above was additionally merged into `integration-244-family`, rebuilt (`lake build`
+green), re-verified (`pytest tests/`, `lake lint` green; restaled ledger entries re-verified via
+`LEDGER_EXEC_LOCAL=1`, never docker), and pushed — final integration head **`110160b`**, three
+sequential merge commits (`f7fd61e` sabr, then timing, then schwartz, each followed by a ledger
+re-verify commit for the entries the custom merge driver dropped for re-verification). The
+schwartz merge needed manual conflict resolution against unrelated concurrent integration content
+(`MathFin/AxiomAudit.lean`, `benchmarks/mathematical_finance.json`, `formalization.yaml`): both
+sides' additions were kept (unioned by benchmark `id`, both `AxiomAudit.lean` headliner sections
+kept), and the two generated files were regenerated from source rather than hand-merged.
+
+### Evidence
+
+`lake build` green on all three branch worktrees and on integration at every step above;
+`python3 -m tools.verify.ledger status` fresh (0 stale / 0 missing) on all four heads after each
+fix; `uv run pytest tests/ -q` green throughout; `lake lint` clean throughout. No `sorry`/`admit`/
+`native_decide` introduced anywhere in this audit's own fixes.
+
 ## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
 
 Scope: `FixedIncome/CIRRiccati` by Alfredo Garcia (@oxarbitrage), merged with its two commits
