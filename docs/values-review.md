@@ -125,7 +125,7 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
-## 2026-10-19 — pr-roll + Fable-gate audit record for PRs #264, #265, #281, #274, #275
+## 2026-10-19 — pr-roll + Fable-gate audit record for PRs #264, #265, #281, #274, #275, #270, #271, #272
 
 Not a values-review round — a durable record that the project's own local discipline (this
 workspace's `AGENTS.md` rules 7+8: 3 consecutive clean pr-roll rounds against an unchanged
@@ -204,8 +204,80 @@ Both fixes were merged into `integration-244-family` (two merge commits, `f7bd2c
 `e444fe8`, both clean auto-merges — no conflicts), rebuilt (`lake build` green, including the
 pre-existing `sorry`s in the vendored `BrownianMotion` package, unrelated to this audit), and
 re-verified (`uv run pytest tests/ -q` 58 passed/1 skipped, `lake lint` clean,
-`python3 -m tools.verify.ledger status` fresh 544/0/0), then pushed — final integration head
-**`e444fe8`**.
+`python3 -m tools.verify.ledger status` fresh 544/0/0), then pushed — integration head
+**`e444fe8`** after this second batch.
+
+A third pass of the same audit covered three more branches, all already past their
+3-consecutive-clean pr-roll rounds from an earlier in-session fix but with no Fable-gate
+evidence:
+
+- **`student-t-parametric-var`** (PR [#270](https://github.com/formal-applied-math/formal-mathfin/pull/270)).
+  The Fable-gate pass found 5 docstring-accuracy findings on
+  `MathFin/RiskMeasures/StudentTValueAtRisk.lean` (the module docstring's
+  explanation of why the roadmap's "Cornish-Fisher-style" formula is really the
+  expected-shortfall closed form, not VaR, in a different scale convention — all
+  wording, no statement changes), all fixed, followed by one required re-confirm
+  round that came back clean. Reached 3-consecutive-clean + 1 Fable pass at final
+  head **`2608da5`**.
+- **`backtest-performance-stats`** (PR [#271](https://github.com/formal-applied-math/formal-mathfin/pull/271)).
+  Round 1 (head `61b0fd8`, already fixing doc typos and a shadowed-variable rename
+  from an earlier pass) was clean. The first Fable-gate pass found 4 items on the
+  new `MathFin/RiskMeasures/BacktestStatistics.lean` — undisclosed degenerate-input
+  behavior for `sharpeRatio`/`cagr` under Lean's `x/0=0` and `rpow` conventions, and
+  two idiom upgrades (`runningMax`/`maxDrawdown` moved from an ad-hoc
+  `univ.filter (· ≤ t)` pattern and an explicit `0 < n` proof argument to
+  `Finset.Iic`/`Finset.nonempty_Iic` and a `[NeZero n]` instance) — fixed in
+  `c35681f`. A second Fable-gate pass (after a fresh 3-consecutive-clean cycle)
+  found 5 more house-style golf items (bare-term proofs via
+  `Finset.le_sup'_of_le`/`.trans_le`/`.le`/`Finset.sup'_le` instead of tactic
+  blocks) — fixed in `ba7da67`. A third Fable-gate pass (after another fresh
+  3-consecutive-clean cycle) found one further item (a scaling lemma's hypothesis
+  could be weakened from `0 < c` to `c ≠ 0`) and explicitly flagged it as optional,
+  diminishing-returns, not worth blocking on — left as-is per the reviewer's own
+  recommendation. Reached 3-consecutive-clean + 1 (non-blocking) Fable pass at
+  final head **`ba7da67`**.
+- **`fn6814-risk-exposure-xva`** (PR [#272](https://github.com/formal-applied-math/formal-mathfin/pull/272),
+  six new counterparty-risk/XVA modules: `FixedIncome/DVA`, `FixedIncome/FVA`,
+  `Portfolio/SingleIndexModel`, `RiskMeasures/CollateralizedExposure`,
+  `RiskMeasures/ComponentVaR`, `RiskMeasures/GaussianExposureProfile`). Round 1
+  (head `94e0e8a`) was already fixing a genuine FVA sign bug from an earlier pass:
+  an unconditional `FVA ≤ 0` lemma was false (a large funding benefit can push net
+  FVA non-negative), replaced with two correct directional sandwich bounds. Five
+  successive Fable-gate passes then found, and fixed, only docstring/prose-accuracy
+  issues — zero further math bugs, confirmed by independently re-deriving the
+  FVA/DVA/Euler-VaR/single-index/collateral/exposure-profile algebra from scratch
+  at every round. Notable fixes: a dangling citation of a nonexistent lemma name
+  (`fva_telescoping_sum_eq_endpoints` → the real `fundingDiscountFactor_telescoping_sum`);
+  a pathwise-vs-expectation conflation and an understated `MAPE − MANE` target in
+  `CollateralizedExposure.lean`; an unconditional `∂VaR/∂xᵢ` claim in
+  `ComponentVaR.lean` that only holds for symmetric `σ` (already correctly hedged
+  one definition over); a false claim that the library "has no Gaussian-integration
+  machinery" for the truncated-normal expectation (it does, in
+  `RiskMeasures/RockafellarUryasev.lean` and `RiskMeasures/GaussianExpectedShortfall.lean`
+  — reworded across three more revisions to cite the right lemma and reduce it
+  correctly at `c = 0` rather than removing the claim outright); a dead top-level
+  `variable` line and `open Set` in `GaussianExposureProfile.lean`; a redundant
+  if-guard in `averageExposure` subsumed by Lean's `x/0=0`; "Effective EPE" renamed
+  to the Basel-correct "Effective EE" for the running-max definition; and a
+  workspace-internal import-comment tag dropped per the no-build-workspace-references
+  convention. A follow-up task was spun off (not part of this PR) to actually wire
+  the EPE/ENE closed forms to the existing Rockafellar-Uryasev machinery rather
+  than just disclosing that the connection exists. Reached 3-consecutive-clean + 1
+  (clean) Fable pass at final head **`d130085`**.
+
+All three were merged into `integration-244-family` (three sequential merge
+commits — `ddf8e0e` student-t, `a06d899` backtest, `523c916` xva). The
+`student-t-parametric-var` merge needed manual conflict resolution in
+`MathFin/RiskMeasures/StudentTValueAtRisk.lean` against an earlier, less-revised
+copy of the same module docstring already on the integration branch: resolved by
+keeping the incoming branch's more complete wording (verified byte-identical to
+the fully-reviewed branch head after resolution) rather than hand-splicing both.
+The `backtest-performance-stats` and `fn6814-risk-exposure-xva` merges were both
+clean auto-merges, no conflicts. Rebuilt (`lake build` green after each merge,
+including the same pre-existing vendored-`BrownianMotion`/`Challenge.lean`
+`sorry`s, unrelated to this audit) and re-verified (`uv run pytest tests/ -q` 58
+passed/1 skipped, `lake lint` clean) after each, pushed incrementally (one push
+per merge) — final integration head **`523c916`**.
 
 ### Evidence
 
