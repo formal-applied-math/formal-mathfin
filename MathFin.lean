@@ -307,6 +307,9 @@ import MathFin.Foundations.FTAPDiscrete
 import MathFin.Foundations.FTAPOnePeriod
 -- General-Ω one-period FTAP, d assets (Esscher minimal-divergence EMM, full — finite-dim market)
 import MathFin.Foundations.FTAPOnePeriodVector
+-- The birthday paradox: ℙ(23 draws from 365 collide) > 1/2, cited from Mathlib's own
+-- `Theorems100.birthday`/`birthday_measure` rather than reproved
+import MathFin.Foundations.BirthdayParadox
 -- BlackScholes
 import MathFin.BlackScholes.Call
 import MathFin.BlackScholes.Put
