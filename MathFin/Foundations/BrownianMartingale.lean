@@ -65,11 +65,7 @@ lemma integrable_exp_mul_of_hasLaw {Ω : Type*} {mΩ : MeasurableSpace Ω}
 lemma integral_exp_mul_stdNormal {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
     {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) P) (a : ℝ) :
     ∫ ω, Real.exp (a * Z ω) ∂P = Real.exp (a ^ 2 / 2) := by
-  have h := hZ.integral_comp
-    (by fun_prop : AEStronglyMeasurable (fun x : ℝ ↦ Real.exp (a * x)) (gaussianReal 0 1))
-  simp only [Function.comp] at h
-  rw [h, integral_exp_mul_gaussianReal_zero a 1]
-  simp
+  simpa [mgf] using mgf_gaussianReal hZ.map_eq a
 
 /-- The MGF of an affine form in two independent standard normals:
 `𝔼[exp(c + a Z₁ + b Z₂)] = exp(c + a²/2 + b²/2)`. -/

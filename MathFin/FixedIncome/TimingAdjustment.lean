@@ -23,12 +23,15 @@ The static step is `changeOfNumeraire` (`Foundations/Numeraire`): `𝔼^{Q^N}[V]
 `𝔼[V·e^{−Y}] = 𝔼[V]·𝔼[e^{−Y}]·exp(−Cov(ln V, Y))`, proved here from the independent-driver
 decomposition `Y = n + u(ρ Z₁ + √(1−ρ²) Z₂)`, `ln V = m + s Z₁`, so `Cov(ln V, Y) = ρ s u`.
 
-* **Hull's timing adjustment** (Hull, *Options, Futures, and Other Derivatives*, eq. 30.3):
-  `Q` is the `T`-forward measure, `Q^N` the `T*`-forward measure, and `e^{−Y} = P(T,T*)`.
-  A payoff fixed at `T` and paid at `T*` has `𝔼^{T*}[V] = 𝔼^T[V]·exp(−Cov(ln V, Y))`.
-* **Bagaria's futures-forward basis** (Bagaria, eq. 8.9): `Q` is the risk-neutral measure,
-  `Q^N` the `T`-forward measure, and `e^{Y}` the bank account `exp(∫₀ᵀ r)`. The futures price
-  `𝔼^Q[V]` is the forward price `𝔼^T[V]` times `exp(Cov(ln V, ∫₀ᵀ r))`.
+* **Hull's timing adjustment** (Hull, *Options, Futures, and Other Derivatives*; the exact
+  lognormal identity underlying eq. 30.3): `Q` is the `T`-forward measure, `Q^N` the
+  `T*`-forward measure, and `e^{−Y} = P(T,T*)`. A payoff fixed at `T` and paid at `T*` has
+  `𝔼^{T*}[V] = 𝔼^T[V]·exp(−Cov(ln V, Y))`.
+* **Bagaria's futures-forward basis** (Bagaria, §8.4, the unnumbered covariance identity
+  preceding Worked case 8.5 — not the Ho–Lee basis approximation of eq. 8.9): `Q` is the
+  risk-neutral measure, `Q^N` the `T`-forward measure, and `e^{Y}` the bank account
+  `exp(∫₀ᵀ r)`. The futures price `𝔼^Q[V]` is the forward price `𝔼^T[V]` times
+  `exp(Cov(ln V, ∫₀ᵀ r))`.
 
 **Exact vs. linearized.** Both statements here are exact under the Gaussian hypothesis.
 Hull's textbook presentation of the timing adjustment, with a `(1 + R_F/m)`-style
@@ -39,8 +42,8 @@ not proved here and is not exact.
 ## Main results
 
 * `integral_mul_exp_neg_gaussian` — `𝔼[V·e^{−Y}] = 𝔼[V]·𝔼[e^{−Y}]·exp(−ρ s u)`.
-* `timingAdjustment_gaussian` — Hull eq. 30.3, exact Gaussian form.
-* `futuresForwardBasis_gaussian` — Bagaria eq. 8.9, exact Gaussian form.
+* `timingAdjustment_gaussian` — the exact lognormal identity underlying Hull's eq. 30.3.
+* `futuresForwardBasis_gaussian` — Bagaria §8.4's covariance identity, exact Gaussian form.
 -/
 
 @[expose] public section
@@ -83,7 +86,8 @@ theorem integral_mul_exp_neg_gaussian (m s n u ρ : ℝ)
   congr 1
   ring
 
-/-- **Hull's timing adjustment** (Hull, eq. 30.3), exact Gaussian form. Let `Q` be the
+/-- **Hull's timing adjustment** (the exact lognormal identity underlying Hull's eq. 30.3).
+Let `Q` be the
 `T`-forward measure (reference numéraire `P(·,T)`, worth `1` at `T` and `B₀ = P(0,T)` today),
 and let the `T*`-bond be worth `P(T,T*) = e^{−Y}` at `T` and `N₀ = P(0,T*)` today, with the
 no-arbitrage normalization `N₀ = B₀·𝔼^T[P(T,T*)]`. For a payoff `V` fixed at `T` and paid at
@@ -118,8 +122,10 @@ theorem timingAdjustment_gaussian (m s n u ρ B₀ N₀ : ℝ)
   rw [hcore] at h
   exact mul_left_cancel₀ hN₀.ne' (h.trans (by ring))
 
-/-- **Bagaria's futures-forward basis** (Bagaria, eq. 8.9), exact Gaussian form. Let `Q` be the
-risk-neutral measure with bank account `e^{Y}`, `Y = ∫₀ᵀ r`, and pass to the `T`-forward
+/-- **Bagaria's futures-forward basis** (Bagaria, §8.4, the unnumbered covariance identity
+preceding Worked case 8.5 — not the Ho–Lee basis approximation of eq. 8.9), exact Gaussian
+form. Let `Q` be the risk-neutral measure with bank account `e^{Y}`, `Y = ∫₀ᵀ r`, and pass to
+the `T`-forward
 measure (numéraire `P(·,T)`, worth `1` at `T` and `N₀ = P(0,T) = 𝔼^Q[e^{−Y}]` today). For an
 underlying `V` with `(ln V, Y)` jointly Gaussian and `Cov(ln V, ∫₀ᵀ r) = ρ s u`, the futures
 price `𝔼^Q[V]` and the forward price `𝔼^T[V]` satisfy
