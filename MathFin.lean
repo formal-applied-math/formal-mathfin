@@ -294,7 +294,7 @@ import MathFin.DeFi.UniswapCurveMechanics
 -- DeFi/lending group: Aave kinked-rate + health factor, Compound cToken exchange rate
 import MathFin.DeFi.Aave
 import MathFin.DeFi.Compound
--- Dai stability fee and CDP liquidation condition
+-- Dai stability fee and vault liquidation condition
 import MathFin.DeFi.Dai
 -- Phase 39: Itô structural drift formula + GBM log-drift (after Nagy 2026)
 import MathFin.Foundations.ItoLemma
