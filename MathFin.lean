@@ -26,7 +26,8 @@
                        spectral risk, Herfindahl concentration.
   * `Actuarial/`     — net premium, Gompertz force of mortality.
   * `Execution/`     — Market microstructure and execution: Glosten-Milgrom
-                       adverse-selection spread.
+                       adverse-selection spread, Roll (1984) bid-ask bounce
+                       spread estimator.
   * `DeFi/`          — Decentralized-finance market microstructure:
                        constant-product AMMs (Uniswap v2-style), swap
                        output, invariant preservation, internal price.
@@ -633,6 +634,7 @@ import MathFin.Contracts.CappedCall
 -- spread, plus a six-point model witnessing that its hypotheses are satisfiable
 import MathFin.Execution.GlostenMilgrom
 import MathFin.Execution.GlostenMilgromModel
+import MathFin.Execution.RollSpread
 -- Continuous-time American put option exercise-boundary geometry
 import MathFin.BlackScholes.AmericanPut.Stopping.PhysicalBoundaryConvexity
 import MathFin.BlackScholes.AmericanPut.Stopping.AEHorizonValue
