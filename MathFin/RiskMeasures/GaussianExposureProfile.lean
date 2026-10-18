@@ -22,10 +22,12 @@ closed forms in `Φ` and the standard normal density `φ`:
 
 As in `RiskMeasures/Gaussian.lean`, we take the closed form as the *definition* of the exposure
 metric rather than wiring it to the truncated-normal expectation `E[max(V,0)]` itself — a
-derivation exists in principle (`RiskMeasures/RockafellarUryasev.lean`'s
-`integral_shortfall_gaussian` and `Foundations/NormalTail.lean`'s Mills-ratio bounds give the same
-`μΦ(μ/σ) + σφ(μ/σ)` shape via the law-level `rockafellarUryasev_of_hasLaw_gaussianReal` bridge),
-but connecting it is left for a follow-up rather than done here. `PFE_α` is literally the Gaussian
+derivation exists in principle: `RiskMeasures/RockafellarUryasev.lean`'s
+`integral_shortfall_gaussian` already gives this exact `μΦ(μ/σ) + σφ(μ/σ)` shape at the
+degenerate threshold `c = 0`, and `RiskMeasures/GaussianExpectedShortfall.lean`'s
+`rockafellarUryasev_of_hasLaw_gaussianReal` is the law-level bridge that would carry it to an
+actual random variable; connecting the two is left for a follow-up rather than done here.
+`PFE_α` is literally the Gaussian
 VaR of `RiskMeasures/GaussianValueAtRisk.lean` restated in exposure language. What we prove are the
 algebraic relations among these closed forms (rearrangements of the definitions), plus the
 path-level aggregates (average and effective EPE) over a discrete exposure profile, mirroring the
