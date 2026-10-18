@@ -125,14 +125,15 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
-## 2026-10-19 — pr-roll + Fable-gate audit record for PRs #264, #265, #281
+## 2026-10-19 — pr-roll + Fable-gate audit record for PRs #264, #265, #281, #274, #275
 
 Not a values-review round — a durable record that the project's own local discipline (this
 workspace's `AGENTS.md` rules 7+8: 3 consecutive clean pr-roll rounds against an unchanged
 head, each a fresh read-only reviewer, then one independent Fable-model second-opinion pass)
-was actually run for three already-merged-into-`integration-244-family` branches that an audit
-found had no git-history evidence of it. All three branches are correct — the audit found real,
-fixable gaps in each (below), not any defect in the formalized mathematics itself.
+was actually run for already-merged-into-`integration-244-family` (or about-to-merge) branches
+that an audit found had no git-history evidence of it. All branches below are correct — the
+audit found real, fixable gaps in each (below), not any defect in the formalized mathematics
+itself.
 
 - **`schwartz-one-factor-futures`** (PR [#264](https://github.com/formal-applied-math/formal-mathfin/pull/264)).
   Round 1 (head `4fb4324`) found the new theorems shipped with zero benchmark/ledger entry
@@ -170,19 +171,47 @@ fixable gaps in each (below), not any defect in the formalized mathematics itsel
 
 Every fix above was additionally merged into `integration-244-family`, rebuilt (`lake build`
 green), re-verified (`pytest tests/`, `lake lint` green; restaled ledger entries re-verified via
-`LEDGER_EXEC_LOCAL=1`, never docker), and pushed — final integration head **`110160b`**, three
-sequential merge commits (`f7fd61e` sabr, then timing, then schwartz, each followed by a ledger
-re-verify commit for the entries the custom merge driver dropped for re-verification). The
-schwartz merge needed manual conflict resolution against unrelated concurrent integration content
-(`MathFin/AxiomAudit.lean`, `benchmarks/mathematical_finance.json`, `formalization.yaml`): both
-sides' additions were kept (unioned by benchmark `id`, both `AxiomAudit.lean` headliner sections
-kept), and the two generated files were regenerated from source rather than hand-merged.
+`LEDGER_EXEC_LOCAL=1`, never docker), and pushed — integration head **`110160b`** after this
+first batch, three sequential merge commits (`f7fd61e` sabr, then timing, then schwartz, each
+followed by a ledger re-verify commit for the entries the custom merge driver dropped for
+re-verification). The schwartz merge needed manual conflict resolution against unrelated
+concurrent integration content (`MathFin/AxiomAudit.lean`, `benchmarks/mathematical_finance.json`,
+`formalization.yaml`): both sides' additions were kept (unioned by benchmark `id`, both
+`AxiomAudit.lean` headliner sections kept), and the two generated files were regenerated from
+source rather than hand-merged.
+
+A second pass of the same audit covered two more branches whose history also lacked positive
+evidence of the Fable-gate step (both already had their 3-consecutive-clean pr-roll rounds):
+
+- **`fn6902-convex-qp-kkt`** (PR [#274](https://github.com/formal-applied-math/formal-mathfin/pull/274)).
+  The Fable-gate pass (head `f4c9090`) found four items: a redundant `hsym : Cᵀ = C` hypothesis
+  on `kkt_sufficient` and `kkt_optimizer_unique_of_posDef` alongside `C.PosSemidef`/`C.PosDef`,
+  which already imply symmetry over ℝ (`hpsd.isHermitian`); a dead `[DecidableEq ι]` binder with
+  six now-pointless `omit [DecidableEq ι] in` prefixes; three docstring passages referencing
+  "the master coverage map" and "item #47/#48" — a document that lives in the study-mathlib
+  workspace, not in this repo; and a feasibility-direction wording slip in `kkt_sufficient`'s
+  docstring (a point outside the feasible set isn't "a global minimizer over" it). All four fixed
+  in `51f7de0`. Reached 3-consecutive-clean + 1 Fable pass at final head **`51f7de0`**.
+- **`birthday-paradox`** (PR [#275](https://github.com/formal-applied-math/formal-mathfin/pull/275)).
+  The Fable-gate pass (head `e49f561`) found one item: the new
+  `MathFin/Foundations/BirthdayParadox.lean` wasn't imported by the umbrella `MathFin.lean`, unlike
+  every other `Foundations` file, so a plain `import MathFin` consumer (the pattern this repo
+  documents for benchmark snippets) wouldn't see it even though `lake build`'s submodule glob
+  compiled it. Fixed in `72a7cf4` (import added to the Foundations block). Reached
+  3-consecutive-clean + 1 Fable pass at final head **`72a7cf4`**.
+
+Both fixes were merged into `integration-244-family` (two merge commits, `f7bd2ca` then
+`e444fe8`, both clean auto-merges — no conflicts), rebuilt (`lake build` green, including the
+pre-existing `sorry`s in the vendored `BrownianMotion` package, unrelated to this audit), and
+re-verified (`uv run pytest tests/ -q` 58 passed/1 skipped, `lake lint` clean,
+`python3 -m tools.verify.ledger status` fresh 544/0/0), then pushed — final integration head
+**`e444fe8`**.
 
 ### Evidence
 
-`lake build` green on all three branch worktrees and on integration at every step above;
-`python3 -m tools.verify.ledger status` fresh (0 stale / 0 missing) on all four heads after each
-fix; `uv run pytest tests/ -q` green throughout; `lake lint` clean throughout. No `sorry`/`admit`/
+`lake build` green on all branch worktrees and on integration at every step above;
+`python3 -m tools.verify.ledger status` fresh (0 stale / 0 missing) on every head after each fix;
+`uv run pytest tests/ -q` green throughout; `lake lint` clean throughout. No `sorry`/`admit`/
 `native_decide` introduced anywhere in this audit's own fixes.
 
 ## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
