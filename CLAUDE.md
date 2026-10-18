@@ -88,7 +88,9 @@ benchmark edit regenerate it with
 constant declared in `MathFin/` that a benchmark proof cites, resolved by
 declaration through `open`s and dot notation, plus the upstream constants each
 `library_wrapper` entry's proof cites, listed in `UPSTREAM_CITATIONS`; the curated
-`MathFin/AxiomAudit.lean` remains the storied headliner file). CI
+`MathFin/AxiomAudit.lean` remains the storied headliner file).
+`tests/test_attribution.py` enforces contributor credit from git history (see
+"Contributor attribution" below). CI
 (`build.yml`) runs pytest + `ledger status` BEFORE the Lean build — pushes
 with failing gates or stale ledger claims go red.
 
@@ -212,6 +214,30 @@ Docker notes:
 - If Docker build fails under Claude/Codex because it cannot write under
   `~/.docker`, rerun the same `docker compose ...` command with elevated
   permissions.
+
+## Contributor attribution
+
+A module a contributor adds names them on both header lines, `Copyright (c) YEAR <name>` and
+`Authors: <name>`. The copyright stays theirs (there is no CLA, and Apache-2.0 §4(c) keeps their
+notices), so a maintainer edit adds to `Authors:` and never replaces a name. Contributors often
+copy a neighbouring module's header, maintainer's name and all: fix the copyright line at merge,
+in a follow-up commit, and say so when thanking them. Any other mismatch (a port, co-authorship,
+a name you cannot place) goes to the maintainer; an agent does not settle it. (2026-10-14: #244
+merged eight modules whose headers named the maintainer. The review saw it and let it through;
+#247, from the contributor, put it right.)
+
+- Contributed work is merged with a merge commit, never squashed or rebased, so it stays on main
+  under its author's name.
+- Every commit author on main other than the maintainer and bots is listed under
+  `## Contributors` in `README.md`. Add a first-time contributor there at merge.
+- `tests/test_attribution.py` checks both header lines and the README list from git history,
+  with names canonicalized by `.mailmap`; `build.yml` checks out with `fetch-depth: 0` for it.
+- Commits are authored by the person the session works for, never by `Claude
+  <noreply@anthropic.com>`, the cloud container's default identity. GitHub ignores `.mailmap`,
+  so such a commit shows as Claude's on github.com. Before the first commit, set
+  `git config user.name` and `user.email` to the user's (the maintainer's are
+  `Raphael Coelho <raphaelrrcoelho@gmail.com>`). The maintainer's commits carry no
+  `Co-Authored-By: Claude` trailer either (their call, 2026-10-15).
 
 ## Memory doctrine — this box is a 10 GB client, not a build server
 

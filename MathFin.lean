@@ -289,6 +289,8 @@ import MathFin.Foundations.ItoFormulaUnrestrictedLocMart
 import MathFin.Foundations.FTAPTwoState
 -- Phase 38: Constant-product AMM (adapted from Pusceddu-Bartoletti FMBC 2024)
 import MathFin.DeFi.ConstantProductAMM
+-- DeFi/AMM group: Uniswap v2/v3 mechanics (impermanent loss, TWAP, fee invariant, v3 virtual reserves)
+import MathFin.DeFi.UniswapCurveMechanics
 -- Phase 39: Itô structural drift formula + GBM log-drift (after Nagy 2026)
 import MathFin.Foundations.ItoLemma
 -- Time-dependent (2D) Itô formula + GBM-as-SDE-solution (genuine exp partials)
@@ -520,6 +522,8 @@ import MathFin.FixedIncome.VasicekSDE
 import MathFin.FixedIncome.VasicekSDEGaussian
 -- Vasicek zero-coupon bond price: the affine term structure (Gaussian Laplace transform)
 import MathFin.FixedIncome.VasicekBondPrice
+-- CIR loadings: B solves the Riccati equation, A solves A' = −κθB
+import MathFin.FixedIncome.CIRRiccati
 -- The T-forward measure: the zero-coupon bond as numéraire (change-of-numéraire instance)
 import MathFin.FixedIncome.ForwardMeasure
 

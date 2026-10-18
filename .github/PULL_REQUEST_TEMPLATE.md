@@ -4,6 +4,11 @@
 
 ## Checklist
 
+### Attribution
+
+- [ ] New files name you on both the `Copyright` and the `Authors:` line, not a name copied from another module's header.
+- [ ] Commits are authored under your own name, and you are listed under Contributors in `README.md`.
+
 ### For Lean proof contributions
 
 - [ ] Proof lives in `MathFin/<Section>/<Module>.lean`, not inlined in JSON (unless it's a single-line library wrapper).

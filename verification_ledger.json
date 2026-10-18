@@ -1312,6 +1312,20 @@
       "input_hash": "7e690e63f549b13508e49fb8a56cef749e3ffa55ae6baed1c4a57250e6989c22",
       "verified_at_commit": "fdfecac"
     },
+    "mf-cir-bond-level-loading": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-15",
+      "elapsed_s": 4.3,
+      "input_hash": "d75deb99a81d2b31bee1118d0c62ef2e79922e0140f32b9ec490fd4771fbfb1a",
+      "verified_at_commit": "ce69512"
+    },
+    "mf-cir-bond-loading-riccati": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-15",
+      "elapsed_s": 5.8,
+      "input_hash": "5f74a3aa2f3600f3a07a9cdd04171d3f267ea1d476b1f056c5a972e527bb9d5e",
+      "verified_at_commit": "ce69512"
+    },
     "mf-cml-decomposition-unique": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-02",
@@ -3561,10 +3575,10 @@
     },
     "sc-ito-integral-against-drifted-price": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.5,
-      "input_hash": "e052015f56e69efad7005ea42d7d82f1c41b990af45667f9dfde1538fdb1d058",
-      "verified_at_commit": "eb1f4f7"
+      "date": "2026-10-15",
+      "elapsed_s": 4.9,
+      "input_hash": "ffb7eeaabd07c073146f5fa6ac6b9d2ce7b9f134f7e2e823c44fce29e6116fe6",
+      "verified_at_commit": "618d173"
     },
     "sc-ito-integral-band": {
       "benchmark_file": "stochastic_calculus.json",
