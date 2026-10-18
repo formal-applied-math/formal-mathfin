@@ -618,6 +618,7 @@ import BrownianMotion.StochasticIntegral.LocalMartingale
 import MathFin.FixedIncome.InterestRateSwap
 import MathFin.FixedIncome.CMS
 import MathFin.FixedIncome.FRA
+import MathFin.FixedIncome.NelsonSiegelSvensson
 import MathFin.Actuarial.ActuarialInsurance
 
 -- Contracts tower: a reified payoff language, model-agnostic until priced
