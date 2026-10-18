@@ -40,8 +40,6 @@ substituted for `0`.
 
 namespace MathFin
 
-variable (V C : ℝ) (Δ H : ℝ)
-
 /-- **Collateralized exposure**: `E_C = max(V - C, 0)`. -/
 noncomputable def collateralizedExposure (V C : ℝ) : ℝ := max (V - C) 0
 
