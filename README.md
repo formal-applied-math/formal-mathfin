@@ -13,8 +13,8 @@ differential equations), no-arbitrage theory, derivative pricing, fixed income, 
 risk measures and actuarial mathematics.
 
 The corpus records 539 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 506 are proved in full, 18 restate a lemma from Mathlib or
-BrownianMotion, and 13 are reduced cores that prove less than the result they are named after.
+Lean statement and proof. Of these, 507 are proved in full, 18 restate a lemma from Mathlib or
+BrownianMotion, and 14 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
 axioms `propext`, `Classical.choice` and `Quot.sound`.
