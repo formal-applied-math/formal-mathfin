@@ -29,7 +29,10 @@
                        adverse-selection spread.
   * `DeFi/`          — Decentralized-finance market microstructure:
                        constant-product AMMs (Uniswap v2-style), swap
-                       output, invariant preservation, internal price.
+                       output, invariant preservation, internal price;
+                       Uniswap v2/v3 mechanics (impermanent loss, TWAP,
+                       fee invariant, virtual reserves); Aave/Compound/Dai
+                       lending-protocol mechanics.
 -/
 
 -- Foundations
