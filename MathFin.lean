@@ -687,7 +687,7 @@ import MathFin.BlackScholes.SVI.TraceSignature
 -- The SVI tail condition d₊ → −∞ iff b(1+ρ) < 2, and the butterfly-free sign formula
 import MathFin.BlackScholes.SVI.TailCondition
 
--- FN6814 risk-management batch #51-56: component/marginal VaR (Euler decomposition),
+-- Counterparty-risk / XVA exposure measures: component/marginal VaR (Euler decomposition),
 -- single-index covariance structure and its large-N limit, Gaussian exposure-profile
 -- closed forms (EPE/ENE/PFE), collateralized exposure, and discrete DVA/FVA
 import MathFin.RiskMeasures.ComponentVaR

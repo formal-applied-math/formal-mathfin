@@ -80,8 +80,9 @@ theorem sum_componentVaR_eq_portfolioVaRN (hvar : 0 < portfolioVarN s x σ) :
       portfolioVarN s x σ := Real.mul_self_sqrt hvar.le
   rw [hsum, ← portfolioVarN_eq_sum_mul_weightedSigmaX, div_eq_iff hsqrt, mul_assoc, hsq]
 
-/-- The textbook min-variance hedge ratio for hedging a position of size `W` against asset `i`
-using the portfolio `p`: `a* = -W·Cov(Rp,Rᵢ)/σᵢ²` (minimality itself is not proven here). -/
+/-- The textbook min-variance hedge ratio for hedging a position of size `W` in portfolio `p` with
+asset `i`: `a* = -W·Cov(Rp,Rᵢ)/σᵢ²` units of `i` minimise `Var(W·Rp + a·Rᵢ)` (minimality itself is
+not proven here). -/
 noncomputable def minVarianceHedgeRatio (W covRpRi varRi : ℝ) : ℝ :=
   -W * covRpRi / varRi
 

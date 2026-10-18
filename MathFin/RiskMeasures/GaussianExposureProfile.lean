@@ -23,8 +23,9 @@ closed forms in `Φ` and the standard normal density `φ`:
 As in `RiskMeasures/Gaussian.lean`, we take the closed form as the *definition* of the exposure
 metric rather than wiring it to the truncated-normal expectation `E[max(V,0)]` itself — a
 derivation exists in principle: `RiskMeasures/RockafellarUryasev.lean`'s
-`integral_shortfall_gaussian` already gives this exact `μΦ(μ/σ) + σφ(μ/σ)` shape at the
-degenerate threshold `c = 0`, and `RiskMeasures/GaussianExpectedShortfall.lean`'s
+`integral_shortfall_gaussian`, at the threshold `c = 0` defining `EPE`, gives
+`σ·(φ(-μ/σ) + (μ/σ)·(1 - Φ(-μ/σ)))`, which is exactly `μΦ(μ/σ) + σφ(μ/σ)` after the standard-normal
+symmetries `φ(-z) = φ(z)` and `Φ(-z) = 1 - Φ(z)`, and `RiskMeasures/GaussianExpectedShortfall.lean`'s
 `rockafellarUryasev_of_hasLaw_gaussianReal` is the law-level bridge that would carry it to an
 actual random variable; connecting the two is left for a follow-up rather than done here.
 `PFE_α` is literally the Gaussian
