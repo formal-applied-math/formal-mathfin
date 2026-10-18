@@ -24,7 +24,11 @@ Adapted from the Aave v2 whitepaper (Aave, "Aave Protocol V2", 2020,
 * `healthFactorV1`, `healthFactorV2`: the single-asset and multi-asset
   (summed) health-factor definitions.
 * `liquidityIndex`: the linear recurrence `LI_t = (R_t·U_t·ΔT/T_year + 1)·LI_{t-1}`
-  and its closed-form (product) solution.
+  and its closed-form (product) solution. **Scope disclosure**: the
+  whitepaper's per-period factor is `LiquidityRate_t·ΔT/T_year + 1`, where
+  `LiquidityRate = BorrowRate·U·(1 − reserveFactor)`; `R` here stands for
+  `BorrowRate` and the recurrence omits `(1 − reserveFactor)` (equivalently,
+  the `reserveFactor = 0` simplification).
 * `stableRateUpdate`: the weighted-average new stable rate, shown to lie
   between the old rate and the new borrower's rate (a weighted average is
   a convex combination).
@@ -112,7 +116,11 @@ theorem healthFactorV2_gt_one_iff {ι : Type*} {s : Finset ι}
   rw [lt_div_iff₀ hdebt, one_mul]
 
 /-- **Aave v2 liquidity-index recurrence** (whitepaper §3.3): the index
-accrues each period by the per-period yield `R_t · U_t · ΔT / T_year`. -/
+accrues each period by the per-period yield `R · U · ΔT / T_year`, where `R`
+stands for the borrow rate. **Scope disclosure**: the whitepaper's per-period
+factor is `LiquidityRate·ΔT/T_year + 1` with
+`LiquidityRate = BorrowRate·U·(1 − reserveFactor)`; this definition omits the
+`(1 − reserveFactor)` factor (the `reserveFactor = 0` simplification). -/
 noncomputable def liquidityIndexStep (R U ΔT Tyear : ℝ) : ℝ :=
   R * U * ΔT / Tyear + 1
 

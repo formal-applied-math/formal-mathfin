@@ -17,7 +17,10 @@ exchange-rate mechanics (§"The cToken Contracts").
 
 ## Results
 
-* `utilization`: `U = Borrows / (Cash + Borrows)`.
+* `utilization`: `U = Borrows / (Cash + Borrows)` — the whitepaper's formula
+  is `Borrows / (Cash + Borrows − Reserves)`; we state the reserves-free
+  simplification (equivalent to `Reserves = 0`) and disclose it here rather
+  than silently dropping the term.
 * `borrowRate`: the affine rate `r = base + slope · U`, monotone in `U` when
   `slope ≥ 0`.
 * `exchangeRate`: `(Cash + Borrows − Reserves) / TotalSupply`.
@@ -38,7 +41,10 @@ namespace DeFi
 namespace Compound
 
 /-- **Compound utilization rate**: the fraction of the pool's assets
-(cash + outstanding borrows) that is currently borrowed out. -/
+(cash + outstanding borrows) that is currently borrowed out. **Scope
+disclosure**: the whitepaper's formula nets out reserves,
+`Borrows / (Cash + Borrows − Reserves)`; this definition is the
+`Reserves = 0` simplification. -/
 noncomputable def utilization (cash borrows : ℝ) : ℝ :=
   borrows / (cash + borrows)
 
