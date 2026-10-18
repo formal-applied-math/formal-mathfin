@@ -16,9 +16,11 @@ Adapted from the Aave v2 whitepaper (Aave, "Aave Protocol V2", 2020,
 
 ## Results
 
-* `kinkedRate`: the piecewise-linear borrow-rate curve, continuous at the
-  optimal-utilization kink `U_opt`.
-* `kinkedRate_continuousAt_optimal`: both branches agree at `U = U_opt`.
+* `kinkedRate`: the piecewise-linear borrow-rate curve; the two branches
+  agree at the optimal-utilization kink `U_opt` (no jump there).
+* `kinkedRate_apply_optimal`: the rate at the kink, `R₀ + slope1` — the
+  common value both branches take at `U = U_opt` (this does not by itself
+  establish `ContinuousAt`, which would additionally need `Uopt ≠ 1`).
 * `kinkedRate_monotone`: the curve is monotone nondecreasing on `[0, 1]`
   when both slopes are nonnegative.
 * `healthFactorV1`, `healthFactorV2`: the single-asset and multi-asset
@@ -50,10 +52,12 @@ noncomputable def kinkedRate (R₀ slope1 slope2 Uopt U : ℝ) : ℝ :=
   if U ≤ Uopt then R₀ + U / Uopt * slope1
   else R₀ + slope1 + (U - Uopt) / (1 - Uopt) * slope2
 
-/-- **Continuity at the kink**: both branches agree at `U = Uopt`, namely
-`R₀ + slope1`. This is what makes the curve a genuine piecewise-linear
-function (no jump) rather than two disconnected rays. -/
-theorem kinkedRate_continuousAt_optimal (R₀ slope1 slope2 Uopt : ℝ) (hU : Uopt ≠ 0) :
+/-- **The rate at the kink** is `R₀ + slope1` — the value the `U ≤ Uopt`
+branch takes at `U = Uopt`, which is also what the `else` branch would give
+there (it is excluded from this `if`, but both expressions agree, which is
+what makes the curve a genuine piecewise-linear function with no jump).
+This lemma states the kink value only; it is not a `ContinuousAt` claim. -/
+theorem kinkedRate_apply_optimal (R₀ slope1 slope2 Uopt : ℝ) (hU : Uopt ≠ 0) :
     kinkedRate R₀ slope1 slope2 Uopt Uopt = R₀ + slope1 := by
   unfold kinkedRate
   rw [if_pos le_rfl, div_self hU, one_mul]
@@ -146,9 +150,10 @@ noncomputable def stableRateUpdate (SRprev SDprev SRnew SBnew : ℝ) : ℝ :=
   (SRprev * SDprev + SRnew * SBnew) / (SDprev + SBnew)
 
 /-- **The updated stable rate is a convex combination** of the previous
-average and the new borrower's rate, hence lies between them. A weighted
-average with nonnegative weights and positive total weight cannot exceed
-(resp. fall below) the larger (resp. smaller) of the two inputs. -/
+average and the new borrower's rate, hence lies between them **when the new
+borrower's rate is at least the prior average** (`hle : SRprev ≤ SRnew`). A
+weighted average with nonnegative weights and positive total weight cannot
+exceed (resp. fall below) the larger (resp. smaller) of the two inputs. -/
 theorem stableRateUpdate_mem_interval
     {SRprev SDprev SRnew SBnew : ℝ}
     (hSDprev : 0 ≤ SDprev) (hSBnew : 0 < SBnew) (hle : SRprev ≤ SRnew) :

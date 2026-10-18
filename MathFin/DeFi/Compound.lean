@@ -11,8 +11,9 @@ public import Mathlib
 # Compound: utilization, affine borrow rate, cToken exchange-rate monotonicity
 
 Adapted from the Compound whitepaper (Compound Labs, "Compound: The Money
-Market Protocol", 2019), §2.3 ("Interest Rate Model") and §3.2 ("The cToken
-Contracts").
+Market Protocol", 2019), the Interest Rate Model section (utilization,
+affine borrow rate) and the cToken Contracts / accrual sections (exchange
+rate, reserve-factor accrual).
 
 ## Results
 
@@ -26,7 +27,7 @@ Contracts").
 * `exchangeRate_mono`: the exchange rate is monotone nondecreasing as
   interest accrues, **under the explicit hypothesis that the reserve-factor
   cut does not exceed the accrued interest** (`reservesAdded ≤ interest`) —
-  the whitepaper's §3.2.1 accrual equations give this directly
+  the whitepaper's reserve-factor accrual equations give this directly
   (`reservesAdded = interest · reserveFactor` with `reserveFactor ∈ [0,1]`),
   but state it as a standalone hypothesis on the accrued amounts rather than
   re-deriving it from `reserveFactor` each time.
@@ -68,7 +69,7 @@ noncomputable def exchangeRate (cash borrows reserves totalSupply : ℝ) : ℝ :
 /-- **cToken exchange-rate monotonicity under interest accrual.**
 Suppose a period accrues `interest` of new borrows, of which
 `reservesAdded` is cut to reserves. **Explicit hypothesis**
-`reservesAdded ≤ interest` — the whitepaper's §3.2.1 accrual equations give
+`reservesAdded ≤ interest` — the whitepaper's reserve-factor accrual equations give
 this directly (`reservesAdded = interest · reserveFactor` with
 `reserveFactor ∈ [0,1]`), but we state it as a standalone hypothesis on the
 accrued amounts rather than re-deriving it from `reserveFactor` here. Under
