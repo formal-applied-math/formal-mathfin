@@ -520,6 +520,8 @@ import MathFin.FixedIncome.VasicekSDE
 import MathFin.FixedIncome.VasicekSDEGaussian
 -- Vasicek zero-coupon bond price: the affine term structure (Gaussian Laplace transform)
 import MathFin.FixedIncome.VasicekBondPrice
+-- CIR loadings: B solves the Riccati equation, A solves A' = −κθB
+import MathFin.FixedIncome.CIRRiccati
 -- The T-forward measure: the zero-coupon bond as numéraire (change-of-numéraire instance)
 import MathFin.FixedIncome.ForwardMeasure
 
@@ -588,6 +590,7 @@ import MathFin.RiskMeasures.Expectile
 import MathFin.RiskMeasures.StandardDeviationPrinciple
 import MathFin.RiskMeasures.BernoulliMixture
 import MathFin.RiskMeasures.VasicekIRB
+import MathFin.RiskMeasures.SACCRExposure
 -- Phase 1 (convex-duality unification): fundamental superhedging bound — every EMM prices a claim
 -- at most its super-replication cost (the pricing-side companion of the coherent-risk representation)
 import MathFin.Foundations.SuperhedgingDuality

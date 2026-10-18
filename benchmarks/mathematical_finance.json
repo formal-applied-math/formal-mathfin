@@ -4880,6 +4880,38 @@
       }
     },
     {
+      "id": "mf-cir-bond-loading-riccati",
+      "name": "CIR Affine Loading B(T) Solves the Riccati Equation",
+      "domain": "mathematical_finance",
+      "description": "For the Cox–Ingersoll–Ross short rate dr = κ(θ − r)dt + σ√r dW, in the affine form P(0,T) = exp(A(T) − B(T)·r₀) of its bond price, the closed-form rate loading B(T) = 2(e^{γT} − 1)/((γ + κ)(e^{γT} − 1) + 2γ), γ = √(κ² + 2σ²), solves the Riccati equation B'(T) = 1 − κB(T) − ½σ²B(T)² with B(0) = 0, at every real T, whenever κ² + 2σ² > 0. Only this equation is verified: the bond price itself is not derived.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.CIRRiccati\n\nopen MathFin\n\n/-- **The CIR rate loading solves the Riccati equation.** With `γ = √(κ² + 2σ²)`, the closed\nform `B(T) = 2(e^{γT} − 1) / ((γ + κ)(e^{γT} − 1) + 2γ)` of the CIR affine bond price\n`P(0,T) = exp(A(T) − B(T)·r₀)` satisfies `B(0) = 0` and `B'(T) = 1 − κB(T) − ½σ²B(T)²` at every\n`T`, whenever `κ² + 2σ² > 0`. Re-exports `MathFin.cirBondB_zero` and\n`MathFin.hasDerivAt_cirBondB`. -/\ntheorem cir_bond_B_solves_riccati {κ σ : ℝ} (h : 0 < κ ^ 2 + 2 * σ ^ 2) :\n    cirBondB κ σ 0 = 0 ∧\n      ∀ T : ℝ, HasDerivAt (cirBondB κ σ)\n        (1 - κ * cirBondB κ σ T - σ ^ 2 / 2 * cirBondB κ σ T ^ 2) T :=\n  ⟨cirBondB_zero κ σ, hasDerivAt_cirBondB h⟩\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Cox, Ingersoll and Ross 1985, A Theory of the Term Structure of Interest Rates; the affine loadings (Brigo–Mercurio §3.2.3)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.cirBondB_zero and MathFin.hasDerivAt_cirBondB (FixedIncome/CIRRiccati.lean). SCOPE. Only the term-structure equation is verified; the bond price P = E[exp(-int_0^T r_s ds)] needs the affine (Feynman-Kac) framework, which is not formalized."
+      }
+    },
+    {
+      "id": "mf-cir-bond-level-loading",
+      "name": "CIR Affine Loading A(T) Solves A' = −κθB",
+      "domain": "mathematical_finance",
+      "description": "For the Cox–Ingersoll–Ross short rate, in the affine form P(0,T) = exp(A(T) − B(T)·r₀) of its bond price, the closed-form level loading A(T) = (2κθ/σ²)·log(2γe^{(κ+γ)T/2} / ((γ + κ)(e^{γT} − 1) + 2γ)), γ = √(κ² + 2σ²), satisfies A(0) = 0 and A'(T) = −κθB(T) at every real T, whenever σ ≠ 0. Only this equation is verified: the bond price itself is not derived.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.CIRRiccati\n\nopen MathFin\n\n/-- **The CIR level loading solves its equation.** In the affine form\n`P(0,T) = exp(A(T) − B(T)·r₀)`, the closed form `A(T) = (2κθ/σ²)·log(2γ e^{(κ+γ)T/2} / D(T))`,\nwith `γ = √(κ² + 2σ²)` and `D(T) = (γ + κ)(e^{γT} − 1) + 2γ`, satisfies `A(0) = 0` and\n`A'(T) = −κθ B(T)` at every `T`, whenever `σ ≠ 0`. Re-exports `MathFin.cirBondA_zero` and\n`MathFin.hasDerivAt_cirBondA`. -/\ntheorem cir_bond_A_solves_equation {κ σ : ℝ} (θ : ℝ) (hσ : σ ≠ 0) :\n    cirBondA κ θ σ 0 = 0 ∧\n      ∀ T : ℝ, HasDerivAt (cirBondA κ θ σ) (-(κ * θ) * cirBondB κ σ T) T :=\n  ⟨cirBondA_zero κ θ σ, hasDerivAt_cirBondA κ θ hσ⟩\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Cox, Ingersoll and Ross 1985, A Theory of the Term Structure of Interest Rates; the affine loadings (Brigo–Mercurio §3.2.3)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.cirBondA_zero and MathFin.hasDerivAt_cirBondA (FixedIncome/CIRRiccati.lean). A is the log-form level loading of P = exp(A - B*r0), so A(0) = 0. SCOPE. sigma != 0 is needed because the factor 2*kappa*theta/sigma^2 divides by sigma^2. Only the term-structure equation is verified; the bond price needs the affine (Feynman-Kac) framework, which is not formalized."
+      }
+    },
+    {
       "id": "mf-forward-measure-spot",
       "name": "Forward Price under the T-Forward Measure",
       "domain": "mathematical_finance",
@@ -5455,6 +5487,38 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof from the model's four primitives -- the prior, informed/value independence, informed traders trading on the value, and uninformed traders tossing a coin. Trade probabilities are derived rather than assumed; quotes are Bochner integrals against the conditioned measures; Bayes is applied through ENNReal.toReal with every finiteness side condition discharged. Axioms-clean. LIMITS: one-period and two-valued, with no dynamics -- no sequence of trades and no convergence of quotes to the true value. The competitive market maker's zero-expected-profit condition is NOT formalized: ask = E[V | buy] and bid = E[V | sell] are posited by the shape of the conclusion, not derived. The sell event is modelled as the complement of the buy event, so there is no no-trade outcome. The statement carries 0 < theta < 1, which the acceptance criterion as written omits."
+      }
+    },
+    {
+      "id": "mf-saccr-ead-mono",
+      "name": "SA-CCR Exposure at Default Is Jointly Monotone",
+      "description": "Basel SA-CCR's EAD = alpha * (RC + PFE) is monotone increasing in the replacement cost RC and the PFE add-on, for any fixed alpha >= 0 -- raising either component never lowers the capital exposure.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.SACCRExposure\n\nopen MathFin\n\ntheorem saccrEAD_mono_thm {α : ℝ} (hα : 0 ≤ α) {RC₁ RC₂ PFE₁ PFE₂ : ℝ}\n    (hRC : RC₁ ≤ RC₂) (hPFE : PFE₁ ≤ PFE₂) :\n    MathFin.saccrEAD α RC₁ PFE₁ ≤ MathFin.saccrEAD α RC₂ PFE₂ :=\n  MathFin.saccrEAD_mono hα hRC hPFE\n"
+      },
+      "metadata": {
+        "chapter": 1,
+        "reference": "Basel Committee on Banking Supervision, The standardised approach for measuring counterparty credit risk exposures (BCBS 279), 2014",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the arithmetic combination EAD = alpha * (RC + PFE) via gcongr. The formula is almost entirely regulatory bookkeeping -- RC and PFE are themselves built from supervisory add-on factors with no mathematical content beyond this arithmetic combination; the regulatory constant alpha = 1.4 is kept as a free parameter since only alpha >= 0 is used. No claim beyond monotonicity is formalized."
+      }
+    },
+    {
+      "id": "mf-saccr-effnotional-diversification-bound",
+      "name": "SA-CCR Effective-Notional Aggregation Has No Negative Diversification",
+      "description": "The two-trade correlated effective-notional aggregation sqrt(d1^2 + d2^2 + 2*rho*d1*d2), for supervisory correlation rho in [-1, 1], never exceeds the sum of the absolute per-trade notionals |d1| + |d2|. This aggregation is only structurally analogous to Basel Annex 4's add-on formula (linear, not quadratic, in rho), so the Annex 4 formula itself is not formalized here.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.SACCRExposure\n\nopen MathFin\n\ntheorem effNotionalPair_le_abs_add_thm {ρ : ℝ} (hρ1 : -1 ≤ ρ) (hρ2 : ρ ≤ 1) (d₁ d₂ : ℝ) :\n    MathFin.effNotionalPair ρ d₁ d₂ ≤ |d₁| + |d₂| :=\n  MathFin.effNotionalPair_le_abs_add hρ1 hρ2 d₁ d₂\n"
+      },
+      "metadata": {
+        "chapter": 1,
+        "reference": "Basel Committee on Banking Supervision, The standardised approach for measuring counterparty credit risk exposures (BCBS 279), 2014, Annex 4 add-on aggregation",
+        "difficulty": "beginner",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "effNotionalPair is the structurally analogous two-trade, linear-in-rho building block (same quadratic form as the variance of a sum of two correlated random variables), NOT a literal specialization of Annex 4's add-on formula, whose two-trade cross term is quadratic in rho, not linear -- see the module docstring in MathFin/RiskMeasures/SACCRExposure.lean. Full formal proof of the stated bound for this building block via sqrt monotonicity and the Cauchy-Schwarz-style cross-term bound."
       }
     }
   ]

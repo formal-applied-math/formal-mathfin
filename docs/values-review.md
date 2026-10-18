@@ -125,6 +125,74 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
+
+Scope: `FixedIncome/CIRRiccati` by Alfredo Garcia (@oxarbitrage), merged with its two commits
+intact, and its two `full` entries, `mf-cir-bond-loading-riccati` and `mf-cir-bond-level-loading`.
+CI ran green on the pull request, and `build.yml` ran on the merged tree. A first single-reader pass
+found nothing beyond one golf; the three-agent panel the protocol asks for (lenses 1, 5 and 8;
+2 and 4; 3, 6, 7 and the first pass) found the rest, each finding confirmed by grep before it was
+applied.
+
+### Standing first pass: prose against statement
+
+No overclaims. The module docstring, the docstrings, both descriptions and both scopes state the
+two equations, `B(0) = A(0) = 0`, the hypotheses (`κ² + 2σ² > 0` for `B`, `σ ≠ 0` for `A`), and
+that the bond price `𝔼[exp(−∫₀ᵀ r_s ds)]` is not derived. The two reductions the docstrings name
+hold: with `x = e^{γT} − 1`, `D² − 2κxD − 2σ²x² = (γ² − κ² − 2σ²)x² + 4γ²e^{γT}` and
+`(κ + γ)D/2 − (γ + κ)γe^{γT} = (κ² − γ²)x/2`. Both hypotheses are also necessary: at `κ = σ = 0`,
+`B` is `0/0 = 0` while the equation demands `B' = 1`, and `σ ≠ 0` is needed unless `κθ = 0`. Two
+gaps in clarity, both fixed: nothing said that `cirBondA` is the log of the factor `vasicekBondA`
+and Brigo–Mercurio call `A`; and `docs/coverage.md` used `D(T)` undefined and named
+`vasicekDeterministic_solves_ODE`, the mean-rate equation, as the parallel, where the Vasicek
+counterpart of `B` is `vasicekBondB`.
+
+### Upgrades executed
+
+- **Names.** `cirBondB_hasDerivAt` and `cirBondA_hasDerivAt` are now `hasDerivAt_cirBondB` and
+  `hasDerivAt_cirBondA`: Mathlib's order, and that of every other `FixedIncome` module and of the
+  sibling `hasDerivAt_riccatiCoeff`. The names ship in the published dataset, so they changed before
+  a release. `κ`, which only the conclusion determines, is explicit in the `A` lemma.
+- **One derivation each.** Both proofs derived `D′`, `γ² = κ² + 2σ²` and `γ > 0`; these are now
+  `hasDerivAt_cirDenom`, `cirGamma_sq` and `cirGamma_pos`, and the derivative of `t ↦ e^{γt}` is one
+  private lemma. The `field_simp` and `linear_combination` steps are unchanged.
+- `hF`'s `have := …; simpa using this` is `simpa using …`, and the curated `AxiomAudit` entry is
+  dated and states its hypotheses.
+- The copyright lines of `CIRRiccati` and of `PricePathDrift` (#228) named the maintainer, copied
+  from a neighbouring header. Both now name their author, which `tests/test_attribution.py` checks.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: `hasDerivAt_cirBondB` holds at every real `T`, for either sign of `κ`
+  and at `σ = 0`; `full` sits where `mf-vasicek-deterministic-ode` and `mf-mm-riccati` do, and the
+  descriptions state their scope. Next: `V(τ, r) = exp(A − B·r)` solves the CIR bond equation
+  `∂_τV = κ(θ − r)∂_rV + ½σ²r∂²_rV − rV` with `V(0, ·) = 1`. That is calculus, not Feynman–Kac; the
+  two entries are its two halves, and it is the interface #63 needs.
+- **Coherence.** Exemplar: Mathlib's derivative calculus only, each proof closed by one certificate
+  that uses `γ² = κ² + 2σ²` once. Reusing `riccatiCoeff` would be a contortion: CIR's `B` is a
+  time-shifted reparametrisation of it that needs `σ ≠ 0` (the Möbius form
+  `2 tanh(γT/2) / (γ + κ tanh(γT/2))`), so the direct proof stays. Next: the bridge
+  `cirBondB κ 0 = vasicekBondB κ`, true for every `κ`, in `Bridges/` so that this module keeps its
+  Mathlib-only import.
+- **First principles and elegance.** The closed forms are verified, not derived. Next:
+  `u = e^{−(κ+γ)T/2} D / (2γ)` solves `u'' + κu' − ½σ²u = 0` with `u(0) = 1` and `u'(0) = 0`; then
+  `B = (2/σ²) u'/u` and `A = −(2κθ/σ²) log u`, so `A' = −κθB` is a `const_mul` corollary and `B`'s
+  equation is one linearization lemma whose other instance is `riccatiCoeff`.
+- **Architecture.** `cirBondA κ θ 0` is a junk value, while as `σ → 0` the loading tends to the
+  deterministic `−θ(T − vasicekBondB κ T)`. So #63 should define its `A` as the integral
+  `∫₀ᵀ (½a₀B² − b₀B)` rather than adopt this closed form; uniqueness for its system can reuse the
+  Grönwall lemma `SDEUniqueness` already uses.
+- **Idiomatic register.** Left as they are, since no Lean was in the loop: `hfun … := rfl` with
+  `rw`, `unfold cirDenom at *` where `at hD ⊢` would do, and a `hF0` that may be unused.
+
+### Ranked backlog
+
+1. The bond equation for `exp(A − B·r)`, and CIR as the first non-Gaussian instance of #63.
+2. Derive the loadings through `u`; `A' = −κθB` then follows from `HasDerivAt.log`.
+3. The `σ = 0` bridge to `vasicekBondB`, in `Bridges/`.
+4. A first consumer: the CIR forward curve, through `rate_eq_neg_log_deriv`.
+5. The remaining golf in the two proofs, with `lean-check` in the loop.
+
 ## 2026-10-14 — corpus 535 — #244: the Itô–drift expectation, Hull–White, Monte Carlo, Cox, CMS, bootstrapping
 
 Scope: the eight modules of #244 by Yang Ye (@leafyoung), merged with its three commits intact:
