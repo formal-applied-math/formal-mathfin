@@ -47,7 +47,7 @@ market makers, building on the constant-product substrate in
   the reciprocal of the *harmonic* mean of the B-in-A series, not of its
   arithmetic mean.
 * `swapOutputWithFee`, `fee_invariant_growth`: the Uniswap v2 **fee
-  invariant** `(x0 + Δx)(y0 - Δy) ≥ x0·y0`, where `Δy = swapOutput x0 y0
+  invariant** `x0·y0 ≤ (x0 + Δx)(y0 - Δy)`, where `Δy = swapOutput x0 y0
   (γ·Δx)` is computed from the fee-discounted input (γ the fee retention
   rate), and `lpFeeShare`, the candidate LP value-growth share
   `f = 1 - √(k1/k2)` (only shown nonnegative here, see its docstring).
@@ -219,14 +219,14 @@ reserve (the fee portion is retained, not refunded) while only the
 fee-adjusted output `Δy` leaves the Y reserve makes the invariant grow
 (weakly) rather than merely hold:
 
-  `(x0 + Δx) * (y0 - Δy) ≥ x0 * y0`,
+  `x0 * y0 ≤ (x0 + Δx) * (y0 - Δy)`,
 
 since `(x0 + γΔx) * (y0 - Δy) = x0 * y0` exactly (the no-fee invariant) and
 `x0 + Δx ≥ x0 + γΔx` with `y0 - Δy > 0`. -/
 theorem fee_invariant_growth
     (x0 y0 Δx γ : ℝ) (hx0 : 0 < x0) (hy0 : 0 < y0) (hΔx : 0 < Δx)
     (hγ0 : 0 < γ) (hγ1 : γ ≤ 1) :
-    (x0 + Δx) * (y0 - swapOutputWithFee x0 y0 Δx γ) ≥ x0 * y0 := by
+    x0 * y0 ≤ (x0 + Δx) * (y0 - swapOutputWithFee x0 y0 Δx γ) := by
   unfold swapOutputWithFee
   have hγΔx : 0 < γ * Δx := mul_pos hγ0 hΔx
   have hinv := swap_preserves_invariant x0 y0 (γ * Δx) hx0 hγΔx

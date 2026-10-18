@@ -10,10 +10,11 @@ public import Mathlib
 /-!
 # Dai (MakerDAO): liquidation inequality and stability-fee compounding
 
-Adapted from the MakerDAO whitepaper (Maker, "The Dai Stablecoin System",
-2017, <https://makerdao.com/en/whitepaper>), the collateralization /
+Adapted from the MakerDAO whitepaper (Maker, "The Maker Protocol:
+MakerDAO's Multi-Collateral Dai (MCD) System", 2020,
+<https://makerdao.com/en/whitepaper>), the collateralization /
 liquidation criterion (§"Liquidation Ratio") and the stability-fee
-compounding of CDP (vault) debt (§"Stability Fee").
+compounding of vault debt (§"Stability Fee").
 
 ## Results
 

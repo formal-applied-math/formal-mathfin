@@ -12,7 +12,8 @@ public import Mathlib
 
 Adapted from the Aave v2 whitepaper (Aave, "Aave Protocol V2", 2020,
 <https://github.com/aave/protocol-v2/blob/master/aave-v2-whitepaper.pdf>),
-§3.2 ("Interest rate model") and §4 ("Health factor").
+§5 ("Formal Definitions"), which states the kinked borrow-rate model and the
+health factor; the liquidity-index recurrence is §3.1 ("aTokens").
 
 ## Results
 
@@ -26,11 +27,13 @@ Adapted from the Aave v2 whitepaper (Aave, "Aave Protocol V2", 2020,
   (summed) health-factor definitions.
 * `liquidityIndexStep`, `liquidityIndex_closedForm`: the linear recurrence
   `LI_t = (R_t·U_t·ΔT/T_year + 1)·LI_{t-1}`
-  and its closed-form (product) solution. **Scope disclosure**: the
-  whitepaper's per-period factor is `LiquidityRate_t·ΔT/T_year + 1`, where
-  `LiquidityRate = BorrowRate·U·(1 − reserveFactor)`; `R` here stands for
-  `BorrowRate` and the recurrence omits `(1 − reserveFactor)` (equivalently,
-  the `reserveFactor = 0` simplification).
+  and its closed-form (product) solution, matching the whitepaper's
+  `LiquidityRate_t = BorrowRate_t·U_t` exactly (`R` here stands for
+  `BorrowRate`). **Scope disclosure**: the deployed
+  `DefaultReserveInterestRateStrategy` contract additionally multiplies by
+  `(1 − reserveFactor)`, a refinement not in the whitepaper and not modeled
+  here (equivalently, the `reserveFactor = 0` simplification relative to the
+  on-chain contract).
 * `stableRateUpdate`: the weighted-average new stable rate, shown (when the
   new borrower's rate is at least the pool's prior average) to lie between
   the two (a weighted average is a convex combination).
@@ -44,7 +47,7 @@ namespace DeFi
 
 namespace Aave
 
-/-- **Aave v2 kinked borrow-rate model** (whitepaper §3.2): below the optimal
+/-- **Aave v2 kinked borrow-rate model** (whitepaper §5, Formal Definitions): below the optimal
 utilization `U_opt`, the rate rises linearly from `R₀` with slope `slope1/U_opt`;
 above it, it rises linearly from `R₀ + slope1` with slope `slope2/(1-U_opt)`.
 `U_opt ∈ (0,1)` is the kink location. -/
@@ -119,12 +122,13 @@ theorem healthFactorV2_gt_one_iff {ι : Type*} {s : Finset ι}
   unfold healthFactorV2
   rw [lt_div_iff₀ hdebt, one_mul]
 
-/-- **Aave v2 liquidity-index recurrence** (whitepaper §3.3): the index
-accrues each period by the per-period yield `R · U · ΔT / T_year`, where `R`
-stands for the borrow rate. **Scope disclosure**: the whitepaper's per-period
-factor is `LiquidityRate·ΔT/T_year + 1` with
-`LiquidityRate = BorrowRate·U·(1 − reserveFactor)`; this definition omits the
-`(1 − reserveFactor)` factor (the `reserveFactor = 0` simplification). -/
+/-- **Aave v2 liquidity-index recurrence** (whitepaper §3.1, aTokens): the
+index accrues each period by the per-period yield `R · U · ΔT / T_year`,
+where `R` stands for the borrow rate, matching the whitepaper's
+`LiquidityRate_t = BorrowRate_t·U_t` exactly. **Scope disclosure**: the
+deployed `DefaultReserveInterestRateStrategy` contract additionally
+multiplies by `(1 − reserveFactor)`, a refinement not in the whitepaper and
+not modeled here. -/
 noncomputable def liquidityIndexStep (R U ΔT Tyear : ℝ) : ℝ :=
   R * U * ΔT / Tyear + 1
 
