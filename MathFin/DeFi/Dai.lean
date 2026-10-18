@@ -12,9 +12,11 @@ public import Mathlib
 
 Adapted from the MakerDAO whitepaper (Maker, "The Maker Protocol:
 MakerDAO's Multi-Collateral Dai (MCD) System", 2020,
-<https://makerdao.com/en/whitepaper>), the collateralization /
-liquidation criterion (§"Liquidation Ratio") and the stability-fee
-compounding of vault debt (§"Stability Fee").
+<https://makerdao.com/en/whitepaper>): the collateralization /
+liquidation criterion from the "Liquidation of Risky Maker Vaults" section,
+and the "Liquidation Ratio" / "Stability Fee" parameter entries under
+"Risk Parameters Controlled by Maker Governance" (these are named
+parameter entries, not sub-sections of the paper).
 
 ## Results
 

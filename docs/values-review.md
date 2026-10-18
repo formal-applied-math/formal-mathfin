@@ -146,7 +146,12 @@ this session: `Aave.lean` cited the kinked-rate model and health factor to white
 itself (the whitepaper's `LiquidityRate_t = BorrowRate_t · U_t` has no reserve factor at all —
 corrected to cite §3.1 and attribute the refinement to the contract, not the paper). `Dai.lean`'s
 URL (`makerdao.com/en/whitepaper`) serves the 2020 Multi-Collateral Dai whitepaper, not the cited
-2017 "The Dai Stablecoin System" — title/year brought in line with the URL. Every other docstring
+2017 "The Dai Stablecoin System" — title/year brought in line with the URL. A second gate pass
+fetched the actual MCD whitepaper page and found `Dai.lean`'s `§"Liquidation Ratio"`/
+`§"Stability Fee"` citations named non-existent sections — both are named parameter entries
+under "Risk Parameters Controlled by Maker Governance", and the liquidation criterion itself
+is in "Liquidation of Risky Maker Vaults"; the header now cites those actual headings and
+drops the `§` marks. Every other docstring
 (Curve/StableSwap non-claim, `lpFeeShare` scope, `twap_eq_average`'s `t1 ≤ t2` junk-value
 disclosure, the Aave/Compound reserves-free simplifications, `kinkedRate_apply_optimal`'s
 non-`ContinuousAt` caveat) was independently re-verified against its theorem and found accurate.
