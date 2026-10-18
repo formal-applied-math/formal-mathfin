@@ -26,11 +26,12 @@ where `z = (ν/α)(fK)^((1-β)/2) log(f/K)` and
 **This is a closed-form asymptotic approximation, not an exact price** — the
 paper derives it via a singular-perturbation (small vol-of-vol, short-maturity)
 expansion and explicitly omits higher-order `⋯` terms (stated to be "much,
-much smaller" than the displayed terms, but nonzero). We formalize the
-displayed truncation (`sabrImpliedVol`) exactly as printed, plus the at-the-money
-(`K = f`) specialization (eq. 2.18, `sabrATMVol`), where the paper's own text
-notes the formula "reduces to" after the removable `z/x(z) → 1` singularity at
-`z = 0`. We do not attempt the singular-perturbation PDE derivation itself —
+much smaller" than the displayed terms, but nonzero). We formalize only the
+at-the-money (`K = f`) specialization (eq. 2.18, `sabrATMVol`) — the general
+formula (eq. 2.17a-c, with its `z`, `x(z)` quoted above for reference) is not
+formalized. At `K = f` the paper's own text notes the formula "reduces to"
+after the removable `z/x(z) → 1` singularity at `z = 0` is resolved. We do not
+attempt the singular-perturbation PDE derivation itself —
 that stochastic machinery (the SABR two-factor SDE's transition density) does
 not exist in this repo or in Mathlib/BrownianMotion, and reconstructing it is
 well beyond a closed-form transcription. What *is* proved here is restricted to
@@ -49,9 +50,11 @@ in section 3 as the ATM-vol curve traced as the forward varies.
 
 ## Main results
 
-* `sabrATMVol_pos` — the backbone factor `α / f^(1-β)` is positive for `α, f > 0`.
+* `sabrBackbone_pos` — the backbone factor `α / f^(1-β)` is positive for `α, f > 0`.
 * `sabrATMVol_zero_tex` — at `t_ex = 0`, `sabrATMVol` collapses exactly to the
   backbone `sabrBackbone`.
+* `sabrATMVol_pos_zero_tex` — corollary: `sabrATMVol` is positive at `t_ex = 0`
+  for `α, f > 0`.
 -/
 
 @[expose] public section
