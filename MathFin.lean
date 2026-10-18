@@ -476,6 +476,9 @@ import MathFin.BlackScholes.PowerCall
 -- numéraire-parameterised template consumed by ExchangeOption, Black-76, KMVMerton
 import MathFin.BlackScholes.GarmanNormalForm
 import MathFin.BlackScholes.ExchangeOption
+-- Exact two-asset closed forms consuming the bivariate normal CDF (Foundations/BivariateNormalCDF)
+import MathFin.BlackScholes.StulzTwoAssetRainbow
+import MathFin.BlackScholes.HeynenKatTwoAssetBarrier
 -- Margrabe BSCallHyp grounding from a joint two-GBM gaussian model (leap-3 closure)
 import MathFin.BlackScholes.MargrabeGrounding
 -- Phase 25: chooser option as call + put portfolio via PCP at chooser date
