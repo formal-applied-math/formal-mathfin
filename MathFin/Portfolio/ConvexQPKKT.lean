@@ -19,15 +19,16 @@ positive definite.
 
 ## Scope actually proved (read before citing as "the KKT theorem")
 
-The master coverage map's item #47 asks for the full *iff* (necessity and
-sufficiency), a mixed equality/inequality version, and two uniqueness
-results. We prove:
+The full KKT theorem (necessity *and* sufficiency, a mixed equality/
+inequality version, and two uniqueness results) is not proved here. We
+prove:
 
 * **Sufficiency** (`kkt_sufficient`): stationarity + dual feasibility +
-  complementary slackness at a feasible point implies global optimality over
-  the feasible set. This is the direction actually used to *certify* a
-  candidate solution, and it follows directly from convexity — no constraint
-  qualification is needed.
+  complementary slackness implies global optimality over the feasible set
+  for every feasible competitor (so `x0` itself is a global minimizer
+  whenever it is feasible). This is the direction actually used to *certify*
+  a candidate solution, and it follows directly from convexity — no
+  constraint qualification is needed.
 * **Uniqueness under `C` positive definite** (`kkt_optimizer_unique_of_posDef`):
   any two points each satisfying a sufficient-KKT system (possibly with
   different multipliers) for the same `c, C` coincide.
@@ -51,17 +52,16 @@ is exactly a pair of opposed inequalities `a ⬝ᵥ x ≤ b` and `-a ⬝ᵥ x �
 it is already representable with the inequality-only machinery proved here
 (at the cost of splitting one multiplier into a nonneg/nonpos pair).
 
-We also prove the **maximum feasible step size** ratio-test lemma (item #48,
-`feasible_step_preserved`): for a feasible `x0` and direction `d`, stepping
+We also prove the **maximum feasible step size** ratio-test lemma
+(`feasible_step_preserved`): for a feasible `x0` and direction `d`, stepping
 to `x0 + σ • d` preserves every constraint `a k ⬝ᵥ x ≤ b k` for every
 `σ ∈ [0, σ̂]`, where `σ̂` is any lower bound for the step length at which a
 constraint with `a k ⬝ᵥ d > 0` would first become binding. We use the sign
 convention "`a k ⬝ᵥ d > 0`" for the direction that can make an upper-bound
-constraint `a k ⬝ᵥ x ≤ b k` newly binding (rather than the coverage-map
-text's "`a k ⬝ᵥ d < 0`"): for a `≤`-constraint, increasing `σ` only
-threatens feasibility along directions where `a k ⬝ᵥ d` is *positive* (it
-increases `a k ⬝ᵥ x`), so that is the sign under which the stated
-feasibility-preservation claim is actually a theorem.
+constraint `a k ⬝ᵥ x ≤ b k` newly binding: for a `≤`-constraint, increasing
+`σ` only threatens feasibility along directions where `a k ⬝ᵥ d` is
+*positive* (it increases `a k ⬝ᵥ x`), so that is the sign under which the
+stated feasibility-preservation claim is actually a theorem.
 
 ## Results
 
@@ -80,13 +80,12 @@ namespace MathFin
 
 open Matrix
 
-variable {ι κ : Type*} [Fintype ι] [DecidableEq ι] [Fintype κ]
+variable {ι κ : Type*} [Fintype ι] [Fintype κ]
 
 /-- The convex QP objective `f(x) = c ⬝ᵥ x + ½ · x ⬝ᵥ (C *ᵥ x)`. -/
 noncomputable def qpObj (c : ι → ℝ) (C : Matrix ι ι ℝ) (x : ι → ℝ) : ℝ :=
   c ⬝ᵥ x + (1 / 2) * (x ⬝ᵥ (C *ᵥ x))
 
-omit [DecidableEq ι] in
 /-- A symmetric matrix's quadratic form is self-adjoint across the dot product:
 `u ⬝ᵥ (C *ᵥ v) = v ⬝ᵥ (C *ᵥ u)`. -/
 lemma dotProduct_mulVec_symm_comm {C : Matrix ι ι ℝ} (hsym : Cᵀ = C) (u v : ι → ℝ) :
@@ -96,7 +95,6 @@ lemma dotProduct_mulVec_symm_comm {C : Matrix ι ι ℝ} (hsym : Cᵀ = C) (u v 
     _ = (C *ᵥ u) ⬝ᵥ v := by rw [vecMul_transpose]
     _ = v ⬝ᵥ (C *ᵥ u) := dotProduct_comm _ _
 
-omit [DecidableEq ι] in
 /-- **Exact quadratic expansion**: for symmetric `C`,
 `f(y) - f(x) = (y-x) ⬝ᵥ (c + C *ᵥ x) + ½ (y-x) ⬝ᵥ (C *ᵥ (y-x))`.
 
@@ -126,7 +124,6 @@ theorem qp_grad_expansion (c : ι → ℝ) {C : Matrix ι ι ℝ} (hsym : Cᵀ =
   rw [hd_c, dotProduct_sub, hy_split]
   ring
 
-omit [DecidableEq ι] in
 /-- The complementary-slackness linear term is nonnegative at any feasible
 competitor `y`: `0 ≤ ∑ k, u k * (a k ⬝ᵥ x0 - a k ⬝ᵥ y)`. The per-term bound is
 `u k * (a k ⬝ᵥ x0 - a k ⬝ᵥ y) = u k * (a k ⬝ᵥ x0 - b k) + u k * (b k - a k ⬝ᵥ y)`,
@@ -138,7 +135,6 @@ lemma kkt_complementary_term_nonneg {a : κ → ι → ℝ} {b : κ → ℝ} {u 
     0 ≤ ∑ k, u k * (a k ⬝ᵥ x0 - a k ⬝ᵥ y) :=
   Finset.sum_nonneg fun k _ => by nlinarith [hu_nonneg k, hfeasy k, hcs k]
 
-omit [DecidableEq ι] in
 /-- **KKT sufficiency** for the convex QP `min c ⬝ᵥ x + ½ x ⬝ᵥ (C *ᵥ x)` subject to
 `∀ k, a k ⬝ᵥ x ≤ b k`: a point `x0` satisfying
 
@@ -146,17 +142,20 @@ omit [DecidableEq ι] in
 * dual feasibility: `u k ≥ 0`,
 * complementary slackness: `u k * (a k ⬝ᵥ x0 - b k) = 0`,
 
-is a global minimizer over the feasible set, provided `C` is symmetric
-positive semidefinite. No constraint qualification is needed. Note `x0`'s own
-feasibility is *not* assumed: complementary slackness alone already forces
-`u k = 0` at every `k` where `a k ⬝ᵥ x0 > b k`, so the hypotheses above are
-in fact slightly more general than "`x0` is a feasible KKT point" — the usual
-application has `x0` feasible, but the proof never needs that fact. -/
-theorem kkt_sufficient {c : ι → ℝ} {C : Matrix ι ι ℝ} (hsym : Cᵀ = C) (hpsd : C.PosSemidef)
+satisfies `qpObj c C x0 ≤ qpObj c C y` for every feasible `y` (so `x0` is a
+global minimizer over the feasible set whenever it is itself feasible),
+provided `C` is positive semidefinite. No constraint qualification is
+needed. Note `x0`'s own feasibility is *not* assumed: complementary
+slackness alone already forces `u k = 0` at every `k` where
+`a k ⬝ᵥ x0 > b k`, so the hypotheses above are in fact slightly more general
+than "`x0` is a feasible KKT point" — the usual application has `x0`
+feasible, but the proof never needs that fact. -/
+theorem kkt_sufficient {c : ι → ℝ} {C : Matrix ι ι ℝ} (hpsd : C.PosSemidef)
     {a : κ → ι → ℝ} {b : κ → ℝ} {x0 : ι → ℝ} {u : κ → ℝ} (hu_nonneg : ∀ k, 0 ≤ u k)
     (hstat : c + C *ᵥ x0 = -∑ k, u k • a k)
     (hcs : ∀ k, u k * (a k ⬝ᵥ x0 - b k) = 0) :
     ∀ y, (∀ k, a k ⬝ᵥ y ≤ b k) → qpObj c C x0 ≤ qpObj c C y := by
+  have hsym : Cᵀ = C := hpsd.isHermitian
   intro y hfeasy
   have hexp := qp_grad_expansion c hsym x0 y
   have hquad_nonneg : 0 ≤ (y - x0) ⬝ᵥ (C *ᵥ (y - x0)) := by
@@ -172,12 +171,11 @@ theorem kkt_sufficient {c : ι → ℝ} {C : Matrix ι ι ℝ} (hsym : Cᵀ = C)
     linarith
   linarith
 
-omit [DecidableEq ι] in
 /-- **Uniqueness of the optimizer under `C ≻ 0`**: if `x0` and `x1` each
 satisfy a sufficient-KKT system (feasibility, stationarity, dual feasibility,
 complementary slackness) for the *same* objective `c, C`, possibly with
 *different* multipliers `u0, u1`, then `x0 = x1`. -/
-theorem kkt_optimizer_unique_of_posDef {c : ι → ℝ} {C : Matrix ι ι ℝ} (hsym : Cᵀ = C)
+theorem kkt_optimizer_unique_of_posDef {c : ι → ℝ} {C : Matrix ι ι ℝ}
     (hpd : C.PosDef) {a : κ → ι → ℝ} {b : κ → ℝ}
     {x0 x1 : ι → ℝ} (hfeas0 : ∀ k, a k ⬝ᵥ x0 ≤ b k) (hfeas1 : ∀ k, a k ⬝ᵥ x1 ≤ b k)
     {u0 : κ → ℝ} (hu0_nonneg : ∀ k, 0 ≤ u0 k)
@@ -186,10 +184,11 @@ theorem kkt_optimizer_unique_of_posDef {c : ι → ℝ} {C : Matrix ι ι ℝ} (
     (hstat1 : c + C *ᵥ x1 = -∑ k, u1 k • a k) (hcs1 : ∀ k, u1 k * (a k ⬝ᵥ x1 - b k) = 0) :
     x0 = x1 := by
   have hpsd := hpd.posSemidef
+  have hsym : Cᵀ = C := hpsd.isHermitian
   have hle01 : qpObj c C x0 ≤ qpObj c C x1 :=
-    kkt_sufficient hsym hpsd hu0_nonneg hstat0 hcs0 x1 hfeas1
+    kkt_sufficient hpsd hu0_nonneg hstat0 hcs0 x1 hfeas1
   have hle10 : qpObj c C x1 ≤ qpObj c C x0 :=
-    kkt_sufficient hsym hpsd hu1_nonneg hstat1 hcs1 x0 hfeas0
+    kkt_sufficient hpsd hu1_nonneg hstat1 hcs1 x0 hfeas0
   have heq : qpObj c C x1 - qpObj c C x0 = 0 := by linarith
   have hexp := qp_grad_expansion c hsym x0 x1
   have hlin : (x1 - x0) ⬝ᵥ (c + C *ᵥ x0) = ∑ k, u0 k * (a k ⬝ᵥ x0 - a k ⬝ᵥ x1) := by
@@ -211,7 +210,7 @@ theorem kkt_optimizer_unique_of_posDef {c : ι → ℝ} {C : Matrix ι ι ℝ} (
   simp only [star_trivial] at this
   linarith [hquad_zero]
 
-omit [DecidableEq ι] [Fintype κ] in
+omit [Fintype κ] in
 /-- **Maximum feasible step size (ratio test)**: let `x0` be feasible and `d`
 a direction. If `σ̂` is a lower bound for the ratio at which each
 `a k ⬝ᵥ d > 0` constraint becomes binding (i.e.
@@ -233,10 +232,10 @@ theorem feasible_step_preserved {a : κ → ι → ℝ} {b : κ → ℝ} {x0 d :
   · push Not at hd
     nlinarith [hfeas0 k]
 
-omit [DecidableEq ι] [Fintype κ] in
-/-- Corollary: the step size `σ0 = min σ̂ 1` preserves feasibility, matching
-the coverage-map's `σ0 = min(σ̂, 1)` normalization (useful when the direction
-`d` is only trusted to be a feasible direction up to unit length). -/
+omit [Fintype κ] in
+/-- Corollary: the step size `σ0 = min σ̂ 1` preserves feasibility (useful
+when the direction `d` is only trusted to be a feasible direction up to unit
+length). -/
 theorem feasible_step_preserved_min_one {a : κ → ι → ℝ} {b : κ → ℝ} {x0 d : ι → ℝ}
     (hfeas0 : ∀ k, a k ⬝ᵥ x0 ≤ b k) {σhat : ℝ} (hσhat_nonneg : 0 ≤ σhat)
     (hub : ∀ k, 0 < a k ⬝ᵥ d → σhat * (a k ⬝ᵥ d) ≤ b k - a k ⬝ᵥ x0) :
