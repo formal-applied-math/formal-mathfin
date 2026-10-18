@@ -2792,7 +2792,7 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > `mf-vasicek-sde-terminal-gaussian`, not re-derived. Also lifted `vasicekSDEVariance_nonneg`
 > out of two duplicate inline proofs (`VasicekSDE.lean`, shared with `VasicekSDEGaussian.lean`).
 > Axioms-clean. Net: corpus 537 → **538**, **507 full** + 18 = 525/538 delivery-ready,
-> 10 reduced, 0 placeholders.
+> 13 reduced, 0 placeholders.
 
 The line below is the pre-re-audit historical record (kept for provenance):
 **235 / 251 delivery-ready** (211 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
