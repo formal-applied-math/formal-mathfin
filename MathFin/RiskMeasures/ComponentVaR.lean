@@ -50,7 +50,7 @@ noncomputable def portfolioVaRN : ℝ := α * Real.sqrt (portfolioVarN s x σ)
 noncomputable def marginalVaR (i : ι) : ℝ :=
   α * weightedSigmaX s x σ i / Real.sqrt (portfolioVarN s x σ)
 
-/-- **Component VaR**: `CVaRᵢ = xᵢ · ∂VaR/∂xᵢ`. -/
+/-- **Component VaR**: `CVaRᵢ = xᵢ · marginalVaRᵢ` (`= xᵢ · ∂VaR/∂xᵢ` for symmetric `σ`). -/
 noncomputable def componentVaR (i : ι) : ℝ := x i * marginalVaR s x σ α i
 
 /-- The portfolio variance is the quadratic form `x'Σx = ∑ᵢ xᵢ(Σx)ᵢ`. -/

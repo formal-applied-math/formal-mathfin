@@ -21,11 +21,12 @@ closed forms in `Φ` and the standard normal density `φ`:
   `PFE_α = μ + σΦ⁻¹(α)`.
 
 As in `RiskMeasures/Gaussian.lean`, we take the closed form as the *definition* of the exposure
-metric (the library has no `Φ⁻¹`-integral machinery for the truncated-normal expectation itself);
-`PFE_α` is literally the Gaussian VaR of `RiskMeasures/GaussianValueAtRisk.lean` restated in
-exposure language. What we prove are the genuinely new algebraic relations among these closed
-forms, plus the path-level aggregates (average and effective EPE) over a discrete exposure
-profile, mirroring the positive-part pattern of `Performance/DownsideMetrics.lean`.
+metric (the library has no Gaussian-integration machinery for the truncated-normal expectation
+`E[max(V,0)]` itself); `PFE_α` is literally the Gaussian VaR of
+`RiskMeasures/GaussianValueAtRisk.lean` restated in exposure language. What we prove are the
+algebraic relations among these closed forms (rearrangements of the definitions), plus the
+path-level aggregates (average and effective EPE) over a discrete exposure profile, mirroring the
+positive-part pattern of `Performance/DownsideMetrics.lean`.
 
 ## Main definitions and results
 

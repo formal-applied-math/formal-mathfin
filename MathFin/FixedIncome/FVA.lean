@@ -45,7 +45,7 @@ depending on their distributional assumptions.
 ## Main definitions and results
 
 * `discreteFVA`: the `FS·Δt` sum form, indexed over uniform buckets.
-* `discreteFVA_eq_net_total`: `FVA = (FS_L · PV(EDNE) - FS_B · PV(EDPE)) · Δt` in closed form
+* `discreteFVA_eq_net_total`: `FVA = (FS_L · ∑EDNE - FS_B · ∑EDPE) · Δt` in closed form
   (linearity of the two sums).
 * `discreteFVA_le_fundingBenefit`, `discreteFVA_ge_neg_fundingCost`: with nonnegative spreads,
   exposures and `Δt`, FVA is sandwiched between the negative of its funding-cost leg and its
@@ -113,9 +113,10 @@ noncomputable def fundingDiscountFactor (FS t : ℝ) : ℝ := Real.exp (-(FS * t
 
 /-- **Telescoping discount factors**: over a finite tenor `t : ℕ → ℝ` and `n` buckets, the sum of
 per-bucket discount-factor drops collapses to the two endpoints,
-`∑ᵢ [DF(tᵢ) - DF(tᵢ₊₁)] = DF(t₀) - DF(tₙ)`, regardless of the exposure profile — this is the
-clean telescoping form that replaces the `FS·Δt` product-rule approximation. A direct instance of
-Mathlib's generic reversed-telescoping-sum lemma `Finset.sum_range_sub'`. -/
+`∑ᵢ [DF(tᵢ) - DF(tᵢ₊₁)] = DF(t₀) - DF(tₙ)` — the clean telescoping identity underlying the
+discount-factor form (the exposure-weighted analogue of the `FS·Δt` sum does not telescope; see
+the module docstring). A direct instance of Mathlib's generic reversed-telescoping-sum lemma
+`Finset.sum_range_sub'`. -/
 theorem fundingDiscountFactor_telescoping_sum (t : ℕ → ℝ) (FS : ℝ) (n : ℕ) :
     ∑ i ∈ Finset.range n,
         (fundingDiscountFactor FS (t i) - fundingDiscountFactor FS (t (i + 1))) =

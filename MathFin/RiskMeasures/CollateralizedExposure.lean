@@ -35,7 +35,8 @@ own `C(t) = V(t - Δ)` is random, so `V - C` there has a different variance from
   `E_C(t) ≤ max(V(t), 0)` whenever collateral is nonnegative.
 * `marginAdjustedPositiveExposure` / `marginAdjustedNegativeExposure`: the collateralized
   positive/negative exposure pair, satisfying `MAPE - MANE = V - C` (the collateral-netted
-  mark-to-market), mirroring the uncollateralized `EPE - ENE = V` decomposition at `C = 0`.
+  mark-to-market), mirroring the pathwise `max(V,0) - max(-V,0) = V` decomposition at `C = 0`
+  (in expectation, `gaussianExposure_epe_sub_ene`'s `EPE - ENE = μ`).
 -/
 
 @[expose] public section
