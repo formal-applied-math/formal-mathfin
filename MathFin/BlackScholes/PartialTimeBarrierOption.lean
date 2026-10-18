@@ -15,13 +15,12 @@ A barrier that is monitored only on part of the option's life. This file covers 
 window, **call** side (QuantLib's `PartialBarrier::Start`, `Option::Call`): the barrier is live
 on `[0, t₁]` and switched off for the remainder `(t₁, T]` of the option's life (Haug, *The
 Complete Guide to Option Pricing Formulas*, §"Partial-Time Barrier Options"). Unlike the binary
-and soft barriers in this
-batch, this genuinely needs the **bivariate** normal CDF — the barrier-monitoring window
-`[0, t₁]` and the full life `[0, T]` are correlated (correlation `ρ = √(t₁/T)`, the two Brownian
-increments share the `[0, t₁]` leg) — which is exactly why the coverage-map note placed #65
-alongside #64 (Heynen–Kat) rather than with the two single-variable items #63/#66, and why this
-file builds on the same `BivariateNormalCDF.lean` substrate (`bivariateNormalCDF`,
-`bivariateNormalCDF_flip_snd`) as `HeynenKatTwoAssetBarrier.lean`.
+and soft barriers in this batch, this genuinely needs the **bivariate** normal CDF — the
+barrier-monitoring window `[0, t₁]` and the full life `[0, T]` are correlated (correlation
+`ρ = √(t₁/T)`, the two Brownian increments share the `[0, t₁]` leg) — which is exactly why the
+coverage-map note placed #65 alongside #64 (Heynen–Kat) rather than with the two single-variable
+items #63/#66, and why this file builds on the same `BivariateNormalCDF.lean` substrate
+(`bivariateNormalCDF`, `bivariateNormalCDF_flip_snd`) as `HeynenKatTwoAssetBarrier.lean`.
 
 **Scope, disclosed honestly**: QuantLib's `AnalyticPartialTimeBarrierOptionEngine` also prices
 the **end**-window case (`PartialBarrier::EndB1`/`EndB2`, barrier live only on `(t₁, T]`) via
