@@ -524,6 +524,10 @@ import MathFin.FixedIncome.VasicekBondPrice
 import MathFin.FixedIncome.CIRRiccati
 -- The T-forward measure: the zero-coupon bond as numéraire (change-of-numéraire instance)
 import MathFin.FixedIncome.ForwardMeasure
+-- ABCD instantaneous volatility: closed-form integrated variance over a window
+import MathFin.FixedIncome.ABCDVolatility
+-- GSR (Gaussian short rate): two-piece piecewise-constant-volatility bond price
+import MathFin.FixedIncome.GSRPiecewiseVol
 
 -- Portfolio
 import MathFin.Portfolio.Markowitz
