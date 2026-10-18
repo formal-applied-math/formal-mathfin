@@ -436,6 +436,9 @@ import MathFin.BlackScholes.Spreads
 import MathFin.BlackScholes.CallSpreadDigital
 import MathFin.BlackScholes.Lookback
 import MathFin.BlackScholes.BarrierParity
+import MathFin.BlackScholes.BinaryBarrierOption
+import MathFin.BlackScholes.SoftBarrierOption
+import MathFin.BlackScholes.PartialTimeBarrierOption
 import MathFin.BlackScholes.PowerOption
 import MathFin.BlackScholes.BreedenLitzenberger
 import MathFin.BlackScholes.BisectionIV
