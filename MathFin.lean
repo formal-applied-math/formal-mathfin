@@ -289,6 +289,9 @@ import MathFin.Foundations.ItoFormulaUnrestrictedLocMart
 import MathFin.Foundations.FTAPTwoState
 -- Phase 38: Constant-product AMM (adapted from Pusceddu-Bartoletti FMBC 2024)
 import MathFin.DeFi.ConstantProductAMM
+import MathFin.DeFi.Aave
+import MathFin.DeFi.Compound
+import MathFin.DeFi.Dai
 -- Phase 39: Itô structural drift formula + GBM log-drift (after Nagy 2026)
 import MathFin.Foundations.ItoLemma
 -- Time-dependent (2D) Itô formula + GBM-as-SDE-solution (genuine exp partials)
