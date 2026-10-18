@@ -2781,6 +2781,19 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > FixedIncome. Both axioms-clean. Net: corpus 292 → **294**, **259 full** + 18 =
 > 277/294 delivery-ready, 17 reduced, 0 placeholders.
 
+> **Schwartz one-factor commodity futures (2026-10-18, corpus 537→538).**
+> `mf-schwartz-futures-price` (`schwartzFuturesPrice_eq_integral`,
+> `Futures/SchwartzOneFactor.lean`): the Schwartz (1997) one-factor commodity futures price
+> `F(0,T) = E[S_T]` equals `exp(m_T + v_T/2)`, the lognormal mean of the terminal spot — the
+> log spot `ln S_T` shares the Vasicek short rate's Gaussian terminal law (`m_T =
+> vasicekSDEMean`, `v_T = vasicekSDEVariance`), so the futures price is the Gaussian MGF at
+> `1` (`mgf_gaussianReal`). Constant-parameter model only; Hull's time-dependent level `q(t)`
+> is out of scope. The log spot's Wiener representation is cited from
+> `mf-vasicek-sde-terminal-gaussian`, not re-derived. Also lifted `vasicekSDEVariance_nonneg`
+> out of two duplicate inline proofs (`VasicekSDE.lean`, shared with `VasicekSDEGaussian.lean`).
+> Axioms-clean. Net: corpus 537 → **538**, **507 full** + 18 = 525/538 delivery-ready,
+> 10 reduced, 0 placeholders.
+
 The line below is the pre-re-audit historical record (kept for provenance):
 **235 / 251 delivery-ready** (211 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
 

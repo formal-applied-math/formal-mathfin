@@ -120,7 +120,8 @@ needed, unlike `vasicekSDE_variance_pos`'s strict form). -/
 lemma vasicekSDEVariance_nonneg (σ : ℝ) {κ : ℝ} (hκ : 0 < κ) {t : ℝ} (ht : 0 ≤ t) :
     0 ≤ vasicekSDEVariance σ κ t := by
   unfold vasicekSDEVariance
-  have : Real.exp (-(2 * κ * t)) ≤ 1 := Real.exp_le_one_iff.2 (by nlinarith)
+  have : Real.exp (-(2 * κ * t)) ≤ 1 :=
+    Real.exp_le_one_iff.2 (neg_nonpos.2 (by positivity))
   positivity
 
 end MathFin

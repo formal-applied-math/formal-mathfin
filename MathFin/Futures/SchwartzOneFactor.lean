@@ -29,7 +29,8 @@ As `T → ∞` the futures curve flattens to `exp(θ + σ² / (4κ))`, independe
 the current spot.
 
 This formalizes only the constant-parameter Schwartz (1997) model; Hull's
-time-dependent convenience-yield extension `q(t)` is out of scope.
+time-dependent level `q(t)` (the Hull-White-form drift calibrated to the
+quoted futures curve, OFOD ch. 35) is out of scope.
 
 ## Main results
 
@@ -57,8 +58,10 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
   {B : ℝ≥0 → Ω → ℝ}
 
 /-- **Schwartz futures price = expected terminal spot.** With the log spot
-`ln S_T = m_T + σ ∫₀ᵀ e^{−κ(T−s)} dB_s` solving the mean-reverting SDE,
-`E[S_T] = schwartzFuturesPrice`. -/
+carried in its Wiener representation `ln S_T = m_T + σ ∫₀ᵀ e^{−κ(T−s)} dB_s`
+(the OU solution representation, as in `mf-vasicek-sde-terminal-gaussian` —
+the modelling bridge from the SDE is cited, not proven here), `E[S_T] =
+schwartzFuturesPrice`. -/
 theorem schwartzFuturesPrice_eq_integral (hB : IsPreBrownianReal B μ)
     (x₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
     ∫ ω, Real.exp (vasicekSDEMean x₀ θ κ (T : ℝ)
@@ -82,8 +85,7 @@ theorem schwartzFuturesPrice_tendsto (x₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ
   have hv : Tendsto (fun t ↦ vasicekSDEVariance σ κ t) atTop (𝓝 (σ ^ 2 / (2 * κ))) := by
     unfold vasicekSDEVariance
     simpa using ((he.const_sub 1).const_mul (σ ^ 2)).div_const (2 * κ)
-  have hlim : θ + σ ^ 2 / (2 * κ) / 2 = θ + σ ^ 2 / (4 * κ) := by
-    field_simp; ring
+  have hlim : θ + σ ^ 2 / (2 * κ) / 2 = θ + σ ^ 2 / (4 * κ) := by ring
   rw [← hlim]
   exact Real.continuous_exp.tendsto _ |>.comp (hm.add (hv.div_const 2))
 

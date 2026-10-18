@@ -1849,4 +1849,16 @@ loading solves `A' = −κθB`. The bond price itself is not derived. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.hasDerivAt_cirBondA
 
+/-! ### Schwartz one-factor commodity futures (2026-10-18)
+
+`schwartzFuturesPrice_eq_integral`: the Schwartz (1997) one-factor commodity futures price
+`F(0,T) = E[S_T]` equals `exp(m_T + v_T/2)`, the lognormal mean of the terminal spot, where
+the log spot `ln S_T` shares the Vasicek short rate's Gaussian terminal law (`m_T =
+vasicekSDEMean`, `v_T = vasicekSDEVariance`), delivered via `mgf_gaussianReal` at `1`. Corpus
+537 → 538. -/
+
+/-- info: 'MathFin.schwartzFuturesPrice_eq_integral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.schwartzFuturesPrice_eq_integral
+
 end MathFin.AxiomAudit

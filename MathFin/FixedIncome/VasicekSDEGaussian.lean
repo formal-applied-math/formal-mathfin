@@ -150,11 +150,8 @@ theorem vasicekShortRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ)
     exact vasicekKernel_integral_sq κ hκ.ne' T
   rw [hInt] at hW
   -- Scale by σ then shift by the mean; the affine map sends N(0, ∫kernel²) to N(mean, σ²·∫kernel²).
-  have hexp_le : Real.exp (-(2 * κ * (T : ℝ))) ≤ 1 :=
-    Real.exp_le_one_iff.mpr (by nlinarith [hκ.le, NNReal.coe_nonneg T])
-  have hden : (0 : ℝ) < 2 * κ := by linarith
-  have hkernel_nonneg : (0 : ℝ) ≤ (1 - Real.exp (-(2 * κ * (T : ℝ)))) / (2 * κ) :=
-    div_nonneg (by linarith) hden.le
+  have hkernel_nonneg : (0 : ℝ) ≤ (1 - Real.exp (-(2 * κ * (T : ℝ)))) / (2 * κ) := by
+    simpa [vasicekSDEVariance] using vasicekSDEVariance_nonneg 1 hκ (NNReal.coe_nonneg T)
   have hvar_nonneg : (0 : ℝ) ≤ vasicekSDEVariance σ κ (T : ℝ) :=
     vasicekSDEVariance_nonneg σ hκ (NNReal.coe_nonneg T)
   have hShift := gaussianReal_const_add (gaussianReal_const_mul hW σ)
