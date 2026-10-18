@@ -35,11 +35,11 @@ maturity recursive discount-factor recovery.
   meaningful domain: no coupon bond or discount factor is quoted at `τ = 0`,
   and the formula's own `τ/λᵢ` terms are only guaranteed nonzero there).
 * `tendsto_nssSlope_nhdsWithin_zero` — the core calculus fact underlying the
-  curve's short end: `s(x) → 1` as `x → 0⁺`, obtained from `HasDerivAt` of
+  curve's short end: `s(x) → 1` as `x → 0 (through nonzero values)`, obtained from `HasDerivAt` of
   `x ↦ 1 - e^{-x}` at `0` (the slope factor is literally a difference
   quotient of that function through the origin).
 * `tendsto_nssYield_nhdsWithin_zero` — **short-end limit**:
-  `y(τ) → β0 + β1` as `τ → 0⁺` (the two curvature terms vanish at the short
+  `y(τ) → β0 + β1` as `τ → 0 (through nonzero values)` (the two curvature terms vanish at the short
   end, leaving level plus slope).
 * `tendsto_nssYield_atTop` — **long-end limit**: `y(τ) → β0` as `τ → ∞`
   (all three non-level terms decay away, leaving the level factor as the
@@ -122,7 +122,7 @@ private theorem tendsto_exp_neg_div_const_nhdsWithin_zero {c : ℝ} (hc : c ≠ 
     simpa using ((tendsto_div_const_nhdsWithin_zero hc).mono_right nhdsWithin_le_nhds).neg
   simpa [Function.comp_def] using (Real.continuous_exp.tendsto (0 : ℝ)).comp hdiv
 
-/-- **Short-end limit**: as `τ → 0⁺`, the Svensson curve tends to `β0 + β1`.
+/-- **Short-end limit**: as `τ → 0 (through nonzero values)`, the Svensson curve tends to `β0 + β1`.
 The slope and level stay (`s(τ/λᵢ) → 1`), both curvature terms vanish
 (`s(τ/λᵢ) - e^{-τ/λᵢ} → 1 - 1 = 0`), since `τ/λᵢ → 0` and `e^{-τ/λᵢ} → 1`. -/
 theorem tendsto_nssYield_nhdsWithin_zero (β0 β1 β2 β3 l1 l2 : ℝ)
