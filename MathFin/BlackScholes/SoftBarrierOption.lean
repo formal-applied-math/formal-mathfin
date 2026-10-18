@@ -41,7 +41,7 @@ and `e₁, e₂, e₃, e₄` the same four with `U` replaced by `L`. Writing `A�
 the `BinaryBarrierOption.lean` convention), `η = 1` for a call / `η = −1` for a put, and
 
   `C₁ = S·e^{(b−r)T}·S^{−2μ}·(SX)^{μ+½} / (2(μ+½))`,
-  `C₂ = X·e^{−rT}·S^{−2(μ−1)}·(SX)^{μ−½} / (2(μ−1/2))`
+  `C₂ = X·e^{−rT}·S^{−2(μ−1)}·(SX)^{μ−½} / (2(μ−½))`
 
 (note: `η` is **not** baked into `C₁, C₂` themselves — it is applied once, outside, below — matching
 `sbTerm1Coef`/`sbTerm2Coef`, which are exactly `C₁`/`C₂` with no `η` factor) the two terms are
