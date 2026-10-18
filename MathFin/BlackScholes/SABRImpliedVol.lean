@@ -29,8 +29,8 @@ expansion and explicitly omits higher-order `⋯` terms (stated to be "much,
 much smaller" than the displayed terms, but nonzero). We formalize only the
 at-the-money (`K = f`) specialization (eq. 2.18, `sabrATMVol`) — the general
 formula (eq. 2.17a-c, with its `z`, `x(z)` quoted above for reference) is not
-formalized. At `K = f` the paper's own text notes the formula "reduces to"
-after the removable `z/x(z) → 1` singularity at `z = 0` is resolved. We do not
+formalized. At `K = f` (so `z = 0`, where `z/x(z) → 1` is a removable
+singularity) the paper states the formula "reduces to" eq. 2.18. We do not
 attempt the singular-perturbation PDE derivation itself —
 that stochastic machinery (the SABR two-factor SDE's transition density) does
 not exist in this repo or in Mathlib/BrownianMotion, and reconstructing it is
@@ -61,8 +61,6 @@ in section 3 as the ATM-vol curve traced as the forward varies.
 
 namespace MathFin
 
-open Real
-
 /-- **The SABR "backbone"**: the leading-order at-the-money implied volatility
 `α / f^(1-β)` (the dominant factor in Hagan-Kumar-Lesniewski-Woodward eq. 2.18;
 called the *backbone* in their section 3, the curve traced by ATM vol as the
@@ -86,7 +84,7 @@ noncomputable def sabrATMVol (f α β ρ ν tex : ℝ) : ℝ :=
         + (2 - 3 * ρ ^ 2) / 24 * ν ^ 2) * tex)
 
 /-- **The backbone is positive** for `α, f > 0`: `α / f^(1-β) > 0`. -/
-theorem sabrBackbone_pos {f α : ℝ} (hf : 0 < f) (hα : 0 < α) (β : ℝ) :
+theorem sabrBackbone_pos {f α : ℝ} (β : ℝ) (hf : 0 < f) (hα : 0 < α) :
     0 < sabrBackbone f α β := by
   unfold sabrBackbone
   exact div_pos hα (Real.rpow_pos_of_pos hf _)
@@ -101,9 +99,9 @@ theorem sabrATMVol_zero_tex (f α β ρ ν : ℝ) :
 
 /-- **The ATM vol is positive at zero time-to-exercise**, for `α, f > 0`: direct
 corollary of `sabrATMVol_zero_tex` and `sabrBackbone_pos`. -/
-theorem sabrATMVol_pos_zero_tex {f α : ℝ} (hf : 0 < f) (hα : 0 < α) (β ρ ν : ℝ) :
+theorem sabrATMVol_pos_zero_tex {f α : ℝ} (β ρ ν : ℝ) (hf : 0 < f) (hα : 0 < α) :
     0 < sabrATMVol f α β ρ ν 0 := by
   rw [sabrATMVol_zero_tex]
-  exact sabrBackbone_pos hf hα β
+  exact sabrBackbone_pos β hf hα
 
 end MathFin
