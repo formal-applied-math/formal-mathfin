@@ -25,8 +25,9 @@ QuantLib computes a *drift* `mu` once (`mu = log(dividendDiscount/discount)/vari
 which for constant cost-of-carry `b = r − q` is `(b − σ²/2)/σ²`, i.e. the same `hkMu`-style
 drift divided by `σ²`) and shares one formula shape between the **cash-or-nothing** payoff
 (`K` = the fixed cash amount) and the **asset-or-nothing** payoff (`mu` shifted by `+1`, `K` =
-the forward price `S·e^{(b−r)T}`). We keep `mu` an explicit parameter rather than hard-wiring
-either case, exactly mirroring QuantLib's shared code path — the docstrings below name which
+the forward price `S·e^{bT}`, QuantLib's `spot·dividendDiscount/discount`). We keep `mu` an
+explicit parameter rather than hard-wiring either case, exactly mirroring QuantLib's shared
+code path — the docstrings below name which
 `mu`/`K` substitution each payoff kind uses, but the lemmas hold for the shared formula shape
 regardless of which substitution is made.
 
