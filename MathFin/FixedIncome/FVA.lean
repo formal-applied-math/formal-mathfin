@@ -10,12 +10,21 @@ public import Mathlib
 /-!
 # Discrete Funding Valuation Adjustment (FVA) and telescoping discount factors
 
-Funding Valuation Adjustment prices the cost of funding uncollateralized exposure at a spread over
-the risk-free rate. Over a discrete tenor with time step `Δt`, funding spreads `FS_B` (borrowing,
-applied to the bank's positive exposure it must fund) and `FS_L` (lending, applied to negative
-exposure), and expected discounted positive/negative exposure `EDPE(tᵢ)`, `EDNE(tᵢ)`:
+Funding Valuation Adjustment nets a funding COST against a funding BENEFIT, the standard
+FCA − FBA split (Hull & White, "The FVA Debate", 2012; Hull, *Options, Futures and Other
+Derivatives*, XVA chapter). Over a discrete tenor with time step `Δt`, funding spreads `FS_B`
+(borrowing, applied to the bank's positive exposure it must fund — a cost) and `FS_L` (lending,
+applied to negative exposure — the bank effectively holds the counterparty's money and earns a
+funding *benefit* from it), and expected discounted positive/negative exposure `EDPE(tᵢ)`,
+`EDNE(tᵢ)` (both nonnegative magnitudes):
 
-  `FVA = -∑ᵢ EDPE(tᵢ) · FS_B · Δt - ∑ᵢ EDNE(tᵢ) · FS_L · Δt`.
+  `FVA = -∑ᵢ EDPE(tᵢ) · FS_B · Δt + ∑ᵢ EDNE(tᵢ) · FS_L · Δt`.
+
+The funding-benefit leg is ADDED back, not subtracted: with equal spreads `FS_B = FS_L = s`, this
+collapses to `FVA = -s · ∑ᵢ (EDPE(tᵢ) - EDNE(tᵢ)) · Δt`, the textbook `-s_F · ∫ EE(t) dt` form over
+*net* expected exposure. (An earlier version of this file subtracted both legs, which silently
+dropped the funding-benefit netting and made `FVA ≤ 0` hold unconditionally — false under the
+correct convention, since a large funding benefit can push net FVA non-negative.)
 
 The clean "telescoping" discount-factor form writes the funding-spread discount factor
 `DF(t) = exp(-FS(0,t)·t)`, so that over a single step the funding cost accrued is exactly the
@@ -34,8 +43,12 @@ depending on their distributional assumptions.
 ## Main definitions and results
 
 * `discreteFVA`: the `FS·Δt` sum form, indexed over uniform buckets.
-* `discreteFVA_eq_neg_total`: `FVA = -(FS_B · PV(EDPE) + FS_L · PV(EDNE)) · Δt` in closed form
+* `discreteFVA_eq_net_total`: `FVA = (FS_L · PV(EDNE) - FS_B · PV(EDPE)) · Δt` in closed form
   (linearity of the two sums).
+* `discreteFVA_le_fundingBenefit`, `discreteFVA_ge_neg_fundingCost`: with nonnegative spreads,
+  exposures and `Δt`, FVA is sandwiched between the negative of its funding-cost leg and its
+  funding-benefit leg — the correct replacement for an unconditional sign claim, since funding
+  benefit can outweigh funding cost (and vice versa) depending on the exposure profile.
 * `fundingDiscountFactor`: `DF(t) = exp(-FS·t)` (constant-spread case).
 * `fundingDiscountFactor_telescoping_sum`: `∑ᵢ [DF(tᵢ₋₁) - DF(tᵢ)] = DF(t₀) - DF(tₙ)`, the
   telescoping collapse over a finite bucket sequence.
@@ -47,16 +60,17 @@ namespace MathFin
 
 variable {n : ℕ} (FSB FSL dt : ℝ) (EDPE EDNE : Fin n → ℝ)
 
-/-- **Discrete FVA**, the `FS·Δt` sum form over `n` uniform buckets of width `Δt`:
-`FVA = -∑ᵢ EDPE(tᵢ)·FS_B·Δt - ∑ᵢ EDNE(tᵢ)·FS_L·Δt`. -/
+/-- **Discrete FVA**, the `FS·Δt` sum form over `n` uniform buckets of width `Δt`, netting the
+funding-cost leg against the funding-benefit leg:
+`FVA = -∑ᵢ EDPE(tᵢ)·FS_B·Δt + ∑ᵢ EDNE(tᵢ)·FS_L·Δt`. -/
 noncomputable def discreteFVA (FSB FSL dt : ℝ) (EDPE EDNE : Fin n → ℝ) : ℝ :=
-  -(∑ i : Fin n, EDPE i * FSB * dt) - ∑ i : Fin n, EDNE i * FSL * dt
+  -(∑ i : Fin n, EDPE i * FSB * dt) + ∑ i : Fin n, EDNE i * FSL * dt
 
-/-- **Closed form**: `FVA = -(FS_B · ∑EDPE + FS_L · ∑EDNE) · Δt`, by factoring the shared `Δt` and
+/-- **Closed form**: `FVA = (FS_L · ∑EDNE - FS_B · ∑EDPE) · Δt`, by factoring the shared `Δt` and
 spread out of each sum. -/
-theorem discreteFVA_eq_neg_total :
+theorem discreteFVA_eq_net_total :
     discreteFVA FSB FSL dt EDPE EDNE =
-      -(FSB * (∑ i : Fin n, EDPE i) + FSL * (∑ i : Fin n, EDNE i)) * dt := by
+      (FSL * (∑ i : Fin n, EDNE i) - FSB * (∑ i : Fin n, EDPE i)) * dt := by
   unfold discreteFVA
   have h1 : ∑ i : Fin n, EDPE i * FSB * dt = (∑ i : Fin n, EDPE i) * (FSB * dt) := by
     rw [Finset.sum_mul]; exact Finset.sum_congr rfl fun i _ ↦ by ring
@@ -65,19 +79,27 @@ theorem discreteFVA_eq_neg_total :
   rw [h1, h2]
   ring
 
-/-- **FVA is the negative of the funding cost**: if both spreads and both exposure profiles are
-nonnegative, `FVA ≤ 0` (funding uncollateralized exposure is a cost, not a benefit). -/
-theorem discreteFVA_nonpos (hFSB : 0 ≤ FSB) (hFSL : 0 ≤ FSL) (hdt : 0 ≤ dt)
-    (hEDPE : ∀ i, 0 ≤ EDPE i) (hEDNE : ∀ i, 0 ≤ EDNE i) :
-    discreteFVA FSB FSL dt EDPE EDNE ≤ 0 := by
-  rw [discreteFVA_eq_neg_total]
+/-- **FVA is bounded above by its funding-benefit leg**: with nonnegative borrowing spread,
+positive exposure and `Δt`, the funding-cost leg can only pull FVA down, never past the
+funding-benefit leg. (The funding-cost and funding-benefit legs can each dominate depending on
+the exposure profile, so FVA has no fixed sign in general — this replaces an earlier,
+incorrect unconditional `FVA ≤ 0` claim that silently assumed no funding benefit.) -/
+theorem discreteFVA_le_fundingBenefit (hFSB : 0 ≤ FSB) (hEDPE : ∀ i, 0 ≤ EDPE i) (hdt : 0 ≤ dt) :
+    discreteFVA FSB FSL dt EDPE EDNE ≤ FSL * (∑ i : Fin n, EDNE i) * dt := by
+  rw [discreteFVA_eq_net_total]
   have h1 : 0 ≤ FSB * ∑ i : Fin n, EDPE i :=
     mul_nonneg hFSB (Finset.sum_nonneg fun i _ ↦ hEDPE i)
+  nlinarith [mul_nonneg h1 hdt]
+
+/-- **FVA is bounded below by the negative of its funding-cost leg**: with nonnegative lending
+spread, negative exposure and `Δt`, the funding-benefit leg can only lift FVA up, never below
+the negative of the funding-cost leg. -/
+theorem discreteFVA_ge_neg_fundingCost (hFSL : 0 ≤ FSL) (hEDNE : ∀ i, 0 ≤ EDNE i) (hdt : 0 ≤ dt) :
+    -(FSB * (∑ i : Fin n, EDPE i)) * dt ≤ discreteFVA FSB FSL dt EDPE EDNE := by
+  rw [discreteFVA_eq_net_total]
   have h2 : 0 ≤ FSL * ∑ i : Fin n, EDNE i :=
     mul_nonneg hFSL (Finset.sum_nonneg fun i _ ↦ hEDNE i)
-  have h3 : 0 ≤ (FSB * ∑ i : Fin n, EDPE i + FSL * ∑ i : Fin n, EDNE i) * dt :=
-    mul_nonneg (by linarith) hdt
-  linarith
+  nlinarith [mul_nonneg h2 hdt]
 
 /-- The (constant-spread) **funding discount factor**: `DF(t) = exp(-FS·t)`. -/
 noncomputable def fundingDiscountFactor (FS t : ℝ) : ℝ := Real.exp (-(FS * t))
