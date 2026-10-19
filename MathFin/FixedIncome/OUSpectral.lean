@@ -123,7 +123,7 @@ The unit-normalized OU generator `ouGen 1 (Real.sqrt 2) = -X·d/dx + d²/dx²` (
 scale `σ² = 2κ = 2`) maps `He_n` to `-n • He_n`: the Hermite polynomials are eigenfunctions
 of the OU generator with eigenvalues `-n` — the eigenvalues the triangular moment ladder
 finds on the diagonal, now with their eigenvectors. Induction on
-`hermite_succ`; the commutators supply the two terms and the induction closes exactly
+`hermite_succ`; the commutators supply the two terms and the induction closes
 because `σ² = 2κ` (here `2 = 2`). -/
 theorem ouGen_hermite (n : ℕ) :
     ouGen 1 (Real.sqrt 2) (hermiteReal n) = -(n : ℝ) • hermiteReal n := by
@@ -240,7 +240,7 @@ theorem ouGen_heigen_two {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ
 
 The reversibility mechanism of the spectral route, at its Gaussian instance: the
 stationary density `π(x) ∝ exp(-x²/(2s²))` has score `π'/π = -x/s²`, so the drift and
-diffusion fluxes cancel — `(σ²/2)·π' = -κx·π` exactly when `s² = σ²/2κ`. The
+diffusion fluxes cancel — `(σ²/2)·π' = -κx·π` when `s² = σ²/2κ`. The
 family-level engine behind this computation on the stack is the Rodrigues formula
 `hermite_eq_deriv_gaussian` (`Mathlib/RingTheory/Polynomial/Hermite/Gaussian.lean`:
 Hermite polynomials as
@@ -261,10 +261,10 @@ theorem gaussianScore_ou (s : ℝ) (x : ℝ) :
     exact h1.neg
   exact (h2.exp.deriv).trans (by ring)
 
-/-- **The no-flux condition (eq. 14.19's stationary Gaussian instance).** At the
+/-- **The no-flux condition (Calc 14.13, stationary Gaussian instance).** At the
 stationary scale `s² = σ²/2κ`, the drift flux `-κx·π` balances the diffusion flux
-`(σ²/2)·π'`: `μπ = ½(σ²π)'` of Calc 14.13, which is what makes the generator symmetric
-on its polynomial domain. -/
+`(σ²/2)·π'`: the condition `μπ = ½(σ²π)'` that yields the divergence form (14.19)
+and hence the generator's symmetry (the symmetry itself is not proved here). -/
 theorem gaussianNoFlux_ou {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2) (x : ℝ) :
     σ ^ 2 / 2 * deriv (fun y ↦ Real.exp (-(y ^ 2 / (2 * s ^ 2)))) x
       = -(κ * x) * Real.exp (-(x ^ 2 / (2 * s ^ 2))) := by
@@ -322,7 +322,7 @@ theorem swirl_charpoly (θ : ℝ) :
 
 /-- **Stretch — the swirl's stationary covariance is isotropic.** Any symmetric `Σ`
 solving the stationary-covariance equation `AΣ + ΣAᵀ = I` for the swirl matrix
-`A = [[1, θ], [-θ, 1]]` is `½I`: the rotation term `θ` cancels out of the equation, so
+`A = [[1, θ], [-θ, 1]]` is `½I`: the solution does not depend on the rotation `θ`, so
 the snapshot carries no trace of the circulation — reversibility fails where the
 spectrum went complex, not where the stationary law is visible. -/
 theorem swirl_isotropy (θ a b d : ℝ)
