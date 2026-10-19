@@ -2631,9 +2631,9 @@
     "mf-schwartz-futures-price": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-19",
-      "elapsed_s": 3.4,
-      "input_hash": "0dd03e52003f338986ba9734461efe40b505cac7684b22eb3806721cbd72346a",
-      "verified_at_commit": "907b914"
+      "elapsed_s": 3.6,
+      "input_hash": "0a4e3419813518e3e276fe9a1634f54f49121754574a85d36adce62802d411e0",
+      "verified_at_commit": "8ac3eb7"
     },
     "mf-second-FTAP-single-period": {
       "benchmark_file": "mathematical_finance.json",

@@ -17,9 +17,11 @@ mean-reverting under the pricing measure:
 
   `d ln S_t = κ(θ − ln S_t) dt + σ dB_t`.
 
-This is the Ornstein–Uhlenbeck dynamics of the Vasicek short rate, so
-`ln S_T` has the Gaussian law `N(m_T, v_T)` with `m_T = vasicekSDEMean` and
-`v_T = vasicekSDEVariance` (`vasicekShortRate_hasLaw_gaussian`). The futures
+This is the Ornstein–Uhlenbeck dynamics of the Vasicek short rate, so, carrying
+`ln S_T` in its Wiener representation (the SDE bridge is cited, not proven — see
+`schwartzFuturesPrice_eq_integral`), it has the Gaussian law `N(m_T, v_T)` with
+`m_T = vasicekSDEMean` and `v_T = vasicekSDEVariance` (`vasicekShortRate_hasLaw_gaussian`).
+The futures
 price is `F(0,T) = E[S_T] = E[e^{ln S_T}]`, the Gaussian moment-generating
 function at `1`:
 
