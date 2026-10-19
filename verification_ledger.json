@@ -1790,17 +1790,17 @@
     },
     "mf-impliedvol-bisection": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-17",
-      "elapsed_s": 5.4,
-      "input_hash": "a48e027a04e52116c0c7926384d526bd1bfe17d7444880bb8b317c72d1cfc4d2",
-      "verified_at_commit": "c8cdbc8"
+      "date": "2026-10-19",
+      "elapsed_s": 3.8,
+      "input_hash": "7d40ca5795cf9d7a11c9f2575053d16f6679868525e578450671ce38b56e9622",
+      "verified_at_commit": "d2c06c8"
     },
     "mf-impliedvol-bracket": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-17",
-      "elapsed_s": 30.7,
-      "input_hash": "e23e1080cf6f11344d6e7d7e7423d4747361252679fea147835d93218b4d9c85",
-      "verified_at_commit": "c8cdbc8"
+      "date": "2026-10-19",
+      "elapsed_s": 3.5,
+      "input_hash": "36aaf3267cd1170803590140db8f4928654e70cdfcc51ddb2d60f1ab9ee8b434",
+      "verified_at_commit": "d2c06c8"
     },
     "mf-information-ratio-scale-invariant": {
       "benchmark_file": "mathematical_finance.json",
@@ -3337,10 +3337,10 @@
     },
     "qrm-var-bisection": {
       "benchmark_file": "quantitative_risk_management.json",
-      "date": "2026-10-17",
-      "elapsed_s": 14.9,
-      "input_hash": "b442470bafc5fa0a5eb0c62eee5729b4fb0120f45192be32bbd6ba8254a38db4",
-      "verified_at_commit": "c8cdbc8"
+      "date": "2026-10-19",
+      "elapsed_s": 3.5,
+      "input_hash": "f918dd932ca49b44a147af604c54f783cbf2cd20d24b2c335e4add0b922490d1",
+      "verified_at_commit": "d2c06c8"
     },
     "qrm-var-comonotone-additive": {
       "benchmark_file": "quantitative_risk_management.json",
