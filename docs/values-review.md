@@ -211,6 +211,87 @@ reasonable next step — the maintainer gets `lsv-module`'s leverage-posterior c
 `forward-smile-module`'s Dupire-ratio formalization as reviewable units, same as every other
 landed module — but is left as the user's/maintainer's call rather than done here.
 
+## 2026-10-19 — coverage verification: inflation-module and estimation-module (never opened as PRs)
+
+Not a values-review round, and not a historical reconstruction — a record of coverage
+verification **performed today**, companion to the `forward-smile-module`/`lsv-module` entry
+above. Two more of the 15 branches the earlier pass of this audit flagged as merged into
+`integration-244-family` with zero `docs/values-review.md` trace and no upstream PR. Ran the
+full local pr-roll (3-consecutive-clean, fresh read-only reviewer each round) + Fable-gate
+discipline against each branch's *current* content today, not against whatever review (if any)
+happened when they were first written.
+
+- **`inflation-module`** (`MathFin/FixedIncome/Inflation.lean`, ~348 lines — inflation is FX:
+  the zero-coupon inflation swap and the YoY convexity, eqs 17.6–17.10). The branch's own git
+  history already carried review-fix commits (`fix(Inflation): align prose with statements...`,
+  `fix(Inflation): Fable-review golf and hypothesis cleanup`), but with no
+  `docs/values-review.md` trace and no upstream PR, so a full independent cycle was run against
+  its current tip rather than assuming the prior fixes were sufficient. Three independent
+  rounds against the unchanged head `7014550` all returned "No feedback to provide." (each
+  reviewer independently re-checked the eq. 17.6–17.10 formalization, the `yoyRatioExp_gaussian`
+  two-rate exponential-moment core, attribution headers, and docstring-vs-statement accuracy).
+  The Fable-gate pass (adversarial re-derivation against the primary source and a Mathlib search
+  for duplicated helpers) also returned "No feedback to provide." **Final branch head:
+  `7014550` — zero fixes needed anywhere in the cycle.**
+- **`estimation-module`** (`MathFin/Foundations/Estimation.lean`, ~498 lines — estimation in
+  practice: detection D-terms and realised-volatility bias, eqs 21.2–21.4). Likewise carried
+  prior review-fix commits (`fix(Estimation): address Fable review findings on PR #253` — no
+  PR #253 exists for this branch; the message reflects locally-applied review feedback, not an
+  actual open PR) with no values-review trace. Three independent rounds against the unchanged
+  head `262182e` all returned "No feedback to provide." (each reviewer independently re-verified
+  the sqrt-bias p.361/p.363 quotation claims for honesty, the chapter noise-sign convention, and
+  the final `habs` golf against `Real.sqrt_sq_eq_abs`). The Fable-gate pass also returned "No
+  feedback to provide." **Final branch head: `262182e` — zero fixes needed anywhere in the
+  cycle.**
+
+Both branches: `lake build`, `lake lint` green throughout (standalone, via a worktree with
+`.lake` symlinked from the main checkout); no `sorry`/`admit`/`native_decide`; attribution
+headers correctly read `Copyright (c) 2026 Yang Ye` / `Authors: Yang Ye` on both.
+
+### Integration sync
+
+Fetched `integration-244-family` fresh immediately before merging. Both branches' files were
+already known to be **stale in integration** relative to their branch tips (predating later
+golf/cleanup commits on each branch), independent of what this review found:
+
+- **estimation-module**: a plain `git merge` of `fork/estimation-module` applied cleanly (no
+  conflicts) — integration's copy still had the longer, pre-golf `habs` proof; the merge brought
+  in the one-line `Real.sqrt_sq_eq_abs` form.
+- **inflation-module**: `git merge` reported "Already up to date" — integration's copy was
+  *ahead* of the branch tip, carrying a commit (`98410dc`, "dedup the standard-normal MGF
+  against BrownianMartingale") applied directly to integration by an earlier, unrelated
+  integration-branch review round ("Found by round 3 of the integration-branch review") and
+  never backported. Attempting to backport it onto the standalone branch was tried and reverted:
+  the dedup consumes `ProbabilityTheory.integral_exp_mul_stdNormal`, a lemma that exists only in
+  integration's tree (promoted there by the separate `timing-adjustment-numeraire-cov`/PR #265
+  branch) and not yet on `origin/main` or on `inflation-module`'s own base — cherry-picking it
+  onto the standalone branch breaks its standalone build (`Unknown identifier
+  integral_exp_mul_stdNormal`). Per this workspace's own precedent for merge-local fixes (the
+  `GSRPiecewiseVol.lean` "third copy" case in the pr-roll+Fable-gate entry below), this is
+  correctly *not* backported — `inflation-module` stays at `7014550` and is correct standalone.
+
+Two concurrent sessions were independently syncing other branches into the same
+`integration-244-family` tip during this pass (observed via shared build-cache contention and a
+non-fast-forward push rejection); the estimation-module merge was redone against the
+post-`lsv-module`-sync head before pushing. Full gates reconfirmed on the final merge: `lake
+build` (9389 jobs, isolated build output to avoid racing the concurrent session's writes to the
+same shared `.lake`), `lake lint` clean, `uv run pytest tests/ -q` (58 passed, 1 skipped),
+`python3 -m tools.verify.ledger status` (fresh 544/stale 0/missing 0). Pushed as **`a6868eb`**
+(parent `010e8ca`, the `lsv-module` sync landed by the concurrent session).
+
+### Recommendation (not acted on)
+
+Neither branch was ever opened as an upstream PR. Both are now coverage-verified to the same
+bar as an opened PR (3-consecutive-clean + Fable gate, zero findings on either) and merged into
+the integration superset. Opening PRs for both against
+`formal-applied-math/formal-mathfin:main` is a reasonable next step — the maintainer gets
+`inflation-module`'s zero-coupon inflation swap / YoY convexity result and
+`estimation-module`'s detection-D-term / realised-vol-bias result as reviewable units, same as
+every other landed module — but is left as the user's/maintainer's call rather than done here.
+`inflation-module` additionally carries one open item worth surfacing to whoever opens that PR:
+the integration-local dedup fix (`98410dc`) above, which cannot land on the standalone branch
+until `ProbabilityTheory.integral_exp_mul_stdNormal` (or an equivalent) reaches `origin/main`.
+
 ## 2026-10-19 — pr-roll + Fable-gate audit record for PRs #264, #265, #281, #274, #275, #270, #271, #272
 
 Not a values-review round — a durable record that the project's own local discipline (this
