@@ -32,8 +32,7 @@ maturity recursive discount-factor recovery.
 
 * `nssSlope`, `nssYield` — the slope factor `s` and the Svensson closed form.
 * `nssYield_continuousOn_Ioi` — `y` is continuous on `(0, ∞)` (the economically
-  meaningful domain: no coupon bond or discount factor is quoted at `τ = 0`,
-  and the formula's own `τ/λᵢ` terms are only guaranteed nonzero there).
+  meaningful domain: no coupon bond or discount factor is quoted at `τ = 0`).
 * `tendsto_nssSlope_nhdsWithin_zero` — the core calculus fact underlying the
   curve's short end: `s(x) → 1` as `x → 0 (through nonzero values)`, obtained from `HasDerivAt` of
   `x ↦ 1 - e^{-x}` at `0` (the slope factor is literally a difference
@@ -93,17 +92,13 @@ theorem tendsto_nssSlope_nhdsWithin_zero :
     have hexp : HasDerivAt (fun x : ℝ ↦ Real.exp (-x)) (-1) 0 := by
       simpa using (hasDerivAt_neg (0 : ℝ)).exp
     simpa using hexp.const_sub (1 : ℝ)
-  have hslope := hasDerivAt_iff_tendsto_slope.mp hf
-  have hcongr : (slope (fun x : ℝ ↦ 1 - Real.exp (-x)) 0) =ᶠ[𝓝[≠] (0 : ℝ)] nssSlope := by
-    filter_upwards [self_mem_nhdsWithin] with x hx
-    simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hx
-    unfold nssSlope
-    simp [slope_def_field, Real.exp_zero]
-  exact hslope.congr' hcongr
+  have hcongr : slope (fun x : ℝ ↦ 1 - Real.exp (-x)) 0 = nssSlope := by
+    funext x; simp [slope_def_field, nssSlope]
+  simpa [hcongr] using hasDerivAt_iff_tendsto_slope.mp hf
 
 /-- Dividing by a nonzero constant tends to `0` through nonzero values as the
 numerator tends to `0` through nonzero values (used to transport the `𝓝[≠] 0`
-short-end limit of `nssSlope` and `exp` along `τ ↦ τ/λ`). -/
+short-end limit of `nssSlope` and `exp` along `τ ↦ τ/l`). -/
 private theorem tendsto_div_const_nhdsWithin_zero {c : ℝ} (hc : c ≠ 0) :
     Tendsto (fun x : ℝ ↦ x / c) (𝓝[≠] (0 : ℝ)) (𝓝[≠] (0 : ℝ)) := by
   rw [tendsto_nhdsWithin_iff]
@@ -115,7 +110,7 @@ private theorem tendsto_div_const_nhdsWithin_zero {c : ℝ} (hc : c ≠ 0) :
     simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hx ⊢
     exact div_ne_zero hx hc
 
-/-- `exp(-τ/λ) → 1` as `τ → 0` through nonzero values. -/
+/-- `exp(-τ/l) → 1` as `τ → 0` through nonzero values. -/
 private theorem tendsto_exp_neg_div_const_nhdsWithin_zero {c : ℝ} (hc : c ≠ 0) :
     Tendsto (fun τ : ℝ ↦ Real.exp (-(τ / c))) (𝓝[≠] (0 : ℝ)) (𝓝 1) := by
   have hdiv : Tendsto (fun τ : ℝ ↦ -(τ / c)) (𝓝[≠] (0 : ℝ)) (𝓝 0) := by
@@ -123,8 +118,8 @@ private theorem tendsto_exp_neg_div_const_nhdsWithin_zero {c : ℝ} (hc : c ≠ 
   simpa [Function.comp_def] using (Real.continuous_exp.tendsto (0 : ℝ)).comp hdiv
 
 /-- **Short-end limit**: as `τ → 0 (through nonzero values)`, the Svensson curve tends to `β₀ + β₁`.
-The slope and level stay (`s(τ/λᵢ) → 1`), both curvature terms vanish
-(`s(τ/λᵢ) - e^{-τ/λᵢ} → 1 - 1 = 0`), since `τ/λᵢ → 0` and `e^{-τ/λᵢ} → 1`. -/
+The slope and level stay (`s(τ/lᵢ) → 1`), both curvature terms vanish
+(`s(τ/lᵢ) - e^{-τ/lᵢ} → 1 - 1 = 0`), since `τ/lᵢ → 0` and `e^{-τ/lᵢ} → 1`. -/
 theorem tendsto_nssYield_nhdsWithin_zero (β₀ β₁ β₂ β₃ l₁ l₂ : ℝ)
     (hl₁ : l₁ ≠ 0) (hl₂ : l₂ ≠ 0) :
     Tendsto (nssYield β₀ β₁ β₂ β₃ l₁ l₂) (𝓝[≠] (0 : ℝ)) (𝓝 (β₀ + β₁)) := by
@@ -142,12 +137,12 @@ theorem tendsto_nssYield_nhdsWithin_zero (β₀ β₁ β₂ β₃ l₁ l₂ : �
     exact
       (((tendsto_const_nhds.add (hs1.const_mul β₁)).add
             ((hs1.sub he1).const_mul β₂)).add
-        ((hs2.sub he2).const_mul β₃)).congr' (by filter_upwards with τ; ring_nf)
+        ((hs2.sub he2).const_mul β₃))
   simpa using h
 
 /-- **Long-end limit**: as `τ → ∞`, the Svensson curve tends to `β₀`, the
 level factor — the slope and both curvature terms decay to `0` since
-`s(τ/λᵢ) → 0` and `e^{-τ/λᵢ} → 0`, given `l₁, l₂ > 0`. -/
+`s(τ/lᵢ) → 0` and `e^{-τ/lᵢ} → 0`, given `l₁, l₂ > 0`. -/
 theorem tendsto_nssYield_atTop (β₀ β₁ β₂ β₃ l₁ l₂ : ℝ)
     (hl₁ : 0 < l₁) (hl₂ : 0 < l₂) :
     Tendsto (nssYield β₀ β₁ β₂ β₃ l₁ l₂) atTop (𝓝 β₀) := by
@@ -162,13 +157,11 @@ theorem tendsto_nssYield_atTop (β₀ β₁ β₂ β₃ l₁ l₂ : ℝ)
   have hs1 : Tendsto (fun τ : ℝ ↦ nssSlope (τ / l₁)) atTop (𝓝 0) := by
     have hnum : Tendsto (fun τ : ℝ ↦ 1 - Real.exp (-(τ / l₁))) atTop (𝓝 1) := by
       simpa using tendsto_const_nhds.sub he1
-    have hden : Tendsto (fun τ : ℝ ↦ τ / l₁) atTop atTop := hdiv1
-    simpa [nssSlope] using hnum.div_atTop hden
+    simpa [nssSlope] using hnum.div_atTop hdiv1
   have hs2 : Tendsto (fun τ : ℝ ↦ nssSlope (τ / l₂)) atTop (𝓝 0) := by
     have hnum : Tendsto (fun τ : ℝ ↦ 1 - Real.exp (-(τ / l₂))) atTop (𝓝 1) := by
       simpa using tendsto_const_nhds.sub he2
-    have hden : Tendsto (fun τ : ℝ ↦ τ / l₂) atTop atTop := hdiv2
-    simpa [nssSlope] using hnum.div_atTop hden
+    simpa [nssSlope] using hnum.div_atTop hdiv2
   have h : Tendsto (nssYield β₀ β₁ β₂ β₃ l₁ l₂) atTop
       (𝓝 (β₀ + β₁ * 0 + β₂ * (0 - 0) + β₃ * (0 - 0))) := by
     unfold nssYield
