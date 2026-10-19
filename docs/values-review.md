@@ -639,6 +639,138 @@ Both PRs: `uv run pytest tests/ -q` green, `lake build` green (9329 jobs / 9328 
 respectively), `lake lint` clean, ledger `status` reports 0 stale / 0 missing after the push. CI
 (`gh pr checks`) confirmed green on both PRs' new heads post-push.
 
+### Ninth pass: fresh whole-diff review after today's `defi-uniswap-curve` and `roll-spread-estimator` merges
+
+Starting integration head: **`a8983d5`** (two more feature branches, `defi-uniswap-curve` and
+`roll-spread-estimator`, had just been Fable-gated and merged in by prior passes, landing a fix
+commit titled "fix: Fable-gate findings for defi-uniswap-curve/roll-spread-estimator, applied
+directly to integration"). Task: run the standard rule-10 whole-diff cycle (fresh read-only
+subagent each round, full diff of `fork/integration-244-family` against `origin/main`) against
+this head, specifically re-checking that the two new merges' content and their merge-conflict
+reconciliation (per rule 10 §6 — prefer the more complete side, reapply the narrower fix) were
+done correctly, then push to 3-consecutive-clean + 1 Fable pass, extending this record.
+
+Local gates confirmed green on `a8983d5` before starting: `lake build` (9388 jobs), `lake lint`,
+`uv run pytest tests/ -q` (58 passed/1 skipped), ledger `status` (fresh 544/stale 0/missing 0).
+
+This pass ran **six full Fable-gate cycles** (each: 3 consecutive clean rounds against an
+unchanged head, then 1 independent Fable pass; any real Fable finding fixed, rebuilt, pushed, and
+the 3-clean bar restarted against the new head) before reaching a cycle whose Fable pass found
+nothing beyond a single trivial wording nit. Defect counts per Fable pass: **5, 6, 6, 3, 2, 1** —
+a clear, monotone convergence to zero.
+
+- **Fable pass 1** (against `a8983d5`, after 3 clean rounds): 5 defects. `GSRPiecewiseVol.lean`'s
+  "third copy" antiderivative claim was stale (a different merge had already removed one of the
+  three copies, leaving two); `FVA.lean` had two docstring sentences describing fork-branch
+  revision history that never existed on `origin/main`; `SingleIndexModel.lean` was missing
+  `end MathFin` (Lean tolerates it at EOF, build stayed green); `SchwartzOneFactor.lean`'s
+  module-doc "Main results" bullet overclaimed "`E[S_T]` for the SDE solution" when the theorem's
+  own docstring correctly scopes it to the Wiener representation with the SDE bridge cited, not
+  proven; `docs/values-review.md` had no entry at all for the `roll-spread-estimator` merge. All
+  fixed in commit `8a765d6`; the three Lean-file fixes backported to their originating branches
+  (`fn6814-risk-exposure-xva@01d1bc4`, `schwartz-one-factor-futures@8ac3eb7`) per rule 10 §6 —
+  `GSRPiecewiseVol.lean`'s "third copy" claim is merge-local and correct on its own originating
+  branch (which hasn't had the dedup merge), so not backported. Integration head → **`8a765d6`**.
+- **Two plain review rounds** (not Fable) separately surfaced two more `docs/values-review.md`
+  gaps while hunting for cross-PR issues: a batch of four merges (`fn6814-risk-exposure-xva`,
+  `backtest-performance-stats`, `student-t-parametric-var`, `fn6902-convex-qp-kkt`) and a batch of
+  nine merges (`haug-barrier-batch`, `bivariate-exotic-options`, `exotic-options-batch1/2`,
+  `rates-vol-models-batch`, `commodity-storage-ou`, `fixed-income-building-blocks`,
+  `vasicek-physical-risk-neutral-bridge`, `sabr-turnbull-wakeman`) that had grown the corpus with
+  no review-log trace. Both closed with new entries (`b9a4e5e`, `8204e50`), each re-confirmed with
+  its own 3-consecutive-clean cycle before the next Fable pass.
+- **Fable pass 2** (against `8204e50`): 6 defects, mostly documentation. A dangling reference to a
+  nonexistent "roadmap's GSR item #72" in `GSRPiecewiseVol.lean` (a stray build-workspace-internal
+  coverage-map row number); `SchwartzOneFactor.lean`'s intro paragraph still overclaimed the SDE
+  law without the Wiener-representation caveat the "Main results" bullet had already been fixed to
+  carry; an "eight"→"nine" file-count error and a misleading sign-bug timeline in the
+  fn6814-batch entry; two false "covered elsewhere" cross-references for `GSRPiecewiseVol.lean`
+  and `BondForward.lean` in the exotic-options-batch entry (neither was actually covered anywhere
+  else); a wrong merge-path citation in the roll-spread entry. Fixed in `962f8ed`; the two
+  Lean-file fixes backported to `rates-vol-models-batch@0fae1f9`,
+  `commodity-rates-exotic-combined@90c267d` (GSR) and `schwartz-one-factor-futures@bc2e8f8`
+  (Schwartz intro). Integration head → **`962f8ed`**, then independently advanced by a concurrent
+  session merging `rates-vol-batch2` (`NelsonSiegelSvensson.lean`, already self-Fable-gated) plus
+  a `UniswapCurveMechanics.lean` docstring restore, landing at **`95d4b9e`** (re-confirmed with its
+  own fresh 3-consecutive-clean cycle before continuing).
+- **Fable pass 3** (against `95d4b9e`): 6 defects, all in `docs/values-review.md` prose plus one
+  Lean docstring. A false "no corpus entries" claim for `creditmetrics-rating-transition` (it
+  actually adds two `qrm-*` benchmark entries — without them the entry's own corpus arithmetic
+  didn't add up); a wrong merge-commit citation for the roll-spread entry (`c63fff8`/`68cc48e`
+  instead of the actual `39460dd`, PR #279, verified via `git merge-base --is-ancestor`); two
+  dangling cross-references to a nonexistent "Fable-gate fix entry above" for `GSRPiecewiseVol.lean`
+  (replaced with direct commit SHAs); two "above"→"below" direction errors (the log is
+  newest-first); off scope figures (~2100→~2600 lines, window end 21:49→23:56); and
+  `UniswapCurveMechanics.lean`'s `harmonicMean` docstring said "nonempty family" while the adjacent
+  theorem's own docstring says the identity holds unconditionally including for the empty family.
+  Fixed in `9cda752`; the Lean docstring fix backported to `defi-uniswap-curve@75d40e3` and
+  `defi-combined-uniswap-aave@49e6e14`. Integration head → **`9cda752`**.
+- **Fable pass 4** (against `9cda752`): 3 defects. The "four merges" entry's "Settled" bullet
+  misfiled `CalendarArbitrage`'s benchmark entries under `quantitative_risk_management.json` when
+  they actually live in `mathematical_finance.json` (contradicting the entry's own earlier scope
+  bullet); the same entry implied `schwartz-one-factor-futures`'s benchmark entry was added by the
+  merge itself, when it was actually added by a separate later commit (`eaee691`, the "543→544"
+  step, after PR #278's "corpus 543" review); and `harmonicMean_reciprocal_eq_arithmeticMean`'s
+  docstring asserted a positivity hypothesis the theorem doesn't carry, then retracted it in the
+  same sentence ("Stated here for strictly positive values... holds unconditionally for any
+  finite family"). Fixed in `370509b`; the docstring fix backported to
+  `defi-uniswap-curve@3966a24` and `defi-combined-uniswap-aave@96aeb30`. Integration head →
+  **`370509b`**.
+- **Fable pass 5** (against `370509b`): 2 defects, both documentation. `NelsonSiegelSvensson.lean`
+  (merged earlier the same day via `rates-vol-batch2`/#283) had no `docs/values-review.md` entry —
+  the same class of today's-merge gap this review log exists to close, just landed after the
+  exotic-options-batch entry's window; and the roll-spread entry's "later re-merged via `c63fff8`"
+  wording implied `RollSpread.lean` re-entered integration through that commit, when `c63fff8`
+  actually merges integration INTO the `defi-combined-uniswap-aave` branch (opposite direction).
+  Both fixed in `71f49e3` (doc-only, no backport applicable — the NSS addition describes the
+  merge event itself, and the direction fix is integration-local history). Integration head →
+  **`71f49e3`**.
+- **Fable pass 6** (against `71f49e3`): 1 trivial finding. The newly-added NSS entry claimed both
+  the long-end and short-end/continuity hypothesis levels (`l > 0` vs `l ≠ 0`) "are disclosed
+  correctly in the respective theorem docstrings" — true only for the long-end theorem's docstring
+  prose; the short-end and continuity theorems carry `l ≠ 0` only in their Lean signatures, not
+  called out in docstring prose. Reworded to match what's actually true, fixed in `26d4d65`
+  (doc-only). This pass's Fable reviewer explicitly assessed the branch as "effectively converged"
+  after independently re-verifying all 34 commit SHAs cited across the five 2026-10-19 entries,
+  all 8 PR-number-to-branch mappings, and every in-file quotation the entries lean on. Final
+  integration head: **`26d4d65`**.
+
+No further fix-and-reconfirm cycle was run after pass 6, given the trivial severity of its single
+finding and the clear monotone convergence (5→6→6→3→2→1) across six independent-model passes.
+
+**Final integration head: `26d4d65`.**
+
+#### Evidence
+
+`lake build` green (9385–9389 jobs across the six cycles, counts vary slightly with concurrent
+merges landing mid-pass), `lake lint` clean, `uv run pytest tests/ -q` green (58 passed/1 skipped)
+and `python3 -m tools.verify.ledger status` green (fresh 544/stale 0/missing 0) reconfirmed at
+every one of the six cycle heads listed above, not just the final one. `mf-schwartz-futures-price`
+(the one ledger entry whose docstring changed twice during this pass) was re-verified via
+`LEDGER_EXEC_LOCAL=1 python3 -m tools.verify.ledger verify --stale --exec` both times, since the
+lean-repl daemon's `cpuset` cgroup controller is not delegated on this host (`crun` refuses with
+"controller `cpuset` is not available"), confirmed working as the local-exec fallback. No
+merge-conflict markers found in any tracked file at any checkpoint. No `sorry`/`admit`/`axiom`
+introduced anywhere in this pass's fixes.
+
+**Backport branches touched this pass** (rule 10 §6, bidirectional — every Lean-content fix was
+applied on both the integration branch and its originating standalone branch, each independently
+rebuilt and lint-checked before pushing): `fn6814-risk-exposure-xva` (`01d1bc4`),
+`schwartz-one-factor-futures` (`8ac3eb7`, then `bc2e8f8`), `rates-vol-models-batch` (`0fae1f9`),
+`commodity-rates-exotic-combined` (`90c267d`), `defi-uniswap-curve` (`75d40e3`, then `3966a24`),
+`defi-combined-uniswap-aave` (`49e6e14`, then `96aeb30`).
+
+**Known out-of-scope item, flagged separately (not this pass's responsibility):** a round of this
+pass surfaced a much larger PRE-EXISTING documentation gap — 15 merges from 2026-10-15/17
+(`bivariate-normal-cdf` #266, `fissler-ziegel-score` #267, `fe8709-creditrisk-plus` #273,
+`bootstrap-review-pickup`, `estimation-module`, `inflation-module`, `lsv-module`,
+`forward-smile-module` (1055 lines, the largest), `ouspectral-module`, `discrete-var-module`,
+`gaussian-copula-nary`, `cva-independent-exposure`, `tranche-expected-loss`,
+`timing-adjustment-numeraire-cov`, `bs-completion-pack`), totaling ~5,000+ lines with zero
+values-review.md trace — predating today's work and substantially larger than anything closed in
+this pass. Spawned as a separate background task rather than folded into this pass's scope, to
+keep this pass's own fix-and-reconfirm cycle converging rather than open-ended.
+
 ## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
 
 Scope: `FixedIncome/CIRRiccati` by Alfredo Garcia (@oxarbitrage), merged with its two commits
