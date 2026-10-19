@@ -468,6 +468,70 @@ after reconciliation; `uv run pytest tests/ -q` 58 passed/1 skipped on both. Fre
 subagent review clean on both reconciliation commits (`39c44ff`, `624850f`). No
 `sorry`/`admit`/`native_decide` introduced.
 
+### Sixth pass: the fifth pass's "clean subset relationship" claim was wrong — redone
+
+A later audit (commissioned separately, same day) re-checked the fifth pass's premise above —
+that `#278`/`#279`'s combined-branch copies had not independently evolved past what the
+standalone branches' audits also fixed — and found it false for both files. The wholesale
+`git checkout <standalone-head> -- <file>` in the fifth pass **regressed real fixes** that had
+already landed on the combined branches' own commit history before that checkout:
+
+- **PR #278** (`UniswapCurveMechanics.lean`): before `39c44ff`, the branch's history already
+  included `069fcad` (normalizing `fee_invariant_growth`'s inequality to the house `≤` style,
+  shared verbatim with `integration-244-family`'s `d8deafd`) and `ce21bd5` (dropping the
+  "#25"/`items` private coverage-map references, the module-doc "four"→ wrong-count artifact, and
+  the unused `with hs_def` naming — also shared with integration). The fifth pass's `git checkout
+  ba288b5` silently reverted all three, because `ba288b5` descends from the standalone
+  `defi-uniswap-curve` branch, which forked *before* `069fcad`/`ce21bd5` existed (those fixes were
+  only ever applied on the combined/integration side, never cherry-picked onto the standalone
+  branch). The fifth pass's entry above describes the inequality as "normalized to `≥` form" —
+  backwards from the actual house style (`≤`), which is itself evidence the checkout went the
+  wrong direction.
+- **PR #279** (`RollSpread.lean`): before `624850f`, the branch's history already included
+  `a627989` ("fix module docstring overclaims"), shared verbatim with
+  `integration-244-family`. It reworded the `rademacher`-law bullet to disclose that only
+  *pairwise* independence is used (not joint/i.i.d.), and corrected the autocovariance conclusion
+  from an unconditional "strictly negative" to the exact `-(s/2)²`, "nonpositive and strictly
+  negative whenever `s ≠ 0`" — `s = 0` is a real edge case the original wording missed. The fifth
+  pass's `git checkout da0fe28` reverted both: `da0fe28` descends from the standalone
+  `roll-spread-estimator` branch, which also forked before `a627989`, so it still carries the
+  old, overclaiming wording.
+
+Both regressions were latent precisely because `integration-244-family`'s own copies (fixed
+directly in `a8983d5`, independently of #278/#279's lineage, and confirmed untouched by the
+fifth pass) still carried the correct content — so a diff against integration immediately
+surfaced what the combined branches had lost, and gave a verified-correct reconciliation target
+rather than requiring a fresh hand-merge.
+
+**Reconciled content** (per AGENTS.md rule 10 §6: preferred the more complete side, re-applied
+only what it still lacked): `integration-244-family`'s current copy of each file, which already
+carried every fix from both lineages — *except* two docstring-precision items from the
+standalone `defi-uniswap-curve` branch's `344daf4` (the `twap_eq_average` t1=t2 junk-value
+disclosure, and `harmonicMean`'s own docstring noting no positivity hypothesis is actually
+required) that `a8983d5` had not ported over, since `344daf4` predated and was not named in that
+commit's message. Those two were added to `integration-244-family` first (commit `a015641`,
+on top of `962f8ed`), making it the verified superset, then copied byte-for-byte onto both
+combined branches:
+
+- **PR #278**: `39c44ff` → **`83ebadc`** (on `defi-combined-uniswap-aave`).
+- **PR #279**: `624850f` → **`886fc38`** (on `risk-stats-combined`).
+- **integration**: `962f8ed` → **`a015641`** (on `integration-244-family`).
+
+Post-reconciliation, `git diff <any-two-of-the-three>:<file>` is empty for both files — all
+three branches now carry byte-identical content for `UniswapCurveMechanics.lean` and
+`RollSpread.lean`.
+
+#### Evidence
+
+`lake build` (via a `.lake/{packages,config}` symlink into the shared, already-populated
+Mathlib olean store, each branch's own `build/` directory kept separate to avoid lock
+contention with concurrent sessions) green for the touched module on all three branches
+(`MathFin.DeFi.UniswapCurveMechanics`, `MathFin.Execution.RollSpread`); `lake lint` clean on the
+full `integration-244-family` tree (9368 jobs). No proof or statement changed on any branch —
+every edit in this pass is docstring/comment-only, confirmed line-by-line against each source
+commit's own "no proof or statement changed" claim. No `sorry`/`admit`/`native_decide`
+introduced.
+
 ## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
 
 Scope: `FixedIncome/CIRRiccati` by Alfredo Garcia (@oxarbitrage), merged with its two commits
