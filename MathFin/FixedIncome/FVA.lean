@@ -24,9 +24,7 @@ funding *benefit* from it), and expected discounted positive/negative exposure `
 
 The funding-benefit leg is ADDED back, not subtracted: with equal spreads `FS_B = FS_L = s`, this
 collapses to `FVA = -s · ∑ᵢ (EDPE(tᵢ) - EDNE(tᵢ)) · Δt`, the textbook `-s_F · ∫ EE(t) dt` form over
-*net* expected exposure. (An earlier version of this file subtracted both legs, which silently
-dropped the funding-benefit netting and made `FVA ≤ 0` hold unconditionally — false under the
-correct convention, since a large funding benefit can push net FVA non-negative.)
+*net* expected exposure.
 
 The clean "telescoping" discount-factor form writes the funding-spread discount factor
 `DF(t) = exp(-FS(0,t)·t)`, an alternative to the product-rule approximation `FS·Δt` above. Both
@@ -83,9 +81,8 @@ theorem discreteFVA_eq_net_total :
 
 /-- **FVA is bounded above by its funding-benefit leg**: with nonnegative borrowing spread,
 positive exposure and `Δt`, the funding-cost leg can only pull FVA down, never past the
-funding-benefit leg. (The funding-cost and funding-benefit legs can each dominate depending on
-the exposure profile, so FVA has no fixed sign in general — this replaces an earlier,
-incorrect unconditional `FVA ≤ 0` claim that silently assumed no funding benefit.) -/
+funding-benefit leg. The funding-cost and funding-benefit legs can each dominate depending on
+the exposure profile, so FVA has no fixed sign in general. -/
 theorem discreteFVA_le_fundingBenefit (hFSB : 0 ≤ FSB) (hEDPE : ∀ i, 0 ≤ EDPE i) (hdt : 0 ≤ dt) :
     discreteFVA FSB FSL dt EDPE EDNE ≤ FSL * (∑ i : Fin n, EDNE i) * dt := by
   rw [discreteFVA_eq_net_total]

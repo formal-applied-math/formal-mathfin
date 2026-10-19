@@ -106,3 +106,5 @@ theorem idiosyncraticTerm_equalWeight_tendsto_zero
   have hhi : ∀ n, ∑ i ∈ s n, ((1 : ℝ) / n) ^ 2 * Dε n i ≤ M / n :=
     fun n ↦ idiosyncraticTerm_equalWeight_bound (s n) (Dε n) M (hM n) (hcard n)
   exact squeeze_zero hlo hhi (tendsto_const_div_atTop_nhds_zero_nat M)
+
+end MathFin
