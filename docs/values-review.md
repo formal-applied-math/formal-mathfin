@@ -125,6 +125,92 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-19 — coverage verification: forward-smile-module and lsv-module (never opened as PRs)
+
+Not a values-review round, and not a historical reconstruction — a record of coverage
+verification **performed today**. An earlier pass of this same 2026-10-19 audit (the entry
+below) flagged a pre-existing, much larger documentation gap: 15 merges into
+`integration-244-family` from 2026-10-15/17 with zero `docs/values-review.md` trace, naming
+`lsv-module` and `forward-smile-module` (1055 lines, the largest of the fifteen) among them,
+and spun it off as separate follow-up work rather than folding it into that pass's own
+fix-and-reconfirm cycle. This entry is that follow-up, run today against each branch's
+*current* content — not an attempt to document what review (if any) happened when these were
+first written.
+
+- **`forward-smile-module`** (`MathFin/BlackScholes/ForwardSmile.lean`, ~1055 lines — Dupire's
+  ratio on a tilted smile surface, Bagaria ch. 10 §10.5). The branch's own git history already
+  showed review-fix commits (`style(ForwardSmile): ...`, `fix(ForwardSmile): address Fable
+  review findings on #250`) suggesting at least one prior round, but with no
+  `docs/values-review.md` trace and no upstream PR — so a full independent cycle was run
+  against its *current* tip rather than assuming the prior fixes were sufficient.
+  Round 1 (head `bcbf789`) found two real issues: the module docstring cited the source as
+  "*Fixed Income & Derivative Pricing*" when the actual title (verified via `pdftotext` against
+  `resources/fixed-income-derivative-pricing-notes.pdf`) is "**Notes on Fixed Income Derivative
+  Pricing**" by Sarthak Bagaria — the title `lsv-module` already used correctly; and
+  `skewRatio_one`'s docstring claimed the ratio "depends on `T₀` alone, not on `σ` or `ψ₁`",
+  which is false (it also depends on `t` — that's exactly why `skewRatio_four`/`skewRatio_ten`,
+  same `T₀` different `t`, give different numbers). Both fixed in `1b36048`. Three further
+  independent rounds (2, 3, 4) against the unchanged `1b36048` all returned "No feedback to
+  provide.", reaching the 3-consecutive-clean bar. The Fable-gate pass (against `1b36048`,
+  re-deriving the whole pipeline symbolically rather than trusting the Lean chain) also found
+  nothing further. **Final branch head: `1b36048`.**
+- **`lsv-module`** (`MathFin/Foundations/LSVLeverage.lean`, ~482 lines — the LSV
+  leverage-posterior algebraic core via a worked two-state "coin-toss" model, Bagaria ch. 11).
+  No prior review-fix commits and no values-review trace — treated as genuinely first-pass
+  work. Three independent rounds against the unchanged head `1d5401e` all returned "No feedback
+  to provide." (re-deriving `cointossPhi_ratio_log`'s quadratic-in-log-moneyness algebra, both
+  wing limits, and `cointossM_nonconstant`'s non-vacuity by hand each time, and cross-checking
+  `lsv_condExp_factors_through_state`/`lsv_condExp_pullout` against the actual Mathlib lemma
+  signatures in the build-face `.lake/packages/mathlib`), reaching the 3-consecutive-clean bar.
+  The Fable-gate pass found two real, compile-verified docstring-accuracy issues:
+  `cointossM_nonconstant`'s docstring gave the reason for its `K > 0` restriction backwards
+  (claimed the `x/0=0` convention makes the statement "true of functions that are genuinely
+  non-constant", which isn't a problem; the actual issue is the opposite — `cointossM … 0 = 0`
+  would let an *unrestricted* nonconstancy claim hold even for a posterior that **is** constant
+  on `(0, ∞)`); and `lsv_condExp_factors_through_state`'s docstring said "no integrability is
+  needed" as the only way Mathlib's `condExp` degenerates to `0`, omitting the other two
+  (non-measurable `S`, non-σ-finite `μ.trim`). Both fixed in `e34c491` (adding a new proved
+  lemma `cointossM_zero` so the corrected docstring cites a fact rather than a convention
+  remark). Per protocol this reset the clean-streak; three fresh independent rounds against the
+  new head `e34c491` all returned "No feedback to provide.", re-clearing the bar. **Final branch
+  head: `e34c491`.**
+
+Both branches: `lake build`, `lake lint` green throughout (standalone, via a worktree with
+`.lake` symlinked from the main checkout); `#print axioms` on every public theorem is the
+standard three (`propext, Classical.choice, Quot.sound`); no `sorry`.
+
+### Integration sync
+
+Fetched `integration-244-family` fresh immediately before merging (head `26d4d65` at fetch
+time).
+
+- **forward-smile**: integration's copy was byte-identical to the branch's pre-fix tip
+  (`bcbf789`), so the same two-line fix was applied directly (not a git merge — no other
+  integration-side changes touched this file). `lake build` (9389 jobs), `lake lint`, and
+  `uv run pytest tests/ -q` (58 passed, 1 skipped) all green. Pushed as `857ac3a`.
+- **lsv-module**: integration's copy had genuinely **diverged** — it was independently
+  hand-edited inside integration via its own separate commit history (`feat` `6e9b775` →
+  `a7ebd0f`/`0172426` → "review round 1/2" `4469e0c`/`91803cb`), never kept in sync with the
+  standalone branch's own commits. Diffed line-by-line against the branch's final content:
+  every point of difference was the branch being strictly more correct/complete (the right
+  book title, the fuller `condExp`-degeneracy disclosure, the `K > 0`-restricted — mathematically
+  meaningful — `cointossM_nonconstant` plus its `cointossM_zero` justification lemma), so per
+  this workspace's stated conflict-resolution preference (prefer the more complete/correct
+  version) the branch's final content (`e34c491`) replaced integration's copy wholesale rather
+  than a line-by-line merge. `lake build` (9389 jobs), `lake lint`, and `uv run pytest tests/ -q`
+  (58 passed, 1 skipped) all green. Pushed as `010e8ca`.
+
+Integration head after both syncs: **`010e8ca`**.
+
+### Recommendation (not acted on)
+
+Neither branch was ever opened as an upstream PR. Both are now coverage-verified to the same
+bar as an opened PR (3-consecutive-clean + Fable gate) and merged into the integration
+superset. Opening PRs for both against `formal-applied-math/formal-mathfin:main` is a
+reasonable next step — the maintainer gets `lsv-module`'s leverage-posterior core and
+`forward-smile-module`'s Dupire-ratio formalization as reviewable units, same as every other
+landed module — but is left as the user's/maintainer's call rather than done here.
+
 ## 2026-10-19 — pr-roll + Fable-gate audit record for PRs #264, #265, #281, #274, #275, #270, #271, #272
 
 Not a values-review round — a durable record that the project's own local discipline (this
