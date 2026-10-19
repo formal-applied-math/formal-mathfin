@@ -26,7 +26,7 @@ This file proves that polynomial core by induction on `Polynomial.hermite_succ`
   `gaussianNoFlux_ou`) — the one-dimensional reversibility mechanism, at eval level;
 * the two-mode weighted-average gap inequality (`twoMode_rate_ge_slowest`): the effective
   decay rate of a two-mode mixture is at least the slowest rate, so a one-exponential fit
-  never understates mean reversion.
+  never understates mean reversion (the fit consequence itself is not formalized here).
 
 ## Status
 
@@ -59,7 +59,7 @@ eigenvectors exist. -/
 noncomputable def ouGen (κ σ : ℝ) (p : Polynomial ℝ) : Polynomial ℝ :=
   -(κ • Polynomial.X) * p.derivative + (σ ^ 2 / 2) • p.derivative.derivative
 
-/-- Subtraction variant (used by the eigeninduction: `He_{n+1} = X·He_n - He_n'`). -/
+/-- `ouGen` preserves subtraction (used by the eigeninduction: `He_{n+1} = X·He_n - He_n'`). -/
 theorem ouGen_sub (κ σ : ℝ) (p q : Polynomial ℝ) :
     ouGen κ σ (p - q) = ouGen κ σ p - ouGen κ σ q := by
   simp only [ouGen, derivative_sub, ← Polynomial.C_mul']
@@ -277,13 +277,15 @@ The chapter's effective decay rate of a multimodal expansion is the weighted ave
 `Σ λ_n c_n e^{-λ_n t} / Σ c_n e^{-λ_n t}`. With two modes and positive weights, that
 average is at least the slowest rate `λ₁` for every `t` — so fitting a single exponential
 to a two-mode decay reads off a rate at least `λ₁` and never understates mean reversion
-(the chapter's second, independent route to the ch. 20 estimation bias). -/
+(the chapter's second, independent route to the ch. 20 estimation bias). Only the
+pointwise bound is proved here; the fitted-exponential consequence is not formalized. -/
 
 /-- **The two-mode gap inequality.** For rates `λ₁ ≤ λ₂`, positive mode weights
 `0 < c₁, c₂` and any `t`, the effective decay rate of the two-mode mixture — the
 weighted average of the rates, weighted by the surviving mode masses — is at least the
 slowest rate `λ₁`. The gap `λ₂ - λ₁` shows up as the excess carried by the fast mode;
-the chapter's one-exponential-fit warning is exactly this inequality read backwards. -/
+the chapter's one-exponential-fit warning is a consequence of this pointwise bound (not
+proved here). -/
 theorem twoMode_rate_ge_slowest {l₁ l₂ c₁ c₂ t : ℝ} (hl₂ : l₁ ≤ l₂)
     (hc₁ : 0 < c₁) (hc₂ : 0 < c₂) :
     l₁ ≤ (l₁ * c₁ * Real.exp (-(l₁ * t)) + l₂ * c₂ * Real.exp (-(l₂ * t)))
