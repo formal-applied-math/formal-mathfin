@@ -1,4 +1,17 @@
 /-
+Copyright (c) 2026 Yang Ye. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yang Ye
+-/
+module
+
+public import Mathlib
+public import MathFin.DeFi.ConstantProductAMM
+
+/-!
+# Uniswap v2/v3 AMM mechanics: impermanent loss, TWAP, fee invariant,
+v3 virtual reserves
+
 This file extends the constant-product AMM formalization
 (`MathFin/DeFi/ConstantProductAMM.lean`, adapted from Pusceddu-Bartoletti
 2024) with further closed-form identities from the Uniswap v2/v3 AMM
@@ -14,19 +27,6 @@ Curve Finance's StableSwap invariant (Michael Egorov, "StableSwap -
 efficient mechanism for Stablecoin liquidity", 2019,
 <https://curve.fi/files/stableswap-paper.pdf>) is not formalized in this
 file; no StableSwap-specific result appears below.
-
-Copyright (c) 2026 Yang Ye. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
--/
-module
-
-public import Mathlib
-public import MathFin.DeFi.ConstantProductAMM
-
-/-!
-# Uniswap v2/v3 AMM mechanics (DeFi/AMM group, items #25 + TWAP +
-fee invariant + v3 virtual reserves)
 
 This file formalises six further closed-form results about automated
 market makers, building on the constant-product substrate in
@@ -47,7 +47,7 @@ market makers, building on the constant-product substrate in
   the reciprocal of the *harmonic* mean of the B-in-A series, not of its
   arithmetic mean.
 * `swapOutputWithFee`, `fee_invariant_growth`: the Uniswap v2 **fee
-  invariant** `(x0 + Δx)(y0 - Δy) ≥ x0·y0`, where `Δy = swapOutput x0 y0
+  invariant** `x0·y0 ≤ (x0 + Δx)(y0 - Δy)`, where `Δy = swapOutput x0 y0
   (γ·Δx)` is computed from the fee-discounted input (γ the fee retention
   rate), and `lpFeeShare`, the candidate LP value-growth share
   `f = 1 - √(k1/k2)` (only shown nonnegative here, see its docstring).
@@ -63,7 +63,7 @@ namespace MathFin
 
 namespace DeFi
 
-/-! ## #25: Impermanent loss closed form -/
+/-! ## Impermanent loss closed form -/
 
 /-- After the external price moves by factor `r` (new price = `r` times the
 price at deposit), a constant-product pool with invariant `k = x0 * y0` and
@@ -110,7 +110,7 @@ theorem lpPortfolioValue_eq
     impermanentLossReservesX x0 y0 r * (r * y0 / x0)
       + impermanentLossReservesY x0 y0 r = 2 * y0 * Real.sqrt r := by
   unfold impermanentLossReservesX impermanentLossReservesY
-  set s := Real.sqrt r with hs_def
+  set s := Real.sqrt r
   have hs_sq : s ^ 2 = r := Real.sq_sqrt hr.le
   have hs_pos : 0 < s := Real.sqrt_pos.mpr hr
   have hx0' : x0 ≠ 0 := hx0.ne'
@@ -223,14 +223,14 @@ reserve (the fee portion is retained, not refunded) while only the
 fee-adjusted output `Δy` leaves the Y reserve makes the invariant grow
 (weakly) rather than merely hold:
 
-  `(x0 + Δx) * (y0 - Δy) ≥ x0 * y0`,
+  `x0 * y0 ≤ (x0 + Δx) * (y0 - Δy)`,
 
 since `(x0 + γΔx) * (y0 - Δy) = x0 * y0` exactly (the no-fee invariant) and
 `x0 + Δx ≥ x0 + γΔx` with `y0 - Δy > 0`. -/
 theorem fee_invariant_growth
     (x0 y0 Δx γ : ℝ) (hx0 : 0 < x0) (hy0 : 0 < y0) (hΔx : 0 < Δx)
     (hγ0 : 0 < γ) (hγ1 : γ ≤ 1) :
-    (x0 + Δx) * (y0 - swapOutputWithFee x0 y0 Δx γ) ≥ x0 * y0 := by
+    x0 * y0 ≤ (x0 + Δx) * (y0 - swapOutputWithFee x0 y0 Δx γ) := by
   unfold swapOutputWithFee
   have hγΔx : 0 < γ * Δx := mul_pos hγ0 hΔx
   have hinv := swap_preserves_invariant x0 y0 (γ * Δx) hx0 hγΔx
