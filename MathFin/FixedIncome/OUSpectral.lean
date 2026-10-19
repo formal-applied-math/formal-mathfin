@@ -15,10 +15,11 @@ transform. For the OU process `dX = -κX dt + σ dW`, the generator
 
 `L p = -(κ • X) * p' + (σ²/2) • p''`
 
-maps real polynomials to real polynomials, and on that invariant subspace it is exactly
-diagonal: the scaled Hermite polynomials `He_n(x/s)` (with stationary scale
-`s² = σ²/2κ`) satisfy `L He_n(x/s) = -nκ He_n(x/s)` — eq. 14.16's OU case, Calc 14.14.
-This file proves that polynomial core by induction on `Polynomial.hermite_succ`
+maps real polynomials to real polynomials, and on that invariant subspace the scaled
+Hermite polynomials `He_n(x/s)` (with stationary scale `s² = σ²/2κ`) are eigenfunctions:
+`L He_n(x/s) = -nκ He_n(x/s)` — eq. 14.16's OU case, Calc 14.14. (Since `He_n(x/s)` has
+degree `n`, they diagonalise `L` on `ℝ[X]`; that basis fact is not formalized here.)
+This file proves the eigenidentities by induction on `Polynomial.hermite_succ`
 (`Mathlib/RingTheory/Polynomial/Hermite/Basic.lean`), together with:
 
 * the commutator identities that drive the induction (`ouGen_derivative`, `ouGen_X_mul`);
@@ -50,7 +51,7 @@ open Polynomial Filter Topology Matrix
 
 /-! ## The generator on polynomials -/
 
-/-- **The OU generator as a map on real polynomials** (eq. 14.16's operator, OU case):
+/-- **The OU generator as a map on real polynomials** (Calc 14.4's operator):
 `L p = -(κ • X) * p.derivative + (σ²/2) • p.derivative.derivative` — drift term `-κx·p'`
 plus diffusion term `(σ²/2)·p''`. Polynomial algebra only: on `Polynomial ℝ` this map is
 triangular degree by degree (the drift preserves degree, the diffusion lowers it by two) —
@@ -307,7 +308,7 @@ The chapter's two-dimensional counterexample — the swirl `dZ = -AZ dt + dW` wi
 `A = [[1, θ], [-θ, 1]]`, whose antisymmetric part rotates — contributes two matrix
 fragments that need no process theory: the characteristic polynomial of `-A` (roots
 `-1 ± iθ`: the spectrum leaves the real line, so no real orthogonal expansion exists),
-and the isotropy of the stationary covariance (`AΣ + ΣAᵀ = I` forces `Σ = ½I`: the
+and the isotropy of the stationary covariance (a symmetric `Σ` with `AΣ + ΣAᵀ = I` is `½I`: the
 rotation drops out of the snapshot, which is exactly why the snapshot cannot detect
 reversibility). Plus the stationary-variance limit of the OU law. -/
 
