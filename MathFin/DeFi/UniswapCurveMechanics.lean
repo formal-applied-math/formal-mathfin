@@ -184,10 +184,10 @@ theorem twap_eq_average (p : ℕ → ℝ) (t1 t2 : ℕ) (h : t1 ≤ t2) :
   unfold twap
   rw [twapAccumulator_sub_eq_sum p t1 t2 h]
 
-/-- **Reciprocal caveat**: the harmonic mean of a finite nonempty family of
-values `q` (typically strictly positive, e.g. prices, though no positivity
-hypothesis is required below — the identity is a `div`/`div` junk-value
-tautology that holds unconditionally). -/
+/-- **Reciprocal caveat**: the harmonic mean of a finite family of
+values `q` (typically nonempty and strictly positive, e.g. prices, though
+neither hypothesis is required below — the identity is a `div`/`div` junk-value
+tautology that holds unconditionally, including for the empty family). -/
 noncomputable def harmonicMean (s : Finset ℕ) (q : ℕ → ℝ) : ℝ :=
   (s.card : ℝ) / ∑ i ∈ s, (1 / q i)
 
