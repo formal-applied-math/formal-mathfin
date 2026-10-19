@@ -82,7 +82,7 @@ theorem ouGen_derivative (κ σ : ℝ) (p : Polynomial ℝ) :
     mul_one, ← Polynomial.C_mul']
   ring
 
-/-- **Commutator with multiplication by `X`.** `L (X p) = X • L p + σ² • p' - κ • (X p)`:
+/-- **Commutator with multiplication by `X`.** `L (X p) = X * L p + σ² • p' - κ • (X p)`:
 multiplying by `X` and generating commute up to the creation term `σ² • p'` (the
 diffusion coefficient acting on one derivative) minus the drift acting on the new
 factor. -/
