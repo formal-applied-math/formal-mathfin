@@ -26,10 +26,11 @@ is the unconditional mean `4`.
 
 These are worked instances of general results in the library. In
 `RiskMeasures/VaRSuperadditivity.lean`, `valueAtRisk_sum_bernoulli_of_card_two` is the two-loan
-example for unit losses with default probability `p`: on `(1 − p)² < α ≤ 1 − p` each loan has
-VaR `0` and the portfolio VaR `1`. The exact superadditivity window for any number of independent
-Bernoulli losses is `valueAtRisk_sum_bernoulli_superadditive_iff`. The dual representation of
-ES over bounded densities is `isGreatest_integral_mul_expectedShortfall`
+example for independent (`iIndepFun`), identically distributed unit losses sharing one default
+probability `p`: on `(1 − p)² < α ≤ 1 − p` each loan has VaR `0` and the portfolio VaR `1`. The
+exact superadditivity window for any number of independent, identically distributed Bernoulli
+losses (same shared `p`) is `valueAtRisk_sum_bernoulli_superadditive_iff`. The dual representation
+of ES over bounded densities is `isGreatest_integral_mul_expectedShortfall`
 (`RiskMeasures/ExpectedShortfall.lean`).
 
 ## Main results
@@ -42,7 +43,8 @@ ES over bounded densities is `isGreatest_integral_mul_expectedShortfall`
   position.
 * `vaR_subadditivity_fails`: on the joint space of the two half-bonds, the halves' `VaR₀.₉₅`
   sum to less than the total's (the values are `0`, `0` and `50`).
-* `vaR_counterexample_window`: subadditivity fails exactly for `(24/25)² < α ≤ 24/25`.
+* `vaR_counterexample_window`: for `α ∈ (0, 1]`, subadditivity fails exactly for
+  `(24/25)² < α ≤ 24/25`.
 * `es_one_bond_eq_80`: `ES₀.₉₅ = 80` for the single bond.
 * `condTailMean_one_bond`: at the single bond the tail event `{L ≥ VaR₀.₉₅}` is the whole space,
   so the conditional tail mean is `E[L] = 4`.
