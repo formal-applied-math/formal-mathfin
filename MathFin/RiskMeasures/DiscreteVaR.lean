@@ -28,8 +28,9 @@ These are worked instances of general results in the library. In
 `RiskMeasures/VaRSuperadditivity.lean`, `valueAtRisk_sum_bernoulli_of_card_two` is the two-loan
 example for independent (`iIndepFun`), identically distributed unit losses sharing one default
 probability `p`: on `(1 − p)² < α ≤ 1 − p` each loan has VaR `0` and the portfolio VaR `1`. The
-exact superadditivity window for any number of independent, identically distributed Bernoulli
-losses (same shared `p`) is `valueAtRisk_sum_bernoulli_superadditive_iff`. The dual representation
+exact superadditivity window, for `α ∈ (0, 1)` and any number of independent, identically
+distributed Bernoulli losses (same shared `p`), is `valueAtRisk_sum_bernoulli_superadditive_iff`.
+The dual representation
 of ES over bounded densities is `isGreatest_integral_mul_expectedShortfall`
 (`RiskMeasures/ExpectedShortfall.lean`).
 
