@@ -37,8 +37,10 @@ of ES over bounded densities is `isGreatest_integral_mul_expectedShortfall`
 
 * `finiteVaR_eq_valueAtRisk`, `finiteES_eq_expectedShortfall`: for `α ∈ (0, 1)` and a probability
   vector `q`, the finite forms agree with the general definitions at the law `∑ i, q i • δ_i`.
-* `finiteVaR_eq_value_min`: for `α ∈ (0, 1]`, VaR at a finite law is attained at a loss value.
-* `finiteVaR_two_point`: VaR of a loss that is `0` with mass `a` and `c > 0` with mass `1 - a`.
+* `finiteVaR_eq_value_min`: for `α ∈ (0, 1]` and a probability vector `q`, VaR at a finite law is
+  attained at a loss value.
+* `finiteVaR_two_point`: for `α ∈ (0, 1]`, VaR of a loss that is `0` with mass `a` and `c > 0` with
+  mass `1 - a`.
 * `vaR_one_bond`, `vaR_two_halves`: `VaR₀.₉₅` is `0` for the single bond and `50` for the split
   position.
 * `vaR_subadditivity_fails`: on the joint space of the two half-bonds, the halves' `VaR₀.₉₅`
@@ -147,9 +149,9 @@ theorem nonempty_values_mass_ge (hq : q ∈ stdSimplex ℝ ι) (hα1 : α ≤ 1)
       Finset.le_max' _ _ (Finset.mem_image_of_mem _ (Finset.mem_univ _))
   exact ⟨_, Finset.mem_filter.2 ⟨Finset.max'_mem _ hne, by rwa [hfull, hq.2]⟩⟩
 
-/-- **Attainment.** For `α ∈ (0, 1]`, the infimum over `ℝ` is the minimum over the loss values
-`v ∈ Finset.image L univ` at which the `q`-mass of `{L ≤ v}` is at least α, so VaR is attained at
-a loss value. -/
+/-- **Attainment.** For `α ∈ (0, 1]` and a probability vector `q`, the infimum over `ℝ` is the
+minimum over the loss values `v ∈ Finset.image L univ` at which the `q`-mass of `{L ≤ v}` is at
+least α, so VaR is attained at a loss value. -/
 theorem finiteVaR_eq_value_min (hq : q ∈ stdSimplex ℝ ι) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR q L α = {v ∈ Finset.univ.image L | α ≤ ∑ i with L i ≤ v, q i}.min'
       (nonempty_values_mass_ge hq hα1) := by
