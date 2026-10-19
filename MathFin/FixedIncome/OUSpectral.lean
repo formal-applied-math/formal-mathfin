@@ -41,6 +41,11 @@ This file proves the eigenidentities by induction on `Polynomial.hermite_succ`
   the general-diffusion no-flux statement (only the Gaussian instance is proved), the
   swirl as a stochastic process, and the Laguerre/Jacobi rows of the Pearson table
   (no Laguerre or Jacobi polynomials are available in the library).
+
+## References
+
+* A. Bagaria, *Fixed Income & Derivative Pricing* (lecture notes), ch. 14 ("the chapter"
+  throughout; eq./Calc/Ex. numbers are as there); the estimation bias is from its ch. 20.
 -/
 
 @[expose] public section
@@ -276,15 +281,16 @@ theorem gaussianNoFlux_ou {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = �
 
 The chapter's effective decay rate of a multimodal expansion is the weighted average
 `Σ λ_n c_n e^{-λ_n t} / Σ c_n e^{-λ_n t}`. With two modes and positive weights, that
-average is at least the slowest rate `λ₁` for every `t` — so fitting a single exponential
-to a two-mode decay reads off a rate at least `λ₁` and never understates mean reversion
-(the chapter's second, independent route to the ch. 20 estimation bias). Only the
-pointwise bound is proved here; the fitted-exponential consequence is not formalized. -/
+average (here with rates `l₁ ≤ l₂`) is at least the slowest rate `l₁` for every `t` — so
+fitting a single exponential to a two-mode decay reads off a rate at least `l₁` and never
+understates mean reversion (the chapter's second, independent route to the Bagaria ch. 20
+estimation bias). Only the pointwise bound is proved here; the fitted-exponential
+consequence is not formalized. -/
 
-/-- **The two-mode gap inequality.** For rates `λ₁ ≤ λ₂`, positive mode weights
+/-- **The two-mode gap inequality.** For rates `l₁ ≤ l₂`, positive mode weights
 `0 < c₁, c₂` and any `t`, the effective decay rate of the two-mode mixture — the
 weighted average of the rates, weighted by the surviving mode masses — is at least the
-slowest rate `λ₁`. The gap `λ₂ - λ₁` shows up as the excess carried by the fast mode;
+slowest rate `l₁`. The gap `l₂ - l₁` shows up as the excess carried by the fast mode;
 the chapter's one-exponential-fit warning is a consequence of this pointwise bound (not
 proved here). -/
 theorem twoMode_rate_ge_slowest {l₁ l₂ c₁ c₂ t : ℝ} (hl₂ : l₁ ≤ l₂)
