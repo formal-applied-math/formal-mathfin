@@ -273,10 +273,10 @@ theorem vaR_two_halves : finiteVaR jointQ (halfL₁ + halfL₂) (19 / 20) = 50 :
   rw [vaR_joint_window _ (by norm_num) (by norm_num)]
   norm_num
 
-/-- **The failure window.** Subadditivity fails exactly for `9216/10000 < α ≤ 24/25`, where
-`9216/10000 = (24/25)²`. The right endpoint is included because the definition uses
-`α ≤ P(L ≤ x)`: at `α = 24/25` each half keeps VaR `0` while the total has VaR `50`. At
-`α = 9216/10000` the total VaR is still `0`, so the left endpoint is excluded. -/
+/-- **The failure window.** For the level `α ∈ (0, 1]`, subadditivity fails exactly for
+`9216/10000 < α ≤ 24/25`, where `9216/10000 = (24/25)²`. The right endpoint is included because
+the definition uses `α ≤ P(L ≤ x)`: at `α = 24/25` each half keeps VaR `0` while the total has
+VaR `50`. At `α = 9216/10000` the total VaR is still `0`, so the left endpoint is excluded. -/
 theorem vaR_counterexample_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR jointQ halfL₁ α + finiteVaR jointQ halfL₂ α
       < finiteVaR jointQ (halfL₁ + halfL₂) α ↔ 9216 / 10000 < α ∧ α ≤ 24 / 25 := by
