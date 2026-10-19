@@ -20,15 +20,15 @@ indicator (buy/sell), modelled as a fair random sign (`rademacher`, from
 `MathFin.Foundations.CorrelationFallacies`). Roll's economic assumptions — stated here as
 explicit, named hypotheses, since the original note leaves them implicit — are:
 
-* the signs `q_t` have the `rademacher` law (pairwise independent fair coin flips across time —
-  joint independence is never used);
-* every pair of the five variables drawn from the two consecutive price changes that *splits
-  across* the two changes (one variable feeding `ΔP_t`, the other `ΔP_{t-1}`) is independent,
-  *except* the sign shared by the two changes with itself; independence *within* a single price
-  change is not assumed.
+* the signs `q_t` have the `rademacher` law (i.i.d. fair coin flips across time);
+* every pair of the five variables entering two consecutive price changes
+  (three signs, two mid-price increments) that is *split across* the two changes — one variable
+  feeding `ΔP_t`, the other `ΔP_{t-1}` — is pairwise independent, except the sign shared by the
+  two changes with itself; independence *within* a single price change (e.g. the sign and
+  mid-price increment of the same change) is never used and so is not assumed.
 
 Under these hypotheses the first-order autocovariance of the *trade-price change*
-`ΔP_t = P_t - P_{t-1}` is `-(s/2)²`, nonpositive and strictly negative whenever `s ≠ 0`:
+`ΔP_t = P_t - P_{t-1}` is strictly negative:
 
 `Cov(ΔP_t, ΔP_{t-1}) = -(s/2)²`.
 
@@ -44,6 +44,13 @@ We state the result for three consecutive sign variables `q0 q1 q2` (representin
 `q_{t-2}, q_{t-1}, q_t`) and two increments `dm1 dm2` (`Δm_{t-1}, Δm_t`), rather than threading a
 time index through a stochastic process, since only these five variables and their pairwise
 independence ever enter the computation.
+
+The inversion is only meaningful when the sample autocovariance `γ̂₁` is negative, as the model
+predicts. If `γ̂₁ ≥ 0` — which real data can and does produce, since the model is an
+approximation — `rollSpreadEstimator` does not apply: `Real.sqrt` of a nonpositive argument
+returns `0` by Mathlib's junk-value convention, so naively evaluating `2 * Real.sqrt (-γ̂₁)` at
+`γ̂₁ ≥ 0` silently yields a spread estimate of `0` rather than signalling that the estimator is
+undefined there.
 
 ## Main results
 
