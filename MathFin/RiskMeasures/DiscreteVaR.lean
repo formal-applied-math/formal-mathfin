@@ -20,7 +20,7 @@ the quantile average `ES_α = (1 − α)⁻¹ ∫_α^1 VaR_u du` (`finiteES`). F
 
 The file works the two-bond example. A single `$100` bond defaulting with probability `1/25` has
 `VaR₀.₉₅ = 0`: the loss is 0 with probability `24/25 ≥ 0.95`. The same exposure split into two
-`$50` bonds defaulting independently has `VaR₀.₉₅ = 50`, so VaR penalises the diversified position.
+`$50` bonds defaulting independently has `VaR₀.₉₅ = 50`, so VaR penalizes the diversified position.
 At the single bond, expected shortfall is `80` while the conditional tail mean `E[L | L ≥ VaR₀.₉₅]`
 is the unconditional mean `4`.
 
@@ -28,8 +28,9 @@ These are worked instances of general results in the library. In
 `RiskMeasures/VaRSuperadditivity.lean`, `valueAtRisk_sum_bernoulli_of_card_two` is the two-loan
 example for unit losses with default probability `p`: on `(1 − p)² < α ≤ 1 − p` each loan has
 VaR `0` and the portfolio VaR `1`. The exact superadditivity window for any number of independent
-Bernoulli losses is `valueAtRisk_sum_bernoulli_superadditive_iff`. The dual representation of ES over bounded densities
-is `isGreatest_integral_mul_expectedShortfall` (`RiskMeasures/ExpectedShortfall.lean`).
+Bernoulli losses is `valueAtRisk_sum_bernoulli_superadditive_iff`. The dual representation of
+ES over bounded densities is `isGreatest_integral_mul_expectedShortfall`
+(`RiskMeasures/ExpectedShortfall.lean`).
 
 ## Main results
 
