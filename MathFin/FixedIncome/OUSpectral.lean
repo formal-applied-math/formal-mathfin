@@ -44,7 +44,7 @@ This file proves the eigenidentities by induction on `Polynomial.hermite_succ`
 
 ## References
 
-* A. Bagaria, *Fixed Income & Derivative Pricing* (lecture notes), ch. 14 ("the chapter"
+* S. Bagaria, *Notes on Fixed Income Derivative Pricing* (lecture notes), ch. 14 ("the chapter"
   throughout; eq./Calc/Ex. numbers are as there); the estimation bias is from its ch. 20.
 -/
 
