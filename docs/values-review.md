@@ -286,6 +286,67 @@ per merge) — final integration head **`523c916`**.
 `uv run pytest tests/ -q` green throughout; `lake lint` clean throughout. No `sorry`/`admit`/
 `native_decide` introduced anywhere in this audit's own fixes.
 
+### Integration-level pass (rule 10): the whole accumulated diff, not any single PR
+
+After the batches above landed (final head `523c916`, which also folded in SABR
+and Schwartz from an earlier session plus the Haug-barrier/bivariate-exotic batch
+and DeFi Uniswap/Curve), AGENTS.md rule 10 requires one more pass that neither a
+per-PR review nor the per-branch Fable passes above could perform: reviewing the
+*whole* `integration-244-family` diff against `origin/main` as one unit (84 files,
+~12,500 insertions across SABR, Schwartz, timing-adjustment, convex-QP-KKT,
+birthday-paradox, Student-t VaR, backtest stats, FN6814 XVA, Haug-barrier/
+bivariate-exotic, DeFi Uniswap/Curve, exotic-options-batch2, roll-spread-estimator),
+hunting specifically for cross-PR duplication, naming collisions, and merge-
+resolution correctness that no single PR's own diff could expose.
+
+Round 1 (head `523c916`) found two real integration-only issues: `README.md` and
+`docs/coverage.md` still stated the pre-merge corpus count of 543 (stale from
+before the `schwartz-one-factor-futures` merge regenerated `formalization.yaml`
+to the true union of 544 — two independently-advanced branches had each separately
+incremented the corpus past 541, and their union is one more than either side's
+own count), and `MathFin/DeFi/UniswapCurveMechanics.lean` put ~16 lines of
+whitepaper-citation prose before its copyright header instead of after it, the
+only outlier among the ~50 newly-merged files. Both fixed in `cb55a2c` (README/
+`docs/coverage.md` corpus-count reconciliation note; header reordered to match
+every sibling file).
+
+Rounds 2 and 3 (same head `cb55a2c`) returned "No feedback to provide." — the
+first 3-consecutive-clean bar for the whole-integration-diff review.
+
+The Fable gate pass (same head `cb55a2c`) found three more real issues no
+same-model round had caught: `MathFin/FixedIncome/FVA.lean` and
+`MathFin/FixedIncome/DVA.lean` each had their "Scope note" docstring paragraph
+duplicated verbatim — a merge-resolution artifact from the `fn6814-risk-exposure-
+xva` merge (`523c916`) where both sides had independently edited the file and the
+conflict resolution kept both copies instead of de-duplicating; four files
+(`BlackScholes/DividendsGreeks.lean`, `BlackScholes/GreekSigns.lean`,
+`BlackScholes/ImpliedVolatility.lean`, `Foundations/Bisection.lean`) had received
+substantive new theorems from the `bs-completion-pack` (#261) and
+`bootstrap-review-pickup` (#254) branches without appending Yang Ye to the
+pre-existing `Authors:` line, inconsistent with how every other Raphael-Coelho
+file touched elsewhere in this same integration diff handles it; and the new
+corpus-reconciliation note in `docs/coverage.md` pointed "above" at entries that
+are actually below it. All three fixed in `0611ed0` — the FVA/DVA dedup and the
+wording fix as integration-only commits (not traceable to any single PR branch,
+per rule 10 §6: no backport needed), the attribution fix applied on the
+integration branch *and* backported to the still-open originating PR branches
+(`bs-completion-pack` commit `f1ece76`, `bootstrap-review-pickup` commit
+`d2c06c8`), per rule 10's bidirectional fix-distribution requirement. Re-verified
+the 90 ledger entries whose input hash changed from the attribution edits
+(`LEDGER_EXEC_LOCAL=1`, `lake env lean`, not docker): 90/90 passed.
+
+Per rule 8, fixing real findings resets the 3-consecutive-clean bar: three more
+fresh rounds were run against the new head `0611ed0`, all three returning
+"No feedback to provide." — re-establishing 3-consecutive-clean + the already-
+complete Fable gate at this head.
+
+**Final integration head: `0611ed0` (`0611ed03a2aaab66f0d6d3cf02ccc51733e93368`).**
+`lake build` green (zero warnings in `MathFin` code — the `sorry` warnings in the
+vendored `BrownianMotion` package and `Challenge.lean` are pre-existing and
+unrelated), `lake lint` clean, `uv run pytest tests/ -q` 58 passed/1 skipped,
+`python3 -m tools.verify.ledger status` fresh 544/stale 0/missing 0. No
+`sorry`/`admit`/`native_decide` introduced by this pass's own fixes.
+
 ## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
 
 Scope: `FixedIncome/CIRRiccati` by Alfredo Garcia (@oxarbitrage), merged with its two commits
