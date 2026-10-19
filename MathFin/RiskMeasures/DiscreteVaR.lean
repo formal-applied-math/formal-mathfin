@@ -74,11 +74,12 @@ noncomputable def finiteVaR (q L : ι → ℝ) (α : ℝ) : ℝ :=
   sInf {x | α ≤ ∑ i with L i ≤ x, q i}
 
 /-- **ES at a finite law**: the quantile average, `(1 - α)⁻¹` times the oriented interval integral
-`∫ u in α..1` of the quantile function `u ↦ finiteVaR q L u`. For `α < 1` this is the quantile
-average over `[α, 1]`; the bridge `finiteES_eq_expectedShortfall` covers `α ∈ (0, 1)`, the only
-range used in this file. At `α = 1` the factor `(1 - α)⁻¹` is Lean's junk value `0⁻¹ = 0`, so
+`∫ u in α..1` of the quantile function `u ↦ finiteVaR q L u`. For `α ∈ (0, 1)` this is the
+quantile average over `[α, 1]`, and the bridge `finiteES_eq_expectedShortfall` covers exactly that
+range, the only one used in this file. Elsewhere it is junk: for `α ≤ 0` the integrand on `[α, 0]`
+is `finiteVaR`'s junk value `0`; at `α = 1` the factor `(1 - α)⁻¹` is Lean's `0⁻¹ = 0`, so
 `finiteES q L 1 = 0` for every loss; for `α > 1` the integral runs backwards and the prefactor is
-negative, so that range is junk too. -/
+negative. -/
 noncomputable def finiteES (q L : ι → ℝ) (α : ℝ) : ℝ :=
   (1 - α)⁻¹ * ∫ u in α..1, finiteVaR q L u
 
