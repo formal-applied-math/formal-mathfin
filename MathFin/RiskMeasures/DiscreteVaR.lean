@@ -24,9 +24,11 @@ The file works the two-bond example. A single `$100` bond defaulting with probab
 At the single bond, expected shortfall is `80` while the conditional tail mean `E[L | L ≥ VaR₀.₉₅]`
 is the unconditional mean `4`.
 
-These are worked instances of general results in the library: the exact superadditivity window
-for independent Bernoulli losses is `valueAtRisk_sum_bernoulli_superadditive_iff`
-(`RiskMeasures/VaRSuperadditivity.lean`), and the dual representation of ES over bounded densities
+These are worked instances of general results in the library. In
+`RiskMeasures/VaRSuperadditivity.lean`, `valueAtRisk_sum_bernoulli_of_card_two` is the two-loan
+example for unit losses with default probability `p`: on `(1 − p)² < α ≤ 1 − p` each loan has
+VaR `0` and the portfolio VaR `1`. The exact superadditivity window for any number of independent
+Bernoulli losses is `valueAtRisk_sum_bernoulli_superadditive_iff`. The dual representation of ES over bounded densities
 is `isGreatest_integral_mul_expectedShortfall` (`RiskMeasures/ExpectedShortfall.lean`).
 
 ## Main results
@@ -342,10 +344,10 @@ theorem condTailMean_one_bond : condTailMean oneQ oneL (19 / 20) = 4 := by
 /-! ## The bounded-density representation of ES at the single bond -/
 
 /-- For the single bond, `ES₀.₉₅` is the greatest value of `E[Z·L]` over densities `Z` with
-`0 ≤ Z ≤ (1 - 19/20)⁻¹ = 20` and `E[Z] = 1`; both equal `80` (`es_one_bond_eq_80`). The maximum
-is attained at `Z = 20` on default and `5/24` on survival. This is the two-state analogue of
-`isGreatest_integral_mul_expectedShortfall`; here the objective is `E[Z·L] = 4·Z(default)`, so
-the bound is the cap. -/
+`0 ≤ Z ≤ (1 - 19/20)⁻¹ = 20` and `E[Z] = 1`; both equal `80` (`es_one_bond_eq_80`). This is the
+two-state analogue of `isGreatest_integral_mul_expectedShortfall`. The objective is
+`E[Z·L] = 4·Z(default)`, so the maximum puts `Z(default)` at the cap `20`, and `E[Z] = 1` then
+gives `Z(survival) = 5/24`. -/
 theorem isGreatest_es_one_bond :
     IsGreatest ((fun Z : Bool → ℝ ↦ ∑ b, oneQ b * Z b * oneL b) ''
       {Z | (∀ b, 0 ≤ Z b ∧ Z b ≤ (1 - 19 / 20)⁻¹) ∧ ∑ b, oneQ b * Z b = 1})
