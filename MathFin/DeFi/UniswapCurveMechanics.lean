@@ -195,8 +195,8 @@ noncomputable def harmonicMean (s : Finset ℕ) (q : ℕ → ℝ) : ℝ :=
 the **reciprocal of the harmonic mean of `q` equals the arithmetic mean of
 `p`** — not the reciprocal of the arithmetic mean of `q`. This is the
 caveat: naively averaging the reciprocal series and inverting gives the
-wrong (harmonic, not arithmetic) mean. Stated here for strictly positive
-values, the intended reading; the identity itself is a `div`/`div`
+wrong (harmonic, not arithmetic) mean. Intended for strictly positive values
+(prices), but stated without that hypothesis: the identity is a `div`/`div`
 junk-value tautology that holds unconditionally for *any* finite family
 `s`, including the empty one (both sides reduce to `0`). -/
 theorem harmonicMean_reciprocal_eq_arithmeticMean
