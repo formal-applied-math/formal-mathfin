@@ -24,7 +24,7 @@ Mean reversion is kept constant here, matching common GSR calibration practice
 separate contribution and composes with this one in principle, but is not combined
 here).
 
-**Scope note** (disclosed honestly, per the roadmap's GSR item #72): this file proves
+**Scope note**: this file proves
 the **two-piece** case — volatility `σ₁` on `(0, T*]`, `σ₂` on `(T*, T]`, for a fixed
 breakpoint `T* ∈ [0, T]` — not the general finitely-many-pieces GSR. The obstruction to
 full generality is not conceptual (the argument below is already piece-count-agnostic
