@@ -599,6 +599,46 @@ Quot.sound]`; `uv run pytest tests/ -q` green (58 passed/1 skipped) on the integ
 `lake lint` clean on both. No `sorry`/`admit`/`native_decide` anywhere in the new file or the
 fixes. No merge-conflict residue found by any review round.
 
+### Eighth pass: stale-ledger CI fixes on PR #261 and PR #254 (routine re-verify, no regression)
+
+CI on two open PRs was red purely on the `python3 -m tools.verify.ledger status` gate (exit 1 on
+any stale entry) — not on `lake build`, `lake lint`, or pytest, which never ran because the ledger
+gate runs first in `build.yml`. "Stale" here means a benchmark's recorded input-hash (its own
+snippet + the transitive `MathFin/` modules it imports + the toolchain pins) no longer matches
+current content; it says nothing about whether the theorem still holds, only that it has not been
+re-checked against what changed. Both PRs needed an actual re-run through Lean
+(`LEDGER_EXEC_LOCAL=1 python3 -m tools.verify.ledger verify --stale --exec --timeout 300`, which
+invokes `lake env lean` directly in this host environment — no Docker needed, consistent with
+this session's established pattern for ledger work), not a hash bump.
+
+- **PR #261 (`bs-completion-pack`)**: re-checking turned up 87 stale entries, not the 13 the task
+  was opened against — `mathematical_finance.json`'s shared dependency surface had moved further
+  since the PR was last touched, cascading staleness to every entry that transitively imports the
+  changed module(s), not just the ones directly named. PR #261 already contained every commit on
+  `main`'s history (0 commits behind), so this was not a rebase-needed situation — it was simply a
+  wider blast radius than the task description's snapshot. All 87 re-verified clean on the first
+  run (`lake build`/`lake lint`/`uv run pytest tests/ -q` all green afterward) — a routine refresh,
+  **no genuine regression**. Head: `f1ece76` → **`440821c`**.
+- **PR #254 (`bootstrap-review-pickup`)**: re-checking confirmed exactly the 3 entries named in the
+  task (`mf-impliedvol-bracket`, `mf-impliedvol-bisection`, `qrm-var-bisection`). All 3 re-verified
+  clean (same full gate suite green afterward) — **no genuine regression**. Head: `d2c06c8` →
+  **`8cf2184`**.
+- **Operational note, disclosed:** while re-verifying PR #261, an accidental duplicate
+  `ledger verify --stale` invocation briefly ran concurrently against the same
+  `verification_ledger.json` in the same worktree (a stray `pkill` meant to clear an unrelated
+  stuck process instead killed only the first run's in-flight `lake env lean` child, and a second
+  `verify` was started believing the first had died). Caught before any write collision — the
+  duplicate was killed within seconds of starting, before it had written anything, and the
+  original process (never actually terminated) finished on its own with a clean, singly-written
+  ledger. No corruption occurred; flagged here only because `CLAUDE.md`'s merge-conflict history on
+  this exact file makes concurrent writers worth naming explicitly, even when it resolved cleanly.
+
+#### Evidence
+
+Both PRs: `uv run pytest tests/ -q` green, `lake build` green (9329 jobs / 9328 jobs
+respectively), `lake lint` clean, ledger `status` reports 0 stale / 0 missing after the push. CI
+(`gh pr checks`) confirmed green on both PRs' new heads post-push.
+
 ## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
 
 Scope: `FixedIncome/CIRRiccati` by Alfredo Garcia (@oxarbitrage), merged with its two commits
