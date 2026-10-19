@@ -310,12 +310,15 @@ fragments that need no process theory: the characteristic polynomial of `-A` (ro
 `-1 ± iθ`: for `θ ≠ 0` the spectrum leaves the real line, which in the chapter's argument rules
 out a real orthogonal expansion — that consequence is not formalized here),
 and the isotropy of the stationary covariance (a symmetric `Σ` with `AΣ + ΣAᵀ = I` is `½I`: the
-rotation drops out of the snapshot, which is exactly why the snapshot cannot detect
-reversibility). Plus the stationary-variance limit of the OU law. -/
+rotation drops out of the snapshot, which in the chapter's argument is why a snapshot cannot
+detect non-reversibility — not formalized here). Plus the stationary-variance limit of the
+OU law. -/
 
-/-- **Stretch — the swirl's characteristic polynomial.** The eigenvalues of `-A` are the
-roots of `(X + 1)² + θ²`, i.e. `-1 ± iθ` — off the real line for `θ ≠ 0`, the spectral
-signature of a non-reversible drift. (`Matrix.charpoly_fin_two` in
+/-- **Stretch — the swirl's characteristic polynomial.** The Lean statement proves the
+characteristic-polynomial identity `(X + 1)² + θ²` over `ℝ` only. The chapter (Ex. 14.2) reads
+off from it that `-A`'s eigenvalues are the complex roots `-1 ± iθ` — off the real line for
+`θ ≠ 0`, the spectral signature of a non-reversible drift; those two further steps (the complex
+roots, and the non-reversibility reading) are not formalized here. (`Matrix.charpoly_fin_two` in
 `Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff`.) -/
 theorem swirl_charpoly (θ : ℝ) :
     (Matrix.charpoly (!![-1, -θ; θ, -1] : Matrix (Fin 2) (Fin 2) ℝ))
