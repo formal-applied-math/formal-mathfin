@@ -370,7 +370,10 @@ theorem swirl_isotropy (θ a b d : ℝ)
 `(σ²/k)(1 - e^{-kt})` of the explicit OU law (here `k = 2κ` is the mean-reversion rate
 doubled and `σ` the law's own diffusion coefficient — NOT the stationary scale `s` used
 elsewhere in this file, where `s² = σ²/2κ`) tends to `σ²/k` as the horizon grows: that
-limit `σ²/k` is `σ²/2κ` in generator parametrization, i.e. the stationary variance `s²`. -/
+limit `σ²/k` is `σ²/2κ` in generator parametrization, i.e. the stationary variance `s²`.
+This `k = 2κ` parametrization is this file's own; the canonical closed form in the `σ, κ, t`
+parametrization used elsewhere in the repo is `vasicekSDEVariance`
+(`MathFin/FixedIncome/VasicekSDE.lean`): `vasicekSDEVariance σ κ t = σ² (1 - e^{-2κt}) / (2κ)`. -/
 theorem ouStationaryVariance_tendsto {k σ : ℝ} (hk : 0 < k) :
     Tendsto (fun t : ℝ ↦ σ ^ 2 / k * (1 - Real.exp (-(k * t)))) atTop (𝓝 (σ ^ 2 / k)) := by
   have he : Tendsto (fun t : ℝ ↦ Real.exp (-(k * t))) atTop (𝓝 0) :=
