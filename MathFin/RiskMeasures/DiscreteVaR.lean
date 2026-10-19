@@ -30,9 +30,8 @@ example for independent (`iIndepFun`), identically distributed unit losses shari
 probability `p`: on `(1 − p)² < α ≤ 1 − p` each loan has VaR `0` and the portfolio VaR `1`. The
 exact superadditivity window, for `α ∈ (0, 1)` and any number of independent, identically
 distributed Bernoulli losses (same shared `p`), is `valueAtRisk_sum_bernoulli_superadditive_iff`.
-The dual representation
-of ES over bounded densities is `isGreatest_integral_mul_expectedShortfall`
-(`RiskMeasures/ExpectedShortfall.lean`).
+For an integrable loss and `α ∈ (0, 1)`, the dual representation of ES over bounded densities is
+`isGreatest_integral_mul_expectedShortfall` (`RiskMeasures/ExpectedShortfall.lean`).
 
 ## Main results
 
