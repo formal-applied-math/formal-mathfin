@@ -307,7 +307,8 @@ theorem twoMode_rate_ge_slowest {l₁ l₂ c₁ c₂ t : ℝ} (hl₂ : l₁ ≤ 
 The chapter's two-dimensional counterexample — the swirl `dZ = -AZ dt + dW` with
 `A = [[1, θ], [-θ, 1]]`, whose antisymmetric part rotates — contributes two matrix
 fragments that need no process theory: the characteristic polynomial of `-A` (roots
-`-1 ± iθ`: the spectrum leaves the real line, so no real orthogonal expansion exists),
+`-1 ± iθ`: for `θ ≠ 0` the spectrum leaves the real line, which in the chapter's argument rules
+out a real orthogonal expansion — that consequence is not formalized here),
 and the isotropy of the stationary covariance (a symmetric `Σ` with `AΣ + ΣAᵀ = I` is `½I`: the
 rotation drops out of the snapshot, which is exactly why the snapshot cannot detect
 reversibility). Plus the stationary-variance limit of the OU law. -/
