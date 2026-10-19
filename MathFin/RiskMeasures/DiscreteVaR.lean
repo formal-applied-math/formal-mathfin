@@ -67,7 +67,9 @@ variable {ι : Type*} [Fintype ι]
 
 /-- **VaR at a finite law**: the infimum of the loss levels `x` at which the `q`-mass of
 `{i | L i ≤ x}` reaches `α`. The lemmas that need `q` to be a probability vector take
-`q ∈ stdSimplex ℝ ι` as a hypothesis. -/
+`q ∈ stdSimplex ℝ ι` as a hypothesis; for such `q` and `α ∈ (0, 1]` the set is nonempty and
+bounded below, which is the only range used in this file. Outside that range (or for weights that
+don't sum to `1`) the set can be empty or all of `ℝ`, where `sInf` returns the junk value `0`. -/
 noncomputable def finiteVaR (q L : ι → ℝ) (α : ℝ) : ℝ :=
   sInf {x | α ≤ ∑ i with L i ≤ x, q i}
 
@@ -92,8 +94,9 @@ lemma isProbabilityMeasure_finiteLaw (hq : q ∈ stdSimplex ℝ ι) :
 
 variable [MeasurableSingletonClass ι]
 
-/-- For nonnegative weights `q`, under `finiteLaw q` the probability of `{L ≤ x}` is the mass
-summed in `finiteVaR`. -/
+/-- For nonnegative weights `q`, under `finiteLaw q` the measure (mass) of `{L ≤ x}` is the sum in
+`finiteVaR` — a probability only once `q` is a probability vector
+(`isProbabilityMeasure_finiteLaw`). -/
 lemma finiteLaw_real_le (hq : ∀ i, 0 ≤ q i) (L : ι → ℝ) (x : ℝ) :
     (finiteLaw q).real {i | L i ≤ x} = ∑ i with L i ≤ x, q i := by
   rw [measureReal_def, finiteLaw, Measure.coe_finsetSum, Finset.sum_apply]
