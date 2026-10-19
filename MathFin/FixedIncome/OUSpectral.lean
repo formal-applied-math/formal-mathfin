@@ -326,9 +326,10 @@ theorem swirl_charpoly (θ : ℝ) :
 
 /-- **Stretch — the swirl's stationary covariance is isotropic.** Any symmetric `Σ`
 solving the stationary-covariance equation `AΣ + ΣAᵀ = I` for the swirl matrix
-`A = [[1, θ], [-θ, 1]]` is `½I`: the solution does not depend on the rotation `θ`, so
-the snapshot carries no trace of the circulation — reversibility fails where the
-spectrum went complex, not where the stationary law is visible. -/
+`A = [[1, θ], [-θ, 1]]` is `½I`: the solution does not depend on the rotation `θ`, so the
+snapshot carries no trace of the circulation. In the chapter's argument (Ex. 14.2) this is why a
+stationary snapshot alone cannot detect that the drift is non-reversible for `θ ≠ 0`
+(`swirl_charpoly`) — that non-reversibility conclusion itself is not formalized here. -/
 theorem swirl_isotropy (θ a b d : ℝ)
     (h : (!![(1 : ℝ), θ; -θ, 1] : Matrix (Fin 2) (Fin 2) ℝ) * !![a, b; b, d]
         + !![a, b; b, d] * !![(1 : ℝ), -θ; θ, 1] = 1) :
