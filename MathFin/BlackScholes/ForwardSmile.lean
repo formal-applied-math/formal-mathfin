@@ -13,7 +13,7 @@ public import MathFin.Foundations.GaussianCDFDeriv
 /-!
 # The forward smile: Dupire's ratio on a linear smile surface (eq 10.8)
 
-Equation numbers refer to Bagaria, *Fixed Income & Derivative Pricing*, ch. 10 §10.5.
+Equation numbers refer to Bagaria, *Notes on Fixed Income Derivative Pricing*, ch. 10 §10.5.
 
 Setting: zero rates, one maturity axis `T`, log-moneyness `k = log(K/F)`, a fixed
 forward `F > 0`. The smile surface of eq 10.7 is tilted by a parameter `ε` so that
@@ -1011,7 +1011,7 @@ theorem forwardSkew_tendsto (ψ₁ T₀ : ℝ) :
 
 /-- The numeric reading at `t = 1`, `T₀ = 1/12`: the closed-form ratio of the forward
 skew `½ψ₁((3/2)t + 2T₀)/(t+T₀)^{3/2}` (`forwardSkew_eq_half`) to today's implied skew
-`ψ₁/√T₀` is `10/(13√13) ≈ 0.213` (the ratio depends on `T₀` alone, not on `σ` or
+`ψ₁/√T₀` is `10/(13√13) ≈ 0.213` (the ratio depends on `t` and `T₀` alone, not on `σ` or
 `ψ₁`; the chapter reads it as "a fifth"). -/
 theorem skewRatio_one :
     (1 / 2) * ((3 / 2) * (1 : ℝ) + 2 * (1 / 12)) * Real.sqrt (1 / 12)
