@@ -415,6 +415,59 @@ not a merge of the two lineages. `exotic-options-batch2` (PR verified still an a
 all green on both branch worktrees and on `integration-244-family` at every step above. No
 `sorry`/`admit`/`native_decide` introduced anywhere in this pass's own fixes.
 
+### Fifth pass: reconciling #278 and #279's own branches (the deferred item above)
+
+The fourth pass explicitly deferred this: `defi-uniswap-curve` and `roll-spread-estimator`'s
+audited fixes (`ba288b5`, `da0fe28`) were reconciled into `integration-244-family` directly, but
+the two downstream-superseding PRs that actually carry these files to the maintainer — #278
+(`defi-combined-uniswap-aave`) and #279 (`risk-stats-combined`) — still had their combined
+branches' own, older copies of `MathFin/DeFi/UniswapCurveMechanics.lean` and
+`MathFin/Execution/RollSpread.lean`, predating both standalone branches' pr-roll + Fable audits.
+Left alone, the maintainer's actual review of #278/#279 would see the stale content even though
+the fixes had already landed on `integration-244-family` and in the standalone branches
+themselves.
+
+For each combined branch, `git diff <combined-branch>:<file> <standalone-branch-final-head>:<file>`
+confirmed a clean subset relationship — the combined branch's copy had **not** independently
+evolved beyond what the standalone branch's audit also fixed (unlike the `integration-244-family`
+case, where independent prior edits had already partially overlapped), so the full fixed file
+content was copied over wholesale rather than hand-merged:
+
+- **PR #278** (`defi-combined-uniswap-aave`): `git checkout ba288b5 -- MathFin/DeFi/UniswapCurveMechanics.lean`
+  on top of the branch's then-head `5a17753`, pulling in all four of the standalone audit's fixes
+  (dropped dead `_hk1`/with-clause hypotheses, the harmonicMean/virtual-reserve/module-doc
+  docstring corrections, the fee-invariant inequality normalized to `≥` form). Built
+  (`lake build` green, `lake lint` clean) and tested (`uv run pytest tests/ -q` 58 passed/1
+  skipped) as part of the full combined branch, not just the one file. Committed and pushed as
+  **`39c44ff`**.
+- **PR #279** (`risk-stats-combined`): `git checkout da0fe28 -- MathFin/Execution/RollSpread.lean`
+  on top of the branch's then-head `a627989`, pulling in the standalone audit's docstring-only
+  fixes (i.i.d./pairwise-independence wording, dropped unproven nonpositivity claim, the
+  undisclosed-`γ̂₁ ≥ 0`-case paragraph). Same build/lint/test gates green. Committed and pushed as
+  **`624850f`**.
+
+Per this workspace's AGENTS.md rule 10 (a content change to an already-reviewed PR needs at
+least one fresh clean review round confirming the reconciliation in context, not a full
+3-consecutive-clean + Fable re-run of the whole PR), one fresh read-only subagent reviewed each
+reconciliation commit standalone — checking for cross-reference breakage against the other files
+newly merged into each combined branch (Aave/Compound/Dai for #278; SA-CCR EAD and the deprado
+quant-stats modules for #279), a clean build of the full combined branch (not just the one file),
+and docstring/correctness fit in the new context. Both came back "No feedback to provide.": the
+one signature change in #278 (`lpFeeShare_nonneg` dropping its now-unused `_hk1` hypothesis) has
+no caller anywhere else in either branch, and both reconciled files compile and lint cleanly as
+part of their full combined branches.
+
+**This reconciliation did not touch `integration-244-family`** — that branch's own copies of
+both files were already fixed directly in the fourth pass above (`a8983d5`), independently of
+#278/#279's lineage, and remain unaffected.
+
+#### Evidence
+
+`lake build` (9333 jobs for #278, 9335 for #279) and `lake lint` green on both combined branches
+after reconciliation; `uv run pytest tests/ -q` 58 passed/1 skipped on both. Fresh read-only
+subagent review clean on both reconciliation commits (`39c44ff`, `624850f`). No
+`sorry`/`admit`/`native_decide` introduced.
+
 ## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
 
 Scope: `FixedIncome/CIRRiccati` by Alfredo Garcia (@oxarbitrage), merged with its two commits
