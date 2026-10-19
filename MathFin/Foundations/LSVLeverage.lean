@@ -59,8 +59,10 @@ For any `v`, the conditional expectation `E[v | σ(S)]` is a *pointwise* Borel f
 the state: there is `m : ℝ → ℝ`, `Measurable m`, with `μ[v | σ(S)] ω = m (S ω)` for every
 `ω`. This is the measure-theoretic content of reading Thm 11.2's `E[v_t | S_t = K]` as a
 genuine function of the strike `K` (eq. 11.2): the posterior is *carried by the state*, not
-by the path. No integrability is needed: for non-integrable `v` the conditional expectation
-is `0` by convention, which factors trivially.
+by the path. No hypothesis on `S`, `v` or `μ` is needed: whenever Mathlib's `condExp` falls
+back to `0` (non-integrable `v`, `S` not measurable so `comap S ≰ m₀`, or `μ` not σ-finite on
+`σ(S)`) the constant `0` factors trivially — so the statement is only informative when
+`S` is measurable, `v` integrable and `μ.trim` σ-finite.
 
 Engine: `stronglyMeasurable_condExp` (the conditional expectation is `σ(S)`-strongly
 measurable) + `StronglyMeasurable.exists_eq_measurable_comp` (the Doob–Dynkin lemma), read
@@ -428,15 +430,20 @@ theorem cointossM_wing_limit_atTop {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F) 
   filter_upwards [eventually_gt_atTop (0:ℝ)] with K hK
   exact (cointossM_eq_of_pos hlo (hlo.trans hhi) hK).symm
 
+/-- At `K = 0` both branch densities are `0` (`x / 0 = 0`), so `cointossM` is `0` there. -/
+theorem cointossM_zero (F σ_lo σ_hi v_lo v_hi : ℝ) :
+    cointossM F σ_lo σ_hi v_lo v_hi 0 = 0 := by
+  simp [cointossM, cointossPhi, lognormalTerminalPDF]
+
 /-- **The posterior variance is not constant** for `F, σ_lo > 0`, `σ_lo < σ_hi` and
 `v_lo < v_hi` (Ex. 11.2's punchline: the posterior `m` is a
 genuine function of the strike; for a flat `σ_loc > 0` and `m > 0` the leverage `σ_loc/√m`
 is then not flat either, a transfer not stated here).
 If `m` were constant on the (economically meaningful) positive strikes it would equal its own
 upper-wing limit `v_hi`; but at the money `m(F) < (v_lo + v_hi)/2 < v_hi`. The quantifier is
-restricted to `K > 0`: `cointossM`'s `0/0` convention at `K = 0` makes an unrestricted statement
-true of functions that are genuinely non-constant on `(0, ∞)`, so it would not capture the
-intended content. -/
+restricted to `K > 0`: `cointossM F σ_lo σ_hi v_lo v_hi 0 = 0` by the `x / 0 = 0` convention
+(`cointossM_zero`), so an unrestricted `¬ ∃ c, ∀ K, … = c` would hold even for a posterior
+that is constant on `(0, ∞)`, and would not capture the intended content. -/
 theorem cointossM_nonconstant {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F)
     (hlo : 0 < σ_lo) (hhi : σ_lo < σ_hi) (hvhi : v_lo < v_hi) :
     ¬ ∃ c : ℝ, ∀ K : ℝ, 0 < K → cointossM F σ_lo σ_hi v_lo v_hi K = c := by
