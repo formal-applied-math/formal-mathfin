@@ -292,6 +292,136 @@ every other landed module — but is left as the user's/maintainer's call rather
 the integration-local dedup fix (`98410dc`) above, which cannot land on the standalone branch
 until `ProbabilityTheory.integral_exp_mul_stdNormal` (or an equivalent) reaches `origin/main`.
 
+## 2026-10-19 — coverage verification: discrete-var-module and ouspectral-module (never opened as PRs)
+
+Not a values-review round, and not a historical reconstruction — a record of coverage
+verification **performed today**, companion to the `forward-smile-module`/`lsv-module` and
+`inflation-module`/`estimation-module` entries above. Two more branches merged into
+`integration-244-family` with zero `docs/values-review.md` trace and no upstream PR. Ran the full
+local pr-roll (3-consecutive-clean, fresh read-only reviewer each round) + Fable-gate discipline
+against each branch's *current* content today, not against whatever review (if any) happened when
+they were first written.
+
+- **`discrete-var-module`** (`MathFin/RiskMeasures/DiscreteVaR.lean`, ~361 lines — VaR and expected
+  shortfall at a finite law, worked as a two-bond example: VaR superadditivity, the single-bond
+  ES, a conditional-tail-mean contrast, and a two-state bounded-density ES representation). The
+  branch's own git history already carried a review-fix commit
+  (`fix(RiskMeasures): DiscreteVaR -- address Fable review on PR #248` — no PR #248 exists for this
+  branch; the message reflects locally-applied review feedback from an earlier session, not an
+  actual open PR), but with no `docs/values-review.md` trace, so a full independent cycle was run
+  against its current tip. **11 real findings across 9 rounds**, every one a docstring-vs-Lean-
+  statement precision gap (never a proof/math bug — every theorem was always correctly proved):
+  the two `VaRSuperadditivity.lean` citations needed independence (`iIndepFun`) + a shared common
+  default probability `p` + their `α ∈ (0,1)` range disclosed; `vaR_counterexample_window`'s
+  module-doc bullet and its own docstring needed `α ∈ (0,1]`; the `valueAtRisk`/`expectedShortfall`
+  bridge theorems and `finiteVaR_eq_value_min`/`finiteVaR_two_point` needed their `α`-domain and
+  probability-vector-`q` hypotheses disclosed; `finiteES`'s dual-representation citation
+  (`isGreatest_integral_mul_expectedShortfall`) needed integrability + its `α` range disclosed;
+  `finiteES`'s own definition needed to describe its integral as the oriented `∫ u in α..1` rather
+  than unconditionally "over `[α,1]`"; `finiteVaR`'s definition needed its junk-value edges
+  disclosed (`sInf` returns `0` outside the valid range); `finiteLaw_real_le` needed "probability"
+  corrected to "measure (mass)" (it only assumes `q` nonnegative, not summing to `1`). Reached
+  3-consecutive-clean at head `7771e11`. The Fable-gate pass found one more real gap
+  (`condTailMean`'s own junk-value edge, undisclosed) — fixed — plus one naming observation
+  (the `vaR_`/`es_` prefix vs. `finiteVaR`/`finiteES`) explicitly flagged optional/non-blocking and
+  left alone. 3-consecutive-reconfirm clean at the post-fix head `03daa8e`. **Final branch head
+  (before integration sync): `03daa8e`.**
+- **`ouspectral-module`** (`MathFin/FixedIncome/OUSpectral.lean`, ~366 lines — the Ornstein-
+  Uhlenbeck generator on real polynomials and its Hermite spectral eigenlayer, Bagaria ch. 14's OU
+  case of eq. 14.16). The branch's own git history already carried several review-fix commits
+  (`fix: address Fable review findings on OUSpectral`, `fix(OUSpectral): round-1 pr-roll review
+  findings`), with no values-review trace. This branch had additionally diverged from
+  `integration-244-family`'s own independently-hand-edited copy of the same file (integration had
+  tightened two passages on its own). Reconciliation found the **branch's original wording was the
+  correct one and integration's tightening was the actual overclaim** in both spots (integration's
+  "the decay rate... never understates mean reversion" / "the eigeninduction closes iff `σ²=2κ`"
+  both overclaimed relative to what's proved; the branch's non-strict originals were right) — the
+  branch kept its own wording. A further 6+ rounds of real docstring-vs-proof overclaim fixes
+  followed, the recurring pattern being the chapter's own argument stated as formalized fact when
+  only a narrower Lean statement is actually proved: the module doc's "exactly diagonal" claim
+  needed the Hermite-basis-completeness fact flagged as unformalized; `ouGen_heigen_two`'s
+  "verbatim" claim against Calc 14.14 was dropped (the chapter's own text has a "lowers the degree"
+  slip, noted as a departure); the no-flux section's Rodrigues-formula link was corrected (the
+  no-flux lemmas are not literally the Rodrigues formula's `n=0`/`n=1` footprint); the
+  one-exponential-fit claim was marked an unformalized consequence of the proved pointwise bound;
+  and, across four sub-rounds, the entire "stretch results" section (the module-doc paragraph,
+  `swirl_charpoly`, `swirl_isotropy`) was made internally consistent in disclosing that only the
+  real characteristic-polynomial identity and the symmetric-`Σ` isotropy computation are proved —
+  the complex eigenvalue roots, the "off the real line" reading, "no real orthogonal expansion",
+  and the non-reversibility reading of the swirl counterexample are all explicitly marked
+  unformalized everywhere they're mentioned. Reached 3-consecutive-clean at head `47488b8`. The
+  Fable-gate pass found one real notation mismatch (`ouGen_X_mul`'s docstring wrote `X • L p`
+  where the statement uses `X * ouGen κ σ p`) — fixed — plus one explicitly-optional cosmetic
+  naming item (`ouGen_comp_smulX` vs. the file's own `ouGen_X_mul` / Mathlib's `smul_X` spelling,
+  not lint-enforced) left non-blocking. 3-consecutive-reconfirm clean at the post-fix head
+  `d5cf1d0`. **Final branch head (before integration sync): `d5cf1d0`.**
+
+Both branches: `lake build`, `lake lint` green throughout (standalone, via a worktree with `.lake`
+symlinked from the main checkout); `#print axioms` on every public theorem is the standard three
+(`propext, Classical.choice, Quot.sound`); no `sorry`/`admit`/`native_decide`; attribution headers
+correctly read `Copyright (c) 2026 Yang Ye` / `Authors: Yang Ye` on both.
+
+### Integration sync
+
+Fetched `integration-244-family` fresh immediately before merging (head `a6868eb` at fetch time,
+the `estimation-module` sync landed by a concurrent session during this pass — multiple sessions
+were syncing different branches into the same tip throughout today).
+
+- **discrete-var-module**: integration's copy was byte-identical to the branch's pre-fix tip
+  (`740a584`), so this was a clean fast-forward merge — no conflicts. The integration-branch
+  review itself (8 pr-roll rounds + 1 Fable-gate pass, same fresh-reviewer-per-round discipline)
+  found **4 more real docstring gaps** beyond what the standalone-branch cycle had already caught
+  (the junk-value behavior of `finiteES` and `finiteLaw` specifically at the `α ≤ 0`/`α > 1`
+  boundaries, and a nonnegative-weights qualifier on one of those clauses) — each fixed on *both*
+  the branch and the integration merge per this workspace's "fix in both places" rule, ending the
+  branch at head **`ca09053`** (pushed to `fork discrete-var-module`) and clearing the integration
+  review's own 3-consecutive-clean + Fable-gate bar. `lake build` (9389 jobs), `lake lint`, and
+  `uv run pytest tests/ -q` (58 passed, 1 skipped) all green throughout. Pushed as **`f7a895e`**.
+- **ouspectral-module**: integration's copy had the independently-tightened-but-actually-overclaimed
+  prose described above; diffed against the branch's final content, every difference was the
+  branch being strictly more correct (the reconciled wording, plus everything integration never
+  got), so the branch's file replaced integration's wholesale (merge commit, no conflicts beyond
+  one docstring hunk that the branch's own commit `e876078` had already folded in). The
+  integration-branch review itself (3 rounds + Fable-gate, same discipline) found **two more real
+  issues** beyond the standalone cycle: the module lacked any citation naming its source book (a
+  `## References` section was added, citing S. Bagaria's *Notes on Fixed Income Derivative
+  Pricing* — the correct title/author, verified against the PDF's own title page and already used
+  correctly in `ForwardSmile.lean`; the branch's own first draft of this citation got the title and
+  author wrong, "A. Bagaria, *Fixed Income & Derivative Pricing*", the same error `Inflation.lean`
+  independently carries and which is out of scope here but should be fixed when that file is next
+  touched — fixed to the correct form here); and the two-mode docstring used `λ₁`/`λ₂` notation
+  inconsistent with `twoMode_rate_ge_slowest`'s actual `l₁`/`l₂` binders (renamed). The
+  integration-branch Fable-gate pass separately found that `ouStationaryVariance_tendsto`'s ad-hoc
+  `k = 2κ` parametrization is an undisclosed near-duplicate of the repo's own `vasicekSDEVariance`
+  (`VasicekSDE.lean`) and of an inline variant inside `SchwartzOneFactor.lean`'s proof — applied
+  the minimal safe fix (citing `vasicekSDEVariance` in the docstring) on both the branch and
+  integration; the fuller fix (restating the theorem directly on `vasicekSDEVariance` and having
+  `SchwartzOneFactor` reuse it, which touches two further files) was explicitly left as an
+  optional, non-blocking follow-up. All three findings were fixed on *both* the branch and the
+  integration merge, ending the branch at head **`255fd68`** (pushed to `fork ouspectral-module`)
+  and clearing the integration review's own 3-consecutive-clean + Fable-gate bar (two separate
+  Fable-gate passes total on the integration side: one for the citation/rename fixes, one more
+  after the `vasicekSDEVariance` fix, each followed by its own fresh 3-consecutive-reconfirm).
+  `lake build` (9385 jobs), `lake lint`, and `uv run --offline pytest -q tests/` (58 passed, 1
+  skipped) all green throughout. Pushed as **`d63c517`**.
+
+Integration head after both syncs: **`d63c517`** (parent `f7a895e`, the `discrete-var-module` sync
+landed first in this pass).
+
+### Recommendation (not acted on)
+
+Neither branch was ever opened as an upstream PR. Both are now coverage-verified to the same bar
+as an opened PR (3-consecutive-clean + Fable gate, on both the standalone branch and the
+integration merge) and merged into the integration superset. Opening PRs for both against
+`formal-applied-math/formal-mathfin:main` is a reasonable next step — the maintainer gets
+`discrete-var-module`'s discrete-law VaR/ES worked example and `ouspectral-module`'s OU-generator
+Hermite eigenlayer as reviewable units, same as every other landed module — but is left as the
+user's/maintainer's call rather than done here. Neither branch was found to be a near-duplicate of
+anything else in the repo (checked explicitly by every review round via targeted greps across
+`MathFin/`). `ouspectral-module` additionally carries one open item worth surfacing to whoever
+opens that PR: the optional `vasicekSDEVariance`/`SchwartzOneFactor` consolidation noted above,
+which touches two files beyond this branch's own scope.
+
 ## 2026-10-19 — pr-roll + Fable-gate audit record for PRs #264, #265, #281, #274, #275, #270, #271, #272
 
 Not a values-review round — a durable record that the project's own local discipline (this
