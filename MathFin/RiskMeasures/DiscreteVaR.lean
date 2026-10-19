@@ -35,8 +35,8 @@ of ES over bounded densities is `isGreatest_integral_mul_expectedShortfall`
 
 ## Main results
 
-* `finiteVaR_eq_valueAtRisk`, `finiteES_eq_expectedShortfall`: the finite forms agree with the
-  general definitions at the law `∑ i, q i • δ_i`.
+* `finiteVaR_eq_valueAtRisk`, `finiteES_eq_expectedShortfall`: for `α ∈ (0, 1)` and a probability
+  vector `q`, the finite forms agree with the general definitions at the law `∑ i, q i • δ_i`.
 * `finiteVaR_eq_value_min`: for `α ∈ (0, 1]`, VaR at a finite law is attained at a loss value.
 * `finiteVaR_two_point`: VaR of a loss that is `0` with mass `a` and `c > 0` with mass `1 - a`.
 * `vaR_one_bond`, `vaR_two_halves`: `VaR₀.₉₅` is `0` for the single bond and `50` for the split
@@ -99,7 +99,8 @@ lemma finiteLaw_real_le (hq : ∀ i, 0 ≤ q i) (L : ι → ℝ) (x : ℝ) :
   refine Finset.sum_congr rfl fun i _ ↦ ?_
   by_cases hi : L i ≤ x <;> simp [Measure.dirac_apply, hi, hq i]
 
-/-- `finiteVaR` is `valueAtRisk` at the law `∑ i, q i • δ_i`. -/
+/-- For `α ∈ (0, 1)` and a probability vector `q`, `finiteVaR` is `valueAtRisk` at the law
+`∑ i, q i • δ_i`. -/
 theorem finiteVaR_eq_valueAtRisk (hq : q ∈ stdSimplex ℝ ι) {L : ι → ℝ} {α : ℝ}
     (hα : α ∈ Ioo 0 1) : finiteVaR q L α = valueAtRisk L (finiteLaw q) α := by
   have := isProbabilityMeasure_finiteLaw hq
@@ -109,7 +110,8 @@ theorem finiteVaR_eq_valueAtRisk (hq : q ∈ stdSimplex ℝ ι) {L : ι → ℝ}
     simp [valueAtRisk_le_iff (measurable_of_finite L).aemeasurable hα, finiteLaw_real_le hq.1]
   rw [finiteVaR, hset, csInf_Ici]
 
-/-- `finiteES` is `expectedShortfall` at the law `∑ i, q i • δ_i`. -/
+/-- For `α ∈ (0, 1)` and a probability vector `q`, `finiteES` is `expectedShortfall` at the law
+`∑ i, q i • δ_i`. -/
 theorem finiteES_eq_expectedShortfall (hq : q ∈ stdSimplex ℝ ι) {L : ι → ℝ} {α : ℝ}
     (hα : α ∈ Ioo 0 1) : finiteES q L α = expectedShortfall L (finiteLaw q) α := by
   rw [finiteES, expectedShortfall, intervalIntegral.integral_of_le hα.2.le,
