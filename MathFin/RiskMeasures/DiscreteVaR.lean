@@ -71,8 +71,9 @@ variable {ι : Type*} [Fintype ι]
 noncomputable def finiteVaR (q L : ι → ℝ) (α : ℝ) : ℝ :=
   sInf {x | α ≤ ∑ i with L i ≤ x, q i}
 
-/-- **ES at a finite law**: the quantile average, `(1 - α)⁻¹` times the integral of the quantile
-function `u ↦ finiteVaR q L u` over `[α, 1]`. -/
+/-- **ES at a finite law**: the quantile average, `(1 - α)⁻¹` times the oriented interval integral
+`∫ u in α..1` of the quantile function `u ↦ finiteVaR q L u` — an integral over `[α, 1]` when
+`α ≤ 1`, the only range used in this file. -/
 noncomputable def finiteES (q L : ι → ℝ) (α : ℝ) : ℝ :=
   (1 - α)⁻¹ * ∫ u in α..1, finiteVaR q L u
 
