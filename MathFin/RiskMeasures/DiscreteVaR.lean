@@ -91,7 +91,8 @@ lemma isProbabilityMeasure_finiteLaw (hq : q ∈ stdSimplex ℝ ι) :
 
 variable [MeasurableSingletonClass ι]
 
-/-- Under `finiteLaw q`, the probability of `{L ≤ x}` is the mass summed in `finiteVaR`. -/
+/-- For nonnegative weights `q`, under `finiteLaw q` the probability of `{L ≤ x}` is the mass
+summed in `finiteVaR`. -/
 lemma finiteLaw_real_le (hq : ∀ i, 0 ≤ q i) (L : ι → ℝ) (x : ℝ) :
     (finiteLaw q).real {i | L i ≤ x} = ∑ i with L i ≤ x, q i := by
   rw [measureReal_def, finiteLaw, Measure.coe_finsetSum, Finset.sum_apply]
@@ -138,8 +139,9 @@ theorem finiteVaR_eq_of_mem_of_forall_lt {v₀ : ℝ}
     finiteVaR q L α = v₀ :=
   IsLeast.csInf_eq ⟨hmem, fun x hx ↦ not_lt.1 fun h ↦ (hbelow x h).not_ge hx⟩
 
-/-- The loss values `v` at which the mass of `{L ≤ v}` is at least α form a nonempty finite set:
-at the largest loss value that mass is the full mass `1 ≥ α`. -/
+/-- For a probability vector `q` and `α ≤ 1`, the loss values `v` at which the mass of `{L ≤ v}`
+is at least α form a nonempty finite set: at the largest loss value that mass is the full mass
+`1 ≥ α`. -/
 theorem nonempty_values_mass_ge (hq : q ∈ stdSimplex ℝ ι) (hα1 : α ≤ 1) :
     {v ∈ Finset.univ.image L | α ≤ ∑ i with L i ≤ v, q i}.Nonempty := by
   have hne := (Finset.nonempty_of_sum_ne_zero (by rw [hq.2]; norm_num)).image L
