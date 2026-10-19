@@ -306,9 +306,10 @@ theorem twoMode_rate_ge_slowest {l₁ l₂ c₁ c₂ t : ℝ} (hl₂ : l₁ ≤ 
 
 The chapter's two-dimensional counterexample — the swirl `dZ = -AZ dt + dW` with
 `A = [[1, θ], [-θ, 1]]`, whose antisymmetric part rotates — contributes two matrix
-fragments that need no process theory: the characteristic polynomial of `-A` (roots
-`-1 ± iθ`: for `θ ≠ 0` the spectrum leaves the real line, which in the chapter's argument rules
-out a real orthogonal expansion — that consequence is not formalized here),
+fragments that need no process theory: the characteristic polynomial of `-A` (only the real
+identity `(X + 1)² + θ²` is proved; the chapter reads off from it the complex roots `-1 ± iθ`,
+off the real line for `θ ≠ 0`, ruling out a real orthogonal expansion — neither the complex roots
+nor that consequence is formalized here),
 and the isotropy of the stationary covariance (a symmetric `Σ` with `AΣ + ΣAᵀ = I` is `½I`: the
 rotation drops out of the snapshot, which in the chapter's argument is why a snapshot cannot
 detect non-reversibility — not formalized here). Plus the stationary-variance limit of the
