@@ -35,7 +35,8 @@ quoted futures curve, OFOD ch. 35) is out of scope.
 ## Main results
 
 * `schwartzFuturesPrice` — the closed form `exp(m_T + v_T / 2)`.
-* `schwartzFuturesPrice_eq_integral` — it equals `E[S_T]` for the SDE solution.
+* `schwartzFuturesPrice_eq_integral` — it equals `E[S_T]` for the log spot in its
+  Wiener representation (the SDE bridge is cited, not proven).
 * `schwartzFuturesPrice_tendsto` — the long-maturity flattening limit.
 -/
 
