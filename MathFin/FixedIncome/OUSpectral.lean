@@ -223,11 +223,11 @@ theorem hermiteReal_two : hermiteReal 2 = X * X - 1 := by
   rw [hermiteReal, h2]
   simp
 
-/-- **The `n = 2` mechanism of Calc 14.14, verbatim.** With `f = (x/s)² - 1` (the
+/-- **The `n = 2` mechanism of Calc 14.14.** With `f = (x/s)² - 1` (the
 evaluated `He_2(x/s)`), the generator output evaluates to `-(2κ) · f` — the drift term
-preserves the degree, the diffusion term supplies exactly the constant that closes the
-polynomial back on itself, and the arithmetic uses `σ²/s² = 2κ` (via the stationary-scale
-hypothesis). -/
+preserves the degree (the chapter's text says it "lowers" it, a slip), the diffusion term
+supplies exactly the constant that closes the polynomial back on itself, and the
+arithmetic uses `σ²/s² = 2κ` (via the stationary-scale hypothesis). -/
 theorem ouGen_heigen_two {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2) (x : ℝ) :
     Polynomial.eval x (ouGen κ σ (scaledHermite s 2))
       = -(2 : ℝ) * κ * ((x / s) ^ 2 - 1) := by
@@ -240,12 +240,12 @@ theorem ouGen_heigen_two {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ
 
 The reversibility mechanism of the spectral route, at its Gaussian instance: the
 stationary density `π(x) ∝ exp(-x²/(2s²))` has score `π'/π = -x/s²`, so the drift and
-diffusion fluxes cancel — `(σ²/2)·π' = -κx·π` when `s² = σ²/2κ`. The
-family-level engine behind this computation on the stack is the Rodrigues formula
-`hermite_eq_deriv_gaussian` (`Mathlib/RingTheory/Polynomial/Hermite/Gaussian.lean`:
-Hermite polynomials as
-Gaussian-density derivatives); the two lemmas below are its `n = 0` and `n = 1`
-footprint at the density level. -/
+diffusion fluxes cancel — `(σ²/2)·π' = -κx·π` when `s² = σ²/2κ`. The score computed
+below is the scale-`s` counterpart of the `n = 1` case of the Rodrigues formula
+`hermite_eq_deriv_gaussian` (`Mathlib/RingTheory/Polynomial/Hermite/Gaussian.lean`, unit
+scale: Hermite polynomials as Gaussian-density derivatives), proved here directly by the
+chain rule; the no-flux lemma is that score times `σ²/2` under the stationary-scale
+identity. -/
 
 /-- **The Gaussian score (Calc 14.13's derivative, eval level).** The stationary
 Gaussian density `π(x) = exp(-x²/(2s²))` satisfies `π'(x) = -(x/s²)·π(x)`: the log-density
