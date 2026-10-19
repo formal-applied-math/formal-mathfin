@@ -347,6 +347,74 @@ unrelated), `lake lint` clean, `uv run pytest tests/ -q` 58 passed/1 skipped,
 `python3 -m tools.verify.ledger status` fresh 544/stale 0/missing 0. No
 `sorry`/`admit`/`native_decide` introduced by this pass's own fixes.
 
+A fourth pass of the same audit covered two more branches, both already past their
+3-consecutive-clean pr-roll rounds but with no Fable-gate evidence. Unlike the batches above,
+both branches' file content had already independently diverged further downstream (into the
+larger combined PRs #278 `defi-combined-uniswap-aave` and #279 `risk-stats-combined`, and
+separately into `integration-244-family` itself via unrelated prior edits), so the originating
+branches below are themselves stale forks of what's actually shipping — this pass still ran the
+required local discipline on them as asked, and separately reconciled the genuinely-missing
+fixes into `integration-244-family` directly rather than merging stale content over newer:
+
+- **`defi-uniswap-curve`** (no open PR against this exact branch — superseded downstream by
+  PR #278 `defi-combined-uniswap-aave`, which carries further independent revisions of the same
+  file). No round-1 gaps; already at 3-consecutive-clean pr-roll entering this pass. The
+  Fable-gate pass (head `344daf4`) found: a dead `hs : s.Nonempty` hypothesis (and the `hcard`
+  local it fed) on `harmonicMean_reciprocal_eq_arithmeticMean` — the identity is an unconditional
+  div/div junk-value tautology, true even at `s = ∅` — with the docstring updated to match; a
+  dead `_hk1` hypothesis on `lpFeeShare_nonneg`; missing in-range-reserves disclosure on the
+  `virtualReserveX`/`virtualReserveY` docstrings (the v3 formulas only hold for
+  `√p_a ≤ √P ≤ √p_b`; outside the range actual reserves saturate, not formalized here); and the
+  module docstring undercounting its own result list ("four" when six are listed). All four fixed
+  in `ba288b5`. A fresh post-fix round confirmed clean ("No feedback to provide."). Reached
+  3-consecutive-clean + 1 Fable pass at final head **`ba288b5`**.
+- **`roll-spread-estimator`** (no open PR against this exact branch — superseded downstream by
+  PR #279 `risk-stats-combined`). The pr-roll rounds leading into this pass had already fixed a
+  real gap: the file header previously carried no author at all, now attributed to Yang Ye. The
+  Fable-gate pass (head `afe9599`) found two further real issues: the module docstring's
+  independence-hypothesis bullet list overstated the requirement as pairwise independence among
+  *all* five variables, when `rollCovariance`'s own docstring correctly limits it to pairs split
+  across the two consecutive price changes; and the positive-autocovariance (`γ ≥ 0`) case was
+  undisclosed — `rollSpreadEstimator` is only meaningful when the sample autocovariance is
+  negative, and `Real.sqrt`'s junk-value convention otherwise silently returns a spread of `0`
+  rather than signalling "undefined here". Both fixed in `da0fe28`. A fresh post-fix round
+  confirmed clean. Reached 3-consecutive-clean + 1 Fable pass at final head **`da0fe28`**.
+
+Reconciling into `integration-244-family`: `git merge-base` confirmed the integration branch's
+copies of both files had already diverged from these two originating branches before this pass
+began (independent prior edits had already fixed some of the same issues under different
+wording — RollSpread's independence-hypothesis prose, UniswapCurveMechanics's header order and
+fee-invariant inequality direction). A plain `git merge` of either originating branch would have
+regressed those already-landed improvements, so per rule 10 §6 ("prefer whichever branch's
+version is more complete/recent, then manually re-apply any narrower fix the other branch made
+to the same lines before it was superseded"), the still-missing fixes were instead applied
+directly on `integration-244-family`: the `γ ≥ 0` disclosure (not previously present there) for
+RollSpread; and for UniswapCurveMechanics, the dead `_hk1` hypothesis (still present there), the
+harmonicMean docstring wording (the hypothesis had already been dropped upstream independently,
+but its docstring still said "nonempty"), the in-range-reserves disclosure, and the "four"→"six"
+count fix (still wrong on that branch too). Committed as `a8983d5`, rebuilt (`lake build` green,
+same pre-existing vendored-`BrownianMotion`/`Challenge.lean` `sorry`s, unrelated), re-verified
+(`uv run pytest tests/ -q` 58 passed/1 skipped, `lake lint` clean,
+`python3 -m tools.verify.ledger status` fresh 544/stale 0/missing 0), and pushed — integration
+head **`a8983d5`** after this fourth batch.
+
+**Deferred, left alone, not part of this pass**: a full rule-10 whole-integration-diff pr-roll +
+Fable cycle re-run against the new head `a8983d5` was out of scope for this fourth pass (it was
+scoped to the two named originating branches' own discipline plus reconciling their real gaps,
+not a fresh rule-10 round) — the prior rule-10 round's 3-consecutive-clean + Fable bar was
+established at `0611ed0` and has not been re-run at `a8983d5`. Likewise, no attempt was made to
+reconcile `defi-uniswap-curve`/`roll-spread-estimator` with their downstream-superseding PRs
+(#278, #279) — those are separate, independently-evolving PRs with their own review cycles, and
+the fixes landed here address the specific entries those branches' own git history was missing,
+not a merge of the two lineages. `exotic-options-batch2` (PR verified still an ancestor of
+`integration-244-family` via `git merge-base --is-ancestor`) needed no action in this pass.
+
+### Evidence
+
+`lake build`, `lake lint`, `uv run pytest tests/ -q`, and `python3 -m tools.verify.ledger status`
+all green on both branch worktrees and on `integration-244-family` at every step above. No
+`sorry`/`admit`/`native_decide` introduced anywhere in this pass's own fixes.
+
 ## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
 
 Scope: `FixedIncome/CIRRiccati` by Alfredo Garcia (@oxarbitrage), merged with its two commits
