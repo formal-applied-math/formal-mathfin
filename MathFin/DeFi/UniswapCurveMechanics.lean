@@ -25,10 +25,10 @@ public import Mathlib
 public import MathFin.DeFi.ConstantProductAMM
 
 /-!
-# Uniswap v2/v3 AMM mechanics: impermanent loss, TWAP, fee invariant,
-v3 virtual reserves
+# Uniswap v2/v3 AMM mechanics (DeFi/AMM group, items #25 + TWAP +
+fee invariant + v3 virtual reserves)
 
-This file formalises four further closed-form results about automated
+This file formalises six further closed-form results about automated
 market makers, building on the constant-product substrate in
 `ConstantProductAMM.lean`.
 
@@ -47,7 +47,7 @@ market makers, building on the constant-product substrate in
   the reciprocal of the *harmonic* mean of the B-in-A series, not of its
   arithmetic mean.
 * `swapOutputWithFee`, `fee_invariant_growth`: the Uniswap v2 **fee
-  invariant** `x0·y0 ≤ (x0 + Δx)(y0 - Δy)`, where `Δy = swapOutput x0 y0
+  invariant** `(x0 + Δx)(y0 - Δy) ≥ x0·y0`, where `Δy = swapOutput x0 y0
   (γ·Δx)` is computed from the fee-discounted input (γ the fee retention
   rate), and `lpFeeShare`, the candidate LP value-growth share
   `f = 1 - √(k1/k2)` (only shown nonnegative here, see its docstring).
@@ -63,7 +63,7 @@ namespace MathFin
 
 namespace DeFi
 
-/-! ## Impermanent loss closed form -/
+/-! ## #25: Impermanent loss closed form -/
 
 /-- After the external price moves by factor `r` (new price = `r` times the
 price at deposit), a constant-product pool with invariant `k = x0 * y0` and
@@ -110,7 +110,7 @@ theorem lpPortfolioValue_eq
     impermanentLossReservesX x0 y0 r * (r * y0 / x0)
       + impermanentLossReservesY x0 y0 r = 2 * y0 * Real.sqrt r := by
   unfold impermanentLossReservesX impermanentLossReservesY
-  set s := Real.sqrt r
+  set s := Real.sqrt r with hs_def
   have hs_sq : s ^ 2 = r := Real.sq_sqrt hr.le
   have hs_pos : 0 < s := Real.sqrt_pos.mpr hr
   have hx0' : x0 ≠ 0 := hx0.ne'
@@ -177,14 +177,17 @@ noncomputable def twap (p : ℕ → ℝ) (t1 t2 : ℕ) : ℝ :=
 /-- The TWAP equals the arithmetic mean of the price series over the
 window `(t1, t2]`, i.e. the telescoping accumulator identity really does
 compute a time-weighted average — for `t1 < t2`; at `t1 = t2` both sides
-reduce to `_ / 0 = 0` by Lean's junk-value convention for division. -/
+reduce to `_ / 0 = 0` by Lean's junk-value convention for division, not a
+genuine average over an empty window. -/
 theorem twap_eq_average (p : ℕ → ℝ) (t1 t2 : ℕ) (h : t1 ≤ t2) :
     twap p t1 t2 = (∑ i ∈ Finset.Ico (t1 + 1) (t2 + 1), p i) / ((t2 : ℝ) - (t1 : ℝ)) := by
   unfold twap
   rw [twapAccumulator_sub_eq_sum p t1 t2 h]
 
 /-- **Reciprocal caveat**: the harmonic mean of a finite nonempty family of
-strictly positive values `q`. -/
+values `q` (typically strictly positive, e.g. prices, though no positivity
+hypothesis is required below — the identity is a `div`/`div` junk-value
+tautology that holds unconditionally). -/
 noncomputable def harmonicMean (s : Finset ℕ) (q : ℕ → ℝ) : ℝ :=
   (s.card : ℝ) / ∑ i ∈ s, (1 / q i)
 
@@ -192,9 +195,10 @@ noncomputable def harmonicMean (s : Finset ℕ) (q : ℕ → ℝ) : ℝ :=
 the **reciprocal of the harmonic mean of `q` equals the arithmetic mean of
 `p`** — not the reciprocal of the arithmetic mean of `q`. This is the
 caveat: naively averaging the reciprocal series and inverting gives the
-wrong (harmonic, not arithmetic) mean. Stated for a nonempty family of
-strictly positive values, the intended reading; the identity itself is a
-`div`/`div` junk-value tautology that also holds at `s = ∅`. -/
+wrong (harmonic, not arithmetic) mean. Stated here for strictly positive
+values, the intended reading; the identity itself is a `div`/`div`
+junk-value tautology that holds unconditionally for *any* finite family
+`s`, including the empty one (both sides reduce to `0`). -/
 theorem harmonicMean_reciprocal_eq_arithmeticMean
     (s : Finset ℕ) (p : ℕ → ℝ) :
     1 / harmonicMean s (fun i => 1 / p i) = (∑ i ∈ s, p i) / (s.card : ℝ) := by
@@ -219,14 +223,14 @@ reserve (the fee portion is retained, not refunded) while only the
 fee-adjusted output `Δy` leaves the Y reserve makes the invariant grow
 (weakly) rather than merely hold:
 
-  `x0 * y0 ≤ (x0 + Δx) * (y0 - Δy)`,
+  `(x0 + Δx) * (y0 - Δy) ≥ x0 * y0`,
 
 since `(x0 + γΔx) * (y0 - Δy) = x0 * y0` exactly (the no-fee invariant) and
 `x0 + Δx ≥ x0 + γΔx` with `y0 - Δy > 0`. -/
 theorem fee_invariant_growth
     (x0 y0 Δx γ : ℝ) (hx0 : 0 < x0) (hy0 : 0 < y0) (hΔx : 0 < Δx)
     (hγ0 : 0 < γ) (hγ1 : γ ≤ 1) :
-    x0 * y0 ≤ (x0 + Δx) * (y0 - swapOutputWithFee x0 y0 Δx γ) := by
+    (x0 + Δx) * (y0 - swapOutputWithFee x0 y0 Δx γ) ≥ x0 * y0 := by
   unfold swapOutputWithFee
   have hγΔx : 0 < γ * Δx := mul_pos hγ0 hΔx
   have hinv := swap_preserves_invariant x0 y0 (γ * Δx) hx0 hγΔx
@@ -249,7 +253,7 @@ noncomputable def lpFeeShare (k1 k2 : ℝ) : ℝ :=
 
 /-- `lpFeeShare` is nonnegative when the invariant has not shrunk,
 matching the fee economics (fees only grow `k`). -/
-theorem lpFeeShare_nonneg (k1 k2 : ℝ) (_hk1 : 0 < k1) (hk2 : 0 < k2) (h : k1 ≤ k2) :
+theorem lpFeeShare_nonneg (k1 k2 : ℝ) (hk2 : 0 < k2) (h : k1 ≤ k2) :
     0 ≤ lpFeeShare k1 k2 := by
   unfold lpFeeShare
   have : Real.sqrt (k1 / k2) ≤ 1 := by
@@ -260,11 +264,20 @@ theorem lpFeeShare_nonneg (k1 k2 : ℝ) (_hk1 : 0 < k1) (hk2 : 0 < k2) (h : k1 �
 /-! ## Uniswap v3 virtual-reserve curve -/
 
 /-- **Virtual reserve of token X** in a Uniswap v3 concentrated-liquidity
-position with liquidity `L`, current price `√P`, and range `[√p_a, √p_b]`. -/
+position with liquidity `L`, current price `√P`, and range `[√p_a, √p_b]`.
+This formula represents the position's *in-range* reserves only — valid
+while `√p_a ≤ √P ≤ √p_b`; once the price moves below the range the
+position's actual X reserve saturates instead of following this curve
+(and above the range it holds no X at all), which this file does not
+formalize. -/
 noncomputable def virtualReserveX (L sqrtP sqrtPb : ℝ) : ℝ :=
   L * (1 / sqrtP - 1 / sqrtPb)
 
-/-- **Virtual reserve of token Y** for the same position. -/
+/-- **Virtual reserve of token Y** for the same position. As with
+`virtualReserveX`, this represents the *in-range* reserve only — valid
+while `√p_a ≤ √P ≤ √p_b`; outside the range the actual Y reserve
+saturates rather than following this curve, which is not formalized
+here. -/
 noncomputable def virtualReserveY (L sqrtP sqrtPa : ℝ) : ℝ :=
   L * (sqrtP - sqrtPa)
 
