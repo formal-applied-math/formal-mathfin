@@ -339,7 +339,9 @@ theorem es_one_bond_eq_80 : finiteES oneQ oneL (19 / 20) = 80 := by
 /-! ## The conditional tail mean at an atom -/
 
 /-- **`E[L | L ≥ VaR_α]` at a finite law**: the `q`-weighted mean of `L` over the tail event
-`{i | finiteVaR q L α ≤ L i}`. -/
+`{i | finiteVaR q L α ≤ L i}`. For a probability vector `q` and `α ∈ (0, 1]` the tail mass is
+positive, so this is a genuine conditional mean; outside that range the tail mass can be `0` and
+the quotient returns the junk value `0`. -/
 noncomputable def condTailMean (q L : ι → ℝ) (α : ℝ) : ℝ :=
   (∑ i with finiteVaR q L α ≤ L i, q i * L i) /
     (∑ i with finiteVaR q L α ≤ L i, q i)
