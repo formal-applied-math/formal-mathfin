@@ -102,8 +102,8 @@ Multi-dimensional seed:
 * `multiGauss_hasLaw_joint` — the joint bridge: the joint vector of `d` independent
   standard normals has the product law `multiGauss d` (Mathlib's `iIndepFun.hasLaw_pi`);
 * `multiD_consistency` — the Etemadi strong law for pairwise-independent vector draws
-  with law `multiGauss d` and any measurable integrable payoff of the whole vector; `multiD_consistency_iid` — the
-  full-independence specialization;
+  with law `multiGauss d` and any measurable integrable payoff of the whole vector;
+  `multiD_consistency_iid` — the full-independence specialization;
 * `multiD_integrable_of_bounded` — the bounded-payoff instance of the seed's
   integrability hypothesis.
 

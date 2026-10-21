@@ -67,7 +67,8 @@ bottom-up: `bandIntegral_slice` (the band-to-slice conversion; the Fubini interc
 `expectation_pathIntegral_eq` comes from `ItoDriftExpectation`), `incrementEnergy` (the
 increment-energy law), `deltaStepLp`/`deltaStepLp_tendsto` (the step approximants), the per-cell
 weighted isometry (`weightedCellSq_step`, `clm_band_energy`, `stepIncr_stepCLM_ae`), the gap
-decay (`errorIncr_ae`, `cellGap_le`, `gapSum_le`) and the unconditional quadratic block, the
+decay (`errorIncr_ae`, `cellGap_le`, `gapSum_le`) and the quadratic block with its gap hypothesis
+discharged (`quadraticSqSum_tendsto_uncond`, still for the hypothesized `M`), the
 fourth/third-moment bounds (`stepSum_pow4_le`, `trueIncr_pow4_le`, `trueIncr_pow3_le`),
 the drift primitive (`AdaptedDrift.driftPath` reused, with its adaptedness
 `stronglyMeasurable_driftPath`, from `Foundations/AdaptedDrift`), the drift
@@ -77,10 +78,11 @@ block, the two quadratic corrections and the Taylor-remainder convergence.
 
 Headline (conditional on a version `M`): `itoDrift_expectation_identity_adapted` — the
 integrated Itô–drift identity stated above, for bounded adapted path-continuous coefficients,
-under the hypotheses on `M` and `X` above. Its unconditional companion — the same identity for
-the process the library constructs, derived from `ItoFormulaAdapted.ito_formula_adapted` by
-centering and Fubini, with weaker hypotheses on `f` (C², no third derivative) but with `X`
-fixed to the constructed process and `B` additionally assumed path-continuous (`hBcont`) — is
+under the hypotheses on `M` and `X` above. Its companion with no hypothesized `M` — the same
+identity for the process the library constructs, derived from
+`ItoFormulaAdapted.ito_formula_adapted` by centering and Fubini, with weaker hypotheses on `f`
+(`f''` continuous, `f'` and `f''` bounded, no third derivative) but with `X` fixed to the
+constructed process and `B` additionally assumed path-continuous (`hBcont`) — is
 `itoDrift_expectation_identity_adapted_uncond` in
 `MathFin.Foundations.ItoFormulaAdaptedDriftUncond`.
 Under `hBcont`, the headline's own conclusion follows from that companion by a.e. congruence
@@ -1243,7 +1245,7 @@ theorem quadraticSqSum_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Me
 
 end StageFourC
 
-/-! #### Stage 5a — the gap decay, unconditional
+/-! #### Stage 5a — the gap decay, discharging `hgap` (for the hypothesized `M`)
 
 The per-cell Cauchy–Schwarz pairing of the error increment `δεₖ = ΔMₖ − δ(tₖ)·ΔBₖ`
 against the cell energy. The error increment is the band increment of the CLM process of
@@ -1702,9 +1704,9 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
                   Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
             ∂(trimMeasure_T (μ := μ) T hBmeas)) := by ring
 
-/-- **The summed gap bound** (the `hgap` witness of `quadraticSqSum_tendsto`, made
-unconditional): the absolute difference between the summed weighted second moments and
-the frozen rectangle sum is at most `2·|C_w|·|D_δ|·√T` times the `L²`
+/-- **The summed gap bound** (the `hgap` witness of `quadraticSqSum_tendsto`, proved for the
+hypothesized `M` of `hMadap`, `hMeq`): the absolute difference between the summed weighted
+second moments and the frozen rectangle sum is at most `2·|C_w|·|D_δ|·√T` times the `L²`
 norm of the integrand error `φ − δⁿ` — per-cell Cauchy–Schwarz (`cellGap_le`), then
 finite-sum Cauchy–Schwarz against the cell lengths (telescoping to `T`) and the summed band
 energies of the error class (telescoping to `‖φ − δⁿ‖²` via `uniform_band_split` and the
@@ -1848,8 +1850,9 @@ theorem gapSum_le (n : ℕ) (hn : 0 < n) {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
         ∂(trimMeasure_T (μ := μ) T hBmeas)) := by ring
 
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- **The convergence of the quadratic block, unconditional** (the `hgap` hypothesis of
-`quadraticSqSum_tendsto` discharged by `gapSum_le` + `deltaStepLp_tendsto`). -/
+/-- **The convergence of the quadratic block, gap hypothesis discharged** (the `hgap`
+hypothesis of `quadraticSqSum_tendsto` discharged by `gapSum_le` + `deltaStepLp_tendsto`). Not
+unconditional: `M` is still a hypothesized version of `δ●B` (`hMadap`, `hMeq`). -/
 theorem quadraticSqSum_tendsto_uncond (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t))
     {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
@@ -3113,8 +3116,8 @@ stochastic integral has zero mean"); the drift block is the pathwise left-endpoi
 Riemann–Stieltjes sum (`AdaptedDrift.tendsto_sum_mul_driftPath_sub` along each path at the
 weight `f'∘X` + DCT + the stage-1
 Fubini `expectation_pathIntegral_eq`); the quadratic block is `quadraticSqSum_tendsto_uncond` at the
-weight `f″∘X` plus the `O(mesh)` drift corrections (`𝔼|ΔM·driftIncr| ≤ 2D_βD_δ·cell^{3/2}`,
-`𝔼[driftIncr²] ≤ (D_β·cell)²`, both summed to `O(√mesh)`, `O(mesh)`); the Taylor
+weight `f″∘X` plus the drift corrections (`𝔼|ΔM·driftIncr| ≤ 2D_βD_δ·cell^{3/2}`,
+`𝔼[driftIncr²] ≤ (D_β·cell)²`, which the proofs sum to `O(√mesh)` and `O(mesh)`); the Taylor
 remainder dies by `abs_discreteTaylorRemainder_le` + `trueIncr_pow3_le`
 (`taylorRemainderSum_tendsto`). -/
 
@@ -3623,7 +3626,7 @@ theorem driftSum_expect_tendsto (hBmeas : ∀ t, Measurable (B t))
 omit hB hδadap hδcont hδbdd hMadap hMeq in
 /-- **The drift block** (`driftBlock_tendsto`): for `X` adapted and path-continuous, `g`
 continuous with `|g| ≤ C₁`, and `β` bounded adapted path-continuous, the per-cell drift
-sums of the adapted assembly converge to the time-integral of the frozen means,
+sums of the adapted assembly converge to the time integral of the means `𝔼[g (X_s) β_s]`,
 
   `∑ₖ 𝔼[g (X tₖ) · (AdaptedDrift.driftPath β tₖ₊₁ − AdaptedDrift.driftPath β tₖ)]
   → ∫₀ᵀ 𝔼[g (X_s) β_s] ds`.
@@ -3775,10 +3778,10 @@ private theorem tendsto_inv_sqrt_nat_add :
   rw [Real.sqrt_div (by norm_num : (0 : ℝ) ≤ 1), Real.sqrt_one]
 
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- **The drift² corrections of the quadratic block die** (`O(mesh)`): the summed absolute
-expectations of the frozen weight against the drift-increment squares are at most
-`2·C₂·D_β²·T²/(n+1)` — each drift increment is pointwise `D_β·cell`
-(`AdaptedDrift.abs_driftPath_sub_le`) and the cells telescope to `T`. -/
+/-- **The drift² corrections of the quadratic block die**: the statement is the limit `0`.
+The proof bounds the summed absolute expectations of the frozen weight against the
+drift-increment squares by `2·C₂·D_β²·T²/(n+1)` (`O(mesh)`) — each drift increment is
+pointwise `D_β·cell` (`AdaptedDrift.abs_driftPath_sub_le`) and the cells telescope to `T`. -/
 theorem quadDriftSqSum_tendsto (hBmeas : ∀ t, Measurable (B t)) {β : ℝ≥0 → Ω → ℝ}
     {X : ℝ≥0 → Ω → ℝ} (T : ℝ≥0)
     (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
@@ -3930,9 +3933,9 @@ private theorem one_div_sqrt_le_two {n : ℕ} (hn : 0 < n) :
   simpa using hsq
 
 set_option maxHeartbeats 1600000 in
-/-- **The drift–martingale cross corrections of the quadratic block die** (`O(√mesh)`):
-the summed absolute expectations of the frozen weight against
-`Δ(AdaptedDrift.driftPath β)ₖ·ΔMₖ` are at most `2·C₂·D_β·|D_δ|·T·√T/√(n+1)` —
+/-- **The drift–martingale cross corrections of the quadratic block die**: the statement is
+the limit `0`. The proof bounds the summed absolute expectations of the frozen weight against
+`Δ(AdaptedDrift.driftPath β)ₖ·ΔMₖ` by `2·C₂·|D_β|·|D_δ|·T·√T/√(n+1)` (`O(√mesh)`) —
 Cauchy–Schwarz pairs the
 `D_β·cell`-bounded drift increment (`AdaptedDrift.abs_driftPath_sub_le`) against the
 `D_δ²·cell`-energy martingale increment (`trueIncr_sq_le`), and the cells telescope to `T`. -/
@@ -4144,7 +4147,8 @@ theorem quadCrossSum_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω �
 
 set_option maxHeartbeats 1600000 in
 /-- **The Taylor remainder dies**: the summed discrete Taylor remainders along the uniform
-partition have expectation tending to `0` — each `|Rₖ| ≤ C₃·|ΔXₖ|³`
+partition have expectation tending to `0` (the statement; the rate below is the proof's) —
+each `|Rₖ| ≤ C₃·|ΔXₖ|³`
 (`abs_discreteTaylorRemainder_le`) with `ΔXₖ = Δ(AdaptedDrift.driftPath β)ₖ + ΔMₖ` (the increment
 decomposition), `(a+b)³ ≤ 4·(a³+b³)` (`pow3_add_le`), the drift increment pointwise
 `D_β·cell`, and the martingale increment `𝔼|ΔM|³ ≤ √(3·(D_δ²·cell)³)`

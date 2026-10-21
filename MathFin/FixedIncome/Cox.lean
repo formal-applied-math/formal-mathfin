@@ -17,9 +17,9 @@ public import MathFin.FixedIncome.CDSTimeVarying
 The Cox construction of a default time, for a deterministic intensity: for `h`
 continuous and strictly positive on all of `ℝ`, with `Λ = cumHazard h → ∞`, the
 time obtained by inverting a unit-exponential clock through `Λ` satisfies, for
-`t, T ≥ 0`, the survival law `P(τ > t) = e^{−Λ(t)}` and the density-pricing
-identity `P(τ ≤ T) = ∫₀ᵀ h(s)·e^{−Λ(s)} ds`. The CDS legs are *defined* as the
-deterministic integrals `c·∫₀ᵀ e^{−rs}S(s) ds` (premium) and
+`t, T ≥ 0`, the survival law `P(τ > t) = e^{−Λ(t)}` and the default-density
+identity `P(τ ≤ T) = ∫₀ᵀ h(s)·e^{−Λ(s)} ds` (undiscounted; nothing is priced against
+`τ`). The CDS legs are *defined* as the deterministic integrals `c·∫₀ᵀ e^{−rs}S(s) ds` (premium) and
 `(1−R)·∫₀ᵀ e^{−rs}h(s)S(s) ds` (protection); no theorem here identifies them with
 expectations over `τ`, and the fair spread is the algebraic solution of
 `c·A = (1−R)·L` for `A > 0`.

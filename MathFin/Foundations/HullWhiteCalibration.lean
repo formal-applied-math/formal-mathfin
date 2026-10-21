@@ -498,9 +498,10 @@ continuity of `deriv f0` (`contDiff_one_iff_deriv`). -/
 noncomputable def theta (f0 : ℝ → ℝ) (κ σ : ℝ) (t : ℝ) : ℝ :=
   deriv f0 t + κ * f0 t + (σ ^ 2 / (2 * κ)) * (1 - Real.exp (-(2 * κ * t)))
 
-/-- The calibrated particular solution in closed form: `β(t) = f(0,t) +
-(σ²/2κ²)·(1 − e^{−κt})²` — the initial forward plus the convexity correction,
-i.e. the calibrated expected short rate. -/
+/-- The closed form `β(t) = f(0,t) + (σ²/2κ²)·(1 − e^{−κt})²` — the initial forward plus
+the convexity correction. A definition: that it is the calibrated deterministic part is
+`mean_eq_forward` (for `f0 ∈ C¹`, `κ ≠ 0`, `r₀ = f(0,0)`), and that it is the expected short
+rate is `calibMean_eq_forward` (for `κ > 0`). -/
 noncomputable def calibAlpha (f0 : ℝ → ℝ) (κ σ : ℝ) (t : ℝ) : ℝ :=
   f0 t + (σ ^ 2 / (2 * κ ^ 2)) * (1 - Real.exp (-(κ * t))) ^ 2
 

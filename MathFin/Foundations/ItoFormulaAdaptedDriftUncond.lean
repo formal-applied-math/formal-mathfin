@@ -8,7 +8,7 @@ module
 public import MathFin.Foundations.ItoFormulaAdapted
 public import MathFin.Foundations.ItoFormulaTDRemainder
 
-/-! # The unconditional integrated Itô–drift identity (the constructed process)
+/-! # The integrated Itô–drift identity for the constructed process (no hypothesized `M`)
 
 A corollary of `ItoFormulaAdapted.ito_formula_adapted`: for the Itô process the library
 constructs,
@@ -16,7 +16,7 @@ constructs,
   `X = c + ∫₀• β ds + itoContinuousMod` at the `processToLp` class of `δ`
   (`ItoFormulaAdapted.adaptedItoProcess`, whose `X 0 = c` almost surely),
 
-the integrated Itô–drift identity holds **unconditionally**:
+the integrated Itô–drift identity holds with no hypothesized version `M` of `δ●B`:
 
   `𝔼[f(X_T)] = f c + ∫₀ᵀ (𝔼[f'(X_s)·β_s] + ½·𝔼[f''(X_s)·δ_s²]) ds`,
 
@@ -51,10 +51,11 @@ Hypothesis comparison with the conditional theorem (neither statement implies th
 
 The `X`-generality is not extra reach once `hBcont` holds: every such `X` is, at each `t ≤ T`,
 a.s. equal to the constructed process, so the conditional theorem's exact conclusion follows
-from the unconditional one by a.e. congruence. That reduction is
-`itoDrift_expectation_identity_adapted_of_uncond` below — it needs only `hMeq` and `hXrel` (no
-`hMadap`, no `hXcont`) and `f ∈ C²`. The conditional theorem's only remaining extra reach is a
-`B` without everywhere-continuous paths.
+from `itoDrift_expectation_identity_adapted_uncond` by a.e. congruence. That reduction is
+`itoDrift_expectation_identity_adapted_of_uncond` below — of the `M`/`X` hypotheses it needs
+only `hMeq` and `hXrel` (no `hMadap`, no `hXcont`), and of `f` only twice differentiable with
+`f''` continuous and `f'`, `f''` bounded. The conditional theorem's only remaining extra reach
+is a `B` without everywhere-continuous paths.
 
 ## Relation to the conditional route
 
@@ -66,7 +67,8 @@ not need that `M`.
 
 ## Result
 
-* `itoDrift_expectation_identity_adapted_uncond` — the unconditional identity (headline);
+* `itoDrift_expectation_identity_adapted_uncond` — the identity for the constructed process,
+  with no hypothesized `M` but with `hBcont` (headline);
 * `itoDrift_expectation_identity_adapted_of_uncond` — the conditional theorem's conclusion
   recovered from it under `hBcont`, for any version `M` and `X = c + ∫₀• β ds + M`;
 * `band_integrable` (private) — product integrability of a bounded predictable weight on a
@@ -109,7 +111,7 @@ private theorem band_integrable {w : ℝ≥0 → Ω → ℝ}
   .of_bound ((hw_pred.mono (natFiltration hBmeas).predictable_le_prod).aestronglyMeasurable)
       Cw (ae_of_all _ fun z ↦ (Real.norm_eq_abs _).trans_le (hw_bdd z.1 z.2))
 
-/-- **The integrated Itô–drift identity, unconditionally, for the constructed process.** For
+/-- **The integrated Itô–drift identity for the constructed process, no hypothesized `M`.** For
 `X = adaptedItoProcess T hBmeas (processToLp δ) c β` (so `X 0 = c` almost surely),
 `𝔼[f(X_T)] = f c + ∫₀ᵀ (𝔼[f'(X_s)·β_s] + ½·𝔼[f''(X_s)·δ_s²]) ds`, for `B` a pre-Brownian
 motion with every path continuous, `β, δ` bounded, `natFiltration`-adapted and path-continuous,
@@ -226,8 +228,8 @@ theorem itoDrift_expectation_identity_adapted_uncond (hB : IsPreBrownianReal B �
   simp only [g]
   rw [integral_add (hAs s) ((hBs s).const_mul _), integral_const_mul]
 
-/-- **The conditional theorem's conclusion, recovered from the unconditional one under
-`hBcont`.** If `M` is any version of the Itô process of `δ` (`hMeq`; no adaptedness or path
+/-- **The conditional theorem's conclusion, recovered from the constructed-process identity
+under `hBcont`.** If `M` is any version of the Itô process of `δ` (`hMeq`; no adaptedness or path
 continuity asked) and `X = c + ∫₀• β ds + M` (`hXrel`), then `X t` agrees almost surely with the
 constructed process at every `t ≤ T`, and the conclusion of the conditional
 `itoDrift_expectation_identity_adapted` follows from

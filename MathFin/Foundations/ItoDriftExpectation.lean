@@ -170,7 +170,8 @@ theorem expectation_pathIntegral_eq {w : ℝ≥0 → Ω → ℝ}
   exact (tendsto_nhds_unique hdet' hdct).symm
 
 /-- **The integrated Itô–drift identity, constant-coefficient case.** For the
-constant-coefficient Itô process `X_t = X₀ + b·t + σ·B_t` and `f` three times differentiable
+constant-coefficient Itô process `X_t = X₀ + b·t + σ·B_t`, with `B` a pre-Brownian motion with
+measurable sections and every path continuous (`hBcont`), and `f` three times differentiable
 with `f'`, `f''`, `f'''` bounded,
 
   `𝔼[f(X_T)] = 𝔼[f(X₀ + b·0 + σ·B₀)] + ∫₀ᵀ 𝔼[f'(X_s)·b + ½·f''(X_s)·σ²] ds`.
