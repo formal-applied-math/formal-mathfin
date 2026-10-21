@@ -237,8 +237,9 @@ Comparator below).
 - [`MathFin/Examples.lean`](MathFin/Examples.lean): five representative proofs.
 - [`docs/open-problems.md`](docs/open-problems.md): a survey of open problems in mathematical
   finance.
-- [`docs/roadmap.md`](docs/roadmap.md) and the
-  [issue tracker](https://github.com/formal-applied-math/formal-mathfin/issues): planned work.
+- [`docs/status.md`](docs/status.md): where the program stands, and its backlog, the
+  [issue tracker](https://github.com/formal-applied-math/formal-mathfin/issues).
+- [`docs/roadmap.md`](docs/roadmap.md): where it is going and why.
 - [`docs/README.md`](docs/README.md): an index of the remaining documents.
 
 ## Contributing
@@ -287,8 +288,8 @@ release. Both are in [`CITATION.cff`](CITATION.cff).
 ## Acknowledgements
 
 The library depends on Mathlib and on BrownianMotion, the formalization of Brownian motion and
-stochastic integration led by Rémy Degenne. Much of the benchmark follows Yuri F. Saporito's
-*Stochastic Processes*. The contract language takes its design ideas, but no code, from Paul
+stochastic integration led by Rémy Degenne. The stochastic-processes part of the benchmark follows Yuri
+F. Saporito's *Stochastic Processes*. The contract language takes its design ideas, but no code, from Paul
 Bilokon's *The Contract Is Not the Model* (2026), and the survival models draw on Yosuke Ito's
 Archive of Formal Proofs entry on actuarial mathematics ([`docs/sources.md`](docs/sources.md)). The
 American put results are ported from Robert Martin's

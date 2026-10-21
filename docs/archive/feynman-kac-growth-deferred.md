@@ -48,7 +48,7 @@ the obstruction that blocks the existing bounded-`C²` FK proof
 
 1. **Permanently redundant for the BS model.** `BlackScholes/PDE.lean` `bs_pde_holds`
    already proves the closed-form price `bsV` satisfies the BS PDE (via genuine
-   `HasDerivAt` Greeks), and `Foundations/PricingFromBrownian.bs_call_formula_via_brownian`
+   `HasDerivAt` Greeks), and `Bridges/PricingFromBrownian.bs_call_formula_via_brownian`
    proves the risk-neutral expectation equals `bsV`. Compose them ⇒ "risk-neutral price
    solves the BS PDE" is already a theorem. A second, structural derivation of the same
    fact adds depth but fills no capability gap.

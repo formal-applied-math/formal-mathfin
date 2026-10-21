@@ -278,7 +278,7 @@ and the `Martingale/Centering.lean` predictability restatements.
 | `MathFin.mem_gains_imp_predictable` (`Foundations/FTAPDiscrete.lean:111`) | `[MeasurableSingletonClass Ω]` |
 | `MathFin.gains_disjoint_stdSimplex` (`Foundations/FTAPDiscrete.lean:148`) | `[IsProbabilityMeasure P]` |
 | `MathFin.noArbitrage_of_isEMM` (`Foundations/FTAPDiscrete.lean:225`) | `[Nonempty Ω]`, `[IsProbabilityMeasure P]` |
-| `MathFin.BSCallHyp.exists_of_physical` (`Foundations/GaussianGirsanov.lean:145`) | `[IsProbabilityMeasure P]` |
+| `MathFin.BSCallHyp.exists_of_physical` (`Bridges/GaussianGirsanov.lean:145`) | `[IsProbabilityMeasure P]` |
 | `MathFin.sde_pathwise_uniqueness` (`Foundations/SDEUniqueness.lean:171`) | `[IsProbabilityMeasure μ]` |
 | `MathFin.riskContribution_eq_variance_div_card_of_riskParity` (`Portfolio/RiskParityFOC.lean:132`) | `[DecidableEq ι]` |
 | `MathFin.coherentRisk_isLUB` (`RiskMeasures/AcceptanceSet.lean:103`) | `[Nonempty ι]` |

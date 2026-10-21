@@ -75,7 +75,7 @@ form*, not the general theorem).
 ## Found already-done
 
 The "BM-under-use" gap (idiom reviewer) is already closed:
-`Foundations/PricingFromBrownian.lean` provides 11 `…_via_brownian` corollaries
+`Bridges/PricingFromBrownian.lean` provides 11 `…_via_brownian` corollaries
 (call, put, parity, Bachelier, digitals, power, dividends, stock-numeraire, KMV,
 Merton) routing the flagship prices through `BSCallHyp.of_isPreBrownian`. No new
 corollaries were built.

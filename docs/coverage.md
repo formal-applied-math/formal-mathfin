@@ -77,7 +77,7 @@ Library modules added without corpus entries, each stating its own scope:
 `Foundations/BivariateNormalCDF` (the standard `N₂`, its law, margins, covariance, symmetries
 and the `r = 0, ±1` cases), `Foundations/GaussianCopula`, `Foundations/GammaPoissonMixturePgf`
 (the Gamma MGF, which Mathlib lacks, and the Poisson–Gamma mixture as an iterated integral),
-`Foundations/OUSpectral` (the OU generator on Hermite polynomials), `Foundations/LSVLeverage`,
+`Foundations/OUSpectral` (the OU generator on Hermite polynomials), `BlackScholes/LSVLeverage`,
 `Foundations/Estimation`, `Foundations/ItoFormulaAdaptedDriftConstructed` (the integrated Itô–drift
 identity for the constructed process, with no hypothesized `M`), `BlackScholes/ForwardSmile`,
 `BlackScholes/KirkSpreadApproximation`, `BlackScholes/StulzTwoAssetRainbow`,
@@ -506,7 +506,7 @@ file has the unnormalized Esscher transform `(∫ e^f dμ)·μ.tilted f = e^f·�
   only in the drift are equivalent (`jumpDiffusionIncrementLaw_absolutelyContinuous`): on the
   canonical model a change of drift is a move of the standard normal sample, and the moved
   Gaussian `N(m, 1)` is the Esscher tilt of `N(0, 1)` (`gaussianReal_tilted_const_mul`), equivalent
-  to it. This is static Girsanov on the Gaussian factor (`Foundations/GaussianGirsanov.lean`).
+  to it. This is static Girsanov on the Gaussian factor (`Bridges/GaussianGirsanov.lean`).
 - Incompleteness at one date. The Esscher transform multiplies the Lévy measure by `e^{θx}`
   (`smul_tilted_eq_withDensity`). Suppose `σ ≠ 0`, the jumps are nontrivial (`Λ > 0`, `ν` not the
   point mass at `0`), the jump law's moment-generating function is finite near `0` and near `θ`
@@ -2652,7 +2652,7 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > the 5 `markov_chains` entries whose `library_wrapper` credit rested on a
 > since-removed second backend while the active Lean code is a structural
 > specification (matching how `poisson_processes` already tiers its structural
-> entries). See `docs/deep-review-2026-05-29.md`.
+> entries). See `docs/archive/deep-review-2026-05-29.md`.
 >
 > **Upgrade-properly round (2026-05-29).** Rather than only relabel down, two of
 > those entries were *earned back to `full`* by re-pointing the benchmark at the
@@ -2856,4 +2856,4 @@ Per-pass session logs and the pre-2026-05 hybrid-backend validation records
 were removed from this file on 2026-05-30, when the SymPy and Isabelle backends
 were stripped (the project is Lean-only). They remain in git history. The
 2026-05-29 honesty re-audit — the basis for the current counts above — is also
-recorded in `docs/deep-review-2026-05-29.md`.
+recorded in `docs/archive/deep-review-2026-05-29.md`.

@@ -278,13 +278,13 @@ The same lemma gives the Esscher transform of a jump-diffusion without jumps
 (`jumpDiffusionIncrementLaw_zero_tilted`). The same file's tilted moments and identification of
 a law by its moment-generating function give the case with jumps
 (`jumpDiffusionIncrementLaw_tilted`).
-[`Foundations/GaussianGirsanov.lean`](../MathFin/Foundations/GaussianGirsanov.lean)
+[`Bridges/GaussianGirsanov.lean`](../MathFin/Bridges/GaussianGirsanov.lean)
 
 ### BSCallHyp from a Brownian model ✅
 A concrete Brownian-driven physical model produces the pricing hypothesis
 directly (`BSCallHyp.of_isPreBrownian`, `bsTerminal_via_brownian`) — the second
 route into `BSCallHyp`.
-[`Foundations/BSCallHypFromBrownian.lean`](../MathFin/Foundations/BSCallHypFromBrownian.lean)
+[`Bridges/BSCallHypFromBrownian.lean`](../MathFin/Bridges/BSCallHypFromBrownian.lean)
 
 ### Continuous-time first FTAP — discounted price is a `Q`-martingale ✅
 Under the risk-neutral measure, the discounted Black–Scholes price
@@ -457,7 +457,7 @@ infrastructure. See [`roadmap.md`](roadmap.md).
   this is the next gate. The infinite-horizon `L2Predictable` variant of the
   integral itself is now **delivered** (`itoIntegralL2` in
   `Foundations/ItoIntegralL2Dense.lean`, B2, 2026-06-13) — see
-  [`ito-integral-clm-deferred.md`](ito-integral-clm-deferred.md). The
+  [`ito-integral-clm-deferred.md`](archive/ito-integral-clm-deferred.md). The
   **localization entry point** is delivered too (B3, 2026-06-13): the elementary
   Itô integral is a continuous **local martingale** in Degenne's
   `IsLocalMartingale` class given continuous Brownian paths

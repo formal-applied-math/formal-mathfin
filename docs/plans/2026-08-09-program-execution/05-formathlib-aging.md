@@ -45,7 +45,7 @@ Rules:
   flagged loudly in CI output — visible, not failing, to start.
 - `merged` entries get deleted at the next pin bump that contains them; the
   report lists "deletable at current pin" as its top section. The
-  pin-bump drift sweep (`docs/upstream-consumption-review-2026-07-27.md`
+  pin-bump drift sweep (`docs/archive/upstream-consumption-review-2026-07-27.md`
   method) picks these up.
 
 ## Cross-library consumption (wire into both CLAUDE.md files)

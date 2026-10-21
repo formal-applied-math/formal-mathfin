@@ -588,8 +588,8 @@ The butterfly-arbitrage criterion is *already formalized*, in substance:
 | `BlackScholes/BreedenLitzenberger.breedenLitzenberger` | `∂²V/∂K² = e^{−rT}·density` — butterfly-freeness **is** this second derivative's sign |
 | `BreedenLitzenberger.lognormalTerminalPDF_nonneg_via_strike_convexity` | the density-nonnegativity ⟸ strike-convexity route, already proved |
 | `BlackScholes/StrikeConvexity.bsV_strike_convexOn`, `bsP_strike_convexOn` | the convexity side for calls and puts |
-| `BlackScholes/{ImpliedVolatility,BisectionIV,NewtonRaphsonIV,NewtonConvergence}` | the implied-vol layer, with convergence |
-| `PutStrikeConvexity`, `SpotConvexity`, `StaticBounds`, `PriceBounds` | the surrounding static-arbitrage results |
+| `BlackScholes/{ImpliedVolatility,BisectionIV,NewtonConvergence}` | the implied-vol layer, with convergence |
+| `PutStrikeConvexity`, `SpotConvexity`, `PriceBounds` | the surrounding static-arbitrage results |
 
 Missing is small and well-defined: an SVI parametrization module and
 Durrleman's `g`. Positivity certificates land in the house idiom
@@ -598,7 +598,7 @@ Durrleman's `g`. Positivity certificates land in the house idiom
 ### 2. American boundary convexity for `0 < q < r` (§1) — solved in #212
 
 `Binomial/SnellEnvelope.americanPrice_is_snell_envelope` plus
-`Binomial/American`, `AmericanCallNoDividend`, `Bermudan`,
+`Binomial/American`, `Bermudan`,
 `MertonAmericanCallTree`, `BlackScholes/Dividends`, and the convexity trio
 (`StrikeConvexity`, `PutStrikeConvexity`, `SpotConvexity`).
 `Binomial/CRRConvergence` is the discrete→continuous seam.

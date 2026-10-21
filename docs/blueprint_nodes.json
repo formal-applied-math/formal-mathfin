@@ -81,12 +81,12 @@
   "text":
   "A concrete Brownian-driven physical model produces the pricing\n  hypothesis directly — the second route into `BSCallHyp`.",
   "name": "MathFin.BSCallHyp.of_isPreBrownian",
-  "module": "MathFin.Foundations.BSCallHypFromBrownian",
+  "module": "MathFin.Bridges.BSCallHypFromBrownian",
   "line": 96,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:bscallhyp-brownian",
-  "file": "/app/MathFin/Foundations/BSCallHypFromBrownian.lean"},
+  "file": "/app/MathFin/Bridges/BSCallHypFromBrownian.lean"},
  {"uses":
   ["def:brownian-motion", "thm:discrete-ito", "thm:quadratic-variation"],
   "title": "Itô for x² in L²: ∑B·ΔB → ½(B_T²−B₀²−T)",
@@ -104,12 +104,12 @@
   "text":
   "Tilting the physical Gaussian by an exponential density yields\n  an equivalent probability measure with shifted mean — static Girsanov,\n  constructed, not assumed.",
   "name": "MathFin.hasLaw_esscher_tilt",
-  "module": "MathFin.Foundations.GaussianGirsanov",
+  "module": "MathFin.Bridges.GaussianGirsanov",
   "line": 98,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:esscher-tilt",
-  "file": "/app/MathFin/Foundations/GaussianGirsanov.lean"},
+  "file": "/app/MathFin/Bridges/GaussianGirsanov.lean"},
  {"uses": [],
   "title": "BS PDE ↔ Itô-drift balance (algebraic)",
   "text":
@@ -207,12 +207,12 @@
   "text":
   "Under the Esscher-derived risk-neutral measure the call price\n  is the discounted expectation: **the risk-neutral measure is a theorem, not an\n  axiom** — `BSCallHyp` stops being a hypothesis.",
   "name": "MathFin.bs_call_formula_of_physical",
-  "module": "MathFin.Foundations.GaussianGirsanov",
+  "module": "MathFin.Bridges.GaussianGirsanov",
   "line": 224,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:girsanov-call",
-  "file": "/app/MathFin/Foundations/GaussianGirsanov.lean"},
+  "file": "/app/MathFin/Bridges/GaussianGirsanov.lean"},
  {"uses":
   ["def:brownian-motion", "def:ito-integral-clm", "thm:market-completeness"],
   "title": "The pricing measure on 𝓕ᴮ_T is unique",

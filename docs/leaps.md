@@ -14,7 +14,7 @@ This document is the narrative. For the per-theorem audit see
 
 ## Leap 1 — static Girsanov: the risk-neutral measure is *derived*
 
-`MathFin/Foundations/GaussianGirsanov.lean`.
+`MathFin/Bridges/GaussianGirsanov.lean`.
 
 `BSCallHyp` is no longer an axiom. The risk-neutral measure `Q` is
 *constructed* from the physical measure `P` by an explicit Radon-Nikodym
@@ -38,7 +38,7 @@ slice of Girsanov tractable without the path-wise stochastic integral.
 
 ## Leap 2 — the genesis cascade: physical → EMM → pricing
 
-`MathFin/Foundations/GaussianGirsanov.lean` (same file).
+`MathFin/Bridges/GaussianGirsanov.lean` (same file).
 
 Two composites wire the Girsanov construction into the prior pricing
 artifacts — making `GaussianGirsanov` load-bearing rather than a dead leaf:

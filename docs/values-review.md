@@ -1123,7 +1123,7 @@ Eleven findings; three were must-fix. All are applied, and the first is fixed by
 
 Scope: corpus 490 → 495. `Foundations/Esscher.lean` and `BlackScholes/JumpDiffusionEsscher.lean`
 are new. Two refactors make existing code consume them: `gaussianReal_withDensity_esscher` in
-`Foundations/GaussianGirsanov.lean`, and the Gaussian identification in
+`Bridges/GaussianGirsanov.lean`, and the Gaussian identification in
 `Foundations/ExpMartingaleQBrownian.lean`. One compensated-drift criterion was lifted into
 `BlackScholes/JumpDiffusionProcess.lean`. Entries: `mf-jump-diffusion-esscher-transform`,
 `mf-jump-diffusion-esscher-pricing`, `mf-merton-esscher-pricing`,
@@ -3866,7 +3866,7 @@ from it), and corpus entry `sc-ito-formula-unrestricted-local` (`full`).
 — the full mathematical content of Summit C. The Degenne-`IsLocalMartingale`-typeclass packaging is
 *deferred* (open frontier), blocked only on the parametrized-integral adaptedness of `M`; this is
 recorded consistently across the file, `AxiomAudit`, the corpus scope, `docs/coverage.md`, and
-`docs/roadmap.md`. No overclaiming remains.
+`docs/archive/roadmap-history.md`. No overclaiming remains.
 
 ## 2026-06-28 — corpus 300 — Brownian exit times: the first localizing sequence
 
@@ -4794,7 +4794,7 @@ explicit no-sorry-dependency audit; (B) does-it-earn-its-place / continuity-hypo
 honesty / scope honesty / stale docs.
 
 **Findings & resolution**:
-- **BLOCKER (honesty, stale docs)** — `docs/roadmap.md` still read "Next: **B3**"
+- **BLOCKER (honesty, stale docs)** — `docs/archive/roadmap-history.md` still read "Next: **B3**"
   as future work, and `docs/coverage.md`'s live-status block was stale (corpus
   280 / 263-ready, pre-B2). Both updated to record B2+B3 as delivered (corpus
   283 / 266-ready); `docs/blueprint.md` frontier note extended with the B3
@@ -4834,7 +4834,7 @@ continuous linear isometry. `MathFin/Foundations/ItoIntegralL2Dense.lean`
 (`itoIntegralL2`, `itoIntegralL2_norm`), corpus entry
 `sc-ito-infinite-horizon-isometry`, plus de-privatising
 `ItoIntegralCLM.setIntegral_eq_zero_of_orthogonal_pred` for reuse. Closes the
-σ-finite density gap recorded in `docs/ito-integral-clm-deferred.md`.
+σ-finite density gap recorded in `docs/archive/ito-integral-clm-deferred.md`.
 
 **Panel**: three agents over the eight lenses (slop / idiom / clarity;
 coherence / first-principles / architecture; inspired / elegant / honesty).
@@ -4854,7 +4854,7 @@ coherence / first-principles / architecture; inspired / elegant / honesty).
   `itoIntegralCLM_T`"; it is a sibling CLM reusing that file's density
   machinery, not a direct extension. Reworded.
 - **MINOR (honesty, stale docs)** — `docs/coverage.md`, `docs/blueprint.md`,
-  `docs/roadmap.md`, and the deferred-doc header still listed the
+  `docs/archive/roadmap-history.md`, and the deferred-doc header still listed the
   infinite-horizon variant as open/future. All updated to record B2 as
   delivered; the deferred doc carries a `CLOSED 2026-06-13` stamp.
 
@@ -6026,7 +6026,7 @@ Per-lens, briefly.
 
 Executed against the previous round's ranked backlog, in its order. Items 1, 3 and 5 landed;
 items 2, 4 and 6 were assessed and deliberately not attempted, each with a stated reason
-(`docs/roadmap.md` carries the reasons); item 7 stays conditional by its own terms.
+(`docs/archive/roadmap-history.md` carries the reasons); item 7 stays conditional by its own terms.
 
 Reviewed by this session against the eight lenses; single-reviewer, no agent panel.
 

@@ -3,7 +3,7 @@
 **Date:** 2026-08-16 · **Status:** design, approved · **Corpus at design time:** 353
 **Companions:** [`mathematical-architecture.md`](../mathematical-architecture.md) (the I↔II seam),
 [`leaps.md`](../leaps.md) (Leap 5, whose open hypothesis this addresses),
-[`roadmap.md`](../roadmap.md) (crown-jewel conversions)
+[`roadmap.md`](../archive/roadmap-history.md) (crown-jewel conversions)
 
 ---
 
