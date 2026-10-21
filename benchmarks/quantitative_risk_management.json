@@ -1,5 +1,6 @@
 {
   "description": "Quantitative risk management: the general quantile layer, value-at-risk and expected shortfall for every law (Rockafellar–Uryasev, coherence, dual representation, elicitability), copulas and Sklar's theorem, dependence, extreme value theory, Bernoulli-mixture credit portfolios and the Basel IRB limit theorem. `chapter` refers to McNeil, Frey and Embrechts, Quantitative Risk Management (2015); exercises cite Hofert, Frey and McNeil, The QRM Exercise Book (2020).",
+  "alignment_source": "McNeil, Frey and Embrechts, Quantitative Risk Management (2015), with each entry's `reference`",
   "theorems": [
     {
       "id": "qrm-quantile-transform",

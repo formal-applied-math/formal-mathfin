@@ -1,0 +1,228 @@
+{
+  "description": "No-arbitrage theory: the fundamental theorems of asset pricing in one-period, multi-state and discrete-time markets, state prices and pricing kernels, convex duality, superhedging, the change of numéraire, triangular arbitrage. `chapter` is the section number the entry had in the original single-file corpus, not a chapter of one book; each entry's `reference` names its source.",
+  "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)",
+  "theorems": [
+    {
+      "id": "mf-state-price-pricing-linear",
+      "name": "Arrow-Debreu State-Price Pricing: Linearity",
+      "description": "Linear pricing functional `V_0(X + Y) = V_0(X) + V_0(Y)` from Arrow-Debreu state prices.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.StatePrices\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem statePricePricing_add_thm {ι : Type*}\n    (s : Finset ι) (q X Y : ι → ℝ) :\n    MathFin.statePricePricing s q (fun i => X i + Y i) =\n      MathFin.statePricePricing s q X + MathFin.statePricePricing s q Y :=\n  MathFin.statePricePricing_add s q X Y\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Arrow-Debreu state prices (Arrow 1953, Debreu 1959)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-state-price-risk-neutral",
+      "name": "State Prices as Risk-Neutral Expectation",
+      "description": "If q_i = e^{-rT} · ν_i where ν is the risk-neutral measure, then V_0(X) = e^{-rT} · E^ν[X].",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.StatePrices\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem statePricePricing_eq_riskNeutral_thm {ι : Type*}\n    (s : Finset ι) (ν X : ι → ℝ) (rT : ℝ) :\n    MathFin.statePricePricing s (fun i => Real.exp (-rT) * ν i) X =\n      Real.exp (-rT) * ∑ i ∈ s, ν i * X i :=\n  MathFin.statePricePricing_eq_riskNeutral s ν X rT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "State prices and risk-neutral pricing equivalence (Arrow-Debreu)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-triangle-arbitrage-unique",
+      "name": "Triangle Arbitrage: Third Rate Uniquely Determined",
+      "description": "Given two non-zero exchange rates S_AB, S_BC, the no-arb constraint S_AB·S_BC·S_CA = 1 uniquely determines S_CA = 1/(S_AB·S_BC).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.TriangleArbitrage\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem triangleNoArb_solve_third_thm {S_AB S_BC : ℝ}\n    (h_ab : S_AB ≠ 0) (h_bc : S_BC ≠ 0) :\n    ∃! S_CA : ℝ, MathFin.TriangleNoArb S_AB S_BC S_CA :=\n  MathFin.triangleNoArb_solve_third h_ab h_bc\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Triangle arbitrage (classical FX no-arb)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-no-arb-putcall-parity",
+      "name": "Put-Call Parity from No-Arbitrage",
+      "description": "Under a positive linear pricing functional (state prices q summing to the discount factor and pricing the spot), the call minus put portfolio is worth S0 - K*DF. First-principles parity, no distributional hypothesis.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.NoArbitrageDerivations\n\nopen MathFin\n\ntheorem putCall_parity_from_no_arbitrage_thm\n    {ι : Type*} (s : Finset ι) (q : ι → ℝ) (S : ι → ℝ)\n    (DF S₀ K : ℝ)\n    (h_bond : ∑ i ∈ s, q i = DF)\n    (h_stock : ∑ i ∈ s, q i * S i = S₀) :\n    (∑ i ∈ s, q i * max (S i - K) 0) - (∑ i ∈ s, q i * max (K - S i) 0)\n      = S₀ - K * DF :=\n  MathFin.putCall_parity_from_no_arbitrage s q S DF S₀ K h_bond h_stock\n"
+      },
+      "metadata": {
+        "reference": "First fundamental theorem of asset pricing (put-call parity, state-price form)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.NoArbitrageDerivations. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-no-arb-forward-price",
+      "name": "Forward Price from No-Arbitrage",
+      "description": "Given state-price weights q that price the zero-coupon bond at DF ≠ 0 and the stock at S₀, exactly one forward strike F makes the forward contract's payoff S_T − F worth zero at inception. The statement asserts existence and uniqueness (∃!); the proof's witness is the cash-and-carry value F = S₀/DF, which the statement does not name.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.NoArbitrageDerivations\n\nopen MathFin\n\ntheorem forward_price_eq_spot_div_discount_thm\n    {ι : Type*} (s : Finset ι) (q : ι → ℝ) (S : ι → ℝ)\n    (DF S₀ : ℝ) (hDF : DF ≠ 0)\n    (h_bond : ∑ i ∈ s, q i = DF)\n    (h_stock : ∑ i ∈ s, q i * S i = S₀) :\n    ∃! F : ℝ, ∑ i ∈ s, q i * (S i - F) = 0 :=\n  MathFin.forward_price_eq_spot_div_discount s q S DF S₀ hDF h_bond h_stock\n"
+      },
+      "metadata": {
+        "reference": "No-arbitrage forward price F = S0/DF (cash-and-carry)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.NoArbitrageDerivations. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-pricing-kernel-butterfly",
+      "name": "Pricing Kernel: Butterfly No-Arbitrage from FTAP",
+      "description": "In a two-state market, the FTAP-derived discounted state prices make call-price butterfly spreads cost ≥ 0 — the canonical static no-arbitrage constraint, derived not assumed.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Bridges.PricingKernel\n\nopen MeasureTheory ProbabilityTheory\n\n/-- **No-arbitrage ⟹ butterfly spreads cost ≥ 0** (Phase 53). For sign data\n    `z_up > 0 > z_down`, the discounted FTAP state prices are non-negative, so the\n    finite-state call-price functional `K ↦ Σᵢ qᵢ · max(Sᵢ − K, 0)` is convex in\n    the strike and the butterfly combination `C(K₁) − 2·C((K₁+K₃)/2) + C(K₃)` has\n    non-negative cost. The state prices come from the Phase 37 backward-FTAP EMM\n    construction, so this static no-arbitrage constraint is derived, not assumed.\n    Re-exports `MathFin.stateprice_call_butterfly_nonneg`. -/\ntheorem pricing_kernel_butterfly_nonneg\n    (z_up z_down rT : ℝ) (h_up : 0 < z_up) (h_down : z_down < 0)\n    (S : Fin 2 → ℝ) (K₁ K₃ : ℝ) :\n    0 ≤ (∑ i, MathFin.statePrices_two_state z_up z_down rT i * max (S i - K₁) 0)\n        - 2 * (∑ i, MathFin.statePrices_two_state z_up z_down rT i *\n              max (S i - (K₁ + K₃) / 2) 0)\n        + (∑ i, MathFin.statePrices_two_state z_up z_down rT i * max (S i - K₃) 0) :=\n  MathFin.stateprice_call_butterfly_nonneg z_up z_down rT h_up h_down S K₁ K₃\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Pricing kernel / state prices from FTAP (Phase 53; Nagy 2026 §7 backward FTAP)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation re-exported from MathFin/Bridges/PricingKernel.lean: discounted FTAP state prices are non-negative (stateprices_nonneg, from z_up>0>z_down), feeding ConvexPricingFunctional.callPrice_finiteState_butterfly_nonneg. No axioms beyond Mathlib defaults. Wires the previously-orphan Phase-53 bridge (bridges.md row 53) to the corpus."
+      }
+    },
+    {
+      "id": "mf-ftap-multi-state-forward",
+      "name": "Forward FTAP: Multi-State, Multi-Asset",
+      "description": "EMM existence ⟹ no arbitrage in an arbitrary finite-state, finite-asset one-period market (forward Fundamental Theorem of Asset Pricing).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.FTAPMultiState\n\n/-- **Forward FTAP, arbitrary finite state + finite assets** (Phase 42). If there\n    is a strictly-positive probability `q` with `Σ q = 1` whose `q`-weighted excess\n    return is zero for every asset (an equivalent martingale measure), then no\n    portfolio attains a payoff that is non-negative in every state and strictly\n    positive in at least one state — i.e. no arbitrage. Standard linearity /\n    `Finset.sum_comm` argument. Re-exports `MathFin.noArbitrage_of_emm_multi`. -/\ntheorem ftap_multi_state_forward {N M : ℕ} (z : Fin M → Fin N → ℝ)\n    (h_emm : MathFin.HasEMM_multi_state z) :\n    ¬ MathFin.HasArbitrage_multi_state z :=\n  MathFin.noArbitrage_of_emm_multi z h_emm\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Fundamental Theorem of Asset Pricing, multi-state forward (Phase 42; Nagy 2026 §7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation re-exported from MathFin/Foundations/FTAPMultiState.lean: EMM ⟹ no-arbitrage via the q-weighted-excess-return argument (Finset.sum_comm + Finset.sum_pos'). Forward direction in arbitrary finite state + finite assets, generalising the two-state Phase 37. No axioms beyond Mathlib defaults. Wires the previously-orphan Phase-42 bridge (bridges.md row 42) to the corpus."
+      }
+    },
+    {
+      "id": "mf-convex-duality-root",
+      "name": "Cone-Separation Root (Convex-Duality Unification)",
+      "description": "A closed convex cone in (ι → ℝ) disjoint from the standard simplex admits a strictly-positive functional that is ≤ 0 on the cone. This single geometric Hahn–Banach fact is the shared root of three apparently separate pillars: the FTAP (attainable-gains cone ⟹ the EMM), the coherent-risk representation (acceptance cone ⟹ representing density), and superhedging (super-replication cone ⟹ the price bound).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.ConvexDuality\n\n/-- **Cone-separation root — the shared kernel of the convex-duality unification.**\n    A closed convex cone `C ⊆ (ι → ℝ)` disjoint from the standard simplex admits a\n    strictly-positive functional `q` that is `≤ 0` on `C`. One Hahn–Banach fact, three\n    instances: the FTAP (apply to the attainable-gains cone — the separating `q` is the\n    equivalent martingale measure), the coherent-risk representation (apply to the\n    acceptance cone — `q` is a representing density), and superhedging (apply to the\n    super-replication cone — `q` prices the bound). Re-exports\n    `MathFin.exists_pos_separating_of_cone_disjoint_simplex`. -/\ntheorem convex_duality_root {ι : Type*} [Fintype ι] [Nonempty ι]\n    (C : Set (ι → ℝ)) (hCconv : Convex ℝ C) (hCclosed : IsClosed C)\n    (hCcone : ∀ ⦃x⦄, x ∈ C → ∀ ⦃c : ℝ⦄, 0 ≤ c → c • x ∈ C)\n    (hdisj : Disjoint (stdSimplex ℝ ι) C) :\n    ∃ q : ι → ℝ, (∀ i, 0 < q i) ∧ ∀ v ∈ C, ∑ i, q i * v i ≤ 0 :=\n  MathFin.exists_pos_separating_of_cone_disjoint_simplex C hCconv hCclosed hCcone hdisj\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Convex-duality unification of asset pricing and risk (FTAP = coherent-risk representation = superhedging dual); finite-dimensional geometric Hahn–Banach",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full re-export of the cone-separation root MathFin.exists_pos_separating_of_cone_disjoint_simplex (MathFin/Foundations/ConvexDuality.lean), the shared geometric kernel of the convex-duality unification. Generalizes the subspace separating-dual kernel exists_pos_dual_of_disjoint_stdSimplex (now re-derived from it) to a closed convex cone with a one-sided ≤ 0 bound — the form the acceptance cone (coherent risk) and the super-replication cone (superhedging) need, not just the FTAP gains cone. Proof: geometric_hahn_banach_compact_closed; the cone's nonnegative-scaling homogeneity upgrades the subspace's two-sided vanishing to a one-sided sign bound. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
+      "id": "mf-superhedging-emm-bound",
+      "name": "Fundamental Superhedging Bound",
+      "description": "In a finite-state market, every equivalent martingale measure prices a claim at most its super-replication cost. The EMM prices of a claim lie below its superhedging price — the dual side of the no-arbitrage pricing interval and the pricing-side companion of the coherent-risk representation.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.SuperhedgingDuality\n\nopen scoped BigOperators\n\n/-- **Fundamental superhedging bound.** For an excess-return matrix `z`, any equivalent martingale\n    measure `q` and any cost-`x` portfolio `θ` super-replicating the claim `Y`, the EMM price of `Y` is\n    at most `x`. Re-exports `MathFin.emm_le_superReplication`. -/\ntheorem superhedging_emm_bound {M N : ℕ} (z : Fin M → Fin N → ℝ) (Y : Fin N → ℝ)\n    {q : Fin N → ℝ} (hq : q ∈ MathFin.EMMSet z) {x : ℝ} {θ : Fin M → ℝ}\n    (hsr : MathFin.SuperReplicates z Y x θ) :\n    ∑ n, q n * Y n ≤ x :=\n  MathFin.emm_le_superReplication z Y hq hsr\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Fundamental theorem of superhedging (EMM bound); the dual side of the no-arbitrage price interval",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full proof re-exported from MathFin/Foundations/SuperhedgingDuality.lean: in a finite-state market with excess-return matrix z, every equivalent martingale measure (EMMSet) prices a claim Y at most any super-replication cost x (SuperReplicates). Proof: q-weight the super-replication inequality, then the martingale constraint kills the portfolio term (∑ₙ qₙ zₘₙ = 0) and ∑q = 1 leaves x. The reverse strong-duality equality (superhedging price = sup of EMM prices) needs closedness of the super-replication cone — a polyhedral/Farkas fact absent from Mathlib at this pin — and is a documented follow-up. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
+      "id": "mf-ftap-single-period-complete",
+      "name": "Multi-State Single-Period FTAP (Biconditional)",
+      "description": "No arbitrage ⟺ an equivalent martingale measure exists, in an arbitrary finite-state, finite-asset one-period market. The backward direction (no arbitrage ⟹ EMM) is finite-dimensional geometric Hahn–Banach separation of the attainable-payoff span from the standard simplex, completing the multi-state FTAP to a biconditional.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.FTAPMultiState\n\n/-- **Multi-state single-period FTAP, biconditional** (Harrison–Pliska). In an\n    arbitrary finite-state, finite-asset one-period market with excess-return\n    matrix `z`, an equivalent martingale measure exists iff there is no\n    arbitrage. The backward direction (no arbitrage ⟹ EMM) is finite-dimensional\n    geometric Hahn–Banach separation of the attainable-payoff span from the\n    standard simplex. Re-exports `MathFin.hasEMM_multi_iff_not_hasArbitrage`. -/\ntheorem ftap_single_period_complete {N M : ℕ} [NeZero N] (z : Fin M → Fin N → ℝ) :\n    MathFin.HasEMM_multi_state z ↔ ¬ MathFin.HasArbitrage_multi_state z :=\n  MathFin.hasEMM_multi_iff_not_hasArbitrage z\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Fundamental Theorem of Asset Pricing, multi-state biconditional (Harrison–Pliska 1981; Nagy 2026 §7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation re-exported from MathFin/Foundations/FTAPMultiState.lean: completes the multi-state single-period FTAP to a biconditional by adding the backward direction (no arbitrage ⟹ EMM) via the separating-dual kernel exists_pos_dual_of_disjoint_stdSimplex (finite-dimensional geometric Hahn–Banach, Foundations/ConvexSeparation.lean). Closes the file's flagged Phase-42c open item. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
+      "id": "mf-ftap-discrete-complete",
+      "name": "Finite-Ω Multi-Period FTAP (Harrison–Pliska)",
+      "description": "On a finite full-support probability space with a filtration and an adapted scalar discounted price over a finite horizon, the market has no arbitrage ⟺ it admits an equivalent martingale measure. The finite case of Dalang–Morton–Willinger: backward via global separation of the attainable-gains subspace from the standard simplex, forward via martingale-transform telescoping.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.FTAPDiscrete\n\nopen MeasureTheory\n\n/-- **Finite-Ω multi-period FTAP** (Harrison–Pliska; the finite case of\n    Dalang–Morton–Willinger). On a finite full-support probability space with a\n    filtration `𝓕` and an adapted scalar discounted price `S` over a finite\n    horizon `T`, the market has no arbitrage iff it admits an equivalent\n    martingale measure. Backward: the attainable-gains subspace misses the\n    standard simplex under no arbitrage, so the separating hyperplane is the EMM.\n    Forward: martingale-transform telescoping. Re-exports\n    `MathFin.ftap_discrete`. -/\ntheorem ftap_discrete_complete {Ω : Type*} [Fintype Ω] [Nonempty Ω]\n    {mΩ : MeasurableSpace Ω} [MeasurableSingletonClass Ω] (𝓕 : Filtration ℕ mΩ)\n    (P : Measure Ω) [IsProbabilityMeasure P] (S : ℕ → Ω → ℝ) (T : ℕ)\n    (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :\n    MathFin.NoArbitrage 𝓕 P S T ↔ ∃ Q, MathFin.IsEMM 𝓕 P S T Q :=\n  MathFin.ftap_discrete 𝓕 P S T hS hP\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Finite-Ω Fundamental Theorem of Asset Pricing / Harrison–Pliska 1981 (finite Dalang–Morton–Willinger)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full multi-period biconditional NoArbitrage ⟺ ∃ EMM re-exported from MathFin/Foundations/FTAPDiscrete.lean. Scope: finite Ω, one scalar discounted asset, finite horizon T, full-support P. Backward direction via global geometric Hahn–Banach separation of the attainable-gains subspace from the standard simplex (Foundations/ConvexSeparation.lean) + PMF normalisation + the conditional-expectation characterisation; forward via martingale-transform telescoping. The general-Ω DMW (L⁰-closedness + measurable selection) and the d-asset generalisation are out of scope. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
+      "id": "mf-ftap-one-period-general",
+      "name": "General-Ω One-Period FTAP (Föllmer–Schied)",
+      "description": "On an arbitrary probability space, a single scalar discounted excess return Y ∈ L⁰ admits no arbitrage ⟺ there is an equivalent martingale measure Q ~ P under which Y is integrable with E_Q[Y] = 0. The Föllmer–Schied / one-period Dalang–Morton–Willinger theorem — the measure-theoretic step beyond finite Ω: backward via a bounded-density reduction to L¹, the scalar no-arbitrage dichotomy, and a two-region balancing withDensity (no Hahn–Banach, no Kreps–Yan).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.FTAPOnePeriod\n\nopen MeasureTheory\n\n/-- **General-Ω one-period FTAP** (Föllmer–Schied 1.55 / one-period\n    Dalang–Morton–Willinger). For a single measurable scalar discounted excess\n    return `Y` on an arbitrary probability space `(Ω, P)`, no arbitrage holds iff\n    there is an equivalent martingale measure `Q ~ P` under which `Y` is\n    integrable and `E_Q[Y] = 0`. Backward: a bounded-density reduction to `L¹`,\n    the scalar no-arbitrage dichotomy, and a two-region balancing `withDensity`.\n    Re-exports `MathFin.OnePeriod.ftap_one_period`. -/\ntheorem ftap_one_period_general {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (P : Measure Ω) [IsProbabilityMeasure P] (Y : Ω → ℝ) (hY : Measurable Y) :\n    MathFin.OnePeriod.NoArbitrage P Y ↔ ∃ Q, MathFin.OnePeriod.IsEMM P Y Q :=\n  MathFin.OnePeriod.ftap_one_period P Y hY\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "General-Ω one-period Fundamental Theorem of Asset Pricing (Föllmer–Schied Thm 1.55; one-period Dalang–Morton–Willinger)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full biconditional NoArbitrage ⟺ ∃ EMM re-exported from MathFin/Foundations/FTAPOnePeriod.lean. Scope: one trading period, one scalar L⁰ return Y, arbitrary probability space (Ω, P). Backward direction (NA ⟹ EMM) is the elementary Föllmer–Schied route: a bounded strictly-positive density reduction (P̃ = P.withDensity of (1+|Y|)⁻¹/κ) making Y integrable, the scalar no-arbitrage dichotomy (a one-signed Y is killed by θ = ±1), and the two-region balancing withDensity Z = λ·𝟙_{Y≥0} + μ·𝟙_{Y<0} that re-weights up/down moves until Y is fair — no Hahn–Banach, no Kreps–Yan. Forward via E_Q[θ·Y] = 0. The general-Ω multi-period DMW (measurable selection) and the d-asset case are out of scope. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
+      "id": "mf-ftap-one-period-vector",
+      "name": "d-Asset One-Period FTAP (Esscher EMM, finite-dimensional market)",
+      "description": "On an arbitrary probability space, for a ℝᵈ-valued discounted excess return Y, no arbitrage ⟺ there is an equivalent martingale measure Q ~ P with Y integrable and E_Q[Y] = 0 ∈ ℝᵈ — with no non-redundancy hypothesis. The backward direction is an explicit logistic-tilt construction (the softplus analogue of the Esscher measure, not the Esscher measure itself): minimise the smooth convex potential θ ↦ E[log(1 + exp⟪θ,Y⟫)]. The potential is constant along the gains kernel N = {θ : ⟪θ,Y⟫ = 0 a.e.} and coercive on its orthogonal complement Nᗮ, so a minimiser on Nᗮ is automatically global (redundant directions absorbed); its first-order condition E[Y·σ⟪θ₀,Y⟫] = 0 (σ logistic) yields a strictly-positive bounded density.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.FTAPOnePeriodVector\n\nopen MeasureTheory\n\n/-- **d-asset one-period FTAP** (Föllmer–Schied 1.6, full). For a measurable\n    `ℝᵈ`-valued discounted excess return `Y` on an arbitrary probability space and\n    constant portfolios `θ ∈ ℝᵈ`, no arbitrage holds iff there is an equivalent martingale\n    measure `Q ~ P` with `Y` integrable and `E_Q[Y] = 0` — with **no non-redundancy\n    hypothesis** (redundant assets are absorbed by minimising the potential over the gains\n    kernel's orthogonal complement). Backward: an explicit logistic-tilt EMM (the softplus\n    analogue of the Esscher measure) from minimising `θ ↦ E[log(1+exp⟪θ,Y⟫)]`. Re-exports\n    `MathFin.OnePeriodVector.ftap_one_period_vector` at `F = EuclideanSpace ℝ (Fin d)`. -/\ntheorem ftap_one_period_vector_market {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (P : Measure Ω) [IsProbabilityMeasure P] {d : ℕ} (Y : Ω → EuclideanSpace ℝ (Fin d))\n    (hY : Measurable Y) :\n    MathFin.OnePeriodVector.NoArbitrage P Y ↔ ∃ Q, MathFin.OnePeriodVector.IsEMM P Y Q :=\n  MathFin.OnePeriodVector.ftap_one_period_vector P Y hY"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "d-asset one-period Fundamental Theorem of Asset Pricing (Föllmer–Schied Thm 1.6; Esscher / minimal-entropy martingale measure)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Honest derivation of the biconditional NoArbitrage ⟺ ∃ EMM re-exported from MathFin/Foundations/FTAPOnePeriodVector.lean, the FULL unrestricted one-period d-asset FTAP — no non-redundancy hypothesis. The MathFin theorem is stated for a discounted excess return valued in any finite-dimensional real inner-product space F (the ℝᵈ market is F = EuclideanSpace ℝ (Fin d)). Scope: one trading period, finite-dimensional market, trivial ℱ₀ (constant θ), arbitrary probability space. Backward direction (NA ⟹ EMM): minimise the smooth convex softplus potential θ ↦ ∫ log(1+exp⟪θ,Y⟫); it is constant along the gains kernel N = {θ : ⟪θ,Y⟫ = 0 a.e.} and, under no arbitrage, coercive on Nᗮ (via the unit-sphere minimum of g(θ)=∫⟪θ,Y⟫⁺ together with N ⊓ Nᗮ = ⊥), so a minimiser on Nᗮ exists and — because the potential is N-translation-invariant — is global over all of F; its first-order condition (differentiation under the integral) is ∫ Y·σ⟪θ₀,Y⟫ = 0, so z = σ⟪θ₀,Y⟫ ∈ (0,1) is a strictly-positive bounded fair density and Q = P.withDensity(z/∫z) is the EMM; integrability is dropped by a bounded-density reduction P̃ = P.withDensity((1+‖Y‖)⁻¹/κ). Redundant assets are thereby absorbed (no quotient by the gains kernel or measurable selection needed). No Hahn–Banach, no L⁰-cone closedness, no measurable selection. Only the general-Ω multi-period DMW remains out of scope. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
+      "id": "mf-change-of-numeraire",
+      "name": "Change of Numéraire (Price Invariance)",
+      "description": "Given a pricing measure Q for the money-market numéraire B and a second strictly-positive numéraire N, the numéraire measure Q^N (Radon–Nikodym density dQ^N/dQ = (N_T·B₀)/(N₀·B_T)) reprices every terminal claim X consistently: N₀·E^{Q^N}[X/N_T] = B₀·E^Q[X/B_T]. This is the abstract change-of-numéraire theorem — the shared backbone of the library's concrete numéraire changes (the Black–Scholes stock numéraire, the exchange-option second-asset numéraire, the Garman forward/annuity normal form).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.Numeraire\n\nopen MeasureTheory\n\n/-- **Change of numéraire — price is numéraire-invariant.**\nGiven a pricing measure `Q` for the money-market numéraire `B` and a second\nstrictly-positive numéraire `N`, the numéraire measure\n`Q^N = numeraireMeasure Q B_T N_T B₀ N₀` (density `dQ^N/dQ = (N_T·B₀)/(N₀·B_T)`)\nreprices every terminal claim `X` consistently:\n\n  `N₀·𝔼^{Q^N}[X/N_T] = B₀·𝔼^Q[X/B_T]`.\n\nThe proof is a one-line density cancellation, and needs no integrability\nhypothesis. This is the abstract backbone of the library's concrete numéraire\nchanges (the BS stock numéraire, the exchange-option second-asset numéraire, the\nGarman forward/annuity numéraires). Re-exports `MathFin.changeOfNumeraire`. -/\ntheorem change_of_numeraire {Ω : Type*} [MeasurableSpace Ω] (Q : Measure Ω)\n    (X BT NT : Ω → ℝ) (B0 N0 : ℝ)\n    (hNTmeas : Measurable NT) (hBTmeas : Measurable BT)\n    (hNTpos : ∀ ω, 0 < NT ω) (hBTpos : ∀ ω, 0 < BT ω) (hB0 : 0 ≤ B0) (hN0 : 0 < N0) :\n    N0 * ∫ ω, X ω / NT ω ∂(MathFin.numeraireMeasure Q BT NT B0 N0)\n      = B0 * ∫ ω, X ω / BT ω ∂Q :=\n  MathFin.changeOfNumeraire X hNTmeas hBTmeas hNTpos hBTpos hB0 hN0\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Change of numéraire (Geman–El Karoui–Rochet); numéraire-invariance of arbitrage-free prices",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full re-export of MathFin.changeOfNumeraire (MathFin/Foundations/Numeraire.lean): N₀·E^{Q^N}[X/N_T] = B₀·E^Q[X/B_T] where Q^N = Q.withDensity((N_T·B₀)/(N₀·B_T)). The identity is a pure measure-transport fact (integral_withDensity_eq_integral_toReal_smul) plus scalar cancellation of N_T — it holds for every claim X with NO integrability or square-integrability hypothesis, needing only strict positivity of the two numéraires. Companion numeraireMeasure_isProbabilityMeasure shows Q^N is a probability measure under the tradeability/normalization condition E^Q[N_T/B_T] = N₀/B₀ (N/B a Q-martingale). The abstract backbone is CONSUMED by the Black–Scholes stock numéraire: stockNumeraireMeasure_eq_numeraireMeasure (MathFin/BlackScholes/StockNumeraire.lean) exhibits dQ^(S)/dQ = e^{−rT}·S_T/S₀ as the instance B_T = e^{rT}, B₀ = 1, N = S. No axioms beyond Mathlib defaults."
+      }
+    }
+  ]
+}

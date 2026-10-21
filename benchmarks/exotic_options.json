@@ -1,0 +1,182 @@
+{
+  "description": "Exotic options priced or bounded from the Black–Scholes and Gaussian layers: Asian, chooser, barrier, lookback, exchange (Margrabe) and quanto, two-asset rainbow and barrier options, spread and basket approximations. `chapter` is the section number the entry had in the original single-file corpus, not a chapter of one book; each entry's `reference` names its source.",
+  "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)",
+  "theorems": [
+    {
+      "id": "mf-am-gm-two",
+      "name": "Two-Element AM-GM Inequality",
+      "description": "For non-negative a, b: √(a·b) ≤ (a + b)/2. The two-element arithmetic-mean-geometric-mean inequality.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.AsianInequality\n\nopen MathFin\n\ntheorem am_gm_two_thm (a b : ℝ) (ha : 0 ≤ a) (hb : 0 ≤ b) :\n    Real.sqrt (a * b) ≤ (a + b) / 2 :=\n  MathFin.am_gm_two a b ha hb\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "AM-GM inequality (two-element case)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via nlinarith on (a-b)² ≥ 0 and Real.sqrt monotonicity. Lives in MathFin/BlackScholes/AsianInequality.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-asian-geom-le-arith-two",
+      "name": "Two-Date Geometric ≤ Arithmetic Asian Payoff",
+      "description": "For positive prices S₁, S₂ at two averaging dates and any strike K, the geometric-Asian-call payoff is bounded above by the arithmetic-Asian-call payoff.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.AsianInequality\n\nopen MathFin\n\ntheorem asian_geom_le_arith_two_thm (S₁ S₂ K : ℝ)\n    (h₁ : 0 ≤ S₁) (h₂ : 0 ≤ S₂) :\n    max (Real.sqrt (S₁ * S₂) - K) 0 ≤ max ((S₁ + S₂) / 2 - K) 0 :=\n  MathFin.asian_payoff_geom_le_arith_two S₁ S₂ K h₁ h₂\n"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "Asian options: geometric vs arithmetic (Kemna-Vorst 1990; Hull Ch 26.13)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via AM-GM + max monotonicity. Lives in MathFin/BlackScholes/AsianInequality.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-geom-mean-arith-mean-n",
+      "name": "N-Element Equal-Weight AM-GM",
+      "description": "For non-negative f : Fin n → ℝ and n > 0: n · ∏ f_i^{1/n} ≤ ∑ f_i — equal-weight AM-GM derived from mathlib's weighted version.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.AsianInequality\n\nopen MathFin\n\ntheorem geom_mean_arith_mean_n_thm {n : ℕ} (f : Fin n → ℝ)\n    (h_nn : ∀ i, 0 ≤ f i) (hn : 0 < n) :\n    (n : ℝ) * (∏ i : Fin n, f i ^ ((n : ℝ)⁻¹)) ≤ ∑ i : Fin n, f i :=\n  MathFin.geom_mean_le_arith_mean_n f h_nn hn\n"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "AM-GM inequality (equal-weight n-element case)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: equal-weight specialization of Real.geom_mean_le_arith_mean_weighted plus multiplication by n. Lives in MathFin/BlackScholes/AsianInequality.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-chooser-decompose",
+      "name": "Chooser Option Payoff Decomposition (via Put-Call Parity)",
+      "description": "At the chooser date t, max(C_t, P_t) = C_t + max(0, K·e^{-r(T-t)} - S_t). Hence a chooser = long call (strike K, mat. T) + long put-payoff at date t with adjusted strike.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.Chooser\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem chooser_via_pcp_thm (C P S K_disc : ℝ) (hPCP : C - P = S - K_disc) :\n    max C P = C + max 0 (K_disc - S) :=\n  MathFin.chooser_via_pcp _ _ _ _ hPCP\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Chooser options (Hull 26.7, Rubinstein 1991)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-barrier-inout-parity",
+      "name": "Knock-in / Knock-out Barrier Parity (in-out parity)",
+      "description": "V_in + V_out = V_vanilla: the barrier-hit event A and its complement partition every path, so the discounted expected payoffs add to the vanilla price. Pure linearity of expectation; needs no barrier density.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.BarrierParity\n\nopen MeasureTheory\nopen MathFin\n\ntheorem knockIn_add_knockOut_eq_vanilla_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (D : ℝ) (Q : Measure Ω) (A : Set Ω) (f : Ω → ℝ)\n    (hA : MeasurableSet A) (hf : Integrable f Q) :\n    knockInValue D Q A f + knockOutValue D Q A f = vanillaValue D Q f :=\n  MathFin.knockIn_add_knockOut_eq_vanilla D Q A f hA hf\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "In-out barrier parity (Hull, barrier options)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-lookback-payoff-ge-vanilla",
+      "name": "Lookback Call Payoff ≥ Vanilla Call Payoff",
+      "description": "Since the running max M ≥ S_T, max(M - K, 0) ≥ max(S_T - K, 0). Hence lookback call ≥ vanilla call (static lower bound).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.Lookback\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem lookback_payoff_ge_vanilla_thm (M S K : ℝ) (h : S ≤ M) :\n    max (S - K) 0 ≤ max (M - K) 0 :=\n  MathFin.lookback_payoff_ge_vanilla M S K h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Lookback option lower bound (Hull 26.8)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-exchange-numeraire",
+      "name": "Exchange Option in the S²-Numéraire (change-of-numéraire instance)",
+      "description": "Margrabe's exchange option valued in the second-asset (S²) numéraire is a genuine instance of the general change of numéraire: S²₀·E^{Q^(S²)}[max(S¹/S²−1,0)] = E^Q[max(S¹−S²,0)], where Q^(S²) = numeraireMeasure Q 1 S²_T 1 S²₀. Composes changeOfNumeraire (X = the exchange payoff, N = S²) with the payoff reduction max(S¹−S²,0) = S²·max(S¹/S²−1,0).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.ExchangeOption\n\nopen MeasureTheory MathFin\n\n/-- **The exchange option in the S²-numéraire is a change-of-numéraire instance.** With\nthe second asset `S²` as numéraire (`numeraireMeasure Q 1 S²_T 1 S²₀`, density\n`dQ^(S²)/dQ = S²_T/S²₀`), the option's `S²`-numéraire value equals its value under the\nreference measure `Q`:\n`S²₀·𝔼^{Q^(S²)}[max(S¹_T/S²_T − 1, 0)] = 𝔼^Q[max(S¹_T − S²_T, 0)]`. This is the general\n`changeOfNumeraire` law at `X =` the exchange payoff, `N = S²`, composed with the payoff\nreduction `max(S¹−S²,0) = S²·max(S¹/S²−1,0)`; no integrability hypothesis is needed. Re-\nexports `MathFin.exchangeOption_numeraire_price`. -/\ntheorem exchange_option_numeraire_price {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (Q : Measure Ω) (S1T S2T : Ω → ℝ) (S2_0 : ℝ)\n    (hS2meas : Measurable S2T) (hS2pos : ∀ ω, 0 < S2T ω) (hS20 : 0 < S2_0) :\n    S2_0 * ∫ ω, max (S1T ω / S2T ω - 1) 0\n        ∂(MathFin.numeraireMeasure Q (fun _ => 1) S2T 1 S2_0)\n      = ∫ ω, max (S1T ω - S2T ω) 0 ∂Q :=\n  MathFin.exchangeOption_numeraire_price Q S1T S2T S2_0 hS2meas hS2pos hS20\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Change of numéraire (Geman–El Karoui–Rochet); Margrabe (1978) exchange option in the S²-numéraire",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.exchangeOption_numeraire_price (MathFin/BlackScholes/ExchangeOption.lean): the exchange option's value in the S²-numéraire equals its value under the reference measure Q, as an instance of the general changeOfNumeraire law (Foundations/Numeraire.lean) at X = the exchange payoff, N = S², B ≡ 1, composed with the existing exchange_payoff_eq_ratio. Needs no integrability hypothesis, only strict positivity S²_T > 0. NOTE: ExchangeOption and GarmanNormalForm otherwise contain NO withDensity measure (their numéraire content is payoff algebra / d₁-d₂ closed form), so this is the one genuine measure-level numéraire instance they support — not a fabricated wrapper. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
+      "id": "mf-asian-geom-driver-gaussian",
+      "name": "Two-Date Geometric-Asian Log-Driver is Gaussian",
+      "domain": "mathematical_finance",
+      "description": "The geometric-average Asian option's log-driver at two sampling dates s <= t is Gaussian: the average of the Brownian values (B_s + B_t)/2 -- the Gaussian part of log sqrt(S_s * S_t) under GBM -- has the centred Gaussian law N(0, (3s+t)/4), the variance being the covariance sum (s + 2*min(s,t) + t)/4. Turns the geometric average into a priceable lognormal, complementing the AM-GM payoff bound (mf-asian-geom-le-arith-two). The derivation reads the sum of Brownian values as a single Wiener integral of the deterministic step kernel 1/2*(1_{(0,s]} + 1_{(0,t]}) via the new identity int 1_{(0,u]} dB = B_u, so wienerIntegralLp_hasLaw_gaussian gives the Gaussian law and the variance is the kernel L2-norm evaluated through the Brownian covariance int B_s * B_t = min(s,t).",
+      "code": {
+        "lean": "import MathFin.BlackScholes.AsianGeometric\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **Two-date geometric-Asian log-driver is Gaussian.**\nFor a Black–Scholes GBM `S_u = S₀·exp((r−σ²/2)u + σ B_u)` sampled at two dates\n`s ≤ t`, the geometric average `√(S_s·S_t)` is lognormal because its log-driver —\nthe average of the Brownian values `(B_s + B_t)/2` — is Gaussian with the\ncovariance-sum variance `(s + 2·min(s,t) + t)/4 = (3s+t)/4`.\nRe-exports `MathFin.asianGeom_driver_hasLaw`. -/\ntheorem asian_geom_driver_gaussian\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (T : ℝ≥0)\n    {s t : ℝ≥0} (hst : s ≤ t) (hsT : s ≤ T) (htT : t ≤ T) :\n    HasLaw (fun ω => (B s ω + B t ω) / 2)\n      (gaussianReal 0 ((3 * (s : ℝ) + t) / 4).toNNReal) μ :=\n  MathFin.asianGeom_driver_hasLaw hB T hst hsT htT\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Geometric-average Asian option; the log geometric average is Gaussian with the Brownian covariance-sum variance",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.BlackScholes.AsianGeometric (asianGeom_driver_hasLaw). The two-date geometric-Asian log-driver (B_s + B_t)/2 has law N(0, (3s+t)/4). Route: (B_s + B_t)/2 = int 1/2*(1_{(0,s]} + 1_{(0,t]}) dB is a single Wiener integral of a deterministic step kernel, using the new foundational identity wienerIntegralLp_stepIndicator (MathFin.Foundations.WienerIntegralIndicator: int 1_{(s,t]} dB = B_t - B_s, from LinearMap.extendOfNorm_eq on the single-basis coefficient); so wienerIntegralLp_hasLaw_gaussian gives the centred Gaussian law, its variance the kernel L2-norm computed on the Omega-side through the Brownian covariance integral_mul_eval (int B_u * B_v = min(u,v)) plus zero-start B_0 = 0 a.s. (from int B_0^2 = 0). Same 'sum of Brownian values as a Wiener integral of a step kernel' route as the Vasicek bond price for the integrated rate; here the kernel is a sum of indicators. Honest scope: two dates (matching the AM-GM entry mf-asian-geom-le-arith-two); the n-date extension is the Finset covariance sum (1/n^2) sum sum min(t_i, t_j), unblocked by the same crux. Axioms-clean: [propext, Classical.choice, Quot.sound]."
+      }
+    },
+    {
+      "id": "mf-asian-geom-n-driver",
+      "name": "n-Date Geometric-Asian Log-Driver is Gaussian",
+      "description": "The average of Brownian values (1/n) sum B_{t_i} is Gaussian with variance (1/n^2) sum sum min(t_i,t_j).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.AsianGeometricN\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **n-date geometric-Asian log-driver is Gaussian.** The average of the Brownian\nvalues `(1/n) ∑ᵢ B_{τᵢ}` — the Gaussian part of the log geometric average of a\nBlack–Scholes GBM sampled at `τ₁,…,τₙ` — has the centred Gaussian law\n`N(0, (1/n²) ∑ᵢ∑ⱼ min(τᵢ,τⱼ))`. Re-exports `MathFin.geomAsianN_driver_hasLaw`. -/\ntheorem asian_geom_n_driver\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (T : ℝ≥0) {n : ℕ} (hn : 0 < n)\n    (τ : Fin n → ℝ≥0) (hτT : ∀ i, τ i ≤ T) :\n    HasLaw (fun ω => (∑ i, B (τ i) ω) / n)\n      (gaussianReal 0 ((∑ i, ∑ j, min (τ i : ℝ) (τ j)) / (n : ℝ) ^ 2).toNNReal) μ :=\n  MathFin.geomAsianN_driver_hasLaw hB T hn τ hτT\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Kemna-Vorst 1990; geometric Asian options",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: n-date generalization via the Wiener step-kernel + Brownian covariance. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-asian-geom-n-price",
+      "name": "n-Date Geometric-Asian Call Price (Closed Form)",
+      "description": "Discounted geometric-Asian call price equals the Black-Scholes call with effective spot and volatility.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.AsianGeometricN\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **n-date geometric-Asian call price, closed form.** The discounted expected\ngeometric-Asian call payoff equals the Black–Scholes call price with the effective\nspot `Ŝ₀` and volatility `σ_G` — the geometric average reduced to one effective BS\ndriver. Re-exports `MathFin.geomAsianN_call_price`. -/\ntheorem asian_geom_n_price\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (T : ℝ≥0) {n : ℕ} (hn : 0 < n)\n    (τ : Fin n → ℝ≥0) (hτT : ∀ i, τ i ≤ T)\n    (S₀ K r σ Tmat : ℝ) (hS₀ : 0 < S₀) (hK : 0 < K) (hσ : 0 < σ) (hTmat : 0 < Tmat)\n    (hV : 0 < geomAsianVar τ) :\n    ∫ ω, Real.exp (-r * Tmat) *\n        max ((∏ i, (S₀ * Real.exp ((r - σ ^ 2 / 2) * (τ i : ℝ) + σ * B (τ i) ω)) ^ ((n : ℝ)⁻¹))\n          - K) 0 ∂μ\n      = geomAsianEffSpot S₀ r σ Tmat τ *\n          Phi (bsd1 (geomAsianEffSpot S₀ r σ Tmat τ) K r (geomAsianEffVol σ Tmat τ) Tmat)\n        - K * Real.exp (-r * Tmat) *\n          Phi (bsd2 (geomAsianEffSpot S₀ r σ Tmat τ) K r (geomAsianEffVol σ Tmat τ) Tmat) :=\n  MathFin.geomAsianN_call_price hB T hn τ hτT S₀ K r σ Tmat hS₀ hK hσ hTmat hV\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Kemna-Vorst 1990",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: reduction to one effective BS driver + bs_call_formula. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-quanto-forward-grounded",
+      "name": "Quanto Forward Derived from a Joint-Gaussian FX Model",
+      "description": "FX-density-weighted foreign expectation of the terminal equals quantoForward; the -rho sigma_S sigma_FX drift is derived, not posited.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.QuantoGrounding\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\n/-- **Girsanov-grounded quanto forward.** The FX-density-weighted foreign expectation of the\nforeign terminal equals the quanto-adjusted forward `S₀·exp((r_dom − ρ σ_S σ_FX)T)` — the\n`−ρ σ_S σ_FX` drift adjustment is the log-covariance produced by the change of measure, not an\nassumption. Re-exports `MathFin.quantoForward_of_gaussian`. -/\ntheorem quanto_forward_grounded\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    (S₀ r_dom σ_S σ_FX ρ T : ℝ) (hT : 0 ≤ T) (hρ : ρ ^ 2 ≤ 1)\n    {Z_S Z_perp : Ω → ℝ}\n    (hZS : HasLaw Z_S (gaussianReal 0 1) μ) (hZperp : HasLaw Z_perp (gaussianReal 0 1) μ)\n    (hZSm : Measurable Z_S) (hZperpm : Measurable Z_perp)\n    (hindep : IndepFun Z_S Z_perp μ) :\n    ∫ ω, (S₀ * Real.exp ((r_dom - σ_S ^ 2 / 2) * T + σ_S * Real.sqrt T * Z_S ω))\n        * Real.exp (-(σ_FX * Real.sqrt T)\n            * (ρ * Z_S ω + Real.sqrt (1 - ρ ^ 2) * Z_perp ω) - σ_FX ^ 2 * T / 2) ∂μ\n      = quantoForward S₀ r_dom ρ σ_S σ_FX T :=\n  MathFin.quantoForward_of_gaussian S₀ r_dom σ_S σ_FX ρ T hT hρ hZS hZperp hZSm hZperpm hindep\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Reiner 1992; quanto via change of measure",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: FX Esscher tilt + independent-normal decomposition + Gaussian MGF cross-term. Re-export from MathFin. Axioms-clean."
+      }
+    }
+  ]
+}

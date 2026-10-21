@@ -125,15 +125,35 @@ review:
 alignment:
   namespace: MathFin
   statements:
+    - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      lean: 7 statements
+      module: benchmarks/actuarial.json
+      status: full 7 · wrapper 0 · reduced 0 · placeholder 0
+      note: per-statement map in docs/coverage.md
     - source: Robert Martin, AmericanPutConvexity, https://github.com/robertmartin8/AmericanPutConvexity/tree/9b2b208520341a63b64eef43c1ecb3c5708a8e63
       lean: 2 statements
       module: benchmarks/american_put_boundary.json
       status: full 2 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
+    - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      lean: 18 statements
+      module: benchmarks/binomial.json
+      status: full 18 · wrapper 0 · reduced 0 · placeholder 0
+      note: per-statement map in docs/coverage.md
+    - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      lean: 88 statements
+      module: benchmarks/black_scholes.json
+      status: full 87 · wrapper 1 · reduced 0 · placeholder 0
+      note: per-statement map in docs/coverage.md
     - source: brownian_motion (Saporito, Stochastic Processes)
       lean: 10 statements
       module: benchmarks/brownian_motion.json
       status: full 4 · wrapper 3 · reduced 3 · placeholder 0
+      note: per-statement map in docs/coverage.md
+    - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      lean: 1 statements
+      module: benchmarks/commodities.json
+      status: full 1 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: measure_theory (Saporito, Stochastic Processes)
       lean: 7 statements
@@ -145,6 +165,16 @@ alignment:
       module: benchmarks/continuous_martingales.json
       status: full 2 · wrapper 2 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
+    - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      lean: 9 statements
+      module: benchmarks/contracts.json
+      status: full 9 · wrapper 0 · reduced 0 · placeholder 0
+      note: per-statement map in docs/coverage.md
+    - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      lean: 10 statements
+      module: benchmarks/credit.json
+      status: full 10 · wrapper 0 · reduced 0 · placeholder 0
+      note: per-statement map in docs/coverage.md
     - source: measure_theory (Saporito, Stochastic Processes)
       lean: 3 statements
       module: benchmarks/cross_validated.json
@@ -155,10 +185,30 @@ alignment:
       module: benchmarks/distributions.json
       status: full 4 · wrapper 2 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
+    - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      lean: 11 statements
+      module: benchmarks/exotic_options.json
+      status: full 11 · wrapper 0 · reduced 0 · placeholder 0
+      note: per-statement map in docs/coverage.md
     - source: stochastic_calculus (Saporito, Stochastic Processes)
       lean: 22 statements
       module: benchmarks/girsanov_finance.json
       status: full 21 · wrapper 0 · reduced 1 · placeholder 0
+      note: per-statement map in docs/coverage.md
+    - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      lean: 32 statements
+      module: benchmarks/interest_rates.json
+      status: full 32 · wrapper 0 · reduced 0 · placeholder 0
+      note: per-statement map in docs/coverage.md
+    - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      lean: 82 statements
+      module: benchmarks/jumps_and_variance_swaps.json
+      status: full 82 · wrapper 0 · reduced 0 · placeholder 0
+      note: per-statement map in docs/coverage.md
+    - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      lean: 7 statements
+      module: benchmarks/market_microstructure.json
+      status: full 7 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: markov_chains (Saporito, Stochastic Processes)
       lean: 9 statements
@@ -170,20 +220,30 @@ alignment:
       module: benchmarks/martingales.json
       status: full 7 · wrapper 3 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
-    - source: mathematical_finance (Saporito, Stochastic Processes)
-      lean: 344 statements
-      module: benchmarks/mathematical_finance.json
-      status: full 343 · wrapper 1 · reduced 0 · placeholder 0
+    - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      lean: 14 statements
+      module: benchmarks/no_arbitrage.json
+      status: full 14 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: poisson_processes (Saporito, Stochastic Processes)
       lean: 5 statements
       module: benchmarks/poisson_processes.json
       status: full 4 · wrapper 0 · reduced 1 · placeholder 0
       note: per-statement map in docs/coverage.md
-    - source: mathematical_finance (Saporito, Stochastic Processes)
+    - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      lean: 40 statements
+      module: benchmarks/portfolio_and_performance.json
+      status: full 40 · wrapper 0 · reduced 0 · placeholder 0
+      note: per-statement map in docs/coverage.md
+    - source: McNeil, Frey and Embrechts, Quantitative Risk Management (2015), with each entry's `reference`
       lean: 67 statements
       module: benchmarks/quantitative_risk_management.json
       status: full 67 · wrapper 0 · reduced 0 · placeholder 0
+      note: per-statement map in docs/coverage.md
+    - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      lean: 25 statements
+      module: benchmarks/risk_measures.json
+      status: full 25 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: stochastic_calculus (Saporito, Stochastic Processes)
       lean: 51 statements

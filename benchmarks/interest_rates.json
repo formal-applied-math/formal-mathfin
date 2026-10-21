@@ -1,0 +1,539 @@
+{
+  "description": "Interest rates: zero-coupon bonds, yields, duration and convexity, immunization, coupon bonds and curves, swaps, FRAs, swaptions and caplets under Black-76, the Vasicek, Hull–White, CIR and GSR short-rate models, the forward measure. `chapter` is the section number the entry had in the original single-file corpus, not a chapter of one book; each entry's `reference` names its source.",
+  "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)",
+  "theorems": [
+    {
+      "id": "mf-zcb-maturity",
+      "name": "Zero-Coupon Bond at Maturity",
+      "description": "ZCB pays par at maturity: B(T, T) = exp(0) = 1.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.ZCB\n\nopen MathFin\n\ntheorem zcb_maturity_thm (r T : ℝ) : MathFin.zcb r T T = 1 :=\n  MathFin.zcb_at_maturity r T\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Continuous-compounding ZCB (Hull 4.2)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-zcb-yield",
+      "name": "Zero-Coupon Bond Yield Identity",
+      "description": "Under a constant short rate r, the yield-to-maturity of a continuously-compounded ZCB equals r: -log(B(t,T))/(T-t) = r.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.ZCB\n\nopen MathFin\n\ntheorem zcb_yield_thm {r t T : ℝ} (htT : t < T) :\n    -Real.log (MathFin.zcb r t T) / (T - t) = r :=\n  MathFin.zcb_yield_eq_rate htT\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Yield-to-maturity for ZCB (Hull 4.2)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via log of exp + algebraic simplification. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-zcb-duration",
+      "name": "Zero-Coupon Bond Duration = Time to Maturity",
+      "description": "ZCB Macaulay duration equals remaining time: -∂_r B(t,T) / B(t,T) = T - t.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.ZCB\n\nopen MathFin\n\ntheorem zcb_duration_thm (t T r : ℝ) :\n    -deriv (fun r' => MathFin.zcb r' t T) r / MathFin.zcb r t T = T - t :=\n  MathFin.zcb_duration_eq_time_to_maturity t T r\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Macaulay/Modified Duration for ZCB (Hull 4.8)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: the rate derivative ∂_r B = −(T − t)·B of the price itself (hasDerivAt_zcb_r) substituted into −∂_r B / B. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-zcb-convexity",
+      "name": "Zero-Coupon Bond Convexity = (Time to Maturity)²",
+      "description": "ZCB convexity equals squared remaining time: ∂²_r B(t,T) / B(t,T) = (T - t)².",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.ZCB\n\nopen MathFin\n\ntheorem zcb_convexity_thm (t T r : ℝ) :\n    deriv (deriv fun r' => MathFin.zcb r' t T) r / MathFin.zcb r t T = (T - t)^2 :=\n  MathFin.zcb_convexity_eq_time_to_maturity_sq t T r\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Bond convexity for ZCB (Hull 4.9)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: the second rate-derivative of the price itself, ∂²_r B = (T − t)²·B (hasDerivAt_deriv_zcb_r, via hasDerivAt_deriv_of_eventually in Foundations/DerivOfDeriv.lean), divided by B. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-portfolio-rate-deriv",
+      "name": "Bond Portfolio First-Order Rate Sensitivity",
+      "description": "For a ZCB portfolio P(r) = ∑ w_i exp(-r(T_i - t)) with duration-times-value D_P·P = ∑ w_i (T_i - t) exp(-r(T_i - t)), the rate derivative is ∂P/∂r = -D_P·P.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.Immunization\n\nopen MathFin\n\ntheorem bond_portfolio_rate_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => MathFin.bondPortfolioValue s w T t r')\n      (-MathFin.bondPortfolioDur s w T t r) r :=\n  MathFin.hasDerivAt_bondPortfolioValue_r s w T t r\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Bond portfolio duration (Fabozzi, Fixed Income Mathematics; Hull Ch 4)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from HasDerivAt.sum on the per-bond exponential derivative. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-single-dur",
+      "name": "Single-Bond Portfolio Duration",
+      "description": "A single-bond portfolio's duration-times-value reduces to w·(T - t)·exp(-r(T - t)), matching the ZCB duration in FixedIncome.lean.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.Immunization\n\nopen MathFin\n\ntheorem bond_single_dur_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    MathFin.bondPortfolioDur {i} w T t r =\n      w i * (T i - t) * Real.exp (-(r * (T i - t))) :=\n  MathFin.bondPortfolio_single_bond_dur i w T t r\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Single ZCB duration as a degenerate portfolio (Fabozzi, Fixed Income Mathematics)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-single-value",
+      "name": "Single-Bond Portfolio Value",
+      "description": "A single-bond portfolio's value reduces to w·exp(-r(T - t)), matching the ZCB price.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.Immunization\n\nopen MathFin\n\ntheorem bond_single_value_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    MathFin.bondPortfolioValue {i} w T t r =\n      w i * Real.exp (-(r * (T i - t))) :=\n  MathFin.bondPortfolio_single_bond_value i w T t r\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Single ZCB price as a degenerate portfolio (Fabozzi, Fixed Income Mathematics)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-immunization-first-order",
+      "name": "Bond Portfolio First-Order Immunization",
+      "description": "If the duration-times-value of the asset portfolio matches that of the liability, the net portfolio's first-order rate sensitivity is zero: ∂(A - L)/∂r = 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.Immunization\n\nopen MathFin\n\ntheorem bond_immunization_first_order_thm\n    {ι κ : Type*}\n    (sA : Finset ι) (wA TA : ι → ℝ)\n    (sL : Finset κ) (wL TL : κ → ℝ)\n    (t r : ℝ)\n    (h_match : MathFin.bondPortfolioDur sA wA TA t r =\n               MathFin.bondPortfolioDur sL wL TL t r) :\n    HasDerivAt (fun r' =>\n        MathFin.bondPortfolioValue sA wA TA t r' -\n        MathFin.bondPortfolioValue sL wL TL t r')\n      0 r :=\n  MathFin.bondPortfolio_immunization_first_order sA wA TA sL wL TL t r h_match\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Redington immunization (Redington 1952; Fabozzi, Fixed Income Mathematics Ch 5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from rate-sensitivity of A and L plus duration matching. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-annuity-closed-form",
+      "name": "Annuity Closed Form via Geometric Series",
+      "description": "A_n(c, r, Δt) = c·e^{-rΔt}·(1 - e^{-nrΔt})/(1 - e^{-rΔt}), the standard annuity present-value formula derived from the geometric series identity.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.CouponBonds\n\nopen MathFin Real\n\ntheorem annuity_closed_form_thm (n : ℕ) (c r Δt : ℝ)\n    (h : Real.exp (-(r * Δt)) ≠ 1) :\n    MathFin.annuityValue n c r Δt =\n      c * Real.exp (-(r * Δt)) *\n        (1 - Real.exp (-(r * Δt)) ^ n) / (1 - Real.exp (-(r * Δt))) :=\n  MathFin.annuityValue_closed_form n c r Δt h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Annuity formula (Fabozzi, Fixed Income Mathematics Ch 2; Hull Ch 4.5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via term rewriting exp(-r(i+1)Δt) = exp(-rΔt)·exp(-rΔt)^i, geom_sum_eq, and field_simp. Lives in MathFin/FixedIncome/CouponBonds.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-forward-spot-flat",
+      "name": "Forward Rate = Spot Rate Under Flat Curve",
+      "description": "Under a constant short rate r, the instantaneous forward rate f(t, T) = -∂_T log B(t, T) equals r at every horizon. ZCB compatibility.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.CouponBonds\n\nopen MathFin\n\ntheorem forward_spot_flat_thm (r t T : ℝ) :\n    HasDerivAt (fun T' => -Real.log (MathFin.zcb r t T')) r T :=\n  MathFin.hasDerivAt_neg_log_zcb_T r t T\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Forward/spot rate consistency (Hull Ch 4.7; Fabozzi Ch 3)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: log(exp(-r(T-t))) = -r(T-t), so -log = r(T-t), with derivative r in T. Lives in MathFin/FixedIncome/CouponBonds.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-coupon-bond-strict-anti",
+      "name": "Coupon Bond Strictly Decreasing in Yield",
+      "description": "For a coupon bond with strictly positive coupons paid at strictly future times, the price is a strictly decreasing function of the yield. Establishes YTM uniqueness at the parameter-monotonicity level.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.CouponBonds\n\nopen MathFin\n\ntheorem coupon_bond_strict_anti_thm\n    {ι : Type*} (s : Finset ι) (c T : ι → ℝ) (t : ℝ)\n    (h_pos : ∀ i ∈ s, 0 < c i)\n    (h_future : ∀ i ∈ s, t < T i)\n    (h_nonempty : s.Nonempty) :\n    StrictAnti (fun r => ∑ i ∈ s, c i * Real.exp (-(r * (T i - t)))) :=\n  MathFin.couponBondPrice_strictAnti s c T t h_pos h_future h_nonempty\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "YTM monotonicity → uniqueness (Fabozzi, Fixed Income Mathematics; Hull Ch 4)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Finset.sum_lt_sum_of_nonempty and Real.exp_lt_exp on each summand. Lives in MathFin/FixedIncome/CouponBonds.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-dur-rate-deriv",
+      "name": "Bond Portfolio Duration Rate Sensitivity",
+      "description": "Derivative of the duration-times-value w.r.t. rate: ∂_r (D_P·P) = −C_P·P, where C_P is the convexity-times-value.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_dur_rate_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => MathFin.bondPortfolioDur s w T t r')\n      (-MathFin.bondPortfolioConv s w T t r) r :=\n  MathFin.hasDerivAt_bondPortfolioDur_r s w T t r\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Bond convexity (Fabozzi, Fixed Income Mathematics Ch 5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via HasDerivAt.sum on the per-bond exponential second derivative. Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-2nd-deriv",
+      "name": "Bond Portfolio Second-Order Rate Sensitivity",
+      "description": "The second rate-derivative of a zero-coupon bond portfolio's value P(r) = Σᵢ wᵢ·e^{−r(Tᵢ − t)}: ∂²P/∂r² = Σᵢ wᵢ(Tᵢ − t)²·e^{−r(Tᵢ − t)}, the convexity-times-value C_P·P.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_2nd_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (deriv fun r' => MathFin.bondPortfolioValue s w T t r')\n      (MathFin.bondPortfolioConv s w T t r) r :=\n  MathFin.hasDerivAt_deriv_bondPortfolioValue_r s w T t r\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Bond convexity (Fabozzi, Fixed Income Mathematics Ch 5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, stated for the portfolio value itself: the r-derivative of minus the duration-times-value (hasDerivAt_neg_bondPortfolioDur_r, by negating the duration derivative) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since −D_P·P is ∂P/∂r at every r (hasDerivAt_bondPortfolioValue_r). Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-single-conv",
+      "name": "Single-Bond Portfolio Convexity",
+      "description": "A single-bond portfolio's convexity-times-value equals w·(T-t)²·exp(-r(T-t)), matching the ZCB second-order sensitivity in FixedIncome.lean.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_single_conv_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    MathFin.bondPortfolioConv {i} w T t r =\n      w i * (T i - t) ^ 2 * Real.exp (-(r * (T i - t))) :=\n  MathFin.bondPortfolio_single_bond_conv i w T t r\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Single ZCB convexity as a degenerate portfolio (Fabozzi Ch 5)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-2nd-immunization",
+      "name": "Bond Portfolio Second-Order Immunization",
+      "description": "Matching the convexity-times-value Σᵢ wᵢ(Tᵢ − t)²·e^{−r(Tᵢ − t)} of the asset and liability bond portfolios gives ∂²(A − L)/∂r² = 0 at the current rate r: the surplus has zero second rate-derivative. The statement assumes only the convexity-times-value match; matching duration-times-value is the separate first-order condition. Redington's second-order condition is the strict inequality ∂²A/∂r² > ∂²L/∂r², with values and first derivatives matched, which makes the surplus a local minimum. This entry is the equality boundary, where the second-order term vanishes, and claims no minimum.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_2nd_immunization_thm\n    {ι κ : Type*}\n    (sA : Finset ι) (wA TA : ι → ℝ)\n    (sL : Finset κ) (wL TL : κ → ℝ)\n    (t r : ℝ)\n    (h_match_conv : MathFin.bondPortfolioConv sA wA TA t r =\n                    MathFin.bondPortfolioConv sL wL TL t r) :\n    HasDerivAt (deriv fun r' =>\n        MathFin.bondPortfolioValue sA wA TA t r' - MathFin.bondPortfolioValue sL wL TL t r')\n      0 r :=\n  MathFin.bondPortfolio_immunization_second_order sA wA TA sL wL TL t r h_match_conv\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Second-order Redington immunization (Fabozzi Ch 5; Hull Ch 4.11)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, stated for the surplus A − L itself: the second derivative of each side is its convexity-times-value (hasDerivAt_neg_bondPortfolioDur_r, the r-derivative of −Dur·P), so matching those makes the r-derivative of the dollar-duration gap vanish. That is transported to `deriv` of the surplus by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the dollar-duration gap is ∂(A − L)/∂r at every r (hasDerivAt_bondPortfolioValue_r on each side). Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bootstrap-solve",
+      "name": "Yield Curve Bootstrap: General Solve",
+      "description": "From the coupon-bond pricing equation P = ∑ c_i·B_i + (c_n + F)·B_n, the new ZCB price is B_n = (P - ∑ c_i·B_i)/(c_n + F).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.YieldCurve\n\nopen MathFin\n\ntheorem bootstrap_solve_thm\n    {ι : Type*} (sprev : Finset ι) (c B : ι → ℝ)\n    (P c_last F B_last : ℝ) (h : c_last + F ≠ 0)\n    (hP : MathFin.couponBondPricingEq sprev c B P c_last F B_last) :\n    B_last = (P - ∑ i ∈ sprev, c i * B i) / (c_last + F) :=\n  MathFin.bootstrap_solve sprev c B P c_last F B_last h hP\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Yield curve bootstrapping (Fabozzi, Fixed Income Mathematics Ch 9; Hull Ch 4.6)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp + linarith on the pricing equation. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bootstrap-solve-first",
+      "name": "Yield Curve Bootstrap: First Bond (Base Case)",
+      "description": "For a single-period coupon bond with cash flow c + F at maturity, B_1 = P/(c + F).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.YieldCurve\n\nopen MathFin\n\ntheorem bootstrap_first_thm (P c_last F B_last : ℝ) (h : c_last + F ≠ 0)\n    (hP : P = (c_last + F) * B_last) :\n    B_last = P / (c_last + F) :=\n  MathFin.bootstrap_solve_first P c_last F B_last h hP\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Yield curve bootstrapping base case (Fabozzi Ch 9)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bootstrap-solve-second",
+      "name": "Yield Curve Bootstrap: Second Bond Step",
+      "description": "For a two-period coupon bond paying c at both dates plus F at the second: B_2 = (P - c·B_1)/(c + F).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.YieldCurve\n\nopen MathFin\n\ntheorem bootstrap_second_thm (P c F B_1 B_2 : ℝ) (h : c + F ≠ 0)\n    (hP : P = c * B_1 + (c + F) * B_2) :\n    B_2 = (P - c * B_1) / (c + F) :=\n  MathFin.bootstrap_solve_second P c F B_1 B_2 h hP\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Two-bond bootstrap step (Fabozzi Ch 9)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp + ring. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bootstrap-consistency",
+      "name": "Yield Curve Bootstrap: Consistency",
+      "description": "The bootstrapped B_n price, plugged back into the pricing equation, reproduces the original observed bond price P.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.YieldCurve\n\nopen MathFin\n\ntheorem bootstrap_consistency_thm\n    {ι : Type*} (sprev : Finset ι) (c B : ι → ℝ)\n    (P c_last F : ℝ) (h : c_last + F ≠ 0) :\n    MathFin.couponBondPricingEq sprev c B P c_last F\n      ((P - ∑ i ∈ sprev, c i * B i) / (c_last + F)) :=\n  MathFin.bootstrap_consistency sprev c B P c_last F h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Bootstrap inversion identity (Fabozzi Ch 9)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp + ring on the pricing equation. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-macaulay-modified-discrete",
+      "name": "Modified Duration Numerator = Macaulay Numerator / (1+y)",
+      "description": "Under discrete annual compounding (1 + y ≠ 0), the modified duration numerator equals the Macaulay duration numerator divided by (1+y). This is the algebraic core of the price-sensitivity identity -dP/dy = D_mod · P with D_mod = D_mac / (1+y); that derivative identity is not part of this entry's statement.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.MacaulayModified\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem modifiedNumerator_eq_macaulayNumerator_div_thm {ι : Type*}\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (y : ℝ) (hy : 1 + y ≠ 0) :\n    MathFin.modifiedNumerator s t c y =\n      MathFin.macaulayNumerator s t c y / (1 + y) :=\n  MathFin.modifiedNumerator_eq_macaulayNumerator_div s t c y hy\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Macaulay vs Modified duration (Fabozzi 4.3)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-forward-rate-nonflat",
+      "name": "Forward Rate from Non-Flat Spot-Rate Curve",
+      "description": "When the spot rate R(T) is differentiable, d/dT [T · R(T)] = R(T) + T · R'(T) (product rule). This is the instantaneous forward rate, generalizing the flat-curve case.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.ForwardRate\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem hasDerivAt_T_mul_spotRate_thm {R : ℝ → ℝ} {R'_T T : ℝ}\n    (hR : HasDerivAt R R'_T T) :\n    HasDerivAt (fun t => t * R t) (R T + T * R'_T) T :=\n  MathFin.hasDerivAt_T_mul_spotRate hR\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Forward rate from spot rate (Fabozzi 5.2, Hull 4.7)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-vasicek-deterministic-ode",
+      "name": "Vasicek Deterministic ODE Solution",
+      "description": "The closed form r(t) = θ + (r₀ - θ)·e^{-κt} solves the deterministic part of the Vasicek SDE dr/dt = κ(θ - r(t)). Exhibits exponential mean reversion to θ at rate κ.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.Vasicek\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem vasicekDeterministic_solves_ODE_thm (r₀ θ κ t : ℝ) :\n    HasDerivAt (MathFin.vasicekDeterministic r₀ θ κ)\n      (κ * (θ - MathFin.vasicekDeterministic r₀ θ κ t)) t :=\n  MathFin.vasicekDeterministic_solves_ODE r₀ θ κ t\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Vasicek 1977 short-rate model (deterministic part)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-vasicek-half-life",
+      "name": "Vasicek/OU Half-Life at log 2 / κ",
+      "description": "At t = log(2)/κ the gap between r(t) and θ has closed to half its initial value.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.Vasicek\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem vasicekDeterministic_at_halfLife_thm (r₀ θ κ : ℝ) (hκ : 0 < κ) :\n    MathFin.vasicekDeterministic r₀ θ κ (MathFin.meanReversionHalfLife κ) - θ =\n      (r₀ - θ) / 2 :=\n  MathFin.vasicekDeterministic_at_halfLife r₀ θ κ hκ\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Mean-reversion half-life (Vasicek 1977, Ornstein-Uhlenbeck)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-swaption-parity",
+      "name": "Black Model Payer-Receiver Swaption Parity",
+      "description": "V^payer − V^receiver = A · (F − K) — the swap-rate analog of put-call parity.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Black76\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem swaption_payer_receiver_parity_thm (A F K σ T : ℝ) :\n    MathFin.blackPayerSwaption A F K σ T - MathFin.blackReceiverSwaption A F K σ T =\n      A * (F - K) :=\n  MathFin.swaption_payer_receiver_parity A F K σ T\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Black model for swaptions (Black 1976 specialisation)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-vasicek-sde-terminal-gaussian",
+      "name": "Vasicek Terminal Distribution is Gaussian (Wiener Representation)",
+      "domain": "mathematical_finance",
+      "description": "The Vasicek short-rate SDE dr = κ(θ − r)dt + σ dB has the textbook solution r_T = r₀e^{−κT} + θ(1 − e^{−κT}) + σ ∫₀ᵀ e^{−κ(T−s)} dB_s (cited, not proved here). For κ > 0 and r_T in this Wiener representation, this theorem DERIVES (no longer posits) the terminal law r_T ~ N(vasicekSDEMean, vasicekSDEVariance) = N(r₀e^{−κT}+θ(1−e^{−κT}), σ²(1−e^{−2κT})/(2κ)). The stochastic term is the Wiener integral of the DETERMINISTIC integrand e^{−κ(T−s)}, hence Gaussian (sc-wiener-integral-gaussian) with variance its squared L²-norm ∫₀ᵀ e^{−2κ(T−s)} ds = (1−e^{−2κT})/(2κ) (an FTC computation); the affine map x ↦ mean + σx then sends N(0, ∫kernel²) to N(mean, σ²·∫kernel²) = N(vasicekSDEMean, vasicekSDEVariance) via gaussianReal_const_mul / gaussianReal_const_add. This is the FIRST consumer of the deterministic-integrand Itô tower in the FixedIncome layer — the analytic Wiener/Itô machinery made load-bearing in a pricing module, closing the two-tower gap for the Vasicek short rate (VasicekSDE.lean previously stated this law without derivation).",
+      "code": {
+        "lean": "import MathFin.FixedIncome.VasicekSDEGaussian\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\ntheorem vasicek_sde_terminal_gaussian\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    HasLaw (fun ω => vasicekSDEMean r₀ θ κ (T : ℝ)\n        + σ * (wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω))\n      (gaussianReal (vasicekSDEMean r₀ θ κ (T : ℝ))\n        (vasicekSDEVariance σ κ (T : ℝ)).toNNReal) μ :=\n  MathFin.vasicekShortRate_hasLaw_gaussian hB r₀ θ σ hκ T\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Vasicek 1977 short-rate model (terminal distribution, derived from the SDE via the Wiener integral)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.FixedIncome.VasicekSDEGaussian (vasicekShortRate_hasLaw_gaussian). DERIVES the Vasicek terminal Gaussian law (previously posited as closed-form defs in VasicekSDE.lean) for the short rate in its Wiener representation, the textbook solution of the SDE (that it solves the SDE is cited, not proved): the diffusion term sigma * (Wiener integral of e^{-kappa(T-s)}) is Gaussian by the deterministic-integrand Wiener-Gaussian theorem (sc-wiener-integral-gaussian); the variance is fixed by the FTC integral int_0^T e^{-2kappa(T-s)} ds = (1-e^{-2kappa T})/(2kappa) (vasicekKernel_integral_sq, antiderivative e^{-2kappa(T-s)}/(2kappa)); the affine map x |-> mean + sigma*x transports the law N(0, var) to N(vasicekSDEMean, vasicekSDEVariance) via gaussianReal_const_mul / gaussianReal_const_add with the NNReal variance algebra. First consumer of the deterministic-integrand Ito tower in FixedIncome -- the two-tower bridge. Axioms-clean: [propext, Classical.choice, Quot.sound]."
+      }
+    },
+    {
+      "id": "mf-vasicek-bond-price",
+      "name": "Vasicek Zero-Coupon Bond Price (Affine Term Structure)",
+      "domain": "mathematical_finance",
+      "description": "The Vasicek zero-coupon bond price P(0,T) = E[exp(-∫₀ᵀ r_s ds)], the expectation taken under the probability measure that carries the Brownian driver (read as the pricing measure; no change of measure is built in this entry). Under Vasicek the integrated short rate ∫₀ᵀ r_s ds = M(T) + σ∫₀ᵀ g dB is again Gaussian (integrated OU kernel g(u) = (1-e^{-κ(T-u)})/κ), so the bond price is a Gaussian Laplace transform and collapses to the classical AFFINE TERM STRUCTURE P(0,T) = A(T)·exp(-B(T)·r₀) with B(T) = (1-e^{-κT})/κ. The exponential-affine dependence on the initial short rate r₀ is the defining property of an affine term-structure model.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.VasicekBondPrice\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **Vasicek zero-coupon bond price — the affine term structure.**\nThe risk-neutral present value `P(0,T) = 𝔼[exp(−∫₀ᵀ r_s ds)]` of one unit paid\nat `T` under the Vasicek short-rate model separates the initial rate into the\nexponential-affine form `P(0,T) = A(T)·exp(−B(T)·r₀)`, `B(T) = (1−e^{−κT})/κ`.\nRe-exports `MathFin.vasicekBondPrice_affine`. -/\ntheorem vasicek_bond_price_affine\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    ∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω)) ∂μ\n      = vasicekBondA θ σ κ (T : ℝ) * Real.exp (-(vasicekBondB κ (T : ℝ) * r₀)) :=\n  MathFin.vasicekBondPrice_affine hB r₀ θ σ hκ T\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Vasicek 1977 short-rate model; the affine zero-coupon bond price P(0,T) = A(T)·exp(-B(T)·r₀)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.FixedIncome.VasicekBondPrice (vasicekBondPrice_affine). The Vasicek zero-coupon bond price P(0,T) = E[exp(-int_0^T r_s ds)] as the Gaussian Laplace transform of the integrated short rate, collapsing to the affine term structure P = A(T)*exp(-B(T)*r0), B(T) = (1-e^{-kappa T})/kappa. The integrated rate int_0^T r_s ds = M(T) + sigma*int_0^T g dB is carried in its Wiener representation (integrated OU kernel g(u) = (1-e^{-kappa(T-u)})/kappa; the deterministic time-order swap is the modelling bridge, cited not proven -- parity with the OU-solution model of mf-vasicek-sde-terminal-gaussian). Its Gaussian law N(M, sigma^2 V) follows from wienerIntegralLp_hasLaw_gaussian + the FTC variance integral int_0^T g^2 = V(T) (vasicekIntegratedKernel_integral_sq, antiderivative u/kappa^2 - 2e^{-kappa(T-u)}/kappa^3 + e^{-2kappa(T-u)}/(2kappa^3)); the bond price factors exp(-M)*E[exp(-sigma*int g dB)] = exp(-M + sigma^2 V/2) via the centred Gaussian MGF integral_exp_mul_gaussianReal_zero at -sigma. Second consumer of the deterministic-integrand Wiener tower in FixedIncome. Axioms-clean: [propext, Classical.choice, Quot.sound]."
+      }
+    },
+    {
+      "id": "mf-cir-bond-loading-riccati",
+      "name": "CIR Affine Loading B(T) Solves the Riccati Equation",
+      "domain": "mathematical_finance",
+      "description": "For the Cox–Ingersoll–Ross short rate dr = κ(θ − r)dt + σ√r dW, in the affine form P(0,T) = exp(A(T) − B(T)·r₀) of its bond price, the closed-form rate loading B(T) = 2(e^{γT} − 1)/((γ + κ)(e^{γT} − 1) + 2γ), γ = √(κ² + 2σ²), solves the Riccati equation B'(T) = 1 − κB(T) − ½σ²B(T)² with B(0) = 0, at every real T, whenever κ² + 2σ² > 0. Only this equation is verified: the bond price itself is not derived.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.CIRRiccati\n\nopen MathFin\n\n/-- **The CIR rate loading solves the Riccati equation.** With `γ = √(κ² + 2σ²)`, the closed\nform `B(T) = 2(e^{γT} − 1) / ((γ + κ)(e^{γT} − 1) + 2γ)` of the CIR affine bond price\n`P(0,T) = exp(A(T) − B(T)·r₀)` satisfies `B(0) = 0` and `B'(T) = 1 − κB(T) − ½σ²B(T)²` at every\n`T`, whenever `κ² + 2σ² > 0`. Re-exports `MathFin.cirBondB_zero` and\n`MathFin.hasDerivAt_cirBondB`. -/\ntheorem cir_bond_B_solves_riccati {κ σ : ℝ} (h : 0 < κ ^ 2 + 2 * σ ^ 2) :\n    cirBondB κ σ 0 = 0 ∧\n      ∀ T : ℝ, HasDerivAt (cirBondB κ σ)\n        (1 - κ * cirBondB κ σ T - σ ^ 2 / 2 * cirBondB κ σ T ^ 2) T :=\n  ⟨cirBondB_zero κ σ, hasDerivAt_cirBondB h⟩\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Cox, Ingersoll and Ross 1985, A Theory of the Term Structure of Interest Rates; the affine loadings (Brigo–Mercurio §3.2.3)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.cirBondB_zero and MathFin.hasDerivAt_cirBondB (FixedIncome/CIRRiccati.lean). SCOPE. Only the term-structure equation is verified; the bond price P = E[exp(-int_0^T r_s ds)] needs the affine (Feynman-Kac) framework, which is not formalized."
+      }
+    },
+    {
+      "id": "mf-cir-bond-level-loading",
+      "name": "CIR Affine Loading A(T) Solves A' = −κθB",
+      "domain": "mathematical_finance",
+      "description": "For the Cox–Ingersoll–Ross short rate, in the affine form P(0,T) = exp(A(T) − B(T)·r₀) of its bond price, the closed-form level loading A(T) = (2κθ/σ²)·log(2γe^{(κ+γ)T/2} / ((γ + κ)(e^{γT} − 1) + 2γ)), γ = √(κ² + 2σ²), satisfies A(0) = 0 and A'(T) = −κθB(T) at every real T, whenever σ ≠ 0. Only this equation is verified: the bond price itself is not derived.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.CIRRiccati\n\nopen MathFin\n\n/-- **The CIR level loading solves its equation.** In the affine form\n`P(0,T) = exp(A(T) − B(T)·r₀)`, the closed form `A(T) = (2κθ/σ²)·log(2γ e^{(κ+γ)T/2} / D(T))`,\nwith `γ = √(κ² + 2σ²)` and `D(T) = (γ + κ)(e^{γT} − 1) + 2γ`, satisfies `A(0) = 0` and\n`A'(T) = −κθ B(T)` at every `T`, whenever `σ ≠ 0`. Re-exports `MathFin.cirBondA_zero` and\n`MathFin.hasDerivAt_cirBondA`. -/\ntheorem cir_bond_A_solves_equation {κ σ : ℝ} (θ : ℝ) (hσ : σ ≠ 0) :\n    cirBondA κ θ σ 0 = 0 ∧\n      ∀ T : ℝ, HasDerivAt (cirBondA κ θ σ) (-(κ * θ) * cirBondB κ σ T) T :=\n  ⟨cirBondA_zero κ θ σ, hasDerivAt_cirBondA κ θ hσ⟩\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Cox, Ingersoll and Ross 1985, A Theory of the Term Structure of Interest Rates; the affine loadings (Brigo–Mercurio §3.2.3)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.cirBondA_zero and MathFin.hasDerivAt_cirBondA (FixedIncome/CIRRiccati.lean). A is the log-form level loading of P = exp(A - B*r0), so A(0) = 0. SCOPE. sigma != 0 is needed because the factor 2*kappa*theta/sigma^2 divides by sigma^2. Only the term-structure equation is verified; the bond price needs the affine (Feynman-Kac) framework, which is not formalized."
+      }
+    },
+    {
+      "id": "mf-forward-measure-spot",
+      "name": "Forward Price under the T-Forward Measure",
+      "domain": "mathematical_finance",
+      "description": "The T-forward measure Q^T is the pricing measure with the zero-coupon bond P(·,T) as numéraire. Its defining property is that the forward price is the Q^T-expectation of the spot: E^{Q^T}[S_T] = S_0/P(0,T) = S_0·e^{rT} = F(0,T), the no-arbitrage forward price. Built as a change-of-numéraire instance (bond slots N_T = P(T,T) = 1, N_0 = P(0,T) = e^{-rT}, money-market reference B_T = e^{rT}, B_0 = 1), the natural next numéraire instance after the stock and exchange-option S²-numéraires.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.ForwardMeasure\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- **Black–Scholes forward price under the T-forward measure.**\nWith the zero-coupon bond `P(·,T)` as numéraire, the forward price of the spot is\nits `Q^T`-expectation: `𝔼^{Q^T}[S_T] = S_0·e^{rT} = S_0/P(0,T) = F(0,T)`, the\nno-arbitrage forward price. Re-exports `MathFin.forwardMeasure_bs_expected_terminal`. -/\ntheorem forward_measure_bs_expected_terminal\n    {Ω : Type*} [MeasurableSpace Ω] {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, bsTerminal S_0 r σ T (Z ω) ∂(forwardMeasure Q r T) = S_0 * Real.exp (r * T) :=\n  MathFin.forwardMeasure_bs_expected_terminal h\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "The T-forward measure (Geman-El Karoui-Rochet); the forward price as the bond-numeraire expectation of the spot",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.FixedIncome.ForwardMeasure (forwardMeasure_bs_expected_terminal). The T-forward measure Q^T (zero-coupon bond P(.,T) as numeraire) satisfies E^{Q^T}[S_T] = S_0*e^{rT} = S_0/P(0,T) = F(0,T), the no-arbitrage forward price. Built as a numeraireMeasure instance (N_T = P(T,T) = 1, N_0 = P(0,T) = e^{-rT}, reference B_T = e^{rT}, B_0 = 1) on the change-of-numeraire engine (MathFin.changeOfNumeraire, no integrability hypothesis): forwardMeasure_price gives e^{-rT}*E^{Q^T}[X] = E^Q[e^{-rT}X] for any claim, and combined with the discounted-terminal EMM property discounted_terminal_eq_S0 yields the forward price of the BS terminal. HONEST SCOPE: in the constant-rate ZCB the density dQ^T/dQ = 1 so Q^T = Q coincides with the risk-neutral measure (the construction generalizes verbatim to a stochastic short rate where Q^T != Q). Natural next numeraire instance after the stock and S^2-numeraires. Axioms-clean: [propext, Classical.choice, Quot.sound]."
+      }
+    },
+    {
+      "id": "mf-fixedincome-swap",
+      "name": "Vanilla Interest-Rate Swap: Zero Value iff Par Swap Rate",
+      "description": "Vanilla interest-rate swap: annuity, payer-swap value, par swap rate, and the par identity over the zcb curve.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.InterestRateSwap\n\nopen MathFin\n\n/-- Vanilla interest-rate swap par identity on the zcb curve: with a positive daycount and a nonempty payment schedule, the payer swap is worth zero iff the fixed rate is the par swap rate. -/\ntheorem mf_fixedincome_swap {ι : Type*} (r δ K T0 Tn : ℝ) (T : ι → ℝ) (s : Finset ι)\n    (hδ : 0 < δ) (hs : s.Nonempty) :\n    payerSwapValue (zcb r 0 T0) (zcb r 0 Tn) K (annuity δ (fun i ↦ zcb r 0 (T i)) s) = 0 ↔\n      K = parSwapRate (zcb r 0 T0) (zcb r 0 Tn) (annuity δ (fun i ↦ zcb r 0 (T i)) s) :=\n  MathFin.payerSwapValue_zcb_eq_zero_iff r δ K T0 Tn T s hδ hs\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Formalize the vanilla interest-rate swap value and par swap rate S = (P(0,T₀)−P(0,Tₙ))/(δ·Σ P(0,Tᵢ))",
+        "difficulty": "small",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/FixedIncome/InterestRateSwap.lean (magistral-drafted statement, leanstral proof, human-refined at review). The par identity payerSwapValue = 0 ↔ K = parSwapRate is proved abstractly for any nonzero annuity (payerSwapValue_eq_zero_iff) and instantiated on the zcb curve with positivity discharged by zcb_pos + annuity_pos rather than assumed. Re-export from MathFin. Axioms-clean. Introduces definitions: annuity, payerSwapValue, parSwapRate (new-defs review class).",
+        "provenance": {
+          "statement_source": "magistral-autoform",
+          "statement_model": "magistral-medium",
+          "source": "leanstral-autoform",
+          "model": "labs-leanstral-1-5",
+          "issue": 66,
+          "new_defs": [
+            "annuity",
+            "payerSwapValue",
+            "parSwapRate"
+          ],
+          "refined": "statement generalized at review: abstract A ≠ 0 core + zcb corollary; lint-clean names + docstrings; unused hypotheses and imports removed"
+        }
+      }
+    },
+    {
+      "id": "mf-fixedincome-fra",
+      "name": "Forward-rate agreement value and fair-rate identity",
+      "description": "The simple forward rate implied by two zero-coupon bonds gives the FRA discount-factor value, and the FRA is worth zero exactly at that rate.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.FRA\n\nopen MathFin\n\n/-- The ZCB-implied simple forward rate expands the FRA value to the discount-factor difference, and it is the unique fixed rate giving zero value. -/\ntheorem mf_fixedincome_fra (r δ K T1 T2 : ℝ) (hδ : δ ≠ 0) :\n    fraValue δ (zcb r 0 T2) (fraForwardRate (zcb r 0 T1) (zcb r 0 T2) δ) K =\n        zcb r 0 T1 - zcb r 0 T2 - δ * zcb r 0 T2 * K\n      ∧ (fraValue δ (zcb r 0 T2) (fraForwardRate (zcb r 0 T1) (zcb r 0 T2) δ) K = 0 ↔\n        K = fraForwardRate (zcb r 0 T1) (zcb r 0 T2) δ) :=\n  ⟨MathFin.fraValue_zcb_eq_discount_difference r δ K T1 T2 hδ,\n   MathFin.fraValue_zcb_eq_zero_iff r δ K T1 T2 hδ⟩\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Forward-rate agreement: F = (P(0,T₁)/P(0,T₂)−1)/δ and V = δ·P(0,T₂)·(F−K)",
+        "difficulty": "small",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/FixedIncome/FRA.lean. The generic FRA algebra is instantiated on the existing deterministic zcb curve. The discount-factor denominator is proved nonzero from zcb_pos; only the nonzero accrual period is assumed. The benchmark re-exports both the expanded value identity and the fair-rate zero-value equivalence. Axioms-clean.",
+        "provenance": {
+          "issue": 67,
+          "new_defs": [
+            "fraForwardRate",
+            "fraValue"
+          ],
+          "refined": "structural zcb consumer; no let-bound conclusion and no rfl-backed full entry"
+        }
+      }
+    },
+    {
+      "id": "mf-caplet-floorlet-parity",
+      "name": "Black-76 Caplet-Floorlet Parity",
+      "description": "V^caplet - V^floorlet = α·(F - K), the forward-rate analogue of put-call parity. The caplet/floorlet pair is the payer/receiver swaption pair with the accrual factor in the annuity slot, so parity is that theorem applied.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Black76\n\nopen MathFin\n\n/-- Caplet-floorlet parity, the forward-rate analogue of put-call parity. -/\ntheorem mf_caplet_floorlet_parity (F K σ T α : ℝ) :\n    blackCaplet F K σ T α - blackFloorlet F K σ T α = α * (F - K) :=\n  MathFin.caplet_floorlet_parity F K σ T α\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-76 caplet/floorlet parity (Hull 29.2)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Futures/Black76.lean. Derived by application of swaption_payer_receiver_parity rather than re-running the Phi-symmetry argument: blackCaplet_eq_blackPayerSwaption records that the caplet is the payer swaption's formula with the accrual factor where the annuity sits. The caplet and floorlet price definitions are exercised through this identity and the ledger; they carry no separate benchmark entry, since price-equals-definition closes by rfl. Re-export from MathFin. Axioms-clean."
+      }
+    }
+  ]
+}

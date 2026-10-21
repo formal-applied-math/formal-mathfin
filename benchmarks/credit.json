@@ -1,0 +1,166 @@
+{
+  "description": "Credit: survival and hazard curves, credit spreads, CDS, first-to-default, the Merton/KMV structural model, the Cox default time, CVA and portfolio credit. `chapter` is the section number the entry had in the original single-file corpus, not a chapter of one book; each entry's `reference` names its source.",
+  "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)",
+  "theorems": [
+    {
+      "id": "mf-survival-at-zero",
+      "name": "Survival Probability at Maturity",
+      "description": "Under constant hazard rate h, the survival probability at T = t equals 1: S(T, T) = 1.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.Credit\n\nopen MathFin\n\ntheorem survival_at_zero_thm (h T : ℝ) :\n    MathFin.survivalProbability h T T = 1 :=\n  MathFin.survival_at_zero h T\n"
+      },
+      "metadata": {
+        "chapter": 17,
+        "reference": "Reduced-form credit risk (Duffie-Singleton 1999; Lando 2004)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from exp(0) = 1. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-survival-pos",
+      "name": "Survival Probability Positivity",
+      "description": "Survival probability is strictly positive: 0 < exp(-h(T-t)) for all h, t, T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.Credit\n\nopen MathFin\n\ntheorem survival_pos_thm (h t T : ℝ) :\n    0 < MathFin.survivalProbability h t T :=\n  MathFin.survival_pos h t T\n"
+      },
+      "metadata": {
+        "chapter": 17,
+        "reference": "Reduced-form credit risk (Duffie-Singleton 1999)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from Real.exp_pos. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-credit-spread-eq-hazard",
+      "name": "Credit Spread Equals Hazard Under Constant Hazard",
+      "description": "Under constant hazard rate h, the credit spread -log(S)/(T-t) equals h. Structurally identical to ZCB yield equality under flat rate.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.Credit\n\nopen MathFin\n\ntheorem credit_spread_eq_hazard_thm {h t T : ℝ} (htT : t < T) :\n    -Real.log (MathFin.survivalProbability h t T) / (T - t) = h :=\n  MathFin.creditSpread_eq_hazard htT\n"
+      },
+      "metadata": {
+        "chapter": 17,
+        "reference": "Reduced-form credit pricing under constant hazard (Lando 2004 Ch 5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Real.log_exp + field_simp. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-first-to-default-spread",
+      "name": "First-to-Default Spread Is the Sum of Single-Name Hazards",
+      "description": "For a basket of jointly independent exponential default times τ_i ~ Exp(rates i), the first-to-default credit spread — read off the measure of the basket survival event, −log μ(min_i τ_i > t)/t for t > 0 — equals Σ rates: basket intensity is the sum of single-name intensities, so FtD spreads are additive under independence. Dependent default times are not treated.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.FirstToDefault\n\nopen MeasureTheory ProbabilityTheory MathFin\n\ntheorem first_to_default_spread_thm\n    {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}\n    {n : ℕ} {rates : Fin n → ℝ} {τ : Fin n → Ω → ℝ}\n    (hrates_pos : ∀ i, 0 < rates i)\n    (hexp_law : ∀ i, Measure.map (τ i) μ = expMeasure (rates i))\n    (hindep : iIndepFun τ μ)\n    (hmeas : ∀ i, Measurable (τ i))\n    (hn : 0 < n) {t : ℝ} (ht : 0 < t) :\n    -Real.log ((μ {ω | t < Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩\n        (fun i : Fin n => τ i ω)}).toReal) / t\n      = ∑ i, rates i :=\n  MathFin.firstToDefault_spread_eq_sum_hazards hrates_pos hexp_law hindep hmeas hn ht\n"
+      },
+      "metadata": {
+        "chapter": 17,
+        "reference": "First-to-default baskets under independent reduced-form intensities (Lando 2004 Ch 5; Duffie-Singleton 2003)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: Foundations/ExpMin.minimum_survival (minimum of jointly independent exponentials survives at the summed rate) bridged into the Credit.lean vocabulary — the basket survival probability IS survivalProbability (Σ rates) 0 t (firstToDefault_survival), and the spread reading follows by creditSpread_eq_hazard. Lives in MathFin/FixedIncome/FirstToDefault.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-survival-strictAnti",
+      "name": "Survival Strictly Decreasing Under Positive Hazard",
+      "description": "Positive hazard ⇒ survival probability strictly decreasing in horizon T. Hazard induces default risk that accumulates over time.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.Credit\n\nopen MathFin\n\ntheorem survival_strictAnti_thm {h t : ℝ} (hh : 0 < h) :\n    StrictAntiOn (fun T => MathFin.survivalProbability h t T) (Set.Ici t) :=\n  MathFin.survival_strictAnti_of_pos_hazard hh\n"
+      },
+      "metadata": {
+        "chapter": 17,
+        "reference": "Reduced-form credit risk: survival monotonicity (Lando 2004)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Real.exp_lt_exp on increasing argument. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-hazard-survival-const",
+      "name": "Time-Varying Hazard Survival Reduces to Constant Form",
+      "description": "When the hazard function is constant h(u) ≡ h₀, the cumulative hazard ∫₀^t h₀ du = h₀·t and the survival probability exp(-cumHazard) matches the constant-hazard formula exp(-h₀(T-t)) at t=0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.HazardCurve\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem hazardSurvival_eq_const_survival_thm (h_0 T : ℝ) :\n    MathFin.hazardSurvival (fun _ => h_0) T =\n      MathFin.survivalProbability h_0 0 T :=\n  MathFin.hazardSurvival_eq_const_survival h_0 T\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Time-varying hazard credit (Lando, Credit Risk Modeling)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-credit-spread-time-avg-hazard",
+      "name": "Credit Spread as Time-Averaged Hazard",
+      "description": "Under time-varying hazard h(u), the credit spread c(T) = -log(S(T))/T = H(T)/T where H is the cumulative hazard. The spread is the time-averaged hazard.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.HazardCurve\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\n/-- **Credit spread = time-averaged hazard** — definitional given\n    `S := exp(−H)` (`Real.log_exp`); paired below with the substantive FTC\n    recovery that grounds the model. -/\ntheorem creditSpread_eq_time_avg_hazard_thm {h : ℝ → ℝ} {T : ℝ} (hT : 0 < T) :\n    -Real.log (MathFin.hazardSurvival h T) / T = MathFin.cumHazard h T / T :=\n  MathFin.creditSpread_eq_time_avg_hazard hT\n\n/-- **Hazard recovered from the survival curve** (the substantive direction):\n    `h(t) = −d/dt log S(t)` for continuous `h`, by the FTC through the\n    `ExponentialDiscount` principle. -/\ntheorem hazard_recovers_from_survival_thm {h : ℝ → ℝ} (t : ℝ)\n    (hh : Continuous h) :\n    HasDerivAt (fun s => -(Real.log (MathFin.hazardSurvival h s))) (h t) t :=\n  MathFin.hazard_eq_neg_log_deriv_survival t hh"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Hazard curve and credit spread (Lando, Credit Risk Modeling)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The snippet exports both directions honestly split: the spread identity −log S(T)/T = H(T)/T is definitional given S := exp(−H) (Real.log_exp), and the substantive content is the FTC recovery hazard_eq_neg_log_deriv_survival (h(t) = −d/dt log S(t) for continuous h), also exported. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-kmv-merton-pd",
+      "name": "KMV-Merton risk-neutral probability of default = Q(V_T ≤ F)",
+      "description": "Under the Merton structural model with the firm value's risk-neutral law (BSCallHyp), the KMV default probability kmvPD equals the actual risk-neutral default probability 1 − Q({V_T > F}) — the genuine probabilistic content (via the BS risk-neutral exercise probability), not the algebraic Φ-symmetry identity.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.KMVMertonStructural\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\ntheorem kmv_pd_eq_risk_neutral_default_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : MeasureTheory.Measure Ω}\n    [MeasureTheory.IsProbabilityMeasure Q] {V_0 F r σ_V T : ℝ} {Z : Ω → ℝ}\n    (hV : 0 < V_0) (hF : 0 < F) (h : MathFin.BSCallHyp Q V_0 F r σ_V T Z) :\n    MathFin.kmvPD V_0 F r σ_V T =\n      1 - (Q {ω | MathFin.bsTerminal V_0 r σ_V T (Z ω) > F}).toReal :=\n  MathFin.kmvPD_eq_one_sub_survival_probability hV hF h\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Merton 1974 structural credit; KMV (Moody's) commercial implementation",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation: kmvPD = 1 − Q({V_T > F}) via MathFin.kmvPD_eq_one_sub_survival_probability, which routes through riskNeutralProb_S_T_gt_K (the genuine BS risk-neutral exercise probability). Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-kmv-survival-Phi-d2",
+      "name": "KMV-Merton Survival Probability = Φ(d_2^KMV)",
+      "description": "The probabilistic survival statement of the KMV–Merton model: under risk-neutral lognormal firm-value dynamics, Q({V_T > F}).toReal = Φ(DD) — the measure of the no-default event equals the standard-normal CDF of the distance to default (survival_probability_eq_Phi_distanceToDefault), routed through the lognormal tail computation riskNeutralProb_S_T_gt_K and kmvDistanceToDefault_eq_bsd2.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.KMVMertonStructural\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\ntheorem kmv_survival_probability_eq_Phi_dd_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : MeasureTheory.Measure Ω}\n    [MeasureTheory.IsProbabilityMeasure Q] {V_0 F r σ_V T : ℝ} {Z : Ω → ℝ}\n    (hV : 0 < V_0) (hF : 0 < F) (h : MathFin.BSCallHyp Q V_0 F r σ_V T Z) :\n    (Q {ω | MathFin.bsTerminal V_0 r σ_V T (Z ω) > F}).toReal =\n      Phi (MathFin.kmvDistanceToDefault V_0 F r σ_V T) :=\n  MathFin.survival_probability_eq_Phi_distanceToDefault hV hF h\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Merton 1974 / KMV survival probability",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the genuinely probabilistic survival statement Q({V_T > F}).toReal = Phi(distance-to-default), via MathFin.survival_probability_eq_Phi_distanceToDefault, which routes the no-default event's measure through riskNeutralProb_S_T_gt_K (the lognormal tail computation) and kmvDistanceToDefault_eq_bsd2. Replaces the former algebraic CDF-symmetry shadow (1 - Phi(-DD) = Phi(DD)). Complements mf-kmv-merton-pd (the PD identification) on the survival side. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cds-fair-spread",
+      "name": "CDS Fair Spread: c = h · (1 − R)",
+      "description": "Under constant hazard h with recovery R, the fair CDS spread c = h · (1 − R), via leg equality.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.Credit\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem cds_leg_equality_thm (h R factor c : ℝ) (h_factor_ne : factor ≠ 0) :\n    c * factor = (1 - R) * h * factor ↔ c = MathFin.cdsFairSpread h R :=\n  MathFin.cds_leg_equality h R factor c h_factor_ne\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "CDS pricing under constant hazard with recovery (Jarrow-Turnbull)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the iff-characterisation c·factor = (1−R)·h·factor ⟺ c = (1−R)·h. `factor` is an abstract common annuity factor (both legs proportional to the same factor); the closed-form annuity computation (1−e^{−(r+h)T})/(r+h) is module prose, not Lean. Re-export from MathFin. Axioms-clean."
+      }
+    }
+  ]
+}
