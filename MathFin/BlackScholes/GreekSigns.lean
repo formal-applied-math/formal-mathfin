@@ -31,21 +31,26 @@ trader can read each sign off the formula and the table below.
 | ∂_K V        | ≤ 0    | `−e^{−rτ} · Φ(d_2) ≤ 0` (call decreases in strike) |
 | ∂²_K V       | ≥ 0    | `e^{−rτ} · ϕ(d_2)/(K σ √τ) ≥ 0` (Breeden-Litzenberger) |
 
-These signs are the *qualitative* expression of: a call is increasing
-and convex in spot, increasing in vol, decreasing and convex in strike,
-increasing in rate, decreasing in dividends.
+Read through the mean value theorem, these signs say that a call is increasing and convex in
+spot, increasing in vol, decreasing and convex in strike, and increasing in rate. This file
+states only the signs of the formulas, each the derivative of the price by the lemma cited
+below. Stated as properties of the price elsewhere: convexity in spot (`bsV_spot_convexOn`),
+strict monotonicity in vol (`bsV_strictMonoOn_sigma`), convexity in strike
+(`bsV_strike_convexOn`), and a call non-increasing in the dividend yield (`antitone_bsVDiv_q`,
+`DividendsGreeks.lean`). Monotonicity in spot, strike and rate is not stated as such.
 
 ## Results
 
-* `bsV_delta_nonneg`, `bsV_delta_le_one`: `Φ(d_1) ∈ [0, 1]`.
-* `bsV_gamma_pos`: `∂²_S V > 0` (call strictly convex in spot).
-* `bsV_rho_nonneg`: `∂_r V ≥ 0` (call increasing in rate).
-* `bsV_partial_K_nonpos`: `∂_K V ≤ 0` (call decreasing in strike).
-* `bsV_partial_KK_nonneg`: `∂²_K V ≥ 0` (call convex in strike).
-* `bsV_theta_tau_nonneg`: for `r ≥ 0` the formula `∂_τ V` of `hasDerivAt_bsV_tau` is `≥ 0`
-  (calendar theta `Θ = −∂_τ V ≤ 0`, Hull §19.5).
+* `bsV_delta_nonneg`, `bsV_delta_le_one`: `Φ(d_1) ∈ [0, 1]` (`∂_S V` by `hasDerivAt_bsV_S`).
+* `bsV_gamma_pos`: the gamma formula, `∂²_S V` by `hasDerivAt_deriv_bsV_S`, is `> 0`.
+* `bsV_rho_nonneg`: the rho formula, `∂_r V` by `hasDerivAt_bsV_r`, is `≥ 0`.
+* `bsV_partial_K_nonpos`: the formula `∂_K V` of `hasDerivAt_bsV_K` is `≤ 0`.
+* `bsV_partial_KK_nonneg`: the formula `∂²_K V` of `hasDerivAt_deriv_bsV_K` is `≥ 0`.
+* `bsV_theta_tau_nonneg`: for `S, K, σ ≥ 0` and `r ≥ 0` the formula `∂_τ V` of
+  `hasDerivAt_bsV_tau` is `≥ 0` (calendar theta `Θ = −∂_τ V ≤ 0`, Hull §19.5).
 * `bsP_delta_nonpos`, `bsP_rho_nonpos`: the put column of Hull Table 19.6 (put delta
-  `Φ(d₁) − 1 ≤ 0`, put rho `≤ 0`); put vega equals call vega (`hasDerivAt_bsP_sigma`), whose
+  `Φ(d₁) − 1 ≤ 0`, the formula of `hasDerivAt_bsP_S`; put rho `≤ 0` for `K, τ ≥ 0`, the formula
+  of `hasDerivAt_bsP_r`); put vega equals call vega (`hasDerivAt_bsP_sigma`), whose
   sign is `bsV_vega_pos`. Put theta has no unconditional sign: for `r > 0` a deep
   in-the-money put has positive calendar theta (`Θ_put → r K e^{−rτ}` as `S → 0`; not
   formalized here).
@@ -72,7 +77,7 @@ theorem bsV_delta_le_one (S K r σ τ : ℝ) : Phi (bsd1 S K r σ τ) ≤ 1 :=
 
 /-- **Call gamma is strictly positive**: the gamma formula `ϕ(d_1) / (S σ √τ)`, which is
 `∂²_S V` by `hasDerivAt_deriv_bsV_S`, is positive for `S, σ, τ > 0`. Convexity in spot is
-`SpotConvexity.bsV_spot_convexOn`, strict convexity `SpotConvexity.bsV_spot_strictConvexOn`. -/
+`bsV_spot_convexOn`, strict convexity `bsV_spot_strictConvexOn` (`SpotConvexity.lean`). -/
 theorem bsV_gamma_pos {K r σ : ℝ} (_hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     0 < gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ) := by
@@ -85,7 +90,8 @@ theorem bsV_gamma_pos {K r σ : ℝ} (_hK : 0 < K) (hσ : 0 < σ)
 /-! ## Rho sign constraint -/
 
 /-- **Call rho is non-negative**: `∂_r V = K · τ · e^{−rτ} · Φ(d_2) ≥ 0`
-for `K ≥ 0` and `τ ≥ 0`. The call price increases in the risk-free rate. -/
+for `K ≥ 0` and `τ ≥ 0` (the formula is `∂_r V` by `hasDerivAt_bsV_r`). Read through the mean
+value theorem, the call price increases in the risk-free rate; that monotonicity is not stated. -/
 theorem bsV_rho_nonneg {K τ : ℝ} (hK : 0 ≤ K) (hτ : 0 ≤ τ) (S r σ : ℝ) :
     0 ≤ K * τ * Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ) := by
   have h_exp_nn : 0 ≤ Real.exp (-(r * τ)) := (Real.exp_pos _).le
@@ -94,9 +100,9 @@ theorem bsV_rho_nonneg {K τ : ℝ} (hK : 0 ≤ K) (hτ : 0 ≤ τ) (S r σ : �
 
 /-! ## Strike-direction sign constraints -/
 
-/-- **Partial in strike is non-positive**: `∂_K V = −e^{−rτ} · Φ(d_2) ≤ 0`.
-The call price decreases in the strike (a more out-of-the-money option
-is worth less). -/
+/-- **Partial in strike is non-positive**: `∂_K V = −e^{−rτ} · Φ(d_2) ≤ 0` (the formula is
+`∂_K V` by `hasDerivAt_bsV_K`). Read through the mean value theorem, the call price decreases
+in the strike; that monotonicity is not stated. -/
 theorem bsV_partial_K_nonpos (S K r σ τ : ℝ) :
     -(Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ)) ≤ 0 := by
   have h_exp_nn : 0 ≤ Real.exp (-(r * τ)) := (Real.exp_pos _).le
@@ -124,8 +130,9 @@ theorem bsV_partial_KK_nonneg {K σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ :
 
 /-! ## Theta and put-side sign constraints -/
 
-/-- **Call theta sign**: for `r ≥ 0` the formula `σ S ϕ(d₁)/(2√τ) + r K e^{−rτ} Φ(d₂)`, which is
-`∂_τ V` by `hasDerivAt_bsV_tau`, is `≥ 0`; i.e. the calendar theta `Θ = −∂_τ V` of a call on a
+/-- **Call theta sign**: for `S, K, σ ≥ 0` and `r ≥ 0` the formula
+`σ S ϕ(d₁)/(2√τ) + r K e^{−rτ} Φ(d₂)`, which is `∂_τ V` by `hasDerivAt_bsV_tau` (for
+`K, σ, S, τ > 0`), is `≥ 0`; i.e. the calendar theta `Θ = −∂_τ V` of a call on a
 non-dividend-paying stock is `≤ 0`. -/
 theorem bsV_theta_tau_nonneg {S K r σ τ : ℝ} (hS : 0 ≤ S) (hK : 0 ≤ K) (hr : 0 ≤ r)
     (hσ : 0 ≤ σ) :
@@ -135,11 +142,13 @@ theorem bsV_theta_tau_nonneg {S K r σ τ : ℝ} (hS : 0 ≤ S) (hK : 0 ≤ K) (
   have := Phi_nonneg (bsd2 S K r σ τ)
   positivity
 
-/-- **Put delta is non-positive**: `Φ(d₁) − 1 ≤ 0`. -/
+/-- **Put delta is non-positive**: `Φ(d₁) − 1 ≤ 0`, the formula that is `∂_S P` by
+`hasDerivAt_bsP_S`. -/
 theorem bsP_delta_nonpos (S K r σ τ : ℝ) : Phi (bsd1 S K r σ τ) - 1 ≤ 0 :=
   sub_nonpos.mpr (bsV_delta_le_one S K r σ τ)
 
-/-- **Put rho is non-positive**: `∂_r P = −K τ e^{−rτ} Φ(−d₂) ≤ 0`. -/
+/-- **Put rho is non-positive**: `∂_r P = −K τ e^{−rτ} Φ(−d₂) ≤ 0` for `K ≥ 0` and `τ ≥ 0`
+(the formula is `∂_r P` by `hasDerivAt_bsP_r`). -/
 theorem bsP_rho_nonpos {K τ : ℝ} (hK : 0 ≤ K) (hτ : 0 ≤ τ) (S r σ : ℝ) :
     -(K * τ * Real.exp (-(r * τ)) * Phi (-bsd2 S K r σ τ)) ≤ 0 := by
   have := Phi_nonneg (-bsd2 S K r σ τ)

@@ -33,17 +33,17 @@ zero-rates ratio
 enters **as a definition** (`dupireRatio`) — the derivation of the ratio itself
 from a local-vol model is not developed here. The headline results:
 
-* `dupireRatio_k_slope` — eq 10.8: the ATM k-slope of `R` has ε-slope
-  `2σψ₁·((3/2)T + 2T₀)/(T+T₀)^{3/2}` (with `(T+T₀)^{3/2}` rendered as
+* `dupireRatio_k_slope` — eq 10.8: for `F, σ, T, T₀ > 0`, the ATM k-slope of `R` has
+  ε-slope `2σψ₁·((3/2)T + 2T₀)/(T+T₀)^{3/2}` (with `(T+T₀)^{3/2}` rendered as
   `(T+T₀)·√(T+T₀)`). The numerator `(3/2)T + 2T₀` is the one consistent with the
   rule of two (`localSkew_zero`).
 * `dupireRatio_sqrt_slope` — the σ_loc reading: the same slope for `√R` is
   `localSkew ψ₁ T₀ T = ψ₁·((3/2)T + 2T₀)/(T+T₀)^{3/2}` — a first-order-in-ε reading of
-  the local-vol ATM skew implied by the surface (for `T > 0`), not the actual skew of
-  the `ε = 1` surface, which carries `O(ψ₁³)` corrections (not proved here).
+  the local-vol ATM skew implied by the surface (for `F, σ, T, T₀ > 0`), not the actual
+  skew of the `ε = 1` surface, which carries `O(ψ₁³)` corrections (not proved here).
 * `localSkew_zero`, `tendsto_localSkew_nhds_zero`, `tendsto_localSkew_mul_sqrt_atTop` —
-  the closed form `localSkew` equals `2ψ₁/√T₀` at `T = 0`, twice the implied ATM skew
-  `ψ₁/√T₀` (the rule of two), tends to that value as `T → 0`, and behaves like
+  for `T₀ > 0` the closed form `localSkew` equals `2ψ₁/√T₀` at `T = 0`, twice the implied
+  ATM skew `ψ₁/√T₀` (the rule of two), tends to that value as `T → 0`, and behaves like
   `(3/2)ψ₁/√T` as `T → ∞`. These are statements about the closed form;
   `dupireRatio_sqrt_slope` identifies it with the skew of the surface only for `T > 0`.
 
@@ -75,9 +75,9 @@ inserted so first-order-in-ε readings extract the skew slope. At `ε = 0` (and 
 `k = 0` for every `ε`) it is the ATM vol `σ`. -/
 noncomputable def smileSurface (σ ψ₁ T₀ ε k T : ℝ) : ℝ := σ + ε * ψ₁ * k / Real.sqrt (T + T₀)
 
-/-- The smile surface is positive whenever the tilt is smaller than the base:
+/-- The smile surface is positive whenever `T + T₀ > 0` and the tilt is smaller than the base:
 `|ε·ψ₁·k| < σ·√(T+T₀)` (positivity cannot hold for arbitrary tilts — the surface
-dips below zero for large `|ε·ψ₁·k|`). -/
+is negative once `ε·ψ₁·k < −σ·√(T+T₀)`). -/
 theorem smileSurface_pos {σ ψ₁ T₀ ε k T : ℝ} (hS : 0 < T + T₀)
     (hb : |ε * ψ₁ * k| < σ * Real.sqrt (T + T₀)) :
     0 < smileSurface σ ψ₁ T₀ ε k T := by
@@ -530,12 +530,13 @@ noncomputable def smileN (σ ψ₁ T₀ ε k T : ℝ) : ℝ :=
 /-- **The Gatheral denominator deformation** of Dupire's ratio,
 `δ = −k·w_k/w + w_k²·(k²−w−w²/4)/(4w²) + w_kk/2`, specialized to this surface (so
 `w_kk/2 = (εψ₁/√(T+T₀))²·T` is spelled out); Dupire's ratio is `w_T/(1 + δ)`
-(`dupireRatio_eq`). The `1 + smileDelta` form is Durrleman's function `g`
-(`MathFin.SVI.durrleman`, `SVI/Reduction.lean`) for this surface's variance, and
+(`dupireRatio_eq`). `1 + smileDelta` has the algebraic form of Durrleman's function `g`, which
+`MathFin.SVI.durrleman` (`SVI/Reduction.lean`) defines for the SVI variance only; here this
+surface's variance stands in for SVI's, and no lemma connects the two. Likewise
 `dpl`/`dmi`/`blackForm`/`exp_mul_pdf_dmi` above mirror `SVI.blackPlus`/`blackMinus`/
-`logBlackCall`/`black_density_identity` (`MathFin.SVI.BlackSmile`,
-`SVI/BlackSmile.lean`) with an abstract total variance `w` standing in for
-`SVI.variance p k`; see those modules for the fully worked SVI case. -/
+`logBlackCall`/`black_density_identity` (`SVI/BlackSmile.lean`) with an abstract total
+variance `w` standing in for `SVI.variance p k`; see those modules for the fully worked SVI
+case. -/
 noncomputable def smileDelta (σ ψ₁ T₀ ε k T : ℝ) : ℝ :=
   -k * wSlope σ ψ₁ T₀ ε T k / totalVar σ ψ₁ T₀ ε k T
     + wSlope σ ψ₁ T₀ ε T k ^ 2 * (k ^ 2 - totalVar σ ψ₁ T₀ ε k T
@@ -851,9 +852,10 @@ private theorem hasDerivAt_slopeNum {σ ψ₁ T₀ T : ℝ} (hσ : 0 < σ) (hT :
     field_simp [hσ.ne', hT.ne', (Real.sqrt_pos.mpr hS).ne']
     ring
 
-/-- **Eq 10.8**: the ATM `k`-slope of Dupire's ratio has ε-slope
-`2σψ₁·((3/2)T + 2T₀)/(T+T₀)^{3/2}` — the local-vol variance skew implied by the
-tilted surface. -/
+/-- **Eq 10.8**: for `F, σ, T, T₀ > 0`, the ATM `k`-slope of Dupire's ratio has ε-slope
+`2σψ₁·((3/2)T + 2T₀)/(T+T₀)^{3/2}` — the first-order-in-ε coefficient of the local-variance
+ATM skew implied by the tilted surface, reading `R` as `σ_loc²` (Dupire's ratio enters as a
+definition). -/
 theorem dupireRatio_k_slope {F σ ψ₁ T₀ T : ℝ} (hF : 0 < F) (hσ : 0 < σ) (hT : 0 < T)
     (h₀ : 0 < T₀) :
     deriv (fun ε ↦ deriv (fun k ↦ dupireRatio F σ ψ₁ T₀ ε k T) 0) 0
@@ -872,18 +874,19 @@ theorem dupireRatio_k_slope {F σ ψ₁ T₀ T : ℝ} (hF : 0 < F) (hσ : 0 < σ
 
 /-! ## The `σ_loc` reading -/
 
-/-- The closed form of the local-vol ATM skew of the tilted surface,
+/-- The closed form of the first-order-in-ε local-vol ATM skew of the tilted surface,
 `ψ₁·((3/2)T + 2T₀)/(T+T₀)^{3/2}` (with `(T+T₀)^{3/2}` rendered as `(T+T₀)·√(T+T₀)`);
-`dupireRatio_sqrt_slope` identifies it with the skew for `T > 0`. -/
+`dupireRatio_sqrt_slope` identifies it with the ε-slope of the ATM `k`-slope of `√R` for
+`F, σ, T, T₀ > 0`. -/
 noncomputable def localSkew (ψ₁ T₀ T : ℝ) : ℝ :=
   ψ₁ * ((3 / 2) * T + 2 * T₀) / ((T + T₀) * Real.sqrt (T + T₀))
 
 /-- **The local-vol ATM skew** (eq 10.8's square-root reading): the ε-slope of the
 ATM `k`-slope of `√R` — a first-order-in-ε reading of the local vol implied by the
 surface, not the actual skew of the `ε = 1` surface (which carries `O(ψ₁³)`
-corrections, not proved here) — is `localSkew ψ₁ T₀ T` for every `T > 0`. The closed
-form at `T = 0` is twice the implied ATM skew (`localSkew_zero`); as `T → ∞` it behaves
-like `(3/2)ψ₁/√T` (`tendsto_localSkew_mul_sqrt_atTop`). -/
+corrections, not proved here) — is `localSkew ψ₁ T₀ T` for every `T > 0`, given
+`F, σ, T₀ > 0`. The closed form at `T = 0` is twice the implied ATM skew (`localSkew_zero`);
+as `T → ∞` it behaves like `(3/2)ψ₁/√T` (`tendsto_localSkew_mul_sqrt_atTop`). -/
 theorem dupireRatio_sqrt_slope {F σ ψ₁ T₀ T : ℝ} (hF : 0 < F) (hσ : 0 < σ) (hT : 0 < T)
     (h₀ : 0 < T₀) :
     deriv (fun ε ↦ deriv (fun k ↦ Real.sqrt (dupireRatio F σ ψ₁ T₀ ε k T)) 0) 0
@@ -945,7 +948,7 @@ theorem dupireRatio_sqrt_slope {F σ ψ₁ T₀ T : ℝ} (hF : 0 < F) (hσ : 0 <
 
 /-! ## Corollaries -/
 
-/-- **The rule of two, on the closed form**: `localSkew` at `T = 0` is `2·(ψ₁/√T₀)`,
+/-- **The rule of two, on the closed form**: for `T₀ > 0`, `localSkew` at `T = 0` is `2·(ψ₁/√T₀)`,
 twice the implied ATM skew `ψ₁/√T₀`. An algebraic identity on the closed form;
 `dupireRatio_sqrt_slope` identifies the closed form with the skew only for `T > 0`. -/
 theorem localSkew_zero (ψ₁ T₀ : ℝ) (h₀ : 0 < T₀) :

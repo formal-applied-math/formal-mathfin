@@ -43,16 +43,18 @@ the call-on-the-max and call-on-the-min prices are
 * `stulz_max_min_payoff_parity`: the **payoff-level** identity behind Stulz's whole
   construction, `max(max(a,b)−K,0) + max(min(a,b)−K,0) = max(a−K,0) + max(b−K,0)` — pure
   algebra, no probability.
-* `stulzCallMax_add_stulzCallMin`: the matching **price-level** identity, `C_max + C_min`
-  equals the sum of two *ordinary* one-asset Black-Scholes calls on `S¹` and `S²` (via
-  `GarmanNormalForm.bsVGarman`). It is the price-level counterpart of the payoff identity, but
-  it is not derived from it: the proof consumes only `bivariateNormalCDF_flip_snd` /
-  `bivariateNormalCDF_neg_neg`, the two general bivariate-CDF identities of
-  `BivariateNormalCDF.lean`, with no separate probabilistic derivation.
+* `stulzCallMax_add_stulzCallMin`: the matching **price-level** identity, for `S¹, S², K > 0`
+  and `ρ² ≤ 1`: `C_max + C_min` equals the sum of two *ordinary* one-asset Black-Scholes calls
+  on `S¹` and `S²` (`bsVGarman`, `GarmanNormalForm.lean`). It is the price-level counterpart of
+  the payoff identity, but it is not derived from it: the proof consumes only
+  `bivariateNormalCDF_flip_snd` / `bivariateNormalCDF_neg_neg`, the two general bivariate-CDF
+  identities of `BivariateNormalCDF.lean`, with no separate probabilistic derivation.
 
-**Scope.** `stulzCallMax_add_stulzCallMin` verifies the closed form's
-*internal consistency* (it collapses to the one-asset case exactly as Stulz's own derivation
-requires), not a from-first-principles derivation from a joint two-GBM model — the same scope
+**Scope.** `stulzCallMax_add_stulzCallMin` is a partial consistency check on the closed forms.
+Its proof uses only `ρ₁² ≤ 1` and `ρ₂² ≤ 1`, so it holds for any values of `d`, `v`, `ρ₁`, `ρ₂`
+with those bounds: it checks the strike term, `y₁`, `y₂` and that `C_min`'s arguments are the
+sign flips of `C_max`'s, but not `stulzD`, `stulzEffVol`, `stulzRho1` or `stulzRho2`. It is
+not a from-first-principles derivation from a joint two-GBM model — the same scope
 as `GarmanNormalForm.lean`'s own specializations, which take the one-asset BS closed form as
 given rather than re-deriving it from Girsanov. Deriving `C_max` itself from a bivariate
 lognormal expectation is a separate, harder project (the two-asset analogue of
@@ -66,7 +68,8 @@ namespace MathFin
 open Real
 
 /-- **Effective spread volatility** `v = √(σ₁² + σ₂² − 2ρσ₁σ₂)` — the same quantity as the
-Margrabe effective vol (`margrabe_effective_variance`'s square root). -/
+Margrabe effective vol (the square root of `margrabe_effective_variance`'s log-spread variance
+divided by `T`). -/
 noncomputable def stulzEffVol (σ1 σ2 ρ : ℝ) : ℝ :=
   √(σ1 ^ 2 + σ2 ^ 2 - 2 * ρ * σ1 * σ2)
 
@@ -182,11 +185,13 @@ private lemma stulzY2_eq_gbsd1 (S2 K b2 σ2 T r : ℝ) (hS2 : 0 < S2) (hK : 0 < 
     log_SexpNegQ_div_KexpNegR S2 K r (r - b2) T hS2 hK]
   ring
 
-/-- **The price-level parity**: `C_max + C_min` equals the sum of two one-asset `bsVGarman`
-calls on `S¹` and `S²` at strike `K`, discount factor `e^{−rT}`. The proof pairs each `N₂` term
-of `C_max` with its counterpart in `C_min` via `bivariateNormalCDF_flip_snd` (asset terms) and
-`bivariateNormalCDF_neg_neg` (the strike term). It is the price-level counterpart of
-`stulz_max_min_payoff_parity`, proved from the N₂ identities, not from the payoff lemma. -/
+/-- **The price-level parity**: for `S¹, S², K > 0` and `ρ² ≤ 1`, `C_max + C_min` equals the
+sum of two one-asset `bsVGarman` calls on `S¹` and `S²` at strike `K`, discount factor
+`e^{−rT}`. The proof pairs each `N₂` term of `C_max` with its counterpart in `C_min` via
+`bivariateNormalCDF_flip_snd` (asset terms) and `bivariateNormalCDF_neg_neg` (the strike term).
+It is the price-level counterpart of `stulz_max_min_payoff_parity`, proved from the N₂
+identities, not from the payoff lemma. It uses only `ρ₁², ρ₂² ≤ 1` of `d`, `v`, `ρ₁`, `ρ₂`, so
+it does not check `stulzD`, `stulzEffVol`, `stulzRho1` or `stulzRho2`. -/
 theorem stulzCallMax_add_stulzCallMin (S1 S2 K r b1 b2 σ1 σ2 T : ℝ) {ρ : ℝ} (hρ : ρ ^ 2 ≤ 1)
     (hS1 : 0 < S1) (hS2 : 0 < S2) (hK : 0 < K) :
     stulzCallMax S1 S2 K r b1 b2 σ1 σ2 ρ T + stulzCallMin S1 S2 K r b1 b2 σ1 σ2 ρ T =

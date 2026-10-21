@@ -43,9 +43,10 @@ and the four knock-out prices are `A(1,-1)` (down-out call), `A(1,1)` (up-out ca
   probabilistic reading is not proved here, and the comparison with the one-asset formula
   (which checks `e₁`, `e₃` and the reflection exponent) is by inspection — that formula is not
   in the library.
-* `heynenKat_downOut_add_upOut`: for a fixed option type `η`, the down-out and up-out values
-  sum to a closed form with no `N₂` left: each pair `N₂(ηdᵢ, φeᵢ; −ηφρ)`, `φ = ±1`, collapses
-  via `bivariateNormalCDF_flip_snd` to `Φ(ηdᵢ)`. It holds for any arguments `dᵢ, eᵢ`, so it
+* `heynenKat_downOut_add_upOut`: for a fixed option type `η` (`η² = 1`) and `ρ² ≤ 1`, the
+  down-out and up-out values sum to a closed form with no `N₂` left: each pair
+  `N₂(ηdᵢ, φeᵢ; −ηφρ)`, `φ = ±1`, collapses via `bivariateNormalCDF_flip_snd` to `Φ(ηdᵢ)`.
+  It holds for any arguments `dᵢ, eᵢ`, so it
   checks only that `φ` enters as `(φeᵢ, −ηφρ)`; and the sum has no payoff meaning, since the two
   formulas apply to the disjoint regimes `S₂ > H` and `S₂ < H`.
 
@@ -140,8 +141,9 @@ theorem heynenKatA_rho_zero (eta phi S1 S2 X H T r b1 b2 σ1 σ2 : ℝ) :
   ring
 
 /-- **Down-out and up-out collapse to a bivariate-CDF-free form.** For a fixed option type
-`η ∈ {-1,1}`, summing the down-barrier (`φ=-1`) and up-barrier (`φ=1`) knock-out values pairs
-every `N₂(ηdᵢ,φeᵢ;−ηφρ)` with its `φ`-flipped partner via `bivariateNormalCDF_flip_snd`
+`η ∈ {-1,1}` and a correlation with `ρ² ≤ 1`, summing the down-barrier (`φ=-1`) and
+up-barrier (`φ=1`) knock-out values pairs every `N₂(ηdᵢ,φeᵢ;−ηφρ)` with its `φ`-flipped
+partner via `bivariateNormalCDF_flip_snd`
 (`N₂(a,b;r)+N₂(a,-b;-r)=Φ(a)`, applied at `a = ηdᵢ`, `b = eᵢ`, `r = -ηρ`), collapsing all four
 `N₂` pairs to `Φ(ηd₁), Φ(ηd₂), Φ(ηd₃), Φ(ηd₄)` simultaneously. It holds for any arguments
 `dᵢ, eᵢ`: it checks only that `φ` enters as `(φeᵢ, −ηφρ)`, and the sum has no payoff meaning

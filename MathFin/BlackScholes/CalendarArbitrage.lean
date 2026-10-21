@@ -20,9 +20,10 @@ steps, both proved here with zero rates and on the maturity domain described und
 1. **Martingale step.** If the (forward) price `X_t` is a martingale, then for every level `L`
    the undiscounted call value `t ↦ E[(X_t − L)⁺]` is non-decreasing: by conditional Jensen,
    `(X_s − L)⁺ = (E[X_t | ℱ_s] − L)⁺ ≤ E[(X_t − L)⁺ | ℱ_s]` for `s ≤ t`.
-2. **Black–Scholes step.** With zero rates and unit spot normalisation the Black–Scholes call
-   depends on volatility and maturity only through the total variance `w = σ²T`, and it is
-   strictly increasing in `w` (positive vega, `bsV_strictMonoOn_sigma`). So call prices are
+2. **Black–Scholes step.** With zero rates the Black–Scholes call depends on volatility and
+   maturity only through the total variance `w = σ²T` (for `σ, T > 0`; `totalVarianceCall` is
+   the call at unit maturity and volatility `√w`), and for strike and spot `K, S > 0` it is
+   strictly increasing in `w > 0` (positive vega, `bsV_strictMonoOn_sigma`). So call prices are
    non-decreasing in maturity at every strike iff total variance is non-decreasing in maturity
    at every log-moneyness.
 
@@ -42,8 +43,11 @@ steps, both proved here with zero rates and on the maturity domain described und
 
 **Scope.** Rates and dividends are zero and the forward is the spot `S`. In the last three
 results maturity `t` ranges over all of `ℝ` and the total variance must be positive at every
-real `t`. That excludes every surface with `w(k, t) → 0` as `t → 0⁺`, the flat `w = σ²t`
-included, so they do not cover Gatheral–Jacquier's setting `t > 0`; the `t > 0` form
+real `t`. Positivity and monotonicity on `ℝ` together rule out every surface with
+`w(k, t) → 0` as `t → 0⁺`, the flat `w = σ²t` included: such a surface is either not positive
+on `ℝ` or, extended positively to `t ≤ 0`, not monotone across `t = 0`, and then both sides of
+the equivalences are false. So the results say nothing about such a surface on `t > 0` and do
+not cover Gatheral–Jacquier's setting `t > 0`; the `t > 0` form
 (`MonotoneOn … (Ioi 0)`) is not stated here. The local-variance characterisation (crossed
 total-variance lines ⟺ negative local variance) is not formalised here.
 -/
@@ -98,7 +102,7 @@ parametrised by total variance `w = σ²T`. -/
 noncomputable def totalVarianceCall (K S w : ℝ) : ℝ := bsV K 0 (Real.sqrt w) S 1
 
 /-- With zero rates the Black–Scholes call depends on `σ` and `T` only through the total
-variance `σ²T`. -/
+variance `σ²T`, for `σ > 0` and `T > 0`. -/
 theorem bsV_eq_totalVarianceCall {K S σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     bsV K 0 σ S T = totalVarianceCall K S (σ ^ 2 * T) := by
   have hs : Real.sqrt (σ ^ 2 * T) = σ * Real.sqrt T := by
@@ -111,7 +115,8 @@ theorem bsV_eq_totalVarianceCall {K S σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
   unfold totalVarianceCall bsV
   simp only [bsd2, hd1, hs, Real.sqrt_one, mul_one, zero_mul, neg_zero, Real.exp_zero]
 
-/-- The total-variance call is strictly increasing in total variance on `(0, ∞)`. -/
+/-- The total-variance call is strictly increasing in total variance on `(0, ∞)`, for strike
+and spot `K, S > 0`. -/
 theorem strictMonoOn_totalVarianceCall {K S : ℝ} (hK : 0 < K) (hS : 0 < S) :
     StrictMonoOn (totalVarianceCall K S) (Ioi 0) := by
   intro a ha b hb hab
@@ -123,9 +128,10 @@ surface over log-moneyness `k` and maturity `t`, priced with zero rates at forwa
 the call at strike `K` and maturity `t` is `totalVarianceCall K S (w (log (K / S)) t)`. Call
 prices are non-decreasing in maturity at every strike iff `t ↦ w(k, t)` is non-decreasing at
 every `k`. Maturity `t` ranges over all of `ℝ` and `w` must be positive at every real `t`.
-This is not more general than the economic setting: positivity on `ℝ` excludes every surface
-with `w(k, t) → 0` as `t → 0⁺`, the flat `w = σ²t` included. The `t > 0` form
-(`MonotoneOn … (Ioi 0)`) is not stated here. -/
+This is not more general than the economic setting: positivity and monotonicity on `ℝ`
+together rule out every surface with `w(k, t) → 0` as `t → 0⁺`, the flat `w = σ²t` included.
+Extended positively to `t ≤ 0`, such a surface makes both sides false, so the theorem says
+nothing about it on `t > 0`. The `t > 0` form (`MonotoneOn … (Ioi 0)`) is not stated here. -/
 theorem calendar_free_iff {S : ℝ} (hS : 0 < S) (w : ℝ → ℝ → ℝ) (hw : ∀ k t, 0 < w k t) :
     (∀ K, 0 < K → Monotone fun t ↦ totalVarianceCall K S (w (Real.log (K / S)) t)) ↔
       ∀ k, Monotone (w k) := by
@@ -144,8 +150,9 @@ theorem calendar_free_iff {S : ℝ} (hS : 0 < S) (w : ℝ → ℝ → ℝ) (hw :
 Black–Scholes prices of a positive total-variance surface `w` are the call values
 `∫ (X_t − K)⁺` of a real-indexed martingale `X`, at every strike `K > 0` and maturity `t`,
 then `t ↦ w(k, t)` is non-decreasing at every log-moneyness `k`. As in `calendar_free_iff`,
-`t` ranges over all of `ℝ` and `w` must be positive at every real `t`, which excludes
-surfaces with `w(k, t) → 0` as `t → 0⁺` (such as `w = σ²t`). -/
+`t` ranges over all of `ℝ` and `w` must be positive at every real `t`; with the monotonicity
+on `ℝ` that the hypotheses force, this excludes surfaces with `w(k, t) → 0` as `t → 0⁺` (such
+as `w = σ²t`). -/
 theorem monotone_totalVariance_of_martingale {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {μ : Measure Ω} [IsFiniteMeasure μ] {ℱ : Filtration ℝ mΩ} {X : ℝ → Ω → ℝ}
     (hX : Martingale X ℱ μ) {S : ℝ} (hS : 0 < S) (w : ℝ → ℝ → ℝ) (hw : ∀ k t, 0 < w k t)

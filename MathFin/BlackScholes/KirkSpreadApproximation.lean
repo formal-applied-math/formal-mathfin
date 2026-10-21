@@ -45,7 +45,7 @@ against the one case where the true answer is known in closed form.
 
 * `kirkEffectiveVariance`: `σ₁² − 2ρσ₁σ₂·w + σ₂²·w²` where `w = S²₀/(S²₀+K')`
   (`K'` is the already-discounted cash strike, `K·e^{-rT}`).
-* `kirkEffectiveVariance_zero_eq_margrabe`: at `K' = 0` (so `w = 1`) Kirk's
+* `kirkEffectiveVariance_zero_eq_margrabe`: at `K' = 0` and `S²₀ ≠ 0` (so `w = 1`) Kirk's
   effective variance is exactly the Margrabe effective variance
   `σ₁² + σ₂² − 2ρσ₁σ₂`.
 * `kirkSpreadPrice`: the Kirk approximate price, `bsVGarman` at
@@ -73,11 +73,11 @@ not stated as a theorem here), i.e. Kirk's approximation is "Margrabe with `S²`
 noncomputable def kirkEffectiveVariance (S2 K σ1 σ2 ρ : ℝ) : ℝ :=
   σ1 ^ 2 - 2 * ρ * σ1 * σ2 * kirkWeight S2 K + σ2 ^ 2 * kirkWeight S2 K ^ 2
 
-/-- **Kirk reduces to Margrabe at `K = 0`**: `kirkWeight S2 0 = 1`, so Kirk's
+/-- **Kirk reduces to Margrabe at `K = 0`**: for `S²₀ ≠ 0`, `kirkWeight S2 0 = 1`, so Kirk's
 effective variance collapses to exactly the Margrabe effective variance
 `σ₁² + σ₂² − 2ρσ₁σ₂` — the one point where the spread-option payoff
-`max(S¹ − S² − K, 0)` is the *exact* exchange-option payoff and Kirk's
-approximation is not an approximation at all. -/
+`max(S¹ − S² − K, 0)` is the *exact* exchange-option payoff. The price-level collapse to
+`margrabePrice` is `kirkSpreadPrice_zero_eq_margrabe`. -/
 theorem kirkEffectiveVariance_zero_eq_margrabe (S2 σ1 σ2 ρ : ℝ) (hS2 : S2 ≠ 0) :
     kirkEffectiveVariance S2 0 σ1 σ2 ρ = σ1 ^ 2 + σ2 ^ 2 - 2 * ρ * σ1 * σ2 := by
   unfold kirkEffectiveVariance kirkWeight
@@ -101,7 +101,7 @@ noncomputable def kirkSpreadPrice (S1 S2 K r σ1 σ2 ρ T : ℝ) : ℝ :=
   bsVGarman S1 (S2 + kirkDiscountedStrike K r T) 1
     (Real.sqrt (kirkEffectiveVariance S2 (kirkDiscountedStrike K r T) σ1 σ2 ρ)) T
 
-/-- **Kirk's price collapses to the Margrabe price at `K = 0`, for every `r`**: the
+/-- **Kirk's price collapses to the Margrabe price at `K = 0`, for every `r`** (and `S²₀ ≠ 0`): the
 discounted cash strike `kirkDiscountedStrike 0 r T` is `0` regardless of `r` (nothing to
 discount), so the pseudo-asset is `S²₀` itself, the effective variance is Margrabe's
 (`kirkEffectiveVariance_zero_eq_margrabe`), and `kirkSpreadPrice` is `margrabePrice` at the

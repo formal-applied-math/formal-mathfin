@@ -20,7 +20,8 @@ basket to a single lognormal and price that lognormal with the ordinary
 Black-Scholes closed form.
 
 For forwards `Fᵢ = Sᵢ₀ · e^{rT}`, weights `wᵢ`, vols `σᵢ` and correlations
-`ρᵢⱼ`, the basket forward's first two (risk-neutral) moments are
+`ρᵢⱼ`, the basket forward's first two (risk-neutral) moments under a joint
+lognormal model are (not proved here)
 
   `M₁ = ∑ᵢ wᵢ Fᵢ`,
   `M₂ = ∑ᵢ ∑ⱼ wᵢ wⱼ Fᵢ Fⱼ · e^{ρᵢⱼ σᵢ σⱼ T}`,
@@ -40,10 +41,10 @@ spread approximation, which is BS parameterised by its pseudo-asset.
 * `basketMomentMatchPrice`: the approximate basket call price, `bsVGarman`
   at `A = DF·M₁`, the matched `σ_eff`.
 * `basketEffVol_single`: **consistency check** — with a single asset
-  (`n = 1`, weight `1`, self-correlation `1`), the basket collapses to that
-  one asset and the matched effective vol is exactly its own vol `σ` (no
-  approximation error at all in the degenerate one-asset case, the one case
-  where the true law *is* lognormal).
+  (`n = 1`, weight `1`, self-correlation `1`; `F ≠ 0`, `T > 0`, `σ ≥ 0`), the
+  matched effective vol is exactly the asset's own vol `σ`. A one-asset basket
+  is lognormal, and the matching recovers its volatility; the statement is
+  about `basketEffVol`, not about the price.
 -/
 
 @[expose] public section
@@ -64,9 +65,11 @@ noncomputable def basketM2 {n : ℕ} (w F σ : Fin n → ℝ) (ρ : Fin n → Fi
 
 /-- **The moment-matched effective volatility**: solving
 `M₂ = M₁² · e^{σ_eff²T}` for `σ_eff`. Meaningful when `M₂ ≥ M₁² > 0` and `T > 0`
-(the first holds for a positive semidefinite correlation matrix and nonnegative
-weights and forwards); otherwise `Real.log`, the division or `Real.sqrt` returns
-Mathlib's junk value and `basketEffVol` is `0`. -/
+(`M₂ ≥ M₁²` holds for a positive semidefinite correlation matrix and `T ≥ 0`, and
+`M₁ > 0` for nonnegative weights and positive forwards with some weight positive;
+neither is proved here). Otherwise the value comes from Mathlib's conventions for
+`Real.log`, division and `Real.sqrt` and carries no meaning; it need not be `0`
+(for example `M₂/M₁² < −1` with `T > 0` gives a positive value). -/
 noncomputable def basketEffVol {n : ℕ} (w F σ : Fin n → ℝ) (ρ : Fin n → Fin n → ℝ) (T : ℝ) : ℝ :=
   Real.sqrt (Real.log (basketM2 w F σ ρ T / (basketM1 w F) ^ 2) / T)
 
@@ -82,8 +85,9 @@ noncomputable def basketMomentMatchPrice {n : ℕ} (w F σ : Fin n → ℝ) (ρ 
 
 /-- **Single-asset consistency check**: a "basket" of one asset with weight
 `1` and (trivial) self-correlation `1` collapses the moment-matched
-effective vol to exactly that asset's own volatility `σ` — no approximation
-error in the one case where the basket genuinely is lognormal. -/
+effective vol to exactly that asset's own volatility `σ`, for `F ≠ 0`, `T > 0`
+and `σ ≥ 0`. A one-asset basket is lognormal, and the matching recovers its
+volatility; the statement is about `basketEffVol`, not about the price. -/
 theorem basketEffVol_single (F σ T : ℝ) (hF : F ≠ 0) (hT : 0 < T) (hσ : 0 ≤ σ) :
     basketEffVol (n := 1) (fun _ ↦ 1) (fun _ ↦ F) (fun _ ↦ σ) (fun _ _ ↦ 1) T = σ := by
   unfold basketEffVol basketM2 basketM1

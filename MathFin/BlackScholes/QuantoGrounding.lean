@@ -64,7 +64,7 @@ theorem quantoForward_of_gaussian
   set E : ℝ := (r_dom - σ_S ^ 2 / 2) * T - σ_FX ^ 2 * T / 2 with hE
   set a : ℝ := (σ_S - ρ * σ_FX) * Real.sqrt T with ha
   set b : ℝ := -(σ_FX * Real.sqrt (1 - ρ ^ 2)) * Real.sqrt T with hb
-  -- Pointwise: the integrand is the constant `S₀·e^E` times the two single-driver exponentials.
+  -- Pointwise: the integrand is `S₀·exp(E + a·Z_S + b·Z_⊥)`, an exponential affine in the drivers.
   have hpt : (fun ω ↦ (S₀ * Real.exp ((r_dom - σ_S ^ 2 / 2) * T + σ_S * Real.sqrt T * Z_S ω))
         * Real.exp (-(σ_FX * Real.sqrt T)
             * (ρ * Z_S ω + Real.sqrt (1 - ρ ^ 2) * Z_perp ω) - σ_FX ^ 2 * T / 2))
