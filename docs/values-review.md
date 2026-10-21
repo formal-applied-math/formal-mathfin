@@ -125,64 +125,6 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
-## 2026-10-18 — corpus 541 — #278: Uniswap v2/v3 mechanics and Aave/Compound/Dai lending mechanics
-
-Scope: four `MathFin/DeFi/` modules by Yang Ye (merging `defi-uniswap-curve` and
-`defi-lending-protocols` into one combined branch, then into `integration-244-family`):
-`UniswapCurveMechanics` (impermanent loss, TWAP, the v2 fee invariant, v3 virtual reserves),
-`Aave`, `Compound`, `Dai`. No corpus entries; the corpus stays at 541 (these are library
-modules, not benchmark theorems). `lake build` (8689 jobs) and `lake lint` both clean;
-`tools.verify.ledger status` reports fresh: 541 stale: 0 missing: 0; `pytest` 58 passed, 1
-skipped. Four independent read-only review rounds (math re-derivation, headers/naming/build/
-lint, commit/style conventions, edge-case and hypothesis-strength analysis) plus a Fable-model
-gate pass executed in this session.
-
-### Standing first pass: prose against statement
-
-The gate pass caught two citation-accuracy defects the four prior rounds missed, both fixed in
-this session: `Aave.lean` cited the kinked-rate model and health factor to whitepaper §3.2/§4
-(actually §5 "Formal Definitions"), and its liquidity-index disclosure attributed the on-chain
-`DefaultReserveInterestRateStrategy` contract's `(1 − reserveFactor)` term to the whitepaper
-itself (the whitepaper's `LiquidityRate_t = BorrowRate_t · U_t` has no reserve factor at all —
-corrected to cite §3.1 and attribute the refinement to the contract, not the paper). `Dai.lean`'s
-URL (`makerdao.com/en/whitepaper`) serves the 2020 Multi-Collateral Dai whitepaper, not the cited
-2017 "The Dai Stablecoin System" — title/year brought in line with the URL. A second gate pass
-fetched the actual MCD whitepaper page and found `Dai.lean`'s `§"Liquidation Ratio"`/
-`§"Stability Fee"` citations named non-existent sections — both are named parameter entries
-under "Risk Parameters Controlled by Maker Governance", and the liquidation criterion itself
-is in "Liquidation of Risky Maker Vaults"; the header now cites those actual headings and
-drops the `§` marks. Every other docstring
-(Curve/StableSwap non-claim, `lpFeeShare` scope, `twap_eq_average`'s `t1 ≤ t2` junk-value
-disclosure, the Aave/Compound reserves-free simplifications, `kinkedRate_apply_optimal`'s
-non-`ContinuousAt` caveat) was independently re-verified against its theorem and found accurate.
-
-### Lens 6 (idiomatic register)
-
-`fee_invariant_growth`'s statement used `≥`; Mathlib house style states results with `≤`/`<`.
-Flipped to `x0 * y0 ≤ (x0 + Δx) * (...)` (defeq to the old statement, so the proof term is
-unchanged) and the two prose copies of the inequality updated to match.
-
-### Settled / not upgrades
-
-- The naming-depth split within `MathFin/DeFi/` (bare `MathFin.DeFi` for the AMM files vs. a
-  third-level `MathFin.DeFi.Aave`/`.Compound`/`.Dai` for the lending files) mirrors a pattern
-  already widespread across the repo (e.g. `MathFin/BlackScholes/AmericanPut/Boundary/*.lean`
-  vs. the bare-namespace majority of `MathFin/BlackScholes/`) — not a new inconsistency, no
-  upgrade taken.
-- No `sorry`/`admit`/`axiom`/`native_decide`/`polyrith` anywhere in the diff.
-
-### Lens 4 (architectural ingenuity)
-
-A follow-up review round found `Compound.lean`'s `utilization` was an orphan definition —
-documented and faithful to the whitepaper, but never composed with `borrowRate` by any
-theorem, so the module stated the rate curve's two pieces (`U` and `r(U)`) without connecting
-them. Added `borrowRate_utilization`, a one-line `rfl` composing the two, closing the gap.
-
-### Ranked backlog
-
-1. (low) Standardize `MathFin/DeFi/`'s namespace depth one way or the other — cosmetic,
-   deferred to whenever another DeFi module is added.
-
 ## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
 
 Scope: `FixedIncome/CIRRiccati` by Alfredo Garcia (@oxarbitrage), merged with its two commits
