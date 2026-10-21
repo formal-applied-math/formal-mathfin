@@ -26,7 +26,7 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-### The CIR loadings solve their term-structure equations (2026-10-14)
+### The CIR loadings solve their term-structure equations (2026-10-15)
 
 Two entries added, `mf-cir-bond-loading-riccati` and `mf-cir-bond-level-loading` (both `full`).
 Corpus 535 → 537.

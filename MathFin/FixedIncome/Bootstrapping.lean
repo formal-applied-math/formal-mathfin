@@ -167,12 +167,12 @@ theorem affineStep_err (a b c lo hi : ℝ) (hb : 0 < b) (hσ : (a - c) / b ∈ S
     (n : ℕ) :
     |bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n - (a - c) / b|
       ≤ (hi - lo) / 2 ^ (n + 1) :=
-  abs_bisectMid_sub_le (fun x _ => threshold_affine a b c x hb) hσ n
+  abs_bisectMid_sub_le (fun x _ ↦ threshold_affine a b c x hb) hσ n
 
 /-- Convergence form of the affine bootstrap step. -/
 theorem affineStep_tendsto (a b c lo hi : ℝ) (hb : 0 < b) (hσ : (a - c) / b ∈ Set.Icc lo hi) :
     Tendsto (bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi) atTop (𝓝 ((a - c) / b)) :=
-  tendsto_bisectMid (fun x _ => threshold_affine a b c x hb) hσ
+  tendsto_bisectMid (fun x _ ↦ threshold_affine a b c x hb) hσ
 
 /-- **Repricing bound.** The instrument value `a − b·x` at the bisection
 estimate is within `b·(hi − lo)/2^{n+1}` of the quote `c` — the slope-weighed

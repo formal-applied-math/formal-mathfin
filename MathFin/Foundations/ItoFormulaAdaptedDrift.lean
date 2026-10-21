@@ -120,19 +120,15 @@ open MathFin ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessGeneral
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
 
-/-- Telescoping over a partition: `∑_{k<n} (a_{k+1} − a_k) = a_n − a_0`. -/
-private theorem sum_telescope (a : ℕ → ℝ) (n : ℕ) :
-    ∑ k ∈ Finset.range n, (a (k + 1) - a k) = a n - a 0 := by
-  induction n with
-  | zero => simp
-  | succ m ih => rw [Finset.sum_range_succ, ih]; ring
-
 /-! ### Stage 2 — the bounded *adapted* coefficients (`β`, `δ` random)
+
+(Stage 1, the constant-coefficient identity, is `ito_drift_expectation_identity` in
+`MathFin/Foundations/ItoDriftExpectation`.)
 
 The integrated Itô–drift identity for an Itô process with random adapted coefficients.
 The data: a pre-Brownian motion `B` with measurable sections (path continuity of `B` is not
-assumed), bounded adapted path-continuous `β, δ`, and, as hypotheses, `M` and `X` are
-hypotheses: a `natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every
+assumed), bounded adapted path-continuous `β, δ`, and two hypothesized processes: a
+`natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every
 `t ≥ 0` (`hMeq`, the process values of `itoProcessCLM` at the σ-realization `processToLp δ`),
 and an `X` with `X t = c + ∫₀ᵗ β_s ds + M t` (`hXrel`) whose every path is continuous
 (`hXcont`), which forces every path of `M` to be continuous.
@@ -568,9 +564,9 @@ theorem deltaStepLp_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measu
     congr 1
     rw [map_sub, hstep n]
   have hbridge := itoIntegralCLM_T_of_bdd_adapted_cont hB hBmeas hδadap hδcont hδbdd T
-  refine Metric.tendsto_atTop.mpr fun ε hε => ?_
+  refine Metric.tendsto_atTop.mpr fun ε hε ↦ ?_
   obtain ⟨N, hN⟩ := Metric.tendsto_atTop.mp hbridge ε hε
-  refine ⟨N, fun n hn => ?_⟩
+  refine ⟨N, fun n hn ↦ ?_⟩
   have hN' := hN n hn
   rw [dist_eq_norm] at hN'
   rw [key n, dist_eq_norm, sub_zero, Real.norm_eq_abs,
@@ -683,7 +679,7 @@ private lemma itoSimpleProcess_stepσ_incr {B : ℝ≥0 → Ω → ℝ} (hBmeas 
         δ (t ↑j) ω * (B (min (t (↑j + 1)) (t (k + 1))) ω - B (min (t ↑j) (t (k + 1))) ω)
           - δ (t ↑j) ω * (B (min (t (↑j + 1)) (t k)) ω - B (min (t ↑j) (t k)) ω) = 0 := by
     rintro j _ hj
-    have hjk : (j : ℕ) ≠ k := fun h => hj (Subtype.ext h)
+    have hjk : (j : ℕ) ≠ k := fun h ↦ hj (Subtype.ext h)
     by_cases hlt : (j : ℕ) < k
     · have h1 : min (t ((j : ℕ) + 1)) (t (k + 1)) = t ((j : ℕ) + 1) :=
         min_eq_left (hmono (by omega))
@@ -829,6 +825,7 @@ open scoped NNReal ENNReal
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ}
 
+omit [IsProbabilityMeasure μ] in
 /-- The uniform-partition band split: the `(0,T]`-band integral of an integrable
 space-time function is the sum of its uniform cell integrals (iterated
 `setIntegral_union` over the nested left endpoints). -/
@@ -1372,11 +1369,10 @@ private theorem weighted_sq_le_of_congr {f g w : Ω → ℝ} {C E : ℝ}
         rw [integral_congr_ae (Eventually.of_forall fun ω ↦ by
           show (C * g ω) ^ 2 = C ^ 2 * g ω ^ 2; ring), integral_const_mul, hE]
 
-include hB hMadap hMeq in
+omit hMadap in
 /-- **Weighted error energy**: the second moment of `w·δεₖ` is at most `C_w²` cell-band
 energies of the integrand error (`|w| ≤ C_w` pointwise). -/
 private theorem weightedErrorIncr_sq_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
-    (hwm : Measurable[natFiltration hBmeas (unifPart T n k)] w)
     (hwb : ∀ ω, |w ω| ≤ Cw) :
     ∫ ω, (w ω * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω
         - δ (unifPart T n k) ω
@@ -1421,7 +1417,7 @@ private theorem weightedErrorIncr_sq_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ
     (errorIncr_ae hB hBmeas hδadap hδcont hδbdd hMeq hk)
     hDmem.integrable_sq hbandE
 
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
+omit [IsProbabilityMeasure μ] hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- The real `L²` triangle inequality at the integral level: `‖a + b‖₂ ≤ ‖a‖₂ + ‖b‖₂`. -/
 private theorem sqrtIntegral_sq_add_le {a b : Ω → ℝ}
     (ham : MemLp a 2 μ) (hbm : MemLp b 2 μ) :
@@ -1593,7 +1589,7 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
             (abs_nonneg _)))
       (hMsub.add hs)
   -- the two energy factors
-  have hwde := weightedErrorIncr_sq_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq hk hwm hwb
+  have hwde := weightedErrorIncr_sq_le hB hBmeas hδadap hδcont hδbdd hMeq hk hwb
   have htri : Real.sqrt (∫ ω, ((M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)
         + δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ∂μ)
       ≤ Real.sqrt (∫ ω, (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)
@@ -1750,11 +1746,11 @@ theorem gapSum_le (n : ℕ) (hn : 0 < n) {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
         - ∫ ω, w (unifPart T n k) ω * (δ (unifPart T n k) ω
             * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ∂μ|
         ≤ 2 * |Cw| * |Dd| * Real.sqrt (cell k) * Real.sqrt (bandE k) :=
-    fun k hk => cellGap_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq (Finset.mem_range.mp hk)
+    fun k hk ↦ cellGap_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq (Finset.mem_range.mp hk)
       (hwadap (unifPart T n k)) (hwbdd (unifPart T n k))
   -- the cell lengths telescope to `T`; the band energies telescope to `‖φ − δⁿ‖²`
   have hsumcell : ∑ k ∈ Finset.range n, cell k = (T : ℝ) := by
-    rw [sum_telescope (a := fun k ↦ ((unifPart T n k : ℝ)))]
+    rw [Finset.sum_range_sub (fun k ↦ ((unifPart T n k : ℝ)))]
     have hnT : unifPart T n n = T := by
       have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
       simp only [unifPart, div_self hne, one_mul]
@@ -2032,7 +2028,7 @@ private theorem integral_pow3_gaussianReal (v : ℝ≥0) :
     simp
   · rw [integral_gaussianReal_eq_integral_smul hv]
     simp only [smul_eq_mul]
-    have hmap : Measure.map (fun x : ℝ => -x) (volume : Measure ℝ) = volume :=
+    have hmap : Measure.map (fun x : ℝ ↦ -x) (volume : Measure ℝ) = volume :=
       (Measure.measurePreserving_neg (μ := (volume : Measure ℝ))).map_eq
     have hpdfneg : ∀ x : ℝ, gaussianPDFReal 0 v (-x) = gaussianPDFReal 0 v x := by
       intro x
@@ -2041,7 +2037,7 @@ private theorem integral_pow3_gaussianReal (v : ℝ≥0) :
         = ∫ x, gaussianPDFReal 0 v (-x) * (-x) ^ 3 ∂volume := by
       have h1 : ∫ y, gaussianPDFReal 0 v y * y ^ 3 ∂volume
           = ∫ y, gaussianPDFReal 0 v y * y ^ 3
-              ∂(Measure.map (fun x : ℝ => -x) (volume : Measure ℝ)) := by
+              ∂(Measure.map (fun x : ℝ ↦ -x) (volume : Measure ℝ)) := by
         rw [hmap]
       rw [h1]
       exact integral_map_equiv (MeasurableEquiv.neg (G := ℝ))
@@ -2058,7 +2054,7 @@ private theorem integral_pow3_gaussianReal (v : ℝ≥0) :
     rw [hcongr]
     linarith
 
-omit hδadap hδcont hδbdd hMadap hMeq in
+omit [IsProbabilityMeasure μ] hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- Third moment of a Brownian increment: `E[(B_{t₁} − B_{t₀})³] = 0` for `t₀ ≤ t₁`
 (the law-transfer of the vanishing odd Gaussian moment). -/
 private theorem integral_increment_pow3
@@ -2075,7 +2071,7 @@ private theorem integral_increment_pow3
   simp only [Function.comp_def] at hcomp
   rw [hcomp, integral_pow3_gaussianReal]
 
-omit hδadap hδcont hδbdd hMadap hMeq in
+omit [IsProbabilityMeasure μ] hδadap hδcont hδbdd hMadap hMeq in
 /-- Fourth-power isometry kernel: for `χ` measurable in the natural filtration at `t₀`,
 `E[χ·(B t₁ − B t₀)⁴] = E[χ]·3·(t₁ − t₀)²`. -/
 private theorem integral_natMeasurable_mul_increment_pow4
@@ -2094,7 +2090,7 @@ private theorem integral_natMeasurable_mul_increment_pow4
   simp only [Function.comp_apply, id_eq] at key
   rw [key, integral_increment_pow4 hB ht]
 
-omit hδadap hδcont hδbdd hMadap hMeq in
+omit [IsProbabilityMeasure μ] hδadap hδcont hδbdd hMadap hMeq in
 set_option maxHeartbeats 1600000 in
 /-- **The step-sum fourth-moment recursion**: for a bounded integrand sampled along a
 monotone time grid (`φ j` measurable in `𝓕_{s j}`, `|φ| ≤ D`), the fourth moment of the
@@ -2338,7 +2334,7 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
         (∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 3 * φ N ω) := by
       obtain ⟨g, hg, hgf⟩ := hZadapt
       obtain ⟨g', hg', hgf'⟩ := hyadapt
-      refine ⟨fun p => (g p) ^ 3 * g' p, hg.pow_const 3 |>.mul hg', ?_⟩
+      refine ⟨fun p ↦ (g p) ^ 3 * g' p, hg.pow_const 3 |>.mul hg', ?_⟩
       funext ω
       have h1 := congrFun hgf ω
       have h2 := congrFun hgf' ω
@@ -2358,7 +2354,7 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
         (∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) * (φ N ω) ^ 3) := by
       obtain ⟨g, hg, hgf⟩ := hZadapt
       obtain ⟨g', hg', hgf'⟩ := hyadapt
-      refine ⟨fun p => g p * (g' p) ^ 3, hg.mul (hg'.pow_const 3), ?_⟩
+      refine ⟨fun p ↦ g p * (g' p) ^ 3, hg.mul (hg'.pow_const 3), ?_⟩
       funext ω
       have h1 := congrFun hgf ω
       have h2 := congrFun hgf' ω
@@ -2385,14 +2381,14 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
         = (fun ω ↦ ((∑ k ∈ Finset.range N,
               φ k ω * (B (s (k + 1)) ω - B (s k) ω)) * (φ N ω) ^ 3)
           * (B (s (N + 1)) ω - B (s N) ω) ^ 3) from by funext ω; ring]
-      rw [key, integral_increment_pow3 hB hBmeas (hsmono (Nat.le_succ N)), mul_zero]
+      rw [key, integral_increment_pow3 hB (hsmono (Nat.le_succ N)), mul_zero]
     -- the even mixed term: isometry kernel at `χ = Z²φN²`
     have hZ2adapt : AdaptedAt B (s N) (fun ω ↦
         (∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 2
           * (φ N ω) ^ 2) := by
       obtain ⟨g, hg, hgf⟩ := hZadapt
       obtain ⟨g', hg', hgf'⟩ := hyadapt
-      refine ⟨fun p => (g p) ^ 2 * (g' p) ^ 2, hg.pow_const 2 |>.mul (hg'.pow_const 2), ?_⟩
+      refine ⟨fun p ↦ (g p) ^ 2 * (g' p) ^ 2, hg.pow_const 2 |>.mul (hg'.pow_const 2), ?_⟩
       funext ω
       have h1 := congrFun hgf ω
       have h2 := congrFun hgf' ω
@@ -2716,7 +2712,7 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
         - unifPart T (n * 2 ^ p) (2 ^ p * k + j))
       = ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
     intro p
-    rw [sum_telescope (a := fun j : ℕ ↦ ((unifPart T (n * 2 ^ p) (2 ^ p * k + j) : ℝ)))]
+    rw [Finset.sum_range_sub (fun j : ℕ ↦ ((unifPart T (n * 2 ^ p) (2 ^ p * k + j) : ℝ)))]
     simp only [Nat.add_zero]
     rw [show ((2 : ℕ) ^ p * k + 2 ^ p) = 2 ^ p * (k + 1) from by ring, hgrid p (k + 1),
       hgrid p k]
@@ -3518,7 +3514,7 @@ theorem driftOscSum_tendsto {β : ℝ≥0 → Ω → ℝ}
       ≤ (ε / ((T : ℝ) + 1)) * (T : ℝ) := by
     refine le_trans (Finset.sum_le_sum fun k hk ↦
       hcell k (Finset.mem_range.mp hk)) ?_
-    rw [← Finset.mul_sum, sum_telescope (a := fun k : ℕ ↦ ((unifPart T n k : ℝ)))]
+    rw [← Finset.mul_sum, Finset.sum_range_sub (fun k : ℕ ↦ ((unifPart T n k : ℝ)))]
     have hnT : unifPart T n n = T := by
       have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn1.ne'
       simp only [unifPart, div_self hne, one_mul]
@@ -3614,7 +3610,7 @@ theorem driftSum_expect_tendsto (hBmeas : ∀ t, Measurable (B t))
                 = (C1 * |Db|) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) :=
               fun k _ ↦ by ring
             rw [Finset.sum_congr rfl hcomm, ← Finset.mul_sum,
-              sum_telescope (a := fun k : ℕ ↦ ((unifPart T n k : ℝ))), hnT, h0,
+              Finset.sum_range_sub (fun k : ℕ ↦ ((unifPart T n k : ℝ))), hnT, h0,
               NNReal.coe_zero, sub_zero]
   refine tendsto_integral_of_dominated_convergence (fun _ : Ω ↦ C1 * |Db| * (T : ℝ))
     (fun n ↦ (hmeasS n).aestronglyMeasurable) (integrable_const _)
@@ -4506,7 +4502,7 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
         norm_num
       have h1 : Tendsto (fun n : ℕ ↦ ((1 / ((n : ℝ) + 1)) ^ 2)) atTop (𝓝 (0 : ℝ)) :=
         (tendsto_one_div_nat_add.pow 2).trans_eq
-          (congrArg (fun x : ℝ => 𝓝 x) (by norm_num : ((0 : ℝ) ^ 2) = (0 : ℝ)))
+          (congrArg (fun x : ℝ ↦ 𝓝 x) (by norm_num : ((0 : ℝ) ^ 2) = (0 : ℝ)))
       have hA : Tendsto (fun n : ℕ ↦ (4 * C3 * (4 * |Db| ^ 3 * (T : ℝ) ^ 3))
           * ((1 / ((n : ℝ) + 1)) ^ 2)) atTop
           (𝓝 ((4 * C3 * (4 * |Db| ^ 3 * (T : ℝ) ^ 3)) * (0 : ℝ))) :=
@@ -5315,4 +5311,6 @@ theorem itoDrift_expectation_identity_adapted
   rw [hmerge]
   linarith
 
-end MathFin.StageFiveD
+end StageFiveD
+
+end MathFin

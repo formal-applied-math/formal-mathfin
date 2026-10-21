@@ -1835,7 +1835,7 @@ than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen
 /-- info: 'MathFin.valueAtRisk_gbm_loss' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms MathFin.valueAtRisk_gbm_loss
 
-/-! ### The CIR loadings (2026-10-14)
+/-! ### The CIR loadings (2026-10-15)
 
 `hasDerivAt_cirBondB`: for `κ² + 2σ² > 0`, the closed-form CIR rate loading solves
 `B' = 1 − κB − ½σ²B²` at every `T`. `hasDerivAt_cirBondA`: for `σ ≠ 0`, the log-form level
