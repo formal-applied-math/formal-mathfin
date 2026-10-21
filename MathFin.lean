@@ -719,3 +719,13 @@ import MathFin.BlackScholes.SVI.TraceSignature
 import MathFin.BlackScholes.SVI.TailCondition
 -- Calendar-spread arbitrage (Gatheral–Jacquier Lemma 2.1) and its raw-SVI form
 import MathFin.BlackScholes.CalendarArbitrage
+
+-- Counterparty-risk / XVA exposure measures: component/marginal VaR (Euler decomposition),
+-- single-index covariance structure and its large-N limit, Gaussian exposure-profile
+-- closed forms (EPE/ENE/PFE), collateralized exposure, and discrete DVA/FVA
+import MathFin.RiskMeasures.ComponentVaR
+import MathFin.Portfolio.SingleIndexModel
+import MathFin.RiskMeasures.GaussianExposureProfile
+import MathFin.RiskMeasures.CollateralizedExposure
+import MathFin.FixedIncome.DVA
+import MathFin.FixedIncome.FVA
