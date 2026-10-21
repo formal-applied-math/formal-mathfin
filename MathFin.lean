@@ -526,6 +526,8 @@ import MathFin.FixedIncome.VasicekSDE
 import MathFin.FixedIncome.VasicekSDEGaussian
 -- Vasicek zero-coupon bond price: the affine term structure (Gaussian Laplace transform)
 import MathFin.FixedIncome.VasicekBondPrice
+-- Vasicek real-world vs. risk-neutral terminal law (constant market price of risk)
+import MathFin.FixedIncome.VasicekMarketPriceOfRisk
 -- CIR loadings: B solves the Riccati equation, A solves A' = −κθB
 import MathFin.FixedIncome.CIRRiccati
 -- The T-forward measure: the zero-coupon bond as numéraire (change-of-numéraire instance)
