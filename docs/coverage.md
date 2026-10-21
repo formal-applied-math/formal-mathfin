@@ -26,7 +26,7 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-### The contributor batch, #248–#283 (2026-10-21)
+### The contributor batch, #248–#284 (2026-10-21)
 
 Thirty pull requests by Yang Ye, merged with their commits intact and adjusted in follow-up
 commits after the values review of 2026-10-21 (`docs/values-review.md`). Seven entries added, all
@@ -35,18 +35,20 @@ commits after the values review of 2026-10-21 (`docs/values-review.md`). Seven e
 
 - **Schwartz one-factor futures** (`mf-schwartz-futures-price`, `Futures/SchwartzOneFactor.lean`).
   For the log spot carried in its Ornstein–Uhlenbeck Wiener representation
-  `ln S_T = m_T + σ∫₀ᵀ e^{−κ(T−s)} dB_s`, `E[S_T] = exp(m_T + v_T/2)` with `m_T = vasicekSDEMean`
-  and `v_T = vasicekSDEVariance` (`schwartzFuturesPrice_eq_integral`): Mathlib's
+  `ln S_T = m_T + σ∫₀ᵀ e^{−κ(T−s)} dB_s`, `E[S_T] = exp(m_T + v_T/2)` for `κ > 0`, with
+  `m_T = vasicekSDEMean` and `v_T = vasicekSDEVariance` (`schwartzFuturesPrice_eq_integral`): Mathlib's
   `mgf_gaussianReal` at `1` composed with the derived Gaussian law of the representation
   (`vasicekShortRate_hasLaw_gaussian`). That the representation solves the Schwartz (1997)
   log-price SDE is cited, not proved, as for `mf-vasicek-sde-terminal-gaussian`. The long-maturity
-  limit `tendsto_schwartzFuturesPrice_atTop` (through the shared
-  `tendsto_vasicekSDEVariance_atTop`) is proved but not benchmarked. Constant parameters only.
+  limit `tendsto_schwartzFuturesPrice_atTop` (through
+  `tendsto_vasicekSDEVariance_atTop` in `FixedIncome/VasicekSDE`) is proved but not benchmarked.
+  The expectation is under the given measure, read as the pricing measure; that the futures price
+  is `E^Q[S_T]` is a textbook identification. Constant parameters only.
 - **CreditMetrics** (`qrm-creditmetrics-default-absorbing-monotone`,
   `qrm-creditmetrics-gaussian-threshold-row-stochastic`, `RiskMeasures/CreditMetrics.lean`). A
   rating-transition matrix is `P ∈ Matrix.rowStochastic ℝ ι`; `P ^ k` stays row-stochastic
   (Mathlib's `Submonoid.pow_mem`), and for an absorbing state `d` the probability `(P ^ k) i d`
-  is monotone in `k` (`monotone_pow_apply_absorbing`). Row-wise thresholds
+  is monotone in `k` (`monotone_pow_apply_absorbing`). Row-wise monotone thresholds
   `z : Fin (m + 1) → EReal` with `z 0 = ⊥` and `z (last) = ⊤` partition `ℝ` into buckets, so the
   bucket probabilities under any probability law sum to one and the threshold matrix is
   row-stochastic (`thresholdMatrix_mem_rowStochastic`); the CreditMetrics case is that theorem
@@ -57,10 +59,10 @@ commits after the values review of 2026-10-21 (`docs/values-review.md`). Seven e
   Lemma 2.1). Calls on a real martingale are non-decreasing in maturity (conditional Jensen,
   `ConvexOn.map_condExp_le`); with zero rates the Black–Scholes call depends only on total
   variance and is strictly increasing in it, so call prices rise with maturity at every strike iff
-  `t ↦ w(k, t)` rises at every `k`, and likewise for a raw-SVI family. Maturity ranges over all of
-  `ℝ` with total variance positive at every real `t`, which excludes surfaces with
-  `w(k, t) → 0` as `t → 0⁺`, such as `w = σ²t`; the `t > 0` form is not stated. Not proved: the
-  local-variance characterisation, SSVI, and the slice-crossing quartic.
+  `t ↦ w(k, t)` rises at every `k`, and likewise for a raw-SVI family. Both are stated on
+  maturities `t > 0` (`MonotoneOn … (Ioi 0)`), with total variance positive there and nothing
+  assumed at `t ≤ 0`, so the flat `w = σ²t` is covered. Not proved: the local-variance
+  characterisation, SSVI, and the slice-crossing quartic.
 - **SA-CCR** (`mf-saccr-ead-mono`, `mf-saccr-effnotional-diversification-bound`,
   `RiskMeasures/SACCRExposure.lean`). `EAD = α·(RC + PFE)` is nondecreasing in `RC` and in `PFE`
   for `α ≥ 0`, with `RC` and `PFE` free real numbers. `effNotionalIR D₁ D₂ D₃ =
@@ -76,14 +78,14 @@ Library modules added without corpus entries, each stating its own scope:
 and the `r = 0, ±1` cases), `Foundations/GaussianCopula`, `Foundations/GammaPoissonMixturePgf`
 (the Gamma MGF, which Mathlib lacks, and the Poisson–Gamma mixture as an iterated integral),
 `Foundations/OUSpectral` (the OU generator on Hermite polynomials), `Foundations/LSVLeverage`,
-`Foundations/Estimation`, `Foundations/ItoFormulaAdaptedDriftUncond` (the integrated Itô–drift
+`Foundations/Estimation`, `Foundations/ItoFormulaAdaptedDriftConstructed` (the integrated Itô–drift
 identity for the constructed process, with no hypothesized `M`), `BlackScholes/ForwardSmile`,
 `BlackScholes/KirkSpreadApproximation`, `BlackScholes/StulzTwoAssetRainbow`,
 `BlackScholes/HeynenKatTwoAssetBarrier`, `BlackScholes/BasketMomentMatching`,
 `FixedIncome/{Inflation, CVA, DefaultDensity, TimingAdjustment, VasicekMarketPriceOfRisk,
 NelsonSiegelSvensson, ABCDVolatility, GSRPiecewiseVol}`, `RiskMeasures/{DiscreteVaR, TrancheLoss,
 JointElicitability, ComponentVaR}`, `Portfolio/{SingleIndexModel, ConvexQPKKT}`,
-`Execution/RollSpread`, `Performance/{FracDiffWeights, AverageUniqueness, BetSizeSigmoid,
+`Execution/RollSpread`, `Performance/{FracDiffWeights, LabelUniqueness, BetSizeSigmoid,
 PurgedCV}`, `DeFi/{UniswapMechanics, Aave, Compound, Dai}` and
 `Commodities/{FisherSraffaOwnRate, TheoryOfStorage, AR1OUCalibration}`. The batch also reworked
 `FixedIncome/Bootstrapping` (the induction at the prefix it is fed, instantiated with the FRA and

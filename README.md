@@ -263,7 +263,8 @@ Raphael Coelho maintains the library, with contributions from:
 - [Yang Ye](https://github.com/leafyoung): the integrated Itô–drift identity, Hull–White
   calibration, a Monte Carlo pricer, Cox credit, CMS rates and curve bootstrapping; the bivariate
   normal CDF, the Schwartz futures price, CVA, inflation, the LHP tranche loss, calendar arbitrage,
-  joint elicitability, CreditMetrics, SA-CCR, two-asset options and DeFi lending mechanics.
+  joint elicitability, CreditMetrics, SA-CCR, two-asset options and DeFi lending and AMM
+  mechanics.
 
 Each module's header names its authors.
 
