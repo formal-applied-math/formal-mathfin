@@ -279,19 +279,21 @@ changed prose in 50 Lean files. What it found, by kind:
 
 ### Ranked backlog
 
-1. The Student-t law, then VaR and ES at it (reopens #270).
+1. The Student-t law, then VaR and ES at it (#285; reopens #270).
 2. `BivariateNormalCDF` on Mathlib's Gaussian API; the copula bridged to the one-factor default
-   model, with one parametrization of `ρ`.
+   model, with one parametrization of `ρ` (#286).
 3. One Wiener-integral bond-price lemma (Vasicek, Hull–White, GSR); Gaussian EPE and PFE stated at
-   the law once (#259's `expectedExposure_gaussian`), then collateralized EPE under a margin period.
+   the law once (#259's `expectedExposure_gaussian`), then collateralized EPE under a margin period
+   (#287).
 4. Calendar arbitrage: generalize the martingale step to any convex payoff, and connect the
    `t > 0` statements to the local-variance characterisation.
-5. The Vasicek Girsanov density with `vasicekBondB` as a covariance; the Cox protection leg as an
-   expectation (`cox_cdf_timeVarying` with `integral_indicator_Iic_eq`).
+5. The Vasicek Girsanov density with `vasicekBondB` as a covariance (#288); the Cox protection leg
+   as an expectation, `cox_cdf_timeVarying` with `integral_indicator_Iic_eq` (#289).
 6. Retire or demote the conditional route of `ItoFormulaAdaptedDrift`, now that
-   `_of_adaptedItoProcess` reduces it to `hBcont`; its 26 root names into a namespace.
-7. The real theorems behind #277 and #281 (forward prices from `forward_price_from_no_arbitrage`;
-   the SABR `K → f` limit and backbone law), if those PRs come back.
+   `_of_adaptedItoProcess` reduces it to `hBcont`; its 26 root names into a namespace (#290).
+7. The real theorems behind #277 and #281 (forward prices from `forward_price_from_no_arbitrage`,
+   #108; key-rate durations as a derivative identity, #69; the SABR `K → f` limit and backbone law,
+   #100), if those PRs come back.
 
 ### Evidence
 
