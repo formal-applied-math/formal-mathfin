@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 537 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 506 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 544 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 513 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 13 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -137,7 +137,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Thirteen of the 537 results are reduced cores. Twelve assume a structure whose fields include the
+- Thirteen of the 544 results are reduced cores. Twelve assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, Lévy's characterization, the two-dimensional Itô formula,
@@ -261,7 +261,9 @@ Raphael Coelho maintains the library, with contributions from:
   performance metrics.
 - [Mert Unsal](https://github.com/mertunsall): the Black–Scholes charm.
 - [Yang Ye](https://github.com/leafyoung): the integrated Itô–drift identity, Hull–White
-  calibration, a Monte Carlo pricer, Cox credit, CMS rates and curve bootstrapping.
+  calibration, a Monte Carlo pricer, Cox credit, CMS rates and curve bootstrapping; the bivariate
+  normal CDF, the Schwartz futures price, CVA, inflation, the LHP tranche loss, calendar arbitrage,
+  joint elicitability, CreditMetrics, SA-CCR, two-asset options and DeFi lending mechanics.
 
 Each module's header names its authors.
 

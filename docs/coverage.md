@@ -26,52 +26,67 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-### CreditMetrics rating-transition matrices and Gaussian threshold migration (2026-10-17)
+### The contributor batch, #248–#283 (2026-10-21)
 
-Two entries added, `qrm-creditmetrics-default-absorbing-monotone` and
-`qrm-creditmetrics-gaussian-threshold-row-stochastic` (both `full`). Corpus 537 → 539.
+Thirty pull requests by Yang Ye, merged with their commits intact and adjusted in follow-up
+commits after the values review of 2026-10-21 (`docs/values-review.md`). Seven entries added, all
+`full`; corpus 537 → 544. Six pull requests of the batch are not merged (#270, #271, #275, #277,
+#281, #284; the review says why).
 
-`RiskMeasures/CreditMetrics.lean`: a rating-transition matrix is `P ∈ Matrix.rowStochastic ℝ ι`
-for a general finite index type (not restricted to `Fin n`); its `k`-period power `P ^ k` stays
-row-stochastic (`pow_mem_rowStochastic`, via Mathlib's `Submonoid.pow_mem`), and if `d` is an
-absorbing state (`P d d = 1`) the probability `(P ^ k) i d` of being in `d` after `k` periods is
-monotone in `k` (`monotone_pow_apply_absorbing`). Separately, row-wise thresholds
-`z : Fin (m + 1) → EReal` with `z 0 = ⊥`, `z (last) = ⊤` partition `ℝ` into buckets
-`(z j, z (j + 1)]` (`ratingBucket`, `iUnion_ratingBucket`, `pairwise_disjoint_ratingBucket`), so
-their probabilities under ANY probability law sum to one (`sum_measureReal_ratingBucket`) and the
-resulting matrix is row-stochastic for any latent law (`thresholdMatrix_mem_rowStochastic`); the
-CreditMetrics case (latent `~ N(0, 1)`) is a one-line corollary
-(`gaussianThresholdMatrix_mem_rowStochastic`). Threshold calibration to a target matrix and
-correlated multi-obligor migration are not formalized.
+- **Schwartz one-factor futures** (`mf-schwartz-futures-price`, `Futures/SchwartzOneFactor.lean`).
+  For the log spot carried in its Ornstein–Uhlenbeck Wiener representation
+  `ln S_T = m_T + σ∫₀ᵀ e^{−κ(T−s)} dB_s`, `E[S_T] = exp(m_T + v_T/2)` with `m_T = vasicekSDEMean`
+  and `v_T = vasicekSDEVariance` (`schwartzFuturesPrice_eq_integral`): Mathlib's
+  `mgf_gaussianReal` at `1` composed with the derived Gaussian law of the representation
+  (`vasicekShortRate_hasLaw_gaussian`). That the representation solves the Schwartz (1997)
+  log-price SDE is cited, not proved, as for `mf-vasicek-sde-terminal-gaussian`. The long-maturity
+  limit `tendsto_schwartzFuturesPrice_atTop` (through the shared
+  `tendsto_vasicekSDEVariance_atTop`) is proved but not benchmarked. Constant parameters only.
+- **CreditMetrics** (`qrm-creditmetrics-default-absorbing-monotone`,
+  `qrm-creditmetrics-gaussian-threshold-row-stochastic`, `RiskMeasures/CreditMetrics.lean`). A
+  rating-transition matrix is `P ∈ Matrix.rowStochastic ℝ ι`; `P ^ k` stays row-stochastic
+  (Mathlib's `Submonoid.pow_mem`), and for an absorbing state `d` the probability `(P ^ k) i d`
+  is monotone in `k` (`monotone_pow_apply_absorbing`). Row-wise thresholds
+  `z : Fin (m + 1) → EReal` with `z 0 = ⊥` and `z (last) = ⊤` partition `ℝ` into buckets, so the
+  bucket probabilities under any probability law sum to one and the threshold matrix is
+  row-stochastic (`thresholdMatrix_mem_rowStochastic`); the CreditMetrics case is that theorem
+  at `gaussianReal 0 1`. This is one obligor's threshold migration: no copula, no calibration of
+  the thresholds to a target matrix, no correlated multi-obligor migration.
+- **Calendar-spread arbitrage** (`mf-calendar-arbitrage-total-variance`,
+  `mf-svi-calendar-free-iff`, `BlackScholes/CalendarArbitrage.lean`; Gatheral–Jacquier 2014,
+  Lemma 2.1). Calls on a real martingale are non-decreasing in maturity (conditional Jensen,
+  `ConvexOn.map_condExp_le`); with zero rates the Black–Scholes call depends only on total
+  variance and is strictly increasing in it, so call prices rise with maturity at every strike iff
+  `t ↦ w(k, t)` rises at every `k`, and likewise for a raw-SVI family. Maturity ranges over all of
+  `ℝ` with total variance positive at every real `t`, which excludes surfaces with
+  `w(k, t) → 0` as `t → 0⁺`, such as `w = σ²t`; the `t > 0` form is not stated. Not proved: the
+  local-variance characterisation, SSVI, and the slice-crossing quartic.
+- **SA-CCR** (`mf-saccr-ead-mono`, `mf-saccr-effnotional-diversification-bound`,
+  `RiskMeasures/SACCRExposure.lean`). `EAD = α·(RC + PFE)` is monotone in `RC` and in `PFE` for
+  `α ≥ 0`. `effNotionalPair ρ d₁ d₂ = √(d₁² + d₂² + 2ρ·d₁·d₂)` is the Basel CRE52.57
+  interest-rate effective notional of a hedging set with two maturity buckets populated
+  (`ρ = 0.7` adjacent, `0.3` first and third), and it never exceeds `|d₁| + |d₂|` for
+  `ρ ∈ [-1, 1]` (`effNotionalPair_le_abs_add`). The three-bucket formula, the bucket notionals
+  themselves and the single-factor add-on of the other asset classes are not formalized.
 
-### Calendar-spread arbitrage (2026-10-17)
-
-Two entries added, `mf-calendar-arbitrage-total-variance` and `mf-svi-calendar-free-iff`
-(both `full`). Corpus 537 → 539.
-
-`BlackScholes/CalendarArbitrage.lean` (Gatheral–Jacquier 2014, Lemma 2.1): calls on a real
-martingale are non-decreasing in maturity (conditional Jensen, `ConvexOn.map_condExp_le`);
-with zero rates the Black–Scholes call depends only on total variance `σ²T` and is strictly
-increasing in it, so call prices rise with maturity at every strike iff `t ↦ w(k, t)` rises at
-every `k`. The raw-SVI form is stated on `SVI.bsSmile` for a maturity-indexed parameter family.
-Not proved: the local-variance characterisation, SSVI, and the slice-crossing quartic.
-
-### SA-CCR exposure at default and effective-notional diversification (2026-10-18)
-
-Two entries added: `mf-saccr-ead-mono` (`full`) and
-`mf-saccr-effnotional-diversification-bound` (`reduced_core`). Corpus 537 → 539.
-
-`RiskMeasures/SACCRExposure.lean`: Basel SA-CCR's `EAD = α·(RC + PFE)` is almost entirely
-regulatory bookkeeping — `RC` and `PFE` are themselves built from supervisory add-on factors with
-no mathematical content beyond the arithmetic combination — so the one real structural fact
-formalized is joint monotonicity in `RC` and `PFE` for `α ≥ 0` (`saccrEAD_mono`, `full`). The
-Annex 4 add-on aggregation's two-trade cross term is quadratic in the supervisory correlation `ρ`,
-not linear, so the formalized `effNotionalPair ρ d₁ d₂ = √(d₁² + d₂² + 2ρ·d₁·d₂)` is a
-structurally analogous *linear*-in-`ρ` building block, not a literal specialization of the Basel
-formula — hence `reduced_core`. Its no-negative-diversification bound
-(`effNotionalPair_le_abs_add`, `ρ ∈ [-1, 1] ⟹ effNotionalPair ≤ |d₁| + |d₂|`) is the delivered
-claim; the `ρ = 0` and `ρ = 1` collapse lemmas and the `d₁`-monotonicity lemma are proved in the
-module but not separately benchmarked.
+Library modules added without corpus entries, each stating its own scope:
+`Foundations/BivariateNormalCDF` (the standard `N₂`, its law, margins, covariance, symmetries
+and the `r = 0, ±1` cases), `Foundations/GaussianCopula`, `Foundations/GammaPoissonMixturePgf`
+(the Gamma MGF, which Mathlib lacks, and the Poisson–Gamma mixture as an iterated integral),
+`Foundations/OUSpectral` (the OU generator on Hermite polynomials), `Foundations/LSVLeverage`,
+`Foundations/Estimation`, `Foundations/ItoFormulaAdaptedDriftUncond` (the integrated Itô–drift
+identity for the constructed process, with no hypothesized `M`), `BlackScholes/ForwardSmile`,
+`BlackScholes/KirkSpreadApproximation`, `BlackScholes/StulzTwoAssetRainbow`,
+`BlackScholes/HeynenKatTwoAssetBarrier`, `BlackScholes/BasketMomentMatching`,
+`FixedIncome/{Inflation, CVA, DefaultDensity, TimingAdjustment, VasicekMarketPriceOfRisk,
+NelsonSiegelSvensson, ABCDVolatility, GSRPiecewiseVol}`, `RiskMeasures/{DiscreteVaR, TrancheLoss,
+JointElicitability, ComponentVaR}`, `Portfolio/{SingleIndexModel, ConvexQPKKT}`,
+`Execution/RollSpread`, `Performance/{FracDiffWeights, AverageUniqueness, BetSizeSigmoid,
+PurgedCV}`, `DeFi/{UniswapMechanics, Aave, Compound, Dai}` and
+`Commodities/{FisherSraffaOwnRate, TheoryOfStorage, AR1OUCalibration}`. The batch also reworked
+`FixedIncome/Bootstrapping` (the induction at the prefix it is fed, instantiated with the FRA and
+swap strips, on `Foundations/Bisection`) and deduplicated `HullWhiteCalibration` and
+`ItoFormulaAdaptedDrift` against `VasicekSDEGaussian` and `AdaptedDrift`.
 
 ### The CIR loadings solve their term-structure equations (2026-10-14)
 
@@ -2827,19 +2842,6 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > `gaussianReal_const_mul`/`gaussianReal_const_add`. First Itô-tower consumer in
 > FixedIncome. Both axioms-clean. Net: corpus 292 → **294**, **259 full** + 18 =
 > 277/294 delivery-ready, 17 reduced, 0 placeholders.
-
-> **Schwartz one-factor commodity futures (2026-10-18, corpus 537→538).**
-> `mf-schwartz-futures-price` (`schwartzFuturesPrice_eq_integral`,
-> `Futures/SchwartzOneFactor.lean`): the Schwartz (1997) one-factor commodity futures price
-> `F(0,T) = E[S_T]` equals `exp(m_T + v_T/2)`, the lognormal mean of the terminal spot — the
-> log spot `ln S_T` shares the Vasicek short rate's Gaussian terminal law (`m_T =
-> vasicekSDEMean`, `v_T = vasicekSDEVariance`), so the futures price is the Gaussian MGF at
-> `1` (`mgf_gaussianReal`). Constant-parameter model only; Hull's time-dependent level `q(t)`
-> is out of scope. The log spot's Wiener representation is cited from
-> `mf-vasicek-sde-terminal-gaussian`, not re-derived. Also lifted `vasicekSDEVariance_nonneg`
-> out of two duplicate inline proofs (`VasicekSDE.lean`, shared with `VasicekSDEGaussian.lean`).
-> Axioms-clean. Net: corpus 537 → **538**, **507 full** + 18 = 525/538 delivery-ready,
-> 13 reduced, 0 placeholders.
 
 The line below is the pre-re-audit historical record (kept for provenance):
 **235 / 251 delivery-ready** (211 full + 24 library wrappers), 16 reduced cores, 0 placeholders.

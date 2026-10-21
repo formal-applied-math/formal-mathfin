@@ -8,6 +8,15 @@ breadth at this stage, and what the concrete next round would look like.
 
 ## 2026-06-29 — POST-ITÔ STRATEGIC UPDATE: the gate is open (supersedes the "out of reach" framing below)
 
+> **Update (2026-10-21) — the contributor batch #248–#283 (corpus 537 → 544).** Thirty pull requests
+> by Yang Ye merged after a values review; six held (#270, #271, #275, #277, #281, #284). Breadth came in
+> credit (the bivariate normal CDF, LHP tranche loss, CVA, CreditMetrics, CreditRisk+'s Gamma MGF), rates
+> (Schwartz futures, inflation, timing adjustment, Nelson–Siegel–Svensson, GSR), options (Stulz, Heynen–Kat,
+> Kirk, calendar arbitrage, the Dupire skew) and risk (joint elicitability, SA-CCR, component VaR). The
+> next rungs are the review's ranked backlog (`docs/values-review.md`, 2026-10-21): the Student-t law,
+> `BivariateNormalCDF` on Mathlib's Gaussian API, and one Wiener-integral bond-price lemma shared by
+> Vasicek, Hull–White and GSR.
+
 > **Update (2026-07-16) — optimal market making, single-asset closed-form (corpus 330 → 333).** A new
 > breadth axis opens: `Foundations/MarketMakingRiccati` formalizes the single-asset (`d = 1`) closed-form
 > (LQ/Riccati) approximation of Bergault–Evangelista–Guéant–Vieira (arXiv:1810.04383). Three `full`

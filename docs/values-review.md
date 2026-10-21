@@ -125,6 +125,135 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-21 — corpus 544 — the batch from Yang Ye, #248–#284: thirty merged, six held
+
+Scope: the thirty-six open pull requests by Yang Ye (@leafyoung), all drafts, each green on its own
+head. Thirty are merged with their commits intact; the adjustments below are follow-up commits on
+the merged tree. Seven corpus entries come in (Schwartz futures, two CreditMetrics, two calendar
+arbitrage, two SA-CCR), all `full`; corpus 537 → 544. Five read-only reviewers split the batch by
+topic (the #244 follow-ups; options; rates; risk and credit; the mixed batches). Each finding that
+was acted on was confirmed by grep or by reading the statement, and adjudicated here.
+
+### Held, not merged
+
+- **#275** re-exported two theorems of Mathlib's `Archive` (the birthday problem). It has no finance
+  content, is the first non-`module` content file, and would have leaked the Archive's global
+  `MeasureSpace (Fin n → Fin m)` instance into every `import MathFin`. The library depends on
+  Mathlib and BrownianMotion only.
+- **#284** recorded the contributor's own review process: an integration branch, local agent
+  rules, local copies of the sources. Its counts were not main's, and some of its claims were false
+  by the time it was read.
+- **#270** named a Student-t VaR and ES, but no Student-t law is built or used:
+  `studentTValueAtRisk μ σ xα := μ + σ·xα` is `gaussianVaR` with the quantile left free.
+- **#271** was bookkeeping: `runningMax` is Mathlib's `partialSups`, and the Sharpe scale law is
+  `sharpeRatio_scale_invariant`.
+- **#277** stated `rfl`, `field_simp` and `Finset.sum_comm` identities as the clean price, bond and
+  FX forwards, loan schedules and key-rate durations.
+- **#281** transcribed Hagan et al.'s eq. 2.18 as a definition; its theorems were `div_pos` and the
+  definition at `t = 0`.
+
+The same review dropped, from merged pull requests: from #272, four modules (Gaussian exposure
+profiles, collateralized exposure, DVA, FVA) whose theorems were `rfl`, `ring` or `max_le_max`
+restatements and whose prose claimed an expectation nothing stated; and from #273, the defaultable
+bond, which was `mgf_id_gaussianReal` at `−1` with the model only in prose.
+
+### The standing first pass: prose against statement
+
+The batch's prose was careful about scope in most files; the overclaims were concentrated.
+- **A benchmark description outran its statement.** `mf-schwartz-futures-price` said `ln S_T`
+  "solves the same mean-reverting SDE"; the entry proves the futures price for the Wiener
+  representation, and the SDE bridge is cited.
+- **A false generality claim.** `calendar_free_iff` called its statement "strictly more general
+  than the economic setting". Its hypothesis `hw : ∀ k t, 0 < w k t` quantifies over every real
+  `t`, which with monotonicity excludes every surface with `w → 0` as `t → 0⁺`, `w = σ²t`
+  included. The docstrings and both descriptions now say so.
+- **A misclassification, in the safe direction.** #279 classed the SA-CCR effective notional as a
+  `reduced_core` "only structurally analogous" to Basel's formula. It is Basel's CRE52.57
+  interest-rate effective notional with two buckets populated (`1.4 = 2·0.7`, `0.6 = 2·0.3`); the
+  entry is `full`. The README sentence it added is gone.
+- **Checks the Lean does not perform.** Heynen–Kat and Stulz claimed to be "cross-checked against"
+  QuantLib and Rmetrics; Heynen–Kat said in–out parity is not a theorem (it is
+  `knockIn_add_knockOut_eq_vanilla`) and pointed to a reflection argument `BarrierParity` does not
+  contain.
+- **Monotonicity read off a sign.** #261's prose said the call is worth less under a higher
+  dividend yield while proving only the sign of a formula; `antitone_bsVDiv_q` and
+  `monotone_bsPDiv_q` now prove it.
+- **Smaller.** #250's title promised a forward smile the file never defines. `VasicekMarketPriceOfRisk`
+  did not say its tilted measure reproduces the terminal marginal only and is not the risk-neutral
+  measure. #268 called a single obligor's threshold migration a Gaussian copula. #260 stated the
+  `ρ = −1` case and the `ρ²` dependence as if proved. Uniswap v3's "virtual" reserves were the real
+  ones (whitepaper eq. 2.2). Several equation and page numbers named no source (#253); one cited the
+  wrong author and title (#252). The source behind most of them is S. Bagaria, *Notes on Fixed
+  Income Derivative Pricing* (lecture notes), now cited in one form; where the PR history did not
+  name it, published references replace the numbers.
+- References to the contributor's process (review rounds, an integration branch, a question for
+  the maintainer, build-plan labels) are gone from shipped docstrings, and #278's own entry in this
+  log is not merged: its `corpus 541` heading parses and would have moved the freshness anchor.
+
+### Upgrades executed
+
+- **One `bivariateNormalCDF`.** #262 and #266 each defined `MathFin.bivariateNormalCDF`, and the
+  combined tree would not have built. TrancheLoss and the Gaussian copula consume
+  `Foundations/BivariateNormalCDF`; `posPart_Phi_sub_Phi` lives there once.
+- **Consume, don't copy.** Component VaR on main's `marginalVariance` and
+  `sum_riskContribution_eq_variance`; `integral_defaultDensity_zero` is
+  `Cox.defaultDensity_antideriv`; GSR's bond price on a public antiderivative of `VasicekBondPrice`
+  (it had shipped a known duplicate); `IndepFun.exp_mul` in place of two hand-built independence
+  steps; one stationary-variance limit `tendsto_vasicekSDEVariance_atTop` for Schwartz and OU.
+- **A theorem where the prose had one.** The Poisson–Gamma mixture is now an iterated integral
+  against `poissonMeasure` (it was the Gamma MGF at `z − 1`); `heynenKatA_rho_zero` factors the
+  two-asset barrier into a one-asset price times a barrier factor; the dividend-yield
+  monotonicity above; the subadditivity failure stated for the library's `valueAtRisk`.
+- **Definitions are not results.** Deleted `rfl` and substitution theorems
+  (`borrowRate_utilization`, `kirkSpreadPrice_eq_bsVGarman`, `fisher_identity`, two YoY
+  corollaries, five forward-skew corollaries, `indexLinkedPrice_eq`, the `portfolioPgf` product,
+  wrappers of `Submonoid.pow_mem`, `Matrix.charpoly_fin_two` and Mathlib's `condExp` API).
+- **Names.** Mathlib order throughout (`hasDerivAt_…`, `continuous_…`, `tendsto_…`, `…_nhdsNE_…`);
+  Ziegel spelled right in every identifier; the file `UniswapCurveMechanics` is `UniswapMechanics`,
+  since Curve is not formalized; `OUSpectral` moved to `Foundations/`.
+- The #244 follow-ups (#254–#257) close that review's backlog items 1 and 2 and part of 3: the
+  expectation identity holds for the constructed process with no hypothesized `M`
+  (`itoDrift_expectation_identity_adapted_uncond`), and the bootstrap induction is stated at the
+  prefix it is fed and instantiated with the FRA and swap strips.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: `integral_posPart_oneFactorPD_sub`, the LHP tranche loss read as a
+  conditional probability and consumed by dominated convergence along main's large-pool limit.
+  Next: the Student-t law (anchored at `ν = 1` to Mathlib's `cauchyMeasure`), so #270's VaR and ES
+  can be stated at a law.
+- **Coherence.** Exemplar: `covariance_rollPriceChange`, Roll's bid–ask bounce covariance, built
+  entirely on Mathlib's covariance and independence API. Next: `BivariateNormalCDF` on Mathlib's `IsGaussian` and
+  `multivariateGaussian`, with a `BivariateGaussianHyp` instance.
+- **Zero slop.** Next: one Wiener-integral bond-price lemma for Vasicek, Hull–White and GSR; one
+  `(k, w)` Black form for SVI, the local skew and calendar arbitrage; one linear-growth bound
+  (four copies).
+- **First principles.** Next: the Vasicek market-price-of-risk Girsanov density, which needs the
+  joint law of `(B_T, ∫₀ᵀ e^{−κ(T−s)} dB_s)`; Kirk grounded against a lognormal pseudo-asset.
+- **Idiomatic register.** Generic names in root `MathFin` (`uniqueness`, `qpObj`, `kFromPhi`) and two
+  lemmas in Mathlib's `ProbabilityTheory` namespace should move into their modules' namespaces.
+
+### Ranked backlog
+
+1. The Student-t law, then VaR and ES at it (reopens #270).
+2. `BivariateNormalCDF` on Mathlib's Gaussian API; the copula bridged to the one-factor default
+   model, with one parametrization of `ρ`.
+3. One Wiener-integral bond-price lemma (Vasicek, Hull–White, GSR); Gaussian EPE and PFE stated at
+   the law once (#259's `expectedExposure_gaussian`), then collateralized EPE under a margin period.
+4. Calendar arbitrage restated on `t > 0`, which admits `w = σ²t`.
+5. The Vasicek Girsanov density with `vasicekBondB` as a covariance; the Cox protection leg as an
+   expectation (`cox_cdf_timeVarying` with `integral_indicator_Iic_eq`).
+6. Retire or demote the conditional route of `ItoFormulaAdaptedDrift`, now that `_of_uncond`
+   reduces it to `hBcont`; its 26 root names into a namespace.
+7. The real theorems behind #277 and #281 (forward prices from `forward_price_from_no_arbitrage`;
+   the SABR `K → f` limit and backbone law), if those PRs come back.
+
+### Evidence
+
+The python gates pass on the merged tree, except the ledger row check until the re-verification
+sweep. `tests/test_attribution.py` passes with full history; `.mailmap` maps Yang Ye's second
+address. `AxiomAuditGen` and `formalization.yaml` are regenerated at corpus 544.
+
 ## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
 
 Scope: `FixedIncome/CIRRiccati` by Alfredo Garcia (@oxarbitrage), merged with its two commits
