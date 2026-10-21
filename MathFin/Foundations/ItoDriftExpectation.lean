@@ -35,8 +35,8 @@ An adapted-coefficient analogue, `itoDrift_expectation_identity_adapted`
 `M` of the Itô integral of `δ` with every path continuous; it is not used to derive the
 constant-coefficient case here. For the process the library constructs, the pathwise formula
 for adapted coefficients is `ItoFormulaAdapted.ito_formula_adapted`; its expectation form, with
-no hypothesized `M`, is `itoDrift_expectation_identity_adapted_uncond`
-(`ItoFormulaAdaptedDriftUncond`).
+no hypothesized `M`, is `itoDrift_expectation_identity_adaptedItoProcess`
+(`ItoFormulaAdaptedDriftConstructed`).
 -/
 
 @[expose] public section

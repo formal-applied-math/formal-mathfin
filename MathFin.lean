@@ -27,7 +27,7 @@
   * `Actuarial/`     — net premium, Gompertz force of mortality.
   * `Execution/`     — Market microstructure and execution: Glosten-Milgrom
                        adverse-selection spread, Roll (1984) bid-ask bounce
-                       spread estimator.
+                       autocovariance and spread inversion.
   * `DeFi/`          — Decentralized-finance market microstructure:
                        constant-product AMMs (Uniswap v2-style), swap
                        output, invariant preservation, internal price;
@@ -57,7 +57,8 @@ import MathFin.Foundations.PoissonInterarrival
 -- Poisson probability generating function E[x^N] = e^{r(x−1)} (absent from
 -- Mathlib); the engine behind Merton-mixture compensation identities
 import MathFin.Foundations.PoissonPgf
--- CreditRisk+ sector pgf: Poisson default count mixed over a Gamma sector factor
+-- CreditRisk+ sector pgf: Poisson default count mixed over a Gamma sector factor, as an
+-- iterated integral
 import MathFin.Foundations.GammaPoissonMixturePgf
 -- The freezing lemma: E[g(X, Y)] = ∫ x, E[g(x, Y)] d(law X) for independent X, Y
 import MathFin.Foundations.IndepFreezing
@@ -271,9 +272,9 @@ import MathFin.Foundations.ItoDriftExpectation
 -- conditional on a hypothesized adapted, path-continuous version `M` of the Itô integral
 -- (the library does not construct one for general δ)
 import MathFin.Foundations.ItoFormulaAdaptedDrift
--- The unconditional companion: the same identity for the constructed process,
--- derived from ito_formula_adapted (centering + Fubini)
-import MathFin.Foundations.ItoFormulaAdaptedDriftUncond
+-- The companion with no hypothesized M (for B with continuous paths): the same identity for
+-- the constructed process, derived from ito_formula_adapted (centering + Fubini)
+import MathFin.Foundations.ItoFormulaAdaptedDriftConstructed
 -- Cross-horizon consistency of the CLM Itô integral: one pinned `M` (`hMeq`) represents
 -- the CLM integral at every horizon `τ ≤ T` (band-transfer kernel + freeze law)
 import MathFin.Foundations.ItoIntegralCrossHorizon
@@ -548,7 +549,8 @@ import MathFin.FixedIncome.CDSTimeVarying
 import MathFin.FixedIncome.Cox
 -- Default-time density of a deterministic hazard curve (law of τ as Lebesgue density)
 import MathFin.FixedIncome.DefaultDensity
--- CVA under exposure independent of default (Fubini reduction + Gaussian closed form)
+-- CVA under exposure independent of default (Fubini reduction; Gaussian expected exposure in
+-- closed form)
 import MathFin.FixedIncome.CVA
 -- Phase 41: Vasicek SDE closed-form (full SDE, mean + variance)
 import MathFin.FixedIncome.VasicekSDE
@@ -558,7 +560,8 @@ import MathFin.Foundations.OUSpectral
 import MathFin.FixedIncome.VasicekSDEGaussian
 -- Vasicek zero-coupon bond price: the affine term structure (Gaussian Laplace transform)
 import MathFin.FixedIncome.VasicekBondPrice
--- Vasicek real-world vs. risk-neutral terminal law (constant market price of risk)
+-- Vasicek real-world vs. risk-neutral terminal mean; an Esscher tilt reproducing the
+-- risk-neutral terminal law
 import MathFin.FixedIncome.VasicekMarketPriceOfRisk
 -- CIR loadings: B solves the Riccati equation, A solves A' = −κθB
 import MathFin.FixedIncome.CIRRiccati
@@ -601,7 +604,7 @@ import MathFin.Performance.DownsideMetrics
 import MathFin.Performance.Kelly
 import MathFin.Performance.KellyNumeraire
 import MathFin.Performance.FracDiffWeights
-import MathFin.Performance.AverageUniqueness
+import MathFin.Performance.LabelUniqueness
 import MathFin.Performance.BetSizeSigmoid
 import MathFin.Performance.PurgedCV
 
@@ -758,7 +761,7 @@ import MathFin.BlackScholes.CalendarArbitrage
 import MathFin.RiskMeasures.ComponentVaR
 import MathFin.Portfolio.SingleIndexModel
 
--- Fisher/Sraffa own-rate-of-interest identity relating spot, forward, and own rates
+-- Fisher/Sraffa own rate: Sraffa's implied own rate from spot, forward and financing rate
 import MathFin.Commodities.FisherSraffaOwnRate
 -- Theory of storage: convenience yield and the kink point of the storage price curve
 import MathFin.Commodities.TheoryOfStorage

@@ -51,9 +51,9 @@ Hypothesis comparison with the conditional theorem (neither statement implies th
 
 The `X`-generality is not extra reach once `hBcont` holds: every such `X` is, at each `t ≤ T`,
 a.s. equal to the constructed process, so the conditional theorem's exact conclusion follows
-from `itoDrift_expectation_identity_adapted_uncond` by a.e. congruence. That reduction is
-`itoDrift_expectation_identity_adapted_of_uncond` below — of the `M`/`X` hypotheses it needs
-only `hMeq` and `hXrel` (no `hMadap`, no `hXcont`), and of `f` only twice differentiable with
+from `itoDrift_expectation_identity_adaptedItoProcess` by a.e. congruence. That reduction is
+`itoDrift_expectation_identity_adapted_of_adaptedItoProcess` below — of the `M`/`X` hypotheses it
+needs only `hMeq` and `hXrel` (no `hMadap`, no `hXcont`), and of `f` only twice differentiable with
 `f''` continuous and `f'`, `f''` bounded. The conditional theorem's only remaining extra reach
 is a `B` without everywhere-continuous paths.
 
@@ -67,10 +67,10 @@ not need that `M`.
 
 ## Result
 
-* `itoDrift_expectation_identity_adapted_uncond` — the identity for the constructed process,
+* `itoDrift_expectation_identity_adaptedItoProcess` — the identity for the constructed process,
   with no hypothesized `M` but with `hBcont` (headline);
-* `itoDrift_expectation_identity_adapted_of_uncond` — the conditional theorem's conclusion
-  recovered from it under `hBcont`, for any version `M` and `X = c + ∫₀• β ds + M`;
+* `itoDrift_expectation_identity_adapted_of_adaptedItoProcess` — the conditional theorem's
+  conclusion recovered from it under `hBcont`, for any version `M` and `X = c + ∫₀• β ds + M`;
 * `band_integrable` (private) — product integrability of a bounded predictable weight on a
   time band (the hypothesis of the Fubini interchange).
 
@@ -119,7 +119,7 @@ and `f` twice differentiable with `f''` continuous and `f'`, `f''` bounded. No v
 `δ●B` and no hypothesis on `X` is assumed; unlike the conditional
 `itoDrift_expectation_identity_adapted`, `X` is fixed to the constructed process and `B` is
 assumed path-continuous (`hBcont`). -/
-theorem itoDrift_expectation_identity_adapted_uncond (hB : IsPreBrownianReal B μ)
+theorem itoDrift_expectation_identity_adaptedItoProcess (hB : IsPreBrownianReal B μ)
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
     {β : ℝ≥0 → Ω → ℝ}
     (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
@@ -233,11 +233,11 @@ under `hBcont`.** If `M` is any version of the Itô process of `δ` (`hMeq`; no 
 continuity asked) and `X = c + ∫₀• β ds + M` (`hXrel`), then `X t` agrees almost surely with the
 constructed process at every `t ≤ T`, and the conclusion of the conditional
 `itoDrift_expectation_identity_adapted` follows from
-`itoDrift_expectation_identity_adapted_uncond` by a.e. congruence — for `f` twice differentiable
+`itoDrift_expectation_identity_adaptedItoProcess` by a.e. congruence — for `f` twice differentiable
 with continuous `f''` and bounded `f'`, `f''`, and without `hMadap`, `hXcont` or a third
 derivative. The conditional theorem's remaining extra reach is a `B` without everywhere-continuous
 paths. -/
-theorem itoDrift_expectation_identity_adapted_of_uncond (hB : IsPreBrownianReal B μ)
+theorem itoDrift_expectation_identity_adapted_of_adaptedItoProcess (hB : IsPreBrownianReal B μ)
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) {M : ℝ≥0 → Ω → ℝ}
     (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
       (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
@@ -268,7 +268,7 @@ theorem itoDrift_expectation_identity_adapted_of_uncond (hB : IsPreBrownianReal 
         fun ω h ↦ congrArg f h)]
     simp
   rw [h0, integral_congr_ae ((hX T le_rfl).mono fun ω h ↦ congrArg f h),
-    itoDrift_expectation_identity_adapted_uncond hBmeas hδadap hδcont hδbdd hB hBcont hβadap
+    itoDrift_expectation_identity_adaptedItoProcess hBmeas hδadap hδcont hδbdd hB hBcont hβadap
       hβcont hβbdd c hf hf' hf''c hg1 hg2]
   congr 1
   refine setIntegral_congr_fun measurableSet_Ioc fun s hs ↦ ?_

@@ -40,8 +40,8 @@ everywhere-continuous modification `exists_continuous_localMartingale_modificati
 only to the augmented filtration `augFiltration`. For the process the library does construct,
 the pathwise formula is `ItoFormulaAdapted.ito_formula_adapted` — and the expectation identity
 itself is available for that process **without a hypothesized `M`** (for `B` with continuous
-paths), as `itoDrift_expectation_identity_adapted_uncond` in
-`MathFin.Foundations.ItoFormulaAdaptedDriftUncond` (a sibling module, so that this one stays
+paths), as `itoDrift_expectation_identity_adaptedItoProcess` in
+`MathFin.Foundations.ItoFormulaAdaptedDriftConstructed` (a sibling module, so that this one stays
 free of the `ItoFormulaAdapted` import): a corollary of the pathwise formula by centering
 (`integral_itoIntegralCLM_T`) and Fubini at a predictable weight, with no `M`/`X` hypotheses
 (the conditional statement here still quantifies over versions of `δ●B`). The
@@ -52,7 +52,7 @@ values of `X`, integrated over `Ω`; the first-order martingale terms die exactl
 (`mul_trueIncr_expect_eq_zero`, the martingale property of the adapted Itô integral
 transferred along the a.e. `hMeq`); the drift block converges by pathwise Riemann–Stieltjes
 sums + DCT + the Fubini interchange (`driftBlock_tendsto`); the quadratic block converges by
-the summed weighted increment isometry (`quadraticSqSum_tendsto_uncond`, discharged from its
+the summed weighted increment isometry (`quadraticSqSum_tendsto'`, discharged from its
 conditional form by the step-approximant `L²` convergence `deltaStepLp_tendsto`); the
 drift² corrections (`quadDriftSqSum_tendsto`), the drift–martingale cross corrections
 (`quadCrossSum_tendsto`) and the Taylor remainder (the cubic bound + the third-moment
@@ -61,14 +61,14 @@ them by `O(mesh)`, `O(√mesh)` and `O(√mesh)`; only the limits are stated.
 
 Main results: `MathFin.itoDrift_expectation_identity_adapted` (conditional on a version `M`,
 for any `X` satisfying its hypotheses; this file) and
-`MathFin.itoDrift_expectation_identity_adapted_uncond` (no hypothesized `M`, for the constructed
-process and `B` with continuous paths; `ItoFormulaAdaptedDriftUncond`). Supporting layers,
+`MathFin.itoDrift_expectation_identity_adaptedItoProcess` (no hypothesized `M`, for the constructed
+process and `B` with continuous paths; `ItoFormulaAdaptedDriftConstructed`). Supporting layers,
 bottom-up: `bandIntegral_slice` (the band-to-slice conversion; the Fubini interchange
 `expectation_pathIntegral_eq` comes from `ItoDriftExpectation`), `incrementEnergy` (the
 increment-energy law), `deltaStepLp`/`deltaStepLp_tendsto` (the step approximants), the per-cell
 weighted isometry (`weightedCellSq_step`, `clm_band_energy`, `stepIncr_stepCLM_ae`), the gap
 decay (`errorIncr_ae`, `cellGap_le`, `gapSum_le`) and the quadratic block with its gap hypothesis
-discharged (`quadraticSqSum_tendsto_uncond`, still for the hypothesized `M`), the
+discharged (`quadraticSqSum_tendsto'`, still for the hypothesized `M`), the
 fourth/third-moment bounds (`stepSum_pow4_le`, `trueIncr_pow4_le`, `trueIncr_pow3_le`),
 the drift primitive (`AdaptedDrift.driftPath` reused, with its adaptedness
 `stronglyMeasurable_driftPath`, from `Foundations/AdaptedDrift`), the drift
@@ -83,12 +83,12 @@ identity for the process the library constructs, derived from
 `ItoFormulaAdapted.ito_formula_adapted` by centering and Fubini, with weaker hypotheses on `f`
 (`f''` continuous, `f'` and `f''` bounded, no third derivative) but with `X` fixed to the
 constructed process and `B` additionally assumed path-continuous (`hBcont`) — is
-`itoDrift_expectation_identity_adapted_uncond` in
-`MathFin.Foundations.ItoFormulaAdaptedDriftUncond`.
+`itoDrift_expectation_identity_adaptedItoProcess` in
+`MathFin.Foundations.ItoFormulaAdaptedDriftConstructed`.
 Under `hBcont`, the headline's own conclusion follows from that companion by a.e. congruence
-(`itoDrift_expectation_identity_adapted_of_uncond`, same module, needing neither `hMadap` nor
-`hXcont` nor a third derivative), so this file's remaining extra reach is a `B` without
-everywhere-continuous paths.
+(`itoDrift_expectation_identity_adapted_of_adaptedItoProcess`, same module, needing neither
+`hMadap` nor `hXcont` nor a third derivative), so this file's remaining extra reach is a `B`
+without everywhere-continuous paths.
 Public supporting layers (all `MathFin.*`):
 
 * foundations: `integral_mul_condExp_eq`, `memLp_M`, `incrementEnergy` (the increment
@@ -96,7 +96,7 @@ Public supporting layers (all `MathFin.*`):
   `deltaStepLp` / `deltaStepLp_tendsto`;
 * convergence blocks: `driftBlock_tendsto` (with the drift primitive `AdaptedDrift.driftPath`
   and `driftSum_expect_tendsto`), `quadraticSqSum_tendsto` /
-  `quadraticSqSum_tendsto_uncond`
+  `quadraticSqSum_tendsto'`
   (via `gapSum_le` and the mean-function Riemann limit `frozenRiemann_tendsto`), the exact
   martingale kill `mul_trueIncr_expect_eq_zero`, the
   Taylor bound `taylorRemainderSum_tendsto` (`trueIncr_pow3_le`, `trueIncr_pow4_le`,
@@ -1853,7 +1853,7 @@ omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- **The convergence of the quadratic block, gap hypothesis discharged** (the `hgap`
 hypothesis of `quadraticSqSum_tendsto` discharged by `gapSum_le` + `deltaStepLp_tendsto`). Not
 unconditional: `M` is still a hypothesized version of `δ●B` (`hMadap`, `hMeq`). -/
-theorem quadraticSqSum_tendsto_uncond (hB : IsPreBrownianReal B μ)
+theorem quadraticSqSum_tendsto' (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t))
     {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
     (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
@@ -3115,7 +3115,7 @@ first-order martingale terms die **exactly** (the martingale-kill lemma
 stochastic integral has zero mean"); the drift block is the pathwise left-endpoint
 Riemann–Stieltjes sum (`AdaptedDrift.tendsto_sum_mul_driftPath_sub` along each path at the
 weight `f'∘X` + DCT + the stage-1
-Fubini `expectation_pathIntegral_eq`); the quadratic block is `quadraticSqSum_tendsto_uncond` at the
+Fubini `expectation_pathIntegral_eq`); the quadratic block is `quadraticSqSum_tendsto'` at the
 weight `f″∘X` plus the drift corrections (`𝔼|ΔM·driftIncr| ≤ 2D_βD_δ·cell^{3/2}`,
 `𝔼[driftIncr²] ≤ (D_β·cell)²`, which the proofs sum to `O(√mesh)` and `O(mesh)`); the Taylor
 remainder dies by `abs_discreteTaylorRemainder_le` + `trueIncr_pow3_le`
@@ -3219,7 +3219,7 @@ discrete Itô formula (`MathFin.discrete_ito_formula`) at the grid values of `X`
 over `Ω`; the first-order martingale terms die exactly (`mul_trueIncr_expect_eq_zero`); the
 drift block converges by pathwise Riemann–Stieltjes sums
 (`AdaptedDrift.tendsto_sum_mul_driftPath_sub` along each path at the weight `f'∘X`) + DCT
-(`driftBlock_tendsto`); the quadratic block converges by `quadraticSqSum_tendsto_uncond`
+(`driftBlock_tendsto`); the quadratic block converges by `quadraticSqSum_tendsto'`
 at the weight `f''∘X`, with the drift–martingale cross terms (`quadCrossSum_tendsto`)
 and the drift² corrections (`quadDriftSqSum_tendsto`) tending to `0`; the Taylor remainder dies by
 `abs_discreteTaylorRemainder_le` + `trueIncr_pow3_le` (`taylorRemainderSum_tendsto`).
@@ -4684,7 +4684,7 @@ Route: the per-path discrete Itô formula (`MathFin.discrete_ito_formula`) at th
 values of `X`, integrated over `Ω`; the first-order martingale terms die exactly
 (`mul_trueIncr_expect_eq_zero` at the `𝓕_{tₖ}`-measurable bounded test `f' ∘ X`); the
 drift block converges to `∫₀ᵀ 𝔼[f'∘X·β]` (`driftBlock_tendsto`); the quadratic block
-converges to `∫₀ᵀ 𝔼[f''∘X·δ²]` (`quadraticSqSum_tendsto_uncond` at the weight `f''∘X`);
+converges to `∫₀ᵀ 𝔼[f''∘X·δ²]` (`quadraticSqSum_tendsto'` at the weight `f''∘X`);
 the drift² corrections, the drift–martingale cross corrections and the Taylor remainder
 die (`quadDriftSqSum_tendsto`, `quadCrossSum_tendsto`,
 `taylorRemainderSum_tendsto`); the two time integrals cross the expectation by the
@@ -4793,7 +4793,7 @@ theorem itoDrift_expectation_identity_adapted
         * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)
     atTop (𝓝 (∫ s in Set.Ioc (0 : ℝ≥0) T,
         (∫ ω, f'' (X s ω) * (δ s ω * δ s ω) ∂μ) ∂ItoIntegralL2.timeMeasure)) :=
-    quadraticSqSum_tendsto_uncond hB hBmeas hδadap hδcont hδbdd hMadap hMeq
+    quadraticSqSum_tendsto' hB hBmeas hδadap hδcont hδbdd hMadap hMeq
       (w := fun s ω ↦ f'' (X s ω)) (Cw := C2)
       (fun t ↦ hf''c.measurable.comp (hXadap t).measurable)
       (fun ω ↦ hf''c.comp (hXcont ω))
