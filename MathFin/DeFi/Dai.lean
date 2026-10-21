@@ -22,7 +22,7 @@ parameter entries, not sub-sections of the paper).
 
 * `isLiquidatable`: the predicate `collateral / debt < liquidationRatio`.
 * `isLiquidatable_iff_mul`: cross-multiplied equivalent form (no division).
-* `stabilityFeeClosedForm`: the compounding recurrence
+* `debt_eq_debt_zero_mul_pow`: the compounding recurrence
   `debt (n+1) = debt n · (1 + fee)` has closed form `debt n = debt 0 · (1+fee)^n`.
 -/
 
@@ -52,13 +52,13 @@ theorem isLiquidatable_iff_mul
 satisfying `debt (n+1) = debt n · (1 + fee)` at every step, the debt after
 `n` periods equals the initial debt compounded at the per-period stability
 fee, `debt n = debt 0 · (1 + fee)^n`. Proved by induction on `n`. -/
-theorem stabilityFeeClosedForm
+theorem debt_eq_debt_zero_mul_pow
     (debt : ℕ → ℝ) (fee : ℝ)
     (hrec : ∀ n, debt (n + 1) = debt n * (1 + fee)) :
     ∀ n, debt n = debt 0 * (1 + fee) ^ n
   | 0 => by simp
   | (n + 1) => by
-      rw [hrec n, stabilityFeeClosedForm debt fee hrec n, pow_succ]
+      rw [hrec n, debt_eq_debt_zero_mul_pow debt fee hrec n, pow_succ]
       ring
 
 end Dai

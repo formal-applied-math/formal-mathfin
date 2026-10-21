@@ -10,8 +10,9 @@ public import Mathlib
 /-!
 # ABCD instantaneous volatility — closed-form integrated variance
 
-The **ABCD parametrization** is the standard humped instantaneous-volatility
-shape used for forward rates / caplets in LIBOR market models:
+The **ABCD parametrization** (Rebonato) is the standard humped
+instantaneous-volatility shape used for forward rates / caplets in LIBOR market
+models, as a function of the time to maturity `τ`:
 
   `f(τ) = (a + b·τ) · e^{-c·τ} + d`.
 
@@ -38,6 +39,11 @@ Vasicek/Hull–White kernel variance integrals
 * `abcdVol_sq_integral` — the definite integral
   `∫_{T1}^{T2} f(τ)² dτ = F(T2) - F(T1)` via FTC.
 * `abcdVol_sq_integral_zero` — the `[0, T]`-window specialization.
+
+## References
+
+* R. Rebonato, *Modern Pricing of Interest-Rate Derivatives: The LIBOR Market Model and
+  Beyond*, Princeton University Press, 2002.
 -/
 
 @[expose] public section

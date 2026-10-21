@@ -23,35 +23,34 @@ formula and its one real structural fact: `EAD` is monotone increasing in each o
 for any fixed `α ≥ 0`, so netting or hedging that lowers either component can only lower (never
 raise) the capital exposure.
 
-The other SA-CCR building block with actual algebraic content is Annex 4's **add-on**
-aggregation, which combines the per-trade *effective notionals* `Dₖ` of a hedging set into a
-single asset-class add-on via a single-systematic-factor correlation `ρ`:
+The other SA-CCR building block with algebraic content is the **effective notional** of an
+interest-rate hedging set. SA-CCR splits the trades of one currency into three maturity buckets
+(under one year, one to five years, over five years) with signed bucket effective notionals
+`D₁, D₂, D₃`, and aggregates them as
 
-  `AddOn = √((Σₖ ρₖ · Dₖ)² + Σₖ (1 − ρₖ²) · Dₖ²)`
+  `EffectiveNotional = √(D₁² + D₂² + D₃² + 1.4·D₁·D₂ + 1.4·D₂·D₃ + 0.6·D₁·D₃)`,
 
-(expanding this for two trades with equal supervisory correlation `ρ` gives a cross term in `ρ²`,
-not `ρ`: `√(D₁² + D₂² + 2ρ²·D₁·D₂)`). We instead formalise the structurally analogous two-trade
-building block with a *linear* correlation cross term, calling it `effNotionalPair` since it
-takes the same per-trade effective notionals as input (Basel's own term for the add-on formula's
-output would be "add-on", not "effective notional" — the formalised quantity below is named after
-its inputs, not after the Basel output it does not reproduce):
+that is, with correlation `0.7` between adjacent buckets and `0.3` between the first and the third
+(Basel Framework CRE52.57). When two buckets are populated this is exactly
 
-  `EffNotional ρ d₁ d₂ = √(d₁² + d₂² + 2ρ·d₁·d₂)`,
+  `effNotionalPair ρ d₁ d₂ = √(d₁² + d₂² + 2ρ·d₁·d₂)`,
 
-the same quadratic-form combination as the variance of a sum of two correlated random variables —
-useful on its own merits (it is this shape, not the Annex-4 one, that the diversification bounds
-below are about), but not a literal algebraic specialisation of the Annex-4 formula above. We
-prove it collapses to
-`|d₁ + d₂|` at `ρ = 1` (full correlation, no diversification benefit) and to `√(d₁² + d₂²)` at
-`ρ = 0` (independent add-ons), that it never exceeds `|d₁| + |d₂|` for `ρ ∈ [-1, 1]` (no *negative*
-diversification), and that for `ρ ≥ 0` and both notionals nonnegative, growing `d₁`'s magnitude
-never shrinks the aggregate (`effNotionalPair_mono_left`; the formula is symmetric in `d₁, d₂`, so
-the same holds for `d₂` by relabelling).
+at `ρ = 0.7` (adjacent buckets) or `ρ = 0.3` (the first and third). It is the same quadratic form
+as the standard deviation of a sum of two correlated risks. It is not the single-factor
+aggregation that SA-CCR uses for the credit, equity and commodity classes,
+`√((Σₖ ρₖ·Aₖ)² + Σₖ (1 − ρₖ²)·Aₖ²)` over entity-level add-ons `Aₖ`, whose two-entity cross term
+with equal `ρ` is `2ρ²·A₁·A₂`. We prove that `effNotionalPair` collapses to `|d₁ + d₂|` at `ρ = 1`
+(full correlation, no diversification benefit) and to `√(d₁² + d₂²)` at `ρ = 0`, that it never
+exceeds `|d₁| + |d₂|` for `ρ ∈ [-1, 1]` (no *negative* diversification: recognising offset across
+buckets never gives more than adding the absolute bucket notionals), and that for `ρ ≥ 0` and both
+notionals nonnegative, growing `d₁` never shrinks the aggregate (`effNotionalPair_mono_left`; the
+formula is symmetric in `d₁, d₂`, so the same holds for `d₂` by relabelling). The three-bucket
+formula itself is not stated here.
 
 ## Main definitions
 
 * `saccrEAD`: `α · (RC + PFE)`.
-* `effNotionalPair`: the two-trade correlated aggregation `√(d₁² + d₂² + 2ρ·d₁·d₂)`.
+* `effNotionalPair`: the two-bucket interest-rate effective notional `√(d₁² + d₂² + 2ρ·d₁·d₂)`.
 
 ## Main results
 
@@ -67,7 +66,10 @@ the same holds for `d₂` by relabelling).
 ## References
 
 * Basel Committee on Banking Supervision, *The standardised approach for measuring counterparty
-  credit risk exposures* (BCBS 279), 2014 (the EAD formula, and the Annex 4 add-on aggregation).
+  credit risk exposures* (BCBS 279), 2014 (the EAD formula and the interest-rate effective
+  notional).
+* Basel Committee on Banking Supervision, *The Basel Framework*, CRE52 (standardised approach to
+  counterparty credit risk), CRE52.57.
 -/
 
 @[expose] public section
@@ -93,14 +95,14 @@ theorem saccrAlpha_pos : 0 < saccrAlpha := by norm_num [saccrAlpha]
 
 /-- `EAD` is monotone increasing in the replacement cost `RC`, for any fixed `α ≥ 0`. -/
 theorem saccrEAD_mono_rc {α : ℝ} (hα : 0 ≤ α) {PFE : ℝ} :
-    Monotone (fun RC => saccrEAD α RC PFE) := by
+    Monotone (fun RC ↦ saccrEAD α RC PFE) := by
   intro RC₁ RC₂ h
   simp only [saccrEAD]
   gcongr
 
 /-- `EAD` is monotone increasing in the PFE add-on, for any fixed `α ≥ 0`. -/
 theorem saccrEAD_mono_pfe {α : ℝ} (hα : 0 ≤ α) {RC : ℝ} :
-    Monotone (fun PFE => saccrEAD α RC PFE) := by
+    Monotone (fun PFE ↦ saccrEAD α RC PFE) := by
   intro PFE₁ PFE₂ h
   simp only [saccrEAD]
   gcongr
@@ -115,23 +117,21 @@ theorem saccrEAD_mono {α : ℝ} (hα : 0 ≤ α) {RC₁ RC₂ PFE₁ PFE₂ : �
 
 /-! ## Effective notional aggregation
 
-SA-CCR's Annex 4 combines the per-trade effective notionals of a hedging set into an add-on using
-a supervisory correlation parameter `ρ`, with a cross term quadratic in `ρ` (see the module
-docstring). `effNotionalPair` below is the structurally analogous *two-trade, linear-in-`ρ`*
-building block — not a literal specialisation of the Annex-4 formula, as the module docstring
-explains — chosen because it is the shape the diversification bounds in this file are about
-(identical to the variance of a sum of two correlated random variables). -/
+SA-CCR aggregates the signed maturity-bucket effective notionals of an interest-rate hedging set
+with correlation `0.7` between adjacent buckets and `0.3` between the first and the third
+(CRE52.57; see the module docstring). `effNotionalPair` below is that aggregation when two
+buckets are populated, for a general correlation `ρ`. -/
 
-/-- The two-trade correlated aggregation of effective notionals `d₁, d₂`, with a correlation `ρ`
-cross term linear in `ρ`: `√(d₁² + d₂² + 2ρ·d₁·d₂)`. Structurally analogous to, but not a literal
-specialisation of, the BCBS 279 Annex 4 add-on formula (see the module docstring). -/
+/-- The interest-rate effective notional of a hedging set with two populated maturity buckets of
+signed effective notionals `d₁, d₂`: `√(d₁² + d₂² + 2ρ·d₁·d₂)`, with `ρ = 0.7` for adjacent
+buckets and `ρ = 0.3` for the first and third (Basel Framework CRE52.57). -/
 noncomputable def effNotionalPair (ρ d₁ d₂ : ℝ) : ℝ := √(d₁ ^ 2 + d₂ ^ 2 + 2 * ρ * d₁ * d₂)
 
 theorem effNotionalPair_nonneg (ρ d₁ d₂ : ℝ) : 0 ≤ effNotionalPair ρ d₁ d₂ :=
   Real.sqrt_nonneg _
 
 /-- At full correlation `ρ = 1` the aggregation collapses to `|d₁ + d₂|`: no diversification
-benefit, trades simply add. -/
+benefit, the signed bucket notionals simply add. -/
 theorem effNotionalPair_eq_abs_add_of_corr_one (d₁ d₂ : ℝ) :
     effNotionalPair 1 d₁ d₂ = |d₁ + d₂| := by
   unfold effNotionalPair
@@ -143,9 +143,9 @@ theorem effNotionalPair_eq_hypot_of_corr_zero (d₁ d₂ : ℝ) :
     effNotionalPair 0 d₁ d₂ = √(d₁ ^ 2 + d₂ ^ 2) := by
   unfold effNotionalPair; ring_nf
 
-/-- For supervisory correlation `ρ ∈ [-1, 1]` (the range Basel's supervisory correlations live
-in), the aggregated notional never exceeds the sum of the absolute add-ons: there is no
-*negative* diversification from this formula. The bound fails outside `[-1, 1]`, e.g. `ρ = -5`,
+/-- For a correlation `ρ ∈ [-1, 1]` (which contains Basel's `0.7` and `0.3`), the aggregated
+notional never exceeds the sum of the absolute bucket notionals: there is no *negative*
+diversification from this formula. The bound fails outside `[-1, 1]`, e.g. `ρ = -5`,
 `d₁ = 1`, `d₂ = -1` gives `effNotionalPair = √12 > 2`. -/
 theorem effNotionalPair_le_abs_add {ρ : ℝ} (hρ1 : -1 ≤ ρ) (hρ2 : ρ ≤ 1) (d₁ d₂ : ℝ) :
     effNotionalPair ρ d₁ d₂ ≤ |d₁| + |d₂| := by
@@ -163,10 +163,10 @@ theorem effNotionalPair_le_abs_add {ρ : ℝ} (hρ1 : -1 ≤ ρ) (hρ2 : ρ ≤ 
   nlinarith [h1, h2, h3]
 
 /-- `effNotionalPair` is monotone in `d₁` on `[0, ∞)`, for `ρ ≥ 0` and `d₂ ≥ 0`: increasing a
-nonnegative trade notional `d₁` never decreases the aggregate when the correlation and the other
+nonnegative bucket notional `d₁` never decreases the aggregate when the correlation and the other
 notional are both nonnegative. -/
 theorem effNotionalPair_mono_left {ρ : ℝ} (hρ : 0 ≤ ρ) {d₂ : ℝ} (hd₂ : 0 ≤ d₂) :
-    MonotoneOn (fun d₁ => effNotionalPair ρ d₁ d₂) (Set.Ici (0 : ℝ)) := by
+    MonotoneOn (fun d₁ ↦ effNotionalPair ρ d₁ d₂) (Set.Ici (0 : ℝ)) := by
   intro d₁ hd₁ d₁' hd₁' h
   simp only [Set.mem_Ici] at hd₁ hd₁'
   unfold effNotionalPair

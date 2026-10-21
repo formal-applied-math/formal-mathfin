@@ -32,13 +32,13 @@ Under these hypotheses the first-order autocovariance of the *trade-price change
 
 `Cov(ΔP_t, ΔP_{t-1}) = -(s/2)²`.
 
-This is `rollCovariance`. Covariance is bilinear and translation-invariant, so the mean of the
-mid-price increments plays no role; only independence matters. Expanding the product and
+This is `covariance_rollPriceChange`. Covariance is bilinear and translation-invariant, so the
+mean of the mid-price increments plays no role; only independence matters. Expanding the product and
 discarding every covariance between independent variables leaves exactly one surviving term: the
 own-covariance (variance) of the sign `q_{t-1}` shared between the two consecutive price changes,
 whose variance is `1` (`variance_one_of_hasLaw_rademacher`). The identity is usually inverted into
 the **Roll estimator** `ŝ = 2 √(-γ̂₁)` of the spread from the sample first-order autocovariance
-`γ̂₁` of observed price changes; `rollSpreadEstimator` records this algebraic inversion.
+`γ̂₁` of observed price changes; `rollSpread_eq_two_mul_sqrt` records this algebraic inversion.
 
 We state the result for three consecutive sign variables `q0 q1 q2` (representing
 `q_{t-2}, q_{t-1}, q_t`) and two increments `dm1 dm2` (`Δm_{t-1}, Δm_t`), rather than threading a
@@ -47,7 +47,7 @@ independence ever enter the computation.
 
 The inversion is only meaningful when the sample autocovariance `γ̂₁` is negative, as the model
 predicts. If `γ̂₁ ≥ 0` — which real data can and does produce, since the model is an
-approximation — `rollSpreadEstimator` does not apply: `Real.sqrt` of a nonpositive argument
+approximation — `rollSpread_eq_two_mul_sqrt` does not apply: `Real.sqrt` of a nonpositive argument
 returns `0` by Mathlib's junk-value convention, so naively evaluating `2 * Real.sqrt (-γ̂₁)` at
 `γ̂₁ ≥ 0` silently yields a spread estimate of `0` rather than signalling that the estimator is
 undefined there.
@@ -56,8 +56,15 @@ undefined there.
 
 * `variance_id_rademacher`, `variance_one_of_hasLaw_rademacher`: a fair random sign has variance
   `1`.
-* `rollCovariance`: `Cov(ΔP_t, ΔP_{t-1}) = -(s/2)²` under the stated independence hypotheses.
-* `rollSpreadEstimator`: the algebraic inversion `s = 2 * √(-Cov(ΔP_t, ΔP_{t-1}))` (for `s ≥ 0`).
+* `covariance_rollPriceChange`: `Cov(ΔP_t, ΔP_{t-1}) = -(s/2)²` under the stated independence
+  hypotheses.
+* `rollSpread_eq_two_mul_sqrt`: the algebraic inversion `s = 2 * √(-Cov(ΔP_t, ΔP_{t-1}))`
+  (for `s ≥ 0`).
+
+## References
+
+* R. Roll, "A simple implicit measure of the effective bid-ask spread in an efficient market",
+  *Journal of Finance* 39 (1984), 1127–1139.
 -/
 
 @[expose] public section
@@ -106,7 +113,7 @@ except `q1` with itself — the lag-one autocovariance of the trade-price change
 own-covariance of the shared sign `q1` is the only surviving term. Independence *within* a single
 price change (e.g. `dm2` with `q2`, or `dm1` with `q0`) is never used and so is not assumed: those
 pairs never get multiplied together by the covariance expansion. -/
-theorem rollCovariance
+theorem covariance_rollPriceChange
     (hq0 : HasLaw q0 rademacher P) (hq1 : HasLaw q1 rademacher P) (hq2 : HasLaw q2 rademacher P)
     (hdm1 : MemLp dm1 2 P) (hdm2 : MemLp dm2 2 P)
     (h_q2q1 : q2 ⟂ᵢ[P] q1) (h_q2q0 : q2 ⟂ᵢ[P] q0) (h_q1q0 : q1 ⟂ᵢ[P] q0)
@@ -149,7 +156,7 @@ theorem rollCovariance
 `s = 2 √(-Cov(ΔP_t, ΔP_{t-1}))` for `s ≥ 0`. Stated directly from the covariance value (rather
 than re-deriving it from the independence hypotheses) since the inversion is pure algebra on the
 real number `γ := cov[ΔP_t, ΔP_{t-1}; P]`. -/
-theorem rollSpreadEstimator {γ : ℝ} (hs : 0 ≤ s) (hγ : γ = -(s / 2) ^ 2) :
+theorem rollSpread_eq_two_mul_sqrt {γ : ℝ} (hs : 0 ≤ s) (hγ : γ = -(s / 2) ^ 2) :
     s = 2 * Real.sqrt (-γ) := by
   rw [hγ, neg_neg, Real.sqrt_sq (by positivity)]
   ring

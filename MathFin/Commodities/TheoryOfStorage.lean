@@ -10,23 +10,24 @@ public import Mathlib
 /-!
 # Theory of storage: convenience yield and the canonical-storage price kink
 
-The **theory of storage** (Working 1949, Kaldor) models the commodity spot
+The **theory of storage** (Kaldor 1939, Working 1949) models the commodity spot
 price as a kinked function of "availability" `A` (current stock plus expected
-supply). Above the kink, the price tracks the inverse demand-for-storage
-curve `f⁻¹(A)` (price falls as availability rises); below it — once price
-would fall to the point storage is no longer attractive — the market sits at
-the investment-regime price floor `Sbar = E[S_{t+1}] − C`:
+supply). For availability below the kink point `A*` (scarcity) the price tracks
+the inverse demand-for-storage curve `f⁻¹(A)`, which falls as availability
+rises; at and above `A*` storage is profitable and the market sits at the
+investment-regime price floor `Sbar = E[S_{t+1}] − C`:
 
   `S(A) = max(Sbar, f⁻¹(A))`                         (canonical-storage price)
   `Y(A) = max(f⁻¹(A) − Sbar, 0)`                      (convenience yield)
 
 The convenience yield is positive exactly where scarcity bites — below the
 kink (`A` small, so `f⁻¹(A)` would exceed `Sbar`) — and zero at and above it.
-The two are two faces of the same kink: `Y(A) = S(A) − Sbar` always. The
-cost-of-carry identity ties the futures price `F` to the spot price `S(A)`
-through the finance/storage cost `C` net of the convenience-yield benefit:
+The two are two faces of the same kink: `Y(A) = S(A) − Sbar` always. Taking
+the futures price to be `F = Sbar + C` (it is not derived here), the
+cost-of-carry identity — the spot price `S(A)` plus the finance/storage cost `C`
+net of the convenience-yield benefit — is that identity rearranged:
 
-  `F − S(A) = C − Y(A)`,  with `F = Sbar + C`
+  `F − S(A) = C − Y(A)`
 
 (convenience yield *reduces* net carry cost — high-yield, near-backwardation
 markets have `Y(A)` large relative to `C`. This is the standard sign
@@ -47,9 +48,17 @@ reference availability `a_ref`, reference price `p_ref`), the kink point
   in the inverse demand-for-storage curve `f⁻¹ : ℝ → ℝ`.
 * `convenienceYield_eq_storageSpotPrice_sub` : `Y(A) = S(A) − Sbar`.
 * `carry_identity_at_availability` : `(Sbar + C) − S(A) = C − Y(A)`, the
-  cost-of-carry identity evaluated at the kink functions (`F := Sbar + C`).
+  cost-of-carry identity at the kink functions with `F` taken to be `Sbar + C`
+  (`convenienceYield_eq_storageSpotPrice_sub` rearranged; no futures pricing is
+  derived).
 * `invDemandIsoelastic`, `kinkPoint`, `kinkPoint_spec` : the isoelastic
   demand-for-storage curve and the kink point solving `f⁻¹(A*) = Sbar`.
+
+## References
+
+* N. Kaldor, "Speculation and economic stability", *Review of Economic Studies* 7 (1939), 1–27.
+* H. Working, "The theory of price of storage", *American Economic Review* 39 (1949),
+  1254–1262.
 -/
 
 @[expose] public section
@@ -79,12 +88,13 @@ theorem convenienceYield_eq_storageSpotPrice_sub (Sbar : ℝ) (invDemand : ℝ �
 
 /-! ### Cost-of-carry identity -/
 
-/-- **Carry identity at a given availability**: with the futures price set by
-cost of carry off the investment-regime floor (`F = Sbar + C`), the carry
+/-- **Carry identity at a given availability**: with the futures price taken to
+be `F = Sbar + C` (cost of carry off the investment-regime floor), the carry
 spread against the canonical-storage spot price is exactly `C − Y(A)` —
 convenience yield subtracts from the carry cost `C`, the standard
 theory-of-storage sign convention (convenience yield is a benefit to the
-holder of physical stock). -/
+holder of physical stock). No futures pricing is derived here: `F` is an input,
+and the identity is `convenienceYield_eq_storageSpotPrice_sub` rearranged. -/
 theorem carry_identity_at_availability (Sbar C : ℝ) (invDemand : ℝ → ℝ) (A : ℝ) :
     (Sbar + C) - storageSpotPrice Sbar invDemand A = C - convenienceYield Sbar invDemand A := by
   rw [convenienceYield_eq_storageSpotPrice_sub]; ring

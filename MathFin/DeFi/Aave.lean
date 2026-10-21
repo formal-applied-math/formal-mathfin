@@ -25,7 +25,7 @@ health factor; the liquidity-index recurrence is §3.1 ("aTokens").
   when both slopes are nonnegative.
 * `healthFactorV1`, `healthFactorV2`: the single-asset and multi-asset
   (summed) health-factor definitions.
-* `liquidityIndexStep`, `liquidityIndex_closedForm`: the linear recurrence
+* `liquidityIndexStep`, `liquidityIndex_eq_prod_mul`: the linear recurrence
   `LI_t = (R_t·U_t·ΔT/T_year + 1)·LI_{t-1}`
   and its closed-form (product) solution, matching the whitepaper's
   `LiquidityRate_t = BorrowRate_t·U_t` exactly (`R` here stands for
@@ -96,9 +96,9 @@ liquidation threshold, over total debt (borrows plus accrued fees). Values
 noncomputable def healthFactorV1 (collateral liquidationThreshold borrows fees : ℝ) : ℝ :=
   collateral * liquidationThreshold / (borrows + fees)
 
-/-- **Health factor safety criterion**: `Hf > 1 ↔ collateral·LT > debt`, when
+/-- **Health factor safety criterion**: `1 < Hf ↔ debt < collateral·LT`, when
 total debt is positive. -/
-theorem healthFactorV1_gt_one_iff
+theorem one_lt_healthFactorV1_iff
     {collateral liquidationThreshold borrows fees : ℝ} (hdebt : 0 < borrows + fees) :
     1 < healthFactorV1 collateral liquidationThreshold borrows fees ↔
       borrows + fees < collateral * liquidationThreshold := by
@@ -113,8 +113,8 @@ noncomputable def healthFactorV2 {ι : Type*} (s : Finset ι)
   (∑ i ∈ s, collateral i * liquidationThreshold i) / ∑ i ∈ s, borrows i
 
 /-- **Multi-asset health factor safety criterion**, the `healthFactorV2`
-analogue of `healthFactorV1_gt_one_iff`. -/
-theorem healthFactorV2_gt_one_iff {ι : Type*} {s : Finset ι}
+analogue of `one_lt_healthFactorV1_iff`. -/
+theorem one_lt_healthFactorV2_iff {ι : Type*} {s : Finset ι}
     {collateral liquidationThreshold borrows : ι → ℝ}
     (hdebt : 0 < ∑ i ∈ s, borrows i) :
     1 < healthFactorV2 s collateral liquidationThreshold borrows ↔
@@ -136,13 +136,13 @@ noncomputable def liquidityIndexStep (R U ΔT Tyear : ℝ) : ℝ :=
 `LI` satisfying `LI (n+1) = liquidityIndexStep (R (n+1)) (U (n+1)) ΔT Tyear * LI n`
 for every step, the index after `n` steps equals the initial index times the
 product of all per-step growth factors. Proved by induction on `n`. -/
-theorem liquidityIndex_closedForm
+theorem liquidityIndex_eq_prod_mul
     (LI R U : ℕ → ℝ) (ΔT Tyear : ℝ)
     (hrec : ∀ n, LI (n + 1) = liquidityIndexStep (R (n + 1)) (U (n + 1)) ΔT Tyear * LI n) :
     ∀ n, LI n = (∏ t ∈ Finset.range n, liquidityIndexStep (R (t + 1)) (U (t + 1)) ΔT Tyear) * LI 0
   | 0 => by simp
   | (n + 1) => by
-      rw [hrec n, liquidityIndex_closedForm LI R U ΔT Tyear hrec n,
+      rw [hrec n, liquidityIndex_eq_prod_mul LI R U ΔT Tyear hrec n,
         Finset.prod_range_succ]
       ring
 

@@ -11,17 +11,19 @@ public import MathFin.BlackScholes.BreedenLitzenberger
 /-!
 # LSV leverage-posterior core
 
-Chapter 11's theorem *shape* is `L²(t,K) · E[v_t | S_t = K] = σ_loc²(t,K)` (eq. 11.1; Bagaria,
-*Notes on Fixed Income Derivative Pricing*, ch. 11): the local-stochastic-volatility leverage
-function `L` is pinned by the posterior mean of the stochastic variance on the state, and
-everything about the fit flows through that equation.
-This file proves the **algebraic and analytic core behind the form** — the parts that follow
-from measure theory and exact real arithmetic, with no stochastic-process hypotheses:
+A local-stochastic-volatility (LSV) model is calibrated to the local-volatility surface by the
+condition `L²(t,K) · E[v_t | S_t = K] = σ_loc²(t,K)`: the leverage function `L` is pinned by the
+posterior mean of the stochastic variance given the state (Gyöngy's mimicking theorem; the
+particle calibration of Guyon and Henry-Labordère). We follow S. Bagaria, *Notes on Fixed Income
+Derivative Pricing* (lecture notes), ch. 11, where this is eq. 11.1; the equation, example and
+calculation numbers below (Thm 11.2, Ex. 11.1–11.2, Calc 11.3) are that chapter's.
 
-* the conditioning step itself: `E[v | σ(S)]` *is* a Borel function of the state
-  (Doob–Dynkin; Thm 11.2 reads `E[v_t | S_t = K]` as a function of `K` exactly this way),
-  and `L²(S)` crosses the conditional expectation (`lsv_condExp_factors_through_state`,
-  `lsv_condExp_pullout`);
+The conditioning step itself is Mathlib's: `E[v | σ(S)]` is a Borel function of the state by
+`stronglyMeasurable_condExp` and the Doob–Dynkin lemma
+`StronglyMeasurable.exists_eq_measurable_comp`, and `L²(S)` comes out of the conditional
+expectation by `condExp_mul_of_stronglyMeasurable_left`. This file proves the algebraic and
+analytic core behind the condition, with no stochastic-process hypotheses:
+
 * the pinned product and its extremes (`lsv_pinned_product`, eq. 11.6): `m = 1` recovers
   pure local vol, `m = σ_loc²` (with `σ_loc > 0`) switches the leverage off (Ex. 11.1);
 * the coin-toss λ-dial family (§11.4 / Calc 11.3): branch variances `29/400 ∓ λ/20` keep
@@ -29,21 +31,26 @@ from measure theory and exact real arithmetic, with no stochastic-process hypoth
   squared value `25/29` at `σ_loc = 1/4` (the exact square of the chapter's "0.93");
 * the coin-toss posterior of Ex. 11.2 as exact inequalities and limits: ATM posterior on the
   high branch `< 1/2`; ATM posterior variance `m(F)` below the unconditional mean; posterior
-  on the high branch → 1
-  in BOTH wings (the log-density ratio is a downward parabola in `ln(K/F)`); and
-  nonconstancy of the posterior variance `m`.
+  on the high branch → 1 in both wings (the log-density ratio is a downward parabola in
+  `ln(K/F)`); and nonconstancy of the posterior variance `m` on the positive strikes.
 
-## Status block (proved / hypothesized / gated — the honest boundary)
+## Scope
 
-* **Proved here:** every declaration in this file, with no proof holes left open.
-* **Not here (gated chapter mathematics, by design):** Thm 11.2's *iff* content (that the
-  leverage-defined model reprices the market — needs Gyöngy-mimicry flow uniqueness, weak
-  existence on the local-vol side, the Dupire surface formula on a non-Gaussian carrier,
-  and the McKean–Vlasov existence question, "not settled in general");
-  §11.3's grid and particle machinery; every decimal figure of the chapter tables
-  (22.9%, 26.9%, 0.98, 1.09 → 0.71). The build proves exact statements, not decimals.
-* **Stretch (gated — see the record at the bottom of this file):** the condExp
-  characterization of the coin-toss posterior on a two-branch mixture measure.
+* Not proved here: Thm 11.2's *iff* content, that the leverage-defined model reprices the
+  market (it needs Gyöngy's mimicking theorem with flow uniqueness, weak existence on the
+  local-vol side, the Dupire surface formula on a non-Gaussian carrier, and the McKean–Vlasov
+  existence question, which is not settled in general); §11.3's grid and particle machinery;
+  every decimal figure of the chapter's tables (22.9%, 26.9%, 0.98, 1.09 → 0.71), since the
+  statements here are exact; and that the coin-toss posterior `cointossM ∘ S_T` *is* the
+  conditional expectation `E[v | σ(S_T)]` on the two-branch mixture measure (see the note at
+  the end of this file).
+
+## References
+
+* I. Gyöngy, "Mimicking the one-dimensional marginal distributions of processes having an Itô
+  differential", *Probability Theory and Related Fields* 71 (1986), 501–516.
+* J. Guyon and P. Henry-Labordère, "Being particular about calibration", *Risk*, January 2012.
+* S. Bagaria, *Notes on Fixed Income Derivative Pricing* (lecture notes), ch. 11.
 -/
 
 @[expose] public section
@@ -52,50 +59,9 @@ namespace MathFin.LSV
 
 open MeasureTheory ProbabilityTheory Filter Topology
 
-/-! ## B1–B2: the conditioning layer -/
+/-! ## The pinned product and its extremes -/
 
-/-- **B1 — Doob–Dynkin factorization of the state conditional expectation.**
-For any `v`, the conditional expectation `E[v | σ(S)]` is a *pointwise* Borel function of
-the state: there is `m : ℝ → ℝ`, `Measurable m`, with `μ[v | σ(S)] ω = m (S ω)` for every
-`ω`. This is the measure-theoretic content of reading Thm 11.2's `E[v_t | S_t = K]` as a
-genuine function of the strike `K` (eq. 11.2): the posterior is *carried by the state*, not
-by the path. No hypothesis on `S`, `v` or `μ` is needed: whenever Mathlib's `condExp` falls
-back to `0` (non-integrable `v`, `S` not measurable so `comap S ≰ m₀`, or `μ` not σ-finite on
-`σ(S)`) the constant `0` factors trivially — so the statement is only informative when
-`S` is measurable, `v` integrable and `μ.trim` σ-finite.
-
-Engine: `stronglyMeasurable_condExp` (the conditional expectation is `σ(S)`-strongly
-measurable) + `StronglyMeasurable.exists_eq_measurable_comp` (the Doob–Dynkin lemma), read
-at `Real.measurableSpace.comap S`. -/
-theorem lsv_condExp_factors_through_state {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
-    {S v : Ω → ℝ} :
-    ∃ m : ℝ → ℝ, Measurable m ∧ ∀ ω,
-      μ[v | Real.measurableSpace.comap S] ω = m (S ω) := by
-  obtain ⟨m, hm, hmeq⟩ :=
-    (stronglyMeasurable_condExp (f := v)).exists_eq_measurable_comp (f := S)
-  exact ⟨m, hm.measurable, congrFun hmeq⟩
-
-/-- **B2 — `L²` crosses the conditional expectation (the factoring step of Thm 11.2).**
-For Borel `L` (the leverage function) and integrable `v` with `L²(S) · v` integrable,
-`E[L²(S) · v | σ(S)] = L²(S) · E[v | σ(S)]` a.e. This is exactly the chapter's factoring
-sentence: "L²(t,S_t) comes out of the conditional expectation because … it
-is a deterministic function of the thing being conditioned on."
-
-Engine: `condExp_mul_of_stronglyMeasurable_left` (`PullOut.lean`); `L ∘ S` is
-`σ(S)`-measurable by `comap_measurable`. -/
-theorem lsv_condExp_pullout {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
-    {S v : Ω → ℝ} {L : ℝ → ℝ}
-    (hL : Measurable L)
-    (hv : Integrable v μ)
-    (hLv : Integrable (fun ω ↦ L (S ω) ^ 2 * v ω) μ) :
-    μ[fun ω ↦ L (S ω) ^ 2 * v ω | Real.measurableSpace.comap S] =ᵐ[μ]
-      (fun ω ↦ L (S ω) ^ 2) * μ[v | Real.measurableSpace.comap S] :=
-  condExp_mul_of_stronglyMeasurable_left
-    ((hL.comp (comap_measurable S)).pow_const 2).stronglyMeasurable hLv hv
-
-/-! ## B3: the pinned product and its extremes -/
-
-/-- **B3 — the pinned product (eq. 11.6 shape), at one strike.** The leverage of an LSV model
+/-- **The pinned product (eq. 11.6 shape), at one strike.** The leverage of an LSV model
 is `L = σ_loc / √m`, where `m` is the posterior mean of the stochastic variance at the strike;
 the defining product `L² · m = σ_loc²` is an identity as soon as `m > 0`. The λ = 0
 endpoint (`cointoss_endpoint_l0_pinned`) is this telescope at `m = 29/400`. -/
@@ -115,7 +81,7 @@ theorem lsv_leverage_switches_off (σ_loc m : ℝ) (hσ : 0 < σ_loc) (h : m = �
     σ_loc / Real.sqrt m = 1 := by
   rw [h, Real.sqrt_sq hσ.le, div_self hσ.ne']
 
-/-! ## B4: the coin-toss λ-dial family (§11.4, Calc 11.3) -/
+/-! ## The coin-toss λ-dial family (§11.4, Calc 11.3) -/
 
 /-- The λ-dial branch variances of Calc 11.3: a flat 25%-volatility surface split into a
 low and a high branch, `v_lo(λ) = 29/400 − λ/20` and `v_hi(λ) = 29/400 + λ/20`. At `λ = 1`
@@ -162,7 +128,7 @@ theorem cointoss_endpoint_l0_quarter :
     ((1:ℝ) / 4 / Real.sqrt (29 / 400)) ^ 2 = 25 / 29 := by
   rw [cointoss_endpoint_l0_sq]; norm_num
 
-/-! ## B5: the coin-toss posterior (Ex. 11.2) -/
+/-! ## The coin-toss posterior (Ex. 11.2) -/
 
 /-- The branch density of the coin-toss example: the Black–Scholes lognormal terminal
 density with spot `F`, zero rate, unit maturity and branch volatility `σ`, evaluated at
@@ -453,14 +419,14 @@ theorem cointossM_nonconstant {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F)
       filter_upwards [eventually_gt_atTop (0:ℝ)] with K hK using (hc K hK).symm))
   linarith [cointossM_atm_lt_uncond hF hlo hhi hvhi, hc F hF]
 
-/-! ## Gated stretch: `cointoss_condExp_characterization` (recorded, not proved)
+/-! ## Not proved here: the posterior as a conditional expectation
 
-**The would-be statement.** On the two-branch mixture space `Ω := ℝ ⊕ ℝ` with
+**The statement.** On the two-branch mixture space `Ω := ℝ ⊕ ℝ` with
 `μ_mix := (1/2) • (Measure.map Sum.inl γ) + (1/2) • (Measure.map Sum.inr γ)`
 (`γ := ProbabilityTheory.gaussianReal 0 1`), terminal state
 `S_T (Sum.inl z) = F · exp (σ_lo · z − σ_lo²/2)`, `S_T (Sum.inr z) = F · exp (σ_hi · z − σ_hi²/2)`
-and branch variance `v (Sum.inl _) = v_lo`, `v (Sum.inr _) = v_hi`, the posterior function
-of B5 *is* the conditional expectation:
+and branch variance `v (Sum.inl _) = v_lo`, `v (Sum.inr _) = v_hi`, the posterior `cointossM`
+of the previous section *is* the conditional expectation:
 
   `μ_mix[v | Real.measurableSpace.comap S_T] =ᵐ[μ_mix]
     (fun p ↦ cointossM F σ_lo σ_hi v_lo v_hi (S_T p))`.
@@ -473,17 +439,17 @@ of B5 *is* the conditional expectation:
 `S_T` on one branch once `γ.map (z ↦ σ_c z − σ_c²/2) = gaussianReal (−σ_c²/2) σ_c²` is read
 off `gaussianReal_map_const_mul` / `gaussianReal_map_add_const`.
 
-**What remains (not attempted here).** The two-branch characterization itself:
+**What remains.** The two-branch characterization itself:
 `σ(S_T)`-strong measurability of `cointossM ∘ S_T`, and the set-integral identity
 `∀ s ∈ comap S_T, ∫ x in s, cointossM (S_T x) ∂μ_mix = ∫ x in s, v x ∂μ_mix`, split over the
 two branches (`integral_add`, real `smul`, `integral_map`) and transported to `Ioi 0` by the
 pushforward above, where the defining identity `cointossM · (φ_lo + φ_hi) = v_lo φ_lo + v_hi φ_hi`
 (the definition of `cointossM`, with `φ_lo + φ_hi > 0`) closes it.
 
-**What is nevertheless proved here:** the analytic properties of the posterior listed here,
-which the characterization would transport — the ATM inequalities, the posterior's two wing
-limits, the posterior variance's upper-wing limit, and nonconstancy. The gap is only the
-measure-theoretic *interpretation* of `cointossM ∘ S_T` as the condExp on the mixture; that
-interpretation stays chapter-sourced (Ex. 11.2's Bayes computation). -/
+**What is proved here:** the analytic properties of the posterior that the characterization
+would transport — the ATM inequalities, the posterior's two wing limits, the posterior
+variance's upper-wing limit, and nonconstancy. The gap is only the measure-theoretic
+*interpretation* of `cointossM ∘ S_T` as the conditional expectation on the mixture, which is
+taken from Ex. 11.2's Bayes computation, not proved. -/
 
 end MathFin.LSV

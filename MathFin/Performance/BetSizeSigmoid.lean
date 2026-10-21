@@ -10,10 +10,10 @@ public import Mathlib
 /-!
 # Sigmoid bet-sizing function
 
-López de Prado (*Advances in Financial Machine Learning*, ch. 10) sizes a bet
-from the divergence `x = f - p` between a forecast `f` and the current
-probability `p` via the sigmoid `m(x) = x / √(w + x²)` (`w > 0` a width
-parameter calibrated from past divergences), rather than a hard threshold.
+López de Prado (*Advances in Financial Machine Learning*, Wiley 2018, ch. 10) sizes
+a bet from the divergence `x = f - p` between the forecast price `f` and the
+current market price `p` via the sigmoid `m(x) = x / √(w + x²)` (`w > 0` a width
+parameter), rather than a hard threshold.
 
 This file proves the three structural properties that justify using `m` as a
 bet-sizing map: it is odd, bounded in `(-1,1)`, and strictly increasing in `x`

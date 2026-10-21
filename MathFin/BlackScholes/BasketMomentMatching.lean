@@ -57,12 +57,16 @@ noncomputable def basketM1 {n : ℕ} (w F : Fin n → ℝ) : ℝ :=
   ∑ i, w i * F i
 
 /-- **The matched second moment**: `M₂ = ∑ᵢ∑ⱼ wᵢwⱼFᵢFⱼ · e^{ρᵢⱼσᵢσⱼT}`, from the
-pairwise lognormal cross-moments `𝔼[Sᵢ_T Sⱼ_T] = Fᵢ Fⱼ e^{ρᵢⱼσᵢσⱼT}`. -/
+pairwise lognormal cross-moments `𝔼[Sᵢ_T Sⱼ_T] = Fᵢ Fⱼ e^{ρᵢⱼσᵢσⱼT}` (that `M₂` is the
+second moment of the basket under a joint lognormal model is not proved here). -/
 noncomputable def basketM2 {n : ℕ} (w F σ : Fin n → ℝ) (ρ : Fin n → Fin n → ℝ) (T : ℝ) : ℝ :=
   ∑ i, ∑ j, w i * w j * F i * F j * Real.exp (ρ i j * σ i * σ j * T)
 
 /-- **The moment-matched effective volatility**: solving
-`M₂ = M₁² · e^{σ_eff²T}` for `σ_eff`. -/
+`M₂ = M₁² · e^{σ_eff²T}` for `σ_eff`. Meaningful when `M₂ ≥ M₁² > 0` and `T > 0`
+(the first holds for a positive semidefinite correlation matrix and nonnegative
+weights and forwards); otherwise `Real.log`, the division or `Real.sqrt` returns
+Mathlib's junk value and `basketEffVol` is `0`. -/
 noncomputable def basketEffVol {n : ℕ} (w F σ : Fin n → ℝ) (ρ : Fin n → Fin n → ℝ) (T : ℝ) : ℝ :=
   Real.sqrt (Real.log (basketM2 w F σ ρ T / (basketM1 w F) ^ 2) / T)
 

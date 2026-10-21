@@ -20,7 +20,7 @@ disjoint from each of them.
 
 ## Main results
 
-* `mem_inter_imp_overlaps`: if some point lies in both a training and a test
+* `overlapsTest_of_mem_of_mem`: if some point lies in both a training and a test
   interval, the overlap predicate holds between them (the interval-arithmetic
   heart of the result).
 * `purged_disjoint`: a training interval `i` purging leaves untouched (no
@@ -42,7 +42,7 @@ def overlapsTest (lo hi : ι → ℝ) (lo' hi' : κ → ℝ) (i : ι) (j : κ) :
 /-- If a point lies in both intervals, the overlap predicate holds between
 them: whichever of `lo i`/`hi' j` comes first pins down which of the three
 overlap cases applies. -/
-theorem mem_inter_imp_overlaps (lo hi : ι → ℝ) (lo' hi' : κ → ℝ) {i : ι} {j : κ} {t : ℝ}
+theorem overlapsTest_of_mem_of_mem (lo hi : ι → ℝ) (lo' hi' : κ → ℝ) {i : ι} {j : κ} {t : ℝ}
     (ht : t ∈ Set.Icc (lo i) (hi i)) (ht' : t ∈ Set.Icc (lo' j) (hi' j)) :
     overlapsTest lo hi lo' hi' i j := by
   obtain ⟨hlo, hhi⟩ := ht
@@ -60,6 +60,6 @@ theorem purged_disjoint (lo hi : ι → ℝ) (lo' hi' : κ → ℝ) {i : ι}
     Disjoint (Set.Icc (lo i) (hi i)) (Set.Icc (lo' j) (hi' j)) := by
   rw [Set.disjoint_left]
   intro t ht ht'
-  exact hret j (mem_inter_imp_overlaps lo hi lo' hi' ht ht')
+  exact hret j (overlapsTest_of_mem_of_mem lo hi lo' hi' ht ht')
 
 end MathFin

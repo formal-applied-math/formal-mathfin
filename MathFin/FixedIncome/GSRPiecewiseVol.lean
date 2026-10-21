@@ -32,30 +32,25 @@ in spirit: split, apply FTC on each piece, sum variances) but mechanical: each
 additional piece needs its own disjoint-union / interval-additivity bookkeeping, which
 is better done once as an induction over a list of breakpoints than hand-duplicated.
 Two pieces is the smallest case that is genuinely new (distinct from the
-already-landed constant-`σ` Vasicek bridge) and already demonstrates the mechanism in
-full.
+constant-`σ` Vasicek bond price `vasicekBondPrice_eq`) and already demonstrates the
+mechanism in full.
 
 ## Why this is still "the same Gaussian-moment substrate"
 
 Even with `σ` piecewise constant, the integrated short rate's diffusion part
-`∫₀ᵀ σ(u)·g(u) dB_u` (`g` the Vasicek integrated kernel, reused **verbatim** from
-`VasicekBondPrice.lean`) is still the Wiener integral of a single **deterministic**
-`L²` integrand `u ↦ σ(u)·g(u)` — piecewise-constant `σ` times a bounded kernel is still
-bounded, hence `L²` on the finite-measure window. No new stochastic-integral machinery
-is needed: only a new (elementary) variance integral, computed by splitting the
-integration domain at `T*` and reusing the quadratic-times-exponential antiderivative
-from `VasicekBondPrice.vasicekIntegratedKernel_integral_sq`'s proof (reproduced here,
-evaluated at three points `0, T*, T` instead of just the two endpoints `0, T`).
+`∫₀ᵀ σ(u)·g(u) dB_u` (`g` the Vasicek integrated kernel of `VasicekBondPrice.lean`) is
+still the Wiener integral of a single **deterministic** `L²` integrand `u ↦ σ(u)·g(u)` —
+piecewise-constant `σ` times a bounded kernel is still bounded, hence `L²` on the
+finite-measure window. No new stochastic-integral machinery is needed: only a new
+(elementary) variance integral, computed by splitting the integration domain at `T*` and
+evaluating the antiderivative `vasicekIntegratedKernelSqAntideriv` of `g²` at the three
+points `0, T*, T` (`integral_vasicekIntegratedKernel_sq_eq_sub`).
 
-**Known debt, left deliberately unresolved**: this is the *third* copy of that
-quadratic-times-exponential antiderivative in the repo (`VasicekBondPrice.lean`'s own
-inline proof, `HullWhiteCalibration.lean`'s analogous `kernel_integral_sq`, and this
-file's `vasKernelSqAntideriv`). The clean fix is to lift it out of
-`VasicekBondPrice.lean` as a shared, general (arbitrary-sub-interval) lemma that all
-three sites consume — not done here because it means editing an already-landed,
-ledger-tracked file purely for a refactor, which is out of scope for the session that
-landed this module and risks marking unrelated ledger entries stale for no semantic
-change. Left as a follow-up.
+As in `VasicekBondPrice`, the integrated short rate is *defined* by its Wiener
+representation `M(T) + ∫₀ᵀ σ(u)·g(u) dB_u` (`gsrIntegratedRate`): that it is the integral
+of the solution of the GSR short-rate SDE (the SDE solution plus the time-order swap) is the
+modelling bridge, cited, not derived here. Everything downstream of the representation is
+derived.
 
 ## Main results
 
@@ -137,68 +132,19 @@ noncomputable def gsrKernelLp {κ : ℝ} (hκ : 0 < κ) (σ1 σ2 Tstar : ℝ) (T
 
 /-! ### The variance integral, by splitting at `T*` -/
 
-/-- Antiderivative of `(vasicekIntegratedKernel κ T)²` (reproduces the closed form used
-inside `vasicekIntegratedKernel_integral_sq`, exposed here so it can be evaluated at the
-interior breakpoint `T*` as well as at the window endpoints `0, T`). Left a public (not
-`private`) `def`, unlike its neighboring lemmas below: `gsrBondV` is a plain `def` (data,
-not a proof), so its *value* embeds `vasKernelSqAntideriv` directly — the module system
-requires a public `def`'s value to only reference public declarations (a `private`
-dependency here fails to elaborate with "would need to be public to access here"), unlike
-a `private` lemma consumed only from inside a `Prop`-valued theorem's (proof-irrelevant)
-body, which is fine. -/
-noncomputable def vasKernelSqAntideriv (κ T u : ℝ) : ℝ :=
-  u / κ ^ 2 - 2 * Real.exp (-(κ * (T - u))) / κ ^ 3 + Real.exp (-(2 * κ * (T - u))) / (2 * κ ^ 3)
-
-/-- `vasKernelSqAntideriv κ T` is a pointwise antiderivative of `(vasicekIntegratedKernel κ T)²`. -/
-private lemma hasDerivAt_vasKernelSqAntideriv (κ T u : ℝ) (hκ : κ ≠ 0) :
-    HasDerivAt (vasKernelSqAntideriv κ T) ((vasicekIntegratedKernel κ T u) ^ 2) u := by
-  have he : Real.exp (-(2 * κ * (T - u)))
-      = Real.exp (-(κ * (T - u))) * Real.exp (-(κ * (T - u))) := by
-    rw [← Real.exp_add]; congr 1; ring
-  have hlin : HasDerivAt (fun u : ℝ ↦ u / κ ^ 2) (1 / κ ^ 2) u :=
-    (hasDerivAt_id u).div_const (κ ^ 2)
-  have harg1 : HasDerivAt (fun u ↦ -(κ * (T - u))) κ u := by
-    have h : HasDerivAt (fun u ↦ -(κ * (T - u))) (-(κ * (-1))) u := by
-      apply HasDerivAt.neg; apply HasDerivAt.const_mul
-      simpa using (hasDerivAt_id u).const_sub T
-    simpa using h
-  have harg2 : HasDerivAt (fun u ↦ -(2 * κ * (T - u))) (2 * κ) u := by
-    have h : HasDerivAt (fun u ↦ -(2 * κ * (T - u))) (-(2 * κ * (-1))) u := by
-      apply HasDerivAt.neg; apply HasDerivAt.const_mul
-      simpa using (hasDerivAt_id u).const_sub T
-    simpa using h
-  have hexp1 := harg1.exp
-  have hexp2 := harg2.exp
-  have h2 := (hexp1.const_mul (2 : ℝ)).div_const (κ ^ 3)
-  have h3 := hexp2.div_const (2 * κ ^ 3)
-  have hcomb := (hlin.sub h2).add h3
-  refine hcomb.congr_deriv ?_
-  unfold vasicekIntegratedKernel
-  rw [he]
-  field_simp
-  ring
-
-/-- `vasKernelSqAntideriv κ T` evaluated at `A, B` gives `∫_A^B (vasicekIntegratedKernel κ T)²`,
-by the FTC. -/
-private lemma vasKernelSq_integral_interval (κ T A B : ℝ) (hκ : κ ≠ 0) :
-    ∫ u in A..B, (vasicekIntegratedKernel κ T u) ^ 2
-      = vasKernelSqAntideriv κ T B - vasKernelSqAntideriv κ T A := by
-  apply intervalIntegral.integral_eq_sub_of_hasDerivAt
-    (fun u _ ↦ hasDerivAt_vasKernelSqAntideriv κ T u hκ)
-  apply Continuous.intervalIntegrable
-  unfold vasicekIntegratedKernel; fun_prop
-
 /-- **The GSR closed-form variance**: `σ₁²·(F(T*) - F(0)) + σ₂²·(F(T) - F(T*))`,
-`F = vasKernelSqAntideriv κ T`. -/
+`F = vasicekIntegratedKernelSqAntideriv κ T` (the antiderivative of `g²`). -/
 noncomputable def gsrBondV (κ σ1 σ2 Tstar T : ℝ) : ℝ :=
-  σ1 ^ 2 * (vasKernelSqAntideriv κ T Tstar - vasKernelSqAntideriv κ T 0)
-    + σ2 ^ 2 * (vasKernelSqAntideriv κ T T - vasKernelSqAntideriv κ T Tstar)
+  σ1 ^ 2 * (vasicekIntegratedKernelSqAntideriv κ T Tstar
+      - vasicekIntegratedKernelSqAntideriv κ T 0)
+    + σ2 ^ 2 * (vasicekIntegratedKernelSqAntideriv κ T T
+      - vasicekIntegratedKernelSqAntideriv κ T Tstar)
 
 /-- **The core calculus fact**: the `(0,T]`-window `L²` norm of the GSR kernel is the
 closed-form `gsrBondV`, by splitting the window at `T*` (`gsrKernel` restricted to
 `(0,T*]` is exactly `σ₁ · g`, and restricted to `(T*,T]` is exactly `σ₂ · g` — no
 approximation, a genuine case split on `gsrSigma`'s own definition) and applying
-`vasKernelSq_integral_interval` on each piece. -/
+`integral_vasicekIntegratedKernel_sq_eq_sub` on each piece. -/
 theorem gsrKernel_integral_sq_eq {κ : ℝ} (hκ : 0 < κ) (σ1 σ2 Tstar T : ℝ)
     (hTstar0 : 0 ≤ Tstar) (hTstarT : Tstar ≤ T) :
     ∫ u in Set.Ioc (0 : ℝ) T, (gsrKernel σ1 σ2 Tstar κ T u) ^ 2 ∂volume
@@ -233,15 +179,17 @@ theorem gsrKernel_integral_sq_eq {κ : ℝ} (hκ : 0 < κ) (σ1 σ2 Tstar T : �
     rw [← Set.Ioc_union_Ioc_eq_Ioc hTstar0 hTstarT,
       setIntegral_union hdisj measurableSet_Ioc hmeas1 hmeas2]
   have hstep2 : ∫ u in Set.Ioc (0 : ℝ) Tstar, (gsrKernel σ1 σ2 Tstar κ T u) ^ 2 ∂volume
-      = σ1 ^ 2 * (vasKernelSqAntideriv κ T Tstar - vasKernelSqAntideriv κ T 0) := by
+      = σ1 ^ 2 * (vasicekIntegratedKernelSqAntideriv κ T Tstar
+          - vasicekIntegratedKernelSqAntideriv κ T 0) := by
     rw [setIntegral_congr_fun measurableSet_Ioc heq1, integral_const_mul,
       ← intervalIntegral.integral_of_le hTstar0,
-      vasKernelSq_integral_interval κ T 0 Tstar hκ.ne']
+      integral_vasicekIntegratedKernel_sq_eq_sub κ T 0 Tstar hκ.ne']
   have hstep3 : ∫ u in Set.Ioc Tstar T, (gsrKernel σ1 σ2 Tstar κ T u) ^ 2 ∂volume
-      = σ2 ^ 2 * (vasKernelSqAntideriv κ T T - vasKernelSqAntideriv κ T Tstar) := by
+      = σ2 ^ 2 * (vasicekIntegratedKernelSqAntideriv κ T T
+          - vasicekIntegratedKernelSqAntideriv κ T Tstar) := by
     rw [setIntegral_congr_fun measurableSet_Ioc heq2, integral_const_mul,
       ← intervalIntegral.integral_of_le hTstarT,
-      vasKernelSq_integral_interval κ T Tstar T hκ.ne']
+      integral_vasicekIntegratedKernel_sq_eq_sub κ T Tstar T hκ.ne']
   rw [hstep1, hstep2, hstep3, gsrBondV]
 
 /-! ### The GSR short rate and the bond price -/
@@ -275,9 +223,11 @@ private lemma gsrWienerLaw (hB : IsPreBrownianReal B μ) {κ : ℝ} (hκ : 0 < �
   have h0 := wienerIntegralLp_hasLaw_gaussian hB T (gsrKernelLp hκ σ1 σ2 (Tstar : ℝ) T)
   rwa [gsrKernelLp_integral_sq hκ σ1 σ2 Tstar T hTstarT] at h0
 
-/-- **The GSR integrated short rate** in Wiener representation: deterministic mean
-(the Vasicek mean, unchanged — only the volatility axis is piecewise here) plus the
-Wiener integral of the piecewise-weighted kernel. -/
+/-- **The GSR integrated short rate**, *defined* by its Wiener representation: deterministic
+mean (the Vasicek mean, unchanged — only the volatility axis is piecewise here) plus the
+Wiener integral of the piecewise-weighted kernel. That this is `∫₀ᵀ r_s ds` for the solution
+of the GSR short-rate SDE is the modelling bridge (the SDE solution and the time-order swap),
+cited, not derived, as for `vasicekIntegratedRate`. -/
 noncomputable def gsrIntegratedRate (hB : IsPreBrownianReal B μ) (r₀ θ σ1 σ2 : ℝ) {κ : ℝ}
     (hκ : 0 < κ) (Tstar T : ℝ≥0) (ω : Ω) : ℝ :=
   vasicekIntegratedMean r₀ θ κ (T : ℝ)

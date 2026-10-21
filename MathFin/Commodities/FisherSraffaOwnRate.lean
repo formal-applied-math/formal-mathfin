@@ -12,7 +12,8 @@ public import Mathlib
 
 A commodity's **own rate of interest** `b` (Keynes, *General Theory* ch. 17;
 Sraffa 1932) is the real return of holding and lending the commodity itself.
-Fisher's exact identity relates `b` to the inflation rate `i` and the
+Fisher's exact identity relates `b` to the rate of change `i` of the commodity's
+money price (the inflation rate, for the composite consumption good) and the
 resulting **money (nominal) rate** `r`:
 
   `1 + r = (1 + b)(1 + i)`,
@@ -29,8 +30,8 @@ is treated as second-order-small and dropped.
 
 ## Main results
 
-* `fisherMoneyRate`: the money rate `r` defined as `(1+b)(1+i) − 1`.
-* `fisher_identity`: `1 + fisherMoneyRate b i = (1+b)*(1+i)`.
+* `fisherMoneyRate`: the money rate `r` defined as `(1+b)(1+i) − 1`, so that
+  Fisher's identity `1 + r = (1+b)(1+i)` holds by definition.
 * `fisher_linear_approx_error`: `fisherMoneyRate b i − (b + i) = b * i`, the
   exact statement underlying `r ≈ b + i` for small `b, i`.
 * `sraffaOwnRate`: Sraffa's implied own rate `b` from spot/forward/financing/time.
@@ -46,13 +47,8 @@ namespace MathFin
 
 /-- **Fisher money (nominal) rate**: `r = (1+b)(1+i) − 1`, exactly solving
 `1 + r = (1+b)(1+i)` for the nominal rate `r` given a commodity's own rate of
-interest `b` and the inflation rate `i`. -/
+interest `b` and the rate of change `i` of its money price. -/
 noncomputable def fisherMoneyRate (b i : ℝ) : ℝ := (1 + b) * (1 + i) - 1
-
-/-- **Fisher's exact identity**: `1 + r = (1+b)(1+i)`. -/
-theorem fisher_identity (b i : ℝ) :
-    1 + fisherMoneyRate b i = (1 + b) * (1 + i) := by
-  unfold fisherMoneyRate; ring
 
 /-- **Linear approximation error**: `r − (b+i) = b·i` exactly. The usual
 first-order approximation `r ≈ b + i` drops this cross term, which is

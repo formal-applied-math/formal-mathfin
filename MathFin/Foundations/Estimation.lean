@@ -9,35 +9,39 @@ public import Mathlib
 public import MathFin.Foundations.GaussianMoments
 
 /-!
-# Estimation in practice: detection D-terms and realised-volatility bias
+# Estimation: Gaussian variance-ratio divergence and realised-volatility bias
 
-A regime is a state, not a parameter: between two centered Gaussian regimes with
-variance ratio `r = σ²_high/σ²_low`, the per-observation discrimination information is
-the Kullback–Leibler D-term `D = ½(r − 1 − ln r)` of eq. (21.2). `llr` (the log
-likelihood ratio, `MeasureTheory.llr`) is the object; the computation here
-makes it a quadratic integral against the high-variance law
-(`kl_gaussianReal_var_ratio`), via the `withDensity` structure of `gaussianReal`
-(`gaussianReal_of_var_ne_zero`) and the `rnDeriv` ratio identity
-`MeasureTheory.Measure.rnDeriv_withDensity_right`.
+**Detection.** Between two centred Gaussian regimes with variance ratio
+`r = σ²_high/σ²_low`, the per-observation discrimination information is the Kullback–Leibler
+divergence `D = ½(r − 1 − ln r)` (`kl_gaussianReal_var_ratio`), stated as the integral of the
+log-likelihood ratio `MeasureTheory.llr` against the high-variance law. The proof writes both
+laws in `withDensity` form (`gaussianReal_of_var_ne_zero`) and identifies the Radon–Nikodym
+derivative with the pdf ratio (`MeasureTheory.Measure.rnDeriv_withDensity_right`). `D` is the
+denominator of Wald's sequential-test delay `≈ ln(1/α)/D`; near `r = 1` it is `(r − 1)²/4` up
+to a cubic remainder (`abs_klVarRatio_sub_sq_le`).
 
-Sampling obstructions are the chapter's second half: iid mean-zero noise of scale `η`,
-independent of the signal, turns the realised-variance estimator's expectation into
-`σ²T + 2nη²` — bias linear in sampling frequency (`rvExpectation_withNoise`, eq. 21.4) —
-and the square-root estimator of a nondegenerate volatility target is biased low, `E[σ̂] < σ`
-(`sqrtBias_oneSided` + `sqrtBias_absGaussianSample`, the sign of eq. 21.3). The drift
-estimator, by contrast, sees only the endpoints: its variance is `σ²/T` whatever the
-sampling frequency (`drift_se_endpoint_var`, Calc 21.4's flat column), matching the
-chapter's `σ/√T` standard error — not `σ²·T`, which would contradict it.
+**Realised volatility.** Observing `n` increments of second moment `σ²Δt` through mean-zero
+noise of variance `η²`, independent of the signal, makes the expected realised variance
+`σ²T + 2nη²`: a bias linear in the sampling frequency (`integral_sum_sq_noisy_increments`;
+Zhang, Mykland and Aït-Sahalia). The square-root estimator of a nondegenerate variance target
+is biased low, `E[σ̂] < σ` (`sqrtBias_oneSided`, with the one-sample Gaussian instance
+`sqrtBias_absGaussianSample`). The endpoint drift estimator `(X_T − X_0)/T` of
+`X_t = μt + σB_t` has law `N(μ, σ²/T)`, so its standard error `σ/√T` does not depend on the
+sampling frequency (`drift_se_endpoint_hasLaw`, `drift_se_endpoint_var`).
 
 ## Scope
 
-Proved: the D-term itself and its small-shift expansion `D(r) = (r−1)²/4 + O(|r−1|³)`
-(`kl_gaussianReal_small_shift`), the noise-bias expectation, the sign of the square-root
-bias, and the endpoint drift-estimator law. Not proved here: the SPRT delay law
-`ln(1/α)/D` (only its D-ingredient is formalised), the Bayesian regime-filter recursion,
-totally inaccessible stopping times, the exact `√(2/n)·Γ((n+1)/2)/Γ(n/2)` bias constant,
-Marchenko–Pastur and eigenvalue cleaning, the two-scale / realised-kernel estimators, the
-2D Heston measure change, and measure-invariance of pathwise quadratic variation.
+Not proved here: the sequential-test delay `ln(1/α)/D` itself (only `D` is formalised), the
+exact constant `√(2/n)·Γ((n+1)/2)/Γ(n/2)` of the square-root bias, and noise-robust estimators
+such as two-scale realised variance.
+
+## References
+
+* T. M. Cover and J. A. Thomas, *Elements of Information Theory*, 2nd ed., Wiley, 2006.
+* L. Zhang, P. A. Mykland and Y. Aït-Sahalia, "A tale of two time scales: determining
+  integrated volatility with noisy high-frequency data", *Journal of the American Statistical
+  Association* 100 (2005), 1394–1411.
+* A. Wald, *Sequential Analysis*, Wiley, 1947.
 -/
 
 @[expose] public section
@@ -48,13 +52,13 @@ open scoped ENNReal NNReal
 
 namespace MathFin
 
-/-! ## The D-term of eq. (21.2): KL divergence between variance-ratio Gaussians -/
+/-! ## The D-term: KL divergence between variance-ratio Gaussians -/
 
 section KL
 
 /-- Pointwise identity: the log of the pdf ratio between `N(0, r·v)` and `N(0, v)` is
 the quadratic `−½·ln r + x²(r−1)/(2rv)` (completing-the-square algebra, the
-one-observation face of the chapter's D-term). -/
+one-observation form of the D-term). -/
 private lemma log_ratio_gaussianPDFReal_eq {r v : ℝ≥0} (hv : v ≠ 0) (hr : r ≠ 0) (x : ℝ) :
     Real.log (gaussianPDFReal 0 (r * v) x / gaussianPDFReal 0 v x) =
       -(Real.log (r : ℝ)) / 2 + x ^ 2 * ((r : ℝ) - 1) / (2 * (r : ℝ) * (v : ℝ)) := by
@@ -105,10 +109,10 @@ private lemma log_ratio_gaussianPDFReal_eq {r v : ℝ≥0} (hv : v ≠ 0) (hr : 
           field_simp
         rw [hx1]
 
-/-- **Eq. (21.2)'s D-term.** `KL(N(0, r·v) ‖ N(0, v))` — the integral of the log
+/-- **The D-term.** `KL(N(0, r·v) ‖ N(0, v))` — the integral of the log
 likelihood ratio `llr` against `N(0, r·v)` (the high-variance law when `r > 1`) — is
-`½(r − 1 − ln r)`, the denominator of
-the chapter's detection-delay arithmetic (delay ≈ ln(1/α)/D observations, p. 360).
+`½(r − 1 − ln r)`, the denominator of Wald's sequential-test delay `≈ ln(1/α)/D`
+observations (the delay itself is not proved here).
 The proof writes both laws in `withDensity` form, computes the RN derivative as the
 pdf ratio via `Measure.rnDeriv_withDensity_right` and `Measure.rnDeriv_withDensity`,
 and integrates the resulting quadratic termwise with the second moment
@@ -186,14 +190,15 @@ theorem kl_gaussianReal_var_ratio {r v : ℝ≥0} (hv : v ≠ 0) (hr : r ≠ 0) 
   field_simp
   ring
 
-/-- **The small-shift quadratic (§21.3 p. 361: halving the gap between the regimes
-quarters the information and quadruples the delay).** Near `r = 1` the D-term proved
-above is `(r−1)²/4` up to a cubic remainder: `|D(r) − (r−1)²/4| ≤ |r−1|³` whenever
-`|r − 1| ≤ ½`. So the discrimination information vanishes quadratically as the two
-regimes coalesce, and the chapter's delay arithmetic `≈ ln(1/α)/D` grows like
+/-- **The small-shift quadratic (halving the gap between the regimes quarters the
+information).** Near `r = 1` the value `D(r) = (r − 1 − ln r)/2` of
+`kl_gaussianReal_var_ratio` is `(r−1)²/4` up to a cubic remainder:
+`|D(r) − (r−1)²/4| ≤ |r−1|³` whenever `|r − 1| ≤ ½`. The statement is about this real
+function; it does not mention the Gaussian laws. So the discrimination information vanishes
+quadratically as the two regimes coalesce, and a delay `≈ ln(1/α)/D` would grow like
 `1/(r−1)²`. From the second-order log-series bound
 `Real.abs_log_sub_add_sum_range_le` at `x = 1 − r`. -/
-theorem kl_gaussianReal_small_shift {r : ℝ} (hr : |r - 1| ≤ 1 / 2) :
+theorem abs_klVarRatio_sub_sq_le {r : ℝ} (hr : |r - 1| ≤ 1 / 2) :
     |(r - 1 - Real.log r) / 2 - (r - 1) ^ 2 / 4| ≤ |r - 1| ^ 3 := by
   have h := abs_log_sub_add_sum_range_le (x := 1 - r) (by rw [abs_sub_comm]; linarith) 2
   rw [sub_sub_cancel, abs_sub_comm] at h
@@ -210,26 +215,25 @@ theorem kl_gaussianReal_small_shift {r : ℝ} (hr : |r - 1| ≤ 1 / 2) :
 
 end KL
 
-/-! ## Eq. (21.4): realised variance under iid mean-zero noise -/
+/-! ## Realised variance under mean-zero noise -/
 
 section RealizedVol
 
 variable {α : Type*} [MeasurableSpace α] {μ : Measure α}
 
-/-- **Eq. (21.4): the realised-variance noise bias is linear in sampling frequency.**
-Over `n` increments `ΔX_i` with second moment `E[(ΔX_i)²] = σ²·Δt` (the
+/-- **The realised-variance noise bias is linear in sampling frequency** (Zhang, Mykland and
+Aït-Sahalia 2005). Over `n` increments `ΔX_i` with second moment `E[(ΔX_i)²] = σ²·Δt` (the
 `MathFin.integral_sq_gaussianReal` moment in the Gaussian instance)
 observed through mean-zero noise `ε_j` of scale `η` (`E[ε_j] = 0`, `E[ε_j²] = η²`), so that
-the observed increment is `ΔY_i = ΔX_i + (ε_{i+1} − ε_i)` (the chapter's `Y = X + ε`,
-p. 366), the noisy realised sum has expectation `σ²T + 2nη²` where `T = n·Δt` (the
-noise leg of the chapter's "noise, dependence, and scale" obstructions, §21.3 p. 361):
-each increment contributes its signal second moment plus **two** noise second moments,
-and all cross-terms vanish by independence + mean-zero
-(`IndepFun.integral_mul_eq_mul_integral`). Only the independences the cross-terms use are assumed —
-each increment against its two noise draws, and adjacent noise draws pairwise — so iid
-noise independent of the signal is a special case. No probability hypothesis on `μ` is
+the observed price is `Y = X + ε` and the observed increment is
+`ΔY_i = ΔX_i + (ε_{i+1} − ε_i)`, the noisy realised sum has expectation `σ²T + 2nη²`
+where `T = n·Δt`: each increment contributes its signal second moment plus **two** noise
+second moments, and all cross-terms vanish by independence + mean-zero
+(`IndepFun.integral_mul_eq_mul_integral`). Only the independences the cross-terms use are
+assumed — each increment against its two noise draws, and adjacent noise draws pairwise — so
+iid noise independent of the signal is a special case. No probability hypothesis on `μ` is
 needed; the integrability hypotheses are kept explicit. -/
-theorem rvExpectation_withNoise {n : ℕ} {dt T sigma eta : ℝ} (hT : T = (n : ℝ) * dt)
+theorem integral_sum_sq_noisy_increments {n : ℕ} {dt T sigma eta : ℝ} (hT : T = (n : ℝ) * dt)
     (dX : ℕ → α → ℝ) (e : ℕ → α → ℝ)
     (hdXi : ∀ i ∈ Finset.range n, Integrable (dX i) μ)
     (hei : ∀ j ∈ Finset.range (n + 1), Integrable (e j) μ)
@@ -309,20 +313,19 @@ theorem rvExpectation_withNoise {n : ℕ} {dt T sigma eta : ℝ} (hT : T = (n : 
 
 end RealizedVol
 
-/-! ## Eq. (21.3)'s sign: the square-root estimator is biased low -/
+/-! ## The square-root estimator is biased low -/
 
 section SqrtBias
 
 variable {α : Type*} [MeasurableSpace α] {μ : Measure α} [IsProbabilityMeasure μ]
 
-/-- **Eq. (21.3)'s sign: `E[σ̂] < σ`.** If `Y ≥ 0` is a nondegenerate target with
+/-- **The sign of the square-root bias: `E[σ̂] < σ`.** If `Y ≥ 0` is a nondegenerate target with
 `E[Y] = σ²` (the sample reading: `Y = RV/T`, the noise-free annualised realised variance
 whose square root is the volatility estimator `σ̂ = √Y`), then `E[√Y] < σ` — the
 square-root estimator of a nondegenerate volatility is **biased low**. Strictness comes
 from the tangent-line identity at `σ²`: `√y = (y + σ²)/(2σ) − (√y − σ)²/(2σ)`, whose
 remainder is strictly positive on `{Y ≠ σ²}`, a set of positive measure by nondegeneracy.
-The exact `√(2/n)·Γ((n+1)/2)/Γ(n/2)` constant of the chapter stays gated (Gamma
-machinery). -/
+The exact Gaussian constant `√(2/n)·Γ((n+1)/2)/Γ(n/2)` of the bias is not formalized here. -/
 theorem sqrtBias_oneSided {Y : α → ℝ} (hYnn : ∀ ω, 0 ≤ Y ω)
     {sigma : ℝ} (hsig : 0 < sigma) (hint : Integrable Y μ)
     (hmean : ∫ ω, Y ω ∂μ = sigma * sigma) (hnd : μ {ω | Y ω ≠ sigma * sigma} ≠ 0) :
@@ -404,9 +407,9 @@ theorem sqrtBias_oneSided {Y : α → ℝ} (hYnn : ∀ ω, 0 ≤ Y ω)
 /-- **The Gaussian sample instance: `E[|Z|] < σ` for `Z ~ N(0, σ²)`.** The single-sample
 (`n = 1`) realised-volatility estimator is `σ̂ = |Z| = √(Z²)`, whose target
 `Y = Z²` is nondegenerate (`P(Z² = σ²) = 0` — a nondegenerate Gaussian has no atoms,
-`NullSingletonClass`) — so eq. (21.3)'s one-sided bias applies. The chapter's exact
-constant `√(2/n)·Γ((n+1)/2)/Γ(n/2) = √(2/π) ≈ 0.798` at `n = 1` (so `E|Z| ≈ 0.798σ`)
-stays gated. -/
+`NullSingletonClass`) — so `sqrtBias_oneSided` applies. The exact constant
+`√(2/n)·Γ((n+1)/2)/Γ(n/2) = √(2/π) ≈ 0.798` at `n = 1` (so `E|Z| ≈ 0.798σ`) is not
+formalized here. -/
 theorem sqrtBias_absGaussianSample {v : ℝ≥0} (hv : v ≠ 0) :
     ∫ x, |x| ∂(gaussianReal 0 v) < Real.sqrt (v : ℝ) := by
   have hvpc : 0 < v := hv.bot_lt
@@ -454,17 +457,17 @@ theorem sqrtBias_absGaussianSample {v : ℝ≥0} (hv : v ≠ 0) :
 
 end SqrtBias
 
-/-! ## Calc 21.4's bad column: the drift estimator sees only the endpoints -/
+/-! ## The drift estimator sees only the endpoints -/
 
 section DriftSE
 
 variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
 
-/-- **Calc 21.4's drift column (the law).** For `X_t = μt + σB_t` with `B_T ~ N(0, T)`,
+/-- **The endpoint drift estimator (its law).** For `X_t = μt + σB_t` with `B_T ~ N(0, T)`,
 the endpoint drift estimator `(X_T − X_0)/T = μ + (σ/T)·B_T` has law `N(μ, σ²/T)` — an
 affine pushforward of the gaussianReal sample (`gaussianReal_const_mul` then
-`gaussianReal_const_add`). The variance slot is `σ²/T`,
-giving the chapter's flat-in-`n` drift standard error `σ/√T` (p. 363). -/
+`gaussianReal_const_add`). The variance slot is `σ²/T`, so the drift standard error `σ/√T`
+does not depend on the number `n` of sampling points. -/
 theorem drift_se_endpoint_hasLaw {T : ℝ} (hT : 0 < T) (mu sigma : ℝ) {B : Ω → ℝ}
     (hB : HasLaw B (gaussianReal 0 T.toNNReal) P) :
     HasLaw (fun ω ↦ (mu * T + sigma * B ω) / T)
@@ -483,9 +486,9 @@ theorem drift_se_endpoint_hasLaw {T : ℝ} (hT : 0 < T) (mu sigma : ℝ) {B : Ω
       Real.coe_toNNReal _ hT.le]
     field_simp
 
-/-- **Calc 21.4's drift column (the variance).** `Var[(X_T − X_0)/T] = σ²/T`: the drift
-estimator's standard error is `σ/√T`, independent of the sampling frequency `n` — the
-estimator "is a function of the endpoints" (p. 363). Via `HasLaw.variance_eq` and
+/-- **The endpoint drift estimator (its variance).** `Var[(X_T − X_0)/T] = σ²/T`: the drift
+estimator's standard error is `σ/√T`, independent of the sampling frequency `n`, because the
+estimator is a function of the endpoints only. Via `HasLaw.variance_eq` and
 `variance_id_gaussianReal`. -/
 theorem drift_se_endpoint_var {T : ℝ} (hT : 0 < T) (mu sigma : ℝ) {B : Ω → ℝ}
     (hB : HasLaw B (gaussianReal 0 T.toNNReal) P) :

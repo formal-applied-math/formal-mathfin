@@ -48,6 +48,9 @@ derived. `∫₀ᵀ g(u) dB_u` is the Wiener integral of the *deterministic* int
 
 ## Main results
 
+* `vasicekIntegratedKernelSqAntideriv`, `hasDerivAt_vasicekIntegratedKernelSqAntideriv`,
+  `integral_vasicekIntegratedKernel_sq_eq_sub` — the antiderivative of `g²` and its FTC form
+  over any interval (also used by `FixedIncome/GSRPiecewiseVol`).
 * `vasicekIntegratedKernel_integral_sq` — the variance integral `∫₀ᵀ g² = V(T)`.
 * `vasicekIntegratedRate_hasLaw_gaussian` — `∫₀ᵀ r_s ds ~ N(M(T), σ²V(T))`.
 * `vasicekBondPrice_eq` — the bond price `𝔼[exp(−∫₀ᵀ r_s ds)] = exp(−M(T) + σ²V(T)/2)`.
@@ -120,46 +123,60 @@ noncomputable def vasicekIntegratedKernelLp {κ : ℝ} (hκ : 0 < κ) (T : ℝ�
 
 /-! ### The variance integral `∫₀ᵀ g² = V(T)` -/
 
+/-- The antiderivative `F(u) = u/κ² − 2e^{−κ(T−u)}/κ³ + e^{−2κ(T−u)}/(2κ³)` of the squared
+integrated kernel `g(u)²`. -/
+noncomputable def vasicekIntegratedKernelSqAntideriv (κ T u : ℝ) : ℝ :=
+  u / κ ^ 2 - 2 * Real.exp (-(κ * (T - u))) / κ ^ 3 + Real.exp (-(2 * κ * (T - u))) / (2 * κ ^ 3)
+
+/-- `F` differentiates to `g²`: its derivative expands the square
+`g² = (1 − 2e^{−κ(T−u)} + e^{−2κ(T−u)})/κ²`. -/
+lemma hasDerivAt_vasicekIntegratedKernelSqAntideriv (κ T u : ℝ) (hκ : κ ≠ 0) :
+    HasDerivAt (vasicekIntegratedKernelSqAntideriv κ T)
+      ((vasicekIntegratedKernel κ T u) ^ 2) u := by
+  have he : Real.exp (-(2 * κ * (T - u)))
+      = Real.exp (-(κ * (T - u))) * Real.exp (-(κ * (T - u))) := by
+    rw [← Real.exp_add]; congr 1; ring
+  have hlin : HasDerivAt (fun u : ℝ ↦ u / κ ^ 2) (1 / κ ^ 2) u :=
+    (hasDerivAt_id u).div_const (κ ^ 2)
+  have harg1 : HasDerivAt (fun u ↦ -(κ * (T - u))) κ u := by
+    have h : HasDerivAt (fun u ↦ -(κ * (T - u))) (-(κ * (-1))) u := by
+      apply HasDerivAt.neg; apply HasDerivAt.const_mul
+      simpa using (hasDerivAt_id u).const_sub T
+    simpa using h
+  have harg2 : HasDerivAt (fun u ↦ -(2 * κ * (T - u))) (2 * κ) u := by
+    have h : HasDerivAt (fun u ↦ -(2 * κ * (T - u))) (-(2 * κ * (-1))) u := by
+      apply HasDerivAt.neg; apply HasDerivAt.const_mul
+      simpa using (hasDerivAt_id u).const_sub T
+    simpa using h
+  have hexp1 := harg1.exp
+  have hexp2 := harg2.exp
+  have h2 := (hexp1.const_mul (2 : ℝ)).div_const (κ ^ 3)
+  have h3 := hexp2.div_const (2 * κ ^ 3)
+  have hcomb := (hlin.sub h2).add h3
+  refine hcomb.congr_deriv ?_
+  unfold vasicekIntegratedKernel
+  rw [he]
+  field_simp
+  ring
+
+/-- The FTC form over any interval: `∫_A^B g(u)² du = F(B) − F(A)`. -/
+lemma integral_vasicekIntegratedKernel_sq_eq_sub (κ T A B : ℝ) (hκ : κ ≠ 0) :
+    ∫ u in A..B, (vasicekIntegratedKernel κ T u) ^ 2
+      = vasicekIntegratedKernelSqAntideriv κ T B - vasicekIntegratedKernelSqAntideriv κ T A := by
+  apply intervalIntegral.integral_eq_sub_of_hasDerivAt
+    (fun u _ ↦ hasDerivAt_vasicekIntegratedKernelSqAntideriv κ T u hκ)
+  apply Continuous.intervalIntegrable
+  unfold vasicekIntegratedKernel; fun_prop
+
 /-- **The variance-fixing integral**: `∫₀ᵀ g(u)² du = V(T)`, by the FTC with
-antiderivative `F(u) = u/κ² − 2e^{−κ(T−u)}/κ³ + e^{−2κ(T−u)}/(2κ³)`, whose
-derivative expands the square `g² = (1 − 2e^{−κ(T−u)} + e^{−2κ(T−u)})/κ²`. -/
+antiderivative `vasicekIntegratedKernelSqAntideriv`. -/
 lemma vasicekIntegratedKernel_integral_sq {κ : ℝ} (hκ : κ ≠ 0) (T : ℝ≥0) :
     ∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernel κ T u) ^ 2 ∂volume
       = vasicekBondV κ (T : ℝ) := by
-  rw [← intervalIntegral.integral_of_le (by positivity : (0 : ℝ) ≤ (T : ℝ))]
-  have hderiv : ∀ u ∈ Set.uIcc (0 : ℝ) (T : ℝ),
-      HasDerivAt (fun u : ℝ ↦ u / κ ^ 2 - 2 * Real.exp (-(κ * ((T : ℝ) - u))) / κ ^ 3
-          + Real.exp (-(2 * κ * ((T : ℝ) - u))) / (2 * κ ^ 3))
-        ((vasicekIntegratedKernel κ T u) ^ 2) u := by
-    intro u _
-    have he : Real.exp (-(2 * κ * ((T : ℝ) - u)))
-        = Real.exp (-(κ * ((T : ℝ) - u))) * Real.exp (-(κ * ((T : ℝ) - u))) := by
-      rw [← Real.exp_add]; congr 1; ring
-    have hlin : HasDerivAt (fun u : ℝ ↦ u / κ ^ 2) (1 / κ ^ 2) u :=
-      (hasDerivAt_id u).div_const (κ ^ 2)
-    have harg1 : HasDerivAt (fun u ↦ -(κ * ((T : ℝ) - u))) κ u := by
-      have h : HasDerivAt (fun u ↦ -(κ * ((T : ℝ) - u))) (-(κ * (-1))) u := by
-        apply HasDerivAt.neg; apply HasDerivAt.const_mul
-        simpa using (hasDerivAt_id u).const_sub (T : ℝ)
-      simpa using h
-    have harg2 : HasDerivAt (fun u ↦ -(2 * κ * ((T : ℝ) - u))) (2 * κ) u := by
-      have h : HasDerivAt (fun u ↦ -(2 * κ * ((T : ℝ) - u))) (-(2 * κ * (-1))) u := by
-        apply HasDerivAt.neg; apply HasDerivAt.const_mul
-        simpa using (hasDerivAt_id u).const_sub (T : ℝ)
-      simpa using h
-    have hexp1 := harg1.exp
-    have hexp2 := harg2.exp
-    have h2 := (hexp1.const_mul (2 : ℝ)).div_const (κ ^ 3)
-    have h3 := hexp2.div_const (2 * κ ^ 3)
-    have hcomb := (hlin.sub h2).add h3
-    have hval : (1 / κ ^ 2 - 2 * (Real.exp (-(κ * ((T : ℝ) - u))) * κ) / κ ^ 3
-          + Real.exp (-(2 * κ * ((T : ℝ) - u))) * (2 * κ) / (2 * κ ^ 3))
-        = (vasicekIntegratedKernel κ T u) ^ 2 := by
-      rw [vasicekIntegratedKernel, he]; field_simp; ring
-    exact hval ▸ hcomb
-  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv
-    (by apply Continuous.intervalIntegrable; unfold vasicekIntegratedKernel; fun_prop)]
-  simp only [sub_self, mul_zero, neg_zero, Real.exp_zero, mul_one, sub_zero, zero_div]
+  rw [← intervalIntegral.integral_of_le (by positivity : (0 : ℝ) ≤ (T : ℝ)),
+    integral_vasicekIntegratedKernel_sq_eq_sub κ (T : ℝ) 0 (T : ℝ) hκ]
+  simp only [vasicekIntegratedKernelSqAntideriv, sub_self, mul_zero, neg_zero, Real.exp_zero,
+    mul_one, sub_zero, zero_div]
   rw [vasicekBondV]
   field_simp
   ring
