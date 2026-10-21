@@ -26,6 +26,150 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Every module connected: the coherence pass (2026-10-21)
+
+A coherence pass found 41 modules that imported nothing from the library and that nothing
+imported, and 47 more that nothing imported or cited. Each now has a bridge: a proved theorem tying
+it to an object the library already had. `tests/test_architecture.py` keeps it so. 114 entries
+added (111 `full`, 3 `reduced_core`), two replaced; corpus 544 → 658. The finance corpus is now
+split by area. What each bridge proves, by area:
+
+- **Rates under a measure the library constructs** (`interest_rates.json`; issues #287, #288).
+  One Wiener-integral lemma, `E[exp(−(m + c∫f dB))] = exp(−m + c²∫f²/2)`
+  (`mf-wiener-integral-bond-lemma`, `Foundations/WienerIntegralExpMoment`), gives the Vasicek,
+  Hull–White and GSR bond prices (`mf-gsr-two-piece-bond-price`, `mf-hull-white-reprices-curve`);
+  GSR at one volatility is Vasicek, and Hull–White at constant forcing is Vasicek. Under the
+  Girsanov measure `Q_λ = P.withDensity(exp(−λB_T − λ²T/2))` a Wiener integral `∫f dB` has law
+  `N(−λ∫f, ∫f²)` (`Foundations/WienerIntegralGirsanov`), so on `[0, T]` the Vasicek short rate is
+  `N(m_T − λσB(T), v_T)` under `Q_λ`, and the bond price under `Q_λ` is the Vasicek bond formula
+  (`𝔼_μ[exp(−∫r)]`) at level `θ − λσ/κ` (`mf-vasicek-girsanov-short-rate-law`, `mf-vasicek-girsanov-bond-price`). The
+  Hull–White `S`-forward measure is built through the change of numéraire; under it `r_S` is
+  Gaussian with mean the initial forward curve, and the futures–forward gap of the short rate is
+  `σ²B(S)²/2` (`mf-hull-white-forward-measure-short-rate`, `mf-hull-white-futures-forward-gap`;
+  #68 for the instantaneous short rate only). The inflation reconstitution factor has mean one
+  under that measure (`mf-inflation-hw-reconstitution-normaliser`); the reconstitution formula is
+  not derived. Throughout, rates are carried in their Wiener representation: that it solves the
+  SDE is cited, not proved.
+- **Curves and affine models** (`interest_rates.json`). The Vasicek yield in Nelson–Siegel slope
+  factors, with its short and long ends (`mf-vasicek-yield-nelson-siegel-factors`,
+  `mf-vasicek-yield-curve-ends`); the affine bond PDE from the Riccati equations, for CIR (closed
+  form only, not shown to equal the expectation) and for the Vasicek expectation
+  (`mf-affine-bond-pde-from-riccati`, `mf-cir-closed-form-bond-pde`, `mf-vasicek-bond-price-pde`);
+  the ABCD forward is Gaussian and its call is Black-76 at the RMS volatility
+  (`mf-abcd-log-forward-gaussian`, `mf-abcd-black76-rms-volatility`; no forward measure, accrual or
+  payment discount); par swaps as coupon bonds in the bootstrap
+  (`mf-bootstrap-par-swap-coupon-bond`, `mf-bootstrap-swap-strip-reprices`); the CMS par rate is
+  convex and spanned on a compact strike range (`mf-cms-par-rate-convex`,
+  `mf-cms-par-rate-compact-spanning`); the OU Hermite modes decay at rate `nκ`, for `n ≤ 2` only
+  (`mf-ou-hermite-modes-decay`, `reduced_core`).
+- **Commodities** (`commodities.json`). The storage forward with convenience yield and the
+  Sraffa own rate derived from `forward_price_from_no_arbitrage`
+  (`mf-storage-forward-convenience-yield`, `mf-storage-forward-kink-invariant`,
+  `mf-sraffa-own-rate-from-forward`); the one-step AR(1) residual of the OU short rate
+  (`mf-ar1-ou-one-step-residual`; multi-step not formalized).
+- **Credit** (`credit.json`; issues #286, #289). The bivariate normal is now on Mathlib's Gaussian
+  API, with a characterisation hub (`mf-bivariate-normal-gaussian-characterization`). One
+  parametrisation of the one-factor model: at a common default probability `π`, the model in the
+  asset correlation `ρ` and the Gaussian factor copula at loading `√ρ` give the same probability
+  that all names default, and two names default together with probability `N₂(Φ⁻¹π, Φ⁻¹π; ρ)`
+  (`mf-one-factor-copula-joint-default`, `mf-one-factor-pairwise-default-bivariate-normal`,
+  `mf-gaussian-factor-copula-pair-law`). CreditMetrics thresholds calibrated with `Φ⁻¹` reproduce
+  the transition matrix (`mf-creditmetrics-threshold-calibration`,
+  `mf-creditmetrics-default-covariance`); Marshall–Olkin default covariance
+  (`mf-marshall-olkin-default-covariance`); CreditRisk+ sector loss MGF and the Gamma MGF
+  (`mf-creditriskplus-sector-loss-mgf`, `mf-gamma-mgf`); the protection leg as an expectation over
+  the constructed Cox default time (`mf-cds-protection-leg-expectation`, #289); the Gaussian CVA
+  integrand (`mf-cva-gaussian-exposure`); the LHP stop loss and tranche limit, at zero
+  recovery (`mf-lhp-stop-loss-closed-form`, `mf-lhp-tranche-loss-limit`); the actuarial survival function as
+  a hazard survival (`mf-survival-tpx-hazard`); Hoeffding at the bivariate normal
+  (`mf-hoeffding-bivariate-normal`).
+- **No-arbitrage** (`no_arbitrage.json`). One EMM notion per setting, with bridges: the scalar
+  one-period EMM is the vector one; the multi-state, two-state and measure forms agree, so the
+  separation and softplus proofs of the FTAP are shown to agree (`mf-ftap-two-state-iff`,
+  `mf-ftap-multi-state-measure-form`); the discrete EMM at one period is the one-period EMM
+  (`mf-ftap-discrete-one-period`); a sampled continuous-time EMM is a discrete one
+  (`mf-continuous-emm-sampled`, one direction). `EMMSet` is now `martingaleProbVectors` (it never
+  required equivalence); the law of one price and a positive super-replication lower bound
+  (`mf-replication-martingale-price`, `mf-superhedging-bounded-below`; the duality equality stays
+  open). Triangular no-arbitrage is derived from the multi-state FTAP
+  (`mf-triangle-arbitrage-ftap`; frictionless trades, positive rates).
+- **Risk measures** (`risk_measures.json`, `actuarial.json`). Spectral risk on the quantile, with
+  ES mixtures coherent (`mf-spectral-es-mixture-coherent`; step spectra only); expectiles strictly
+  elicitable (`mf-expectile-elicitable`); the standard-deviation principle is VaR and ES at
+  Gaussian loadings (`mf-sd-principle-gaussian-var-es`); log-utility acceptance (with Mathlib's
+  `Real.log`, which is `log|x|` at nonpositive wealth) is not a cone, so it induces no coherent
+  risk measure (`mf-utility-acceptance-not-cone`, correcting a module that
+  claimed the ADEH characterisation); Gaussian Euler allocation and the VaR gradient
+  (`mf-component-var-gaussian-euler`); the discrete ES against the tail mean
+  (`mf-discrete-es-vs-tail-mean`); Fissler–Ziegel joint elicitability
+  (`mf-fissler-ziegel-joint-elicitability`); the SA-CCR effective notional as a standard deviation
+  (`mf-saccr-effnotional-std-dev`); VaR of uncorrelated Gaussian positions through the Herfindahl
+  index (`mf-uncorrelated-gaussian-var-herfindahl`); the life annuity-due at constant force
+  (`mf-life-annuity-due-constant-force`).
+- **Exotics** (`exotic_options.json`, `black_scholes.json`). Margrabe's formula as the expected
+  exchange payoff under the two-GBM model (`mf-margrabe-exchange-expected-payoff`), and the
+  better-of-two option as the second asset plus Margrabe (`mf-better-of-two-closed-form`, #57), which makes
+  Kirk at zero strike exact (`mf-kirk-zero-strike-margrabe`) and gives Stulz's call-on-max its
+  better-of-two limit (`mf-stulz-call-max-zero-strike`, `reduced_core`: Stulz for `K > 0` is not
+  derived); the geometric Asian price below the arithmetic expected payoff
+  (`mf-asian-geom-price-le-arith`); barrier in–out parity at the Black–Scholes price
+  (`mf-barrier-inout-parity-bs`); a lookback above the call (`mf-lookback-call-ge-bs-call`); basket
+  moments in the joint lognormal model (`mf-basket-moment-match-single-asset`,
+  `mf-basket-lognormal-moments`); the chooser as an expected payoff (`mf-chooser-price-bs`);
+  Heynen–Kat at zero correlation as Black–Scholes times a barrier factor
+  (`mf-heynen-kat-independent-bs-factor`, `reduced_core`); the normalised spread is standard normal
+  (`mf-margrabe-normalized-spread-normal`); the GBM log return law (`mf-gbm-log-return-law`).
+  `MargrabeGrounding`'s two existential theorems no longer claim to derive their hypothesis: they
+  now exhibit the measure and driver.
+- **Structural** (`black_scholes.json`, `binomial.json`). The American put is at least the
+  Black–Scholes(–Merton) put (`mf-american-put-ge-bsm-european-put`; the early-exercise premium's
+  positivity is not proved); its value is unchanged by null-set horizon changes
+  (`mf-american-put-ae-horizon-invariance`); Monte Carlo on Mathlib's infinite product
+  (`mf-monte-carlo-put-call-consistency`, `mf-monte-carlo-call-clt-variance`); the rule of two for
+  Dupire's ratio on a tilted smile (`mf-dupire-tilted-smile-local-skew`); the LSV coin-toss
+  posterior as a conditional expectation (`mf-lsv-coin-toss-posterior-nonflat`; Gyöngy's
+  mimicking theorem not proved); the BS PDE in the Brownian coordinate
+  (`mf-bs-heat-equation-brownian-coordinate`, replacing `PDEFromIto`'s algebraic restatements; the
+  local-martingale statement is not proved); binomial law of one price, American = European call
+  on the tree and its CRR limit, and the CRR log-return moments' limit
+  (`mf-binomial-law-of-one-price`, `mf-binomial-american-call-eq-european`,
+  `mf-crr-american-call-tendsto-bs`, `mf-crr-log-return-moments-limit`).
+- **Stochastic foundations** (`stochastic_foundations.json`). The Markov property of Brownian
+  motion as conditional freezing (`mf-brownian-markov-condexp`); Doob's decomposition and optional
+  sampling for the discrete Snell envelope (attainment only at time 0, in expectation) (`mf-snell-doob-decomposition`,
+  `mf-snell-optional-sampling`); the binomial price as a path expectation
+  (`mf-binomial-price-path-measure`); merged Poisson arrivals (one-time marginal) and thinning from
+  i.i.d. marks, with the jump count of a Merton-type jump-diffusion split by a
+  set of jump sizes (`mf-poisson-merged-arrivals`,
+  `mf-poisson-thinning-iid-marks`, `mf-merton-jump-count-split`); Picard iterates as an a.e.
+  decomposition (`mf-sde-picard-pathwise`, short horizon); the Itô–drift expectation identity for
+  the constructed process at every `τ ≤ T`, and the conditional route applied to it
+  (`mf-ito-drift-expectation-constructed`, `mf-ito-drift-expectation-discrete-route`; #290).
+- **Portfolio and performance** (`portfolio_and_performance.json`). Markowitz first-order conditions
+  are sufficient for the global minimum, by the convex-QP KKT hub (`mf-markowitz-lagrangian-sufficient`,
+  `mf-markowitz-variance-random-returns`, `mf-markowitz-two-asset-variance-of-returns`,
+  `mf-markowitz-gmv-equal-marginal-variance`; necessity not proved); two-asset risk parity unique
+  (`mf-risk-parity-two-asset-unique`); Black–Litterman as GLS (`mf-black-litterman-gls-minimizer`);
+  the single-index covariance and CAPM beta from returns (`mf-single-index-variance-from-returns`,
+  `mf-single-index-beta-capm`); the sigmoid bet size at the z-statistic is the Kelly fraction
+  (`mf-bet-size-sigmoid-zscore-kelly`); fractional-differencing weights as a binomial series, and the
+  differenced drift estimator's law (`mf-frac-diff-binomial-series`,
+  `mf-drift-estimator-differenced-law`); `E|Z| = √(2v/π)` (`mf-gaussian-mean-abs-deviation`); purged
+  cross-validation leaves test labels independent of training labels when labels are functions of
+  Brownian increments (`mf-purged-cv-no-leakage-brownian`, pairwise).
+- **DeFi and microstructure** (`defi.json`, `market_microstructure.json`). Lending indices as periodic
+  compounding against the zero-coupon bond (`mf-compound-borrow-index-continuous-limit`,
+  `mf-dai-stability-fee-continuous-rate`); Aave liquidation at `T` as the Merton/KMV default
+  probability (`mf-aave-health-factor-terminal-liquidation-probability`; terminal only); impermanent
+  loss nonpositive, zero iff the price is unchanged (`mf-cpmm-impermanent-loss-nonpositive`, #90);
+  the Uniswap v3 position against a covered call, and its price bound
+  (`mf-uniswap-v3-position-covered-call`, `mf-uniswap-v3-position-bs-price-bound`, #92); the LP
+  value under a lognormal price (`mf-cpmm-lp-expected-value-lognormal`); an AMM arbitrage exists iff
+  the pool price differs from the oracle (the direction of the profitable trade is a separate lemma) (`mf-cpmm-arbitrage-iff-price-divergence`); Glosten–Milgrom
+  quotes as conditional expectations, and the model's witness (`mf-glosten-milgrom-quote-condexp`,
+  `mf-glosten-milgrom-model-witness`); Roll's spread from the autocovariance
+  (`mf-roll-spread-autocovariance`). Fees, gas and block timing are not modelled.
+
 ### The contributor batch, #248–#284 (2026-10-21)
 
 Thirty pull requests by Yang Ye, merged with their commits intact and adjusted in follow-up
@@ -53,7 +197,8 @@ commits after the values review of 2026-10-21 (`docs/values-review.md`). Seven e
   bucket probabilities under any probability law sum to one and the threshold matrix is
   row-stochastic (`thresholdMatrix_mem_rowStochastic`); the CreditMetrics case is that theorem
   at `gaussianReal 0 1`. This is one obligor's threshold migration: no copula, no calibration of
-  the thresholds to a target matrix, no correlated multi-obligor migration.
+  the thresholds to a target matrix, no correlated multi-obligor migration. (The coherence pass
+  above adds the calibration and the two-obligor default covariance.)
 - **Calendar-spread arbitrage** (`mf-calendar-arbitrage-total-variance`,
   `mf-svi-calendar-free-iff`, `BlackScholes/CalendarArbitrage.lean`; Gatheral–Jacquier 2014,
   Lemma 2.1). Calls on a real martingale are non-decreasing in maturity (conditional Jensen,
@@ -73,7 +218,8 @@ commits after the values review of 2026-10-21 (`docs/values-review.md`). Seven e
   `effNotionalIR_second_zero`). The bucket notionals themselves, the add-on and the PFE
   multiplier are not formalized.
 
-Library modules added without corpus entries, each stating its own scope:
+Library modules the batch added without corpus entries, each stating its own scope (the coherence
+pass the same day gave each a corpus entry or a library consumer; see the section above):
 `Foundations/BivariateNormalCDF` (the standard `N₂`, its law, margins, covariance, symmetries
 and the `r = 0, ±1` cases), `Foundations/GaussianCopula`, `Foundations/GammaPoissonMixturePgf`
 (the Gamma MGF, which Mathlib lacks, and the Poisson–Gamma mixture as an iterated integral),
@@ -2333,7 +2479,7 @@ prior corpus audit, not a verification of this addition.
 > Degenne's sorry-backed general càdlàg modification. Earlier this day: the **d-asset**
 > one-period FTAP `ftap_one_period_vector`
 > (`Foundations/FTAPOnePeriodVector.lean`, entry `mf-ftap-one-period-vector`, **`full`**)
-> is the unrestricted Föllmer–Schied 1.6 for a discounted excess return valued in any
+> is the unrestricted Föllmer–Schied §1.2 for a discounted excess return valued in any
 > **finite-dimensional** inner-product space `F` (the `ℝᵈ` market is `F = EuclideanSpace ℝ
 > (Fin d)`) — **no non-redundancy hypothesis**. The explicit **Esscher / minimal-divergence**
 > EMM minimises the convex softplus potential `θ ↦ ∫ log(1 + exp⟪θ,Y⟫)`; it is constant
@@ -2343,7 +2489,7 @@ prior corpus audit, not a verification of this addition.
 > under the integral) hands back the strictly-positive bounded density `σ⟪θ₀,Y⟫`. No
 > Hahn–Banach, no L⁰-closedness, no measurable selection — those remain only for the
 > general-Ω **multi-period** DMW. General-Ω one-period **Fundamental Theorem of Asset Pricing**
-> (Föllmer–Schied 1.55 / one-period Dalang–Morton–Willinger): `ftap_one_period`
+> (Föllmer–Schied §1.2 / one-period Dalang–Morton–Willinger): `ftap_one_period`
 > — for a scalar `L⁰` excess return on an **arbitrary** probability space, no
 > arbitrage ⟺ ∃ equivalent martingale measure `Q ~ P` with `Y` integrable and
 > `E_Q[Y] = 0` (`Foundations/FTAPOnePeriod.lean`, entry
@@ -2779,11 +2925,11 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > `Foundations/ConvexSeparation.lean`) and forward via martingale-transform
 > telescoping (`Foundations/FTAPDiscrete.lean`). (2) **General-Ω one-period
 > scalar FTAP** `ftap_one_period` (`mf-ftap-one-period-general`) — Föllmer–Schied
-> 1.55 for an arbitrary probability space and a single scalar `L⁰` excess return;
+> §1.2 for an arbitrary probability space and a single scalar `L⁰` excess return;
 > backward via a bounded-density reduction to `L¹`, the scalar no-arbitrage
 > dichotomy, and a two-region balancing `withDensity` — no Hahn–Banach, no
 > Kreps–Yan (`Foundations/FTAPOnePeriod.lean`). (3) **D-asset one-period FTAP**
-> `ftap_one_period_vector` (`mf-ftap-one-period-vector`) — Föllmer–Schied 1.6 for
+> `ftap_one_period_vector` (`mf-ftap-one-period-vector`) — Föllmer–Schied §1.2 for
 > any finite-dimensional inner-product space `F`; the Esscher/minimal-divergence
 > EMM minimises the convex softplus potential `θ ↦ ∫ log(1 + exp⟪θ,Y⟫)`, which
 > is coercive on `Nᗮ` (the orthogonal complement of the gains kernel `N = {θ :

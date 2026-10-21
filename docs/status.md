@@ -18,8 +18,8 @@ python3 -m tools.verify.coverage_report
 
 The corpus is grouped by area: no-arbitrage, Black–Scholes, exotic options, jumps and variance
 swaps, interest rates, credit, risk measures, quantitative risk management, portfolio and
-performance, binomial models, contracts, actuarial mathematics, market microstructure and
-commodities. Next to these sit the stochastic-calculus files (Brownian motion, martingales,
+performance, binomial models, contracts, actuarial mathematics, market microstructure,
+commodities and DeFi, with the results that tie the stochastic foundations to them. Next to these sit the stochastic-calculus files (Brownian motion, martingales,
 stochastic calculus, Girsanov), the American-put boundary and the SVI certificate.
 
 ## How the parts connect
