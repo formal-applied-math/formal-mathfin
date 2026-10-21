@@ -26,7 +26,25 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-### The CIR loadings solve their term-structure equations (2026-10-15)
+### CreditMetrics rating-transition matrices and Gaussian threshold migration (2026-10-17)
+
+Two entries added, `qrm-creditmetrics-default-absorbing-monotone` and
+`qrm-creditmetrics-gaussian-threshold-row-stochastic` (both `full`). Corpus 537 → 539.
+
+`RiskMeasures/CreditMetrics.lean`: a rating-transition matrix is `P ∈ Matrix.rowStochastic ℝ ι`
+for a general finite index type (not restricted to `Fin n`); its `k`-period power `P ^ k` stays
+row-stochastic (`pow_mem_rowStochastic`, via Mathlib's `Submonoid.pow_mem`), and if `d` is an
+absorbing state (`P d d = 1`) the probability `(P ^ k) i d` of being in `d` after `k` periods is
+monotone in `k` (`monotone_pow_apply_absorbing`). Separately, row-wise thresholds
+`z : Fin (m + 1) → EReal` with `z 0 = ⊥`, `z (last) = ⊤` partition `ℝ` into buckets
+`(z j, z (j + 1)]` (`ratingBucket`, `iUnion_ratingBucket`, `pairwise_disjoint_ratingBucket`), so
+their probabilities under ANY probability law sum to one (`sum_measureReal_ratingBucket`) and the
+resulting matrix is row-stochastic for any latent law (`thresholdMatrix_mem_rowStochastic`); the
+CreditMetrics case (latent `~ N(0, 1)`) is a one-line corollary
+(`gaussianThresholdMatrix_mem_rowStochastic`). Threshold calibration to a target matrix and
+correlated multi-obligor migration are not formalized.
+
+### The CIR loadings solve their term-structure equations (2026-10-14)
 
 Two entries added, `mf-cir-bond-loading-riccati` and `mf-cir-bond-level-loading` (both `full`).
 Corpus 535 → 537.

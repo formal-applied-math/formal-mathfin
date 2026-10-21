@@ -2173,6 +2173,20 @@
       "input_hash": "e2e7564aa57c680654925d554f06cbb125529b5a790ecf9de62e42dbfddd0bc8",
       "verified_at_commit": "fdfecac"
     },
+    "qrm-creditmetrics-default-absorbing-monotone": {
+      "benchmark_file": "quantitative_risk_management.json",
+      "date": "2026-10-17",
+      "elapsed_s": 4.3,
+      "input_hash": "2e2c65eb8dffa68b23eff9972a7e23cec81de7be7c4d93ce3240ef5aa8971066",
+      "verified_at_commit": "f4b196b"
+    },
+    "qrm-creditmetrics-gaussian-threshold-row-stochastic": {
+      "benchmark_file": "quantitative_risk_management.json",
+      "date": "2026-10-17",
+      "elapsed_s": 5.5,
+      "input_hash": "0ea831f29f9c99ba3420f83917149ac838a0312faa6bcd5e96c992f8ff3b3eb8",
+      "verified_at_commit": "f4b196b"
+    },
     "qrm-default-correlation": {
       "benchmark_file": "quantitative_risk_management.json",
       "date": "2026-10-02",
