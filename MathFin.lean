@@ -533,6 +533,8 @@ import MathFin.FixedIncome.VasicekMarketPriceOfRisk
 import MathFin.FixedIncome.CIRRiccati
 -- The T-forward measure: the zero-coupon bond as numéraire (change-of-numéraire instance)
 import MathFin.FixedIncome.ForwardMeasure
+-- Inflation is FX: the zero-coupon inflation swap and the YoY convexity (eqs 17.6, 17.7, 17.10)
+import MathFin.FixedIncome.Inflation
 
 -- Portfolio
 import MathFin.Portfolio.Markowitz
