@@ -34,7 +34,8 @@ An adapted-coefficient analogue, `itoDrift_expectation_identity_adapted`
 (`ItoFormulaAdaptedDrift`), assumes rather than constructs a `natFiltration`-adapted version
 `M` of the Itô integral of `δ` with every path continuous; it is not used to derive the
 constant-coefficient case here. For the process the library constructs, the pathwise formula
-for adapted coefficients is `ItoFormulaAdapted.ito_formula_adapted`.
+for adapted coefficients is `ItoFormulaAdapted.ito_formula_adapted`; its expectation form holds
+unconditionally as `itoDrift_expectation_identity_adapted_uncond` (`ItoFormulaAdaptedDriftUncond`).
 -/
 
 @[expose] public section

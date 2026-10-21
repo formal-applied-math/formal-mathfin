@@ -262,6 +262,9 @@ import MathFin.Foundations.ItoDriftExpectation
 -- conditional on a hypothesized adapted, path-continuous version `M` of the Itô integral
 -- (the library does not construct one for general δ)
 import MathFin.Foundations.ItoFormulaAdaptedDrift
+-- The unconditional companion: the same identity for the constructed process,
+-- derived from ito_formula_adapted (centering + Fubini)
+import MathFin.Foundations.ItoFormulaAdaptedDriftUncond
 -- Cross-horizon consistency of the CLM Itô integral: one pinned `M` (`hMeq`) represents
 -- the CLM integral at every horizon `τ ≤ T` (band-transfer kernel + freeze law)
 import MathFin.Foundations.ItoIntegralCrossHorizon
