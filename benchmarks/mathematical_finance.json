@@ -5509,7 +5509,7 @@
       "id": "mf-calendar-arbitrage-total-variance",
       "name": "Calendar-Spread Arbitrage: Calls Rise with Maturity iff Total Variance Does",
       "domain": "mathematical_finance",
-      "description": "For a real-valued martingale X on a finite measure space, the undiscounted call value t -> E[(X_t - L)^+] is non-decreasing in t for every level L (conditional Jensen). For a positive implied total-variance surface w(k, t) priced by the zero-rate Black–Scholes formula at forward S > 0 (call at strike K and maturity t is the Black–Scholes price with total variance w(log(K/S), t)), call prices are non-decreasing in maturity at every strike exactly when t -> w(k, t) is non-decreasing at every log-moneyness k. The local-variance form (crossed total-variance lines iff negative local variance) is not proved, and no martingale is constructed from a calendar-free surface.",
+      "description": "For a real-valued martingale X on a finite measure space, the undiscounted call value t -> E[(X_t - L)^+] is non-decreasing in t for every level L (conditional Jensen). For an implied total-variance surface w(k, t) defined and positive at every real maturity t (the statement quantifies over t in R, so surfaces with w(k, t) -> 0 as t -> 0+, e.g. w = sigma^2 t, are outside it), priced by the zero-rate Black–Scholes formula at forward S > 0 (call at strike K and maturity t is the Black–Scholes price with total variance w(log(K/S), t)), call prices are non-decreasing in maturity at every strike exactly when t -> w(k, t) is non-decreasing at every log-moneyness k. The local-variance form (crossed total-variance lines iff negative local variance) is not proved, and no martingale is constructed from a calendar-free surface.",
       "code": {
         "lean": "import MathFin.BlackScholes.CalendarArbitrage\n\nopen MathFin MeasureTheory\n\n/-- **Calendar-spread arbitrage (Gatheral–Jacquier 2014, Lemma 2.1).** (1) Calls on a real\nmartingale are non-decreasing in maturity: `s ≤ t → ∫ (X_s − L)⁺ ≤ ∫ (X_t − L)⁺`. (2) For a\npositive total-variance surface `w(k, t)` priced by the zero-rate Black–Scholes formula at\nforward `S > 0`, call prices are non-decreasing in maturity at every strike iff `t ↦ w(k, t)` is\nnon-decreasing at every log-moneyness `k`. Re-exports\n`MathFin.integral_posPart_sub_mono_of_martingale` and `MathFin.calendar_free_iff`. -/\ntheorem calendar_arbitrage_gatheral_jacquier {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsFiniteMeasure μ] {ℱ : Filtration ℝ mΩ} {X : ℝ → Ω → ℝ}\n    (hX : Martingale X ℱ μ) {S : ℝ} (hS : 0 < S) (w : ℝ → ℝ → ℝ) (hw : ∀ k t, 0 < w k t) :\n    (∀ L : ℝ, Monotone fun t ↦ ∫ ω, (X t ω - L)⁺ ∂μ) ∧\n      ((∀ K, 0 < K → Monotone fun t ↦ totalVarianceCall K S (w (Real.log (K / S)) t)) ↔\n        ∀ k, Monotone (w k)) :=\n  ⟨fun L _ _ h ↦ integral_posPart_sub_mono_of_martingale hX L h, calendar_free_iff hS w hw⟩\n"
       },
@@ -5518,14 +5518,14 @@
         "reference": "Gatheral and Jacquier, Arbitrage-free SVI volatility surfaces, Quantitative Finance 14(1) (2014), Section 2.1, Lemma 2.1",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.integral_posPart_sub_mono_of_martingale and MathFin.calendar_free_iff (MathFin/BlackScholes/CalendarArbitrage.lean). The martingale half applies Mathlib's ConvexOn.map_condExp_le to the convex payoff x -> (x - L)^+ and integrates. The price half uses bsV_eq_totalVarianceCall (with r = 0 the Black–Scholes call depends on sigma and T only through sigma^2 T) and the strict monotonicity of the call in volatility (bsV_strictMonoOn_sigma). SCOPE. Zero rates and dividends, forward = spot S; prices are Black–Scholes prices of the surface, so the equivalence is between monotonicity of prices and of total variance, not the existence of a martingale with those prices (Kellerer). Not formalised: the local-variance characterisation and derivative forms under differentiability beyond Mathlib deriv nonnegativity (deriv_integral_posPart_sub_nonneg)."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.integral_posPart_sub_mono_of_martingale and MathFin.calendar_free_iff (MathFin/BlackScholes/CalendarArbitrage.lean). The martingale half applies Mathlib's ConvexOn.map_condExp_le to the convex payoff x -> (x - L)^+ and integrates. The price half uses bsV_eq_totalVarianceCall (with r = 0 the Black–Scholes call depends on sigma and T only through sigma^2 T) and the strict monotonicity of the call in volatility (bsV_strictMonoOn_sigma). SCOPE. Zero rates and dividends, forward = spot S; prices are Black–Scholes prices of the surface, so the equivalence is between monotonicity of prices and of total variance, not the existence of a martingale with those prices (Kellerer). Maturity t ranges over all of R and w must be positive at every real t, which excludes surfaces with w(k, t) -> 0 as t -> 0+ (e.g. w = sigma^2 t); the t > 0 form is not formalised. Not formalised either: the local-variance characterisation. The derivative form is only 0 <= deriv of the call value (deriv_integral_posPart_sub_nonneg, not part of this entry)."
       }
     },
     {
       "id": "mf-svi-calendar-free-iff",
       "name": "Raw SVI Family Free of Calendar Arbitrage iff Total Variance Rises with Maturity",
       "domain": "mathematical_finance",
-      "description": "For a maturity-indexed family of raw SVI parameters p(t) with total variance positive at every log-strike, the SVI-smiled Black–Scholes call (spot, maturity and discount normalised to one) is non-decreasing in maturity at every positive strike exactly when the SVI total variance t -> w_{p(t)}(k) is non-decreasing at every log-moneyness k. No condition on the parameter paths themselves (for example a quartic crossing test between slices) is derived.",
+      "description": "For a family of raw SVI parameters p(t) indexed by every real t, with total variance positive at every log-strike and every t, the SVI-smiled Black–Scholes call (spot, maturity and discount normalised to one) is non-decreasing in maturity at every positive strike exactly when the SVI total variance t -> w_{p(t)}(k) is non-decreasing at every log-moneyness k. No condition on the parameter paths themselves (for example a quartic crossing test between slices) is derived.",
       "code": {
         "lean": "import MathFin.BlackScholes.CalendarArbitrage\n\nopen MathFin MathFin.SVI\n\n/-- **No calendar arbitrage for raw SVI slices.** For maturity-indexed raw SVI parameters `p t`\nwith positive variance, the SVI-smiled Black–Scholes call `bsSmile (p t) K` is non-decreasing in\nmaturity at every strike `K > 0` iff the SVI total variance `t ↦ variance (p t) k` is\nnon-decreasing at every log-moneyness `k`. Re-exports\n`MathFin.SVI.bsSmile_calendar_free_iff`. -/\ntheorem svi_calendar_free_iff (p : ℝ → Params) (hw : ∀ t k, 0 < variance (p t) k) :\n    (∀ K, 0 < K → Monotone fun t ↦ bsSmile (p t) K) ↔\n      ∀ k, Monotone fun t ↦ variance (p t) k :=\n  bsSmile_calendar_free_iff p hw\n"
       },
@@ -5546,7 +5546,7 @@
         "lean": "import MathFin.RiskMeasures.SACCRExposure\n\nopen MathFin\n\ntheorem saccrEAD_mono_thm {α : ℝ} (hα : 0 ≤ α) {RC₁ RC₂ PFE₁ PFE₂ : ℝ}\n    (hRC : RC₁ ≤ RC₂) (hPFE : PFE₁ ≤ PFE₂) :\n    MathFin.saccrEAD α RC₁ PFE₁ ≤ MathFin.saccrEAD α RC₂ PFE₂ :=\n  MathFin.saccrEAD_mono hα hRC hPFE\n"
       },
       "metadata": {
-        "chapter": 1,
+        "chapter": 13,
         "reference": "Basel Committee on Banking Supervision, The standardised approach for measuring counterparty credit risk exposures (BCBS 279), 2014",
         "difficulty": "beginner",
         "formalization_status": "full",
@@ -5555,18 +5555,18 @@
     },
     {
       "id": "mf-saccr-effnotional-diversification-bound",
-      "name": "SA-CCR Effective-Notional Aggregation Has No Negative Diversification",
-      "description": "The two-trade correlated effective-notional aggregation sqrt(d1^2 + d2^2 + 2*rho*d1*d2), for supervisory correlation rho in [-1, 1], never exceeds the sum of the absolute per-trade notionals |d1| + |d2|. This aggregation is only structurally analogous to Basel Annex 4's add-on formula (linear, not quadratic, in rho), so the Annex 4 formula itself is not formalized here.",
+      "name": "SA-CCR Interest-Rate Effective Notional Has No Negative Diversification",
+      "description": "The SA-CCR interest-rate effective notional of a hedging set with two populated maturity buckets, sqrt(d1^2 + d2^2 + 2*rho*d1*d2) for signed bucket effective notionals d1, d2 (Basel Framework CRE52.57 uses rho = 0.7 for adjacent buckets and rho = 0.3 for the first and third), never exceeds |d1| + |d2| for any correlation rho in [-1, 1]. The three-bucket formula is not stated.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.SACCRExposure\n\nopen MathFin\n\ntheorem effNotionalPair_le_abs_add_thm {ρ : ℝ} (hρ1 : -1 ≤ ρ) (hρ2 : ρ ≤ 1) (d₁ d₂ : ℝ) :\n    MathFin.effNotionalPair ρ d₁ d₂ ≤ |d₁| + |d₂| :=\n  MathFin.effNotionalPair_le_abs_add hρ1 hρ2 d₁ d₂\n"
       },
       "metadata": {
-        "chapter": 1,
-        "reference": "Basel Committee on Banking Supervision, The standardised approach for measuring counterparty credit risk exposures (BCBS 279), 2014, Annex 4 add-on aggregation",
+        "chapter": 13,
+        "reference": "Basel Committee on Banking Supervision, The standardised approach for measuring counterparty credit risk exposures (BCBS 279), 2014; Basel Framework CRE52.57 (interest-rate effective notional)",
         "difficulty": "beginner",
-        "formalization_status": "reduced_core",
-        "formalization_scope": "effNotionalPair is the structurally analogous two-trade, linear-in-rho building block (same quadratic form as the variance of a sum of two correlated random variables), NOT a literal specialization of Annex 4's add-on formula, whose two-trade cross term is quadratic in rho, not linear -- see the module docstring in MathFin/RiskMeasures/SACCRExposure.lean. Full formal proof of the stated bound for this building block via sqrt monotonicity and the Cauchy-Schwarz-style cross-term bound."
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, for every rho in [-1, 1] (which contains Basel's 0.7 and 0.3), of effNotionalPair rho d1 d2 <= |d1| + |d2|, where effNotionalPair rho d1 d2 = sqrt(d1^2 + d2^2 + 2*rho*d1*d2) is the CRE52.57 interest-rate effective notional when two of the three maturity buckets are populated. Proof by sqrt monotonicity and the cross-term bound rho*d1*d2 <= |d1|*|d2|. LIMITS: the three-bucket formula, the bucket effective notionals themselves (supervisory duration, delta, maturity factor) and the single-factor add-on aggregation of the credit, equity and commodity classes are not formalized."
       }
     }
   ]

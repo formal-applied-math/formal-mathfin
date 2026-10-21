@@ -32,8 +32,11 @@
                        constant-product AMMs (Uniswap v2-style), swap
                        output, invariant preservation, internal price;
                        Uniswap v2/v3 mechanics (impermanent loss, TWAP,
-                       fee invariant, virtual reserves); Aave/Compound/Dai
-                       lending-protocol mechanics.
+                       fee invariant, v3 real-reserves curve);
+                       Aave/Compound/Dai lending-protocol mechanics.
+  * `Commodities/`   — own rate of interest (Fisher/Sraffa), theory of
+                       storage (convenience yield, kink point), AR(1)–OU
+                       calibration.
 -/
 
 -- Foundations
@@ -300,8 +303,8 @@ import MathFin.Foundations.ItoFormulaUnrestrictedLocMart
 import MathFin.Foundations.FTAPTwoState
 -- Phase 38: Constant-product AMM (adapted from Pusceddu-Bartoletti FMBC 2024)
 import MathFin.DeFi.ConstantProductAMM
--- DeFi/AMM group: Uniswap v2/v3 mechanics (impermanent loss, TWAP, fee invariant, v3 virtual reserves)
-import MathFin.DeFi.UniswapCurveMechanics
+-- DeFi/AMM group: Uniswap v2/v3 mechanics (impermanent loss, TWAP, fee invariant, v3 real reserves)
+import MathFin.DeFi.UniswapMechanics
 -- DeFi/lending group: Aave kinked-rate + health factor, Compound cToken exchange rate
 import MathFin.DeFi.Aave
 import MathFin.DeFi.Compound
@@ -337,7 +340,7 @@ import MathFin.BlackScholes.DividendsGreeks
 import MathFin.BlackScholes.Forward
 import MathFin.BlackScholes.HigherGreeks
 import MathFin.BlackScholes.StrikeGreeks
--- The forward smile: Dupire's ratio on a tilted smile surface (eq 10.8)
+-- Local-vol skew of a tilted smile surface via Dupire's ratio; the rule of two
 import MathFin.BlackScholes.ForwardSmile
 import MathFin.BlackScholes.PutStrikeConvexity
 import MathFin.BlackScholes.StaticBounds
@@ -498,7 +501,7 @@ import MathFin.BlackScholes.GarmanNormalForm
 -- Basket option pricing via moment-matching to a single lognormal (approximation)
 import MathFin.BlackScholes.BasketMomentMatching
 import MathFin.BlackScholes.ExchangeOption
--- Exact two-asset closed forms consuming the bivariate normal CDF (Foundations/BivariateNormalCDF)
+-- Two-asset closed forms (Stulz rainbow, Heynen–Kat barrier) on the bivariate normal CDF
 import MathFin.BlackScholes.StulzTwoAssetRainbow
 import MathFin.BlackScholes.HeynenKatTwoAssetBarrier
 -- Margrabe BSCallHyp grounding from a joint two-GBM gaussian model (leap-3 closure)
@@ -561,7 +564,7 @@ import MathFin.FixedIncome.VasicekMarketPriceOfRisk
 import MathFin.FixedIncome.CIRRiccati
 -- The T-forward measure: the zero-coupon bond as numéraire (change-of-numéraire instance)
 import MathFin.FixedIncome.ForwardMeasure
--- Inflation is FX: the zero-coupon inflation swap and the YoY convexity (eqs 17.6, 17.7, 17.10)
+-- Inflation is FX: the zero-coupon inflation swap and the YoY convexity
 import MathFin.FixedIncome.Inflation
 -- ABCD instantaneous volatility: closed-form integrated variance over a window
 import MathFin.FixedIncome.ABCDVolatility
@@ -648,9 +651,9 @@ import MathFin.RiskMeasures.SACCRExposure
 -- Phase 1 (convex-duality unification): fundamental superhedging bound — every EMM prices a claim
 -- at most its super-replication cost (the pricing-side companion of the coherent-risk representation)
 import MathFin.Foundations.SuperhedgingDuality
--- LSV calibration: the leverage-posterior core (eq 11.1's form layer)
+-- LSV calibration: the leverage-posterior core (L²·E[v | S = K] = σ_loc²)
 import MathFin.Foundations.LSVLeverage
--- Estimation in practice: detection D-terms and realised-volatility bias (eqs 21.2–21.4)
+-- Estimation: Gaussian variance-ratio KL, realised-variance noise bias, square-root bias
 import MathFin.Foundations.Estimation
 
 -- Bridges (certified cross-domain unifications)
@@ -757,7 +760,7 @@ import MathFin.Portfolio.SingleIndexModel
 
 -- Fisher/Sraffa own-rate-of-interest identity relating spot, forward, and own rates
 import MathFin.Commodities.FisherSraffaOwnRate
--- Theory of storage: convenience yield and the kink point in the storage-cost curve
+-- Theory of storage: convenience yield and the kink point of the storage price curve
 import MathFin.Commodities.TheoryOfStorage
 -- AR(1) <-> Ornstein-Uhlenbeck parameter inversion for commodity calibration
 import MathFin.Commodities.AR1OUCalibration

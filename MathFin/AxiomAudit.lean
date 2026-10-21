@@ -1814,8 +1814,8 @@ than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen
 /-- info: 'MathFin.not_isElicitable_expectedShortfall_integrable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms MathFin.not_isElicitable_expectedShortfall_integrable
 
-/-- info: 'MathFin.strictlyJointlyElicits_fisslerZieglerExpScore' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms MathFin.strictlyJointlyElicits_fisslerZieglerExpScore
+/-- info: 'MathFin.strictlyJointlyElicits_fisslerZiegelExpScore' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.strictlyJointlyElicits_fisslerZiegelExpScore
 
 /-- info: 'MathFin.isJointlyElicitable_valueAtRisk_lowerExpectedShortfall' depends on axioms: [propext,
  Classical.choice,
@@ -1843,7 +1843,7 @@ than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen
 /-- info: 'MathFin.valueAtRisk_gbm_loss' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms MathFin.valueAtRisk_gbm_loss
 
-/-! ### The CIR loadings (2026-10-15)
+/-! ### The CIR loadings (2026-10-14)
 
 `hasDerivAt_cirBondB`: for `κ² + 2σ² > 0`, the closed-form CIR rate loading solves
 `B' = 1 − κB − ½σ²B²` at every `T`. `hasDerivAt_cirBondA`: for `σ ≠ 0`, the log-form level
@@ -1859,11 +1859,10 @@ loading solves `A' = −κθB`. The bond price itself is not derived. -/
 
 /-! ### Schwartz one-factor commodity futures (2026-10-18)
 
-`schwartzFuturesPrice_eq_integral`: the Schwartz (1997) one-factor commodity futures price
-`F(0,T) = E[S_T]` equals `exp(m_T + v_T/2)`, the lognormal mean of the terminal spot, where
-the log spot `ln S_T` shares the Vasicek short rate's Gaussian terminal law (`m_T =
-vasicekSDEMean`, `v_T = vasicekSDEVariance`), delivered via `mgf_gaussianReal` at `1`. Corpus
-537 → 538. -/
+`schwartzFuturesPrice_eq_integral`: for the log spot `ln S_T` in its Ornstein–Uhlenbeck Wiener
+representation, `E[S_T] = exp(m_T + v_T/2)` with `m_T = vasicekSDEMean` and
+`v_T = vasicekSDEVariance`, via `mgf_gaussianReal` at `1`: the Schwartz (1997) one-factor futures
+price. That the representation solves the Schwartz SDE is cited, not proved. -/
 
 /-- info: 'MathFin.schwartzFuturesPrice_eq_integral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
