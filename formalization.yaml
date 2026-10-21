@@ -171,9 +171,9 @@ alignment:
       status: full 7 · wrapper 3 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: mathematical_finance (Saporito, Stochastic Processes)
-      lean: 340 statements
+      lean: 341 statements
       module: benchmarks/mathematical_finance.json
-      status: full 339 · wrapper 1 · reduced 0 · placeholder 0
+      status: full 340 · wrapper 1 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: poisson_processes (Saporito, Stochastic Processes)
       lean: 5 statements
