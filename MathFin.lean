@@ -550,7 +550,7 @@ import MathFin.FixedIncome.CVA
 -- Phase 41: Vasicek SDE closed-form (full SDE, mean + variance)
 import MathFin.FixedIncome.VasicekSDE
 -- OU generator on polynomials: the Hermite spectral layer of the OU/Vasicek family
-import MathFin.FixedIncome.OUSpectral
+import MathFin.Foundations.OUSpectral
 -- Itô→pricing bridge: Vasicek terminal law derived (Wiener integral is Gaussian)
 import MathFin.FixedIncome.VasicekSDEGaussian
 -- Vasicek zero-coupon bond price: the affine term structure (Gaussian Laplace transform)
