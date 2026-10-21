@@ -34,7 +34,7 @@ This file proves the eigenidentities by induction on `Polynomial.hermite_succ`
 * **Proved here:** every declaration in this file, no proof holes. The commutators carry
   the κ and σ² coefficients explicitly, and the eigeninduction closes when `σ² = 2κ`
   (only this direction is proved; the converse — that it fails off that scale — is not).
-* **Not here (gated chapter mathematics, by design):** the `L²(π)` operator theory —
+* **Not here:** the `L²(π)` operator theory —
   self-adjointness of the generator against the stationary law (Calc 14.13's pairing,
   eq. 14.18), the eigenfunction expansion `P_t f = Σ c_n e^{-λ_n t} φ_n` (eq. 14.17),
   completeness of the Hermite basis, spectral-gap theory beyond the two-mode inequality,
@@ -52,7 +52,7 @@ This file proves the eigenidentities by induction on `Polynomial.hermite_succ`
 
 namespace MathFin.OUSpectral
 
-open Polynomial Filter Topology Matrix
+open Polynomial Matrix
 
 /-! ## The generator on polynomials -/
 
@@ -207,7 +207,7 @@ theorem ouGen_comp_smulX (κ σ s : ℝ) (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ
 At the stationary scale `s² = σ²/2κ`, the generator maps the scaled Hermite polynomial
 `q_n = He_n(x/s)` to `-(nκ) • q_n`. The eigenvalue is `-nκ` — the OU row of the
 eigenvalue table, and the diagonal of the triangular moment ladder. -/
-theorem ouGen_heigen_scaled_poly {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2)
+theorem ouGen_scaledHermite {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2)
     (n : ℕ) :
     ouGen κ σ (scaledHermite s n) = (-(n : ℝ) * κ) • scaledHermite s n := by
   rw [scaledHermite, ouGen_comp_smulX κ σ s hs h, ouGen_hermite, Polynomial.smul_comp,
@@ -215,11 +215,11 @@ theorem ouGen_heigen_scaled_poly {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s 
 
 /-- **The scaled eigenidentity, eval level.** For
 `q_n(x) = He_n(x/s)`: `eval x (L q_n) = -(nκ) · eval x q_n` at every point `x`. -/
-theorem ouGen_heigen_scaled {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2)
+theorem eval_ouGen_scaledHermite {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2)
     (n : ℕ) (x : ℝ) :
     Polynomial.eval x (ouGen κ σ (scaledHermite s n))
       = -(n : ℝ) * κ * Polynomial.eval x (scaledHermite s n) := by
-  rw [ouGen_heigen_scaled_poly hs h n, Polynomial.eval_smul, smul_eq_mul]
+  rw [ouGen_scaledHermite hs h n, Polynomial.eval_smul, smul_eq_mul]
 
 /-- `He₂ = X² - 1` over `ℝ`. -/
 theorem hermiteReal_two : hermiteReal 2 = X * X - 1 := by
@@ -234,10 +234,11 @@ evaluated `He_2(x/s)`), the generator output evaluates to `-(2κ) · f` — the 
 preserves the degree (the chapter's text says it "lowers" it, a slip), the diffusion term
 supplies exactly the constant that closes the polynomial back on itself, and the
 arithmetic uses `σ²/s² = 2κ` (via the stationary-scale hypothesis). -/
-theorem ouGen_heigen_two {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2) (x : ℝ) :
+theorem eval_ouGen_scaledHermite_two {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2)
+    (x : ℝ) :
     Polynomial.eval x (ouGen κ σ (scaledHermite s 2))
       = -(2 : ℝ) * κ * ((x / s) ^ 2 - 1) := by
-  rw [ouGen_heigen_scaled hs h 2 x, scaledHermite_eval, hermiteReal_two]
+  rw [eval_ouGen_scaledHermite hs h 2 x, scaledHermite_eval, hermiteReal_two]
   simp only [Polynomial.eval_sub, Polynomial.eval_mul, Polynomial.eval_X,
     Polynomial.eval_one]
   ring
@@ -308,38 +309,21 @@ theorem twoMode_rate_ge_slowest {l₁ l₂ c₁ c₂ t : ℝ} (hl₂ : l₁ ≤ 
   field_simp
   nlinarith [hkey]
 
-/-! ## Stretch results (Ex. 14.2 fragments — the swirl, matrix algebra only)
+/-! ## The swirl (Ex. 14.2): matrix algebra only
 
-The chapter's two-dimensional counterexample — the swirl `dZ = -AZ dt + dW` with
-`A = [[1, θ], [-θ, 1]]`, whose antisymmetric part rotates — contributes two matrix
-fragments that need no process theory: the characteristic polynomial of `-A` (only the real
-identity `(X + 1)² + θ²` is proved; the chapter reads off from it the complex roots `-1 ± iθ`,
-off the real line for `θ ≠ 0`, ruling out a real orthogonal expansion — neither the complex roots
-nor that consequence is formalized here),
-and the isotropy of the stationary covariance (a symmetric `Σ` with `AΣ + ΣAᵀ = I` is `½I`: the
-rotation drops out of the snapshot, which in the chapter's argument is why a snapshot cannot
-detect non-reversibility — not formalized here). Plus the stationary-variance limit of the
-OU law. -/
+The chapter's two-dimensional counterexample is the swirl `dZ = -AZ dt + dW` with
+`A = [[1, θ], [-θ, 1]]`, whose antisymmetric part rotates. One fragment of it needs no process
+theory: the stationary covariance is isotropic (a symmetric `Σ` with `AΣ + ΣAᵀ = I` is `½I`), so
+the rotation drops out of the snapshot. In the chapter's argument this is why a snapshot cannot
+detect non-reversibility; that conclusion, and the complex spectrum `-1 ± iθ` of `-A`, are not
+formalized here. -/
 
-/-- **Stretch — the swirl's characteristic polynomial.** The Lean statement proves the
-characteristic-polynomial identity `(X + 1)² + θ²` over `ℝ` only. The chapter (Ex. 14.2) reads
-off from it that `-A`'s eigenvalues are the complex roots `-1 ± iθ` — off the real line for
-`θ ≠ 0`, the spectral signature of a non-reversible drift; those two further steps (the complex
-roots, and the non-reversibility reading) are not formalized here. (`Matrix.charpoly_fin_two` in
-`Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff`.) -/
-theorem swirl_charpoly (θ : ℝ) :
-    (Matrix.charpoly (!![-1, -θ; θ, -1] : Matrix (Fin 2) (Fin 2) ℝ))
-      = (X + 1) ^ 2 + Polynomial.C (θ ^ 2) := by
-  rw [Matrix.charpoly_fin_two]
-  simp [Matrix.trace_fin_two_of, Matrix.det_fin_two_of, map_add, map_neg, map_one, map_mul]
-  ring
-
-/-- **Stretch — the swirl's stationary covariance is isotropic.** Any symmetric `Σ`
+/-- **The swirl's stationary covariance is isotropic.** Any symmetric `Σ`
 solving the stationary-covariance equation `AΣ + ΣAᵀ = I` for the swirl matrix
 `A = [[1, θ], [-θ, 1]]` is `½I`: the solution does not depend on the rotation `θ`, so the
 snapshot carries no trace of the circulation. In the chapter's argument (Ex. 14.2) this is why a
-stationary snapshot alone cannot detect that the drift is non-reversible for `θ ≠ 0`
-(`swirl_charpoly`) — that non-reversibility conclusion itself is not formalized here. -/
+stationary snapshot alone cannot detect that the drift is non-reversible for `θ ≠ 0` — that
+non-reversibility conclusion itself is not formalized here. -/
 theorem swirl_isotropy (θ a b d : ℝ)
     (h : (!![(1 : ℝ), θ; -θ, 1] : Matrix (Fin 2) (Fin 2) ℝ) * !![a, b; b, d]
         + !![a, b; b, d] * !![(1 : ℝ), -θ; θ, 1] = 1) :
@@ -365,22 +349,6 @@ theorem swirl_isotropy (θ a b d : ℝ)
   intro i j
   fin_cases i <;> fin_cases j <;>
     simp [ha, hd]
-
-/-- **Stretch — the stationary variance as a limit of the OU law.** The variance factor
-`(σ²/k)(1 - e^{-kt})` of the explicit OU law (here `k = 2κ` is the mean-reversion rate
-doubled and `σ` the law's own diffusion coefficient — NOT the stationary scale `s` used
-elsewhere in this file, where `s² = σ²/2κ`) tends to `σ²/k` as the horizon grows: that
-limit `σ²/k` is `σ²/2κ` in generator parametrization, i.e. the stationary variance `s²`.
-This `k = 2κ` parametrization is this file's own; the canonical closed form in the `σ, κ, t`
-parametrization used elsewhere in the repo is `vasicekSDEVariance`
-(`MathFin/FixedIncome/VasicekSDE.lean`): `vasicekSDEVariance σ κ t = σ² (1 - e^{-2κt}) / (2κ)`. -/
-theorem ouStationaryVariance_tendsto {k σ : ℝ} (hk : 0 < k) :
-    Tendsto (fun t : ℝ ↦ σ ^ 2 / k * (1 - Real.exp (-(k * t)))) atTop (𝓝 (σ ^ 2 / k)) := by
-  have he : Tendsto (fun t : ℝ ↦ Real.exp (-(k * t))) atTop (𝓝 0) :=
-    Real.tendsto_exp_neg_atTop_nhds_zero.comp
-      ((tendsto_const_mul_atTop_of_pos hk).mpr tendsto_id)
-  simpa using (tendsto_const_nhds (x := σ ^ 2 / k)).mul
-    ((tendsto_const_nhds (x := (1 : ℝ))).sub he)
 
 end MathFin.OUSpectral
 

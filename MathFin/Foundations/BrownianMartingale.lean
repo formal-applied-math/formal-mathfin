@@ -61,7 +61,8 @@ lemma integrable_exp_mul_of_hasLaw {Ω : Type*} {mΩ : MeasurableSpace Ω}
   rw [hZ.map_eq]
   exact integrable_exp_mul_gaussianReal α
 
-/-- **Standard-normal MGF** via `HasLaw` transfer: `𝔼[exp(a·Z)] = exp(a²/2)` for `Z ~ N(0,1)`. -/
+/-- **Standard-normal MGF** via `HasLaw` transfer: `𝔼[exp(a·Z)] = exp(a²/2)` for
+`Z ~ N(0,1)` — Mathlib's `mgf_gaussianReal` with `mgf` unfolded, kept as a rewrite handle. -/
 lemma integral_exp_mul_stdNormal {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
     {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) P) (a : ℝ) :
     ∫ ω, Real.exp (a * Z ω) ∂P = Real.exp (a ^ 2 / 2) := by
@@ -78,8 +79,7 @@ lemma integral_exp_affine_indep {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Mea
       = fun ω ↦ Real.exp c * (Real.exp (a * Z₁ ω) * Real.exp (b * Z₂ ω)) := by
     funext ω; rw [← Real.exp_add, ← Real.exp_add, add_assoc]
   have hind : IndepFun (fun ω ↦ Real.exp (a * Z₁ ω)) (fun ω ↦ Real.exp (b * Z₂ ω)) P :=
-    hindep.comp (by fun_prop : Measurable fun x ↦ Real.exp (a * x))
-      (by fun_prop : Measurable fun x ↦ Real.exp (b * x))
+    hindep.exp_mul a b
   have hprod : ∫ ω, Real.exp (a * Z₁ ω) * Real.exp (b * Z₂ ω) ∂P
       = Real.exp (a ^ 2 / 2) * Real.exp (b ^ 2 / 2) := by
     rw [← integral_exp_mul_stdNormal h₁ a, ← integral_exp_mul_stdNormal h₂ b]

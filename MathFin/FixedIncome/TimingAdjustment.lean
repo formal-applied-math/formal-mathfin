@@ -23,8 +23,9 @@ The static step is `changeOfNumeraire` (`Foundations/Numeraire`): `𝔼^{Q^N}[V]
 `𝔼[V·e^{−Y}] = 𝔼[V]·𝔼[e^{−Y}]·exp(−Cov(ln V, Y))`, proved here from the independent-driver
 decomposition `Y = n + u(ρ Z₁ + √(1−ρ²) Z₂)`, `ln V = m + s Z₁`, so `Cov(ln V, Y) = ρ s u`.
 
-* **Hull's timing adjustment** (Hull, *Options, Futures, and Other Derivatives*; the exact
-  lognormal identity underlying eq. 30.3): `Q` is the `T`-forward measure, `Q^N` the
+* **Hull's timing adjustment** (Hull, *Options, Futures, and Other Derivatives*, the chapter
+  on convexity, timing and quanto adjustments; the exact lognormal identity underlying its
+  timing-adjustment formula): `Q` is the `T`-forward measure, `Q^N` the
   `T*`-forward measure, and `e^{−Y} = P(T,T*)`. A payoff fixed at `T` and paid at `T*` has
   `𝔼^{T*}[V] = 𝔼^T[V]·exp(−Cov(ln V, Y))`.
 * **Bagaria's futures-forward basis** (Bagaria, §8.4, the unnumbered covariance identity
@@ -42,8 +43,15 @@ not proved here and is not exact.
 ## Main results
 
 * `integral_mul_exp_neg_gaussian` — `𝔼[V·e^{−Y}] = 𝔼[V]·𝔼[e^{−Y}]·exp(−ρ s u)`.
-* `timingAdjustment_gaussian` — the exact lognormal identity underlying Hull's eq. 30.3.
+* `timingAdjustment_gaussian` — the exact lognormal identity underlying Hull's timing
+  adjustment.
 * `futuresForwardBasis_gaussian` — Bagaria §8.4's covariance identity, exact Gaussian form.
+
+## References
+
+* J. C. Hull, *Options, Futures, and Other Derivatives* (the chapter on convexity, timing and
+  quanto adjustments).
+* S. Bagaria, *Notes on Fixed Income Derivative Pricing* (lecture notes), ch. 8.
 -/
 
 @[expose] public section
@@ -86,7 +94,7 @@ theorem integral_mul_exp_neg_gaussian (m s n u ρ : ℝ)
   congr 1
   ring
 
-/-- **Hull's timing adjustment** (the exact lognormal identity underlying Hull's eq. 30.3).
+/-- **Hull's timing adjustment** (the exact lognormal identity underlying Hull's formula).
 Let `Q` be the
 `T`-forward measure (reference numéraire `P(·,T)`, worth `1` at `T` and `B₀ = P(0,T)` today),
 and let the `T*`-bond be worth `P(T,T*) = e^{−Y}` at `T` and `N₀ = P(0,T*)` today, with the

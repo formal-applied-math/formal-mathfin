@@ -31,18 +31,25 @@ maturity recursive discount-factor recovery.
 ## Main results
 
 * `nssSlope`, `nssYield` — the slope factor `s` and the Svensson closed form.
-* `nssYield_continuousOn_Ioi` — `y` is continuous on `(0, ∞)` (the economically
+* `continuousOn_nssYield` — `y` is continuous on `(0, ∞)` (the economically
   meaningful domain: no coupon bond or discount factor is quoted at `τ = 0`).
-* `tendsto_nssSlope_nhdsWithin_zero` — the core calculus fact underlying the
+* `tendsto_nssSlope_nhdsNE_zero` — the core calculus fact underlying the
   curve's short end: `s(x) → 1` as `x → 0 (through nonzero values)`, obtained from `HasDerivAt` of
   `x ↦ 1 - e^{-x}` at `0` (the slope factor is literally a difference
   quotient of that function through the origin).
-* `tendsto_nssYield_nhdsWithin_zero` — **short-end limit**:
+* `tendsto_nssYield_nhdsNE_zero` — **short-end limit**:
   `y(τ) → β₀ + β₁` as `τ → 0 (through nonzero values)` (the two curvature terms vanish at the short
   end, leaving level plus slope).
 * `tendsto_nssYield_atTop` — **long-end limit**: `y(τ) → β₀` as `τ → ∞`
   (all three non-level terms decay away, leaving the level factor as the
   asymptotic long rate).
+
+## References
+
+* C. R. Nelson, A. F. Siegel, *Parsimonious Modeling of Yield Curves*, Journal of Business 60
+  (1987).
+* L. E. O. Svensson, *Estimating and Interpreting Forward Interest Rates: Sweden 1992–1994*,
+  NBER Working Paper 4871 (1994).
 -/
 
 @[expose] public section
@@ -74,7 +81,7 @@ theorem continuousAt_nssSlope {x : ℝ} (hx : x ≠ 0) : ContinuousAt nssSlope x
 
 /-- **The curve is continuous on `(0, ∞)`**, the economically meaningful
 domain for a yield curve (no instrument is quoted at `τ = 0`). -/
-theorem nssYield_continuousOn_Ioi (β₀ β₁ β₂ β₃ l₁ l₂ : ℝ)
+theorem continuousOn_nssYield (β₀ β₁ β₂ β₃ l₁ l₂ : ℝ)
     (hl₁ : l₁ ≠ 0) (hl₂ : l₂ ≠ 0) :
     ContinuousOn (nssYield β₀ β₁ β₂ β₃ l₁ l₂) (Set.Ioi 0) := by
   have h1 : ∀ τ ∈ Set.Ioi (0 : ℝ), τ / l₁ ≠ 0 := fun τ hτ ↦ div_ne_zero hτ.ne' hl₁
@@ -86,7 +93,7 @@ theorem nssYield_continuousOn_Ioi (β₀ β₁ β₂ β₃ l₁ l₂ : ℝ)
 `1` as `x → 0` through nonzero values. This is the difference quotient of
 `f(x) = 1 - e^{-x}` through the origin, so it is exactly `HasDerivAt f 1 0`
 read via `hasDerivAt_iff_tendsto_slope`. -/
-theorem tendsto_nssSlope_nhdsWithin_zero :
+theorem tendsto_nssSlope_nhdsNE_zero :
     Tendsto nssSlope (𝓝[≠] (0 : ℝ)) (𝓝 1) := by
   have hf : HasDerivAt (fun x : ℝ ↦ 1 - Real.exp (-x)) 1 0 := by
     have hexp : HasDerivAt (fun x : ℝ ↦ Real.exp (-x)) (-1) 0 := by
@@ -99,7 +106,7 @@ theorem tendsto_nssSlope_nhdsWithin_zero :
 /-- Dividing by a nonzero constant tends to `0` through nonzero values as the
 numerator tends to `0` through nonzero values (used to transport the `𝓝[≠] 0`
 short-end limit of `nssSlope` and `exp` along `τ ↦ τ/l`). -/
-private theorem tendsto_div_const_nhdsWithin_zero {c : ℝ} (hc : c ≠ 0) :
+private theorem tendsto_div_const_nhdsNE_zero {c : ℝ} (hc : c ≠ 0) :
     Tendsto (fun x : ℝ ↦ x / c) (𝓝[≠] (0 : ℝ)) (𝓝[≠] (0 : ℝ)) := by
   rw [tendsto_nhdsWithin_iff]
   refine ⟨?_, ?_⟩
@@ -111,26 +118,26 @@ private theorem tendsto_div_const_nhdsWithin_zero {c : ℝ} (hc : c ≠ 0) :
     exact div_ne_zero hx hc
 
 /-- `exp(-τ/l) → 1` as `τ → 0` through nonzero values. -/
-private theorem tendsto_exp_neg_div_const_nhdsWithin_zero {c : ℝ} (hc : c ≠ 0) :
+private theorem tendsto_exp_neg_div_const_nhdsNE_zero {c : ℝ} (hc : c ≠ 0) :
     Tendsto (fun τ : ℝ ↦ Real.exp (-(τ / c))) (𝓝[≠] (0 : ℝ)) (𝓝 1) := by
   have hdiv : Tendsto (fun τ : ℝ ↦ -(τ / c)) (𝓝[≠] (0 : ℝ)) (𝓝 0) := by
-    simpa using ((tendsto_div_const_nhdsWithin_zero hc).mono_right nhdsWithin_le_nhds).neg
+    simpa using ((tendsto_div_const_nhdsNE_zero hc).mono_right nhdsWithin_le_nhds).neg
   simpa [Function.comp_def] using (Real.continuous_exp.tendsto (0 : ℝ)).comp hdiv
 
 /-- **Short-end limit**: as `τ → 0 (through nonzero values)`, the Svensson curve tends to `β₀ + β₁`.
 The slope and level stay (`s(τ/lᵢ) → 1`), both curvature terms vanish
 (`s(τ/lᵢ) - e^{-τ/lᵢ} → 1 - 1 = 0`), since `τ/lᵢ → 0` and `e^{-τ/lᵢ} → 1`. -/
-theorem tendsto_nssYield_nhdsWithin_zero (β₀ β₁ β₂ β₃ l₁ l₂ : ℝ)
+theorem tendsto_nssYield_nhdsNE_zero (β₀ β₁ β₂ β₃ l₁ l₂ : ℝ)
     (hl₁ : l₁ ≠ 0) (hl₂ : l₂ ≠ 0) :
     Tendsto (nssYield β₀ β₁ β₂ β₃ l₁ l₂) (𝓝[≠] (0 : ℝ)) (𝓝 (β₀ + β₁)) := by
-  have hdiv1 := tendsto_div_const_nhdsWithin_zero hl₁
-  have hdiv2 := tendsto_div_const_nhdsWithin_zero hl₂
+  have hdiv1 := tendsto_div_const_nhdsNE_zero hl₁
+  have hdiv2 := tendsto_div_const_nhdsNE_zero hl₂
   have hs1 : Tendsto (fun τ : ℝ ↦ nssSlope (τ / l₁)) (𝓝[≠] (0 : ℝ)) (𝓝 1) :=
-    tendsto_nssSlope_nhdsWithin_zero.comp hdiv1
+    tendsto_nssSlope_nhdsNE_zero.comp hdiv1
   have hs2 : Tendsto (fun τ : ℝ ↦ nssSlope (τ / l₂)) (𝓝[≠] (0 : ℝ)) (𝓝 1) :=
-    tendsto_nssSlope_nhdsWithin_zero.comp hdiv2
-  have he1 := tendsto_exp_neg_div_const_nhdsWithin_zero hl₁
-  have he2 := tendsto_exp_neg_div_const_nhdsWithin_zero hl₂
+    tendsto_nssSlope_nhdsNE_zero.comp hdiv2
+  have he1 := tendsto_exp_neg_div_const_nhdsNE_zero hl₁
+  have he2 := tendsto_exp_neg_div_const_nhdsNE_zero hl₂
   have h : Tendsto (nssYield β₀ β₁ β₂ β₃ l₁ l₂) (𝓝[≠] (0 : ℝ))
       (𝓝 (β₀ + β₁ * 1 + β₂ * (1 - 1) + β₃ * (1 - 1))) := by
     unfold nssYield

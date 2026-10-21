@@ -13,15 +13,16 @@ public import MathFin.FixedIncome.DefaultDensity
 /-!
 # CVA under independent exposure (no wrong-way risk)
 
-Hull, *Options, Futures and Other Derivatives* ch. 24, §24.2 (CVA) and Bagaria ch. 16
-(eq. 16.2): with exposure independent of the counterparty's default time,
+Hull, *Options, Futures, and Other Derivatives* (CVA, in its credit-risk chapter). With
+exposure independent of the counterparty's default time, CVA is the CDS protection-leg
+integral of Bagaria eq. 16.2 with the discount curve `P(0,·)` replaced by `D·EE`:
 
   `CVA = LGD · E[D(τ) · V_τ⁺ · 1{τ ≤ T}] = LGD · ∫₀ᵀ D(s) · EE(s) · λ(s) · Q(s) ds`,
 
 `EE(s) = E[V_s⁺]` the expected positive exposure.
 
 Independence uses the same two-factor product-space layout as `MathFin.Cox.cox_mixing_survival`
-(mathfin `FixedIncome/Cox.lean`), though not its mixing construction: the exposure lives on
+(`FixedIncome/Cox.lean`), though not its mixing construction: the exposure lives on
 `(Ω₁, ν)`, the default time on `(Ω₂, μ)`, and the pricing measure is `ν.prod μ`, so τ is
 independent of the exposure by the product measure itself, with no mixing against the first
 factor's randomness. The Fubini step reduces the claim to the kernel
@@ -30,7 +31,13 @@ factor's randomness. The Fubini step reduces the claim to the kernel
 * `integral_exposure_eq` — the general reduction (joint integrability hypothesized).
 * `expectedExposure_gaussian` — `E[(m + σ√s·Z)⁺] = m·Φ(m/(σ√s)) + σ√s·φ(m/(σ√s))`,
   from `bachelier_call_formula` with the strike shifted to `K = 1`, `S₀ = m + 1`.
-* `cva_gaussian` — headline: Gaussian exposure, bounded `D, m, σ`, CVA in closed form.
+* `cva_gaussian` — headline: Gaussian exposure, bounded `D, m, σ`: CVA as a one-dimensional
+  time integral whose integrand (the expected exposure) is in closed form.
+
+## References
+
+* J. C. Hull, *Options, Futures, and Other Derivatives* (the credit-risk chapter: CVA).
+* S. Bagaria, *Notes on Fixed Income Derivative Pricing* (lecture notes), ch. 16.
 -/
 
 @[expose] public section
@@ -58,8 +65,8 @@ theorem measurable_expectedExposure [SFinite ν] {V : ℝ → Ω₁ → ℝ}
     (hV : Measurable (Function.uncurry V)) : Measurable (expectedExposure V ν) :=
   (hV.max measurable_const).stronglyMeasurable.integral_prod_right'.measurable
 
-/-- **No-WWR reduction** (Hull ch. 24; Bagaria eq. 16.2): exposure independent of a default
-time with deterministic continuous hazard `h ≥ 0` gives
+/-- **No-WWR reduction** (Hull's CVA; the protection-leg kernel of Bagaria eq. 16.2):
+exposure independent of a default time with deterministic continuous hazard `h ≥ 0` gives
 `E[1{τ ≤ T} D(τ) V_τ⁺] = ∫₀ᵀ D(s) · EE(s) · λ(s)Q(s) ds`. -/
 theorem integral_exposure_eq [IsProbabilityMeasure ν] [IsProbabilityMeasure μ]
     {h : ℝ → ℝ} (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s) {τ : Ω₂ → ℝ} (hτ : Measurable τ)
@@ -90,10 +97,12 @@ theorem expectedExposure_gaussian [IsProbabilityMeasure ν] {Z : Ω₁ → ℝ}
   simpa only [add_right_comm a 1, add_sub_cancel_right] using this
 
 open ProbabilityTheory in
-/-- **CVA with Gaussian exposure, no wrong-way risk** (Hull ch. 24, §24.2;
-Bagaria eq. 16.2). Exposure `V_s = m(s) + σ(s)√s·Z`, `Z ~ N(0,1)` on the exposure factor,
+/-- **CVA with Gaussian exposure, no wrong-way risk** (Hull's CVA; the protection-leg kernel
+of Bagaria eq. 16.2). Exposure `V_s = m(s) + σ(s)√s·Z`, `Z ~ N(0,1)` on the exposure factor,
 independent (product measure) of a default time with continuous hazard `h ≥ 0`; `D`, `m`, `σ`
-measurable and bounded, `σ > 0`. Then
+measurable and bounded, `σ > 0`. Only the marginal laws `V_s ~ N(m(s), σ(s)²s)` enter a CVA
+under independence, so one driver `Z` for all `s` loses nothing for this value; no exposure
+dynamics are modelled. Then
 
   `CVA = LGD · ∫₀ᵀ D(s) · [m(s)Φ(d_s) + σ(s)√s·φ(d_s)] · λ(s)Q(s) ds`, `d_s = m(s)/(σ(s)√s)`. -/
 theorem cva_gaussian [IsProbabilityMeasure ν] [IsProbabilityMeasure μ]

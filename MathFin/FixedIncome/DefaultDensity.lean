@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.FixedIncome.HazardCurve
+public import MathFin.FixedIncome.Cox
 
 /-!
 # The default-time density of a deterministic hazard curve
@@ -21,7 +22,7 @@ Here `Q = hazardSurvival h` (`FixedIncome/HazardCurve.lean`) and the density is
 
 ## Calculus layer (no probability)
 
-* `hazardSurvival_hasDerivAt` — `Q' = −λ·Q` at `t`, for `h` locally integrable and
+* `hasDerivAt_hazardSurvival` — `Q' = −λ·Q` at `t`, for `h` locally integrable and
   continuous at `t`.
 * `defaultDensity_nonneg` — `λ ≥ 0 ⇒ f ≥ 0`.
 * `integral_defaultDensity` — `∫ₐᵇ f = Q(a) − Q(b)` for continuous `h`;
@@ -30,8 +31,8 @@ Here `Q = hazardSurvival h` (`FixedIncome/HazardCurve.lean`) and the density is
 ## Measure-theoretic layer (a true Lebesgue density of `τ`'s law)
 
 For a random time `τ` (a.e.-measurable, finite measure space) whose CDF on `[0, ∞)` is
-`P(τ ≤ a) = 1 − Q(a)` — **hypothesized**, the shape of mathfin's
-`Cox.cox_cdf_timeVarying` — with `h` continuous and `≥ 0`:
+`P(τ ≤ a) = 1 − Q(a)` — **hypothesized**, the shape of
+`MathFin.Cox.cox_cdf_timeVarying` — with `h` continuous and `≥ 0`:
 
 * `map_eq_withDensity` — `Law(τ) = Leb.withDensity (1_{[0,∞)}·f)` (`lawDensity`).
 * `integral_comp_eq` — `E[g(τ)] = ∫_{[0,∞)} f·g` for measurable `g`.
@@ -43,6 +44,10 @@ For a random time `τ` (a.e.-measurable, finite measure space) whose CDF on `[0,
 Scope: deterministic, *continuous* hazard (the bootstrapped piecewise-constant curve of
 §16.4 is not covered); `τ` is not constructed here, and the stochastic-intensity (Cox
 mixing) density is not treated.
+
+## References
+
+* S. Bagaria, *Notes on Fixed Income Derivative Pricing* (lecture notes), ch. 16.
 -/
 
 @[expose] public section
@@ -59,7 +64,7 @@ noncomputable def defaultDensity (h : ℝ → ℝ) (t : ℝ) : ℝ := h t * haza
 /-- **`−dQ/dt = λ·Q`** (Bagaria ch. 16, Calc. 16.2): for a locally integrable hazard `h`
 continuous at `t`, the survival curve has derivative `−f(t)` at `t`. FTC for
 `∫₀ᵗ h` composed with `exp`. -/
-theorem hazardSurvival_hasDerivAt {h : ℝ → ℝ} (hloc : LocallyIntegrable h) {t : ℝ}
+theorem hasDerivAt_hazardSurvival {h : ℝ → ℝ} (hloc : LocallyIntegrable h) {t : ℝ}
     (ht : ContinuousAt h t) :
     HasDerivAt (hazardSurvival h) (-defaultDensity h t) t := by
   have hH : HasDerivAt (cumHazard h) (h t) t :=
@@ -79,26 +84,28 @@ theorem defaultDensity_nonneg {h : ℝ → ℝ} (hnn : ∀ s, 0 ≤ h s) (t : �
   mul_nonneg (hnn t) (hazardSurvival_pos h t).le
 
 /-- The density is continuous for a continuous hazard. -/
-theorem defaultDensity_continuous {h : ℝ → ℝ} (hh : Continuous h) :
+theorem continuous_defaultDensity {h : ℝ → ℝ} (hh : Continuous h) :
     Continuous (defaultDensity h) :=
   hh.mul (continuous_iff_continuousAt.2 fun _ ↦
-    (hazardSurvival_hasDerivAt hh.locallyIntegrable hh.continuousAt).continuousAt)
+    (hasDerivAt_hazardSurvival hh.locallyIntegrable hh.continuousAt).continuousAt)
 
 /-- **Interval default probability**: `∫ₐᵇ f = Q(a) − Q(b)` for a continuous hazard. -/
 theorem integral_defaultDensity {h : ℝ → ℝ} (hh : Continuous h) (a b : ℝ) :
     ∫ s in a..b, defaultDensity h s = hazardSurvival h a - hazardSurvival h b := by
   have hd : ∀ s, HasDerivAt (fun u ↦ -hazardSurvival h u) (defaultDensity h s) s := fun s ↦ by
-    have := (hazardSurvival_hasDerivAt hh.locallyIntegrable hh.continuousAt (t := s)).neg
+    have := (hasDerivAt_hazardSurvival hh.locallyIntegrable hh.continuousAt (t := s)).neg
     rw [neg_neg] at this
     exact this
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun s _ ↦ hd s)
-    ((defaultDensity_continuous hh).intervalIntegrable a b)]
+    ((continuous_defaultDensity hh).intervalIntegrable a b)]
   ring
 
-/-- **Default probability by `T`**: `∫₀ᵀ f = 1 − Q(T)` (calculus identity; no `τ`). -/
+/-- **Default probability by `T`**: `∫₀ᵀ f = 1 − Q(T)` (calculus identity; no `τ`). This is
+`MathFin.Cox.defaultDensity_antideriv`, restated through `defaultDensity` and
+`hazardSurvival`. -/
 theorem integral_defaultDensity_zero {h : ℝ → ℝ} (hh : Continuous h) (T : ℝ) :
-    ∫ s in (0:ℝ)..T, defaultDensity h s = 1 - hazardSurvival h T := by
-  rw [integral_defaultDensity hh, hazardSurvival_at_zero]
+    ∫ s in (0:ℝ)..T, defaultDensity h s = 1 - hazardSurvival h T :=
+  MathFin.Cox.defaultDensity_antideriv hh T
 
 /-! ### Measure-theoretic layer: `f` is the Lebesgue density of the law of `τ` -/
 
@@ -115,7 +122,7 @@ noncomputable def lawDensity (h : ℝ → ℝ) : ℝ → ℝ≥0∞ :=
 
 /-- `lawDensity h` is measurable for a continuous hazard. -/
 theorem measurable_lawDensity {h : ℝ → ℝ} (hh : Continuous h) : Measurable (lawDensity h) :=
-  ((defaultDensity_continuous hh).measurable.ennreal_ofReal).indicator measurableSet_Ici
+  ((continuous_defaultDensity hh).measurable.ennreal_ofReal).indicator measurableSet_Ici
 
 /-- Mass of `(−∞, a]` under `Leb.withDensity (lawDensity h)`, for `a ≥ 0`: `1 − Q(a)`. -/
 theorem withDensity_Iic {h : ℝ → ℝ} (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s) {a : ℝ}
@@ -125,7 +132,7 @@ theorem withDensity_Iic {h : ℝ → ℝ} (hh : Continuous h) (hnn : ∀ s, 0 �
     lintegral_indicator measurableSet_Ici, Measure.restrict_restrict measurableSet_Ici,
     Set.Ici_inter_Iic, ← integral_defaultDensity_zero hh a, intervalIntegral.integral_of_le ha,
     ← integral_Icc_eq_integral_Ioc, ofReal_integral_eq_lintegral_ofReal]
-  · exact (defaultDensity_continuous hh).continuousOn.integrableOn_Icc
+  · exact (continuous_defaultDensity hh).continuousOn.integrableOn_Icc
   · exact Filter.Eventually.of_forall fun s ↦ defaultDensity_nonneg hnn s
 
 /-- `Leb.withDensity (lawDensity h)` puts no mass on `(−∞, a]` for `a < 0`. -/
@@ -145,7 +152,7 @@ whose CDF on `[0, ∞)` is `P(τ ≤ a) = 1 − Q(a)` (`Q = hazardSurvival h`). 
   `Law(τ) = Leb.withDensity (1_{[0,∞)} · ofReal (λ·Q))`.
 
 The CDF hypothesis has exactly the shape of the Cox-construction CDF identity
-`MathFin.Cox.cox_cdf_timeVarying` (mathfin `FixedIncome/Cox.lean`); `τ` is hypothesized,
+`MathFin.Cox.cox_cdf_timeVarying` (`FixedIncome/Cox.lean`); `τ` is hypothesized,
 not constructed, here. -/
 theorem map_eq_withDensity [IsFiniteMeasure μ] {h : ℝ → ℝ} (hh : Continuous h)
     (hnn : ∀ s, 0 ≤ h s) {τ : Ω → ℝ} (hτ : AEMeasurable τ μ)
@@ -202,9 +209,10 @@ theorem integral_indicator_Iic_eq [IsFiniteMeasure μ] {h : ℝ → ℝ} (hh : C
   · simp [hs]
 
 /-- **Cross-check against Mathlib's exponential law** (constant hazard `λ > 0`): the
-`lawDensity` of the flat curve reproduces `expMeasure λ`, the law that the pin's
-`PoissonInterarrival.map_firstArrival_eq_expMeasure` assigns to the first arrival of a
-rate-`λ` Poisson process. Obtained from `map_eq_withDensity` with `τ = id`. -/
+`lawDensity` of the flat curve reproduces `expMeasure λ`, the law that
+`MathFin.PoissonInterarrival.map_firstArrival_eq_expMeasure`
+(`Foundations/PoissonInterarrival.lean`) assigns to the first arrival of a rate-`λ` Poisson
+process. Obtained from `map_eq_withDensity` with `τ = id`. -/
 theorem expMeasure_eq_withDensity {r : ℝ} (hr : 0 < r) :
     ProbabilityTheory.expMeasure r = volume.withDensity (lawDensity fun _ ↦ r) := by
   haveI := ProbabilityTheory.isProbabilityMeasure_expMeasure hr

@@ -22,12 +22,13 @@ risk-neutral long-run level is `θ − λσ/κ`. The terminal means differ by `�
 
 * `vasicekSDEMean_physical_eq_riskNeutral`: the real-world mean equals the risk-neutral mean
   plus `λσ·B(T)`; the analogue of `bsTerminal_physical_eq_riskNeutral`.
-* `vasicekShortRate_physical_eq_riskNeutral`: a static Girsanov (Esscher) tilt of the
-  real-world measure under which the same terminal short rate `r_T` has the risk-neutral
-  Gaussian law `N(mean_θ − λσ·B(T), var)`.
+* `vasicekShortRate_hasLaw_esscherTilt`: a static Girsanov (Esscher) tilt of the
+  real-world measure under which the same terminal short rate `r_T` has the Gaussian law
+  `N(mean_θ − λσ·B(T), var)` that the risk-neutral measure assigns it.
 
 The tilt is on the normalised terminal driver of `r_T` alone, so it is a terminal-law
-statement, not the pathwise Girsanov change of the whole Brownian path.
+statement, not the pathwise Girsanov change of the whole Brownian path; the tilted measure
+is not the risk-neutral measure.
 -/
 
 @[expose] public section
@@ -57,8 +58,16 @@ Let `r_T = mean_θ + σ ∫₀ᵀ e^{−κ(T−s)} dB_s` be the real-world termi
 `Z = (∫₀ᵀ e^{−κ(T−s)} dB_s)/√v` its standard-normal driver (`v = (1 − e^{−2κT})/(2κ)`).
 Under the Esscher tilt `Q = μ.withDensity(exp(cZ − c²/2))` with `c = −lam·B(T)/√v`, the same
 `r_T` has law `N(mean_θ − lamσ·B(T), var)`: the mean of the model with long-run level
-`θ − lamσ/κ`, i.e. the risk-neutral law under market price of risk `lam`. -/
-theorem vasicekShortRate_physical_eq_riskNeutral (hB : IsPreBrownianReal B μ)
+`θ − lamσ/κ`, i.e. the law the risk-neutral measure assigns to `r_T` under market price of
+risk `lam` (a textbook fact, not proved here). `Q` is *not* the risk-neutral measure: it is a
+`T`-dependent tilt of `r_T`'s own normalised driver, so it reproduces the terminal marginal
+only — under `Q` the rest of the path (e.g. `∫₀ᵀ r_s ds`) does not have its risk-neutral
+law, and `Q` does not price discounted payoffs. The market-price-of-risk Girsanov density
+`exp(−lam·B_T − lam²T/2)` is a different measure with the same `r_T`-marginal; that
+identification needs the joint Gaussian law of `(B_T, ∫₀ᵀ e^{−κ(T−s)} dB_s)` and is not
+proved. As in `vasicekShortRate_hasLaw_gaussian`, `r_T` is the Wiener representation of the
+OU solution; that it solves the Vasicek SDE is cited, not proved. -/
+theorem vasicekShortRate_hasLaw_esscherTilt (hB : IsPreBrownianReal B μ)
     (r₀ θ σ lam : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) (hT : 0 < T) :
     let I : Ω → ℝ := fun ω ↦ wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω
     let s : ℝ := Real.sqrt (vasicekSDEVariance 1 κ T)
