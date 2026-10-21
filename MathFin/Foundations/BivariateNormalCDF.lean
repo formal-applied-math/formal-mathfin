@@ -29,6 +29,12 @@ gives a standard bivariate normal pair with correlation `r`, and
   `(X, Y)`, so `N₂(a, b; r) = N₂(b, a; r)`.
 * `bivariateNormalCDF_zero`, `bivariateNormalCDF_one`, `bivariateNormalCDF_neg_one`: the
   independent, comonotone and countermonotone cases.
+* `bivariateNormalCDF_flip_snd`: **`N₂(a, b; r) + N₂(a, -b; -r) = Φ(a)`**, the two-asset
+  analogue of `Phi_add_Phi_neg` — the key algebraic ingredient behind exact two-asset closed
+  forms (Stulz 1982, Heynen & Kat 1994/96) that package `N₂(·,·;ρ)` / `N₂(·,·;-ρ)` pairs.
+* `bivariateNormalCDF_neg_neg`: **`N₂(-a, -b; r) = 1 - Φ(a) - Φ(b) + N₂(a, b; r)`**, the joint
+  survival identity, derived purely algebraically from `bivariateNormalCDF_flip_snd` and
+  `bivariateNormalCDF_comm` (no new measure-theoretic argument).
 
 Outside `r ∈ [-1, 1]` the square root truncates to `0` and the construction is no longer a
 bivariate normal; every result that needs it carries the hypothesis `r ^ 2 ≤ 1`.
@@ -213,5 +219,89 @@ theorem bivariateNormalCDF_neg_one (a b : ℝ) :
   · rw [posPart_eq_self.2 (sub_nonneg.2 (strictMono_Phi.monotone h)), ← Iic_sdiff_Iic,
       measureReal_sdiff (Iic_subset_Iic.2 h) measurableSet_Iic, ← cdf_eq_real, ← cdf_eq_real,
       cdf_gaussianReal_zero_one]
+
+/-! ## A sign-flip identity: `N₂(a, b; r) + N₂(a, -b; -r) = Φ(a)`
+
+Negating the second coordinate of the Cholesky pair sends correlation `r` to `-r` without
+touching the `X`-margin, so splitting the real line into the closed rays `Iic b` and `Ici b`
+(covering `ℝ`, meeting only at the null set `{b}` for the atom-free `Y`-margin) gives the
+identity below. It is the two-asset analogue of `Phi_add_Phi_neg`. -/
+
+/-- The sign-flip map `(x, y) ↦ (x, -y)` sends `bivariateNormalLaw r` to `bivariateNormalLaw
+(-r)`: negating `Y` negates the correlation, unconditionally in `r`. -/
+lemma bivariateNormalLaw_map_negSnd (r : ℝ) :
+    (bivariateNormalLaw r).map (fun p : ℝ × ℝ ↦ (p.1, -p.2)) = bivariateNormalLaw (-r) := by
+  have hnegStd : stdNormalPair.map (fun p : ℝ × ℝ ↦ (p.1, -p.2)) = stdNormalPair := by
+    have hf : (fun p : ℝ × ℝ ↦ (p.1, -p.2)) = Prod.map id (fun x : ℝ ↦ -x) := rfl
+    have hneg : (gaussianReal (0 : ℝ) (1 : NNReal)).map ((-1 : ℝ) * ·) = gaussianReal 0 1 := by
+      have h := gaussianReal_map_const_mul (μ := (0 : ℝ)) (v := (1 : NNReal)) (-1)
+      simpa using h
+    have hneg' : (gaussianReal (0 : ℝ) (1 : NNReal)).map (fun x : ℝ ↦ -x) = gaussianReal 0 1 := by
+      simpa [neg_one_mul] using hneg
+    rw [hf, stdNormalPair, ← Measure.map_prod_map _ _ measurable_id (by fun_prop),
+      Measure.map_id, hneg']
+  have hcomm : (fun p : ℝ × ℝ ↦ (p.1, -p.2)) ∘ choleskyPair r =
+      choleskyPair (-r) ∘ (fun p : ℝ × ℝ ↦ (p.1, -p.2)) := by
+    funext p
+    simp only [Function.comp, choleskyPair, neg_sq, Prod.mk.injEq]
+    constructor <;> first | ring | trivial
+  rw [bivariateNormalLaw, bivariateNormalLaw,
+    Measure.map_map (by fun_prop) (measurable_choleskyPair r), hcomm,
+    ← Measure.map_map (measurable_choleskyPair (-r)) (by fun_prop), hnegStd]
+
+/-- **The sign-flip identity**: `N₂(a, b; r) + N₂(a, -b; -r) = Φ(a)`. Splits `(bivariateNormalLaw
+r).real (Iic a ×ˢ ·)` across the closed-ray cover `Iic b ∪ Ici b = univ` (meeting at the null
+set `{b}`, since the `Y`-margin `map_snd_bivariateNormalLaw` is atom-free), then reads off the
+`X`-margin via `map_fst_bivariateNormalLaw`. -/
+theorem bivariateNormalCDF_flip_snd (a b : ℝ) {r : ℝ} (hr : r ^ 2 ≤ 1) :
+    bivariateNormalCDF a b r + bivariateNormalCDF a (-b) (-r) = Phi a := by
+  have hmeas : MeasurableSet (Iic a ×ˢ Iic b : Set (ℝ × ℝ)) :=
+    measurableSet_Iic.prod measurableSet_Iic
+  have hflip : bivariateNormalCDF a (-b) (-r) = (bivariateNormalLaw r).real (Iic a ×ˢ Ici b) := by
+    rw [bivariateNormalCDF_eq_law, ← bivariateNormalLaw_map_negSnd r,
+      map_measureReal_apply (by fun_prop) (measurableSet_Iic.prod measurableSet_Iic)]
+    congr 1
+    ext p
+    simp only [mem_preimage, mem_prod, mem_Iic, mem_Ici]
+    constructor
+    · rintro ⟨h1, h2⟩; exact ⟨h1, by linarith⟩
+    · rintro ⟨h1, h2⟩; exact ⟨h1, by linarith⟩
+  have hsingleton : (bivariateNormalLaw r).real (Iic a ×ˢ ({b} : Set ℝ)) = 0 := by
+    have hsub : (Iic a ×ˢ ({b} : Set ℝ) : Set (ℝ × ℝ)) ⊆ univ ×ˢ ({b} : Set ℝ) :=
+      prod_mono (subset_univ _) subset_rfl
+    have hzero : (bivariateNormalLaw r).real (univ ×ˢ ({b} : Set ℝ)) = 0 := by
+      have : NullSingletonClass (gaussianReal (0 : ℝ) (1 : NNReal)) :=
+        nullSingletonClass_gaussianReal one_ne_zero
+      rw [show (univ ×ˢ ({b} : Set ℝ) : Set (ℝ × ℝ)) = Prod.snd ⁻¹' {b} by ext p; simp,
+        ← map_measureReal_apply measurable_snd (measurableSet_singleton b),
+        map_snd_bivariateNormalLaw]
+      simp [measureReal_def]
+    exact le_antisymm (hzero ▸ measureReal_mono hsub) measureReal_nonneg
+  have hunion : (Iic a ×ˢ Iic b : Set (ℝ × ℝ)) ∪ (Iic a ×ˢ Ici b) = Iic a ×ˢ univ := by
+    rw [← prod_union]; congr 1; ext x; simp
+  have hinter : (Iic a ×ˢ Iic b : Set (ℝ × ℝ)) ∩ (Iic a ×ˢ Ici b) = Iic a ×ˢ {b} := by
+    rw [← prod_inter]; congr 1; ext x; simp [le_antisymm_iff]
+  have hkey := measureReal_union_add_inter (μ := bivariateNormalLaw r)
+    (s := Iic a ×ˢ Iic b) (t := Iic a ×ˢ Ici b) (measurableSet_Iic.prod measurableSet_Ici)
+  rw [hunion, hinter, hsingleton, add_zero] at hkey
+  have hmargin : (bivariateNormalLaw r).real (Iic a ×ˢ (univ : Set ℝ)) = Phi a := by
+    rw [show (Iic a ×ˢ (univ : Set ℝ) : Set (ℝ × ℝ)) = Prod.fst ⁻¹' Iic a by ext p; simp,
+      ← map_measureReal_apply measurable_fst measurableSet_Iic,
+      map_fst_bivariateNormalLaw hr]
+    simp [measureReal_def, Phi_def]
+  rw [bivariateNormalCDF_eq_law, hflip, ← hkey, hmargin]
+
+/-- **Joint survival identity**: `N₂(-a, -b; r) = 1 - Φ(a) - Φ(b) + N₂(a, b; r)`, derived purely
+algebraically from the sign-flip identity `bivariateNormalCDF_flip_snd` and the symmetry
+`bivariateNormalCDF_comm` — no new measure-theoretic content. This is the identity that
+collapses the strike-side terms of Stulz-style two-asset closed forms. -/
+theorem bivariateNormalCDF_neg_neg (a b : ℝ) {r : ℝ} (hr : r ^ 2 ≤ 1) :
+    bivariateNormalCDF (-a) (-b) r = 1 - Phi a - Phi b + bivariateNormalCDF a b r := by
+  have hr' : (-r) ^ 2 ≤ 1 := by rwa [neg_sq]
+  have h1 := bivariateNormalCDF_flip_snd a b hr
+  have h2 := bivariateNormalCDF_flip_snd (-b) a hr'
+  rw [neg_neg, Phi_neg, bivariateNormalCDF_comm (-b) a hr',
+    bivariateNormalCDF_comm (-b) (-a) hr] at h2
+  linarith
 
 end MathFin
