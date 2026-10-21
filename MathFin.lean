@@ -50,6 +50,8 @@ import MathFin.Foundations.PoissonInterarrival
 -- Poisson probability generating function E[x^N] = e^{r(x−1)} (absent from
 -- Mathlib); the engine behind Merton-mixture compensation identities
 import MathFin.Foundations.PoissonPgf
+-- CreditRisk+ sector pgf: Poisson default count mixed over a Gamma sector factor
+import MathFin.Foundations.GammaPoissonMixturePgf
 -- The freezing lemma: E[g(X, Y)] = ∫ x, E[g(x, Y)] d(law X) for independent X, Y
 import MathFin.Foundations.IndepFreezing
 -- Jensen's inequality through a supporting line (no closed domain needed)
@@ -505,6 +507,8 @@ import MathFin.FixedIncome.ConvexityImmunization
 import MathFin.FixedIncome.YieldCurve
 import MathFin.FixedIncome.Bootstrapping
 import MathFin.FixedIncome.Credit
+-- Defaultable ZCB price under correlated Gaussian short rate and hazard rate
+import MathFin.FixedIncome.CorrelatedGaussianDefaultableBond
 -- First-to-default: basket intensity = Σ single-name intensities
 -- (bridges Foundations.ExpMin into the Credit vocabulary)
 import MathFin.FixedIncome.FirstToDefault
