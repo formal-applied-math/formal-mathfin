@@ -304,6 +304,15 @@ missing. The python gates pass, including `tests/test_attribution.py` with full 
 `.mailmap` maps Yang Ye's second address. `AxiomAuditGen` and `formalization.yaml` are
 regenerated at corpus 544.
 
+After the batch, BrownianMotion moved from `0d5b6eb` to `a7ad7af`, its master: six commits, of
+which the only Lean change reorders the variables of four lemmas in `Auxiliary/Martingale.lean`,
+none cited here. Its master pins the same Mathlib (`0434c03`), Lean (`v4.33.0-rc1`) and every
+shared dependency as this library, so Mathlib does not move. The ledger was re-verified in full
+(all 544 entries) at the new pin. Mathlib master (Lean `v4.36.0-rc1`) was checked for the gaps
+the library fills itself — the `tanh` derivative, the Gamma MGF and convolutions, `erf`/`erfinv`
+and `Φ⁻¹`, the Hermite ODE, `Lᵖ` dominated convergence, Riemann sums, the Student-t law — and
+none is filled there yet.
+
 ## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
 
 Scope: `FixedIncome/CIRRiccati` by Alfredo Garcia (@oxarbitrage), merged with its two commits
