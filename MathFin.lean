@@ -620,6 +620,8 @@ import MathFin.RiskMeasures.TrancheLoss
 import MathFin.Foundations.SuperhedgingDuality
 -- LSV calibration: the leverage-posterior core (eq 11.1's form layer)
 import MathFin.Foundations.LSVLeverage
+-- Estimation in practice: detection D-terms and realised-volatility bias (eqs 21.2–21.4)
+import MathFin.Foundations.Estimation
 
 -- Bridges (certified cross-domain unifications)
 import MathFin.Bridges.ConcentrationVariance
