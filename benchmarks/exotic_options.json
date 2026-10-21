@@ -368,6 +368,54 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.normalizedSpread_hasLaw_std (MathFin/BlackScholes/MargrabeGrounding.lean): Gaussianity of a linear image of the pair, variance 1 from margrabe_effective_variance. SCOPE: the law of the normalized spread only; Margrabe's price as the discounted expected exchange payoff is not part of this entry."
       }
+    },
+    {
+      "id": "mf-soft-barrier-call-sub-put",
+      "name": "Soft Barrier Knock-In: Call Minus Put",
+      "domain": "mathematical_finance",
+      "description": "Proves that, for Hart & Ross's soft-barrier (corridor [L,U]) knock-in closed form, the call-minus-put difference w(1) - w(-1) collapses to a form with every normal CDF term cancelled, leaving only the (A1-A2) and (B1-B2) corridor-reflection factors. A structural cross-check that the eta sign is threaded consistently through both the outer sign and all eight Phi arguments of the transcribed formula.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.SoftBarrierOption\n\nopen MathFin\n\n/-- **Call minus put, soft-barrier knock-in.** Re-exports\n`MathFin.softBarrier_call_sub_put`. -/\ntheorem soft_barrier_call_sub_put (S X U L b r σ T : ℝ) :\n    softBarrierKnockIn 1 S X U L b r σ T - softBarrierKnockIn (-1) S X U L b r σ T\n      = (sbTerm1Coef S X b r σ T * (sbA1 S X U b σ - sbA2 S X L b σ)\n          - sbTerm2Coef S X b r σ T * (sbBB1 S X U b σ - sbBB2 S X L b σ)) / (U - L) :=\n  MathFin.softBarrier_call_sub_put S X U L b r σ T\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Hart & Ross 1994, soft barrier options; Haug, The Complete Guide to Option Pricing Formulas, §\"Soft Barrier Options\"",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full proof, axioms-clean. Transcribed from, and cross-checked against, QuantLib's AnalyticSoftBarrierEngine::knockInValue (MathFin/BlackScholes/SoftBarrierOption.lean). SCOPE: an algebraic identity on the transcribed closed form (call value minus put value at fixed knock-in direction). NOT PROVED: that the soft-barrier formula is itself a discounted expected payoff under the corridor knock-in probability."
+      }
+    },
+    {
+      "id": "mf-partial-time-barrier-down-add-up",
+      "name": "Partial-Time Barrier: Down-Window Plus Up-Window",
+      "domain": "mathematical_finance",
+      "description": "Proves that, for Haug's partial-time (start-window, call) barrier closed form CA, summing the down-window (eta=1) and up-window (eta=-1) values collapses every bivariate normal CDF term to a single univariate Phi, via the correlation identity rho^2 <= 1 that holds whenever the monitoring window [0,t1] is a sub-interval of the option's life [0,T].",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PartialTimeBarrierOption\n\nopen MathFin\n\n/-- **Down-window plus up-window, same strike/barrier.** Re-exports\n`MathFin.ptCA_down_add_up`. -/\ntheorem partial_time_barrier_down_add_up (S X H b r σ t1 T : ℝ) (ht1 : 0 ≤ t1) (hT : t1 ≤ T) :\n    ptCA 1 S X H b r σ t1 T + ptCA (-1) S X H b r σ t1 T\n      = S * Real.exp ((b - r) * T) *\n          (Phi (ptD1 S X b σ T) - ptHSmu1 S H b σ * Phi (ptF1 S X H b σ T))\n        - X * Real.exp (-r * T) *\n            (Phi (ptD2 S X b σ T) - ptHSmu S H b σ * Phi (ptF2 S X H b σ T)) :=\n  MathFin.ptCA_down_add_up S X H b r σ t1 T ht1 hT\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Haug, The Complete Guide to Option Pricing Formulas, §\"Partial-Time Barrier Options\"",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full proof, axioms-clean. Transcribed from, and cross-checked against, QuantLib's AnalyticPartialTimeBarrierOptionEngine::CA (MathFin/BlackScholes/PartialTimeBarrierOption.lean), start-window call side only. SCOPE: an identity between the down- and up-window closed forms via bivariateNormalCDF_flip_snd. NOT PROVED: the end-window case (CoB1/CoB2), the put side, or that CA is itself a discounted expected barrier-knock payoff."
+      }
+    },
+    {
+      "id": "mf-binary-barrier-inout-parity",
+      "name": "Binary Barrier In-Out Parity (Down and Up Families)",
+      "domain": "mathematical_finance",
+      "description": "Proves that, for Rubinstein & Reiner's binary (digital) barrier closed forms, the down-knock-in plus down-knock-out values sum to the vanilla digital value B1 across all 16 (call/put, strike-vs-barrier) branches, and likewise for the up-knock-in/up-knock-out pair -- a genuine cross-check that each branch's B2/B3/B4 correction terms cancel against its paired branch.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.BinaryBarrierOption\n\nopen MathFin\n\n/-- **In-out parity, down-barrier family.** Re-exports `MathFin.bboDownIn_add_DownOut`. -/\ntheorem binary_barrier_down_in_add_out (S X H mu σ T : ℝ) (isCall xGeH : Bool) :\n    bboDownInAlpha S X H mu σ T isCall xGeH + bboDownOutAlpha S X H mu σ T isCall xGeH\n      = bboB1 S X mu σ T isCall :=\n  MathFin.bboDownIn_add_DownOut S X H mu σ T isCall xGeH\n\n/-- **In-out parity, up-barrier family.** Re-exports `MathFin.bboUpIn_add_UpOut`. -/\ntheorem binary_barrier_up_in_add_out (S X H mu σ T : ℝ) (isCall xGeH : Bool) :\n    bboUpInAlpha S X H mu σ T isCall xGeH + bboUpOutAlpha S X H mu σ T isCall xGeH\n      = bboB1 S X mu σ T isCall :=\n  MathFin.bboUpIn_add_UpOut S X H mu σ T isCall xGeH\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Rubinstein & Reiner 1991; Haug, The Complete Guide to Option Pricing Formulas, §\"Binary Barrier Options\"",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full proof, axioms-clean. Transcribed from, and cross-checked against, QuantLib's AnalyticBinaryBarrierEngine_helper::payoffAtExpiry (MathFin/BlackScholes/BinaryBarrierOption.lean). SCOPE: an algebraic parity identity across the 16-branch transcription, decided by case split and ring. NOT PROVED: that the binary-barrier closed forms are themselves discounted expected knock-in/out digital payoffs."
+      }
     }
   ]
 }

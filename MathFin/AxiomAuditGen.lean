@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (742 MathFin constants, 29 upstream). Citations
+  corpus (746 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -586,6 +586,12 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.basketMomentMatchPrice_single_eq_integral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.basketMomentMatchPrice_single_eq_integral
+
+/-- info: 'MathFin.bboDownIn_add_DownOut' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bboDownIn_add_DownOut
+
+/-- info: 'MathFin.bboUpIn_add_UpOut' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bboUpIn_add_UpOut
 
 /-- info: 'MathFin.betSize_sqrt_mul_zScore' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.betSize_sqrt_mul_zScore
@@ -1919,6 +1925,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.processToLpPredictable_coeFn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.processToLpPredictable_coeFn
 
+/-- info: 'MathFin.ptCA_down_add_up' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ptCA_down_add_up
+
 /-- info: 'MathFin.putCall_parity_from_no_arbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.putCall_parity_from_no_arbitrage
 
@@ -1987,6 +1996,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.sharpeSqTwo_critical_iff_crossProduct_FOC' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.sharpeSqTwo_critical_iff_crossProduct_FOC
+
+/-- info: 'MathFin.softBarrier_call_sub_put' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.softBarrier_call_sub_put
 
 /-- info: 'MathFin.sortinoRatio_scale_invariant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.sortinoRatio_scale_invariant
