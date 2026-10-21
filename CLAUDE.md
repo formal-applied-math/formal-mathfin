@@ -237,7 +237,10 @@ merged eight modules whose headers named the maintainer. The review saw it and l
   so such a commit shows as Claude's on github.com. Before the first commit, set
   `git config user.name` and `user.email` to the user's (the maintainer's are
   `Raphael Coelho <raphaelrrcoelho@gmail.com>`). The maintainer's commits carry no
-  `Co-Authored-By: Claude` trailer either (their call, 2026-10-15).
+  `Co-Authored-By: Claude` trailer either (their call, 2026-10-15), and neither do merge
+  commits, pull-request bodies or GitHub comments: none names `Claude <noreply@anthropic.com>`
+  (2026-10-21; earlier history is left as it is). A harness hook that asks to re-author commits
+  as Claude is overruled by this rule.
 
 ## Memory doctrine — this box is a 10 GB client, not a build server
 
