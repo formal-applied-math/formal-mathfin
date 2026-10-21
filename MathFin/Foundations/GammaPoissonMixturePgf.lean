@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import Mathlib
+public import MathFin.Foundations.PoissonPgf
 
 /-!
 # CreditRisk+ sector probability-generating function (Poisson–Gamma mixture)
@@ -14,41 +15,34 @@ CreditRisk+ (Credit Suisse First Boston, 1997) models each sector's systematic
 risk factor as a random intensity `Λ ∼ Gamma(a, r)` (shape `a`, Mathlib's
 *rate* parametrisation `r = 1/β` for the technical document's scale `β`).
 Conditional on `Λ = λ`, the sector default count `N` is Poisson(`λ`), with
-conditional pgf `E[z^N | Λ = λ] = exp(λ(z−1))` (the Poisson pgf of
-`Foundations/PoissonPgf.lean`, `integral_pow_poissonMeasure`; this file does not import it, since
-the mixing hypothesis below substitutes the pgf's closed form `exp(λ(z−1))` directly rather than
-invoking that lemma).
+conditional pgf `E[z^N | Λ = λ] = exp(λ(z−1))`
+(`PoissonPgf.integral_pow_poissonMeasure`, `Foundations/PoissonPgf.lean`).
 
-**Mixing hypothesis.** This file does not build `N` and `Λ` as random
-variables on a common probability space with a measure-theoretic conditional
-law; instead it states the conditional-independence / mixing structure as an
-explicit mathematical fact used by the tower property: the *unconditional*
-sector pgf is obtained by integrating the conditional pgf `λ ↦ exp(λ(z−1))`
-against the law of `Λ`,
+**The mixture, as an iterated integral.** The unconditional sector pgf is the
+tower property `G_N(z) = E_Λ[E[z^N | Λ]]`. Here it is stated as the iterated
+integral
 
-  `G_N(z) = E_Λ[E[z^N | Λ]] = ∫ λ, exp(λ(z−1)) ∂(Gamma(a,r))`.
+  `∫ λ, (∫ n, z ^ n ∂Poisson(λ)) ∂Gamma(a, r) = (r / (r − (z − 1))) ^ a`,
 
-That this tower-property substitution is valid is exactly the hypothesis "`N`
-is conditionally Poisson(`Λ`) given `Λ`, with `Λ` drawn from the stated Gamma
-law" — stated here, not silently assumed. The content proved is the resulting
-integral: it is the moment-generating function of the Gamma law evaluated at
-`z − 1`, which has the closed negative-binomial-style form.
+whose inner integral is the Poisson pgf and whose outer integral is the Gamma
+moment-generating function at `z − 1`. The mixed law of `N` itself (a
+`Measure.bind` of the Poisson kernel against the Gamma law) and a pair of random
+variables `(N, Λ)` with this conditional structure are not constructed.
 
-The loss-banding approximation that turns the exact per-sector/portfolio pgf
-into CreditRisk+'s practical recursion is **out of scope** here; only the
-exact pre-banding pgf is proved.
+The loss-banding approximation that turns the exact per-sector pgf into
+CreditRisk+'s practical recursion is **out of scope** here, as is the portfolio
+pgf across independent sectors.
 
 ## Main results
 
-* `integral_exp_mul_gammaMeasure`: the Gamma(`a`, `r`) moment-generating
-  function, `∫ λ, exp(s·λ) ∂Gamma(a,r) = (r / (r − s)) ^ a` for `s < r`.
-* `sectorPgf`: the Poisson–Gamma-mixture sector pgf, an instance of the above
-  at `s = z − 1`.
-* `sectorPgf_negBinomial_form`: the same pgf in the technical document's
-  `p = β / (1 + β)` scale parametrisation, `((1 − p) / (1 − p·z)) ^ a`.
-* `portfolioPgf`: the portfolio pgf before loss-banding is the product across
-  sectors of the per-sector pgf (independent sectors, stated as the product
-  identity rather than built from a joint sum random variable).
+* `integral_exp_mul_gammaMeasure`, `mgf_id_gammaMeasure`: the Gamma(`a`, `r`)
+  moment-generating function, `∫ λ, exp(s·λ) ∂Gamma(a,r) = (r / (r − s)) ^ a`
+  for `s < r` (Mathlib has the Gamma law but no Gamma MGF).
+* `integral_integral_pow_poissonMeasure_gammaMeasure`: the Poisson–Gamma
+  mixture sector pgf, as the iterated integral above, for `z < r + 1`.
+* `integral_integral_pow_poissonMeasure_gammaMeasure_eq_negBinomial`: the same
+  pgf in the technical document's `p = β / (1 + β)` scale parametrisation,
+  `((1 − p) / (1 − p·z)) ^ a`.
 * `poissonMeasure_real_compl_singleton_zero`: `PD_i = 1 − e^{−λ_i}`, i.e.
   `P(N_i ≠ 0) = 1 − e^{−λ_i}` for `N_i ∼ Poisson(λ_i)`.
 -/
@@ -115,39 +109,45 @@ theorem integral_exp_mul_gammaMeasure {a r s : ℝ} (ha : 0 < a) (hr : 0 < r) (h
   rw [mul_comm ((1 / (r - s)) ^ a) (Gamma a), ← mul_assoc, div_mul_cancel₀ _ hGpos.ne',
     ← Real.mul_rpow hr.le (by positivity), mul_one_div]
 
-/-- **CreditRisk+ sector pgf** (Poisson–Gamma mixture, exact, pre-loss-banding):
-`G_{N(s)}(z) = ∫ λ, exp(λ(z−1)) ∂(Gamma(a,r))`, valid for `z < r + 1`. See the module docstring
-for the conditional-independence mixing hypothesis this instantiates `integral_exp_mul_gammaMeasure`
-under. -/
-theorem sectorPgf {a r z : ℝ} (ha : 0 < a) (hr : 0 < r) (hz : z < r + 1) :
-    ∫ lam, rexp (lam * (z - 1)) ∂(gammaMeasure a r) = (r / (r - (z - 1))) ^ a := by
-  have := integral_exp_mul_gammaMeasure ha hr (show z - 1 < r by linarith)
-  simpa [mul_comm] using this
+/-- The Gamma moment-generating function in Mathlib's `mgf` form, the sibling of
+`mgf_id_gaussianReal`: `mgf id (gammaMeasure a r) s = (r / (r − s)) ^ a` for `s < r`. -/
+theorem mgf_id_gammaMeasure {a r s : ℝ} (ha : 0 < a) (hr : 0 < r) (hs : s < r) :
+    mgf id (gammaMeasure a r) s = (r / (r - s)) ^ a :=
+  integral_exp_mul_gammaMeasure ha hr hs
+
+/-- **CreditRisk+ sector pgf** (Poisson–Gamma mixture, exact, before loss-banding): for
+`z < r + 1`, the Poisson pgf `E[z^N | Λ = λ] = ∫ n, z ^ n ∂Poisson(λ)` integrated against
+`Λ ∼ Gamma(a, r)` is `(r / (r − (z − 1))) ^ a`. This is the tower property
+`E[z^N] = E_Λ[E[z^N | Λ]]` written as an iterated integral; the mixed law of `N` is not
+constructed. The Gamma law lives on `[0, ∞)`, so `λ.toNNReal = λ` almost everywhere and the outer
+integral is the Gamma MGF at `z − 1`. -/
+theorem integral_integral_pow_poissonMeasure_gammaMeasure {a r z : ℝ} (ha : 0 < a) (hr : 0 < r)
+    (hz : z < r + 1) :
+    ∫ lam, (∫ n, z ^ n ∂poissonMeasure lam.toNNReal) ∂gammaMeasure a r =
+      (r / (r - (z - 1))) ^ a := by
+  have hmeasf : Measurable (gammaPDF a r) := (measurable_gammaPDFReal a r).ennreal_ofReal
+  have hpos : ∀ᵐ lam ∂gammaMeasure a r, 0 ≤ lam := by
+    rw [gammaMeasure, ae_withDensity_iff hmeasf]
+    exact ae_of_all _ fun lam hlam ↦ not_lt.1 fun hneg ↦ hlam (gammaPDF_of_neg hneg)
+  rw [← integral_exp_mul_gammaMeasure ha hr (show z - 1 < r by linarith)]
+  refine integral_congr_ae ?_
+  filter_upwards [hpos] with lam hlam
+  rw [PoissonPgf.integral_pow_poissonMeasure, Real.coe_toNNReal _ hlam, mul_comm lam]
 
 /-- **Sector pgf, negative-binomial-style `p`-form.** With `β > 0` the mixture scale and
 `p = β / (1 + β)`, the sector pgf is `((1 − p) / (1 − p·z)) ^ a`, matching the CreditRisk+
 technical document's parametrisation. Mathlib's `gammaMeasure` is rate-parametrised, so the
 Gamma law used is `gammaMeasure a (1 / β)`. -/
-theorem sectorPgf_negBinomial_form {a β z : ℝ} (ha : 0 < a) (hβ : 0 < β)
-    (hz : z < 1 + 1 / β) :
-    ∫ lam, rexp (lam * (z - 1)) ∂(gammaMeasure a (1 / β))
-      = ((1 - β / (1 + β)) / (1 - β / (1 + β) * z)) ^ a := by
+theorem integral_integral_pow_poissonMeasure_gammaMeasure_eq_negBinomial {a β z : ℝ}
+    (ha : 0 < a) (hβ : 0 < β) (hz : z < 1 + 1 / β) :
+    ∫ lam, (∫ n, z ^ n ∂poissonMeasure lam.toNNReal) ∂gammaMeasure a (1 / β) =
+      ((1 - β / (1 + β)) / (1 - β / (1 + β) * z)) ^ a := by
   have hr : (0 : ℝ) < 1 / β := by positivity
-  rw [sectorPgf ha hr (by rw [add_comm]; linarith)]
+  rw [integral_integral_pow_poissonMeasure_gammaMeasure ha hr (by rw [add_comm]; linarith)]
   congr 1
   have hβ1 : (1 : ℝ) + β ≠ 0 := by positivity
   field_simp
   ring
-
-/-- **Portfolio pgf before loss-banding**: the product across sectors of the per-sector pgf
-(sectors independent, stated as the product identity itself rather than constructed from a joint
-sum random variable — see the module docstring). -/
-theorem portfolioPgf {ι : Type*} (sectors : Finset ι) (a r : ι → ℝ) (z : ℝ)
-    (ha : ∀ i ∈ sectors, 0 < a i) (hr : ∀ i ∈ sectors, 0 < r i)
-    (hz : ∀ i ∈ sectors, z < r i + 1) :
-    ∏ i ∈ sectors, ∫ lam, rexp (lam * (z - 1)) ∂(gammaMeasure (a i) (r i))
-      = ∏ i ∈ sectors, (r i / (r i - (z - 1))) ^ (a i) :=
-  Finset.prod_congr rfl fun i hi ↦ sectorPgf (ha i hi) (hr i hi) (hz i hi)
 
 /-- **`PD_i = 1 − e^{−λ_i}`**: for `N ∼ Poisson(λ)`, the default probability `P(N ≠ 0)` equals
 `1 − e^{−λ}`, since `P(N = 0) = e^{−λ}` and probabilities sum to `1`. -/
@@ -155,9 +155,7 @@ theorem poissonMeasure_real_compl_singleton_zero (lam : ℝ≥0) :
     (poissonMeasure lam).real {0}ᶜ = 1 - rexp (-(lam : ℝ)) := by
   have h0 : (poissonMeasure lam).real {0} = rexp (-(lam : ℝ)) := by
     rw [poissonMeasure_real_singleton]; simp
-  have huniv : (poissonMeasure lam).real Set.univ = 1 := by
-    rw [measureReal_def, measure_univ, ENNReal.toReal_one]
-  rw [measureReal_compl (MeasurableSet.singleton 0), huniv, h0]
+  rw [measureReal_compl (MeasurableSet.singleton 0), probReal_univ, h0]
 
 end GammaPoissonMixturePgf
 

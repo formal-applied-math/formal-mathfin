@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.Foundations.Sklar
 public import MathFin.Foundations.NormalQuantile
+public import MathFin.Foundations.BivariateNormalCDF
 
 /-!
 # The one-factor Gaussian copula
@@ -36,8 +37,9 @@ The copula is defined via `copulaOf`, so being a copula is Sklar's theorem.
 * `gaussianFactorCopula_zero`: `ρ = 0` gives the independence copula `Π`.
 * `gaussianFactorCopula_one`: `ρ = 1` gives the comonotonicity copula `M`.
 
-`ρ = −1` is in range (`ρ ∈ [−1, 1]`) and gives `M` again, same as `ρ = 1`: every name is then
-`−Z₀`, so the family depends on `ρ` only through `ρ²`. The countermonotonicity copula `W` is only
+`ρ = −1` is in range (`ρ ∈ [−1, 1]`); every name is then `−Z₀`, so it also gives `M`, and the
+family depends on `ρ` only through `ρ²`. Neither fact is stated as a lemma here; only `ρ = 1` is
+(`gaussianFactorCopula_one`). The countermonotonicity copula `W` is only
 a copula in dimension two and is not a member of this symmetric family at all (pairwise
 correlations here are `ρ²`, always nonnegative), so no choice of `ρ` recovers it.
 -/
@@ -47,29 +49,6 @@ correlations here are `ρ²`, always nonnegative), so no choice of `ρ` recovers
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Set
-open scoped NNReal
-
-/-- The law of two independent standard normals `(Z₁, Z₂)`. -/
-noncomputable abbrev stdNormal2 : Measure (ℝ × ℝ) := (gaussianReal 0 1).prod (gaussianReal 0 1)
-
-/-- A unit-norm combination `a Z₁ + b Z₂` of independent standard normals is standard normal. -/
-lemma map_stdNormal2_linComb {a b : ℝ} (hab : a ^ 2 + b ^ 2 = 1) :
-    stdNormal2.map (fun z ↦ a * z.1 + b * z.2) = gaussianReal 0 1 := by
-  have h1 : stdNormal2.map (fun z ↦ a * z.1) = gaussianReal 0 ⟨a ^ 2, sq_nonneg a⟩ := by
-    rw [show (fun z : ℝ × ℝ ↦ a * z.1) = (a * ·) ∘ Prod.fst from rfl,
-      ← Measure.map_map (measurable_const_mul a) measurable_fst, Measure.map_fst_prod,
-      measure_univ, one_smul, gaussianReal_map_const_mul, mul_zero, mul_one]
-    rfl
-  have h2 : stdNormal2.map (fun z ↦ b * z.2) = gaussianReal 0 ⟨b ^ 2, sq_nonneg b⟩ := by
-    rw [show (fun z : ℝ × ℝ ↦ b * z.2) = (b * ·) ∘ Prod.snd from rfl,
-      ← Measure.map_map (measurable_const_mul b) measurable_snd, Measure.map_snd_prod,
-      measure_univ, one_smul, gaussianReal_map_const_mul, mul_zero, mul_one]
-    rfl
-  have h := gaussianReal_add_gaussianReal_of_indepFun
-    (indepFun_prod (μ := gaussianReal 0 1) (ν := gaussianReal 0 1)
-      (measurable_const_mul a) (measurable_const_mul b)) h1 h2
-  rwa [show (⟨a ^ 2, sq_nonneg a⟩ + ⟨b ^ 2, sq_nonneg b⟩ : ℝ≥0) = 1 from NNReal.eq hab,
-    add_zero] at h
 
 variable {n : ℕ} {ρ : ℝ}
 
@@ -88,7 +67,7 @@ noncomputable def gaussianFactorVec (ρ : ℝ) (z : ℝ × (Fin n → ℝ)) : Fi
 
 /-- `(Z₀, Zᵢ)` is a pair of independent standard normals. -/
 lemma map_stdNormalFactors_pair (i : Fin n) :
-    (stdNormalFactors n).map (fun z ↦ (z.1, z.2 i)) = stdNormal2 := by
+    (stdNormalFactors n).map (fun z ↦ (z.1, z.2 i)) = stdNormalPair := by
   rw [show (fun z : ℝ × (Fin n → ℝ) ↦ (z.1, z.2 i)) = Prod.map id (fun w ↦ w i) from rfl,
     ← Measure.map_prod_map _ _ measurable_id (measurable_pi_apply i), Measure.map_id,
     (measurePreserving_eval (fun _ ↦ gaussianReal 0 1) i).map_eq]
@@ -98,13 +77,9 @@ lemma map_gaussianFactorVec (hρ : ρ ∈ Icc (-1) 1) (i : Fin n) :
     (stdNormalFactors n).map (fun z ↦ gaussianFactorVec ρ z i) = gaussianReal 0 1 := by
   rw [show (fun z ↦ gaussianFactorVec ρ z i) =
       (fun p : ℝ × ℝ ↦ ρ * p.1 + √(1 - ρ ^ 2) * p.2) ∘ (fun z ↦ (z.1, z.2 i)) from rfl,
-    ← Measure.map_map (by fun_prop) (by fun_prop), map_stdNormalFactors_pair]
-  refine map_stdNormal2_linComb ?_
-  rw [Real.sq_sqrt (by nlinarith [hρ.1, hρ.2])]
-  ring
-
-/-- `Φ` is measurable. -/
-@[fun_prop] lemma measurable_Phi : Measurable Phi := continuous_Phi.measurable
+    ← Measure.map_map (by fun_prop) (by fun_prop), map_stdNormalFactors_pair,
+    map_linear_stdNormalPair, Real.sq_sqrt (by nlinarith [hρ.1, hρ.2]), add_sub_cancel,
+    Real.toNNReal_one]
 
 /-- `Φ` pushes the standard normal law to the uniform law on `(0, 1)`. -/
 lemma map_Phi_gaussianReal : (gaussianReal 0 1).map Phi = volume.restrict (Ioo 0 1) := by

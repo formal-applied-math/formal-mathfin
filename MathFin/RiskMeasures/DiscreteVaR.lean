@@ -41,16 +41,18 @@ For an integrable loss and `α ∈ (0, 1)`, the dual representation of ES over b
   attained at a loss value.
 * `finiteVaR_two_point`: for `α ∈ (0, 1]`, VaR of a loss that is `0` with mass `a` and `c > 0` with
   mass `1 - a`.
-* `vaR_one_bond`, `vaR_two_halves`: `VaR₀.₉₅` is `0` for the single bond and `50` for the split
-  position.
-* `vaR_subadditivity_fails`: on the joint space of the two half-bonds, the halves' `VaR₀.₉₅`
+* `finiteVaR_one_bond`, `finiteVaR_two_halves`: `VaR₀.₉₅` is `0` for the single bond and `50`
+  for the split position.
+* `finiteVaR_subadditivity_fails`: on the joint space of the two half-bonds, the halves' `VaR₀.₉₅`
   sum to less than the total's (the values are `0`, `0` and `50`).
-* `vaR_counterexample_window`: for `α ∈ (0, 1]`, subadditivity fails exactly for
+  `valueAtRisk_finiteLaw_subadditivity_fails` states the same failure for the library's
+  `valueAtRisk` at the law `∑ p, jointQ p • δ_p`.
+* `finiteVaR_counterexample_window`: for `α ∈ (0, 1]`, subadditivity fails exactly for
   `(24/25)² < α ≤ 24/25`.
-* `es_one_bond_eq_80`: `ES₀.₉₅ = 80` for the single bond.
+* `finiteES_one_bond`: `ES₀.₉₅ = 80` for the single bond.
 * `condTailMean_one_bond`: at the single bond the tail event `{L ≥ VaR₀.₉₅}` is the whole space,
   so the conditional tail mean is `E[L] = 4`.
-* `isGreatest_es_one_bond`: for the single bond, `ES₀.₉₅` is the greatest `E[Z·L]` over
+* `isGreatest_finiteES_one_bond`: for the single bond, `ES₀.₉₅` is the greatest `E[Z·L]` over
   densities `0 ≤ Z ≤ (1 − 19/20)⁻¹` with `E[Z] = 1`.
 -/
 
@@ -212,15 +214,15 @@ private lemma one_bond_cdf (x : ℝ) :
   simp [oneL, oneQ, add_comm]
 
 /-- The single-bond VaR as a function of the level `α ∈ (0, 1]`: `0` for `α ≤ 24/25`, `100`
-above. This is the quantile function integrated in `es_one_bond_eq_80`. -/
-theorem vaR_one_bond_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
+above. This is the quantile function integrated in `finiteES_one_bond`. -/
+theorem finiteVaR_one_bond_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR oneQ oneL α = if α ≤ 24 / 25 then 0 else 100 :=
   finiteVaR_two_point (by norm_num) (by norm_num) one_bond_cdf hα0 hα1
 
 /-- The single `$100` bond defaulting w.p. `1/25` has `VaR₀.₉₅ = 0`: the loss is 0 with probability
 `24/25 ≥ 19/20`. -/
-theorem vaR_one_bond : finiteVaR oneQ oneL (19 / 20) = 0 := by
-  rw [vaR_one_bond_window _ (by norm_num) (by norm_num), if_pos (by norm_num)]
+theorem finiteVaR_one_bond : finiteVaR oneQ oneL (19 / 20) = 0 := by
+  rw [finiteVaR_one_bond_window _ (by norm_num) (by norm_num), if_pos (by norm_num)]
 
 /-! ## The two half-bonds on their joint space `Bool × Bool` -/
 
@@ -265,19 +267,19 @@ private lemma joint_cdf (x : ℝ) :
   split_ifs <;> norm_num
 
 /-- The first half-bond's VaR as a function of the level `α ∈ (0, 1]`. -/
-theorem vaR_half₁_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
+theorem finiteVaR_half₁_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR jointQ halfL₁ α = if α ≤ 24 / 25 then 0 else 50 :=
   finiteVaR_two_point (by norm_num) (by norm_num) joint_half₁_cdf hα0 hα1
 
 /-- The second half-bond's VaR as a function of the level `α ∈ (0, 1]`. -/
-theorem vaR_half₂_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
+theorem finiteVaR_half₂_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR jointQ halfL₂ α = if α ≤ 24 / 25 then 0 else 50 :=
   finiteVaR_two_point (by norm_num) (by norm_num) joint_half₂_cdf hα0 hα1
 
 /-- The total VaR of the two half-bonds as a function of the level `α ∈ (0, 1]`: `0` up to the
 mass `9216/10000` of no default, `50` up to the mass `9984/10000` of at most one default, `100`
 above. -/
-theorem vaR_joint_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
+theorem finiteVaR_joint_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR jointQ (halfL₁ + halfL₂) α
       = if α ≤ 9216 / 10000 then 0 else if α ≤ 9984 / 10000 then 50 else 100 := by
   split_ifs <;> refine finiteVaR_eq_of_mem_of_forall_lt ?_ fun x hx ↦ ?_ <;> rw [joint_cdf] <;>
@@ -285,18 +287,19 @@ theorem vaR_joint_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
 
 /-- The same exposure split into two independent `$50` bonds has `VaR₀.₉₅ = 50`:
 `P(L = 0) = 0.9216 < 0.95` but `P(L ≤ 50) = 0.9984 ≥ 0.95`. -/
-theorem vaR_two_halves : finiteVaR jointQ (halfL₁ + halfL₂) (19 / 20) = 50 := by
-  rw [vaR_joint_window _ (by norm_num) (by norm_num)]
+theorem finiteVaR_two_halves : finiteVaR jointQ (halfL₁ + halfL₂) (19 / 20) = 50 := by
+  rw [finiteVaR_joint_window _ (by norm_num) (by norm_num)]
   norm_num
 
 /-- **The failure window.** For the level `α ∈ (0, 1]`, subadditivity fails exactly for
 `9216/10000 < α ≤ 24/25`, where `9216/10000 = (24/25)²`. The right endpoint is included because
 the definition uses `α ≤ P(L ≤ x)`: at `α = 24/25` each half keeps VaR `0` while the total has
 VaR `50`. At `α = 9216/10000` the total VaR is still `0`, so the left endpoint is excluded. -/
-theorem vaR_counterexample_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
+theorem finiteVaR_counterexample_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR jointQ halfL₁ α + finiteVaR jointQ halfL₂ α
       < finiteVaR jointQ (halfL₁ + halfL₂) α ↔ 9216 / 10000 < α ∧ α ≤ 24 / 25 := by
-  rw [vaR_joint_window α hα0 hα1, vaR_half₁_window α hα0 hα1, vaR_half₂_window α hα0 hα1]
+  rw [finiteVaR_joint_window α hα0 hα1, finiteVaR_half₁_window α hα0 hα1,
+    finiteVaR_half₂_window α hα0 hα1]
   constructor
   · split_ifs <;> intro h <;> norm_num at h <;> exact ⟨by linarith, by linarith⟩
   · rintro ⟨h1, h2⟩
@@ -305,21 +308,35 @@ theorem vaR_counterexample_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
 
 /-- **Subadditivity fails at the 95% level** on one probability space: the two `$50` half-bonds'
 `VaR₀.₉₅` sum to less than the `VaR₀.₉₅` of their total. The values are `0` for each half
-(`vaR_half₁_window`, `vaR_half₂_window`) and `50` for the total (`vaR_two_halves`). -/
-theorem vaR_subadditivity_fails :
+(`finiteVaR_half₁_window`, `finiteVaR_half₂_window`) and `50` for the total
+(`finiteVaR_two_halves`). -/
+theorem finiteVaR_subadditivity_fails :
     finiteVaR jointQ halfL₁ (19 / 20) + finiteVaR jointQ halfL₂ (19 / 20)
       < finiteVaR jointQ (halfL₁ + halfL₂) (19 / 20) :=
-  (vaR_counterexample_window _ (by norm_num) (by norm_num)).2 ⟨by norm_num, by norm_num⟩
+  (finiteVaR_counterexample_window _ (by norm_num) (by norm_num)).2 ⟨by norm_num, by norm_num⟩
+
+/-- **Subadditivity of `valueAtRisk` fails**: the same failure for the library's `valueAtRisk`
+at the law `∑ p, jointQ p • δ_p` of the two half-bonds, through the bridge
+`finiteVaR_eq_valueAtRisk`. -/
+theorem valueAtRisk_finiteLaw_subadditivity_fails :
+    valueAtRisk halfL₁ (finiteLaw jointQ) (19 / 20) +
+        valueAtRisk halfL₂ (finiteLaw jointQ) (19 / 20)
+      < valueAtRisk (halfL₁ + halfL₂) (finiteLaw jointQ) (19 / 20) := by
+  have hα : (19 / 20 : ℝ) ∈ Ioo 0 1 := ⟨by norm_num, by norm_num⟩
+  rw [← finiteVaR_eq_valueAtRisk jointQ_mem_simplex hα,
+    ← finiteVaR_eq_valueAtRisk jointQ_mem_simplex hα,
+    ← finiteVaR_eq_valueAtRisk jointQ_mem_simplex hα]
+  exact finiteVaR_subadditivity_fails
 
 /-! ## Expected shortfall at the single bond -/
 
 /-- `ES₀.₉₅ = 80` for the single bond: the quantile function is `0` on `[19/20, 24/25]` and `100`
 on `(24/25, 1]`, so the average is `(1/(1/20)) · 100 · (1 - 24/25) = 80`. -/
-theorem es_one_bond_eq_80 : finiteES oneQ oneL (19 / 20) = 80 := by
+theorem finiteES_one_bond : finiteES oneQ oneL (19 / 20) = 80 := by
   have hz1 (u) (hu : u ∈ Icc (19 / 20 : ℝ) (24 / 25)) : finiteVaR oneQ oneL u = 0 := by
-    rw [vaR_one_bond_window u (by linarith [hu.1]) (by linarith [hu.2]), if_pos hu.2]
+    rw [finiteVaR_one_bond_window u (by linarith [hu.1]) (by linarith [hu.2]), if_pos hu.2]
   have hc1 (u) (hu : u ∈ Ioc (24 / 25 : ℝ) 1) : finiteVaR oneQ oneL u = 100 := by
-    rw [vaR_one_bond_window u (by linarith [hu.1]) hu.2, if_neg (not_le.2 hu.1)]
+    rw [finiteVaR_one_bond_window u (by linarith [hu.1]) hu.2, if_neg (not_le.2 hu.1)]
   -- the quantile function agrees a.e. with a constant on each piece, which gives both
   -- integrability and the value of the integral in one hypothesis
   have hae1 : finiteVaR oneQ oneL =ᵐ[volume.restrict (Ι (19 / 20 : ℝ) (24 / 25))]
@@ -354,26 +371,26 @@ noncomputable def condTailMean (q L : ι → ℝ) (α : ℝ) : ℝ :=
 
 /-- At the single bond the tail event `{L ≥ VaR₀.₉₅} = {L ≥ 0}` is the whole state space, so the
 conditional tail mean is the unconditional expectation `E[L] = 4`, while `ES₀.₉₅ = 80`
-(`es_one_bond_eq_80`). -/
+(`finiteES_one_bond`). -/
 theorem condTailMean_one_bond : condTailMean oneQ oneL (19 / 20) = 4 := by
   have hfilt : {b ∈ (Finset.univ : Finset Bool) | finiteVaR oneQ oneL (19 / 20) ≤ oneL b}
       = Finset.univ :=
-    Finset.filter_true_of_mem fun b _ ↦ by rw [vaR_one_bond]; cases b <;> norm_num [oneL]
+    Finset.filter_true_of_mem fun b _ ↦ by rw [finiteVaR_one_bond]; cases b <;> norm_num [oneL]
   rw [condTailMean, hfilt, oneQ_mem_simplex.2, div_one]
   norm_num [oneQ, oneL]
 
 /-! ## The bounded-density representation of ES at the single bond -/
 
 /-- For the single bond, `ES₀.₉₅` is the greatest value of `E[Z·L]` over densities `Z` with
-`0 ≤ Z ≤ (1 - 19/20)⁻¹ = 20` and `E[Z] = 1`; both equal `80` (`es_one_bond_eq_80`). This is the
+`0 ≤ Z ≤ (1 - 19/20)⁻¹ = 20` and `E[Z] = 1`; both equal `80` (`finiteES_one_bond`). This is the
 two-state analogue of `isGreatest_integral_mul_expectedShortfall`. The objective is
 `E[Z·L] = 4·Z(default)`, so the maximum puts `Z(default)` at the cap `20`, and `E[Z] = 1` then
 gives `Z(survival) = 5/24`. -/
-theorem isGreatest_es_one_bond :
+theorem isGreatest_finiteES_one_bond :
     IsGreatest ((fun Z : Bool → ℝ ↦ ∑ b, oneQ b * Z b * oneL b) ''
       {Z | (∀ b, 0 ≤ Z b ∧ Z b ≤ (1 - 19 / 20)⁻¹) ∧ ∑ b, oneQ b * Z b = 1})
       (finiteES oneQ oneL (19 / 20)) := by
-  rw [es_one_bond_eq_80]
+  rw [finiteES_one_bond]
   refine ⟨⟨fun c ↦ if c then 20 else 5 / 24,
     ⟨fun c ↦ by cases c <;> norm_num, by norm_num [oneQ]⟩, by norm_num [oneQ, oneL]⟩, ?_⟩
   rintro v ⟨Z, ⟨hcap, -⟩, rfl⟩

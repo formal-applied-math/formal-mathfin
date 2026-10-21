@@ -11,10 +11,13 @@ public import MathFin.RiskMeasures.Elicitability
 /-!
 # Joint elicitability of (VaR, ES): a Fissler–Ziegel score
 
-Expected shortfall alone is not elicitable (`not_isElicitable_expectedShortfall`), but the pair
-(value-at-risk, expected shortfall) is: Fissler and Ziegel (2016), *Higher order elicitability and
-Osband's principle*, Ann. Statist. 44(4), Corollary 5.5. This file transcribes their scoring
-function (5.5) and proves strict consistency of its simplest strictly consistent member.
+Expected shortfall alone is not elicitable (`not_isElicitable_expectedShortfall`, for this
+library's upper-tail `expectedShortfall`), but in the profit sign convention the pair (lower
+`α`-quantile, lower-tail expected shortfall) is jointly elicitable: Fissler and Ziegel (2016),
+*Higher order elicitability and Osband's principle*, Ann. Statist. 44(4), Corollary 5.5. This file
+transcribes their scoring function (5.5) and proves strict consistency of its simplest strictly
+consistent member. The loss-convention pair (`valueAtRisk`, `expectedShortfall`) is not treated
+here.
 
 ## The source formula
 
@@ -45,10 +48,10 @@ quantile (`strictlyElicits_pinballLoss`), with minimum value `−ES_α`; what re
 
 * `StrictlyJointlyElicits`, `IsJointlyElicitable`: strict consistency of a joint score for a pair.
 * `StrictlyJointlyElicits.apply_mixture`: jointly elicitable pairs have convex joint level sets.
-* `fisslerZieglerScore`: the scoring family (5.5), verbatim.
-* `fisslerZieglerExpScore`: its member `G₁ = 0`, `𝒢₂ = exp`, `a = 0`.
+* `fisslerZiegelScore`: the scoring family (5.5), verbatim.
+* `fisslerZiegelExpScore`: its member `G₁ = 0`, `𝒢₂ = exp`, `a = 0`.
 * `lowerExpectedShortfall`: the lower-tail expected shortfall (5.1) of the paper.
-* `strictlyJointlyElicits_fisslerZieglerExpScore`: the member strictly elicits
+* `strictlyJointlyElicits_fisslerZiegelExpScore`: the member strictly elicits
   `(VaR_α, ES_α)` on laws with finite mean and unique `α`-quantile.
 * `isJointlyElicitable_valueAtRisk_lowerExpectedShortfall`: the pair is jointly elicitable.
 -/
@@ -106,20 +109,20 @@ theorem StrictlyJointlyElicits.apply_mixture {S : ℝ → ℝ → ℝ → ℝ} {
 in their profit sign convention, for a VaR forecast `x₁`, an ES forecast `x₂` and an outcome `y`:
 `(𝟙{y ≤ x₁} − α) G₁(x₁) − 𝟙{y ≤ x₁} G₁(y) + G₂(x₂)(x₂ − x₁ + α⁻¹ 𝟙{y ≤ x₁}(x₁ − y))
 − 𝒢₂(x₂) + a(y)`. Their Corollary 5.5 requires `𝒢₂' = G₂`. -/
-noncomputable def fisslerZieglerScore (G₁ G₂ 𝒢₂ a : ℝ → ℝ) (α x₁ x₂ y : ℝ) : ℝ :=
+noncomputable def fisslerZiegelScore (G₁ G₂ 𝒢₂ a : ℝ → ℝ) (α x₁ x₂ y : ℝ) : ℝ :=
   ((if y ≤ x₁ then 1 else 0) - α) * G₁ x₁ - (if y ≤ x₁ then 1 else 0) * G₁ y +
     G₂ x₂ * (x₂ - x₁ + α⁻¹ * (if y ≤ x₁ then 1 else 0) * (x₁ - y)) - 𝒢₂ x₂ + a y
 
 /-- The member of the Fissler–Ziegel family with `G₁ = 0`, `𝒢₂ = G₂ = exp` and `a = 0`. -/
-noncomputable def fisslerZieglerExpScore (α : ℝ) : ℝ → ℝ → ℝ → ℝ :=
-  fisslerZieglerScore 0 Real.exp Real.exp 0 α
+noncomputable def fisslerZiegelExpScore (α : ℝ) : ℝ → ℝ → ℝ → ℝ :=
+  fisslerZiegelScore 0 Real.exp Real.exp 0 α
 
 /-- The exponential member through the pinball loss:
 `S(v, e, y) = exp e · (e − y + α⁻¹ S_α(v, y)) − exp e`. -/
-lemma fisslerZieglerExpScore_eq (hα : α ≠ 0) (v e y : ℝ) :
-    fisslerZieglerExpScore α v e y =
+lemma fisslerZiegelExpScore_eq (hα : α ≠ 0) (v e y : ℝ) :
+    fisslerZiegelExpScore α v e y =
       Real.exp e * (e - y + α⁻¹ * pinballLoss α v y) - Real.exp e := by
-  rw [fisslerZieglerExpScore, fisslerZieglerScore, pinballLoss_eq_ite]
+  rw [fisslerZiegelExpScore, fisslerZiegelScore, pinballLoss_eq_ite]
   simp only [Pi.zero_apply, mul_zero, sub_zero, add_zero]
   congr 2
   field_simp
@@ -135,7 +138,7 @@ noncomputable def lowerExpectedShortfall (μ : Measure ℝ) (α : ℝ) : ℝ :=
 lemma integral_sub_inv_mul_integral_pinballLoss {μ : Measure ℝ} [IsProbabilityMeasure μ]
     (hint : Integrable id μ) (hα : α ∈ Ioo 0 1) :
     ∫ y, y ∂μ - α⁻¹ * ∫ y, pinballLoss α (quantile μ α) y ∂μ = lowerExpectedShortfall μ α := by
-  have hvar : ∀ u, valueAtRisk id μ u = quantile μ u := fun u ↦ by rw [valueAtRisk, Measure.map_id]
+  have hvar (u : ℝ) : valueAtRisk id μ u = quantile μ u := by rw [valueAtRisk, Measure.map_id]
   have h := integral_pinballLoss (P := μ) (X := id) hint hα (quantile μ α)
   simp only [id] at h
   rw [h, ← hvar, rockafellarUryasev_valueAtRisk hint hα, expectedShortfall]
@@ -154,14 +157,15 @@ lemma integral_sub_inv_mul_integral_pinballLoss {μ : Measure ℝ} [IsProbabilit
   field_simp
   ring
 
-/-- **The exponential Fissler–Ziegel score strictly elicits `(VaR_α, ES_α)`** (Fissler–Ziegel 2016,
-Corollary 5.5, with `G₁ = 0` and `𝒢₂ = exp`) on the laws with finite mean whose `α`-quantile is
-unique: the true pair (lower `α`-quantile, lower-tail expected shortfall) is the unique minimizer
-of the expected score over all of `ℝ²`. The paper's own domain is `A₀ = {x₁ ≥ x₂}`; the extension
-to all of `ℝ²` is this file's own observation (see the module docstring), not the paper's claim —
-`G₁ = 0` removes the term that ties the two coordinates together. -/
-theorem strictlyJointlyElicits_fisslerZieglerExpScore (hα : α ∈ Ioo 0 1) :
-    StrictlyJointlyElicits (fisslerZieglerExpScore α) (fun μ ↦ quantile μ α)
+/-- **The exponential Fissler–Ziegel score strictly elicits the profit-convention
+`(VaR_α, ES_α)`** (Fissler–Ziegel 2016, Corollary 5.5, with `G₁ = 0` and `𝒢₂ = exp`) on the laws
+with finite mean whose `α`-quantile is unique: the true pair (lower `α`-quantile, lower-tail
+expected shortfall) is the unique minimizer of the expected score over all of `ℝ²`. The paper's
+own domain is `A₀ = {x₁ ≥ x₂}`; the extension to all of `ℝ²` is this file's own observation (see
+the module docstring), not the paper's claim — `G₁ = 0` removes the term that ties the two
+coordinates together. -/
+theorem strictlyJointlyElicits_fisslerZiegelExpScore (hα : α ∈ Ioo 0 1) :
+    StrictlyJointlyElicits (fisslerZiegelExpScore α) (fun μ ↦ quantile μ α)
       (fun μ ↦ lowerExpectedShortfall μ α)
       {μ | IsProbabilityMeasure μ ∧ Integrable id μ ∧ ∀ x, quantile μ α < x → α < cdf μ x} := by
   intro μ hμC
@@ -169,17 +173,16 @@ theorem strictlyJointlyElicits_fisslerZieglerExpScore (hα : α ∈ Ioo 0 1) :
   obtain ⟨hμ, hint, -⟩ := hμC
   have hα0 : α ≠ 0 := hα.1.ne'
   have hint' : Integrable (fun y : ℝ ↦ y) μ := hint
-  have hS : ∀ v e, fisslerZieglerExpScore α v e = fun y ↦
+  have hS (v e : ℝ) : fisslerZiegelExpScore α v e = fun y ↦
       Real.exp e * (e - y + α⁻¹ * pinballLoss α v y) - Real.exp e :=
-    fun v e ↦ funext (fisslerZieglerExpScore_eq hα0 v e)
-  have hA : ∀ e : ℝ, Integrable (fun y : ℝ ↦ e - y) μ := fun e ↦ (integrable_const e).sub hint'
-  have hB : ∀ v, Integrable (fun y ↦ α⁻¹ * pinballLoss α v y) μ := fun v ↦ (hpi v).const_mul _
-  have hi : ∀ v e, Integrable (fun y ↦ e - y + α⁻¹ * pinballLoss α v y) μ := fun v e ↦
+    funext (fisslerZiegelExpScore_eq hα0 v e)
+  have hA (e : ℝ) : Integrable (fun y : ℝ ↦ e - y) μ := (integrable_const e).sub hint'
+  have hB (v : ℝ) : Integrable (fun y ↦ α⁻¹ * pinballLoss α v y) μ := (hpi v).const_mul _
+  have hi (v e : ℝ) : Integrable (fun y ↦ e - y + α⁻¹ * pinballLoss α v y) μ :=
     (hA e).add (hB v)
   -- the expected score, in terms of the expected pinball loss
-  have hE : ∀ v e, ∫ y, fisslerZieglerExpScore α v e y ∂μ =
+  have hE (v e : ℝ) : ∫ y, fisslerZiegelExpScore α v e y ∂μ =
       Real.exp e * (e - ∫ y, y ∂μ + α⁻¹ * ∫ y, pinballLoss α v y ∂μ) - Real.exp e := by
-    intro v e
     rw [hS, integral_sub ((hi v e).const_mul _) (integrable_const _), integral_const_mul,
       integral_add (hA e) (hB v), integral_sub (integrable_const e) hint', integral_const,
       integral_const, integral_const_mul]
@@ -198,7 +201,7 @@ theorem strictlyJointlyElicits_fisslerZieglerExpScore (hα : α ∈ Ioo 0 1) :
   have hαi : 0 < α⁻¹ := inv_pos.2 hα.1
   -- the strict convexity of `exp`: `1 + t < exp t` off `0` makes `exp t · (t − 1) + 1` strictly
   -- positive, since `exp t · (t − 1) + 1 = exp t · (exp (−t) − (1 − t))`
-  have hexp : ∀ t : ℝ, t ≠ 0 → 0 < Real.exp t * (t - 1) + 1 := fun t ht ↦ by
+  have hexp (t : ℝ) (ht : t ≠ 0) : 0 < Real.exp t * (t - 1) + 1 := by
     have hm : Real.exp t * (t - 1) + 1 = Real.exp t * (Real.exp (-t) - (1 - t)) := by
       have h1 : Real.exp t * Real.exp (-t) = 1 := by
         rw [← Real.exp_add, add_neg_cancel, Real.exp_zero]
@@ -227,12 +230,13 @@ theorem strictlyJointlyElicits_fisslerZieglerExpScore (hα : α ∈ Ioo 0 1) :
     have h2 := mul_pos (Real.exp_pos r) h1
     linarith [hsplit]
 
-/-- **`(VaR_α, ES_α)` is jointly elicitable** (Fissler–Ziegel 2016, Corollary 5.5) on the laws with
-finite mean and unique `α`-quantile, although the (upper-tail, loss-convention) `expectedShortfall`
-alone is not (`not_isElicitable_expectedShortfall`). -/
+/-- **The profit-convention pair (lower `α`-quantile, `lowerExpectedShortfall`) is jointly
+elicitable** (Fissler–Ziegel 2016, Corollary 5.5) on the laws with finite mean and unique
+`α`-quantile, although the (upper-tail, loss-convention) `expectedShortfall` alone is not
+(`not_isElicitable_expectedShortfall`). -/
 theorem isJointlyElicitable_valueAtRisk_lowerExpectedShortfall (hα : α ∈ Ioo 0 1) :
     IsJointlyElicitable (fun μ ↦ quantile μ α) (fun μ ↦ lowerExpectedShortfall μ α)
       {μ | IsProbabilityMeasure μ ∧ Integrable id μ ∧ ∀ x, quantile μ α < x → α < cdf μ x} :=
-  ⟨_, strictlyJointlyElicits_fisslerZieglerExpScore hα⟩
+  ⟨_, strictlyJointlyElicits_fisslerZiegelExpScore hα⟩
 
 end MathFin

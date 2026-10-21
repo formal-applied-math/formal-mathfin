@@ -26,9 +26,9 @@ risk `(β_p σ_M)²`.
 
 * `singleIndexKernel`: `σᵢⱼ = βᵢβⱼσ_M² + (idiosyncratic diagonal)`.
 * `portfolioVarN_singleIndex_eq`: `Var(Rp) = (∑ wᵢβᵢ)² σ_M² + ∑ wᵢ² D_ε(i)`.
-* `idiosyncraticTerm_equalWeight_bound`: for equal weights `1/n` and idiosyncratic variances
+* `idiosyncraticTerm_equalWeight_le`: for equal weights `1/n` and idiosyncratic variances
   bounded by `M`, the idiosyncratic term is at most `M / n`.
-* `idiosyncraticTerm_equalWeight_tendsto_zero`: hence it tends to `0` as `n → ∞`
+* `tendsto_idiosyncraticTerm_equalWeight_zero`: hence it tends to `0` as `n → ∞`
   (idiosyncratic risk diversifies away under equal weighting).
 -/
 
@@ -82,7 +82,7 @@ theorem portfolioVarN_singleIndex_eq [DecidableEq ι] :
 /-- **Idiosyncratic-term bound under equal weighting**: with weights `1/n` on an index set of
 cardinality `n` and idiosyncratic variances bounded by `M`, the idiosyncratic term is at most
 `M / n`. -/
-lemma idiosyncraticTerm_equalWeight_bound {n : ℕ} (M : ℝ)
+lemma idiosyncraticTerm_equalWeight_le {n : ℕ} (M : ℝ)
     (hM : ∀ i ∈ s, Dε i ≤ M) (hcard : s.card = n) :
     ∑ i ∈ s, ((1 : ℝ) / n) ^ 2 * Dε i ≤ M / n := by
   have hbound : ∑ i ∈ s, ((1 : ℝ) / n) ^ 2 * Dε i ≤ ∑ _i ∈ s, ((1 : ℝ) / n) ^ 2 * M :=
@@ -96,15 +96,15 @@ lemma idiosyncraticTerm_equalWeight_bound {n : ℕ} (M : ℝ)
 /-- **Diversification**: the idiosyncratic term under equal weighting on an index set of
 cardinality `n` tends to `0` as `n → ∞`, for nonnegative idiosyncratic variances uniformly bounded
 by `M` — idiosyncratic risk diversifies away, leaving only the systematic term `(β_p σ_M)²`. -/
-theorem idiosyncraticTerm_equalWeight_tendsto_zero
-    (s : ℕ → Finset ι) (Dε : ℕ → ι → ℝ) (M : ℝ)
-    (hM : ∀ n, ∀ i ∈ s n, Dε n i ≤ M) (hMnn : ∀ n, ∀ i ∈ s n, 0 ≤ Dε n i)
-    (hcard : ∀ n, (s n).card = n) :
-    Tendsto (fun n ↦ ∑ i ∈ s n, ((1 : ℝ) / n) ^ 2 * Dε n i) atTop (𝓝 0) := by
-  have hlo : ∀ n, 0 ≤ ∑ i ∈ s n, ((1 : ℝ) / n) ^ 2 * Dε n i :=
-    fun n ↦ Finset.sum_nonneg fun i hi ↦ mul_nonneg (sq_nonneg _) (hMnn n i hi)
-  have hhi : ∀ n, ∑ i ∈ s n, ((1 : ℝ) / n) ^ 2 * Dε n i ≤ M / n :=
-    fun n ↦ idiosyncraticTerm_equalWeight_bound (s n) (Dε n) M (hM n) (hcard n)
+theorem tendsto_idiosyncraticTerm_equalWeight_zero
+    (t : ℕ → Finset ι) (D : ℕ → ι → ℝ) (M : ℝ)
+    (hM : ∀ n, ∀ i ∈ t n, D n i ≤ M) (hMnn : ∀ n, ∀ i ∈ t n, 0 ≤ D n i)
+    (hcard : ∀ n, (t n).card = n) :
+    Tendsto (fun n ↦ ∑ i ∈ t n, ((1 : ℝ) / n) ^ 2 * D n i) atTop (𝓝 0) := by
+  have hlo (n : ℕ) : 0 ≤ ∑ i ∈ t n, ((1 : ℝ) / n) ^ 2 * D n i :=
+    Finset.sum_nonneg fun i hi ↦ mul_nonneg (sq_nonneg _) (hMnn n i hi)
+  have hhi (n : ℕ) : ∑ i ∈ t n, ((1 : ℝ) / n) ^ 2 * D n i ≤ M / n :=
+    idiosyncraticTerm_equalWeight_le (t n) (D n) M (hM n) (hcard n)
   exact squeeze_zero hlo hhi (tendsto_const_div_atTop_nhds_zero_nat M)
 
 end MathFin
