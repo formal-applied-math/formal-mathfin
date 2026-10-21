@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -28,7 +28,7 @@ efficient mechanism for Stablecoin liquidity", 2019,
 <https://curve.fi/files/stableswap-paper.pdf>) is not formalized in this
 file; no StableSwap-specific result appears below.
 
-This file formalises six further closed-form results about automated
+This file formalises further closed-form results about automated
 market makers, building on the constant-product substrate in
 `ConstantProductAMM.lean`.
 
@@ -40,6 +40,10 @@ market makers, building on the constant-product substrate in
   (`x0, y0, r > 0`), derived (not merely asserted) from the post-price-move
   reserve split — the defined reserves satisfy both defining equations
   (`x1*y1 = x0*y0` and `y1/x1 = r*y0/x0`), not just the first.
+* `impermanentLoss_eq_neg_sq`, `impermanentLoss_nonpos`, `impermanentLoss_eq_zero_iff`: the
+  loss is `−(√r − 1)²/(1 + r)`, so it is never positive and vanishes exactly at `r = 1`
+  (AM–GM, `2√r ≤ 1 + r`). Fees are not modelled. The expected LP value under a lognormal price
+  is in `MathFin/Bridges/ConstantProductLPLognormal.lean`.
 * `twapAccumulator`, `twap`, `twapAccumulator_sub_eq_sum`, `twap_eq_average`:
   the **Uniswap v2 TWAP** over unit time steps, defined as
   `p_{t1,t2} = (a_{t2} - a_{t1})/(t2 - t1)`; the accumulator difference
@@ -60,6 +64,18 @@ market makers, building on the constant-product substrate in
   curve** `(x + L/√p_b)(y + L√p_a) = L²` (v3 whitepaper §2, eq. 2.2): the
   real reserves of an in-range position, shifted by `L/√p_b` and `L√p_a`
   (that is, the virtual reserves `L/√P` and `L√P`), have constant product.
+* `v3PositionValue`: the value, in token Y, of a v3 position at any square-root price `s`:
+  all token X below the range, the in-range reserves inside, all token Y above (v3 whitepaper
+  §6.4.1, eqs. 6.29–6.30). `v3PositionValue_at_lower`, `v3PositionValue_at_upper`: the two
+  boundary cases, all X at `s = √p_a` and all Y at `s = √p_b`; `v3PositionValue_nonneg`.
+* `v3PositionValue_eq_coveredCall_of_le`, `v3PositionValue_eq_coveredCall_of_lt`,
+  `coveredCall_sub_v3PositionValue`, `v3PositionValue_le_coveredCall`: **a v3 position is a
+  covered call, less a smoothing term.** With `x_max = realReserveX L √p_a √p_b` the position's
+  full X holding, the payoff `x_max · (s² − max (s² − K) 0)` of `x_max` units of X and a short
+  call struck at the geometric-mean price `K = √(p_a p_b)` equals the position's value outside
+  the range and exceeds it inside by exactly `min (L(s − √p_a)²/√p_a) (L(√p_b − s)²/√p_b)`.
+  Fees are not modelled. The resulting Black–Scholes price bound is
+  `integral_discounted_v3PositionValue_le` in `MathFin/Bridges/UniswapV3CoveredCallPrice.lean`.
 * `tickPrice`, `tickPrice_ratio`: the v3 tick price `p(i) = 1.0001^i` and
   its per-tick ratio.
 -/
@@ -154,6 +170,27 @@ theorem impermanentLoss_eq (x0 y0 r : ℝ) (hx0 : 0 < x0) (hy0 : 0 < y0) (hr : 0
   have hr1 : (1 : ℝ) + r ≠ 0 := by positivity
   rw [show 2 * y0 * Real.sqrt r / (y0 * (r + 1)) = 2 * Real.sqrt r / (1 + r) by
     field_simp; ring]
+
+/-- **Impermanent loss is a negative square**: for `r ≥ 0`,
+`IL(r) = 2√r/(1 + r) − 1 = −(√r − 1)²/(1 + r)`. -/
+theorem impermanentLoss_eq_neg_sq {r : ℝ} (hr : 0 ≤ r) :
+    impermanentLoss r = -(Real.sqrt r - 1) ^ 2 / (1 + r) := by
+  have h1 : (1 : ℝ) + r ≠ 0 := (by linarith : (0 : ℝ) < 1 + r).ne'
+  rw [impermanentLoss, eq_div_iff h1, sub_mul, div_mul_cancel₀ _ h1]
+  linear_combination Real.sq_sqrt hr
+
+/-- **Impermanent loss is never positive** (AM–GM, `2√r ≤ 1 + r`): a fee-free constant-product
+LP never ends a price move ahead of holding the deposit. -/
+theorem impermanentLoss_nonpos {r : ℝ} (hr : 0 ≤ r) : impermanentLoss r ≤ 0 := by
+  rw [impermanentLoss_eq_neg_sq hr, neg_div]
+  exact neg_nonpos.mpr (div_nonneg (sq_nonneg _) (by linarith))
+
+/-- **Impermanent loss vanishes exactly when the price returns**: for `r ≥ 0`,
+`IL(r) = 0 ↔ r = 1`. -/
+theorem impermanentLoss_eq_zero_iff {r : ℝ} (hr : 0 ≤ r) : impermanentLoss r = 0 ↔ r = 1 := by
+  rw [impermanentLoss_eq_neg_sq hr, neg_div, neg_eq_zero,
+    div_eq_zero_iff, or_iff_left (by linarith : (0 : ℝ) < 1 + r).ne', sq_eq_zero_iff, sub_eq_zero,
+    Real.sqrt_eq_one]
 
 /-! ## Uniswap v2 TWAP accumulator -/
 
@@ -275,8 +312,8 @@ position with liquidity `L`, square-root price `√P`, and range `[√p_a, √p_
 gives the virtual reserve `L/√P`. This formula represents the position's
 *in-range* reserves only — valid while `√p_a ≤ √P ≤ √p_b`; once the price moves
 below the range the position's actual X reserve saturates instead of following
-this curve (and above the range it holds no X at all), which this file does not
-formalize. -/
+this curve (and above the range it holds no X at all), which `v3PositionValue` below
+models (all X below the range, all Y above). -/
 noncomputable def realReserveX (L sqrtP sqrtPb : ℝ) : ℝ :=
   L * (1 / sqrtP - 1 / sqrtPb)
 
@@ -284,8 +321,8 @@ noncomputable def realReserveX (L sqrtP sqrtPb : ℝ) : ℝ :=
 `y = L(√P − √p_a)`. Adding `L√p_a` gives the virtual reserve `L√P`. As with
 `realReserveX`, this represents the *in-range* reserve only — valid
 while `√p_a ≤ √P ≤ √p_b`; outside the range the actual Y reserve
-saturates rather than following this curve, which is not formalized
-here. -/
+saturates rather than following this curve, as `v3PositionValue` below
+models. -/
 noncomputable def realReserveY (L sqrtP sqrtPa : ℝ) : ℝ :=
   L * (sqrtP - sqrtPa)
 
@@ -304,6 +341,119 @@ theorem realReserves_curve
   have hPb' : sqrtPb ≠ 0 := hPb.ne'
   field_simp
   ring
+
+/-- **Value of a Uniswap v3 position**, in token Y, at square-root price `s`, for liquidity `L` on
+the square-root price range `[a, b]` (`a = √p_a`, `b = √p_b`). Below the range the position
+holds only token X, its full amount `realReserveX L a b`, worth `s²` each; inside the range it
+holds the real reserves `realReserveY L s a` and `realReserveX L s b`; above the range it holds
+only token Y, its full amount `realReserveY L b a` (v3 whitepaper §6.4.1, eqs. 6.29–6.30). -/
+noncomputable def v3PositionValue (L a b s : ℝ) : ℝ :=
+  if s ≤ a then s ^ 2 * realReserveX L a b
+  else if s ≤ b then realReserveY L s a + s ^ 2 * realReserveX L s b
+  else realReserveY L b a
+
+/-- **All token X at the lower end** of the range: at `s = a` the position is worth its full X
+holding `realReserveX L a b` at price `a²`. -/
+theorem v3PositionValue_at_lower (L a b : ℝ) :
+    v3PositionValue L a b a = a ^ 2 * realReserveX L a b := by
+  rw [v3PositionValue, if_pos le_rfl]
+
+/-- **All token Y at the upper end** of the range: at `s = b` the in-range X reserve is zero and
+the position is worth its full Y holding `realReserveY L b a`. -/
+theorem v3PositionValue_at_upper (L : ℝ) {a b : ℝ} (hab : a < b) :
+    v3PositionValue L a b b = realReserveY L b a := by
+  rw [v3PositionValue, if_neg (not_le.mpr hab), if_pos le_rfl, realReserveX, sub_self, mul_zero,
+    mul_zero, add_zero]
+
+/-- **A v3 position has nonnegative value** for `L ≥ 0` and `0 < a ≤ b`. -/
+theorem v3PositionValue_nonneg {L a b s : ℝ} (hL : 0 ≤ L) (ha : 0 < a) (hab : a ≤ b) :
+    0 ≤ v3PositionValue L a b s := by
+  unfold v3PositionValue realReserveX realReserveY
+  split_ifs with hsa hsb
+  · exact mul_nonneg (sq_nonneg s)
+      (mul_nonneg hL (sub_nonneg.mpr (one_div_le_one_div_of_le ha hab)))
+  · have hs' : 0 < s := ha.trans (not_le.mp hsa)
+    exact add_nonneg (mul_nonneg hL (by linarith [not_le.mp hsa]))
+      (mul_nonneg (sq_nonneg s) (mul_nonneg hL (sub_nonneg.mpr (one_div_le_one_div_of_le hs' hsb))))
+  · exact mul_nonneg hL (by linarith)
+
+/-- **Below the range the position is the covered call**: for `0 ≤ s ≤ a`,
+`v3PositionValue L a b s = x_max · (s² − max (s² − ab) 0)` with `x_max = realReserveX L a b`
+(here `s² ≤ ab`, so the call is out of the money). -/
+theorem v3PositionValue_eq_coveredCall_of_le {L a b s : ℝ} (ha : 0 < a) (hab : a ≤ b)
+    (hs : 0 ≤ s) (hsa : s ≤ a) :
+    v3PositionValue L a b s = realReserveX L a b * (s ^ 2 - max (s ^ 2 - a * b) 0) := by
+  rw [v3PositionValue, if_pos hsa,
+    max_eq_right (by nlinarith [mul_le_mul hsa hsa hs ha.le, mul_le_mul_of_nonneg_left hab ha.le]),
+    sub_zero, mul_comm]
+
+/-- **Above the range the position is the covered call**: for `b < s`,
+`v3PositionValue L a b s = x_max · (s² − max (s² − ab) 0) = x_max · ab = L (b − a)`, the full Y
+holding (here `s² > ab`, so the call is in the money and caps the payoff). -/
+theorem v3PositionValue_eq_coveredCall_of_lt {L a b s : ℝ} (ha : 0 < a) (hab : a ≤ b)
+    (hbs : b < s) :
+    v3PositionValue L a b s = realReserveX L a b * (s ^ 2 - max (s ^ 2 - a * b) 0) := by
+  have hb : 0 < b := ha.trans_le hab
+  rw [v3PositionValue, if_neg (not_le.mpr (hab.trans_lt hbs)), if_neg (not_le.mpr hbs),
+    max_eq_left (by nlinarith [mul_le_mul hbs.le hbs.le hb.le (hb.trans hbs).le,
+      mul_le_mul_of_nonneg_right hab hb.le]),
+    sub_sub_cancel, realReserveX, realReserveY]
+  field_simp
+
+/-- In-range identity behind `coveredCall_sub_v3PositionValue`: holding all of `x_max` at price
+`s²` beats the in-range position by `L (s − a)² / a`. -/
+theorem realReserveX_mul_sq_sub_inRange {L a b s : ℝ} (ha : a ≠ 0) (hb : b ≠ 0) (hs : s ≠ 0) :
+    realReserveX L a b * s ^ 2 - (realReserveY L s a + s ^ 2 * realReserveX L s b)
+      = L * (s - a) ^ 2 / a := by
+  unfold realReserveX realReserveY
+  field_simp
+  ring
+
+/-- In-range identity behind `coveredCall_sub_v3PositionValue`: the capped payoff `x_max · ab`
+beats the in-range position by `L (b − s)² / b`. -/
+theorem realReserveX_mul_mul_sub_inRange {L a b s : ℝ} (ha : a ≠ 0) (hb : b ≠ 0) (hs : s ≠ 0) :
+    realReserveX L a b * (a * b) - (realReserveY L s a + s ^ 2 * realReserveX L s b)
+      = L * (b - s) ^ 2 / b := by
+  unfold realReserveX realReserveY
+  field_simp
+  ring
+
+/-- **Inside the range the covered call exceeds the position by the smaller squared gap.** For
+`L ≥ 0`, `0 < a < s ≤ b`:
+`x_max · (s² − max (s² − ab) 0) − v3PositionValue L a b s = min (L(s − a)²/a) (L(b − s)²/b)`. -/
+theorem coveredCall_sub_v3PositionValue {L a b s : ℝ} (hL : 0 ≤ L) (ha : 0 < a) (has : a < s)
+    (hsb : s ≤ b) :
+    realReserveX L a b * (s ^ 2 - max (s ^ 2 - a * b) 0) - v3PositionValue L a b s
+      = min (L * (s - a) ^ 2 / a) (L * (b - s) ^ 2 / b) := by
+  have hs : 0 < s := ha.trans has
+  have hb : 0 < b := hs.trans_le hsb
+  have hX : 0 ≤ realReserveX L a b :=
+    mul_nonneg hL (sub_nonneg.mpr (one_div_le_one_div_of_le ha (has.le.trans hsb)))
+  have h1 := realReserveX_mul_sq_sub_inRange (L := L) ha.ne' hb.ne' hs.ne'
+  have h2 := realReserveX_mul_mul_sub_inRange (L := L) ha.ne' hb.ne' hs.ne'
+  rw [v3PositionValue, if_neg (not_le.mpr has), if_pos hsb]
+  rcases le_total (s ^ 2) (a * b) with h | h
+  · rw [max_eq_right (sub_nonpos.mpr h), sub_zero, h1, min_eq_left]
+    nlinarith [mul_nonneg hX (sub_nonneg.mpr h)]
+  · rw [max_eq_left (sub_nonneg.mpr h), sub_sub_cancel, h2, min_eq_right]
+    nlinarith [mul_nonneg hX (sub_nonneg.mpr h)]
+
+/-- **A v3 position is worth at most the covered call** `x_max · (s² − max (s² − ab) 0)`: long
+its full X holding `x_max = realReserveX L a b`, short a call struck at the geometric-mean price
+`ab = √(p_a p_b)`. Equality holds outside the range (`v3PositionValue_eq_coveredCall_of_le`,
+`v3PositionValue_eq_coveredCall_of_lt`); inside it the gap is `coveredCall_sub_v3PositionValue`. -/
+theorem v3PositionValue_le_coveredCall {L a b s : ℝ} (hL : 0 ≤ L) (ha : 0 < a) (hab : a ≤ b)
+    (hs : 0 ≤ s) :
+    v3PositionValue L a b s ≤ realReserveX L a b * (s ^ 2 - max (s ^ 2 - a * b) 0) := by
+  rcases le_or_gt s a with hsa | has
+  · exact (v3PositionValue_eq_coveredCall_of_le ha hab hs hsa).le
+  rcases le_or_gt s b with hsb | hbs
+  · have := coveredCall_sub_v3PositionValue hL ha has hsb
+    have : 0 ≤ min (L * (s - a) ^ 2 / a) (L * (b - s) ^ 2 / b) :=
+      le_min (div_nonneg (mul_nonneg hL (sq_nonneg _)) ha.le)
+        (div_nonneg (mul_nonneg hL (sq_nonneg _)) (ha.trans (has.trans_le hsb)).le)
+    linarith
+  · exact (v3PositionValue_eq_coveredCall_of_lt ha hab hbs).le
 
 /-- **Tick price**: Uniswap v3 discretizes the price axis into ticks `i`
 (integers) with `p(i) = 1.0001^i`, so every tick is `0.01%` apart from its

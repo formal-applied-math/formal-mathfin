@@ -306,9 +306,9 @@ namespace MathFin.AxiomAudit
 #guard_msgs (whitespace := lax) in
   #print axioms MathFin.gbm_solves_sde
 
-/-- info: 'MathFin.bs_pde_eq_itoDrift2D_minus_rV' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.discountedCallBrownian_heat_equation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.bs_pde_eq_itoDrift2D_minus_rV
+  #print axioms MathFin.discountedCallBrownian_heat_equation
 
 /-! ## Margrabe BSCallHyp grounding (leap-3 closure via gaussian vector) -/
 
@@ -1025,8 +1025,8 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.bs_identity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.bs_identity
 
-/-- info: 'MathFin.bs_pde_from_no_arbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.bs_pde_from_no_arbitrage
+/-- info: 'MathFin.margrabe_exchange_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.margrabe_exchange_price
 
 -- Values round 6 (2026-06-09): Andre's reflection-principle counting
 -- bijection (Binomial/PathReflection.lean), wired to the corpus as
@@ -1211,7 +1211,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ftap_discrete
 
 -- General-Ω one-period FTAP (`FTAPOnePeriod.lean`): NoArbitrage ⟺ ∃ EMM for a
--- scalar L⁰ return on an arbitrary probability space (Föllmer–Schied 1.55 /
+-- scalar L⁰ return on an arbitrary probability space (Föllmer–Schied §1.2 /
 -- one-period DMW). Backward via the bounded-density reduction to L¹, the scalar
 -- no-arbitrage dichotomy, and the two-region balancing `withDensity` — no
 -- Hahn–Banach, no Kreps–Yan.

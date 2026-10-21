@@ -47,6 +47,8 @@ def _module_name(path: Path) -> str:
 def _modules() -> dict[str, list[str]]:
     mods = {}
     for path in sorted(MATHFIN_DIR.rglob("*.lean")):
+        if path.name.startswith("."):  # tool temp files (`ledger verify --exec`), not modules
+            continue
         name = _module_name(path)
         if name in AGGREGATORS or name.startswith("MathFin.Blueprint."):
             continue

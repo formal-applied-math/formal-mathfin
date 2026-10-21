@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.Foundations.BivariateNormalCDF
+public import MathFin.BlackScholes.PutGreeks
 
 /-!
 # Heynen & Kat two-asset barrier option: the closed form
@@ -43,6 +44,10 @@ and the four knock-out prices are `A(1,-1)` (down-out call), `A(1,1)` (up-out ca
   probabilistic reading is not proved here, and the comparison with the one-asset formula
   (which checks `e₁`, `e₃` and the reflection exponent) is by inspection — that formula is not
   in the library.
+* `heynenKatA_call_rho_zero_eq_bsV`, `heynenKatA_put_rho_zero_eq_bsP`: at `ρ = 0` and
+  `b₁ = r` (asset 1 pays no dividend), that one-asset factor is the library's Black–Scholes
+  call `bsV` (put `bsP`), since `hkD1`, `hkD2` are then `bsd1`, `bsd2`. So the independent
+  knock-out value is `bsV · (barrier factor)`; the barrier factor is still a transcription.
 * `heynenKat_downOut_add_upOut`: for a fixed option type `η` (`η² = 1`) and `ρ² ≤ 1`, the
   down-out and up-out values sum to a closed form with no `N₂` left: each pair
   `N₂(ηdᵢ, φeᵢ; −ηφρ)`, `φ = ±1`, collapses via `bivariateNormalCDF_flip_snd` to `Φ(ηdᵢ)`.
@@ -188,5 +193,45 @@ theorem heynenKat_downOut_add_upOut (S1 S2 X H T r b1 b2 σ1 σ2 : ℝ) {eta ρ 
         Real.exp (2 * (b2 - σ2 ^ 2 / 2 + ρ * σ1 * σ2) * Real.log (H / S2) / σ2 ^ 2))) * h3 +
     (eta * X * Real.exp (-(r * T)) *
         Real.exp (2 * (b2 - σ2 ^ 2 / 2) * Real.log (H / S2) / σ2 ^ 2)) * h4
+
+/-! ### The independent case through the library's Black–Scholes prices -/
+
+/-- At cost of carry `b₁ = r`, Heynen–Kat's `d₁` is the Black–Scholes `bsd1`. -/
+lemma hkD1_eq_bsd1 (S X r σ T : ℝ) : hkD1 S X r σ T = bsd1 S X r σ T := by
+  unfold hkD1 hkMu bsd1
+  ring
+
+/-- At cost of carry `b₁ = r`, Heynen–Kat's `d₂` is the Black–Scholes `bsd2`. -/
+lemma hkD2_eq_bsd2 (S X r σ T : ℝ) : hkD2 S X r σ T = bsd2 S X r σ T := by
+  unfold hkD2 bsd2
+  rw [hkD1_eq_bsd1]
+
+/-- **Independent assets, call: Black–Scholes call times barrier factor.** At `ρ = 0` and
+`b₁ = r`, the Heynen–Kat knock-out call value is the Black–Scholes call `bsV X r σ₁ S₁ T`
+on asset 1 times the closed-form barrier factor `Φ(φe₁) − e^{2μ₂ log(H/S₂)/σ₂²}Φ(φe₃)` of
+asset 2 (`heynenKatA_rho_zero` with `hkD1_eq_bsd1`, `hkD2_eq_bsd2`). Neither side is shown to
+be a discounted expected payoff. -/
+theorem heynenKatA_call_rho_zero_eq_bsV (phi S1 S2 X H T r b2 σ1 σ2 : ℝ) :
+    heynenKatA 1 phi S1 S2 X H T r r b2 σ1 σ2 0 =
+      bsV X r σ1 S1 T *
+        (Phi (phi * hkE1 H S2 b2 σ1 σ2 0 T) -
+          Real.exp (2 * hkMu b2 σ2 * Real.log (H / S2) / σ2 ^ 2) *
+            Phi (phi * hkE3 H S2 b2 σ1 σ2 0 T)) := by
+  rw [heynenKatA_rho_zero, hkD1_eq_bsd1, hkD2_eq_bsd2, bsV, sub_self, zero_mul, Real.exp_zero]
+  simp only [one_mul, mul_one]
+
+/-- **Independent assets, put: Black–Scholes put times barrier factor.** At `ρ = 0` and
+`b₁ = r`, the Heynen–Kat knock-out put value is the Black–Scholes put `bsP X r σ₁ S₁ T` on
+asset 1 times the same barrier factor of asset 2. Neither side is shown to be a discounted
+expected payoff. -/
+theorem heynenKatA_put_rho_zero_eq_bsP (phi S1 S2 X H T r b2 σ1 σ2 : ℝ) :
+    heynenKatA (-1) phi S1 S2 X H T r r b2 σ1 σ2 0 =
+      bsP X r σ1 S1 T *
+        (Phi (phi * hkE1 H S2 b2 σ1 σ2 0 T) -
+          Real.exp (2 * hkMu b2 σ2 * Real.log (H / S2) / σ2 ^ 2) *
+            Phi (phi * hkE3 H S2 b2 σ1 σ2 0 T)) := by
+  rw [heynenKatA_rho_zero, hkD1_eq_bsd1, hkD2_eq_bsd2, bsP, sub_self, zero_mul, Real.exp_zero]
+  simp only [neg_mul, one_mul, mul_one]
+  ring
 
 end MathFin

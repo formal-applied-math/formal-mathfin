@@ -1313,6 +1313,21 @@
         "formalization_status": "full",
         "formalization_scope": "Full derivation re-exported from MathFin/BlackScholes/VarianceSwapEquivalence.lean: the log-payoff static-replication strike equals σ² (varianceSwap_log_contribution) and the realised-variance equipartition sum tends to σ²·T (tendsto_expected_bsLogPrice_equipartition_sum, Phase 34). Both conjuncts are genuine functionals. No axioms beyond Mathlib defaults. Wires the previously-orphan Phase-45 bridge (bridges.md row 45) to the corpus."
       }
+    },
+    {
+      "id": "mf-merton-jump-count-split",
+      "name": "Jumps of a Merton-Type Jump-Diffusion Split into Independent Poisson Streams",
+      "domain": "mathematical_finance",
+      "description": "In the jump-diffusion model JumpDiffusionHyp Q Λ Z N J (Merton's independence structure with i.i.d. log-jump sizes J i of any law, the Poisson(Λ) jump count N independent of them; the library's Gaussian-jump MertonHyp is not an instance as stated), for a measurable set A of sizes with p = Q(J₀ ∈ A), the number of jumps with size in A is Poisson(p·Λ), the number with size in Aᶜ is Poisson((1 − p)·Λ), and the two counts are independent; for A = (0, ∞) these are the up-jumps and the remaining jumps (log-size ≤ 0). Stated at a fixed horizon, for the model's single jump count.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JumpDiffusionThinning\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen scoped NNReal\n\n/-- In the Merton jump-diffusion model `JumpDiffusionHyp Q Λ Z N J`, the jumps whose size lies in\na measurable set `A` and those whose size lies in `Aᶜ` arrive as independent Poisson counts with\nmeans `Λ·Q(J₀ ∈ A)` and `Λ·Q(J₀ ∉ A)`. Re-export of `MathFin.JumpDiffusionHyp.jumpCounts_split`. -/\ntheorem merton_jump_counts_split {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}\n    {Λ : ℝ≥0} {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ} (h : JumpDiffusionHyp Q Λ Z N J)\n    {A : Set ℝ} (hA : MeasurableSet A) :\n    Q.map (fun ω ↦ PoissonThinning.marksIn J A (N ω) ω)\n        = poissonMeasure ((Q (J 0 ⁻¹' A)).toNNReal * Λ) ∧\n      Q.map (fun ω ↦ PoissonThinning.marksIn J Aᶜ (N ω) ω)\n        = poissonMeasure ((1 - (Q (J 0 ⁻¹' A)).toNNReal) * Λ) ∧\n      IndepFun (fun ω ↦ PoissonThinning.marksIn J A (N ω) ω)\n        (fun ω ↦ PoissonThinning.marksIn J Aᶜ (N ω) ω) Q :=\n  h.jumpCounts_split hA\n"
+      },
+      "metadata": {
+        "reference": "R. C. Merton, Option pricing when underlying stock returns are discontinuous, Journal of Financial Economics 3 (1976) 125–144; Saporito, Theorem 3.3.10 (thinning)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.JumpDiffusionHyp.jumpCounts_split (MathFin/BlackScholes/JumpDiffusionThinning.lean): PoissonThinning.thinned_streams_of_iid_marks applied to the fields N_law, J_meas, J_indep, J_ident and the lemma N_indep_J of JumpDiffusionHyp (MathFin/BlackScholes/JumpDiffusionMixing.lean). SCOPE: the jump count at one horizon; the time structure of the jump-diffusion process is not used."
+      }
     }
   ]
 }

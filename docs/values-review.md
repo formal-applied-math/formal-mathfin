@@ -125,6 +125,140 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-21 — corpus 657, modules 625 — the coherence pass: every module connected
+
+Scope: the whole library, read for coherence, mathematical and financial, after the #248–#284
+batch. The question was whether it still grows as one formalization program or has started to
+grow around itself. The finding was the second, in one specific way: growth had started to go
+around the corpus. The values gates audit what the corpus cites, so a module nothing cites is
+invisible to them. Forty-one modules imported nothing from the library and nothing imported
+them; forty-seven more were imported by nothing and cited by no entry. They were honest, and they
+connected to nothing. Around them: `Foundations/` held models (pricing from Brownian motion,
+the Monte Carlo pricer, LSV, Hull–White calibration), seven encodings of an equivalent martingale
+measure had no bridge between them, and `EMMSet` did not require equivalence; rates and credit
+were priced under a measure the library never built, "risk-neutral" in prose only; ten modules
+were empty re-exports; the roadmap mixed strategy with a phase log, and the corpus was filed by
+chapters of a textbook that no longer described most of it. The maintainer's direction: build
+the bridges, do not quarantine.
+
+### Upgrades executed
+
+- **One graph, enforced.** `tests/test_architecture.py`: every module imports a library module
+  or is imported by one, and is imported by a module or cited by an entry; `Foundations/`
+  imports only `Foundations/`. `STAGING` admits a module only against an open issue, and it is
+  empty. Modules that joined a foundation to a model moved to `Bridges/`, models to their
+  sections; the ten stubs are deleted. The review cadence now counts modules too
+  (`REVIEW_SLACK_MODULES = 15`), and this heading carries the count it reads.
+- **A bridge for every island.** 113 entries (110 `full`, 3 `reduced_core`), two replaced;
+  corpus 544 → 657 (658 with the entry below); 20 modules added, 10 deleted, 615 → 625. What
+  each bridge proves is in `docs/coverage.md` ("Every module connected") and
+  `docs/bridges.md`.
+- **Rates under a measure the library constructs.** One Wiener bond-price lemma for Vasicek,
+  Hull–White and GSR (#287, first half); the Vasicek short rate and bond price under the
+  Girsanov measure `Q_λ` (#288); the Hull–White `S`-forward measure, with the futures–forward gap
+  of the short rate (#68, instantaneous rate only).
+- **One EMM.** `OnePeriodVector.IsEMM` is the canonical one-period notion; the scalar,
+  multi-state, two-state, discrete and sampled continuous notions are proved equivalent to it or
+  restrict to it. `EMMSet` is `martingaleProbVectors`.
+- **Statements replaced, not reworded.** `PDEFromIto`'s algebraic restatements of the
+  Black–Scholes PDE are replaced by the heat equation of the discounted call in the Brownian
+  coordinate; `MargrabeGrounding`'s existential theorems now exhibit their measure, and
+  `margrabe_exchange_price` proves Margrabe's formula as an expected payoff; the CMS "adjustment"
+  lemmas are Jensen gaps and are named so; `ItoFormulaAdaptedDrift` is in its namespace with
+  its continuity hypothesis weakened to almost sure (#290).
+- **Docs.** `docs/status.md` (one page), `docs/roadmap.md` (strategy only; the phase log is in
+  `docs/archive/`), the corpus split by area.
+
+### The standing first pass: prose against statement
+
+Five read-only reviewers read the 115 new or replaced entries against the statements they cite,
+and every docstring the pass changed. 96 entries were accurate as written. The rest, four older
+entries they cite, and 35 docstrings needed fixes, all applied. By kind:
+- **A factor wrong.** The Girsanov shift of `σ∫g dB` in the Vasicek bond entry and docstring
+  was off by `σ`.
+- **A measure read as the pricing measure.** "Risk-neutral" where the measure is the given one
+  (the Vasicek bond, the Wiener bond lemma, basket moments, the GBM log return, the binomial path
+  measure, the PDE coordinate); a `μ`-expectation called "the price under `μ`" where `μ` is the
+  real-world measure.
+- **A different object.** `gaussianLimit` called Wiener measure: it is the pre-Brownian
+  projective limit on the product space `ℝ≥0 → ℝ`. The one-factor pair law attributed to the
+  copula, which lives on `[0, 1]ⁿ`.
+- **A name that claims coverage.** "The Merton model" for `JumpDiffusionHyp`, of which the
+  Gaussian-jump `MertonHyp` is not an instance: now "Merton-type". "Affine bond prices solve the
+  PDE" for a closed form not shown to be the price.
+- **A stronger mode.** "Does not move" for an a.s. statement; "a martingale" for one
+  unconditional identity (the chooser, Glosten–Milgrom beliefs); a CLT listed as almost sure
+  convergence; purged cross-validation stated for the whole fold where the theorem is pairwise,
+  with the roles of the spans swapped; the two-asset risk-parity portfolio "the only one" where
+  the theorem is long-only.
+- **A hypothesis or convention not disclosed.** Zero recovery in the LHP tranche limit;
+  `Real.log` equal to `log|x|` at nonpositive wealth in the log-utility acceptance set; `0 < d`
+  in `BinomialNoArb`; a rate per block, not per period; a nonempty span.
+- **An understatement now false.** CreditMetrics "calibration not included" and Uniswap v3
+  "saturation not formalized", both proved today.
+- **Locators.** Föllmer–Schied "Thm 1.55" and "Thm 1.6" could not be corroborated and are §1.2
+  everywhere; AMLCR §2.4 is §§2.3–2.4; a JKB section and an AFML subsection are dropped to the
+  chapter; Bagaria's notes are cited where his examples are used.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: `margrabe_exchange_price`, Margrabe's formula as an expected
+  payoff by splitting off an independent residual. Next: compose it with
+  `exchangeOption_numeraire_price`, so the `S²`-numéraire statement is a theorem (#291).
+- **Coherence.** Exemplar: `vasicekBondPrice_girsanov`, the market price of risk through one
+  Wiener lemma and one constructed measure. Next: `eq_bivariateNormalLaw` from Mathlib's
+  `IsGaussian.ext_covarianceBilinDual` (#293); a covariance lemma for Wiener integrals, so the
+  prose that reads `⟪f, g⟫` as a covariance cites one (#297).
+- **Zero slop.** Next: reuse `integrable_bsCall_payoff` in `BarrierParity` and `Lookback` (#291);
+  one exponential-kernel integral for the three Vasicek kernels (#297).
+- **Architectural ingenuity.** Next: one law for the one-factor model, so every default identity
+  transfers in one rewrite (#293); a neutral `LognormalHyp`, with `BSCallHyp` an instance (#298).
+- **First principles.** Next: utility acceptance on positive wealth (#295); the chooser's Markov
+  step derived from `JumpDiffusionProcess.condExp_comp` (#291); `MertonHyp` an instance of
+  `JumpDiffusionHyp` (#298).
+- **Idiomatic register.** Next: `HullWhite.integratedRate` is the short rate and should be named
+  so (#297); Markowitz on `Sg *ᵥ w` (#299).
+- **Concept clarity.** Next: the CreditMetrics joint migration matrix (#293); purged
+  cross-validation at the σ-algebra level (#299); conditional attainment for the Snell envelope
+  (#301).
+- **Beautiful math.** Next: component VaR as the gradient, with the Euler allocation from
+  homogeneity (#295).
+
+### Ranked backlog
+
+1. The Student-t law, then VaR and ES at it (#285, carried).
+2. Gaussian EPE and PFE at the law, then collateralized EPE (#287, second half).
+3. Margrabe under the `S²`-numéraire measure; the chooser's step derived (#291).
+4. One-factor credit: one law, heterogeneous thresholds, recovery, joint migration (#293).
+5. Utility acceptance on positive wealth; component VaR as a gradient (#295).
+6. Rates: the Wiener covariance lemma, Hull–White names, one kernel lemma, the `Q_λ` capstone
+   (#297).
+7. `MertonHyp` as a `JumpDiffusionHyp`; a neutral lognormal hypothesis (#298).
+8. Markowitz necessity, N-asset risk parity, purged cross-validation jointly (#299).
+9. The one-period FTAP from the vector theorem; positive state prices for the forward (#300).
+10. Snell conditional attainment; the Poisson specs retired (#301).
+
+Also open from the pass: Stulz and Heynen–Kat as expected payoffs (#292), Marshall–Olkin's
+correlation and first-to-default (#294), and the DeFi pieces with no bridge yet (#296). Two
+leads were rejected as having no honest bridge: SA-CCR against Stulz (a shared quadratic form,
+no finance) and the insurance module against the premium principles (shared prose only). The
+backlogs of earlier reviews that had no issue are filed in the tracker, which is the one backlog
+(`docs/status.md`).
+
+After the panel, one entry was added and read against its statement: `mf-better-of-two-closed-form`
+(#57), a re-export of `integral_betterOfTwo`, which the pass had proved and nothing cited as a
+`full` entry. Corpus 658.
+
+### Evidence
+
+`lake build` is green locally (9,381 jobs; the only `sorry` warnings are upstream BrownianMotion
+and `Challenge.lean`), with `AxiomAudit` and `AxiomAuditGen` (771 guards) passing. The ledger
+re-verified every entry whose inputs changed: 658 fresh, none stale or missing. The python gates
+pass, `tests/test_architecture.py` included. `AxiomAuditGen`, `formalization.yaml` and the
+blueprint are regenerated at corpus 658. The Mathlib cache and the image registry were not
+reachable from this session, so the build ran from source; CI on the pushed tree is the
+canonical check.
+
 ## 2026-10-21 — corpus 544 — the batch from Yang Ye, #248–#284: thirty merged, six held
 
 Scope: the thirty-six open pull requests by Yang Ye (@leafyoung), all drafts, each green on its own

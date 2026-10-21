@@ -1,12 +1,13 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import Mathlib
 public import MathFin.Foundations.GaussianMoments
+public import MathFin.Foundations.GaussianPartialMoments
 
 /-!
 # Estimation: Gaussian variance-ratio divergence and realised-volatility bias
@@ -26,19 +27,24 @@ draws independent of each other) makes the expected realised variance
 `σ²T + 2nη²`: a bias linear in the sampling frequency (`integral_sum_sq_noisy_increments`;
 Zhang, Mykland and Aït-Sahalia). The square-root estimator of a nondegenerate variance target
 is biased low, `E[σ̂] < σ` (`sqrtBias_oneSided`, with the one-sample Gaussian instance
-`sqrtBias_absGaussianSample`). The endpoint drift estimator `(X_T − X_0)/T` of
-`X_t = μt + σB_t` has law `N(μ, σ²/T)`, so its standard error `σ/√T` does not depend on the
-sampling frequency (`drift_se_endpoint_hasLaw`, `drift_se_endpoint_var`).
+`sqrtBias_absGaussianSample`). For one Gaussian sample the bias is exact:
+`E|Z| = √(2v/π)` for `Z ∼ N(0, v)` (`integral_abs_gaussianReal`), read off the truncated first
+moment of the standard normal in `Foundations/GaussianPartialMoments.lean`. The endpoint drift
+estimator `(X_T − X_0)/T` of `X_t = μt + σB_t` has law `N(μ, σ²/T)`, so its standard error
+`σ/√T` does not depend on the sampling frequency (`drift_se_endpoint_hasLaw`,
+`drift_se_endpoint_var`).
 
 ## Scope
 
 Not proved here: the sequential-test delay `ln(1/α)/D` itself (only `D` is formalised); the
 identification of the stated `∫ llr` with Mathlib's `InformationTheory.klDiv` (it needs absolute
 continuity and integrability of `llr`, `InformationTheory.toReal_klDiv`); the exact constant
-`√(2/n)·Γ((n+1)/2)/Γ(n/2)` of the square-root bias; noise-robust estimators such as two-scale
-realised variance; and that the `n`-sample drift estimator reduces to the endpoint form. The
-drift statements take a single `B_T ∼ N(0, T)` and the endpoint estimator `(μT + σB_T)/T` as
-given (no process `X` or `B` is constructed), so `n` does not appear in them.
+`√(2/n)·Γ((n+1)/2)/Γ(n/2)` of the square-root bias for `n ≥ 2` (the `n = 1` value is
+`integral_abs_gaussianReal`); and noise-robust estimators such as two-scale realised variance.
+The drift statements here take a single `B_T ∼ N(0, T)` and the endpoint estimator
+`(μT + σB_T)/T` as given, so `n` does not appear in them; that the `n`-sample estimator of a
+pre-Brownian motion with drift, on an equally spaced grid, reduces to this endpoint form is
+`hasLaw_fracDiff_one_driftEstimator` in `Performance/FracDiffWeights.lean`.
 
 ## References
 
@@ -330,7 +336,8 @@ whose square root is the volatility estimator `σ̂ = √Y`), then `E[√Y] < σ
 square-root estimator of a nondegenerate volatility is **biased low**. Strictness comes
 from the tangent-line identity at `σ²`: `√y = (y + σ²)/(2σ) − (√y − σ)²/(2σ)`, whose
 remainder is strictly positive on `{Y ≠ σ²}`, a set of positive measure by nondegeneracy.
-The exact Gaussian constant `√(2/n)·Γ((n+1)/2)/Γ(n/2)` of the bias is not formalized here. -/
+The exact Gaussian constant `√(2/n)·Γ((n+1)/2)/Γ(n/2)` of the bias is not formalized here
+for `n ≥ 2`; for `n = 1` it is `integral_abs_gaussianReal`. -/
 theorem sqrtBias_oneSided {Y : α → ℝ} (hYnn : ∀ ω, 0 ≤ Y ω)
     {sigma : ℝ} (hsig : 0 < sigma) (hint : Integrable Y μ)
     (hmean : ∫ ω, Y ω ∂μ = sigma * sigma) (hnd : μ {ω | Y ω ≠ sigma * sigma} ≠ 0) :
@@ -412,9 +419,8 @@ theorem sqrtBias_oneSided {Y : α → ℝ} (hYnn : ∀ ω, 0 ≤ Y ω)
 /-- **The Gaussian sample instance: `E[|Z|] < σ` for `Z ~ N(0, σ²)`.** The single-sample
 (`n = 1`) realised-volatility estimator is `σ̂ = |Z| = √(Z²)`, whose target
 `Y = Z²` is nondegenerate (`P(Z² = σ²) = 0` — a nondegenerate Gaussian has no atoms,
-`NullSingletonClass`) — so `sqrtBias_oneSided` applies. The exact constant
-`√(2/n)·Γ((n+1)/2)/Γ(n/2) = √(2/π) ≈ 0.798` at `n = 1` (so `E|Z| ≈ 0.798σ`) is not
-formalized here. -/
+`NullSingletonClass`) — so `sqrtBias_oneSided` applies. The exact value
+`E|Z| = σ√(2/π) ≈ 0.798σ` is `integral_abs_gaussianReal`. -/
 theorem sqrtBias_absGaussianSample {v : ℝ≥0} (hv : v ≠ 0) :
     ∫ x, |x| ∂(gaussianReal 0 v) < Real.sqrt (v : ℝ) := by
   have hvpc : 0 < v := hv.bot_lt
@@ -459,6 +465,42 @@ theorem sqrtBias_absGaussianSample {v : ℝ≥0} (hv : v ≠ 0) :
     (by rw [MathFin.integral_sq_gaussianReal v]; exact hsqrtsq.symm) hnd
   rw [show (fun x : ℝ ↦ |x|) = fun x : ℝ ↦ Real.sqrt (x ^ 2) from funext habs]
   exact hmain
+
+/-- **Mean absolute value of a centred Gaussian: `E|Z| = √(2v/π)` for `Z ∼ N(0, v)`.** The
+one-sample volatility estimator `|Z|` therefore underestimates `σ = √v` by the exact factor
+`√(2/π) ≈ 0.798` (compare `sqrtBias_absGaussianSample`). For `v = 1`, `|x|ϕ(x)` is the even
+function `y ↦ yϕ(y)` of `|x|`, so `E|Z| = 2∫₀^∞ zϕ(z) dz = 2ϕ(0)` by the truncated first
+moment `integral_id_mul_gaussianPDFReal_Ioi`; a general `v` is the image of `N(0, 1)` under
+`x ↦ √v·x` (`gaussianReal_map_const_mul`). -/
+theorem integral_abs_gaussianReal (v : ℝ≥0) :
+    ∫ x, |x| ∂(gaussianReal 0 v) = √(2 * v / π) := by
+  have hφ (x : ℝ) : gaussianPDFReal 0 1 |x| = gaussianPDFReal 0 1 x := by
+    simp [gaussianPDFReal, sq_abs]
+  have hstd : ∫ x, |x| ∂(gaussianReal 0 1) = 2 * (√(2 * π))⁻¹ := by
+    calc ∫ x, |x| ∂(gaussianReal 0 1)
+        = ∫ x, |x| * gaussianPDFReal 0 1 |x| := by
+          rw [integral_gaussianReal_eq_integral_smul one_ne_zero]
+          congr 1 with x
+          rw [hφ, smul_eq_mul, mul_comm]
+      _ = 2 * ∫ x in Set.Ioi 0, x * gaussianPDFReal 0 1 x :=
+          integral_comp_abs (f := fun y ↦ y * gaussianPDFReal 0 1 y)
+      _ = 2 * (√(2 * π))⁻¹ := by
+          rw [integral_id_mul_gaussianPDFReal_Ioi]
+          simp [gaussianPDFReal]
+  have hmap : gaussianReal 0 v = (gaussianReal 0 1).map (√(v : ℝ) * ·) := by
+    rw [gaussianReal_map_const_mul, mul_zero, mul_one]
+    congr 1
+    ext
+    exact (Real.sq_sqrt (NNReal.coe_nonneg v)).symm
+  rw [hmap, integral_map (continuous_const_mul _).aemeasurable continuous_abs.aestronglyMeasurable]
+  simp_rw [abs_mul, abs_of_nonneg (Real.sqrt_nonneg _)]
+  rw [integral_const_mul, hstd, eq_comm,
+    Real.sqrt_eq_iff_mul_self_eq (by positivity) (by positivity)]
+  have h : √(v : ℝ) * (2 * (√(2 * π))⁻¹) * (√(v : ℝ) * (2 * (√(2 * π))⁻¹)) =
+      (√(v : ℝ) * √(v : ℝ)) * 4 * (√(2 * π) * √(2 * π))⁻¹ := by ring
+  rw [h, Real.mul_self_sqrt (NNReal.coe_nonneg v), Real.mul_self_sqrt (by positivity)]
+  field_simp
+  ring
 
 end SqrtBias
 

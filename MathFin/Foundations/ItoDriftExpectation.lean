@@ -30,13 +30,14 @@ process `X_t = X₀ + b·t + σ·B_t`:
   `f'`, `f''`, `f'''` bounded, the exponential-growth hypotheses of `ito_formula_itoProcess`
   hold at `λ = 0`.
 
-An adapted-coefficient analogue, `itoDrift_expectation_identity_adapted`
-(`ItoFormulaAdaptedDrift`), assumes rather than constructs a `natFiltration`-adapted version
-`M` of the Itô integral of `δ` with every path continuous; it is not used to derive the
-constant-coefficient case here. For the process the library constructs, the pathwise formula
-for adapted coefficients is `ItoFormulaAdapted.ito_formula_adapted`; its expectation form, with
-no hypothesized `M`, is `itoDrift_expectation_identity_adaptedItoProcess`
-(`ItoFormulaAdaptedDriftConstructed`).
+The adapted-coefficient case is proved twice elsewhere, and neither proof is used here.
+`ItoDriftConditional.itoDrift_expectation_identity_adapted` (`ItoFormulaAdaptedDrift`)
+uses the discrete Itô formula and takes as hypotheses a `natFiltration`-adapted version `M` of
+the Itô integral of `δ` and an almost surely path-continuous `X = c + ∫ β + M`.
+`itoDrift_expectation_identity_adaptedItoProcess` (`ItoFormulaAdaptedDriftConstructed`) takes
+the expectation of the pathwise formula `ItoFormulaAdapted.ito_formula_adapted` for the process
+the library constructs, with no hypothesized `M`; that module also shows the constructed process
+meets the hypotheses of the first proof when every path of `B` is continuous.
 -/
 
 @[expose] public section

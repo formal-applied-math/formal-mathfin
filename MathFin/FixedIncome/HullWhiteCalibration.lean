@@ -1,12 +1,13 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import Mathlib
 public import MathFin.Foundations.WienerIntegralGaussian
+public import MathFin.Foundations.WienerIntegralExpMoment
 public import MathFin.FixedIncome.VasicekBondPrice
 public import MathFin.FixedIncome.VasicekSDEGaussian
 
@@ -36,10 +37,14 @@ is derived from those representations.
   (`integratedRate_hasLaw_gaussian`).
 * **The affine bond price** — the integrated rate reuses the Vasicek integrated kernel
   `vasicekIntegratedKernelLp` verbatim (integrating the diffusion kernel over
-  `s ∈ [u, T]` is model-independent), so `bondPrice_eq` is the exponential-Gaussian
-  moment with variance `vasicekBondV` again; `bondA` gains the `θ`-forcing integral and
-  `bondPrice_affine` gives the time-0 affine form `A(T)·e^{−B(T)·r₀}`, `A` independent of
-  `r₀` and `B = vasicekBondB` reused verbatim. `P(t,T)` for `t > 0` is not formalized.
+  `s ∈ [u, T]` is model-independent), so `bondPrice_eq` is the Wiener bond-price lemma
+  `integral_exp_neg_add_mul_wienerIntegralLp` with variance `vasicekBondV` again; `bondA` gains
+  the `θ`-forcing integral and `bondPrice_affine` gives the time-0 affine form
+  `A(T)·e^{−B(T)·r₀}`, `A` independent of `r₀` and `B = vasicekBondB` reused verbatim.
+  `P(t,T)` for `t > 0` is not formalized.
+* **Constant forcing is Vasicek** — with `θ ≡ κθ_v` the integrated mean is Vasicek's
+  `r₀B(T) + θ_v(T − B(T))` (`integratedMean_const`), so the integrated HW rate *is* the
+  integrated Vasicek rate `vasicekIntegratedRate` at level `θ_v` (`bondRate_const`).
 * **Calibration** — `theta` is the calibration formula
   `θ(t) = ∂_t f(0,t) + κ·f(0,t) + (σ²/2κ)·(1 − e^{−2κt})`; `calibAlpha_solves_ODE`
   verifies by differentiation that the closed form
@@ -79,6 +84,8 @@ Public lemmas (all in `namespace MathFin.HullWhite`):
   affine coefficients;
 * `bondPrice_eq`, `bondPrice_affine` — the exponential-Gaussian bond moment and its
   time-0 affine form with `vasicekBondB` reused verbatim;
+* `integratedMean_const`, `bondRate_const` — constant forcing `κθ_v` is the Vasicek model at
+  level `θ_v`;
 * `theta_continuous`, `calibAlpha_solves_ODE`, `mean_eq_forward`, `calibMean`,
   `calibMean_eq_forward`, `var_eq_interval`, `calibCorrection_integral`,
   `calibIntegratedMean`, `reprices_curve` — the calibration `θ`-formula and the
@@ -454,17 +461,37 @@ noncomputable def bondRate (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ) (κ 
 
 /-- **The HW zero-coupon bond price** — the exponential-Gaussian moment:
 `P(0,T) = 𝔼[exp(−bondRate T)] = exp(−∫₀ᵀ α + σ²·V(T)/2)` with `V = vasicekBondV`
-the Vasicek variance, unchanged: the zero-mean `vasicekBondPrice_eq` (`r₀ = θ = 0`)
-times the deterministic discount `exp(−∫₀ᵀ α)`. -/
+the Vasicek variance, unchanged: the Wiener bond-price lemma
+`integral_exp_neg_add_mul_wienerIntegralLp` at `m = ∫₀ᵀ α`, `c = σ` and the Vasicek integrated
+kernel. -/
 theorem bondPrice_eq (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ) (κ σ r₀ : ℝ)
     (hκ : 0 < κ) (T : ℝ≥0) :
     ∫ ω, Real.exp (-(bondRate hB θ κ σ r₀ hκ T ω)) ∂μ
       = Real.exp (-(integratedMean θ κ r₀ (T : ℝ))
-          + σ ^ 2 * vasicekBondV κ (T : ℝ) / 2) := by
-  have h := vasicekBondPrice_eq hB 0 0 σ hκ T
-  simp only [vasicekIntegratedRate, vasicekIntegratedMean, zero_mul, add_zero, zero_add,
-    neg_zero] at h
-  simp_rw [bondRate, neg_add, Real.exp_add, integral_const_mul, h]
+          + σ ^ 2 * vasicekBondV κ (T : ℝ) / 2) :=
+  (integral_exp_neg_add_mul_wienerIntegralLp hB T (integratedMean θ κ r₀ (T : ℝ)) σ
+    (vasicekIntegratedKernelLp hκ T)).trans <| by rw [vasicekIntegratedKernelLp_integral_sq hκ T]
+
+/-- **Constant forcing, integrated**: with `θ ≡ κ·θ_v` the integrated deterministic part is
+Vasicek's `∫₀ᵀ α = r₀·B(T) + θ_v·(T − B(T))` (`κ ≠ 0`): `integratedMean_eq` plus the kernel mass
+`∫₀ᵀ B(T − s) ds = (T − B(T))/κ` (`integral_vasicekIntegratedKernel`). -/
+theorem integratedMean_const (r₀ θ : ℝ) {κ : ℝ} (hκ : κ ≠ 0) (T : ℝ) :
+    integratedMean (fun _ ↦ κ * θ) κ r₀ T = vasicekIntegratedMean r₀ θ κ T := by
+  have hmass : ∫ s in (0 : ℝ)..T, vasicekBondB κ (T - s) = (T - vasicekBondB κ T) / κ :=
+    integral_vasicekIntegratedKernel κ T hκ
+  rw [integratedMean_eq _ continuous_const κ r₀ T hκ, intervalIntegral.integral_const_mul, hmass,
+    vasicekIntegratedMean]
+  field_simp
+
+omit [IsProbabilityMeasure μ] in
+/-- **Hull–White with constant forcing is Vasicek**: with `θ ≡ κ·θ_v`, the integrated HW short
+rate is the integrated Vasicek short rate at long-run level `θ_v`, as random variables (same
+deterministic part by `integratedMean_const`, same Wiener part by construction). -/
+theorem bondRate_const (hB : IsPreBrownianReal B μ) (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ)
+    (T : ℝ≥0) :
+    bondRate hB (fun _ ↦ κ * θ) κ σ r₀ hκ T = vasicekIntegratedRate hB r₀ θ σ hκ T := by
+  funext ω
+  rw [bondRate, vasicekIntegratedRate, integratedMean_const r₀ θ hκ.ne']
 
 /-- The HW affine coefficient `A(T) = exp(−∫₀ᵀ θ(s)·B(T−s) ds + σ²·V(T)/2)` —
 Vasicek's `vasicekBondA` with the constant-drift term `θ_v·(T − B(T))` replaced by

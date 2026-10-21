@@ -1,11 +1,12 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import Mathlib
+public import MathFin.FixedIncome.PeriodicCompounding
 
 /-!
 # Aave v2: kinked interest-rate model, health factor, liquidity index
@@ -19,12 +20,17 @@ health factor; the liquidity-index recurrence is §3.1 ("aTokens").
 
 * `kinkedRate`: the piecewise-linear borrow-rate curve.
 * `kinkedRate_apply_optimal`: the rate at the kink is `R₀ + slope1`, for
-  `Uopt ≠ 0` (the value of the `U ≤ Uopt` branch; continuity at the kink is
-  not stated).
+  `Uopt ≠ 0` (the value of the `U ≤ Uopt` branch).
+* `kinkedRate_eq_affine_add_hinge`: for `Uopt ≠ 0` the kinked curve is an affine rate plus
+  `(slope2/(1 − Uopt) − slope1/Uopt) · max (U − Uopt) 0`, a call payoff on utilization struck
+  at the kink; hence `continuous_kinkedRate`, the curve is continuous (at the kink included).
 * `kinkedRate_monotone`: the curve is monotone nondecreasing on `[0, 1]`
   when `0 < Uopt < 1` and both slopes are nonnegative.
 * `healthFactorV1`, `healthFactorV2`: the single-asset and multi-asset
-  (summed) health-factor definitions.
+  (summed) health-factor definitions; `healthFactorV1_lt_one_iff`, the liquidation criterion
+  `Hf < 1 ↔ collateral · LT < debt` (whitepaper §5: below `1` the loan "can be liquidated").
+  The probability of `Hf < 1` at a horizon, for lognormal collateral, is
+  `prob_healthFactorV1_lt_one_eq_kmvPD` in `MathFin/Bridges/LiquidationAsStructuralDefault.lean`.
 * `liquidityIndexStep`, `liquidityIndex_eq_prod_mul`: the linear recurrence
   `LI_t = (R_t·U_t·ΔT/T_year + 1)·LI_{t-1}`
   and its closed-form (product) solution, matching the whitepaper's
@@ -34,6 +40,11 @@ health factor; the liquidity-index recurrence is §3.1 ("aTokens").
   `(1 − reserveFactor)`, a refinement not in the whitepaper and not modeled
   here (equivalently, the `reserveFactor = 0` simplification relative to the
   on-chain contract).
+* `liquidityIndex_eq_pow_mul`, `tendsto_liquidityIndexStep_pow`: at a constant borrow rate and
+  utilization the index grows by a power of one step factor, and splitting a horizon into `n`
+  equal update intervals, that power tends to `1 / zcb (R·U) 0 (T/Tyear)` — continuous
+  compounding at the liquidity rate, the library's zero-coupon bond
+  (`FixedIncome/PeriodicCompounding.lean`). Time-varying rates are not covered by the limit.
 * `stableRateUpdate`, `stableRateUpdate_mem_interval`: the weighted-average new
   stable rate, shown to lie in `[SRprev, SRnew]` when the new borrower's rate is
   at least the pool's prior average, the prior stable debt is nonnegative and
@@ -43,6 +54,8 @@ health factor; the liquidity-index recurrence is §3.1 ("aTokens").
 @[expose] public section
 
 namespace MathFin
+
+open Filter Topology
 
 namespace DeFi
 
@@ -57,13 +70,38 @@ noncomputable def kinkedRate (R₀ slope1 slope2 Uopt U : ℝ) : ℝ :=
   else R₀ + slope1 + (U - Uopt) / (1 - Uopt) * slope2
 
 /-- **The rate at the kink** is `R₀ + slope1` — the value the `U ≤ Uopt`
-branch takes at `U = Uopt`. The `else` expression would also give `R₀ + slope1`
-there (by inspection; not stated as a lemma). This lemma states the kink value
-only; continuity at the kink is not proved. -/
+branch takes at `U = Uopt`. That the `else` branch approaches the same value is
+`continuous_kinkedRate`. -/
 theorem kinkedRate_apply_optimal (R₀ slope1 slope2 Uopt : ℝ) (hU : Uopt ≠ 0) :
     kinkedRate R₀ slope1 slope2 Uopt Uopt = R₀ + slope1 := by
   unfold kinkedRate
   rw [if_pos le_rfl, div_self hU, one_mul]
+
+/-- **The kinked rate is an affine rate plus a call on utilization.** For `Uopt ≠ 0`,
+
+  `kinkedRate R₀ slope1 slope2 Uopt U = R₀ + (slope1/Uopt)·U + c · max (U − Uopt) 0`,
+
+with `c = slope2/(1−Uopt) − slope1/Uopt` the jump in slope at the kink. Below the kink only the
+affine part is active; above it the hinge `max (U − Uopt) 0`, the payoff of a call on
+utilization struck at `Uopt`, adds the jump. -/
+theorem kinkedRate_eq_affine_add_hinge (R₀ slope1 slope2 : ℝ) {Uopt : ℝ} (hU : Uopt ≠ 0)
+    (U : ℝ) :
+    kinkedRate R₀ slope1 slope2 Uopt U
+      = R₀ + slope1 / Uopt * U + (slope2 / (1 - Uopt) - slope1 / Uopt) * max (U - Uopt) 0 := by
+  unfold kinkedRate
+  split_ifs with h
+  · rw [max_eq_right (sub_nonpos.mpr h)]
+    ring
+  · rw [max_eq_left (sub_nonneg.mpr (not_le.mp h).le)]
+    linear_combination -div_mul_cancel₀ slope1 hU
+
+/-- **The kinked rate is continuous** for `Uopt ≠ 0`, at the kink included: by
+`kinkedRate_eq_affine_add_hinge` it is an affine function plus a multiple of
+`max (U − Uopt) 0`. -/
+theorem continuous_kinkedRate (R₀ slope1 slope2 : ℝ) {Uopt : ℝ} (hU : Uopt ≠ 0) :
+    Continuous (kinkedRate R₀ slope1 slope2 Uopt) := by
+  rw [funext (kinkedRate_eq_affine_add_hinge R₀ slope1 slope2 hU)]
+  fun_prop
 
 /-- **Monotonicity on `[0,1]`**: if `0 < Uopt < 1` and both slopes are
 nonnegative, the kinked rate is monotone nondecreasing in utilization `U`. -/
@@ -105,6 +143,15 @@ theorem one_lt_healthFactorV1_iff
   unfold healthFactorV1
   rw [lt_div_iff₀ hdebt, one_mul]
 
+/-- **Liquidation criterion**: `Hf < 1 ↔ collateral·LT < debt`, when total debt is positive.
+The Aave v2 whitepaper (§5, Formal Definitions) calls a loan with `Hf < 1` undercollateralised
+and liquidatable. -/
+theorem healthFactorV1_lt_one_iff
+    {collateral liquidationThreshold borrows fees : ℝ} (hdebt : 0 < borrows + fees) :
+    healthFactorV1 collateral liquidationThreshold borrows fees < 1 ↔
+      collateral * liquidationThreshold < borrows + fees := by
+  rw [healthFactorV1, div_lt_one hdebt]
+
 /-- **Aave v2 multi-asset health factor**: summed over the borrower's
 assets `i ∈ s`, collateral weighted by each asset's liquidation threshold
 over total borrows across assets. -/
@@ -145,6 +192,27 @@ theorem liquidityIndex_eq_prod_mul
       rw [hrec n, liquidityIndex_eq_prod_mul LI R U ΔT Tyear hrec n,
         Finset.prod_range_succ]
       ring
+
+/-- **Constant rates: the index grows by a power of one step factor.** If the borrow rate `R`
+and utilization `U` do not change, `liquidityIndex_eq_prod_mul` collapses to
+`LI n = liquidityIndexStep R U ΔT Tyear ^ n · LI 0`. -/
+theorem liquidityIndex_eq_pow_mul (LI : ℕ → ℝ) (R U ΔT Tyear : ℝ)
+    (hrec : ∀ n, LI (n + 1) = liquidityIndexStep R U ΔT Tyear * LI n) (n : ℕ) :
+    LI n = liquidityIndexStep R U ΔT Tyear ^ n * LI 0 := by
+  simpa using liquidityIndex_eq_prod_mul LI (fun _ ↦ R) (fun _ ↦ U) ΔT Tyear hrec n
+
+/-- **Frequent updates converge to continuous compounding at the liquidity rate.** At a constant
+borrow rate `R` and utilization `U`, splitting a horizon `T` into `n` equal update intervals
+`T / n` gives the index growth `liquidityIndexStep R U (T / n) Tyear ^ n`, which tends to
+`1 / zcb (R·U) 0 (T / Tyear) = exp (R·U·T/Tyear)` as `n → ∞`. Each step accrues linear
+interest; the limit is the zero-coupon bond's continuous compounding. -/
+theorem tendsto_liquidityIndexStep_pow (R U T Tyear : ℝ) :
+    Tendsto (fun n : ℕ ↦ liquidityIndexStep R U (T / n) Tyear ^ n) atTop
+      (𝓝 (zcb (R * U) 0 (T / Tyear))⁻¹) := by
+  have h (n : ℕ) : liquidityIndexStep R U (T / n) Tyear = 1 + R * U * (T / Tyear) / n := by
+    unfold liquidityIndexStep
+    ring
+  simpa only [h] using tendsto_one_add_div_pow_inv_zcb (R * U) (T / Tyear)
 
 /-- **Aave v2 stable-rate weighted average** (whitepaper §3.4): when a new
 stable-rate borrow of size `SBnew` at rate `SRnew` joins an existing stable

@@ -1,13 +1,14 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import Mathlib
 public import MathFin.Foundations.Numeraire
 public import MathFin.Foundations.BrownianMartingale
+public import MathFin.FixedIncome.TimingAdjustment
 
 /-!
 # Inflation is FX: the zero-coupon inflation swap and the YoY convexity
@@ -29,7 +30,11 @@ applied twice (`yoyRatioExp_gaussian`).
 Composing with the Hull–White bond-reconstitution deterministics `Dⁱ = −½Bⁱ²Vⁱ`
 collapses the exponent — the real-variance halves cancel, the nominal halves double — to
 the chapter's eq. (17.10) (`yoyConvexity_eq`), with the naive ratio of forwards carried
-as an explicit multiplicative constant.
+as an explicit multiplicative constant. The deterministic `D = −½B²V` is tied to the library's
+Hull–White model (`FixedIncome/HullWhiteCalibration`) by `integral_exp_hwD_forwardMeasure`. With
+`V = Var(r_S)` the variance of the Hull–White short rate, the reconstitution factor
+`exp(D − B(r_S − f(0,S)))` has mean `1` under the calibrated `S`-forward measure
+(`HullWhite.forwardMeasure`, `FixedIncome/TimingAdjustment`).
 
 ## Scope
 
@@ -38,7 +43,8 @@ landed anchor is `MathFin.changeOfNumeraire_setIntegral_eq`); eq. (17.9)'s SDE-l
 drift-shift derivation `δ = −ρ_{rI}σ_rσ_I`; the two-correlated-Hull–White dynamics (the
 means, variances and covariance of the rate deviations are explicit inputs here); and the
 chapter's numeric tables. The Jarrow–Yildirim identification is a hypothesis (`hident`),
-never derived.
+never derived. The reconstitution formula itself, `P(S,T)` as a function of `r_S`, is not derived
+either: only its normalisation under the `S`-forward measure is.
 
 ## References
 
@@ -225,8 +231,10 @@ real/nominal bond-price ratio `Pʳ(S,T)/Pⁿ(S,T)` as the naive ratio of forward
 `e^{Dʳ−Dⁿ}·e^{−Bʳyʳ+Bⁿyⁿ}`, with deterministic parts `Dⁱ = −½Bⁱ²Vⁱ`. Composing
 `yoyRatioExp_gaussian_cov` with those deterministics collapses the exponent — the
 real-variance halves cancel, the nominal halves double — to the chapter's eq. (17.10).
-The reconstitution formula is taken as the integrand of `yoyConvexity_eq`, not derived here
-(no Hull–White model is built in this file). -/
+The reconstitution formula is taken as the integrand of `yoyConvexity_eq`, not derived. What
+is derived from the library's Hull–White model is the role of `Dⁱ` as the normaliser of the
+reconstitution factor under the calibrated `S`-forward measure
+(`integral_exp_hwD_forwardMeasure`). -/
 namespace MathFin.Inflation.Convexity
 
 variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
@@ -283,5 +291,42 @@ theorem yoyConvexity_eq (mn mr Vn Vr ρ Bn Br Pn0T Pn0S Pr0T Pr0S Cov : ℝ)
     simp only [hwD]
     ring
   rw [hex]
+
+/-- **The reconstitution deterministic is the forward-measure normaliser.** In the library's
+Hull–White model calibrated to a `C¹` forward curve `f0` (`HullWhite.theta`, short rate started
+at `f(0,0)`, `κ > 0`), let `V = σ²(1 − e^{−2κS})/(2κ)` be the variance of the short rate `r_S`
+(`HullWhite.integratedRate_hasLaw_gaussian`). Then for every factor `b`, under the `S`-forward
+measure `Q^S` (`HullWhite.forwardMeasure`),
+
+  `𝔼^{Q^S}[exp(hwD b V − b·(r_S − f(0, S)))] = 1`.
+
+Under `Q^S` the deviation `r_S − f(0,S)` is `N(0, V)` (`HullWhite.shortRate_hasLaw_forwardMeasure`
+and `HullWhite.calibMean`), so `D = −½b²V` cancels its exponential moment. This is the identity
+that makes the reconstitution formula `P(S,T) = (P(0,T)/P(0,S))·exp(D − B(S,T)(r_S − f(0,S)))`
+consistent with `𝔼^{Q^S}[P(S,T)] = P(0,T)/P(0,S)`. The formula itself is not derived, and the
+short rate is the Hull–White Wiener representation (that it solves the SDE is cited, not proved). -/
+theorem integral_exp_hwD_forwardMeasure [IsProbabilityMeasure μ] {B : NNReal → Ω → ℝ}
+    (hB : IsPreBrownianReal B μ) (f0 : ℝ → ℝ)
+    (hf0 : ContDiff ℝ 1 f0) (κ σ : ℝ) (hκ : 0 < κ) (S : NNReal) (b : ℝ) :
+    ∫ ω, Real.exp (hwD b (vasicekSDEVariance σ κ S)
+        - b * (HullWhite.integratedRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S ω - f0 S))
+      ∂HullWhite.forwardMeasure hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S = 1 := by
+  have hlaw := gaussianReal_sub_const
+    (HullWhite.shortRate_hasLaw_forwardMeasure hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S) (f0 S)
+  have hm := mgf_gaussianReal hlaw.map_eq (-b)
+  simp only [mgf] at hm
+  have hfac (ω : Ω) : Real.exp (hwD b (vasicekSDEVariance σ κ S)
+      - b * (HullWhite.integratedRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S ω - f0 S))
+      = Real.exp (hwD b (vasicekSDEVariance σ κ S))
+        * Real.exp (-b * (HullWhite.integratedRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S ω
+          - f0 S)) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  simp_rw [hfac]
+  rw [integral_const_mul, hm, ← Real.exp_add, Real.exp_eq_one_iff,
+    Real.coe_toNNReal _ (vasicekSDEVariance_nonneg σ hκ S.coe_nonneg),
+    HullWhite.calibMean f0 hf0 κ σ hκ S, hwD, vasicekBondB]
+  ring
 
 end MathFin.Inflation.Convexity

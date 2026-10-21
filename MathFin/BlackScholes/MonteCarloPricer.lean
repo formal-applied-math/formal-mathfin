@@ -1,13 +1,14 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import Mathlib
 public import MathFin.Foundations.StandardNormal
 public import MathFin.BlackScholes.Put
+public import MathFin.BlackScholes.PutGreeks
 public import MathFin.BlackScholes.LognormalMoments
 
 /-!
@@ -42,13 +43,17 @@ this module proves, end to end:
   `payoff_le`), which licenses integrability (`integrable_payoff`) and `L²`
   membership (`memLp2_payoff`) — exactly the strong-law and CLT hypotheses.
 
-Honest scoping: the ensemble is hypothesized, not constructed — `consistency` takes
+Scope: the general theorems take the ensemble as a hypothesis — `consistency` takes
 pairwise independence (`∀ i j, i ≠ j → Z i ⟂ᵢ[μ] Z j`) plus identical standard-normal
-laws, `consistency_iid`/`clt` take the i.i.d. bundle `iIndepFun Z μ`. Such an
-ensemble exists (Mathlib constructs i.i.d. sequences on a countable product), but no
-theorem here instantiates one; the multi-dimensional seed below likewise hypothesizes
-its draws, `Measure.pi` giving only the law of one draw. Variance reduction and
-multi-dimensional closed forms are future layers.
+laws, `consistency_iid`/`clt` take the i.i.d. bundle `iIndepFun Z μ`. The last section
+discharges these hypotheses on a canonical space: under Mathlib's countable product
+`Measure.infinitePi` of standard normals on `ℕ → ℝ` (`canonicalEnsemble`) the coordinates
+are i.i.d. `N(0, 1)`, and there, with no ensemble hypothesis, the put and call estimators
+converge almost surely to the closed forms `bsP` and `bsV` (`consistency_canonical`,
+`mc_call_consistency_canonical`) and the call estimator satisfies the CLT centred at `bsV`
+(`mc_call_clt_canonical`). The multi-dimensional seed below
+still hypothesizes its draws, `Measure.pi` giving only the law of one draw. Variance reduction
+and multi-dimensional closed forms are future layers.
 
 ## Result
 
@@ -106,6 +111,14 @@ Multi-dimensional seed:
   `multiD_consistency_iid` — the full-independence specialization;
 * `multiD_integrable_of_bounded` — the bounded-payoff instance of the seed's
   integrability hypothesis.
+
+Canonical ensemble:
+
+* `canonicalEnsemble` — `ℕ → ℝ` under `Measure.infinitePi` of standard normals;
+  `hasLaw_canonical`, `iIndepFun_canonical` — its coordinates are i.i.d. `N(0, 1)`;
+* `consistency_canonical`, `mc_call_consistency_canonical` — a.s. convergence of the put and
+  call estimators to `bsP K r σ S₀ T` and `bsV K r σ S₀ T`;
+* `mc_call_clt_canonical` — `√n·(mcCallMean n − bsV) ⇒ 𝓝(0, Var(C))` on that space.
 
 Supporting lemmas (nonnegativity, measurability, law/independence transfer through
 the payoff map, the integral-linearity workhorse `integral_lin_comb3`, the estimator
@@ -1163,5 +1176,77 @@ theorem multiD_integrable_of_bounded {H : (Fin d → ℝ) → ℝ}
   memLp_one_iff_integrable.1 (MemLp.of_bound hH C (Filter.Eventually.of_forall hb))
 
 end MultiD
+
+/-! ### The canonical ensemble
+
+The ensemble theorems above hypothesize their draws. On the sequence space `ℕ → ℝ` under
+Mathlib's countable product `Measure.infinitePi` of standard normals, the coordinate maps have
+law `N(0, 1)` (`Measure.infinitePi_map_eval`) and are mutually independent
+(`iIndepFun_infinitePi`), so every hypothesis is discharged. -/
+
+section Canonical
+
+/-- The canonical Monte Carlo sample space: sequences `ω : ℕ → ℝ` under the product of
+countably many standard normals (Mathlib's `Measure.infinitePi`); draw `i` is `ω i`. -/
+noncomputable def canonicalEnsemble : Measure (ℕ → ℝ) :=
+  Measure.infinitePi fun _ ↦ gaussianReal 0 1
+
+instance canonicalEnsemble_isProbabilityMeasure : IsProbabilityMeasure canonicalEnsemble := by
+  unfold canonicalEnsemble
+  infer_instance
+
+/-- Each canonical draw `ω ↦ ω i` is standard normal. -/
+theorem hasLaw_canonical (i : ℕ) :
+    HasLaw (fun ω : ℕ → ℝ ↦ ω i) (gaussianReal 0 1) canonicalEnsemble :=
+  ⟨(measurable_pi_apply i).aemeasurable, Measure.infinitePi_map_eval _ i⟩
+
+/-- The canonical draws are mutually independent. -/
+theorem iIndepFun_canonical :
+    iIndepFun (fun (i : ℕ) (ω : ℕ → ℝ) ↦ ω i) canonicalEnsemble :=
+  iIndepFun_infinitePi (X := fun _ ↦ id) fun _ ↦ measurable_id
+
+variable {S_0 K r σ T : ℝ}
+
+/-- **Monte Carlo consistency for the put, on the canonical ensemble.** For `S₀, K, σ, T > 0`,
+almost every sequence of i.i.d. standard-normal draws makes the sample mean of discounted put
+payoffs converge to the Black–Scholes put `bsP K r σ S₀ T`. -/
+theorem consistency_canonical (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
+    ∀ᵐ ω ∂canonicalEnsemble,
+      Tendsto (fun n ↦ estimator S_0 K r σ T (fun i ω ↦ ω i) n ω) atTop
+        (𝓝 (bsP K r σ S_0 T)) := by
+  simpa only [bsP, neg_mul] using consistency_iid (μ := canonicalEnsemble)
+    (Z := fun i ω ↦ ω i) ⟨hS_0, hK, hσ, hT, hasLaw_canonical 0⟩ hasLaw_canonical
+    iIndepFun_canonical
+
+/-- **Monte Carlo consistency for the call, on the canonical ensemble.** For `S₀, K, σ, T > 0`,
+almost every sequence of i.i.d. standard-normal draws makes the sample mean of discounted call
+payoffs converge to the Black–Scholes call `bsV K r σ S₀ T`. -/
+theorem mc_call_consistency_canonical (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ)
+    (hT : 0 < T) :
+    ∀ᵐ ω ∂canonicalEnsemble,
+      Tendsto (fun n ↦ mcCallMean S_0 K r σ T (fun i ω ↦ ω i) n ω) atTop
+        (𝓝 (bsV K r σ S_0 T)) := by
+  simpa only [bsV, neg_mul] using mc_call_consistency_iid (μ := canonicalEnsemble)
+    (Z := fun i ω ↦ ω i) ⟨hS_0, hK, hσ, hT, hasLaw_canonical 0⟩ hasLaw_canonical
+    iIndepFun_canonical
+
+/-- **Monte Carlo error bars for the call, on the canonical ensemble.** For `S₀, K, σ, T > 0`,
+`√n·(mcCallMean n − bsV K r σ S₀ T) ⇒ 𝓝(0, Var(C))` in distribution, `C` the discounted call
+payoff of one draw; `mc_call_variance` gives `Var(C)` in closed form. -/
+theorem mc_call_clt_canonical (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
+    TendstoInDistribution
+      (fun (n : ℕ) (ω : ℕ → ℝ) ↦ Real.sqrt (n : ℝ) *
+        (mcCallMean S_0 K r σ T (fun i ω ↦ ω i) n ω - bsV K r σ S_0 T))
+      atTop (id : ℝ → ℝ) (fun _ ↦ canonicalEnsemble)
+      (gaussianReal 0
+        (Var[fun ω ↦ mcCallPayoff S_0 K r σ T (ω 0); canonicalEnsemble]).toNNReal) := by
+  have h : BSCallHyp canonicalEnsemble S_0 K r σ T (fun ω ↦ ω 0) :=
+    ⟨hS_0, hK, hσ, hT, hasLaw_canonical 0⟩
+  have hclt := mc_call_clt (Z := fun (i : ℕ) (ω : ℕ → ℝ) ↦ ω i) h hasLaw_canonical iIndepFun_canonical
+  rw [mean_mcCallPayoff_eq_bsCall h] at hclt
+  rw [bsV, ← neg_mul]
+  exact hclt
+
+end Canonical
 
 end MathFin.MonteCarlo

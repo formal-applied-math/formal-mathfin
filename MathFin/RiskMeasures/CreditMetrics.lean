@@ -1,11 +1,13 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import Mathlib
+public import MathFin.Foundations.BivariateNormalCDF
+public import MathFin.Foundations.HoeffdingCovariance
 
 /-!
 # CreditMetrics rating transitions
@@ -27,8 +29,18 @@ entry `P i j` is the probability of moving from rating `i` to rating `j`. Mathli
   (`iUnion_ratingBucket`, `pairwise_disjoint_ratingBucket`), so their probabilities under any
   probability law sum to one, and a matrix built row by row this way is row-stochastic
   (`thresholdMatrix_mem_rowStochastic`); the CreditMetrics case is the law `N(0, 1)`,
-  `thresholdMatrix_mem_rowStochastic (gaussianReal 0 1)`. This is one obligor's marginal
-  migration; no copula (joint law of several obligors) is involved.
+  `thresholdMatrix_mem_rowStochastic (gaussianReal 0 1)`.
+* **Calibration.** Conversely, every transition matrix arises this way: with the thresholds
+  `Φ⁻¹` of the cumulative row sums `∑_{k < j} P i k` (`gaussianThresholds`; `-∞` and `+∞` at the
+  ends), standard normal threshold migration reproduces `P` exactly
+  (`thresholdMatrix_gaussianThresholds`).
+* **Two obligors.** When the latent returns of two obligors are standard bivariate normal with
+  asset correlation `r` (`bivariateNormalLaw r`), both land in the lowest rating bucket (Default,
+  in the threshold ordering) with probability `N₂(Φ⁻¹(P i 0), Φ⁻¹(P k 0); r)`
+  (`measureReal_default_prod_gaussianThresholds`), and the covariance of their default indicators
+  is `N₂(Φ⁻¹(P i 0), Φ⁻¹(P k 0); r) − P i 0 · P k 0`
+  (`covariance_indicator_default_gaussianThresholds`, by `covariance_indicator_one`). Joint
+  migration to buckets other than Default is not stated.
 
 ## Main results
 
@@ -36,9 +48,10 @@ entry `P i j` is the probability of moving from rating `i` to rating `j`. Mathli
 * `ratingBucket`, `thresholdMatrix`: the threshold construction.
 * `thresholdMatrix_mem_rowStochastic`: threshold migration under any latent law gives a transition
   matrix.
-
-The calibration of the thresholds to a given matrix (`z = Φ⁻¹` of cumulative row sums) and the
-correlated multi-obligor migration are not formalized here.
+* `gaussianThresholds`, `thresholdMatrix_gaussianThresholds`: the calibrated thresholds reproduce
+  the matrix.
+* `measureReal_default_prod_gaussianThresholds`, `covariance_indicator_default_gaussianThresholds`:
+  joint default and default covariance of two obligors with correlated returns.
 -/
 
 @[expose] public section
@@ -119,5 +132,151 @@ theorem thresholdMatrix_mem_rowStochastic (μ : Measure ℝ) [IsProbabilityMeasu
     (hm : ∀ i, z i (Fin.last m) = ⊤) : thresholdMatrix μ z ∈ rowStochastic ℝ (Fin m) :=
   mem_rowStochastic_iff_sum.2
     ⟨fun _ _ ↦ measureReal_nonneg, fun i ↦ sum_measureReal_ratingBucket μ (hz i) (h0 i) (hm i)⟩
+
+/-! ### Calibration of the thresholds to a transition matrix -/
+
+/-- The standard normal threshold below which a latent return falls with probability `c`: `⊥` for
+`c ≤ 0`, `⊤` for `c ≥ 1`, and `Φ⁻¹(c)` in between. -/
+noncomputable def gaussianThreshold (c : ℝ) : EReal :=
+  if c ≤ 0 then ⊥ else if 1 ≤ c then ⊤ else (PhiInv c : EReal)
+
+lemma gaussianThreshold_zero : gaussianThreshold 0 = ⊥ := if_pos le_rfl
+
+lemma gaussianThreshold_of_mem_Ioo {c : ℝ} (hc : c ∈ Ioo 0 1) :
+    gaussianThreshold c = (PhiInv c : EReal) := by
+  rw [gaussianThreshold, if_neg (not_le.2 hc.1), if_neg (not_le.2 hc.2)]
+
+lemma gaussianThreshold_mono {c d : ℝ} (hcd : c ≤ d) :
+    gaussianThreshold c ≤ gaussianThreshold d := by
+  by_cases hc0 : c ≤ 0
+  · rw [gaussianThreshold, if_pos hc0]
+    exact bot_le
+  by_cases hd1 : 1 ≤ d
+  · have hd0 : ¬d ≤ 0 := not_le.2 (by linarith [not_le.1 hc0])
+    simp only [gaussianThreshold, if_pos hd1, if_neg hd0]
+    exact le_top
+  have hc1 : ¬1 ≤ c := fun h ↦ hd1 (h.trans hcd)
+  have hd0 : ¬d ≤ 0 := fun h ↦ hc0 (hcd.trans h)
+  simp only [gaussianThreshold, if_neg hc0, if_neg hc1, if_neg hd0, if_neg hd1,
+    EReal.coe_le_coe_iff]
+  exact strictMonoOn_PhiInv.monotoneOn ⟨not_le.1 hc0, not_le.1 hc1⟩ ⟨not_le.1 hd0, not_le.1 hd1⟩ hcd
+
+/-- A standard normal return falls below the threshold of `c ∈ [0, 1]` with probability `c`. -/
+lemma measureReal_coe_le_gaussianThreshold {c : ℝ} (hc : c ∈ Icc 0 1) :
+    (gaussianReal 0 1).real {x : ℝ | (x : EReal) ≤ gaussianThreshold c} = c := by
+  unfold gaussianThreshold
+  split_ifs with h0 h1
+  · simp [le_antisymm h0 hc.1]
+  · simp [le_antisymm hc.2 h1]
+  · simp only [EReal.coe_le_coe_iff]
+    rw [show {x : ℝ | x ≤ PhiInv c} = Iic (PhiInv c) from rfl, ← cdf_eq_real,
+      cdf_gaussianReal_zero_one, Phi_PhiInv ⟨not_le.1 h0, not_le.1 h1⟩]
+
+/-- The standard normal law puts mass `d − c` between the thresholds of `c ≤ d` in `[0, 1]`. -/
+lemma measureReal_gaussianThreshold_lt_le {c d : ℝ} (hc : c ∈ Icc 0 1) (hd : d ∈ Icc 0 1)
+    (hcd : c ≤ d) :
+    (gaussianReal 0 1).real
+        {x : ℝ | gaussianThreshold c < (x : EReal) ∧ (x : EReal) ≤ gaussianThreshold d} =
+      d - c := by
+  have hset : {x : ℝ | gaussianThreshold c < (x : EReal) ∧ (x : EReal) ≤ gaussianThreshold d} =
+      {x : ℝ | (x : EReal) ≤ gaussianThreshold d} \
+        {x : ℝ | (x : EReal) ≤ gaussianThreshold c} := by
+    ext x
+    simp only [mem_ofPred_eq, mem_sdiff, not_le]
+    exact and_comm
+  have hsub : {x : ℝ | (x : EReal) ≤ gaussianThreshold c} ⊆
+      {x : ℝ | (x : EReal) ≤ gaussianThreshold d} :=
+    fun _ hx ↦ le_trans hx (gaussianThreshold_mono hcd)
+  rw [hset, measureReal_sdiff hsub (measurableSet_le measurable_coe_real_ereal measurable_const),
+    measureReal_coe_le_gaussianThreshold hd, measureReal_coe_le_gaussianThreshold hc]
+
+/-- The cumulative probability `∑_{k < j} P i k` of the ratings below `j` in row `i`. -/
+noncomputable def cumulativeRow (P : Matrix (Fin m) (Fin m) ℝ) (i : Fin m) (j : Fin (m + 1)) : ℝ :=
+  ∑ k ∈ Finset.univ.filter (fun k : Fin m ↦ k.castSucc < j), P i k
+
+lemma cumulativeRow_zero (P : Matrix (Fin m) (Fin m) ℝ) (i : Fin m) : cumulativeRow P i 0 = 0 := by
+  simp [cumulativeRow]
+
+lemma cumulativeRow_succ (P : Matrix (Fin m) (Fin m) ℝ) (i j : Fin m) :
+    cumulativeRow P i j.succ = cumulativeRow P i j.castSucc + P i j := by
+  have h : Finset.univ.filter (fun k : Fin m ↦ k.castSucc < j.succ) =
+      insert j (Finset.univ.filter fun k : Fin m ↦ k.castSucc < j.castSucc) := by
+    ext k
+    simp [Fin.castSucc_lt_succ_iff, Fin.castSucc_lt_castSucc_iff, le_iff_eq_or_lt]
+  rw [cumulativeRow, h, Finset.sum_insert (by simp)]
+  exact add_comm _ _
+
+lemma cumulativeRow_mem_Icc {P : Matrix (Fin m) (Fin m) ℝ} (hP : P ∈ rowStochastic ℝ (Fin m))
+    (i : Fin m) (j : Fin (m + 1)) : cumulativeRow P i j ∈ Icc 0 1 := by
+  refine ⟨Finset.sum_nonneg fun k _ ↦ nonneg_of_mem_rowStochastic hP, ?_⟩
+  calc cumulativeRow P i j ≤ ∑ k, P i k :=
+        Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+          fun k _ _ ↦ nonneg_of_mem_rowStochastic hP
+    _ = 1 := (mem_rowStochastic_iff_sum.1 hP).2 i
+
+/-- The **CreditMetrics thresholds** of a transition matrix: in row `i`, the threshold below
+rating `j` is `Φ⁻¹` of the cumulative probability `∑_{k < j} P i k` (`-∞` and `+∞` at the ends). -/
+noncomputable def gaussianThresholds (P : Matrix (Fin m) (Fin m) ℝ) (i : Fin m) (j : Fin (m + 1)) :
+    EReal :=
+  gaussianThreshold (cumulativeRow P i j)
+
+/-- **Threshold calibration recovers the transition matrix** (CreditMetrics): for a row-stochastic
+`P`, standard normal threshold migration with the thresholds `gaussianThresholds P` (`Φ⁻¹` of the
+cumulative row sums) has transition matrix exactly `P`. -/
+theorem thresholdMatrix_gaussianThresholds {P : Matrix (Fin m) (Fin m) ℝ}
+    (hP : P ∈ rowStochastic ℝ (Fin m)) :
+    thresholdMatrix (gaussianReal 0 1) (gaussianThresholds P) = P := by
+  ext i j
+  have hle : cumulativeRow P i j.castSucc ≤ cumulativeRow P i j.succ := by
+    rw [cumulativeRow_succ]
+    linarith [nonneg_of_mem_rowStochastic hP (i := i) (j := j)]
+  simp only [thresholdMatrix, of_apply, ratingBucket, gaussianThresholds]
+  rw [measureReal_gaussianThreshold_lt_le (cumulativeRow_mem_Icc hP i _)
+    (cumulativeRow_mem_Icc hP i _) hle, cumulativeRow_succ]
+  ring
+
+/-! ### Two obligors with correlated returns -/
+
+/-- The lowest rating bucket of the calibrated thresholds is `(-∞, Φ⁻¹(P i 0)]`. -/
+lemma ratingBucket_gaussianThresholds_zero {P : Matrix (Fin (m + 1)) (Fin (m + 1)) ℝ}
+    {i : Fin (m + 1)} (hpd : P i 0 ∈ Ioo 0 1) :
+    ratingBucket (gaussianThresholds P i) 0 = Iic (PhiInv (P i 0)) := by
+  have h1 : cumulativeRow P i (0 : Fin (m + 1)).succ = P i 0 := by
+    rw [cumulativeRow_succ, Fin.castSucc_zero, cumulativeRow_zero, zero_add]
+  ext x
+  simp only [ratingBucket, gaussianThresholds, Fin.castSucc_zero, cumulativeRow_zero, h1,
+    gaussianThreshold_zero, gaussianThreshold_of_mem_Ioo hpd, mem_ofPred_eq, mem_Iic,
+    EReal.bot_lt_coe, true_and, EReal.coe_le_coe_iff]
+
+/-- **Joint default of two obligors** (CreditMetrics, correlated migration). Two obligors in
+ratings `i` and `k` migrate by the calibrated thresholds of `P`, and their latent returns are
+standard bivariate normal with asset correlation `r` (`bivariateNormalLaw r`). With default
+probabilities `P i 0, P k 0 ∈ (0, 1)` (the lowest bucket), both default with probability
+`N₂(Φ⁻¹(P i 0), Φ⁻¹(P k 0); r)`. -/
+theorem measureReal_default_prod_gaussianThresholds {P : Matrix (Fin (m + 1)) (Fin (m + 1)) ℝ}
+    {i k : Fin (m + 1)} (hi : P i 0 ∈ Ioo 0 1) (hk : P k 0 ∈ Ioo 0 1) (r : ℝ) :
+    (bivariateNormalLaw r).real
+        (ratingBucket (gaussianThresholds P i) 0 ×ˢ ratingBucket (gaussianThresholds P k) 0) =
+      bivariateNormalCDF (PhiInv (P i 0)) (PhiInv (P k 0)) r := by
+  rw [ratingBucket_gaussianThresholds_zero hi, ratingBucket_gaussianThresholds_zero hk,
+    bivariateNormalCDF_eq_law]
+
+/-- **Default covariance of two obligors** (CreditMetrics): under the hypotheses of
+`measureReal_default_prod_gaussianThresholds` with `r ∈ [−1, 1]`, the covariance of the two default
+indicators is `N₂(Φ⁻¹(P i 0), Φ⁻¹(P k 0); r) − P i 0 · P k 0`; each obligor defaults with
+probability `P i 0` (resp. `P k 0`) because each margin of the pair is standard normal. -/
+theorem covariance_indicator_default_gaussianThresholds
+    {P : Matrix (Fin (m + 1)) (Fin (m + 1)) ℝ} {i k : Fin (m + 1)} (hi : P i 0 ∈ Ioo 0 1)
+    (hk : P k 0 ∈ Ioo 0 1) {r : ℝ} (hr : r ^ 2 ≤ 1) :
+    cov[(Prod.fst ⁻¹' ratingBucket (gaussianThresholds P i) 0).indicator 1,
+        (Prod.snd ⁻¹' ratingBucket (gaussianThresholds P k) 0).indicator 1; bivariateNormalLaw r] =
+      bivariateNormalCDF (PhiInv (P i 0)) (PhiInv (P k 0)) r - P i 0 * P k 0 := by
+  rw [ratingBucket_gaussianThresholds_zero hi, ratingBucket_gaussianThresholds_zero hk,
+    covariance_indicator_one (measurableSet_Iic.preimage measurable_fst)
+      (measurableSet_Iic.preimage measurable_snd),
+    ← map_measureReal_apply measurable_fst measurableSet_Iic,
+    ← map_measureReal_apply measurable_snd measurableSet_Iic, map_fst_bivariateNormalLaw hr,
+    map_snd_bivariateNormalLaw, ← cdf_eq_real, ← cdf_eq_real, cdf_gaussianReal_zero_one,
+    Phi_PhiInv hi, Phi_PhiInv hk, bivariateNormalCDF_eq_law, Set.prod_eq]
 
 end MathFin

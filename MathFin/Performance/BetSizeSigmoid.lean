@@ -1,11 +1,12 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import Mathlib
+public import MathFin.Performance.Ratios
 
 /-!
 # Sigmoid bet-sizing function
@@ -17,13 +18,18 @@ parameter), rather than a hard threshold.
 
 This file proves the three structural properties that justify using `m` as a
 bet-sizing map: it is odd, bounded in `(-1,1)`, and strictly increasing in `x`
-whenever `w > 0`.
+whenever `w > 0`. It also ties `m` to the Kelly criterion: fed the z-statistic
+`z = (p − ½)/√(p(1 − p))` of a predicted win probability `p` (scaled by `√w`), the
+sigmoid returns exactly `2p − 1`, the Kelly fraction of an even-money bet
+(`kellyFraction p 1`, `Performance/Ratios.lean`). López de Prado's probability-based size
+`2Φ(z) − 1` (ch. 10) is a different map and is not treated here.
 
 ## Main results
 
 * `betSize_odd`: `m w (-x) = -m w x`.
 * `betSize_mem_Ioo`: `m w x ∈ (-1, 1)` for `w > 0`.
 * `betSize_strictMono`: `w > 0 → StrictMono (m w ·)`.
+* `betSize_sqrt_mul_zScore`: `m w (√w · z) = kellyFraction p 1 = 2p − 1` for `0 < p < 1`.
 -/
 
 @[expose] public section
@@ -89,5 +95,26 @@ theorem betSize_strictMono {w : ℝ} (hw : 0 < w) : StrictMono (betSize w) := by
   have hs2pos : 0 < Real.sqrt (w + b ^ 2) := Real.sqrt_pos.mpr (by positivity)
   rw [betSize, betSize, div_lt_div_iff₀ hs1pos hs2pos]
   exact betSize_cross hw hab
+
+/-- **The sigmoid of the probability z-score is the even-money Kelly fraction.** For a
+predicted win probability `0 < p < 1`, let `z = (p − ½)/√(p(1 − p))` be the z-statistic of
+`p` against `½`. For every width `w > 0`, `m w (√w · z) = 2p − 1 = kellyFraction p 1`, the
+Kelly fraction of an even-money bet (`Performance/Ratios.lean`). The width only rescales
+the argument, and `w + w z² = w / (4 p (1 − p))`, so `√w·z / √(w + w z²) = 2p − 1`. -/
+theorem betSize_sqrt_mul_zScore {w p : ℝ} (hw : 0 < w) (hp₀ : 0 < p) (hp₁ : p < 1) :
+    betSize w (√w * ((p - 1 / 2) / √(p * (1 - p)))) = kellyFraction p 1 := by
+  have hpq : 0 < p * (1 - p) := mul_pos hp₀ (sub_pos.2 hp₁)
+  have hp0 : p ≠ 0 := hp₀.ne'
+  have hq0 : 1 - p ≠ 0 := (sub_pos.2 hp₁).ne'
+  have hs0 : √(p * (1 - p)) ≠ 0 := (Real.sqrt_pos.2 hpq).ne'
+  have hw0 : √w ≠ 0 := (Real.sqrt_pos.2 hw).ne'
+  have hrad : w + (√w * ((p - 1 / 2) / √(p * (1 - p)))) ^ 2 =
+      (√w / (2 * √(p * (1 - p)))) ^ 2 := by
+    rw [mul_pow, div_pow, div_pow, mul_pow, Real.sq_sqrt hw.le, Real.sq_sqrt hpq.le]
+    field_simp
+    ring
+  rw [betSize, hrad, Real.sqrt_sq (by positivity), kellyFraction]
+  field_simp
+  ring
 
 end MathFin

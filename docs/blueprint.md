@@ -37,7 +37,6 @@ graph TD
   bsCall["Black–Scholes call formula"]:::proved
   bsIdentity["bs_identity: S·φ(d₁) = Ke^{−rτ}·φ(d₂)"]:::proved
   bsPde["Black–Scholes PDE (from the closed form)"]:::proved
-  bsPdeNoArb["BS PDE ↔ Itô-drift balance (algebraic)"]:::proved
   carrMadan["Carr–Madan static replication"]:::proved
   crrBsConvergence["CRR → Black–Scholes convergence"]:::proved
   discreteIto["Discrete Itô formula (pathwise)"]:::proved
@@ -48,6 +47,7 @@ graph TD
   markovPathLaw["Markov path law (Ionescu–Tulcea)"]:::proved
   itoIntegralClm["Continuous Itô integral (CLM on [0,T])"]:::proved
   bsDelta["Greeks (δ shown; γ vega θ ρ alongside)"]:::proved
+  bsPdeBrownian["BS PDE in the Brownian coordinate"]:::proved
   bsPdeFeynmanKac["Black–Scholes PDE (from Feynman–Kac)"]:::proved
   bscallhypBrownian["BSCallHyp from a Brownian model"]:::proved
   continuousFtap["Continuous-time first FTAP (EMM)"]:::proved
@@ -71,6 +71,8 @@ graph TD
 
   brownianMotion --> itoIntegralClm
   bsIdentity --> bsDelta
+  bsCall --> bsPdeBrownian
+  feynmanKacHeatEq --> bsPdeBrownian
   bsCall --> bsPdeFeynmanKac
   feynmanKacHeatEq --> bsPdeFeynmanKac
   brownianMotion --> bscallhypBrownian
@@ -224,15 +226,11 @@ not built**: the operational result it would prove — *the discounted GBM is a
 would buy an alternative *derivation route* to a theorem we already hold, not a new
 result, so it is a poor trade against ~400 lines of parallel keystone.
 
-The BS PDE is *routed* through the shared drift — `bs_pde_eq_itoDrift2D_minus_rV`:
-`BS-PDE-LHS = itoDrift2D V_t V_S V_SS (rS) (σS) − rV` is a **polynomial
-identity** — but deriving "drift `= 0`" *from* a no-arbitrage `Q`-martingale is
-deferred (not yet proved). The win is structural: the BS coefficient is one
-instance of the general `itoDrift2D`, not a bespoke algebra.
+The Black–Scholes PDE read in the Brownian coordinate is the next section's backward heat equation;
+deriving it from a no-arbitrage `Q`-martingale by Itô's formula is not proved.
 → *Finance:* the asset dynamics underlying every BS-family closed form — the
 genuine GBM derivatives in hand, the SDE-solution limit still to come.
-[`Foundations/ItoLemma2D.lean`](../MathFin/Foundations/ItoLemma2D.lean),
-[`BlackScholes/PDEFromIto.lean`](../MathFin/BlackScholes/PDEFromIto.lean)
+[`Foundations/ItoLemma2D.lean`](../MathFin/Foundations/ItoLemma2D.lean)
 
 ### Expectation-form Itô / Feynman–Kac ✅
 `E[f(Bₜ)] = f(0) + ½ ∫₀ᵗ E[f''(Bₛ)] ds` (`expectation_ito`,
@@ -335,19 +333,16 @@ PDE is real mathematics but a *different proof* than the one formalized; the
 graph shows `thm:bs-pde` as a root, and that is the truth.
 [`BlackScholes/PDE.lean`](../MathFin/BlackScholes/PDE.lean)
 
-### BS PDE from no-arbitrage + Itô 🚧
-The PDE is shown *algebraically equal* to the Itô-drift balance: the iff
-`bsItoDrift − rV = 0 ↔ BS-PDE` (`bs_pde_from_no_arbitrage`) and the routing
-`BS-PDE-LHS = itoDrift2D (rS) (σS) − rV` (`bs_pde_eq_itoDrift2D_minus_rV`) are
-both polynomial identities (`ring`). What is **deferred**: deriving "drift `= 0`"
-*from* a no-arbitrage `Q`-martingale (the dynamic-hedging derivation proper). The
-bounded-derivative Itô formulas do not reach it: the *time-dependent* formula
-now exists (`sc-thm-7.1.2`, `full` in the bounded regime — Summit A′ below),
-but the BS value function's `Γ` is unbounded as `S → 0`, so the bounded formula
-does not yet apply to it. So this meets the closed-form route at the PDE
-*coefficient*, with the martingale step still to come. An *independent*
-probabilistic derivation of the PDE — via Feynman–Kac rather than Itô — is
-complete: next section.
+### BS PDE in the Brownian coordinate ✅
+Read along the Brownian state, the discounted call price
+`f(t,x) = e^{−rt}·V(S₀e^{(r−σ²/2)t+σx}, T−t)` solves the backward heat equation
+`∂_t f + ½∂_xx f = 0` for `t < T` (`discountedCallBrownian_heat_equation`), with
+`∂_x f = σ e^{−rt} S Φ(d₁)` (`hasDerivAt_discountedCallBrownian_x`), from the Feynman–Kac
+heat-flow form of the price. This is the analytic fact behind the delta hedge. What is **not**
+proved: that `f(t, B_t)` is a local martingale, by Itô's formula. The value function's `Γ` is
+unbounded as `S → 0`, so the bounded time-dependent formula (`sc-thm-7.1.2`) does not reach it.
+Until 2026-10-21 this section described `ring` identities between the PDE and an Itô-drift
+balance; they were removed as restatements.
 [`BlackScholes/PDEFromIto.lean`](../MathFin/BlackScholes/PDEFromIto.lean)
 
 ### BS PDE from Feynman–Kac ✅
@@ -403,10 +398,11 @@ model — they are the same price, in the limit.
 [`Binomial/CRRCharFun.lean`](../MathFin/Binomial/CRRCharFun.lean)
 
 ### Margrabe exchange option ✅
-The option to exchange one asset for another prices as a Black–Scholes call on
-the ratio, with effective volatility `√(σ₁² + σ₂² − 2ρσ₁σ₂)`
-(`margrabe_price_of_gaussian`, `margrabe_bsCallHyp_of_gaussian`,
-`normalizedSpread_hasLaw_std`) — the multivariate corollary.
+Under two correlated lognormal assets with drift `r`, the discounted expected payoff of
+the option to exchange one for the other is Margrabe's closed form, a Black–Scholes call
+on the ratio with effective volatility `√(σ₁² + σ₂² − 2ρσ₁σ₂)` (`margrabe_exchange_price`,
+via `margrabe_bsCallHyp_of_gaussian` and `normalizedSpread_hasLaw_std`) — the
+multivariate corollary.
 [`BlackScholes/MargrabeGrounding.lean`](../MathFin/BlackScholes/MargrabeGrounding.lean)
 
 ### Carr–Madan static replication — spanning formula ✅

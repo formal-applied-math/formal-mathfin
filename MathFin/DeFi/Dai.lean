@@ -1,11 +1,12 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import Mathlib
+public import MathFin.FixedIncome.PeriodicCompounding
 
 /-!
 # Dai (MakerDAO): liquidation inequality and stability-fee compounding
@@ -24,7 +25,16 @@ parameter entries, not sub-sections of the paper).
 * `isLiquidatable_iff_mul`: cross-multiplied equivalent form (no division), for
   `debt > 0`.
 * `debt_eq_debt_zero_mul_pow`: the compounding recurrence
-  `debt (n+1) = debt n · (1 + fee)` has closed form `debt n = debt 0 · (1+fee)^n`.
+  `debt (n+1) = debt n · (1 + fee)` has closed form `debt n = debt 0 · (1+fee)^n`
+  (the library's `eq_mul_pow_of_succ`, `FixedIncome/PeriodicCompounding.lean`).
+* `debt_mul_zcb_log_eq`: per-period stability-fee compounding *is* continuous compounding at
+  the rate `log (1 + fee)`: discounting the debt after `n` periods by the zero-coupon bond
+  `zcb (log (1 + fee)) 0 n` returns the initial debt, for `fee > −1`. The Multi-Collateral Dai
+  `Jug` compounds its per-second rate (`duty`) over the elapsed seconds, so a period here is a
+  second and `log (1 + fee)` is the continuously compounded per-second rate.
+
+The probability that a vault with lognormal collateral is liquidatable at a horizon is in
+`MathFin/Bridges/LiquidationAsStructuralDefault.lean` (`prob_isLiquidatable_eq_kmvPD`).
 -/
 
 @[expose] public section
@@ -52,15 +62,23 @@ theorem isLiquidatable_iff_mul
 /-- **Dai stability-fee compounding**: given a vault-debt sequence
 satisfying `debt (n+1) = debt n · (1 + fee)` at every step, the debt after
 `n` periods equals the initial debt compounded at the per-period stability
-fee, `debt n = debt 0 · (1 + fee)^n`. Proved by induction on `n`. -/
+fee, `debt n = debt 0 · (1 + fee)^n`: the closed form of a per-period accrual index,
+`eq_mul_pow_of_succ`. -/
 theorem debt_eq_debt_zero_mul_pow
     (debt : ℕ → ℝ) (fee : ℝ)
     (hrec : ∀ n, debt (n + 1) = debt n * (1 + fee)) :
-    ∀ n, debt n = debt 0 * (1 + fee) ^ n
-  | 0 => by simp
-  | (n + 1) => by
-      rw [hrec n, debt_eq_debt_zero_mul_pow debt fee hrec n, pow_succ]
-      ring
+    ∀ n, debt n = debt 0 * (1 + fee) ^ n :=
+  eq_mul_pow_of_succ hrec
+
+/-- **Stability-fee compounding is continuous compounding at the rate `log (1 + fee)`.** If the
+vault debt compounds at the per-period fee `fee > −1`, then discounting the debt after `n`
+periods by the zero-coupon bond at the continuously compounded rate `log (1 + fee)` (time in
+periods) returns the initial debt: `debt n · zcb (log (1 + fee)) 0 n = debt 0`. -/
+theorem debt_mul_zcb_log_eq (debt : ℕ → ℝ) {fee : ℝ} (hfee : -1 < fee)
+    (hrec : ∀ n, debt (n + 1) = debt n * (1 + fee)) (n : ℕ) :
+    debt n * zcb (Real.log (1 + fee)) 0 n = debt 0 := by
+  rw [debt_eq_debt_zero_mul_pow debt fee hrec n, mul_assoc, one_add_pow_mul_zcb_log hfee n,
+    mul_one]
 
 end Dai
 

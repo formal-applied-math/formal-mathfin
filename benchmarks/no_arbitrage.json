@@ -36,18 +36,18 @@
     },
     {
       "id": "mf-triangle-arbitrage-unique",
-      "name": "Triangle Arbitrage: Third Rate Uniquely Determined",
-      "description": "Given two non-zero exchange rates S_AB, S_BC, the no-arb constraint S_AB·S_BC·S_CA = 1 uniquely determines S_CA = 1/(S_AB·S_BC).",
+      "name": "Triangle No-Arbitrage Determines the Third Rate",
       "domain": "mathematical_finance",
+      "description": "For positive exchange rates S_AB and S_BC (S_XY = units of Y per unit of X), exactly one rate S_CA leaves the three frictionless conversion trades A→B, B→C, C→A without arbitrage (no real combination whose net holding is non-negative in every currency and positive in one), namely S_CA = 1/(S_AB·S_BC). No-arbitrage is the multi-state FTAP's notion with the currencies as coordinates; reverse trades are at the reciprocal rate, and bid–ask spreads and transaction costs are not modelled.",
       "code": {
-        "lean": "import MathFin.Foundations.TriangleArbitrage\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem triangleNoArb_solve_third_thm {S_AB S_BC : ℝ}\n    (h_ab : S_AB ≠ 0) (h_bc : S_BC ≠ 0) :\n    ∃! S_CA : ℝ, MathFin.TriangleNoArb S_AB S_BC S_CA :=\n  MathFin.triangleNoArb_solve_third h_ab h_bc\n"
+        "lean": "import MathFin.Foundations.TriangleArbitrage\n\n/-- **No arbitrage determines the third cross rate.** For positive `S_AB`, `S_BC` exactly one\n    `S_CA` leaves the currency triangle without arbitrage, namely `1 / (S_AB · S_BC)`.\n    Re-exports `MathFin.triangleNoArb_solve_third`. -/\ntheorem triangleNoArb_solve_third_thm {S_AB S_BC : ℝ} (h_ab : 0 < S_AB) (h_bc : 0 < S_BC) :\n    ∃! S_CA : ℝ, MathFin.TriangleNoArb S_AB S_BC S_CA :=\n  MathFin.triangleNoArb_solve_third h_ab h_bc\n"
       },
       "metadata": {
         "chapter": 9,
-        "reference": "Triangle arbitrage (classical FX no-arb)",
+        "reference": "Y. Aiba, N. Hatano, H. Takayasu, K. Marumo, T. Shimizu, Triangular arbitrage as an interaction among foreign exchange rates, Physica A 310 (2002) 467–479 (the rate product); H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed., de Gruyter (2016), §1.2",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.triangleNoArb_solve_third (MathFin/Foundations/TriangleArbitrage.lean). SCOPE: TriangleNoArb is defined as ¬ HasArbitrage_multi_state (triangleTrades S_AB S_BC S_CA), the multi-state FTAP's arbitrage over the currency coordinates, and triangleNoArb_iff proves it equivalent to S_AB·S_BC·S_CA = 1 for positive S_AB, S_BC. The hypotheses are positivity (not just non-vanishing): with a negative rate a single reversed trade is an arbitrage, so no S_CA works. Not modelled: bid–ask spreads, transaction costs."
       }
     },
     {
@@ -131,17 +131,17 @@
     {
       "id": "mf-superhedging-emm-bound",
       "name": "Fundamental Superhedging Bound",
-      "description": "In a finite-state market, every equivalent martingale measure prices a claim at most its super-replication cost. The EMM prices of a claim lie below its superhedging price — the dual side of the no-arbitrage pricing interval and the pricing-side companion of the coherent-risk representation.",
       "domain": "mathematical_finance",
+      "description": "In a finite-state one-period market with excess-return matrix z, every martingale probability vector q (q ≥ 0, Σq = 1, every asset's excess return q-fair), in particular every equivalent martingale measure, prices a claim at most any of its super-replication costs: Σ_n q n Y n ≤ x whenever x plus some portfolio dominates Y in every state. The superhedging duality equality (superhedging price = supremum of EMM prices) is not proved.",
       "code": {
-        "lean": "import MathFin.Foundations.SuperhedgingDuality\n\nopen scoped BigOperators\n\n/-- **Fundamental superhedging bound.** For an excess-return matrix `z`, any equivalent martingale\n    measure `q` and any cost-`x` portfolio `θ` super-replicating the claim `Y`, the EMM price of `Y` is\n    at most `x`. Re-exports `MathFin.emm_le_superReplication`. -/\ntheorem superhedging_emm_bound {M N : ℕ} (z : Fin M → Fin N → ℝ) (Y : Fin N → ℝ)\n    {q : Fin N → ℝ} (hq : q ∈ MathFin.EMMSet z) {x : ℝ} {θ : Fin M → ℝ}\n    (hsr : MathFin.SuperReplicates z Y x θ) :\n    ∑ n, q n * Y n ≤ x :=\n  MathFin.emm_le_superReplication z Y hq hsr\n"
+        "lean": "import MathFin.Foundations.SuperhedgingDuality\n\nopen scoped BigOperators\n\n/-- **Fundamental superhedging bound.** For an excess-return matrix `z`, any martingale\n    probability vector `q` (`q ≥ 0`, `∑ q = 1`, every asset `q`-fair; in particular any\n    equivalent martingale measure) and any cost-`x` portfolio `θ` super-replicating the claim\n    `Y`, the `q`-price of `Y` is at most `x`. Re-exports `MathFin.emm_le_superReplication`. -/\ntheorem superhedging_emm_bound {M N : ℕ} (z : Fin M → Fin N → ℝ) (Y : Fin N → ℝ)\n    {q : Fin N → ℝ} (hq : q ∈ MathFin.martingaleProbVectors z) {x : ℝ} {θ : Fin M → ℝ}\n    (hsr : MathFin.SuperReplicates z Y x θ) :\n    ∑ n, q n * Y n ≤ x :=\n  MathFin.emm_le_superReplication z Y hq hsr\n"
       },
       "metadata": {
         "chapter": 14,
-        "reference": "Fundamental theorem of superhedging (EMM bound); the dual side of the no-arbitrage price interval",
+        "reference": "H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed., de Gruyter (2016), §1.3 (superhedging and arbitrage-free prices)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full proof re-exported from MathFin/Foundations/SuperhedgingDuality.lean: in a finite-state market with excess-return matrix z, every equivalent martingale measure (EMMSet) prices a claim Y at most any super-replication cost x (SuperReplicates). Proof: q-weight the super-replication inequality, then the martingale constraint kills the portfolio term (∑ₙ qₙ zₘₙ = 0) and ∑q = 1 leaves x. The reverse strong-duality equality (superhedging price = sup of EMM prices) needs closedness of the super-replication cone — a polyhedral/Farkas fact absent from Mathlib at this pin — and is a documented follow-up. No axioms beyond Mathlib defaults."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.emm_le_superReplication (MathFin/Foundations/SuperhedgingDuality.lean). SCOPE: q ranges over martingaleProbVectors z (q ≥ 0, possibly vanishing on some states), which contains every EMM (hasEMM_multi_state_iff_exists_pos_mem), so the statement is stronger than the EMM bound it is named after. Proof: q-weight the super-replication inequality; fairness (Σ_n q n z m n = 0) kills the portfolio term and Σq = 1 leaves x. Not proved: the strong-duality equality, which needs closedness of the finitely generated super-replication cone (Mathlib at this pin has PointedCone.DualFG but no Minkowski–Weyl)."
       }
     },
     {
@@ -182,11 +182,11 @@
       "description": "On an arbitrary probability space, a single scalar discounted excess return Y ∈ L⁰ admits no arbitrage ⟺ there is an equivalent martingale measure Q ~ P under which Y is integrable with E_Q[Y] = 0. The Föllmer–Schied / one-period Dalang–Morton–Willinger theorem — the measure-theoretic step beyond finite Ω: backward via a bounded-density reduction to L¹, the scalar no-arbitrage dichotomy, and a two-region balancing withDensity (no Hahn–Banach, no Kreps–Yan).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.FTAPOnePeriod\n\nopen MeasureTheory\n\n/-- **General-Ω one-period FTAP** (Föllmer–Schied 1.55 / one-period\n    Dalang–Morton–Willinger). For a single measurable scalar discounted excess\n    return `Y` on an arbitrary probability space `(Ω, P)`, no arbitrage holds iff\n    there is an equivalent martingale measure `Q ~ P` under which `Y` is\n    integrable and `E_Q[Y] = 0`. Backward: a bounded-density reduction to `L¹`,\n    the scalar no-arbitrage dichotomy, and a two-region balancing `withDensity`.\n    Re-exports `MathFin.OnePeriod.ftap_one_period`. -/\ntheorem ftap_one_period_general {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (P : Measure Ω) [IsProbabilityMeasure P] (Y : Ω → ℝ) (hY : Measurable Y) :\n    MathFin.OnePeriod.NoArbitrage P Y ↔ ∃ Q, MathFin.OnePeriod.IsEMM P Y Q :=\n  MathFin.OnePeriod.ftap_one_period P Y hY\n"
+        "lean": "import MathFin.Foundations.FTAPOnePeriod\n\nopen MeasureTheory\n\n/-- **General-Ω one-period FTAP** (Föllmer–Schied §1.2 / one-period\n    Dalang–Morton–Willinger). For a single measurable scalar discounted excess\n    return `Y` on an arbitrary probability space `(Ω, P)`, no arbitrage holds iff\n    there is an equivalent martingale measure `Q ~ P` under which `Y` is\n    integrable and `E_Q[Y] = 0`. Backward: a bounded-density reduction to `L¹`,\n    the scalar no-arbitrage dichotomy, and a two-region balancing `withDensity`.\n    Re-exports `MathFin.OnePeriod.ftap_one_period`. -/\ntheorem ftap_one_period_general {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (P : Measure Ω) [IsProbabilityMeasure P] (Y : Ω → ℝ) (hY : Measurable Y) :\n    MathFin.OnePeriod.NoArbitrage P Y ↔ ∃ Q, MathFin.OnePeriod.IsEMM P Y Q :=\n  MathFin.OnePeriod.ftap_one_period P Y hY\n"
       },
       "metadata": {
         "chapter": 14,
-        "reference": "General-Ω one-period Fundamental Theorem of Asset Pricing (Föllmer–Schied Thm 1.55; one-period Dalang–Morton–Willinger)",
+        "reference": "H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed., de Gruyter (2016), §1.2 (fundamental theorem of asset pricing, one period; the one-period case of Dalang–Morton–Willinger)",
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full biconditional NoArbitrage ⟺ ∃ EMM re-exported from MathFin/Foundations/FTAPOnePeriod.lean. Scope: one trading period, one scalar L⁰ return Y, arbitrary probability space (Ω, P). Backward direction (NA ⟹ EMM) is the elementary Föllmer–Schied route: a bounded strictly-positive density reduction (P̃ = P.withDensity of (1+|Y|)⁻¹/κ) making Y integrable, the scalar no-arbitrage dichotomy (a one-signed Y is killed by θ = ±1), and the two-region balancing withDensity Z = λ·𝟙_{Y≥0} + μ·𝟙_{Y<0} that re-weights up/down moves until Y is fair — no Hahn–Banach, no Kreps–Yan. Forward via E_Q[θ·Y] = 0. The general-Ω multi-period DMW (measurable selection) and the d-asset case are out of scope. No axioms beyond Mathlib defaults."
@@ -198,11 +198,11 @@
       "description": "On an arbitrary probability space, for a ℝᵈ-valued discounted excess return Y, no arbitrage ⟺ there is an equivalent martingale measure Q ~ P with Y integrable and E_Q[Y] = 0 ∈ ℝᵈ — with no non-redundancy hypothesis. The backward direction is an explicit logistic-tilt construction (the softplus analogue of the Esscher measure, not the Esscher measure itself): minimise the smooth convex potential θ ↦ E[log(1 + exp⟪θ,Y⟫)]. The potential is constant along the gains kernel N = {θ : ⟪θ,Y⟫ = 0 a.e.} and coercive on its orthogonal complement Nᗮ, so a minimiser on Nᗮ is automatically global (redundant directions absorbed); its first-order condition E[Y·σ⟪θ₀,Y⟫] = 0 (σ logistic) yields a strictly-positive bounded density.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.FTAPOnePeriodVector\n\nopen MeasureTheory\n\n/-- **d-asset one-period FTAP** (Föllmer–Schied 1.6, full). For a measurable\n    `ℝᵈ`-valued discounted excess return `Y` on an arbitrary probability space and\n    constant portfolios `θ ∈ ℝᵈ`, no arbitrage holds iff there is an equivalent martingale\n    measure `Q ~ P` with `Y` integrable and `E_Q[Y] = 0` — with **no non-redundancy\n    hypothesis** (redundant assets are absorbed by minimising the potential over the gains\n    kernel's orthogonal complement). Backward: an explicit logistic-tilt EMM (the softplus\n    analogue of the Esscher measure) from minimising `θ ↦ E[log(1+exp⟪θ,Y⟫)]`. Re-exports\n    `MathFin.OnePeriodVector.ftap_one_period_vector` at `F = EuclideanSpace ℝ (Fin d)`. -/\ntheorem ftap_one_period_vector_market {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (P : Measure Ω) [IsProbabilityMeasure P] {d : ℕ} (Y : Ω → EuclideanSpace ℝ (Fin d))\n    (hY : Measurable Y) :\n    MathFin.OnePeriodVector.NoArbitrage P Y ↔ ∃ Q, MathFin.OnePeriodVector.IsEMM P Y Q :=\n  MathFin.OnePeriodVector.ftap_one_period_vector P Y hY"
+        "lean": "import MathFin.Foundations.FTAPOnePeriodVector\n\nopen MeasureTheory\n\n/-- **d-asset one-period FTAP** (Föllmer–Schied §1.2, full). For a measurable\n    `ℝᵈ`-valued discounted excess return `Y` on an arbitrary probability space and\n    constant portfolios `θ ∈ ℝᵈ`, no arbitrage holds iff there is an equivalent martingale\n    measure `Q ~ P` with `Y` integrable and `E_Q[Y] = 0` — with **no non-redundancy\n    hypothesis** (redundant assets are absorbed by minimising the potential over the gains\n    kernel's orthogonal complement). Backward: an explicit logistic-tilt EMM (the softplus\n    analogue of the Esscher measure) from minimising `θ ↦ E[log(1+exp⟪θ,Y⟫)]`. Re-exports\n    `MathFin.OnePeriodVector.ftap_one_period_vector` at `F = EuclideanSpace ℝ (Fin d)`. -/\ntheorem ftap_one_period_vector_market {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (P : Measure Ω) [IsProbabilityMeasure P] {d : ℕ} (Y : Ω → EuclideanSpace ℝ (Fin d))\n    (hY : Measurable Y) :\n    MathFin.OnePeriodVector.NoArbitrage P Y ↔ ∃ Q, MathFin.OnePeriodVector.IsEMM P Y Q :=\n  MathFin.OnePeriodVector.ftap_one_period_vector P Y hY"
       },
       "metadata": {
         "chapter": 14,
-        "reference": "d-asset one-period Fundamental Theorem of Asset Pricing (Föllmer–Schied Thm 1.6; Esscher / minimal-entropy martingale measure)",
+        "reference": "d-asset one-period Fundamental Theorem of Asset Pricing (Föllmer–Schied §1.2; Esscher / minimal-entropy martingale measure)",
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Honest derivation of the biconditional NoArbitrage ⟺ ∃ EMM re-exported from MathFin/Foundations/FTAPOnePeriodVector.lean, the FULL unrestricted one-period d-asset FTAP — no non-redundancy hypothesis. The MathFin theorem is stated for a discounted excess return valued in any finite-dimensional real inner-product space F (the ℝᵈ market is F = EuclideanSpace ℝ (Fin d)). Scope: one trading period, finite-dimensional market, trivial ℱ₀ (constant θ), arbitrary probability space. Backward direction (NA ⟹ EMM): minimise the smooth convex softplus potential θ ↦ ∫ log(1+exp⟪θ,Y⟫); it is constant along the gains kernel N = {θ : ⟪θ,Y⟫ = 0 a.e.} and, under no arbitrage, coercive on Nᗮ (via the unit-sphere minimum of g(θ)=∫⟪θ,Y⟫⁺ together with N ⊓ Nᗮ = ⊥), so a minimiser on Nᗮ exists and — because the potential is N-translation-invariant — is global over all of F; its first-order condition (differentiation under the integral) is ∫ Y·σ⟪θ₀,Y⟫ = 0, so z = σ⟪θ₀,Y⟫ ∈ (0,1) is a strictly-positive bounded fair density and Q = P.withDensity(z/∫z) is the EMM; integrability is dropped by a bounded-density reduction P̃ = P.withDensity((1+‖Y‖)⁻¹/κ). Redundant assets are thereby absorbed (no quotient by the gains kernel or measurable selection needed). No Hahn–Banach, no L⁰-cone closedness, no measurable selection. Only the general-Ω multi-period DMW remains out of scope. No axioms beyond Mathlib defaults."
@@ -222,6 +222,118 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full re-export of MathFin.changeOfNumeraire (MathFin/Foundations/Numeraire.lean): N₀·E^{Q^N}[X/N_T] = B₀·E^Q[X/B_T] where Q^N = Q.withDensity((N_T·B₀)/(N₀·B_T)). The identity is a pure measure-transport fact (integral_withDensity_eq_integral_toReal_smul) plus scalar cancellation of N_T — it holds for every claim X with NO integrability or square-integrability hypothesis, needing only strict positivity of the two numéraires. Companion numeraireMeasure_isProbabilityMeasure shows Q^N is a probability measure under the tradeability/normalization condition E^Q[N_T/B_T] = N₀/B₀ (N/B a Q-martingale). The abstract backbone is CONSUMED by the Black–Scholes stock numéraire: stockNumeraireMeasure_eq_numeraireMeasure (MathFin/BlackScholes/StockNumeraire.lean) exhibits dQ^(S)/dQ = e^{−rT}·S_T/S₀ as the instance B_T = e^{rT}, B₀ = 1, N = S. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
+      "id": "mf-ftap-two-state-iff",
+      "name": "Two-State FTAP Biconditional",
+      "domain": "mathematical_finance",
+      "description": "In a one-period, one-asset market with two states and excess returns z_up, z_down, an equivalent martingale measure (q_up, q_down > 0, q_up + q_down = 1, q_up·z_up + q_down·z_down = 0) exists iff there is no arbitrage (no position θ with θ·z_up, θ·z_down ≥ 0 and one of them > 0). Proved as the N = 2, M = 1 case of the multi-state FTAP: the two-state EMM and arbitrage notions are shown equivalent to the multi-state ones for the matrix (z_up, z_down).",
+      "code": {
+        "lean": "import MathFin.Foundations.FTAPMultiState\n\n/-- **Two-state FTAP biconditional.** In a one-period, one-asset, two-state market with\n    excess returns `z_up`, `z_down`, an equivalent martingale measure exists iff there is no\n    arbitrage. The `N = 2`, `M = 1` case of the multi-state FTAP. Re-exports\n    `MathFin.hasEMM_two_state_iff_not_hasArbitrage`. -/\ntheorem ftap_two_state_iff (z_up z_down : ℝ) :\n    MathFin.HasEMM_two_state z_up z_down ↔ ¬ MathFin.HasArbitrage_two_state z_up z_down :=\n  MathFin.hasEMM_two_state_iff_not_hasArbitrage z_up z_down\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed., de Gruyter (2016), §1.2 (fundamental theorem of asset pricing, one period); T. Nagy, From Itô to Black–Scholes: A Machine-Verified Derivation in Lean 4, SSRN 6336503 (2026), §7",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.hasEMM_two_state_iff_not_hasArbitrage (MathFin/Foundations/FTAPMultiState.lean). SCOPE: one period, one asset, two states; the EMM and arbitrage notions are those of MathFin/Foundations/FTAPTwoState.lean, proved equal to the multi-state ones at N = 2, M = 1 (hasEMM_two_state_iff_multi, hasArbitrage_two_state_iff_multi); the biconditional is then hasEMM_multi_iff_not_hasArbitrage (separation of the payoff span from the simplex). No hypotheses beyond the two real excess returns."
+      }
+    },
+    {
+      "id": "mf-ftap-multi-state-measure-form",
+      "name": "Finite-State EMM as a One-Period Equivalent Martingale Measure",
+      "domain": "mathematical_finance",
+      "description": "For a one-period market with N states and M assets (excess-return matrix z) and any probability P on the N states that charges every state, a strictly positive probability vector q pricing every asset's excess return at zero exists iff there is a probability measure Q ~ P on the states under which the ℝᴹ-valued return vector is integrable with Q-mean zero. Derived by composing the finite-state FTAP (separation), a proved equivalence between matrix arbitrage and measure-theoretic arbitrage on Fin N, and the general-Ω vector FTAP (softplus construction), so the two independent FTAP proofs are shown to agree on finite state spaces.",
+      "code": {
+        "lean": "import MathFin.Foundations.FTAPMultiState\n\nopen MeasureTheory\n\n/-- **The finite-state EMM is the one-period EMM on the state space.** For any probability `P`\n    on `Fin N` charging every state, an EMM vector for the excess-return matrix `z` exists iff\n    some `Q ~ P` makes the `ℝᴹ`-valued return vector `multiStateReturn z` integrable with\n    `E_Q[multiStateReturn z] = 0`. Re-exports `MathFin.hasEMM_multi_state_iff_exists_isEMM`. -/\ntheorem ftap_multi_state_measure_form {N M : ℕ} [NeZero N] (z : Fin M → Fin N → ℝ)\n    (P : Measure (Fin N)) [IsProbabilityMeasure P] (hP : ∀ i, P {i} ≠ 0) :\n    MathFin.HasEMM_multi_state z ↔\n      ∃ Q, MathFin.OnePeriodVector.IsEMM P (MathFin.multiStateReturn z) Q :=\n  MathFin.hasEMM_multi_state_iff_exists_isEMM z P hP\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed., de Gruyter (2016), §1.2 (fundamental theorem of asset pricing, one period)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.hasEMM_multi_state_iff_exists_isEMM (MathFin/Foundations/FTAPMultiState.lean). SCOPE: finite state space Fin N with its discrete σ-algebra, any probability P with P {i} ≠ 0 for every state, returns as the EuclideanSpace ℝ (Fin M)-valued map multiStateReturn z. The equivalence is derived, not constructed: hasEMM_multi_iff_not_hasArbitrage, hasArbitrage_multi_state_iff_not_noArbitrage (proved directly: P-a.e. is everywhere, and the payoff is an inner product), and OnePeriodVector.ftap_one_period_vector. The explicit correspondence q i = Q {i} is not stated."
+      }
+    },
+    {
+      "id": "mf-ftap-discrete-one-period",
+      "name": "Discrete-Time EMM at Horizon One Is the One-Period EMM",
+      "domain": "mathematical_finance",
+      "description": "On a finite probability space with a filtration whose initial σ-algebra is trivial (𝓕 0 = ⊥) and an adapted scalar discounted price S, a measure Q is an equivalent martingale measure of the discrete-time market at horizon 1 iff it is an equivalent martingale measure of the one-period market for the excess return S 1 − S 0 (Q ~ P, E_Q[S 1 − S 0] = 0). The one-step martingale condition S 0 = E_Q[S 1 | 𝓕 0] becomes E_Q[S 1 − S 0] = 0 because S 0 is a constant and conditioning on ⊥ is expectation.",
+      "code": {
+        "lean": "import MathFin.Foundations.FTAPDiscrete\n\nopen MeasureTheory ProbabilityTheory\n\n/-- **At horizon one the discrete-time EMM is the one-period EMM.** With trivial initial\n    information `𝓕 0 = ⊥` and `S` adapted on a finite space, `Q` is an EMM of the one-step\n    market iff it is an EMM of the one-period market for `S 1 − S 0`. Re-exports\n    `MathFin.isEMM_one_iff_onePeriod`. -/\ntheorem discrete_emm_horizon_one {Ω : Type*} [Fintype Ω] {mΩ : MeasurableSpace Ω}\n    [MeasurableSingletonClass Ω] (𝓕 : Filtration ℕ mΩ) (P : Measure Ω) (S : ℕ → Ω → ℝ)\n    (hS : StronglyAdapted 𝓕 S) (h0 : 𝓕 0 = ⊥) (Q : Measure Ω) :\n    MathFin.IsEMM 𝓕 P S 1 Q ↔ MathFin.OnePeriod.IsEMM P (S 1 - S 0) Q :=\n  MathFin.isEMM_one_iff_onePeriod 𝓕 P S hS h0\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed., de Gruyter (2016), §1.2 (one-period model) and §5.2 (multi-period arbitrage and martingale measures)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.isEMM_one_iff_onePeriod (MathFin/Foundations/FTAPDiscrete.lean). SCOPE: finite Ω, horizon T = 1, trivial 𝓕 0, scalar adapted price. The companion MathFin.noArbitrage_one_iff_onePeriod (same file, needs only 𝓕 0 = ⊥) identifies the no-arbitrage conditions; it is not part of this entry's statement. Longer horizons are not reduced to one-period markets here."
+      }
+    },
+    {
+      "id": "mf-continuous-emm-sampled",
+      "name": "A Continuous-Time EMM Sampled Is a Discrete-Time EMM",
+      "domain": "mathematical_finance",
+      "description": "If Q is an equivalent martingale measure for a scalar discounted price S in continuous time (Q ~ P and S a Q-martingale for a filtration 𝓕 indexed by ℝ≥0), then for any monotone schedule t 0 ≤ t 1 ≤ ⋯ and any horizon T, Q is an equivalent martingale measure in the finite-horizon discrete-time sense for the sampled price n ↦ S (t n) and the sampled filtration n ↦ 𝓕 (t n). General Ω. One direction only, and the discrete-time FTAP itself still needs a finite Ω.",
+      "code": {
+        "lean": "import MathFin.Foundations.FTAPDiscrete\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **A continuous-time EMM, sampled along a monotone schedule, is a discrete-time EMM** for\n    the sampled price and filtration, at every finite horizon. Re-exports\n    `MathFin.ContinuousMarket.IsEMM.sampled`. -/\ntheorem continuous_emm_sampled {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {𝓕 : Filtration ℝ≥0 mΩ} {S : ℝ≥0 → Ω → ℝ} {Q : Measure Ω}\n    (h : MathFin.ContinuousMarket.IsEMM (P := P) (𝓕 := 𝓕) S Q)\n    {t : ℕ → ℝ≥0} (ht : Monotone t) (T : ℕ) :\n    MathFin.IsEMM (MathFin.ContinuousMarket.sampledFiltration 𝓕 ht) P (fun n ↦ S (t n)) T Q :=\n  h.sampled ht T\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "S. E. Shreve, Stochastic Calculus for Finance II: Continuous-Time Models, Springer (2004), §5.4 (fundamental theorems of asset pricing); H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed., de Gruyter (2016), §5.2",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.ContinuousMarket.IsEMM.sampled (MathFin/Foundations/FTAPDiscrete.lean), built on martingale_comp_monotone (MathFin/Foundations/ContinuousMarket.lean). SCOPE: scalar price (F = ℝ), arbitrary probability space, any monotone schedule and horizon. Not claimed: the converse (a measure that is a discrete EMM along every schedule need not make S adapted at all times), and any discrete-time no-arbitrage conclusion for non-finite Ω (ftap_discrete assumes a finite full-support space)."
+      }
+    },
+    {
+      "id": "mf-triangle-arbitrage-ftap",
+      "name": "Triangle No-Arbitrage Is the Cross-Rate Identity",
+      "domain": "mathematical_finance",
+      "description": "For three currencies with positive rates S_AB, S_BC (S_XY = units of Y per unit of X) and any S_CA, the three frictionless conversion trades A→B, B→C, C→A allow no arbitrage (no real combination whose net holding is non-negative in every currency and positive in one) iff S_AB·S_BC·S_CA = 1. No-arbitrage is the multi-state FTAP's notion with the currencies as coordinates; the forward direction uses the FTAP's separation half, the reverse prices with the currency values (S_AB·S_BC, S_BC, 1). Reverse trades are at the reciprocal rate; bid–ask spreads and transaction costs are not modelled.",
+      "code": {
+        "lean": "import MathFin.Foundations.TriangleArbitrage\n\n/-- **Triangle no-arbitrage is the cross-rate identity.** For positive `S_AB`, `S_BC`, the three\n    frictionless conversion trades allow no arbitrage iff `S_AB · S_BC · S_CA = 1`. Re-exports\n    `MathFin.triangleNoArb_iff`. -/\ntheorem triangle_no_arbitrage_iff_cross_rate {S_AB S_BC S_CA : ℝ} (hab : 0 < S_AB)\n    (hbc : 0 < S_BC) :\n    ¬ MathFin.HasArbitrage_multi_state (MathFin.triangleTrades S_AB S_BC S_CA) ↔\n      S_AB * S_BC * S_CA = 1 :=\n  MathFin.triangleNoArb_iff hab hbc\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Y. Aiba, N. Hatano, H. Takayasu, K. Marumo, T. Shimizu, Triangular arbitrage as an interaction among foreign exchange rates, Physica A 310 (2002) 467–479 (the rate product); H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed., de Gruyter (2016), §1.2",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.triangleNoArb_iff (MathFin/Foundations/TriangleArbitrage.lean). SCOPE: frictionless market of three conversion trades (triangleTrades), any real multiple of each trade allowed; arbitrage is HasArbitrage_multi_state over the currency coordinates. Positivity of S_AB and S_BC is used only for the reverse direction; prod_eq_one_of_triangleNoArb gives the forward direction for any signs. Not modelled: bid–ask spreads, transaction costs, position limits."
+      }
+    },
+    {
+      "id": "mf-replication-martingale-price",
+      "name": "Law of One Price for Martingale Probability Vectors",
+      "domain": "mathematical_finance",
+      "description": "In a finite-state one-period market with excess-return matrix z, every martingale probability vector q (q ≥ 0, Σq = 1, every asset's excess return q-fair; not necessarily strictly positive) prices a replicable claim at its replication cost: if Y n = x + Σ_m θ_m z m n in every state n, then Σ_n q n Y n = x.",
+      "code": {
+        "lean": "import MathFin.Foundations.SuperhedgingDuality\n\nopen scoped BigOperators\n\n/-- **Law of one price.** Every martingale probability vector prices a replicable claim at its\n    replication cost. Re-exports `MathFin.martingalePrice_eq_of_replicates`. -/\ntheorem replicable_claim_martingale_price {M N : ℕ} (z : Fin M → Fin N → ℝ) {Y : Fin N → ℝ}\n    {q : Fin N → ℝ} (hq : q ∈ MathFin.martingaleProbVectors z) {x : ℝ} {θ : Fin M → ℝ}\n    (hrep : ∀ n, Y n = x + ∑ m, θ m * z m n) :\n    ∑ n, q n * Y n = x :=\n  MathFin.martingalePrice_eq_of_replicates z hq hrep\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed., de Gruyter (2016), §1.3 (arbitrage-free prices of attainable claims)",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.martingalePrice_eq_of_replicates (MathFin/Foundations/SuperhedgingDuality.lean). SCOPE: finite states and assets, exact replication Y = x + θ·z, q ranging over all martingale probability vectors (EMMs are the strictly positive ones). Proof: emm_le_superReplication applied to (x, θ) for Y and to (−x, −θ) for −Y."
+      }
+    },
+    {
+      "id": "mf-superhedging-bounded-below",
+      "name": "Super-Replication Costs Are Bounded Below by an EMM Price",
+      "domain": "mathematical_finance",
+      "description": "In a finite-state one-period market with at least one state and no arbitrage, there is a strictly positive martingale probability vector q (an equivalent martingale measure) such that, for every claim Y, every super-replication cost x (x plus some portfolio dominating Y in every state) is at least the q-price Σ_n q n Y n. So no claim's superhedging price is −∞. The superhedging duality equality (superhedging price = supremum of EMM prices) is not proved.",
+      "code": {
+        "lean": "import MathFin.Foundations.SuperhedgingDuality\n\nopen scoped BigOperators\n\n/-- **Under no arbitrage, one EMM price bounds every super-replication cost from below.**\n    Re-exports `MathFin.exists_pos_price_le_superReplication`. -/\ntheorem superhedging_bounded_below_of_no_arbitrage {M N : ℕ} [NeZero N]\n    (z : Fin M → Fin N → ℝ) (hNA : ¬ MathFin.HasArbitrage_multi_state z) :\n    ∃ q ∈ MathFin.martingaleProbVectors z, (∀ n, 0 < q n) ∧\n      ∀ (Y : Fin N → ℝ) (x : ℝ) (θ : Fin M → ℝ),\n        MathFin.SuperReplicates z Y x θ → ∑ n, q n * Y n ≤ x :=\n  MathFin.exists_pos_price_le_superReplication z hNA\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed., de Gruyter (2016), §1.3 (superhedging and arbitrage-free prices)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.exists_pos_price_le_superReplication (MathFin/Foundations/SuperhedgingDuality.lean). SCOPE: composes the multi-state FTAP's backward direction (hasEMM_multi_of_not_hasArbitrage) with emm_le_superReplication. Not proved: the reverse inequality / superhedging duality equality, which needs closedness of the finitely generated super-replication cone (absent from Mathlib at this pin); nonemptiness of the set of super-replication costs is not stated."
       }
     }
   ]

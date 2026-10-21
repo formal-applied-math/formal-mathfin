@@ -1,12 +1,14 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import MathFin.Foundations.ItoFormulaAdapted
 public import MathFin.Foundations.ItoFormulaTDRemainder
+public import MathFin.Foundations.ItoFormulaAdaptedDrift
+public import MathFin.Foundations.ItoIntegralCrossHorizon
 
 /-! # The integrated Itô–drift identity for the constructed process (no hypothesized `M`)
 
@@ -18,17 +20,11 @@ constructs,
 
 the integrated Itô–drift identity holds with no hypothesized version `M` of `δ●B`:
 
-  `𝔼[f(X_T)] = f c + ∫₀ᵀ (𝔼[f'(X_s)·β_s] + ½·𝔼[f''(X_s)·δ_s²]) ds`,
+  `𝔼[f(X_τ)] = f c + ∫₀^τ (𝔼[f'(X_s)·β_s] + ½·𝔼[f''(X_s)·δ_s²]) ds`  for every `τ ≤ T`,
 
 for `B` a pre-Brownian motion with every path continuous, `β, δ` bounded,
 `natFiltration`-adapted and path-continuous, and `f` twice differentiable with `f''`
-continuous and `f'`, `f''` bounded. No `M` or `X` version is hypothesized — the conditional
-packaging of `itoDrift_expectation_identity_adapted` in `ItoFormulaAdaptedDrift` (a
-`natFiltration`-adapted, everywhere-path-continuous version of `δ●B`) is bypassed, not
-discharged: the identity is derived directly for the constructed process, without any version
-`M`. This module is separate from `ItoFormulaAdaptedDrift` so that that module
-stays free of the `ItoFormulaAdapted` import and its own route (the discrete partition
-skeleton) remains self-contained.
+continuous and `f'`, `f''` bounded.
 
 Route: `ItoFormulaAdapted.ito_formula_adapted` gives the pathwise a.e. decomposition
 `f(X_T) − f c =ᵐ ∫₀ᵀ f'(X)·δ dB + ∫₀ᵀ (f'(X)·β + ½·f''(X)·δ²) ds`; integrating, the stochastic
@@ -37,46 +33,57 @@ mean zero), and the drift integral crosses the expectation by `integral_integral
 bounded predictable weight `f'(X)·β + ½·f''(X)·δ²`. Its product integrability is
 `band_integrable` below (predictability gives product-measurability, boundedness gives
 integrability on the finite band) — no path continuity of `X` is needed, which is what makes
-the a.e.-continuous constructed process reachable.
+the a.e.-continuous constructed process reachable. This gives the identity at the horizon `T`
+(`itoDrift_expectation_identity_adaptedItoProcess`).
 
-Hypothesis comparison with the conditional theorem (neither statement implies the other):
-* weaker on `f`: `f ∈ C²` with continuous `f''` and bounded `f'`, `f''` (no third derivative),
-  where the conditional theorem needs `f` three times differentiable with `f'''` bounded;
-* no `M` hypotheses (`hMadap`, `hMeq`) and no `hXcont`/`hXrel`: `X` is fixed to the
-  constructed process `adaptedItoProcess … (processToLp δ) c β`, whereas the conditional
-  theorem is stated for any `X = c + ∫₀• β ds + M` with `M` a version as above;
-* stronger on `B`: it adds `hBcont` (every path of `B` continuous), which the conditional
-  theorem does not assume (`ito_formula_adapted` and the predictability lemmas for
-  `adaptedItoProcess` need it).
+Every version of the Itô process gives the same identity: if `M` is a.e. equal to the Itô
+process of `δ` at every time and `X = c + ∫₀• β ds + M`, then `X t` agrees almost surely with
+the constructed process at every `t ≤ T`, and the identity transfers by a.e. congruence
+(`itoDrift_expectation_identity_adapted_of_adaptedItoProcess`, needing no adaptedness or path
+continuity of `M`).
 
-The `X`-generality is not extra reach once `hBcont` holds: every such `X` is, at each `t ≤ T`,
-a.s. equal to the constructed process, so the conditional theorem's exact conclusion follows
-from `itoDrift_expectation_identity_adaptedItoProcess` by a.e. congruence. That reduction is
-`itoDrift_expectation_identity_adapted_of_adaptedItoProcess` below — of the `M`/`X` hypotheses it
-needs only `hMeq` and `hXrel` (no `hMadap`, no `hXcont`), and of `f` only twice differentiable with
-`f''` continuous and `f'`, `f''` bounded. The conditional theorem's only remaining extra reach
-is a `B` without everywhere-continuous paths.
+The identity at an earlier time `τ ≤ T` of the horizon-`T` process
+(`itoDrift_expectation_identity_adaptedItoProcess_of_le`) comes from the cross-horizon
+consistency of the Itô integral (`ItoIntegralCrossHorizon`): the horizon-`T` Itô term, frozen at
+`τ`, is a version of the horizon-`τ` Itô process (`ae_eq_itoProcessCLM_min`, with
+`itoProcessCLM_eq_terminal_of_ge` for times past the horizon), so the version theorem at horizon
+`τ` applies to it.
 
-## Relation to the conditional route
+## Relation to the discrete route
 
-The library cannot supply the `M` that `itoDrift_expectation_identity_adapted` hypothesizes:
-`itoContinuousMod` is continuous only almost surely, modifying it on the null failure set need
-not preserve `natFiltration`-adaptedness (the natural filtration is not complete), and the
-everywhere-continuous modification is adapted only to `augFiltration`. The identity here does
-not need that `M`.
+`ItoFormulaAdaptedDrift` proves the same identity by a different argument (the discrete Itô
+formula on uniform partitions, no pathwise Itô formula), as
+`ItoDriftConditional.itoDrift_expectation_identity_adapted`, for any `natFiltration`-adapted
+version `M` of `δ●B` whose `X = c + ∫₀• β ds + M` has almost surely continuous paths, and for `f`
+with a bounded third derivative. The constructed Itô term, frozen after the horizon, meets those
+hypotheses: it is `natFiltration`-adapted (`itoContinuousMod_isStronglyPredictable`), a.e. equal
+to the Itô process at every time (`itoContinuousMod_min_ae_eq_itoProcessCLM`), and almost surely
+path-continuous (`itoContinuousMod_continuousOn`). So the discrete route also applies to the
+constructed process (`itoDrift_expectation_identity_adapted_at_adaptedItoProcess`): the two
+routes are two proofs of one identity there, the pathwise one under weaker hypotheses on `f`.
+
+Hypothesis comparison with `ItoDriftConditional.itoDrift_expectation_identity_adapted`:
+* weaker on `f` here: `f ∈ C²` with continuous `f''` and bounded `f'`, `f''` (no third
+  derivative);
+* stronger on `B` here: every path of `B` continuous (`hBcont`), which `ito_formula_adapted` and
+  the predictability lemmas for `adaptedItoProcess` need. The discrete route's only extra reach
+  is a `B` without everywhere-continuous paths.
 
 ## Result
 
-* `itoDrift_expectation_identity_adaptedItoProcess` — the identity for the constructed process,
-  with no hypothesized `M` but with `hBcont` (headline);
-* `itoDrift_expectation_identity_adapted_of_adaptedItoProcess` — the conditional theorem's
-  conclusion recovered from it under `hBcont`, for any version `M` and `X = c + ∫₀• β ds + M`;
-* `band_integrable` (private) — product integrability of a bounded predictable weight on a
-  time band (the hypothesis of the Fubini interchange).
+* `itoDrift_expectation_identity_adaptedItoProcess` — the identity at the horizon `T`, with no
+  hypothesized `M` but with `hBcont` (headline);
+* `itoDrift_expectation_identity_adaptedItoProcess_of_le` — the identity at every `τ ≤ T`;
+* `itoDrift_expectation_identity_adapted_of_adaptedItoProcess` — the identity for any version `M`
+  of the Itô process and `X = c + ∫₀• β ds + M`, under `hBcont`;
+* `itoContinuousMod_min_ae_eq_itoProcessCLM` — the constructed Itô term, frozen after the
+  horizon, is a version of the Itô process at every time;
+* `itoDrift_expectation_identity_adapted_at_adaptedItoProcess` — the discrete route
+  (`ItoFormulaAdaptedDrift`) applied to the constructed process;
+* `band_integrable` (private) — product integrability of a bounded predictable weight on a time
+  band (the hypothesis of the Fubini interchange).
 
-The constant-coefficient case is `ito_drift_expectation_identity` in `ItoDriftExpectation`;
-the conditional statement (for `X` built from a version `M` satisfying its hypotheses) is
-`itoDrift_expectation_identity_adapted` in `ItoFormulaAdaptedDrift`.
+The constant-coefficient case is `ito_drift_expectation_identity` in `ItoDriftExpectation`.
 -/
 
 @[expose] public section
@@ -116,9 +123,9 @@ private theorem band_integrable {w : ℝ≥0 → Ω → ℝ}
 `𝔼[f(X_T)] = f c + ∫₀ᵀ (𝔼[f'(X_s)·β_s] + ½·𝔼[f''(X_s)·δ_s²]) ds`, for `B` a pre-Brownian
 motion with every path continuous, `β, δ` bounded, `natFiltration`-adapted and path-continuous,
 and `f` twice differentiable with `f''` continuous and `f'`, `f''` bounded. No version `M` of
-`δ●B` and no hypothesis on `X` is assumed; unlike the conditional
-`itoDrift_expectation_identity_adapted`, `X` is fixed to the constructed process and `B` is
-assumed path-continuous (`hBcont`). -/
+`δ●B` and no hypothesis on `X` is assumed; unlike the discrete route
+`ItoDriftConditional.itoDrift_expectation_identity_adapted`, `X` is fixed to the constructed
+process and `B` is assumed path-continuous (`hBcont`). -/
 theorem itoDrift_expectation_identity_adaptedItoProcess (hB : IsPreBrownianReal B μ)
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
     {β : ℝ≥0 → Ω → ℝ}
@@ -228,15 +235,14 @@ theorem itoDrift_expectation_identity_adaptedItoProcess (hB : IsPreBrownianReal 
   simp only [g]
   rw [integral_add (hAs s) ((hBs s).const_mul _), integral_const_mul]
 
-/-- **The conditional theorem's conclusion, recovered from the constructed-process identity
-under `hBcont`.** If `M` is any version of the Itô process of `δ` (`hMeq`; no adaptedness or path
-continuity asked) and `X = c + ∫₀• β ds + M` (`hXrel`), then `X t` agrees almost surely with the
-constructed process at every `t ≤ T`, and the conclusion of the conditional
-`itoDrift_expectation_identity_adapted` follows from
-`itoDrift_expectation_identity_adaptedItoProcess` by a.e. congruence — for `f` twice differentiable
-with continuous `f''` and bounded `f'`, `f''`, and without `hMadap`, `hXcont` or a third
-derivative. The conditional theorem's remaining extra reach is a `B` without everywhere-continuous
-paths. -/
+/-- **The identity for every version of the Itô process, under `hBcont`.** If `M` is any version
+of the Itô process of `δ` (`hMeq`; no adaptedness or path continuity asked) and
+`X = c + ∫₀• β ds + M` (`hXrel`), then `X t` agrees almost surely with the constructed process at
+every `t ≤ T`, and `𝔼[f(X_T)] = 𝔼[f(X_0)] + ∫₀ᵀ (𝔼[f'(X_s)·β_s] + ½·𝔼[f''(X_s)·δ_s²]) ds`
+follows from `itoDrift_expectation_identity_adaptedItoProcess` by a.e. congruence — for `f` twice
+differentiable with continuous `f''` and bounded `f'`, `f''`. This is the conclusion of the
+discrete route `ItoDriftConditional.itoDrift_expectation_identity_adapted` without its
+adaptedness, path-continuity and third-derivative hypotheses, but with `hBcont`. -/
 theorem itoDrift_expectation_identity_adapted_of_adaptedItoProcess (hB : IsPreBrownianReal B μ)
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) {M : ℝ≥0 → Ω → ℝ}
     (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
@@ -276,5 +282,137 @@ theorem itoDrift_expectation_identity_adapted_of_adaptedItoProcess (hB : IsPreBr
       = f' (adaptedItoProcess T hBmeas φ c β s ω) * β s ω by rw [h]),
     integral_congr_ae ((hX s hs.2).mono fun ω h ↦ show f'' (X s ω) * (δ s ω * δ s ω)
       = f'' (adaptedItoProcess T hBmeas φ c β s ω) * (δ s ω * δ s ω) by rw [h])]
+
+/-- **The constructed Itô term, frozen after its horizon, is a version of the Itô process at
+every time.** `itoContinuousMod φ (t ∧ T) =ᵐ (φ●B)_t` for every `t`: before the horizon this is
+the modification property `itoContinuousMod_modification`; after it, the CLM process is frozen at
+its terminal value (`itoProcessCLM_eq_terminal_of_ge`, `itoProcessCLM_terminal_eq`). -/
+theorem itoContinuousMod_min_ae_eq_itoProcessCLM (hB : IsPreBrownianReal B μ)
+    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (t : ℝ≥0) :
+    itoContinuousMod T hBmeas φ (min t T) =ᵐ[μ] (itoProcessCLM hB T t hBmeas φ : Ω → ℝ) := by
+  rcases le_total t T with htT | hTt
+  · rw [min_eq_left htT]
+    exact itoContinuousMod_modification hB T hBmeas hBcont φ htT
+  · rw [min_eq_right hTt, itoProcessCLM_eq_terminal_of_ge hB hBmeas hTt φ,
+      ← itoProcessCLM_terminal_eq]
+    exact itoContinuousMod_modification hB T hBmeas hBcont φ le_rfl
+
+/-- **The integrated Itô–drift identity at every time of the horizon.** For the constructed
+process `X = adaptedItoProcess T hBmeas (processToLp δ) c β` and every `τ ≤ T`,
+`𝔼[f(X_τ)] = f c + ∫₀^τ (𝔼[f'(X_s)·β_s] + ½·𝔼[f''(X_s)·δ_s²]) ds`, under the hypotheses of
+`itoDrift_expectation_identity_adaptedItoProcess`. The horizon-`T` Itô term frozen at `τ` is a
+version of the horizon-`τ` Itô process (`ae_eq_itoProcessCLM_min`, the cross-horizon consistency
+of the Itô integral), so `itoDrift_expectation_identity_adapted_of_adaptedItoProcess` at horizon
+`τ` applies to it; before `τ` it is the constructed process. -/
+theorem itoDrift_expectation_identity_adaptedItoProcess_of_le (hB : IsPreBrownianReal B μ)
+    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
+    {β : ℝ≥0 → Ω → ℝ}
+    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
+    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
+    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
+    (c : ℝ) {f f' f'' : ℝ → ℝ}
+    (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
+    (hf''c : Continuous f'')
+    {C1 C2 : ℝ} (hg1 : ∀ x, |f' x| ≤ C1) (hg2 : ∀ x, |f'' x| ≤ C2) {τ : ℝ≥0} (hτ : τ ≤ T) :
+    ∫ ω, f (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)
+      c β τ ω) ∂μ
+      = f c + ∫ s in Set.Ioc (0 : ℝ≥0) τ,
+          ((∫ ω, f' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)
+              c β s ω) * β s ω ∂μ)
+            + (1 / 2) * (∫ ω, f'' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap
+              hδcont hδbdd) c β s ω) * (δ s ω * δ s ω) ∂μ))
+        ∂ItoIntegralL2.timeMeasure := by
+  set φ := processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd
+  -- the horizon-`T` Itô term, frozen at `τ`, is a version of the horizon-`τ` Itô process
+  have hMτ := ae_eq_itoProcessCLM_min hB hBmeas hδadap hδcont hδbdd
+    (M := fun t ↦ itoContinuousMod T hBmeas φ (min t T))
+    (itoContinuousMod_min_ae_eq_itoProcessCLM hBmeas hB hBcont φ) τ hτ
+  have h := itoDrift_expectation_identity_adapted_of_adaptedItoProcess hBmeas hδadap hδcont hδbdd
+    (T := τ) hB hBcont (M := fun t ↦ itoContinuousMod T hBmeas φ (min (min t τ) T)) hMτ
+    hβadap hβcont hβbdd
+    (X := fun t ω ↦
+      c + AdaptedDrift.driftPath β t ω + itoContinuousMod T hBmeas φ (min (min t τ) T) ω)
+    c (fun _ ↦ rfl) hf hf' hf''c hg1 hg2
+  -- up to `τ`, that process is the constructed one
+  have hX (s : ℝ≥0) (hs : s ≤ τ) (ω : Ω) :
+      c + AdaptedDrift.driftPath β s ω + itoContinuousMod T hBmeas φ (min (min s τ) T) ω
+        = adaptedItoProcess T hBmeas φ c β s ω := by
+    rw [min_eq_left hs, min_eq_left (hs.trans hτ)]
+    rfl
+  have h0 : ∀ᵐ ω ∂μ,
+      f (c + AdaptedDrift.driftPath β 0 ω + itoContinuousMod T hBmeas φ (min (min 0 τ) T) ω)
+        = f c :=
+    (adaptedItoProcess_zero hB T hBmeas hBcont φ c (b := β)).mono fun ω hω ↦ by
+      rw [hX 0 zero_le ω, hω]
+  simp only [hX τ le_rfl] at h
+  rw [h, integral_congr_ae h0, integral_const, probReal_univ, one_smul]
+  congr 1
+  refine setIntegral_congr_fun measurableSet_Ioc fun s hs ↦ ?_
+  simp only [hX s hs.2]
+
+/-- **The discrete route applies to the constructed process.** Under `hBcont`, the constructed
+Itô term `itoContinuousMod`, frozen after the horizon `T`, satisfies every hypothesis that
+`ItoDriftConditional.itoDrift_expectation_identity_adapted` (`ItoFormulaAdaptedDrift`, proved
+from the discrete Itô formula) places on its version `M` of `δ●B` and on
+`X = c + ∫₀• β ds + M`: it is `natFiltration`-adapted (`itoContinuousMod_isStronglyPredictable`),
+a.e. equal to the Itô process at every time (`itoContinuousMod_min_ae_eq_itoProcessCLM`), and
+almost surely path-continuous (`itoContinuousMod_continuousOn`). For `f` with `f'`, `f''`, `f'''`
+bounded, that theorem therefore gives
+`𝔼[f(X_T)] = f c + ∫₀ᵀ (𝔼[f'(X_s)·β_s] + ½·𝔼[f''(X_s)·δ_s²]) ds` for the constructed process
+`X = adaptedItoProcess T hBmeas (processToLp δ) c β`: the conclusion of
+`itoDrift_expectation_identity_adaptedItoProcess`, by an independent proof and under the stronger
+hypothesis on `f`. -/
+theorem itoDrift_expectation_identity_adapted_at_adaptedItoProcess (hB : IsPreBrownianReal B μ)
+    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
+    {β : ℝ≥0 → Ω → ℝ}
+    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
+    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
+    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
+    (c : ℝ) {f f' f'' f''' : ℝ → ℝ}
+    (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
+    (hf'' : ∀ x, HasDerivAt f'' (f''' x) x)
+    {C1 C2 C3 : ℝ} (hg1 : ∀ x, |f' x| ≤ C1) (hg2 : ∀ x, |f'' x| ≤ C2)
+    (hg3 : ∀ x, |f''' x| ≤ C3) :
+    ∫ ω, f (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)
+      c β T ω) ∂μ
+      = f c + ∫ s in Set.Ioc (0 : ℝ≥0) T,
+          ((∫ ω, f' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)
+              c β s ω) * β s ω ∂μ)
+            + (1 / 2) * (∫ ω, f'' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap
+              hδcont hδbdd) c β s ω) * (δ s ω * δ s ω) ∂μ))
+        ∂ItoIntegralL2.timeMeasure := by
+  set φ := processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd
+  -- the hypotheses of the discrete route, for `M t = itoContinuousMod φ (t ∧ T)`
+  have hMadap (t : ℝ≥0) :
+      StronglyMeasurable[natFiltration hBmeas t] (itoContinuousMod T hBmeas φ (min t T)) :=
+    ((itoContinuousMod_isStronglyPredictable hB T hBmeas hBcont φ).stronglyAdapted
+      (min t T)).mono ((natFiltration hBmeas).mono (min_le_left t T))
+  have hXcont : ∀ᵐ ω ∂μ, Continuous fun s ↦
+      c + AdaptedDrift.driftPath β s ω + itoContinuousMod T hBmeas φ (min s T) ω :=
+    (itoContinuousMod_continuousOn hB T hBmeas hBcont φ).mono fun ω hω ↦
+      (continuous_const.add (AdaptedDrift.continuous_driftPath hβcont hβbdd ω)).add
+        (hω.comp_continuous (continuous_id.min continuous_const)
+          fun s ↦ ⟨zero_le, min_le_right s T⟩)
+  have h := ItoDriftConditional.itoDrift_expectation_identity_adapted hB hBmeas hδadap hδcont
+    hδbdd (M := fun t ↦ itoContinuousMod T hBmeas φ (min t T)) hMadap
+    (itoContinuousMod_min_ae_eq_itoProcessCLM hBmeas hB hBcont φ) hβadap hβcont hβbdd
+    (X := fun t ω ↦ c + AdaptedDrift.driftPath β t ω + itoContinuousMod T hBmeas φ (min t T) ω)
+    c hXcont (fun _ ↦ rfl) hf hf' hf'' hg1 hg2 hg3
+  -- up to the horizon, that process is the constructed one
+  have hX (s : ℝ≥0) (hs : s ≤ T) (ω : Ω) :
+      c + AdaptedDrift.driftPath β s ω + itoContinuousMod T hBmeas φ (min s T) ω
+        = adaptedItoProcess T hBmeas φ c β s ω := by
+    rw [min_eq_left hs]
+    rfl
+  have h0 : ∀ᵐ ω ∂μ,
+      f (c + AdaptedDrift.driftPath β 0 ω + itoContinuousMod T hBmeas φ (min 0 T) ω) = f c :=
+    (adaptedItoProcess_zero hB T hBmeas hBcont φ c (b := β)).mono fun ω hω ↦ by
+      rw [hX 0 zero_le ω, hω]
+  simp only [hX T le_rfl] at h
+  rw [h, integral_congr_ae h0, integral_const, probReal_univ, one_smul]
+  congr 1
+  refine setIntegral_congr_fun measurableSet_Ioc fun s hs ↦ ?_
+  simp only [hX s hs.2]
 
 end MathFin

@@ -1,19 +1,20 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import Mathlib
+public import MathFin.FixedIncome.PeriodicCompounding
 
 /-!
 # Compound: utilization, affine borrow rate, cToken exchange-rate monotonicity
 
-Adapted from the Compound whitepaper (Compound Labs, "Compound: The Money
-Market Protocol", 2019), the Interest Rate Model section (utilization,
-affine borrow rate) and the cToken Contracts / accrual sections (exchange
-rate, reserve-factor accrual).
+Adapted from the Compound whitepaper (R. Leshner and G. Hayes, "Compound: The Money
+Market Protocol", v1.0, February 2019): §2.3 Interest Rate Model (utilization,
+affine borrow rate), §3.1 cToken Contracts (exchange rate) and §3.2.1 Market Dynamics
+(interest-rate index, reserve-factor accrual).
 
 ## Results
 
@@ -32,11 +33,19 @@ rate, reserve-factor accrual).
   accrual equations give this (`reservesAdded = interest · reserveFactor` with
   `reserveFactor ∈ [0,1]` and `interest ≥ 0`), but it is stated as a standalone
   hypothesis on the accrued amounts rather than re-derived from `reserveFactor`.
+* `borrowIndex_eq_mul_pow`, `borrowIndex_le_inv_zcb`, `tendsto_borrowIndex`: the interest-rate
+  index of §3.2.1, `Index_n = Index_{n−1} · (1 + r·t)` at a per-block rate `r` over periods of
+  length `t`, against the library's zero-coupon bond (`FixedIncome/PeriodicCompounding.lean`):
+  at a constant rate it is `Index_0 · (1 + r t)^n`, never above continuous compounding
+  `Index_0 / zcb r 0 (n t)`, and accruing a horizon `T` in `n` equal periods converges to
+  `Index_0 / zcb r 0 T`. Rates that change between periods are not covered.
 -/
 
 @[expose] public section
 
 namespace MathFin
+
+open Filter Topology
 
 namespace DeFi
 
@@ -95,6 +104,31 @@ theorem exchangeRate_mono
   unfold exchangeRate
   rw [div_le_div_iff_of_pos_right htotalSupply]
   linarith
+
+/-- **Compound interest-rate index** (whitepaper §3.2.1, Market Dynamics): each transaction
+compounds the index by the interest for the period, `Index_n = Index_{n−1} · (1 + r·t)`. At a
+constant per-block rate `r` and period length `t`, the index is `Index_0 · (1 + r t)^n`. -/
+theorem borrowIndex_eq_mul_pow (index : ℕ → ℝ) (r t : ℝ)
+    (hrec : ∀ n, index (n + 1) = index n * (1 + r * t)) (n : ℕ) :
+    index n = index 0 * (1 + r * t) ^ n :=
+  eq_mul_pow_of_succ hrec n
+
+/-- **Per-period accrual never exceeds continuous compounding at the same rate.** At a constant
+rate `r` with `r t ≥ −1` and a nonnegative initial index, after `n` periods of length `t` the
+index is at most `Index_0 / zcb r 0 (n t) = Index_0 · exp (r · n t)`. -/
+theorem borrowIndex_le_inv_zcb (index : ℕ → ℝ) {r t : ℝ} (h0 : 0 ≤ index 0) (hrt : -1 ≤ r * t)
+    (hrec : ∀ n, index (n + 1) = index n * (1 + r * t)) (n : ℕ) :
+    index n ≤ index 0 * (zcb r 0 (n * t))⁻¹ := by
+  rw [borrowIndex_eq_mul_pow index r t hrec n]
+  exact mul_le_mul_of_nonneg_left (one_add_mul_pow_le_inv_zcb hrt n) h0
+
+/-- **Accruing ever more often converges to continuous compounding.** Splitting a horizon `T`
+into `n` equal accrual periods at the constant rate `r`, the index `Index_0 · (1 + r (T/n))^n`
+tends to `Index_0 / zcb r 0 T = Index_0 · exp (r T)`. -/
+theorem tendsto_borrowIndex (index₀ r T : ℝ) :
+    Tendsto (fun n : ℕ ↦ index₀ * (1 + r * (T / n)) ^ n) atTop
+      (𝓝 (index₀ * (zcb r 0 T)⁻¹)) := by
+  simpa only [mul_div_assoc] using (tendsto_one_add_div_pow_inv_zcb r T).const_mul index₀
 
 end Compound
 

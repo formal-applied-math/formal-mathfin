@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Foundations.HoeffdingCovariance
 
 /-!
 # The Marshall–Olkin common-shock model
@@ -26,6 +27,10 @@ Section 7.2.2; Marshall and Olkin 1967). In Lean the clocks are `T 0`, `T 1`, `T
   survive together more often than independent names with the same margins would. With positive
   probability they default at the same instant, so the joint law has a singular component even
   though both margins are continuous.
+* **Default covariance** (`covariance_indicator_marshallOlkin`): for horizons `s, t ≥ 0` the
+  default indicators `𝟙{X₁ ≤ s}`, `𝟙{X₂ ≤ t}` have covariance
+  `exp(−(λ₁ + λ₃)s − (λ₂ + λ₃)t) (exp(λ₃ min(s, t)) − 1)`, by the indicator covariance
+  `covariance_indicator_one` of `Foundations/HoeffdingCovariance.lean`.
 * **First to default** (`marshallOlkin_firstToDefault_survival`,
   `marshallOlkin_firstToDefault_spread_lt`): `min(X₁, X₂) = min(T₁, T₂, T₃)` survives to `t` with
   probability `exp(−(λ₁ + λ₂ + λ₃) t)`. So the first-to-default intensity is `λ₁ + λ₂ + λ₃`. That
@@ -42,6 +47,7 @@ Section 7.2.2; Marshall and Olkin 1967). In Lean the clocks are `T 0`, `T 1`, `T
 * `marshallOlkinCopula`, `marshallOlkin_survival_eq_copula`.
 * `marshallOlkin_survival_gt_mul`: positive quadrant dependence.
 * `marshallOlkin_diagonal_pos`: the joint law charges the diagonal (a singular component).
+* `covariance_indicator_marshallOlkin`: the covariance of the two default indicators.
 * `marshallOlkin_firstToDefault_survival`, `marshallOlkin_firstToDefault_spread`,
   `marshallOlkin_single_name_spread_fst`, `marshallOlkin_single_name_spread_snd`,
   `marshallOlkin_firstToDefault_spread_lt`.
@@ -263,6 +269,65 @@ theorem marshallOlkin_diagonal_pos (hrate : ∀ i, 0 < rate i)
     exact ENNReal.toReal_pos (Finset.prod_ne_zero_iff.2 fun i _ ↦ hpos i)
       (ENNReal.prod_ne_top fun i _ ↦ measure_ne_top _ _)
   exact hS.trans_le (measureReal_mono hsub)
+
+/-- **Default covariance under a common shock**: for horizons `s, t ≥ 0`, the default indicators
+`𝟙{X₁ ≤ s}` and `𝟙{X₂ ≤ t}` have covariance
+`exp(−(λ₁ + λ₃)s − (λ₂ + λ₃)t) · (exp(λ₃ min(s, t)) − 1)`, positive when `λ₃ min(s, t) > 0`. The
+covariance of two indicators is `P(A ∩ B) − P(A)P(B)` (`covariance_indicator_one`,
+`Foundations/HoeffdingCovariance.lean`), unchanged under complementing both events
+(`measureReal_inter_sub_mul_compl`), so it is read off the joint survival function
+(`marshallOlkin_survival`) and the margins. -/
+theorem covariance_indicator_marshallOlkin (hrate : ∀ i, 0 < rate i)
+    (hT : ∀ i, HasLaw (T i) (expMeasure (rate i)) P) (hind : iIndepFun T P) {s t : ℝ}
+    (hs : 0 ≤ s) (ht : 0 ≤ t) :
+    cov[{ω | min (T 0 ω) (T 2 ω) ≤ s}.indicator 1, {ω | min (T 1 ω) (T 2 ω) ≤ t}.indicator 1; P] =
+      Real.exp (-((rate 0 + rate 2) * s) - (rate 1 + rate 2) * t) *
+        (Real.exp (rate 2 * min s t) - 1) := by
+  set Z : Ω → ℝ × ℝ := fun ω ↦ (min (T 0 ω) (T 2 ω), min (T 1 ω) (T 2 ω))
+  have hZ : AEMeasurable Z P := ((hT 0).aemeasurable.min (hT 2).aemeasurable).prodMk
+    ((hT 1).aemeasurable.min (hT 2).aemeasurable)
+  have := Measure.isProbabilityMeasure_map (μ := P) hZ
+  have hA : MeasurableSet (Prod.fst ⁻¹' Iic s : Set (ℝ × ℝ)) :=
+    measurableSet_Iic.preimage measurable_fst
+  have hB : MeasurableSet (Prod.snd ⁻¹' Iic t : Set (ℝ × ℝ)) :=
+    measurableSet_Iic.preimage measurable_snd
+  -- the covariance is computed on the joint law of `(X₁, X₂)`
+  have hcov : cov[{ω | min (T 0 ω) (T 2 ω) ≤ s}.indicator 1,
+      {ω | min (T 1 ω) (T 2 ω) ≤ t}.indicator 1; P] =
+      cov[(Prod.fst ⁻¹' Iic s).indicator 1, (Prod.snd ⁻¹' Iic t).indicator 1; P.map Z] :=
+    (covariance_map_fun (measurable_one.indicator hA).aestronglyMeasurable
+      (measurable_one.indicator hB).aestronglyMeasurable hZ).symm
+  have e₁ : Z ⁻¹' ((Prod.fst ⁻¹' Iic s)ᶜ ∩ (Prod.snd ⁻¹' Iic t)ᶜ) =
+      {ω | s < min (T 0 ω) (T 2 ω) ∧ t < min (T 1 ω) (T 2 ω)} := by
+    ext ω
+    simp [Z]
+  have e₂ : Z ⁻¹' (Prod.fst ⁻¹' Iic s)ᶜ = {ω | s < min (T 0 ω) (T 2 ω)} := by
+    ext ω
+    simp [Z]
+  have e₃ : Z ⁻¹' (Prod.snd ⁻¹' Iic t)ᶜ = {ω | t < min (T 1 ω) (T 2 ω)} := by
+    ext ω
+    simp [Z]
+  rw [hcov, covariance_indicator_one hA hB, ← measureReal_inter_sub_mul_compl hA hB,
+    map_measureReal_apply_of_aemeasurable hZ (hA.compl.inter hB.compl),
+    map_measureReal_apply_of_aemeasurable hZ hA.compl,
+    map_measureReal_apply_of_aemeasurable hZ hB.compl, e₁, e₂, e₃,
+    marshallOlkin_survival hrate hT hind hs ht,
+    measureReal_min_gt hrate hT hind (i := 0) (j := 2) (by decide),
+    measureReal_min_gt hrate hT hind (i := 1) (j := 2) (by decide),
+    expMeasure_real_Ioi (add_pos (hrate 0) (hrate 2)),
+    expMeasure_real_Ioi (add_pos (hrate 1) (hrate 2)), max_eq_left hs, max_eq_left ht]
+  have hmax : max s t = s + t - min s t := by linarith [min_add_max s t]
+  have h₁ : Real.exp (-(rate 0 * s) - rate 1 * t - rate 2 * max s t) =
+      Real.exp (-((rate 0 + rate 2) * s) - (rate 1 + rate 2) * t) *
+        Real.exp (rate 2 * min s t) := by
+    rw [← Real.exp_add, hmax]
+    congr 1
+    ring
+  have h₂ : Real.exp (-((rate 0 + rate 2) * s)) * Real.exp (-((rate 1 + rate 2) * t)) =
+      Real.exp (-((rate 0 + rate 2) * s) - (rate 1 + rate 2) * t) := by
+    rw [← Real.exp_add, sub_eq_add_neg]
+  rw [h₁, h₂]
+  ring
 
 /-! ### First to default under a common shock -/
 

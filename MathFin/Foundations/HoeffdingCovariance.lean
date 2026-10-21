@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Foundations.BivariateNormalCDF
 
 /-!
 # Hoeffding's covariance identity
@@ -44,6 +45,8 @@ inclusion–exclusion. The identity is stated for the law of `(X, Y)` on `ℝ²`
 ## Main results
 
 * `covariance_indicator_one`: `cov(𝟙_A, 𝟙_B) = P(A ∩ B) − P(A) P(B)`.
+* `integral_bivariateNormalCDF_sub_mul`: at the standard bivariate normal law with correlation
+  `r ∈ [−1, 1]`, `∫∫ (N₂(s, t; r) − Φ(s) Φ(t)) ds dt = r`.
 * `covariance_fst_snd_eq_integral`: Hoeffding's identity for a law on `ℝ²`.
 * `covariance_eq_integral_cdf`: Hoeffding's identity for random variables.
 * `integrable_cdf_sub_mul`: the Hoeffding integrand is integrable on `ℝ²`.
@@ -417,5 +420,24 @@ theorem correlation_le_correlation_of_cdf_le (hX : MemLp X 2 P) (hY : MemLp Y 2 
   exact covariance_le_covariance_of_cdf_le hX hY hX' hY' hlawX hlawY hF
 
 end RandomVariables
+
+/-! ### At the standard bivariate normal law -/
+
+/-- **Hoeffding's identity at the standard bivariate normal law**: for `r ∈ [−1, 1]`,
+`∫∫ (N₂(s, t; r) − Φ(s) Φ(t)) ds dt = r`. The covariance of the Cholesky pair is `r`
+(`covariance_fst_snd_bivariateNormalLaw`), its joint CDF is `N₂(·, ·; r)` and its margins are
+standard normal. -/
+theorem integral_bivariateNormalCDF_sub_mul {r : ℝ} (hr : r ^ 2 ≤ 1) :
+    ∫ p : ℝ × ℝ, (bivariateNormalCDF p.1 p.2 r - Phi p.1 * Phi p.2) = r := by
+  have h := covariance_fst_snd_eq_integral (μ := bivariateNormalLaw r)
+    (memLp_fst_bivariateNormalLaw r) (memLp_snd_bivariateNormalLaw r)
+  rw [covariance_fst_snd_bivariateNormalLaw] at h
+  refine Eq.trans ?_ h.symm
+  congr 1
+  funext p
+  rw [bivariateNormalCDF_eq_law, Set.Iic_prod_eq,
+    ← map_measureReal_apply measurable_fst measurableSet_Iic,
+    ← map_measureReal_apply measurable_snd measurableSet_Iic, map_fst_bivariateNormalLaw hr,
+    map_snd_bivariateNormalLaw, ← cdf_eq_real, ← cdf_eq_real, cdf_gaussianReal_zero_one]
 
 end MathFin

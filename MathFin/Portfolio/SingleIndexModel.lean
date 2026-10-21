@@ -1,21 +1,27 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import Mathlib
 public import MathFin.Portfolio.MarkowitzNAsset
+public import MathFin.Portfolio.CovariancePSD
+public import MathFin.Portfolio.CAPM
 
 /-!
 # Single-index covariance structure and its large-`N` limit
 
 Sharpe's single-index model writes each asset's return as `Rᵢ = βᵢ·R_M + εᵢ`, with idiosyncratic
 shocks `εᵢ` uncorrelated across assets and with the market. The implied covariance kernel is
-`Σ = ββ'σ_M² + D_ε` (`D_ε` diagonal). No return variables appear here, so the passage from the
-return model to this kernel is not formalized: we work directly with the kernel and
-`Portfolio/MarkowitzNAsset.lean`'s sum-form portfolio variance:
+`Σ = ββ'σ_M² + D_ε` (`D_ε` diagonal). The passage from the return model to this kernel is
+`covariance_singleIndex`: for square-integrable `R_M` and `εᵢ`, with the shocks uncorrelated with
+the market and with each other, `cov(Rᵢ, Rⱼ)` is the kernel with `D_ε(i) = Var[εᵢ]`, by
+bilinearity of covariance. With the self-dot identity of `Portfolio/CovariancePSD.lean` this gives
+the variance of the random portfolio return (`variance_singleIndex_portfolio`), and the loading
+`βᵢ` is the CAPM beta `cov(Rᵢ, R_M)/Var[R_M]` of `Portfolio/CAPM.lean` (`beta_singleIndex`).
+On the kernel itself, with `Portfolio/MarkowitzNAsset.lean`'s sum-form portfolio variance:
 
   `Var(Rp) = (w'β)² σ_M² + w'D_εw`,
 
@@ -32,6 +38,9 @@ The limit is stated for the idiosyncratic term alone; that `Var(Rp)` minus the s
   bounded by `M`, the idiosyncratic term is at most `M / n`.
 * `tendsto_idiosyncraticTerm_equalWeight_zero`: hence, for nonnegative variances bounded by `M`,
   it tends to `0` as `n → ∞` (idiosyncratic risk diversifies away under equal weighting).
+* `covariance_singleIndex`: the covariance of the return model is `singleIndexKernel`.
+* `variance_singleIndex_portfolio`: `Var[∑ wᵢRᵢ] = (∑ wᵢβᵢ)² Var[R_M] + ∑ wᵢ² Var[εᵢ]`.
+* `beta_singleIndex`: the CAPM beta of asset `i` is `βᵢ`.
 -/
 
 @[expose] public section
@@ -110,5 +119,68 @@ theorem tendsto_idiosyncraticTerm_equalWeight_zero
   have hhi (n : ℕ) : ∑ i ∈ t n, ((1 : ℝ) / n) ^ 2 * D n i ≤ M / n :=
     idiosyncraticTerm_equalWeight_le (t n) (D n) M (hM n) (hcard n)
   exact squeeze_zero hlo hhi (tendsto_const_div_atTop_nhds_zero_nat M)
+
+/-! ### From the return model to the kernel -/
+
+section ReturnModel
+
+open MeasureTheory ProbabilityTheory
+
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsFiniteMeasure P]
+  {RM : Ω → ℝ} {ε : ι → Ω → ℝ}
+
+/-- **The single-index kernel is the covariance of the return model.** Let
+`Rᵢ = βᵢ R_M + εᵢ` with square-integrable market return `R_M` and shocks `εᵢ`, the shocks
+uncorrelated with the market and with each other, and `Var[R_M] = σ_M²`. Then
+`cov(Rᵢ, Rⱼ) = βᵢβⱼσ_M² + 1[i = j]·Var[εᵢ]`: the kernel `singleIndexKernel` with the shock
+variances on the diagonal. Bilinearity of covariance (`covariance_add_left`,
+`covariance_smul_left`, …) and the zero cross-covariances. -/
+theorem covariance_singleIndex [DecidableEq ι] (hRM : MemLp RM 2 P)
+    (hε : ∀ i, MemLp (ε i) 2 P) (hRMε : ∀ i, cov[RM, ε i; P] = 0)
+    (hεε : ∀ i j, i ≠ j → cov[ε i, ε j; P] = 0) (hσM : Var[RM; P] = σM ^ 2) (i j : ι) :
+    cov[β i • RM + ε i, β j • RM + ε j; P] =
+      singleIndexKernel β σM (fun k ↦ Var[ε k; P]) i j := by
+  rw [covariance_add_left (hRM.const_smul _) (hε i) ((hRM.const_smul _).add (hε j)),
+    covariance_add_right (hRM.const_smul _) (hRM.const_smul _) (hε j),
+    covariance_add_right (hε i) (hRM.const_smul _) (hε j)]
+  simp only [covariance_smul_left, covariance_smul_right,
+    covariance_self hRM.aestronglyMeasurable.aemeasurable, hσM, hRMε,
+    covariance_comm (ε i) RM]
+  simp only [singleIndexKernel]
+  split_ifs with hij
+  · subst hij
+    rw [covariance_self (hε i).aestronglyMeasurable.aemeasurable]
+    ring
+  · rw [hεε i j hij]
+    ring
+
+/-- **Single-index portfolio variance from the return model.** Under the hypotheses of
+`covariance_singleIndex`, the variance of the portfolio return `∑ wᵢ Rᵢ` is
+`(∑ wᵢβᵢ)² σ_M² + ∑ wᵢ² Var[εᵢ]`. The self-dot identity
+`portfolioVarN_covariance_eq_variance` turns the variance into the quadratic form of the
+covariance kernel, which `covariance_singleIndex` identifies and
+`portfolioVarN_singleIndex_eq` evaluates. -/
+theorem variance_singleIndex_portfolio [DecidableEq ι] (hRM : MemLp RM 2 P)
+    (hε : ∀ i, MemLp (ε i) 2 P) (hRMε : ∀ i, cov[RM, ε i; P] = 0)
+    (hεε : ∀ i j, i ≠ j → cov[ε i, ε j; P] = 0) (hσM : Var[RM; P] = σM ^ 2) :
+    Var[∑ i ∈ s, w i • (β i • RM + ε i); P] =
+      (∑ i ∈ s, w i * β i) ^ 2 * σM ^ 2 + ∑ i ∈ s, w i ^ 2 * Var[ε i; P] := by
+  rw [← portfolioVarN_covariance_eq_variance s w (fun i ↦ β i • RM + ε i)
+    fun i _ ↦ (hRM.const_smul _).add (hε i)]
+  simp_rw [covariance_singleIndex β σM hRM hε hRMε hεε hσM]
+  exact portfolioVarN_singleIndex_eq s w β σM _
+
+/-- **The single-index loading is the CAPM beta.** Under the return model, the CAPM beta
+`cov(Rᵢ, R_M) / Var[R_M]` (`beta`, `Portfolio/CAPM.lean`) of asset `i` is its loading `βᵢ`,
+provided the market variance is nonzero. -/
+theorem beta_singleIndex (hRM : MemLp RM 2 P) (hε : ∀ i, MemLp (ε i) 2 P)
+    (hRMε : ∀ i, cov[RM, ε i; P] = 0) (hvar : Var[RM; P] ≠ 0) (i : ι) :
+    MathFin.beta cov[β i • RM + ε i, RM; P] Var[RM; P] = β i := by
+  unfold MathFin.beta
+  rw [covariance_add_left (hRM.const_smul _) (hε i) hRM, covariance_smul_left,
+    covariance_self hRM.aestronglyMeasurable.aemeasurable, covariance_comm (ε i) RM, hRMε,
+    add_zero, mul_div_assoc, div_self hvar, mul_one]
+
+end ReturnModel
 
 end MathFin

@@ -289,6 +289,86 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: trichotomy of the hit-set + reflection of below-barrier endpoints. Re-export from MathFin. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-binomial-price-path-measure",
+      "name": "Binomial Price as an Expectation over Coin-Flip Paths",
+      "domain": "mathematical_finance",
+      "description": "If the CRR risk-neutral up-probability crrUpProb u d r equals q ∈ [0, 1], then for every payoff g, horizon N and spot S₀, the backward-induction price binomialPrice u d r g N S₀ equals e^{−rN} times the expectation of g(S₀·∏_{i<N}(u if ω_i else d)) under coinFlipMeasure q: the Ionescu–Tulcea Markov-chain law on ℕ → Bool with Bernoulli(q) initial and transition laws (i.i.d. flips). The cylinder probabilities q^{#up}(1 − q)^{#down} are derived from the construction, not assumed.",
+      "code": {
+        "lean": "import MathFin.Binomial.PathMeasure\n\nopen MeasureTheory MathFin\nopen scoped NNReal\n\n/-- The `N`-step CRR backward-induction price is the discounted expectation of the payoff of\nthe spot path under the Ionescu–Tulcea law of i.i.d. `Bernoulli(q)` coin flips,\n`q = crrUpProb u d r`. Re-export of `MathFin.binomialPrice_eq_integral_coinFlipMeasure`. -/\ntheorem binomial_price_eq_path_expectation (u d r : ℝ) (g : ℝ → ℝ) {q : ℝ≥0} (hq : q ≤ 1)\n    (hqcrr : crrUpProb u d r = q) (N : ℕ) (S₀ : ℝ) :\n    binomialPrice u d r g N S₀\n      = Real.exp (-(r * N)) * ∫ ω, g (spotPath S₀ u d N ω) ∂coinFlipMeasure q hq :=\n  binomialPrice_eq_integral_coinFlipMeasure u d r g hq hqcrr N S₀\n"
+      },
+      "metadata": {
+        "chapter": 1,
+        "reference": "J. C. Cox, S. A. Ross and M. Rubinstein, Option pricing: a simplified approach, Journal of Financial Economics 7 (1979) 229–263; S. E. Shreve, Stochastic Calculus for Finance I, Springer (2004), §2.4",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.binomialPrice_eq_integral_coinFlipMeasure (MathFin/Binomial/PathMeasure.lean). coinFlipMeasure q is markovPathMeasure (Bernoulli q) (fun _ ↦ Bernoulli q) (MathFin/Foundations/MarkovPathMeasure.lean); the probability of the first N flips being x is ∏ Bernoulli(q)(x_i), from markovPathMeasure_cylinder; the integral of a function of N flips is the finite sum over the 2^N sequences (integral_comp_flips), and the backward recursion unrolls into the same sum (binomialPrice_eq_sum). SCOPE: European payoffs of the terminal spot; American prices and path-dependent payoffs are not covered."
+      }
+    },
+    {
+      "id": "mf-binomial-law-of-one-price",
+      "name": "Law of One Price in the One-Period Binomial Model",
+      "domain": "mathematical_finance",
+      "description": "In the one-period binomial model with S₀ > 0 and 0 < d < e^r < u, the portfolio replicating a claim (V_u, V_d) is unique, and every portfolio (Δ, B) paying V_u in the up state and V_d in the down state costs ΔS₀ + B = e^{−r}(qV_u + (1−q)V_d), q = (e^r − d)/(u − d). This price equals the two-state pricing-kernel value whose state prices e^{−r}·(−z_d, z_u)/(z_u − z_d) are the discounted backward-FTAP martingale weights of the excess returns z_u = u − e^r, z_d = d − e^r. One period, two states.",
+      "code": {
+        "lean": "import MathFin.Binomial.BinomialFromFTAP\n\nopen MathFin\n\n/-- **Law of one price, one-period binomial.** Re-export of\n`MathFin.binomial_replicatingPortfolio_unique`, `binomial_replication_cost_eq_price` and\n`binomial_replication_cost_eq_pricingKernel`. -/\ntheorem binomial_law_of_one_price {S₀ u d r V_u V_d : ℝ} (hS₀ : 0 < S₀)\n    (h : BinomialNoArb u d r) :\n    (∃! p : ℝ × ℝ, p.1 * (S₀ * u) + p.2 * Real.exp r = V_u ∧\n        p.1 * (S₀ * d) + p.2 * Real.exp r = V_d) ∧\n    ∀ Δ B : ℝ, Δ * (S₀ * u) + B * Real.exp r = V_u → Δ * (S₀ * d) + B * Real.exp r = V_d →\n      Δ * S₀ + B = binomialOptionPriceOnePeriod u d r V_u V_d ∧\n        Δ * S₀ + B = pricingKernel_two_state (u - Real.exp r) (d - Real.exp r) r V_u V_d :=\n  ⟨binomial_replicatingPortfolio_unique hS₀ h, fun _ _ h_up h_down ↦\n    ⟨binomial_replication_cost_eq_price hS₀ h h_up h_down,\n      binomial_replication_cost_eq_pricingKernel hS₀ h h_up h_down⟩⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "S. E. Shreve, Stochastic Calculus for Finance I: The Binomial Asset Pricing Model, Springer (2004), §1.1; J. M. Harrison and S. R. Pliska, Martingales and stochastic integrals in the theory of continuous trading, Stoch. Proc. Appl. 11 (1981) 215–260",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.binomial_replicatingPortfolio_unique and binomial_replication_cost_eq_price (MathFin/Binomial/ReplicatingUniqueness.lean) and binomial_replication_cost_eq_pricingKernel (MathFin/Binomial/BinomialFromFTAP.lean). Uniqueness is the nonzero determinant S₀(u − d)e^r; the kernel identity rests on binomial_q_eq_emm and binomial_emmWeightDown_eq (the FTAPTwoState weights are q and 1 − q) and pricingKernel_two_state (Bridges/PricingKernel). SCOPE: one period, two states; the multi-period tree is not covered here."
+      }
+    },
+    {
+      "id": "mf-binomial-american-call-eq-european",
+      "name": "American Call Equals European Call in the Binomial Tree (No Dividends)",
+      "domain": "mathematical_finance",
+      "description": "In the n-step binomial tree with 0 < d < e^r < u, a nonnegative per-step rate r ≥ 0 and strike K ≥ 0, the American call price on a non-dividend-paying stock (backward induction with the Bellman maximum of exercise value and continuation value) equals the European call price at every step n and spot S: early exercise never adds value. The one-period continuation dominates the intrinsic value by Jensen's inequality for (·)⁺, the martingale identity qu + (1−q)d = e^r and e^{−r}K ≤ K; induction on n lifts it.",
+      "code": {
+        "lean": "import MathFin.Binomial.MertonAmericanCallTree\n\nopen MathFin\n\n/-- **American call = European call in the binomial tree.** Re-export of\n`MathFin.americanCallPrice_eq_binomialPrice`. -/\ntheorem binomial_american_call_eq_european {u d r K : ℝ} (h : BinomialNoArb u d r)\n    (hr : 0 ≤ r) (hK : 0 ≤ K) (n : ℕ) (S : ℝ) :\n    americanPrice u d r (fun S' ↦ max (S' - K) 0) n S =\n      binomialPrice u d r (fun S' ↦ max (S' - K) 0) n S :=\n  americanCallPrice_eq_binomialPrice h hr hK n S\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "S. E. Shreve, Stochastic Calculus for Finance I: The Binomial Asset Pricing Model, Springer (2004), §4.5; R. C. Merton, Theory of Rational Option Pricing, Bell J. Econ. Manag. Sci. 4(1) (1973) 141–183",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.americanCallPrice_eq_binomialPrice (MathFin/Binomial/MertonAmericanCallTree.lean): americanCallPrice_le_binomialPrice by induction from call_one_period_continuation_dominates_intrinsic, and binomialPrice_le_americanPrice (Binomial/American). SCOPE: the discrete tree, no dividends, r ≥ 0, K ≥ 0. The continuous-time American = European statement is not part of this entry (mf-merton-1973-no-early-exercise proves the strict dominance bsV > S₀ − K only)."
+      }
+    },
+    {
+      "id": "mf-crr-american-call-tendsto-bs",
+      "name": "CRR American Call Converges to the Black–Scholes Call",
+      "domain": "mathematical_finance",
+      "description": "On the Cox–Ross–Rubinstein tree (u = e^{σ√(T/n)}, d = e^{−σ√(T/n)}, per-step rate rT/n) with r ≥ 0, σ, T, S₀, K > 0 and no-arbitrage at every step n ≥ 1, the n-step American call price on a non-dividend-paying stock converges as n → ∞ to the Black–Scholes European call price S₀Φ(d₁) − Ke^{−rT}Φ(d₂). The no-arbitrage hypothesis holds whenever |r|√T < σ (binomialNoArb_crr). A statement about the tree prices: a continuous-time American call value is not defined or identified here.",
+      "code": {
+        "lean": "import MathFin.Binomial.MertonAmericanCallTree\n\nopen MathFin Filter\nopen scoped Topology\n\n/-- **The CRR American call converges to the Black–Scholes call.** Re-export of\n`MathFin.crr_americanCall_tendsto_bs`. -/\ntheorem crr_american_call_tendsto_black_scholes {r σ T S₀ K : ℝ} (hr : 0 ≤ r) (hσ : 0 < σ)\n    (hT : 0 < T) (hS₀ : 0 < S₀) (hK : 0 < K)\n    (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :\n    Tendsto (fun n : ℕ ↦ americanPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)\n        (fun x ↦ max (x - K) 0) n S₀) atTop\n      (𝓝 (S₀ * Phi (bsd1 S₀ K r σ T) - K * Real.exp (-(r * T)) * Phi (bsd2 S₀ K r σ T))) :=\n  crr_americanCall_tendsto_bs hr hσ hT hS₀ hK hna\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "J. C. Cox, S. A. Ross and M. Rubinstein, Option pricing: a simplified approach, J. Financial Econ. 7 (1979) 229–263",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.crr_americanCall_tendsto_bs (MathFin/Binomial/MertonAmericanCallTree.lean): for n ≥ 1 the American and European CRR prices agree (americanCallPrice_eq_binomialPrice, the per-step rate rT/n being nonnegative), and the European prices converge to the closed form (binomialPrice_call_tendsto_bs_closed, Binomial/CRRClosedForm). SCOPE: convergence of tree prices; no continuous-time optimal-stopping value is involved."
+      }
+    },
+    {
+      "id": "mf-crr-log-return-moments-limit",
+      "name": "Mean and Variance of the CRR Log-Return Law Converge to the Black–Scholes Values",
+      "domain": "mathematical_finance",
+      "description": "Let ν_n be the Cox–Ross–Rubinstein one-step risk-neutral log-return law (mass p_n at σ√(T/n) and 1 − p_n at −σ√(T/n)) and ν_n^{*n} its n-fold convolution, the law of the n-step log-return. For σ, T > 0, as n → ∞ the mean of ν_n^{*n} converges to (r − σ²/2)T and its variance to σ²T, the mean and variance of the Black–Scholes limit law N((r − σ²/2)T, σ²T). This complements the weak convergence of the same laws (mf-crr-gaussian-limit), which does not by itself give convergence of moments. For a boundedly supported law the k-fold convolution has k times its mean and variance; the CRR drift and variance limits finish it.",
+      "code": {
+        "lean": "import MathFin.Binomial.CRRDiscreteIto\n\nopen MathFin MeasureTheory ProbabilityTheory Filter\nopen scoped Topology\n\n/-- **Mean and variance of the `n`-step CRR log-return law converge to those of the\nBlack–Scholes limit.** Re-export of `MathFin.crrRowLaw_moments_tendsto`. -/\ntheorem crr_log_return_moments_limit {r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Tendsto (fun n : ℕ ↦ ∫ x, x ∂(convPow (crrStepMeasure r σ T n) n)) atTop\n        (𝓝 (∫ x, x ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) ∧\n      Tendsto (fun n : ℕ ↦ variance id (convPow (crrStepMeasure r σ T n) n)) atTop\n        (𝓝 (variance id (gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) :=\n  crrRowLaw_moments_tendsto hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "J. C. Cox, S. A. Ross and M. Rubinstein, Option pricing: a simplified approach, J. Financial Econ. 7 (1979) 229–263",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.crrRowLaw_moments_tendsto (MathFin/Binomial/CRRDiscreteIto.lean). General lemmas there: bounded support propagates through convolution powers (ae_abs_le_convPow), and convPow ν k has mean k·E_ν[X] and variance k·Var_ν(X) (integral_id_convPow, variance_convPow, via Mathlib's integral_conv and variance_eq_sub). The CRR step has mean (2p_n − 1)σ√(T/n) and variance 4p_n(1 − p_n)σ²T/n; the limits are crr_drift_limit_n and crr_variance_limit. No no-arbitrage hypothesis: p_n → 1/2, so the step law is a probability measure for large n. SCOPE: first two moments; higher moments and rates are not covered."
+      }
     }
   ]
 }

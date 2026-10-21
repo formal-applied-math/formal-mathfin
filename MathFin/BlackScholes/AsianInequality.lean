@@ -6,6 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.BlackScholes.AsianGeometricN
+public import MathFin.BlackScholes.PDE
 
 /-!
 # Geometric vs arithmetic Asian options
@@ -22,8 +24,11 @@ Since `x ↦ max(x − K, 0)` is monotone non-decreasing:
 
   `max(geomMean − K, 0) ≤ max(arithMean − K, 0)`.
 
-Integrating over the pricing measure preserves this pointwise inequality, so
-the geometric Asian price is bounded above by the arithmetic Asian price.
+Integrating over the pricing measure preserves this pointwise inequality. In the
+Black–Scholes model with a Brownian driver the geometric Asian price has a closed
+form, the Black–Scholes call `bsV` at an effective spot and volatility
+(`geomAsianN_call_price`, `BlackScholes/AsianGeometricN.lean`), so the arithmetic Asian
+call, which has no closed form, is bounded below by that `bsV` value.
 
 Results:
 
@@ -32,8 +37,11 @@ Results:
   `rpow` to `sqrt`.
 * `geom_mean_le_arith_mean_n`: weighted AM-GM specialized to equal weights
   `1/n` (Mathlib's `Real.geom_mean_le_arith_mean_weighted`).
-* `asian_payoff_geom_le_arith_two`: two-time-point geometric Asian payoff is
-  bounded above by the arithmetic Asian payoff.
+* `asian_payoff_geom_le_arith_two`, `asian_payoff_geom_le_arith_n`: the geometric
+  Asian payoff is bounded above by the arithmetic Asian payoff (two and `n` dates).
+* `geomAsianN_bsV_le_arith`: the price-level bound — the closed-form geometric-Asian
+  price `bsV K r σ_G Ŝ₀ T` is at most the discounted expected arithmetic-Asian payoff
+  of the Black–Scholes GBM sampled at the same dates.
 -/
 
 @[expose] public section
@@ -105,5 +113,65 @@ lemma asian_payoff_geom_le_arith_n {n : ℕ} (S : Fin n → ℝ)
   have h_div : (∏ i, S i ^ ((n : ℝ)⁻¹)) ≤ (∑ i, S i) / n := by
     rw [le_div_iff₀ hn_pos, mul_comm]; exact h
   exact max_le_max (by linarith) le_rfl
+
+/-! ### The price-level bound in the Black–Scholes model -/
+
+section PriceBound
+
+open MeasureTheory ProbabilityTheory
+open scoped NNReal
+
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+  {B : ℝ≥0 → Ω → ℝ}
+
+/-- The arithmetic-average Asian call payoff of a Black–Scholes GBM sampled at dates `τ` is
+integrable: it is the positive part of a finite sum of lognormals minus a constant. -/
+lemma integrable_arithAsian_payoff (hB : IsPreBrownianReal B μ) {n : ℕ} (τ : Fin n → ℝ≥0)
+    (S₀ K r σ : ℝ) :
+    Integrable (fun ω ↦ max ((∑ i, S₀ * Real.exp ((r - σ ^ 2 / 2) * (τ i : ℝ) + σ * B (τ i) ω))
+      / n - K) 0) μ := by
+  have hS (i : Fin n) : Integrable
+      (fun ω ↦ S₀ * Real.exp ((r - σ ^ 2 / 2) * (τ i : ℝ) + σ * B (τ i) ω)) μ := by
+    have h : Integrable (fun ω ↦ Real.exp (σ * B (τ i) ω)) μ := by
+      rw [show (fun ω ↦ Real.exp (σ * B (τ i) ω)) = (fun x ↦ Real.exp (σ * x)) ∘ B (τ i)
+        from rfl]
+      refine Integrable.comp_aemeasurable ?_ (hB.aemeasurable _)
+      rw [(hB.hasLaw_eval (τ i)).map_eq]
+      exact integrable_exp_mul_gaussianReal σ
+    refine (h.const_mul (S₀ * Real.exp ((r - σ ^ 2 / 2) * (τ i : ℝ)))).congr
+      (ae_of_all _ fun ω ↦ ?_)
+    simp only [Real.exp_add]
+    ring
+  exact (((integrable_finsetSum _ fun i _ ↦ hS i).div_const _).sub'
+    (integrable_const K)).pos_part
+
+/-- **The geometric-Asian closed form bounds the arithmetic Asian call from below.** For a
+Black–Scholes GBM `S_u = S₀·exp((r − σ²/2)u + σB_u)` sampled at dates `τ : Fin n → ℝ≥0`
+(all `≤ T`, non-degenerate log-driver variance), the Black–Scholes call at the geometric
+average's effective spot `Ŝ₀` and volatility `σ_G` — which is the geometric-Asian price,
+`geomAsianN_call_price` — is at most the discounted expected arithmetic-Asian call payoff
+`e^{−rT}·𝔼[max((1/n)∑ᵢ S_{τᵢ} − K, 0)]`. The proof integrates the pointwise AM–GM payoff
+bound `asian_payoff_geom_le_arith_n`. -/
+theorem geomAsianN_bsV_le_arith (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+    {n : ℕ} (hn : 0 < n) (τ : Fin n → ℝ≥0) (hτT : ∀ i, τ i ≤ T)
+    (S₀ K r σ Tmat : ℝ) (hS₀ : 0 < S₀) (hK : 0 < K) (hσ : 0 < σ) (hTmat : 0 < Tmat)
+    (hV : 0 < geomAsianVar τ) :
+    bsV K r (geomAsianEffVol σ Tmat τ) (geomAsianEffSpot S₀ r σ Tmat τ) Tmat ≤
+      ∫ ω, Real.exp (-r * Tmat) *
+        max ((∑ i, S₀ * Real.exp ((r - σ ^ 2 / 2) * (τ i : ℝ) + σ * B (τ i) ω)) / n - K) 0
+        ∂μ := by
+  calc bsV K r (geomAsianEffVol σ Tmat τ) (geomAsianEffSpot S₀ r σ Tmat τ) Tmat
+      = ∫ ω, Real.exp (-r * Tmat) *
+          max ((∏ i, (S₀ * Real.exp ((r - σ ^ 2 / 2) * (τ i : ℝ) + σ * B (τ i) ω))
+            ^ ((n : ℝ)⁻¹)) - K) 0 ∂μ := by
+        rw [geomAsianN_call_price hB T hn τ hτT S₀ K r σ Tmat hS₀ hK hσ hTmat hV, bsV,
+          neg_mul]
+    _ ≤ _ := integral_mono_of_nonneg
+        (ae_of_all _ fun ω ↦ mul_nonneg (Real.exp_pos _).le (le_max_right _ _))
+        ((integrable_arithAsian_payoff hB τ S₀ K r σ).const_mul _)
+        (ae_of_all _ fun ω ↦ mul_le_mul_of_nonneg_left
+          (asian_payoff_geom_le_arith_n _ (fun i ↦ by positivity) hn K) (Real.exp_pos _).le)
+
+end PriceBound
 
 end MathFin

@@ -13,30 +13,30 @@ public import MathFin.BlackScholes.Digital
 public import MathFin.BlackScholes.PowerCall
 public import MathFin.BlackScholes.StockNumeraire
 public import MathFin.BlackScholes.Dividends
+public import MathFin.BlackScholes.DividendsGreeks
 public import MathFin.FixedIncome.KMVMertonStructural
 
 /-!
 # Pricing entry points from a pre-Brownian motion (phase 31)
 
-This file demonstrates that the full BS pricing pipeline (call, put,
-put-call parity, Bachelier call) is derivable from a *single* primitive:
-the existence of a pre-Brownian motion `W : ℝ≥0 → Ω → ℝ` (`IsPreBrownianReal W
-Q` from the `BrownianMotion` package).
+This file restates the Black–Scholes-family pricing formulas that are stated under the
+marginal hypothesis `BSCallHyp` or `BachelierHyp` (call, put, put-call parity, the
+Bachelier call, digitals, the power call, the call and put with a dividend yield, the
+stock-numeraire exercise probability, KMV–Merton) with that hypothesis discharged by a
+pre-Brownian motion `W : ℝ≥0 → Ω → ℝ` (`IsPreBrownianReal W Q` from the `BrownianMotion`
+package).
 
-Each composite corollary is a *one-line composition*:
-
-  `existing pricing formula ∘ BSCallHyp.of_isPreBrownian`,
-
-with the scaled `Z := W T.toNNReal / √T` discharging the marginal-Gaussian
-hypothesis. The proofs are zero-line.
+Each corollary composes an existing pricing formula with `BSCallHyp.of_isPreBrownian` (or
+`BachelierHyp.of_isPreBrownian`): the scaled `Z := W T.toNNReal / √T` discharges the
+marginal-Gaussian hypothesis. All but the dividend put are term-mode one-liners; the dividend
+put also folds the discount `e^{−rT} = e^{−qT}·e^{−(r−q)T}` into the closed form `bsPDiv`.
 
 ## Why this matters
 
-The pre-existing BS / Bachelier pricing theorems take the marginal `Z ~
-N(0, 1)` as hypothesis. The Bridge A scaling lemma
-(`scaled_isPreBrownian_eval_law`) shows this marginal is *constructible
-from any pre-Brownian motion*, so the entire pricing pipeline now has a
-single foundational entry point: "supply a Brownian motion."
+The pricing theorems take the marginal `Z ~ N(0, 1)` as a hypothesis. The scaling lemma
+(`scaled_isPreBrownian_eval_law`) shows that this marginal comes from any pre-Brownian motion,
+so each formula listed above holds for the terminal value of an actual Brownian model. Only
+the time-`T` marginal is used: nothing here concerns the price process before `T`.
 
 ## Results
 
@@ -44,6 +44,9 @@ single foundational entry point: "supply a Brownian motion."
 * `bs_put_formula_via_brownian`: BS put price formula from BM.
 * `bs_put_call_parity_via_brownian`: put-call parity from BM.
 * `bachelier_call_formula_via_brownian`: Bachelier call price formula from BM.
+* `bs_dividends_put_formula_via_brownian`: the Black–Scholes–Merton put with a continuous
+  dividend yield `q`, as the closed form `bsPDiv`, from BM. Consumed by
+  `Bridges/AmericanPutEuropeanBound`, which bounds the American put value below by it.
 -/
 
 @[expose] public section
@@ -169,6 +172,31 @@ theorem bs_dividends_call_formula_via_brownian
         - K * Real.exp (-(r * T)) * Phi (bsd2 S_0 K (r - q) σ T) :=
   bs_dividends_call_formula
     (BSCallHyp.of_isPreBrownian (r := r - q) Q W hW hS_0 hK hσ hT)
+
+/-- **Black–Scholes–Merton put with a continuous dividend yield, from a pre-Brownian
+motion.** With the stock drifting at `r − q` under `Q` and discounting at `r`, the discounted
+expected put payoff is the closed form
+
+  `bsPDiv K r q σ S_0 T = e^{−qT}·(K·e^{−(r−q)T}·Φ(−d₂) − S_0·Φ(−d₁))`,
+
+`d₁, d₂` taken at rate `r − q`. It is `bs_put_formula` at rate `r − q`, multiplied by
+`e^{−qT}`: `e^{−rT} = e^{−qT}·e^{−(r−q)T}`. -/
+theorem bs_dividends_put_formula_via_brownian
+    {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    (Q : Measure Ω) [IsProbabilityMeasure Q]
+    (W : ℝ≥0 → Ω → ℝ) (hW : IsPreBrownianReal W Q)
+    {S_0 K r q σ T : ℝ}
+    (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
+    ∫ ω, Real.exp (-r * T) *
+        max (K - bsTerminal S_0 (r - q) σ T (W T.toNNReal ω / Real.sqrt T)) 0 ∂Q
+      = bsPDiv K r q σ S_0 T := by
+  rw [bsPDiv, bsP, ← neg_mul (r - q),
+    ← bs_put_formula (BSCallHyp.of_isPreBrownian (r := r - q) Q W hW hS_0 hK hσ hT),
+    ← integral_const_mul]
+  refine integral_congr_ae (ae_of_all _ fun ω ↦ ?_)
+  simp only [← mul_assoc, ← Real.exp_add]
+  congr 2
+  ring
 
 /-- **Stock-numeraire exercise probability from a pre-Brownian motion**. -/
 theorem stockNumeraire_exercise_probability_via_brownian

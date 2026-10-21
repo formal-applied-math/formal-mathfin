@@ -1061,7 +1061,7 @@
     {
       "id": "qrm-creditmetrics-gaussian-threshold-row-stochastic",
       "name": "CreditMetrics: Gaussian Threshold Migration Gives a Transition Matrix",
-      "description": "For row-wise thresholds −∞ = z i 0 ≤ … ≤ z i m = +∞ in EReal, the matrix of standard-normal bucket probabilities N(0,1)(z i j < Z ≤ z i (j+1)) is row-stochastic (the general threshold theorem, which holds for any latent probability law, at N(0,1)). Threshold calibration to a target matrix is not included.",
+      "description": "For row-wise thresholds −∞ = z i 0 ≤ … ≤ z i m = +∞ in EReal, the matrix of standard-normal bucket probabilities N(0,1)(z i j < Z ≤ z i (j+1)) is row-stochastic (the general threshold theorem, which holds for any latent probability law, at N(0,1)). Threshold calibration to a target matrix is the separate entry mf-creditmetrics-threshold-calibration.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CreditMetrics\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology Matrix\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem gaussianThresholdMatrix_mem_rowStochastic_thm {m : ℕ} {z : Fin m → Fin (m + 1) → EReal} (hz : ∀ i, Monotone (z i)) (h0 : ∀ i, z i 0 = ⊥) (hm : ∀ i, z i (Fin.last m) = ⊤) :\n    thresholdMatrix (gaussianReal 0 1) z ∈ rowStochastic ℝ (Fin m) :=\n  MathFin.thresholdMatrix_mem_rowStochastic (gaussianReal 0 1) hz h0 hm\n\n"
@@ -1071,7 +1071,7 @@
         "reference": "CreditMetrics Technical Document (J.P. Morgan 1997), ch. 6",
         "difficulty": "basic",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof that the threshold buckets partition ℝ, so bucket probabilities under any probability law sum to one. The N(0,1) case is thresholdMatrix_mem_rowStochastic at gaussianReal 0 1. Does not formalize calibration z = Φ⁻¹(cumulative row sums) or correlated multi-obligor migration. Lives in MathFin/RiskMeasures/CreditMetrics.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof that the threshold buckets partition ℝ, so bucket probabilities under any probability law sum to one. The N(0,1) case is thresholdMatrix_mem_rowStochastic at gaussianReal 0 1. The converse, calibration z = Φ⁻¹(cumulative row sums) reproducing a given row-stochastic matrix, is thresholdMatrix_gaussianThresholds (mf-creditmetrics-threshold-calibration). The default covariance of two obligors with bivariate normal returns is covariance_indicator_default_gaussianThresholds (mf-creditmetrics-default-covariance). Joint migration of several obligors to buckets other than Default is not formalized. Lives in MathFin/RiskMeasures/CreditMetrics.lean. Axioms-clean."
       }
     }
   ]

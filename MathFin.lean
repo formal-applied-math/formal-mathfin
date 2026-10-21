@@ -325,7 +325,7 @@ import MathFin.Foundations.EquivMeasure
 -- Phase 42: Multi-state FTAP backward (hypothesis-form, forward direction proved)
 import MathFin.Foundations.FTAPMultiState
 import MathFin.Foundations.FTAPDiscrete
--- General-Ω one-period FTAP (Föllmer–Schied 1.55 / one-period DMW, scalar)
+-- General-Ω one-period FTAP (Föllmer–Schied §1.2 / one-period DMW, scalar)
 import MathFin.Foundations.FTAPOnePeriod
 -- General-Ω one-period FTAP, d assets (Esscher minimal-divergence EMM, full — finite-dim market)
 import MathFin.Foundations.FTAPOnePeriodVector
@@ -757,3 +757,23 @@ import MathFin.Commodities.FisherSraffaOwnRate
 import MathFin.Commodities.TheoryOfStorage
 -- AR(1) <-> Ornstein-Uhlenbeck parameter inversion for commodity calibration
 import MathFin.Commodities.AR1OUCalibration
+import MathFin.Binomial.PathMeasure
+import MathFin.BlackScholes.JumpDiffusionThinning
+import MathFin.Bridges.ABCDBlack76
+import MathFin.Bridges.AmericanPutEuropeanBound
+import MathFin.Bridges.BellmanDoobDecomposition
+import MathFin.Bridges.ConstantProductLPLognormal
+import MathFin.Bridges.LiquidationAsStructuralDefault
+import MathFin.Bridges.OUHermiteVasicek
+import MathFin.Bridges.UniswapV3CoveredCallPrice
+import MathFin.Execution.GlostenMilgromCondExp
+import MathFin.FixedIncome.AffineTermStructurePDE
+import MathFin.FixedIncome.PeriodicCompounding
+import MathFin.FixedIncome.VasicekYieldNelsonSiegel
+import MathFin.Foundations.GaussianPairLinearLaw
+import MathFin.Foundations.GaussianPartialMoments
+import MathFin.Foundations.WienerIntegralExpMoment
+import MathFin.Foundations.WienerIntegralGirsanov
+import MathFin.RiskMeasures.CreditRiskPlus
+import MathFin.RiskMeasures.OneFactorCopula
+import MathFin.Bridges.LSVPosteriorConditionalExpectation

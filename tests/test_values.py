@@ -307,7 +307,7 @@ def test_values_review_is_current() -> None:
     )
     reviewed_modules = [int(m.group(1)) for m in REVIEW_MODULES_RE.finditer(text)]
     if reviewed_modules:
-        modules = sum(1 for _ in Path("MathFin").rglob("*.lean"))
+        modules = sum(1 for p in Path("MathFin").rglob("*.lean") if not p.name.startswith("."))
         newest_modules = max(reviewed_modules)
         assert modules - newest_modules <= REVIEW_SLACK_MODULES, (
             f"MathFin/ has {modules} modules but the latest recorded values review covered "

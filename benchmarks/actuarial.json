@@ -136,6 +136,22 @@
           "refined": "signature-bound def arguments + docstrings (docBlame); unused hσ_eq hypothesis and unused Insurance import removed; per-principle lemmas extracted, bundle derived from them"
         }
       }
+    },
+    {
+      "id": "mf-life-annuity-due-constant-force",
+      "name": "Life Annuity-Due Under a Constant Force of Mortality",
+      "domain": "mathematical_finance",
+      "description": "With flat-rate discount factors B(0, k) = e^{−rk} (zero-coupon bond prices) and survival probabilities S(k) = exp(−∫₀ᵏ μ) for a constant force of mortality μ ≡ m, the n-payment life annuity-due Σ_{k<n} B(0, k)·S(k) equals (1 − vⁿ)/(1 − v) with v = e^{−(r+m)}, provided v ≠ 1: a constant force of mortality acts as an addition to the interest rate. The life annuity-due is defined as this sum; its identification with the expected present value of payments to a random lifetime is not proved.",
+      "code": {
+        "lean": "import MathFin.Actuarial.Insurance\n\nopen MathFin\n\n/-- Under a constant force of mortality `m`, the life annuity-due is the annuity-certain at the\ndiscount factor `e^{−(r + m)}`. -/\ntheorem life_annuity_due_constant_force_thm {r m : ℝ} (n : ℕ)\n    (hv : Real.exp (-(r + m)) ≠ 1) :\n    lifeAnnuityDue r (fun _ ↦ m) n =\n      (1 - Real.exp (-(r + m)) ^ n) / (1 - Real.exp (-(r + m))) :=\n  lifeAnnuityDue_const n hv\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "D. C. M. Dickson, M. R. Hardy and H. R. Waters, Actuarial Mathematics for Life Contingent Risks, 2nd ed., Cambridge University Press (2013), Chapter 5 (annuities)",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.lifeAnnuityDue_const (MathFin/Actuarial/Insurance.lean). lifeAnnuityDue r μ n := Σ_{k<n} zcb r 0 k · survivalFromForce μ k, with zcb from MathFin/FixedIncome/ZCB.lean and survivalFromForce from MathFin/Actuarial/Mortality.lean; the closed form is the annuity-due geometric sum annuityDue_closed_form at v = e^{−(r+m)}. SCOPE: constant force of mortality and flat rate; the probabilistic reading of the sum as an expected present value is not proved."
+      }
     }
   ]
 }

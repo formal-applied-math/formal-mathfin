@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -34,7 +34,12 @@ stochastic-process hypotheses:
 * the coin-toss posterior of Ex. 11.2 as exact inequalities and limits: ATM posterior on the
   high branch `< 1/2`; ATM posterior variance `m(F)` below the unconditional mean; posterior
   on the high branch → 1 in both wings (the log-density ratio is a downward parabola in
-  `ln(K/F)`); and nonconstancy of the posterior variance `m` on the positive strikes.
+  `ln(K/F)`); and nonconstancy of the posterior variance `m` on the positive strikes;
+* the posterior read off option prices (`cointossPhi_eq_deriv_deriv_bsV`,
+  `cointossPostHi_eq_strike_convexity`, `cointossM_eq_strike_convexity`): by
+  Breeden–Litzenberger (`breedenLitzenberger`), each branch density is the second strike
+  derivative of that branch's Black–Scholes call price, so the Bayes weights and the posterior
+  variance are ratios of call-price convexities.
 
 ## Scope
 
@@ -43,10 +48,11 @@ stochastic-process hypotheses:
   local-vol side, the Dupire surface formula on a non-Gaussian carrier, and the McKean–Vlasov
   existence question, which is not settled in general); §11.3's grid and particle machinery;
   every decimal figure of the chapter's tables (22.9%, 26.9%, 0.98, 1.09 → 0.71), since the
-  statements here are exact; and that the coin-toss posterior `cointossM ∘ S_T` *is* the
-  conditional expectation `E[v | σ(S_T)]` on the two-branch mixture measure (see the note at
-  the end of this file), or that the Bayes ratio `cointossPostHi ∘ S_T` is the conditional
-  probability of the high branch. Both are defined by their Bayes formulas.
+  statements here are exact. Here `cointossM` and `cointossPostHi` are defined by their Bayes
+  formulas; that `cointossM ∘ S_T` is the conditional expectation `E[v | σ(S_T)]` on the
+  two-branch mixture, and `cointossPostHi ∘ S_T` the conditional probability of the high
+  branch, is proved in `Bridges/LSVPosteriorConditionalExpectation.lean`
+  (`cointossM_comp_ae_eq_condExp`, `cointossPostHi_comp_ae_eq_condExp`).
 
 ## References
 
@@ -424,38 +430,53 @@ theorem cointossM_nonconstant {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F)
       filter_upwards [eventually_gt_atTop (0:ℝ)] with K hK using (hc K hK).symm))
   linarith [cointossM_atm_lt_uncond hF hlo hhi hvhi, hc F hF]
 
-/-! ## Not proved here: the posterior as a conditional expectation
+/-! ## The posterior from call prices (Breeden–Litzenberger)
 
-**The statement.** On the two-branch mixture space `Ω := ℝ ⊕ ℝ` with
-`μ_mix := (1/2) • (Measure.map Sum.inl γ) + (1/2) • (Measure.map Sum.inr γ)`
-(`γ := ProbabilityTheory.gaussianReal 0 1`), terminal state
-`S_T (Sum.inl z) = F · exp (σ_lo · z − σ_lo²/2)`, `S_T (Sum.inr z) = F · exp (σ_hi · z − σ_hi²/2)`
-and branch variance `v (Sum.inl _) = v_lo`, `v (Sum.inr _) = v_hi`, the posterior `cointossM`
-of the previous section *is* the conditional expectation:
+Each branch density `φ_c` is the lognormal density that Breeden–Litzenberger reads off the
+second strike derivative of the branch's call price: `φ_c(K) = ∂²_K C_c(K)` with
+`C_c(K) = bsV K 0 σ_c F 1` (zero rate, unit maturity, so the discount factor is `1`). The Bayes
+posterior of Ex. 11.2 is therefore a ratio of call-price convexities, the quantities a
+calibration observes. -/
 
-  `μ_mix[v | Real.measurableSpace.comap S_T] =ᵐ[μ_mix]
-    (fun p ↦ cointossM F σ_lo σ_hi v_lo v_hi (S_T p))`.
+/-- **A branch density is a call-price convexity.** For `F, σ, K > 0`,
+`φ_σ(K) = ∂²_K bsV(K, 0, σ, F, 1)`: Breeden–Litzenberger at zero rate and unit maturity. -/
+theorem cointossPhi_eq_deriv_deriv_bsV {F σ K : ℝ} (hF : 0 < F) (hσ : 0 < σ) (hK : 0 < K) :
+    cointossPhi F σ K = deriv (deriv fun k ↦ bsV k 0 σ F 1) K := by
+  rw [(breedenLitzenberger hF hσ hK one_pos).deriv]
+  simp [cointossPhi]
 
-**What is already available.** The single-branch pushforward is in the library:
-`jumpDiffusionIncrementLaw_zero` identifies the zero-jump increment law with
-`gaussianReal (bτ) (σ²τ)`, and `jumpDiffusionIncrementLaw_zero_map_mul_exp` pushes it through
-`y ↦ S·eʸ` to `(volume.restrict (Ioi 0)).withDensity (ofReal ∘ lognormalTerminalPDF S r σ τ)`
-(general form: `map_mul_exp_withDensity`). At `r = 0`, `τ = 1` this is exactly the law of
-`S_T` on one branch once `γ.map (z ↦ σ_c z − σ_c²/2) = gaussianReal (−σ_c²/2) σ_c²` is read
-off `gaussianReal_map_const_mul` / `gaussianReal_map_add_const`.
+/-- **The posterior weight of the high branch from call prices.** For `F, K > 0` and positive
+branch volatilities, `P(hi | S_T = K) = C_hi''(K) / (C_lo''(K) + C_hi''(K))`, where
+`C_c(K) = bsV K 0 σ_c F 1`. -/
+theorem cointossPostHi_eq_strike_convexity {F σ_lo σ_hi K : ℝ} (hF : 0 < F) (hlo : 0 < σ_lo)
+    (hhi : 0 < σ_hi) (hK : 0 < K) :
+    cointossPostHi F σ_lo σ_hi K =
+      deriv (deriv fun k ↦ bsV k 0 σ_hi F 1) K /
+        (deriv (deriv fun k ↦ bsV k 0 σ_lo F 1) K + deriv (deriv fun k ↦ bsV k 0 σ_hi F 1) K) := by
+  rw [cointossPostHi, cointossPhi_eq_deriv_deriv_bsV hF hlo hK,
+    cointossPhi_eq_deriv_deriv_bsV hF hhi hK]
 
-**What remains.** The two-branch characterization itself:
-`σ(S_T)`-strong measurability of `cointossM ∘ S_T`, and the set-integral identity
-`∀ s ∈ comap S_T, ∫ x in s, cointossM (S_T x) ∂μ_mix = ∫ x in s, v x ∂μ_mix`, split over the
-two branches (`integral_add`, real `smul`, `integral_map`) and transported to `Ioi 0` by the
-pushforward above, where the defining identity `cointossM · (φ_lo + φ_hi) = v_lo φ_lo + v_hi φ_hi`
-(the definition of `cointossM`, with `φ_lo + φ_hi > 0`) closes it.
+/-- **The posterior variance from call prices.** For `F, K > 0` and positive branch
+volatilities, `m(K) = (v_lo·C_lo''(K) + v_hi·C_hi''(K)) / (C_lo''(K) + C_hi''(K))`. -/
+theorem cointossM_eq_strike_convexity {F σ_lo σ_hi v_lo v_hi K : ℝ} (hF : 0 < F)
+    (hlo : 0 < σ_lo) (hhi : 0 < σ_hi) (hK : 0 < K) :
+    cointossM F σ_lo σ_hi v_lo v_hi K =
+      (v_lo * deriv (deriv fun k ↦ bsV k 0 σ_lo F 1) K
+          + v_hi * deriv (deriv fun k ↦ bsV k 0 σ_hi F 1) K) /
+        (deriv (deriv fun k ↦ bsV k 0 σ_lo F 1) K + deriv (deriv fun k ↦ bsV k 0 σ_hi F 1) K) := by
+  rw [cointossM, cointossPhi_eq_deriv_deriv_bsV hF hlo hK,
+    cointossPhi_eq_deriv_deriv_bsV hF hhi hK]
 
-**What is proved here:** the analytic properties of the posterior that the characterization
-would transport — the ATM inequalities, the posterior's two wing limits, the posterior
-variance's upper-wing limit, and nonconstancy. The gap is only the measure-theoretic
-*interpretation* of `cointossM ∘ S_T` as the conditional expectation on the mixture (and of
-`cointossPostHi ∘ S_T` as the conditional probability of the high branch), which is taken from
-Ex. 11.2's Bayes computation, not proved. -/
+/-! ## The posterior as a conditional expectation
+
+On the two-branch mixture space `ℝ ⊕ ℝ` (a standard normal draw on the low or the high branch,
+each with probability `1/2`), with terminal price `S_T = F·exp(σ_c z − σ_c²/2)` on branch `c` and
+branch variance `v`, the posterior of this file is the conditional expectation:
+`cointossM F σ_lo σ_hi v_lo v_hi ∘ S_T =ᵐ E[v | σ(S_T)]`. That theorem, and the matching
+statement for `cointossPostHi` as the conditional probability of the high branch, is proved in
+`Bridges/LSVPosteriorConditionalExpectation.lean`, which pushes each branch's normal law
+forward to the density `cointossPhi F σ_c` on `(0, ∞)` with the library's
+`jumpDiffusionIncrementLaw_zero_map_mul_exp` and applies Mathlib's
+`ae_eq_condExp_of_forall_setIntegral_eq`. -/
 
 end MathFin.LSV

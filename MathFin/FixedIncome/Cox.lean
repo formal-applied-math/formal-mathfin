@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -20,9 +20,11 @@ time obtained by inverting a unit-exponential clock through `Λ` satisfies, for
 `t, T ≥ 0`, the survival law `P(τ > t) = e^{−Λ(t)}` and the default-density
 identity `P(τ ≤ T) = ∫₀ᵀ h(s)·e^{−Λ(s)} ds` (undiscounted; nothing is priced against
 `τ`). The CDS legs are *defined* as the deterministic integrals `c·∫₀ᵀ e^{−rs}S(s) ds` (premium) and
-`(1−R)·∫₀ᵀ e^{−rs}h(s)S(s) ds` (protection); no theorem here identifies them with
-expectations over `τ`, and the fair spread is the algebraic solution of
-`c·A = (1−R)·L` for `A > 0`.
+`(1−R)·∫₀ᵀ e^{−rs}h(s)S(s) ds` (protection), and the fair spread is the algebraic solution of
+`c·A = (1−R)·L` for `A > 0`. This file does not identify the legs with expectations over `τ`;
+`FixedIncome/CVA.lean` proves that the protection leg is `(1 − R)·E[e^{−rτ}·1{τ ≤ T}]` for the
+constructed `τ` (`CVA.protectionLeg_eq_integral_coxDefaultTime`), using the measurability of `τ`
+proved here (`measurable_coxDefaultTime`).
 
 The module layers:
 
@@ -37,8 +39,10 @@ The module layers:
 * **Deterministic time-varying intensity** — the Cox default time
   `coxDefaultTime` (clock inversion through `Λ`), with the survival and CDF
   identities. The mechanism is an a.e. set equality between the survival event
-  and the clock-tail event, so no inverse continuity or inverse measurability
-  is ever needed.
+  and the clock-tail event, so the identities need no regularity of the inverse.
+  The default time is measurable (`measurable_coxDefaultTime`): `Λ` is a continuous
+  injection, hence a measurable embedding, and `Function.invFun Λ` extends its inverse
+  by a constant off the range.
 * **The CDS legs under `λ(t)`** — the risky annuity and default-density
   integrals (`cdsAnnuity`, `cdsLosses`), the explicit legs (`premiumLeg`,
   `protectionLeg`), the balance theorem `cdsFairSpreadTV_balances`, the
@@ -70,7 +74,8 @@ Public lemmas (all in `namespace MathFin.Cox`):
 * `cumHazard_strictMono`, `cumHazard_surjOn_Ici` — monotonicity and
   surjectivity of the cumulative hazard;
 * `cox_survival_timeVarying`, `cox_cdf_timeVarying` — the survival and CDF
-  identities of the clock-inverted default time;
+  identities of the clock-inverted default time; `measurable_coxDefaultTime` — its
+  measurability;
 * `cdsAnnuity_pos`, `defaultDensity_antideriv`, `clockTail_eq_defaultDensity`,
   `cdsFairSpreadTV_balances`, `cdsAnnuity_eq_riskyAnnuity`,
   `cdsLosses_eq_riskyAnnuity_mul`, `cdsFairSpreadTV_const`,
@@ -318,6 +323,20 @@ private theorem expClock_nonneg_ae {ξ : Ω → ℝ} (hξmeas : Measurable ξ)
 unit-exponential clock through the cumulative hazard `Λ`. -/
 noncomputable def coxDefaultTime (h : ℝ → ℝ) (ξ : Ω → ℝ) : Ω → ℝ :=
   fun ω ↦ Function.invFun (cumHazard h) (ξ ω)
+
+/-- **The Cox default time is measurable.** `Λ = cumHazard h` is a continuous injection of `ℝ`,
+hence a measurable embedding (`Continuous.measurableEmbedding`), and `Function.invFun Λ` is
+`Function.extend Λ id` with a constant off the range of `Λ`, measurable by
+`MeasurableEmbedding.measurable_extend`. Divergence of `Λ` is not needed. -/
+theorem measurable_coxDefaultTime {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s, 0 < h s)
+    {ξ : Ω → ℝ} (hξmeas : Measurable ξ) : Measurable (coxDefaultTime h ξ) := by
+  have hΛ : MeasurableEmbedding (cumHazard h) :=
+    (cumHazard_continuous hh).measurableEmbedding (cumHazard_strictMono hh hpos).injective
+  have hinv : Measurable (Function.invFun (cumHazard h)) := by
+    rw [show Function.invFun (cumHazard h) =
+        Function.extend (cumHazard h) id fun _ ↦ Classical.arbitrary ℝ from rfl]
+    exact hΛ.measurable_extend measurable_id measurable_const
+  exact hinv.comp hξmeas
 
 /-- The inverse of `Λ` inverts exactly on the half-line, and lands there. -/
 private theorem invFun_on_halfline {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s, 0 < h s)
@@ -568,7 +587,8 @@ theorem cdsFairSpreadTV_const (r lam R T : ℝ) (hT : 0 < T) :
 /-- **Default probability as the integral of the default density**
 (deterministic-intensity Cox): for `a ≥ 0` the constructed default time satisfies
 `P(τ ≤ a) = ∫₀^a h·S`. The discounted identity
-`E[e^{−rτ}·1{τ ≤ a}] = ∫₀^a e^{−rs}h(s)S(s) ds` (`r ≠ 0`) is not proved. -/
+`E[e^{−rτ}·1{τ ≤ a}] = ∫₀^a e^{−rs}h(s)S(s) ds` is `CVA.protectionLeg_eq_integral_coxDefaultTime`
+(`FixedIncome/CVA.lean`). -/
 theorem cox_defaultProb_density {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s, 0 < h s)
     (hdiv : Filter.Tendsto (cumHazard h) Filter.atTop Filter.atTop)
     {ξ : Ω → ℝ} (hξmeas : Measurable ξ) (hξlaw : Measure.map ξ μ = expMeasure 1)

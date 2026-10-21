@@ -1,12 +1,13 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import Mathlib
 public import MathFin.Foundations.NormalQuantile
+public import MathFin.Foundations.BivariateGaussian
 
 /-!
 # The standard bivariate normal CDF `N₂(a, b; r)`
@@ -19,12 +20,30 @@ For independent standard normals `Z₁, Z₂` (the coordinates of `N(0,1) ⊗ N(
 gives a standard bivariate normal pair with correlation `r`, and
 `N₂(a, b; r) = P(X ≤ a, Y ≤ b)`.
 
+The Cholesky map is a continuous linear map, so `bivariateNormalLaw r` is Gaussian in Mathlib's
+sense (`IsGaussian`, via `isGaussian_map` and Mathlib's instance for products of Gaussian
+measures). A Gaussian measure is determined by its mean and covariance (Mathlib's
+characteristic-function `Measure.ext_of_charFunDual` with `IsGaussian.charFunDual_eq'`); on `ℝ²`
+this says that a centred Gaussian law with unit variances and covariance `r` is
+`bivariateNormalLaw r` (`eq_bivariateNormalLaw`). The swap symmetry is derived from it.
+
 ## Main results
 
 * `bivariateNormalCDF`: `N₂(a, b; r)`, and `bivariateNormalLaw r`, the law of `(X, Y)`.
 * `stdNormalPair`, `map_linear_stdNormalPair`: `c Z₁ + d Z₂ ∼ N(0, c² + d²)`.
-* `map_fst_bivariateNormalLaw`, `map_snd_bivariateNormalLaw`: both margins are `N(0, 1)`.
-* `covariance_bivariateNormalLaw`: `Cov(X, Y) = r` (with unit variances, so `Corr(X, Y) = r`).
+* `stdNormalVec ι`: the law `N(0, 1)^ι` of a vector of independent standard normals, and its
+  `IsGaussian` instance (Mathlib's `iIndepFun.hasGaussianLaw`). Pushed to
+  `EuclideanSpace ℝ ι` it is Mathlib's `stdGaussian` (`map_pi_eq_stdGaussian`).
+* `isGaussian_bivariateNormalLaw`: the law of the Cholesky pair is Gaussian, for every `r`.
+* `covariance_fst_snd_bivariateNormalLaw`, `variance_snd_bivariateNormalLaw`: `Cov(X, Y) = r` and
+  `Var Y = 1` for every `r`; `variance_fst_bivariateNormalLaw`: `Var X = 1` for `r² ≤ 1`.
+* `map_fst_bivariateNormalLaw`, `map_snd_bivariateNormalLaw`: both margins are `N(0, 1)`, read
+  off Mathlib's `IsGaussian.map_eq_gaussianReal`.
+* `eq_bivariateNormalLaw`: a Gaussian law on `ℝ²` with centred coordinates, unit variances and
+  covariance `r` (`r² ≤ 1`) is `bivariateNormalLaw r`.
+* `bivariateGaussianHyp_bivariateNormalLaw`, `condExp_fst_bivariateNormalLaw`: the pair satisfies
+  the hypotheses `BivariateGaussianHyp` of `Foundations/BivariateGaussian.lean`, so
+  `E[X | Y] = r Y` almost surely.
 * `bivariateNormalLaw_map_swap`, `bivariateNormalCDF_comm`: `(Y, X)` has the same law as
   `(X, Y)`, so `N₂(a, b; r) = N₂(b, a; r)`.
 * `bivariateNormalCDF_zero`, `bivariateNormalCDF_one`, `bivariateNormalCDF_neg_one`: the
@@ -39,13 +58,12 @@ gives a standard bivariate normal pair with correlation `r`, and
   side as the joint survival `P(X > a, Y > b)` is not stated here.
 
 Outside `r ∈ [-1, 1]` the square root truncates to `0` and the construction is no longer the
-standard bivariate normal with correlation `r` (it degenerates to the law of `(rY, Y)`); every
-result that needs it carries the hypothesis `r ^ 2 ≤ 1`.
+standard bivariate normal with correlation `r` (it degenerates to the law of `(rY, Y)`, still with
+`Cov(X, Y) = r` but `Var X = r²`); every result that needs unit variances carries the hypothesis
+`r ^ 2 ≤ 1`.
 
-Neighbouring notions: Mathlib's `ProbabilityTheory.multivariateGaussian` (on
-`EuclideanSpace ℝ (Fin 2)`) and the hypothesis bundle `BivariateGaussianHyp`
-(`Foundations/BivariateGaussian.lean`). The bridges from `bivariateNormalLaw` to them are not
-stated here.
+Mathlib's `ProbabilityTheory.multivariateGaussian` lives on `EuclideanSpace ℝ (Fin 2)` rather
+than `ℝ × ℝ`; the identification of `bivariateNormalLaw r` with it is not stated here.
 -/
 
 @[expose] public section
@@ -54,25 +72,62 @@ namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real Set
 
-/-- The law of two independent standard normals, `N(0,1) ⊗ N(0,1)`. -/
+/-- The law of two independent standard normals, `N(0,1) ⊗ N(0,1)`. It is Gaussian by Mathlib's
+instance for products of Gaussian measures. -/
 noncomputable abbrev stdNormalPair : Measure (ℝ × ℝ) := (gaussianReal 0 1).prod (gaussianReal 0 1)
 
-/-- The Cholesky map `(z₁, z₂) ↦ (r z₂ + √(1 − r²) z₁, z₂)`. -/
-noncomputable def choleskyPair (r : ℝ) (p : ℝ × ℝ) : ℝ × ℝ :=
-  (r * p.2 + √(1 - r ^ 2) * p.1, p.2)
+/-- The law of a vector of independent standard normals indexed by `ι`: Mathlib's product measure
+`Measure.pi` of `N(0, 1)`. Its image under `WithLp.toLp 2` is Mathlib's
+`stdGaussian (EuclideanSpace ℝ ι)` (`map_pi_eq_stdGaussian`). -/
+noncomputable abbrev stdNormalVec (ι : Type*) [Fintype ι] : Measure (ι → ℝ) :=
+  Measure.pi fun _ : ι ↦ gaussianReal 0 1
+
+/-- **A vector of independent standard normals is Gaussian**: Mathlib's
+`iIndepFun.hasGaussianLaw` applied to the coordinates of `Measure.pi`. -/
+instance isGaussian_stdNormalVec (ι : Type*) [Fintype ι] : IsGaussian (stdNormalVec ι) := by
+  have h : HasGaussianLaw id (stdNormalVec ι) :=
+    iIndepFun.hasGaussianLaw (X := fun i (x : ι → ℝ) ↦ x i)
+      (fun i ↦ (measurePreserving_eval (fun _ : ι ↦ gaussianReal 0 1) i).hasLaw.hasGaussianLaw)
+      (iIndepFun_pi (X := fun _ : ι ↦ id) fun _ ↦ aemeasurable_id)
+  simpa using h.isGaussian_map
+
+/-- A coordinate of a vector of independent standard normals is square integrable. -/
+lemma memLp_eval_stdNormalVec {ι : Type*} [Fintype ι] (i : ι) :
+    MemLp (fun w : ι → ℝ ↦ w i) 2 (stdNormalVec ι) := by
+  have hmap : (stdNormalVec ι).map (fun w ↦ w i) = gaussianReal 0 1 :=
+    (measurePreserving_eval (fun _ : ι ↦ gaussianReal 0 1) i).map_eq
+  have h := memLp_id_gaussianReal' (μ := 0) (v := 1) 2 (by norm_num)
+  rw [← hmap] at h
+  exact (memLp_map_measure_iff aestronglyMeasurable_id (measurable_pi_apply i).aemeasurable).1 h
+
+/-- The Cholesky map `(z₁, z₂) ↦ (r z₂ + √(1 − r²) z₁, z₂)`, as a continuous linear map. -/
+noncomputable def choleskyPair (r : ℝ) : ℝ × ℝ →L[ℝ] ℝ × ℝ :=
+  (r • ContinuousLinearMap.snd ℝ ℝ ℝ + √(1 - r ^ 2) • ContinuousLinearMap.fst ℝ ℝ ℝ).prod
+    (ContinuousLinearMap.snd ℝ ℝ ℝ)
+
+@[simp]
+lemma choleskyPair_apply (r : ℝ) (p : ℝ × ℝ) :
+    choleskyPair r p = (r * p.2 + √(1 - r ^ 2) * p.1, p.2) := by
+  simp [choleskyPair]
 
 @[fun_prop]
-lemma measurable_choleskyPair (r : ℝ) : Measurable (choleskyPair r) := by
-  unfold choleskyPair; fun_prop
+lemma measurable_choleskyPair (r : ℝ) : Measurable (choleskyPair r) :=
+  (choleskyPair r).measurable
 
 /-- The law of the Cholesky pair. For `r ^ 2 ≤ 1` it is the standard bivariate normal law with
-correlation `r` (`map_linear_bivariateNormalLaw`, `map_fst_bivariateNormalLaw`,
-`covariance_bivariateNormalLaw`); for `r ^ 2 > 1` it is the law of `(rY, Y)`. -/
+correlation `r` (`eq_bivariateNormalLaw`, `map_fst_bivariateNormalLaw`,
+`covariance_fst_snd_bivariateNormalLaw`); for `r ^ 2 > 1` it is the law of `(rY, Y)`. -/
 noncomputable def bivariateNormalLaw (r : ℝ) : Measure (ℝ × ℝ) :=
   stdNormalPair.map (choleskyPair r)
 
 instance (r : ℝ) : IsProbabilityMeasure (bivariateNormalLaw r) :=
   Measure.isProbabilityMeasure_map (measurable_choleskyPair r).aemeasurable
+
+/-- **The Cholesky pair is Gaussian**, for every `r`: the image of the Gaussian measure
+`N(0,1) ⊗ N(0,1)` under a continuous linear map (Mathlib's `isGaussian_map`). -/
+instance isGaussian_bivariateNormalLaw (r : ℝ) : IsGaussian (bivariateNormalLaw r) := by
+  unfold bivariateNormalLaw
+  infer_instance
 
 /-- **The standard bivariate normal CDF** `N₂(a, b; r) = P(X ≤ a, Y ≤ b)` for the Cholesky pair
 `X = r Z₂ + √(1 − r²) Z₁`, `Y = Z₂`. -/
@@ -82,9 +137,9 @@ noncomputable def bivariateNormalCDF (a b r : ℝ) : ℝ :=
 /-- `N₂(a, b; r)` is the `bivariateNormalLaw r`-measure of the quadrant `(-∞, a] × (-∞, b]`. -/
 lemma bivariateNormalCDF_eq_law (a b r : ℝ) :
     bivariateNormalCDF a b r = (bivariateNormalLaw r).real (Iic a ×ˢ Iic b) := by
-  rw [bivariateNormalLaw, map_measureReal_apply (measurable_choleskyPair r)
+  rw [bivariateNormalCDF, bivariateNormalLaw, map_measureReal_apply (measurable_choleskyPair r)
     (measurableSet_Iic.prod measurableSet_Iic)]
-  rfl
+  congr 1
 
 /-- A linear combination of independent standard normals: `c Z₁ + d Z₂ ∼ N(0, c² + d²)`. -/
 lemma map_linear_stdNormalPair (c d : ℝ) :
@@ -100,86 +155,222 @@ lemma map_linear_stdNormalPair (c d : ℝ) :
   · simp
   · ext; rw [Real.coe_toNNReal _ (by positivity)]; simp
 
+/-- A linear functional of the Cholesky pair, for every `r`:
+`c X + d Y ∼ N(0, (c √(1 − r²))² + (c r + d)²)`. -/
+lemma map_linear_bivariateNormalLaw' (r c d : ℝ) :
+    (bivariateNormalLaw r).map (fun q ↦ c * q.1 + d * q.2) =
+      gaussianReal 0 ((c * √(1 - r ^ 2)) ^ 2 + (c * r + d) ^ 2).toNNReal := by
+  rw [bivariateNormalLaw, Measure.map_map (by fun_prop) (measurable_choleskyPair r)]
+  have hf : (fun q : ℝ × ℝ ↦ c * q.1 + d * q.2) ∘ choleskyPair r =
+      fun p ↦ (c * √(1 - r ^ 2)) * p.1 + (c * r + d) * p.2 := by
+    ext p; simp only [Function.comp, choleskyPair_apply]; ring
+  rw [hf, map_linear_stdNormalPair]
+
 /-- A linear functional of the bivariate normal pair: `c X + d Y ∼ N(0, c² + 2cdr + d²)`. -/
 lemma map_linear_bivariateNormalLaw {r : ℝ} (hr : r ^ 2 ≤ 1) (c d : ℝ) :
     (bivariateNormalLaw r).map (fun q ↦ c * q.1 + d * q.2) =
       gaussianReal 0 (c ^ 2 + 2 * c * d * r + d ^ 2).toNNReal := by
-  have hs : √(1 - r ^ 2) ^ 2 = 1 - r ^ 2 := sq_sqrt (by linarith)
-  rw [bivariateNormalLaw, Measure.map_map (by fun_prop) (measurable_choleskyPair r)]
-  have hf : (fun q : ℝ × ℝ ↦ c * q.1 + d * q.2) ∘ choleskyPair r =
-      fun p ↦ (c * √(1 - r ^ 2)) * p.1 + (c * r + d) * p.2 := by
-    ext p; simp only [Function.comp, choleskyPair]; ring
-  rw [hf, map_linear_stdNormalPair]
+  rw [map_linear_bivariateNormalLaw', mul_pow, sq_sqrt (by linarith)]
   congr 2
-  rw [mul_pow, hs]; ring
+  ring
 
-/-- The first margin `X ∼ N(0, 1)` (needs `r ^ 2 ≤ 1`: for `|r| > 1` the junk-valued root
-makes `X = r Y`, which is not `N(0, 1)`). -/
-lemma map_fst_bivariateNormalLaw {r : ℝ} (hr : r ^ 2 ≤ 1) :
-    (bivariateNormalLaw r).map Prod.fst = gaussianReal 0 1 := by
-  have e : (Prod.fst : ℝ × ℝ → ℝ) = fun q ↦ 1 * q.1 + 0 * q.2 := by ext; simp
-  rw [e, map_linear_bivariateNormalLaw hr]
-  congr 1
-  simp
-
-/-- The second margin `Y = Z₂ ∼ N(0, 1)`, for every `r` (unconditional: `Y` never involves
-the possibly-junk-valued root). -/
-lemma map_snd_bivariateNormalLaw (r : ℝ) :
-    (bivariateNormalLaw r).map Prod.snd = gaussianReal 0 1 := by
-  rw [bivariateNormalLaw, Measure.map_map measurable_snd (measurable_choleskyPair r)]
-  exact Measure.map_snd_prod.trans (by simp)
-
-/-- `Var[c X + d Y] = c ^ 2 + 2 c d r + d ^ 2`, read off `map_linear_bivariateNormalLaw`'s
-pushforward. -/
-lemma variance_linear_bivariateNormalLaw {r : ℝ} (hr : r ^ 2 ≤ 1) (c d : ℝ) :
-    Var[fun q ↦ c * q.1 + d * q.2; bivariateNormalLaw r] = c ^ 2 + 2 * c * d * r + d ^ 2 := by
-  rw [← variance_id_map (by fun_prop), map_linear_bivariateNormalLaw hr, variance_id_gaussianReal,
-    Real.coe_toNNReal _ (by nlinarith [sq_nonneg (c * r + d)])]
-
-/-- `c X + d Y ∈ L²(bivariateNormalLaw r)`, transported from the Gaussian `L²`-membership
-along `map_linear_bivariateNormalLaw`. -/
-lemma memLp_linear_bivariateNormalLaw {r : ℝ} (hr : r ^ 2 ≤ 1) (c d : ℝ) :
+/-- `c X + d Y ∈ L²(bivariateNormalLaw r)`, for every `r`. -/
+lemma memLp_linear_bivariateNormalLaw (r c d : ℝ) :
     MemLp (fun q : ℝ × ℝ ↦ c * q.1 + d * q.2) 2 (bivariateNormalLaw r) := by
   have h := memLp_id_gaussianReal (μ := 0)
-    (v := (c ^ 2 + 2 * c * d * r + d ^ 2).toNNReal) 2
-  rw [← map_linear_bivariateNormalLaw hr] at h
+    (v := ((c * √(1 - r ^ 2)) ^ 2 + (c * r + d) ^ 2).toNNReal) 2
+  rw [← map_linear_bivariateNormalLaw' r c d] at h
   exact (memLp_map_measure_iff aestronglyMeasurable_id (by fun_prop)).1 h
 
-/-- **The correlation is the parameter `r`**: `Cov(X, Y) = r`, and `Var X = Var Y = 1`. -/
-theorem covariance_bivariateNormalLaw {r : ℝ} (hr : r ^ 2 ≤ 1) :
-    cov[Prod.fst, Prod.snd; bivariateNormalLaw r] = r ∧
-      Var[Prod.fst; bivariateNormalLaw r] = 1 ∧ Var[Prod.snd; bivariateNormalLaw r] = 1 := by
-  have e1 : (Prod.fst : ℝ × ℝ → ℝ) = fun q ↦ 1 * q.1 + 0 * q.2 := by ext; simp
-  have e2 : (Prod.snd : ℝ × ℝ → ℝ) = fun q ↦ 0 * q.1 + 1 * q.2 := by ext; simp
-  have e3 : (Prod.fst + Prod.snd : ℝ × ℝ → ℝ) = fun q ↦ 1 * q.1 + 1 * q.2 := by ext; simp
-  have v1 : Var[Prod.fst; bivariateNormalLaw r] = 1 := by
-    rw [e1, variance_linear_bivariateNormalLaw hr]; ring
-  have v2 : Var[Prod.snd; bivariateNormalLaw r] = 1 := by
-    rw [e2, variance_linear_bivariateNormalLaw hr]; ring
-  have m1 : MemLp Prod.fst 2 (bivariateNormalLaw r) := by
-    rw [e1]; exact memLp_linear_bivariateNormalLaw hr 1 0
-  have m2 : MemLp Prod.snd 2 (bivariateNormalLaw r) := by
-    rw [e2]; exact memLp_linear_bivariateNormalLaw hr 0 1
-  have hadd := variance_add m1 m2
-  rw [e3, variance_linear_bivariateNormalLaw hr, v1, v2] at hadd
-  exact ⟨by linarith, v1, v2⟩
+lemma memLp_fst_bivariateNormalLaw (r : ℝ) : MemLp Prod.fst 2 (bivariateNormalLaw r) := by
+  simpa using memLp_linear_bivariateNormalLaw r 1 0
 
-/-- **Exchangeability**: for `r ∈ [-1, 1]`, `(Y, X)` has the same law as `(X, Y)`. -/
+lemma memLp_snd_bivariateNormalLaw (r : ℝ) : MemLp Prod.snd 2 (bivariateNormalLaw r) := by
+  simpa using memLp_linear_bivariateNormalLaw r 0 1
+
+/-- `E[c X + d Y] = 0`, for every `r`. -/
+lemma integral_linear_bivariateNormalLaw (r c d : ℝ) :
+    ∫ q, c * q.1 + d * q.2 ∂bivariateNormalLaw r = 0 := by
+  have h := integral_id_gaussianReal (μ := 0)
+    (v := ((c * √(1 - r ^ 2)) ^ 2 + (c * r + d) ^ 2).toNNReal)
+  rw [← map_linear_bivariateNormalLaw' r c d, integral_map (by fun_prop) (by fun_prop)] at h
+  exact h
+
+lemma integral_fst_bivariateNormalLaw (r : ℝ) : ∫ q, q.1 ∂bivariateNormalLaw r = 0 := by
+  simpa using integral_linear_bivariateNormalLaw r 1 0
+
+lemma integral_snd_bivariateNormalLaw (r : ℝ) : ∫ q, q.2 ∂bivariateNormalLaw r = 0 := by
+  simpa using integral_linear_bivariateNormalLaw r 0 1
+
+/-- `Var[c X + d Y] = (c √(1 − r²))² + (c r + d)²`, for every `r`. -/
+private lemma variance_linear_bivariateNormalLaw' (r c d : ℝ) :
+    Var[fun q ↦ c * q.1 + d * q.2; bivariateNormalLaw r] =
+      (c * √(1 - r ^ 2)) ^ 2 + (c * r + d) ^ 2 := by
+  rw [← variance_id_map (by fun_prop), map_linear_bivariateNormalLaw' r c d,
+    variance_id_gaussianReal, Real.coe_toNNReal _ (by positivity)]
+
+/-- `Var[c X + d Y] = c ^ 2 + 2 c d r + d ^ 2` for `r² ≤ 1`. -/
+lemma variance_linear_bivariateNormalLaw {r : ℝ} (hr : r ^ 2 ≤ 1) (c d : ℝ) :
+    Var[fun q ↦ c * q.1 + d * q.2; bivariateNormalLaw r] = c ^ 2 + 2 * c * d * r + d ^ 2 := by
+  rw [variance_linear_bivariateNormalLaw', mul_pow, sq_sqrt (by linarith)]
+  ring
+
+/-- `Var Y = 1`, for every `r` (`Y = Z₂` never involves the root). -/
+lemma variance_snd_bivariateNormalLaw (r : ℝ) : Var[Prod.snd; bivariateNormalLaw r] = 1 := by
+  rw [show (Prod.snd : ℝ × ℝ → ℝ) = fun q ↦ 0 * q.1 + 1 * q.2 by ext; simp,
+    variance_linear_bivariateNormalLaw']
+  ring
+
+/-- `Var X = 1` for `r² ≤ 1` (for `r² > 1`, `X = rY` and `Var X = r²`). -/
+lemma variance_fst_bivariateNormalLaw {r : ℝ} (hr : r ^ 2 ≤ 1) :
+    Var[Prod.fst; bivariateNormalLaw r] = 1 := by
+  rw [show (Prod.fst : ℝ × ℝ → ℝ) = fun q ↦ 1 * q.1 + 0 * q.2 by ext; simp,
+    variance_linear_bivariateNormalLaw hr]
+  ring
+
+/-- **The parameter is the covariance**: `Cov(X, Y) = r`, for every `r` (for `r² > 1` the pair is
+`(rY, Y)`, whose covariance is still `r`). With `variance_fst_bivariateNormalLaw` and
+`variance_snd_bivariateNormalLaw`, `r` is the correlation when `r² ≤ 1`. -/
+theorem covariance_fst_snd_bivariateNormalLaw (r : ℝ) :
+    cov[Prod.fst, Prod.snd; bivariateNormalLaw r] = r := by
+  have v₁ : Var[Prod.fst; bivariateNormalLaw r] = √(1 - r ^ 2) ^ 2 + r ^ 2 := by
+    rw [show (Prod.fst : ℝ × ℝ → ℝ) = fun q ↦ 1 * q.1 + 0 * q.2 by ext; simp,
+      variance_linear_bivariateNormalLaw']
+    ring
+  have v₃ : Var[Prod.fst + Prod.snd; bivariateNormalLaw r] = √(1 - r ^ 2) ^ 2 + (r + 1) ^ 2 := by
+    rw [show (Prod.fst + Prod.snd : ℝ × ℝ → ℝ) = fun q ↦ 1 * q.1 + 1 * q.2 by ext; simp,
+      variance_linear_bivariateNormalLaw']
+    ring
+  have hadd := variance_add (memLp_fst_bivariateNormalLaw r) (memLp_snd_bivariateNormalLaw r)
+  rw [v₁, v₃, variance_snd_bivariateNormalLaw] at hadd
+  linear_combination (-1 / 2 : ℝ) * hadd
+
+/-- The first margin `X ∼ N(0, 1)`, read off Mathlib's `IsGaussian.map_eq_gaussianReal` (needs
+`r ^ 2 ≤ 1`: for `|r| > 1` the junk-valued root makes `X = r Y`, which is not `N(0, 1)`). -/
+lemma map_fst_bivariateNormalLaw {r : ℝ} (hr : r ^ 2 ≤ 1) :
+    (bivariateNormalLaw r).map Prod.fst = gaussianReal 0 1 := by
+  have h := IsGaussian.map_eq_gaussianReal (μ := bivariateNormalLaw r)
+    (ContinuousLinearMap.fst ℝ ℝ ℝ)
+  simp only [ContinuousLinearMap.coe_fst'] at h
+  rw [h, integral_fst_bivariateNormalLaw, variance_fst_bivariateNormalLaw hr, Real.toNNReal_one]
+
+/-- The second margin `Y = Z₂ ∼ N(0, 1)`, for every `r`, read off Mathlib's
+`IsGaussian.map_eq_gaussianReal`. -/
+lemma map_snd_bivariateNormalLaw (r : ℝ) :
+    (bivariateNormalLaw r).map Prod.snd = gaussianReal 0 1 := by
+  have h := IsGaussian.map_eq_gaussianReal (μ := bivariateNormalLaw r)
+    (ContinuousLinearMap.snd ℝ ℝ ℝ)
+  simp only [ContinuousLinearMap.coe_snd'] at h
+  rw [h, integral_snd_bivariateNormalLaw, variance_snd_bivariateNormalLaw, Real.toNNReal_one]
+
+/-! ### A Gaussian law on `ℝ²` is determined by its first two moments -/
+
+/-- `L q = L(1, 0) q₁ + L(0, 1) q₂` for a continuous linear functional on `ℝ²`. -/
+private lemma strongDual_apply_eq (L : StrongDual ℝ (ℝ × ℝ)) (q : ℝ × ℝ) :
+    L q = L (1, 0) * q.1 + L (0, 1) * q.2 := by
+  have : q = q.1 • ((1 : ℝ), (0 : ℝ)) + q.2 • ((0 : ℝ), (1 : ℝ)) := by ext <;> simp
+  conv_lhs => rw [this]
+  simp only [map_add, map_smul, smul_eq_mul]
+  ring
+
+/-- The mean of a law on `ℝ²` with integrable coordinates is the pair of coordinate means. -/
+private lemma integral_id_eq_pair {μ : Measure (ℝ × ℝ)} (h₁ : Integrable Prod.fst μ)
+    (h₂ : Integrable Prod.snd μ) : μ[id] = (∫ q, q.1 ∂μ, ∫ q, q.2 ∂μ) :=
+  integral_pair h₁ h₂
+
+/-- The variance of `a X + b Y` from the second moments of the coordinates. -/
+private lemma variance_linear_of_memLp {μ : Measure (ℝ × ℝ)} [IsFiniteMeasure μ]
+    (h₁ : MemLp Prod.fst 2 μ) (h₂ : MemLp Prod.snd 2 μ) (a b : ℝ) :
+    Var[fun q ↦ a * q.1 + b * q.2; μ] = a ^ 2 * Var[Prod.fst; μ]
+      + 2 * a * b * cov[Prod.fst, Prod.snd; μ] + b ^ 2 * Var[Prod.snd; μ] := by
+  rw [variance_fun_add (h₁.const_mul a) (h₂.const_mul b), variance_const_mul, variance_const_mul,
+    covariance_const_mul_left, covariance_const_mul_right]
+  ring
+
+/-- The variance of a continuous linear functional on `ℝ²` from the second moments of the
+coordinates. -/
+private lemma variance_strongDual {μ : Measure (ℝ × ℝ)} [IsFiniteMeasure μ]
+    (h₁ : MemLp Prod.fst 2 μ) (h₂ : MemLp Prod.snd 2 μ) (L : StrongDual ℝ (ℝ × ℝ)) :
+    Var[L; μ] = L (1, 0) ^ 2 * Var[Prod.fst; μ]
+      + 2 * L (1, 0) * L (0, 1) * cov[Prod.fst, Prod.snd; μ] + L (0, 1) ^ 2 * Var[Prod.snd; μ] := by
+  set a := L (1, 0)
+  set b := L (0, 1)
+  have hL : ⇑L = fun q ↦ a * q.1 + b * q.2 := funext (strongDual_apply_eq L)
+  rw [hL, variance_linear_of_memLp h₁ h₂]
+
+/-- **A Gaussian law on `ℝ²` with standardized coordinates is the Cholesky law.** If `μ` is
+Gaussian, its coordinates are centred with unit variances, and their covariance is `r` with
+`r² ≤ 1`, then `μ = bivariateNormalLaw r`. Both laws are Gaussian with the same mean and the same
+variance on every linear functional, so their characteristic functions agree (Mathlib's
+`IsGaussian.charFunDual_eq'` and `Measure.ext_of_charFunDual`). -/
+theorem eq_bivariateNormalLaw {μ : Measure (ℝ × ℝ)} [IsGaussian μ] {r : ℝ} (hr : r ^ 2 ≤ 1)
+    (h₁ : ∫ q, q.1 ∂μ = 0) (h₂ : ∫ q, q.2 ∂μ = 0) (v₁ : Var[Prod.fst; μ] = 1)
+    (v₂ : Var[Prod.snd; μ] = 1) (hc : cov[Prod.fst, Prod.snd; μ] = r) :
+    μ = bivariateNormalLaw r := by
+  have m₁ : MemLp Prod.fst 2 μ := by
+    simpa using IsGaussian.memLp_dual μ (ContinuousLinearMap.fst ℝ ℝ ℝ) 2 (by simp)
+  have m₂ : MemLp Prod.snd 2 μ := by
+    simpa using IsGaussian.memLp_dual μ (ContinuousLinearMap.snd ℝ ℝ ℝ) 2 (by simp)
+  have hmean : μ[id] = (bivariateNormalLaw r)[id] := by
+    rw [integral_id_eq_pair (m₁.integrable one_le_two) (m₂.integrable one_le_two),
+      integral_id_eq_pair ((memLp_fst_bivariateNormalLaw r).integrable one_le_two)
+        ((memLp_snd_bivariateNormalLaw r).integrable one_le_two),
+      h₁, h₂, integral_fst_bivariateNormalLaw, integral_snd_bivariateNormalLaw]
+  refine Measure.ext_of_charFunDual (funext fun L ↦ ?_)
+  rw [IsGaussian.charFunDual_eq', IsGaussian.charFunDual_eq', hmean,
+    covarianceBilinDual_self_eq_variance (IsGaussian.memLp_two_id (μ := μ)),
+    covarianceBilinDual_self_eq_variance (IsGaussian.memLp_two_id (μ := bivariateNormalLaw r)),
+    variance_strongDual m₁ m₂, v₁, v₂, hc,
+    variance_strongDual (memLp_fst_bivariateNormalLaw r) (memLp_snd_bivariateNormalLaw r),
+    variance_fst_bivariateNormalLaw hr, variance_snd_bivariateNormalLaw,
+    covariance_fst_snd_bivariateNormalLaw]
+
+/-- **Exchangeability**: for `r ∈ [-1, 1]`, `(Y, X)` has the same law as `(X, Y)`. The swapped
+law is Gaussian (the swap is a continuous linear equivalence) with the same moments, so
+`eq_bivariateNormalLaw` applies. -/
 theorem bivariateNormalLaw_map_swap {r : ℝ} (hr : r ^ 2 ≤ 1) :
     (bivariateNormalLaw r).map Prod.swap = bivariateNormalLaw r := by
-  refine Measure.ext_of_charFunDual (funext fun L ↦ ?_)
-  rw [charFunDual_eq_charFun_map_one, charFunDual_eq_charFun_map_one,
-    Measure.map_map L.continuous.measurable measurable_swap]
-  have hL (q : ℝ × ℝ) : L q = L (1, 0) * q.1 + L (0, 1) * q.2 := by
-    have : q = q.1 • ((1 : ℝ), (0 : ℝ)) + q.2 • ((0 : ℝ), (1 : ℝ)) := by ext <;> simp
-    conv_lhs => rw [this]
-    simp only [map_add, map_smul, smul_eq_mul]; ring
-  have h1 : (L : ℝ × ℝ → ℝ) = fun q ↦ L (1, 0) * q.1 + L (0, 1) * q.2 := funext hL
-  have h2 : (L : ℝ × ℝ → ℝ) ∘ Prod.swap = fun q ↦ L (0, 1) * q.1 + L (1, 0) * q.2 := by
-    ext q; rw [Function.comp_apply, hL (Prod.swap q)]; simp only [Prod.fst_swap, Prod.snd_swap]
-    ring
-  rw [h2, h1, map_linear_bivariateNormalLaw hr, map_linear_bivariateNormalLaw hr]
-  congr 3
+  have hswap : ⇑(ContinuousLinearEquiv.prodComm ℝ ℝ ℝ) = Prod.swap := funext fun _ ↦ by simp
+  have : IsGaussian ((bivariateNormalLaw r).map Prod.swap) := by
+    rw [← hswap]
+    infer_instance
+  refine eq_bivariateNormalLaw hr ?_ ?_ ?_ ?_ ?_
+  · rw [integral_map measurable_swap.aemeasurable (by fun_prop)]
+    exact integral_snd_bivariateNormalLaw r
+  · rw [integral_map measurable_swap.aemeasurable (by fun_prop)]
+    exact integral_fst_bivariateNormalLaw r
+  · rw [variance_map (by fun_prop) measurable_swap.aemeasurable]
+    exact variance_snd_bivariateNormalLaw r
+  · rw [variance_map (by fun_prop) measurable_swap.aemeasurable]
+    exact variance_fst_bivariateNormalLaw hr
+  · rw [covariance_map_fun (by fun_prop) (by fun_prop) measurable_swap.aemeasurable]
+    exact (covariance_comm _ _).trans (covariance_fst_snd_bivariateNormalLaw r)
+
+/-- **The Cholesky pair satisfies `BivariateGaussianHyp`** (`Foundations/BivariateGaussian.lean`)
+with means `0`, `σ_X = σ_Y = 1` and `ρ = r`, for every `r`. The structure does not constrain
+`Var X`; for `r² > 1` the pair is `(rY, Y)` with `Var X = r²`, and the hypotheses still hold. -/
+theorem bivariateGaussianHyp_bivariateNormalLaw (r : ℝ) :
+    BivariateGaussianHyp (bivariateNormalLaw r) Prod.fst Prod.snd 0 0 1 1 r where
+  σ_X_pos := one_pos
+  σ_Y_pos := one_pos
+  X_meas := measurable_fst
+  Y_meas := measurable_snd
+  joint_gaussian := IsGaussian.hasGaussianLaw_id
+  mean_X := integral_fst_bivariateNormalLaw r
+  mean_Y := integral_snd_bivariateNormalLaw r
+  var_Y := by rw [variance_snd_bivariateNormalLaw]; norm_num
+  cov_XY := by rw [covariance_fst_snd_bivariateNormalLaw]; ring
+
+/-- **Regression of `X` on `Y`**: for the Cholesky pair, `E[X | Y] = r Y` almost surely, for every
+`r`. The bivariate Gaussian conditional-expectation formula
+(`BivariateGaussianHyp.conditional_expectation_formula`) at
+`bivariateGaussianHyp_bivariateNormalLaw`. -/
+theorem condExp_fst_bivariateNormalLaw (r : ℝ) :
+    (bivariateNormalLaw r)[Prod.fst | MeasurableSpace.comap Prod.snd inferInstance]
+      =ᵐ[bivariateNormalLaw r] fun p ↦ r * p.2 := by
+  filter_upwards [(bivariateGaussianHyp_bivariateNormalLaw r).conditional_expectation_formula]
+    with p hp
+  rw [hp]
   ring
 
 /-- **Symmetry**: `N₂(a, b; r) = N₂(b, a; r)` for `r ∈ [-1, 1]`. -/
@@ -257,7 +448,7 @@ lemma bivariateNormalLaw_map_negSnd (r : ℝ) :
   have hcomm : (fun p : ℝ × ℝ ↦ (p.1, -p.2)) ∘ choleskyPair r =
       choleskyPair (-r) ∘ (fun p : ℝ × ℝ ↦ (p.1, -p.2)) := by
     funext p
-    simp only [Function.comp, choleskyPair, neg_sq, Prod.mk.injEq]
+    simp only [Function.comp, choleskyPair_apply, neg_sq, Prod.mk.injEq]
     constructor <;> first | ring | trivial
   rw [bivariateNormalLaw, bivariateNormalLaw,
     Measure.map_map (by fun_prop) (measurable_choleskyPair r), hcomm,
@@ -316,5 +507,37 @@ theorem bivariateNormalCDF_neg_neg (a b : ℝ) {r : ℝ} (hr : r ^ 2 ≤ 1) :
   rw [neg_neg, Phi_neg, bivariateNormalCDF_comm (-b) a hr',
     bivariateNormalCDF_comm (-b) (-a) hr] at h2
   linarith
+
+end MathFin
+
+/-! ### The first threshold to `+∞` -/
+
+namespace MathFin
+
+open MeasureTheory ProbabilityTheory Set Filter Topology
+
+/-- **Sending the first threshold to `+∞` recovers the second margin**: `N₂(a, b; r) → Φ(b)` as
+`a → ∞`, for every `r`. The quadrants `(-∞, a] × (-∞, b]` increase to `ℝ × (-∞, b]`
+(continuity of measure from below, `tendsto_measure_iUnion_atTop`), whose
+`bivariateNormalLaw r`-measure is `Φ(b)` by the second margin `map_snd_bivariateNormalLaw`,
+which needs no condition on `r`. -/
+theorem tendsto_bivariateNormalCDF_atTop_fst (b r : ℝ) :
+    Tendsto (fun a ↦ bivariateNormalCDF a b r) atTop (𝓝 (Phi b)) := by
+  have hmono : Monotone fun a : ℝ ↦ (Iic a ×ˢ Iic b : Set (ℝ × ℝ)) :=
+    fun _ _ h ↦ prod_mono (Iic_subset_Iic.mpr h) subset_rfl
+  have hU : (⋃ a : ℝ, (Iic a ×ˢ Iic b : Set (ℝ × ℝ))) = univ ×ˢ Iic b := by
+    ext p
+    simp only [mem_iUnion, mem_prod, mem_Iic, mem_univ, true_and]
+    exact ⟨fun ⟨_, _, h⟩ ↦ h, fun h ↦ ⟨p.1, le_rfl, h⟩⟩
+  have hlim : Tendsto (fun a : ℝ ↦ bivariateNormalLaw r (Iic a ×ˢ Iic b)) atTop
+      (𝓝 (bivariateNormalLaw r (univ ×ˢ Iic b))) := by
+    rw [← hU]
+    exact tendsto_measure_iUnion_atTop hmono
+  have hPhi : Phi b = (bivariateNormalLaw r (univ ×ˢ Iic b)).toReal := by
+    rw [show (univ ×ˢ Iic b : Set (ℝ × ℝ)) = Prod.snd ⁻¹' Iic b by ext p; simp,
+      ← Measure.map_apply measurable_snd measurableSet_Iic, map_snd_bivariateNormalLaw, Phi_def]
+  rw [hPhi]
+  simp only [bivariateNormalCDF_eq_law, measureReal_def]
+  exact (ENNReal.tendsto_toReal (measure_ne_top _ _)).comp hlim
 
 end MathFin

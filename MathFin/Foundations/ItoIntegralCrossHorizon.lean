@@ -42,7 +42,8 @@ path-continuous `δ` in the process form:
   to `(0,t]`, where `itoProcessCLM_eq_zero_of_vanishes_before` and
   `itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after` make the process value a
   terminal integral, then apply the kernel);
-* `mconsist` / `mconsist_frozen` / `mMeq_frozen` — the horizon-consistency corollaries:
+* `ae_eq_itoProcessCLM_of_le` / `ae_eq_itoProcessCLM_of_horizon_le` /
+  `ae_eq_itoProcessCLM_min` — the horizon-consistency corollaries:
   from the horizon-`T` pinning `hMeq : ∀ t, M t =ᵐ (φ●B)_t` alone, `M t` represents the
   CLM integral at every horizon `τ ≤ T` (at `t ≤ τ` directly; past `τ` the τ-horizon CLM
   is frozen, so `M τ` represents it at every `t ≥ τ`, and the frozen reversion
@@ -60,8 +61,13 @@ Public API (all in `namespace MathFin`):
 * `itoProcessCLM_consist` — the process form: for the σ-realization `processToLp δ` of a
   bounded, adapted, path-continuous `δ`, the τ- and T-horizon CLM processes agree at every
   `t ≤ τ ≤ T`;
-* `mconsist`, `mconsist_frozen`, `mMeq_frozen` — the horizon-consistency corollaries for
+* `ae_eq_itoProcessCLM_of_le`, `ae_eq_itoProcessCLM_of_horizon_le`,
+  `ae_eq_itoProcessCLM_min` — the horizon-consistency corollaries for
   a process `M` pinned to the T-horizon CLM integral by an a.e. `hMeq`.
+
+`ItoFormulaAdaptedDriftConstructed` uses `ae_eq_itoProcessCLM_min` and
+`itoProcessCLM_eq_terminal_of_ge` to state the integrated Itô–drift identity for the constructed
+process at every time `τ ≤ T` of its horizon.
 
 Supporting lemmas (`eLpNorm_band_transfer` and the simple-embedding scaffolding) are
 `private`.
@@ -352,7 +358,7 @@ theorem itoProcessCLM_consist (hB : IsPreBrownianReal B μ)
 /-- **The horizon-consistency corollary**: from the horizon-`T` pinning
 `hMeq : ∀ t, M t =ᵐ (φ●B)_t` alone, `M t` represents the CLM Itô integral of `δ` at
 every horizon `τ ≤ T` and every time `t ≤ τ`. -/
-theorem mconsist (hB : IsPreBrownianReal B μ)
+theorem ae_eq_itoProcessCLM_of_le (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
     (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
     (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
@@ -370,7 +376,7 @@ theorem mconsist (hB : IsPreBrownianReal B μ)
 /-- **The frozen corollary**: past the horizon the CLM process freezes
 (`itoProcessCLM_eq_terminal_of_ge`), so `M τ` represents the τ-horizon CLM integral at
 *every* time `t ≥ τ`. -/
-theorem mconsist_frozen (hB : IsPreBrownianReal B μ)
+theorem ae_eq_itoProcessCLM_of_horizon_le (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
     (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
     (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
@@ -391,9 +397,10 @@ theorem mconsist_frozen (hB : IsPreBrownianReal B μ)
     (congrFun (congrArg (fun z : Lp ℝ 2 μ ↦ (z : Ω → ℝ)) (hLp.trans hfrz.symm))))
 
 /-- **The frozen-reversion corollary**: the time-frozen reversion `t ↦ M (min t τ)`
-represents the τ-horizon CLM process at *every* time — at `t ≤ τ` by `mconsist`, past
+represents the τ-horizon CLM process at *every* time — at `t ≤ τ` by
+`ae_eq_itoProcessCLM_of_le`, past
 `τ` by the freeze law. -/
-theorem mMeq_frozen (hB : IsPreBrownianReal B μ)
+theorem ae_eq_itoProcessCLM_min (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
     (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
     (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
@@ -407,9 +414,9 @@ theorem mMeq_frozen (hB : IsPreBrownianReal B μ)
   intro t
   rcases le_total t τ with hle | hge
   · rw [min_eq_left hle]
-    exact mconsist hB hBmeas hδadap hδcont hδbdd hMeq hτT hle
+    exact ae_eq_itoProcessCLM_of_le hB hBmeas hδadap hδcont hδbdd hMeq hτT hle
   · rw [min_eq_right hge]
-    exact mconsist_frozen hB hBmeas hδadap hδcont hδbdd hMeq hτT hge
+    exact ae_eq_itoProcessCLM_of_horizon_le hB hBmeas hδadap hδcont hδbdd hMeq hτT hge
 
 end CrossHorizon
 

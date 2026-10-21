@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
+public import MathFin.Foundations.IndepFreezing
 
 /-!
 # Brownian Markov property at the σ-algebra level
@@ -29,12 +30,26 @@ the past evaluation map, so the function-valued independence upgrades to
 which together with `IsPreBrownianReal.shift` is the full textbook package: after
 `t₀`, Brownian motion **restarts afresh, independently of its entire past**.
 
+The same two facts give the Markov property as a conditional expectation. The shifted
+process is pre-Brownian, so its law on the path space `ℝ≥0 → ℝ` (product σ-algebra) is
+Degenne's projective-limit measure `gaussianLimit` (`IsPreBrownianReal.hasLaw_gaussianLimit`), and the freezing lemma
+`condExp_comp_prodMk_of_indep` (`Foundations/IndepFreezing`, Shreve's independence lemma)
+turns the σ-algebra independence into
+
+  `𝔼[g(Y, (X_{t₀+t} − X_{t₀})_t) | 𝓕ᵉ_{t₀}] = ∫ g(Y, x) dW(x)`
+
+for every `𝓕ᵉ_{t₀}`-measurable `Y`. This is the simple Markov property at a fixed time
+`t₀` for the natural (unaugmented) filtration, not the strong Markov property.
+
 ## Main results
 
 * `shift_indep_natural` — σ(increments after `t₀`) is independent of the
   natural filtration at `t₀`.
 * `brownian_markov_property` — the textbook package: the shifted increment
   process is a pre-Brownian motion *and* independent of `𝓕ᵉ_{t₀}`.
+* `condExp_shift_eq_integral_gaussianLimit` — the Markov property in conditional-expectation
+  form: given `𝓕ᵉ_{t₀}`, a functional of the past and the future increment path is
+  integrated against `gaussianLimit` in its future argument.
 -/
 
 @[expose] public section
@@ -71,5 +86,35 @@ theorem brownian_markov_property (h : IsPreBrownianReal X P)
       (MeasurableSpace.comap (fun ω (t : ℝ≥0) ↦ X (t₀ + t) ω - X t₀ ω) inferInstance)
       (Filtration.natural X (fun t ↦ (hX t).stronglyMeasurable) t₀) P :=
   ⟨h.shift t₀, shift_indep_natural h hX t₀⟩
+
+/-- **The Markov property as a conditional expectation.** For a pre-Brownian motion `X` with
+measurable sections, a time `t₀`, a `𝓕ᵉ_{t₀}`-measurable `Y` and a strongly measurable `g` with
+`g(Y, ·)` integrable along the future increment path,
+
+  `𝔼[g(Y, (X_{t₀+t} − X_{t₀})_t) | 𝓕ᵉ_{t₀}] = ∫ g(Y, x) dW(x)`  almost surely,
+
+with `W = gaussianLimit` the pre-Brownian law on the product path space `ℝ≥0 → ℝ`: given the
+past, the past is frozen and
+the future increment path keeps the law of a Brownian motion started at `0`. The freezing
+lemma `condExp_comp_prodMk_of_indep` applied to `shift_indep_natural`; the law of the
+shifted process is `gaussianLimit` because it is pre-Brownian (`IsPreBrownianReal.shift`,
+`IsPreBrownianReal.hasLaw_gaussianLimit`). -/
+theorem condExp_shift_eq_integral_gaussianLimit (h : IsPreBrownianReal X P)
+    (hX : ∀ t, Measurable (X t)) (t₀ : ℝ≥0) {α : Type*} {mα : MeasurableSpace α} {Y : Ω → α}
+    (hY : Measurable[Filtration.natural X (fun t ↦ (hX t).stronglyMeasurable) t₀] Y)
+    {g : α × (ℝ≥0 → ℝ) → ℝ} (hg : StronglyMeasurable g)
+    (hgi : Integrable (fun ω ↦ g (Y ω, fun t ↦ X (t₀ + t) ω - X t₀ ω)) P) :
+    P[fun ω ↦ g (Y ω, fun t ↦ X (t₀ + t) ω - X t₀ ω) |
+        Filtration.natural X (fun t ↦ (hX t).stronglyMeasurable) t₀]
+      =ᵐ[P] fun ω ↦ ∫ x, g (Y ω, x) ∂gaussianLimit := by
+  have : IsProbabilityMeasure P := h.isGaussianProcess.isProbabilityMeasure
+  have hshift : Measurable fun ω (t : ℝ≥0) ↦ X (t₀ + t) ω - X t₀ ω :=
+    measurable_pi_lambda _ fun t ↦ (hX _).sub (hX _)
+  have hlaw : P.map (fun ω (t : ℝ≥0) ↦ X (t₀ + t) ω - X t₀ ω) = gaussianLimit :=
+    ((h.shift t₀).hasLaw_gaussianLimit hshift.aemeasurable).map_eq
+  rw [← hlaw]
+  exact condExp_comp_prodMk_of_indep
+    ((Filtration.natural X fun t ↦ (hX t).stronglyMeasurable).le t₀) hY hshift.aemeasurable
+    (shift_indep_natural h hX t₀) hg hgi
 
 end MathFin

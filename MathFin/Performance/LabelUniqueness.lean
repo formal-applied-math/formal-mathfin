@@ -24,6 +24,8 @@ mean of `u_{t,i}` over `i`'s span) is not defined here.
 
 * `concurrency_pos`: `c_t > 0` whenever some span contains `t`.
 * `uniqueness_mem_Ioc`: `u_{t,i} ∈ (0, 1]` whenever `t ∈ span i`.
+* `concurrency_sumElim`: the concurrency of a pooled sample `ι ⊕ κ` is the sum of the two
+  samples' concurrencies (used by `Performance/PurgedCV.lean`).
 -/
 
 @[expose] public section
@@ -63,5 +65,15 @@ theorem uniqueness_mem_Ioc (t0 t1 : ι → ℝ) {t : ℝ} {i : ι}
     exact div_pos one_pos hpos
   · rw [uniqueness, if_pos hi, div_le_one hpos]
     exact one_le_concurrency t0 t1 hi
+
+/-- **Concurrency of a pooled sample**: the labels of `ι ⊕ κ` active at `t` are those of `ι`
+and those of `κ`, so the concurrencies add. -/
+theorem concurrency_sumElim {κ : Type*} [Fintype κ] (t0 t1 : ι → ℝ) (t0' t1' : κ → ℝ)
+    (t : ℝ) :
+    concurrency (Sum.elim t0 t0') (Sum.elim t1 t1') t =
+      concurrency t0 t1 t + concurrency t0' t1' t := by
+  unfold concurrency
+  rw [Fintype.sum_sum_type]
+  rfl
 
 end MathFin

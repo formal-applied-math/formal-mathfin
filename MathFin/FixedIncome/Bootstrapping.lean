@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -10,6 +10,7 @@ public import MathFin.Foundations.Bisection
 public import MathFin.FixedIncome.FRA
 public import MathFin.FixedIncome.InterestRateSwap
 public import MathFin.FixedIncome.ZCB
+public import MathFin.FixedIncome.YieldCurve
 
 /-!
 # Curve bootstrapping by bracketing search
@@ -53,6 +54,12 @@ The module layers:
   With one payment at the new maturity (annuity `A₀ + δ·x`), the value is
   `(P0 − K·A₀) − (1 + K·δ)·x` — covered under `1 + K·δ > 0`
   (`swapLastCouponThreshold`).
+* **The swap is a par coupon bond** — the zero-value last-coupon swap at fixed rate `K`
+  is the coupon-bond pricing equation `couponBondPricingEq` of
+  `FixedIncome/YieldCurve.lean` with coupon `K·δ` and face `1`
+  (`payerSwapValue_lastCoupon_eq_zero_iff_couponBond`), so the closed-form bootstrap
+  `bootstrap_solve` names the swap's root, and bisection on the swap recovers the
+  discount factor of the coupon bond (`swapBootstrap_recovers_couponBondFactor`).
 * **The induction** — `boot` builds the curve by structural recursion over
   the instrument index: step `i` bisects instrument `i`'s solving function on
   the prefix bootstrapped so far, so each step literally inherits the previous
@@ -101,7 +108,9 @@ sign, possibly zero, so no bracketing sign change is guaranteed), and joint
 solves for several new factors at once.
 
 Boundary: `MathFin/FixedIncome/YieldCurve.lean` owns the closed-form
-`bootstrap_solve*` names; this module owns the search-based bootstrap.
+`bootstrap_solve*` names; this module owns the search-based bootstrap, and the swap layer
+proves that bisection on the swap lands within `(hi − lo)/2^{n+1}` of the closed-form root, for a
+bracket containing it (`swapBootstrap_recovers_couponBondFactor`).
 
 ## Result
 
@@ -124,7 +133,9 @@ Public lemmas (all in `namespace MathFin.Bootstrapping`):
   `payerSwapValue_affine_lastCoupon`,
   `payerSwapValue_affine_lastCoupon_annuity`,
   `strictAnti_payerSwapValue_lastCoupon`, `swapLastCouponThreshold`,
-  `swapStep_lastCoupon_err` — the payer-swap layer;
+  `swapStep_lastCoupon_err`, `payerSwapValue_lastCoupon_eq_zero_iff_couponBond`,
+  `swapBootstrap_recovers_couponBondFactor` — the payer-swap layer and its agreement with
+  the closed-form coupon-bond bootstrap;
 * `boot_length`, `boot_succ_ne_nil`, `boot_step_err`, `boot_reprices_all` —
   the induction over instruments;
 * `boot_reprices_fraChain`, `boot_reprices_swapChain` — the FRA and swap strips
@@ -133,7 +144,8 @@ Public lemmas (all in `namespace MathFin.Bootstrapping`):
 
 Supporting declarations: the `@[simp]` unfolding equations `fraChain_cons` and
 `swapChain_cons`; and, `private`, the threshold bridge `threshold_affine`, the
-slope-weighted residual `abs_affine_sub_eq` and the unfolding lemma `boot_succ`.
+slope-weighted residual `abs_affine_sub_eq`, the coupon-sum identity
+`sum_const_mul_eq_annuity` and the unfolding lemma `boot_succ`.
 -/
 
 set_option autoImplicit false
@@ -419,6 +431,44 @@ theorem swapStep_lastCoupon_err (P0 K A₀ δ c lo hi : ℝ) (hpos : 0 < 1 + K *
     |bisectMid (fun x : ℝ ↦ -(payerSwapValue P0 x K (A₀ + δ * x))) (-c) lo hi n
       - (P0 - K * A₀ - c) / (1 + K * δ)| ≤ (hi - lo) / 2 ^ (n + 1) :=
   abs_bisectMid_sub_le (swapLastCouponThreshold P0 K A₀ δ c lo hi hpos) hσ n
+
+/-- The coupons `K·δ` paid on the schedule `s`, discounted by `P`, are `K` times the annuity. -/
+private theorem sum_const_mul_eq_annuity {ι : Type*} (s : Finset ι) (P : ι → ℝ) (K δ : ℝ) :
+    ∑ i ∈ s, K * δ * P i = K * annuity δ P s := by
+  simp only [annuity, Finset.mul_sum, mul_assoc]
+
+/-- **A zero-value swap is a par coupon bond.** The last-coupon payer swap (floating leg
+`P0 − x`, one fixed payment of `K·δ` at each date of `s` and at the new factor `x`) has
+zero value exactly when the coupon bond paying `K·δ` at every date and face `1` at the last
+prices at `P0`: the pricing equation `couponBondPricingEq` of `FixedIncome/YieldCurve.lean`
+with coupon `K·δ` and face `1`. -/
+theorem payerSwapValue_lastCoupon_eq_zero_iff_couponBond {ι : Type*} (s : Finset ι)
+    (P : ι → ℝ) (P0 K δ x : ℝ) :
+    payerSwapValue P0 x K (annuity δ P s + δ * x) = 0 ↔
+      couponBondPricingEq s (fun _ ↦ K * δ) P P0 (K * δ) 1 x := by
+  simp only [payerSwapValue, couponBondPricingEq, sum_const_mul_eq_annuity]
+  constructor <;> intro h <;> linear_combination h
+
+/-- **Swap bootstrapping recovers the coupon-bond discount factor.** If the new factor `x`
+solves the par-coupon-bond pricing equation — coupon `K·δ` at every date of `s` and at the new
+one, face `1`, price `P0` — then bisection on the zero-quote last-coupon swap, from any bracket
+`[lo, hi]` containing `x`, lands within `(hi − lo)/2^{n+1}` of it (`1 + K·δ > 0`). The
+closed-form bootstrap `bootstrap_solve` identifies `x` with the swap's bisection root
+`(P0 − K·A₀)/(1 + K·δ)`. -/
+theorem swapBootstrap_recovers_couponBondFactor {ι : Type*} (s : Finset ι) (P : ι → ℝ)
+    (P0 K δ x lo hi : ℝ) (hpos : 0 < 1 + K * δ)
+    (hbond : couponBondPricingEq s (fun _ ↦ K * δ) P P0 (K * δ) 1 x)
+    (hx : x ∈ Set.Icc lo hi) (n : ℕ) :
+    |bisectMid (fun y : ℝ ↦ -(payerSwapValue P0 y K (annuity δ P s + δ * y))) 0 lo hi n - x|
+      ≤ (hi - lo) / 2 ^ (n + 1) := by
+  have hroot : x = (P0 - K * annuity δ P s - 0) / (1 + K * δ) := by
+    have h := bootstrap_solve s (fun _ ↦ K * δ) P P0 (K * δ) 1 x
+      (show (0 : ℝ) < K * δ + 1 by linarith).ne' hbond
+    simp only [sum_const_mul_eq_annuity] at h
+    rwa [sub_zero, add_comm 1 (K * δ)]
+  have h := swapStep_lastCoupon_err P0 K (annuity δ P s) δ 0 lo hi hpos
+    (by rw [← hroot]; exact hx) n
+  rwa [neg_zero, ← hroot] at h
 
 end Swap
 

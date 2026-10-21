@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -46,13 +46,13 @@ is a separate, substantial development (closedness of a finitely-generated
 cone, the finite-dimensional Farkas transposition theorem in coordinates)
 that is out of scope here. Uniqueness of the multipliers when the active
 constraint gradients are linearly independent (a linear-algebra consequence
-of stationarity and complementary slackness) is not stated either. We also
-do not separately prove a mixed
-equality/inequality-constraint version: an equality constraint `a ⬝ᵥ x = b`
-is exactly a pair of opposed inequalities `a ⬝ᵥ x ≤ b` and `-a ⬝ᵥ x ≤ -b`, so
-it is already representable with the inequality-only machinery proved here
-(at the cost of writing its free multiplier as a difference of two
-nonnegative ones).
+of stationarity and complementary slackness) is not stated either.
+
+**Equality constraints** (`kkt_sufficient_of_eq`): an equality constraint
+`a ⬝ᵥ x = b` is exactly the pair of opposed inequalities `a ⬝ᵥ x ≤ b` and
+`-a ⬝ᵥ x ≤ -b`, and a free multiplier is the difference of two nonnegative ones,
+so sufficiency for the equality-constrained QP is `kkt_sufficient` applied to
+that pair. A mixed equality/inequality statement is not stated separately.
 
 We also prove the ratio-test **feasible step size** lemma
 (`feasible_step_preserved`): for a feasible `x0` and direction `d`, stepping
@@ -74,6 +74,8 @@ set) is not proved.
   `qpObj c C y - qpObj c C x = (y-x) ⬝ᵥ (c + C *ᵥ x) + ½ (y-x) ⬝ᵥ (C *ᵥ (y-x))`
   — the algebraic core of convexity, valid for any symmetric `C`.
 * `kkt_sufficient`: KKT sufficiency for the inequality-constrained convex QP.
+* `kkt_sufficient_of_eq`: KKT sufficiency for the equality-constrained convex QP, with
+  multipliers of either sign.
 * `kkt_point_unique_of_posDef`: uniqueness of the feasible KKT point under `C ≻ 0`.
 * `feasible_step_preserved`: the ratio-test feasibility-preservation lemma.
 -/
@@ -215,6 +217,31 @@ theorem kkt_point_unique_of_posDef {c : ι → ℝ} {C : Matrix ι ι ℝ}
   have := hpd.dotProduct_mulVec_pos hd_ne
   simp only [star_trivial] at this
   linarith [hquad_zero]
+
+/-- **KKT sufficiency with equality constraints**: for the convex QP
+`min c ⬝ᵥ x + ½ x ⬝ᵥ (C *ᵥ x)` subject to `∀ k, a k ⬝ᵥ x = b k`, a feasible point `x0`
+satisfying stationarity `c + C *ᵥ x0 = ∑ k, ν k • a k` for some multipliers `ν` (of
+either sign) satisfies `qpObj c C x0 ≤ qpObj c C y` for every feasible `y`, provided `C`
+is positive semidefinite.
+
+This is `kkt_sufficient` for the inequality system `a k ⬝ᵥ x ≤ b k`, `-a k ⬝ᵥ x ≤ -b k`
+indexed by `κ ⊕ κ`, with the free multiplier `ν k` split into the nonnegative pair
+`max (-ν k) 0`, `max (ν k) 0`. Complementary slackness holds because `x0` is feasible. -/
+theorem kkt_sufficient_of_eq {c : ι → ℝ} {C : Matrix ι ι ℝ} (hpsd : C.PosSemidef)
+    {a : κ → ι → ℝ} {b : κ → ℝ} {x0 : ι → ℝ} (hfeas : ∀ k, a k ⬝ᵥ x0 = b k)
+    {ν : κ → ℝ} (hstat : c + C *ᵥ x0 = ∑ k, ν k • a k) :
+    ∀ y, (∀ k, a k ⬝ᵥ y = b k) → qpObj c C x0 ≤ qpObj c C y := by
+  intro y hy
+  refine kkt_sufficient hpsd (a := Sum.elim a (-a)) (b := Sum.elim b (-b))
+    (u := Sum.elim (fun k ↦ max (-ν k) 0) fun k ↦ max (ν k) 0)
+    (fun k ↦ by cases k <;> simp) ?_ (fun k ↦ by cases k <;> simp [hfeas]) y
+    fun k ↦ by cases k <;> simp [hy]
+  rw [hstat, Fintype.sum_sum_type, ← Finset.sum_add_distrib, ← Finset.sum_neg_distrib]
+  refine Finset.sum_congr rfl fun k _ ↦ ?_
+  simp only [Sum.elim_inl, Sum.elim_inr, Pi.neg_apply, smul_neg]
+  rw [show ν k • a k = (max (ν k) 0 - max (-ν k) 0) • a k by rw [max_zero_sub_eq_self],
+    sub_smul]
+  abel
 
 omit [Fintype κ] in
 /-- **Feasible step size (ratio test)**: let `x0` be feasible and `d`

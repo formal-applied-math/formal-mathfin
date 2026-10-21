@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -33,6 +33,12 @@ factor's randomness. The Fubini step reduces the claim to the kernel
   `σ, s > 0`, from `bachelier_call_formula` with the strike shifted to `K = 1`, `S₀ = m + 1`.
 * `cva_gaussian` — headline: Gaussian exposure, bounded `D, m, σ`, `σ > 0`: CVA as a
   one-dimensional time integral whose integrand (the expected exposure) is in closed form.
+* `cva_one_eq_protectionLeg` — the CVA of a unit exposure discounted at a flat rate `r` is the CDS
+  protection leg `Cox.protectionLeg` (Bagaria eq. 16.2), for any default time whose CDF on
+  `[0, ∞)` is `1 − Q` (hypothesized, as above).
+* `protectionLeg_eq_integral_coxDefaultTime` — for the Cox default time constructed in
+  `FixedIncome/Cox.lean` (a unit-exponential clock inverted through `∫₀ᵗ h`), the protection leg is
+  the expectation `(1 − R)·E[e^{−rτ}·1{τ ≤ T}]`; here the CDF is derived, not hypothesized.
 
 ## References
 
@@ -167,5 +173,46 @@ theorem cva_gaussian [IsProbabilityMeasure ν] [IsProbabilityMeasure μ]
   rw [Set.uIoc_of_le hT] at hs
   simp only [expectedExposure]
   rw [expectedExposure_gaussian hZ (hσpos s) hs.1]
+
+/-- **The protection leg is the CVA of a unit exposure.** For a default time `τ` with continuous
+hazard `h ≥ 0` (CDF `1 − Q` on `[0, ∞)`, hypothesized), recovery `R`, flat rate `r` and `T ≥ 0`,
+the CVA of the constant exposure `V ≡ 1` discounted by `e^{−rs}` is
+`(1 − R)·E[e^{−rτ}·1{τ ≤ T}] = (1 − R)·∫₀ᵀ e^{−rs} h(s) Q(s) ds = Cox.protectionLeg R r h T`. -/
+theorem cva_one_eq_protectionLeg [IsProbabilityMeasure ν] [IsFiniteMeasure μ] {h : ℝ → ℝ}
+    (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s) {τ : Ω₂ → ℝ} (hτ : AEMeasurable τ μ)
+    (hcdf : ∀ a, 0 ≤ a → μ {ω | τ ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival h a))
+    (R r : ℝ) {T : ℝ} (hT : 0 ≤ T) :
+    cva (1 - R) (fun s ↦ rexp (-(r * s))) (fun _ _ ↦ 1) τ T ν μ = Cox.protectionLeg R r h T := by
+  simp only [cva, max_eq_left (zero_le_one : (0 : ℝ) ≤ 1), mul_one]
+  rw [integral_fun_snd (f := fun ω ↦ (Set.Iic T).indicator (fun s ↦ rexp (-(r * s))) (τ ω)),
+    probReal_univ, one_smul,
+    integral_indicator_Iic_eq hh hnn hτ hcdf (by fun_prop) hT, Cox.protectionLeg, Cox.cdsLosses]
+  congr 1
+  refine intervalIntegral.integral_congr fun s _ ↦ ?_
+  simp only [defaultDensity]
+  ring
+
+/-- **The Cox protection leg is an expectation over the constructed default time.** For `h`
+continuous and positive with `∫₀ᵗ h → ∞`, `ξ` a unit-exponential clock and
+`τ = Cox.coxDefaultTime h ξ` (the clock inverted through `∫₀ᵗ h`), the CDS protection leg
+`(1 − R)·∫₀ᵀ e^{−rs} h(s) e^{−∫₀ˢ h} ds` (`Cox.protectionLeg`) equals
+`(1 − R)·E[e^{−rτ}·1{τ ≤ T}]` for `T ≥ 0`. The CDF of `τ` is `Cox.cox_cdf_timeVarying` and its
+measurability is `Cox.measurable_coxDefaultTime`. -/
+theorem protectionLeg_eq_integral_coxDefaultTime [IsFiniteMeasure μ] {h : ℝ → ℝ}
+    (hh : Continuous h) (hpos : ∀ s, 0 < h s)
+    (hdiv : Filter.Tendsto (cumHazard h) Filter.atTop Filter.atTop) {ξ : Ω₂ → ℝ}
+    (hξmeas : Measurable ξ) (hξlaw : μ.map ξ = ProbabilityTheory.expMeasure 1) (R r : ℝ) {T : ℝ}
+    (hT : 0 ≤ T) :
+    Cox.protectionLeg R r h T =
+      (1 - R) * ∫ ω, (Set.Iic T).indicator (fun s ↦ rexp (-(r * s)))
+        (Cox.coxDefaultTime h ξ ω) ∂μ := by
+  rw [integral_indicator_Iic_eq hh (fun s ↦ (hpos s).le)
+    (Cox.measurable_coxDefaultTime hh hpos hξmeas).aemeasurable
+    (fun _ ha ↦ Cox.cox_cdf_timeVarying hh hpos hdiv hξmeas hξlaw ha) (by fun_prop) hT,
+    Cox.protectionLeg, Cox.cdsLosses]
+  congr 1
+  refine intervalIntegral.integral_congr fun s _ ↦ ?_
+  simp only [defaultDensity]
+  ring
 
 end MathFin.CVA

@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.Portfolio.TangentPortfolio
+public import MathFin.Portfolio.Markowitz
 
 /-!
 # Markowitz cross-product FOC derived from Sharpe-ratio maximization
@@ -37,7 +38,8 @@ loop between the optimization-theoretic and algebraic perspectives.
 ## Results
 
 * `expectedReturnTwo`, `varianceTwo`, `marginalVarOne`, `marginalVarTwo`,
-  `sharpeSqTwo`: definitions.
+  `sharpeSqTwo`: definitions (`varianceTwo` is `portfolioVarTwo` of
+  `Portfolio/Markowitz.lean` with the weight as first argument).
 * `varianceTwo_eq_w_dot_Sigma_w`: `V = w · (Σw)₁ + (1 − w) · (Σw)₂` (the
   self-dot identity).
 * `hasDerivAt_varianceTwo`: `V'(w) = 2 · ((Σw)₁ − (Σw)₂)`.
@@ -55,9 +57,10 @@ namespace MathFin
 (with `1 − w` on asset 2). -/
 noncomputable def expectedReturnTwo (w r₁ r₂ : ℝ) : ℝ := w * r₁ + (1 - w) * r₂
 
-/-- Two-asset portfolio variance. -/
+/-- Two-asset portfolio variance as a function of the weight `w`: the library's
+`portfolioVarTwo` (`Portfolio/Markowitz.lean`) with the weight as first argument. -/
 noncomputable def varianceTwo (w σ₁ σ₂ ρ : ℝ) : ℝ :=
-  w^2 * σ₁^2 + (1 - w)^2 * σ₂^2 + 2 * w * (1 - w) * ρ * σ₁ * σ₂
+  portfolioVarTwo σ₁ σ₂ ρ w
 
 /-- Marginal variance contribution of asset 1: `(Σw)₁ = w σ₁² + (1−w) ρ σ₁ σ₂`. -/
 noncomputable def marginalVarOne (w σ₁ σ₂ ρ : ℝ) : ℝ :=
@@ -75,7 +78,7 @@ noncomputable def sharpeSqTwo (w r₁ r₂ σ₁ σ₂ ρ : ℝ) : ℝ :=
 lemma varianceTwo_eq_w_dot_Sigma_w (w σ₁ σ₂ ρ : ℝ) :
     varianceTwo w σ₁ σ₂ ρ =
       w * marginalVarOne w σ₁ σ₂ ρ + (1 - w) * marginalVarTwo w σ₁ σ₂ ρ := by
-  unfold varianceTwo marginalVarOne marginalVarTwo
+  unfold varianceTwo portfolioVarTwo marginalVarOne marginalVarTwo
   ring
 
 /-- **Derivative of `E(w) = w r₁ + (1 − w) r₂`** is `r₁ − r₂`. -/
@@ -103,7 +106,7 @@ lemma hasDerivAt_varianceTwo (w σ₁ σ₂ ρ : ℝ) :
       (fun w' ↦ (σ₁^2 + σ₂^2 - 2*ρ*σ₁*σ₂) * w'^2 +
                  (-2*σ₂^2 + 2*ρ*σ₁*σ₂) * w' + σ₂^2) := by
     funext w'
-    unfold varianceTwo
+    unfold varianceTwo portfolioVarTwo
     ring
   rw [h_v_poly]
   have h_sq : HasDerivAt (fun w' : ℝ ↦ w'^2) (2*w) w := by
@@ -151,7 +154,7 @@ theorem sharpeSqTwo_deriv_numerator_factored (w r₁ r₂ σ₁ σ₂ ρ : ℝ) 
           (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ)) =
       2 * expectedReturnTwo w r₁ r₂ *
         (r₁ * marginalVarTwo w σ₁ σ₂ ρ - r₂ * marginalVarOne w σ₁ σ₂ ρ) := by
-  unfold expectedReturnTwo varianceTwo marginalVarOne marginalVarTwo
+  unfold expectedReturnTwo varianceTwo portfolioVarTwo marginalVarOne marginalVarTwo
   ring
 
 /-- **Critical-point characterisation**: in the `E ≠ 0`, `V > 0` regime, the

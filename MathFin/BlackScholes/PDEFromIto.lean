@@ -5,176 +5,134 @@ Authors: Raphael Coelho
 -/
 module
 
--- `import Mathlib` comes transitively through `ItoLemma` / `BlackScholes.PDE`.
-public import MathFin.Foundations.ItoLemma
+-- `import Mathlib` comes transitively through `ItoLemma2D` / `PDEFromFeynmanKac`.
 public import MathFin.Foundations.ItoLemma2D
-public import MathFin.BlackScholes.PDE
+public import MathFin.BlackScholes.PDEFromFeynmanKac
 
 /-!
-# Black-Scholes PDE derived via the Itô-drift formula (phase 46)
+# The Black–Scholes PDE in the Brownian coordinate
 
-The pre-existing `BlackScholes/PDE.lean` proves the BS PDE *directly*:
-`∂_t V + (1/2) σ² S² ∂_SS V + r S ∂_S V − r V = 0` follows from explicit
-computation of the partial derivatives of `bsV = S Φ(d_1) − K e^{−rτ}
-Φ(d_2)`. That is a *backward* verification (we have the closed form, we
-check it satisfies the PDE).
+Write the stock with drift `r` in its Brownian coordinate, `S = gbmValue S₀ r σ t x =
+S₀·exp((r − σ²/2)t + σx)`, where `x` stands for the value `B_t` of the driving Brownian motion,
+and consider the discounted Black–Scholes call value
 
-This file derives the same PDE *forward*, from the **no-arbitrage
-condition + Itô structural drift formula** (Phase 39 `itoDrift`). The
-chain:
+  `f(t, x) = e^{−rt} · bsV K r σ (gbmValue S₀ r σ t x) (T − t)`   (`discountedCallBrownian`).
 
-1. Under the risk-neutral measure `Q`, the discounted price `e^{−rt} V_t`
-   is a `Q`-martingale (fundamental no-arbitrage statement).
-2. By Itô's lemma applied to `f(S, t) := e^{−rt} · V(S, T−t)`, the drift
-   of `d(e^{−rt} V_t)` is zero (martingale property).
-3. The drift involves partial derivatives of `V`, and setting it to zero
-   gives the BS PDE.
+For a function of `(t, B_t)` the time-dependent Itô formula (`Foundations/ItoFormulaTD`,
+`Foundations/ItoFormulaLocalized`) reads
+`f(t, B_t) − f(0, B_0) = ∫ f_x(s, B_s) dB_s + ∫ (f_t + ½ f_xx)(s, B_s) ds`. This file proves
+the analytic fact that makes the drift integrand vanish: for `t < T`,
 
-The result: the PDE is a *consequence* of risk-neutral pricing + Itô,
-not a separate assumption. The closed-form `bsV` satisfies the PDE
-(verified directly in `PDE.lean`), and *why* it satisfies the PDE is
-that any no-arb option price must satisfy it.
+  `f_t + ½ f_xx = 0`   (`discountedCallBrownian_heat_equation`),
 
-## What this file is
+with `f` differentiable in `t` and `f_x` differentiable in `x`, and identifies the integrand
+of the stochastic term, `f_x = σ · e^{−rt} S · Φ(d₁)`, the discounted delta hedge
+(`hasDerivAt_discountedCallBrownian_x`).
 
-A **structural derivation** of the BS PDE coefficient relationship from
-the Itô-drift formula, at the algebraic level. The full continuous-time
-martingale-property derivation requires the integral form of Itô's lemma
-(see `Foundations/ItoLemma.lean` note); the drift-coefficient version
-here is the algebraic core.
+The proof goes through the Feynman–Kac representation (`BlackScholes/PDEFromFeynmanKac`).
+In the Brownian coordinate the discounted price is a heat flow,
+`f(t, x) = e^{−rT} · u(σ²(T − t), log S₀ + (r − σ²/2)T + σx)`
+(`discountedCallBrownian_eq_heatFlow`), `u = feynmanU (ξ ↦ (e^ξ − K)⁺)`: `∂_t` moves only the
+time slot of `u` and `∂_x` only its space slot, so the heat equation `∂_τ u = ½ ∂_yy u`
+(`feynmanU_heat_equation`) gives `f_t + ½ f_xx = e^{−rT}·σ²·(−u_τ + ½ u_yy) = 0`.
 
-## The bridge to the continuous-time foundations (status, 2026-05-28)
+Not proved here: the stochastic-integral statement itself, that `f(t, B_t)` is a local
+martingale on `[0, T)`. Applying the localized Itô formula to `f` needs exponential growth
+bounds on `f` and its partials up to third order, uniformly in time, and a localization away
+from `t = T`, where `bsV` is not differentiable in `τ`.
 
-The closing of the `Foundations/` → pricing-modules bridge gap (F1 in
-`docs/archive/portfolio-review-2026-05-28.md`) for this file requires Itô's
-lemma for general `C²(ℝ², ℝ)` functions `(s, t) ↦ V(s, t)` applied to
-GBM `S_t`. We now have:
+## Results
 
-* `Foundations/ItoIntegralCLM.itoIntegralCLM_T` — the continuous Itô
-  integral as a continuous linear isometry `Lp 2 trim_T →L[ℝ] Lp 2 μ`.
-* `Foundations/ItoFormulaSquaredL2.itoSquared_L2_tendsto_div2` — Itô's
-  lemma for `f(x) = x²` in continuous L² form: the Riemann sums
-  `∑ B·ΔB` converge in `L²(μ)` to `½·(B_T² − B_0² − T)`.
-
-What remains for a full refactor consuming the continuous Itô integral:
-
-1. **Itô's lemma for general `C²(ℝ → ℝ)`** at the L² level — extending
-   `itoSquared_L2_tendsto_div2` from `x²` to arbitrary smooth `f`. The
-   bound on the discrete Taylor remainder under `f ∈ C³` is the missing
-   ingredient (`Foundations/DiscreteIto.discreteTaylorRemainder` exists;
-   the third-order bound is documented as deferred).
-2. **Itô's lemma for `C²(ℝ² → ℝ)`** with time dependence — adds the
-   `∂_t V dt` term used here as `V_t` in `bsItoDrift`.
-3. **Geometric Brownian motion as an SDE solution** — `S_t = S_0 exp((r −
-   ½σ²)t + σB_t)` solves `dS = rS dt + σS dB`, derived via (2). Then
-   plugging into (2) gives the BS PDE.
-
-The algebraic identity in this file pre-figures the drift coefficient
-the continuous derivation will produce; the `bsItoDrift` definition is
-the right *target*. A multi-session continuation closes the bridge by
-deriving rather than positing it.
-
-## Result
-
-* `bs_drift_under_riskNeutral`: under risk-neutral GBM `dS = r S dt + σ
-  S dB`, the Itô drift of `V(S, t)` is `r S · ∂_S V + (1/2) σ² S² · ∂_SS
-  V + ∂_t V` — the LHS of the BS PDE (modulo `−rV`).
-* `bs_pde_from_no_arbitrage`: setting the drift of the *discounted*
-  option price `e^{−rt} V_t` to zero (no-arb) recovers the BS PDE
-  algebraic identity.
-
-The discount + drift algebra:
-`d(e^{−rt} V) = e^{−rt} · (dV − r V dt) = e^{−rt} · (drift_V dt + ... dB − r V dt)`
-⟹ for `d(e^{−rt} V)` to be driftless: `drift_V = r V`.
-i.e., `∂_t V + r S ∂_S V + (1/2) σ² S² ∂_SS V = r V`,
-i.e., the BS PDE. -/
+* `discountedCallBrownian`: the discounted call value in the Brownian coordinate.
+* `discountedCallBrownian_eq_heatFlow`: its heat-flow (Feynman–Kac) form for `t < T`.
+* `hasDerivAt_discountedCallBrownian_x`: `f_x = σ · e^{−rt} S · Φ(d₁)`.
+* `discountedCallBrownian_heat_equation`: `f_t + ½ f_xx = 0` for `t < T`.
+-/
 
 @[expose] public section
 
 namespace MathFin
 
-/-- **BS Itô-drift coefficient** of `V(S, t)` under risk-neutral GBM
-`dS_t = r S_t dt + σ S_t dB_t`. Specialises Phase 39's `itoDrift` to
-two-argument `V(S, t)` via the two partials `∂_S V` and `∂_SS V`, plus
-the `∂_t V` term that comes from the *time* dependence of `V` (Itô's
-lemma for `f(X_t, t)` adds a `∂_t f` term).
+open FeynmanKacHeatEquation
 
-  `drift(V) = ∂_t V + r S · ∂_S V + (1/2) · σ² S² · ∂_SS V`. -/
-noncomputable def bsItoDrift (r σ S V_S V_SS V_t : ℝ) : ℝ :=
-  V_t + r * S * V_S + (1 / 2) * σ ^ 2 * S ^ 2 * V_SS
+/-- The discounted Black–Scholes call value in the Brownian coordinate:
+`f(t, x) = e^{−rt} · bsV K r σ (S₀·exp((r − σ²/2)t + σx)) (T − t)`. -/
+noncomputable def discountedCallBrownian (K r σ S₀ T t x : ℝ) : ℝ :=
+  Real.exp (-(r * t)) * bsV K r σ (gbmValue S₀ r σ t x) (T - t)
 
-/-- **No-arbitrage condition for the discounted option price**: the drift
-of `e^{−rt} V_t` must vanish under `Q`. With the product rule,
+/-- **The discounted call is a heat flow in the Brownian coordinate.** For `K, σ, S₀ > 0` and
+`t < T`, `f(t, x) = e^{−rT} · u(σ²(T − t), log S₀ + (r − σ²/2)T + σx)` with
+`u = feynmanU (ξ ↦ (e^ξ − K)⁺)`: the Feynman–Kac form of `bsV` (`bsV_eq_discount_feynmanU`) at
+`S = gbmValue S₀ r σ t x`, where `log S + (r − σ²/2)(T − t) = log S₀ + (r − σ²/2)T + σx` and
+`e^{−rt}·e^{−r(T−t)} = e^{−rT}`. -/
+theorem discountedCallBrownian_eq_heatFlow {K r σ S₀ T t : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    (hS₀ : 0 < S₀) (ht : t < T) (x : ℝ) :
+    discountedCallBrownian K r σ S₀ T t x =
+      Real.exp (-(r * T)) * feynmanU (fun ξ ↦ max (Real.exp ξ - K) 0) (σ ^ 2 * (T - t))
+        (Real.log S₀ + (r - σ ^ 2 / 2) * T + σ * x) := by
+  rw [discountedCallBrownian,
+    bsV_eq_discount_feynmanU (show 0 < gbmValue S₀ r σ t x from mul_pos hS₀ (Real.exp_pos _))
+      hK hσ (sub_pos.mpr ht),
+    ← mul_assoc, ← Real.exp_add, gbmValue, Real.log_mul hS₀.ne' (Real.exp_pos _).ne',
+    Real.log_exp]
+  congr 2 <;> ring
 
-  `d(e^{−rt} V_t) = e^{−rt} · (dV − r V dt)`,
+/-- **The integrand of the stochastic term: the discounted delta hedge.** For `K, σ, S₀ > 0`
+and `t < T`, `∂_x f(t, x) = σ · (e^{−rt} S) · Φ(d₁)` with `S = gbmValue S₀ r σ t x` and `d₁`
+at `(S, T − t)`: the chain rule through Delta (`hasDerivAt_bsV_S`) and `∂_x S = σ S`. -/
+theorem hasDerivAt_discountedCallBrownian_x {K r σ S₀ T t : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    (hS₀ : 0 < S₀) (ht : t < T) (x : ℝ) :
+    HasDerivAt (fun y ↦ discountedCallBrownian K r σ S₀ T t y)
+      (σ * (Real.exp (-(r * t)) * gbmValue S₀ r σ t x) *
+        Phi (bsd1 (gbmValue S₀ r σ t x) K r σ (T - t))) x := by
+  have hG : 0 < gbmValue S₀ r σ t x := mul_pos hS₀ (Real.exp_pos _)
+  exact (((hasDerivAt_bsV_S (r := r) hK hσ hG (sub_pos.mpr ht)).comp x
+    (hasDerivAt_gbmValue_space S₀ r σ t x)).const_mul (Real.exp (-(r * t)))).congr_deriv
+      (by ring)
 
-so drift of `e^{−rt} V_t` is `e^{−rt} · (drift(V) − r V)`. Setting this to
-zero (and dividing by `e^{−rt} > 0`) gives `drift(V) = r V` — equivalently,
+/-- **The Black–Scholes PDE in the Brownian coordinate.** For `K, σ, S₀ > 0` and `t < T`, the
+discounted call value `f(t, x) = e^{−rt}·bsV K r σ (S₀e^{(r−σ²/2)t+σx}) (T − t)` is
+differentiable in `t`, its `x`-derivative is differentiable in `x`, and
 
-  `∂_t V + r S · ∂_S V + (1/2) · σ² S² · ∂_SS V − r V = 0`,
+  `∂_t f + ½ ∂_xx f = 0`,
 
-which is the Black-Scholes PDE. -/
-theorem bs_pde_from_no_arbitrage (r σ S V V_S V_SS V_t : ℝ) :
-    bsItoDrift r σ S V_S V_SS V_t - r * V = 0 ↔
-      V_t + r * S * V_S + (1 / 2) * σ ^ 2 * S ^ 2 * V_SS - r * V = 0 := by
-  unfold bsItoDrift
-  constructor
-  · intro h; linarith
-  · intro h; linarith
-
-/-- **Itô-drift identification of the BS PDE LHS**: the LHS of the
-Black-Scholes PDE `∂_t V + r S ∂_S V + (1/2) σ² S² ∂_SS V − r V` equals
-`drift(V) − rV` where `drift(V)` is the Itô drift of `V` under risk-
-neutral GBM. -/
-theorem bs_pde_lhs_eq_drift_minus_rV (r σ S V V_S V_SS V_t : ℝ) :
-    V_t + r * S * V_S + (1 / 2) * σ ^ 2 * S ^ 2 * V_SS - r * V =
-      bsItoDrift r σ S V_S V_SS V_t - r * V := by
-  unfold bsItoDrift
-  ring
-
-/-- **One-dimensional Itô drift of `V = V(S)`** (no explicit time
-dependence — pure function of `S`). This is just Phase 39's `itoDrift`
-with `μ_X = r S, σ_X = σ S, f' = V_S, f'' = V_SS`. -/
-lemma bsItoDrift_no_time_eq_itoDrift (r σ S V_S V_SS : ℝ) :
-    bsItoDrift r σ S V_S V_SS 0 = itoDrift V_S V_SS (r * S) (σ * S) := by
-  unfold bsItoDrift itoDrift
-  ring
-
-/-! ### Item 6 — the BS drift IS the general 2D Itô drift under GBM
-
-This closes the loop to `Foundations/ItoLemma2D.lean`: the bespoke
-`bsItoDrift` is *literally* `itoDrift2D` of `V(t, S)` specialised to the
-risk-neutral GBM generator `(μ_X, σ_X) = (r S, σ S)`. The BS PDE is then
-the general Itô-drift machinery applied to one diffusion, not a
-pricing-specific algebra — a structural consumer of the foundations
-2D-Itô layer (cf. F1 in `docs/archive/portfolio-review-2026-05-28.md`). -/
-
-/-- **The BS Itô drift is the 2D Itô drift under risk-neutral GBM.**
-`bsItoDrift r σ S V_S V_SS V_t = itoDrift2D V_t V_S V_SS (r·S) (σ·S)`. The
-time-derivative slot `V_t` of `itoDrift2D` carries the `∂_t V` term; the
-GBM local drift `r·S` and local volatility `σ·S` fill the generator. -/
-lemma bsItoDrift_eq_itoDrift2D (r σ S V_S V_SS V_t : ℝ) :
-    bsItoDrift r σ S V_S V_SS V_t = itoDrift2D V_t V_S V_SS (r * S) (σ * S) := by
-  unfold bsItoDrift itoDrift2D
-  ring
-
-/-- **The Black–Scholes PDE LHS, routed through the general 2D Itô drift.**
-A *polynomial identity*: the BS-PDE LHS equals `itoDrift2D V_t V_S V_SS (r·S)
-(σ·S) − r·V`, i.e. the general 2D-Itô drift (`Foundations.ItoLemma2D`)
-specialised to the risk-neutral GBM generator `(r·S, σ·S)`, minus `r·V`.
-This is the value of routing through the shared `itoDrift2D` rather than the
-bespoke `bsItoDrift`: the BS-PDE coefficient is one instance of the general
-Itô-drift definition.
-
-NOTE — what this does NOT prove: that the discounted price `e^{−rt} V_t` is a
-`Q`-martingale (hence driftless), which is what makes "drift `= 0`" the
-*no-arbitrage* condition. That continuous-time martingale step is deferred
-(see module header); here `… = 0` is only the **algebraic form** of the
-no-arbitrage PDE, established by `ring`, not derived from a martingale. -/
-theorem bs_pde_eq_itoDrift2D_minus_rV (r σ S V V_S V_SS V_t : ℝ) :
-    V_t + r * S * V_S + (1 / 2) * σ ^ 2 * S ^ 2 * V_SS - r * V =
-      itoDrift2D V_t V_S V_SS (r * S) (σ * S) - r * V := by
-  unfold itoDrift2D
+the drift integrand of the time-dependent Itô formula for `f(t, B_t)`. Derived from the
+heat-flow form (`discountedCallBrownian_eq_heatFlow`) and the heat equation of the
+Feynman–Kac function (`feynmanU_heat_equation`). -/
+theorem discountedCallBrownian_heat_equation {K r σ S₀ T t x : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    (hS₀ : 0 < S₀) (ht : t < T) :
+    DifferentiableAt ℝ (fun s ↦ discountedCallBrownian K r σ S₀ T s x) t ∧
+      DifferentiableAt ℝ (deriv fun y ↦ discountedCallBrownian K r σ S₀ T t y) x ∧
+      deriv (fun s ↦ discountedCallBrownian K r σ S₀ T s x) t
+        + 1 / 2 * deriv (deriv fun y ↦ discountedCallBrownian K r σ S₀ T t y) x = 0 := by
+  -- the call payoff in log-price, with the growth bound the Feynman–Kac lemmas need
+  have hhc : Continuous fun ξ : ℝ ↦ max (Real.exp ξ - K) 0 :=
+    (Real.continuous_exp.sub continuous_const).max continuous_const
+  have hhb (z : ℝ) : |max (Real.exp z - K) 0| ≤ Real.exp z := by
+    rw [abs_of_nonneg (le_max_right _ _)]
+    exact max_le (by linarith) (Real.exp_nonneg z)
+  have hτ : 0 < σ ^ 2 * (T - t) := mul_pos (pow_pos hσ 2) (sub_pos.mpr ht)
+  have hlin (y : ℝ) :
+      HasDerivAt (fun y' : ℝ ↦ Real.log S₀ + (r - σ ^ 2 / 2) * T + σ * y') σ y := by
+    simpa using ((hasDerivAt_id y).const_mul σ).const_add (Real.log S₀ + (r - σ ^ 2 / 2) * T)
+  -- `∂_t`: only the time slot `σ²(T − s)` of the heat flow moves
+  have hdt := (((hasDerivAt_feynmanU_t hτ hhc hhb
+      (Real.log S₀ + (r - σ ^ 2 / 2) * T + σ * x)).comp t
+      (show HasDerivAt (fun s : ℝ ↦ σ ^ 2 * (T - s)) (-σ ^ 2) t by
+        simpa using ((hasDerivAt_id t).const_sub T).const_mul (σ ^ 2))).const_mul
+      (Real.exp (-(r * T)))).congr_of_eventuallyEq
+    ((eventually_lt_nhds ht).mono fun s hs ↦ discountedCallBrownian_eq_heatFlow hK hσ hS₀ hs x)
+  -- `∂_x` and `∂_xx`: only the space slot `log S₀ + (r − σ²/2)T + σy` moves
+  have hdx (y : ℝ) := (((hasDerivAt_feynmanU_x hτ hhc hhb
+      (Real.log S₀ + (r - σ ^ 2 / 2) * T + σ * y)).comp y (hlin y)).const_mul
+      (Real.exp (-(r * T)))).congr_of_eventuallyEq
+    (Filter.Eventually.of_forall fun y' ↦ discountedCallBrownian_eq_heatFlow hK hσ hS₀ ht y')
+  have hdxx := ((((hasDerivAt_feynmanU_xx hτ hhc hhb
+      (Real.log S₀ + (r - σ ^ 2 / 2) * T + σ * x)).comp x (hlin x)).mul_const σ).const_mul
+      (Real.exp (-(r * T)))).congr_of_eventuallyEq
+    (Filter.Eventually.of_forall fun y ↦ (hdx y).deriv)
+  refine ⟨hdt.differentiableAt, hdxx.differentiableAt, ?_⟩
+  rw [hdt.deriv, hdxx.deriv, feynmanU_heat_equation hτ]
   ring
 
 end MathFin

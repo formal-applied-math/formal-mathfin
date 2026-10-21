@@ -7,33 +7,43 @@ module
 
 public import Mathlib
 public import MathFin.Foundations.EquivMeasure
+public import MathFin.Foundations.FTAPOnePeriodVector
 
 /-!
 # One-period FTAP on a general probability space (scalar)
 
-The Föllmer–Schied (Thm 1.55) / one-period Dalang–Morton–Willinger Fundamental
-Theorem of Asset Pricing for a single scalar discounted excess return `Y` on an
-**arbitrary** probability space `(Ω, P)`: no arbitrage ⟺ there is an equivalent
-martingale measure `Q ~ P` with `Y` integrable and `E_Q[Y] = 0`.
+The one-period Fundamental Theorem of Asset Pricing (Föllmer–Schied, *Stochastic Finance*,
+§1.2; the one-period case of Dalang–Morton–Willinger) for a single scalar discounted excess
+return `Y` on an **arbitrary** probability space `(Ω, P)`: no arbitrage ⟺ there is an
+equivalent martingale measure `Q ~ P` with `Y` integrable and `E_Q[Y] = 0`.
 
-This is the step from finite Ω (`Foundations/FTAPDiscrete.lean`) to genuine
-measure theory: `Y ∈ L⁰` (not bounded, integrability not free). The backward
+`Y ∈ L⁰` here: it need not be bounded, and integrability is not free. The backward
 direction is the elementary route — a bounded-density reduction to `L¹`, a scalar
 no-arbitrage dichotomy, and a two-region `withDensity` construction that
 re-weights the up- and down-moves until `Y` is fair (no Hahn–Banach, no
 Kreps–Yan).
 
+## Relation to the vector and discrete-time theorems
+
+`IsEMM` is the vector notion `OnePeriodVector.IsEMM` at `F = ℝ`, and `NoArbitrage` is the
+vector no-arbitrage condition at `F = ℝ` (`noArbitrage_iff_vector`: on `ℝ` the inner
+product `⟪θ, y⟫` is `θ · y`). So `ftap_one_period` is the `F = ℝ` case of
+`OnePeriodVector.ftap_one_period_vector`; the proof below is an independent construction
+of that case (a two-region density instead of the logistic tilt). On a finite space with
+trivial initial information, the one-step market of `Foundations/FTAPDiscrete.lean` is this
+market for `Y = S 1 − S 0` (`isEMM_one_iff_onePeriod`, `noArbitrage_one_iff_onePeriod`).
+
 ## Scope
 
 One trading period, **one scalar asset**, arbitrary `(Ω, P)`. The `d`-asset
-generalisation is now closed in full (`Foundations/FTAPOnePeriodVector.lean`,
-`ftap_one_period_vector`); only the general-Ω **multi-period** Dalang–Morton–Willinger
-theorem (which glues one-period conditional markets and needs a measurable selection
-theorem) remains open.
+generalisation is `Foundations/FTAPOnePeriodVector.lean`; the general-Ω **multi-period**
+Dalang–Morton–Willinger theorem (which glues one-period conditional markets and needs a
+measurable selection theorem) is not formalised.
 
-## Main result
+## Main results
 
 * `MathFin.OnePeriod.ftap_one_period`
+* `MathFin.OnePeriod.noArbitrage_iff_vector`
 -/
 
 @[expose] public section
@@ -51,14 +61,11 @@ a.e. already has `θ · Y = 0` a.e. -/
 def NoArbitrage : Prop :=
   ∀ θ : ℝ, 0 ≤ᵐ[P] (fun ω ↦ θ * Y ω) → (fun ω ↦ θ * Y ω) =ᵐ[P] 0
 
-/-- **Equivalent martingale measure** (one period): `Q ~ P`, `Y` is `Q`-integrable,
-and `E_Q[Y] = 0`. -/
-structure IsEMM (Q : Measure Ω) : Prop where
-  prob : IsProbabilityMeasure Q
-  absP : Q ≪ P
-  Pabs : P ≪ Q
-  int  : Integrable Y Q
-  fair : ∫ ω, Y ω ∂Q = 0
+/-- **Equivalent martingale measure** (one period, scalar): `Q ~ P`, `Y` is `Q`-integrable,
+and `E_Q[Y] = 0`. This is the library's one-period notion `OnePeriodVector.IsEMM` at
+`F = ℝ`, with the same fields `prob`, `absP`, `Pabs`, `int`, `fair`. -/
+abbrev IsEMM (Q : Measure Ω) : Prop :=
+  OnePeriodVector.IsEMM P Y Q
 
 omit [IsProbabilityMeasure P] in
 /-- **Forward direction**: an equivalent martingale measure precludes arbitrage.
@@ -291,12 +298,21 @@ theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) 
 For a single measurable discounted excess return `Y` on an arbitrary probability
 space, *no arbitrage* holds if and only if there exists an *equivalent martingale
 measure*: a `Q ~ P` under which `Y` is integrable and `E_Q[Y] = 0`. This is the
-Föllmer–Schied / one-period Dalang–Morton–Willinger theorem — the genuine
-measure-theoretic step beyond the finite-`Ω` Harrison–Pliska result of
-`Foundations/FTAPDiscrete.lean`. -/
+Föllmer–Schied / one-period Dalang–Morton–Willinger theorem for one asset; on a finite
+space with trivial initial information its EMM and no-arbitrage notions are those of the
+horizon-`1` market of `Foundations/FTAPDiscrete.lean` (`isEMM_one_iff_onePeriod`,
+`noArbitrage_one_iff_onePeriod`). -/
 theorem ftap_one_period (hY : Measurable Y) :
     NoArbitrage P Y ↔ ∃ Q, IsEMM P Y Q :=
   ⟨fun hNA ↦ exists_isEMM_of_noArbitrage P Y hY hNA,
    fun ⟨_, hQ⟩ ↦ noArbitrage_of_isEMM P Y hQ⟩
+
+omit [IsProbabilityMeasure P] in
+/-- **The scalar no-arbitrage condition is the vector one at `F = ℝ`.** On `ℝ` the inner
+product `⟪θ, y⟫` is the product `θ · y`, so a scalar position `θ` with gain `θ · Y` is the
+vector portfolio `θ ∈ ℝ`. With `IsEMM` defined as `OnePeriodVector.IsEMM` at `F = ℝ`, this
+identifies `ftap_one_period` with `OnePeriodVector.ftap_one_period_vector` at `F = ℝ`. -/
+theorem noArbitrage_iff_vector : NoArbitrage P Y ↔ OnePeriodVector.NoArbitrage P Y := by
+  simp only [NoArbitrage, OnePeriodVector.NoArbitrage, Real.inner_apply]
 
 end MathFin.OnePeriod

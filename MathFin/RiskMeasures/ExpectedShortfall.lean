@@ -405,6 +405,25 @@ theorem expectedShortfall_isCoherentRisk {ι : Type*} [Fintype ι] [MeasurableSp
     simp_rw [Pi.add_apply, neg_add]
     exact expectedShortfall_add_le .of_finite .of_finite hα
 
+/-- **From losses to positions**: on a finite space, every coherent risk measure of losses
+(`IsCoherentRiskMeasure`) gives the coherent risk measure of positions `X ↦ ρ(−X)` in the sense of
+Artzner, Delbaen, Eber and Heath (`IsCoherentRisk`, `RiskMeasures/AcceptanceSet.lean`). A position
+`X` is a gain, so its loss is `−X`. `expectedShortfall_isCoherentRisk` is the case of expected
+shortfall. -/
+theorem IsCoherentRiskMeasure.isCoherentRisk_neg {ι : Type*} [Fintype ι] [MeasurableSpace ι]
+    [MeasurableSingletonClass ι] {P : Measure ι} [IsFiniteMeasure P] {ρ : (ι → ℝ) → ℝ}
+    (hρ : IsCoherentRiskMeasure P ρ) : IsCoherentRisk fun X : ι → ℝ ↦ ρ fun i ↦ -X i where
+  monotone X Y hXY := hρ.mono .of_finite .of_finite (ae_of_all _ fun i ↦ neg_le_neg (hXY i))
+  cashInvariant X m := by
+    simp_rw [neg_add]
+    rw [hρ.add_const .of_finite, sub_eq_add_neg]
+  posHom l hl X := by
+    simp_rw [Pi.smul_apply, smul_eq_mul, ← mul_neg]
+    exact hρ.const_mul .of_finite hl
+  subadditive X Y := by
+    simp_rw [Pi.add_apply, neg_add]
+    exact hρ.add_le .of_finite .of_finite
+
 /-- **ES has an ADEH representation**: on a finite probability space, `ES_α(−X)` is the least upper
 bound of the expected losses `∑ qᵢ (−Xᵢ)` over the representing set of `X ↦ ES_α(−X)`
 (`coherentRisk_isLUB` applied to `expectedShortfall_isCoherentRisk`). The dual representation

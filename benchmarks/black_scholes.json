@@ -1409,6 +1409,134 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.SVI.bsSmile_calendar_free_iff (MathFin/BlackScholes/CalendarArbitrage.lean), the instance S = 1, w(k, t) = variance (p t) k of mf-calendar-arbitrage-total-variance on the SVI library's bsSmile price. SCOPE. The family p : R -> Params is arbitrary data; the SVI library has no maturity variable of its own, and SSVI, the slice-crossing quartic and the SSVI calendar theorems are not formalised."
       }
+    },
+    {
+      "id": "mf-gbm-log-return-law",
+      "name": "Black–Scholes Log-Return Is Normal",
+      "domain": "mathematical_finance",
+      "description": "Under the Black–Scholes lognormal hypothesis S_T = S₀·exp((r − σ²/2)T + σ√T·Z) with Z ~ N(0, 1), the log-return (r − σ²/2)T + σ√T·Z = log(S_T/S₀) has law N((r − σ²/2)T, σ²T).",
+      "code": {
+        "lean": "import MathFin.BlackScholes.GBMLogMoments\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- **The Black–Scholes log-return is normal.** Re-exports `MathFin.bsLogReturn_hasLaw`. -/\ntheorem bs_log_return_normal {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}\n    [IsProbabilityMeasure Q] {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :\n    HasLaw (fun ω ↦ bsLogReturn r σ T (Z ω))\n      (gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal) Q :=\n  MathFin.bsLogReturn_hasLaw h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "J. C. Hull, Options, Futures, and Other Derivatives, 10th ed., Pearson (2018), §15.1 (lognormal property of stock prices)",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.bsLogReturn_hasLaw (MathFin/BlackScholes/GBMLogMoments.lean): Mathlib's gaussianReal_const_mul and gaussianReal_const_add applied to the standard-normal driver; log(S_T/S₀) = bsLogReturn is bsLogReturn_eq. SCOPE: the lognormal hypothesis BSCallHyp is assumed (it is derived from a Brownian model elsewhere in the library)."
+      }
+    },
+    {
+      "id": "mf-american-put-ge-bsm-european-put",
+      "name": "American Put Dominates the Black–Scholes–Merton European Put",
+      "domain": "mathematical_finance",
+      "description": "For S, K, σ, T > 0, r ≥ 0 and any dividend yield q, the continuous-time American put value (the supremum, over stopping rules bounded by T, of the expected discounted payoff e^{−rτ}(K − S_τ)⁺ for the geometric Brownian motion S of drift r − q driven by a jointly measurable pre-Brownian motion, any filtration) is at least the closed-form Black–Scholes–Merton European put e^{−qT}(K e^{−(r−q)T}Φ(−d₂) − SΦ(−d₁)); in particular for the constructed Brownian model on its completed usual filtration, the setting of the exercise-boundary entries. Exercise at maturity is an admissible rule and its expected payoff is computed in closed form. A strictly positive early-exercise premium is not proved.",
+      "code": {
+        "lean": "import MathFin.Bridges.AmericanPutEuropeanBound\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.BlackScholes.AmericanPut.Stopping\n\n/-- **The American put dominates the Black–Scholes–Merton European put**, for any jointly\nmeasurable pre-Brownian motion `W` and any filtration. Re-export of\n`MathFin.BlackScholes.AmericanPut.Stopping.bsPDiv_le_americanPutValue`. -/\ntheorem american_put_ge_bsm_european_put {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}\n    [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {W : ℝ≥0 → Ω → ℝ}\n    (hW : IsPreBrownianReal W P) (hWm : Measurable W.uncurry) {K r q σ S : ℝ}\n    (hK : 0 < K) (hr : 0 ≤ r) (hσ : 0 < σ) (hS : 0 < S) {T : ℝ≥0} (hT : 0 < T) :\n    bsPDiv K r q σ S T ≤ americanPutValue P 𝓕 W K r q σ S T :=\n  bsPDiv_le_americanPutValue hW hWm hK hr hσ hS hT\n\n/-- The same bound for the constructed Brownian model on its completed usual filtration.\nRe-export of `MathFin.BlackScholes.AmericanPut.Stopping.bsPDiv_le_brownianUsualAmericanPut`. -/\ntheorem american_put_ge_bsm_european_put_usual {K r q σ S : ℝ} (hK : 0 < K) (hr : 0 ≤ r)\n    (hσ : 0 < σ) (hS : 0 < S) {T : ℝ≥0} (hT : 0 < T) :\n    bsPDiv K r q σ S T ≤ brownianUsualAmericanPut K r q σ S T :=\n  bsPDiv_le_brownianUsualAmericanPut hK hr hσ hS hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "R. C. Merton, Theory of Rational Option Pricing, Bell J. Econ. Manag. Sci. 4(1) (1973) 141–183 (an American option is worth at least its European counterpart); I. Karatzas and S. E. Shreve, Methods of Mathematical Finance, Springer (1998), §2.5",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.BlackScholes.AmericanPut.Stopping.bsPDiv_le_americanPutValue and bsPDiv_le_brownianUsualAmericanPut (MathFin/Bridges/AmericanPutEuropeanBound.lean). The maturity reward is computed by MathFin.bs_dividends_put_formula_via_brownian (MathFin/Bridges/PricingFromBrownian.lean): bs_put_formula at rate r − q under BSCallHyp.of_isPreBrownian, times e^{−qT}. The value dominates it because the deterministic rule T is admissible (european_expectation_le_value). SCOPE: a lower bound only; no strict early-exercise premium, no optimal rule. Hypotheses: W pre-Brownian and jointly measurable, r ≥ 0 (used to bound the reward by K), S, K, σ, T > 0."
+      }
+    },
+    {
+      "id": "mf-american-put-ae-horizon-invariance",
+      "name": "American Put Value Is Unchanged by Almost-Surely Bounded Stopping Times",
+      "domain": "mathematical_finance",
+      "description": "For any measure, filtration and driving process W, the American put value defined as the supremum of expected discounted GBM put payoffs over extended stopping times that are bounded by the horizon T only almost surely (and may be infinite on a null set, where the value is immaterial) equals the value over stopping times bounded by T at every point, and the in-the-money exercise threshold is the same under both conventions. Proof by clipping a rule at T, which changes it only on a null set. A statement about the convention, not about the value itself.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.AmericanPut.Stopping.AEHorizonValue\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin.BlackScholes.AmericanPut.Stopping\n\n/-- **The American put value and threshold do not depend on the horizon convention.**\nRe-export of `aeAmericanPutValue_eq` and `aeExerciseThreshold_eq`. -/\ntheorem american_put_ae_horizon_invariance {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω)\n    (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (W : ℝ≥0 → Ω → ℝ) (K r q σ S : ℝ) (T : ℝ≥0) :\n    aeAmericanPutValue P 𝓕 W K r q σ S T = americanPutValue P 𝓕 W K r q σ S T ∧\n      aeExerciseThreshold P 𝓕 W K r q σ T = exerciseThreshold P 𝓕 W K r q σ T :=\n  ⟨aeAmericanPutValue_eq P 𝓕 W K r q σ S T, aeExerciseThreshold_eq P 𝓕 W K r q σ T⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "G. Peskir and A. Shiryaev, Optimal Stopping and Free-Boundary Problems, Birkhäuser (2006), Ch. I (finite-horizon problems over stopping times τ ≤ T)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.BlackScholes.AmericanPut.Stopping.aeAmericanPutValue_eq and aeExerciseThreshold_eq (MathFin/BlackScholes/AmericanPut/Stopping/AEHorizonValue.lean). An almost-surely bounded rule, clipped at the horizon, is a pointwise bounded rule with the same reward almost everywhere; conversely every pointwise bounded rule is almost-surely bounded. SCOPE: the equality of the two suprema and of the two thresholds; no property of the value itself. This is the equality the American-put boundary entries cite in their scope."
+      }
+    },
+    {
+      "id": "mf-monte-carlo-put-call-consistency",
+      "name": "Monte Carlo Consistency for the Black–Scholes Put and Call",
+      "domain": "mathematical_finance",
+      "description": "On the sequence space ℕ → ℝ under the product of countably many standard normals (Mathlib's Measure.infinitePi), for S₀, K, σ, T > 0, almost surely the Monte Carlo sample means (1/n)Σ_{i<n} e^{−rT}(K − S_T(Z_i))⁺ and (1/n)Σ_{i<n} e^{−rT}(S_T(Z_i) − K)⁺, with S_T(z) = S₀e^{(r−σ²/2)T+σ√T z} and Z_i the coordinates, converge to the Black–Scholes put Ke^{−rT}Φ(−d₂) − S₀Φ(−d₁) and call S₀Φ(d₁) − Ke^{−rT}Φ(d₂). Etemadi's strong law (Mathlib) applied to the discounted payoffs, whose means are the closed forms. No convergence rate is part of this entry.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.MonteCarloPricer\n\nopen MeasureTheory ProbabilityTheory Filter\nopen scoped Topology\nopen MathFin MathFin.MonteCarlo\n\n/-- **Monte Carlo consistency on the canonical i.i.d. standard-normal space**, put and call.\nRe-export of `MathFin.MonteCarlo.consistency_canonical` and `mc_call_consistency_canonical`. -/\ntheorem monte_carlo_put_call_consistency {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K)\n    (hσ : 0 < σ) (hT : 0 < T) :\n    (∀ᵐ ω ∂canonicalEnsemble,\n      Tendsto (fun n ↦ estimator S_0 K r σ T (fun i ω ↦ ω i) n ω) atTop\n        (𝓝 (bsP K r σ S_0 T))) ∧\n    ∀ᵐ ω ∂canonicalEnsemble,\n      Tendsto (fun n ↦ mcCallMean S_0 K r σ T (fun i ω ↦ ω i) n ω) atTop\n        (𝓝 (bsV K r σ S_0 T)) :=\n  ⟨consistency_canonical hS_0 hK hσ hT, mc_call_consistency_canonical hS_0 hK hσ hT⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "P. Glasserman, Monte Carlo Methods in Financial Engineering, Springer (2003), §1.1",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.MonteCarlo.consistency_canonical and mc_call_consistency_canonical (MathFin/BlackScholes/MonteCarloPricer.lean). The canonical ensemble is Mathlib's Measure.infinitePi of gaussianReal 0 1; its coordinates are i.i.d. standard normal by Measure.infinitePi_map_eval and iIndepFun_infinitePi, so the module's ensemble hypotheses are discharged rather than assumed. The limits are stated as the library's closed forms bsP and bsV. SCOPE: almost-sure convergence only; the module also proves the pairwise-independent version for an arbitrary ensemble."
+      }
+    },
+    {
+      "id": "mf-monte-carlo-call-clt-variance",
+      "name": "Monte Carlo Error Bars for the Black–Scholes Call, with Closed-Form Variance",
+      "domain": "mathematical_finance",
+      "description": "On the canonical i.i.d. standard-normal sequence space (Mathlib's Measure.infinitePi), for S₀, K, σ, T > 0 the Monte Carlo call estimator Ĉ_n satisfies √n·(Ĉ_n − C_BS) → N(0, σ_C²) in distribution (Mathlib's central limit theorem), and the limit variance is in closed form: σ_C² = e^{−2rT}(S₀²e^{2μ+2ν²}Φ(d₁+ν) − 2KS₀e^{μ+ν²/2}Φ(d₁) + K²Φ(d₂)) − C_BS², with μ = (r − σ²/2)T and ν = σ√T, from the truncated second moment of the lognormal. No rate of convergence (Berry–Esseen) and no variance reduction.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.MonteCarloPricer\n\nopen MeasureTheory ProbabilityTheory Filter\nopen MathFin MathFin.MonteCarlo\n\n/-- **Monte Carlo CLT for the call, with the limit variance in closed form.** Re-export of\n`MathFin.MonteCarlo.mc_call_clt_canonical` and `mc_call_variance`. -/\ntheorem monte_carlo_call_error_bars {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K)\n    (hσ : 0 < σ) (hT : 0 < T) :\n    TendstoInDistribution\n      (fun (n : ℕ) (ω : ℕ → ℝ) ↦ Real.sqrt (n : ℝ) *\n        (mcCallMean S_0 K r σ T (fun i ω ↦ ω i) n ω - bsV K r σ S_0 T))\n      atTop (id : ℝ → ℝ) (fun _ ↦ canonicalEnsemble)\n      (gaussianReal 0\n        (Var[fun ω ↦ mcCallPayoff S_0 K r σ T (ω 0); canonicalEnsemble]).toNNReal) ∧\n    Var[fun ω ↦ mcCallPayoff S_0 K r σ T (ω 0); canonicalEnsemble]\n      = Real.exp (-2 * r * T) *\n          (S_0 ^ 2 * Real.exp (2 * (r - σ ^ 2 / 2) * T + 2 * (σ * Real.sqrt T) ^ 2)\n              * Phi (bsd1 S_0 K r σ T + σ * Real.sqrt T)\n            - 2 * K * (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + (σ * Real.sqrt T) ^ 2 / 2))\n                * Phi (bsd1 S_0 K r σ T)\n            + K ^ 2 * Phi (bsd2 S_0 K r σ T))\n        - (S_0 * Phi (bsd1 S_0 K r σ T)\n            - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T)) ^ 2 :=\n  ⟨mc_call_clt_canonical hS_0 hK hσ hT, mc_call_variance ⟨hS_0, hK, hσ, hT, hasLaw_canonical 0⟩⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "P. Glasserman, Monte Carlo Methods in Financial Engineering, Springer (2003), §1.1.2",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.MonteCarlo.mc_call_clt_canonical and mc_call_variance (MathFin/BlackScholes/MonteCarloPricer.lean). The CLT is Mathlib's tendstoInDistribution_inv_sqrt_mul_sum_sub applied to the discounted call payoffs, L² by domination with the discounted terminal; the centring is the closed form bsV via bs_call_formula. The variance is E[C²] − E[C]², with the truncated lognormal second moment computed by completing the square. SCOPE: convergence in distribution, no rate; one-dimensional; i.i.d. draws on the canonical product space."
+      }
+    },
+    {
+      "id": "mf-dupire-tilted-smile-local-skew",
+      "name": "First-Order Local-Volatility Skew of a Tilted Smile and the Rule of Two",
+      "domain": "mathematical_finance",
+      "description": "On the zero-rate smile σ_BS(ε,k,T) = σ + εψ₁k/√(T+T₀) in log-moneyness k (F, σ, T₀ > 0), with call prices given by Black–Scholes and local variance taken to be Dupire's ratio R = 2∂_T C/(K²∂²_K C) (the ratio enters as a definition; it is not derived from a local-volatility model): for every T > 0 the ε-derivative at ε = 0 of the at-the-money k-slope of √R equals ψ₁((3/2)T + 2T₀)/(T+T₀)^{3/2}, which is ((3/2)T + 2T₀)/(T + T₀) times the first-order implied ATM skew ψ₁/√(T+T₀); as T → 0⁺ it tends to twice the implied ATM skew at T = 0 (the rule of two). First order in ε, for this one-parameter family of surfaces; the ε = 1 surface and general smiles are not covered.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.ForwardSmile\n\nopen MathFin.ForwardSmile\n\n/-- **First-order local-volatility ATM skew of the tilted smile.** Re-export of\n`MathFin.ForwardSmile.dupireRatio_sqrt_slope` and `dupireRatio_sqrt_slope_eq_mul_skew`. -/\ntheorem tilted_smile_local_skew {F σ ψ₁ T₀ T : ℝ} (hF : 0 < F) (hσ : 0 < σ) (hT : 0 < T)\n    (h₀ : 0 < T₀) :\n    deriv (fun ε ↦ deriv (fun k ↦ Real.sqrt (dupireRatio F σ ψ₁ T₀ ε k T)) 0) 0\n        = ψ₁ * ((3 / 2) * T + 2 * T₀) / ((T + T₀) * Real.sqrt (T + T₀)) ∧\n      deriv (fun ε ↦ deriv (fun k ↦ Real.sqrt (dupireRatio F σ ψ₁ T₀ ε k T)) 0) 0\n        = ((3 / 2) * T + 2 * T₀) / (T + T₀)\n          * deriv (fun ε ↦ deriv (fun k ↦ smileSurface σ ψ₁ T₀ ε k T) 0) 0 :=\n  ⟨dupireRatio_sqrt_slope hF hσ hT h₀, dupireRatio_sqrt_slope_eq_mul_skew hF hσ hT h₀⟩\n\n/-- **The rule of two on the tilted smile.** Re-export of\n`MathFin.ForwardSmile.tendsto_dupireRatio_sqrt_slope_nhdsGT_zero`. -/\ntheorem tilted_smile_rule_of_two {F σ ψ₁ T₀ : ℝ} (hF : 0 < F) (hσ : 0 < σ) (h₀ : 0 < T₀) :\n    Filter.Tendsto\n      (fun T ↦ deriv (fun ε ↦ deriv (fun k ↦ Real.sqrt (dupireRatio F σ ψ₁ T₀ ε k T)) 0) 0)\n      (nhdsWithin 0 (Set.Ioi 0))\n      (nhds (2 * deriv (fun ε ↦ deriv (fun k ↦ smileSurface σ ψ₁ T₀ ε k 0) 0) 0)) :=\n  tendsto_dupireRatio_sqrt_slope_nhdsGT_zero hF hσ h₀\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "B. Dupire, Pricing with a smile, Risk 7(1) (1994) 18–20; J. Gatheral, The Volatility Surface: A Practitioner's Guide, Wiley (2006), ch. 1; S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 10",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.ForwardSmile.dupireRatio_sqrt_slope, dupireRatio_sqrt_slope_eq_mul_skew and tendsto_dupireRatio_sqrt_slope_nhdsGT_zero (MathFin/BlackScholes/ForwardSmile.lean). Prices are MathFin.bsV at zero rate on the tilted surface; Dupire's ratio is a definition; the slopes are iterated deriv at ε = 0, k = 0, computed by HasDerivAt chains through the Black form in (k, w) coordinates. SCOPE: first order in ε on one parametric family; the rule of two is the T → 0⁺ limit for that family, not the general short-expiry statement; the ε = 1 surface and the notes' forward-skew reading (eq. 10.9) are not formalized."
+      }
+    },
+    {
+      "id": "mf-lsv-coin-toss-posterior-nonflat",
+      "name": "Coin-Toss Posterior Variance E[v | S_T] Is Not Flat in the Strike",
+      "domain": "mathematical_finance",
+      "description": "For the two-branch lognormal coin toss used to illustrate LSV calibration (equal priors, zero rate, unit maturity, branch volatilities 0 < σ_lo < σ_hi, branch variances v_lo < v_hi), the conditional expectation of the branch variance given the terminal price is m(S_T) almost surely, with m(K) = (v_lo φ_lo(K) + v_hi φ_hi(K))/(φ_lo(K) + φ_hi(K)) and φ_c the branch's lognormal density; m lies below (v_lo + v_hi)/2 at the money, tends to v_hi as K → ∞, and is not constant on K > 0. Each φ_c is the second strike derivative of that branch's Black–Scholes call (Breeden–Litzenberger), so m is a ratio of call-price convexities. That an LSV model calibrated to a flat local volatility has the resulting non-flat leverage σ_loc/√m (Gyöngy's mimicking theorem) is not proved.",
+      "code": {
+        "lean": "import MathFin.Bridges.LSVPosteriorConditionalExpectation\n\nopen MeasureTheory Filter Topology\nopen MathFin MathFin.LSV\n\n/-- **The coin-toss posterior variance is `E[v | S_T]` and is not flat in the strike.**\nRe-export of `cointossM_comp_ae_eq_condExp`, `cointossM_atm_lt_uncond`,\n`cointossM_wing_limit_atTop` and `cointossM_nonconstant`. -/\ntheorem coin_toss_posterior_variance_nonflat {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F)\n    (hlo : 0 < σ_lo) (hhi : σ_lo < σ_hi) (hvhi : v_lo < v_hi) :\n    (fun p ↦ cointossM F σ_lo σ_hi v_lo v_hi (cointossST F σ_lo σ_hi p)) =ᵐ[cointossMix]\n        cointossMix[cointossV v_lo v_hi |\n          MeasurableSpace.comap (cointossST F σ_lo σ_hi) inferInstance] ∧\n      cointossM F σ_lo σ_hi v_lo v_hi F < (v_lo + v_hi) / 2 ∧\n      Tendsto (fun K : ℝ ↦ cointossM F σ_lo σ_hi v_lo v_hi K) atTop (𝓝 v_hi) ∧\n      ¬ ∃ c : ℝ, ∀ K : ℝ, 0 < K → cointossM F σ_lo σ_hi v_lo v_hi K = c :=\n  ⟨cointossM_comp_ae_eq_condExp hF hlo (hlo.trans hhi), cointossM_atm_lt_uncond hF hlo hhi hvhi,\n    cointossM_wing_limit_atTop hF hlo hhi, cointossM_nonconstant hF hlo hhi hvhi⟩\n\n/-- **The posterior variance from call prices** (Breeden–Litzenberger). Re-export of\n`cointossM_eq_strike_convexity`. -/\ntheorem coin_toss_posterior_from_call_prices {F σ_lo σ_hi v_lo v_hi K : ℝ} (hF : 0 < F)\n    (hlo : 0 < σ_lo) (hhi : 0 < σ_hi) (hK : 0 < K) :\n    cointossM F σ_lo σ_hi v_lo v_hi K =\n      (v_lo * deriv (deriv fun k ↦ bsV k 0 σ_lo F 1) K\n          + v_hi * deriv (deriv fun k ↦ bsV k 0 σ_hi F 1) K) /\n        (deriv (deriv fun k ↦ bsV k 0 σ_lo F 1) K + deriv (deriv fun k ↦ bsV k 0 σ_hi F 1) K) :=\n  cointossM_eq_strike_convexity hF hlo hhi hK\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "J. Guyon and P. Henry-Labordère, Being particular about calibration, Risk (January 2012); I. Gyöngy, Mimicking the one-dimensional marginal distributions of processes having an Itô differential, Probab. Theory Relat. Fields 71 (1986) 501–516; S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 11, Ex. 11.2",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.LSV.cointossM_comp_ae_eq_condExp (MathFin/Bridges/LSVPosteriorConditionalExpectation.lean) and cointossM_atm_lt_uncond, cointossM_wing_limit_atTop, cointossM_nonconstant, cointossM_eq_strike_convexity (MathFin/BlackScholes/LSVLeverage.lean). The mixture is (1/2)·N(0,1) on each branch of ℝ ⊕ ℝ; each branch law of S_T is the density cointossPhi on (0, ∞) (jumpDiffusionIncrementLaw_zero_map_mul_exp), and the identification uses Mathlib's ae_eq_condExp_of_forall_setIntegral_eq. The branch densities are identified with call-price convexities by MathFin.breedenLitzenberger. SCOPE: the coin-toss example; NOT proved: that the leverage function of an LSV model calibrated to a flat local volatility is σ_loc/√m (Gyöngy's mimicking theorem, McKean–Vlasov existence), or any decimal figure of the source tables."
+      }
+    },
+    {
+      "id": "mf-bs-heat-equation-brownian-coordinate",
+      "name": "Discounted Black–Scholes Call Solves the Backward Heat Equation in the Brownian Coordinate",
+      "domain": "mathematical_finance",
+      "description": "Let f(t,x) = e^{−rt}·C_BS(S₀e^{(r−σ²/2)t+σx}, T − t) be the discounted Black–Scholes call value written in the Brownian coordinate x (the value of the driving Brownian motion), with K, σ, S₀ > 0. For t < T, f is differentiable in t, ∂_x f is differentiable in x, and f_t + ½f_xx = 0, so the drift integrand of the time-dependent Itô formula for f(t, B_t) vanishes; and f_x = σ·e^{−rt}S·Φ(d₁), the discounted delta hedge. Derived from the Feynman–Kac heat-flow representation of the price. That f(t, B_t) is a local martingale (the Itô-integral identity itself) is not proved.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PDEFromIto\n\nopen MathFin\n\n/-- **The Black–Scholes PDE in the Brownian coordinate, and the delta hedge.** Re-export of\n`MathFin.discountedCallBrownian_heat_equation` and `hasDerivAt_discountedCallBrownian_x`. -/\ntheorem bs_heat_equation_brownian_coordinate {K r σ S₀ T t x : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    (hS₀ : 0 < S₀) (ht : t < T) :\n    (DifferentiableAt ℝ (fun s ↦ discountedCallBrownian K r σ S₀ T s x) t ∧\n      DifferentiableAt ℝ (deriv fun y ↦ discountedCallBrownian K r σ S₀ T t y) x ∧\n      deriv (fun s ↦ discountedCallBrownian K r σ S₀ T s x) t\n        + 1 / 2 * deriv (deriv fun y ↦ discountedCallBrownian K r σ S₀ T t y) x = 0) ∧\n    HasDerivAt (fun y ↦ discountedCallBrownian K r σ S₀ T t y)\n      (σ * (Real.exp (-(r * t)) * gbmValue S₀ r σ t x) *\n        Phi (bsd1 (gbmValue S₀ r σ t x) K r σ (T - t))) x :=\n  ⟨discountedCallBrownian_heat_equation hK hσ hS₀ ht,\n    hasDerivAt_discountedCallBrownian_x hK hσ hS₀ ht x⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "S. E. Shreve, Stochastic Calculus for Finance II: Continuous-Time Models, Springer (2004), §4.5",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.discountedCallBrownian_heat_equation and MathFin.hasDerivAt_discountedCallBrownian_x (MathFin/BlackScholes/PDEFromIto.lean). The discounted price equals e^{−rT}·feynmanU(ξ ↦ (e^ξ − K)⁺)(σ²(T − t), log S₀ + (r − σ²/2)T + σx) (bsV_eq_discount_feynmanU); ∂_t moves only the time slot and ∂_x only the space slot, so feynmanU_heat_equation gives the result. The delta identity is hasDerivAt_bsV_S composed with ∂_x gbmValue. SCOPE: the pointwise PDE for t < T; the Itô-integral representation of f(t, B_t), which needs growth bounds up to third order and a localization away from T, is not proved."
+      }
     }
   ]
 }

@@ -10,10 +10,14 @@ public import Mathlib
 /-!
 # Conditional expectation of a bivariate Gaussian
 
-For `(X, Y)` jointly Gaussian with positive marginal variances and correlation
-`ρ ∈ (−1, 1)`:
+For `(X, Y)` jointly Gaussian with means `μ_X, μ_Y`, `Var Y = σ_Y² > 0` and
+`Cov(X, Y) = ρ σ_X σ_Y` with `σ_X > 0` (`BivariateGaussianHyp`):
 
     E[X | σ(Y)] = μ_X + (ρ σ_X / σ_Y) (Y − μ_Y)   a.s.
+
+The hypotheses do not ask that `Var X = σ_X²` or `|ρ| < 1`: only the covariance of `X` with `Y`
+enters. The standard bivariate normal law of `Foundations/BivariateNormalCDF.lean` satisfies them
+(`bivariateGaussianHyp_bivariateNormalLaw`), giving `E[X | Y] = r Y` there.
 -/
 
 @[expose] public section

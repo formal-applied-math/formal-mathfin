@@ -39,12 +39,17 @@ as a limit.)
   curve's short end: `s(x) → 1` as `x → 0 (through nonzero values)`, obtained from `HasDerivAt` of
   `x ↦ 1 - e^{-x}` at `0` (the slope factor is literally a difference
   quotient of that function through the origin).
+* `tendsto_nssSlope_atTop` — the slope factor's long end: `s(x) → 0` as `x → ∞`.
 * `tendsto_nssYield_nhdsNE_zero` — **short-end limit**:
   `y(τ) → β₀ + β₁` as `τ → 0 (through nonzero values)` (the two curvature terms vanish at the short
   end, leaving level plus slope).
 * `tendsto_nssYield_atTop` — **long-end limit**: `y(τ) → β₀` as `τ → ∞`
   (all three non-level terms decay away, leaving the level factor as the
   asymptotic long rate).
+
+The slope factor is also the Vasicek rate loading per unit maturity,
+`s(κτ) = vasicekBondB κ τ / τ`; `FixedIncome/VasicekYieldNelsonSiegel.lean` writes the
+Vasicek zero yield in these factors.
 
 ## References
 
@@ -149,6 +154,13 @@ theorem tendsto_nssYield_nhdsNE_zero (β₀ β₁ β₂ β₃ l₁ l₂ : ℝ)
         ((hs2.sub he2).const_mul β₃))
   simpa using h
 
+/-- **Long end of the slope factor**: `s(x) = (1 − e^{−x})/x → 0` as `x → ∞` (the numerator
+tends to `1`, the denominator to `∞`). -/
+theorem tendsto_nssSlope_atTop : Tendsto nssSlope atTop (𝓝 0) := by
+  have hnum : Tendsto (fun x : ℝ ↦ 1 - Real.exp (-x)) atTop (𝓝 1) := by
+    simpa using tendsto_const_nhds.sub Real.tendsto_exp_neg_atTop_nhds_zero
+  exact hnum.div_atTop tendsto_id
+
 /-- **Long-end limit**: as `τ → ∞`, the Svensson curve tends to `β₀`, the
 level factor — the slope and both curvature terms decay to `0` since
 `s(τ/lᵢ) → 0` and `e^{-τ/lᵢ} → 0`, given `l₁, l₂ > 0`. -/
@@ -163,14 +175,10 @@ theorem tendsto_nssYield_atTop (β₀ β₁ β₂ β₃ l₁ l₂ : ℝ)
     Real.tendsto_exp_neg_atTop_nhds_zero.comp hdiv1
   have he2 : Tendsto (fun τ : ℝ ↦ Real.exp (-(τ / l₂))) atTop (𝓝 0) :=
     Real.tendsto_exp_neg_atTop_nhds_zero.comp hdiv2
-  have hs1 : Tendsto (fun τ : ℝ ↦ nssSlope (τ / l₁)) atTop (𝓝 0) := by
-    have hnum : Tendsto (fun τ : ℝ ↦ 1 - Real.exp (-(τ / l₁))) atTop (𝓝 1) := by
-      simpa using tendsto_const_nhds.sub he1
-    simpa [nssSlope] using hnum.div_atTop hdiv1
-  have hs2 : Tendsto (fun τ : ℝ ↦ nssSlope (τ / l₂)) atTop (𝓝 0) := by
-    have hnum : Tendsto (fun τ : ℝ ↦ 1 - Real.exp (-(τ / l₂))) atTop (𝓝 1) := by
-      simpa using tendsto_const_nhds.sub he2
-    simpa [nssSlope] using hnum.div_atTop hdiv2
+  have hs1 : Tendsto (fun τ : ℝ ↦ nssSlope (τ / l₁)) atTop (𝓝 0) :=
+    tendsto_nssSlope_atTop.comp hdiv1
+  have hs2 : Tendsto (fun τ : ℝ ↦ nssSlope (τ / l₂)) atTop (𝓝 0) :=
+    tendsto_nssSlope_atTop.comp hdiv2
   have h : Tendsto (nssYield β₀ β₁ β₂ β₃ l₁ l₂) atTop
       (𝓝 (β₀ + β₁ * 0 + β₂ * (0 - 0) + β₃ * (0 - 0))) := by
     unfold nssYield

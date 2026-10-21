@@ -1,12 +1,14 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import Mathlib
 public import MathFin.BlackScholes.GarmanNormalForm
+public import MathFin.BlackScholes.ExchangeOption
+public import MathFin.BlackScholes.MargrabeGrounding
 public import MathFin.Foundations.BivariateNormalCDF
 
 /-!
@@ -49,6 +51,20 @@ the call-on-the-max and call-on-the-min prices are
   the payoff identity, but it is not derived from it: the proof consumes only
   `bivariateNormalCDF_flip_snd` / `bivariateNormalCDF_neg_neg`, the two general bivariate-CDF
   identities of `BivariateNormalCDF.lean`, with no separate probabilistic derivation.
+
+* `stulzD_eq_margrabeD1`: at equal costs of carry, Stulz's ratio argument `d` is Margrabe's
+  `d₁` at the spread volatility `v` (`ExchangeOption.lean`).
+* `tendsto_stulzCallMax_zero_strike`: as the strike `K ↓ 0`, with `b₁ = b₂ = r`, the
+  call-on-the-max closed form tends to `S² + margrabePrice S¹ S² v T`, the closed-form price
+  of the better-of-two payoff `max(S¹_T, S²_T) = S²_T + max(S¹_T − S²_T, 0)`. The strike
+  terms `y₁, y₂ → ∞` and each `N₂(yᵢ, ·; ρᵢ)` tends to its second margin
+  (`tendsto_bivariateNormalCDF_atTop_fst`). This checks `stulzD` and `stulzEffVol` against
+  Margrabe's formula, which the parity identity below does not; it does not check `ρ₁`, `ρ₂`,
+  which drop out in the limit.
+* `tendsto_stulzCallMax_zero_strike_betterOfTwo`: in the two-GBM model of
+  `MargrabeGrounding.lean`, that limit is the discounted expected better-of-two payoff
+  `𝔼_P[e^{−rT}max(S¹_T, S²_T)]` (`integral_betterOfTwo`). Stulz's formula itself, for `K > 0`,
+  is still not derived as an expected payoff.
 
 **Scope.** `stulzCallMax_add_stulzCallMin` is a partial consistency check on the closed forms.
 Its proof uses only `ρ₁² ≤ 1` and `ρ₂² ≤ 1`, so it holds for any values of `d`, `v`, `ρ₁`, `ρ₂`
@@ -228,5 +244,106 @@ theorem stulzCallMax_add_stulzCallMin (S1 S2 K r b1 b2 σ1 σ2 T : ℝ) {ρ : �
   simp only [stulzCallMax, stulzCallMin, bsVGarman, gbsd2, hgbsd1, hgbsd2]
   linear_combination (S1 * Real.exp ((b1 - r) * T)) * hasset1 +
     (S2 * Real.exp ((b2 - r) * T)) * hasset2 - (K * Real.exp (-(r * T))) * hstrike
+
+/-! ## Zero strike: the better-of-two option through Margrabe -/
+
+/-- **Stulz's `d` is Margrabe's `d₁`** at equal costs of carry `b₁ = b₂`, with the spread
+volatility `v = stulzEffVol σ₁ σ₂ ρ`. -/
+lemma stulzD_eq_margrabeD1 (S1 S2 b σ1 σ2 ρ T : ℝ) :
+    stulzD S1 S2 b b σ1 σ2 ρ T = margrabeD1 S1 S2 (stulzEffVol σ1 σ2 ρ) T := by
+  unfold stulzD margrabeD1
+  congr 1
+  ring
+
+open Filter Topology in
+/-- As the strike falls to `0`, `y₁ → +∞`: `log(S₁/K) → +∞`. -/
+lemma tendsto_stulzY1_zero_strike {S1 b1 σ1 T : ℝ} (hS1 : 0 < S1) (hσ1 : 0 < σ1) (hT : 0 < T) :
+    Tendsto (fun K ↦ stulzY1 S1 K b1 σ1 T) (𝓝[>] 0) atTop := by
+  have hlog : Tendsto (fun K ↦ Real.log (S1 / K)) (𝓝[>] 0) atTop := by
+    refine (tendsto_atTop_add_const_left _ (Real.log S1)
+      (tendsto_neg_atBot_atTop.comp Real.tendsto_log_nhdsGT_zero)).congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with K hK
+    rw [Function.comp_apply, Real.log_div hS1.ne' (Set.mem_Ioi.mp hK).ne', sub_eq_add_neg]
+  show Tendsto (fun K ↦ (Real.log (S1 / K) + (b1 + σ1 ^ 2 / 2) * T) / (σ1 * Real.sqrt T)) _ _
+  exact (tendsto_atTop_add_const_right _ _ hlog).atTop_div_const
+    (mul_pos hσ1 (Real.sqrt_pos.mpr hT))
+
+open Filter Topology in
+/-- As the strike falls to `0`, `y₂ → +∞` (`y₂` has the shape of `y₁`). -/
+lemma tendsto_stulzY2_zero_strike {S2 b2 σ2 T : ℝ} (hS2 : 0 < S2) (hσ2 : 0 < σ2) (hT : 0 < T) :
+    Tendsto (fun K ↦ stulzY2 S2 K b2 σ2 T) (𝓝[>] 0) atTop :=
+  tendsto_stulzY1_zero_strike (b1 := b2) hS2 hσ2 hT
+
+open Filter Topology in
+/-- **Stulz's call on the maximum at zero strike is the better-of-two price.** With equal
+costs of carry `b₁ = b₂ = r`, as `K ↓ 0` the closed form `stulzCallMax` tends to
+`S² + margrabePrice S¹ S² v T`, `v = stulzEffVol σ₁ σ₂ ρ`: the closed-form price of
+`max(S¹_T, S²_T) = S²_T + max(S¹_T − S²_T, 0)` (Margrabe's exchange option plus one unit of
+`S²`). This is a statement about the closed forms; neither is derived here as an expected
+payoff. -/
+theorem tendsto_stulzCallMax_zero_strike {S1 S2 r σ1 σ2 ρ T : ℝ} (hS1 : 0 < S1) (hS2 : 0 < S2)
+    (hσ1 : 0 < σ1) (hσ2 : 0 < σ2) (hT : 0 < T) :
+    Tendsto (fun K ↦ stulzCallMax S1 S2 K r r r σ1 σ2 ρ T) (𝓝[>] 0)
+      (𝓝 (S2 + margrabePrice S1 S2 (stulzEffVol σ1 σ2 ρ) T)) := by
+  -- the two asset terms: `N₂(yᵢ, ·; ρᵢ)` tends to its second margin as `yᵢ → ∞`
+  have h1 : Tendsto (fun K ↦ S1 * bivariateNormalCDF (stulzY1 S1 K r σ1 T)
+      (margrabeD1 S1 S2 (stulzEffVol σ1 σ2 ρ) T) (stulzRho1 σ1 σ2 ρ)) (𝓝[>] 0)
+      (𝓝 (S1 * Phi (margrabeD1 S1 S2 (stulzEffVol σ1 σ2 ρ) T))) :=
+    ((tendsto_bivariateNormalCDF_atTop_fst _ _).comp
+      (tendsto_stulzY1_zero_strike hS1 hσ1 hT)).const_mul S1
+  have h2 : Tendsto (fun K ↦ S2 * bivariateNormalCDF (stulzY2 S2 K r σ2 T)
+      (-margrabeD1 S1 S2 (stulzEffVol σ1 σ2 ρ) T + stulzEffVol σ1 σ2 ρ * Real.sqrt T)
+      (stulzRho2 σ1 σ2 ρ)) (𝓝[>] 0)
+      (𝓝 (S2 * Phi (-margrabeD1 S1 S2 (stulzEffVol σ1 σ2 ρ) T +
+        stulzEffVol σ1 σ2 ρ * Real.sqrt T))) :=
+    ((tendsto_bivariateNormalCDF_atTop_fst _ _).comp
+      (tendsto_stulzY2_zero_strike hS2 hσ2 hT)).const_mul S2
+  -- the strike term vanishes: `K e^{−rT}` times a number in `[0, 1]`
+  have hKe : Tendsto (fun K : ℝ ↦ K * Real.exp (-(r * T))) (𝓝[>] 0) (𝓝 0) := by
+    simpa using (tendsto_nhdsWithin_of_tendsto_nhds (s := Set.Ioi 0)
+      (tendsto_id : Tendsto id (𝓝 (0 : ℝ)) (𝓝 0))).mul_const (Real.exp (-(r * T)))
+  have h3 : Tendsto (fun K ↦ K * Real.exp (-(r * T)) *
+      (1 - bivariateNormalCDF (-stulzY1 S1 K r σ1 T + σ1 * Real.sqrt T)
+        (-stulzY2 S2 K r σ2 T + σ2 * Real.sqrt T) ρ)) (𝓝[>] 0) (𝓝 0) := by
+    refine squeeze_zero_norm' ?_ hKe
+    filter_upwards [self_mem_nhdsWithin] with K hK
+    have hK0 : 0 < K * Real.exp (-(r * T)) := mul_pos (Set.mem_Ioi.mp hK) (Real.exp_pos _)
+    have hN0 : 0 ≤ bivariateNormalCDF (-stulzY1 S1 K r σ1 T + σ1 * Real.sqrt T)
+        (-stulzY2 S2 K r σ2 T + σ2 * Real.sqrt T) ρ := MeasureTheory.measureReal_nonneg
+    have hN1 : bivariateNormalCDF (-stulzY1 S1 K r σ1 T + σ1 * Real.sqrt T)
+        (-stulzY2 S2 K r σ2 T + σ2 * Real.sqrt T) ρ ≤ 1 := MeasureTheory.measureReal_le_one
+    rw [Real.norm_eq_abs, abs_mul, abs_of_pos hK0, abs_of_nonneg (sub_nonneg.mpr hN1)]
+    exact mul_le_of_le_one_right hK0.le (sub_le_self _ hN0)
+  -- the limit `S¹Φ(d₁) + S²Φ(−d₁ + v√T)` is `S² + Margrabe`, since `−d₁ + v√T = −d₂`
+  have hlim : S1 * Phi (margrabeD1 S1 S2 (stulzEffVol σ1 σ2 ρ) T) +
+      S2 * Phi (-margrabeD1 S1 S2 (stulzEffVol σ1 σ2 ρ) T + stulzEffVol σ1 σ2 ρ * Real.sqrt T)
+        - 0 = S2 + margrabePrice S1 S2 (stulzEffVol σ1 σ2 ρ) T := by
+    rw [show -margrabeD1 S1 S2 (stulzEffVol σ1 σ2 ρ) T + stulzEffVol σ1 σ2 ρ * Real.sqrt T
+        = -margrabeD2 S1 S2 (stulzEffVol σ1 σ2 ρ) T by rw [margrabeD2]; ring, Phi_neg]
+    unfold margrabePrice
+    ring
+  rw [← hlim]
+  refine ((h1.add h2).sub h3).congr fun K ↦ ?_
+  simp only [stulzCallMax, stulzD_eq_margrabeD1, sub_self, zero_mul, Real.exp_zero, mul_one]
+
+open Filter Topology MeasureTheory ProbabilityTheory in
+/-- **Stulz's call on the maximum at zero strike is the expected better-of-two payoff.** For
+two Black–Scholes terminals driven by a jointly Gaussian pair of standard normals with
+covariance `ρ` and a non-degenerate spread variance, the closed form `stulzCallMax` with
+`b₁ = b₂ = r` tends, as `K ↓ 0`, to `𝔼_P[e^{−rT}·max(S¹_T, S²_T)]`
+(`tendsto_stulzCallMax_zero_strike` and `integral_betterOfTwo`). -/
+theorem tendsto_stulzCallMax_zero_strike_betterOfTwo {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {P : Measure Ω} [IsProbabilityMeasure P] {W₁ W₂ : Ω → ℝ} {S1 S2 r σ1 σ2 ρ T : ℝ}
+    (hjoint : HasGaussianLaw (fun ω ↦ (W₁ ω, W₂ ω)) P)
+    (hW₁meas : Measurable W₁) (hW₂meas : Measurable W₂)
+    (hW₁ : HasLaw W₁ (gaussianReal 0 1) P) (hW₂ : HasLaw W₂ (gaussianReal 0 1) P)
+    (hcov : cov[W₁, W₂; P] = ρ) (hS1 : 0 < S1) (hS2 : 0 < S2) (hσ1 : 0 < σ1) (hσ2 : 0 < σ2)
+    (hT : 0 < T) (hv : 0 < σ1 ^ 2 + σ2 ^ 2 - 2 * ρ * σ1 * σ2) :
+    Tendsto (fun K ↦ stulzCallMax S1 S2 K r r r σ1 σ2 ρ T) (𝓝[>] 0)
+      (𝓝 (∫ ω, Real.exp (-(r * T)) *
+        max (bsTerminal S1 r σ1 T (W₁ ω)) (bsTerminal S2 r σ2 T (W₂ ω)) ∂P)) := by
+  rw [integral_betterOfTwo hjoint hW₁meas hW₂meas hW₁ hW₂ hcov hS1 hS2 hσ2
+    (Real.sqrt_pos.mpr hv) hT (Real.sq_sqrt hv.le)]
+  exact tendsto_stulzCallMax_zero_strike hS1 hS2 hσ1 hσ2 hT
 
 end MathFin

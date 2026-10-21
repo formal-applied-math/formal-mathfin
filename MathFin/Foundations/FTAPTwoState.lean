@@ -25,7 +25,7 @@ module
 public import Mathlib
 
 /-!
-# FTAP both directions, two-state market (phase 37, after Nagy 2026)
+# FTAP both directions, two-state market (after Nagy 2026)
 
 In a one-period, one-asset market with two states (`up`, `down`) and
 excess-return vector `z = (z_up, z_down)`, the **Fundamental Theorem of
@@ -52,10 +52,14 @@ negative and strictly positive in at least one state.
 * `emm_of_signs_swapped` / `emm_of_trivial_market`: the mirrored sign
   regime, and the trivial market `z = 0` (EMM `(1/2, 1/2)`).
 
-*Not formalized here*: Nagy 7.2 (no arbitrage and `z ≠ 0` ⟹ opposite
-strict signs) and the packaged two-state iff. The backward *construction*
-is the load-bearing half: `Bridges/PricingKernel` builds the
-discounted state prices directly from the named weights.
+The packaged two-state biconditional and Nagy 7.2 (no arbitrage and `z ≠ 0` ⟹
+opposite strict signs) are proved in `Foundations/FTAPMultiState.lean`
+(`hasEMM_two_state_iff_not_hasArbitrage`,
+`signs_opposite_of_not_hasArbitrage_two_state`): this market is the `N = 2`, `M = 1`
+multi-state market (`hasEMM_two_state_iff_multi`, `hasArbitrage_two_state_iff_multi`), so
+they are instances of the multi-state FTAP. The backward *construction* here is what
+`Bridges/PricingKernel` consumes: it builds the discounted state prices directly from the
+named weights.
 -/
 
 @[expose] public section
@@ -64,7 +68,8 @@ namespace MathFin
 
 /-- **EMM existence in a two-state market**: there exists a strictly
 positive probability `(q_up, q_down)` summing to `1` such that
-`q_up · z_up + q_down · z_down = 0` (zero risk-neutral excess return). -/
+`q_up · z_up + q_down · z_down = 0` (zero risk-neutral excess return). The `N = 2`,
+`M = 1` case of `HasEMM_multi_state` (`hasEMM_two_state_iff_multi`). -/
 def HasEMM_two_state (z_up z_down : ℝ) : Prop :=
   ∃ q_up q_down : ℝ,
     0 < q_up ∧ 0 < q_down ∧ q_up + q_down = 1 ∧

@@ -6,6 +6,7 @@ Authors: Yang Ye, Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Portfolio.CovariancePSD
 
 /-!
 # Basel SA-CCR: exposure at default and effective notional aggregation
@@ -49,11 +50,26 @@ notionals nonnegative, growing `d₁` never shrinks the aggregate (`effNotionalP
 formula is symmetric in `d₁, d₂`, so the same holds for `d₂` by relabelling; that version is not
 stated).
 
+**The effective notional is a standard deviation.** Its radicand is the Markowitz quadratic form
+`∑ᵢⱼ DᵢDⱼρᵢⱼ` (`portfolioVarN`, `Portfolio/MarkowitzNAsset.lean`) of the bucket notionals under the
+supervisory correlation matrix `saccrIRCorrelation` (`effNotionalIR_eq_sqrt_portfolioVarN`). So if
+the three bucket risk factors `Zᵢ` have unit variances and the supervisory correlations as
+covariances, `effNotionalIR` is the standard deviation of the hedging-set exposure `∑ Dᵢ Zᵢ`
+(`effNotionalIR_eq_sqrt_variance`, through `portfolioVarN_covariance_eq_variance` of
+`Portfolio/CovariancePSD.lean`). The supervisory matrix is positive semidefinite: the radicand is
+a sum of squares, nonnegative for every hedging set, so the square root never truncates
+(`effNotionalIR_radicand_nonneg`, `effNotionalIR_sq`). The bound "never more than adding the
+absolute notionals" holds for every kernel with entries in `[-1, 1]`
+(`sqrt_portfolioVarN_le_sum_abs`), and both `effNotionalIR_le_abs_add` and
+`effNotionalPair_le_abs_add` are proved as its instances. The bucket risk factors themselves are
+not part of the Basel formula; the theorem says which variance the formula computes.
+
 ## Main definitions
 
 * `saccrEAD`: `α · (RC + PFE)`.
 * `effNotionalIR`: the CRE52.57 interest-rate effective notional of three maturity buckets.
 * `effNotionalPair`: the two-bucket aggregation `√(d₁² + d₂² + 2ρ·d₁·d₂)` at a general `ρ`.
+* `saccrIRCorrelation`: the CRE52.57 correlation matrix of the three maturity buckets.
 
 ## Main results
 
@@ -70,6 +86,14 @@ stated).
   `|D₁| + |D₂| + |D₃|`.
 * `effNotionalIR_third_zero`, `effNotionalIR_second_zero`: with one bucket empty it is
   `effNotionalPair` at `0.7` or `0.3`.
+* `sqrt_portfolioVarN_le_sum_abs`: for a kernel with entries in `[-1, 1]`, the square root of the
+  quadratic form never exceeds the sum of the absolute weights.
+* `effNotionalIR_eq_sqrt_portfolioVarN`, `effNotionalPair_eq_sqrt_portfolioVarN`: the effective
+  notionals as square roots of Markowitz quadratic forms.
+* `effNotionalIR_eq_sqrt_variance`: the effective notional is the standard deviation of the
+  hedging-set exposure under unit-variance factors with the supervisory correlations.
+* `effNotionalIR_radicand_nonneg`, `effNotionalIR_sq`: the supervisory correlation matrix is
+  positive semidefinite, and the effective notional squares to its radicand.
 
 ## References
 
@@ -154,25 +178,6 @@ theorem effNotionalPair_eq_hypot_of_corr_zero (d₁ d₂ : ℝ) :
     effNotionalPair 0 d₁ d₂ = √(d₁ ^ 2 + d₂ ^ 2) := by
   unfold effNotionalPair; ring_nf
 
-/-- For a correlation `ρ ∈ [-1, 1]` (which contains Basel's `0.7` and `0.3`), the aggregated
-notional never exceeds the sum of the absolute bucket notionals: there is no *negative*
-diversification from this formula. The bound fails outside `[-1, 1]`, e.g. `ρ = -5`,
-`d₁ = 1`, `d₂ = -1` gives `effNotionalPair = √12 > 2`. -/
-theorem effNotionalPair_le_abs_add {ρ : ℝ} (hρ1 : -1 ≤ ρ) (hρ2 : ρ ≤ 1) (d₁ d₂ : ℝ) :
-    effNotionalPair ρ d₁ d₂ ≤ |d₁| + |d₂| := by
-  unfold effNotionalPair
-  rw [show |d₁| + |d₂| = √((|d₁| + |d₂|) ^ 2) from (Real.sqrt_sq (by positivity)).symm]
-  apply Real.sqrt_le_sqrt
-  have h1 : d₁ ^ 2 = |d₁| ^ 2 := (sq_abs d₁).symm
-  have h2 : d₂ ^ 2 = |d₂| ^ 2 := (sq_abs d₂).symm
-  have h3 : 2 * ρ * d₁ * d₂ ≤ 2 * |d₁| * |d₂| := by
-    have hle : d₁ * d₂ ≤ |d₁| * |d₂| := (abs_mul d₁ d₂) ▸ le_abs_self (d₁ * d₂)
-    have hge : -(|d₁| * |d₂|) ≤ d₁ * d₂ := by
-      have h := neg_abs_le (d₁ * d₂)
-      rwa [abs_mul] at h
-    nlinarith [mul_nonneg (abs_nonneg d₁) (abs_nonneg d₂)]
-  nlinarith [h1, h2, h3]
-
 /-- `effNotionalPair` is monotone in `d₁` on `[0, ∞)`, for `ρ ≥ 0` and `d₂ ≥ 0`: increasing a
 nonnegative bucket notional `d₁` never decreases the aggregate when the correlation and the other
 notional are both nonnegative. -/
@@ -191,18 +196,6 @@ The bucket notionals themselves (supervisory duration, delta, maturity factor) a
 noncomputable def effNotionalIR (D₁ D₂ D₃ : ℝ) : ℝ :=
   √(D₁ ^ 2 + D₂ ^ 2 + D₃ ^ 2 + 7 / 5 * D₁ * D₂ + 7 / 5 * D₂ * D₃ + 3 / 5 * D₁ * D₃)
 
-/-- **No negative diversification across the three buckets**: the SA-CCR interest-rate effective
-notional never exceeds the sum of the absolute bucket notionals. -/
-theorem effNotionalIR_le_abs_add (D₁ D₂ D₃ : ℝ) :
-    effNotionalIR D₁ D₂ D₃ ≤ |D₁| + |D₂| + |D₃| := by
-  unfold effNotionalIR
-  rw [Real.sqrt_le_left (by positivity)]
-  have h12 : D₁ * D₂ ≤ |D₁| * |D₂| := (abs_mul D₁ D₂) ▸ le_abs_self (D₁ * D₂)
-  have h23 : D₂ * D₃ ≤ |D₂| * |D₃| := (abs_mul D₂ D₃) ▸ le_abs_self (D₂ * D₃)
-  have h13 : D₁ * D₃ ≤ |D₁| * |D₃| := (abs_mul D₁ D₃) ▸ le_abs_self (D₁ * D₃)
-  nlinarith [sq_abs D₁, sq_abs D₂, sq_abs D₃, mul_nonneg (abs_nonneg D₁) (abs_nonneg D₂),
-    mul_nonneg (abs_nonneg D₂) (abs_nonneg D₃), mul_nonneg (abs_nonneg D₁) (abs_nonneg D₃)]
-
 /-- With the third bucket empty, the SA-CCR effective notional is `effNotionalPair` at the
 adjacent-bucket correlation `0.7`. -/
 theorem effNotionalIR_third_zero (D₁ D₂ : ℝ) :
@@ -218,5 +211,102 @@ theorem effNotionalIR_second_zero (D₁ D₃ : ℝ) :
   unfold effNotionalIR effNotionalPair
   congr 1
   ring
+
+/-! ## The effective notional as a standard deviation -/
+
+/-- **No negative diversification for a correlation-bounded kernel**: if every entry of the kernel
+`c` on `s` lies in `[-1, 1]`, the square root of the quadratic form `∑ᵢⱼ wᵢwⱼcᵢⱼ` never exceeds
+`∑ᵢ |wᵢ|`, because each term is at most `|wᵢ||wⱼ|`. -/
+theorem sqrt_portfolioVarN_le_sum_abs {ι : Type*} (s : Finset ι) (w : ι → ℝ) {c : ι → ι → ℝ}
+    (hc : ∀ i ∈ s, ∀ j ∈ s, |c i j| ≤ 1) :
+    √(portfolioVarN s w c) ≤ ∑ i ∈ s, |w i| := by
+  unfold portfolioVarN
+  rw [Real.sqrt_le_left (Finset.sum_nonneg fun i _ ↦ abs_nonneg (w i)), sq, Finset.sum_mul_sum]
+  refine Finset.sum_le_sum fun i hi ↦ Finset.sum_le_sum fun j hj ↦ ?_
+  calc w i * w j * c i j ≤ |w i * w j * c i j| := le_abs_self _
+    _ = |w i| * |w j| * |c i j| := by rw [abs_mul, abs_mul]
+    _ ≤ |w i| * |w j| * 1 := mul_le_mul_of_nonneg_left (hc i hi j hj) (by positivity)
+    _ = |w i| * |w j| := mul_one _
+
+/-- The supervisory correlations between the three maturity buckets of an interest-rate hedging
+set (Basel Framework CRE52.57): `1` on the diagonal, `0.7` between adjacent buckets and `0.3`
+between the first and the third. -/
+noncomputable def saccrIRCorrelation : Fin 3 → Fin 3 → ℝ :=
+  ![![1, 7 / 10, 3 / 10], ![7 / 10, 1, 7 / 10], ![3 / 10, 7 / 10, 1]]
+
+/-- **The effective notional is the square root of a Markowitz quadratic form**: `effNotionalIR`
+is `√(∑ᵢⱼ DᵢDⱼρᵢⱼ)` with the supervisory correlations `ρ = saccrIRCorrelation`. -/
+theorem effNotionalIR_eq_sqrt_portfolioVarN (D : Fin 3 → ℝ) :
+    effNotionalIR (D 0) (D 1) (D 2) = √(portfolioVarN Finset.univ D saccrIRCorrelation) := by
+  simp only [effNotionalIR, portfolioVarN, saccrIRCorrelation, Fin.sum_univ_three,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons,
+    Matrix.tail_cons]
+  congr 1
+  ring
+
+/-- The two-bucket aggregation is the square root of the quadratic form of the correlation
+matrix `!![1, ρ; ρ, 1]`. -/
+theorem effNotionalPair_eq_sqrt_portfolioVarN (ρ d₁ d₂ : ℝ) :
+    effNotionalPair ρ d₁ d₂ = √(portfolioVarN Finset.univ ![d₁, d₂] ![![1, ρ], ![ρ, 1]]) := by
+  simp only [effNotionalPair, portfolioVarN, Fin.sum_univ_two, Matrix.cons_val_zero,
+    Matrix.cons_val_one]
+  congr 1
+  ring
+
+/-- For a correlation `ρ ∈ [-1, 1]` (which contains Basel's `0.7` and `0.3`), the aggregated
+notional never exceeds the sum of the absolute bucket notionals: there is no *negative*
+diversification from this formula. This is `sqrt_portfolioVarN_le_sum_abs` at the kernel
+`!![1, ρ; ρ, 1]`. The bound fails outside `[-1, 1]`, e.g. `ρ = -5`, `d₁ = 1`, `d₂ = -1` gives
+`effNotionalPair = √12 > 2`. -/
+theorem effNotionalPair_le_abs_add {ρ : ℝ} (hρ1 : -1 ≤ ρ) (hρ2 : ρ ≤ 1) (d₁ d₂ : ℝ) :
+    effNotionalPair ρ d₁ d₂ ≤ |d₁| + |d₂| := by
+  have h := sqrt_portfolioVarN_le_sum_abs Finset.univ ![d₁, d₂] (c := ![![1, ρ], ![ρ, 1]])
+    (by norm_num [Fin.forall_fin_succ, abs_le, hρ1, hρ2])
+  rw [← effNotionalPair_eq_sqrt_portfolioVarN] at h
+  simpa only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one] using h
+
+/-- **No negative diversification across the three buckets**: the SA-CCR interest-rate effective
+notional never exceeds the sum of the absolute bucket notionals. This is
+`sqrt_portfolioVarN_le_sum_abs` at the supervisory correlations, whose entries lie in `[0, 1]`. -/
+theorem effNotionalIR_le_abs_add (D₁ D₂ D₃ : ℝ) :
+    effNotionalIR D₁ D₂ D₃ ≤ |D₁| + |D₂| + |D₃| := by
+  have h := sqrt_portfolioVarN_le_sum_abs Finset.univ ![D₁, D₂, D₃] (c := saccrIRCorrelation)
+    (by norm_num [Fin.forall_fin_succ, saccrIRCorrelation, Matrix.cons_val_two, abs_le])
+  rw [← effNotionalIR_eq_sqrt_portfolioVarN] at h
+  simpa only [Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+    Matrix.head_cons, Matrix.tail_cons] using h
+
+section Variance
+
+open MeasureTheory ProbabilityTheory
+
+/-- **The effective notional is the standard deviation of the hedging-set exposure**: if the
+three bucket risk factors `Zᵢ` are square-integrable with covariances equal to the supervisory
+correlations (unit variances, `0.7` between adjacent buckets, `0.3` between the first and the
+third), then `effNotionalIR D₀ D₁ D₂ = sd(∑ᵢ Dᵢ Zᵢ)`. This is
+`portfolioVarN_covariance_eq_variance` at the supervisory kernel. -/
+theorem effNotionalIR_eq_sqrt_variance {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+    [IsFiniteMeasure μ] {Z : Fin 3 → Ω → ℝ} (hZ : ∀ i, MemLp (Z i) 2 μ)
+    (hcov : ∀ i j, cov[Z i, Z j; μ] = saccrIRCorrelation i j) (D : Fin 3 → ℝ) :
+    effNotionalIR (D 0) (D 1) (D 2) = √Var[∑ i, D i • Z i; μ] := by
+  have hk : (fun i j ↦ cov[Z i, Z j; μ]) = saccrIRCorrelation := funext₂ hcov
+  rw [effNotionalIR_eq_sqrt_portfolioVarN, ← hk,
+    portfolioVarN_covariance_eq_variance _ D Z fun i _ ↦ hZ i]
+
+end Variance
+
+/-- **The supervisory correlation matrix is positive semidefinite**: the radicand of
+`effNotionalIR` is nonnegative for every hedging set. It is the sum of squares
+`(D₁ + 0.7 D₂ + 0.3 D₃)² + (51 D₂ + 49 D₃)²/5100 + (112/255) D₃²`. -/
+theorem effNotionalIR_radicand_nonneg (D₁ D₂ D₃ : ℝ) :
+    0 ≤ D₁ ^ 2 + D₂ ^ 2 + D₃ ^ 2 + 7 / 5 * D₁ * D₂ + 7 / 5 * D₂ * D₃ + 3 / 5 * D₁ * D₃ := by
+  nlinarith [sq_nonneg (D₁ + 7 / 10 * D₂ + 3 / 10 * D₃), sq_nonneg (51 * D₂ + 49 * D₃),
+    sq_nonneg D₃]
+
+/-- The square of the effective notional is its radicand: no truncation at zero. -/
+theorem effNotionalIR_sq (D₁ D₂ D₃ : ℝ) :
+    effNotionalIR D₁ D₂ D₃ ^ 2 =
+      D₁ ^ 2 + D₂ ^ 2 + D₃ ^ 2 + 7 / 5 * D₁ * D₂ + 7 / 5 * D₂ * D₃ + 3 / 5 * D₁ * D₃ :=
+  Real.sq_sqrt (effNotionalIR_radicand_nonneg D₁ D₂ D₃)
 
 end MathFin

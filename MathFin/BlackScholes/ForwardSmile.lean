@@ -46,6 +46,11 @@ from a local-vol model is not developed here. The headline results:
   ATM skew `ψ₁/√T₀` (the rule of two), tends to that value as `T → 0`, and behaves like
   `(3/2)ψ₁/√T` as `T → ∞`. These are statements about the closed form;
   `dupireRatio_sqrt_slope` identifies it with the skew of the surface only for `T > 0`.
+* `smileSurface_skew_slope`, `dupireRatio_sqrt_slope_eq_mul_skew`,
+  `tendsto_dupireRatio_sqrt_slope_nhdsGT_zero` — the rule of two on the surface itself: the
+  first-order implied ATM skew is `ψ₁/√(T+T₀)`, the first-order local ATM skew is that times
+  `((3/2)T + 2T₀)/(T + T₀)` for every `T > 0`, and as `T → 0⁺` it tends to twice the implied
+  ATM skew at `T = 0`. All first order in ε, for this one-parameter family of surfaces.
 
 The notes' eq 10.9 reads a forward skew off `localSkew` as one half of it (the rule of two
 run in reverse). That reading is a heuristic and is not formalized here.
@@ -999,5 +1004,45 @@ theorem tendsto_localSkew_mul_sqrt_atTop (ψ₁ T₀ : ℝ) :
   rw [hinner, Real.sqrt_div hT0]
   field_simp [hne, (Real.sqrt_pos.mpr hpos).ne']
   ring
+
+/-! ## The rule of two on the surface itself -/
+
+/-- **The implied ATM skew, first order in ε**: the ε-slope at `ε = 0` of the ATM `k`-slope of
+the implied-volatility surface is `ψ₁/√(T+T₀)` (the surface is affine in `k`). -/
+theorem smileSurface_skew_slope (σ ψ₁ T₀ T : ℝ) :
+    deriv (fun ε ↦ deriv (fun k ↦ smileSurface σ ψ₁ T₀ ε k T) 0) 0
+      = ψ₁ / Real.sqrt (T + T₀) := by
+  have h : (fun ε ↦ deriv (fun k ↦ smileSurface σ ψ₁ T₀ ε k T) 0)
+      = fun ε ↦ ε * (ψ₁ / Real.sqrt (T + T₀)) :=
+    funext fun ε ↦ (hasDerivAt_smileSurface_k (σ := σ) (ψ₁ := ψ₁) (T₀ := T₀) (ε := ε)
+      (T := T) (x := 0)).deriv.trans (mul_div_assoc ε ψ₁ _)
+  rw [h, (hasDerivAt_mul_const _).deriv]
+
+/-- **Local versus implied ATM skew, first order in ε.** For `F, σ, T₀ > 0` and every `T > 0`,
+the ε-slope of the ATM `k`-slope of `√R` (Dupire's local volatility, `R` taken as its
+definition) is the ε-slope of the implied ATM skew times `((3/2)T + 2T₀)/(T + T₀)`, a factor
+that decreases from `2` (as `T → 0⁺`) to `3/2` (as `T → ∞`). -/
+theorem dupireRatio_sqrt_slope_eq_mul_skew {F σ ψ₁ T₀ T : ℝ} (hF : 0 < F) (hσ : 0 < σ)
+    (hT : 0 < T) (h₀ : 0 < T₀) :
+    deriv (fun ε ↦ deriv (fun k ↦ Real.sqrt (dupireRatio F σ ψ₁ T₀ ε k T)) 0) 0
+      = ((3 / 2) * T + 2 * T₀) / (T + T₀)
+        * deriv (fun ε ↦ deriv (fun k ↦ smileSurface σ ψ₁ T₀ ε k T) 0) 0 := by
+  rw [dupireRatio_sqrt_slope hF hσ hT h₀, smileSurface_skew_slope, localSkew,
+    div_mul_div_comm, mul_comm ψ₁]
+
+/-- **The rule of two on the tilted surface.** For `F, σ, T₀ > 0`, as `T → 0⁺` the
+first-order-in-ε local-volatility ATM skew (the ε-slope of the ATM `k`-slope of `√R`) tends to
+twice the first-order implied ATM skew at `T = 0`, `2·ψ₁/√T₀`. The statement is about the Dupire
+ratio of the surface for `T > 0` (`dupireRatio_sqrt_slope`), not only about the closed form
+`localSkew`. -/
+theorem tendsto_dupireRatio_sqrt_slope_nhdsGT_zero {F σ ψ₁ T₀ : ℝ} (hF : 0 < F)
+    (hσ : 0 < σ) (h₀ : 0 < T₀) :
+    Filter.Tendsto
+      (fun T ↦ deriv (fun ε ↦ deriv (fun k ↦ Real.sqrt (dupireRatio F σ ψ₁ T₀ ε k T)) 0) 0)
+      (nhdsWithin 0 (Set.Ioi 0))
+      (nhds (2 * deriv (fun ε ↦ deriv (fun k ↦ smileSurface σ ψ₁ T₀ ε k 0) 0) 0)) := by
+  rw [smileSurface_skew_slope, zero_add]
+  exact ((tendsto_localSkew_nhds_zero ψ₁ T₀ h₀).mono_left nhdsWithin_le_nhds).congr'
+    (eventually_nhdsWithin_of_forall fun T hT ↦ (dupireRatio_sqrt_slope hF hσ hT h₀).symm)
 
 end MathFin.ForwardSmile
