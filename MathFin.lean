@@ -117,6 +117,7 @@ import MathFin.Foundations.QuantileConvergence
 import MathFin.Foundations.Copula
 import MathFin.Foundations.Sklar
 import MathFin.Foundations.CopulaFamilies
+import MathFin.Foundations.GaussianCopula
 import MathFin.Foundations.HoeffdingCovariance
 import MathFin.Foundations.MarshallOlkin
 import MathFin.Foundations.CorrelationFallacies
