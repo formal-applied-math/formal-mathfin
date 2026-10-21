@@ -5492,7 +5492,7 @@
     {
       "id": "mf-schwartz-futures-price",
       "name": "Schwartz One-Factor Commodity Futures Price",
-      "description": "The Schwartz (1997) one-factor commodity futures price F(0,T) = E[S_T] equals exp(m_T + v_T/2), the lognormal mean of the terminal spot, where ln S_T ~ N(m_T, v_T) solves the same mean-reverting SDE as the Vasicek short rate. Delivered via the Gaussian moment-generating function at 1 (mgf_gaussianReal), composed with the existing Vasicek terminal-law machinery.",
+      "description": "For the log spot carried in its Ornstein–Uhlenbeck Wiener representation ln S_T = m_T + σ∫₀ᵀ e^{−κ(T−s)} dB_s (the solution form of the Schwartz (1997) log-price SDE d ln S = κ(θ − ln S)dt + σ dB; that this representation solves the SDE is cited, not derived here), E[S_T] = E[exp(ln S_T)] = exp(m_T + v_T/2) with m_T = vasicekSDEMean and v_T = vasicekSDEVariance: the Schwartz one-factor futures price F(0,T) = E[S_T]. Proved by composing Mathlib's Gaussian MGF (mgf_gaussianReal at 1) with the derived Gaussian law of that representation (vasicekShortRate_hasLaw_gaussian).",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Futures.SchwartzOneFactor\n\nopen MeasureTheory ProbabilityTheory Real MathFin\nopen scoped NNReal\nopen WienerIntegralL2\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n  {B : ℝ≥0 → Ω → ℝ}\n\n/-- Schwartz one-factor futures price equals the expected terminal spot. -/\ntheorem schwartz_futures_price_eq_expected_spot\n    (hB : IsPreBrownianReal B μ) (x₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    ∫ ω, Real.exp (vasicekSDEMean x₀ θ κ (T : ℝ)\n        + σ * (wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω)) ∂μ\n      = schwartzFuturesPrice x₀ θ κ σ T :=\n  MathFin.schwartzFuturesPrice_eq_integral hB x₀ θ σ hκ T\n"
@@ -5502,7 +5502,7 @@
         "reference": "Schwartz (1997), 'The Stochastic Behavior of Commodity Prices: Implications for Valuation and Hedging,' Journal of Finance",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof for the constant-parameter Schwartz (1997) model. Hull's time-dependent level q(t) (the Hull-White-form drift calibrated to the quoted futures curve, OFOD ch. 35) is out of scope. The log spot is carried in its Wiener representation (the OU solution representation, as in mf-vasicek-sde-terminal-gaussian) -- the modelling bridge from the SDE is cited, not proven here, matching that entry's own disclosure. Lives in MathFin/Futures/SchwartzOneFactor.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof for the constant-parameter Schwartz (1997) model. Hull's time-dependent level q(t) (the Hull-White-form drift calibrated to the quoted futures curve) is out of scope. The log spot is carried in its Wiener representation (the OU solution representation of vasicekShortRate_hasLaw_gaussian) -- that this representation solves the SDE is cited, not proven here (mf-vasicek-sde-terminal-gaussian rests on the same representation). Lives in MathFin/Futures/SchwartzOneFactor.lean. Axioms-clean."
       }
     },
     {
