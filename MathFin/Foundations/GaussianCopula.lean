@@ -20,14 +20,17 @@ where the systematic factor `Z₀` and the idiosyncratic factors `Z₁, …, Z�
 normals. Every `Xᵢ` is standard normal (`map_gaussianFactorVec`); by an easy unformalized
 calculation, `Cov(Xᵢ, Xⱼ) = ρ²` for `i ≠ j` (not proved as a lemma here — no covariance API is
 exercised in this file). This is the latent-variable model behind the Vasicek large-pool model and
-standard CDO tranche pricing: name `i` defaults by time `t` when `Xᵢ ≤ Φ⁻¹(pᵢ(t))`.
+standard CDO tranche pricing: name `i` defaults by time `t` when `Xᵢ ≤ Φ⁻¹(pᵢ(t))`. (The library's
+`RiskMeasures/BernoulliMixture.lean`, `VasicekIRB.lean` and `TrancheLoss.lean` state their
+threshold model directly; they do not go through `gaussianFactorCopula`.)
 
 We take the factors as a point `(z₀, z) : ℝ × (Fin n → ℝ)` under the product of standard normal
 laws (`stdNormalFactors`), with the systematic factor in the first slot, so that every name is
 treated symmetrically. (A common bivariate construction instead writes the pair as
-`(Z₁, ρ Z₁ + √(1 − ρ²) Z₂)`, correlation `ρ`; the symmetric model here always has pairwise
-correlation `ρ²` (not `ρ`), so even at `n = 2` it does not coincide with that bivariate
-construction for any `ρ < 0`, nor for `ρ ∈ (0, 1)` without reparametrising `ρ ↦ √ρ`.)
+`(Z₁, ρ Z₁ + √(1 − ρ²) Z₂)`, correlation `ρ`. By the unformalized calculation above, the
+symmetric model here has pairwise correlation `ρ²` (not `ρ`), so even at `n = 2` it does not
+coincide with that bivariate construction for any `ρ < 0`, nor for `ρ ∈ (0, 1)` without
+reparametrising `ρ ↦ √ρ`. None of this is stated as a lemma.)
 
 The copula is defined via `copulaOf`, so being a copula is Sklar's theorem.
 
@@ -39,9 +42,11 @@ The copula is defined via `copulaOf`, so being a copula is Sklar's theorem.
 
 `ρ = −1` is in range (`ρ ∈ [−1, 1]`); every name is then `−Z₀`, so it also gives `M`, and the
 family depends on `ρ` only through `ρ²`. Neither fact is stated as a lemma here; only `ρ = 1` is
-(`gaussianFactorCopula_one`). The countermonotonicity copula `W` is only
-a copula in dimension two and is not a member of this symmetric family at all (pairwise
-correlations here are `ρ²`, always nonnegative), so no choice of `ρ` recovers it.
+(`gaussianFactorCopula_one`). The countermonotonicity copula `W` (`countermonotoneCopula`) is
+defined on `Fin 2` only (for `d ≥ 3` the lower Fréchet bound is not a copula,
+`not_exists_isCopula_frechetLower`), and it is not a member of this symmetric family (pairwise
+correlations here are `ρ²`, always nonnegative), so no choice of `ρ` recovers it. That is not
+stated as a lemma either.
 -/
 
 @[expose] public section

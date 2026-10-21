@@ -21,14 +21,16 @@ calculation numbers below (Thm 11.2, Ex. 11.1–11.2, Calc 11.3) are that chapte
 The conditioning step itself is Mathlib's: `E[v | σ(S)]` is a Borel function of the state by
 `stronglyMeasurable_condExp` and the Doob–Dynkin lemma
 `StronglyMeasurable.exists_eq_measurable_comp`, and `L²(S)` comes out of the conditional
-expectation by `condExp_mul_of_stronglyMeasurable_left`. This file proves the algebraic and
-analytic core behind the condition, with no stochastic-process hypotheses:
+expectation by `condExp_mul_of_stronglyMeasurable_left`. Those lemmas are not applied to an LSV
+model in this file. This file proves the algebraic and analytic core behind the condition, with no
+stochastic-process hypotheses:
 
 * the pinned product and its extremes (`lsv_pinned_product`, eq. 11.6): `m = 1` recovers
   pure local vol, `m = σ_loc²` (with `σ_loc > 0`) switches the leverage off (Ex. 11.1);
 * the coin-toss λ-dial family (§11.4 / Calc 11.3): branch variances `29/400 ∓ λ/20` keep
-  `E[v^λ]` pinned at `29/400` for every λ; the λ = 0 endpoint is flat leverage with
-  squared value `25/29` at `σ_loc = 1/4` (the exact square of the chapter's "0.93");
+  `E[v^λ]` pinned at `29/400` for every λ; at the λ = 0 endpoint, read as the constant
+  posterior `m = 29/400`, the squared leverage at `σ_loc = 1/4` is `25/29` (the exact square of
+  the chapter's "0.93");
 * the coin-toss posterior of Ex. 11.2 as exact inequalities and limits: ATM posterior on the
   high branch `< 1/2`; ATM posterior variance `m(F)` below the unconditional mean; posterior
   on the high branch → 1 in both wings (the log-density ratio is a downward parabola in
@@ -43,7 +45,8 @@ analytic core behind the condition, with no stochastic-process hypotheses:
   every decimal figure of the chapter's tables (22.9%, 26.9%, 0.98, 1.09 → 0.71), since the
   statements here are exact; and that the coin-toss posterior `cointossM ∘ S_T` *is* the
   conditional expectation `E[v | σ(S_T)]` on the two-branch mixture measure (see the note at
-  the end of this file).
+  the end of this file), or that the Bayes ratio `cointossPostHi ∘ S_T` is the conditional
+  probability of the high branch. Both are defined by their Bayes formulas.
 
 ## References
 
@@ -83,7 +86,7 @@ theorem lsv_leverage_switches_off (σ_loc m : ℝ) (hσ : 0 < σ_loc) (h : m = �
 
 /-! ## The coin-toss λ-dial family (§11.4, Calc 11.3) -/
 
-/-- The λ-dial branch variances of Calc 11.3: a flat 25%-volatility surface split into a
+/-- The λ-dial branch variances of Calc 11.3, against a flat 25% local-volatility surface: a
 low and a high branch, `v_lo(λ) = 29/400 − λ/20` and `v_hi(λ) = 29/400 + λ/20`. At `λ = 1`
 these are the Ex. 11.2 coin toss `9/400 = 0.15²` and `49/400 = 0.35²`; at `λ = 0` the dial
 collapses to the single deterministic variance `29/400 = (0.269…)²`. -/
@@ -94,8 +97,9 @@ noncomputable def cointossVHi (lam : ℝ) : ℝ := 29 / 400 + lam / 20
 
 /-- **λ-invariance of the branch mean:** for every λ, the two-branch average of the variance
 is exactly `29/400`. The dial moves variance between the branches without moving the mean —
-"λ changes the answer, does not change the calibration, and therefore cannot be determined
-by it". -/
+in the chapter's words, "λ changes the answer, does not change the calibration, and therefore
+cannot be determined by it". Only the invariance of the mean is proved; calibration is not
+modelled here. -/
 theorem cointoss_family_mean (lam : ℝ) :
     (cointossVLo lam + cointossVHi lam) / 2 = 29 / 400 := by
   unfold cointossVLo cointossVHi; ring
@@ -111,7 +115,8 @@ theorem cointossVHi_pos (lam : ℝ) (h0 : 0 ≤ lam) : 0 < cointossVHi lam := by
 
 /-- **The λ = 0 endpoint in ratio form (Calc 11.3):** the dial collapses to a single
 deterministic variance `m ≡ E[v⁰] = 29/400`, so the squared leverage is the flat ratio
-`σ_loc² / (29/400)`. -/
+`σ_loc² / (29/400)`. The statement is the algebraic identity at `m = 29/400`; that the posterior
+`cointossM` equals `29/400` at `λ = 0` is not stated. -/
 theorem cointoss_endpoint_l0_sq (σ_loc : ℝ) :
     (σ_loc / Real.sqrt (29 / 400)) ^ 2 = σ_loc ^ 2 / (29 / 400) := by
   rw [div_pow, Real.sq_sqrt (by norm_num : (0:ℝ) ≤ 29 / 400)]
@@ -449,7 +454,8 @@ pushforward above, where the defining identity `cointossM · (φ_lo + φ_hi) = v
 **What is proved here:** the analytic properties of the posterior that the characterization
 would transport — the ATM inequalities, the posterior's two wing limits, the posterior
 variance's upper-wing limit, and nonconstancy. The gap is only the measure-theoretic
-*interpretation* of `cointossM ∘ S_T` as the conditional expectation on the mixture, which is
-taken from Ex. 11.2's Bayes computation, not proved. -/
+*interpretation* of `cointossM ∘ S_T` as the conditional expectation on the mixture (and of
+`cointossPostHi ∘ S_T` as the conditional probability of the high branch), which is taken from
+Ex. 11.2's Bayes computation, not proved. -/
 
 end MathFin.LSV

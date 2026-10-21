@@ -21,7 +21,8 @@ denominator of Wald's sequential-test delay `≈ ln(1/α)/D`; near `r = 1` it is
 to a cubic remainder (`abs_klVarRatio_sub_sq_le`).
 
 **Realised volatility.** Observing `n` increments of second moment `σ²Δt` through mean-zero
-noise of variance `η²`, independent of the signal, makes the expected realised variance
+noise of variance `η²` (each increment independent of its two noise draws, and adjacent noise
+draws independent of each other) makes the expected realised variance
 `σ²T + 2nη²`: a bias linear in the sampling frequency (`integral_sum_sq_noisy_increments`;
 Zhang, Mykland and Aït-Sahalia). The square-root estimator of a nondegenerate variance target
 is biased low, `E[σ̂] < σ` (`sqrtBias_oneSided`, with the one-sample Gaussian instance
@@ -31,9 +32,13 @@ sampling frequency (`drift_se_endpoint_hasLaw`, `drift_se_endpoint_var`).
 
 ## Scope
 
-Not proved here: the sequential-test delay `ln(1/α)/D` itself (only `D` is formalised), the
-exact constant `√(2/n)·Γ((n+1)/2)/Γ(n/2)` of the square-root bias, and noise-robust estimators
-such as two-scale realised variance.
+Not proved here: the sequential-test delay `ln(1/α)/D` itself (only `D` is formalised); the
+identification of the stated `∫ llr` with Mathlib's `InformationTheory.klDiv` (it needs absolute
+continuity and integrability of `llr`, `InformationTheory.toReal_klDiv`); the exact constant
+`√(2/n)·Γ((n+1)/2)/Γ(n/2)` of the square-root bias; noise-robust estimators such as two-scale
+realised variance; and that the `n`-sample drift estimator reduces to the endpoint form. The
+drift statements take a single `B_T ∼ N(0, T)` and the endpoint estimator `(μT + σB_T)/T` as
+given (no process `X` or `B` is constructed), so `n` does not appear in them.
 
 ## References
 
@@ -190,8 +195,8 @@ theorem kl_gaussianReal_var_ratio {r v : ℝ≥0} (hv : v ≠ 0) (hr : r ≠ 0) 
   field_simp
   ring
 
-/-- **The small-shift quadratic (halving the gap between the regimes quarters the
-information).** Near `r = 1` the value `D(r) = (r − 1 − ln r)/2` of
+/-- **The small-shift quadratic (to leading order, halving the gap between the regimes quarters
+the information).** Near `r = 1` the value `D(r) = (r − 1 − ln r)/2` of
 `kl_gaussianReal_var_ratio` is `(r−1)²/4` up to a cubic remainder:
 `|D(r) − (r−1)²/4| ≤ |r−1|³` whenever `|r − 1| ≤ ½`. The statement is about this real
 function; it does not mention the Gaussian laws. So the discrimination information vanishes
@@ -467,7 +472,8 @@ variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
 the endpoint drift estimator `(X_T − X_0)/T = μ + (σ/T)·B_T` has law `N(μ, σ²/T)` — an
 affine pushforward of the gaussianReal sample (`gaussianReal_const_mul` then
 `gaussianReal_const_add`). The variance slot is `σ²/T`, so the drift standard error `σ/√T`
-does not depend on the number `n` of sampling points. -/
+does not depend on the number `n` of sampling points (`n` does not appear in the statement,
+which takes the endpoint form as given). -/
 theorem drift_se_endpoint_hasLaw {T : ℝ} (hT : 0 < T) (mu sigma : ℝ) {B : Ω → ℝ}
     (hB : HasLaw B (gaussianReal 0 T.toNNReal) P) :
     HasLaw (fun ω ↦ (mu * T + sigma * B ω) / T)

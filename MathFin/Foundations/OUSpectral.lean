@@ -34,7 +34,8 @@ This file proves the eigenidentities by induction on `Polynomial.hermite_succ`
 * **Proved here:** every declaration in this file, no proof holes. The commutators carry
   the κ and σ² coefficients explicitly, and the eigeninduction closes when `σ² = 2κ`
   (only this direction is proved; the converse — that it fails off that scale — is not).
-* **Not here:** the `L²(π)` operator theory —
+* **Not here:** that `ouGen` is the OU process's infinitesimal generator (it is defined as the
+  polynomial operator above; no process appears in this file); the `L²(π)` operator theory —
   self-adjointness of the generator against the stationary law (Calc 14.13's pairing,
   eq. 14.18), the eigenfunction expansion `P_t f = Σ c_n e^{-λ_n t} φ_n` (eq. 14.17),
   completeness of the Hermite basis, spectral-gap theory beyond the two-mode inequality,
@@ -59,9 +60,9 @@ open Polynomial Matrix
 /-- **The OU generator as a map on real polynomials** (Calc 14.4's operator):
 `L p = -(κ • X) * p.derivative + (σ²/2) • p.derivative.derivative` — drift term `-κx·p'`
 plus diffusion term `(σ²/2)·p''`. Polynomial algebra only: on `Polynomial ℝ` this map is
-triangular degree by degree (the drift preserves degree, the diffusion lowers it by two) —
-which is why the polynomial moment ladder sees its diagonal eigenvalues before any
-eigenvectors exist. -/
+triangular degree by degree (the drift preserves degree, the diffusion lowers it by two; not
+stated as a lemma here) — which is why the chapter's polynomial moment ladder (not formalized
+here) sees its diagonal eigenvalues before any eigenvectors exist. -/
 noncomputable def ouGen (κ σ : ℝ) (p : Polynomial ℝ) : Polynomial ℝ :=
   -(κ • Polynomial.X) * p.derivative + (σ ^ 2 / 2) • p.derivative.derivative
 
@@ -127,8 +128,8 @@ theorem hermiteReal_succ (n : ℕ) :
 /-- **The Hermite eigenidentity (eq. 14.16's OU case / Calc 14.14 at `κ = 1`, `s = 1`).**
 The unit-normalized OU generator `ouGen 1 (Real.sqrt 2) = -X·d/dx + d²/dx²` (stationary
 scale `σ² = 2κ = 2`) maps `He_n` to `-n • He_n`: the Hermite polynomials are eigenfunctions
-of the OU generator with eigenvalues `-n` — the eigenvalues the triangular moment ladder
-finds on the diagonal, now with their eigenvectors. Induction on
+of the OU generator with eigenvalues `-n` — the eigenvalues the chapter's triangular moment
+ladder (not formalized here) finds on the diagonal, now with their eigenvectors. Induction on
 `hermite_succ`; the commutators supply the two terms and the induction closes
 because `σ² = 2κ` (here `2 = 2`). -/
 theorem ouGen_hermite (n : ℕ) :
@@ -206,7 +207,7 @@ theorem ouGen_comp_smulX (κ σ s : ℝ) (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ
 /-- **The scaled eigenidentity, polynomial level (Calc 14.14 / Pearson-table OU row).**
 At the stationary scale `s² = σ²/2κ`, the generator maps the scaled Hermite polynomial
 `q_n = He_n(x/s)` to `-(nκ) • q_n`. The eigenvalue is `-nκ` — the OU row of the
-eigenvalue table, and the diagonal of the triangular moment ladder. -/
+eigenvalue table, and the diagonal of the chapter's moment ladder (not formalized here). -/
 theorem ouGen_scaledHermite {κ σ s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2)
     (n : ℕ) :
     ouGen κ σ (scaledHermite s n) = (-(n : ℝ) * κ) • scaledHermite s n := by
@@ -254,9 +255,10 @@ scale: Hermite polynomials as Gaussian-density derivatives), proved here directl
 chain rule; the no-flux lemma is that score times `σ²/2` under the stationary-scale
 identity. -/
 
-/-- **The Gaussian score (Calc 14.13's derivative, eval level).** The stationary
+/-- **The Gaussian score (Calc 14.13's derivative, eval level).** The unnormalized
 Gaussian density `π(x) = exp(-x²/(2s²))` satisfies `π'(x) = -(x/s²)·π(x)`: the log-density
-is `-(x/s)²/2`, whose gradient `-(x/s²)` is the score. `deriv_exp` + the chain rule. -/
+is `-(x/s)²/2`, whose gradient `-(x/s²)` is the score. `deriv_exp` + the chain rule. (That
+`π` is the OU stationary density at `s² = σ²/2κ` is not proved here.) -/
 theorem gaussianScore_ou (s : ℝ) (x : ℝ) :
     deriv (fun y ↦ Real.exp (-(y ^ 2 / (2 * s ^ 2)))) x
       = -(x / s ^ 2) * Real.exp (-(x ^ 2 / (2 * s ^ 2))) := by

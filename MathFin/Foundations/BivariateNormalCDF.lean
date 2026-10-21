@@ -34,8 +34,9 @@ gives a standard bivariate normal pair with correlation `r`, and
   analogue of `Phi_add_Phi_neg` — the key algebraic ingredient behind exact two-asset closed
   forms (Stulz 1982, Heynen & Kat 1994/96) that package `N₂(·,·;ρ)` / `N₂(·,·;-ρ)` pairs.
 * `bivariateNormalCDF_neg_neg`: **`N₂(-a, -b; r) = 1 - Φ(a) - Φ(b) + N₂(a, b; r)`**, the joint
-  survival identity, derived purely algebraically from `bivariateNormalCDF_flip_snd` and
-  `bivariateNormalCDF_comm` (no new measure-theoretic argument).
+  survival identity, derived purely algebraically from `bivariateNormalCDF_flip_snd`,
+  `bivariateNormalCDF_comm` and `Phi_neg` (no new measure-theoretic argument). Reading either
+  side as the joint survival `P(X > a, Y > b)` is not stated here.
 
 Outside `r ∈ [-1, 1]` the square root truncates to `0` and the construction is no longer the
 standard bivariate normal with correlation `r` (it degenerates to the law of `(rY, Y)`); every
@@ -64,7 +65,9 @@ noncomputable def choleskyPair (r : ℝ) (p : ℝ × ℝ) : ℝ × ℝ :=
 lemma measurable_choleskyPair (r : ℝ) : Measurable (choleskyPair r) := by
   unfold choleskyPair; fun_prop
 
-/-- The standard bivariate normal law with correlation `r`: the law of the Cholesky pair. -/
+/-- The law of the Cholesky pair. For `r ^ 2 ≤ 1` it is the standard bivariate normal law with
+correlation `r` (`map_linear_bivariateNormalLaw`, `map_fst_bivariateNormalLaw`,
+`covariance_bivariateNormalLaw`); for `r ^ 2 > 1` it is the law of `(rY, Y)`. -/
 noncomputable def bivariateNormalLaw (r : ℝ) : Measure (ℝ × ℝ) :=
   stdNormalPair.map (choleskyPair r)
 
@@ -301,9 +304,10 @@ theorem bivariateNormalCDF_flip_snd (a b : ℝ) {r : ℝ} (hr : r ^ 2 ≤ 1) :
   rw [bivariateNormalCDF_eq_law, hflip, ← hkey, hmargin]
 
 /-- **Joint survival identity**: `N₂(-a, -b; r) = 1 - Φ(a) - Φ(b) + N₂(a, b; r)`, derived purely
-algebraically from the sign-flip identity `bivariateNormalCDF_flip_snd` and the symmetry
-`bivariateNormalCDF_comm` — no new measure-theoretic content. This is the identity that
-collapses the strike-side terms of Stulz-style two-asset closed forms. -/
+algebraically from the sign-flip identity `bivariateNormalCDF_flip_snd`, the symmetry
+`bivariateNormalCDF_comm` and `Phi_neg` — no new measure-theoretic content. (Reading either side
+as `P(X > a, Y > b)` is not stated here.) This is the identity that collapses the strike-side
+terms of Stulz-style two-asset closed forms. -/
 theorem bivariateNormalCDF_neg_neg (a b : ℝ) {r : ℝ} (hr : r ^ 2 ≤ 1) :
     bivariateNormalCDF (-a) (-b) r = 1 - Phi a - Phi b + bivariateNormalCDF a b r := by
   have hr' : (-r) ^ 2 ≤ 1 := by rwa [neg_sq]
