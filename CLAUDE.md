@@ -89,6 +89,11 @@ constant declared in `MathFin/` that a benchmark proof cites, resolved by
 declaration through `open`s and dot notation, plus the upstream constants each
 `library_wrapper` entry's proof cites, listed in `UPSTREAM_CITATIONS`; the curated
 `MathFin/AxiomAudit.lean` remains the storied headliner file).
+`tests/test_architecture.py` keeps the library one graph: `Foundations/` imports only
+`Foundations/` (joins live in `Bridges/`), every module imports a library module or is
+imported by one, and every module is imported by another or cited by a corpus entry. A
+module that connects to nothing gets a bridge (a proved theorem tying it to the library's
+objects), never a quarantine list (2026-10-21).
 `tests/test_attribution.py` enforces contributor credit from git history (see
 "Contributor attribution" below). CI
 (`build.yml`) runs pytest + `ledger status` BEFORE the Lean build — pushes
@@ -107,7 +112,8 @@ how a disciplined library quietly settles into being a *fine* dump). Genuine
 slop uncovered is fixed in-session; larger upgrades become backlog items with
 owners. The judgment is human/agent; the CADENCE is machine-enforced:
 `test_values_review_is_current` fails once the corpus outgrows the last
-recorded review by more than 12 entries (a cadence threshold — did we refresh
+recorded review by more than 12 entries, or the library by more than 15 modules (the
+review heading records both: `— corpus N, modules M —`; a cadence threshold — did we refresh
 and act on the backlog — not a quality verdict).
 
 **The last step of every session, before anything is called done: read the
@@ -175,7 +181,8 @@ only pure-Mathlib wrapper snippets carry the blanket import.
 
 Delivery/status docs:
 - `docs/coverage.md`: per-theorem audit, safe claim wording, verification evidence, and remaining placeholders.
-- `docs/roadmap.md`: next-steps roadmap (strategic depth-vs-breadth framing + tactical phase log).
+- `docs/status.md`: scope, pillars, the rules that keep the library one graph, and the backlog (the issue tracker).
+- `docs/roadmap.md`: strategy (depth before breadth; how breadth is admitted); the phase log is `docs/archive/roadmap-history.md`.
 - `docs/bridges.md`: catalogue of Foundations/ → pricing-module bridges.
 - `docs/patterns.md`: distilled Lean proof patterns from prior phases.
 
@@ -461,7 +468,11 @@ time.
 ## Benchmark JSON shape
 
 Either a top-level list of theorem dicts, or
-`{"theorems": [...], "description": "..."}`. Each theorem requires `id`,
-`name`, `domain` (must match a `Domain` enum value), and a `code` map with a
-single `"lean"` key. Optional: `description`, `metadata`. Files are organized
-by Saporito stochastic-processes textbook chapters.
+`{"theorems": [...], "description": "...", "alignment_source": "..."}`. Each theorem
+requires `id`, `name`, `domain` (must match a `Domain` enum value), and a `code` map with
+a single `"lean"` key. Optional: `description`, `metadata`. The stochastic-processes files
+(`brownian_motion.json`, `martingales.json`, `stochastic_calculus.json`, …) follow the
+chapters of Saporito's textbook; the finance corpus is grouped by area (`no_arbitrage.json`,
+`black_scholes.json`, `interest_rates.json`, `credit.json`, `risk_measures.json`, …), with
+each entry's `reference` naming its source. A file's `alignment_source` is the source label
+`formalization.yaml` reports for it.

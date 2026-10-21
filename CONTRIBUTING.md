@@ -42,32 +42,42 @@ The CI pipeline runs `pytest tests/ -q` → `python3 -m tools.verify.ledger stat
 ## Adding a theorem
 
 1. **Pick a home.** The library is organised by topic under `MathFin/`:
-   - `Foundations/` — probability primitives, Itô, FTAP, pricing kernels.
+   - `Foundations/` — probability primitives, Itô, FTAP, pricing kernels. It imports only
+     `Foundations/`: a model lives in its market's section.
+   - `Bridges/` — modules that join a foundation to a model, or two sections to each other.
    - `BlackScholes/` — BS family, Greeks, exotics.
    - `Binomial/` — CRR, American, Snell, reflection.
    - `Futures/`, `FixedIncome/`, `Portfolio/`, `Performance/`, `RiskMeasures/`,
-     `Actuarial/`, `DeFi/` — domain-specific modules.
-2. **Author the proof in a real `.lean` file**, not in a JSON snippet.
+     `Actuarial/`, `Commodities/`, `Contracts/`, `DeFi/`, `Execution/` — domain-specific
+     modules.
+2. **Connect it.** A new module stands on what the library already has: the one normal law
+   (`Phi`, `quantile`), `valueAtRisk`, `bsV`, the numéraire, `zcb`, the Vasicek bond lemma and
+   so on. A model whose formula the library can derive is derived, not posited, and an object
+   the library already encodes is reused or proved equal to the existing one. The rule is
+   enforced by `tests/test_architecture.py`. Every module imports a library module or is
+   imported by one, and is imported by another module or cited by a corpus entry. A module
+   that connects to nothing needs a bridge: a proved theorem tying it to the rest.
+3. **Author the proof in a real `.lean` file**, not in a JSON snippet.
    Non-trivial proofs need the full `lake build` memory budget + incremental
    compilation + LSP authoring. The benchmark JSONs are for re-export shims
    (5-25 lines) that `import MathFin.<Section>.<Module>` and reference
    the named lemma. Trivial library wrappers (single-line `:= someLemma`)
    can stay inline in the JSON.
-3. **Iterate fast via the REPL daemon.** Per-file checks in 5-30 sec
+4. **Iterate fast via the REPL daemon.** Per-file checks in 5-30 sec
    instead of 5-15 min:
    ```bash
    docker compose -f docker/docker-compose.yml up -d lean-repl
    docker compose -f docker/docker-compose.yml logs -f lean-repl | grep -m1 READY
    ./scripts/lean-check.sh MathFin/<Section>/<Module>.lean
    ```
-4. **Confirm axioms-cleanliness.** Every `full` theorem must depend only on
+5. **Confirm axioms-cleanliness.** Every `full` theorem must depend only on
    the three standard Mathlib axioms:
    ```lean
    #print axioms myTheorem
    -- expected: [propext, Classical.choice, Quot.sound]
    ```
    Anything more (e.g. `sorryAx`) means the proof has a gap.
-5. **Update the audit.** Add a row to `docs/coverage.md` describing the
+6. **Update the audit.** Add a row to `docs/coverage.md` describing the
    theorem, the file path, and its faithfulness status:
    - `full` — derived from honest hypotheses.
    - `library_wrapper` — direct application of a named Mathlib /
@@ -76,15 +86,17 @@ The CI pipeline runs `pytest tests/ -q` → `python3 -m tools.verify.ledger stat
      structure that pins down the textbook statement without deriving it.
    - `placeholder` — must be 0; if you need a placeholder, the proof isn't
      ready to merge.
-6. **Run the full build.** `lake build` (or the docker equivalent) — clean
+7. **Run the full build.** `lake build` (or the docker equivalent) — clean
    build is required.
-7. **Run the regression tests:**
+8. **Run the regression tests:**
    ```bash
    docker compose -f docker/docker-compose.yml run --rm \
        --entrypoint python3 verify -m pytest tests/ -q
    ```
 
-   All three suites must pass:
+   The suites must pass, among them:
+   - `tests/test_architecture.py` — the `Foundations/` rule, and every module connected and
+     used.
    - `tests/test_router.py` — Lean-only routing, no `sorry`, `@[expose]` rule,
      `formalization_status` declared on every entry.
    - `tests/test_ledger.py` — ledger freshness and globally unique ids.
