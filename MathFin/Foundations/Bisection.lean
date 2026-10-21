@@ -41,6 +41,7 @@ and stopping rules are out of scope.
   from any starting bracket `(a, b)` the `n`-th one has width `(b − a) / 2ⁿ`.
 * `mapsTo_bisectStep`, `bisect_mem`: at a threshold `σ` the trap is invariant,
   so every bracket contains `σ`.
+* `bisectMid_mem_Icc`: at a threshold `σ ∈ [lo, hi]`, every estimate lies in `[lo, hi]`.
 * `abs_bisectMid_sub_le`, `tendsto_bisectMid`: the `n`-th estimate is within
   `(hi − lo) / 2ⁿ⁺¹` of `σ`, and the estimates converge to `σ`.
 -/

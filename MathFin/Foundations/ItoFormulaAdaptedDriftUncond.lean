@@ -10,9 +10,8 @@ public import MathFin.Foundations.ItoFormulaTDRemainder
 
 /-! # The unconditional integrated Itô–drift identity (the constructed process)
 
-The #244 review's main request — make the adapted expectation identity unconditional, or derive
-it from `ItoFormulaAdapted.ito_formula_adapted` — lands here as the derivation: for the Itô
-process the library constructs,
+A corollary of `ItoFormulaAdapted.ito_formula_adapted`: for the Itô process the library
+constructs,
 
   `X = c + ∫₀• β ds + itoContinuousMod` at the `processToLp` class of `δ`
   (`ItoFormulaAdapted.adaptedItoProcess`, whose `X 0 = c` almost surely),
@@ -57,20 +56,13 @@ from the unconditional one by a.e. congruence. That reduction is
 `hMadap`, no `hXcont`) and `f ∈ C²`. The conditional theorem's only remaining extra reach is a
 `B` without everywhere-continuous paths.
 
-## Open question for the maintainer: the conditional route
+## Relation to the conditional route
 
-The #244 review asked to prove the expectation form as a corollary **and retire the
-conditional route** (`itoDrift_expectation_identity_adapted`, the roughly 5.3k-line
-`ItoFormulaAdaptedDrift`). This module does the first part only; both theorems are kept as
-co-headlines. By `itoDrift_expectation_identity_adapted_of_uncond`, the conditional theorem's
-conclusion is implied by the unconditional one whenever every path of `B` is continuous; its
-only remaining reach is a `B` without that property. (Separately, the library cannot supply the
-hypothesized `M` itself: `itoContinuousMod` is continuous only almost surely, modifying it on
-the null failure set need not preserve `natFiltration`-adaptedness (the natural filtration is
-not complete), and the everywhere-continuous modification is adapted only to `augFiltration`.)
-Whether the no-`hBcont` case justifies keeping the roughly 5.3k-line route, and whether to
-demote, deprecate or delete `ItoFormulaAdaptedDrift`, is left for the maintainer to decide;
-this module does not change it.
+The library cannot supply the `M` that `itoDrift_expectation_identity_adapted` hypothesizes:
+`itoContinuousMod` is continuous only almost surely, modifying it on the null failure set need
+not preserve `natFiltration`-adaptedness (the natural filtration is not complete), and the
+everywhere-continuous modification is adapted only to `augFiltration`. The identity here does
+not need that `M`.
 
 ## Result
 
@@ -135,7 +127,8 @@ theorem itoDrift_expectation_identity_adapted_uncond (hB : IsPreBrownianReal B �
     (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
     (hf''c : Continuous f'')
     {C1 C2 : ℝ} (hg1 : ∀ x, |f' x| ≤ C1) (hg2 : ∀ x, |f'' x| ≤ C2) :
-    ∫ ω, f (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd) c β T ω) ∂μ
+    ∫ ω, f (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)
+      c β T ω) ∂μ
       = f c + ∫ s in Set.Ioc (0 : ℝ≥0) T,
           ((∫ ω, f' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)
               c β s ω) * β s ω ∂μ)

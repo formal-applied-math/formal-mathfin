@@ -39,13 +39,13 @@ That is a conditional theorem: no lemma in the library supplies such an `M` for 
 everywhere-continuous modification `exists_continuous_localMartingale_modification` is adapted
 only to the augmented filtration `augFiltration`. For the process the library does construct,
 the pathwise formula is `ItoFormulaAdapted.ito_formula_adapted` — and the expectation identity
-itself is available for that process **unconditionally**, as
-`itoDrift_expectation_identity_adapted_uncond` in `MathFin.Foundations.ItoFormulaAdaptedDriftUncond`
-(a sibling module, so that this one stays free of the `ItoFormulaAdapted` import): a corollary
-of the pathwise formula by centering (`integral_itoIntegralCLM_T`) and Fubini at a predictable
-weight, with no `M`/`X` hypotheses (the #244 review's request; the conditional statement here
-still quantifies over versions of `δ●B`). The constant-coefficient case is `ItoDriftExpectation`,
-proved there separately.
+itself is available for that process **without a hypothesized `M`** (for `B` with continuous
+paths), as `itoDrift_expectation_identity_adapted_uncond` in
+`MathFin.Foundations.ItoFormulaAdaptedDriftUncond` (a sibling module, so that this one stays
+free of the `ItoFormulaAdapted` import): a corollary of the pathwise formula by centering
+(`integral_itoIntegralCLM_T`) and Fubini at a predictable weight, with no `M`/`X` hypotheses
+(the conditional statement here still quantifies over versions of `δ●B`). The
+constant-coefficient case is `ItoDriftExpectation`, proved there separately.
 
 Route: the per-path discrete Itô formula (`MathFin.discrete_ito_formula`) at the grid
 values of `X`, integrated over `Ω`; the first-order martingale terms die exactly
@@ -61,9 +61,9 @@ them by `O(mesh)`, `O(√mesh)` and `O(√mesh)`; only the limits are stated.
 
 Main results: `MathFin.itoDrift_expectation_identity_adapted` (conditional on a version `M`,
 for any `X` satisfying its hypotheses; this file) and
-`MathFin.itoDrift_expectation_identity_adapted_uncond` (unconditional, for the constructed
-process; `ItoFormulaAdaptedDriftUncond`). Supporting layers, bottom-up:
-`bandIntegral_slice` (the band-to-slice conversion; the Fubini interchange
+`MathFin.itoDrift_expectation_identity_adapted_uncond` (no hypothesized `M`, for the constructed
+process and `B` with continuous paths; `ItoFormulaAdaptedDriftUncond`). Supporting layers,
+bottom-up: `bandIntegral_slice` (the band-to-slice conversion; the Fubini interchange
 `expectation_pathIntegral_eq` comes from `ItoDriftExpectation`), `incrementEnergy` (the
 increment-energy law), `deltaStepLp`/`deltaStepLp_tendsto` (the step approximants), the per-cell
 weighted isometry (`weightedCellSq_step`, `clm_band_energy`, `stepIncr_stepCLM_ae`), the gap
@@ -79,9 +79,10 @@ Headline (conditional on a version `M`): `itoDrift_expectation_identity_adapted`
 integrated Itô–drift identity stated above, for bounded adapted path-continuous coefficients,
 under the hypotheses on `M` and `X` above. Its unconditional companion — the same identity for
 the process the library constructs, derived from `ItoFormulaAdapted.ito_formula_adapted` by
-centering and Fubini, with weaker hypotheses on `f` (C², no third derivative) but with `X` fixed to the
-constructed process and `B` additionally assumed path-continuous (`hBcont`) — is
-`itoDrift_expectation_identity_adapted_uncond` in `MathFin.Foundations.ItoFormulaAdaptedDriftUncond`.
+centering and Fubini, with weaker hypotheses on `f` (C², no third derivative) but with `X`
+fixed to the constructed process and `B` additionally assumed path-continuous (`hBcont`) — is
+`itoDrift_expectation_identity_adapted_uncond` in
+`MathFin.Foundations.ItoFormulaAdaptedDriftUncond`.
 Under `hBcont`, the headline's own conclusion follows from that companion by a.e. congruence
 (`itoDrift_expectation_identity_adapted_of_uncond`, same module, needing neither `hMadap` nor
 `hXcont` nor a third derivative), so this file's remaining extra reach is a `B` without

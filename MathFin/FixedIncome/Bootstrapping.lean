@@ -126,13 +126,13 @@ Public lemmas (all in `namespace MathFin.Bootstrapping`):
   `swapStep_lastCoupon_err` — the payer-swap layer;
 * `boot_length`, `boot_succ_ne_nil`, `boot_step_err`, `boot_reprices_all` —
   the induction over instruments;
-* `fraChain_eq`, `fraChain_spot`, `boot_reprices_fraChain`, `swapChain_eq`,
-  `boot_reprices_swapChain` — the FRA and swap strips inside the induction;
+* `boot_reprices_fraChain`, `boot_reprices_swapChain` — the FRA and swap strips
+  inside the induction;
 * `fraBootstrap_flatCurve` — the flat-curve capstone.
 
-Supporting declarations (the threshold bridge `threshold_affine`; the
-slope-weighted residual `abs_affine_sub_eq`; and the unfolding lemma
-`boot_succ`) are `private`.
+Supporting declarations: the `@[simp]` unfolding equations `fraChain_cons` and
+`swapChain_cons`; and, `private`, the threshold bridge `threshold_affine`, the
+slope-weighted residual `abs_affine_sub_eq` and the unfolding lemma `boot_succ`.
 -/
 
 set_option autoImplicit false
@@ -546,16 +546,11 @@ noncomputable def fraChain (δ : ℝ) (K : ℕ → ℝ) : ℕ → List ℝ → �
 
 /-- The unfolding equation: on `x :: p` the strip instrument is the FRA value
 function of the instrument layer, the earlier factor read off the head of `p`
-(defaulting to the valuation-date factor `1` when `p` is empty) — matching
-`swapChain_eq`'s general shape on the fed-in list. -/
-theorem fraChain_eq (δ : ℝ) (K : ℕ → ℝ) (x : ℝ) (p : List ℝ) (i : ℕ) :
+(defaulting to the valuation-date factor `1` when `p` is empty, so on `[x]` it is
+the spot deposit) — matching `swapChain_cons`'s general shape on the fed-in list. -/
+@[simp]
+theorem fraChain_cons (δ : ℝ) (K : ℕ → ℝ) (x : ℝ) (p : List ℝ) (i : ℕ) :
     fraChain δ K i (x :: p) = fraValue δ x (fraForwardRate (p.head?.getD 1) x δ) (K i) := rfl
-
-
-/-- The anchor: on the empty prefix the strip instrument is the spot deposit,
-the FRA whose earlier discount factor is the valuation-date factor `1`. -/
-theorem fraChain_spot (δ : ℝ) (K : ℕ → ℝ) (x : ℝ) (i : ℕ) :
-    fraChain δ K i [x] = fraValue δ x (fraForwardRate 1 x δ) (K i) := rfl
 
 /-- **The FRA strip reprices inside the induction.** At every step `i`
 (step `0` is the spot deposit, anchored at the valuation-date factor `1`),
@@ -590,7 +585,8 @@ noncomputable def swapChain (δ : ℝ) (K : ℕ → ℝ) : ℕ → List ℝ → 
     | [] => 0
 
 /-- The unfolding equation of the swap strip instrument. -/
-theorem swapChain_eq (δ : ℝ) (K : ℕ → ℝ) (x : ℝ) (p : List ℝ) (i : ℕ) :
+@[simp]
+theorem swapChain_cons (δ : ℝ) (K : ℕ → ℝ) (x : ℝ) (p : List ℝ) (i : ℕ) :
     swapChain δ K i (x :: p) = payerSwapValue 1 x (K i) (δ * p.sum + δ * x) := rfl
 
 /-- **The swap strip reprices inside the induction.** At every step `i`, under
