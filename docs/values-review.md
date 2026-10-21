@@ -295,9 +295,12 @@ changed prose in 50 Lean files. What it found, by kind:
 
 ### Evidence
 
-The python gates pass on the merged tree, except the ledger row check until the re-verification
-sweep. `tests/test_attribution.py` passes with full history; `.mailmap` maps Yang Ye's second
-address. `AxiomAuditGen` and `formalization.yaml` are regenerated at corpus 544.
+`lake build` and `lake lint` are green on runners for the merged tree after each round (the
+first round's fixes, then the second pass's `effNotionalIR`, the calendar restatement and the
+renames). The ledger sweep re-verified every entry whose inputs changed: 544 fresh, none stale or
+missing. The python gates pass, including `tests/test_attribution.py` with full history;
+`.mailmap` maps Yang Ye's second address. `AxiomAuditGen` and `formalization.yaml` are
+regenerated at corpus 544.
 
 ## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
 
