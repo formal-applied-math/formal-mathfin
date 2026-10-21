@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import Mathlib
+public import MathFin.Foundations.Bisection
 public import MathFin.FixedIncome.FRA
 public import MathFin.FixedIncome.InterestRateSwap
 public import MathFin.FixedIncome.ZCB
@@ -19,14 +20,15 @@ its new discount factor, with the already-solved factors held fixed. This
 module connects the curve instruments (`fraValue`, `payerSwapValue` — both
 carry `zero_iff` root conditions in `MathFin`) to a proved bisection
 root-finder: each step reprices its instrument to tolerance, and the induction
-`boot` carries that to every step under hypotheses stated below.
+`boot` carries that to every step under per-step hypotheses stated at the
+prefix the recursion feeds in.
 
 The module layers:
 
-* **A bisection engine** — the iteration `bisectStep` / `bisect` /
-  `bisectMid` with its three facts: the bracket is invariant around the
-  threshold, the error is at most half the interval per step, and the
-  estimates converge.
+* **A bisection engine** — imported from `MathFin.Foundations.Bisection` (not
+  duplicated here): the iteration `bisectStep` / `bisect` / `bisectMid` with
+  its three facts — the bracket is invariant around the threshold, the error
+  is at most half the interval per step, and the estimates converge.
 * **A threshold bridge** (private) — the engine's hypothesis
   (`∀ x ∈ [lo, hi], f x < C ↔ x < σ`) is produced from an affine function with
   positive slope (`threshold_affine`).
@@ -55,43 +57,57 @@ The module layers:
   the prefix bootstrapped so far, so each step literally inherits the previous
   factors. `boot_step_err` bounds every step, `boot_length` (proved by
   induction) tracks the curve, and `boot_reprices_all` is the repricing
-  theorem over all instruments (the `Finset.range` form is
-  `boot_reprices_range`).
+  theorem over all instruments — with hypotheses stated at the fed-in prefix
+  (see the scope note). `fraChain` with `boot_reprices_fraChain` runs the
+  FRA strip through the induction (fixed rate `K i` per FRA; step `0` is the
+  spot deposit, anchored at the valuation-date factor `1`), and `swapChain`
+  with `boot_reprices_swapChain` does the same for the spot-starting swap
+  strip (fixed rate `K i` per maturity, last-coupon annuity over the prefix)
+  — both discharging every hypothesis of `boot_reprices_all` except the
+  per-step bracket condition, under the instrument layer's standing
+  conditions.
 * **Flat-curve capstone** — `fraBootstrap_flatCurve`: if the fixed rate
   equals the flat-curve forward rate, bisection from any positive bracket
   around the true later discount factor recovers it to within
   `(hi − lo)/2^{n+1}`.
 
 Scope of the induction: the hypotheses of `boot_step_err` and
-`boot_reprices_all` quantify over *every* prefix list `p`, with brackets
-`lo i`, `hi i` fixed in advance. They therefore hold only for instruments
-whose root stays in a fixed bracket whatever the earlier factors are; for the
-FRA and swap instruments of this file the root moves with the prefix, and no
-instrument here is shown to satisfy them. Restating the hypotheses at the
-prefix the recursion actually feeds in would remove that restriction; it is
-not done here. The pointwise per-`n` error bound is the curve-level statement
-(the prefix stabilizes only under an extra constant-threshold hypothesis).
-The per-step lemmas cover one-factor-at-a-time instruments that are affine in
-their new unknown with slope of known strict sign (FRA: `1 + δ·K > 0`;
-known-schedule swap: always; last-coupon swap: `1 + K·δ > 0`). Excluded: instruments whose *already-fixed* legs contain the
-new factor (forward-starting fixed/floating exchanges — the value is still
-affine in the bracket but with a slope of unknown sign, possibly zero, so no
-bracketing sign change is guaranteed), and joint solves for several new
-factors at once.
-
-Disclosure: the bisection engine here duplicates
-`MathFin/Foundations/Bisection.lean` (this module was developed separately) —
-its three definitions are public because the module's statements name them,
-and its facts are private. Switching to the shared `Bisection` module is a
-follow-up.
+`boot_reprices_all` are stated at the prefix the recursion actually feeds the
+step — `boot V c lo hi n i`, the factors the earlier steps produced — and, on
+that prefix, on the step's own bracket `[lo i, hi i]` (bisection evaluates the
+instrument nowhere else). Each step assumes only what it consumes: the
+instrument's threshold shape and affine identity at the run's actual earlier
+factors, and a bracket containing the root computed from them. The first two are
+exactly the facts the instrument layers provide at any prefix — the FRA by
+`fraValue_affine_of_newUnknown` + `fraThreshold` (under `δ ≠ 0`, `1 + δ·K > 0`,
+on a positive bracket), the known-schedule swap by
+`payerSwapValue_affine_of_newUnknown` + `swapThreshold` (no slope condition),
+the last-coupon swap by `payerSwapValue_affine_lastCoupon` +
+`swapLastCouponThreshold` (under `1 + K·δ > 0`) — and `boot_reprices_fraChain` /
+`boot_reprices_swapChain` discharge every hypothesis of `boot_reprices_all`
+except the bracket condition for `fraChain` / `swapChain`, the FRA and swap
+strips as `boot` instruments, under those standing conditions. The bracket
+condition stays a hypothesis: the root moves with the prefix, so which bracket
+is adequate depends on the factors the run produced, and the theorems ask for
+exactly that, at the step that uses it. The pointwise per-`n` error bound is the
+curve-level statement (convergence of the factors as `n → ∞` would follow by
+induction on `i` when the hypotheses hold for every `n` and each threshold is
+continuous in the prefix — as for `fraChain` / `swapChain`, whose roots are
+affine in it — but is not formalized). Excluded: instruments whose
+*already-fixed* legs contain the new factor (forward-starting fixed/floating
+exchanges — the value is still affine in the bracket but with a slope of unknown
+sign, possibly zero, so no bracketing sign change is guaranteed), and joint
+solves for several new factors at once.
 
 Boundary: `MathFin/FixedIncome/YieldCurve.lean` owns the closed-form
 `bootstrap_solve*` names; this module owns the search-based bootstrap.
 
 ## Result
 
-Public definitions: `bisectStep`, `bisect`, `bisectMid` (the bisection
-engine, duplicating `Bisection`), `boot` (the bootstrapped curve).
+Public definitions: `boot` (the bootstrapped curve), `fraChain` and
+`swapChain` (the FRA and swap strips as `boot` instruments). The bisection
+engine (`bisectStep`, `bisect`, `bisectMid`) is imported from
+`MathFin.Foundations.Bisection`.
 
 Public lemmas (all in `namespace MathFin.Bootstrapping`):
 
@@ -108,15 +124,15 @@ Public lemmas (all in `namespace MathFin.Bootstrapping`):
   `payerSwapValue_affine_lastCoupon_annuity`,
   `strictAnti_payerSwapValue_lastCoupon`, `swapLastCouponThreshold`,
   `swapStep_lastCoupon_err` — the payer-swap layer;
-* `boot_length`, `boot_succ_ne_nil`, `boot_step_err`, `boot_reprices_all`,
-  `boot_reprices_range` — the induction over instruments;
+* `boot_length`, `boot_succ_ne_nil`, `boot_step_err`, `boot_reprices_all` —
+  the induction over instruments;
+* `fraChain_eq`, `fraChain_spot`, `boot_reprices_fraChain`, `swapChain_eq`,
+  `boot_reprices_swapChain` — the FRA and swap strips inside the induction;
 * `fraBootstrap_flatCurve` — the flat-curve capstone.
 
-Supporting declarations (the engine facts `bisect_zero`, `bisect_succ`,
-`bisectStep_snd_sub_fst`, `bisect_snd_sub_fst`, `mapsTo_bisectStep`,
-`bisect_mem`, `abs_bisectMid_sub_le`, `tendsto_bisectMid`; the threshold
-bridge `threshold_affine`; and the unfolding lemma `boot_succ`) are
-`private`.
+Supporting declarations (the threshold bridge `threshold_affine`; the
+slope-weighted residual `abs_affine_sub_eq`; and the unfolding lemma
+`boot_succ`) are `private`.
 -/
 
 set_option autoImplicit false
@@ -127,90 +143,6 @@ namespace MathFin.Bootstrapping
 
 open Filter Topology
 
-/-! ### The self-contained bisection engine
-
-The engine lives in this module rather than being imported (see the
-disclosure in the module docstring): one bisection step, the iterated
-bracket, the midpoint estimate — public, since the module's statements name
-them — and the engine facts, private: bracket invariance at a threshold,
-error ≤ half-interval per step, convergence. -/
-
-/-- One **bisection step** toward `f x = C` on the bracket `I = (a, b)`: evaluate
-`f` at the midpoint `m`, keep `(m, b)` if `f m < C` and `(a, m)` otherwise. -/
-noncomputable def bisectStep (f : ℝ → ℝ) (C : ℝ) (I : ℝ × ℝ) : ℝ × ℝ :=
-  let m := (I.1 + I.2) / 2
-  if f m < C then (m, I.2) else (I.1, m)
-
-/-- The `n`-th **bisection bracket** for `f x = C`, starting from `(a, b)`. -/
-noncomputable def bisect (f : ℝ → ℝ) (C a b : ℝ) (n : ℕ) : ℝ × ℝ :=
-  (bisectStep f C)^[n] (a, b)
-
-/-- The **bisection estimate** after `n` steps: the midpoint of the `n`-th
-bracket. At `n = 0` it is the midpoint of the starting bracket. -/
-noncomputable def bisectMid (f : ℝ → ℝ) (C a b : ℝ) (n : ℕ) : ℝ :=
-  ((bisect f C a b n).1 + (bisect f C a b n).2) / 2
-
-/-- The bisection bracket at step zero is the starting bracket. -/
-@[simp] private lemma bisect_zero (f : ℝ → ℝ) (C a b : ℝ) : bisect f C a b 0 = (a, b) := rfl
-
-/-- One unfolding of the iterated bisection step. -/
-private lemma bisect_succ (f : ℝ → ℝ) (C a b : ℝ) (n : ℕ) :
-    bisect f C a b (n + 1) = bisectStep f C (bisect f C a b n) :=
-  Function.iterate_succ_apply' _ _ _
-
-/-- A bisection step halves the bracket, whatever `f` and `C` are. -/
-private lemma bisectStep_snd_sub_fst (f : ℝ → ℝ) (C : ℝ) (I : ℝ × ℝ) :
-    (bisectStep f C I).2 - (bisectStep f C I).1 = (I.2 - I.1) / 2 := by
-  simp only [bisectStep]
-  split_ifs <;> ring
-
-/-- **Halving**: the `n`-th bracket has width `(b − a) / 2ⁿ`, whatever `f` and
-`C` are. -/
-private theorem bisect_snd_sub_fst (f : ℝ → ℝ) (C a b : ℝ) (n : ℕ) :
-    (bisect f C a b n).2 - (bisect f C a b n).1 = (b - a) / 2 ^ n := by
-  induction n with
-  | zero => simp
-  | succ n ih => rw [bisect_succ, bisectStep_snd_sub_fst, ih, pow_succ, div_div]
-
-variable {f : ℝ → ℝ} {C lo hi σ : ℝ}
-
-/-- **The trap is invariant.** If `σ` is the threshold of `f` against `C` on
-`[lo, hi]`, a bisection step keeps the left endpoint in `[lo, σ]` and the right
-endpoint in `[σ, hi]`: at the midpoint `m`, `f m < C` means `m < σ`, and
-otherwise `σ ≤ m`. -/
-private theorem mapsTo_bisectStep (hC : ∀ x ∈ Set.Icc lo hi, f x < C ↔ x < σ) :
-    Set.MapsTo (bisectStep f C) (Set.Icc lo σ ×ˢ Set.Icc σ hi)
-      (Set.Icc lo σ ×ˢ Set.Icc σ hi) := by
-  rintro ⟨a, b⟩ ⟨⟨hla, haσ⟩, hσb, hbh⟩
-  have hm : (a + b) / 2 ∈ Set.Icc lo hi := ⟨by linarith, by linarith⟩
-  simp only [bisectStep]
-  split_ifs with h
-  · exact ⟨⟨hm.1, ((hC _ hm).1 h).le⟩, hσb, hbh⟩
-  · exact ⟨⟨hla, haσ⟩, not_lt.1 ((hC _ hm).not.1 h), hm.2⟩
-
-/-- **Every bisection bracket traps the threshold**: the `n`-th bracket
-`(aₙ, bₙ)` from `(lo, hi)` has `aₙ ∈ [lo, σ]` and `bₙ ∈ [σ, hi]`. -/
-private theorem bisect_mem (hC : ∀ x ∈ Set.Icc lo hi, f x < C ↔ x < σ) (hσ : σ ∈ Set.Icc lo hi)
-    (n : ℕ) : bisect f C lo hi n ∈ Set.Icc lo σ ×ˢ Set.Icc σ hi :=
-  (mapsTo_bisectStep hC).iterate n ⟨⟨le_rfl, hσ.1⟩, hσ.2, le_rfl⟩
-
-/-- **Error bound**: the `n`-th estimate is within `(hi − lo) / 2ⁿ⁺¹` of the
-threshold, half the width of a bracket that contains both. -/
-private theorem abs_bisectMid_sub_le (hC : ∀ x ∈ Set.Icc lo hi, f x < C ↔ x < σ)
-    (hσ : σ ∈ Set.Icc lo hi) (n : ℕ) :
-    |bisectMid f C lo hi n - σ| ≤ (hi - lo) / 2 ^ (n + 1) := by
-  obtain ⟨⟨-, ha⟩, hb, -⟩ := bisect_mem hC hσ n
-  rw [pow_succ, ← div_div, ← bisect_snd_sub_fst f C, bisectMid, abs_sub_le_iff]
-  constructor <;> linarith
-
-/-- **Convergence**: the bisection estimates converge to the threshold. -/
-private theorem tendsto_bisectMid (hC : ∀ x ∈ Set.Icc lo hi, f x < C ↔ x < σ)
-    (hσ : σ ∈ Set.Icc lo hi) : Tendsto (bisectMid f C lo hi) atTop (𝓝 σ) :=
-  tendsto_iff_dist_tendsto_zero.2 <| squeeze_zero (fun _ ↦ dist_nonneg)
-    (abs_bisectMid_sub_le hC hσ) <| tendsto_const_nhds.div_atTop <|
-      (tendsto_pow_atTop_atTop_of_one_lt (by norm_num : (1 : ℝ) < 2)).comp
-        (tendsto_add_atTop_nat 1)
-
 /-! ### Threshold bridge: from instrument shape to the engine's hypothesis -/
 
 /-- The threshold property is *global* for an affine function with positive
@@ -219,6 +151,12 @@ private theorem threshold_affine (a b c x : ℝ) (hb : 0 < b) :
     b * x - a < -c ↔ x < (a - c) / b := by
   rw [lt_div_iff₀ hb, mul_comm x b]
   constructor <;> intro h <;> linarith
+
+/-- The slope-weighted residual: for `b > 0`, `|a − b·m − c| = b · |m − (a − c)/b|`. -/
+private theorem abs_affine_sub_eq (a b c m : ℝ) (hb : 0 < b) :
+    |a - b * m - c| = b * |m - (a - c) / b| := by
+  have : a - b * m - c = b * ((a - c) / b - m) := by field_simp; ring
+  rw [this, abs_mul, abs_of_pos hb, abs_sub_comm]
 
 /-! ### The affine bootstrap step -/
 
@@ -243,25 +181,8 @@ theorem affineStep_value_err (a b c lo hi : ℝ) (hb : 0 < b)
     (hσ : (a - c) / b ∈ Set.Icc lo hi) (n : ℕ) :
     |a - b * bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n - c|
       ≤ b * ((hi - lo) / 2 ^ (n + 1)) := by
-  have hb0 : b ≠ 0 := hb.ne'
-  have key := abs_bisectMid_sub_le (f := fun x : ℝ ↦ b * x - a) (C := -c)
-    (σ := (a - c) / b) (fun x _ => threshold_affine a b c x hb) hσ n
-  have hexp : a - b * bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n - c
-      = b * ((a - c) / b - bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n) := by
-    field_simp
-    ring
-  have hle : |(a - c) / b - bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n|
-      ≤ (hi - lo) / 2 ^ (n + 1) := by
-    rw [abs_sub_comm]
-    exact key
-  calc |a - b * bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n - c|
-      = |b * ((a - c) / b - bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n)| := by
-        rw [hexp]
-    _ = |b| * |(a - c) / b - bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n| := by
-          rw [abs_mul]
-    _ = b * |(a - c) / b - bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n| := by
-          rw [abs_of_pos hb]
-    _ ≤ b * ((hi - lo) / 2 ^ (n + 1)) := mul_le_mul_of_nonneg_left hle hb.le
+  rw [abs_affine_sub_eq _ _ _ _ hb]
+  exact mul_le_mul_of_nonneg_left (affineStep_err a b c lo hi hb hσ n) hb.le
 
 /-- **Step budget.** Some number `n ≤ ⌈log₂ (b·(hi − lo)/ε)⌉` of bisection steps
 achieves repricing accuracy `ε`. `Real.logb 2` is `log₂`; Mathlib states the log ladder over
@@ -480,11 +401,9 @@ theorem payerSwapValue_affine_lastCoupon_annuity {ι : Type*} (P0 K δ x : ℝ) 
 the slope condition `1 + K·δ > 0`. -/
 theorem strictAnti_payerSwapValue_lastCoupon (P0 K A₀ δ : ℝ) (hpos : 0 < 1 + K * δ) :
     StrictAnti (fun x : ℝ ↦ payerSwapValue P0 x K (A₀ + δ * x)) := by
-  have h : ∀ z : ℝ, payerSwapValue P0 z K (A₀ + δ * z) = (P0 - K * A₀) - (1 + K * δ) * z :=
-    fun z => payerSwapValue_affine_lastCoupon P0 K A₀ δ z
   intro x y hxy
   show payerSwapValue P0 y K (A₀ + δ * y) < payerSwapValue P0 x K (A₀ + δ * x)
-  rw [h y, h x]
+  rw [payerSwapValue_affine_lastCoupon, payerSwapValue_affine_lastCoupon]
   linarith [mul_lt_mul_of_pos_right hxy hpos]
 
 /-- Threshold of the last-coupon swap. -/
@@ -508,9 +427,12 @@ end Swap
 `boot` builds the discount curve by structural recursion over the instrument
 index: step `i` bisects instrument `i`'s increasing rearrangement
 `x ↦ −V i (x :: prefix)` at level `−c i` on the prefix bootstrapped so far —
-each step literally inherits the previous factors. The parameter `n` is the
-bisection step count used at *every* instrument (uniform budget; a
-per-instrument budget `n : ℕ → ℕ` is a trivial reindexing). -/
+each step literally inherits the previous factors. The step theorems below
+state their hypotheses at exactly this fed-in prefix (`boot V c lo hi n i`),
+not at every prefix list whatever: each step assumes only what it consumes.
+The parameter `n` is the bisection step count used at *every* instrument
+(uniform budget; a per-instrument budget `n : ℕ → ℕ` would need `boot` to
+use `n i` at step `i` — not formalized). -/
 
 /-- The **bootstrapped curve**: after the first `i` instruments, a list of
 discount factors, the head being the newest. -/
@@ -539,62 +461,157 @@ theorem boot_succ_ne_nil (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ) 
   rw [boot_succ]
   exact List.cons_ne_nil _ _
 
-/-- **The bootstrap step theorem, indexed.** For every instrument `i`, the
-`i`-th bootstrapped factor (with `n` bisection steps per instrument) is within
-`(hi i − lo i)/2^{n+1}` of that instrument's threshold `σ i`, evaluated at the
-factors bootstrapped so far. The threshold hypothesis is per instrument *and
-per prefix*: it is stated for every list `p` (see the module's scope note). Since
-`n` is arbitrary, the gap to the prefix-dependent threshold tends to `0`;
-convergence of the factors themselves is not stated (the prefix stabilizes only
-under an extra constant-threshold hypothesis). -/
+/-- **The bootstrap step theorem, at the fed-in prefix.** For every instrument
+`i`, the `i`-th bootstrapped factor (with `n` bisection steps per instrument)
+is within `(hi i − lo i)/2^{n+1}` of that instrument's threshold `σ i p`,
+where `p` is the prefix the recursion actually feeds step `i` — the factors
+the earlier steps produced (`boot V c lo hi n i`), not an arbitrary list. The
+threshold hypothesis and the root-in-bracket condition are assumed exactly
+there: each step consumes only its own instrument's shape, on its own
+bracket, at the factors the run produced. The prefix itself depends on `n`,
+so the hypotheses are per-`n`: if they hold for every `n`, the gap to the
+prefix-dependent threshold tends to `0` (not stated as a theorem);
+convergence of the factors themselves is not stated either (it would follow
+by induction on `i` when, in addition, each `σ i` is continuous in the
+prefix). -/
 theorem boot_step_err (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ) (σ : ℕ → List ℝ → ℝ)
-    (hthr : ∀ (i : ℕ) (p : List ℝ),
-      (∀ x ∈ Set.Icc (lo i) (hi i), -(V i (x :: p)) < -(c i) ↔ x < σ i p)
-        ∧ σ i p ∈ Set.Icc (lo i) (hi i))
-    (i n : ℕ) :
+    (i n : ℕ)
+    (hthr : ∀ x ∈ Set.Icc (lo i) (hi i),
+      -(V i (x :: boot V c lo hi n i)) < -(c i) ↔ x < σ i (boot V c lo hi n i))
+    (hσ : σ i (boot V c lo hi n i) ∈ Set.Icc (lo i) (hi i)) :
     |(boot V c lo hi n (i + 1)).head (boot_succ_ne_nil V c lo hi n i)
-      - σ i (boot V c lo hi n i)| ≤ (hi i - lo i) / 2 ^ (n + 1) := by
-  have h := abs_bisectMid_sub_le
-    (f := fun x : ℝ ↦ -(V i (x :: boot V c lo hi n i))) (C := -(c i))
-    (lo := lo i) (hi := hi i) (σ := σ i (boot V c lo hi n i))
-    (fun x hx => (hthr i (boot V c lo hi n i)).1 x hx)
-    (hthr i (boot V c lo hi n i)).2 n
-  simp only [boot_succ, List.head_cons]
-  exact h
+      - σ i (boot V c lo hi n i)| ≤ (hi i - lo i) / 2 ^ (n + 1) :=
+  abs_bisectMid_sub_le hthr hσ n
 
-/-- **The bootstrap repricing theorem.** Given per instrument, for every prefix
-list `p`, the affine shape `V i (x :: p) = a i p − b i p · x` with slope
-`b i p > 0` and a fixed bracket containing the root, every bootstrapped factor
-reprices its own quote up to the slope-weighted half-interval
-`b i · (hi i − lo i)/2^{n+1}` — for every instrument `i`; `boot_reprices_range`
-is the "all inputs" form. The all-prefix hypotheses restrict which instruments
-qualify (see the module's scope note). -/
+/-- **The bootstrap repricing theorem, at the fed-in prefix.** Given
+instrument `i`'s affine shape `V i (x :: p) = a i p − b i p · x` on the step's
+own bracket (bisection evaluates the instrument only there), slope
+`b i p > 0`, and the root `(a i p − c i)/b i p` in the bracket — all at the
+prefix `p` the recursion feeds step `i` — the bootstrapped factor reprices
+instrument `i`'s quote up to the slope-weighted half-interval
+`b i p · (hi i − lo i)/2^{n+1}`. The shape and slope are exactly the facts the
+instrument layers of this file provide at whatever prefix is fed in (FRA:
+`fraValue_affine_of_newUnknown` + `fraThreshold`; known-schedule swap:
+`payerSwapValue_affine_of_newUnknown` + `swapThreshold`; last-coupon swap:
+`payerSwapValue_affine_lastCoupon` + `swapLastCouponThreshold`), so the only
+run-dependent input left is the per-step bracket choice;
+`boot_reprices_fraChain` / `boot_reprices_swapChain` discharge every
+hypothesis but it for the FRA and swap strips, under the FRA / swap standing
+conditions. -/
 theorem boot_reprices_all (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ) (a b : ℕ → List ℝ → ℝ)
-    (hb : ∀ i p, 0 < b i p)
-    (hV : ∀ (i : ℕ) (p : List ℝ) (x : ℝ), V i (x :: p) = a i p - b i p * x)
-    (hσ : ∀ i p, (a i p - c i) / b i p ∈ Set.Icc (lo i) (hi i))
-    (i n : ℕ) :
+    (i n : ℕ) (hb : 0 < b i (boot V c lo hi n i))
+    (hV : ∀ x ∈ Set.Icc (lo i) (hi i),
+      V i (x :: boot V c lo hi n i)
+        = a i (boot V c lo hi n i) - b i (boot V c lo hi n i) * x)
+    (hσ : (a i (boot V c lo hi n i) - c i) / b i (boot V c lo hi n i)
+      ∈ Set.Icc (lo i) (hi i)) :
     |V i ((boot V c lo hi n (i + 1)).head (boot_succ_ne_nil V c lo hi n i)
         :: boot V c lo hi n i) - c i|
       ≤ b i (boot V c lo hi n i) * ((hi i - lo i) / 2 ^ (n + 1)) := by
-  simp only [boot_succ, List.head_cons, hV i (boot V c lo hi n i), neg_sub]
-  exact affineStep_value_err (a i (boot V c lo hi n i)) (b i (boot V c lo hi n i)) (c i)
-    (lo i) (hi i) (hb i _) (hσ i _) n
+  simp only [boot_succ, List.head_cons]
+  set p := boot V c lo hi n i
+  have hthr : ∀ x ∈ Set.Icc (lo i) (hi i),
+      -(V i (x :: p)) < -(c i) ↔ x < (a i p - c i) / b i p := by
+    intro x hx
+    rw [hV x hx, neg_sub]
+    exact threshold_affine (a i p) (b i p) (c i) x hb
+  have hstep : |bisectMid (fun x : ℝ ↦ -(V i (x :: p))) (-(c i)) (lo i) (hi i) n
+      - (a i p - c i) / b i p| ≤ (hi i - lo i) / 2 ^ (n + 1) :=
+    abs_bisectMid_sub_le hthr hσ n
+  rw [hV _ (bisectMid_mem_Icc hthr hσ n), abs_affine_sub_eq _ _ _ _ hb]
+  exact mul_le_mul_of_nonneg_left hstep hb.le
 
-/-- "Reprices all inputs": the repricing bound holds for every instrument index
-inside a budget of `m` instruments — the inheritance carried structurally by
-`boot` (each step consumes the previous factors), with the quantifier running
-over `Finset.range m`. -/
-theorem boot_reprices_range (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ) (a b : ℕ → List ℝ → ℝ)
-    (hb : ∀ i p, 0 < b i p)
-    (hV : ∀ (i : ℕ) (p : List ℝ) (x : ℝ), V i (x :: p) = a i p - b i p * x)
-    (hσ : ∀ i p, (a i p - c i) / b i p ∈ Set.Icc (lo i) (hi i))
-    (m n : ℕ) :
-    ∀ i ∈ Finset.range m,
-      |V i ((boot V c lo hi n (i + 1)).head (boot_succ_ne_nil V c lo hi n i)
-          :: boot V c lo hi n i) - c i|
-        ≤ b i (boot V c lo hi n i) * ((hi i - lo i) / 2 ^ (n + 1)) :=
-  fun i _ => boot_reprices_all V c lo hi a b hb hV hσ i n
+/-! #### The file's instruments inside the induction
+
+`fraChain` and `swapChain` are the instrument layers in `boot`'s list form:
+the new factor `x` at the head of the fed-in list, the already-bootstrapped
+factors behind it. Both are anchored at every step, including the first: the
+discount factor at the valuation date is `1`, so step `0` of the FRA strip is
+the spot deposit (an FRA whose earlier factor is `1`), and every swap step is a
+spot-starting swap (`P0 = 1`). Each instrument `i` carries its own fixed rate
+`K i`. They discharge every hypothesis of `boot_reprices_all` except the
+bracket condition, which stays a hypothesis; what they add is only the
+instrument layer's standing assumptions. -/
+
+/-- The **FRA strip as a `boot` instrument**: instrument `i` is the FRA with
+fixed rate `K i`, reading the new factor `x` and the previous factor off the
+fed-in list; on the empty prefix (step `0`) the previous factor is the
+valuation-date factor `1`, so the first instrument is the spot deposit. (The
+`[]` branch is never fed by `boot`, which always passes `x :: prefix`.) -/
+noncomputable def fraChain (δ : ℝ) (K : ℕ → ℝ) : ℕ → List ℝ → ℝ :=
+  fun i l ↦
+    match l with
+    | x :: p => fraValue δ x (fraForwardRate (p.head?.getD 1) x δ) (K i)
+    | [] => 0
+
+/-- The unfolding equation: on `x :: p` the strip instrument is the FRA value
+function of the instrument layer, the earlier factor read off the head of `p`
+(defaulting to the valuation-date factor `1` when `p` is empty) — matching
+`swapChain_eq`'s general shape on the fed-in list. -/
+theorem fraChain_eq (δ : ℝ) (K : ℕ → ℝ) (x : ℝ) (p : List ℝ) (i : ℕ) :
+    fraChain δ K i (x :: p) = fraValue δ x (fraForwardRate (p.head?.getD 1) x δ) (K i) := rfl
+
+
+/-- The anchor: on the empty prefix the strip instrument is the spot deposit,
+the FRA whose earlier discount factor is the valuation-date factor `1`. -/
+theorem fraChain_spot (δ : ℝ) (K : ℕ → ℝ) (x : ℝ) (i : ℕ) :
+    fraChain δ K i [x] = fraValue δ x (fraForwardRate 1 x δ) (K i) := rfl
+
+/-- **The FRA strip reprices inside the induction.** At every step `i`
+(step `0` is the spot deposit, anchored at the valuation-date factor `1`),
+under the FRA layer's standing conditions — `δ ≠ 0`, `1 + δ·K i > 0`, a
+positive bracket — the only hypothesis left is the bracket condition at the
+fed-in prefix: `[lo i, hi i]` must contain the root computed from the *actual*
+previous factor `((boot (fraChain δ K) c lo hi n i).head?.getD 1 − c i) /
+(1 + δ·K i)`. Then the bootstrapped factor reprices instrument `i`'s quote to
+within `(1 + δ·K i)·(hi i − lo i)/2^{n+1}`. -/
+theorem boot_reprices_fraChain (δ : ℝ) (K c lo hi : ℕ → ℝ) (n i : ℕ) (hδ : δ ≠ 0)
+    (hpos : 0 < 1 + δ * K i) (hlo : 0 < lo i)
+    (hσ : ((boot (fraChain δ K) c lo hi n i).head?.getD 1 - c i) / (1 + δ * K i)
+      ∈ Set.Icc (lo i) (hi i)) :
+    |fraChain δ K i ((boot (fraChain δ K) c lo hi n (i + 1)).head
+        (boot_succ_ne_nil (fraChain δ K) c lo hi n i)
+        :: boot (fraChain δ K) c lo hi n i) - c i|
+      ≤ (1 + δ * K i) * ((hi i - lo i) / 2 ^ (n + 1)) :=
+  boot_reprices_all (fraChain δ K) c lo hi (fun _ p ↦ p.head?.getD 1)
+    (fun j _ ↦ 1 + δ * K j) i n hpos
+    (fun x hx ↦ fraValue_affine_of_newUnknown _ δ (K i) x hδ (lt_of_lt_of_le hlo hx.1).ne') hσ
+
+/-- The **swap strip as a `boot` instrument**: instrument `i` is the
+spot-starting payer swap (`P0 = 1`) maturing at the new factor `x`, with fixed
+rate `K i` and one fixed payment (accrual `δ`) at each bootstrapped date and at
+the new one — annuity `δ·(Σ prefix) + δ·x`, the last-coupon form of the swap
+layer. Every step, including the first (empty prefix: the one-period swap), is
+a genuine swap; the `[]` branch is never fed by `boot`. -/
+noncomputable def swapChain (δ : ℝ) (K : ℕ → ℝ) : ℕ → List ℝ → ℝ :=
+  fun i l ↦
+    match l with
+    | x :: p => payerSwapValue 1 x (K i) (δ * p.sum + δ * x)
+    | [] => 0
+
+/-- The unfolding equation of the swap strip instrument. -/
+theorem swapChain_eq (δ : ℝ) (K : ℕ → ℝ) (x : ℝ) (p : List ℝ) (i : ℕ) :
+    swapChain δ K i (x :: p) = payerSwapValue 1 x (K i) (δ * p.sum + δ * x) := rfl
+
+/-- **The swap strip reprices inside the induction.** At every step `i`, under
+the last-coupon slope condition `1 + K i·δ > 0` (no bracket positivity is
+needed: the swap value is affine on all of `ℝ`), the only hypothesis left is
+the bracket condition at the fed-in prefix: `[lo i, hi i]` must contain the
+root `(1 − K i·δ·Σ prefix − c i)/(1 + K i·δ)` computed from the factors the run
+actually produced. Then the bootstrapped factor reprices swap `i`'s quote
+(`c i = 0` for a par-rate quote `K i`) to within
+`(1 + K i·δ)·(hi i − lo i)/2^{n+1}`. -/
+theorem boot_reprices_swapChain (δ : ℝ) (K c lo hi : ℕ → ℝ) (n i : ℕ)
+    (hpos : 0 < 1 + K i * δ)
+    (hσ : (1 - K i * (δ * (boot (swapChain δ K) c lo hi n i).sum) - c i) / (1 + K i * δ)
+      ∈ Set.Icc (lo i) (hi i)) :
+    |swapChain δ K i ((boot (swapChain δ K) c lo hi n (i + 1)).head
+        (boot_succ_ne_nil (swapChain δ K) c lo hi n i)
+        :: boot (swapChain δ K) c lo hi n i) - c i|
+      ≤ (1 + K i * δ) * ((hi i - lo i) / 2 ^ (n + 1)) :=
+  boot_reprices_all (swapChain δ K) c lo hi (fun j p ↦ 1 - K j * (δ * p.sum))
+    (fun j _ ↦ 1 + K j * δ) i n hpos
+    (fun x _ ↦ payerSwapValue_affine_lastCoupon 1 (K i) _ δ x) hσ
 
 /-! ### Flat-curve capstone: the bootstrap recovers the flat-curve factor -/
 
@@ -605,28 +622,24 @@ bracket around it recovers the factor to within `(hi − lo)/2^{n+1}`. -/
 theorem fraBootstrap_flatCurve (r δ K T1 T2 lo hi : ℝ) (hδ : δ ≠ 0)
     (hK : K = fraForwardRate (zcb r 0 T1) (zcb r 0 T2) δ)
     (hx : zcb r 0 T2 ∈ Set.Icc lo hi) (hlo : 0 < lo) (n : ℕ) :
-    |bisectMid (fun x : ℝ ↦ -(fraValue δ x (fraForwardRate (zcb r 0 T1) x δ) K)) (-0) lo hi n
+    |bisectMid (fun x : ℝ ↦ -(fraValue δ x (fraForwardRate (zcb r 0 T1) x δ) K)) 0 lo hi n
       - zcb r 0 T2| ≤ (hi - lo) / 2 ^ (n + 1) := by
+  have h1 : δ * ((zcb r 0 T1 / zcb r 0 T2 - 1) / δ)
+      = zcb r 0 T1 / zcb r 0 T2 - 1 := by field_simp
   have hpos : 0 < 1 + δ * K := by
-    simp only [hK, fraForwardRate]
-    have h1 : δ * ((zcb r 0 T1 / zcb r 0 T2 - 1) / δ)
-        = zcb r 0 T1 / zcb r 0 T2 - 1 := by
-      field_simp
-    rw [h1]
+    simp only [hK, fraForwardRate, h1]
     linarith [div_pos (zcb_pos r 0 T1) (zcb_pos r 0 T2)]
   have hσeq : (zcb r 0 T1 - 0) / (1 + δ * K) = zcb r 0 T2 := by
     rw [hK, sub_zero]
     have hp : zcb r 0 T1 ≠ 0 := (zcb_pos r 0 T1).ne'
     have hx : zcb r 0 T2 ≠ 0 := (zcb_pos r 0 T2).ne'
-    have h1 : (1 : ℝ) + δ * ((zcb r 0 T1 / zcb r 0 T2 - 1) / δ)
-        = zcb r 0 T1 / zcb r 0 T2 := by
-      field_simp
-      ring
     unfold fraForwardRate
-    rw [h1, div_eq_iff (div_ne_zero hp hx)]
+    rw [show (1 : ℝ) + δ * ((zcb r 0 T1 / zcb r 0 T2 - 1) / δ)
+        = zcb r 0 T1 / zcb r 0 T2 from by rw [h1]; ring,
+      div_eq_iff (div_ne_zero hp hx)]
     field_simp
   have hthr : ∀ x ∈ Set.Icc lo hi,
-      (fun x : ℝ ↦ -(fraValue δ x (fraForwardRate (zcb r 0 T1) x δ) K)) x < -0
+      (fun x : ℝ ↦ -(fraValue δ x (fraForwardRate (zcb r 0 T1) x δ) K)) x < 0
         ↔ x < zcb r 0 T2 := by
     intro x hx
     have hthr' := fraThreshold (zcb r 0 T1) δ K 0 lo hi hδ hpos hlo x hx
