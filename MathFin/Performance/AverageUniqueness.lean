@@ -17,7 +17,8 @@ per-observation uniqueness `u_{t,i} = 1[t ∈ span i] / c_t`.
 
 This file states both over a finite index type `ι` and proves the basic bound
 used to justify uniqueness-weighted sampling: whenever `i`'s span actually
-contains `t`, `u_{t,i} ∈ (0, 1]`.
+contains `t`, `u_{t,i} ∈ (0, 1]`. The average uniqueness of observation `i` (the
+mean of `u_{t,i}` over `i`'s span) is not defined here.
 
 ## Main results
 

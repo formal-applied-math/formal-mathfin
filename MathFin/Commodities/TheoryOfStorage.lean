@@ -20,9 +20,11 @@ investment-regime price floor `Sbar = E[S_{t+1}] − C`:
   `S(A) = max(Sbar, f⁻¹(A))`                         (canonical-storage price)
   `Y(A) = max(f⁻¹(A) − Sbar, 0)`                      (convenience yield)
 
-The convenience yield is positive exactly where scarcity bites — below the
-kink (`A` small, so `f⁻¹(A)` would exceed `Sbar`) — and zero at and above it.
-The two are two faces of the same kink: `Y(A) = S(A) − Sbar` always. Taking
+By definition the convenience yield is positive exactly where `f⁻¹(A) > Sbar`
+and zero elsewhere; for a decreasing `f⁻¹` that is where scarcity bites, below
+the kink. The definitions here take any `f⁻¹ : ℝ → ℝ`: no monotonicity of `f⁻¹`
+is assumed, and nothing is proved about `A` below or above `A*`. The two
+functions are two faces of the same kink: `Y(A) = S(A) − Sbar` always. Taking
 the futures price to be `F = Sbar + C` (it is not derived here), the
 cost-of-carry identity — the spot price `S(A)` plus the finance/storage cost `C`
 net of the convenience-yield benefit — is that identity rearranged:
@@ -37,10 +39,13 @@ i.e. from `C`).
 
 For an isoelastic demand-for-storage curve
 `f⁻¹(A) = p_ref · (a_ref / A) ^ ε` (flexibility `ε = −d ln p / d ln A`,
-reference availability `a_ref`, reference price `p_ref`), the kink point
-`A*` where `f⁻¹(A*) = Sbar` is
+reference availability `a_ref`, reference price `p_ref`), a kink point `A*`
+with `f⁻¹(A*) = Sbar` is
 
-  `A* = a_ref · (p_ref / Sbar) ^ {1/ε}`.
+  `A* = a_ref · (p_ref / Sbar) ^ {1/ε}`
+
+for `a_ref, p_ref, Sbar > 0` and `ε ≠ 0` (`kinkPoint_spec`); that it is the
+only crossing is not stated.
 
 ## Main results
 
@@ -52,7 +57,8 @@ reference availability `a_ref`, reference price `p_ref`), the kink point
   (`convenienceYield_eq_storageSpotPrice_sub` rearranged; no futures pricing is
   derived).
 * `invDemandIsoelastic`, `kinkPoint`, `kinkPoint_spec` : the isoelastic
-  demand-for-storage curve and the kink point solving `f⁻¹(A*) = Sbar`.
+  demand-for-storage curve and a kink point solving `f⁻¹(A*) = Sbar`, for
+  `a_ref, p_ref, Sbar > 0` and `ε ≠ 0`.
 
 ## References
 
@@ -74,8 +80,8 @@ noncomputable def storageSpotPrice (Sbar : ℝ) (invDemand : ℝ → ℝ) (A : �
   max Sbar (invDemand A)
 
 /-- **Convenience yield**: positive exactly where scarcity pushes the
-demand-for-storage price above the investment-regime floor, zero at and
-above it. -/
+demand-for-storage price above the investment-regime floor (`f⁻¹(A) > Sbar`),
+zero where it does not. -/
 noncomputable def convenienceYield (Sbar : ℝ) (invDemand : ℝ → ℝ) (A : ℝ) : ℝ :=
   max (invDemand A - Sbar) 0
 
@@ -112,8 +118,9 @@ demand-for-storage curve meets the investment-regime floor `Sbar`. -/
 noncomputable def kinkPoint (a_ref p_ref Sbar ε : ℝ) : ℝ :=
   a_ref * (p_ref / Sbar) ^ (1 / ε)
 
-/-- **Kink-point equation**: `f⁻¹(A*) = Sbar`, i.e. `kinkPoint` really is where
-the isoelastic demand-for-storage curve crosses the floor. -/
+/-- **Kink-point equation**: `f⁻¹(A*) = Sbar`, i.e. the isoelastic
+demand-for-storage curve meets the floor at `kinkPoint` (uniqueness of the
+crossing is not stated). -/
 theorem kinkPoint_spec (a_ref p_ref Sbar ε : ℝ)
     (ha : 0 < a_ref) (hp : 0 < p_ref) (hS : 0 < Sbar) (hε : ε ≠ 0) :
     invDemandIsoelastic a_ref p_ref ε (kinkPoint a_ref p_ref Sbar ε) = Sbar := by

@@ -21,7 +21,8 @@ parameter entries, not sub-sections of the paper).
 ## Results
 
 * `isLiquidatable`: the predicate `collateral / debt < liquidationRatio`.
-* `isLiquidatable_iff_mul`: cross-multiplied equivalent form (no division).
+* `isLiquidatable_iff_mul`: cross-multiplied equivalent form (no division), for
+  `debt > 0`.
 * `debt_eq_debt_zero_mul_pow`: the compounding recurrence
   `debt (n+1) = debt n · (1 + fee)` has closed form `debt n = debt 0 · (1+fee)^n`.
 -/

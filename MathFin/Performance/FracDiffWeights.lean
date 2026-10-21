@@ -13,15 +13,17 @@ public import Mathlib
 López de Prado (*Advances in Financial Machine Learning*, ch. 5) builds the
 fractionally-differenced series `(1-B)^d X` from a weight sequence computed by
 the recursion `w_0 = 1`, `w_k = -w_{k-1}·(d-k+1)/k`, the binomial-series
-coefficients of `(1-B)^d` for real exponent `d`.
+coefficients of `(1-B)^d` for real exponent `d` (the series and the
+differenced series are not formalized here).
 
 This file states the recursion as `fracDiffWeight` and proves it agrees with
 the closed-form alternating product `(-1)^k · ∏_{i<k} (d-i)/(i+1)` — the
-real-exponent generalized binomial coefficient `(-1)^k · C(d,k)` — by
-induction directly on the recursion. It also records the elementary
-per-step magnitude ratio relating consecutive weights (the ratio `|d-k|/(k+1)`
-tends to `1`, so it drives `w_k → 0` only for `d > -1`; this file does not
-claim decay for every `d`).
+real-exponent generalized binomial coefficient `(-1)^k · C(d,k)` by its
+textbook definition (no identification with a Mathlib binomial coefficient is
+proved) — by induction directly on the recursion. It also records the
+elementary per-step magnitude ratio relating consecutive weights. The ratio
+`|d-k|/(k+1)` tends to `1`; that the weights nevertheless tend to `0` for
+`d > -1` is not proved here, and no decay statement is.
 
 ## Main results
 

@@ -22,16 +22,16 @@ rate, reserve-factor accrual).
   reserves out of the denominator, `Borrows / (Cash + Borrows − Reserves)`;
   this file follows the whitepaper, not that later on-chain refinement.)
 * `utilization_mem_Icc`: for nonnegative cash and borrows, `U ∈ [0, 1]`.
-* `borrowRate`: the affine rate `r = base + slope · U`, monotone in `U` when
-  `slope ≥ 0`.
+* `borrowRate`, `borrowRate_monotone`: the affine rate `r = base + slope · U`,
+  monotone in `U` when `slope ≥ 0`.
 * `exchangeRate`: `(Cash + Borrows − Reserves) / TotalSupply`.
-* `exchangeRate_mono`: the exchange rate is monotone nondecreasing as
-  interest accrues, **under the explicit hypothesis that the reserve-factor
-  cut does not exceed the accrued interest** (`reservesAdded ≤ interest`) —
-  the whitepaper's reserve-factor accrual equations give this directly
-  (`reservesAdded = interest · reserveFactor` with `reserveFactor ∈ [0,1]`),
-  but state it as a standalone hypothesis on the accrued amounts rather than
-  re-deriving it from `reserveFactor` each time.
+* `exchangeRate_mono`: over one accrual period, with cash and a positive total
+  supply unchanged, the exchange rate does not decrease, **under the explicit
+  hypothesis that the reserve-factor cut does not exceed the accrued
+  interest** (`reservesAdded ≤ interest`) — the whitepaper's reserve-factor
+  accrual equations give this (`reservesAdded = interest · reserveFactor` with
+  `reserveFactor ∈ [0,1]` and `interest ≥ 0`), but it is stated as a standalone
+  hypothesis on the accrued amounts rather than re-derived from `reserveFactor`.
 -/
 
 @[expose] public section
@@ -81,11 +81,11 @@ noncomputable def exchangeRate (cash borrows reserves totalSupply : ℝ) : ℝ :
 Suppose a period accrues `interest` of new borrows, of which
 `reservesAdded` is cut to reserves. **Explicit hypothesis**
 `reservesAdded ≤ interest` — the whitepaper's reserve-factor accrual equations give
-this directly (`reservesAdded = interest · reserveFactor` with
-`reserveFactor ∈ [0,1]`), but we state it as a standalone hypothesis on the
+this (`reservesAdded = interest · reserveFactor` with `reserveFactor ∈ [0,1]` and
+`interest ≥ 0`), but we state it as a standalone hypothesis on the
 accrued amounts rather than re-deriving it from `reserveFactor` here. Under
-it, and with cash and supply unchanged, the exchange rate after accrual is
-at least the rate before. -/
+it, with cash and supply unchanged and `totalSupply > 0`, the exchange rate after
+accrual is at least the rate before. -/
 theorem exchangeRate_mono
     {cash borrows reserves totalSupply interest reservesAdded : ℝ}
     (htotalSupply : 0 < totalSupply)

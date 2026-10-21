@@ -36,12 +36,15 @@ market makers, building on the constant-product substrate in
 
 * `impermanentLossReservesX/Y`, `impermanentLossReserves_invariant`,
   `impermanentLossReserves_price`, `impermanentLoss_eq`: the **impermanent
-  loss closed form** `IL(r) = 2√r/(1+r) - 1` for a constant-product LP,
-  derived (not merely asserted) from the post-price-move reserve split —
-  both defining equations (`x1*y1 = x0*y0` and `y1/x1 = r*y0/x0`) are
-  proved, not just the first.
-* `twapAccumulator`, `twap_eq_average`: the **Uniswap v2 TWAP accumulator**
-  telescoping-sum identity `p_{t1,t2} = (a_{t2} - a_{t1})/(t2 - t1)`.
+  loss closed form** `IL(r) = 2√r/(1+r) - 1` for a constant-product LP
+  (`x0, y0, r > 0`), derived (not merely asserted) from the post-price-move
+  reserve split — the defined reserves satisfy both defining equations
+  (`x1*y1 = x0*y0` and `y1/x1 = r*y0/x0`), not just the first.
+* `twapAccumulator`, `twap`, `twapAccumulator_sub_eq_sum`, `twap_eq_average`:
+  the **Uniswap v2 TWAP** over unit time steps, defined as
+  `p_{t1,t2} = (a_{t2} - a_{t1})/(t2 - t1)`; the accumulator difference
+  telescopes to the window sum, so for `t1 ≤ t2` the TWAP is
+  `(∑_{t1 < i ≤ t2} p_i)/(t2 - t1)`.
 * `harmonicMean`, `harmonicMean_reciprocal_eq_arithmeticMean`: the
   **reciprocal caveat** — the arithmetic mean of an A-in-B price series is
   the reciprocal of the *harmonic* mean of the B-in-A series. That it
@@ -50,7 +53,8 @@ market makers, building on the constant-product substrate in
 * `swapOutputWithFee`, `fee_invariant_growth`: the Uniswap v2 **fee
   invariant** `x0·y0 ≤ (x0 + Δx)(y0 - Δy)`, where `Δy = swapOutput x0 y0
   (γ·Δx)` is computed from the fee-discounted input (γ the fee retention
-  rate), and `lpFeeShare`, the candidate LP value-growth share
+  rate; positive reserves and input, `0 < γ ≤ 1`), and `lpFeeShare`, the
+  candidate LP value-growth share
   `f = 1 - √(k1/k2)` (only shown nonnegative here, see its docstring).
 * `realReserveX/Y`, `realReserves_curve`: the Uniswap v3 **real-reserves
   curve** `(x + L/√p_b)(y + L√p_a) = L²` (v3 whitepaper §2, eq. 2.2): the
@@ -72,8 +76,8 @@ namespace DeFi
 price at deposit), a constant-product pool with invariant `k = x0 * y0` and
 deposit-time price `y0 / x0` re-balances to the reserves that keep `k`
 fixed at the new price `r * y0 / x0`. This is the **new reserve of token
-X**: solving `x1 * y1 = x0 * y0` and `y1 / x1 = r * y0 / x0` gives
-`x1 = sqrt (x0^2 / r)`. -/
+X**: solving `x1 * y1 = x0 * y0` and `y1 / x1 = r * y0 / x0` for positive
+reserves gives `x1 = sqrt (x0^2 / r)`. -/
 noncomputable def impermanentLossReservesX (x0 _y0 r : ℝ) : ℝ :=
   Real.sqrt (x0 ^ 2 / r)
 
@@ -92,9 +96,10 @@ theorem impermanentLossReserves_invariant
   exact Real.sqrt_sq (by positivity)
 
 /-- The rebalanced reserves sit at the new price `r * y0 / x0`: this is the
-second defining equation (alongside `impermanentLossReserves_invariant`)
-that pins down `x1, y1` as *the* solution of `x1 * y1 = x0 * y0` and
-`y1 / x1 = r * y0 / x0`, not merely one pair satisfying the invariant. -/
+second defining equation, so with `impermanentLossReserves_invariant` the
+defined pair satisfies both `x1 * y1 = x0 * y0` and `y1 / x1 = r * y0 / x0`,
+not merely the invariant. That it is the only positive solution is not
+stated. -/
 theorem impermanentLossReserves_price
     (x0 y0 r : ℝ) (hx0 : 0 < x0) (hy0 : 0 < y0) (hr : 0 < r) :
     impermanentLossReservesY x0 y0 r / impermanentLossReservesX x0 y0 r

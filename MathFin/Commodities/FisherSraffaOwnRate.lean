@@ -18,10 +18,14 @@ resulting **money (nominal) rate** `r`:
 
   `1 + r = (1 + b)(1 + i)`,
 
-and **Sraffa's implied own rate** recovers `b` from a spot price `S`,
-forward price `F`, financing rate `m` and maturity `T`:
+and **Sraffa's implied own rate** is defined from a spot price `S`, forward
+price `F`, financing rate `m` and maturity `T` as
 
-  `b = ((1 + m)^T · S / F)^{1/T} − 1`.
+  `b = ((1 + m)^T · S / F)^{1/T} − 1`;
+
+`sraffaOwnRate_spec` shows that this `b` solves the cost-of-carry equation
+`(1 + b)^T = (1 + m)^T · S / F`. That it returns the own rate a forward was
+quoted at (the converse direction) is not stated.
 
 Expanding the Fisher identity gives the familiar linear approximation
 `r ≈ b + i`; its error term is exactly `b · i` — the identity is an exact
@@ -35,8 +39,9 @@ is treated as second-order-small and dropped.
 * `fisher_linear_approx_error`: `fisherMoneyRate b i − (b + i) = b * i`, the
   exact statement underlying `r ≈ b + i` for small `b, i`.
 * `sraffaOwnRate`: Sraffa's implied own rate `b` from spot/forward/financing/time.
-* `sraffaOwnRate_spec`: `(1 + sraffaOwnRate m S F T)^T = (1+m)^T · S / F`,
-  the defining equation Sraffa's formula inverts.
+* `sraffaOwnRate_spec`: `(1 + sraffaOwnRate m S F T)^T = (1+m)^T · S / F`
+  for `T ≠ 0` and `(1+m)^T · S / F ≥ 0`, the defining equation Sraffa's formula
+  inverts.
 -/
 
 @[expose] public section
@@ -59,9 +64,9 @@ theorem fisher_linear_approx_error (b i : ℝ) :
 
 /-! ### Sraffa's implied own rate -/
 
-/-- **Sraffa's implied own rate**: `b = ((1+m)^T · S/F)^{1/T} − 1`, recovered
-from the financing rate `m`, spot price `S`, forward price `F` and maturity
-`T` via the cost-of-carry relation `F = S·(1+m)^T / (1+b)^T`. -/
+/-- **Sraffa's implied own rate**: `b = ((1+m)^T · S/F)^{1/T} − 1`, from the
+financing rate `m`, spot price `S`, forward price `F` and maturity `T`: the
+cost-of-carry relation `F = S·(1+m)^T / (1+b)^T` solved for `b`. -/
 noncomputable def sraffaOwnRate (m S F T : ℝ) : ℝ :=
   ((1 + m) ^ T * (S / F)) ^ (1 / T) - 1
 

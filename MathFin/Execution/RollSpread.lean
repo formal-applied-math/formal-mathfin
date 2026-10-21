@@ -27,6 +27,7 @@ explicit, named hypotheses, since the original note leaves them implicit — are
   *except* the sign shared by the two changes with itself; independence *within* a single price
   change is not assumed.
 
+The mid-price increments are also assumed square-integrable, so that the covariances exist.
 Under these hypotheses the first-order autocovariance of the *trade-price change*
 `ΔP_t = P_t - P_{t-1}` is `-(s/2)²`, nonpositive and strictly negative whenever `s ≠ 0`:
 
@@ -38,28 +39,30 @@ discarding every covariance between independent variables leaves exactly one sur
 own-covariance (variance) of the sign `q_{t-1}` shared between the two consecutive price changes,
 whose variance is `1` (`variance_one_of_hasLaw_rademacher`). The identity is usually inverted into
 the **Roll estimator** `ŝ = 2 √(-γ̂₁)` of the spread from the sample first-order autocovariance
-`γ̂₁` of observed price changes; `rollSpread_eq_two_mul_sqrt` records this algebraic inversion.
+`γ̂₁` of observed price changes; `rollSpread_eq_two_mul_sqrt` records the inversion at the level of
+the model's covariance (`s = 2 √(-γ)` whenever `γ = -(s/2)²` and `s ≥ 0`). No sample
+autocovariance, and no property of `ŝ` as an estimator, is formalized.
 
 We state the result for three consecutive sign variables `q0 q1 q2` (representing
 `q_{t-2}, q_{t-1}, q_t`) and two increments `dm1 dm2` (`Δm_{t-1}, Δm_t`), rather than threading a
 time index through a stochastic process, since only these five variables and their pairwise
 independence ever enter the computation.
 
-The inversion is only meaningful when the sample autocovariance `γ̂₁` is negative, as the model
-predicts. If `γ̂₁ ≥ 0` — which real data can and does produce, since the model is an
-approximation — `rollSpread_eq_two_mul_sqrt` does not apply: `Real.sqrt` of a nonpositive argument
-returns `0` by Mathlib's junk-value convention, so naively evaluating `2 * Real.sqrt (-γ̂₁)` at
-`γ̂₁ ≥ 0` silently yields a spread estimate of `0` rather than signalling that the estimator is
-undefined there.
+The inversion is only meaningful when the sample autocovariance `γ̂₁` is nonpositive, as the model
+predicts. If `γ̂₁ > 0` — which real data can and does produce, since the model is an
+approximation — no `s` satisfies the hypothesis `γ = -(s/2)²` of `rollSpread_eq_two_mul_sqrt`, and
+`Real.sqrt` of the negative argument `-γ̂₁` returns `0` by Mathlib's junk-value convention, so
+naively evaluating `2 * Real.sqrt (-γ̂₁)` at `γ̂₁ > 0` silently yields a spread estimate of `0`
+rather than signalling that the estimator is undefined there.
 
 ## Main results
 
 * `variance_id_rademacher`, `variance_one_of_hasLaw_rademacher`: a fair random sign has variance
   `1`.
-* `covariance_rollPriceChange`: `Cov(ΔP_t, ΔP_{t-1}) = -(s/2)²` under the stated independence
-  hypotheses.
-* `rollSpread_eq_two_mul_sqrt`: the algebraic inversion `s = 2 * √(-Cov(ΔP_t, ΔP_{t-1}))`
-  (for `s ≥ 0`).
+* `covariance_rollPriceChange`: `Cov(ΔP_t, ΔP_{t-1}) = -(s/2)²` under the stated law,
+  integrability and independence hypotheses.
+* `rollSpread_eq_two_mul_sqrt`: the algebraic inversion `s = 2 * √(-γ)` for `s ≥ 0` and any real
+  `γ = -(s/2)²`; with `covariance_rollPriceChange` it gives `s = 2 * √(-Cov(ΔP_t, ΔP_{t-1}))`.
 
 ## References
 
@@ -154,8 +157,8 @@ theorem covariance_rollPriceChange
 
 /-- **Roll's (1984) spread estimator**: inverting the covariance identity algebraically gives
 `s = 2 √(-Cov(ΔP_t, ΔP_{t-1}))` for `s ≥ 0`. Stated directly from the covariance value (rather
-than re-deriving it from the independence hypotheses) since the inversion is pure algebra on the
-real number `γ := cov[ΔP_t, ΔP_{t-1}; P]`. -/
+than re-deriving it from the independence hypotheses) since the inversion is pure algebra on a
+real number `γ` standing for `cov[ΔP_t, ΔP_{t-1}; P]`. -/
 theorem rollSpread_eq_two_mul_sqrt {γ : ℝ} (hs : 0 ≤ s) (hγ : γ = -(s / 2) ^ 2) :
     s = 2 * Real.sqrt (-γ) := by
   rw [hγ, neg_neg, Real.sqrt_sq (by positivity)]

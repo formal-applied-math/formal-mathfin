@@ -12,31 +12,38 @@ public import MathFin.FixedIncome.Vasicek
 /-!
 # AR(1) ↔ OU parameter inversion
 
-A discretely-sampled Ornstein-Uhlenbeck (Vasicek) process observed on a grid
-of spacing `Δt` is exactly an AR(1) process `x_{n+1} = φ x_n + ε_n`. This
-file records the standard dictionary between the AR(1) fit `(φ, Var(resid))`
-and the continuous-time OU parameters `(k, σ)`:
+A discretely-sampled Ornstein-Uhlenbeck (Vasicek) process with long-run level
+`θ`, observed on a grid of spacing `Δt`, is an AR(1) process
+`x_{n+1} − θ = φ (x_n − θ) + ε_n` (a standard fact, not proved here: no OU
+transition law is used in this file). This file records the standard
+dictionary between the AR(1) fit `(φ, Var(resid))` and the continuous-time OU
+parameters `(k, σ)`:
 
   `φ = e^{−kΔt}`                        (mean-reversion discount)
   `k = −ln(φ)/Δt`                       (inverse: mean-reversion speed)
   `σ² = 2k·Var(resid) / (1 − e^{−2kΔt})`  (diffusion coefficient)
   `half-life = ln 2 / k`
 
-This is pure algebra given the existing closed-form Vasicek/OU terminal-law
-substrate (`FixedIncome/VasicekSDE.lean`): `ouPhiFromK` is literally the decay
-factor appearing in `vasicekSDEMean`, and `ouSigmaSqFromVar` inverts
-`vasicekSDEVariance` for `σ²` given an observed residual variance.
+This is pure algebra on the closed forms `vasicekSDEMean` and
+`vasicekSDEVariance` of `FixedIncome/VasicekSDE.lean` (their identification with
+the OU terminal law, `vasicekShortRate_hasLaw_gaussian`, is not used here):
+`ouPhiFromK` is literally the decay factor appearing in `vasicekSDEMean`, and
+`ouSigmaSqFromVar` inverts `vasicekSDEVariance` for `σ²` given an observed
+residual variance.
 
 ## Main results
 
-* `ouPhiFromK`, `kFromPhi` : the `φ ↔ k` dictionary, mutually inverse on
-  `Δt ≠ 0` (`kFromPhi_ouPhiFromK`) and on `φ > 0` (`ouPhiFromK_kFromPhi`).
+* `ouPhiFromK`, `kFromPhi` : the `φ ↔ k` dictionary: `kFromPhi ∘ ouPhiFromK`
+  is the identity for `Δt ≠ 0` (`kFromPhi_ouPhiFromK`), and `ouPhiFromK ∘ kFromPhi`
+  is the identity on `φ > 0` for `Δt ≠ 0` (`ouPhiFromK_kFromPhi`).
 * `ouSigmaSqFromVar` : the implied diffusion coefficient from a fitted AR(1)
   residual variance.
-* `ouPhiFromK_halfLife` : `FixedIncome.Vasicek`'s existing `meanReversionHalfLife`
-  (`ln 2 / k`) is indeed the time at which the decay factor hits `1/2`.
-* `ouSigmaSqFromVar_vasicekSDEVariance` : `ouSigmaSqFromVar` genuinely inverts
-  `vasicekSDEVariance`, closing the round-trip the module docstring claims.
+* `ouPhiFromK_halfLife` : the decay factor at `FixedIncome.Vasicek`'s existing
+  `meanReversionHalfLife` (`ln 2 / k`) is `1/2`, for `k ≠ 0`.
+* `ouSigmaSqFromVar_vasicekSDEVariance` : `ouSigmaSqFromVar` recovers `σ²` from
+  `vasicekSDEVariance σ k Δt`, for `k ≠ 0` and `1 − e^{−2kΔt} ≠ 0` (one direction
+  of the round trip: recovering a residual variance from `ouSigmaSqFromVar` is not
+  stated).
 -/
 
 @[expose] public section
@@ -57,8 +64,8 @@ noncomputable def kFromPhi (φ Δt : ℝ) : ℝ := -Real.log φ / Δt
 noncomputable def ouSigmaSqFromVar (k residVar Δt : ℝ) : ℝ :=
   2 * k * residVar / (1 - Real.exp (-(2 * k * Δt)))
 
-/-- **`ouSigmaSqFromVar` genuinely inverts `vasicekSDEVariance`**: feeding it
-the exact Vasicek/OU variance at spacing `Δt` recovers the diffusion
+/-- **`ouSigmaSqFromVar` inverts `vasicekSDEVariance`**: feeding it the
+closed-form Vasicek/OU variance at spacing `Δt` recovers the diffusion
 coefficient `σ²` it came from, for `k ≠ 0` and `1 − e^{−2kΔt} ≠ 0` (e.g.
 `k, Δt` both nonzero). -/
 theorem ouSigmaSqFromVar_vasicekSDEVariance (σ k Δt : ℝ) (hk : k ≠ 0)

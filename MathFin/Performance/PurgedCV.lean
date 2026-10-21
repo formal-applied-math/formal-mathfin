@@ -40,8 +40,8 @@ def overlapsTest (lo hi : ι → ℝ) (lo' hi' : κ → ℝ) (i : ι) (j : κ) :
   (lo' j ≤ lo i ∧ lo i ≤ hi' j) ∨ (lo' j ≤ hi i ∧ hi i ≤ hi' j) ∨ (lo i ≤ lo' j ∧ hi' j ≤ hi i)
 
 /-- If a point lies in both intervals, the overlap predicate holds between
-them: whichever of `lo i`/`hi' j` comes first pins down which of the three
-overlap cases applies. -/
+them: comparing `lo' j` with `lo i`, and then `hi i` with `hi' j`, picks which
+of the three overlap cases applies. -/
 theorem overlapsTest_of_mem_of_mem (lo hi : ι → ℝ) (lo' hi' : κ → ℝ) {i : ι} {j : κ} {t : ℝ}
     (ht : t ∈ Set.Icc (lo i) (hi i)) (ht' : t ∈ Set.Icc (lo' j) (hi' j)) :
     overlapsTest lo hi lo' hi' i j := by

@@ -18,11 +18,11 @@ health factor; the liquidity-index recurrence is §3.1 ("aTokens").
 ## Results
 
 * `kinkedRate`: the piecewise-linear borrow-rate curve.
-* `kinkedRate_apply_optimal`: the rate at the kink, `R₀ + slope1` — the
-  common value both branches take at `U = U_opt` (this does not by itself
-  establish `ContinuousAt`, which would additionally need `Uopt ≠ 1`).
+* `kinkedRate_apply_optimal`: the rate at the kink is `R₀ + slope1`, for
+  `Uopt ≠ 0` (the value of the `U ≤ Uopt` branch; continuity at the kink is
+  not stated).
 * `kinkedRate_monotone`: the curve is monotone nondecreasing on `[0, 1]`
-  when both slopes are nonnegative.
+  when `0 < Uopt < 1` and both slopes are nonnegative.
 * `healthFactorV1`, `healthFactorV2`: the single-asset and multi-asset
   (summed) health-factor definitions.
 * `liquidityIndexStep`, `liquidityIndex_eq_prod_mul`: the linear recurrence
@@ -34,9 +34,10 @@ health factor; the liquidity-index recurrence is §3.1 ("aTokens").
   `(1 − reserveFactor)`, a refinement not in the whitepaper and not modeled
   here (equivalently, the `reserveFactor = 0` simplification relative to the
   on-chain contract).
-* `stableRateUpdate`: the weighted-average new stable rate, shown (when the
-  new borrower's rate is at least the pool's prior average) to lie between
-  the two (a weighted average is a convex combination).
+* `stableRateUpdate`, `stableRateUpdate_mem_interval`: the weighted-average new
+  stable rate, shown to lie in `[SRprev, SRnew]` when the new borrower's rate is
+  at least the pool's prior average, the prior stable debt is nonnegative and
+  the new borrow is positive.
 -/
 
 @[expose] public section
@@ -56,17 +57,16 @@ noncomputable def kinkedRate (R₀ slope1 slope2 Uopt U : ℝ) : ℝ :=
   else R₀ + slope1 + (U - Uopt) / (1 - Uopt) * slope2
 
 /-- **The rate at the kink** is `R₀ + slope1` — the value the `U ≤ Uopt`
-branch takes at `U = Uopt`, which is also what the `else` branch would give
-there (it is excluded from this `if`, but both expressions agree, which is
-what makes the curve a genuine piecewise-linear function with no jump).
-This lemma states the kink value only; it is not a `ContinuousAt` claim. -/
+branch takes at `U = Uopt`. The `else` expression would also give `R₀ + slope1`
+there (by inspection; not stated as a lemma). This lemma states the kink value
+only; continuity at the kink is not proved. -/
 theorem kinkedRate_apply_optimal (R₀ slope1 slope2 Uopt : ℝ) (hU : Uopt ≠ 0) :
     kinkedRate R₀ slope1 slope2 Uopt Uopt = R₀ + slope1 := by
   unfold kinkedRate
   rw [if_pos le_rfl, div_self hU, one_mul]
 
-/-- **Monotonicity on `[0,1]`**: if both slopes are nonnegative, the kinked
-rate is monotone nondecreasing in utilization `U`. -/
+/-- **Monotonicity on `[0,1]`**: if `0 < Uopt < 1` and both slopes are
+nonnegative, the kinked rate is monotone nondecreasing in utilization `U`. -/
 theorem kinkedRate_monotone {R₀ slope1 slope2 Uopt : ℝ}
     (hUopt0 : 0 < Uopt) (hUopt1 : Uopt < 1)
     (hs1 : 0 ≤ slope1) (hs2 : 0 ≤ slope2) :
@@ -153,11 +153,12 @@ debt-weighted mean of the two rates. -/
 noncomputable def stableRateUpdate (SRprev SDprev SRnew SBnew : ℝ) : ℝ :=
   (SRprev * SDprev + SRnew * SBnew) / (SDprev + SBnew)
 
-/-- **The updated stable rate is a convex combination** of the previous
-average and the new borrower's rate, hence lies between them **when the new
-borrower's rate is at least the prior average** (`hle : SRprev ≤ SRnew`). A
-weighted average with nonnegative weights and positive total weight cannot
-exceed (resp. fall below) the larger (resp. smaller) of the two inputs. -/
+/-- **The updated stable rate lies between** the previous average and the new
+borrower's rate **when the new borrower's rate is at least the prior average**
+(`hle : SRprev ≤ SRnew`), the prior stable debt is nonnegative and the new borrow
+is positive. It is a weighted average with nonnegative weights and positive total
+weight, so it cannot exceed (resp. fall below) the larger (resp. smaller) of the
+two inputs. -/
 theorem stableRateUpdate_mem_interval
     {SRprev SDprev SRnew SBnew : ℝ}
     (hSDprev : 0 ≤ SDprev) (hSBnew : 0 < SBnew) (hle : SRprev ≤ SRnew) :
