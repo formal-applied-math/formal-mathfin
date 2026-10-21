@@ -167,10 +167,15 @@ The batch's prose was careful about scope in most files; the overclaims were con
   than the economic setting". Its hypothesis `hw : ∀ k t, 0 < w k t` quantifies over every real
   `t`, which with monotonicity excludes every surface with `w → 0` as `t → 0⁺`, `w = σ²t`
   included. The docstrings and both descriptions now say so.
-- **A misclassification, in the safe direction.** #279 classed the SA-CCR effective notional as a
-  `reduced_core` "only structurally analogous" to Basel's formula. It is Basel's CRE52.57
-  interest-rate effective notional with two buckets populated (`1.4 = 2·0.7`, `0.6 = 2·0.3`); the
-  entry is `full`. The README sentence it added is gone.
+- **A misclassification, and the first correction overclaimed.** #279 classed the SA-CCR effective
+  notional as a `reduced_core` "only structurally analogous" to Basel's formula. In fact its
+  two-bucket form is Basel's CRE52.57 interest-rate effective notional with one bucket empty
+  (`1.4 = 2·0.7`, `0.6 = 2·0.3`). The first round of this review made the entry `full` on that
+  ground; the second prose pass caught that this, too, claimed more than the Lean, since CRE52.57
+  has three buckets and was never defined. `effNotionalIR` now defines the three-bucket formula,
+  the entry proves `effNotionalIR_le_abs_add`, and `effNotionalIR_third_zero` and
+  `effNotionalIR_second_zero` prove the reductions; `full` is honest. The README sentence #279
+  added is gone.
 - **Checks the Lean does not perform.** Heynen–Kat and Stulz claimed to be "cross-checked against"
   QuantLib and Rmetrics; Heynen–Kat said in–out parity is not a theorem (it is
   `knockIn_add_knockOut_eq_vanilla`) and pointed to a reflection argument `BarrierParity` does not

@@ -29,7 +29,7 @@ active constraints. We prove:
   whenever it is feasible). This is the direction actually used to *certify*
   a candidate solution, and it follows directly from convexity — no
   constraint qualification is needed.
-* **Uniqueness under `C` positive definite** (`kkt_optimizer_unique_of_posDef`):
+* **Uniqueness under `C` positive definite** (`kkt_point_unique_of_posDef`):
   any two feasible points each satisfying a sufficient-KKT system (possibly
   with different multipliers) for the same `c, C, a, b` coincide. A minimizer
   not known to be a KKT point is not covered, since necessity is not proved.
@@ -74,7 +74,7 @@ set) is not proved.
   `qpObj c C y - qpObj c C x = (y-x) ⬝ᵥ (c + C *ᵥ x) + ½ (y-x) ⬝ᵥ (C *ᵥ (y-x))`
   — the algebraic core of convexity, valid for any symmetric `C`.
 * `kkt_sufficient`: KKT sufficiency for the inequality-constrained convex QP.
-* `kkt_optimizer_unique_of_posDef`: uniqueness of the feasible KKT point under `C ≻ 0`.
+* `kkt_point_unique_of_posDef`: uniqueness of the feasible KKT point under `C ≻ 0`.
 * `feasible_step_preserved`: the ratio-test feasibility-preservation lemma.
 -/
 
@@ -181,7 +181,7 @@ complementary slackness) for the *same* objective `c, C` and constraints
 `a, b`, possibly with *different* multipliers `u0, u1`, then `x0 = x1`. Both
 points are assumed to be KKT points; a minimizer not known to be one is not
 covered. -/
-theorem kkt_optimizer_unique_of_posDef {c : ι → ℝ} {C : Matrix ι ι ℝ}
+theorem kkt_point_unique_of_posDef {c : ι → ℝ} {C : Matrix ι ι ℝ}
     (hpd : C.PosDef) {a : κ → ι → ℝ} {b : κ → ℝ}
     {x0 x1 : ι → ℝ} (hfeas0 : ∀ k, a k ⬝ᵥ x0 ≤ b k) (hfeas1 : ∀ k, a k ⬝ᵥ x1 ≤ b k)
     {u0 : κ → ℝ} (hu0_nonneg : ∀ k, 0 ≤ u0 k)

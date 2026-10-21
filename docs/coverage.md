@@ -62,12 +62,14 @@ commits after the values review of 2026-10-21 (`docs/values-review.md`). Seven e
   `w(k, t) → 0` as `t → 0⁺`, such as `w = σ²t`; the `t > 0` form is not stated. Not proved: the
   local-variance characterisation, SSVI, and the slice-crossing quartic.
 - **SA-CCR** (`mf-saccr-ead-mono`, `mf-saccr-effnotional-diversification-bound`,
-  `RiskMeasures/SACCRExposure.lean`). `EAD = α·(RC + PFE)` is monotone in `RC` and in `PFE` for
-  `α ≥ 0`. `effNotionalPair ρ d₁ d₂ = √(d₁² + d₂² + 2ρ·d₁·d₂)` is the Basel CRE52.57
-  interest-rate effective notional of a hedging set with two maturity buckets populated
-  (`ρ = 0.7` adjacent, `0.3` first and third), and it never exceeds `|d₁| + |d₂|` for
-  `ρ ∈ [-1, 1]` (`effNotionalPair_le_abs_add`). The three-bucket formula, the bucket notionals
-  themselves and the single-factor add-on of the other asset classes are not formalized.
+  `RiskMeasures/SACCRExposure.lean`). `EAD = α·(RC + PFE)` is nondecreasing in `RC` and in `PFE`
+  for `α ≥ 0`, with `RC` and `PFE` free real numbers. `effNotionalIR D₁ D₂ D₃ =
+  √(D₁² + D₂² + D₃² + 1.4·D₁·D₂ + 1.4·D₂·D₃ + 0.6·D₁·D₃)` is the Basel CRE52.57 interest-rate
+  effective notional of a hedging set's three maturity buckets, and it never exceeds
+  `|D₁| + |D₂| + |D₃|` (`effNotionalIR_le_abs_add`). With one bucket empty it is the two-bucket
+  form `effNotionalPair` at `ρ = 0.7` or `0.3` (`effNotionalIR_third_zero`,
+  `effNotionalIR_second_zero`). The bucket notionals themselves, the add-on and the PFE
+  multiplier are not formalized.
 
 Library modules added without corpus entries, each stating its own scope:
 `Foundations/BivariateNormalCDF` (the standard `N₂`, its law, margins, covariance, symmetries

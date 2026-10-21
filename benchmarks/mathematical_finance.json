@@ -5540,7 +5540,7 @@
     {
       "id": "mf-saccr-ead-mono",
       "name": "SA-CCR Exposure at Default Is Jointly Monotone",
-      "description": "Basel SA-CCR's EAD = alpha * (RC + PFE) is monotone increasing in the replacement cost RC and the PFE add-on, for any fixed alpha >= 0 -- raising either component never lowers the capital exposure.",
+      "description": "Basel SA-CCR's EAD = alpha * (RC + PFE) is jointly nondecreasing in the replacement cost RC and the PFE add-on, for any fixed alpha >= 0 -- raising either component never lowers the capital exposure.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.SACCRExposure\n\nopen MathFin\n\ntheorem saccrEAD_mono_thm {α : ℝ} (hα : 0 ≤ α) {RC₁ RC₂ PFE₁ PFE₂ : ℝ}\n    (hRC : RC₁ ≤ RC₂) (hPFE : PFE₁ ≤ PFE₂) :\n    MathFin.saccrEAD α RC₁ PFE₁ ≤ MathFin.saccrEAD α RC₂ PFE₂ :=\n  MathFin.saccrEAD_mono hα hRC hPFE\n"
@@ -5550,23 +5550,23 @@
         "reference": "Basel Committee on Banking Supervision, The standardised approach for measuring counterparty credit risk exposures (BCBS 279), 2014",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the arithmetic combination EAD = alpha * (RC + PFE) via gcongr. The formula is almost entirely regulatory bookkeeping -- RC and PFE are themselves built from supervisory add-on factors with no mathematical content beyond this arithmetic combination; the regulatory constant alpha = 1.4 is kept as a free parameter since only alpha >= 0 is used. No claim beyond monotonicity is formalized."
+        "formalization_scope": "Full formal proof, via gcongr, that EAD = alpha * (RC + PFE) is jointly nondecreasing in (RC, PFE) for alpha >= 0. RC and PFE enter as free real numbers; their construction (replacement cost, PFE multiplier, asset-class add-ons) is not formalized; the regulatory constant alpha = 1.4 is kept as a free parameter since only alpha >= 0 is used. No claim beyond monotonicity is formalized."
       }
     },
     {
       "id": "mf-saccr-effnotional-diversification-bound",
       "name": "SA-CCR Interest-Rate Effective Notional Has No Negative Diversification",
-      "description": "The SA-CCR interest-rate effective notional of a hedging set with two populated maturity buckets, sqrt(d1^2 + d2^2 + 2*rho*d1*d2) for signed bucket effective notionals d1, d2 (Basel Framework CRE52.57 uses rho = 0.7 for adjacent buckets and rho = 0.3 for the first and third), never exceeds |d1| + |d2| for any correlation rho in [-1, 1]. The three-bucket formula is not stated.",
+      "description": "The SA-CCR interest-rate effective notional of a hedging set, sqrt(D1^2 + D2^2 + D3^2 + 1.4*D1*D2 + 1.4*D2*D3 + 0.6*D1*D3) for the signed effective notionals D1, D2, D3 of its three maturity buckets (Basel Framework CRE52.57), never exceeds |D1| + |D2| + |D3|: recognising offset across buckets never gives more than adding the absolute bucket notionals.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.SACCRExposure\n\nopen MathFin\n\ntheorem effNotionalPair_le_abs_add_thm {ρ : ℝ} (hρ1 : -1 ≤ ρ) (hρ2 : ρ ≤ 1) (d₁ d₂ : ℝ) :\n    MathFin.effNotionalPair ρ d₁ d₂ ≤ |d₁| + |d₂| :=\n  MathFin.effNotionalPair_le_abs_add hρ1 hρ2 d₁ d₂\n"
+        "lean": "import MathFin.RiskMeasures.SACCRExposure\n\nopen MathFin\n\ntheorem effNotionalIR_le_abs_add_thm (D₁ D₂ D₃ : ℝ) :\n    MathFin.effNotionalIR D₁ D₂ D₃ ≤ |D₁| + |D₂| + |D₃| :=\n  MathFin.effNotionalIR_le_abs_add D₁ D₂ D₃\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Basel Committee on Banking Supervision, The standardised approach for measuring counterparty credit risk exposures (BCBS 279), 2014; Basel Framework CRE52.57 (interest-rate effective notional)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof, for every rho in [-1, 1] (which contains Basel's 0.7 and 0.3), of effNotionalPair rho d1 d2 <= |d1| + |d2|, where effNotionalPair rho d1 d2 = sqrt(d1^2 + d2^2 + 2*rho*d1*d2) is the CRE52.57 interest-rate effective notional when two of the three maturity buckets are populated. Proof by sqrt monotonicity and the cross-term bound rho*d1*d2 <= |d1|*|d2|. LIMITS: the three-bucket formula, the bucket effective notionals themselves (supervisory duration, delta, maturity factor) and the single-factor add-on aggregation of the credit, equity and commodity classes are not formalized."
+        "formalization_scope": "Full formal proof of effNotionalIR D1 D2 D3 <= |D1| + |D2| + |D3|, where effNotionalIR is the CRE52.57 three-bucket formula with Basel's coefficients 1.4, 1.4 and 0.6 (written 7/5 and 3/5). Proof by sqrt monotonicity and the cross-term bounds Di*Dj <= |Di|*|Dj|. In the module, effNotionalIR_third_zero and effNotionalIR_second_zero reduce it to the two-bucket form effNotionalPair at rho = 0.7 and 0.3. LIMITS: the bucket effective notionals themselves (supervisory duration, delta, maturity factor), the add-on and PFE multiplier, and the single-factor aggregation of the credit, equity and commodity classes are not formalized."
       }
     }
   ]

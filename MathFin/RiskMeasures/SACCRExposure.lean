@@ -31,12 +31,13 @@ interest-rate hedging set. SA-CCR splits the trades of one currency into three m
   `EffectiveNotional = √(D₁² + D₂² + D₃² + 1.4·D₁·D₂ + 1.4·D₂·D₃ + 0.6·D₁·D₃)`,
 
 that is, with correlation `0.7` between adjacent buckets and `0.3` between the first and the third
-(Basel Framework CRE52.57). When two buckets are populated (the third notional `0`), expanding
-this by hand gives
+(Basel Framework CRE52.57). This is `effNotionalIR`, and it never exceeds `|D₁| + |D₂| + |D₃|`
+(`effNotionalIR_le_abs_add`). With one bucket empty it is
 
-  `effNotionalPair ρ d₁ d₂ = √(d₁² + d₂² + 2ρ·d₁·d₂)`,
+  `effNotionalPair ρ d₁ d₂ = √(d₁² + d₂² + 2ρ·d₁·d₂)`
 
-at `ρ = 0.7` (adjacent buckets) or `ρ = 0.3` (the first and third). It is the same quadratic form
+at `ρ = 0.7` (third bucket empty, `effNotionalIR_third_zero`) or `ρ = 0.3` (middle bucket empty,
+`effNotionalIR_second_zero`). The two-bucket form is the same quadratic form
 as the standard deviation of a sum of two correlated risks. It is not the single-factor
 aggregation that SA-CCR uses for the credit, equity and commodity classes,
 `√((Σₖ ρₖ·Aₖ)² + Σₖ (1 − ρₖ²)·Aₖ²)` over entity-level add-ons `Aₖ`, whose two-entity cross term
@@ -46,14 +47,13 @@ exceeds `|d₁| + |d₂|` for `ρ ∈ [-1, 1]` (no *negative* diversification: r
 buckets never gives more than adding the absolute bucket notionals), and that for `ρ ≥ 0` and both
 notionals nonnegative, growing `d₁` never shrinks the aggregate (`effNotionalPair_mono_left`; the
 formula is symmetric in `d₁, d₂`, so the same holds for `d₂` by relabelling; that version is not
-stated). The three-bucket formula itself is not defined here, so its reduction to
-`effNotionalPair` above is a hand computation, not a Lean theorem.
+stated).
 
 ## Main definitions
 
 * `saccrEAD`: `α · (RC + PFE)`.
-* `effNotionalPair`: the two-bucket aggregation `√(d₁² + d₂² + 2ρ·d₁·d₂)`, Basel's interest-rate
-  effective notional at `ρ = 0.7` or `ρ = 0.3` when one bucket is empty.
+* `effNotionalIR`: the CRE52.57 interest-rate effective notional of three maturity buckets.
+* `effNotionalPair`: the two-bucket aggregation `√(d₁² + d₂² + 2ρ·d₁·d₂)` at a general `ρ`.
 
 ## Main results
 
@@ -66,6 +66,10 @@ stated). The three-bucket formula itself is not defined here, so its reduction t
   negative diversification).
 * `effNotionalPair_mono_left`: for `ρ ≥ 0` and `d₂ ≥ 0`, the aggregation is monotone in `d₁` on
   `[0, ∞)`.
+* `effNotionalIR_le_abs_add`: the three-bucket effective notional never exceeds
+  `|D₁| + |D₂| + |D₃|`.
+* `effNotionalIR_third_zero`, `effNotionalIR_second_zero`: with one bucket empty it is
+  `effNotionalPair` at `0.7` or `0.3`.
 
 ## References
 
@@ -123,14 +127,15 @@ theorem saccrEAD_mono {α : ℝ} (hα : 0 ≤ α) {RC₁ RC₂ PFE₁ PFE₂ : �
 
 SA-CCR aggregates the signed maturity-bucket effective notionals of an interest-rate hedging set
 with correlation `0.7` between adjacent buckets and `0.3` between the first and the third
-(CRE52.57; see the module docstring). `effNotionalPair` below is the two-bucket quadratic form
-for a general correlation `ρ`; at `ρ = 0.7` or `ρ = 0.3` it is that aggregation with one bucket
-empty, by hand expansion of CRE52.57 (the three-bucket formula is not defined here). -/
+(CRE52.57, `effNotionalIR` at the end of this section). `effNotionalPair` below is the
+two-bucket quadratic form for a general correlation `ρ`; at `ρ = 0.7` or `ρ = 0.3` it is that
+aggregation with one bucket empty (`effNotionalIR_third_zero`, `effNotionalIR_second_zero`). -/
 
 /-- The two-bucket aggregation `√(d₁² + d₂² + 2ρ·d₁·d₂)` of signed bucket effective notionals
 `d₁, d₂` at correlation `ρ`. At `ρ = 0.7` (adjacent buckets) or `ρ = 0.3` (the first and third)
-it is the interest-rate effective notional of Basel Framework CRE52.57 for a hedging set with the
-remaining bucket empty; that identification is a hand expansion, not a Lean statement. -/
+it is the interest-rate effective notional `effNotionalIR` of Basel Framework CRE52.57 for a
+hedging set with the remaining bucket empty (`effNotionalIR_third_zero`,
+`effNotionalIR_second_zero`). -/
 noncomputable def effNotionalPair (ρ d₁ d₂ : ℝ) : ℝ := √(d₁ ^ 2 + d₂ ^ 2 + 2 * ρ * d₁ * d₂)
 
 theorem effNotionalPair_nonneg (ρ d₁ d₂ : ℝ) : 0 ≤ effNotionalPair ρ d₁ d₂ :=
@@ -178,5 +183,40 @@ theorem effNotionalPair_mono_left {ρ : ℝ} (hρ : 0 ≤ ρ) {d₂ : ℝ} (hd�
   unfold effNotionalPair
   apply Real.sqrt_le_sqrt
   nlinarith [mul_nonneg (mul_nonneg hρ hd₂) (sub_nonneg.mpr h), mul_le_mul h h hd₁ (hd₁.trans h)]
+
+/-- **The SA-CCR interest-rate effective notional** of a hedging set (Basel Framework CRE52.57):
+`√(D₁² + D₂² + D₃² + 1.4·D₁·D₂ + 1.4·D₂·D₃ + 0.6·D₁·D₃)` for the signed effective notionals
+`D₁, D₂, D₃` of its three maturity buckets (under one year, one to five years, over five years).
+The bucket notionals themselves (supervisory duration, delta, maturity factor) are inputs. -/
+noncomputable def effNotionalIR (D₁ D₂ D₃ : ℝ) : ℝ :=
+  √(D₁ ^ 2 + D₂ ^ 2 + D₃ ^ 2 + 7 / 5 * D₁ * D₂ + 7 / 5 * D₂ * D₃ + 3 / 5 * D₁ * D₃)
+
+/-- **No negative diversification across the three buckets**: the SA-CCR interest-rate effective
+notional never exceeds the sum of the absolute bucket notionals. -/
+theorem effNotionalIR_le_abs_add (D₁ D₂ D₃ : ℝ) :
+    effNotionalIR D₁ D₂ D₃ ≤ |D₁| + |D₂| + |D₃| := by
+  unfold effNotionalIR
+  rw [Real.sqrt_le_left (by positivity)]
+  have h12 : D₁ * D₂ ≤ |D₁| * |D₂| := (abs_mul D₁ D₂) ▸ le_abs_self (D₁ * D₂)
+  have h23 : D₂ * D₃ ≤ |D₂| * |D₃| := (abs_mul D₂ D₃) ▸ le_abs_self (D₂ * D₃)
+  have h13 : D₁ * D₃ ≤ |D₁| * |D₃| := (abs_mul D₁ D₃) ▸ le_abs_self (D₁ * D₃)
+  nlinarith [sq_abs D₁, sq_abs D₂, sq_abs D₃, mul_nonneg (abs_nonneg D₁) (abs_nonneg D₂),
+    mul_nonneg (abs_nonneg D₂) (abs_nonneg D₃), mul_nonneg (abs_nonneg D₁) (abs_nonneg D₃)]
+
+/-- With the third bucket empty, the SA-CCR effective notional is `effNotionalPair` at the
+adjacent-bucket correlation `0.7`. -/
+theorem effNotionalIR_third_zero (D₁ D₂ : ℝ) :
+    effNotionalIR D₁ D₂ 0 = effNotionalPair (7 / 10) D₁ D₂ := by
+  unfold effNotionalIR effNotionalPair
+  congr 1
+  ring
+
+/-- With the middle bucket empty, the SA-CCR effective notional is `effNotionalPair` at the
+first-to-third-bucket correlation `0.3`. -/
+theorem effNotionalIR_second_zero (D₁ D₃ : ℝ) :
+    effNotionalIR D₁ 0 D₃ = effNotionalPair (3 / 10) D₁ D₃ := by
+  unfold effNotionalIR effNotionalPair
+  congr 1
+  ring
 
 end MathFin
