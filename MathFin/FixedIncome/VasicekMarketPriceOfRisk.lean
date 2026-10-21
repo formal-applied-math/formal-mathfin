@@ -6,7 +6,7 @@ Authors: Yang Ye
 module
 
 public import Mathlib
-public import MathFin.Foundations.GaussianGirsanov
+public import MathFin.Bridges.GaussianGirsanov
 public import MathFin.FixedIncome.VasicekBondPrice
 public import MathFin.FixedIncome.VasicekSDEGaussian
 

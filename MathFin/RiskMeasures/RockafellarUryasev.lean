@@ -8,7 +8,7 @@ module
 public import Mathlib
 public import MathFin.RiskMeasures.Gaussian
 public import MathFin.Foundations.StandardNormal
-public import MathFin.BlackScholes.Bachelier
+public import MathFin.Foundations.GaussianPartialMoments
 
 /-!
 # The Rockafellar–Uryasev variational characterization of Gaussian CVaR
@@ -37,18 +37,12 @@ and integrating against the Gaussian density turns the right side into
 off the tail event — which is **why** the R-U minimum is attained at VaR: the
 `α`-tail event itself certifies optimality.
 
-The expected-shortfall integral is computed from two standard-normal
-primitives: the truncated first moment `∫_{Ioi a} x·ϕ(x) dx = ϕ(a)`
-(`Bachelier.lean`; a standard-normal fact that could hoist to
-`Foundations/StandardNormal` in a future de-inversion pass) and the Gaussian
-tail mass `∫_{Ioi a} ϕ(x) dx = 1 − Φ(a)` (derived below from
-`gaussianReal_Ioi_toReal`).
+The expected-shortfall integral is the standard-normal stop-loss transform
+`E[(Z − z)⁺] = ϕ(z) − z(1 − Φ(z))` (`integral_max_sub_mul_gaussianPDFReal`), built in
+`Foundations/GaussianPartialMoments` from the truncated first moment and the tail mass.
 
 ## Results
 
-* `integral_gaussianPDFReal_Ioi`: tail mass `∫_{Ioi a} ϕ = 1 − Φ(a)`.
-* `integral_max_sub_mul_gaussianPDFReal`: standard-normal expected shortfall
-  `E[(Z − z)⁺] = ϕ(z) − z(1 − Φ(z))`.
 * `integral_shortfall_gaussian`: affine-loss expected shortfall closed form.
 * `ruObjective_at_gaussianVaR`: `g(VaR_α) = CVaR_α` (the minimum value).
 * `gaussianCVaR_le_ruObjective`: `g(c) ≥ CVaR_α` for every `c` (minimality).
@@ -69,16 +63,6 @@ open MeasureTheory ProbabilityTheory Real
 standard-normal density. -/
 noncomputable def ruObjective (μ σ α c : ℝ) : ℝ :=
   c + (∫ x, max (μ + σ * x - c) 0 * gaussianPDFReal 0 1 x) / (1 - α)
-
-/-- **Gaussian tail mass in pdf form**: `∫_{Ioi a} ϕ(x) dx = 1 − Φ(a)`. -/
-lemma integral_gaussianPDFReal_Ioi (a : ℝ) :
-    ∫ x in Set.Ioi a, gaussianPDFReal 0 1 x = 1 - Phi a := by
-  have h_meas : (gaussianReal (0 : ℝ) 1 (Set.Ioi a)).toReal
-      = ∫ x in Set.Ioi a, gaussianPDFReal 0 1 x := by
-    rw [gaussianReal_apply_eq_integral _ one_ne_zero]
-    exact ENNReal.toReal_ofReal <| setIntegral_nonneg measurableSet_Ioi
-      (fun _ _ ↦ gaussianPDFReal_nonneg _ _ _)
-  rw [← h_meas, gaussianReal_Ioi_toReal, Phi_neg]
 
 /-- Integrability of the shortfall integrand `x ↦ max(μ + σx − c, 0)·ϕ(x)`:
 dominated by `(|μ − c| + |σ|·|x|)·ϕ(x)`, whose pieces are the Gaussian mass and
@@ -113,35 +97,6 @@ lemma integrable_shortfall (μ σ c : ℝ) :
         ring
     _ = |μ - c| * gaussianPDFReal 0 1 x + |σ| * |x * gaussianPDFReal 0 1 x| := by
         rw [abs_mul, abs_of_nonneg h_pdf_nn]
-
-/-- **Standard-normal expected shortfall**: `E[(Z − z)⁺] = ϕ(z) − z·(1 − Φ(z))`.
-The positive part localizes the integral to the tail `Ioi z`, where it splits
-into the truncated first moment (`= ϕ(z)`) minus `z` times the tail mass. -/
-lemma integral_max_sub_mul_gaussianPDFReal (z : ℝ) :
-    ∫ x, max (x - z) 0 * gaussianPDFReal 0 1 x
-      = gaussianPDFReal 0 1 z - z * (1 - Phi z) := by
-  have h_eq : (fun x ↦ max (x - z) 0 * gaussianPDFReal 0 1 x)
-      = Set.indicator (Set.Ioi z) (fun x ↦ (x - z) * gaussianPDFReal 0 1 x) := by
-    funext x
-    by_cases hx : x ∈ Set.Ioi z
-    · rw [Set.indicator_of_mem hx, max_eq_left (sub_nonneg.2 (Set.mem_Ioi.1 hx).le)]
-    · have hxz : x ≤ z := not_lt.1 (fun h ↦ hx (Set.mem_Ioi.2 h))
-      rw [Set.indicator_of_notMem hx, max_eq_right (sub_nonpos.2 hxz), zero_mul]
-  rw [h_eq, integral_indicator measurableSet_Ioi]
-  have h_int_x : IntegrableOn (fun x ↦ x * gaussianPDFReal 0 1 x) (Set.Ioi z) volume :=
-    integrable_id_mul_gaussianPDFReal_volume.integrableOn
-  have h_int_pdf : IntegrableOn (fun x ↦ z * gaussianPDFReal 0 1 x) (Set.Ioi z) volume :=
-    ((integrable_gaussianPDFReal 0 1).const_mul z).integrableOn
-  calc ∫ x in Set.Ioi z, (x - z) * gaussianPDFReal 0 1 x
-      = ∫ x in Set.Ioi z,
-          (x * gaussianPDFReal 0 1 x - z * gaussianPDFReal 0 1 x) := by
-        congr 1; funext x; ring
-    _ = (∫ x in Set.Ioi z, x * gaussianPDFReal 0 1 x)
-          - ∫ x in Set.Ioi z, z * gaussianPDFReal 0 1 x :=
-        integral_sub h_int_x h_int_pdf
-    _ = gaussianPDFReal 0 1 z - z * (1 - Phi z) := by
-        rw [integral_id_mul_gaussianPDFReal_Ioi, integral_const_mul,
-          integral_gaussianPDFReal_Ioi]
 
 /-- **Affine-loss expected shortfall closed form**: for `L = μ + σ·Z` with
 `σ > 0` and `z_c = (c − μ)/σ`,

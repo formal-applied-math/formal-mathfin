@@ -8,7 +8,7 @@ module
 public import Mathlib
 public import MathFin.Foundations.StatePrices
 public import MathFin.Foundations.FTAPTwoState
-public import MathFin.Foundations.ConvexPricingFunctional
+public import MathFin.Bridges.ConvexPricingFunctional
 
 /-!
 # Pricing kernel from state prices + FTAP (phase 53)
@@ -188,7 +188,7 @@ The FTAP two-state state prices are non-negative
 the finite-state call-price functional `K ↦ Σᵢ qᵢ · max(Sᵢ − K, 0)` is
 convex in the strike and the butterfly combination
 `C(K₁) − 2·C((K₁+K₃)/2) + C(K₃)` is non-negative
-(`Foundations/ConvexPricingFunctional.callPrice_finiteState_butterfly_nonneg`).
+(`Bridges/ConvexPricingFunctional.callPrice_finiteState_butterfly_nonneg`).
 
 This is the canonical static no-arbitrage constraint on observed option
 prices — butterfly spreads cannot have negative cost — derived here from the

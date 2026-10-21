@@ -46,7 +46,7 @@ here is the algebraic core.
 ## The bridge to the continuous-time foundations (status, 2026-05-28)
 
 The closing of the `Foundations/` → pricing-modules bridge gap (F1 in
-`docs/portfolio-review-2026-05-28.md`) for this file requires Itô's
+`docs/archive/portfolio-review-2026-05-28.md`) for this file requires Itô's
 lemma for general `C²(ℝ², ℝ)` functions `(s, t) ↦ V(s, t)` applied to
 GBM `S_t`. We now have:
 
@@ -147,7 +147,7 @@ This closes the loop to `Foundations/ItoLemma2D.lean`: the bespoke
 risk-neutral GBM generator `(μ_X, σ_X) = (r S, σ S)`. The BS PDE is then
 the general Itô-drift machinery applied to one diffusion, not a
 pricing-specific algebra — a structural consumer of the foundations
-2D-Itô layer (cf. F1 in `docs/portfolio-review-2026-05-28.md`). -/
+2D-Itô layer (cf. F1 in `docs/archive/portfolio-review-2026-05-28.md`). -/
 
 /-- **The BS Itô drift is the 2D Itô drift under risk-neutral GBM.**
 `bsItoDrift r σ S V_S V_SS V_t = itoDrift2D V_t V_S V_SS (r·S) (σ·S)`. The

@@ -17,8 +17,8 @@ import MathFin.Foundations.ItoFormulaCLM
 import MathFin.Foundations.ItoFormulaTD
 import MathFin.Foundations.ItoLemma2D
 import MathFin.Foundations.FeynmanKacHeatEquation
-import MathFin.Foundations.GaussianGirsanov
-import MathFin.Foundations.BSCallHypFromBrownian
+import MathFin.Bridges.GaussianGirsanov
+import MathFin.Bridges.BSCallHypFromBrownian
 import MathFin.Foundations.ContinuousFTAP
 import MathFin.Foundations.MarketCompleteness
 import MathFin.Foundations.CarrMadan

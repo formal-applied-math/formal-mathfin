@@ -7,7 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.BlackScholes.ExchangeOption
-public import MathFin.Foundations.GaussianGirsanov
+public import MathFin.Bridges.GaussianGirsanov
 
 /-!
 # Grounding the Margrabe `BSCallHyp` from a joint two-GBM model

@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
-public import MathFin.Foundations.BSCallHypFromBrownian
+public import MathFin.Bridges.BSCallHypFromBrownian
 public import MathFin.BlackScholes.Put
 public import MathFin.BlackScholes.Forward
 public import MathFin.BlackScholes.Digital

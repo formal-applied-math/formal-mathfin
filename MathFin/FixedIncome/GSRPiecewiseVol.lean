@@ -20,7 +20,7 @@ time** rather than a single scalar — the feature actually exercised in cap/swa
 calibration, where a term structure of volatility is bootstrapped bucket by bucket.
 Mean reversion is kept constant here, matching common GSR calibration practice
 (reversion is held fixed while volatility is bucketed); `θ` is likewise constant
-(the time-varying-drift generalization is `Foundations/HullWhiteCalibration.lean`'s
+(the time-varying-drift generalization is `FixedIncome/HullWhiteCalibration.lean`'s
 separate contribution and composes with this one in principle, but is not combined
 here).
 

@@ -54,7 +54,7 @@ negative and strictly positive in at least one state.
 
 *Not formalized here*: Nagy 7.2 (no arbitrage and `z ≠ 0` ⟹ opposite
 strict signs) and the packaged two-state iff. The backward *construction*
-is the load-bearing half: `Foundations/PricingKernel` builds the
+is the load-bearing half: `Bridges/PricingKernel` builds the
 discounted state prices directly from the named weights.
 -/
 
@@ -105,7 +105,7 @@ theorem noArbitrage_of_emm (z_up z_down : ℝ)
 /-- **The canonical backward-FTAP up-state weight** (Nagy 2026, Theorem 7.3):
 `q_up = −z_down / (z_up − z_down)`. Named — rather than left as an
 existential witness inside `emm_of_signs` — so downstream constructions
-(the discounted state prices of `Foundations/PricingKernel`) can consume
+(the discounted state prices of `Bridges/PricingKernel`) can consume
 the weights themselves, making their FTAP lineage definitional. -/
 noncomputable def emmWeightUp (z_up z_down : ℝ) : ℝ :=
   -z_down / (z_up - z_down)

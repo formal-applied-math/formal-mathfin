@@ -82,7 +82,7 @@ import MathFin.Foundations.GaussianCDFDeriv
 -- The Esscher transform of a law on ℝ (Mathlib's `Measure.tilted`): tilted moments, a law with
 -- every exponential moment is fixed by its MGF, and the Gaussian tilt N(m, v) ↦ N(m + θv, v)
 import MathFin.Foundations.Esscher
-import MathFin.Foundations.GaussianGirsanov
+import MathFin.Bridges.GaussianGirsanov
 import MathFin.Foundations.FeynmanKacHeatEquation
 import MathFin.Foundations.BrownianMartingale
 -- Continuous-time first FTAP: discounted GBM price is a Q-martingale (Wald exponential)
@@ -142,15 +142,15 @@ import MathFin.Foundations.AlmgrenChriss
 import MathFin.Foundations.DerivOfDeriv
 import MathFin.Foundations.MarketMakingRiccati
 import MathFin.Foundations.MatrixMarketMakingRiccati
-import MathFin.Foundations.ConvexPricingFunctional
+import MathFin.Bridges.ConvexPricingFunctional
 import MathFin.Foundations.ConvexSeparation
 -- Phase 1 (convex-duality unification): cone-separation root generalizing
 -- ConvexSeparation from a subspace (two-sided `= 0`) to a closed convex cone (`≤ 0`)
 import MathFin.Foundations.ConvexDuality
 -- Phase 30 (Bridge A): BSCallHyp / BachelierHyp from IsPreBrownian
-import MathFin.Foundations.BSCallHypFromBrownian
+import MathFin.Bridges.BSCallHypFromBrownian
 -- Phase 31: Pricing entry points from IsPreBrownian (composite corollaries)
-import MathFin.Foundations.PricingFromBrownian
+import MathFin.Bridges.PricingFromBrownian
 -- Phase 32: Variance-swap log-price squared-increment from BrownianQuadraticVariation
 import MathFin.Foundations.VarianceSwapFromQV
 -- Phase 33: Variance-swap equipartition sum from BrownianQuadraticVariation
@@ -278,8 +278,8 @@ import MathFin.Foundations.ItoFormulaAdaptedDriftConstructed
 -- Cross-horizon consistency of the CLM Itô integral: one pinned `M` (`hMeq`) represents
 -- the CLM integral at every horizon `τ ≤ T` (band-transfer kernel + freeze law)
 import MathFin.Foundations.ItoIntegralCrossHorizon
-import MathFin.Foundations.HullWhiteCalibration
-import MathFin.Foundations.MonteCarloPricer
+import MathFin.FixedIncome.HullWhiteCalibration
+import MathFin.BlackScholes.MonteCarloPricer
 -- Martingale representation, step 3: the Doléans exponential of a deterministic step
 -- integrand is an Itô integral (time locality of `∫·dB` + unbounded `𝓕_a`-scaling)
 import MathFin.Foundations.DoleansStepRepresentation
@@ -316,9 +316,9 @@ import MathFin.Foundations.ItoLemma
 -- Time-dependent (2D) Itô formula + GBM-as-SDE-solution (genuine exp partials)
 import MathFin.Foundations.ItoLemma2D
 -- Phase 45: Variance swap log-payoff and QV-limit form equivalence
-import MathFin.Foundations.VarianceSwapEquivalence
+import MathFin.BlackScholes.VarianceSwapEquivalence
 -- Phase 53: Pricing kernel from two-state FTAP (state-prices composition)
-import MathFin.Foundations.PricingKernel
+import MathFin.Bridges.PricingKernel
 -- Shared change-of-measure helper: a positive normalised density gives an
 -- equivalent probability measure (consumed by the one-period FTAP files)
 import MathFin.Foundations.EquivMeasure
@@ -344,7 +344,6 @@ import MathFin.BlackScholes.StrikeGreeks
 -- Local-vol skew of a tilted smile surface via Dupire's ratio; the rule of two
 import MathFin.BlackScholes.ForwardSmile
 import MathFin.BlackScholes.PutStrikeConvexity
-import MathFin.BlackScholes.StaticBounds
 import MathFin.BlackScholes.AsianInequality
 -- Geometric-average Asian: two-date log-driver is Gaussian with the covariance-sum variance
 import MathFin.BlackScholes.AsianGeometric
@@ -446,19 +445,15 @@ import MathFin.BlackScholes.SpotConvexity
 import MathFin.BlackScholes.PriceBounds
 import MathFin.BlackScholes.CallPriceFunction
 -- Phase 13 additions:
-import MathFin.BlackScholes.Quanto
 -- Quanto correction derived from a joint-Gaussian FX model (Girsanov-grounded)
 import MathFin.BlackScholes.QuantoGrounding
 import MathFin.BlackScholes.NewtonConvergence
-import MathFin.BlackScholes.NewtonRaphsonIV
-import MathFin.BlackScholes.LognormalCOV
 
 -- Futures
 import MathFin.Futures.Black76
 import MathFin.Futures.Black76Greeks
 import MathFin.Futures.SchwartzOneFactor
 -- Phase 13 additions:
-import MathFin.Futures.Swaption
 
 -- Binomial
 import MathFin.Binomial.Model
@@ -467,7 +462,6 @@ import MathFin.Binomial.CRRConvergence
 import MathFin.Binomial.DriftLimit
 import MathFin.Binomial.Bermudan
 import MathFin.Binomial.MartingaleRepresentation
-import MathFin.Binomial.AmericanCallNoDividend
 -- Phase 13 additions:
 import MathFin.Binomial.Girsanov
 import MathFin.Binomial.SecondFTAP
@@ -536,8 +530,6 @@ import MathFin.FixedIncome.TimingAdjustment
 import MathFin.FixedIncome.Vasicek
 -- Phase 13 additions:
 import MathFin.FixedIncome.KMVMerton
-import MathFin.FixedIncome.MeanReversionHalfLife
-import MathFin.FixedIncome.CDS
 -- Phase 21: first-principles duration-as-price-sensitivity
 import MathFin.FixedIncome.DurationSensitivity
 -- Phase 22: first-principles convexity-as-second-derivative
@@ -584,7 +576,6 @@ import MathFin.Portfolio.RiskParity
 import MathFin.Portfolio.BlackLitterman
 import MathFin.Portfolio.TangentPortfolio
 -- Phase 13 additions:
-import MathFin.Portfolio.TangentPortfolioN
 -- Phase 21: first-principles Sharpe-FOC and CAPM-equilibrium derivations
 import MathFin.Portfolio.SharpeFOCDerivation
 import MathFin.Portfolio.CAPMEquilibrium
@@ -655,7 +646,7 @@ import MathFin.RiskMeasures.SACCRExposure
 -- at most its super-replication cost (the pricing-side companion of the coherent-risk representation)
 import MathFin.Foundations.SuperhedgingDuality
 -- LSV calibration: the leverage-posterior core (L²·E[v | S = K] = σ_loc²)
-import MathFin.Foundations.LSVLeverage
+import MathFin.BlackScholes.LSVLeverage
 -- Estimation: Gaussian variance-ratio KL, realised-variance noise bias, square-root bias
 import MathFin.Foundations.Estimation
 
@@ -667,7 +658,6 @@ import MathFin.Bridges.SurvivalUnification
 import MathFin.Actuarial.Insurance
 import MathFin.Actuarial.Mortality
 -- Phase 13 additions:
-import MathFin.Actuarial.CompoundPoisson
 -- Compound-Poisson aggregate-loss MGF: iid-sum MGF composed with the Poisson pgf
 import MathFin.Actuarial.CompoundPoissonMGF
 -- Survival model (re-formalized from Yosuke Ito's AFP `Survival_Model`, BSD, cited)
