@@ -13,14 +13,16 @@ public import MathFin.Portfolio.MarkowitzNAsset
 
 Sharpe's single-index model writes each asset's return as `Rᵢ = βᵢ·R_M + εᵢ`, with idiosyncratic
 shocks `εᵢ` uncorrelated across assets and with the market. The implied covariance kernel is
-`Σ = ββ'σ_M² + D_ε` (`D_ε` diagonal). We work directly with this kernel and
+`Σ = ββ'σ_M² + D_ε` (`D_ε` diagonal). No return variables appear here, so the passage from the
+return model to this kernel is not formalized: we work directly with the kernel and
 `Portfolio/MarkowitzNAsset.lean`'s sum-form portfolio variance:
 
   `Var(Rp) = (w'β)² σ_M² + w'D_εw`,
 
-in which, for a bounded idiosyncratic variance and the equal-weight portfolio, the idiosyncratic
-term tends to `0` as `n → ∞` — i.e. idiosyncratic risk diversifies away, leaving only systematic
-risk `(β_p σ_M)²`.
+in which, for nonnegative, uniformly bounded idiosyncratic variances and the equal-weight
+portfolio, the idiosyncratic term tends to `0` as `n → ∞`: idiosyncratic risk diversifies away.
+The limit is stated for the idiosyncratic term alone; that `Var(Rp)` minus the systematic term
+`(β_p σ_M)²` tends to `0` follows with `portfolioVarN_singleIndex_eq` but is not stated.
 
 ## Main definitions and results
 
@@ -28,8 +30,8 @@ risk `(β_p σ_M)²`.
 * `portfolioVarN_singleIndex_eq`: `Var(Rp) = (∑ wᵢβᵢ)² σ_M² + ∑ wᵢ² D_ε(i)`.
 * `idiosyncraticTerm_equalWeight_le`: for equal weights `1/n` and idiosyncratic variances
   bounded by `M`, the idiosyncratic term is at most `M / n`.
-* `tendsto_idiosyncraticTerm_equalWeight_zero`: hence it tends to `0` as `n → ∞`
-  (idiosyncratic risk diversifies away under equal weighting).
+* `tendsto_idiosyncraticTerm_equalWeight_zero`: hence, for nonnegative variances bounded by `M`,
+  it tends to `0` as `n → ∞` (idiosyncratic risk diversifies away under equal weighting).
 -/
 
 @[expose] public section
@@ -95,7 +97,9 @@ lemma idiosyncraticTerm_equalWeight_le {n : ℕ} (M : ℝ)
 
 /-- **Diversification**: the idiosyncratic term under equal weighting on an index set of
 cardinality `n` tends to `0` as `n → ∞`, for nonnegative idiosyncratic variances uniformly bounded
-by `M` — idiosyncratic risk diversifies away, leaving only the systematic term `(β_p σ_M)²`. -/
+by `M` — idiosyncratic risk diversifies away. The statement is about the idiosyncratic term
+alone; the systematic term `(β_p σ_M)²` that remains in `portfolioVarN_singleIndex_eq` does not
+enter it. -/
 theorem tendsto_idiosyncraticTerm_equalWeight_zero
     (t : ℕ → Finset ι) (D : ℕ → ι → ℝ) (M : ℝ)
     (hM : ∀ n, ∀ i ∈ t n, D n i ≤ M) (hMnn : ∀ n, ∀ i ∈ t n, 0 ≤ D n i)

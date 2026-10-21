@@ -47,8 +47,8 @@ For an integrable loss and `α ∈ (0, 1)`, the dual representation of ES over b
   sum to less than the total's (the values are `0`, `0` and `50`).
   `valueAtRisk_finiteLaw_subadditivity_fails` states the same failure for the library's
   `valueAtRisk` at the law `∑ p, jointQ p • δ_p`.
-* `finiteVaR_counterexample_window`: for `α ∈ (0, 1]`, subadditivity fails exactly for
-  `(24/25)² < α ≤ 24/25`.
+* `finiteVaR_counterexample_window`: for the two half-bonds and `α ∈ (0, 1]`, subadditivity fails
+  exactly for `(24/25)² < α ≤ 24/25`.
 * `finiteES_one_bond`: `ES₀.₉₅ = 80` for the single bond.
 * `condTailMean_one_bond`: at the single bond the tail event `{L ≥ VaR₀.₉₅}` is the whole space,
   so the conditional tail mean is `E[L] = 4`.
@@ -363,8 +363,8 @@ theorem finiteES_one_bond : finiteES oneQ oneL (19 / 20) = 80 := by
 
 /-- **`E[L | L ≥ VaR_α]` at a finite law**: the `q`-weighted mean of `L` over the tail event
 `{i | finiteVaR q L α ≤ L i}`. For a probability vector `q` and `α ∈ (0, 1]` the tail mass is
-positive, so this is a genuine conditional mean; outside that range the tail mass can be `0` and
-the quotient returns the junk value `0`. -/
+positive (not stated as a lemma here), so this is a genuine conditional mean; outside that range
+the tail mass can be `0` and the quotient returns the junk value `0`. -/
 noncomputable def condTailMean (q L : ι → ℝ) (α : ℝ) : ℝ :=
   (∑ i with finiteVaR q L α ≤ L i, q i * L i) /
     (∑ i with finiteVaR q L α ≤ L i, q i)

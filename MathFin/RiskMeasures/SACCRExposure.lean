@@ -16,12 +16,12 @@ computes the exposure at default of a derivatives netting set as
   `EAD = α · (RC + PFE)`,
 
 where `RC` is the replacement cost, `PFE` is the potential future exposure add-on, and the
-regulator fixes `α = 1.4`. This is almost entirely a regulatory bookkeeping definition: `RC` and
-`PFE` are themselves built from supervisory add-on factors, maturity and supervisory-correlation
-parameters that have no mathematical content beyond their arithmetic combination. We record the
-formula and its one real structural fact: `EAD` is monotone increasing in each of `RC` and `PFE`
-for any fixed `α ≥ 0`, so netting or hedging that lowers either component can only lower (never
-raise) the capital exposure.
+regulator fixes `α = 1.4`. Here `RC` and `PFE` enter as free real numbers: their construction
+from supervisory factors (the replacement cost, the PFE multiplier, the asset-class add-ons) is not
+formalized, apart from the two-bucket interest-rate effective notional below. We record the
+formula and its one structural fact: `EAD` is nondecreasing in `RC` and in `PFE`, jointly, for any
+fixed `α ≥ 0`, so netting or hedging that lowers one component without raising the other can only
+lower (never raise) the capital exposure.
 
 The other SA-CCR building block with algebraic content is the **effective notional** of an
 interest-rate hedging set. SA-CCR splits the trades of one currency into three maturity buckets
@@ -31,7 +31,8 @@ interest-rate hedging set. SA-CCR splits the trades of one currency into three m
   `EffectiveNotional = √(D₁² + D₂² + D₃² + 1.4·D₁·D₂ + 1.4·D₂·D₃ + 0.6·D₁·D₃)`,
 
 that is, with correlation `0.7` between adjacent buckets and `0.3` between the first and the third
-(Basel Framework CRE52.57). When two buckets are populated this is exactly
+(Basel Framework CRE52.57). When two buckets are populated (the third notional `0`), expanding
+this by hand gives
 
   `effNotionalPair ρ d₁ d₂ = √(d₁² + d₂² + 2ρ·d₁·d₂)`,
 
@@ -44,17 +45,20 @@ with equal `ρ` is `2ρ²·A₁·A₂`. We prove that `effNotionalPair` collapse
 exceeds `|d₁| + |d₂|` for `ρ ∈ [-1, 1]` (no *negative* diversification: recognising offset across
 buckets never gives more than adding the absolute bucket notionals), and that for `ρ ≥ 0` and both
 notionals nonnegative, growing `d₁` never shrinks the aggregate (`effNotionalPair_mono_left`; the
-formula is symmetric in `d₁, d₂`, so the same holds for `d₂` by relabelling). The three-bucket
-formula itself is not stated here.
+formula is symmetric in `d₁, d₂`, so the same holds for `d₂` by relabelling; that version is not
+stated). The three-bucket formula itself is not defined here, so its reduction to
+`effNotionalPair` above is a hand computation, not a Lean theorem.
 
 ## Main definitions
 
 * `saccrEAD`: `α · (RC + PFE)`.
-* `effNotionalPair`: the two-bucket interest-rate effective notional `√(d₁² + d₂² + 2ρ·d₁·d₂)`.
+* `effNotionalPair`: the two-bucket aggregation `√(d₁² + d₂² + 2ρ·d₁·d₂)`, Basel's interest-rate
+  effective notional at `ρ = 0.7` or `ρ = 0.3` when one bucket is empty.
 
 ## Main results
 
 * `saccrEAD_mono_rc`, `saccrEAD_mono_pfe`: `EAD` is monotone in `RC` and in `PFE` for `α ≥ 0`.
+* `saccrEAD_mono`: `EAD` is jointly monotone in `(RC, PFE)` for `α ≥ 0`.
 * `effNotionalPair_nonneg`: the aggregated notional is nonnegative.
 * `effNotionalPair_eq_abs_add_of_corr_one`: at `ρ = 1`, `effNotionalPair = |d₁ + d₂|`.
 * `effNotionalPair_eq_hypot_of_corr_zero`: at `ρ = 0`, `effNotionalPair = √(d₁² + d₂²)`.
@@ -119,12 +123,14 @@ theorem saccrEAD_mono {α : ℝ} (hα : 0 ≤ α) {RC₁ RC₂ PFE₁ PFE₂ : �
 
 SA-CCR aggregates the signed maturity-bucket effective notionals of an interest-rate hedging set
 with correlation `0.7` between adjacent buckets and `0.3` between the first and the third
-(CRE52.57; see the module docstring). `effNotionalPair` below is that aggregation when two
-buckets are populated, for a general correlation `ρ`. -/
+(CRE52.57; see the module docstring). `effNotionalPair` below is the two-bucket quadratic form
+for a general correlation `ρ`; at `ρ = 0.7` or `ρ = 0.3` it is that aggregation with one bucket
+empty, by hand expansion of CRE52.57 (the three-bucket formula is not defined here). -/
 
-/-- The interest-rate effective notional of a hedging set with two populated maturity buckets of
-signed effective notionals `d₁, d₂`: `√(d₁² + d₂² + 2ρ·d₁·d₂)`, with `ρ = 0.7` for adjacent
-buckets and `ρ = 0.3` for the first and third (Basel Framework CRE52.57). -/
+/-- The two-bucket aggregation `√(d₁² + d₂² + 2ρ·d₁·d₂)` of signed bucket effective notionals
+`d₁, d₂` at correlation `ρ`. At `ρ = 0.7` (adjacent buckets) or `ρ = 0.3` (the first and third)
+it is the interest-rate effective notional of Basel Framework CRE52.57 for a hedging set with the
+remaining bucket empty; that identification is a hand expansion, not a Lean statement. -/
 noncomputable def effNotionalPair (ρ d₁ d₂ : ℝ) : ℝ := √(d₁ ^ 2 + d₂ ^ 2 + 2 * ρ * d₁ * d₂)
 
 theorem effNotionalPair_nonneg (ρ d₁ d₂ : ℝ) : 0 ≤ effNotionalPair ρ d₁ d₂ :=

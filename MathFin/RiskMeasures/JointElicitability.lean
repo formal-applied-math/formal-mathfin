@@ -51,8 +51,9 @@ quantile (`strictlyElicits_pinballLoss`), with minimum value `−ES_α`; what re
 * `fisslerZiegelScore`: the scoring family (5.5), verbatim.
 * `fisslerZiegelExpScore`: its member `G₁ = 0`, `𝒢₂ = exp`, `a = 0`.
 * `lowerExpectedShortfall`: the lower-tail expected shortfall (5.1) of the paper.
-* `strictlyJointlyElicits_fisslerZiegelExpScore`: the member strictly elicits
-  `(VaR_α, ES_α)` on laws with finite mean and unique `α`-quantile.
+* `strictlyJointlyElicits_fisslerZiegelExpScore`: for `α ∈ (0, 1)` the member strictly elicits
+  the profit-convention pair `(quantile μ α, lowerExpectedShortfall μ α)`, over all of `ℝ²`, on
+  probability laws with finite mean and unique `α`-quantile.
 * `isJointlyElicitable_valueAtRisk_lowerExpectedShortfall`: the pair is jointly elicitable.
 -/
 
@@ -117,7 +118,7 @@ noncomputable def fisslerZiegelScore (G₁ G₂ 𝒢₂ a : ℝ → ℝ) (α x�
 noncomputable def fisslerZiegelExpScore (α : ℝ) : ℝ → ℝ → ℝ → ℝ :=
   fisslerZiegelScore 0 Real.exp Real.exp 0 α
 
-/-- The exponential member through the pinball loss:
+/-- The exponential member through the pinball loss, for `α ≠ 0`:
 `S(v, e, y) = exp e · (e − y + α⁻¹ S_α(v, y)) − exp e`. -/
 lemma fisslerZiegelExpScore_eq (hα : α ≠ 0) (v e y : ℝ) :
     fisslerZiegelExpScore α v e y =
@@ -133,8 +134,10 @@ Fissler–Ziegel (2016): the mean of the worst `α`-fraction of outcomes in the 
 noncomputable def lowerExpectedShortfall (μ : Measure ℝ) (α : ℝ) : ℝ :=
   α⁻¹ * ∫ u in Ioc 0 α, quantile μ u
 
-/-- The minimum of the `v`-part of the expected score is minus the lower-tail expected shortfall:
-`E[Y] − α⁻¹ E[S_α(VaR_α, Y)] = ES_α`. -/
+/-- At the lower `α`-quantile, the `v`-part of the expected score is minus the lower-tail expected
+shortfall: `E[Y] − α⁻¹ E[S_α(VaR_α, Y)] = ES_α`, for `α ∈ (0, 1)` and a law with finite mean. That
+this value is the minimum over `v` is `strictlyElicits_pinballLoss`, stated for laws whose
+`α`-quantile is unique. -/
 lemma integral_sub_inv_mul_integral_pinballLoss {μ : Measure ℝ} [IsProbabilityMeasure μ]
     (hint : Integrable id μ) (hα : α ∈ Ioo 0 1) :
     ∫ y, y ∂μ - α⁻¹ * ∫ y, pinballLoss α (quantile μ α) y ∂μ = lowerExpectedShortfall μ α := by

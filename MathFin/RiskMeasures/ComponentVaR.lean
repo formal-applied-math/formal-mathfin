@@ -13,10 +13,12 @@ public import MathFin.Portfolio.RiskParityFOC
 /-!
 # Component and marginal Value-at-Risk (the Euler allocation)
 
-For a Gaussian portfolio loss with positions `x : ι → ℝ` and covariance kernel `σ`, the parametric
-VaR is `VaR = α · √(x'Σx)` for a quantile multiplier `α` (e.g. `α = Φ⁻¹(level)`, as in
-`RiskMeasures/Gaussian.lean`). Since `x ↦ √(x'Σx)` is positively homogeneous of degree 1, Euler's
-theorem predicts `∑ᵢ xᵢ · ∂VaR/∂xᵢ = VaR`. Here the marginal VaR is *defined* by the textbook
+For a zero-mean Gaussian portfolio loss with positions `x : ι → ℝ` and covariance kernel `σ`, the
+parametric VaR is `VaR = α · √(x'Σx)` for a quantile multiplier `α` (e.g. `α = Φ⁻¹(level)`, as in
+`RiskMeasures/Gaussian.lean`). Here `portfolioVaRN` is *defined* as that expression; no loss law
+appears in this file, so the Gaussian quantile identity behind it is not proved here. Since
+`x ↦ √(x'Σx)` is positively homogeneous of degree 1, Euler's theorem predicts
+`∑ᵢ xᵢ · ∂VaR/∂xᵢ = VaR`. Here the marginal VaR is *defined* by the textbook
 closed form `α(Σx)ᵢ/√(x'Σx)`, which is `∂VaR/∂xᵢ` for symmetric `σ`; that derivative identity is
 not proved in this file. With this definition the component VaR `xᵢ · marginalVaRᵢ` is
 `α/√(x'Σx)` times the risk contribution `xᵢ(Σx)ᵢ` of `Portfolio/RiskParityFOC.lean`, and the
@@ -27,8 +29,8 @@ Euler identity reduces to `sum_riskContribution_eq_variance`.
 * `portfolioVaRN`: the parametric VaR `α · √(x'Σx)`.
 * `marginalVaR`: defined as `α(Σx)ᵢ/√(x'Σx)`, with `(Σx)ᵢ = marginalVariance s σ x i`.
 * `componentVaR`: `CVaRᵢ = xᵢ · marginalVaRᵢ`.
-* `sum_componentVaR_eq_portfolioVaRN`: the Euler allocation `∑ᵢ CVaRᵢ = VaR` (needs `0 < x'Σx`,
-  i.e. the portfolio variance is strictly positive).
+* `sum_componentVaR_eq_portfolioVaRN`: the Euler allocation `∑ᵢ CVaRᵢ = VaR`, stated for
+  `0 < x'Σx` (strictly positive portfolio variance).
 -/
 
 @[expose] public section
