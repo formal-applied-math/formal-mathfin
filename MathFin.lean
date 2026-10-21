@@ -506,6 +506,7 @@ import MathFin.FixedIncome.FirstToDefault
 import MathFin.FixedIncome.MacaulayModified
 import MathFin.FixedIncome.HazardCurve
 import MathFin.FixedIncome.ForwardRate
+import MathFin.FixedIncome.TimingAdjustment
 import MathFin.FixedIncome.Vasicek
 -- Phase 13 additions:
 import MathFin.FixedIncome.KMVMerton

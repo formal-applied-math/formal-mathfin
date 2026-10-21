@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -60,6 +60,31 @@ lemma integrable_exp_mul_of_hasLaw {Ω : Type*} {mΩ : MeasurableSpace Ω}
   refine Integrable.comp_aemeasurable ?_ hZ.aemeasurable
   rw [hZ.map_eq]
   exact integrable_exp_mul_gaussianReal α
+
+/-- **Standard-normal MGF** via `HasLaw` transfer: `𝔼[exp(a·Z)] = exp(a²/2)` for `Z ~ N(0,1)`. -/
+lemma integral_exp_mul_stdNormal {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+    {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) P) (a : ℝ) :
+    ∫ ω, Real.exp (a * Z ω) ∂P = Real.exp (a ^ 2 / 2) := by
+  simpa [mgf] using mgf_gaussianReal hZ.map_eq a
+
+/-- The MGF of an affine form in two independent standard normals:
+`𝔼[exp(c + a Z₁ + b Z₂)] = exp(c + a²/2 + b²/2)`. -/
+lemma integral_exp_affine_indep {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+    {Z₁ Z₂ : Ω → ℝ}
+    (h₁ : HasLaw Z₁ (gaussianReal 0 1) P) (h₂ : HasLaw Z₂ (gaussianReal 0 1) P)
+    (hm₁ : Measurable Z₁) (hm₂ : Measurable Z₂) (hindep : IndepFun Z₁ Z₂ P) (c a b : ℝ) :
+    ∫ ω, Real.exp (c + a * Z₁ ω + b * Z₂ ω) ∂P = Real.exp (c + a ^ 2 / 2 + b ^ 2 / 2) := by
+  have hpt : (fun ω ↦ Real.exp (c + a * Z₁ ω + b * Z₂ ω))
+      = fun ω ↦ Real.exp c * (Real.exp (a * Z₁ ω) * Real.exp (b * Z₂ ω)) := by
+    funext ω; rw [← Real.exp_add, ← Real.exp_add, add_assoc]
+  have hind : IndepFun (fun ω ↦ Real.exp (a * Z₁ ω)) (fun ω ↦ Real.exp (b * Z₂ ω)) P :=
+    hindep.comp (by fun_prop : Measurable fun x ↦ Real.exp (a * x))
+      (by fun_prop : Measurable fun x ↦ Real.exp (b * x))
+  have hprod : ∫ ω, Real.exp (a * Z₁ ω) * Real.exp (b * Z₂ ω) ∂P
+      = Real.exp (a ^ 2 / 2) * Real.exp (b ^ 2 / 2) := by
+    rw [← integral_exp_mul_stdNormal h₁ a, ← integral_exp_mul_stdNormal h₂ b]
+    exact hind.integral_mul_eq_mul_integral (by fun_prop) (by fun_prop)
+  rw [hpt, integral_const_mul, hprod, ← Real.exp_add, ← Real.exp_add, add_assoc]
 
 namespace IsFilteredPreBrownian
 
