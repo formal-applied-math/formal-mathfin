@@ -5488,6 +5488,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof from the model's four primitives -- the prior, informed/value independence, informed traders trading on the value, and uninformed traders tossing a coin. Trade probabilities are derived rather than assumed; quotes are Bochner integrals against the conditioned measures; Bayes is applied through ENNReal.toReal with every finiteness side condition discharged. Axioms-clean. LIMITS: one-period and two-valued, with no dynamics -- no sequence of trades and no convergence of quotes to the true value. The competitive market maker's zero-expected-profit condition is NOT formalized: ask = E[V | buy] and bid = E[V | sell] are posited by the shape of the conclusion, not derived. The sell event is modelled as the complement of the buy event, so there is no no-trade outcome. The statement carries 0 < theta < 1, which the acceptance criterion as written omits."
       }
+    },
+    {
+      "id": "mf-schwartz-futures-price",
+      "name": "Schwartz One-Factor Commodity Futures Price",
+      "description": "The Schwartz (1997) one-factor commodity futures price F(0,T) = E[S_T] equals exp(m_T + v_T/2), the lognormal mean of the terminal spot, where ln S_T ~ N(m_T, v_T) solves the same mean-reverting SDE as the Vasicek short rate. Delivered via the Gaussian moment-generating function at 1 (mgf_gaussianReal), composed with the existing Vasicek terminal-law machinery.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.SchwartzOneFactor\n\nopen MeasureTheory ProbabilityTheory Real MathFin\nopen scoped NNReal\nopen WienerIntegralL2\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n  {B : ℝ≥0 → Ω → ℝ}\n\n/-- Schwartz one-factor futures price equals the expected terminal spot. -/\ntheorem schwartz_futures_price_eq_expected_spot\n    (hB : IsPreBrownianReal B μ) (x₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    ∫ ω, Real.exp (vasicekSDEMean x₀ θ κ (T : ℝ)\n        + σ * (wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω)) ∂μ\n      = schwartzFuturesPrice x₀ θ κ σ T :=\n  MathFin.schwartzFuturesPrice_eq_integral hB x₀ θ σ hκ T\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Schwartz (1997), 'The Stochastic Behavior of Commodity Prices: Implications for Valuation and Hedging,' Journal of Finance",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof for the constant-parameter Schwartz (1997) model. Hull's time-dependent level q(t) (the Hull-White-form drift calibrated to the quoted futures curve, OFOD ch. 35) is out of scope. The log spot is carried in its Wiener representation (the OU solution representation, as in mf-vasicek-sde-terminal-gaussian) -- the modelling bridge from the SDE is cited, not proven here, matching that entry's own disclosure. Lives in MathFin/Futures/SchwartzOneFactor.lean. Axioms-clean."
+      }
     }
   ]
 }

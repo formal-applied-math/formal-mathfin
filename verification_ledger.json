@@ -2628,6 +2628,13 @@
       "input_hash": "7c16d04caf3281a893ec5e3c4d6d57c6842ddf50dd6cf693f399c3d19369b566",
       "verified_at_commit": "fdfecac"
     },
+    "mf-schwartz-futures-price": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-19",
+      "elapsed_s": 3.6,
+      "input_hash": "0a4e3419813518e3e276fe9a1634f54f49121754574a85d36adce62802d411e0",
+      "verified_at_commit": "8ac3eb7"
+    },
     "mf-second-FTAP-single-period": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-02",
@@ -2840,10 +2847,10 @@
     },
     "mf-vasicek-bond-price": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-08",
-      "elapsed_s": 5.3,
-      "input_hash": "8c8ba265b85c9f1f11a766d9a2b128183e1862ce5963034838e5245ab875a802",
-      "verified_at_commit": "eb1f4f7"
+      "date": "2026-10-19",
+      "elapsed_s": 3.8,
+      "input_hash": "5d8891369520fb7f56be739066a6bbb7b0e00604e13d4231250dce4805629951",
+      "verified_at_commit": "eaee691"
     },
     "mf-vasicek-deterministic-ode": {
       "benchmark_file": "mathematical_finance.json",
@@ -2861,10 +2868,10 @@
     },
     "mf-vasicek-sde-terminal-gaussian": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-02",
-      "elapsed_s": 4.1,
-      "input_hash": "a7129aff9fe1553d9fde2003bc19fbb308113864a4f660c7d3fab2663c2e2cf3",
-      "verified_at_commit": "fdfecac"
+      "date": "2026-10-19",
+      "elapsed_s": 3.6,
+      "input_hash": "a2a3baf876b57a9d9a83c4f1128c9a2e823b47d05b418fed97c10044e887d844",
+      "verified_at_commit": "eaee691"
     },
     "mf-vega": {
       "benchmark_file": "mathematical_finance.json",

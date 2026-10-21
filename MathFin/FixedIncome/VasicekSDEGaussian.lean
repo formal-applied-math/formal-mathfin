@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -150,14 +150,10 @@ theorem vasicekShortRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ)
     exact vasicekKernel_integral_sq κ hκ.ne' T
   rw [hInt] at hW
   -- Scale by σ then shift by the mean; the affine map sends N(0, ∫kernel²) to N(mean, σ²·∫kernel²).
-  have hexp_le : Real.exp (-(2 * κ * (T : ℝ))) ≤ 1 :=
-    Real.exp_le_one_iff.mpr (by nlinarith [hκ.le, NNReal.coe_nonneg T])
-  have hden : (0 : ℝ) < 2 * κ := by linarith
-  have hkernel_nonneg : (0 : ℝ) ≤ (1 - Real.exp (-(2 * κ * (T : ℝ)))) / (2 * κ) :=
-    div_nonneg (by linarith) hden.le
-  have hvar_nonneg : (0 : ℝ) ≤ vasicekSDEVariance σ κ (T : ℝ) := by
-    unfold vasicekSDEVariance
-    exact div_nonneg (mul_nonneg (sq_nonneg σ) (by linarith)) hden.le
+  have hkernel_nonneg : (0 : ℝ) ≤ (1 - Real.exp (-(2 * κ * (T : ℝ)))) / (2 * κ) := by
+    simpa [vasicekSDEVariance] using vasicekSDEVariance_nonneg 1 hκ (NNReal.coe_nonneg T)
+  have hvar_nonneg : (0 : ℝ) ≤ vasicekSDEVariance σ κ (T : ℝ) :=
+    vasicekSDEVariance_nonneg σ hκ (NNReal.coe_nonneg T)
   have hShift := gaussianReal_const_add (gaussianReal_const_mul hW σ)
     (vasicekSDEMean r₀ θ κ (T : ℝ))
   convert hShift using 2
