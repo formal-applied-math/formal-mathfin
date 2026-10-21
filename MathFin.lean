@@ -522,8 +522,6 @@ import MathFin.FixedIncome.ConvexityImmunization
 import MathFin.FixedIncome.YieldCurve
 import MathFin.FixedIncome.Bootstrapping
 import MathFin.FixedIncome.Credit
--- Defaultable ZCB price under correlated Gaussian short rate and hazard rate
-import MathFin.FixedIncome.CorrelatedGaussianDefaultableBond
 -- First-to-default: basket intensity = Σ single-name intensities
 -- (bridges Foundations.ExpMin into the Credit vocabulary)
 import MathFin.FixedIncome.FirstToDefault
@@ -752,15 +750,10 @@ import MathFin.BlackScholes.SVI.TailCondition
 -- Calendar-spread arbitrage (Gatheral–Jacquier Lemma 2.1) and its raw-SVI form
 import MathFin.BlackScholes.CalendarArbitrage
 
--- Counterparty-risk / XVA exposure measures: component/marginal VaR (Euler decomposition),
--- single-index covariance structure and its large-N limit, Gaussian exposure-profile
--- closed forms (EPE/ENE/PFE), collateralized exposure, and discrete DVA/FVA
+-- Component VaR (the Euler decomposition of portfolio VaR) and the single-index covariance
+-- structure with its large-N limit
 import MathFin.RiskMeasures.ComponentVaR
 import MathFin.Portfolio.SingleIndexModel
-import MathFin.RiskMeasures.GaussianExposureProfile
-import MathFin.RiskMeasures.CollateralizedExposure
-import MathFin.FixedIncome.DVA
-import MathFin.FixedIncome.FVA
 
 -- Fisher/Sraffa own-rate-of-interest identity relating spot, forward, and own rates
 import MathFin.Commodities.FisherSraffaOwnRate
