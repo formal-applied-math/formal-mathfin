@@ -79,9 +79,9 @@ real-curve/nominal-curve ratio:
 That measure is the nominal T-forward measure when `Pⁿ₀T = 𝔼^{Qⁿ}[1/B_T]`, which the
 statement does not assume (see the section note). The proof is
 `MathFin.changeOfNumeraire` at `X := I_T`, `N_T ≡ 1`, `N₀ = Pⁿ₀T`, `B₀ = 1`, plus field
-algebra; no integrability hypothesis is needed. (Under
-`numeraireMeasure Qn BT (fun _ ↦ Pn0T) 1 Pn0T`, whose density is `1/B_T`, the same integral is
-the identification `hident` itself — the spot price `I₀·Pʳ(0,T)`, with no division by
+algebra; no integrability hypothesis is needed. (A remark, not stated as a lemma here: under
+`numeraireMeasure Qn BT (fun _ ↦ Pn0T) 1 Pn0T`, whose density is `1/B_T`, the same integral
+is the left side of `hident` — the spot price `I₀·Pʳ(0,T)`, with no division by
 `Pⁿ(0,T)`.) -/
 theorem forwardIndex_eq (BT : Ω → ℝ) (Pn0T Pr0T I0 : ℝ) (IT : Ω → ℝ)
     (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)
@@ -96,8 +96,8 @@ theorem forwardIndex_eq (BT : Ω → ℝ) (Pn0T Pr0T I0 : ℝ) (IT : Ω → ℝ)
 `I_T/I₀ − (1+b)^T` at `T`; `b` is quoted as the breakeven. Fairness (`hfair`: under the
 T-bond numéraire measure — the nominal T-forward measure under the section's
 normalisation — the fixed leg `I₀(1+b)^T` matches the floating leg `I_T`)
-combined with eq. (17.6) — so under the identification `hident` — gives the curve-only
-breakeven identity
+combined with eq. (17.6) — so under the identification `hident` — gives, for `I₀ > 0`, the
+curve-only breakeven identity
 
   `(1+b)^T = Pʳ(0,T) / Pⁿ(0,T)`,
 
@@ -130,7 +130,8 @@ variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
 
 /-- **The two-rate exponential moment (eq. 17.10's Gaussian core).** For independent
 standard normals `Z₁, Z₂` and Gaussian rate deviations `yⁿ = mⁿ + √Vⁿ·Z₁` and
-`yʳ = mʳ + √Vʳ·(ρ·Z₁ + √(1−ρ²)·Z₂)` (so `Cov(yⁿ, yʳ) = ρ·√(Vⁿ·Vʳ)`),
+`yʳ = mʳ + √Vʳ·(ρ·Z₁ + √(1−ρ²)·Z₂)`, with `Vⁿ, Vʳ ≥ 0` and `ρ² ≤ 1` (their covariance is
+`ρ·√(Vⁿ·Vʳ)`, an elementary fact not stated in Lean),
 
   `𝔼[exp(Bⁿ·yⁿ − Bʳ·yʳ)] = exp(Bⁿ·mⁿ − Bʳ·mʳ + ½(Bⁿ²Vⁿ + Bʳ²Vʳ − 2·Bⁿ·Bʳ·ρ·√(VⁿVʳ)))`.
 
@@ -198,8 +199,9 @@ theorem yoyRatioExp_gaussian (mn mr Vn Vr ρ Bn Br : ℝ)
   rw [hsum]
 
 /-- **Covariance form of the two-rate exponential moment.** The same conclusion with the
-correlation slot replaced by the covariance `Cov = ρ·√(Vⁿ·Vʳ)` of the two rate deviations
-(the form in which eq. 17.10 is stated in the chapter). -/
+correlation slot replaced by `Cov`, fixed by hypothesis `hCov : Cov = ρ·√(Vⁿ·Vʳ)` (the
+covariance of the two rate deviations; that identification is not a Lean statement), the
+form in which eq. 17.10 is stated in the chapter. -/
 theorem yoyRatioExp_gaussian_cov (mn mr Vn Vr ρ Bn Br Cov : ℝ)
     (hVn : 0 ≤ Vn) (hVr : 0 ≤ Vr) (hρ : ρ ^ 2 ≤ 1) (hCov : Cov = ρ * Real.sqrt (Vn * Vr))
     {Z1 Z2 : Ω → ℝ}
@@ -243,8 +245,8 @@ below) — the Gaussian expectation collapses to the naive ratio times the corre
 
   `C = exp(Bⁿ·mⁿ − Bʳ·mʳ + Bⁿ²·Vⁿ − Bʳ·Bⁿ·Cov)`,
 
-the chapter's eq. (17.10) verbatim, with `Cov = ρ·√(VⁿVʳ)` the covariance of the two
-rate deviations. The exponent's composition is pure algebra on
+the chapter's eq. (17.10) verbatim, with `Cov = ρ·√(VⁿVʳ)` (hypothesis `hCov`) the
+covariance of the two rate deviations. The exponent's composition is pure algebra on
 `yoyRatioExp_gaussian_cov`: `(Dʳ−Dⁿ) = (Bⁿ²Vⁿ − Bʳ²Vʳ)/2` cancels the *real*
 variance's half exactly and doubles the *nominal* variance's half. The means `mⁿ, mʳ`,
 variances and `Cov` are inputs: where they come from (two correlated Hull–White fits, the

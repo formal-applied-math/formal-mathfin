@@ -128,7 +128,7 @@ integrated kernel `g(u)²`. -/
 noncomputable def vasicekIntegratedKernelSqAntideriv (κ T u : ℝ) : ℝ :=
   u / κ ^ 2 - 2 * Real.exp (-(κ * (T - u))) / κ ^ 3 + Real.exp (-(2 * κ * (T - u))) / (2 * κ ^ 3)
 
-/-- `F` differentiates to `g²`: its derivative expands the square
+/-- For `κ ≠ 0`, `F` differentiates to `g²`: its derivative expands the square
 `g² = (1 − 2e^{−κ(T−u)} + e^{−2κ(T−u)})/κ²`. -/
 lemma hasDerivAt_vasicekIntegratedKernelSqAntideriv (κ T u : ℝ) (hκ : κ ≠ 0) :
     HasDerivAt (vasicekIntegratedKernelSqAntideriv κ T)
@@ -159,7 +159,7 @@ lemma hasDerivAt_vasicekIntegratedKernelSqAntideriv (κ T u : ℝ) (hκ : κ ≠
   field_simp
   ring
 
-/-- The FTC form over any interval: `∫_A^B g(u)² du = F(B) − F(A)`. -/
+/-- The FTC form over any interval, for `κ ≠ 0`: `∫_A^B g(u)² du = F(B) − F(A)`. -/
 lemma integral_vasicekIntegratedKernel_sq_eq_sub (κ T A B : ℝ) (hκ : κ ≠ 0) :
     ∫ u in A..B, (vasicekIntegratedKernel κ T u) ^ 2
       = vasicekIntegratedKernelSqAntideriv κ T B - vasicekIntegratedKernelSqAntideriv κ T A := by

@@ -56,11 +56,12 @@ derived.
 
 * `gsrSigma`, `gsrKernel` — the two-piece volatility and the σ-weighted kernel.
 * `gsrBondV` — the closed-form variance `σ₁²·V(0,T*) + σ₂²·V(T*,T)`.
-* `gsrKernel_integral_sq_eq` — the core calculus fact: the kernel's `L²` norm over
-  `(0,T]` equals `gsrBondV`.
-* `gsrIntegratedRate_hasLaw_gaussian` — the integrated short rate is Gaussian with
-  this variance.
-* `gsrBondPrice_eq` — the exponential-Gaussian zero-coupon bond price.
+* `gsrKernel_integral_sq_eq` — the core calculus fact: the kernel's squared `L²` norm
+  over `(0,T]` equals `gsrBondV` (`κ > 0`, `0 ≤ T* ≤ T`).
+* `gsrIntegratedRate_hasLaw_gaussian` — the integrated short rate, in its Wiener
+  representation, is Gaussian with this variance.
+* `gsrBondPrice_eq` — the exponential-Gaussian moment `𝔼_μ[exp(−∫₀ᵀ r_s ds)]`, the
+  zero-coupon bond price when `μ` is read as the pricing measure.
 -/
 
 @[expose] public section
@@ -140,8 +141,8 @@ noncomputable def gsrBondV (κ σ1 σ2 Tstar T : ℝ) : ℝ :=
     + σ2 ^ 2 * (vasicekIntegratedKernelSqAntideriv κ T T
       - vasicekIntegratedKernelSqAntideriv κ T Tstar)
 
-/-- **The core calculus fact**: the `(0,T]`-window `L²` norm of the GSR kernel is the
-closed-form `gsrBondV`, by splitting the window at `T*` (`gsrKernel` restricted to
+/-- **The core calculus fact**: the `(0,T]`-window squared `L²` norm of the GSR kernel is
+the closed-form `gsrBondV`, by splitting the window at `T*` (`gsrKernel` restricted to
 `(0,T*]` is exactly `σ₁ · g`, and restricted to `(T*,T]` is exactly `σ₂ · g` — no
 approximation, a genuine case split on `gsrSigma`'s own definition) and applying
 `integral_vasicekIntegratedKernel_sq_eq_sub` on each piece. -/
@@ -245,8 +246,9 @@ theorem gsrIntegratedRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ) (r₀ θ
   convert hShift using 2 <;> first | rfl | ring
 
 /-- **The GSR zero-coupon bond price**: the exponential-Gaussian moment
-`P(0,T) = exp(−M(T) + gsrBondV κ σ₁ σ₂ T* T / 2)`, the exact two-piece-volatility
-analogue of `vasicekBondPrice_eq`. -/
+`𝔼_μ[exp(−∫₀ᵀ r_s ds)] = exp(−M(T) + gsrBondV κ σ₁ σ₂ T* T / 2)`, with `∫₀ᵀ r_s ds` the
+Wiener representation `gsrIntegratedRate`; it is `P(0,T)` when `μ` is read as the pricing
+measure. The exact two-piece-volatility analogue of `vasicekBondPrice_eq`. -/
 theorem gsrBondPrice_eq (hB : IsPreBrownianReal B μ) (r₀ θ σ1 σ2 : ℝ) {κ : ℝ} (hκ : 0 < κ)
     (Tstar T : ℝ≥0) (hTstarT : (Tstar : ℝ) ≤ (T : ℝ)) :
     ∫ ω, Real.exp (-(gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar T ω)) ∂μ

@@ -20,14 +20,19 @@ mean-reverting under the pricing measure:
 This is the Ornstein–Uhlenbeck dynamics of the Vasicek short rate, so, carrying
 `ln S_T` in its Wiener representation (the SDE bridge is cited, not proven — see
 `schwartzFuturesPrice_eq_integral`), it has the Gaussian law `N(m_T, v_T)` with
-`m_T = vasicekSDEMean` and `v_T = vasicekSDEVariance` (`vasicekShortRate_hasLaw_gaussian`).
-The futures
+`m_T = vasicekSDEMean` and `v_T = vasicekSDEVariance` (`vasicekShortRate_hasLaw_gaussian`),
+for `κ > 0`. The futures
 price is `F(0,T) = E[S_T] = E[e^{ln S_T}]`, the Gaussian moment-generating
 function at `1`:
 
   `F(0,T) = exp(m_T + v_T / 2)`.
 
-As `T → ∞` the futures curve flattens to `exp(θ + σ² / (4κ))`, independent of
+In the Lean, `E` is the expectation under an arbitrary probability measure `μ` carrying the
+Brownian motion: `μ` is *read* as the pricing measure, and that the futures price is
+`E^Q[S_T]` is the textbook identification, not proved here. `schwartzFuturesPrice` is the
+closed form, defined; `schwartzFuturesPrice_eq_integral` proves it equals `E[S_T]`.
+
+As `T → ∞` (for `κ > 0`) the closed form flattens to `exp(θ + σ² / (4κ))`, independent of
 the current spot.
 
 This formalizes only the constant-parameter Schwartz (1997) model; Hull's
@@ -57,8 +62,9 @@ open scoped NNReal
 open WienerIntegralL2
 
 /-- **Schwartz one-factor futures price** with initial log spot `x₀`, long-run
-log level `θ`, mean-reversion speed `κ`, volatility `σ` and maturity `T`:
-`exp(m_T + v_T / 2)`, the lognormal mean of the terminal spot. -/
+log level `θ`, mean-reversion speed `κ`, volatility `σ` and maturity `T`, defined as the
+closed form `exp(m_T + v_T / 2)`; `schwartzFuturesPrice_eq_integral` proves it is the mean
+`E[S_T]` of the terminal spot (for `κ > 0`, the log spot in its Wiener representation). -/
 noncomputable def schwartzFuturesPrice (x₀ θ κ σ T : ℝ) : ℝ :=
   Real.exp (vasicekSDEMean x₀ θ κ T + vasicekSDEVariance σ κ T / 2)
 
@@ -69,8 +75,8 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
 /-- **Schwartz futures price = expected terminal spot.** With the log spot
 carried in its Wiener representation `ln S_T = m_T + σ ∫₀ᵀ e^{−κ(T−s)} dB_s`
 (the OU solution representation of `vasicekShortRate_hasLaw_gaussian` — the
-modelling bridge from the SDE is cited, not proven here), `E[S_T] =
-schwartzFuturesPrice`. -/
+modelling bridge from the SDE is cited, not proven here) and `κ > 0`, `E[S_T] =
+schwartzFuturesPrice`, the expectation taken under the given probability measure `μ`. -/
 theorem schwartzFuturesPrice_eq_integral (hB : IsPreBrownianReal B μ)
     (x₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
     ∫ ω, Real.exp (vasicekSDEMean x₀ θ κ (T : ℝ)

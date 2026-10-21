@@ -29,10 +29,10 @@ factor's randomness. The Fubini step reduces the claim to the kernel
 `MathFin.DefaultDensity.integral_indicator_Iic_eq` with discount curve `D · EE`.
 
 * `integral_exposure_eq` — the general reduction (joint integrability hypothesized).
-* `expectedExposure_gaussian` — `E[(m + σ√s·Z)⁺] = m·Φ(m/(σ√s)) + σ√s·φ(m/(σ√s))`,
-  from `bachelier_call_formula` with the strike shifted to `K = 1`, `S₀ = m + 1`.
-* `cva_gaussian` — headline: Gaussian exposure, bounded `D, m, σ`: CVA as a one-dimensional
-  time integral whose integrand (the expected exposure) is in closed form.
+* `expectedExposure_gaussian` — `E[(m + σ√s·Z)⁺] = m·Φ(m/(σ√s)) + σ√s·φ(m/(σ√s))` for
+  `σ, s > 0`, from `bachelier_call_formula` with the strike shifted to `K = 1`, `S₀ = m + 1`.
+* `cva_gaussian` — headline: Gaussian exposure, bounded `D, m, σ`, `σ > 0`: CVA as a
+  one-dimensional time integral whose integrand (the expected exposure) is in closed form.
 
 ## References
 
@@ -67,7 +67,8 @@ theorem measurable_expectedExposure [SFinite ν] {V : ℝ → Ω₁ → ℝ}
 
 /-- **No-WWR reduction** (Hull's CVA; the protection-leg kernel of Bagaria eq. 16.2):
 exposure independent of a default time with deterministic continuous hazard `h ≥ 0` gives
-`E[1{τ ≤ T} D(τ) V_τ⁺] = ∫₀ᵀ D(s) · EE(s) · λ(s)Q(s) ds`. -/
+`E[1{τ ≤ T} D(τ) V_τ⁺] = ∫₀ᵀ D(s) · EE(s) · λ(s)Q(s) ds`, for measurable `D`, jointly
+measurable `V`, `T ≥ 0`, and the left integrand jointly integrable (hypothesis `hint`). -/
 theorem integral_exposure_eq [IsProbabilityMeasure ν] [IsProbabilityMeasure μ]
     {h : ℝ → ℝ} (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s) {τ : Ω₂ → ℝ} (hτ : Measurable τ)
     (hcdf : ∀ a, 0 ≤ a → μ {ω | τ ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival h a))
@@ -100,9 +101,10 @@ open ProbabilityTheory in
 /-- **CVA with Gaussian exposure, no wrong-way risk** (Hull's CVA; the protection-leg kernel
 of Bagaria eq. 16.2). Exposure `V_s = m(s) + σ(s)√s·Z`, `Z ~ N(0,1)` on the exposure factor,
 independent (product measure) of a default time with continuous hazard `h ≥ 0`; `D`, `m`, `σ`
-measurable and bounded, `σ > 0`. Only the marginal laws `V_s ~ N(m(s), σ(s)²s)` enter a CVA
-under independence, so one driver `Z` for all `s` loses nothing for this value; no exposure
-dynamics are modelled. Then
+measurable and bounded, `σ > 0`, `T ≥ 0`. By `integral_exposure_eq` a CVA under independence
+depends on `V` only through `EE(s)`, so only the marginal laws `V_s ~ N(m(s), σ(s)²s)` enter
+it and one driver `Z` for all `s` loses nothing for this value; no exposure dynamics are
+modelled. Then
 
   `CVA = LGD · ∫₀ᵀ D(s) · [m(s)Φ(d_s) + σ(s)√s·φ(d_s)] · λ(s)Q(s) ds`, `d_s = m(s)/(σ(s)√s)`. -/
 theorem cva_gaussian [IsProbabilityMeasure ν] [IsProbabilityMeasure μ]

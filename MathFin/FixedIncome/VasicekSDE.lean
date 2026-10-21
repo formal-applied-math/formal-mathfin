@@ -125,8 +125,9 @@ lemma vasicekSDEVariance_nonneg (σ : ℝ) {κ : ℝ} (hκ : 0 < κ) {t : ℝ} (
   positivity
 
 open Filter Topology in
-/-- **The stationary variance.** For `κ > 0` the Vasicek variance `σ²(1 − e^{−2κt})/(2κ)`
-tends to the stationary variance `σ²/(2κ)` as `t → ∞`. -/
+/-- **The long-run variance.** For `κ > 0` the closed-form Vasicek variance
+`σ²(1 − e^{−2κt})/(2κ)` tends to `σ²/(2κ)` as `t → ∞` — the variance of the textbook
+stationary law; no stationary law is constructed here. -/
 theorem tendsto_vasicekSDEVariance_atTop (σ : ℝ) {κ : ℝ} (hκ : 0 < κ) :
     Tendsto (fun t ↦ vasicekSDEVariance σ κ t) atTop (𝓝 (σ ^ 2 / (2 * κ))) := by
   have he : Tendsto (fun t : ℝ ↦ Real.exp (-(2 * κ * t))) atTop (𝓝 0) :=

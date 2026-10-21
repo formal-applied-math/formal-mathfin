@@ -25,19 +25,19 @@ cap/caplet and swaption pricing is the **integrated variance** over a window
 
 an elementary integral of a (quadratic polynomial)×(exponential) plus linear
 and constant cross terms. We give the closed-form antiderivative and the
-resulting definite-integral formula via the FTC, mirroring the
-polynomial-times-exponential antiderivative pattern already used for the
-Vasicek/Hull–White kernel variance integrals
-(`FixedIncome/VasicekBondPrice.lean`, `Foundations/HullWhiteCalibration.lean`).
+resulting definite-integral formula via the FTC, the same explicit-antiderivative
+FTC route as the Vasicek kernel variance integral
+(`integral_vasicekIntegratedKernel_sq_eq_sub`, `FixedIncome/VasicekBondPrice.lean`).
+Every result below assumes `c ≠ 0` (the antiderivative divides by `c`).
 
 ## Main results
 
 * `abcdVol` — the ABCD instantaneous volatility `f(τ) = (a+bτ)e^{-cτ} + d`.
 * `abcdIntegratedVarAntideriv` — the closed-form antiderivative of `f²`.
 * `hasDerivAt_abcdIntegratedVarAntideriv` — the core calculus fact: its
-  derivative is `f(τ)²`.
+  derivative is `f(τ)²`, for `c ≠ 0`.
 * `abcdVol_sq_integral` — the definite integral
-  `∫_{T1}^{T2} f(τ)² dτ = F(T2) - F(T1)` via FTC.
+  `∫_{T1}^{T2} f(τ)² dτ = F(T2) - F(T1)` via FTC, for `c ≠ 0`.
 * `abcdVol_sq_integral_zero` — the `[0, T]`-window specialization.
 
 ## References
@@ -119,7 +119,7 @@ theorem hasDerivAt_abcdIntegratedVarAntideriv (a b c d τ : ℝ) (hc : c ≠ 0) 
   field_simp
   ring
 
-/-- **ABCD integrated variance over `[T1, T2]`**, via the FTC:
+/-- **ABCD integrated variance over `[T1, T2]`**, via the FTC, for `c ≠ 0`:
 `∫_{T1}^{T2} f(τ)² dτ = F(T2) - F(T1)`, `F = abcdIntegratedVarAntideriv`. -/
 theorem abcdVol_sq_integral (a b c d T1 T2 : ℝ) (hc : c ≠ 0) :
     ∫ τ in T1..T2, abcdVol a b c d τ ^ 2
@@ -130,7 +130,7 @@ theorem abcdVol_sq_integral (a b c d T1 T2 : ℝ) (hc : c ≠ 0) :
   unfold abcdVol
   fun_prop
 
-/-- **The `[0, T]`-window specialization**, the usual "total integrated variance
+/-- **The `[0, T]`-window specialization** (`c ≠ 0`), the usual "total integrated variance
 to maturity `T`" used in caplet/swaption calibration. -/
 theorem abcdVol_sq_integral_zero (a b c d T : ℝ) (hc : c ≠ 0) :
     ∫ τ in (0 : ℝ)..T, abcdVol a b c d τ ^ 2

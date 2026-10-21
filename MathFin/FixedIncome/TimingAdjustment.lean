@@ -14,7 +14,7 @@ public import MathFin.Foundations.Numeraire
 
 Two textbook corrections are the same identity. Let `Q^N` be the measure attached to a
 numéraire whose relative weight against the reference numéraire is `e^{−Y}`. For a payoff
-`V` with `(ln V, Y)` jointly Gaussian,
+`V` with `(ln V, Y)` jointly Gaussian in the two-driver form below,
 
   `𝔼^{Q^N}[V] = 𝔼^Q[V] · exp(−Cov(ln V, Y))`.
 
@@ -39,6 +39,13 @@ Hull's textbook presentation of the timing adjustment, with a `(1 + R_F/m)`-styl
 simple-compounding denominator, replaces the exact covariance `Cov(ln V, Y)` with its
 first-order (bond-duration) approximation in the forward rate. That approximate form is
 not proved here and is not exact.
+
+**What the measures are.** In the Lean, `Q` is any measure `μ` carrying the two independent
+standard normals, `Q^N` is `numeraireMeasure` with the stated normalisation, and `Y` is the
+Gaussian variable `n + u(ρ Z₁ + √(1−ρ²) Z₂)`. "Risk-neutral", "`T`-forward", "bank account
+`exp(∫₀ᵀ r)`" and "`P(T,T*)`" are readings of these; no short rate or bond is modelled. That
+the futures price is `𝔼^Q[V]` and the forward price is `𝔼^T[V]` are textbook
+identifications, not proved here.
 
 ## Main results
 
@@ -98,9 +105,10 @@ theorem integral_mul_exp_neg_gaussian (m s n u ρ : ℝ)
 Let `Q` be the
 `T`-forward measure (reference numéraire `P(·,T)`, worth `1` at `T` and `B₀ = P(0,T)` today),
 and let the `T*`-bond be worth `P(T,T*) = e^{−Y}` at `T` and `N₀ = P(0,T*)` today, with the
-no-arbitrage normalization `N₀ = B₀·𝔼^T[P(T,T*)]`. For a payoff `V` fixed at `T` and paid at
-`T*`, with `(ln V, Y)` jointly Gaussian and `Cov(ln V, Y) = ρ s u`, the `T*`-forward
-expectation is
+no-arbitrage normalization `N₀ = B₀·𝔼^T[P(T,T*)]` (hypothesis `hnorm`). These are readings
+of `μ` and the two numéraires (see the module note). For a payoff `V` fixed at `T` and paid
+at `T*`, with `ln V = m + s Z₁` and `Y = n + u(ρ Z₁ + √(1−ρ²) Z₂)` as in
+`integral_mul_exp_neg_gaussian` (so `Cov(ln V, Y) = ρ s u`), the `T*`-forward expectation is
 
   `𝔼^{T*}[V] = 𝔼^T[V] · exp(−ρ s u)`.
 
@@ -132,11 +140,13 @@ theorem timingAdjustment_gaussian (m s n u ρ B₀ N₀ : ℝ)
 
 /-- **Bagaria's futures-forward basis** (Bagaria, §8.4, the unnumbered covariance identity
 preceding Worked case 8.5 — not the Ho–Lee basis approximation of eq. 8.9), exact Gaussian
-form. Let `Q` be the risk-neutral measure with bank account `e^{Y}`, `Y = ∫₀ᵀ r`, and pass to
-the `T`-forward
-measure (numéraire `P(·,T)`, worth `1` at `T` and `N₀ = P(0,T) = 𝔼^Q[e^{−Y}]` today). For an
-underlying `V` with `(ln V, Y)` jointly Gaussian and `Cov(ln V, ∫₀ᵀ r) = ρ s u`, the futures
-price `𝔼^Q[V]` and the forward price `𝔼^T[V]` satisfy
+form. Read `μ` as the risk-neutral measure `Q` with bank account `e^{Y}`, `Y = ∫₀ᵀ r`, and pass
+to the `T`-forward measure (numéraire `P(·,T)`, worth `1` at `T` and
+`N₀ = P(0,T) = 𝔼^Q[e^{−Y}]` today, hypothesis `hnorm`). These are readings: `μ` is any
+measure carrying `Z₁, Z₂`, and no short rate is modelled (see the module note). For an
+underlying `V` with `ln V = m + s Z₁` and `Y = n + u(ρ Z₁ + √(1−ρ²) Z₂)` as in
+`integral_mul_exp_neg_gaussian` (so `Cov(ln V, Y) = ρ s u`), the textbook futures price
+`𝔼^Q[V]` and forward price `𝔼^T[V]` satisfy
 
   `𝔼^Q[V] = 𝔼^T[V] · exp(ρ s u)`. -/
 theorem futuresForwardBasis_gaussian (m s n u ρ N₀ : ℝ)

@@ -11,20 +11,23 @@ public import MathFin.FixedIncome.VasicekBondPrice
 public import MathFin.FixedIncome.VasicekSDEGaussian
 
 /-!
-# Vasicek short rate: real-world and risk-neutral measures (constant market price of risk)
+# Vasicek short rate: real-world vs. risk-neutral terminal law (constant market price of risk)
 
-With a constant market price of risk `λ`, the Vasicek short rate has real-world dynamics
-`dr = κ(θ − r)dt + σ dz` and risk-neutral dynamics `dr = [κ(θ − r) − λσ]dt + σ dz̃`, i.e. the
-risk-neutral long-run level is `θ − λσ/κ`. The terminal means differ by `λσ·B(T)` with
-`B(T) = (1 − e^{−κT})/κ`.
+Textbook background (not formalized here): with a constant market price of risk `λ`, the
+Vasicek short rate has real-world dynamics `dr = κ(θ − r)dt + σ dz` and risk-neutral dynamics
+`dr = [κ(θ − r) − λσ]dt + σ dz̃`, i.e. the risk-neutral long-run level is `θ − λσ/κ`, and the
+terminal means differ by `λσ·B(T)` with `B(T) = (1 − e^{−κT})/κ`. Neither SDE nor either
+measure is constructed below.
 
 ## Main results
 
-* `vasicekSDEMean_physical_eq_riskNeutral`: the real-world mean equals the risk-neutral mean
-  plus `λσ·B(T)`; the analogue of `bsTerminal_physical_eq_riskNeutral`.
+* `vasicekSDEMean_physical_eq_riskNeutral`: an algebraic identity of closed forms
+  (`κ ≠ 0`): `vasicekSDEMean` at level `θ` equals `vasicekSDEMean` at the risk-neutral level
+  `θ − λσ/κ` plus `λσ·B(T)`; the analogue of `bsTerminal_physical_eq_riskNeutral`.
 * `vasicekShortRate_hasLaw_esscherTilt`: a static Girsanov (Esscher) tilt of the
   real-world measure under which the same terminal short rate `r_T` has the Gaussian law
-  `N(mean_θ − λσ·B(T), var)` that the risk-neutral measure assigns it.
+  `N(mean_θ − λσ·B(T), var)` (`κ > 0`, `T > 0`), the law that the risk-neutral measure
+  assigns it in the textbook model (not proved here).
 
 The tilt is on the normalised terminal driver of `r_T` alone, so it is a terminal-law
 statement, not the pathwise Girsanov change of the whole Brownian path; the tilted measure
@@ -39,8 +42,9 @@ open MeasureTheory ProbabilityTheory Real
 open scoped NNReal ENNReal
 open WienerIntegralL2
 
-/-- **Real-world vs. risk-neutral Vasicek mean.** Replacing the long-run level `θ` by the
-risk-neutral level `θ − lamσ/κ` lowers the terminal mean by `lamσ·(1 − e^{−κT})/κ`. -/
+/-- **Real-world vs. risk-neutral Vasicek mean.** An algebraic identity of the closed form
+`vasicekSDEMean`, for `κ ≠ 0`: replacing the long-run level `θ` by the risk-neutral level
+`θ − lamσ/κ` changes the terminal mean by `−lamσ·(1 − e^{−κT})/κ`. -/
 theorem vasicekSDEMean_physical_eq_riskNeutral (r₀ θ κ σ lam T : ℝ) (hκ : κ ≠ 0) :
     vasicekSDEMean r₀ θ κ T
       = vasicekSDEMean r₀ (θ - lam * σ / κ) κ T
@@ -53,8 +57,9 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
   {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ}
 
-/-- **Vasicek terminal law under the risk-neutral measure, from the real-world one.**
-Let `r_T = mean_θ + σ ∫₀ᵀ e^{−κ(T−s)} dB_s` be the real-world terminal short rate, and
+/-- **Vasicek terminal law with the risk-neutral mean, under a static Esscher tilt.**
+For `κ > 0` and `T > 0`, let `r_T = mean_θ + σ ∫₀ᵀ e^{−κ(T−s)} dB_s` be the real-world
+terminal short rate, and
 `Z = (∫₀ᵀ e^{−κ(T−s)} dB_s)/√v` its standard-normal driver (`v = (1 − e^{−2κT})/(2κ)`).
 Under the Esscher tilt `Q = μ.withDensity(exp(cZ − c²/2))` with `c = −lam·B(T)/√v`, the same
 `r_T` has law `N(mean_θ − lamσ·B(T), var)`: the mean of the model with long-run level

@@ -23,10 +23,12 @@ level/slope/curvature decomposition, and `l₁, l₂ > 0` are decay parameters
 governing where the two curvature humps peak. Setting `β₃ = 0` recovers the
 plain three-factor Nelson-Siegel curve.
 
-This is a genuinely different object from bootstrapping: it is a smooth,
-globally-defined closed form in four (Nelson-Siegel) or six (Svensson)
-parameters, fit across the whole curve at once, rather than a maturity-by-
-maturity recursive discount-factor recovery.
+This is a genuinely different object from bootstrapping: it is a closed form
+in four (Nelson-Siegel) or six (Svensson) parameters, fit across the whole
+curve at once, rather than a maturity-by-maturity recursive discount-factor
+recovery. (Only continuity on `(0, ∞)` is proved here; at `τ = 0` the Lean
+definition takes Lean's `x / 0 = 0` junk value, and the short end is stated
+as a limit.)
 
 ## Main results
 
