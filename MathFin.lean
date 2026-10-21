@@ -29,7 +29,10 @@
                        adverse-selection spread.
   * `DeFi/`          — Decentralized-finance market microstructure:
                        constant-product AMMs (Uniswap v2-style), swap
-                       output, invariant preservation, internal price.
+                       output, invariant preservation, internal price;
+                       Uniswap v2/v3 mechanics (impermanent loss, TWAP,
+                       fee invariant, virtual reserves); Aave/Compound/Dai
+                       lending-protocol mechanics.
 -/
 
 -- Foundations
@@ -296,6 +299,13 @@ import MathFin.Foundations.ItoFormulaUnrestrictedLocMart
 import MathFin.Foundations.FTAPTwoState
 -- Phase 38: Constant-product AMM (adapted from Pusceddu-Bartoletti FMBC 2024)
 import MathFin.DeFi.ConstantProductAMM
+-- DeFi/AMM group: Uniswap v2/v3 mechanics (impermanent loss, TWAP, fee invariant, v3 virtual reserves)
+import MathFin.DeFi.UniswapCurveMechanics
+-- DeFi/lending group: Aave kinked-rate + health factor, Compound cToken exchange rate
+import MathFin.DeFi.Aave
+import MathFin.DeFi.Compound
+-- Dai stability fee and vault liquidation condition
+import MathFin.DeFi.Dai
 -- Phase 39: Itô structural drift formula + GBM log-drift (after Nagy 2026)
 import MathFin.Foundations.ItoLemma
 -- Time-dependent (2D) Itô formula + GBM-as-SDE-solution (genuine exp partials)
