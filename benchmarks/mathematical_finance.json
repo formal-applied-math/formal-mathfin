@@ -5536,6 +5536,38 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.SVI.bsSmile_calendar_free_iff (MathFin/BlackScholes/CalendarArbitrage.lean), the instance S = 1, w(k, t) = variance (p t) k of mf-calendar-arbitrage-total-variance on the SVI library's bsSmile price. SCOPE. The family p : R -> Params is arbitrary data; the SVI library has no maturity variable of its own, and SSVI, the slice-crossing quartic and the SSVI calendar theorems are not formalised."
       }
+    },
+    {
+      "id": "mf-saccr-ead-mono",
+      "name": "SA-CCR Exposure at Default Is Jointly Monotone",
+      "description": "Basel SA-CCR's EAD = alpha * (RC + PFE) is monotone increasing in the replacement cost RC and the PFE add-on, for any fixed alpha >= 0 -- raising either component never lowers the capital exposure.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.SACCRExposure\n\nopen MathFin\n\ntheorem saccrEAD_mono_thm {α : ℝ} (hα : 0 ≤ α) {RC₁ RC₂ PFE₁ PFE₂ : ℝ}\n    (hRC : RC₁ ≤ RC₂) (hPFE : PFE₁ ≤ PFE₂) :\n    MathFin.saccrEAD α RC₁ PFE₁ ≤ MathFin.saccrEAD α RC₂ PFE₂ :=\n  MathFin.saccrEAD_mono hα hRC hPFE\n"
+      },
+      "metadata": {
+        "chapter": 1,
+        "reference": "Basel Committee on Banking Supervision, The standardised approach for measuring counterparty credit risk exposures (BCBS 279), 2014",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the arithmetic combination EAD = alpha * (RC + PFE) via gcongr. The formula is almost entirely regulatory bookkeeping -- RC and PFE are themselves built from supervisory add-on factors with no mathematical content beyond this arithmetic combination; the regulatory constant alpha = 1.4 is kept as a free parameter since only alpha >= 0 is used. No claim beyond monotonicity is formalized."
+      }
+    },
+    {
+      "id": "mf-saccr-effnotional-diversification-bound",
+      "name": "SA-CCR Effective-Notional Aggregation Has No Negative Diversification",
+      "description": "The two-trade correlated effective-notional aggregation sqrt(d1^2 + d2^2 + 2*rho*d1*d2), for supervisory correlation rho in [-1, 1], never exceeds the sum of the absolute per-trade notionals |d1| + |d2|. This aggregation is only structurally analogous to Basel Annex 4's add-on formula (linear, not quadratic, in rho), so the Annex 4 formula itself is not formalized here.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.SACCRExposure\n\nopen MathFin\n\ntheorem effNotionalPair_le_abs_add_thm {ρ : ℝ} (hρ1 : -1 ≤ ρ) (hρ2 : ρ ≤ 1) (d₁ d₂ : ℝ) :\n    MathFin.effNotionalPair ρ d₁ d₂ ≤ |d₁| + |d₂| :=\n  MathFin.effNotionalPair_le_abs_add hρ1 hρ2 d₁ d₂\n"
+      },
+      "metadata": {
+        "chapter": 1,
+        "reference": "Basel Committee on Banking Supervision, The standardised approach for measuring counterparty credit risk exposures (BCBS 279), 2014, Annex 4 add-on aggregation",
+        "difficulty": "beginner",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "effNotionalPair is the structurally analogous two-trade, linear-in-rho building block (same quadratic form as the variance of a sum of two correlated random variables), NOT a literal specialization of Annex 4's add-on formula, whose two-trade cross term is quadratic in rho, not linear -- see the module docstring in MathFin/RiskMeasures/SACCRExposure.lean. Full formal proof of the stated bound for this building block via sqrt monotonicity and the Cauchy-Schwarz-style cross-term bound."
+      }
     }
   ]
 }

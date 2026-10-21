@@ -26,7 +26,8 @@
                        spectral risk, Herfindahl concentration.
   * `Actuarial/`     — net premium, Gompertz force of mortality.
   * `Execution/`     — Market microstructure and execution: Glosten-Milgrom
-                       adverse-selection spread.
+                       adverse-selection spread, Roll (1984) bid-ask bounce
+                       spread estimator.
   * `DeFi/`          — Decentralized-finance market microstructure:
                        constant-product AMMs (Uniswap v2-style), swap
                        output, invariant preservation, internal price;
@@ -592,6 +593,10 @@ import MathFin.Performance.RatiosExtended
 import MathFin.Performance.DownsideMetrics
 import MathFin.Performance.Kelly
 import MathFin.Performance.KellyNumeraire
+import MathFin.Performance.FracDiffWeights
+import MathFin.Performance.AverageUniqueness
+import MathFin.Performance.BetSizeSigmoid
+import MathFin.Performance.PurgedCV
 
 -- RiskMeasures
 import MathFin.RiskMeasures.Gaussian
@@ -635,6 +640,7 @@ import MathFin.RiskMeasures.CreditMetrics
 import MathFin.RiskMeasures.VasicekIRB
 -- LHP tranche expected loss: the Vasicek (2002) stop-loss closed form and the finite-pool limit
 import MathFin.RiskMeasures.TrancheLoss
+import MathFin.RiskMeasures.SACCRExposure
 -- Phase 1 (convex-duality unification): fundamental superhedging bound — every EMM prices a claim
 -- at most its super-replication cost (the pricing-side companion of the coherent-risk representation)
 import MathFin.Foundations.SuperhedgingDuality
@@ -681,6 +687,7 @@ import MathFin.Contracts.CappedCall
 -- spread, plus a six-point model witnessing that its hypotheses are satisfiable
 import MathFin.Execution.GlostenMilgrom
 import MathFin.Execution.GlostenMilgromModel
+import MathFin.Execution.RollSpread
 -- Continuous-time American put option exercise-boundary geometry
 import MathFin.BlackScholes.AmericanPut.Stopping.PhysicalBoundaryConvexity
 import MathFin.BlackScholes.AmericanPut.Stopping.AEHorizonValue

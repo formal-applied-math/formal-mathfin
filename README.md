@@ -12,9 +12,9 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 537 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 506 are proved in full, 18 restate a lemma from Mathlib or
-BrownianMotion, and 13 are reduced cores that prove less than the result they are named after.
+The corpus records 539 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 507 are proved in full, 18 restate a lemma from Mathlib or
+BrownianMotion, and 14 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
 axioms `propext`, `Classical.choice` and `Quot.sound`.
@@ -137,12 +137,14 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Thirteen of the 537 results are reduced cores. Twelve assume a structure whose fields include the
+- Fourteen of the 539 results are reduced cores. Twelve assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, Lévy's characterization, the two-dimensional Itô formula,
   and five theorems on Markov chains. The thirteenth proves a special case: the first interarrival
-  time of a Poisson process is exponential.
+  time of a Poisson process is exponential. The fourteenth, the SA-CCR effective-notional
+  diversification bound, proves its stated claim for a building block that is only structurally
+  analogous to the Basel Annex 4 add-on formula (linear, not quadratic, in the correlation).
 - Girsanov's theorem is proved only for bounded predictable $`\theta`$, and, as for $`B`$ itself,
   only at the level of finite-dimensional laws: neither path continuity of the new process nor
   independence of its increments from the past is stated.

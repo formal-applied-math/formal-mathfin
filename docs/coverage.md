@@ -56,6 +56,23 @@ increasing in it, so call prices rise with maturity at every strike iff `t ↦ w
 every `k`. The raw-SVI form is stated on `SVI.bsSmile` for a maturity-indexed parameter family.
 Not proved: the local-variance characterisation, SSVI, and the slice-crossing quartic.
 
+### SA-CCR exposure at default and effective-notional diversification (2026-10-18)
+
+Two entries added: `mf-saccr-ead-mono` (`full`) and
+`mf-saccr-effnotional-diversification-bound` (`reduced_core`). Corpus 537 → 539.
+
+`RiskMeasures/SACCRExposure.lean`: Basel SA-CCR's `EAD = α·(RC + PFE)` is almost entirely
+regulatory bookkeeping — `RC` and `PFE` are themselves built from supervisory add-on factors with
+no mathematical content beyond the arithmetic combination — so the one real structural fact
+formalized is joint monotonicity in `RC` and `PFE` for `α ≥ 0` (`saccrEAD_mono`, `full`). The
+Annex 4 add-on aggregation's two-trade cross term is quadratic in the supervisory correlation `ρ`,
+not linear, so the formalized `effNotionalPair ρ d₁ d₂ = √(d₁² + d₂² + 2ρ·d₁·d₂)` is a
+structurally analogous *linear*-in-`ρ` building block, not a literal specialization of the Basel
+formula — hence `reduced_core`. Its no-negative-diversification bound
+(`effNotionalPair_le_abs_add`, `ρ ∈ [-1, 1] ⟹ effNotionalPair ≤ |d₁| + |d₂|`) is the delivered
+claim; the `ρ = 0` and `ρ = 1` collapse lemmas and the `d₁`-monotonicity lemma are proved in the
+module but not separately benchmarked.
+
 ### The CIR loadings solve their term-structure equations (2026-10-14)
 
 Two entries added, `mf-cir-bond-loading-riccati` and `mf-cir-bond-level-loading` (both `full`).

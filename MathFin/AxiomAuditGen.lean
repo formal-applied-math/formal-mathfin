@@ -677,6 +677,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.downsideMetrics_bundle' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.downsideMetrics_bundle
 
+/-- info: 'MathFin.effNotionalPair_le_abs_add' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.effNotionalPair_le_abs_add
+
 /-- info: 'MathFin.emm_implies_no_arbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.emm_implies_no_arbitrage
 

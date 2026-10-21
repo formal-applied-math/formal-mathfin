@@ -1816,6 +1816,20 @@
       "input_hash": "7c16d04caf3281a893ec5e3c4d6d57c6842ddf50dd6cf693f399c3d19369b566",
       "verified_at_commit": "fdfecac"
     },
+    "mf-saccr-ead-mono": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-18",
+      "elapsed_s": 5.3,
+      "input_hash": "71062f1dfeb6059da5f02ae703fd2ee57379e6f18c878bdfa502845d319a5816",
+      "verified_at_commit": "58a3eb1"
+    },
+    "mf-saccr-effnotional-diversification-bound": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-18",
+      "elapsed_s": 5.6,
+      "input_hash": "e53e0959b72920e9177992f4ae806b26b2711106a763efac6a44eb64dbadfddb",
+      "verified_at_commit": "58a3eb1"
+    },
     "mf-schwartz-futures-price": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-19",
