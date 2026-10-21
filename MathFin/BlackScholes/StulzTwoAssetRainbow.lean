@@ -10,18 +10,17 @@ public import MathFin.BlackScholes.GarmanNormalForm
 public import MathFin.Foundations.BivariateNormalCDF
 
 /-!
-# Stulz (1982): the exact two-asset rainbow (max/min) closed form
+# Stulz (1982): the two-asset rainbow (max/min) closed form
 
-A call on `max(S¹_T, S²_T)` or `min(S¹_T, S²_T)` struck at `K` is **exactly** priced by a
-pair of bivariate-normal-CDF closed forms (Stulz, *Options on the Minimum or the Maximum of
-Two Risky Assets*, Journal of Financial Economics 10 (1982), 161–185) — genuinely distinct
-from `BasketMomentMatching.lean`'s `n`-asset moment-matching *approximation*: this is an exact
-closed form, but only for `n = 2`.
+R. M. Stulz ("Options on the minimum or the maximum of two risky assets: analysis and
+applications", *Journal of Financial Economics* 10 (1982), 161–185) prices a call on
+`max(S¹_T, S²_T)` or `min(S¹_T, S²_T)` struck at `K` by a pair of bivariate-normal-CDF closed
+forms. This module transcribes those closed forms; that they are the discounted expected payoffs
+is Stulz's theorem and is not proved here (see **Scope**). Unlike `BasketMomentMatching.lean`'s
+`n`-asset moment-matching approximation, Stulz's formula is exact, but only for `n = 2`.
 
-Transcribed from, and cross-checked against, the Rmetrics `fExoticOptions::TwoRiskyAssetsOption`
-reference implementation (itself a transcription of Haug, *The Complete Guide to Option Pricing
-Formulas*, §2.8.1) — no independent numerical verification was run, only a side-by-side formula
-read. Uses the cost-of-carry convention `bᵢ` (`bᵢ = r` for a non-dividend asset,
+The formulas are those of E. G. Haug, *The Complete Guide to Option Pricing Formulas*, 2nd ed.,
+McGraw-Hill (2007), in the cost-of-carry convention `bᵢ` (`bᵢ = r` for a non-dividend asset,
 `bᵢ = r - qᵢ` under a continuous yield `qᵢ`, `bᵢ = 0` for a futures-style asset). With
 
   `v = √(σ₁² + σ₂² − 2ρσ₁σ₂)`                          (`stulzEffVol`, the Margrabe spread vol)
@@ -44,14 +43,14 @@ the call-on-the-max and call-on-the-min prices are
 * `stulz_max_min_payoff_parity`: the **payoff-level** identity behind Stulz's whole
   construction, `max(max(a,b)−K,0) + max(min(a,b)−K,0) = max(a−K,0) + max(b−K,0)` — pure
   algebra, no probability.
-* `stulz_call_max_add_call_min`: the matching **price-level** identity, `C_max + C_min` equals
-  the sum of two *ordinary* one-asset Black-Scholes calls on `S¹` and `S²` (via
-  `GarmanNormalForm.bsVGarman`). This is exactly the payoff identity transported through
-  pricing, and the proof consumes only `bivariateNormalCDF_flip_snd` /
-  `bivariateNormalCDF_neg_neg` — the two general bivariate-CDF identities proved for this
-  purpose in `BivariateNormalCDF.lean` — with no separate probabilistic derivation.
+* `stulzCallMax_add_stulzCallMin`: the matching **price-level** identity, `C_max + C_min`
+  equals the sum of two *ordinary* one-asset Black-Scholes calls on `S¹` and `S²` (via
+  `GarmanNormalForm.bsVGarman`). It is the price-level counterpart of the payoff identity, but
+  it is not derived from it: the proof consumes only `bivariateNormalCDF_flip_snd` /
+  `bivariateNormalCDF_neg_neg`, the two general bivariate-CDF identities of
+  `BivariateNormalCDF.lean`, with no separate probabilistic derivation.
 
-**Scope, disclosed honestly**: `stulz_call_max_add_call_min` verifies the closed form's
+**Scope.** `stulzCallMax_add_stulzCallMin` verifies the closed form's
 *internal consistency* (it collapses to the one-asset case exactly as Stulz's own derivation
 requires), not a from-first-principles derivation from a joint two-GBM model — the same scope
 as `GarmanNormalForm.lean`'s own specializations, which take the one-asset BS closed form as
@@ -186,9 +185,9 @@ private lemma stulzY2_eq_gbsd1 (S2 K b2 σ2 T r : ℝ) (hS2 : 0 < S2) (hK : 0 < 
 /-- **The price-level parity**: `C_max + C_min` equals the sum of two one-asset `bsVGarman`
 calls on `S¹` and `S²` at strike `K`, discount factor `e^{−rT}`. The proof pairs each `N₂` term
 of `C_max` with its counterpart in `C_min` via `bivariateNormalCDF_flip_snd` (asset terms) and
-`bivariateNormalCDF_neg_neg` (the strike term) — exactly the algebraic content of
-`stulz_max_min_payoff_parity`, transported through the pricing formula. -/
-theorem stulz_call_max_add_call_min (S1 S2 K r b1 b2 σ1 σ2 T : ℝ) {ρ : ℝ} (hρ : ρ ^ 2 ≤ 1)
+`bivariateNormalCDF_neg_neg` (the strike term). It is the price-level counterpart of
+`stulz_max_min_payoff_parity`, proved from the N₂ identities, not from the payoff lemma. -/
+theorem stulzCallMax_add_stulzCallMin (S1 S2 K r b1 b2 σ1 σ2 T : ℝ) {ρ : ℝ} (hρ : ρ ^ 2 ≤ 1)
     (hS1 : 0 < S1) (hS2 : 0 < S2) (hK : 0 < K) :
     stulzCallMax S1 S2 K r b1 b2 σ1 σ2 ρ T + stulzCallMin S1 S2 K r b1 b2 σ1 σ2 ρ T =
       bsVGarman (S1 * Real.exp ((b1 - r) * T)) K (Real.exp (-(r * T))) σ1 T +

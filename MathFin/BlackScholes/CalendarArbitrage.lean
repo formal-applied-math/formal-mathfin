@@ -15,7 +15,7 @@ public import MathFin.BlackScholes.SVI.BlackScholesBridge
 Gatheral and Jacquier, *Arbitrage-free SVI volatility surfaces* (Quantitative Finance 14(1),
 2014), §2.1, Lemma 2.1: an implied total-variance surface `w(k, t)` is free of calendar spread
 arbitrage iff `t ↦ w(k, t)` is non-decreasing for every log-moneyness `k`. The proof runs in two
-steps, both proved here.
+steps, both proved here with zero rates and on the maturity domain described under **Scope**.
 
 1. **Martingale step.** If the (forward) price `X_t` is a martingale, then for every level `L`
    the undiscounted call value `t ↦ E[(X_t − L)⁺]` is non-decreasing: by conditional Jensen,
@@ -32,7 +32,7 @@ steps, both proved here.
 * `deriv_integral_posPart_sub_nonneg`: the maturity derivative of that call value is
   nonnegative (`∂_T C ≥ 0`, as a `deriv`).
 * `bsV_eq_totalVarianceCall`: the zero-rate Black–Scholes call is a function of `σ²T`.
-* `totalVarianceCall_strictMonoOn`: it is strictly increasing in total variance.
+* `strictMonoOn_totalVarianceCall`: it is strictly increasing in total variance.
 * `calendar_free_iff`: call prices non-decreasing in maturity at every strike ⟺
   `t ↦ w(k, t)` non-decreasing at every `k` (the price form of Lemma 2.1).
 * `monotone_totalVariance_of_martingale`: a total-variance surface whose Black–Scholes prices
@@ -40,8 +40,12 @@ steps, both proved here.
 * `SVI.bsSmile_calendar_free_iff`: the same equivalence for a maturity-indexed family of raw
   SVI slices, on the SVI library's `bsSmile` price.
 
-The local-variance characterisation (crossed total-variance lines ⟺ negative local variance)
-is not formalised here.
+**Scope.** Rates and dividends are zero and the forward is the spot `S`. In the last three
+results maturity `t` ranges over all of `ℝ` and the total variance must be positive at every
+real `t`. That excludes every surface with `w(k, t) → 0` as `t → 0⁺`, the flat `w = σ²t`
+included, so they do not cover Gatheral–Jacquier's setting `t > 0`; the `t > 0` form
+(`MonotoneOn … (Ioi 0)`) is not stated here. The local-variance characterisation (crossed
+total-variance lines ⟺ negative local variance) is not formalised here.
 -/
 
 @[expose] public section
@@ -108,7 +112,7 @@ theorem bsV_eq_totalVarianceCall {K S σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
   simp only [bsd2, hd1, hs, Real.sqrt_one, mul_one, zero_mul, neg_zero, Real.exp_zero]
 
 /-- The total-variance call is strictly increasing in total variance on `(0, ∞)`. -/
-theorem totalVarianceCall_strictMonoOn {K S : ℝ} (hK : 0 < K) (hS : 0 < S) :
+theorem strictMonoOn_totalVarianceCall {K S : ℝ} (hK : 0 < K) (hS : 0 < S) :
     StrictMonoOn (totalVarianceCall K S) (Ioi 0) := by
   intro a ha b hb hab
   exact bsV_strictMonoOn_sigma hK one_pos hS (Real.sqrt_pos.mpr ha) (Real.sqrt_pos.mpr hb)
@@ -118,9 +122,10 @@ theorem totalVarianceCall_strictMonoOn {K S : ℝ} (hK : 0 < K) (hS : 0 < S) :
 surface over log-moneyness `k` and maturity `t`, priced with zero rates at forward `S > 0`:
 the call at strike `K` and maturity `t` is `totalVarianceCall K S (w (log (K / S)) t)`. Call
 prices are non-decreasing in maturity at every strike iff `t ↦ w(k, t)` is non-decreasing at
-every `k`. Maturity `t` ranges over all of `ℝ`; no `t > 0` restriction is imposed (the
-statement is honest but strictly more general than the economic setting, where only `t > 0`
-is meaningful). -/
+every `k`. Maturity `t` ranges over all of `ℝ` and `w` must be positive at every real `t`.
+This is not more general than the economic setting: positivity on `ℝ` excludes every surface
+with `w(k, t) → 0` as `t → 0⁺`, the flat `w = σ²t` included. The `t > 0` form
+(`MonotoneOn … (Ioi 0)`) is not stated here. -/
 theorem calendar_free_iff {S : ℝ} (hS : 0 < S) (w : ℝ → ℝ → ℝ) (hw : ∀ k t, 0 < w k t) :
     (∀ K, 0 < K → Monotone fun t ↦ totalVarianceCall K S (w (Real.log (K / S)) t)) ↔
       ∀ k, Monotone (w k) := by
@@ -131,14 +136,16 @@ theorem calendar_free_iff {S : ℝ} (hS : 0 < S) (w : ℝ → ℝ → ℝ) (hw :
       rw [mul_div_cancel_left₀ _ hS.ne', Real.log_exp]
     have := h _ hK hab
     simp only [hk] at this
-    exact ((totalVarianceCall_strictMonoOn hK hS).le_iff_le (hw k a) (hw k b)).mp this
+    exact ((strictMonoOn_totalVarianceCall hK hS).le_iff_le (hw k a) (hw k b)).mp this
   · intro h K hK a b hab
-    exact ((totalVarianceCall_strictMonoOn hK hS).le_iff_le (hw _ a) (hw _ b)).mpr (h _ hab)
+    exact ((strictMonoOn_totalVarianceCall hK hS).le_iff_le (hw _ a) (hw _ b)).mpr (h _ hab)
 
 /-- **Gatheral–Jacquier 2014, Lemma 2.1 (martingale direction).** If the zero-rate
 Black–Scholes prices of a positive total-variance surface `w` are the call values
 `∫ (X_t − K)⁺` of a real-indexed martingale `X`, at every strike `K > 0` and maturity `t`,
-then `t ↦ w(k, t)` is non-decreasing at every log-moneyness `k`. -/
+then `t ↦ w(k, t)` is non-decreasing at every log-moneyness `k`. As in `calendar_free_iff`,
+`t` ranges over all of `ℝ` and `w` must be positive at every real `t`, which excludes
+surfaces with `w(k, t) → 0` as `t → 0⁺` (such as `w = σ²t`). -/
 theorem monotone_totalVariance_of_martingale {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {μ : Measure Ω} [IsFiniteMeasure μ] {ℱ : Filtration ℝ mΩ} {X : ℝ → Ω → ℝ}
     (hX : Martingale X ℱ μ) {S : ℝ} (hS : 0 < S) (w : ℝ → ℝ → ℝ) (hw : ∀ k t, 0 < w k t)
@@ -154,7 +161,9 @@ namespace SVI
 parameters `p t` with positive variance, the SVI-smiled Black–Scholes price `bsSmile` (spot,
 maturity and discount normalised to one) is non-decreasing in maturity at every strike iff the
 SVI total variance `t ↦ variance (p t) k` is non-decreasing at every log-moneyness `k`
-(Gatheral–Jacquier 2014, Lemma 2.1, specialised to the raw SVI slices of their §3.1). -/
+(Gatheral–Jacquier 2014, Lemma 2.1, specialised to the raw SVI slices of their §3.1). The
+family is indexed by every real `t` and the variance must be positive at every `t`, as in
+`calendar_free_iff`. -/
 theorem bsSmile_calendar_free_iff (p : ℝ → Params) (hw : ∀ t k, 0 < variance (p t) k) :
     (∀ K, 0 < K → Monotone fun t ↦ bsSmile (p t) K) ↔
       ∀ k, Monotone fun t ↦ variance (p t) k := by

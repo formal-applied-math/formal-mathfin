@@ -15,7 +15,8 @@ public import MathFin.BlackScholes.ExchangeOption
 **This is an approximation, not an exact closed form.** The spread-option
 payoff `max(S¹_T − S²_T − K, 0)` for `K ≠ 0` has no known exact Black–Scholes
 closed form — unlike the `K = 0` case, which is the exact Margrabe exchange
-option (`BlackScholes/ExchangeOption.lean`). Kirk (1995) prices it, in
+option (`BlackScholes/ExchangeOption.lean`). E. Kirk ("Correlation in the energy markets",
+in *Managing Energy Price Risk*, Risk Publications, 1995, 71–78) prices it, in
 forward terms, by treating `F² + K` as a single "pseudo-asset" and running
 the Margrabe/Garman machinery on `F¹` vs. that pseudo-asset, approximating
 the pseudo-asset's lognormal volatility by linearising `F²/(F² + K)` at its
@@ -37,7 +38,7 @@ At `K = 0` the discounted cash strike `K·e^{-rT}` is `0` for every `r`, so
 the pseudo-asset reduces to `S²` itself for every `r`: both the
 **effective-variance parameter** (`kirkEffectiveVariance_zero_eq_margrabe`)
 and the **price itself** (`kirkSpreadPrice_zero_eq_margrabe`) collapse to
-exactly Margrabe at `K = 0`, for every `r` — the honest consistency check
+exactly Margrabe at `K = 0`, for every `r` (and `S²₀ ≠ 0`) — the consistency check
 against the one case where the true answer is known in closed form.
 
 ## Results
@@ -49,14 +50,9 @@ against the one case where the true answer is known in closed form.
   `σ₁² + σ₂² − 2ρσ₁σ₂`.
 * `kirkSpreadPrice`: the Kirk approximate price, `bsVGarman` at
   `A = S¹₀`, `K' = S²₀ + K·e^{-rT}`, `DF = 1`, `σ = √σ_eff²`.
-* `kirkSpreadPrice_eq_bsVGarman`: definitional unfolding exhibiting
-  `kirkSpreadPrice` as a `GarmanNormalForm` instance (trivial by
-  construction — it is built that way — but names the fact the file is
-  for: Kirk's formula is literally the BS closed form parameterised by the
-  pseudo-asset, not a new pricing primitive).
-* `kirkSpreadPrice_zero_eq_margrabe`: at `K = 0`, for every `r`,
-  `kirkSpreadPrice` is exactly `margrabePrice` at the (K=0) effective
-  volatility — a genuine price-level equality, not just a variance-level one.
+* `kirkSpreadPrice_zero_eq_margrabe`: at `K = 0`, for every `r` and `S²₀ ≠ 0`,
+  `kirkSpreadPrice` is exactly `margrabePrice` at the Margrabe volatility
+  `√(σ₁² + σ₂² − 2ρσ₁σ₂)` — a price-level equality, not just a variance-level one.
 -/
 
 @[expose] public section
@@ -70,9 +66,10 @@ pseudo-asset `S² + K`'s lognormal volatility is approximated by `σ₂ · w`. -
 noncomputable def kirkWeight (S2 K : ℝ) : ℝ := S2 / (S2 + K)
 
 /-- **Kirk's effective variance**: `σ₁² − 2ρσ₁σ₂·w + σ₂²·w²`, with
-`w = kirkWeight S2 K`. This is the variance of `L₁ − w·L₂` under the
-Margrabe-style bilinear expansion (`margrabe_variance_sub`), i.e. Kirk's
-approximation is "Margrabe with `S²` shrunk by `w`." -/
+`w = kirkWeight S2 K`. It is `Var[L₁ − w·L₂]/T` for log-prices with variances `σᵢ²T` and
+correlation `ρ` (the bilinear expansion of `margrabe_variance_sub` with `L₂` scaled by `w`;
+not stated as a theorem here), i.e. Kirk's approximation is "Margrabe with `S²` shrunk by
+`w`." -/
 noncomputable def kirkEffectiveVariance (S2 K σ1 σ2 ρ : ℝ) : ℝ :=
   σ1 ^ 2 - 2 * ρ * σ1 * σ2 * kirkWeight S2 K + σ2 ^ 2 * kirkWeight S2 K ^ 2
 
@@ -104,28 +101,16 @@ noncomputable def kirkSpreadPrice (S1 S2 K r σ1 σ2 ρ T : ℝ) : ℝ :=
   bsVGarman S1 (S2 + kirkDiscountedStrike K r T) 1
     (Real.sqrt (kirkEffectiveVariance S2 (kirkDiscountedStrike K r T) σ1 σ2 ρ)) T
 
-/-- **Kirk's price is, by construction, a `GarmanNormalForm` instance** at the
-pseudo-asset strike `S²₀ + K·e^{-rT}` and effective volatility `σ_eff`.
-Definitional unfolding — the content is that `kirkSpreadPrice` is *literally*
-the one BS closed form `bsVGarman`, not a bespoke new pricing formula,
-parameterised by the Kirk pseudo-asset. -/
-theorem kirkSpreadPrice_eq_bsVGarman (S1 S2 K r σ1 σ2 ρ T : ℝ) :
-    kirkSpreadPrice S1 S2 K r σ1 σ2 ρ T =
-      bsVGarman S1 (S2 + kirkDiscountedStrike K r T) 1
-        (Real.sqrt (kirkEffectiveVariance S2 (kirkDiscountedStrike K r T) σ1 σ2 ρ)) T :=
-  rfl
-
-/-- **Kirk's price collapses to the exact Margrabe price at `K = 0`, for
-every `r`**: the discounted cash strike `kirkDiscountedStrike 0 r T` is `0`
-regardless of `r` (nothing to discount), so the pseudo-asset is `S²₀` itself
-and `kirkSpreadPrice` is literally `margrabePrice` at the `K = 0` effective
-volatility — a genuine *price-level* equality (not merely the
-variance-level `kirkEffectiveVariance_zero_eq_margrabe`), witnessing that
-Kirk's heuristic is exact at the one point where the spread payoff
-`max(S¹ − S² − K, 0)` is the exact exchange-option payoff. -/
-theorem kirkSpreadPrice_zero_eq_margrabe (S1 S2 r σ1 σ2 ρ T : ℝ) :
+/-- **Kirk's price collapses to the Margrabe price at `K = 0`, for every `r`**: the
+discounted cash strike `kirkDiscountedStrike 0 r T` is `0` regardless of `r` (nothing to
+discount), so the pseudo-asset is `S²₀` itself, the effective variance is Margrabe's
+(`kirkEffectiveVariance_zero_eq_margrabe`), and `kirkSpreadPrice` is `margrabePrice` at the
+Margrabe volatility `√(σ₁² + σ₂² − 2ρσ₁σ₂)` — the point where the spread payoff
+`max(S¹ − S² − K, 0)` is the exchange-option payoff. -/
+theorem kirkSpreadPrice_zero_eq_margrabe (S1 r σ1 σ2 ρ T : ℝ) {S2 : ℝ} (hS2 : S2 ≠ 0) :
     kirkSpreadPrice S1 S2 0 r σ1 σ2 ρ T =
-      margrabePrice S1 S2 (Real.sqrt (kirkEffectiveVariance S2 0 σ1 σ2 ρ)) T := by
+      margrabePrice S1 S2 (Real.sqrt (σ1 ^ 2 + σ2 ^ 2 - 2 * ρ * σ1 * σ2)) T := by
+  rw [← kirkEffectiveVariance_zero_eq_margrabe S2 σ1 σ2 ρ hS2]
   unfold kirkSpreadPrice kirkDiscountedStrike
   rw [zero_mul, add_zero]
   exact (margrabe_eq_bsVGarman S1 S2 _ T).symm

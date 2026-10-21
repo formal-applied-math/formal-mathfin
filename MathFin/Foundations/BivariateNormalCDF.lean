@@ -28,7 +28,8 @@ gives a standard bivariate normal pair with correlation `r`, and
 * `bivariateNormalLaw_map_swap`, `bivariateNormalCDF_comm`: `(Y, X)` has the same law as
   `(X, Y)`, so `N₂(a, b; r) = N₂(b, a; r)`.
 * `bivariateNormalCDF_zero`, `bivariateNormalCDF_one`, `bivariateNormalCDF_neg_one`: the
-  independent, comonotone and countermonotone cases.
+  independent, comonotone and countermonotone cases; `posPart_Phi_sub_Phi`:
+  `(Φ(t) − Φ(k))⁺` is the standard normal probability of `(k, t]`.
 * `bivariateNormalCDF_flip_snd`: **`N₂(a, b; r) + N₂(a, -b; -r) = Φ(a)`**, the two-asset
   analogue of `Phi_add_Phi_neg` — the key algebraic ingredient behind exact two-asset closed
   forms (Stulz 1982, Heynen & Kat 1994/96) that package `N₂(·,·;ρ)` / `N₂(·,·;-ρ)` pairs.
@@ -36,8 +37,14 @@ gives a standard bivariate normal pair with correlation `r`, and
   survival identity, derived purely algebraically from `bivariateNormalCDF_flip_snd` and
   `bivariateNormalCDF_comm` (no new measure-theoretic argument).
 
-Outside `r ∈ [-1, 1]` the square root truncates to `0` and the construction is no longer a
-bivariate normal; every result that needs it carries the hypothesis `r ^ 2 ≤ 1`.
+Outside `r ∈ [-1, 1]` the square root truncates to `0` and the construction is no longer the
+standard bivariate normal with correlation `r` (it degenerates to the law of `(rY, Y)`); every
+result that needs it carries the hypothesis `r ^ 2 ≤ 1`.
+
+Neighbouring notions: Mathlib's `ProbabilityTheory.multivariateGaussian` (on
+`EuclideanSpace ℝ (Fin 2)`) and the hypothesis bundle `BivariateGaussianHyp`
+(`Foundations/BivariateGaussian.lean`). The bridges from `bivariateNormalLaw` to them are not
+stated here.
 -/
 
 @[expose] public section
@@ -204,21 +211,25 @@ theorem bivariateNormalCDF_one (a b : ℝ) : bivariateNormalCDF a b 1 = Phi (min
   congr 1
   ext y; simp
 
+/-- `(Φ(t) − Φ(k))⁺` is the standard normal probability of `(k, t]`. -/
+lemma posPart_Phi_sub_Phi (k t : ℝ) :
+    (Phi t - Phi k)⁺ = (gaussianReal 0 1).real (Ioc k t) := by
+  rcases le_total t k with h | h
+  · rw [Ioc_eq_empty (not_lt.2 h), measureReal_empty, posPart_eq_zero]
+    exact sub_nonpos.2 (strictMono_Phi.monotone h)
+  · rw [posPart_eq_self.2 (sub_nonneg.2 (strictMono_Phi.monotone h)), ← Iic_sdiff_Iic,
+      measureReal_sdiff (Iic_subset_Iic.2 h) measurableSet_Iic, ← cdf_eq_real, ← cdf_eq_real,
+      cdf_gaussianReal_zero_one]
+
 /-- **Countermonotone** (`r = -1`): `N₂(a, b; -1) = (Φ(b) − Φ(−a))⁺`. -/
 theorem bivariateNormalCDF_neg_one (a b : ℝ) :
     bivariateNormalCDF a b (-1) = (Phi b - Phi (-a))⁺ := by
-  rw [bivariateNormalCDF_of_sqrt_eq_zero (by simp)]
+  rw [bivariateNormalCDF_of_sqrt_eq_zero (by simp), posPart_Phi_sub_Phi]
   have hset : {y : ℝ | -1 * y ≤ a ∧ y ≤ b} = Icc (-a) b := by
     ext y; simp only [mem_ofPred_eq, mem_Icc]; constructor <;> rintro ⟨h1, h2⟩ <;> constructor <;>
       linarith
   have := nullSingletonClass_gaussianReal (μ := 0) one_ne_zero
   rw [hset, measureReal_congr Ioc_ae_eq_Icc.symm]
-  rcases le_total b (-a) with h | h
-  · rw [Ioc_eq_empty (not_lt.2 h), measureReal_empty, eq_comm, posPart_eq_zero]
-    exact sub_nonpos.2 (strictMono_Phi.monotone h)
-  · rw [posPart_eq_self.2 (sub_nonneg.2 (strictMono_Phi.monotone h)), ← Iic_sdiff_Iic,
-      measureReal_sdiff (Iic_subset_Iic.2 h) measurableSet_Iic, ← cdf_eq_real, ← cdf_eq_real,
-      cdf_gaussianReal_zero_one]
 
 /-! ## A sign-flip identity: `N₂(a, b; r) + N₂(a, -b; -r) = Φ(a)`
 
@@ -255,8 +266,6 @@ set `{b}`, since the `Y`-margin `map_snd_bivariateNormalLaw` is atom-free), then
 `X`-margin via `map_fst_bivariateNormalLaw`. -/
 theorem bivariateNormalCDF_flip_snd (a b : ℝ) {r : ℝ} (hr : r ^ 2 ≤ 1) :
     bivariateNormalCDF a b r + bivariateNormalCDF a (-b) (-r) = Phi a := by
-  have hmeas : MeasurableSet (Iic a ×ˢ Iic b : Set (ℝ × ℝ)) :=
-    measurableSet_Iic.prod measurableSet_Iic
   have hflip : bivariateNormalCDF a (-b) (-r) = (bivariateNormalLaw r).real (Iic a ×ˢ Ici b) := by
     rw [bivariateNormalCDF_eq_law, ← bivariateNormalLaw_map_negSnd r,
       map_measureReal_apply (by fun_prop) (measurableSet_Iic.prod measurableSet_Iic)]
