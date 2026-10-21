@@ -524,6 +524,10 @@ import MathFin.FixedIncome.KMVMertonStructural
 -- Phase 28: CDS fair spread under time-varying hazard (cash-flow balance)
 import MathFin.FixedIncome.CDSTimeVarying
 import MathFin.FixedIncome.Cox
+-- Default-time density of a deterministic hazard curve (law of τ as Lebesgue density)
+import MathFin.FixedIncome.DefaultDensity
+-- CVA under exposure independent of default (Fubini reduction + Gaussian closed form)
+import MathFin.FixedIncome.CVA
 -- Phase 41: Vasicek SDE closed-form (full SDE, mean + variance)
 import MathFin.FixedIncome.VasicekSDE
 -- OU generator on polynomials: the Hermite spectral layer of the OU/Vasicek family
