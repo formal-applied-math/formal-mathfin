@@ -38,7 +38,7 @@ duration:
 This module states the identity abstractly, parametrized by an arbitrary
 per-cashflow dollar-duration contribution `d : ι → ℝ` (a caller could instantiate
 `d` with the per-cashflow term of `modifiedNumerator`/`bondPriceDisc` from
-`DurationSensitivity`, or with any other per-cashflow duration contribution,
+`MacaulayModified`, or with any other per-cashflow duration contribution,
 without this module depending on that substrate), under exactly the
 partition-of-unity hypothesis above — making explicit that the identity is a
 genuine consequence of partition of unity, not a restatement of it.
