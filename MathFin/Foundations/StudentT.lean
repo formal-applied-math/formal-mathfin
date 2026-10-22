@@ -11,8 +11,7 @@ public import Mathlib
 # The Student-t law
 
 The standard (unit-scale) Student-t law with `ν > 0` degrees of freedom is the law on `ℝ` with
-density proportional to the kernel `(1 + x²/ν)^(-(ν+1)/2)` (McNeil, Frey and Embrechts,
-*Quantitative Risk Management* (2015), Appendix A.2.1).
+density proportional to the kernel `(1 + x²/ν)^(-(ν+1)/2)`.
 
 Mathlib has no Student-t law at this pin. This file builds it as `volume.withDensity` of the
 normalized kernel, `studentTPDFReal ν x = k_ν(x) / C_ν` with `C_ν = ∫ k_ν`
@@ -158,7 +157,7 @@ noncomputable def studentTPDF (ν x : ℝ) : ℝ≥0∞ := ENNReal.ofReal (stude
 lemma studentTPDFReal_pos (hν : 0 < ν) (x : ℝ) : 0 < studentTPDFReal ν x :=
   div_pos (studentTKernel_pos hν x) (studentTNormConst_pos hν)
 
-/-- **The textbook Student-t density** (McNeil–Frey–Embrechts, Appendix A.2.1):
+/-- **The textbook Student-t density**:
 `g_ν(x) = Γ((ν+1)/2) / (√(νπ) Γ(ν/2)) · (1 + x²/ν)^(-(ν+1)/2)`. -/
 theorem studentTPDFReal_eq (hν : 0 < ν) (x : ℝ) :
     studentTPDFReal ν x = Gamma ((ν + 1) / 2) / (√(ν * π) * Gamma (ν / 2)) *
