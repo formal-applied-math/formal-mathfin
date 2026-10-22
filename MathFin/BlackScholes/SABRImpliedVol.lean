@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.BlackScholes.ImpliedVolatility
+public import MathFin.Futures.Black76
 
 /-!
 # The SABR lognormal implied-volatility asymptotic approximation
@@ -64,13 +65,18 @@ open design question (issue #100). What is proved concerns the *printed* formula
   scaled by `t_ex`, is positive, the ATM Black call priced at `sabrATMVol` is
   strictly above the same call priced at the backbone (via
   `bsV_strictMonoOn_sigma`, `BlackScholes/ImpliedVolatility.lean`).
+* `sabrATMVol_black_futures_price` — the ATM option priced, as the paper prescribes, by
+  Black's formula at `σ_ATM = sabrATMVol`: under the Black-76 hypothesis at that vol,
+  the discounted expected call payoff is `e^{−rT} · f · (2Φ(σ_ATM √T / 2) − 1)`. This
+  is Black's formula evaluated at eq. 2.18's vol; it does not show that the SABR model
+  itself produces this price.
 -/
 
 @[expose] public section
 
 namespace MathFin
 
-open Filter Topology
+open Filter MeasureTheory Topology
 
 /-- **The SABR "backbone"**: the leading-order at-the-money implied volatility
 `α / f^(1-β)` (the dominant factor in Hagan-Kumar-Lesniewski-Woodward eq. 2.18;
@@ -135,6 +141,19 @@ theorem sabrATMVol_bsV_gt_backbone_bsV {f α β ρ ν tex T : ℝ} (hf : 0 < f) 
     unfold sabrATMVol
     nlinarith [mul_pos hpos hbracket]
   exact bsV_strictMonoOn_sigma hf hT hf hpos (hpos.trans hlt) hlt
+
+/-- **The ATM price as Black-76 at `sabrATMVol`**: Hagan et al. price European options by
+Black's formula with the implied vol `σ_B`; at the money that vol is eq. 2.18. Under the
+Black-76 hypothesis at `σ_ATM = sabrATMVol f α β ρ ν tex` (forward `f`, strike `f`, zero
+drift), the discounted expected call payoff is `e^{−rT} · f · (2Φ(σ_ATM √T / 2) − 1)`
+(`black_futures_formula_atm`). This is Black's formula at eq. 2.18's vol, not a
+statement that the SABR dynamics produce this price. -/
+theorem sabrATMVol_black_futures_price {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {Q : Measure Ω} [IsProbabilityMeasure Q] {f α β ρ ν tex T : ℝ} {Z : Ω → ℝ}
+    (h : BSCallHyp Q f f 0 (sabrATMVol f α β ρ ν tex) T Z) (r : ℝ) :
+    ∫ ω, Real.exp (-r * T) * max (bsTerminal f 0 (sabrATMVol f α β ρ ν tex) T (Z ω) - f) 0 ∂Q
+      = Real.exp (-r * T) * f * (2 * Phi (sabrATMVol f α β ρ ν tex * Real.sqrt T / 2) - 1) :=
+  black_futures_formula_atm h r
 
 /-! ### The general formula (eq. 2.17) and its `K → f` limit -/
 
