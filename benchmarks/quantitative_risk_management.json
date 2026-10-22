@@ -1079,7 +1079,7 @@
       "domain": "mathematical_finance",
       "description": "For T with the Student-t law t_ν, σ ≥ 0 and α ∈ (0, 1), the library's valueAtRisk of the location-scale loss μ + σT is μ + σ·t_ν⁻¹(α), where t_ν⁻¹(α) = quantile (studentTMeasure ν) α is the quantile of the law.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_of_hasLaw_studentTMeasure_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {T : Ω → ℝ} {ν μ σ α : ℝ} (hT : HasLaw T (studentTMeasure ν) P)\n    (hσ : 0 ≤ σ) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk (fun ω ↦ μ + σ * T ω) P α = μ + σ * quantile (studentTMeasure ν) α :=\n  MathFin.valueAtRisk_of_hasLaw_studentTMeasure hT hσ hα\n"
+        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_of_hasLaw_studentTMeasure_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {T : Ω → ℝ} {ν μ σ α : ℝ}\n    (hT : HasLaw T (studentTMeasure ν) P) (hσ : 0 ≤ σ) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk (fun ω ↦ μ + σ * T ω) P α = μ + σ * quantile (studentTMeasure ν) α :=\n  MathFin.valueAtRisk_of_hasLaw_studentTMeasure hT hσ hα\n"
       },
       "metadata": {
         "chapter": 2,

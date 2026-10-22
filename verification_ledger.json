@@ -3346,8 +3346,8 @@
       "benchmark_file": "quantitative_risk_management.json",
       "date": "2026-10-22",
       "elapsed_s": 3.5,
-      "input_hash": "9ebe8cb268aac510e767443b18d77163f13a7b2b3d045cb861635161273d9397",
-      "verified_at_commit": "332197a"
+      "input_hash": "ad821e675d1768e43cf5e5d04e177a15b0300dca186adbd4e2537c7c8fd85042",
+      "verified_at_commit": "94432e1"
     },
     "qrm-student-t-var-le-es": {
       "benchmark_file": "quantitative_risk_management.json",
