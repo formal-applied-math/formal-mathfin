@@ -1,0 +1,126 @@
+{
+  "description": "Decentralised-finance mechanics tied to the library: lending-protocol interest indices as periodic compounding against the zero-coupon bond, liquidation as a structural default, constant-product and concentrated-liquidity positions against option payoffs and the lognormal model. Fees, gas and block timing are not modelled. `chapter` is not used; each entry's `reference` names its source.",
+  "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)",
+  "theorems": [
+    {
+      "id": "mf-compound-borrow-index-continuous-limit",
+      "name": "Compound Interest-Rate Index Against Continuous Compounding",
+      "domain": "mathematical_finance",
+      "description": "Compound's interest-rate index Index_n = Index_{n-1} * (1 + r*t), at a constant per-block rate r over periods of t blocks, with r*t >= -1 and a nonnegative initial index, never exceeds continuous compounding over the elapsed time: Index_n <= Index_0 / zcb(r, 0, n*t) = Index_0 * exp(r*n*t). Splitting a horizon T into n equal periods, Index_0 * (1 + r*T/n)^n converges to Index_0 / zcb(r, 0, T). Rates that change between periods are not covered.",
+      "code": {
+        "lean": "import MathFin.DeFi.Compound\n\nopen MathFin MathFin.DeFi.Compound Filter Topology\n\n/-- Compound's interest-rate index at a constant rate never out-accrues continuous compounding\nover the elapsed time, and accruing a horizon in ever more periods converges to it. -/\ntheorem compound_borrow_index_vs_continuous (index : ℕ → ℝ) {r t : ℝ} (h0 : 0 ≤ index 0)\n    (hrt : -1 ≤ r * t) (hrec : ∀ n, index (n + 1) = index n * (1 + r * t)) :\n    (∀ n : ℕ, index n ≤ index 0 * (zcb r 0 (n * t))⁻¹) ∧\n      ∀ T : ℝ, Tendsto (fun n : ℕ ↦ index 0 * (1 + r * (T / n)) ^ n) atTop\n        (𝓝 (index 0 * (zcb r 0 T)⁻¹)) :=\n  ⟨borrowIndex_le_inv_zcb index h0 hrt hrec, fun T ↦ tendsto_borrowIndex (index 0) r T⟩\n"
+      },
+      "metadata": {
+        "reference": "R. Leshner and G. Hayes, Compound: The Money Market Protocol, v1.0 (February 2019), §3.2.1 Market Dynamics (Index_{a,n} = Index_{a,(n-1)} * (1 + r * t)); J. C. Hull, Options, Futures, and Other Derivatives, §4.2 (continuous compounding)",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.DeFi.Compound.borrowIndex_le_inv_zcb and MathFin.DeFi.Compound.tendsto_borrowIndex (MathFin/DeFi/Compound.lean), which instantiate MathFin.one_add_mul_pow_le_inv_zcb and MathFin.tendsto_one_add_div_pow_inv_zcb (MathFin/FixedIncome/PeriodicCompounding.lean) against the library's zero-coupon bond zcb (MathFin/FixedIncome/ZCB.lean). SCOPE: constant rate only; the index recurrence is a hypothesis, as in the whitepaper; the limit is Mathlib's (1 + t/n)^n -> exp t. Per-block rates that change with utilization, and the reserve-factor split, are not covered."
+      }
+    },
+    {
+      "id": "mf-dai-stability-fee-continuous-rate",
+      "name": "Dai Stability-Fee Compounding Is Continuous Compounding",
+      "domain": "mathematical_finance",
+      "description": "If a Dai vault's debt compounds at a per-period stability fee fee > -1, debt(n+1) = debt(n) * (1 + fee), then the debt after n periods discounted by the zero-coupon bond at the continuously compounded rate log(1 + fee), zcb(log(1 + fee), 0, n), equals the initial debt: per-period compounding at fee is continuous compounding at log(1 + fee), with time measured in periods.",
+      "code": {
+        "lean": "import MathFin.DeFi.Dai\n\nopen MathFin\n\n/-- Per-period stability-fee compounding, discounted at the continuously compounded rate\n`log (1 + fee)`, returns the initial debt. -/\ntheorem dai_stability_fee_continuous_rate (debt : ℕ → ℝ) {fee : ℝ} (hfee : -1 < fee)\n    (hrec : ∀ n, debt (n + 1) = debt n * (1 + fee)) (n : ℕ) :\n    debt n * zcb (Real.log (1 + fee)) 0 n = debt 0 :=\n  MathFin.DeFi.Dai.debt_mul_zcb_log_eq debt hfee hrec n\n"
+      },
+      "metadata": {
+        "reference": "MakerDAO, The Maker Protocol: MakerDAO's Multi-Collateral Dai (MCD) System (2020), risk parameter 'Stability Fee'; MakerDAO technical documentation, Rates Module (Jug: per-second rate compounded over elapsed seconds by drip); J. C. Hull, Options, Futures, and Other Derivatives, §4.2 (continuous compounding)",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.DeFi.Dai.debt_mul_zcb_log_eq (MathFin/DeFi/Dai.lean), which applies MathFin.one_add_pow_mul_zcb_log (MathFin/FixedIncome/PeriodicCompounding.lean) to the closed form debt n = debt 0 * (1 + fee)^n. SCOPE: the per-period fee is constant and the compounding recurrence is a hypothesis; a period is any unit (a second for the MCD Jug). Fixed-point rounding of the on-chain rpow is not modelled."
+      }
+    },
+    {
+      "id": "mf-aave-health-factor-terminal-liquidation-probability",
+      "name": "Aave Health-Factor Liquidation Probability at a Horizon",
+      "domain": "mathematical_finance",
+      "description": "If the collateral value at T is lognormal, C_T = C_0 * exp((mu - sigma^2/2) T + sigma sqrt(T) Z) with Z standard normal (BSCallHyp, rate slot read as the drift mu), and the liquidation threshold LT > 0 and the total debt borrows + fees > 0 are fixed, then the probability that the Aave single-asset health factor C_T * LT / (borrows + fees) is below 1 at T equals the Merton/KMV default probability kmvPD = Phi(-d2) with default barrier (borrows + fees) / LT. A check at the single date T: the probability of a first passage below the threshold before T is not derived; one risky collateral asset.",
+      "code": {
+        "lean": "import MathFin.Bridges.LiquidationAsStructuralDefault\n\nopen MathFin MeasureTheory ProbabilityTheory\n\n/-- The probability that an Aave health factor is below one at the horizon, for lognormal\ncollateral, is the Merton–KMV default probability with barrier `(borrows + fees) / LT`. -/\ntheorem aave_health_factor_liquidation_probability {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q] {C_0 LT B F μ σ T : ℝ} {Z : Ω → ℝ}\n    (hdebt : 0 < B + F) (hLT : 0 < LT) (h : BSCallHyp Q C_0 ((B + F) / LT) μ σ T Z) :\n    (Q {ω | MathFin.DeFi.Aave.healthFactorV1 (bsTerminal C_0 μ σ T (Z ω)) LT B F < 1}).toReal\n      = kmvPD C_0 ((B + F) / LT) μ σ T :=\n  prob_healthFactorV1_lt_one_eq_kmvPD hdebt hLT h\n"
+      },
+      "metadata": {
+        "reference": "Aave, Aave Protocol V2 whitepaper (2020), §5 Formal Definitions (health factor; HF < 1 can be liquidated); R. C. Merton, On the pricing of corporate debt: the risk structure of interest rates, J. Finance 29 (1974) 449-470",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.prob_healthFactorV1_lt_one_eq_kmvPD (MathFin/Bridges/LiquidationAsStructuralDefault.lean): the liquidation set {HF < 1} is rewritten to {C_T < (B+F)/LT} (MathFin.DeFi.Aave.healthFactorV1_lt_one_iff) and its probability computed by MathFin.prob_bsTerminal_lt_eq_kmvPD (the strict shortfall region z < -d2, the standard normal's null singletons, Phi_def, kmvDistanceToDefault_eq_bsd2). SCOPE: terminal check at T only (protocols liquidate at the first crossing, a first-passage probability not computed here); debt and fees fixed at T; single collateral asset; the multi-asset healthFactorV2 is not covered."
+      }
+    },
+    {
+      "id": "mf-cpmm-impermanent-loss-nonpositive",
+      "name": "Constant-Product Impermanent Loss Is Nonpositive",
+      "domain": "mathematical_finance",
+      "description": "For a fee-free constant-product pool with deposit (x0, y0) and a price move by the factor r > 0, the LP-to-HODL value ratio minus one, computed from the rebalanced reserves, equals IL(r) = 2 sqrt(r)/(1 + r) - 1 = -(sqrt(r) - 1)^2/(1 + r); hence IL(r) <= 0, with IL(r) = 0 if and only if r = 1. Fees are not modelled.",
+      "code": {
+        "lean": "import MathFin.DeFi.UniswapMechanics\n\nopen MathFin.DeFi\n\n/-- The constant-product impermanent loss, derived from the rebalanced reserves, is\n`−(√r − 1)²/(1 + r)`: never positive, and zero exactly when the price returns. -/\ntheorem cpmm_impermanent_loss_nonpos {x0 y0 r : ℝ} (hx0 : 0 < x0) (hy0 : 0 < y0) (hr : 0 < r) :\n    (impermanentLossReservesX x0 y0 r * (r * y0 / x0) + impermanentLossReservesY x0 y0 r)\n          / (x0 * (r * y0 / x0) + y0) - 1 = impermanentLoss r ∧\n      impermanentLoss r = -(Real.sqrt r - 1) ^ 2 / (1 + r) ∧\n      impermanentLoss r ≤ 0 ∧ (impermanentLoss r = 0 ↔ r = 1) :=\n  ⟨impermanentLoss_eq x0 y0 r hx0 hy0 hr, impermanentLoss_eq_neg_sq hr.le,\n    impermanentLoss_nonpos hr.le, impermanentLoss_eq_zero_iff hr.le⟩\n"
+      },
+      "metadata": {
+        "reference": "L. Heimbach, E. Schertenleib, R. Wattenhofer, Risks and Returns of Uniswap V3 Liquidity Providers, Proc. 4th ACM Conference on Advances in Financial Technologies (AFT 2022), arXiv:2205.08904 (impermanent loss of a constant-product position, the v2 formula as the full-range case)",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.DeFi.impermanentLoss_eq, impermanentLoss_eq_neg_sq, impermanentLoss_nonpos and impermanentLoss_eq_zero_iff (MathFin/DeFi/UniswapMechanics.lean). The rebalanced reserves satisfy both the invariant and the new-price equation (impermanentLossReserves_invariant, impermanentLossReserves_price); the sign is AM-GM, 2 sqrt r <= 1 + r, via sqrt(r)^2 = r. SCOPE: fee-free pool at the external price; that the rebalanced reserves are the only positive solution is not stated."
+      }
+    },
+    {
+      "id": "mf-uniswap-v3-position-covered-call",
+      "name": "Uniswap v3 Position Value as a Covered Call",
+      "domain": "mathematical_finance",
+      "description": "For a Uniswap v3 position with liquidity L >= 0 on the square-root price range [a, b] (0 < a < b), its value in token Y at square-root price s >= 0 (all token X below the range, the real reserves inside, all token Y above) is all X at s = a and all Y at s = b; it equals the covered-call payoff x_max * (s^2 - max(s^2 - ab, 0)) (long the full X holding x_max, short a call struck at sqrt(p_a p_b) = ab) outside the range, is at most that payoff everywhere, and inside the range falls short of it by exactly min(L (s - a)^2 / a, L (b - s)^2 / b). Fees are not modelled.",
+      "code": {
+        "lean": "import MathFin.DeFi.UniswapMechanics\n\nopen MathFin.DeFi\n\n/-- A Uniswap v3 range position is a covered call struck at the geometric-mean price, less a\nsmoothing term inside the range. -/\ntheorem uniswap_v3_position_covered_call {L a b s : ℝ} (hL : 0 ≤ L) (ha : 0 < a) (hab : a < b)\n    (hs : 0 ≤ s) :\n    v3PositionValue L a b a = a ^ 2 * realReserveX L a b ∧\n      v3PositionValue L a b b = realReserveY L b a ∧\n      (s ≤ a ∨ b < s →\n        v3PositionValue L a b s = realReserveX L a b * (s ^ 2 - max (s ^ 2 - a * b) 0)) ∧\n      v3PositionValue L a b s ≤ realReserveX L a b * (s ^ 2 - max (s ^ 2 - a * b) 0) ∧\n      (a < s → s ≤ b →\n        realReserveX L a b * (s ^ 2 - max (s ^ 2 - a * b) 0) - v3PositionValue L a b s\n          = min (L * (s - a) ^ 2 / a) (L * (b - s) ^ 2 / b)) :=\n  ⟨v3PositionValue_at_lower L a b, v3PositionValue_at_upper L hab,\n    fun h ↦ h.elim (v3PositionValue_eq_coveredCall_of_le ha hab.le hs)\n      (v3PositionValue_eq_coveredCall_of_lt ha hab.le),\n    v3PositionValue_le_coveredCall hL ha hab.le hs,\n    fun has hsb ↦ coveredCall_sub_v3PositionValue hL ha has hsb⟩\n"
+      },
+      "metadata": {
+        "reference": "H. Adams, N. Zinsmeister, M. Salem, R. Keefer, D. Robinson, Uniswap v3 Core (2021), §2 (eq. 2.2, real reserves) and §6.4.1 (eqs. 6.29-6.30, token amounts below, inside and above the range)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.DeFi.v3PositionValue_at_lower, v3PositionValue_at_upper, v3PositionValue_eq_coveredCall_of_le, v3PositionValue_eq_coveredCall_of_lt, v3PositionValue_le_coveredCall and coveredCall_sub_v3PositionValue (MathFin/DeFi/UniswapMechanics.lean). The value is defined from the v3 reserve formulas realReserveX/realReserveY in the three price regimes; the in-range gaps come from two algebraic identities (realReserveX_mul_sq_sub_inRange, realReserveX_mul_mul_sub_inRange). SCOPE: values in token Y at a given price; fees, ticks and the pricing of the call are not modelled."
+      }
+    },
+    {
+      "id": "mf-cpmm-lp-expected-value-lognormal",
+      "name": "Expected Constant-Product LP Value Under a Lognormal Price",
+      "domain": "mathematical_finance",
+      "description": "For a fee-free constant-product pool kept at the external price, with deposit (x0, y0) at the pool price and a driftless lognormal price move r_T = exp(-sigma^2 T/2 + sigma sqrt(T) Z), Z standard normal (BSCallHyp with zero drift), the expected value of the LP position at T is exp(-sigma^2 T/8) times the expected value of holding the deposit. Values are in token Y and undiscounted; fees and the arbitrage path are not modelled.",
+      "code": {
+        "lean": "import MathFin.Bridges.ConstantProductLPLognormal\n\nopen MathFin MathFin.DeFi MeasureTheory ProbabilityTheory\n\n/-- Under a driftless lognormal price move, the expected constant-product LP value is\n`exp (−σ² T / 8)` times the expected buy-and-hold value. -/\ntheorem cpmm_lp_expected_value_lognormal {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}\n    [IsProbabilityMeasure Q] {x0 y0 K σ T : ℝ} {Z : Ω → ℝ} (hx0 : 0 < x0) (hy0 : 0 < y0)\n    (h : BSCallHyp Q 1 K 0 σ T Z) :\n    ∫ ω, (impermanentLossReservesX x0 y0 (bsTerminal 1 0 σ T (Z ω))\n          * (bsTerminal 1 0 σ T (Z ω) * y0 / x0)\n        + impermanentLossReservesY x0 y0 (bsTerminal 1 0 σ T (Z ω))) ∂Q\n      = Real.exp (-(σ ^ 2 * T / 8))\n        * ∫ ω, (x0 * (bsTerminal 1 0 σ T (Z ω) * y0 / x0) + y0) ∂Q :=\n  integral_lpValue_eq_exp_mul_integral_hodlValue hx0 hy0 h\n"
+      },
+      "metadata": {
+        "reference": "G. Angeris, H.-T. Kao, R. Chiang, C. Noyes, T. Chitra, An analysis of Uniswap markets, Cryptoeconomic Systems 1(1) (2021); J. Milionis, C. C. Moallemi, T. Roughgarden, A. L. Zhang, Automated Market Making and Loss-Versus-Rebalancing (2022), arXiv:2208.06046 (constant-product rate sigma^2/8)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.integral_lpValue_eq_exp_mul_integral_hodlValue (MathFin/Bridges/ConstantProductLPLognormal.lean): the LP value is 2 y0 sqrt(r) (MathFin.DeFi.lpPortfolioValue_eq), sqrt of a lognormal factor is lognormal with half the volatility (sqrt_bsTerminal_one, Real.exp_half), and both expectations are the library's forward identity expected_terminal_eq_forward (MathFin/BlackScholes/Forward.lean); the general-drift formula E[LP_T] = 2 y0 exp((mu/2 - sigma^2/8) T) is integral_lpValue_lognormal. SCOPE: fee-free pool assumed at the external price at T; deposit at the pool price; values in token Y, undiscounted; fees and the path of arbitrage trades are not modelled."
+      }
+    },
+    {
+      "id": "mf-cpmm-arbitrage-iff-price-divergence",
+      "name": "Constant-Product Arbitrage Exists Iff the Pool Price Diverges",
+      "domain": "mathematical_finance",
+      "description": "For a fee-free constant-product pool with reserves x, y > 0 and an external price P > 0, the pool's internal price y/x differs from P if and only if some single swap against the pool, valued at P, earns a riskless profit, by selling X to the pool or buying X from it (which direction pays, selling when P < y/x and buying when y/x < P, is exists_profitable_swap_iff / exists_profitable_reverse_swap_iff, not this statement). Equivalently, a pool at the external price admits no profitable swap of any size. Fees are not modelled.",
+      "code": {
+        "lean": "import MathFin.DeFi.ConstantProductAMM\n\nopen MathFin.DeFi\n\n/-- The internal price `y / x` differs from the external price `P` exactly when some single swap\nagainst the pool, valued at `P`, earns a riskless profit. -/\ntheorem cpmm_arbitrage_iff_price_divergence {x y P : ℝ} (hx : 0 < x) (hy : 0 < y) (hP : 0 < P) :\n    arbitragePresent x y P ↔\n      (∃ Δx > 0, P * Δx < swapOutput x y Δx) ∨ (∃ Δy > 0, Δy < P * swapOutput y x Δy) :=\n  arbitragePresent_iff hx hy hP\n"
+      },
+      "metadata": {
+        "reference": "G. Angeris, H.-T. Kao, R. Chiang, C. Noyes, T. Chitra, An analysis of Uniswap markets, Cryptoeconomic Systems 1(1) (2021), §2.1 (optimal arbitrage; no-arbitrage bound (3), which at zero fee says the pool price equals the reference price)",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.DeFi.arbitragePresent_iff (MathFin/DeFi/ConstantProductAMM.lean), from exists_profitable_swap_iff and exists_profitable_reverse_swap_iff: a swap of size D > 0 is profitable iff P (x + D) < y (resp. y + D < P x), and such a D exists iff P x < y (resp. y < P x). arbitragePresent is defined as internalPrice x y ≠ P. SCOPE: fee-free pool, one swap at a time; the optimal arbitrage size and the fee band of Angeris et al. are not formalized."
+      }
+    },
+    {
+      "id": "mf-uniswap-v3-position-bs-price-bound",
+      "name": "Black-Scholes Price Bound for a Uniswap v3 Position",
+      "domain": "mathematical_finance",
+      "description": "If the price of X in Y is lognormal under Q (BSCallHyp with rate r, volatility sigma, strike slot ab), the discounted expected value at T of a Uniswap v3 position with liquidity L >= 0 on the square-root price range [a, b] (0 < a <= b), held without fees, is at most x_max * (S_0 - C), where x_max is the position's full X holding and C = S_0 Phi(d1) - ab e^{-rT} Phi(d2) is the Black-Scholes call struck at the geometric-mean price ab = sqrt(p_a p_b). An upper bound only: the expectation of the in-range gap is not computed.",
+      "code": {
+        "lean": "import MathFin.Bridges.UniswapV3CoveredCallPrice\n\nopen MathFin MathFin.DeFi MeasureTheory ProbabilityTheory\n\n/-- The Black–Scholes value of a Uniswap v3 range position is at most that of the covered call\nstruck at the geometric-mean price of the range. -/\ntheorem uniswap_v3_position_bs_price_bound {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q] {S_0 r σ T L a b : ℝ} {Z : Ω → ℝ} (hL : 0 ≤ L)\n    (ha : 0 < a) (hab : a ≤ b) (h : BSCallHyp Q S_0 (a * b) r σ T Z) :\n    ∫ ω, Real.exp (-r * T) * v3PositionValue L a b (Real.sqrt (bsTerminal S_0 r σ T (Z ω))) ∂Q\n      ≤ realReserveX L a b * (S_0 - (S_0 * Phi (bsd1 S_0 (a * b) r σ T)\n          - a * b * Real.exp (-r * T) * Phi (bsd2 S_0 (a * b) r σ T))) :=\n  integral_discounted_v3PositionValue_le hL ha hab h\n"
+      },
+      "metadata": {
+        "reference": "H. Adams, N. Zinsmeister, M. Salem, R. Keefer, D. Robinson, Uniswap v3 Core (2021), §6.4.1 (eqs. 6.29-6.30, position token amounts); F. Black and M. Scholes, The pricing of options and corporate liabilities, J. Political Economy 81 (1973) 637-654",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.integral_discounted_v3PositionValue_le (MathFin/Bridges/UniswapV3CoveredCallPrice.lean): the pointwise covered-call bound MathFin.DeFi.v3PositionValue_le_coveredCall at s = sqrt(S_T), integral_mono (the position value is measurable and bounded by x_max * ab), then discounted_terminal_eq_S0 (MathFin/BlackScholes/Forward.lean) and bs_call_formula (MathFin/BlackScholes/Call.lean). SCOPE: an upper bound, not the price; the position is held to T with no fees, no rebalancing and Y as the numeraire; the expected in-range gap is not computed."
+      }
+    }
+  ]
+}

@@ -1097,7 +1097,7 @@ git commit -m "feat(corpus): eight entries for the contracts tower"
 ## Task 7: Documentation, and the prose-vs-statement pass
 
 **Files:**
-- Modify: `docs/bridges.md`, `docs/coverage.md`, `docs/patterns.md`, `docs/roadmap.md`, `docs/mathematical-architecture.md`, `README.md`
+- Modify: `docs/bridges.md`, `docs/coverage.md`, `docs/patterns.md`, `docs/archive/roadmap-history.md`, `docs/mathematical-architecture.md`, `README.md`
 
 Every phase is a complete repo upgrade, not just the Lean.
 
@@ -1118,7 +1118,7 @@ Add a dated batch with the two patterns this phase produced:
 
 `patterns.md` is a first-class citizen: consult it before proofs, update it in the same flow.
 
-- [ ] **Step 4: `docs/roadmap.md` and `docs/mathematical-architecture.md`**
+- [ ] **Step 4: `docs/archive/roadmap-history.md` and `docs/mathematical-architecture.md`**
 
 Record the tower as delivered, and record the two deferred rungs with their forcing cases: **branching contracts + the lifecycle state machine** (forced by the first autocall entry) and **path-dependent instances** (forced by wiring `bsAssets` to the full GBM path rather than the terminal value).
 
@@ -1207,7 +1207,7 @@ python3 -m tools.verify.coverage_report
 - [ ] **Step 9: Commit**
 
 ```bash
-git add docs/bridges.md docs/coverage.md docs/patterns.md docs/roadmap.md \
+git add docs/bridges.md docs/coverage.md docs/patterns.md docs/archive/roadmap-history.md \
         docs/mathematical-architecture.md docs/sources.md README.md
 git commit -m "docs(contracts): record the tower, its ceiling, and the two patterns it produced"
 ```

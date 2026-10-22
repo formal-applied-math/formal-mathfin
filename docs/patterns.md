@@ -1,6 +1,6 @@
 # Learnings
 
-Notes from the 2026-05-22 session that pushed `docs/roadmap.md`'s
+Notes from the 2026-05-22 session that pushed `docs/archive/roadmap-history.md`'s
 three depth-theorem candidates to completion (continuous K-convexity bridge,
 multi-step Merton tree, full reflection-principle bijection — Phases 15
 and 16). This document captures what worked, what was harder than expected,

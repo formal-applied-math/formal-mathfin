@@ -30,11 +30,14 @@ process `X_t = X₀ + b·t + σ·B_t`:
   `f'`, `f''`, `f'''` bounded, the exponential-growth hypotheses of `ito_formula_itoProcess`
   hold at `λ = 0`.
 
-An adapted-coefficient analogue, `itoDrift_expectation_identity_adapted`
-(`ItoFormulaAdaptedDrift`), assumes rather than constructs a `natFiltration`-adapted version
-`M` of the Itô integral of `δ` with every path continuous; it is not used to derive the
-constant-coefficient case here. For the process the library constructs, the pathwise formula
-for adapted coefficients is `ItoFormulaAdapted.ito_formula_adapted`.
+The adapted-coefficient case is proved twice elsewhere, and neither proof is used here.
+`ItoDriftConditional.itoDrift_expectation_identity_adapted` (`ItoFormulaAdaptedDrift`)
+uses the discrete Itô formula and takes as hypotheses a `natFiltration`-adapted version `M` of
+the Itô integral of `δ` and an almost surely path-continuous `X = c + ∫ β + M`.
+`itoDrift_expectation_identity_adaptedItoProcess` (`ItoFormulaAdaptedDriftConstructed`) takes
+the expectation of the pathwise formula `ItoFormulaAdapted.ito_formula_adapted` for the process
+the library constructs, with no hypothesized `M`; that module also shows the constructed process
+meets the hypotheses of the first proof when every path of `B` is continuous.
 -/
 
 @[expose] public section
@@ -47,13 +50,6 @@ open ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessGeneral QuadraticVariationL2
   ItoIntegralBrownian
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-
-/-- Telescoping over a partition: `∑_{k<n} (a_{k+1} − a_k) = a_n − a_0`. -/
-private theorem sum_telescope (a : ℕ → ℝ) (n : ℕ) :
-    ∑ k ∈ Finset.range n, (a (k + 1) - a k) = a n - a 0 := by
-  induction n with
-  | zero => simp
-  | succ m ih => rw [Finset.sum_range_succ, ih]; ring
 
 /-- **Fubini for the path integral of a bounded path-continuous family** (the interchange the
 integrated Itô–drift identity needs):
@@ -143,7 +139,7 @@ theorem expectation_pathIntegral_eq {w : ℝ≥0 → Ω → ℝ}
             (Finset.mul_sum (Finset.range n)
               (fun k ↦ ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) C).symm
         _ = C * ((unifPart T n n : ℝ) - unifPart T n 0) := by
-            rw [sum_telescope (a := fun k ↦ ((unifPart T n k : ℝ)))]
+            rw [Finset.sum_range_sub (fun k ↦ ((unifPart T n k : ℝ)))]
         _ = C * (T : ℝ) := by
             rw [hnn]
             simp only [unifPart, Nat.cast_zero, zero_div, zero_mul, NNReal.coe_zero,
@@ -175,7 +171,8 @@ theorem expectation_pathIntegral_eq {w : ℝ≥0 → Ω → ℝ}
   exact (tendsto_nhds_unique hdet' hdct).symm
 
 /-- **The integrated Itô–drift identity, constant-coefficient case.** For the
-constant-coefficient Itô process `X_t = X₀ + b·t + σ·B_t` and `f` three times differentiable
+constant-coefficient Itô process `X_t = X₀ + b·t + σ·B_t`, with `B` a pre-Brownian motion with
+measurable sections and every path continuous (`hBcont`), and `f` three times differentiable
 with `f'`, `f''`, `f'''` bounded,
 
   `𝔼[f(X_T)] = 𝔼[f(X₀ + b·0 + σ·B₀)] + ∫₀ᵀ 𝔼[f'(X_s)·b + ½·f''(X_s)·σ²] ds`.

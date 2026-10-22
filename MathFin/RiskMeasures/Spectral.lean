@@ -6,53 +6,67 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.RiskMeasures.ExpectedShortfall
 
 /-!
-# Spectral risk measures: monotonicity and convex combinations
+# Spectral risk measures
 
-A **spectral risk measure** assigns to a loss its risk via a weighted
-average of quantiles, with non-negative non-decreasing weight function
-`φ : [0,1] → ℝ₊` integrating to one:
+A **spectral risk measure** weights the value-at-risk curve of a loss by a spectrum `φ`:
 
-  `ρ_φ(L) := ∫₀¹ φ(u) · VaR_u(L) du`.
+  `ρ_φ(X) = ∫₀¹ φ(u) · VaR_u(X) du`
 
-Special cases:
-- `φ ≡ 1` (uniform): `ρ_φ = E[L]`.
-- `φ(u) = 𝟙_{u ≥ α} / (1−α)`: `ρ_φ = CVaR_α(L)`.
+(`spectralRiskMeasure`; Acerbi, *Spectral measures of risk: a coherent representation of
+subjective risk aversion*, J. Banking Finance 26 (2002), 1505–1518). The VaR curve is
+`valueAtRisk` of `RiskMeasures/ValueAtRisk.lean`, the quantile function of the law of the loss.
+Two spectra recover measures the library already has:
 
-Key abstract properties:
-- **Linearity** in the loss: `ρ_φ(L + c) = ρ_φ(L) + c` (using `∫φ = 1`).
-- **Convex combinations**: any convex combination of spectral measures with
-  individually normalized spectra is again spectral (the combined weight
-  function is the convex combination of the individual ones).
+* the constant spectrum `φ ≡ 1` gives the mean, `ρ_1(X) = E[X]` (`spectralRiskMeasure_one`),
+  because the quantile function pushes the uniform law on `(0, 1)` forward to the law of `X`;
+* the spectrum `(1 − α)⁻¹ 𝟙_{(α, 1)}` (`esSpectrum`) gives expected shortfall
+  (`spectralRiskMeasure_esSpectrum`).
 
-Since Mathlib's quantile calculus has limited support at the current pin,
-we formalize spectral risk *axiomatically* via the integral operator on
-finite weighted sums of quantile evaluations. This is sufficient for the
-finite-state discrete-distribution case (which is itself the standard
-banking-regulation formulation).
+A convex combination `∑ₖ wₖ (1 − αₖ)⁻¹ 𝟙_{(αₖ, 1)}` of expected-shortfall spectra is a
+nondecreasing step spectrum. Its spectral risk is the same convex combination of expected
+shortfalls (`spectralRiskMeasure_sum_esSpectrum`), and that mixture is a coherent risk measure on
+the integrable losses (`isCoherentRiskMeasure_spectralRiskFinite_expectedShortfall`,
+`isCoherentRiskMeasure_spectralRiskMeasure_sum_esSpectrum`). Each coherence axiom of the mixture
+is a finite-weight lemma of this file applied to the coherent expected shortfall
+(`expectedShortfall_isCoherentRiskMeasure`). Acerbi's theorem (Theorem 4.1 there), that every
+nonnegative nondecreasing spectrum integrating to one gives a coherent measure, is proved here only
+for these step spectra.
 
-Results:
+The finite weighted sum `spectralRiskFinite s φ Q = ∑ᵢ φᵢ Qᵢ` carries the algebra: translation
+invariance, monotonicity and convex combinations in the weights. With `Qₖ = ES_{αₖ}(X)` it is the
+mixture of expected shortfalls above.
 
-* `spectralRiskFinite`: weighted sum `Σ φ_i · Q_i` over a finite quantile grid.
-* `spectralRisk_translation`: `ρ(L + c) = ρ(L) + c` when weights sum to `1`.
-* `spectralRisk_mono`: monotonicity — non-negative weights and pointwise
-  quantile dominance `Q ≤ Q'` give `ρ_φ(Q) ≤ ρ_φ(Q')`.
-* `spectralRisk_convex_combination_normalized`: a convex combination of two
-  normalized weight vectors is itself a normalized weight vector.
-* `spectralRisk_convex_combination`: the convex combination of two spectral
-  risks acts on the loss through the combined weight function.
+## Main results
+
+* `spectralRiskFinite`, `spectralRisk_translation`, `spectralRisk_mono`,
+  `spectralRisk_convex_combination_normalized`, `spectralRisk_convex_combination`: the finite
+  weighted sum and its algebra.
+* `isCoherentRiskMeasure_spectralRiskFinite_expectedShortfall`: a convex combination of expected
+  shortfalls is a coherent risk measure.
+* `isCoherentRisk_spectralRiskFinite_expectedShortfall`: on a finite space it is coherent in the
+  Artzner–Delbaen–Eber–Heath sense for positions.
+* `spectralRiskMeasure`, `esSpectrum`.
+* `spectralRiskMeasure_one`: the constant spectrum gives the mean.
+* `spectralRiskMeasure_esSpectrum`: the expected-shortfall spectrum gives expected shortfall.
+* `spectralRiskMeasure_sum_esSpectrum`: a step spectrum gives the mixture of expected shortfalls.
+* `isCoherentRiskMeasure_spectralRiskMeasure_sum_esSpectrum`: step-spectrum spectral risk
+  measures are coherent.
 -/
 
 @[expose] public section
 
 namespace MathFin
 
-open Finset
-
 variable {ι : Type*}
 
-/-- Finite-grid spectral risk: weighted sum `Σ φ_i · Q_i`. -/
+/-! ### The finite weighted sum -/
+
+/-- Finite spectral sum: the weighted sum `∑ᵢ φᵢ Qᵢ` of the values `Q` with weights `φ`. With
+`Qₖ = ES_{αₖ}(X)` it is a mixture of expected shortfalls
+(`spectralRiskMeasure_sum_esSpectrum`). -/
 noncomputable def spectralRiskFinite (s : Finset ι) (φ : ι → ℝ) (Q : ι → ℝ) : ℝ :=
   ∑ i ∈ s, φ i * Q i
 
@@ -66,15 +80,19 @@ theorem spectralRisk_translation (s : Finset ι) (φ : ι → ℝ) (Q : ι → �
         funext i; ring]
   rw [Finset.sum_add_distrib, ← Finset.sum_mul, h_norm, one_mul]
 
-/-- **Monotonicity**: with non-negative weights, pointwise quantile dominance
-gives risk dominance: `Q ≤ Q'` on the grid ⟹ `ρ_φ(Q) ≤ ρ_φ(Q')` — the
-monotonicity coherence axiom in the finite quantile-grid formulation. -/
+/-- **Monotonicity**: with nonnegative weights, pointwise dominance of the values `Q ≤ Q'` on `s`
+gives `ρ_φ(Q) ≤ ρ_φ(Q')`. -/
 theorem spectralRisk_mono (s : Finset ι) (φ Q Q' : ι → ℝ)
     (hφ : ∀ i ∈ s, 0 ≤ φ i) (hQ : ∀ i ∈ s, Q i ≤ Q' i) :
     spectralRiskFinite s φ Q ≤ spectralRiskFinite s φ Q' := by
   unfold spectralRiskFinite
   exact Finset.sum_le_sum fun i hi ↦
     mul_le_mul_of_nonneg_left (hQ i hi) (hφ i hi)
+
+/-- The finite spectral sum depends on the values only on `s`. -/
+theorem spectralRiskFinite_congr {s : Finset ι} {φ Q Q' : ι → ℝ} (h : ∀ i ∈ s, Q i = Q' i) :
+    spectralRiskFinite s φ Q = spectralRiskFinite s φ Q' :=
+  Finset.sum_congr rfl fun i hi ↦ by rw [h i hi]
 
 /-- **Convex combination of normalized spectra remains normalized**:
 `t Σ φ + (1−t) Σ ψ = t · 1 + (1−t) · 1 = 1`. The convex-combination weight
@@ -86,9 +104,8 @@ theorem spectralRisk_convex_combination_normalized
   rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum, hφ, hψ]
   ring
 
-/-- **Convex combination of spectral risks**: a convex combination of
-spectral risk measures (with normalized weight functions) acts on the loss
-by the convex combination of the underlying weight functions. -/
+/-- **Convex combination of spectral sums**: a convex combination of two finite spectral sums
+acts on the values through the convex combination of the weights. -/
 theorem spectralRisk_convex_combination
     (s : Finset ι) (φ ψ : ι → ℝ) (Q : ι → ℝ) (t : ℝ) :
     t * spectralRiskFinite s φ Q + (1 - t) * spectralRiskFinite s ψ Q =
@@ -97,5 +114,127 @@ theorem spectralRisk_convex_combination
   rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun i _ ↦ ?_)
   ring
+
+/-! ### Mixtures of expected shortfalls -/
+
+open MeasureTheory Set
+
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {α : ℝ}
+
+/-- **A convex combination of expected shortfalls is coherent**: for weights `w ≥ 0` with
+`∑ w = 1` and levels `αₖ ∈ (0, 1)`, `X ↦ ∑ₖ wₖ ES_{αₖ}(X)` satisfies the four axioms of a coherent
+risk measure on the integrable losses. Each axiom is the finite-sum lemma of this file applied to
+the corresponding axiom of expected shortfall (`expectedShortfall_isCoherentRiskMeasure`). -/
+theorem isCoherentRiskMeasure_spectralRiskFinite_expectedShortfall [IsProbabilityMeasure P]
+    (s : Finset ι) {w α : ι → ℝ} (hw : ∀ k ∈ s, 0 ≤ w k) (hw1 : ∑ k ∈ s, w k = 1)
+    (hα : ∀ k ∈ s, α k ∈ Ioo 0 1) :
+    IsCoherentRiskMeasure P fun X ↦ spectralRiskFinite s w fun k ↦ expectedShortfall X P (α k)
+    where
+  mono _ _ hX hY hXY :=
+    spectralRisk_mono s w _ _ hw fun k hk ↦ expectedShortfall_mono hX hY hXY (hα k hk)
+  add_const X hX m :=
+    (spectralRiskFinite_congr (Q' := fun k ↦ expectedShortfall X P (α k) + m)
+      fun k hk ↦ expectedShortfall_add_const hX (hα k hk) m).trans
+      (spectralRisk_translation s w (fun k ↦ expectedShortfall X P (α k)) m hw1)
+  const_mul X hX c hc := by
+    simp only [spectralRiskFinite, Finset.mul_sum]
+    exact Finset.sum_congr rfl fun k hk ↦ by
+      rw [expectedShortfall_const_mul hX (hα k hk) hc]
+      ring
+  add_le X Y hX hY := by
+    refine (spectralRisk_mono s w _ _ hw fun k hk ↦
+      expectedShortfall_add_le hX hY (hα k hk)).trans_eq ?_
+    simp only [spectralRiskFinite, mul_add, Finset.sum_add_distrib]
+
+/-- **Mixtures of expected shortfall in the ADEH framework**: on a finite probability space,
+`X ↦ ∑ₖ wₖ ES_{αₖ}(−X)` is a coherent risk measure of positions in the sense of Artzner, Delbaen,
+Eber and Heath (`IsCoherentRisk`), so `coherentRisk_isLUB` represents it as a supremum of expected
+losses. This is `IsCoherentRiskMeasure.isCoherentRisk_neg` applied to
+`isCoherentRiskMeasure_spectralRiskFinite_expectedShortfall`. -/
+theorem isCoherentRisk_spectralRiskFinite_expectedShortfall {κ : Type*} [Fintype κ]
+    [MeasurableSpace κ] [MeasurableSingletonClass κ] (Q : Measure κ) [IsProbabilityMeasure Q]
+    (s : Finset ι) {w α : ι → ℝ} (hw : ∀ k ∈ s, 0 ≤ w k) (hw1 : ∑ k ∈ s, w k = 1)
+    (hα : ∀ k ∈ s, α k ∈ Ioo 0 1) :
+    IsCoherentRisk fun X : κ → ℝ ↦
+      spectralRiskFinite s w fun k ↦ expectedShortfall (fun i ↦ -X i) Q (α k) :=
+  (isCoherentRiskMeasure_spectralRiskFinite_expectedShortfall (P := Q) s hw hw1
+    hα).isCoherentRisk_neg
+
+/-! ### The spectral risk of a loss -/
+
+/-- The **spectral risk measure** with spectrum `φ`: `ρ_φ(X) = ∫₀¹ φ(u) · VaR_u(X) du`. -/
+noncomputable def spectralRiskMeasure (φ : ℝ → ℝ) (X : Ω → ℝ) (P : Measure Ω) : ℝ :=
+  ∫ u in Ioo 0 1, φ u * valueAtRisk X P u
+
+/-- The **expected-shortfall spectrum** `(1 − α)⁻¹ 𝟙_{(α, 1)}`: uniform weight on the levels
+above `α`. -/
+noncomputable def esSpectrum (α : ℝ) : ℝ → ℝ :=
+  (Ioo α 1).indicator fun _ ↦ (1 - α)⁻¹
+
+/-- Weighting a function by the expected-shortfall spectrum restricts it to `(α, 1)`. -/
+lemma esSpectrum_mul (α : ℝ) (g : ℝ → ℝ) (u : ℝ) :
+    esSpectrum α u * g u = (Ioo α 1).indicator (fun v ↦ (1 - α)⁻¹ * g v) u :=
+  (indicator_mul_left (Ioo α 1) (fun _ ↦ (1 - α)⁻¹) g).symm
+
+/-- **The constant spectrum gives the mean**: `∫₀¹ VaR_u(X) du = E[X]`. The VaR curve is the
+quantile function of the law of `X`, which pushes the uniform law on `(0, 1)` forward to that
+law (`integral_eq_setIntegral_quantile`). -/
+theorem spectralRiskMeasure_one [IsProbabilityMeasure P] (hX : AEMeasurable X P) :
+    spectralRiskMeasure 1 X P = ∫ ω, X ω ∂P := by
+  have := Measure.isProbabilityMeasure_map hX
+  have hq := integral_eq_setIntegral_quantile (μ := P.map X) (f := fun x ↦ x) (by fun_prop)
+  rw [integral_map hX (by fun_prop)] at hq
+  simp only [spectralRiskMeasure, Pi.one_apply, one_mul]
+  exact hq.symm
+
+/-- **The expected-shortfall spectrum gives expected shortfall**: for `α ∈ (0, 1)`,
+`∫₀¹ (1 − α)⁻¹ 𝟙_{(α, 1)}(u) VaR_u(X) du = ES_α(X)`. -/
+theorem spectralRiskMeasure_esSpectrum (hα : α ∈ Ioo 0 1) :
+    spectralRiskMeasure (esSpectrum α) X P = expectedShortfall X P α := by
+  simp_rw [spectralRiskMeasure, esSpectrum_mul α (valueAtRisk X P)]
+  rw [setIntegral_indicator measurableSet_Ioo, inter_eq_right.2 (Ioo_subset_Ioo_left hα.1.le),
+    integral_const_mul, expectedShortfall]
+
+/-- **A step spectrum gives a mixture of expected shortfalls**: for an integrable loss and levels
+`αₖ ∈ (0, 1)`, the spectral risk of `∑ₖ wₖ (1 − αₖ)⁻¹ 𝟙_{(αₖ, 1)}` is `∑ₖ wₖ ES_{αₖ}(X)`. -/
+theorem spectralRiskMeasure_sum_esSpectrum [IsProbabilityMeasure P] (hX : Integrable X P)
+    (s : Finset ι) (w : ι → ℝ) {α : ι → ℝ} (hα : ∀ k ∈ s, α k ∈ Ioo 0 1) :
+    spectralRiskMeasure (fun u ↦ ∑ k ∈ s, w k * esSpectrum (α k) u) X P =
+      spectralRiskFinite s w fun k ↦ expectedShortfall X P (α k) := by
+  have hint (k : ι) :
+      IntegrableOn (fun u ↦ w k * (esSpectrum (α k) u * valueAtRisk X P u)) (Ioo 0 1) := by
+    simp_rw [esSpectrum_mul (α k) (valueAtRisk X P)]
+    exact ((Integrable.const_mul (integrableOn_valueAtRisk hX) _).indicator
+      measurableSet_Ioo).const_mul _
+  simp_rw [spectralRiskMeasure, Finset.sum_mul, mul_assoc]
+  rw [integral_finsetSum s fun k _ ↦ hint k]
+  exact Finset.sum_congr rfl fun k hk ↦ by
+    rw [integral_const_mul]
+    exact congrArg (w k * ·) (spectralRiskMeasure_esSpectrum (hα k hk))
+
+/-- **Step-spectrum spectral risk measures are coherent**: for weights `w ≥ 0` with `∑ w = 1` and
+levels `αₖ ∈ (0, 1)`, the spectral risk measure of the nondecreasing step spectrum
+`∑ₖ wₖ (1 − αₖ)⁻¹ 𝟙_{(αₖ, 1)}` is a coherent risk measure on the integrable losses. On those
+losses it is the mixture of expected shortfalls (`spectralRiskMeasure_sum_esSpectrum`), which is
+coherent (`isCoherentRiskMeasure_spectralRiskFinite_expectedShortfall`). -/
+theorem isCoherentRiskMeasure_spectralRiskMeasure_sum_esSpectrum [IsProbabilityMeasure P]
+    (s : Finset ι) {w α : ι → ℝ} (hw : ∀ k ∈ s, 0 ≤ w k) (hw1 : ∑ k ∈ s, w k = 1)
+    (hα : ∀ k ∈ s, α k ∈ Ioo 0 1) :
+    IsCoherentRiskMeasure P
+      (spectralRiskMeasure (fun u ↦ ∑ k ∈ s, w k * esSpectrum (α k) u) · P) := by
+  have e (X : Ω → ℝ) (hX : Integrable X P) := spectralRiskMeasure_sum_esSpectrum hX s w hα
+  have h := isCoherentRiskMeasure_spectralRiskFinite_expectedShortfall (P := P) s hw hw1 hα
+  exact
+    { mono := fun X Y hX hY hXY ↦
+        (e X hX).trans_le ((h.mono hX hY hXY).trans_eq (e Y hY).symm)
+      add_const := fun X hX m ↦
+        (e (fun ω ↦ X ω + m) (hX.add (integrable_const m))).trans
+          ((h.add_const hX m).trans (congrArg (· + m) (e X hX).symm))
+      const_mul := fun X hX c hc ↦
+        (e (fun ω ↦ c * X ω) (hX.const_mul c)).trans
+          ((h.const_mul hX hc).trans (congrArg (c * ·) (e X hX).symm))
+      add_le := fun X Y hX hY ↦
+        (e (fun ω ↦ X ω + Y ω) (hX.add hY)).trans_le
+          ((h.add_le hX hY).trans_eq (congrArg₂ (· + ·) (e X hX) (e Y hY)).symm) }
 
 end MathFin

@@ -50,7 +50,7 @@ isometry by L²-completion: the time measure `ν` (Lebesgue on `ℝ≥0`, below)
 simple processes into the predictable `L²`, density of those embeddings (via
 `generateFrom_eq_predictable`), and `LinearMap.extendOfNorm`. This is the foundation of a
 continuous-time Itô-*calculus* layer (Itô's lemma, SDEs). The full resume-plan is in
-`docs/ito-integral-clm-deferred.md`.
+`docs/archive/ito-integral-clm-deferred.md`.
 -/
 
 @[expose] public section
@@ -107,7 +107,7 @@ Nothing downstream is weakened: every consumer goes through `itoSimple_apply`
 consumes `SimpleProcess.integral` directly, at a genuine time `t : ℝ≥0`.
 Restoring the consumption relation — `itoSimple = integral … t` for any `t`
 dominating `V`'s finite support — is a follow-up recorded in
-`docs/upstream-consumption-review-2026-07-27.md`. -/
+`docs/archive/upstream-consumption-review-2026-07-27.md`. -/
 noncomputable def itoSimple (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) : Ω → ℝ :=
   fun ω ↦ V.value.sum fun p v ↦ v ω * (B p.2 ω - B p.1 ω)

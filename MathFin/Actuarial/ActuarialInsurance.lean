@@ -15,11 +15,15 @@ public import Mathlib
 -- new-defs: expectedValuePremium, variancePremium, stdDevPremium
 
 /-!
+# Loaded premium principles
+
 Classical loaded premium principles — expected-value `(1 + θ)·μ`, variance
 `μ + α·σ²`, standard-deviation `μ + β·σ` — and their nonnegative-loading
-bound: each principle prices at or above the pure premium (the mean loss).
-The loadings are the safety margins on top of the net premium of
-`MathFin/Actuarial/Insurance.lean`.
+bound: each principle prices at or above the pure premium `μ`, the mean loss.
+The principles take the mean `μ`, the variance `σ²` and the standard deviation
+`σ` as numbers. For a random loss `X`, `stdDevPrinciple` of
+`RiskMeasures/StandardDeviationPrinciple.lean` is `stdDevPremium` at the mean and
+standard deviation of `X`.
 -/
 
 set_option autoImplicit false

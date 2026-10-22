@@ -8,30 +8,30 @@ module
 public import MathFin.Foundations.SDEExistence
 public import MathFin.Foundations.DriftProcessModification
 
-/-! # The strong solution as a pathwise process (SDE existence, the pathwise bridge)
+/-! # The Picard fixed point, sliced into paths (SDE existence, the pathwise bridge)
 
-`SDEExistence` produced the strong solution of `dX = b(X)dt + σ(X)dB` as the **abstract**
-fixed point `picardSolution ∈ E = Lp ℝ 2 (trimMeasure_T T)` of the Picard map
-`Φ(X) = η + driftProcessAssembled(b∘X) + itoProcessAssembled(σ∘X)`. That fixed point is an
-`L²` equivalence class on the space–time product; on its own it is not yet a *pathwise* object.
+`SDEExistence` produced the solution of `dX = b(X)dt + σ(X)dB` as the **abstract** fixed point
+`picardSolution ∈ E = Lp ℝ 2 (trimMeasure_T T)` of the Picard map
+`Φ(X) = η + driftProcessAssembled(b∘X) + itoProcessAssembled(σ∘X)`, under the short-horizon
+contraction condition `T·L_b + √T·L_σ < 1`. That fixed point is an `L²` equivalence class on the
+space–time product.
 
-This file slices the fixed-point equation `X = Φ(X)` — which holds in `E` — into a genuine
-**pathwise decomposition** of the solution's sample paths:
-`X_t(ω) = η(ω) + (drift limit)_t(ω) + (Itô modification)_t(ω)` for almost every `(t, ω)`.
+This file slices the fixed-point equation `X = Φ(X)`, which holds in `E`, into a decomposition of
+representatives: `X(t, ω) = η(t, ω) + (drift limit)_t(ω) + (Itô modification)_t(ω)` for almost
+every `(t, ω)` with respect to `trimMeasure_T T` (`sde_pathwise_decomposition`). The two analytic
+terms are given by processes defined at every `(t, ω)`:
+* the **drift** `driftProcessAssembled(b∘X)` has `coeFn` a.e. equal to the pointwise `limUnder`
+  process `driftContinuousMod(b∘X)` (`driftProcessAssembled_coeFn`, `DriftProcessModification`);
+* the **Itô term** `itoProcessAssembled(σ∘X)` is by construction the class of the continuous
+  modification `itoContinuousMod(σ∘X)` (`ItoProcessPredictable`).
 
-The two analytic terms become honest pathwise processes:
-* the **drift** `driftProcessAssembled(b∘X)` — an abstract `extendOfNorm` operator — has `coeFn`
-  a.e. equal to the pointwise `limUnder` process `driftContinuousMod(b∘X)`
-  (`driftProcessAssembled_coeFn`, the pathwise-realization crux of `DriftProcessModification`),
-  itself the a.e. limit of the honest elementary Lebesgue integrals `∫₀ᵗ b(Xⁿ_s) ds`;
-* the **Itô** `itoProcessAssembled(σ∘X)` is *by construction* the continuous modification
-  `itoContinuousMod(σ∘X)` (`ItoProcessPredictable`), the pathwise `(σ∘X) ● B`.
-
-So the `E`-fixed point genuinely *is* a pathwise strong solution: `sde_pathwise_decomposition`.
-
-The remaining refinement — rewriting `driftContinuousMod(b∘X)_t(ω)` as the single Lebesgue integral
-`∫₀ᵗ b(X_s(ω)) ds` (a per-`ω` interval Cauchy–Schwarz limit of `driftSimpleProcess_eq_setIntegral`)
-— is a presentational upgrade of the drift term, not a strengthening of the existence statement.
+For each `t ≤ T`, the drift term is almost surely the time integral
+`∫_{(0,t]} (b∘X)(s, ω) ds` of a representative of the class `b∘X = lipComp b X`
+(`sde_pathwise_drift_eq_setIntegral`). A representative of a class is determined only up to a
+null set of `(s, ω)`, and the per-path identity with `∫₀ᵗ b(X_s(ω)) ds` for a chosen
+representative of `X` is not proved here. Nor is it proved that `X` has a representative that is
+a continuous adapted process satisfying the integral equation at every `t` almost surely, which
+is the textbook notion of a strong solution.
 -/
 
 @[expose] public section
@@ -47,15 +47,15 @@ open ItoIntegralL2 ItoIntegralCLM ItoIntegralProcess ItoIntegralProcessGeneral
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ}
 
-/-- **The strong solution as a pathwise process (the pathwise bridge).** The abstract `E`-fixed point
-`picardSolution` decomposes, almost everywhere on the space–time product, into its initial condition,
-a pathwise drift, and a pathwise Itô term:
-`X_t(ω) = η(ω) + driftContinuousMod(b∘X)_t(ω) + itoContinuousMod(σ∘X)_t(ω)`.
-Both analytic terms are genuine pathwise objects — the drift is the a.e. limit of the honest elementary
-Lebesgue integrals `∫₀ᵗ b(Xⁿ_s) ds` (`driftProcessAssembled_coeFn`), the Itô term is the continuous
-modification `(σ∘X) ● B` (`itoProcessAssembled` is *defined* from `itoContinuousMod`). The fixed-point
-equation `X = Φ(X)` holds in `E`; taking `coeFn` through `Lp.coeFn_add` and the two realization
-identities slices it into this pathwise form. -/
+/-- **The Picard fixed point, sliced into paths.** The abstract `E`-fixed point `picardSolution`
+decomposes, almost everywhere for `trimMeasure_T T` on the space–time product, into its initial
+condition, a drift process and an Itô process:
+`X(t, ω) = η(t, ω) + driftContinuousMod(b∘X)_t(ω) + itoContinuousMod(σ∘X)_t(ω)`.
+The drift process is the pointwise `limUnder` of elementary drift integrals
+(`driftProcessAssembled_coeFn`); the Itô process is the continuous modification of `(σ∘X) ● B`
+(`itoProcessAssembled` is defined from `itoContinuousMod`). The fixed-point equation `X = Φ(X)`
+holds in `E`; taking `coeFn` through `Lp.coeFn_add` and the two realization identities slices it
+into this form. -/
 theorem sde_pathwise_decomposition (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)
@@ -90,11 +90,11 @@ theorem sde_pathwise_decomposition (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
   conv_lhs => rw [hX]
   simp only [h1, h2, hd, hi, Pi.add_apply]
 
-/-- **The pathwise solution's drift term is the honest Lebesgue integral.** For every `t ≤ T`, the drift
-term `driftContinuousMod(b∘X)` of `sde_pathwise_decomposition` is, almost surely, the genuine time
-integral `∫₀ᵗ (b∘X)_s(ω) ds` — `driftContinuousMod_eq_setIntegral` applied to the coefficient
-composition `b∘X = lipComp b X`. This closes the honest-remainder gap: the drift term of the strong
-solution is not merely an abstract limit but the recognizable SDE integral `∫₀ᵗ b(X_s(ω)) ds`. -/
+/-- **The drift term is a time integral.** For every `t ≤ T`, the drift term
+`driftContinuousMod(b∘X)` of `sde_pathwise_decomposition` is, almost surely, the time integral
+`∫_{(0,t]} (b∘X)(s, ω) ds` of the representative `⇑(lipComp b X)` of the class `b∘X`
+(`driftContinuousMod_eq_setIntegral` applied to `lipComp b X`). The per-path identity with
+`∫₀ᵗ b(X_s(ω)) ds` for a chosen representative of `X` is not stated. -/
 theorem sde_pathwise_drift_eq_setIntegral (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)

@@ -1,12 +1,13 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
 public import Mathlib
 public import MathFin.BlackScholes.PDE
+public import MathFin.BlackScholes.PutGreeks
 
 /-!
 # Black-Scholes-Merton (continuous dividends) Greeks
@@ -17,11 +18,23 @@ and derive the Greeks via existing call Greeks at effective drift `r − q`.
 
 ## Main results
 
-* `bsVDiv` — the dividend-adjusted call price, expressed via the identity.
+* `bsVDiv` — the dividend-adjusted call closed form, defined as `e^{-qτ} · bsV(K, r-q, σ, S, τ)`.
+  Its unfolding is the right-hand side of `bs_dividends_call_formula` (`Dividends.lean`), the
+  discounted expected payoff under drift `r − q`; no lemma here states that for `bsVDiv`.
 * `hasDerivAt_bsVDiv_S` — δ_q = e^{-qT} · Φ(d₁').
 * `hasDerivAt_deriv_bsVDiv_S` — γ_q = e^{-qT} · ϕ(d₁') / (S σ √τ), from the
   formula-level `hasDerivAt_bsVDiv_SS`.
 * `hasDerivAt_bsVDiv_sigma` — vega_q = e^{-qT} · S · ϕ(d₁') · √τ.
+* `bsVDiv_pde` — Hull eq. (19.4) with dividend yield: `Θ + (r−q) S Δ + ½ σ² S² Γ = r V`,
+  stated on the Greek formulas.
+* `bsVDiv_psi_nonpos` — the psi formula `−S τ e^{-qτ} Φ(d₁')` of `hasDerivAt_bsVDiv_q` is `≤ 0`
+  for `S, τ ≥ 0`; `antitone_bsVDiv_q` — so, for `K, σ, τ, S > 0`, the call price is
+  non-increasing in the dividend yield.
+* `bsPDiv`, `bsPDiv_eq_bsVDiv` — the dividend-adjusted put and put-call parity with yield `q`
+  (Hull §17.4): `P_q = V_q − S e^{-qτ} + K e^{-rτ}`.
+* `hasDerivAt_bsPDiv_q`, `bsPDiv_psi_nonneg` — put psi `∂_q P_q = S τ e^{-qτ} Φ(−d₁')`, and
+  that formula is `≥ 0` for `S, τ ≥ 0`; `monotone_bsPDiv_q` — so, for `K, σ, τ, S > 0`, the put
+  price is non-decreasing in `q`.
 -/
 
 @[expose] public section
@@ -166,5 +179,91 @@ lemma hasDerivAt_bsVDiv_tau {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   unfold bsVDiv
   convert h_full using 1 <;> try rfl
   ring
+
+/-- **Black–Scholes–Merton PDE with dividend yield** (Hull eq. 19.4 with `q`): writing
+`Θ = −∂_τ V_q` (calendar theta, `hasDerivAt_bsVDiv_tau`), `Δ = e^{-qτ} Φ(d₁')`
+(`hasDerivAt_bsVDiv_S`) and `Γ = e^{-qτ} ϕ(d₁')/(S σ √τ)` (`hasDerivAt_deriv_bsVDiv_S`), the
+three formulas satisfy `Θ + (r − q) S Δ + ½ σ² S² Γ = r V_q` for `σ, S, τ > 0`. Stated on the
+formulas, as `bs_pde_holds` is. -/
+theorem bsVDiv_pde {K r q σ : ℝ} (hσ : 0 < σ) {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
+    -(-(q * bsVDiv K r q σ S τ) +
+        Real.exp (-(q * τ)) *
+          (σ * S * gaussianPDFReal 0 1 (bsd1 S K (r - q) σ τ) / (2 * Real.sqrt τ)
+            + (r - q) * K * Real.exp (-((r - q) * τ)) * Phi (bsd2 S K (r - q) σ τ))) +
+      (r - q) * S * (Real.exp (-(q * τ)) * Phi (bsd1 S K (r - q) σ τ)) +
+      (1 / 2 : ℝ) * σ ^ 2 * S ^ 2 *
+        (Real.exp (-(q * τ)) * gaussianPDFReal 0 1 (bsd1 S K (r - q) σ τ)
+          / (S * σ * Real.sqrt τ)) =
+      r * bsVDiv K r q σ S τ := by
+  have h_sqrt_ne : Real.sqrt τ ≠ 0 := (Real.sqrt_pos.mpr hτ).ne'
+  have hS_ne : S ≠ 0 := hS.ne'
+  have hσ_ne : σ ≠ 0 := hσ.ne'
+  rw [bsVDiv, bsV]
+  field_simp
+  ring
+
+/-- **BS-Merton psi sign**: the psi formula `∂_q V_q = −S τ e^{-qτ} Φ(d₁')` of
+`hasDerivAt_bsVDiv_q` is `≤ 0` for `S ≥ 0` and `τ ≥ 0`. -/
+theorem bsVDiv_psi_nonpos {S τ : ℝ} (hS : 0 ≤ S) (hτ : 0 ≤ τ) (K r q σ : ℝ) :
+    -(S * τ * Real.exp (-(q * τ)) * Phi (bsd1 S K (r - q) σ τ)) ≤ 0 := by
+  have := Phi_nonneg (bsd1 S K (r - q) σ τ)
+  exact neg_nonpos.mpr (by positivity)
+
+/-- **The call is worth no more under a higher dividend yield**: for `K, σ, τ, S > 0`,
+`q ↦ V_q` is antitone (non-increasing; strictness is not stated), by the mean value theorem
+from `hasDerivAt_bsVDiv_q` and the sign `bsVDiv_psi_nonpos`. -/
+theorem antitone_bsVDiv_q {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)
+    {S : ℝ} (hS : 0 < S) :
+    Antitone fun q ↦ bsVDiv K r q σ S τ :=
+  antitone_of_hasDerivAt_nonpos (fun q ↦ hasDerivAt_bsVDiv_q hK hσ hτ hS q)
+    fun q ↦ bsVDiv_psi_nonpos hS.le hτ.le K r q σ
+
+/-- Dividends-adjusted BS put closed form, defined as `P_q = e^{-qτ} · bsP(K, r-q, σ, S, τ)`,
+which unfolds to `K e^{-rτ} Φ(−d₂') − S e^{-qτ} Φ(−d₁')`. That it is a discounted expected
+payoff is not stated here. -/
+noncomputable def bsPDiv (K r q σ : ℝ) (S τ : ℝ) : ℝ :=
+  Real.exp (-(q * τ)) * bsP K (r - q) σ S τ
+
+/-- **Put-call parity with a continuous dividend yield**:
+`P_q = V_q − S e^{-qτ} + K e^{-rτ}`. -/
+theorem bsPDiv_eq_bsVDiv (K r q σ S τ : ℝ) :
+    bsPDiv K r q σ S τ = bsVDiv K r q σ S τ - S * Real.exp (-(q * τ))
+      + K * Real.exp (-(r * τ)) := by
+  have h : Real.exp (-(q * τ)) * Real.exp (-((r - q) * τ)) = Real.exp (-(r * τ)) := by
+    rw [← Real.exp_add]; congr 1; ring
+  rw [bsPDiv, bsVDiv, bsP_eq_bsV]
+  linear_combination K * h
+
+/-- **Put psi**: `∂_q P_q = S τ e^{-qτ} Φ(−d₁')`, via parity and `hasDerivAt_bsVDiv_q`. -/
+lemma hasDerivAt_bsPDiv_q {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)
+    {S : ℝ} (hS : 0 < S) (q : ℝ) :
+    HasDerivAt (fun q' ↦ bsPDiv K r q' σ S τ)
+      (S * τ * Real.exp (-(q * τ)) * Phi (-bsd1 S K (r - q) σ τ)) q := by
+  have h_eq : (fun q' : ℝ ↦ bsPDiv K r q' σ S τ) = fun q' ↦
+      bsVDiv K r q' σ S τ - S * Real.exp (-(q' * τ)) + K * Real.exp (-(r * τ)) :=
+    funext fun q' ↦ bsPDiv_eq_bsVDiv K r q' σ S τ
+  rw [h_eq]
+  have h_neg : HasDerivAt (fun q' : ℝ ↦ -(q' * τ)) (-τ) q := (hasDerivAt_mul_const τ).neg
+  have h := ((hasDerivAt_bsVDiv_q (r := r) hK hσ hτ hS q).sub (h_neg.exp.const_mul S)).add_const
+    (K * Real.exp (-(r * τ)))
+  convert h using 1
+  all_goals try rfl
+  linear_combination S * τ * Real.exp (-(q * τ)) * Phi_add_Phi_neg (bsd1 S K (r - q) σ τ)
+
+/-- **Put psi sign**: the put psi formula `∂_q P_q = S τ e^{-qτ} Φ(−d₁')` of
+`hasDerivAt_bsPDiv_q` is `≥ 0` for `S ≥ 0` and `τ ≥ 0`. -/
+theorem bsPDiv_psi_nonneg {S τ : ℝ} (hS : 0 ≤ S) (hτ : 0 ≤ τ) (K r q σ : ℝ) :
+    0 ≤ S * τ * Real.exp (-(q * τ)) * Phi (-bsd1 S K (r - q) σ τ) := by
+  have := Phi_nonneg (-bsd1 S K (r - q) σ τ)
+  positivity
+
+/-- **The put is worth no less under a higher dividend yield**: for `K, σ, τ, S > 0`,
+`q ↦ P_q` is monotone (non-decreasing; strictness is not stated), by the mean value theorem
+from `hasDerivAt_bsPDiv_q` and the sign `bsPDiv_psi_nonneg`. -/
+theorem monotone_bsPDiv_q {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)
+    {S : ℝ} (hS : 0 < S) :
+    Monotone fun q ↦ bsPDiv K r q σ S τ :=
+  monotone_of_hasDerivAt_nonneg (fun q ↦ hasDerivAt_bsPDiv_q hK hσ hτ hS q)
+    fun q ↦ bsPDiv_psi_nonneg hS.le hτ.le K r q σ
 
 end MathFin

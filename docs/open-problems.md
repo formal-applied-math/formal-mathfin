@@ -1,4 +1,13 @@
-# Open problems in mathematical finance — a verified survey
+# Open problems in mathematical finance — survey and research catalogue
+
+**Current catalogue (2026-10-21):** [eight structured records](research-problems/README.md)
+with stable IDs, exact statements, source locators, dated reviews, and separate
+mathematical and Lean statuses. Five are open research questions, two retain
+existing formal resolutions, and one records a reported resolution. The
+[JSON database](research-problems/problems.json) is the maintained record;
+the [audit](research-problems/audit-2026-10-21.md) explains the corrections.
+The older survey below retains additional leads. Entries outside that audit
+have **not** all been revalidated as of October 2026.
 
 **Purpose.** This library formalizes *known* mathematics. This document is the
 scouting report for the other activity: genuinely unsolved problems, and which
@@ -76,14 +85,14 @@ conflation costs: **16 of 36** unverified claims were wrong on first audit.
 of problems that *were* open and are now closed, with the closing result named.
 Open-problem lists are common; lists that track their own decay are not.
 
-arXiv is unreachable from this environment (network policy), so sources are
-publisher pages, author preprints, and mirrors. Tier 2's "residual" column
-reports what the closing papers say they left open; not independently
-re-verified.
+The original survey used publisher pages, author preprints, and mirrors because
+arXiv was then unreachable. The October 2026 audit also consulted arXiv. Except
+where explicitly updated, Tier 2's residuals have not been independently
+revalidated in that audit.
 
 ---
 
-## Tier 1 — surviving open problems
+## Tier 1 — earlier survey entries, with subsequent status updates
 
 ### 1. Convexity of the American exercise boundary for `0 < q < r` — **solved**
 **Class B · bracketed by theorems on both sides**
@@ -223,31 +232,36 @@ weighted-space conditions and function-space regularity is real. But treat this
 as a *bracketed gap in a mature theory*, not the pristine open problem the
 2007 quote suggests.
 
-### 8. Short-time uniqueness for the supercooled Stefan problem
-**Class A · residual framed by the closing paper (2025)**
+### 8. Physical Stefan uniqueness when jumps accumulate at time zero
+**Updated 2026-10-21 · author-identified residual · MF-OP-002**
 
-Muñoz (2025) proved the free boundary is `C¹` in space and `C^∞` off a
-countable set assuming only integrable initial temperature, resolved the
-conjecture that jump times cannot accumulate, and proved that **short-time
-uniqueness of physical solutions implies global uniqueness**, answering two
-previously-open questions. Separate 2026 work gives uniqueness of maximal weak
-solutions in 1D and regularity in arbitrary dimensions.
+Muñoz (2025) reduces global uniqueness to short-time uniqueness and excludes
+jump accumulation at positive times for integrable initial data.
+[Blore–Hambly (2026-09-21)](https://arxiv.org/html/2609.24297v1), Theorem 3.1,
+then prove global uniqueness when the minimal physical solution is continuous
+on some `(0, ε)`. Their Remark 3.9 identifies jumps accumulating at zero as the
+remaining possible mechanism for nonuniqueness; it does not exhibit two solutions.
 
-**Open:** short-time uniqueness itself, for initial data outside the current
-well-posedness regime — a reduction away from resolution, not a frontier.
+The catalogue asks for uniqueness or a counterexample in that residual regime,
+with a precise initial-data and physical-jump formulation. A separate theorem
+about the maximal weak solution does not establish uniqueness among all physical
+solutions. See [MF-OP-002](research-problems/README.md).
 
-### 9. Uniqueness of Kyle equilibrium
-**Class A · "longstanding unresolved question"; small-time result 2025 — found in round 4**
+### 9. Uniqueness of Kyle equilibrium — static resolution reported
+**Updated 2026-10-21 · resolution reported · MF-OP-008**
 
-Whether the one-period Kyle (1985) model admits an equilibrium *different from*
-the closed-form one is explicitly called a longstanding unresolved question
-(McLennan–Monteiro). In continuous time, the literature proved existence via
-PDE methods within Markovian/bridge structures; a 2025 FBSDE characterization
-of *all* equilibria gives uniqueness **for small time horizons** — the first
-uniqueness result without structural restriction.
+[Monteiro–Tourky (August 2026)](https://cbe.anu.edu.au/researchpapers/econ/wp708.pdf)
+report uniqueness in the one-period Gaussian Kyle model for Borel-measurable
+strategies, with pointwise optimality. The catalogue retains this as a
+**reported resolution**, with the proof not independently checked here, rather
+than publishing the static problem as open.
 
-**Open:** global-in-time uniqueness in continuous time; uniqueness beyond the
-pricing-rule classes in the static model.
+The continuous-time question needs its own exact hypotheses. The
+[Qiao–Zhang FBSDE paper](https://arxiv.org/html/2506.12281v1) works with a specified
+equilibrium class and discrete inside information in its characterization;
+its small-time result cannot be advertised as a theorem about every classical
+Kyle–Back equilibrium. No new continuous-time research issue is inferred from
+that gap. See [MF-OP-008](research-problems/README.md).
 
 ### 10. Microfoundation of the square-root impact law
 **Class A · "one of the most fascinating puzzles in finance" — found in round 4**
@@ -261,18 +275,19 @@ latent liquidity) coexist without a canonical derivation.
 **Open:** a first-principles equilibrium microfoundation. Connects to the
 Tier 2 propagator-endogeneity residual and to §5.
 
-### 11. Existence for the equilibrium HJB of time-inconsistent control
-**Class A · "still an open problem under general model assumptions" (2026)**
+### 11. Equilibrium existence with action-dependent diffusion
+**Updated 2026-10-21 · explicit future work · MF-OP-003**
 
-Time-inconsistent problems — dynamic mean-variance, non-exponential
-discounting — replace optimality by intra-personal equilibrium, characterized
-by an *extended/equilibrium* HJB system. Linear-quadratic and various Markovian
-cases are settled (some with uniqueness via infinite BSDE families); a 2026
-vanishing-entropy-regularization approach is explicitly still building an
-existence theory.
+[Wang–Yu–Zhang–Zhou (2026-04-04)](https://arxiv.org/html/2603.10321v2)
+**prove** relaxed-equilibrium existence through vanishing entropy regularization
+under their hypotheses for drift control. The earlier survey incorrectly used
+their introductory open-problem statement as if it were their conclusion.
 
-**Open:** existence (and uniqueness) of equilibrium solutions to the EHJB
-equation under general model assumptions.
+Section 2 explicitly leaves action-dependent diffusion for future study. The
+catalogue asks for an extension with compact controls, uniform ellipticity,
+regularity, integrability, and appropriate quantitative hypotheses stated
+precisely. It does not assert that unrestricted existence or uniqueness holds.
+See [MF-OP-003](research-problems/README.md).
 
 ### 12. Epstein–Zin consumption–investment in incomplete markets
 **Class A + B · "absent from the literature" (2025–26), with an intrinsic nonuniqueness theorem**
@@ -322,7 +337,7 @@ A young literature is not the same as a hard problem.
 
 ---
 
-## Tier 2 — narrowed or closed
+## Tier 2 — narrowed, closed, or corrected
 
 Entries earlier drafts carried as open — plus, from round 4, folklore items
 confirmed closed before they were ever added. The closing result is usually
@@ -334,7 +349,7 @@ the more useful fact.
 | **[R3]** MFG master equation without monotonicity | Mou–Zhang, *anti-monotonicity conditions* (JEMS 2025); uniqueness with **no** monotonicity constraint via a conservative reading, adapting hyperbolic-systems arguments | Whether a weak-solution notion *selects* Nash equilibria |
 | **[R3]** Radner equilibrium beyond smallness | Xing–Žitković, globally solvable Markovian quadratic BSDE systems (*Ann. Prob.*); global existence for incomplete finite-agent Radner equilibrium under Markovian assumptions; limited-participation existence with exponential preferences | Non-Markovian settings; general preferences |
 | **[R2]** Bass martingale uniqueness / classification in `d ≥ 2` | The decomposition of stretched Brownian motion into Bass martingales: for non-irreducible pairs, SBM decomposes on a canonical paving into irreducible cells, a Bass martingale on each. What an earlier draft quoted *as* the open state was the resolution. | `q`-Bass extensions; convergence of dual optimising sequences |
-| **[R2]** Pathwise uniqueness for rough/square-root Volterra | Prömel–Scheffels (2025) for a broad class of singular SVEs; Hölder coefficients `sgn(x)\|x\|^ξ`, `ξ ∈ [1/2,1]`, cover the square-root case and apply to rough Heston | Jump-diffusion settings need extra monotonicity |
+| **Corrected 2026-10-21:** pathwise uniqueness for rough/square-root Volterra | The earlier claimed resolution was wrong. For kernel `(t−s)^−α`, Prömel–Scheffels require `ξ > 1/[2(1−α)]`, which excludes square-root diffusion for `α > 0`. | Rough-Heston pathwise uniqueness is explicitly still open in Forde–Gerhold–Smith (2026-10-19); see [MF-OP-001](research-problems/README.md). |
 | **[R2]** Elicitability of systemic risk measures | CoVaR, CoES, MES fail identifiability and elicitability alone; joint elicitability with the reference VaR **also fails** — resolved by *multi-objective* (lexicographically ordered bivariate) scores with Diebold–Mariano-type tests | Set-valued systemic measures; test power |
 | No-trade region shape, multi-asset proportional costs | An **ellipsoid** around the frictionless target, shape given by a matrix-valued algebraic Riccati equation, even in high dimensions | Exact solutions beyond independent assets; the case *with return predictability* |
 | MOT dual attainment / duality gap | Beiglböck–Nutz–Touzi complete quasi-sure duality on the line; Beiglböck–Lim–Obłój sharpness (`C²` attains, `C^{2−ε}` counterexamples) | Higher dimensions; continuous-time multi-marginal |
@@ -588,8 +603,8 @@ The butterfly-arbitrage criterion is *already formalized*, in substance:
 | `BlackScholes/BreedenLitzenberger.breedenLitzenberger` | `∂²V/∂K² = e^{−rT}·density` — butterfly-freeness **is** this second derivative's sign |
 | `BreedenLitzenberger.lognormalTerminalPDF_nonneg_via_strike_convexity` | the density-nonnegativity ⟸ strike-convexity route, already proved |
 | `BlackScholes/StrikeConvexity.bsV_strike_convexOn`, `bsP_strike_convexOn` | the convexity side for calls and puts |
-| `BlackScholes/{ImpliedVolatility,BisectionIV,NewtonRaphsonIV,NewtonConvergence}` | the implied-vol layer, with convergence |
-| `PutStrikeConvexity`, `SpotConvexity`, `StaticBounds`, `PriceBounds` | the surrounding static-arbitrage results |
+| `BlackScholes/{ImpliedVolatility,BisectionIV,NewtonConvergence}` | the implied-vol layer, with convergence |
+| `PutStrikeConvexity`, `SpotConvexity`, `PriceBounds` | the surrounding static-arbitrage results |
 
 Missing is small and well-defined: an SVI parametrization module and
 Durrleman's `g`. Positivity certificates land in the house idiom
@@ -598,7 +613,7 @@ Durrleman's `g`. Positivity certificates land in the house idiom
 ### 2. American boundary convexity for `0 < q < r` (§1) — solved in #212
 
 `Binomial/SnellEnvelope.americanPrice_is_snell_envelope` plus
-`Binomial/American`, `AmericanCallNoDividend`, `Bermudan`,
+`Binomial/American`, `Bermudan`,
 `MertonAmericanCallTree`, `BlackScholes/Dividends`, and the convexity trio
 (`StrikeConvexity`, `PutStrikeConvexity`, `SpotConvexity`).
 `Binomial/CRRConvergence` is the discrete→continuous seam.

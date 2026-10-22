@@ -9,116 +9,86 @@ public import Mathlib
 public import MathFin.Binomial.Model
 
 /-!
-# Uniqueness of the binomial replicating portfolio
+# Uniqueness of the binomial replicating portfolio, and the law of one price
 
-The single-period binomial replicating portfolio is given by the closed-form
+`Binomial.Model` exhibits a single-period replicating portfolio
 
-  `Δ = (V_u − V_d) / (S₀ · (u − d))`,
-  `B = e^{−r} · (u · V_d − d · V_u) / (u − d)`,
+  `Δ = (V_u − V_d) / (S₀ · (u − d))`,   `B = e^{−r} · (u · V_d − d · V_u) / (u − d)`,
 
-which pays exactly `V_u` in the up-state and `V_d` in the down-state
-(see `replicating_payoff_up` and `replicating_payoff_down` in `Binomial.Model`).
-This file proves the *uniqueness* of this pair:
+which pays `V_u` in the up-state and `V_d` in the down-state (`replicating_payoff_up`,
+`replicating_payoff_down`) and costs the risk-neutral price
+`binomialOptionPriceOnePeriod u d r V_u V_d` (`replicating_portfolio_cost`). This file proves
+that it is the only one: under no-arbitrage (`d < e^r < u`, so `u ≠ d`) and `S₀ > 0`, the
+linear system
 
-  **Given target payoffs `V_u, V_d` and the spot `S₀ > 0`, the linear system
+  `Δ · (S₀ · u) + B · e^r = V_u`,   `Δ · (S₀ · d) + B · e^r = V_d`
 
-      Δ · (S₀ · u) + B · e^r = V_u,
-      Δ · (S₀ · d) + B · e^r = V_d,
+has exactly one solution, its determinant being `S₀ · (u − d) · e^r ≠ 0`. Consequently every
+portfolio that replicates the claim costs the risk-neutral price: the law of one price in the
+one-period binomial market.
 
-  has a *unique* solution `(Δ, B)` whenever `u ≠ d` (which holds under no-arb).**
+Scope: one period, two states. The multi-period tree and the equivalence between uniqueness
+of the martingale measure and completeness are not stated here (`Binomial.SecondFTAP` proves the
+one-period uniqueness of `q`; `Binomial.BinomialFromFTAP` identifies the price with the
+FTAP pricing kernel).
 
-This is the discrete-time *market completeness* statement: every two-state
-contingent claim is replicated by a unique portfolio. Combined with the
-First FTAP (existence of a risk-neutral measure) and the Second FTAP
-(uniqueness of EMM, proved single-period in `SecondFTAP.lean`), this gives
-the full FTAP equivalence
+## Results
 
-  no-arb ⟺ ∃ EMM ⟺ (∃ EMM ∧ completeness) ⟺ unique EMM ⟺ completeness.
-
-The proof is pure linear algebra: the coefficient matrix has determinant
-`S₀ · (u − d) · e^r ≠ 0` under no-arb (`u > d > 0`, `e^r > 0`).
-
-## Result
-
-* `binomial_replicatingPortfolio_unique`: the replicating portfolio `(Δ, B)`
-  is uniquely determined by the target payoffs `(V_u, V_d)`.
+* `binomial_replicatingPortfolio_unique`: the replicating portfolio `(Δ, B)` is uniquely
+  determined by the target payoffs `(V_u, V_d)`.
+* `binomial_replication_cost_eq_price`: any portfolio replicating `(V_u, V_d)` costs
+  `binomialOptionPriceOnePeriod u d r V_u V_d`.
 -/
 
 @[expose] public section
 
 namespace MathFin
 
-open Real
-
 /-- **Uniqueness of the single-period binomial replicating portfolio**.
 
-Under no-arbitrage (`d < e^r < u`, hence `u > d`) with positive spot `S₀ > 0`,
-the linear system
+Under no-arbitrage (`d < e^r < u`, hence `u > d`) with positive spot `S₀ > 0`, the linear system
 
   `Δ · (S₀ · u) + B · e^r = V_u`,
   `Δ · (S₀ · d) + B · e^r = V_d`
 
-has a unique solution `(Δ, B)`, given explicitly by
-
-  `Δ = (V_u − V_d) / (S₀ · (u − d))`,    `B = e^{−r} · (u · V_d − d · V_u) / (u − d)`.
-
-The proof: the system is a 2×2 linear system in `(Δ, B)` with coefficient
-matrix `[[S₀·u, e^r], [S₀·d, e^r]]`. Its determinant is
-`S₀ · u · e^r − S₀ · d · e^r = S₀ · (u − d) · e^r`, which is strictly positive
-(and so non-zero) since `S₀ > 0`, `u > d` (no-arb), and `e^r > 0`. -/
+has a unique solution `(Δ, B)`: the portfolio of `Binomial.Model`,
+`Δ = (V_u − V_d) / (S₀ · (u − d))`, `B = e^{−r} · (u · V_d − d · V_u) / (u − d)`.
+Subtracting the equations gives `Δ · S₀ · (u − d) = V_u − V_d`, and `u · (down) − d · (up)`
+gives `B · e^r · (u − d) = u · V_d − d · V_u`. -/
 theorem binomial_replicatingPortfolio_unique
     {S₀ u d r V_u V_d : ℝ} (hS₀ : 0 < S₀) (h : BinomialNoArb u d r) :
     ∃! p : ℝ × ℝ,
       p.1 * (S₀ * u) + p.2 * Real.exp r = V_u ∧
       p.1 * (S₀ * d) + p.2 * Real.exp r = V_d := by
-  have h_ud : 0 < u - d := sub_pos.mpr h.d_lt_u
-  have h_ud_ne : u - d ≠ 0 := h_ud.ne'
-  have h_S₀_ne : S₀ ≠ 0 := hS₀.ne'
-  have h_exp_pos : 0 < Real.exp r := Real.exp_pos _
-  have h_exp_ne : Real.exp r ≠ 0 := h_exp_pos.ne'
-  set Δ : ℝ := (V_u - V_d) / (S₀ * (u - d)) with Δ_def
-  set B : ℝ := Real.exp (-r) * (u * V_d - d * V_u) / (u - d) with B_def
-  refine ⟨(Δ, B), ?_, ?_⟩
-  · -- Existence: `(Δ, B)` satisfies both equations.
-    have h_exp_inv : Real.exp (-r) * Real.exp r = 1 := by
-      rw [← Real.exp_add]; simp
-    refine ⟨?_, ?_⟩
-    · -- Δ · S₀·u + B · e^r = V_u
-      rw [Δ_def, B_def]
-      have h_S₀_ud_ne : S₀ * (u - d) ≠ 0 := mul_ne_zero h_S₀_ne h_ud_ne
-      field_simp
-      linear_combination (u * V_d - d * V_u) * h_exp_inv
-    · -- Δ · S₀·d + B · e^r = V_d
-      rw [Δ_def, B_def]
-      have h_S₀_ud_ne : S₀ * (u - d) ≠ 0 := mul_ne_zero h_S₀_ne h_ud_ne
-      field_simp
-      linear_combination (u * V_d - d * V_u) * h_exp_inv
-  · -- Uniqueness: any `(Δ', B')` satisfying both equations must equal `(Δ, B)`.
-    rintro ⟨Δ', B'⟩ ⟨h_up, h_down⟩
-    -- Subtract the two equations: Δ' · S₀ · (u - d) = V_u - V_d
-    have h_sub : Δ' * (S₀ * (u - d)) = V_u - V_d := by
-      have : Δ' * (S₀ * u) - Δ' * (S₀ * d) = V_u - V_d := by linarith
-      linarith [show Δ' * (S₀ * u) - Δ' * (S₀ * d) = Δ' * (S₀ * (u - d)) from by ring]
-    -- So Δ' = (V_u - V_d) / (S₀ · (u - d)) = Δ
-    have h_S₀_ud_ne : S₀ * (u - d) ≠ 0 := mul_ne_zero h_S₀_ne h_ud_ne
-    have h_Δ_eq : Δ' = Δ := by
-      rw [Δ_def]
-      rw [eq_div_iff h_S₀_ud_ne]
-      exact h_sub
-    -- From h_up and Δ' = Δ: B' · e^r = V_u − Δ' · S₀ · u; substitute Δ' = Δ:
-    have h_exp_inv : Real.exp (-r) * Real.exp r = 1 := by
-      rw [← Real.exp_add]; simp
-    have h_B'_eq : B' * Real.exp r = (u * V_d - d * V_u) / (u - d) := by
-      have h_step : B' * Real.exp r = V_u - Δ' * (S₀ * u) := by linarith [h_up]
-      rw [h_step, h_Δ_eq, Δ_def]
-      field_simp
-      ring
-    have h_B_eq : B' = B := by
-      rw [B_def]
-      have h_recover : B' = B' * Real.exp r * Real.exp (-r) := by
-        rw [mul_assoc, mul_comm (Real.exp r) (Real.exp (-r)), h_exp_inv, mul_one]
-      rw [h_recover, h_B'_eq]
-      ring
-    exact Prod.ext h_Δ_eq h_B_eq
+  refine ⟨((V_u - V_d) / (S₀ * (u - d)), Real.exp (-r) * (u * V_d - d * V_u) / (u - d)),
+    ⟨replicating_payoff_up hS₀ h, replicating_payoff_down hS₀ h⟩, ?_⟩
+  rintro ⟨Δ, B⟩ hp
+  obtain ⟨h_up, h_down⟩ : Δ * (S₀ * u) + B * Real.exp r = V_u ∧
+      Δ * (S₀ * d) + B * Real.exp r = V_d := hp
+  have hud : u - d ≠ 0 := (sub_pos.mpr h.d_lt_u).ne'
+  have hexp : Real.exp (-r) * Real.exp r = 1 := by
+    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
+  refine Prod.ext ?_ ?_
+  · show Δ = (V_u - V_d) / (S₀ * (u - d))
+    rw [eq_div_iff (mul_ne_zero hS₀.ne' hud)]
+    linear_combination h_up - h_down
+  · show B = Real.exp (-r) * (u * V_d - d * V_u) / (u - d)
+    rw [eq_div_iff hud]
+    linear_combination Real.exp (-r) * (u * h_down - d * h_up) - B * (u - d) * hexp
+
+/-- **Law of one price in the one-period binomial market.** Under no-arbitrage and `S₀ > 0`,
+every portfolio `(Δ, B)` that pays `V_u` in the up-state and `V_d` in the down-state costs
+`Δ · S₀ + B = e^{−r} · (q · V_u + (1 − q) · V_d)`, the risk-neutral price. By uniqueness
+(`binomial_replicatingPortfolio_unique`) it is the portfolio of `Binomial.Model`, whose cost
+is `replicating_portfolio_cost`. -/
+theorem binomial_replication_cost_eq_price {S₀ u d r V_u V_d Δ B : ℝ} (hS₀ : 0 < S₀)
+    (h : BinomialNoArb u d r) (h_up : Δ * (S₀ * u) + B * Real.exp r = V_u)
+    (h_down : Δ * (S₀ * d) + B * Real.exp r = V_d) :
+    Δ * S₀ + B = binomialOptionPriceOnePeriod u d r V_u V_d := by
+  obtain ⟨p, -, hp⟩ := binomial_replicatingPortfolio_unique (V_u := V_u) (V_d := V_d) hS₀ h
+  obtain ⟨rfl, rfl⟩ := Prod.mk.inj <| (hp (Δ, B) ⟨h_up, h_down⟩).trans
+    (hp ((V_u - V_d) / (S₀ * (u - d)), Real.exp (-r) * (u * V_d - d * V_u) / (u - d))
+      ⟨replicating_payoff_up hS₀ h, replicating_payoff_down hS₀ h⟩).symm
+  exact replicating_portfolio_cost hS₀ h
 
 end MathFin

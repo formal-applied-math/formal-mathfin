@@ -4,6 +4,11 @@
 
 ## Checklist
 
+### Attribution
+
+- [ ] New files name you on both the `Copyright` and the `Authors:` line, not a name copied from another module's header.
+- [ ] Commits are authored under your own name, and you are listed under Contributors in `README.md`.
+
 ### For Lean proof contributions
 
 - [ ] Proof lives in `MathFin/<Section>/<Module>.lean`, not inlined in JSON (unless it's a single-line library wrapper).
@@ -14,6 +19,9 @@
       argument. Every `def`, `structure` and `inductive` needs a doc comment.
 - [ ] `./scripts/lean-check.sh MathFin/<Section>/<Module>.lean` returns `"success": true`.
 - [ ] Benchmark re-export shim added (or updated) in `benchmarks/*.json`.
+- [ ] Each new module connects to the library: it imports the library objects it reuses (or
+      proves its own equal to them), and it is imported by another module or cited by a corpus
+      entry (`tests/test_architecture.py`). `Foundations/` imports only `Foundations/`.
 - [ ] `metadata.formalization_status` set to `full` / `library_wrapper` / `reduced_core` (never `placeholder` to merge).
 - [ ] `description` states what the entry **proves**, not the textbook theorem it is named after,
       and carries any narrowing in that same field — `description` and `formalization_scope` are

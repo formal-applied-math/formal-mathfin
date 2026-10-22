@@ -7,7 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.BlackScholes.Call
-public import MathFin.Foundations.GaussianCDFDeriv
+public import MathFin.Foundations.GaussianPartialMoments
 
 /-!
 # Bachelier model option pricing
@@ -26,9 +26,8 @@ PDF. The proof structure parallels `bs_call_formula`: HasLaw transfer +
 indicator decomposition on the exercise region `Ioi(-d)` + a truncated-mean
 identity for the Gaussian first moment.
 
-Key new primitive: **truncated mean of `N(0, 1)`** —
-`∫ z in Ioi a, z · ϕ(z) dz = ϕ(a)`,
-proved via FTC since `(−ϕ)' = z · ϕ`.
+The truncated mean of `N(0, 1)`, `∫ z in Ioi a, z · ϕ(z) dz = ϕ(a)`, is
+`integral_id_mul_gaussianPDFReal_Ioi` in `Foundations/GaussianPartialMoments`.
 -/
 
 @[expose] public section
@@ -37,79 +36,6 @@ namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real Filter
 open scoped NNReal ENNReal Topology
-
-/-! ### Integrability of `z ↦ z · ϕ(0, 1, z)`
-
-The standard-normal PDF derivative (`hasDerivAt_neg_gaussianPDFReal_zero_one`,
-`hasDerivAt_gaussianPDFReal_zero_one`) it consumes now lives in
-`Foundations.GaussianCDFDeriv`. -/
-
-/-- The function `z ↦ z · ϕ(0, 1, z)` is integrable on `ℝ` (against Lebesgue).
-Derived by transferring `Integrable id (gaussianReal 0 1)` (the existence of the
-first moment of `N(0, 1)`) through the withDensity identification of
-`gaussianReal`. -/
-lemma integrable_id_mul_gaussianPDFReal_volume :
-    Integrable (fun z : ℝ ↦ z * gaussianPDFReal 0 1 z) volume := by
-  have h_id_integrable : Integrable (id : ℝ → ℝ) (gaussianReal (0 : ℝ) 1) := by
-    have h_memLp : MemLp (id : ℝ → ℝ) 2 (gaussianReal (0 : ℝ) 1) := memLp_id_gaussianReal 2
-    exact (h_memLp.mono_exponent (by norm_num : (1 : ℝ≥0∞) ≤ 2)).integrable le_rfl
-  rw [gaussianReal_of_var_ne_zero (0 : ℝ) (one_ne_zero : (1 : ℝ≥0) ≠ 0)] at h_id_integrable
-  have h_pdf_meas : Measurable (gaussianPDF (0 : ℝ) 1) := by
-    unfold gaussianPDF; fun_prop
-  have h_pdf_lt_top : ∀ᵐ z ∂(volume : Measure ℝ), gaussianPDF (0 : ℝ) 1 z < ∞ := by
-    refine ae_of_all _ (fun z ↦ ?_)
-    unfold gaussianPDF; exact ENNReal.ofReal_lt_top
-  rw [integrable_withDensity_iff_integrable_smul' h_pdf_meas h_pdf_lt_top] at h_id_integrable
-  have h_eq : (fun z : ℝ ↦ (gaussianPDF (0 : ℝ) 1 z).toReal • id z)
-            = (fun z : ℝ ↦ z * gaussianPDFReal 0 1 z) := by
-    funext z
-    show (gaussianPDF (0 : ℝ) 1 z).toReal • z = z * gaussianPDFReal 0 1 z
-    unfold gaussianPDF
-    rw [ENNReal.toReal_ofReal (gaussianPDFReal_nonneg _ _ _)]
-    simp [smul_eq_mul, mul_comm]
-  rwa [h_eq] at h_id_integrable
-
-/-! ### Truncated first moment of the standard normal -/
-
-/-- **Truncated mean** of `N(0, 1)` on `(a, ∞)`:
-`∫ z in Ioi a, z · ϕ(z) dz = ϕ(a)`.
-
-Proved via FTC for improper integrals (`integral_Ioi_of_hasDerivAt_of_tendsto`)
-using the antiderivative `z ↦ -ϕ(z)` of `z ↦ z · ϕ(z)`, and the fact that
-`ϕ(z) → 0` as `z → ∞`. -/
-lemma integral_id_mul_gaussianPDFReal_Ioi (a : ℝ) :
-    ∫ z in Set.Ioi a, z * gaussianPDFReal 0 1 z = gaussianPDFReal 0 1 a := by
-  -- Antiderivative of z · ϕ(0,1,z) is -ϕ(0,1,z)
-  have h_deriv : ∀ x ∈ Set.Ioi a,
-      HasDerivAt (fun z' ↦ -gaussianPDFReal 0 1 z') (x * gaussianPDFReal 0 1 x) x := by
-    intro x _; exact hasDerivAt_neg_gaussianPDFReal_zero_one x
-  have h_cont : ContinuousWithinAt (fun z' : ℝ ↦ -gaussianPDFReal 0 1 z') (Set.Ici a) a := by
-    have : Continuous fun z' : ℝ ↦ -gaussianPDFReal 0 1 z' := by
-      unfold gaussianPDFReal; fun_prop
-    exact this.continuousWithinAt
-  have h_int : IntegrableOn (fun z' : ℝ ↦ z' * gaussianPDFReal 0 1 z') (Set.Ioi a) volume := by
-    have h_full : Integrable (fun z' : ℝ ↦ z' * gaussianPDFReal 0 1 z') volume :=
-      integrable_id_mul_gaussianPDFReal_volume
-    exact h_full.integrableOn
-  have h_lim : Tendsto (fun z' : ℝ ↦ -gaussianPDFReal 0 1 z') atTop (𝓝 0) := by
-    rw [show (0 : ℝ) = -0 from neg_zero.symm]
-    refine Tendsto.neg ?_
-    -- gaussianPDFReal 0 1 z = (sqrt(2π))⁻¹ · exp(-z²/2). Both factors handled separately.
-    have h_atBot : Tendsto (fun z : ℝ ↦ -(z - 0)^2/2) atTop atBot := by
-      have h_sub : Tendsto (fun z : ℝ ↦ (z - 0)^2) atTop atTop := by simp
-      have h_neg : Tendsto (fun z : ℝ ↦ -((z - 0)^2)) atTop atBot :=
-        tendsto_neg_atTop_atBot.comp h_sub
-      have h_div := h_neg.atBot_div_const (by norm_num : (0 : ℝ) < 2)
-      simpa using h_div
-    have h_exp : Tendsto (fun z : ℝ ↦ Real.exp (-(z - 0)^2/2)) atTop (𝓝 0) :=
-      Real.tendsto_exp_atBot.comp h_atBot
-    have h_mul := h_exp.const_mul ((Real.sqrt (2 * π))⁻¹ : ℝ)
-    rw [mul_zero] at h_mul
-    convert h_mul using 1
-    funext z; unfold gaussianPDFReal; simp [NNReal.coe_one]
-  have hres := integral_Ioi_of_hasDerivAt_of_tendsto h_cont h_deriv h_int h_lim
-  -- hres : ∫ z in Ioi a, z * pdf z = 0 - (-pdf a) = pdf a
-  linarith [hres]
 
 /-! ### Bachelier model hypothesis -/
 

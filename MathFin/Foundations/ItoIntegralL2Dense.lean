@@ -51,7 +51,7 @@ exhaustion of the time axis:
 
 Pure consumption of the finite-horizon layer + Degenne's `SimpleProcess`
 infrastructure; nothing of the π-system or the isometry is reproved. This closes
-the unbounded-horizon gap recorded in `docs/ito-integral-clm-deferred.md`.
+the unbounded-horizon gap recorded in `docs/archive/ito-integral-clm-deferred.md`.
 -/
 
 @[expose] public section

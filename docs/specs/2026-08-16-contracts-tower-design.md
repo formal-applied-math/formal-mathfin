@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-16 · **Status:** design, awaiting approval · **Corpus at design time:** 358
 **Companions:** [`mathematical-architecture.md`](../mathematical-architecture.md),
-[`bridges.md`](../bridges.md), [`roadmap.md`](../roadmap.md),
+[`bridges.md`](../bridges.md), [`roadmap.md`](../archive/roadmap-history.md),
 [`2026-08-16-ito-chain-rule-design.md`](2026-08-16-ito-chain-rule-design.md) (in flight, disjoint)
 
 **External source:** Bilokon, *The Contract Is Not the Model: Proof-Carrying Exotic

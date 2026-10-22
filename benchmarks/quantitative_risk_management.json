@@ -1,5 +1,6 @@
 {
   "description": "Quantitative risk management: the general quantile layer, value-at-risk and expected shortfall for every law (Rockafellar–Uryasev, coherence, dual representation, elicitability), copulas and Sklar's theorem, dependence, extreme value theory, Bernoulli-mixture credit portfolios and the Basel IRB limit theorem. `chapter` refers to McNeil, Frey and Embrechts, Quantitative Risk Management (2015); exercises cite Hofert, Frey and McNeil, The QRM Exercise Book (2020).",
+  "alignment_source": "McNeil, Frey and Embrechts, Quantitative Risk Management (2015), with each entry's `reference`",
   "theorems": [
     {
       "id": "qrm-quantile-transform",
@@ -1042,6 +1043,38 @@
       }
     },
     {
+      "id": "qrm-creditmetrics-default-absorbing-monotone",
+      "name": "CreditMetrics: Cumulative Default Probability Is Nondecreasing",
+      "description": "For a row-stochastic transition matrix P whose state d is absorbing (P d d = 1), the k-period probability (P^k) i d of being in d starting from i is monotone in k.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.CreditMetrics\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology Matrix\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem monotone_pow_apply_absorbing_thm {ι : Type*} [Fintype ι] [DecidableEq ι] {P : Matrix ι ι ℝ} (hP : P ∈ rowStochastic ℝ ι) {d : ι} (hd : P d d = 1) (i : ι) :\n    Monotone fun k : ℕ ↦ (P ^ k) i d :=\n  MathFin.monotone_pow_apply_absorbing hP hd i\n\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "CreditMetrics Technical Document (J.P. Morgan 1997), ch. 6",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. P^k row-stochastic via Mathlib's rowStochastic submonoid; (P^(k+1)) i d ≥ (P^k) i d · P d d. Lives in MathFin/RiskMeasures/CreditMetrics.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-creditmetrics-gaussian-threshold-row-stochastic",
+      "name": "CreditMetrics: Gaussian Threshold Migration Gives a Transition Matrix",
+      "description": "For row-wise thresholds −∞ = z i 0 ≤ … ≤ z i m = +∞ in EReal, the matrix of standard-normal bucket probabilities N(0,1)(z i j < Z ≤ z i (j+1)) is row-stochastic (the general threshold theorem, which holds for any latent probability law, at N(0,1)). Threshold calibration to a target matrix is the separate entry mf-creditmetrics-threshold-calibration.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.CreditMetrics\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology Matrix\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem gaussianThresholdMatrix_mem_rowStochastic_thm {m : ℕ} {z : Fin m → Fin (m + 1) → EReal} (hz : ∀ i, Monotone (z i)) (h0 : ∀ i, z i 0 = ⊥) (hm : ∀ i, z i (Fin.last m) = ⊤) :\n    thresholdMatrix (gaussianReal 0 1) z ∈ rowStochastic ℝ (Fin m) :=\n  MathFin.thresholdMatrix_mem_rowStochastic (gaussianReal 0 1) hz h0 hm\n\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "CreditMetrics Technical Document (J.P. Morgan 1997), ch. 6",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof that the threshold buckets partition ℝ, so bucket probabilities under any probability law sum to one. The N(0,1) case is thresholdMatrix_mem_rowStochastic at gaussianReal 0 1. The converse, calibration z = Φ⁻¹(cumulative row sums) reproducing a given row-stochastic matrix, is thresholdMatrix_gaussianThresholds (mf-creditmetrics-threshold-calibration). The default covariance of two obligors with bivariate normal returns is covariance_indicator_default_gaussianThresholds (mf-creditmetrics-default-covariance). Joint migration of several obligors to buckets other than Default is not formalized. Lives in MathFin/RiskMeasures/CreditMetrics.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "qrm-student-t-density",
       "name": "Student-t Density in Closed Form",
       "domain": "mathematical_finance",
@@ -1055,22 +1088,6 @@
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The kernel is written as a Gamma mixture of Gaussian kernels (Mathlib's integral_rpow_mul_exp_neg_mul_Ioi), the two integrals are exchanged (integral_integral_swap, integrability via integrable_prod_iff'), and the inner Gaussian and outer Gamma integrals are evaluated with integral_gaussian and Gamma_eq_integral. Lives in MathFin/Foundations/StudentT.lean. Axioms-clean."
-      }
-    },
-    {
-      "id": "qrm-student-t-cauchy",
-      "name": "Student-t Law with One Degree of Freedom Is Cauchy",
-      "domain": "mathematical_finance",
-      "description": "The Student-t law with ν = 1 degree of freedom equals Mathlib's standard Cauchy law: studentTMeasure 1 = cauchyMeasure 0 1.",
-      "code": {
-        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem studentTMeasure_one_thm : studentTMeasure 1 = cauchyMeasure 0 1 :=\n  MathFin.studentTMeasure_one\n"
-      },
-      "metadata": {
-        "chapter": 2,
-        "reference": "MFE (2015)",
-        "difficulty": "basic",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof: at ν = 1 the kernel is (1 + x²)⁻¹ and its integral is π (Mathlib's integral_univ_inv_one_add_sq), so the two densities agree pointwise. Lives in MathFin/Foundations/StudentT.lean. Axioms-clean."
       }
     },
     {
@@ -1090,6 +1107,22 @@
       }
     },
     {
+      "id": "qrm-student-t-var-le-es",
+      "name": "VaR Bounded by ES for a Student-t Loss",
+      "domain": "mathematical_finance",
+      "description": "For the Student-t law t_ν with ν > 1 and α ∈ (0, 1), the VaR and ES closed forms satisfy q ≤ g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α), read off the library's general VaR ≤ ES.",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem quantile_studentTMeasure_le_expectedShortfall_closedForm_thm {ν α : ℝ} (hν : 1 < ν)\n    (hα : α ∈ Ioo 0 1) :\n    quantile (studentTMeasure ν) α ≤\n      studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *\n        ((ν + quantile (studentTMeasure ν) α ^ 2) / (ν - 1)) :=\n  MathFin.quantile_studentTMeasure_le_expectedShortfall_closedForm hν hα\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "MFE (2015) Example 2.15",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: valueAtRisk_le_expectedShortfall applied to the identity under the Student-t law, rewritten with the Student-t VaR and ES theorems; the inequality is not reproved from scratch. Lives in MathFin/RiskMeasures/StudentTValueAtRisk.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "qrm-student-t-es",
       "name": "Expected Shortfall of a Student-t Loss",
       "domain": "mathematical_finance",
@@ -1106,19 +1139,19 @@
       }
     },
     {
-      "id": "qrm-student-t-var-le-es",
-      "name": "VaR Bounded by ES for a Student-t Loss",
+      "id": "qrm-student-t-cauchy",
+      "name": "Student-t Law with One Degree of Freedom Is Cauchy",
       "domain": "mathematical_finance",
-      "description": "For the Student-t law t_ν with ν > 1 and α ∈ (0, 1), the VaR and ES closed forms satisfy q ≤ g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α), read off the library's general VaR ≤ ES.",
+      "description": "The Student-t law with ν = 1 degree of freedom equals Mathlib's standard Cauchy law: studentTMeasure 1 = cauchyMeasure 0 1.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem quantile_studentTMeasure_le_expectedShortfall_closedForm_thm {ν α : ℝ} (hν : 1 < ν)\n    (hα : α ∈ Ioo 0 1) :\n    quantile (studentTMeasure ν) α ≤\n      studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *\n        ((ν + quantile (studentTMeasure ν) α ^ 2) / (ν - 1)) :=\n  MathFin.quantile_studentTMeasure_le_expectedShortfall_closedForm hν hα\n"
+        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem studentTMeasure_one_thm : studentTMeasure 1 = cauchyMeasure 0 1 :=\n  MathFin.studentTMeasure_one\n"
       },
       "metadata": {
         "chapter": 2,
-        "reference": "MFE (2015) Example 2.15",
-        "difficulty": "intermediate",
+        "reference": "MFE (2015)",
+        "difficulty": "basic",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: valueAtRisk_le_expectedShortfall applied to the identity under the Student-t law, rewritten with the Student-t VaR and ES theorems; the inequality is not reproved from scratch. Lives in MathFin/RiskMeasures/StudentTValueAtRisk.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: at ν = 1 the kernel is (1 + x²)⁻¹ and its integral is π (Mathlib's integral_univ_inv_one_add_sq), so the two densities agree pointwise. Lives in MathFin/Foundations/StudentT.lean. Axioms-clean."
       }
     }
   ]

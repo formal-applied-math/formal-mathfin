@@ -260,7 +260,7 @@ specs** for the *general continuous adapted* case, and narrowing them to the sim
 
 **Interim wiring DONE (2026-07-06, docs-only, ledger-neutral):** `gir-thm-9.1.8` and `sc-thm-9.1.8`
 `formalization_scope` prose now cross-references the real `gir-simple-adapted` derivation and names the exact
-remaining gap (the σ-realization `processToLp_of_bdd_adapted_cont`); `docs/roadmap.md`, `docs/coverage.md`,
+remaining gap (the σ-realization `processToLp_of_bdd_adapted_cont`); `docs/archive/roadmap-history.md`, `docs/coverage.md`,
 `docs/bridges.md`, `docs/mathematical-architecture.md` record the frontier (simple-adapted `full`;
 continuous-adapted infrastructure-gated).
 
