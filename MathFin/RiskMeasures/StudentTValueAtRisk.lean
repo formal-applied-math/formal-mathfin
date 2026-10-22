@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import Mathlib
+public import MathFin.RiskMeasures.Gaussian
 
 /-!
 # Student-t VaR and expected shortfall closed forms
@@ -59,7 +60,10 @@ file does not undertake) — both left as disclosed gaps.
 
 * `studentTPdf`: the standard (unit-scale) Student-t density `g_ν`, built from `Real.Gamma`.
 * `studentTPdf_pos`: `g_ν(x) > 0` for `ν > 0`.
-* `studentTValueAtRisk`: the (trivial) VaR closed form `μ + σ x_α`.
+* `studentTValueAtRisk`: the (trivial) VaR closed form `μ + σ x_α`, and
+  `studentTValueAtRisk_eq_gaussianVaR` — it is literally `RiskMeasures.Gaussian.gaussianVaR`
+  evaluated at the Student-t quantile `x_α` in place of the normal quantile `z`: the
+  location-scale VaR quantile formula is the same closed form for any quantile function.
 * `studentTExpectedShortfall`: the pdf-based ES closed form, meaningful only for `ν > 1`, `α < 1`
   (outside that range the Lean term is a junk value: e.g. `ν = 1` or `α = 1` collapses it to `μ`
   via `x/0 = 0`, whereas the real ES diverges there).
@@ -105,6 +109,14 @@ theorem studentTPdf_pos {ν : ℝ} (hν : 0 < ν) (x : ℝ) : 0 < studentTPdf ν
 closed form (McNeil-Frey-Embrechts, Example 2.15); it carries no pdf term. -/
 noncomputable def studentTValueAtRisk (μ σ xα : ℝ) : ℝ := μ + σ * xα
 
+/-- **The Student-t VaR closed form is the Gaussian one**, at the Student-t quantile:
+the location-scale VaR formula `μ + σ·q` does not depend on which distribution the
+quantile `q` comes from, only on it being *a* quantile of the standardized loss. This
+makes literal the parallel the definition's docstring draws with `gaussianVaR`
+(`RiskMeasures/Gaussian.lean`). -/
+theorem studentTValueAtRisk_eq_gaussianVaR (μ σ xα : ℝ) :
+    studentTValueAtRisk μ σ xα = gaussianVaR μ σ xα := rfl
+
 /-- **Student-t expected shortfall** at quantile `x_α` and level `α` for a location-scale loss
 `L = μ + σ T`, `T ~ t_ν`: `ES_α(L) = μ + σ · g_ν(x_α)/(1-α) · (ν + x_α²)/(ν-1)`
 (McNeil-Frey-Embrechts, Example 2.15). Meaningful only for `ν > 1`, `α < 1`: outside that range
@@ -122,12 +134,13 @@ theorem studentTExpectedShortfall_affine (ν μ σ xα α a b : ℝ) (ha : 0 ≤
   unfold studentTExpectedShortfall
   rw [abs_of_nonneg ha]; ring
 
-/-- **VaR affine invariance**: `VaR_α(a·L + b) = a·VaR_α(L) + b` for `a ≥ 0`, matching
-`gaussianVaR_affine` (volatility scales by `|a|·σ`, so `0 ≤ a` is load-bearing). -/
+/-- **VaR affine invariance**: `VaR_α(a·L + b) = a·VaR_α(L) + b` for `a ≥ 0`. Since
+`studentTValueAtRisk_eq_gaussianVaR` identifies this closed form with `gaussianVaR` pointwise,
+the Gaussian file's own affine-invariance proof (`gaussianVaR_affine`) transfers directly —
+this is the import earning its keep, not just the `rfl` identification above. -/
 theorem studentTValueAtRisk_affine (μ σ xα a b : ℝ) (ha : 0 ≤ a) :
-    studentTValueAtRisk (a * μ + b) (|a| * σ) xα = a * studentTValueAtRisk μ σ xα + b := by
-  unfold studentTValueAtRisk
-  rw [abs_of_nonneg ha]; ring
+    studentTValueAtRisk (a * μ + b) (|a| * σ) xα = a * studentTValueAtRisk μ σ xα + b :=
+  gaussianVaR_affine μ σ xα a b ha
 
 /-- **The ES closed form is positive** for a centered, positively-scaled loss (`μ = 0`, `σ > 0`)
 at any quantile `x_α`, with `ν > 1` and `α < 1`: a sanity check standing in for a

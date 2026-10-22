@@ -2677,6 +2677,13 @@
       "input_hash": "393fd52054d8cb330196b13b03e6a2031047a23938d44506e5b74a8cd85aa6db",
       "verified_at_commit": "fdfecac"
     },
+    "mf-student-t-expected-shortfall-pos": {
+      "benchmark_file": "quantitative_risk_management.json",
+      "date": "2026-10-22",
+      "elapsed_s": 7.6,
+      "input_hash": "d4d4cbe86311e32c8de599173d3f545268509bbd6a79b77dba7eecd5a85b0c5f",
+      "verified_at_commit": "2608da5"
+    },
     "mf-superhedging-emm-bound": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-02",

@@ -1040,6 +1040,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Mean −q and variance q(1 − q) of the two-point loss. Lives in MathFin/RiskMeasures/StandardDeviationPrinciple.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-student-t-expected-shortfall-pos",
+      "name": "Student-t Expected Shortfall Closed Form Is Positive",
+      "domain": "mathematical_finance",
+      "description": "For a centered, positively-scaled Student-t location-scale loss (μ = 0, σ > 0), the expected-shortfall closed form μ + σ·g_ν(x_α)/(1−α)·(ν+x_α²)/(ν−1) (McNeil-Frey-Embrechts, Example 2.15) is positive at any quantile x_α, for ν > 1 and α < 1.",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MathFin\n\ntheorem student_t_expected_shortfall_pos_thm {ν σ xα α : ℝ}\n    (hν : 1 < ν) (hσ : 0 < σ) (hα : α < 1) :\n    0 < studentTExpectedShortfall ν 0 σ xα α :=\n  studentTExpectedShortfall_pos hν hσ hα\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "A. J. McNeil, R. Frey and P. Embrechts, Quantitative Risk Management, revised ed. (2015), Example 2.15",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof (positivity + linarith). Lives in MathFin/RiskMeasures/StudentTValueAtRisk.lean. No HasLaw-level bridge to an actual Student-t-distributed random variable (Mathlib has no Student-t law at the pinned version); this is a sanity check on the stated closed form. Axioms-clean."
+      }
     }
   ]
 }
