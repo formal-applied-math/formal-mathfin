@@ -353,35 +353,19 @@
       }
     },
     {
-      "id": "mf-uncovered-interest-parity-risk-neutral",
-      "name": "Uncovered Interest Parity under the Domestic Risk-Neutral Measure",
-      "domain": "mathematical_finance",
-      "description": "Under the Garman–Kohlhagen hypothesis (terminal spot S·exp((r_d − r_f − σ²/2)T + σ√T·Z) with Z standard normal under Q, S, K, σ, T > 0), the risk-neutral expected terminal spot is E_Q[S_T] = S·e^{(r_d − r_f)T}, the covered-parity forward. This is the risk-neutral form of uncovered interest parity; the same equation under the physical measure is not claimed.",
-      "code": {
-        "lean": "import MathFin.FixedIncome.FxForwardParity\n\nopen MathFin MeasureTheory\n\n/-- **Uncovered interest parity, risk-neutral form.** -/\ntheorem uncovered_interest_parity_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q] {S K r_d r_f σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S K (r_d - r_f) σ T Z) :\n    ∫ ω, bsTerminal S (r_d - r_f) σ T (Z ω) ∂Q = fxForward S r_d r_f T :=\n  uncovered_interest_parity h\n"
-      },
-      "metadata": {
-        "chapter": 14,
-        "reference": "Uncovered interest parity; Garman & Kohlhagen, 'Foreign currency option values', J. Int. Money Finance 2 (1983) 231–237",
-        "difficulty": "intermediate",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.uncovered_interest_parity (MathFin/FixedIncome/FxForwardParity.lean), which is expected_terminal_eq_forward (MathFin/BlackScholes/Forward.lean, the Gaussian MGF) at drift r_d − r_f, the hypothesis of garman_kohlhagen_call_formula. SCOPE: risk-neutral (pricing-measure) statement under the lognormal model; uncovered parity under the physical measure is an economic hypothesis and is not formalized. The strike K plays no part; it is carried because BSCallHyp requires K > 0. This is the same expected_terminal_eq_forward as mf-forward-price (benchmarks/black_scholes.json), at drift r_d - r_f instead of a generic r; no additional derivation happens here beyond that specialization."
-      }
-    },
-    {
       "id": "mf-covered-eq-uncovered-interest-parity",
       "name": "Covered and Uncovered Interest Parity Agree",
       "domain": "mathematical_finance",
-      "description": "If a finite-state market (domestic bond at e^{−r_d T}, foreign bond in domestic currency at S·e^{−r_f T}) prices the forward S_T − F to zero, and the Garman–Kohlhagen hypothesis holds with the same spot S and rates, then F is the risk-neutral expected terminal spot E_Q[S_T]: the covered-parity forward equals the risk-neutral uncovered-parity expectation.",
+      "description": "If a finite-state market (domestic bond at e^{−r_d T}, foreign bond in domestic currency at S·e^{−r_f T}) prices the forward S_T − F to zero, and the Garman–Kohlhagen hypothesis holds with the same spot S and rates, then F is the risk-neutral expected terminal spot E_Q[S_T]: the covered-parity forward equals the risk-neutral uncovered-parity expectation. (This also records, as its uncovered-parity half, that E_Q[S_T] = S·e^{(r_d − r_f)T} under Garman–Kohlhagen — the risk-neutral form of uncovered interest parity; the same equation under the physical measure is not claimed.)",
       "code": {
         "lean": "import MathFin.FixedIncome.FxForwardParity\n\nopen MathFin MeasureTheory\n\n/-- **Covered and uncovered parity agree.** -/\ntheorem covered_eq_uncovered_interest_parity_thm {ι : Type*} (s : Finset ι) (q S_T : ι → ℝ)\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S K r_d r_f σ T F : ℝ} {Z : Ω → ℝ}\n    (h_dom : ∑ i ∈ s, q i = Real.exp (-(r_d * T)))\n    (h_for : ∑ i ∈ s, q i * S_T i = S * Real.exp (-(r_f * T)))\n    (hF : ∑ i ∈ s, q i * (S_T i - F) = 0) (h : BSCallHyp Q S K (r_d - r_f) σ T Z) :\n    F = ∫ ω, bsTerminal S (r_d - r_f) σ T (Z ω) ∂Q :=\n  covered_eq_uncovered_interest_parity s q S_T h_dom h_for hF h\n"
       },
       "metadata": {
         "chapter": 14,
-        "reference": "Covered vs uncovered interest parity (Hull, Options, Futures, and Other Derivatives, currency forwards and currency options)",
+        "reference": "Covered vs uncovered interest parity (Hull, Options, Futures, and Other Derivatives, currency forwards and currency options); the uncovered-parity half is Garman & Kohlhagen, 'Foreign currency option values', J. Int. Money Finance 2 (1983) 231–237",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.covered_eq_uncovered_interest_parity (MathFin/FixedIncome/FxForwardParity.lean), composing covered_interest_parity (from forward_price_from_no_arbitrage) with uncovered_interest_parity (from expected_terminal_eq_forward). SCOPE: the finite-state market and the lognormal model are separate hypotheses sharing spot and rates; that one model realizes both is not constructed."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.covered_eq_uncovered_interest_parity (MathFin/FixedIncome/FxForwardParity.lean), composing covered_interest_parity (from forward_price_from_no_arbitrage) with uncovered_interest_parity (from expected_terminal_eq_forward, MathFin/BlackScholes/Forward.lean, the Gaussian MGF, at drift r_d − r_f). SCOPE: the finite-state market and the lognormal model are separate hypotheses sharing spot and rates; that one model realizes both is not constructed. The uncovered-parity half is risk-neutral (pricing-measure) only: uncovered parity under the physical measure is an economic hypothesis and is not formalized. K plays no part in the conclusion; it is carried because BSCallHyp requires K > 0. The uncovered-parity half is the same expected_terminal_eq_forward as mf-forward-price (benchmarks/black_scholes.json), at drift r_d − r_f instead of a generic r; no additional derivation happens there beyond that specialization."
       }
     }
   ]

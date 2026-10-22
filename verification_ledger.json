@@ -3629,13 +3629,6 @@
       "input_hash": "39463c80e7e81cc1959a152df1c9e842ef0391873d3f93545df9a0f9bd7d240b",
       "verified_at_commit": "199887f8"
     },
-    "mf-uncovered-interest-parity-risk-neutral": {
-      "benchmark_file": "no_arbitrage.json",
-      "date": "2026-10-23",
-      "elapsed_s": 3.7,
-      "input_hash": "34e21f2a1c7ff6cf3fc28376b3e67868c16e4935db10ca46e5e427a7b3188b34",
-      "verified_at_commit": "f3a314a"
-    },
     "mf-uniswap-v3-position-bs-price-bound": {
       "benchmark_file": "defi.json",
       "date": "2026-10-21",
