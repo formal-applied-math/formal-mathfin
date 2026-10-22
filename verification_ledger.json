@@ -2617,9 +2617,9 @@
     "mf-relative-drawdown-scale-invariant": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.9,
-      "input_hash": "200a79d8e141b1acd6af1c5afe88c5d2913ac626462f366fd61bedfc53bc95e8",
-      "verified_at_commit": "84b880f"
+      "elapsed_s": 3.5,
+      "input_hash": "347fd38132bef65422926e3b3ff797e20da54bd340386852c84c788f6c07faf3",
+      "verified_at_commit": "ce4d6bb"
     },
     "mf-rho": {
       "benchmark_file": "mathematical_finance.json",

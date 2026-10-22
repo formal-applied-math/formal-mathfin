@@ -47,9 +47,10 @@ noncomputable def maxRelativeDrawdown (E : ι → ℝ) (t : ι) : ℝ :=
   partialSups (relativeDrawdown E) t
 
 /-- The running peak is positively homogeneous: multiplication by `c > 0` is an order
-isomorphism of `ℝ`, so it commutes with the finite suprema defining `partialSups`. Mathlib's
-`partialSups_const_mul` is the `[Group α]` version, which does not cover `ℝ` under `*`. -/
-theorem partialSups_const_mul₀ {c : ℝ} (hc : 0 < c) (E : ι → ℝ) (t : ι) :
+isomorphism, so it commutes with the finite suprema defining `partialSups`. This is the
+group-with-zero version of Mathlib's `[Group α]` lemma `partialSups_const_mul`. -/
+theorem partialSups_const_mul₀ {G₀ : Type*} [GroupWithZero G₀] [SemilatticeSup G₀]
+    [PosMulReflectLT G₀] {c : G₀} (hc : 0 < c) (E : ι → G₀) (t : ι) :
     partialSups (fun s ↦ c * E s) t = c * partialSups E t :=
   map_partialSups (OrderIso.mulLeft₀ c hc) E t
 
