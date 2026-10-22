@@ -30,6 +30,8 @@ The invariance holds for every equity curve, with no positivity hypothesis on `E
   for `c > 0` (multiplication by `c` is an order isomorphism, so it commutes with `⊔`).
 * `relativeDrawdown_const_mul`: the relative drawdown of `c E` equals that of `E`.
 * `maxRelativeDrawdown_const_mul`: hence so does the maximum relative drawdown up to any time.
+* `sub_le_maximumDrawdown`: every chronological decline `E s − E t` (`s ≤ t`) of a finite path
+  is at most `maximumDrawdown E`.
 * `partialSups_mul_relativeDrawdown_le_maximumDrawdown`: on a finite path the two notions are
   tied: the relative drawdown at `t`, scaled back up by a nonzero running peak, is the
   absolute decline `max_{s ≤ t} E s − E t`, which is at most `maximumDrawdown E`.
