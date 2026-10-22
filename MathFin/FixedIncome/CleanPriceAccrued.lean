@@ -24,9 +24,9 @@ forward by `f` periods:
   `(1 + y)^f` factor carries the last-coupon-date present value forward by
   the elapsed fraction `f` of the period that has since run. `(1 + y)^f`
   here is `Real.rpow`; the formula is the intended compound-interest carry
-  only under the standard yield domain `1 + y > 0` (the proved results below
-  all fix `f = 0`, where `Real.rpow_zero` sidesteps the issue regardless of
-  `y`, and the coupon-date results assume `1 + y > 0`).
+  only under the standard yield domain `1 + y > 0` (the on-coupon-date
+  results fix `f = 0`, where `Real.rpow_zero` sidesteps the issue regardless
+  of `y`; the across-a-coupon-date results assume `1 + y > 0`).
 
 Accrued interest on the next coupon (its amount supplied separately as
 `c1`, since it is not tied to the cashflow map `c`) is the simple-interest
@@ -53,6 +53,8 @@ At the end of a period (`f ↑ 1`) the next coupon `j` (`t j = 1`) is paid and a
 new period starts: the remaining cashflows are `s.erase j`, each one period
 closer (`t i - 1`), and `f` restarts at `0`. With `1 + y > 0`:
 
+* `dirtyPrice_one_eq`: at `f = 1` the dirty price is the new period's dirty
+  price plus `c j`.
 * `tendsto_dirtyPrice_coupon_date`: the dirty price tends to the new period's
   dirty price **plus the coupon** `c j` — it drops by exactly the coupon paid.
 * `tendsto_cleanPrice_coupon_date`: the clean price, with accrued interest
@@ -96,8 +98,8 @@ theorem dirtyPrice_on_coupon_date (s : Finset ι) (t : ι → ℕ) (c : ι → �
   rw [Real.rpow_zero, one_mul]
 
 /-- On a coupon date, no interest has accrued. -/
-theorem accruedInterest_on_coupon_date (c1 : ℝ) : accruedInterest c1 0 = 0 := by
-  unfold accruedInterest; ring
+theorem accruedInterest_on_coupon_date (c1 : ℝ) : accruedInterest c1 0 = 0 :=
+  zero_mul c1
 
 /-- On a coupon date, clean price equals dirty price (equivalently, equals
 the ordinary `bondPriceDisc`): the two conventions agree exactly on coupon

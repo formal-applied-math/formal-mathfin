@@ -133,7 +133,7 @@ theorem covered_eq_uncovered_interest_parity {ι : Type*} (s : Finset ι) (q S_T
 
 /-- At zero maturity the forward collapses to the spot rate. -/
 theorem fxForward_at_zero (S r_d r_f : ℝ) : fxForward S r_d r_f 0 = S := by
-  unfold fxForward; simp
+  simp [fxForward]
 
 /-- Every CIP forward is positive whenever the spot rate is. -/
 theorem fxForward_pos {S : ℝ} (hS : 0 < S) (r_d r_f T : ℝ) : 0 < fxForward S r_d r_f T :=

@@ -11,7 +11,7 @@ public import MathFin.FixedIncome.CouponBonds
 /-!
 # Loan amortization schedules: bullet, equal-principal and level-payment
 
-Both schedules share the same per-period interest accrual on the outstanding
+All three schedules share the same per-period interest accrual on the outstanding
 balance `B_{n-1}`,
 
   `I_n = B_{n-1} · i`,
@@ -27,12 +27,8 @@ They differ only in how `P_n` is chosen:
   `B_n = B_0` for `n < N`, `B_N = 0`.
 * **Equal-principal**: `P_n = B_0 / N` every period — a constant principal
   payment. Closed form: `B_n = B_0 · (1 - n / N)`.
-
-Both closed forms are proved here by induction on the balance recurrence,
-matching the standard amortization-table identities.
-
 * **Level payment** (mortgage-style): the same payment `A` every period, its
-  principal part `A - I_n` being what is left after interest, so
+  principal part `P_n = A - I_n` being what is left after interest, so
   `B_n = B_{n-1}·(1 + i) - A`. Priced against `annuityValue`
   (`MathFin/FixedIncome/CouponBonds.lean`), the present value of `N` payments
   `A` discounted continuously at rate `r` over periods of length `Δt`: if the
@@ -40,6 +36,9 @@ matching the standard amortization-table identities.
   `i = e^{rΔt} - 1`, then after `n ≤ N` payments the outstanding balance is
   the value of the `N - n` payments still to come, and the loan is paid off
   at `N`.
+
+All three closed forms are proved here by induction on the balance recurrence,
+matching the standard amortization-table identities.
 
 ## Result
 
