@@ -29,7 +29,8 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 ### The Student-t law: VaR and ES at the law (2026-10-22)
 
 Five entries added to `benchmarks/quantitative_risk_management.json`, all `full`.
-Corpus 535 → 540.
+Corpus 658 → 663 (after merging `origin/main` to resolve a 370-commit divergence; the
+delta this section itself contributed was 535 → 540 before that merge).
 
 Mathlib has no Student-t law at the pin. `Foundations/StudentT.lean` builds it as Lebesgue measure
 with density `k_ν/∫k_ν`, `k_ν(x) = (1 + x²/ν)^(-(ν+1)/2)`, computes the normalizing constant (a
@@ -57,8 +58,8 @@ Verification:
 - The default `lake build` passed, including the curated `AxiomAudit.lean` (three new Student-t
   guards) and the regenerated `AxiomAuditGen.lean`.
 - `lake lint` passed.
-- The ledger reports 540 fresh, 0 stale and 0 missing entries; the five new entries were verified
-  with `lake env lean`.
+- The ledger reports 663 fresh, 0 stale and 0 missing entries (after the subsequent merge with
+  `origin/main`); the five new entries were verified with `lake env lean`.
 
 ### Every module connected: the coherence pass (2026-10-21)
 
