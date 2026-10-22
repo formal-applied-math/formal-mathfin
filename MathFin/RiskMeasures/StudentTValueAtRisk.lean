@@ -6,155 +6,142 @@ Authors: Yang Ye
 module
 
 public import Mathlib
-public import MathFin.RiskMeasures.Gaussian
+public import MathFin.Foundations.StudentT
+public import MathFin.RiskMeasures.ExpectedShortfall
 
 /-!
-# Student-t VaR and expected shortfall closed forms
+# Value-at-risk and expected shortfall of a Student-t loss
 
-A "Student-t (Cornish-Fisher-style) parametric VaR" was wanted in the closed form
+Let `T` have the standard Student-t law `t_ν` (`Foundations/StudentT.lean`) and consider the
+location-scale loss `L = μ + σ T` with `σ ≥ 0`. Through the library's own `valueAtRisk` and
+`expectedShortfall` (`RiskMeasures/ValueAtRisk.lean`), this file proves the closed forms of
+McNeil, Frey and Embrechts, *Quantitative Risk Management* (2015), Example 2.15:
 
-  `VaR_t = -1/α · (1-ν)⁻¹ · (ν-2+x_α²) · t.pdf(x_α) · σ - μ`.
+  `VaR_α(L) = μ + σ t_ν⁻¹(α)`,
+  `ES_α(L) = μ + σ · g_ν(t_ν⁻¹(α))/(1 − α) · (ν + t_ν⁻¹(α)²)/(ν − 1)`   (`ν > 1`),
 
-**That formula is not a VaR formula.** Checked against McNeil, Frey and Embrechts,
-*Quantitative Risk Management* (2015) — the same book this file's sibling
-`RiskMeasures/RiskClosedForms.lean` cites (there, Example 2.14) — Example 2.15 (the univariate
-Student-t density itself is Appendix A.2): for a location-scale Student-t loss
-`L = μ + σ T`, `T ~ t_ν` standard (unit scale, not unit variance),
+where `t_ν⁻¹(α) = quantile (studentTMeasure ν) α` is the quantile of the law
+(`cdf_studentTMeasure_quantile`: it solves `F_ν(q) = α`) and `g_ν = studentTPDFReal ν` is its
+density. The ES proof runs through the Acerbi–Tasche formula
+(`expectedShortfall_eq_acerbiTasche`): the law has no atoms, so the tail probability above the
+quantile is exactly `1 − α` and ES is the tail first moment `∫_q^∞ t g_ν(t) dt / (1 − α)`, which
+`setIntegral_Ioi_mul_studentTPDFReal` evaluates.
 
-  `VaR_α(L) = μ + σ · t_ν⁻¹(α)`                                              (just the quantile)
-  `ES_α(L) = μ + σ · g_ν(t_ν⁻¹(α))/(1 - α) · (ν + t_ν⁻¹(α)²)/(ν - 1)`,  `ν > 1`
-
-where `g_ν` is the standard Student-t density. The above formula is the **second** line
-(expected shortfall, not VaR) rewritten for losses defined as the *negative* of a return, with
-`α` itself the left-tail probability and `x_α < 0`: `-1/α · (1-ν)⁻¹ = 1/(α(ν-1))` there plays the
-role of `1/(1-α) · 1/(ν-1)` here, and the `-μ` plays the role of `+μ` for a loss defined with the
-opposite sign — an algebraically valid rewrite of the same closed form, not a second error. The
-`ν - 2` is *not* itself an error either: it is the unit-*variance*
-standardization used in Christoffersen's *Elements of Financial Risk Management* (the
-"Cornish-Fisher-style" chapter this formula is drawn from). Writing `Y = T·√((ν-2)/ν)` rescales the
-standard `T ~ t_ν` to `Var Y = 1` (`ν > 2`), with standardized density
-`f_Y(y) = √(ν/(ν-2)) · g_ν(y·√(ν/(ν-2)))`; substituting into the `g_ν`/`t_ν⁻¹(α)` form above
-turns the `ν + t_ν⁻¹(α)²` factor into `ν - 2 + y_α²` for the standardized quantile `y_α`, with
-`f_Y` in place of `g_ν` — the same closed form in a different scale convention, not a bug
-to fix. This file formalizes the two real closed forms directly, in the unit-*scale* `(1-α)`-
-upper-tail loss convention of the source (McNeil-Frey-Embrechts) rather than re-deriving the
-unit-*variance* rewrite: `studentTValueAtRisk`, the honest (trivial) VaR quantile closed form, and
-`studentTExpectedShortfall`, the pdf-based closed form this formula was actually describing, with
-the `ν` matching this file's own scale convention rather than the unit-variance rewrite's `ν - 2`.
-
-Mathlib has no Student-t distribution at all (no pdf, no law, no quantile function) at the
-pinned version, so unlike `RiskMeasures/GaussianValueAtRisk.lean` there is no `HasLaw`-level
-bridge here: nothing below is proved from a measure-theoretic tail-probability definition of
-VaR/ES for an actual Student-t-distributed random variable. `studentTPdf` is defined directly
-from `Real.Gamma`, matching the textbook density formula, and `studentTValueAtRisk` /
-`studentTExpectedShortfall` are *stated* closed forms (parametrized by the quantile `x_α`, as
-`RiskMeasures/Gaussian.lean` parametrizes on `z` rather than on `α` directly). What is proved is
-purely algebraic: positivity of the density (`studentTPdf_pos`), affine invariance of both
-closed forms (`studentTValueAtRisk_affine`, `studentTExpectedShortfall_affine`), and positivity
-of the ES closed form (`studentTExpectedShortfall_pos`). NOT attempted: any measure-theoretic
-VaR/ES statement for an actual Student-t random variable (no Mathlib support to bridge to), and
-any `ν → ∞` Gaussian-limit statement (would need a limit argument on `Real.Gamma` ratios this
-file does not undertake) — both left as disclosed gaps.
+`VaR ≤ ES` is not reproved: it is the general `valueAtRisk_le_expectedShortfall`, instantiated
+at the Student-t loss (`valueAtRisk_le_expectedShortfall_studentT`).
 
 ## Main results
 
-* `studentTPdf`: the standard (unit-scale) Student-t density `g_ν`, built from `Real.Gamma`.
-* `studentTPdf_pos`: `g_ν(x) > 0` for `ν > 0`.
-* `studentTValueAtRisk`: the (trivial) VaR closed form `μ + σ x_α`, and
-  `studentTValueAtRisk_eq_gaussianVaR` — it is literally `RiskMeasures.Gaussian.gaussianVaR`
-  evaluated at the Student-t quantile `x_α` in place of the normal quantile `z`: the
-  location-scale VaR quantile formula is the same closed form for any quantile function.
-* `studentTExpectedShortfall`: the pdf-based ES closed form, meaningful only for `ν > 1`, `α < 1`
-  (outside that range the Lean term is a junk value: e.g. `ν = 1` or `α = 1` collapses it to `μ`
-  via `x/0 = 0`, whereas the real ES diverges there).
-* `studentTValueAtRisk_affine`, `studentTExpectedShortfall_affine`: affine invariance of each
-  closed form, `a ≥ 0`, matching `gaussianVaR_affine` / `gaussianCVaR_affine` (volatility scales
-  by `|a|·σ`, so `0 ≤ a` is load-bearing).
-* `studentTExpectedShortfall_pos`: the ES closed form is positive for a centered, positively
-  scaled loss (`μ = 0`, `σ > 0`) at any quantile `x_α` (the `x_α²` term needs no sign hypothesis).
-
-The general `valueAtRisk_le_expectedShortfall` fact (McNeil-Frey-Embrechts' VaR ≤ ES) is
-deliberately NOT re-proved here for these closed forms: `(ν+x_α²)/(ν-1) ≥ 1` alone does not make
-`σ·(g_ν(x_α)/(1-α))·(ν+x_α²)/(ν-1) ≥ σ·x_α` for arbitrary `x_α` (the density `g_ν(x_α)` can be
-far below `1`, e.g. at a large `x_α`), so stating it as an unconditional sanity lemma here would
-be dressing up a false claim as a theorem; the real inequality needs the actual tail-probability
-definitions and is out of scope without a `HasLaw` bridge.
+* `valueAtRisk_of_hasLaw_studentT`: `VaR_α(μ + σ T) = μ + σ t_ν⁻¹(α)`.
+* `expectedShortfall_of_hasLaw_studentT`: the McNeil–Frey–Embrechts closed form of
+  `ES_α(μ + σ T)` for `ν > 1`.
+* `valueAtRisk_le_expectedShortfall_studentT`: `VaR_α(μ + σ T) ≤ ES_α(μ + σ T)`.
+* `quantile_studentT_le_expectedShortfall_closedForm`: the same inequality between the two closed
+  forms, `q ≤ g_ν(q)/(1 − α) · (ν + q²)/(ν − 1)`.
 -/
 
 @[expose] public section
 
 namespace MathFin
 
-open Real
+open MeasureTheory ProbabilityTheory Set
 
-/-- The standard (unit-scale, *not* unit-variance) Student-t density with `ν` degrees of
-freedom, `g_ν(x) = Γ((ν+1)/2) / (√(νπ) Γ(ν/2)) · (1 + x²/ν)^(-(ν+1)/2)`
-(McNeil-Frey-Embrechts, *Quantitative Risk Management*, Appendix A.2). -/
-noncomputable def studentTPdf (ν x : ℝ) : ℝ :=
-  Gamma ((ν + 1) / 2) / (Real.sqrt (ν * π) * Gamma (ν / 2)) * (1 + x ^ 2 / ν) ^ (-(ν + 1) / 2)
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+  {T : Ω → ℝ} {ν μ σ α : ℝ}
 
-/-- The density is positive for `ν > 0`: a ratio of positive Gammas times a positive power. -/
-theorem studentTPdf_pos {ν : ℝ} (hν : 0 < ν) (x : ℝ) : 0 < studentTPdf ν x := by
-  have hΓ1 : 0 < Gamma ((ν + 1) / 2) := Gamma_pos_of_pos (by linarith)
-  have hΓ2 : 0 < Gamma (ν / 2) := Gamma_pos_of_pos (by linarith)
-  have hπ : 0 < ν * π := mul_pos hν pi_pos
-  have hbase : 0 < 1 + x ^ 2 / ν := by positivity
-  unfold studentTPdf
-  have : 0 < Real.sqrt (ν * π) * Gamma (ν / 2) := mul_pos (Real.sqrt_pos.2 hπ) hΓ2
-  positivity
+/-- The Student-t law has a continuous cdf: it has a density, hence no atoms. -/
+lemma continuous_cdf_studentTMeasure (hν : 0 < ν) : Continuous (cdf (studentTMeasure ν)) :=
+  have := isProbabilityMeasure_studentTMeasure hν
+  continuous_cdf
 
-/-- **Student-t value-at-risk** at quantile `x_α` for a location-scale loss `L = μ + σ T`,
-`T ~ t_ν`: `VaR_α(L) = μ + σ x_α`, the same quantile closed form as `gaussianVaR`
-(`RiskMeasures/Gaussian.lean`), with `x_α` in place of `z = Φ⁻¹(α)`. This is the actual VaR
-closed form (McNeil-Frey-Embrechts, Example 2.15); it carries no pdf term. -/
-noncomputable def studentTValueAtRisk (μ σ xα : ℝ) : ℝ := μ + σ * xα
+/-- The Student-t quantile `t_ν⁻¹(α)` solves `F_ν(q) = α`. -/
+lemma cdf_studentTMeasure_quantile (hν : 0 < ν) (hα : α ∈ Ioo 0 1) :
+    cdf (studentTMeasure ν) (quantile (studentTMeasure ν) α) = α :=
+  cdf_quantile (continuous_cdf_studentTMeasure hν) hα
 
-/-- **The Student-t VaR closed form is the Gaussian one**, at the Student-t quantile:
-the location-scale VaR formula `μ + σ·q` does not depend on which distribution the
-quantile `q` comes from, only on it being *a* quantile of the standardized loss. This
-makes literal the parallel the definition's docstring draws with `gaussianVaR`
-(`RiskMeasures/Gaussian.lean`). -/
-theorem studentTValueAtRisk_eq_gaussianVaR (μ σ xα : ℝ) :
-    studentTValueAtRisk μ σ xα = gaussianVaR μ σ xα := rfl
+omit [IsProbabilityMeasure P] in
+/-- A Student-t loss with `ν > 1` is integrable. -/
+lemma integrable_of_hasLaw_studentT (hν : 1 < ν) (hT : HasLaw T (studentTMeasure ν) P) :
+    Integrable T P := by
+  have hν0 : 0 < ν := by linarith
+  have h : Integrable id (studentTMeasure ν) := by
+    rw [studentTMeasure, integrable_withDensity_iff (measurable_studentTPDF ν)
+      (ae_of_all _ fun _ ↦ ENNReal.ofReal_lt_top)]
+    refine (integrable_mul_studentTPDFReal hν).congr (ae_of_all _ fun x ↦ ?_)
+    simp [studentTPDF, ENNReal.toReal_ofReal (studentTPDFReal_pos hν0 x).le]
+  rw [← hT.map_eq] at h
+  exact (integrable_map_measure aestronglyMeasurable_id hT.aemeasurable).1 h
 
-/-- **Student-t expected shortfall** at quantile `x_α` and level `α` for a location-scale loss
-`L = μ + σ T`, `T ~ t_ν`: `ES_α(L) = μ + σ · g_ν(x_α)/(1-α) · (ν + x_α²)/(ν-1)`
-(McNeil-Frey-Embrechts, Example 2.15). Meaningful only for `ν > 1`, `α < 1`: outside that range
-this is a junk value (`x/0 = 0` collapses it to `μ`), not the real (divergent) ES. This, not a
-VaR, is the closed form the formula in the module docstring was actually describing (in the
-unit-variance convention). -/
-noncomputable def studentTExpectedShortfall (ν μ σ xα α : ℝ) : ℝ :=
-  μ + σ * (studentTPdf ν xα / (1 - α)) * ((ν + xα ^ 2) / (ν - 1))
+/-- **Value-at-risk of a Student-t loss**: `VaR_α(μ + σ T) = μ + σ t_ν⁻¹(α)` for `T ~ t_ν` and
+`σ ≥ 0`. -/
+theorem valueAtRisk_of_hasLaw_studentT (hT : HasLaw T (studentTMeasure ν) P) (hσ : 0 ≤ σ)
+    (hα : α ∈ Ioo 0 1) :
+    valueAtRisk (fun ω ↦ μ + σ * T ω) P α = μ + σ * quantile (studentTMeasure ν) α := by
+  rw [valueAtRisk_comp (h := fun x ↦ μ + σ * x) hT.aemeasurable
+    ((monotone_id.const_mul hσ).const_add μ)
+    (by fun_prop : Continuous fun x ↦ μ + σ * x).lowerSemicontinuous hα,
+    valueAtRisk_eq_quantile hT]
 
-/-- **ES affine invariance**: `ES_α(a·L + b) = a·ES_α(L) + b` for `a ≥ 0`, matching
-`gaussianCVaR_affine` (volatility scales by `|a|·σ`, so `0 ≤ a` is load-bearing). -/
-theorem studentTExpectedShortfall_affine (ν μ σ xα α a b : ℝ) (ha : 0 ≤ a) :
-    studentTExpectedShortfall ν (a * μ + b) (|a| * σ) xα α =
-      a * studentTExpectedShortfall ν μ σ xα α + b := by
-  unfold studentTExpectedShortfall
-  rw [abs_of_nonneg ha]; ring
+/-- **Expected shortfall of a standard Student-t loss**: for `T ~ t_ν` with `ν > 1`,
+`ES_α(T) = g_ν(q)/(1 − α) · (ν + q²)/(ν − 1)` at `q = t_ν⁻¹(α)`. -/
+theorem expectedShortfall_of_hasLaw_studentT_standard (hν : 1 < ν)
+    (hT : HasLaw T (studentTMeasure ν) P) (hα : α ∈ Ioo 0 1) :
+    expectedShortfall T P α =
+      studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *
+        ((ν + quantile (studentTMeasure ν) α ^ 2) / (ν - 1)) := by
+  have hν0 : 0 < ν := by linarith
+  have := isProbabilityMeasure_studentTMeasure hν0
+  set q := quantile (studentTMeasure ν) α
+  have hVaR : valueAtRisk T P α = q := valueAtRisk_eq_quantile hT
+  -- the tail above the quantile carries probability exactly `1 − α`
+  have htail : P.real {ω | q < T ω} = 1 - α := by
+    rw [hT.measureReal_eq (p := fun x ↦ q < x) measurableSet_Ioi, show {x | q < x} = Ioi q from rfl,
+      ← compl_Iic,
+      probReal_compl_eq_one_sub measurableSet_Iic, ← cdf_eq_real,
+      cdf_studentTMeasure_quantile hν0 hα]
+  -- and the tail first moment is the integral evaluated in `Foundations/StudentT.lean`
+  have hmoment : ∫ ω in {ω | q < T ω}, T ω ∂P = ∫ t in Ioi q, t * studentTPDFReal ν t := by
+    rw [show {ω | q < T ω} = T ⁻¹' Ioi q from rfl, ← setIntegral_map (f := fun t : ℝ ↦ t)
+      measurableSet_Ioi (by fun_prop) hT.aemeasurable, hT.map_eq, studentTMeasure,
+      setIntegral_withDensity_eq_setIntegral_toReal_smul (measurable_studentTPDF ν)
+        (ae_of_all _ fun _ ↦ ENNReal.ofReal_lt_top) _ measurableSet_Ioi]
+    refine setIntegral_congr_fun measurableSet_Ioi fun t _ ↦ ?_
+    simp [studentTPDF, ENNReal.toReal_ofReal (studentTPDFReal_pos hν0 t).le, mul_comm]
+  rw [expectedShortfall_eq_acerbiTasche (integrable_of_hasLaw_studentT hν hT) hα, hVaR,
+    htail, hmoment, setIntegral_Ioi_mul_studentTPDFReal hν, sub_self, mul_zero, add_zero]
+  ring
 
-/-- **VaR affine invariance**: `VaR_α(a·L + b) = a·VaR_α(L) + b` for `a ≥ 0`. Since
-`studentTValueAtRisk_eq_gaussianVaR` identifies this closed form with `gaussianVaR` pointwise,
-the Gaussian file's own affine-invariance proof (`gaussianVaR_affine`) transfers directly —
-this is the import earning its keep, not just the `rfl` identification above. -/
-theorem studentTValueAtRisk_affine (μ σ xα a b : ℝ) (ha : 0 ≤ a) :
-    studentTValueAtRisk (a * μ + b) (|a| * σ) xα = a * studentTValueAtRisk μ σ xα + b :=
-  gaussianVaR_affine μ σ xα a b ha
+/-- **Expected shortfall of a Student-t loss** (McNeil–Frey–Embrechts, Example 2.15): for
+`T ~ t_ν` with `ν > 1` and `σ ≥ 0`, at `q = t_ν⁻¹(α)`,
+`ES_α(μ + σ T) = μ + σ · g_ν(q)/(1 − α) · (ν + q²)/(ν − 1)`. -/
+theorem expectedShortfall_of_hasLaw_studentT (hν : 1 < ν) (hT : HasLaw T (studentTMeasure ν) P)
+    (hσ : 0 ≤ σ) (hα : α ∈ Ioo 0 1) :
+    expectedShortfall (fun ω ↦ μ + σ * T ω) P α =
+      μ + σ * (studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *
+        ((ν + quantile (studentTMeasure ν) α ^ 2) / (ν - 1))) := by
+  have hint := integrable_of_hasLaw_studentT hν hT
+  rw [show (fun ω ↦ μ + σ * T ω) = fun ω ↦ σ * T ω + μ from funext fun _ ↦ add_comm _ _,
+    expectedShortfall_add_const (hint.const_mul σ) hα, expectedShortfall_const_mul hint hα hσ,
+    expectedShortfall_of_hasLaw_studentT_standard hν hT hα, add_comm]
 
-/-- **The ES closed form is positive** for a centered, positively-scaled loss (`μ = 0`, `σ > 0`)
-at any quantile `x_α`, with `ν > 1` and `α < 1`: a sanity check standing in for a
-measure-theoretic positivity statement this file cannot derive (no `HasLaw` bridge is
-available). -/
-theorem studentTExpectedShortfall_pos {ν σ xα α : ℝ} (hν : 1 < ν) (hσ : 0 < σ) (hα : α < 1) :
-    0 < studentTExpectedShortfall ν 0 σ xα α := by
-  have hνpos : 0 < ν := by linarith
-  have hpdf : 0 < studentTPdf ν xα := studentTPdf_pos hνpos xα
-  have h1α : 0 < 1 - α := sub_pos.2 hα
-  have hnum : 0 < ν + xα ^ 2 := by positivity
-  have hden : 0 < ν - 1 := by linarith
-  unfold studentTExpectedShortfall
-  have : 0 < σ * (studentTPdf ν xα / (1 - α)) * ((ν + xα ^ 2) / (ν - 1)) := by positivity
-  linarith
+/-- **VaR ≤ ES for a Student-t loss**: the general `valueAtRisk_le_expectedShortfall`, at the
+law. -/
+theorem valueAtRisk_le_expectedShortfall_studentT (hν : 1 < ν)
+    (hT : HasLaw T (studentTMeasure ν) P) (hα : α ∈ Ioo 0 1) :
+    valueAtRisk (fun ω ↦ μ + σ * T ω) P α ≤ expectedShortfall (fun ω ↦ μ + σ * T ω) P α :=
+  valueAtRisk_le_expectedShortfall
+    ((integrable_const μ).add ((integrable_of_hasLaw_studentT hν hT).const_mul σ)) hα
+
+/-- **The closed forms inherit `VaR ≤ ES`**: at `q = t_ν⁻¹(α)` with `ν > 1`,
+`q ≤ g_ν(q)/(1 − α) · (ν + q²)/(ν − 1)`. An inequality about the Student-t density and quantile,
+read off the general `valueAtRisk_le_expectedShortfall` for `T = id` under the law itself. -/
+theorem quantile_studentT_le_expectedShortfall_closedForm (hν : 1 < ν) (hα : α ∈ Ioo 0 1) :
+    quantile (studentTMeasure ν) α ≤
+      studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *
+        ((ν + quantile (studentTMeasure ν) α ^ 2) / (ν - 1)) := by
+  have := isProbabilityMeasure_studentTMeasure (by linarith : 0 < ν)
+  have hT : HasLaw id (studentTMeasure ν) (studentTMeasure ν) := .id
+  rw [← expectedShortfall_of_hasLaw_studentT_standard hν hT hα, ← valueAtRisk_eq_quantile hT]
+  exact valueAtRisk_le_expectedShortfall (integrable_of_hasLaw_studentT hν hT) hα
 
 end MathFin

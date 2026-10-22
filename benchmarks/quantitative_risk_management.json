@@ -1042,19 +1042,83 @@
       }
     },
     {
-      "id": "mf-student-t-expected-shortfall-pos",
-      "name": "Student-t Expected Shortfall Closed Form Is Positive",
+      "id": "qrm-student-t-density",
+      "name": "Student-t Density in Closed Form",
       "domain": "mathematical_finance",
-      "description": "For a centered, positively-scaled Student-t location-scale loss (μ = 0, σ > 0), the expected-shortfall closed form μ + σ·g_ν(x_α)/(1−α)·(ν+x_α²)/(ν−1) (McNeil-Frey-Embrechts, Example 2.15) is positive at any quantile x_α, for ν > 1 and α < 1.",
+      "description": "The Student-t law studentTMeasure ν (built in MathFin as Lebesgue measure with density k_ν/∫k_ν, k_ν(x) = (1 + x²/ν)^(-(ν+1)/2)) has, for ν > 0, the textbook density g_ν(x) = Γ((ν+1)/2)/(√(νπ)Γ(ν/2))·(1 + x²/ν)^(-(ν+1)/2): the normalizing integral ∫k_ν equals √(νπ)Γ(ν/2)/Γ((ν+1)/2).",
       "code": {
-        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MathFin\n\ntheorem student_t_expected_shortfall_pos_thm {ν σ xα α : ℝ}\n    (hν : 1 < ν) (hσ : 0 < σ) (hα : α < 1) :\n    0 < studentTExpectedShortfall ν 0 σ xα α :=\n  studentTExpectedShortfall_pos hν hσ hα\n"
+        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem studentTPDFReal_eq_thm {ν : ℝ} (hν : 0 < ν) (x : ℝ) :\n    studentTPDFReal ν x = Real.Gamma ((ν + 1) / 2) / (√(ν * Real.pi) * Real.Gamma (ν / 2)) *\n      (1 + x ^ 2 / ν) ^ (-(ν + 1) / 2) :=\n  MathFin.studentTPDFReal_eq hν x\n"
       },
       "metadata": {
-        "chapter": 8,
-        "reference": "A. J. McNeil, R. Frey and P. Embrechts, Quantitative Risk Management, revised ed. (2015), Example 2.15",
+        "chapter": 2,
+        "reference": "A. J. McNeil, R. Frey and P. Embrechts, Quantitative Risk Management, revised ed. (2015), Example 2.15 and Appendix A.2.1",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The kernel is written as a Gamma mixture of Gaussian kernels (Mathlib's integral_rpow_mul_exp_neg_mul_Ioi), the two integrals are exchanged (integral_integral_swap, integrability via integrable_prod_iff'), and the inner Gaussian and outer Gamma integrals are evaluated with integral_gaussian and Gamma_eq_integral. Lives in MathFin/Foundations/StudentT.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-student-t-cauchy",
+      "name": "Student-t Law with One Degree of Freedom Is Cauchy",
+      "domain": "mathematical_finance",
+      "description": "The Student-t law with ν = 1 degree of freedom equals Mathlib's standard Cauchy law: studentTMeasure 1 = cauchyMeasure 0 1.",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem studentTMeasure_one_thm : studentTMeasure 1 = cauchyMeasure 0 1 :=\n  MathFin.studentTMeasure_one\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "A. J. McNeil, R. Frey and P. Embrechts, Quantitative Risk Management, revised ed. (2015), Example 2.15 and Appendix A.2.1",
         "difficulty": "introductory",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof (positivity + linarith). Lives in MathFin/RiskMeasures/StudentTValueAtRisk.lean. No HasLaw-level bridge to an actual Student-t-distributed random variable (Mathlib has no Student-t law at the pinned version); this is a sanity check on the stated closed form. Axioms-clean."
+        "formalization_scope": "Full formal proof: at ν = 1 the kernel is (1 + x²)⁻¹ and its integral is π (Mathlib's integral_univ_inv_one_add_sq), so the two densities agree pointwise. Lives in MathFin/Foundations/StudentT.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-student-t-var",
+      "name": "Value-at-Risk of a Student-t Loss",
+      "domain": "mathematical_finance",
+      "description": "For T with the Student-t law t_ν, σ ≥ 0 and α ∈ (0, 1), the library's valueAtRisk of the location-scale loss μ + σT is μ + σ·t_ν⁻¹(α), where t_ν⁻¹(α) = quantile (studentTMeasure ν) α is the quantile of the law.",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_of_hasLaw_studentT_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {T : Ω → ℝ} {ν μ σ α : ℝ} (hT : HasLaw T (studentTMeasure ν) P)\n    (hσ : 0 ≤ σ) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk (fun ω ↦ μ + σ * T ω) P α = μ + σ * quantile (studentTMeasure ν) α :=\n  MathFin.valueAtRisk_of_hasLaw_studentT hT hσ hα\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "A. J. McNeil, R. Frey and P. Embrechts, Quantitative Risk Management, revised ed. (2015), Example 2.15 and Appendix A.2.1",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: VaR commutes with the monotone continuous map x ↦ μ + σx (valueAtRisk_comp) and depends on T only through its law. The quantile t_ν⁻¹(α) is the generic quantile of the Student-t law (it solves F_ν(q) = α, cdf_studentTMeasure_quantile); no closed form for it is given (none exists for general ν). Lives in MathFin/RiskMeasures/StudentTValueAtRisk.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-student-t-es",
+      "name": "Expected Shortfall of a Student-t Loss",
+      "domain": "mathematical_finance",
+      "description": "For T with the Student-t law t_ν, ν > 1, σ ≥ 0 and α ∈ (0, 1), the library's expectedShortfall of the location-scale loss μ + σT is the McNeil-Frey-Embrechts closed form μ + σ·g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α), with g_ν the Student-t density.",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem expectedShortfall_of_hasLaw_studentT_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {T : Ω → ℝ} {ν μ σ α : ℝ} (hν : 1 < ν)\n    (hT : HasLaw T (studentTMeasure ν) P) (hσ : 0 ≤ σ) (hα : α ∈ Ioo 0 1) :\n    expectedShortfall (fun ω ↦ μ + σ * T ω) P α =\n      μ + σ * (studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *\n        ((ν + quantile (studentTMeasure ν) α ^ 2) / (ν - 1))) :=\n  MathFin.expectedShortfall_of_hasLaw_studentT hν hT hσ hα\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "A. J. McNeil, R. Frey and P. Embrechts, Quantitative Risk Management, revised ed. (2015), Example 2.15 and Appendix A.2.1",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The law has a continuous cdf, so the Acerbi-Tasche formula (expectedShortfall_eq_acerbiTasche) reduces ES of the standard loss to the tail first moment ∫_q^∞ t g_ν(t) dt / (1 − α); that integral is evaluated by the fundamental theorem of calculus with antiderivative −(ν/(ν−1)) C_ν⁻¹ (1 + t²/ν)^((1−ν)/2). Translation invariance and positive homogeneity of ES give the location-scale form. Lives in MathFin/RiskMeasures/StudentTValueAtRisk.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-student-t-var-le-es",
+      "name": "VaR Bounded by ES for a Student-t Loss",
+      "domain": "mathematical_finance",
+      "description": "For the Student-t law t_ν with ν > 1 and α ∈ (0, 1), the VaR and ES closed forms satisfy q ≤ g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α), read off the library's general VaR ≤ ES.",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem quantile_studentT_le_expectedShortfall_closedForm_thm {ν α : ℝ} (hν : 1 < ν)\n    (hα : α ∈ Ioo 0 1) :\n    quantile (studentTMeasure ν) α ≤\n      studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *\n        ((ν + quantile (studentTMeasure ν) α ^ 2) / (ν - 1)) :=\n  MathFin.quantile_studentT_le_expectedShortfall_closedForm hν hα\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "A. J. McNeil, R. Frey and P. Embrechts, Quantitative Risk Management, revised ed. (2015), Example 2.15 and Appendix A.2.1",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: valueAtRisk_le_expectedShortfall applied to the identity under the Student-t law, rewritten with the Student-t VaR and ES theorems; the inequality is not reproved from scratch. Lives in MathFin/RiskMeasures/StudentTValueAtRisk.lean. Axioms-clean."
       }
     }
   ]
