@@ -10,7 +10,7 @@ public import MathFin.BlackScholes.Forward
 public import MathFin.Foundations.NoArbitrageDerivations
 
 /-!
-# FX forward via covered interest parity, and the implied forward curve
+# FX forward: covered and uncovered interest parity
 
 **Covered interest parity (CIP)**: with continuously-compounded domestic and
 foreign rates `r_d`, `r_f` and spot `S` (domestic per unit of foreign), the
@@ -36,20 +36,6 @@ under the physical measure, is an empirical hypothesis and is not claimed
 here. The two parities agree (`covered_eq_uncovered_interest_parity`): the
 forward a static market prices to zero is the model's expected spot.
 
-**Implied forward curve**: chaining CIP across two maturities gives the
-**forward-forward factor** — the ratio `F(0,T₂)/F(0,T₁)`, i.e. the implied
-carry between `T₁` and `T₂` (the FX-swap points over that leg, quoted as the
-additive `F(0,T₂) - F(0,T₁) = F(0,T₁)·(factor - 1)`, follow from it) — purely
-from the two spot-dated forwards, with the spot rate canceling. This is *not itself* an exchange rate: the actual
-`T₁`-struck forward for delivery at `T₂` is the random
-`S_{T₁} · exp((r_d - r_f)·(T₂ - T₁))`, since the future spot `S_{T₁}` is
-unknown today. What the factor gives is the deterministic multiplier by
-which that future forward quote relates to today's two spot-dated quotes —
-the curve is internally consistent, with no re-anchoring to `S` needed once
-`F(0,T₁)` and `F(0,T₂)` are known:
-
-  `F(0, T₂) / F(0, T₁) = exp((r_d - r_f) · (T₂ - T₁))`.
-
 ## Result
 
 * `fxForward`: the CIP forward rate `S · exp((r_d - r_f) · T)`.
@@ -61,13 +47,6 @@ the curve is internally consistent, with no re-anchoring to `S` needed once
   Garman–Kohlhagen risk-neutral hypothesis.
 * `covered_eq_uncovered_interest_parity`: the CIP forward equals the
   risk-neutral expected spot.
-* `fxForward_at_zero`: `F(0, 0) = S` (the forward collapses to spot at
-  immediate maturity).
-* `fxForward_pos`: every CIP forward is positive whenever spot is.
-* `forwardForwardFactor`: the ratio `F(0,T₂)/F(0,T₁)` — the forward-forward
-  factor, independent of `S`.
-* `forwardForwardFactor_eq_exp_diff`: that ratio equals
-  `exp((r_d - r_f)·(T₂ - T₁))` — the curve is multiplicatively consistent.
 -/
 
 @[expose] public section
@@ -130,32 +109,5 @@ theorem covered_eq_uncovered_interest_parity {ι : Type*} (s : Finset ι) (q S_T
     F = ∫ ω, bsTerminal S (r_d - r_f) σ T (Z ω) ∂Q := by
   rw [uncovered_interest_parity h]
   exact (covered_interest_parity s q S_T S r_d r_f T F h_dom h_for).mp hF
-
-/-- At zero maturity the forward collapses to the spot rate. -/
-theorem fxForward_at_zero (S r_d r_f : ℝ) : fxForward S r_d r_f 0 = S := by
-  simp [fxForward]
-
-/-- Every CIP forward is positive whenever the spot rate is. -/
-theorem fxForward_pos {S : ℝ} (hS : 0 < S) (r_d r_f T : ℝ) : 0 < fxForward S r_d r_f T :=
-  mul_pos hS (Real.exp_pos _)
-
-/-- The **forward-forward factor** between `T₁` and `T₂`: the ratio of the
-two spot-dated CIP forwards. The spot rate `S` cancels, so this is exactly
-the deterministic forward-forward carry factor a forward curve built from
-market-quoted forwards would use, with no need to re-observe spot. It is a
-unitless ratio, not an exchange rate — see the module docstring. -/
-noncomputable def forwardForwardFactor (S r_d r_f T1 T2 : ℝ) : ℝ :=
-  fxForward S r_d r_f T2 / fxForward S r_d r_f T1
-
-/-- The forward-forward factor equals `exp((r_d - r_f)·(T₂ - T₁))`, with no
-dependence on `S` left. This is the forward curve's self-consistency:
-chaining two spot-dated forwards agrees with the direct CIP exponential over
-the maturity gap. -/
-theorem forwardForwardFactor_eq_exp_diff {S : ℝ} (hS : S ≠ 0) (r_d r_f T1 T2 : ℝ) :
-    forwardForwardFactor S r_d r_f T1 T2 = Real.exp ((r_d - r_f) * (T2 - T1)) := by
-  unfold forwardForwardFactor fxForward
-  rw [mul_div_mul_left _ _ hS, ← Real.exp_sub]
-  congr 1
-  ring
 
 end MathFin

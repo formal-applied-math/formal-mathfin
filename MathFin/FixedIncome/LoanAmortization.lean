@@ -71,7 +71,7 @@ def balance (B0 : ℝ) (P : ℕ → ℝ) : ℕ → ℝ
   | n + 1 => balance B0 P n - P (n + 1)
 
 /-- Interest accrued in period `n ≥ 1` is the prior balance times the period
-rate: `I_n = B_{n-1} · i`. Shared by every amortization schedule. Periods are
+rate: `I_n = B_{n-1} · i`, for any principal schedule `P` fixed in advance. Periods are
 `n = 1, …, N`; `n - 1` is ℕ-truncated subtraction, so at `n = 0` this
 evaluates to `B₀ · i` (the same value as period 1) rather than being
 undefined — `n = 0` is not a meaningful period, and callers should use

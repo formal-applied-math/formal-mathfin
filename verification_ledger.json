@@ -1693,16 +1693,16 @@
     "mf-covered-eq-uncovered-interest-parity": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.4,
-      "input_hash": "07b3a0c0df228696df5c38cb05e2f819ac31c927b12ce32e83956d68282fe4d3",
-      "verified_at_commit": "93fee73"
+      "elapsed_s": 8.6,
+      "input_hash": "7e54b8826b9dc6f4bae65d65135ffefa031cbe8ce72d4f6dbe1949fb24cafb1d",
+      "verified_at_commit": "458faa2"
     },
     "mf-covered-interest-parity": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.4,
-      "input_hash": "4485d5523a8a4a3ab5f61417b7bf954a04e1591f3d64b1ba2b8064097349d281",
-      "verified_at_commit": "93fee73"
+      "elapsed_s": 10.3,
+      "input_hash": "aa7e3af69734a91d2f30bf8b58e6c67f06e8226e564f9c4b977e9b3a114951d2",
+      "verified_at_commit": "458faa2"
     },
     "mf-cpmm-arbitrage-iff-price-divergence": {
       "benchmark_file": "defi.json",
@@ -2736,9 +2736,9 @@
     "mf-level-payment-balance-annuity": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.5,
-      "input_hash": "f11ac5e0bbe1bf3bf45778a57ca96386b43f3e8299bd72c3eeddbe59964ee7ee",
-      "verified_at_commit": "93fee73"
+      "elapsed_s": 5.6,
+      "input_hash": "434cc43ae4ba1ab1a084af57c6826f73383753cfeb4d3f5c078fdcb9c6bab182",
+      "verified_at_commit": "458faa2"
     },
     "mf-lhp-stop-loss-closed-form": {
       "benchmark_file": "credit.json",
@@ -3632,9 +3632,9 @@
     "mf-uncovered-interest-parity-risk-neutral": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.5,
-      "input_hash": "54c0d3f2d29e79206d998f0f7a89566b9b02b58290375b865cff5e4ae5f798e6",
-      "verified_at_commit": "93fee73"
+      "elapsed_s": 7.0,
+      "input_hash": "e47212b078d18051f11bca2ded168c99fc7a9b4d498cc6ab45cb281c07980bd8",
+      "verified_at_commit": "458faa2"
     },
     "mf-uniswap-v3-position-bs-price-bound": {
       "benchmark_file": "defi.json",
