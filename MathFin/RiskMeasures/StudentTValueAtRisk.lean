@@ -96,8 +96,7 @@ theorem expectedShortfall_of_hasLaw_studentT_standard (hν : 1 < ν)
   -- the tail above the quantile carries probability exactly `1 − α`
   have htail : P.real {ω | q < T ω} = 1 - α := by
     rw [hT.measureReal_eq (p := fun x ↦ q < x) measurableSet_Ioi, show {x | q < x} = Ioi q from rfl,
-      ← compl_Iic,
-      probReal_compl_eq_one_sub measurableSet_Iic, ← cdf_eq_real,
+      ← compl_Iic, probReal_compl_eq_one_sub measurableSet_Iic, ← cdf_eq_real,
       cdf_studentTMeasure_quantile hν0 hα]
   -- and the tail first moment is the integral evaluated in `Foundations/StudentT.lean`
   have hmoment : ∫ ω in {ω | q < T ω}, T ω ∂P = ∫ t in Ioi q, t * studentTPDFReal ν t := by
