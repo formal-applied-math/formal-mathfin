@@ -26,7 +26,7 @@ The invariance holds for every equity curve, with no positivity hypothesis on `E
 
 ## Main results
 
-* `partialSups_const_mul`: the running peak of `c E` is `c` times the running peak of `E`,
+* `partialSups_const_mul₀`: the running peak of `c E` is `c` times the running peak of `E`,
   for `c > 0` (multiplication by `c` is an order isomorphism, so it commutes with `⊔`).
 * `relativeDrawdown_const_mul`: the relative drawdown of `c E` equals that of `E`.
 * `maxRelativeDrawdown_const_mul`: hence so does the maximum relative drawdown up to any time.
@@ -47,8 +47,9 @@ noncomputable def maxRelativeDrawdown (E : ι → ℝ) (t : ι) : ℝ :=
   partialSups (relativeDrawdown E) t
 
 /-- The running peak is positively homogeneous: multiplication by `c > 0` is an order
-isomorphism of `ℝ`, so it commutes with the finite suprema defining `partialSups`. -/
-theorem partialSups_const_mul {c : ℝ} (hc : 0 < c) (E : ι → ℝ) (t : ι) :
+isomorphism of `ℝ`, so it commutes with the finite suprema defining `partialSups`. Mathlib's
+`partialSups_const_mul` is the `[Group α]` version, which does not cover `ℝ` under `*`. -/
+theorem partialSups_const_mul₀ {c : ℝ} (hc : 0 < c) (E : ι → ℝ) (t : ι) :
     partialSups (fun s ↦ c * E s) t = c * partialSups E t :=
   map_partialSups (OrderIso.mulLeft₀ c hc) E t
 
@@ -58,7 +59,7 @@ scales by `c`. -/
 theorem relativeDrawdown_const_mul {c : ℝ} (hc : 0 < c) (E : ι → ℝ) :
     relativeDrawdown (fun s ↦ c * E s) = relativeDrawdown E := by
   funext t
-  simp only [relativeDrawdown, partialSups_const_mul hc, mul_div_mul_left _ _ hc.ne']
+  simp only [relativeDrawdown, partialSups_const_mul₀ hc, mul_div_mul_left _ _ hc.ne']
 
 /-- The maximum relative drawdown up to any time is scale invariant. -/
 theorem maxRelativeDrawdown_const_mul {c : ℝ} (hc : 0 < c) (E : ι → ℝ) :
