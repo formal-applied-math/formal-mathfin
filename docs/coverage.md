@@ -49,7 +49,8 @@ states VaR and ES of `μ + σT` through the library's `valueAtRisk` and `expecte
 What is not covered:
 - `t_ν⁻¹(α)` is the generic `quantile` of the law; no closed form for it is given.
 - `qrm-student-t-var-le-es` benchmarks the inequality between the two closed forms; the
-  measure-level `valueAtRisk_le_expectedShortfall_studentTMeasure` is not itself a benchmark entry.
+  measure-level `valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure` is not itself a
+  benchmark entry.
 - The construction as the law of `Z/√(V/ν)` (independent normal and χ²) is not formalized.
 
 Verification:

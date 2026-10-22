@@ -28,14 +28,15 @@ quantile is exactly `1 − α` and ES is the tail first moment `∫_q^∞ t g_ν
 `setIntegral_Ioi_mul_studentTPDFReal` evaluates.
 
 `VaR ≤ ES` is not reproved: it is the general `valueAtRisk_le_expectedShortfall`, instantiated
-at the Student-t loss (`valueAtRisk_le_expectedShortfall_studentTMeasure`).
+at the Student-t loss (`valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure`).
 
 ## Main results
 
 * `valueAtRisk_of_hasLaw_studentTMeasure`: `VaR_α(μ + σ T) = μ + σ t_ν⁻¹(α)`.
 * `expectedShortfall_of_hasLaw_studentTMeasure`: the McNeil–Frey–Embrechts closed form of
   `ES_α(μ + σ T)` for `ν > 1`.
-* `valueAtRisk_le_expectedShortfall_studentTMeasure`: `VaR_α(μ + σ T) ≤ ES_α(μ + σ T)`.
+* `valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure`:
+  `VaR_α(μ + σ T) ≤ ES_α(μ + σ T)`.
 * `quantile_studentTMeasure_le_expectedShortfall_closedForm`: the same inequality between the
   two closed forms, `q ≤ g_ν(q)/(1 − α) · (ν + q²)/(ν − 1)`.
 -/
@@ -125,7 +126,7 @@ theorem expectedShortfall_of_hasLaw_studentTMeasure (hν : 1 < ν)
 
 /-- **VaR ≤ ES for a Student-t loss**: the general `valueAtRisk_le_expectedShortfall`, at the
 law. -/
-theorem valueAtRisk_le_expectedShortfall_studentTMeasure (hν : 1 < ν)
+theorem valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure (hν : 1 < ν)
     (hT : HasLaw T (studentTMeasure ν) P) (hα : α ∈ Ioo 0 1) :
     valueAtRisk (fun ω ↦ μ + σ * T ω) P α ≤ expectedShortfall (fun ω ↦ μ + σ * T ω) P α :=
   valueAtRisk_le_expectedShortfall
