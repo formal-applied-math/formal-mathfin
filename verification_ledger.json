@@ -2614,6 +2614,13 @@
       "input_hash": "7c16d04caf3281a893ec5e3c4d6d57c6842ddf50dd6cf693f399c3d19369b566",
       "verified_at_commit": "fdfecac"
     },
+    "mf-sabr-atm-vol-zero-tex": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-22",
+      "elapsed_s": 4.3,
+      "input_hash": "0a018ef7d4006a4ca9c71b9ef97975d16796c530d8564df1b186417f4ef882bc",
+      "verified_at_commit": "f2d9067"
+    },
     "mf-second-FTAP-single-period": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-02",

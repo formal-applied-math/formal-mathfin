@@ -5456,6 +5456,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof from the model's four primitives -- the prior, informed/value independence, informed traders trading on the value, and uninformed traders tossing a coin. Trade probabilities are derived rather than assumed; quotes are Bochner integrals against the conditioned measures; Bayes is applied through ENNReal.toReal with every finiteness side condition discharged. Axioms-clean. LIMITS: one-period and two-valued, with no dynamics -- no sequence of trades and no convergence of quotes to the true value. The competitive market maker's zero-expected-profit condition is NOT formalized: ask = E[V | buy] and bid = E[V | sell] are posited by the shape of the conclusion, not derived. The sell event is modelled as the complement of the buy event, so there is no no-trade outcome. The statement carries 0 < theta < 1, which the acceptance criterion as written omits."
       }
+    },
+    {
+      "id": "mf-sabr-atm-vol-zero-tex",
+      "name": "SABR ATM Implied Vol at Zero Time-to-Exercise Is the Backbone",
+      "domain": "mathematical_finance",
+      "description": "Under the SABR lognormal implied-volatility asymptotic (Hagan-Kumar-Lesniewski-Woodward, eq. 2.18), the at-the-money implied vol at zero time-to-exercise collapses exactly to the backbone α/f^(1-β): the bracketed perturbation correction vanishes identically since it is multiplied by t_ex.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.SABRImpliedVol\n\nopen MathFin\n\ntheorem sabr_atm_vol_zero_tex_thm (f α β ρ ν : ℝ) :\n    sabrATMVol f α β ρ ν 0 = sabrBackbone f α β :=\n  sabrATMVol_zero_tex f α β ρ ν\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002, eq. 2.18",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Lives in MathFin/BlackScholes/SABRImpliedVol.lean. Only the at-the-money (K=f) specialization is formalized, not the general eq. 2.17a-c smile; the general formula's omitted higher-order terms are not formalized at all. Axioms-clean."
+      }
     }
   ]
 }

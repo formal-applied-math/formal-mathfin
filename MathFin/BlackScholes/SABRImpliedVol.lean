@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import Mathlib
+public import MathFin.BlackScholes.ImpliedVolatility
 
 /-!
 # The SABR lognormal implied-volatility asymptotic approximation
@@ -55,6 +56,13 @@ in section 3 as the ATM-vol curve traced as the forward varies.
   backbone `sabrBackbone`.
 * `sabrATMVol_pos_zero_tex` — corollary: `sabrATMVol` is positive at `t_ex = 0`
   for `α, f > 0`.
+* `sabrATMVol_bsV_gt_backbone_bsV` — a SABR-specific consequence of `BlackScholes/
+  ImpliedVolatility.lean`'s `bsV_strictMonoOn_sigma`: whenever eq. 2.18's
+  bracketed perturbation correction, scaled by `t_ex`, is positive, the full
+  ATM vol `sabrATMVol` prices the ATM Black call *strictly above* the bare
+  backbone `sabrBackbone` — the stochastic-vol correction the paper adds to
+  the leading-order term genuinely raises the option's value, not merely
+  some other positive vol would.
 -/
 
 @[expose] public section
@@ -103,5 +111,26 @@ theorem sabrATMVol_pos_zero_tex {f α : ℝ} (β ρ ν : ℝ) (hf : 0 < f) (hα 
     0 < sabrATMVol f α β ρ ν 0 := by
   rw [sabrATMVol_zero_tex]
   exact sabrBackbone_pos β hf hα
+
+/-- **The perturbation correction genuinely raises the ATM price**: whenever eq.
+2.18's bracketed stochastic-vol correction `(1-β)²/24·α²/f^(2-2β) + ρβαν/4/f^(1-β)
++ (2-3ρ²)/24·ν²`, scaled by `t_ex`, is positive, the full ATM vol `sabrATMVol`
+strictly exceeds the bare backbone `sabrBackbone` — and, by `bsV_strictMonoOn_sigma`
+(`BlackScholes/ImpliedVolatility.lean`, the strict monotonicity of the Black call
+price in its vol input), the ATM Black call priced at `sabrATMVol` is strictly more
+expensive than the same option priced at the backbone alone. This is a
+SABR-specific fact, not a generic instance of implied-vol uniqueness: it ties
+eq. 2.18's correction term itself, not an arbitrary positive constant, to the
+price it produces. -/
+theorem sabrATMVol_bsV_gt_backbone_bsV {f α β ρ ν tex T : ℝ} (hf : 0 < f) (hα : 0 < α)
+    (hT : 0 < T)
+    (hbracket : 0 < ((1 - β) ^ 2 / 24 * (α ^ 2 / f ^ (2 - 2 * β))
+        + ρ * β * α * ν / 4 / f ^ (1 - β) + (2 - 3 * ρ ^ 2) / 24 * ν ^ 2) * tex) :
+    bsV f 0 (sabrBackbone f α β) f T < bsV f 0 (sabrATMVol f α β ρ ν tex) f T := by
+  have hpos := sabrBackbone_pos β hf hα
+  have hlt : sabrBackbone f α β < sabrATMVol f α β ρ ν tex := by
+    unfold sabrATMVol
+    nlinarith [mul_pos hpos hbracket]
+  exact bsV_strictMonoOn_sigma hf hT hf hpos (hpos.trans hlt) hlt
 
 end MathFin
