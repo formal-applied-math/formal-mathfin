@@ -579,8 +579,8 @@ import MathFin.RiskMeasures.ValueAtRisk
 import MathFin.RiskMeasures.GaussianValueAtRisk
 -- Expected shortfall: Rockafellar–Uryasev for every law, coherence, dual representation; the
 -- Gaussian ES closed form; VaR by bisection; VaR superadditivity; closed forms and tail ratios;
--- VaR and ES of the Student-t law (McNeil–Frey–Embrechts closed forms); elicitability (VaR elicitable,
--- ES not); Bernoulli mixtures and the Basel IRB limit theorem
+-- VaR and ES of the Student-t law (McNeil–Frey–Embrechts closed forms); elicitability
+-- (VaR elicitable, ES not); Bernoulli mixtures and the Basel IRB limit theorem
 import MathFin.RiskMeasures.ExpectedShortfall
 import MathFin.RiskMeasures.GaussianExpectedShortfall
 import MathFin.RiskMeasures.ValueAtRiskBisection
