@@ -966,8 +966,8 @@
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-22",
       "elapsed_s": 3.5,
-      "input_hash": "d0a6e6ec029408c0aff8d577d997be1a5b11b545ee979387edc09a704523950c",
-      "verified_at_commit": "1df552e"
+      "input_hash": "59820b06881c2ae7ee4e160f299a22d8f1b2c2feb1f11c8e1c99291a2b1595d8",
+      "verified_at_commit": "7bf990b"
     },
     "mf-bond-immunization-first-order": {
       "benchmark_file": "mathematical_finance.json",
