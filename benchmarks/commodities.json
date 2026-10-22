@@ -1,0 +1,82 @@
+{
+  "description": "Commodities: futures prices under the Schwartz one-factor model. `chapter` is the section number the entry had in the original single-file corpus, not a chapter of one book; each entry's `reference` names its source.",
+  "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)",
+  "theorems": [
+    {
+      "id": "mf-schwartz-futures-price",
+      "name": "Schwartz One-Factor Commodity Futures Price",
+      "description": "For κ > 0 and the log spot carried in its Ornstein–Uhlenbeck Wiener representation ln S_T = m_T + σ∫₀ᵀ e^{−κ(T−s)} dB_s (the solution form of the Schwartz (1997) log-price SDE d ln S = κ(θ − ln S)dt + σ dB; that this representation solves the SDE is cited, not derived here), E[S_T] = E[exp(ln S_T)] = exp(m_T + v_T/2) with m_T = vasicekSDEMean and v_T = vasicekSDEVariance, the expectation taken under the given probability measure. Read as the pricing measure, this is the Schwartz one-factor futures price F(0,T) = E^Q[S_T]; that identification of the futures price is textbook, not proved here. Proved by composing Mathlib's Gaussian MGF (mgf_gaussianReal at 1) with the derived Gaussian law of that representation (vasicekShortRate_hasLaw_gaussian).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.SchwartzOneFactor\n\nopen MeasureTheory ProbabilityTheory Real MathFin\nopen scoped NNReal\nopen WienerIntegralL2\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n  {B : ℝ≥0 → Ω → ℝ}\n\n/-- Schwartz one-factor futures price equals the expected terminal spot. -/\ntheorem schwartz_futures_price_eq_expected_spot\n    (hB : IsPreBrownianReal B μ) (x₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    ∫ ω, Real.exp (vasicekSDEMean x₀ θ κ (T : ℝ)\n        + σ * (wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω)) ∂μ\n      = schwartzFuturesPrice x₀ θ κ σ T :=\n  MathFin.schwartzFuturesPrice_eq_integral hB x₀ θ σ hκ T\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Schwartz (1997), 'The Stochastic Behavior of Commodity Prices: Implications for Valuation and Hedging,' Journal of Finance",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, for the constant-parameter Schwartz (1997) model with κ > 0, that E[exp(ln S_T)] = exp(m_T + v_T/2) for the log spot in its Wiener representation, under an arbitrary probability measure read as the pricing measure; that the futures price equals E^Q[S_T] is the textbook identification, not proved. Hull's time-dependent level q(t) (the Hull-White-form drift calibrated to the quoted futures curve) is out of scope. The log spot is carried in its Wiener representation (the OU solution representation of vasicekShortRate_hasLaw_gaussian) -- that this representation solves the SDE is cited, not proven here (mf-vasicek-sde-terminal-gaussian rests on the same representation). Lives in MathFin/Futures/SchwartzOneFactor.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-ar1-ou-one-step-residual",
+      "name": "One OU Step Is an AR(1) Step: Gaussian Residual and σ² Recovery",
+      "domain": "mathematical_finance",
+      "description": "For the Vasicek (OU) short rate with speed k > 0, one step Δt from a deterministic start r₀ (rate in its Wiener representation) has AR(1) residual ε = (r_Δt − θ) − e^{−kΔt}(r₀ − θ) distributed N(0, σ²(1 − e^{−2kΔt})/(2k)), and for Δt > 0 the calibration formula σ² = 2k·Var(ε)/(1 − e^{−2kΔt}) applied to that residual's variance returns σ². The multi-step AR(1) statement with independent innovations along a path is not formalized.",
+      "code": {
+        "lean": "import MathFin.Commodities.AR1OUCalibration\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- **One OU step is an AR(1) step.** The residual `(r_Δt − θ) − φ·(r₀ − θ)`, `φ = e^{−kΔt}`, is\n`N(0, vasicekSDEVariance σ k Δt)`, and `ouSigmaSqFromVar` applied to its variance returns `σ²`\nfor `Δt > 0`. Re-exports `MathFin.ouStepResidual_hasLaw` and\n`MathFin.ouSigmaSqFromVar_variance_ouStepResidual`. -/\ntheorem ou_one_step_is_ar1\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (r₀ θ σ : ℝ) {k : ℝ} (hk : 0 < k)\n    {Δt : ℝ≥0} (hΔt : 0 < (Δt : ℝ)) :\n    HasLaw (ouStepResidual hB r₀ θ σ hk Δt)\n        (gaussianReal 0 (vasicekSDEVariance σ k Δt).toNNReal) μ ∧\n      ouSigmaSqFromVar k (Var[ouStepResidual hB r₀ θ σ hk Δt; μ]) Δt = σ ^ 2 :=\n  ⟨ouStepResidual_hasLaw hB r₀ θ σ hk Δt,\n    ouSigmaSqFromVar_variance_ouStepResidual hB r₀ θ σ hk hΔt⟩\n"
+      },
+      "metadata": {
+        "reference": "P. Glasserman, Monte Carlo Methods in Financial Engineering (Springer, 2003), §3.3 (Gaussian short-rate models: the exact one-step transition of the Vasicek short rate)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.ouStepResidual_hasLaw and MathFin.ouSigmaSqFromVar_variance_ouStepResidual (MathFin/Commodities/AR1OUCalibration.lean), from MathFin.vasicekShortRate_hasLaw_gaussian (MathFin/FixedIncome/VasicekSDEGaussian.lean) and MathFin.ouSigmaSqFromVar_vasicekSDEVariance. SCOPE: one step from a deterministic start, the rate in its Wiener representation (its SDE cited, not proved); the multi-step AR(1) with independent innovations needs the OU Markov transition law and is not formalized; no estimator is analysed."
+      }
+    },
+    {
+      "id": "mf-storage-forward-convenience-yield",
+      "name": "Commodity Forward with Storage Cost and Convenience Yield from No-Arbitrage",
+      "domain": "mathematical_finance",
+      "description": "In a finite-state market with state prices q, discount factor DF = Σq ≠ 0 and terminal commodity prices S_T, suppose the stored commodity is priced at the spot S₀ as the claim on S_T − C + Y (storage cost C and convenience yield Y, both deterministic and paid at delivery). Then a forward with strike F has zero value exactly when F = S₀/DF + C − Y. Derived from the library's no-arbitrage forward applied to the stored-commodity claim.",
+      "code": {
+        "lean": "import MathFin.Commodities.TheoryOfStorage\n\nopen MathFin\n\n/-- **Cost of carry with storage cost and convenience yield, from no-arbitrage.** If the stored\ncommodity is priced at `S₀` as the claim on `S_T − C + Y` and `Σ q = DF ≠ 0`, the forward at\nstrike `F` has zero value iff `F = S₀/DF + C − Y`. Re-exports\n`MathFin.storageForward_from_no_arbitrage`. -/\ntheorem storage_forward_convenience_yield {ι : Type*} (s : Finset ι) (q S : ι → ℝ)\n    (DF S₀ C Y F : ℝ) (hDF : DF ≠ 0) (h_bond : ∑ i ∈ s, q i = DF)\n    (h_carry : ∑ i ∈ s, q i * (S i - C + Y) = S₀) :\n    (∑ i ∈ s, q i * (S i - F) = 0) ↔ F = S₀ / DF + C - Y :=\n  storageForward_from_no_arbitrage s q S DF S₀ C Y F hDF h_bond h_carry\n"
+      },
+      "metadata": {
+        "reference": "J. C. Hull, Options, Futures, and Other Derivatives (10th ed., Pearson, 2018), ch. 5 (commodity futures: storage costs and convenience yields); H. Working, The Theory of Price of Storage, American Economic Review 39 (1949), 1254–1262",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.storageForward_from_no_arbitrage (MathFin/Commodities/TheoryOfStorage.lean), from MathFin.forward_price_from_no_arbitrage (MathFin/Foundations/NoArbitrageDerivations.lean) applied to the claim S_T − C + Y. SCOPE: finite state space; storage cost and convenience yield are deterministic amounts paid at delivery (a proportional or stochastic convenience yield is not covered); the pricing of the stored commodity at S₀ is a hypothesis."
+      }
+    },
+    {
+      "id": "mf-storage-forward-kink-invariant",
+      "name": "Theory-of-Storage Forward Is Sbar + C at Every Availability",
+      "domain": "mathematical_finance",
+      "description": "In the canonical theory-of-storage model the spot price at availability A is S(A) = max(Sbar, f⁻¹(A)) and the convenience yield is Y(A) = max(f⁻¹(A) − Sbar, 0). With zero rates (state prices summing to 1) and the stored commodity priced at S(A) as the claim on S_T − C + Y(A), the forward with zero value has strike F = Sbar + C at every availability A: the convenience yield offsets exactly the spot's premium over the floor Sbar. The inverse demand-for-storage curve f⁻¹ is arbitrary; no monotonicity is assumed.",
+      "code": {
+        "lean": "import MathFin.Commodities.TheoryOfStorage\n\nopen MathFin\n\n/-- **The storage forward does not see availability.** With `Σ q = 1`, spot `S(A)` and\nconvenience yield `Y(A)`, the zero-value forward strike is `Sbar + C` for every `A`.\nRe-exports `MathFin.storageForward_at_availability`. -/\ntheorem storage_forward_kink_invariant {ι : Type*} (s : Finset ι) (q S : ι → ℝ)\n    (Sbar C F : ℝ) (invDemand : ℝ → ℝ) (A : ℝ) (h_bond : ∑ i ∈ s, q i = 1)\n    (h_carry : ∑ i ∈ s, q i * (S i - C + convenienceYield Sbar invDemand A)\n      = storageSpotPrice Sbar invDemand A) :\n    (∑ i ∈ s, q i * (S i - F) = 0) ↔ F = Sbar + C :=\n  storageForward_at_availability s q S Sbar C F invDemand A h_bond h_carry\n"
+      },
+      "metadata": {
+        "reference": "N. Kaldor, Speculation and Economic Stability, Review of Economic Studies 7 (1939), 1–27; H. Working, The Theory of Price of Storage, American Economic Review 39 (1949), 1254–1262",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.storageForward_at_availability (MathFin/Commodities/TheoryOfStorage.lean): MathFin.storageForward_from_no_arbitrage at DF = 1 with the kink identity Y(A) = S(A) − Sbar (convenienceYield_eq_storageSpotPrice_sub). SCOPE: finite state space, zero rates, deterministic storage cost and convenience yield paid at delivery; the pricing of the stored commodity at S(A) is a hypothesis."
+      }
+    },
+    {
+      "id": "mf-sraffa-own-rate-from-forward",
+      "name": "Sraffa's Own Rate Recovered from the No-Arbitrage Forward",
+      "domain": "mathematical_finance",
+      "description": "In a finite-state market with discount factor (1 + m)^{−T} (money rate m > −1, maturity T ≠ 0) and a commodity whose loan in kind earns the own rate b > −1 (the claim on (1 + b)^T units at T is priced at the spot S₀ > 0), the forward F with zero value satisfies Sraffa's formula ((1 + m)^T·S₀/F)^{1/T} − 1 = b: the formula returns the own rate. The forward is derived from the library's no-arbitrage forward, which gives (1 + b)^T·F = S₀·(1 + m)^T.",
+      "code": {
+        "lean": "import MathFin.Commodities.FisherSraffaOwnRate\n\nopen MathFin\n\n/-- **Sraffa's formula returns the own rate of the no-arbitrage forward.** With\n`Σ q = (1 + m)^{−T}` and the in-kind loan priced at `S₀`, the zero-value forward `F` satisfies\n`sraffaOwnRate m S₀ F T = b`. Re-exports `MathFin.sraffaOwnRate_eq_of_no_arbitrage`. -/\ntheorem sraffa_own_rate_from_forward {ι : Type*} (s : Finset ι) (q S : ι → ℝ)\n    (m b S₀ F T : ℝ) (hm : 0 < 1 + m) (hb : 0 < 1 + b) (hT : T ≠ 0) (hS₀ : 0 < S₀)\n    (h_bond : ∑ i ∈ s, q i = (1 + m) ^ (-T))\n    (h_own : ∑ i ∈ s, q i * ((1 + b) ^ T * S i) = S₀)\n    (h_fwd : ∑ i ∈ s, q i * (S i - F) = 0) :\n    sraffaOwnRate m S₀ F T = b :=\n  sraffaOwnRate_eq_of_no_arbitrage s q S m b S₀ F T hm hb hT hS₀ h_bond h_own h_fwd\n"
+      },
+      "metadata": {
+        "reference": "P. Sraffa, Dr. Hayek on Money and Capital, Economic Journal 42(165) (1932), 42–53; J. M. Keynes, The General Theory of Employment, Interest and Money (1936), ch. 17",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.sraffaOwnRate_eq_of_no_arbitrage (MathFin/Commodities/FisherSraffaOwnRate.lean), from MathFin.forward_price_from_no_arbitrage (MathFin/Foundations/NoArbitrageDerivations.lean) applied to the in-kind claim (1 + b)^T·S_T. SCOPE: finite state space; compounding by real powers (1 + m)^T and (1 + b)^T with m, b > −1 and T ≠ 0; the pricing of the in-kind loan at S₀ is a hypothesis."
+      }
+    }
+  ]
+}

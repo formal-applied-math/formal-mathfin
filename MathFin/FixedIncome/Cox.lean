@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -17,12 +17,14 @@ public import MathFin.FixedIncome.CDSTimeVarying
 The Cox construction of a default time, for a deterministic intensity: for `h`
 continuous and strictly positive on all of `ℝ`, with `Λ = cumHazard h → ∞`, the
 time obtained by inverting a unit-exponential clock through `Λ` satisfies, for
-`t, T ≥ 0`, the survival law `P(τ > t) = e^{−Λ(t)}` and the density-pricing
-identity `P(τ ≤ T) = ∫₀ᵀ h(s)·e^{−Λ(s)} ds`. The CDS legs are *defined* as the
-deterministic integrals `c·∫₀ᵀ e^{−rs}S(s) ds` (premium) and
-`(1−R)·∫₀ᵀ e^{−rs}h(s)S(s) ds` (protection); no theorem here identifies them with
-expectations over `τ`, and the fair spread is the algebraic solution of
-`c·A = (1−R)·L` for `A > 0`.
+`t, T ≥ 0`, the survival law `P(τ > t) = e^{−Λ(t)}` and the default-density
+identity `P(τ ≤ T) = ∫₀ᵀ h(s)·e^{−Λ(s)} ds` (undiscounted; nothing is priced against
+`τ`). The CDS legs are *defined* as the deterministic integrals `c·∫₀ᵀ e^{−rs}S(s) ds` (premium) and
+`(1−R)·∫₀ᵀ e^{−rs}h(s)S(s) ds` (protection), and the fair spread is the algebraic solution of
+`c·A = (1−R)·L` for `A > 0`. This file does not identify the legs with expectations over `τ`;
+`FixedIncome/CVA.lean` proves that the protection leg is `(1 − R)·E[e^{−rτ}·1{τ ≤ T}]` for the
+constructed `τ` (`CVA.protectionLeg_eq_integral_coxDefaultTime`), using the measurability of `τ`
+proved here (`measurable_coxDefaultTime`).
 
 The module layers:
 
@@ -37,13 +39,15 @@ The module layers:
 * **Deterministic time-varying intensity** — the Cox default time
   `coxDefaultTime` (clock inversion through `Λ`), with the survival and CDF
   identities. The mechanism is an a.e. set equality between the survival event
-  and the clock-tail event, so no inverse continuity or inverse measurability
-  is ever needed.
+  and the clock-tail event, so the identities need no regularity of the inverse.
+  The default time is measurable (`measurable_coxDefaultTime`): `Λ` is a continuous
+  injection, hence a measurable embedding, and `Function.invFun Λ` extends its inverse
+  by a constant off the range.
 * **The CDS legs under `λ(t)`** — the risky annuity and default-density
   integrals (`cdsAnnuity`, `cdsLosses`), the explicit legs (`premiumLeg`,
   `protectionLeg`), the balance theorem `cdsFairSpreadTV_balances`, the
-  constant-`λ` case `cdsFairSpread`, and the default probability as the integral
-  of the default density (undiscounted).
+  constant-`λ` case `cdsFairSpreadTV_const` (collapsing to `cdsFairSpread`), and the default
+  probability as the integral of the default density (undiscounted).
 * **Restricted Cox mixing** — on the product of a path space with the clock
   space, `(μ₁ ⊗ Exp(1)){Λ_t < ξ} = ∫ e^{−Λ_t} dμ₁` for any `Λ ≥ 0` with
   measurable time sections; a default time enters only when hypothesized
@@ -70,13 +74,13 @@ Public lemmas (all in `namespace MathFin.Cox`):
 * `cumHazard_strictMono`, `cumHazard_surjOn_Ici` — monotonicity and
   surjectivity of the cumulative hazard;
 * `cox_survival_timeVarying`, `cox_cdf_timeVarying` — the survival and CDF
-  identities of the clock-inverted default time;
+  identities of the clock-inverted default time; `measurable_coxDefaultTime` — its
+  measurability;
 * `cdsAnnuity_pos`, `defaultDensity_antideriv`, `clockTail_eq_defaultDensity`,
   `cdsFairSpreadTV_balances`, `cdsAnnuity_eq_riskyAnnuity`,
   `cdsLosses_eq_riskyAnnuity_mul`, `cdsFairSpreadTV_const`,
   `cox_defaultProb_density` — the time-varying CDS layer;
-* `cox_mixing_survival`, `cox_mixing_survival_le`, `cox_mixed_survival` — the
-  restricted-Cox mixing identity.
+* `cox_mixing_survival`, `cox_mixed_survival` — the restricted-Cox mixing identity.
 
 Supporting lemmas (`hazardSurvival_eq_exp`, `cumHazard_zero`,
 `cumHazard_nonneg`, `cumHazard_deriv`, `cumHazard_continuous`,
@@ -240,13 +244,13 @@ private theorem cumHazard_deriv {h : ℝ → ℝ} (hh : Continuous h) (s : ℝ) 
 
 /-- Continuity of the cumulative hazard (via its differentiability). -/
 private theorem cumHazard_continuous {h : ℝ → ℝ} (hh : Continuous h) : Continuous (cumHazard h) :=
-  Differentiable.continuous fun s => (cumHazard_deriv hh s).differentiableAt
+  Differentiable.continuous fun s ↦ (cumHazard_deriv hh s).differentiableAt
 
 /-- Under a continuous hazard intensity, strictly positive for all calendar time,
 the cumulative hazard is strictly increasing. -/
 theorem cumHazard_strictMono {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s, 0 < h s) :
     StrictMono (cumHazard h) :=
-  strictMono_of_hasDerivAt_pos (fun s => cumHazard_deriv hh s) hpos
+  strictMono_of_hasDerivAt_pos (fun s ↦ cumHazard_deriv hh s) hpos
 
 /-- Under a continuous, strictly positive intensity with divergent cumulative
 hazard, `Λ` maps the half-line onto the half-line (IVT from `Λ 0 = 0` and
@@ -319,6 +323,20 @@ private theorem expClock_nonneg_ae {ξ : Ω → ℝ} (hξmeas : Measurable ξ)
 unit-exponential clock through the cumulative hazard `Λ`. -/
 noncomputable def coxDefaultTime (h : ℝ → ℝ) (ξ : Ω → ℝ) : Ω → ℝ :=
   fun ω ↦ Function.invFun (cumHazard h) (ξ ω)
+
+/-- **The Cox default time is measurable.** `Λ = cumHazard h` is a continuous injection of `ℝ`,
+hence a measurable embedding (`Continuous.measurableEmbedding`), and `Function.invFun Λ` is
+`Function.extend Λ id` with a constant off the range of `Λ`, measurable by
+`MeasurableEmbedding.measurable_extend`. Divergence of `Λ` is not needed. -/
+theorem measurable_coxDefaultTime {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s, 0 < h s)
+    {ξ : Ω → ℝ} (hξmeas : Measurable ξ) : Measurable (coxDefaultTime h ξ) := by
+  have hΛ : MeasurableEmbedding (cumHazard h) :=
+    (cumHazard_continuous hh).measurableEmbedding (cumHazard_strictMono hh hpos).injective
+  have hinv : Measurable (Function.invFun (cumHazard h)) := by
+    rw [show Function.invFun (cumHazard h) =
+        Function.extend (cumHazard h) id fun _ ↦ Classical.arbitrary ℝ from rfl]
+    exact hΛ.measurable_extend measurable_id measurable_const
+  exact hinv.comp hξmeas
 
 /-- The inverse of `Λ` inverts exactly on the half-line, and lands there. -/
 private theorem invFun_on_halfline {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s, 0 < h s)
@@ -569,7 +587,8 @@ theorem cdsFairSpreadTV_const (r lam R T : ℝ) (hT : 0 < T) :
 /-- **Default probability as the integral of the default density**
 (deterministic-intensity Cox): for `a ≥ 0` the constructed default time satisfies
 `P(τ ≤ a) = ∫₀^a h·S`. The discounted identity
-`E[e^{−rτ}·1{τ ≤ a}] = ∫₀^a e^{−rs}h(s)S(s) ds` (`r ≠ 0`) is not proved. -/
+`E[e^{−rτ}·1{τ ≤ a}] = ∫₀^a e^{−rs}h(s)S(s) ds` is `CVA.protectionLeg_eq_integral_coxDefaultTime`
+(`FixedIncome/CVA.lean`). -/
 theorem cox_defaultProb_density {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s, 0 < h s)
     (hdiv : Filter.Tendsto (cumHazard h) Filter.atTop Filter.atTop)
     {ξ : Ω → ℝ} (hξmeas : Measurable ξ) (hξlaw : Measure.map ξ μ = expMeasure 1)
@@ -597,39 +616,22 @@ space with the unit-exponential-clock space:
 for any `Λ ≥ 0` with measurable time sections. No default time, intensity or path
 regularity is involved; with `τ` hypothesized as the clock's crossing of `Λ`, it
 is the mixed survival `P(τ > t) = E[e^{−Λ_t}]` (`cox_mixed_survival`). -/
-theorem cox_mixing_survival {Λ : ℝ → Ω₁ → ℝ} (hΛmeas : ∀ t, Measurable fun ω => Λ t ω)
+theorem cox_mixing_survival {Λ : ℝ → Ω₁ → ℝ} (hΛmeas : ∀ t, Measurable fun ω ↦ Λ t ω)
     (hΛnn : ∀ t ω, 0 ≤ Λ t ω) (t : ℝ) :
     (μ₁.prod (expMeasure 1)) {p : Ω₁ × ℝ | Λ t p.1 < p.2}
       = ∫⁻ ω : Ω₁, ENNReal.ofReal (rexp (-(Λ t ω))) ∂μ₁ := by
   haveI : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
-  have hmap : Measurable fun p : Ω₁ × ℝ => (Λ t p.1, p.2) :=
+  have hmap : Measurable fun p : Ω₁ × ℝ ↦ (Λ t p.1, p.2) :=
     ((hΛmeas t).comp measurable_fst).prodMk measurable_snd
   have hset : MeasurableSet {p : Ω₁ × ℝ | Λ t p.1 < p.2} :=
     hmap (measurableSet_lt measurable_fst measurable_snd)
   rw [Measure.prod_apply hset]
-  refine lintegral_congr fun ω => ?_
+  refine lintegral_congr fun ω ↦ ?_
   have hpre : Prod.mk ω ⁻¹' {p : Ω₁ × ℝ | Λ t p.1 < p.2} = Set.Ioi (Λ t ω) := by
     ext y
     simp
   rw [hpre]
   exact expClock_Ioi (hΛnn t ω)
-
-/-- The mixed survival event is a probability (`≤ 1`) — `e^{−Λ} ∈ [0,1]`
-pathwise. -/
-theorem cox_mixing_survival_le {μ₁ : Measure Ω₁} [IsProbabilityMeasure μ₁]
-    {Λ : ℝ → Ω₁ → ℝ} (hΛmeas : ∀ t, Measurable fun ω => Λ t ω)
-    (hΛnn : ∀ t ω, 0 ≤ Λ t ω) (t : ℝ) :
-    (μ₁.prod (expMeasure 1)) {p : Ω₁ × ℝ | Λ t p.1 < p.2} ≤ 1 := by
-  calc (μ₁.prod (expMeasure 1)) {p : Ω₁ × ℝ | Λ t p.1 < p.2}
-      = ∫⁻ ω : Ω₁, ENNReal.ofReal (rexp (-(Λ t ω))) ∂μ₁ :=
-        cox_mixing_survival hΛmeas hΛnn t
-    _ ≤ ∫⁻ _ : Ω₁, (1:ℝ≥0∞) ∂μ₁ := by
-        refine lintegral_mono fun ω => ?_
-        have hle : rexp (-(Λ t ω)) ≤ 1 :=
-          Real.exp_le_one_iff.mpr (by have := hΛnn t ω; linarith)
-        calc ENNReal.ofReal (rexp (-(Λ t ω))) ≤ ENNReal.ofReal 1 := ENNReal.ofReal_le_ofReal hle
-          _ = 1 := ENNReal.ofReal_one
-    _ = 1 := by rw [lintegral_one, measure_univ]
 
 /-- **Mixed survival of a restricted-Cox default time**: a `τ` on the product
 space whose survival event at the single time `t` is the clock beating `Λ_t`
@@ -638,7 +640,7 @@ rewritten by `hτ`. Constructing such a `τ` would need paths of `Λ` that are
 continuous, strictly increasing and divergent with `Λ(0) = 0`; those are not
 assumed, and the construction is not done here. -/
 theorem cox_mixed_survival {τ : Ω₁ × ℝ → ℝ} {Λ : ℝ → Ω₁ → ℝ}
-    (hΛmeas : ∀ t, Measurable fun ω => Λ t ω)
+    (hΛmeas : ∀ t, Measurable fun ω ↦ Λ t ω)
     (hΛnn : ∀ t ω, 0 ≤ Λ t ω)
     {t : ℝ} (hτ : ∀ p : Ω₁ × ℝ, t < τ p ↔ Λ t p.1 < p.2) :
     (μ₁.prod (expMeasure 1)) {p : Ω₁ × ℝ | t < τ p}

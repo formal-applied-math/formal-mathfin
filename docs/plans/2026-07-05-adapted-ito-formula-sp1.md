@@ -39,7 +39,7 @@ This is theorem proving, not app code. Each task's "test" is the Lean compiler:
 | `benchmarks/stochastic_calculus.json` | new `full` entry `sc-adapted-qv` re-exporting the headline |
 | `MathFin/AxiomAudit.lean` | pin the headline theorem's axioms |
 | `MathFin/AxiomAuditGen.lean` | regenerated (byte-fresh) after the benchmark edit |
-| `docs/coverage.md`, `docs/bridges.md`, `docs/roadmap.md` | delivery + a Foundations bridge row |
+| `docs/coverage.md`, `docs/bridges.md`, `docs/archive/roadmap-history.md` | delivery + a Foundations bridge row |
 
 ## Notation (used throughout)
 
@@ -151,7 +151,7 @@ git commit -m "feat(foundations): itoProcessCLM per-cell increment = sub-interva
 **Files:**
 - Modify: `benchmarks/stochastic_calculus.json` (new entry `sc-adapted-qv`)
 - Modify: `MathFin/AxiomAudit.lean`, `MathFin/AxiomAuditGen.lean` (regen)
-- Modify: `docs/coverage.md`, `docs/bridges.md`, `docs/roadmap.md`
+- Modify: `docs/coverage.md`, `docs/bridges.md`, `docs/archive/roadmap-history.md`
 - Modify: `verification_ledger.json` (re-verify)
 
 **Interfaces:**

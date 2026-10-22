@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -11,14 +11,14 @@ public import MathFin.Foundations.WienerIntegralGaussian
 public import MathFin.FixedIncome.VasicekSDE
 
 /-!
-# Vasicek terminal distribution, derived from the SDE (phase: Itô→pricing bridge)
+# Vasicek terminal distribution of the Ornstein–Uhlenbeck solution (Itô→pricing bridge)
 
 `FixedIncome/VasicekSDE.lean` *posited* the terminal law of the Vasicek short
-rate `r_t ~ N(mean, var)` as closed-form `def`s, in the `BSCallHyp` style, with
-the SDE→law derivation explicitly open ("gated on the continuous Itô integral").
+rate `r_t ~ N(mean, var)` as closed-form `def`s, in the `BSCallHyp` style.
 
-This file **derives** that law. The Vasicek SDE `dr_t = κ(θ − r_t)dt + σ dB_t`
-has solution
+This file **derives** that law for the short rate in its Wiener representation. The Vasicek
+SDE `dr_t = κ(θ − r_t)dt + σ dB_t` has, as a textbook fact cited and not proved here, the
+solution
 
   `r_t = r₀ e^{−κt} + θ(1 − e^{−κt}) + σ ∫₀ᵗ e^{−κ(t−s)} dB_s`,
 
@@ -125,8 +125,9 @@ noncomputable def vasicekDiffusionTerm (hB : IsPreBrownianReal B μ) (κ σ : �
     (hκ : 0 ≤ κ) (T : ℝ≥0) (ω : Ω) : ℝ :=
   σ * (wienerIntegralLp B hB T (vasicekKernelLp κ hκ T) ω)
 
-/-- **Vasicek terminal law, derived.** The genuine short rate
-`r_T = vasicekSDEMean + σ ∫₀ᵀ e^{−κ(T−s)} dB_s` (the SDE solution) has the
+/-- **Vasicek terminal law, derived.** The short rate in its Wiener representation
+`r_T = vasicekSDEMean + σ ∫₀ᵀ e^{−κ(T−s)} dB_s` (the textbook solution of the Vasicek SDE;
+that it solves the SDE is cited, not proved) has the
 Gaussian law `N(vasicekSDEMean, vasicekSDEVariance)` — the closed form `VasicekSDE.lean`
 posited is now a theorem. -/
 theorem vasicekShortRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ)
@@ -150,14 +151,10 @@ theorem vasicekShortRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ)
     exact vasicekKernel_integral_sq κ hκ.ne' T
   rw [hInt] at hW
   -- Scale by σ then shift by the mean; the affine map sends N(0, ∫kernel²) to N(mean, σ²·∫kernel²).
-  have hexp_le : Real.exp (-(2 * κ * (T : ℝ))) ≤ 1 :=
-    Real.exp_le_one_iff.mpr (by nlinarith [hκ.le, NNReal.coe_nonneg T])
-  have hden : (0 : ℝ) < 2 * κ := by linarith
-  have hkernel_nonneg : (0 : ℝ) ≤ (1 - Real.exp (-(2 * κ * (T : ℝ)))) / (2 * κ) :=
-    div_nonneg (by linarith) hden.le
-  have hvar_nonneg : (0 : ℝ) ≤ vasicekSDEVariance σ κ (T : ℝ) := by
-    unfold vasicekSDEVariance
-    exact div_nonneg (mul_nonneg (sq_nonneg σ) (by linarith)) hden.le
+  have hkernel_nonneg : (0 : ℝ) ≤ (1 - Real.exp (-(2 * κ * (T : ℝ)))) / (2 * κ) := by
+    simpa [vasicekSDEVariance] using vasicekSDEVariance_nonneg 1 hκ (NNReal.coe_nonneg T)
+  have hvar_nonneg : (0 : ℝ) ≤ vasicekSDEVariance σ κ (T : ℝ) :=
+    vasicekSDEVariance_nonneg σ hκ (NNReal.coe_nonneg T)
   have hShift := gaussianReal_const_add (gaussianReal_const_mul hW σ)
     (vasicekSDEMean r₀ θ κ (T : ℝ))
   convert hShift using 2

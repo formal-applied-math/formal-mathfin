@@ -1,0 +1,568 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-21",
+  "scope": "Research problems in mathematical finance, independent of immediate Lean implementation readiness.",
+  "organization_reference": {
+    "title": "Ulam AI / UnsolvedMath",
+    "url": "https://huggingface.co/datasets/ulamai/UnsolvedMath",
+    "use": "Organization inspired by stable IDs, self-contained statements, subject tags, source provenance, and dated reviews. No problem records were imported."
+  },
+  "status_policy": {
+    "open": "A scoped unresolved question with dated supporting evidence and a resolution search.",
+    "solved": "A resolution supported by the recorded evidence; a faithful kernel-checked proof qualifies.",
+    "resolution_reported": "A proposed resolution was located but has not been independently checked in this catalogue.",
+    "formalization": "Independent of mathematical status and scoped to this repository.",
+    "difficulty": "Unassessed unless supported by a named assessment; GitHub difficulty:hard denotes required expertise, not a prediction of solvability."
+  },
+  "problems": [
+    {
+      "id": "MF-OP-001",
+      "title": "Pathwise uniqueness for the square-root rough-Heston variance equation",
+      "area": "stoch-vol",
+      "tags": [
+        "rough-volatility",
+        "stochastic-volterra-equations",
+        "pathwise-uniqueness"
+      ],
+      "statement": "Fix $H\\in(0,1/2)$, $v_0>0$, $\\nu>0$, and a Brownian motion $W$. Consider nonnegative continuous adapted solutions satisfying $\\sup_{t\\leq T}\\mathbb E[V_t^p]<\\infty$ for every finite $T$ and $p\\geq1$, of\n\n$$V_t=v_0+\\frac{\\nu}{\\Gamma(H+1/2)}\\int_0^t(t-s)^{H-1/2}\\sqrt{V_s}\\,dW_s.$$\n\nIf $V$ and $\\widetilde V$ use the same Brownian motion and initial value on the same filtered probability space, must they be indistinguishable on every finite horizon? A proof or a counterexample settles this question. This is already a concrete case of rough Heston, with constant initial forward variance and zero mean reversion.",
+      "statement_origin": "source_question",
+      "background": "Strong simulation and coupling arguments need control of solutions driven by the same noise, beyond determining their distribution.",
+      "mathematical_status": "open",
+      "difficulty": "unassessed",
+      "formalization": {
+        "status": "not_started",
+        "scope": "this repository",
+        "declarations": []
+      },
+      "known_results": [
+        "Weak existence and uniqueness in law are available for this affine Volterra model.",
+        "Pathwise uniqueness holds after localizing away from zero; the square-root boundary is the difficulty.",
+        "For a singular kernel $(t-s)^{-\\alpha}$, Prömel–Scheffels require diffusion Hölder exponent $\\xi>1/[2(1-\\alpha)]$. With $\\alpha=1/2-H>0$, this excludes $\\xi=1/2$."
+      ],
+      "sources": [
+        {
+          "id": "forde-2026",
+          "title": "Forde–Gerhold–Smith, Small-time VIX smile and the stationary distribution for the Rough Heston model",
+          "url": "https://martinforde.github.io/VIXSmile-StationaryDistN-rHeston.pdf",
+          "date": "2026-10-19",
+          "locator": "Section 2, equation (1), pp. 2–3",
+          "role": "openness",
+          "finding": "Explicitly says pathwise uniqueness is unknown even for constant initial variance; distinguishes weak uniqueness and localization."
+        },
+        {
+          "id": "promel-scheffels",
+          "title": "Prömel–Scheffels, Pathwise uniqueness for singular stochastic Volterra equations with Hölder coefficients",
+          "url": "https://doi.org/10.1007/s40072-024-00335-y",
+          "date": "2024-08-14",
+          "locator": "Assumption 2.1 and Theorem 2.3; journal issue 2025",
+          "role": "partial_result",
+          "finding": "The full regularity assumption is stronger than one-half Hölder for singular kernels; Remark 2.2 alone is not the theorem."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-10-21",
+        "evidence_type": "explicit_open_statement",
+        "latest_openness_evidence_date": "2026-10-19",
+        "resolution_searches": [
+          "\"rough Heston\" \"pathwise uniqueness\"",
+          "\"rough Heston\" \"strong existence\"",
+          "\"rough Heston\" \"pathwise\" \"2026\""
+        ],
+        "nearby_results_checked": [
+          "Prömel–Scheffels does not cover the square-root exponent for H<1/2.",
+          "The August 2026 local stochastic rough-volatility filtering paper concerns conditional-density equations, not this pathwise-uniqueness theorem."
+        ],
+        "conclusion": "No resolution of this scoped question was located. This is a dated literature assessment, not a proof of openness."
+      },
+      "related_problems": [],
+      "issue_number": 326,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/326",
+      "history": [
+        {
+          "date": "2026-10-21",
+          "status": "open",
+          "reason": "Added after source and resolution-search review."
+        }
+      ]
+    },
+    {
+      "id": "MF-OP-002",
+      "title": "Physical Stefan uniqueness when jumps accumulate at time zero",
+      "area": "credit",
+      "tags": [
+        "systemic-risk",
+        "mckean-vlasov",
+        "free-boundary",
+        "uniqueness"
+      ],
+      "statement": "Let $g\\geq0$ be a bounded integrable density on $(0,\\infty)$ and $B$ a standard Brownian motion. Define\n\n$$X_t^x=x+B_t-\\Lambda_t,\\qquad \\tau^x=\\inf\\{t\\geq0:X_t^x\\leq0\\},\\qquad\n\\Lambda_t=\\int_0^\\infty\\mathbb P(\\tau^x\\leq t)g(x)\\,dx.$$\n\nRequire $\\Lambda$ to be nondecreasing and càdlàg and to obey the physical minimal-jump rule. Writing\n$\\mu_{t-}(A)=\\int_0^\\infty\\mathbb P(\\tau^x\\geq t,\\,X_{t-}^x\\in A)g(x)\\,dx$, this rule is\n$\\Delta\\Lambda_t=\\inf\\{z>0:\\mu_{t-}((0,z])<z\\}$, with the corresponding initial rule.\n\nAssume the initial rule gives no jump at zero and a finite global minimal physical solution $\\underline\\Lambda$ exists. In the remaining regime where $\\Delta\\underline\\Lambda_{t_n}>0$ for some $t_n\\downarrow0$, is the physical solution unique? Prove uniqueness in this regime or construct one admissible $g$ with two distinct physical solutions.",
+      "statement_origin": "scoped_residual_of_theorem",
+      "background": "The loss process models contagious defaults in a mean-field system; uniqueness determines whether the same initial balance-sheet distribution determines a single loss evolution.",
+      "mathematical_status": "open",
+      "difficulty": "unassessed",
+      "formalization": {
+        "status": "not_started",
+        "scope": "this repository",
+        "declarations": []
+      },
+      "known_results": [
+        "Muñoz reduces global uniqueness to short-time uniqueness and rules out accumulation of jumps at positive times for integrable initial data.",
+        "Blore–Hambly Theorem 3.1 gives global uniqueness when the minimal solution is continuous on some (0, epsilon). Remark 3.9 isolates accumulation at zero as the remaining possible mechanism.",
+        "Uniqueness of a maximal weak solution in the separate free-target formulation is not, by itself, uniqueness among all physical solutions here."
+      ],
+      "sources": [
+        {
+          "id": "blore-hambly",
+          "title": "Blore–Hambly, A transform approach to the supercooled Stefan problem",
+          "url": "https://arxiv.org/html/2609.24297v1",
+          "date": "2026-09-21",
+          "locator": "Equations (1.2)–(1.3), Theorem 3.1, Remark 3.9",
+          "role": "residual",
+          "finding": "Reduces possible nonuniqueness to jump accumulation at zero; does not prove that this mechanism produces nonuniqueness."
+        },
+        {
+          "id": "munoz",
+          "title": "Muñoz, Free boundary regularity and well-posedness of physical solutions to the supercooled Stefan problem",
+          "url": "https://arxiv.org/abs/2506.18741",
+          "date": "2025-06-23",
+          "locator": "Theorems 1.1 and 1.7",
+          "role": "partial_result",
+          "finding": "Regularity and local-to-global uniqueness for physical solutions."
+        },
+        {
+          "id": "chau-kim-murugan",
+          "title": "Chau–Kim–Murugan, Uniqueness of the maximal solution of the supercooled Stefan problem in 1D",
+          "url": "https://arxiv.org/abs/2601.00234",
+          "date": "2026-01-01",
+          "locator": "Abstract and maximal-weak-solution formulation",
+          "role": "nearby_result",
+          "finding": "A uniqueness result for a different specified solution class; not evidence that the stated physical-solution question is closed."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-10-21",
+        "evidence_type": "residual_identified_by_author",
+        "latest_openness_evidence_date": "2026-09-21",
+        "resolution_searches": [
+          "\"supercooled Stefan\" \"uniqueness\" 2026",
+          "\"supercooled Stefan\" \"accumulating\" \"uniqueness\" 2026"
+        ],
+        "nearby_results_checked": [
+          "The September 2026 transform result substantially narrows the older survey question.",
+          "Jump accumulation is necessary for possible nonuniqueness here, not a demonstrated counterexample."
+        ],
+        "conclusion": "No resolution of this scoped question was located. This is a dated literature assessment, not a proof of openness."
+      },
+      "related_problems": [],
+      "issue_number": 327,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/327",
+      "history": [
+        {
+          "date": "2026-10-21",
+          "status": "open",
+          "reason": "Added after source and resolution-search review."
+        }
+      ]
+    },
+    {
+      "id": "MF-OP-003",
+      "title": "Relaxed equilibrium existence with action-dependent diffusion under time inconsistency",
+      "area": "portfolio",
+      "tags": [
+        "stochastic-control",
+        "time-inconsistency",
+        "equilibrium-hjb",
+        "controlled-diffusion"
+      ],
+      "statement": "Consider an infinite-horizon diffusion on $\\mathbb R^d$ with compact action set $U$ and relaxed Markov policies $\\pi(x,du)$. Its generator is\n\n$$\\mathcal L^\\pi f(x)=\\int_U\\left[b(x,u)\\cdot\\nabla f(x)+\\tfrac12\\operatorname{tr}\\big(a(x,u)D^2f(x)\\big)\\right]\\pi(x,du),\\qquad a=\\sigma\\sigma^\\top.$$\n\nThe current self evaluates a policy by $J^\\pi(x)=\\mathbb E_x[\\int_0^\\infty\\int_U r(s,X_s,u)\\pi(X_s,du)\\,ds]$, with non-exponential time dependence. An equilibrium permits no positive first-order gain from a deviation over $[0,\\varepsilon]$ followed by the prescribed policy.\n\nExtend the relaxed-equilibrium existence theory of Wang–Yu–Zhang–Zhou to covariance $a(x,u)$ that depends on the action. Retain compact controls, uniform ellipticity, coefficient regularity, reward integrability, and the quantitative hypotheses of their existence theorem in appropriate uniform-in-action form; state every additional restriction. The target is an existence and verification theorem for the controlled-diffusion EHJB system, without assuming its solution exists. Any obstruction should identify precisely which proposed extension fails.",
+      "statement_origin": "source_extension_with_model_spelled_out",
+      "background": "Portfolio allocations typically affect both drift and variance. An existence theory confined to drift control leaves out that feature.",
+      "mathematical_status": "open",
+      "difficulty": "unassessed",
+      "formalization": {
+        "status": "not_started",
+        "scope": "this repository",
+        "declarations": []
+      },
+      "known_results": [
+        "Wang–Yu–Zhang–Zhou prove existence through vanishing entropy regularization for drift control and explicitly leave controlled diffusion to future work.",
+        "Huang–Yu–Zhang establish a convergent policy iteration for regularized drift-control problems and also explicitly leave controlled diffusion open.",
+        "Special solvable models and uniqueness under stronger hypotheses do not establish the requested general existence theorem."
+      ],
+      "sources": [
+        {
+          "id": "wang-yu-zhang-zhou",
+          "title": "Wang–Yu–Zhang–Zhou, Equilibrium under Time-Inconsistency: A New Existence Theory by Vanishing Entropy Regularization",
+          "url": "https://arxiv.org/html/2603.10321v2",
+          "date": "2026-04-04",
+          "locator": "Section 2 opening; Assumptions 2.1–2.2; Section 4 existence and verification theorems",
+          "role": "explicit_extension",
+          "finding": "Proves results for action-independent diffusion and explicitly leaves action-dependent diffusion for future study."
+        },
+        {
+          "id": "huang-yu-zhang",
+          "title": "Huang–Yu–Zhang, Policy Iteration Achieves Regularized Equilibrium under Time Inconsistency",
+          "url": "https://arxiv.org/html/2603.06145v2",
+          "date": "2026-03-26",
+          "locator": "Introduction, paragraph on controlled diffusion",
+          "role": "partial_result",
+          "finding": "The regularized policy-iteration result also controls only drift and explicitly identifies diffusion control as future work."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-10-21",
+        "evidence_type": "explicit_future_work",
+        "latest_openness_evidence_date": "2026-04-04",
+        "resolution_searches": [
+          "\"equilibrium\" \"controlled diffusion\" \"entropy\" \"time-inconsistent\"",
+          "\"time inconsistent\" \"diffusion control\" \"equilibrium existence\" 2026"
+        ],
+        "nearby_results_checked": [
+          "The source resolves an existence question in its stated drift-control setting; quoting its introductory open-problem sentence as its conclusion is wrong."
+        ],
+        "conclusion": "No resolution of this scoped question was located. This is a dated literature assessment, not a proof of openness."
+      },
+      "related_problems": [],
+      "issue_number": 328,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/328",
+      "history": [
+        {
+          "date": "2026-10-21",
+          "status": "open",
+          "reason": "Added after source and resolution-search review."
+        }
+      ]
+    },
+    {
+      "id": "MF-OP-004",
+      "title": "Integrable Schrödinger potentials for continuum SPX/VIX calibration",
+      "area": "stoch-vol",
+      "tags": [
+        "calibration",
+        "spx-vix",
+        "martingale-transport",
+        "entropy",
+        "dual-attainment"
+      ],
+      "statement": "Work at zero rates with positive SPX levels $X,Y$ at dates separated by $\\tau>0$ and a nonnegative VIX level $V$ observed together with $X$. Fix their three marginal laws and a reference law $R$ on $(X,V,Y)$. The feasible laws $Q$ obey those marginals and\n\n$$\\mathbb E_Q[Y\\mid X,V]=X,\\qquad\n\\mathbb E_Q[-(2/\\tau)\\log(Y/X)\\mid X,V]=V^2.$$\n\nFor the entropy problem $\\inf_Q H(Q\\mid R)$, establish explicit hypotheses for continuous marginals under which a finite minimizer admits integrable dual potentials:\n\n$$\\log\\frac{dQ_*}{dR}=f(X)+g(V)+h(Y)+\\Delta(X,V)(Y-X)+\\Gamma(X,V)\\big[-(2/\\tau)\\log(Y/X)-V^2\\big].$$\n\nThe static terms must be integrable under their respective marginals, with the dynamic terms admissible and integrable as required for the dual portfolio. Identify sufficient assumptions and their limits; finite-entropy feasibility alone is not asserted to suffice. The target concerns continuum marginal constraints, beyond a finite-grid multiplier calculation.",
+      "statement_origin": "source_question",
+      "background": "These potentials justify the semistatic hedge and the dual calibration algorithm, not merely the existence of a calibrated probability law.",
+      "mathematical_status": "open",
+      "difficulty": "unassessed",
+      "formalization": {
+        "status": "not_started",
+        "scope": "this repository",
+        "declarations": []
+      },
+      "known_results": [
+        "Nutz–Wiesel establish integrable potentials for a two-marginal martingale bridge under their assumptions, while explicitly identifying the additional SPX/VIX constraints as unresolved.",
+        "Joint SPX/VIX calibration itself is already achieved in the literature.",
+        "Recent global multi-maturity feasibility and memory-selection results address a different question from integrable attainment of this entropy dual."
+      ],
+      "sources": [
+        {
+          "id": "nutz-wiesel",
+          "title": "Nutz–Wiesel, On the Martingale Schrödinger Bridge between Two Distributions",
+          "url": "https://www.math.columbia.edu/~mnutz/docs/martingaleSBpotentials.pdf",
+          "date": "2024-01-10",
+          "locator": "Introduction, p. 3, paragraph citing Guyon [18,19]",
+          "role": "openness",
+          "finding": "Explicitly identifies first-principles existence of integrable potentials for joint SPX/VIX calibration as open."
+        },
+        {
+          "id": "guyon",
+          "title": "Guyon, Dispersion-constrained martingale Schrödinger problems and the exact joint S&P 500/VIX smile calibration puzzle",
+          "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3853237",
+          "date": "2021",
+          "locator": "Problem formulation; cited by Nutz–Wiesel [19]",
+          "role": "original_problem",
+          "finding": "Underlying dispersion-constrained calibration problem; the current audit uses Nutz–Wiesel for the openness assertion."
+        },
+        {
+          "id": "global-calibration",
+          "title": "Acharya et al., Global Multi-Maturity SPX–VIX Calibration Beyond Markovian Stitching",
+          "url": "https://arxiv.org/html/2609.04087v2",
+          "date": "2026-10-15",
+          "locator": "Feasibility, entropy selection, and finite-memory calibration results",
+          "role": "nearby_result",
+          "finding": "Addresses global feasibility and cross-month dependence; no integrable-potential theorem resolving this question was identified."
+        },
+        {
+          "id": "multi-marginal-dual",
+          "title": "Che–Lim–Sun, Dual Attainment in Multi-Period Multi-Asset Martingale Optimal Transport and Its Computation",
+          "url": "https://arxiv.org/abs/2602.02996",
+          "date": "2026-02-03",
+          "locator": "Main MOT dual-attainment theorem",
+          "role": "nearby_result",
+          "finding": "Linear-cost MOT dual attainment is distinct from the dispersion-constrained entropy dual here."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-10-21",
+        "evidence_type": "explicit_open_statement",
+        "latest_openness_evidence_date": "2024-01-10",
+        "resolution_searches": [
+          "\"SPX\" \"VIX\" \"integrable\" \"potentials\"",
+          "\"SPX\" \"VIX\" \"dual attainment\"",
+          "\"Schrödinger\" \"VIX\" \"2026\" potentials"
+        ],
+        "nearby_results_checked": [
+          "The latest explicit assertion located is from 2024; the 2026 review does not redate that assertion.",
+          "Finite-grid calibration, ordinary MOT dual attainment, and joint-calibration feasibility are not the same theorem."
+        ],
+        "conclusion": "No resolution of this scoped question was located. This is a dated literature assessment, not a proof of openness."
+      },
+      "related_problems": [
+        "MF-OP-005"
+      ],
+      "issue_number": 329,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/329",
+      "history": [
+        {
+          "date": "2026-10-21",
+          "status": "open",
+          "reason": "Added after source and resolution-search review."
+        }
+      ]
+    },
+    {
+      "id": "MF-OP-005",
+      "title": "A semistatic FTAP for calibrated equivalent martingale measures with finite entropy",
+      "area": "foundations",
+      "tags": [
+        "ftap",
+        "semistatic-trading",
+        "calibration",
+        "entropy",
+        "martingale-measures"
+      ],
+      "statement": "Let $P$ be a reference probability on $\\mathbb R^2$ with canonical prices $(X,Y)$ and let $\\nu$ be an integrable prescribed law of $Y$, inferred from a full terminal call-price curve. Define\n\n$$\\mathcal M_{\\mathrm{fin}}(\\nu)=\\{Q\\sim P: Q_Y=\\nu,\\ \\mathbb E_Q[Y\\mid X]=X,\\ H(Q\\mid P)<\\infty\\}.$$\n\nGive a necessary-and-sufficient criterion, formulated in terms of semistatic trading opportunities and their appropriate admissibility or closure, for $\\mathcal M_{\\mathrm{fin}}(\\nu)\\ne\\varnothing$. A zero-cost semistatic payoff has the form\n$h(X)(Y-X)+g(Y)-\\int g\\,d\\nu$.\n\nThe criterion must distinguish equivalent from merely absolutely continuous measures, impose the entire terminal law, and account for finite relative entropy. Simply restating measure existence, or using the usual FTAP for a finite menu of options, does not answer this question.",
+      "statement_origin": "source_question",
+      "background": "This would characterize when exact option calibration can stay equivalent to a physical model at finite information cost.",
+      "mathematical_status": "open",
+      "difficulty": "unassessed",
+      "formalization": {
+        "status": "not_started",
+        "scope": "this repository",
+        "declarations": []
+      },
+      "known_results": [
+        "Nutz–Wiesel–Zhao assume nonemptiness of this class in (1.3), then prove the entropy-minimization and semistatic-utility results. They explicitly ask for a trading criterion for that assumption.",
+        "Non-closedness of semistatic payoffs is a central obstruction.",
+        "Pennanen–Perkkiö provide broad semistatic duality results with a finite set of statically traded derivatives; that does not directly impose a full terminal law."
+      ],
+      "sources": [
+        {
+          "id": "nutz-wiesel-zhao",
+          "title": "Nutz–Wiesel–Zhao, Martingale Schrödinger Bridges and Optimal Semistatic Portfolios",
+          "url": "https://www.math.columbia.edu/~mnutz/docs/MartingaleSchroedingerBridges.pdf",
+          "date": "2022-04-25",
+          "locator": "Equations (1.2)–(1.3), p. 3, and discussion after Theorem 1.3",
+          "role": "openness",
+          "finding": "Explicitly asks for a trading-based characterization of calibrated equivalent martingale measures, including finite entropy."
+        },
+        {
+          "id": "pennanen-perkkio",
+          "title": "Pennanen–Perkkiö, Duality in convex stochastic optimization",
+          "url": "https://doi.org/10.1007/s10107-025-02216-1",
+          "date": "2025-03-21",
+          "locator": "Section on optimal semistatic hedging; finite set K of derivatives (2026 journal volume)",
+          "role": "nearby_result",
+          "finding": "The static asset set is finite, unlike the continuum calibration constraint here."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-10-21",
+        "evidence_type": "explicit_open_statement",
+        "latest_openness_evidence_date": "2022-04-25",
+        "resolution_searches": [
+          "\"martingale Schrödinger\" \"fundamental theorem\"",
+          "\"semistatic\" \"finite entropy\" \"arbitrage\"",
+          "\"martingale\" \"semistatic\" \"fundamental theorem\" \"2026\""
+        ],
+        "nearby_results_checked": [
+          "The latest explicit assertion located is from 2022. No later resolution was located; this older evidence is displayed rather than advertised as a new assertion.",
+          "The finite-derivative semistatic theorem does not directly resolve this full-marginal question."
+        ],
+        "conclusion": "No resolution of this scoped question was located. This is a dated literature assessment, not a proof of openness."
+      },
+      "related_problems": [
+        "MF-OP-004"
+      ],
+      "issue_number": 330,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/330",
+      "history": [
+        {
+          "date": "2026-10-21",
+          "status": "open",
+          "reason": "Added after source and resolution-search review."
+        }
+      ]
+    },
+    {
+      "id": "MF-OP-006",
+      "title": "Convexity of the American-put exercise boundary for 0 <= q <= r",
+      "area": "black-scholes",
+      "tags": [
+        "solved",
+        "lean"
+      ],
+      "statement": "For $K,r,\\sigma>0$ and $0\\leq q\\leq r$, prove convexity of $\\log(B(\\tau)/K)$ and strict convexity of $B(\\tau)$ for the classical finite-horizon American-put stopping value, in time to expiry $\\tau>0$.",
+      "statement_origin": "existing_repository_result",
+      "background": "Retained as a solved catalogue record, with contributor credit and proof links.",
+      "mathematical_status": "solved",
+      "difficulty": "unassessed",
+      "formalization": {
+        "status": "proved",
+        "scope": "this repository",
+        "declarations": [
+          "Stopping.brownianUsualLogBoundary_convexOn",
+          "brownianUsualStockBoundary_strictConvexOn"
+        ]
+      },
+      "known_results": [
+        "Solved by Robert Martin; the repository records the imported Lean proof."
+      ],
+      "sources": [
+        {
+          "id": "repository-resolution",
+          "title": "Repository survey and resolution record",
+          "url": "https://github.com/formal-applied-math/formal-mathfin/blob/main/docs/open-problems.md",
+          "date": null,
+          "locator": "Survey entry and closed issue #175",
+          "role": "resolution",
+          "finding": "Resolution checked against the current repository documentation and closed issue; no proof rerun in this documentation session."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-10-21",
+        "evidence_type": "repository_formal_proof",
+        "latest_openness_evidence_date": null,
+        "resolution_searches": [],
+        "nearby_results_checked": [],
+        "conclusion": "Existing solved status preserved; no new proof verification claimed."
+      },
+      "related_problems": [],
+      "issue_number": 175,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/175",
+      "history": [
+        {
+          "date": "2026-10-21",
+          "status": "solved",
+          "reason": "Imported the existing resolution record; this date is the catalogue import, not the proof date."
+        }
+      ]
+    },
+    {
+      "id": "MF-OP-007",
+      "title": "Explicit semialgebraic certificate for the full SVI no-butterfly domain",
+      "area": "stoch-vol",
+      "tags": [
+        "solved",
+        "lean"
+      ],
+      "statement": "Construct an explicit finite quantifier-free polynomial-sign formula for positivity and strike convexity of the five-parameter SVI-smiled Black–Scholes call, with the tail condition needed for a normalized call-price function.",
+      "statement_origin": "existing_repository_result",
+      "background": "Retained as a solved catalogue record, with contributor credit and proof links.",
+      "mathematical_status": "solved",
+      "difficulty": "unassessed",
+      "formalization": {
+        "status": "proved",
+        "scope": "this repository",
+        "declarations": [
+          "fullCertificateFormula_iff",
+          "extendedCertificateFormula_iff_bsSmile_convex",
+          "butterflyFreeFormula_iff_isNormalizedCallPrice"
+        ]
+      },
+      "known_results": [
+        "Solved by Robert Martin; the repository records the imported Lean proof."
+      ],
+      "sources": [
+        {
+          "id": "repository-resolution",
+          "title": "Repository survey and resolution record",
+          "url": "https://github.com/formal-applied-math/formal-mathfin/blob/main/docs/open-problems.md",
+          "date": null,
+          "locator": "Survey entry and closed issue #174",
+          "role": "resolution",
+          "finding": "Resolution checked against the current repository documentation and closed issue; no proof rerun in this documentation session."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-10-21",
+        "evidence_type": "repository_formal_proof",
+        "latest_openness_evidence_date": null,
+        "resolution_searches": [],
+        "nearby_results_checked": [],
+        "conclusion": "Existing solved status preserved; no new proof verification claimed."
+      },
+      "related_problems": [],
+      "issue_number": 174,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/174",
+      "history": [
+        {
+          "date": "2026-10-21",
+          "status": "solved",
+          "reason": "Imported the existing resolution record; this date is the catalogue import, not the proof date."
+        }
+      ]
+    },
+    {
+      "id": "MF-OP-008",
+      "title": "Uniqueness of the one-period Gaussian Kyle equilibrium",
+      "area": "execution",
+      "tags": [
+        "equilibrium",
+        "kyle",
+        "resolution-reported"
+      ],
+      "statement": "In the one-period Kyle model with independent Gaussian fundamental value and noise demand, is the affine equilibrium unique among all Borel-measurable insider strategies satisfying optimality for every observed value?",
+      "statement_origin": "source_question",
+      "background": "The older survey listed this as open. A newly located working paper reports a resolution.",
+      "mathematical_status": "resolution_reported",
+      "difficulty": "unassessed",
+      "formalization": {
+        "status": "not_started",
+        "scope": "this repository",
+        "declarations": []
+      },
+      "known_results": [
+        "Monteiro–Tourky report uniqueness without restricting insider strategies to affine ones."
+      ],
+      "sources": [
+        {
+          "id": "monteiro-tourky",
+          "title": "Monteiro–Tourky, The One-Period Gaussian Kyle Model Has Exactly One Equilibrium",
+          "url": "https://cbe.anu.edu.au/researchpapers/econ/wp708.pdf",
+          "date": "2026-08",
+          "locator": "ANU Working Paper 708, statement and abstract",
+          "role": "resolution_claim",
+          "finding": "Reports a resolution for all Borel-measurable strategies, with pointwise optimality; the proof has not been independently checked here."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-10-21",
+        "evidence_type": "unreviewed_resolution",
+        "latest_openness_evidence_date": null,
+        "resolution_searches": [
+          "\"Kyle\" \"uniqueness\" \"nonlinear\" \"2026\""
+        ],
+        "nearby_results_checked": [
+          "Continuous-time Kyle–Back uniqueness is a different question."
+        ],
+        "conclusion": "Do not publish this as an unqualified open problem. Track the reported resolution and review status separately."
+      },
+      "related_problems": [],
+      "issue_number": null,
+      "issue_url": null,
+      "history": [
+        {
+          "date": "2026-10-21",
+          "status": "resolution_reported",
+          "reason": "ANU Working Paper 708 found during the resolution search."
+        }
+      ]
+    }
+  ]
+}

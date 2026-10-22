@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Portfolio.Markowitz
 
 /-!
 # N-asset Markowitz portfolio variance (sum form)
@@ -30,7 +31,7 @@ Results:
 * `portfolioVarN_nonneg_of_psd`: if the kernel `σ` defines a non-negative
   quadratic form, then `Var(w) ≥ 0`.
 * `portfolioVarN_two_asset_compat`: when the index set has cardinality 2,
-  the explicit form matches the two-asset formula in `Markowitz.lean`.
+  the double sum is the two-asset `portfolioVarTwo` of `Markowitz.lean`.
 -/
 
 @[expose] public section
@@ -100,7 +101,7 @@ lemma portfolioVarN_nonneg_of_psd
 /-- **Two-asset compatibility**: for an index set `{0, 1} ⊆ Fin 2` with weights
 `w 0 = w` and `w 1 = 1 − w` and the covariance kernel
 `σ 0 0 = σ₁², σ 1 1 = σ₂², σ 0 1 = σ 1 0 = ρ · σ₁ · σ₂`, the n-asset variance
-matches the two-asset formula in `Markowitz.lean`. -/
+is the two-asset `portfolioVarTwo σ₁ σ₂ ρ w` of `Markowitz.lean`. -/
 lemma portfolioVarN_two_asset_compat (w σ₁ σ₂ ρ : ℝ) :
     portfolioVarN (Finset.univ : Finset (Fin 2))
         (fun i ↦ if i = 0 then w else 1 - w)
@@ -108,8 +109,8 @@ lemma portfolioVarN_two_asset_compat (w σ₁ σ₂ ρ : ℝ) :
           if i = 0 ∧ j = 0 then σ₁ ^ 2
           else if i = 1 ∧ j = 1 then σ₂ ^ 2
           else ρ * σ₁ * σ₂) =
-      w ^ 2 * σ₁ ^ 2 + (1 - w) ^ 2 * σ₂ ^ 2 + 2 * w * (1 - w) * ρ * σ₁ * σ₂ := by
-  unfold portfolioVarN
+      portfolioVarTwo σ₁ σ₂ ρ w := by
+  unfold portfolioVarN portfolioVarTwo
   rw [show (Finset.univ : Finset (Fin 2)) = {0, 1} from rfl]
   simp [Finset.sum_insert, Finset.mem_singleton, Finset.sum_singleton]
   ring

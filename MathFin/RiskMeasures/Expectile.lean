@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.RiskMeasures.Elicitability
 
 /-!
 # Expectiles
@@ -25,7 +26,22 @@ That root is the expectile (`existsUnique_expectileGap_eq_zero`).
 
 Raising the level raises the gap pointwise, since `∂/∂α = E[(Y − e)⁺] + E[(e − Y)⁺] ≥ 0`, so it
 moves the root to the right: **expectiles are nondecreasing in the level**
-(`expectile_mono`, Exercise 8.13).
+(`expectile_mono`, Exercise 8.13). At the level `1/2` the gap is `(E[Y] − e)/2`, so the
+`1/2`-expectile is the mean (`expectile_half`).
+
+For a law with finite second moment the expectile is also the forecast that minimizes the
+expected **asymmetric squared loss** `S(e, y) = α ((y − e)⁺)² + (1 − α) ((e − y)⁺)²`
+(`expectileLoss`; Newey and Powell, *Asymmetric least squares estimation and testing*,
+Econometrica 55 (1987), 819–847). The loss is strongly convex in the forecast with modulus
+`min(α, 1 − α)`, and minus half its derivative at `e` is `g = α (y − e)⁺ − (1 − α)(e − y)⁺`
+(`expectileLoss_ge`, a pointwise bound). The expectation of `g` is the gap, which vanishes at the
+expectile, so integrating the bound there gives
+`E[S(e, Y)] ≥ E[S(e_α, Y)] + min(α, 1 − α)(e − e_α)²`. Hence the loss strictly elicits the
+expectile, in the sense of `StrictlyElicits` (`RiskMeasures/Elicitability.lean`), on the laws with
+finite second moment (`strictlyElicits_expectileLoss`). The quantile is elicited by the pinball
+loss (`strictlyElicits_pinballLoss`); expected shortfall is not elicitable
+(`not_isElicitable_expectedShortfall`). Whether the expectile is a coherent risk measure for
+`α ≥ 1/2` is not treated here.
 
 ## Main results
 
@@ -34,6 +50,9 @@ moves the root to the right: **expectiles are nondecreasing in the level**
 * `existsUnique_expectileGap_eq_zero`: the expectile exists and is unique.
 * `expectile`: the `α`-expectile, and `expectileGap_expectile`.
 * `expectile_mono`: expectiles are nondecreasing in the level.
+* `expectile_half`: the `1/2`-expectile is the mean.
+* `expectileLoss`, `expectileLoss_ge`: the asymmetric squared loss and its strong convexity.
+* `strictlyElicits_expectileLoss`: the asymmetric squared loss strictly elicits the expectile.
 -/
 
 @[expose] public section
@@ -172,5 +191,100 @@ theorem expectile_mono (hY : Integrable Y P) (hα : α ∈ Ioo 0 1) {β : ℝ} (
   have := expectileGap_sub_le (α := β) hY hlt.le
   rw [expectileGap_expectile hY hβ] at this
   nlinarith [mul_pos (lt_min hβ.1 (sub_pos.2 hβ.2)) (sub_pos.2 hlt)]
+
+/-- **The `1/2`-expectile is the mean**: at the level `1/2` the gap is `(E[Y] − e)/2`
+(`expectileGap_eq`), whose root is `E[Y]`. -/
+theorem expectile_half (hY : Integrable Y P) : expectile (1 / 2) Y P = ∫ ω, Y ω ∂P := by
+  have hα : (1 / 2 : ℝ) ∈ Ioo 0 1 := ⟨by norm_num, by norm_num⟩
+  obtain ⟨r, -, hr⟩ := existsUnique_expectileGap_eq_zero hY hα
+  have hmean : expectileGap (1 / 2) Y P (∫ ω, Y ω ∂P) = 0 := by
+    rw [expectileGap_eq hY]
+    ring
+  rw [hr _ (expectileGap_expectile hY hα), hr _ hmean]
+
+/-! ### Elicitability -/
+
+/-- The **asymmetric squared loss** `S(e, y) = α ((y − e)⁺)² + (1 − α) ((e − y)⁺)²` of a forecast
+`e` for an outcome `y`. -/
+noncomputable def expectileLoss (α e y : ℝ) : ℝ :=
+  α * max (y - e) 0 ^ 2 + (1 - α) * max (e - y) 0 ^ 2
+
+/-- **The asymmetric squared loss is strongly convex in the forecast**, with modulus
+`min(α, 1 − α)`: moving the forecast from `e` to `e'` raises the loss by at least
+`−2 (e' − e) g + min(α, 1 − α)(e' − e)²`, where `g = α (y − e)⁺ − (1 − α)(e − y)⁺` is minus half
+the derivative of the loss at `e`. The four cases are the positions of `y` relative to `e` and
+`e'`. -/
+lemma expectileLoss_ge (e e' y : ℝ) :
+    min α (1 - α) * (e' - e) ^ 2 ≤
+      expectileLoss α e' y - expectileLoss α e y +
+        2 * (e' - e) * (α * max (y - e) 0 - (1 - α) * max (e - y) 0) := by
+  have h1 := min_le_left α (1 - α)
+  have h2 := min_le_right α (1 - α)
+  unfold expectileLoss
+  rcases le_total e y with hy | hy <;> rcases le_total e' y with hy' | hy'
+  · rw [max_eq_left (sub_nonneg.2 hy), max_eq_right (sub_nonpos.2 hy),
+      max_eq_left (sub_nonneg.2 hy'), max_eq_right (sub_nonpos.2 hy')]
+    nlinarith [mul_nonneg (sub_nonneg.2 h1) (sq_nonneg (e' - e))]
+  · rw [max_eq_left (sub_nonneg.2 hy), max_eq_right (sub_nonpos.2 hy),
+      max_eq_right (sub_nonpos.2 hy'), max_eq_left (sub_nonneg.2 hy')]
+    nlinarith [mul_nonneg (sub_nonneg.2 h2) (sq_nonneg (e' - y)),
+      mul_nonneg (sub_nonneg.2 h1) (sq_nonneg (y - e)),
+      mul_nonneg (mul_nonneg (sub_nonneg.2 h1) (sub_nonneg.2 hy)) (sub_nonneg.2 hy')]
+  · rw [max_eq_right (sub_nonpos.2 hy), max_eq_left (sub_nonneg.2 hy),
+      max_eq_left (sub_nonneg.2 hy'), max_eq_right (sub_nonpos.2 hy')]
+    nlinarith [mul_nonneg (sub_nonneg.2 h1) (sq_nonneg (y - e')),
+      mul_nonneg (sub_nonneg.2 h2) (sq_nonneg (e - y)),
+      mul_nonneg (mul_nonneg (sub_nonneg.2 h2) (sub_nonneg.2 hy)) (sub_nonneg.2 hy')]
+  · rw [max_eq_right (sub_nonpos.2 hy), max_eq_left (sub_nonneg.2 hy),
+      max_eq_right (sub_nonpos.2 hy'), max_eq_left (sub_nonneg.2 hy')]
+    nlinarith [mul_nonneg (sub_nonneg.2 h2) (sq_nonneg (e' - e))]
+
+/-- **The asymmetric squared loss strictly elicits the expectile**: for `α ∈ (0, 1)` and a law
+`μ` on `ℝ` with finite second moment, every expected loss `∫ S(e, y) dμ(y)` is finite and the
+`α`-expectile of `μ` is its unique minimizer. Integrating `expectileLoss_ge` at the expectile,
+where the gap vanishes, gives `E[S(e, Y)] − E[S(e_α, Y)] ≥ min(α, 1 − α)(e − e_α)² > 0` for
+`e ≠ e_α`. -/
+theorem strictlyElicits_expectileLoss (hα : α ∈ Ioo 0 1) :
+    StrictlyElicits (expectileLoss α) (fun μ ↦ expectile α id μ)
+      {μ | IsProbabilityMeasure μ ∧ MemLp id 2 μ} := by
+  rintro μ ⟨hμ, h2⟩
+  have hint : Integrable id μ := h2.integrable one_le_two
+  have hp (e : ℝ) : Integrable (fun y : ℝ ↦ max (y - e) 0) μ :=
+    (hint.sub (integrable_const e)).pos_part
+  have hn (e : ℝ) : Integrable (fun y : ℝ ↦ max (e - y) 0) μ :=
+    ((integrable_const e).sub hint).pos_part
+  have hp2 (e : ℝ) : Integrable (fun y : ℝ ↦ max (y - e) 0 ^ 2) μ :=
+    (h2.sub (memLp_const e)).pos_part.integrable_sq
+  have hn2 (e : ℝ) : Integrable (fun y : ℝ ↦ max (e - y) 0 ^ 2) μ :=
+    ((memLp_const e).sub h2).pos_part.integrable_sq
+  have hS (e : ℝ) : Integrable (expectileLoss α e) μ :=
+    ((hp2 e).const_mul α).add ((hn2 e).const_mul (1 - α))
+  refine ⟨hS, fun e he ↦ ?_⟩
+  have he' : e ≠ expectile α id μ := he
+  show ∫ y, expectileLoss α (expectile α id μ) y ∂μ < ∫ y, expectileLoss α e y ∂μ
+  set r := expectile α id μ
+  have hgap : α * ∫ y, max (y - r) 0 ∂μ - (1 - α) * ∫ y, max (r - y) 0 ∂μ = 0 :=
+    expectileGap_expectile hint hα
+  have hdiff : Integrable (fun y ↦ expectileLoss α e y - expectileLoss α r y) μ :=
+    (hS e).sub (hS r)
+  have hg : Integrable (fun y ↦ α * max (y - r) 0 - (1 - α) * max (r - y) 0) μ :=
+    ((hp r).const_mul α).sub ((hn r).const_mul (1 - α))
+  have hD : ∫ y, (expectileLoss α e y - expectileLoss α r y +
+        2 * (e - r) * (α * max (y - r) 0 - (1 - α) * max (r - y) 0)) ∂μ =
+      ∫ y, expectileLoss α e y ∂μ - ∫ y, expectileLoss α r y ∂μ := by
+    rw [integral_add hdiff (hg.const_mul _), integral_sub (hS e) (hS r), integral_const_mul,
+      integral_sub ((hp r).const_mul α) ((hn r).const_mul (1 - α)), integral_const_mul,
+      integral_const_mul, hgap, mul_zero, add_zero]
+  have hlow : min α (1 - α) * (e - r) ^ 2 ≤
+      ∫ y, expectileLoss α e y ∂μ - ∫ y, expectileLoss α r y ∂μ :=
+    calc min α (1 - α) * (e - r) ^ 2 = ∫ _, min α (1 - α) * (e - r) ^ 2 ∂μ := by simp
+      _ ≤ ∫ y, (expectileLoss α e y - expectileLoss α r y +
+            2 * (e - r) * (α * max (y - r) 0 - (1 - α) * max (r - y) 0)) ∂μ :=
+          integral_mono (integrable_const _) (hdiff.add (hg.const_mul _))
+            fun y ↦ expectileLoss_ge r e y
+      _ = _ := hD
+  have hpos : 0 < min α (1 - α) * (e - r) ^ 2 :=
+    mul_pos (lt_min hα.1 (sub_pos.2 hα.2)) (sq_pos_of_ne_zero (sub_ne_zero.2 he'))
+  linarith
 
 end MathFin

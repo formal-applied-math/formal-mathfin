@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -25,7 +25,7 @@ equivariance under the affine map `z ↦ m + σ z` (`quantile_gaussianReal`).
 ## Main results
 
 * `continuous_Phi`, `strictMono_Phi`, `Phi_mem_Ioo`: `Φ` is a continuous increasing bijection
-  `ℝ → (0, 1)`.
+  `ℝ → (0, 1)`; `measurable_Phi` is its `fun_prop` measurability.
 * `PhiInv`: the standard normal quantile function.
 * `Phi_PhiInv`, `PhiInv_Phi`: the two inverse identities.
 * `PhiInv_one_sub`: symmetry, `Φ⁻¹(1 − p) = −Φ⁻¹(p)`.
@@ -50,6 +50,9 @@ lemma cdf_gaussianReal_zero_one : ⇑(cdf (gaussianReal 0 1)) = Phi := by
 /-- `Φ` is continuous. -/
 lemma continuous_Phi : Continuous Phi :=
   continuous_iff_continuousAt.2 fun x ↦ (hasDerivAt_Phi x).continuousAt
+
+/-- `Φ` is measurable. -/
+@[fun_prop] lemma measurable_Phi : Measurable Phi := continuous_Phi.measurable
 
 /-- `Φ` is strictly increasing: its derivative, the normal density, is positive. -/
 lemma strictMono_Phi : StrictMono Phi :=

@@ -125,6 +125,328 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-21 — corpus 657, modules 625 — the coherence pass: every module connected
+
+Scope: the whole library, read for coherence, mathematical and financial, after the #248–#284
+batch. The question was whether it still grows as one formalization program or has started to
+grow around itself. The finding was the second, in one specific way: growth had started to go
+around the corpus. The values gates audit what the corpus cites, so a module nothing cites is
+invisible to them. Forty-one modules imported nothing from the library and nothing imported
+them; forty-seven more were imported by nothing and cited by no entry. They were honest, and they
+connected to nothing. Around them: `Foundations/` held models (pricing from Brownian motion,
+the Monte Carlo pricer, LSV, Hull–White calibration), seven encodings of an equivalent martingale
+measure had no bridge between them, and `EMMSet` did not require equivalence; rates and credit
+were priced under a measure the library never built, "risk-neutral" in prose only; ten modules
+were empty re-exports; the roadmap mixed strategy with a phase log, and the corpus was filed by
+chapters of a textbook that no longer described most of it. The maintainer's direction: build
+the bridges, do not quarantine.
+
+### Upgrades executed
+
+- **One graph, enforced.** `tests/test_architecture.py`: every module imports a library module
+  or is imported by one, and is imported by a module or cited by an entry; `Foundations/`
+  imports only `Foundations/`. `STAGING` admits a module only against an open issue, and it is
+  empty. Modules that joined a foundation to a model moved to `Bridges/`, models to their
+  sections; the ten stubs are deleted. The review cadence now counts modules too
+  (`REVIEW_SLACK_MODULES = 15`), and this heading carries the count it reads.
+- **A bridge for every island.** 113 entries (110 `full`, 3 `reduced_core`), two replaced;
+  corpus 544 → 657 (658 with the entry below); 20 modules added, 10 deleted, 615 → 625. What
+  each bridge proves is in `docs/coverage.md` ("Every module connected") and
+  `docs/bridges.md`.
+- **Rates under a measure the library constructs.** One Wiener bond-price lemma for Vasicek,
+  Hull–White and GSR (#287, first half); the Vasicek short rate and bond price under the
+  Girsanov measure `Q_λ` (#288); the Hull–White `S`-forward measure, with the futures–forward gap
+  of the short rate (#68, instantaneous rate only).
+- **One EMM.** `OnePeriodVector.IsEMM` is the canonical one-period notion; the scalar,
+  multi-state, two-state, discrete and sampled continuous notions are proved equivalent to it or
+  restrict to it. `EMMSet` is `martingaleProbVectors`.
+- **Statements replaced, not reworded.** `PDEFromIto`'s algebraic restatements of the
+  Black–Scholes PDE are replaced by the heat equation of the discounted call in the Brownian
+  coordinate; `MargrabeGrounding`'s existential theorems now exhibit their measure, and
+  `margrabe_exchange_price` proves Margrabe's formula as an expected payoff; the CMS "adjustment"
+  lemmas are Jensen gaps and are named so; `ItoFormulaAdaptedDrift` is in its namespace with
+  its continuity hypothesis weakened to almost sure (#290).
+- **Docs.** `docs/status.md` (one page), `docs/roadmap.md` (strategy only; the phase log is in
+  `docs/archive/`), the corpus split by area.
+
+### The standing first pass: prose against statement
+
+Five read-only reviewers read the 115 new or replaced entries against the statements they cite,
+and every docstring the pass changed. 96 entries were accurate as written. The rest, four older
+entries they cite, and 35 docstrings needed fixes, all applied. By kind:
+- **A factor wrong.** The Girsanov shift of `σ∫g dB` in the Vasicek bond entry and docstring
+  was off by `σ`.
+- **A measure read as the pricing measure.** "Risk-neutral" where the measure is the given one
+  (the Vasicek bond, the Wiener bond lemma, basket moments, the GBM log return, the binomial path
+  measure, the PDE coordinate); a `μ`-expectation called "the price under `μ`" where `μ` is the
+  real-world measure.
+- **A different object.** `gaussianLimit` called Wiener measure: it is the pre-Brownian
+  projective limit on the product space `ℝ≥0 → ℝ`. The one-factor pair law attributed to the
+  copula, which lives on `[0, 1]ⁿ`.
+- **A name that claims coverage.** "The Merton model" for `JumpDiffusionHyp`, of which the
+  Gaussian-jump `MertonHyp` is not an instance: now "Merton-type". "Affine bond prices solve the
+  PDE" for a closed form not shown to be the price.
+- **A stronger mode.** "Does not move" for an a.s. statement; "a martingale" for one
+  unconditional identity (the chooser, Glosten–Milgrom beliefs); a CLT listed as almost sure
+  convergence; purged cross-validation stated for the whole fold where the theorem is pairwise,
+  with the roles of the spans swapped; the two-asset risk-parity portfolio "the only one" where
+  the theorem is long-only.
+- **A hypothesis or convention not disclosed.** Zero recovery in the LHP tranche limit;
+  `Real.log` equal to `log|x|` at nonpositive wealth in the log-utility acceptance set; `0 < d`
+  in `BinomialNoArb`; a rate per block, not per period; a nonempty span.
+- **An understatement now false.** CreditMetrics "calibration not included" and Uniswap v3
+  "saturation not formalized", both proved today.
+- **Locators.** Föllmer–Schied "Thm 1.55" and "Thm 1.6" could not be corroborated and are §1.2
+  everywhere; AMLCR §2.4 is §§2.3–2.4; a JKB section and an AFML subsection are dropped to the
+  chapter; Bagaria's notes are cited where his examples are used.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: `margrabe_exchange_price`, Margrabe's formula as an expected
+  payoff by splitting off an independent residual. Next: compose it with
+  `exchangeOption_numeraire_price`, so the `S²`-numéraire statement is a theorem (#291).
+- **Coherence.** Exemplar: `vasicekBondPrice_girsanov`, the market price of risk through one
+  Wiener lemma and one constructed measure. Next: `eq_bivariateNormalLaw` from Mathlib's
+  `IsGaussian.ext_covarianceBilinDual` (#293); a covariance lemma for Wiener integrals, so the
+  prose that reads `⟪f, g⟫` as a covariance cites one (#297).
+- **Zero slop.** Next: reuse `integrable_bsCall_payoff` in `BarrierParity` and `Lookback` (#291);
+  one exponential-kernel integral for the three Vasicek kernels (#297).
+- **Architectural ingenuity.** Next: one law for the one-factor model, so every default identity
+  transfers in one rewrite (#293); a neutral `LognormalHyp`, with `BSCallHyp` an instance (#298).
+- **First principles.** Next: utility acceptance on positive wealth (#295); the chooser's Markov
+  step derived from `JumpDiffusionProcess.condExp_comp` (#291); `MertonHyp` an instance of
+  `JumpDiffusionHyp` (#298).
+- **Idiomatic register.** Next: `HullWhite.integratedRate` is the short rate and should be named
+  so (#297); Markowitz on `Sg *ᵥ w` (#299).
+- **Concept clarity.** Next: the CreditMetrics joint migration matrix (#293); purged
+  cross-validation at the σ-algebra level (#299); conditional attainment for the Snell envelope
+  (#301).
+- **Beautiful math.** Next: component VaR as the gradient, with the Euler allocation from
+  homogeneity (#295).
+
+### Ranked backlog
+
+1. The Student-t law, then VaR and ES at it (#285, carried).
+2. Gaussian EPE and PFE at the law, then collateralized EPE (#287, second half).
+3. Margrabe under the `S²`-numéraire measure; the chooser's step derived (#291).
+4. One-factor credit: one law, heterogeneous thresholds, recovery, joint migration (#293).
+5. Utility acceptance on positive wealth; component VaR as a gradient (#295).
+6. Rates: the Wiener covariance lemma, Hull–White names, one kernel lemma, the `Q_λ` capstone
+   (#297).
+7. `MertonHyp` as a `JumpDiffusionHyp`; a neutral lognormal hypothesis (#298).
+8. Markowitz necessity, N-asset risk parity, purged cross-validation jointly (#299).
+9. The one-period FTAP from the vector theorem; positive state prices for the forward (#300).
+10. Snell conditional attainment; the Poisson specs retired (#301).
+
+Also open from the pass: Stulz and Heynen–Kat as expected payoffs (#292), Marshall–Olkin's
+correlation and first-to-default (#294), and the DeFi pieces with no bridge yet (#296). Two
+leads were rejected as having no honest bridge: SA-CCR against Stulz (a shared quadratic form,
+no finance) and the insurance module against the premium principles (shared prose only). The
+backlogs of earlier reviews that had no issue are filed in the tracker, which is the one backlog
+(`docs/status.md`).
+
+After the panel, one entry was added and read against its statement: `mf-better-of-two-closed-form`
+(#57), a re-export of `integral_betterOfTwo`, which the pass had proved and nothing cited as a
+`full` entry. Corpus 658.
+
+### Evidence
+
+`lake build` is green locally (9,381 jobs; the only `sorry` warnings are upstream BrownianMotion
+and `Challenge.lean`), with `AxiomAudit` and `AxiomAuditGen` (771 guards) passing. The ledger
+re-verified every entry whose inputs changed: 658 fresh, none stale or missing. The python gates
+pass, `tests/test_architecture.py` included. `AxiomAuditGen`, `formalization.yaml` and the
+blueprint are regenerated at corpus 658. The Mathlib cache and the image registry were not
+reachable from this session, so the build ran from source; CI on the pushed tree is the
+canonical check.
+
+## 2026-10-21 — corpus 544 — the batch from Yang Ye, #248–#284: thirty merged, six held
+
+Scope: the thirty-six open pull requests by Yang Ye (@leafyoung), all drafts, each green on its own
+head. Thirty are merged with their commits intact; the adjustments below are follow-up commits on
+the merged tree. Seven corpus entries come in (Schwartz futures, two CreditMetrics, two calendar
+arbitrage, two SA-CCR), all `full`; corpus 537 → 544. Five read-only reviewers split the batch by
+topic (the #244 follow-ups; options; rates; risk and credit; the mixed batches). Each finding that
+was acted on was confirmed by grep or by reading the statement, and adjudicated here.
+
+### Held, not merged
+
+- **#275** re-exported two theorems of Mathlib's `Archive` (the birthday problem). It has no finance
+  content, is the first non-`module` content file, and would have leaked the Archive's global
+  `MeasureSpace (Fin n → Fin m)` instance into every `import MathFin`. The library depends on
+  Mathlib and BrownianMotion only.
+- **#284** recorded the contributor's own review process: an integration branch, local agent
+  rules, local copies of the sources. Its counts were not main's, and some of its claims were false
+  by the time it was read.
+- **#270** named a Student-t VaR and ES, but no Student-t law is built or used:
+  `studentTValueAtRisk μ σ xα := μ + σ·xα` is `gaussianVaR` with the quantile left free.
+- **#271** was bookkeeping: `runningMax` is Mathlib's `partialSups`, and the Sharpe scale law is
+  `sharpeRatio_scale_invariant`.
+- **#277** stated `rfl`, `field_simp` and `Finset.sum_comm` identities as the clean price, bond and
+  FX forwards, loan schedules and key-rate durations.
+- **#281** transcribed Hagan et al.'s eq. 2.18 as a definition; its theorems were `div_pos` and the
+  definition at `t = 0`.
+
+The same review dropped, from merged pull requests: from #272, four modules (Gaussian exposure
+profiles, collateralized exposure, DVA, FVA) whose theorems were `rfl`, `ring` or `max_le_max`
+restatements and whose prose claimed an expectation nothing stated; and from #273, the defaultable
+bond, which was `mgf_id_gaussianReal` at `−1` with the model only in prose.
+
+### The standing first pass: prose against statement
+
+The batch's prose was careful about scope in most files; the overclaims were concentrated.
+- **A benchmark description outran its statement.** `mf-schwartz-futures-price` said `ln S_T`
+  "solves the same mean-reverting SDE"; the entry proves the futures price for the Wiener
+  representation, and the SDE bridge is cited.
+- **A false generality claim.** `calendar_free_iff` called its statement "strictly more general
+  than the economic setting". Its hypothesis `hw : ∀ k t, 0 < w k t` quantified over every real
+  `t`, which with monotonicity on `ℝ` excludes every surface with `w → 0` as `t → 0⁺`, `w = σ²t`
+  included: the flat Black–Scholes surface, and the case issue #104 names. The first round
+  disclosed this; the second restated all three theorems and both entries on `t > 0`
+  (`MonotoneOn … (Ioi 0)`, positivity there only), so `w = σ²t` is covered and `full` is
+  honest.
+- **A misclassification, and the first correction overclaimed.** #279 classed the SA-CCR effective
+  notional as a `reduced_core` "only structurally analogous" to Basel's formula. In fact its
+  two-bucket form is Basel's CRE52.57 interest-rate effective notional with one bucket empty
+  (`1.4 = 2·0.7`, `0.6 = 2·0.3`). The first round of this review made the entry `full` on that
+  ground; the second prose pass caught that this, too, claimed more than the Lean, since CRE52.57
+  has three buckets and was never defined. `effNotionalIR` now defines the three-bucket formula,
+  the entry proves `effNotionalIR_le_abs_add`, and `effNotionalIR_third_zero` and
+  `effNotionalIR_second_zero` prove the reductions; `full` is honest. The README sentence #279
+  added is gone.
+- **Checks the Lean does not perform.** Heynen–Kat and Stulz claimed to be "cross-checked against"
+  QuantLib and Rmetrics; Heynen–Kat said in–out parity is not a theorem (it is
+  `knockIn_add_knockOut_eq_vanilla`) and pointed to a reflection argument `BarrierParity` does not
+  contain.
+- **Monotonicity read off a sign.** #261's prose said the call is worth less under a higher
+  dividend yield while proving only the sign of a formula; `antitone_bsVDiv_q` and
+  `monotone_bsPDiv_q` now prove it.
+- **Smaller.** #250's title promised a forward smile the file never defines. `VasicekMarketPriceOfRisk`
+  did not say its tilted measure reproduces the terminal marginal only and is not the risk-neutral
+  measure. #268 called a single obligor's threshold migration a Gaussian copula. #260 stated the
+  `ρ = −1` case and the `ρ²` dependence as if proved. Uniswap v3's "virtual" reserves were the real
+  ones (whitepaper eq. 2.2). Several equation and page numbers named no source (#253); one cited the
+  wrong author and title (#252). The source behind most of them is S. Bagaria, *Notes on Fixed
+  Income Derivative Pricing* (lecture notes), now cited in one form; where the PR history did not
+  name it, published references replace the numbers.
+- References to the contributor's process (review rounds, an integration branch, a question for
+  the maintainer, build-plan labels) are gone from shipped docstrings, and #278's own entry in this
+  log is not merged: its `corpus 541` heading parses and would have moved the freshness anchor.
+
+### Upgrades executed
+
+- **One `bivariateNormalCDF`.** #262 and #266 each defined `MathFin.bivariateNormalCDF`, and the
+  combined tree would not have built. TrancheLoss and the Gaussian copula consume
+  `Foundations/BivariateNormalCDF`; `posPart_Phi_sub_Phi` lives there once.
+- **Consume, don't copy.** Component VaR on main's `marginalVariance` and
+  `sum_riskContribution_eq_variance`; `integral_defaultDensity_zero` is
+  `Cox.defaultDensity_antideriv`; GSR's bond price on a public antiderivative of `VasicekBondPrice`
+  (it had shipped a known duplicate); `IndepFun.exp_mul` in place of two hand-built independence
+  steps; one stationary-variance limit, `tendsto_vasicekSDEVariance_atTop` in `VasicekSDE`, for
+  Schwartz (OUSpectral's private copy deleted).
+- **A theorem where the prose had one.** The Poisson–Gamma mixture is now an iterated integral
+  against `poissonMeasure` (it was the Gamma MGF at `z − 1`); `heynenKatA_rho_zero` factors the
+  two-asset barrier into a one-asset price times a barrier factor; the dividend-yield
+  monotonicity above; the subadditivity failure stated for the library's `valueAtRisk`.
+- **Definitions are not results.** Deleted `rfl` and substitution theorems
+  (`borrowRate_utilization`, `kirkSpreadPrice_eq_bsVGarman`, `fisher_identity`, two YoY
+  corollaries, five forward-skew corollaries, `indexLinkedPrice_eq`, the `portfolioPgf` product,
+  wrappers of `Submonoid.pow_mem`, `Matrix.charpoly_fin_two` and Mathlib's `condExp` API).
+- **Names.** Mathlib order throughout (`hasDerivAt_…`, `continuous_…`, `tendsto_…`, `…_nhdsNE_…`);
+  Ziegel spelled right in every identifier; the file `UniswapCurveMechanics` is `UniswapMechanics`,
+  since Curve is not formalized; `OUSpectral` moved to `Foundations/`.
+- The #244 follow-ups (#254–#257) close that review's backlog items 1 and 2 and part of 3: the
+  expectation identity holds for the constructed process with no hypothesized `M`, for `B` with
+  every path continuous (`itoDrift_expectation_identity_adaptedItoProcess`), and the bootstrap
+  induction is stated at the
+  prefix it is fed and instantiated with the FRA and swap strips.
+
+### The second prose pass
+
+At the maintainer's direction — claims of proof without Lean behind them, and disagreements
+between Lean and prose, are not traded for coverage — a second, independent panel of six read
+every docstring of the 59 modules the batch added or changed, the seven new entries, and this
+batch's docs, against the statements, after the fixes above. Two mechanical checks ran first:
+every name cited in backticks resolves to a declaration in MathFin, Mathlib or BrownianMotion
+(`abs_le`, generated by `to_additive`, and the names of Solidity contracts and a QuantLib class are
+the only non-matches), and every prose edit left the comment-stripped Lean unchanged. The pass
+changed prose in 50 Lean files. What it found, by kind:
+- **Hypotheses missing from the prose** — the most common: `κ ≠ 0` or `κ > 0`, `c ≠ 0`,
+  `T₀ > 0`, `σ, S, K > 0`, `ρ² ≤ 1`, `η² = 1`, positivity of reserves, `debt > 0`, adjacent noise
+  draws independent.
+- **Readings stated as results.** An expectation under a given measure read as "the futures
+  price" or "risk-neutral"; a defined closed form called "the price"; a Bayes ratio called a
+  conditional expectation; `ouGen` called the OU generator; "solves the SDE" for a Wiener
+  representation. Each is now labelled as a reading or an identification the library cites.
+- **Unstated lemmas.** Covariance `ρ²` of the copula, triangularity of `ouGen`, uniqueness of the
+  impermanent-loss reserves and of the kink point, continuity of Aave's kinked rate, maximality of
+  the ratio-test step, the AM–HM half of the TWAP remark: each is now said to be unproved.
+- **Names that claim more.** `kkt_optimizer_unique_of_posDef` (it states uniqueness of KKT
+  points) is `kkt_point_unique_of_posDef`; the `…_uncond` theorems, which need `hBcont`, are
+  `itoDrift_expectation_identity_adaptedItoProcess` and `…_of_adaptedItoProcess`, in
+  `ItoFormulaAdaptedDriftConstructed`; `quadraticSqSum_tendsto_uncond` (which still assumes the
+  hypothesized `M`) is `quadraticSqSum_tendsto'`; `AverageUniqueness`, which never defines the
+  average, is `LabelUniqueness`.
+- **Two corrections of this review's own first round.** The SA-CCR entry, made `full` in round
+  one, claimed CRE52.57 while proving a two-term form: `effNotionalIR` now defines the three-bucket
+  formula and the entry proves its bound. The calendar entries, disclosed in round one, are now
+  restated on `t > 0`.
+- **Main, outside the batch.** `VasicekSDEGaussian` and `mf-vasicek-sde-terminal-gaussian` said
+  the terminal law is derived "from the SDE"; what is derived is the law of the Wiener
+  representation, and that it solves the SDE is cited. The prose and the entry now say so.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: `integral_posPart_oneFactorPD_sub`, the LHP tranche loss read as a
+  conditional probability and consumed by dominated convergence along main's large-pool limit.
+  Next: the Student-t law (anchored at `ν = 1` to Mathlib's `cauchyMeasure`), so #270's VaR and ES
+  can be stated at a law.
+- **Coherence.** Exemplar: `covariance_rollPriceChange`, Roll's bid–ask bounce covariance, built
+  entirely on Mathlib's covariance and independence API. Next: `BivariateNormalCDF` on Mathlib's
+  `IsGaussian` and `multivariateGaussian`, with a `BivariateGaussianHyp` instance.
+- **Zero slop.** Next: one Wiener-integral bond-price lemma for Vasicek, Hull–White and GSR; one
+  `(k, w)` Black form for SVI, the local skew and calendar arbitrage; one linear-growth bound
+  (four copies).
+- **First principles.** Next: the Vasicek market-price-of-risk Girsanov density, which needs the
+  joint law of `(B_T, ∫₀ᵀ e^{−κ(T−s)} dB_s)`; Kirk grounded against a lognormal pseudo-asset.
+- **Idiomatic register.** Generic names in root `MathFin` (`uniqueness`, `qpObj`, `kFromPhi`) and two
+  lemmas in Mathlib's `ProbabilityTheory` namespace should move into their modules' namespaces.
+
+### Ranked backlog
+
+1. The Student-t law, then VaR and ES at it (#285; reopens #270).
+2. `BivariateNormalCDF` on Mathlib's Gaussian API; the copula bridged to the one-factor default
+   model, with one parametrization of `ρ` (#286).
+3. One Wiener-integral bond-price lemma (Vasicek, Hull–White, GSR); Gaussian EPE and PFE stated at
+   the law once (#259's `expectedExposure_gaussian`), then collateralized EPE under a margin period
+   (#287).
+4. Calendar arbitrage: generalize the martingale step to any convex payoff, and connect the
+   `t > 0` statements to the local-variance characterisation.
+5. The Vasicek Girsanov density with `vasicekBondB` as a covariance (#288); the Cox protection leg
+   as an expectation, `cox_cdf_timeVarying` with `integral_indicator_Iic_eq` (#289).
+6. Retire or demote the conditional route of `ItoFormulaAdaptedDrift`, now that
+   `_of_adaptedItoProcess` reduces it to `hBcont`; its 26 root names into a namespace (#290).
+7. The real theorems behind #277 and #281 (forward prices from `forward_price_from_no_arbitrage`,
+   #108; key-rate durations as a derivative identity, #69; the SABR `K → f` limit and backbone law,
+   #100), if those PRs come back.
+
+### Evidence
+
+`lake build` and `lake lint` are green on runners for the merged tree after each round (the
+first round's fixes, then the second pass's `effNotionalIR`, the calendar restatement and the
+renames). The ledger sweep re-verified every entry whose inputs changed: 544 fresh, none stale or
+missing. The python gates pass, including `tests/test_attribution.py` with full history;
+`.mailmap` maps Yang Ye's second address. `AxiomAuditGen` and `formalization.yaml` are
+regenerated at corpus 544.
+
+After the batch, BrownianMotion moved from `0d5b6eb` to `a7ad7af`, its master: six commits, of
+which the only Lean change reorders the variables of four lemmas in `Auxiliary/Martingale.lean`,
+none cited here. Its master pins the same Mathlib (`0434c03`), Lean (`v4.33.0-rc1`) and every
+shared dependency as this library, so Mathlib does not move. The ledger was re-verified in full
+(all 544 entries) at the new pin. Mathlib master (Lean `v4.36.0-rc1`) was checked for the gaps
+the library fills itself — the `tanh` derivative, the Gamma MGF and convolutions, `erf`/`erfinv`
+and `Φ⁻¹`, the Hermite ODE, `Lᵖ` dominated convergence, Riemann sums, the Student-t law — and
+none is filled there yet.
+
 ## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
 
 Scope: `FixedIncome/CIRRiccati` by Alfredo Garcia (@oxarbitrage), merged with its two commits
@@ -935,7 +1257,7 @@ Eleven findings; three were must-fix. All are applied, and the first is fixed by
 
 Scope: corpus 490 → 495. `Foundations/Esscher.lean` and `BlackScholes/JumpDiffusionEsscher.lean`
 are new. Two refactors make existing code consume them: `gaussianReal_withDensity_esscher` in
-`Foundations/GaussianGirsanov.lean`, and the Gaussian identification in
+`Bridges/GaussianGirsanov.lean`, and the Gaussian identification in
 `Foundations/ExpMartingaleQBrownian.lean`. One compensated-drift criterion was lifted into
 `BlackScholes/JumpDiffusionProcess.lean`. Entries: `mf-jump-diffusion-esscher-transform`,
 `mf-jump-diffusion-esscher-pricing`, `mf-merton-esscher-pricing`,
@@ -3678,7 +4000,7 @@ from it), and corpus entry `sc-ito-formula-unrestricted-local` (`full`).
 — the full mathematical content of Summit C. The Degenne-`IsLocalMartingale`-typeclass packaging is
 *deferred* (open frontier), blocked only on the parametrized-integral adaptedness of `M`; this is
 recorded consistently across the file, `AxiomAudit`, the corpus scope, `docs/coverage.md`, and
-`docs/roadmap.md`. No overclaiming remains.
+`docs/archive/roadmap-history.md`. No overclaiming remains.
 
 ## 2026-06-28 — corpus 300 — Brownian exit times: the first localizing sequence
 
@@ -4606,7 +4928,7 @@ explicit no-sorry-dependency audit; (B) does-it-earn-its-place / continuity-hypo
 honesty / scope honesty / stale docs.
 
 **Findings & resolution**:
-- **BLOCKER (honesty, stale docs)** — `docs/roadmap.md` still read "Next: **B3**"
+- **BLOCKER (honesty, stale docs)** — `docs/archive/roadmap-history.md` still read "Next: **B3**"
   as future work, and `docs/coverage.md`'s live-status block was stale (corpus
   280 / 263-ready, pre-B2). Both updated to record B2+B3 as delivered (corpus
   283 / 266-ready); `docs/blueprint.md` frontier note extended with the B3
@@ -4646,7 +4968,7 @@ continuous linear isometry. `MathFin/Foundations/ItoIntegralL2Dense.lean`
 (`itoIntegralL2`, `itoIntegralL2_norm`), corpus entry
 `sc-ito-infinite-horizon-isometry`, plus de-privatising
 `ItoIntegralCLM.setIntegral_eq_zero_of_orthogonal_pred` for reuse. Closes the
-σ-finite density gap recorded in `docs/ito-integral-clm-deferred.md`.
+σ-finite density gap recorded in `docs/archive/ito-integral-clm-deferred.md`.
 
 **Panel**: three agents over the eight lenses (slop / idiom / clarity;
 coherence / first-principles / architecture; inspired / elegant / honesty).
@@ -4666,7 +4988,7 @@ coherence / first-principles / architecture; inspired / elegant / honesty).
   `itoIntegralCLM_T`"; it is a sibling CLM reusing that file's density
   machinery, not a direct extension. Reworded.
 - **MINOR (honesty, stale docs)** — `docs/coverage.md`, `docs/blueprint.md`,
-  `docs/roadmap.md`, and the deferred-doc header still listed the
+  `docs/archive/roadmap-history.md`, and the deferred-doc header still listed the
   infinite-horizon variant as open/future. All updated to record B2 as
   delivered; the deferred doc carries a `CLOSED 2026-06-13` stamp.
 
@@ -5838,7 +6160,7 @@ Per-lens, briefly.
 
 Executed against the previous round's ranked backlog, in its order. Items 1, 3 and 5 landed;
 items 2, 4 and 6 were assessed and deliberately not attempted, each with a stated reason
-(`docs/roadmap.md` carries the reasons); item 7 stays conditional by its own terms.
+(`docs/archive/roadmap-history.md` carries the reasons); item 7 stays conditional by its own terms.
 
 Reviewed by this session against the eight lenses; single-reviewer, no agent panel.
 

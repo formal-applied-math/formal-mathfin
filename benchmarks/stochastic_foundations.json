@@ -1,0 +1,166 @@
+{
+  "description": "Results that connect the stochastic foundations to the rest of the library: the Markov property of Brownian motion as conditional freezing, Doob's decomposition and optional sampling for the discrete Snell envelope, Poisson superposition and thinning, SDE solutions, the Itô drift identity, the bivariate normal on Mathlib's Gaussian API. `chapter` is not used; each entry's `reference` names its source.",
+  "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)",
+  "theorems": [
+    {
+      "id": "mf-bivariate-normal-gaussian-characterization",
+      "name": "A Standardized Gaussian Law on ℝ² Is the Bivariate Normal",
+      "domain": "mathematical_finance",
+      "description": "If a Gaussian measure on ℝ² (Mathlib's IsGaussian) has centred coordinates with unit variances and covariance r, with r² ≤ 1, then it is the standard bivariate normal law with correlation r (the library's Cholesky construction bivariateNormalLaw r).",
+      "code": {
+        "lean": "import MathFin.Foundations.BivariateNormalCDF\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- A Gaussian law on `ℝ²` with centred, unit-variance coordinates and covariance `r` is\n`bivariateNormalLaw r`. -/\ntheorem gaussian_eq_bivariateNormalLaw {μ : Measure (ℝ × ℝ)} [IsGaussian μ] {r : ℝ}\n    (hr : r ^ 2 ≤ 1) (h₁ : ∫ q, q.1 ∂μ = 0) (h₂ : ∫ q, q.2 ∂μ = 0)\n    (v₁ : Var[Prod.fst; μ] = 1) (v₂ : Var[Prod.snd; μ] = 1)\n    (hc : cov[Prod.fst, Prod.snd; μ] = r) :\n    μ = bivariateNormalLaw r :=\n  MathFin.eq_bivariateNormalLaw hr h₁ h₂ v₁ v₂ hc\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "P. Billingsley, Probability and Measure, 3rd ed. (1995), §29 (the multivariate normal law is determined by its mean and covariance)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.eq_bivariateNormalLaw (MathFin/Foundations/BivariateNormalCDF.lean). SCOPE: both measures are Gaussian and have equal characteristic functions (Mathlib's IsGaussian.charFunDual_eq' and Measure.ext_of_charFunDual): the mean and the variance of every continuous linear functional agree. Stated for centred unit-variance coordinates only; the general mean–covariance case on ℝ² is Mathlib's IsGaussian.ext_covarianceBilinDual."
+      }
+    },
+    {
+      "id": "mf-hoeffding-bivariate-normal",
+      "name": "Hoeffding's Covariance Identity at the Bivariate Normal",
+      "domain": "mathematical_finance",
+      "description": "For r ∈ [−1, 1], the standard bivariate normal CDF N₂(s, t; r) satisfies ∫∫ (N₂(s, t; r) − Φ(s)Φ(t)) ds dt = r.",
+      "code": {
+        "lean": "import MathFin.Foundations.HoeffdingCovariance\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- Hoeffding's identity at the standard bivariate normal law. -/\ntheorem hoeffding_bivariateNormal {r : ℝ} (hr : r ^ 2 ≤ 1) :\n    ∫ p : ℝ × ℝ, (bivariateNormalCDF p.1 p.2 r - Phi p.1 * Phi p.2) = r :=\n  MathFin.integral_bivariateNormalCDF_sub_mul hr\n\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Höffding (1940); MFE (2015) Lemma 7.27",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.integral_bivariateNormalCDF_sub_mul (MathFin/Foundations/HoeffdingCovariance.lean). SCOPE: Hoeffding's identity covariance_fst_snd_eq_integral at the Cholesky law bivariateNormalLaw r, whose covariance is r (covariance_fst_snd_bivariateNormalLaw) and whose margins are standard normal."
+      }
+    },
+    {
+      "id": "mf-brownian-markov-condexp",
+      "name": "Markov Property of Brownian Motion as a Conditional Expectation",
+      "domain": "brownian_motion",
+      "description": "For a pre-Brownian motion X with measurable sections and a fixed time t₀: for every σ(X_u : u ≤ t₀)-measurable Y and every strongly measurable g with g(Y, future increment path) integrable, E[g(Y, (X_{t₀+t} − X_{t₀})_t) | σ(X_u : u ≤ t₀)] = ∫ g(Y, x) dW(x) almost surely, W being gaussianLimit, the law of pre-Brownian motion on the product space of all paths ℝ≥0 → ℝ (Degenne's projective limit, not Wiener measure on continuous paths). This is the simple Markov property at a deterministic time, for the natural (unaugmented) filtration; the strong Markov property at stopping times is not proved.",
+      "code": {
+        "lean": "import MathFin.Foundations.BrownianMarkov\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- The Markov property of a pre-Brownian motion as a conditional expectation: given the\nnatural filtration at `t₀`, a functional `g(Y, ·)` of an `𝓕ᵉ_{t₀}`-measurable `Y` and of the\nfuture increment path integrates the path against `gaussianLimit`, the pre-Brownian law on\n`ℝ≥0 → ℝ`.\nRe-export of `MathFin.condExp_shift_eq_integral_gaussianLimit`. -/\ntheorem brownian_markov_condExp {Ω α : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {X : ℝ≥0 → Ω → ℝ} (h : IsPreBrownianReal X P) (hX : ∀ t, Measurable (X t)) (t₀ : ℝ≥0)\n    {mα : MeasurableSpace α} {Y : Ω → α}\n    (hY : Measurable[Filtration.natural X (fun t ↦ (hX t).stronglyMeasurable) t₀] Y)\n    {g : α × (ℝ≥0 → ℝ) → ℝ} (hg : StronglyMeasurable g)\n    (hgi : Integrable (fun ω ↦ g (Y ω, fun t ↦ X (t₀ + t) ω - X t₀ ω)) P) :\n    P[fun ω ↦ g (Y ω, fun t ↦ X (t₀ + t) ω - X t₀ ω) |\n        Filtration.natural X (fun t ↦ (hX t).stronglyMeasurable) t₀]\n      =ᵐ[P] fun ω ↦ ∫ x, g (Y ω, x) ∂gaussianLimit :=\n  MathFin.condExp_shift_eq_integral_gaussianLimit h hX t₀ hY hg hgi\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "I. Karatzas and S. E. Shreve, Brownian Motion and Stochastic Calculus, 2nd ed., Springer (1991), §2.5 (the Markov property); S. E. Shreve, Stochastic Calculus for Finance II, Springer (2004), Lemma 2.3.4 (independence lemma)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.condExp_shift_eq_integral_gaussianLimit (MathFin/Foundations/BrownianMarkov.lean). The σ-algebra independence of the post-t₀ increment path from the natural filtration (shift_indep_natural) is fed to the conditional freezing lemma condExp_comp_prodMk_of_indep (MathFin/Foundations/IndepFreezing.lean); the law of the increment path is gaussianLimit because the shifted process is pre-Brownian (IsPreBrownianReal.shift, IsPreBrownianReal.hasLaw_gaussianLimit). SCOPE: deterministic time t₀ only (no strong Markov property); natural filtration, not its augmentation; no path continuity of X assumed or used."
+      }
+    },
+    {
+      "id": "mf-snell-doob-decomposition",
+      "name": "Doob Decomposition of the Finite-Horizon Snell Envelope",
+      "domain": "martingales",
+      "description": "For an adapted integrable reward Z on a filtered probability space and a horizon N, the Bellman value U_i = max(Z_i, E[U_{i+1} | F_i]) (finiteBellman, frozen at Z_N after N) is M + A with M a martingale and A predictable, A_0 = 0, the pair unique up to a.e. equality; A is almost surely nonincreasing, and at each step i < N it almost surely does not move on the event Z_i < U_i. The characterization of the optimal stopping times through A is not stated.",
+      "code": {
+        "lean": "import MathFin.Bridges.BellmanDoobDecomposition\n\nopen MeasureTheory ProbabilityTheory MathFin.BlackScholes.AmericanPut.Stopping\n\n/-- The finite-horizon Snell envelope `U = finiteBellman P 𝓕 Z N` has a Doob decomposition\n`U = M + A` (martingale plus predictable `A` with `A 0 = 0`), unique up to a.e. equality; its\ncompensator is a.e. nonincreasing and does not move at a step `i < N` taken where `Z i < U i`.\nRe-export of `finiteBellman_doob_decomposition`. -/\ntheorem snell_envelope_doob_decomposition {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}\n    [IsProbabilityMeasure P] {𝓕 : Filtration ℕ ‹MeasurableSpace Ω›} {Z : ℕ → Ω → ℝ}\n    (ha : Adapted 𝓕 Z) (hi : ∀ i, Integrable (Z i) P) (N : ℕ) :\n    ∃ M A : ℕ → Ω → ℝ,\n      (Martingale M 𝓕 P ∧ (StronglyAdapted 𝓕 fun n ↦ A (n + 1)) ∧ A 0 = 0 ∧\n        M + A = finiteBellman P 𝓕 Z N) ∧\n      (∀ᵐ ω ∂P, Antitone fun n ↦ A n ω) ∧\n      (∀ i < N, ∀ᵐ ω ∂P, Z i ω < finiteBellman P 𝓕 Z N i ω → A (i + 1) ω = A i ω) ∧\n      ∀ M' A' : ℕ → Ω → ℝ, Martingale M' 𝓕 P → (StronglyAdapted 𝓕 fun n ↦ A' (n + 1)) →\n        A' 0 = 0 → (∀ n, Integrable (A' n) P) → M' + A' = finiteBellman P 𝓕 Z N →\n        ∀ n, M' n =ᵐ[P] M n ∧ A' n =ᵐ[P] A n :=\n  finiteBellman_doob_decomposition ha hi N\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "D. Lamberton and B. Lapeyre, Introduction to Stochastic Calculus Applied to Finance, 2nd ed., Chapman & Hall/CRC (2008), §2.3 (decomposition of supermartingales and the Snell envelope)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.BlackScholes.AmericanPut.Stopping.finiteBellman_doob_decomposition (MathFin/Bridges/BellmanDoobDecomposition.lean). Witnesses are Mathlib's martingalePart and predictablePart of U; uniqueness is doob_decomposition_unique (MathFin/Foundations/DoobDecomposition.lean); monotonicity of the compensator from the supermartingale property of U (finiteBellman_supermartingale); constancy on the continuation region from the Bellman recursion finiteBellman_recursion. SCOPE: discrete time, finite horizon; the largest optimal stopping time (first time A decreases) is not derived."
+      }
+    },
+    {
+      "id": "mf-snell-optional-sampling",
+      "name": "Optional Sampling for the Finite-Horizon Snell Envelope",
+      "domain": "stopping_times",
+      "description": "For an adapted integrable reward Z, a horizon N, the Bellman value U = finiteBellman (U_i = max(Z_i, E[U_{i+1} | F_i])), and stopping times σ ≤ τ with τ ≤ N: E[Z_τ | F_σ] ≤ U_σ almost surely. That U_σ equals the supremum of these conditional expected rewards (attainment) is not stated here.",
+      "code": {
+        "lean": "import MathFin.Bridges.BellmanDoobDecomposition\n\nopen MeasureTheory ProbabilityTheory MathFin.BlackScholes.AmericanPut.Stopping\n\n/-- At a stopping time `σ`, the finite-horizon Snell envelope dominates the conditional\nexpected reward of every later stopping time `τ ≤ N`: `𝔼[Z_τ | 𝓕_σ] ≤ U_σ` a.s. Re-export of\n`condExp_stoppedValue_le_finiteBellman`. -/\ntheorem snell_envelope_optional_sampling {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}\n    [IsProbabilityMeasure P] {𝓕 : Filtration ℕ ‹MeasurableSpace Ω›} {Z : ℕ → Ω → ℝ}\n    (ha : Adapted 𝓕 Z) (hi : ∀ i, Integrable (Z i) P) {N : ℕ} {σ τ : Ω → ℕ∞}\n    (hσ : IsStoppingTime 𝓕 σ) (hτ : IsStoppingTime 𝓕 τ) (hστ : σ ≤ τ) (hτN : ∀ ω, τ ω ≤ N) :\n    P[stoppedValue Z τ | hσ.measurableSpace]\n      ≤ᵐ[P] stoppedValue (finiteBellman P 𝓕 Z N) σ :=\n  condExp_stoppedValue_le_finiteBellman ha hi hσ hτ hστ hτN\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "D. Lamberton and B. Lapeyre, Introduction to Stochastic Calculus Applied to Finance, 2nd ed., Chapman & Hall/CRC (2008), §2.2 (the Snell envelope)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.BlackScholes.AmericanPut.Stopping.condExp_stoppedValue_le_finiteBellman (MathFin/Bridges/BellmanDoobDecomposition.lean). The optional sampling inequality submartingale_optional_sampling (MathFin/Foundations/OptionalSamplingInequality.lean) for the submartingale −U gives E[U_τ | F_σ] ≤ U_σ; pathwise dominance Z_τ ≤ U_τ (finiteBellman_dominates, τ ≤ N) and condExp_mono finish. SCOPE: the domination half of the Snell characterization at stopping times; attainment is proved elsewhere only at time 0 and in expectation (E[Z at the first contact time] = E[U_0]: finiteBellmanContact_expected_payoff, finiteBellmanContact_optimal) and is not part of this entry; conditional attainment at a stopping time σ is not proved."
+      }
+    },
+    {
+      "id": "mf-poisson-merged-arrivals",
+      "name": "Superposition of Arrival-Time Poisson Counts (One-Time Marginal)",
+      "domain": "poisson_processes",
+      "description": "If ξ and η are families of i.i.d. Exp(r₁) and Exp(r₂) interarrival times, the two families independent of each other, and N₁, N₂ are the counting processes they generate, then for every t ≥ 0 the merged count N₁(t) + N₂(t) has the Poisson((r₁ + r₂)t) law. Only the one-time marginal is proved: that the merged count is a Poisson process (independent increments, exponential merged interarrival times) is not.",
+      "code": {
+        "lean": "import MathFin.Foundations.PoissonSuperposition\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- Two counting processes built from independent families of i.i.d. `Exp(r₁)` and `Exp(r₂)`\ninterarrival times merge into a count with the `Poisson((r₁ + r₂)·t)` law at every `t ≥ 0`.\nRe-export of `MathFin.PoissonSuperposition.map_add_count_eq_poissonMeasure`. -/\ntheorem merged_arrival_count_poisson {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {r₁ r₂ : ℝ≥0} (hr₁ : 0 < r₁) (hr₂ : 0 < r₂) {ξ η : ℕ → Ω → ℝ}\n    (hξm : ∀ i, Measurable (ξ i)) (hηm : ∀ i, Measurable (η i))\n    (hξ0 : ∀ i ω, 0 ≤ ξ i ω) (hη0 : ∀ i ω, 0 ≤ η i ω)\n    (hξlaw : ∀ i, μ.map (ξ i) = expMeasure r₁) (hηlaw : ∀ i, μ.map (η i) = expMeasure r₂)\n    (hξind : iIndepFun ξ μ) (hηind : iIndepFun η μ)\n    (hξη : IndepFun (fun ω i ↦ ξ i ω) (fun ω i ↦ η i ω) μ) {N₁ N₂ : ℝ → Ω → ℕ}\n    (hN₁ : ∀ t k ω, N₁ t ω = k ↔\n      (∑ i ∈ Finset.range k, ξ i ω) ≤ t ∧ t < ∑ i ∈ Finset.range (k + 1), ξ i ω)\n    (hN₂ : ∀ t k ω, N₂ t ω = k ↔\n      (∑ i ∈ Finset.range k, η i ω) ≤ t ∧ t < ∑ i ∈ Finset.range (k + 1), η i ω)\n    {t : ℝ} (ht : 0 ≤ t) :\n    μ.map (fun ω ↦ N₁ t ω + N₂ t ω) = poissonMeasure ((r₁ + r₂) * ⟨t, ht⟩) :=\n  MathFin.PoissonSuperposition.map_add_count_eq_poissonMeasure hr₁ hr₂ hξm hηm hξ0 hη0 hξlaw\n    hηlaw hξind hηind hξη hN₁ hN₂ ht\n"
+      },
+      "metadata": {
+        "chapter": 3,
+        "reference": "Saporito, Theorem 3.3.9 (superposition), one-time marginal of the arrival-time construction of Theorem 3.3.5",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.PoissonSuperposition.map_add_count_eq_poissonMeasure (MathFin/Foundations/PoissonSuperposition.lean). Both marginals Poisson(r_i t) are derived from the constructions by PoissonCounting.map_count_eq_poissonMeasure (MathFin/Foundations/PoissonCounting.lean); the counts are independent because each is measurable for the σ-algebra of its own interarrival family (measurable_count_comap); the sum law is Mathlib's Poisson convolution through indepFun_map_add_poissonMeasure. SCOPE: one time t; process-level superposition not proved."
+      }
+    },
+    {
+      "id": "mf-poisson-thinning-iid-marks",
+      "name": "Thinning a Poisson Count by I.I.D. Marks",
+      "domain": "poisson_processes",
+      "description": "Let N have the Poisson(r) law, let Y 0, Y 1, … be i.i.d. marks independent of N, and let A be a measurable set of marks with p = P(Y 0 ∈ A). Then the number of the first N marks lying in A and the number lying in Aᶜ are independent, with laws Poisson(p·r) and Poisson((1 − p)·r). The binomial marking law is derived from the i.i.d. marks (the count of the first n marks in A is Binomial(n, p)), not assumed. Stated for one count, not for Poisson processes.",
+      "code": {
+        "lean": "import MathFin.Foundations.PoissonThinning\n\nopen MeasureTheory ProbabilityTheory MathFin.PoissonThinning\nopen scoped NNReal\n\n/-- Thinning a `Poisson(r)` count `N` by i.i.d. marks `Y i` independent of `N`: the number of\nthe first `N` marks in a measurable set `A` and the number in `Aᶜ` are independent, with laws\n`Poisson(p·r)` and `Poisson((1 − p)·r)`, `p = P(Y 0 ∈ A)`. Re-export of\n`MathFin.PoissonThinning.thinned_streams_of_iid_marks`. -/\ntheorem poisson_thinning_iid_marks {Ω α : Type*} {mΩ : MeasurableSpace Ω} {mα : MeasurableSpace α}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] {r : ℝ≥0} {N : Ω → ℕ} {Y : ℕ → Ω → α}\n    {A : Set α} (hA : MeasurableSet A) (hN : HasLaw N (poissonMeasure r) μ)\n    (hY : ∀ i, Measurable (Y i)) (hind : iIndepFun Y μ)\n    (hid : ∀ i, IdentDistrib (Y i) (Y 0) μ μ) (hNY : IndepFun N (fun ω i ↦ Y i ω) μ) :\n    μ.map (fun ω ↦ marksIn Y A (N ω) ω) = poissonMeasure ((μ (Y 0 ⁻¹' A)).toNNReal * r) ∧\n      μ.map (fun ω ↦ marksIn Y Aᶜ (N ω) ω)\n        = poissonMeasure ((1 - (μ (Y 0 ⁻¹' A)).toNNReal) * r) ∧\n      IndepFun (fun ω ↦ marksIn Y A (N ω) ω) (fun ω ↦ marksIn Y Aᶜ (N ω) ω) μ :=\n  thinned_streams_of_iid_marks hA hN hY hind hid hNY\n"
+      },
+      "metadata": {
+        "chapter": 3,
+        "reference": "Saporito, Theorem 3.3.10 (thinning), with the marking mechanism derived from i.i.d. marks",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.PoissonThinning.thinned_streams_of_iid_marks (MathFin/Foundations/PoissonThinning.lean). The event {(M, K) = (j, k)} is {N = j + k} ∩ {exactly j of the first j + k marks in A}; independence of N from the marks splits its probability; measure_marksIn_eq gives C(n, j) p^j (1 − p)^{n−j} by summing the iIndepFun product formula over the j-subsets of range n; thinned_streams₀ then derives the two laws and their independence. SCOPE: a single Poisson count and its marks; no time parameter."
+      }
+    },
+    {
+      "id": "mf-sde-picard-pathwise",
+      "name": "Picard Fixed Point of an SDE: Almost-Everywhere Pathwise Decomposition",
+      "domain": "stochastic_differential_equations",
+      "description": "For dX = b(X)dt + σ(X)dB with Lipschitz b, σ, a pre-Brownian B with continuous paths, and the short-horizon condition T·L_b + √T·L_σ < 1, the Picard fixed point X ∈ Lp 2 (trimMeasure_T T) satisfies X(t, ω) = η(t, ω) + driftContinuousMod(b∘X)_t(ω) + itoContinuousMod(σ∘X)_t(ω) for almost every (t, ω) on the trimmed space–time product; and for each t ≤ T, almost surely, the drift term is the time integral over (0, t] of the representative ⇑(lipComp b X) of the class b∘X. Not proved: an identity at every t almost surely, path continuity or adaptedness of a representative of X, or the per-path integral ∫₀ᵗ b(X_s(ω)) ds.",
+      "code": {
+        "lean": "import MathFin.Foundations.SDEPathwise\n\nopen MeasureTheory ProbabilityTheory MathFin.SDEExistence MathFin.ItoIntegralL2\n  MathFin.ItoIntegralCLM MathFin.ItoIntegralProcessContinuousModification\nopen scoped NNReal\n\n/-- The Picard fixed point `X ∈ Lp 2 (trimMeasure_T T)` of `dX = b(X)dt + σ(X)dB` equals, for\nalmost every `(t, ω)`, `η + driftContinuousMod(b∘X) + itoContinuousMod(σ∘X)`, and for each\n`t ≤ T` the drift term is a.s. `∫_{(0,t]}` of the representative `⇑(lipComp b X)`.\nRe-export of `sde_pathwise_decomposition` and `sde_pathwise_drift_eq_setIntegral`. -/\ntheorem picard_fixed_point_pathwise {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (T : ℝ≥0)\n    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)\n    {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)\n    (η_E : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))\n    (hc : (T : ℝ) * Lb + Real.sqrt (T : ℝ) * Lσ < 1) :\n    (⇑(picardSolution hB T hBmeas hBcont hb hσ η_E hc)\n      =ᵐ[trimMeasure_T (μ := μ) T hBmeas]\n      fun z ↦ ⇑η_E z\n        + Function.uncurry (driftContinuousMod T hBmeas\n            (lipComp T hBmeas b Lb hb (picardSolution hB T hBmeas hBcont hb hσ η_E hc))) z\n        + Function.uncurry (itoContinuousMod T hBmeas\n            (lipComp T hBmeas σ Lσ hσ (picardSolution hB T hBmeas hBcont hb hσ η_E hc))) z) ∧\n    ∀ t ≤ T, ∀ᵐ ω ∂μ, driftContinuousMod T hBmeas\n        (lipComp T hBmeas b Lb hb (picardSolution hB T hBmeas hBcont hb hσ η_E hc)) t ω\n      = ∫ s in Set.Ioc (0 : ℝ≥0) t,\n        ⇑(lipComp T hBmeas b Lb hb (picardSolution hB T hBmeas hBcont hb hσ η_E hc)) (s, ω)\n          ∂timeMeasure :=\n  ⟨sde_pathwise_decomposition hB T hBmeas hBcont hb hσ η_E hc,\n    fun _ ht ↦ sde_pathwise_drift_eq_setIntegral hB T hBmeas hBcont hb hσ η_E hc ht⟩\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Saporito Thm 8.2.5 (strong solutions of SDEs), Picard construction in L²; B. Øksendal, Stochastic Differential Equations, 6th ed., Springer (2003), Thm 5.2.1",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.SDEExistence.sde_pathwise_decomposition and sde_pathwise_drift_eq_setIntegral (MathFin/Foundations/SDEPathwise.lean). The fixed-point equation X = Φ(X) in E is sliced through Lp.coeFn_add and the realization identities driftProcessAssembled_coeFn and memLp_itoContinuousMod.coeFn_toLp; the drift identity is driftContinuousMod_eq_setIntegral at lipComp b X. SCOPE: named for what it proves, an a.e. decomposition on the space–time product; it is not the textbook strong-solution statement (a continuous adapted process satisfying the integral equation for all t a.s.), and only for the short horizon of the contraction."
+      }
+    },
+    {
+      "id": "mf-ito-drift-expectation-constructed",
+      "name": "Integrated Itô–Drift Identity for the Constructed Itô Process",
+      "domain": "stochastic_calculus",
+      "description": "For B a pre-Brownian motion with every path continuous, β and δ bounded, adapted to the natural filtration of B and path-continuous, the Itô process X = c + ∫ β ds + ∫ δ dB constructed at horizon T (adaptedItoProcess), and f twice differentiable with f'' continuous and f', f'' bounded: for every τ ≤ T, E[f(X_τ)] = f(c) + ∫₀^τ (E[f'(X_s) β_s] + ½ E[f''(X_s) δ_s²]) ds. Unbounded coefficients, unbounded f' or f'', time-dependent f and a random starting point are not covered.",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoFormulaAdaptedDriftConstructed\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralL2 MathFin.ItoFormulaAdapted\nopen scoped NNReal\n\n/-- The integrated Itô–drift identity `𝔼[f(X_τ)] = f c + ∫₀^τ (𝔼[f'(X_s)β_s] + ½𝔼[f''(X_s)δ_s²]) ds`\nat every `τ ≤ T` for the constructed Itô process `X = c + ∫ β ds + ∫ δ dB` (horizon `T`).\nRe-export of `MathFin.itoDrift_expectation_identity_adaptedItoProcess_of_le`. -/\ntheorem ito_drift_expectation_constructed {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)\n    {T : ℝ≥0} {δ β : ℝ≥0 → Ω → ℝ} {Dd Db : ℝ}\n    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))\n    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω) (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)\n    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))\n    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω) (hβbdd : ∀ t ω, |β t ω| ≤ Db)\n    (c : ℝ) {f f' f'' : ℝ → ℝ} (hf : ∀ x, HasDerivAt f (f' x) x)\n    (hf' : ∀ x, HasDerivAt f' (f'' x) x) (hf''c : Continuous f'')\n    {C1 C2 : ℝ} (hg1 : ∀ x, |f' x| ≤ C1) (hg2 : ∀ x, |f'' x| ≤ C2) {τ : ℝ≥0} (hτ : τ ≤ T) :\n    ∫ ω, f (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)\n      c β τ ω) ∂μ\n      = f c + ∫ s in Set.Ioc (0 : ℝ≥0) τ,\n          ((∫ ω, f' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)\n              c β s ω) * β s ω ∂μ)\n            + (1 / 2) * (∫ ω, f'' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap\n              hδcont hδbdd) c β s ω) * (δ s ω * δ s ω) ∂μ)) ∂timeMeasure :=\n  itoDrift_expectation_identity_adaptedItoProcess_of_le hBmeas hδadap hδcont hδbdd hB hBcont\n    hβadap hβcont hβbdd c hf hf' hf''c hg1 hg2 hτ\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "B. Øksendal, Stochastic Differential Equations, 6th ed., Springer (2003), §7.4 (Dynkin's formula; here the expectation form for an Itô process with bounded adapted coefficients); Saporito Ch 7",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.itoDrift_expectation_identity_adaptedItoProcess_of_le (MathFin/Foundations/ItoFormulaAdaptedDriftConstructed.lean). At the horizon T the identity is the expectation of ItoFormulaAdapted.ito_formula_adapted (centering of the Itô integral and Fubini at a bounded predictable weight); at τ < T the horizon-T Itô term frozen at τ is a version of the horizon-τ Itô process (ae_eq_itoProcessCLM_min, itoProcessCLM_eq_terminal_of_ge in MathFin/Foundations/ItoIntegralCrossHorizon.lean), and the version theorem itoDrift_expectation_identity_adapted_of_adaptedItoProcess at horizon τ applies. SCOPE: deterministic times τ ≤ T (not stopping times), bounded coefficients with continuous paths, f ∈ C² with bounded f', f''."
+      }
+    },
+    {
+      "id": "mf-ito-drift-expectation-discrete-route",
+      "name": "Integrated Itô–Drift Identity by the Discrete Itô Formula, at the Constructed Process",
+      "domain": "stochastic_calculus",
+      "description": "For B a pre-Brownian motion with every path continuous, bounded natural-filtration-adapted path-continuous β, δ, the constructed Itô process X = c + ∫ β ds + ∫ δ dB at horizon T, and f three times differentiable with f', f'', f''' bounded: E[f(X_T)] = f(c) + ∫₀ᵀ (E[f'(X_s) β_s] + ½ E[f''(X_s) δ_s²]) ds, derived from the discrete Itô formula on uniform partitions. The conclusion is that of mf-ito-drift-expectation-constructed at τ = T under a stronger hypothesis on f; what is new is the route, which applies because the constructed Itô term (frozen after T) is natural-filtration-adapted, a.e. equal to the Itô integral at every time and almost surely path-continuous.",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoFormulaAdaptedDriftConstructed\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralL2 MathFin.ItoFormulaAdapted\nopen scoped NNReal\n\n/-- The discrete-Itô-formula route (`ItoDriftConditional.itoDrift_expectation_identity_adapted`)\napplied to the constructed Itô process, whose frozen Itô term meets its hypotheses:\n`𝔼[f(X_T)] = f c + ∫₀ᵀ (𝔼[f'(X_s)β_s] + ½𝔼[f''(X_s)δ_s²]) ds` for `f` with `f'`, `f''`,\n`f'''` bounded. Re-export of `MathFin.itoDrift_expectation_identity_adapted_at_adaptedItoProcess`. -/\ntheorem ito_drift_expectation_discrete_route {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)\n    {T : ℝ≥0} {δ β : ℝ≥0 → Ω → ℝ} {Dd Db : ℝ}\n    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))\n    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω) (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)\n    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))\n    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω) (hβbdd : ∀ t ω, |β t ω| ≤ Db)\n    (c : ℝ) {f f' f'' f''' : ℝ → ℝ} (hf : ∀ x, HasDerivAt f (f' x) x)\n    (hf' : ∀ x, HasDerivAt f' (f'' x) x) (hf'' : ∀ x, HasDerivAt f'' (f''' x) x)\n    {C1 C2 C3 : ℝ} (hg1 : ∀ x, |f' x| ≤ C1) (hg2 : ∀ x, |f'' x| ≤ C2)\n    (hg3 : ∀ x, |f''' x| ≤ C3) :\n    ∫ ω, f (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)\n      c β T ω) ∂μ\n      = f c + ∫ s in Set.Ioc (0 : ℝ≥0) T,\n          ((∫ ω, f' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap hδcont hδbdd)\n              c β s ω) * β s ω ∂μ)\n            + (1 / 2) * (∫ ω, f'' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hδadap\n              hδcont hδbdd) c β s ω) * (δ s ω * δ s ω) ∂μ)) ∂timeMeasure :=\n  itoDrift_expectation_identity_adapted_at_adaptedItoProcess hBmeas hδadap hδcont hδbdd hB\n    hBcont hβadap hβcont hβbdd c hf hf' hf'' hg1 hg2 hg3\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Saporito Ch 7 (Itô formula via the discrete Taylor expansion on partitions); B. Øksendal, Stochastic Differential Equations, 6th ed., Springer (2003), §7.4 (Dynkin's formula)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.itoDrift_expectation_identity_adapted_at_adaptedItoProcess (MathFin/Foundations/ItoFormulaAdaptedDriftConstructed.lean), which applies MathFin.ItoDriftConditional.itoDrift_expectation_identity_adapted (MathFin/Foundations/ItoFormulaAdaptedDrift.lean: per-path discrete Itô formula, martingale kill, weighted increment isometry, Taylor-remainder and cross-term limits) to M t = itoContinuousMod φ (t ∧ T): adapted by itoContinuousMod_isStronglyPredictable, pinned to the Itô process by itoContinuousMod_min_ae_eq_itoProcessCLM, a.s. path-continuous by itoContinuousMod_continuousOn. SCOPE: horizon T only; f''' bounded; the discrete route alone also covers a B without continuous paths, for which the library constructs no version M."
+      }
+    }
+  ]
+}

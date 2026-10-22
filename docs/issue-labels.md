@@ -11,6 +11,13 @@ triaging work. Labels should answer four questions:
 Use `good first issue` and `help wanted` as public entry-point labels on top of
 the taxonomy when the task is ready for outside contributors.
 
+Use `open-problem` for a sourced mathematical research-problem record. Retain
+it when the problem is solved so closed issues remain discoverable. An unresolved
+catalogue question uses `type:research` and `status:research`; a concrete Lean
+implementation gets a separate linked `type:proof` issue. Mathematical status
+and formalization status are recorded independently in the
+[research catalogue](research-problems/README.md).
+
 Colors are consistent per dimension so an issue's labels read at a glance:
 `area:*` share one hue, `type:*` another, while `difficulty:*` and `status:*`
 use a semantic scale (green → amber → red).
@@ -64,6 +71,7 @@ cross-cutting.
 |---|---|---|
 | `status:needs-triage` | New issue that has not been classified yet. | human |
 | `status:needs-info` | Waiting on clarification before work should start. | human |
+| `status:research` | Sourced mathematical question under research, outside the `status:ready` implementation queue. | human |
 | `status:ready` | Scoped enough for a contributor to pick up. | human, or the pipeline on release |
 | `status:in-progress` | Someone is actively working on it. | human, or the pipeline on seed |
 | `status:blocked-upstream` | Blocked on Mathlib, BrownianMotion, or another external project. | human |
@@ -78,7 +86,7 @@ drifted from reality, and the pipeline re-drafted work it had already queued. Th
 fix was to stop keeping a private record: **the issue is now the state machine, and
 everything the pipeline stores locally is a cache of it.**
 
-So the pipeline moves an issue between three of the seven statuses:
+So the pipeline moves an issue between three of the eight statuses:
 
 | transition | when |
 |---|---|
@@ -92,8 +100,8 @@ Three consequences worth knowing when you triage:
 - **A label may move without a human touching it.** If an issue you filed is
   suddenly `status:in-progress` with nobody assigned, a machine drafted a statement
   for it. Nothing has been merged — see below.
-- **The four other statuses are yours alone, and the pipeline will not overrule
-  them.** `status:blocked-design` in particular looks identical to "ready" from the
+- **The pre-existing manual statuses are yours alone, and the pipeline will not
+  overrule them.** `status:blocked-design` in particular looks identical to "ready" from the
   machine's side (no PR, no stub), so it is explicitly excluded: parking an issue
   there reliably keeps it out of the pipeline. An issue with *no* status label is
   likewise never promoted — the pipeline repairs its own writes, it does not decide
@@ -116,6 +124,7 @@ corrects itself rather than needing a manual fix.
 | Prove a new Black-Scholes Greek | `area:black-scholes`, `type:proof`, `difficulty:medium`, `status:ready` |
 | Generalize an Itô-formula hypothesis | `area:foundations`, `type:proof`, `difficulty:hard`, `status:ready` |
 | Draft an upstream BrownianMotion issue | `area:foundations`, `type:research`, `difficulty:hard`, `status:blocked-upstream` |
+| Catalogue a sourced unresolved mathematical question | `open-problem`, one `area:*`, `type:research`, `difficulty:hard`, `status:research` |
 | Fix a failing build workflow | `area:ci`, `type:bug`, `difficulty:medium`, `status:ready` |
 
 ## Bootstrap commands

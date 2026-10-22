@@ -279,6 +279,14 @@ REVIEW_HEADER_RE = re.compile(
     re.MULTILINE,
 )
 REVIEW_SLACK_ENTRIES = 12
+# Since 2026-10-21 a review heading also records the module count ("— corpus 544, modules 610
+# —"): a batch of 42 modules arrived with 7 entries, so counting entries alone let most of a
+# batch go unreviewed.
+REVIEW_MODULES_RE = re.compile(
+    r"^## \d{4}-\d{2}-\d{2}\b.*?— corpus \d+, modules (\d+)",
+    re.MULTILINE,
+)
+REVIEW_SLACK_MODULES = 15
 
 
 def test_values_review_is_current() -> None:
@@ -297,6 +305,16 @@ def test_values_review_is_current() -> None:
         "(docs/values-review.md) and record the verdict before pushing more "
         "proof content."
     )
+    reviewed_modules = [int(m.group(1)) for m in REVIEW_MODULES_RE.finditer(text)]
+    if reviewed_modules:
+        modules = sum(1 for p in Path("MathFin").rglob("*.lean") if not p.name.startswith("."))
+        newest_modules = max(reviewed_modules)
+        assert modules - newest_modules <= REVIEW_SLACK_MODULES, (
+            f"MathFin/ has {modules} modules but the latest recorded values review covered "
+            f"{newest_modules}, more than {REVIEW_SLACK_MODULES} modules of unreviewed growth. "
+            "Run the values review (docs/values-review.md) and record the verdict, with the "
+            "module count in its heading, before pushing more proof content."
+        )
 
 
 # --------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -18,8 +18,9 @@ public import MathFin.Foundations.ItoIsometryAdapted
 public import MathFin.Foundations.ItoIntegralBrownian
 public import MathFin.Foundations.QuadraticVariationL2
 public import MathFin.Foundations.GaussianMoments
+public import MathFin.Foundations.AdaptedDrift
 
-/-! # The integrated Itô–drift identity for adapted coefficients
+/-! # The integrated Itô–drift identity for adapted coefficients: the discrete route
 
 The bounded-adapted case of the integrated Itô–drift identity — the expectation form of
 Itô's formula along an Itô process with random coefficients,
@@ -27,59 +28,67 @@ Itô's formula along an Itô process with random coefficients,
   `𝔼[f(X_T)] = 𝔼[f(X_0)] + ∫₀ᵀ (𝔼[f'(X_s)·β_s] + ½·𝔼[f''(X_s)·δ_s²]) ds`,
 
 for `β, δ` bounded, `natFiltration`-adapted and path-continuous, and `f` three times
-differentiable with `f'`, `f''`, `f'''` bounded. `M` and `X` are hypotheses: a `natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every
-`t ≥ 0` (`hMeq`, the process values of `itoProcessCLM` at the σ-realization `processToLp δ`),
-and an `X` with `X t = c + ∫₀ᵗ β_s ds + M t` (`hXrel`) whose every path is continuous
-(`hXcont`), which forces every path of `M` to be continuous.
+differentiable with `f'`, `f''`, `f'''` bounded, proved from the discrete Itô formula on uniform
+partitions. `M` and `X` are hypotheses: a `natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for
+every `t ≥ 0` (`hMeq`, the process values of `itoProcessCLM` at the σ-realization
+`processToLp δ`), and an `X` with `X t = c + ∫₀ᵗ β_s ds + M t` (`hXrel`) whose paths are
+continuous almost surely (`hXcont`). `B` is a pre-Brownian motion with measurable sections; its
+paths need not be continuous.
 
-That is a conditional theorem: no lemma in the library supplies such an `M` for general `δ`.
-`exists_continuous_modification_itoProcess` is continuous only almost surely, and the
-everywhere-continuous modification `exists_continuous_localMartingale_modification` is adapted
-only to the augmented filtration `augFiltration`. For the process the library does construct,
-the pathwise formula is `ItoFormulaAdapted.ito_formula_adapted`. The constant-coefficient case
-is `ItoDriftExpectation`, proved there separately.
+## Relation to the constructed process
+
+The hypotheses are met by the process the library constructs. When every path of `B` is
+continuous, the Itô term `itoContinuousMod` of `ItoFormulaAdapted.adaptedItoProcess`, frozen
+after the horizon `T`, is `natFiltration`-adapted, pinned to `δ●B` at every time, and almost
+surely path-continuous; so `itoDrift_expectation_identity_adapted` applies to the constructed
+process (`itoDrift_expectation_identity_adapted_at_adaptedItoProcess` in
+`ItoFormulaAdaptedDriftConstructed`). That module also derives the same identity from the
+pathwise formula `ItoFormulaAdapted.ito_formula_adapted` by centering and Fubini, with weaker
+hypotheses on `f` (no third derivative), and for every version `M` of `δ●B`
+(`itoDrift_expectation_identity_adapted_of_adaptedItoProcess`). The two derivations are
+independent: this file never uses the pathwise formula. What the statement here covers beyond
+them is a `B` whose paths are not all continuous; for such a `B` no lemma in the library supplies
+an `M` satisfying the hypotheses.
 
 Route: the per-path discrete Itô formula (`MathFin.discrete_ito_formula`) at the grid
 values of `X`, integrated over `Ω`; the first-order martingale terms die exactly
 (`mul_trueIncr_expect_eq_zero`, the martingale property of the adapted Itô integral
 transferred along the a.e. `hMeq`); the drift block converges by pathwise Riemann–Stieltjes
 sums + DCT + the Fubini interchange (`driftBlock_tendsto`); the quadratic block converges by
-the summed weighted increment isometry (`quadraticSqSum_tendsto_uncond`, discharged from its
+the summed weighted increment isometry (`quadraticSqSum_tendsto'`, discharged from its
 conditional form by the step-approximant `L²` convergence `deltaStepLp_tendsto`); the
 drift² corrections (`quadDriftSqSum_tendsto`), the drift–martingale cross corrections
 (`quadCrossSum_tendsto`) and the Taylor remainder (the cubic bound + the third-moment
 estimate, `taylorRemainderSum_tendsto`, `trueIncr_pow3_le`) tend to `0` — the proofs bound
-them by `O(mesh)`, `O(√mesh)` and `O(√mesh)`; only the limits are stated.
+them by `O(mesh)`, `O(√mesh)` and `O(√mesh)`; only the limits are stated. Path continuity of
+`X` enters only through dominated convergence and the Fubini interchange
+(`expectation_pathIntegral_eq_of_ae`), so almost sure continuity suffices.
 
-Main result: `MathFin.itoDrift_expectation_identity_adapted`. Supporting layers, bottom-up:
-`bandIntegral_slice` (the band-to-slice conversion; the Fubini interchange
-`expectation_pathIntegral_eq` comes from `ItoDriftExpectation`), `incrementEnergy` (the
-increment-energy law), `deltaStepLp`/`deltaStepLp_tendsto` (the step approximants), the per-cell
-weighted isometry (`weightedCellSq_step`, `clm_band_energy`, `stepIncr_stepCLM_ae`), the gap
-decay (`errorIncr_ae`, `cellGap_le`, `gapSum_le`) and the unconditional quadratic block, the
+Supporting layers, bottom-up: `bandIntegral_slice` (the band-to-slice conversion; the Fubini
+interchange `expectation_pathIntegral_eq` comes from `ItoDriftExpectation`), `incrementEnergy`
+(the increment-energy law), `deltaStepLp`/`deltaStepLp_tendsto` (the step approximants), the
+per-cell weighted isometry (`weightedCellSq_step`, `clm_band_energy`, `stepIncr_stepCLM_ae`), the
+gap decay (`errorIncr_ae`, `cellGap_le`, `gapSum_le`) and the quadratic block with its gap
+hypothesis discharged (`quadraticSqSum_tendsto'`, for the hypothesized `M`), the
 fourth/third-moment bounds (`stepSum_pow4_le`, `trueIncr_pow4_le`, `trueIncr_pow3_le`),
-the drift primitive (`driftPrim`, `driftPrim_adapted`, `driftPrim_continuous`), the drift
+the drift primitive (`AdaptedDrift.driftPath` reused, with its adaptedness
+`stronglyMeasurable_driftPath`, from `Foundations/AdaptedDrift`), the drift
 block, the two quadratic corrections and the Taylor-remainder convergence.
 
 ## Result
 
-Headline: `itoDrift_expectation_identity_adapted` — the integrated Itô–drift identity
-stated above, for bounded adapted path-continuous coefficients, under the hypotheses on `M`
-and `X` above. Public supporting layers (all `MathFin.*`):
+All public names are in the namespace `MathFin.ItoDriftConditional`.
 
-* foundations: `integral_mul_condExp_eq`, `memLp_M`, `incrementEnergy` (the increment
+* `itoDrift_expectation_identity_adapted` — the identity above, conditional on `M` and `X`.
+* Foundations: `integral_mul_condExp_eq`, `memLp_M`, `incrementEnergy` (the increment
   isometry), `weightedCellSq_step` (the per-cell weighted isometry), the step approximants
-  `deltaStepLp` / `deltaStepLp_tendsto`;
-* convergence blocks: `driftBlock_tendsto` (with the drift primitive `driftPrim`,
-  `driftPrim_adapted`, `driftSum_expect_tendsto`), `quadraticSqSum_tendsto` /
-  `quadraticSqSum_tendsto_uncond`
-  (via `gapSum_le`), the exact martingale kill `mul_trueIncr_expect_eq_zero`, the
-  Taylor bound `taylorRemainderSum_tendsto` (`trueIncr_pow3_le`, `trueIncr_pow4_le`,
-  `trueIncr_pow4_integrable`), and the dying corrections `quadDriftSqSum_tendsto` /
-  `quadCrossSum_tendsto`.
-
-Also public, and not used by the headline: `driftPrim_continuous`, `driftOscSum_tendsto`,
-`driftPath_add`, `abs_driftPath_sub_le`, `frozenRiemann_tendsto`.
+  `deltaStepLp` / `deltaStepLp_tendsto`.
+* Convergence blocks: `driftBlock_tendsto` (with the drift primitive `AdaptedDrift.driftPath`
+  and `driftSum_expect_tendsto`), `quadraticSqSum_tendsto` / `quadraticSqSum_tendsto'`
+  (via `gapSum_le` and the mean-function Riemann limit `frozenRiemann_tendsto`), the exact
+  martingale kill `mul_trueIncr_expect_eq_zero`, the Taylor bound `taylorRemainderSum_tendsto`
+  (`trueIncr_pow3_le`, `trueIncr_pow4_le`, `trueIncr_pow4_integrable`), and the dying
+  corrections `quadDriftSqSum_tendsto` / `quadCrossSum_tendsto`.
 
 The constant-coefficient case and the Fubini interchange are `ito_drift_expectation_identity`
 and `expectation_pathIntegral_eq` in `ItoDriftExpectation`.
@@ -92,42 +101,40 @@ Everything else in the file is `private` scaffolding.
 open MeasureTheory ProbabilityTheory Filter Topology
 open scoped NNReal
 
-namespace MathFin
+namespace MathFin.ItoDriftConditional
 
 open MathFin ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessGeneral
   QuadraticVariationL2 ItoIntegralBrownian
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
 
-/-- Telescoping over a partition: `∑_{k<n} (a_{k+1} − a_k) = a_n − a_0`. -/
-private theorem sum_telescope (a : ℕ → ℝ) (n : ℕ) :
-    ∑ k ∈ Finset.range n, (a (k + 1) - a k) = a n - a 0 := by
-  induction n with
-  | zero => simp
-  | succ m ih => rw [Finset.sum_range_succ, ih]; ring
-
 /-! ### Stage 2 — the bounded *adapted* coefficients (`β`, `δ` random)
+
+(Stage 1, the constant-coefficient identity, is `ito_drift_expectation_identity` in
+`MathFin/Foundations/ItoDriftExpectation`.)
 
 The integrated Itô–drift identity for an Itô process with random adapted coefficients.
 The data: a pre-Brownian motion `B` with measurable sections (path continuity of `B` is not
-assumed), bounded adapted path-continuous `β, δ`, and, as hypotheses, `M` and `X` are hypotheses: a `natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every
+assumed), bounded adapted path-continuous `β, δ`, and two hypothesized processes: a
+`natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every
 `t ≥ 0` (`hMeq`, the process values of `itoProcessCLM` at the σ-realization `processToLp δ`),
-and an `X` with `X t = c + ∫₀ᵗ β_s ds + M t` (`hXrel`) whose every path is continuous
-(`hXcont`), which forces every path of `M` to be continuous.
-No lemma in the library supplies such an `M` for general `δ` (see the module docstring).
+and an `X` with `X t = c + ∫₀ᵗ β_s ds + M t` (`hXrel`) whose paths are continuous almost surely
+(`hXcont`). For `B` with continuous paths, the constructed Itô process provides such an `M` (see
+the module docstring).
 
 `ΔX` over a cell splits into the drift increment plus the martingale increment. The proof is
 the partition/Taylor skeleton of `ItoFormulaC2` at the path `k ↦ X_{tₖ}`
 (`MathFin.discrete_ito_formula` — an exact per-path identity), with the three terms
 dispatched by: pathwise Riemann sums (drift), the summed weighted increment isometry at the
-adapted weight `f''(X)` (martingale square), and a cubic-moment bound (Taylor remainder). Taking expectations turns
+adapted weight `f''(X)` (martingale square), and a cubic-moment bound (Taylor remainder).
+Taking expectations turns
 the pathwise identity into the integrated one; the drift integral crosses the expectation by
 the stage-1 Fubini lemma `expectation_pathIntegral_eq`.
 
 The per-cell second moments `E[(M_v−M_u)²]` come from the martingale property of `M`
 (inherited a.e. from `itoProcessCLM`) and the time-indexed Itô isometry
-`itoProcessCLM_norm_sq`. The blocks use `M` through `hMeq` and `hMadap`; path continuity
-enters through the hypothesis `hXcont`. -/
+`itoProcessCLM_norm_sq`. The blocks use `M` through `hMeq` and `hMadap`; almost sure path
+continuity enters through the hypothesis `hXcont`. -/
 
 section Adapted
 
@@ -170,113 +177,6 @@ private theorem integral_sq_add {α : Type*} {mα : MeasurableSpace α} {ν : Me
       = ∫ ω, a ω ^ 2 ∂ν + 2 * ∫ ω, a ω * b ω ∂ν := by
     rw [integral_add ha2 (hab.const_mul 2), integral_const_mul]
   rw [h1, h2]
-
-set_option maxHeartbeats 1000000 in
-/-- **The terminal cross-isometry** (polarization of the terminal Itô isometry): the `L²`
-pairing of two predictable integrands equals the expectation of the product of their Itô
-integrals, `𝔼[(∫₀ᵀ p dB)·(∫₀ᵀ q dB)] = ⟨p, q⟩_{L²(trim)}`. Route: the Itô integral is
-linear, so `I(p+q)² = (Ip + Iq)²` a.e.; expanding that square under the expectation and the
-`L²` norm `‖p+q‖²` under the integral, and matching the two against the isometry
-`itoIntegralCLM_T_norm`, pins the cross term. -/
-private theorem crossTerminal_isometry (p q : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    ∫ ω, itoIntegralCLM_T hB T hBmeas p ω * itoIntegralCLM_T hB T hBmeas q ω ∂μ
-      = ∫ z, (p : ℝ≥0 × Ω → ℝ) z * (q : ℝ≥0 × Ω → ℝ) z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
-  have hpair : Integrable (fun z : ℝ≥0 × Ω ↦ (p : ℝ≥0 × Ω → ℝ) z * (q : ℝ≥0 × Ω → ℝ) z)
-      (trimMeasure_T (μ := μ) T hBmeas) := (Lp.memLp p).integrable_mul (Lp.memLp q)
-  -- the terminal isometry read as an integral identity, at `r` and at `p + q`
-  have hI2 : ∀ r : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      ∫ ω, itoIntegralCLM_T hB T hBmeas r ω ^ 2 ∂μ = ‖r‖ ^ 2 := by
-    intro r
-    rw [sqIntegral_of_Lp (itoIntegralCLM_T hB T hBmeas r),
-      itoIntegralCLM_T_norm hB T hBmeas r]
-  -- `I(p+q)` = `I p + I q` a.e. (linearity of the Itô integral as an Lp map)
-  have haddae : (fun ω ↦ itoIntegralCLM_T hB T hBmeas (p + q) ω)
-      =ᵐ[μ] (fun ω ↦ itoIntegralCLM_T hB T hBmeas p ω + itoIntegralCLM_T hB T hBmeas q ω) := by
-    filter_upwards [Lp.coeFn_add (itoIntegralCLM_T hB T hBmeas p)
-      (itoIntegralCLM_T hB T hBmeas q)] with ω hω
-    have h1 : itoIntegralCLM_T hB T hBmeas (p + q) ω
-        = (itoIntegralCLM_T hB T hBmeas p
-            + itoIntegralCLM_T hB T hBmeas q : Lp ℝ 2 μ) ω := by
-      rw [map_add]
-    rw [h1, hω]
-    simp only [Pi.add_apply]
-  -- expansion A: the expectation side
-  have hEexpand : ∫ ω, (itoIntegralCLM_T hB T hBmeas p ω
-        + itoIntegralCLM_T hB T hBmeas q ω) ^ 2 ∂μ
-      = ∫ ω, itoIntegralCLM_T hB T hBmeas p ω ^ 2 ∂μ
-        + 2 * ∫ ω, itoIntegralCLM_T hB T hBmeas p ω * itoIntegralCLM_T hB T hBmeas q ω ∂μ
-        + ∫ ω, itoIntegralCLM_T hB T hBmeas q ω ^ 2 ∂μ :=
-    integral_sq_add (a := fun ω ↦ itoIntegralCLM_T hB T hBmeas p ω)
-      (b := fun ω ↦ itoIntegralCLM_T hB T hBmeas q ω)
-      (Lp.memLp _).integrable_sq (Lp.memLp _).integrable_sq
-      ((Lp.memLp (itoIntegralCLM_T hB T hBmeas p)).integrable_mul
-        (Lp.memLp (itoIntegralCLM_T hB T hBmeas q)))
-  -- expansion B: the norm side
-  have hNexpand : ‖p + q‖ ^ 2
-      = ∫ z, (p : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas)
-        + 2 * ∫ z, (p : ℝ≥0 × Ω → ℝ) z * (q : ℝ≥0 × Ω → ℝ) z ∂(trimMeasure_T (μ := μ) T hBmeas)
-        + ∫ z, (q : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) := by
-    have hsquare : (fun z : ℝ≥0 × Ω ↦ (p : ℝ≥0 × Ω → ℝ) z + (q : ℝ≥0 × Ω → ℝ) z) ^ 2
-        = fun z ↦ (p : ℝ≥0 × Ω → ℝ) z ^ 2 + 2 * (p : ℝ≥0 × Ω → ℝ) z * (q : ℝ≥0 × Ω → ℝ) z
-            + (q : ℝ≥0 × Ω → ℝ) z ^ 2 := by
-      funext z
-      simp only [Pi.pow_apply]
-      ring
-    have hsqae : (fun z : ℝ≥0 × Ω ↦
-          ((p + q : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2)
-        =ᵐ[trimMeasure_T (μ := μ) T hBmeas]
-          (fun z : ℝ≥0 × Ω ↦
-            ((fun z : ℝ≥0 × Ω ↦ (p : ℝ≥0 × Ω → ℝ) z + (q : ℝ≥0 × Ω → ℝ) z) z) ^ 2) := by
-      filter_upwards [Lp.coeFn_add p q] with z hz
-      simp only [hz, Pi.add_apply]
-    calc ‖p + q‖ ^ 2
-        = ∫ z, ((p + q : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
-            ∂(trimMeasure_T (μ := μ) T hBmeas) := lp_two_norm_sq _
-      _ = ∫ z, ((fun z : ℝ≥0 × Ω ↦ (p : ℝ≥0 × Ω → ℝ) z + (q : ℝ≥0 × Ω → ℝ) z) z) ^ 2
-            ∂(trimMeasure_T (μ := μ) T hBmeas) := integral_congr_ae hsqae
-      _ = ∫ z, (p : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas)
-            + 2 * ∫ z, (p : ℝ≥0 × Ω → ℝ) z * (q : ℝ≥0 × Ω → ℝ) z
-                ∂(trimMeasure_T (μ := μ) T hBmeas)
-            + ∫ z, (q : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) :=
-            integral_sq_add (a := fun z ↦ (p : ℝ≥0 × Ω → ℝ) z)
-              (b := fun z ↦ (q : ℝ≥0 × Ω → ℝ) z)
-              (Lp.memLp p).integrable_sq (Lp.memLp q).integrable_sq hpair
-  -- match: `E[(Ip + Iq)²] = ‖p+q‖²` through the two expansions
-  have hEnorm : ∫ ω, itoIntegralCLM_T hB T hBmeas p ω ^ 2 ∂μ
-      + 2 * ∫ ω, itoIntegralCLM_T hB T hBmeas p ω * itoIntegralCLM_T hB T hBmeas q ω ∂μ
-      + ∫ ω, itoIntegralCLM_T hB T hBmeas q ω ^ 2 ∂μ
-      = ∫ z, (p : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas)
-        + 2 * ∫ z, (p : ℝ≥0 × Ω → ℝ) z * (q : ℝ≥0 × Ω → ℝ) z ∂(trimMeasure_T (μ := μ) T hBmeas)
-        + ∫ z, (q : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) := by
-    calc ∫ ω, itoIntegralCLM_T hB T hBmeas p ω ^ 2 ∂μ
-        + 2 * ∫ ω, itoIntegralCLM_T hB T hBmeas p ω * itoIntegralCLM_T hB T hBmeas q ω ∂μ
-        + ∫ ω, itoIntegralCLM_T hB T hBmeas q ω ^ 2 ∂μ
-        = ∫ ω, (itoIntegralCLM_T hB T hBmeas p ω
-            + itoIntegralCLM_T hB T hBmeas q ω) ^ 2 ∂μ := hEexpand.symm
-      _ = ∫ ω, itoIntegralCLM_T hB T hBmeas (p + q) ω ^ 2 ∂μ := by
-          have hsq : (fun ω ↦ (itoIntegralCLM_T hB T hBmeas p ω
-                + itoIntegralCLM_T hB T hBmeas q ω) ^ 2)
-              =ᵐ[μ] (fun ω ↦ itoIntegralCLM_T hB T hBmeas (p + q) ω ^ 2) := by
-            filter_upwards [haddae] with ω hω
-            show (itoIntegralCLM_T hB T hBmeas p ω + itoIntegralCLM_T hB T hBmeas q ω) ^ 2
-                = itoIntegralCLM_T hB T hBmeas (p + q) ω ^ 2
-            rw [hω]
-          exact integral_congr_ae hsq
-      _ = ‖p + q‖ ^ 2 := hI2 (p + q)
-      _ = ∫ z, (p : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas)
-            + 2 * ∫ z, (p : ℝ≥0 × Ω → ℝ) z * (q : ℝ≥0 × Ω → ℝ) z
-                ∂(trimMeasure_T (μ := μ) T hBmeas)
-            + ∫ z, (q : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) :=
-          hNexpand
-  -- the four isometries collapse the squares, leaving the cross terms equal
-  have hEp : ∫ ω, itoIntegralCLM_T hB T hBmeas p ω ^ 2 ∂μ = ‖p‖ ^ 2 := hI2 p
-  have hEq : ∫ ω, itoIntegralCLM_T hB T hBmeas q ω ^ 2 ∂μ = ‖q‖ ^ 2 := hI2 q
-  have hEpq : ∫ z, (p : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) = ‖p‖ ^ 2 :=
-    (lp_two_norm_sq p).symm
-  have hEqq : ∫ z, (q : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) = ‖q‖ ^ 2 :=
-    (lp_two_norm_sq q).symm
-  rw [hEp, hEq, hEpq, hEqq] at hEnorm
-  linarith [hEnorm]
 
 /-- **The band-slice conversion**: for a bounded adapted path-continuous `ψ`, the
 `(u,v]`-band integral of its uncurried form over the predictable trim measure equals the
@@ -396,7 +296,7 @@ The data: a pre-Brownian `B` with measurable sections; bounded adapted path-cont
 `β, δ`; and the hypothesized `M` — a `natFiltration`-strongly-adapted *version* of the Itô
 integral of `δ` (`M t =ᵐ (δ●B)_t` for every `t`, the CLM process values of the σ-realization
 `processToLp δ`). The process under test, `X t = c + ∫₀ᵗ β_s ds + M t`, is likewise a
-hypothesis (`hXrel`), and its path continuity is assumed (`hXcont`).
+hypothesis (`hXrel`), and its paths are assumed continuous almost surely (`hXcont`).
 
 * `integral_mul_condExp_eq` — the expectation pull-out `𝔼[h · g] = 𝔼[h · 𝔼[g | 𝓕]]`;
 * `incrementEnergy` — the unweighted increment isometry `𝔼[(M_v − M_u)²] = ∫_{(u,v]} δ² d(trim)`
@@ -424,93 +324,6 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
     (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
 
 include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- The pathwise drift integral splits over the time scale: `∫₀^v = ∫₀^u + ∫_{(u,v]}`
-for `u ≤ v` (`timeMeasure`-form; `(0,u]` and `(u,v]` are exactly disjoint). -/
-theorem driftPath_add {β : ℝ≥0 → Ω → ℝ} (hbcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
-    {Db : ℝ} (hbdd : ∀ s ω, |β s ω| ≤ Db) {u v : ℝ≥0} (huv : u ≤ v) (ω : Ω) :
-    (∫ s in Set.Ioc 0 v, β s ω ∂ItoIntegralL2.timeMeasure)
-      = ∫ s in Set.Ioc 0 u, β s ω ∂ItoIntegralL2.timeMeasure
-        + ∫ s in Set.Ioc u v, β s ω ∂ItoIntegralL2.timeMeasure := by
-  have hβm : Measurable (fun s : ℝ≥0 ↦ β s ω) := hbcont ω |>.measurable
-  have hintOf : ∀ w : Set ℝ≥0, IsFiniteMeasure (ItoIntegralL2.timeMeasure.restrict w) →
-      IntegrableOn (fun s : ℝ≥0 ↦ β s ω) w ItoIntegralL2.timeMeasure := by
-    intro w _
-    refine Integrable.of_bound
-      (μ := ItoIntegralL2.timeMeasure.restrict w)
-      ⟨fun z : ℝ≥0 ↦ β z ω, hβm.stronglyMeasurable,
-        Eventually.of_forall fun _ ↦ rfl⟩ Db ?_
-    exact Eventually.of_forall fun z ↦ by simpa [Real.norm_eq_abs] using hbdd z ω
-  haveI hfin0 : IsFiniteMeasure
-      (ItoIntegralL2.timeMeasure.restrict (Set.Ioc 0 u)) :=
-    ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
-      ItoIntegralL2.timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
-  haveI hfinv : IsFiniteMeasure
-      (ItoIntegralL2.timeMeasure.restrict (Set.Ioc u v)) :=
-    ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
-      ItoIntegralL2.timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
-  have hint0 : IntegrableOn (fun s : ℝ≥0 ↦ β s ω) (Set.Ioc 0 u)
-      ItoIntegralL2.timeMeasure := hintOf _ hfin0
-  have hintv : IntegrableOn (fun s : ℝ≥0 ↦ β s ω) (Set.Ioc u v)
-      ItoIntegralL2.timeMeasure := hintOf _ hfinv
-  have hunion : Set.Ioc 0 u ∪ Set.Ioc u v = Set.Ioc 0 v :=
-    Set.Ioc_union_Ioc_eq_Ioc (by norm_num : (0:ℝ≥0) ≤ u) huv
-  rw [← hunion]
-  exact setIntegral_union
-    (Set.disjoint_left.2 fun a ha hb ↦ by
-      have h1 : (u : ℝ) < (a : ℝ) := by exact_mod_cast hb.1
-      have h2 : (a : ℝ) ≤ (u : ℝ) := by exact_mod_cast ha.2
-      linarith) measurableSet_Ioc hint0 hintv
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- The pathwise drift integral is **Lipschitz in `t`, uniformly in `ω`**, with constant
-the `β`-bound: `|∫₀^v β − ∫₀^u β| ≤ D_β·|v − u|`. The cell increments of the drift block
-are `O(mesh)`. -/
-theorem abs_driftPath_sub_le {β : ℝ≥0 → Ω → ℝ} (hbcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
-    {Db : ℝ} (hbdd : ∀ s ω, |β s ω| ≤ Db) (u v : ℝ≥0) (ω : Ω) :
-    |(∫ s in Set.Ioc 0 v, β s ω ∂ItoIntegralL2.timeMeasure)
-      - ∫ s in Set.Ioc 0 u, β s ω ∂ItoIntegralL2.timeMeasure| ≤ Db * |(v : ℝ) - u| := by
-  have hβm : Measurable (fun s : ℝ≥0 ↦ β s ω) := hbcont ω |>.measurable
-  -- bound of the indicator integral of `β` over a cell `(a,b]` by `D_β·(b−a)`
-  have hcell : ∀ a b : ℝ≥0, a ≤ b →
-      |∫ z, (Set.Ioc a b).indicator (fun s : ℝ≥0 ↦ β s ω) z
-      ∂ItoIntegralL2.timeMeasure| ≤ Db * ((b : ℝ) - a) := by
-    intro a b hab
-    have hint1 : Integrable ((Set.Ioc a b).indicator (1 : ℝ≥0 → ℝ))
-        ItoIntegralL2.timeMeasure := by
-      rw [integrable_indicator_iff measurableSet_Ioc]
-      exact integrableOn_const (hs := ne_of_lt (by
-        rw [ItoIntegralL2.timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top))
-    have hintB : Integrable (fun z : ℝ≥0 ↦
-        Db * (Set.Ioc a b).indicator (1 : ℝ≥0 → ℝ) z) ItoIntegralL2.timeMeasure :=
-      hint1.const_mul Db
-    refine le_trans MeasureTheory.abs_integral_le_integral_abs ?_
-    refine le_trans (integral_mono_of_nonneg
-      (Eventually.of_forall fun z ↦ abs_nonneg _) hintB ?_) ?_
-    · filter_upwards with z
-      by_cases hz : z ∈ Set.Ioc a b
-      · rw [Set.indicator_of_mem hz, Set.indicator_of_mem hz]
-        simpa using hbdd z ω
-      · rw [Set.indicator_of_notMem hz, Set.indicator_of_notMem hz]; norm_num
-    · rw [integral_const_mul, integral_indicator_one measurableSet_Ioc, measureReal_def,
-        ItoIntegralL2.timeMeasure_Ioc,
-        ENNReal.toReal_ofReal (sub_nonneg.mpr (by linarith [NNReal.coe_le_coe.mpr hab]))]
-  rcases le_total u v with huv | hvu
-  · rw [driftPath_add hbcont hbdd huv ω, add_sub_cancel_left, ← integral_indicator
-      (μ := ItoIntegralL2.timeMeasure) (f := fun s : ℝ≥0 ↦ β s ω) measurableSet_Ioc,
-      abs_of_nonneg (show (0 : ℝ) ≤ (v : ℝ) - (u : ℝ) by
-        linarith [NNReal.coe_le_coe.mp huv])]
-    exact hcell u v huv
-  · have hsub : (∫ s in Set.Ioc 0 v, β s ω ∂ItoIntegralL2.timeMeasure)
-        - ∫ s in Set.Ioc 0 u, β s ω ∂ItoIntegralL2.timeMeasure
-        = -(∫ s in Set.Ioc v u, β s ω ∂ItoIntegralL2.timeMeasure) := by
-      rw [driftPath_add hbcont hbdd hvu ω]; ring
-    rw [hsub, abs_neg, ← integral_indicator
-      (μ := ItoIntegralL2.timeMeasure) (f := fun s : ℝ≥0 ↦ β s ω) measurableSet_Ioc,
-      abs_of_nonpos (show (v : ℝ) - (u : ℝ) ≤ 0 by
-        linarith [NNReal.coe_le_coe.mp hvu])]
-    exact (hcell v u hvu).trans (by rw [neg_sub])
 
 /-! #### Stage 3 foundations — the expectation pull-out and the increment-energy law -/
 
@@ -739,9 +552,9 @@ theorem deltaStepLp_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measu
     congr 1
     rw [map_sub, hstep n]
   have hbridge := itoIntegralCLM_T_of_bdd_adapted_cont hB hBmeas hδadap hδcont hδbdd T
-  refine Metric.tendsto_atTop.mpr fun ε hε => ?_
+  refine Metric.tendsto_atTop.mpr fun ε hε ↦ ?_
   obtain ⟨N, hN⟩ := Metric.tendsto_atTop.mp hbridge ε hε
-  refine ⟨N, fun n hn => ?_⟩
+  refine ⟨N, fun n hn ↦ ?_⟩
   have hN' := hN n hn
   rw [dist_eq_norm] at hN'
   rw [key n, dist_eq_norm, sub_zero, Real.norm_eq_abs,
@@ -854,7 +667,7 @@ private lemma itoSimpleProcess_stepσ_incr {B : ℝ≥0 → Ω → ℝ} (hBmeas 
         δ (t ↑j) ω * (B (min (t (↑j + 1)) (t (k + 1))) ω - B (min (t ↑j) (t (k + 1))) ω)
           - δ (t ↑j) ω * (B (min (t (↑j + 1)) (t k)) ω - B (min (t ↑j) (t k)) ω) = 0 := by
     rintro j _ hj
-    have hjk : (j : ℕ) ≠ k := fun h => hj (Subtype.ext h)
+    have hjk : (j : ℕ) ≠ k := fun h ↦ hj (Subtype.ext h)
     by_cases hlt : (j : ℕ) < k
     · have h1 : min (t ((j : ℕ) + 1)) (t (k + 1)) = t ((j : ℕ) + 1) :=
         min_eq_left (hmono (by omega))
@@ -1000,6 +813,7 @@ open scoped NNReal ENNReal
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ}
 
+omit [IsProbabilityMeasure μ] in
 /-- The uniform-partition band split: the `(0,T]`-band integral of an integrable
 space-time function is the sum of its uniform cell integrals (iterated
 `setIntegral_union` over the nested left endpoints). -/
@@ -1162,10 +976,10 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
   {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
 
 omit hB in
-/-- The mean function of a bounded measurable path-continuous family is continuous
-(the stage-1 DCT interchange, factored out). -/
+/-- The mean function of a bounded measurable family with almost surely continuous paths is
+continuous (the stage-1 DCT interchange, factored out). -/
 private lemma continuous_mean_of_bdd_cont {g : ℝ≥0 → Ω → ℝ}
-    (hgmeas : ∀ s, Measurable (g s)) (hgcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ g s ω)
+    (hgmeas : ∀ s, Measurable (g s)) (hgcont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ g s ω)
     {C : ℝ} (hgbdd : ∀ s ω, |g s ω| ≤ C) :
     Continuous fun s : ℝ≥0 ↦ ∫ ω, g s ω ∂μ :=
   continuous_iff_continuousAt.mpr fun s₀ ↦
@@ -1175,14 +989,49 @@ private lemma continuous_mean_of_bdd_cont {g : ℝ≥0 → Ω → ℝ}
       (Eventually.of_forall fun s ↦ Eventually.of_forall fun ω ↦ by
         simpa [Real.norm_eq_abs] using hgbdd s ω)
       (integrable_const C)
-      (Eventually.of_forall fun ω ↦ (hgcont ω).continuousAt)
+      (hgcont.mono fun _ h ↦ h.continuousAt)
+
+omit hB in
+/-- `expectation_pathIntegral_eq` (`ItoDriftExpectation`) for a bounded measurable family whose
+paths are continuous only almost surely: set the family to `0` on a measurable null set
+containing every discontinuous path, apply the everywhere-continuous version, and undo the
+change on both sides (it alters each integrand on a null set only). -/
+private lemma expectation_pathIntegral_eq_of_ae {w : ℝ≥0 → Ω → ℝ}
+    (hw_meas : ∀ s, Measurable (w s)) (hw_cont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ w s ω)
+    {C : ℝ} (hC0 : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0) :
+    ∫ ω, (∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure) ∂μ
+      = ∫ s in Set.Ioc 0 T, (∫ ω, w s ω ∂μ) ∂ItoIntegralL2.timeMeasure := by
+  obtain ⟨t, hbad, ht, hμt⟩ := exists_measurable_superset_of_null (ae_iff.1 hw_cont)
+  have hgood : ∀ᵐ ω ∂μ, ω ∈ tᶜ := measure_eq_zero_iff_ae_notMem.1 hμt
+  have hw'_cont (ω : Ω) : Continuous fun s ↦ tᶜ.indicator (w s) ω := by
+    by_cases hω : ω ∈ t
+    · simp only [Set.indicator_of_notMem (Set.notMem_compl_iff.2 hω)]
+      exact continuous_const
+    · simp only [Set.indicator_of_mem (Set.mem_compl hω)]
+      exact Classical.byContradiction fun h ↦ hω (hbad h)
+  have hw'_bdd (s : ℝ≥0) (ω : Ω) : |tᶜ.indicator (w s) ω| ≤ C := by
+    by_cases hω : ω ∈ tᶜ
+    · rw [Set.indicator_of_mem hω]
+      exact hw_bdd s ω
+    · rw [Set.indicator_of_notMem hω, abs_zero]
+      exact hC0
+  calc ∫ ω, (∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure) ∂μ
+      = ∫ ω, (∫ s in Set.Ioc 0 T, tᶜ.indicator (w s) ω ∂ItoIntegralL2.timeMeasure) ∂μ :=
+        integral_congr_ae (hgood.mono fun ω hω ↦ by simp only [Set.indicator_of_mem hω])
+    _ = ∫ s in Set.Ioc 0 T, (∫ ω, tᶜ.indicator (w s) ω ∂μ) ∂ItoIntegralL2.timeMeasure :=
+        expectation_pathIntegral_eq (w := fun s ↦ tᶜ.indicator (w s))
+          (fun s ↦ (hw_meas s).indicator ht.compl) hw'_cont hC0 hw'_bdd T
+    _ = ∫ s in Set.Ioc 0 T, (∫ ω, w s ω ∂μ) ∂ItoIntegralL2.timeMeasure :=
+        setIntegral_congr_fun measurableSet_Ioc fun s _ ↦
+          integral_congr_ae (hgood.mono fun ω hω ↦ by simp only [Set.indicator_of_mem hω])
 
 omit hB in
 /-- **The frozen Riemann convergence**: the left-endpoint Riemann sums of the deterministic
-mean function of a bounded measurable path-continuous family converge to the time integral
-of the means (the deterministic `tendsto_riemann_continuous` applied to the mean function). -/
+mean function of a bounded measurable family with almost surely continuous paths converge to
+the time integral of the means (the deterministic `tendsto_riemann_continuous` applied to the
+mean function). -/
 theorem frozenRiemann_tendsto {g : ℝ≥0 → Ω → ℝ} {T : ℝ≥0}
-    (hgmeas : ∀ s, Measurable (g s)) (hgcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ g s ω)
+    (hgmeas : ∀ s, Measurable (g s)) (hgcont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ g s ω)
     {C : ℝ} (hgbdd : ∀ s ω, |g s ω| ≤ C) :
     Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
         (∫ ω, g (unifPart T n k) ω ∂μ) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k))
@@ -1244,7 +1093,7 @@ private theorem trueIncr_sq_le {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
           rw [integral_const, hDsq2]
           simp
   have hmeanmeas : Measurable (fun s : ℝ≥0 ↦ ∫ ω, δ s ω * δ s ω ∂μ) :=
-    (continuous_mean_of_bdd_cont hgmeas hgcont (fun s ω ↦ by
+    (continuous_mean_of_bdd_cont hgmeas (ae_of_all _ hgcont) (fun s ω ↦ by
       show |δ s ω * δ s ω| ≤ |Dd| * |Dd|
       rw [abs_mul]
       calc |δ s ω| * |δ s ω| ≤ |Dd| * |δ s ω| :=
@@ -1303,7 +1152,7 @@ theorem quadraticSqSum_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Me
       (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
     {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
     (hwadap : ∀ t, Measurable[natFiltration hBmeas t] (w t))
-    (hwcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ w s ω)
+    (hwcont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ w s ω)
     (hwbdd : ∀ s ω, |w s ω| ≤ Cw)
     (hgap : ∃ r : ℕ → ℝ, Tendsto r atTop (𝓝 0) ∧ ∀ n : ℕ, 0 < n →
       |∑ k ∈ Finset.range n,
@@ -1323,8 +1172,8 @@ theorem quadraticSqSum_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Me
     exact (((hwadap s).mono ((natFiltration hBmeas).le s) le_rfl).mul
       (((hδadap s).mono ((natFiltration hBmeas).le s)).measurable.mul
         ((hδadap s).mono ((natFiltration hBmeas).le s)).measurable))
-  have hgcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ w s ω * (δ s ω * δ s ω) :=
-    fun ω ↦ (hwcont ω).mul ((hδcont ω).mul (hδcont ω))
+  have hgcont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ w s ω * (δ s ω * δ s ω) :=
+    hwcont.mono fun ω h ↦ h.mul ((hδcont ω).mul (hδcont ω))
   have hgbdd : ∀ s ω, |w s ω * (δ s ω * δ s ω)| ≤ |Cw| * (Dd * Dd) := by
     intro s ω
     have hDd : |Dd| * |Dd| = Dd * Dd := by
@@ -1416,7 +1265,7 @@ theorem quadraticSqSum_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Me
 
 end StageFourC
 
-/-! #### Stage 5a — the gap decay, unconditional
+/-! #### Stage 5a — the gap decay, discharging `hgap` (for the hypothesized `M`)
 
 The per-cell Cauchy–Schwarz pairing of the error increment `δεₖ = ΔMₖ − δ(tₖ)·ΔBₖ`
 against the cell energy. The error increment is the band increment of the CLM process of
@@ -1511,27 +1360,6 @@ private theorem errorIncr_ae {n k : ℕ} (hk : k < n) :
             - deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω := by
         rw [hsub1, hsub0]
 
-omit hMadap in
-/-- The second moment of the error increment is the band energy of the integrand error
-`ψₙ = φ − δⁿ` over the cell (the version-free `clm_band_energy` transferred along the a.e.
-identification). -/
-private theorem errorIncr_sq_eq_band {n k : ℕ} (hk : k < n) :
-    ∫ ω, (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω
-        - δ (unifPart T n k) ω
-          * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ∂μ
-      = ∫ z in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) ×ˢ (Set.univ : Set Ω),
-          ((processToLp T hBmeas hδadap hδcont hδbdd
-              - deltaStepLp hBmeas hδadap hδbdd n :
-                Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
-          ∂(trimMeasure_T (μ := μ) T hBmeas) := by
-  refine (integral_congr_ae ?_).trans
-    (clm_band_energy hB hBmeas T
-      (processToLp T hBmeas hδadap hδcont hδbdd - deltaStepLp hBmeas hδadap hδbdd n)
-      (unifPart_mono T n (Nat.le_succ k))
-      (unifPart_le_T hk))
-  filter_upwards [errorIncr_ae hB hBmeas hδadap hδcont hδbdd hMeq hk] with ω hω
-  rw [hω]
-
 set_option linter.unusedSectionVars false in
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- Generic weighted-square transfer: if `f =ᵐ g`, `g²` is integrable with energy `E`,
@@ -1564,11 +1392,10 @@ private theorem weighted_sq_le_of_congr {f g w : Ω → ℝ} {C E : ℝ}
         rw [integral_congr_ae (Eventually.of_forall fun ω ↦ by
           show (C * g ω) ^ 2 = C ^ 2 * g ω ^ 2; ring), integral_const_mul, hE]
 
-include hB hMadap hMeq in
+omit hMadap in
 /-- **Weighted error energy**: the second moment of `w·δεₖ` is at most `C_w²` cell-band
 energies of the integrand error (`|w| ≤ C_w` pointwise). -/
 private theorem weightedErrorIncr_sq_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
-    (hwm : Measurable[natFiltration hBmeas (unifPart T n k)] w)
     (hwb : ∀ ω, |w ω| ≤ Cw) :
     ∫ ω, (w ω * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω
         - δ (unifPart T n k) ω
@@ -1613,7 +1440,7 @@ private theorem weightedErrorIncr_sq_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ
     (errorIncr_ae hB hBmeas hδadap hδcont hδbdd hMeq hk)
     hDmem.integrable_sq hbandE
 
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
+omit [IsProbabilityMeasure μ] hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- The real `L²` triangle inequality at the integral level: `‖a + b‖₂ ≤ ‖a‖₂ + ‖b‖₂`. -/
 private theorem sqrtIntegral_sq_add_le {a b : Ω → ℝ}
     (ham : MemLp a 2 μ) (hbm : MemLp b 2 μ) :
@@ -1648,7 +1475,8 @@ private theorem sqrtIntegral_sq_add_le {a b : Ω → ℝ}
         Real.sqrt_sq (add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _))
 
 /-- **Per-cell gap bound**: the absolute difference over one cell between the expectations
-of the weighted true-increment square and of the weighted rectangle square — the Cauchy–Schwarz pairing of the
+of the weighted true-increment square and of the weighted rectangle square — the
+Cauchy–Schwarz pairing of the
 error increment `δεₖ` against the cell energy `ΔMₖ + δ(tₖ)ΔBₖ`, each factor bounded by the
 weighted error energy (`weightedErrorIncr_sq_le`) and the `2·|D_δ|·√cell` cell energy
 (`trueIncr_sq_le` + the rectangle second moment). -/
@@ -1784,7 +1612,7 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
             (abs_nonneg _)))
       (hMsub.add hs)
   -- the two energy factors
-  have hwde := weightedErrorIncr_sq_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq hk hwm hwb
+  have hwde := weightedErrorIncr_sq_le hB hBmeas hδadap hδcont hδbdd hMeq hk hwb
   have htri : Real.sqrt (∫ ω, ((M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)
         + δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ∂μ)
       ≤ Real.sqrt (∫ ω, (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)
@@ -1847,7 +1675,8 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
               + δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω))| ∂μ :=
         abs_integral_le_integral_abs
     _ ≤ Real.sqrt (∫ ω, (w ω * ((M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω
-              - δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)))) ^ 2 ∂μ)
+              - δ (unifPart T n k) ω
+                * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)))) ^ 2 ∂μ)
           * Real.sqrt (∫ ω, ((M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)
             + δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ∂μ) :=
         hpair
@@ -1895,9 +1724,9 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
                   Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
             ∂(trimMeasure_T (μ := μ) T hBmeas)) := by ring
 
-/-- **The summed gap bound** (the `hgap` witness of `quadraticSqSum_tendsto`, made
-unconditional): the absolute difference between the summed weighted second moments and
-the frozen rectangle sum is at most `2·|C_w|·|D_δ|·√T` times the `L²`
+/-- **The summed gap bound** (the `hgap` witness of `quadraticSqSum_tendsto`, proved for the
+hypothesized `M` of `hMadap`, `hMeq`): the absolute difference between the summed weighted
+second moments and the frozen rectangle sum is at most `2·|C_w|·|D_δ|·√T` times the `L²`
 norm of the integrand error `φ − δⁿ` — per-cell Cauchy–Schwarz (`cellGap_le`), then
 finite-sum Cauchy–Schwarz against the cell lengths (telescoping to `T`) and the summed band
 energies of the error class (telescoping to `‖φ − δⁿ‖²` via `uniform_band_split` and the
@@ -1940,11 +1769,11 @@ theorem gapSum_le (n : ℕ) (hn : 0 < n) {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
         - ∫ ω, w (unifPart T n k) ω * (δ (unifPart T n k) ω
             * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ∂μ|
         ≤ 2 * |Cw| * |Dd| * Real.sqrt (cell k) * Real.sqrt (bandE k) :=
-    fun k hk => cellGap_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq (Finset.mem_range.mp hk)
+    fun k hk ↦ cellGap_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq (Finset.mem_range.mp hk)
       (hwadap (unifPart T n k)) (hwbdd (unifPart T n k))
   -- the cell lengths telescope to `T`; the band energies telescope to `‖φ − δⁿ‖²`
   have hsumcell : ∑ k ∈ Finset.range n, cell k = (T : ℝ) := by
-    rw [sum_telescope (a := fun k ↦ ((unifPart T n k : ℝ)))]
+    rw [Finset.sum_range_sub (fun k ↦ ((unifPart T n k : ℝ)))]
     have hnT : unifPart T n n = T := by
       have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
       simp only [unifPart, div_self hne, one_mul]
@@ -2041,9 +1870,10 @@ theorem gapSum_le (n : ℕ) (hn : 0 < n) {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
         ∂(trimMeasure_T (μ := μ) T hBmeas)) := by ring
 
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- **The convergence of the quadratic block, unconditional** (the `hgap` hypothesis of
-`quadraticSqSum_tendsto` discharged by `gapSum_le` + `deltaStepLp_tendsto`). -/
-theorem quadraticSqSum_tendsto_uncond (hB : IsPreBrownianReal B μ)
+/-- **The convergence of the quadratic block, gap hypothesis discharged** (the `hgap`
+hypothesis of `quadraticSqSum_tendsto` discharged by `gapSum_le` + `deltaStepLp_tendsto`). Not
+unconditional: `M` is still a hypothesized version of `δ●B` (`hMadap`, `hMeq`). -/
+theorem quadraticSqSum_tendsto' (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t))
     {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
     (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
@@ -2055,7 +1885,7 @@ theorem quadraticSqSum_tendsto_uncond (hB : IsPreBrownianReal B μ)
       (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
     {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
     (hwadap : ∀ t, Measurable[natFiltration hBmeas t] (w t))
-    (hwcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ w s ω)
+    (hwcont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ w s ω)
     (hwbdd : ∀ s ω, |w s ω| ≤ Cw) :
     Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
         ∫ ω, w (unifPart T n k) ω
@@ -2214,11 +2044,6 @@ private theorem young134 (a b : ℝ) : |a| * |b| ^ 3 ≤ a ^ 4 / 4 + 3 * b ^ 4 /
   linarith [young34 b a, mul_comm (abs b ^ 3) (abs a)]
 
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- Pointwise nonnegativity of a product of squared terms. -/
-private theorem sqmul_nonneg {a b : ℝ} : (0:ℝ) ≤ a ^ 2 * b ^ 2 := by
-  positivity
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- Third moment of a centered real Gaussian (odd moment, by density symmetry). -/
 private theorem integral_pow3_gaussianReal (v : ℝ≥0) :
     ∫ x, x ^ 3 ∂(gaussianReal 0 v) = 0 := by
@@ -2227,7 +2052,7 @@ private theorem integral_pow3_gaussianReal (v : ℝ≥0) :
     simp
   · rw [integral_gaussianReal_eq_integral_smul hv]
     simp only [smul_eq_mul]
-    have hmap : Measure.map (fun x : ℝ => -x) (volume : Measure ℝ) = volume :=
+    have hmap : Measure.map (fun x : ℝ ↦ -x) (volume : Measure ℝ) = volume :=
       (Measure.measurePreserving_neg (μ := (volume : Measure ℝ))).map_eq
     have hpdfneg : ∀ x : ℝ, gaussianPDFReal 0 v (-x) = gaussianPDFReal 0 v x := by
       intro x
@@ -2236,7 +2061,7 @@ private theorem integral_pow3_gaussianReal (v : ℝ≥0) :
         = ∫ x, gaussianPDFReal 0 v (-x) * (-x) ^ 3 ∂volume := by
       have h1 : ∫ y, gaussianPDFReal 0 v y * y ^ 3 ∂volume
           = ∫ y, gaussianPDFReal 0 v y * y ^ 3
-              ∂(Measure.map (fun x : ℝ => -x) (volume : Measure ℝ)) := by
+              ∂(Measure.map (fun x : ℝ ↦ -x) (volume : Measure ℝ)) := by
         rw [hmap]
       rw [h1]
       exact integral_map_equiv (MeasurableEquiv.neg (G := ℝ))
@@ -2253,7 +2078,7 @@ private theorem integral_pow3_gaussianReal (v : ℝ≥0) :
     rw [hcongr]
     linarith
 
-omit hδadap hδcont hδbdd hMadap hMeq in
+omit [IsProbabilityMeasure μ] hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- Third moment of a Brownian increment: `E[(B_{t₁} − B_{t₀})³] = 0` for `t₀ ≤ t₁`
 (the law-transfer of the vanishing odd Gaussian moment). -/
 private theorem integral_increment_pow3
@@ -2270,7 +2095,7 @@ private theorem integral_increment_pow3
   simp only [Function.comp_def] at hcomp
   rw [hcomp, integral_pow3_gaussianReal]
 
-omit hδadap hδcont hδbdd hMadap hMeq in
+omit [IsProbabilityMeasure μ] hδadap hδcont hδbdd hMadap hMeq in
 /-- Fourth-power isometry kernel: for `χ` measurable in the natural filtration at `t₀`,
 `E[χ·(B t₁ − B t₀)⁴] = E[χ]·3·(t₁ − t₀)²`. -/
 private theorem integral_natMeasurable_mul_increment_pow4
@@ -2289,7 +2114,7 @@ private theorem integral_natMeasurable_mul_increment_pow4
   simp only [Function.comp_apply, id_eq] at key
   rw [key, integral_increment_pow4 hB ht]
 
-omit hδadap hδcont hδbdd hMadap hMeq in
+omit [IsProbabilityMeasure μ] hδadap hδcont hδbdd hMadap hMeq in
 set_option maxHeartbeats 1600000 in
 /-- **The step-sum fourth-moment recursion**: for a bounded integrand sampled along a
 monotone time grid (`φ j` measurable in `𝓕_{s j}`, `|φ| ≤ D`), the fourth moment of the
@@ -2533,7 +2358,7 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
         (∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 3 * φ N ω) := by
       obtain ⟨g, hg, hgf⟩ := hZadapt
       obtain ⟨g', hg', hgf'⟩ := hyadapt
-      refine ⟨fun p => (g p) ^ 3 * g' p, hg.pow_const 3 |>.mul hg', ?_⟩
+      refine ⟨fun p ↦ (g p) ^ 3 * g' p, hg.pow_const 3 |>.mul hg', ?_⟩
       funext ω
       have h1 := congrFun hgf ω
       have h2 := congrFun hgf' ω
@@ -2553,7 +2378,7 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
         (∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) * (φ N ω) ^ 3) := by
       obtain ⟨g, hg, hgf⟩ := hZadapt
       obtain ⟨g', hg', hgf'⟩ := hyadapt
-      refine ⟨fun p => g p * (g' p) ^ 3, hg.mul (hg'.pow_const 3), ?_⟩
+      refine ⟨fun p ↦ g p * (g' p) ^ 3, hg.mul (hg'.pow_const 3), ?_⟩
       funext ω
       have h1 := congrFun hgf ω
       have h2 := congrFun hgf' ω
@@ -2580,14 +2405,14 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
         = (fun ω ↦ ((∑ k ∈ Finset.range N,
               φ k ω * (B (s (k + 1)) ω - B (s k) ω)) * (φ N ω) ^ 3)
           * (B (s (N + 1)) ω - B (s N) ω) ^ 3) from by funext ω; ring]
-      rw [key, integral_increment_pow3 hB hBmeas (hsmono (Nat.le_succ N)), mul_zero]
+      rw [key, integral_increment_pow3 hB (hsmono (Nat.le_succ N)), mul_zero]
     -- the even mixed term: isometry kernel at `χ = Z²φN²`
     have hZ2adapt : AdaptedAt B (s N) (fun ω ↦
         (∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 2
           * (φ N ω) ^ 2) := by
       obtain ⟨g, hg, hgf⟩ := hZadapt
       obtain ⟨g', hg', hgf'⟩ := hyadapt
-      refine ⟨fun p => (g p) ^ 2 * (g' p) ^ 2, hg.pow_const 2 |>.mul (hg'.pow_const 2), ?_⟩
+      refine ⟨fun p ↦ (g p) ^ 2 * (g' p) ^ 2, hg.pow_const 2 |>.mul (hg'.pow_const 2), ?_⟩
       funext ω
       have h1 := congrFun hgf ω
       have h2 := congrFun hgf' ω
@@ -2911,7 +2736,7 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
         - unifPart T (n * 2 ^ p) (2 ^ p * k + j))
       = ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
     intro p
-    rw [sum_telescope (a := fun j : ℕ ↦ ((unifPart T (n * 2 ^ p) (2 ^ p * k + j) : ℝ)))]
+    rw [Finset.sum_range_sub (fun j : ℕ ↦ ((unifPart T (n * 2 ^ p) (2 ^ p * k + j) : ℝ)))]
     simp only [Nat.add_zero]
     rw [show ((2 : ℕ) ^ p * k + 2 ^ p) = 2 ^ p * (k + 1) from by ring, hgrid p (k + 1),
       hgrid p k]
@@ -3302,15 +3127,17 @@ end StageFiveB
 /-! #### Stage 5c — the martingale kill
 
 Toward the integrated Itô–drift identity for `X_t = c + ∫₀ᵗ β + M_t` (`hXrel`) with bounded
-adapted path-continuous `β, δ` and the hypothesized `M`. Route of the assembly: the per-path discrete Itô formula
+adapted path-continuous `β, δ` and the hypothesized `M`. Route of the assembly: the per-path
+discrete Itô formula
 (`MathFin.discrete_ito_formula`) at the grid values of `X`, integrated over `Ω`; the
 first-order martingale terms die **exactly** (the martingale-kill lemma
 `mul_trueIncr_expect_eq_zero` below — the discrete-assembly replacement for "the
 stochastic integral has zero mean"); the drift block is the pathwise left-endpoint
-Riemann–Stieltjes sum (uniform continuity of `f'∘X` along each path + DCT + the stage-1
-Fubini `expectation_pathIntegral_eq`); the quadratic block is `quadraticSqSum_tendsto_uncond` at the
-weight `f″∘X` plus the `O(mesh)` drift corrections (`𝔼|ΔM·driftIncr| ≤ 2D_βD_δ·cell^{3/2}`,
-`𝔼[driftIncr²] ≤ (D_β·cell)²`, both summed to `O(√mesh)`, `O(mesh)`); the Taylor
+Riemann–Stieltjes sum (`AdaptedDrift.tendsto_sum_mul_driftPath_sub` along each path at the
+weight `f'∘X` + DCT + the stage-1
+Fubini `expectation_pathIntegral_eq`); the quadratic block is `quadraticSqSum_tendsto'` at the
+weight `f″∘X` plus the drift corrections (`𝔼|ΔM·driftIncr| ≤ 2D_βD_δ·cell^{3/2}`,
+`𝔼[driftIncr²] ≤ (D_β·cell)²`, which the proofs sum to `O(√mesh)` and `O(mesh)`); the Taylor
 remainder dies by `abs_discreteTaylorRemainder_le` + `trueIncr_pow3_le`
 (`taylorRemainderSum_tendsto`). -/
 
@@ -3410,23 +3237,20 @@ path-continuous `β, δ`, under the hypotheses on `M` and `X` of the module docs
 for `f` three times differentiable with `f'`, `f''`, `f'''` bounded. Route: the per-path
 discrete Itô formula (`MathFin.discrete_ito_formula`) at the grid values of `X`, integrated
 over `Ω`; the first-order martingale terms die exactly (`mul_trueIncr_expect_eq_zero`); the
-drift block converges by pathwise Riemann–Stieltjes sums (uniform continuity of `f'∘X` along
-each path) + DCT (`driftBlock_tendsto`); the quadratic block converges by `quadraticSqSum_tendsto_uncond`
+drift block converges by pathwise Riemann–Stieltjes sums
+(`AdaptedDrift.tendsto_sum_mul_driftPath_sub` along each path at the weight `f'∘X`) + DCT
+(`driftBlock_tendsto`); the quadratic block converges by `quadraticSqSum_tendsto'`
 at the weight `f''∘X`, with the drift–martingale cross terms (`quadCrossSum_tendsto`)
 and the drift² corrections (`quadDriftSqSum_tendsto`) tending to `0`; the Taylor remainder dies by
 `abs_discreteTaylorRemainder_le` + `trueIncr_pow3_le` (`taylorRemainderSum_tendsto`).
 The two drift integrals cross the expectation by the stage-1 Fubini lemma
 `expectation_pathIntegral_eq`. -/
 
-/-- The pathwise drift primitive of `β`: `t ω ↦ ∫₀ᵗ β_s ω ds` (`timeMeasure` form). -/
-noncomputable def driftPrim (β : ℝ≥0 → Ω → ℝ) (t : ℝ≥0) (ω : Ω) : ℝ :=
-  ∫ s in Set.Ioc (0:ℝ≥0) t, β s ω ∂ItoIntegralL2.timeMeasure
-
 section StageFiveD
 
 open MeasureTheory ProbabilityTheory Filter Topology ItoIntegralProcessGeneral
 open ItoIntegralL2 ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
-open ItoIntegralProcess QuadraticVariationL2 ItoIntegralBrownian MathFin
+open ItoIntegralProcess QuadraticVariationL2 ItoIntegralBrownian AdaptedDrift MathFin
 open scoped NNReal ENNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
@@ -3443,11 +3267,6 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
 include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
 
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- Pointwise `|a − b| ≤ |a| + |b|` (the triangle instance for differences). -/
-private theorem abs_le_abs_add {a b : ℝ} : |a - b| ≤ |a| + |b| :=
-  abs_sub_le a 0 b |>.trans (by simp)
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- `(a + b)³ ≤ 4·(a³ + b³)` for `a, b ≥ 0` — the Taylor-remainder kernel
 (sharp at `a = b`, from `4·(a³+b³) − (a+b)³ = 3·(a−b)²·(a+b) ≥ 0`). -/
 private theorem pow3_add_le {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
@@ -3459,691 +3278,13 @@ private theorem pow3_add_le {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
   linarith
 
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- The drift primitive at time `0` vanishes (empty band). -/
-private theorem driftPrim_zero {β : ℝ≥0 → Ω → ℝ} (ω : Ω) : driftPrim β 0 ω = 0 := by
-  have h : (Set.Ioc (0:ℝ≥0) 0) = (∅ : Set ℝ≥0) := Set.Ioc_eq_empty_iff.mpr (by simp)
-  simp only [driftPrim, h, setIntegral_empty]
-
-omit hB hδadap hδcont hδbdd hMadap hMeq in
-/-- **The drift primitive is adapted**: `ω ↦ ∫₀ᵗ β_s ω ds` is measurable in the natural
-filtration at `t`. Route: it is the pointwise limit of the left-endpoint Riemann sums
-(`tendsto_riemann_continuous`, applied per path), each of which is `natFiltration`-measurable
-(finitely many grid values, each adapted at an earlier time via the filtration monotonicity),
-and measurability is closed under sequential `liminf` (`Measurable.liminf` +
-`Filter.Tendsto.liminf_eq`): the time-integral of adapted coefficients is adapted, because
-the natural filtration is closed under pointwise limits (compare
-`AdaptedDrift.stronglyMeasurable_driftPath`). -/
-theorem driftPrim_adapted {β : ℝ≥0 → Ω → ℝ}
-    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
-    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
-    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db) (t : ℝ≥0) :
-    StronglyMeasurable[natFiltration hBmeas t] (driftPrim β t) := by
-  have hsum : ∀ n : ℕ, Measurable[natFiltration hBmeas t] (fun ω : Ω ↦
-      ∑ k ∈ Finset.range n, β (unifPart t n k) ω
-        * ((unifPart t n (k + 1) : ℝ) - unifPart t n k)) := fun n ↦
-    Finset.measurable_sum _ fun k hk ↦
-      ((hβadap (unifPart t n k)).measurable.mono
-        ((natFiltration hBmeas).mono
-          (unifPart_le_T (Nat.le_of_lt (Finset.mem_range.mp hk))))
-        le_rfl).mul_const _
-  have hlim : (driftPrim β t) = fun ω : Ω ↦
-      atTop.liminf (fun n : ℕ ↦ ∑ k ∈ Finset.range n, β (unifPart t n k) ω
-        * ((unifPart t n (k + 1) : ℝ) - unifPart t n k)) := by
-    funext ω
-    exact (((tendsto_riemann_continuous (h := fun s : ℝ≥0 ↦ β s ω) (hβcont ω) t
-      (fun s _ ↦ hβbdd s ω)).liminf_eq)).symm
-  rw [hlim]
-  exact (Measurable.liminf hsum).stronglyMeasurable
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- The drift primitive is `Db`-Lipschitz in `t` along every path
-(`abs_driftPath_sub_le`), hence continuous. -/
-theorem driftPrim_continuous {β : ℝ≥0 → Ω → ℝ}
-    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
-    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db) (ω : Ω) :
-    Continuous (fun s : ℝ≥0 ↦ driftPrim β s ω) := by
-  refine continuous_iff_continuousAt.mpr fun s₀ ↦ Metric.continuousAt_iff.mpr ?_
-  intro ε hε
-  refine ⟨ε / (|Db| + 1), div_pos hε (by positivity : (0 : ℝ) < |Db| + 1), fun s hs ↦ ?_⟩
-  rw [Real.dist_eq]
-  have hstep : |driftPrim β s ω - driftPrim β s₀ ω| ≤ |Db| * |(s : ℝ) - s₀| :=
-    (abs_driftPath_sub_le hβcont hβbdd s₀ s ω).trans (by
-      rw [abs_sub_comm (s : ℝ) (s₀ : ℝ)]
-      exact mul_le_mul_of_nonneg_right (le_abs_self Db) (abs_nonneg _))
-  have hpos : (0 : ℝ) < |Db| + 1 := by positivity
-  calc |driftPrim β s ω - driftPrim β s₀ ω| ≤ |Db| * |(s : ℝ) - s₀| := hstep
-    _ = |Db| * dist (s : ℝ≥0) s₀ := by rw [NNReal.dist_eq]
-    _ ≤ (|Db| + 1) * dist (s : ℝ≥0) s₀ := by
-        have h1 : (|Db| : ℝ) ≤ |Db| + 1 := by linarith
-        have hd : (0 : ℝ) ≤ dist (s : ℝ≥0) s₀ := by
-          rw [NNReal.dist_eq]; exact abs_nonneg _
-        exact mul_le_mul_of_nonneg_right h1 hd
-    _ < (|Db| + 1) * (ε / (|Db| + 1)) := mul_lt_mul_of_pos_left hs hpos
-    _ = ε := by field_simp
-
-omit hB hδadap hδcont hδbdd hMadap hMeq in
-/-- **Joint continuity of the mean absolute increment of `β`**: the two-variable mean
-function `(s, u) ↦ 𝔼|β s − β u|` is continuous. Route: the one-variable slices are
-continuous by the stage-4 mean-continuity DCT (`continuous_mean_of_bdd_cont`), and the
-coupling `|𝔼|β s − β u| − 𝔼|β s₀ − β u₀|| ≤ 𝔼|β u₀ − β u| + |𝔼|β s − β u₀| −
-𝔼|β s₀ − β u₀||` (the value-level reverse triangle `abs_sub_le`, with
-`abs_abs_sub_abs_le_abs_sub` under the first integral) reduces joint continuity at
-`(s₀, u₀)` to the two slice continuities, noting `𝔼|β u₀ − β u₀| = 0`. -/
-private theorem continuous_jointMeanAbsDiff {β : ℝ≥0 → Ω → ℝ}
-    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
-    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
-    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db) :
-    Continuous (fun p : ℝ≥0 × ℝ≥0 ↦ ∫ ω, |β p.1 ω - β p.2 ω| ∂μ) := by
-  have hβmeas : ∀ s : ℝ≥0, Measurable (β s) :=
-    fun s ↦ ((hβadap s).measurable.mono ((natFiltration hBmeas).le s) le_rfl)
-  have hDb : ∀ s ω, |β s ω| ≤ |Db| := fun s ω ↦ (hβbdd s ω).trans (le_abs_self Db)
-  -- the two one-variable slices (via the stage-4 mean-continuity DCT)
-  have hcont1 : ∀ u₀ : ℝ≥0, Continuous (fun s : ℝ≥0 ↦ ∫ ω, |β s ω - β u₀ ω| ∂μ) :=
-    fun u₀ ↦ continuous_mean_of_bdd_cont (fun s ↦ (hβmeas s).sub (hβmeas u₀) |>.abs)
-      (fun ω ↦ ((hβcont ω).sub continuous_const).abs)
-      (fun s ω ↦ by
-        have h1 : |β s ω - β u₀ ω| ≤ 2 * |Db| := by
-          have h2 := abs_le_abs_add (a := β s ω) (b := β u₀ ω)
-          linarith [hDb s ω, hDb u₀ ω]
-        calc |(|β s ω - β u₀ ω|)| = |β s ω - β u₀ ω| := abs_of_nonneg (abs_nonneg _)
-          _ ≤ 2 * |Db| := h1)
-  have hcont2 : ∀ s₀ : ℝ≥0, Continuous (fun u : ℝ≥0 ↦ ∫ ω, |β s₀ ω - β u ω| ∂μ) :=
-    fun s₀ ↦ continuous_mean_of_bdd_cont (fun u ↦ (hβmeas s₀).sub (hβmeas u) |>.abs)
-      (fun ω ↦ (continuous_const.sub (hβcont ω)).abs)
-      (fun u ω ↦ by
-        have h1 : |β u ω - β s₀ ω| ≤ 2 * |Db| := by
-          have h2 := abs_le_abs_add (a := β s₀ ω) (b := β u ω)
-          rw [abs_sub_comm (β s₀ ω) (β u ω)] at h2
-          linarith [hDb s₀ ω, hDb u ω]
-        calc |(|β s₀ ω - β u ω|)| = |β s₀ ω - β u ω| := abs_of_nonneg (abs_nonneg _)
-          _ = |β u ω - β s₀ ω| := abs_sub_comm _ _
-          _ ≤ 2 * |Db| := h1)
-  -- the integral-level coupling: differencing through the `s`-slice
-  have hstep1 : ∀ x y z : ℝ≥0,
-      |(∫ ω, |β x ω - β y ω| ∂μ) - ∫ ω, |β x ω - β z ω| ∂μ|
-        ≤ ∫ ω, |β z ω - β y ω| ∂μ := by
-    intro x y z
-    have hint : ∀ p q : ℝ≥0, Integrable (fun ω ↦ |β p ω - β q ω|) μ := by
-      intro p q
-      exact Integrable.of_bound (((hβmeas p).sub (hβmeas q)).abs.aestronglyMeasurable)
-        (2 * |Db|)
-        (Eventually.of_forall fun ω ↦ by
-          have h2 : |β p ω - β q ω| ≤ 2 * |Db| := by
-            have h3 := abs_le_abs_add (a := β p ω) (b := β q ω)
-            linarith [hDb p ω, hDb q ω]
-          show ‖|β p ω - β q ω|‖ ≤ 2 * |Db|
-          rw [Real.norm_eq_abs, abs_of_nonneg (abs_nonneg _)]
-          exact h2)
-    calc |(∫ ω, |β x ω - β y ω| ∂μ) - ∫ ω, |β x ω - β z ω| ∂μ|
-        = |∫ ω, (|β x ω - β y ω| - |β x ω - β z ω|) ∂μ| := by
-          rw [← integral_sub (hint x y) (hint x z)]
-      _ ≤ ∫ ω, abs (|β x ω - β y ω| - |β x ω - β z ω|) ∂μ :=
-          abs_integral_le_integral_abs
-      _ ≤ ∫ ω, |β z ω - β y ω| ∂μ := by
-          refine integral_mono_of_nonneg (Eventually.of_forall fun ω ↦ abs_nonneg _)
-            (hint z y) ?_
-          filter_upwards [] with ω
-          have h3 := abs_abs_sub_abs_le_abs_sub
-            (a := β x ω - β y ω) (b := β x ω - β z ω)
-          rw [sub_sub_sub_cancel_left] at h3
-          exact h3
-  -- joint continuity from the two slice continuities and the coupling
-  refine continuous_iff_continuousAt.mpr fun p₀ ↦ ?_
-  obtain ⟨s₀, u₀⟩ := p₀
-  rw [Metric.continuousAt_iff]
-  intro ε hε
-  obtain ⟨δu, hδu, hδuc⟩ := Metric.continuousAt_iff.mp
-    ((hcont2 u₀).continuousAt) (ε / 2) (by positivity)
-  obtain ⟨δs, hδs, hδsc⟩ := Metric.continuousAt_iff.mp
-    ((hcont1 u₀).continuousAt) (ε / 2) (by positivity)
-  refine ⟨min δs δu, lt_min hδs hδu, fun p hp ↦ ?_⟩
-  obtain ⟨s, u⟩ := p
-  have hps : dist s s₀ < δs :=
-    lt_of_lt_of_le (lt_of_le_of_lt (le_max_left (α := ℝ) _ _) hp) (min_le_left _ _)
-  have hpu : dist u u₀ < δu :=
-    lt_of_lt_of_le (lt_of_le_of_lt (le_max_right (α := ℝ) _ _) hp) (min_le_right _ _)
-  -- the `u`-slice: `𝔼|β u₀ − β u| < ε/2` (the diagonal value is `0`)
-  have h2val : ∫ ω, |β u₀ ω - β u₀ ω| ∂μ = 0 := by
-    have hz : (fun ω : Ω ↦ |β u₀ ω - β u₀ ω|) = fun _ : Ω ↦ (0 : ℝ) := by
-      funext ω; rw [sub_self, abs_zero]
-    rw [hz, integral_zero]
-  have hterm1 : ∫ ω, |β u₀ ω - β u ω| ∂μ < ε / 2 := by
-    have h := hδuc hpu
-    rw [Real.dist_eq, h2val, sub_zero,
-      abs_of_nonneg (integral_nonneg fun ω ↦ abs_nonneg _)] at h
-    exact h
-  -- the `s`-slice term and the assembly
-  have hterm2 : |(∫ ω, |β s ω - β u₀ ω| ∂μ) - ∫ ω, |β s₀ ω - β u₀ ω| ∂μ| < ε / 2 := by
-    have h := hδsc hps
-    rw [Real.dist_eq] at h
-    exact h
-  calc |(∫ ω, |β s ω - β u ω| ∂μ) - ∫ ω, |β s₀ ω - β u₀ ω| ∂μ|
-      ≤ |(∫ ω, |β s ω - β u ω| ∂μ) - ∫ ω, |β s ω - β u₀ ω| ∂μ|
-          + |(∫ ω, |β s ω - β u₀ ω| ∂μ) - ∫ ω, |β s₀ ω - β u₀ ω| ∂μ| :=
-        abs_sub_le (∫ ω, |β s ω - β u ω| ∂μ) (∫ ω, |β s ω - β u₀ ω| ∂μ)
-          (∫ ω, |β s₀ ω - β u₀ ω| ∂μ)
-    _ ≤ ∫ ω, |β u₀ ω - β u ω| ∂μ
-          + |(∫ ω, |β s ω - β u₀ ω| ∂μ) - ∫ ω, |β s₀ ω - β u₀ ω| ∂μ| :=
-        add_le_add (hstep1 s u u₀) le_rfl
-    _ < ε := by rw [← add_halves ε]; exact add_lt_add hterm1 hterm2
-
-omit hB hδadap hδcont hδbdd hMadap hMeq in
-/-- **The drift-cell oscillation sum dies**: the summed mean-oscillation of `β` over the
-uniform cells, `∑_{k<n} ∫_{cellₖ} 𝔼|β_s − β_{tₖ}| ds`, tends to `0` as the mesh `T/n → 0`.
-Not used by the headline, whose drift block goes through `driftSum_expect_tendsto`.
-
-Route: the joint mean function `(s, u) ↦ 𝔼|β s − β u|` is continuous
-(`continuous_jointMeanAbsDiff`), hence uniformly continuous on the compact square `[0,T]²`
-(Heine–Cantor, `IsCompact.uniformContinuousOn_of_continuous`); on a cell of mesh `< δ` the
-mean is within `ε` of the diagonal value `𝔼|β_{tₖ} − β_{tₖ}| = 0`, and the cell lengths
-telescope to `T`. -/
-theorem driftOscSum_tendsto {β : ℝ≥0 → Ω → ℝ}
-    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
-    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
-    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db) (T : ℝ≥0) :
-    Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
-        ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-          (∫ ω, |β s ω - β (unifPart T n k) ω| ∂μ) ∂ItoIntegralL2.timeMeasure)
-      atTop (𝓝 0) := by
-  have hjoint : Continuous (fun p : ℝ≥0 × ℝ≥0 ↦ ∫ ω, |β p.1 ω - β p.2 ω| ∂μ) :=
-    continuous_jointMeanAbsDiff hBmeas hβadap hβcont hβbdd
-  -- the `s`-slice of the joint mean (the per-cell integrand family)
-  have hslice : ∀ u₀ : ℝ≥0, Continuous (fun s : ℝ≥0 ↦ ∫ ω, |β s ω - β u₀ ω| ∂μ) :=
-    fun u₀ ↦ hjoint.comp (Continuous.prodMk_left u₀)
-  have hDb : ∀ s ω, |β s ω| ≤ |Db| := fun s ω ↦ (hβbdd s ω).trans (le_abs_self Db)
-  refine Metric.tendsto_atTop.mpr fun ε hε ↦ ?_
-  obtain ⟨δ, hδ0, hδc⟩ := Metric.uniformContinuousOn_iff.1
-    ((isCompact_Icc.prod isCompact_Icc).uniformContinuousOn_of_continuous
-      hjoint.continuousOn) (ε / ((T : ℝ) + 1)) (by positivity)
-  obtain ⟨N, hN⟩ := exists_nat_gt ((T : ℝ) / δ)
-  refine ⟨max N 1, fun n hn ↦ ?_⟩
-  have hn1 : 0 < n := lt_of_lt_of_le one_pos (le_trans (le_max_right N 1) hn)
-  have hnN : N ≤ n := le_trans (le_max_left N 1) hn
-  have hn0 : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn1.ne'
-  have hNn : (↑N : ℝ) ≤ (↑n : ℝ) := by exact_mod_cast hnN
-  have hgb : ∀ (k : ℕ) (s : ℝ≥0) (ω : Ω),
-      |β s ω - β (unifPart T n k) ω| ≤ 2 * |Db| := by
-    intro k s ω
-    have h2 := abs_le_abs_add (a := β s ω) (b := β (unifPart T n k) ω)
-    linarith [hDb s ω, hDb (unifPart T n k) ω]
-  have hgk_le : ∀ (k : ℕ) (s : ℝ≥0),
-      (∫ ω, |β s ω - β (unifPart T n k) ω| ∂μ) ≤ 2 * |Db| := by
-    intro k s
-    refine le_trans (integral_mono_of_nonneg (Eventually.of_forall fun ω ↦ abs_nonneg _)
-      (integrable_const (2 * |Db|))
-      (Eventually.of_forall fun ω ↦ hgb k s ω)) ?_
-    rw [integral_const]
-    simp
-  have hcellint : ∀ k : ℕ, k < n → IntegrableOn
-      (fun s : ℝ≥0 ↦ ∫ ω, |β s ω - β (unifPart T n k) ω| ∂μ)
-      (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))) ItoIntegralL2.timeMeasure := by
-    intro k hk
-    haveI : IsFiniteMeasure
-        (ItoIntegralL2.timeMeasure.restrict (Set.Ioc (unifPart T n k)
-          (unifPart T n (k + 1)))) :=
-      ⟨by
-        rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
-          ItoIntegralL2.timeMeasure_Ioc]
-        exact ENNReal.ofReal_lt_top⟩
-    exact Integrable.of_bound
-      (μ := ItoIntegralL2.timeMeasure.restrict (Set.Ioc (unifPart T n k)
-        (unifPart T n (k + 1))))
-      (((hslice (unifPart T n k)).measurable.aestronglyMeasurable).mono_measure
-        Measure.restrict_le_self)
-      (2 * |Db|)
-      (Eventually.of_forall fun s ↦ by
-        show ‖∫ ω, |β s ω - β (unifPart T n k) ω| ∂μ‖ ≤ 2 * |Db|
-        rw [Real.norm_eq_abs, abs_of_nonneg (integral_nonneg fun ω ↦ abs_nonneg _)]
-        exact hgk_le k s)
-  have hmesh : (T : ℝ) / (n : ℝ) < δ := by
-    rw [div_lt_iff₀ (by exact_mod_cast hn1 : (0 : ℝ) < (n : ℝ)), mul_comm]
-    exact (div_lt_iff₀ hδ0).mp (lt_of_lt_of_le hN hNn)
-  -- per-cell: the mean is within `ε/(T+1)` of the vanishing diagonal
-  have hcell : ∀ k : ℕ, k < n →
-      ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-          (∫ ω, |β s ω - β (unifPart T n k) ω| ∂μ) ∂ItoIntegralL2.timeMeasure
-        ≤ (ε / ((T : ℝ) + 1)) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
-    intro k hk
-    haveI : IsFiniteMeasure
-        (ItoIntegralL2.timeMeasure.restrict (Set.Ioc (unifPart T n k)
-          (unifPart T n (k + 1)))) :=
-      ⟨by
-        rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
-          ItoIntegralL2.timeMeasure_Ioc]
-        exact ENNReal.ofReal_lt_top⟩
-    have hkt : unifPart T n k ≤ T := unifPart_le_T (Nat.le_of_lt hk)
-    have hkt1 : unifPart T n (k + 1) ≤ T := unifPart_le_T (Nat.succ_le_of_lt hk)
-    have huv : unifPart T n k ≤ unifPart T n (k + 1) := unifPart_mono T n (Nat.le_succ k)
-    have hcellen : ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) / (n : ℝ) := by
-      simp only [unifPart]
-      push_cast
-      field_simp
-      ring
-    have hdiag : (∫ ω, |β (unifPart T n k) ω - β (unifPart T n k) ω| ∂μ) = 0 := by
-      have hz : (fun ω : Ω ↦ |β (unifPart T n k) ω - β (unifPart T n k) ω|)
-          = fun _ : Ω ↦ (0 : ℝ) := by
-        funext ω; rw [sub_self, abs_zero]
-      rw [hz, integral_zero]
-    have hpt : ∀ s ∈ Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-        (∫ ω, |β s ω - β (unifPart T n k) ω| ∂μ) ≤ ε / ((T : ℝ) + 1) := by
-      intro s hs
-      have hst : unifPart T n k ≤ s := le_of_lt hs.1
-      have hsm : s ≤ unifPart T n (k + 1) := hs.2
-      have hge : (0 : ℝ) ≤ (s : ℝ) - ↑(unifPart T n k) := by
-        have h1 := NNReal.coe_nonneg (unifPart T n k)
-        have h2 := NNReal.coe_le_coe.mpr hst
-        linarith
-      have hps : dist s (unifPart T n k) < δ := by
-        rw [NNReal.dist_eq, abs_of_nonneg hge]
-        calc (s : ℝ) - ↑(unifPart T n k)
-            ≤ ↑(unifPart T n (k + 1)) - ↑(unifPart T n k) :=
-              sub_le_sub_right (by exact_mod_cast hsm) _
-          _ = (T : ℝ) / (n : ℝ) := hcellen
-          _ < δ := hmesh
-      have hmem : (s, unifPart T n k) ∈
-          Set.Icc (0:ℝ≥0) T ×ˢ Set.Icc (0:ℝ≥0) T :=
-        ⟨⟨le_trans zero_le hst, le_trans hsm hkt1⟩, ⟨le_trans zero_le le_rfl, hkt⟩⟩
-      have hmemq : (unifPart T n k, unifPart T n k) ∈
-          Set.Icc (0:ℝ≥0) T ×ˢ Set.Icc (0:ℝ≥0) T :=
-        ⟨⟨(zero_le : (0:ℝ≥0) ≤ unifPart T n k), hkt⟩,
-          ⟨(zero_le : (0:ℝ≥0) ≤ unifPart T n k), hkt⟩⟩
-      have hpq : dist (s, unifPart T n k) (unifPart T n k, unifPart T n k) < δ := by
-        refine lt_of_le_of_lt ?_ hps
-        rw [Prod.dist_eq]
-        refine max_le le_rfl ?_
-        exact le_trans (le_of_eq (dist_self (unifPart T n k))) dist_nonneg
-      have hval := hδc (s, unifPart T n k) hmem (unifPart T n k, unifPart T n k) hmemq hpq
-      rw [Real.dist_eq] at hval
-      have hval' : (∫ ω, |β s ω - β (unifPart T n k) ω| ∂μ) < ε / ((T : ℝ) + 1) := by
-        have h2 : (∫ ω, |β (unifPart T n k) ω - β (unifPart T n k) ω| ∂μ) = 0 := hdiag
-        rw [show ∫ ω, |β (s, unifPart T n k).1 ω - β (s, unifPart T n k).2 ω| ∂μ
-              = ∫ ω, |β s ω - β (unifPart T n k) ω| ∂μ from rfl,
-            show ∫ ω, |β (unifPart T n k, unifPart T n k).1 ω
-                - β (unifPart T n k, unifPart T n k).2 ω| ∂μ = 0 from h2,
-            sub_zero, abs_of_nonneg (integral_nonneg fun (ω : Ω) ↦
-              abs_nonneg (β s ω - β (unifPart T n k) ω))] at hval
-        exact hval
-      exact le_of_lt hval'
-    refine le_trans (setIntegral_mono_on (hcellint k hk) (integrableOn_const
-      (hs := ne_of_lt (by
-        rw [ItoIntegralL2.timeMeasure_Ioc]
-        exact ENNReal.ofReal_lt_top))) measurableSet_Ioc hpt) ?_
-    rw [setIntegral_const, smul_eq_mul, measureReal_def, ItoIntegralL2.timeMeasure_Ioc,
-      ENNReal.toReal_ofReal (sub_nonneg.mpr (NNReal.coe_le_coe.mpr huv)), mul_comm]
-  -- the cells telescope to `T`
-  have hsum : (∑ k ∈ Finset.range n,
-      ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-        (∫ ω, |β s ω - β (unifPart T n k) ω| ∂μ) ∂ItoIntegralL2.timeMeasure)
-      ≤ (ε / ((T : ℝ) + 1)) * (T : ℝ) := by
-    refine le_trans (Finset.sum_le_sum fun k hk ↦
-      hcell k (Finset.mem_range.mp hk)) ?_
-    rw [← Finset.mul_sum, sum_telescope (a := fun k : ℕ ↦ ((unifPart T n k : ℝ)))]
-    have hnT : unifPart T n n = T := by
-      have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn1.ne'
-      simp only [unifPart, div_self hne, one_mul]
-    have h0 : unifPart T n 0 = 0 := by simp only [unifPart]; norm_num
-    rw [hnT, h0]
-    simp
-  have hnn0 : (0 : ℝ) ≤ ∑ k ∈ Finset.range n,
-      ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-        (∫ ω, |β s ω - β (unifPart T n k) ω| ∂μ) ∂ItoIntegralL2.timeMeasure :=
-    Finset.sum_nonneg fun k _ ↦ integral_nonneg fun (s : ℝ≥0) ↦ integral_nonneg
-      (fun (ω : Ω) ↦ abs_nonneg (β s ω - β (unifPart T n k) ω))
-  rw [Real.dist_eq, sub_zero, abs_of_nonneg hnn0]
-  calc (∑ k ∈ Finset.range n,
-        ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-          (∫ ω, |β s ω - β (unifPart T n k) ω| ∂μ) ∂ItoIntegralL2.timeMeasure)
-      ≤ (ε / ((T : ℝ) + 1)) * (T : ℝ) := hsum
-    _ < ε := by
-        rw [div_mul_eq_mul_div, div_lt_iff₀ (by positivity : (0 : ℝ) < (T : ℝ) + 1)]
-        nlinarith [mul_lt_mul_of_pos_right (lt_add_one (T : ℝ)) hε]
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- The uniform-partition band split for the deterministic time measure: the `(0,T]`
-integral of a path-continuous integrand is the sum of its uniform cell integrals (the
-`timeMeasure` analogue of the stage-4 `uniform_band_split`). -/
-private theorem time_band_split {T : ℝ≥0} {n : ℕ} (hn : 0 < n) {F : ℝ≥0 → ℝ}
-    (hFcont : Continuous F) :
-    ∫ s in Set.Ioc (0:ℝ≥0) T, F s ∂ItoIntegralL2.timeMeasure
-      = ∑ k ∈ Finset.range n,
-          ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)), F s
-            ∂ItoIntegralL2.timeMeasure := by
-  have hTn : unifPart T n n = T := by
-    have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-    simp only [unifPart, div_self hne, one_mul]
-  -- a uniform cell bound for `F` (continuity on the compact `[0,T]`; the norm is on `ℝ`)
-  obtain ⟨C, hC⟩ := (isCompact_Icc (a := (0:ℝ≥0)) (b := T)).exists_bound_of_continuousOn
-    (f := F) hFcont.continuousOn
-  -- continuous integrands are integrable on any cell of `[0,T]` (finite measure;
-  -- the a.e. membership of the restricted measure via `ae_restrict_mem`)
-  have hintOf : ∀ a b : ℝ≥0, a ≤ b → b ≤ T →
-      IntegrableOn F (Set.Ioc a b) ItoIntegralL2.timeMeasure := by
-    intro a b hab hbT
-    haveI hfin : IsFiniteMeasure
-        (ItoIntegralL2.timeMeasure.restrict (Set.Ioc a b)) :=
-      ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
-        ItoIntegralL2.timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
-    refine Integrable.of_bound
-      (μ := ItoIntegralL2.timeMeasure.restrict (Set.Ioc a b))
-      ((hFcont.measurable.aestronglyMeasurable).mono_measure Measure.restrict_le_self)
-      C ?_
-    filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with z hz
-    have hmem : z ∈ Set.Icc (0:ℝ≥0) T :=
-      ⟨le_trans (show (0:ℝ≥0) ≤ a from zero_le) (le_of_lt hz.1), le_trans hz.2 hbT⟩
-    simpa [Real.norm_eq_abs] using hC z hmem
-  have key : ∀ m : ℕ, 0 < m → m ≤ n →
-      ∫ s in Set.Ioc (0:ℝ≥0) (unifPart T n m), F s ∂ItoIntegralL2.timeMeasure
-        = ∑ k ∈ Finset.range m,
-            ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)), F s
-              ∂ItoIntegralL2.timeMeasure := by
-    intro m
-    induction m with
-    | zero => intro hm; exact absurd hm (Nat.not_lt_zero 0)
-    | succ m ih =>
-      intro hm0 hmT
-      rcases Nat.eq_zero_or_pos m with hm0' | hm0'
-      · subst hm0'
-        have h0 : unifPart T n 0 = 0 := by
-          unfold unifPart
-          norm_num
-        rw [Finset.range_one, Finset.sum_singleton, h0]
-      · have hmt : unifPart T n m ≤ unifPart T n (m + 1) :=
-          unifPart_mono T n (Nat.le_succ m)
-        have hunion : (Set.Ioc (0:ℝ≥0) (unifPart T n m))
-            ∪ (Set.Ioc (unifPart T n m) (unifPart T n (m + 1)))
-            = (Set.Ioc (0:ℝ≥0) (unifPart T n (m + 1))) :=
-          Set.Ioc_union_Ioc_eq_Ioc
-            (show (0:ℝ≥0) ≤ unifPart T n m from by simp only [unifPart]; positivity) hmt
-        have hdisj : Disjoint (Set.Ioc (0:ℝ≥0) (unifPart T n m))
-            (Set.Ioc (unifPart T n m) (unifPart T n (m + 1))) :=
-          Set.disjoint_left.2 fun a ha hb ↦ by
-            have h1 : ((unifPart T n m : ℝ)) < (a : ℝ) := by exact_mod_cast hb.1
-            have h2 : (a : ℝ) ≤ ((unifPart T n m : ℝ)) := by exact_mod_cast ha.2
-            linarith
-        have hintU := hintOf (0:ℝ≥0) (unifPart T n m)
-          (by simp only [unifPart]; positivity)
-          (unifPart_le_T (le_trans (Nat.le_succ m) hmT))
-        have hintV := hintOf (unifPart T n m) (unifPart T n (m + 1)) hmt
-          (unifPart_le_T hmT)
-        calc ∫ s in Set.Ioc (0:ℝ≥0) (unifPart T n (m + 1)), F s
-              ∂ItoIntegralL2.timeMeasure
-            = ∫ s in (Set.Ioc (0:ℝ≥0) (unifPart T n m)
-                ∪ Set.Ioc (unifPart T n m) (unifPart T n (m + 1))), F s
-              ∂ItoIntegralL2.timeMeasure := by rw [hunion]
-          _ = ∫ s in Set.Ioc (0:ℝ≥0) (unifPart T n m), F s ∂ItoIntegralL2.timeMeasure
-              + ∫ s in Set.Ioc (unifPart T n m) (unifPart T n (m + 1)), F s
-                ∂ItoIntegralL2.timeMeasure :=
-              setIntegral_union hdisj measurableSet_Ioc hintU hintV
-          _ = ∑ k ∈ Finset.range m,
-                ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)), F s
-                  ∂ItoIntegralL2.timeMeasure
-              + ∫ s in Set.Ioc (unifPart T n m) (unifPart T n (m + 1)), F s
-                ∂ItoIntegralL2.timeMeasure := by rw [ih hm0' (by omega)]
-          _ = ∑ k ∈ Finset.range (m + 1),
-                ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)), F s
-                  ∂ItoIntegralL2.timeMeasure := (Finset.sum_range_succ _ m).symm
-  have hkey := key n hn (le_refl n)
-  rw [hTn] at hkey
-  exact hkey
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- **Pathwise Riemann–Stieltjes convergence of the drift block**: for a fixed path `ω`,
-the left-endpoint sums of `s ↦ g (X s ω)` against the drift primitive of `β_ω` converge to
-the path integral `∫₀ᵀ g (X s ω) · β s ω ds`. Route: the per-cell comparison
-`∫_{cellₖ} (g (X tₖ ω) − g (X s ω)) · β s ω ds`, each cell at most the mesh-oscillation of
-`g ∘ X_ω` on `[0,T]` (Heine–Cantor) times `|D_β|·cell`, the cells telescoping to `T`. -/
-private theorem driftRS_path_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω → ℝ}
-    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
-    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
-    (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
-    {g : ℝ → ℝ} (hgcont : Continuous g) (T : ℝ≥0) (ω : Ω) :
-    Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n, g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω))
-      atTop (𝓝 (∫ s in Set.Ioc (0:ℝ≥0) T, g (X s ω) * β s ω
-        ∂ItoIntegralL2.timeMeasure)) := by
-  set a : ℝ≥0 → ℝ := fun s ↦ g (X s ω) with ha_def
-  have hacont : Continuous a := hgcont.comp (hXcont ω)
-  have hbω : Continuous fun s : ℝ≥0 ↦ β s ω := hβcont ω
-  have hDb : ∀ s, |β s ω| ≤ |Db| := fun s ↦ (hβbdd s ω).trans (le_abs_self Db)
-  -- a uniform bound of `a` on `[0,T]`, and the cell-integrability helper (bounded + measurable
-  -- integrand on a finite-measure cell; the a.e. membership via `ae_restrict_mem`)
-  obtain ⟨Ca, hCa⟩ := (isCompact_Icc (a := (0:ℝ≥0)) (b := T)).exists_bound_of_continuousOn
-    (f := a) hacont.continuousOn
-  have hintOf : ∀ (H : ℝ≥0 → ℝ), Measurable H → ∀ (a b : ℝ≥0), a ≤ b → b ≤ T →
-      ∀ (Ch : ℝ), (∀ z ∈ Set.Ioc a b, |H z| ≤ Ch) →
-      IntegrableOn H (Set.Ioc a b) ItoIntegralL2.timeMeasure := by
-    intro H Hm a' b' hab hbT Ch hCh
-    haveI hfin : IsFiniteMeasure (ItoIntegralL2.timeMeasure.restrict (Set.Ioc a' b')) :=
-      ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
-        ItoIntegralL2.timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
-    refine Integrable.of_bound
-      (μ := ItoIntegralL2.timeMeasure.restrict (Set.Ioc a' b'))
-      (Hm.aestronglyMeasurable.mono_measure Measure.restrict_le_self) Ch ?_
-    filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with z hz
-    exact hCh z hz
-  -- the ε-N skeleton: uniform continuity of `a` on `[0,T]`
-  refine Metric.tendsto_atTop.mpr fun ε hε ↦ ?_
-  obtain ⟨δ, hδ0, hδc⟩ := Metric.uniformContinuousOn_iff.1
-    ((isCompact_Icc (a := (0:ℝ≥0)) (b := T)).uniformContinuousOn_of_continuous
-      (f := a) hacont.continuousOn) (ε / ((|Db| + 1) * ((T : ℝ) + 1))) (by positivity)
-  obtain ⟨N, hN⟩ := exists_nat_gt ((T : ℝ) / δ)
-  refine ⟨max N 1, fun n hn ↦ ?_⟩
-  have hn1 : 0 < n := lt_of_lt_of_le one_pos (le_trans (le_max_right N 1) hn)
-  have hnN : N ≤ n := le_trans (le_max_left N 1) hn
-  have hn0 : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn1.ne'
-  have hmesh : (T : ℝ) / (n : ℝ) < δ := by
-    rw [div_lt_iff₀ (by exact_mod_cast hn1 : (0 : ℝ) < (n : ℝ)), mul_comm]
-    exact (div_lt_iff₀ hδ0).mp (lt_of_lt_of_le hN (by exact_mod_cast hnN))
-  have hcellen : ∀ k : ℕ,
-      ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) / (n : ℝ) := by
-    intro k
-    simp only [unifPart]
-    push_cast
-    field_simp
-    ring
-  -- per-cell oscillation bound: `|a tₖ − a s| < ε'` on the cell
-  have hosc : ∀ (k : ℕ), k < n → ∀ s ∈ Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-      |a (unifPart T n k) - a s| < ε / ((|Db| + 1) * ((T : ℝ) + 1)) := by
-    intro k hk s hs
-    have hkt : unifPart T n k ≤ T := unifPart_le_T (Nat.le_of_lt hk)
-    have hkt1 : unifPart T n (k + 1) ≤ T := unifPart_le_T (Nat.succ_le_of_lt hk)
-    have hge : (0 : ℝ) ≤ (s : ℝ) - ↑(unifPart T n k) := by
-      have h1 := NNReal.coe_nonneg (unifPart T n k)
-      have h2 : ((unifPart T n k : ℝ)) ≤ (s : ℝ) := NNReal.coe_le_coe.mpr (le_of_lt hs.1)
-      linarith
-    have hps : dist s (unifPart T n k) < δ := by
-      rw [NNReal.dist_eq, abs_of_nonneg hge]
-      calc (s : ℝ) - ↑(unifPart T n k) ≤ ↑(unifPart T n (k + 1)) - ↑(unifPart T n k) :=
-            sub_le_sub_right (by exact_mod_cast hs.2) _
-        _ = (T : ℝ) / (n : ℝ) := hcellen k
-        _ < δ := hmesh
-    have hmem : s ∈ Set.Icc (0:ℝ≥0) T :=
-      ⟨le_trans (show (0:ℝ≥0) ≤ s from zero_le) le_rfl, le_trans hs.2 hkt1⟩
-    have hmemk : unifPart T n k ∈ Set.Icc (0:ℝ≥0) T :=
-      ⟨show (0:ℝ≥0) ≤ unifPart T n k from zero_le, hkt⟩
-    have hval := hδc s hmem (unifPart T n k) hmemk hps
-    rw [Real.dist_eq, abs_sub_comm] at hval
-    exact hval
-  -- the two cell splits: the sum becomes per-cell constant integrals, the target per-cell
-  have hsplitS : (∑ k ∈ Finset.range n, a (unifPart T n k)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω))
-      = ∑ k ∈ Finset.range n,
-          ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-            a (unifPart T n k) * β s ω ∂ItoIntegralL2.timeMeasure := by
-    refine Finset.sum_congr rfl fun k hk ↦ ?_
-    simp only [driftPrim]
-    rw [driftPath_add hβcont hβbdd (unifPart_mono T n (Nat.le_succ k)) ω, add_sub_cancel_left]
-    exact (integral_const_mul _ _).symm
-  have hsplitI := time_band_split (T := T) hn1 (F := fun s : ℝ≥0 ↦ a s * β s ω)
-    (hacont.mul hbω)
-  -- per-cell difference identity (both integrands integrable on the cell)
-  have hintmem : ∀ k : ℕ, k < n →
-      IntegrableOn (fun s : ℝ≥0 ↦ a (unifPart T n k) * β s ω)
-        (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))) ItoIntegralL2.timeMeasure ∧
-      IntegrableOn (fun s : ℝ≥0 ↦ a s * β s ω)
-        (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))) ItoIntegralL2.timeMeasure := by
-    intro k hk
-    have hkt : unifPart T n k ≤ T := unifPart_le_T (Nat.le_of_lt hk)
-    have hkt1 : unifPart T n (k + 1) ≤ T := unifPart_le_T (Nat.succ_le_of_lt hk)
-    have hak : ∀ z ∈ Set.Icc (0:ℝ≥0) T, |a z| ≤ Ca := fun z hz ↦ by
-      simpa [Real.norm_eq_abs] using hCa z hz
-    refine ⟨hintOf (fun s : ℝ≥0 ↦ a (unifPart T n k) * β s ω)
-        ((measurable_const : Measurable fun _ : ℝ≥0 ↦ a (unifPart T n k)).mul hbω.measurable)
-        (unifPart T n k) (unifPart T n (k + 1)) (unifPart_mono T n (Nat.le_succ k)) hkt1
-        (Ca * |Db|) (fun z hz ↦ by
-          have h1 : |a (unifPart T n k)| ≤ Ca := hak _ ⟨show (0:ℝ≥0) ≤ unifPart T n k from
-            zero_le, hkt⟩
-          rw [abs_mul]
-          exact mul_le_mul h1 (hDb z) (abs_nonneg _)
-            (le_trans (abs_nonneg (a (unifPart T n k))) h1)),
-      hintOf (fun s : ℝ≥0 ↦ a s * β s ω) (hacont.measurable.mul hbω.measurable)
-        (unifPart T n k) (unifPart T n (k + 1)) (unifPart_mono T n (Nat.le_succ k)) hkt1
-        (Ca * |Db|) (fun z hz ↦ by
-          have h1 : |a z| ≤ Ca := hak _ ⟨le_trans (show (0:ℝ≥0) ≤ unifPart T n k from zero_le)
-            (le_of_lt hz.1), le_trans hz.2 hkt1⟩
-          rw [abs_mul]
-          exact mul_le_mul h1 (hDb z) (abs_nonneg _)
-            (le_trans (abs_nonneg (a z)) h1))⟩
-  have hcelldiff : ∀ k : ℕ, k < n →
-      (∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-          a (unifPart T n k) * β s ω ∂ItoIntegralL2.timeMeasure)
-        - ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-          a s * β s ω ∂ItoIntegralL2.timeMeasure
-      = ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-          (a (unifPart T n k) - a s) * β s ω ∂ItoIntegralL2.timeMeasure := by
-    intro k hk
-    refine (integral_sub (hintmem k hk).1 (hintmem k hk).2).symm.trans ?_
-    refine integral_congr_ae (Eventually.of_forall fun s ↦ ?_)
-    show a (unifPart T n k) * β s ω - a s * β s ω = (a (unifPart T n k) - a s) * β s ω
-    ring
-  -- the |S_n − I| bound
-  have hmain : |(∑ k ∈ Finset.range n, a (unifPart T n k)
-          * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω))
-        - ∫ s in Set.Ioc (0:ℝ≥0) T, a s * β s ω ∂ItoIntegralL2.timeMeasure|
-      ≤ (ε / ((|Db| + 1) * ((T : ℝ) + 1))) * |Db| * (T : ℝ) := by
-    have key : (∑ k ∈ Finset.range n, a (unifPart T n k)
-          * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω))
-        - ∫ s in Set.Ioc (0:ℝ≥0) T, a s * β s ω ∂ItoIntegralL2.timeMeasure
-        = ∑ k ∈ Finset.range n,
-            ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-              (a (unifPart T n k) - a s) * β s ω ∂ItoIntegralL2.timeMeasure := by
-      rw [hsplitS, hsplitI, ← Finset.sum_sub_distrib]
-      exact Finset.sum_congr rfl fun k hk ↦ hcelldiff k (Finset.mem_range.mp hk)
-    rw [key]
-    have hintdiff : ∀ k : ℕ, k < n →
-        IntegrableOn (fun s : ℝ≥0 ↦ (a (unifPart T n k) - a s) * β s ω)
-          (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))) ItoIntegralL2.timeMeasure := by
-      intro k hk
-      refine hintOf (fun s : ℝ≥0 ↦ (a (unifPart T n k) - a s) * β s ω)
-        ((measurable_const.sub hacont.measurable).mul hbω.measurable)
-        (unifPart T n k) (unifPart T n (k + 1))
-        (unifPart_mono T n (Nat.le_succ k)) (unifPart_le_T (Nat.succ_le_of_lt hk))
-        (2 * Ca * |Db|) ?_
-      intro z hz
-      have h1 : |a (unifPart T n k)| ≤ Ca := by
-        simpa [Real.norm_eq_abs] using hCa (unifPart T n k)
-          ⟨show (0:ℝ≥0) ≤ unifPart T n k from zero_le, unifPart_le_T (Nat.le_of_lt hk)⟩
-      have h2 : |a z| ≤ Ca := by
-        simpa [Real.norm_eq_abs] using hCa z
-          ⟨le_trans (show (0:ℝ≥0) ≤ unifPart T n k from zero_le) (le_of_lt hz.1),
-            le_trans hz.2 (unifPart_le_T (Nat.succ_le_of_lt hk))⟩
-      have h4 : |a (unifPart T n k) - a z| ≤ 2 * Ca := by
-        have hsub := abs_le_abs_add (a := a (unifPart T n k)) (b := a z)
-        linarith
-      rw [abs_mul]
-      have hCa0 : 0 ≤ Ca := le_trans (abs_nonneg (a (unifPart T n k))) h1
-      exact mul_le_mul h4 (hDb z) (abs_nonneg _) (by linarith)
-    have hb0 : 0 ≤ ε / ((|Db| + 1) * ((T : ℝ) + 1)) :=
-      div_nonneg hε.le (by positivity)
-    have hintabs : ∀ k : ℕ, k < n →
-        IntegrableOn (fun s : ℝ≥0 ↦ |a (unifPart T n k) - a s| * |β s ω|)
-          (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))) ItoIntegralL2.timeMeasure := by
-      intro k hk
-      refine hintOf (fun s : ℝ≥0 ↦ |a (unifPart T n k) - a s| * |β s ω|)
-        (((measurable_const.sub hacont.measurable).abs).mul hbω.measurable.abs)
-        (unifPart T n k) (unifPart T n (k + 1))
-        (unifPart_mono T n (Nat.le_succ k)) (unifPart_le_T (Nat.succ_le_of_lt hk))
-        ((ε / ((|Db| + 1) * ((T : ℝ) + 1))) * |Db|) ?_
-      intro z hz
-      rw [abs_mul, abs_abs, abs_abs]
-      exact mul_le_mul (le_of_lt (hosc k hk z hz)) (hDb z) (abs_nonneg _) hb0
-    calc |∑ k ∈ Finset.range n,
-          ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-            (a (unifPart T n k) - a s) * β s ω ∂ItoIntegralL2.timeMeasure|
-        ≤ ∑ k ∈ Finset.range n,
-          |∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-            (a (unifPart T n k) - a s) * β s ω ∂ItoIntegralL2.timeMeasure| :=
-          Finset.abs_sum_le_sum_abs _ _
-      _ ≤ ∑ k ∈ Finset.range n,
-          ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-            |(a (unifPart T n k) - a s) * β s ω| ∂ItoIntegralL2.timeMeasure :=
-          Finset.sum_le_sum fun k _ ↦ abs_integral_le_integral_abs
-      _ = ∑ k ∈ Finset.range n,
-          ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-            |a (unifPart T n k) - a s| * |β s ω| ∂ItoIntegralL2.timeMeasure :=
-          Finset.sum_congr rfl fun k _ ↦ setIntegral_congr_ae measurableSet_Ioc
-            (Eventually.of_forall fun s _ ↦ abs_mul _ _)
-      _ ≤ ∑ k ∈ Finset.range n,
-          ∫ s in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)),
-            (ε / ((|Db| + 1) * ((T : ℝ) + 1))) * |Db| ∂ItoIntegralL2.timeMeasure :=
-          Finset.sum_le_sum fun k hk ↦ by
-            refine setIntegral_mono_on (hintabs k (Finset.mem_range.mp hk))
-              (hintOf (fun _ : ℝ≥0 ↦ (ε / ((|Db| + 1) * ((T : ℝ) + 1))) * |Db|)
-                measurable_const (unifPart T n k) (unifPart T n (k + 1))
-                (unifPart_mono T n (Nat.le_succ k))
-                (unifPart_le_T (Nat.succ_le_of_lt (Finset.mem_range.mp hk))) _
-                (fun z _ ↦ le_refl _))
-              measurableSet_Ioc ?_
-            intro z hz
-            exact mul_le_mul (le_of_lt (hosc k (Finset.mem_range.mp hk) z hz)) (hDb z)
-              (abs_nonneg _) hb0
-      _ = (ε / ((|Db| + 1) * ((T : ℝ) + 1))) * |Db| * (T : ℝ) := by
-          have hcellconst : ∀ j : ℕ, j < n →
-              ∫ s in Set.Ioc (unifPart T n j) (unifPart T n (j + 1)),
-                (ε / ((|Db| + 1) * ((T : ℝ) + 1))) * |Db| ∂ItoIntegralL2.timeMeasure
-              = (ε / ((|Db| + 1) * ((T : ℝ) + 1))) * |Db|
-                  * ((unifPart T n (j + 1) : ℝ) - unifPart T n j) := by
-            intro j hj
-            rw [MeasureTheory.setIntegral_const, smul_eq_mul, measureReal_def,
-              ItoIntegralL2.timeMeasure_Ioc,
-              ENNReal.toReal_ofReal (sub_nonneg.mpr
-                (NNReal.coe_le_coe.mpr (unifPart_mono T n (Nat.le_succ j))))]
-            have hfin : ((unifPart T n (j + 1) : ℝ) - unifPart T n j)
-                * ((ε / ((|Db| + 1) * ((T : ℝ) + 1))) * |Db|)
-              = (ε / ((|Db| + 1) * ((T : ℝ) + 1))) * |Db|
-                * ((unifPart T n (j + 1) : ℝ) - unifPart T n j) := by ring
-            exact hfin
-          rw [Finset.sum_congr rfl fun j hj ↦ hcellconst j (Finset.mem_range.mp hj),
-            ← Finset.mul_sum, sum_telescope (a := fun k : ℕ ↦ ((unifPart T n k : ℝ)))]
-          have hnT : unifPart T n n = T := by
-            have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn1.ne'
-            simp only [unifPart, div_self hne, one_mul]
-          have h0 : unifPart T n 0 = 0 := by simp only [unifPart]; norm_num
-          rw [hnT, h0]
-          simp
-  -- conclusion: `ε'·|Db|·T < ε`
-  rw [Real.dist_eq]
-  have hQ : (0:ℝ) < (|Db| + 1) * ((T : ℝ) + 1) := by positivity
-  have hlt : (|Db| * (T : ℝ)) < (|Db| + 1) * ((T : ℝ) + 1) := by
-    have h1 : (0:ℝ) ≤ |Db| := abs_nonneg Db
-    have h2 : (0:ℝ) ≤ (T:ℝ) := NNReal.coe_nonneg T
-    nlinarith
-  calc |(∑ k ∈ Finset.range n, a (unifPart T n k)
-          * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω))
-        - ∫ s in Set.Ioc (0:ℝ≥0) T, a s * β s ω ∂ItoIntegralL2.timeMeasure|
-      ≤ (ε / ((|Db| + 1) * ((T : ℝ) + 1))) * |Db| * (T : ℝ) := hmain
-    _ < ε := by
-        rw [show (ε / ((|Db| + 1) * ((T : ℝ) + 1))) * |Db| * (T : ℝ)
-              = (ε * (|Db| * (T : ℝ))) / ((|Db| + 1) * ((T : ℝ) + 1)) from by ring,
-          div_lt_iff₀ hQ]
-        exact mul_lt_mul_of_pos_left hlt hε
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- **The drift block at the expectation level (DCT)**: the expectations of the per-cell
-drift sums — `𝔼[∑ₖ g (X tₖ) · (driftPrim β tₖ₊₁ − driftPrim β tₖ)]` — converge to the
+drift sums — `𝔼[∑ₖ g (X tₖ) · (AdaptedDrift.driftPath β tₖ₊₁ − AdaptedDrift.driftPath β tₖ)]`
+— converge to the
 expectation of the pathwise limit. Route: per-path Riemann–Stieltjes convergence
-(`driftRS_path_tendsto`) under the global domination `|S_n| ≤ C₁·|D_β|·T` (the drift
-primitive is `D_β`-Lipschitz per cell, `abs_driftPath_sub_le`; the cells telescope to `T`;
+(`AdaptedDrift.tendsto_sum_mul_driftPath_sub` with weight `s ↦ g (X s ω)`, bounded by `C₁`)
+under the global domination `|S_n| ≤ C₁·|D_β|·T` (the drift primitive is `D_β`-Lipschitz
+per cell (`AdaptedDrift.abs_driftPath_sub_le`); the cells telescope to `T`;
 `|g| ≤ C₁`). -/
 theorem driftSum_expect_tendsto (hBmeas : ∀ t, Measurable (B t))
     {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω → ℝ} (T : ℝ≥0)
@@ -4151,10 +3292,10 @@ theorem driftSum_expect_tendsto (hBmeas : ∀ t, Measurable (B t))
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
     {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
     (hXadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (X t))
-    (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
+    (hXcont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ X s ω)
     {g : ℝ → ℝ} {C1 : ℝ} (hgcont : Continuous g) (hg1 : ∀ x, |g x| ≤ C1) :
     Tendsto (fun n : ℕ ↦ ∫ ω, ∑ k ∈ Finset.range n, g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ∂μ)
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ∂μ)
       atTop (𝓝 (∫ ω, (∫ s in Set.Ioc (0:ℝ≥0) T, g (X s ω) * β s ω
         ∂ItoIntegralL2.timeMeasure) ∂μ)) := by
   have hC1 : (0:ℝ) ≤ C1 := le_trans (abs_nonneg _) (hg1 0)
@@ -4163,18 +3304,18 @@ theorem driftSum_expect_tendsto (hBmeas : ∀ t, Measurable (B t))
     fun t ↦ (hXadap t).measurable.mono ((natFiltration hBmeas).le t) le_rfl
   have hgx : ∀ t : ℝ≥0, Measurable (fun ω ↦ g (X t ω)) :=
     fun t ↦ hgcont.measurable.comp (hXm t)
-  have hdp : ∀ t : ℝ≥0, Measurable (driftPrim β t) :=
-    fun t ↦ (driftPrim_adapted hBmeas hβadap hβcont hβbdd t).measurable.mono
+  have hdp : ∀ t : ℝ≥0, Measurable (driftPath β t) :=
+    fun t ↦ (stronglyMeasurable_driftPath hBmeas hβadap hβcont hβbdd t).measurable.mono
       ((natFiltration hBmeas).le t) le_rfl
   have hmeasS : ∀ n : ℕ, Measurable (fun ω ↦ ∑ k ∈ Finset.range n,
       g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)) :=
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)) :=
     fun n ↦ Finset.measurable_sum _ fun k _ ↦
       (hgx _).mul ((hdp _).sub (hdp _))
   -- the uniform bound `|S_n| ≤ C₁·|D_β|·T`
   have hbound : ∀ n : ℕ, ∀ ω : Ω,
       |∑ k ∈ Finset.range n, g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)|
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)|
       ≤ C1 * |Db| * (T : ℝ) := by
     intro n ω
     rcases Nat.eq_zero_or_pos n with rfl | hn
@@ -4185,48 +3326,48 @@ theorem driftSum_expect_tendsto (hBmeas : ∀ t, Measurable (B t))
         simp only [unifPart, div_self hne, one_mul]
       have h0 : unifPart T n 0 = 0 := by simp only [unifPart]; norm_num
       calc |∑ k ∈ Finset.range n, g (X (unifPart T n k) ω)
-            * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)|
+            * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)|
           ≤ ∑ k ∈ Finset.range n, |g (X (unifPart T n k) ω)
-              * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)| :=
+              * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)| :=
             Finset.abs_sum_le_sum_abs _ _
         _ = ∑ k ∈ Finset.range n, |g (X (unifPart T n k) ω)|
-              * |driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω| :=
+              * |driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω| :=
             Finset.sum_congr rfl fun k _ ↦ abs_mul _ _
-        _ ≤ ∑ k ∈ Finset.range n, C1 * |driftPrim β (unifPart T n (k + 1)) ω
-              - driftPrim β (unifPart T n k) ω| :=
+        _ ≤ ∑ k ∈ Finset.range n, C1 * |driftPath β (unifPart T n (k + 1)) ω
+              - driftPath β (unifPart T n k) ω| :=
             Finset.sum_le_sum fun k _ ↦
               mul_le_mul_of_nonneg_right (hg1 (X (unifPart T n k) ω)) (abs_nonneg _)
         _ ≤ ∑ k ∈ Finset.range n, C1 * (|Db| * ((unifPart T n (k + 1) : ℝ)
               - unifPart T n k)) :=
             Finset.sum_le_sum fun k hk ↦ by
               refine mul_le_mul_of_nonneg_left ?_ hC1
-              simp only [driftPrim]
-              refine le_trans (abs_driftPath_sub_le hβcont hβbdd (unifPart T n k)
-                (unifPart T n (k + 1)) ω) ?_
               have hsub : (0:ℝ) ≤ (unifPart T n (k + 1) : ℝ) - unifPart T n k :=
                 sub_nonneg.mpr (NNReal.coe_le_coe.mpr (unifPart_mono T n (Nat.le_succ k)))
-              rw [abs_of_nonneg hsub]
-              exact mul_le_mul_of_nonneg_right (le_abs_self Db) hsub
+              exact (abs_driftPath_sub_le hβcont hβbdd
+                (unifPart_mono T n (Nat.le_succ k)) ω).trans
+                (mul_le_mul_of_nonneg_right (le_abs_self Db) hsub)
         _ = C1 * |Db| * (T : ℝ) := by
             have hcomm : ∀ k ∈ Finset.range n, C1 * (|Db| * ((unifPart T n (k + 1) : ℝ)
                   - unifPart T n k))
                 = (C1 * |Db|) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) :=
               fun k _ ↦ by ring
             rw [Finset.sum_congr rfl hcomm, ← Finset.mul_sum,
-              sum_telescope (a := fun k : ℕ ↦ ((unifPart T n k : ℝ))), hnT, h0,
+              Finset.sum_range_sub (fun k : ℕ ↦ ((unifPart T n k : ℝ))), hnT, h0,
               NNReal.coe_zero, sub_zero]
   refine tendsto_integral_of_dominated_convergence (fun _ : Ω ↦ C1 * |Db| * (T : ℝ))
     (fun n ↦ (hmeasS n).aestronglyMeasurable) (integrable_const _)
     (fun n ↦ Eventually.of_forall fun ω ↦ by
       simpa [Real.norm_eq_abs] using hbound n ω)
-    (Eventually.of_forall fun ω ↦ driftRS_path_tendsto hβcont hβbdd hXcont hgcont T ω)
+    (hXcont.mono fun ω hω ↦ tendsto_sum_mul_driftPath_sub hβcont hβbdd T ω
+      (g := fun s ↦ g (X s ω)) (hgcont.comp hω).continuousOn fun s ↦ hg1 (X s ω))
 
 omit hB hδadap hδcont hδbdd hMadap hMeq in
 /-- **The drift block** (`driftBlock_tendsto`): for `X` adapted and path-continuous, `g`
 continuous with `|g| ≤ C₁`, and `β` bounded adapted path-continuous, the per-cell drift
-sums of the adapted assembly converge to the time-integral of the frozen means,
+sums of the adapted assembly converge to the time integral of the means `𝔼[g (X_s) β_s]`,
 
-  `∑ₖ 𝔼[g (X tₖ) · (driftPrim β tₖ₊₁ − driftPrim β tₖ)] → ∫₀ᵀ 𝔼[g (X_s) β_s] ds`.
+  `∑ₖ 𝔼[g (X tₖ) · (AdaptedDrift.driftPath β tₖ₊₁ − AdaptedDrift.driftPath β tₖ)]
+  → ∫₀ᵀ 𝔼[g (X_s) β_s] ds`.
 
 Route: the DCT convergence `driftSum_expect_tendsto` (per-path Riemann–Stieltjes sums +
 global domination) for the expectation-of-sum form, the finite-sum/expectation interchange,
@@ -4237,50 +3378,49 @@ theorem driftBlock_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω →
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
     {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
     (hXadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (X t))
-    (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
+    (hXcont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ X s ω)
     {g : ℝ → ℝ} {C1 : ℝ} (hgcont : Continuous g) (hg1 : ∀ x, |g x| ≤ C1) :
     Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
         ∫ ω, g (X (unifPart T n k) ω)
-          * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ∂μ)
+          * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ∂μ)
       atTop (𝓝 (∫ s in Set.Ioc (0:ℝ≥0) T,
           (∫ ω, g (X s ω) * β s ω ∂μ) ∂ItoIntegralL2.timeMeasure)) := by
   have hC1 : (0:ℝ) ≤ C1 := le_trans (abs_nonneg _) (hg1 0)
   -- the DCT limit in expectation-of-sum form, bridged to sum-of-expectations form
   have hA : Tendsto (fun n : ℕ ↦ ∫ ω, ∑ k ∈ Finset.range n, g (X (unifPart T n k) ω)
-      * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ∂μ)
+      * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ∂μ)
     atTop (𝓝 (∫ ω, (∫ s in Set.Ioc (0:ℝ≥0) T, g (X s ω) * β s ω
       ∂ItoIntegralL2.timeMeasure) ∂μ)) :=
     driftSum_expect_tendsto hBmeas T hβadap hβcont hβbdd hXadap hXcont hgcont hg1
   have hswap : ∀ n : ℕ, (∑ k ∈ Finset.range n, ∫ ω, g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ∂μ)
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ∂μ)
       = ∫ ω, ∑ k ∈ Finset.range n, g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ∂μ := by
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ∂μ := by
     intro n
     have hint : ∀ k ∈ Finset.range n, Integrable (fun ω ↦ g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)) μ := by
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)) μ := by
       intro k hk
       have hXk : Measurable (X (unifPart T n k)) :=
         (hXadap (unifPart T n k)).measurable.mono
           ((natFiltration hBmeas).le (unifPart T n k)) le_rfl
-      have hdp1 : Measurable (driftPrim β (unifPart T n (k + 1))) :=
-        (driftPrim_adapted hBmeas hβadap hβcont hβbdd
+      have hdp1 : Measurable (driftPath β (unifPart T n (k + 1))) :=
+        (stronglyMeasurable_driftPath hBmeas hβadap hβcont hβbdd
           (unifPart T n (k + 1))).measurable.mono
           ((natFiltration hBmeas).le (unifPart T n (k + 1))) le_rfl
-      have hdp0 : Measurable (driftPrim β (unifPart T n k)) :=
-        (driftPrim_adapted hBmeas hβadap hβcont hβbdd (unifPart T n k)).measurable.mono
+      have hdp0 : Measurable (driftPath β (unifPart T n k)) :=
+        (stronglyMeasurable_driftPath hBmeas hβadap hβcont hβbdd (unifPart T n k)).measurable.mono
           ((natFiltration hBmeas).le (unifPart T n k)) le_rfl
       have hm : Measurable (fun ω ↦ g (X (unifPart T n k) ω)
-          * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)) :=
+          * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)) :=
         (hgcont.measurable.comp hXk).mul (hdp1.sub hdp0)
       refine Integrable.of_bound hm.aestronglyMeasurable (C1 * |Db| * (T : ℝ) + 1) ?_
       filter_upwards with ω
       show ‖g (X (unifPart T n k) ω)
-          * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)‖
+          * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)‖
         ≤ C1 * |Db| * (T : ℝ) + 1
       rw [Real.norm_eq_abs, abs_mul]
-      have hD : |driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω|
+      have hD : |driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω|
           ≤ |Db| * (T : ℝ) := by
-        simp only [driftPrim]
         have hsub : (0:ℝ) ≤ (unifPart T n (k + 1) : ℝ) - unifPart T n k :=
           sub_nonneg.mpr (NNReal.coe_le_coe.mpr (unifPart_mono T n (Nat.le_succ k)))
         have hcellle : (unifPart T n (k + 1) : ℝ) - unifPart T n k ≤ (T : ℝ) := by
@@ -4289,28 +3429,27 @@ theorem driftBlock_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω →
               (Finset.mem_range.mp hk)))
           have h2 := NNReal.coe_nonneg (unifPart T n k)
           linarith
-        refine le_trans (abs_driftPath_sub_le hβcont hβbdd (unifPart T n k)
-          (unifPart T n (k + 1)) ω) ?_
-        rw [abs_of_nonneg hsub]
-        exact mul_le_mul (le_abs_self Db) hcellle hsub (abs_nonneg Db)
+        exact (abs_driftPath_sub_le hβcont hβbdd
+          (unifPart_mono T n (Nat.le_succ k)) ω).trans
+          (mul_le_mul (le_abs_self Db) hcellle hsub (abs_nonneg Db))
       refine le_trans
         (mul_le_mul (hg1 (X (unifPart T n k) ω)) hD (abs_nonneg _) hC1) ?_
       linarith
     exact (integral_finsetSum _ hint).symm
   have hB : Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
       ∫ ω, g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ∂μ)
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ∂μ)
     atTop (𝓝 (∫ ω, (∫ s in Set.Ioc (0:ℝ≥0) T, g (X s ω) * β s ω
       ∂ItoIntegralL2.timeMeasure) ∂μ)) :=
     Tendsto.congr' (Eventually.of_forall fun n ↦ (hswap n).symm) hA
   -- the Fubini interchange on the limit integrand
   have hβm : ∀ t : ℝ≥0, Measurable (β t) :=
     fun t ↦ (hβadap t).measurable.mono ((natFiltration hBmeas).le t) le_rfl
-  have hEq := expectation_pathIntegral_eq (μ := μ)
+  have hEq := expectation_pathIntegral_eq_of_ae (μ := μ)
     (w := fun s ω ↦ g (X s ω) * β s ω)
     (fun s ↦ (hgcont.measurable.comp ((hXadap s).measurable.mono
       ((natFiltration hBmeas).le s) le_rfl)).mul (hβm s))
-    (fun ω ↦ (hgcont.comp (hXcont ω)).mul (hβcont ω))
+    (hXcont.mono fun ω h ↦ (hgcont.comp h).mul (hβcont ω))
     (mul_nonneg hC1 (abs_nonneg Db))
     (fun s ω ↦ by
       rw [abs_mul]
@@ -4326,9 +3465,9 @@ Three convergences consumed by `itoDrift_expectation_identity_adapted`; each sta
 only the limit `0`, and the bounds below are what the proofs establish:
 
 * `quadDriftSqSum_tendsto` — the drift² corrections `O(mesh)`:
-  `∑ₖ |𝔼[g (X tₖ)·(Δ(driftPrim β))ₖ²]| ≤ 2·C₂·D_β²·T²/(n+1) → 0`;
+  `∑ₖ |𝔼[g (X tₖ)·(Δ(AdaptedDrift.driftPath β))ₖ²]| ≤ 2·C₂·D_β²·T²/(n+1) → 0`;
 * `quadCrossSum_tendsto` — the drift–martingale cross corrections `O(√mesh)`:
-  `∑ₖ |𝔼[g (X tₖ)·Δ(driftPrim β)ₖ·ΔMₖ]| ≤ 2·C₂·D_β·|D_δ|·T·√T/√(n+1) → 0`
+  `∑ₖ |𝔼[g (X tₖ)·Δ(AdaptedDrift.driftPath β)ₖ·ΔMₖ]| ≤ 2·C₂·D_β·|D_δ|·T·√T/√(n+1) → 0`
   (the `D_β·cell`-bounded drift increment paired against the `D_δ²·cell`-energy
   martingale increment, `trueIncr_sq_le`);
 * `taylorRemainderSum_tendsto` — the Taylor remainder: `|𝔼[∑ₖ Rₖ]|` is at most
@@ -4377,10 +3516,10 @@ private theorem tendsto_inv_sqrt_nat_add :
   rw [Real.sqrt_div (by norm_num : (0 : ℝ) ≤ 1), Real.sqrt_one]
 
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- **The drift² corrections of the quadratic block die** (`O(mesh)`): the summed absolute
-expectations of the frozen weight against the drift-increment squares are at most
-`2·C₂·D_β²·T²/(n+1)` — each drift increment is pointwise `D_β·cell`
-(`abs_driftPath_sub_le`) and the cells telescope to `T`. -/
+/-- **The drift² corrections of the quadratic block die**: the statement is the limit `0`.
+The proof bounds the summed absolute expectations of the frozen weight against the
+drift-increment squares by `2·C₂·D_β²·T²/(n+1)` (`O(mesh)`) — each drift increment is
+pointwise `D_β·cell` (`AdaptedDrift.abs_driftPath_sub_le`) and the cells telescope to `T`. -/
 theorem quadDriftSqSum_tendsto (hBmeas : ∀ t, Measurable (B t)) {β : ℝ≥0 → Ω → ℝ}
     {X : ℝ≥0 → Ω → ℝ} (T : ℝ≥0)
     (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
@@ -4390,78 +3529,76 @@ theorem quadDriftSqSum_tendsto (hBmeas : ∀ t, Measurable (B t)) {β : ℝ≥0 
     {g : ℝ → ℝ} {C2 : ℝ} (hgcont : Continuous g) (hg2 : ∀ x, |g x| ≤ C2) :
     Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
         ∫ ω, g (X (unifPart T n k) ω)
-          * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ)
+          * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2 ∂μ)
       atTop (𝓝 0) := by
   have hC2 : (0 : ℝ) ≤ C2 := le_trans (abs_nonneg _) (hg2 0)
   -- per-cell absolute bound
   have hcell : ∀ n : ℕ, ∀ k : ℕ,
       |∫ ω, g (X (unifPart T n k) ω)
-          * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ|
+          * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2 ∂μ|
         ≤ C2 * Db ^ 2 * ((T : ℝ) / (n : ℝ)) ^ 2 := by
     intro n k
     have hXk : Measurable (X (unifPart T n k)) :=
       (hXadap (unifPart T n k)).measurable.mono
         ((natFiltration hBmeas).le (unifPart T n k)) le_rfl
-    have hdpm : Measurable (driftPrim β (unifPart T n (k + 1))) :=
-      (driftPrim_adapted hBmeas hβadap hβcont hβbdd
+    have hdpm : Measurable (driftPath β (unifPart T n (k + 1))) :=
+      (stronglyMeasurable_driftPath hBmeas hβadap hβcont hβbdd
         (unifPart T n (k + 1))).measurable.mono
         ((natFiltration hBmeas).le (unifPart T n (k + 1))) le_rfl
-    have hdp0 : Measurable (driftPrim β (unifPart T n k)) :=
-      (driftPrim_adapted hBmeas hβadap hβcont hβbdd
+    have hdp0 : Measurable (driftPath β (unifPart T n k)) :=
+      (stronglyMeasurable_driftPath hBmeas hβadap hβcont hβbdd
         (unifPart T n k)).measurable.mono
         ((natFiltration hBmeas).le (unifPart T n k)) le_rfl
     have hmeas : Measurable (fun ω ↦ g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2) :=
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2) :=
       (hgcont.measurable.comp hXk).mul ((hdpm.sub hdp0).pow_const 2)
     have hbound : ∀ ω : Ω,
         |g (X (unifPart T n k) ω)
-          * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2|
+          * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2|
         ≤ C2 * Db ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 2 := by
       intro ω
       have h1 : |g (X (unifPart T n k) ω)| ≤ C2 := hg2 _
-      have h2 : |driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω|
-          ≤ Db * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
-        have h := abs_driftPath_sub_le hβcont hβbdd (unifPart T n k)
-          (unifPart T n (k + 1)) ω
-        rwa [abs_of_nonneg (sub_nonneg.mpr
-          (NNReal.coe_le_coe.mpr (unifPart_mono T n (Nat.le_succ k))))] at h
+      have h2 : |driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω|
+          ≤ Db * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) :=
+        abs_driftPath_sub_le hβcont hβbdd
+          (unifPart_mono T n (Nat.le_succ k)) ω
       have hcellnn : (0 : ℝ) ≤ (unifPart T n (k + 1) : ℝ) - unifPart T n k :=
         sub_nonneg.mpr (NNReal.coe_le_coe.mpr (unifPart_mono T n (Nat.le_succ k)))
-      have h3 : (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2
+      have h3 : (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2
           ≤ (Db * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 2 := by
         refine (sq_le_sq).mpr ?_
         rw [abs_mul, abs_of_nonneg hcellnn]
         rcases le_total 0 Db with hDb | hDb
         · rw [abs_of_nonneg hDb]; exact h2
         · rw [abs_of_nonpos hDb]
-          have habs : (0 : ℝ) ≤ |driftPrim β (unifPart T n (k + 1)) ω
-              - driftPrim β (unifPart T n k) ω| := abs_nonneg _
+          have habs : (0 : ℝ) ≤ |driftPath β (unifPart T n (k + 1)) ω
+              - driftPath β (unifPart T n k) ω| := abs_nonneg _
           have hnonpos : Db * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ≤ 0 :=
             mul_nonpos_of_nonpos_of_nonneg hDb hcellnn
           linarith
-      rw [abs_mul, abs_pow (a := driftPrim β (unifPart T n (k + 1)) ω
-        - driftPrim β (unifPart T n k) ω) 2, sq_abs]
+      rw [abs_mul, abs_pow (a := driftPath β (unifPart T n (k + 1)) ω
+        - driftPath β (unifPart T n k) ω) 2, sq_abs]
       calc |g (X (unifPart T n k) ω)|
-            * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2
+            * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2
           ≤ C2 * (Db * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 2 :=
             mul_le_mul h1 h3 (sq_nonneg _) hC2
         _ = C2 * Db ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 2 := by ring
     have hint : Integrable (fun ω ↦ g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2) μ :=
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2) μ :=
       Integrable.of_bound hmeas.aestronglyMeasurable
         (C2 * Db ^ 2 * ((T : ℝ) / (n : ℝ)) ^ 2 + 1)
         (Eventually.of_forall fun ω ↦ by
           show ‖g (X (unifPart T n k) ω)
-              * (driftPrim β (unifPart T n (k + 1)) ω
-                - driftPrim β (unifPart T n k) ω) ^ 2‖ ≤ _
+              * (driftPath β (unifPart T n (k + 1)) ω
+                - driftPath β (unifPart T n k) ω) ^ 2‖ ≤ _
           rw [Real.norm_eq_abs]
           have h := hbound ω
           rw [cellLen_eq (T := T) (n := n) k] at h
           linarith)
     calc |∫ ω, g (X (unifPart T n k) ω)
-            * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ|
+            * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2 ∂μ|
         ≤ ∫ ω, |g (X (unifPart T n k) ω)
-            * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2| ∂μ :=
+            * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2| ∂μ :=
           abs_integral_le_integral_abs
       _ ≤ ∫ ω, (C2 * Db ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 2) ∂μ :=
           integral_mono_of_nonneg (Eventually.of_forall fun ω ↦ abs_nonneg _)
@@ -4472,7 +3609,7 @@ theorem quadDriftSqSum_tendsto (hBmeas : ∀ t, Measurable (B t)) {β : ℝ≥0 
   -- squeeze: the absolute sums die, hence the signed sums die
   have hboundtendsto : Tendsto (fun n : ℕ ↦ |∑ k ∈ Finset.range n,
       ∫ ω, g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ|)
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2 ∂μ|)
       atTop (𝓝 0) := by
     refine squeeze_zero' (g := fun n : ℕ ↦ 2 * C2 * Db ^ 2 * (T : ℝ) ^ 2 / ((n : ℝ) + 1))
       (Eventually.of_forall fun n ↦ abs_nonneg _) ?_ ?_
@@ -4480,10 +3617,10 @@ theorem quadDriftSqSum_tendsto (hBmeas : ∀ t, Measurable (B t)) {β : ℝ≥0 
       have hn0 : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
       calc |∑ k ∈ Finset.range n,
             ∫ ω, g (X (unifPart T n k) ω)
-              * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ|
+              * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2 ∂μ|
           ≤ ∑ k ∈ Finset.range n,
             |∫ ω, g (X (unifPart T n k) ω)
-              * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ| :=
+              * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2 ∂μ| :=
             Finset.abs_sum_le_sum_abs _ _
         _ ≤ ∑ k ∈ Finset.range n, (C2 * Db ^ 2 * ((T : ℝ) / (n : ℝ)) ^ 2) :=
             Finset.sum_le_sum fun k _ ↦ hcell n k
@@ -4512,20 +3649,11 @@ theorem quadDriftSqSum_tendsto (hBmeas : ∀ t, Measurable (B t)) {β : ℝ≥0 
   refine hboundtendsto.congr' (Eventually.of_forall fun n ↦ ?_)
   show |∑ k ∈ Finset.range n,
       ∫ ω, g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ|
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2 ∂μ|
     = dist (∑ k ∈ Finset.range n,
       ∫ ω, g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ) 0
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2 ∂μ) 0
   rw [Real.dist_eq, sub_zero]
-
-
-/-- `√(n+1) ≤ 2·√n` for `n ≥ 1` (real form). -/
-private theorem sqrt_succ_le_two_sqrt {n : ℕ} (hn : 0 < n) :
-    Real.sqrt (((n : ℝ)) + 1) ≤ 2 * Real.sqrt ((n : ℝ)) := by
-  have hnm : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
-  refine le_trans (Real.sqrt_le_sqrt (show ((n : ℝ)) + 1 ≤ 4 * (n : ℝ) from by nlinarith)) ?_
-  rw [show (2 : ℝ) * Real.sqrt ((n : ℝ)) = Real.sqrt (4 * (n : ℝ)) from by
-    rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 4)]; norm_num]
 
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- The `1/√n ≤ 2/√(n+1)` comparison for `n ≥ 1`. -/
@@ -4543,11 +3671,12 @@ private theorem one_div_sqrt_le_two {n : ℕ} (hn : 0 < n) :
   simpa using hsq
 
 set_option maxHeartbeats 1600000 in
-/-- **The drift–martingale cross corrections of the quadratic block die** (`O(√mesh)`):
-the summed absolute expectations of the frozen weight against
-`Δ(driftPrim β)ₖ·ΔMₖ` are at most `2·C₂·D_β·|D_δ|·T·√T/√(n+1)` — Cauchy–Schwarz pairs the
-`D_β·cell`-bounded drift increment (`abs_driftPath_sub_le`) against the `D_δ²·cell`-energy
-martingale increment (`trueIncr_sq_le`), and the cells telescope to `T`. -/
+/-- **The drift–martingale cross corrections of the quadratic block die**: the statement is
+the limit `0`. The proof bounds the summed absolute expectations of the frozen weight against
+`Δ(AdaptedDrift.driftPath β)ₖ·ΔMₖ` by `2·C₂·|D_β|·|D_δ|·T·√T/√(n+1)` (`O(√mesh)`) —
+Cauchy–Schwarz pairs the
+`D_β·cell`-bounded drift increment (`AdaptedDrift.abs_driftPath_sub_le`) against the
+`D_δ²·cell`-energy martingale increment (`trueIncr_sq_le`), and the cells telescope to `T`. -/
 theorem quadCrossSum_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω → ℝ}
     (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
@@ -4556,7 +3685,7 @@ theorem quadCrossSum_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω �
     {g : ℝ → ℝ} {C2 : ℝ} (hgcont : Continuous g) (hg2 : ∀ x, |g x| ≤ C2) :
     Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
         ∫ ω, g (X (unifPart T n k) ω)
-          * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
+          * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
           * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ)
       atTop (𝓝 0) := by
   have hC2 : (0 : ℝ) ≤ C2 := le_trans (abs_nonneg _) (hg2 0)
@@ -4564,7 +3693,7 @@ theorem quadCrossSum_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω �
   -- per-cell absolute bound
   have hcell : ∀ n : ℕ, ∀ k : ℕ, k < n →
       |∫ ω, g (X (unifPart T n k) ω)
-          * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
+          * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
           * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ|
         ≤ C2 * |Db| * |Dd| * (((unifPart T n (k + 1) : ℝ) - unifPart T n k)
           * Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) := by
@@ -4574,25 +3703,23 @@ theorem quadCrossSum_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω �
     have hXk : Measurable (X (unifPart T n k)) :=
       (hXadap (unifPart T n k)).measurable.mono
         ((natFiltration hBmeas).le (unifPart T n k)) le_rfl
-    have hdpm : Measurable (driftPrim β (unifPart T n (k + 1))) :=
-      (driftPrim_adapted hBmeas hβadap hβcont hβbdd
+    have hdpm : Measurable (driftPath β (unifPart T n (k + 1))) :=
+      (stronglyMeasurable_driftPath hBmeas hβadap hβcont hβbdd
         (unifPart T n (k + 1))).measurable.mono
         ((natFiltration hBmeas).le (unifPart T n (k + 1))) le_rfl
-    have hdp0 : Measurable (driftPrim β (unifPart T n k)) :=
-      (driftPrim_adapted hBmeas hβadap hβcont hβbdd
+    have hdp0 : Measurable (driftPath β (unifPart T n k)) :=
+      (stronglyMeasurable_driftPath hBmeas hβadap hβcont hβbdd
         (unifPart T n k)).measurable.mono
         ((natFiltration hBmeas).le (unifPart T n k)) le_rfl
-    set dI : Ω → ℝ := fun ω ↦ driftPrim β (unifPart T n (k + 1)) ω
-      - driftPrim β (unifPart T n k) ω with hdIdef
+    set dI : Ω → ℝ := fun ω ↦ driftPath β (unifPart T n (k + 1)) ω
+      - driftPath β (unifPart T n k) ω with hdIdef
     set tI : Ω → ℝ := fun ω ↦ M (unifPart T n (k + 1)) ω
       - M (unifPart T n k) ω with htIdef
     -- the drift increment: bounded pointwise by `|Db|·cell`, `L²`
     have hdIb : ∀ ω : Ω, |dI ω| ≤ |Db| * ((unifPart T n (k + 1) : ℝ)
-        - unifPart T n k) := by
-      intro ω
-      have h := abs_driftPath_sub_le hβcont hβbdd' (unifPart T n k)
-        (unifPart T n (k + 1)) ω
-      rwa [abs_of_nonneg hcellnn] at h
+        - unifPart T n k) := fun ω ↦
+      abs_driftPath_sub_le hβcont hβbdd'
+        (unifPart_mono T n (Nat.le_succ k)) ω
     have hdImem : MemLp dI 2 μ := by
       have hdIm : Measurable dI := by
         rw [hdIdef]
@@ -4680,7 +3807,7 @@ theorem quadCrossSum_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω �
   -- squeeze
   have hboundtendsto : Tendsto (fun n : ℕ ↦ |∑ k ∈ Finset.range n,
       ∫ ω, g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
         * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ|)
       atTop (𝓝 0) := by
     refine squeeze_zero' (g := fun n : ℕ ↦ 2 * C2 * |Db| * |Dd| * (T : ℝ)
@@ -4714,11 +3841,11 @@ theorem quadCrossSum_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω �
       have hK0 : (0 : ℝ) ≤ C2 * |Db| * |Dd| := by positivity
       calc |∑ k ∈ Finset.range n,
             ∫ ω, g (X (unifPart T n k) ω)
-              * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
+              * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
               * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ|
           ≤ ∑ k ∈ Finset.range n,
             |∫ ω, g (X (unifPart T n k) ω)
-              * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
+              * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
               * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ| :=
             Finset.abs_sum_le_sum_abs _ _
         _ ≤ ∑ k ∈ Finset.range n, (C2 * |Db| * |Dd| * (((unifPart T n (k + 1) : ℝ)
@@ -4747,19 +3874,20 @@ theorem quadCrossSum_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω �
   refine hboundtendsto.congr' (Eventually.of_forall fun n ↦ ?_)
   show |∑ k ∈ Finset.range n,
       ∫ ω, g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
         * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ|
     = dist (∑ k ∈ Finset.range n,
       ∫ ω, g (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
         * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ) 0
   rw [Real.dist_eq, sub_zero]
 
 
 set_option maxHeartbeats 1600000 in
 /-- **The Taylor remainder dies**: the summed discrete Taylor remainders along the uniform
-partition have expectation tending to `0` — each `|Rₖ| ≤ C₃·|ΔXₖ|³`
-(`abs_discreteTaylorRemainder_le`) with `ΔXₖ = Δ(driftPrim β)ₖ + ΔMₖ` (the increment
+partition have expectation tending to `0` (the statement; the rate below is the proof's) —
+each `|Rₖ| ≤ C₃·|ΔXₖ|³`
+(`abs_discreteTaylorRemainder_le`) with `ΔXₖ = Δ(AdaptedDrift.driftPath β)ₖ + ΔMₖ` (the increment
 decomposition), `(a+b)³ ≤ 4·(a³+b³)` (`pow3_add_le`), the drift increment pointwise
 `D_β·cell`, and the martingale increment `𝔼|ΔM|³ ≤ √(3·(D_δ²·cell)³)`
 (`trueIncr_pow3_le`); the cells telescope to `T`, giving
@@ -4768,7 +3896,7 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
     {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω → ℝ}
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
     {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
-    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + driftPrim β t ω + M t ω)
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + driftPath β t ω + M t ω)
     (hXadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (X t))
     {f f' f'' f''' : ℝ → ℝ}
     (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
@@ -4817,43 +3945,41 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
     have hsubm : Measurable (fun ω : Ω ↦ X (unifPart T n (k + 1)) ω
         - X (unifPart T n k) ω) := hX1m.sub hX0m
     have hΔ : ∀ ω : Ω, X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω
-        = (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
+        = (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
           + (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) := by
       intro ω
       rw [hXrel (unifPart T n (k + 1)), hXrel (unifPart T n k)]
-      show (c + driftPrim β (unifPart T n (k + 1)) ω
+      show (c + driftPath β (unifPart T n (k + 1)) ω
             + M (unifPart T n (k + 1)) ω)
-          - (c + driftPrim β (unifPart T n k) ω + M (unifPart T n k) ω) = _
+          - (c + driftPath β (unifPart T n k) ω + M (unifPart T n k) ω) = _
       ring
-    have hdIb : ∀ ω : Ω, |driftPrim β (unifPart T n (k + 1)) ω
-        - driftPrim β (unifPart T n k) ω| ≤ |Db| * ((unifPart T n (k + 1) : ℝ)
-        - unifPart T n k) := by
-      intro ω
-      have h := abs_driftPath_sub_le hβcont hβbdd' (unifPart T n k)
-        (unifPart T n (k + 1)) ω
-      rwa [abs_of_nonneg hcellnn] at h
+    have hdIb : ∀ ω : Ω, |driftPath β (unifPart T n (k + 1)) ω
+        - driftPath β (unifPart T n k) ω| ≤ |Db| * ((unifPart T n (k + 1) : ℝ)
+        - unifPart T n k) := fun ω ↦
+      abs_driftPath_sub_le hβcont hβbdd'
+        (unifPart_mono T n (Nat.le_succ k)) ω
     have hcub : ∀ ω : Ω, (abs (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω)) ^ 3
-        ≤ (4 : ℝ) * ((abs (driftPrim β (unifPart T n (k + 1)) ω
-              - driftPrim β (unifPart T n k) ω)) ^ 3
+        ≤ (4 : ℝ) * ((abs (driftPath β (unifPart T n (k + 1)) ω
+              - driftPath β (unifPart T n k) ω)) ^ 3
             + (abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)) ^ 3) := by
       intro ω
       have h1 : abs (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω)
-          ≤ abs (driftPrim β (unifPart T n (k + 1)) ω
-              - driftPrim β (unifPart T n k) ω)
+          ≤ abs (driftPath β (unifPart T n (k + 1)) ω
+              - driftPath β (unifPart T n k) ω)
             + abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) := by
         rw [hΔ ω]
         exact abs_add_le _ _
       have h2 := pow3_add_le (abs_nonneg _) (abs_nonneg _)
-        (a := abs (driftPrim β (unifPart T n (k + 1)) ω
-              - driftPrim β (unifPart T n k) ω))
+        (a := abs (driftPath β (unifPart T n (k + 1)) ω
+              - driftPath β (unifPart T n k) ω))
         (b := abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω))
       calc (abs (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω)) ^ 3
-          ≤ (abs (driftPrim β (unifPart T n (k + 1)) ω
-                - driftPrim β (unifPart T n k) ω)
+          ≤ (abs (driftPath β (unifPart T n (k + 1)) ω
+                - driftPath β (unifPart T n k) ω)
               + abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)) ^ 3 :=
             pow_le_pow_left₀ (abs_nonneg _) h1 3
-        _ ≤ (4 : ℝ) * ((abs (driftPrim β (unifPart T n (k + 1)) ω
-                - driftPrim β (unifPart T n k) ω)) ^ 3
+        _ ≤ (4 : ℝ) * ((abs (driftPath β (unifPart T n (k + 1)) ω
+                - driftPath β (unifPart T n k) ω)) ^ 3
               + (abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)) ^ 3) := h2
     -- integrability of |ΔM|³ (dominated by |ΔM|⁴ + 1)
     have htdI3 : Integrable (fun ω ↦ (abs (M (unifPart T n (k + 1)) ω
@@ -4910,8 +4036,8 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
         ≤ (4 : ℝ) * ((|Db| * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 3
           + Real.sqrt (3 * (Dd ^ 2 * ((unifPart T n (k + 1) : ℝ)
             - unifPart T n k)) ^ 3)) := by
-      have hdI3 : ∫ ω, (abs (driftPrim β (unifPart T n (k + 1)) ω
-          - driftPrim β (unifPart T n k) ω)) ^ 3 ∂μ
+      have hdI3 : ∫ ω, (abs (driftPath β (unifPart T n (k + 1)) ω
+          - driftPath β (unifPart T n k) ω)) ^ 3 ∂μ
           ≤ (|Db| * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 3 := by
         refine le_trans (integral_mono_of_nonneg
           (Eventually.of_forall fun ω ↦ by positivity)
@@ -5119,7 +4245,7 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
         norm_num
       have h1 : Tendsto (fun n : ℕ ↦ ((1 / ((n : ℝ) + 1)) ^ 2)) atTop (𝓝 (0 : ℝ)) :=
         (tendsto_one_div_nat_add.pow 2).trans_eq
-          (congrArg (fun x : ℝ => 𝓝 x) (by norm_num : ((0 : ℝ) ^ 2) = (0 : ℝ)))
+          (congrArg (fun x : ℝ ↦ 𝓝 x) (by norm_num : ((0 : ℝ) ^ 2) = (0 : ℝ)))
       have hA : Tendsto (fun n : ℕ ↦ (4 * C3 * (4 * |Db| ^ 3 * (T : ℝ) ^ 3))
           * ((1 / ((n : ℝ) + 1)) ^ 2)) atTop
           (𝓝 ((4 * C3 * (4 * |Db| ^ 3 * (T : ℝ) ^ 3)) * (0 : ℝ))) :=
@@ -5151,16 +4277,17 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
 set_option maxHeartbeats 1600000 in
 omit hMadap in
 /-- **Per-cell Taylor-remainder integrability** (assembly input): along the adapted process
-`X` with the decomposition `X t = c + driftPrim β t + M t`, the `k`-th cell's discrete
-Taylor remainder is integrable — `|Rₖ| ≤ C₃·|ΔXₖ|³` (`abs_discreteTaylorRemainder_le`)
-with `ΔXₖ = Δ(driftPrim β)ₖ + ΔMₖ` (pointwise, from `hXrel`), the drift increment bounded
-by `|D_β|·cell` (`abs_driftPath_sub_le`), and the martingale increment in `L³` by the
+`X` with the decomposition `X t = c + AdaptedDrift.driftPath β t + M t`, the `k`-th cell's
+discrete Taylor remainder is integrable — `|Rₖ| ≤ C₃·|ΔXₖ|³` (`abs_discreteTaylorRemainder_le`)
+with `ΔXₖ = Δ(AdaptedDrift.driftPath β)ₖ + ΔMₖ` (pointwise, from `hXrel`), the drift
+increment bounded
+by `|D_β|·cell` (`AdaptedDrift.abs_driftPath_sub_le`), and the martingale increment in `L³` by the
 fourth-moment bound `trueIncr_pow4_integrable` (the domination `x³ ≤ x⁴ + 1`). -/
 private theorem remainderCell_integrable {n : ℕ} (hn : 0 < n) {k : ℕ} (hk : k < n)
     {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
     {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
-    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + driftPrim β t ω + M t ω)
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + driftPath β t ω + M t ω)
     (hXadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (X t))
     {f f' f'' f''' : ℝ → ℝ}
     (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
@@ -5189,20 +4316,18 @@ private theorem remainderCell_integrable {n : ℕ} (hn : 0 < n) {k : ℕ} (hk : 
       (((hf''cont.measurable.comp hX0m).mul ((hX1m.sub hX0m).pow_const 2)).const_mul (1 / 2))
   -- the increment decomposition and the pointwise drift bound
   have hΔ : ∀ ω : Ω, X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω
-      = (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
+      = (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
         + (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) := by
     intro ω
     rw [hXrel (unifPart T n (k + 1)), hXrel (unifPart T n k)]
-    show (c + driftPrim β (unifPart T n (k + 1)) ω + M (unifPart T n (k + 1)) ω)
-        - (c + driftPrim β (unifPart T n k) ω + M (unifPart T n k) ω) = _
+    show (c + driftPath β (unifPart T n (k + 1)) ω + M (unifPart T n (k + 1)) ω)
+        - (c + driftPath β (unifPart T n k) ω + M (unifPart T n k) ω) = _
     ring
-  have hdIb : ∀ ω : Ω, |driftPrim β (unifPart T n (k + 1)) ω
-      - driftPrim β (unifPart T n k) ω| ≤ |Db| * ((unifPart T n (k + 1) : ℝ)
-      - unifPart T n k) := by
-    intro ω
-    have h := abs_driftPath_sub_le hβcont hβbdd' (unifPart T n k)
-      (unifPart T n (k + 1)) ω
-    rwa [abs_of_nonneg hcellnn] at h
+  have hdIb : ∀ ω : Ω, |driftPath β (unifPart T n (k + 1)) ω
+      - driftPath β (unifPart T n k) ω| ≤ |Db| * ((unifPart T n (k + 1) : ℝ)
+      - unifPart T n k) := fun ω ↦
+    abs_driftPath_sub_le hβcont hβbdd'
+      (unifPart_mono T n (Nat.le_succ k)) ω
   -- `𝔼|ΔM|³ < ∞` (the `L⁴` bound via `trueIncr_pow4_integrable`, dominated by `x⁴ + 1`)
   have htdI3 : Integrable (fun ω ↦ (abs (M (unifPart T n (k + 1)) ω
       - M (unifPart T n k) ω)) ^ 3) μ := by
@@ -5232,22 +4357,22 @@ private theorem remainderCell_integrable {n : ℕ} (hn : 0 < n) {k : ℕ} (hk : 
         + (abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)) ^ 3) := by
     intro ω
     have h1 : abs (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω)
-        ≤ abs (driftPrim β (unifPart T n (k + 1)) ω
-            - driftPrim β (unifPart T n k) ω)
+        ≤ abs (driftPath β (unifPart T n (k + 1)) ω
+            - driftPath β (unifPart T n k) ω)
           + abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) := by
       rw [hΔ ω]
       exact abs_add_le _ _
     have h2 := pow3_add_le (abs_nonneg _) (abs_nonneg _)
-      (a := abs (driftPrim β (unifPart T n (k + 1)) ω
-            - driftPrim β (unifPart T n k) ω))
+      (a := abs (driftPath β (unifPart T n (k + 1)) ω
+            - driftPath β (unifPart T n k) ω))
       (b := abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω))
     calc (abs (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω)) ^ 3
-        ≤ (abs (driftPrim β (unifPart T n (k + 1)) ω
-              - driftPrim β (unifPart T n k) ω)
+        ≤ (abs (driftPath β (unifPart T n (k + 1)) ω
+              - driftPath β (unifPart T n k) ω)
             + abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)) ^ 3 :=
           pow_le_pow_left₀ (abs_nonneg _) h1 3
-      _ ≤ (4 : ℝ) * ((abs (driftPrim β (unifPart T n (k + 1)) ω
-              - driftPrim β (unifPart T n k) ω)) ^ 3
+      _ ≤ (4 : ℝ) * ((abs (driftPath β (unifPart T n (k + 1)) ω
+              - driftPath β (unifPart T n k) ω)) ^ 3
             + (abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)) ^ 3) := h2
       _ ≤ (4 : ℝ) * (((|Db| * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 3
             + (abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)) ^ 3)) :=
@@ -5285,19 +4410,20 @@ set_option maxHeartbeats 1600000 in
 /-- **The integrated Itô–drift identity for adapted coefficients**, conditional on the
 process `M`. For `β, δ` bounded, `natFiltration`-adapted and path-continuous, a hypothesized
 `natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every `t` (`hMeq`), and a hypothesized
-`X` with `X_t = c + ∫₀ᵗ β_s ds + M_t` (`hXrel`, the `driftPrim β` decomposition) and every
-path continuous (`hXcont`, which forces every path of `M` to be continuous), and `f` three
-times differentiable with `f'`, `f''`, `f'''` bounded,
+`X` with `X_t = c + ∫₀ᵗ β_s ds + M_t` (`hXrel`, the `AdaptedDrift.driftPath β` decomposition)
+with almost every path continuous (`hXcont`), and `f` three times differentiable with `f'`,
+`f''`, `f'''` bounded,
 
   `𝔼[f(X_T)] = 𝔼[f(X_0)] + ∫₀ᵀ (𝔼[f'(X_s)·β_s] + ½·𝔼[f''(X_s)·δ_s²]) ds`.
 
-No lemma in the library supplies such an `M` for general `δ` (see the module docstring).
+For `B` with continuous paths the constructed Itô process satisfies these hypotheses
+(`itoDrift_expectation_identity_adapted_at_adaptedItoProcess`, see the module docstring).
 
 Route: the per-path discrete Itô formula (`MathFin.discrete_ito_formula`) at the grid
 values of `X`, integrated over `Ω`; the first-order martingale terms die exactly
 (`mul_trueIncr_expect_eq_zero` at the `𝓕_{tₖ}`-measurable bounded test `f' ∘ X`); the
 drift block converges to `∫₀ᵀ 𝔼[f'∘X·β]` (`driftBlock_tendsto`); the quadratic block
-converges to `∫₀ᵀ 𝔼[f''∘X·δ²]` (`quadraticSqSum_tendsto_uncond` at the weight `f''∘X`);
+converges to `∫₀ᵀ 𝔼[f''∘X·δ²]` (`quadraticSqSum_tendsto'` at the weight `f''∘X`);
 the drift² corrections, the drift–martingale cross corrections and the Taylor remainder
 die (`quadDriftSqSum_tendsto`, `quadCrossSum_tendsto`,
 `taylorRemainderSum_tendsto`); the two time integrals cross the expectation by the
@@ -5308,8 +4434,8 @@ theorem itoDrift_expectation_identity_adapted
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
     {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
-    (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
-    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + driftPrim β t ω + M t ω)
+    (hXcont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ X s ω)
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + driftPath β t ω + M t ω)
     {f f' f'' f''' : ℝ → ℝ}
     (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
     (hf'' : ∀ x, HasDerivAt f'' (f''' x) x)
@@ -5330,7 +4456,7 @@ theorem itoDrift_expectation_identity_adapted
   have hXadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (X t) := by
     intro t
     rw [hXrel t]
-    exact (((driftPrim_adapted hBmeas hβadap hβcont hβbdd t).measurable.const_add c).add
+    exact (((stronglyMeasurable_driftPath hBmeas hβadap hβcont hβbdd t).measurable.const_add c).add
       (hMadap t).measurable).stronglyMeasurable
   -- `f ∘ X` is integrable (linear growth of `f` from `|f'| ≤ C₁`)
   have hf_lin : ∀ x, |f x| ≤ |f 0| + C1 * |x| := by
@@ -5343,13 +4469,13 @@ theorem itoDrift_expectation_identity_adapted
       _ ≤ |f 0| + C1 * |x| := by linarith
   have hMint : ∀ t : ℝ≥0, Integrable (fun ω ↦ |M t ω|) μ :=
     fun t ↦ (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq t).norm.integrable one_le_two
-  have hdpb : ∀ t : ℝ≥0, ∀ ω, |driftPrim β t ω| ≤ |Db| * (t : ℝ) := by
+  have hdpb : ∀ t : ℝ≥0, ∀ ω, |driftPath β t ω| ≤ |Db| * (t : ℝ) := by
     intro t ω
-    have hE : (Set.Ioc (0:ℝ≥0) (0:ℝ≥0)) = (∅ : Set ℝ≥0) :=
-      Set.Ioc_eq_empty_iff.mpr (by simp)
-    have h := abs_driftPath_sub_le hβcont hβbdd (0 : ℝ≥0) t ω
-    simp only [hE, setIntegral_empty, sub_zero, NNReal.coe_zero,
-      abs_of_nonneg (NNReal.coe_nonneg t)] at h
+    have h0 : driftPath β (0 : ℝ≥0) ω = 0 := by
+      simp only [driftPath, Set.Ioc_self, setIntegral_empty]
+    have h := abs_driftPath_sub_le hβcont hβbdd
+      (show (0 : ℝ≥0) ≤ t from zero_le) ω
+    rw [h0, sub_zero, NNReal.coe_zero, sub_zero] at h
     exact h.trans (mul_le_mul_of_nonneg_right (le_abs_self Db) (NNReal.coe_nonneg t))
   have hXint : ∀ t : ℝ≥0, Integrable (fun ω ↦ f (X t ω)) μ := by
     intro t
@@ -5361,12 +4487,12 @@ theorem itoDrift_expectation_identity_adapted
       (integrable_const _).add ((hMint t).const_mul C1)
     refine Integrable.mono' hdom hmeas (Eventually.of_forall fun ω ↦ ?_)
     have harg : |X t ω| ≤ |c| + |Db| * ((t : ℝ) + 1) + |M t ω| := by
-      have h1 : |X t ω| = |c + driftPrim β t ω + M t ω| := by rw [hXrel t]
+      have h1 : |X t ω| = |c + driftPath β t ω + M t ω| := by rw [hXrel t]
       rw [h1]
-      calc |c + driftPrim β t ω + M t ω| ≤ |c + driftPrim β t ω| + |M t ω| :=
+      calc |c + driftPath β t ω + M t ω| ≤ |c + driftPath β t ω| + |M t ω| :=
             abs_add_le _ _
-        _ ≤ |c| + |driftPrim β t ω| + |M t ω| := by
-            have := abs_add_le c (driftPrim β t ω); linarith
+        _ ≤ |c| + |driftPath β t ω| + |M t ω| := by
+            have := abs_add_le c (driftPath β t ω); linarith
         _ ≤ |c| + |Db| * ((t : ℝ) + 1) + |M t ω| := by
             have h2 := hdpb t ω
             have h3 : |Db| * (t : ℝ) ≤ |Db| * ((t : ℝ) + 1) :=
@@ -5380,18 +4506,18 @@ theorem itoDrift_expectation_identity_adapted
   -- the five block convergences
   have hA : Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
       ∫ ω, f' (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ∂μ)
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ∂μ)
     atTop (𝓝 (∫ s in Set.Ioc (0 : ℝ≥0) T,
         (∫ ω, f' (X s ω) * β s ω ∂μ) ∂ItoIntegralL2.timeMeasure)) :=
     driftBlock_tendsto hBmeas T hβadap hβcont hβbdd hXadap hXcont hf'c hg1
   have hB0 : Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
       ∫ ω, f'' (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ)
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2 ∂μ)
     atTop (𝓝 0) :=
     quadDriftSqSum_tendsto hBmeas T hβadap hβcont hβbdd hXadap hf''c hg2
   have hC0 : Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
       ∫ ω, f'' (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
         * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ)
     atTop (𝓝 0) :=
     quadCrossSum_tendsto hB hBmeas hδadap hδcont hδbdd hMadap hMeq
@@ -5406,23 +4532,23 @@ theorem itoDrift_expectation_identity_adapted
         * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)
     atTop (𝓝 (∫ s in Set.Ioc (0 : ℝ≥0) T,
         (∫ ω, f'' (X s ω) * (δ s ω * δ s ω) ∂μ) ∂ItoIntegralL2.timeMeasure)) :=
-    quadraticSqSum_tendsto_uncond hB hBmeas hδadap hδcont hδbdd hMadap hMeq
+    quadraticSqSum_tendsto' hB hBmeas hδadap hδcont hδbdd hMadap hMeq
       (w := fun s ω ↦ f'' (X s ω)) (Cw := C2)
       (fun t ↦ hf''c.measurable.comp (hXadap t).measurable)
-      (fun ω ↦ hf''c.comp (hXcont ω))
+      (hXcont.mono fun ω h ↦ hf''c.comp h)
       (fun s ω ↦ hg2 (X s ω))
   -- the per-partition identity (expectation of the discrete Itô expansion)
   have key : ∀ n : ℕ, 0 < n →
       (∫ ω, f (X T ω) ∂μ - ∫ ω, f (X (0 : ℝ≥0) ω) ∂μ)
         = (∑ k ∈ Finset.range n, ∫ ω, f' (X (unifPart T n k) ω)
-              * (driftPrim β (unifPart T n (k + 1)) ω
-                - driftPrim β (unifPart T n k) ω) ∂μ)
+              * (driftPath β (unifPart T n (k + 1)) ω
+                - driftPath β (unifPart T n k) ω) ∂μ)
           + (1 / 2) * ((∑ k ∈ Finset.range n, ∫ ω, f'' (X (unifPart T n k) ω)
-              * (driftPrim β (unifPart T n (k + 1)) ω
-                - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ)
+              * (driftPath β (unifPart T n (k + 1)) ω
+                - driftPath β (unifPart T n k) ω) ^ 2 ∂μ)
             + 2 * (∑ k ∈ Finset.range n, ∫ ω, f'' (X (unifPart T n k) ω)
-              * (driftPrim β (unifPart T n (k + 1)) ω
-                - driftPrim β (unifPart T n k) ω)
+              * (driftPath β (unifPart T n (k + 1)) ω
+                - driftPath β (unifPart T n k) ω)
               * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ)
             + (∑ k ∈ Finset.range n, ∫ ω, f'' (X (unifPart T n k) ω)
               * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ))
@@ -5451,18 +4577,18 @@ theorem itoDrift_expectation_identity_adapted
       nlinarith [mul_le_mul_of_nonneg_left hn1 hT0]
     -- the per-cell increment decomposition
     have hΔ : ∀ k : ℕ, ∀ ω : Ω, X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω
-        = (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
+        = (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
           + (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) := by
       intro k ω
       rw [hXrel (unifPart T n (k + 1)), hXrel (unifPart T n k)]
-      show (c + driftPrim β (unifPart T n (k + 1)) ω + M (unifPart T n (k + 1)) ω)
-          - (c + driftPrim β (unifPart T n k) ω + M (unifPart T n k) ω) = _
+      show (c + driftPath β (unifPart T n (k + 1)) ω + M (unifPart T n (k + 1)) ω)
+          - (c + driftPath β (unifPart T n k) ω + M (unifPart T n k) ω) = _
       ring
     -- measurability of the grid-value factors
     have hXm : ∀ t : ℝ≥0, Measurable (X t) := fun t ↦
       (hXadap t).measurable.mono ((natFiltration hBmeas).le t) le_rfl
-    have hdpm : ∀ t : ℝ≥0, Measurable (driftPrim β t) := fun t ↦
-      (driftPrim_adapted hBmeas hβadap hβcont hβbdd t).measurable.mono
+    have hdpm : ∀ t : ℝ≥0, Measurable (driftPath β t) := fun t ↦
+      (stronglyMeasurable_driftPath hBmeas hβadap hβcont hβbdd t).measurable.mono
         ((natFiltration hBmeas).le t) le_rfl
     have hf'Xk : ∀ k : ℕ, Measurable (fun ω ↦ f' (X (unifPart T n k) ω)) := fun k ↦
       hf'c.measurable.comp (hXm (unifPart T n k))
@@ -5474,20 +4600,16 @@ theorem itoDrift_expectation_identity_adapted
         ((natFiltration hBmeas).le (unifPart T n (k + 1))) le_rfl).sub
       ((hMadap (unifPart T n k)).measurable.mono
         ((natFiltration hBmeas).le (unifPart T n k)) le_rfl)
-    have hdIb : ∀ k : ℕ, ∀ ω : Ω, |driftPrim β (unifPart T n (k + 1)) ω
-        - driftPrim β (unifPart T n k) ω| ≤ |Db| * ((unifPart T n (k + 1) : ℝ)
-        - unifPart T n k) := by
+    have hdIb : ∀ k : ℕ, ∀ ω : Ω, |driftPath β (unifPart T n (k + 1)) ω
+        - driftPath β (unifPart T n k) ω| ≤ |Db| * ((unifPart T n (k + 1) : ℝ)
+        - unifPart T n k) := fun k ω ↦
+      abs_driftPath_sub_le hβcont
+        (fun t ω ↦ (hβbdd t ω).trans (le_abs_self Db))
+        (unifPart_mono T n (Nat.le_succ k)) ω
+    have hdIbT : ∀ k : ℕ, ∀ ω : Ω, |driftPath β (unifPart T n (k + 1)) ω
+        - driftPath β (unifPart T n k) ω| ≤ |Db| * ((T : ℝ) + 1) := by
       intro k ω
-      have hcellnn : (0 : ℝ) ≤ (unifPart T n (k + 1) : ℝ) - unifPart T n k :=
-        sub_nonneg.mpr (NNReal.coe_le_coe.mpr (unifPart_mono T n (Nat.le_succ k)))
-      have hβbdd' : ∀ t ω, |β t ω| ≤ |Db| := fun t ω ↦ (hβbdd t ω).trans (le_abs_self Db)
-      have h := abs_driftPath_sub_le hβcont hβbdd' (unifPart T n k)
-        (unifPart T n (k + 1)) ω
-      rwa [abs_of_nonneg hcellnn] at h
-    have hdIbT : ∀ k : ℕ, ∀ ω : Ω, |driftPrim β (unifPart T n (k + 1)) ω
-        - driftPrim β (unifPart T n k) ω| ≤ |Db| * ((T : ℝ) + 1) := by
-      intro k ω
-      calc |driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω|
+      calc |driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω|
           ≤ |Db| * ((T : ℝ) / (n : ℝ)) := by
             have h := hdIb k ω
             rw [← hcellen k]
@@ -5501,8 +4623,8 @@ theorem itoDrift_expectation_identity_adapted
         (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))).integrable
           one_le_two
     have hint1 : ∀ k : ℕ, Integrable (fun ω ↦ f' (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω
-          - driftPrim β (unifPart T n k) ω)) μ := by
+        * (driftPath β (unifPart T n (k + 1)) ω
+          - driftPath β (unifPart T n k) ω)) μ := by
       intro k
       refine Integrable.of_bound
         (((hf'Xk k).mul ((hdpm (unifPart T n (k + 1))).sub
@@ -5510,11 +4632,11 @@ theorem itoDrift_expectation_identity_adapted
         (C1 * |Db| * ((T : ℝ) + 1)) ?_
       filter_upwards with ω
       show ‖f' (X (unifPart T n k) ω)
-          * (driftPrim β (unifPart T n (k + 1)) ω
-            - driftPrim β (unifPart T n k) ω)‖ ≤ _
+          * (driftPath β (unifPart T n (k + 1)) ω
+            - driftPath β (unifPart T n k) ω)‖ ≤ _
       rw [Real.norm_eq_abs, abs_mul]
-      have hstep : |f' (X (unifPart T n k) ω)| * |driftPrim β (unifPart T n (k + 1)) ω
-          - driftPrim β (unifPart T n k) ω| ≤ C1 * (|Db| * ((T : ℝ) + 1)) :=
+      have hstep : |f' (X (unifPart T n k) ω)| * |driftPath β (unifPart T n (k + 1)) ω
+          - driftPath β (unifPart T n k) ω| ≤ C1 * (|Db| * ((T : ℝ) + 1)) :=
         mul_le_mul (hg1 (X (unifPart T n k) ω)) (hdIbT k ω) (abs_nonneg _) hC1
       exact hstep.trans (le_of_eq (by ring))
     have hint2 : ∀ k : ℕ, Integrable (fun ω ↦ f' (X (unifPart T n k) ω)
@@ -5527,8 +4649,8 @@ theorem itoDrift_expectation_identity_adapted
           rw [Real.norm_eq_abs, abs_mul]
           exact mul_le_mul_of_nonneg_right (hg1 _) (abs_nonneg _))
     have hint3 : ∀ k : ℕ, Integrable (fun ω ↦ f'' (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω
-          - driftPrim β (unifPart T n k) ω) ^ 2) μ := by
+        * (driftPath β (unifPart T n (k + 1)) ω
+          - driftPath β (unifPart T n k) ω) ^ 2) μ := by
       intro k
       refine Integrable.of_bound
         (((hf''Xk k).mul (((hdpm (unifPart T n (k + 1))).sub
@@ -5536,11 +4658,11 @@ theorem itoDrift_expectation_identity_adapted
         (C2 * |Db| ^ 2 * ((T : ℝ) + 1) ^ 2) ?_
       filter_upwards with ω
       show ‖f'' (X (unifPart T n k) ω)
-          * (driftPrim β (unifPart T n (k + 1)) ω
-            - driftPrim β (unifPart T n k) ω) ^ 2‖ ≤ _
+          * (driftPath β (unifPart T n (k + 1)) ω
+            - driftPath β (unifPart T n k) ω) ^ 2‖ ≤ _
       rw [Real.norm_eq_abs, abs_mul, abs_pow]
-      have hstep : |f'' (X (unifPart T n k) ω)| * |driftPrim β (unifPart T n (k + 1)) ω
-          - driftPrim β (unifPart T n k) ω| ^ 2
+      have hstep : |f'' (X (unifPart T n k) ω)| * |driftPath β (unifPart T n (k + 1)) ω
+          - driftPath β (unifPart T n k) ω| ^ 2
           ≤ C2 * ((|Db| * ((T : ℝ) + 1)) ^ 2) :=
         mul_le_mul (hg2 _) (pow_le_pow_left₀ (abs_nonneg _) (hdIbT k ω) 2)
           (sq_nonneg _) hC2
@@ -5548,20 +4670,20 @@ theorem itoDrift_expectation_identity_adapted
       rw [show ((|Db| * ((T : ℝ) + 1)) ^ 2)
             = |Db| ^ 2 * ((T : ℝ) + 1) ^ 2 from by ring, mul_assoc]
     have hint4 : ∀ k : ℕ, Integrable (fun ω ↦ f'' (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω
-          - driftPrim β (unifPart T n k) ω)
+        * (driftPath β (unifPart T n (k + 1)) ω
+          - driftPath β (unifPart T n k) ω)
         * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)) μ := fun k ↦
       Integrable.mono' (hdMint k |>.abs.const_mul (C2 * (|Db| * ((T : ℝ) + 1))))
         (((hf''Xk k).mul ((hdpm (unifPart T n (k + 1))).sub
           (hdpm (unifPart T n k)))).mul (hdMm k) |>.aestronglyMeasurable)
         (Eventually.of_forall fun ω ↦ by
           show ‖f'' (X (unifPart T n k) ω)
-              * (driftPrim β (unifPart T n (k + 1)) ω
-                - driftPrim β (unifPart T n k) ω)
+              * (driftPath β (unifPart T n (k + 1)) ω
+                - driftPath β (unifPart T n k) ω)
               * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)‖ ≤ _
           rw [Real.norm_eq_abs, abs_mul, abs_mul]
-          have hstep : |f'' (X (unifPart T n k) ω)| * |driftPrim β (unifPart T n (k + 1)) ω
-              - driftPrim β (unifPart T n k) ω| ≤ C2 * (|Db| * ((T : ℝ) + 1)) :=
+          have hstep : |f'' (X (unifPart T n k) ω)| * |driftPath β (unifPart T n (k + 1)) ω
+              - driftPath β (unifPart T n k) ω| ≤ C2 * (|Db| * ((T : ℝ) + 1)) :=
             mul_le_mul (hg2 _) (hdIbT k ω) (abs_nonneg _) hC2
           exact mul_le_mul_of_nonneg_right hstep (abs_nonneg _))
     have hint5 : ∀ k : ℕ, Integrable (fun ω ↦ f'' (X (unifPart T n k) ω)
@@ -5577,7 +4699,7 @@ theorem itoDrift_expectation_identity_adapted
           rw [Real.norm_eq_abs, abs_mul, abs_pow, sq_abs]
           exact mul_le_mul_of_nonneg_right (hg2 _) (sq_nonneg _))
     have hintStwo : ∀ k : ℕ, Integrable (fun ω : Ω ↦ 2 * (f'' (X (unifPart T n k) ω)
-        * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
+        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
         * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω))
         + f'' (X (unifPart T n k) ω)
           * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2) μ := fun k ↦
@@ -5594,7 +4716,7 @@ theorem itoDrift_expectation_identity_adapted
       intro k
       refine ((hint1 k).add (hint2 k)).congr (Eventually.of_forall fun ω ↦ ?_)
       show f' (X (unifPart T n k) ω)
-            * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
+            * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
           + f' (X (unifPart T n k) ω)
             * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)
         = f' (X (unifPart T n k) ω)
@@ -5607,10 +4729,10 @@ theorem itoDrift_expectation_identity_adapted
       refine ((hint3 k).add (((hint4 k).const_mul 2).add (hint5 k))).congr
         (Eventually.of_forall fun ω ↦ ?_)
       show f'' (X (unifPart T n k) ω)
-            * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2
+            * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2
           + (2 * (f'' (X (unifPart T n k) ω)
-              * (driftPrim β (unifPart T n (k + 1)) ω
-                - driftPrim β (unifPart T n k) ω)
+              * (driftPath β (unifPart T n (k + 1)) ω
+                - driftPath β (unifPart T n k) ω)
               * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω))
             + f'' (X (unifPart T n k) ω)
               * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2)
@@ -5666,8 +4788,8 @@ theorem itoDrift_expectation_identity_adapted
     have hintS1 : (∫ ω, (∑ k ∈ Finset.range n, f' (X (unifPart T n k) ω)
           * (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω)) ∂μ)
         = (∑ k ∈ Finset.range n, ∫ ω, f' (X (unifPart T n k) ω)
-            * (driftPrim β (unifPart T n (k + 1)) ω
-              - driftPrim β (unifPart T n k) ω) ∂μ)
+            * (driftPath β (unifPart T n (k + 1)) ω
+              - driftPath β (unifPart T n k) ω) ∂μ)
           + (∑ k ∈ Finset.range n, ∫ ω, f' (X (unifPart T n k) ω)
             * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ) := by
       rw [integral_finsetSum (μ := μ) (s := Finset.range n)
@@ -5678,8 +4800,8 @@ theorem itoDrift_expectation_identity_adapted
           (∫ ω, f' (X (unifPart T n k) ω)
               * (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω) ∂μ)
             = (∫ ω, f' (X (unifPart T n k) ω)
-                * (driftPrim β (unifPart T n (k + 1)) ω
-                  - driftPrim β (unifPart T n k) ω) ∂μ)
+                * (driftPath β (unifPart T n (k + 1)) ω
+                  - driftPath β (unifPart T n k) ω) ∂μ)
               + (∫ ω, f' (X (unifPart T n k) ω)
                 * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ) := by
         intro k _
@@ -5688,8 +4810,8 @@ theorem itoDrift_expectation_identity_adapted
           show f' (X (unifPart T n k) ω)
               * (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω)
             = f' (X (unifPart T n k) ω)
-                * (driftPrim β (unifPart T n (k + 1)) ω
-                  - driftPrim β (unifPart T n k) ω)
+                * (driftPath β (unifPart T n (k + 1)) ω
+                  - driftPath β (unifPart T n k) ω)
               + f' (X (unifPart T n k) ω)
                 * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)
           rw [hΔ k ω]
@@ -5698,11 +4820,11 @@ theorem itoDrift_expectation_identity_adapted
     have hintS2 : (∫ ω, (∑ k ∈ Finset.range n, f'' (X (unifPart T n k) ω)
           * (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω) ^ 2) ∂μ)
         = (∑ k ∈ Finset.range n, ∫ ω, f'' (X (unifPart T n k) ω)
-            * (driftPrim β (unifPart T n (k + 1)) ω
-              - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ)
+            * (driftPath β (unifPart T n (k + 1)) ω
+              - driftPath β (unifPart T n k) ω) ^ 2 ∂μ)
           + 2 * (∑ k ∈ Finset.range n, ∫ ω, f'' (X (unifPart T n k) ω)
-            * (driftPrim β (unifPart T n (k + 1)) ω
-              - driftPrim β (unifPart T n k) ω)
+            * (driftPath β (unifPart T n (k + 1)) ω
+              - driftPath β (unifPart T n k) ω)
             * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ)
           + (∑ k ∈ Finset.range n, ∫ ω, f'' (X (unifPart T n k) ω)
             * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ) := by
@@ -5714,11 +4836,11 @@ theorem itoDrift_expectation_identity_adapted
           (∫ ω, f'' (X (unifPart T n k) ω)
               * (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω) ^ 2 ∂μ)
             = (∫ ω, f'' (X (unifPart T n k) ω)
-                * (driftPrim β (unifPart T n (k + 1)) ω
-                  - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ)
+                * (driftPath β (unifPart T n (k + 1)) ω
+                  - driftPath β (unifPart T n k) ω) ^ 2 ∂μ)
               + (2 * (∫ ω, f'' (X (unifPart T n k) ω)
-                * (driftPrim β (unifPart T n (k + 1)) ω
-                  - driftPrim β (unifPart T n k) ω)
+                * (driftPath β (unifPart T n (k + 1)) ω
+                  - driftPath β (unifPart T n k) ω)
                 * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ)
               + (∫ ω, f'' (X (unifPart T n k) ω)
                 * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)) := by
@@ -5726,11 +4848,11 @@ theorem itoDrift_expectation_identity_adapted
         calc ∫ ω, f'' (X (unifPart T n k) ω)
               * (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω) ^ 2 ∂μ
             = ∫ ω, (f'' (X (unifPart T n k) ω)
-                * (driftPrim β (unifPart T n (k + 1)) ω
-                  - driftPrim β (unifPart T n k) ω) ^ 2
+                * (driftPath β (unifPart T n (k + 1)) ω
+                  - driftPath β (unifPart T n k) ω) ^ 2
               + (2 * (f'' (X (unifPart T n k) ω)
-                * (driftPrim β (unifPart T n (k + 1)) ω
-                  - driftPrim β (unifPart T n k) ω)
+                * (driftPath β (unifPart T n (k + 1)) ω
+                  - driftPath β (unifPart T n k) ω)
                 * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω))
               + f'' (X (unifPart T n k) ω)
                 * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2)) ∂μ :=
@@ -5740,21 +4862,21 @@ theorem itoDrift_expectation_identity_adapted
                 rw [hΔ k ω]
                 ring)
           _ = (∫ ω, f'' (X (unifPart T n k) ω)
-                * (driftPrim β (unifPart T n (k + 1)) ω
-                  - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ)
+                * (driftPath β (unifPart T n (k + 1)) ω
+                  - driftPath β (unifPart T n k) ω) ^ 2 ∂μ)
               + (∫ ω, (2 * (f'' (X (unifPart T n k) ω)
-                  * (driftPrim β (unifPart T n (k + 1)) ω
-                    - driftPrim β (unifPart T n k) ω)
+                  * (driftPath β (unifPart T n (k + 1)) ω
+                    - driftPath β (unifPart T n k) ω)
                   * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω))
                 + f'' (X (unifPart T n k) ω)
                   * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2) ∂μ) :=
               integral_add (hint3 k) (hintStwo k)
           _ = (∫ ω, f'' (X (unifPart T n k) ω)
-                * (driftPrim β (unifPart T n (k + 1)) ω
-                  - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ)
+                * (driftPath β (unifPart T n (k + 1)) ω
+                  - driftPath β (unifPart T n k) ω) ^ 2 ∂μ)
               + (2 * (∫ ω, f'' (X (unifPart T n k) ω)
-                  * (driftPrim β (unifPart T n (k + 1)) ω
-                    - driftPrim β (unifPart T n k) ω)
+                  * (driftPath β (unifPart T n (k + 1)) ω
+                    - driftPath β (unifPart T n k) ω)
                   * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ)
                 + (∫ ω, f'' (X (unifPart T n k) ω)
                   * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)) := by
@@ -5788,14 +4910,14 @@ theorem itoDrift_expectation_identity_adapted
           rw [integral_add hintShalf hintS3int, integral_const_mul]
           ring
       _ = (∑ k ∈ Finset.range n, ∫ ω, f' (X (unifPart T n k) ω)
-              * (driftPrim β (unifPart T n (k + 1)) ω
-                - driftPrim β (unifPart T n k) ω) ∂μ)
+              * (driftPath β (unifPart T n (k + 1)) ω
+                - driftPath β (unifPart T n k) ω) ∂μ)
           + (1 / 2) * ((∑ k ∈ Finset.range n, ∫ ω, f'' (X (unifPart T n k) ω)
-              * (driftPrim β (unifPart T n (k + 1)) ω
-                - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ)
+              * (driftPath β (unifPart T n (k + 1)) ω
+                - driftPath β (unifPart T n k) ω) ^ 2 ∂μ)
             + 2 * (∑ k ∈ Finset.range n, ∫ ω, f'' (X (unifPart T n k) ω)
-              * (driftPrim β (unifPart T n (k + 1)) ω
-                - driftPrim β (unifPart T n k) ω)
+              * (driftPath β (unifPart T n (k + 1)) ω
+                - driftPath β (unifPart T n k) ω)
               * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ)
             + (∑ k ∈ Finset.range n, ∫ ω, f'' (X (unifPart T n k) ω)
               * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ))
@@ -5806,11 +4928,11 @@ theorem itoDrift_expectation_identity_adapted
   -- the limit of the right-hand side
   have hR : Tendsto (fun n : ℕ ↦
       (∑ k ∈ Finset.range n, ∫ ω, f' (X (unifPart T n k) ω)
-          * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ∂μ)
+          * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ∂μ)
         + (1 / 2) * ((∑ k ∈ Finset.range n, ∫ ω, f'' (X (unifPart T n k) ω)
-            * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ)
+            * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2 ∂μ)
           + 2 * (∑ k ∈ Finset.range n, ∫ ω, f'' (X (unifPart T n k) ω)
-            * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
+            * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
             * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ)
           + (∑ k ∈ Finset.range n, ∫ ω, f'' (X (unifPart T n k) ω)
             * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ))
@@ -5826,11 +4948,11 @@ theorem itoDrift_expectation_identity_adapted
       ((hB0.add ((tendsto_const_nhds (x := (2 : ℝ))).mul hC0)).add hD0))).add hE0
   have hL : Tendsto (fun n : ℕ ↦
       (∑ k ∈ Finset.range n, ∫ ω, f' (X (unifPart T n k) ω)
-          * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ∂μ)
+          * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ∂μ)
         + (1 / 2) * ((∑ k ∈ Finset.range n, ∫ ω, f'' (X (unifPart T n k) ω)
-            * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω) ^ 2 ∂μ)
+            * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2 ∂μ)
           + 2 * (∑ k ∈ Finset.range n, ∫ ω, f'' (X (unifPart T n k) ω)
-            * (driftPrim β (unifPart T n (k + 1)) ω - driftPrim β (unifPart T n k) ω)
+            * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
             * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ)
           + (∑ k ∈ Finset.range n, ∫ ω, f'' (X (unifPart T n k) ω)
             * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ))
@@ -5875,10 +4997,11 @@ theorem itoDrift_expectation_identity_adapted
       (((hδadap s).measurable.mono ((natFiltration hBmeas).le s) le_rfl).mul
         ((hδadap s).measurable.mono ((natFiltration hBmeas).le s) le_rfl))
   have hcontd : Continuous fun s : ℝ≥0 ↦ ∫ ω, f' (X s ω) * β s ω ∂μ :=
-    continuous_mean_of_bdd_cont hdm (fun ω ↦ (hf'c.comp (hXcont ω)).mul (hβcont ω)) hbdd_d
+    continuous_mean_of_bdd_cont hdm (hXcont.mono fun ω h ↦ (hf'c.comp h).mul (hβcont ω))
+      hbdd_d
   have hcontq : Continuous fun s : ℝ≥0 ↦ ∫ ω, f'' (X s ω) * (δ s ω * δ s ω) ∂μ :=
     continuous_mean_of_bdd_cont hqm
-      (fun ω ↦ (hf''c.comp (hXcont ω)).mul ((hδcont ω).mul (hδcont ω))) hbdd_q
+      (hXcont.mono fun ω h ↦ (hf''c.comp h).mul ((hδcont ω).mul (hδcont ω))) hbdd_q
   have hdint : IntegrableOn (fun s : ℝ≥0 ↦ (∫ ω, f' (X s ω) * β s ω ∂μ))
       (Set.Ioc (0 : ℝ≥0) T) ItoIntegralL2.timeMeasure := by
     haveI : IsFiniteMeasure
@@ -5933,4 +5056,6 @@ theorem itoDrift_expectation_identity_adapted
   rw [hmerge]
   linarith
 
-end MathFin.StageFiveD
+end StageFiveD
+
+end MathFin.ItoDriftConditional

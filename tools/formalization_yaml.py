@@ -8,8 +8,8 @@ The generator never invents editorial fields, and reads ONLY main-repo sources
 repo self-reports independently.
 
 Benchmark entries may set ``metadata.alignment_source``. Distinct explicit
-sources are joined per file; files without one retain the legacy domain/textbook
-label.
+sources are joined per file; failing those, a file's own top-level ``alignment_source``
+is used; files with neither retain the legacy domain/textbook label.
 
 Per the standard, mechanically-git-derivable facts (toolchain, pins, commit,
 build status) are intentionally NOT duplicated here.
@@ -111,6 +111,22 @@ def _load_meta(root: str) -> dict:
         return {}
     with open(path, "rb") as f:
         return tomllib.load(f)
+
+
+def _file_sources(root: str) -> dict:
+    """The file-level ``alignment_source`` of each benchmark file that sets one: a file whose
+    entries come from many works says so here, so that its row does not fall back to the
+    label of the corpus's first textbook."""
+    out = {}
+    for path in sorted(glob.glob(os.path.join(root, "benchmarks", "*.json"))):
+        try:
+            data = json.load(open(path))
+        except (OSError, ValueError):
+            continue
+        src = data.get("alignment_source") if isinstance(data, dict) else None
+        if isinstance(src, str) and src.strip():
+            out[os.path.basename(path)] = src.strip()
+    return out
 
 
 def _theorems(root: str):
@@ -313,10 +329,12 @@ def build_doc(root: str) -> dict:
         main_results.append(row)
 
     alignment_statements = []
+    file_sources = _file_sources(root)
     for base in sorted(by_file):
         d = by_file[base]
         alignment_statements.append({
             "source": ("; ".join(sorted(d["alignment_sources"]))
+                       or file_sources.get(base)
                        or f"{d['domain']} ({DOMAIN_SOURCE})"),
             "lean": f"{d['n']} statements",
             "module": f"benchmarks/{base}",

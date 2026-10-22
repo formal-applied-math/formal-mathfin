@@ -306,9 +306,9 @@ namespace MathFin.AxiomAudit
 #guard_msgs (whitespace := lax) in
   #print axioms MathFin.gbm_solves_sde
 
-/-- info: 'MathFin.bs_pde_eq_itoDrift2D_minus_rV' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.discountedCallBrownian_heat_equation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.bs_pde_eq_itoDrift2D_minus_rV
+  #print axioms MathFin.discountedCallBrownian_heat_equation
 
 /-! ## Margrabe BSCallHyp grounding (leap-3 closure via gaussian vector) -/
 
@@ -1025,8 +1025,8 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.bs_identity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.bs_identity
 
-/-- info: 'MathFin.bs_pde_from_no_arbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.bs_pde_from_no_arbitrage
+/-- info: 'MathFin.margrabe_exchange_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.margrabe_exchange_price
 
 -- Values round 6 (2026-06-09): Andre's reflection-principle counting
 -- bijection (Binomial/PathReflection.lean), wired to the corpus as
@@ -1211,7 +1211,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ftap_discrete
 
 -- General-Ω one-period FTAP (`FTAPOnePeriod.lean`): NoArbitrage ⟺ ∃ EMM for a
--- scalar L⁰ return on an arbitrary probability space (Föllmer–Schied 1.55 /
+-- scalar L⁰ return on an arbitrary probability space (Föllmer–Schied §1.2 /
 -- one-period DMW). Backward via the bounded-density reduction to L¹, the scalar
 -- no-arbitrage dichotomy, and the two-region balancing `withDensity` — no
 -- Hahn–Banach, no Kreps–Yan.
@@ -1814,6 +1814,14 @@ than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen
 /-- info: 'MathFin.not_isElicitable_expectedShortfall_integrable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms MathFin.not_isElicitable_expectedShortfall_integrable
 
+/-- info: 'MathFin.strictlyJointlyElicits_fisslerZiegelExpScore' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.strictlyJointlyElicits_fisslerZiegelExpScore
+
+/-- info: 'MathFin.isJointlyElicitable_valueAtRisk_lowerExpectedShortfall' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms MathFin.isJointlyElicitable_valueAtRisk_lowerExpectedShortfall
+
 /-- info: 'MathFin.measureReal_le_eq_copulaOf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms MathFin.measureReal_le_eq_copulaOf
 
@@ -1848,5 +1856,37 @@ loading solves `A' = −κθB`. The bond price itself is not derived. -/
 /-- info: 'MathFin.hasDerivAt_cirBondA' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.hasDerivAt_cirBondA
+
+/-! ### Schwartz one-factor commodity futures (2026-10-18)
+
+`schwartzFuturesPrice_eq_integral`: for the log spot `ln S_T` in its Ornstein–Uhlenbeck Wiener
+representation, `E[S_T] = exp(m_T + v_T/2)` with `m_T = vasicekSDEMean` and
+`v_T = vasicekSDEVariance`, via `mgf_gaussianReal` at `1`: the Schwartz (1997) one-factor futures
+price. That the representation solves the Schwartz SDE is cited, not proved. -/
+
+/-- info: 'MathFin.schwartzFuturesPrice_eq_integral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.schwartzFuturesPrice_eq_integral
+
+/-! ### Calendar-spread arbitrage
+
+Gatheral–Jacquier 2014, Lemma 2.1: martingale calls rise with maturity; prices rise with
+maturity iff total variance does; the raw-SVI family form. -/
+
+/-- info: 'MathFin.integral_posPart_sub_mono_of_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.integral_posPart_sub_mono_of_martingale
+
+/-- info: 'MathFin.calendar_free_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.calendar_free_iff
+
+/-- info: 'MathFin.monotone_totalVariance_of_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.monotone_totalVariance_of_martingale
+
+/-- info: 'MathFin.SVI.bsSmile_calendar_free_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.SVI.bsSmile_calendar_free_iff
 
 end MathFin.AxiomAudit
