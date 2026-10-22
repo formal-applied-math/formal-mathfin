@@ -11,8 +11,9 @@ public import MathFin.FixedIncome.DurationSensitivity
 /-!
 # Key-rate partials sum to the parallel-shift derivative
 
-`DurationSensitivity` prices a bond off a single flat yield, `P(y) = Σ cᵢ / (1 + y)^{tᵢ}`
-(`bondPriceDisc`), and differentiates it: `P'(y) = -ModNum(y)` (`hasDerivAt_bondPriceDisc`).
+`MacaulayModified` prices a bond off a single flat yield, `P(y) = Σ cᵢ / (1 + y)^{tᵢ}`
+(`bondPriceDisc`), and `DurationSensitivity` differentiates it: `P'(y) = -ModNum(y)`
+(`hasDerivAt_bondPriceDisc`).
 Key-rate analysis refines the flat yield to a curve: cashflow `i` is discounted at its own
 tenor's spot rate `kᵢ`,
 
