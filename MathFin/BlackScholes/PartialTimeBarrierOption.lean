@@ -17,8 +17,8 @@ on `[0, t₁]` and switched off for the remainder `(t₁, T]` of the option's li
 Complete Guide to Option Pricing Formulas*, §"Partial-Time Barrier Options"). Unlike the binary
 and soft barriers transcribed alongside this file, this genuinely needs the **bivariate** normal
 CDF — the barrier-monitoring window `[0, t₁]` and the full life `[0, T]` are correlated
-(correlation `ρ = √(t₁/T)`, the two Brownian increments share the `[0, t₁]` leg) — and why this
-file builds on the same `BivariateNormalCDF.lean` substrate (`bivariateNormalCDF`,
+(correlation `ρ = √(t₁/T)`, the two Brownian increments share the `[0, t₁]` leg) — which is why
+this file builds on the same `BivariateNormalCDF.lean` substrate (`bivariateNormalCDF`,
 `bivariateNormalCDF_flip_snd`) as `HeynenKatTwoAssetBarrier.lean`.
 
 **Scope, disclosed honestly**: QuantLib's `AnalyticPartialTimeBarrierOptionEngine` also prices
@@ -31,8 +31,9 @@ of scope. **`CA` is also call-only**: QuantLib's `CA` is commented
 `calculate()` via the put–call spot-reflection symmetry (strike `X ↦ S²/X`, barrier `H ↦ S²/H`,
 barrier direction mirrored, the `CA`-call result on the transformed inputs scaled by `X/S`) rather
 than a second closed form — that symmetry transform is not formalized here either. The knock-in
-case (`CIA = vanilla − CA`) is, as elsewhere in this batch, QuantLib's own *definition* via
-in–out parity rather than an independent closed form, so it is not separately formalized.
+case (`CIA = vanilla − CA`) is, as in `SoftBarrierOption.lean` and `BinaryBarrierOption.lean`,
+QuantLib's own *definition* via in–out parity rather than an independent closed form, so it is
+not separately formalized.
 
 Transcribed from, and cross-checked against, QuantLib's
 `ql/pricingengines/barrier/analyticpartialtimebarrieroptionengine.cpp` (`CA`, upstream commit
@@ -49,7 +50,8 @@ With cost-of-carry `b = r − q`, `ρ = √(t₁/T)`, `μ = (b − σ²/2)/σ²`
   `e₃ = e₁ + 2log(H/S)/(σ√t₁)`,  `e₄ = e₃ − σ√t₁`,
   `f₁ = (log(S/X) + 2log(H/S) + (b+σ²/2)T)/(σ√T)`,  `f₂ = f₁ − σ√T`,
 
-and `(H/S)^{2μ}`, `(H/S)^{2(μ+1)}` as `exp(·log·)` (as in the other two files of this batch), the
+and `(H/S)^{2μ}`, `(H/S)^{2(μ+1)}` as `exp(·log·)` (as in `SoftBarrierOption.lean` and
+`BinaryBarrierOption.lean`), the
 start-window out-barrier **call** value (`η = 1` down, `η = −1` up) is
 
   `CA(η) = S·e^{(b−r)T}·(N₂(d₁, ηe₁; ηρ) − (H/S)^{2(μ+1)}·N₂(f₁, ηe₃; ηρ))`

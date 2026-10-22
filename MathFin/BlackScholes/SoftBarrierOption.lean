@@ -66,9 +66,9 @@ the *definition* QuantLib itself uses, not an independent theorem).
 **Scope, disclosed honestly**: this verifies the closed form's internal `η`-symmetry, not a
 from-first-principles derivation of the corridor-crossing probability (the genuinely hard step —
 reducing a "soft" barrier to a mixture of Black–Scholes-style terms via Hart & Ross's integration
-over the corridor — is Haug's/QuantLib's analytic content, taken as given, exactly as the
-two-asset and binary barrier files in this batch take the Heynen–Kat/Rubinstein–Reiner closed
-forms as given rather than re-deriving them from a joint density).
+over the corridor — is Haug's/QuantLib's analytic content, taken as given, exactly as
+`HeynenKatTwoAssetBarrier.lean` and `BinaryBarrierOption.lean` take the Heynen–Kat/
+Rubinstein–Reiner closed forms as given rather than re-deriving them from a joint density).
 -/
 
 @[expose] public section

@@ -3142,9 +3142,9 @@
     "mf-partial-time-barrier-down-add-up": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.4,
-      "input_hash": "919a6cbc3bf014edd947479fe2e25cd46d3aef1b1fcf85a2903aec08de05a3f5",
-      "verified_at_commit": "50d3c57"
+      "elapsed_s": 3.3,
+      "input_hash": "555606d9c8bc2837670c13315faf36b493cc05cdb327e79e262bb48e045917bc",
+      "verified_at_commit": "3de5ea5"
     },
     "mf-performance-gain_to_pain": {
       "benchmark_file": "mathematical_finance.json",
@@ -3373,9 +3373,9 @@
     "mf-soft-barrier-call-sub-put": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.2,
-      "input_hash": "7d7f7cb84a07cc3adb2692791dc01448cbfb40b5564f75411572b68ff368b369",
-      "verified_at_commit": "bdcf8eb"
+      "elapsed_s": 3.0,
+      "input_hash": "e01485033416422636961347e792ff5ebe2b823668cf9fdb6e0f1948557010e4",
+      "verified_at_commit": "3de5ea5"
     },
     "mf-sortino-scale-invariant": {
       "benchmark_file": "mathematical_finance.json",
