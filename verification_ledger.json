@@ -2736,9 +2736,9 @@
     "mf-level-payment-balance-annuity": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.1,
-      "input_hash": "4a0e58daddeed3e8e63e0d0e8ff74269fa0ae4cbb2b269195441e03bb399f007",
-      "verified_at_commit": "206a35e"
+      "elapsed_s": 3.2,
+      "input_hash": "f5d027ab72e0b7b1380988e9359cc280fcdc3e8898269e1e7cd3020cde63953b",
+      "verified_at_commit": "c15be90"
     },
     "mf-lhp-stop-loss-closed-form": {
       "benchmark_file": "credit.json",

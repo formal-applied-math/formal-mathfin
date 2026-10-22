@@ -45,8 +45,6 @@ matching the standard amortization-table identities.
 * `bulletPrincipal`, `equalPrincipalPayment` — the two principal-payment
   schedules.
 * `balance` — the shared balance recurrence `B_n = B_{n-1} - P_n` (as a fold).
-* `interestAccrued`, `interestAccrued_succ` — `I_n = B_{n-1} · i`,
-  independent of the schedule (proved on actual periods `n + 1`).
 * `balance_bullet_lt`, `balance_bullet_eq` — the bullet closed form.
 * `balance_equalPrincipal` — the equal-principal closed form
   `B_n = B_0 · (1 - n / N)`.
@@ -69,21 +67,6 @@ for `k = 1, …, n`). Defined by the shared recurrence `B_n = B_{n-1} - P_n`. -/
 def balance (B0 : ℝ) (P : ℕ → ℝ) : ℕ → ℝ
   | 0 => B0
   | n + 1 => balance B0 P n - P (n + 1)
-
-/-- Interest accrued in period `n ≥ 1` is the prior balance times the period
-rate: `I_n = B_{n-1} · i`, for any principal schedule `P` fixed in advance. Periods are
-`n = 1, …, N`; `n - 1` is ℕ-truncated subtraction, so at `n = 0` this
-evaluates to `B₀ · i` (the same value as period 1) rather than being
-undefined — `n = 0` is not a meaningful period, and callers should use
-`interestAccrued_succ` for the proved recurrence on actual periods. -/
-def interestAccrued (B0 : ℝ) (P : ℕ → ℝ) (i : ℝ) (n : ℕ) : ℝ :=
-  balance B0 P (n - 1) * i
-
-/-- The defining recurrence of `interestAccrued`, stated on `n + 1` (an
-actual period `n + 1 ≥ 1`) to avoid the ℕ-truncated-subtraction pitfall at
-`n = 0`: `I_{n+1} = B_n · i`. -/
-@[simp] theorem interestAccrued_succ (B0 : ℝ) (P : ℕ → ℝ) (i : ℝ) (n : ℕ) :
-    interestAccrued B0 P i (n + 1) = balance B0 P n * i := rfl
 
 /-- The bullet schedule: no principal is repaid before maturity `N`, and the
 entire balance is repaid in period `N`. -/
