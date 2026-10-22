@@ -102,9 +102,8 @@ noncomputable def sabrATMVol (f α β ρ ν tex : ℝ) : ℝ :=
 
 /-- **The backbone is positive** for `α, f > 0`: `α / f^(1-β) > 0`. -/
 theorem sabrBackbone_pos {f α : ℝ} (β : ℝ) (hf : 0 < f) (hα : 0 < α) :
-    0 < sabrBackbone f α β := by
-  unfold sabrBackbone
-  exact div_pos hα (Real.rpow_pos_of_pos hf _)
+    0 < sabrBackbone f α β :=
+  div_pos hα (Real.rpow_pos_of_pos hf _)
 
 /-- **Zero time-to-exercise collapses the ATM vol to the backbone**: at `t_ex = 0`
 the bracketed perturbation correction in eq. 2.18 vanishes identically
@@ -117,20 +116,18 @@ theorem sabrATMVol_zero_tex (f α β ρ ν : ℝ) :
 /-- **The ATM vol is positive at zero time-to-exercise**, for `α, f > 0`: direct
 corollary of `sabrATMVol_zero_tex` and `sabrBackbone_pos`. -/
 theorem sabrATMVol_pos_zero_tex {f α : ℝ} (β ρ ν : ℝ) (hf : 0 < f) (hα : 0 < α) :
-    0 < sabrATMVol f α β ρ ν 0 := by
-  rw [sabrATMVol_zero_tex]
-  exact sabrBackbone_pos β hf hα
+    0 < sabrATMVol f α β ρ ν 0 :=
+  (sabrATMVol_zero_tex f α β ρ ν).symm ▸ sabrBackbone_pos β hf hα
 
-/-- **The perturbation correction genuinely raises the ATM price**: whenever eq.
+/-- **A positive perturbation correction raises the ATM price**: whenever eq.
 2.18's bracketed stochastic-vol correction `(1-β)²/24·α²/f^(2-2β) + ρβαν/4/f^(1-β)
 + (2-3ρ²)/24·ν²`, scaled by `t_ex`, is positive, the full ATM vol `sabrATMVol`
 strictly exceeds the bare backbone `sabrBackbone` — and, by `bsV_strictMonoOn_sigma`
 (`BlackScholes/ImpliedVolatility.lean`, the strict monotonicity of the Black call
 price in its vol input), the ATM Black call priced at `sabrATMVol` is strictly more
-expensive than the same option priced at the backbone alone. This is a
-SABR-specific fact, not a generic instance of implied-vol uniqueness: it ties
-eq. 2.18's correction term itself, not an arbitrary positive constant, to the
-price it produces. -/
+expensive than the same option priced at the backbone alone. The positivity of
+the correction is a hypothesis (`hbracket`), not proved; the conclusion is the strict
+monotonicity of the Black call in its vol, applied to `backbone < backbone · (1 + c)`. -/
 theorem sabrATMVol_bsV_gt_backbone_bsV {f α β ρ ν tex T : ℝ} (hf : 0 < f) (hα : 0 < α)
     (hT : 0 < T)
     (hbracket : 0 < ((1 - β) ^ 2 / 24 * (α ^ 2 / f ^ (2 - 2 * β))

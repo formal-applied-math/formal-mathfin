@@ -328,7 +328,7 @@ import MathFin.BlackScholes.AsianGeometric
 import MathFin.BlackScholes.AsianGeometricN
 import MathFin.BlackScholes.ImpliedVolatility
 -- SABR (Hagan-Kumar-Lesniewski-Woodward 2002) lognormal implied-vol asymptotic
--- approximation: ATM specialization (eq. 2.18) and its zero-maturity backbone limit
+-- approximation: eq. 2.17 -> eq. 2.18 as K -> f, backbone law, ATM Black-76 price
 import MathFin.BlackScholes.SABRImpliedVol
 import MathFin.BlackScholes.LognormalMoments
 import MathFin.BlackScholes.VarianceSwap

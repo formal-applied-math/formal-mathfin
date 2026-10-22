@@ -2618,22 +2618,22 @@
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-22",
       "elapsed_s": 3.6,
-      "input_hash": "9cad3af75d38bae2f5c3ffd9195ff839a79997e307aa5e632e22c313a078ebe0",
-      "verified_at_commit": "86d624c"
+      "input_hash": "0ee178ec0f90bfc5c177701f7d21e59952d45ae97766a17fb44004685f4d592a",
+      "verified_at_commit": "cd760be"
     },
     "mf-sabr-backbone-law": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.5,
-      "input_hash": "abdce18d38bb72e2e9175c1d1de7bf56570304cb5561e808493eeeed5f8a6ced",
-      "verified_at_commit": "86d624c"
+      "elapsed_s": 3.6,
+      "input_hash": "71a34d50a8d24e9d0109160189d7c6cf812fdc4e3ab8a0ffa9a91c214860993d",
+      "verified_at_commit": "cd760be"
     },
     "mf-sabr-implied-vol-atm-limit": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-22",
-      "elapsed_s": 5.2,
-      "input_hash": "cd882a930d32b8d5bac3eb6c11c8c975a428da608ab731b00d62c9912abdecf2",
-      "verified_at_commit": "86d624c"
+      "elapsed_s": 3.5,
+      "input_hash": "90457d95afc2c9d1c86598429d7aff7813d652879bbedf96367a1f4c0835b82b",
+      "verified_at_commit": "cd760be"
     },
     "mf-second-FTAP-single-period": {
       "benchmark_file": "mathematical_finance.json",
