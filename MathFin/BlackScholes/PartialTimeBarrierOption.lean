@@ -61,12 +61,11 @@ start-window out-barrier **call** value (`η = 1` down, `η = −1` up) is
   — every `N₂(a, ηb; ηρ)` pair (`η = ±1`) telescopes via `bivariateNormalCDF_flip_snd` to a
   single `Φ(a)`, exactly the mechanism behind `HeynenKatTwoAssetBarrier.lean`'s
   `heynenKat_downOut_add_upOut`. As there, the down/up window-start prices are mutually exclusive
-  regimes (down-monitored vs. up-monitored), so the sum itself is not a payoff decomposition; but
-  the right-hand side is `t₁`-free and is exactly Haug's full-life down-and-out call closed form
-  (the `X ≥ H` branch) for every `0 ≤ t₁ ≤ T` — at `t₁ = T` (so `ρ = 1`) this value is `CA(1)`
-  itself with `CA(−1) = 0`, since the up-window monitors nothing. It verifies the `(ηe_i, ηρ)`
-  sign pattern is self-consistent across `η = ±1`, the same scope the Heynen–Kat file disclosed
-  for its own analogous check.
+  regimes (down-monitored vs. up-monitored), so the sum itself is not a payoff decomposition;
+  what the identity shows is that the right-hand side is `t₁`-free — it equals Haug's full-life
+  down-and-out call closed form (the `X ≥ H` branch) for every `0 ≤ t₁ ≤ T`, not only in some
+  limit. It verifies the `(ηe_i, ηρ)` sign pattern is self-consistent across `η = ±1`, the same
+  scope the Heynen–Kat file disclosed for its own analogous check.
 -/
 
 @[expose] public section

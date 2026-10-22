@@ -37,7 +37,7 @@ With `stdDev = σ√T`, `η = 1` for `Down{In,Out}` / `η = −1` for `Up{In,Out
   `y₁ = η(log(H²/(SX))/stdDev + μ·stdDev)`,  `y₂ = η(log(H/S)/stdDev + μ·stdDev)`,
 
 and, with `(H/S)^{2μ}` written as `exp(2μ·log(H/S))` (algebraically identical for `S, H > 0`,
-and the form QuantLib itself falls back to when `(H/S)^{2μ}` over/underflows),
+and the form QuantLib itself falls back to when `(H/S)^{2μ}` overflows),
 
   `B₁ = Φ(x₁)`,  `B₂ = Φ(x₂)`,  `B₃ = (H/S)^{2μ}·Φ(y₁)`,  `B₄ = (H/S)^{2μ}·Φ(y₂)`.
 
@@ -61,7 +61,7 @@ The in–out identity here is a real check on the 16-branch table (a misplaced `
 one of the 16 QuantLib branches breaks it), but — like `HeynenKatTwoAssetBarrier.lean`'s
 down-out/up-out check — it holds by pure term cancellation once the table is fixed, so it does
 not independently re-derive `B₁, B₂, B₃, B₄` themselves from a stochastic argument. The `variance
-= 0` and `(H/S)^{2μ}` overflow/underflow edge cases QuantLib special-cases numerically, and the
+= 0` and `(H/S)^{2μ}` overflow edge cases QuantLib special-cases numerically, and the
 already-knocked-in/knocked-out spot guards `AnalyticBinaryBarrierEngine::calculate()` applies
 *before* calling `payoffAtExpiry` (a `DownOut`/`UpOut` priced at `0` once the spot has already
 crossed the barrier, a `DownIn`/`UpIn` re-priced as a plain vanilla digital via
@@ -94,7 +94,7 @@ noncomputable def bboY2 (S H mu σ T eta : ℝ) : ℝ :=
 
 /-- **`(H/S)^{2μ}`**, written as `exp(2μ·log(H/S))` — algebraically the same value for
 `S, H > 0`, and the closed form QuantLib itself substitutes when the direct power
-over/underflows. -/
+overflows. -/
 noncomputable def bboHS2mu (S H mu : ℝ) : ℝ := Real.exp (2 * mu * Real.log (H / S))
 
 /-- **`B₁`**: the vanilla (barrier-free) digital `α`-factor for the `isCall` side — cash-or-nothing
