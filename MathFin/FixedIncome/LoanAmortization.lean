@@ -95,19 +95,14 @@ theorem balance_bullet_lt {B0 : ℝ} {N n : ℕ} (hn : n < N) :
     balance B0 (bulletPrincipal B0 N) n = B0 := by
   induction n with
   | zero => rfl
-  | succ k ih =>
-    have hk : k < N := Nat.lt_of_succ_lt hn
-    simp only [balance, bulletPrincipal, ih hk, if_neg hn.ne, sub_zero]
+  | succ k ih => simp [balance, bulletPrincipal, ih (Nat.lt_of_succ_lt hn), hn.ne]
 
 /-- Under the bullet schedule, the balance is exactly zero at maturity
 (assuming it was unpaid up to `N - 1`, i.e. `N ≥ 1`). -/
 theorem balance_bullet_eq {B0 : ℝ} {N : ℕ} (hN : 0 < N) :
     balance B0 (bulletPrincipal B0 N) N = 0 := by
   obtain ⟨M, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hN.ne'
-  have hprev : balance B0 (bulletPrincipal B0 (M + 1)) M = B0 :=
-    balance_bullet_lt (Nat.lt_succ_self M)
-  simp only [balance, bulletPrincipal, hprev]
-  norm_num
+  simp [balance, bulletPrincipal, balance_bullet_lt (Nat.lt_succ_self M)]
 
 /-- The equal-principal schedule: a constant payment `B₀ / N` every period. -/
 noncomputable def equalPrincipalPayment (B0 : ℝ) (N : ℕ) : ℕ → ℝ := fun _ ↦ B0 / N

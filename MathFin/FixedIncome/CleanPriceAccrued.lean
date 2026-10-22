@@ -94,8 +94,7 @@ theorem cleanPrice_eq_dirty_sub_accrued (s : Finset ι) (t : ι → ℕ) (c : ι
 discrete-compounding bond price. -/
 theorem dirtyPrice_on_coupon_date (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (y : ℝ) :
     dirtyPrice s t c y 0 = bondPriceDisc s t c y := by
-  unfold dirtyPrice
-  rw [Real.rpow_zero, one_mul]
+  rw [dirtyPrice, Real.rpow_zero, one_mul]
 
 /-- On a coupon date, no interest has accrued. -/
 theorem accruedInterest_on_coupon_date (c1 : ℝ) : accruedInterest c1 0 = 0 :=

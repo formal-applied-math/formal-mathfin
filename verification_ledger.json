@@ -1518,9 +1518,9 @@
     "mf-clean-price-continuous-at-coupon-date": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.3,
-      "input_hash": "bae2c2c9be5d92344d21f85cca5b5b880ebe844620e3f6585b355ccc950c360f",
-      "verified_at_commit": "8ab0332"
+      "elapsed_s": 3.8,
+      "input_hash": "20d2ce5f87e8886466303327680d2a7b4b25a92e9c547587061da32e8a8a713a",
+      "verified_at_commit": "8b36963"
     },
     "mf-cml-decomposition-unique": {
       "benchmark_file": "mathematical_finance.json",
@@ -1848,8 +1848,8 @@
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-22",
       "elapsed_s": 3.1,
-      "input_hash": "539b44a2a05a6899262d6065ee918fed410be967940714f90fdb02b0efbb0d26",
-      "verified_at_commit": "8ab0332"
+      "input_hash": "7dfff76b6255364a1f9c4fd4d0fd4fdf91fe54464e7395be2993e95ac97ccef9",
+      "verified_at_commit": "8b36963"
     },
     "mf-discrete-es-vs-tail-mean": {
       "benchmark_file": "risk_measures.json",
@@ -2736,9 +2736,9 @@
     "mf-level-payment-balance-annuity": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-22",
-      "elapsed_s": 5.6,
-      "input_hash": "434cc43ae4ba1ab1a084af57c6826f73383753cfeb4d3f5c078fdcb9c6bab182",
-      "verified_at_commit": "458faa2"
+      "elapsed_s": 3.7,
+      "input_hash": "7821de1407a3fc5aa65daa497c97848194c2cb069a3b1ebd8b85628344cda621",
+      "verified_at_commit": "8b36963"
     },
     "mf-lhp-stop-loss-closed-form": {
       "benchmark_file": "credit.json",

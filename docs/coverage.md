@@ -46,7 +46,8 @@ Eight `full` entries, corpus 658 → 666, each derived from library machinery:
 - **Clean and dirty price** (`interest_rates.json`). As `f ↑ 1` the dirty price tends to the next
   period's dirty price plus the coupon, and the clean price to the next period's clean price
   (`mf-dirty-price-drops-by-coupon`, `mf-clean-price-continuous-at-coupon-date`).
-- **Level-payment loan** (`interest_rates.json`). After `n` payments the balance is
+- **Level-payment loan** (`interest_rates.json`). With principal `B₀ = annuityValue N A r Δt`
+  and period rate `e^{rΔt} − 1`, after `n ≤ N` payments the balance is
   `annuityValue (N − n) A r Δt`, zero at `N` (`mf-level-payment-balance-annuity`).
 
 ### Every module connected: the coherence pass (2026-10-21)
