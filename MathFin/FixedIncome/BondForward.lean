@@ -24,9 +24,15 @@ equivalently (the usual forward-price statement)
 
   `X = (P₀ - Σ_{t ≤ t_fe} Df(t) · CF(t)) / Df(t_fe)`.
 
-This module states the replication identity as a definition
-(`bondForwardPrice`) and proves it is exactly the strike making the forward
-contract's time-0 value zero — the no-arbitrage characterization.
+Here `s` is the caller-supplied set of coupon dates in `(0, t_fe]`; nothing in
+`Finset ι` itself enforces that range, so passing it correctly is the
+caller's responsibility. The coupon-stripped spot `P₀ - Σ Df(t)·CF(t)` plays
+the role of `S₀` in `forward_price_from_no_arbitrage`
+(`MathFin/Foundations/NoArbitrageDerivations.lean`); this module states the
+replication identity as a definition (`bondForwardPrice`) and proves it is
+exactly the strike making the forward contract's time-0 value zero — the
+no-arbitrage characterization — without re-deriving the replication argument
+itself.
 
 ## Result
 
@@ -63,9 +69,6 @@ theorem forwardValue_eq_zero_iff_eq_bondForwardPrice (s : Finset ι) (Df CF : ι
     (P0 Df_fe : ℝ) (hDf : Df_fe ≠ 0) (X : ℝ) :
     forwardValue s Df CF P0 Df_fe X = 0 ↔ X = bondForwardPrice s Df CF P0 Df_fe := by
   unfold forwardValue bondForwardPrice
-  rw [sub_eq_zero]
-  constructor
-  · intro h; field_simp; linarith
-  · intro h; rw [h]; field_simp
+  rw [sub_eq_zero, eq_div_iff hDf, mul_comm, eq_comm]
 
 end MathFin

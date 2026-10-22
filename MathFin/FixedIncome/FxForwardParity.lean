@@ -17,14 +17,15 @@ no-arbitrage forward rate for maturity `T` is
   `F(0, T) = S · exp((r_d - r_f) · T)`.
 
 This is distinct from the already-tracked Garman–Kohlhagen *spot* option
-formula (`MathFin/BlackScholes/QuantoGrounding.lean`): CIP prices the forward
-*contract itself* via cash-and-carry replication in the two money markets,
-with no optionality involved.
+formula (`garman_kohlhagen_call_formula` in `MathFin/BlackScholes/Dividends.lean`):
+CIP prices the forward *contract itself* via cash-and-carry replication in the
+two money markets, with no optionality involved.
 
 **Implied forward curve**: chaining CIP across two maturities gives the
-**forward-forward factor** — the ratio `F(0,T₂)/F(0,T₁)`, i.e. the FX-swap
-points between `T₁` and `T₂` — purely from the two spot-dated forwards, with
-the spot rate canceling. This is *not itself* an exchange rate: the actual
+**forward-forward factor** — the ratio `F(0,T₂)/F(0,T₁)`, i.e. the implied
+carry between `T₁` and `T₂` (the FX-swap points over that leg, quoted as the
+additive `F(0,T₂) - F(0,T₁) = F(0,T₁)·(factor - 1)`, follow from it) — purely
+from the two spot-dated forwards, with the spot rate canceling. This is *not itself* an exchange rate: the actual
 `T₁`-struck forward for delivery at `T₂` is the random
 `S_{T₁} · exp((r_d - r_f)·(T₂ - T₁))`, since the future spot `S_{T₁}` is
 unknown today. What the factor gives is the deterministic multiplier by
@@ -64,7 +65,7 @@ theorem fxForward_pos {S : ℝ} (hS : 0 < S) (r_d r_f T : ℝ) : 0 < fxForward S
 
 /-- The **forward-forward factor** between `T₁` and `T₂`: the ratio of the
 two spot-dated CIP forwards. The spot rate `S` cancels, so this is exactly
-the deterministic FX-swap-points factor a forward curve built from
+the deterministic forward-forward carry factor a forward curve built from
 market-quoted forwards would use, with no need to re-observe spot. It is a
 unitless ratio, not an exchange rate — see the module docstring. -/
 noncomputable def forwardForwardFactor (S r_d r_f T1 T2 : ℝ) : ℝ :=

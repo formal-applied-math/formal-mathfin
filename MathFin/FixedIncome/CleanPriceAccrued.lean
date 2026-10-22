@@ -44,7 +44,8 @@ accrued interest — the two pricing conventions agree exactly where they must.
 * `cleanPrice_eq_dirty_sub_accrued`: `Clean = Dirty - Accrued` by definition.
 * `dirtyPrice_on_coupon_date`: `Dirty(y, 0) = bondPriceDisc s t c y`.
 * `accruedInterest_on_coupon_date`: `Accrued(0) = 0`.
-* `cleanPrice_eq_dirty_on_coupon_date`: on a coupon date, clean = dirty.
+* `cleanPrice_on_coupon_date`: on a coupon date, clean price equals
+  `bondPriceDisc` (equivalently, equals dirty price).
 -/
 
 @[expose] public section
@@ -87,7 +88,7 @@ theorem accruedInterest_on_coupon_date (c1 : ℝ) : accruedInterest c1 0 = 0 := 
 /-- On a coupon date, clean price equals dirty price (equivalently, equals
 the ordinary `bondPriceDisc`): the two conventions agree exactly on coupon
 dates, where there is nothing left to accrue. -/
-theorem cleanPrice_eq_dirty_on_coupon_date (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (y c1 : ℝ) :
+theorem cleanPrice_on_coupon_date (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (y c1 : ℝ) :
     cleanPrice s t c y 0 c1 = bondPriceDisc s t c y := by
   rw [cleanPrice_eq_dirty_sub_accrued, dirtyPrice_on_coupon_date,
     accruedInterest_on_coupon_date, sub_zero]
