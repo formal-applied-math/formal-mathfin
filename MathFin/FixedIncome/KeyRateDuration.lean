@@ -77,7 +77,8 @@ taken as hypotheses, so the statement holds for whatever `∂P/∂kⱼ` is; they
 `hasDerivAt_bondPriceKeyRate_update` by uniqueness of derivatives. -/
 theorem hasDerivAt_bondPriceKeyRate_parallel [DecidableEq ι] (s : Finset ι) (t : ι → ℕ)
     (c k : ι → ℝ) (hk : ∀ i ∈ s, 1 + k i ≠ 0) {D : ι → ℝ}
-    (hD : ∀ j ∈ s, HasDerivAt (fun x ↦ bondPriceKeyRate s t c (Function.update k j x)) (D j) (k j)) :
+    (hD : ∀ j ∈ s,
+      HasDerivAt (fun x ↦ bondPriceKeyRate s t c (Function.update k j x)) (D j) (k j)) :
     HasDerivAt (fun ε ↦ bondPriceKeyRate s t c (fun i ↦ k i + ε)) (∑ j ∈ s, D j) 0 := by
   unfold bondPriceKeyRate
   refine HasDerivAt.fun_sum fun j hj ↦ ?_

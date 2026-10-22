@@ -97,8 +97,8 @@ theorem balance_bullet_lt {B0 : ℝ} {N n : ℕ} (hn : n < N) :
   | zero => rfl
   | succ k ih => simp [balance, bulletPrincipal, ih (Nat.lt_of_succ_lt hn), hn.ne]
 
-/-- Under the bullet schedule, the balance is exactly zero at maturity
-(assuming it was unpaid up to `N - 1`, i.e. `N ≥ 1`). -/
+/-- Under the bullet schedule, the balance is exactly zero at maturity `N ≥ 1`
+(at `N = 0` maturity is not a payment period, and the balance stays `B₀`). -/
 theorem balance_bullet_eq {B0 : ℝ} {N : ℕ} (hN : 0 < N) :
     balance B0 (bulletPrincipal B0 N) N = 0 := by
   obtain ⟨M, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hN.ne'

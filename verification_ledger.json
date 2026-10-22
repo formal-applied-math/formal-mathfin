@@ -2708,9 +2708,9 @@
     "mf-key-rate-partials-sum-to-yield-derivative": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.8,
-      "input_hash": "b623a90b606aecaa63d165f82c668c71116a14e6b9857197958f97650c304960",
-      "verified_at_commit": "de65c87"
+      "elapsed_s": 3.6,
+      "input_hash": "a625eebc4a6771534b460a0b0efa6b58df406ef1decaebe844daffb8066beec1",
+      "verified_at_commit": "206a35e"
     },
     "mf-kirk-zero-strike-margrabe": {
       "benchmark_file": "exotic_options.json",
@@ -2736,9 +2736,9 @@
     "mf-level-payment-balance-annuity": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.7,
-      "input_hash": "7821de1407a3fc5aa65daa497c97848194c2cb069a3b1ebd8b85628344cda621",
-      "verified_at_commit": "8b36963"
+      "elapsed_s": 3.1,
+      "input_hash": "4a0e58daddeed3e8e63e0d0e8ff74269fa0ae4cbb2b269195441e03bb399f007",
+      "verified_at_commit": "206a35e"
     },
     "mf-lhp-stop-loss-closed-form": {
       "benchmark_file": "credit.json",
