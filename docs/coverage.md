@@ -59,6 +59,7 @@ Verification:
 - `lake lint` passed.
 - The ledger reports 540 fresh, 0 stale and 0 missing entries; the five new entries were verified
   with `lake env lean`.
+
 ### Every module connected: the coherence pass (2026-10-21)
 
 A coherence pass found 41 modules that imported nothing from the library and that nothing
