@@ -2616,10 +2616,10 @@
     },
     "mf-relative-drawdown-scale-invariant": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-10-22",
-      "elapsed_s": 3.5,
-      "input_hash": "347fd38132bef65422926e3b3ff797e20da54bd340386852c84c788f6c07faf3",
-      "verified_at_commit": "ce4d6bb"
+      "date": "2026-10-23",
+      "elapsed_s": 3.2,
+      "input_hash": "b7546fff2efc7054a644335055591ec172636b8fe49b846ca4c492c541dc579b",
+      "verified_at_commit": "7e83ecf"
     },
     "mf-rho": {
       "benchmark_file": "mathematical_finance.json",
