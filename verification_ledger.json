@@ -2709,8 +2709,8 @@
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-22",
       "elapsed_s": 3.5,
-      "input_hash": "6fd74b011611d622066b12b168240e62b464902cd34ec0a8ddd524ae27446173",
-      "verified_at_commit": "7c75867"
+      "input_hash": "21abd79e7cc62136890fc948292d2bc203b01f7ab0caf178619b724f2b52611d",
+      "verified_at_commit": "8443df0"
     },
     "mf-kirk-zero-strike-margrabe": {
       "benchmark_file": "exotic_options.json",

@@ -9,7 +9,7 @@ public import Mathlib
 public import MathFin.FixedIncome.DurationSensitivity
 
 /-!
-# Key-rate durations sum to the parallel-shift derivative
+# Key-rate partials sum to the parallel-shift derivative
 
 `DurationSensitivity` prices a bond off a single flat yield, `P(y) = Σ cᵢ / (1 + y)^{tᵢ}`
 (`bondPriceDisc`), and differentiates it: `P'(y) = -ModNum(y)` (`hasDerivAt_bondPriceDisc`).
@@ -81,9 +81,9 @@ theorem hasDerivAt_bondPriceKeyRate_parallel [DecidableEq ι] (s : Finset ι) (t
   unfold bondPriceKeyRate
   refine HasDerivAt.fun_sum fun j hj ↦ ?_
   rw [(hD j hj).unique (hasDerivAt_bondPriceKeyRate_update s t c k hj (hk j hj))]
-  have := (hasDerivAt_coupon_term (c j) (t j) (y := k j + 0) (by simpa using hk j hj)).comp_const_add
-    (k j) 0
-  rwa [add_zero] at this
+  simpa using
+    (hasDerivAt_coupon_term (c j) (t j) (y := k j + 0) (by simpa using hk j hj)).comp_const_add
+      (k j) 0
 
 /-- **`Σⱼ ∂P/∂kⱼ = dP/dy`.** On a flat curve `k ≡ y` (with `1 + y ≠ 0`), the key-rate partials
 `D j = ∂P/∂kⱼ` sum to the derivative of the flat-yield price `bondPriceDisc` at `y`: a
