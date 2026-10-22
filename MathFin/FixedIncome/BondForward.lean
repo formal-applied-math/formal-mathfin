@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import Mathlib
+public import MathFin.Foundations.NoArbitrageDerivations
 
 /-!
 # Bond forward price by cash-and-carry replication
@@ -28,11 +29,11 @@ Here `s` is the caller-supplied set of coupon dates in `(0, t_fe]`; nothing in
 `Finset ι` itself enforces that range, so passing it correctly is the
 caller's responsibility. The coupon-stripped spot `P₀ - Σ Df(t)·CF(t)` plays
 the role of `S₀` in `forward_price_from_no_arbitrage`
-(`MathFin/Foundations/NoArbitrageDerivations.lean`); this module states the
-replication identity as a definition (`bondForwardPrice`) and proves it is
-exactly the strike making the forward contract's time-0 value zero — the
-no-arbitrage characterization — without re-deriving the replication argument
-itself.
+(`MathFin/Foundations/NoArbitrageDerivations.lean`), and
+`bondForwardPrice_from_no_arbitrage` derives the forward price from it: in a
+finite-state market whose state prices price the bond as its pre-expiry coupons
+plus its value at `t_fe`, the forward contract paying `B(t_fe) - X` is worth
+zero exactly at `X = bondForwardPrice`.
 
 ## Result
 
@@ -41,6 +42,8 @@ itself.
   `(P₀ - Σ Df(t)·CF(t)) / Df(t_fe)`.
 * `forwardValue_eq_zero_iff_eq_bondForwardPrice`: `X` makes the forward's
   value zero iff `X = bondForwardPrice` — the no-arbitrage characterization.
+* `bondForwardPrice_from_no_arbitrage`: the forward price derived from
+  `forward_price_from_no_arbitrage`, with the coupon-stripped bond as the asset.
 -/
 
 @[expose] public section
@@ -70,5 +73,20 @@ theorem forwardValue_eq_zero_iff_eq_bondForwardPrice (s : Finset ι) (Df CF : ι
     forwardValue s Df CF P0 Df_fe X = 0 ↔ X = bondForwardPrice s Df CF P0 Df_fe := by
   unfold forwardValue bondForwardPrice
   rw [sub_eq_zero, eq_div_iff hDf, mul_comm, eq_comm]
+
+/-- **Bond forward price from no-arbitrage.** A finite-state market with state
+prices `q` on the states `Ω` at the forward-expiry date `t_fe`: the zero-coupon
+bond to `t_fe` costs `Df_fe = Σ q ω`, and the bond, worth `B ω` (ex-coupon) at
+`t_fe` in state `ω`, is priced as its coupons paid up to `t_fe` plus its value
+then, `P₀ = Σ Df(t)·CF(t) + Σ q ω · B ω`. Then the forward contract paying
+`B - X` at `t_fe` is worth zero iff `X = bondForwardPrice`: this is
+`forward_price_from_no_arbitrage` with the coupon-stripped bond
+`P₀ - Σ Df(t)·CF(t)` as the spot. -/
+theorem bondForwardPrice_from_no_arbitrage {Ω : Type*} (states : Finset Ω) (q B : Ω → ℝ)
+    (s : Finset ι) (Df CF : ι → ℝ) (P0 Df_fe X : ℝ) (hDf : Df_fe ≠ 0)
+    (h_zcb : ∑ ω ∈ states, q ω = Df_fe)
+    (h_bond : P0 = ∑ t ∈ s, Df t * CF t + ∑ ω ∈ states, q ω * B ω) :
+    ∑ ω ∈ states, q ω * (B ω - X) = 0 ↔ X = bondForwardPrice s Df CF P0 Df_fe :=
+  forward_price_from_no_arbitrage states q B Df_fe _ X hDf h_zcb (by rw [h_bond]; ring)
 
 end MathFin

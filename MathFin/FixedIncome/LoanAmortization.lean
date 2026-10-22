@@ -6,9 +6,10 @@ Authors: Yang Ye
 module
 
 public import Mathlib
+public import MathFin.FixedIncome.CouponBonds
 
 /-!
-# Loan amortization schedules: bullet and equal-principal recurrences
+# Loan amortization schedules: bullet, equal-principal and level-payment
 
 Both schedules share the same per-period interest accrual on the outstanding
 balance `B_{n-1}`,
@@ -30,6 +31,16 @@ They differ only in how `P_n` is chosen:
 Both closed forms are proved here by induction on the balance recurrence,
 matching the standard amortization-table identities.
 
+* **Level payment** (mortgage-style): the same payment `A` every period, its
+  principal part `A - I_n` being what is left after interest, so
+  `B_n = B_{n-1}·(1 + i) - A`. Priced against `annuityValue`
+  (`MathFin/FixedIncome/CouponBonds.lean`), the present value of `N` payments
+  `A` discounted continuously at rate `r` over periods of length `Δt`: if the
+  loan's principal is that annuity's value and the period rate is
+  `i = e^{rΔt} - 1`, then after `n ≤ N` payments the outstanding balance is
+  the value of the `N - n` payments still to come, and the loan is paid off
+  at `N`.
+
 ## Result
 
 * `bulletPrincipal`, `equalPrincipalPayment` — the two principal-payment
@@ -40,6 +51,13 @@ matching the standard amortization-table identities.
 * `balance_bullet_lt`, `balance_bullet_eq` — the bullet closed form.
 * `balance_equalPrincipal` — the equal-principal closed form
   `B_n = B_0 · (1 - n / N)`.
+* `levelPaymentBalance`, `balance_levelPayment` — the level-payment balance,
+  and that it is `balance` with principal `A - I_n`.
+* `annuityValue_succ_mul_exp_sub` — one period of an annuity's value:
+  `A_{m+1}·e^{rΔt} - A = A_m`.
+* `levelPaymentBalance_eq_annuityValue`, `levelPaymentBalance_eq_zero` — the
+  balance after `n` level payments is `annuityValue (N - n) A r Δt`, and zero
+  at `N`.
 -/
 
 @[expose] public section
@@ -107,5 +125,61 @@ theorem balance_equalPrincipal {B0 : ℝ} {N : ℕ} (hN : N ≠ 0) (n : ℕ) :
     push_cast
     field_simp
     ring
+
+/-- The level-payment balance: interest at period rate `i` accrues on the
+outstanding balance, then the payment `A` is made, `B_{n+1} = B_n·(1 + i) - A`. -/
+def levelPaymentBalance (B0 A i : ℝ) : ℕ → ℝ
+  | 0 => B0
+  | n + 1 => levelPaymentBalance B0 A i n * (1 + i) - A
+
+/-- The level-payment schedule is the shared recurrence `balance` with the
+principal part of period `n + 1`'s payment being `A` less the interest
+`B_n · i` on the outstanding balance. -/
+theorem balance_levelPayment (B0 A i : ℝ) (n : ℕ) :
+    balance B0 (fun m ↦ A - levelPaymentBalance B0 A i (m - 1) * i) n =
+      levelPaymentBalance B0 A i n := by
+  induction n with
+  | zero => rfl
+  | succ k ih =>
+    simp only [balance, levelPaymentBalance, ih, Nat.add_sub_cancel]
+    ring
+
+/-- One period of an annuity: carrying the value of `m + 1` payments forward one
+period and paying the first leaves the value of the other `m`,
+`A_{m+1}·e^{rΔt} - A = A_m`. -/
+theorem annuityValue_succ_mul_exp_sub (m : ℕ) (A r Δt : ℝ) :
+    annuityValue (m + 1) A r Δt * Real.exp (r * Δt) - A = annuityValue m A r Δt := by
+  rw [annuityValue, annuityValue, Finset.sum_range_succ', add_mul, Finset.sum_mul,
+    mul_assoc A, ← Real.exp_add]
+  simp only [Nat.cast_zero, zero_add, one_mul, neg_add_cancel, Real.exp_zero, mul_one,
+    add_sub_cancel_right]
+  refine Finset.sum_congr rfl fun i _ ↦ ?_
+  rw [mul_assoc, ← Real.exp_add]
+  congr 2
+  push_cast
+  ring
+
+/-- **Level-payment schedule against `annuityValue`.** A loan whose principal
+`B₀` is the value `annuityValue N A r Δt` of `N` level payments `A`, at period
+rate `i = e^{rΔt} - 1`, has outstanding balance after `n ≤ N` payments equal to
+the value of the `N - n` payments still to come. -/
+theorem levelPaymentBalance_eq_annuityValue {B0 A r Δt : ℝ} {N : ℕ}
+    (hB0 : annuityValue N A r Δt = B0) {n : ℕ} (hn : n ≤ N) :
+    levelPaymentBalance B0 A (Real.exp (r * Δt) - 1) n = annuityValue (N - n) A r Δt := by
+  induction n with
+  | zero => exact hB0.symm
+  | succ k ih =>
+    obtain ⟨m, hm⟩ := Nat.exists_eq_add_of_lt hn
+    rw [levelPaymentBalance, ih (Nat.le_of_succ_le hn), add_sub_cancel,
+      show N - k = m + 1 by omega, show N - (k + 1) = m by omega,
+      annuityValue_succ_mul_exp_sub]
+
+/-- **A level-payment loan is paid off at maturity**: with `B₀` the value of the
+`N` payments, the balance after the `N`-th is zero. -/
+theorem levelPaymentBalance_eq_zero {B0 A r Δt : ℝ} {N : ℕ}
+    (hB0 : annuityValue N A r Δt = B0) :
+    levelPaymentBalance B0 A (Real.exp (r * Δt) - 1) N = 0 := by
+  rw [levelPaymentBalance_eq_annuityValue hB0 le_rfl, Nat.sub_self, annuityValue,
+    Finset.sum_range_zero]
 
 end MathFin

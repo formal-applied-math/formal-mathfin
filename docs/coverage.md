@@ -26,6 +26,29 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Fixed-income building blocks (#277; issues #69, #108)
+
+Eight `full` entries, corpus 658 → 666, each derived from library machinery:
+
+- **Interest-rate parity** (`no_arbitrage.json`; #108). Covered parity `F = S·e^{(r_d−r_f)T}` is
+  `forward_price_from_no_arbitrage` with the foreign zero-coupon bond as the asset
+  (`mf-covered-interest-parity`; the one-period discrete form is
+  `covered_interest_parity_discrete`). Uncovered parity in its risk-neutral form,
+  `E_Q[S_T] = S·e^{(r_d−r_f)T}`, is `expected_terminal_eq_forward` under the Garman–Kohlhagen
+  hypothesis (`mf-uncovered-interest-parity-risk-neutral`; the physical-measure UIP is not
+  claimed), and the two agree (`mf-covered-eq-uncovered-interest-parity`).
+- **Bond forward** (`interest_rates.json`). `forward_price_from_no_arbitrage` with the
+  coupon-stripped bond as the spot (`mf-bond-forward-from-no-arbitrage`).
+- **Key-rate duration** (`interest_rates.json`; #69). With one spot rate per cashflow, the
+  partials `∂P/∂kⱼ` sum to the parallel-shift derivative, and on a flat curve to `dP/dy` through
+  `hasDerivAt_bondPriceDisc` (`mf-key-rate-partials-sum-to-yield-derivative`). Interpolated
+  key-rate nodes are not modelled.
+- **Clean and dirty price** (`interest_rates.json`). As `f ↑ 1` the dirty price tends to the next
+  period's dirty price plus the coupon, and the clean price to the next period's clean price
+  (`mf-dirty-price-drops-by-coupon`, `mf-clean-price-continuous-at-coupon-date`).
+- **Level-payment loan** (`interest_rates.json`). After `n` payments the balance is
+  `annuityValue (N − n) A r Δt`, zero at `N` (`mf-level-payment-balance-annuity`).
+
 ### Every module connected: the coherence pass (2026-10-21)
 
 A coherence pass found 41 modules that imported nothing from the library and that nothing

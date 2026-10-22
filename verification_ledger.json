@@ -962,6 +962,13 @@
       "input_hash": "4ec034be0950aa20b27c8913272e63eae31eb8b288984b2d56add4b6c73ba9ef",
       "verified_at_commit": "cb1b3cd"
     },
+    "mf-bond-forward-from-no-arbitrage": {
+      "benchmark_file": "interest_rates.json",
+      "date": "2026-10-22",
+      "elapsed_s": 3.5,
+      "input_hash": "d0a6e6ec029408c0aff8d577d997be1a5b11b545ee979387edc09a704523950c",
+      "verified_at_commit": "1df552e"
+    },
     "mf-bond-immunization-first-order": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-21",
@@ -1508,6 +1515,13 @@
       "input_hash": "41dab077c191b3d4ac2eb1cfb4c3ac40aa799d5f81f2dd5b73abecef63df86be",
       "verified_at_commit": "025a67bd"
     },
+    "mf-clean-price-continuous-at-coupon-date": {
+      "benchmark_file": "interest_rates.json",
+      "date": "2026-10-22",
+      "elapsed_s": 3.4,
+      "input_hash": "a581fb513360888a2a6510065fdb3e618896b7324de15d581ffdc63471ae0a1a",
+      "verified_at_commit": "1df552e"
+    },
     "mf-cml-decomposition-unique": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-21",
@@ -1676,6 +1690,20 @@
       "input_hash": "e3297a60e9d1c24fc43b29856c80c908a4421801db822775661ed9fb498dc966",
       "verified_at_commit": "cb1b3cd"
     },
+    "mf-covered-eq-uncovered-interest-parity": {
+      "benchmark_file": "no_arbitrage.json",
+      "date": "2026-10-22",
+      "elapsed_s": 3.6,
+      "input_hash": "b3698303e793134e095606fb92f652364fc40d057292ca9986632120e7472dfc",
+      "verified_at_commit": "1df552e"
+    },
+    "mf-covered-interest-parity": {
+      "benchmark_file": "no_arbitrage.json",
+      "date": "2026-10-22",
+      "elapsed_s": 3.5,
+      "input_hash": "4f34f04584cf558a9337223fbc91ddd50c63e6fba6a3914a7bd16e5bbabb67e0",
+      "verified_at_commit": "1df552e"
+    },
     "mf-cpmm-arbitrage-iff-price-divergence": {
       "benchmark_file": "defi.json",
       "date": "2026-10-21",
@@ -1815,6 +1843,13 @@
       "elapsed_s": 8.3,
       "input_hash": "79f6f4b3a8e8eb49de64140322bd16cfbbae09093d94a8bfd5b33a3244c1dcd8",
       "verified_at_commit": "199887f8"
+    },
+    "mf-dirty-price-drops-by-coupon": {
+      "benchmark_file": "interest_rates.json",
+      "date": "2026-10-22",
+      "elapsed_s": 3.4,
+      "input_hash": "fe5302ff9d5a7613b0994943a6cac6c877107bef45035eda1a881bb3c5861f0c",
+      "verified_at_commit": "1df552e"
     },
     "mf-discrete-es-vs-tail-mean": {
       "benchmark_file": "risk_measures.json",
@@ -2670,6 +2705,13 @@
       "input_hash": "0b5da7f74f5845803f1d3be2bccc0bc58708c4cf771a6ec1b7c821a9ae0e9837",
       "verified_at_commit": "cb1b3cd"
     },
+    "mf-key-rate-partials-sum-to-yield-derivative": {
+      "benchmark_file": "interest_rates.json",
+      "date": "2026-10-22",
+      "elapsed_s": 3.4,
+      "input_hash": "e04a47b312dca8b274ab19cf6faf8a8a84ab90935a4fd7918a6c12fd7493fb81",
+      "verified_at_commit": "1df552e"
+    },
     "mf-kirk-zero-strike-margrabe": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-10-21",
@@ -2690,6 +2732,13 @@
       "elapsed_s": 8.2,
       "input_hash": "8e801d391b4c8c3afda1389e6b480809fbbf8834740c731327a257bd4830769b",
       "verified_at_commit": "199887f8"
+    },
+    "mf-level-payment-balance-annuity": {
+      "benchmark_file": "interest_rates.json",
+      "date": "2026-10-22",
+      "elapsed_s": 3.8,
+      "input_hash": "55672d60f1248a331b688d42773eb8650bfa9e5980f3fbfe90d82fccee2571af",
+      "verified_at_commit": "1df552e"
     },
     "mf-lhp-stop-loss-closed-form": {
       "benchmark_file": "credit.json",
@@ -3579,6 +3628,13 @@
       "elapsed_s": 7.8,
       "input_hash": "39463c80e7e81cc1959a152df1c9e842ef0391873d3f93545df9a0f9bd7d240b",
       "verified_at_commit": "199887f8"
+    },
+    "mf-uncovered-interest-parity-risk-neutral": {
+      "benchmark_file": "no_arbitrage.json",
+      "date": "2026-10-22",
+      "elapsed_s": 3.5,
+      "input_hash": "f3d8bb3fd8270b4f9c4258c011795ef51da5a9563c1d790f804457c75e56e686",
+      "verified_at_commit": "1df552e"
     },
     "mf-uniswap-v3-position-bs-price-bound": {
       "benchmark_file": "defi.json",

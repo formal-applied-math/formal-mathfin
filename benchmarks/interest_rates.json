@@ -842,6 +842,86 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.Inflation.Convexity.integral_exp_hwD_forwardMeasure (MathFin/FixedIncome/Inflation.lean). SCOPE: the normalisation E^{Q^S}[exp(D − b(r_S − f(0,S)))] = 1 with D = hwD b Var(r_S), under the calibrated Hull–White S-forward measure (HullWhite.forwardMeasure). The reconstitution formula for P(S,T), and the two-curve Jarrow–Yildirim dynamics behind the YoY convexity, are not derived. The short rate is its Wiener representation; the SDE solution and the time-order swap are cited, not proved."
       }
+    },
+    {
+      "id": "mf-key-rate-partials-sum-to-yield-derivative",
+      "name": "Key-Rate Partial Derivatives Sum to dP/dy",
+      "domain": "mathematical_finance",
+      "description": "For a bond priced as P(k) = Σ cᵢ/(1 + kᵢ)^{tᵢ}, each cashflow discounted at its own tenor's spot rate kᵢ, take on a flat curve k ≡ y (1 + y ≠ 0) any partial derivatives D j = ∂P/∂kⱼ, as HasDerivAt along the curve that moves kⱼ alone. Then Σⱼ D j = dP/dy, the derivative of the flat-yield price Σ cᵢ/(1 + y)^{tᵢ}. Dividing by −P, the key-rate durations sum to the modified duration.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.KeyRateDuration\n\nopen MathFin\n\n/-- **Key-rate partials sum to the yield derivative** on a flat curve. -/\ntheorem key_rate_partials_sum_to_yield_derivative {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ} (hy : 1 + y ≠ 0) {D : ι → ℝ}\n    (hD : ∀ j ∈ s, HasDerivAt\n      (fun x ↦ bondPriceKeyRate s t c (Function.update (fun _ ↦ y) j x)) (D j) y) :\n    ∑ j ∈ s, D j = deriv (bondPriceDisc s t c) y :=\n  sum_keyRate_partials_eq_deriv_bondPriceDisc s t c hy hD\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Key-rate duration (Ho, 'Key Rate Durations: Measures of Interest Rate Risks', J. Fixed Income 2(2), 1992)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.sum_keyRate_partials_eq_deriv_bondPriceDisc (MathFin/FixedIncome/KeyRateDuration.lean). Each partial is identified with −tⱼcⱼ/(1+kⱼ)^{tⱼ+1} (hasDerivAt_bondPriceKeyRate_update, from hasDerivAt_coupon_term) by uniqueness of derivatives; their sum is the derivative along the parallel shift k + ε·1 (hasDerivAt_bondPriceKeyRate_parallel, which holds on any curve), and on a flat curve that shift is a move of the yield, whose derivative is hasDerivAt_bondPriceDisc. SCOPE: one key rate per cashflow, annual compounding, integer tenors; interpolated key-rate nodes (hat-function bases) are not modelled."
+      }
+    },
+    {
+      "id": "mf-clean-price-continuous-at-coupon-date",
+      "name": "Clean Price Is Continuous Across a Coupon Date",
+      "domain": "mathematical_finance",
+      "description": "With dirty price (1 + y)^f · Σ cᵢ/(1 + y)^{tᵢ} at elapsed fraction f of the period, accrued interest f · c_j on the next coupon c_j (t_j = 1, all tᵢ ≥ 1) and clean price dirty − accrued, for 1 + y > 0: as f ↑ 1 the clean price tends to the clean price at the start of the next period (remaining cashflows without j, each one period closer, f = 0), for any next accruing coupon.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.CleanPriceAccrued\n\nopen MathFin Filter Topology\n\n/-- **The clean price is continuous across a coupon date.** -/\ntheorem clean_price_continuous_at_coupon_date {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ} (hy : 0 < 1 + y) {j : ι} (hj : j ∈ s)\n    (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i) (c1' : ℝ) :\n    Tendsto (fun f ↦ cleanPrice s t c y f (c j)) (𝓝[<] 1)\n      (𝓝 (cleanPrice (s.erase j) (fun i ↦ t i - 1) c y 0 c1')) :=\n  tendsto_cleanPrice_coupon_date s t c hy hj htj ht c1'\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Clean and dirty bond prices, accrued interest (Fabozzi, Bond Markets, Analysis and Strategies; Hull, Options, Futures, and Other Derivatives)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.tendsto_cleanPrice_coupon_date (MathFin/FixedIncome/CleanPriceAccrued.lean): the limit of the dirty price (tendsto_dirtyPrice_coupon_date, continuity of f ↦ (1+y)^f) minus the limit of the accrued interest. SCOPE: street-convention dirty price with flat yield, integer periods, accrued interest linear in the period fraction; day-count conventions are not modelled."
+      }
+    },
+    {
+      "id": "mf-dirty-price-drops-by-coupon",
+      "name": "Dirty Price Drops by the Coupon at a Coupon Date",
+      "domain": "mathematical_finance",
+      "description": "With dirty price (1 + y)^f · Σ cᵢ/(1 + y)^{tᵢ} at elapsed fraction f of the period, next coupon c_j (t_j = 1, all tᵢ ≥ 1) and 1 + y > 0: as f ↑ 1 the dirty price tends to the dirty price at the start of the next period (remaining cashflows without j, each one period closer, f = 0) plus c_j. The dirty price drops by exactly the coupon paid.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.CleanPriceAccrued\n\nopen MathFin Filter Topology\n\n/-- **The dirty price drops by the coupon at a coupon date.** -/\ntheorem dirty_price_drops_by_coupon {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ} (hy : 0 < 1 + y) {j : ι} (hj : j ∈ s)\n    (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i) :\n    Tendsto (fun f ↦ dirtyPrice s t c y f) (𝓝[<] 1)\n      (𝓝 (dirtyPrice (s.erase j) (fun i ↦ t i - 1) c y 0 + c j)) :=\n  tendsto_dirtyPrice_coupon_date s t c hy hj htj ht\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Clean and dirty bond prices, accrued interest (Fabozzi, Bond Markets, Analysis and Strategies; Hull, Options, Futures, and Other Derivatives)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.tendsto_dirtyPrice_coupon_date (MathFin/FixedIncome/CleanPriceAccrued.lean): continuity of f ↦ (1+y)^f (Real.continuousAt_const_rpow) and the end-of-period value dirtyPrice_one_eq, which splits the coupon off a sum of bondPriceDisc terms. SCOPE: street-convention dirty price with flat yield and integer periods."
+      }
+    },
+    {
+      "id": "mf-bond-forward-from-no-arbitrage",
+      "name": "Bond Forward Price from No-Arbitrage",
+      "domain": "mathematical_finance",
+      "description": "In a finite-state market with state prices q at the forward-expiry date, where the zero-coupon bond to that date costs Df_fe = Σ q ≠ 0 and a coupon bond worth B in each state at expiry is priced as its pre-expiry coupons plus its expiry value, P₀ = Σ Df(t)·CF(t) + Σ q·B: the forward contract paying B − X at expiry has zero value iff X = (P₀ − Σ Df(t)·CF(t))/Df_fe.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.BondForward\n\nopen MathFin\n\n/-- **Bond forward price from no-arbitrage.** -/\ntheorem bond_forward_from_no_arbitrage {Ω ι : Type*} (states : Finset Ω) (q B : Ω → ℝ)\n    (s : Finset ι) (Df CF : ι → ℝ) (P0 Df_fe X : ℝ) (hDf : Df_fe ≠ 0)\n    (h_zcb : ∑ ω ∈ states, q ω = Df_fe)\n    (h_bond : P0 = ∑ t ∈ s, Df t * CF t + ∑ ω ∈ states, q ω * B ω) :\n    ∑ ω ∈ states, q ω * (B ω - X) = 0 ↔ X = bondForwardPrice s Df CF P0 Df_fe :=\n  bondForwardPrice_from_no_arbitrage states q B s Df CF P0 Df_fe X hDf h_zcb h_bond\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Forward on a coupon-bearing asset (Hull, Options, Futures, and Other Derivatives, forward price of an asset providing known income)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.bondForwardPrice_from_no_arbitrage (MathFin/FixedIncome/BondForward.lean), which is forward_price_from_no_arbitrage (MathFin/Foundations/NoArbitrageDerivations.lean) applied with the coupon-stripped bond P₀ − Σ Df·CF as the spot. SCOPE: finite state space; the coupon dates in s are the caller's (the range (0, t_fe] is not enforced)."
+      }
+    },
+    {
+      "id": "mf-level-payment-balance-annuity",
+      "name": "Level-Payment Loan Balance Is the Remaining Annuity",
+      "domain": "mathematical_finance",
+      "description": "A loan with level payment A and period rate i = e^{rΔt} − 1, whose balance follows B_{n+1} = B_n·(1 + i) − A, and whose principal B₀ is the annuity value A_N = Σ_{k<N} A·e^{−r(k+1)Δt} of its N payments: after n ≤ N payments the balance is the annuity value of the N − n payments still to come. In particular it is zero after the N-th.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.LoanAmortization\n\nopen MathFin\n\n/-- **The level-payment balance is the value of the remaining payments.** -/\ntheorem level_payment_balance_annuity {B0 A r Δt : ℝ} {N : ℕ}\n    (hB0 : annuityValue N A r Δt = B0) {n : ℕ} (hn : n ≤ N) :\n    levelPaymentBalance B0 A (Real.exp (r * Δt) - 1) n = annuityValue (N - n) A r Δt :=\n  levelPaymentBalance_eq_annuityValue hB0 hn\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Level-payment (mortgage) amortization (Fabozzi, Bond Markets, Analysis and Strategies, fixed-rate level-payment mortgages)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.levelPaymentBalance_eq_annuityValue (MathFin/FixedIncome/LoanAmortization.lean): induction on n with the one-period annuity identity annuityValue_succ_mul_exp_sub, A_{m+1}·e^{rΔt} − A = A_m, against annuityValue (MathFin/FixedIncome/CouponBonds.lean). balance_levelPayment identifies the recurrence with the module's shared balance recurrence (principal = payment − interest). SCOPE: constant rate, continuously-compounded discounting matched to the period rate."
+      }
     }
   ]
 }
