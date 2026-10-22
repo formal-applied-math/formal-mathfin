@@ -42,14 +42,14 @@ states VaR and ES of `μ + σT` through the library's `valueAtRisk` and `expecte
 |---|---|---|---|
 | `qrm-student-t-density` | For ν > 0, the Student-t law built as Lebesgue measure with density k_ν/∫k_ν, k_ν(x) = (1 + x²/ν)^(-(ν+1)/2), has density Γ((ν+1)/2)/(√(νπ)Γ(ν/2))·(1 + x²/ν)^(-(ν+1)/2). | `MathFin/Foundations/StudentT.lean`, `MathFin.studentTPDFReal_eq` | `full` |
 | `qrm-student-t-cauchy` | The Student-t law with ν = 1 is Mathlib's standard Cauchy law: studentTMeasure 1 = cauchyMeasure 0 1. | `MathFin/Foundations/StudentT.lean`, `MathFin.studentTMeasure_one` | `full` |
-| `qrm-student-t-var` | For T ~ t_ν, σ ≥ 0 and α ∈ (0, 1): VaR_α(μ + σT) = μ + σ·t_ν⁻¹(α), with t_ν⁻¹(α) the quantile of the law. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_of_hasLaw_studentT` | `full` |
-| `qrm-student-t-es` | For T ~ t_ν, ν > 1, σ ≥ 0 and α ∈ (0, 1): ES_α(μ + σT) = μ + σ·g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α). | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.expectedShortfall_of_hasLaw_studentT` | `full` |
-| `qrm-student-t-var-le-es` | For ν > 1 and α ∈ (0, 1), q ≤ g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α), the general VaR ≤ ES read through the two closed forms. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.quantile_studentT_le_expectedShortfall_closedForm` | `full` |
+| `qrm-student-t-var` | For T ~ t_ν, σ ≥ 0 and α ∈ (0, 1): VaR_α(μ + σT) = μ + σ·t_ν⁻¹(α), with t_ν⁻¹(α) the quantile of the law. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_of_hasLaw_studentTMeasure` | `full` |
+| `qrm-student-t-es` | For T ~ t_ν, ν > 1, σ ≥ 0 and α ∈ (0, 1): ES_α(μ + σT) = μ + σ·g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α). | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.expectedShortfall_of_hasLaw_studentTMeasure` | `full` |
+| `qrm-student-t-var-le-es` | For ν > 1 and α ∈ (0, 1), q ≤ g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α), the general VaR ≤ ES read through the two closed forms. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.quantile_studentTMeasure_le_expectedShortfall_closedForm` | `full` |
 
 What is not covered:
 - `t_ν⁻¹(α)` is the generic `quantile` of the law; no closed form for it is given.
 - `qrm-student-t-var-le-es` benchmarks the inequality between the two closed forms; the
-  measure-level `valueAtRisk_le_expectedShortfall_studentT` is not itself a benchmark entry.
+  measure-level `valueAtRisk_le_expectedShortfall_studentTMeasure` is not itself a benchmark entry.
 - The construction as the law of `Z/√(V/ν)` (independent normal and χ²) is not formalized.
 
 Verification:

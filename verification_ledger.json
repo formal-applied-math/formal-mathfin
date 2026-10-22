@@ -3324,37 +3324,37 @@
     "qrm-student-t-cauchy": {
       "benchmark_file": "quantitative_risk_management.json",
       "date": "2026-10-22",
-      "elapsed_s": 7.4,
-      "input_hash": "091599d85e748c9603a76eb4f9bd8087d291e6029a7cbbf100f5e8154a5953f9",
-      "verified_at_commit": "6aae7ef"
+      "elapsed_s": 3.1,
+      "input_hash": "b49b6b9dfe985df7de22a3fb173db9ca5865e1e0fcec4aff0c1d937ac90faebc",
+      "verified_at_commit": "cbdf3c3"
     },
     "qrm-student-t-density": {
       "benchmark_file": "quantitative_risk_management.json",
       "date": "2026-10-22",
-      "elapsed_s": 7.2,
-      "input_hash": "8ed41c971aefd9770f1fc2a5528868150e45879fc01de852d13063b64980913c",
-      "verified_at_commit": "6aae7ef"
+      "elapsed_s": 3.5,
+      "input_hash": "873f5116109f1463c5a8fdde5844bcbf5426584a7d849bc57efef2e25afa82ef",
+      "verified_at_commit": "cbdf3c3"
     },
     "qrm-student-t-es": {
       "benchmark_file": "quantitative_risk_management.json",
       "date": "2026-10-22",
-      "elapsed_s": 7.6,
-      "input_hash": "c84c9ee33e69b92c29eafb37d397ecaa654364b88ac37de2ecb646e753f94b0f",
-      "verified_at_commit": "6aae7ef"
+      "elapsed_s": 3.2,
+      "input_hash": "bdcb914ede58d4e9382a81597a384aa27ce41a0cc54c4b121918ab9c1e207914",
+      "verified_at_commit": "cbdf3c3"
     },
     "qrm-student-t-var": {
       "benchmark_file": "quantitative_risk_management.json",
       "date": "2026-10-22",
-      "elapsed_s": 7.7,
-      "input_hash": "9c9d885a81dbe1882b16fd1cf9ec7433a06b3691efa02efb36d720239cdfd986",
-      "verified_at_commit": "6aae7ef"
+      "elapsed_s": 3.5,
+      "input_hash": "c69dc673a47fe83cc6bd6962ac740e425644f43e998668eaf4ba6566ce14e295",
+      "verified_at_commit": "cbdf3c3"
     },
     "qrm-student-t-var-le-es": {
       "benchmark_file": "quantitative_risk_management.json",
       "date": "2026-10-22",
-      "elapsed_s": 8.2,
-      "input_hash": "18990268505bb5ae8962991db369d59fa01e8a52a22ef365669a59098f2a86bb",
-      "verified_at_commit": "6aae7ef"
+      "elapsed_s": 3.5,
+      "input_hash": "22baeb5475983126596813ec94f8b88436a61374496f984057eab6effb971dd0",
+      "verified_at_commit": "cbdf3c3"
     },
     "qrm-systematic-floor": {
       "benchmark_file": "quantitative_risk_management.json",

@@ -28,16 +28,16 @@ quantile is exactly `1 − α` and ES is the tail first moment `∫_q^∞ t g_ν
 `setIntegral_Ioi_mul_studentTPDFReal` evaluates.
 
 `VaR ≤ ES` is not reproved: it is the general `valueAtRisk_le_expectedShortfall`, instantiated
-at the Student-t loss (`valueAtRisk_le_expectedShortfall_studentT`).
+at the Student-t loss (`valueAtRisk_le_expectedShortfall_studentTMeasure`).
 
 ## Main results
 
-* `valueAtRisk_of_hasLaw_studentT`: `VaR_α(μ + σ T) = μ + σ t_ν⁻¹(α)`.
-* `expectedShortfall_of_hasLaw_studentT`: the McNeil–Frey–Embrechts closed form of
+* `valueAtRisk_of_hasLaw_studentTMeasure`: `VaR_α(μ + σ T) = μ + σ t_ν⁻¹(α)`.
+* `expectedShortfall_of_hasLaw_studentTMeasure`: the McNeil–Frey–Embrechts closed form of
   `ES_α(μ + σ T)` for `ν > 1`.
-* `valueAtRisk_le_expectedShortfall_studentT`: `VaR_α(μ + σ T) ≤ ES_α(μ + σ T)`.
-* `quantile_studentT_le_expectedShortfall_closedForm`: the same inequality between the two closed
-  forms, `q ≤ g_ν(q)/(1 − α) · (ν + q²)/(ν − 1)`.
+* `valueAtRisk_le_expectedShortfall_studentTMeasure`: `VaR_α(μ + σ T) ≤ ES_α(μ + σ T)`.
+* `quantile_studentTMeasure_le_expectedShortfall_closedForm`: the same inequality between the
+  two closed forms, `q ≤ g_ν(q)/(1 − α) · (ν + q²)/(ν − 1)`.
 -/
 
 @[expose] public section
@@ -61,7 +61,7 @@ lemma cdf_studentTMeasure_quantile (hν : 0 < ν) (hα : α ∈ Ioo 0 1) :
 
 omit [IsProbabilityMeasure P] in
 /-- A Student-t loss with `ν > 1` is integrable. -/
-lemma integrable_of_hasLaw_studentT (hν : 1 < ν) (hT : HasLaw T (studentTMeasure ν) P) :
+lemma integrable_of_hasLaw_studentTMeasure (hν : 1 < ν) (hT : HasLaw T (studentTMeasure ν) P) :
     Integrable T P := by
   have hν0 : 0 < ν := by linarith
   have h : Integrable id (studentTMeasure ν) := by
@@ -74,7 +74,7 @@ lemma integrable_of_hasLaw_studentT (hν : 1 < ν) (hT : HasLaw T (studentTMeasu
 
 /-- **Value-at-risk of a Student-t loss**: `VaR_α(μ + σ T) = μ + σ t_ν⁻¹(α)` for `T ~ t_ν` and
 `σ ≥ 0`. -/
-theorem valueAtRisk_of_hasLaw_studentT (hT : HasLaw T (studentTMeasure ν) P) (hσ : 0 ≤ σ)
+theorem valueAtRisk_of_hasLaw_studentTMeasure (hT : HasLaw T (studentTMeasure ν) P) (hσ : 0 ≤ σ)
     (hα : α ∈ Ioo 0 1) :
     valueAtRisk (fun ω ↦ μ + σ * T ω) P α = μ + σ * quantile (studentTMeasure ν) α := by
   rw [valueAtRisk_comp (h := fun x ↦ μ + σ * x) hT.aemeasurable
@@ -84,7 +84,7 @@ theorem valueAtRisk_of_hasLaw_studentT (hT : HasLaw T (studentTMeasure ν) P) (h
 
 /-- **Expected shortfall of a standard Student-t loss**: for `T ~ t_ν` with `ν > 1`,
 `ES_α(T) = g_ν(q)/(1 − α) · (ν + q²)/(ν − 1)` at `q = t_ν⁻¹(α)`. -/
-theorem expectedShortfall_of_hasLaw_studentT_standard (hν : 1 < ν)
+theorem expectedShortfall_of_hasLaw_studentTMeasure_standard (hν : 1 < ν)
     (hT : HasLaw T (studentTMeasure ν) P) (hα : α ∈ Ioo 0 1) :
     expectedShortfall T P α =
       studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *
@@ -106,41 +106,41 @@ theorem expectedShortfall_of_hasLaw_studentT_standard (hν : 1 < ν)
         (ae_of_all _ fun _ ↦ ENNReal.ofReal_lt_top) _ measurableSet_Ioi]
     refine setIntegral_congr_fun measurableSet_Ioi fun t _ ↦ ?_
     simp [studentTPDF, ENNReal.toReal_ofReal (studentTPDFReal_pos hν0 t).le, mul_comm]
-  rw [expectedShortfall_eq_acerbiTasche (integrable_of_hasLaw_studentT hν hT) hα, hVaR,
+  rw [expectedShortfall_eq_acerbiTasche (integrable_of_hasLaw_studentTMeasure hν hT) hα, hVaR,
     htail, hmoment, setIntegral_Ioi_mul_studentTPDFReal hν, sub_self, mul_zero, add_zero]
   ring
 
 /-- **Expected shortfall of a Student-t loss** (McNeil–Frey–Embrechts, Example 2.15): for
 `T ~ t_ν` with `ν > 1` and `σ ≥ 0`, at `q = t_ν⁻¹(α)`,
 `ES_α(μ + σ T) = μ + σ · g_ν(q)/(1 − α) · (ν + q²)/(ν − 1)`. -/
-theorem expectedShortfall_of_hasLaw_studentT (hν : 1 < ν) (hT : HasLaw T (studentTMeasure ν) P)
-    (hσ : 0 ≤ σ) (hα : α ∈ Ioo 0 1) :
+theorem expectedShortfall_of_hasLaw_studentTMeasure (hν : 1 < ν)
+    (hT : HasLaw T (studentTMeasure ν) P) (hσ : 0 ≤ σ) (hα : α ∈ Ioo 0 1) :
     expectedShortfall (fun ω ↦ μ + σ * T ω) P α =
       μ + σ * (studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *
         ((ν + quantile (studentTMeasure ν) α ^ 2) / (ν - 1))) := by
-  have hint := integrable_of_hasLaw_studentT hν hT
+  have hint := integrable_of_hasLaw_studentTMeasure hν hT
   rw [show (fun ω ↦ μ + σ * T ω) = fun ω ↦ σ * T ω + μ from funext fun _ ↦ add_comm _ _,
     expectedShortfall_add_const (hint.const_mul σ) hα, expectedShortfall_const_mul hint hα hσ,
-    expectedShortfall_of_hasLaw_studentT_standard hν hT hα, add_comm]
+    expectedShortfall_of_hasLaw_studentTMeasure_standard hν hT hα, add_comm]
 
 /-- **VaR ≤ ES for a Student-t loss**: the general `valueAtRisk_le_expectedShortfall`, at the
 law. -/
-theorem valueAtRisk_le_expectedShortfall_studentT (hν : 1 < ν)
+theorem valueAtRisk_le_expectedShortfall_studentTMeasure (hν : 1 < ν)
     (hT : HasLaw T (studentTMeasure ν) P) (hα : α ∈ Ioo 0 1) :
     valueAtRisk (fun ω ↦ μ + σ * T ω) P α ≤ expectedShortfall (fun ω ↦ μ + σ * T ω) P α :=
   valueAtRisk_le_expectedShortfall
-    ((integrable_const μ).add ((integrable_of_hasLaw_studentT hν hT).const_mul σ)) hα
+    ((integrable_const μ).add ((integrable_of_hasLaw_studentTMeasure hν hT).const_mul σ)) hα
 
 /-- **The closed forms inherit `VaR ≤ ES`**: at `q = t_ν⁻¹(α)` with `ν > 1`,
 `q ≤ g_ν(q)/(1 − α) · (ν + q²)/(ν − 1)`. An inequality about the Student-t density and quantile,
 read off the general `valueAtRisk_le_expectedShortfall` for `T = id` under the law itself. -/
-theorem quantile_studentT_le_expectedShortfall_closedForm (hν : 1 < ν) (hα : α ∈ Ioo 0 1) :
+theorem quantile_studentTMeasure_le_expectedShortfall_closedForm (hν : 1 < ν) (hα : α ∈ Ioo 0 1) :
     quantile (studentTMeasure ν) α ≤
       studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *
         ((ν + quantile (studentTMeasure ν) α ^ 2) / (ν - 1)) := by
   have := isProbabilityMeasure_studentTMeasure (by linarith : 0 < ν)
   have hT : HasLaw id (studentTMeasure ν) (studentTMeasure ν) := .id
-  rw [← expectedShortfall_of_hasLaw_studentT_standard hν hT hα, ← valueAtRisk_eq_quantile hT]
-  exact valueAtRisk_le_expectedShortfall (integrable_of_hasLaw_studentT hν hT) hα
+  rw [← expectedShortfall_of_hasLaw_studentTMeasure_standard hν hT hα, ← valueAtRisk_eq_quantile hT]
+  exact valueAtRisk_le_expectedShortfall (integrable_of_hasLaw_studentTMeasure hν hT) hα
 
 end MathFin

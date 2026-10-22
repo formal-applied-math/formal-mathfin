@@ -38,7 +38,7 @@ mixture of Gaussian kernels and exchanging the integrals, so the density is the 
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real Set Filter
-open scoped ENNReal NNReal Topology
+open scoped ENNReal Topology
 
 variable {ν : ℝ}
 
@@ -213,8 +213,7 @@ lemma studentTNormConst_one : studentTNormConst 1 = π := by
 `cauchyMeasure 0 1`. -/
 theorem studentTMeasure_one : studentTMeasure 1 = cauchyMeasure 0 1 := by
   rw [cauchyMeasure_of_scale_ne_zero 0 one_ne_zero, studentTMeasure]
-  congr 1
-  funext x
+  congr 1 with x
   simp only [studentTPDF, cauchyPDF, studentTPDFReal, cauchyPDFReal, studentTKernel_one,
     studentTNormConst_one, sub_zero, NNReal.coe_one, one_pow]
   congr 1

@@ -725,8 +725,8 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.expectedShortfall_of_hasLaw_lomaxMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.expectedShortfall_of_hasLaw_lomaxMeasure
 
-/-- info: 'MathFin.expectedShortfall_of_hasLaw_studentT' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.expectedShortfall_of_hasLaw_studentT
+/-- info: 'MathFin.expectedShortfall_of_hasLaw_studentTMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.expectedShortfall_of_hasLaw_studentTMeasure
 
 /-- info: 'MathFin.expectedUtility_mix' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.expectedUtility_mix
@@ -1505,8 +1505,8 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.quantile_map' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.quantile_map
 
-/-- info: 'MathFin.quantile_studentT_le_expectedShortfall_closedForm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.quantile_studentT_le_expectedShortfall_closedForm
+/-- info: 'MathFin.quantile_studentTMeasure_le_expectedShortfall_closedForm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.quantile_studentTMeasure_le_expectedShortfall_closedForm
 
 /-- info: 'MathFin.quantoForward_of_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.quantoForward_of_gaussian
@@ -1685,8 +1685,8 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.valueAtRisk_of_hasLaw_gaussianReal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.valueAtRisk_of_hasLaw_gaussianReal
 
-/-- info: 'MathFin.valueAtRisk_of_hasLaw_studentT' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.valueAtRisk_of_hasLaw_studentT
+/-- info: 'MathFin.valueAtRisk_of_hasLaw_studentTMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.valueAtRisk_of_hasLaw_studentTMeasure
 
 /-- info: 'MathFin.valueAtRisk_portfolio_add_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.valueAtRisk_portfolio_add_le

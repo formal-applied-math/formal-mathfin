@@ -341,8 +341,8 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.studentTPDFReal_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms MathFin.studentTPDFReal_eq
 
-/-- info: 'MathFin.expectedShortfall_of_hasLaw_studentT' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms MathFin.expectedShortfall_of_hasLaw_studentT
+/-- info: 'MathFin.expectedShortfall_of_hasLaw_studentTMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.expectedShortfall_of_hasLaw_studentTMeasure
 
 /-! ## Certified cross-domain bridges -/
 

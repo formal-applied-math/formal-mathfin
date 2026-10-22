@@ -1079,7 +1079,7 @@
       "domain": "mathematical_finance",
       "description": "For T with the Student-t law t_ν, σ ≥ 0 and α ∈ (0, 1), the library's valueAtRisk of the location-scale loss μ + σT is μ + σ·t_ν⁻¹(α), where t_ν⁻¹(α) = quantile (studentTMeasure ν) α is the quantile of the law.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_of_hasLaw_studentT_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {T : Ω → ℝ} {ν μ σ α : ℝ} (hT : HasLaw T (studentTMeasure ν) P)\n    (hσ : 0 ≤ σ) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk (fun ω ↦ μ + σ * T ω) P α = μ + σ * quantile (studentTMeasure ν) α :=\n  MathFin.valueAtRisk_of_hasLaw_studentT hT hσ hα\n"
+        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_of_hasLaw_studentTMeasure_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {T : Ω → ℝ} {ν μ σ α : ℝ} (hT : HasLaw T (studentTMeasure ν) P)\n    (hσ : 0 ≤ σ) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk (fun ω ↦ μ + σ * T ω) P α = μ + σ * quantile (studentTMeasure ν) α :=\n  MathFin.valueAtRisk_of_hasLaw_studentTMeasure hT hσ hα\n"
       },
       "metadata": {
         "chapter": 2,
@@ -1095,7 +1095,7 @@
       "domain": "mathematical_finance",
       "description": "For T with the Student-t law t_ν, ν > 1, σ ≥ 0 and α ∈ (0, 1), the library's expectedShortfall of the location-scale loss μ + σT is the McNeil–Frey–Embrechts closed form μ + σ·g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α), with g_ν the Student-t density.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem expectedShortfall_of_hasLaw_studentT_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {T : Ω → ℝ} {ν μ σ α : ℝ} (hν : 1 < ν)\n    (hT : HasLaw T (studentTMeasure ν) P) (hσ : 0 ≤ σ) (hα : α ∈ Ioo 0 1) :\n    expectedShortfall (fun ω ↦ μ + σ * T ω) P α =\n      μ + σ * (studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *\n        ((ν + quantile (studentTMeasure ν) α ^ 2) / (ν - 1))) :=\n  MathFin.expectedShortfall_of_hasLaw_studentT hν hT hσ hα\n"
+        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem expectedShortfall_of_hasLaw_studentTMeasure_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {T : Ω → ℝ} {ν μ σ α : ℝ} (hν : 1 < ν)\n    (hT : HasLaw T (studentTMeasure ν) P) (hσ : 0 ≤ σ) (hα : α ∈ Ioo 0 1) :\n    expectedShortfall (fun ω ↦ μ + σ * T ω) P α =\n      μ + σ * (studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *\n        ((ν + quantile (studentTMeasure ν) α ^ 2) / (ν - 1))) :=\n  MathFin.expectedShortfall_of_hasLaw_studentTMeasure hν hT hσ hα\n"
       },
       "metadata": {
         "chapter": 2,
@@ -1111,7 +1111,7 @@
       "domain": "mathematical_finance",
       "description": "For the Student-t law t_ν with ν > 1 and α ∈ (0, 1), the VaR and ES closed forms satisfy q ≤ g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α), read off the library's general VaR ≤ ES.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem quantile_studentT_le_expectedShortfall_closedForm_thm {ν α : ℝ} (hν : 1 < ν)\n    (hα : α ∈ Ioo 0 1) :\n    quantile (studentTMeasure ν) α ≤\n      studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *\n        ((ν + quantile (studentTMeasure ν) α ^ 2) / (ν - 1)) :=\n  MathFin.quantile_studentT_le_expectedShortfall_closedForm hν hα\n"
+        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem quantile_studentTMeasure_le_expectedShortfall_closedForm_thm {ν α : ℝ} (hν : 1 < ν)\n    (hα : α ∈ Ioo 0 1) :\n    quantile (studentTMeasure ν) α ≤\n      studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *\n        ((ν + quantile (studentTMeasure ν) α ^ 2) / (ν - 1)) :=\n  MathFin.quantile_studentTMeasure_le_expectedShortfall_closedForm hν hα\n"
       },
       "metadata": {
         "chapter": 2,
