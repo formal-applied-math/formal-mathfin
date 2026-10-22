@@ -26,6 +26,24 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### SABR: the ATM limit, the backbone law, the ATM Black-76 price (2026-10-22)
+
+Three `full` entries in `BlackScholes/SABRImpliedVol.lean`, on Hagan–Kumar–Lesniewski–Woodward
+(2002), answering the three items named on issue #100.
+
+- **`mf-sabr-implied-vol-atm-limit`** (`tendsto_sabrImpliedVol_atm`): the printed smile formula
+  (eq. 2.17a-c, `⋯` dropped) tends to the ATM formula (eq. 2.18) as `K → f`, `K ≠ f`, for
+  `f > 0`, `α ≠ 0`, `ν ≠ 0`, `ρ ≠ 1`. The `0/0` of `z/x(z)` at `K = f` is resolved by
+  `x(0) = 0`, `x'(0) = 1` (`hasDerivAt_sabrX_zero`); `ν = 0` is excluded (`z ≡ 0` there).
+- **`mf-sabr-backbone-law`** (`hasDerivAt_log_sabrBackbone`): along `α / f^(1-β)`,
+  `d log σ / df = (β − 1)/f` for `f, α > 0`.
+- **`mf-sabr-atm-black76-price`** (`sabrATMVol_black_futures_price`, from the new
+  `black_futures_formula_atm` in `Futures/Black76.lean`): under the Black-76 hypothesis at
+  `σ = sabrATMVol`, the discounted expected ATM call payoff is `e^{−rT} f (2Φ(σ√T/2) − 1)`.
+
+All three are about the printed formulas. Nothing is derived from the SABR SDE, and there is no
+error bound against the model's implied volatility (issue #100's `O(T²)` statement stays open).
+
 ### Every module connected: the coherence pass (2026-10-21)
 
 A coherence pass found 41 modules that imported nothing from the library and that nothing
@@ -169,24 +187,6 @@ split by area. What each bridge proves, by area:
   quotes as conditional expectations, and the model's witness (`mf-glosten-milgrom-quote-condexp`,
   `mf-glosten-milgrom-model-witness`); Roll's spread from the autocovariance
   (`mf-roll-spread-autocovariance`). Fees, gas and block timing are not modelled.
-
-### SABR: the ATM limit, the backbone law, the ATM Black-76 price (2026-10-22)
-
-Three `full` entries in `BlackScholes/SABRImpliedVol.lean`, on Hagan–Kumar–Lesniewski–Woodward
-(2002), answering the three items named on issue #100.
-
-- **`mf-sabr-implied-vol-atm-limit`** (`tendsto_sabrImpliedVol_atm`): the printed smile formula
-  (eq. 2.17a-c, `⋯` dropped) tends to the ATM formula (eq. 2.18) as `K → f`, `K ≠ f`, for
-  `f > 0`, `α ≠ 0`, `ν ≠ 0`, `ρ ≠ 1`. The `0/0` of `z/x(z)` at `K = f` is resolved by
-  `x(0) = 0`, `x'(0) = 1` (`hasDerivAt_sabrX_zero`); `ν = 0` is excluded (`z ≡ 0` there).
-- **`mf-sabr-backbone-law`** (`hasDerivAt_log_sabrBackbone`): along `α / f^(1-β)`,
-  `d log σ / df = (β − 1)/f` for `f, α > 0`.
-- **`mf-sabr-atm-black76-price`** (`sabrATMVol_black_futures_price`, from the new
-  `black_futures_formula_atm` in `Futures/Black76.lean`): under the Black-76 hypothesis at
-  `σ = sabrATMVol`, the discounted expected ATM call payoff is `e^{−rT} f (2Φ(σ√T/2) − 1)`.
-
-All three are about the printed formulas. Nothing is derived from the SABR SDE, and there is no
-error bound against the model's implied volatility (issue #100's `O(T²)` statement stays open).
 
 ### The contributor batch, #248–#284 (2026-10-21)
 
