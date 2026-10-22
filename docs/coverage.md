@@ -39,12 +39,14 @@ Eight `full` entries, corpus 658 → 666, each derived from library machinery:
   claimed), and the two agree (`mf-covered-eq-uncovered-interest-parity`).
 - **Bond forward** (`interest_rates.json`). `forward_price_from_no_arbitrage` with the
   coupon-stripped bond as the spot (`mf-bond-forward-from-no-arbitrage`).
-- **Key-rate duration** (`interest_rates.json`; #69). With one spot rate per cashflow, the
-  partials `∂P/∂kⱼ` sum to the parallel-shift derivative, and on a flat curve to `dP/dy` through
+- **Key-rate duration** (`interest_rates.json`; #69). With one spot rate per cashflow (all
+  `1 + kᵢ ≠ 0`), the partials `∂P/∂kⱼ` sum to the parallel-shift derivative, and on a flat curve
+  to `dP/dy` through
   `hasDerivAt_bondPriceDisc` (`mf-key-rate-partials-sum-to-yield-derivative`). Interpolated
   key-rate nodes are not modelled, and the durations `−(1/P)·∂P/∂kⱼ` are not defined.
-- **Clean and dirty price** (`interest_rates.json`). As `f ↑ 1` the dirty price tends to the next
-  period's dirty price plus the coupon, and the clean price to the next period's clean price
+- **Clean and dirty price** (`interest_rates.json`). For `1 + y ≠ 0`, with next coupon `c_j`
+  (`t_j = 1`, all `tᵢ ≥ 1`), as `f ↑ 1` the dirty price tends to the next period's dirty price
+  plus `c_j`, and the clean price (accruing `c_j`) to the next period's clean price
   (`mf-dirty-price-drops-by-coupon`, `mf-clean-price-continuous-at-coupon-date`).
 - **Level-payment loan** (`interest_rates.json`). With principal `B₀ = annuityValue N A r Δt`
   and period rate `e^{rΔt} − 1`, after `n ≤ N` payments the balance is
