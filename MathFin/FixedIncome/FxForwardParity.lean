@@ -106,8 +106,8 @@ theorem covered_eq_uncovered_interest_parity {ι : Type*} (s : Finset ι) (q S_T
     (h_dom : ∑ i ∈ s, q i = Real.exp (-(r_d * T)))
     (h_for : ∑ i ∈ s, q i * S_T i = S * Real.exp (-(r_f * T)))
     (hF : ∑ i ∈ s, q i * (S_T i - F) = 0) (h : BSCallHyp Q S K (r_d - r_f) σ T Z) :
-    F = ∫ ω, bsTerminal S (r_d - r_f) σ T (Z ω) ∂Q := by
-  rw [uncovered_interest_parity h]
-  exact (covered_interest_parity s q S_T S r_d r_f T F h_dom h_for).mp hF
+    F = ∫ ω, bsTerminal S (r_d - r_f) σ T (Z ω) ∂Q :=
+  ((covered_interest_parity s q S_T S r_d r_f T F h_dom h_for).mp hF).trans
+    (uncovered_interest_parity h).symm
 
 end MathFin

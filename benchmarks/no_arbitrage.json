@@ -365,7 +365,7 @@
         "reference": "Uncovered interest parity; Garman & Kohlhagen, 'Foreign currency option values', J. Int. Money Finance 2 (1983) 231–237",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.uncovered_interest_parity (MathFin/FixedIncome/FxForwardParity.lean), which is expected_terminal_eq_forward (MathFin/BlackScholes/Forward.lean, the Gaussian MGF) at drift r_d − r_f, the hypothesis of garman_kohlhagen_call_formula. SCOPE: risk-neutral (pricing-measure) statement under the lognormal model; uncovered parity under the physical measure is an economic hypothesis and is not formalized. The strike K plays no part; it is carried because BSCallHyp requires K > 0."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.uncovered_interest_parity (MathFin/FixedIncome/FxForwardParity.lean), which is expected_terminal_eq_forward (MathFin/BlackScholes/Forward.lean, the Gaussian MGF) at drift r_d − r_f, the hypothesis of garman_kohlhagen_call_formula. SCOPE: risk-neutral (pricing-measure) statement under the lognormal model; uncovered parity under the physical measure is an economic hypothesis and is not formalized. The strike K plays no part; it is carried because BSCallHyp requires K > 0. This is the same expected_terminal_eq_forward as mf-forward-price (benchmarks/black_scholes.json), at drift r_d - r_f instead of a generic r; no additional derivation happens here beyond that specialization."
       }
     },
     {

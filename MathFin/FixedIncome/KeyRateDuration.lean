@@ -32,7 +32,7 @@ computes.
 ## Results
 
 * `hasDerivAt_bondPriceKeyRate_update`: `∂P/∂kⱼ = -tⱼ·cⱼ / (1 + kⱼ)^{tⱼ+1}`, as a `HasDerivAt`.
-* `hasDerivAt_bondPriceKeyRate_parallel`: on any curve, the parallel-shift derivative is
+* `hasDerivAt_bondPriceKeyRate_parallel`: on any curve with `1 + kᵢ ≠ 0`, the parallel-shift derivative is
   `Σⱼ ∂P/∂kⱼ`, for any choice of witnesses `∂P/∂kⱼ`.
 * `sum_keyRate_partials_eq_deriv_bondPriceDisc`, `sum_deriv_keyRate_eq_deriv_bondPriceDisc`:
   on a flat curve `k ≡ y`, `Σⱼ ∂P/∂kⱼ = dP/dy` (`deriv (bondPriceDisc s t c) y`), for given

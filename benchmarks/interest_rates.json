@@ -856,7 +856,7 @@
         "reference": "Key-rate duration (Ho, 'Key Rate Durations: Measures of Interest Rate Risks', J. Fixed Income 2(2), 1992)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc, via sum_keyRate_partials_eq_deriv_bondPriceDisc (MathFin/FixedIncome/KeyRateDuration.lean). Each partial is identified with −tⱼcⱼ/(1+kⱼ)^{tⱼ+1} (hasDerivAt_bondPriceKeyRate_update, from hasDerivAt_coupon_term) by uniqueness of derivatives; their sum is the derivative along the parallel shift k + ε·1 (hasDerivAt_bondPriceKeyRate_parallel, which holds on any curve), and on a flat curve that shift is a move of the yield, whose derivative is hasDerivAt_bondPriceDisc. SCOPE: one key rate per cashflow, annual compounding, integer tenors; interpolated key-rate nodes (hat-function bases) are not modelled."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc, via sum_keyRate_partials_eq_deriv_bondPriceDisc (MathFin/FixedIncome/KeyRateDuration.lean). Each partial is identified with −tⱼcⱼ/(1+kⱼ)^{tⱼ+1} (hasDerivAt_bondPriceKeyRate_update, from hasDerivAt_coupon_term) by uniqueness of derivatives; their sum is the derivative along the parallel shift k + ε·1 (hasDerivAt_bondPriceKeyRate_parallel, which holds on any curve with 1 + kᵢ ≠ 0), and on a flat curve that shift is a move of the yield, whose derivative is hasDerivAt_bondPriceDisc. SCOPE: one key rate per cashflow, annual compounding, integer tenors; interpolated key-rate nodes (hat-function bases) are not modelled."
       }
     },
     {
@@ -911,7 +911,7 @@
       "id": "mf-level-payment-balance-annuity",
       "name": "Level-Payment Loan Balance Is the Remaining Annuity",
       "domain": "mathematical_finance",
-      "description": "A loan with level payment A and period rate i = e^{rΔt} − 1, whose balance follows B_{n+1} = B_n·(1 + i) − A, and whose principal B₀ is the annuity value A_N = Σ_{k<N} A·e^{−r(k+1)Δt} of its N payments: after n ≤ N payments the balance is the annuity value of the N − n payments still to come. In particular it is zero after the N-th.",
+      "description": "A loan with level payment A and period rate i = e^{rΔt} − 1, whose balance follows B_{n+1} = B_n·(1 + i) − A, and whose principal B₀ is the annuity value A_N = Σ_{k<N} A·e^{−r(k+1)Δt} of its N payments: after n ≤ N payments the balance is the annuity value of the N − n payments still to come.",
       "code": {
         "lean": "import MathFin.FixedIncome.LoanAmortization\n\nopen MathFin\n\n/-- **The level-payment balance is the value of the remaining payments.** -/\ntheorem level_payment_balance_annuity {B0 A r Δt : ℝ} {N : ℕ}\n    (hB0 : annuityValue N A r Δt = B0) {n : ℕ} (hn : n ≤ N) :\n    levelPaymentBalance B0 A (Real.exp (r * Δt) - 1) n = annuityValue (N - n) A r Δt :=\n  levelPaymentBalance_eq_annuityValue hB0 hn\n"
       },

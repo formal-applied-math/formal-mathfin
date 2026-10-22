@@ -36,7 +36,9 @@ Eight `full` entries, corpus 658 → 666, each derived from library machinery:
   `covered_interest_parity_discrete`). Uncovered parity in its risk-neutral form,
   `E_Q[S_T] = S·e^{(r_d−r_f)T}`, is `expected_terminal_eq_forward` under the Garman–Kohlhagen
   hypothesis (`mf-uncovered-interest-parity-risk-neutral`; the physical-measure UIP is not
-  claimed), and the two agree (`mf-covered-eq-uncovered-interest-parity`).
+  claimed — and it is the same `expected_terminal_eq_forward` as `mf-forward-price`
+  (`benchmarks/black_scholes.json`), at drift `r_d − r_f` instead of a generic `r`, not a second
+  derivation), and the two agree (`mf-covered-eq-uncovered-interest-parity`).
 - **Bond forward** (`interest_rates.json`). `forward_price_from_no_arbitrage` with the
   coupon-stripped bond as the spot (`mf-bond-forward-from-no-arbitrage`).
 - **Key-rate duration** (`interest_rates.json`; #69). With one spot rate per cashflow (all
@@ -50,7 +52,9 @@ Eight `full` entries, corpus 658 → 666, each derived from library machinery:
   (`mf-dirty-price-drops-by-coupon`, `mf-clean-price-continuous-at-coupon-date`).
 - **Level-payment loan** (`interest_rates.json`). With principal `B₀ = annuityValue N A r Δt`
   and period rate `e^{rΔt} − 1`, after `n ≤ N` payments the balance is
-  `annuityValue (N − n) A r Δt`, zero at `N` (`mf-level-payment-balance-annuity`).
+  `annuityValue (N − n) A r Δt` (`mf-level-payment-balance-annuity`). The module's
+  `levelPaymentBalance_eq_zero` corollary (balance is zero at `N`) is not itself a benchmark
+  entry.
 
 ### Every module connected: the coherence pass (2026-10-21)
 

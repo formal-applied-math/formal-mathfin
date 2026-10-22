@@ -68,6 +68,6 @@ theorem bondForwardPrice_from_no_arbitrage {Ω : Type*} (states : Finset Ω) (q 
     (h_zcb : ∑ ω ∈ states, q ω = Df_fe)
     (h_bond : P0 = ∑ t ∈ s, Df t * CF t + ∑ ω ∈ states, q ω * B ω) :
     ∑ ω ∈ states, q ω * (B ω - X) = 0 ↔ X = bondForwardPrice s Df CF P0 Df_fe :=
-  forward_price_from_no_arbitrage states q B Df_fe _ X hDf h_zcb (by rw [h_bond]; ring)
+  forward_price_from_no_arbitrage states q B Df_fe _ X hDf h_zcb (eq_sub_of_add_eq' h_bond.symm)
 
 end MathFin
