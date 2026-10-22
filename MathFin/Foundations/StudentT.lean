@@ -110,7 +110,7 @@ private lemma mixture_x_eq {u : ℝ} (hu : 0 < u) :
 
 /-- **The Student-t normalizing constant**: `C_ν = √(νπ) Γ(ν/2) / Γ((ν+1)/2)`
 (equivalently `√ν · B(1/2, ν/2)`). Proved by writing the kernel as a Gamma mixture of Gaussian
-kernels and exchanging the two integrals (Tonelli). -/
+kernels and exchanging the two integrals (Fubini, integrability via `integrable_prod_iff'`). -/
 theorem studentTNormConst_eq (hν : 0 < ν) :
     studentTNormConst ν = √(ν * π) * Gamma (ν / 2) / Gamma ((ν + 1) / 2) := by
   set f : ℝ → ℝ → ℝ := fun x u ↦ u ^ ((ν + 1) / 2 - 1) * exp (-((1 + x ^ 2 / ν) * u))
