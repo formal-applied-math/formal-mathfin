@@ -28,9 +28,8 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ### The Student-t law: VaR and ES at the law (2026-10-22)
 
-Five entries added to `benchmarks/quantitative_risk_management.json`, all `full`; they replace
-`mf-student-t-expected-shortfall-pos`, which stated a closed form with the quantile left free and
-no law behind it. Corpus 536 → 540.
+Five entries added to `benchmarks/quantitative_risk_management.json`, all `full`.
+Corpus 535 → 540.
 
 Mathlib has no Student-t law at the pin. `Foundations/StudentT.lean` builds it as Lebesgue measure
 with density `k_ν/∫k_ν`, `k_ν(x) = (1 + x²/ν)^(-(ν+1)/2)`, computes the normalizing constant (a
@@ -54,8 +53,8 @@ What is not covered:
 - The construction as the law of `Z/√(V/ν)` (independent normal and χ²) is not formalized.
 
 Verification:
-- The default `lake build` passed, including the curated `AxiomAudit.lean` (three Student-t
-  guards replace the two old ones) and the regenerated `AxiomAuditGen.lean`.
+- The default `lake build` passed, including the curated `AxiomAudit.lean` (three new Student-t
+  guards) and the regenerated `AxiomAuditGen.lean`.
 - `lake lint` passed.
 - The ledger reports 540 fresh, 0 stale and 0 missing entries; the five new entries were verified
   with `lake env lean`.
