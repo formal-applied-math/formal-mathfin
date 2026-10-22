@@ -42,7 +42,7 @@ Eight `full` entries, corpus 658 → 666, each derived from library machinery:
 - **Key-rate duration** (`interest_rates.json`; #69). With one spot rate per cashflow, the
   partials `∂P/∂kⱼ` sum to the parallel-shift derivative, and on a flat curve to `dP/dy` through
   `hasDerivAt_bondPriceDisc` (`mf-key-rate-partials-sum-to-yield-derivative`). Interpolated
-  key-rate nodes are not modelled.
+  key-rate nodes are not modelled, and the durations `−(1/P)·∂P/∂kⱼ` are not defined.
 - **Clean and dirty price** (`interest_rates.json`). As `f ↑ 1` the dirty price tends to the next
   period's dirty price plus the coupon, and the clean price to the next period's clean price
   (`mf-dirty-price-drops-by-coupon`, `mf-clean-price-continuous-at-coupon-date`).

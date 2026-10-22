@@ -20,8 +20,8 @@ tenor's spot rate `kᵢ`,
 
 The key-rate sensitivity to node `j` is the partial derivative `∂P/∂kⱼ`, the derivative of `P`
 along the curve that moves `kⱼ` alone (`Function.update k j`). The key-rate duration is
-`KRDⱼ = -(1/P)·∂P/∂kⱼ`, so statements about the partials carry over to the durations by
-dividing by `-P`.
+`KRDⱼ = -(1/P)·∂P/∂kⱼ`; this module states its results for the partials and does not define
+the durations.
 
 The identity that makes key rates a decomposition of duration: the partials sum to the
 derivative under a parallel shift `k ↦ k + ε·1`. On a flat curve `k ≡ y` the parallel shift is
@@ -33,8 +33,9 @@ computes.
 * `hasDerivAt_bondPriceKeyRate_update`: `∂P/∂kⱼ = -tⱼ·cⱼ / (1 + kⱼ)^{tⱼ+1}`, as a `HasDerivAt`.
 * `hasDerivAt_bondPriceKeyRate_parallel`: on any curve, the parallel-shift derivative is
   `Σⱼ ∂P/∂kⱼ`, for any choice of witnesses `∂P/∂kⱼ`.
-* `sum_keyRate_partials_eq_deriv_bondPriceDisc`: on a flat curve `k ≡ y`,
-  `Σⱼ ∂P/∂kⱼ = dP/dy` (`deriv (bondPriceDisc s t c) y`).
+* `sum_keyRate_partials_eq_deriv_bondPriceDisc`, `sum_deriv_keyRate_eq_deriv_bondPriceDisc`:
+  on a flat curve `k ≡ y`, `Σⱼ ∂P/∂kⱼ = dP/dy` (`deriv (bondPriceDisc s t c) y`), for given
+  partial-derivative witnesses and for the `deriv`s themselves.
 -/
 
 @[expose] public section
@@ -87,8 +88,7 @@ theorem hasDerivAt_bondPriceKeyRate_parallel [DecidableEq ι] (s : Finset ι) (t
 /-- **`Σⱼ ∂P/∂kⱼ = dP/dy`.** On a flat curve `k ≡ y` (with `1 + y ≠ 0`), the key-rate partials
 `D j = ∂P/∂kⱼ` sum to the derivative of the flat-yield price `bondPriceDisc` at `y`: a
 parallel shift of a flat curve is a move of the yield, so `hasDerivAt_bondPriceKeyRate_parallel`
-and `hasDerivAt_bondPriceDisc` compute the same derivative. Dividing by `-P(y)`, the key-rate
-durations sum to the modified duration. -/
+and `hasDerivAt_bondPriceDisc` compute the same derivative. -/
 theorem sum_keyRate_partials_eq_deriv_bondPriceDisc [DecidableEq ι] (s : Finset ι) (t : ι → ℕ)
     (c : ι → ℝ) {y : ℝ} (hy : 1 + y ≠ 0) {D : ι → ℝ}
     (hD : ∀ j ∈ s, HasDerivAt
@@ -100,5 +100,15 @@ theorem sum_keyRate_partials_eq_deriv_bondPriceDisc [DecidableEq ι] (s : Finset
     have := (hasDerivAt_bondPriceDisc s t c (y := y + 0) (by simpa using hy)).comp_const_add y 0
     rwa [add_zero] at this
   rw [hpar.unique hflat, (hasDerivAt_bondPriceDisc s t c hy).deriv]
+
+/-- **`Σⱼ ∂P/∂kⱼ = dP/dy`, with the partials as `deriv`s.** On a flat curve `k ≡ y`
+(`1 + y ≠ 0`), the key-rate partial derivatives sum to the derivative of the flat-yield price
+`bondPriceDisc` at `y`. Each partial exists by `hasDerivAt_bondPriceKeyRate_update`. -/
+theorem sum_deriv_keyRate_eq_deriv_bondPriceDisc [DecidableEq ι] (s : Finset ι) (t : ι → ℕ)
+    (c : ι → ℝ) {y : ℝ} (hy : 1 + y ≠ 0) :
+    ∑ j ∈ s, deriv (fun x ↦ bondPriceKeyRate s t c (Function.update (fun _ ↦ y) j x)) y =
+      deriv (bondPriceDisc s t c) y :=
+  sum_keyRate_partials_eq_deriv_bondPriceDisc s t c hy fun _ hj ↦
+    (hasDerivAt_bondPriceKeyRate_update s t c _ hj hy).differentiableAt.hasDerivAt
 
 end MathFin

@@ -847,16 +847,16 @@
       "id": "mf-key-rate-partials-sum-to-yield-derivative",
       "name": "Key-Rate Partial Derivatives Sum to dP/dy",
       "domain": "mathematical_finance",
-      "description": "For a bond priced as P(k) = Σ cᵢ/(1 + kᵢ)^{tᵢ}, each cashflow discounted at its own tenor's spot rate kᵢ, take on a flat curve k ≡ y (1 + y ≠ 0) any partial derivatives D j = ∂P/∂kⱼ, as HasDerivAt along the curve that moves kⱼ alone. Then Σⱼ D j = dP/dy, the derivative of the flat-yield price Σ cᵢ/(1 + y)^{tᵢ}. Dividing by −P, the key-rate durations sum to the modified duration.",
+      "description": "For a bond priced as P(k) = Σ cᵢ/(1 + kᵢ)^{tᵢ}, each cashflow discounted at its own tenor's spot rate kᵢ, on a flat curve k ≡ y with 1 + y ≠ 0: the partial derivatives ∂P/∂kⱼ (the derivative along the curve that moves kⱼ alone) sum to dP/dy, the derivative of the flat-yield price Σ cᵢ/(1 + y)^{tᵢ}. Key-rate durations −(1/P)·∂P/∂kⱼ are not defined.",
       "code": {
-        "lean": "import MathFin.FixedIncome.KeyRateDuration\n\nopen MathFin\n\n/-- **Key-rate partials sum to the yield derivative** on a flat curve. -/\ntheorem key_rate_partials_sum_to_yield_derivative {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ} (hy : 1 + y ≠ 0) {D : ι → ℝ}\n    (hD : ∀ j ∈ s, HasDerivAt\n      (fun x ↦ bondPriceKeyRate s t c (Function.update (fun _ ↦ y) j x)) (D j) y) :\n    ∑ j ∈ s, D j = deriv (bondPriceDisc s t c) y :=\n  sum_keyRate_partials_eq_deriv_bondPriceDisc s t c hy hD\n"
+        "lean": "import MathFin.FixedIncome.KeyRateDuration\n\nopen MathFin\n\n/-- **Key-rate partials sum to the yield derivative** on a flat curve. -/\ntheorem key_rate_partials_sum_to_yield_derivative {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ} (hy : 1 + y ≠ 0) :\n    ∑ j ∈ s, deriv (fun x ↦ bondPriceKeyRate s t c (Function.update (fun _ ↦ y) j x)) y =\n      deriv (bondPriceDisc s t c) y :=\n  sum_deriv_keyRate_eq_deriv_bondPriceDisc s t c hy\n"
       },
       "metadata": {
         "chapter": 14,
         "reference": "Key-rate duration (Ho, 'Key Rate Durations: Measures of Interest Rate Risks', J. Fixed Income 2(2), 1992)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.sum_keyRate_partials_eq_deriv_bondPriceDisc (MathFin/FixedIncome/KeyRateDuration.lean). Each partial is identified with −tⱼcⱼ/(1+kⱼ)^{tⱼ+1} (hasDerivAt_bondPriceKeyRate_update, from hasDerivAt_coupon_term) by uniqueness of derivatives; their sum is the derivative along the parallel shift k + ε·1 (hasDerivAt_bondPriceKeyRate_parallel, which holds on any curve), and on a flat curve that shift is a move of the yield, whose derivative is hasDerivAt_bondPriceDisc. SCOPE: one key rate per cashflow, annual compounding, integer tenors; interpolated key-rate nodes (hat-function bases) are not modelled."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc, via sum_keyRate_partials_eq_deriv_bondPriceDisc (MathFin/FixedIncome/KeyRateDuration.lean). Each partial is identified with −tⱼcⱼ/(1+kⱼ)^{tⱼ+1} (hasDerivAt_bondPriceKeyRate_update, from hasDerivAt_coupon_term) by uniqueness of derivatives; their sum is the derivative along the parallel shift k + ε·1 (hasDerivAt_bondPriceKeyRate_parallel, which holds on any curve), and on a flat curve that shift is a move of the yield, whose derivative is hasDerivAt_bondPriceDisc. SCOPE: one key rate per cashflow, annual compounding, integer tenors; interpolated key-rate nodes (hat-function bases) are not modelled."
       }
     },
     {

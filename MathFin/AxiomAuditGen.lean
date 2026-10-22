@@ -2066,8 +2066,8 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.sum_componentVaR_eq_valueAtRisk_sub' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.sum_componentVaR_eq_valueAtRisk_sub
 
-/-- info: 'MathFin.sum_keyRate_partials_eq_deriv_bondPriceDisc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.sum_keyRate_partials_eq_deriv_bondPriceDisc
+/-- info: 'MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc
 
 /-- info: 'MathFin.survival_at_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.survival_at_zero
