@@ -2621,6 +2621,13 @@
       "input_hash": "acc200446f8615fa7fd2d310730bde8b2b665fbf15b2664bc1cfbdd5df6303de",
       "verified_at_commit": "fdfecac"
     },
+    "mf-relative-drawdown-scale-invariant": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-10-22",
+      "elapsed_s": 3.5,
+      "input_hash": "dddb015766f6b775773b48229d2ead42087b8b4b3fa66e5bd128f13a238b3cd1",
+      "verified_at_commit": "1491063"
+    },
     "mf-rho": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-08",
