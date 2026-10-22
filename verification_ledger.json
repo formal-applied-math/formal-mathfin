@@ -668,13 +668,6 @@
       "input_hash": "82778ea65ba8fd5a459387b5967ead5b161d63f117b89f97e60f9da72d0bdbb7",
       "verified_at_commit": "69c4a8c"
     },
-    "mf-backtest-max-drawdown-bounded": {
-      "benchmark_file": "quantitative_risk_management.json",
-      "date": "2026-10-22",
-      "elapsed_s": 5.6,
-      "input_hash": "f957ad73fb447ec1a6b4ee0ab189d8f6015d7e39d4de5b830425482e06fb7b27",
-      "verified_at_commit": "ba7da67"
-    },
     "mf-barrier-inout-parity": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-10-02",

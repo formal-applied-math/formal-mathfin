@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (580 MathFin constants, 29 upstream). Citations
+  corpus (578 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -52,12 +52,6 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.AdaptedRiemannStieltjes.tendsto_itoIntegralAgainst_stepσ' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.AdaptedRiemannStieltjes.tendsto_itoIntegralAgainst_stepσ
-
-/-- info: 'MathFin.Backtest.maxDrawdown_le_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.Backtest.maxDrawdown_le_one
-
-/-- info: 'MathFin.Backtest.maxDrawdown_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.Backtest.maxDrawdown_nonneg
 
 /-- info: 'MathFin.BivariateGaussianHyp.conditional_expectation_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.BivariateGaussianHyp.conditional_expectation_formula
