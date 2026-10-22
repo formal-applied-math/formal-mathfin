@@ -1518,9 +1518,9 @@
     "mf-clean-price-continuous-at-coupon-date": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.8,
-      "input_hash": "3675eb29c8dfe087912db0b1c9bcb34a6d5a3d8e03c88bf707ed2a11dc689778",
-      "verified_at_commit": "93fee73"
+      "elapsed_s": 3.3,
+      "input_hash": "bae2c2c9be5d92344d21f85cca5b5b880ebe844620e3f6585b355ccc950c360f",
+      "verified_at_commit": "8ab0332"
     },
     "mf-cml-decomposition-unique": {
       "benchmark_file": "mathematical_finance.json",
@@ -1847,9 +1847,9 @@
     "mf-dirty-price-drops-by-coupon": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.6,
-      "input_hash": "46c5066b4651dfb0cb81bbdedbe0adeef16bf592c214ad242e820e907b6b8bd3",
-      "verified_at_commit": "93fee73"
+      "elapsed_s": 3.1,
+      "input_hash": "539b44a2a05a6899262d6065ee918fed410be967940714f90fdb02b0efbb0d26",
+      "verified_at_commit": "8ab0332"
     },
     "mf-discrete-es-vs-tail-mean": {
       "benchmark_file": "risk_measures.json",

@@ -26,7 +26,7 @@ forward by `f` periods:
   here is `Real.rpow`; the formula is the intended compound-interest carry
   only under the standard yield domain `1 + y > 0` (the on-coupon-date
   results fix `f = 0`, where `Real.rpow_zero` sidesteps the issue regardless
-  of `y`; the across-a-coupon-date results assume `1 + y > 0`).
+  of `y`; the across-a-coupon-date results need only `1 + y ≠ 0`).
 
 Accrued interest on the next coupon (its amount supplied separately as
 `c1`, since it is not tied to the cashflow map `c`) is the simple-interest
@@ -51,7 +51,7 @@ accrued interest — the two pricing conventions agree exactly where they must.
 
 At the end of a period (`f ↑ 1`) the next coupon `j` (`t j = 1`) is paid and a
 new period starts: the remaining cashflows are `s.erase j`, each one period
-closer (`t i - 1`), and `f` restarts at `0`. With `1 + y > 0`:
+closer (`t i - 1`), and `f` restarts at `0`. With `1 + y ≠ 0`:
 
 * `dirtyPrice_one_eq`: at `f = 1` the dirty price is the new period's dirty
   price plus `c j`.
@@ -113,9 +113,8 @@ theorem cleanPrice_on_coupon_date (s : Finset ι) (t : ι → ℕ) (c : ι → �
 price plus the coupon `c j` paid on that date: carrying the last-coupon-date
 value one full period forward discounts every cashflow one period less. -/
 theorem dirtyPrice_one_eq [DecidableEq ι] (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ}
-    (hy : 0 < 1 + y) {j : ι} (hj : j ∈ s) (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i) :
+    (hy : 1 + y ≠ 0) {j : ι} (hj : j ∈ s) (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i) :
     dirtyPrice s t c y 1 = dirtyPrice (s.erase j) (fun i ↦ t i - 1) c y 0 + c j := by
-  have hy0 : 1 + y ≠ 0 := hy.ne'
   rw [dirtyPrice_on_coupon_date, dirtyPrice, Real.rpow_one, bondPriceDisc, Finset.mul_sum,
     bondPriceDisc, ← Finset.add_sum_erase s _ hj, add_comm]
   congr 1
@@ -131,11 +130,11 @@ fraction `f` of the period rises to `1`, the dirty price tends to the new
 period's dirty price (remaining cashflows `s.erase j`, each one period closer,
 `f = 0`) plus the coupon `c j` paid on the date. -/
 theorem tendsto_dirtyPrice_coupon_date [DecidableEq ι] (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ)
-    {y : ℝ} (hy : 0 < 1 + y) {j : ι} (hj : j ∈ s) (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i) :
+    {y : ℝ} (hy : 1 + y ≠ 0) {j : ι} (hj : j ∈ s) (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i) :
     Tendsto (fun f ↦ dirtyPrice s t c y f) (𝓝[<] 1)
       (𝓝 (dirtyPrice (s.erase j) (fun i ↦ t i - 1) c y 0 + c j)) := by
   rw [← dirtyPrice_one_eq s t c hy hj htj ht]
-  exact (((Real.continuousAt_const_rpow hy.ne').mul continuousAt_const).tendsto).mono_left
+  exact (((Real.continuousAt_const_rpow hy).mul continuousAt_const).tendsto).mono_left
     nhdsWithin_le_nhds
 
 /-- **The clean price is continuous across a coupon date.** With accrued
@@ -144,7 +143,7 @@ the clean price at the start of the new period, whatever coupon `c1'` accrues
 next: the coupon the dirty price sheds (`tendsto_dirtyPrice_coupon_date`) is
 exactly the accrued interest that has built up to it. -/
 theorem tendsto_cleanPrice_coupon_date [DecidableEq ι] (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ)
-    {y : ℝ} (hy : 0 < 1 + y) {j : ι} (hj : j ∈ s) (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i)
+    {y : ℝ} (hy : 1 + y ≠ 0) {j : ι} (hj : j ∈ s) (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i)
     (c1' : ℝ) :
     Tendsto (fun f ↦ cleanPrice s t c y f (c j)) (𝓝[<] 1)
       (𝓝 (cleanPrice (s.erase j) (fun i ↦ t i - 1) c y 0 c1')) := by
