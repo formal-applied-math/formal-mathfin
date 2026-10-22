@@ -34,9 +34,12 @@ constant — all assets contribute equally to variance.
 Risk parity was previously stated as an algebraic identity at closed-form
 weights. This file shows it as the *output of an optimisation*: critical
 points of the log-barrier-regularised variance minimisation satisfy the
-risk-budget property. The 2-asset closed form `σ_2 / (σ_1 + σ_2)` is a
-*solution* of this FOC for `b_i = 1/N` — the algebraic verification in
-`RiskParity.lean` becomes a check that this candidate is actually critical.
+risk-budget property. The 2-asset closed form `σ_2 / (σ_1 + σ_2)` has equal
+risk contributions (`RiskParity.lean`; `isRiskParity_two_iff` shows it is the
+only long-only budget portfolio that does), so it satisfies this FOC with the
+uniform budget `b_i = RC_i = Var(w)/2`. For the budget `b_i = 1/N` the solution
+is that portfolio rescaled, since `RC_i(t·w) = t²·RC_i(w)`; the rescaling is not
+formalized here.
 
 ## Results
 

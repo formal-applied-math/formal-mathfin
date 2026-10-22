@@ -6,14 +6,18 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Actuarial.ActuarialInsurance
+public import MathFin.RiskMeasures.GaussianExpectedShortfall
 
 /-!
 # The standard-deviation principle: everything but monotonicity
 
 The **standard-deviation principle** prices a loss `X` with finite variance by
-`ρ(X) = E[X] + k·sd(X)` for a loading `k ≥ 0` (`stdDevPrinciple`). It satisfies three of the four
-coherence axioms of `RiskMeasures/ExpectedShortfall.lean`, and fails the fourth (QRM Exercise Book, Exercises 2.19
-and 8.11).
+`ρ(X) = E[X] + k·sd(X)` for a loading `k ≥ 0` (`stdDevPrinciple`). It is the premium principle
+`stdDevPremium` of `Actuarial/ActuarialInsurance.lean` evaluated at the mean and standard deviation
+of `X`, so a nonnegative loading prices at or above the mean (`integral_le_stdDevPrinciple`). It
+satisfies three of the four coherence axioms of `RiskMeasures/ExpectedShortfall.lean`, and fails
+the fourth (QRM Exercise Book, Exercises 2.19 and 8.11).
 
 * **Translation invariance** (`stdDevPrinciple_add_const`): shifting by cash shifts the mean and
   leaves the standard deviation alone. The standard deviation alone is *not* translation
@@ -24,9 +28,17 @@ and 8.11).
   (`covariance_le_sqrt_mul_sqrt`). That inequality is the discriminant condition for the
   nonnegative quadratic `t ↦ Var(X + tY)`.
 * **Monotonicity fails** (`stdDevPrinciple_not_monotone`): a loss `B ≤ 0` that equals `−1` with a
-  small probability `q` and `0` otherwise has `ρ(B) > 0 = ρ(0)` once `q(1 + k²) < k²`. Its rare gains
-  inflate the standard deviation more than they lower the mean. This is the counterexample of
-  QRM Exercise 8.11.
+  small probability `q` and `0` otherwise has `ρ(B) > 0 = ρ(0)` once `q(1 + k²) < k²`. Its rare
+  gains inflate the standard deviation more than they lower the mean. This is the counterexample
+  of QRM Exercise 8.11.
+
+On Gaussian losses the two standard risk measures are standard-deviation principles. For
+`X ~ N(m, v)` and `α ∈ (0, 1)`, `VaR_α(X)` is the principle with loading `Φ⁻¹(α)`
+(`stdDevPrinciple_eq_valueAtRisk_of_hasLaw_gaussianReal`), and for `v ≠ 0` `ES_α(X)` is the
+principle with loading `ϕ(Φ⁻¹(α))/(1 − α)`, where `ϕ` is the standard normal density
+(`stdDevPrinciple_eq_expectedShortfall_of_hasLaw_gaussianReal`). Both follow from the Gaussian
+closed forms `valueAtRisk_of_hasLaw_gaussianReal` and `expectedShortfall_of_hasLaw_gaussianReal`,
+with the mean and variance of the law.
 
 ## Main results
 
@@ -34,13 +46,18 @@ and 8.11).
 * `sqrt_variance_add_le`: the standard deviation is subadditive.
 * `stdDevPrinciple_add_const`, `stdDevPrinciple_const_mul`, `stdDevPrinciple_add_le`.
 * `stdDevPrinciple_not_monotone`: the principle is not monotone.
+* `integral_le_stdDevPrinciple`: a nonnegative loading prices at or above the mean.
+* `stdDevPrinciple_eq_valueAtRisk_of_hasLaw_gaussianReal`,
+  `stdDevPrinciple_eq_expectedShortfall_of_hasLaw_gaussianReal`: on Gaussian losses VaR and ES are
+  standard-deviation principles.
 -/
 
 @[expose] public section
 
 namespace MathFin
 
-open MeasureTheory ProbabilityTheory
+open MeasureTheory ProbabilityTheory Set
+open scoped NNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
   {X Y : Ω → ℝ}
@@ -77,15 +94,23 @@ lemma sqrt_variance_add_const (hX : AEStronglyMeasurable X P) (m : ℝ) :
     √Var[fun ω ↦ X ω + m; P] = √Var[X; P] := by
   rw [variance_add_const hX]
 
-/-- The **standard-deviation principle** with loading `k`: `ρ(X) = E[X] + k·sd(X)`. -/
+/-- The **standard-deviation principle** with loading `k`: `ρ(X) = E[X] + k·sd(X)`, the premium
+principle `stdDevPremium` at the mean and standard deviation of `X`. -/
 noncomputable def stdDevPrinciple (k : ℝ) (X : Ω → ℝ) (P : Measure Ω) : ℝ :=
-  P[X] + k * √Var[X; P]
+  stdDevPremium k P[X] √Var[X; P]
+
+omit [IsProbabilityMeasure P] in
+/-- **A nonnegative loading prices at or above the mean**: `E[X] ≤ E[X] + k·sd(X)` for `k ≥ 0`.
+This is `stdDevPremium_ge_mean` at the mean and standard deviation of `X`. -/
+theorem integral_le_stdDevPrinciple {k : ℝ} (hk : 0 ≤ k) : P[X] ≤ stdDevPrinciple k X P :=
+  stdDevPremium_ge_mean _ hk (Real.sqrt_nonneg _)
 
 /-- **Translation invariance**: `ρ(X + m) = ρ(X) + m`. -/
 theorem stdDevPrinciple_add_const (k : ℝ) (hX : MemLp X 2 P) (m : ℝ) :
     stdDevPrinciple k (fun ω ↦ X ω + m) P = stdDevPrinciple k X P + m := by
-  rw [stdDevPrinciple, stdDevPrinciple, integral_add (hX.integrable one_le_two)
-    (integrable_const m), integral_const, sqrt_variance_add_const hX.aestronglyMeasurable]
+  unfold stdDevPrinciple stdDevPremium
+  rw [integral_add (hX.integrable one_le_two) (integrable_const m), integral_const,
+    sqrt_variance_add_const hX.aestronglyMeasurable]
   simp only [probReal_univ, one_smul]
   ring
 
@@ -93,15 +118,15 @@ omit [IsProbabilityMeasure P] in
 /-- **Positive homogeneity**: `ρ(cX) = c ρ(X)` for `c ≥ 0`. -/
 theorem stdDevPrinciple_const_mul (k : ℝ) (X : Ω → ℝ) {c : ℝ} (hc : 0 ≤ c) :
     stdDevPrinciple k (fun ω ↦ c * X ω) P = c * stdDevPrinciple k X P := by
-  rw [stdDevPrinciple, stdDevPrinciple, integral_const_mul, variance_const_mul,
-    Real.sqrt_mul (sq_nonneg c), Real.sqrt_sq hc]
+  unfold stdDevPrinciple stdDevPremium
+  rw [integral_const_mul, variance_const_mul, Real.sqrt_mul (sq_nonneg c), Real.sqrt_sq hc]
   ring
 
 /-- **Subadditivity**: `ρ(X + Y) ≤ ρ(X) + ρ(Y)` for a nonnegative loading. -/
 theorem stdDevPrinciple_add_le {k : ℝ} (hk : 0 ≤ k) (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :
     stdDevPrinciple k (fun ω ↦ X ω + Y ω) P ≤ stdDevPrinciple k X P + stdDevPrinciple k Y P := by
-  rw [stdDevPrinciple, stdDevPrinciple, stdDevPrinciple,
-    integral_add (hX.integrable one_le_two) (hY.integrable one_le_two)]
+  unfold stdDevPrinciple stdDevPremium
+  rw [integral_add (hX.integrable one_le_two) (hY.integrable one_le_two)]
   nlinarith [mul_le_mul_of_nonneg_left (sqrt_variance_add_le hX hY) hk]
 
 /-- **The standard-deviation principle is not monotone** (QRM Exercise 8.11). Let `B ≤ 0` take
@@ -133,7 +158,8 @@ theorem stdDevPrinciple_not_monotone {k : ℝ} (hk : 0 ≤ k) {B : Ω → ℝ} (
     ring
   have hq1 : q < 1 := by nlinarith
   refine ⟨fun ω ↦ (hB ω).elim (fun h ↦ h ▸ by norm_num) (fun h ↦ h.le), ?_⟩
-  rw [stdDevPrinciple, stdDevPrinciple, hmean, hvar]
+  unfold stdDevPrinciple stdDevPremium
+  rw [hmean, hvar]
   have h0 : Var[fun _ ↦ (0 : ℝ); P] = 0 := by simpa using variance_const_mul 0 B P
   simp only [integral_const, smul_zero, h0, Real.sqrt_zero, mul_zero, add_zero]
   -- `q < k √(q(1 − q))` because `q² < k² q (1 − q)`
@@ -143,5 +169,26 @@ theorem stdDevPrinciple_not_monotone {k : ℝ} (hk : 0 ≤ k) {B : Ω → ℝ} (
       rw [mul_pow, Real.sq_sqrt hpos.le]
     exact lt_of_pow_lt_pow_left₀ 2 (by positivity) (by rw [hx]; nlinarith)
   linarith
+
+/-! ### Gaussian losses -/
+
+omit [IsProbabilityMeasure P] in
+/-- **On a Gaussian loss VaR is a standard-deviation principle**: for `X ~ N(m, v)` and
+`α ∈ (0, 1)`, `E[X] + Φ⁻¹(α)·sd(X) = m + √v Φ⁻¹(α) = VaR_α(X)`. -/
+theorem stdDevPrinciple_eq_valueAtRisk_of_hasLaw_gaussianReal {m : ℝ} {v : ℝ≥0}
+    (hX : HasLaw X (gaussianReal m v) P) {α : ℝ} (hα : α ∈ Ioo 0 1) :
+    stdDevPrinciple (PhiInv α) X P = valueAtRisk X P α := by
+  rw [valueAtRisk_of_hasLaw_gaussianReal hX hα, gaussianVaR, stdDevPrinciple, stdDevPremium,
+    hX.integral_eq, integral_id_gaussianReal, hX.variance_eq, variance_id_gaussianReal, mul_comm]
+
+/-- **On a Gaussian loss ES is a standard-deviation principle**: for `X ~ N(m, v)` with `v ≠ 0`
+and `α ∈ (0, 1)`, `E[X] + (ϕ(Φ⁻¹(α))/(1 − α))·sd(X) = ES_α(X)`, where `ϕ` is the standard normal
+density. -/
+theorem stdDevPrinciple_eq_expectedShortfall_of_hasLaw_gaussianReal {m : ℝ} {v : ℝ≥0}
+    (hv : v ≠ 0) (hX : HasLaw X (gaussianReal m v) P) {α : ℝ} (hα : α ∈ Ioo 0 1) :
+    stdDevPrinciple (gaussianPDFReal 0 1 (PhiInv α) / (1 - α)) X P = expectedShortfall X P α := by
+  rw [expectedShortfall_of_hasLaw_gaussianReal hv hX hα, gaussianCVaR, stdDevPrinciple,
+    stdDevPremium, hX.integral_eq, integral_id_gaussianReal, hX.variance_eq,
+    variance_id_gaussianReal, mul_comm]
 
 end MathFin

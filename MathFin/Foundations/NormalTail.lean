@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.NormalQuantile
-public import MathFin.RiskMeasures.RockafellarUryasev
+public import MathFin.Foundations.GaussianPartialMoments
 
 /-! # The left tail of the standard normal
 

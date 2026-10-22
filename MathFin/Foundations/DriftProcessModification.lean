@@ -399,10 +399,12 @@ theorem drift_slice_sq_integrable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t
      by rw [← eLpNorm_trim_ae 𝓕.predictable_le_prod (Lp.aestronglyMeasurable h)]; exact (Lp.memLp h).2⟩
   exact hmem.integrable_sq.congr (by filter_upwards [hcoe] with z hz; rw [hz])
 
-/-- **The pathwise drift limit IS the honest Lebesgue integral.** For every `t ≤ T`, the pointwise
-`limUnder` drift `driftContinuousMod T g t ω` equals the genuine time-integral `∫₀ᵗ ⇑g(s,ω) ds` for
-almost every `ω`. This upgrades `sde_pathwise_decomposition`'s drift term from the abstract limit to the
-recognizable Lebesgue integral `∫₀ᵗ b(X_s(ω)) ds`. The elementary drifts satisfy
+/-- **The pathwise drift limit is a Lebesgue integral.** For every `t ≤ T`, the pointwise
+`limUnder` drift `driftContinuousMod T g t ω` equals the time integral `∫_{(0,t]} ⇑g(s,ω) ds` of the
+representative `⇑g` of the class `g`, for almost every `ω`. Applied at `g = lipComp b X`, this writes
+the drift term of `sde_pathwise_decomposition` as the time integral of a representative of `b∘X`; the
+per-path identity with `∫₀ᵗ b(X_s(ω)) ds` for a chosen representative of `X` is not stated. The
+elementary drifts satisfy
 `driftSimpleProcess Vₙ t ω = ∫₀ᵗ ⇑Vₙ(s,ω) ds` and converge to `driftContinuousMod` (Layer 2); the ω-slice
 energies `Dₙ(ω) = ∫₀ᵀ (⇑Vₙ − ⇑g)²(s,ω) ds` decay in `L¹(μ)` (`= ‖simpleAssembly_T Vₙ − g‖² → 0`,
 `drift_slice_energy_eq`), so along a subsequence `Dₙₖ(ω) → 0` a.e., whence the interval Cauchy–Schwarz

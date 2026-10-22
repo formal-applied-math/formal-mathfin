@@ -48,7 +48,7 @@ is the other one: the `LinearIsometryEquiv` sending a square-integrable martinga
 to its terminal value `X ∞` in `L²`, i.e. the Doob-space isomorphism, not
 `‖∫ φ dB‖₂² = ∫ 𝔼[φ²] dt`. The two compose rather than compete, and consuming
 `SquareIntegrable` for our `L²`-martingale layer is an open follow-up — see
-`docs/upstream-consumption-review-2026-07-27.md`.)
+`docs/archive/upstream-consumption-review-2026-07-27.md`.)
 We re-encode adaptedness concretely as `AdaptedAt` (factoring through
 `pastProcess`) so that the weak-Markov independence `IsPreBrownianReal.indepFun_shift`
 applies directly. The deterministic moments `integral_two_increment` /

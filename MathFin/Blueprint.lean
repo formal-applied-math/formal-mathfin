@@ -17,8 +17,8 @@ import MathFin.Foundations.ItoFormulaCLM
 import MathFin.Foundations.ItoFormulaTD
 import MathFin.Foundations.ItoLemma2D
 import MathFin.Foundations.FeynmanKacHeatEquation
-import MathFin.Foundations.GaussianGirsanov
-import MathFin.Foundations.BSCallHypFromBrownian
+import MathFin.Bridges.GaussianGirsanov
+import MathFin.Bridges.BSCallHypFromBrownian
 import MathFin.Foundations.ContinuousFTAP
 import MathFin.Foundations.MarketCompleteness
 import MathFin.Foundations.CarrMadan
@@ -232,12 +232,12 @@ attribute [blueprint "thm:bs-pde" (title := "Black–Scholes PDE (from the close
   Greeks and `bs_identity`. -/)]
   MathFin.bs_pde_holds
 
-attribute [blueprint "thm:bs-pde-no-arb" (title := "BS PDE ↔ Itô-drift balance (algebraic)")
-  (statement := /-- The PDE is *algebraically equivalent* to the Itô-drift balance
-  $\text{drift} - rV = 0$, routed through the shared `itoDrift2D`. Deferred, by
-  name: deriving drift $=0$ *from* the no-arbitrage $Q$-martingale (needs the
-  time-dependent Itô formula on the unbounded-Γ value function). -/)]
-  MathFin.bs_pde_from_no_arbitrage
+attribute [blueprint "thm:bs-pde-brownian" (title := "BS PDE in the Brownian coordinate")
+  (statement := /-- The discounted call price read along the Brownian state,
+  $f(t,x) = e^{-rt}\,V(S_0 e^{(r-\sigma^2/2)t + \sigma x},\,T-t)$, solves the backward heat
+  equation $\partial_t f + \tfrac12\partial_{xx} f = 0$ for $t < T$, from the Feynman–Kac
+  heat-flow form of the price. That $f(t, B_t)$ is then a local martingale is not proved. -/)]
+  MathFin.discountedCallBrownian_heat_equation
 
 attribute [blueprint "thm:feynman-kac-heat-eq" (title := "Heat equation for the kernel convolution")
   (statement := /-- The convolution $u(t,x) = \int g(z)\,K(t,z-x)\,dz$ against the
@@ -257,11 +257,12 @@ attribute [blueprint "thm:bs-pde-feynman-kac" (title := "Black–Scholes PDE (fr
   MathFin.bsV_satisfies_bs_pde_via_feynmanKac
 
 attribute [blueprint "thm:margrabe" (title := "Margrabe exchange option")
-  (statement := /-- The option to exchange one asset for another prices as a BS
-  call on the ratio with effective volatility
-  $\sqrt{\sigma_1^2 + \sigma_2^2 - 2\rho\sigma_1\sigma_2}$ — the multivariate
-  corollary. -/)]
-  MathFin.margrabe_price_of_gaussian
+  (statement := /-- For two geometric Brownian motions with correlated Gaussian drivers, the
+  discounted expected exchange payoff $\mathbb E[e^{-rT}(S^1_T - S^2_T)^+]$ equals Margrabe's
+  price: a Black–Scholes call on the ratio at effective volatility
+  $\sqrt{\sigma_1^2 + \sigma_2^2 - 2\rho\sigma_1\sigma_2}$, by splitting off an independent
+  residual. -/)]
+  MathFin.margrabe_exchange_price
 
 attribute [blueprint "thm:carr-madan" (title := "Carr–Madan static replication")
   (statement := /-- Every twice-differentiable payoff decomposes as cash, a

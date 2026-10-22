@@ -37,10 +37,13 @@ This file establishes the two pieces of the reduction:
 The price-level formula (`margrabe_price_via_call`) prices the exchange option
 in the `S²`-numeraire as a vanilla `bs_call_formula` call on the ratio
 `R = S¹/S²`. Its pricing primitive is `BSCallHyp` for the ratio — the same
-abstraction `bs_call_formula` takes for any underlying. That primitive is
-*derived* from a joint two-GBM gaussian model in
-`MathFin/BlackScholes/MargrabeGrounding.lean` (`margrabe_bsCallHyp_of_gaussian`,
-the Margrabe-analog of leap-1 Girsanov), so the reduction is end-to-end.
+abstraction `bs_call_formula` takes for any underlying.
+`MathFin/BlackScholes/MargrabeGrounding.lean` (`margrabe_bsCallHyp_of_gaussian`) constructs
+that primitive from a joint two-GBM Gaussian model: under an Esscher tilt `Q` of the model
+measure, a standard-normal driver drives the actual ratio `S¹_T/S²_T` (that `Q` is the
+`S²`-numéraire measure is not proved). The same file proves the price-level statement directly
+under the model measure: `margrabe_exchange_price` shows that `margrabePrice` is the
+discounted expected exchange payoff.
 
 ## Results
 
@@ -171,10 +174,9 @@ This closes the price-level reduction. The exchange option, valued in the
 `S²`-numeraire, is a vanilla Black-Scholes call on the ratio `R = S¹/S²`
 struck at `1` with zero rate and effective vol `σ`. The pricing primitive is
 `BSCallHyp` for the *ratio* — exactly the abstraction `bs_call_formula` takes
-for any underlying; here the underlying is `R`. The grounding of this
-hypothesis from a joint two-GBM model (via the `S²`-numeraire change of
-measure) is the Margrabe-analog of leap-1 Girsanov — a separate deeper
-result, just as `BSCallHyp` itself was assumed until Girsanov derived it. -/
+for any underlying; here the underlying is `R`. Its construction from a joint two-GBM
+model, under an Esscher tilt not shown to be the `S²`-numeraire measure, is
+`MargrabeGrounding.lean`. -/
 
 /-- **Bridge**: standard BS `d₁` of the ratio `R₀ = S¹₀/S²₀` (strike `1`,
 zero rate) is the Margrabe `d₁`. -/

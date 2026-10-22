@@ -11,9 +11,12 @@ public import Mathlib
 # Markowitz two-asset portfolio theory
 
 Closed-form results for the two-asset minimum-variance problem. Returns are
-modelled by their first two moments only (`σ_1`, `σ_2`, ρ`), not by a probability
-space — this is the classical mean-variance setting where the covariance matrix
-is the primitive.
+modelled by their first two moments only (`σ_1`, `σ_2`, `ρ`) — the classical
+mean-variance setting where the covariance matrix is the primitive. That the formula
+below is the variance of the random portfolio return `w R₁ + (1 − w) R₂` is proved in
+`Portfolio/MarkowitzLagrangian.lean` (`portfolioVarTwo_eq_variance`), together with the
+first-order condition the minimum-variance weight satisfies there
+(`marginalVariance_minVarWeightTwo`).
 
 For a two-asset portfolio with weight `w` on asset 1 and `1 - w` on asset 2:
 
@@ -32,21 +35,36 @@ immediate, and avoids any explicit calculus.
 
 Results:
 
+* `covTwo`, `portfolioVarTwo_eq_dotProduct`: the two-asset covariance matrix, and
+  `Var(w)` as its quadratic form at the weights `(w, 1 − w)`.
 * `portfolioVarTwo_eq_quad`: the factorization above.
 * `portfolioVarTwo_at_minVarWeight`: `Var(w*) = V_min`.
 * `portfolioVarTwo_ge_min`: `Var(w) ≥ V_min` for every `w`, given `D > 0`.
-* `minPortfolioVarTwo_perfect_anticorr`: at `ρ = -1`, the minimum variance
-  is exactly zero (perfect hedge).
+* `minPortfolioVarTwo_perfect_anticorr`: at `ρ = -1` the closed form `V_min`
+  is zero; it is the minimum variance when `D > 0` (perfect hedge).
 -/
 
 @[expose] public section
 
 namespace MathFin
 
+open Matrix
+
 /-- Portfolio variance for a two-asset mix with weight `w` on asset 1 and
 `1 - w` on asset 2. -/
 noncomputable def portfolioVarTwo (σ₁ σ₂ ρ : ℝ) (w : ℝ) : ℝ :=
   w ^ 2 * σ₁ ^ 2 + (1 - w) ^ 2 * σ₂ ^ 2 + 2 * w * (1 - w) * ρ * σ₁ * σ₂
+
+/-- The two-asset covariance matrix `!![σ₁², ρσ₁σ₂; ρσ₁σ₂, σ₂²]` for volatilities
+`σ₁, σ₂` and correlation `ρ`. -/
+noncomputable def covTwo (σ₁ σ₂ ρ : ℝ) : Matrix (Fin 2) (Fin 2) ℝ :=
+  !![σ₁ ^ 2, ρ * σ₁ * σ₂; ρ * σ₁ * σ₂, σ₂ ^ 2]
+
+/-- `portfolioVarTwo` is the quadratic form of `covTwo` at the weights `(w, 1 − w)`. -/
+lemma portfolioVarTwo_eq_dotProduct (σ₁ σ₂ ρ w : ℝ) :
+    portfolioVarTwo σ₁ σ₂ ρ w = ![w, 1 - w] ⬝ᵥ (covTwo σ₁ σ₂ ρ *ᵥ ![w, 1 - w]) := by
+  simp [portfolioVarTwo, covTwo, mulVec, dotProduct, Fin.sum_univ_two]
+  ring
 
 /-- Denominator of the min-variance weight: `D = σ_1² − 2 ρ σ_1 σ_2 + σ_2²`. -/
 noncomputable def minVarDenom (σ₁ σ₂ ρ : ℝ) : ℝ :=
@@ -92,8 +110,9 @@ lemma portfolioVarTwo_ge_min {σ₁ σ₂ ρ : ℝ}
     mul_nonneg hD.le h_sq
   linarith
 
-/-- **Perfect-hedge corollary**: when `ρ = -1` and both volatilities are
-positive, the minimum portfolio variance equals zero. -/
+/-- **Perfect-hedge corollary**: at `ρ = -1` the closed form `V_min` is zero, for any
+`σ₁, σ₂`. It is the minimum portfolio variance when `D = (σ₁ + σ₂)² > 0`
+(`portfolioVarTwo_ge_min`, `portfolioVarTwo_at_minVarWeight`). -/
 lemma minPortfolioVarTwo_perfect_anticorr (σ₁ σ₂ : ℝ) :
     minPortfolioVarTwo σ₁ σ₂ (-1) = 0 := by
   unfold minPortfolioVarTwo

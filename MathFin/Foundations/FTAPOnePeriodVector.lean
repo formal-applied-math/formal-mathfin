@@ -41,6 +41,24 @@ orthogonal complement, where coercivity is recovered. Out of scope (the remainin
 rung): the general-Ω **multi-period** DMW (predictable `L⁰(ℱ_t)`-strategies and the L⁰
 gains-cone closedness).
 
+## The one-period EMM of the library
+
+`IsEMM` here is the library's one notion of an equivalent martingale measure for a single
+trading period. The other one-period encodings are proved equivalent to it, and the
+continuous-time notion restricts to it:
+
+* the scalar `OnePeriod.IsEMM` (`Foundations/FTAPOnePeriod.lean`) is defined as this notion
+  at `F = ℝ`, and its no-arbitrage condition is this one at `F = ℝ`
+  (`OnePeriod.noArbitrage_iff_vector`);
+* the finite-state `HasEMM_multi_state` (`Foundations/FTAPMultiState.lean`) holds iff this
+  notion has a witness on `Ω = Fin N` with the asset returns as an `ℝᴹ`-valued `Y`
+  (`hasEMM_multi_state_iff_exists_isEMM`);
+* the discrete-time `MathFin.IsEMM` at horizon `1` with trivial `𝓕 0`
+  (`Foundations/FTAPDiscrete.lean`) is the scalar one for `Y = S 1 − S 0`
+  (`isEMM_one_iff_onePeriod`);
+* a continuous-time `ContinuousMarket.IsEMM` gives this notion for every increment
+  `S t − S s` (`ContinuousMarket.IsEMM.increment`, in `Foundations/FTAPDiscrete.lean`).
+
 ## Main result
 
 * `MathFin.OnePeriodVector.ftap_one_period_vector`
@@ -64,7 +82,8 @@ def NoArbitrage : Prop :=
     (fun ω ↦ inner ℝ θ (Y ω)) =ᵐ[P] 0
 
 /-- **Equivalent martingale measure** (one period, finite-dim): `Q ~ P`, `Y` is
-`Q`-integrable, and `E_Q[Y] = 0 ∈ F`. -/
+`Q`-integrable, and `E_Q[Y] = 0 ∈ F`. The library's canonical one-period notion; see the
+module docstring for the encodings proved equivalent to it. -/
 structure IsEMM (Q : Measure Ω) : Prop where
   prob : IsProbabilityMeasure Q
   absP : Q ≪ P

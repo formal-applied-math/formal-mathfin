@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.Binomial.Model
 public import MathFin.Binomial.American
+public import MathFin.Binomial.CRRClosedForm
 
 /-!
 # Merton 1973 in the binomial tree
@@ -15,9 +16,9 @@ public import MathFin.Binomial.American
 Classical Merton (1973) result extended from continuous-time Black-Scholes to
 the discrete-time binomial tree.
 
-**Theorem.** In a binomial tree with no dividends (`g(S) = max(S − K, 0)`) and
-positive risk-free rate `r > 0`, the American call price equals the European
-call price at every step `n` and every spot `S`:
+**Theorem.** In a binomial tree with no dividends (`g(S) = max(S − K, 0)`), a
+nonnegative risk-free rate `r ≥ 0` and a nonnegative strike `K ≥ 0`, the American call
+price equals the European call price at every step `n` and every spot `S`:
 
   `americanPrice u d r g n S = binomialPrice u d r g n S`.
 
@@ -40,9 +41,11 @@ Steps 1 and 2 together give `continuation ≥ max(S · e^{−r} · e^r − K · 
 = `max(S − K · e^{−r}, 0)`. Step 3 gives `max(S − K · e^{−r}, 0) ≥
 max(S − K, 0)`.
 
-This is the binomial-tree counterpart of `bsV_ge_forward_lower_bound` in
-`PriceBounds.lean` (the continuous-time version); together they extend
-Merton 1973 across both modelling regimes.
+The one-period dominance is the binomial-tree counterpart of `bsV_ge_forward_lower_bound` in
+`PriceBounds.lean` (the European call dominates the discounted forward payoff). In continuous
+time the library proves that dominance but not the American = European equality; here the tree
+version of the equality is proved, and its CRR limit is the Black–Scholes call
+(`crr_americanCall_tendsto_bs`).
 
 ## Results
 
@@ -59,7 +62,11 @@ Merton 1973 across both modelling regimes.
   `Binomial.American`), this gives:
 * `americanCallPrice_eq_binomialPrice`: **American call = European call**
   for the non-dividend call in the binomial tree (Merton 1973), at every
-  step `n` and every spot `S ≥ 0`.
+  step `n` and every spot `S`.
+* `crr_americanCall_tendsto_bs`: on the Cox–Ross–Rubinstein tree with `r ≥ 0`, the
+  `n`-step American call price converges to the Black–Scholes European call price
+  `S₀·Φ(d₁) − K·e^{−rT}·Φ(d₂)` (the equality above, transported along
+  `binomialPrice_call_tendsto_bs_closed`).
 -/
 
 @[expose] public section
@@ -179,7 +186,8 @@ theorem call_one_period_continuation_ge_forward
 `call_one_period_continuation_ge_forward` with the forward-discount
 inequality `max(S − K · e^{−r}, 0) ≥ max(S − K, 0)` (for `r ≥ 0`, `K ≥ 0`).
 
-For positive `r` and positive `K`, this is *strict*. -/
+The inequality need not be strict, even for `r > 0` and `K > 0`: when the call is out of the
+money in both daughter states (`S·u ≤ K`), both sides are `0`. -/
 theorem call_one_period_continuation_dominates_intrinsic
     {u d r K S : ℝ} (h : BinomialNoArb u d r) (hr : 0 ≤ r) (hK : 0 ≤ K) :
     max (S - K) 0 ≤
@@ -293,5 +301,31 @@ theorem americanCallPrice_eq_binomialPrice {u d r K : ℝ} (h : BinomialNoArb u 
   le_antisymm
     (americanCallPrice_le_binomialPrice (K := K) h hr hK n S)
     (binomialPrice_le_americanPrice h _ n S)
+
+/-! ## The CRR American call converges to the Black–Scholes call -/
+
+section CRRLimit
+
+open Filter
+open scoped Topology
+
+/-- **The CRR American call converges to the Black–Scholes European call.** On the
+Cox–Ross–Rubinstein tree (`u = e^{σ√(T/n)}`, `d = e^{−σ√(T/n)}`, per-step rate `rT/n`) with
+`r ≥ 0`, `σ, T, S₀, K > 0` and no-arbitrage at every step `n ≥ 1`, the `n`-step American call
+price converges to `S₀·Φ(d₁) − K·e^{−rT}·Φ(d₂)` as `n → ∞`. At each `n ≥ 1` the American and
+European tree prices coincide (`americanCallPrice_eq_binomialPrice`, the per-step rate
+`rT/n` being nonnegative), and the European prices converge
+(`binomialPrice_call_tendsto_bs_closed`). -/
+theorem crr_americanCall_tendsto_bs {r σ T S₀ K : ℝ} (hr : 0 ≤ r) (hσ : 0 < σ) (hT : 0 < T)
+    (hS₀ : 0 < S₀) (hK : 0 < K)
+    (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
+    Tendsto (fun n : ℕ ↦ americanPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
+        (fun x ↦ max (x - K) 0) n S₀) atTop
+      (𝓝 (S₀ * Phi (bsd1 S₀ K r σ T) - K * Real.exp (-(r * T)) * Phi (bsd2 S₀ K r σ T))) :=
+  (binomialPrice_call_tendsto_bs_closed hσ hT hS₀ hK hna).congr'
+    (eventually_atTop.mpr ⟨1, fun n hn ↦ (americanCallPrice_eq_binomialPrice (hna n hn)
+      (mul_nonneg hr (div_nonneg hT.le n.cast_nonneg)) hK.le n S₀).symm⟩)
+
+end CRRLimit
 
 end MathFin

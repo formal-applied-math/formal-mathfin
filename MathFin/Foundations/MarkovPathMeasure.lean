@@ -39,6 +39,9 @@ the canonical Mathlib carrier for discrete laws.
 * `markovPathMeasure_cylinder` — **Theorem 1.1.2**: cylinder probabilities
   factor as `init(path 0) · ∏_{k<n} P(path k)(path (k+1))`, derived from
   the construction.
+
+`Binomial/PathMeasure.lean` uses the chain with `Bernoulli(q)` initial and transition laws as the
+law of i.i.d. coin flips, and writes the CRR binomial price as an expectation over its paths.
 -/
 
 @[expose] public section

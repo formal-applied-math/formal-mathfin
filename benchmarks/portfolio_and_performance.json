@@ -1,0 +1,892 @@
+{
+  "description": "Portfolio theory and performance: Markowitz, the tangent portfolio, CAPM and factor models, Black–Litterman, risk parity, Kelly growth, Sharpe, Sortino and related ratios. `chapter` is the section number the entry had in the original single-file corpus, not a chapter of one book; each entry's `reference` names its source.",
+  "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)",
+  "theorems": [
+    {
+      "id": "mf-markowitz-variance-factored",
+      "name": "Two-Asset Markowitz Variance Factorization",
+      "description": "Completing-the-square: Var(w) = D·(w - w*)² + V_min where D = σ₁² - 2ρσ₁σ₂ + σ₂², w* is the min-var weight, V_min = σ₁²σ₂²(1-ρ²)/D.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.Markowitz\n\nopen MathFin\n\ntheorem markowitz_variance_factored_thm {σ₁ σ₂ ρ : ℝ}\n    (hD : MathFin.minVarDenom σ₁ σ₂ ρ ≠ 0) (w : ℝ) :\n    MathFin.portfolioVarTwo σ₁ σ₂ ρ w =\n      MathFin.minVarDenom σ₁ σ₂ ρ *\n        (w - MathFin.minVarWeightTwo σ₁ σ₂ ρ) ^ 2\n      + MathFin.minPortfolioVarTwo σ₁ σ₂ ρ :=\n  MathFin.portfolioVarTwo_eq_quad hD w\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Markowitz mean-variance frontier, two-asset case (Bodie-Kane-Marcus Ch 7)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp + ring on the polynomial identity. Lives in MathFin/Portfolio/Markowitz.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-min-var-value",
+      "name": "Two-Asset Markowitz Variance at Min Weight",
+      "description": "The portfolio variance evaluated at the min-variance weight equals V_min = σ₁²σ₂²(1-ρ²)/D.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.Markowitz\n\nopen MathFin\n\ntheorem markowitz_min_var_value_thm {σ₁ σ₂ ρ : ℝ}\n    (hD : MathFin.minVarDenom σ₁ σ₂ ρ ≠ 0) :\n    MathFin.portfolioVarTwo σ₁ σ₂ ρ (MathFin.minVarWeightTwo σ₁ σ₂ ρ) =\n      MathFin.minPortfolioVarTwo σ₁ σ₂ ρ :=\n  MathFin.portfolioVarTwo_at_minVarWeight hD\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Markowitz minimum-variance closed form (Bodie-Kane-Marcus Ch 7)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, immediate from the variance factorization at w = w*. Lives in MathFin/Portfolio/Markowitz.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-min-var-bound",
+      "name": "Two-Asset Markowitz Variance Lower Bound",
+      "description": "Portfolio variance is always at least the minimum-variance value: Var(w) ≥ V_min for all w (under positive D).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.Markowitz\n\nopen MathFin\n\ntheorem markowitz_min_var_bound_thm {σ₁ σ₂ ρ : ℝ}\n    (hD : 0 < MathFin.minVarDenom σ₁ σ₂ ρ) (w : ℝ) :\n    MathFin.minPortfolioVarTwo σ₁ σ₂ ρ ≤\n      MathFin.portfolioVarTwo σ₁ σ₂ ρ w :=\n  MathFin.portfolioVarTwo_ge_min hD w\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Markowitz mean-variance frontier as a lower envelope (Bodie-Kane-Marcus Ch 7)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from the variance factorization plus sq_nonneg + linarith. Lives in MathFin/Portfolio/Markowitz.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-perfect-hedge",
+      "name": "Two-Asset Markowitz Perfect Hedge",
+      "description": "When ρ = -1 (perfectly anti-correlated), the minimum portfolio variance is exactly zero.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.Markowitz\n\nopen MathFin\n\ntheorem markowitz_perfect_hedge_thm (σ₁ σ₂ : ℝ) :\n    MathFin.minPortfolioVarTwo σ₁ σ₂ (-1) = 0 :=\n  MathFin.minPortfolioVarTwo_perfect_anticorr σ₁ σ₂\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Markowitz perfect-hedge identity (Bodie-Kane-Marcus Ch 7)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The numerator (1 - ρ²) vanishes at ρ = -1. Lives in MathFin/Portfolio/Markowitz.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-capm-beta-market",
+      "name": "CAPM Beta of the Market Portfolio",
+      "description": "The market's beta is one: β_M = Cov(R_M, R_M)/Var(R_M) = 1.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.CAPM\n\nopen MathFin\n\ntheorem capm_beta_market_thm {varRm : ℝ} (hVar : varRm ≠ 0) :\n    MathFin.beta varRm varRm = 1 :=\n  MathFin.beta_market hVar\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "CAPM (Sharpe 1964; Bodie-Kane-Marcus Ch 9)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from div_self. Lives in MathFin/Portfolio/CAPM.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-capm-beta-riskfree",
+      "name": "CAPM Beta of a Risk-Free Asset",
+      "description": "A risk-free asset (zero covariance with the market) has beta zero: β = 0/Var(R_M) = 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.CAPM\n\nopen MathFin\n\ntheorem capm_beta_riskfree_thm (varRm : ℝ) :\n    MathFin.beta 0 varRm = 0 :=\n  MathFin.beta_of_riskFree varRm\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "CAPM (Sharpe 1964; Bodie-Kane-Marcus Ch 9)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from zero_div. Lives in MathFin/Portfolio/CAPM.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-capm-beta-linearity-two",
+      "name": "CAPM Beta Linearity for Two-Asset Portfolio",
+      "description": "Beta of a portfolio R_p = w₁R₁ + w₂R₂ is the weighted sum of betas: β_p = w₁β₁ + w₂β₂. Bilinearity of covariance.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.CAPM\n\nopen MathFin\n\ntheorem capm_beta_linearity_two_thm {varRm : ℝ} (hVar : varRm ≠ 0)\n    (w₁ w₂ covR₁Rm covR₂Rm : ℝ) :\n    MathFin.beta (w₁ * covR₁Rm + w₂ * covR₂Rm) varRm =\n      w₁ * MathFin.beta covR₁Rm varRm + w₂ * MathFin.beta covR₂Rm varRm :=\n  MathFin.beta_linearity_two hVar w₁ w₂ covR₁Rm covR₂Rm\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "CAPM beta linearity (Bodie-Kane-Marcus Ch 9.3)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via bilinearity of covariance, axiomatized as `(w₁·c₁ + w₂·c₂)/v = w₁·c₁/v + w₂·c₂/v`. Lives in MathFin/Portfolio/CAPM.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-capm-beta-linearity-finset",
+      "name": "CAPM Beta Linearity for Finset-Indexed Portfolio",
+      "description": "Beta of a portfolio R_p = ∑ w_i R_i is the weighted sum of betas: β_p = ∑ w_i β_i. Bilinearity over a finite-index family.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.CAPM\n\nopen MathFin\n\ntheorem capm_beta_linearity_finset_thm\n    {ι : Type*} (s : Finset ι) (w c : ι → ℝ) (varRm : ℝ) :\n    MathFin.beta (∑ i ∈ s, w i * c i) varRm =\n      ∑ i ∈ s, w i * MathFin.beta (c i) varRm :=\n  MathFin.beta_linearity_finset s w c varRm\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "CAPM beta linearity for portfolios (Bodie-Kane-Marcus Ch 9.3)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Finset.sum_div + mul_div_assoc. Lives in MathFin/Portfolio/CAPM.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-n-scaling",
+      "name": "N-Asset Portfolio Variance Quadratic Scaling",
+      "description": "Portfolio variance scales quadratically in the weight magnitude: Var(c·w) = c²·Var(w).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.MarkowitzNAsset\n\nopen MathFin\n\ntheorem markowitz_n_scaling_thm\n    {ι : Type*} (s : Finset ι) (w : ι → ℝ) (σ : ι → ι → ℝ) (c : ℝ) :\n    MathFin.portfolioVarN s (fun i => c * w i) σ =\n      c ^ 2 * MathFin.portfolioVarN s w σ :=\n  MathFin.portfolioVarN_smul s w σ c\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Markowitz portfolio variance scaling (Bodie-Kane-Marcus Ch 7)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from Finset.mul_sum + ring on the double sum. Lives in MathFin/Portfolio/MarkowitzNAsset.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-n-diag",
+      "name": "N-Asset Portfolio Variance Diagonal Covariance",
+      "description": "When σ_ij = 0 for i ≠ j (uncorrelated assets), the portfolio variance reduces to ∑ w_i²·σ_ii.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.MarkowitzNAsset\n\nopen MathFin\n\ntheorem markowitz_n_diag_thm {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (w : ι → ℝ) (σ : ι → ι → ℝ)\n    (h_diag : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → σ i j = 0) :\n    MathFin.portfolioVarN s w σ = ∑ i ∈ s, w i ^ 2 * σ i i :=\n  MathFin.portfolioVarN_diag s w σ h_diag\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Uncorrelated-asset portfolio variance (Bodie-Kane-Marcus Ch 7.2)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via inner-sum collapse Finset.sum_ite_eq' on the diagonal. Lives in MathFin/Portfolio/MarkowitzNAsset.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-n-iid",
+      "name": "Diversification Under Equal Weights and IID",
+      "description": "Equal weights c on an n-asset portfolio with zero cross-covariances and common variance σ² gives Var = c²·n·σ². The classical diversification scaling.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.MarkowitzNAsset\n\nopen MathFin\n\ntheorem markowitz_n_iid_thm {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (c σ_sq : ℝ)\n    (kernel : ι → ι → ℝ)\n    (h_diag : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → kernel i j = 0)\n    (h_var : ∀ i ∈ s, kernel i i = σ_sq) :\n    MathFin.portfolioVarN s (fun _ => c) kernel = c ^ 2 * s.card * σ_sq :=\n  MathFin.portfolioVarN_equal_weights_iid s c σ_sq kernel h_diag h_var\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Diversification under iid assets (Bodie-Kane-Marcus Ch 7.4)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via diagonal collapse + Finset.sum_const + nsmul_eq_mul. Lives in MathFin/Portfolio/MarkowitzNAsset.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-n-psd",
+      "name": "N-Asset Covariance Kernel PSD: Portfolio Variance Non-Negativity",
+      "description": "PSD derived, not assumed: the Markowitz quadratic form at the genuine covariance kernel σ_ij = cov(R_i, R_j) of square-integrable returns equals Var[∑ wᵢ • Rᵢ] ≥ 0 — the self-dot variance identity, via Mathlib's variance_sum' with covariance_smul_left/right peeling the weights — discharging the PSD hypothesis of portfolioVarN_nonneg_of_psd from first principles.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.CovariancePSD\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\ntheorem markowitz_covariance_psd_nonneg_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : MeasureTheory.Measure Ω}\n    [MeasureTheory.IsFiniteMeasure μ] {ι : Type*} (s : Finset ι) (w : ι → ℝ)\n    (R : ι → Ω → ℝ) (hR : ∀ i ∈ s, MeasureTheory.MemLp (R i) 2 μ) :\n    0 ≤ MathFin.portfolioVarN s w (fun i j => cov[R i, R j; μ]) :=\n  MathFin.portfolioVarN_covariance_nonneg s w R hR\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Positive-semidefinite covariance (Bodie-Kane-Marcus Ch 7; Markowitz 1952)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the PSD property is DERIVED, not assumed. portfolioVarN_covariance_nonneg (Portfolio/CovariancePSD.lean) proves the Markowitz quadratic form with the genuine covariance kernel cov(R_i, R_j) of L2 random returns equals Var[sum w_i R_i] >= 0 — the self-dot variance identity, via Mathlib's variance_sum' (variance of a sum = double sum of covariances) with covariance_smul_left/right peeling the weights. Replaces the former conclusion-in-hypothesis form (PSD assumed, instantiated at w). Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-n-two-asset",
+      "name": "N-Asset Markowitz Matches Two-Asset Formula",
+      "description": "When the index set has cardinality 2 with weights (w, 1-w) and the standard ρ-parametrized covariance, the n-asset variance recovers the two-asset formula w²σ₁² + (1-w)²σ₂² + 2w(1-w)ρσ₁σ₂.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.MarkowitzNAsset\n\nopen MathFin\n\ntheorem markowitz_n_two_asset_thm (w σ₁ σ₂ ρ : ℝ) :\n    MathFin.portfolioVarN (Finset.univ : Finset (Fin 2))\n        (fun i => if i = 0 then w else 1 - w)\n        (fun i j =>\n          if i = 0 ∧ j = 0 then σ₁ ^ 2\n          else if i = 1 ∧ j = 1 then σ₂ ^ 2\n          else ρ * σ₁ * σ₂) =\n      w ^ 2 * σ₁ ^ 2 + (1 - w) ^ 2 * σ₂ ^ 2 + 2 * w * (1 - w) * ρ * σ₁ * σ₂ :=\n  MathFin.portfolioVarN_two_asset_compat w σ₁ σ₂ ρ\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Two-asset specialization of the n-asset Markowitz variance (Bodie-Kane-Marcus Ch 7.3)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Finset.univ on Fin 2 expansion + ring. Lives in MathFin/Portfolio/MarkowitzNAsset.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-sharpe-scale-invariant",
+      "name": "Sharpe Ratio Scale Invariance",
+      "description": "The Sharpe ratio (μ - r_f)/σ is invariant under uniform scaling of mean, risk-free rate, and volatility: S(λμ, λr_f, λσ) = S(μ, r_f, σ).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.Ratios\n\nopen MathFin\n\ntheorem sharpe_scale_invariant_thm {c : ℝ} (hc : c ≠ 0) (μ r_f σ : ℝ) :\n    MathFin.sharpeRatio (c * μ) (c * r_f) (c * σ) =\n      MathFin.sharpeRatio μ r_f σ :=\n  MathFin.sharpeRatio_scale_invariant hc μ r_f σ\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Sharpe ratio (Sharpe 1966; Bodie-Kane-Marcus Ch 10)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp on the definition. Lives in MathFin/Performance/Ratios.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-sharpe-sqrtT-scaling",
+      "name": "Sharpe Ratio √T Time-Aggregation Scaling",
+      "description": "Under iid time aggregation L_T ~ N(T·μ, T·σ²), the Sharpe ratio scales as √T: S_T = √T · S_1. Standard quant rule for annualizing.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.Ratios\n\nopen MathFin Real\n\ntheorem sharpe_sqrtT_thm {μ r_f σ T : ℝ} (hT : 0 < T) (hσ : σ ≠ 0) :\n    MathFin.sharpeRatio (T * μ) (T * r_f) (σ * Real.sqrt T) =\n      Real.sqrt T * MathFin.sharpeRatio μ r_f σ :=\n  MathFin.sharpeRatio_scaleT hT hσ\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Sharpe ratio time scaling (Bodie-Kane-Marcus Ch 5.5; Hull Ch 14 vol annualization)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via T = √T·√T rewrite + field_simp. Lives in MathFin/Performance/Ratios.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-kelly-foc",
+      "name": "Kelly Criterion First-Order Optimality",
+      "description": "At the Kelly fraction f* = (p·b - q)/b with q = 1 - p, the derivative of the expected log-growth p·log(1 + f·b) + q·log(1 - f) vanishes.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.Ratios\n\nopen MathFin\n\ntheorem kelly_foc_thm {p b : ℝ}\n    (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    HasDerivAt (fun f => MathFin.kellyGrowth p b f) 0\n      (MathFin.kellyFraction p b) :=\n  MathFin.kellyGrowth_deriv_at_kelly hp hp1 hb\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Kelly criterion (Kelly 1956; Thorp 2006)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via HasDerivAt.log composition + field_simp on the polynomial identity at f*. Lives in MathFin/Performance/Ratios.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cml-equation",
+      "name": "Capital Market Line Equation",
+      "description": "On the CML through (0, r_f) with slope Sharpe_t: μ_combined = r_f + σ_combined·Sharpe_t. Standard CML equation.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.TwoFundSeparation\n\nopen MathFin\n\ntheorem cml_equation_thm (μ_t σ_t r_f α : ℝ) (hσ_t : σ_t ≠ 0) :\n    MathFin.cmlMean μ_t r_f α =\n      r_f + MathFin.cmlStdev σ_t α * MathFin.sharpeRatio μ_t r_f σ_t :=\n  MathFin.cml_equation μ_t σ_t r_f α hσ_t\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Capital Market Line (Tobin 1958; Bodie-Kane-Marcus Ch 9.2)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp + ring on the definitions. Lives in MathFin/Portfolio/TwoFundSeparation.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cml-sharpe-invariant",
+      "name": "Sharpe Invariance Along the CML",
+      "description": "Every (mean, stdev) pair on the Capital Market Line has the same Sharpe ratio as the tangent portfolio. Algebraic content of two-fund separation.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.TwoFundSeparation\n\nopen MathFin\n\ntheorem cml_sharpe_invariant_thm (μ_t σ_t r_f α : ℝ)\n    (hα : α ≠ 0) (hσ_t : σ_t ≠ 0) :\n    MathFin.sharpeRatio (MathFin.cmlMean μ_t r_f α) r_f\n        (MathFin.cmlStdev σ_t α) =\n      MathFin.sharpeRatio μ_t r_f σ_t :=\n  MathFin.cml_sharpeRatio_invariant μ_t σ_t r_f α hα hσ_t\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Two-fund separation theorem (Tobin 1958; Bodie-Kane-Marcus Ch 9.2)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp + ring. Lives in MathFin/Portfolio/TwoFundSeparation.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cml-decomposition-unique",
+      "name": "CML Decomposition Uniqueness",
+      "description": "Given a target portfolio standard deviation σ_p, the tangent-fund weight on the CML is uniquely α = σ_p/σ_t: that weight attains σ_p (recovery), and any weight attaining σ_p equals it (uniqueness).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.TwoFundSeparation\n\nopen MathFin\n\n/-- **CML decomposition with unique weight** (two-fund separation): the\n    tangent-fund weight `α = σ_p / σ_t` attains the target standard deviation,\n    AND any weight attaining it equals `σ_p / σ_t` — existence and uniqueness\n    of the decomposition weight. Re-exports\n    `MathFin.cml_weight_recovers_stdev` + `MathFin.cml_weight_unique`. -/\ntheorem cml_decomposition_unique_weight (σ_t σ_p : ℝ) (hσ_t : σ_t ≠ 0) :\n    MathFin.cmlStdev σ_t (σ_p / σ_t) = σ_p ∧\n    ∀ α, MathFin.cmlStdev σ_t α = σ_p → α = σ_p / σ_t :=\n  ⟨MathFin.cml_weight_recovers_stdev σ_t σ_p hσ_t,\n   fun α h => MathFin.cml_weight_unique σ_t α σ_p hσ_t h⟩"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Two-fund separation decomposition (Tobin 1958)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/Portfolio/TwoFundSeparation.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cml-mean-at-stdev",
+      "name": "CML Mean Recovery from Std Deviation",
+      "description": "A portfolio with std deviation σ_p on the CML has expected return r_f + σ_p·Sharpe_t. Inverse mapping to cml_decomposition_unique.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.TwoFundSeparation\n\nopen MathFin\n\ntheorem cml_mean_at_stdev_thm (μ_t σ_t r_f σ_p : ℝ) (hσ_t : σ_t ≠ 0) :\n    MathFin.cmlMean μ_t r_f (σ_p / σ_t) =\n      r_f + σ_p * MathFin.sharpeRatio μ_t r_f σ_t :=\n  MathFin.cml_mean_at_stdev μ_t σ_t r_f σ_p hσ_t\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Capital Market Line — return as function of risk (Bodie-Kane-Marcus Ch 9.2)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp + ring. Lives in MathFin/Portfolio/TwoFundSeparation.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-sortino-scale-invariant",
+      "name": "Sortino Ratio Scale Invariance",
+      "description": "Sortino ratio (μ - target)/σ_down is invariant under uniform scaling of mean, target, and downside semi-deviation.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.RatiosExtended\n\nopen MathFin\n\ntheorem sortino_scale_invariant_thm {c : ℝ} (hc : c ≠ 0) (μ target σ_down : ℝ) :\n    MathFin.sortinoRatio (c * μ) (c * target) (c * σ_down) =\n      MathFin.sortinoRatio μ target σ_down :=\n  MathFin.sortinoRatio_scale_invariant hc μ target σ_down\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Sortino ratio (Sortino-van der Meer 1991; Bodie-Kane-Marcus Ch 10)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-sortino-translation",
+      "name": "Sortino Ratio Translation Invariance",
+      "description": "Sortino ratio is invariant under additive shift of both mean and target by the same amount.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.RatiosExtended\n\nopen MathFin\n\ntheorem sortino_translation_thm (μ target σ_down shift : ℝ) :\n    MathFin.sortinoRatio (μ + shift) (target + shift) σ_down =\n      MathFin.sortinoRatio μ target σ_down :=\n  MathFin.sortinoRatio_translation μ target σ_down shift\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Sortino ratio (Sortino-van der Meer 1991)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via ring_nf. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-treynor-scale-invariant",
+      "name": "Treynor Ratio Scale Invariance",
+      "description": "Treynor ratio (μ - r_f)/β is invariant under uniform scaling of mean, risk-free rate, and beta.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.RatiosExtended\n\nopen MathFin\n\ntheorem treynor_scale_invariant_thm {c : ℝ} (hc : c ≠ 0) (μ r_f β : ℝ) :\n    MathFin.treynorRatio (c * μ) (c * r_f) (c * β) =\n      MathFin.treynorRatio μ r_f β :=\n  MathFin.treynorRatio_scale_invariant hc μ r_f β\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Treynor ratio (Treynor 1965; Bodie-Kane-Marcus Ch 10)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-information-ratio-scale-invariant",
+      "name": "Information Ratio Scale Invariance",
+      "description": "Information ratio (μ_p - μ_b)/σ_active is invariant under uniform scaling.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.RatiosExtended\n\nopen MathFin\n\ntheorem information_ratio_scale_invariant_thm {c : ℝ} (hc : c ≠ 0)\n    (μ_p μ_b σ_active : ℝ) :\n    MathFin.informationRatio (c * μ_p) (c * μ_b) (c * σ_active) =\n      MathFin.informationRatio μ_p μ_b σ_active :=\n  MathFin.informationRatio_scale_invariant hc μ_p μ_b σ_active\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Information ratio (Grinold-Kahn 1999, Active Portfolio Management)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-tracking-error-self",
+      "name": "Tracking Error Vanishes for Self-Benchmark",
+      "description": "When the benchmark equals the portfolio (σ_p = σ_b and cov = σ_p²), the tracking-error² vanishes.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.RatiosExtended\n\nopen MathFin\n\ntheorem tracking_error_self_thm (σ_p : ℝ) :\n    MathFin.trackingErrorSq σ_p σ_p (σ_p ^ 2) = 0 :=\n  MathFin.trackingErrorSq_self σ_p\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Tracking error decomposition (Grinold-Kahn 1999)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via ring. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-tracking-error-cauchy-bound",
+      "name": "Tracking Error Lower Bound from Cauchy-Schwarz",
+      "description": "Under the Cauchy-Schwarz bound cov ≤ σ_p·σ_b, the tracking-error² ≥ (σ_p - σ_b)².",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.RatiosExtended\n\nopen MathFin\n\ntheorem tracking_error_cauchy_bound_thm (σ_p σ_b cov : ℝ)\n    (h_cs : cov ≤ σ_p * σ_b) :\n    (σ_p - σ_b) ^ 2 ≤ MathFin.trackingErrorSq σ_p σ_b cov :=\n  MathFin.trackingErrorSq_ge_diff_sq σ_p σ_b cov h_cs\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Tracking error bound from Cauchy-Schwarz (Grinold-Kahn 1999)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via nlinarith on the algebraic identity. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-downside-performance-metrics",
+      "name": "Omega, Maximum Drawdown, and Calmar",
+      "description": "Finite-state Omega is nonnegative and satisfies its threshold identity; finite-path maximum drawdown is nonnegative and positively homogeneous; the Calmar ratio is invariant under positive common scaling.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.DownsideMetrics\n\nopen MathFin\n\ntheorem downside_performance_metrics_full\n    {ι : Type*} [Fintype ι] (m : MathFin.FiniteReturnModel ι) (threshold : ℝ)\n    (hdown : MathFin.omegaDownside m threshold ≠ 0)\n    {n : ℕ} (price : Fin n → ℝ) (annualReturn c : ℝ) (hc : 0 < c) :\n    (0 ≤ MathFin.omegaRatio m threshold ∧\n      MathFin.omegaRatio m threshold - 1 =\n        (MathFin.finiteExpectedReturn m - threshold) / MathFin.omegaDownside m threshold) ∧\n    (0 ≤ MathFin.maximumDrawdown price ∧\n      MathFin.maximumDrawdown (fun i => c * price i) =\n        c * MathFin.maximumDrawdown price) ∧\n    MathFin.calmarRatio (c * annualReturn) (c * MathFin.maximumDrawdown price) =\n      MathFin.calmarRatio annualReturn (MathFin.maximumDrawdown price) :=\n  MathFin.downsideMetrics_bundle m threshold hdown price annualReturn c hc\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Omega ratio (Keating-Shadwick 2002); maximum drawdown and Calmar ratio (Young 1991)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Finite-state Omega ratio with normalized nonnegative weights, finite-path maximum drawdown over chronological peak-to-trough candidates, and positive-scaling Calmar invariance. Lives in MathFin/Performance/DownsideMetrics.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-relative-drawdown-scale-invariant",
+      "name": "Relative Drawdown Is Invariant Under Scaling the Equity Curve",
+      "description": "For an equity curve E on a finite time grid and c > 0, the relative drawdown 1 − E_t / max_{s≤t} E_s (running peak = Mathlib's partialSups) of c·E equals that of E at every time t, and so does the maximum relative drawdown up to every t; by contrast the absolute maximumDrawdown of c·E is c times that of E. No positivity assumption on E is needed (a zero running peak gives relative drawdown 1 on both sides by the x/0 = 0 convention).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.DownsideMetrics\nimport MathFin.Performance.RelativeDrawdown\n\nopen MathFin\n\ntheorem relative_drawdown_scale_invariant_full {n : ℕ} (E : Fin n → ℝ) {c : ℝ} (hc : 0 < c) :\n    relativeDrawdown (fun s ↦ c * E s) = relativeDrawdown E ∧\n      maxRelativeDrawdown (fun s ↦ c * E s) = maxRelativeDrawdown E ∧\n      maximumDrawdown (fun s ↦ c * E s) = c * maximumDrawdown E :=\n  ⟨relativeDrawdown_const_mul hc E, maxRelativeDrawdown_const_mul hc E,\n    maximumDrawdown_scale E c hc.le⟩\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Relative (percentage) drawdown, e.g. C. Bacon, Practical Portfolio Performance Measurement and Attribution, 2nd ed. (2008), Ch. 4; absolute maximum drawdown and Calmar ratio (Young 1991)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Running peak is partialSups; positive scaling commutes with it because multiplication by c > 0 is an order isomorphism (OrderIso.mulLeft₀ + map_partialSups). The Lean results hold over any locally-finite-order-bot time index; the snippet instantiates Fin n to contrast with MathFin.maximumDrawdown. Lives in MathFin/Performance/RelativeDrawdown.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-kelly-n-periods-linearity",
+      "name": "Multi-Period Kelly Log-Growth Linearity",
+      "description": "E[log(R_1...R_n)] = n*kellyGrowth(p, b, f) over n iid Kelly periods: expected total log-growth under the n-fold product of the two-point wealth-multiplier law equals n times the per-period expected log-growth. Linearity of expectation over the actual multi-period model.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.Kelly\n\nopen MathFin MeasureTheory\n\ntheorem kelly_n_periods_linearity_thm (n : ℕ) {p : ℝ}\n    (hp : 0 ≤ p) (hp1 : p ≤ 1) (b f : ℝ) :\n    ∫ R : Fin n → ℝ, ∑ i, Real.log (R i)\n        ∂(Measure.pi fun _ : Fin n => MathFin.kellyReturnMeasure p b f)\n      = (n : ℝ) * MathFin.kellyGrowth p b f :=\n  MathFin.kellyGrowth_n_periods n hp hp1 b f\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Multi-period Kelly aggregation (Kelly 1956; Thorp 2006)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal derivation (reduced_core -> full, 2026-06-06, repairing the definitional-rfl demotion of the same morning): the n-period iid model is now actual measure theory — one period's wealth multiplier is the two-point law kellyReturnMeasure p b f (win 1+f*b w.p. p, lose to 1-f w.p. 1-p), n periods are its n-fold product Measure.pi, and E[sum_i log R_i] = n * kellyGrowth p b f is COMPUTED via linearity of expectation: integral_finsetSum + the measure-preserving coordinate evaluations of the product measure (measurePreserving_eval) + the one-period evaluation integral_log_kellyReturnMeasure. The compounded-wealth reading is log(prod R_i) = sum log R_i. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-kelly-n-periods-foc",
+      "name": "Multi-Period Kelly First-Order Optimality",
+      "description": "For every horizon of n periods, the first-order condition for the expected log-growth n·g(f) holds at the one-period Kelly fraction f*: the derivative in f vanishes there, so the horizon does not move the critical point (Kelly is myopic). That f* maximizes the growth is not part of this entry's statement.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.Kelly\n\nopen MathFin\n\ntheorem kelly_n_periods_foc_thm (n : ℕ) {p b : ℝ}\n    (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    HasDerivAt (fun f => (n : ℝ) * MathFin.kellyGrowth p b f) 0\n      (MathFin.kellyFraction p b) :=\n  MathFin.kelly_n_periods_deriv_at_kelly n hp hp1 hb\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Multi-period Kelly myopia (Thorp 2006; MacLean-Thorp-Ziemba 2010)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via const_mul on single-period first-order condition. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-kelly-fraction-lt-one",
+      "name": "Kelly Fraction < 1",
+      "description": "For proper probabilities p < 1 and positive payoff b > 0, the Kelly fraction is strictly less than 1 — Kelly never bets the full bankroll on a single proper bet.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.Kelly\n\nopen MathFin\n\ntheorem kelly_fraction_lt_one_thm {p b : ℝ} (hp : p < 1) (hb : 0 < b) :\n    MathFin.kellyFraction p b < 1 :=\n  MathFin.kellyFraction_lt_one hp hb\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Kelly fraction bounds (Kelly 1956)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via div_lt_one + nlinarith. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-kelly-fraction-zero-iff",
+      "name": "Kelly Fraction = 0 iff Break-Even Bet",
+      "description": "For odds b ≠ 0, the Kelly fraction f* = 0 if and only if p·(b+1) = 1 — i.e., exactly when the bet has zero edge, p·b − (1 − p) = 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.Kelly\n\nopen MathFin\n\ntheorem kelly_fraction_zero_iff_thm (p : ℝ) {b : ℝ} (hb : b ≠ 0) :\n    MathFin.kellyFraction p b = 0 ↔ p * (b + 1) = 1 :=\n  MathFin.kellyFraction_eq_zero_iff p hb\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Kelly fraction zero at break-even (Thorp 2006)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via div_eq_zero_iff + linarith. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-kelly-fraction-pos-iff",
+      "name": "Kelly Fraction > 0 iff Favorable Bet",
+      "description": "For odds b > 0, the Kelly fraction f* > 0 if and only if p·(b+1) > 1 — i.e., exactly when the bet has positive edge, p·b − (1 − p) > 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.Kelly\n\nopen MathFin\n\ntheorem kelly_fraction_pos_iff_thm (p : ℝ) {b : ℝ} (hb : 0 < b) :\n    0 < MathFin.kellyFraction p b ↔ 1 < p * (b + 1) :=\n  MathFin.kellyFraction_pos_iff p hb\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Kelly fraction sign (Thorp 2006)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via lt_div_iff + linarith. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-risk-parity-2-asset",
+      "name": "Two-Asset Risk-Parity Equal Contribution",
+      "description": "For two assets, the risk-parity weights w₁ = σ₂/(σ₁+σ₂), w₂ = σ₁/(σ₁+σ₂) make each asset contribute equally to portfolio variance — independent of correlation.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.RiskParity\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem risk_parity_equal_contribution_thm (σ₁ σ₂ ρ : ℝ) (hσ : σ₁ + σ₂ ≠ 0) :\n    let w₁ := MathFin.riskParityWeightTwo σ₁ σ₂\n    let w₂ := MathFin.riskParityWeightTwo σ₂ σ₁\n    w₁ * (w₁ * σ₁^2 + w₂ * ρ * σ₁ * σ₂) =\n      w₂ * (w₁ * ρ * σ₁ * σ₂ + w₂ * σ₂^2) :=\n  MathFin.risk_parity_equal_contribution σ₁ σ₂ ρ hσ\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Risk parity (Maillard-Roncalli-Teiletche 2010)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black-litterman-1d-mean",
+      "name": "Black-Litterman 1D Posterior Mean (Precision-Weighted)",
+      "description": "Posterior mean in the 1D Black-Litterman update equals (s₁²π + s₀²Q)/(s₀²+s₁²), the precision-weighted combination of prior π and view Q.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.BlackLitterman\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\ntheorem blackLitterman_mean_eq_precision_weighted_thm\n    (π Q s0sq s1sq : ℝ) (h₀ : 0 < s0sq) (h₁ : 0 < s1sq) :\n    MathFin.posteriorMean1d π Q s0sq s1sq =\n      (π / s0sq + Q / s1sq) / (1 / s0sq + 1 / s1sq) :=\n  MathFin.blackLitterman_mean_eq_precision_weighted π Q s0sq s1sq h₀ h₁\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Black-Litterman 1992 (posterior via gaussian conjugacy)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black-litterman-1d-variance",
+      "name": "Black-Litterman 1D Posterior Variance (Harmonic Mean)",
+      "description": "Posterior variance s₀²s₁²/(s₀²+s₁²) = 1/(1/s₀² + 1/s₁²): precision (1/variance) is additive in independent gaussian updates.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.BlackLitterman\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem blackLitterman_var_eq_inv_sum_precision_thm\n    (s0sq s1sq : ℝ) (h₀ : 0 < s0sq) (h₁ : 0 < s1sq) :\n    MathFin.posteriorVariance1d s0sq s1sq = 1 / (1 / s0sq + 1 / s1sq) :=\n  MathFin.blackLitterman_var_eq_inv_sum_precision s0sq s1sq h₀ h₁\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Black-Litterman 1992 (posterior precision additivity)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-tangent-portfolio-foc",
+      "name": "Sharpe-ratio FOC via calculus (two-asset)",
+      "description": "The squared Sharpe ratio Sh²(w) has a critical point (HasDerivAt = 0) at weight w iff the cross-product condition r₂·(Σw)₁ = r₁·(Σw)₂ holds — the genuine first-order condition derived from HasDerivAt of Sh² (not an algebraic identity). Non-degeneracy: variance ≠ 0, expected excess return ≠ 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.SharpeFOCDerivation\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\ntheorem sharpe_foc_via_calculus_thm\n    (w r₁ r₂ σ₁ σ₂ ρ : ℝ)\n    (hV : MathFin.varianceTwo w σ₁ σ₂ ρ ≠ 0)\n    (hE : MathFin.expectedReturnTwo w r₁ r₂ ≠ 0) :\n    HasDerivAt (fun w' => MathFin.sharpeSqTwo w' r₁ r₂ σ₁ σ₂ ρ) 0 w ↔\n      r₂ * MathFin.marginalVarOne w σ₁ σ₂ ρ = r₁ * MathFin.marginalVarTwo w σ₁ σ₂ ρ :=\n  MathFin.sharpeSqTwo_critical_iff_crossProduct_FOC w r₁ r₂ σ₁ σ₂ ρ hV hE\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Tangent portfolio (Markowitz 1952, Sharpe 1964)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation: the FOC is the critical-point condition of the squared Sharpe ratio, proved via HasDerivAt + derivative-uniqueness + numerator factorisation (MathFin.sharpeSqTwo_critical_iff_crossProduct_FOC). Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-tangent-portfolio-N-sufficient",
+      "name": "N-Asset Tangent Portfolio Sufficient Condition",
+      "description": "If Σw = λ · μ_excess for some scalar λ, then w satisfies the cross-product Sharpe FOC: r_j · (Σw)_i = r_i · (Σw)_j.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.TangentPortfolio\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem isTangent_of_proportional_thm {ι : Type*}\n    (s : Finset ι) (μ_excess : ι → ℝ) (Sg : ι → ι → ℝ) (w : ι → ℝ) (lam : ℝ)\n    (h : ∀ i ∈ s, (∑ k ∈ s, Sg i k * w k) = lam * μ_excess i) :\n    MathFin.IsTangentPortfolioN s μ_excess Sg w :=\n  MathFin.isTangent_of_proportional s μ_excess Sg w lam h\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "N-asset tangent portfolio (Markowitz 1952, Sharpe 1964; matrix-inverse characterisation)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-kelly-numeraire-emm",
+      "name": "Kelly Numéraire Deflator Makes the Bet Fair (Discrete, Two-Outcome)",
+      "description": "In the two-outcome bet (win probability 0 < p < 1, odds b > 0), deflate the physical probabilities by the growth-optimal (Kelly) terminal wealth W*₊ = 1 + f*·b, W*₋ = 1 − f*, where f* = (p·b − (1 − p))/b is the Kelly fraction. The deflated weights q₊ = p/W*₊ and q₋ = (1 − p)/W*₋ give the bet zero expected return: q₊·b + q₋·(−1) = 0. This is the martingale half of the discrete numéraire-portfolio ⟹ EMM identity; the closed forms q₊ = 1/(b+1), q₋ = b/(b+1), their independence of p, and their summing to 1 (which makes q a probability) are not part of this entry's statement.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.KellyNumeraire\n\nopen MathFin\n\n/-- **Deflating by the Kelly (growth-optimal) wealth makes the bet fair.** In the\ntwo-outcome market (bet at fraction `f` pays odds `b` with physical\nprobability `p`), deflate the physical measure by the growth-optimal terminal wealth\n`W*₊ = 1 + f*·b`, `W*₋ = 1 - f*` at the Kelly fraction `f* = kellyFraction p b`. The\nresulting probabilities `q₊ = p/W*₊`, `q₋ = (1-p)/W*₋` give the bet zero\nexpected excess return, `q₊·b + q₋·(-1) = 0`: the martingale half of the discrete\nnuméraire-portfolio ⟹ EMM identity (that `q₊ + q₋ = 1` is not stated here). Re-exports\n`MathFin.kellyNumeraire_isRiskNeutral`. -/\ntheorem kelly_numeraire_isRiskNeutral {p b : ℝ} (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    p / (1 + kellyFraction p b * b) * b\n      + (1 - p) / (1 - kellyFraction p b) * (-1) = 0 :=\n  MathFin.kellyNumeraire_isRiskNeutral hp hp1 hb\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Numéraire portfolio / benchmark approach (Long 1990; Platen); Kelly growth-optimal criterion",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.kellyNumeraire_isRiskNeutral (MathFin/Performance/KellyNumeraire.lean): the growth-optimal (Kelly) portfolio, used as numéraire, deflates the physical measure into the EMM. Consumes the Kelly fraction kellyFraction and its first-order optimality (kellyGrowth_deriv_at_kelly): 1 + f*·b = p·(b+1), so the GOP-deflated win-probability p/W*₊ = 1/(b+1) is p-independent — the fair-odds risk-neutral probability. HONEST SCOPE: the discrete, two-outcome market — the fully elementary shadow of the continuous Long/Platen benchmark theorem (deflated prices are P-martingales, EMM density ∝ 1/N*), which needs a state-price-density / market model absent from the Itô tower. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
+      "id": "mf-performance-gain_to_pain",
+      "name": "Gain-to-Pain Ratio is Nonnegative",
+      "description": "The gain-to-pain ratio, total gains over total losses on a finite period set, is nonnegative — unconditionally.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.RatiosExtended\n\nopen MathFin\n\n/-- The gain-to-pain ratio is nonnegative: both legs are sums of positive/negative parts. -/\ntheorem mf_performance_gain_to_pain {ι : Type*} (s : Finset ι) (r : ι → ℝ) :\n    0 ≤ gainToPain s r :=\n  MathFin.gainToPain_nonneg s r\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Add the gain-to-pain ratio and prove it is nonnegative",
+        "difficulty": "good-first",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Performance/RatiosExtended.lean (autoformalized statement, leanstral proof, human-refined at review). Re-export from MathFin. Axioms-clean. Introduces definitions: gainToPain (new-defs review class).",
+        "provenance": {
+          "statement_source": "autoform",
+          "statement_model": "autoform",
+          "source": "leanstral-autoform",
+          "model": "labs-leanstral-1-5",
+          "issue": 161,
+          "new_defs": [
+            "gainToPain"
+          ],
+          "refined": "spurious `0 < pain` hypothesis dropped (the drafter guarded a division Lean does not need guarding — x/0 = 0); def restated on Mathlib's posPart/negPart instead of open-coded max, which supplies posPart_sub_negPart and hence one_le_gainToPain_iff (ratio ≥ 1 ↔ the period was profitable) as the lemma that makes the definition earn its place; landed in the existing RatiosExtended module the issue named, not a new one-lemma module"
+        }
+      }
+    },
+    {
+      "id": "mf-performance-upside_capture",
+      "name": "Add the upside-capture ratio and prove homogeneity in the portfolio return",
+      "description": "The upside-capture ratio is homogeneous of degree one in the portfolio leg — unconditionally.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.RatiosExtended\n\nopen MathFin\n\n/-- Upside capture is homogeneous of degree one in the portfolio return. -/\ntheorem mf_performance_upside_capture {ι : Type*} (up : Finset ι) (p b : ι → ℝ) (c : ℝ) :\n    upCapture up (c • p) b = c * upCapture up p b :=\n  MathFin.upCapture_smul up p b c\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Add the upside-capture ratio and prove positive homogeneity in the portfolio return",
+        "difficulty": "small",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Performance/RatiosExtended.lean (autoformalized statement, leanstral proof, human-refined at review). Re-export from MathFin. Axioms-clean. Introduces definitions: upCapture (new-defs review class).",
+        "provenance": {
+          "statement_source": "autoform",
+          "statement_model": "autoform",
+          "source": "leanstral-autoform",
+          "model": "labs-leanstral-1-5",
+          "issue": 162,
+          "new_defs": [
+            "upCapture"
+          ],
+          "refined": "spurious `∑ b ≠ 0` hypothesis dropped (mul_div_assoc needs no nonvanishing denominator); scalar leg stated as `c • p` and the lemma named `_smul`, since the claim is degree-one homogeneity and `_scale_invariant` is already taken in this namespace by the genuinely invariant Sortino/Treynor/IR lemmas; landed in the existing RatiosExtended module the issue named, not a new one-lemma module"
+        }
+      }
+    },
+    {
+      "id": "mf-markowitz-lagrangian-sufficient",
+      "name": "Markowitz Lagrangian First-Order Condition Is Sufficient for Minimum Variance",
+      "domain": "mathematical_finance",
+      "description": "For a positive semidefinite covariance matrix Σ, a portfolio w with budget ∑ wᵢ = 1, target return ∑ wᵢ μᵢ = m and Lagrangian first-order condition (Σw)ᵢ = λ₁ + λ₂ μᵢ for every asset has variance wᵀΣw no larger than that of any portfolio meeting the same two constraints. Sufficiency only: that every minimum-variance portfolio satisfies the first-order condition is not proved.",
+      "code": {
+        "lean": "import MathFin.Portfolio.MarkowitzLagrangian\n\nopen MathFin\n\n/-- **The Lagrangian FOC is sufficient for minimum variance.** For positive semidefinite `Sg`,\na portfolio `w` meeting the budget and the return target with `(Sg w)ᵢ = λ₁ + λ₂ μᵢ` has\nvariance at most that of every portfolio `v` meeting the same constraints. -/\ntheorem markowitz_lagrangian_sufficient_thm {ι : Type*} [Fintype ι] {Sg : Matrix ι ι ℝ}\n    (hSg : Sg.PosSemidef) {μ w : ι → ℝ} {m lam₁ lam₂ : ℝ}\n    (hw₁ : ∑ i, w i = 1) (hwμ : portfolioReturn Finset.univ w μ = m)\n    (h_FOC : ∀ i, marginalVariance Finset.univ Sg w i = lam₁ + lam₂ * μ i)\n    {v : ι → ℝ} (hv₁ : ∑ i, v i = 1) (hvμ : portfolioReturn Finset.univ v μ = m) :\n    portfolioVariance Finset.univ Sg w ≤ portfolioVariance Finset.univ Sg v :=\n  MathFin.portfolioVariance_le_of_lagrangian_FOC hSg hw₁ hwμ h_FOC hv₁ hvμ\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Merton, An Analytic Derivation of the Efficient Portfolio Frontier, J. Financial and Quantitative Analysis 7(4) (1972), §II; Boyd and Vandenberghe, Convex Optimization (2004), §5.5.3",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.portfolioVariance_le_of_lagrangian_FOC (MathFin/Portfolio/MarkowitzLagrangian.lean), proved as an instance of the KKT sufficiency theorem kkt_sufficient_of_eq (MathFin/Portfolio/ConvexQPKKT.lean) for the QP min ½ wᵀΣw with the equality constraints 1·w = 1, μ·w = m. SCOPE: sufficiency of the first-order condition for a global minimum among feasible portfolios; positive semidefiniteness of Σ is a hypothesis; necessity (every minimiser satisfies the FOC) and the closed-form frontier are not proved."
+      }
+    },
+    {
+      "id": "mf-markowitz-variance-random-returns",
+      "name": "Markowitz Minimum Variance for Random Returns",
+      "domain": "mathematical_finance",
+      "description": "For square-integrable random returns R₁, …, Rₙ, a portfolio w with ∑ wᵢ = 1, ∑ wᵢ μᵢ = m and Lagrangian first-order condition ∑ⱼ cov(Rᵢ, Rⱼ) wⱼ = λ₁ + λ₂ μᵢ for every asset satisfies Var[∑ wᵢ Rᵢ] ≤ Var[∑ vᵢ Rᵢ] for every portfolio v meeting the same constraints. Positive semidefiniteness of the covariance matrix is derived, not assumed. Sufficiency only: necessity of the first-order condition is not proved.",
+      "code": {
+        "lean": "import MathFin.Portfolio.MarkowitzLagrangian\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- **Markowitz for random returns.** A budget- and target-feasible portfolio whose\ncovariances with the assets satisfy the Lagrangian FOC minimises the variance of the\nportfolio return among all feasible portfolios. -/\ntheorem markowitz_variance_random_returns_thm {ι : Type*} [Fintype ι] {Ω : Type*}\n    {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsFiniteMeasure P] (R : ι → Ω → ℝ)\n    (hR : ∀ i, MemLp (R i) 2 P) {μ w : ι → ℝ} {m lam₁ lam₂ : ℝ}\n    (hw₁ : ∑ i, w i = 1) (hwμ : portfolioReturn Finset.univ w μ = m)\n    (h_FOC : ∀ i, marginalVariance Finset.univ (fun i j ↦ cov[R i, R j; P]) w i =\n      lam₁ + lam₂ * μ i)\n    {v : ι → ℝ} (hv₁ : ∑ i, v i = 1) (hvμ : portfolioReturn Finset.univ v μ = m) :\n    Var[∑ i, w i • R i; P] ≤ Var[∑ i, v i • R i; P] :=\n  MathFin.variance_le_of_lagrangian_FOC R hR hw₁ hwμ h_FOC hv₁ hvμ\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Markowitz, Portfolio Selection, J. Finance 7(1) (1952) 77–91; Merton, An Analytic Derivation of the Efficient Portfolio Frontier, J. Financial and Quantitative Analysis 7(4) (1972), §II",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.variance_le_of_lagrangian_FOC (MathFin/Portfolio/MarkowitzLagrangian.lean): posSemidef_covariance derives Matrix.PosSemidef of the covariance matrix from covariance_kernel_psd (MathFin/Portfolio/CovariancePSD.lean), portfolioVarN_covariance_eq_variance identifies the quadratic form with Var[∑ wᵢ Rᵢ], and portfolioVariance_le_of_lagrangian_FOC (KKT sufficiency) gives the inequality. SCOPE: sufficiency only; the means μ are given numbers (not required to be E[Rᵢ]); square-integrability on a finite measure is assumed."
+      }
+    },
+    {
+      "id": "mf-markowitz-two-asset-variance-of-returns",
+      "name": "Two-Asset Portfolio Variance Is the Variance of the Portfolio Return",
+      "domain": "mathematical_finance",
+      "description": "For square-integrable returns R₁, R₂ with Var[R₁] = σ₁², Var[R₂] = σ₂² and cov(R₁, R₂) = ρσ₁σ₂, the two-asset formula w²σ₁² + (1 − w)²σ₂² + 2w(1 − w)ρσ₁σ₂ equals Var[w R₁ + (1 − w) R₂] for every weight w: the closed form is derived from the covariance kernel of the returns.",
+      "code": {
+        "lean": "import MathFin.Portfolio.MarkowitzLagrangian\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- **The two-asset variance formula is the variance of the portfolio return.** -/\ntheorem markowitz_two_asset_variance_of_returns_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsFiniteMeasure P] {R₁ R₂ : Ω → ℝ} (h₁ : MemLp R₁ 2 P)\n    (h₂ : MemLp R₂ 2 P) {σ₁ σ₂ ρ : ℝ} (hv₁ : Var[R₁; P] = σ₁ ^ 2)\n    (hv₂ : Var[R₂; P] = σ₂ ^ 2) (hc : cov[R₁, R₂; P] = ρ * σ₁ * σ₂) (w : ℝ) :\n    portfolioVarTwo σ₁ σ₂ ρ w = Var[w • R₁ + (1 - w) • R₂; P] :=\n  MathFin.portfolioVarTwo_eq_variance h₁ h₂ hv₁ hv₂ hc w\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Markowitz, Portfolio Selection, J. Finance 7(1) (1952) 77–91; Bodie, Kane and Marcus, Investments, ch. 7 (portfolios of two risky assets)",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.portfolioVarTwo_eq_variance (MathFin/Portfolio/MarkowitzLagrangian.lean), from the self-dot identity portfolioVarN_covariance_eq_variance (MathFin/Portfolio/CovariancePSD.lean) on Fin 2 with covariance_self and covariance_comm. SCOPE: σ₁, σ₂, ρ enter only through the three moment hypotheses; the sign of σᵢ and |ρ| ≤ 1 are not assumed."
+      }
+    },
+    {
+      "id": "mf-markowitz-gmv-equal-marginal-variance",
+      "name": "Two-Asset Minimum-Variance Portfolio Equalises Marginal Variances",
+      "domain": "mathematical_finance",
+      "description": "At the two-asset minimum-variance weight w* = (σ₂² − ρσ₁σ₂)/D, with D = σ₁² − 2ρσ₁σ₂ + σ₂² ≠ 0, each asset's marginal variance (Σw*)ᵢ, its covariance with the portfolio, equals the minimum variance V_min = σ₁²σ₂²(1 − ρ²)/D. So w* satisfies the budget-only Lagrangian first-order condition with multiplier V_min.",
+      "code": {
+        "lean": "import MathFin.Portfolio.MarkowitzLagrangian\n\nopen MathFin\n\n/-- **The minimum-variance mix equalises marginal variances at `V_min`.** -/\ntheorem markowitz_gmv_equal_marginal_variance_thm {σ₁ σ₂ ρ : ℝ}\n    (hD : minVarDenom σ₁ σ₂ ρ ≠ 0) (i : Fin 2) :\n    marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ)\n        ![minVarWeightTwo σ₁ σ₂ ρ, 1 - minVarWeightTwo σ₁ σ₂ ρ] i =\n      minPortfolioVarTwo σ₁ σ₂ ρ :=\n  MathFin.marginalVariance_minVarWeightTwo hD i\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Merton, An Analytic Derivation of the Efficient Portfolio Frontier, J. Financial and Quantitative Analysis 7(4) (1972), §II (minimum-variance portfolio)",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.marginalVariance_minVarWeightTwo (MathFin/Portfolio/MarkowitzLagrangian.lean), on the covariance matrix covTwo (MathFin/Portfolio/Markowitz.lean). SCOPE: an algebraic identity for D ≠ 0; that w* minimises the variance is the separate result portfolioVarTwo_ge_min (D > 0). The corollary isConstrainedVarianceCriticalPoint_minVarWeightTwo (critical point under the budget constraint) is not part of this entry's statement."
+      }
+    },
+    {
+      "id": "mf-risk-parity-two-asset-unique",
+      "name": "Two-Asset Risk Parity: The Closed Form Is the Unique Long-Only Solution",
+      "domain": "mathematical_finance",
+      "description": "For two assets with volatilities σ₁, σ₂ > 0 and any correlation ρ, a long-only budget portfolio (w₁, w₂ > 0, w₁ + w₂ = 1) has equal risk contributions wᵢ(Σw)ᵢ under the covariance matrix [[σ₁², ρσ₁σ₂], [ρσ₁σ₂, σ₂²]] if and only if w₁ = σ₂/(σ₁ + σ₂).",
+      "code": {
+        "lean": "import MathFin.Portfolio.RiskParity\n\nopen MathFin\n\n/-- **The two-asset risk-parity portfolio is unique.** -/\ntheorem risk_parity_two_asset_unique_thm {σ₁ σ₂ w₁ w₂ : ℝ} (hσ₁ : 0 < σ₁) (hσ₂ : 0 < σ₂)\n    (hw₁ : 0 < w₁) (hw₂ : 0 < w₂) (hsum : w₁ + w₂ = 1) (ρ : ℝ) :\n    IsRiskParity Finset.univ (covTwo σ₁ σ₂ ρ) ![w₁, w₂] ↔ w₁ = riskParityWeightTwo σ₁ σ₂ :=\n  MathFin.isRiskParity_two_iff hσ₁ hσ₂ hw₁ hw₂ hsum ρ\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Maillard, Roncalli and Teïletche, The Properties of Equally Weighted Risk Contribution Portfolios, J. Portfolio Management 36(4) (2010) 60–70, §2 (two-asset case)",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.isRiskParity_two_iff (MathFin/Portfolio/RiskParity.lean), using the risk-parity predicate IsRiskParity (MathFin/Portfolio/RiskParityFOC.lean) and covTwo (MathFin/Portfolio/Markowitz.lean). The key step is RC₁ − RC₂ = (w₁σ₁ − w₂σ₂)(w₁σ₁ + w₂σ₂). SCOPE: two assets, long-only weights; the N-asset existence and uniqueness of the equal-risk-contribution portfolio are not proved."
+      }
+    },
+    {
+      "id": "mf-black-litterman-gls-minimizer",
+      "name": "Black–Litterman Posterior Mean Minimises the Mixed-Estimation Loss",
+      "domain": "mathematical_finance",
+      "description": "If μ_post solves the Black–Litterman normal equation (Σ⁻¹ + PᵀΩ⁻¹P) μ_post = Σ⁻¹π + PᵀΩ⁻¹Q and the precisions Σ⁻¹, Ω⁻¹ are positive semidefinite, then μ_post minimises the Theil–Goldberger mixed-estimation loss ½(μ − π)ᵀΣ⁻¹(μ − π) + ½(Pμ − Q)ᵀΩ⁻¹(Pμ − Q). The normal equation is taken as the definition of the posterior mean; its derivation by Gaussian conditioning is not formalized.",
+      "code": {
+        "lean": "import MathFin.Portfolio.BlackLittermanND\n\nopen MathFin\n\n/-- **The Black–Litterman posterior mean is a generalized-least-squares minimiser.** -/\ntheorem black_litterman_gls_minimizer_thm {n m : ℕ} {μ_post π : Fin n → ℝ} {Q : Fin m → ℝ}\n    {Sg_inv : Matrix (Fin n) (Fin n) ℝ} {P : Matrix (Fin m) (Fin n) ℝ}\n    {Om_inv : Matrix (Fin m) (Fin m) ℝ} (h : IsBLPosteriorMean μ_post π Q Sg_inv P Om_inv)\n    (hS : Sg_inv.PosSemidef) (hO : Om_inv.PosSemidef) (μ : Fin n → ℝ) :\n    blLoss π Q Sg_inv P Om_inv μ_post ≤ blLoss π Q Sg_inv P Om_inv μ :=\n  h.blLoss_le hS hO μ\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Theil and Goldberger, On Pure and Mixed Statistical Estimation in Economics, International Economic Review 2(1) (1961) 65–78; Black and Litterman, Global Portfolio Optimization, Financial Analysts Journal 48(5) (1992) 28–43",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.IsBLPosteriorMean.blLoss_le (MathFin/Portfolio/BlackLittermanND.lean): blLoss_eq_qpObj writes the loss as the convex QP objective with Hessian the posterior precision, and the unconstrained case of kkt_sufficient_of_eq (MathFin/Portfolio/ConvexQPKKT.lean) applies. SCOPE: minimisation given a solution of the normal equation; the normal equation is the definition of IsBLPosteriorMean, and the Bayesian (Gaussian-conjugate) derivation of the posterior is not formalized."
+      }
+    },
+    {
+      "id": "mf-single-index-variance-from-returns",
+      "name": "Single-Index Model: Portfolio Variance from the Return Model",
+      "domain": "mathematical_finance",
+      "description": "For returns Rᵢ = βᵢ R_M + εᵢ with square-integrable market return R_M and shocks εᵢ, the shocks uncorrelated with the market and with each other, and Var[R_M] = σ_M², the portfolio return has Var[∑ wᵢ Rᵢ] = (∑ wᵢβᵢ)² σ_M² + ∑ wᵢ² Var[εᵢ]: the single-index covariance kernel is derived from the return model.",
+      "code": {
+        "lean": "import MathFin.Portfolio.SingleIndexModel\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- **Single-index portfolio variance from the return model.** -/\ntheorem single_index_variance_from_returns_thm {ι : Type*} [DecidableEq ι] (s : Finset ι)\n    (w β : ι → ℝ) (σM : ℝ) {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsFiniteMeasure P] {RM : Ω → ℝ} {ε : ι → Ω → ℝ} (hRM : MemLp RM 2 P)\n    (hε : ∀ i, MemLp (ε i) 2 P) (hRMε : ∀ i, cov[RM, ε i; P] = 0)\n    (hεε : ∀ i j, i ≠ j → cov[ε i, ε j; P] = 0) (hσM : Var[RM; P] = σM ^ 2) :\n    Var[∑ i ∈ s, w i • (β i • RM + ε i); P] =\n      (∑ i ∈ s, w i * β i) ^ 2 * σM ^ 2 + ∑ i ∈ s, w i ^ 2 * Var[ε i; P] :=\n  MathFin.variance_singleIndex_portfolio s w β σM hRM hε hRMε hεε hσM\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Sharpe, A Simplified Model for Portfolio Analysis, Management Science 9(2) (1963) 277–293",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.variance_singleIndex_portfolio (MathFin/Portfolio/SingleIndexModel.lean): covariance_singleIndex derives cov(Rᵢ, Rⱼ) = singleIndexKernel by bilinearity of covariance, portfolioVarN_covariance_eq_variance (MathFin/Portfolio/CovariancePSD.lean) gives the variance of the portfolio return, and portfolioVarN_singleIndex_eq evaluates the kernel's quadratic form. SCOPE: uncorrelatedness (not independence) is assumed; the large-n diversification limit is a separate result."
+      }
+    },
+    {
+      "id": "mf-single-index-beta-capm",
+      "name": "Single-Index Loading Is the CAPM Beta",
+      "domain": "mathematical_finance",
+      "description": "For returns Rᵢ = βᵢ R_M + εᵢ with square-integrable R_M and εᵢ, shocks uncorrelated with the market and Var[R_M] ≠ 0, the CAPM beta cov(Rᵢ, R_M)/Var[R_M] of asset i equals its loading βᵢ.",
+      "code": {
+        "lean": "import MathFin.Portfolio.SingleIndexModel\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- **The single-index loading is the CAPM beta.** -/\ntheorem single_index_beta_capm_thm {ι : Type*} (β : ι → ℝ) {Ω : Type*}\n    {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsFiniteMeasure P] {RM : Ω → ℝ}\n    {ε : ι → Ω → ℝ} (hRM : MemLp RM 2 P) (hε : ∀ i, MemLp (ε i) 2 P)\n    (hRMε : ∀ i, cov[RM, ε i; P] = 0) (hvar : Var[RM; P] ≠ 0) (i : ι) :\n    MathFin.beta cov[β i • RM + ε i, RM; P] Var[RM; P] = β i :=\n  MathFin.beta_singleIndex β hRM hε hRMε hvar i\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Sharpe, A Simplified Model for Portfolio Analysis, Management Science 9(2) (1963) 277–293; Sharpe, Capital Asset Prices, J. Finance 19(3) (1964) 425–442",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.beta_singleIndex (MathFin/Portfolio/SingleIndexModel.lean), with beta the CAPM ratio of MathFin/Portfolio/CAPM.lean, by covariance_add_left, covariance_smul_left and covariance_self. SCOPE: identifies the regression loading with the CAPM beta; it does not prove the CAPM pricing relation."
+      }
+    },
+    {
+      "id": "mf-bet-size-sigmoid-zscore-kelly",
+      "name": "Sigmoid Bet Size of the Probability z-Score Is the Even-Money Kelly Fraction",
+      "domain": "mathematical_finance",
+      "description": "For a predicted win probability 0 < p < 1 with z-statistic z = (p − ½)/√(p(1 − p)) and any width w > 0, López de Prado's sigmoid bet size m(x) = x/√(w + x²) at x = √w·z equals 2p − 1, the Kelly fraction (p·b − (1 − p))/b of an even-money bet (b = 1). López de Prado's probability-based size 2Φ(z) − 1 is a different map and is not covered.",
+      "code": {
+        "lean": "import MathFin.Performance.BetSizeSigmoid\n\nopen MathFin\n\n/-- **The sigmoid of the probability z-score is the even-money Kelly fraction.** -/\ntheorem bet_size_sigmoid_zscore_kelly_thm {w p : ℝ} (hw : 0 < w) (hp₀ : 0 < p)\n    (hp₁ : p < 1) :\n    betSize w (√w * ((p - 1 / 2) / √(p * (1 - p)))) = kellyFraction p 1 :=\n  MathFin.betSize_sqrt_mul_zScore hw hp₀ hp₁\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "López de Prado, Advances in Financial Machine Learning, Wiley (2018), ch. 10 (§10.3 bet sizing from predicted probabilities, §10.6 the sigmoid function); Kelly, A New Interpretation of Information Rate, Bell System Technical Journal 35 (1956) 917–926",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.betSize_sqrt_mul_zScore (MathFin/Performance/BetSizeSigmoid.lean), with kellyFraction from MathFin/Performance/Ratios.lean: w + w z² = w/(4p(1 − p)), so √w·z/√(w + w z²) = 2p − 1. SCOPE: even-money odds only; the identity is algebraic and says nothing about the optimality of the sigmoid size; the Gaussian size 2Φ(z) − 1 is not treated."
+      }
+    },
+    {
+      "id": "mf-frac-diff-binomial-series",
+      "name": "Fractional-Differencing Weights Are the Binomial Series of (1 − x)^d",
+      "domain": "mathematical_finance",
+      "description": "The weights of the fractional-differencing recursion w₀ = 1, wₖ₊₁ = −wₖ(d − k)/(k + 1) satisfy ∑ₖ wₖ xᵏ = (1 − x)^d for every real d and |x| < 1; equivalently wₖ = (−1)ᵏ·C(d, k) with Mathlib's generalized binomial coefficient. The statement is for a scalar x; the backshift operator itself is not formalized.",
+      "code": {
+        "lean": "import MathFin.Performance.FracDiffWeights\n\nopen MathFin\n\n/-- **The fractional-differencing weights are the binomial series of `(1 - x)^d`.** -/\ntheorem frac_diff_binomial_series_thm (d : ℝ) {x : ℝ} (hx : |x| < 1) :\n    HasSum (fun k ↦ fracDiffWeight d k * x ^ k) ((1 - x) ^ d) :=\n  MathFin.hasSum_fracDiffWeight_mul_pow d hx\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "López de Prado, Advances in Financial Machine Learning, Wiley (2018), ch. 5, §5.4; Hosking, Fractional Differencing, Biometrika 68(1) (1981) 165–176",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.hasSum_fracDiffWeight_mul_pow (MathFin/Performance/FracDiffWeights.lean): fracDiffWeight_eq_choose identifies the weights with (−1)ᵏ Ring.choose d k, and Mathlib's Real.one_add_rpow_hasFPowerSeriesOnBall_zero gives the series of (1 + y)^d at y = −x. SCOPE: scalar argument |x| < 1; convergence of the differenced series of a time series and the decay of the weights are not proved."
+      }
+    },
+    {
+      "id": "mf-drift-estimator-differenced-law",
+      "name": "First-Difference Drift Estimator of Brownian Motion with Drift Has Law N(μ, σ²/T)",
+      "domain": "mathematical_finance",
+      "description": "Let X_t = μt + σB_t with B a pre-Brownian motion, observed at the n ≥ 1 equally spaced times kT/n of [0, T]. The drift estimator (1/T)∑ᵢ (Δ¹X)ᵢ₊₁, built from the d = 1 fractionally differenced observations, has law N(μ, σ²/T) for every n: it telescopes to (X_T − X_0)/T, so sampling more often does not reduce the standard error σ/√T. Only the case d = 1 (the first difference) of fractional differencing is involved.",
+      "code": {
+        "lean": "import MathFin.Performance.FracDiffWeights\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- **The first-difference drift estimator has law `N(μ, σ²/T)` at every sampling frequency.** -/\ntheorem drift_estimator_differenced_law_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B P) (mu sigma : ℝ)\n    {T : ℝ≥0} (hT : 0 < T) {n : ℕ} (hn : 0 < n) :\n    HasLaw (fun ω ↦ (∑ i ∈ Finset.range n,\n        fracDiff 1 (fun k ↦ mu * (k * T / n : ℝ≥0) + sigma * B (k * T / n) ω) (i + 1)) / T)\n      (gaussianReal mu (sigma ^ 2 / T).toNNReal) P :=\n  MathFin.hasLaw_fracDiff_one_driftEstimator hB mu sigma hT hn\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Merton, On Estimating the Expected Return on the Market, J. Financial Economics 8(4) (1980) 323–361, §I; López de Prado, Advances in Financial Machine Learning, Wiley (2018), ch. 5",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.hasLaw_fracDiff_one_driftEstimator (MathFin/Performance/FracDiffWeights.lean): fracDiff_one_succ (d = 1 is the first difference), Finset.sum_range_sub (telescoping), Mathlib's IsPreBrownianReal.hasLaw_sub (B_T − B_0 ∼ N(0, T)) and drift_se_endpoint_hasLaw (MathFin/Foundations/Estimation.lean). SCOPE: equally spaced grid on [0, T], drift and volatility constant; only d = 1 enters; estimators for other d are not treated."
+      }
+    },
+    {
+      "id": "mf-gaussian-mean-abs-deviation",
+      "name": "Mean Absolute Value of a Centred Gaussian: E|Z| = √(2v/π)",
+      "domain": "mathematical_finance",
+      "description": "For Z ∼ N(0, v), E|Z| = √(2v/π). So the one-sample volatility estimator |Z| underestimates σ = √v by the exact factor √(2/π) ≈ 0.798. The n-sample constant √(2/n)·Γ((n+1)/2)/Γ(n/2) for n ≥ 2 is not covered.",
+      "code": {
+        "lean": "import MathFin.Foundations.Estimation\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\n/-- **Mean absolute value of a centred Gaussian.** -/\ntheorem gaussian_mean_abs_deviation_thm (v : ℝ≥0) :\n    ∫ x, |x| ∂(gaussianReal 0 v) = √(2 * v / π) :=\n  MathFin.integral_abs_gaussianReal v\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Johnson, Kotz and Balakrishnan, Continuous Univariate Distributions, Vol. 1, 2nd ed., Wiley (1994), ch. 13 (mean deviation of the normal distribution)",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.integral_abs_gaussianReal (MathFin/Foundations/Estimation.lean): for v = 1, Mathlib's integral_comp_abs and the truncated first moment integral_id_mul_gaussianPDFReal_Ioi (MathFin/Foundations/GaussianPartialMoments.lean) give E|Z| = 2φ(0); a general v by gaussianReal_map_const_mul. SCOPE: the one-sample (n = 1) case of the square-root bias."
+      }
+    },
+    {
+      "id": "mf-purged-cv-no-leakage-brownian",
+      "name": "Purged Cross-Validation: Surviving Training Labels Are Independent of Test Labels",
+      "domain": "mathematical_finance",
+      "description": "Let every label be a measurable function of the increments of a pre-Brownian motion over its own nonempty span [lo, hi] ⊆ [0, ∞). If a training label survives purging (its span neither starts inside, ends inside nor envelops any test span), then it is independent of every test label. Pairwise only: joint independence of the whole test fold from the whole surviving training set, embargoing, and labels with random spans are not covered.",
+      "code": {
+        "lean": "import MathFin.Performance.PurgedCV\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- **After purging, test labels are independent of surviving training labels.** -/\ntheorem purged_cv_no_leakage_brownian_thm {ι κ Ω E E' : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [MeasurableSpace E] [MeasurableSpace E'] {B : ℝ≥0 → Ω → ℝ}\n    (hB : IsPreBrownianReal B P) {lo hi : ι → ℝ≥0} {lo' hi' : κ → ℝ≥0}\n    (hspan : ∀ i, lo i ≤ hi i) (hspan' : ∀ j, lo' j ≤ hi' j) {L : ι → Ω → E}\n    {L' : κ → Ω → E'} (hL : ∀ i, IsSpanLabel B (lo i) (hi i) (L i))\n    (hL' : ∀ j, IsSpanLabel B (lo' j) (hi' j) (L' j)) {i : ι}\n    (hret : ∀ j, ¬ overlapsTest lo hi lo' hi' i j) (j : κ) :\n    IndepFun (L i) (L' j) P :=\n  MathFin.indepFun_of_purged hB hspan hspan' hL hL' hret j\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "López de Prado, Advances in Financial Machine Learning, Wiley (2018), ch. 7, §7.4 (purging); Karatzas and Shreve, Brownian Motion and Stochastic Calculus, 2nd ed., Springer (1991), §2.1 (independent increments)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.indepFun_of_purged (MathFin/Performance/PurgedCV.lean): lt_or_lt_of_not_overlapsTest turns survival of purging into strict separation of the spans, and IsSpanLabel.indepFun_of_le applies Mathlib's weak Markov property IsPreBrownianReal.indepFun_shift. SCOPE: labels are measurable functions of the increment family (B u − B s)_{s,u ∈ span} (IsSpanLabel) over deterministic spans; the conclusion is pairwise independence; features, embargo and joint independence of folds are not treated."
+      }
+    }
+  ]
+}

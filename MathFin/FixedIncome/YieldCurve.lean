@@ -25,9 +25,12 @@ so
 
 provided `c_last + F ≠ 0`.
 
-This identity, applied recursively starting from a single-period bond (where
-`sprev = ∅` and `B_last = P / (c_last + F)`), bootstraps the full discount
-curve from coupon-bond market data.
+Applied recursively, starting from a single-period bond (where `sprev = ∅` and
+`B_last = P / (c_last + F)`), this identity is how the discount curve is bootstrapped
+from coupon-bond market data. Only the single steps are proved here; the recursion over
+instruments is the search-based `boot` of `FixedIncome/Bootstrapping.lean`, where
+`swapBootstrap_recovers_couponBondFactor` shows that bisection on a zero-value swap
+recovers the factor named by `bootstrap_solve`.
 
 Results:
 
@@ -39,6 +42,8 @@ Results:
   previous schedule: `B_1 = P_1 / (c_1 + F)`.
 * `bootstrap_solve_second`: bootstrap step for the second bond:
   `B_2 = (P_2 − c · B_1) / (c + F)`.
+* `bootstrap_consistency`: the bootstrapped price, plugged back into the pricing
+  equation, recovers the bond price.
 -/
 
 @[expose] public section

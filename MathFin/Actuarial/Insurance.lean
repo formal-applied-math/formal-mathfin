@@ -6,31 +6,51 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Actuarial.Mortality
+public import MathFin.FixedIncome.ZCB
 
 /-!
-# Net premium principle (life insurance)
+# Net premium principle and the life annuity-due
 
 The **net premium principle** sets the periodic premium `P` of an insurance
-contract by equating the present value of expected premiums with the
-present value of expected benefits:
+contract by equating the present value of the premiums with the present value of
+the benefits:
 
   `P · annuityFactor = benefitPV`,
 
-so `P = benefitPV / annuityFactor`. Both quantities are deterministic
-expectations under the mortality-and-interest joint setup.
+so `P = benefitPV / annuityFactor` (`net_premium_principle`, Mathlib's `eq_div_iff`).
 
-Two algebraic results:
+The annuity factor of `n` payments at the start of each period is the
+**annuity-due** `ä_n = ∑_{k<n} vᵏ = (1 − vⁿ)/(1 − v)` for a per-period discount
+factor `v ≠ 1` (`annuityDue_closed_form`, a geometric sum). The immediate annuity of
+`FixedIncome/CouponBonds.lean` (`annuityValue`) pays one period later.
 
-* **Annuity-due formula** `ä_n = (1 − v^n) / d` where `v = 1/(1+i)` and
-  `d = 1 − v` is the discount rate. (Mirror of the immediate-annuity
-  closed form `a_n = (1 − v^n) / i` in `CouponBonds.lean`.)
-* **Net premium algebra**: `P · ä_n = benefitPV ⟺ P = benefitPV / ä_n`.
+A **life annuity-due** pays only while the insured is alive:
+`ä = ∑_{k<n} B(0, k) · S(k)` (`lifeAnnuityDue`), with the flat-rate zero-coupon bond
+price `B(0, k) = zcb r 0 k` (`FixedIncome/ZCB.lean`) and the survival probability
+`S(k) = survivalFromForce μ k = exp(−∫₀ᵏ μ)` of a force of mortality `μ`
+(`Actuarial/Mortality.lean`). For a constant force `m`, survival is `e^{−mk}` and
+discounting is `e^{−rk}`, so the life annuity-due is the annuity-certain at the
+discount factor `e^{−(r + m)}`: a constant force of mortality acts as an addition to
+the interest rate (`lifeAnnuityDue_const`). This is the discrete counterpart of the
+risky annuity `riskyAnnuity_eq` of `FixedIncome/Cox.lean`, where a constant default
+intensity adds to the rate in the same way.
 
-Results:
+`lifeAnnuityDue` is written directly as the sum `∑ B(0, k) S(k)`. That it is the
+expected present value of the payments made to a random lifetime with survival
+function `S` is the standard actuarial reading; it is not proved here.
+
+## Main results
 
 * `annuityDue_closed_form`: `Σ_{k=0}^{n-1} v^k = (1 − v^n)/(1 − v)` (geometric).
-* `net_premium_principle`: equivalent algebraic statement (Mathlib's
-  `eq_div_iff`, cited).
+* `net_premium_principle`: `P · A = B ↔ P = B / A` for `A ≠ 0`.
+* `lifeAnnuityDue`, `lifeAnnuityDue_const`: the life annuity-due, and its closed form
+  under a constant force of mortality.
+
+## References
+
+* D. C. M. Dickson, M. R. Hardy and H. R. Waters, *Actuarial Mathematics for Life
+  Contingent Risks*, 2nd ed., Cambridge University Press (2013), Chapter 5 (annuities).
 -/
 
 @[expose] public section
@@ -55,5 +75,26 @@ defining algebra of the net premium. This is Mathlib's `eq_div_iff`
 theorem net_premium_principle (P A B : ℝ) (hA : A ≠ 0) :
     P * A = B ↔ P = B / A :=
   (eq_div_iff hA).symm
+
+/-- The **life annuity-due** of `n` unit payments at times `0, 1, …, n − 1`, each paid only if
+the insured is alive: `∑_{k<n} B(0, k) · S(k)`, with the flat-rate zero-coupon bond price
+`B(0, k) = zcb r 0 k` and the survival probability `S(k) = survivalFromForce μ k` of the force
+of mortality `μ`. -/
+noncomputable def lifeAnnuityDue (r : ℝ) (μ : ℝ → ℝ) (n : ℕ) : ℝ :=
+  ∑ k ∈ Finset.range n, zcb r 0 k * survivalFromForce μ k
+
+/-- **A constant force of mortality adds to the interest rate**: for a constant force `m`, the
+life annuity-due is the annuity-certain `(1 − vⁿ)/(1 − v)` at the discount factor
+`v = e^{−(r + m)}`, for `v ≠ 1`. Each term is `e^{−rk} · e^{−mk} = (e^{−(r + m)})ᵏ`, and the sum is
+`annuityDue_closed_form`. -/
+theorem lifeAnnuityDue_const {r m : ℝ} (n : ℕ) (hv : Real.exp (-(r + m)) ≠ 1) :
+    lifeAnnuityDue r (fun _ ↦ m) n =
+      (1 - Real.exp (-(r + m)) ^ n) / (1 - Real.exp (-(r + m))) := by
+  rw [← annuityDue_closed_form _ n hv, lifeAnnuityDue]
+  refine Finset.sum_congr rfl fun k _ ↦ ?_
+  rw [zcb, survivalFromForce, survivalFromIntensity, cumulativeIntensity,
+    intervalIntegral.integral_const, ← Real.exp_add, ← Real.exp_nat_mul, smul_eq_mul]
+  congr 1
+  ring
 
 end MathFin

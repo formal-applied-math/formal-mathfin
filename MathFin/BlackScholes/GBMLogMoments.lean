@@ -10,62 +10,31 @@ public import MathFin.BlackScholes.Call
 public import MathFin.Foundations.ItoLemma
 
 /-!
-# Itô's lemma applied to GBM log (L¹-mean form) — phase 40
+# The law of the Black–Scholes log-return
 
-The pre-existing `Foundations/ItoLemma.lean` (phase 39, after Nagy 2026)
-gives the **structural drift coefficient** of `f(X_t)` under Itô's
-lemma. Phase 39's `itoDrift_log_gbm` specialises to `f = log` on GBM,
-computing the drift of `log S_t` as the celebrated `μ − σ²/2`.
+Under the Black–Scholes lognormal hypothesis `BSCallHyp` (`S_T = S₀·e^{(r − σ²/2)T + σ√T·Z}`
+with `Z ~ N(0, 1)`), the log-return `log(S_T/S₀)` is the affine function
+`(r − σ²/2)T + σ√T·Z` of the standard normal (`bsLogReturn_eq`), so it is Gaussian:
 
-This file gives the **L¹-mean form**: under the BS risk-neutral
-lognormal hypothesis (`BSCallHyp`), the log-return `log(S_T/S_0)` has
+  `log(S_T/S₀) ~ N((r − σ²/2)T, σ²T)`,
 
-  `E_Q[log(S_T/S_0)] = (r − σ²/2)·T`.
+by Mathlib's affine maps of `gaussianReal` (`gaussianReal_const_mul`,
+`gaussianReal_const_add`). Its mean `(r − σ²/2)T` and variance `σ²T` are read off the law.
 
-This is the Itô-corrected drift integrated over `[0, T]`. The `−σ²/2`
-correction is the celebrated Itô correction, the same one that appears
-in `bsd2` relative to `bsd1` of the BS pricing formula.
+The mean is the drift that Itô's formula gives `log S` for GBM with drift `r`: the
+`dt`-coefficient `itoDrift_log_gbm`, `r − σ²/2` (`Foundations/ItoLemma.lean`), times `T`
+(`bsLogReturn_mean_eq_itoDrift`). That identity compares two computations of the same
+number: the Itô drift is computed algebraically from `f = log`, and the mean from the Gaussian
+law. This file does not prove Itô's formula for `log S`.
 
-## Why this is the L¹-form of Itô's lemma
-
-Itô's lemma applied to `f = log` on GBM `dS = r S dt + σ S dB_t` (under
-`Q` with `μ = r`) gives
-
-  `d(log S_t) = (r − σ²/2) dt + σ dB_t`.
-
-Integrating over `[0, T]` and taking expectations under `Q`:
-
-  `E_Q[log S_T − log S_0] = (r − σ²/2) · T + σ · E_Q[B_T] = (r − σ²/2) · T`,
-
-the second equality because Brownian motion has zero mean. This is
-precisely the identity below.
-
-The **variance** content `Var_Q[log(S_T/S_0)] = σ²·T` is the QV
-identity, already proved in Phase 34
-(`tendsto_expected_bsLogPrice_equipartition_sum`) via the realised-
-variance / quadratic-variation chain. The two forms together (mean
-here + variance in Phase 34) constitute the L¹-expectation Itô lemma
-applied to `f = log` on GBM.
-
-## Why this is not slop
-
-The full **path-wise** Itô lemma `f(X_T) − f(X_0) = ∫ f' dX + (1/2) ∫
-f'' d⟨X⟩` requires showing discrete Itô (phase 35) sums converge to
-Itô integrals + dominated convergence on the Taylor remainder. Nagy
-2026 marks his integral-form statement as "structurally verified" —
-the L²-limit step is not constructed in detail there either.
-
-This file does *not* claim the path-wise theorem. It proves the
-**L¹-mean specialisation** for `f = log` on GBM, which together with
-Phase 34 gives the full L¹-expectation Itô lemma at this
-specialisation.
-
-## Result
+## Main results
 
 * `bsLogReturn`: definition `(r − σ²/2)·T + σ·√T·Z`.
-* `bsLogReturn_eq`: algebraic identity `log(bsTerminal/S_0) =
-  bsLogReturn`.
+* `bsLogReturn_eq`: `log(bsTerminal S₀ r σ T Z / S₀) = bsLogReturn r σ T Z`.
+* `bsLogReturn_hasLaw`: `bsLogReturn r σ T Z ~ N((r − σ²/2)T, σ²T)` under `BSCallHyp`.
 * `bsLogReturn_mean`: `E_Q[bsLogReturn] = (r − σ²/2)·T`.
+* `bsLogReturn_variance`: `Var_Q[bsLogReturn] = σ²T`.
+* `bsLogReturn_mean_eq_itoDrift`: the mean is `T` times the Itô drift of `log S`.
 -/
 
 @[expose] public section
@@ -73,6 +42,7 @@ specialisation.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
+open scoped NNReal
 
 /-- **BS log-return** as a function of the standard-normal sample: by
 the lognormal hypothesis `S_T = bsTerminal S_0 r σ T Z = S_0 ·
@@ -88,55 +58,46 @@ function of `Z` under `log`. -/
 theorem bsLogReturn_eq (S_0 r σ T Z : ℝ) (hS_0 : 0 < S_0) :
     Real.log (bsTerminal S_0 r σ T Z / S_0) = bsLogReturn r σ T Z := by
   unfold bsTerminal bsLogReturn
-  have hS_0_ne : S_0 ≠ 0 := hS_0.ne'
-  rw [show S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z) / S_0
-        = Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z) from by
-      field_simp]
-  exact Real.log_exp _
+  rw [mul_div_cancel_left₀ _ hS_0.ne', Real.log_exp]
 
-/-- **Mean of BS log-return under `Q`** (Phase 40 main result). Under
-`BSCallHyp` (`Z ~ N(0, 1)` under `Q`):
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsProbabilityMeasure Q]
+  {S_0 K r σ T : ℝ} {Z : Ω → ℝ}
 
-  `E_Q[bsLogReturn r σ T Z] = (r − σ²/2) · T`.
+/-- **The Black–Scholes log-return is Gaussian**: under `BSCallHyp`,
+`bsLogReturn r σ T Z ~ N((r − σ²/2)T, σ²T)` — the affine image `(r − σ²/2)T + σ√T·Z` of the
+standard normal `Z`. -/
+theorem bsLogReturn_hasLaw (h : BSCallHyp Q S_0 K r σ T Z) :
+    HasLaw (fun ω ↦ bsLogReturn r σ T (Z ω))
+      (gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal) Q := by
+  have hL := gaussianReal_const_add (gaussianReal_const_mul h.Z_law (σ * Real.sqrt T))
+    ((r - σ ^ 2 / 2) * T)
+  have hv : (.mk ((σ * Real.sqrt T) ^ 2) (sq_nonneg _) : ℝ≥0) * 1 = (σ ^ 2 * T).toNNReal := by
+    refine NNReal.coe_injective ?_
+    rw [NNReal.coe_mul, NNReal.coe_one, mul_one, NNReal.coe_mk,
+      Real.coe_toNNReal _ (mul_nonneg (sq_nonneg σ) h.T_pos.le), mul_pow,
+      Real.sq_sqrt h.T_pos.le]
+  rw [mul_zero, zero_add, hv] at hL
+  exact hL
 
-This is the *Itô-corrected drift* integrated over `[0, T]`. The
-`−σ²/2` correction (relative to the naïve drift `r·T`) is the
-celebrated Itô correction, the same `−σ²/2` that appears in `bsd2`
-relative to `bsd1`.
-
-Proof: `HasLaw` transfer of the integral to `gaussianReal 0 1`,
-linearity of integration, `integral_id_gaussianReal` (`∫ z ∂N(0,1) =
-0`), algebra. -/
-theorem bsLogReturn_mean
-    {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    {Q : Measure Ω} [IsProbabilityMeasure Q]
-    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}
-    (h : BSCallHyp Q S_0 K r σ T Z) :
+/-- **Mean of the BS log-return under `Q`**: `E_Q[bsLogReturn r σ T Z] = (r − σ²/2)·T`, the
+mean of the law `bsLogReturn_hasLaw`. -/
+theorem bsLogReturn_mean (h : BSCallHyp Q S_0 K r σ T Z) :
     ∫ ω, bsLogReturn r σ T (Z ω) ∂Q = (r - σ ^ 2 / 2) * T := by
-  obtain ⟨_hS_0, _hK, _hσ, _hT, hZ⟩ := h
-  unfold bsLogReturn
-  -- HasLaw transfer: ∫ ω, g (Z ω) ∂Q = ∫ z, g z ∂(gaussianReal 0 1)
-  have h_g : AEStronglyMeasurable
-      (fun z : ℝ ↦ (r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
-      (gaussianReal 0 1) :=
-    Continuous.aestronglyMeasurable (by fun_prop)
-  rw [show (fun ω ↦ (r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω)
-        = (fun z : ℝ ↦ (r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z) ∘ Z from rfl]
-  rw [hZ.integral_comp h_g]
-  -- Now ∫ z, ((r-σ²/2)·T + σ·√T·z) ∂(gaussianReal 0 1)
-  -- = (r-σ²/2)·T + σ·√T · ∫ z, z ∂(gaussianReal 0 1)
-  -- = (r-σ²/2)·T + σ·√T · 0  =  (r-σ²/2)·T
-  have h_int_id : Integrable (id : ℝ → ℝ) (gaussianReal 0 1) :=
-    (memLp_id_gaussianReal (μ := 0) (v := 1) 1).integrable (le_refl _)
-  have h_int_lin : Integrable
-      (fun z : ℝ ↦ σ * Real.sqrt T * z) (gaussianReal 0 1) := by
-    have h_eq : (fun z : ℝ ↦ σ * Real.sqrt T * z) =
-                (σ * Real.sqrt T) • (id : ℝ → ℝ) := by
-      funext z; rfl
-    rw [h_eq]
-    exact h_int_id.smul (σ * Real.sqrt T)
-  rw [integral_add (integrable_const _) h_int_lin]
-  rw [integral_const, integral_const_mul, integral_id_gaussianReal]
-  simp
+  rw [(bsLogReturn_hasLaw h).integral_eq, integral_id_gaussianReal]
+
+/-- **Variance of the BS log-return under `Q`**: `Var_Q[bsLogReturn r σ T Z] = σ²T`, the
+variance of the law `bsLogReturn_hasLaw`. -/
+theorem bsLogReturn_variance (h : BSCallHyp Q S_0 K r σ T Z) :
+    Var[fun ω ↦ bsLogReturn r σ T (Z ω); Q] = σ ^ 2 * T := by
+  rw [(bsLogReturn_hasLaw h).variance_eq, variance_id_gaussianReal,
+    Real.coe_toNNReal _ (mul_nonneg (sq_nonneg σ) h.T_pos.le)]
+
+/-- **The mean log-return is `T` times the Itô drift of `log S`**: for any `S ≠ 0`,
+`E_Q[log(S_T/S₀)] = itoDrift (1/S) (−1/S²) (rS) (σS) · T`, where the right side is the
+`dt`-coefficient of `log` along GBM with drift `r` and volatility `σ` (`itoDrift_log_gbm`,
+`r − σ²/2`), integrated over `[0, T]`. -/
+theorem bsLogReturn_mean_eq_itoDrift (h : BSCallHyp Q S_0 K r σ T Z) {S : ℝ} (hS : S ≠ 0) :
+    ∫ ω, bsLogReturn r σ T (Z ω) ∂Q = itoDrift (1 / S) (-1 / S ^ 2) (r * S) (σ * S) * T := by
+  rw [bsLogReturn_mean h, itoDrift_log_gbm r σ S hS]
 
 end MathFin
