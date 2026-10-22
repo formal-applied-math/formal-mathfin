@@ -1517,10 +1517,10 @@
     },
     "mf-clean-price-continuous-at-coupon-date": {
       "benchmark_file": "interest_rates.json",
-      "date": "2026-10-22",
-      "elapsed_s": 3.8,
-      "input_hash": "20d2ce5f87e8886466303327680d2a7b4b25a92e9c547587061da32e8a8a713a",
-      "verified_at_commit": "8b36963"
+      "date": "2026-10-23",
+      "elapsed_s": 2.8,
+      "input_hash": "527ca30b867a990ff5bc65b4e4d65fadd720d9147b67b4fed744f0a3b1237432",
+      "verified_at_commit": "3f00239"
     },
     "mf-cml-decomposition-unique": {
       "benchmark_file": "mathematical_finance.json",
@@ -1846,10 +1846,10 @@
     },
     "mf-dirty-price-drops-by-coupon": {
       "benchmark_file": "interest_rates.json",
-      "date": "2026-10-22",
-      "elapsed_s": 3.1,
-      "input_hash": "7dfff76b6255364a1f9c4fd4d0fd4fdf91fe54464e7395be2993e95ac97ccef9",
-      "verified_at_commit": "8b36963"
+      "date": "2026-10-23",
+      "elapsed_s": 7.1,
+      "input_hash": "da09f63c3f0e35c74f985190a937546de14813de825f23a7e59fecb74e5d82f5",
+      "verified_at_commit": "3f00239"
     },
     "mf-discrete-es-vs-tail-mean": {
       "benchmark_file": "risk_measures.json",
@@ -2708,9 +2708,9 @@
     "mf-key-rate-partials-sum-to-yield-derivative": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-23",
-      "elapsed_s": 3.8,
-      "input_hash": "b8271534470559fd776e97f6acfb189781b99fb8fbee21daef01f77c65a0cb29",
-      "verified_at_commit": "f3a314a"
+      "elapsed_s": 7.1,
+      "input_hash": "312f846d925250ecb73c5206b2a2c287e869650409ab4a3370c596513728a4df",
+      "verified_at_commit": "3f00239"
     },
     "mf-kirk-zero-strike-margrabe": {
       "benchmark_file": "exotic_options.json",
@@ -2735,10 +2735,10 @@
     },
     "mf-level-payment-balance-annuity": {
       "benchmark_file": "interest_rates.json",
-      "date": "2026-10-22",
-      "elapsed_s": 3.2,
-      "input_hash": "f5d027ab72e0b7b1380988e9359cc280fcdc3e8898269e1e7cd3020cde63953b",
-      "verified_at_commit": "c15be90"
+      "date": "2026-10-23",
+      "elapsed_s": 7.2,
+      "input_hash": "2573c24f3ec5a4446b6be95786d1ed48fe6608f539b64651e591d879eaa15ef1",
+      "verified_at_commit": "3f00239"
     },
     "mf-lhp-stop-loss-closed-form": {
       "benchmark_file": "credit.json",

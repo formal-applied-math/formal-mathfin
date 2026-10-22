@@ -133,8 +133,7 @@ theorem tendsto_dirtyPrice_coupon_date [DecidableEq ι] (s : Finset ι) (t : ι 
     Tendsto (fun f ↦ dirtyPrice s t c y f) (𝓝[<] 1)
       (𝓝 (dirtyPrice (s.erase j) (fun i ↦ t i - 1) c y 0 + c j)) := by
   rw [← dirtyPrice_one_eq s t c hy hj htj ht]
-  exact (((Real.continuousAt_const_rpow hy).mul continuousAt_const).tendsto).mono_left
-    nhdsWithin_le_nhds
+  exact ((Real.continuousAt_const_rpow hy).mul continuousAt_const).continuousWithinAt
 
 /-- **The clean price is continuous across a coupon date.** With accrued
 interest on the coupon `c j` being paid, the clean price tends, as `f ↑ 1`, to

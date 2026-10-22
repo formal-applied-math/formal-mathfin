@@ -856,7 +856,7 @@
         "reference": "Key-rate duration (Ho, 'Key Rate Durations: Measures of Interest Rate Risks', J. Fixed Income 2(2), 1992)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc, via sum_keyRate_partials_eq_deriv_bondPriceDisc (MathFin/FixedIncome/KeyRateDuration.lean). Each partial is identified with −tⱼcⱼ/(1+kⱼ)^{tⱼ+1} (hasDerivAt_bondPriceKeyRate_update, from hasDerivAt_coupon_term) by uniqueness of derivatives; their sum is the derivative along the parallel shift k + ε·1 (hasDerivAt_bondPriceKeyRate_parallel, which holds on any curve with 1 + kᵢ ≠ 0), and on a flat curve that shift is a move of the yield, whose derivative is hasDerivAt_bondPriceDisc. SCOPE: one key rate per cashflow, annual compounding, integer tenors; interpolated key-rate nodes (hat-function bases) are not modelled."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc, via sum_keyRate_partials_eq_deriv_bondPriceDisc (MathFin/FixedIncome/KeyRateDuration.lean). Each partial is identified with −tⱼcⱼ/(1+kⱼ)^{tⱼ+1} (hasDerivAt_bondPriceKeyRate_update, from hasDerivAt_coupon_term) by uniqueness of derivatives; their sum is the derivative along the parallel shift k + ε·1 (hasDerivAt_bondPriceKeyRate_parallel, which holds on any curve), and on a flat curve that shift is a move of the yield, whose derivative is hasDerivAt_bondPriceDisc. SCOPE: one key rate per cashflow, annual compounding, integer tenors; interpolated key-rate nodes (hat-function bases) are not modelled."
       }
     },
     {

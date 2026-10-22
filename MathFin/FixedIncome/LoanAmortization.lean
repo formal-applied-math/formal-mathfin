@@ -91,16 +91,15 @@ theorem balance_bullet_eq {B0 : ℝ} {N : ℕ} (hN : 0 < N) :
 noncomputable def equalPrincipalPayment (B0 : ℝ) (N : ℕ) : ℕ → ℝ := fun _ ↦ B0 / N
 
 /-- Closed form for the equal-principal schedule: `B_n = B₀ · (1 - n / N)`,
-proved by induction on the balance recurrence. -/
-theorem balance_equalPrincipal {B0 : ℝ} {N : ℕ} (hN : N ≠ 0) (n : ℕ) :
+proved by induction on the balance recurrence. (At `N = 0` both sides reduce
+to `B₀` under the `x / 0 = 0` convention, so no `N ≠ 0` hypothesis is needed.) -/
+theorem balance_equalPrincipal {B0 : ℝ} {N : ℕ} (n : ℕ) :
     balance B0 (equalPrincipalPayment B0 N) n = B0 * (1 - (n : ℝ) / N) := by
-  have hN' : (N : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hN
   induction n with
   | zero => simp [balance]
   | succ k ih =>
     simp only [balance, equalPrincipalPayment, ih]
     push_cast
-    field_simp
     ring
 
 /-- The level-payment balance: interest at period rate `i` accrues on the
