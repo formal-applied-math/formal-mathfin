@@ -41,9 +41,9 @@ Eight `full` entries, corpus 658 → 666, each derived from library machinery:
   derivation), and the two agree (`mf-covered-eq-uncovered-interest-parity`).
 - **Bond forward** (`interest_rates.json`). `forward_price_from_no_arbitrage` with the
   coupon-stripped bond as the spot (`mf-bond-forward-from-no-arbitrage`).
-- **Key-rate duration** (`interest_rates.json`; #69). With one spot rate per cashflow (all
-  `1 + kᵢ ≠ 0`), the partials `∂P/∂kⱼ` sum to the parallel-shift derivative, and on a flat curve
-  to `dP/dy` through
+- **Key-rate duration** (`interest_rates.json`; #69). With one spot rate per cashflow, the
+  partials `∂P/∂kⱼ` sum to the parallel-shift derivative on any curve, and on a flat curve with
+  `1 + y ≠ 0` to `dP/dy` through
   `hasDerivAt_bondPriceDisc` (`mf-key-rate-partials-sum-to-yield-derivative`). Interpolated
   key-rate nodes are not modelled, and the durations `−(1/P)·∂P/∂kⱼ` are not defined.
 - **Clean and dirty price** (`interest_rates.json`). For `1 + y ≠ 0`, with next coupon `c_j`
