@@ -58,11 +58,10 @@ lemma continuous_studentTKernel (hν : 0 < ν) : Continuous (studentTKernel ν) 
 
 /-- The kernel is integrable for every `ν > 0`: it is the Japanese bracket `(1 + ‖y‖²)^(-r/2)`
 with `r = ν + 1 > 1 = dim ℝ`, at `y = x/√ν`. -/
-lemma integrable_studentTKernel (hν : 0 < ν) : Integrable (studentTKernel ν) := by
-  have h := (integrable_rpow_neg_one_add_norm_sq (E := ℝ) (μ := volume) (r := ν + 1)
-    (by simp; linarith)).comp_div (sqrt_pos.2 hν).ne'
-  refine h.congr (ae_of_all _ fun x ↦ ?_)
-  simp only [studentTKernel, norm_eq_abs, sq_abs, div_pow, sq_sqrt hν.le]
+lemma integrable_studentTKernel (hν : 0 < ν) : Integrable (studentTKernel ν) :=
+  ((integrable_rpow_neg_one_add_norm_sq (E := ℝ) (μ := volume) (r := ν + 1)
+    (by simp; linarith)).comp_div (sqrt_pos.2 hν).ne').congr <| ae_of_all _ fun x ↦ by
+      simp only [studentTKernel, norm_eq_abs, sq_abs, div_pow, sq_sqrt hν.le]
 
 /-- The normalizing constant `C_ν = ∫ k_ν`. -/
 noncomputable def studentTNormConst (ν : ℝ) : ℝ := ∫ x, studentTKernel ν x
@@ -130,9 +129,7 @@ theorem studentTNormConst_eq (hν : 0 < ν) :
         ((ae_restrict_iff' measurableSet_Ioi).2 (ae_of_all _ fun u (hu : 0 < u) ↦ ?_))
       simp only [Function.uncurry_apply_pair, f]
       rw [← mixture_x_eq hu, ← integral_mixture_x hν u]
-      refine integral_congr_ae (ae_of_all _ fun x ↦ ?_)
-      simp only
-      rw [norm_of_nonneg (by positivity)]
+      exact integral_congr_ae (ae_of_all _ fun x ↦ (norm_of_nonneg (by positivity)).symm)
   calc studentTNormConst ν
       = (Gamma ((ν + 1) / 2))⁻¹ * ∫ x, ∫ u in Ioi 0, f x u := by
         rw [studentTNormConst, ← integral_const_mul]
@@ -197,9 +194,8 @@ lemma measurable_studentTPDF (ν : ℝ) : Measurable (studentTPDF ν) :=
   (measurable_studentTPDFReal ν).ennreal_ofReal
 
 /-- The Student-t law has a density, so it charges no single point. -/
-instance nullSingletonClass_studentTMeasure (ν : ℝ) : NullSingletonClass (studentTMeasure ν) := by
-  unfold studentTMeasure
-  infer_instance
+instance nullSingletonClass_studentTMeasure (ν : ℝ) : NullSingletonClass (studentTMeasure ν) :=
+  inferInstanceAs (NullSingletonClass (volume.withDensity _))
 
 /-! ### The Cauchy anchor -/
 
@@ -241,13 +237,9 @@ lemma integrable_mul_studentTPDFReal (hν : 1 < ν) :
     ring_nf
   rw [norm_mul, norm_of_nonneg (studentTPDFReal_pos hν0 x).le]
   simp only [norm_eq_abs, sq_abs, div_pow, sq_sqrt hν0.le, studentTPDFReal]
-  calc |x| * (studentTKernel ν x / studentTNormConst ν)
-      ≤ √ν * (1 + x ^ 2 / ν) ^ (1 / 2 : ℝ) * (studentTKernel ν x / studentTNormConst ν) := by
-        gcongr
-        exact (div_pos (studentTKernel_pos hν0 x) hC).le
-    _ = √ν / studentTNormConst ν * (1 + x ^ 2 / ν) ^ (-ν / 2) := by
-        rw [← h2]
-        ring
+  refine (mul_le_mul_of_nonneg_right h1 (div_pos (studentTKernel_pos hν0 x) hC).le).trans_eq ?_
+  rw [← h2]
+  ring
 
 /-- **The tail first moment of the Student-t law**: for `ν > 1`,
 `∫_q^∞ t g_ν(t) dt = g_ν(q) (ν + q²)/(ν − 1)`. The antiderivative of `t g_ν(t)` is
