@@ -39,7 +39,8 @@ Three `full` entries in `BlackScholes/SABRImpliedVol.lean`, on Hagan–Kumar–L
   `d log σ / df = (β − 1)/f` for `f, α > 0`.
 - **`mf-sabr-atm-black76-price`** (`sabrATMVol_black_futures_price`, from the new
   `black_futures_formula_atm` in `Futures/Black76.lean`): under the Black-76 hypothesis at
-  `σ = sabrATMVol`, the discounted expected ATM call payoff is `e^{−rT} f (2Φ(σ√T/2) − 1)`.
+  `σ = sabrATMVol f α β ρ ν T` (the vol's own `t_ex` fixed to the option's expiry `T`, not an
+  independent variable), the discounted expected ATM call payoff is `e^{−rT} f (2Φ(σ√T/2) − 1)`.
 
 All three are about the printed formulas. Nothing is derived from the SABR SDE, and there is no
 error bound against the model's implied volatility (issue #100's `O(T²)` statement stays open).

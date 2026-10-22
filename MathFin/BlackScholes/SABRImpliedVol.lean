@@ -125,16 +125,19 @@ theorem sabrATMVol_bsV_gt_backbone_bsV {f α β ρ ν tex T : ℝ} (hf : 0 < f) 
   exact bsV_strictMonoOn_sigma hf hT hf hpos (hpos.trans hlt) hlt
 
 /-- **The ATM price as Black-76 at `sabrATMVol`**: Hagan et al. price European options by
-Black's formula with the implied vol `σ_B`; at the money that vol is eq. 2.18. Under the
-Black-76 hypothesis at `σ_ATM = sabrATMVol f α β ρ ν tex` (forward `f`, strike `f`, zero
+Black's formula with the implied vol `σ_B`; at the money that vol is eq. 2.18. The vol's own
+`t_ex` argument is the option's time to expiry, so it is instantiated at the same `T` the
+Black-76 price is computed for (not left as an independent free variable — eq. 2.18's ATM vol
+is specifically the vol *for an option expiring at `t_ex`*, priced at that same expiry). Under
+the Black-76 hypothesis at `σ_ATM = sabrATMVol f α β ρ ν T` (forward `f`, strike `f`, zero
 drift), the discounted expected call payoff is `e^{−rT} · f · (2Φ(σ_ATM √T / 2) − 1)`
 (`black_futures_formula_atm`). This is Black's formula at eq. 2.18's vol, not a
 statement that the SABR dynamics produce this price. -/
 theorem sabrATMVol_black_futures_price {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    {Q : Measure Ω} [IsProbabilityMeasure Q] {f α β ρ ν tex T : ℝ} {Z : Ω → ℝ}
-    (h : BSCallHyp Q f f 0 (sabrATMVol f α β ρ ν tex) T Z) (r : ℝ) :
-    ∫ ω, Real.exp (-r * T) * max (bsTerminal f 0 (sabrATMVol f α β ρ ν tex) T (Z ω) - f) 0 ∂Q
-      = Real.exp (-r * T) * f * (2 * Phi (sabrATMVol f α β ρ ν tex * Real.sqrt T / 2) - 1) :=
+    {Q : Measure Ω} [IsProbabilityMeasure Q] {f α β ρ ν T : ℝ} {Z : Ω → ℝ}
+    (h : BSCallHyp Q f f 0 (sabrATMVol f α β ρ ν T) T Z) (r : ℝ) :
+    ∫ ω, Real.exp (-r * T) * max (bsTerminal f 0 (sabrATMVol f α β ρ ν T) T (Z ω) - f) 0 ∂Q
+      = Real.exp (-r * T) * f * (2 * Phi (sabrATMVol f α β ρ ν T * Real.sqrt T / 2) - 1) :=
   black_futures_formula_atm h r
 
 /-! ### The general formula (eq. 2.17) and its `K → f` limit -/

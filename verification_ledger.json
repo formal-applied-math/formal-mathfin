@@ -3261,23 +3261,23 @@
     "mf-sabr-atm-black76-price": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.9,
-      "input_hash": "4919706fb6c88a240c7b0da10653519fd836bee62836fa87879990067563bf29",
-      "verified_at_commit": "7174a6c"
+      "elapsed_s": 7.6,
+      "input_hash": "8577b266fb4438ac0278179ce083b80ddc01b663d57d375cf6da6777c274a4c5",
+      "verified_at_commit": "4252cee"
     },
     "mf-sabr-backbone-law": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.5,
-      "input_hash": "1092003ea7174025e80a1436b7f6f5016982921a1fed20b171b8b6c7ef60e5f3",
-      "verified_at_commit": "7174a6c"
+      "elapsed_s": 7.8,
+      "input_hash": "9b469f160b15b7feb4bfc5cccb6503f0d4af426b0e607aa25cd5f84646449968",
+      "verified_at_commit": "4252cee"
     },
     "mf-sabr-implied-vol-atm-limit": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-10-22",
-      "elapsed_s": 3.4,
-      "input_hash": "92e3499c77bec830bb4de2d02a83ba96d9d00812937d1a499937059c2d5bf20a",
-      "verified_at_commit": "7174a6c"
+      "elapsed_s": 7.7,
+      "input_hash": "c112ec7780ab2940d68313ff9445c219482234074601d54fc6e37c942aa87c7e",
+      "verified_at_commit": "4252cee"
     },
     "mf-saccr-ead-mono": {
       "benchmark_file": "risk_measures.json",
