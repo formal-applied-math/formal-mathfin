@@ -1,12 +1,13 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
 public import Mathlib
 public import MathFin.BlackScholes.PDE
+public import MathFin.BlackScholes.PutGreeks
 public import MathFin.Foundations.NormalTail
 
 /-!
@@ -34,6 +35,7 @@ proved.
   strictly monotone on `(0, ∞)` for `K, S, T > 0`.
 * `implied_volatility_unique`: as a corollary, the implied volatility is
   unique whenever it exists.
+* `impliedVol_put_eq_call`: under put-call parity, put and call implied volatilities coincide.
 * `tendsto_bsV_sigma_atTop`: the call price tends to the spot as `σ → ∞`.
 * `exists_impliedVol_gt_of_bsV_lt`: a price strictly between the Black–Scholes
   price at `σ₀ > 0` and the spot has a unique positive implied volatility, and it
@@ -85,6 +87,19 @@ theorem implied_volatility_unique {K r T : ℝ} (hK : 0 < K) (hT : 0 < T)
     (h_eq : bsV K r σ₁ S T = bsV K r σ₂ S T) :
     σ₁ = σ₂ := by
   exact (bsV_strictMonoOn_sigma hK hT hS).injOn hσ₁ hσ₂ h_eq
+
+/-- **Put and call implied volatilities coincide** (Hull §20.1). If market prices `C` and `P`
+satisfy put-call parity `C − P = S − K e^{−rT}`, the call is priced by Black–Scholes at `σ_c`
+and the put at `σ_p`, then `σ_c = σ_p`: by `bsP_eq_bsV` the put price at `σ_p` determines the
+call price at `σ_p`, which must be `C`, and implied volatility is unique. -/
+theorem impliedVol_put_eq_call {K r T : ℝ} (hK : 0 < K) (hT : 0 < T)
+    {S C P σc σp : ℝ} (hS : 0 < S) (hσc : 0 < σc) (hσp : 0 < σp)
+    (h_parity : C - P = S - K * Real.exp (-(r * T)))
+    (hC : bsV K r σc S T = C) (hP : bsP K r σp S T = P) :
+    σc = σp := by
+  refine implied_volatility_unique (r := r) hK hT hS hσc hσp ?_
+  rw [bsP_eq_bsV] at hP
+  linarith
 
 /-! ## Existence above a reference volatility
 

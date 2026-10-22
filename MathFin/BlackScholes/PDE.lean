@@ -427,6 +427,18 @@ lemma hasDerivAt_bsV_t {K T r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   convert h_comp using 1 <;> try rfl
   ring
 
+/-- **Theta in maturity form**: at a fixed calendar date `t`, `∂_T V(S, T − t) = ∂_τ V`, the
+negative of the calendar theta `hasDerivAt_bsV_t` (`∂_t V = −∂_τ V`). Theta stated as `∂/∂τ`
+or as `∂/∂T` is therefore the same number; theta stated as `∂/∂t` has the opposite sign. -/
+lemma hasDerivAt_bsV_maturity {K t r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    {S T : ℝ} (hS : 0 < S) (ht_T : t < T) :
+    HasDerivAt (fun T' ↦ bsV K r σ S (T' - t))
+      (σ * S * gaussianPDFReal 0 1 (bsd1 S K r σ (T - t)) / (2 * Real.sqrt (T - t))
+        + r * K * Real.exp (-(r * (T - t))) * Phi (bsd2 S K r σ (T - t))) T := by
+  have h := (hasDerivAt_bsV_tau (r := r) hK hσ hS (sub_pos.mpr ht_T)).comp T
+    ((hasDerivAt_id T).sub_const t)
+  rwa [mul_one] at h
+
 /-! ### Vega and Rho -/
 
 /-- **Vega**: `∂_σ V = S · ϕ(d₁) · √τ`.

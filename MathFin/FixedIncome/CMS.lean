@@ -48,13 +48,13 @@ adjustment on the swap layer of `MathFin/FixedIncome/InterestRateSwap.lean`
   deterministic `e^{rT}` while the curve `P` is random, a simplification: a
   stochastic-rate model would need a random `B_T`, which the numéraire engine
   accepts.
-* **The headline.** `cms_adjustment_nonneg`: Jensen under the annuity measure
+* **The headline.** `cmsCurveRate_jensenGap_nonneg`: Jensen under the annuity measure
   (Mathlib's `ConvexOn.map_integral_le`) gives
 
     `S(x₀) ≤ 𝔼^{Qᴬ}[S(W)]` whenever `𝔼^{Qᴬ}[W] = x₀`,
 
   for every nonnegative `W` with `W` and `S ∘ W` `Qᴬ`-integrable: the Jensen gap
-  of the rate functional is nonnegative (`cms_adjustment_delta_nonneg` states the
+  of the rate functional is nonnegative (`cmsCurveRate_jensenGap_sub_nonneg` states the
   gap). `Qᴬ` enters only as a probability measure, `W` is not tied to the curve
   `P` that defines `Qᴬ`, and `S(x₀)` is not shown to be today's par rate.
 * **The replication seed.** `cmsCurveRate_spanning`: Carr–Madan static
@@ -89,7 +89,7 @@ Public lemmas (all in `namespace MathFin.CMS`):
   — first and second derivatives and convexity of the rate functional;
 * `annuityMeasure_isProbabilityMeasure`, `annuityMeasure_price` — the annuity
   measure and its fair-value identity;
-* `cms_adjustment_nonneg`, `cms_adjustment_delta_nonneg` — the Jensen gap of the
+* `cmsCurveRate_jensenGap_nonneg`, `cmsCurveRate_jensenGap_sub_nonneg` — the Jensen gap of the
   rate functional under `Qᴬ` is nonnegative;
 * `cmsCurveRate_spanning`, `cmsCurveRate_strip_nonneg`,
   `convexityNumerator_nonneg` — the replication identity, the tangent-line
@@ -379,7 +379,7 @@ measure `Qᴬ` of the previous section satisfies `S(𝔼^{Qᴬ}[W]) ≤ 𝔼^{Q�
 is used only as one; `W` is not linked to the curve `P` that defines `Qᴬ`, and no
 martingale property is assumed. This is not the CMS convexity adjustment
 `𝔼^{T_p}[S_T] − S₀`. -/
-theorem cms_adjustment_nonneg {Q : Measure Ω} (r T δ P0 C A0 x₀ : ℝ)
+theorem cmsCurveRate_jensenGap_nonneg {Q : Measure Ω} (r T δ P0 C A0 x₀ : ℝ)
     (P : Ω → ι → ℝ) (s : Finset ι) (W : Ω → ℝ) (hδ : 0 < δ) (hC : 0 < C)
     (hPC : 0 ≤ P0 + C) (hs : s.Nonempty) (hP : ∀ ω i, i ∈ s → 0 < P ω i)
     (hA0 : 0 < A0)
@@ -401,7 +401,7 @@ theorem cms_adjustment_nonneg {Q : Measure Ω} (r T δ P0 C A0 x₀ : ℝ)
   rwa [hfwd] at hj
 
 /-- The Jensen gap itself: `𝔼^{Qᴬ}[S(W)] − S(𝔼^{Qᴬ}[W]) ≥ 0`. -/
-theorem cms_adjustment_delta_nonneg {Q : Measure Ω} (r T δ P0 C A0 x₀ : ℝ)
+theorem cmsCurveRate_jensenGap_sub_nonneg {Q : Measure Ω} (r T δ P0 C A0 x₀ : ℝ)
     (P : Ω → ι → ℝ) (s : Finset ι) (W : Ω → ℝ) (hδ : 0 < δ) (hC : 0 < C)
     (hPC : 0 ≤ P0 + C) (hs : s.Nonempty) (hP : ∀ ω i, i ∈ s → 0 < P ω i)
     (hA0 : 0 < A0)
@@ -414,7 +414,7 @@ theorem cms_adjustment_delta_nonneg {Q : Measure Ω} (r T δ P0 C A0 x₀ : ℝ)
     (hfwd : ∫ ω, W ω ∂(annuityMeasure Q r T δ P s A0) = x₀) :
     0 ≤ ∫ ω, cmsCurveRate P0 δ C (W ω) ∂(annuityMeasure Q r T δ P s A0)
       - cmsCurveRate P0 δ C x₀ :=
-  sub_nonneg.2 (cms_adjustment_nonneg r T δ P0 C A0 x₀ P s W hδ hC hPC hs hP hA0 hint
+  sub_nonneg.2 (cmsCurveRate_jensenGap_nonneg r T δ P0 C A0 x₀ P s W hδ hC hPC hs hP hA0 hint
     hrepr hWpos hWint hSint hfwd)
 
 end Annuity

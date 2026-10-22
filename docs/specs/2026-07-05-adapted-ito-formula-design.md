@@ -300,7 +300,7 @@ re-elaboration speed.
      capstone.
 - **Coverage:** both count toward `full + library_wrapper` delivery. Update
   `docs/coverage.md`, `docs/bridges.md` (a new Foundations bridge:
-  constant-coeff → adapted-coeff Itô), `docs/roadmap.md`, and
+  constant-coeff → adapted-coeff Itô), `docs/archive/roadmap-history.md`, and
   `docs/mathematical-architecture.md` (note SP1/SP2 land; the Girsanov row
   stays partial until SP3).
 - **Do not** claim the Girsanov row is wired — that is SP3.

@@ -1,13 +1,14 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
 public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.WienerIntegralGaussian
+public import MathFin.Foundations.WienerIntegralExpMoment
 public import MathFin.Foundations.BrownianMartingale
 public import MathFin.FixedIncome.VasicekSDE
 
@@ -21,7 +22,8 @@ solution. This file takes the next step in the fixed-income layer: the
 
   `P(0, T) = 𝔼[exp(−∫₀ᵀ r_s ds)]`,
 
-the risk-neutral present value of one unit paid at `T`. Under the Vasicek model
+under the measure `μ` carrying `B`, read as the risk-neutral present value of one unit paid at
+`T` (`vasicekBondPrice_girsanov` builds the change from a real-world `μ`). Under the Vasicek model
 the *integrated* short rate is again Gaussian, so the bond price is a Gaussian
 Laplace transform and collapses to the classical **affine term structure**
 
@@ -48,9 +50,17 @@ derived. `∫₀ᵀ g(u) dB_u` is the Wiener integral of the *deterministic* int
 
 ## Main results
 
-* `vasicekIntegratedKernel_integral_sq` — the variance integral `∫₀ᵀ g² = V(T)`.
+* `vasicekIntegratedKernelSqAntideriv`, `hasDerivAt_vasicekIntegratedKernelSqAntideriv`,
+  `integral_vasicekIntegratedKernel_sq_eq_sub` — the antiderivative of `g²` and its FTC form
+  over any interval (also used by `FixedIncome/GSRPiecewiseVol`).
+* `vasicekIntegratedKernel_integral_sq` — the variance integral `∫₀ᵀ g² = V(T)`, and
+  `vasicekIntegratedKernelLp_integral_sq`, the same for the `L²` element.
+* `integral_vasicekIntegratedKernel`, `integral_vasicekIntegratedKernelLp` — the kernel's mass
+  `∫₀ᵀ g = (T − B(T))/κ`, the covariance of `∫₀ᵀ g dB` with `B_T`.
 * `vasicekIntegratedRate_hasLaw_gaussian` — `∫₀ᵀ r_s ds ~ N(M(T), σ²V(T))`.
-* `vasicekBondPrice_eq` — the bond price `𝔼[exp(−∫₀ᵀ r_s ds)] = exp(−M(T) + σ²V(T)/2)`.
+* `vasicekBondPrice_eq` — the bond price `𝔼[exp(−∫₀ᵀ r_s ds)] = exp(−M(T) + σ²V(T)/2)`, the
+  instance `m = M(T)`, `c = σ`, `f = g` of the Wiener bond-price lemma
+  `integral_exp_neg_add_mul_wienerIntegralLp` (`Foundations/WienerIntegralExpMoment`).
 * `vasicekBondPrice_affine` — the affine form `P(0,T) = A(T)·exp(−B(T)·r₀)`.
 -/
 
@@ -120,49 +130,98 @@ noncomputable def vasicekIntegratedKernelLp {κ : ℝ} (hκ : 0 < κ) (T : ℝ�
 
 /-! ### The variance integral `∫₀ᵀ g² = V(T)` -/
 
+/-- The antiderivative `F(u) = u/κ² − 2e^{−κ(T−u)}/κ³ + e^{−2κ(T−u)}/(2κ³)` of the squared
+integrated kernel `g(u)²`. -/
+noncomputable def vasicekIntegratedKernelSqAntideriv (κ T u : ℝ) : ℝ :=
+  u / κ ^ 2 - 2 * Real.exp (-(κ * (T - u))) / κ ^ 3 + Real.exp (-(2 * κ * (T - u))) / (2 * κ ^ 3)
+
+/-- For `κ ≠ 0`, `F` differentiates to `g²`: its derivative expands the square
+`g² = (1 − 2e^{−κ(T−u)} + e^{−2κ(T−u)})/κ²`. -/
+lemma hasDerivAt_vasicekIntegratedKernelSqAntideriv (κ T u : ℝ) (hκ : κ ≠ 0) :
+    HasDerivAt (vasicekIntegratedKernelSqAntideriv κ T)
+      ((vasicekIntegratedKernel κ T u) ^ 2) u := by
+  have he : Real.exp (-(2 * κ * (T - u)))
+      = Real.exp (-(κ * (T - u))) * Real.exp (-(κ * (T - u))) := by
+    rw [← Real.exp_add]; congr 1; ring
+  have hlin : HasDerivAt (fun u : ℝ ↦ u / κ ^ 2) (1 / κ ^ 2) u :=
+    (hasDerivAt_id u).div_const (κ ^ 2)
+  have harg1 : HasDerivAt (fun u ↦ -(κ * (T - u))) κ u := by
+    have h : HasDerivAt (fun u ↦ -(κ * (T - u))) (-(κ * (-1))) u := by
+      apply HasDerivAt.neg; apply HasDerivAt.const_mul
+      simpa using (hasDerivAt_id u).const_sub T
+    simpa using h
+  have harg2 : HasDerivAt (fun u ↦ -(2 * κ * (T - u))) (2 * κ) u := by
+    have h : HasDerivAt (fun u ↦ -(2 * κ * (T - u))) (-(2 * κ * (-1))) u := by
+      apply HasDerivAt.neg; apply HasDerivAt.const_mul
+      simpa using (hasDerivAt_id u).const_sub T
+    simpa using h
+  have hexp1 := harg1.exp
+  have hexp2 := harg2.exp
+  have h2 := (hexp1.const_mul (2 : ℝ)).div_const (κ ^ 3)
+  have h3 := hexp2.div_const (2 * κ ^ 3)
+  have hcomb := (hlin.sub h2).add h3
+  refine hcomb.congr_deriv ?_
+  unfold vasicekIntegratedKernel
+  rw [he]
+  field_simp
+  ring
+
+/-- The FTC form over any interval, for `κ ≠ 0`: `∫_A^B g(u)² du = F(B) − F(A)`. -/
+lemma integral_vasicekIntegratedKernel_sq_eq_sub (κ T A B : ℝ) (hκ : κ ≠ 0) :
+    ∫ u in A..B, (vasicekIntegratedKernel κ T u) ^ 2
+      = vasicekIntegratedKernelSqAntideriv κ T B - vasicekIntegratedKernelSqAntideriv κ T A := by
+  apply intervalIntegral.integral_eq_sub_of_hasDerivAt
+    (fun u _ ↦ hasDerivAt_vasicekIntegratedKernelSqAntideriv κ T u hκ)
+  apply Continuous.intervalIntegrable
+  unfold vasicekIntegratedKernel; fun_prop
+
 /-- **The variance-fixing integral**: `∫₀ᵀ g(u)² du = V(T)`, by the FTC with
-antiderivative `F(u) = u/κ² − 2e^{−κ(T−u)}/κ³ + e^{−2κ(T−u)}/(2κ³)`, whose
-derivative expands the square `g² = (1 − 2e^{−κ(T−u)} + e^{−2κ(T−u)})/κ²`. -/
+antiderivative `vasicekIntegratedKernelSqAntideriv`. -/
 lemma vasicekIntegratedKernel_integral_sq {κ : ℝ} (hκ : κ ≠ 0) (T : ℝ≥0) :
     ∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernel κ T u) ^ 2 ∂volume
       = vasicekBondV κ (T : ℝ) := by
-  rw [← intervalIntegral.integral_of_le (by positivity : (0 : ℝ) ≤ (T : ℝ))]
-  have hderiv : ∀ u ∈ Set.uIcc (0 : ℝ) (T : ℝ),
-      HasDerivAt (fun u : ℝ ↦ u / κ ^ 2 - 2 * Real.exp (-(κ * ((T : ℝ) - u))) / κ ^ 3
-          + Real.exp (-(2 * κ * ((T : ℝ) - u))) / (2 * κ ^ 3))
-        ((vasicekIntegratedKernel κ T u) ^ 2) u := by
-    intro u _
-    have he : Real.exp (-(2 * κ * ((T : ℝ) - u)))
-        = Real.exp (-(κ * ((T : ℝ) - u))) * Real.exp (-(κ * ((T : ℝ) - u))) := by
-      rw [← Real.exp_add]; congr 1; ring
-    have hlin : HasDerivAt (fun u : ℝ ↦ u / κ ^ 2) (1 / κ ^ 2) u :=
-      (hasDerivAt_id u).div_const (κ ^ 2)
-    have harg1 : HasDerivAt (fun u ↦ -(κ * ((T : ℝ) - u))) κ u := by
-      have h : HasDerivAt (fun u ↦ -(κ * ((T : ℝ) - u))) (-(κ * (-1))) u := by
-        apply HasDerivAt.neg; apply HasDerivAt.const_mul
-        simpa using (hasDerivAt_id u).const_sub (T : ℝ)
-      simpa using h
-    have harg2 : HasDerivAt (fun u ↦ -(2 * κ * ((T : ℝ) - u))) (2 * κ) u := by
-      have h : HasDerivAt (fun u ↦ -(2 * κ * ((T : ℝ) - u))) (-(2 * κ * (-1))) u := by
-        apply HasDerivAt.neg; apply HasDerivAt.const_mul
-        simpa using (hasDerivAt_id u).const_sub (T : ℝ)
-      simpa using h
-    have hexp1 := harg1.exp
-    have hexp2 := harg2.exp
-    have h2 := (hexp1.const_mul (2 : ℝ)).div_const (κ ^ 3)
-    have h3 := hexp2.div_const (2 * κ ^ 3)
-    have hcomb := (hlin.sub h2).add h3
-    have hval : (1 / κ ^ 2 - 2 * (Real.exp (-(κ * ((T : ℝ) - u))) * κ) / κ ^ 3
-          + Real.exp (-(2 * κ * ((T : ℝ) - u))) * (2 * κ) / (2 * κ ^ 3))
-        = (vasicekIntegratedKernel κ T u) ^ 2 := by
-      rw [vasicekIntegratedKernel, he]; field_simp; ring
-    exact hval ▸ hcomb
-  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv
-    (by apply Continuous.intervalIntegrable; unfold vasicekIntegratedKernel; fun_prop)]
-  simp only [sub_self, mul_zero, neg_zero, Real.exp_zero, mul_one, sub_zero, zero_div]
+  rw [← intervalIntegral.integral_of_le (by positivity : (0 : ℝ) ≤ (T : ℝ)),
+    integral_vasicekIntegratedKernel_sq_eq_sub κ (T : ℝ) 0 (T : ℝ) hκ]
+  simp only [vasicekIntegratedKernelSqAntideriv, sub_self, mul_zero, neg_zero, Real.exp_zero,
+    mul_one, sub_zero, zero_div]
   rw [vasicekBondV]
   field_simp
   ring
+
+/-! ### The kernel's mass `∫₀ᵀ g = (T − B(T))/κ` -/
+
+/-- **The mass of the integrated kernel**: `∫₀ᵀ g(u) du = (T − B(T))/κ`, by the FTC with
+antiderivative `u/κ − e^{−κ(T−u)}/κ²` (`κ ≠ 0`). It is `⟪𝟙_{(0,T]}, g⟫`, the covariance of the
+Wiener integral `∫₀ᵀ g dB` with `B_T`, and `−λσ` times it is the mean shift a constant market
+price of risk `λ` gives the integrated rate under the Girsanov measure
+(`vasicekBondPrice_girsanov`). -/
+lemma integral_vasicekIntegratedKernel (κ T : ℝ) (hκ : κ ≠ 0) :
+    ∫ u in (0 : ℝ)..T, vasicekIntegratedKernel κ T u = (T - vasicekBondB κ T) / κ := by
+  have hderiv (u : ℝ) : HasDerivAt (fun u : ℝ ↦ u / κ - Real.exp (-(κ * (T - u))) / κ ^ 2)
+      (vasicekIntegratedKernel κ T u) u := by
+    have harg : HasDerivAt (fun u ↦ -(κ * (T - u))) κ u := by
+      have h : HasDerivAt (fun u ↦ -(κ * (T - u))) (-(κ * (-1))) u := by
+        apply HasDerivAt.neg; apply HasDerivAt.const_mul
+        simpa using (hasDerivAt_id u).const_sub T
+      simpa using h
+    have hlin : HasDerivAt (fun u : ℝ ↦ u / κ) (1 / κ) u := (hasDerivAt_id u).div_const κ
+    refine (hlin.sub (harg.exp.div_const (κ ^ 2))).congr_deriv ?_
+    simp only [vasicekIntegratedKernel]
+    field_simp
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun u _ ↦ hderiv u)
+    (by apply Continuous.intervalIntegrable; unfold vasicekIntegratedKernel; fun_prop)]
+  simp only [sub_self, mul_zero, neg_zero, Real.exp_zero, sub_zero, zero_div, vasicekBondB]
+  field_simp
+  ring
+
+/-- `∫₀ᵀ g = (T − B(T))/κ` for the `L²` element of the integrated kernel. -/
+lemma integral_vasicekIntegratedKernelLp {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
+    ∫ u in Set.Ioc (0 : ℝ) (T : ℝ), vasicekIntegratedKernelLp hκ T u
+      = ((T : ℝ) - vasicekBondB κ T) / κ := by
+  rw [← integral_vasicekIntegratedKernel κ T hκ.ne', intervalIntegral.integral_of_le T.coe_nonneg]
+  refine integral_congr_ae ?_
+  filter_upwards [(vasicekIntegratedKernel_memLp hκ T).coeFn_toLp] with u hu
+  rw [vasicekIntegratedKernelLp, hu]
 
 /-! ### The integrated short rate and the bond price -/
 
@@ -174,7 +233,7 @@ noncomputable def vasicekIntegratedRate (hB : IsPreBrownianReal B μ) (r₀ θ �
     + σ * (wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
 
 /-- `∫₀ᵀ g² = V(T)` for the `L²`-representative kernel (a.e. equal to the honest kernel). -/
-private lemma vasicekIntegratedKernelLp_integral_sq {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
+lemma vasicekIntegratedKernelLp_integral_sq {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
     (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernelLp hκ T u) ^ 2 ∂volume)
       = vasicekBondV κ (T : ℝ) := by
   rw [show (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernelLp hκ T u) ^ 2 ∂volume)
@@ -185,14 +244,14 @@ private lemma vasicekIntegratedKernelLp_integral_sq {κ : ℝ} (hκ : 0 < κ) (T
   exact vasicekIntegratedKernel_integral_sq hκ.ne' T
 
 /-- `V(T) ≥ 0` (it is an integral of a square). -/
-private lemma vasicekBondV_nonneg {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
+lemma vasicekBondV_nonneg {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
     (0 : ℝ) ≤ vasicekBondV κ (T : ℝ) := by
   rw [← vasicekIntegratedKernelLp_integral_sq hκ T]
   exact integral_nonneg fun u ↦ sq_nonneg _
 
 /-- **The centred diffusion law.** `σ∫₀ᵀ g dB`'s core — the Wiener integral of the integrated
-kernel — is centred Gaussian with variance `V(T)`. The single source of the Vasicek Gaussian
-law, consumed by both `vasicekIntegratedRate_hasLaw_gaussian` and `vasicekBondPrice_eq`. -/
+kernel — is centred Gaussian with variance `V(T)`; consumed by
+`vasicekIntegratedRate_hasLaw_gaussian`. -/
 private lemma vasicekWienerLaw (hB : IsPreBrownianReal B μ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
     HasLaw (fun ω ↦ wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
       (gaussianReal 0 (vasicekBondV κ (T : ℝ)).toNNReal) μ := by
@@ -219,42 +278,20 @@ theorem vasicekIntegratedRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ)
     rw [Real.coe_toNNReal _ (mul_nonneg (sq_nonneg σ) hV_nonneg), NNReal.coe_mul, NNReal.coe_mk,
       Real.coe_toNNReal _ hV_nonneg]
 
-/-- **The Vasicek zero-coupon bond price.** The risk-neutral present value of one
-unit at `T`,
+/-- **The Vasicek zero-coupon bond price.** The expectation under `μ` (read as the pricing
+measure; no change of measure is built here) of one unit at `T`,
 
   `P(0, T) = 𝔼[exp(−∫₀ᵀ r_s ds)] = exp(−M(T) + σ²V(T)/2)`,
 
-is the Gaussian Laplace transform of the integrated short rate: factoring off the
-deterministic mean, `𝔼[exp(−σ·∫g dB)] = exp(σ²V(T)/2)` by the centred Gaussian
-MGF at `−σ` (`integral_exp_mul_gaussianReal_zero`). -/
+is the Gaussian Laplace transform of the integrated short rate: the Wiener bond-price lemma
+`integral_exp_neg_add_mul_wienerIntegralLp` at `m = M(T)`, `c = σ` and the integrated kernel `g`,
+whose squared `L²`-norm is `V(T)` (`vasicekIntegratedKernelLp_integral_sq`). -/
 theorem vasicekBondPrice_eq (hB : IsPreBrownianReal B μ)
     (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
     ∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω)) ∂μ
-      = Real.exp (-(vasicekIntegratedMean r₀ θ κ (T : ℝ)) + σ ^ 2 * vasicekBondV κ (T : ℝ) / 2) := by
-  set M : ℝ := vasicekIntegratedMean r₀ θ κ (T : ℝ) with hM
-  set V : ℝ := vasicekBondV κ (T : ℝ) with hV
-  have hV_nonneg : (0 : ℝ) ≤ V := hV ▸ vasicekBondV_nonneg hκ T
-  have hW : HasLaw (fun ω ↦ wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
-      (gaussianReal 0 V.toNNReal) μ := hV ▸ vasicekWienerLaw hB hκ T
-  -- Factor the integrand: exp(−(M + σW)) = exp(−M)·exp((−σ)·W).
-  have hfactor : ∀ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω))
-      = Real.exp (-M) * Real.exp ((-σ) *
-          (wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)) := by
-    intro ω
-    rw [vasicekIntegratedRate, ← hM, ← Real.exp_add]
-    congr 1
-    ring
-  simp_rw [hfactor]
-  rw [integral_const_mul,
-    show (fun ω ↦ Real.exp ((-σ) * (wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)))
-        = (fun x ↦ Real.exp ((-σ) * x))
-          ∘ (fun ω ↦ wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω) from rfl,
-    hW.integral_comp (by fun_prop : AEStronglyMeasurable (fun x ↦ Real.exp ((-σ) * x))
-      (gaussianReal 0 V.toNNReal)),
-    integral_exp_mul_gaussianReal_zero (-σ) V.toNNReal,
-    Real.coe_toNNReal _ hV_nonneg, ← Real.exp_add]
-  congr 1
-  ring
+      = Real.exp (-(vasicekIntegratedMean r₀ θ κ (T : ℝ)) + σ ^ 2 * vasicekBondV κ (T : ℝ) / 2) :=
+  (integral_exp_neg_add_mul_wienerIntegralLp hB T (vasicekIntegratedMean r₀ θ κ (T : ℝ)) σ
+    (vasicekIntegratedKernelLp hκ T)).trans <| by rw [vasicekIntegratedKernelLp_integral_sq hκ T]
 
 /-- The Vasicek affine coefficient `A(T) = exp(−θ(T − B(T)) + σ²V(T)/2)`, so that
 the bond price factors as `P(0,T) = A(T)·exp(−B(T)·r₀)`. -/

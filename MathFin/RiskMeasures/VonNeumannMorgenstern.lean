@@ -10,12 +10,14 @@ public import Mathlib
 /-!
 # von Neumann–Morgenstern lotteries and the expected-utility functional
 
-`RiskMeasures.UtilityDerivation` starts from a concave utility and derives the
-coherent-risk acceptance-set properties. It takes the *expected-utility form*
-`E[u(W + X)]` as given. This file supplies the layer underneath: the mixture
-algebra of lotteries, the affinity of expected utility in that mixture, and the
-verification that an expected-utility preference satisfies the von Neumann–
-Morgenstern axioms.
+`RiskMeasures.UtilityDerivation` defines the acceptance set of an expected-utility
+agent through `expectedUtility` and shows that a concave utility makes it convex and
+an increasing one makes it closed under adding cash. Such a set need not be a cone,
+so it need not be the acceptance set of a coherent risk measure
+(`not_exists_isCoherentRisk_log_acceptance`). This file supplies the layer
+underneath: the mixture algebra of lotteries, the affinity of expected utility in
+that mixture, and the verification that an expected-utility preference satisfies
+the von Neumann–Morgenstern axioms.
 
 ## Setup
 

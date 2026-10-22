@@ -8,6 +8,8 @@ module
 public import Mathlib
 public import MathFin.Foundations.ConvexSeparation
 public import MathFin.Foundations.MartingaleTransform
+public import MathFin.Foundations.FTAPOnePeriod
+public import MathFin.Foundations.ContinuousMarket
 
 /-!
 # Discrete-time FTAP on a finite probability space (scalar, finite horizon)
@@ -33,10 +35,27 @@ Finite Ω, one scalar discounted asset, finite horizon `T`. The general-Ω DMW
 theorem (which needs L⁰-closedness under no arbitrage and measurable selection)
 and the `d`-asset generalisation are out of scope here.
 
+## Relation to the other EMM notions
+
+* **One period.** At horizon `1` with trivial initial information `𝓕 0 = ⊥`, the time-`0`
+  price and the time-`1` holding are constants, and this market is the one-period market of
+  `Foundations/FTAPOnePeriod.lean` for the increment `Y = S 1 − S 0`: the EMMs coincide
+  (`isEMM_one_iff_onePeriod`) and so do the no-arbitrage conditions
+  (`noArbitrage_one_iff_onePeriod`).
+* **Continuous time.** `ContinuousMarket.IsEMM` is a process-level notion over `ℝ≥0` on a
+  general Ω and stays separate. It restricts in one direction: sampled along any monotone
+  schedule, a continuous-time EMM is an EMM here for the sampled price and filtration
+  (`ContinuousMarket.IsEMM.sampled`, general Ω, though `ftap_discrete` itself needs finite
+  Ω), and it is a one-period EMM for every increment `S t − S s`
+  (`ContinuousMarket.IsEMM.increment`). The converses are not claimed: neither restriction
+  sees adaptedness of `S` at all times or the martingale property between arbitrary times.
+
 ## Main definitions / results (assembled across this file)
 
 * `MathFin.NoArbitrage`, `MathFin.IsEMM`
 * `MathFin.ftap_discrete` — the biconditional `NoArbitrage ↔ ∃ Q, IsEMM Q`
+* `MathFin.isEMM_one_iff_onePeriod`, `MathFin.noArbitrage_one_iff_onePeriod`
+* `MathFin.ContinuousMarket.IsEMM.sampled`, `MathFin.ContinuousMarket.IsEMM.increment`
 -/
 
 @[expose] public section
@@ -74,7 +93,8 @@ def NoArbitrage : Prop :=
 
 /-- **Equivalent martingale measure** for the finite horizon. The martingale
 property is the one-step form up to `T` (the honest finite-horizon object: `S`
-need not be a `Q`-martingale past the horizon). -/
+need not be a `Q`-martingale past the horizon). At `T = 1` with `𝓕 0 = ⊥` this is the
+one-period notion for `S 1 − S 0` (`isEMM_one_iff_onePeriod`). -/
 structure IsEMM (Q : Measure Ω) : Prop where
   prob : IsProbabilityMeasure Q
   absP : Q ≪ P
@@ -276,4 +296,107 @@ theorem ftap_discrete (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :
   ⟨fun hNA ↦ exists_isEMM_of_noArbitrage 𝓕 P S T hS hP hNA,
    fun ⟨_, hQ⟩ ↦ noArbitrage_of_isEMM 𝓕 P S T hS hQ⟩
 
+/-! ### Horizon one: the one-period market
+
+With trivial initial information `𝓕 0 = ⊥`, a `⊥`-measurable function is constant
+(`stronglyMeasurable_bot_iff`): the time-`0` price is a number, the time-`1` holding is a
+constant position, and `Q[· | ⊥]` is the plain expectation (`condExp_bot`). The one-step
+market is then the one-period market of `Foundations/FTAPOnePeriod.lean` for the increment
+`S 1 − S 0`. -/
+
+omit [Nonempty Ω] [IsProbabilityMeasure P] in
+/-- **At horizon `1` the discrete-time EMM is the one-period EMM.** With `𝓕 0 = ⊥` and `S`
+adapted, `Q` is an equivalent martingale measure for the one-step market iff it is one for
+the one-period excess return `S 1 − S 0`: the one-step martingale condition
+`S 0 = E_Q[S 1]` (the price `S 0` being a constant) is `E_Q[S 1 − S 0] = 0`. -/
+theorem isEMM_one_iff_onePeriod (hS : StronglyAdapted 𝓕 S) (h0 : 𝓕 0 = ⊥) {Q : Measure Ω} :
+    IsEMM 𝓕 P S 1 Q ↔ OnePeriod.IsEMM P (S 1 - S 0) Q := by
+  have hS0 : StronglyMeasurable[𝓕 0] (S 0) := hS 0
+  rw [h0] at hS0
+  obtain ⟨c, hc⟩ := stronglyMeasurable_bot_iff.mp hS0
+  -- under a probability measure, the constant price `S 0 = c` has mean `c`
+  have hmean (μ : Measure Ω) [IsProbabilityMeasure μ] : ∫ ω, S 0 ω ∂μ = c := by simp [hc]
+  constructor
+  · intro hQ
+    haveI := hQ.prob
+    have hm := hQ.mart 0 Nat.zero_lt_one
+    rw [h0, condExp_bot, hc] at hm
+    obtain ⟨_, hcQ⟩ := hm.exists
+    refine ⟨hQ.prob, hQ.absP, hQ.Pabs, Integrable.of_finite, ?_⟩
+    show ∫ ω, (S 1 ω - S 0 ω) ∂Q = 0
+    rw [integral_sub Integrable.of_finite Integrable.of_finite, hmean Q]
+    exact sub_eq_zero.mpr hcQ.symm
+  · intro hQ
+    haveI := hQ.prob
+    refine ⟨hQ.prob, hQ.absP, hQ.Pabs, fun t ht ↦ ?_⟩
+    obtain rfl : t = 0 := by omega
+    rw [h0, condExp_bot, hc]
+    have hfair : ∫ ω, (S 1 ω - S 0 ω) ∂Q = 0 := hQ.fair
+    rw [integral_sub Integrable.of_finite Integrable.of_finite, hmean Q] at hfair
+    exact Filter.Eventually.of_forall fun _ ↦ (sub_eq_zero.mp hfair).symm
+
+omit [Fintype Ω] [Nonempty Ω] [MeasurableSingletonClass Ω] [IsProbabilityMeasure P] in
+/-- **At horizon `1` discrete-time no arbitrage is one-period no arbitrage.** With
+`𝓕 0 = ⊥`, a predictable strategy holds a constant `θ` over the single period, and its
+discounted gain `martingaleTransform φ S 1` is `θ · (S 1 − S 0)`. -/
+theorem noArbitrage_one_iff_onePeriod (h0 : 𝓕 0 = ⊥) :
+    NoArbitrage 𝓕 P S 1 ↔ OnePeriod.NoArbitrage P (S 1 - S 0) := by
+  have hgain (φ : ℕ → Ω → ℝ) :
+      martingaleTransform φ S 1 = fun ω ↦ φ 1 ω * (S 1 - S 0) ω := by
+    funext ω; simp [martingaleTransform]
+  constructor
+  · intro hNA θ hθ
+    have h := hNA (fun _ _ ↦ θ) (fun _ ↦ stronglyMeasurable_const) (by rw [hgain]; exact hθ)
+    rwa [hgain] at h
+  · intro hNA φ hφ hpos
+    have hφ1 : StronglyMeasurable[𝓕 0] (φ 1) := hφ 0
+    rw [h0] at hφ1
+    obtain ⟨θ, hθ⟩ := stronglyMeasurable_bot_iff.mp hφ1
+    simp only [hgain φ, hθ] at hpos ⊢
+    exact hNA θ hpos
+
 end MathFin
+
+/-! ### The continuous-time EMM, sampled
+
+A continuous-time EMM `ContinuousMarket.IsEMM` (`Foundations/ContinuousMarket.lean`) is a
+process-level object on a general Ω. It restricts to the discrete-time and one-period
+notions; these restrictions are one-directional. -/
+
+namespace MathFin.ContinuousMarket
+
+open MeasureTheory ProbabilityTheory
+open scoped NNReal
+
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}
+
+/-- **A continuous-time EMM, sampled, is a discrete-time EMM.** If `Q` is an equivalent
+martingale measure for the scalar discounted price `S` in continuous time, then along any
+monotone schedule `t 0 ≤ t 1 ≤ ⋯` it is an equivalent martingale measure, at every finite
+horizon `T`, for the sampled price `n ↦ S (t n)` and the sampled filtration
+`n ↦ 𝓕 (t n)`. General Ω; the sampled martingale is `martingale_comp_monotone`. -/
+theorem IsEMM.sampled {S : ℝ≥0 → Ω → ℝ} {Q : Measure Ω}
+    (h : IsEMM (P := P) (𝓕 := 𝓕) S Q) {t : ℕ → ℝ≥0} (ht : Monotone t) (T : ℕ) :
+    MathFin.IsEMM (sampledFiltration 𝓕 ht) P (fun n ↦ S (t n)) T Q :=
+  ⟨h.isProb, h.ac, h.ac', fun n _ ↦
+    ((martingale_comp_monotone h.martingale ht).condExp_ae_eq (Nat.le_add_right n 1)).symm⟩
+
+/-- **A continuous-time EMM is a one-period EMM for every increment.** If `Q` is an
+equivalent martingale measure for the discounted price `S`, then for any two dates `s`, `t`
+it is an equivalent martingale measure, in the sense of
+`Foundations/FTAPOnePeriodVector.lean`, for the one-period excess return `S t − S s` with a
+constant holding: a martingale has constant expectation. -/
+theorem IsEMM.increment {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
+    [FiniteDimensional ℝ F] {S : ℝ≥0 → Ω → F} {Q : Measure Ω}
+    (h : IsEMM (P := P) (𝓕 := 𝓕) S Q) (s t : ℝ≥0) :
+    OnePeriodVector.IsEMM P (S t - S s) Q := by
+  haveI := h.isProb
+  have hmean (u : ℝ≥0) : ∫ ω, S u ω ∂Q = ∫ ω, S 0 ω ∂Q := by
+    rw [← integral_condExp (𝓕.le 0)]
+    exact integral_congr_ae (h.martingale.condExp_ae_eq (zero_le : (0 : ℝ≥0) ≤ u))
+  refine ⟨h.isProb, h.ac, h.ac', (h.martingale.integrable t).sub (h.martingale.integrable s), ?_⟩
+  show ∫ ω, (S t ω - S s ω) ∂Q = 0
+  rw [integral_sub (h.martingale.integrable t) (h.martingale.integrable s), hmean t, hmean s,
+    sub_self]
+
+end MathFin.ContinuousMarket

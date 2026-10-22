@@ -1,0 +1,1590 @@
+{
+  "description": "Black–Scholes and its family: the European call and put, digitals, Bachelier, Black-76, dividends and Garman–Kohlhagen, the Greeks, the pricing PDE, static price bounds, implied volatility, convexity in spot and strike, Breeden–Litzenberger and Carr–Madan spanning, calendar arbitrage of total variance. `chapter` is the section number the entry had in the original single-file corpus, not a chapter of one book; each entry's `reference` names its source.",
+  "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)",
+  "theorems": [
+    {
+      "id": "mf-bs-put-formula",
+      "name": "Black-Scholes European Put Formula",
+      "description": "Discounted expected put payoff under the risk-neutral lognormal hypothesis: P = K e^{-rT} Phi(-d_2) - S_0 Phi(-d_1), where d_1, d_2 are the standard BS quantities.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.Put\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Black-Scholes European put pricing formula via direct integration\n    parallel to the call formula (left-tail completing-the-square). -/\ntheorem bs_put_formula\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, Real.exp (-r * T) * max (K - bsTerminal S_0 r σ T (Z ω)) 0 ∂Q\n      = K * Real.exp (-r * T) * Phi (-(bsd2 S_0 K r σ T)) -\n        S_0 * Phi (-(bsd1 S_0 K r σ T)) :=\n  MathFin.bs_put_formula h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-Scholes put formula (Hull 16.6, Shreve 4.5)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Lives in MathFin/BlackScholes/Put.lean (~230 lines). Derivation parallel to bs_call_formula: HasLaw transfer to standard normal, max(K - S_T, 0) as indicator on Iic(-d_2), then left-tail completing-the-square integral_exp_mul_gaussianPDFReal_Iic. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-put-call-parity",
+      "name": "Put-Call Parity",
+      "description": "C - P = S_0 - K e^{-rT}: the difference between European call and put prices under the BS hypothesis equals the spot minus the discounted strike. Direct algebraic corollary of bs_call_formula + bs_put_formula + Phi(d) + Phi(-d) = 1.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.Put\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Put-call parity: C - P = S_0 - K e^{-rT}. -/\ntheorem put_call_parity\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    (∫ ω, Real.exp (-r * T) * max (bsTerminal S_0 r σ T (Z ω) - K) 0 ∂Q) -\n    (∫ ω, Real.exp (-r * T) * max (K - bsTerminal S_0 r σ T (Z ω)) 0 ∂Q)\n      = S_0 - K * Real.exp (-r * T) :=\n  MathFin.bs_put_call_parity h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Put-call parity (Hull 11.4, Shreve 4.5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Direct algebraic corollary of bs_call_formula + bs_put_formula + Phi_add_Phi_neg. Lives in MathFin/BlackScholes/Put.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cash-or-nothing",
+      "name": "Cash-or-Nothing Digital Call",
+      "description": "Cash-or-nothing digital pays $1 iff S_T > K. Price: V = e^{-rT} Phi(d_2).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.Digital\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Cash-or-nothing digital call pricing formula. -/\ntheorem cash_or_nothing_formula\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, Real.exp (-r * T) *\n        (Set.Ioi K).indicator (fun _ => (1 : ℝ)) (bsTerminal S_0 r σ T (Z ω)) ∂Q\n      = Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) :=\n  MathFin.bs_cash_or_nothing_formula h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cash-or-nothing digital (Hull 26.1)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. HasLaw transfer + indicator identification on Ioi(-d_2) via bsTerminal_gt_K_iff + gaussianReal_Ioi_toReal. Lives in MathFin/BlackScholes/Digital.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-asset-or-nothing",
+      "name": "Asset-or-Nothing Digital Call",
+      "description": "Asset-or-nothing digital pays S_T iff S_T > K. Price: V = S_0 Phi(d_1).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.Digital\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Asset-or-nothing digital call pricing formula. -/\ntheorem asset_or_nothing_formula\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, Real.exp (-r * T) *\n        (Set.Ioi K).indicator (fun s => s) (bsTerminal S_0 r σ T (Z ω)) ∂Q\n      = S_0 * Phi (bsd1 S_0 K r σ T) :=\n  MathFin.bs_asset_or_nothing_formula h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Asset-or-nothing digital (Hull 26.1)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. HasLaw transfer + indicator on Ioi(-d_2) + completing-the-square integral_exp_mul_gaussianPDFReal_Ioi. Together with cash-or-nothing, gives BS call decomposition. Lives in MathFin/BlackScholes/Digital.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-forward-price",
+      "name": "Forward / Futures Pricing Formula",
+      "description": "F = S_0 e^{rT}: the no-arbitrage forward price equals the risk-neutral expectation of the terminal asset price under BSCallHyp.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.Forward\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- No-arbitrage forward price under BS lognormal hypothesis: E_Q[S_T] = S_0 e^{rT}. -/\ntheorem forward_price\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, bsTerminal S_0 r σ T (Z ω) ∂Q = S_0 * Real.exp (r * T) :=\n  MathFin.expected_terminal_eq_forward h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Forward pricing under no-arbitrage (Hull 5.6)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Uses Gaussian MGF identity integral_exp_mul_gaussianPDFReal_univ + BS martingale algebra. Lives in MathFin/BlackScholes/Forward.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-vega",
+      "name": "BS Vega (Sensitivity to Volatility)",
+      "description": "Vega = dV/dσ = S phi(d_1) sqrt(τ). For K, S, σ, τ > 0 the Black-Scholes call price has derivative with respect to volatility equal to S * pdf(d_1) * sqrt(τ). Its positivity is not part of this entry's statement.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PDE\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\n/-- Black-Scholes vega: dV/dσ = S phi(d_1) sqrt(τ). -/\ntheorem bs_vega {K r : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => MathFin.bsV K r s S τ)\n      (S * gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) * Real.sqrt τ) σ :=\n  MathFin.hasDerivAt_bsV_sigma hK hS hσ hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS vega (Hull 19.3, Shreve 4.5)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Chain rule + magic identity bs_identity collapse the d/dσ d_i terms, leaving S pdf(d_1) sqrt(τ). Lives in MathFin/BlackScholes/PDE.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-rho",
+      "name": "BS Rho (Sensitivity to Risk-Free Rate)",
+      "description": "Rho = dV/dr = K tau e^{-r tau} Phi(d_2). The Black-Scholes call price derivative with respect to the risk-free rate r equals K * tau * exp(-r*tau) * Phi(d_2).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PDE\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\n/-- Black-Scholes rho: dV/dr = K tau e^{-r tau} Phi(d_2). -/\ntheorem bs_rho {K σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)\n    {S : ℝ} (hS : 0 < S) (r : ℝ) :\n    HasDerivAt (fun r' => MathFin.bsV K r' σ S τ)\n      (K * τ * Real.exp (-(r * τ)) * MathFin.Phi (MathFin.bsd2 S K r σ τ)) r :=\n  MathFin.hasDerivAt_bsV_r hK hσ hτ hS r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS rho (Hull 19.5)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Chain rule on d/dr d_i + d/dr exp(-rτ) + magic identity collapses pdf terms, leaving K*τ*exp(-rτ)*Phi(d_2). Lives in MathFin/BlackScholes/PDE.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bachelier-call",
+      "name": "Bachelier Model Call Pricing",
+      "description": "Under arithmetic-BM dynamics S_T = S_0 + sigma*sqrt(T)*Z (no log, no exponential), the European call price is V = (S_0 - K) Phi(d) + sigma sqrt(T) phi(d), where d = (S_0 - K)/(sigma sqrt(T)).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.Bachelier\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Bachelier European call pricing formula. -/\ntheorem bachelier_call_formula\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K σ T : ℝ} {Z : Ω → ℝ}\n    (h : BachelierHyp Q S_0 K σ T Z) :\n    ∫ ω, max (bachelierTerminal S_0 σ T (Z ω) - K) 0 ∂Q\n      = (S_0 - K) * Phi (bachelierD S_0 K σ T) +\n        σ * Real.sqrt T * gaussianPDFReal 0 1 (bachelierD S_0 K σ T) :=\n  MathFin.bachelier_call_formula h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Bachelier (1900) option pricing; modern: Brigo & Mercurio (2006), Black (1976)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Parallels bs_call_formula but for arithmetic BM. Key new primitive: truncated mean of N(0,1): integral_id_mul_gaussianPDFReal_Ioi a = pdf(0,1,a), proved via FTC integral_Ioi_of_hasDerivAt_of_tendsto using (-pdf)' = z*pdf. Plus integrable_id_mul_gaussianPDFReal_volume (transfer via withDensity). Lives in MathFin/BlackScholes/Bachelier.lean (~330 lines). Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-implied-vol-unique",
+      "name": "Implied Volatility Uniqueness",
+      "description": "For S, K, T > 0, the BS call price as a function of sigma is strictly monotone on (0, infinity). Hence the implied volatility (when it exists) is unique.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.ImpliedVolatility\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\n/-- Implied volatility uniqueness: the BS call price is strictly monotone in σ on (0, ∞). -/\ntheorem implied_vol_unique {K r T : ℝ} (hK : 0 < K) (hT : 0 < T)\n    {S : ℝ} (hS : 0 < S) {σ₁ σ₂ : ℝ} (hσ₁ : 0 < σ₁) (hσ₂ : 0 < σ₂)\n    (h_eq : MathFin.bsV K r σ₁ S T = MathFin.bsV K r σ₂ S T) :\n    σ₁ = σ₂ :=\n  MathFin.implied_volatility_unique hK hT hS hσ₁ hσ₂ h_eq\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Implied volatility uniqueness (Hull 19.10, Shreve 4.5)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Vega-positivity (bsV_vega_pos) + strictMonoOn_of_deriv_pos + StrictMonoOn.injOn. Lives in MathFin/BlackScholes/ImpliedVolatility.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-call-strictly-convex-in-spot",
+      "name": "Black–Scholes Call Is Strictly Convex in the Spot",
+      "description": "For K, σ, τ > 0 and any rate r, the Black–Scholes call price S ↦ bsV K r σ S τ = S·Φ(d₁) − Ke^{−rτ}·Φ(d₂) is strictly convex on (0, ∞), and for S₀, s > 0 with s ≠ S₀ it lies strictly above its tangent at S₀, whose slope is the delta Φ(d₁(S₀)): bsV(S₀) + Φ(d₁(S₀))·(s − S₀) < bsV(s). The proof is the second-derivative test: the gamma φ(d₁)/(Sσ√τ) is positive.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.SpotConvexity\n\n/-- **The Black–Scholes call is strictly convex in the spot**, and lies strictly above its delta\ntangent away from the point of tangency. -/\ntheorem bs_call_strictly_convex_in_spot_thm {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    (hτ : 0 < τ) {S₀ s : ℝ} (hS₀ : 0 < S₀) (hs : 0 < s) (hne : s ≠ S₀) :\n    StrictConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun S ↦ MathFin.bsV K r σ S τ) ∧\n      MathFin.bsV K r σ S₀ τ + MathFin.Phi (MathFin.bsd1 S₀ K r σ τ) * (s - S₀)\n        < MathFin.bsV K r σ s τ :=\n  ⟨MathFin.bsV_spot_strictConvexOn hK hσ hτ, MathFin.bsV_spot_tangent_lt hK hσ hτ hS₀ hs hne⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hull, Options, Futures, and Other Derivatives (gamma); Shreve (2004), Stochastic Calculus for Finance II, §4.5",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Strict convexity by the second-derivative test (strictConvexOn_of_deriv2_pos'): the second spot derivative is the gamma φ(d₁)/(Sσ√τ) (hasDerivAt_deriv_bsV_S), positive by bsV_gamma_pos (bsV_spot_strictConvexOn). The strict tangent inequality compares secant slopes with the delta Φ(d₁(S₀)) (hasDerivAt_bsV_S) through StrictConvexOn.slope_lt_of_hasDerivAt and StrictConvexOn.lt_slope_of_hasDerivAt (bsV_spot_tangent_lt). Lives in MathFin/BlackScholes/SpotConvexity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-call-tends-to-spot-high-vol",
+      "name": "Black–Scholes Call Tends to the Spot as the Volatility Grows",
+      "description": "For T > 0 and any S, K, r, the Black–Scholes call price bsV K r σ S T = S·Φ(d₁) − Ke^{−rT}·Φ(d₂) tends to S as σ → ∞. For σ ≠ 0, d₁ = (log(S/K) + rT)/(σ√T) + σ√T/2, so d₁ → ∞ and d₂ = d₁ − σ√T → −∞, while Φ tends to 1 at ∞ and to 0 at −∞.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.ImpliedVolatility\n\nopen Filter Topology\n\n/-- **The Black–Scholes call tends to the spot as `σ → ∞`.** -/\ntheorem bs_call_tends_to_spot_high_vol_thm (S K r : ℝ) {T : ℝ} (hT : 0 < T) :\n    Tendsto (fun σ ↦ MathFin.bsV K r σ S T) atTop (𝓝 S) :=\n  MathFin.tendsto_bsV_sigma_atTop S K r hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hull, Options, Futures, and Other Derivatives (implied volatility); Gatheral (2006), The Volatility Surface",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. For σ ≠ 0, d₁ = (log(S/K) + rT)/√T · σ⁻¹ + √T/2 · σ (bsd1_eq_inv_add, from the same identity at the maturity s², where √(s²) = s), so d₁ → ∞ and d₂ = d₁ − σ√T → −∞ (tendsto_bsd1_sigma_atTop, tendsto_bsd2_sigma_atTop). Φ → 1 at ∞ and Φ → 0 at −∞ (tendsto_Phi_atTop, tendsto_Phi_atBot, Foundations/NormalTail.lean). Lives in MathFin/BlackScholes/ImpliedVolatility.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-implied-vol-exists-above-reference",
+      "name": "Implied Volatility Exists Above a Reference Volatility",
+      "description": "For K, S, T > 0, any rate r and a volatility σ₀ > 0, a call price C strictly between the Black–Scholes price at σ₀ and the spot, bsV K r σ₀ S T < C < S, has an implied volatility σ > σ₀ (bsV K r σ S T = C), and every positive σ' with bsV K r σ' S T = C equals σ. The Black–Scholes price is continuous and strictly increasing in the volatility and tends to S as σ → ∞, so the intermediate value theorem applies. A volatility σ₀ with bsV(σ₀) < C is a hypothesis: existence for every price in the no-arbitrage range ((S − Ke^{−rT})⁺, S) would also need the σ → 0 limit, which is not proved.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.ImpliedVolatility\n\n/-- **Implied volatility above a reference volatility.** A price strictly between the\nBlack–Scholes price at `σ₀ > 0` and the spot has an implied volatility above `σ₀`, and it is the\nonly positive one. -/\ntheorem implied_vol_exists_above_reference_thm {K r T S σ₀ C : ℝ} (hK : 0 < K) (hT : 0 < T)\n    (hS : 0 < S) (hσ₀ : 0 < σ₀) (hlo : MathFin.bsV K r σ₀ S T < C) (hhi : C < S) :\n    ∃ σ, σ₀ < σ ∧ MathFin.bsV K r σ S T = C ∧\n      ∀ σ' > 0, MathFin.bsV K r σ' S T = C → σ' = σ :=\n  MathFin.exists_impliedVol_gt_of_bsV_lt hK hT hS hσ₀ hlo hhi\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hull, Options, Futures, and Other Derivatives (implied volatility); Gatheral (2006), The Volatility Surface",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The limit σ → ∞ (tendsto_bsV_sigma_atTop) gives σ₁ > σ₀ with C < bsV(σ₁); the intermediate value theorem on [σ₀, σ₁] (intermediate_value_Ioo, with bsV_continuousOn_sigma) gives σ ∈ (σ₀, σ₁) with bsV(σ) = C, and strict monotonicity in σ (implied_volatility_unique) makes it the only positive solution (exists_impliedVol_gt_of_bsV_lt). The σ → 0 limit, which would remove the hypothesis on σ₀, is not proved. Lives in MathFin/BlackScholes/ImpliedVolatility.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black-futures",
+      "name": "Black-76 Formula for Futures Options",
+      "description": "European call on a futures contract: V = e^{-rT} [F Phi(d_1) - K Phi(d_2)] where d_1 = (log(F/K) + sigma^2 T/2) / (sigma sqrt(T)) and d_2 = d_1 - sigma sqrt(T). Specialization of BS to zero-drift futures + independent discount rate.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Black76\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Black-76 formula for European call on futures. -/\ntheorem black_futures_call\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {F K σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q F K 0 σ T Z) (r : ℝ) :\n    ∫ ω, Real.exp (-r * T) * max (bsTerminal F 0 σ T (Z ω) - K) 0 ∂Q\n      = Real.exp (-r * T) *\n          (F * Phi (bsd1 F K 0 σ T) - K * Phi (bsd2 F K 0 σ T)) :=\n  MathFin.black_futures_formula h r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black (1976) formula for futures options (Hull 18.7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Specialization of bs_call_formula with BS-drift r=0 (futures are martingales) plus external discount rate. Lives in MathFin/Futures/Black76.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-put-delta",
+      "name": "BS Put Delta",
+      "description": "Put delta: ∂P/∂S = Φ(d₁) - 1. Direct chain rule via put-call parity P = C - S + K e^{-rτ}.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PutGreeks\n\nopen MathFin\n\ntheorem bs_put_delta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => MathFin.bsP K r σ s τ)\n      (MathFin.Phi (MathFin.bsd1 S K r σ τ) - 1) S :=\n  MathFin.hasDerivAt_bsP_S hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS put delta (Hull 19.4)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via put-call parity: bsP = bsV - S + K e^{-rτ}, so ∂P/∂S = ∂V/∂S - 1 = Φ(d₁) - 1. Lives in MathFin/BlackScholes/PutGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-put-gamma",
+      "name": "BS Put Gamma",
+      "description": "Put gamma: the second S-derivative of the Black-Scholes put price, ∂²P/∂S² = ϕ(d₁)/(S σ √τ). Same as the call gamma, since the put and call deltas differ by a constant.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PutGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_put_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (deriv fun s => MathFin.bsP K r σ s τ)\n      (gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) S :=\n  MathFin.hasDerivAt_deriv_bsP_S hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS put gamma (Hull 19.4)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, stated for the put price itself: the gamma formula hasDerivAt_bsP_SS (the S-derivative of the delta Φ(d₁) − 1) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the delta formula is ∂P/∂S on all of S > 0 (hasDerivAt_bsP_S). Same as call gamma (the linear correction in put-call parity has zero second derivative). Lives in MathFin/BlackScholes/PutGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-put-theta",
+      "name": "BS Put Theta (τ form)",
+      "description": "Put theta: ∂P/∂τ = σ S ϕ(d₁) / (2 √τ) - r K e^{-rτ} Φ(-d₂).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PutGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_put_theta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun t => MathFin.bsP K r σ S t)\n      (σ * S * gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) / (2 * Real.sqrt τ)\n        - r * K * Real.exp (-(r * τ)) * MathFin.Phi (-MathFin.bsd2 S K r σ τ)) τ :=\n  MathFin.hasDerivAt_bsP_tau hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS put theta (Hull 19.4)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via put-call parity: ∂P/∂τ = ∂V/∂τ - r K e^{-rτ}, with Φ(d₂) → Φ(-d₂) via Phi_add_Phi_neg. Lives in MathFin/BlackScholes/PutGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-put-vega",
+      "name": "BS Put Vega",
+      "description": "Put vega: ∂P/∂σ = S ϕ(d₁) √τ. Same as call vega.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PutGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_put_vega_thm {K r : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => MathFin.bsP K r s S τ)\n      (S * gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) * Real.sqrt τ) σ :=\n  MathFin.hasDerivAt_bsP_sigma hK hS hσ hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS put vega (Hull 19.6)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Same as call vega via put-call parity. Lives in MathFin/BlackScholes/PutGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-put-rho",
+      "name": "BS Put Rho",
+      "description": "Put rho: ∂P/∂r = -K τ e^{-rτ} Φ(-d₂).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PutGreeks\n\nopen MathFin\n\ntheorem bs_put_rho_thm {K σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)\n    {S : ℝ} (hS : 0 < S) (r : ℝ) :\n    HasDerivAt (fun r' => MathFin.bsP K r' σ S τ)\n      (-(K * τ * Real.exp (-(r * τ)) * MathFin.Phi (-MathFin.bsd2 S K r σ τ))) r :=\n  MathFin.hasDerivAt_bsP_r hK hσ hτ hS r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS put rho (Hull 19.7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via put-call parity + Phi_add_Phi_neg. Lives in MathFin/BlackScholes/PutGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-vanna",
+      "name": "BS Vanna (∂²V/∂σ∂S)",
+      "description": "Vanna: the S-derivative of the Black-Scholes vega, ∂/∂S (∂V/∂σ) = −ϕ(d₁)·d₂/σ, a mixed second derivative of the call price. Cross-Greek between spot and volatility.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_vanna_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => deriv (fun σ' => MathFin.bsV K r σ' s τ) σ)\n      (-(gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) * MathFin.bsd2 S K r σ τ / σ)) S :=\n  MathFin.hasDerivAt_S_deriv_bsV_sigma hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS vanna (Wystup 2002)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, stated for the call price itself: the vanna formula hasDerivAt_bsV_vanna (product + chain rule on the vega formula S·ϕ(d₁)·√τ, with the σ√τ − d₁ = −d₂ collapse) is transported to `s ↦ ∂V/∂σ(s)` by hasDerivAt_deriv_param_of_eventually (Foundations/DerivOfDeriv.lean), since the vega formula is ∂V/∂σ at every S > 0 (hasDerivAt_bsV_sigma). Lives in MathFin/BlackScholes/HigherGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-volga",
+      "name": "BS Volga / Vomma (∂²V/∂σ²)",
+      "description": "Volga (vomma): the second σ-derivative of the Black-Scholes call price, ∂²V/∂σ² = vega · d₁ · d₂ / σ with vega = S·ϕ(d₁)·√τ, the second-order sensitivity of option value to volatility.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_volga_thm {K r : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (deriv fun σ' => MathFin.bsV K r σ' S τ)\n      (S * gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) * Real.sqrt τ\n        * MathFin.bsd1 S K r σ τ * MathFin.bsd2 S K r σ τ / σ) σ :=\n  MathFin.hasDerivAt_deriv_bsV_sigma hK hS hσ hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS volga / vomma (Wystup 2002)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, stated for the call price itself: the volga formula hasDerivAt_bsV_volga (the clean derivative ∂_σ d₁ = −d₂/σ + chain rule on ϕ, applied to the vega formula) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the vega formula is ∂V/∂σ on all of σ > 0 (hasDerivAt_bsV_sigma). Lives in MathFin/BlackScholes/HigherGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-charm",
+      "name": "BS Charm (∂Δ/∂τ)",
+      "description": "Charm: the τ-derivative of the Black-Scholes call delta, ∂/∂τ (∂V/∂S) = ϕ(d₁)·((r + σ²/2)τ − log(S/K))/(2στ√τ), the sensitivity of delta to time to maturity.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_charm_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun t => deriv (fun s => MathFin.bsV K r σ s t) S)\n      (gaussianPDFReal 0 1 (bsd1 S K r σ τ)\n        * (((r + σ ^ 2 / 2) * τ - Real.log (S / K)) / (2 * σ * τ * Real.sqrt τ))) τ :=\n  MathFin.hasDerivAt_tau_deriv_bsV_S hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS charm (Wystup 2002)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, stated for the call delta itself: the charm formula hasDerivAt_bsV_charm (chain rule on Φ(d₁(τ)): ∂_τ d₁ · ϕ(d₁)) is transported to `t ↦ ∂V/∂S(t)` by hasDerivAt_deriv_param_of_eventually (Foundations/DerivOfDeriv.lean), since Φ(d₁) is ∂V/∂S at every τ > 0 (hasDerivAt_bsV_S). Lives in MathFin/BlackScholes/HigherGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bachelier-delta",
+      "name": "Bachelier Delta",
+      "description": "Bachelier delta: ∂V/∂S = Φ(d) where d = (S-K)/(σ√T). Chain-rule contributions through d cancel via the identity (S-K)/(σ√T) = d.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.BachelierGreeks\n\nopen MathFin\n\ntheorem bachelier_delta_thm {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : ℝ) :\n    HasDerivAt (fun s => MathFin.bachelierV K σ T s)\n      (MathFin.Phi (MathFin.bachelierD S K σ T)) S :=\n  MathFin.hasDerivAt_bachelierV_S hσ hT S\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Bachelier delta",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Product + chain rule, with (S-K)·∂d/∂S = d cancelling the σ√T·ϕ(d)·∂d/∂S contribution. Lives in MathFin/BlackScholes/BachelierGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bachelier-vega",
+      "name": "Bachelier Vega",
+      "description": "Bachelier vega: ∂V/∂σ = √T · ϕ(d). Cancellation via (S-K)·∂d/∂σ = -d²·σ√T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.BachelierGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bachelier_vega_thm {K T : ℝ} (hT : 0 < T)\n    {S σ : ℝ} (hσ : 0 < σ) :\n    HasDerivAt (fun s => MathFin.bachelierV K s T S)\n      (Real.sqrt T * gaussianPDFReal 0 1 (MathFin.bachelierD S K σ T)) σ :=\n  MathFin.hasDerivAt_bachelierV_sigma hT hσ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Bachelier vega",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Quotient rule on d + chain rule on Φ, ϕ; algebraic cancellation. Lives in MathFin/BlackScholes/BachelierGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cash-digital-delta",
+      "name": "Cash-or-Nothing Digital Delta",
+      "description": "Cash digital delta: ∂V_cash/∂S = e^{-rτ} · ϕ(d₂) / (S σ √τ). Direct chain rule on Φ(d₂(S)).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem cash_digital_delta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => MathFin.bsCashDigital K r σ s τ)\n      (Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ)\n        / (S * σ * Real.sqrt τ)) S :=\n  MathFin.hasDerivAt_bsCashDigital_S hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cash-or-nothing digital delta (Hull 26.1)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Chain rule on e^{-rτ} · Φ(d₂(S)). Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-asset-digital-delta",
+      "name": "Asset-or-Nothing Digital Delta",
+      "description": "Asset digital delta: ∂V_asset/∂S = Φ(d₁) + ϕ(d₁) / (σ √τ). Product rule on S · Φ(d₁(S)).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem asset_digital_delta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => MathFin.bsAssetDigital K r σ s τ)\n      (MathFin.Phi (MathFin.bsd1 S K r σ τ)\n        + gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) / (σ * Real.sqrt τ)) S :=\n  MathFin.hasDerivAt_bsAssetDigital_S hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Asset-or-nothing digital delta (Hull 26.1)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Product rule on S · Φ(d₁(S)). Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-dividends-call",
+      "name": "BS-Merton Call with Continuous Dividends",
+      "description": "V_q = S e^{-qT} Φ(d₁) - K e^{-rT} Φ(d₂) with effective drift r-q. Extension of bs_call_formula to dividend-paying assets.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.Dividends\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem bs_dividends_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r q σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K (r - q) σ T Z) :\n    ∫ ω, Real.exp (-r * T) * max (bsTerminal S_0 (r - q) σ T (Z ω) - K) 0 ∂Q\n      = S_0 * Real.exp (-(q * T)) * Phi (bsd1 S_0 K (r - q) σ T)\n        - K * Real.exp (-(r * T)) * Phi (bsd2 S_0 K (r - q) σ T) :=\n  MathFin.bs_dividends_call_formula h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS-Merton with dividends (Hull 17.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Apply bs_call_formula with rate parameter r-q, then factor e^{-rT} = e^{-qT} · e^{-(r-q)T} on the LHS. Lives in MathFin/BlackScholes/Dividends.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-garman-kohlhagen",
+      "name": "Garman-Kohlhagen FX Call",
+      "description": "FX call pricing: V = S e^{-r_f·T} Φ(d₁) - K e^{-r_d·T} Φ(d₂) with effective drift r_d - r_f. Trivial corollary of dividends formula with q = r_f.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.Dividends\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem garman_kohlhagen_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r_d r_f σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K (r_d - r_f) σ T Z) :\n    ∫ ω, Real.exp (-r_d * T) * max (bsTerminal S_0 (r_d - r_f) σ T (Z ω) - K) 0 ∂Q\n      = S_0 * Real.exp (-(r_f * T)) * Phi (bsd1 S_0 K (r_d - r_f) σ T)\n        - K * Real.exp (-(r_d * T)) * Phi (bsd2 S_0 K (r_d - r_f) σ T) :=\n  MathFin.garman_kohlhagen_call_formula h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Garman-Kohlhagen FX (Hull 17.3)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Direct specialization of bs_dividends_call_formula with q := r_f. Lives in MathFin/BlackScholes/Dividends.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black76-delta",
+      "name": "Black-76 Delta",
+      "description": "Futures option delta: ∂V_B/∂F = e^{-rT} · Φ(d₁). Specialization of BS delta to zero drift, post-multiplied by discount factor.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Black76Greeks\n\nopen MathFin\n\ntheorem black76_delta_thm {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun f => MathFin.blackV K σ r f T)\n      (Real.exp (-(r * T)) * MathFin.Phi (MathFin.bsd1 F K 0 σ T)) F :=\n  MathFin.hasDerivAt_blackV_F hK hσ r hF hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-76 delta (Hull 17.6)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. bsV delta at r=0 times outer discount factor e^{-rT}. Lives in MathFin/Futures/Black76Greeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black76-gamma",
+      "name": "Black-76 Gamma",
+      "description": "Futures option gamma: the second F-derivative of the Black-76 price, ∂²V_B/∂F² = e^{-rT}·ϕ(d₁)/(F σ √T).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Black76Greeks\n\nopen MathFin ProbabilityTheory\n\ntheorem black76_gamma_thm {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (deriv fun f => MathFin.blackV K σ r f T)\n      (Real.exp (-(r * T)) * gaussianPDFReal 0 1 (MathFin.bsd1 F K 0 σ T)\n        / (F * σ * Real.sqrt T)) F :=\n  MathFin.hasDerivAt_deriv_blackV_F hK hσ r hF hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-76 gamma (Hull 17.6)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, stated for the Black-76 price itself: the gamma formula hasDerivAt_blackV_FF (bsV gamma at r=0 times outer discount factor) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the delta e^{-rT}·Φ(d₁) is ∂V_B/∂F on all of F > 0 (hasDerivAt_blackV_F). Lives in MathFin/Futures/Black76Greeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black76-vega",
+      "name": "Black-76 Vega",
+      "description": "Futures option vega: ∂V_B/∂σ = e^{-rT} · F · ϕ(d₁) · √T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Black76Greeks\n\nopen MathFin ProbabilityTheory\n\ntheorem black76_vega_thm {K : ℝ} (hK : 0 < K) (r : ℝ)\n    {F σ T : ℝ} (hF : 0 < F) (hσ : 0 < σ) (hT : 0 < T) :\n    HasDerivAt (fun s => MathFin.blackV K s r F T)\n      (Real.exp (-(r * T)) * F * gaussianPDFReal 0 1 (MathFin.bsd1 F K 0 σ T)\n        * Real.sqrt T) σ :=\n  MathFin.hasDerivAt_blackV_sigma hK r hF hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-76 vega (Hull 17.6)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. bsV vega at r=0 times outer discount factor. Lives in MathFin/Futures/Black76Greeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bachelier-gamma",
+      "name": "Bachelier Gamma",
+      "description": "Bachelier gamma: the second S-derivative of the Bachelier (normal-model) call price, ∂²V/∂S² = ϕ(d)/(σ √T), at every spot S.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.BachelierGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bachelier_gamma_thm {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : ℝ) :\n    HasDerivAt (deriv fun s => MathFin.bachelierV K σ T s)\n      (gaussianPDFReal 0 1 (MathFin.bachelierD S K σ T) / (σ * Real.sqrt T)) S :=\n  MathFin.hasDerivAt_deriv_bachelierV_S hσ hT S\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Bachelier gamma",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, stated for the Bachelier price itself: the gamma formula hasDerivAt_bachelierV_SS (chain rule on Φ(d(S)) with ∂_S d = 1/(σ√T)) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the delta Φ(d) is ∂V/∂S at every S (hasDerivAt_bachelierV_S). Lives in MathFin/BlackScholes/BachelierGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bachelier-theta",
+      "name": "Bachelier Theta",
+      "description": "Bachelier theta: ∂V/∂T = σ · ϕ(d) / (2 √T). Cancellation via (S-K) · d / √T = σ · d².",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.BachelierGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bachelier_theta_thm {K σ : ℝ} (hσ : 0 < σ) {S T : ℝ} (hT : 0 < T) :\n    HasDerivAt (fun t => MathFin.bachelierV K σ t S)\n      (σ * gaussianPDFReal 0 1 (MathFin.bachelierD S K σ T) / (2 * Real.sqrt T)) T :=\n  MathFin.hasDerivAt_bachelierV_T hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Bachelier theta",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Quotient + chain rules on d(T) + algebraic cancellation. Lives in MathFin/BlackScholes/BachelierGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-asset-digital-gamma",
+      "name": "Asset-or-Nothing Digital Gamma",
+      "description": "Asset-or-nothing digital gamma: the second S-derivative of the asset-digital price, ∂²V_asset/∂S² = -ϕ(d₁)·d₂/(S σ² τ); the Φ-term and pdf-term contributions of the delta Φ(d₁) + ϕ(d₁)/(σ√τ) collapse via σ√τ − d₁ = -d₂.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem asset_digital_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (deriv fun s => MathFin.bsAssetDigital K r σ s τ)\n      (-(gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) *\n        MathFin.bsd2 S K r σ τ / (S * σ^2 * τ))) S :=\n  MathFin.hasDerivAt_deriv_bsAssetDigital_S hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Asset-or-nothing gamma (Hull 26.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, stated for the asset-digital price itself: the gamma formula hasDerivAt_bsAssetDigital_SS (sum of Φ-chain-rule and pdf-chain-rule contributions, collapsed via the σ√τ − d₁ = -d₂ identity) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the delta formula is ∂V_asset/∂S on all of S > 0 (hasDerivAt_bsAssetDigital_S). Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-merton-delta",
+      "name": "BS-Merton Delta (Dividends)",
+      "description": "BS-Merton delta: ∂V_q/∂S = e^{-qT} · Φ(d₁') where d₁' = bsd1 S K (r-q) σ T. Via identity V_q = e^{-qT} · bsV(K, r-q, σ, S, T).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DividendsGreeks\n\nopen MathFin\n\ntheorem bs_merton_delta_thm {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => MathFin.bsVDiv K r q σ s τ)\n      (Real.exp (-(q * τ)) * MathFin.Phi (MathFin.bsd1 S K (r - q) σ τ)) S :=\n  MathFin.hasDerivAt_bsVDiv_S hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS-Merton dividends delta (Hull 17.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Direct const_mul of the BS call delta at effective drift r-q. Lives in MathFin/BlackScholes/DividendsGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-merton-gamma",
+      "name": "BS-Merton Gamma (Dividends)",
+      "description": "BS-Merton gamma: the second S-derivative of the call price with continuous dividend yield q, ∂²V_q/∂S² = e^{-qτ}·ϕ(d₁')/(S σ √τ), with d₁' the d₁ of rate r − q.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DividendsGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_merton_gamma_thm {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (deriv fun s => MathFin.bsVDiv K r q σ s τ)\n      (Real.exp (-(q * τ)) * gaussianPDFReal 0 1 (MathFin.bsd1 S K (r - q) σ τ)\n        / (S * σ * Real.sqrt τ)) S :=\n  MathFin.hasDerivAt_deriv_bsVDiv_S hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS-Merton dividends gamma (Hull 17.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, stated for the dividend-adjusted price itself: the gamma formula hasDerivAt_bsVDiv_SS (direct const_mul of the BS call gamma at effective drift r-q) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the delta e^{-qτ}·Φ(d₁') is ∂V_q/∂S on all of S > 0 (hasDerivAt_bsVDiv_S). Lives in MathFin/BlackScholes/DividendsGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-merton-vega",
+      "name": "BS-Merton Vega (Dividends)",
+      "description": "BS-Merton vega: ∂V_q/∂σ = e^{-qT} · S · ϕ(d₁') · √T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DividendsGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_merton_vega_thm {K r q : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => MathFin.bsVDiv K r q s S τ)\n      (Real.exp (-(q * τ)) * S * gaussianPDFReal 0 1 (MathFin.bsd1 S K (r - q) σ τ)\n        * Real.sqrt τ) σ :=\n  MathFin.hasDerivAt_bsVDiv_sigma hK hS hσ hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS-Merton dividends vega (Hull 17.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Direct const_mul of the BS call vega at effective drift r-q. Lives in MathFin/BlackScholes/DividendsGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-merton-rho",
+      "name": "BS-Merton Rho (Dividends)",
+      "description": "BS-Merton rho: ∂V_q/∂r = K · τ · e^{-rτ} · Φ(d₂'). Chain rule on r-q applied to existing call rho, then e^{-qT} · e^{-(r-q)T} = e^{-rT}.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DividendsGreeks\n\nopen MathFin\n\ntheorem bs_merton_rho_thm {K q σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)\n    {S : ℝ} (hS : 0 < S) (r : ℝ) :\n    HasDerivAt (fun r' => MathFin.bsVDiv K r' q σ S τ)\n      (K * τ * Real.exp (-(r * τ)) * MathFin.Phi (MathFin.bsd2 S K (r - q) σ τ)) r :=\n  MathFin.hasDerivAt_bsVDiv_r hK hσ hτ hS r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS-Merton dividends rho (Hull 17.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via chain rule on r' ↦ r' - q applied to existing call rho, combining e^{-qT} · e^{-(r-q)T} = e^{-rT}. Lives in MathFin/BlackScholes/DividendsGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-merton-psi",
+      "name": "BS-Merton Psi (dividend Greek)",
+      "description": "BS-Merton psi: ∂V_q/∂q = -S · τ · e^{-qτ} · Φ(d₁'). Sensitivity of the option price to the dividend yield, derived via product rule on V_q = e^{-qτ}·bsV(K, r-q, σ, S, τ).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DividendsGreeks\n\nopen MathFin\n\ntheorem bs_merton_psi_thm {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)\n    {S : ℝ} (hS : 0 < S) (q : ℝ) :\n    HasDerivAt (fun q' => MathFin.bsVDiv K r q' σ S τ)\n      (-(S * τ * Real.exp (-(q * τ)) * MathFin.Phi (MathFin.bsd1 S K (r - q) σ τ))) q :=\n  MathFin.hasDerivAt_bsVDiv_q hK hσ hτ hS q\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS-Merton dividends psi (Hull 17.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via product rule on V_q = e^{-qτ}·bsV(K, r-q, σ, S, τ). The first-term contribution -τ·V_q and the second-term -K·τ·e^{-rτ}·Φ(d₂') combine via the magic-identity-like cancellation S·e^{-qτ}·Φ(d₁') = K·e^{-rτ}·Φ(d₂') minus itself (the residual Φ(d₂') terms cancel). Lives in MathFin/BlackScholes/DividendsGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-merton-theta",
+      "name": "BS-Merton Theta (τ form, Dividends)",
+      "description": "BS-Merton theta: ∂V_q/∂τ = -q·V_q + e^{-qτ}·(σ·S·ϕ(d₁')/(2√τ) + (r-q)·K·e^{-(r-q)τ}·Φ(d₂')).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DividendsGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_merton_theta_thm {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun t => MathFin.bsVDiv K r q σ S t)\n      (-(q * MathFin.bsVDiv K r q σ S τ) +\n        Real.exp (-(q * τ)) *\n          (σ * S * gaussianPDFReal 0 1 (MathFin.bsd1 S K (r - q) σ τ) / (2 * Real.sqrt τ)\n            + (r - q) * K * Real.exp (-((r - q) * τ)) *\n              MathFin.Phi (MathFin.bsd2 S K (r - q) σ τ))) τ :=\n  MathFin.hasDerivAt_bsVDiv_tau hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS-Merton dividends theta (Hull 17.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via product rule on V_q = e^{-qτ}·bsV(K, r-q, σ, S, τ) using existing hasDerivAt_bsV_tau at effective drift r-q. Lives in MathFin/BlackScholes/DividendsGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cash-digital-gamma",
+      "name": "Cash-or-Nothing Digital Gamma",
+      "description": "Cash-or-nothing digital gamma: the second S-derivative of the cash-digital price, ∂²V_cash/∂S² = -e^{-rτ}·ϕ(d₂)·d₁/(S² σ² τ); differentiating the delta e^{-rτ}·ϕ(d₂)/(S·σ·√τ) is a quotient rule collapsed via d₂ + σ√τ = d₁.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem cash_digital_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (deriv fun s => MathFin.bsCashDigital K r σ s τ)\n      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) *\n        MathFin.bsd1 S K r σ τ / (S^2 * σ^2 * τ))) S :=\n  MathFin.hasDerivAt_deriv_bsCashDigital_S hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cash-or-nothing gamma (Hull 26.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, stated for the cash-digital price itself: the gamma formula hasDerivAt_bsCashDigital_SS, a quotient rule on δ_cash(s) = e^{-rτ}·ϕ(d₂(s))/(s·σ·√τ) — numerator f(s) = e^{-rτ}·ϕ(d₂(s)) with f'(S) = e^{-rτ}·(-d₂·ϕ(d₂))·(1/(Sσ√τ)), denominator g(s) = s·σ·√τ with g'(S) = σ·√τ, and (f'·g − f·g')/g² collapsed via d₂ + σ√τ = d₁ — is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since δ_cash is ∂V_cash/∂S on all of S > 0 (hasDerivAt_bsCashDigital_S). Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-asset-digital-rho",
+      "name": "Asset-or-Nothing Digital Rho",
+      "description": "Asset digital rho: ∂_r V_asset = S · ϕ(d₁) · √τ/σ. Direct chain rule using ∂_r d₁ = √τ/σ.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem asset_digital_rho_thm (S K σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) (r : ℝ) :\n    HasDerivAt (fun r' => MathFin.bsAssetDigital K r' σ S τ)\n      (S * gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) * (Real.sqrt τ / σ)) r :=\n  MathFin.hasDerivAt_bsAssetDigital_r S K σ hσ hτ r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Asset-or-nothing rho (Hull 26.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₁. ∂_r d₁ = √τ/σ since d₁ − d₂ is r-independent. Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cash-digital-rho",
+      "name": "Cash-or-Nothing Digital Rho",
+      "description": "Cash digital rho: ∂_r V_cash = e^{-rτ}·(ϕ(d₂)·√τ/σ − τ·Φ(d₂)). Product rule on e^{-rτ}·Φ(d₂(r)).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem cash_digital_rho_thm (S K σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) (r : ℝ) :\n    HasDerivAt (fun r' => MathFin.bsCashDigital K r' σ S τ)\n      (Real.exp (-(r * τ)) *\n        (gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) * (Real.sqrt τ / σ)\n          - τ * MathFin.Phi (MathFin.bsd2 S K r σ τ))) r :=\n  MathFin.hasDerivAt_bsCashDigital_r S K σ hσ hτ r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cash-or-nothing rho (Hull 26.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via product rule. ∂_r e^{-rτ} = -τ·e^{-rτ}, ∂_r Φ(d₂(r)) = ϕ(d₂)·√τ/σ. Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-asset-digital-vega",
+      "name": "Asset-or-Nothing Digital Vega",
+      "description": "Asset digital vega: ∂_σ V_asset = -S · ϕ(d₁) · d₂ / σ. Chain rule with ∂_σ d₁ = -d₂/σ via bsd2_eq.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem asset_digital_vega_thm (S K r : ℝ) {σ τ : ℝ} (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun σ' => MathFin.bsAssetDigital K r σ' S τ)\n      (-(S * gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) *\n        MathFin.bsd2 S K r σ τ / σ)) σ :=\n  MathFin.hasDerivAt_bsAssetDigital_sigma S K r hσ hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Asset-or-nothing vega (Hull 26.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₁. The Lean form (σ²τ/2 − log(S/K) − rτ)/(σ²√τ) for ∂_σ d₁ equals -d₂/σ via bsd2_eq + field_simp + ring. Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cash-digital-vega",
+      "name": "Cash-or-Nothing Digital Vega",
+      "description": "Cash digital vega: ∂_σ V_cash = -e^{-rτ} · ϕ(d₂) · d₁ / σ. Chain rule with ∂_σ d₂ = -d₁/σ.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem cash_digital_vega_thm (S K : ℝ) {r σ τ : ℝ} (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun σ' => MathFin.bsCashDigital K r σ' S τ)\n      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) *\n        MathFin.bsd1 S K r σ τ / σ)) σ :=\n  MathFin.hasDerivAt_bsCashDigital_sigma S K hσ hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cash-or-nothing vega (Hull 26.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₂. The Lean form ∂_σ d₂ = ∂_σ d₁ − √τ equals -d₁/σ via bsd2_eq + the identity bsd2 + σ√τ = bsd1. Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-asset-digital-theta",
+      "name": "Asset-or-Nothing Digital Theta (τ form)",
+      "description": "Asset digital theta: ∂_τ V_asset = S · ϕ(d₁) · ((r + σ²/2)τ − log(S/K))/(2στ√τ). Direct chain rule.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem asset_digital_theta_thm (S K r σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :\n    HasDerivAt (fun t => MathFin.bsAssetDigital K r σ S t)\n      (S * gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) *\n        (((r + σ^2/2) * τ - Real.log (S/K)) / (2 * σ * τ * Real.sqrt τ))) τ :=\n  MathFin.hasDerivAt_bsAssetDigital_tau S K r σ hσ hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Asset-or-nothing theta (Hull 26.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₁ in τ. Lean's natural quotient-rule form for ∂_τ d₁ equals (r + σ²/2)/(σ√τ) − d₁/(2τ) by algebra (left to consumer). Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cash-digital-theta",
+      "name": "Cash-or-Nothing Digital Theta (τ form)",
+      "description": "Cash digital theta: ∂_τ V_cash = -r·e^{-rτ}·Φ(d₂) + e^{-rτ}·ϕ(d₂)·∂_τ d₂. Product rule on e^{-rτ}·Φ(d₂(τ)).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DigitalGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem cash_digital_theta_thm (S K r σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :\n    HasDerivAt (fun t => MathFin.bsCashDigital K r σ S t)\n      (-r * Real.exp (-(r * τ)) * MathFin.Phi (MathFin.bsd2 S K r σ τ) +\n        Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) *\n          (((r + σ^2/2) * τ - Real.log (S/K)) / (2 * σ * τ * Real.sqrt τ)\n            - σ / (2 * Real.sqrt τ))) τ :=\n  MathFin.hasDerivAt_bsCashDigital_tau S K r σ hσ hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cash-or-nothing theta (Hull 26.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via product rule on e^{-rτ}·Φ(d₂(τ)). ∂_τ e^{-rτ} = -r·e^{-rτ}; ∂_τ Φ(d₂(τ)) = ϕ(d₂)·∂_τ d₂ where ∂_τ d₂ is the Lean natural form. Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cash-digital-strike",
+      "name": "Cash-or-Nothing Digital Strike Derivative",
+      "domain": "mathematical_finance",
+      "description": "Cash digital strike derivative: ∂_K V_cash = −e^{-rτ}·ϕ(d₂)/(K σ √τ), minus the discounted lognormal density formula at K (lognormalTerminalPDF, mf-breeden-litzenberger). Chain rule on Φ(d₂(K)) with ∂_K d₂ = −1/(K σ √τ). The cash digital is minus the strike derivative of the call price (mf-bsV-K-deriv), so this is also the second strike derivative of the call (mf-bsV-KK-deriv) with the sign reversed.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.StrikeGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem cash_digital_strike_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => MathFin.bsCashDigital k r σ S τ)\n      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ))) K :=\n  MathFin.hasDerivAt_bsCashDigital_K hS hσ hK hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cash-or-nothing strike sensitivity (Hull 26.1)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Chain rule on e^{-rτ} · Φ(d₂(K)): hasDerivAt_Phi with ∂_K d₂ = −1/(K σ √τ) (hasDerivAt_bsd2_K). The second strike derivative of the call price, hasDerivAt_deriv_bsV_K, is this lemma negated. Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black76-rho",
+      "name": "Black-76 Rho",
+      "description": "Black-76 rho: ∂_r V_B = -T · V_B. Clean form because the inner bsV is r-independent (zero drift in futures setup) — only the e^{-rT} discount contributes.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Black76Greeks\n\nopen MathFin\n\ntheorem black76_rho_thm (K σ F T : ℝ) (r : ℝ) :\n    HasDerivAt (fun r' => MathFin.blackV K σ r' F T)\n      (-T * MathFin.blackV K σ r F T) r :=\n  MathFin.hasDerivAt_blackV_r K σ F T r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-76 rho (Hull 17.6)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The inner bsV(K, 0, σ, F, T) has zero drift so is r-independent. Only the discount factor e^{-rT} contributes, giving the clean -T·V_B form. Lives in MathFin/Futures/Black76Greeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black76-theta",
+      "name": "Black-76 Theta (T form)",
+      "description": "Black-76 theta: ∂_T V_B = -r·V_B + e^{-rT}·σ·F·ϕ(d₁)/(2√T). Product rule on e^{-rT}·bsV(K, 0, σ, F, T) using BS theta at r=0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Black76Greeks\n\nopen MathFin ProbabilityTheory\n\ntheorem black76_theta_thm {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun t => MathFin.blackV K σ r F t)\n      (-r * MathFin.blackV K σ r F T +\n        Real.exp (-(r * T)) *\n          (σ * F * gaussianPDFReal 0 1 (MathFin.bsd1 F K 0 σ T) / (2 * Real.sqrt T))) T :=\n  MathFin.hasDerivAt_blackV_T hK hσ r hF hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-76 theta (Hull 17.6)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via product rule on e^{-rT}·bsV(K, 0, σ, F, T). ∂_T e^{-rT} = -r·e^{-rT}; ∂_T bsV(·, 0, ·) reduces to σ·F·ϕ(d₁)/(2√T) (the rK·e^{-rT}·Φ(d₂) term vanishes at r=0). Lives in MathFin/Futures/Black76Greeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-phi-le-one",
+      "name": "Standard Normal CDF Upper Bound",
+      "description": "Φ(x) ≤ 1 for all x, the upper-bound side of the CDF range. Follows from Φ(x) + Φ(-x) = 1 and Φ(-x) ≥ 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PriceBounds\n\nopen MathFin\n\ntheorem phi_le_one_thm (x : ℝ) : MathFin.Phi x ≤ 1 :=\n  MathFin.Phi_le_one x\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Standard normal CDF range",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Phi_add_Phi_neg + Phi_nonneg + linarith. Lives in MathFin/BlackScholes/StaticBounds.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsV-le-S",
+      "name": "Call Price Upper Bound",
+      "description": "Black-Scholes call price never exceeds the underlying price: bsV(K, r, σ, S, τ) ≤ S, for S, K ≥ 0. Follows from Φ ≤ 1.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PriceBounds\n\nopen MathFin\n\ntheorem bsV_le_S_thm (K r σ S τ : ℝ) (hS : 0 ≤ S) (hK : 0 ≤ K) :\n    MathFin.bsV K r σ S τ ≤ S :=\n  MathFin.bsV_le_S K r σ S τ hS hK\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Call price upper bound (Hull Ch 11.2; Merton 1973)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from S·Φ(d₁) ≤ S and K·e^{-rτ}·Φ(d₂) ≥ 0. Lives in MathFin/BlackScholes/StaticBounds.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsP-le-K-disc",
+      "name": "Put Price Upper Bound",
+      "description": "Black-Scholes put price never exceeds the discounted strike: bsP(K, r, σ, S, τ) ≤ K·e^{-rτ}, for S, K ≥ 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PriceBounds\n\nopen MathFin\n\ntheorem bsP_le_K_disc_thm (K r σ S τ : ℝ) (hS : 0 ≤ S) (hK : 0 ≤ K) :\n    MathFin.bsP K r σ S τ ≤ K * Real.exp (-(r * τ)) :=\n  MathFin.bsP_le_K_disc K r σ S τ hS hK\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Put price upper bound (Hull Ch 11.2; Merton 1973)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from K·e^{-rτ}·Φ(-d₂) ≤ K·e^{-rτ} and S·Φ(-d₁) ≥ 0. Lives in MathFin/BlackScholes/StaticBounds.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-box-spread-identity",
+      "name": "Box Spread Arbitrage Identity",
+      "description": "The box spread payoff (long call/short put at K₁) - (long call/short put at K₂) equals (K₂ - K₁)·e^{-rτ}, independent of S, σ. Pure-arbitrage identity from put-call parity at two strikes.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PriceBounds\n\nopen MathFin\n\ntheorem box_spread_thm (K₁ K₂ r σ S τ : ℝ) :\n    (MathFin.bsV K₁ r σ S τ - MathFin.bsP K₁ r σ S τ) -\n      (MathFin.bsV K₂ r σ S τ - MathFin.bsP K₂ r σ S τ) =\n      (K₂ - K₁) * Real.exp (-(r * τ)) :=\n  MathFin.box_spread_identity K₁ K₂ r σ S τ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Box spread pricing (Hull Ch 12.8; Cohen 1985)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via two applications of put-call parity + linarith. Lives in MathFin/BlackScholes/StaticBounds.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsd1-K-deriv",
+      "name": "Strike Derivative of d_1",
+      "description": "∂_K d_1(S, K, r, σ, τ) = -1/(K·σ·√τ). Mirror of the ∂_S d_1 result.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.StrikeGreeks\n\nopen MathFin\n\ntheorem bsd1_K_deriv_thm (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ)\n    {K : ℝ} (hK : 0 < K) :\n    HasDerivAt (fun k => MathFin.bsd1 S k r σ τ)\n      (-(1 / (K * σ * Real.sqrt τ))) K :=\n  MathFin.hasDerivAt_bsd1_K S r σ τ hS hσ hτ hK\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-Scholes K-derivative of d_1 (Hull Ch 17)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Real.log_div + HasDerivAt.congr_of_eventuallyEq on a (k ≠ 0)-neighborhood. Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsd2-K-deriv",
+      "name": "Strike Derivative of d_2",
+      "description": "∂_K d_2(S, K, r, σ, τ) = -1/(K·σ·√τ), same as ∂_K d_1 since d_2 - d_1 = -σ√τ is K-independent.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.StrikeGreeks\n\nopen MathFin\n\ntheorem bsd2_K_deriv_thm (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ)\n    {K : ℝ} (hK : 0 < K) :\n    HasDerivAt (fun k => MathFin.bsd2 S k r σ τ)\n      (-(1 / (K * σ * Real.sqrt τ))) K :=\n  MathFin.hasDerivAt_bsd2_K S r σ τ hS hσ hτ hK\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-Scholes K-derivative of d_2 (Hull Ch 17)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: bsd2 = bsd1 - σ√τ, so K-derivative is same as bsd1's. Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsV-K-deriv",
+      "name": "Call Price Strike Derivative",
+      "description": "∂_K bsV = -e^{-rτ}·Φ(d_2). The magic identity S·ϕ(d_1) = K·e^{-rτ}·ϕ(d_2) collapses the d_1 contribution.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.StrikeGreeks\n\nopen MathFin\n\ntheorem bsV_K_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => MathFin.bsV k r σ S τ)\n      (-(Real.exp (-(r * τ)) * MathFin.Phi (MathFin.bsd2 S K r σ τ))) K :=\n  MathFin.hasDerivAt_bsV_K hS hσ hK hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-Scholes ∂_K Greek (Hull Ch 17; Black-Scholes 1973)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via product/chain rule + bs_identity magic identity collapse. Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsP-K-deriv",
+      "name": "Put Price Strike Derivative",
+      "description": "∂_K bsP = e^{-rτ}·Φ(-d_2). Follows from put-call parity bsP = bsV - S + K·e^{-rτ}.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.StrikeGreeks\n\nopen MathFin\n\ntheorem bsP_K_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => MathFin.bsP k r σ S τ)\n      (Real.exp (-(r * τ)) * MathFin.Phi (-MathFin.bsd2 S K r σ τ)) K :=\n  MathFin.hasDerivAt_bsP_K hS hσ hK hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-Scholes put ∂_K Greek (Hull Ch 17)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via put-call parity bsP_eq_bsV + ∂_K bsV + Phi_neg. Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsV-KK-deriv",
+      "name": "Call Price Second Strike-Derivative",
+      "description": "The second strike-derivative of the Black-Scholes call price: ∂²V/∂K² = e^{-rτ}·ϕ(d_2)/(K·σ·√τ). Its sign — and with it convexity of the call price in strike, the butterfly-spread non-negativity — is not part of this entry's statement.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.StrikeGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bsV_KK_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (deriv fun k => MathFin.bsV k r σ S τ)\n      (Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ)) K :=\n  MathFin.hasDerivAt_deriv_bsV_K hS hσ hK hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Call price convexity in strike (butterfly spread non-negativity; Hull Ch 12.8)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, stated for the call price itself: minus the K-derivative of the cash digital e^{-rτ}·Phi(d_2(K)) (hasDerivAt_bsCashDigital_K, mf-cash-digital-strike, chaining via Phi' = ϕ and ∂_K d_2) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since -e^{-rτ}·Phi(d_2) is ∂_K bsV on all of K > 0 (hasDerivAt_bsV_K). Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-second-moment-terminal",
+      "name": "Lognormal Second Moment under Risk-Neutral",
+      "description": "E_Q[S_T²] = S_0²·exp(2rT + σ²T) under the BS lognormal hypothesis. Derived from the Gaussian MGF evaluated at 2σ√T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.LognormalMoments\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem second_moment_terminal_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, (bsTerminal S_0 r σ T (Z ω))^2 ∂Q =\n      S_0^2 * Real.exp (2 * r * T + σ^2 * T) :=\n  MathFin.secondMoment_terminal h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Lognormal second moment (Hull Ch 14.7; risk-neutral measure under BS)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: (bsTerminal z)^2 = S_0^2·exp(2(r-σ²/2)T + 2σ√T·z), then HasLaw transfer + gaussian MGF at 2σ√T + BS algebra 2(r-σ²/2)T + (2σ√T)²/2 = 2rT + σ²T. Lives in MathFin/BlackScholes/LognormalMoments.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-variance-terminal",
+      "name": "Lognormal Variance under Risk-Neutral",
+      "description": "Var_Q[S_T] = S_0²·exp(2rT)·(exp(σ²T) - 1). Combines the second-moment formula with E[S_T] = S_0·exp(rT).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.LognormalMoments\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem variance_terminal_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, (bsTerminal S_0 r σ T (Z ω))^2 ∂Q -\n      (∫ ω, bsTerminal S_0 r σ T (Z ω) ∂Q)^2 =\n        S_0^2 * Real.exp (2 * r * T) * (Real.exp (σ^2 * T) - 1) :=\n  MathFin.variance_terminal h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Lognormal variance (Hull Ch 14.7; Bodie-Kane-Marcus Ch 21)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: secondMoment_terminal − (expected_terminal_eq_forward)² = S_0²·exp(2rT)·(exp(σ²T) - 1), via exp(rT)² = exp(2rT) and Real.exp_add. Lives in MathFin/BlackScholes/LognormalMoments.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-gaussian-smoothing",
+      "name": "Gaussian Smoothing of the Black–Scholes Call",
+      "description": "For S, K, σ, T > 0, a mean m and a variance v ≥ 0, the Black–Scholes call price C_BS(S; σ) (bsV, at strike K, rate r and maturity T) at the spot Se^x, averaged over x ~ N(m, v), is the Black–Scholes call at the spot Se^{m + v/2} and the volatility √(σ² + v/T): ∫ C_BS(Se^x; σ) dN(m, v)(x) = C_BS(Se^{m + v/2}; √(σ² + v/T)). The spot is multiplied by the lognormal mean E[e^x] = e^{m + v/2} (also proved) and the log-return variance σ²T gains v.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.GaussianSmoothing\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Gaussian smoothing of the Black–Scholes call.** -/\ntheorem bs_gaussian_smoothing_thm {S K r σ T : ℝ} (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ)\n    (hT : 0 < T) (m : ℝ) (v : ℝ≥0) :\n    ∫ x, MathFin.bsV K r σ (S * Real.exp x) T ∂(gaussianReal m v)\n      = MathFin.bsV K r (Real.sqrt (σ ^ 2 + v / T)) (S * Real.exp (m + v / 2)) T :=\n  MathFin.integral_bsV_mul_exp_gaussianReal hS hK hσ hT m v\n\n/-- The lognormal mean `∫ eˣ dN(m, v) = e^{m + v/2}`. -/\ntheorem lognormal_mean_thm (m : ℝ) (v : ℝ≥0) :\n    ∫ x, Real.exp x ∂(gaussianReal m v) = Real.exp (m + v / 2) :=\n  MathFin.integral_exp_gaussianReal m v\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. On N(0,1) ⊗ N(m, v) with coordinates Z and G, the mixing formula (jumpDiffusion_call_eq_integral_bsV, mf-jump-diffusion-mixing-formula) makes the average the expected discounted payoff of the terminal price S·e^{(r − σ²/2)T + σ√T·Z + G}. The total log-shock σ√T·Z + G is N(m, σ²T + v) (gaussianReal_const_mul, IndepFun.hasLaw_fun_add, gaussianReal_conv_gaussianReal); standardized it is N(0,1) (hasLaw_sub_div_of_gaussianReal), and the terminal price is a Black–Scholes terminal price at the spot Se^{m + v/2} and a volatility σ' with σ'²T = σ²T + v, priced by the Black–Scholes formula (integral_bsCall_payoff_eq_bsV) (integral_bsV_mul_exp_gaussianReal_of_sq). The lognormal mean is Mathlib's Gaussian moment generating function at 1 (mgf_fun_id_gaussianReal, integral_exp_gaussianReal). Lives in MathFin/BlackScholes/GaussianSmoothing.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussianPDF-symmetry",
+      "name": "Standard Normal PDF Symmetry",
+      "description": "ϕ(-z) = ϕ(z) for the standard normal density, since the gaussian is symmetric around 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PutStrikeConvexity\n\nopen ProbabilityTheory MathFin\n\ntheorem gaussianPDF_symmetry_thm (z : ℝ) :\n    gaussianPDFReal 0 1 (-z) = gaussianPDFReal 0 1 z :=\n  MathFin.gaussianPDFReal_zero_one_neg z\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Standard normal symmetry",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via congr + ring on the PDF formula. Lives in MathFin/BlackScholes/PutStrikeConvexity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsP-KK-deriv",
+      "name": "Put Price Second Strike-Derivative",
+      "description": "The second strike-derivative of the Black-Scholes put price: ∂²P/∂K² = e^{-rτ}·ϕ(d_2)/(K·σ·√τ), the same as the call's, since put and call differ by a function linear in K.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PutStrikeConvexity\n\nopen ProbabilityTheory MathFin\n\ntheorem bsP_KK_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (deriv fun k => MathFin.bsP k r σ S τ)\n      (Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (MathFin.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ)) K :=\n  MathFin.hasDerivAt_deriv_bsP_K hS hσ hK hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Put price convexity in strike (mirror of call convexity; Hull Ch 12.8)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, stated for the put price itself: the K-derivative of the strike sensitivity e^{-rτ}·Phi(-d_2(K)) (hasDerivAt_bsP_KK, via the derivative of Phi(-d_2(K)) + PDF symmetry + field_simp) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since e^{-rτ}·Phi(-d_2) is ∂_K bsP on all of K > 0 (hasDerivAt_bsP_K). Lives in MathFin/BlackScholes/PutStrikeConvexity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-capped-call-bull-spread",
+      "name": "Capped Call equals Bull Call Spread",
+      "description": "min(max(S - K₁, 0), K₂ - K₁) = max(S - K₁, 0) - max(S - K₂, 0). Pure pointwise algebra via case split on S.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.CappedCall\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem capped_call_eq_bull_spread_thm (S K₁ K₂ : ℝ) (h : K₁ ≤ K₂) :\n    min (max (S - K₁) 0) (K₂ - K₁) = max (S - K₁) 0 - max (S - K₂) 0 :=\n  MathFin.cappedCall_eq_bull_spread S K₁ K₂ h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Capped call decomposition (Hull 11.2)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bull-call-spread-payoff-le",
+      "name": "Bull-Call Spread Payoff Non-Negativity",
+      "description": "For K₁ ≤ K₂, max(S - K₂, 0) ≤ max(S - K₁, 0): the bull-call spread payoff is non-negative everywhere.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.Spreads\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem bull_call_spread_payoff_le_thm (S K₁ K₂ : ℝ) (h : K₁ ≤ K₂) :\n    max (S - K₂) 0 ≤ max (S - K₁) 0 :=\n  MathFin.bull_call_spread_payoff_le S K₁ K₂ h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Bull-call spread no-arb (Hull 11.5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-butterfly-payoff-nonneg",
+      "name": "Butterfly Spread Payoff Non-Negativity",
+      "description": "For K₁ ≤ K₃ with K₂ = (K₁+K₃)/2, max(S-K₁, 0) - 2·max(S-K₂, 0) + max(S-K₃, 0) ≥ 0. The butterfly payoff is non-negative — the foundation for Breeden-Litzenberger's implied PDF.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.Spreads\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem butterfly_payoff_nonneg_thm (S K₁ K₃ : ℝ) (h : K₁ ≤ K₃) :\n    0 ≤ max (S - K₁) 0 - 2 * max (S - (K₁ + K₃) / 2) 0 + max (S - K₃) 0 :=\n  MathFin.butterfly_payoff_nonneg S K₁ K₃ h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Butterfly spread (Hull 11.5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-nth-moment-terminal",
+      "name": "n-th Moment of the Terminal Asset Price (Power-Forward Moment)",
+      "description": "Under the BS lognormal hypothesis, E_Q[S_T^n] = S_0^n · exp(n·r·T + n(n-1)/2 · σ²·T). Generalizes the forward (n=1) and second moment (n=2). Derivation: gaussian MGF at c = n·σ·√T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PowerOption\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem nthMoment_terminal_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (n : ℕ)\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, (bsTerminal S_0 r σ T (Z ω))^n ∂Q =\n      S_0^n *\n        Real.exp ((n : ℝ) * r * T + (n : ℝ) * ((n : ℝ) - 1) / 2 * σ^2 * T) :=\n  MathFin.nthMoment_terminal n h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Power options under lognormal (Hull 26.10, Heynen-Kat 1996)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-power-forward-price",
+      "name": "Power-Forward Price under BS Lognormal",
+      "description": "Discounted n-th moment of S_T equals S_0^n · exp((n-1)·r·T + n(n-1)/2 · σ² T). Generalizes spot-forward parity (n=1: price = S_0).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PowerOption\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem powerForward_price_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (n : ℕ)\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    Real.exp (-(r * T)) *\n      (∫ ω, (bsTerminal S_0 r σ T (Z ω))^n ∂Q) =\n      S_0^n *\n        Real.exp ((((n : ℝ) - 1) * r * T) +\n                  (n : ℝ) * ((n : ℝ) - 1) / 2 * σ^2 * T) :=\n  MathFin.powerForward_price n h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Power forward price (Heynen-Kat 1996)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-breeden-litzenberger",
+      "name": "Breeden-Litzenberger under Black-Scholes: Second Strike-Derivative of the Call",
+      "description": "Breeden-Litzenberger under Black-Scholes: the second strike-derivative of the call price is the discounted lognormal density with risk-neutral parameters at K, ∂²V/∂K² = e^{-rT}·ϕ(d_2)/(K σ √T) (lognormalTerminalPDF). That this function is a probability density, or the density of S_T under a pricing measure, is not part of this entry's statement; mf-black-scholes-lognormal-density identifies it with the density of the price at K, and mf-black-scholes-price-law shows that it is the density of the law of the price and integrates to one.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.BreedenLitzenberger\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem breedenLitzenberger_thm {S_0 r σ : ℝ} (hS : 0 < S_0) (hσ : 0 < σ)\n    {K T : ℝ} (hK : 0 < K) (hT : 0 < T) :\n    HasDerivAt (deriv fun k => bsV k r σ S_0 T)\n      (Real.exp (-(r * T)) * MathFin.lognormalTerminalPDF S_0 r σ T K) K :=\n  MathFin.breedenLitzenberger hS hσ hK hT\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Breeden-Litzenberger 1978 (state-price densities from option prices)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: the call's second strike-derivative (hasDerivAt_deriv_bsV_K) with its value read as the density lognormalTerminalPDF, which unfolds to ϕ(d_2)/(K σ √T). Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-call-price-convex-in-strike",
+      "name": "The Call Price Is Convex in the Strike Under Any Law, Strictly Where the Law Charges Every Interval",
+      "domain": "mathematical_finance",
+      "description": "Let X be a real random variable with finite mean under a finite measure μ, and let C(k) = ∫ (X − k)⁺ dμ be the undiscounted call price at strike k. Then C is convex in k: integrating the convex payoff against a positive measure keeps it convex. If moreover s is a convex set of strikes and μ{k₁ < X < k₂} ≠ 0 whenever k₁ < k₂ lie in s, then C is strictly convex on s: every butterfly spread a·C(k₁) + b·C(k₂) − C(a·k₁ + b·k₂), with a, b > 0, a + b = 1 and distinct strikes k₁ ≠ k₂ in s, has a positive price. Its payoff is nonnegative, and positive when k₁ < X < k₂. No model or discounting is assumed. Only this direction is proved: that strict convexity on s forces the law to charge every interval of s is not formalized.",
+      "metadata": {
+        "chapter": 14,
+        "reference": "Merton (1973), Theory of rational option pricing, Bell Journal of Economics and Management Science 4, 141-183; Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Convexity: the payoff k ↦ (X − k)⁺ is convex for each outcome (convexOn_call_payoff), and Mathlib's integral_convexOn_of_integrand_ae integrates convexity, the call payoffs being integrable because X is (convexOn_integral_call). Strict convexity: Mathlib's LinearOrder.strictConvexOn_of_lt reduces to k₁ < k₂. The butterfly payoff is nonnegative, and on {k₁ < X < k₂} the call struck at k₂ pays nothing while a·(X − k₁) exceeds (X − (a k₁ + b k₂))⁺, so the payoff is positive there; a nonnegative integrable function whose support has positive measure has a positive integral (Mathlib's integral_pos_iff_support_of_nonneg) (strictConvexOn_integral_call). Lives in MathFin/BlackScholes/StrikeConvexity.lean, where the Black–Scholes strike convexity bsV_strike_convexOn is now this lemma for the standard normal law (integral_bsCall_payoff_eq_bsV). Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.BlackScholes.StrikeConvexity\n\nopen MeasureTheory\n\n/-- **The call price is convex in the strike under any law, and strictly convex where the law\ncharges every interval of strikes.** -/\ntheorem call_price_convex_in_strike_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsFiniteMeasure μ] {X : Ω → ℝ} (hX : Integrable X μ) :\n    ConvexOn ℝ Set.univ (fun k ↦ ∫ ω, max (X ω - k) 0 ∂μ) ∧\n      ∀ s : Set ℝ, Convex ℝ s →\n        (∀ k₁ ∈ s, ∀ k₂ ∈ s, k₁ < k₂ → μ {ω | k₁ < X ω ∧ X ω < k₂} ≠ 0) →\n          StrictConvexOn ℝ s (fun k ↦ ∫ ω, max (X ω - k) 0 ∂μ) :=\n  ⟨MathFin.convexOn_integral_call hX, fun _ hs hμ ↦ MathFin.strictConvexOn_integral_call hX hs hμ⟩\n"
+      }
+    },
+    {
+      "id": "mf-call-spread-digital",
+      "name": "A Digital Is the Limit of Call Spreads",
+      "description": "Let X be a measurable real random variable with finite mean under a finite measure μ (for instance a terminal price under a pricing measure), and let C(k) = ∫ (X − k)⁺ dμ be the undiscounted call price at strike k. Then the call spread (C(K) − C(K + h))/h, long 1/h calls struck at K and short 1/h struck at K + h, tends to μ{X > K} as h decreases to 0. So minus the right derivative of the call price in the strike is the undiscounted price of the digital paying 1 when X > K. The statement is one one-sided limit for one law: no model or discounting is assumed, and only the right derivative is claimed (the left one, −μ{X ≥ K}, and differentiability exactly off the atoms are mf-call-strike-differentiable-iff-no-atom).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.CallSpreadDigital\n\nopen MeasureTheory Filter\nopen scoped Topology\n\n/-- **A digital is a limit of call spreads**: `(C(K) − C(K + h))/h → μ {X > K}` as `h ↓ 0`. -/\ntheorem call_spread_digital_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsFiniteMeasure μ] {X : Ω → ℝ} (hXm : Measurable X) (hX : Integrable X μ) (K : ℝ) :\n    Tendsto (fun h ↦ (∫ ω, max (X ω - K) 0 ∂μ - ∫ ω, max (X ω - (K + h)) 0 ∂μ) / h) (𝓝[>] 0)\n      (𝓝 (μ.real {ω | K < X ω})) :=\n  MathFin.tendsto_call_spread hXm hX K\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. For h > 0 the spread payoff ((X − K)⁺ − (X − K − h)⁺)/h has absolute value at most 1, because the call payoff is 1-Lipschitz in the strike (abs_call_payoff_sub_le, from Mathlib's abs_max_sub_max_le_abs); it is also nonnegative (bull_call_spread_payoff_le, mf-bull-call-spread-payoff-le), which the bound does not need. It tends pointwise to the indicator of {X > K}: it equals 1 once h < X − K, and 0 when X ≤ K. Mathlib's tendsto_integral_filter_of_dominated_convergence along 𝓝[>] 0 with the constant bound 1, then integral_indicator_one. Lives in MathFin/BlackScholes/CallSpreadDigital.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-call-prices-determine-law",
+      "name": "Call Prices at Every Strike Determine the Law (Breeden–Litzenberger, First Order)",
+      "description": "Let μ and μ' be probability laws on ℝ of a log-return Y, each with ∫ eʸ < ∞, and let S > 0. If the undiscounted call prices ∫ (Seʸ − K)⁺ agree under μ and μ' at every strike K > 0, then μ = μ'. So option prices at all strikes determine the pricing law of the underlying, the first-order form of Breeden and Litzenberger, for any law with a finite forward and not only the lognormal one. A common positive discount factor does not change the statement. The second-order (density) form is mf-breeden-litzenberger-jump-diffusion, for jump-diffusions with a Gaussian part, and mf-breeden-litzenberger for Black–Scholes.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.CallSpreadDigital\n\nopen MeasureTheory\n\n/-- **Call prices at every strike determine the law** of the log-return. -/\ntheorem call_prices_determine_law_thm {μ μ' : Measure ℝ} [IsProbabilityMeasure μ]\n    [IsProbabilityMeasure μ'] {S : ℝ} (hS : 0 < S) (hμ : Integrable Real.exp μ)\n    (hμ' : Integrable Real.exp μ')\n    (h : ∀ K, 0 < K →\n      ∫ y, max (S * Real.exp y - K) 0 ∂μ = ∫ y, max (S * Real.exp y - K) 0 ∂μ') :\n    μ = μ' :=\n  MathFin.measure_eq_of_integral_call_eq hS hμ hμ' h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. For a ∈ ℝ the strike K = Seᵃ gives {y : K < Seʸ} = (a, ∞). The call spreads at K are equal under μ and μ' for every h > 0, both strikes K and K + h being positive, so their limits μ(a, ∞) and μ'(a, ∞) agree (tendsto_call_spread, mf-call-spread-digital; tendsto_nhds_unique). Complements give μ(−∞, a] = μ'(−∞, a] for every a, and Mathlib's Measure.ext_of_Iic concludes. Lives in MathFin/BlackScholes/CallSpreadDigital.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-call-strike-derivative",
+      "name": "The Strike Derivative of a Call Price Is Minus the Digital",
+      "description": "Let X be a measurable real random variable with finite mean under a finite measure μ, let C(k) = ∫ (X − k)⁺ dμ be the undiscounted call price at strike k, and suppose X has no atom at K: μ{X = K} = 0. Then C is differentiable at K and C'(K) = −μ{X > K}: minus the strike derivative of the call price is the undiscounted price of the digital paying 1 when X > K. No model or discounting is assumed. At an atom C is not differentiable: its right derivative is −μ{X > K} (mf-call-spread-digital) and its left one −μ{X ≥ K} (mf-call-strike-differentiable-iff-no-atom).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.CallSpreadDigital\n\nopen MeasureTheory\n\n/-- **The strike derivative of the call price is minus the digital**: `C'(K) = −μ {X > K}` where\n`X` has no atom at `K`. -/\ntheorem call_strike_derivative_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsFiniteMeasure μ] {X : Ω → ℝ} (hXm : Measurable X) (hX : Integrable X μ) {K : ℝ}\n    (hK : μ {ω | X ω = K} = 0) :\n    HasDerivAt (fun k ↦ ∫ ω, max (X ω - k) 0 ∂μ) (-μ.real {ω | K < X ω}) K :=\n  MathFin.hasDerivAt_integral_call hXm hX hK\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Mathlib's hasDerivAt_integral_of_dominated_loc_of_lip (differentiation under the integral sign). The call payoff k ↦ (X − k)⁺ is 1-Lipschitz in the strike (abs_call_payoff_sub_le, from Mathlib's abs_max_sub_max_le_abs), with the constant bound 1 integrable under the finite measure. Off the atom, so for μ-almost every ω, it is differentiable at K with derivative −1_{X > K}: near K it is X − k when X > K and 0 when X < K. The derivative of the integral is ∫ −1_{X > K} dμ = −μ{X > K} (integral_indicator_one). Lives in MathFin/BlackScholes/CallSpreadDigital.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-call-strike-differentiable-iff-no-atom",
+      "name": "The Call Price Is Differentiable in the Strike Exactly Where the Law Has No Atom",
+      "domain": "mathematical_finance",
+      "description": "Let X be a measurable real random variable with finite mean under a finite measure μ, and let C(k) = ∫ (X − k)⁺ dμ be the undiscounted call price at strike k. As h ↓ 0 the call spread just below the strike, (C(K − h) − C(K))/h, tends to μ{X ≥ K}, so the left strike derivative of C is −μ{X ≥ K}; the right one is −μ{X > K} (mf-call-spread-digital). And C is differentiable at K if and only if μ{X = K} = 0: at an atom the two one-sided derivatives differ by its mass, and the call price has a kink. No model or discounting is assumed.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.CallSpreadDigital\n\nopen MeasureTheory Filter\nopen scoped Topology\n\n/-- **The call price is differentiable in the strike exactly where the law has no atom**; the call\nspread below the strike tends to `μ {X ≥ K}`. -/\ntheorem call_strike_differentiable_iff_no_atom_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsFiniteMeasure μ] {X : Ω → ℝ} (hXm : Measurable X) (hX : Integrable X μ)\n    (K : ℝ) :\n    Tendsto (fun h ↦ (∫ ω, max (X ω - (K - h)) 0 ∂μ - ∫ ω, max (X ω - K) 0 ∂μ) / h) (𝓝[>] 0)\n        (𝓝 (μ.real {ω | K ≤ X ω})) ∧\n      (DifferentiableAt ℝ (fun k ↦ ∫ ω, max (X ω - k) 0 ∂μ) K ↔ μ {ω | X ω = K} = 0) :=\n  ⟨MathFin.tendsto_call_spread_left hXm hX K, MathFin.differentiableAt_integral_call_iff hXm hX K⟩\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The left spread: dominated convergence, as for mf-call-spread-digital; the spread payoff ((X − K + h)⁺ − (X − K)⁺)/h is at most 1 in absolute value (abs_call_payoff_sub_le, from Mathlib's abs_max_sub_max_le_abs), equal to 1 when X ≥ K and to 0 once h < K − X. Off an atom C is differentiable (hasDerivAt_integral_call, mf-call-strike-derivative). Conversely, if C is differentiable at K its right and left slopes both tend to C'(K) (Mathlib's HasDerivAt.tendsto_slope_zero_right and tendsto_slope_zero_left, the latter composed with h ↦ −h), so tendsto_nhds_unique gives C'(K) = −μ{X > K} = −μ{X ≥ K}; and μ{X ≥ K} = μ{X > K} + μ{X = K} (measureReal_union). Lives in MathFin/BlackScholes/CallSpreadDigital.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-impliedvol-bracket",
+      "name": "Bisection Bracket Existence for Implied Volatility",
+      "description": "For f continuous and strictly increasing on [σ_lo, σ_hi], any target strictly between f(σ_lo) and f(σ_hi) is attained at a unique σ ∈ (σ_lo, σ_hi): the IVT gives existence, strict monotonicity gives uniqueness. This is the existence half of the bisection method. It says a root exists in the bracket, not that the bisection iterates converge to it; convergence, and the Black-Scholes instantiation, are mf-impliedvol-bisection.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.BisectionIV\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem impliedVol_bracket_exists_thm {f : ℝ → ℝ} {σ_lo σ_hi C_obs : ℝ}\n    (h_lo_lt_hi : σ_lo < σ_hi)\n    (h_cont : ContinuousOn f (Set.Icc σ_lo σ_hi))\n    (h_mono : StrictMonoOn f (Set.Icc σ_lo σ_hi))\n    (h_brkt : f σ_lo < C_obs ∧ C_obs < f σ_hi) :\n    ∃! σ : ℝ, σ ∈ Set.Ioo σ_lo σ_hi ∧ f σ = C_obs :=\n  MathFin.impliedVol_bracket_exists h_lo_lt_hi h_cont h_mono h_brkt\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Intermediate value theorem; bracketing for bisection (Press et al., Numerical Recipes, §9.1)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-impliedvol-bisection",
+      "name": "Bisection Converges to the Implied Volatility",
+      "description": "For K, S, T > 0, any rate r, and a volatility bracket 0 < σ_lo < σ_hi whose Black-Scholes call prices straddle the market price, bsV(σ_lo) < C_obs < bsV(σ_hi): there is an implied volatility σ ∈ (σ_lo, σ_hi), it is the only positive σ with bsV(σ) = C_obs, and the bisection estimates converge to it. After n halvings (n = 0, 1, …; n = 0 is the midpoint of [σ_lo, σ_hi]) the estimate is within (σ_hi − σ_lo)/2^(n+1) of σ. The bisection iteration is a noncomputable definition over ℝ in the library, not an assumed sequence; floating-point error and stopping rules are not modelled.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.BisectionIV\n\nopen Filter Topology\nopen MathFin\n\ntheorem impliedVol_bisection_converges_thm {K r T S σ_lo σ_hi C_obs : ℝ}\n    (hK : 0 < K) (hT : 0 < T) (hS : 0 < S) (h_lo : 0 < σ_lo) (h_lo_hi : σ_lo < σ_hi)\n    (h_brkt : bsV K r σ_lo S T < C_obs ∧ C_obs < bsV K r σ_hi S T) :\n    ∃ σ ∈ Set.Ioo σ_lo σ_hi, bsV K r σ S T = C_obs ∧\n      (∀ σ' > 0, bsV K r σ' S T = C_obs → σ' = σ) ∧\n      (∀ n, |bisectMid (fun v ↦ bsV K r v S T) C_obs σ_lo σ_hi n - σ| ≤\n        (σ_hi - σ_lo) / 2 ^ (n + 1)) ∧\n      Tendsto (bisectMid (fun v ↦ bsV K r v S T) C_obs σ_lo σ_hi) atTop (𝓝 σ) :=\n  MathFin.impliedVol_bisection_converges hK hT hS h_lo h_lo_hi h_brkt\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Bisection method: Burden & Faires, Numerical Analysis, §2.1; Press et al., Numerical Recipes, §9.1. Implied volatility by iterative search: Hull, Options, Futures, and Other Derivatives (implied volatilities)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The bisection iteration is defined, not assumed (Foundations/Bisection.lean): bisectStep (evaluate at the midpoint, keep the half that straddles the target), bisect (its n-fold iterate) and bisectMid (the midpoint of the n-th bracket, counted from n = 0). The generic convergence theorem assumes only that σ ∈ [lo, hi] is the threshold of f against C on the bracket (f x < C ↔ x < σ for x ∈ [lo, hi]); the limit point enters only through that hypothesis, which needs neither continuity nor strictness, and in general the threshold need not solve f σ = C. Under it a step maps the trap [lo, σ] × [σ, hi] into itself, so by Set.MapsTo.iterate every bracket contains σ; each step halves the width; hence |bisectMid n − σ| ≤ (hi − lo)/2^(n+1) → 0. For the BS call price, bsV_continuousOn_sigma and the intermediate value theorem put σ strictly inside the bracket; bsV_strictMonoOn_sigma makes σ the threshold, and implied_volatility_unique makes it the only positive implied volatility. Axioms-clean. LIMITS: exact real arithmetic, so no floating-point error analysis and no stopping rule. The textbook bisection theorem for a merely continuous f with a sign change (convergence to some root, no monotonicity) is not formalized here."
+      }
+    },
+    {
+      "id": "mf-bsV-forward-lower-bound",
+      "name": "European Call Forward Lower Bound (No-Arb)",
+      "description": "Under risk-neutral lognormal hypothesis, bsV ≥ S_0 - K·e^{-rT}. Proof: bsV = bsP + S_0 - K·e^{-rT} (put-call parity) and bsP ≥ 0 (integral of (K-S_T)⁺ is non-negative).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PriceBounds\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem bsV_ge_forward_lower_bound_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    S_0 - K * Real.exp (-(r * T)) ≤ bsV K r σ S_0 T :=\n  MathFin.bsV_ge_forward_lower_bound h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "European call lower bound (Hull 11.3, Shreve 4.5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-merton-1973-no-early-exercise",
+      "name": "Merton 1973: European Call Strictly Exceeds Immediate Exercise (No Dividends)",
+      "description": "Under the Black–Scholes lognormal hypothesis and a positive interest rate r > 0, the European call value strictly exceeds the immediate-exercise payoff: bsV > S₀ − K. This strict dominance is Merton's (1973) reason that early exercise of a non-dividend-paying American call is never optimal; the American-equals-European conclusion itself is not formalized in this entry.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PriceBounds\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem bsV_strict_gt_immediate_exercise_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) (hr : 0 < r) :\n    S_0 - K < bsV K r σ S_0 T :=\n  MathFin.bsV_strict_gt_immediate_exercise h hr\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton 1973 (American call on non-dividend stock)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-quanto-correction-factor",
+      "name": "Quanto Correction Factor exp(-ρ σ_S σ_FX T)",
+      "description": "Ratio of the quanto-adjusted forward to the un-adjusted domestic forward equals exp(-ρ σ_S σ_FX T).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.Dividends\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem quanto_correction_factor_thm (S_0 r_dom ρ σ_S σ_FX T : ℝ) (hS : 0 < S_0) :\n    MathFin.quantoForward S_0 r_dom ρ σ_S σ_FX T / (S_0 * Real.exp (r_dom * T))\n      = Real.exp (-(ρ * σ_S * σ_FX * T)) :=\n  MathFin.quanto_correction_factor S_0 r_dom ρ σ_S σ_FX T hS\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Quanto correction (Reiner 1992, Hull 31.4)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-carr-madan-log",
+      "name": "Carr-Madan Log-Payoff Algebra",
+      "description": "log(S) − log(F) = log(S/F): the algebraic identity used in the Carr-Madan static replication of the log payoff.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\n\nopen Real\n\n/-- Carr–Madan log-payoff algebra: `log S − log F = log (S / F)`.\n    Direct invocation of Mathlib's `Real.log_div`. -/\ntheorem carrMadan_log_payoff_algebra_thm (S F : ℝ) (hS : 0 < S) (hF : 0 < F) :\n    Real.log S - Real.log F = Real.log (S / F) :=\n  (Real.log_div hS.ne' hF.ne').symm\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Carr-Madan static replication (Carr-Madan 2001)",
+        "difficulty": "intermediate",
+        "formalization_status": "library_wrapper",
+        "formalization_scope": "Direct invocation of Mathlib's Real.log_div (statement-identical algebra step of the Carr-Madan log-contract chain). Relabeled full->library_wrapper in the 2026-06-03 audit; the former MathFin alias lemma was deleted. The genuine Carr-Madan content lives in mf-carr-madan-spanning and mf-carr-madan-log-contract (both full)."
+      }
+    },
+    {
+      "id": "mf-carr-madan-spanning",
+      "name": "Carr-Madan Spanning Formula",
+      "description": "Static replication: any C-two payoff f decomposes as cash + forward + a continuum of OTM puts and calls weighted by f'', over a compact strike range [L,U].",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.CarrMadan\n\nopen MathFin\n\ntheorem carrMadan_spanning_thm {f f' f'' : ℝ → ℝ} {L U κ S : ℝ}\n    (hLκ : L ≤ κ) (hκU : κ ≤ U) (hS : S ∈ Set.Icc L U)\n    (hf : ∀ t ∈ Set.Icc L U, HasDerivAt f (f' t) t)\n    (hf' : ∀ t ∈ Set.Icc L U, HasDerivAt f' (f'' t) t)\n    (hf'' : ContinuousOn f'' (Set.Icc L U)) :\n    f S = f κ + f' κ * (S - κ)\n      + (∫ K in L..κ, f'' K * max (K - S) 0)\n      + (∫ K in κ..U, f'' K * max (S - K) 0) :=\n  MathFin.carrMadan_spanning hLκ hκU hS hf hf' hf''\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Carr-Madan static replication (Carr-Madan 2001)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the spanning formula (compact strike range) via Taylor integral remainder + positive-part case split. Lives in MathFin/Foundations/CarrMadan.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-carr-madan-log-contract",
+      "name": "Carr-Madan Log-Contract Replication",
+      "description": "The log payoff log(S) replicates as a forward plus a strip of OTM options weighted by 1/K-squared -- the variance-swap building block.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.CarrMadan\n\nopen MathFin\n\ntheorem carrMadan_log_spanning_thm {L U κ S : ℝ} (hL : 0 < L)\n    (hLκ : L ≤ κ) (hκU : κ ≤ U) (hS : S ∈ Set.Icc L U) :\n    Real.log S = Real.log κ + κ⁻¹ * (S - κ)\n      + (∫ K in L..κ, -(K ^ 2)⁻¹ * max (K - S) 0)\n      + (∫ K in κ..U, -(K ^ 2)⁻¹ * max (S - K) 0) :=\n  MathFin.carrMadan_log_spanning hL hLκ hκU hS\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Variance-swap log-contract replication (Carr-Madan 2001; Demeterfi-Derman-Kamal 1999)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: the log payoff's Carr-Madan strip, specialising carrMadan_spanning to f = log. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-newton-raphson-fixed-at-root",
+      "name": "Newton-Raphson Iteration: Local Quadratic Convergence",
+      "description": "Local quadratic convergence of Newton–Raphson at a simple root r: under HasDerivAt f, an L-Lipschitz f' and |f'| ≥ m > 0 on [r − δ, r + δ], one step contracts quadratically at the sharp Newton–Kantorovich constant, |newtonStep f f' x − r| ≤ (L/(2m))·(x − r)² for x in that interval; and from any x₀ with |x₀ − r| ≤ δ and L·δ ≤ m, newtonSeq → r. The (1/2)ⁿ error bound behind that convergence is proved in the source module (newtonSeq_error_le_geometric) but is not part of this entry's statement.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.NewtonConvergence\n\nopen Filter Topology MathFin\n\ntheorem newton_quadratic_error_and_tendsto_thm {f f' : ℝ → ℝ} {r δ m L x₀ : ℝ}\n    (hroot : f r = 0) (hm0 : 0 < m) (hL : 0 ≤ L)\n    (hd : ∀ y ∈ Set.Icc (r - δ) (r + δ), HasDerivAt f (f' y) y)\n    (hlip : ∀ y ∈ Set.Icc (r - δ) (r + δ), ∀ w ∈ Set.Icc (r - δ) (r + δ),\n      |f' y - f' w| ≤ L * |y - w|)\n    (hm : ∀ y ∈ Set.Icc (r - δ) (r + δ), m ≤ |f' y|)\n    (hx₀ : |x₀ - r| ≤ δ) (hbasin : L * δ ≤ m) :\n    (∀ x ∈ Set.Icc (r - δ) (r + δ),\n        |MathFin.newtonStep f f' x - r| ≤ L / (2 * m) * (x - r) ^ 2) ∧\n      Tendsto (MathFin.newtonSeq f f' x₀) atTop (𝓝 r) :=\n  ⟨fun _ hx => MathFin.newtonStep_quadratic_error hroot hm0 hL hd hlip hm hx,\n    MathFin.newtonSeq_tendsto_root hroot hm0 hL hd hlip hm hx₀ hbasin⟩\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Newton-Raphson root-finding (classical numerical analysis)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04, sharpened same day): genuine Newton-Raphson convergence theory replacing the definitional fixed-point unfold. (i) One-step quadratic error |newtonStep x - r| <= (L/(2m))(x-r)^2 — the sharp Newton-Kantorovich constant — under HasDerivAt + L-Lipschitz f' + |f'| >= m > 0 on [r-d, r+d], proved via the integral form of the Taylor remainder: the FTC for the linearization-subtracted auxiliary w ↦ f w - f'(x)w turns the remainder into ∫(f'(t) - f'(x))dt, and the Lipschitz bound, linear in |t - x|, integrates to (L/2)(x-r)^2 (no second derivative anywhere); (ii) basin convergence: |x0 - r| <= d with L*d <= m gives the halving invariant and (1/2)^n geometric decay, hence newtonSeq → r (BlackScholes/NewtonConvergence.lean). In the implied-vol application f' = vega > 0 (bsV_vega_pos) discharges the simple-root hypothesis. The old fixed-point identity remains as the trivial lemma newtonStep_fixed_at_root in ImpliedVolatility.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-lognormal-cov-differential",
+      "name": "Lognormal-Gaussian Change of Variables (Differential)",
+      "description": "The implied PDF f(K) and the standard-normal PDF are related by f(K) · K · σ · √T = ϕ(d_2(K)): the Jacobian of the substitution K ↦ z = -d_2(K). The measure-level change of variables, the law of the price Seʸ from the law of the log-return, is mf-price-law-change-of-variables, and the law of the Black–Scholes price is mf-black-scholes-price-law.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.BreedenLitzenberger\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem lognormalTerminalPDF_change_of_variables_thm\n    {S_0 r σ T K : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :\n    MathFin.lognormalTerminalPDF S_0 r σ T K * (K * σ * Real.sqrt T) =\n      gaussianPDFReal 0 1 (bsd2 S_0 K r σ T) :=\n  MathFin.lognormalTerminalPDF_change_of_variables hK hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Lognormal-gaussian change of variables (BS density jacobian)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-speed",
+      "name": "BS Speed (∂³V/∂S³)",
+      "description": "BS speed: the third S-derivative of the Black-Scholes call price, ∂³V/∂S³ = -ϕ(d₁)(d₁ + σ√τ)/(S² σ² τ), one quotient rule on the gamma ϕ(d₁)/(S σ √τ).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\n/-- BS speed: the third spot derivative of the call price, `∂³V/∂S³`. -/\ntheorem mf_bs_speed {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (deriv (deriv fun s => bsV K r σ s τ))\n      (-(gaussianPDFReal 0 1 (bsd1 S K r σ τ) * (bsd1 S K r σ τ + σ * Real.sqrt τ)\n        / (S ^ 2 * σ ^ 2 * τ))) S :=\n  MathFin.hasDerivAt_deriv_deriv_bsV_S hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS speed (Wystup 2002; Hull 19.4)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/BlackScholes/HigherGreeks.lean, beside vanna/volga/charm, stated for the call price itself. The speed formula hasDerivAt_bsV_SSS is a quotient rule on the gamma expression, with the chain rule ϕ'(d₁) = -d₁·ϕ(d₁) supplying the numerator derivative; the σ²τ denominator (not σ√τ) is where the two contributions combine. It is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean) twice: the delta Φ(d₁) is ∂V/∂S on all of S > 0, so ∂²V/∂S² is the gamma expression there (hasDerivAt_deriv_bsV_S), and so ∂³V/∂S³ is its derivative. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black76-speed",
+      "name": "Black-76 Speed",
+      "description": "Black-76 speed: the third F-derivative of the Black-76 price, ∂³V_B/∂F³ = e^{-rT}·(-ϕ(d₁)(d₁ + σ√T)/(F² σ² T)); the discount factor is F-independent, so it rides through as a constant multiplier on the zero-drift BS speed.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Black76Greeks\n\nopen MathFin ProbabilityTheory\n\n/-- Black-76 speed: the third futures-price derivative of the Black-76 price, the zero-drift\n    BS speed carried through the discount factor. -/\ntheorem mf_black76_speed {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (deriv (deriv fun f => blackV K σ r f T))\n      (Real.exp (-(r * T)) * -(gaussianPDFReal 0 1 (bsd1 F K 0 σ T) *\n        (bsd1 F K 0 σ T + σ * Real.sqrt T) / (F ^ 2 * σ ^ 2 * T))) F :=\n  MathFin.hasDerivAt_deriv_deriv_blackV_F hK hσ r hF hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-76 speed (Hull 17.6)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Futures/Black76Greeks.lean, stated for the Black-76 price itself. The speed formula hasDerivAt_blackV_FFF is a bare-term const_mul of the r = 0 BS speed, matching the shape of the sibling Black-76 greeks: e^{-rT} stays live in both the function and the value, so r is load-bearing. It is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean) twice, through the genuine gamma hasDerivAt_deriv_blackV_F. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-calendar-arbitrage-total-variance",
+      "name": "Calendar-Spread Arbitrage: Calls Rise with Maturity iff Total Variance Does",
+      "domain": "mathematical_finance",
+      "description": "For a real-valued martingale X on a finite measure space, the undiscounted call value t -> E[(X_t - L)^+] is non-decreasing in t for every level L (conditional Jensen). For an implied total-variance surface w(k, t), positive at every maturity t > 0 (nothing is assumed at t <= 0, so the flat surface w = sigma^2 t is included), priced by the zero-rate Black–Scholes formula at forward S > 0 (call at strike K and maturity t is the Black–Scholes price with total variance w(log(K/S), t)), call prices are non-decreasing in maturity on t > 0 at every strike exactly when t -> w(k, t) is non-decreasing on t > 0 at every log-moneyness k. The local-variance form (crossed total-variance lines iff negative local variance) is not proved, and no martingale is constructed from a calendar-free surface.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.CalendarArbitrage\n\nopen MathFin MeasureTheory Set\n\n/-- **Calendar-spread arbitrage (Gatheral–Jacquier 2014, Lemma 2.1).** (1) Calls on a real\nmartingale are non-decreasing in maturity: `s ≤ t → ∫ (X_s − L)⁺ ≤ ∫ (X_t − L)⁺`. (2) For a\ntotal-variance surface `w(k, t)`, positive on maturities `t > 0` and priced by the zero-rate\nBlack–Scholes formula at forward `S > 0`, call prices are non-decreasing in maturity on `t > 0`\nat every strike iff `t ↦ w(k, t)` is non-decreasing on `t > 0` at every log-moneyness `k`.\nRe-exports `MathFin.integral_posPart_sub_mono_of_martingale` and `MathFin.calendar_free_iff`. -/\ntheorem calendar_arbitrage_gatheral_jacquier {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsFiniteMeasure μ] {ℱ : Filtration ℝ mΩ} {X : ℝ → Ω → ℝ}\n    (hX : Martingale X ℱ μ) {S : ℝ} (hS : 0 < S) (w : ℝ → ℝ → ℝ)\n    (hw : ∀ k, ∀ t, 0 < t → 0 < w k t) :\n    (∀ L : ℝ, Monotone fun t ↦ ∫ ω, (X t ω - L)⁺ ∂μ) ∧\n      ((∀ K, 0 < K →\n          MonotoneOn (fun t ↦ totalVarianceCall K S (w (Real.log (K / S)) t)) (Ioi 0)) ↔\n        ∀ k, MonotoneOn (w k) (Ioi 0)) :=\n  ⟨fun L _ _ h ↦ integral_posPart_sub_mono_of_martingale hX L h, calendar_free_iff hS w hw⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Gatheral and Jacquier, Arbitrage-free SVI volatility surfaces, Quantitative Finance 14(1) (2014), Section 2.1, Lemma 2.1",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.integral_posPart_sub_mono_of_martingale and MathFin.calendar_free_iff (MathFin/BlackScholes/CalendarArbitrage.lean). The martingale half applies Mathlib's ConvexOn.map_condExp_le to the convex payoff x -> (x - L)^+ and integrates. The price half uses bsV_eq_totalVarianceCall (with r = 0 the Black–Scholes call depends on sigma and T only through sigma^2 T) and the strict monotonicity of the call in volatility (bsV_strictMonoOn_sigma). SCOPE. Zero rates and dividends, forward = spot S; prices are Black–Scholes prices of the surface, so the equivalence is between monotonicity of prices and of total variance, not the existence of a martingale with those prices (Kellerer). Maturities are t > 0 (MonotoneOn on Ioi 0), with w positive there; nothing is assumed at t <= 0. Not formalised: the local-variance characterisation. The derivative form is only 0 <= deriv of the call value (deriv_integral_posPart_sub_nonneg, not part of this entry)."
+      }
+    },
+    {
+      "id": "mf-svi-calendar-free-iff",
+      "name": "Raw SVI Family Free of Calendar Arbitrage iff Total Variance Rises with Maturity",
+      "domain": "mathematical_finance",
+      "description": "For a family of raw SVI parameters p(t) indexed by maturity t > 0, with total variance positive at every log-strike and every t > 0 (nothing is assumed at t <= 0), the SVI-smiled Black–Scholes call (spot, maturity and discount normalised to one) is non-decreasing in maturity on t > 0 at every positive strike exactly when the SVI total variance t -> w_{p(t)}(k) is non-decreasing on t > 0 at every log-moneyness k. No condition on the parameter paths themselves (for example a quartic crossing test between slices) is derived.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.CalendarArbitrage\n\nopen MathFin MathFin.SVI Set\n\n/-- **No calendar arbitrage for raw SVI slices.** For raw SVI parameters `p t` indexed by\nmaturity `t > 0`, with positive variance, the SVI-smiled Black–Scholes call `bsSmile (p t) K` is\nnon-decreasing in maturity on `t > 0` at every strike `K > 0` iff the SVI total variance\n`t ↦ variance (p t) k` is non-decreasing on `t > 0` at every log-moneyness `k`. Re-exports\n`MathFin.SVI.bsSmile_calendar_free_iff`. -/\ntheorem svi_calendar_free_iff (p : ℝ → Params) (hw : ∀ t, 0 < t → ∀ k, 0 < variance (p t) k) :\n    (∀ K, 0 < K → MonotoneOn (fun t ↦ bsSmile (p t) K) (Ioi 0)) ↔\n      ∀ k, MonotoneOn (fun t ↦ variance (p t) k) (Ioi 0) :=\n  bsSmile_calendar_free_iff p hw\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Gatheral and Jacquier, Arbitrage-free SVI volatility surfaces, Quantitative Finance 14(1) (2014), Section 2.1, Lemma 2.1; raw SVI, Section 3.1",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.SVI.bsSmile_calendar_free_iff (MathFin/BlackScholes/CalendarArbitrage.lean), the instance S = 1, w(k, t) = variance (p t) k of mf-calendar-arbitrage-total-variance on the SVI library's bsSmile price. SCOPE. The family p : R -> Params is arbitrary data; the SVI library has no maturity variable of its own, and SSVI, the slice-crossing quartic and the SSVI calendar theorems are not formalised."
+      }
+    },
+    {
+      "id": "mf-gbm-log-return-law",
+      "name": "Black–Scholes Log-Return Is Normal",
+      "domain": "mathematical_finance",
+      "description": "Under the Black–Scholes lognormal hypothesis S_T = S₀·exp((r − σ²/2)T + σ√T·Z) with Z ~ N(0, 1), the log-return (r − σ²/2)T + σ√T·Z = log(S_T/S₀) has law N((r − σ²/2)T, σ²T).",
+      "code": {
+        "lean": "import MathFin.BlackScholes.GBMLogMoments\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- **The Black–Scholes log-return is normal.** Re-exports `MathFin.bsLogReturn_hasLaw`. -/\ntheorem bs_log_return_normal {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}\n    [IsProbabilityMeasure Q] {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :\n    HasLaw (fun ω ↦ bsLogReturn r σ T (Z ω))\n      (gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal) Q :=\n  MathFin.bsLogReturn_hasLaw h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "J. C. Hull, Options, Futures, and Other Derivatives, 10th ed., Pearson (2018), §15.1 (lognormal property of stock prices)",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.bsLogReturn_hasLaw (MathFin/BlackScholes/GBMLogMoments.lean): Mathlib's gaussianReal_const_mul and gaussianReal_const_add applied to the standard-normal driver; log(S_T/S₀) = bsLogReturn is bsLogReturn_eq. SCOPE: the lognormal hypothesis BSCallHyp is assumed (it is derived from a Brownian model elsewhere in the library)."
+      }
+    },
+    {
+      "id": "mf-american-put-ge-bsm-european-put",
+      "name": "American Put Dominates the Black–Scholes–Merton European Put",
+      "domain": "mathematical_finance",
+      "description": "For S, K, σ, T > 0, r ≥ 0 and any dividend yield q, the continuous-time American put value (the supremum, over stopping rules bounded by T, of the expected discounted payoff e^{−rτ}(K − S_τ)⁺ for the geometric Brownian motion S of drift r − q driven by a jointly measurable pre-Brownian motion, any filtration) is at least the closed-form Black–Scholes–Merton European put e^{−qT}(K e^{−(r−q)T}Φ(−d₂) − SΦ(−d₁)); in particular for the constructed Brownian model on its completed usual filtration, the setting of the exercise-boundary entries. Exercise at maturity is an admissible rule and its expected payoff is computed in closed form. A strictly positive early-exercise premium is not proved.",
+      "code": {
+        "lean": "import MathFin.Bridges.AmericanPutEuropeanBound\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.BlackScholes.AmericanPut.Stopping\n\n/-- **The American put dominates the Black–Scholes–Merton European put**, for any jointly\nmeasurable pre-Brownian motion `W` and any filtration. Re-export of\n`MathFin.BlackScholes.AmericanPut.Stopping.bsPDiv_le_americanPutValue`. -/\ntheorem american_put_ge_bsm_european_put {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}\n    [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {W : ℝ≥0 → Ω → ℝ}\n    (hW : IsPreBrownianReal W P) (hWm : Measurable W.uncurry) {K r q σ S : ℝ}\n    (hK : 0 < K) (hr : 0 ≤ r) (hσ : 0 < σ) (hS : 0 < S) {T : ℝ≥0} (hT : 0 < T) :\n    bsPDiv K r q σ S T ≤ americanPutValue P 𝓕 W K r q σ S T :=\n  bsPDiv_le_americanPutValue hW hWm hK hr hσ hS hT\n\n/-- The same bound for the constructed Brownian model on its completed usual filtration.\nRe-export of `MathFin.BlackScholes.AmericanPut.Stopping.bsPDiv_le_brownianUsualAmericanPut`. -/\ntheorem american_put_ge_bsm_european_put_usual {K r q σ S : ℝ} (hK : 0 < K) (hr : 0 ≤ r)\n    (hσ : 0 < σ) (hS : 0 < S) {T : ℝ≥0} (hT : 0 < T) :\n    bsPDiv K r q σ S T ≤ brownianUsualAmericanPut K r q σ S T :=\n  bsPDiv_le_brownianUsualAmericanPut hK hr hσ hS hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "R. C. Merton, Theory of Rational Option Pricing, Bell J. Econ. Manag. Sci. 4(1) (1973) 141–183 (an American option is worth at least its European counterpart); I. Karatzas and S. E. Shreve, Methods of Mathematical Finance, Springer (1998), §2.5",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.BlackScholes.AmericanPut.Stopping.bsPDiv_le_americanPutValue and bsPDiv_le_brownianUsualAmericanPut (MathFin/Bridges/AmericanPutEuropeanBound.lean). The maturity reward is computed by MathFin.bs_dividends_put_formula_via_brownian (MathFin/Bridges/PricingFromBrownian.lean): bs_put_formula at rate r − q under BSCallHyp.of_isPreBrownian, times e^{−qT}. The value dominates it because the deterministic rule T is admissible (european_expectation_le_value). SCOPE: a lower bound only; no strict early-exercise premium, no optimal rule. Hypotheses: W pre-Brownian and jointly measurable, r ≥ 0 (used to bound the reward by K), S, K, σ, T > 0."
+      }
+    },
+    {
+      "id": "mf-american-put-ae-horizon-invariance",
+      "name": "American Put Value Is Unchanged by Almost-Surely Bounded Stopping Times",
+      "domain": "mathematical_finance",
+      "description": "For any measure, filtration and driving process W, the American put value defined as the supremum of expected discounted GBM put payoffs over extended stopping times that are bounded by the horizon T only almost surely (and may be infinite on a null set, where the value is immaterial) equals the value over stopping times bounded by T at every point, and the in-the-money exercise threshold is the same under both conventions. Proof by clipping a rule at T, which changes it only on a null set. A statement about the convention, not about the value itself.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.AmericanPut.Stopping.AEHorizonValue\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin.BlackScholes.AmericanPut.Stopping\n\n/-- **The American put value and threshold do not depend on the horizon convention.**\nRe-export of `aeAmericanPutValue_eq` and `aeExerciseThreshold_eq`. -/\ntheorem american_put_ae_horizon_invariance {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω)\n    (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (W : ℝ≥0 → Ω → ℝ) (K r q σ S : ℝ) (T : ℝ≥0) :\n    aeAmericanPutValue P 𝓕 W K r q σ S T = americanPutValue P 𝓕 W K r q σ S T ∧\n      aeExerciseThreshold P 𝓕 W K r q σ T = exerciseThreshold P 𝓕 W K r q σ T :=\n  ⟨aeAmericanPutValue_eq P 𝓕 W K r q σ S T, aeExerciseThreshold_eq P 𝓕 W K r q σ T⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "G. Peskir and A. Shiryaev, Optimal Stopping and Free-Boundary Problems, Birkhäuser (2006), Ch. I (finite-horizon problems over stopping times τ ≤ T)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.BlackScholes.AmericanPut.Stopping.aeAmericanPutValue_eq and aeExerciseThreshold_eq (MathFin/BlackScholes/AmericanPut/Stopping/AEHorizonValue.lean). An almost-surely bounded rule, clipped at the horizon, is a pointwise bounded rule with the same reward almost everywhere; conversely every pointwise bounded rule is almost-surely bounded. SCOPE: the equality of the two suprema and of the two thresholds; no property of the value itself. This is the equality the American-put boundary entries cite in their scope."
+      }
+    },
+    {
+      "id": "mf-monte-carlo-put-call-consistency",
+      "name": "Monte Carlo Consistency for the Black–Scholes Put and Call",
+      "domain": "mathematical_finance",
+      "description": "On the sequence space ℕ → ℝ under the product of countably many standard normals (Mathlib's Measure.infinitePi), for S₀, K, σ, T > 0, almost surely the Monte Carlo sample means (1/n)Σ_{i<n} e^{−rT}(K − S_T(Z_i))⁺ and (1/n)Σ_{i<n} e^{−rT}(S_T(Z_i) − K)⁺, with S_T(z) = S₀e^{(r−σ²/2)T+σ√T z} and Z_i the coordinates, converge to the Black–Scholes put Ke^{−rT}Φ(−d₂) − S₀Φ(−d₁) and call S₀Φ(d₁) − Ke^{−rT}Φ(d₂). Etemadi's strong law (Mathlib) applied to the discounted payoffs, whose means are the closed forms. No convergence rate is part of this entry.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.MonteCarloPricer\n\nopen MeasureTheory ProbabilityTheory Filter\nopen scoped Topology\nopen MathFin MathFin.MonteCarlo\n\n/-- **Monte Carlo consistency on the canonical i.i.d. standard-normal space**, put and call.\nRe-export of `MathFin.MonteCarlo.consistency_canonical` and `mc_call_consistency_canonical`. -/\ntheorem monte_carlo_put_call_consistency {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K)\n    (hσ : 0 < σ) (hT : 0 < T) :\n    (∀ᵐ ω ∂canonicalEnsemble,\n      Tendsto (fun n ↦ estimator S_0 K r σ T (fun i ω ↦ ω i) n ω) atTop\n        (𝓝 (bsP K r σ S_0 T))) ∧\n    ∀ᵐ ω ∂canonicalEnsemble,\n      Tendsto (fun n ↦ mcCallMean S_0 K r σ T (fun i ω ↦ ω i) n ω) atTop\n        (𝓝 (bsV K r σ S_0 T)) :=\n  ⟨consistency_canonical hS_0 hK hσ hT, mc_call_consistency_canonical hS_0 hK hσ hT⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "P. Glasserman, Monte Carlo Methods in Financial Engineering, Springer (2003), §1.1",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.MonteCarlo.consistency_canonical and mc_call_consistency_canonical (MathFin/BlackScholes/MonteCarloPricer.lean). The canonical ensemble is Mathlib's Measure.infinitePi of gaussianReal 0 1; its coordinates are i.i.d. standard normal by Measure.infinitePi_map_eval and iIndepFun_infinitePi, so the module's ensemble hypotheses are discharged rather than assumed. The limits are stated as the library's closed forms bsP and bsV. SCOPE: almost-sure convergence only; the module also proves the pairwise-independent version for an arbitrary ensemble."
+      }
+    },
+    {
+      "id": "mf-monte-carlo-call-clt-variance",
+      "name": "Monte Carlo Error Bars for the Black–Scholes Call, with Closed-Form Variance",
+      "domain": "mathematical_finance",
+      "description": "On the canonical i.i.d. standard-normal sequence space (Mathlib's Measure.infinitePi), for S₀, K, σ, T > 0 the Monte Carlo call estimator Ĉ_n satisfies √n·(Ĉ_n − C_BS) → N(0, σ_C²) in distribution (Mathlib's central limit theorem), and the limit variance is in closed form: σ_C² = e^{−2rT}(S₀²e^{2μ+2ν²}Φ(d₁+ν) − 2KS₀e^{μ+ν²/2}Φ(d₁) + K²Φ(d₂)) − C_BS², with μ = (r − σ²/2)T and ν = σ√T, from the truncated second moment of the lognormal. No rate of convergence (Berry–Esseen) and no variance reduction.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.MonteCarloPricer\n\nopen MeasureTheory ProbabilityTheory Filter\nopen MathFin MathFin.MonteCarlo\n\n/-- **Monte Carlo CLT for the call, with the limit variance in closed form.** Re-export of\n`MathFin.MonteCarlo.mc_call_clt_canonical` and `mc_call_variance`. -/\ntheorem monte_carlo_call_error_bars {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K)\n    (hσ : 0 < σ) (hT : 0 < T) :\n    TendstoInDistribution\n      (fun (n : ℕ) (ω : ℕ → ℝ) ↦ Real.sqrt (n : ℝ) *\n        (mcCallMean S_0 K r σ T (fun i ω ↦ ω i) n ω - bsV K r σ S_0 T))\n      atTop (id : ℝ → ℝ) (fun _ ↦ canonicalEnsemble)\n      (gaussianReal 0\n        (Var[fun ω ↦ mcCallPayoff S_0 K r σ T (ω 0); canonicalEnsemble]).toNNReal) ∧\n    Var[fun ω ↦ mcCallPayoff S_0 K r σ T (ω 0); canonicalEnsemble]\n      = Real.exp (-2 * r * T) *\n          (S_0 ^ 2 * Real.exp (2 * (r - σ ^ 2 / 2) * T + 2 * (σ * Real.sqrt T) ^ 2)\n              * Phi (bsd1 S_0 K r σ T + σ * Real.sqrt T)\n            - 2 * K * (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + (σ * Real.sqrt T) ^ 2 / 2))\n                * Phi (bsd1 S_0 K r σ T)\n            + K ^ 2 * Phi (bsd2 S_0 K r σ T))\n        - (S_0 * Phi (bsd1 S_0 K r σ T)\n            - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T)) ^ 2 :=\n  ⟨mc_call_clt_canonical hS_0 hK hσ hT, mc_call_variance ⟨hS_0, hK, hσ, hT, hasLaw_canonical 0⟩⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "P. Glasserman, Monte Carlo Methods in Financial Engineering, Springer (2003), §1.1.2",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.MonteCarlo.mc_call_clt_canonical and mc_call_variance (MathFin/BlackScholes/MonteCarloPricer.lean). The CLT is Mathlib's tendstoInDistribution_inv_sqrt_mul_sum_sub applied to the discounted call payoffs, L² by domination with the discounted terminal; the centring is the closed form bsV via bs_call_formula. The variance is E[C²] − E[C]², with the truncated lognormal second moment computed by completing the square. SCOPE: convergence in distribution, no rate; one-dimensional; i.i.d. draws on the canonical product space."
+      }
+    },
+    {
+      "id": "mf-dupire-tilted-smile-local-skew",
+      "name": "First-Order Local-Volatility Skew of a Tilted Smile and the Rule of Two",
+      "domain": "mathematical_finance",
+      "description": "On the zero-rate smile σ_BS(ε,k,T) = σ + εψ₁k/√(T+T₀) in log-moneyness k (F, σ, T₀ > 0), with call prices given by Black–Scholes and local variance taken to be Dupire's ratio R = 2∂_T C/(K²∂²_K C) (the ratio enters as a definition; it is not derived from a local-volatility model): for every T > 0 the ε-derivative at ε = 0 of the at-the-money k-slope of √R equals ψ₁((3/2)T + 2T₀)/(T+T₀)^{3/2}, which is ((3/2)T + 2T₀)/(T + T₀) times the first-order implied ATM skew ψ₁/√(T+T₀); as T → 0⁺ it tends to twice the implied ATM skew at T = 0 (the rule of two). First order in ε, for this one-parameter family of surfaces; the ε = 1 surface and general smiles are not covered.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.ForwardSmile\n\nopen MathFin.ForwardSmile\n\n/-- **First-order local-volatility ATM skew of the tilted smile.** Re-export of\n`MathFin.ForwardSmile.dupireRatio_sqrt_slope` and `dupireRatio_sqrt_slope_eq_mul_skew`. -/\ntheorem tilted_smile_local_skew {F σ ψ₁ T₀ T : ℝ} (hF : 0 < F) (hσ : 0 < σ) (hT : 0 < T)\n    (h₀ : 0 < T₀) :\n    deriv (fun ε ↦ deriv (fun k ↦ Real.sqrt (dupireRatio F σ ψ₁ T₀ ε k T)) 0) 0\n        = ψ₁ * ((3 / 2) * T + 2 * T₀) / ((T + T₀) * Real.sqrt (T + T₀)) ∧\n      deriv (fun ε ↦ deriv (fun k ↦ Real.sqrt (dupireRatio F σ ψ₁ T₀ ε k T)) 0) 0\n        = ((3 / 2) * T + 2 * T₀) / (T + T₀)\n          * deriv (fun ε ↦ deriv (fun k ↦ smileSurface σ ψ₁ T₀ ε k T) 0) 0 :=\n  ⟨dupireRatio_sqrt_slope hF hσ hT h₀, dupireRatio_sqrt_slope_eq_mul_skew hF hσ hT h₀⟩\n\n/-- **The rule of two on the tilted smile.** Re-export of\n`MathFin.ForwardSmile.tendsto_dupireRatio_sqrt_slope_nhdsGT_zero`. -/\ntheorem tilted_smile_rule_of_two {F σ ψ₁ T₀ : ℝ} (hF : 0 < F) (hσ : 0 < σ) (h₀ : 0 < T₀) :\n    Filter.Tendsto\n      (fun T ↦ deriv (fun ε ↦ deriv (fun k ↦ Real.sqrt (dupireRatio F σ ψ₁ T₀ ε k T)) 0) 0)\n      (nhdsWithin 0 (Set.Ioi 0))\n      (nhds (2 * deriv (fun ε ↦ deriv (fun k ↦ smileSurface σ ψ₁ T₀ ε k 0) 0) 0)) :=\n  tendsto_dupireRatio_sqrt_slope_nhdsGT_zero hF hσ h₀\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "B. Dupire, Pricing with a smile, Risk 7(1) (1994) 18–20; J. Gatheral, The Volatility Surface: A Practitioner's Guide, Wiley (2006), ch. 1; S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 10",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.ForwardSmile.dupireRatio_sqrt_slope, dupireRatio_sqrt_slope_eq_mul_skew and tendsto_dupireRatio_sqrt_slope_nhdsGT_zero (MathFin/BlackScholes/ForwardSmile.lean). Prices are MathFin.bsV at zero rate on the tilted surface; Dupire's ratio is a definition; the slopes are iterated deriv at ε = 0, k = 0, computed by HasDerivAt chains through the Black form in (k, w) coordinates. SCOPE: first order in ε on one parametric family; the rule of two is the T → 0⁺ limit for that family, not the general short-expiry statement; the ε = 1 surface and the notes' forward-skew reading (eq. 10.9) are not formalized."
+      }
+    },
+    {
+      "id": "mf-lsv-coin-toss-posterior-nonflat",
+      "name": "Coin-Toss Posterior Variance E[v | S_T] Is Not Flat in the Strike",
+      "domain": "mathematical_finance",
+      "description": "For the two-branch lognormal coin toss used to illustrate LSV calibration (equal priors, zero rate, unit maturity, branch volatilities 0 < σ_lo < σ_hi, branch variances v_lo < v_hi), the conditional expectation of the branch variance given the terminal price is m(S_T) almost surely, with m(K) = (v_lo φ_lo(K) + v_hi φ_hi(K))/(φ_lo(K) + φ_hi(K)) and φ_c the branch's lognormal density; m lies below (v_lo + v_hi)/2 at the money, tends to v_hi as K → ∞, and is not constant on K > 0. Each φ_c is the second strike derivative of that branch's Black–Scholes call (Breeden–Litzenberger), so m is a ratio of call-price convexities. That an LSV model calibrated to a flat local volatility has the resulting non-flat leverage σ_loc/√m (Gyöngy's mimicking theorem) is not proved.",
+      "code": {
+        "lean": "import MathFin.Bridges.LSVPosteriorConditionalExpectation\n\nopen MeasureTheory Filter Topology\nopen MathFin MathFin.LSV\n\n/-- **The coin-toss posterior variance is `E[v | S_T]` and is not flat in the strike.**\nRe-export of `cointossM_comp_ae_eq_condExp`, `cointossM_atm_lt_uncond`,\n`cointossM_wing_limit_atTop` and `cointossM_nonconstant`. -/\ntheorem coin_toss_posterior_variance_nonflat {F σ_lo σ_hi v_lo v_hi : ℝ} (hF : 0 < F)\n    (hlo : 0 < σ_lo) (hhi : σ_lo < σ_hi) (hvhi : v_lo < v_hi) :\n    (fun p ↦ cointossM F σ_lo σ_hi v_lo v_hi (cointossST F σ_lo σ_hi p)) =ᵐ[cointossMix]\n        cointossMix[cointossV v_lo v_hi |\n          MeasurableSpace.comap (cointossST F σ_lo σ_hi) inferInstance] ∧\n      cointossM F σ_lo σ_hi v_lo v_hi F < (v_lo + v_hi) / 2 ∧\n      Tendsto (fun K : ℝ ↦ cointossM F σ_lo σ_hi v_lo v_hi K) atTop (𝓝 v_hi) ∧\n      ¬ ∃ c : ℝ, ∀ K : ℝ, 0 < K → cointossM F σ_lo σ_hi v_lo v_hi K = c :=\n  ⟨cointossM_comp_ae_eq_condExp hF hlo (hlo.trans hhi), cointossM_atm_lt_uncond hF hlo hhi hvhi,\n    cointossM_wing_limit_atTop hF hlo hhi, cointossM_nonconstant hF hlo hhi hvhi⟩\n\n/-- **The posterior variance from call prices** (Breeden–Litzenberger). Re-export of\n`cointossM_eq_strike_convexity`. -/\ntheorem coin_toss_posterior_from_call_prices {F σ_lo σ_hi v_lo v_hi K : ℝ} (hF : 0 < F)\n    (hlo : 0 < σ_lo) (hhi : 0 < σ_hi) (hK : 0 < K) :\n    cointossM F σ_lo σ_hi v_lo v_hi K =\n      (v_lo * deriv (deriv fun k ↦ bsV k 0 σ_lo F 1) K\n          + v_hi * deriv (deriv fun k ↦ bsV k 0 σ_hi F 1) K) /\n        (deriv (deriv fun k ↦ bsV k 0 σ_lo F 1) K + deriv (deriv fun k ↦ bsV k 0 σ_hi F 1) K) :=\n  cointossM_eq_strike_convexity hF hlo hhi hK\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "J. Guyon and P. Henry-Labordère, Being particular about calibration, Risk (January 2012); I. Gyöngy, Mimicking the one-dimensional marginal distributions of processes having an Itô differential, Probab. Theory Relat. Fields 71 (1986) 501–516; S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 11, Ex. 11.2",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.LSV.cointossM_comp_ae_eq_condExp (MathFin/Bridges/LSVPosteriorConditionalExpectation.lean) and cointossM_atm_lt_uncond, cointossM_wing_limit_atTop, cointossM_nonconstant, cointossM_eq_strike_convexity (MathFin/BlackScholes/LSVLeverage.lean). The mixture is (1/2)·N(0,1) on each branch of ℝ ⊕ ℝ; each branch law of S_T is the density cointossPhi on (0, ∞) (jumpDiffusionIncrementLaw_zero_map_mul_exp), and the identification uses Mathlib's ae_eq_condExp_of_forall_setIntegral_eq. The branch densities are identified with call-price convexities by MathFin.breedenLitzenberger. SCOPE: the coin-toss example; NOT proved: that the leverage function of an LSV model calibrated to a flat local volatility is σ_loc/√m (Gyöngy's mimicking theorem, McKean–Vlasov existence), or any decimal figure of the source tables."
+      }
+    },
+    {
+      "id": "mf-bs-heat-equation-brownian-coordinate",
+      "name": "Discounted Black–Scholes Call Solves the Backward Heat Equation in the Brownian Coordinate",
+      "domain": "mathematical_finance",
+      "description": "Let f(t,x) = e^{−rt}·C_BS(S₀e^{(r−σ²/2)t+σx}, T − t) be the discounted Black–Scholes call value written in the Brownian coordinate x (the value of the driving Brownian motion), with K, σ, S₀ > 0. For t < T, f is differentiable in t, ∂_x f is differentiable in x, and f_t + ½f_xx = 0, so the drift integrand of the time-dependent Itô formula for f(t, B_t) vanishes; and f_x = σ·e^{−rt}S·Φ(d₁), the discounted delta hedge. Derived from the Feynman–Kac heat-flow representation of the price. That f(t, B_t) is a local martingale (the Itô-integral identity itself) is not proved.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PDEFromIto\n\nopen MathFin\n\n/-- **The Black–Scholes PDE in the Brownian coordinate, and the delta hedge.** Re-export of\n`MathFin.discountedCallBrownian_heat_equation` and `hasDerivAt_discountedCallBrownian_x`. -/\ntheorem bs_heat_equation_brownian_coordinate {K r σ S₀ T t x : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    (hS₀ : 0 < S₀) (ht : t < T) :\n    (DifferentiableAt ℝ (fun s ↦ discountedCallBrownian K r σ S₀ T s x) t ∧\n      DifferentiableAt ℝ (deriv fun y ↦ discountedCallBrownian K r σ S₀ T t y) x ∧\n      deriv (fun s ↦ discountedCallBrownian K r σ S₀ T s x) t\n        + 1 / 2 * deriv (deriv fun y ↦ discountedCallBrownian K r σ S₀ T t y) x = 0) ∧\n    HasDerivAt (fun y ↦ discountedCallBrownian K r σ S₀ T t y)\n      (σ * (Real.exp (-(r * t)) * gbmValue S₀ r σ t x) *\n        Phi (bsd1 (gbmValue S₀ r σ t x) K r σ (T - t))) x :=\n  ⟨discountedCallBrownian_heat_equation hK hσ hS₀ ht,\n    hasDerivAt_discountedCallBrownian_x hK hσ hS₀ ht x⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "S. E. Shreve, Stochastic Calculus for Finance II: Continuous-Time Models, Springer (2004), §4.5",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.discountedCallBrownian_heat_equation and MathFin.hasDerivAt_discountedCallBrownian_x (MathFin/BlackScholes/PDEFromIto.lean). The discounted price equals e^{−rT}·feynmanU(ξ ↦ (e^ξ − K)⁺)(σ²(T − t), log S₀ + (r − σ²/2)T + σx) (bsV_eq_discount_feynmanU); ∂_t moves only the time slot and ∂_x only the space slot, so feynmanU_heat_equation gives the result. The delta identity is hasDerivAt_bsV_S composed with ∂_x gbmValue. SCOPE: the pointwise PDE for t < T; the Itô-integral representation of f(t, B_t), which needs growth bounds up to third order and a localization away from T, is not proved."
+      }
+    },
+    {
+      "id": "mf-sabr-implied-vol-atm-limit",
+      "name": "SABR Implied Vol Formula Tends to the ATM Formula as K -> f",
+      "domain": "mathematical_finance",
+      "description": "The printed SABR implied-volatility formula sigma_B(K, f) of Hagan-Kumar-Lesniewski-Woodward (eq. 2.17a-c, higher-order terms dropped) tends to their at-the-money formula (eq. 2.18) as the strike K tends to the forward f, K != f, for f > 0, alpha != 0, nu != 0, rho != 1 and any beta, t_ex. At K = f the z/x(z) factor is 0/0; the limit is resolved from x(0) = 0 and x'(0) = 1. The singular-perturbation derivation of eq. 2.17 and any error bound against the true SABR implied volatility are not formalized here.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.SABRImpliedVol\n\nopen MathFin Filter Topology\n\ntheorem sabr_implied_vol_atm_limit_thm {f α β ρ ν tex : ℝ} (hf : 0 < f) (hα : α ≠ 0)\n    (hν : ν ≠ 0) (hρ : ρ ≠ 1) :\n    Tendsto (fun K ↦ sabrImpliedVol K f α β ρ ν tex) (𝓝[≠] f)\n      (𝓝 (sabrATMVol f α β ρ ν tex)) :=\n  tendsto_sabrImpliedVol_atm hf hα hν hρ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002, eqs. 2.17a-c and 2.18",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the K -> f limit of the printed formula. Lives in MathFin/BlackScholes/SABRImpliedVol.lean (tendsto_sabrImpliedVol_atm, via hasDerivAt_sabrX_zero, tendsto_div_sabrX, tendsto_sabrZ). Axioms-clean. LIMITS: the statement is about the two printed truncations (eq. 2.17a with its '...' terms dropped, and eq. 2.18), not about the SABR model: the singular-perturbation derivation, the SABR SDE's transition density, and any O(t_ex^2) error bound against the true implied volatility (issue #100's full ask) are not formalized. The hypotheses are weaker than the paper's (rho != 1 rather than |rho| < 1; alpha, nu nonzero rather than positive). nu = 0 (the CEV limit) is excluded: there z is identically 0."
+      }
+    },
+    {
+      "id": "mf-sabr-backbone-law",
+      "name": "SABR Backbone Law: d log sigma / d log f = beta - 1",
+      "domain": "mathematical_finance",
+      "description": "Along the SABR leading-order at-the-money volatility curve sigma(f) = alpha / f^(1-beta) (Hagan-Kumar-Lesniewski-Woodward, section 3, the backbone), the log-volatility has derivative (beta - 1)/f in the forward f, for f > 0 and alpha != 0; that is, d log sigma / d log f = beta - 1. The t_ex correction of eq. 2.18 is not covered.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.SABRImpliedVol\n\nopen MathFin\n\ntheorem sabr_backbone_law_thm {f α : ℝ} (β : ℝ) (hf : 0 < f) (hα : α ≠ 0) :\n    HasDerivAt (fun x ↦ Real.log (sabrBackbone x α β)) ((β - 1) / f) f :=\n  hasDerivAt_log_sabrBackbone β hf hα\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002, section 3 and eq. 2.18",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Lives in MathFin/BlackScholes/SABRImpliedVol.lean (hasDerivAt_log_sabrBackbone). Axioms-clean. LIMITS: the law is proved for the leading-order backbone alpha / f^(1-beta) only; the t_ex correction term of eq. 2.18 is not included, and nothing is said about the true SABR ATM implied volatility."
+      }
+    },
+    {
+      "id": "mf-sabr-atm-black76-price",
+      "name": "SABR ATM Price as Black-76 at the ATM Vol",
+      "domain": "mathematical_finance",
+      "description": "Hagan-Kumar-Lesniewski-Woodward price European options by Black's formula at the SABR implied vol; at the money that vol is eq. 2.18. Under the Black-76 hypothesis (forward f, strike f, zero drift, standard-normal driver) at vol sigma_ATM = sabrATMVol, the discounted expected call payoff E[e^(-rT) max(F_T - f, 0)] equals e^(-rT) f (2 Phi(sigma_ATM sqrt(T) / 2) - 1). That the SABR dynamics themselves produce this price is not proved here.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.SABRImpliedVol\n\nopen MathFin MeasureTheory ProbabilityTheory\n\ntheorem sabr_atm_black76_price_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q] {f α β ρ ν tex T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q f f 0 (sabrATMVol f α β ρ ν tex) T Z) (r : ℝ) :\n    ∫ ω, Real.exp (-r * T) * max (bsTerminal f 0 (sabrATMVol f α β ρ ν tex) T (Z ω) - f) 0 ∂Q\n      = Real.exp (-r * T) * f * (2 * Phi (sabrATMVol f α β ρ ν tex * Real.sqrt T / 2) - 1) :=\n  sabrATMVol_black_futures_price h r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002, eq. 2.18; Black (1976)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The ATM Black-76 closed form is derived in MathFin/Futures/Black76.lean (black_futures_formula_atm: from black_futures_formula, d1 = sigma sqrt(T)/2 = -d2 at K = F, and Phi(x) + Phi(-x) = 1) and instantiated at sabrATMVol in MathFin/BlackScholes/SABRImpliedVol.lean (sabrATMVol_black_futures_price). Axioms-clean. LIMITS: this is Black's formula evaluated at eq. 2.18's vol, the pricing rule the paper prescribes; it is not derived from the SABR SDE, and no bound on the gap to the SABR model's actual ATM price is given. BSCallHyp at sigma_ATM requires sabrATMVol > 0, which is a hypothesis, not proved."
+      }
+    }
+  ]
+}

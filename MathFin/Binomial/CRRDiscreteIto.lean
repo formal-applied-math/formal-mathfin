@@ -8,169 +8,208 @@ module
 public import Mathlib
 public import MathFin.Binomial.CRRConvergence
 public import MathFin.Binomial.DriftLimit
+public import MathFin.Binomial.CRRCharFun
 
 /-!
-# CRR binomial scheme as a discrete-Itô process (phase 44a+b)
+# Mean and variance of the CRR log-return law, and their Black–Scholes limits
 
-The pre-existing `Binomial/CRRConvergence.lean` ships:
-- `crrProb_tendsto_half`: `p_n → 1/2` as `n → ∞`,
-- `crr_variance_limit`: `4 σ² T · p_n · (1 − p_n) → σ² T`,
-- `crr_one_step_martingale`: `p · u + (1 − p) · d = e^{rΔt}` (algebraic),
+`Binomial/CRRCharFun.lean` defines the law of one CRR risk-neutral log-return step,
+`crrStepMeasure r σ T n` (mass `pₙ = crrProb r σ T n` at `+σ√(T/n)` and `1 − pₙ` at
+`−σ√(T/n)`), takes the law of the `n`-step log-return to be its `n`-fold convolution
+`convPow (crrStepMeasure r σ T n) n`, and proves that this law converges weakly to the
+Black–Scholes normal `N((r − σ²/2)T, σ²T)` (`crr_tendsto_gaussian_inDistribution`). Weak
+convergence does not by itself carry moments along. This file proves that the first two do
+converge: the mean and the variance of the `n`-step law tend to `(r − σ²/2)T` and `σ²T`, the
+mean and variance of the limit law (`crrRowLaw_moments_tendsto`).
 
-and `Binomial/DriftLimit.lean` ships:
-- `crr_drift_limit_n`: `n · (2 p_n − 1) · σ · √(T/n) → (r − σ²/2) · T`.
-
-This file states the CRR log-price's per-step **drift** and **quadratic
-variation** as closed forms in the CRR parameters and composes the existing
-CRR limit lemmas above to recover the BS values — the discrete analogue of
-the continuous drift/QV. (The general discrete-Itô scaffolding lives in
-`Foundations/DiscreteIto.lean`, phase 35, after Nagy 2026; this file states
-the CRR-specific identities rather than instantiating that general formula.)
-The binomial log-price `log S_k` has:
-
-* per-step drift `q · log u + (1 − q) · log d = (2q − 1) · σ √Δt`,
-* per-step quadratic variation `q · (log u)² + (1 − q) · (log d)² − drift²
-  = 4 q (1 − q) · σ² Δt`,
-
-are the discrete analogues of the BS log-price's continuous drift
-`(r − σ²/2) dt` and QV `σ² dt`. Summed over `n` steps and taking
-`n → ∞`, the existing `crr_drift_limit_n` and `crr_variance_limit` lemmas
-deliver the BS values.
-
-## Scope (honest)
-
-**44a (algebraic identification)**: The per-step drift and QV formulas as
-closed-form expressions in CRR parameters. No probability, just algebra
-on `crrUp, crrDown, crrProb`.
-
-**44b (limit composition)**: Summed-over-n drift and QV converge to BS
-drift and QV. Pure composition of existing `crr_drift_limit_n` (drift)
-and `crr_variance_limit` (QV) with the per-step identities.
-
-**44c (distributional convergence)**: the binomial call price converges to
-the BS call price — proved in `Binomial/CRRCharFun.lean`
-(`binomialPrice_call_tendsto_bs`) via characteristic functions + Lévy
-continuity + put-call parity (no triangular-array CLT needed).
+The route is general first. For a probability law `ν` on `ℝ` carried by a bounded interval,
+bounded support propagates through convolution (`ae_abs_le_convPow`), so polynomials are
+integrable, and the `k`-fold convolution has mean `k·E_ν[X]` and variance `k·Var_ν(X)`
+(`integral_id_convPow`, `variance_convPow`, from `integral_conv`). For the CRR step these are
+`(2pₙ − 1)σ√(T/n)` and `4pₙ(1 − pₙ)σ²T/n` (`integral_id_crrStepMeasure`,
+`variance_id_crrStepMeasure`), so the `n`-step moments are `n(2pₙ − 1)σ√(T/n)` and
+`4σ²T·pₙ(1 − pₙ)`, whose limits are `crr_drift_limit_n` and `crr_variance_limit`.
 
 ## Results
 
-* `binomialLogReturnDrift`: per-step drift `(2 p − 1) · σ √Δt`.
-* `binomialLogReturnQV`: per-step QV `4 p (1 − p) · σ² Δt`.
-* `binomial_drift_per_step_eq`: algebraic identity for per-step drift
-  in terms of `crrProb, crrUp, crrDown`.
-* `binomial_QV_per_step_eq`: algebraic identity for per-step QV.
-* `tendsto_sum_drift_atTop_BS_drift`: `n · per_step_drift → (r −
-  σ²/2)·T` (composes `crr_drift_limit_n`).
-* `tendsto_sum_QV_atTop_BS_QV`: `n · per_step_QV → σ²·T` (composes
-  `crr_variance_limit`).
+* `integrable_of_continuous_of_ae_abs_le`, `ae_abs_le_conv`, `ae_abs_le_convPow`: bounded
+  support and integrability through convolution powers.
+* `integral_id_convPow`, `variance_convPow`: mean and variance of a convolution power.
+* `integral_id_crrStepMeasure`, `variance_id_crrStepMeasure`: mean and variance of the CRR step.
+* `crrRowLaw_moments_tendsto`: mean and variance of the `n`-step CRR log-return law converge to
+  those of `N((r − σ²/2)T, σ²T)`.
 -/
 
 @[expose] public section
 
 namespace MathFin
 
-open Filter
+open MeasureTheory ProbabilityTheory Filter
 open scoped Topology
 
-/-- **Per-step drift of the binomial log-return** in the CRR
-parameterisation. Algebraically `(2q − 1) · σ · √Δt`, where `q = crrProb,
-Δt = T/n, σ` is the BS volatility. -/
-noncomputable def binomialLogReturnDrift (r σ T : ℝ) (n : ℕ) : ℝ :=
-  (2 * crrProb r σ T n - 1) * σ * Real.sqrt (crrStep T n)
+/-! ### Moments of convolution powers of a boundedly supported law -/
 
-/-- **Per-step quadratic variation of the binomial log-return**:
-`4 q (1 − q) · σ² · Δt`. This is the discrete analogue of the BS
-log-price QV per `dt`, which equals `σ² dt`. As `q → 1/2`, the prefactor
-`4 q (1 − q) → 1`, so the per-step QV → `σ² · Δt`. Summed over `n`
-steps: `n · σ²·Δt · 4q(1−q) → σ²·T`. -/
-noncomputable def binomialLogReturnQV (r σ T : ℝ) (n : ℕ) : ℝ :=
-  4 * crrProb r σ T n * (1 - crrProb r σ T n) * σ ^ 2 * crrStep T n
+section ConvolutionMoments
 
-/-- **Algebraic per-step drift identity**: `q · log u + (1 − q) · log d
-= (2q − 1) · σ · √Δt`, where `log u = σ √Δt` and `log d = −σ √Δt` in the
-CRR parameterisation. This is the discrete-Itô drift coefficient of
-`log S_k → log S_{k+1}`. -/
-theorem binomial_drift_per_step_eq (r σ T : ℝ) (n : ℕ) :
-    crrProb r σ T n * Real.log (crrUp σ T n) +
-      (1 - crrProb r σ T n) * Real.log (crrDown σ T n) =
-        binomialLogReturnDrift r σ T n := by
-  unfold binomialLogReturnDrift crrUp crrDown
-  rw [Real.log_exp, Real.log_exp]
+/-- A continuous function is integrable against a finite measure carried by a bounded
+interval. -/
+lemma integrable_of_continuous_of_ae_abs_le {μ : Measure ℝ} [IsFiniteMeasure μ] {c : ℝ}
+    (hμ : ∀ᵐ x ∂μ, |x| ≤ c) {g : ℝ → ℝ} (hg : Continuous g) : Integrable g μ := by
+  obtain ⟨C, hC⟩ := (isCompact_Icc (a := -c) (b := c)).exists_bound_of_continuousOn
+    hg.continuousOn
+  exact Integrable.of_bound hg.aestronglyMeasurable C (hμ.mono fun x hx ↦ hC x (abs_le.mp hx))
+
+/-- Bounded support adds under convolution: if `|x| ≤ c` `μ`-a.e. and `|y| ≤ a` `ν`-a.e., then
+`|z| ≤ c + a` `(μ ∗ ν)`-a.e. -/
+lemma ae_abs_le_conv {μ ν : Measure ℝ} {c a : ℝ} (hμ : ∀ᵐ x ∂μ, |x| ≤ c)
+    (hν : ∀ᵐ y ∂ν, |y| ≤ a) : ∀ᵐ z ∂(μ ∗ ν), |z| ≤ c + a := by
+  refine (ae_map_iff (by fun_prop) (measurableSet_le (by fun_prop) (by fun_prop))).2 ?_
+  filter_upwards [(Measure.quasiMeasurePreserving_fst (μ := μ) (ν := ν)).ae hμ,
+    (Measure.quasiMeasurePreserving_snd (μ := μ) (ν := ν)).ae hν] with p h₁ h₂
+  exact (abs_add_le _ _).trans (add_le_add h₁ h₂)
+
+/-- Bounded support propagates through convolution powers: if `|y| ≤ a` `ν`-a.e., then
+`|x| ≤ k·a` almost everywhere for `convPow ν k`. -/
+lemma ae_abs_le_convPow {ν : Measure ℝ} {a : ℝ} (hν : ∀ᵐ y ∂ν, |y| ≤ a) :
+    ∀ k : ℕ, ∀ᵐ x ∂(convPow ν k), |x| ≤ k * a
+  | 0 => by simp [convPow, ae_dirac_eq]
+  | k + 1 => by
+    rw [convPow]
+    exact (ae_abs_le_conv (ae_abs_le_convPow hν k) hν).mono fun x hx ↦ by
+      rwa [Nat.cast_succ, add_one_mul]
+
+variable {ν : Measure ℝ} [IsProbabilityMeasure ν] {a : ℝ}
+
+/-- One convolution step against a boundedly supported law: the means add, and the second
+moment picks up the cross term `2·E_μ[X]·E_ν[Y]`. -/
+lemma integral_id_and_sq_conv {μ : Measure ℝ} [IsProbabilityMeasure μ] {c : ℝ}
+    (hμ : ∀ᵐ x ∂μ, |x| ≤ c) (hν : ∀ᵐ y ∂ν, |y| ≤ a) :
+    ∫ z, z ∂(μ ∗ ν) = ∫ x, x ∂μ + ∫ y, y ∂ν ∧
+      ∫ z, z ^ 2 ∂(μ ∗ ν)
+        = ∫ x, x ^ 2 ∂μ + 2 * (∫ x, x ∂μ) * (∫ y, y ∂ν) + ∫ y, y ^ 2 ∂ν := by
+  have hconv := ae_abs_le_conv hμ hν
+  have hμ1 := integrable_of_continuous_of_ae_abs_le hμ continuous_id'
+  have hμ2 := integrable_of_continuous_of_ae_abs_le hμ (continuous_pow 2)
+  have hν1 := integrable_of_continuous_of_ae_abs_le hν continuous_id'
+  have hν2 := integrable_of_continuous_of_ae_abs_le hν (continuous_pow 2)
+  constructor
+  · rw [integral_conv (integrable_of_continuous_of_ae_abs_le hconv continuous_id')]
+    have hin (x : ℝ) : ∫ y, (x + y) ∂ν = x + ∫ y, y ∂ν := by
+      rw [integral_add (integrable_const x) hν1, integral_const, probReal_univ, one_smul]
+    simp_rw [hin]
+    rw [integral_add hμ1 (integrable_const _), integral_const, probReal_univ, one_smul]
+  · rw [integral_conv (integrable_of_continuous_of_ae_abs_le hconv (continuous_pow 2))]
+    have hin (x : ℝ) :
+        ∫ y, (x + y) ^ 2 ∂ν = x ^ 2 + 2 * x * ∫ y, y ∂ν + ∫ y, y ^ 2 ∂ν := by
+      rw [show (fun y ↦ (x + y) ^ 2) = fun y ↦ (x ^ 2 + 2 * x * y) + y ^ 2 from
+          funext fun y ↦ by ring,
+        integral_add (show Integrable (fun y ↦ x ^ 2 + 2 * x * y) ν from
+          (integrable_const (x ^ 2)).add (hν1.const_mul (2 * x))) hν2,
+        integral_add (integrable_const (x ^ 2)) (hν1.const_mul (2 * x)), integral_const_mul,
+        integral_const, probReal_univ, one_smul]
+    simp_rw [hin]
+    have hμ1' : Integrable (fun x ↦ 2 * x * ∫ y, y ∂ν) μ := (hμ1.const_mul 2).mul_const _
+    rw [integral_add (show Integrable (fun x ↦ x ^ 2 + 2 * x * ∫ y, y ∂ν) μ from
+        hμ2.add hμ1') (integrable_const _),
+      integral_add hμ2 hμ1', integral_mul_const, integral_const_mul, integral_const,
+      probReal_univ, one_smul]
+
+/-- **Mean and variance of a convolution power**, in moment form: for a probability law `ν`
+carried by a bounded interval, `E[X] = k·E_ν[X]` and `E[X²] − E[X]² = k·(E_ν[X²] − E_ν[X]²)`
+under `convPow ν k`. -/
+lemma convPow_moments (hν : ∀ᵐ y ∂ν, |y| ≤ a) :
+    ∀ k : ℕ, ∫ x, x ∂(convPow ν k) = k * ∫ y, y ∂ν ∧
+      ∫ x, x ^ 2 ∂(convPow ν k) - (∫ x, x ∂(convPow ν k)) ^ 2
+        = k * (∫ y, y ^ 2 ∂ν - (∫ y, y ∂ν) ^ 2)
+  | 0 => by simp [convPow]
+  | k + 1 => by
+    haveI := convPow_isProbabilityMeasure ν k
+    obtain ⟨h1, h2⟩ := convPow_moments hν k
+    obtain ⟨c1, c2⟩ := integral_id_and_sq_conv (ae_abs_le_convPow hν k) hν
+    rw [h1] at h2
+    rw [convPow, c1, c2, h1]
+    push_cast
+    exact ⟨by ring, by linear_combination h2⟩
+
+/-- **The mean of a convolution power**: `E[X] = k·E_ν[X]` under `convPow ν k`, for a
+probability law `ν` carried by a bounded interval. -/
+lemma integral_id_convPow (hν : ∀ᵐ y ∂ν, |y| ≤ a) (k : ℕ) :
+    ∫ x, x ∂(convPow ν k) = k * ∫ y, y ∂ν :=
+  (convPow_moments hν k).1
+
+/-- The variance of a law carried by a bounded interval, in moment form. -/
+lemma variance_id_eq_of_ae_abs_le {μ : Measure ℝ} [IsProbabilityMeasure μ] {c : ℝ}
+    (hμ : ∀ᵐ x ∂μ, |x| ≤ c) :
+    variance id μ = ∫ x, x ^ 2 ∂μ - (∫ x, x ∂μ) ^ 2 := by
+  rw [variance_eq_sub (MemLp.of_bound continuous_id.aestronglyMeasurable c
+    (hμ.mono fun x hx ↦ by simpa [Real.norm_eq_abs] using hx))]
+  rfl
+
+/-- **The variance of a convolution power**: `Var(convPow ν k) = k·Var(ν)`, for a probability
+law `ν` carried by a bounded interval. -/
+lemma variance_convPow (hν : ∀ᵐ y ∂ν, |y| ≤ a) (k : ℕ) :
+    variance id (convPow ν k) = k * variance id ν := by
+  haveI := convPow_isProbabilityMeasure ν k
+  rw [variance_id_eq_of_ae_abs_le (ae_abs_le_convPow hν k), variance_id_eq_of_ae_abs_le hν]
+  exact (convPow_moments hν k).2
+
+end ConvolutionMoments
+
+/-! ### The CRR step law and its `n`-step convolution -/
+
+/-- The CRR step law is carried by `[−|σ√(T/n)|, |σ√(T/n)|]`. -/
+lemma crrStepMeasure_ae_abs_le (r σ T : ℝ) (n : ℕ) :
+    ∀ᵐ x ∂(crrStepMeasure r σ T n), |x| ≤ |σ * Real.sqrt (T / n)| := by
+  rw [crrStepMeasure, ae_add_measure_iff]
+  exact ⟨Measure.ae_smul_measure (by simp [ae_dirac_eq]) _,
+    Measure.ae_smul_measure (by simp [ae_dirac_eq]) _⟩
+
+/-- **The mean of one CRR log-return step**: `(2pₙ − 1)·σ√(T/n)`, for `0 ≤ pₙ ≤ 1`. -/
+lemma integral_id_crrStepMeasure {r σ T : ℝ} {n : ℕ} (hp0 : 0 ≤ crrProb r σ T n)
+    (hp1 : crrProb r σ T n ≤ 1) :
+    ∫ x, x ∂(crrStepMeasure r σ T n) = (2 * crrProb r σ T n - 1) * (σ * Real.sqrt (T / n)) := by
+  rw [integral_crrStepMeasure hp0 hp1 fun x ↦ x]
   ring
 
-/-- **Algebraic per-step QV identity**: the variance of the binomial
-log-return equals `4 q (1 − q) · σ² · Δt`.
-
-Computation: `Var = q · (log u)² + (1−q) · (log d)² − [q · log u + (1−q) · log d]²
-= q · (σ√Δt)² + (1−q) · (−σ√Δt)² − ((2q−1)σ√Δt)²
-= σ²·Δt · (q + 1 − q − (2q−1)²)
-= σ²·Δt · (1 − (2q−1)²)
-= σ²·Δt · 4q(1−q)`. -/
-theorem binomial_QV_per_step_eq (r σ T : ℝ) (n : ℕ) (hT : 0 < T) (hn : 1 ≤ n) :
-    crrProb r σ T n * (Real.log (crrUp σ T n)) ^ 2 +
-    (1 - crrProb r σ T n) * (Real.log (crrDown σ T n)) ^ 2 -
-    (crrProb r σ T n * Real.log (crrUp σ T n) +
-      (1 - crrProb r σ T n) * Real.log (crrDown σ T n)) ^ 2 =
-        binomialLogReturnQV r σ T n := by
-  unfold binomialLogReturnQV crrUp crrDown
-  rw [Real.log_exp, Real.log_exp]
-  -- Subgoal: q·(σ√Δt)² + (1−q)·(−σ√Δt)² − (q·σ√Δt − (1−q)·σ√Δt)²  =  4q(1−q)·σ²·Δt
-  -- LHS = σ²·Δt·[q + (1−q) − (2q−1)²] = σ²·Δt·(1 − (2q−1)²) = σ²·Δt·4q(1−q)
-  have h_n_pos : (0 : ℝ) < n := by exact_mod_cast hn
-  have h_step_pos : 0 < crrStep T n := div_pos hT h_n_pos
-  have h_sqrt_sq : Real.sqrt (crrStep T n) ^ 2 = crrStep T n :=
-    Real.sq_sqrt h_step_pos.le
-  -- After log_exp, we have (σ·√Δt)² and (−σ·√Δt)² as the per-step log values squared
-  -- Reduce using (a+b)² = a² + 2ab + b² then ring on (√Δt)² = Δt
-  nlinarith [h_sqrt_sq, sq_nonneg (crrProb r σ T n),
-             sq_nonneg (1 - crrProb r σ T n),
-             sq_nonneg σ,
-             sq_nonneg (σ * Real.sqrt (crrStep T n))]
-
-/-- **Summed-over-n drift converges to BS drift**: `n · per_step_drift →
-(r − σ²/2)·T` as `n → ∞`. Direct consequence of `crr_drift_limit_n` from
-`Binomial/DriftLimit.lean`. -/
-theorem tendsto_sum_drift_atTop_BS_drift
-    {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
-    Tendsto (fun n : ℕ ↦ (n : ℝ) * binomialLogReturnDrift r σ T n)
-      atTop (𝓝 ((r - σ ^ 2 / 2) * T)) := by
-  unfold binomialLogReturnDrift crrStep
-  -- After unfolding, the function is `n · (2 p_n − 1) · σ · √(T/n)`, exactly
-  -- the form of `crr_drift_limit_n`.
-  refine (crr_drift_limit_n hσ hT).congr' ?_
-  filter_upwards with n
+/-- **The variance of one CRR log-return step**: `4pₙ(1 − pₙ)·(σ√(T/n))²`, for `0 ≤ pₙ ≤ 1`. -/
+lemma variance_id_crrStepMeasure {r σ T : ℝ} {n : ℕ} (hp0 : 0 ≤ crrProb r σ T n)
+    (hp1 : crrProb r σ T n ≤ 1) :
+    variance id (crrStepMeasure r σ T n)
+      = 4 * crrProb r σ T n * (1 - crrProb r σ T n) * (σ * Real.sqrt (T / n)) ^ 2 := by
+  haveI := isProbabilityMeasure_crrStepMeasure hp0 hp1
+  rw [variance_id_eq_of_ae_abs_le (crrStepMeasure_ae_abs_le r σ T n),
+    integral_crrStepMeasure hp0 hp1 fun x ↦ x ^ 2, integral_id_crrStepMeasure hp0 hp1]
   ring
 
-/-- **Summed-over-n QV converges to BS QV**: `n · per_step_QV → σ²·T` as
-`n → ∞`. Composes `crr_variance_limit` (which gives `4 σ² T · p · (1−p)
-→ σ² T`) with the identity `n · per_step_QV = n · 4 p (1−p) · σ² · (T/n)
-= 4 σ² T · p · (1−p)`. -/
-theorem tendsto_sum_QV_atTop_BS_QV
-    {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
-    Tendsto (fun n : ℕ ↦ (n : ℝ) * binomialLogReturnQV r σ T n)
-      atTop (𝓝 (σ ^ 2 * T)) := by
-  refine (crr_variance_limit (r := r) hσ hT).congr' ?_
-  filter_upwards [Filter.eventually_gt_atTop 0] with n hn
-  unfold binomialLogReturnQV crrStep
-  have hn_pos : (0 : ℝ) < n := by exact_mod_cast hn
-  have hn_ne : (n : ℝ) ≠ 0 := hn_pos.ne'
-  field_simp
-
-/-- **Discrete-Itô identification of the binomial scheme** (phase 44
-summary). The binomial scheme, parameterised by CRR, is a discrete-Itô
-process whose per-step drift and QV — when summed over `n` steps — limit
-to the BS log-price drift `(r − σ²/2)·T` and QV `σ²·T`. The full
-distributional convergence to the BS call price is proved separately in
-`Binomial/CRRCharFun.lean` (`binomialPrice_call_tendsto_bs`).
-
-Packaged as a single conjunction for downstream consumption. -/
-theorem binomial_discrete_ito_convergence
-    {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
-    Tendsto (fun n : ℕ ↦ (n : ℝ) * binomialLogReturnDrift r σ T n)
-        atTop (𝓝 ((r - σ ^ 2 / 2) * T)) ∧
-    Tendsto (fun n : ℕ ↦ (n : ℝ) * binomialLogReturnQV r σ T n)
-        atTop (𝓝 (σ ^ 2 * T)) :=
-  ⟨tendsto_sum_drift_atTop_BS_drift hσ hT,
-   tendsto_sum_QV_atTop_BS_QV hσ hT⟩
+/-- **Mean and variance of the `n`-step CRR log-return law converge to those of the
+Black–Scholes limit.** For `σ, T > 0`, as `n → ∞` the mean and the variance of
+`convPow (crrStepMeasure r σ T n) n` converge to the mean `(r − σ²/2)T` and the variance `σ²T`
+of `N((r − σ²/2)T, σ²T)` (`bsLimitProbMeasure`), the weak limit of the same laws
+(`crr_tendsto_gaussian_inDistribution`). No no-arbitrage hypothesis is needed: `pₙ → 1/2`
+(`crrProb_tendsto_half`), so the step law is a probability measure for all large `n`. -/
+theorem crrRowLaw_moments_tendsto {r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
+    Tendsto (fun n : ℕ ↦ ∫ x, x ∂(convPow (crrStepMeasure r σ T n) n)) atTop
+        (𝓝 (∫ x, x ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) ∧
+      Tendsto (fun n : ℕ ↦ variance id (convPow (crrStepMeasure r σ T n) n)) atTop
+        (𝓝 (variance id (gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) := by
+  rw [integral_id_gaussianReal, variance_id_gaussianReal,
+    Real.coe_toNNReal _ (mul_nonneg (sq_nonneg σ) hT.le)]
+  have hp : ∀ᶠ n : ℕ in atTop, crrProb r σ T n ∈ Set.Ioo 0 1 :=
+    (crrProb_tendsto_half (r := r) hσ hT).eventually_mem (Ioo_mem_nhds (by norm_num) (by norm_num))
+  constructor
+  · refine (crr_drift_limit_n hσ hT).congr' ?_
+    filter_upwards [hp] with n hn
+    haveI := isProbabilityMeasure_crrStepMeasure hn.1.le hn.2.le
+    rw [integral_id_convPow (crrStepMeasure_ae_abs_le r σ T n) n,
+      integral_id_crrStepMeasure hn.1.le hn.2.le]
+    ring
+  · refine (crr_variance_limit (r := r) hσ hT).congr' ?_
+    filter_upwards [hp, eventually_gt_atTop 0] with n hn hn0
+    haveI := isProbabilityMeasure_crrStepMeasure hn.1.le hn.2.le
+    have hcancel : (n : ℝ) * (T / n) = T := mul_div_cancel₀ T (Nat.cast_ne_zero.mpr hn0.ne')
+    rw [variance_convPow (crrStepMeasure_ae_abs_le r σ T n) n,
+      variance_id_crrStepMeasure hn.1.le hn.2.le, mul_pow,
+      Real.sq_sqrt (div_nonneg hT.le n.cast_nonneg)]
+    linear_combination (-(4 * σ ^ 2 * crrProb r σ T n * (1 - crrProb r σ T n))) * hcancel
 
 end MathFin

@@ -569,7 +569,7 @@ git commit -m "feat(corpus): martingale representation and completeness entries;
 ### Task 8: Documentation and the repo-complete upgrade
 
 **Files:**
-- Modify: `docs/coverage.md`, `docs/bridges.md`, `docs/mathematical-architecture.md`, `docs/roadmap.md`, `docs/leaps.md`, `docs/patterns.md`, `README.md`
+- Modify: `docs/coverage.md`, `docs/bridges.md`, `docs/mathematical-architecture.md`, `docs/archive/roadmap-history.md`, `docs/leaps.md`, `docs/patterns.md`, `README.md`
 
 A phase is not done until the whole repo reflects it.
 
@@ -587,7 +587,7 @@ The narrative entry, in the register of Leaps 1–4: what was assumed, what is n
 
 - [ ] **Step 5: `docs/patterns.md`** — dated batch. At minimum: `𝓕_a`-linearity by simple-process density + `DenseRange.equalizer`; the MGF-comparison route from orthogonality to a vanishing conditional expectation; countable generation of a natural filtration from path continuity.
 
-- [ ] **Step 6: `docs/roadmap.md`** — phase-log entry.
+- [ ] **Step 6: `docs/archive/roadmap-history.md`** — phase-log entry.
 
 - [ ] **Step 7: `README.md`** — refresh corpus counts from `coverage_report`.
 
@@ -595,7 +595,7 @@ The narrative entry, in the register of Leaps 1–4: what was assumed, what is n
 
 ```bash
 git add docs/coverage.md docs/bridges.md docs/mathematical-architecture.md \
-        docs/roadmap.md docs/leaps.md docs/patterns.md README.md
+        docs/archive/roadmap-history.md docs/leaps.md docs/patterns.md README.md
 git commit -m "docs: record the martingale-representation phase across the doc set"
 ```
 

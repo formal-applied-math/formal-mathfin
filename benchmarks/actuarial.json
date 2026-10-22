@@ -1,0 +1,157 @@
+{
+  "description": "Actuarial mathematics: mortality and survival models, annuities and insurance, premium principles, the compound Poisson model. `chapter` is the section number the entry had in the original single-file corpus, not a chapter of one book; each entry's `reference` names its source.",
+  "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)",
+  "theorems": [
+    {
+      "id": "mf-annuity-due-closed-form",
+      "name": "Annuity-Due Geometric Closed Form",
+      "description": "Σ_{k=0}^{n-1} v^k = (1 - v^n)/(1 - v) for v ≠ 1. The annuity-due present value formula, mirror of the immediate-annuity case.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Actuarial.Insurance\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem annuityDue_closed_form_thm (v : ℝ) (n : ℕ) (hv : v ≠ 1) :\n    ∑ k ∈ Finset.range n, v ^ k = (1 - v ^ n) / (1 - v) :=\n  MathFin.annuityDue_closed_form v n hv\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Annuity-due formula (Bowers et al., Actuarial Mathematics)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gompertz-cumulative-force",
+      "name": "Gompertz Cumulative Force of Mortality",
+      "description": "∫₀^t B·e^{c·u} du = (B/c)·(e^{c·t} - 1) for c ≠ 0. The closed-form cumulative force of mortality under the Gompertz law μ(t) = B·e^{c·t}.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Actuarial.Mortality\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem gompertz_cumulative_force_thm (B c t : ℝ) (hc : c ≠ 0) :\n    ∫ u in (0:ℝ)..t, B * Real.exp (c * u) =\n      (B / c) * (Real.exp (c * t) - 1) :=\n  MathFin.gompertz_cumulative_force B c t hc\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Gompertz mortality law (Bowers et al., Actuarial Mathematics)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-compound-poisson-mgf",
+      "name": "Compound-Poisson Aggregate-Loss MGF",
+      "description": "For iid claim sizes Xᵢ, the MGF of the n-claim sum ∑_{i<n} Xᵢ, integrated against the Poisson(λ) law of n, equals exp(λ(M_X(t) − 1)). This is the compound-Poisson aggregate-loss MGF in mixture form: the claim count enters as the Poisson weights, not as a random variable N independent of the claims.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Actuarial.CompoundPoissonMGF\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- **Compound-Poisson aggregate-loss MGF.** For a Poisson claim count `N ∼ Poisson(λ)` and\ni.i.d. claim sizes `Xᵢ`, integrating the `n`-claim aggregate MGF against the Poisson law gives\n`exp(λ·(M_X(t) − 1))` — the Poisson PGF evaluated at the common claim MGF. Re-exports\n`MathFin.compoundPoisson_mgf`. -/\ntheorem compound_poisson_mgf\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}\n    (lam : ℝ≥0) (t : ℝ) (X : ℕ → Ω → ℝ)\n    (hindep : iIndepFun X μ) (hmeas : ∀ i, Measurable (X i))\n    (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) :\n    ∫ n, mgf (fun ω => ∑ i ∈ Finset.range n, X i ω) μ t ∂(poissonMeasure lam)\n      = Real.exp ((lam : ℝ) * (mgf (X 0) μ t - 1)) :=\n  MathFin.compoundPoisson_mgf lam t X hindep hmeas hident\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Compound Poisson MGF (Cramér-Lundberg actuarial theory)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: n-claim iid-sum MGF (iIndepFun.mgf_sum) composed with the Poisson pgf (integral_pow_poissonMeasure). Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-compound-poisson-mgf-random-count",
+      "name": "Compound-Poisson Aggregate-Loss MGF with a Random Claim Count",
+      "description": "For a claim count N ~ Poisson(λ) independent of i.i.d. claim sizes Xᵢ with E[exp(tX₀)] finite, the aggregate loss S = ∑_{i<N} Xᵢ has E[exp(tS)] = exp(λ(M_X(t) − 1)). The count is a random variable on the same probability space as the claims; the expectation over it is computed by freezing the count, which reduces it to the mixture form mf-compound-poisson-mgf.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Actuarial.CompoundPoissonMGF\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **Compound-Poisson aggregate-loss MGF.** For `N ∼ Poisson(λ)` independent of i.i.d. claim\nsizes `Xᵢ` whose MGF is finite at `t`, `𝔼[exp(t·∑_{i<N} Xᵢ)] = exp(λ·(M_X(t) − 1))`. -/\ntheorem compound_poisson_mgf_random_count_thm {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}\n    (lam : ℝ≥0) (t : ℝ) {N : Ω → ℕ} (X : ℕ → Ω → ℝ)\n    (hN : HasLaw N (poissonMeasure lam) μ) (hindep : iIndepFun X μ)\n    (hmeas : ∀ i, Measurable (X i)) (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ)\n    (hNX : IndepFun N (fun ω i ↦ X i ω) μ)\n    (hint : Integrable (fun ω ↦ Real.exp (t * X 0 ω)) μ) :\n    mgf (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ t\n      = Real.exp ((lam : ℝ) * (mgf (X 0) μ t - 1)) :=\n  MathFin.compoundPoisson_mgf_of_indepFun lam t X hN hindep hmeas hident hNX hint\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Compound Poisson MGF (Cramér-Lundberg actuarial theory); e.g. Klugman-Panjer-Willmot, Loss Models, Thm 9.3",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: integrating out the independent Poisson count (integral_comp_of_hasLaw_of_countable, the freezing lemma for a countable variable), with E[exp(t·∑_{i<n} Xᵢ)] = M_X(t)ⁿ for each n (mgf_range_sum_of_iid, integrable by integrable_exp_mul_sum_range_of_iid) and n ↦ M_X(t)ⁿ integrable against Poisson(λ) (PoissonPgf.integrable_pow_poissonMeasure), then the mixture form compoundPoisson_mgf. The claim MGF must be finite at t (hint): otherwise E[exp(tS)] = +∞ when λ > 0, which the Bochner mgf records as 0, and the identity fails. Lives in MathFin/Actuarial/CompoundPoissonMGF.lean, on MathFin/Foundations/IndepFreezing.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-survival-ccdf-ratio",
+      "name": "Survival Ratio tpₓ = S_X(x+t)/S_X(x)",
+      "description": "Keystone of the survival model (Ito's ccdfTx_ccdfX): the conditional survival probability tpₓ = P(X>x+t | X>x) equals the ratio S_X(x+t)/S_X(x) of unconditional survival probabilities, for t ≥ 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Actuarial.SurvivalModel\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin.SurvivalModel\n\n/-- **Survival ratio** `tpₓ = S_X(x+t) / S_X(x)` for `t ≥ 0` — the keystone of the\nsurvival model (Ito's `ccdfTx_ccdfX`): conditioning on survival to age `x`, a further\n`t` years of survival has probability the ratio of the two unconditional survival\nprobabilities. Re-exports `MathFin.SurvivalModel.survive_eq_survivalFunction_ratio`. -/\ntheorem survival_ratio\n    {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} [IsProbabilityMeasure P] {X : Ω → ℝ}\n    (hX : Measurable X) (x : ℝ) {t : ℝ} (ht : 0 ≤ t) :\n    survive P X t x = survivalFunction P X (x + t) / survivalFunction P X x :=\n  MathFin.SurvivalModel.survive_eq_survivalFunction_ratio hX x ht\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Yosuke Ito, AFP Actuarial Mathematics, Survival_Model (ccdfTx_ccdfX)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, our own design: the conditional survival probability, defined via Mathlib's conditional measure cond, collapses to the survival-function ratio through cond_apply and the sub-event alive(x+t) ⊆ alive(x). The AFP entry (Ito, Actuarial Mathematics, Survival_Model) was consulted as a source and is cited. Axioms-clean.",
+        "provenance": {
+          "source": "afp-actuarial-mathematics",
+          "issue": 112,
+          "upstream": "Yosuke Ito, AFP Actuarial Mathematics (Survival_Model), BSD — consulted as a source, cited"
+        }
+      }
+    },
+    {
+      "id": "mf-survival-ccdf-zero",
+      "name": "Survival Function at Age Zero S_X(0)=1",
+      "description": "Ito's ccdfX_0_1: the survival function of the age at death is 1 at age 0, since X > 0 almost surely.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Actuarial.SurvivalModel\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin.SurvivalModel\n\n/-- **`S_X(0) = 1`**: everyone is alive at age `0`, since the age at death `X > 0`\nalmost surely — Ito's `ccdfX_0_1`. Re-exports `MathFin.SurvivalModel.survivalFunction_zero`. -/\ntheorem survival_at_zero\n    {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} [IsProbabilityMeasure P] {X : Ω → ℝ}\n    (hpos : ∀ᵐ ω ∂P, 0 < X ω) :\n    survivalFunction P X 0 = 1 :=\n  MathFin.SurvivalModel.survivalFunction_zero hpos\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Yosuke Ito, AFP Actuarial Mathematics, Survival_Model (ccdfX_0_1)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, our own design: X > 0 a.e. makes {X > 0} an ae-full event, so P{X>0} = 1 via measure_congr on the ae-equality to univ. The AFP entry (Ito, Actuarial Mathematics, Survival_Model) was consulted as a source and is cited. Axioms-clean.",
+        "provenance": {
+          "source": "afp-actuarial-mathematics",
+          "issue": 112,
+          "upstream": "Yosuke Ito, AFP Actuarial Mathematics (Survival_Model), BSD — consulted as a source, cited"
+        }
+      }
+    },
+    {
+      "id": "mf-insurance-premium-principles",
+      "name": "Formalize the classical loaded premium principles (expected-value, variance, standard-deviation) and their nonnegative-loading bounds",
+      "description": "Classical loaded premium principles and their nonnegative-loading bounds: each prices at or above the pure premium.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Actuarial.ActuarialInsurance\n\nopen MathFin\n\n/-- The three classical loaded premium principles with nonnegative loadings price at or above the pure premium (the mean loss). -/\ntheorem mf_insurance_premium_principles (μ σ2 σ θ α β : ℝ) (hμ : 0 ≤ μ) (hσ2 : 0 ≤ σ2)\n    (hσ : 0 ≤ σ) (hθ : 0 ≤ θ) (hα : 0 ≤ α) (hβ : 0 ≤ β) :\n    expectedValuePremium θ μ ≥ μ ∧ variancePremium α μ σ2 ≥ μ ∧ stdDevPremium β μ σ ≥ μ :=\n  MathFin.premium_ge_mean μ σ2 σ θ α β hμ hσ2 hσ hθ hα hβ\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Formalize the classical loaded premium principles (expected-value, variance, standard-deviation) and their nonnegative-loading bounds",
+        "difficulty": "small",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Actuarial/ActuarialInsurance.lean (magistral-drafted statement, leanstral proof, human-refined at review). Each principle carries its own named bound (expectedValuePremium_ge_mean, variancePremium_ge_mean, stdDevPremium_ge_mean — one-term mul_nonneg certificates); premium_ge_mean bundles them. Re-export from MathFin. Axioms-clean. Introduces definitions: expectedValuePremium, variancePremium, stdDevPremium (new-defs review class).",
+        "provenance": {
+          "statement_source": "magistral-autoform",
+          "statement_model": "magistral-medium",
+          "source": "leanstral-autoform",
+          "model": "labs-leanstral-1-5",
+          "issue": 85,
+          "new_defs": [
+            "expectedValuePremium",
+            "variancePremium",
+            "stdDevPremium"
+          ],
+          "refined": "signature-bound def arguments + docstrings (docBlame); unused hσ_eq hypothesis and unused Insurance import removed; per-principle lemmas extracted, bundle derived from them"
+        }
+      }
+    },
+    {
+      "id": "mf-life-annuity-due-constant-force",
+      "name": "Life Annuity-Due Under a Constant Force of Mortality",
+      "domain": "mathematical_finance",
+      "description": "With flat-rate discount factors B(0, k) = e^{−rk} (zero-coupon bond prices) and survival probabilities S(k) = exp(−∫₀ᵏ μ) for a constant force of mortality μ ≡ m, the n-payment life annuity-due Σ_{k<n} B(0, k)·S(k) equals (1 − vⁿ)/(1 − v) with v = e^{−(r+m)}, provided v ≠ 1: a constant force of mortality acts as an addition to the interest rate. The life annuity-due is defined as this sum; its identification with the expected present value of payments to a random lifetime is not proved.",
+      "code": {
+        "lean": "import MathFin.Actuarial.Insurance\n\nopen MathFin\n\n/-- Under a constant force of mortality `m`, the life annuity-due is the annuity-certain at the\ndiscount factor `e^{−(r + m)}`. -/\ntheorem life_annuity_due_constant_force_thm {r m : ℝ} (n : ℕ)\n    (hv : Real.exp (-(r + m)) ≠ 1) :\n    lifeAnnuityDue r (fun _ ↦ m) n =\n      (1 - Real.exp (-(r + m)) ^ n) / (1 - Real.exp (-(r + m))) :=\n  lifeAnnuityDue_const n hv\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "D. C. M. Dickson, M. R. Hardy and H. R. Waters, Actuarial Mathematics for Life Contingent Risks, 2nd ed., Cambridge University Press (2013), Chapter 5 (annuities)",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.lifeAnnuityDue_const (MathFin/Actuarial/Insurance.lean). lifeAnnuityDue r μ n := Σ_{k<n} zcb r 0 k · survivalFromForce μ k, with zcb from MathFin/FixedIncome/ZCB.lean and survivalFromForce from MathFin/Actuarial/Mortality.lean; the closed form is the annuity-due geometric sum annuityDue_closed_form at v = e^{−(r+m)}. SCOPE: constant force of mortality and flat rate; the probabilistic reading of the sum as an expected present value is not proved."
+      }
+    }
+  ]
+}

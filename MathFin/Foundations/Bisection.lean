@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -41,6 +41,7 @@ and stopping rules are out of scope.
   from any starting bracket `(a, b)` the `n`-th one has width `(b − a) / 2ⁿ`.
 * `mapsTo_bisectStep`, `bisect_mem`: at a threshold `σ` the trap is invariant,
   so every bracket contains `σ`.
+* `bisectMid_mem_Icc`: at a threshold `σ ∈ [lo, hi]`, every estimate lies in `[lo, hi]`.
 * `abs_bisectMid_sub_le`, `tendsto_bisectMid`: the `n`-th estimate is within
   `(hi − lo) / 2ⁿ⁺¹` of `σ`, and the estimates converge to `σ`.
 -/
@@ -116,6 +117,13 @@ theorem abs_bisectMid_sub_le (hC : ∀ x ∈ Set.Icc lo hi, f x < C ↔ x < σ)
   obtain ⟨⟨-, ha⟩, hb, -⟩ := bisect_mem hC hσ n
   rw [pow_succ, ← div_div, ← bisect_snd_sub_fst f C, bisectMid, abs_sub_le_iff]
   constructor <;> linarith
+
+/-- **The estimate stays in the bracket**: the `n`-th bisection estimate lies
+in `[lo, hi]`, since it is the midpoint of a sub-bracket of `[lo, hi]`. -/
+theorem bisectMid_mem_Icc (hC : ∀ x ∈ Set.Icc lo hi, f x < C ↔ x < σ) (hσ : σ ∈ Set.Icc lo hi)
+    (n : ℕ) : bisectMid f C lo hi n ∈ Set.Icc lo hi := by
+  obtain ⟨⟨h1, h2⟩, h3, h4⟩ := bisect_mem hC hσ n
+  constructor <;> simp only [bisectMid] <;> linarith
 
 /-- **Convergence**: the bisection estimates converge to the threshold. -/
 theorem tendsto_bisectMid (hC : ∀ x ∈ Set.Icc lo hi, f x < C ↔ x < σ)

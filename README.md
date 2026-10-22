@@ -12,9 +12,9 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 535 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 504 are proved in full, 18 restate a lemma from Mathlib or
-BrownianMotion, and 13 are reduced cores that prove less than the result they are named after.
+The corpus records 658 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 624 are proved in full, 18 restate a lemma from Mathlib or
+BrownianMotion, and 16 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
 axioms `propext`, `Classical.choice` and `Quot.sound`.
@@ -137,12 +137,15 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Thirteen of the 535 results are reduced cores. Twelve assume a structure whose fields include the
+- Sixteen of the 658 results are reduced cores. Twelve assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, Lévy's characterization, the two-dimensional Itô formula,
-  and five theorems on Markov chains. The thirteenth proves a special case: the first interarrival
-  time of a Poisson process is exponential.
+  and five theorems on Markov chains. The other four prove special cases: the first interarrival
+  time of a Poisson process is exponential; Stulz's call on the maximum is checked only in its
+  zero-strike limit, and the Heynen–Kat two-asset barrier only at zero correlation, neither formula
+  being derived as an expected payoff; the Ornstein–Uhlenbeck Hermite modes decay at their
+  eigenvalues only for degree at most 2.
 - Girsanov's theorem is proved only for bounded predictable $`\theta`$, and, as for $`B`$ itself,
   only at the level of finite-dimensional laws: neither path continuity of the new process nor
   independence of its increments from the past is stated.
@@ -237,8 +240,9 @@ Comparator below).
 - [`MathFin/Examples.lean`](MathFin/Examples.lean): five representative proofs.
 - [`docs/open-problems.md`](docs/open-problems.md): a survey of open problems in mathematical
   finance.
-- [`docs/roadmap.md`](docs/roadmap.md) and the
-  [issue tracker](https://github.com/formal-applied-math/formal-mathfin/issues): planned work.
+- [`docs/status.md`](docs/status.md): where the program stands, and its backlog, the
+  [issue tracker](https://github.com/formal-applied-math/formal-mathfin/issues).
+- [`docs/roadmap.md`](docs/roadmap.md): where it is going and why.
 - [`docs/README.md`](docs/README.md): an index of the remaining documents.
 
 ## Contributing
@@ -247,6 +251,26 @@ Contributions are welcome. [`CONTRIBUTING.md`](CONTRIBUTING.md) explains how to 
 [`docs/onboarding.md`](docs/onboarding.md) walks through a first contribution. Issues labelled
 [good first issue](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 are the usual starting point.
+
+## Contributors
+
+Raphael Coelho maintains the library, with contributions from:
+
+- [Godstime Aburu](https://github.com/BboyGT): the issue-label taxonomy.
+- [Alfredo Garcia](https://github.com/oxarbitrage): Glosten–Milgrom adverse selection, a drift term
+  in the Itô-process price and the CIR bond loadings.
+- [Robert Martin](https://github.com/robertmartin8): log-convexity of the American put exercise
+  boundary.
+- [Aleksey Salkutsan](https://github.com/kernelpanic888): forward rate agreements and downside
+  performance metrics.
+- [Mert Unsal](https://github.com/mertunsall): the Black–Scholes charm.
+- [Yang Ye](https://github.com/leafyoung): the integrated Itô–drift identity, Hull–White
+  calibration, a Monte Carlo pricer, Cox credit, CMS rates and curve bootstrapping; the bivariate
+  normal CDF, the Schwartz futures price, CVA, inflation, the LHP tranche loss, calendar arbitrage,
+  joint elicitability, CreditMetrics, SA-CCR, two-asset options and DeFi lending and AMM
+  mechanics.
+
+Each module's header names its authors.
 
 ## Citation
 
@@ -267,8 +291,8 @@ release. Both are in [`CITATION.cff`](CITATION.cff).
 ## Acknowledgements
 
 The library depends on Mathlib and on BrownianMotion, the formalization of Brownian motion and
-stochastic integration led by Rémy Degenne. Much of the benchmark follows Yuri F. Saporito's
-*Stochastic Processes*. The contract language takes its design ideas, but no code, from Paul
+stochastic integration led by Rémy Degenne. The stochastic-processes part of the benchmark follows Yuri
+F. Saporito's *Stochastic Processes*. The contract language takes its design ideas, but no code, from Paul
 Bilokon's *The Contract Is Not the Model* (2026), and the survival models draw on Yosuke Ito's
 Archive of Formal Proofs entry on actuarial mathematics ([`docs/sources.md`](docs/sources.md)). The
 American put results are ported from Robert Martin's

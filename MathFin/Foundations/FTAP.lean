@@ -14,10 +14,11 @@ public import MathFin.Foundations.NoArbitrageCore
 
 The abstract discrete-time **forward** direction only: existence of an
 equivalent martingale measure precludes arbitrage, via the martingale-transform
-argument. This is the narrowest of the FTAP files — for the *both-directions*
-explicit two-state theorem (with the backward EMM construction) see
-`FTAPTwoState.lean`, and for the finite-state forward direction see
-`FTAPMultiState.lean`.
+argument, on a general probability space. Both directions are proved elsewhere in
+narrower settings: on a finite full-support space over a finite horizon
+(`FTAPDiscrete.lean`), for one period on a general space (`FTAPOnePeriod.lean`,
+`FTAPOnePeriodVector.lean`), and for one-period finite-state markets
+(`FTAPMultiState.lean`, whose two-state case is `FTAPTwoState.lean`).
 -/
 
 @[expose] public section

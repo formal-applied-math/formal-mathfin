@@ -14,7 +14,7 @@ This document is the narrative. For the per-theorem audit see
 
 ## Leap 1 — static Girsanov: the risk-neutral measure is *derived*
 
-`MathFin/Foundations/GaussianGirsanov.lean`.
+`MathFin/Bridges/GaussianGirsanov.lean`.
 
 `BSCallHyp` is no longer an axiom. The risk-neutral measure `Q` is
 *constructed* from the physical measure `P` by an explicit Radon-Nikodym
@@ -38,7 +38,7 @@ slice of Girsanov tractable without the path-wise stochastic integral.
 
 ## Leap 2 — the genesis cascade: physical → EMM → pricing
 
-`MathFin/Foundations/GaussianGirsanov.lean` (same file).
+`MathFin/Bridges/GaussianGirsanov.lean` (same file).
 
 Two composites wire the Girsanov construction into the prior pricing
 artifacts — making `GaussianGirsanov` load-bearing rather than a dead leaf:
@@ -86,10 +86,11 @@ That `BSCallHyp` for the ratio is now *derived*, the Margrabe-analog of leap 1:
 | Theorem | Content |
 |---|---|
 | `normalizedSpread_hasLaw_std` | **Bivariate → univariate reduction.** For a jointly-gaussian pair `(W₁,W₂)` of standard drivers with correlation `ρ`, the normalized log-spread driver `(σ₁W₁ − σ₂W₂)/σ_eff` is `N(0,1)`: gaussianity is preserved under the linear map (`HasGaussianLaw.map_of_measurable`), and the variance is pinned to `1` by covariance bilinearity (`margrabe_effective_variance`) — making `Foundations/BivariateGaussian`'s machinery load-bearing. |
-| **`margrabe_bsCallHyp_of_gaussian`** | **The capstone.** From the joint gaussian model there exists a probability measure `Q` (the explicit Esscher tilt — the `S²`-numeraire change) and a standard-normal driver under which `BSCallHyp` holds for the ratio at the effective vol. The two-asset grounding *reduces to* the one-asset Girsanov (`BSCallHyp.exists_of_physical`, leap 1) applied to the single effective driver — the gaussian-vector reduction is the only new ingredient. |
+| **`margrabe_bsCallHyp_of_gaussian`** | From the joint Gaussian model it exhibits a probability measure `Q` (an explicit Esscher tilt) and a standard-normal driver `Z` with the pathwise identity `S¹_T/S²_T = bsTerminal (S1/S2) 0 σ_eff T Z`, so `BSCallHyp` holds for the ratio at the effective volatility. That `Q` is the `S²`-numéraire measure is not shown. (Until 2026-10-21 the theorem only asserted that some such `Q` and `Z` exist, which any Gaussian driver satisfies.) |
+| **`margrabe_exchange_price`** | The discounted expected exchange payoff under the physical two-GBM model, `E_P[e^{−rT}(S¹_T − S²_T)⁺]`, equals Margrabe's price, by splitting off a residual independent of the effective driver (`HasGaussianLaw.indepFun_of_covariance_eq_zero`). |
 
-Composing `margrabe_bsCallHyp_of_gaussian` with `margrabe_price_via_call`
-prices the exchange option with **no** assumed risk-neutral hypothesis.
+The exchange option is therefore priced as an expectation in the model itself; the numéraire
+reading of `Q` above is the part that stays open.
 
 ## The honest abstraction boundary
 

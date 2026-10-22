@@ -200,7 +200,7 @@ price is the *unique* arbitrage-free one; `docs/leaps.md` gains Leap 5.
 **Repo-complete upgrade**, per the standing rule that a phase is not done until
 the whole repo reflects it: `docs/coverage.md` (flip `gir-thm-9.3.4`, add the new
 entries), `docs/bridges.md`, `docs/mathematical-architecture.md`,
-`docs/roadmap.md`, `docs/leaps.md`, `docs/patterns.md` (dated batch, at minimum
+`docs/archive/roadmap-history.md`, `docs/leaps.md`, `docs/patterns.md` (dated batch, at minimum
 the `𝓕_a`-linearity pattern and the MGF-comparison route to conditional
 vanishing), `README.md` counts, `MathFin/AxiomAudit.lean` plus a regenerated
 `AxiomAuditGen.lean`, `@[blueprint]` tags, the verification ledger,

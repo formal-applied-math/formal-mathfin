@@ -21,8 +21,8 @@ The conditional-expectation-form inequality — Saporito, Theorem 2.3.6 —
 is absent. This file derives it, and the derivation *is* the textbook
 conceptual picture: **optional sampling inequality = optional sampling
 equality + monotone compensator**, through the Doob decomposition
-`f = M + A` (Mathlib's `martingalePart` / `predictablePart`, packaged as the
-existence-and-uniqueness theorem in `Foundations/DoobDecomposition.lean`):
+`f = M + A` (Mathlib's `martingalePart` / `predictablePart`, used directly; their
+existence-and-uniqueness statement is `Foundations/DoobDecomposition.lean`):
 
 * the martingale part transports across stopping times by Mathlib's
   *equality* (`M_σ =ᵐ μ[M_τ | ℱ_σ]`);
@@ -40,6 +40,9 @@ drift `A` — nothing else.
 
 * `submartingale_optional_sampling`: the optional sampling inequality
   `f_σ ≤ᵐ μ[f_τ | ℱ_σ]` for bounded stopping times `σ ≤ τ`.
+
+`Bridges/BellmanDoobDecomposition.lean` applies it to the finite-horizon Snell envelope
+`finiteBellman` of the American-put tower: `𝔼[Z_τ | 𝓕_σ] ≤ U_σ` for stopping times `σ ≤ τ ≤ N`.
 
 The Degenne `BrownianMotion` package now **proves** a `⊓`-form sibling,
 `Submartingale.stoppedValue_min_ae_le_condExp_nat`

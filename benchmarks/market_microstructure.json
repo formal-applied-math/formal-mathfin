@@ -1,0 +1,163 @@
+{
+  "description": "Market microstructure and execution: Almgren–Chriss optimal execution, market making (scalar and matrix Riccati), Glosten–Milgrom. `chapter` is the section number the entry had in the original single-file corpus, not a chapter of one book; each entry's `reference` names its source.",
+  "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)",
+  "theorems": [
+    {
+      "id": "mf-almgren-chriss-EL",
+      "name": "Almgren-Chriss Trajectory Satisfies EL Equation",
+      "description": "The closed-form Almgren-Chriss trajectory X(t) = X_0 · sinh(κ(T-t))/sinh(κT) satisfies the Euler-Lagrange equation X''(t) = κ² · X(t) at every t. No condition on sinh(κT) is needed: under Lean's x/0 = 0 the degenerate closed form is the zero path, which satisfies the equation too.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.AlmgrenChriss\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem almgrenChrissPath_satisfies_EL_thm (X_0 κ T t : ℝ) :\n    HasDerivAt (deriv (MathFin.almgrenChrissPath X_0 κ T))\n      (κ^2 * MathFin.almgrenChrissPath X_0 κ T t) t :=\n  MathFin.almgrenChrissPath_satisfies_EL X_0 κ T t\n"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "Almgren-Chriss optimal execution (Almgren-Chriss 2000)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, stated for the trajectory itself: the t-derivative of the first-derivative formula X'(t) = −X_0·κ·cosh(κ(T-t))/sinh(κT) is κ²·X(t) (chain rule on cosh), transported to `deriv` of X by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since that formula is X' at every t (hasDerivAt_almgrenChrissPath). Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-mm-riccati",
+      "name": "Market-Making Riccati Coefficient — Closed Form",
+      "domain": "mathematical_finance",
+      "description": "The scalar Riccati coefficient a(t)=Â·tanh(Â(T−t)) solves a'=a²−Â² (single-asset LQ approximation of multi-asset market making).",
+      "code": {
+        "lean": "import MathFin.Foundations.MarketMakingRiccati\n\n/-- **Market-making Riccati coefficient — closed form.** The scalar coefficient\n`a(t) = Â · tanh (Â (T − t))` solves the Riccati ODE `a' = a² − Â²`\n(Bergault–Evangelista–Guéant–Vieira, single-asset LQ approximation). Re-exports\n`MathFin.hasDerivAt_riccatiCoeff`. -/\ntheorem mm_riccati_closed_form (Â T t : ℝ) :\n    HasDerivAt (MathFin.riccatiCoeff Â T) (MathFin.riccatiCoeff Â T t ^ 2 - Â ^ 2) t :=\n  MathFin.hasDerivAt_riccatiCoeff Â T t\n"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "Bergault, Evangelista, Guéant, Vieira — Closed-form approximations in multi-asset market making (arXiv:1810.04383), single-asset case",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof re-exported from MathFin/Foundations/MarketMakingRiccati.lean. Verifies the closed-form scalar Riccati coefficient solves its ODE (a'=a²−Â²). The stochastic optimal-control substrate (existence of the true value function, verification theorem) is out of scope, mirroring the Almgren–Chriss entry. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-mm-value-function",
+      "name": "Market-Making Value Function — Approximate HJ Verification (d=1)",
+      "domain": "mathematical_finance",
+      "description": "The quadratic ansatz θ̌(t,q)=−A(t)q²−B(t)q−C(t) solves the approximate (quadratic-Hamiltonian) Hamilton–Jacobi equation when (A,B,C) solve the Riccati/linear ODE system.",
+      "code": {
+        "lean": "import MathFin.Foundations.MarketMakingRiccati\n\n/-- **Market-making value function — approximate-HJ verification (d = 1).** The quadratic ansatz\n`θ̌(t,q) = −A(t) q² − B(t) q − C(t)` has time-derivative equal to the approximate\n(quadratic-Hamiltonian) Hamilton–Jacobi right-hand side when `(A, B, C)` solve the scalar\nRiccati/linear ODE system. Re-exports `MathFin.valueFunction_satisfies_approxHJ`. -/\ntheorem mm_value_function_hj\n    (γ σ z α₀b α₁b α₂b α₀a α₁a α₂a : ℝ) (hz : 0 < z) (A B C : ℝ → ℝ) (t q : ℝ)\n    (hA : HasDerivAt A (2 * z * (α₂b + α₂a) * A t ^ 2 - γ * σ ^ 2 / 2) t)\n    (hB : HasDerivAt B (2 * z * (α₁b - α₁a) * A t + 2 * z ^ 2 * (α₂b - α₂a) * A t ^ 2\n                        + 2 * z * (α₂b + α₂a) * A t * B t) t)\n    (hC : HasDerivAt C (z * (α₀b + α₀a) + z ^ 2 * (α₁b + α₁a) * A t + z * (α₁b - α₁a) * B t\n                        + z ^ 3 * (α₂b + α₂a) * A t ^ 2 / 2 + z * (α₂b + α₂a) * B t ^ 2 / 2\n                        + z ^ 2 * (α₂b - α₂a) * A t * B t) t) :\n    HasDerivAt (fun s => -(A s) * q ^ 2 - B s * q - C s)\n      (γ * σ ^ 2 / 2 * q ^ 2 - z * (α₀b + α₀a)\n        - α₁b * (2 * A t * q * z + A t * z ^ 2 + B t * z)\n        - α₁a * (-2 * A t * q * z + A t * z ^ 2 - B t * z)\n        - (1 / (2 * z)) * (α₂b * (2 * A t * q * z + A t * z ^ 2 + B t * z) ^ 2\n                    + α₂a * (-2 * A t * q * z + A t * z ^ 2 - B t * z) ^ 2)) t :=\n  MathFin.valueFunction_satisfies_approxHJ γ σ z α₀b α₁b α₂b α₀a α₁a α₂a hz A B C t q hA hB hC\n"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "Bergault, Evangelista, Guéant, Vieira — Closed-form approximations in multi-asset market making (arXiv:1810.04383), single-asset case, Prop. 1",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof re-exported from MathFin. Verifies the quadratic ansatz solves the APPROXIMATE (quadratic-Hamiltonian) HJ equation given the ODE system; not the exact HJ equation, and not the claim that the approximation is close to the true value function (numerical in the paper). Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-mm-quotes",
+      "name": "Market-Making Closed-Form Quotes — Constant Spread + Linear Skew",
+      "domain": "mathematical_finance",
+      "description": "The greedy quotes give a constant half-spread A(t)z+c (c=quoteConstA for Model A, quoteConstB for Model B) and an inventory-linear model-independent skew −2A(t)q−B(t).",
+      "code": {
+        "lean": "import MathFin.Foundations.MarketMakingRiccati\n\n/-- **Market-making closed-form quotes — constant spread + linear skew (Models A & B).** The greedy\nhalf-spread is constant in inventory (with the model constant `c`: `quoteConstA` for the CARA\nModel A, `quoteConstB` for the risk-adjusted Model B), and the skew is inventory-linear and\nmodel-independent (`c` cancels). Re-exports `MathFin.mmHalfSpread_const` / `MathFin.mmSkew_linear`. -/\ntheorem mm_quotes_spread_skew (A B : ℝ → ℝ) (γ z k t q : ℝ) :\n    (MathFin.mmQuoteAsk A B z (MathFin.quoteConstA γ z k) t q\n        + MathFin.mmQuoteBid A B z (MathFin.quoteConstA γ z k) t q) / 2\n      = A t * z + MathFin.quoteConstA γ z k\n    ∧ (MathFin.mmQuoteAsk A B z (MathFin.quoteConstB k) t q\n        + MathFin.mmQuoteBid A B z (MathFin.quoteConstB k) t q) / 2\n      = A t * z + MathFin.quoteConstB k\n    ∧ ∀ c : ℝ, (MathFin.mmQuoteAsk A B z c t q - MathFin.mmQuoteBid A B z c t q) / 2\n      = -2 * A t * q - B t :=\n  ⟨MathFin.mmHalfSpread_const A B z (MathFin.quoteConstA γ z k) t q,\n   MathFin.mmHalfSpread_const A B z (MathFin.quoteConstB k) t q,\n   fun c => MathFin.mmSkew_linear A B z c t q⟩\n"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "Bergault, Evangelista, Guéant, Vieira — Closed-form approximations in multi-asset market making (arXiv:1810.04383), single-asset case, §3.3.3; recovers Guéant–Lehalle–Fernandez-Tapia for Model A",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof re-exported from MathFin. The exponential-intensity quote map δ̃_ξ(p)=p+c is defined by its known closed form (Guéant [18]/[20]), not re-derived from the intensity sup; the spread/skew are exact consequences, instantiated at the Model-A (quoteConstA) and Model-B (quoteConstB) constants. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-mm-matrix-riccati",
+      "name": "Matrix Riccati Coefficient — Multi-Asset Closed Form",
+      "description": "The matrix analogue of the scalar market-making Riccati: the spectral closed form a(t)=U·diag(riccatiCoeff(λᵢ))·Uᴴ solves the matrix Riccati ODE a'=a·a−Â·Â for any Hermitian Â (no matrix tanh required).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.MatrixMarketMakingRiccati\n\n/-- **Matrix Riccati coefficient — multi-asset closed form (BEGV Prop. 2).** For a Hermitian\n`Â` with eigendecomposition `Â = U·diag(λ)·Uᴴ`, the spectral closed form\n`matrixRiccatiCoeff hÂ T t = U·diag(riccatiCoeff (λᵢ) T t)·Uᴴ` solves the matrix Riccati ODE\n`a'(t) = a(t)·a(t) − Â·Â` — no matrix `tanh` required. Re-exports\n`MathFin.hasDerivAt_matrixRiccatiCoeff`. -/\ntheorem mm_matrix_riccati_closed_form {n : Type*} [Fintype n] [DecidableEq n]\n    {Â : Matrix n n ℝ} (hÂ : Â.IsHermitian) (T t : ℝ) :\n    HasDerivAt (MathFin.matrixRiccatiCoeff hÂ T)\n      (MathFin.matrixRiccatiCoeff hÂ T t * MathFin.matrixRiccatiCoeff hÂ T t - Â * Â) t :=\n  MathFin.hasDerivAt_matrixRiccatiCoeff hÂ T t"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "Bergault, Evangelista, Guéant, Vieira — Closed-form approximations in multi-asset market making (arXiv:1810.04383), Proposition 2 (matrix Riccati)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof re-exported from MathFin/Foundations/MatrixMarketMakingRiccati.lean. Verifies the multi-asset matrix Riccati closed form (spectral reduction: a=U·diag(riccatiCoeff λ)·Uᴴ) solves the matrix ODE a'=a·a−Â·Â for any Hermitian Â, with the matrix-valued derivative taken under the L∞ operator norm. The stochastic optimal-control substrate (true value function, verification theorem) is out of scope, mirroring the single-asset entry. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-mm-matrix-value",
+      "name": "Matrix Value Coefficient — Multi-Asset Market-Making Riccati",
+      "description": "The change of variables A(t)=½·D₊^{-½}·matrixRiccatiCoeff·D₊^{-½} solves the market-making matrix Riccati A'=2·A·D₊·A−(γ/2)·Σ, given a positive diagonal D₊ and Â with Â·Â=γ·(D₊^{½}·Σ·D₊^{½}).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.MatrixMarketMakingRiccati\n\n/-- **Matrix value coefficient — multi-asset market-making Riccati (BEGV Prop. 2, Eq. 11).**\nWith a positive diagonal `D₊ = diagonal d` and `Â` the Hermitian generator scale\n`Â·Â = γ•(D₊^{½}·cov·D₊^{½})`, the change of variables `A(t) = ½•(D₊^{-½}·matrixRiccatiCoeff·D₊^{-½})`\nsolves the market-making matrix Riccati `A'(t) = 2•(A(t)·D₊·A(t)) − (γ/2)•cov`. Re-exports\n`MathFin.hasDerivAt_mmMatrixValueCoeff`. -/\ntheorem mm_matrix_value_riccati {n : Type*} [Fintype n] [DecidableEq n]\n    (d : n → ℝ) (hd : ∀ i, 0 < d i) (cov : Matrix n n ℝ) (γ : ℝ)\n    {Â : Matrix n n ℝ} (hÂ : Â.IsHermitian)\n    (hÂsq : Â * Â = γ • (Matrix.diagonal (fun i => Real.sqrt (d i)) * cov\n                          * Matrix.diagonal (fun i => Real.sqrt (d i)))) (T t : ℝ) :\n    HasDerivAt (MathFin.mmMatrixValueCoeff d hÂ T)\n      ((2 : ℝ) • (MathFin.mmMatrixValueCoeff d hÂ T t * Matrix.diagonal d\n          * MathFin.mmMatrixValueCoeff d hÂ T t) - (γ / 2) • cov) t :=\n  MathFin.hasDerivAt_mmMatrixValueCoeff d hd cov γ hÂ hÂsq T t"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "Bergault, Evangelista, Guéant, Vieira — Closed-form approximations in multi-asset market making (arXiv:1810.04383), Proposition 2 / Eq. 11 (matrix value-function coefficient)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof re-exported from MathFin. Verifies A(t)=½·D₊^{-½}·matrixRiccatiCoeff·D₊^{-½} solves the market-making matrix Riccati A'=2·A·D₊·A−(γ/2)·cov, with D₊=diagonal d positive and Â Hermitian satisfying Â·Â=γ·(D₊^{½}·cov·D₊^{½}) — Â enters by this defining relation (the matrix-square-root construction of Â is out of scope, so the verified content is the change of variables). The optimal-control substrate and the B/C coefficients are out of scope. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-glosten-milgrom-spread-positive",
+      "name": "Glosten-Milgrom Adverse-Selection Spread Is Positive",
+      "description": "The market maker's ask strictly exceeds its bid, from the trader mix alone: a buy moves the posterior on the high value strictly more than a sell does, so the two quotes cannot coincide. The two trade probabilities are derived from the model's four primitives rather than assumed. Requires 0 < theta < 1, which issue #107's acceptance criterion omits. Delivered scope: the quotes ask = E[V | buy] and bid = E[V | sell] are posited by the shape of the conclusion, not derived from a competitive market maker's zero expected profit, which is the content of Glosten-Milgrom (1985); the sell event is the complement of the buy event, so there is no no-trade outcome; one period and two-valued, with no dynamics.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Execution.GlostenMilgrom\n\nopen MathFin.Execution MeasureTheory ProbabilityTheory\n\ntheorem glostenMilgrom_spread_pos_thm {Ω : Type*} [MeasurableSpace Ω]\n    (μ : Measure Ω) [IsProbabilityMeasure μ] (H B I : Set Ω)\n    (hH : MeasurableSet H) (hB : MeasurableSet B) (hI : MeasurableSet I)\n    {θ p VL VH : ℝ}\n    (hθ0 : 0 < θ) (hθ1 : θ < 1) (hp0 : 0 < p) (hV : VL < VH)\n    (hprior : μ H = ENNReal.ofReal θ)\n    (hbuy : B ∩ I = H ∩ I)\n    (hindepH : μ (H ∩ I) = ENNReal.ofReal p * ENNReal.ofReal θ)\n    (hindepHc : μ (Hᶜ ∩ I) = ENNReal.ofReal p * ENNReal.ofReal (1 - θ))\n    (huninfH : 2 * μ ((H ∩ B) \\ I) = μ (H \\ I))\n    (huninfHc : 2 * μ ((Hᶜ ∩ B) \\ I) = μ (Hᶜ \\ I)) :\n    0 < (∫ ω, payoff H VL VH ω ∂(μ[|B])) - (∫ ω, payoff H VL VH ω ∂(μ[|Bᶜ])) :=\n  MathFin.Execution.spread_pos_of_model μ H B I hH hB hI hθ0 hθ1 hp0 hV hprior hbuy\n    hindepH hindepHc huninfH huninfHc\n"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "Glosten & Milgrom, Bid, ask and transaction prices in a specialist market with heterogeneously informed traders, J. Financial Economics 14 (1985) 71-100",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from the model's four primitives -- the prior, informed/value independence, informed traders trading on the value, and uninformed traders tossing a coin. Trade probabilities are derived rather than assumed; quotes are Bochner integrals against the conditioned measures; Bayes is applied through ENNReal.toReal with every finiteness side condition discharged. Axioms-clean. LIMITS: one-period and two-valued, with no dynamics -- no sequence of trades and no convergence of quotes to the true value. The competitive market maker's zero-expected-profit condition is NOT formalized: ask = E[V | buy] and bid = E[V | sell] are posited by the shape of the conclusion, not derived. The sell event is modelled as the complement of the buy event, so there is no no-trade outcome. The statement carries 0 < theta < 1, which the acceptance criterion as written omits."
+      }
+    },
+    {
+      "id": "mf-glosten-milgrom-quote-condexp",
+      "name": "Glosten-Milgrom Quotes Are the Conditional Expectation Given the Trade",
+      "domain": "mathematical_finance",
+      "description": "For a finite measure, a measurable value-high event H and a measurable buy event B, the conditional expectation of the two-valued asset V given the sigma-algebra generated by B is almost everywhere the ask E[V | B] on buys and the bid E[V | B^c] on sells, and P(B) * ask + P(B^c) * bid = E[V]: the expected transaction price is the expected value. One trade; the quotes are the conditioned integrals of the Glosten-Milgrom module, and the competitive market maker's zero-profit derivation and the multi-trade price sequence are not formalized.",
+      "code": {
+        "lean": "import MathFin.Execution.GlostenMilgromCondExp\n\nopen MathFin.Execution MeasureTheory ProbabilityTheory MeasurableSpace\n\n/-- The Glosten–Milgrom quotes are the conditional expectation of the value given the trade\ndirection, and they average to the unconditional expected value. -/\ntheorem glostenMilgrom_quote_condExp {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)\n    [IsFiniteMeasure μ] {H B : Set Ω} [DecidablePred (· ∈ B)] (hH : MeasurableSet H)\n    (hB : MeasurableSet B) (VL VH : ℝ) :\n    μ[payoff H VL VH | generateFrom {B}] =ᵐ[μ]\n        B.piecewise (fun _ ↦ ∫ ω, payoff H VL VH ω ∂μ[|B])\n          (fun _ ↦ ∫ ω, payoff H VL VH ω ∂μ[|Bᶜ]) ∧\n      μ.real B * ∫ ω, payoff H VL VH ω ∂μ[|B] + μ.real Bᶜ * ∫ ω, payoff H VL VH ω ∂μ[|Bᶜ]\n        = ∫ ω, payoff H VL VH ω ∂μ :=\n  ⟨condExp_payoff_eq_quote μ hH hB VL VH, measureReal_mul_ask_add_measureReal_mul_bid μ hH hB VL VH⟩\n"
+      },
+      "metadata": {
+        "reference": "L. R. Glosten and P. R. Milgrom, Bid, ask and transaction prices in a specialist market with heterogeneously informed traders, J. Financial Economics 14 (1985) 71-100",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.Execution.condExp_payoff_eq_quote and measureReal_mul_ask_add_measureReal_mul_bid (MathFin/Execution/GlostenMilgromCondExp.lean): Mathlib's ProbabilityTheory.condExp_generateFrom_singleton on B and on B^c (a set and its complement generate the same sigma-algebra), then the tower property integral_condExp and integral_piecewise. SCOPE: one trade; the sell event is the complement of the buy event; the quotes are the conditioned integrals, and their derivation from a competitive market maker's zero expected profit, the sequence of trades and the convergence of quotes are NOT formalized."
+      }
+    },
+    {
+      "id": "mf-glosten-milgrom-model-witness",
+      "name": "Glosten-Milgrom Spread in an Explicit Six-Outcome Economy",
+      "domain": "mathematical_finance",
+      "description": "In the explicit six-outcome economy (value high or low with prior theta, arriving trader informed with probability p and trading on the value, uninformed traders tossing a fair coin; masses theta p, theta(1-p)/2, theta(1-p)/2, (1-theta)p, (1-theta)(1-p)/2, (1-theta)(1-p)/2), for every 0 < theta < 1, 0 < p <= 1 and V_L < V_H, the ask E[V | buy] strictly exceeds the bid E[V | sell]. The economy discharges every hypothesis of mf-glosten-milgrom-spread-positive, so that theorem is not vacuous. The quotes are posited as conditional expectations; the zero-profit derivation is not formalized.",
+      "code": {
+        "lean": "import MathFin.Execution.GlostenMilgromModel\n\nopen MathFin.Execution MeasureTheory ProbabilityTheory\n\n/-- In the explicit six-outcome Glosten–Milgrom economy the ask strictly exceeds the bid, for\nevery interior prior and every positive share of informed traders. -/\ntheorem glostenMilgrom_model_spread_pos {θ p VL VH : ℝ}\n    (hθ0 : 0 < θ) (hθ1 : θ < 1) (hp0 : 0 < p) (hp1 : p ≤ 1) (hV : VL < VH) :\n    0 < (∫ ω, payoff gmHigh VL VH ω ∂((gmMeasure θ p)[|gmBuy]))\n      - (∫ ω, payoff gmHigh VL VH ω ∂((gmMeasure θ p)[|gmBuyᶜ])) :=\n  spread_pos_witness hθ0 hθ1 hp0 hp1 hV\n"
+      },
+      "metadata": {
+        "reference": "L. R. Glosten and P. R. Milgrom, Bid, ask and transaction prices in a specialist market with heterogeneously informed traders, J. Financial Economics 14 (1985) 71-100",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.Execution.spread_pos_witness (MathFin/Execution/GlostenMilgromModel.lean), which builds the six-point measure gmMeasure, computes the masses of the constrained events, and applies spread_pos_of_model (MathFin/Execution/GlostenMilgrom.lean). SCOPE: the quotes are the conditioned integrals E[V | buy], E[V | sell]; the competitive market maker's zero-profit derivation is NOT formalized; one period, two values, the sell event is the complement of the buy event."
+      }
+    },
+    {
+      "id": "mf-roll-spread-autocovariance",
+      "name": "Roll Spread from the Autocovariance of Price Changes",
+      "domain": "mathematical_finance",
+      "description": "In Roll's model P_t = m_t + (s/2) q_t with fair random trade signs q (Rademacher law), square-integrable mid-price increments, and independence of every pair of variables split across two consecutive price changes (except the shared sign with itself), the lag-one autocovariance of trade-price changes is Cov(dP_t, dP_{t-1}) = -(s/2)^2, so a nonnegative spread is s = 2 sqrt(-Cov(dP_t, dP_{t-1})). A population identity: the sample autocovariance and the statistical properties of the Roll estimator are not formalized.",
+      "code": {
+        "lean": "import MathFin.Execution.RollSpread\n\nopen MathFin MeasureTheory ProbabilityTheory\n\n/-- Roll (1984): the lag-one autocovariance of trade-price changes is `−(s/2)²`, so the spread is\n`2 √(−Cov)`. -/\ntheorem roll_spread_from_autocovariance {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {q0 q1 q2 dm1 dm2 : Ω → ℝ} {s : ℝ} (hs : 0 ≤ s)\n    (hq0 : HasLaw q0 rademacher P) (hq1 : HasLaw q1 rademacher P) (hq2 : HasLaw q2 rademacher P)\n    (hdm1 : MemLp dm1 2 P) (hdm2 : MemLp dm2 2 P)\n    (h_q2q1 : q2 ⟂ᵢ[P] q1) (h_q2q0 : q2 ⟂ᵢ[P] q0) (h_q1q0 : q1 ⟂ᵢ[P] q0)\n    (h_dm2dm1 : dm2 ⟂ᵢ[P] dm1) (h_dm2q0 : dm2 ⟂ᵢ[P] q0) (h_dm2q1 : dm2 ⟂ᵢ[P] q1)\n    (h_dm1q1 : dm1 ⟂ᵢ[P] q1) (h_dm1q2 : dm1 ⟂ᵢ[P] q2) :\n    cov[rollPriceChange dm2 q1 q2 s, rollPriceChange dm1 q0 q1 s; P] = -(s / 2) ^ 2 ∧\n      s = 2 * Real.sqrt (-cov[rollPriceChange dm2 q1 q2 s, rollPriceChange dm1 q0 q1 s; P]) := by\n  have hcov := covariance_rollPriceChange (s := s) hq0 hq1 hq2 hdm1 hdm2 h_q2q1 h_q2q0 h_q1q0\n    h_dm2dm1 h_dm2q0 h_dm2q1 h_dm1q1 h_dm1q2\n  exact ⟨hcov, rollSpread_eq_two_mul_sqrt hs hcov⟩\n"
+      },
+      "metadata": {
+        "reference": "R. Roll, A simple implicit measure of the effective bid-ask spread in an efficient market, J. Finance 39 (1984) 1127-1139",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.covariance_rollPriceChange and MathFin.rollSpread_eq_two_mul_sqrt (MathFin/Execution/RollSpread.lean), built on Mathlib's covariance bilinearity and IndepFun.covariance_eq_zero and the Rademacher law of MathFin/Foundations/CorrelationFallacies.lean. SCOPE: Roll's implicit assumptions are explicit hypotheses (Rademacher signs, square-integrable increments, the eight cross-change pairwise independences); three signs and two increments, no time-indexed process; the sample autocovariance and any property of the estimator are NOT formalized."
+      }
+    }
+  ]
+}

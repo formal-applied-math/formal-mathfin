@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.BlackScholes.PDE
 
 /-!
 # Knock-in / knock-out barrier parity (in–out parity)
@@ -33,6 +34,10 @@ honest specialisations of it and the parity reads as an identity about *values*.
 * `knockInValue` / `knockOutValue` / `vanillaValue`: the three barrier values.
 * `barrier_payoff_partition`: the pathwise split `𝟙_A·f + 𝟙_{Aᶜ}·f = f`.
 * `knockIn_add_knockOut_eq_vanilla`: in–out parity `V_in + V_out = V_vanilla`.
+* `knockIn_add_knockOut_eq_bsV`: for a call under the Black–Scholes lognormal hypothesis,
+  the knock-in and knock-out values sum to the Black–Scholes price `bsV`, for any measurable
+  barrier event. So a closed form for either leg gives the other as `bsV` minus it; no
+  closed form for either leg is proved here.
 -/
 
 @[expose] public section
@@ -84,5 +89,20 @@ theorem knockIn_add_knockOut_eq_vanilla
   unfold knockInValue knockOutValue vanillaValue discountedValue
   rw [← mul_add, integral_indicator hA, integral_indicator hA.compl,
     integral_add_compl hA hf]
+
+/-- **In–out parity for a Black–Scholes call.** Under `BSCallHyp`, for any measurable
+barrier-hit event `A`, the knock-in and knock-out calls (payoff `max(S_T − K, 0)`, discount
+`e^{−rT}`) sum to the Black–Scholes price: `V_in + V_out = bsV K r σ S₀ T`. This is
+`knockIn_add_knockOut_eq_vanilla` with the vanilla leg priced by
+`integral_bsCall_payoff_eq_bsV`. -/
+theorem knockIn_add_knockOut_eq_bsV {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) {A : Set Ω}
+    (hA : MeasurableSet A) :
+    knockInValue (Real.exp (-r * T)) Q A (fun ω ↦ max (bsTerminal S_0 r σ T (Z ω) - K) 0) +
+        knockOutValue (Real.exp (-r * T)) Q A (fun ω ↦ max (bsTerminal S_0 r σ T (Z ω) - K) 0)
+      = bsV K r σ S_0 T := by
+  rw [knockIn_add_knockOut_eq_vanilla _ _ _ _ hA
+      ((integrable_bsTerminal h.Z_law S_0 r σ T).sub' (integrable_const K)).pos_part,
+    vanillaValue, discountedValue, ← integral_const_mul, integral_bsCall_payoff_eq_bsV h]
 
 end MathFin
