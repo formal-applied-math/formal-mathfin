@@ -26,6 +26,40 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The Student-t law: VaR and ES at the law (2026-10-22)
+
+Five entries added to `benchmarks/quantitative_risk_management.json`, all `full`; they replace
+`mf-student-t-expected-shortfall-pos`, which stated a closed form with the quantile left free and
+no law behind it. Corpus 536 → 540.
+
+Mathlib has no Student-t law at the pin. `Foundations/StudentT.lean` builds it as Lebesgue measure
+with density `k_ν/∫k_ν`, `k_ν(x) = (1 + x²/ν)^(-(ν+1)/2)`, computes the normalizing constant (a
+Gamma mixture of Gaussian kernels, integrals exchanged), anchors `ν = 1` at Mathlib's
+`cauchyMeasure 0 1`, and evaluates the tail first moment. `RiskMeasures/StudentTValueAtRisk.lean`
+states VaR and ES of `μ + σT` through the library's `valueAtRisk` and `expectedShortfall`
+(McNeil, Frey and Embrechts 2015, Example 2.15); ES goes through the Acerbi–Tasche formula.
+
+| Benchmark ID | Mathematical conclusion | Lean module and declaration | Faithfulness |
+|---|---|---|---|
+| `qrm-student-t-density` | For ν > 0, the Student-t law built as Lebesgue measure with density k_ν/∫k_ν, k_ν(x) = (1 + x²/ν)^(-(ν+1)/2), has density Γ((ν+1)/2)/(√(νπ)Γ(ν/2))·(1 + x²/ν)^(-(ν+1)/2). | `MathFin/Foundations/StudentT.lean`, `MathFin.studentTPDFReal_eq` | `full` |
+| `qrm-student-t-cauchy` | The Student-t law with ν = 1 is Mathlib's standard Cauchy law: studentTMeasure 1 = cauchyMeasure 0 1. | `MathFin/Foundations/StudentT.lean`, `MathFin.studentTMeasure_one` | `full` |
+| `qrm-student-t-var` | For T ~ t_ν, σ ≥ 0 and α ∈ (0, 1): VaR_α(μ + σT) = μ + σ·t_ν⁻¹(α), with t_ν⁻¹(α) the quantile of the law. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_of_hasLaw_studentT` | `full` |
+| `qrm-student-t-es` | For T ~ t_ν, ν > 1, σ ≥ 0 and α ∈ (0, 1): ES_α(μ + σT) = μ + σ·g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α). | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.expectedShortfall_of_hasLaw_studentT` | `full` |
+| `qrm-student-t-var-le-es` | For ν > 1 and α ∈ (0, 1), q ≤ g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α), the general VaR ≤ ES read through the two closed forms. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.quantile_studentT_le_expectedShortfall_closedForm` | `full` |
+
+What is not covered:
+- `t_ν⁻¹(α)` is the generic `quantile` of the law; no closed form for it is given.
+- `qrm-student-t-var-le-es` benchmarks the inequality between the two closed forms; the
+  measure-level `valueAtRisk_le_expectedShortfall_studentT` is not itself a benchmark entry.
+- The construction as the law of `Z/√(V/ν)` (independent normal and χ²) is not formalized.
+
+Verification:
+- The default `lake build` passed, including the curated `AxiomAudit.lean` (three Student-t
+  guards replace the two old ones) and the regenerated `AxiomAuditGen.lean`.
+- `lake lint` passed.
+- The ledger reports 540 fresh, 0 stale and 0 missing entries; the five new entries were verified
+  with `lake env lean`.
+
 ### The variance swap on one process, under one measure (2026-10-08)
 
 Five entries added and one restated, all `full`: `mf-jump-diffusion-terminal-law`,
@@ -1030,11 +1064,6 @@ What is not covered:
 | `qrm-es-monotone-level` | For an integrable loss X and 0 < α ≤ β < 1, ES_α(X) ≤ ES_β(X). | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_mono_level` | `full` |
 | `qrm-es-adeh-representation` | On a finite probability space, X ↦ ES_α(−X) satisfies the ADEH axioms (IsCoherentRisk), so ES_α(−X) is the least upper bound of the expected losses ∑ qᵢ(−Xᵢ) over its representing probability vectors. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_isLUB_representingSet` | `full` |
 | `qrm-gaussian-es` | For a loss X ~ N(m, v) with v > 0 and α ∈ (0, 1): ES_α(X) = gaussianCVaR m √v (Φ⁻¹(α)) α = m + √v·ϕ(Φ⁻¹(α))/(1 − α). | `MathFin/RiskMeasures/GaussianExpectedShortfall.lean`, `MathFin.expectedShortfall_of_hasLaw_gaussianReal` | `full` |
-| `qrm-student-t-density` | For ν > 0, the Student-t law built as Lebesgue measure with density k_ν/∫k_ν, k_ν(x) = (1 + x²/ν)^(-(ν+1)/2), has density Γ((ν+1)/2)/(√(νπ)Γ(ν/2))·(1 + x²/ν)^(-(ν+1)/2). | `MathFin/Foundations/StudentT.lean`, `MathFin.studentTPDFReal_eq` | `full` |
-| `qrm-student-t-cauchy` | The Student-t law with ν = 1 is Mathlib's standard Cauchy law: studentTMeasure 1 = cauchyMeasure 0 1. | `MathFin/Foundations/StudentT.lean`, `MathFin.studentTMeasure_one` | `full` |
-| `qrm-student-t-var` | For T ~ t_ν, σ ≥ 0 and α ∈ (0, 1): VaR_α(μ + σT) = μ + σ·t_ν⁻¹(α), with t_ν⁻¹(α) the quantile of the law. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_of_hasLaw_studentT` | `full` |
-| `qrm-student-t-es` | For T ~ t_ν, ν > 1, σ ≥ 0 and α ∈ (0, 1): ES_α(μ + σT) = μ + σ·g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α). | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.expectedShortfall_of_hasLaw_studentT` | `full` |
-| `qrm-student-t-var-le-es` | For ν > 1 and α ∈ (0, 1), q ≤ g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α), the general VaR ≤ ES read through the two closed forms. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.quantile_studentT_le_expectedShortfall_closedForm` | `full` |
 | `qrm-var-bisection` | For any loss X, α ∈ (0, 1) and a bracket with P(X ≤ lo) < α ≤ P(X ≤ hi), bisection on x ↦ P(X ≤ x) against α converges to VaR_α(X) (with error at most (hi − lo)/2^(n+1) after n steps, abs_bisectMid_sub_valueAtRisk_le). | `MathFin/RiskMeasures/ValueAtRiskBisection.lean`, `MathFin.tendsto_bisectMid_valueAtRisk` | `full` |
 | `qrm-var-superadditive-bernoulli` | For d independent Bernoulli(p) losses Y₁,…,Y_d (values in {0,1}, p ∈ (0,1)) and α ∈ (0, 1): ∑ VaR_α(Yᵢ) < VaR_α(∑ Yᵢ) if and only if (1 − p)^d < α ≤ 1 − p. So VaR is superadditive for such losses whenever d ≥ 2 and α lies in that range. | `MathFin/RiskMeasures/VaRSuperadditivity.lean`, `MathFin.valueAtRisk_sum_bernoulli_superadditive_iff` | `full` |
 | `qrm-var-superadditive-pareto` | For independent L₁, L₂ with Pareto law F(x) = 1 − x^(−1/2) on [1, ∞) and every α ∈ (0, 1): VaR_α(L₁) + VaR_α(L₂) < VaR_α(L₁ + L₂). | `MathFin/RiskMeasures/VaRSuperadditivity.lean`, `MathFin.valueAtRisk_add_gt_of_paretoHalf` | `full` |

@@ -86,9 +86,9 @@ private lemma studentTKernel_eq_integral (hν : 0 < ν) (x : ℝ) :
     inv_rpow hb.le, ← rpow_neg hb.le, neg_div]
   field_simp
 
-/-- The inner Gaussian integral: for `u > 0`, integrating the mixture integrand over `x` gives
+/-- The inner Gaussian integral: integrating the mixture integrand over `x` gives
 `u^(s−1) e^(−u) √(π/(u/ν))`. -/
-private lemma integral_mixture_x (hν : 0 < ν) {u : ℝ} (hu : 0 < u) :
+private lemma integral_mixture_x (hν : 0 < ν) (u : ℝ) :
     ∫ x, u ^ ((ν + 1) / 2 - 1) * exp (-((1 + x ^ 2 / ν) * u)) =
       u ^ ((ν + 1) / 2 - 1) * exp (-u) * √(π / (u / ν)) := by
   rw [← integral_gaussian (u / ν), ← integral_const_mul]
@@ -129,7 +129,7 @@ theorem studentTNormConst_eq (hν : 0 < ν) :
     · refine ((GammaIntegral_convergent (half_pos hν)).const_mul √(ν * π)).congr
         ((ae_restrict_iff' measurableSet_Ioi).2 (ae_of_all _ fun u (hu : 0 < u) ↦ ?_))
       simp only [Function.uncurry_apply_pair, f]
-      rw [← mixture_x_eq hu, ← integral_mixture_x hν hu]
+      rw [← mixture_x_eq hu, ← integral_mixture_x hν u]
       refine integral_congr_ae (ae_of_all _ fun x ↦ ?_)
       simp only
       rw [norm_of_nonneg (by positivity)]
@@ -142,7 +142,7 @@ theorem studentTNormConst_eq (hν : 0 < ν) :
     _ = (Gamma ((ν + 1) / 2))⁻¹ * ∫ u in Ioi 0, √(ν * π) * (exp (-u) * u ^ (ν / 2 - 1)) := by
         congr 1
         refine setIntegral_congr_fun measurableSet_Ioi fun u (hu : 0 < u) ↦ ?_
-        rw [integral_mixture_x hν hu, mixture_x_eq hu]
+        rw [integral_mixture_x hν u, mixture_x_eq hu]
     _ = √(ν * π) * Gamma (ν / 2) / Gamma ((ν + 1) / 2) := by
         rw [integral_const_mul, ← Gamma_eq_integral (half_pos hν)]
         field_simp
