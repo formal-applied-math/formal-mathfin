@@ -1040,6 +1040,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Mean −q and variance q(1 − q) of the two-point loss. Lives in MathFin/RiskMeasures/StandardDeviationPrinciple.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-backtest-max-drawdown-bounded",
+      "name": "Max Drawdown of a Positive Equity Curve Lies in [0, 1]",
+      "domain": "mathematical_finance",
+      "description": "For a strictly positive equity curve E, the max drawdown (the largest running-maximum-relative decline 1 − Eₜ/max_{s≤t} Es over the whole curve) is nonnegative and at most 1 — the finite-sample backtest statistic always lies in the unit interval, matching its interpretation as a fraction of peak value lost.",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.BacktestStatistics\n\nopen MathFin.Backtest\n\ntheorem backtest_max_drawdown_bounded_thm {n : ℕ} [NeZero n] {E : Fin n → ℝ}\n    (hE : ∀ t, 0 < E t) :\n    0 ≤ maxDrawdown E ∧ maxDrawdown E ≤ 1 :=\n  ⟨maxDrawdown_nonneg hE, maxDrawdown_le_one hE⟩\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "W. F. Bacon, Practical Portfolio Performance Measurement and Attribution, 2nd ed. (2008), Ch. 4 \"Risk\"",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof (Finset.sup' bounds). Lives in MathFin/RiskMeasures/BacktestStatistics.lean. A finite-sample statistic of one realized equity-curve path, not a probabilistic drawdown law. Axioms-clean."
+      }
     }
   ]
 }

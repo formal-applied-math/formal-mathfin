@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import Mathlib
+public import MathFin.Performance.Ratios
 
 /-!
 # Backtest performance statistics
@@ -53,7 +54,9 @@ Two other objects in the library are adjacent but distinct:
 * `MathFin.sharpeRatio` (`Performance/Ratios.lean`) is the *parametric* Sharpe ratio
   `(μ − r_f) / σ` from already-known moments, with its own `√T` time-aggregation lemma
   `sharpeRatio_scaleT`. The `sharpeRatio` here is the *empirical* counterpart, computed
-  from a finite sample of realized returns rather than supplied moments.
+  from a finite sample of realized returns rather than supplied moments — it is exactly
+  the parametric formula with the plug-in (sample) estimators substituted for the unknown
+  moments (`sharpeRatio_eq_sharpeRatio_sampleMean_sampleStdDev`).
 * `MathFin.maximumDrawdown` (`Performance/DownsideMetrics.lean`) is the largest *absolute*
   price decline `max_{i ≤ j} (price i − price j)` over a finite path. `maxDrawdown` here is
   the largest *relative* decline `1 − E_t / max_{s ≤ t} E_s`, the convention used in
@@ -68,6 +71,10 @@ Two other objects in the library are adjacent but distinct:
   the same positive constant (e.g. a currency redenomination).
 * `drawdown_nonneg`, `drawdown_le_one`, `maxDrawdown_nonneg`, `maxDrawdown_le_one`: for a
   strictly positive equity curve, every drawdown — hence the max drawdown — lies in `[0, 1]`.
+* `sharpeRatio_eq_sharpeRatio_sampleMean_sampleStdDev`: the plug-in identity tying this
+  file's empirical Sharpe ratio to `MathFin.sharpeRatio`'s parametric formula.
+* `sharpeRatio_eq_sharpeRatio_annualized`: the empirical ratio's `√N` annualization agrees with
+  `Performance/Ratios.lean`'s `sharpeRatio_scaleT` (iid time-aggregation of the moments).
 -/
 
 @[expose] public section
@@ -95,6 +102,31 @@ noncomputable def sharpeRatio (N : ℝ) (r : Fin n → ℝ) : ℝ :=
 /-- Annualized volatility: `√N · std(r)`, `N` periods per year. -/
 noncomputable def annualizedVolatility (N : ℝ) (r : Fin n → ℝ) : ℝ :=
   Real.sqrt N * sampleStdDev r
+
+/-- **The empirical Sharpe ratio is the parametric `MathFin.sharpeRatio` with the sample
+mean and sample standard deviation plugged in for the (unknown) population moments, at
+zero risk-free rate**: `√N` times the already-known-moments formula `(μ − r_f)/σ`
+(`Performance/Ratios.lean`), evaluated at `μ = sampleMean r`, `r_f = 0`, `σ = sampleStdDev
+r`. This is the estimator relationship between the two Sharpe-ratio objects the module
+docstring distinguishes: same formula, moments supplied vs. moments estimated. -/
+theorem sharpeRatio_eq_sharpeRatio_sampleMean_sampleStdDev (N : ℝ) (r : Fin n → ℝ) :
+    sharpeRatio N r = Real.sqrt N * MathFin.sharpeRatio (sampleMean r) 0 (sampleStdDev r) := by
+  unfold sharpeRatio MathFin.sharpeRatio
+  rw [sub_zero, mul_div_assoc]
+
+/-- **The empirical Sharpe ratio is also the parametric formula at the *annualized* mean and
+volatility**: the `√N` time-aggregation this file bakes into `sharpeRatio` directly is the same
+`√N` that `Performance/Ratios.lean`'s `sharpeRatio_scaleT` derives from iid time aggregation of
+the moments themselves, so the two routes to annualizing agree. This makes the `Performance.
+Ratios` import do real work beyond the plug-in identity above: it transfers an actual theorem
+about the parametric ratio, not just its definition. -/
+theorem sharpeRatio_eq_sharpeRatio_annualized (N : ℝ) (r : Fin n → ℝ) (hN : 0 < N)
+    (hσ : sampleStdDev r ≠ 0) :
+    sharpeRatio N r = MathFin.sharpeRatio (N * sampleMean r) 0 (annualizedVolatility N r) := by
+  rw [sharpeRatio_eq_sharpeRatio_sampleMean_sampleStdDev, ← MathFin.sharpeRatio_scaleT hN hσ,
+    mul_zero]
+  unfold annualizedVolatility
+  rw [mul_comm (Real.sqrt N)]
 
 /-- Compound annual growth rate of an equity curve held for `k` periods, `N` periods per
 year: `(E_final / E_initial) ^ (N / k) - 1`. -/
