@@ -382,14 +382,14 @@
         "reference": "Hart & Ross 1994, soft barrier options; Haug, The Complete Guide to Option Pricing Formulas, §\"Soft Barrier Options\"",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full proof, axioms-clean. Transcribed from, and cross-checked against, QuantLib's AnalyticSoftBarrierEngine::knockInValue (MathFin/BlackScholes/SoftBarrierOption.lean). SCOPE: an algebraic identity on the transcribed closed form (call value minus put value at fixed knock-in direction). NOT PROVED: that the soft-barrier formula is itself a discounted expected payoff under the corridor knock-in probability."
+        "formalization_scope": "Full proof, axioms-clean. Transcribed from, and cross-checked against, QuantLib's AnalyticSoftBarrierEngine::knockInValue (MathFin/BlackScholes/SoftBarrierOption.lean). SCOPE: an algebraic identity on the transcribed closed form -- w(eta=1) minus w(eta=-1), the two eta branches of knockInValue (eta=1 is Haug's soft-down-and-in call, eta=-1 his soft-up-and-in put; QuantLib keys eta off the option type alone, a convention this file inherits). NOT PROVED: that the soft-barrier formula is itself a discounted expected payoff under the corridor knock-in probability."
       }
     },
     {
       "id": "mf-partial-time-barrier-down-add-up",
       "name": "Partial-Time Barrier: Down-Window Plus Up-Window",
       "domain": "mathematical_finance",
-      "description": "Proves that, for Haug's partial-time (start-window, call) barrier closed form CA, summing the down-window (eta=1) and up-window (eta=-1) values collapses every bivariate normal CDF term to a single univariate Phi, via the correlation identity rho^2 <= 1 that holds whenever the monitoring window [0,t1] is a sub-interval of the option's life [0,T].",
+      "description": "Proves that, for Haug's partial-time (start-window, call) barrier closed form CA, summing the down-window (eta=1) and up-window (eta=-1) values collapses every bivariate normal CDF term to a single univariate Phi, via bivariateNormalCDF_flip_snd, whose hypothesis rho^2 <= 1 holds whenever the monitoring window [0,t1] is a sub-interval of the option's life [0,T].",
       "code": {
         "lean": "import MathFin.BlackScholes.PartialTimeBarrierOption\n\nopen MathFin\n\n/-- **Down-window plus up-window, same strike/barrier.** Re-exports\n`MathFin.ptCA_down_add_up`. -/\ntheorem partial_time_barrier_down_add_up (S X H b r σ t1 T : ℝ) (ht1 : 0 ≤ t1) (hT : t1 ≤ T) :\n    ptCA 1 S X H b r σ t1 T + ptCA (-1) S X H b r σ t1 T\n      = S * Real.exp ((b - r) * T) *\n          (Phi (ptD1 S X b σ T) - ptHSmu1 S H b σ * Phi (ptF1 S X H b σ T))\n        - X * Real.exp (-r * T) *\n            (Phi (ptD2 S X b σ T) - ptHSmu S H b σ * Phi (ptF2 S X H b σ T)) :=\n  MathFin.ptCA_down_add_up S X H b r σ t1 T ht1 hT\n"
       },
@@ -405,7 +405,7 @@
       "id": "mf-binary-barrier-inout-parity",
       "name": "Binary Barrier In-Out Parity (Down and Up Families)",
       "domain": "mathematical_finance",
-      "description": "Proves that, for Rubinstein & Reiner's binary (digital) barrier closed forms, the down-knock-in plus down-knock-out values sum to the vanilla digital value B1 across the 8 down-family branches (DownIn and DownOut, each with 4 call/put x strike-vs-barrier cases), and likewise for the up-knock-in/up-knock-out pair across the 8 up-family branches -- together the file's full 16-branch transcription -- a genuine cross-check that each branch's B2/B3/B4 correction terms cancel against its paired branch.",
+      "description": "Proves that, for Rubinstein & Reiner's binary (digital) barrier closed forms, the down-knock-in plus down-knock-out alpha-factors sum to the vanilla digital alpha-factor B1 (the price itself is discount*K*B1) across the 8 down-family branches (DownIn and DownOut, each with 4 call/put x strike-vs-barrier cases), and likewise for the up-knock-in/up-knock-out pair across the 8 up-family branches -- together the file's full 16-branch transcription -- a genuine cross-check that each branch's B2/B3/B4 correction terms cancel against its paired branch.",
       "code": {
         "lean": "import MathFin.BlackScholes.BinaryBarrierOption\n\nopen MathFin\n\n/-- **In-out parity, down-barrier family.** Re-exports `MathFin.bboDownIn_add_DownOut`. -/\ntheorem binary_barrier_down_in_add_out (S X H mu σ T : ℝ) (isCall xGeH : Bool) :\n    bboDownInAlpha S X H mu σ T isCall xGeH + bboDownOutAlpha S X H mu σ T isCall xGeH\n      = bboB1 S X mu σ T isCall :=\n  MathFin.bboDownIn_add_DownOut S X H mu σ T isCall xGeH\n\n/-- **In-out parity, up-barrier family.** Re-exports `MathFin.bboUpIn_add_UpOut`. -/\ntheorem binary_barrier_up_in_add_out (S X H mu σ T : ℝ) (isCall xGeH : Bool) :\n    bboUpInAlpha S X H mu σ T isCall xGeH + bboUpOutAlpha S X H mu σ T isCall xGeH\n      = bboB1 S X mu σ T isCall :=\n  MathFin.bboUpIn_add_UpOut S X H mu σ T isCall xGeH\n"
       },

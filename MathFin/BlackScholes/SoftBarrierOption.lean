@@ -15,8 +15,7 @@ A "soft" barrier option does not knock in/out at a single level but across a **c
 `[L, U]`: the knock-in probability ramps linearly as the underlying's terminal log-price sweeps
 the band, rather than jumping at a single barrier (Hart & Ross 1994; Haug, *The Complete Guide
 to Option Pricing Formulas*, §"Soft Barrier Options"). Single-underlying, single-variable
-Black–Scholes machinery — no bivariate normal CDF, matching the coverage-map note that #63 is
-one of the two simplest standalone wins in this batch.
+Black–Scholes machinery — no bivariate normal CDF needed.
 
 Transcribed from, and cross-checked against, QuantLib's
 `ql/pricingengines/barrier/analyticsoftbarrierengine.cpp`
@@ -75,8 +74,6 @@ forms as given rather than re-deriving them from a joint density).
 @[expose] public section
 
 namespace MathFin
-
-open Real
 
 /-- **`μ = (b + σ²/2)/σ²`** (Haug/QuantLib's soft-barrier drift; distinct from `hkMu`/the binary
 barrier's `mu`, which use `b − σ²/2`). -/

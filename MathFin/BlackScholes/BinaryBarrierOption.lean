@@ -15,8 +15,7 @@ A digital (cash-or-nothing / asset-or-nothing) option that is additionally knock
 knocked out by a single barrier `H` (Rubinstein & Reiner 1991; Haug, *The Complete Guide to
 Option Pricing Formulas*, §"Binary Barrier Options"). Unlike the two-asset barriers in
 `HeynenKatTwoAssetBarrier.lean`, this is single-underlying, single-variable Black–Scholes
-machinery — no bivariate normal CDF needed, matching the coverage-map note that #66 is one of
-the two simplest standalone wins in this batch.
+machinery — no bivariate normal CDF needed.
 
 Transcribed from, and cross-checked against, QuantLib's
 `ql/pricingengines/barrier/analyticbinarybarrierengine.cpp`
@@ -73,8 +72,6 @@ crossed the barrier, a `DownIn`/`UpIn` re-priced as a plain vanilla digital via
 @[expose] public section
 
 namespace MathFin
-
-open Real
 
 /-- `φ(isCall) = 1` for a call, `−1` for a put (QuantLib's `phi`). -/
 noncomputable def bboPhiOf (isCall : Bool) : ℝ := if isCall then 1 else -1

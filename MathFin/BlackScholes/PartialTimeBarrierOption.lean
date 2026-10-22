@@ -15,21 +15,19 @@ A barrier that is monitored only on part of the option's life. This file covers 
 window, **call** side (QuantLib's `PartialBarrier::Start`, `Option::Call`): the barrier is live
 on `[0, t₁]` and switched off for the remainder `(t₁, T]` of the option's life (Haug, *The
 Complete Guide to Option Pricing Formulas*, §"Partial-Time Barrier Options"). Unlike the binary
-and soft barriers in this batch, this genuinely needs the **bivariate** normal CDF — the
-barrier-monitoring window `[0, t₁]` and the full life `[0, T]` are correlated (correlation
-`ρ = √(t₁/T)`, the two Brownian increments share the `[0, t₁]` leg) — which is exactly why the
-coverage-map note placed #65 alongside #64 (Heynen–Kat) rather than with the two single-variable
-items #63/#66, and why this file builds on the same `BivariateNormalCDF.lean` substrate
-(`bivariateNormalCDF`, `bivariateNormalCDF_flip_snd`) as `HeynenKatTwoAssetBarrier.lean`.
+and soft barriers transcribed alongside this file, this genuinely needs the **bivariate** normal
+CDF — the barrier-monitoring window `[0, t₁]` and the full life `[0, T]` are correlated
+(correlation `ρ = √(t₁/T)`, the two Brownian increments share the `[0, t₁]` leg) — and why this
+file builds on the same `BivariateNormalCDF.lean` substrate (`bivariateNormalCDF`,
+`bivariateNormalCDF_flip_snd`) as `HeynenKatTwoAssetBarrier.lean`.
 
 **Scope, disclosed honestly**: QuantLib's `AnalyticPartialTimeBarrierOptionEngine` also prices
 the **end**-window case (`PartialBarrier::EndB1`/`EndB2`, barrier live only on `(t₁, T]`) via
 `CoB1`/`CoB2`, which are substantially more involved (each has its own strike-vs-barrier case
-split with extra vanilla-minus-partial decompositions) and are genuinely harder — matching the
-coverage-map's own assessment that "#64–65 ... need more substrate or are genuinely harder," this
-file formalizes the **start**-window case (`CA`, QuantLib's simplest of the three) and leaves
-`EndB1`/`EndB2` out of scope. **`CA` is also call-only**: QuantLib's `CA` is commented
-`// Partial-Time-Start-OUT Call Option calculation`, and the engine prices a *put* in
+split with extra vanilla-minus-partial decompositions) and genuinely harder; this file formalizes
+the **start**-window case (`CA`, QuantLib's simplest of the three) and leaves `EndB1`/`EndB2` out
+of scope. **`CA` is also call-only**: QuantLib's `CA` is commented
+`//Partial-Time-Start- OUT  Call Option calculation`, and the engine prices a *put* in
 `calculate()` via the put–call spot-reflection symmetry (strike `X ↦ S²/X`, barrier `H ↦ S²/H`,
 barrier direction mirrored, the `CA`-call result on the transformed inputs scaled by `X/S`) rather
 than a second closed form — that symmetry transform is not formalized here either. The knock-in
@@ -63,16 +61,16 @@ start-window out-barrier **call** value (`η = 1` down, `η = −1` up) is
   — every `N₂(a, ηb; ηρ)` pair (`η = ±1`) telescopes via `bivariateNormalCDF_flip_snd` to a
   single `Φ(a)`, exactly the mechanism behind `HeynenKatTwoAssetBarrier.lean`'s
   `heynenKat_downOut_add_upOut`. As there, the down/up window-start prices are mutually exclusive
-  regimes (down-monitored vs. up-monitored), so the sum has no payoff-level meaning; it verifies
-  the `(ηe_i, ηρ)` sign pattern is self-consistent across `η = ±1`, the same scope the Heynen–Kat
-  file disclosed for its own analogous check.
+  regimes (down-monitored vs. up-monitored), so the sum has no payoff-level meaning in general
+  (it coincides with the ordinary down-and-out call only in the degenerate `t₁ = T` case, where
+  the monitoring window is the whole life); it verifies the `(ηe_i, ηρ)` sign pattern is
+  self-consistent across `η = ±1`, the same scope the Heynen–Kat file disclosed for its own
+  analogous check.
 -/
 
 @[expose] public section
 
 namespace MathFin
-
-open Real
 
 /-- **`ρ = √(t₁/T)`**, the correlation between the barrier-window and full-life log-returns. -/
 noncomputable def ptRho (t1 T : ℝ) : ℝ := Real.sqrt (t1 / T)
@@ -132,9 +130,7 @@ a monitoring window can only be a sub-interval of the option's life. -/
 theorem ptRho_sq_le_one {t1 T : ℝ} (ht1 : 0 ≤ t1) (hT : t1 ≤ T) : ptRho t1 T ^ 2 ≤ 1 := by
   have hT0 : 0 ≤ T := ht1.trans hT
   rw [ptRho, Real.sq_sqrt (div_nonneg ht1 hT0)]
-  rcases hT0.eq_or_lt with hT0' | hT0'
-  · simp [← hT0']
-  · exact (div_le_one hT0').mpr hT
+  exact div_le_one_of_le₀ hT hT0
 
 /-- **Down-window plus up-window, same strike/barrier**: `CA(1) + CA(−1)` collapses to a closed
 form with every bivariate CDF replaced by a single `Φ`, via `bivariateNormalCDF_flip_snd` applied
