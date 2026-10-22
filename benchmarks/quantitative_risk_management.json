@@ -1068,7 +1068,7 @@
       "metadata": {
         "chapter": 2,
         "reference": "A. J. McNeil, R. Frey and P. Embrechts, Quantitative Risk Management, revised ed. (2015)",
-        "difficulty": "introductory",
+        "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: at ν = 1 the kernel is (1 + x²)⁻¹ and its integral is π (Mathlib's integral_univ_inv_one_add_sq), so the two densities agree pointwise. Lives in MathFin/Foundations/StudentT.lean. Axioms-clean."
       }

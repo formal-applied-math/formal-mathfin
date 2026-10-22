@@ -97,7 +97,8 @@ private lemma integral_mixture_x (hν : 0 < ν) (u : ℝ) :
   field_simp
   ring
 
-/-- The outer Gamma integral: `∫_0^∞ u^(s−1) e^(−u) √(π/(u/ν)) du = √(νπ) Γ(ν/2)`. -/
+/-- The outer integrand, rearranged: for `u > 0`,
+`u^(s−1) e^(−u) √(π/(u/ν)) = √(νπ) · e^(−u) u^(ν/2−1)`, the Gamma integrand at `ν/2`. -/
 private lemma mixture_x_eq {u : ℝ} (hu : 0 < u) :
     u ^ ((ν + 1) / 2 - 1) * exp (-u) * √(π / (u / ν)) =
       √(ν * π) * (exp (-u) * u ^ (ν / 2 - 1)) := by
