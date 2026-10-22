@@ -12,10 +12,10 @@ public import MathFin.Foundations.StandardNormal
 # Soft barrier options: Hart & Ross's closed form
 
 A "soft" barrier option does not knock in/out at a single level but across a **corridor**
-`[L, U]`: the knock-in probability ramps linearly as the underlying's terminal log-price sweeps
-the band, rather than jumping at a single barrier (Hart & Ross 1994; Haug, *The Complete Guide
-to Option Pricing Formulas*, §"Soft Barrier Options"). Single-underlying, single-variable
-Black–Scholes machinery — no bivariate normal CDF needed.
+`[L, U]`: the knocked-in fraction ramps linearly with how far into the band the underlying's
+running extreme has penetrated, rather than jumping at a single barrier (Hart & Ross 1994; Haug,
+*The Complete Guide to Option Pricing Formulas*, §"Soft Barrier Options"). Single-underlying,
+single-variable Black–Scholes machinery — no bivariate normal CDF needed.
 
 Transcribed from, and cross-checked against, QuantLib's
 `ql/pricingengines/barrier/analyticsoftbarrierengine.cpp`

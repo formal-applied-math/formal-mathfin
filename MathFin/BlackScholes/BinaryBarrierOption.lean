@@ -49,7 +49,7 @@ QuantLib's 16-branch `switch` (barrier type × call/put × strike-vs-barrier) se
 ## Main results
 
 * `bboDownIn_add_DownOut`: knock-in + knock-out, same direction/type/regime, collapses to the
-  vanilla digital value `B₁` — the barrier-hit event and its complement partition the payoff
+  vanilla digital α-factor `B₁` — the barrier-hit event and its complement partition the payoff
   (the same in–out parity as `BarrierParity.lean`'s `knockIn_add_knockOut_eq_vanilla`, here
   verified against the literal 16-branch closed form rather than the measure-theoretic
   definition). Checked for every `(isCall, xGeH)` combination by `decide`-free case split.
@@ -158,7 +158,7 @@ noncomputable def bboUpOutAlpha (S X H mu σ T : ℝ) (isCall xGeH : Bool) : ℝ
 
 /-- **In–out parity, down-barrier family**: for every call/put choice and every
 strike-vs-barrier regime, the down-knock-in and down-knock-out values (QuantLib's `DownIn` and
-`DownOut` switch cases, `η = 1` throughout) sum to the vanilla digital value `B₁`. A genuine
+`DownOut` switch cases, `η = 1` throughout) sum to the vanilla digital α-factor `B₁`. A genuine
 cross-check on the 16-branch transcription: each of the four `(isCall, xGeH)` branches cancels
 its `B₂, B₃, B₄` terms against the paired branch independently (so a transposed sign on any one
 of the eight `Down*` branches would break exactly that case). -/
