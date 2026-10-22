@@ -27,47 +27,50 @@ where `z = (ν/α)(fK)^((1-β)/2) log(f/K)` and
 **This is a closed-form asymptotic approximation, not an exact price** — the
 paper derives it via a singular-perturbation (small vol-of-vol, short-maturity)
 expansion and explicitly omits higher-order `⋯` terms (stated to be "much,
-much smaller" than the displayed terms, but nonzero). We formalize only the
-at-the-money (`K = f`) specialization (eq. 2.18, `sabrATMVol`) — the general
-formula (eq. 2.17a-c, with its `z`, `x(z)` quoted above for reference) is not
-formalized. At `K = f` (so `z = 0`, where `z/x(z) → 1` is a removable
-singularity) the paper states the formula "reduces to" eq. 2.18. We do not
-attempt the singular-perturbation PDE derivation itself —
-that stochastic machinery (the SABR two-factor SDE's transition density) does
-not exist in this repo or in Mathlib/BrownianMotion, and reconstructing it is
-well beyond a closed-form transcription. What *is* proved here is restricted to
-elementary algebraic consequences of the stated formula: the ATM specialization
-is definitionally eq. 2.18, and at zero time-to-exercise the ATM volatility
-collapses exactly to the SABR "backbone" `α / f^(1-β)` that the paper calls out
-in section 3 as the ATM-vol curve traced as the forward varies.
+much smaller" than the displayed terms, but nonzero). Neither that derivation nor
+any error bound against the true SABR implied volatility is formalized here: the
+two-factor SDE's transition density and its short-time (heat-kernel /
+geodesic-distance) asymptotics do not exist in this repo or in
+Mathlib/BrownianMotion, and the rigorous statement of the expansion is itself an
+open design question (issue #100). What is proved concerns the *printed* formulas
+(eq. 2.17a-c with the `⋯` dropped, and eq. 2.18):
+
+* At `K = f` the general formula is `0/0` in its `z / x(z)` factor (`z = 0`,
+  `x(0) = 0`), and the paper says it "reduces to" eq. 2.18. We prove this as a
+  limit: `sabrImpliedVol K f ⋯ → sabrATMVol f ⋯` as `K → f`, `K ≠ f`. The
+  removable singularity is resolved by `x'(0) = 1` (`hasDerivAt_sabrX_zero`), so
+  `z / x(z) → 1`.
+* The *backbone law* (section 3): along the leading-order ATM curve
+  `f ↦ α / f^(1-β)`, `d log σ / d log f = β - 1`, stated as the derivative of
+  `log ∘ sabrBackbone` in `f`.
 
 ## Main definitions
 
-* `sabrATMVol` — the at-the-money implied vol (eq. 2.18), the `K = f`
-  specialization where the general formula's removable singularity is already
-  resolved in closed form.
-* `sabrBackbone` — the leading-order ATM vol `α / f^(1-β)` (eq. 2.18's
-  dominant term; "the backbone" in the paper's section 3 terminology).
+* `sabrZ`, `sabrX` — Hagan's `z` and `x(z)` (eqs. 2.17b, 2.17c).
+* `sabrImpliedVol` — the general implied vol `σ_B(K, f)` (eq. 2.17a, `⋯` dropped).
+* `sabrATMVol` — the at-the-money implied vol (eq. 2.18).
+* `sabrBackbone` — the leading-order ATM vol `α / f^(1-β)` ("the backbone" in the
+  paper's section 3 terminology).
 
 ## Main results
 
-* `sabrBackbone_pos` — the backbone factor `α / f^(1-β)` is positive for `α, f > 0`.
-* `sabrATMVol_zero_tex` — at `t_ex = 0`, `sabrATMVol` collapses exactly to the
-  backbone `sabrBackbone`.
-* `sabrATMVol_pos_zero_tex` — corollary: `sabrATMVol` is positive at `t_ex = 0`
-  for `α, f > 0`.
-* `sabrATMVol_bsV_gt_backbone_bsV` — a SABR-specific consequence of `BlackScholes/
-  ImpliedVolatility.lean`'s `bsV_strictMonoOn_sigma`: whenever eq. 2.18's
-  bracketed perturbation correction, scaled by `t_ex`, is positive, the full
-  ATM vol `sabrATMVol` prices the ATM Black call *strictly above* the bare
-  backbone `sabrBackbone` — the stochastic-vol correction the paper adds to
-  the leading-order term genuinely raises the option's value, not merely
-  some other positive vol would.
+* `tendsto_sabrImpliedVol_atm` — eq. 2.17a tends to eq. 2.18 as `K → f`
+  (for `f > 0`, `α ≠ 0`, `ν ≠ 0`, `ρ ≠ 1`, any `β`, `t_ex`).
+* `hasDerivAt_log_sabrBackbone` — the backbone law
+  `d/df log (α / f^(1-β)) = (β - 1) / f`.
+* `sabrBackbone_pos`, `sabrATMVol_zero_tex`, `sabrATMVol_pos_zero_tex` — the
+  backbone is positive for `α, f > 0`, and is the ATM vol at `t_ex = 0`.
+* `sabrATMVol_bsV_gt_backbone_bsV` — whenever eq. 2.18's bracketed correction,
+  scaled by `t_ex`, is positive, the ATM Black call priced at `sabrATMVol` is
+  strictly above the same call priced at the backbone (via
+  `bsV_strictMonoOn_sigma`, `BlackScholes/ImpliedVolatility.lean`).
 -/
 
 @[expose] public section
 
 namespace MathFin
+
+open Filter Topology
 
 /-- **The SABR "backbone"**: the leading-order at-the-money implied volatility
 `α / f^(1-β)` (the dominant factor in Hagan-Kumar-Lesniewski-Woodward eq. 2.18;
@@ -132,5 +135,146 @@ theorem sabrATMVol_bsV_gt_backbone_bsV {f α β ρ ν tex T : ℝ} (hf : 0 < f) 
     unfold sabrATMVol
     nlinarith [mul_pos hpos hbracket]
   exact bsV_strictMonoOn_sigma hf hT hf hpos (hpos.trans hlt) hlt
+
+/-! ### The general formula (eq. 2.17) and its `K → f` limit -/
+
+/-- **Hagan's `x(z)`** (Hagan-Kumar-Lesniewski-Woodward eq. 2.17c):
+`x(z) = log((√(1 - 2ρz + z²) + z - ρ) / (1 - ρ))`. -/
+noncomputable def sabrX (ρ z : ℝ) : ℝ :=
+  Real.log ((Real.sqrt (1 - 2 * ρ * z + z ^ 2) + z - ρ) / (1 - ρ))
+
+/-- **Hagan's `z`** (eq. 2.17b): `z = (ν/α) (fK)^((1-β)/2) log(f/K)`. -/
+noncomputable def sabrZ (K f α β ν : ℝ) : ℝ :=
+  ν / α * (f * K) ^ ((1 - β) / 2) * Real.log (f / K)
+
+/-- **The SABR implied volatility `σ_B(K, f)`** (Hagan-Kumar-Lesniewski-Woodward eq. 2.17a),
+the printed asymptotic formula with its `⋯` terms dropped:
+
+`α / [(fK)^((1-β)/2) (1 + (1-β)²/24 log²(f/K) + (1-β)⁴/1920 log⁴(f/K))] · (z / x(z))
+  · (1 + [(1-β)²/24 · α²/(fK)^(1-β) + ρβαν/4/(fK)^((1-β)/2) + (2-3ρ²)/24 · ν²] t_ex)`.
+
+At `K = f` the factor `z / x(z)` is `0 / 0` (Lean's `0 / 0 = 0` makes the literal value
+`0` there); `tendsto_sabrImpliedVol_atm` shows the formula tends to `sabrATMVol` as
+`K → f`. -/
+noncomputable def sabrImpliedVol (K f α β ρ ν tex : ℝ) : ℝ :=
+  α / ((f * K) ^ ((1 - β) / 2) *
+      (1 + (1 - β) ^ 2 / 24 * Real.log (f / K) ^ 2
+        + (1 - β) ^ 4 / 1920 * Real.log (f / K) ^ 4)) *
+    (sabrZ K f α β ν / sabrX ρ (sabrZ K f α β ν)) *
+    (1 + ((1 - β) ^ 2 / 24 * (α ^ 2 / (f * K) ^ (1 - β))
+        + ρ * β * α * ν / 4 / (f * K) ^ ((1 - β) / 2)
+        + (2 - 3 * ρ ^ 2) / 24 * ν ^ 2) * tex)
+
+/-- **`x(z)` has slope `1` at `z = 0`** (`ρ ≠ 1`). With `x(0) = 0`, this is what makes
+`z = 0` a removable singularity of `z / x(z)`. -/
+theorem hasDerivAt_sabrX_zero {ρ : ℝ} (hρ : ρ ≠ 1) : HasDerivAt (sabrX ρ) 1 0 := by
+  have h1ρ : (1 : ℝ) - ρ ≠ 0 := sub_ne_zero.mpr (Ne.symm hρ)
+  have hq : HasDerivAt (fun z : ℝ ↦ 1 - 2 * ρ * z + z ^ 2) (-(2 * ρ)) 0 :=
+    ((((hasDerivAt_id' (0 : ℝ)).const_mul (2 * ρ)).const_sub 1).add
+      (hasDerivAt_pow 2 (0 : ℝ))).congr_deriv (by norm_num)
+  have hs := hq.sqrt (by norm_num)
+  have hg := ((hs.add (hasDerivAt_id' (0 : ℝ))).sub_const ρ).div_const (1 - ρ)
+  have hl := hg.log (by norm_num [h1ρ])
+  unfold sabrX
+  convert hl using 1
+  simp only [Pi.add_apply]
+  norm_num
+  field_simp
+  ring
+
+/-- **`z / x(z) → 1` as `z → 0`, `z ≠ 0`** (`ρ ≠ 1`): the removable singularity of
+eq. 2.17a's `z / x(z)` factor, from `x(0) = 0` and `x'(0) = 1`. -/
+theorem tendsto_div_sabrX {ρ : ℝ} (hρ : ρ ≠ 1) :
+    Tendsto (fun z ↦ z / sabrX ρ z) (𝓝[≠] 0) (𝓝 1) := by
+  have h := (hasDerivAt_iff_tendsto_slope_zero.mp (hasDerivAt_sabrX_zero hρ)).inv₀ one_ne_zero
+  have h0 : sabrX ρ 0 = 0 := by
+    have h1ρ : (1 : ℝ) - ρ ≠ 0 := sub_ne_zero.mpr (Ne.symm hρ)
+    simp [sabrX, h1ρ]
+  simpa [h0, div_eq_mul_inv, mul_comm] using h
+
+/-- **`z → 0` through nonzero values as `K → f`, `K ≠ f`** (`f > 0`, `α ≠ 0`, `ν ≠ 0`):
+`z(K)` is continuous at `K = f` with `z(f) = 0`, and `z(K) ≠ 0` for `K > 0`, `K ≠ f`,
+since `log(f/K) ≠ 0` there. -/
+theorem tendsto_sabrZ {f α β ν : ℝ} (hf : 0 < f) (hα : α ≠ 0) (hν : ν ≠ 0) :
+    Tendsto (fun K ↦ sabrZ K f α β ν) (𝓝[≠] f) (𝓝[≠] 0) := by
+  have hcont : ContinuousAt (fun K ↦ sabrZ K f α β ν) f := by
+    unfold sabrZ
+    have hff : f * f ≠ 0 := (mul_pos hf hf).ne'
+    have hf0 : f ≠ 0 := hf.ne'
+    have hdiv : f / f ≠ 0 := div_ne_zero hf0 hf0
+    have hr : f * f ≠ 0 ∨ 0 ≤ (1 - β) / 2 := Or.inl hff
+    fun_prop (disch := assumption)
+  have hval : sabrZ f f α β ν = 0 := by simp [sabrZ, hf.ne']
+  rw [tendsto_nhdsWithin_iff]
+  refine ⟨hval ▸ hcont.tendsto.mono_left nhdsWithin_le_nhds, ?_⟩
+  have hpos : ∀ᶠ K in 𝓝[≠] f, 0 < K := nhdsWithin_le_nhds (Ioi_mem_nhds hf)
+  filter_upwards [hpos, self_mem_nhdsWithin] with K hK hKf
+  have hfK : f / K ≠ 1 := fun h ↦ hKf ((div_eq_one_iff_eq hK.ne').mp h).symm
+  simp only [Set.mem_compl_iff, Set.mem_singleton_iff, sabrZ]
+  exact mul_ne_zero (mul_ne_zero (div_ne_zero hν hα) (Real.rpow_pos_of_pos (mul_pos hf hK) _).ne')
+    (Real.log_ne_zero_of_pos_of_ne_one (div_pos hf hK) hfK)
+
+/-- The factors of eq. 2.17a other than `z / x(z)` are continuous in `K` at `K = f`
+(`f > 0`). -/
+private theorem sabrImpliedVol_rest_continuousAt {f α β ρ ν tex : ℝ} (hf : 0 < f) :
+    ContinuousAt (fun K ↦ α / ((f * K) ^ ((1 - β) / 2) *
+      (1 + (1 - β) ^ 2 / 24 * Real.log (f / K) ^ 2
+        + (1 - β) ^ 4 / 1920 * Real.log (f / K) ^ 4)) *
+    (1 + ((1 - β) ^ 2 / 24 * (α ^ 2 / (f * K) ^ (1 - β))
+        + ρ * β * α * ν / 4 / (f * K) ^ ((1 - β) / 2)
+        + (2 - 3 * ρ ^ 2) / 24 * ν ^ 2) * tex)) f := by
+  have hff : f * f ≠ 0 := (mul_pos hf hf).ne'
+  have hf0 : f ≠ 0 := hf.ne'
+  have hdiv : f / f ≠ 0 := div_ne_zero hf0 hf0
+  have hr : f * f ≠ 0 ∨ 0 ≤ (1 - β) / 2 := Or.inl hff
+  have hr' : f * f ≠ 0 ∨ 0 ≤ 1 - β := Or.inl hff
+  have h1 : (f * f) ^ ((1 - β) / 2) ≠ 0 := (Real.rpow_pos_of_pos (mul_pos hf hf) _).ne'
+  have h2 : (f * f) ^ (1 - β) ≠ 0 := (Real.rpow_pos_of_pos (mul_pos hf hf) _).ne'
+  have h3 : (f * f) ^ ((1 - β) / 2) * (1 + (1 - β) ^ 2 / 24 * Real.log (f / f) ^ 2
+        + (1 - β) ^ 4 / 1920 * Real.log (f / f) ^ 4) ≠ 0 := by simpa [hf.ne'] using h1
+  fun_prop (disch := assumption)
+
+/-- **The general SABR formula tends to the ATM formula as `K → f`**
+(Hagan-Kumar-Lesniewski-Woodward: eq. 2.17a "reduces to" eq. 2.18 at `K = f`): for
+`f > 0`, `α ≠ 0`, `ν ≠ 0`, `ρ ≠ 1` and every `β`, `t_ex`, `σ_B(K, f) → σ_ATM(f)` as
+`K → f` with `K ≠ f`. At `K = f` itself the printed formula is `0 / 0` in its `z / x(z)`
+factor, so the limit, not evaluation, is the content. This concerns the two printed
+truncations only; it says nothing about how well either approximates the true SABR
+implied volatility. -/
+theorem tendsto_sabrImpliedVol_atm {f α β ρ ν tex : ℝ} (hf : 0 < f) (hα : α ≠ 0) (hν : ν ≠ 0)
+    (hρ : ρ ≠ 1) :
+    Tendsto (fun K ↦ sabrImpliedVol K f α β ρ ν tex) (𝓝[≠] f)
+      (𝓝 (sabrATMVol f α β ρ ν tex)) := by
+  have hR := (sabrImpliedVol_rest_continuousAt (α := α) (β := β) (ρ := ρ) (ν := ν) (tex := tex)
+    hf).tendsto.mono_left (nhdsWithin_le_nhds (s := {f}ᶜ))
+  have hZX := (tendsto_div_sabrX hρ).comp (tendsto_sabrZ (β := β) hf hα hν)
+  have hhalf : (f * f) ^ ((1 - β) / 2) = f ^ (1 - β) := by
+    rw [Real.mul_rpow hf.le hf.le, ← Real.rpow_add hf]; ring_nf
+  have hfull : (f * f) ^ (1 - β) = f ^ (2 - 2 * β) := by
+    rw [Real.mul_rpow hf.le hf.le, ← Real.rpow_add hf]; ring_nf
+  convert hR.mul hZX using 1
+  · funext K
+    simp only [sabrImpliedVol, Function.comp_apply]
+    ring
+  · simp only [sabrATMVol, sabrBackbone, hhalf, hfull, div_self hf.ne', Real.log_one]
+    congr 1
+    ring
+
+/-! ### The backbone law -/
+
+/-- **The SABR backbone law** (Hagan-Kumar-Lesniewski-Woodward section 3): along the
+leading-order ATM curve `σ(f) = α / f^(1-β)`, `d log σ / df = (β - 1) / f`, i.e.
+`d log σ / d log f = β - 1` (`β = 1`: flat; `β = 0`: `σ ∝ 1/f`). Holds for `f > 0`,
+`α ≠ 0`. -/
+theorem hasDerivAt_log_sabrBackbone {f α : ℝ} (β : ℝ) (hf : 0 < f) (hα : α ≠ 0) :
+    HasDerivAt (fun x ↦ Real.log (sabrBackbone x α β)) ((β - 1) / f) f := by
+  have hev : (fun x ↦ Real.log α - (1 - β) * Real.log x) =ᶠ[𝓝 f]
+      fun x ↦ Real.log (sabrBackbone x α β) := by
+    filter_upwards [Ioi_mem_nhds hf] with x hx
+    rw [sabrBackbone, Real.log_div hα (Real.rpow_pos_of_pos hx _).ne', Real.log_rpow hx]
+  have hd := ((Real.hasDerivAt_log hf.ne').const_mul (1 - β)).const_sub (Real.log α)
+  refine (hd.congr_of_eventuallyEq hev.symm).congr_deriv ?_
+  field_simp
+  ring
 
 end MathFin
