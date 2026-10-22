@@ -1558,9 +1558,9 @@
       "id": "mf-sabr-backbone-law",
       "name": "SABR Backbone Law: d log sigma / d log f = beta - 1",
       "domain": "mathematical_finance",
-      "description": "Along the SABR leading-order at-the-money volatility curve sigma(f) = alpha / f^(1-beta) (Hagan-Kumar-Lesniewski-Woodward, section 3, the backbone), the log-volatility has derivative (beta - 1)/f in the forward f, for f > 0 and alpha != 0; that is, d log sigma / d log f = beta - 1. The t_ex correction of eq. 2.18 is not covered.",
+      "description": "Along the SABR leading-order at-the-money volatility curve sigma(f) = alpha / f^(1-beta) (Hagan-Kumar-Lesniewski-Woodward, section 3, the backbone), the log-volatility has derivative (beta - 1)/f in the forward f, for f > 0 and alpha > 0; that is, d log sigma / d log f = beta - 1. The t_ex correction of eq. 2.18 is not covered.",
       "code": {
-        "lean": "import MathFin.BlackScholes.SABRImpliedVol\n\nopen MathFin\n\ntheorem sabr_backbone_law_thm {f α : ℝ} (β : ℝ) (hf : 0 < f) (hα : α ≠ 0) :\n    HasDerivAt (fun x ↦ Real.log (sabrBackbone x α β)) ((β - 1) / f) f :=\n  hasDerivAt_log_sabrBackbone β hf hα\n"
+        "lean": "import MathFin.BlackScholes.SABRImpliedVol\n\nopen MathFin\n\ntheorem sabr_backbone_law_thm {f α : ℝ} (β : ℝ) (hf : 0 < f) (hα : 0 < α) :\n    HasDerivAt (fun x ↦ Real.log (sabrBackbone x α β)) ((β - 1) / f) f :=\n  hasDerivAt_log_sabrBackbone β hf hα\n"
       },
       "metadata": {
         "chapter": 9,

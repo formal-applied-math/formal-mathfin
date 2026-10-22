@@ -58,9 +58,8 @@ open design question (issue #100). What is proved concerns the *printed* formula
 * `tendsto_sabrImpliedVol_atm` — eq. 2.17a tends to eq. 2.18 as `K → f`
   (for `f > 0`, `α ≠ 0`, `ν ≠ 0`, `ρ ≠ 1`, any `β`, `t_ex`).
 * `hasDerivAt_log_sabrBackbone` — the backbone law
-  `d/df log (α / f^(1-β)) = (β - 1) / f`.
-* `sabrBackbone_pos`, `sabrATMVol_zero_tex`, `sabrATMVol_pos_zero_tex` — the
-  backbone is positive for `α, f > 0`, and is the ATM vol at `t_ex = 0`.
+  `d/df log (α / f^(1-β)) = (β - 1) / f` (`f, α > 0`).
+* `sabrBackbone_pos` — the backbone is positive for `α, f > 0`.
 * `sabrATMVol_bsV_gt_backbone_bsV` — whenever eq. 2.18's bracketed correction,
   scaled by `t_ex`, is positive, the ATM Black call priced at `sabrATMVol` is
   strictly above the same call priced at the backbone (via
@@ -104,20 +103,6 @@ noncomputable def sabrATMVol (f α β ρ ν tex : ℝ) : ℝ :=
 theorem sabrBackbone_pos {f α : ℝ} (β : ℝ) (hf : 0 < f) (hα : 0 < α) :
     0 < sabrBackbone f α β :=
   div_pos hα (Real.rpow_pos_of_pos hf _)
-
-/-- **Zero time-to-exercise collapses the ATM vol to the backbone**: at `t_ex = 0`
-the bracketed perturbation correction in eq. 2.18 vanishes identically
-(it is multiplied by `t_ex`), leaving exactly `σ_ATM = α/f^(1-β)`. -/
-theorem sabrATMVol_zero_tex (f α β ρ ν : ℝ) :
-    sabrATMVol f α β ρ ν 0 = sabrBackbone f α β := by
-  unfold sabrATMVol
-  ring
-
-/-- **The ATM vol is positive at zero time-to-exercise**, for `α, f > 0`: direct
-corollary of `sabrATMVol_zero_tex` and `sabrBackbone_pos`. -/
-theorem sabrATMVol_pos_zero_tex {f α : ℝ} (β ρ ν : ℝ) (hf : 0 < f) (hα : 0 < α) :
-    0 < sabrATMVol f α β ρ ν 0 :=
-  (sabrATMVol_zero_tex f α β ρ ν).symm ▸ sabrBackbone_pos β hf hα
 
 /-- **A positive perturbation correction raises the ATM price**: whenever eq.
 2.18's bracketed stochastic-vol correction `(1-β)²/24·α²/f^(2-2β) + ρβαν/4/f^(1-β)
@@ -281,13 +266,13 @@ theorem tendsto_sabrImpliedVol_atm {f α β ρ ν tex : ℝ} (hf : 0 < f) (hα :
 /-- **The SABR backbone law** (Hagan-Kumar-Lesniewski-Woodward section 3): along the
 leading-order ATM curve `σ(f) = α / f^(1-β)`, `d log σ / df = (β - 1) / f`, i.e.
 `d log σ / d log f = β - 1` (`β = 1`: flat; `β = 0`: `σ ∝ 1/f`). Holds for `f > 0`,
-`α ≠ 0`. -/
-theorem hasDerivAt_log_sabrBackbone {f α : ℝ} (β : ℝ) (hf : 0 < f) (hα : α ≠ 0) :
+`α > 0`. -/
+theorem hasDerivAt_log_sabrBackbone {f α : ℝ} (β : ℝ) (hf : 0 < f) (hα : 0 < α) :
     HasDerivAt (fun x ↦ Real.log (sabrBackbone x α β)) ((β - 1) / f) f := by
   have hev : (fun x ↦ Real.log α - (1 - β) * Real.log x) =ᶠ[𝓝 f]
       fun x ↦ Real.log (sabrBackbone x α β) := by
     filter_upwards [Ioi_mem_nhds hf] with x hx
-    rw [sabrBackbone, Real.log_div hα (Real.rpow_pos_of_pos hx _).ne', Real.log_rpow hx]
+    rw [sabrBackbone, Real.log_div hα.ne' (Real.rpow_pos_of_pos hx _).ne', Real.log_rpow hx]
   have hd := ((Real.hasDerivAt_log hf.ne').const_mul (1 - β)).const_sub (Real.log α)
   refine (hd.congr_of_eventuallyEq hev.symm).congr_deriv ?_
   field_simp
