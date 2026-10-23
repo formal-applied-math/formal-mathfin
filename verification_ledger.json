@@ -1560,9 +1560,9 @@
     "mf-collateralized-exposure-brownian": {
       "benchmark_file": "credit.json",
       "date": "2026-10-23",
-      "elapsed_s": 39.4,
-      "input_hash": "681e44e17a7db241f1ab0b4fd496ebbbc6d468a9864f0cd4b129954439ad8e17",
-      "verified_at_commit": "eca9ec9"
+      "elapsed_s": 15.1,
+      "input_hash": "fde4f26d7de99a8cb04d02e098d22e735ceb8e711e5493230523acd395ab252e",
+      "verified_at_commit": "ed2b128"
     },
     "mf-component-var-gaussian-euler": {
       "benchmark_file": "risk_measures.json",
@@ -1854,9 +1854,9 @@
     "mf-dva-cva-mirror": {
       "benchmark_file": "credit.json",
       "date": "2026-10-23",
-      "elapsed_s": 41.0,
-      "input_hash": "594dcff4a33d68ced1d6bd81b42defde29c3415601fc927059c1401c9f247e25",
-      "verified_at_commit": "eca9ec9"
+      "elapsed_s": 2.8,
+      "input_hash": "e18841185515ff319bdca9577c1d7ffc056d01d411f647bb39b4533eebfdb114",
+      "verified_at_commit": "ed2b128"
     },
     "mf-exchange-numeraire": {
       "benchmark_file": "exotic_options.json",

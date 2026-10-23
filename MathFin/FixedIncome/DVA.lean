@@ -13,8 +13,9 @@ public import MathFin.FixedIncome.CVA
 
 Debt valuation adjustment is the counterparty's gain on the bank's *own* default: structurally
 `CVA.cva` applied to the bank's own default time/hazard and the exposure seen from the bank's
-side, `-V` (the bank owes the counterparty when `V > 0`; it is the counterparty who gains, by the
-same amount, on the bank's own default, which is a short position in the same exposure). This
+side, `-V` (`cva`'s own convention has `V > 0` as the counterparty owing the bank, an asset to the
+bank; the bank owes the counterparty exactly when `V < 0`, which is the liability regime `-V > 0`
+mirrors — it is the counterparty who gains, by that amount, on the bank's own default). This
 file proves that mirror as a genuine corollary of `cva`'s own definition (`dva_eq_cva_neg_exposure`,
 `rfl`) and of `cva_gaussian` (`dva_gaussian`), never as an independent construction — contrast the
 deleted `FixedIncome/DVA.lean` of #272, whose content was `ring_nf`/`Finset.sum_range_sub'`

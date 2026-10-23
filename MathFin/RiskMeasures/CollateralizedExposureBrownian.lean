@@ -49,18 +49,17 @@ noncomputable def collateralizedExposure (V : ℝ≥0 → Ω → ℝ) (Δ t : �
   max (V t ω - V (t - Δ) ω) 0
 
 /-- Standardizing a mean-zero Gaussian law: if `Y ~ N(0, v)` with `v > 0`, then `Y / √v ~ N(0,1)`.
-A genuine derivation from `gaussianReal_const_mul`, not a hypothesis. -/
+A genuine derivation from Mathlib's `gaussianReal_div_const`, not a hypothesis. -/
 private lemma hasLaw_standard_of_hasLaw_gaussianReal_zero {Y : Ω → ℝ} {v : ℝ≥0}
     (hY : HasLaw Y (gaussianReal 0 v) P) (hv : 0 < v) :
     HasLaw (fun ω ↦ Y ω / √(v : ℝ)) (gaussianReal 0 1) P := by
   have hv' : (0:ℝ) < (v:ℝ) := NNReal.coe_pos.mpr hv
-  have hc := gaussianReal_const_mul hY (√(v:ℝ))⁻¹
-  have hveq : NNReal.mk ((√(v:ℝ))⁻¹ ^ 2) (sq_nonneg _) * v = 1 := by
+  have hc := gaussianReal_div_const hY √(v:ℝ)
+  have hveq : v / NNReal.mk ((√(v:ℝ)) ^ 2) (sq_nonneg _) = 1 := by
     apply NNReal.coe_injective
     push_cast
-    rw [inv_pow, Real.sq_sqrt hv'.le, inv_mul_cancel₀ hv'.ne']
-  rw [mul_zero, hveq] at hc
-  simpa [div_eq_inv_mul] using hc
+    rw [Real.sq_sqrt hv'.le, div_self hv'.ne']
+  rwa [zero_div, hveq] at hc
 
 /-- **Collateralized exposure under a Brownian-driven process, in closed form**: for
 `V_t = m + σ B_t` with `B` an actual pre-Brownian motion, `σ > 0` and `0 < Δ ≤ t`,
