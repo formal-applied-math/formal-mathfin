@@ -54,7 +54,7 @@ private theorem hasSum_pw (r : ℝ≥0) : HasSum (pw r) 1 :=
 /-- **Shift identity** `(n+1)·c_r(n+1) = r·c_r(n)` — the engine of both moments. -/
 private theorem pw_succ_mul (r : ℝ≥0) (n : ℕ) :
     ((n : ℝ) + 1) * pw r (n + 1) = (r : ℝ) * pw r n := by
-  show ((n : ℝ) + 1) * (Real.exp (-(r : ℝ)) * (r : ℝ) ^ (n + 1) / (n + 1).factorial)
+  change ((n : ℝ) + 1) * (Real.exp (-(r : ℝ)) * (r : ℝ) ^ (n + 1) / (n + 1).factorial)
       = (r : ℝ) * (Real.exp (-(r : ℝ)) * (r : ℝ) ^ n / n.factorial)
   rw [Nat.factorial_succ]
   have hn : ((n : ℝ) + 1) ≠ 0 := by positivity
@@ -207,7 +207,8 @@ private theorem hasSum_pw_compensated_sq (r : ℝ≥0) :
   rw [show (r : ℝ) ^ 2 + (r : ℝ) - 2 * (r : ℝ) * (r : ℝ) + (r : ℝ) ^ 2 * 1 = (r : ℝ) from by ring]
     at h
   have hfun : (fun n => pw r n * ((n : ℝ) - (r : ℝ)) ^ 2)
-      = (fun n => pw r n * (n : ℝ) ^ 2 - 2 * (r : ℝ) * (pw r n * (n : ℝ)) + (r : ℝ) ^ 2 * pw r n) := by
+      = (fun n => pw r n * (n : ℝ) ^ 2 - 2 * (r : ℝ) * (pw r n * (n : ℝ)) + (r : ℝ) ^
+          2 * pw r n) := by
     funext n; ring
   rw [hfun]; exact h
 
@@ -245,7 +246,8 @@ theorem memLp_compensated (N : PoissonRandomMeasure P ν) {D : Set (ℝ × E)}
     MemLp (N.compensated D) 2 P := by
   refine (memLp_two_iff_integrable_sq (N.measurable_compensated hD).aestronglyMeasurable).mpr ?_
   have hrw : (fun ω => (N.compensated D ω) ^ 2)
-      = (fun x : ℝ≥0∞ => (x.toReal - (referenceIntensity ν D).toReal) ^ 2) ∘ (fun ω => N.N ω D) := rfl
+      = (fun x : ℝ≥0∞ => (x.toReal - (referenceIntensity ν D).toReal) ^ 2) ∘
+          (fun ω => N.N ω D) := rfl
   rw [hrw, ← integrable_map_measure (by fun_prop) (N.measurable_eval hD).aemeasurable,
       N.poisson_law hD hfin, poissonMeasureENN,
       integrable_map_measure (by fun_prop) (Measurable.aemeasurable (by fun_prop)),

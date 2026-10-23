@@ -118,7 +118,7 @@ theorem exists_replicating_strategy_in_price (hBmeas : ∀ t, Measurable (B t))
   have hval : itoIntegralAgainstCLM hB T hBmeas σ ψ = itoIntegralCLM_T hB T hBmeas φ := by
     rw [itoIntegralAgainstCLM_apply, hψ]
   refine ⟨ψ, ?_, ?_⟩
-  · show (⇑H) =ᵐ[μ] fun ω ↦ (∫ ω, H ω ∂μ)
+  · change (⇑H) =ᵐ[μ] fun ω ↦ (∫ ω, H ω ∂μ)
         + (itoIntegralAgainstCLM hB T hBmeas σ ψ : Ω → ℝ) ω
     rw [hval]
     exact hφ

@@ -15,7 +15,8 @@ the two lateral sides is a separate obligation, not claimed here.
 
 ## Result
 
-Public entry points include `linearPriceEvolution_smoothAt`, `linearPriceEvolution_pricingOperator`, `exists_smooth_initial_solution`, `exists_continuous_compact_interval_extension`.
+Public entry points include `linearPriceEvolution_smoothAt`, `linearPriceEvolution_pricingOperator`,
+`exists_smooth_initial_solution`, `exists_continuous_compact_interval_extension`.
 -/
 
 @[expose] public section
@@ -46,10 +47,12 @@ theorem linearPriceEvolution_pricingOperator {f : ℝ → ℝ} (hf : Continuous 
     pricingOperator k h (fun z => linearPriceEvolution f k h a z.1 z.2) (x,t) = 0 := by
   have he := linearPriceEvolution_eventuallyEq_kernel (k := k) (h := h) (x := x) hf ht
   have het : linearPriceEvolution f k h a x =ᶠ[𝓝 t] linearPriceKernel f k h a x := by
-    simpa only [Function.comp_def,id_eq] using he.comp_tendsto (continuousAt_const.prodMk continuousAt_id)
+    simpa only [Function.comp_def,id_eq] using he.comp_tendsto
+        (continuousAt_const.prodMk continuousAt_id)
   have hex : (fun y => linearPriceEvolution f k h a y t) =ᶠ[𝓝 x]
       (fun y => linearPriceKernel f k h a y t) := by
-    simpa only [Function.comp_def,id_eq] using he.comp_tendsto (continuousAt_id.prodMk continuousAt_const)
+    simpa only [Function.comp_def,id_eq] using he.comp_tendsto
+        (continuousAt_id.prodMk continuousAt_const)
   have hp := linearPriceKernel_equation (k := k) (h := h) (x := x) hf hc ht
   unfold Boundary.dividendSpatialOperator at hp
   unfold pricingOperator

@@ -16,7 +16,8 @@ is silently added by this coordinate change.
 
 ## Result
 
-Public entry points include `movingLineTransform`, `movingLineTransform_deriv_x`, `movingLineTransform_deriv2_x`, `movingLineTransform_hasDeriv_t`.
+Public entry points include `movingLineTransform`, `movingLineTransform_deriv_x`,
+`movingLineTransform_deriv2_x`, `movingLineTransform_hasDeriv_t`.
 -/
 
 @[expose] public section

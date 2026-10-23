@@ -14,7 +14,8 @@ branch is tangent to the payoff at `d` and is an upper support even at the join.
 
 ## Result
 
-Public entry points include `stationaryPutTail`, `stationaryPutCap`, `stationaryPutTail_at_join`, `stationaryPutCap_continuous`.
+Public entry points include `stationaryPutTail`, `stationaryPutCap`, `stationaryPutTail_at_join`,
+`stationaryPutCap_continuous`.
 -/
 
 @[expose] public section
@@ -44,7 +45,7 @@ theorem stationaryPutCap_continuous (m d : ℝ) : Continuous (stationaryPutCap m
   simpa only [hx] using (stationaryPutTail_at_join m d).symm
 
 theorem stationaryPutTail_ge_intrinsic {m d : ℝ} (hm : 0 < m)
-    (hd : Real.exp d = m/(1+m)) (x : ℝ) : 1-Real.exp x ≤ stationaryPutTail m d x := by
+    (hd : Real.exp d = m / (1 + m)) (x : ℝ) : 1-Real.exp x ≤ stationaryPutTail m d x := by
   have hd0 : 0 < 1+m := by linarith
   have hdx : Real.exp x = Real.exp d * Real.exp (x-d) := by
     rw [← Real.exp_add]
@@ -64,18 +65,18 @@ theorem stationaryPutTail_nonneg {m d : ℝ} (hd : d < 0) (x : ℝ) :
   exact mul_nonneg (sub_nonneg.mpr (Real.exp_le_one_iff.mpr hd.le)) (Real.exp_pos _).le
 
 theorem stationaryPutCap_ge_payoff {m d : ℝ} (hm : 0 < m) (hd0 : d < 0)
-    (hd : Real.exp d = m/(1+m)) (x : ℝ) : putPayoff x ≤ stationaryPutCap m d x := by
+    (hd : Real.exp d = m / (1 + m)) (x : ℝ) : putPayoff x ≤ stationaryPutCap m d x := by
   unfold stationaryPutCap putPayoff
   split_ifs with hx
   · rw [max_eq_left (sub_nonneg.mpr (Real.exp_le_one_iff.mpr (hx.trans hd0.le)))]
   · exact max_le (stationaryPutTail_ge_intrinsic hm hd x) (stationaryPutTail_nonneg hd0 x)
 
 theorem stationaryPutCap_nonneg {m d : ℝ} (hm : 0 < m) (hd0 : d < 0)
-    (hd : Real.exp d = m/(1+m)) (x : ℝ) : 0 ≤ stationaryPutCap m d x :=
+    (hd : Real.exp d = m / (1 + m)) (x : ℝ) : 0 ≤ stationaryPutCap m d x :=
   (le_max_right _ _).trans (stationaryPutCap_ge_payoff hm hd0 hd x)
 
 theorem stationaryPutCap_le_tail {m d : ℝ} (hm : 0 < m)
-    (hd : Real.exp d = m/(1+m)) (x : ℝ) : stationaryPutCap m d x ≤ stationaryPutTail m d x := by
+    (hd : Real.exp d = m / (1 + m)) (x : ℝ) : stationaryPutCap m d x ≤ stationaryPutTail m d x := by
   unfold stationaryPutCap
   split_ifs
   · exact stationaryPutTail_ge_intrinsic hm hd x
@@ -112,7 +113,7 @@ theorem pricingOperator_add_constant (F : ℝ × ℝ → ℝ) (k h ε : ℝ) (z 
 
 theorem stationaryPutCap_upper_support {k h m d : ℝ} (hk : 0 ≤ k)
     (hh : 0 ≤ h) (hhk : h ≤ k) (hm : 0 < m) (hd0 : d < 0)
-    (hd : Real.exp d = m/(1+m)) (hmQ : 0 ≤ k+(k-h-1)*m-m^2)
+    (hd : Real.exp d = m / (1 + m)) (hmQ : 0 ≤ k + (k - h - 1) * m - m ^ 2)
     {ε : ℝ} (hε : 0 ≤ ε) (z : ℝ × ℝ) :
     ∃ F : ℝ × ℝ → ℝ, ContDiffAt ℝ 2 F z ∧ F z = stationaryPutCap m d z.1+ε ∧
       (∀ᶠ w in 𝓝 z, stationaryPutCap m d w.1+ε ≤ F w) ∧
@@ -131,7 +132,8 @@ theorem stationaryPutCap_upper_support {k h m d : ℝ} (hk : 0 ≤ k)
       fun_prop
     · by_cases he : z.1 = d
       · simp only [stationaryPutCap,he,le_refl,ite_true,stationaryPutTail_at_join]
-      · simp only [stationaryPutCap,if_neg (not_le.mpr (lt_of_le_of_ne (le_of_not_gt hx) (Ne.symm he)))]
+      · simp only
+          [stationaryPutCap,if_neg (not_le.mpr (lt_of_le_of_ne (le_of_not_gt hx) (Ne.symm he)))]
     · exact Filter.Eventually.of_forall (fun w => by
         dsimp only
         linarith [stationaryPutCap_le_tail hm hd w.1])

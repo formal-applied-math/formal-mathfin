@@ -62,7 +62,8 @@ the uniform partition of `[0, T]` into `n` pieces, the integrated squared
 difference between `2 · ∑ B_{kT/n} · ΔB_k` and `B_T² − B_0² − T` tends to
 zero. The proof is one algebraic step from the pathwise discrete identity
 (`discrete_squaring_identity`) plus `tendsto_qv` (the L² QV of BM). -/
-theorem itoSquared_L2_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
+theorem itoSquared_L2_tendsto (hB : IsPreBrownianReal B μ)
+    (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
     Tendsto (fun n : ℕ ↦
         ∫ ω, (2 * (∑ k ∈ Finset.range n,
                       B (unifPart T n k) ω *
@@ -100,7 +101,8 @@ theorem itoSquared_L2_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Mea
 `[0, T]` tend to `½·(B_T² − B_0² − T)` in `L²(μ)`. The canonical statement of
 "the Itô integral of `s ↦ B_s` against `dB_s` equals `½(B_T² − B_0² − T)`",
 extracted from the `factor-of-2` form `itoSquared_L2_tendsto`. -/
-theorem itoSquared_L2_tendsto_div2 (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
+theorem itoSquared_L2_tendsto_div2 (hB : IsPreBrownianReal B μ)
+    (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
     Tendsto (fun n : ℕ ↦
         ∫ ω, ((∑ k ∈ Finset.range n,
                   B (unifPart T n k) ω *

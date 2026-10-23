@@ -113,7 +113,7 @@ theorem PoissonRandomMeasure.AdaptedAt.measurable {N : PoissonRandomMeasure P ν
 /-- The reference intensity of a finite-mark box `(s,t] × A` is finite. -/
 theorem referenceIntensity_box_ne_top {s t : ℝ} {A : Set E} (hAfin : ν A ≠ ⊤) :
     referenceIntensity ν (Set.Ioc s t ×ˢ A) ≠ ⊤ := by
-  show ((volume.restrict (Set.Ici (0 : ℝ))).prod ν) (Set.Ioc s t ×ˢ A) ≠ ⊤
+  change ((volume.restrict (Set.Ici (0 : ℝ))).prod ν) (Set.Ioc s t ×ˢ A) ≠ ⊤
   rw [Measure.prod_prod]
   refine ENNReal.mul_ne_top ?_ hAfin
   rw [Measure.restrict_apply measurableSet_Ioc]
@@ -127,7 +127,7 @@ theorem referenceIntensity_box_toReal {a b : ℝ} (ha : 0 ≤ a) (hab : a ≤ b)
   have hsub : Set.Ioc a b ⊆ Set.Ici (0 : ℝ) :=
     fun x hx => le_of_lt (lt_of_le_of_lt ha (Set.mem_Ioc.mp hx).1)
   have hval : referenceIntensity ν (Set.Ioc a b ×ˢ A) = ENNReal.ofReal (b - a) * ν A := by
-    show ((volume.restrict (Set.Ici (0 : ℝ))).prod ν) (Set.Ioc a b ×ˢ A) = _
+    change ((volume.restrict (Set.Ici (0 : ℝ))).prod ν) (Set.Ioc a b ×ˢ A) = _
     rw [Measure.prod_prod, Measure.restrict_apply measurableSet_Ioc,
         Set.inter_eq_left.mpr hsub, Real.volume_Ioc]
   rw [hval, ENNReal.toReal_mul, ENNReal.toReal_ofReal (by linarith)]
@@ -168,7 +168,8 @@ theorem integral_mul_compensated_eq_zero (N : PoissonRandomMeasure P ν) {D : Se
   have hfield : Indep (N.regionSigma D)
       (MeasurableSpace.comap (fun ω => N.N ω D) inferInstance) P := N.indep_of_disjoint_region hD
   have hraw : IndepFun X (fun ω => N.N ω D) P :=
-    (IndepFun_iff_Indep _ _ _).mpr (indep_of_indep_of_le_left hfield (measurable_iff_comap_le.mp hX))
+    (IndepFun_iff_Indep _ _ _).mpr
+        (indep_of_indep_of_le_left hfield (measurable_iff_comap_le.mp hX))
   have hcomp : IndepFun X (N.compensated D) P := by
     have h := hraw.comp (φ := (id : ℝ → ℝ))
       (ψ := fun x : ℝ≥0∞ => x.toReal - (referenceIntensity ν D).toReal) measurable_id (by fun_prop)
@@ -225,7 +226,7 @@ theorem integral_cross_compensated_eq_zero (N : PoissonRandomMeasure P ν)
   have hXa : Measurable[N.regionSigma (Set.Ioc sb tb ×ˢ Ab)] φa :=
     hφa'.mono (pastSigma_le_regionSigma N hab Ab) le_rfl
   have hXÑa : Measurable[N.regionSigma (Set.Ioc sb tb ×ˢ Ab)] (N.compensated Ba) := by
-    show Measurable[N.regionSigma (Set.Ioc sb tb ×ˢ Ab)]
+    change Measurable[N.regionSigma (Set.Ioc sb tb ×ˢ Ab)]
       fun ω => (N.N ω Ba).toReal - (referenceIntensity ν Ba).toReal
     have hc : Measurable[N.regionSigma (Set.Ioc sb tb ×ˢ Ab)] fun ω => N.N ω Ba :=
       (measurable_iff_comap_le.mpr le_rfl).mono (comap_le_regionSigma N hdisj hBa) le_rfl

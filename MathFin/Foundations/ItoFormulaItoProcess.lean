@@ -97,7 +97,8 @@ theorem ito_formula_itoProcess (hBmeas : ∀ t, Measurable (B t))
   have t6 : (0 : ℝ) ≤ |σ| ^ 3 := by positivity
   have hCsum_nonneg : (0 : ℝ) ≤ Csum := by rw [hCsum]; linarith [t1, t2, t3, t4, t5, t6]
   have hlam'0 : (0 : ℝ) ≤ lam' := by rw [hlam']; exact mul_nonneg hlam (abs_nonneg _)
-  -- `f^{(k)}` evaluated at the localized argument is dominated by `K·exp(lam'|x|)`, uniformly in `t`
+  -- `f^{(k)}` evaluated at the localized argument is dominated by `K·exp(lam'|x|)`, uniformly in
+  -- `t`
   have hfbd : ∀ h : ℝ → ℝ, (∀ x, |h x| ≤ C * Real.exp (lam * |x|)) →
       ∀ t x : ℝ, |h (X₀ + b * S.cut n t + σ * x)| ≤ K * Real.exp (lam' * |x|) := by
     intro h hh t x
@@ -244,7 +245,8 @@ theorem ito_formula_itoProcess (hBmeas : ∀ t, Measurable (B t))
   have hsn : (s : ℝ) ≤ (n : ℝ) := le_trans (by exact_mod_cast hs.2) hTn
   dsimp only
   rw [S.cut_eq_id_of_abs_le (x := (s : ℝ)) (by rw [abs_of_nonneg (NNReal.coe_nonneg s)]; linarith),
-      S.cutD1_eq_one_of_abs_lt (x := (s : ℝ)) (by rw [abs_of_nonneg (NNReal.coe_nonneg s)]; linarith)]
+      S.cutD1_eq_one_of_abs_lt (x := (s : ℝ))
+          (by rw [abs_of_nonneg (NNReal.coe_nonneg s)]; linarith)]
   ring
 
 end MathFin

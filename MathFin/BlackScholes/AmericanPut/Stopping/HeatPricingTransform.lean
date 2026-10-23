@@ -16,7 +16,8 @@ spatial endpoints. Heat time is twice normalized pricing time.
 
 ## Result
 
-Public entry points include `pricingGauge`, `priceFromHeat`, `pricingGauge_hasDeriv_space`, `pricingGauge_hasDeriv_time`.
+Public entry points include `pricingGauge`, `priceFromHeat`, `pricingGauge_hasDeriv_space`,
+`pricingGauge_hasDeriv_time`.
 -/
 
 @[expose] public section
@@ -71,14 +72,14 @@ theorem priceFromHeat_continuous {V : ℝ × ℝ → ℝ} (hV : Continuous V) (k
       (continuous_const.mul (continuous_snd.sub continuous_const))))
 
 theorem priceFromHeat_smoothAt {V : ℝ × ℝ → ℝ} {k h L a x t : ℝ}
-    (hV : ContDiffAt ℝ ∞ V (x-L,2*(t-a))) :
+    (hV : ContDiffAt ℝ ∞ V (x - L, 2 * (t - a))) :
     ContDiffAt ℝ ∞ (priceFromHeat V k h L a) (x,t) := by
   exact (show ContDiffAt ℝ ∞ (fun z : ℝ × ℝ => pricingGauge k h L a z.1 z.2) (x,t) by
     unfold pricingGauge; fun_prop).mul (hV.comp (x,t)
       (show ContDiffAt ℝ ∞ (fun z : ℝ × ℝ => (z.1-L,2*(z.2-a))) (x,t) by fun_prop))
 
 theorem priceFromHeat_pricingOperator {V : ℝ × ℝ → ℝ} {k h L a x t : ℝ}
-    (hV : ContDiffAt ℝ 2 V (x-L,2*(t-a))) :
+    (hV : ContDiffAt ℝ 2 V (x - L, 2 * (t - a))) :
     pricingOperator k h (priceFromHeat V k h L a) (x,t) =
       pricingGauge k h L a x t *
         (2*deriv (fun s => V (x-L,s)) (2*(t-a))-
@@ -86,7 +87,8 @@ theorem priceFromHeat_pricingOperator {V : ℝ × ℝ → ℝ} {k h L a x t : �
   have hvx : ContDiffAt ℝ 2 (fun y => V (y-L,2*(t-a))) x :=
     hV.comp x (show ContDiffAt ℝ 2 (fun y : ℝ => (y-L,2*(t-a))) x by fun_prop)
   have hvs : DifferentiableAt ℝ (fun s => V (x-L,s)) (2*(t-a)) :=
-    (hV.comp (2*(t-a)) (show ContDiffAt ℝ 2 (fun s : ℝ => (x-L,s)) (2*(t-a)) by fun_prop)).differentiableAt
+    (hV.comp (2*(t-a))
+        (show ContDiffAt ℝ 2 (fun s : ℝ => (x-L,s)) (2*(t-a)) by fun_prop)).differentiableAt
       (by norm_num)
   have hvt : HasDerivAt (fun s => V (x-L,2*(s-a)))
       (2*deriv (fun s => V (x-L,s)) (2*(t-a))) t := by

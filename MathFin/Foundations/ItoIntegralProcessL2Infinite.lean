@@ -206,7 +206,7 @@ private lemma clampSP_value_sum {N : Type*} [AddCommMonoid N] (T : ℝ≥0)
     (hclamp : ∀ a ∈ V.value.support, a.1 ≤ T → φ (a.1, a.2 ⊓ T) (V.value a) = φ a (V.value a))
     (hdrop : ∀ a ∈ V.value.support, T < a.1 → φ a (V.value a) = 0) :
     (clampSP T hBmeas V).value.sum φ = V.value.sum φ := by
-  show ((V.value.filter (fun q ↦ q.1 ≤ T)).mapDomain (fun q ↦ (q.1, q.2 ⊓ T))).sum φ
+  change ((V.value.filter (fun q ↦ q.1 ≤ T)).mapDomain (fun q ↦ (q.1, q.2 ⊓ T))).sum φ
       = V.value.sum φ
   rw [Finsupp.sum_mapDomain_index hφ0 hφadd, Finsupp.sum, Finsupp.support_filter,
       Finset.sum_filter]
@@ -230,7 +230,8 @@ lemma clampSP_itoSimpleProcess (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)
   · rw [show min (a.2 ⊓ T) t = min a.2 t from by rw [min_assoc, min_eq_right ht]]
   · have h1 : min a.1 t = t := min_eq_right (le_of_lt (lt_of_le_of_lt ht hP))
     have h2 : min a.2 t = t :=
-      min_eq_right (le_of_lt (lt_of_le_of_lt ht (lt_of_lt_of_le hP (V.le_of_mem_support_value a ha))))
+      min_eq_right
+          (le_of_lt (lt_of_le_of_lt ht (lt_of_lt_of_le hP (V.le_of_mem_support_value a ha))))
     rw [h1, h2, sub_self, mul_zero]
 
 /-- **Clamp agrees with `V` pointwise on the band `(0,T]`.** -/

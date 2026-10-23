@@ -35,7 +35,8 @@ def parameterValues (p : Params) : Fin 5 → ℝ := ![p.a, p.b, p.rho, p.m, p.si
 noncomputable def parameterEval (p : Params) : ParameterRing →+* ℝ :=
   MvPolynomial.eval (parameterValues p)
 
-/-- The numerator polynomial with coefficients in the parameter ring; it specialises to `polynomial p` (`universalPolynomial_eval`). -/
+/-- The numerator polynomial with coefficients in the parameter ring; it specialises to
+`polynomial p` (`universalPolynomial_eval`). -/
 noncomputable def universalPolynomial : Polynomial ParameterRing :=
   let a : ParameterRing := MvPolynomial.X (0 : Fin 5)
   let b : ParameterRing := MvPolynomial.X (1 : Fin 5)

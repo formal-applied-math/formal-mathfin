@@ -10,7 +10,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.HeatPricingTransform
 /-! # Constructed fixed-interval pricing-equation boundary correction 
 ## Result
 
-Public entry points include `pricingGauge_ne_zero`, `heatBoundaryDatum`, `heatBoundaryDatum_continuous`, `heatBoundaryDatum_zero`.
+Public entry points include `pricingGauge_ne_zero`, `heatBoundaryDatum`,
+`heatBoundaryDatum_continuous`, `heatBoundaryDatum_zero`.
 -/
 
 @[expose] public section

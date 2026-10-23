@@ -11,7 +11,8 @@ public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 /-! # Two-sided heat boundary correction on a finite interval 
 ## Result
 
-Public entry points include `exists_boundary_time_cutoff`, `intervalHeatCorrection`, `intervalHeatCorrection_continuous`, `intervalHeatCorrection_smoothAt`.
+Public entry points include `exists_boundary_time_cutoff`, `intervalHeatCorrection`,
+`intervalHeatCorrection_continuous`, `intervalHeatCorrection_smoothAt`.
 -/
 
 @[expose] public section
@@ -67,7 +68,8 @@ theorem intervalHeatCorrection_smoothAt {f₀ f₁ : ℝ → ℝ}
     (hx : 0 < x) (hxL : x < L) :
     ContDiffAt ℝ ∞ (fun z : ℝ × ℝ => intervalHeatCorrection f₀ f₁ L z.1 z.2) (x,t) := by
   have h0 := (compact_heatBoundaryExtension_smooth h₀ hc₀).contDiffAt
-    ((isOpen_lt continuous_const continuous_fst).mem_nhds (show (x,t) ∈ {z : ℝ × ℝ | 0 < z.1} from hx))
+    ((isOpen_lt continuous_const continuous_fst).mem_nhds
+        (show (x,t) ∈ {z : ℝ × ℝ | 0 < z.1} from hx))
   have h1 := (compact_heatBoundaryExtension_smooth h₁ hc₁).contDiffAt
     ((isOpen_lt continuous_const continuous_fst).mem_nhds
       (show (L-x,t) ∈ {z : ℝ × ℝ | 0 < z.1} from sub_pos.mpr hxL))
@@ -81,7 +83,8 @@ theorem intervalHeatCorrection_equation {f₀ f₁ : ℝ → ℝ}
     deriv (fun s => intervalHeatCorrection f₀ f₁ L x s) t =
       (1/2)*deriv (deriv (fun y => intervalHeatCorrection f₀ f₁ L y t)) x := by
   have h0 := (compact_heatBoundaryExtension_smooth h₀ hc₀).contDiffAt
-    ((isOpen_lt continuous_const continuous_fst).mem_nhds (show (x,t) ∈ {z : ℝ × ℝ | 0 < z.1} from hx))
+    ((isOpen_lt continuous_const continuous_fst).mem_nhds
+        (show (x,t) ∈ {z : ℝ × ℝ | 0 < z.1} from hx))
   have h1 := (compact_heatBoundaryExtension_smooth h₁ hc₁).contDiffAt
     ((isOpen_lt continuous_const continuous_fst).mem_nhds
       (show (L-x,t) ∈ {z : ℝ × ℝ | 0 < z.1} from sub_pos.mpr hxL))
@@ -91,7 +94,8 @@ theorem intervalHeatCorrection_equation {f₀ f₁ : ℝ → ℝ}
   have h1x : ContDiffAt ℝ 2 (fun y => heatBoundaryExtension f₁ (L-y) t) x :=
     (h1.comp x (show ContDiffAt ℝ ∞ (fun y : ℝ => (L-y,t)) x by fun_prop)).of_le
       (WithTop.coe_le_coe.mpr le_top)
-  have hs : deriv (deriv (fun y => heatBoundaryExtension f₀ y t+heatBoundaryExtension f₁ (L-y) t)) x =
+  have hs : deriv
+      (deriv (fun y => heatBoundaryExtension f₀ y t+heatBoundaryExtension f₁ (L-y) t)) x =
       deriv (deriv (fun y => heatBoundaryExtension f₀ y t)) x+
       deriv (deriv (fun y => heatBoundaryExtension f₁ (L-y) t)) x := by
     simpa only [show (2 : ℕ) = 1+1 from rfl,iteratedDeriv_succ,iteratedDeriv_zero] using
@@ -100,11 +104,13 @@ theorem intervalHeatCorrection_equation {f₀ f₁ : ℝ → ℝ}
       deriv (deriv (fun y => heatBoundaryExtension f₁ y t)) (L-x) := by
     simpa only [show (2 : ℕ) = 1+1 from rfl,iteratedDeriv_succ,iteratedDeriv_zero,
       show (-1 : ℝ)^(1+1) = 1 by norm_num,one_smul] using congr_fun
-      (iteratedDeriv_comp_const_sub (n := 2) (f := fun y => heatBoundaryExtension f₁ y t) (s := L)) x
+      (iteratedDeriv_comp_const_sub (n := 2) (f := fun y => heatBoundaryExtension f₁ y t) (s := L))
+          x
   have ht₀ : DifferentiableAt ℝ (fun s => heatBoundaryExtension f₀ x s) t :=
     (h0.comp t (show ContDiffAt ℝ ∞ (fun s : ℝ => (x,s)) t by fun_prop)).differentiableAt (by simp)
   have ht₁ : DifferentiableAt ℝ (fun s => heatBoundaryExtension f₁ (L-x) s) t :=
-    (h1.comp t (show ContDiffAt ℝ ∞ (fun s : ℝ => (L-x,s)) t by fun_prop)).differentiableAt (by simp)
+    (h1.comp t (show ContDiffAt ℝ ∞ (fun s : ℝ => (L-x,s)) t by fun_prop)).differentiableAt
+        (by simp)
   unfold intervalHeatCorrection
   rw [deriv_fun_add ht₀ ht₁,hs,hr,
     compact_heatBoundaryExtension_equation h₀ hc₀ hx t,

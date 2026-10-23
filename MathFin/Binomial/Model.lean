@@ -211,7 +211,8 @@ theorem binomialPrice_const (u d r c : ℝ) (_h : BinomialNoArb u d r) (n : ℕ)
   | succ n ih =>
     rw [binomialPrice_succ, ih (S * u), ih (S * d)]
     have h_q_complement : crrUpProb u d r + (1 - crrUpProb u d r) = 1 := by ring
-    have h_factor : Real.exp (-r) * Real.exp (-(n : ℝ) * r) = Real.exp (-((n + 1 : ℕ) : ℝ) * r) := by
+    have h_factor : Real.exp (-r) * Real.exp (-(n : ℝ) * r) =
+        Real.exp (-((n + 1 : ℕ) : ℝ) * r) := by
       rw [← Real.exp_add]
       congr 1
       push_cast

@@ -17,7 +17,8 @@ space-time maximum, and the pricing PDE excludes it.
 
 ## Result
 
-Public entry points include `canonicalTimeIncrement`, `canonicalTimeIncrement_continuous`, `canonicalTimeIncrement_spatial_deriv`, `canonicalTimeIncrement_contDiffAt`.
+Public entry points include `canonicalTimeIncrement`, `canonicalTimeIncrement_continuous`,
+`canonicalTimeIncrement_spatial_deriv`, `canonicalTimeIncrement_contDiffAt`.
 -/
 
 @[expose] public section

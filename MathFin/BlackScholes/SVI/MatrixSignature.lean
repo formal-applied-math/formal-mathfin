@@ -19,8 +19,6 @@ change the test.
 
 @[expose] public section
 
-set_option maxHeartbeats 800000
-
 namespace MathFin
 namespace SVI
 open Matrix Polynomial
@@ -36,7 +34,8 @@ private theorem quadratic_apply {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ) (x : 
 private theorem quadratic_diagonal {n : ℕ} (w : Fin n → ℝ) :
     (diagonal w).toQuadraticForm' = QuadraticMap.weightedSumSquares ℝ w := by
   ext x
-  simp [quadratic_apply, mulVec_diagonal, dotProduct, QuadraticMap.weightedSumSquares_apply]
+  simp only [quadratic_apply, dotProduct, mulVec_diagonal, QuadraticMap.weightedSumSquares_apply,
+    smul_eq_mul]
   apply Finset.sum_congr rfl
   intro i hi
   ring
@@ -47,7 +46,8 @@ private theorem quadratic_conjugate {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ)
       M.toQuadraticForm'.comp ((Matrix.UnitaryGroup.toLinearEquiv U).toLinearMap) := by
   ext x
   simp only [QuadraticMap.comp_apply, quadratic_apply]
-  change dotProduct x ((star (U : Matrix (Fin n) (Fin n) ℝ) * M * (U : Matrix (Fin n) (Fin n) ℝ)) *ᵥ x) =
+  change dotProduct x
+      ((star (U : Matrix (Fin n) (Fin n) ℝ) * M * (U : Matrix (Fin n) (Fin n) ℝ)) *ᵥ x) =
     dotProduct ((U : Matrix (Fin n) (Fin n) ℝ) *ᵥ x)
       (M *ᵥ ((U : Matrix (Fin n) (Fin n) ℝ) *ᵥ x))
   rw [← mulVec_mulVec, ← mulVec_mulVec, dotProduct_mulVec]
@@ -61,7 +61,8 @@ theorem signatureTest_eq_matrixSignature {n : ℕ} (M : Matrix (Fin n) (Fin n) �
     (hM : M.IsSymm) : signatureTest M = matrixSignature M := by
   have hh : M.IsHermitian := Matrix.isHermitian_iff_isSymm.mpr hM
   have heq : (diagonal hh.eigenvalues).toQuadraticForm' =
-      M.toQuadraticForm'.comp (Matrix.UnitaryGroup.toLinearEquiv hh.eigenvectorUnitary).toLinearMap := by
+      M.toQuadraticForm'.comp
+          (Matrix.UnitaryGroup.toLinearEquiv hh.eigenvectorUnitary).toLinearMap := by
     rw [← quadratic_conjugate]
     have hdiag := hh.conjStarAlgAut_star_eigenvectorUnitary
     simpa [Unitary.conjStarAlgAut_star_apply, Function.comp_def] using

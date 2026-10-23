@@ -109,7 +109,7 @@ lemma mgf_id_withDensity_coshKernel (Λ : ℝ≥0) {ν : Measure ℝ} {s u : ℝ
     mgf id ((Λ • ν).withDensity fun x ↦ coshKernel s x) u
       = Λ * (∫ x, rexp ((u + s) * x) ∂ν + ∫ x, rexp ((u - s) * x) ∂ν
           - 2 * ∫ x, rexp (u * x) ∂ν) := by
-  show ∫ x, rexp (u * x) ∂((Λ • ν).withDensity fun x ↦ coshKernel s x) = _
+  change ∫ x, rexp (u * x) ∂((Λ • ν).withDensity fun x ↦ coshKernel s x) = _
   rw [integral_withDensity_eq_integral_smul (measurable_coshKernel s),
     integral_smul_nnreal_measure, integral_coshKernel_smul_exp hp hm h0, NNReal.smul_def,
     smul_eq_mul]
@@ -176,7 +176,7 @@ lemma mgf_id_secondDifferenceMeasure (b σ : ℝ) (Λ : ℝ≥0) {ν : Measure �
       = Λ * (∫ x, rexp ((u + s) * x) ∂ν + ∫ x, rexp ((u - s) * x) ∂ν
           - 2 * ∫ x, rexp (u * x) ∂ν) :=
     mgf_id_withDensity_coshKernel Λ hp hm h0
-  show ∫ x, rexp (u * x) ∂(secondDifferenceMeasure σ s Λ ν) = _
+  change ∫ x, rexp (u * x) ∂(secondDifferenceMeasure σ s Λ ν) = _
   rw [secondDifferenceMeasure, integral_add_measure
       (integrable_dirac (f := fun x : ℝ ↦ rexp (u * x)) (a := 0) enorm_lt_top).smul_measure_nnreal
       (integrable_exp_mul_withDensity_coshKernel Λ hp hm h0),

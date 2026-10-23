@@ -13,13 +13,13 @@ public import MathFin.Foundations.FiniteMeasureCauchySchwarz
 The `L²` drift operator `driftProcessAssembled : E →L E` is assembled abstractly (`extendOfNorm`);
 `driftContinuousMod` is its pointwise-`limUnder` pathwise realization. This file supplies the drift
 analog of the Itô side's `itoContinuousMod_tendsto` / `_modification`: the per-`t` value bridge that
-lets an `E`-element be sliced into a genuine pathwise identity — the piece the pathwise SDE-existence
-statement (`sc-thm-8.2.5`, existence half) needs.
+lets an `E`-element be sliced into a genuine pathwise identity — the piece the pathwise
+SDE-existence statement (`sc-thm-8.2.5`, existence half) needs.
 
-The drift side is **simpler** than the Itô side: `driftSimpleProcess V · ω` is continuous for *every*
-`ω` (a finite sum of `𝓕`-coefficients times continuous time-increments), so there is no exceptional
-null set and no martingale maximal inequality — the uniform-in-`t` control is pure Cauchy–Schwarz
-(`sq_intervalIntegral_le`) against the deterministic time integral.
+The drift side is **simpler** than the Itô side: `driftSimpleProcess V · ω` is continuous for
+*every* `ω` (a finite sum of `𝓕`-coefficients times continuous time-increments), so there is no
+exceptional null set and no martingale maximal inequality — the uniform-in-`t` control is pure
+Cauchy–Schwarz (`sq_intervalIntegral_le`) against the deterministic time integral.
 -/
 
 @[expose] public section
@@ -34,9 +34,10 @@ open ItoIntegralL2 ItoIntegralCLM ItoIntegralProcess ItoIntegralProcessGeneral
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ}
 
-/-- **The running-max keystone (drift).** For `i ≤ T`, `|driftSimpleProcess W i ω|` is bounded by the
-running maximum over `[0,T]`. The supremum is genuine (not the junk value of an unbounded family):
-`driftSimpleProcess W · ω` is continuous and `[0,T]` is compact, so the family is bounded above. -/
+/-- **The running-max keystone (drift).** For `i ≤ T`, `|driftSimpleProcess W i ω|` is bounded by
+the running maximum over `[0,T]`. The supremum is genuine (not the junk value of an unbounded
+family): `driftSimpleProcess W · ω` is continuous and `[0,T]` is compact, so the family is bounded
+above. -/
 lemma drift_norm_le_iSup_Iic (hBmeas : ∀ t, Measurable (B t))
     (W : SimpleProcess ℝ (natFiltration hBmeas)) (ω : Ω) {i T : ℝ≥0} (hi : i ≤ T) :
     |driftSimpleProcess hBmeas W i ω|
@@ -50,22 +51,26 @@ lemma drift_norm_le_iSup_Iic (hBmeas : ∀ t, Measurable (B t))
 
 /-! ## Layer 1 — the drift maximal estimate (direct Chebyshev) and Borel–Cantelli -/
 
-/-- The elementary drift **negates**: `drift (-V) = -drift V` (via `driftSimpleProcess_smul (-1)`). -/
+/-- The elementary drift **negates**: `drift (-V) = -drift V` (via `driftSimpleProcess_smul (-1)`).
+-/
 lemma driftSimpleProcess_neg (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration hBmeas)) (t : ℝ≥0) :
     driftSimpleProcess hBmeas (-V) t = -driftSimpleProcess hBmeas V t := by
   rw [show (-V) = (-1 : ℝ) • V from (neg_one_smul ℝ V).symm, driftSimpleProcess_smul, neg_one_smul]
 
-/-- The elementary drift is **subtractive** (from `_add` + `_neg`), mirroring `itoSimpleProcess_sub`. -/
+/-- The elementary drift is **subtractive** (from `_add` + `_neg`), mirroring
+`itoSimpleProcess_sub`. -/
 lemma driftSimpleProcess_sub (hBmeas : ∀ t, Measurable (B t))
     (V W : SimpleProcess ℝ (natFiltration hBmeas)) (t : ℝ≥0) :
     driftSimpleProcess hBmeas (V - W) t
       = driftSimpleProcess hBmeas V t - driftSimpleProcess hBmeas W t := by
   rw [sub_eq_add_neg, driftSimpleProcess_add, driftSimpleProcess_neg, ← sub_eq_add_neg]
 
-/-- **The `E`-norm² of a simple embedding as a double integral.** Tonelli turns `‖simpleAssembly_T W‖²`
-into `∫_Ω ∫₀ᵀ (⇑W)² ds dμ` — the outer-`ω`, inner-time energy that the drift Chebyshev bound reads. -/
-lemma simpleAssembly_T_norm_sq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (W : TBoundedSP T hBmeas) :
+/-- **The `E`-norm² of a simple embedding as a double integral.** Tonelli turns
+`‖simpleAssembly_T W‖²` into `∫_Ω ∫₀ᵀ (⇑W)² ds dμ` — the outer-`ω`, inner-time energy that the drift
+Chebyshev bound reads. -/
+lemma simpleAssembly_T_norm_sq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (W : TBoundedSP T hBmeas) :
     ‖simpleAssembly_T (μ := μ) T hBmeas W‖ ^ 2
       = ∫ ω, ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑W.val s ω) ^ 2 ∂timeMeasure ∂μ := by
   set 𝓕 := natFiltration (mΩ := mΩ) hBmeas
@@ -86,9 +91,10 @@ lemma simpleAssembly_T_norm_sq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) 
   rw [integral_prod _ hintV]
   exact integral_integral_swap hintV.swap
 
-/-- **Pointwise sup bound.** For every `ω`, the squared running maximum of `|drift W · ω|` over `[0,T]`
-is at most the deterministic energy `T·∫₀ᵀ (⇑W)²`: each slice obeys `driftSimpleProcess_sq_le`, so the
-sup does too. Sup-free on the right — the input to a Chebyshev bound that dodges sup-measurability. -/
+/-- **Pointwise sup bound.** For every `ω`, the squared running maximum of `|drift W · ω|` over
+`[0,T]` is at most the deterministic energy `T·∫₀ᵀ (⇑W)²`: each slice obeys
+`driftSimpleProcess_sq_le`, so the sup does too. Sup-free on the right — the input to a Chebyshev
+bound that dodges sup-measurability. -/
 lemma drift_iSup_sq_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (W : SimpleProcess ℝ (natFiltration hBmeas)) (ω : Ω) :
     (⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W (i : ℝ≥0) ω|) ^ 2
@@ -108,9 +114,10 @@ lemma drift_iSup_sq_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 
 /-- **The drift maximal probability (direct Chebyshev).** For a `T`-bounded simple process `W`, the
 probability that the running maximum of `|drift W|` over `[0,T]` reaches `ε` is at most
-`(ε²)⁻¹·T·‖simpleAssembly_T W‖²`. Unlike the Itô side (Doob's weak-type maximal inequality), the drift
-paths are honestly continuous, so the sup is controlled pathwise by `drift_iSup_sq_le`; bounding the
-event by the sup-free set `{ε² ≤ T∫₀ᵀW²}` sidesteps sup-measurability and leaves a one-line Markov. -/
+`(ε²)⁻¹·T·‖simpleAssembly_T W‖²`. Unlike the Itô side (Doob's weak-type maximal inequality), the
+drift paths are honestly continuous, so the sup is controlled pathwise by `drift_iSup_sq_le`;
+bounding the event by the sup-free set `{ε² ≤ T∫₀ᵀW²}` sidesteps sup-measurability and leaves a
+one-line Markov. -/
 lemma drift_maximal_prob (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (W : TBoundedSP T hBmeas)
     {ε : ℝ} (hε : 0 < ε) :
     μ.real {ω | ε ≤ ⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W.val (i : ℝ≥0) ω|}
@@ -140,22 +147,26 @@ lemma drift_maximal_prob (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (W : T
           simpa [pow_two] using mul_self_le_mul_self hε.le hω
       _ ≤ _ := drift_iSup_sq_le T hBmeas W.val ω
   have hmono : μ.real {ω | ε ≤ ⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W.val (i : ℝ≥0) ω|}
-      ≤ μ.real {ω | ε ^ 2 ≤ (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑W.val s ω) ^ 2 ∂timeMeasure} := by
+      ≤ μ.real
+          {ω | ε ^ 2 ≤ (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑W.val s ω) ^ 2 ∂timeMeasure} := by
     rw [measureReal_def, measureReal_def]
     exact ENNReal.toReal_mono (measure_ne_top μ _) (measure_mono hsub)
-  have hchain : ε ^ 2 * μ.real {ω | ε ≤ ⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W.val (i : ℝ≥0) ω|}
+  have hchain : ε ^ 2 *
+      μ.real {ω | ε ≤ ⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W.val (i : ℝ≥0) ω|}
       ≤ (T : ℝ) * ‖simpleAssembly_T (μ := μ) T hBmeas W‖ ^ 2 :=
     (mul_le_mul_of_nonneg_left hmono (by positivity)).trans (hmarkov.trans_eq hintg)
   calc μ.real {ω | ε ≤ ⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W.val (i : ℝ≥0) ω|}
       = (ε ^ 2)⁻¹
-          * (ε ^ 2 * μ.real {ω | ε ≤ ⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W.val (i : ℝ≥0) ω|}) := by
+          * (ε ^ 2 *
+              μ.real {ω | ε ≤ ⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W.val (i : ℝ≥0) ω|}) := by
         rw [← mul_assoc, inv_mul_cancel₀ (by positivity), one_mul]
     _ ≤ (ε ^ 2)⁻¹ * ((T : ℝ) * ‖simpleAssembly_T (μ := μ) T hBmeas W‖ ^ 2) :=
         mul_le_mul_of_nonneg_left hchain (by positivity)
 
 /-- **Summable maximal tail (drift).** For the fast subsequence `V` (`approxSeq`), the probabilities
 that the running max of `|drift (Vₙ − Vₙ₊₁)|` over `[0,T]` reaches `(3/4)ⁿ` are summable: Chebyshev
-gives `≤ ((3/4)ⁿ)⁻²·T·‖simpleAssembly_T (Vₙ−Vₙ₊₁)‖² ≤ (16/9)ⁿ·T·(2·2⁻ⁿ)² = 4T·(4/9)ⁿ`, and `4/9 < 1`. -/
+gives `≤ ((3/4)ⁿ)⁻²·T·‖simpleAssembly_T (Vₙ−Vₙ₊₁)‖² ≤ (16/9)ⁿ·T·(2·2⁻ⁿ)² = 4T·(4/9)ⁿ`, and
+`4/9 < 1`. -/
 theorem drift_summable_maximal_tail (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (V : ℕ → TBoundedSP T hBmeas)
     (hV : ∀ n, ‖simpleAssembly_T (μ := μ) T hBmeas (V n) - φ‖ ≤ (2⁻¹ : ℝ) ^ n) :
@@ -163,7 +174,9 @@ theorem drift_summable_maximal_tail (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
       ⨆ i : Set.Iic T, |driftSimpleProcess hBmeas (V n - V (n + 1)).val (i : ℝ≥0) ω|}) := by
   refine Summable.of_nonneg_of_le (fun n ↦ measureReal_nonneg) (fun n ↦ ?_)
     ((summable_geometric_of_lt_one (r := 4 / 9) (by norm_num) (by norm_num)).mul_left (4 * (T : ℝ)))
-  refine (drift_maximal_prob T hBmeas (V n - V (n + 1)) (ε := (3 / 4 : ℝ) ^ n) (by positivity)).trans ?_
+  refine
+      (drift_maximal_prob T hBmeas (V n - V (n + 1)) (ε := (3 / 4 : ℝ) ^ n) (by positivity)).trans
+      ?_
   have hnorm : ‖simpleAssembly_T (μ := μ) T hBmeas (V n - V (n + 1))‖ ≤ 2 * (2⁻¹ : ℝ) ^ n := by
     rw [map_sub]
     calc ‖simpleAssembly_T (μ := μ) T hBmeas (V n) - simpleAssembly_T (μ := μ) T hBmeas (V (n + 1))‖
@@ -216,12 +229,12 @@ theorem drift_ae_eventually_sup_lt (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B 
 
 /-! ## Layer 2 — pointwise a.s. convergence of the elementary drifts -/
 
-/-- **Pointwise a.s. convergence (drift).** For almost every `ω` and every `t ≤ T`, the approximating
-elementary drifts `driftSimpleProcess Vₙ t ω` converge to `driftContinuousMod φ t ω`. The consecutive
-distances are eventually `< (3/4)ⁿ` (a.s., uniformly in `t ≤ T`, by `drift_ae_eventually_sup_lt` +
-the running-max keystone + subtractivity), hence summable, so the sequence is Cauchy in `ℝ`. This is
-the drift analog of `itoContinuousMod_tendsto`, with no martingale and no exceptional null set beyond
-the Borel–Cantelli one. -/
+/-- **Pointwise a.s. convergence (drift).** For almost every `ω` and every `t ≤ T`, the
+approximating elementary drifts `driftSimpleProcess Vₙ t ω` converge to `driftContinuousMod φ t ω`.
+The consecutive distances are eventually `< (3/4)ⁿ` (a.s., uniformly in `t ≤ T`, by
+`drift_ae_eventually_sup_lt` + the running-max keystone + subtractivity), hence summable, so the
+sequence is Cauchy in `ℝ`. This is the drift analog of `itoContinuousMod_tendsto`, with no
+martingale and no exceptional null set beyond the Borel–Cantelli one. -/
 theorem driftContinuousMod_tendsto (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     ∀ᵐ ω ∂μ, ∀ t : ℝ≥0, t ≤ T →
@@ -244,7 +257,8 @@ theorem driftContinuousMod_tendsto (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B 
             - driftSimpleProcess hBmeas (V (n + N + 1)).val t ω
           = driftSimpleProcess hBmeas (V (n + N) - V (n + N + 1)).val t ω := by
         rw [hcoe]
-        exact (congrFun (driftSimpleProcess_sub hBmeas (V (n + N)).val (V (n + N + 1)).val t) ω).symm
+        exact (congrFun
+            (driftSimpleProcess_sub hBmeas (V (n + N)).val (V (n + N + 1)).val t) ω).symm
       rw [hlin]
       exact (drift_norm_le_iSup_Iic hBmeas (V (n + N) - V (n + N + 1)).val ω ht).trans
         (hN (n + N) (Nat.le_add_left N n)).le
@@ -254,16 +268,16 @@ theorem driftContinuousMod_tendsto (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B 
 
 /-! ## Layer 3 — the assembled drift's pointwise realization (the crux) -/
 
-/-- **The assembled drift, sliced, is the pathwise drift limit.** The abstract `extendOfNorm` operator
-`driftProcessAssembled T g : E →L E` — built from the density of `simpleAssembly_T`, with no pathwise
-content of its own — has `coeFn` almost everywhere equal to the honest pointwise `limUnder` process
-`driftContinuousMod T g`. This is the drift analog of the Itô side's `itoProcessAssembled` being *built
-from* `itoContinuousMod`; here the identification must be **proved**, via two convergences of the same
-approximating sequence `driftSimpleProcessLp Vₙ` (`Vₙ → g` in `E`): to `driftProcessAssembled g` by the
-operator's continuity, and to `driftContinuousMod T g` a.e. (Layer 2 lifted from the per-slice a.e. to
-the trim measure — the convergence set is predictable-measurable, so its product-conull status
-transfers to the trim via `trim_measurableSet_eq`). In-measure limits on the finite trim measure are
-a.e.-unique. -/
+/-- **The assembled drift, sliced, is the pathwise drift limit.** The abstract `extendOfNorm`
+operator `driftProcessAssembled T g : E →L E` — built from the density of `simpleAssembly_T`, with
+no pathwise content of its own — has `coeFn` almost everywhere equal to the honest pointwise
+`limUnder` process `driftContinuousMod T g`. This is the drift analog of the Itô side's
+`itoProcessAssembled` being *built from* `itoContinuousMod`; here the identification must be
+**proved**, via two convergences of the same approximating sequence `driftSimpleProcessLp Vₙ`
+(`Vₙ → g` in `E`): to `driftProcessAssembled g` by the operator's continuity, and to
+`driftContinuousMod T g` a.e. (Layer 2 lifted from the per-slice a.e. to the trim measure — the
+convergence set is predictable-measurable, so its product-conull status transfers to the trim via
+`trim_measurableSet_eq`). In-measure limits on the finite trim measure are a.e.-unique. -/
 theorem driftProcessAssembled_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (g : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     ⇑(driftProcessAssembled (μ := μ) T hBmeas g)
@@ -311,7 +325,8 @@ theorem driftProcessAssembled_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
   have hLp : Tendsto (fun n ↦ driftSimpleProcessLp (μ := μ) T hBmeas (V n).val) atTop
       (𝓝 (driftProcessAssembled (μ := μ) T hBmeas g)) := by
     have hrw : (fun n ↦ driftSimpleProcessLp (μ := μ) T hBmeas (V n).val)
-        = fun n ↦ driftProcessAssembled (μ := μ) T hBmeas (simpleAssembly_T (μ := μ) T hBmeas (V n)) :=
+        = fun n ↦
+            driftProcessAssembled (μ := μ) T hBmeas (simpleAssembly_T (μ := μ) T hBmeas (V n)) :=
       funext fun n ↦ (driftProcessAssembled_simpleAssembly T hBmeas (V n)).symm
     rw [hrw]
     exact ((driftProcessAssembled (μ := μ) T hBmeas).continuous.tendsto g).comp hsa
@@ -338,10 +353,11 @@ theorem driftProcessAssembled_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
 
 /-! ## Layer 4 refinement — the pathwise drift as an honest single Lebesgue integral -/
 
-/-- **The ω-slice energy of a simple embedding minus a target.** `∫_Ω ∫₀ᵀ (⇑W − ⇑g)² ds dμ` equals the
-squared `E`-distance `‖simpleAssembly_T W − g‖²` — the driver of the `L¹(μ)` decay `Dₙ(ω) → 0` used in
-`driftContinuousMod_eq_setIntegral`. Tonelli through the trim↔product transfer (`integral_trim_ae` +
-`ae_eq_of_ae_eq_trim`, both keyed off `AEStronglyMeasurable` w.r.t. the trim). -/
+/-- **The ω-slice energy of a simple embedding minus a target.** `∫_Ω ∫₀ᵀ (⇑W − ⇑g)² ds dμ` equals
+the squared `E`-distance `‖simpleAssembly_T W − g‖²` — the driver of the `L¹(μ)` decay `Dₙ(ω) → 0`
+used in `driftContinuousMod_eq_setIntegral`. Tonelli through the trim↔product transfer
+(`integral_trim_ae` + `ae_eq_of_ae_eq_trim`, both keyed off `AEStronglyMeasurable` w.r.t. the trim).
+-/
 theorem drift_slice_energy_eq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (g : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (W : TBoundedSP T hBmeas) :
     (∫ ω, ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑W.val s ω - ⇑g (s, ω)) ^ 2 ∂timeMeasure ∂μ)
@@ -368,7 +384,8 @@ theorem drift_slice_energy_eq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       (Lp.aestronglyMeasurable h),
      by rw [← eLpNorm_trim_ae 𝓕.predictable_le_prod (Lp.aestronglyMeasurable h)]
         exact (Lp.memLp h).2⟩
-  have hinth : Integrable (fun z ↦ (⇑h z) ^ 2) ((timeMeasure_T T).prod μ) := hmemh_prod.integrable_sq
+  have hinth : Integrable (fun z ↦ (⇑h z) ^ 2) ((timeMeasure_T T).prod μ) :=
+      hmemh_prod.integrable_sq
   have hintdiff : Integrable (fun z ↦ (⇑W.val z.1 z.2 - ⇑g z) ^ 2) ((timeMeasure_T T).prod μ) :=
     hinth.congr hcoesq
   have hsm_hsq : AEStronglyMeasurable[𝓕.predictable] (fun z ↦ (⇑h z) ^ 2)
@@ -379,8 +396,8 @@ theorem drift_slice_energy_eq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   rw [lp_two_norm_sq, htrim2, integral_congr_ae hcoesq, integral_prod _ hintdiff]
   exact integral_integral_swap hintdiff.swap
 
-/-- **The prod-`L²` integrability of a simple embedding minus a target's pointwise difference squared** —
-the Fubini feed for the ω-slice energy `Dₙ`. -/
+/-- **The prod-`L²` integrability of a simple embedding minus a target's pointwise difference
+squared** — the Fubini feed for the ω-slice energy `Dₙ`. -/
 theorem drift_slice_sq_integrable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (g : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (W : TBoundedSP T hBmeas) :
     Integrable (fun z ↦ (⇑W.val z.1 z.2 - ⇑g z) ^ 2) ((timeMeasure_T T).prod μ) := by
@@ -395,20 +412,22 @@ theorem drift_slice_sq_integrable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t
   have hcoe : ⇑h =ᵐ[(timeMeasure_T T).prod μ] fun z ↦ ⇑W.val z.1 z.2 - ⇑g z :=
     ae_eq_of_ae_eq_trim hcoe_trim
   have hmem : MemLp (⇑h) 2 ((timeMeasure_T T).prod μ) :=
-    ⟨aestronglyMeasurable_of_aestronglyMeasurable_trim 𝓕.predictable_le_prod (Lp.aestronglyMeasurable h),
-     by rw [← eLpNorm_trim_ae 𝓕.predictable_le_prod (Lp.aestronglyMeasurable h)]; exact (Lp.memLp h).2⟩
+    ⟨aestronglyMeasurable_of_aestronglyMeasurable_trim 𝓕.predictable_le_prod
+        (Lp.aestronglyMeasurable h),
+     by rw [← eLpNorm_trim_ae 𝓕.predictable_le_prod (Lp.aestronglyMeasurable h)]; exact
+         (Lp.memLp h).2⟩
   exact hmem.integrable_sq.congr (by filter_upwards [hcoe] with z hz; rw [hz])
 
-/-- **The pathwise drift limit is a Lebesgue integral.** For every `t ≤ T`, the pointwise
-`limUnder` drift `driftContinuousMod T g t ω` equals the time integral `∫_{(0,t]} ⇑g(s,ω) ds` of the
-representative `⇑g` of the class `g`, for almost every `ω`. Applied at `g = lipComp b X`, this writes
-the drift term of `sde_pathwise_decomposition` as the time integral of a representative of `b∘X`; the
-per-path identity with `∫₀ᵗ b(X_s(ω)) ds` for a chosen representative of `X` is not stated. The
-elementary drifts satisfy
-`driftSimpleProcess Vₙ t ω = ∫₀ᵗ ⇑Vₙ(s,ω) ds` and converge to `driftContinuousMod` (Layer 2); the ω-slice
-energies `Dₙ(ω) = ∫₀ᵀ (⇑Vₙ − ⇑g)²(s,ω) ds` decay in `L¹(μ)` (`= ‖simpleAssembly_T Vₙ − g‖² → 0`,
-`drift_slice_energy_eq`), so along a subsequence `Dₙₖ(ω) → 0` a.e., whence the interval Cauchy–Schwarz
-`|∫₀ᵗ(⇑Vₙₖ − ⇑g)| ≤ √(T·Dₙₖ(ω)) → 0` forces `∫₀ᵗ ⇑Vₙₖ → ∫₀ᵗ ⇑g`. Matching the two limits. -/
+/-- **The pathwise drift limit is a Lebesgue integral.** For every `t ≤ T`, the pointwise `limUnder`
+drift `driftContinuousMod T g t ω` equals the time integral `∫_{(0,t]} ⇑g(s,ω) ds` of the
+representative `⇑g` of the class `g`, for almost every `ω`. Applied at `g = lipComp b X`, this
+writes the drift term of `sde_pathwise_decomposition` as the time integral of a representative of
+`b∘X`; the per-path identity with `∫₀ᵗ b(X_s(ω)) ds` for a chosen representative of `X` is not
+stated. The elementary drifts satisfy `driftSimpleProcess Vₙ t ω = ∫₀ᵗ ⇑Vₙ(s,ω) ds` and converge to
+`driftContinuousMod` (Layer 2); the ω-slice energies `Dₙ(ω) = ∫₀ᵀ (⇑Vₙ − ⇑g)²(s,ω) ds` decay in
+`L¹(μ)` (`= ‖simpleAssembly_T Vₙ − g‖² → 0`, `drift_slice_energy_eq`), so along a subsequence
+`Dₙₖ(ω) → 0` a.e., whence the interval Cauchy–Schwarz `|∫₀ᵗ(⇑Vₙₖ − ⇑g)| ≤ √(T·Dₙₖ(ω)) → 0` forces
+`∫₀ᵗ ⇑Vₙₖ → ∫₀ᵗ ⇑g`. Matching the two limits. -/
 theorem driftContinuousMod_eq_setIntegral (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (g : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {t : ℝ≥0} (ht : t ≤ T) :
     ∀ᵐ ω ∂μ, driftContinuousMod T hBmeas g t ω
@@ -420,7 +439,8 @@ theorem driftContinuousMod_eq_setIntegral (T : ℝ≥0) (hBmeas : ∀ t, Measura
   have hg_prod : MemLp (⇑g) 2 ((timeMeasure_T T).prod μ) :=
     ⟨aestronglyMeasurable_of_aestronglyMeasurable_trim (natFiltration hBmeas).predictable_le_prod
       (Lp.aestronglyMeasurable g),
-     by rw [← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod (Lp.aestronglyMeasurable g)]
+     by rw [← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod
+         (Lp.aestronglyMeasurable g)]
         exact (Lp.memLp g).2⟩
   have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑g (s, ω)) 2 (timeMeasure_T T) := by
     filter_upwards [hg_prod.1.prodMk_right, hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2

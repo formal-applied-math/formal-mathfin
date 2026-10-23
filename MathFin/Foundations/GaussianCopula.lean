@@ -150,7 +150,7 @@ theorem covariance_gaussianFactorVec (ρ : ℝ) {i j : Fin n} (hij : i ≠ j) :
       (X := fun _ : Fin n ↦ (id : ℝ → ℝ)) fun _ ↦ aemeasurable_id).indepFun hij).covariance_eq_zero
         (memLp_eval_stdNormalVec i) (memLp_eval_stdNormalVec j)
   -- bilinearity
-  show cov[(fun z : ℝ × (Fin n → ℝ) ↦ ρ * z.1) + fun z ↦ √(1 - ρ ^ 2) * z.2 i,
+  change cov[(fun z : ℝ × (Fin n → ℝ) ↦ ρ * z.1) + fun z ↦ √(1 - ρ ^ 2) * z.2 i,
     (fun z : ℝ × (Fin n → ℝ) ↦ ρ * z.1) + fun z ↦ √(1 - ρ ^ 2) * z.2 j; stdNormalFactors n] = ρ ^ 2
   rw [covariance_add_left hA (hB i) (hA.add (hB j)), covariance_add_right hA hA (hB j),
     covariance_add_right (hB i) hA (hB j)]

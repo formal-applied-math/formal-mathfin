@@ -15,7 +15,9 @@ to zero, with no nesting assumption and no classical pricing contract.
 
 ## Result
 
-Public entry points include `BoundedRule.roundUp_time_tendsto_of_mesh`, `expectedReward_roundUp_tendsto_of_mesh`, `gridValue_tendsto_americanValue_of_mesh`, `brownianGridPrice_tendsto_usual_of_mesh`.
+Public entry points include `BoundedRule.roundUp_time_tendsto_of_mesh`,
+`expectedReward_roundUp_tendsto_of_mesh`, `gridValue_tendsto_americanValue_of_mesh`,
+`brownianGridPrice_tendsto_usual_of_mesh`.
 -/
 
 @[expose] public section
@@ -51,7 +53,8 @@ theorem expectedReward_roundUp_tendsto_of_mesh {P : Measure Ω} [IsProbabilityMe
       (𝓝 (∫ ω, putReward W K r q σ S θ.time ω ∂P)) := by
   apply tendsto_integral_of_dominated_convergence (fun _ => K)
   · intro n
-    exact (putReward_measurable hW K r q σ S (θ.roundUp (hδ n)).measurable_time).aestronglyMeasurable
+    exact (putReward_measurable hW K r q σ S
+        (θ.roundUp (hδ n)).measurable_time).aestronglyMeasurable
   · exact integrable_const K
   · intro n
     apply Eventually.of_forall

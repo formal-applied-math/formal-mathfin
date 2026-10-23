@@ -18,7 +18,8 @@ strict logarithmic curvature.
 
 ## Result
 
-Public entry points include `canonicalLogBoundary_convexOn`, `zeroDividend_canonicalLogBoundary_convexOn`, and `liuRange_canonicalLogBoundary_convexOn`.
+Public entry points include `canonicalLogBoundary_convexOn`,
+`zeroDividend_canonicalLogBoundary_convexOn`, and `liuRange_canonicalLogBoundary_convexOn`.
 -/
 
 @[expose] public section
@@ -46,7 +47,7 @@ theorem zeroDividend_canonicalLogBoundary_convexOn {k : ℝ} (hk : 0 < k) :
   canonicalLogBoundary_convexOn hk le_rfl hk.le
 
 theorem liuRange_canonicalLogBoundary_convexOn {k h : ℝ}
-    (hh : 0 ≤ h) (hliu : h+1 ≤ k) : ConvexOn ℝ (Ioi 0) (canonicalLogBoundary k h) :=
+    (hh : 0 ≤ h) (hliu : h + 1 ≤ k) : ConvexOn ℝ (Ioi 0) (canonicalLogBoundary k h) :=
   canonicalLogBoundary_convexOn (by linarith) hh (by linarith)
 
 end MathFin.BlackScholes.AmericanPut.Stopping

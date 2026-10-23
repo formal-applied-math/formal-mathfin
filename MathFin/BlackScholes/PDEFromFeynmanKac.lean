@@ -50,10 +50,10 @@ makes `feynmanU` load-bearing for pricing). Step 3 is the three Greeks via Feynm
 `hasDerivAt_bsV_S_fk` (Delta — the `S`-derivative as a kernel moment), `hasDerivAt_bsV_tau_fk`
 (Theta — the product rule on the discount `e^{−rτ'}` times the discounted heat flow, with *both*
 kernel arguments `σ²τ'` and `log S + (r−σ²/2)τ'` moving with `τ'`), and `hasDerivAt_bsV_SS_fk`
-(Gamma). The Theta consumes `hasDerivAt_feynmanU_comp` and through it the heat kernel's joint Fréchet
-differentiability `hasFDerivAt_heatKernel`; the curve domination bounds the two kernel-derivative terms
-separately (`curve_sq_ratio_le` / `curve_abs_ratio_le` + `heatKernel_loc_le`), avoiding the
-single-mega-constant blow-up that defeated the brute force.
+(Gamma). The Theta consumes `hasDerivAt_feynmanU_comp` and through it the heat kernel's joint
+Fréchet differentiability `hasFDerivAt_heatKernel`; the curve domination bounds the two
+kernel-derivative terms separately (`curve_sq_ratio_le` / `curve_abs_ratio_le` +
+`heatKernel_loc_le`), avoiding the single-mega-constant blow-up that defeated the brute force.
 
 Step 4 is the capstone `bsV_satisfies_bs_pde_via_feynmanKac`: the PDE assembly
 `−V_τ + ½σ²S²V_SS + rSV_S − rV = e^{−rτ}σ²(½U_xx − U_t) = 0` via `feynmanU_heat_equation` and the
@@ -150,12 +150,13 @@ private lemma hasDerivAt_bsV_S_fk {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) 
   filter_upwards [isOpen_Ioi.mem_nhds hS] with S' hS'
   exact bsV_eq_discount_feynmanU hS' hK hσ hτ
 
-/-- **Step 3 (Theta) — the `τ`-derivative of `bsV`, via Feynman–Kac.** The price's time-decay, derived
-from the heat kernel's curve derivative (`hasDerivAt_feynmanU_comp`): product rule on the discount
-`e^{−rτ'}` and the discounted heat flow (both kernel arguments `σ²τ'` and `log S + (r−σ²/2)τ'` move
-with `τ'`), with the bridge `bsV_eq_discount_feynmanU` for the `τ' > 0` domain. This is the consumer
-that makes `hasDerivAt_feynmanU_comp` — and through it the heat kernel's *joint* differentiability
-`hasFDerivAt_heatKernel` — load-bearing for the Black–Scholes time-derivative. -/
+/-- **Step 3 (Theta) — the `τ`-derivative of `bsV`, via Feynman–Kac.** The price's time-decay,
+derived from the heat kernel's curve derivative (`hasDerivAt_feynmanU_comp`): product rule on the
+discount `e^{−rτ'}` and the discounted heat flow (both kernel arguments `σ²τ'` and
+`log S + (r−σ²/2)τ'` move with `τ'`), with the bridge `bsV_eq_discount_feynmanU` for the `τ' > 0`
+domain. This is the consumer that makes `hasDerivAt_feynmanU_comp` — and through it the heat
+kernel's *joint* differentiability `hasFDerivAt_heatKernel` — load-bearing for the Black–Scholes
+time-derivative. -/
 private lemma hasDerivAt_bsV_tau_fk {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S : ℝ} (hS : 0 < S) {τ : ℝ} (hτ : 0 < τ) :
     HasDerivAt (fun τ' ↦ bsV K r σ S τ')
@@ -168,7 +169,8 @@ private lemma hasDerivAt_bsV_tau_fk {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
                     * ((z - (Real.log S + (r - σ ^ 2 / 2) * τ)) ^ 2 - σ ^ 2 * τ)
                     / (2 * (σ ^ 2 * τ) ^ 2))
                 + (r - σ ^ 2 / 2) * ((z - (Real.log S + (r - σ ^ 2 / 2) * τ)) / (σ ^ 2 * τ)
-                    * heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ)))) ∂volume)) τ := by
+                    * heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ)))) ∂volume))
+                        τ := by
   have hσ2 : (0 : ℝ) < σ ^ 2 := by positivity
   have hexp : HasDerivAt (fun τ' ↦ Real.exp (-(r * τ'))) (-r * Real.exp (-(r * τ))) τ := by
     have h1 : HasDerivAt (fun τ' : ℝ ↦ -(r * τ')) (-r) τ := by
@@ -186,10 +188,10 @@ private lemma hasDerivAt_bsV_tau_fk {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   exact bsV_eq_discount_feynmanU hS hK hσ hτ'
 
 /-- **Step 3 (Gamma) — the second `S`-derivative of `bsV`, via Feynman–Kac.** Differentiating the
-Delta `e^{−rτ}·U_x·S⁻¹` (from `hasDerivAt_bsV_S_fk`) in `S`: the first space-derivative integral `U_x`
-moves through `log S` (chain rule on `hasDerivAt_feynmanU_xx`, giving `U_xx·S⁻¹`) and the `S⁻¹` factor
-contributes `−U_x·S⁻²`, so `∂_SS V = e^{−rτ}·(U_xx − U_x)/S²`. The third in-place Greek-via-FK awaiting
-the step-4 PDE assembly. -/
+Delta `e^{−rτ}·U_x·S⁻¹` (from `hasDerivAt_bsV_S_fk`) in `S`: the first space-derivative integral
+`U_x` moves through `log S` (chain rule on `hasDerivAt_feynmanU_xx`, giving `U_xx·S⁻¹`) and the
+`S⁻¹` factor contributes `−U_x·S⁻²`, so `∂_SS V = e^{−rτ}·(U_xx − U_x)/S²`. The third in-place
+Greek-via-FK awaiting the step-4 PDE assembly. -/
 private lemma hasDerivAt_bsV_SS_fk {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)
     {S : ℝ} (hS : 0 < S) :
     HasDerivAt (fun S' ↦ Real.exp (-(r * τ))
@@ -202,7 +204,8 @@ private lemma hasDerivAt_bsV_SS_fk {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
                     * ((z - (Real.log S + (r - σ ^ 2 / 2) * τ)) ^ 2 - σ ^ 2 * τ) / (σ ^ 2 * τ) ^ 2))
               - (∫ z, max (Real.exp z - K) 0
                 * ((z - (Real.log S + (r - σ ^ 2 / 2) * τ)) / (σ ^ 2 * τ)
-                  * heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ))))) / S ^ 2)) S := by
+                  * heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ))))) / S ^ 2))
+                      S := by
   have ht₀ : (0 : ℝ) < σ ^ 2 * τ := by positivity
   have hg := (hasDerivAt_feynmanU_xx ht₀ (callPayoff_continuous K) (callPayoff_le_exp hK)
       (Real.log S + (r - σ ^ 2 / 2) * τ)).comp S
@@ -239,7 +242,8 @@ private lemma integrable_payoff_mul_dtK {t : ℝ} (ht : 0 < t) {K : ℝ} (hK : 0
   · refine ae_of_all _ fun z ↦ ?_
     have hKnn := heatKernel_nonneg ht (z - x)
     have hnorm : ‖max (Real.exp z - K) 0 * (heatKernel t (z - x) * ((z - x) ^ 2 - t) / (2 * t ^ 2))‖
-        = 1 / (2 * t ^ 2) * (|max (Real.exp z - K) 0| * (heatKernel t (z - x) * |(z - x) ^ 2 - t|)) := by
+        = 1 / (2 * t ^ 2) *
+            (|max (Real.exp z - K) 0| * (heatKernel t (z - x) * |(z - x) ^ 2 - t|)) := by
       rw [Real.norm_eq_abs, abs_mul, abs_div, abs_mul, abs_of_nonneg hKnn,
         abs_of_nonneg (by positivity : (0:ℝ) ≤ 2 * t ^ 2)]; ring
     rw [hnorm]
@@ -265,23 +269,26 @@ private lemma integrable_payoff_mul_dxK {t : ℝ} (ht : 0 < t) {K : ℝ} (hK : 0
     have hKnn := heatKernel_nonneg ht (z - x)
     have hnorm : ‖max (Real.exp z - K) 0 * ((z - x) / t * heatKernel t (z - x))‖
         = 1 / t * (|max (Real.exp z - K) 0| * (|z - x| * heatKernel t (z - x))) := by
-      rw [Real.norm_eq_abs, abs_mul, abs_mul, abs_div, abs_of_nonneg hKnn, abs_of_nonneg ht.le]; ring
+      rw [Real.norm_eq_abs, abs_mul, abs_mul, abs_div, abs_of_nonneg hKnn,
+          abs_of_nonneg ht.le]; ring
     rw [hnorm]
     have habs : |z - x| ≤ (z - x) ^ 2 + 1 := by
       nlinarith [sq_nonneg (|z - x| - 1), sq_abs (z - x), abs_nonneg (z - x)]
     apply mul_le_mul_of_nonneg_left _ (by positivity : (0:ℝ) ≤ 1 / t)
-    refine mul_le_mul (callPayoff_le_exp hK z) ?_ (mul_nonneg (abs_nonneg _) hKnn) (Real.exp_nonneg z)
+    refine mul_le_mul (callPayoff_le_exp hK z) ?_ (mul_nonneg (abs_nonneg _) hKnn)
+        (Real.exp_nonneg z)
     exact mul_le_mul_of_nonneg_right habs hKnn
 
-/-- **Step 4 — the Black–Scholes PDE, derived from Feynman–Kac.** The call value's actual derivatives
-satisfy `−∂_τ V + ½σ²S²·∂_SS V + rS·∂_S V − rV = 0`. The three derivatives are the Feynman–Kac Greeks
-(`hasDerivAt_bsV_{S,SS,tau}_fk`), each a heat-kernel integral; the operator vanishes *because the heat
-kernel does*: the `U_x` drift terms cancel algebraically and `∂_t U = ½ ∂_xx U` is the kernel heat
-equation (`feynmanU_heat_equation`). This is the independent, probabilistically-grounded re-derivation
-of `bs_pde_holds` — closing the two-tower gap by making `feynmanU` load-bearing for the PDE. (The hard
-differentiability work — uniform domination, differentiation under the integral — already lives in
-`hasDerivAt_feynmanU_comp` and the Greeks; `feynmanU_heat_equation` supplies only the algebraic kernel
-identity `∂_t K = ½ ∂_xx K`, and the operator vanishing is then exact algebra.) -/
+/-- **Step 4 — the Black–Scholes PDE, derived from Feynman–Kac.** The call value's actual
+derivatives satisfy `−∂_τ V + ½σ²S²·∂_SS V + rS·∂_S V − rV = 0`. The three derivatives are the
+Feynman–Kac Greeks (`hasDerivAt_bsV_{S,SS,tau}_fk`), each a heat-kernel integral; the operator
+vanishes *because the heat kernel does*: the `U_x` drift terms cancel algebraically and
+`∂_t U = ½ ∂_xx U` is the kernel heat equation (`feynmanU_heat_equation`). This is the independent,
+probabilistically-grounded re-derivation of `bs_pde_holds` — closing the two-tower gap by making
+`feynmanU` load-bearing for the PDE. (The hard differentiability work — uniform domination,
+differentiation under the integral — already lives in `hasDerivAt_feynmanU_comp` and the Greeks;
+`feynmanU_heat_equation` supplies only the algebraic kernel identity `∂_t K = ½ ∂_xx K`, and the
+operator vanishing is then exact algebra.) -/
 theorem bsV_satisfies_bs_pde_via_feynmanKac {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     ∃ Vτ VS VSS : ℝ,
@@ -303,7 +310,8 @@ theorem bsV_satisfies_bs_pde_via_feynmanKac {K r σ : ℝ} (hK : 0 < K) (hσ : 0
                   * ((z - c₀) ^ 2 - σ ^ 2 * τ) / (2 * (σ ^ 2 * τ) ^ 2))
               + (r - σ ^ 2 / 2) * ((z - c₀) / (σ ^ 2 * τ) * heatKernel (σ ^ 2 * τ) (z - c₀))))
           = σ ^ 2 * (∫ z, max (Real.exp z - K) 0
-                * (heatKernel (σ ^ 2 * τ) (z - c₀) * ((z - c₀) ^ 2 - σ ^ 2 * τ) / (2 * (σ ^ 2 * τ) ^ 2)))
+                * (heatKernel (σ ^ 2 * τ) (z - c₀) * ((z - c₀) ^ 2 - σ ^ 2 * τ) /
+                    (2 * (σ ^ 2 * τ) ^ 2)))
             + (r - σ ^ 2 / 2) * (∫ z, max (Real.exp z - K) 0
                 * ((z - c₀) / (σ ^ 2 * τ) * heatKernel (σ ^ 2 * τ) (z - c₀))) from by
         rw [← integral_const_mul, ← integral_const_mul,

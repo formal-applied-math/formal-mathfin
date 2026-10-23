@@ -17,7 +17,8 @@ assumed here.
 
 ## Result
 
-Public entry points include `canonicalStockPrice`, `canonicalStockPrice_exp`, `canonicalStockPrice_eq_log`, `canonicalStockPrice_convexOn`.
+Public entry points include `canonicalStockPrice`, `canonicalStockPrice_exp`,
+`canonicalStockPrice_eq_log`, `canonicalStockPrice_convexOn`.
 -/
 
 @[expose] public section
@@ -116,7 +117,8 @@ theorem canonicalPrice_gradient_trace {k h t : ℝ} (hk : 0 < k)
   have hs := (canonicalStockPrice_gradient_trace hk hh hhk ht).comp hexp
   have he := (Real.continuous_exp.tendsto (canonicalLogBoundary k h t)).mono_left
     (nhdsWithin_le_nhds (s := Ioi (canonicalLogBoundary k h t)))
-  have hlim : Tendsto (fun x => deriv (fun S => canonicalStockPrice k h S t) (Real.exp x) * Real.exp x)
+  have hlim : Tendsto
+      (fun x => deriv (fun S => canonicalStockPrice k h S t) (Real.exp x) * Real.exp x)
       (𝓝[>] canonicalLogBoundary k h t)
       (𝓝 (-Real.exp (canonicalLogBoundary k h t))) := by
     simpa only [Function.comp_def,neg_one_mul] using hs.mul he
@@ -137,7 +139,7 @@ theorem zeroDividend_canonicalPrice_gradient_trace {k t : ℝ} (hk : 0 < k) (ht 
 
 /-- Liu's stronger normalized parameter range is a separate checked checkpoint. -/
 theorem liuRange_canonicalPrice_gradient_trace {k h t : ℝ}
-    (hh : 0 ≤ h) (hliu : h+1 ≤ k) (ht : 0 < t) :
+    (hh : 0 ≤ h) (hliu : h + 1 ≤ k) (ht : 0 < t) :
     Tendsto (fun x => deriv (fun y => canonicalPrice k h y t) x)
       (𝓝[>] canonicalLogBoundary k h t)
       (𝓝 (-Real.exp (canonicalLogBoundary k h t))) :=

@@ -127,6 +127,7 @@ theorem quantile_gaussianReal (m : ℝ) (v : ℝ≥0) (hp : p ∈ Ioo 0 1) :
     quantile (gaussianReal m v) p = m + √(v : ℝ) * PhiInv p := by
   rw [gaussianReal_eq_map_standard, quantile_map (h := fun z ↦ √(v : ℝ) * z + m)
     ((monotone_id.const_mul (by positivity)).add_const m)
-    (by fun_prop : Continuous fun z : ℝ ↦ √(v : ℝ) * z + m).lowerSemicontinuous hp, PhiInv, add_comm]
+    (by fun_prop : Continuous fun z : ℝ ↦ √(v : ℝ) * z + m).lowerSemicontinuous hp,
+        PhiInv, add_comm]
 
 end MathFin

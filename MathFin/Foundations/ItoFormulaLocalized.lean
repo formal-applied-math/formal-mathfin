@@ -111,7 +111,8 @@ theorem smoothTrunc_exists : Nonempty SmoothTrunc := by
   -- |φ x| ≤ |x|  (norm of an integral of a `≤ 1` integrand)
   have hla : ∀ x, |φ x| ≤ |x| := fun x ↦ by
     have h := intervalIntegral.norm_integral_le_of_norm_le_const (a := (0 : ℝ)) (b := x)
-      (C := 1) (f := r) fun t _ ↦ by rw [Real.norm_eq_abs]; exact (abs_of_nonneg (hr_nonneg t)).le.trans (hr_le1 t)
+      (C := 1) (f := r) fun t _ ↦ by
+        rw [Real.norm_eq_abs]; exact (abs_of_nonneg (hr_nonneg t)).le.trans (hr_le1 t)
     rw [Real.norm_eq_abs, sub_zero, one_mul] at h
     exact h
   -- φ = id near 0
@@ -123,14 +124,14 @@ theorem smoothTrunc_exists : Nonempty SmoothTrunc := by
       rw [abs_le]
       exact ⟨le_trans (le_inf (by norm_num) hxge) ht.1,
         le_trans ht.2 (sup_le (by norm_num) hxle)⟩
-    show (∫ t in (0 : ℝ)..x, r t) = x
+    change (∫ t in (0 : ℝ)..x, r t) = x
     rw [intervalIntegral.integral_congr hcongr]
     simp
   -- |φ x| ≤ M₀ := ∫ |r|  (eventually constant ⇒ bounded; bound by the full integral)
   set M₀ : ℝ := ∫ t, r t with hM₀
   have hr_nonneg_ae : (0 : ℝ → ℝ) ≤ᵐ[volume] r := ae_of_all _ hr_nonneg
   have hbdd : ∀ x, |φ x| ≤ M₀ := fun x ↦ by
-    show |∫ t in (0 : ℝ)..x, r t| ≤ ∫ t, r t
+    change |∫ t in (0 : ℝ)..x, r t| ≤ ∫ t, r t
     rcases le_total 0 x with hx | hx
     · rw [intervalIntegral.integral_of_le hx,
         abs_of_nonneg (setIntegral_nonneg measurableSet_Ioc fun t _ ↦ hr_nonneg t)]
@@ -245,7 +246,8 @@ lemma cutD1_bdd (S : SmoothTrunc) (n : ℕ) (x : ℝ) : |S.cutD1 n x| ≤ S.M₁
 lemma cutD2_bdd (S : SmoothTrunc) (n : ℕ) (x : ℝ) : |S.cutD2 n x| ≤ S.M₂ := by
   have hM : 0 ≤ S.M₂ := le_trans (abs_nonneg _) (S.bdd₂ 0)
   have hn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
-  rw [cutD2, abs_div, abs_of_pos (by positivity : (0 : ℝ) < (n : ℝ) + 1), div_le_iff₀ (by positivity)]
+  rw [cutD2, abs_div, abs_of_pos (by positivity : (0 : ℝ) < (n : ℝ) + 1),
+      div_le_iff₀ (by positivity)]
   calc |S.φ'' (x / ((n : ℝ) + 1))| ≤ S.M₂ := S.bdd₂ _
     _ ≤ S.M₂ * ((n : ℝ) + 1) := le_mul_of_one_le_right hM (by linarith)
 
@@ -495,7 +497,8 @@ theorem pathIntegral_expGrowth_memLp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
       (hw_cont ω).continuousOn
     exact tendsto_riemann_continuous (h := fun s ↦ w s (B s ω)) (hw_cont ω) T
       (fun s hs ↦ by rw [← Real.norm_eq_abs]; exact hCω s ⟨zero_le, hs⟩)
-  have hP_meas : Measurable P := measurable_of_tendsto_metrizable hR_meas (tendsto_pi_nhds.mpr hpath)
+  have hP_meas : Measurable P :=
+      measurable_of_tendsto_metrizable hR_meas (tendsto_pi_nhds.mpr hpath)
   -- pointwise growth domination and the per-marginal `L²` bound
   have hdom : ∀ (s : ℝ≥0) (ω : Ω),
       (w s (B s ω)) ^ 2 ≤ K ^ 2 * Real.exp (2 * c * |B s ω|) := by
@@ -527,7 +530,9 @@ theorem pathIntegral_expGrowth_memLp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
             apply Real.exp_le_exp.mpr
             rw [show (2 * c) ^ 2 * (s : ℝ) / 2 = 2 * c ^ 2 * (s : ℝ) by ring]
             exact mul_le_mul_of_nonneg_left (by exact_mod_cast hsT) (by positivity)
-          nlinarith [mul_nonneg (sq_nonneg K) (sub_nonneg.mpr hexp), Real.exp_nonneg (2 * c ^ 2 * (T : ℝ))]
+          nlinarith
+              [mul_nonneg (sq_nonneg K) (sub_nonneg.mpr hexp),
+              Real.exp_nonneg (2 * c ^ 2 * (T : ℝ))]
   -- the uniform `L²` bound on the Riemann sums via discrete Cauchy–Schwarz
   set Bnd : ℝ := (T : ℝ) * ((T : ℝ) * A) with hBnd
   have hgap_nonneg : ∀ n k, (0 : ℝ) ≤ (unifPart T n (k + 1) : ℝ) - unifPart T n k := by
@@ -634,7 +639,8 @@ theorem pathIntegral_expGrowth_memLp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
               * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
             refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum fun k hk ↦ ?_) (NNReal.coe_nonneg T)
             exact mul_le_mul_of_nonneg_right
-              (hpoint _ (hle_T n k (Nat.le_of_lt_succ (Nat.lt_succ_of_lt (Finset.mem_range.mp hk)))))
+              (hpoint _
+                  (hle_T n k (Nat.le_of_lt_succ (Nat.lt_succ_of_lt (Finset.mem_range.mp hk)))))
               (hgap_nonneg n k)
         _ = Bnd := by
             rw [← Finset.mul_sum, hsumgap n hn, hBnd]; ring
@@ -653,7 +659,8 @@ theorem pathIntegral_expGrowth_memLp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
         refine liminf_le_liminf (Eventually.of_forall fun n ↦ ?_)
         have hee : (fun ω ↦ ‖(Rsum n ω) ^ 2‖ₑ) = fun ω ↦ ENNReal.ofReal ((Rsum n ω) ^ 2) :=
           funext fun ω ↦ Real.enorm_eq_ofReal (sq_nonneg _)
-        rw [hee, ← ofReal_integral_eq_lintegral_ofReal (hRsq_int n) (ae_of_all _ fun ω ↦ sq_nonneg _)]
+        rw [hee,
+            ← ofReal_integral_eq_lintegral_ofReal (hRsq_int n) (ae_of_all _ fun ω ↦ sq_nonneg _)]
         exact ENNReal.ofReal_le_ofReal (hRbound n)
     _ = ENNReal.ofReal Bnd := liminf_const _
     _ < ⊤ := ENNReal.ofReal_lt_top
@@ -780,7 +787,7 @@ theorem drift_tendsto_L2 (hBmeas : ∀ t, Measurable (B t))
   set driftCut : ℕ → Ω → ℝ := fun n ω ↦
     ∫ s in Set.Ioc 0 T, Jn n ω s ∂ItoIntegralL2.timeMeasure with hdriftCut
   set drift : Ω → ℝ := fun ω ↦ ∫ s in Set.Ioc 0 T, Jl ω s ∂ItoIntegralL2.timeMeasure with hdrift
-  show Tendsto (fun n ↦ ∫ ω, (driftCut n ω - drift ω) ^ 2 ∂μ) atTop (𝓝 0)
+  change Tendsto (fun n ↦ ∫ ω, (driftCut n ω - drift ω) ^ 2 ∂μ) atTop (𝓝 0)
   -- the growth bound on the cutoff inner integrand, uniform in `n`
   have hJn_bound : ∀ n ω s, |Jn n ω s| ≤ K1 * Real.exp (lam * |B s ω|) := by
     intro n ω s
@@ -1069,7 +1076,8 @@ theorem ito_formula_td_localized
   have hdrift_memLp :
       MemLp (fun ω ↦ ∫ s in Set.Ioc 0 T, (f_t s (B s ω) + (1 / 2) * f_xx s (B s ω))
         ∂ItoIntegralL2.timeMeasure) 2 μ :=
-    pathIntegral_expGrowth_memLp hB hBmeas T (w := fun s x ↦ f_t (s : ℝ) x + (1 / 2) * f_xx (s : ℝ) x)
+    pathIntegral_expGrowth_memLp hB hBmeas T
+        (w := fun s x ↦ f_t (s : ℝ) x + (1 / 2) * f_xx (s : ℝ) x)
       (fun s ↦ ((hf_t_cont.comp (continuous_const.prodMk continuous_id)).measurable).add
         (((hf_xx_cont.comp (continuous_const.prodMk continuous_id)).measurable).const_mul (1 / 2)))
       (by positivity : (0 : ℝ) ≤ C * (1 + 1 / 2))
@@ -1127,11 +1135,13 @@ theorem ito_formula_td_localized
   -- lift the two `L²` convergences to `Lp`-norm convergence
   have hbdyCut_tendsto : Tendsto (fun n ↦ (hbdyCut_memLp n).toLp _) atTop
       (𝓝 (hbdy_memLp.toLp _)) :=
-    tendsto_iff_norm_sub_tendsto_zero.mpr (ItoIntegralRiemannBridge.tendsto_norm_toLp_sub' hbdyCut_memLp hbdy_memLp
+    tendsto_iff_norm_sub_tendsto_zero.mpr
+        (ItoIntegralRiemannBridge.tendsto_norm_toLp_sub' hbdyCut_memLp hbdy_memLp
       (boundary_tendsto_L2 hB hBmeas T S hf_x hlam hg_x))
   have hdriftCut_tendsto : Tendsto (fun n ↦ (hdriftCut_memLp n).toLp _) atTop
       (𝓝 (hdrift_memLp.toLp _)) :=
-    tendsto_iff_norm_sub_tendsto_zero.mpr (ItoIntegralRiemannBridge.tendsto_norm_toLp_sub' hdriftCut_memLp hdrift_memLp
+    tendsto_iff_norm_sub_tendsto_zero.mpr
+        (ItoIntegralRiemannBridge.tendsto_norm_toLp_sub' hdriftCut_memLp hdrift_memLp
       (drift_tendsto_L2 hB hBmeas hBcont T S hf_t_cont hf_x_cont hf_xx_cont hlam hg_t hg_x hg_xx))
   -- `aₙ = itoIntegralCLM_T gfxₙ = bdyCutₙ − driftCutₙ` in `Lp`, hence converges, hence Cauchy
   have ha_eq : ∀ n, itoIntegralCLM_T hB T hBmeas (gfx n)

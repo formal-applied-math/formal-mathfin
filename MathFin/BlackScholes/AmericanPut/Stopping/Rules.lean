@@ -74,14 +74,17 @@ noncomputable def ofWithTop (τ : Ω → WithTop ℝ≥0) (hτ : IsStoppingTime 
     (hbound : ∀ ω, τ ω ≤ T) : BoundedRule 𝓕 T where
   time := fun ω => (τ ω).untop (ne_top_of_le_ne_top WithTop.coe_ne_top (hbound ω))
   stopping := by
-    have he : (fun ω => ((τ ω).untop (ne_top_of_le_ne_top WithTop.coe_ne_top (hbound ω)) : WithTop ℝ≥0)) = τ := by
+    have he :
+        (fun ω => ((τ ω).untop (ne_top_of_le_ne_top WithTop.coe_ne_top (hbound ω)) : WithTop ℝ≥0)) =
+        τ := by
       funext ω
       exact WithTop.coe_untop _ _
     rw [he]
     exact hτ
   le_horizon := by
     intro ω
-    exact_mod_cast (show ((τ ω).untop (ne_top_of_le_ne_top WithTop.coe_ne_top (hbound ω)) : WithTop ℝ≥0) ≤ T by
+    exact_mod_cast
+        (show ((τ ω).untop (ne_top_of_le_ne_top WithTop.coe_ne_top (hbound ω)) : WithTop ℝ≥0) ≤ T by
       simpa only [WithTop.coe_untop] using hbound ω)
 
 theorem ofWithTop_coe_time (τ : Ω → WithTop ℝ≥0) (hτ : IsStoppingTime 𝓕 τ)

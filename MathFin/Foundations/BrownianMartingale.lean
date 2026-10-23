@@ -15,7 +15,8 @@ public import MathFin.Foundations.ExpMartingaleIndepIncrements
 
 For a filtered pre-Brownian motion `X`, the following are martingales w.r.t. the filtration `𝓕`:
 
-* `X` itself (already provided as `IsPreBrownianReal.isMartingale` in `Gaussian/BrownianMotion.lean`)
+* `X` itself (already provided as `IsPreBrownianReal.isMartingale` in
+  `Gaussian/BrownianMotion.lean`)
 * `t ↦ (X t)² − t`
 * `t ↦ exp(α X_t − α² t / 2)` (Wald exponential), for any `α : ℝ`: the exponential martingale of
   the process `αX`, whose increments are independent of the past with Gaussian exponential
@@ -45,7 +46,7 @@ which both files import; kept here to avoid a corpus-wide restale). -/
 lemma integral_exp_mul_gaussianReal_zero (α : ℝ) (v : ℝ≥0) :
     ∫ x, Real.exp (α * x) ∂(gaussianReal 0 v) = Real.exp (α ^ 2 * (v : ℝ) / 2) := by
   have h := congr_fun (mgf_id_gaussianReal (μ := 0) (v := v)) α
-  show mgf id (gaussianReal 0 v) α = _
+  change mgf id (gaussianReal 0 v) α = _
   rw [h]
   ring_nf
 
@@ -301,7 +302,7 @@ theorem waldExponential_isMartingale (α : ℝ) :
       fun_prop
     have h := (MathFin.hasLaw_increment hX.toIsPreBrownianReal hst).integral_comp hf
     rw [integral_exp_mul_gaussianReal_zero, NNReal.coe_sub hst] at h
-    show ∫ ω, Real.exp (α * X t ω - α * X s ω) ∂P
+    change ∫ ω, Real.exp (α * X t ω - α * X s ω) ∂P
       = Real.exp (α ^ 2 * (t : ℝ) / 2 - α ^ 2 * (s : ℝ) / 2)
     calc ∫ ω, Real.exp (α * X t ω - α * X s ω) ∂P
         = ∫ ω, Real.exp (α * (X t ω - X s ω)) ∂P := by simp_rw [mul_sub]

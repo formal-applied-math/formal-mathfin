@@ -18,7 +18,8 @@ the coordinate change itself does not involve the rate.
 
 ## Result
 
-Public entry points include `normalizedTime`, `stockBoundary`, `normalizedTime_pos`, `stockBoundary_expiry`.
+Public entry points include `normalizedTime`, `stockBoundary`, `normalizedTime_pos`,
+`stockBoundary_expiry`.
 -/
 
 @[expose] public section

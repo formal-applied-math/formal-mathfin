@@ -15,7 +15,8 @@ restriction. No smoothness across the exercise boundary is assumed.
 
 ## Result
 
-Public entry points include `brownianHeatFlow_tendsto_of_bounded`, `linearPriceEvolution_le_classical_of_continuous`, `classicalPrice_gaussian_comparison`.
+Public entry points include `brownianHeatFlow_tendsto_of_bounded`,
+`linearPriceEvolution_le_classical_of_continuous`, `classicalPrice_gaussian_comparison`.
 -/
 
 @[expose] public section

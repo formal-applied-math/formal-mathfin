@@ -19,7 +19,8 @@ difference where the expiry payoff is zero (`x>0`).
 
 ## Result
 
-Public entry points include `slopeGap`, `slopeGap_differentiable`, `slopeGap_deriv_pos_at_zero`, `initialRatio_between_le_max`.
+Public entry points include `slopeGap`, `slopeGap_differentiable`, `slopeGap_deriv_pos_at_zero`,
+`initialRatio_between_le_max`.
 -/
 
 @[expose] public section
@@ -222,6 +223,7 @@ theorem zeroDividend_initial_superlevel {p : ℝ → ℝ → ℝ} {b : ℝ → �
     Set.OrdConnected {x | 0 < x ∧ ε < normalizedDifference p
       (profile (k - 1 - c) k) (fun _ => 1) c d x 0} := by
   simpa only [sub_zero, profile, ↓reduceIte] using
-    normalizedDifference_initial_superlevel (dividendPutSolution_zero_iff.mpr hp).toContinuousBoundaryPutSolution hc hε d
+    normalizedDifference_initial_superlevel
+        (dividendPutSolution_zero_iff.mpr hp).toContinuousBoundaryPutSolution hc hε d
 
 end MathFin.BlackScholes.AmericanPut.Boundary.Comparison

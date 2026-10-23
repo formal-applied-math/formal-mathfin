@@ -168,8 +168,8 @@ lemma exitTime_monotone (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
     Monotone fun N : ℕ ↦ exitTime B N ω :=
   fun _ _ hNM ↦ exitTime_mono hBcont hNM ω
 
-/-- **The exit times escape to infinity.** A continuous path is bounded on every compact `[0,c]`,
-so once `N` exceeds that bound the exterior is never reached before `c`; hence `exitTime N ω ↑ ⊤`. -/
+/-- **The exit times escape to infinity.** A continuous path is bounded on every compact `[0,c]`, so
+once `N` exceeds that bound the exterior is never reached before `c`; hence `exitTime N ω ↑ ⊤`. -/
 lemma exitTime_tendsto_top (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (ω : Ω) :
     Tendsto (fun N : ℕ ↦ exitTime B N ω) atTop (𝓝 ⊤) := by
   rw [WithTop.tendsto_nhds_top_iff]

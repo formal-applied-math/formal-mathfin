@@ -18,7 +18,8 @@ finite-interval heat correction; assembly in pricing coordinates is separate.
 
 ## Result
 
-Public entry points include `heatBoundaryExtension`, `heatBoundaryExtension_integrable`, `heatBoundaryExtension_continuous`, `heatBoundaryExtension_boundary`.
+Public entry points include `heatBoundaryExtension`, `heatBoundaryExtension_integrable`,
+`heatBoundaryExtension_continuous`, `heatBoundaryExtension_boundary`.
 -/
 
 @[expose] public section
