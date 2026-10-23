@@ -80,8 +80,12 @@ MathFin/
   RiskMeasures/      # VaR, CVaR, coherent axioms
   Actuarial/         # annuity, net premium, Gompertz
   DeFi/              # constant-product AMM
-  Examples.lean      # curated five-proof tour — start here
+MathFinExamples/     # worked demonstrations of the public API (Tour.lean — start here)
+MathFinTest/         # API checks: the README's Lean, through `import MathFin`
 ```
+
+`MathFinExamples/` and `MathFinTest/` import only the umbrella `MathFin`, as a downstream project
+does, and nothing in `MathFin/` imports them.
 
 Every module **must** have `@[expose] public section` after its docstring
 (otherwise its declarations are module-private and benchmark snippets break).

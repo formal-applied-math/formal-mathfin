@@ -55,6 +55,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # 1. forbidden text in library sources
 # --------------------------------------------------------------------------
 
+# The Lean source trees `lake build` compiles: the library and its examples and tests.
+LEAN_SOURCE_DIRS = ("MathFin", "MathFinExamples", "MathFinTest")
+
 FORBIDDEN_PATTERNS = (
     (re.compile(r"\bsorry\b"), "sorry"),
     (re.compile(r"\badmit\b"), "admit"),
@@ -77,7 +80,8 @@ FORBIDDEN_ALLOWLIST: set = set()
 
 def test_mathfin_sources_free_of_forbidden_text() -> None:
     failures = []
-    for path in sorted(Path("MathFin").rglob("*.lean")):
+    paths = (p for d in LEAN_SOURCE_DIRS for p in sorted(Path(d).rglob("*.lean")))
+    for path in paths:
         stripped = _strip_comments(path.read_text())
         for pattern, why in FORBIDDEN_PATTERNS:
             for m in pattern.finditer(stripped):
