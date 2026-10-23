@@ -50,6 +50,7 @@ namespace MathFin
 
 variable {ι : Type*} [DecidableEq ι]
 
+omit [DecidableEq ι] in
 /-- **Equicorrelation ✕ concentration bridge.** A kernel with common variance `v` and common
 covariance `ρ v` ⇒ `Var(w) = v · ((1 − ρ) · HHI(w) + ρ · (∑ wᵢ)²)`. At `ρ = 0` this is
 `portfolioVarN_diag_eq_herfindahl`. -/
@@ -80,12 +81,14 @@ theorem portfolioVarN_equicorrelated_eq_herfindahl (s : Finset ι) (w : ι → �
 
 variable {s : Finset ι} {w : ι → ℝ} {σ : ι → ι → ℝ} {v ρ : ℝ}
 
+omit [DecidableEq ι] in
 /-- For fully invested weights the equicorrelated variance is `v · ((1 − ρ) · HHI(w) + ρ)`. -/
 theorem portfolioVarN_equicorrelated_of_sum_eq_one (h_var : ∀ i ∈ s, σ i i = v)
     (h_cov : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → σ i j = ρ * v) (h_sum : ∑ i ∈ s, w i = 1) :
     portfolioVarN s w σ = v * ((1 - ρ) * herfindahl s w + ρ) := by
   rw [portfolioVarN_equicorrelated_eq_herfindahl s w σ v ρ h_var h_cov, h_sum, one_pow, mul_one]
 
+omit [DecidableEq ι] in
 /-- **Equal weights are variance-minimal** under equicorrelation: for `v ≥ 0` and `ρ ≤ 1`, every
 fully invested portfolio of `n` assets has `Var(w) ≥ v · ((1 − ρ)/n + ρ)`, because `HHI ≥ 1/n`. -/
 theorem portfolioVarN_equicorrelated_ge (h_var : ∀ i ∈ s, σ i i = v)
@@ -97,6 +100,7 @@ theorem portfolioVarN_equicorrelated_ge (h_var : ∀ i ∈ s, σ i i = v)
   rw [portfolioVarN_equicorrelated_of_sum_eq_one h_var h_cov h_sum, div_eq_mul_inv]
   gcongr
 
+omit [DecidableEq ι] in
 /-- Equal weights attain the bound of `portfolioVarN_equicorrelated_ge`:
 `Var(1/n, …, 1/n) = v · ((1 − ρ)/n + ρ)`. -/
 theorem portfolioVarN_equicorrelated_equal_weights (h_var : ∀ i ∈ s, σ i i = v)
@@ -107,6 +111,7 @@ theorem portfolioVarN_equicorrelated_equal_weights (h_var : ∀ i ∈ s, σ i i 
   simp only [Finset.sum_const, nsmul_eq_mul]
   field_simp
 
+omit [DecidableEq ι] in
 /-- **The systematic floor**: for `v ≥ 0` and `ρ ≤ 1`, no fully invested equicorrelated portfolio,
 however diversified, has variance below `ρ v`. -/
 theorem mul_le_portfolioVarN_equicorrelated (h_var : ∀ i ∈ s, σ i i = v)

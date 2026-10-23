@@ -22,8 +22,8 @@ it is equivalent to `g(k) ≥ 0` for every `k` (`certificateFormula_iff`).
 namespace MathFin
 namespace SVI
 open Polynomial
-open scoped Classical
 
+open scoped Classical in
 /-- A fixed finite program. All branching uses polynomial signs; no roots,
 minima, eigenvalues, or real quantifiers occur in this definition. -/
 noncomputable def certificateProgram : SignProgram Bool :=
@@ -35,6 +35,7 @@ noncomputable def certificateProgram : SignProgram Bool :=
         else (countProgram (ds.1-1)).bind fun z ↦ .pure (decide (z=0))
     else .pure false
 
+open scoped Classical in
 theorem certificateProgram_eval (p : Params) :
     certificateProgram.eval p = decide (matrixCertificate (polynomial p)) := by
   classical
@@ -67,9 +68,11 @@ theorem certificateProgram_eval (p : Params) :
       rw [if_neg hl]
       simp [SignProgram.eval, hln]
 
+open scoped Classical in
 /-- The expanded finite Boolean formula, kept compact as a structural definition. -/
 noncomputable def certificateFormula : SignFormula := certificateProgram.toFormula
 
+open scoped Classical in
 theorem certificateFormula_iff (p : Params) (hs : 0 < p.sigma)
     (hb : 0 ≤ p.b) (hr : 0 ≤ 1 - p.rho ^ 2) (hg : varianceGate p) :
     certificateFormula.eval p = true ↔ ∀ k : ℝ, 0 ≤ durrleman p k := by

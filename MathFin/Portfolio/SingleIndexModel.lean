@@ -160,7 +160,7 @@ theorem covariance_singleIndex [DecidableEq ι] (hRM : MemLp RM 2 P)
 `portfolioVarN_covariance_eq_variance` turns the variance into the quadratic form of the
 covariance kernel, which `covariance_singleIndex` identifies and
 `portfolioVarN_singleIndex_eq` evaluates. -/
-theorem variance_singleIndex_portfolio [DecidableEq ι] (hRM : MemLp RM 2 P)
+theorem variance_singleIndex_portfolio (hRM : MemLp RM 2 P)
     (hε : ∀ i, MemLp (ε i) 2 P) (hRMε : ∀ i, cov[RM, ε i; P] = 0)
     (hεε : ∀ i j, i ≠ j → cov[ε i, ε j; P] = 0) (hσM : Var[RM; P] = σM ^ 2) :
     Var[∑ i ∈ s, w i • (β i • RM + ε i); P] =

@@ -19,8 +19,6 @@ change the test.
 
 @[expose] public section
 
-set_option maxHeartbeats 800000
-
 namespace MathFin
 namespace SVI
 open Matrix Polynomial

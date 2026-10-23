@@ -161,6 +161,7 @@ lemma portfolioVarN_covariance_eq_mul_equicorrelation {Ω : Type*} {mΩ : Measur
   simp only [hkernel, portfolioVarN, mul_sum]
   exact sum_congr rfl fun i _ ↦ sum_congr rfl fun j _ ↦ by ring
 
+omit [DecidableEq n] in
 /-- **A common correlation of random variables obeys the equicorrelation bound**: if
 square-integrable `X₁, …, X_d` (`d ≥ 2`) have a common variance `σ² > 0` and a common pairwise
 covariance `ρ σ²`, then `−1/(d − 1) ≤ ρ ≤ 1`. Their covariance kernel is `σ²` times the

@@ -256,7 +256,8 @@ Formally: substitute `h_n = √(T/n)`. Then
   `p_n = (e^{r·h_n²} - e^{-σ·h_n}) / (e^{σ·h_n} - e^{-σ·h_n})`.
 
 Multiply numerator and denominator by `1/h_n`:
-  `p_n = [(e^{r·h_n²} - 1)/h_n − (e^{-σ·h_n} − 1)/h_n] / [(e^{σ·h_n} − 1)/h_n − (e^{-σ·h_n} − 1)/h_n]`.
+  `p_n = N / D` with `N = (e^{r·h_n²} - 1)/h_n − (e^{-σ·h_n} − 1)/h_n` and
+  `D = (e^{σ·h_n} − 1)/h_n − (e^{-σ·h_n} − 1)/h_n`.
 
 As `h_n → 0`:
   - `(e^{r h_n²} − 1)/h_n → 0`

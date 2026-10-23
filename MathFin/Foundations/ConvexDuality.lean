@@ -66,7 +66,7 @@ private lemma functional_eq_sum_single {ι : Type*} [Fintype ι] [DecidableEq ι
 /-- A functional bounded below by a negative `u` on a cone `C` is nonnegative on `C`: a ray
 `c ∈ C` with `f c < 0` is unbounded below on `C` (scale by `(u-1)/f c ≥ 0`), contradicting the
 bound. Shared atom of the two cone-separation theorems below. -/
-private lemma functional_nonneg_on_cone {ι : Type*} [Fintype ι] {C : Set (ι → ℝ)}
+private lemma functional_nonneg_on_cone {ι : Type*} {C : Set (ι → ℝ)}
     (hCcone : ∀ ⦃x⦄, x ∈ C → ∀ ⦃c : ℝ⦄, 0 ≤ c → c • x ∈ C)
     {f : StrongDual ℝ (ι → ℝ)} {u : ℝ} (hu : u < 0) (hlb : ∀ y ∈ C, u < f y) :
     ∀ c ∈ C, 0 ≤ f c := by

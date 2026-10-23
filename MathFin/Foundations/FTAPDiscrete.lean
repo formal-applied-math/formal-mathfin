@@ -75,6 +75,7 @@ variable {Ω : Type*} [Fintype Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}
   [MeasurableSingletonClass Ω] (𝓕 : Filtration ℕ mΩ)
   (P : Measure Ω) [IsProbabilityMeasure P] (S : ℕ → Ω → ℝ) (T : ℕ)
 
+omit [Fintype Ω] in
 /-- On a full-support measure a null set is empty — hence any two full-support
 measures on `Ω` are mutually absolutely continuous. -/
 private lemma eq_empty_of_pos_singleton {μ : Measure Ω} (hμ : ∀ ω, 0 < μ {ω})
@@ -114,6 +115,7 @@ noncomputable def gainsSubspace : Submodule ℝ (Ω → ℝ) :=
   Submodule.span ℝ
     { g | ∃ t, t < T ∧ ∃ A : Set Ω, MeasurableSet[𝓕 t] A ∧ g = incrementIndicator S t A }
 
+omit [Fintype Ω] in
 /-- The martingale transform is additive in the strategy. -/
 private lemma martingaleTransform_add (φ ψ : ℕ → Ω → ℝ) (n : ℕ) :
     martingaleTransform (φ + ψ) S n
@@ -121,6 +123,7 @@ private lemma martingaleTransform_add (φ ψ : ℕ → Ω → ℝ) (n : ℕ) :
   funext ω
   simp only [martingaleTransform, Pi.add_apply, add_mul, Finset.sum_add_distrib]
 
+omit [Fintype Ω] in
 /-- The martingale transform is homogeneous in the strategy. -/
 private lemma martingaleTransform_smul (c : ℝ) (φ : ℕ → Ω → ℝ) (n : ℕ) :
     martingaleTransform (c • φ) S n = c • martingaleTransform φ S n := by
@@ -128,7 +131,7 @@ private lemma martingaleTransform_smul (c : ℝ) (φ : ℕ → Ω → ℝ) (n : 
   simp only [martingaleTransform, Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
   exact Finset.sum_congr rfl fun k _ ↦ by ring
 
-omit [MeasurableSingletonClass Ω] in
+omit [MeasurableSingletonClass Ω] [Fintype Ω] in
 /-- Every element of the attainable-gains subspace is the discounted gains of a
 predictable strategy. (`span`-induction: the generators are the gains of the
 single-period indicator strategies, and predictable gains are closed under the
@@ -188,7 +191,7 @@ theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage �
   rw [eq_empty_of_pos_singleton hP hnull] at hmem
   simp at hmem
 
-omit [IsProbabilityMeasure P] in
+omit [IsProbabilityMeasure P] [Fintype Ω] in
 /-- **Backward direction**: no arbitrage ⟹ an equivalent martingale measure
 exists. The separating-dual `q` of the gains subspace, normalised to a
 probability `Q`, is the EMM: strict positivity gives `Q ~ P`, and the
@@ -245,7 +248,7 @@ theorem exists_isEMM_of_noArbitrage (hS : StronglyAdapted 𝓕 S)
     integral_sub Integrable.of_finite.integrableOn Integrable.of_finite.integrableOn] at hkey
   linarith [hkey]
 
-omit [Nonempty Ω] [IsProbabilityMeasure P] in
+omit [Nonempty Ω] [IsProbabilityMeasure P] [Fintype Ω] in
 /-- **Forward direction**: an equivalent martingale measure precludes arbitrage.
 Under the EMM `Q`, the discounted gains telescope to `∫ G_T dQ = 0`; a
 non-negative integrand with zero integral is `0` a.e., and equivalence transports
@@ -286,7 +289,7 @@ theorem noArbitrage_of_isEMM (hS : StronglyAdapted 𝓕 S)
     (integral_eq_zero_iff_of_nonneg_ae hposQ Integrable.of_finite).mp hGint
   exact hQ.Pabs.ae_eq hzeroQ
 
-omit [IsProbabilityMeasure P] in
+omit [IsProbabilityMeasure P] [Fintype Ω] in
 /-- **Finite-Ω Fundamental Theorem of Asset Pricing** (Harrison–Pliska; the
 finite case of Dalang–Morton–Willinger): a finite-horizon, single-asset market
 on a finite full-support probability space has no arbitrage **iff** it admits an
@@ -304,7 +307,7 @@ constant position, and `Q[· | ⊥]` is the plain expectation (`condExp_bot`). T
 market is then the one-period market of `Foundations/FTAPOnePeriod.lean` for the increment
 `S 1 − S 0`. -/
 
-omit [Nonempty Ω] [IsProbabilityMeasure P] in
+omit [Nonempty Ω] [IsProbabilityMeasure P] [Fintype Ω] in
 /-- **At horizon `1` the discrete-time EMM is the one-period EMM.** With `𝓕 0 = ⊥` and `S`
 adapted, `Q` is an equivalent martingale measure for the one-step market iff it is one for
 the one-period excess return `S 1 − S 0`: the one-step martingale condition

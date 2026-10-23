@@ -58,7 +58,7 @@ lemma portfolioVarN_smul {ι : Type*} (s : Finset ι)
 
 /-- **Diagonal covariance**: when `σ_{ij} = 0` for `i ≠ j`, the portfolio
 variance collapses to `∑ w_i² · σ_{ii}`. -/
-lemma portfolioVarN_diag {ι : Type*} [DecidableEq ι] (s : Finset ι)
+lemma portfolioVarN_diag {ι : Type*} (s : Finset ι)
     (w : ι → ℝ) (σ : ι → ι → ℝ)
     (h_diag : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → σ i j = 0) :
     portfolioVarN s w σ = ∑ i ∈ s, w i ^ 2 * σ i i := by
@@ -79,7 +79,7 @@ lemma portfolioVarN_diag {ι : Type*} [DecidableEq ι] (s : Finset ι)
 /-- **Diversification under iid assets**: equal weights `c` across an index set
 `s` of cardinality `n`, with zero cross-covariances and common variance `σ²`,
 gives `Var(c · 1) = c² · n · σ²`. -/
-lemma portfolioVarN_equal_weights_iid {ι : Type*} [DecidableEq ι]
+lemma portfolioVarN_equal_weights_iid {ι : Type*}
     (s : Finset ι) (c σ_sq : ℝ)
     (kernel : ι → ι → ℝ)
     (h_diag : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → kernel i j = 0)

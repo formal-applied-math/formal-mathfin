@@ -264,6 +264,7 @@ theorem portfolioVariance_le_of_lagrangian_FOC {Sg : Matrix ι ι ℝ} (hSg : Sg
   rw [portfolioVariance_univ, portfolioVariance_univ]
   linarith
 
+omit [Fintype ι] in
 /-- **Covariance matrices are positive semidefinite** (in Mathlib's `Matrix.PosSemidef`
 sense): the covariance matrix of square-integrable returns is symmetric
 (`covariance_comm`) and its quadratic form is the variance of `∑ vᵢ Rᵢ`

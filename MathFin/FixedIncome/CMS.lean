@@ -369,8 +369,8 @@ theorem annuityMeasure_price {Q : Measure Ω} (r T δ : ℝ) (P : Ω → ι → 
 
 /-! ### 4. The headline: the Jensen gap under the annuity measure -/
 
--- the Jensen application carries heavy higher-order unification
 set_option maxHeartbeats 1000000 in
+-- the Jensen application carries heavy higher-order unification
 /-- **The Jensen gap of the CMS rate functional under `Qᴬ`** (the headline). Let
 `S = cmsCurveRate P₀ δ C`, with `P₀` and `C` deterministic; it is convex on
 `[0, ∞)`. Every nonnegative `W` with `W` and `S ∘ W` integrable under the annuity
@@ -421,8 +421,8 @@ end Annuity
 
 /-! ### 5. The replication seed: Carr–Madan spanning of the rate functional -/
 
--- the Carr–Madan instantiation carries heavy higher-order unification
 set_option maxHeartbeats 1000000 in
+-- the Carr–Madan instantiation carries heavy higher-order unification
 /-- **The replication seed**: the CMS rate functional spanned as cash + forward
 + static OTM option strips on the discount factor (Carr–Madan, compact strike
 range `[L, U]` with `L > −C`). The strip weights are

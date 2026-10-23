@@ -337,7 +337,7 @@ theorem valueAtRisk_portfolio_add_le (hX : HasGaussianLaw (fun ω ↦ (X · ω))
 a common mean `m`, a common standard deviation `σ` and a common correlation `ρ`, their average
 has `VaR_α = m + σ √(ρ + (1 − ρ)/d) Φ⁻¹(α)`. As `d` grows the idiosyncratic term `(1 − ρ)/d`
 vanishes, but the common term `ρ` does not. -/
-theorem valueAtRisk_equal_weight_equicorrelated [Nonempty ι] [DecidableEq ι]
+theorem valueAtRisk_equal_weight_equicorrelated [Nonempty ι]
     (hX : HasGaussianLaw (fun ω ↦ (X · ω)) P) {m σ ρ : ℝ} (hσ : 0 ≤ σ)
     (hmean : ∀ i, P[X i] = m) (hvar : ∀ i, Var[X i; P] = σ ^ 2)
     (hcov : ∀ i j, i ≠ j → cov[X i, X j; P] = ρ * σ ^ 2) (hα : α ∈ Ioo 0 1) :

@@ -188,6 +188,7 @@ theorem independenceCopula_real_Iic (u : ι → ℝ) (hu : ∀ i, u i ∈ Icc 0 
   rw [independenceCopula, ← pi_univ_Iic, measureReal_def, Measure.pi_pi, ENNReal.toReal_prod]
   exact Finset.prod_congr rfl fun i _ ↦ uniformIoo_real_Iic (hu i).1 (hu i).2
 
+omit [Fintype ι] in
 /-- `M` is a copula. -/
 theorem isCopula_comonotoneCopula : IsCopula (comonotoneCopula ι) where
   isProbabilityMeasure := Measure.isProbabilityMeasure_map (by fun_prop)

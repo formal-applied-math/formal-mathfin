@@ -1135,6 +1135,7 @@ private theorem trueIncr_sq_le {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
         rw [sq Dd, hDsq2]
 
 set_option maxHeartbeats 1600000 in
+-- a long estimate: elaborating the whole proof exceeds the default budget
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- **The convergence of the quadratic block** (the summed weighted increment isometry,
 conditional on a gap bound): if for some null sequence `r` the weighted second-moment sum
@@ -2114,8 +2115,9 @@ private theorem integral_natMeasurable_mul_increment_pow4
   simp only [Function.comp_apply, id_eq] at key
   rw [key, integral_increment_pow4 hB ht]
 
-omit [IsProbabilityMeasure μ] hδadap hδcont hδbdd hMadap hMeq in
 set_option maxHeartbeats 1600000 in
+-- a long estimate: elaborating the whole proof exceeds the default budget
+omit [IsProbabilityMeasure μ] hδadap hδcont hδbdd hMadap hMeq in
 /-- **The step-sum fourth-moment recursion**: for a bounded integrand sampled along a
 monotone time grid (`φ j` measurable in `𝓕_{s j}`, `|φ| ≤ D`), the fourth moment of the
 Itô sum is at most `3·(D²·total gap)²`. -/
@@ -3671,6 +3673,7 @@ private theorem one_div_sqrt_le_two {n : ℕ} (hn : 0 < n) :
   simpa using hsq
 
 set_option maxHeartbeats 1600000 in
+-- a long estimate: elaborating the whole proof exceeds the default budget
 /-- **The drift–martingale cross corrections of the quadratic block die**: the statement is
 the limit `0`. The proof bounds the summed absolute expectations of the frozen weight against
 `Δ(AdaptedDrift.driftPath β)ₖ·ΔMₖ` by `2·C₂·|D_β|·|D_δ|·T·√T/√(n+1)` (`O(√mesh)`) —
@@ -3884,6 +3887,7 @@ theorem quadCrossSum_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω �
 
 
 set_option maxHeartbeats 1600000 in
+-- a long estimate: elaborating the whole proof exceeds the default budget
 /-- **The Taylor remainder dies**: the summed discrete Taylor remainders along the uniform
 partition have expectation tending to `0` (the statement; the rate below is the proof's) —
 each `|Rₖ| ≤ C₃·|ΔXₖ|³`
@@ -4275,6 +4279,7 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
 
 
 set_option maxHeartbeats 1600000 in
+-- a long estimate: elaborating the whole proof exceeds the default budget
 omit hMadap in
 /-- **Per-cell Taylor-remainder integrability** (assembly input): along the adapted process
 `X` with the decomposition `X t = c + AdaptedDrift.driftPath β t + M t`, the `k`-th cell's
@@ -4407,6 +4412,7 @@ private theorem remainderCell_integrable {n : ℕ} (hn : 0 < n) {k : ℕ} (hk : 
 
 
 set_option maxHeartbeats 1600000 in
+-- a long estimate: elaborating the whole proof exceeds the default budget
 /-- **The integrated Itô–drift identity for adapted coefficients**, conditional on the
 process `M`. For `β, δ` bounded, `natFiltration`-adapted and path-continuous, a hypothesized
 `natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every `t` (`hMeq`), and a hypothesized
