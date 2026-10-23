@@ -965,9 +965,9 @@
     "mf-bond-forward-from-no-arbitrage": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-23",
-      "elapsed_s": 2.9,
-      "input_hash": "fbb8873b508979ad508bfa140554f7a72bab0bcfc4aaee68ed85d952ab37f723",
-      "verified_at_commit": "df11df6"
+      "elapsed_s": 2.8,
+      "input_hash": "fcf58594cc48e423aabf424792d0e8951a168322f37bebab59898e9f0d927506",
+      "verified_at_commit": "567f736"
     },
     "mf-bond-immunization-first-order": {
       "benchmark_file": "mathematical_finance.json",
@@ -1693,16 +1693,16 @@
     "mf-covered-eq-uncovered-interest-parity": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-10-23",
-      "elapsed_s": 3.7,
-      "input_hash": "4044feffa6d66bb1e5e25dada629fd9c226679a51d16c5e1ffd835e3729c2ec0",
-      "verified_at_commit": "f3a314a"
+      "elapsed_s": 18.2,
+      "input_hash": "6112f9ed4eeea141e5ae93ff47753d5564be65c1cf35ca375209fdc4e3cc817a",
+      "verified_at_commit": "567f736"
     },
     "mf-covered-interest-parity": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-10-23",
-      "elapsed_s": 3.7,
-      "input_hash": "19d3b827c1338cf0f07033cbb5885543ff04b13e09fb654e5082fe9721de78b5",
-      "verified_at_commit": "f3a314a"
+      "elapsed_s": 9.2,
+      "input_hash": "4e82f8105b2b5efcb29cec008986063024275fdc58e7c580efa78d4968beb7d0",
+      "verified_at_commit": "567f736"
     },
     "mf-cpmm-arbitrage-iff-price-divergence": {
       "benchmark_file": "defi.json",
@@ -2708,9 +2708,9 @@
     "mf-key-rate-partials-sum-to-yield-derivative": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-23",
-      "elapsed_s": 2.8,
-      "input_hash": "4615fc6d53493cd0f0233e43a8f1bce60b184675d67cbdcf93fbe9ec7c74900d",
-      "verified_at_commit": "42e334e"
+      "elapsed_s": 18.8,
+      "input_hash": "9ead4abe04a59c0552bd4c177976514a9ec9b7625e4925b14cfd72b367fcdf73",
+      "verified_at_commit": "567f736"
     },
     "mf-kirk-zero-strike-margrabe": {
       "benchmark_file": "exotic_options.json",

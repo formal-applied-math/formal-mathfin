@@ -55,11 +55,11 @@ noncomputable def bondForwardPrice (s : Finset ι) (Df : ι → ℝ) (CF : ι �
 
 /-- **Bond forward price from no-arbitrage.** A finite-state market with state
 prices `q` on the states `Ω` at the forward-expiry date `t_fe`: the zero-coupon
-bond to `t_fe` costs `Df_fe = Σ q ω`, and the bond, worth `B ω` (ex-coupon) at
-`t_fe` in state `ω`, is priced as its coupons paid up to `t_fe` plus its value
-then, `P₀ = Σ Df(t)·CF(t) + Σ q ω · B ω`. Then the forward contract paying
-`B - X` at `t_fe` is worth zero iff `X = bondForwardPrice`: this is
-`forward_price_from_no_arbitrage` with the coupon-stripped bond
+bond to `t_fe` costs `Df_fe = Σ q ω` (`Df_fe ≠ 0`), and the bond, worth `B ω`
+(ex-coupon) at `t_fe` in state `ω`, is priced as its coupons paid up to `t_fe`
+plus its value then, `P₀ = Σ Df(t)·CF(t) + Σ q ω · B ω`. Then the forward
+contract paying `B - X` at `t_fe` is worth zero iff `X = bondForwardPrice`:
+this is `forward_price_from_no_arbitrage` with the coupon-stripped bond
 `P₀ - Σ Df(t)·CF(t)` as the spot. -/
 theorem bondForwardPrice_from_no_arbitrage {Ω : Type*} (states : Finset Ω) (q B : Ω → ℝ)
     (s : Finset ι) (Df CF : ι → ℝ) (P0 Df_fe X : ℝ) (hDf : Df_fe ≠ 0)

@@ -74,8 +74,9 @@ theorem covered_interest_parity {ι : Type*} (s : Finset ι) (q S_T : ι → ℝ
     mul_div_assoc, ← Real.exp_sub, neg_sub_neg, ← sub_mul]
 
 /-- **Covered interest parity, one period, discrete compounding**: with the
-domestic bond priced at `1/(1 + r_d)` and the foreign bond, in domestic
-currency, at `S/(1 + r_f)`, the zero-value forward is `S·(1 + r_d)/(1 + r_f)`. -/
+domestic bond priced at `1/(1 + r_d)` (`1 + r_d ≠ 0`) and the foreign bond, in
+domestic currency, at `S/(1 + r_f)`, the zero-value forward is
+`S·(1 + r_d)/(1 + r_f)`. -/
 theorem covered_interest_parity_discrete {ι : Type*} (s : Finset ι) (q S_T : ι → ℝ)
     (S r_d r_f F : ℝ) (hd : 1 + r_d ≠ 0)
     (h_dom : ∑ i ∈ s, q i = 1 / (1 + r_d))

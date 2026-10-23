@@ -67,8 +67,8 @@ theorem bondPriceKeyRate_update_eq [DecidableEq ι] (s : Finset ι) (t : ι → 
   exact Finset.sum_congr rfl fun i hi ↦ by rw [Function.update_of_ne (Finset.ne_of_mem_erase hi)]
 
 /-- **Key-rate partial derivative.** Moving the spot rate of node `j ∈ s` alone moves only
-cashflow `j`'s discount term, so `∂P/∂kⱼ = -tⱼ·cⱼ / (1 + kⱼ)^{tⱼ+1}`: the per-cashflow
-derivative `hasDerivAt_coupon_term` that `hasDerivAt_bondPriceDisc` sums. -/
+cashflow `j`'s discount term, so, for `1 + kⱼ ≠ 0`, `∂P/∂kⱼ = -tⱼ·cⱼ / (1 + kⱼ)^{tⱼ+1}`: the
+per-cashflow derivative `hasDerivAt_coupon_term` that `hasDerivAt_bondPriceDisc` sums. -/
 theorem hasDerivAt_bondPriceKeyRate_update [DecidableEq ι] (s : Finset ι) (t : ι → ℕ)
     (c k : ι → ℝ) {j : ι} (hj : j ∈ s) (hk : 1 + k j ≠ 0) :
     HasDerivAt (fun x ↦ bondPriceKeyRate s t c (Function.update k j x))
