@@ -965,9 +965,9 @@
     "mf-bond-forward-from-no-arbitrage": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-23",
-      "elapsed_s": 3.6,
-      "input_hash": "9cd9df0ebacc80d6bec45f2086e2162d6870957993fbcc038b57efde69922597",
-      "verified_at_commit": "f3a314a"
+      "elapsed_s": 2.9,
+      "input_hash": "fbb8873b508979ad508bfa140554f7a72bab0bcfc4aaee68ed85d952ab37f723",
+      "verified_at_commit": "df11df6"
     },
     "mf-bond-immunization-first-order": {
       "benchmark_file": "mathematical_finance.json",
@@ -2736,9 +2736,9 @@
     "mf-level-payment-balance-annuity": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-23",
-      "elapsed_s": 7.2,
-      "input_hash": "2573c24f3ec5a4446b6be95786d1ed48fe6608f539b64651e591d879eaa15ef1",
-      "verified_at_commit": "3f00239"
+      "elapsed_s": 20.8,
+      "input_hash": "30ca84377d392fc8ac50e531237046527d40996be278814c7a4ff374fccd7a73",
+      "verified_at_commit": "df11df6"
     },
     "mf-lhp-stop-loss-closed-form": {
       "benchmark_file": "credit.json",

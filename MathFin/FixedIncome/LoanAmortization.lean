@@ -37,8 +37,10 @@ They differ only in how `P_n` is chosen:
   the value of the `N - n` payments still to come, and the loan is paid off
   at `N`.
 
-All three closed forms are proved here by induction on the balance recurrence,
-matching the standard amortization-table identities.
+The bullet and equal-principal closed forms are proved by induction on the
+shared `balance` recurrence; the level-payment one, by induction on
+`levelPaymentBalance` directly (`balance_levelPayment` ties the two
+recurrences together but is not used in that proof).
 
 ## Result
 

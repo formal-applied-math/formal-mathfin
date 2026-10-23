@@ -9,19 +9,17 @@ public import Mathlib
 public import MathFin.Foundations.NoArbitrageDerivations
 
 /-!
-# Bond forward price by cash-and-carry replication
+# Bond forward price from no-arbitrage
 
 A forward contract on a coupon bond, struck at forward price `X`, maturing at
-the forward-expiry date `t_fe`, is replicated by buying the bond today and
-financing the purchase to `t_fe`, keeping every coupon `CF(t)` paid at
-`t ≤ t_fe` along the way (worth `Df(t) · CF(t)` today). No-arbitrage
-forces the forward contract's value at inception to be zero: discounting the
-strike `X` paid at `t_fe` back to today must equal the bond's price net of the
+the forward-expiry date `t_fe`, has zero time-0 value exactly when discounting
+the strike `X` paid at `t_fe` back to today equals the bond's price net of the
 discounted coupons it sheds before `t_fe`,
 
   `Df(t_fe) · X = P₀ - Σ_{t ≤ t_fe} Df(t) · CF(t)`,
 
-equivalently (the usual forward-price statement)
+equivalently (the usual cash-and-carry forward-price statement, keeping every
+coupon `CF(t)` paid at `t ≤ t_fe` along the way, worth `Df(t) · CF(t)` today)
 
   `X = (P₀ - Σ_{t ≤ t_fe} Df(t) · CF(t)) / Df(t_fe)`.
 
