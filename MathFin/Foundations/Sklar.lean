@@ -126,7 +126,7 @@ variable {C : Measure (ι → ℝ)} (μ : ι → Measure ℝ) [∀ i, IsProbabil
 omit [Fintype ι] in
 /-- **The converse of Sklar's theorem, margins**: under a copula `C`, the quantile transform of the
 `i`-th coordinate has law `μᵢ`. -/
-theorem hasLaw_quantile_coord [Finite ι] (hC : IsCopula C) (i : ι) :
+theorem hasLaw_quantile_coord (hC : IsCopula C) (i : ι) :
     HasLaw (fun v : ι → ℝ ↦ quantile (μ i) (v i)) (μ i) C :=
   (hasLaw_quantile (μ i)).comp (hC.hasLaw_eval i)
 
@@ -193,7 +193,7 @@ omit [Fintype ι] in
 (McNeil–Frey–Embrechts, Proposition 7.7): transforming each coordinate by a strictly increasing
 map leaves the copula of the vector unchanged. The probability-integral transform of `Tᵢ(Xᵢ)` at
 `Tᵢ(y)` equals that of `Xᵢ` at `y`. -/
-theorem copulaOf_comp_strictMono [Finite ι] (hX : AEMeasurable X P)
+theorem copulaOf_comp_strictMono (hX : AEMeasurable X P)
     {T : ι → ℝ → ℝ} (hT : ∀ i, StrictMono (T i)) :
     copulaOf (fun ω i ↦ T i (X ω i)) P = copulaOf X P := by
   have hcdf (i : ι) (y : ℝ) :
