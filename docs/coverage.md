@@ -37,8 +37,10 @@ Seven `full` entries, corpus 658 → 665, each derived from library machinery:
   `E_Q[S_T] = S·e^{(r_d−r_f)T}`, is `expected_terminal_eq_forward` under the Garman–Kohlhagen
   hypothesis (the physical-measure UIP is not claimed — and it is the same
   `expected_terminal_eq_forward` as `mf-forward-price` (`benchmarks/black_scholes.json`), at drift
-  `r_d − r_f` instead of a generic `r`, not a second derivation), and the two agree with the
-  covered form — both recorded as one entry, `mf-covered-eq-uncovered-interest-parity`.
+  `r_d − r_f` instead of a generic `r`, not a second derivation). The agreement — `F = E_Q[S_T]`,
+  not a restatement of either closed form on its own — is `mf-covered-eq-uncovered-interest-parity`;
+  the risk-neutral half above is `uncovered_interest_parity` inside that entry's cited proof, not a
+  claim of the entry's own type.
 - **Bond forward** (`interest_rates.json`). `forward_price_from_no_arbitrage` with the
   coupon-stripped bond as the spot (`mf-bond-forward-from-no-arbitrage`).
 - **Key-rate duration** (`interest_rates.json`; #69). With one spot rate per cashflow, the
