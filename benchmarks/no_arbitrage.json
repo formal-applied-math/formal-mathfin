@@ -349,7 +349,7 @@
         "reference": "Covered interest parity (Hull, Options, Futures, and Other Derivatives, forward on a foreign currency)",
         "difficulty": "basic",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.covered_interest_parity (MathFin/FixedIncome/FxForwardParity.lean): forward_price_from_no_arbitrage (MathFin/Foundations/NoArbitrageDerivations.lean) with the foreign zero-coupon bond as the asset, then exponential algebra. covered_interest_parity_discrete gives the one-period form S·(1 + r_d)/(1 + r_f). SCOPE: finite state space, deterministic rates."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.covered_interest_parity (MathFin/FixedIncome/FxForwardParity.lean): forward_price_from_no_arbitrage (MathFin/Foundations/NoArbitrageDerivations.lean) with the foreign zero-coupon bond as the asset, then exponential algebra. covered_interest_parity_discrete gives the one-period form S·(1 + r_d)/(1 + r_f) (for 1 + r_d ≠ 0; at 1 + r_f = 0 this holds only via Lean's x / 0 = 0 convention, under which both sides collapse to 0). SCOPE: finite state space, deterministic rates."
       }
     },
     {

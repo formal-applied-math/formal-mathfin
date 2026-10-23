@@ -18,8 +18,9 @@ discounted coupons it sheds before `t_fe`,
 
   `Df(t_fe) · X = P₀ - Σ_{t ≤ t_fe} Df(t) · CF(t)`,
 
-equivalently (the usual cash-and-carry forward-price statement, keeping every
-coupon `CF(t)` paid at `t ≤ t_fe` along the way, worth `Df(t) · CF(t)` today)
+equivalently (the usual cash-and-carry forward-price statement: each coupon
+`CF(t)` paid at `t ≤ t_fe` is kept along the way and is worth `Df(t) · CF(t)`
+today)
 
   `X = (P₀ - Σ_{t ≤ t_fe} Df(t) · CF(t)) / Df(t_fe)`.
 
@@ -47,7 +48,7 @@ namespace MathFin
 
 variable {ι : Type*}
 
-/-- The **bond forward price**: the replication-implied strike
+/-- The **bond forward price**: the no-arbitrage forward price
 `X = (P₀ - Σ Df(t)·CF(t)) / Df(t_fe)`. -/
 noncomputable def bondForwardPrice (s : Finset ι) (Df : ι → ℝ) (CF : ι → ℝ)
     (P0 Df_fe : ℝ) : ℝ :=
