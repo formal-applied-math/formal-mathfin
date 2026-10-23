@@ -11,7 +11,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianHeatFlow
 /-! # Conditional Brownian transitions in the raw natural filtration 
 ## Result
 
-Public entry points include `brownianLogState`, `brownian_scaled_increment_heatFlow`, `brownian_condExp_transition`, `brownianLogState_condExp_transition`.
+Public entry points include `brownianLogState`, `brownian_scaled_increment_heatFlow`,
+`brownian_condExp_transition`, `brownianLogState_condExp_transition`.
 -/
 
 @[expose] public section
@@ -48,7 +49,8 @@ theorem brownian_scaled_increment_heatFlow {f : ℝ → ℝ} (hf : Continuous f)
 theorem brownian_condExp_transition {f : ℝ → ℝ} (hf : Continuous f) {C : ℝ}
     (hb : ∀ x, ‖f x‖ ≤ C) {i j : ℝ≥0} (hij : i ≤ j)
     {X : (ℝ≥0 → ℝ) → ℝ} (hX : Measurable[brownianFiltration i] X) (σ : ℝ) :
-    gaussianLimit[fun ω => f (X ω+σ*(brownian j ω-brownian i ω)) | brownianFiltration i] =ᵐ[gaussianLimit]
+    gaussianLimit[fun ω => f (X ω+σ*(brownian j ω-brownian i ω)) | brownianFiltration i]
+        =ᵐ[gaussianLimit]
       fun ω => brownianHeatFlow f (σ^2*((j : ℝ)-(i : ℝ))).toNNReal (X ω) := by
   have hY : Measurable (fun ω => brownian j ω-brownian i ω) :=
     (measurable_brownian j).sub (measurable_brownian i)

@@ -16,7 +16,8 @@ an obstacle comparison can have a positive contact.
 
 ## Result
 
-Public entry points include `delayedPrice`, `delayedPrice_eventuallyEq`, `delayedPrice_continuous`, `delayedPrice_initial`.
+Public entry points include `delayedPrice`, `delayedPrice_eventuallyEq`, `delayedPrice_continuous`,
+`delayedPrice_initial`.
 -/
 
 @[expose] public section
@@ -68,7 +69,7 @@ theorem delayedPrice_above_payoff (hp : DividendPutSolution k h p b) {a x t : �
   exact (not_lt_of_ge (le_max_left (1-Real.exp x) 0)) hgt
 
 theorem delayedPrice_contDiffAt (hp : DividendPutSolution k h p b) {a x t : ℝ}
-    (ht : a < t) (hx : b (t-a) < x) :
+    (ht : a < t) (hx : b (t - a) < x) :
     ContDiffAt ℝ 2 (fun z : ℝ × ℝ => delayedPrice p a z.1 z.2) (x,t) := by
   have hs : ContDiffAt ℝ 2 (fun z : ℝ × ℝ => p z.1 z.2) (x,t-a) :=
     (hp.price_contDiffAt (sub_pos.mpr ht) hx).of_le (WithTop.coe_le_coe.mpr le_top)
@@ -78,8 +79,9 @@ theorem delayedPrice_contDiffAt (hp : DividendPutSolution k h p b) {a x t : ℝ}
   exact hc.congr_of_eventuallyEq (delayedPrice_eventuallyEq ht)
 
 theorem delayedPrice_equation (hp : DividendPutSolution k h p b) {a x t : ℝ}
-    (ht : a < t) (hx : b (t-a) < x) :
-    deriv (delayedPrice p a x) t = dividendSpatialOperator k h (fun y => delayedPrice p a y t) x := by
+    (ht : a < t) (hx : b (t - a) < x) :
+    deriv (delayedPrice p a x) t =
+        dividendSpatialOperator k h (fun y => delayedPrice p a y t) x := by
   have hs : DifferentiableAt ℝ (p x) (t-a) :=
     ((hp.price_contDiffAt (sub_pos.mpr ht) hx).comp (t-a)
       (show ContDiffAt ℝ ∞ (fun s : ℝ => (x,s)) (t-a) by fun_prop)).differentiableAt (by simp)

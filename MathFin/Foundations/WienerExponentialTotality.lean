@@ -163,7 +163,7 @@ theorem integral_mul_exp_linear_eq_zero (hB : IsPreBrownianReal B μ)
       ∑ k ∈ Finset.range N, (if s k < t i then lam i else 0) * (B (s (k + 1)) ω - B (s k) ω)
         = lam i * (B (t i) ω - B (s 0) ω) := by
     obtain ⟨j, hj⟩ : ∃ j : Fin m, e j = t i := by
-      show t i ∈ Set.range e
+      change t i ∈ Set.range e
       rw [he, Finset.range_orderEmbOfFin S rfl]
       exact htS i
     have hjlt := j.isLt
@@ -362,7 +362,7 @@ private lemma setIntegral_eq_zero_of_iSup_comap (hB : IsPreBrownianReal B μ)
       exact hz
     have hIES : integrableExpSet (fun ω ↦ ∑ i, lam i * B (τ i) ω) nuPos = Set.univ := by
       refine Set.eq_univ_of_forall fun r ↦ ?_
-      show Integrable (fun ω ↦ Real.exp (r * ∑ i, lam i * B (τ i) ω)) nuPos
+      change Integrable (fun ω ↦ Real.exp (r * ∑ i, lam i * B (τ i) ω)) nuPos
       rw [hnuPos, integrable_withDensity_ofReal_iff hfae]
       exact hposL2.integrable_mul (hexpL2 r)
     have hnull : nuPos = 0 ↔ nuNeg = 0 := by

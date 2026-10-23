@@ -22,7 +22,8 @@ is imposed. The global-in-time formulation can be restricted to any maturity.
 
 ## Result
 
-Public entry points include `normalizedRate`, `normalizedRate_pos`, `putPayoff`, `continuationRegion`.
+Public entry points include `normalizedRate`, `normalizedRate_pos`, `putPayoff`,
+`continuationRegion`.
 -/
 
 @[expose] public section

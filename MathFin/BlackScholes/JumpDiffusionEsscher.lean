@@ -146,11 +146,11 @@ lemma monotone_integral_exp_one_add_sub {ν : Measure ℝ}
     (hν : ∀ u, Integrable (fun x ↦ rexp (u * x)) ν) :
     Monotone fun θ ↦ ∫ x, rexp ((1 + θ) * x) ∂ν - ∫ x, rexp (θ * x) ∂ν := by
   intro θ θ' hθ
-  show ∫ x, rexp ((1 + θ) * x) ∂ν - ∫ x, rexp (θ * x) ∂ν
+  change ∫ x, rexp ((1 + θ) * x) ∂ν - ∫ x, rexp (θ * x) ∂ν
       ≤ ∫ x, rexp ((1 + θ') * x) ∂ν - ∫ x, rexp (θ' * x) ∂ν
   rw [← integral_sub (hν _) (hν _), ← integral_sub (hν _) (hν _)]
   refine integral_mono ((hν _).sub (hν _)) ((hν _).sub (hν _)) fun x ↦ ?_
-  show rexp ((1 + θ) * x) - rexp (θ * x) ≤ rexp ((1 + θ') * x) - rexp (θ' * x)
+  change rexp ((1 + θ) * x) - rexp (θ * x) ≤ rexp ((1 + θ') * x) - rexp (θ' * x)
   have key : 0 ≤ (rexp (θ' * x) - rexp (θ * x)) * (rexp x - 1) := by
     rcases le_total 0 x with hx | hx
     · exact mul_nonneg (sub_nonneg.2 (Real.exp_le_exp.2 (mul_le_mul_of_nonneg_right hθ hx)))

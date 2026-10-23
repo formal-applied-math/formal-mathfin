@@ -199,7 +199,7 @@ dependency to its `lakefile.toml`:
 [[require]]
 name = "MathFin"
 git = "https://github.com/formal-applied-math/formal-mathfin"
-rev = "v1.5.0"
+rev = "v1.6.0"
 ```
 
 Then fetch it and the prebuilt Mathlib files:

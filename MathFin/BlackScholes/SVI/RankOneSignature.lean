@@ -58,7 +58,7 @@ theorem one_le_sigPos_of_pos {V : Type*} [AddCommGroup V] [Module ℝ V]
 
 theorem sigPos_le_one_of_rankOne {V : Type*} [AddCommGroup V] [Module ℝ V]
     [FiniteDimensional ℝ V] (Q : QuadraticForm ℝ V) (l : V →ₗ[ℝ] ℝ)
-    (a : ℝ) (hQ : ∀ x, Q x = a*(l x)^2) : sigPos Q ≤ 1 := by
+    (a : ℝ) (hQ : ∀ x, Q x = a * (l x) ^ 2) : sigPos Q ≤ 1 := by
   obtain ⟨W, hW, hp⟩ := exists_finrank_eq_sigPos_and_posDef Q
   let L := l.comp W.subtype
   have hinj : Function.Injective L := by
@@ -78,7 +78,7 @@ theorem sigPos_le_one_of_rankOne {V : Type*} [AddCommGroup V] [Module ℝ V]
 its coefficient; a zero coefficient is allowed. -/
 theorem formSignature_rankOne {V : Type*} [AddCommGroup V] [Module ℝ V]
     [FiniteDimensional ℝ V] (Q : QuadraticForm ℝ V) (l : V →ₗ[ℝ] ℝ)
-    (v : V) (hv : l v ≠ 0) (a : ℝ) (hQ : ∀ x, Q x = a*(l x)^2) :
+    (v : V) (hv : l v ≠ 0) (a : ℝ) (hQ : ∀ x, Q x = a * (l x) ^ 2) :
     formSignature Q = sign a := by
   have hneg : ∀ x, (-Q) x = (-a)*(l x)^2 := by intro x; simp [hQ]
   rcases lt_trichotomy a 0 with ha | rfl | ha

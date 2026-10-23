@@ -15,7 +15,8 @@ paths upgrade fixed-time Itô identities before any random-time substitution.
 
 ## Result
 
-Public entry points include `planeDrift`, `planeResidual`, `planeGenerator_continuous`, `planeDrift_continuous`.
+Public entry points include `planeDrift`, `planeResidual`, `planeGenerator_continuous`,
+`planeDrift_continuous`.
 -/
 
 @[expose] public section
@@ -164,7 +165,8 @@ theorem planeValue_stopped_integrable {G : ℝ × ℝ → ℝ} (hG : Continuous 
     Integrable (fun ω => G (θ.time ω,brownian (θ.time ω) ω)) gaussianLimit := by
   apply (integrable_const A).mono'
     (hG.measurable.comp ((NNReal.continuous_coe.measurable.comp θ.measurable_time).prodMk
-      (measurable_brownian_uncurry.comp (θ.measurable_time.prodMk measurable_id)))).aestronglyMeasurable
+      (measurable_brownian_uncurry.comp
+          (θ.measurable_time.prodMk measurable_id)))).aestronglyMeasurable
   exact Eventually.of_forall (fun ω => hb _ (θ.le_horizon ω) _)
 
 /-- Dynkin's identity at any bounded raw Brownian stopping rule. -/
@@ -177,7 +179,8 @@ theorem plane_dynkin_boundedRule {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G
   have hi := planeValue_stopped_integrable hG.continuous θ hb
   have h0 : Integrable (fun ω => G (0,brownian 0 ω)) gaussianLimit :=
     (integrable_const A).mono'
-      (hG.continuous.measurable.comp (measurable_const.prodMk (measurable_brownian 0))).aestronglyMeasurable
+      (hG.continuous.measurable.comp
+          (measurable_const.prodMk (measurable_brownian 0))).aestronglyMeasurable
       (Eventually.of_forall (fun ω => hb 0 zero_le _))
   have hd := planeDrift_stopped_integrable hG θ hL
   have he := planeResidual_expected_stopped_zero hG θ hb hL

@@ -19,7 +19,8 @@ not asserted by these elementary results.
 
 ## Result
 
-Public entry points include `exerciseSet`, `exerciseThreshold`, `value_at_zero_spot`, `value_continuousOn_spot`.
+Public entry points include `exerciseSet`, `exerciseThreshold`, `value_at_zero_spot`,
+`value_continuousOn_spot`.
 -/
 
 @[expose] public section
@@ -86,7 +87,8 @@ theorem exerciseSet_convex (hW : Measurable W.uncurry) (hzero : ∀ᵐ ω ∂P, 
     have hh := congrArg (fun z : ℝ => z*K) hab
     nlinarith
   have hbound : a*x+b*y ≤ K := by
-    have hh := add_le_add (mul_le_mul_of_nonneg_left hx.2.1 ha) (mul_le_mul_of_nonneg_left hy.2.1 hb)
+    have hh :=
+        add_le_add (mul_le_mul_of_nonneg_left hx.2.1 ha) (mul_le_mul_of_nonneg_left hy.2.1 hb)
     nlinarith [congrArg (fun z : ℝ => z*K) hab]
   have hv := (value_convexOn_spot (P := P) (𝓕 := 𝓕) (q := q) (σ := σ) (T := T) hW hK hr).2
     hx.1 hy.1 ha hb hab
@@ -116,7 +118,8 @@ theorem exerciseSet_bddAbove : BddAbove (exerciseSet P 𝓕 W K r q σ T) :=
 
 theorem threshold_mem_exerciseSet (hW : Measurable W.uncurry) (hzero : ∀ᵐ ω ∂P, W 0 ω = 0)
     (hK : 0 ≤ K) (hr : 0 ≤ r) : exerciseThreshold P 𝓕 W K r q σ T ∈ exerciseSet P 𝓕 W K r q σ T :=
-  (exerciseSet_closed hW hzero hK hr).csSup_mem ⟨0,zero_mem_exerciseSet hW hzero hK hr⟩ exerciseSet_bddAbove
+  (exerciseSet_closed hW hzero hK hr).csSup_mem ⟨0,zero_mem_exerciseSet hW hzero hK hr⟩
+      exerciseSet_bddAbove
 
 theorem exerciseSet_eq_interval (hW : Measurable W.uncurry) (hzero : ∀ᵐ ω ∂P, W 0 ω = 0)
     (hK : 0 ≤ K) (hr : 0 ≤ r) :

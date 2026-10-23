@@ -11,7 +11,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.AugmentedValue
 /-! # The American value on the completed usual Brownian filtration 
 ## Result
 
-Public entry points include `brownianUsualFiltration`, `brownian_completedRaw_le_usual`, `brownian_completed_measurable`, `brownianUsualAmericanPut`.
+Public entry points include `brownianUsualFiltration`, `brownian_completedRaw_le_usual`,
+`brownian_completed_measurable`, `brownianUsualAmericanPut`.
 -/
 
 @[expose] public section
@@ -32,7 +33,8 @@ noncomputable def brownianUsualFiltration :
 theorem brownian_completedRaw_le_usual :
     completedAmbientFiltration gaussianLimit brownianFiltration ≤ brownianUsualFiltration :=
   le_trans le_sup_left (ambientNullAugmentation (mΩ := completedMeasurableSpace gaussianLimit)
-    (completedAmbientFiltration gaussianLimit brownianFiltration) (completedMeasure gaussianLimit)).le_rightCont
+    (completedAmbientFiltration gaussianLimit brownianFiltration)
+        (completedMeasure gaussianLimit)).le_rightCont
 
 instance brownianUsualFiltration_isRightContinuous : brownianUsualFiltration.IsRightContinuous :=
   inferInstanceAs ((ambientNullAugmentation (mΩ := completedMeasurableSpace gaussianLimit)
@@ -89,15 +91,19 @@ theorem brownianUsualAmericanPut_eq_raw {K r q σ S : ℝ}
     (hK : 0 < K) (hr : 0 ≤ r) (hσ : 0 < σ) (hS : 0 < S) (T : ℝ≥0) :
     brownianUsualAmericanPut K r q σ S T = brownianAmericanPut K r q σ S T := by
   have hb (t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ‖classicalCandidate brownian K r q σ S p T t ω‖ ≤ K := by
-    obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp brownian hK.le hr T t ω
+    obtain ⟨hlo,hhi⟩ :=
+        classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp brownian hK.le hr T t ω
     simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
   have hU0 : StronglyMeasurable (classicalCandidate brownian K r q σ S p T 0) :=
-    ((classicalCandidate_adapted hp brownian_adapted T 0).mono (brownianFiltration.le 0) le_rfl).stronglyMeasurable
+    ((classicalCandidate_adapted hp brownian_adapted T 0).mono (brownianFiltration.le 0)
+        le_rfl).stronglyMeasurable
   have hI0 := integral_completion_original gaussianLimit hU0
-  have hinitial := classicalCandidate_initial isBrownianReal_brownian.eval_zero_ae_eq_zero K r q σ S p T
+  have hinitial :=
+      classicalCandidate_initial isBrownianReal_brownian.eval_zero_ae_eq_zero K r q σ S p T
   let θ := brownianClassicalContactRule hp hK hS T
   have hreward := integral_completion_original gaussianLimit
-    (putReward_measurable measurable_brownian_uncurry K r q σ S θ.measurable_time).stronglyMeasurable
+    (putReward_measurable measurable_brownian_uncurry K r q σ S
+        θ.measurable_time).stronglyMeasurable
   have hcontact := brownianClassicalContactRule_expectedReward T hp hK hr hS hσ
   have hprice := brownian_price_identification (T := T) hp hK hr hS hσ
   have hsuper := brownianClassicalCandidate_usual_supermartingale (S := S) hp hK.le hr hσ T
@@ -151,12 +157,14 @@ theorem brownianUsual_boundary_conclusions {K r q σ : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 < K) (hr : 0 ≤ r) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :
-    (0 ≤ deriv (deriv (fun s : ℝ => Real.log (brownianUsualExerciseBoundary K r q σ s.toNNReal/K))) τ) ∧
+    (0 ≤ deriv
+        (deriv (fun s : ℝ => Real.log (brownianUsualExerciseBoundary K r q σ s.toNNReal/K))) τ) ∧
       0 < deriv (deriv (fun s : ℝ => brownianUsualExerciseBoundary K r q σ s.toNNReal)) τ := by
   have he : (fun s : ℝ => brownianUsualExerciseBoundary K r q σ s.toNNReal) =ᶠ[𝓝 τ]
       (fun s : ℝ => brownianExerciseBoundary K r q σ s.toNNReal) := by
     filter_upwards [Ioi_mem_nhds hτ] with s hs
-    rw [brownianUsual_boundary_eq_classical hp hK hr hσ hs,brownian_boundary_eq_classical hp hK hr hσ hs]
+    rw [brownianUsual_boundary_eq_classical hp hK hr hσ hs,brownian_boundary_eq_classical
+        hp hK hr hσ hs]
   have hlog := he.fun_comp (fun y => Real.log (y/K))
   simp only [Function.comp_def] at hlog
   rw [he.deriv.deriv_eq,hlog.deriv.deriv_eq]

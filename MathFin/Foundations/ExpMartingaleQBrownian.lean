@@ -114,7 +114,7 @@ private theorem mgf_expY_eq (h : IsExpQMartingale Q 𝓕 Y T) {t : ℝ≥0} (htT
       = Real.exp (-(a ^ 2 * (t : ℝ) / 2)) * ∫ ω, Real.exp (a * Y t ω) ∂Q := by
     rw [← integral_const_mul]
     refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
-    show Real.exp (a * Y t ω - a ^ 2 * (t : ℝ) / 2)
+    change Real.exp (a * Y t ω - a ^ 2 * (t : ℝ) / 2)
         = Real.exp (-(a ^ 2 * (t : ℝ) / 2)) * Real.exp (a * Y t ω)
     rw [show a * Y t ω - a ^ 2 * (t : ℝ) / 2 = -(a ^ 2 * (t : ℝ) / 2) + a * Y t ω from by ring,
       Real.exp_add]
@@ -191,7 +191,7 @@ private theorem condExp_Y_increment (h : IsExpQMartingale Q 𝓕 Y T) (a : ℝ) 
   have hft_int : Integrable ft Q := by
     have hfac : ft = fun ω ↦ Real.exp (-(a ^ 2 * (t : ℝ) / 2)) * Real.exp (a * Y t ω) := by
       funext ω
-      show Real.exp (a * Y t ω - a ^ 2 * (t : ℝ) / 2)
+      change Real.exp (a * Y t ω - a ^ 2 * (t : ℝ) / 2)
           = Real.exp (-(a ^ 2 * (t : ℝ) / 2)) * Real.exp (a * Y t ω)
       rw [show a * Y t ω - a ^ 2 * (t : ℝ) / 2 = -(a ^ 2 * (t : ℝ) / 2) + a * Y t ω from by ring,
         Real.exp_add]
@@ -323,7 +323,7 @@ private theorem Y_linComb_range_map_eq_gaussianReal (h : IsExpQMartingale Q 𝓕
       ∫ ω, Real.exp (∑ k ∈ Finset.range n, (r * c k) * (Y (t (k + 1)) ω - Y (t k) ω)) ∂Q
         = ∏ k ∈ Finset.range n, Real.exp ((r * c k) ^ 2 * ((t (k + 1) : ℝ) - (t k : ℝ)) / 2) :=
     (Y_increments_mgf_range h ht htT n fun k ↦ r * c k).2
-  show ∫ ω, Real.exp (r * ∑ k ∈ Finset.range n, c k * (Y (t (k + 1)) ω - Y (t k) ω)) ∂Q
+  change ∫ ω, Real.exp (r * ∑ k ∈ Finset.range n, c k * (Y (t (k + 1)) ω - Y (t k) ω)) ∂Q
       = Real.exp (v * r ^ 2 / 2)
   rw [hr, hmgfn, ← Real.exp_sum, hv, Finset.sum_mul, Finset.sum_div]
   exact congrArg Real.exp (Finset.sum_congr rfl fun k _ ↦ by ring)

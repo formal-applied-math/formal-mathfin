@@ -11,8 +11,8 @@ public import MathFin.Foundations.ItoProcessPredictable
 /-! # The drift of an Itô process with adapted coefficients
 
 The drift part of the adapted-coefficient Itô formula (`ItoFormulaAdapted`). For a bounded adapted
-drift rate `b` with continuous paths, the pathwise integral `A_t = ∫₀ᵗ b_s ds` is taken as it stands, with no
-modification:
+drift rate `b` with continuous paths, the pathwise integral `A_t = ∫₀ᵗ b_s ds` is taken as it
+stands, with no modification:
 
 * it is Lipschitz in time with the bound of `b` as constant, on every path
   (`abs_driftPath_sub_le`), which is the hypothesis the quadratic variation
@@ -48,7 +48,8 @@ include hb_cont hb_bdd in
 theorem integrableOn_Ioc (u t : ℝ≥0) (ω : Ω) :
     IntegrableOn (fun s ↦ b s ω) (Set.Ioc u t) timeMeasure :=
   Measure.integrableOn_of_bounded (by rw [timeMeasure_Ioc]; exact ENNReal.ofReal_ne_top)
-    (hb_cont ω).aestronglyMeasurable (ae_of_all _ fun s ↦ (Real.norm_eq_abs _).trans_le (hb_bdd s ω))
+    (hb_cont ω).aestronglyMeasurable
+        (ae_of_all _ fun s ↦ (Real.norm_eq_abs _).trans_le (hb_bdd s ω))
 
 omit mΩ in
 include hb_cont hb_bdd in
@@ -66,7 +67,8 @@ include hb_cont hb_bdd in
 theorem abs_driftPath_sub_le ⦃s t : ℝ≥0⦄ (hst : s ≤ t) (ω : Ω) :
     |driftPath b t ω - driftPath b s ω| ≤ Cb * ((t : ℝ) - s) := by
   rw [driftPath_sub hb_cont hb_bdd hst, ← Real.norm_eq_abs]
-  refine (norm_setIntegral_le_of_norm_le_const (by rw [timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top)
+  refine
+      (norm_setIntegral_le_of_norm_le_const (by rw [timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top)
     fun x _ ↦ (Real.norm_eq_abs _).trans_le (hb_bdd x ω)).trans_eq ?_
   rw [measureReal_def, timeMeasure_Ioc,
     ENNReal.toReal_ofReal (sub_nonneg.2 (NNReal.coe_le_coe.2 hst))]

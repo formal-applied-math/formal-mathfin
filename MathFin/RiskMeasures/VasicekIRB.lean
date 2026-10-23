@@ -122,7 +122,8 @@ theorem tendsto_oneFactorLossFraction_ae {ε : ℕ → Ω → ℝ}
     (hρ : ρ < 1) (F : Ω → ℝ) :
     ∀ᵐ ω ∂P, Tendsto (fun m ↦ oneFactorLossFraction π ρ F ε m ω) atTop
       (𝓝 (oneFactorPD π ρ (F ω))) := by
-  filter_upwards [tendsto_empiricalCDF_ae hε hind (by rw [cdf_gaussianReal_zero_one]; exact continuous_Phi)]
+  filter_upwards
+      [tendsto_empiricalCDF_ae hε hind (by rw [cdf_gaussianReal_zero_one]; exact continuous_Phi)]
     with ω hω
   simp_rw [oneFactorLossFraction_eq_empiricalCDF hρ]
   simpa only [cdf_gaussianReal_zero_one, oneFactorPD] using

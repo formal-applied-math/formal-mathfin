@@ -14,7 +14,8 @@ No derivatives of the initial datum are taken.
 
 ## Result
 
-Public entry points include `heatKernel_smoothAt`, `compact_continuous_heatFlow_smooth`, `compact_continuous_heatFlow_contDiff`.
+Public entry points include `heatKernel_smoothAt`, `compact_continuous_heatFlow_smooth`,
+`compact_continuous_heatFlow_contDiff`.
 -/
 
 @[expose] public section

@@ -288,7 +288,7 @@ private lemma integrable_mul_heatKernel_of_gaussian {t : ℝ} (ht : 0 < t) {g : 
     integrable_withDensity_iff_integrable_smul' (by fun_prop)
       (ae_of_all _ fun y ↦ gaussianPDF_lt_top)] at hg
   refine hg.congr (Filter.Eventually.of_forall fun y ↦ ?_)
-  show (gaussianPDF 0 t.toNNReal y).toReal • g y = g y * heatKernel t y
+  change (gaussianPDF 0 t.toNNReal y).toReal • g y = g y * heatKernel t y
   have hpdf : (gaussianPDF 0 t.toNNReal y).toReal = heatKernel t y := by
     rw [heatKernel_eq_gaussianPDFReal ht]
     simp only [gaussianPDF]
@@ -312,7 +312,7 @@ private lemma integrable_dK {t : ℝ} (ht : 0 < t) :
     Integrable (fun y ↦ -(y / t) * heatKernel t y) volume := by
   refine ((integrable_id_mul_heatKernel ht).const_mul (-(1 / t))).congr
     (Filter.Eventually.of_forall fun y ↦ ?_)
-  show -(1 / t) * (y * heatKernel t y) = -(y / t) * heatKernel t y
+  change -(1 / t) * (y * heatKernel t y) = -(y / t) * heatKernel t y
   ring
 
 /-- `∂²_y K = K·(y²−t)/t²` is integrable. -/
@@ -321,7 +321,7 @@ private lemma integrable_ddK {t : ℝ} (ht : 0 < t) :
   have ht_ne : t ≠ 0 := ht.ne'
   refine (((integrable_sq_mul_heatKernel ht).const_mul (1 / t ^ 2)).sub
     ((integrable_heatKernel ht).const_mul (1 / t))).congr (Filter.Eventually.of_forall fun y ↦ ?_)
-  show 1 / t ^ 2 * (y ^ 2 * heatKernel t y) - 1 / t * heatKernel t y
+  change 1 / t ^ 2 * (y ^ 2 * heatKernel t y) - 1 / t * heatKernel t y
       = heatKernel t y * (y ^ 2 - t) / t ^ 2
   field_simp
 
@@ -432,7 +432,7 @@ lemma integrable_payoff_mul_heatKernel {t : ℝ} (ht : 0 < t) {h : ℝ → ℝ} 
   refine (integrable_exp_mul_poly_heatKernel ht x 1).mono'
     (hhc.mul ((continuous_heatKernel t).comp
       (continuous_id.sub continuous_const))).aestronglyMeasurable (ae_of_all _ fun z ↦ ?_)
-  show ‖h z * heatKernel t (z - x)‖ ≤ Real.exp z * (((z - x) ^ 2 + 1) * heatKernel t (z - x))
+  change ‖h z * heatKernel t (z - x)‖ ≤ Real.exp z * (((z - x) ^ 2 + 1) * heatKernel t (z - x))
   rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (heatKernel_nonneg ht (z - x))]
   have hKnn := heatKernel_nonneg ht (z - x)
   calc |h z| * heatKernel t (z - x)
@@ -441,13 +441,14 @@ lemma integrable_payoff_mul_heatKernel {t : ℝ} (ht : 0 < t) {h : ℝ → ℝ} 
         apply mul_le_mul_of_nonneg_left _ (Real.exp_nonneg z)
         nlinarith [sq_nonneg (z - x), hKnn]
 
-/-- **Spatial monotonicity of the heat kernel.** For `t > 0` and `|x − x₀| < δ`, the kernel
-centred near `x` is dominated by a *wider* kernel centred at the fixed `x₀`:
-`K(t, z − x) ≤ √2 · e^{δ²/(2t)} · K(2t, z − x₀)`. From the elementary `(a + b)² ≥ ½a² − b²`
-(here `(z−x)² ≥ ½(z−x₀)² − (x−x₀)² ≥ ½(z−x₀)² − δ²`), so
-`exp(−(z−x)²/(2t)) ≤ e^{δ²/(2t)}·exp(−(z−x₀)²/(4t))`, and `exp(−(z−x₀)²/(4t)) = √2·√(2πt)·K(2t,z−x₀)`.
-This is the spatial analogue of the temporal bound `K(s,·) ≤ √3·K(3t/2,·)` (`heatKernel_temporal_le`);
-it makes the `x`-derivatives' dominating function independent of `x` over `Metric.ball x₀ δ`. -/
+/-- **Spatial monotonicity of the heat kernel.** For `t > 0` and `|x − x₀| < δ`, the kernel centred
+near `x` is dominated by a *wider* kernel centred at the fixed `x₀`:
+`K(t, z − x) ≤ √2 · e^{δ²/(2t)} · K(2t, z − x₀)`. From the elementary `(a + b)² ≥ ½a² − b²` (here
+`(z−x)² ≥ ½(z−x₀)² − (x−x₀)² ≥ ½(z−x₀)² − δ²`), so
+`exp(−(z−x)²/(2t)) ≤ e^{δ²/(2t)}·exp(−(z−x₀)²/(4t))`, and
+`exp(−(z−x₀)²/(4t)) = √2·√(2πt)·K(2t,z−x₀)`. This is the spatial analogue of the temporal bound
+`K(s,·) ≤ √3·K(3t/2,·)` (`heatKernel_temporal_le`); it makes the `x`-derivatives' dominating
+function independent of `x` over `Metric.ball x₀ δ`. -/
 lemma heatKernel_shift_le {t : ℝ} (ht : 0 < t) {x x₀ δ : ℝ}
     (hx : |x - x₀| < δ) (z : ℝ) :
     heatKernel t (z - x)
@@ -531,13 +532,14 @@ private lemma sq_sub_div_le {t s : ℝ} (ht : 0 < t) (hs_lo : t / 2 < s) (hs_hi 
 
 /-- **Local domination of the heat kernel under a joint variance + centre perturbation.** When the
 variance `v` stays in `(v₀/2, 3v₀/2)` and the centre `x` within `δ` of `x₀`,
-`K(v, z−x) ≤ √3·√2·e^{δ²/(3v₀)}·K(3v₀, z−x₀)`. The composition of `heatKernel_temporal_le` (variance)
-with `heatKernel_shift_le` (centre); the domination engine for differentiating the price along the
-curve `τ ↦ (σ²τ, log S + (r−σ²/2)τ)`, where both kernel arguments move with `τ`. -/
+`K(v, z−x) ≤ √3·√2·e^{δ²/(3v₀)}·K(3v₀, z−x₀)`. The composition of `heatKernel_temporal_le`
+(variance) with `heatKernel_shift_le` (centre); the domination engine for differentiating the price
+along the curve `τ ↦ (σ²τ, log S + (r−σ²/2)τ)`, where both kernel arguments move with `τ`. -/
 lemma heatKernel_loc_le {v₀ v x x₀ δ : ℝ} (hv₀ : 0 < v₀)
     (hv_lo : v₀ / 2 < v) (hv_hi : v < 3 * v₀ / 2) (hx : |x - x₀| < δ) (z : ℝ) :
     heatKernel v (z - x)
-      ≤ Real.sqrt 3 * (Real.sqrt 2 * Real.exp (δ ^ 2 / (3 * v₀))) * heatKernel (3 * v₀) (z - x₀) := by
+      ≤ Real.sqrt 3 * (Real.sqrt 2 * Real.exp (δ ^ 2 / (3 * v₀))) *
+          heatKernel (3 * v₀) (z - x₀) := by
   have h32 : (0 : ℝ) < 3 * v₀ / 2 := by positivity
   calc heatKernel v (z - x)
       ≤ Real.sqrt 3 * heatKernel (3 * v₀ / 2) (z - x) :=
@@ -545,13 +547,14 @@ lemma heatKernel_loc_le {v₀ v x x₀ δ : ℝ} (hv₀ : 0 < v₀)
     _ ≤ Real.sqrt 3 * (Real.sqrt 2 * Real.exp (δ ^ 2 / (2 * (3 * v₀ / 2)))
           * heatKernel (2 * (3 * v₀ / 2)) (z - x₀)) :=
         mul_le_mul_of_nonneg_left (heatKernel_shift_le h32 hx z) (Real.sqrt_nonneg 3)
-    _ = Real.sqrt 3 * (Real.sqrt 2 * Real.exp (δ ^ 2 / (3 * v₀))) * heatKernel (3 * v₀) (z - x₀) := by
+    _ = Real.sqrt 3 * (Real.sqrt 2 * Real.exp (δ ^ 2 / (3 * v₀))) *
+        heatKernel (3 * v₀) (z - x₀) := by
         rw [show 2 * (3 * v₀ / 2) = 3 * v₀ from by ring]; ring
 
-/-- **Curve quadratic-ratio bound** (the `∂_t`-kernel polynomial factor of the curve domination).
-On `v ∈ (v₀/2, 3v₀/2)` with the centre shifted by `≤ d` (`|W − W₀| ≤ d`), the moving denominator is
-absorbed into the fixed `v₀`: `|W²−v|/(2v²) ≤ 2(2W₀²+2d²+3v₀/2)/v₀²`. Isolated as its own lemma so the
-`nlinarith` elaborates without the heartbeat blow-up that defeats it inline. -/
+/-- **Curve quadratic-ratio bound** (the `∂_t`-kernel polynomial factor of the curve domination). On
+`v ∈ (v₀/2, 3v₀/2)` with the centre shifted by `≤ d` (`|W − W₀| ≤ d`), the moving denominator is
+absorbed into the fixed `v₀`: `|W²−v|/(2v²) ≤ 2(2W₀²+2d²+3v₀/2)/v₀²`. Isolated as its own lemma so
+the `nlinarith` elaborates without the heartbeat blow-up that defeats it inline. -/
 private lemma curve_sq_ratio_le {v₀ v W W₀ d : ℝ} (hv₀ : 0 < v₀) (hvlo : v₀ / 2 < v)
     (hvhi : v < 3 * v₀ / 2) (hW : |W - W₀| ≤ d) (hd : 0 ≤ d) :
     |W ^ 2 - v| / (2 * v ^ 2) ≤ 2 * (2 * W₀ ^ 2 + 2 * d ^ 2 + 3 * v₀ / 2) / v₀ ^ 2 := by
@@ -739,8 +742,8 @@ private lemma integral_heatKernel_eq_one {s : ℝ} (hs : 0 < s) :
   rw [integral_congr_ae (Filter.Eventually.of_forall (heatKernel_eq_gaussianPDFReal hs))]
   exact integral_gaussianPDFReal_eq_one 0 (Real.toNNReal_pos.mpr hs).ne'
 
-/-- Uniform bound on the time-derivative `φ′(s) = ½∫f″·K(s,·)`: `|φ′(s)| ≤ ½·Cf″` for `s > 0`
-(since `∫ K(s,·) = 1` and `|f″| ≤ Cf″`). The majorant making `φ′` interval-integrable on `[0, t]`. -/
+/-- Uniform bound on the time-derivative `φ′(s) = ½∫f″·K(s,·)`: `|φ′(s)| ≤ ½·Cf″` for `s > 0` (since
+`∫ K(s,·) = 1` and `|f″| ≤ Cf″`). The majorant making `φ′` interval-integrable on `[0, t]`. -/
 private lemma abs_half_integral_ddf_heatKernel_le {s : ℝ} (hs : 0 < s) {f'' : ℝ → ℝ}
     (_hf''c : Continuous f'') {Cf'' : ℝ} (hCf'' : ∀ x, |f'' x| ≤ Cf'') :
     |(1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume| ≤ (1 / 2) * Cf'' := by
@@ -751,7 +754,7 @@ private lemma abs_half_integral_ddf_heatKernel_le {s : ℝ} (hs : 0 < s) {f'' : 
     _ ≤ ∫ y, Cf'' * heatKernel s y ∂volume := by
         refine integral_mono_of_nonneg (Filter.Eventually.of_forall fun y ↦ abs_nonneg _)
           ((integrable_heatKernel hs).const_mul Cf'') (Filter.Eventually.of_forall fun y ↦ ?_)
-        show |f'' y * heatKernel s y| ≤ Cf'' * heatKernel s y
+        change |f'' y * heatKernel s y| ≤ Cf'' * heatKernel s y
         rw [abs_mul, abs_of_nonneg (heatKernel_nonneg hs y)]
         exact mul_le_mul_of_nonneg_right (hCf'' y) (heatKernel_nonneg hs y)
     _ = Cf'' := by rw [integral_const_mul, integral_heatKernel_eq_one hs, mul_one]
@@ -785,7 +788,7 @@ theorem heatConvolution_eq_add_integral_deriv {t : ℝ} (ht : 0 < t) {f f' f'' :
       (ContinuousOn.aestronglyMeasurable (fun s hs ↦ (hψ_cont s hs.1).continuousWithinAt)
         measurableSet_Ioc)
       (ae_restrict_of_forall_mem measurableSet_Ioc fun s hs ↦ ?_)
-    show ‖(1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume‖ ≤ (1 / 2) * Cf''
+    change ‖(1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume‖ ≤ (1 / 2) * Cf''
     rw [Real.norm_eq_abs]
     exact abs_half_integral_ddf_heatKernel_le hs.1 hf''c hCf''
   -- (b) `Φ` is continuous on `[0, t]`
@@ -812,7 +815,8 @@ theorem heatConvolution_eq_add_integral_deriv {t : ℝ} (ht : 0 < t) {f f' f'' :
     exact ((hasDerivAt_phi_heatEq hs.1 hf hf' hf''c hCf hCf' hCf'').congr_of_eventuallyEq
       heq).hasDerivWithinAt
   -- (d) FTC, then read off the boundary values `Φ t = φ t`, `Φ 0 = f 0`
-  have hFTC := intervalIntegral.integral_eq_sub_of_hasDeriv_right_of_le ht.le hΦ_cont hΦ_deriv hψ_int
+  have hFTC :=
+      intervalIntegral.integral_eq_sub_of_hasDeriv_right_of_le ht.le hΦ_cont hΦ_deriv hψ_int
   rw [show Φ t = φ t from if_pos ht, show Φ 0 = f 0 from if_neg (lt_irrefl 0)] at hFTC
   linarith [hFTC]
 
@@ -845,10 +849,10 @@ private lemma integral_shift_eq_feynmanU (g : ℝ → ℝ) (t x : ℝ) :
 
 variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
 
-/-- **Core transfer.** If `B_t` has law `N(0, t)` (`Measure.map (B t) μ = gaussianReal 0 t.toNNReal`),
-the heat-kernel form `feynmanU g t x` equals the expectation `E[g(x + B_t)]`. Factored out of
-`feynmanU_eq_expectation` so the same transfer serves both the increment-hypothesis bundle and the
-`IsPreBrownianReal` marginal law. -/
+/-- **Core transfer.** If `B_t` has law `N(0, t)`
+(`Measure.map (B t) μ = gaussianReal 0 t.toNNReal`), the heat-kernel form `feynmanU g t x` equals
+the expectation `E[g(x + B_t)]`. Factored out of `feynmanU_eq_expectation` so the same transfer
+serves both the increment-hypothesis bundle and the `IsPreBrownianReal` marginal law. -/
 theorem feynmanU_eq_integral_of_map
     {B : ℝ → Ω → ℝ} {g : ℝ → ℝ} {t : ℝ}
     (h_aem : AEMeasurable (B t) μ)
@@ -956,11 +960,12 @@ theorem expectation_ito
   show (1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume = (1 / 2) * ∫ ω, f'' (B s ω) ∂μ
   rw [hbridge f'' hf''c hs.1]
 
-/-- **Itô's formula in expectation for a pre-Brownian motion** — the repo-standard `IsPreBrownianReal`
-(Degenne) reading of `expectation_ito`. For `f ∈ C²_b` and `t > 0`,
+/-- **Itô's formula in expectation for a pre-Brownian motion** — the repo-standard
+`IsPreBrownianReal` (Degenne) reading of `expectation_ito`. For `f ∈ C²_b` and `t > 0`,
 `E[f(X_t)] = f(0) + ½·∫₀ᵗ E[f″(X_s)] ds`. The increment-law hypotheses are discharged from the
-marginal law `IsPreBrownianReal.hasLaw_eval` through the shared transfer `feynmanU_eq_integral_of_map`.
-(`X` is `ℝ≥0`-indexed; the `∫₀ᵗ` runs over real `s`, so `X` is read at `·.toNNReal`.) -/
+marginal law `IsPreBrownianReal.hasLaw_eval` through the shared transfer
+`feynmanU_eq_integral_of_map`. (`X` is `ℝ≥0`-indexed; the `∫₀ᵗ` runs over real `s`, so `X` is read
+at `·.toNNReal`.) -/
 theorem expectation_ito_isPreBrownian {X : ℝ≥0 → Ω → ℝ} (hX : IsPreBrownianReal X μ)
     {t : ℝ} (ht : 0 < t) {f f' f'' : ℝ → ℝ}
     (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
@@ -994,7 +999,8 @@ needs no regularity beyond the growth bound. The three diff-under-integral lemma
 `hasDerivAt_phi`, replacing its bounded `|f| ≤ Cf` by the sub-Gaussian envelope
 `integrable_exp_mul_poly_heatKernel` and (for the `x`-derivatives) its temporal monotonicity by the
 spatial `heatKernel_shift_le`. This kernel-side heat equation for `u` (`feynmanU_heat_equation`,
-with the derivatives below) is consumed by the Black–Scholes-PDE keystone `sc-bs-pde-feynman-kac`. -/
+with the derivatives below) is consumed by the Black–Scholes-PDE keystone `sc-bs-pde-feynman-kac`.
+-/
 
 /-- **Time-derivative of the Feynman–Kac function** (kernel-side, sub-Gaussian payoff). For `h`
 continuous with `|h z| ≤ eᶻ` and `t > 0`,
@@ -1007,7 +1013,7 @@ theorem hasDerivAt_feynmanU_t {t : ℝ} (ht : 0 < t) {h : ℝ → ℝ} (hhc : Co
     (hh : ∀ z, |h z| ≤ Real.exp z) (x : ℝ) :
     HasDerivAt (fun s ↦ feynmanU h s x)
       (∫ z, h z * (heatKernel t (z - x) * ((z - x) ^ 2 - t) / (2 * t ^ 2)) ∂volume) t := by
-  show HasDerivAt (fun s ↦ ∫ z, h z * heatKernel s (z - x) ∂volume)
+  change HasDerivAt (fun s ↦ ∫ z, h z * heatKernel s (z - x) ∂volume)
       (∫ z, h z * (heatKernel t (z - x) * ((z - x) ^ 2 - t) / (2 * t ^ 2)) ∂volume) t
   have h32 : (0 : ℝ) < 3 * t / 2 := by positivity
   refine hasDerivAt_integral_mul_kernelFamily (φ := fun s z ↦ heatKernel s (z - x))
@@ -1058,7 +1064,7 @@ theorem hasDerivAt_feynmanU_x {t : ℝ} (ht : 0 < t) {h : ℝ → ℝ} (hhc : Co
     (hh : ∀ z, |h z| ≤ Real.exp z) (x : ℝ) :
     HasDerivAt (fun x' ↦ feynmanU h t x')
       (∫ z, h z * ((z - x) / t * heatKernel t (z - x)) ∂volume) x := by
-  show HasDerivAt (fun x' ↦ ∫ z, h z * heatKernel t (z - x') ∂volume)
+  change HasDerivAt (fun x' ↦ ∫ z, h z * heatKernel t (z - x') ∂volume)
       (∫ z, h z * ((z - x) / t * heatKernel t (z - x)) ∂volume) x
   have h2t : (0 : ℝ) < 2 * t := by positivity
   refine hasDerivAt_integral_mul_kernelFamily (φ := fun x' z ↦ heatKernel t (z - x'))
@@ -1135,7 +1141,8 @@ theorem hasDerivAt_feynmanU_xx {t : ℝ} (ht : 0 < t) {h : ℝ → ℝ} (hhc : C
       have hKnn := heatKernel_nonneg ht (z - x)
       have hnorm : ‖h z * ((z - x) / t * heatKernel t (z - x))‖
           = 1 / t * (|h z| * (|z - x| * heatKernel t (z - x))) := by
-        rw [Real.norm_eq_abs, abs_mul, abs_mul, abs_div, abs_of_nonneg hKnn, abs_of_nonneg ht.le]; ring
+        rw [Real.norm_eq_abs, abs_mul, abs_mul, abs_div, abs_of_nonneg hKnn,
+            abs_of_nonneg ht.le]; ring
       rw [hnorm]
       have habs1 : |z - x| ≤ (z - x) ^ 2 + 1 := by
         nlinarith [sq_nonneg (|z - x| - 1), sq_abs (z - x), abs_nonneg (z - x)]
@@ -1155,9 +1162,11 @@ theorem hasDerivAt_feynmanU_xx {t : ℝ} (ht : 0 < t) {h : ℝ → ℝ} (hhc : C
     have habs2 : |(z - x') ^ 2 - t| ≤ 3 * ((z - x) ^ 2 + (3 + t)) := by
       rw [abs_le]
       refine ⟨?_, ?_⟩
-      · nlinarith [sq_nonneg (z - x), sq_nonneg (z - 2 * x + x'), sq_nonneg (2 * (z - x) + (x - x')),
+      · nlinarith
+          [sq_nonneg (z - x), sq_nonneg (z - 2 * x + x'), sq_nonneg (2 * (z - x) + (x - x')),
           hb, ht.le, sq_nonneg (z - x')]
-      · nlinarith [sq_nonneg (z - x), sq_nonneg (z - 2 * x + x'), sq_nonneg (2 * (z - x) + (x - x')),
+      · nlinarith
+          [sq_nonneg (z - x), sq_nonneg (z - 2 * x + x'), sq_nonneg (2 * (z - x) + (x - x')),
           hb, ht.le, sq_nonneg (z - x')]
     have hF'norm : ‖h z * (heatKernel t (z - x') * ((z - x') ^ 2 - t) / t ^ 2)‖
         = 1 / t ^ 2 * (|h z| * (heatKernel t (z - x') * |(z - x') ^ 2 - t|)) := by
@@ -1183,14 +1192,15 @@ theorem hasDerivAt_feynmanU_xx {t : ℝ} (ht : 0 < t) {h : ℝ → ℝ} (hhc : C
             * (Real.exp z * (((z - x) ^ 2 + (3 + t)) * heatKernel (2 * t) (z - x))) := by ring
 
 /-- **Derivative of the Feynman–Kac function along an affine curve** `s ↦ (α s, x₀ + β s)`
-(kernel-side, sub-Gaussian payoff). For `h` continuous with `|h z| ≤ eᶻ`, `α > 0`, `τ > 0`, the price
-`s ↦ feynmanU h (α s) (x₀ + β s)` — with both kernel arguments moving — is differentiable at `τ` with
-`d/ds = ∫ z, h z · (α·∂_t K + β·∂_x K)`. This is the Black–Scholes `τ`-derivative engine (`α = σ²`,
-`β = r − σ²/2`, `x₀ = log S`) and the consumer that makes the heat kernel's joint differentiability
-`hasFDerivAt_heatKernel` load-bearing for pricing. Pointwise derivative: `hasDerivAt_heatKernel_comp`.
-The uniform domination on `s ∈ (τ/2, 3τ/2)` bounds the two terms *separately* by Gaussian-moment
-envelopes (`integrable_exp_mul_poly_heatKernel`) via `heatKernel_loc_le` + `curve_sq_ratio_le` /
-`curve_abs_ratio_le` — no single mega-constant — fed to `hasDerivAt_integral_mul_kernelFamily`. -/
+(kernel-side, sub-Gaussian payoff). For `h` continuous with `|h z| ≤ eᶻ`, `α > 0`, `τ > 0`, the
+price `s ↦ feynmanU h (α s) (x₀ + β s)` — with both kernel arguments moving — is differentiable at
+`τ` with `d/ds = ∫ z, h z · (α·∂_t K + β·∂_x K)`. This is the Black–Scholes `τ`-derivative engine
+(`α = σ²`, `β = r − σ²/2`, `x₀ = log S`) and the consumer that makes the heat kernel's joint
+differentiability `hasFDerivAt_heatKernel` load-bearing for pricing. Pointwise derivative:
+`hasDerivAt_heatKernel_comp`. The uniform domination on `s ∈ (τ/2, 3τ/2)` bounds the two terms
+*separately* by Gaussian-moment envelopes (`integrable_exp_mul_poly_heatKernel`) via
+`heatKernel_loc_le` + `curve_sq_ratio_le` / `curve_abs_ratio_le` — no single mega-constant — fed to
+`hasDerivAt_integral_mul_kernelFamily`. -/
 theorem hasDerivAt_feynmanU_comp {h : ℝ → ℝ} (hhc : Continuous h) (hh : ∀ z, |h z| ≤ Real.exp z)
     {α β x₀ τ : ℝ} (hα : 0 < α) (hτ : 0 < τ) :
     HasDerivAt (fun s ↦ feynmanU h (α * s) (x₀ + β * s))
@@ -1198,7 +1208,7 @@ theorem hasDerivAt_feynmanU_comp {h : ℝ → ℝ} (hhc : Continuous h) (hh : �
               * ((z - (x₀ + β * τ)) ^ 2 - α * τ) / (2 * (α * τ) ^ 2))
           + β * ((z - (x₀ + β * τ)) / (α * τ)
               * heatKernel (α * τ) (z - (x₀ + β * τ)))) ∂volume) τ := by
-  show HasDerivAt (fun s ↦ ∫ z, h z * heatKernel (α * s) (z - (x₀ + β * s)) ∂volume) _ τ
+  change HasDerivAt (fun s ↦ ∫ z, h z * heatKernel (α * s) (z - (x₀ + β * s)) ∂volume) _ τ
   have hατ : (0 : ℝ) < α * τ := by positivity
   have h3ατ : (0 : ℝ) < 3 * (α * τ) := by positivity
   have hd_nn : (0 : ℝ) ≤ |β| * (τ / 2) := by positivity

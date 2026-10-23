@@ -76,7 +76,7 @@ theorem hasDerivAt_gaussianPDFReal_zero_one (z : ℝ) :
 theorem hasDerivAt_Phi (x : ℝ) :
     HasDerivAt Phi (gaussianPDFReal 0 1 x) x := by
   set a : ℝ := x - 1
-  have hax : a < x := by show x - 1 < x; linarith
+  have hax : a < x := by change x - 1 < x; linarith
   have h_pdf_int : Integrable (gaussianPDFReal 0 1) volume :=
     integrable_gaussianPDFReal _ _
   have h_pdf_cont : Continuous (gaussianPDFReal 0 1) := by
@@ -102,7 +102,7 @@ theorem hasDerivAt_Phi (x : ℝ) :
     refine Filter.eventually_of_mem (Ioi_mem_nhds hax) ?_
     intro y hy
     rw [Set.mem_Ioi] at hy
-    show Phi y = Phi a + ∫ z in a..y, gaussianPDFReal 0 1 z
+    change Phi y = Phi a + ∫ z in a..y, gaussianPDFReal 0 1 z
     rw [Phi_eq_integral, Phi_eq_integral, intervalIntegral.integral_of_le hy.le]
     have h_decomp : Set.Iic y = Set.Iic a ∪ Set.Ioc a y := by
       ext z

@@ -15,7 +15,7 @@ condition** `q·X_{n+1}(…,U) + (1 − q)·X_{n+1}(…,D) = X_n` (the explicit 
 expectation w.r.t. the binomial filtration) — every martingale `M` is the discrete stochastic
 integral of a **predictable** strategy `H` against the discounted asset `S`:
 
-  `M_N(ω) = M_0(ω) + ∑_{k<N} H_k(ω)·(S_{k+1}(ω) − S_k(ω))`     (`binomial_martingale_representation`).
+  `M_N(ω) = M_0(ω) + ∑_{k<N} H_k(ω)·(S_{k+1}(ω) − S_k(ω))` (`binomial_martingale_representation`).
 
 This is the **martingale representation theorem** in discrete time — the second pillar of the
 fundamental theorem of asset pricing (completeness: every contingent claim is replicable). The

@@ -57,9 +57,10 @@ theorem exists_compact_localization {F : ℝ × ℝ → ℝ} {z : ℝ × ℝ}
 
 theorem brownianPriceKernel_localization {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     {K r q σ x₀ T t w : ℝ}
-    (hp : Boundary.DividendPutSolution (Boundary.normalizedRate r σ) (Boundary.normalizedRate q σ) p b)
+    (hp : Boundary.DividendPutSolution (Boundary.normalizedRate r σ)
+        (Boundary.normalizedRate q σ) p b)
     (hσ : 0 < σ) (ht : t < T)
-    (hx : b (σ^2/2*(T-t)) < x₀+(r-q-σ^2/2)*t+σ*w) :
+    (hx : b (σ ^ 2 / 2 * (T - t)) < x₀ + (r - q - σ ^ 2 / 2) * t + σ * w) :
     ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧
       G =ᶠ[𝓝 (t,w)] (fun z => brownianPriceKernel p K r q σ x₀ T z.1 z.2) :=
   exists_compact_localization (brownianPriceKernel_contDiffAt hp hσ ht hx)

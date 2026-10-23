@@ -16,7 +16,8 @@ is needed for this approximation theorem.
 
 ## Result
 
-Public entry points include `GridRule`, `GridRule.zero`, `GridRule.maturity`, `BoundedRule.toGridRule`.
+Public entry points include `GridRule`, `GridRule.zero`, `GridRule.maturity`,
+`BoundedRule.toGridRule`.
 -/
 
 @[expose] public section

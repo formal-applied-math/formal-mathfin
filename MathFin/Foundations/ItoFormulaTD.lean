@@ -62,7 +62,7 @@ theorem continuous_uncurry_of_bdd_partials {g g_t g_x : ℝ → ℝ → ℝ}
   refine (LipschitzWith.of_dist_le_mul (K := ⟨Mt + Mx, add_nonneg hMt0 hMx0⟩)
     fun p q ↦ ?_).continuous
   rw [Prod.dist_eq, Real.dist_eq, Real.dist_eq, Real.dist_eq]
-  show |g p.1 p.2 - g q.1 q.2| ≤ (Mt + Mx) * max |p.1 - q.1| |p.2 - q.2|
+  change |g p.1 p.2 - g q.1 q.2| ≤ (Mt + Mx) * max |p.1 - q.1| |p.2 - q.2|
   have h1 : |g p.1 p.2 - g q.1 p.2| ≤ Mt * |p.1 - q.1| :=
     abs_sub_le_of_hasDerivAt (fun s ↦ hg_t s p.2) (fun s ↦ hMt s p.2) q.1 p.1
   have h2 : |g q.1 p.2 - g q.1 q.2| ≤ Mx * |p.2 - q.2| :=
@@ -152,7 +152,7 @@ theorem ito_formula_td_L2
     ∫ s in Set.Ioc 0 T, f_t s (B s ω) ∂ItoIntegralL2.timeMeasure with hIt
   set Ixx : Ω → ℝ := fun ω ↦
     ∫ s in Set.Ioc 0 T, f_xx s (B s ω) ∂ItoIntegralL2.timeMeasure with hIxx
-  show Tendsto (fun n ↦ ∫ ω,
+  change Tendsto (fun n ↦ ∫ ω,
       (Isum n ω - (f T (B T ω) - f 0 (B 0 ω) - It ω - (1 / 2) * Ixx ω)) ^ 2 ∂μ)
     atTop (𝓝 0)
   -- `L²` membership of the three difference terms (for the squeeze's integrability)
@@ -206,7 +206,8 @@ theorem ito_formula_td_L2
   -- the upper bound `3∫(Tsumₙ−∫f_t)² + ¾∫(QVₙ−∫f_xx)² + 3∫Remₙ² → 0` (A2′ + A1′ + A3′)
   have hupper : Tendsto (fun n ↦ 3 * ∫ ω, (Tsum n ω - It ω) ^ 2 ∂μ
       + (3 / 4) * ∫ ω, (QVw n ω - Ixx ω) ^ 2 ∂μ + 3 * ∫ ω, Rem n ω ^ 2 ∂μ) atTop (𝓝 0) := by
-    simpa only [mul_zero, add_zero] using ((hA2.const_mul 3).add (hA1.const_mul (3 / 4))).add (hA3.const_mul 3)
+    simpa only [mul_zero, add_zero] using ((hA2.const_mul 3).add (hA1.const_mul (3 / 4))).add
+        (hA3.const_mul 3)
   refine squeeze_zero' (Eventually.of_forall fun n ↦ integral_nonneg fun ω ↦ sq_nonneg _)
     ?_ hupper
   filter_upwards [eventually_gt_atTop 0] with n hn
@@ -226,7 +227,7 @@ theorem ito_formula_td_L2
   calc ∫ ω, (Isum n ω - (f T (B T ω) - f 0 (B 0 ω) - It ω - (1 / 2) * Ixx ω)) ^ 2 ∂μ
       = ∫ ω, (-(Tsum n ω - It ω) - (1 / 2) * (QVw n ω - Ixx ω) - Rem n ω) ^ 2 ∂μ := by
         refine integral_congr_ae (Eventually.of_forall fun ω ↦ ?_)
-        show (Isum n ω - (f T (B T ω) - f 0 (B 0 ω) - It ω - 1 / 2 * Ixx ω)) ^ 2
+        change (Isum n ω - (f T (B T ω) - f 0 (B 0 ω) - It ω - 1 / 2 * Ixx ω)) ^ 2
           = (-(Tsum n ω - It ω) - 1 / 2 * (QVw n ω - Ixx ω) - Rem n ω) ^ 2
         rw [hpt ω]
     _ ≤ ∫ ω, (3 * (Tsum n ω - It ω) ^ 2 + (3 / 4) * (QVw n ω - Ixx ω) ^ 2
@@ -366,7 +367,7 @@ theorem ito_formula_td_L2_bddDeriv
       = (∫ s in Set.Ioc 0 T, f_t s (B s ω) ∂ItoIntegralL2.timeMeasure)
         + (1 / 2) * ∫ s in Set.Ioc 0 T, f_xx s (B s ω) ∂ItoIntegralL2.timeMeasure := by
     rw [integral_add h1 h2, integral_const_mul]
-  show f T (B T ω) - f 0 (B 0 ω) = (itoIntegralCLM_T hB T hBmeas gfx) ω
+  change f T (B T ω) - f 0 (B 0 ω) = (itoIntegralCLM_T hB T hBmeas gfx) ω
     + ∫ s in Set.Ioc 0 T,
         (f_t s (B s ω) + (1 / 2) * f_xx s (B s ω)) ∂ItoIntegralL2.timeMeasure
   rw [hsplit]

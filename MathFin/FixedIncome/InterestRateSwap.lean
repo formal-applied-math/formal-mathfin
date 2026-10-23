@@ -52,7 +52,7 @@ theorem annuity_pos {ι : Type*} {δ : ℝ} {P : ι → ℝ} {s : Finset ι} (h�
 par swap rate — pure algebra, valid for any nonzero annuity. -/
 theorem payerSwapValue_eq_zero_iff (P0 Pn K : ℝ) {A : ℝ} (hA : A ≠ 0) :
     payerSwapValue P0 Pn K A = 0 ↔ K = parSwapRate P0 Pn A := by
-  show P0 - Pn - K * A = 0 ↔ K = (P0 - Pn) / A
+  change P0 - Pn - K * A = 0 ↔ K = (P0 - Pn) / A
   rw [sub_eq_zero, eq_div_iff hA]
   exact eq_comm
 

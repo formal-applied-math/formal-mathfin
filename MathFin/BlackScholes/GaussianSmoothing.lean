@@ -107,7 +107,7 @@ theorem integral_bsV_mul_exp_gaussianReal_of_sq {S K r σ σ' T : ℝ} (hS : 0 <
         have hE : (r - σ ^ 2 / 2) * T + σ * Real.sqrt T * ω.1 + ω.2
             = m + v / 2 + ((r - σ' ^ 2 / 2) * T + (σ * Real.sqrt T * ω.1 + ω.2 - m)) := by
           linear_combination (1 / 2 : ℝ) * hvar
-        show rexp (-r * T) * max (S * rexp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * ω.1 + ω.2)
+        change rexp (-r * T) * max (S * rexp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * ω.1 + ω.2)
             - K) 0
           = rexp (-r * T) * max (bsTerminal (S * rexp (m + v / 2)) r σ' T
             ((σ * Real.sqrt T * ω.1 + ω.2 - m) / (σ' * Real.sqrt T)) - K) 0

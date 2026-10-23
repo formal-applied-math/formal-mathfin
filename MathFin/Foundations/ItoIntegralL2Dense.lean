@@ -120,7 +120,7 @@ private lemma inner_simpleAssembly_iocSP (hBmeas : ∀ t, Measurable (B t)) (a b
           = Function.uncurry ⇑(iocSP hBmeas a b hF) z := hz
         _ = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z := by rw [h_uncurry_eq]
     rw [hSA_eq]
-    show (g : ℝ≥0 × Ω → ℝ) z * (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z
+    change (g : ℝ≥0 × Ω → ℝ) z * (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z
         = (Set.Ioc a b ×ˢ F).indicator (fun z ↦ (g : ℝ≥0 × Ω → ℝ) z) z
     by_cases hz_in : z ∈ Set.Ioc a b ×ˢ F
     · rw [Set.indicator_of_mem hz_in, Set.indicator_of_mem hz_in, mul_one]

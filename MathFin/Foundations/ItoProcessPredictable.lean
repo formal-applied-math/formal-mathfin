@@ -39,10 +39,12 @@ filtration itself; no augmentation is needed.
 * `memLp_itoContinuousMod` — the assembled process is `L²` in the predictable trim measure.
 * `itoProcessAssembled` — it, packaged as an element of `Lp ℝ 2 (trimMeasure_T T)` (the space
   a Picard iterate for the SDE lands in).
-* `itoProcessAssembled_norm_sq` — the energy identity `‖itoProcessAssembled φ‖²_E = ∫₀ᵀ ‖(φ●B)_t‖² dt`
-  (the contraction workhorse for the SDE fixed point).
-* `itoProcessAssembled_add` / `itoProcessAssembled_sub` — linearity of the assembled process (as an `Lp`
-  class), so the contraction difference reduces to the energy identity via `itoProcessCLM`'s linearity.
+* `itoProcessAssembled_norm_sq` — the energy identity
+  `‖itoProcessAssembled φ‖²_E = ∫₀ᵀ ‖(φ●B)_t‖² dt` (the contraction workhorse for the SDE fixed
+  point).
+* `itoProcessAssembled_add` / `itoProcessAssembled_sub` — linearity of the assembled process (as an
+  `Lp` class), so the contraction difference reduces to the energy identity via `itoProcessCLM`'s
+  linearity.
 -/
 
 @[expose] public section
@@ -162,7 +164,8 @@ noncomputable def itoProcessAssembled (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
-  (memLp_itoContinuousMod hB T hBmeas hBcont φ).toLp (Function.uncurry (itoContinuousMod T hBmeas φ))
+  (memLp_itoContinuousMod hB T hBmeas hBcont φ).toLp
+      (Function.uncurry (itoContinuousMod T hBmeas φ))
 
 /-- **The energy identity.** `‖itoProcessAssembled φ‖²_E = ∫₀ᵀ ‖(φ ● B)_t‖² dt` — the squared
 `E`-norm of the assembled process is the time-integral of the per-time Itô `L²`-norms. Slice by
@@ -297,8 +300,8 @@ theorem itoProcessAssembled_add (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   simp only [Pi.add_apply, hzφ, hzψ]
 
 /-- **Subtractivity** of the assembled Itô process (the SDE contraction consumes this: it turns
-`itoProcessAssembled (σ∘X) − itoProcessAssembled (σ∘Y)` into `itoProcessAssembled (σ∘X − σ∘Y)`, whose
-energy is `∫₀ᵀ ‖itoProcessCLM T t (σ∘X − σ∘Y)‖² dt`). -/
+`itoProcessAssembled (σ∘X) − itoProcessAssembled (σ∘Y)` into `itoProcessAssembled (σ∘X − σ∘Y)`,
+whose energy is `∫₀ᵀ ‖itoProcessCLM T t (σ∘X − σ∘Y)‖² dt`). -/
 theorem itoProcessAssembled_sub (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     (φ ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :

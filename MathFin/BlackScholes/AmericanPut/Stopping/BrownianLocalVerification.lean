@@ -19,7 +19,8 @@ proves the raw contact-martingale property without that extra hypothesis.
 
 ## Result
 
-Public entry points include `brownianAugFiltration`, `brownianFiltration_le_aug`, `stoppedClassicalCandidate_stronglyAdapted`, `brownian_stoppedCandidate_martingale_of_local`.
+Public entry points include `brownianAugFiltration`, `brownianFiltration_le_aug`,
+`stoppedClassicalCandidate_stronglyAdapted`, `brownian_stoppedCandidate_martingale_of_local`.
 -/
 
 @[expose] public section
@@ -32,7 +33,8 @@ open scoped NNReal
 /-- The raw Brownian filtration with the `gaussianLimit`-null measurable sets adjoined at each
 time, via `augFiltration`. -/
 noncomputable def brownianAugFiltration :=
-  MathFin.ItoIntegralProcessLocalMartingaleGeneral.augFiltration (μ := gaussianLimit) measurable_brownian
+  MathFin.ItoIntegralProcessLocalMartingaleGeneral.augFiltration (μ := gaussianLimit)
+      measurable_brownian
 
 theorem brownianFiltration_le_aug : brownianFiltration ≤ brownianAugFiltration :=
   le_sup_left
@@ -69,9 +71,11 @@ theorem brownian_price_identification_of_localMartingale {K r q σ S : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} {T : ℝ≥0}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 < K) (hr : 0 ≤ r) (hS : 0 < S)
-    (hsuper : Supermartingale (classicalCandidate brownian K r q σ S p T) brownianFiltration gaussianLimit)
+    (hsuper : Supermartingale (classicalCandidate brownian K r q σ S p T)
+        brownianFiltration gaussianLimit)
     (hlocal : IsLocalMartingale (fun t ω => classicalCandidate brownian K r q σ S p T
-      (min t ((brownianClassicalContactRule hp hK hS T).time ω)) ω) brownianAugFiltration gaussianLimit) :
+      (min t ((brownianClassicalContactRule hp hK hS T).time ω)) ω) brownianAugFiltration
+          gaussianLimit) :
     brownianAmericanPut K r q σ S T = K*p (Real.log (S/K)) (σ^2/2*(T : ℝ)) :=
   brownian_price_identification_of_martingales hp hK hr hS hsuper
     (brownian_stoppedCandidate_martingale_of_local hp hK hr _ hlocal)
@@ -84,7 +88,8 @@ theorem brownian_boundary_curvature_of_localMartingales {K r q σ : ℝ}
       Supermartingale (classicalCandidate brownian K r q σ S p T) brownianFiltration gaussianLimit)
     (hlocal : ∀ (T : ℝ≥0) (S : ℝ) (hS : 0 < S),
       IsLocalMartingale (fun t ω => classicalCandidate brownian K r q σ S p T
-        (min t ((brownianClassicalContactRule hp hK hS T).time ω)) ω) brownianAugFiltration gaussianLimit)
+        (min t ((brownianClassicalContactRule hp hK hS T).time ω)) ω)
+            brownianAugFiltration gaussianLimit)
     {τ : ℝ} (hτ : 0 < τ) :
     0 < deriv (deriv (fun s : ℝ => brownianExerciseBoundary K r q σ s.toNNReal)) τ :=
   brownian_boundary_curvature_of_martingales hp hK hr hσ hsuper

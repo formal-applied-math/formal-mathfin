@@ -18,7 +18,8 @@ an explicit admissible contact rule; no optimal-stopping assertion is assumed.
 
 ## Result
 
-Public entry points include `classicalCandidate_adapted`, `frozenPutReward`, `frozenPutReward_adapted`, `frozenPutReward_continuous`.
+Public entry points include `classicalCandidate_adapted`, `frozenPutReward`,
+`frozenPutReward_adapted`, `frozenPutReward_continuous`.
 -/
 
 @[expose] public section
@@ -155,7 +156,8 @@ theorem classical_price_eq_value_of_contact_verification
     (hK : 0 < K) (hr : 0 ≤ r) (hS : 0 < S)
     (hsuper : Supermartingale (classicalCandidate W K r q σ S p T) 𝓕 P)
     (hmart : Martingale (fun t ω => classicalCandidate W K r q σ S p T
-      (min t ((classicalContactRule (r := r) (q := q) (σ := σ) hp hadapt hpaths hK hS T).time ω)) ω) 𝓕 P) :
+      (min t ((classicalContactRule (r := r) (q := q) (σ := σ) hp hadapt hpaths hK hS T).time ω)) ω)
+          𝓕 P) :
     americanPutValue P 𝓕 W K r q σ S T = K*p (Real.log (S/K)) (σ^2/2*(T : ℝ)) :=
   classical_price_eq_value_of_verification hp hW hpaths hzero hK hr hS hsuper
     (classicalContactRule hp hadapt hpaths hK hS T)

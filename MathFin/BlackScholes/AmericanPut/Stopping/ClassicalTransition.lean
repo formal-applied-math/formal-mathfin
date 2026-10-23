@@ -12,7 +12,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianVerification
 /-! # Classical Gaussian comparison in physical time and price coordinates 
 ## Result
 
-Public entry points include `classicalPrice_physical_transition`, `classicalCandidate_condExp_le_before_maturity`.
+Public entry points include `classicalPrice_physical_transition`,
+`classicalCandidate_condExp_le_before_maturity`.
 -/
 
 @[expose] public section
@@ -65,7 +66,8 @@ theorem classicalCandidate_condExp_le_before_maturity {K r q σ S : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 ≤ K) (hσ : 0 < σ) {i j T : ℝ≥0} (hij : i ≤ j) (hjT : j ≤ T) :
-    gaussianLimit[classicalCandidate brownian K r q σ S p T j | brownianFiltration i] ≤ᵐ[gaussianLimit]
+    gaussianLimit[classicalCandidate brownian K r q σ S p T j | brownianFiltration i]
+        ≤ᵐ[gaussianLimit]
       classicalCandidate brownian K r q σ S p T i := by
   let a := σ^2/2*((T : ℝ)-(j : ℝ))
   let f : ℝ → ℝ := fun y => Real.exp (-r*(j : ℝ))*K*p y a

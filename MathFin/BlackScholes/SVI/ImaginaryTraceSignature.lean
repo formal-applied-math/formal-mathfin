@@ -23,7 +23,7 @@ namespace SVI
 
 /-- Multiplication by a square root of -1 is an invertible real-linear map. -/
 noncomputable def imaginaryMulEquiv {A : Type*} [CommRing A] [Algebra ℝ A]
-    (u : A) (hu : u^2 = -1) : A ≃ₗ[ℝ] A :=
+    (u : A) (hu : u ^ 2 = -1) : A ≃ₗ[ℝ] A :=
   { Algebra.lmul ℝ A u with
     invFun := fun x ↦ -u*x
     left_inv := by
@@ -51,7 +51,7 @@ theorem formSignature_eq_zero_of_equivalent_neg {V : Type*}
 signature. Multiplication by that root exchanges positive and negative
 subspaces, including when nilpotents make the form degenerate. -/
 theorem weightedTraceForm_signature_zero_of_imaginary (f q : Polynomial ℝ)
-    (u : AdjoinRoot f) (hu : u^2 = -1) :
+    (u : AdjoinRoot f) (hu : u ^ 2 = -1) :
     formSignature (weightedTraceForm f q).toQuadraticMap = 0 := by
   apply formSignature_eq_zero_of_equivalent_neg
   refine ⟨{ imaginaryMulEquiv u hu with map_app' := ?_ }⟩

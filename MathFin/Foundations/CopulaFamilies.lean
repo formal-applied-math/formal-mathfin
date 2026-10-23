@@ -132,7 +132,8 @@ lemma measurable_fgmDensity (θ : ℝ) : Measurable (fgmDensity θ) := by
 /-- The FGM density is nonnegative on the open unit square when `|θ| ≤ 1`. -/
 lemma fgmDensity_nonneg (hθ : |θ| ≤ 1) {v : Fin 2 → ℝ} (hv : ∀ i, v i ∈ Ioo 0 1) :
     0 ≤ fgmDensity θ v := by
-  have hb (i : Fin 2) : |1 - 2 * v i| ≤ 1 := abs_le.2 ⟨by linarith [(hv i).2], by linarith [(hv i).1]⟩
+  have hb (i : Fin 2) : |1 - 2 * v i| ≤ 1 :=
+      abs_le.2 ⟨by linarith [(hv i).2], by linarith [(hv i).1]⟩
   have hprod : |θ * ((1 - 2 * v 0) * (1 - 2 * v 1))| ≤ 1 := by
     rw [abs_mul, abs_mul]
     calc |θ| * (|1 - 2 * v 0| * |1 - 2 * v 1|) ≤ 1 * (1 * 1) := by
@@ -243,11 +244,11 @@ theorem isCopula_fgmCopula (hθ : |θ| ≤ 1) : IsCopula (fgmCopula θ) := by
     have hint : ∫ y in univ, (1 - 2 * y) ∂(volume.restrict (Ioo (0 : ℝ) 1)) = 0 := by
       rw [Measure.restrict_univ, integral_uniformIoo_one_sub_two_mul]
     fin_cases i
-    · show fgmCopula θ ((fun v : Fin 2 → ℝ ↦ v 0) ⁻¹' A) = _
+    · change fgmCopula θ ((fun v : Fin 2 → ℝ ↦ v 0) ⁻¹' A) = _
       rw [show (fun v : Fin 2 → ℝ ↦ v 0) ⁻¹' A = {v | v 0 ∈ A ∧ v 1 ∈ univ} by ext; simp,
         fgmCopula_rect hθ hA MeasurableSet.univ, probReal_univ, hint, mul_one, mul_zero,
         mul_zero, add_zero, ofReal_measureReal]
-    · show fgmCopula θ ((fun v : Fin 2 → ℝ ↦ v 1) ⁻¹' A) = _
+    · change fgmCopula θ ((fun v : Fin 2 → ℝ ↦ v 1) ⁻¹' A) = _
       rw [show (fun v : Fin 2 → ℝ ↦ v 1) ⁻¹' A = {v | v 0 ∈ univ ∧ v 1 ∈ A} by ext; simp,
         fgmCopula_rect hθ MeasurableSet.univ hA, probReal_univ, hint, one_mul, zero_mul,
         mul_zero, add_zero, ofReal_measureReal]
@@ -341,7 +342,8 @@ theorem spearmanRho_fgmCopula (hθ : |θ| ≤ 1) : spearmanRho (fgmCopula θ) = 
   have hx : ∫ x in (0 : ℝ)..1, x = 1 / 2 := by rw [integral_id]; norm_num
   have hx2 : ∫ x in (0 : ℝ)..1, x * (1 - 2 * x) = -1 / 6 := by
     rw [show (fun x : ℝ ↦ x * (1 - 2 * x)) = fun x ↦ x - 2 * x ^ 2 by ext x; ring,
-      intervalIntegral.integral_sub ((by fun_prop : Continuous fun x : ℝ ↦ x).intervalIntegrable _ _)
+      intervalIntegral.integral_sub
+          ((by fun_prop : Continuous fun x : ℝ ↦ x).intervalIntegrable _ _)
         ((by fun_prop : Continuous fun x : ℝ ↦ 2 * x ^ 2).intervalIntegrable _ _),
       intervalIntegral.integral_const_mul, integral_id, integral_pow]
     norm_num

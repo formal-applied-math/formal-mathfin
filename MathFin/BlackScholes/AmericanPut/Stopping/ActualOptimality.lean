@@ -15,7 +15,8 @@ sequence consists of the already constructed optimal physical-grid rules.
 
 ## Result
 
-Public entry points include `canonicalRewardProcess`, `canonicalRewardProcess_continuous`, `canonicalRewardProcess_bound`, `brownianUsualActualContactTime`.
+Public entry points include `canonicalRewardProcess`, `canonicalRewardProcess_continuous`,
+`canonicalRewardProcess_bound`, `brownianUsualActualContactTime`.
 -/
 
 @[expose] public section
@@ -60,13 +61,16 @@ theorem brownianUsualActualContactRule_optimal {k h : ℝ} (hk : 0 ≤ k) (x : �
   let τ : BoundedRule brownianUsualFiltration T :=
     canonicalContactRule (h := h) hk brownianUsual_adapted continuous_brownian x T
   let θ : ℕ → BoundedRule brownianUsualFiltration T := fun n =>
-    (optimalGridRule μ brownianUsual_adapted 1 k h (Real.sqrt 2) (Real.exp x) T (gridStep_pos n)).val
+    (optimalGridRule μ brownianUsual_adapted 1 k h (Real.sqrt 2) (Real.exp x) T
+        (gridStep_pos n)).val
   have hU := canonicalDiscountedPrice_usual_supermartingale (h := h) hk x T
   have hUc := canonicalDiscountedPrice_continuous (h := h) hk x T
   have hUb := canonicalDiscountedPrice_bound (h := h) hk x T
   have hZc := canonicalRewardProcess_continuous k h x T
   have hZm : Measurable Z.uncurry := measurable_uncurry_of_continuous_of_measurable hZc
-    (fun t => putReward_measurable brownian_completed_measurable 1 k h (Real.sqrt 2) (Real.exp x) measurable_const)
+    (fun t =>
+        putReward_measurable brownian_completed_measurable 1 k h (Real.sqrt 2) (Real.exp x)
+        measurable_const)
   have hZb := canonicalRewardProcess_bound (h := h) hk x T
   have hdom (t : ℝ≥0) (_ : t ≤ T) (ω : ℝ≥0 → ℝ) : Z t ω ≤ U t ω :=
     canonicalDiscountedPrice_dominates hk x T t ω
@@ -102,7 +106,9 @@ theorem brownianUsualActualContactRule_optimal {k h : ℝ} (hk : 0 ≤ k) (x : �
     convert! hh using 1
     simp only [canonicalPrice,Real.toNNReal_coe,brownianUsualAmericanPut]
     rfl
-  have he := firstContact_expectedReward_eq_initial hU hUc hUb hZm hZc hZb hdom τ hbefore hcontact θ happrox
+  have he :=
+      firstContact_expectedReward_eq_initial hU hUc hUb hZm hZc hZb hdom τ hbefore
+      hcontact θ happrox
   rw [hZrule,hI0] at he
   convert! he using 1
 
