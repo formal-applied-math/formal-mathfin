@@ -16,7 +16,7 @@ Three exposure measures built directly on `MathFin.CVA.expectedExposure` (`V : �
 actual exposure process, `ν` its measure), never on a bare closed-form definition:
 
 * `expectedNegativeExposure` — `ENE(s) = E_ν[(-V_s)⁺]`, a genuine integral parallel to
-  `CVA.expectedExposure`. `expectedNegativeExposure_eq_sub_integral` proves (not `unfold`+`ring`)
+  `CVA.expectedExposure`. `expectedNegativeExposure_eq_sub_integral` proves
   `ENE = EE - E[V]` from the pointwise identity `(-x)⁺ = x⁺ - x` and integral linearity;
   `expectedNegativeExposure_gaussian` is its Gaussian closed form, a corollary of
   `CVA.expectedExposure_gaussian` composed with that identity.
@@ -50,20 +50,14 @@ variable {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁} {ν : Measure Ω₁}
 noncomputable def expectedNegativeExposure (V : ℝ → Ω₁ → ℝ) (ν : Measure Ω₁) (s : ℝ) : ℝ :=
   ∫ ω, max (-(V s ω)) 0 ∂ν
 
-/-- Pointwise: `(-x)⁺ = x⁺ - x` for any real `x`. -/
-private lemma max_neg_zero_eq (x : ℝ) : max (-x) 0 = max x 0 - x := by
-  rcases le_total 0 x with h | h
-  · rw [max_eq_left h, max_eq_right (neg_nonpos.mpr h)]; ring
-  · rw [max_eq_right h, max_eq_left (neg_nonneg.mpr h)]; ring
-
 /-- **ENE = EE − E[V]**: a genuine measure-theoretic identity, from `(-x)⁺ = x⁺ - x` pointwise
-and integral linearity (not `unfold` + `ring` on closed forms). -/
+and integral linearity. -/
 theorem expectedNegativeExposure_eq_sub_integral {V : ℝ → Ω₁ → ℝ} {s : ℝ}
     (hV : Integrable (V s) ν) :
     expectedNegativeExposure V ν s = expectedExposure V ν s - ∫ ω, V s ω ∂ν := by
-  unfold expectedNegativeExposure expectedExposure
-  simp_rw [max_neg_zero_eq]
-  exact integral_sub hV.pos_part hV
+  rw [expectedNegativeExposure, expectedExposure, ← integral_sub hV.pos_part hV]
+  congr with ω
+  linarith [max_zero_sub_max_neg_zero_eq_self (V s ω)]
 
 /-- **Gaussian expected negative exposure**: for `Z ~ N(0,1)`, `s > 0`, `b > 0`,
 `E[(a + b√s Z)⁻] = E[(a+b√s Z)⁺] - a`, specializing `expectedNegativeExposure_eq_sub_integral`
@@ -72,31 +66,31 @@ theorem expectedNegativeExposure_gaussian [IsProbabilityMeasure ν] {Z : Ω₁ �
     (hZ : HasLaw Z (gaussianReal 0 1) ν) {a b s : ℝ} (hb : 0 < b) (hs : 0 < s) :
     expectedNegativeExposure (fun s ω ↦ a + b * √s * Z ω) ν s
       = a * Phi (a / (b * √s)) + b * √s * gaussianPDFReal 0 1 (a / (b * √s)) - a := by
-  have hZi : Integrable Z ν := by
-    have : Integrable id (ν.map Z) := hZ.map_eq ▸ (memLp_id_gaussianReal 1).integrable le_rfl
-    exact (integrable_map_measure aestronglyMeasurable_id hZ.aemeasurable).mp this
+  have hZi : Integrable Z ν := hZ.hasGaussianLaw.integrable
   have hVi : Integrable (fun ω ↦ a + b * √s * Z ω) ν :=
     (integrable_const a).add (hZi.const_mul (b * √s))
   have hmean : ∫ ω, (a + b * √s * Z ω) ∂ν = a := by
     rw [integral_add (integrable_const a) (hZi.const_mul (b * √s)), integral_const, probReal_univ,
       one_smul, integral_const_mul, hZ.integral_eq, integral_id_gaussianReal, mul_zero, add_zero]
-  rw [expectedNegativeExposure_eq_sub_integral hVi, hmean]
-  change ∫ ω, max (a + b * √s * Z ω) 0 ∂ν - a = _
-  rw [expectedExposure_gaussian hZ hb hs]
+  rw [expectedNegativeExposure_eq_sub_integral hVi, hmean, expectedExposure,
+    expectedExposure_gaussian hZ hb hs]
 
 /-- **Potential future exposure**: the `α`-level value-at-risk of the exposure process at time
-`s`, `PFE_α(s) = VaR_α(V_s)` — the genuine quantile of `V_s`'s law, not a bare closed form. -/
+`s`, `PFE_α(s) = VaR_α(V_s)` — the genuine quantile of `V_s`'s law, not a bare closed form.
+**Scope**: this is the raw `α`-quantile of `V_s`, which matches Hull's "quantile of the exposure
+`V_s⁺`" only when that quantile is nonnegative (e.g. the Gaussian closed form below can be
+negative). -/
 noncomputable def potentialFutureExposure (V : ℝ → Ω₁ → ℝ) (ν : Measure Ω₁) (s α : ℝ) : ℝ :=
   MathFin.valueAtRisk (V s) ν α
 
-/-- **Gaussian PFE**: for the exposure model of `CVA.cva_gaussian`, `PFE_α(s)` is the Gaussian
-value-at-risk closed form at `V_s`'s own law `N(m, (σ√s)²)` — a corollary composing the law of
-`V_s` (`gaussianReal_const_mul`, `gaussianReal_const_add`) with
+/-- **Gaussian PFE**: for the exposure process `V_s = m + σ√s Z` of `CVA.cva_gaussian`, `PFE_α(s)`
+is the Gaussian value-at-risk closed form at `V_s`'s own law `N(m, (σ√s)²)` — a corollary composing
+the law of `V_s` (`gaussianReal_const_mul`, `gaussianReal_const_add`) with
 `valueAtRisk_of_hasLaw_gaussianReal`. -/
 theorem potentialFutureExposure_gaussian [IsProbabilityMeasure ν] {Z : Ω₁ → ℝ}
     (hZ : HasLaw Z (gaussianReal 0 1) ν) (m σ s α : ℝ) (hσ : 0 < σ) (hs : 0 < s)
     (hα : α ∈ Ioo 0 1) :
-    potentialFutureExposure (fun _ ω ↦ m + σ * √s * Z ω) ν s α
+    potentialFutureExposure (fun s ω ↦ m + σ * √s * Z ω) ν s α
       = gaussianVaR m (σ * √s) (PhiInv α) := by
   have hL : HasLaw (fun ω ↦ m + σ * √s * Z ω)
       (gaussianReal m (NNReal.mk ((σ * √s) ^ 2) (sq_nonneg _))) ν := by
@@ -112,15 +106,12 @@ real-valued exposures on a common measure. Proved via pointwise subadditivity of
 (`integral_mono`, `integral_finsetSum`, `Integrable.pos_part`). -/
 theorem integral_posPart_finsetSum_le {ι : Type*} (s : Finset ι) {V : ι → Ω₁ → ℝ}
     (hV : ∀ i ∈ s, Integrable (V i) ν) :
-    ∫ ω, max (∑ i ∈ s, V i ω) 0 ∂ν ≤ ∑ i ∈ s, ∫ ω, max (V i ω) 0 ∂ν := by
-  have hpt : ∀ ω, max (∑ i ∈ s, V i ω) 0 ≤ ∑ i ∈ s, max (V i ω) 0 := fun ω ↦
-    Finset.le_sum_of_subadditive (fun x ↦ max x 0) (max_self (0:ℝ)).le (fun a b ↦ by
-      simpa using max_add_add_le_max_add_max (a := a) (b := b) (c := 0) (d := 0)) s (fun i ↦ V i ω)
-  have hLi : Integrable (fun ω ↦ max (∑ i ∈ s, V i ω) 0) ν := (integrable_finsetSum s hV).pos_part
-  have hRi : Integrable (fun ω ↦ ∑ i ∈ s, max (V i ω) 0) ν :=
-    integrable_finsetSum s fun i hi ↦ (hV i hi).pos_part
-  calc ∫ ω, max (∑ i ∈ s, V i ω) 0 ∂ν
-      ≤ ∫ ω, ∑ i ∈ s, max (V i ω) 0 ∂ν := integral_mono hLi hRi hpt
-    _ = ∑ i ∈ s, ∫ ω, max (V i ω) 0 ∂ν := integral_finsetSum s fun i hi ↦ (hV i hi).pos_part
+    ∫ ω, max (∑ i ∈ s, V i ω) 0 ∂ν ≤ ∑ i ∈ s, ∫ ω, max (V i ω) 0 ∂ν :=
+  (integral_mono (integrable_finsetSum s hV).pos_part
+    (integrable_finsetSum s fun i hi ↦ (hV i hi).pos_part) fun ω ↦
+      Finset.le_sum_of_subadditive (fun x ↦ max x 0) (max_self (0:ℝ)).le (fun a b ↦ by
+        simpa using max_add_add_le_max_add_max (a := a) (b := b) (c := 0) (d := 0)) s
+        fun i ↦ V i ω).trans_eq
+    (integral_finsetSum s fun i hi ↦ (hV i hi).pos_part)
 
 end MathFin.CVA

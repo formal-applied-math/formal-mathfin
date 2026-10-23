@@ -16,10 +16,8 @@ Debt valuation adjustment is the counterparty's gain on the bank's *own* default
 side, `-V` (`cva`'s own convention has `V > 0` as the counterparty owing the bank, an asset to the
 bank; the bank owes the counterparty exactly when `V < 0`, which is the liability regime `-V > 0`
 mirrors — it is the counterparty who gains, by that amount, on the bank's own default). This
-file proves that mirror as a genuine corollary of `cva`'s own definition (`dva_eq_cva_neg_exposure`,
-`rfl`) and of `cva_gaussian` (`dva_gaussian`), never as an independent construction — contrast the
-deleted `FixedIncome/DVA.lean` of #272, whose content was `ring_nf`/`Finset.sum_range_sub'`
-bookkeeping unconnected to the real CVA substrate (`docs/values-review.md`, commit `7767c32`).
+file proves that mirror as a genuine corollary of `cva`'s own definition and of `cva_gaussian`
+(`dva_gaussian`), never as an independent construction.
 
 **What is modelled, honestly**: `cva`'s own independence hypothesis — the default time
 independent of the exposure (no wrong-way risk) — carries over unchanged, now read as "the bank's
@@ -31,7 +29,6 @@ either leg). A full bilateral CVA/DVA model would need that joint law; it is out
 ## Main results
 
 * `dva`: the bank's own-default mirror of `CVA.cva`.
-* `dva_eq_cva_neg_exposure`: `dva = cva` with the exposure negated — `rfl`, the structural mirror.
 * `dva_gaussian`: the Gaussian closed form, a corollary of `CVA.cva_gaussian` applied to the
   mirrored exposure `-(m(s) + σ(s)√s Z) = -m(s) + σ(s)√s·(-Z)`, using `gaussianReal_neg` to keep
   the driver standard normal.
@@ -50,20 +47,13 @@ open MeasureTheory Real ProbabilityTheory MathFin.DefaultDensity
 variable {Ω₁ Ω₂ : Type*} {m₁ : MeasurableSpace Ω₁} {m₂ : MeasurableSpace Ω₂}
   {ν : Measure Ω₁} {μ : Measure Ω₂}
 
-/-- **DVA**: the bank's own-default mirror of `cva` — the bank's own default time `τ_bank` with
-hazard baked into `D`/the hypothesized CDF (as in `cva`), applied to the exposure `-V` seen from
-the bank's own side. Inherits `cva`'s no-wrong-way-risk (independence) assumption, now read for
-the bank's own default. -/
+/-- **DVA**: the bank's own-default mirror of `cva` — the bank's own default time `τBank`, applied
+to the exposure `-V` seen from the bank's side; any hazard structure enters only through the CDF
+hypothesis of `dva_gaussian`, exactly as in `cva_gaussian`. Inherits `cva`'s no-wrong-way-risk
+(independence) assumption, now read for the bank's own default. -/
 noncomputable def dva (LGDBank : ℝ) (D : ℝ → ℝ) (V : ℝ → Ω₁ → ℝ) (τBank : Ω₂ → ℝ) (T : ℝ)
     (ν : Measure Ω₁) (μ : Measure Ω₂) : ℝ :=
   cva LGDBank D (fun s ω ↦ -(V s ω)) τBank T ν μ
-
-/-- **DVA is structurally CVA with the exposure negated** — by definition, not a new proof. This
-is the honest statement of what "DVA mirrors CVA" means here: a single-factor mirror (the bank's
-own default against `-V`), not a jointly-modelled bilateral default. -/
-theorem dva_eq_cva_neg_exposure (LGDBank : ℝ) (D : ℝ → ℝ) (V : ℝ → Ω₁ → ℝ) (τBank : Ω₂ → ℝ)
-    (T : ℝ) (ν : Measure Ω₁) (μ : Measure Ω₂) :
-    dva LGDBank D V τBank T ν μ = cva LGDBank D (fun s ω ↦ -(V s ω)) τBank T ν μ := rfl
 
 /-- **DVA with Gaussian exposure, no wrong-way risk**: a genuine corollary of `cva_gaussian`,
 applied to the mirrored exposure `-(m(s) + σ(s)√s Z) = -m(s) + σ(s)√s·(-Z)`; `gaussianReal_neg`
@@ -79,13 +69,12 @@ theorem dva_gaussian [IsProbabilityMeasure ν] [IsProbabilityMeasure μ]
     dva LGDBank D (fun s ω ↦ m s + σ s * √s * Z ω) τBank T ν μ
       = LGDBank * ∫ s in (0:ℝ)..T, D s * ((-m s) * Phi ((-m s) / (σ s * √s))
           + σ s * √s * gaussianPDFReal 0 1 ((-m s) / (σ s * √s))) * defaultDensity h s := by
-  have hZ' : HasLaw (fun ω ↦ -(Z ω)) (gaussianReal 0 1) ν := by
-    have h := gaussianReal_neg hZ
-    rwa [neg_zero] at h
+  have hZ' : HasLaw (fun ω ↦ -(Z ω)) (gaussianReal 0 1) ν :=
+    (neg_zero : -(0:ℝ) = 0) ▸ gaussianReal_neg hZ
   have heq : (fun s ω ↦ -(m s + σ s * √s * Z ω)) = fun s ω ↦ (-m s) + σ s * √s * (-(Z ω)) := by
     funext s ω; ring
-  have hmb' : ∀ s, |(-m s)| ≤ M := fun s ↦ by rw [abs_neg]; exact hmb s
-  rw [dva_eq_cva_neg_exposure, heq]
+  have hmb' : ∀ s, |(-m s)| ≤ M := fun s ↦ (abs_neg (m s)).le.trans (hmb s)
+  rw [dva, heq]
   exact cva_gaussian hh hnn hτ hcdf hD hDb hm.neg hσ hmb' hσpos hσb hZm.neg hZ' LGDBank hT
 
 end MathFin.CVA
