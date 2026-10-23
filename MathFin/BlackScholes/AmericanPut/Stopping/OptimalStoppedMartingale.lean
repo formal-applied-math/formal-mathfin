@@ -39,7 +39,8 @@ noncomputable def BoundedRule.binary {i j : ℝ≥0} (hij : i ≤ j) (A : Set Ω
     · have hit := hij.trans hjt
       convert! (@MeasurableSet.univ Ω (𝓕 t)) using 1
       ext ω
-      by_cases hω : ω ∈ A <;> simp? [hω]
+      by_cases hω : ω ∈ A <;>
+        simp only [ENNReal.some_eq_coe', mem_ofPred_eq, hω, ↓reduceIte, mem_univ, iff_true]
       · convert! hit using 1
         simp only [ENNReal.ofNNReal,WithTop.coe_le_coe]
       · convert! hjt using 1
@@ -47,14 +48,17 @@ noncomputable def BoundedRule.binary {i j : ℝ≥0} (hij : i ≤ j) (A : Set Ω
     · by_cases hit : i ≤ t
       · convert! (𝓕.mono hit A hA) using 1
         ext ω
-        by_cases hω : ω ∈ A <;> simp? [hω]
+        by_cases hω : ω ∈ A <;>
+          simp only [ENNReal.some_eq_coe', mem_ofPred_eq, hω, ↓reduceIte, iff_true, iff_false]
         · convert! hit using 1
           simp only [ENNReal.ofNNReal,WithTop.coe_le_coe]
         · convert! (lt_of_not_ge hjt) using 1
           simp only [ENNReal.ofNNReal,not_le,WithTop.coe_lt_coe]
       · convert! (@MeasurableSet.empty Ω (𝓕 t)) using 1
         ext ω
-        by_cases hω : ω ∈ A <;> simp? [hω]
+        by_cases hω : ω ∈ A <;>
+          simp only [ENNReal.some_eq_coe', mem_ofPred_eq, hω, ↓reduceIte, mem_empty_iff_false,
+            iff_false]
         · convert! (lt_of_not_ge hit) using 1
           simp only [ENNReal.ofNNReal,not_le,WithTop.coe_lt_coe]
         · convert! (lt_of_not_ge hjt) using 1

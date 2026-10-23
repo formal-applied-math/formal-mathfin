@@ -131,7 +131,7 @@ This specializes the new proof rather than formalizing Liu's published argument.
 theorem brownian_liuRange_boundary_conclusions {K r q σ : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
-    (_hLiu : q + σ ^ 2/2 ≤ r) (hK : 0 < K) (hr : 0 ≤ r) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :
+    (_hLiu : q + σ ^ 2 / 2 ≤ r) (hK : 0 < K) (hr : 0 ≤ r) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :
     (0 ≤ deriv (deriv (fun s : ℝ => Real.log (brownianExerciseBoundary K r q σ s.toNNReal/K))) τ) ∧
       0 < deriv (deriv (fun s : ℝ => brownianExerciseBoundary K r q σ s.toNNReal)) τ :=
   brownian_boundary_conclusions hp hK hr hσ hτ

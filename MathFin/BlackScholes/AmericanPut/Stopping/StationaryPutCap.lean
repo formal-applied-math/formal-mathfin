@@ -113,7 +113,7 @@ theorem pricingOperator_add_constant (F : ℝ × ℝ → ℝ) (k h ε : ℝ) (z 
 
 theorem stationaryPutCap_upper_support {k h m d : ℝ} (hk : 0 ≤ k)
     (hh : 0 ≤ h) (hhk : h ≤ k) (hm : 0 < m) (hd0 : d < 0)
-    (hd : Real.exp d = m / (1 + m)) (hmQ : 0 ≤ k + (k - h - 1) * m - m^2)
+    (hd : Real.exp d = m / (1 + m)) (hmQ : 0 ≤ k + (k - h - 1) * m - m ^ 2)
     {ε : ℝ} (hε : 0 ≤ ε) (z : ℝ × ℝ) :
     ∃ F : ℝ × ℝ → ℝ, ContDiffAt ℝ 2 F z ∧ F z = stationaryPutCap m d z.1+ε ∧
       (∀ᶠ w in 𝓝 z, stationaryPutCap m d w.1+ε ≤ F w) ∧

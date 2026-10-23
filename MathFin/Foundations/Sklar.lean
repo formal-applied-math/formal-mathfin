@@ -68,7 +68,7 @@ noncomputable def copulaOf (X : Ω → ι → ℝ) (P : Measure Ω) : Measure (�
 
 omit [Fintype ι] in
 /-- The probability-integral transform of a random vector is measurable. -/
-lemma aemeasurable_cdf_coord (hX : AEMeasurable X P) :
+lemma aemeasurable_cdf_coord [Finite ι] (hX : AEMeasurable X P) :
     AEMeasurable (fun ω i ↦ cdf (P.map fun ω ↦ X ω i) (X ω i)) P :=
   aemeasurable_pi_iff.2 fun i ↦ (monotone_cdf _).measurable.comp_aemeasurable (hX.eval i)
 
@@ -77,7 +77,7 @@ variable [IsProbabilityMeasure P]
 omit [Fintype ι] in
 /-- **Sklar's theorem, existence of the copula** (continuous margins): the joint law of the
 probability-integral transforms of `X` is a copula. -/
-theorem isCopula_copulaOf (hX : AEMeasurable X P)
+theorem isCopula_copulaOf [Finite ι] (hX : AEMeasurable X P)
     (hF : ∀ i, Continuous (cdf (P.map fun ω ↦ X ω i))) : IsCopula (copulaOf X P) where
   isProbabilityMeasure := Measure.isProbabilityMeasure_map (aemeasurable_cdf_coord hX)
   map_eval i := by
@@ -106,7 +106,7 @@ omit [Fintype ι] in
 /-- **Sklar's theorem, the identity** (continuous margins): the joint distribution function of `X`
 is its copula evaluated at the marginal distribution functions,
 `P(X ≤ x) = C(F₁(x₁), …, F_d(x_d))`. -/
-theorem measureReal_le_eq_copulaOf (hX : AEMeasurable X P)
+theorem measureReal_le_eq_copulaOf [Finite ι] (hX : AEMeasurable X P)
     (hF : ∀ i, Continuous (cdf (P.map fun ω ↦ X ω i))) (x : ι → ℝ) :
     P.real {ω | X ω ≤ x} =
       (copulaOf X P).real (Iic fun i ↦ cdf (P.map fun ω ↦ X ω i) (x i)) := by
@@ -126,13 +126,13 @@ variable {C : Measure (ι → ℝ)} (μ : ι → Measure ℝ) [∀ i, IsProbabil
 omit [Fintype ι] in
 /-- **The converse of Sklar's theorem, margins**: under a copula `C`, the quantile transform of the
 `i`-th coordinate has law `μᵢ`. -/
-theorem hasLaw_quantile_coord (hC : IsCopula C) (i : ι) :
+theorem hasLaw_quantile_coord [Finite ι] (hC : IsCopula C) (i : ι) :
     HasLaw (fun v : ι → ℝ ↦ quantile (μ i) (v i)) (μ i) C :=
   (hasLaw_quantile (μ i)).comp (hC.hasLaw_eval i)
 
 omit [Fintype ι] in
 /-- The vector of coordinatewise quantile transforms is measurable under a copula. -/
-lemma aemeasurable_quantile_coord (hC : IsCopula C) :
+lemma aemeasurable_quantile_coord [Finite ι] (hC : IsCopula C) :
     AEMeasurable (fun v : ι → ℝ ↦ fun i ↦ quantile (μ i) (v i)) C :=
   aemeasurable_pi_iff.2 fun i ↦ (hasLaw_quantile_coord μ hC i).aemeasurable
 
@@ -140,7 +140,7 @@ omit [∀ i, IsProbabilityMeasure (μ i)] [Fintype ι] in
 /-- **The converse of Sklar's theorem, joint law**: under a copula `C`, the vector of quantiles
 `(quantile μᵢ (vᵢ))ᵢ` has joint distribution function `x ↦ C(F₁(x₁), …, F_d(x_d))`. No continuity
 of the margins is needed. -/
-theorem measureReal_quantile_le_eq (hC : IsCopula C) (x : ι → ℝ) :
+theorem measureReal_quantile_le_eq [Finite ι] (hC : IsCopula C) (x : ι → ℝ) :
     C.real {v | (fun i ↦ quantile (μ i) (v i)) ≤ x} = C.real (Iic fun i ↦ cdf (μ i) (x i)) := by
   refine measureReal_congr ?_
   filter_upwards [hC.ae_mem_Ioo] with v hv
@@ -154,7 +154,7 @@ end Converse
 omit [Fintype ι] in
 /-- **Sklar's theorem, uniqueness** (continuous margins): a copula whose value at the marginal
 distribution functions is the joint distribution function of `X` is the copula of `X`. -/
-theorem eq_copulaOf_of_measureReal_le (hX : AEMeasurable X P)
+theorem eq_copulaOf_of_measureReal_le [Finite ι] (hX : AEMeasurable X P)
     (hF : ∀ i, Continuous (cdf (P.map fun ω ↦ X ω i))) {C : Measure (ι → ℝ)} (hC : IsCopula C)
     (hCX : ∀ x, P.real {ω | X ω ≤ x} =
       C.real (Iic fun i ↦ cdf (P.map fun ω ↦ X ω i) (x i))) :
@@ -193,7 +193,7 @@ omit [Fintype ι] in
 (McNeil–Frey–Embrechts, Proposition 7.7): transforming each coordinate by a strictly increasing
 map leaves the copula of the vector unchanged. The probability-integral transform of `Tᵢ(Xᵢ)` at
 `Tᵢ(y)` equals that of `Xᵢ` at `y`. -/
-theorem copulaOf_comp_strictMono (hX : AEMeasurable X P)
+theorem copulaOf_comp_strictMono [Finite ι] (hX : AEMeasurable X P)
     {T : ι → ℝ → ℝ} (hT : ∀ i, StrictMono (T i)) :
     copulaOf (fun ω i ↦ T i (X ω i)) P = copulaOf X P := by
   have hcdf (i : ι) (y : ℝ) :

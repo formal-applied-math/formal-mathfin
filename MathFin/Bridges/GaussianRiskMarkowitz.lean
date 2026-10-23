@@ -343,6 +343,7 @@ theorem valueAtRisk_equal_weight_equicorrelated [Nonempty ι]
     (hcov : ∀ i j, i ≠ j → cov[X i, X j; P] = ρ * σ ^ 2) (hα : α ∈ Ioo 0 1) :
     valueAtRisk (fun ω ↦ ∑ i, (Fintype.card ι : ℝ)⁻¹ * X i ω) P α =
       m + σ * √(ρ + (1 - ρ) / Fintype.card ι) * PhiInv α := by
+  classical
   have hd : (Fintype.card ι : ℝ) ≠ 0 := Nat.cast_ne_zero.2 Fintype.card_ne_zero
   rw [valueAtRisk_portfolio_gaussian hX _ hα,
     portfolioVarN_covariance_eq_mul_equicorrelation X (fun i ↦ (hX.eval i).aemeasurable) hvar

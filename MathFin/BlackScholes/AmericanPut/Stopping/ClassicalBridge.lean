@@ -72,7 +72,7 @@ theorem brownian_boundary_curvature_of_price_identification
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 < K) (hr : 0 ≤ r) (hσ : 0 < σ)
     (hprice : ∀ τ, 0 < τ → ∀ S, 0 < S →
-      brownianAmericanPut K r q σ S τ.toNNReal = K * p (Real.log (S / K)) (σ ^ 2 / 2*τ))
+      brownianAmericanPut K r q σ S τ.toNNReal = K * p (Real.log (S / K)) (σ ^ 2 / 2 * τ))
     {τ : ℝ} (hτ : 0 < τ) :
     0 < deriv (deriv (fun s : ℝ => brownianExerciseBoundary K r q σ s.toNNReal)) τ := by
   have heq : (fun s : ℝ => brownianExerciseBoundary K r q σ s.toNNReal) =ᶠ[𝓝 τ]
