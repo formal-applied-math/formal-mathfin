@@ -2,13 +2,19 @@ import Lake
 open Lake DSL
 
 package MathFin where
-  -- Mathlib's own syntax-linter set (long lines, `cdot`, `show` misuse, …), run
-  -- at elaboration so its findings are build warnings. `weak.` because the
-  -- option is declared by Mathlib, which loads after the lakefile is read.
+  -- Mathlib's own syntax-linter set (`show` misuse, headers, unused `Fintype`
+  -- and `Decidable` instances, …), run at elaboration so its findings are build
+  -- warnings. `weak.` because the options are declared by Mathlib, which loads
+  -- after the lakefile is read. Two style linters stay off until a formatting
+  -- pass: on 2026-10-23 they gave 831 long-line and 669 whitespace warnings, and
+  -- the whitespace one puts a warning inside every one-line
+  -- `#guard_msgs in #print axioms …` of the axiom audits, which then fail.
   leanOptions := #[
     ⟨`autoImplicit, false⟩,
     ⟨`relaxedAutoImplicit, false⟩,
-    ⟨`weak.linter.mathlibStandardSet, true⟩
+    ⟨`weak.linter.mathlibStandardSet, true⟩,
+    ⟨`weak.linter.style.longLine, false⟩,
+    ⟨`weak.linter.style.whitespace, false⟩
   ]
   -- Advisory environment-linter gate. `lake lint` runs Batteries' canonical
   -- `runLinter` over the MathFin package's declarations — the SAME mechanism
