@@ -1094,7 +1094,7 @@ private theorem trueIncr_sq_le {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
           simp
   have hmeanmeas : Measurable (fun s : ℝ≥0 ↦ ∫ ω, δ s ω * δ s ω ∂μ) :=
     (continuous_mean_of_bdd_cont hgmeas (ae_of_all _ hgcont) (fun s ω ↦ by
-      change |δ s ω * δ s ω| ≤ |Dd| * |Dd|
+      show |δ s ω * δ s ω| ≤ |Dd| * |Dd|
       rw [abs_mul]
       calc |δ s ω| * |δ s ω| ≤ |Dd| * |δ s ω| :=
             mul_le_mul_of_nonneg_right (le_trans (hδbdd s ω) (le_abs_self Dd))
@@ -1391,7 +1391,7 @@ private theorem weighted_sq_le_of_congr {f g w : Ω → ℝ} {C E : ℝ}
         exact mul_le_mul_of_nonneg_right (hw ω) (sq_nonneg _)
     _ = C ^ 2 * E := by
         rw [integral_congr_ae (Eventually.of_forall fun ω ↦ by
-          change (C * g ω) ^ 2 = C ^ 2 * g ω ^ 2; ring), integral_const_mul, hE]
+          show (C * g ω) ^ 2 = C ^ 2 * g ω ^ 2; ring), integral_const_mul, hE]
 
 omit hMadap in
 /-- **Weighted error energy**: the second moment of `w·δεₖ` is at most `C_w²` cell-band

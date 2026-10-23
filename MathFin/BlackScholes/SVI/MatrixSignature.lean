@@ -34,7 +34,7 @@ private theorem quadratic_apply {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ) (x : 
 private theorem quadratic_diagonal {n : ℕ} (w : Fin n → ℝ) :
     (diagonal w).toQuadraticForm' = QuadraticMap.weightedSumSquares ℝ w := by
   ext x
-  simp [quadratic_apply, mulVec_diagonal, dotProduct, QuadraticMap.weightedSumSquares_apply]
+  simp? [quadratic_apply, mulVec_diagonal, dotProduct, QuadraticMap.weightedSumSquares_apply]
   apply Finset.sum_congr rfl
   intro i hi
   ring

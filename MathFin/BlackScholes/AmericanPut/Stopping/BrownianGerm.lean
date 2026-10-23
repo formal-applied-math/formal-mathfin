@@ -129,10 +129,9 @@ theorem negativeProbeTest_integral_pos : 0 < ∫ x, negativeProbeTest x ∂gauss
     (integrable_const (1 : ℝ)).mono_nonneg negativeProbeTest_continuous.aestronglyMeasurable
       (Eventually.of_forall (fun x => (negativeProbeTest_bounds x).1))
       (Eventually.of_forall (fun x => (negativeProbeTest_bounds x).2))
-  apply integral_pos_of_integrable_nonneg_nonzero negativeProbeTest_continuous hi
-    (fun x => (negativeProbeTest_bounds x).1)
-  show negativeProbeTest (-2) ≠ 0
-  norm_num [negativeProbeTest]
+  exact integral_pos_of_integrable_nonneg_nonzero negativeProbeTest_continuous hi
+    (fun x ↦ (negativeProbeTest_bounds x).1)
+    (by norm_num [negativeProbeTest] : negativeProbeTest (-2) ≠ 0)
 
 theorem brownianNegativeGerm_prob_one : gaussianLimit brownianNegativeGerm = 1 := by
   rcases isBrownianReal_brownian.indep_zero measurable_brownian continuous_brownian

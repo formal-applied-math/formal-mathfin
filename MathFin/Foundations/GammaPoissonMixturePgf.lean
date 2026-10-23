@@ -79,6 +79,7 @@ theorem integral_exp_mul_gammaMeasure {a r s : ℝ} (ha : 0 < a) (hr : 0 < r) (h
           (r ^ a / Gamma a * lam ^ (a - 1) * exp (-((r - s) * lam))) := by
     rw [gammaMeasure, lintegral_withDensity_eq_lintegral_mul _ hmeasf hmeasg,
       ← lintegral_add_compl _ measurableSet_Ici, compl_Ici]
+    trace_state
     have hleft : ∫⁻ lam in Iio (0 : ℝ),
         (gammaPDF a r * fun lam ↦ ENNReal.ofReal (rexp (s * lam))) lam = 0 := by
       rw [setLIntegral_congr_fun (g := fun _ ↦ (0 : ℝ≥0∞)) measurableSet_Iio]
