@@ -49,7 +49,7 @@ accrued interest — the two pricing conventions agree exactly where they must.
 
 ## Across a coupon date
 
-At the end of a period (`f ↑ 1`) the next coupon `j` (`t j = 1`) is paid and a
+At the end of a period (`f ↑ 1`) the next coupon `j ∈ s` (`t j = 1`) is paid and a
 new period starts: the remaining cashflows are `s.erase j`, each one period
 closer (`t i - 1`), and `f` restarts at `0`. With `1 + y ≠ 0` and every
 cashflow at least one period out (`∀ i ∈ s, 1 ≤ t i`, so `t i - 1` is the true
@@ -111,8 +111,9 @@ theorem cleanPrice_on_coupon_date (s : Finset ι) (t : ι → ℕ) (c : ι → �
     accruedInterest_on_coupon_date, sub_zero]
 
 /-- At the end of a period (`f = 1`), the dirty price is the new period's dirty
-price plus the coupon `c j` paid on that date: carrying the last-coupon-date
-value one full period forward discounts every cashflow one period less. -/
+price plus the next coupon `c j` (`j ∈ s`) paid on that date: carrying the
+last-coupon-date value one full period forward discounts every cashflow one
+period less. -/
 theorem dirtyPrice_one_eq [DecidableEq ι] (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ}
     (hy : 1 + y ≠ 0) {j : ι} (hj : j ∈ s) (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i) :
     dirtyPrice s t c y 1 = dirtyPrice (s.erase j) (fun i ↦ t i - 1) c y 0 + c j := by
@@ -129,7 +130,7 @@ theorem dirtyPrice_one_eq [DecidableEq ι] (s : Finset ι) (t : ι → ℕ) (c :
 /-- **The dirty price drops by the coupon at a coupon date.** As the elapsed
 fraction `f` of the period rises to `1`, the dirty price tends to the new
 period's dirty price (remaining cashflows `s.erase j`, each one period closer,
-`f = 0`) plus the coupon `c j` paid on the date. -/
+`f = 0`) plus the next coupon `c j` (`j ∈ s`) paid on the date. -/
 theorem tendsto_dirtyPrice_coupon_date [DecidableEq ι] (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ)
     {y : ℝ} (hy : 1 + y ≠ 0) {j : ι} (hj : j ∈ s) (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i) :
     Tendsto (fun f ↦ dirtyPrice s t c y f) (𝓝[<] 1)
@@ -138,7 +139,7 @@ theorem tendsto_dirtyPrice_coupon_date [DecidableEq ι] (s : Finset ι) (t : ι 
   exact ((Real.continuousAt_const_rpow hy).mul continuousAt_const).continuousWithinAt
 
 /-- **The clean price is continuous across a coupon date.** With accrued
-interest on the coupon `c j` being paid, the clean price tends, as `f ↑ 1`, to
+interest on the next coupon `c j` (`j ∈ s`) being paid, the clean price tends, as `f ↑ 1`, to
 the clean price at the start of the new period, whatever coupon `c1'` accrues
 next: the coupon the dirty price sheds (`tendsto_dirtyPrice_coupon_date`) is
 exactly the accrued interest that has built up to it. -/
