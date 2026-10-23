@@ -107,6 +107,11 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   targets; it may not assert a property the entry does not deliver
   ("Existence and Uniqueness" on a uniqueness entry, "Convexity" where only a
   second derivative is stated).
+- **Junk values, inside the first pass.** For every price, expectation, probability or rate the
+  session's prose names: does the statement carry the condition that makes the Lean term mean it
+  (integrability, a non-zero denominator, `≠ ∞`, a non-null conditioning event)? Where it does not,
+  the term may be Lean's totalized `0` and the prose describes nothing. The rule and the library's
+  cases are in [`design.md`](design.md#2-a-junk-value-never-gets-a-financial-meaning).
 - **Record**: append a review block below, headed
   `## YYYY-MM-DD — corpus <N> — <one-line title>` (the freshness test parses
   the date and the `corpus <N>` count anywhere in the heading; a
