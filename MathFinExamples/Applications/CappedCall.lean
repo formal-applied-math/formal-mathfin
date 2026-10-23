@@ -24,7 +24,7 @@ use it. A term sheet describes a capped call on an index. This file
 
 Step 4's bound is a fact about the Black–Scholes formula that the formula does not show: the call
 price falls as the strike rises, by no more than the discounted strike gap. Here it comes from the
-payoff, not from any property of `Φ`.
+payoff, not from any property of `Φ`; `BSMarket.call_sub_mem_Icc` states it.
 
 ## What the library supplies
 
@@ -185,6 +185,17 @@ theorem value_mem_Icc [IsProbabilityMeasure Q] (c : CappedCallSheet) (m : BSMark
     _ = e * (c.cap - c.strike) := by simp
 
 end CappedCallSheet
+
+/-- **What the bound says about the call formula.** Between two strikes `K₁ ≤ K₂`, the
+Black–Scholes call price falls, by at most the discounted strike gap `e^{−rT}·(K₂ − K₁)`. The
+proof prices the capped call `K₁/K₂` and reads off `value_mem_Icc`: the bound comes from the
+payoff, and no property of `Φ` is used. -/
+theorem BSMarket.call_sub_mem_Icc [IsProbabilityMeasure Q] (m : BSMarket Q) {K₁ K₂ : ℝ}
+    (hK₁ : 0 < K₁) (hK : K₁ ≤ K₂) {T : ℝ≥0} (hT : 0 < T) :
+    m.call K₁ T - m.call K₂ T ∈ Set.Icc 0 (Real.exp (-m.rate * T) * (K₂ - K₁)) := by
+  let c : CappedCallSheet := ⟨K₁, K₂, T, hK₁, hK, hT, [], []⟩
+  have h := c.value_mem_Icc m
+  rwa [c.value_contract m] at h
 
 /-! ### The check -/
 
