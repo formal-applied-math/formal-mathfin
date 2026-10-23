@@ -16,7 +16,9 @@ expiry. No smooth-fit or free-boundary differentiability assumption is used.
 
 ## Result
 
-Public entry points include `canonicalStockBoundary_exists_later_gt`, `canonicalStockBoundary_continuousAt`, `canonicalStockBoundary_continuousOn`, `canonicalLogBoundary_continuousAt`.
+Public entry points include `canonicalStockBoundary_exists_later_gt`,
+`canonicalStockBoundary_continuousAt`, `canonicalStockBoundary_continuousOn`,
+`canonicalLogBoundary_continuousAt`.
 -/
 
 @[expose] public section

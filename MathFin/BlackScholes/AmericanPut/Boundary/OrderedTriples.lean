@@ -10,7 +10,8 @@ public import MathFin.BlackScholes.AmericanPut.Boundary.ParabolicMaximum
 /-! # Compact ordered equal-time triples in a moving strip 
 ## Result
 
-Public entry points include `sameTimeTriple`, `orderedTriples`, `orderedTriples_isCompact`, `sameTimeTriple_mem`.
+Public entry points include `sameTimeTriple`, `orderedTriples`, `orderedTriples_isCompact`,
+`sameTimeTriple_mem`.
 -/
 
 @[expose] public section

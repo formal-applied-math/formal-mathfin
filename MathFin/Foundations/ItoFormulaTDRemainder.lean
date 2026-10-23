@@ -190,7 +190,7 @@ theorem integrable_increment_sq (t₀ t₁ : ℝ≥0) :
       ((t₁ : ℝ) - t₀)).integrable one_le_two
   refine (h.add (integrable_const ((t₁ : ℝ) - t₀))).congr
     (Eventually.of_forall fun ω ↦ ?_)
-  show (B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀) + ((t₁ : ℝ) - t₀) = (B t₁ ω - B t₀ ω) ^ 2
+  change (B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀) + ((t₁ : ℝ) - t₀) = (B t₁ ω - B t₀ ω) ^ 2
   ring
 
 /-- **The per-step 2D remainder along Brownian nodes is `L²(μ)`**: its square is dominated

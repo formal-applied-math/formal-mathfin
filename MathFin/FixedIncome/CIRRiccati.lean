@@ -117,7 +117,8 @@ theorem hasDerivAt_cirBondA (κ θ : ℝ) {σ : ℝ} (hσ : σ ≠ 0) (T : ℝ) 
   have hγpos := cirGamma_pos h
   have hD := cirDenom_pos h T
   have hF : HasDerivAt (fun t ↦ 2 * cirGamma κ σ * Real.exp ((κ + cirGamma κ σ) * t / 2))
-      (2 * cirGamma κ σ * (Real.exp ((κ + cirGamma κ σ) * T / 2) * ((κ + cirGamma κ σ) / 2))) T := by
+      (2 * cirGamma κ σ *
+          (Real.exp ((κ + cirGamma κ σ) * T / 2) * ((κ + cirGamma κ σ) / 2))) T := by
     simpa using (((hasDerivAt_id T).const_mul (κ + cirGamma κ σ)).div_const 2).exp.const_mul
       (2 * cirGamma κ σ)
   have hg := hF.div (hasDerivAt_cirDenom κ σ T) hD.ne'

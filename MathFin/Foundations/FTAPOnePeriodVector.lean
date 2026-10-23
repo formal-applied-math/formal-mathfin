@@ -310,11 +310,11 @@ a.e. zero. A linear subspace of `F`; the market is non-redundant iff `N = ⊥`. 
 def gainsKernel : Submodule ℝ F where
   carrier := {θ | (fun ω ↦ inner ℝ θ (Y ω)) =ᵐ[P] 0}
   zero_mem' := by
-    show (fun ω ↦ inner ℝ (0 : F) (Y ω)) =ᵐ[P] 0
+    change (fun ω ↦ inner ℝ (0 : F) (Y ω)) =ᵐ[P] 0
     filter_upwards with ω; simp
   add_mem' := by
     intro a b ha hb
-    show (fun ω ↦ inner ℝ (a + b) (Y ω)) =ᵐ[P] 0
+    change (fun ω ↦ inner ℝ (a + b) (Y ω)) =ᵐ[P] 0
     have ha' : (fun ω ↦ inner ℝ a (Y ω)) =ᵐ[P] 0 := ha
     have hb' : (fun ω ↦ inner ℝ b (Y ω)) =ᵐ[P] 0 := hb
     filter_upwards [ha', hb'] with ω ea eb
@@ -322,7 +322,7 @@ def gainsKernel : Submodule ℝ F where
     rw [inner_add_left, ea, eb, add_zero]
   smul_mem' := by
     intro c b hb
-    show (fun ω ↦ inner ℝ (c • b) (Y ω)) =ᵐ[P] 0
+    change (fun ω ↦ inner ℝ (c • b) (Y ω)) =ᵐ[P] 0
     have hb' : (fun ω ↦ inner ℝ b (Y ω)) =ᵐ[P] 0 := hb
     filter_upwards [hb'] with ω eb
     simp only [Pi.zero_apply] at eb ⊢
@@ -358,7 +358,7 @@ lemma exists_pos_lower_bound (hYint : Integrable Y P) (hNA : NoArbitrage P Y)
       filter_upwards [hnonpos] with ω h
       simp only [Pi.zero_apply] at h ⊢; rw [inner_neg_left]; linarith)
     have hθN : θ ∈ N := by
-      show (fun ω ↦ inner ℝ θ (Y ω)) =ᵐ[P] 0
+      change (fun ω ↦ inner ℝ θ (Y ω)) =ᵐ[P] 0
       filter_upwards [hneg] with ω hh
       simp only [Pi.zero_apply, inner_neg_left] at hh ⊢; linarith
     exact inner_self_eq_zero.mp (N.inner_right_of_mem_orthogonal hθN hθK)
@@ -368,7 +368,7 @@ lemma exists_pos_lower_bound (hYint : Integrable Y P) (hNA : NoArbitrage P Y)
     simp only [hg]
     rw [← integral_const_mul]
     refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
-    show max (inner ℝ (r • θ) (Y ω)) 0 = r * max (inner ℝ θ (Y ω)) 0
+    change max (inner ℝ (r • θ) (Y ω)) 0 = r * max (inner ℝ θ (Y ω)) 0
     rw [real_inner_smul_left]
     rcases le_total 0 (inner ℝ θ (Y ω)) with hs | hs
     · rw [max_eq_left hs, max_eq_left (mul_nonneg hr hs)]
@@ -551,7 +551,7 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
       rw [hQ, integrable_withDensity_iff_integrable_smul' hofReal_meas
         (Filter.Eventually.of_forall fun ω ↦ ENNReal.ofReal_lt_top)]
       refine hdY_int.congr (Filter.Eventually.of_forall fun ω ↦ ?_)
-      show dens ω • Y ω = (ENNReal.ofReal (dens ω)).toReal • Y ω
+      change dens ω • Y ω = (ENNReal.ofReal (dens ω)).toReal • Y ω
       rw [ENNReal.toReal_ofReal (hdpos ω).le]
     have hQfair : ∫ ω, Y ω ∂Q = 0 := by
       rw [hQ, integral_withDensity_eq_integral_toReal_smul hofReal_meas
@@ -561,7 +561,7 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
         funext ω
         show (ENNReal.ofReal (dens ω)).toReal • Y ω = ζ⁻¹ • (z ω • Y ω)
         rw [ENNReal.toReal_ofReal (hdpos ω).le]
-        show (z ω / ζ) • Y ω = ζ⁻¹ • (z ω • Y ω)
+        change (z ω / ζ) • Y ω = ζ⁻¹ • (z ω • Y ω)
         rw [div_eq_inv_mul, mul_smul]
       rw [heq, integral_smul, hfair, smul_zero]
     exact ⟨Q, hQprob, hQP, hPQ, hYintQ, hQfair⟩
@@ -616,7 +616,7 @@ theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) 
     rw [hPtdef, integrable_withDensity_iff_integrable_smul' hd_ofReal_meas
       (Filter.Eventually.of_forall fun ω ↦ ENNReal.ofReal_lt_top)]
     refine hdY_int.congr (Filter.Eventually.of_forall fun ω ↦ ?_)
-    show dens ω • Y ω = (ENNReal.ofReal (dens ω)).toReal • Y ω
+    change dens ω • Y ω = (ENNReal.ofReal (dens ω)).toReal • Y ω
     rw [ENNReal.toReal_ofReal (hd_pos ω).le]
   have hNAt : NoArbitrage Pt Y := fun θ h ↦
     hPt_ll_P.ae_eq (hNA θ (hP_ll_Pt.ae_le h))

@@ -17,7 +17,8 @@ pointwise localization used by the local Ito calculation.
 
 ## Result
 
-Public entry points include `exists_compact_set_localization`, `kernelContinuation`, `kernelContinuation_isOpen`, `brownianPriceKernel_compact_localization`.
+Public entry points include `exists_compact_set_localization`, `kernelContinuation`,
+`kernelContinuation_isOpen`, `brownianPriceKernel_compact_localization`.
 -/
 
 @[expose] public section
@@ -73,7 +74,8 @@ theorem kernelContinuation_isOpen {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
 
 theorem brownianPriceKernel_compact_localization {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     {K r q σ x₀ T : ℝ} {C : Set (ℝ × ℝ)}
-    (hp : Boundary.DividendPutSolution (Boundary.normalizedRate r σ) (Boundary.normalizedRate q σ) p b)
+    (hp : Boundary.DividendPutSolution (Boundary.normalizedRate r σ)
+        (Boundary.normalizedRate q σ) p b)
     (hσ : 0 < σ) (hC : IsCompact C) (hCU : C ⊆ kernelContinuation b r q σ x₀ T) :
     ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧
       G =ᶠ[𝓝ˢ C] (fun z => brownianPriceKernel p K r q σ x₀ T z.1 z.2) ∧

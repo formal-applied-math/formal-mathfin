@@ -16,7 +16,8 @@ Continuity from longer maturities is not asserted by this argument.
 
 ## Result
 
-Public entry points include `threshold_upperSemicontinuous`, `threshold_continuousWithinAt_left`, `brownianExerciseBoundary_upperSemicontinuous`, `brownianUsualExerciseBoundary_upperSemicontinuous`.
+Public entry points include `threshold_upperSemicontinuous`, `threshold_continuousWithinAt_left`,
+`brownianExerciseBoundary_upperSemicontinuous`, `brownianUsualExerciseBoundary_upperSemicontinuous`.
 -/
 
 @[expose] public section

@@ -131,9 +131,9 @@ lemma binomialNoArb_crr {r σ T : ℝ} (hT : 0 < T) (hrT : |r| * Real.sqrt T < �
       _ < σ * Real.sqrt (crrStep T n) := mul_lt_mul_of_pos_right hkey hsqrt
   rw [abs_lt] at hbound
   refine ⟨Real.exp_pos _, ?_, ?_⟩
-  · show Real.exp (-(σ * Real.sqrt (crrStep T n))) < Real.exp (r * crrStep T n)
+  · change Real.exp (-(σ * Real.sqrt (crrStep T n))) < Real.exp (r * crrStep T n)
     exact Real.exp_lt_exp.mpr hbound.1
-  · show Real.exp (r * crrStep T n) < Real.exp (σ * Real.sqrt (crrStep T n))
+  · change Real.exp (r * crrStep T n) < Real.exp (σ * Real.sqrt (crrStep T n))
     exact Real.exp_lt_exp.mpr hbound.2
 
 /-! ### One-step risk-neutral martingale identity (algebraic, exact) -/
@@ -338,7 +338,7 @@ theorem crrProb_tendsto_half {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     Real.sq_sqrt h_step_pos.le
   -- Show: crrProb r σ T n = [the composition output]
   -- Compose pulls back through `h_p_form` once we identify rT/n with r·(√(T/n))² etc.
-  show ((fun h : ℝ ↦
+  change ((fun h : ℝ ↦
           ((Real.exp (r * h^2) - 1) / h - (Real.exp (-(σ * h)) - 1) / h)
             / ((Real.exp (σ * h) - 1) / h - (Real.exp (-(σ * h)) - 1) / h))
           ∘ fun n : ℕ ↦ Real.sqrt (crrStep T n)) n = crrProb r σ T n

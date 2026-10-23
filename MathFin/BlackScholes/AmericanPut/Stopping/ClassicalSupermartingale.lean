@@ -15,7 +15,8 @@ Existence of a pair satisfying that contract is a separate obligation.
 
 ## Result
 
-Public entry points include `brownianClassicalCandidate_supermartingale`, `brownian_price_identification`, `brownian_boundary_curvature`, `brownian_boundary_eq_classical`.
+Public entry points include `brownianClassicalCandidate_supermartingale`,
+`brownian_price_identification`, `brownian_boundary_curvature`, `brownian_boundary_eq_classical`.
 -/
 
 @[expose] public section
@@ -29,7 +30,8 @@ theorem brownianClassicalCandidate_supermartingale {K r q σ S : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 ≤ K) (hr : 0 ≤ r) (hσ : 0 < σ) (T : ℝ≥0) :
-    Supermartingale (classicalCandidate brownian K r q σ S p T) brownianFiltration gaussianLimit := by
+    Supermartingale (classicalCandidate brownian K r q σ S p T) brownianFiltration
+        gaussianLimit := by
   let U := classicalCandidate brownian K r q σ S p T
   have hadapt : StronglyAdapted brownianFiltration U :=
     fun t => (classicalCandidate_adapted hp brownian_adapted T t).stronglyMeasurable
@@ -90,7 +92,8 @@ theorem brownian_logBoundary_curvature {K r q σ : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 < K) (hr : 0 ≤ r) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :
-    0 ≤ deriv (deriv (fun s : ℝ => Real.log (brownianExerciseBoundary K r q σ s.toNNReal/K))) τ := by
+    0 ≤ deriv
+        (deriv (fun s : ℝ => Real.log (brownianExerciseBoundary K r q σ s.toNNReal/K))) τ := by
   have heq : (fun s : ℝ => Real.log (brownianExerciseBoundary K r q σ s.toNNReal/K)) =ᶠ[𝓝 τ]
       (fun s => b (σ^2/2*s)) := by
     filter_upwards [Ioi_mem_nhds hτ] with s hs
@@ -128,7 +131,7 @@ This specializes the new proof rather than formalizing Liu's published argument.
 theorem brownian_liuRange_boundary_conclusions {K r q σ : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
-    (_hLiu : q+σ^2/2 ≤ r) (hK : 0 < K) (hr : 0 ≤ r) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :
+    (_hLiu : q + σ^2/2 ≤ r) (hK : 0 < K) (hr : 0 ≤ r) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :
     (0 ≤ deriv (deriv (fun s : ℝ => Real.log (brownianExerciseBoundary K r q σ s.toNNReal/K))) τ) ∧
       0 < deriv (deriv (fun s : ℝ => brownianExerciseBoundary K r q σ s.toNNReal)) τ :=
   brownian_boundary_conclusions hp hK hr hσ hτ

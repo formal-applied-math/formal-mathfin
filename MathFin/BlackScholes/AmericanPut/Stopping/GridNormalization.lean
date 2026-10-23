@@ -14,7 +14,8 @@ over each step. Both are unchanged by the Black--Scholes normalization.
 
 ## Result
 
-Public entry points include `cappedGridTime_scale`, `brownianGridMarkovAux_scale`, `discountedLogPayoff_scale`, `brownianGridPrice_scale`.
+Public entry points include `cappedGridTime_scale`, `brownianGridMarkovAux_scale`,
+`discountedLogPayoff_scale`, `brownianGridPrice_scale`.
 -/
 
 @[expose] public section
@@ -31,8 +32,8 @@ theorem cappedGridTime_scale (a T δ : ℝ≥0) (i : ℕ) :
   ring
 
 theorem brownianGridMarkovAux_scale {Z Z' : ℕ → ℝ → ℝ} {K d β β' σ σ' : ℝ}
-    {a : ℝ≥0} (hK : 0 ≤ K) (hβ : β'*(a : ℝ) = β) (hσ : σ'^2*(a : ℝ) = σ^2)
-    (hZ : ∀ i x, Z i (x+d) = K*Z' i x) (T δ : ℝ≥0) (n i : ℕ) (x : ℝ) :
+    {a : ℝ≥0} (hK : 0 ≤ K) (hβ : β' * (a : ℝ) = β) (hσ : σ' ^ 2*(a : ℝ) = σ ^ 2)
+    (hZ : ∀ i x, Z i (x + d) = K * Z' i x) (T δ : ℝ≥0) (n i : ℕ) (x : ℝ) :
     brownianGridMarkovAux Z T δ β σ n i (x+d) =
       K*brownianGridMarkovAux Z' (a*T) (a*δ) β' σ' n i x := by
   induction n generalizing i x with
@@ -61,7 +62,7 @@ theorem brownianGridMarkovAux_scale {Z Z' : ℕ → ℝ → ℝ} {K d β β' σ 
     simp only [add_assoc,add_comm]
 
 theorem discountedLogPayoff_scale {K r k : ℝ} {a : ℝ≥0}
-    (hK : 0 < K) (hk : k*(a : ℝ) = r) (t : ℝ≥0) (x : ℝ) :
+    (hK : 0 < K) (hk : k * (a : ℝ) = r) (t : ℝ≥0) (x : ℝ) :
     discountedLogPayoff K r t (x+Real.log K) = K*discountedLogPayoff 1 k (a*t) x := by
   have hpay : max (K-Real.exp (x+Real.log K)) 0 = K*max (1-Real.exp x) 0 := by
     rw [mul_max_of_nonneg _ _ hK.le,Real.exp_add,Real.exp_log hK,mul_zero]
@@ -73,8 +74,8 @@ theorem discountedLogPayoff_scale {K r k : ℝ} {a : ℝ≥0}
   ring
 
 theorem brownianGridPrice_scale {K r q σ k h : ℝ} {a : ℝ≥0}
-    (hK : 0 < K) (ha : 0 < a) (hk : k*(a : ℝ) = r) (hh : h*(a : ℝ) = q)
-    (hσ : 2*(a : ℝ) = σ^2) (T δ : ℝ≥0) (x : ℝ) :
+    (hK : 0 < K) (ha : 0 < a) (hk : k * (a : ℝ) = r) (hh : h * (a : ℝ) = q)
+    (hσ : 2 * (a : ℝ) = σ ^ 2) (T δ : ℝ≥0) (x : ℝ) :
     brownianGridPrice K r q σ T δ (x+Real.log K) =
       K*brownianGridPrice 1 k h (Real.sqrt 2) (a*T) (a*δ) x := by
   have hcount : a*T/(a*δ) = T/δ := mul_div_mul_left T δ ha.ne'

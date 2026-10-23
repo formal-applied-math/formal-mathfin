@@ -32,25 +32,25 @@ matrix Riccati ODE `a' = a·a − Â·Â` reduces, on each eigenvalue, to the sc
 
 ## Where this sits (the Riccati is one, approximate, view)
 
-The Riccati is the **LQ-approximation** view of optimal market making, not the fundamental structure.
-For exponential order-arrival intensities the single-asset Avellaneda–Stoikov HJB equation is
-*exactly* linearisable — a Hopf–Cole change of variables turns it into a **linear** ODE system
-(Guéant–Lehalle–Fernandez-Tapia), i.e. a matrix-exponential object with no approximation. The exact
-*multi-asset* problem has no closed form, which is precisely why BEGV quadratically approximate the
-Hamiltonians to recover a solvable Riccati. So this module formalises the tractable approximate closed
-form (the spectral route below); the **exact linearisation is the deeper, more faithful target**
-(not formalised here; the matrix-exponential derivative it needs is Mathlib's
-`hasDerivAt_exp_smul_const`). Read the result as "this closed form solves
-this approximate Riccati", not as "optimal market making, mechanised".
+The Riccati is the **LQ-approximation** view of optimal market making, not the fundamental
+structure. For exponential order-arrival intensities the single-asset Avellaneda–Stoikov HJB
+equation is *exactly* linearisable — a Hopf–Cole change of variables turns it into a **linear** ODE
+system (Guéant–Lehalle–Fernandez-Tapia), i.e. a matrix-exponential object with no approximation. The
+exact *multi-asset* problem has no closed form, which is precisely why BEGV quadratically
+approximate the Hamiltonians to recover a solvable Riccati. So this module formalises the tractable
+approximate closed form (the spectral route below); the **exact linearisation is the deeper, more
+faithful target** (not formalised here; the matrix-exponential derivative it needs is Mathlib's
+`hasDerivAt_exp_smul_const`). Read the result as "this closed form solves this approximate Riccati",
+not as "optimal market making, mechanised".
 
 We verify, in two layers:
 
 * **§1 Abstract matrix Riccati** — `matrixRiccatiCoeff` solves `a'(t) = a(t)·a(t) − Â·Â` with
   `a(T) = 0` (matrix-valued `HasDerivAt`, taken under the `L∞` operator norm — MathFin's committed
   instance; since `n` is finite the space is finite-dimensional, all norms are equivalent, and the
-  derivative statement is norm-independent), for every Hermitian `Â`. This is the genuine multi-asset
-  matrix `tanh`-Riccati closed form (an identification with `Â·tanh(Â(T−t))` made in prose under the
-  Hermitian functional calculus — no matrix `tanh` is built here, though Mathlib's
+  derivative statement is norm-independent), for every Hermitian `Â`. This is the genuine
+  multi-asset matrix `tanh`-Riccati closed form (an identification with `Â·tanh(Â(T−t))` made in
+  prose under the Hermitian functional calculus — no matrix `tanh` is built here, though Mathlib's
   `hÂ.cfc Real.tanh` would give one).
 * **§2 Market-making instantiation** — with a positive diagonal `D₊` and a symmetric `Σ`, and `Â`
   the Hermitian square root scale `Â·Â = γ • (D₊^{½} Σ D₊^{½})`, the coefficient
@@ -62,11 +62,11 @@ We verify, in two layers:
 
 We verify the closed-form solution of the **approximate** (quadratic-Hamiltonian) matrix Riccati
 system. Out of scope: the stochastic optimal-control substrate (existence/uniqueness of the true
-value function and the verification theorem linking it to optimal quotes); the `B(t)`/`C(t)`
-closed forms (matrix variation-of-parameters / integrals) and the general-`d` value-function
-verification; that the approximate value function approximates the true one; and the construction
-of `Â` as a matrix square root (in §2 `Â` enters by its defining relation `Â·Â = γ • (D₊^{½}ΣD₊^{½})`,
-so the content is the change of variables, not matrix-square-root existence).
+value function and the verification theorem linking it to optimal quotes); the `B(t)`/`C(t)` closed
+forms (matrix variation-of-parameters / integrals) and the general-`d` value-function verification;
+that the approximate value function approximates the true one; and the construction of `Â` as a
+matrix square root (in §2 `Â` enters by its defining relation `Â·Â = γ • (D₊^{½}ΣD₊^{½})`, so the
+content is the change of variables, not matrix-square-root existence).
 -/
 
 @[expose] public section
@@ -126,8 +126,8 @@ theorem matrixRiccatiCoeff_isHermitian {Â : Matrix n n ℝ} (hÂ : Â.IsHermiti
 /-- **Matrix Riccati ODE**: `a'(t) = a(t)·a(t) − Â·Â` (matrix-valued derivative under the `L∞`
 operator norm). The `t`-dependence lives entirely in the diagonal core; its derivative is
 `diag (riccatiCoeff (λᵢ)² − λᵢ²)` by the scalar `hasDerivAt_riccatiCoeff`, and conjugating by the
-constant `U`, `Uᴴ` and re-collapsing (`star U · U = 1`, `map_mul`) turns `U · diag(riccatiCoeff² − λ²) · Uᴴ`
-into `a·a − Â·Â`. -/
+constant `U`, `Uᴴ` and re-collapsing (`star U · U = 1`, `map_mul`) turns
+`U · diag(riccatiCoeff² − λ²) · Uᴴ` into `a·a − Â·Â`. -/
 theorem hasDerivAt_matrixRiccatiCoeff {Â : Matrix n n ℝ} (hÂ : Â.IsHermitian) (T t : ℝ) :
     HasDerivAt (matrixRiccatiCoeff hÂ T)
       (matrixRiccatiCoeff hÂ T t * matrixRiccatiCoeff hÂ T t - Â * Â) t := by
@@ -138,7 +138,8 @@ theorem hasDerivAt_matrixRiccatiCoeff {Â : Matrix n n ℝ} (hÂ : Â.IsHermitia
     have hpi : HasDerivAt (fun s => (fun i => riccatiCoeff (hÂ.eigenvalues i) T s : n → ℝ))
         (fun i => riccatiCoeff (hÂ.eigenvalues i) T t ^ 2 - (hÂ.eigenvalues i) ^ 2) t :=
       hasDerivAt_pi.2 (fun i => hasDerivAt_riccatiCoeff (hÂ.eigenvalues i) T t)
-    have hL := (Matrix.diagonalLinearMap (R := ℝ) (n := n) (α := ℝ)).toContinuousLinearMap.hasFDerivAt
+    have hL :=
+        (Matrix.diagonalLinearMap (R := ℝ) (n := n) (α := ℝ)).toContinuousLinearMap.hasFDerivAt
       (x := (fun i => riccatiCoeff (hÂ.eigenvalues i) T t : n → ℝ))
     -- `exact` (not `simpa`) bridges the operator-norm `AddCommGroup`, defeq to the default instance
     have h2 := hL.comp_hasDerivAt t hpi

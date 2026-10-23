@@ -136,7 +136,7 @@ theorem conditional_expectation_formula
     exact this
   have h_X_decomp : (X : Ω → ℝ) = Xhat + (fun ω ↦ X ω - β * Y ω - (μ_X - β * μ_Y)) := by
     funext ω
-    show X ω = (μ_X + β * (Y ω - μ_Y)) + (X ω - β * Y ω - (μ_X - β * μ_Y))
+    change X ω = (μ_X + β * (Y ω - μ_Y)) + (X ω - β * Y ω - (μ_X - β * μ_Y))
     ring
   have h_cond_split :
       P[X | MeasurableSpace.comap Y inferInstance]
@@ -164,13 +164,13 @@ theorem conditional_expectation_formula
     ring
   refine h_cond_split.trans ?_
   filter_upwards [h_cond_centered] with ω hω
-  show ((P[Xhat | MeasurableSpace.comap Y inferInstance]) +
+  change ((P[Xhat | MeasurableSpace.comap Y inferInstance]) +
         (P[fun ω ↦ X ω - β * Y ω - (μ_X - β * μ_Y)
           | MeasurableSpace.comap Y inferInstance])) ω
       = μ_X + (ρ * σ_X / σ_Y) * (Y ω - μ_Y)
   simp only [Pi.add_apply]
   rw [hω, h_condXhat]
-  show (μ_X + β * (Y ω - μ_Y)) + (0 : ℝ) = μ_X + (ρ * σ_X / σ_Y) * (Y ω - μ_Y)
+  change (μ_X + β * (Y ω - μ_Y)) + (0 : ℝ) = μ_X + (ρ * σ_X / σ_Y) * (Y ω - μ_Y)
   rw [hβ_def]
   ring
 

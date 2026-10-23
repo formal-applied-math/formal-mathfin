@@ -16,7 +16,8 @@ The actual price is smooth there because the comparator dominates the payoff.
 
 ## Result
 
-Public entry points include `canonicalPrice_no_positive_supported_max`, `canonicalPrice_le_of_upper_supports`.
+Public entry points include `canonicalPrice_no_positive_supported_max`,
+`canonicalPrice_le_of_upper_supports`.
 -/
 
 @[expose] public section
@@ -30,9 +31,9 @@ theorem canonicalPrice_no_positive_supported_max {k h : ℝ} (hk : 0 < k)
     {F : ℝ × ℝ → ℝ} {z : ℝ × ℝ}
     (hz : z ∈ canonicalContinuationRegion k h)
     (hF : ContDiffAt ℝ 2 F z)
-    (hspace : IsLocalMax (fun x => canonicalPrice k h x z.2 - F (x,z.2)) z.1)
+    (hspace : IsLocalMax (fun x => canonicalPrice k h x z.2 - F (x, z.2)) z.1)
     (htime : ∀ᶠ t in 𝓝[<] z.2,
-      canonicalPrice k h z.1 t - F (z.1,t) ≤ canonicalPrice k h z.1 z.2 - F z)
+      canonicalPrice k h z.1 t - F (z.1, t) ≤ canonicalPrice k h z.1 z.2 - F z)
     (hpos : F z < canonicalPrice k h z.1 z.2)
     (hsuper : 0 ≤ pricingOperator k h F z) : False := by
   have hp : ContDiffAt ℝ 2 (fun w : ℝ × ℝ => canonicalPrice k h w.1 w.2) z :=
@@ -75,9 +76,9 @@ theorem canonicalPrice_le_of_upper_supports {k h : ℝ} (hk : 0 < k)
     (hsupport : ∀ z ∈ Ioo L R ×ˢ Ioc 0 T,
       ∃ F : ℝ × ℝ → ℝ, ContDiffAt ℝ 2 F z ∧ F z = U z ∧
         (∀ᶠ w in 𝓝 z, U w ≤ F w) ∧ 0 ≤ pricingOperator k h F z)
-    (hbottom : ∀ x ∈ Icc L R, canonicalPrice k h x 0 ≤ U (x,0))
-    (hleft : ∀ t ∈ Icc 0 T, canonicalPrice k h L t ≤ U (L,t))
-    (hright : ∀ t ∈ Icc 0 T, canonicalPrice k h R t ≤ U (R,t)) :
+    (hbottom : ∀ x ∈ Icc L R, canonicalPrice k h x 0 ≤ U (x, 0))
+    (hleft : ∀ t ∈ Icc 0 T, canonicalPrice k h L t ≤ U (L, t))
+    (hright : ∀ t ∈ Icc 0 T, canonicalPrice k h R t ≤ U (R, t)) :
     ∀ z ∈ Icc L R ×ˢ Icc 0 T, canonicalPrice k h z.1 z.2 ≤ U z := by
   intro z hz
   by_contra! hpos

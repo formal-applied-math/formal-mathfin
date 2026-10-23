@@ -18,7 +18,9 @@ premise or any time differentiability of the boundary.
 
 ## Result
 
-Public entry points include `canonicalStraightDifference_superlevel_interval`, `canonicalStraightDifference_positive_interval`, `canonicalLogBoundary_no_return_contact`, `zeroDividend_canonicalStraightDifference_positive_interval`.
+Public entry points include `canonicalStraightDifference_superlevel_interval`,
+`canonicalStraightDifference_positive_interval`, `canonicalLogBoundary_no_return_contact`,
+`zeroDividend_canonicalStraightDifference_positive_interval`.
 -/
 
 @[expose] public section
@@ -48,9 +50,9 @@ derivatives, isolated-contact hypothesis, or local curvature are assumed. -/
 theorem canonicalLogBoundary_no_return_contact {k h c d a T U : ℝ}
     (hk : 0 < k) (hh : 0 ≤ h) (hhk : h ≤ k) (hc : 0 < c) (hd : d ≤ 0)
     (ha : 0 < a) (haT : a < T) (hTU : T < U)
-    (hcontact : canonicalLogBoundary k h T = d-c*T)
-    (hpast : ∀ t ∈ Ico a T, canonicalLogBoundary k h t < d-c*t)
-    (hfuture : canonicalLogBoundary k h U < d-c*U) : False := by
+    (hcontact : canonicalLogBoundary k h T = d - c*T)
+    (hpast : ∀ t ∈ Ico a T, canonicalLogBoundary k h t < d - c*t)
+    (hfuture : canonicalLogBoundary k h U < d - c*U) : False := by
   let hp := canonicalPrice_continuousBoundaryPutSolution hk hh hhk
   have hU : 0 < U := (ha.trans haT).trans hTU
   have hpos : 0 < straightDifference (canonicalPrice k h) k h c d (d-c*U) U := by
@@ -68,7 +70,7 @@ theorem zeroDividend_canonicalStraightDifference_positive_interval {k c d t : �
   canonicalStraightDifference_positive_interval hk le_rfl hk.le hc hd ht
 
 theorem liuRange_canonicalStraightDifference_positive_interval {k h c d t : ℝ}
-    (hh : 0 ≤ h) (hliu : h+1 ≤ k) (hc : 0 < c) (hd : d ≤ 0) (ht : 0 < t) :
+    (hh : 0 ≤ h) (hliu : h + 1 ≤ k) (hc : 0 < c) (hd : d ≤ 0) (ht : 0 < t) :
     OrdConnected {x | canonicalLogBoundary k h t < x ∧
       0 < straightDifference (canonicalPrice k h) k h c d x t} :=
   canonicalStraightDifference_positive_interval (by linarith) hh (by linarith) hc hd ht
@@ -104,7 +106,7 @@ theorem zeroDividend_canonicalLogBoundary_below_line_time_interval {k c d : ℝ}
   canonicalLogBoundary_below_line_time_interval hk le_rfl hk.le hc hd
 
 theorem liuRange_canonicalLogBoundary_below_line_time_interval {k h c d : ℝ}
-    (hh : 0 ≤ h) (hliu : h+1 ≤ k) (hc : 0 < c) (hd : d ≤ 0) :
+    (hh : 0 ≤ h) (hliu : h + 1 ≤ k) (hc : 0 < c) (hd : d ≤ 0) :
     OrdConnected {t | 0 < t ∧ canonicalLogBoundary k h t < d-c*t} :=
   canonicalLogBoundary_below_line_time_interval (by linarith) hh (by linarith) hc hd
 

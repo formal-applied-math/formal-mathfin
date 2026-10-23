@@ -967,7 +967,7 @@ value of `localSkew_zero` (continuity of the closed form at `0`). -/
 theorem tendsto_localSkew_nhds_zero (ψ₁ T₀ : ℝ) (h₀ : 0 < T₀) :
     Filter.Tendsto (fun T ↦ localSkew ψ₁ T₀ T) (nhds 0) (nhds (2 * (ψ₁ / Real.sqrt T₀))) := by
   have h : ContinuousAt (fun T ↦ localSkew ψ₁ T₀ T) 0 := by
-    show ContinuousAt (fun T : ℝ ↦ ψ₁ * ((3 / 2) * T + 2 * T₀)
+    change ContinuousAt (fun T : ℝ ↦ ψ₁ * ((3 / 2) * T + 2 * T₀)
       / ((T + T₀) * Real.sqrt (T + T₀))) 0
     exact ContinuousAt.div (by fun_prop) (by fun_prop) (by simp only [zero_add]; positivity)
   rw [← localSkew_zero ψ₁ T₀ h₀]

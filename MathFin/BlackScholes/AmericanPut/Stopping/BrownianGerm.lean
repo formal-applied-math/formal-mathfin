@@ -17,7 +17,8 @@ No independence between these overlapping evaluations is claimed or needed.
 
 ## Result
 
-Public entry points include `brownianProbeTime`, `brownianProbe`, `brownianNegativeGerm`, `brownianProbeTime_pos`.
+Public entry points include `brownianProbeTime`, `brownianProbe`, `brownianNegativeGerm`,
+`brownianProbeTime_pos`.
 -/
 
 @[expose] public section
@@ -56,7 +57,8 @@ theorem brownianProbe_hasLaw (n : ℕ) :
     simp only [NNReal.coe_mul,NNReal.coe_mk,brownianProbeTime,NNReal.coe_pow,
       NNReal.coe_div,NNReal.coe_one,NNReal.coe_add,NNReal.coe_natCast]
     field_simp
-  change HasLaw (fun ω => ((n : ℝ)+1)*brownian (brownianProbeTime n) ω) (gaussianReal 0 1) gaussianLimit
+  change HasLaw (fun ω => ((n : ℝ)+1)*brownian (brownianProbeTime n) ω)
+      (gaussianReal 0 1) gaussianLimit
   simpa only [mul_zero,hv] using hh
 
 theorem brownianNegativeGerm_tail (M : ℕ) :

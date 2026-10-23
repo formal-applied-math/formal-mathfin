@@ -9,15 +9,15 @@ public import MathFin.Foundations.DriftProcessPredictable
 
 /-! # SDE existence/uniqueness via Picard on `E` (build)
 
-The strong solution of `dX = b(X)dt + σ(X)dB`, `X₀ = η` is the fixed point of the
-Picard iterate `Φ(X)_t = η + ∫₀ᵗ b(X_s) ds + ∫₀ᵗ σ(X_s) dB_s`, built as a self-map of
-the predictable `L²` space `E := Lp ℝ 2 (trimMeasure_T T)`. Both analytic terms already land
-back in `E` — the drift as a genuine CLM `driftProcessAssembled : E →L[ℝ] E`, the Itô term as the
-element-valued linear map `itoProcessAssembled : E → E` (built from a continuous modification, so
-*not* a CLM — its linearity is re-established a.e.). This file wires them into the Picard map, proves
-the contraction estimate `‖Φ(X) − Φ(Y)‖ ≤ (T·L_b + √T·L_σ)·‖X − Y‖`, and — when that constant is
-`< 1` — obtains the **unique fixed point** (`picardSolution`) via Banach's theorem: existence and
-uniqueness of the strong solution in `E`.
+The strong solution of `dX = b(X)dt + σ(X)dB`, `X₀ = η` is the fixed point of the Picard iterate
+`Φ(X)_t = η + ∫₀ᵗ b(X_s) ds + ∫₀ᵗ σ(X_s) dB_s`, built as a self-map of the predictable `L²` space
+`E := Lp ℝ 2 (trimMeasure_T T)`. Both analytic terms already land back in `E` — the drift as a
+genuine CLM `driftProcessAssembled : E →L[ℝ] E`, the Itô term as the element-valued linear map
+`itoProcessAssembled : E → E` (built from a continuous modification, so *not* a CLM — its linearity
+is re-established a.e.). This file wires them into the Picard map, proves the contraction estimate
+`‖Φ(X) − Φ(Y)‖ ≤ (T·L_b + √T·L_σ)·‖X − Y‖`, and — when that constant is `< 1` — obtains the **unique
+fixed point** (`picardSolution`) via Banach's theorem: existence and uniqueness of the strong
+solution in `E`.
 
 The `T` vs `√T` asymmetry is structural: both terms integrate a `[0,t]` quantity over `t ∈ [0,T]`,
 but Cauchy–Schwarz already spends a factor of time inside each drift slice (leaving the full `T`),
@@ -29,8 +29,10 @@ survives the outer time-integral). The `driftProcessAssembled_norm_le` (`≤ T�
 * `lipComp` — the coefficient composition `f ∘ X ∈ E` (centered via `lipschitz_sub_const`);
   `lipComp_sub_norm_le` — its `L`-Lipschitz bound.
 * `picardMap` — the Picard iterate `Φ : E → E`.
-* `picardMap_contraction` — the contraction estimate; `picardMap_contractingWith` — as `ContractingWith`.
-* `picardSolution` — the strong solution (the fixed point); `picardMap_exists_unique_fixedPoint` — `∃!`.
+* `picardMap_contraction` — the contraction estimate; `picardMap_contractingWith` — as
+  `ContractingWith`.
+* `picardSolution` — the strong solution (the fixed point); `picardMap_exists_unique_fixedPoint` —
+  `∃!`.
 
 The remaining bridge to the benchmark `sc-thm-8.2.5` (its `ℝ`-time, pointwise-per-`t`,
 `intervalIntegral`-drift, opaque-`Iσ` shape) and the all-`T` extension (a Bielecki weighted

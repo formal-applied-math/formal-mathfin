@@ -16,7 +16,8 @@ The global supermartingale property is separate.
 
 ## Result
 
-Public entry points include `localMartingale_of_ae_path_eq`, `localMartingale_stopped_indicator`, `brownianInteriorRule_martingale`, `brownianClassicalContactRule_martingale`.
+Public entry points include `localMartingale_of_ae_path_eq`, `localMartingale_stopped_indicator`,
+`brownianInteriorRule_martingale`, `brownianClassicalContactRule_martingale`.
 -/
 
 @[expose] public section
@@ -35,7 +36,8 @@ theorem localMartingale_of_ae_path_eq {Ω : Type*} [MeasurableSpace Ω]
   obtain ⟨τ,hτ,hlocal⟩ := hX
   refine ⟨τ,hτ,fun n => ⟨?_,?_⟩⟩
   · apply (hlocal n).1.congr
-      (hY.stoppedProcess_indicator (fun ω => (hcY ω).isCadlag.right_continuous) (hτ.isStoppingTime n))
+      (hY.stoppedProcess_indicator (fun ω => (hcY ω).isCadlag.right_continuous)
+          (hτ.isStoppingTime n))
     intro t
     filter_upwards [heq] with ω hω
     simp only [stoppedProcess]
@@ -85,7 +87,8 @@ theorem brownianInteriorRule_martingale {p : ℝ → ℝ → ℝ} {b : ℝ → �
       (continuous_id.min continuous_const)).sub continuous_const
   have hb : ∀ t ω, ‖U t ω‖ ≤ K := by
     intro t ω
-    obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp brownian hK.le hr T t ω
+    obtain ⟨hlo,hhi⟩ :=
+        classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp brownian hK.le hr T t ω
     change ‖classicalCandidate brownian K r q σ S p T t ω‖ ≤ K
     simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
   obtain ⟨M,_hMcont,hM,heq⟩ := brownianInteriorRule_ito_representation hp hK hS hσ T n
@@ -157,7 +160,8 @@ theorem brownian_price_identification_of_supermartingale {K r q σ S : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} {T : ℝ≥0}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 < K) (hr : 0 ≤ r) (hS : 0 < S) (hσ : 0 < σ)
-    (hsuper : Supermartingale (classicalCandidate brownian K r q σ S p T) brownianFiltration gaussianLimit) :
+    (hsuper : Supermartingale (classicalCandidate brownian K r q σ S p T) brownianFiltration
+        gaussianLimit) :
     brownianAmericanPut K r q σ S T = K*p (Real.log (S/K)) (σ^2/2*(T : ℝ)) :=
   brownian_price_identification_of_martingales hp hK hr hS hsuper
     (brownianClassicalContactRule_martingale hp hK hr hS hσ T)

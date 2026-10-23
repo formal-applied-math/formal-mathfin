@@ -37,10 +37,10 @@ The two structural identities behind them, generic in the multiplier scale `r`:
 
 namespace MathFin
 
-/- The generic simple-Doléans moment bounds live in their own namespace: their `simpleDoleansExp_neg_eq`
-/ `simpleDoleansExp_scaled_eq` / `sq_mul_le_half_add_pow4` are the *partition-generic* forms, distinct
-from (and, in the values-unification pass, subsuming) the `unifPart`-grid specializations of the same
-names in `GirsanovAdaptedTheta`. -/
+/- The generic simple-Doléans moment bounds live in their own namespace: their
+`simpleDoleansExp_neg_eq` / `simpleDoleansExp_scaled_eq` / `sq_mul_le_half_add_pow4` are the
+*partition-generic* forms, distinct from (and, in the values-unification pass, subsuming) the
+`unifPart`-grid specializations of the same names in `GirsanovAdaptedTheta`. -/
 namespace SimpleDoleansMoments
 
 open MeasureTheory ProbabilityTheory
@@ -53,8 +53,8 @@ stochastic exponent of the simple Doléans density. -/
 noncomputable def simpleStochSum (s : ℕ → ℝ≥0) (c : ℕ → Ω → ℝ) (N : ℕ) (T : ℝ≥0) (ω : Ω) : ℝ :=
   ∑ i ∈ Finset.range N, c i ω * (X (min (s (i + 1)) T) ω - X (min (s i) T) ω)
 
-/-- **The discrete quadratic variation** `∑_{i<N} cᵢ²·(s_{i+1}∧T − s_i∧T)` of a simple integrand — the
-drift half of the simple Doléans exponent. -/
+/-- **The discrete quadratic variation** `∑_{i<N} cᵢ²·(s_{i+1}∧T − s_i∧T)` of a simple integrand —
+the drift half of the simple Doléans exponent. -/
 noncomputable def simpleQuadVar (s : ℕ → ℝ≥0) (c : ℕ → Ω → ℝ) (N : ℕ) (T : ℝ≥0) (ω : Ω) : ℝ :=
   ∑ i ∈ Finset.range N,
     (c i ω) ^ 2 * (NNReal.toReal (min (s (i + 1)) T) - NNReal.toReal (min (s i) T))
@@ -117,9 +117,9 @@ lemma measurable_simpleDoleans {s : ℕ → ℝ≥0} (hs : Monotone s) {c : ℕ 
       (𝓕.le T)).measurable
 
 include hX in
-/-- **Uniform `L⁴` bound on the simple Doléans density.** `∫ (Z_{−c}_T)⁴ ≤ exp(6K²T)`, partition-free.
-`(Z_{−c})⁴ = E^{−4c}·exp(6·QV) ≤ exp(6K²T)·E^{−4c}` (`simpleDoleansExp_scaled_eq` at `r = −1, −4` +
-`simpleQuadVar_le`), and `E^{−4c}` is a positive unit-mean density. -/
+/-- **Uniform `L⁴` bound on the simple Doléans density.** `∫ (Z_{−c}_T)⁴ ≤ exp(6K²T)`,
+partition-free. `(Z_{−c})⁴ = E^{−4c}·exp(6·QV) ≤ exp(6K²T)·E^{−4c}` (`simpleDoleansExp_scaled_eq` at
+`r = −1, −4` + `simpleQuadVar_le`), and `E^{−4c}` is a positive unit-mean density. -/
 lemma quad_integral_simpleDoleans_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {c : ℕ → Ω → ℝ}
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
@@ -136,7 +136,8 @@ lemma quad_integral_simpleDoleans_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs
           (fun i ω ↦ (-4 : ℝ) * c i ω) N T ω := by
     intro ω
     rw [simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq, ← Real.exp_nat_mul, ← Real.exp_add]
-    exact Real.exp_le_exp.mpr (by push_cast; linarith [simpleQuadVar_le (Ω := Ω) hs hs0 hc_bdd N hNT ω])
+    exact Real.exp_le_exp.mpr
+        (by push_cast; linarith [simpleQuadVar_le (Ω := Ω) hs hs0 hc_bdd N hNT ω])
   calc ∫ ω, (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 4 ∂P
       ≤ ∫ ω, Real.exp (6 * K ^ 2 * (T : ℝ)) * simpleDoleansExp (X := X) s
           (fun i ω ↦ (-4 : ℝ) * c i ω) N T ω ∂P :=
@@ -146,9 +147,10 @@ lemma quad_integral_simpleDoleans_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs
 
 include hX in
 /-- **Uniform `L²` bound on the simple Doléans density.** `∫ (Z_{−c}_T)² ≤ exp(K²T)`, partition-free
-(the `L²` analogue of `quad_integral_simpleDoleans_le`): `(Z_{−c})² = E^{−2c}·exp(QV) ≤ exp(K²T)·E^{−2c}`
-(`simpleDoleansExp_scaled_eq` at `r = −1, −2` + `simpleQuadVar_le`), and `E^{−2c}` is a positive
-unit-mean density. This is the `M` the limit density's Fatou `L²` bound consumes. -/
+(the `L²` analogue of `quad_integral_simpleDoleans_le`):
+`(Z_{−c})² = E^{−2c}·exp(QV) ≤ exp(K²T)·E^{−2c}` (`simpleDoleansExp_scaled_eq` at `r = −1, −2` +
+`simpleQuadVar_le`), and `E^{−2c}` is a positive unit-mean density. This is the `M` the limit
+density's Fatou `L²` bound consumes. -/
 lemma sq_integral_simpleDoleans_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {c : ℕ → Ω → ℝ}
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
@@ -164,7 +166,8 @@ lemma sq_integral_simpleDoleans_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 
       ≤ Real.exp (K ^ 2 * (T : ℝ)) * simpleDoleansExp (X := X) s
           (fun i ω ↦ (-2 : ℝ) * c i ω) N T ω := by
     intro ω
-    rw [simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq, pow_two, ← Real.exp_add, ← Real.exp_add]
+    rw [simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq, pow_two, ← Real.exp_add,
+        ← Real.exp_add]
     exact Real.exp_le_exp.mpr (by linarith [simpleQuadVar_le (Ω := Ω) hs hs0 hc_bdd N hNT ω])
   calc ∫ ω, (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 2 ∂P
       ≤ ∫ ω, Real.exp (K ^ 2 * (T : ℝ)) * simpleDoleansExp (X := X) s
@@ -189,7 +192,8 @@ lemma memLp_simpleDoleans_two {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0
   rw [memLp_two_iff_integrable_sq hZmeas.aestronglyMeasurable]
   refine (hint2.const_mul (Real.exp (K ^ 2 * (T : ℝ)))).mono'
     (hZmeas.pow_const 2).aestronglyMeasurable (ae_of_all _ fun ω ↦ ?_)
-  rw [Real.norm_of_nonneg (sq_nonneg _), simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq, pow_two,
+  rw [Real.norm_of_nonneg (sq_nonneg _), simpleDoleansExp_neg_eq,
+      simpleDoleansExp_scaled_eq, pow_two,
     ← Real.exp_add, ← Real.exp_add]
   exact Real.exp_le_exp.mpr (by linarith [simpleQuadVar_le (Ω := Ω) hs hs0 hc_bdd N hNT ω])
 
@@ -209,7 +213,8 @@ lemma integrable_simpleDoleans_four {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0
     (ae_of_all _ fun ω ↦ ?_)
   rw [Real.norm_of_nonneg (by positivity), simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq,
     ← Real.exp_nat_mul, ← Real.exp_add]
-  exact Real.exp_le_exp.mpr (by push_cast; linarith [simpleQuadVar_le (Ω := Ω) hs hs0 hc_bdd N hNT ω])
+  exact Real.exp_le_exp.mpr
+      (by push_cast; linarith [simpleQuadVar_le (Ω := Ω) hs hs0 hc_bdd N hNT ω])
 
 /-! ### The drift-corrected exponential `D_u = exp(a·(X_u + simpleDrift_u) − ½a²u)` -/
 
@@ -226,11 +231,13 @@ lemma measurable_driftExp {s : ℕ → ℝ≥0} (hs : Monotone s) {c : ℕ → �
 
 include hX in
 omit [IsProbabilityMeasure P] [SigmaFiniteFiltration P 𝓕] in
-/-- **Uniform `L⁴` bound on the drift-corrected exponentials.** `∫ (D_u)⁴ ≤ exp(4|a|KT)·𝔼[exp(4a·X_u)]`,
-`n`-independent (`(D_u)⁴ = exp(4a·(X_u + drift) − 2a²u) ≤ exp(4|a|KT)·exp(4a·X_u)` since the drift is
-bounded by `K·u ≤ K·T` and `−2a²u ≤ 0`). Only the multiplier *bound* is used, not adaptedness. -/
+/-- **Uniform `L⁴` bound on the drift-corrected exponentials.**
+`∫ (D_u)⁴ ≤ exp(4|a|KT)·𝔼[exp(4a·X_u)]`, `n`-independent
+(`(D_u)⁴ = exp(4a·(X_u + drift) − 2a²u) ≤ exp(4|a|KT)·exp(4a·X_u)` since the drift is bounded by
+`K·u ≤ K·T` and `−2a²u ≤ 0`). Only the multiplier *bound* is used, not adaptedness. -/
 lemma quad_integral_driftExp_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {c : ℕ → Ω → ℝ}
-    {K : ℝ} (hc_bdd : ∀ i ω, |c i ω| ≤ K) (a : ℝ) (N : ℕ) {u T : ℝ≥0} (huT : u ≤ T) (hNT : T ≤ s N) :
+    {K : ℝ} (hc_bdd : ∀ i ω, |c i ω| ≤ K) (a : ℝ) (N : ℕ) {u T : ℝ≥0} (huT : u ≤ T)
+        (hNT : T ≤ s N) :
     ∫ ω, (Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4 ∂P
       ≤ Real.exp (4 * |a| * K * (T : ℝ)) * ∫ ω, Real.exp (4 * a * X u ω) ∂P := by
   have hMGF : Integrable (fun ω ↦ Real.exp (4 * a * X u ω)) P :=
@@ -253,7 +260,8 @@ lemma quad_integral_driftExp_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s
       ≤ ∫ ω, Real.exp (4 * |a| * K * (T : ℝ)) * Real.exp (4 * a * X u ω) ∂P :=
         integral_mono_of_nonneg (ae_of_all _ fun ω ↦ by positivity) (hMGF.const_mul _)
           (ae_of_all _ hpt)
-    _ = Real.exp (4 * |a| * K * (T : ℝ)) * ∫ ω, Real.exp (4 * a * X u ω) ∂P := integral_const_mul _ _
+    _ = Real.exp (4 * |a| * K * (T : ℝ)) * ∫ ω,
+        Real.exp (4 * a * X u ω) ∂P := integral_const_mul _ _
 
 include hX in
 omit [IsProbabilityMeasure P] [SigmaFiniteFiltration P 𝓕] in
@@ -262,7 +270,8 @@ omit [IsProbabilityMeasure P] [SigmaFiniteFiltration P 𝓕] in
 lemma integrable_driftExp_four {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {c : ℕ → Ω → ℝ}
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (a : ℝ) (N : ℕ) {u T : ℝ≥0} (huT : u ≤ T) (hNT : T ≤ s N) :
-    Integrable (fun ω ↦ (Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4) P := by
+    Integrable
+        (fun ω ↦ (Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4) P := by
   have hMGF : Integrable (fun ω ↦ Real.exp (4 * a * X u ω)) P :=
     integrable_exp_mul_of_hasLaw (hX.hasLaw_eval u) (4 * a)
   refine (hMGF.const_mul (Real.exp (4 * |a| * K * (T : ℝ)))).mono'

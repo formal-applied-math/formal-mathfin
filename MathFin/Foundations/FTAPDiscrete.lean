@@ -323,7 +323,7 @@ theorem isEMM_one_iff_onePeriod (hS : StronglyAdapted 𝓕 S) (h0 : 𝓕 0 = ⊥
     rw [h0, condExp_bot, hc] at hm
     obtain ⟨_, hcQ⟩ := hm.exists
     refine ⟨hQ.prob, hQ.absP, hQ.Pabs, Integrable.of_finite, ?_⟩
-    show ∫ ω, (S 1 ω - S 0 ω) ∂Q = 0
+    change ∫ ω, (S 1 ω - S 0 ω) ∂Q = 0
     rw [integral_sub Integrable.of_finite Integrable.of_finite, hmean Q]
     exact sub_eq_zero.mpr hcQ.symm
   · intro hQ
@@ -395,7 +395,7 @@ theorem IsEMM.increment {F : Type*} [NormedAddCommGroup F] [InnerProductSpace �
     rw [← integral_condExp (𝓕.le 0)]
     exact integral_congr_ae (h.martingale.condExp_ae_eq (zero_le : (0 : ℝ≥0) ≤ u))
   refine ⟨h.isProb, h.ac, h.ac', (h.martingale.integrable t).sub (h.martingale.integrable s), ?_⟩
-  show ∫ ω, (S t ω - S s ω) ∂Q = 0
+  change ∫ ω, (S t ω - S s ω) ∂Q = 0
   rw [integral_sub (h.martingale.integrable t) (h.martingale.integrable s), hmean t, hmean s,
     sub_self]
 

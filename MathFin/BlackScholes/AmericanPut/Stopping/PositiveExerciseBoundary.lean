@@ -15,7 +15,9 @@ smooth fit or free-boundary regularity is assumed.
 
 ## Result
 
-Public entry points include `canonicalPrice_le_stationaryPutCap`, `canonicalPrice_contact_below_stationary_join`, `canonicalStockBoundary_uniform_pos`, `canonicalStockBoundary_pos`.
+Public entry points include `canonicalPrice_le_stationaryPutCap`,
+`canonicalPrice_contact_below_stationary_join`, `canonicalStockBoundary_uniform_pos`,
+`canonicalStockBoundary_pos`.
 -/
 
 @[expose] public section
@@ -27,7 +29,7 @@ open scoped Topology ContDiff
 
 theorem canonicalPrice_le_stationaryPutCap {k h m d : ℝ} (hk : 0 < k)
     (hh : 0 ≤ h) (hhk : h ≤ k) (hm : 0 < m) (hd0 : d < 0)
-    (hd : Real.exp d = m/(1+m)) (hmQ : 0 ≤ k+(k-h-1)*m-m^2)
+    (hd : Real.exp d = m / (1 + m)) (hmQ : 0 ≤ k + (k - h-1) * m-m^2)
     (x : ℝ) {t : ℝ} (ht : 0 ≤ t) :
     canonicalPrice k h x t ≤ stationaryPutCap m d x := by
   apply le_of_forall_pos_le_add
@@ -64,7 +66,7 @@ theorem canonicalPrice_le_stationaryPutCap {k h m d : ℝ} (hk : 0 < k)
 
 theorem canonicalPrice_contact_below_stationary_join {k h m d : ℝ} (hk : 0 < k)
     (hh : 0 ≤ h) (hhk : h ≤ k) (hm : 0 < m) (hd0 : d < 0)
-    (hd : Real.exp d = m/(1+m)) (hmQ : 0 ≤ k+(k-h-1)*m-m^2)
+    (hd : Real.exp d = m / (1 + m)) (hmQ : 0 ≤ k + (k - h-1) * m-m^2)
     {x t : ℝ} (hx : x ≤ d) (ht : 0 ≤ t) : canonicalPrice k h x t = putPayoff x := by
   apply le_antisymm _ (canonicalPrice_bounds hk.le x t).1
   have hu := canonicalPrice_le_stationaryPutCap hk hh hhk hm hd0 hd hmQ x ht

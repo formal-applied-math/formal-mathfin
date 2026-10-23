@@ -71,7 +71,7 @@ theorem certificateProgram_eval (p : Params) :
 noncomputable def certificateFormula : SignFormula := certificateProgram.toFormula
 
 theorem certificateFormula_iff (p : Params) (hs : 0 < p.sigma)
-    (hb : 0 ≤ p.b) (hr : 0 ≤ 1-p.rho^2) (hg : varianceGate p) :
+    (hb : 0 ≤ p.b) (hr : 0 ≤ 1 - p.rho ^ 2) (hg : varianceGate p) :
     certificateFormula.eval p = true ↔ ∀ k : ℝ, 0 ≤ durrleman p k := by
   rw [certificateFormula, SignProgram.eval_toFormula, certificateProgram_eval, decide_eq_true_eq]
   exact svi_matrixCertificate_iff p hs hb hr hg

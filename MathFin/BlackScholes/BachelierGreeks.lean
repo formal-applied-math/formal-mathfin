@@ -71,9 +71,11 @@ lemma hasDerivAt_bachelierV_S {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : �
   --            = ϕ(d) · [(S-K)/(σ√T) - d] = ϕ(d) · [d - d] = 0
   -- so Φ(d) = Φ(d) + 0. trivially.
   simp only [Function.comp]
-  show Phi (bachelierD S K σ T) =
-    (1 * Phi (bachelierD S K σ T) + (S - K) * (gaussianPDFReal 0 1 (bachelierD S K σ T) * (1 / (σ * Real.sqrt T))))
-    + σ * Real.sqrt T * (-(bachelierD S K σ T * gaussianPDFReal 0 1 (bachelierD S K σ T)) * (1 / (σ * Real.sqrt T)))
+  change Phi (bachelierD S K σ T) =
+    (1 * Phi (bachelierD S K σ T) + (S - K) *
+        (gaussianPDFReal 0 1 (bachelierD S K σ T) * (1 / (σ * Real.sqrt T))))
+    + σ * Real.sqrt T *
+        (-(bachelierD S K σ T * gaussianPDFReal 0 1 (bachelierD S K σ T)) * (1 / (σ * Real.sqrt T)))
   rw [bachelierD]
   field_simp
   ring

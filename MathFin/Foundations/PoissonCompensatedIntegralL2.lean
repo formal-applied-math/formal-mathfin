@@ -121,7 +121,7 @@ theorem compensated_simple_isometry (N : PoissonRandomMeasure P ν)
               φ j l ω * N.compensated (Set.Ioc (t j) (t (j + 1)) ×ˢ A l) ω) ^ 2 ∂P
       = ∫ ω, ∑ p ∈ I, ∑ q ∈ I, a p ω * a q ω ∂P := by
         refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
-        show (∑ j ∈ Finset.range Nt, ∑ l ∈ Finset.range m,
+        change (∑ j ∈ Finset.range Nt, ∑ l ∈ Finset.range m,
               φ j l ω * N.compensated (Set.Ioc (t j) (t (j + 1)) ×ˢ A l) ω) ^ 2
             = ∑ p ∈ I, ∑ q ∈ I, a p ω * a q ω
         rw [← hsum ω, pow_two, Finset.sum_mul_sum]

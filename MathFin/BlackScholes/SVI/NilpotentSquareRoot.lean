@@ -24,7 +24,7 @@ namespace SVI
 squares the error, so the construction terminates after finitely many steps.
 No reducedness assumption is needed. -/
 theorem exists_sq_neg_one_of_nilpotent {A : Type*} [CommRing A] [Nontrivial A]
-    (half : A) (hh : 2*half = 1) (x : A) (hx : IsNilpotent (x^2+1)) :
+    (half : A) (hh : 2 * half = 1) (x : A) (hx : IsNilpotent (x ^ 2+1)) :
     ∃ u : A, u^2 = -1 := by
   obtain ⟨r, hr⟩ := hx
   induction r using Nat.strong_induction_on generalizing x with

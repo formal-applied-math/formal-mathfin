@@ -32,7 +32,8 @@ theorem eventually_lt_tangent_of_second_deriv_neg {b : ℝ → ℝ} {T : ℝ}
   have hs : ContDiffAt ℝ 2 b T :=
     (hb.contDiffAt (Ioi_mem_nhds hT)).of_le (WithTop.coe_le_coe.mpr le_top)
   have hs₁ : ContDiffAt ℝ 1 (deriv b) T := hs.derivWithin (by norm_num)
-  have hc₂ : ContinuousAt (deriv (deriv b)) T := (hs₁.derivWithin (m := 0) (by norm_num)).continuousAt
+  have hc₂ : ContinuousAt (deriv (deriv b)) T :=
+      (hs₁.derivWithin (m := 0) (by norm_num)).continuousAt
   have hpositive : ∀ᶠ t in 𝓝 T, 0 < t := Ioi_mem_nhds hT
   have hnear : ∀ᶠ t in 𝓝 T, 0 < t ∧ deriv (deriv b) t < 0 :=
     hpositive.and (hc₂.eventually (Iio_mem_nhds hneg))

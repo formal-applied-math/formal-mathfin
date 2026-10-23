@@ -216,7 +216,7 @@ theorem itoSimpleProcess_isometry_time (hBmeas : ∀ t, Measurable (B t))
   calc ∫ ω, (itoSimpleProcess hBmeas V t ω) ^ 2 ∂μ
       = ∫ ω, ∑ p ∈ V.value.support, ∑ q ∈ V.value.support, a p ω * a q ω ∂μ := by
         refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
-        show itoSimpleProcess hBmeas V t ω ^ 2
+        change itoSimpleProcess hBmeas V t ω ^ 2
           = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support, a p ω * a q ω
         rw [show itoSimpleProcess hBmeas V t ω = ∑ p ∈ V.value.support, a p ω from by
               rw [itoSimpleProcess_apply]; rfl, sq, Finset.sum_mul_sum]
@@ -362,7 +362,7 @@ theorem itoSimpleProcessLp_l2_continuous (hBmeas : ∀ t, Measurable (B t))
           = ((memLp_itoSimpleProcess hB hBmeas V t).sub
               (memLp_itoSimpleProcess hB hBmeas V s)).toLp _ := by
         simp only [hF]
-        show (memLp_itoSimpleProcess hB hBmeas V t).toLp _ -
+        change (memLp_itoSimpleProcess hB hBmeas V t).toLp _ -
             (memLp_itoSimpleProcess hB hBmeas V s).toLp _ = _
         rw [← MemLp.toLp_sub]
       rw [hsub, ← real_inner_self_eq_norm_sq, L2.inner_def]
@@ -370,7 +370,7 @@ theorem itoSimpleProcessLp_l2_continuous (hBmeas : ∀ t, Measurable (B t))
       filter_upwards [MemLp.coeFn_toLp ((memLp_itoSimpleProcess (μ := μ) hB hBmeas V t).sub
         (memLp_itoSimpleProcess (μ := μ) hB hBmeas V s))] with ω hω
       rw [hω]; simp only [Pi.sub_apply]
-      show (itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω)
+      change (itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω)
           * (itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω)
           = (itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω) ^ 2
       ring

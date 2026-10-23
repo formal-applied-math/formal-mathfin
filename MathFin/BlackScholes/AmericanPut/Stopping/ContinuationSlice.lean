@@ -17,7 +17,8 @@ Only price values, not derivatives, are passed to the initial-time limit.
 
 ## Result
 
-Public entry points include `canonicalPrice_monotone_time`, `canonicalPrice_time_deriv_nonneg`, `canonicalIntrinsicPremium`, `canonicalIntrinsicPremium_nonneg`.
+Public entry points include `canonicalPrice_monotone_time`, `canonicalPrice_time_deriv_nonneg`,
+`canonicalIntrinsicPremium`, `canonicalIntrinsicPremium_nonneg`.
 -/
 
 @[expose] public section
@@ -52,14 +53,14 @@ theorem canonicalIntrinsicPremium_continuous {k h : ℝ} (hk : 0 ≤ k) :
   (canonicalPrice_continuous hk).sub (by fun_prop)
 
 theorem canonicalIntrinsicPremium_contDiffAt {k h x t : ℝ} (hk : 0 ≤ k)
-    (hz : (x,t) ∈ canonicalContinuationRegion k h) :
+    (hz : (x, t) ∈ canonicalContinuationRegion k h) :
     ContDiffAt ℝ 2 (fun y => canonicalIntrinsicPremium k h y t) x := by
   have hp := (canonicalPrice_contDiffAt hk hz).of_le
     (show (2 : WithTop ℕ∞) ≤ ∞ from WithTop.coe_le_coe.mpr le_top)
   exact (hp.comp (f := fun y : ℝ => (y,t)) x (by fun_prop)).sub (by fun_prop)
 
 theorem canonicalIntrinsicPremium_forcing {k h x t : ℝ} (hk : 0 ≤ k)
-    (hz : (x,t) ∈ canonicalContinuationRegion k h) :
+    (hz : (x, t) ∈ canonicalContinuationRegion k h) :
     k-h*Real.exp x ≤
       deriv (deriv (fun y => canonicalIntrinsicPremium k h y t)) x +
         (k-h-1)*deriv (fun y => canonicalIntrinsicPremium k h y t) x -
@@ -89,12 +90,12 @@ theorem canonicalIntrinsicPremium_forcing {k h x t : ℝ} (hk : 0 ≤ k)
 both endpoint values arbitrarily small. The quantitative constants are explicit. -/
 theorem no_small_forced_profile {f : ℝ → ℝ} {k α c ρ δ η : ℝ}
     (hk : 0 ≤ k) (hρ : 0 < ρ) (hη : 0 < η)
-    (hscale : 2*η*(1+|α| * ρ) < δ)
-    (hf : ContinuousOn f (Icc (c-ρ) (c+ρ)))
-    (hfs : ∀ x ∈ Ioo (c-ρ) (c+ρ), ContDiffAt ℝ 2 f x)
-    (hn : ∀ x ∈ Icc (c-ρ) (c+ρ), 0 ≤ f x)
-    (hforce : ∀ x ∈ Ioo (c-ρ) (c+ρ), δ ≤ deriv (deriv f) x+α*deriv f x-k*f x)
-    (hleft : f (c-ρ) < η*ρ^2) (hright : f (c+ρ) < η*ρ^2) : False := by
+    (hscale : 2 * η*(1 + |α| * ρ) < δ)
+    (hf : ContinuousOn f (Icc (c - ρ) (c + ρ)))
+    (hfs : ∀ x ∈ Ioo (c - ρ) (c + ρ), ContDiffAt ℝ 2 f x)
+    (hn : ∀ x ∈ Icc (c - ρ) (c + ρ), 0 ≤ f x)
+    (hforce : ∀ x ∈ Ioo (c - ρ) (c + ρ), δ ≤ deriv (deriv f) x + α*deriv f x - k*f x)
+    (hleft : f (c - ρ) < η * ρ^2) (hright : f (c + ρ) < η * ρ^2) : False := by
   let V : ℝ → ℝ := fun x => f x-η*(x-c)^2
   have hc : c ∈ Icc (c-ρ) (c+ρ) := ⟨by linarith,by linarith⟩
   obtain ⟨x,hx,hmax⟩ := isCompact_Icc.exists_isMaxOn ⟨c,hc⟩
@@ -150,9 +151,9 @@ theorem no_small_forced_profile {f : ℝ → ℝ} {k α c ρ δ η : ℝ}
 /-- An interval below strike cannot instantly enter continuation when its two
 endpoints were in contact. No initial derivative convergence is required. -/
 theorem canonicalPrice_no_instantaneous_interval {k h c ρ a : ℝ} (hk : 0 < k)
-    (hh : 0 ≤ h) (hhk : h ≤ k) (hρ : 0 < ρ) (hR : c+ρ < 0)
-    (hinitL : canonicalPrice k h (c-ρ) a = 1-Real.exp (c-ρ))
-    (hinitR : canonicalPrice k h (c+ρ) a = 1-Real.exp (c+ρ))
+    (hh : 0 ≤ h) (hhk : h ≤ k) (hρ : 0 < ρ) (hR : c + ρ < 0)
+    (hinitL : canonicalPrice k h (c - ρ) a = 1 - Real.exp (c - ρ))
+    (hinitR : canonicalPrice k h (c + ρ) a = 1 - Real.exp (c + ρ))
     (hcont : ∀ t : ℝ, a < t → ∀ x ∈ Ioo (c-ρ) (c+ρ),
       (x,t) ∈ canonicalContinuationRegion k h) : False := by
   let δ := k-h*Real.exp (c+ρ)

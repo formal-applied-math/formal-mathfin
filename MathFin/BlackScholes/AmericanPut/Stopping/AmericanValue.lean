@@ -17,7 +17,8 @@ follow from the actual stopping rules. No PDE identification is asserted.
 
 ## Result
 
-Public entry points include `exerciseValues`, `americanPutValue`, `exerciseValues_nonempty`, `expectedReward_le_strike`.
+Public entry points include `exerciseValues`, `americanPutValue`, `exerciseValues_nonempty`,
+`expectedReward_le_strike`.
 -/
 
 @[expose] public section

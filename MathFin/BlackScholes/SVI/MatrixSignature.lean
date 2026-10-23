@@ -47,7 +47,8 @@ private theorem quadratic_conjugate {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ)
       M.toQuadraticForm'.comp ((Matrix.UnitaryGroup.toLinearEquiv U).toLinearMap) := by
   ext x
   simp only [QuadraticMap.comp_apply, quadratic_apply]
-  change dotProduct x ((star (U : Matrix (Fin n) (Fin n) ℝ) * M * (U : Matrix (Fin n) (Fin n) ℝ)) *ᵥ x) =
+  change dotProduct x
+      ((star (U : Matrix (Fin n) (Fin n) ℝ) * M * (U : Matrix (Fin n) (Fin n) ℝ)) *ᵥ x) =
     dotProduct ((U : Matrix (Fin n) (Fin n) ℝ) *ᵥ x)
       (M *ᵥ ((U : Matrix (Fin n) (Fin n) ℝ) *ᵥ x))
   rw [← mulVec_mulVec, ← mulVec_mulVec, dotProduct_mulVec]
@@ -61,7 +62,8 @@ theorem signatureTest_eq_matrixSignature {n : ℕ} (M : Matrix (Fin n) (Fin n) �
     (hM : M.IsSymm) : signatureTest M = matrixSignature M := by
   have hh : M.IsHermitian := Matrix.isHermitian_iff_isSymm.mpr hM
   have heq : (diagonal hh.eigenvalues).toQuadraticForm' =
-      M.toQuadraticForm'.comp (Matrix.UnitaryGroup.toLinearEquiv hh.eigenvectorUnitary).toLinearMap := by
+      M.toQuadraticForm'.comp
+          (Matrix.UnitaryGroup.toLinearEquiv hh.eigenvectorUnitary).toLinearMap := by
     rw [← quadratic_conjugate]
     have hdiag := hh.conjStarAlgAut_star_eigenvectorUnitary
     simpa [Unitary.conjStarAlgAut_star_apply, Function.comp_def] using

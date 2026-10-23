@@ -47,7 +47,8 @@ Its failure of subadditivity is proved in `RiskMeasures/VaRSuperadditivity.lean`
 * `pinballLoss`, `integral_pinballLoss`: the pinball loss and its expectation.
 * `integral_pinballLoss_valueAtRisk_le`: VaR minimizes the expected pinball loss.
 * `rockafellarUryasev_sub_expectedShortfall`: the exact Rockafellar–Uryasev excess.
-* `expectedShortfall_lt_rockafellarUryasev`: VaR is the unique minimizer when the quantile is unique.
+* `expectedShortfall_lt_rockafellarUryasev`: VaR is the unique minimizer when the quantile is
+  unique.
 * `strictlyElicits_pinballLoss`: the pinball loss strictly elicits the `α`-quantile.
 * `not_isElicitable_expectedShortfall`: `ES_α` is not elicitable, for every `α ∈ (0, 1)`.
 -/

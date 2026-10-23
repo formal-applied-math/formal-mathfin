@@ -16,7 +16,8 @@ This strict bound is the input for solving the two coupled boundary equations.
 
 ## Result
 
-Public entry points include `boundaryArrivalMass`, `boundaryArrivalMass_nonneg`, `boundaryArrivalMass_lt_one`, `heatBoundaryExtension_finite_bound`.
+Public entry points include `boundaryArrivalMass`, `boundaryArrivalMass_nonneg`,
+`boundaryArrivalMass_lt_one`, `heatBoundaryExtension_finite_bound`.
 -/
 
 @[expose] public section
@@ -60,7 +61,7 @@ theorem boundaryArrivalMass_lt_one {x D : ℝ} (hx : 0 < x) (hD : 0 ≤ D) :
   linarith
 
 theorem heatBoundaryExtension_finite_bound {g : ℝ → ℝ} {a D C x t : ℝ}
-    (hx : 0 < x) (ht : t ≤ a+D)
+    (hx : 0 < x) (ht : t ≤ a + D)
     (hstart : ∀ s, s ≤ a → g s = 0) (hC : ∀ s, ‖g s‖ ≤ C) :
     ‖heatBoundaryExtension g x t‖ ≤ boundaryArrivalMass x D*C := by
   have he : (∫ s in Ioc 0 D, heatBoundaryKernel s x*g (t-s)) =
@@ -126,7 +127,7 @@ noncomputable def crossBoundaryCausal {a : ℝ} (χ : ℝ →ᵇ ℝ) (L : ℝ)
 
 theorem crossBoundaryCausal_dist {a D L : ℝ} (hL : 0 < L)
     (χ : ℝ →ᵇ ℝ) (hχ : ∀ t, ‖χ t‖ ≤ 1)
-    (hstop : ∀ t, a+D < t → χ t = 0) (f g : CausalBoundaryData a) :
+    (hstop : ∀ t, a + D < t → χ t = 0) (f g : CausalBoundaryData a) :
     dist (crossBoundaryCausal χ L f) (crossBoundaryCausal χ L g) ≤
       boundaryArrivalMass L D*dist f g := by
   simp only [Subtype.dist_eq,dist_eq_norm]
@@ -150,7 +151,7 @@ theorem crossBoundaryCausal_dist {a D L : ℝ} (hL : 0 < L)
 
 theorem crossBoundaryCausal_lipschitz {a D L : ℝ} (hL : 0 < L)
     (χ : ℝ →ᵇ ℝ) (hχ : ∀ t, ‖χ t‖ ≤ 1)
-    (hstop : ∀ t, a+D < t → χ t = 0) :
+    (hstop : ∀ t, a + D < t → χ t = 0) :
     LipschitzWith ⟨boundaryArrivalMass L D,boundaryArrivalMass_nonneg hL⟩
       (crossBoundaryCausal (a := a) χ L) :=
   LipschitzWith.of_dist_le_mul (crossBoundaryCausal_dist hL χ hχ hstop)

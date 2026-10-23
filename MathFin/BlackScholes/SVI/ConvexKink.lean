@@ -23,7 +23,7 @@ open Set
 
 private lemma secant_join_lower {f : ℝ → ℝ} {x y z L : ℝ}
     (hxy : x < y) (hyz : y < z)
-    (h₁ : L ≤ (f y-f x)/(y-x)) (h₂ : L ≤ (f z-f y)/(z-y)) :
+    (h₁ : L ≤ (f y - f x) / (y - x)) (h₂ : L ≤ (f z - f y) / (z - y)) :
     L ≤ (f z-f x)/(z-x) := by
   rw [le_div_iff₀ (sub_pos.mpr hxy)] at h₁
   rw [le_div_iff₀ (sub_pos.mpr hyz)] at h₂
@@ -32,7 +32,7 @@ private lemma secant_join_lower {f : ℝ → ℝ} {x y z L : ℝ}
 
 private lemma secant_join_upper {f : ℝ → ℝ} {x y z L : ℝ}
     (hxy : x < y) (hyz : y < z)
-    (h₁ : (f y-f x)/(y-x) ≤ L) (h₂ : (f z-f y)/(z-y) ≤ L) :
+    (h₁ : (f y - f x) / (y - x) ≤ L) (h₂ : (f z - f y) / (z - y) ≤ L) :
     (f z-f x)/(z-x) ≤ L := by
   rw [div_le_iff₀ (sub_pos.mpr hxy)] at h₁
   rw [div_le_iff₀ (sub_pos.mpr hyz)] at h₂

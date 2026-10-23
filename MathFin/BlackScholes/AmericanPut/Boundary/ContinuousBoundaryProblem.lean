@@ -15,7 +15,8 @@ maximum principle and terminal Hopf arguments can use these data directly.
 
 ## Result
 
-Public entry points include `ContinuousBoundaryPutSolution`, `DividendPutSolution.toContinuousBoundaryPutSolution`, `toDividendPutSolution`, `boundary_nonpos`.
+Public entry points include `ContinuousBoundaryPutSolution`,
+`DividendPutSolution.toContinuousBoundaryPutSolution`, `toDividendPutSolution`, `boundary_nonpos`.
 -/
 
 @[expose] public section

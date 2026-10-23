@@ -18,7 +18,8 @@ first-contact times, not an assumption of probabilistic boundary regularity.
 
 ## Result
 
-Public entry points include `brownianUsualActualContactTime_le_of_downcrossing`, `brownianUsualActualContactTime_tendsto_of_germ`, `brownianUsualActualContactTime_tendsto_boundary`.
+Public entry points include `brownianUsualActualContactTime_le_of_downcrossing`,
+`brownianUsualActualContactTime_tendsto_of_germ`, `brownianUsualActualContactTime_tendsto_boundary`.
 -/
 
 @[expose] public section
@@ -31,14 +32,16 @@ open scoped NNReal Topology
 theorem brownianUsualActualContactTime_le_of_downcrossing {k h : ℝ} (hk : 0 < k)
     (hh : 0 ≤ h) (hhk : h ≤ k) (x : ℝ) {T s : ℝ≥0} (hs : s < T)
     (ω : ℝ≥0 → ℝ)
-    (hcross : x+(k-h-1)*(s : ℝ)+Real.sqrt 2*brownian s ω ≤
+    (hcross : x + (k - h-1) * (s : ℝ) + Real.sqrt 2 * brownian s ω ≤
       canonicalLogBoundary k h (T : ℝ)) :
     brownianUsualActualContactTime (h := h) hk.le x T ω ≤ s := by
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   by_contra! hτ
   have hcont := canonicalContactRule_continuation_before (h := h) hk.le
     brownianUsual_adapted continuous_brownian x T ω
-    (show s < (canonicalContactRule (h := h) hk.le brownianUsual_adapted continuous_brownian x T).time ω from hτ)
+    (show s <
+        (canonicalContactRule (h := h) hk.le brownianUsual_adapted continuous_brownian x T).time ω
+        from hτ)
   rw [canonicalContinuationRegion_eq_logBoundary hk hh hhk] at hcont
   have hsR : (s : ℝ) < (T : ℝ) := by exact_mod_cast hs
   have hmono := canonicalLogBoundary_antitoneOn hk hh hhk
@@ -72,7 +75,8 @@ theorem brownianUsualActualContactTime_tendsto_of_germ {k h : ℝ} (hk : 0 < k)
       linarith
     filter_upwards [Iio_mem_nhds hnear] with x hx
     change x < canonicalLogBoundary k h (T : ℝ)-((k-h-1)*(s : ℝ)+Real.sqrt 2*brownian s ω) at hx
-    exact (brownianUsualActualContactTime_le_of_downcrossing hk hh hhk x hsT ω (by linarith)).trans_lt hsδ
+    exact (brownianUsualActualContactTime_le_of_downcrossing hk hh hhk x hsT ω
+        (by linarith)).trans_lt hsδ
 
 /-- This is convergence of the actual optimal rules, whose optimality was
 proved separately, on the completed usual Brownian probability space. -/
@@ -81,7 +85,8 @@ theorem brownianUsualActualContactTime_tendsto_boundary {k h : ℝ} (hk : 0 < k)
     ∀ᵐ ω ∂completedMeasure gaussianLimit,
       Tendsto (fun x => brownianUsualActualContactTime (h := h) hk.le x T ω)
         (𝓝 (canonicalLogBoundary k h (T : ℝ))) (𝓝 0) := by
-  have hg : ∀ᵐ ω ∂completedMeasure gaussianLimit, ω ∈ brownianNegativeGerm := brownianNegativeGerm_ae
+  have hg : ∀ᵐ ω ∂completedMeasure gaussianLimit,
+      ω ∈ brownianNegativeGerm := brownianNegativeGerm_ae
   filter_upwards [hg] with ω hω
   exact brownianUsualActualContactTime_tendsto_of_germ hk hh hhk hT hω
 

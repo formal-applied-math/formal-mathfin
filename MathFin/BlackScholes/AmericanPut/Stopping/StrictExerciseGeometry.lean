@@ -17,7 +17,8 @@ actual interior PDE and a stationary upper barrier.
 
 ## Result
 
-Public entry points include `threshold_lt_strike_of_price_pos`, `value_contact_iff_le_threshold`, `value_strict_continuation_iff`, `canonicalStockBoundary`.
+Public entry points include `threshold_lt_strike_of_price_pos`, `value_contact_iff_le_threshold`,
+`value_strict_continuation_iff`, `canonicalStockBoundary`.
 -/
 
 @[expose] public section

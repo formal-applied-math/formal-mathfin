@@ -16,7 +16,8 @@ integrals, which is exactly the martingale criterion.
 
 ## Result
 
-Public entry points include `BoundedRule.binary`, `BoundedRule.capTime`, `BoundedRule.capBinary`, `expected_value_eq_before_optimal_rule`.
+Public entry points include `BoundedRule.binary`, `BoundedRule.capTime`, `BoundedRule.capBinary`,
+`expected_value_eq_before_optimal_rule`.
 -/
 
 @[expose] public section

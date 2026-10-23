@@ -19,7 +19,8 @@ That hypothesis and classical-solution existence are not proved here.
 
 ## Result
 
-Public entry points include `threshold_eq_of_price_identification`, `brownian_boundary_curvature_of_price_identification`.
+Public entry points include `threshold_eq_of_price_identification`,
+`brownian_boundary_curvature_of_price_identification`.
 -/
 
 @[expose] public section
@@ -36,7 +37,7 @@ variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} [IsProbabilityMeasur
 theorem threshold_eq_of_price_identification (hp : DividendPutSolution k h p b)
     (hW : Measurable W.uncurry) (hzero : ∀ᵐ ω ∂P, W 0 ω = 0)
     (hK : 0 < K) (hr : 0 ≤ r) (ht : 0 < t)
-    (hprice : ∀ S, 0 < S → americanPutValue P 𝓕 W K r q σ S T = K*p (Real.log (S/K)) t) :
+    (hprice : ∀ S, 0 < S → americanPutValue P 𝓕 W K r q σ S T = K * p (Real.log (S / K)) t) :
     exerciseThreshold P 𝓕 W K r q σ T = K*Real.exp (b t) := by
   let B := K*Real.exp (b t)
   have hBpos : 0 < B := mul_pos hK (Real.exp_pos _)
@@ -71,7 +72,7 @@ theorem brownian_boundary_curvature_of_price_identification
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 < K) (hr : 0 ≤ r) (hσ : 0 < σ)
     (hprice : ∀ τ, 0 < τ → ∀ S, 0 < S →
-      brownianAmericanPut K r q σ S τ.toNNReal = K*p (Real.log (S/K)) (σ^2/2*τ))
+      brownianAmericanPut K r q σ S τ.toNNReal = K * p (Real.log (S / K)) (σ ^ 2/2*τ))
     {τ : ℝ} (hτ : 0 < τ) :
     0 < deriv (deriv (fun s : ℝ => brownianExerciseBoundary K r q σ s.toNNReal)) τ := by
   have heq : (fun s : ℝ => brownianExerciseBoundary K r q σ s.toNNReal) =ᶠ[𝓝 τ]

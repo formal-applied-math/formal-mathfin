@@ -16,7 +16,9 @@ European asymptotic, or boundary convexity is assumed.
 
 ## Result
 
-Public entry points include `expiryBarrier_le_canonicalPrice`, `canonicalPrice_exists_expiryBarrier_window`, `canonicalLogBoundary_exists_sqrt_upper_bound`, `canonicalLogBoundary_below_linear_eventually`.
+Public entry points include `expiryBarrier_le_canonicalPrice`,
+`canonicalPrice_exists_expiryBarrier_window`, `canonicalLogBoundary_exists_sqrt_upper_bound`,
+`canonicalLogBoundary_below_linear_eventually`.
 -/
 
 @[expose] public section
@@ -28,7 +30,7 @@ open scoped Topology
 
 theorem expiryBarrier_le_canonicalPrice {k h T : ℝ} (hk : 0 < k)
     (hh : 0 ≤ h) (hhk : h ≤ k) (hT1 : T ≤ 1)
-    (hsmall : (|k-h-1|+k)*Real.sqrt T ≤ 1/4) :
+    (hsmall : (|k - h-1| + k) * Real.sqrt T ≤ 1 / 4) :
     ∀ z ∈ twoSidedStrip (fun t => -Real.sqrt t) Real.sqrt T,
       expiryBarrier z.1 z.2 ≤ canonicalPrice k h z.1 z.2 := by
   have hL : Continuous (fun t : ℝ => -Real.sqrt t) := Real.continuous_sqrt.neg
@@ -50,7 +52,8 @@ theorem expiryBarrier_le_canonicalPrice {k h T : ℝ} (hk : 0 < k)
     simpa only [expiryBarrier_zero] using
       (putPayoff_nonneg x).trans (canonicalPrice_bounds (h := h) hk.le x 0).1
   · intro t ht htT
-    exact (expiryBarrier_left_le_payoff ht (htT.trans hT1)).trans (canonicalPrice_bounds hk.le _ t).1
+    exact (expiryBarrier_left_le_payoff ht (htT.trans hT1)).trans
+        (canonicalPrice_bounds hk.le _ t).1
   · intro t ht _
     simpa using (putPayoff_nonneg (Real.sqrt t)).trans
       (canonicalPrice_bounds (h := h) hk.le (Real.sqrt t) t).1

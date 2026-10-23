@@ -16,7 +16,8 @@ continuation region. No boundary monotonicity or convexity is used.
 
 ## Result
 
-Public entry points include `exists_boundary_sqrt_bound`, `boundary_below_linear_eventually`, `boundary_ratio_tendsto_atBot`, `zeroDividend_boundary_ratio_tendsto_atBot`.
+Public entry points include `exists_boundary_sqrt_bound`, `boundary_below_linear_eventually`,
+`boundary_ratio_tendsto_atBot`, `zeroDividend_boundary_ratio_tendsto_atBot`.
 -/
 
 @[expose] public section

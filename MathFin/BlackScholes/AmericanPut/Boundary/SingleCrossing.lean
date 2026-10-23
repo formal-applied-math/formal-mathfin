@@ -17,7 +17,8 @@ sign restriction makes every strict sublevel set of `R` an interval.
 
 ## Result
 
-Public entry points include `nonneg_right_of_upward_zeros`, `nonpos_left_of_upward_zeros`, `upward_zero_unique`, `value_le_right_of_nonneg_factor`.
+Public entry points include `nonneg_right_of_upward_zeros`, `nonpos_left_of_upward_zeros`,
+`upward_zero_unique`, `value_le_right_of_nonneg_factor`.
 -/
 
 @[expose] public section

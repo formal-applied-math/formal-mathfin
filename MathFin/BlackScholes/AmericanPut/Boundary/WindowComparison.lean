@@ -17,7 +17,8 @@ assuming second differentiability of the price across the free boundary.
 
 ## Result
 
-Public entry points include `DividendPutSolution.obstacle_comparison_window`, `localization_penalty_subsolution`, `DividendPutSolution.obstacle_comparison_unbounded_window`.
+Public entry points include `DividendPutSolution.obstacle_comparison_window`,
+`localization_penalty_subsolution`, `DividendPutSolution.obstacle_comparison_unbounded_window`.
 -/
 
 @[expose] public section
@@ -102,7 +103,8 @@ theorem localization_penalty_subsolution {k h ε x t : ℝ} {U : ℝ → ℝ →
     unfold localizationBarrier
     fun_prop
   have hUt : DifferentiableAt ℝ (U x) t :=
-    (hU.comp t (show ContDiffAt ℝ 2 (fun s : ℝ => (x,s)) t by fun_prop)).differentiableAt (by norm_num)
+    (hU.comp t (show ContDiffAt ℝ 2 (fun s : ℝ => (x,s)) t by fun_prop)).differentiableAt
+        (by norm_num)
   rw [deriv_fun_sub hUt ((localizationBarrier_hasDeriv_t k h x t).differentiableAt.const_mul ε),
     deriv_const_mul_field,dividendSpatialOperator_sub_const_mul hUx hWx]
   have hsup := localizationBarrier_supersolution (h := h) hk x t

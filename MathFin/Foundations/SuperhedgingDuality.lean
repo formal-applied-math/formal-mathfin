@@ -28,11 +28,12 @@ Two consequences:
   whose price of each claim bounds every super-replication cost of that claim from below, so the
   superhedging price of a claim is not `−∞`.
 
-The full superhedging *duality* (superhedging price *equals* the supremum of EMM prices) is the reverse,
-separation-based direction; it requires closedness of the super-replication cone `{W | ∃ θ, W ≤ θ·z}`.
-Farkas itself is *not* the blocker — Mathlib ships `ProperCone.hyperplane_separation` and
-`hyperplane_separation_point` (`Analysis/Convex/Cone/Dual.lean`). What is missing at this pin is
-closedness of a finitely generated cone: Mathlib has `PointedCone.DualFG` but no Minkowski–Weyl and no
+The full superhedging *duality* (superhedging price *equals* the supremum of EMM prices) is the
+reverse, separation-based direction; it requires closedness of the super-replication cone
+`{W | ∃ θ, W ≤ θ·z}`. Farkas itself is *not* the blocker — Mathlib ships
+`ProperCone.hyperplane_separation` and `hyperplane_separation_point`
+(`Analysis/Convex/Cone/Dual.lean`). What is missing at this pin is closedness of a finitely
+generated cone: Mathlib has `PointedCone.DualFG` but no Minkowski–Weyl and no
 `PointedCone.isClosed_span_of_finite`. That one lemma is the whole remaining cost.
 
 ## Main results

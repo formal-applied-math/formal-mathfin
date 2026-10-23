@@ -17,7 +17,8 @@ No derivative of the unknown exercise boundary enters these bounds.
 
 ## Result
 
-Public entry points include `rootProfile_slope_bounds`, `profile_slope_bounds`, `profile_slope_and_deriv_bounded`, `normalizedDrift`.
+Public entry points include `rootProfile_slope_bounds`, `profile_slope_bounds`,
+`profile_slope_and_deriv_bounded`, `normalizedDrift`.
 -/
 
 @[expose] public section
@@ -107,7 +108,9 @@ theorem normalizedDrift_hasDeriv_t {β ρ : ℝ} {f : ℝ → ℝ}
     HasDerivAt (normalizedDrift α c d f x)
       (2 * c * deriv (logSlope f) (x + c * t - d)) t := by
   have hm := (logSlope_hasDeriv hf (x + c * t - d)).differentiableAt.hasDerivAt
-  convert! ((hm.comp t ((((hasDerivAt_id t).const_mul c).const_add x).sub_const d)).const_mul 2).const_add α
+  convert!
+      ((hm.comp t ((((hasDerivAt_id t).const_mul c).const_add x).sub_const d)).const_mul
+      2).const_add α
     using 1
   ring
 

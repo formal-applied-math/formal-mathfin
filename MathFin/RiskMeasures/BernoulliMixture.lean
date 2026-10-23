@@ -102,7 +102,8 @@ theorem measureReal_iInter_default_eq_integral_pow {Q : Ω → ℝ} {U : ι → 
       rw [Real.norm_eq_abs, abs_of_nonneg (pow_nonneg hω.1 _)]
       exact pow_le_one₀ hω.1 hω.2
   rw [hpre, measureReal_def, ← Measure.map_apply_of_aemeasurable (hQ.prodMk hUv) hS, hjoint,
-    hlawU, Measure.prod_apply hS, lintegral_map' (measurable_measure_prodMk_left hS).aemeasurable hQ,
+    hlawU, Measure.prod_apply hS,
+        lintegral_map' (measurable_measure_prodMk_left hS).aemeasurable hQ,
     lintegral_congr_ae (hQ01.mono fun ω hω ↦ hsec (Q ω) hω),
     ← ofReal_integral_eq_lintegral_ofReal hint (hQ01.mono fun ω hω ↦ pow_nonneg hω.1 _),
     ENNReal.toReal_ofReal (integral_nonneg_of_ae (hQ01.mono fun ω hω ↦ pow_nonneg hω.1 _))]

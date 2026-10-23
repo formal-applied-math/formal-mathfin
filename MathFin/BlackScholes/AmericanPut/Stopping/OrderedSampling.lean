@@ -10,7 +10,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.Verification
 /-! # Ordered bounded continuous-time optional sampling 
 ## Result
 
-Public entry points include `BoundedRule.minimum`, `expected_gridValue_tendsto`, `expected_stoppedValue_le_of_le`.
+Public entry points include `BoundedRule.minimum`, `expected_gridValue_tendsto`,
+`expected_stoppedValue_le_of_le`.
 -/
 
 @[expose] public section

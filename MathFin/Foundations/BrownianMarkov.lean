@@ -30,11 +30,11 @@ the past evaluation map, so the function-valued independence upgrades to
 which together with `IsPreBrownianReal.shift` is the full textbook package: after
 `t₀`, Brownian motion **restarts afresh, independently of its entire past**.
 
-The same two facts give the Markov property as a conditional expectation. The shifted
-process is pre-Brownian, so its law on the path space `ℝ≥0 → ℝ` (product σ-algebra) is
-Degenne's projective-limit measure `gaussianLimit` (`IsPreBrownianReal.hasLaw_gaussianLimit`), and the freezing lemma
-`condExp_comp_prodMk_of_indep` (`Foundations/IndepFreezing`, Shreve's independence lemma)
-turns the σ-algebra independence into
+The same two facts give the Markov property as a conditional expectation. The shifted process is
+pre-Brownian, so its law on the path space `ℝ≥0 → ℝ` (product σ-algebra) is Degenne's
+projective-limit measure `gaussianLimit` (`IsPreBrownianReal.hasLaw_gaussianLimit`), and the
+freezing lemma `condExp_comp_prodMk_of_indep` (`Foundations/IndepFreezing`, Shreve's independence
+lemma) turns the σ-algebra independence into
 
   `𝔼[g(Y, (X_{t₀+t} − X_{t₀})_t) | 𝓕ᵉ_{t₀}] = ∫ g(Y, x) dW(x)`
 

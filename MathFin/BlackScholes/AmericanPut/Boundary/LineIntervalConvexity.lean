@@ -15,7 +15,8 @@ This is a geometric replacement for selecting a twice-differentiable tangent.
 
 ## Result
 
-Public entry points include `boundaryRatio_monotone_of_line_intervals`, `convexOn_of_ratio_monotone_and_line_intervals`, `convexOn_of_negative_line_intervals`.
+Public entry points include `boundaryRatio_monotone_of_line_intervals`,
+`convexOn_of_ratio_monotone_and_line_intervals`, `convexOn_of_negative_line_intervals`.
 -/
 
 @[expose] public section
@@ -52,7 +53,7 @@ theorem boundaryRatio_monotone_of_line_intervals {b : ℝ → ℝ}
 
 theorem convexOn_of_ratio_monotone_and_line_intervals {b : ℝ → ℝ}
     (hanti : AntitoneOn b (Ioi 0))
-    (hratio : MonotoneOn (fun t => b t/t) (Ioi 0))
+    (hratio : MonotoneOn (fun t => b t / t) (Ioi 0))
     (hline : ∀ c d : ℝ, 0 < c → d ≤ 0 → OrdConnected {t | 0 < t ∧ b t < d-c*t}) :
     ConvexOn ℝ (Ioi 0) b := by
   apply convexOn_of_slope_mono_adjacent (convex_Ioi (0 : ℝ))

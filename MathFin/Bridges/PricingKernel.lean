@@ -104,7 +104,7 @@ theorem statePrices_two_state_sum_eq_bond (z_up z_down rT : ℝ)
   have h_diff_ne : z_up - z_down ≠ 0 := by
     have h : 0 < z_up - z_down := by linarith
     exact h.ne'
-  show Real.exp (-rT) * emmWeightUp z_up z_down +
+  change Real.exp (-rT) * emmWeightUp z_up z_down +
       Real.exp (-rT) * emmWeightDown z_up z_down = Real.exp (-rT)
   unfold emmWeightUp emmWeightDown
   field_simp

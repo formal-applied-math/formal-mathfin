@@ -16,7 +16,8 @@ results concern price shape in spot, not exercise-boundary curvature in time.
 
 ## Result
 
-Public entry points include `putReward_antitone`, `putReward_convex`, `value_antitone_spot`, `value_convexOn_spot`.
+Public entry points include `putReward_antitone`, `putReward_convex`, `value_antitone_spot`,
+`value_convexOn_spot`.
 -/
 
 @[expose] public section
@@ -36,7 +37,7 @@ theorem putReward_antitone (W : ℝ≥0 → Ω → ℝ) (K r q σ : ℝ) (θ : �
     (Real.exp_pos _).le
 
 theorem putReward_convex (W : ℝ≥0 → Ω → ℝ) (K r q σ : ℝ) (θ : Ω → ℝ≥0) (ω : Ω)
-    (x y : ℝ) {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (hab : a+b=1) :
+    (x y : ℝ) {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (hab : a + b=1) :
     putReward W K r q σ (a*x+b*y) θ ω ≤
       a*putReward W K r q σ x θ ω+b*putReward W K r q σ y θ ω := by
   let G := Real.exp (((r-q)-σ^2/2)*(θ ω : ℝ)+σ*W (θ ω) ω)

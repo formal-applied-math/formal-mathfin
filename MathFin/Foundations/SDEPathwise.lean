@@ -81,7 +81,8 @@ theorem sde_pathwise_decomposition (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
       =ᵐ[trimMeasure_T (μ := μ) T hBmeas]
         Function.uncurry (itoContinuousMod T hBmeas (lipComp T hBmeas σ Lσ hσ X)) :=
     (memLp_itoContinuousMod hB T hBmeas hBcont (lipComp T hBmeas σ Lσ hσ X)).coeFn_toLp
-  -- slice the fixed-point equation through coeFn (rewrite only the standalone ⇑X, not the X in lipComp)
+  -- slice the fixed-point equation through coeFn (rewrite only the standalone ⇑X, not the X in
+  -- lipComp)
   filter_upwards [Lp.coeFn_add
       (η_E + driftProcessAssembled (μ := μ) T hBmeas (lipComp T hBmeas b Lb hb X))
       (itoProcessAssembled hB T hBmeas hBcont (lipComp T hBmeas σ Lσ hσ X)),
@@ -103,7 +104,8 @@ theorem sde_pathwise_drift_eq_setIntegral (hB : IsPreBrownianReal B μ) (T : ℝ
     ∀ᵐ ω ∂μ, driftContinuousMod T hBmeas
         (lipComp T hBmeas b Lb hb (picardSolution hB T hBmeas hBcont hb hσ η_E hc)) t ω
       = ∫ s in Set.Ioc (0 : ℝ≥0) t,
-        ⇑(lipComp T hBmeas b Lb hb (picardSolution hB T hBmeas hBcont hb hσ η_E hc)) (s, ω) ∂timeMeasure :=
+        ⇑(lipComp T hBmeas b Lb hb (picardSolution hB T hBmeas hBcont hb hσ η_E hc)) (s, ω)
+            ∂timeMeasure :=
   driftContinuousMod_eq_setIntegral T hBmeas _ ht
 
 end SDEExistence

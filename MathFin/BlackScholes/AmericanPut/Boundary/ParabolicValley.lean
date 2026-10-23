@@ -18,7 +18,8 @@ The equation without a zero-order term then gives incompatible time signs.
 
 ## Result
 
-Public entry points include `second_deriv_nonneg_at_local_min`, `valleyOnTriple`, `valleyOnTriple_continuousOn`, `parabolic_smoothValley_nonpos`.
+Public entry points include `second_deriv_nonneg_at_local_min`, `valleyOnTriple`,
+`valleyOnTriple_continuousOn`, `parabolic_smoothValley_nonpos`.
 -/
 
 @[expose] public section
@@ -55,9 +56,11 @@ theorem valleyOnTriple_continuousOn {U : ℝ → ℝ → ℝ} {Q : Set (ℝ × �
   have hz : ContinuousOn (fun w : SpaceTimeTriple => U w.2.2.1 w.2.2.2) (orderedTriples Q) :=
     hU.comp (by fun_prop) (fun _ hw => hw.1.2.2)
   unfold valleyOnTriple smoothValley smoothMinimum smoothPositive
-  exact ((hx.sub (((hx.sub hz).add (((hx.sub hz).pow 2).add continuousOn_const).sqrt).div_const 2)).sub
+  exact ((hx.sub
+      (((hx.sub hz).add (((hx.sub hz).pow 2).add continuousOn_const).sqrt).div_const 2)).sub
     ((hy.add ((hy.pow 2).add continuousOn_const).sqrt).div_const 2)).sub
-    (continuousOn_const.mul (show ContinuousOn (fun w : SpaceTimeTriple => w.1.2) (orderedTriples Q) by fun_prop))
+    (continuousOn_const.mul
+        (show ContinuousOn (fun w : SpaceTimeTriple => w.1.2) (orderedTriples Q) by fun_prop))
 
 /-- No positive maximum of the smoothed valley detector minus a strictly
 increasing time penalty. Initial data need only be continuous and satisfy the
@@ -159,7 +162,8 @@ theorem parabolic_smoothValley_nonpos {U D : ℝ → ℝ → ℝ} {b : ℝ → �
     exact second_deriv_nonneg_at_local_min hmY hcy
   have hdt (a : ℝ) (hba : b t < a) (haR : a < R) : HasDerivAt (U a) (deriv (U a) t) t :=
     ((hs a t ht hwx.2.1 hba haR).comp t
-      (show ContDiffAt ℝ 2 (fun s : ℝ => (a,s)) t by fun_prop)).differentiableAt (by norm_num) |>.hasDerivAt
+      (show ContDiffAt ℝ 2 (fun s : ℝ => (a,s)) t by fun_prop)).differentiableAt
+          (by norm_num) |>.hasDerivAt
   have hd := (smoothValley_hasDeriv hδ (hdt x hbx hxR) (hdt y hby hyR) (hdt z hbz hzR)).sub
     ((hasDerivAt_id t).const_mul η)
   have htime : ∀ᶠ s in 𝓝[<] t, 0 ≤ s ∧ s ≤ T := by

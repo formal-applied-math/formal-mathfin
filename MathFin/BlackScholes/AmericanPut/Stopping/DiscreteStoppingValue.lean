@@ -10,7 +10,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.FiniteBellmanOptimality
 /-! # Bellman identification with a supremum over discrete stopping rules 
 ## Result
 
-Public entry points include `DiscreteRule`, `DiscreteRule.zero`, `discreteStoppingValue`, `finiteBellmanRule`.
+Public entry points include `DiscreteRule`, `DiscreteRule.zero`, `discreteStoppingValue`,
+`finiteBellmanRule`.
 -/
 
 @[expose] public section

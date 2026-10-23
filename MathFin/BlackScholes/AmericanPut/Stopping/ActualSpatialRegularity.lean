@@ -17,7 +17,8 @@ differentiability of the free boundary.
 
 ## Result
 
-Public entry points include `canonicalPrice_exercise_value`, `canonicalPrice_hasDerivAt_boundary`, `canonicalPrice_hasDerivAt_exercise`, `canonicalPrice_differentiableAt_spatial`.
+Public entry points include `canonicalPrice_exercise_value`, `canonicalPrice_hasDerivAt_boundary`,
+`canonicalPrice_hasDerivAt_exercise`, `canonicalPrice_differentiableAt_spatial`.
 -/
 
 @[expose] public section
@@ -122,7 +123,7 @@ theorem zeroDividend_canonicalPrice_gradient_continuousAt {k x t : ℝ} (hk : 0 
   canonicalPrice_gradient_continuousAt hk le_rfl hk.le ht
 
 theorem liuRange_canonicalPrice_gradient_continuousAt {k h x t : ℝ}
-    (hh : 0 ≤ h) (hliu : h+1 ≤ k) (ht : 0 < t) :
+    (hh : 0 ≤ h) (hliu : h + 1 ≤ k) (ht : 0 < t) :
     ContinuousAt (fun z : ℝ × ℝ => deriv (fun y => canonicalPrice k h y z.2) z.1) (x,t) :=
   canonicalPrice_gradient_continuousAt (by linarith) hh (by linarith) ht
 
