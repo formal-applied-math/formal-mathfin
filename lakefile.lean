@@ -2,8 +2,13 @@ import Lake
 open Lake DSL
 
 package MathFin where
+  -- Mathlib's own syntax-linter set (long lines, `cdot`, `show` misuse, …), run
+  -- at elaboration so its findings are build warnings. `weak.` because the
+  -- option is declared by Mathlib, which loads after the lakefile is read.
   leanOptions := #[
-    ⟨`autoImplicit, false⟩
+    ⟨`autoImplicit, false⟩,
+    ⟨`relaxedAutoImplicit, false⟩,
+    ⟨`weak.linter.mathlibStandardSet, true⟩
   ]
   -- Advisory environment-linter gate. `lake lint` runs Batteries' canonical
   -- `runLinter` over the MathFin package's declarations — the SAME mechanism
