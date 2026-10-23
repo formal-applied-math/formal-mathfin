@@ -51,7 +51,9 @@ accrued interest — the two pricing conventions agree exactly where they must.
 
 At the end of a period (`f ↑ 1`) the next coupon `j` (`t j = 1`) is paid and a
 new period starts: the remaining cashflows are `s.erase j`, each one period
-closer (`t i - 1`), and `f` restarts at `0`. With `1 + y ≠ 0`:
+closer (`t i - 1`), and `f` restarts at `0`. With `1 + y ≠ 0` and every
+cashflow at least one period out (`∀ i ∈ s, 1 ≤ t i`, so `t i - 1` is the true
+remaining tenor, not an `ℕ`-truncated `0`):
 
 * `dirtyPrice_one_eq`: at `f = 1` the dirty price is the new period's dirty
   price plus `c j`.
