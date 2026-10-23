@@ -90,12 +90,12 @@ theorem canonicalIntrinsicPremium_forcing {k h x t : ℝ} (hk : 0 ≤ k)
 both endpoint values arbitrarily small. The quantitative constants are explicit. -/
 theorem no_small_forced_profile {f : ℝ → ℝ} {k α c ρ δ η : ℝ}
     (hk : 0 ≤ k) (hρ : 0 < ρ) (hη : 0 < η)
-    (hscale : 2 * η*(1 + |α| * ρ) < δ)
+    (hscale : 2 * η * (1 + |α| * ρ) < δ)
     (hf : ContinuousOn f (Icc (c - ρ) (c + ρ)))
     (hfs : ∀ x ∈ Ioo (c - ρ) (c + ρ), ContDiffAt ℝ 2 f x)
     (hn : ∀ x ∈ Icc (c - ρ) (c + ρ), 0 ≤ f x)
-    (hforce : ∀ x ∈ Ioo (c - ρ) (c + ρ), δ ≤ deriv (deriv f) x + α*deriv f x - k*f x)
-    (hleft : f (c - ρ) < η * ρ^2) (hright : f (c + ρ) < η * ρ^2) : False := by
+    (hforce : ∀ x ∈ Ioo (c - ρ) (c + ρ), δ ≤ deriv (deriv f) x + α * deriv f x - k * f x)
+    (hleft : f (c - ρ) < η * ρ ^ 2) (hright : f (c + ρ) < η * ρ ^ 2) : False := by
   let V : ℝ → ℝ := fun x => f x-η*(x-c)^2
   have hc : c ∈ Icc (c-ρ) (c+ρ) := ⟨by linarith,by linarith⟩
   obtain ⟨x,hx,hmax⟩ := isCompact_Icc.exists_isMaxOn ⟨c,hc⟩

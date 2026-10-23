@@ -72,14 +72,14 @@ theorem priceFromHeat_continuous {V : ℝ × ℝ → ℝ} (hV : Continuous V) (k
       (continuous_const.mul (continuous_snd.sub continuous_const))))
 
 theorem priceFromHeat_smoothAt {V : ℝ × ℝ → ℝ} {k h L a x t : ℝ}
-    (hV : ContDiffAt ℝ ∞ V (x - L, 2 *(t - a))) :
+    (hV : ContDiffAt ℝ ∞ V (x - L, 2 * (t - a))) :
     ContDiffAt ℝ ∞ (priceFromHeat V k h L a) (x,t) := by
   exact (show ContDiffAt ℝ ∞ (fun z : ℝ × ℝ => pricingGauge k h L a z.1 z.2) (x,t) by
     unfold pricingGauge; fun_prop).mul (hV.comp (x,t)
       (show ContDiffAt ℝ ∞ (fun z : ℝ × ℝ => (z.1-L,2*(z.2-a))) (x,t) by fun_prop))
 
 theorem priceFromHeat_pricingOperator {V : ℝ × ℝ → ℝ} {k h L a x t : ℝ}
-    (hV : ContDiffAt ℝ 2 V (x - L, 2 *(t - a))) :
+    (hV : ContDiffAt ℝ 2 V (x - L, 2 * (t - a))) :
     pricingOperator k h (priceFromHeat V k h L a) (x,t) =
       pricingGauge k h L a x t *
         (2*deriv (fun s => V (x-L,s)) (2*(t-a))-

@@ -142,7 +142,7 @@ theorem expiryBarrier_left_le_payoff {t : ℝ} (ht : 0 ≤ t) (ht1 : t ≤ 1) :
 killing on the whole shrinking strip. This is an actual derivative inequality. -/
 theorem expiryBarrier_subsolution {k h x t : ℝ} (hk : 0 ≤ k)
     (ht : 0 < t) (ht1 : t ≤ 1)
-    (hsmall : (|k - h-1| + k) * Real.sqrt t ≤ 1 / 4)
+    (hsmall : (|k - h - 1| + k) * Real.sqrt t ≤ 1 / 4)
     (hl : -Real.sqrt t ≤ x) (hr : x ≤ Real.sqrt t) :
     deriv (expiryBarrier x) t ≤ dividendSpatialOperator k h (fun y => expiryBarrier y t) x := by
   let s := Real.sqrt t
@@ -188,7 +188,7 @@ namespace DividendPutSolution
 sufficiently short strip. All comparison hypotheses are discharged here. -/
 theorem expiryBarrier_le_price {k h T : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     (hp : DividendPutSolution k h p b) (hT1 : T ≤ 1)
-    (hsmall : (|k - h-1| + k) * Real.sqrt T ≤ 1 / 4) :
+    (hsmall : (|k - h - 1| + k) * Real.sqrt T ≤ 1 / 4) :
     ∀ z ∈ twoSidedStrip (fun t => -Real.sqrt t) Real.sqrt T,
       expiryBarrier z.1 z.2 ≤ p z.1 z.2 := by
   have hL : Continuous (fun t : ℝ => -Real.sqrt t) := Real.continuous_sqrt.neg

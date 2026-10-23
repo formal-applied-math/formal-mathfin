@@ -50,9 +50,9 @@ derivatives, isolated-contact hypothesis, or local curvature are assumed. -/
 theorem canonicalLogBoundary_no_return_contact {k h c d a T U : ℝ}
     (hk : 0 < k) (hh : 0 ≤ h) (hhk : h ≤ k) (hc : 0 < c) (hd : d ≤ 0)
     (ha : 0 < a) (haT : a < T) (hTU : T < U)
-    (hcontact : canonicalLogBoundary k h T = d - c*T)
-    (hpast : ∀ t ∈ Ico a T, canonicalLogBoundary k h t < d - c*t)
-    (hfuture : canonicalLogBoundary k h U < d - c*U) : False := by
+    (hcontact : canonicalLogBoundary k h T = d - c * T)
+    (hpast : ∀ t ∈ Ico a T, canonicalLogBoundary k h t < d - c * t)
+    (hfuture : canonicalLogBoundary k h U < d - c * U) : False := by
   let hp := canonicalPrice_continuousBoundaryPutSolution hk hh hhk
   have hU : 0 < U := (ha.trans haT).trans hTU
   have hpos : 0 < straightDifference (canonicalPrice k h) k h c d (d-c*U) U := by

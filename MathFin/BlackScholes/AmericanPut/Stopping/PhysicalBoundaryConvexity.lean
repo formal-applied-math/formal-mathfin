@@ -101,14 +101,14 @@ theorem zeroDividend_brownianUsualStockBoundary_strictConvexOn {K r σ : ℝ}
   brownianUsualStockBoundary_strictConvexOn hK hr le_rfl hr.le hσ
 
 theorem liuRange_brownianUsualLogBoundary_convexOn {K r q σ : ℝ}
-    (hK : 0 < K) (hq : 0 ≤ q) (hσ : 0 < σ) (hliu : q + σ^2/2 ≤ r) :
+    (hK : 0 < K) (hq : 0 ≤ q) (hσ : 0 < σ) (hliu : q + σ ^ 2/2 ≤ r) :
     ConvexOn ℝ (Ioi 0)
       (fun τ : ℝ => Real.log (brownianUsualExerciseBoundary K r q σ τ.toNNReal/K)) := by
   have ha : 0 < σ^2/2 := by positivity
   exact brownianUsualLogBoundary_convexOn hK (by linarith) hq (by linarith) hσ
 
 theorem liuRange_brownianUsualStockBoundary_strictConvexOn {K r q σ : ℝ}
-    (hK : 0 < K) (hq : 0 ≤ q) (hσ : 0 < σ) (hliu : q + σ^2/2 ≤ r) :
+    (hK : 0 < K) (hq : 0 ≤ q) (hσ : 0 < σ) (hliu : q + σ ^ 2/2 ≤ r) :
     StrictConvexOn ℝ (Ioi 0)
       (fun τ : ℝ => brownianUsualExerciseBoundary K r q σ τ.toNNReal) := by
   have ha : 0 < σ^2/2 := by positivity

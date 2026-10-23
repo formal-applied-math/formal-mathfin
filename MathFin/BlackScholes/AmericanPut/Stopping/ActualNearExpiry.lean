@@ -30,7 +30,7 @@ open scoped Topology
 
 theorem expiryBarrier_le_canonicalPrice {k h T : ℝ} (hk : 0 < k)
     (hh : 0 ≤ h) (hhk : h ≤ k) (hT1 : T ≤ 1)
-    (hsmall : (|k - h-1| + k) * Real.sqrt T ≤ 1 / 4) :
+    (hsmall : (|k - h - 1| + k) * Real.sqrt T ≤ 1 / 4) :
     ∀ z ∈ twoSidedStrip (fun t => -Real.sqrt t) Real.sqrt T,
       expiryBarrier z.1 z.2 ≤ canonicalPrice k h z.1 z.2 := by
   have hL : Continuous (fun t : ℝ => -Real.sqrt t) := Real.continuous_sqrt.neg

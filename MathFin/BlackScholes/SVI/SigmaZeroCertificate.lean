@@ -66,7 +66,7 @@ private theorem quadratic_ray_closed_of_open (p : Params) (s : ℝ)
   exact hh'
 
 private theorem sigmaZeroBranch_durrleman (p : Params) (s k : ℝ)
-    (hv : variance p k = p.a + s*(k - p.m)) (hp : slope p k = s)
+    (hv : variance p k = p.a + s * (k - p.m)) (hp : slope p k = s)
     (hc : curvature p k = 0) (hw : 0 < variance p k) :
     0 ≤ durrleman p k ↔ 0 ≤ sigmaZeroBranchQuadratic p s (variance p k) := by
   have hn := ne_of_gt hw
@@ -81,7 +81,7 @@ private theorem sigmaZeroBranch_durrleman (p : Params) (s k : ℝ)
   exact (mul_nonneg_iff_of_pos_left (by positivity)).symm
 
 theorem sigmaZeroCertificate_iff (p : Params) (hs : p.sigma = 0)
-    (hb : 0 ≤ p.b) (hr : 0 ≤ 1-p.rho ^ 2) (ha : 0 < p.a) :
+    (hb : 0 ≤ p.b) (hr : 0 ≤ 1 - p.rho ^ 2) (ha : 0 < p.a) :
     sigmaZeroCertificate p ↔ ∀k : ℝ, k≠p.m → 0≤durrleman p k := by
   have hw : ∀k : ℝ,0<variance p k := (sigmaZero_variance_pos_iff p hs hb hr).mpr ha
   have hl := leftSlope_nonpos p hb hr

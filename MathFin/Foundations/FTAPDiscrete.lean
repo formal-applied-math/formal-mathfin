@@ -313,7 +313,8 @@ omit [Nonempty Ω] [IsProbabilityMeasure P] [Fintype Ω] in
 adapted, `Q` is an equivalent martingale measure for the one-step market iff it is one for
 the one-period excess return `S 1 − S 0`: the one-step martingale condition
 `S 0 = E_Q[S 1]` (the price `S 0` being a constant) is `E_Q[S 1 − S 0] = 0`. -/
-theorem isEMM_one_iff_onePeriod [Finite Ω] (hS : StronglyAdapted 𝓕 S) (h0 : 𝓕 0 = ⊥) {Q : Measure Ω} :
+theorem isEMM_one_iff_onePeriod [Finite Ω] (hS : StronglyAdapted 𝓕 S) (h0 : 𝓕 0 = ⊥)
+    {Q : Measure Ω} :
     IsEMM 𝓕 P S 1 Q ↔ OnePeriod.IsEMM P (S 1 - S 0) Q := by
   have hS0 : StronglyMeasurable[𝓕 0] (S 0) := hS 0
   rw [h0] at hS0

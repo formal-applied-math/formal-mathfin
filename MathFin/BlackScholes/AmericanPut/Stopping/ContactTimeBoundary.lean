@@ -32,7 +32,7 @@ open scoped NNReal Topology
 theorem brownianUsualActualContactTime_le_of_downcrossing {k h : ℝ} (hk : 0 < k)
     (hh : 0 ≤ h) (hhk : h ≤ k) (x : ℝ) {T s : ℝ≥0} (hs : s < T)
     (ω : ℝ≥0 → ℝ)
-    (hcross : x + (k - h-1) * (s : ℝ) + Real.sqrt 2 * brownian s ω ≤
+    (hcross : x + (k - h - 1) * (s : ℝ) + Real.sqrt 2 * brownian s ω ≤
       canonicalLogBoundary k h (T : ℝ)) :
     brownianUsualActualContactTime (h := h) hk.le x T ω ≤ s := by
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
