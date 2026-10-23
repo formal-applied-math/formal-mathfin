@@ -2708,9 +2708,9 @@
     "mf-key-rate-partials-sum-to-yield-derivative": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-23",
-      "elapsed_s": 7.1,
-      "input_hash": "312f846d925250ecb73c5206b2a2c287e869650409ab4a3370c596513728a4df",
-      "verified_at_commit": "3f00239"
+      "elapsed_s": 2.8,
+      "input_hash": "96e3870115e38c022eeefea10a226e5720b7b4a70ec8183375700435aeea915d",
+      "verified_at_commit": "409a824"
     },
     "mf-kirk-zero-strike-margrabe": {
       "benchmark_file": "exotic_options.json",
