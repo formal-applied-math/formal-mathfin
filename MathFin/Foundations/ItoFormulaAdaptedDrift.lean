@@ -1388,9 +1388,7 @@ private theorem weighted_sq_le_of_congr {f g w : Ω → ℝ} {C E : ℝ}
         have h2 : (C * g ω) ^ 2 = C ^ 2 * g ω ^ 2 := by ring
         rw [h1, h2]
         exact mul_le_mul_of_nonneg_right (hw ω) (sq_nonneg _)
-    _ = C ^ 2 * E := by
-        rw [integral_congr_ae (Eventually.of_forall fun ω ↦ by ring),
-          integral_const_mul, hE]
+    _ = C ^ 2 * E := by simp_rw [mul_pow]; rw [integral_const_mul, hE]
 
 omit hMadap in
 /-- **Weighted error energy**: the second moment of `w·δεₖ` is at most `C_w²` cell-band

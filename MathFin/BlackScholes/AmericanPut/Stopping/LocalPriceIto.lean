@@ -31,7 +31,7 @@ theorem brownianPriceKernel_localization_zero_drift {p : ℝ → ℝ → ℝ} {b
     {K r q σ x₀ T t w : ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hσ : 0 < σ) (ht : t < T)
-    (hx : b (σ ^ 2 / 2 * (T - t)) < x₀ + (r - q - σ ^ 2/2) * t + σ * w) :
+    (hx : b (σ ^ 2 / 2 * (T - t)) < x₀ + (r - q - σ ^ 2 / 2) * t + σ * w) :
     ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧
       G =ᶠ[𝓝 (t,w)] (fun z => brownianPriceKernel p K r q σ x₀ T z.1 z.2) ∧
       ∀ᶠ z in 𝓝 (t,w), planeGenerator G z = 0 := by
@@ -66,7 +66,7 @@ theorem local_price_ito {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} {K r q σ x₀ T t w : ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hσ : 0 < σ) (ht : t < T)
-    (hx : b (σ ^ 2 / 2 * (T - t)) < x₀ + (r - q - σ ^ 2/2) * t + σ * w) :
+    (hx : b (σ ^ 2 / 2 * (T - t)) < x₀ + (r - q - σ ^ 2 / 2) * t + σ * w) :
     ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧
       G =ᶠ[𝓝 (t,w)] (fun z => brownianPriceKernel p K r q σ x₀ T z.1 z.2) ∧
       (∀ᶠ z in 𝓝 (t,w), planeGenerator G z = 0) ∧
