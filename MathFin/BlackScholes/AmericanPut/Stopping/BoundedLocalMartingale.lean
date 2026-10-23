@@ -71,8 +71,9 @@ theorem locally_bounded_localMartingale_is_martingale (hX : IsLocalMartingale X 
         (show (t : WithTop ℝ≥0) ≤
             (t+1 : ℝ≥0) by exact_mod_cast le_add_of_nonneg_right zero_le).trans hn.le
       have hpos : (⊥ : WithTop ℝ≥0) < τ n ω :=
-        (show (⊥ : WithTop ℝ≥0) < (t+1 : ℝ≥0) by change (0 : WithTop ℝ≥0) <
-            _; exact_mod_cast (show (0 : ℝ≥0) < t+1 by positivity)).trans hn
+        (show (⊥ : WithTop ℝ≥0) < (t+1 : ℝ≥0) by
+          change (0 : WithTop ℝ≥0) < _
+          exact_mod_cast (show (0 : ℝ≥0) < t+1 by positivity)).trans hn
       exact (stoppedProcess_eq_of_le hle).trans
         (indicator_of_mem (show ω ∈ {ω | ⊥ < τ n ω} from hpos) _)
     exact tendsto_const_nhds.congr' heq.symm

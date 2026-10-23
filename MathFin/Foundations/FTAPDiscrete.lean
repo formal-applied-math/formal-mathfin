@@ -197,9 +197,10 @@ exists. The separating-dual `q` of the gains subspace, normalised to a
 probability `Q`, is the EMM: strict positivity gives `Q ~ P`, and the
 annihilation of every increment-indicator gives the martingale property via the
 conditional-expectation characterisation. -/
-theorem exists_isEMM_of_noArbitrage (hS : StronglyAdapted 𝓕 S)
+theorem exists_isEMM_of_noArbitrage [Finite Ω] (hS : StronglyAdapted 𝓕 S)
     (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
     ∃ Q, IsEMM 𝓕 P S T Q := by
+  cases nonempty_fintype Ω
   classical
   obtain ⟨q, hq_pos, hq_dual⟩ :=
     exists_pos_dual_of_disjoint_stdSimplex (gainsSubspace 𝓕 S T)
@@ -253,7 +254,7 @@ omit [Nonempty Ω] [IsProbabilityMeasure P] [Fintype Ω] in
 Under the EMM `Q`, the discounted gains telescope to `∫ G_T dQ = 0`; a
 non-negative integrand with zero integral is `0` a.e., and equivalence transports
 this back to `P`. -/
-theorem noArbitrage_of_isEMM (hS : StronglyAdapted 𝓕 S)
+theorem noArbitrage_of_isEMM [Finite Ω] (hS : StronglyAdapted 𝓕 S)
     {Q : Measure Ω} (hQ : IsEMM 𝓕 P S T Q) : NoArbitrage 𝓕 P S T := by
   haveI := hQ.prob
   intro φ hφ hpos
@@ -294,7 +295,7 @@ omit [IsProbabilityMeasure P] [Fintype Ω] in
 finite case of Dalang–Morton–Willinger): a finite-horizon, single-asset market
 on a finite full-support probability space has no arbitrage **iff** it admits an
 equivalent martingale measure. -/
-theorem ftap_discrete (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :
+theorem ftap_discrete [Finite Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :
     NoArbitrage 𝓕 P S T ↔ ∃ Q, IsEMM 𝓕 P S T Q :=
   ⟨fun hNA ↦ exists_isEMM_of_noArbitrage 𝓕 P S T hS hP hNA,
    fun ⟨_, hQ⟩ ↦ noArbitrage_of_isEMM 𝓕 P S T hS hQ⟩
@@ -312,7 +313,7 @@ omit [Nonempty Ω] [IsProbabilityMeasure P] [Fintype Ω] in
 adapted, `Q` is an equivalent martingale measure for the one-step market iff it is one for
 the one-period excess return `S 1 − S 0`: the one-step martingale condition
 `S 0 = E_Q[S 1]` (the price `S 0` being a constant) is `E_Q[S 1 − S 0] = 0`. -/
-theorem isEMM_one_iff_onePeriod (hS : StronglyAdapted 𝓕 S) (h0 : 𝓕 0 = ⊥) {Q : Measure Ω} :
+theorem isEMM_one_iff_onePeriod [Finite Ω] (hS : StronglyAdapted 𝓕 S) (h0 : 𝓕 0 = ⊥) {Q : Measure Ω} :
     IsEMM 𝓕 P S 1 Q ↔ OnePeriod.IsEMM P (S 1 - S 0) Q := by
   have hS0 : StronglyMeasurable[𝓕 0] (S 0) := hS 0
   rw [h0] at hS0

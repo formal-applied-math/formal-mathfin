@@ -62,6 +62,7 @@ lemma portfolioVarN_diag {ι : Type*} (s : Finset ι)
     (w : ι → ℝ) (σ : ι → ι → ℝ)
     (h_diag : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → σ i j = 0) :
     portfolioVarN s w σ = ∑ i ∈ s, w i ^ 2 * σ i i := by
+  classical
   unfold portfolioVarN
   refine Finset.sum_congr rfl ?_
   intro i hi

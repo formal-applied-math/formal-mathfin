@@ -111,8 +111,8 @@ theorem smoothTrunc_exists : Nonempty SmoothTrunc := by
   -- |φ x| ≤ |x|  (norm of an integral of a `≤ 1` integrand)
   have hla : ∀ x, |φ x| ≤ |x| := fun x ↦ by
     have h := intervalIntegral.norm_integral_le_of_norm_le_const (a := (0 : ℝ)) (b := x)
-      (C := 1) (f := r) fun t _ ↦ by rw [Real.norm_eq_abs]; exact
-          (abs_of_nonneg (hr_nonneg t)).le.trans (hr_le1 t)
+      (C := 1) (f := r) fun t _ ↦ by
+        rw [Real.norm_eq_abs]; exact (abs_of_nonneg (hr_nonneg t)).le.trans (hr_le1 t)
     rw [Real.norm_eq_abs, sub_zero, one_mul] at h
     exact h
   -- φ = id near 0

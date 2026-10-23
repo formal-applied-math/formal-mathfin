@@ -62,8 +62,8 @@ theorem finiteBellmanContact_before (N i : ℕ) (ω : Ω)
   have hne : finiteBellman P 𝓕 Z N i ω ≠ Z i ω := by
     simpa only [mem_singleton_iff,min_eq_left hiN.le,sub_eq_zero] using hn
   have hv : Z i ω < finiteBellman P 𝓕 Z N i ω := lt_of_le_of_ne
-    (by simpa only [min_eq_left hiN.le] using finiteBellman_dominates (P := P) (𝓕 := 𝓕)
-        (Z := Z) N i ω)
+    (by simpa only [min_eq_left hiN.le] using
+          finiteBellman_dominates (P := P) (𝓕 := 𝓕) (Z := Z) N i ω)
     hne.symm
   have he := congrFun (finiteBellman_recursion (P := P) (𝓕 := 𝓕) (Z := Z) hiN) ω
   rw [he] at hv

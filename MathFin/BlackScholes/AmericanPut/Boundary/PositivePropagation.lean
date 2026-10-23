@@ -93,10 +93,10 @@ theorem positive_rectangle_of_positive_bottom {U D : ℝ → ℝ → ℝ} {L a T
     nlinarith [mul_le_mul_of_nonneg_left hq hη.le]
   have hcomp := parabolic_maximum (u := W) (D := D) continuousOn_const (fun _ _ => hL.le) hW
     (fun x t hat htT hx hxL => (hBt x t).sub (hUt x t hx hxL hat htT)) hWpde hinit
-    (fun t hat htT => by simpa [W,B,decayingBump,positiveBump] using neg_nonpos.mpr
-        (hleft t ⟨hat,htT⟩))
-    (fun t hat htT => by simpa [W,B,decayingBump,positiveBump] using neg_nonpos.mpr
-        (hright t ⟨hat,htT⟩))
+    (fun t hat htT => by
+      simpa [W,B,decayingBump,positiveBump] using neg_nonpos.mpr (hleft t ⟨hat,htT⟩))
+    (fun t hat htT => by
+      simpa [W,B,decayingBump,positiveBump] using neg_nonpos.mpr (hright t ⟨hat,htT⟩))
   intro x t hx hxL hat htT
   have hb : 0 < B x t := mul_pos (mul_pos hη (Real.exp_pos _)) (positiveBump_pos hx hxL)
   exact hb.trans_le (sub_nonpos.mp (hcomp (x,t) ⟨hat,htT,hx.le,hxL.le⟩))
