@@ -59,7 +59,7 @@ structure Clause where
   /-- The clause's place in the document, such as `"§2 Payoff"`. -/
   locator : String
   /-- What the clause says. -/
-  says : String
+  text : String
 
 /-- The terms of a capped call as a term sheet states them, with the clauses they come from and
 the features of the instrument the formal contract leaves out. -/
