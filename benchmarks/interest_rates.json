@@ -920,7 +920,7 @@
         "reference": "Level-payment (mortgage) amortization (Fabozzi, Bond Markets, Analysis and Strategies, fixed-rate level-payment mortgages)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.levelPaymentBalance_eq_annuityValue (MathFin/FixedIncome/LoanAmortization.lean): induction on n with the one-period annuity identity annuityValue_succ_mul_exp_sub, A_{m+1}·e^{rΔt} − A = A_m, against annuityValue (MathFin/FixedIncome/CouponBonds.lean). balance_levelPayment identifies the recurrence with the module's shared balance recurrence (principal = payment − interest). SCOPE: constant rate, continuously-compounded discounting matched to the period rate."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.levelPaymentBalance_eq_annuityValue (MathFin/FixedIncome/LoanAmortization.lean): induction on n, unfolding levelPaymentBalance directly against the one-period annuity identity annuityValue_succ_mul_exp_sub, A_{m+1}·e^{rΔt} − A = A_m, against annuityValue (MathFin/FixedIncome/CouponBonds.lean). (balance_levelPayment, which identifies levelPaymentBalance with the module's shared balance recurrence (principal = payment − interest), is a separate result in the same file and is not used by this proof.) SCOPE: constant rate, continuously-compounded discounting matched to the period rate."
       }
     }
   ]
