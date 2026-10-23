@@ -781,7 +781,7 @@ import MathFin.Bridges.LSVPosteriorConditionalExpectation
 import MathFin.FixedIncome.CleanPriceAccrued
 -- Bond forward price derived from forward_price_from_no_arbitrage
 import MathFin.FixedIncome.BondForward
--- Covered and uncovered interest parity, from no-arbitrage and the Garman-Kohlhagen measure
+-- Covered and uncovered interest parity, from no-arbitrage and the Garman–Kohlhagen measure
 import MathFin.FixedIncome.FxForwardParity
 -- Loan amortization: bullet, equal-principal, and level-payment against annuityValue
 import MathFin.FixedIncome.LoanAmortization
