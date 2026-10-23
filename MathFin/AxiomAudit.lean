@@ -291,79 +291,79 @@ namespace MathFin.AxiomAudit
 
 /-- info: 'MathFin.ItoIntegralCLM.generateFrom_predictableRect' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.ItoIntegralCLM.generateFrom_predictableRect
+#print axioms MathFin.ItoIntegralCLM.generateFrom_predictableRect
 
 /-- info: 'MathFin.ItoIntegralCLM.assembly_isometry_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.ItoIntegralCLM.assembly_isometry_T
+#print axioms MathFin.ItoIntegralCLM.assembly_isometry_T
 
 /-- info: 'MathFin.ItoIntegralCLM.simpleAssembly_T_denseRange' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.ItoIntegralCLM.simpleAssembly_T_denseRange
+#print axioms MathFin.ItoIntegralCLM.simpleAssembly_T_denseRange
 
 /-- info: 'MathFin.ItoIntegralCLM.itoIntegralCLM_T_norm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.ItoIntegralCLM.itoIntegralCLM_T_norm
+#print axioms MathFin.ItoIntegralCLM.itoIntegralCLM_T_norm
 
 /-! ## Unbounded-horizon `[0,∞)` Itô integral CLM (Summit B / B2) -/
 
 /-- info: 'MathFin.ItoIntegralL2.itoIntegralL2_norm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.ItoIntegralL2.itoIntegralL2_norm
+#print axioms MathFin.ItoIntegralL2.itoIntegralL2_norm
 
 /-! ## Process-level elementary Itô integral `t ↦ (V●B)_t` — genuine `L²` content -/
 
 /-- info: 'MathFin.ItoIntegralProcess.memLp_itoSimpleProcess' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.ItoIntegralProcess.memLp_itoSimpleProcess
+#print axioms MathFin.ItoIntegralProcess.memLp_itoSimpleProcess
 
 /-- info: 'MathFin.ItoIntegralProcess.itoSimpleProcess_eq_itoSimple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.ItoIntegralProcess.itoSimpleProcess_eq_itoSimple
+#print axioms MathFin.ItoIntegralProcess.itoSimpleProcess_eq_itoSimple
 
 /-! ## Keystone `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` through the CLM (its first genuine consumer) -/
 
 /-- info: 'MathFin.ItoIntegralBrownian.itoIntegralCLM_T_brownian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.ItoIntegralBrownian.itoIntegralCLM_T_brownian
+#print axioms MathFin.ItoIntegralBrownian.itoIntegralCLM_T_brownian
 
 /-! ## Discrete squaring identity (the pathwise Itô keystone) -/
 
 /-- info: 'MathFin.discrete_squaring_identity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.discrete_squaring_identity
+#print axioms MathFin.discrete_squaring_identity
 
 /-! ## Itô's lemma for f(x) = x² — the L² continuous form (the QF-keystone) -/
 
 /-- info: 'MathFin.itoSquared_L2_tendsto' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.itoSquared_L2_tendsto
+#print axioms MathFin.itoSquared_L2_tendsto
 
 /-- info: 'MathFin.itoSquared_L2_tendsto_div2' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.itoSquared_L2_tendsto_div2
+#print axioms MathFin.itoSquared_L2_tendsto_div2
 
 /-! ## Itô chain items 3-6: polynomial remainders, 2D Itô, GBM-SDE, BS-PDE -/
 
 /-- info: 'MathFin.discrete_cubing_identity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.discrete_cubing_identity
+#print axioms MathFin.discrete_cubing_identity
 
 /-- info: 'MathFin.discrete_ito_formula_2d' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.discrete_ito_formula_2d
+#print axioms MathFin.discrete_ito_formula_2d
 
 /-- info: 'MathFin.hasDerivAt_gbmValue_space' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.hasDerivAt_gbmValue_space
+#print axioms MathFin.hasDerivAt_gbmValue_space
 
 /-- info: 'MathFin.gbm_solves_sde' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.gbm_solves_sde
+#print axioms MathFin.gbm_solves_sde
 
 /-- info: 'MathFin.discountedCallBrownian_heat_equation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.discountedCallBrownian_heat_equation
+#print axioms MathFin.discountedCallBrownian_heat_equation
 
 /-! ## Margrabe BSCallHyp grounding (leap-3 closure via gaussian vector) -/
 
@@ -461,7 +461,7 @@ namespace MathFin.AxiomAudit
 
 /-- info: 'MathFin.ItoIntegralRiemannBridge.itoIntegralCLM_T_of_bdd_cont' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.ItoIntegralRiemannBridge.itoIntegralCLM_T_of_bdd_cont
+#print axioms MathFin.ItoIntegralRiemannBridge.itoIntegralCLM_T_of_bdd_cont
 
 /-- info: 'MathFin.ito_formula_L2_bddDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -479,7 +479,7 @@ namespace MathFin.AxiomAudit
 
 /-- info: 'MathFin.ItoIntegralRiemannBridgeTD.itoIntegralCLM_T_of_bdd_cont_td' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.ItoIntegralRiemannBridgeTD.itoIntegralCLM_T_of_bdd_cont_td
+#print axioms MathFin.ItoIntegralRiemannBridgeTD.itoIntegralCLM_T_of_bdd_cont_td
 
 /-- info: 'MathFin.ito_formula_td_L2_bddDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -574,7 +574,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 /-- info: 'MathFin.survival_probability_eq_Phi_distanceToDefault' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.survival_probability_eq_Phi_distanceToDefault
+#print axioms MathFin.survival_probability_eq_Phi_distanceToDefault
 
 /-- info: 'MathFin.newtonStep_quadratic_error' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -594,25 +594,25 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 /-- info: 'MathFin.discounted_americanPrice_supermartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.discounted_americanPrice_supermartingale
+#print axioms MathFin.discounted_americanPrice_supermartingale
 
 /-- info: 'MathFin.discounted_intrinsic_le_americanPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.discounted_intrinsic_le_americanPrice
+#print axioms MathFin.discounted_intrinsic_le_americanPrice
 
 -- Poisson-process theory + Itô-process QV (2026-06-05 full-push round)
 
 /-- info: 'MathFin.PoissonSuperposition.poissonMeasure_conv_poissonMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.PoissonSuperposition.poissonMeasure_conv_poissonMeasure
+#print axioms MathFin.PoissonSuperposition.poissonMeasure_conv_poissonMeasure
 
 /-- info: 'MathFin.PoissonSuperposition.indepFun_map_add_poissonMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.PoissonSuperposition.indepFun_map_add_poissonMeasure
+#print axioms MathFin.PoissonSuperposition.indepFun_map_add_poissonMeasure
 
 /-- info: 'MathFin.PoissonThinning.markedPoissonMeasure_eq_prod' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.PoissonThinning.markedPoissonMeasure_eq_prod
+#print axioms MathFin.PoissonThinning.markedPoissonMeasure_eq_prod
 
 /-- info: 'MathFin.PoissonThinning.thinned_streams' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -620,34 +620,34 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 /-- info: 'MathFin.PoissonCounting.map_count_eq_poissonMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.PoissonCounting.map_count_eq_poissonMeasure
+#print axioms MathFin.PoissonCounting.map_count_eq_poissonMeasure
 
 /-- info: 'MathFin.PoissonInterarrival.map_firstArrival_eq_expMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.PoissonInterarrival.map_firstArrival_eq_expMeasure
+#print axioms MathFin.PoissonInterarrival.map_firstArrival_eq_expMeasure
 
 /-- info: 'MathFin.PoissonInterarrival.survival_factorizes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.PoissonInterarrival.survival_factorizes
+#print axioms MathFin.PoissonInterarrival.survival_factorizes
 
 /-- info: 'MathFin.ItoProcessQV.tendsto_qv_ito_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.ItoProcessQV.tendsto_qv_ito_process
+#print axioms MathFin.ItoProcessQV.tendsto_qv_ito_process
 
 -- Finance layer over the Poisson/QV track (2026-06-06): variance-swap drift
 -- immunity, first-to-default additivity, Poisson pgf, Merton jump-diffusion
 
 /-- info: 'MathFin.tendsto_realizedVariance_gbm_L2' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.tendsto_realizedVariance_gbm_L2
+#print axioms MathFin.tendsto_realizedVariance_gbm_L2
 
 /-- info: 'MathFin.firstToDefault_spread_eq_sum_hazards' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.firstToDefault_spread_eq_sum_hazards
+#print axioms MathFin.firstToDefault_spread_eq_sum_hazards
 
 /-- info: 'MathFin.PoissonPgf.integral_pow_poissonMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-  #print axioms MathFin.PoissonPgf.integral_pow_poissonMeasure
+#print axioms MathFin.PoissonPgf.integral_pow_poissonMeasure
 
 /-- info: 'MathFin.mertonCallTerm_eq_integral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
