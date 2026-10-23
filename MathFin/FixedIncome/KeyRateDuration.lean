@@ -31,7 +31,7 @@ computes.
 
 ## Results
 
-* `bondPriceKeyRate_update_eq`: moving node `j`'s rate to `x` leaves every other cashflow's
+* `bondPriceKeyRate_update_eq`: moving node `j ∈ s`'s rate to `x` leaves every other cashflow's
   term unchanged (used to prove both results below).
 * `hasDerivAt_bondPriceKeyRate_update`: `∂P/∂kⱼ = -tⱼ·cⱼ / (1 + kⱼ)^{tⱼ+1}`, as a `HasDerivAt`.
 * `hasDerivAt_bondPriceKeyRate_parallel`: on any curve, the parallel-shift derivative is
@@ -56,7 +56,7 @@ noncomputable def bondPriceKeyRate (s : Finset ι) (t : ι → ℕ) (c k : ι �
 theorem bondPriceKeyRate_const (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (y : ℝ) :
     bondPriceKeyRate s t c (fun _ ↦ y) = bondPriceDisc s t c y := rfl
 
-/-- Moving node `j`'s spot rate to `x` changes only cashflow `j`'s discount term; the rest of
+/-- Moving node `j ∈ s`'s spot rate to `x` changes only cashflow `j`'s discount term; the rest of
 the curve's contribution is unchanged. -/
 theorem bondPriceKeyRate_update_eq [DecidableEq ι] (s : Finset ι) (t : ι → ℕ) (c k : ι → ℝ)
     {j : ι} (hj : j ∈ s) (x : ℝ) :
