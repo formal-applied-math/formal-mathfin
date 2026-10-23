@@ -863,7 +863,7 @@
       "id": "mf-clean-price-continuous-at-coupon-date",
       "name": "Clean Price Is Continuous Across a Coupon Date",
       "domain": "mathematical_finance",
-      "description": "With dirty price (1 + y)^f · Σ cᵢ/(1 + y)^{tᵢ} at elapsed fraction f of the period, accrued interest f · c_j on the next coupon c_j (j ∈ s, t_j = 1, all tᵢ ≥ 1) and clean price dirty − accrued, for 1 + y ≠ 0: as f ↑ 1 the clean price tends to the clean price at the start of the next period (remaining cashflows without j, each one period closer, f = 0), for any next accruing coupon.",
+      "description": "With dirty price (1 + y)^f · Σ cᵢ/(1 + y)^{tᵢ} at elapsed fraction f of the period, accrued interest f · cⱼ on the next coupon cⱼ (j ∈ s, tⱼ = 1, all tᵢ ≥ 1) and clean price dirty − accrued, for 1 + y ≠ 0: as f ↑ 1 the clean price tends to the clean price at the start of the next period (remaining cashflows without j, each one period closer, f = 0), for any next accruing coupon.",
       "code": {
         "lean": "import MathFin.FixedIncome.CleanPriceAccrued\n\nopen MathFin Filter Topology\n\n/-- **The clean price is continuous across a coupon date.** -/\ntheorem clean_price_continuous_at_coupon_date {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ} (hy : 1 + y ≠ 0) {j : ι} (hj : j ∈ s)\n    (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i) (c1' : ℝ) :\n    Tendsto (fun f ↦ cleanPrice s t c y f (c j)) (𝓝[<] 1)\n      (𝓝 (cleanPrice (s.erase j) (fun i ↦ t i - 1) c y 0 c1')) :=\n  tendsto_cleanPrice_coupon_date s t c hy hj htj ht c1'\n"
       },
@@ -879,7 +879,7 @@
       "id": "mf-dirty-price-drops-by-coupon",
       "name": "Dirty Price Drops by the Coupon at a Coupon Date",
       "domain": "mathematical_finance",
-      "description": "With dirty price (1 + y)^f · Σ cᵢ/(1 + y)^{tᵢ} at elapsed fraction f of the period, next coupon c_j (j ∈ s, t_j = 1, all tᵢ ≥ 1) and 1 + y ≠ 0: as f ↑ 1 the dirty price tends to the dirty price at the start of the next period (remaining cashflows without j, each one period closer, f = 0) plus c_j. The dirty price drops by exactly the coupon paid.",
+      "description": "With dirty price (1 + y)^f · Σ cᵢ/(1 + y)^{tᵢ} at elapsed fraction f of the period, next coupon cⱼ (j ∈ s, tⱼ = 1, all tᵢ ≥ 1) and 1 + y ≠ 0: as f ↑ 1 the dirty price tends to the dirty price at the start of the next period (remaining cashflows without j, each one period closer, f = 0) plus cⱼ. The dirty price drops by exactly the coupon paid.",
       "code": {
         "lean": "import MathFin.FixedIncome.CleanPriceAccrued\n\nopen MathFin Filter Topology\n\n/-- **The dirty price drops by the coupon at a coupon date.** -/\ntheorem dirty_price_drops_by_coupon {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ} (hy : 1 + y ≠ 0) {j : ι} (hj : j ∈ s)\n    (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i) :\n    Tendsto (fun f ↦ dirtyPrice s t c y f) (𝓝[<] 1)\n      (𝓝 (dirtyPrice (s.erase j) (fun i ↦ t i - 1) c y 0 + c j)) :=\n  tendsto_dirtyPrice_coupon_date s t c hy hj htj ht\n"
       },

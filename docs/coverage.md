@@ -51,9 +51,9 @@ Seven `full` entries, corpus 658 → 665, each derived from library machinery:
   `exp(−rⱼTⱼ)`, and the un-normalised partials `∂P/∂kⱼ`, not the durations
   `KRDⱼ = −(1/P)·∂P/∂kⱼ`, which this module does not define. Interpolated key-rate nodes are not
   modelled either.
-- **Clean and dirty price** (`interest_rates.json`). For `1 + y ≠ 0`, with next coupon `c_j`
-  (`j ∈ s`, `t_j = 1`, all `tᵢ ≥ 1`), as `f ↑ 1` the dirty price tends to the next period's dirty
-  price plus `c_j`, and the clean price (accruing `c_j`) to the next period's clean price
+- **Clean and dirty price** (`interest_rates.json`). For `1 + y ≠ 0`, with next coupon `cⱼ`
+  (`j ∈ s`, `tⱼ = 1`, all `tᵢ ≥ 1`), as `f ↑ 1` the dirty price tends to the next period's dirty
+  price plus `cⱼ`, and the clean price (accruing `cⱼ`) to the next period's clean price
   (`mf-dirty-price-drops-by-coupon`, `mf-clean-price-continuous-at-coupon-date`).
 - **Level-payment loan** (`interest_rates.json`). With principal `B₀ = annuityValue N A r Δt`
   and period rate `e^{rΔt} − 1`, after `n ≤ N` payments the balance is
