@@ -156,23 +156,28 @@ namespace MathFin.AxiomAuditGen
 #print axioms MathFin.CMS.parSwapRate_update_eq
 
 /-- info: 'MathFin.CVA.collateralizedExposure_brownian_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.CVA.collateralizedExposure_brownian_gaussian
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.CVA.collateralizedExposure_brownian_gaussian
 
 /-- info: 'MathFin.CVA.cva_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.CVA.cva_gaussian
 
 /-- info: 'MathFin.CVA.dva_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.CVA.dva_gaussian
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.CVA.dva_gaussian
 
 /-- info: 'MathFin.CVA.expectedNegativeExposure_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.CVA.expectedNegativeExposure_gaussian
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.CVA.expectedNegativeExposure_gaussian
 
 /-- info: 'MathFin.CVA.integral_posPart_finsetSum_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.CVA.integral_posPart_finsetSum_le
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.CVA.integral_posPart_finsetSum_le
 
 /-- info: 'MathFin.CVA.potentialFutureExposure_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.CVA.potentialFutureExposure_gaussian
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.CVA.potentialFutureExposure_gaussian
 
 /-- info: 'MathFin.CVA.protectionLeg_eq_integral_coxDefaultTime' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
