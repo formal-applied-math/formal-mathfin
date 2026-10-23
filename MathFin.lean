@@ -623,6 +623,11 @@ import MathFin.RiskMeasures.WorstCaseRisk
 -- Gaussian closed forms identified as the VaR of the law at z = Φ⁻¹(α)
 import MathFin.RiskMeasures.ValueAtRisk
 import MathFin.RiskMeasures.GaussianValueAtRisk
+-- Expected negative exposure, exposure VaR (PFE) and netting subadditivity, built on the real
+-- CVA expected-exposure substrate; collateralized exposure under an actual Brownian-driven
+-- process (lagged collateral is a real earlier value of the process, not an opaque scalar)
+import MathFin.RiskMeasures.ExposureMeasures
+import MathFin.RiskMeasures.CollateralizedExposureBrownian
 -- Expected shortfall: Rockafellar–Uryasev for every law, coherence, dual representation; the
 -- Gaussian ES closed form; VaR by bisection; VaR superadditivity; closed forms and tail ratios;
 -- elicitability (VaR elicitable, ES not); Bernoulli mixtures and the Basel IRB limit theorem

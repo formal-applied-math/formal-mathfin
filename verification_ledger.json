@@ -1557,6 +1557,13 @@
       "input_hash": "325131a4d6a4bf59622f73d008bfa6e0c2b35bd8d33369c864adcf485a3ab997",
       "verified_at_commit": "cb1b3cd"
     },
+    "mf-collateralized-exposure-brownian": {
+      "benchmark_file": "credit.json",
+      "date": "2026-10-23",
+      "elapsed_s": 39.4,
+      "input_hash": "681e44e17a7db241f1ab0b4fd496ebbbc6d468a9864f0cd4b129954439ad8e17",
+      "verified_at_commit": "eca9ec9"
+    },
     "mf-component-var-gaussian-euler": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-10-21",
@@ -1844,12 +1851,26 @@
       "input_hash": "4852754776b1a039347eb1d16cbd54e2855b55915baea990cb34c23bcc0991cb",
       "verified_at_commit": "199887f8"
     },
+    "mf-dva-cva-mirror": {
+      "benchmark_file": "credit.json",
+      "date": "2026-10-23",
+      "elapsed_s": 41.0,
+      "input_hash": "594dcff4a33d68ced1d6bd81b42defde29c3415601fc927059c1401c9f247e25",
+      "verified_at_commit": "eca9ec9"
+    },
     "mf-exchange-numeraire": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-10-21",
       "elapsed_s": 7.6,
       "input_hash": "06f567a96684e9fca819fdb2ef64fa199b127d7d820047d625442ee4a5debd44",
       "verified_at_commit": "199887f8"
+    },
+    "mf-expected-negative-exposure-gaussian": {
+      "benchmark_file": "credit.json",
+      "date": "2026-10-23",
+      "elapsed_s": 34.2,
+      "input_hash": "ea5bd5197749c791af8fee31a418da2d93139384d5c3434f8f5d1b96447ccafd",
+      "verified_at_commit": "eca9ec9"
     },
     "mf-expectile-elicitable": {
       "benchmark_file": "risk_measures.json",
@@ -3083,6 +3104,13 @@
       "input_hash": "776708af73db32519d404f12d14d9d5d78626e00847d089d379136a32310f0de",
       "verified_at_commit": "025a67bd"
     },
+    "mf-netting-exposure-subadditivity": {
+      "benchmark_file": "credit.json",
+      "date": "2026-10-23",
+      "elapsed_s": 38.3,
+      "input_hash": "ec6f91b6a6e71911d03687b2f69ac794f8237f1a82d977eb70c0a3b59e2b25e9",
+      "verified_at_commit": "eca9ec9"
+    },
     "mf-newton-raphson-fixed-at-root": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-10-21",
@@ -3166,6 +3194,13 @@
       "elapsed_s": 7.9,
       "input_hash": "f5e506f97db947df89bbc1c0984098bbb076e41e089dc19ba36289ee5cc99b74",
       "verified_at_commit": "199887f8"
+    },
+    "mf-potential-future-exposure-gaussian": {
+      "benchmark_file": "credit.json",
+      "date": "2026-10-23",
+      "elapsed_s": 27.6,
+      "input_hash": "b1cf8e58e268597c9c9d03f23044f4959f5734771e4b5f42b320b78059b031a6",
+      "verified_at_commit": "eca9ec9"
     },
     "mf-power-forward-price": {
       "benchmark_file": "mathematical_finance.json",
