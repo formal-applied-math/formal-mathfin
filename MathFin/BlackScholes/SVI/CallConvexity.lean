@@ -25,7 +25,8 @@ open Real ProbabilityTheory Set
 
 /-- The first derivative of `blackCall` in strike (`blackCall_hasDerivAt`). -/
 noncomputable def strikeDelta (p : Params) (K : ℝ) : ℝ := blackDelta p (Real.log K)
-/-- The second derivative of `blackCall` in strike: a positive Gaussian factor times Durrleman's function (`strikeDelta_hasDerivAt`). -/
+/-- The second derivative of `blackCall` in strike: a positive Gaussian factor times Durrleman's
+function (`strikeDelta_hasDerivAt`). -/
 noncomputable def strikeDensity (p : Params) (K : ℝ) : ℝ :=
   gaussianPDFReal 0 1 (blackMinus p (Real.log K)) / (K*rootVariance p (Real.log K)) *
     durrleman p (Real.log K)
@@ -80,7 +81,8 @@ theorem blackCall_convex_iff (p : Params) (hs : 0 < p.sigma)
       rw [← (hfirst x hx).deriv, ← (hfirst y hy).deriv]
       exact hm hx hy hxy
     have hh : 0 ≤ derivWithin (strikeDelta p) (Ioi 0) (Real.exp k) := hm'.derivWithin_nonneg
-    rw [(hsecond _ (Real.exp_pos k)).hasDerivWithinAt.derivWithin (isOpen_Ioi.uniqueDiffOn _ (Real.exp_pos k))] at hh
+    rw [(hsecond _ (Real.exp_pos k)).hasDerivWithinAt.derivWithin
+        (isOpen_Ioi.uniqueDiffOn _ (Real.exp_pos k))] at hh
     have hg := (strikeDensity_nonneg_iff p _ (Real.exp_pos k) (hw _)).mp hh
     simpa using hg
   · intro hg
@@ -97,7 +99,7 @@ theorem blackCall_convex_iff (p : Params) (hs : 0 < p.sigma)
 /-- The finite determinant formula characterizes call-price convexity on the
 entire stated smooth positive-variance parameter domain. -/
 theorem certificateFormula_iff_call_convex (p : Params) (hs : 0 < p.sigma)
-    (hb : 0 ≤ p.b) (hr : 0 ≤ 1-p.rho^2) (hg : varianceGate p) :
+    (hb : 0 ≤ p.b) (hr : 0 ≤ 1 - p.rho ^ 2) (hg : varianceGate p) :
     certificateFormula.eval p = true ↔ ConvexOn ℝ (Ioi 0) (blackCall p) := by
   rw [blackCall_convex_iff p hs ((varianceGate_iff p hs hb hr).mp hg)]
   exact certificateFormula_iff p hs hb hr hg

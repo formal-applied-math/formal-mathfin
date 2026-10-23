@@ -56,10 +56,10 @@ theorem convexOn_jumpDiffusionCallPrice_strike (S r b σ : ℝ) (Λ : ℝ≥0) {
 
 /-- **With a Gaussian part the call price is strictly convex in the strike.** For `σ ≠ 0`, `τ > 0`,
 a spot `S > 0` and a finite forward, `k ↦ C(S, k, τ)` is strictly convex on `(0, ∞)`, for any jump
-law: every butterfly spread with distinct positive strikes has a positive price. The price `Seʸ` charges
-every interval of positive strikes (`jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero`), so its
-undiscounted call price is strictly convex there (`strictConvexOn_integral_call`), and the discount
-factor is positive (`StrictConvexOn.smul`). -/
+law: every butterfly spread with distinct positive strikes has a positive price. The price `Seʸ`
+charges every interval of positive strikes (`jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero`), so
+its undiscounted call price is strictly convex there (`strictConvexOn_integral_call`), and the
+discount factor is positive (`StrictConvexOn.smul`). -/
 theorem strictConvexOn_jumpDiffusionCallPrice_strike {S r b σ : ℝ} (hS : 0 < S) (hσ : σ ≠ 0)
     {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν] {τ : ℝ≥0}
     (hY : Integrable rexp (jumpDiffusionIncrementLaw b σ Λ ν τ)) (hτ : 0 < τ) :

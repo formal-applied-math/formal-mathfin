@@ -37,7 +37,7 @@ open MeasureTheory ProbabilityTheory Set
 /-- **Concentration ✕ variance bridge.** Diagonal covariance with common
 variance `σ_sq` ⇒ `Var(w) = σ_sq · HHI(w)`. This is the `ρ = 0` case of
 `portfolioVarN_equicorrelated_eq_herfindahl`. -/
-theorem portfolioVarN_diag_eq_herfindahl {ι : Type*} [DecidableEq ι] (s : Finset ι)
+theorem portfolioVarN_diag_eq_herfindahl {ι : Type*} (s : Finset ι)
     (w : ι → ℝ) (σ : ι → ι → ℝ) (σ_sq : ℝ)
     (h_diag : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → σ i j = 0)
     (h_var : ∀ i ∈ s, σ i i = σ_sq) :
@@ -52,7 +52,7 @@ theorem portfolioVarN_diag_eq_herfindahl {ι : Type*} [DecidableEq ι] (s : Fins
 /-- **Uncorrelated Gaussian VaR is concentration**: for a Gaussian vector `X` of pairwise
 uncorrelated risk factors with common variance `v` and `α ∈ (0, 1)`,
 `VaR_α(∑ wᵢXᵢ) = ∑ wᵢ E Xᵢ + √(v · HHI(w)) · Φ⁻¹(α)`. -/
-theorem valueAtRisk_portfolio_gaussian_uncorrelated {ι : Type*} [Fintype ι] [DecidableEq ι]
+theorem valueAtRisk_portfolio_gaussian_uncorrelated {ι : Type*} [Fintype ι]
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : ι → Ω → ℝ} {α v : ℝ}
     (hX : HasGaussianLaw (fun ω ↦ (X · ω)) P) (hvar : ∀ i, Var[X i; P] = v)
     (hcov : ∀ i j, i ≠ j → cov[X i, X j; P] = 0) (w : ι → ℝ) (hα : α ∈ Ioo 0 1) :

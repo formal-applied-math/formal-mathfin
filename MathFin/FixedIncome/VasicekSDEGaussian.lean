@@ -134,7 +134,8 @@ theorem vasicekShortRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ)
     (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
     HasLaw (fun ω ↦ vasicekSDEMean r₀ θ κ (T : ℝ)
         + σ * (wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω))
-      (gaussianReal (vasicekSDEMean r₀ θ κ (T : ℝ)) (vasicekSDEVariance σ κ (T : ℝ)).toNNReal) μ := by
+      (gaussianReal (vasicekSDEMean r₀ θ κ (T : ℝ)) (vasicekSDEVariance σ κ (T : ℝ)).toNNReal)
+          μ := by
   -- The Wiener integral of the kernel is Gaussian, centred, variance = ∫ kernel².
   have hW : HasLaw (fun ω ↦ wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω)
       (gaussianReal 0 (∫ s in Set.Ioc (0 : ℝ) (T : ℝ),

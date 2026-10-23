@@ -17,7 +17,8 @@ then excludes a boundary at the strike at any positive time.
 
 ## Result
 
-Public entry points include `price_nonneg`, `price_hasDerivAt_boundary`, `boundary_neg`, `boundary_forcing_pos`.
+Public entry points include `price_nonneg`, `price_hasDerivAt_boundary`, `boundary_neg`,
+`boundary_forcing_pos`.
 -/
 
 @[expose] public section

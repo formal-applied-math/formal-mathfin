@@ -11,7 +11,8 @@ public import Mathlib.Analysis.Convex.Continuous
 /-! # Joint spot/maturity continuity, derived from the stopping supremum 
 ## Result
 
-Public entry points include `americanPutValue_uniform_spot_lipschitz`, `americanPutValue_joint_continuousAt`.
+Public entry points include `americanPutValue_uniform_spot_lipschitz`,
+`americanPutValue_joint_continuousAt`.
 -/
 
 @[expose] public section

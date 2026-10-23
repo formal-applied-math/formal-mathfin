@@ -15,7 +15,9 @@ from raw/usual American-value equality at positive spot.
 
 ## Result
 
-Public entry points include `usualBellmanAux_eq_brownianGridMarkovAux`, `brownianGridPrice_eq_usualGridValue`, `brownianGridPrice_tendsto_usual`, `brownianUsualAmericanPut_eq_raw_of_pos`.
+Public entry points include `usualBellmanAux_eq_brownianGridMarkovAux`,
+`brownianGridPrice_eq_usualGridValue`, `brownianGridPrice_tendsto_usual`,
+`brownianUsualAmericanPut_eq_raw_of_pos`.
 -/
 
 @[expose] public section
@@ -30,7 +32,8 @@ theorem usualBellmanAux_eq_brownianGridMarkovAux {Z : ℕ → ℝ → ℝ} {C : 
     (T δ : ℝ≥0) (β σ x : ℝ) (n i : ℕ) :
     @bellmanAux (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit)
       (completedMeasure gaussianLimit)
-      (@cappedGridFiltration (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit) brownianUsualFiltration T δ)
+      (@cappedGridFiltration (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit)
+          brownianUsualFiltration T δ)
       (fun j ω => Z j (brownianLogState β σ x (cappedGridTime T δ j) ω)) n i
       =ᵐ[completedMeasure gaussianLimit]
       fun ω => brownianGridMarkovAux Z T δ β σ n i
@@ -39,7 +42,8 @@ theorem usualBellmanAux_eq_brownianGridMarkovAux {Z : ℕ → ℝ → ℝ} {C : 
   induction n generalizing i with
   | zero => exact Eventually.of_forall (fun _ => rfl)
   | succ n ih =>
-    have hcond := condExp_congr_ae (m := cappedGridFiltration brownianUsualFiltration T δ i) (ih (i+1))
+    have hcond :=
+        condExp_congr_ae (m := cappedGridFiltration brownianUsualFiltration T δ i) (ih (i+1))
     have ht := brownianLogState_usual_condExp_transition
       (brownianGridMarkovAux_continuous hc hb T δ β σ n (i+1))
       (brownianGridMarkovAux_bound hb T δ β σ n (i+1))
@@ -58,7 +62,8 @@ theorem brownianGridPrice_eq_usualGridValue {K r q σ : ℝ} (hK : 0 ≤ K) (hr 
   let μ := completedMeasure gaussianLimit
   have hz : ∀ᵐ ω ∂μ, brownian 0 ω = 0 := isBrownianReal_brownian.eval_zero_ae_eq_zero
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
-  rw [gridValue_eq_bellman brownian_completed_measurable brownianUsual_adapted hK hr (Real.exp_pos x).le hδ]
+  rw [gridValue_eq_bellman brownian_completed_measurable brownianUsual_adapted hK hr
+      (Real.exp_pos x).le hδ]
   have he := usualBellmanAux_eq_brownianGridMarkovAux
     (fun i => discountedLogPayoff_continuous K r (cappedGridTime T δ i))
     (fun i y => discountedLogPayoff_bound hK hr (cappedGridTime T δ i) y)
@@ -87,7 +92,8 @@ theorem brownianGridPrice_tendsto_usual {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 
         K r q σ (Real.exp x) T (gridStep n) :=
     funext (fun n => brownianGridPrice_eq_usualGridValue hK hr T (gridStep_pos n) x)
   rw [he]
-  exact gridValue_tendsto_americanValue brownian_completed_measurable continuous_brownian hK hr (Real.exp_pos x).le
+  exact gridValue_tendsto_americanValue brownian_completed_measurable continuous_brownian hK hr
+      (Real.exp_pos x).le
 
 /-- No classical solution, volatility sign, or dividend restriction is needed. -/
 theorem brownianUsualAmericanPut_eq_raw_of_pos {K r q σ S : ℝ}

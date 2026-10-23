@@ -16,7 +16,8 @@ and right continuation proves the usual-filtration transition without any PDE.
 
 ## Result
 
-Public entry points include `brownianTerminalValue`, `brownianTerminalValue_at_maturity`, `brownianTerminalValue_bound`, `brownianTerminalValue_continuous`.
+Public entry points include `brownianTerminalValue`, `brownianTerminalValue_at_maturity`,
+`brownianTerminalValue_bound`, `brownianTerminalValue_continuous`.
 -/
 
 @[expose] public section
@@ -58,7 +59,8 @@ theorem brownianTerminalValue_adapted {f : ℝ → ℝ} {C : ℝ}
   intro t
   have hw := (brownian_adapted (min t T)).mono (brownianFiltration.mono (min_le_left _ _)) le_rfl
   exact (brownianHeatFlow_continuous hf hb).measurable.comp
-    (measurable_const.prodMk ((measurable_const.add (measurable_const.mul hw)).add measurable_const))
+    (measurable_const.prodMk
+        ((measurable_const.add (measurable_const.mul hw)).add measurable_const))
 
 theorem brownianTerminalValue_eq_condExp {f : ℝ → ℝ} {C : ℝ}
     (hf : Continuous f) (hb : ∀ y, ‖f y‖ ≤ C) (β σ x : ℝ) (T t : ℝ≥0) :
@@ -97,8 +99,11 @@ theorem brownianTerminalValue_usual_martingale {f : ℝ → ℝ} {C : ℝ}
   have hn := bounded_supermartingale_completion gaussianLimit hM.neg.supermartingale
     (fun t ω => by simpa only [Pi.neg_apply,norm_neg] using hbound t ω)
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
-  have hu' := bounded_continuous_supermartingale_rightCont (supermartingale_ambientNullAugmentation hu) hc hbound
-  have hn' := bounded_continuous_supermartingale_rightCont (supermartingale_ambientNullAugmentation hn)
+  have hu' :=
+      bounded_continuous_supermartingale_rightCont
+      (supermartingale_ambientNullAugmentation hu) hc hbound
+  have hn' :=
+      bounded_continuous_supermartingale_rightCont (supermartingale_ambientNullAugmentation hn)
     (fun ω => (hc ω).neg) (fun t ω => by simpa only [Pi.neg_apply,norm_neg] using hbound t ω)
   apply martingale_iff.mpr
   refine ⟨hu',?_⟩
@@ -107,7 +112,8 @@ theorem brownianTerminalValue_usual_martingale {f : ℝ → ℝ} {C : ℝ}
 
 theorem brownianLogState_usual_condExp_transition {f : ℝ → ℝ} (hf : Continuous f) {C : ℝ}
     (hb : ∀ y, ‖f y‖ ≤ C) {i j : ℝ≥0} (hij : i ≤ j) (β σ x : ℝ) :
-    (completedMeasure gaussianLimit)[fun ω => f (brownianLogState β σ x j ω) | brownianUsualFiltration i]
+    (completedMeasure gaussianLimit)[fun ω =>
+        f (brownianLogState β σ x j ω) | brownianUsualFiltration i]
       =ᵐ[completedMeasure gaussianLimit]
       fun ω => brownianHeatFlow f (σ^2*((j : ℝ)-(i : ℝ))).toNNReal
         (brownianLogState β σ x i ω+β*((j : ℝ)-(i : ℝ))) := by

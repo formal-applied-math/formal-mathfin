@@ -18,10 +18,10 @@ box's start `sᵢ`, each mark `Aᵢ` measurable with finite intensity.
 Encoded as the submodule `levySimpleModule` of the `Finsupp` module `(ℝ × ℝ × Set E) →₀ (Ω → ℝ)`
 (index `b = (s, t, A)` ↦ coefficient), carved by the predicate `IsLevySimple`. This is the marked
 analogue of Degenne's `ProbabilityTheory.SimpleProcess` (time-indexed; no space-time version exists
-in Mathlib or BrownianMotion). Adding two integrands concatenates their box families (`Finsupp` add),
-scaling scales the coefficients, and adaptedness / finite marks / a uniform bound are each preserved
-under `0`, `+`, `•` — so the marked integrands are a genuine submodule and inherit the `Module ℝ`
-structure, with no bespoke instance.
+in Mathlib or BrownianMotion). Adding two integrands concatenates their box families (`Finsupp`
+add), scaling scales the coefficients, and adaptedness / finite marks / a uniform bound are each
+preserved under `0`, `+`, `•` — so the marked integrands are a genuine submodule and inherit the
+`Module ℝ` structure, with no bespoke instance.
 
 The elementary integral, the two `L²` embeddings, the isometry (summing the overlapping-box bilinear
 pairing `integral_bilinear_pairing`), and the `extendOfNorm` CLM are built on this source in the
@@ -30,8 +30,8 @@ sibling modules.
 ## Provenance
 
 Structure shape mirrors `ProbabilityTheory.SimpleProcess` (Degenne, BrownianMotion — a `Finsupp` of
-interval coefficients); the compensated-integral content is our own. The PRM field shape is consulted
-from `cgarryZA/LevyStochCalc` (Apache-2.0, cited).
+interval coefficients); the compensated-integral content is our own. The PRM field shape is
+consulted from `cgarryZA/LevyStochCalc` (Apache-2.0, cited).
 -/
 
 @[expose] public section
@@ -49,8 +49,8 @@ def indexBox (b : ℝ × ℝ × Set E) : Set (ℝ × E) := Set.Ioc b.1 b.2.1 ×�
 
 /-- **The marked-simple predicate.** A `Finsupp` `V : (ℝ × ℝ × Set E) →₀ (Ω → ℝ)` is a marked simple
 integrand when, on each box `b = (s, t, A)` in its (finite) support, the coefficient `V b` is
-adapted at the start `s = b.1`, the mark `A = b.2.2` is measurable with finite `ν`-intensity, and the
-coefficients are uniformly bounded. -/
+adapted at the start `s = b.1`, the mark `A = b.2.2` is measurable with finite `ν`-intensity, and
+the coefficients are uniformly bounded. -/
 structure IsLevySimple (N : PoissonRandomMeasure P ν)
     (V : (ℝ × ℝ × Set E) →₀ (Ω → ℝ)) : Prop where
   /-- Each coefficient is adapted at its box's start. -/

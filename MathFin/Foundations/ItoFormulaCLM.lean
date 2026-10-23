@@ -111,7 +111,8 @@ theorem ito_formula_L2_bddDeriv_mk {X : ℝ≥0 → Ω → ℝ} (hX : IsPreBrown
     ∃ gf' : Lp ℝ 2 (trimMeasure_T (μ := μ) T (fun t ↦ IsPreBrownianReal.measurable_mk (h := hX) t)),
       (⇑gf' =ᵐ[trimMeasure_T (μ := μ) T (fun t ↦ IsPreBrownianReal.measurable_mk (h := hX) t)]
         fun z ↦ f' (IsPreBrownianReal.mk (h := hX) X z.1 z.2)) ∧
-      (fun ω ↦ f (IsPreBrownianReal.mk (h := hX) X T ω) - f (IsPreBrownianReal.mk (h := hX) X 0 ω)) =ᵐ[μ]
+      (fun ω ↦ f (IsPreBrownianReal.mk (h := hX) X T ω) -
+          f (IsPreBrownianReal.mk (h := hX) X 0 ω)) =ᵐ[μ]
         (fun ω ↦ (itoIntegralCLM_T (hX.isBrownianReal_mk).toIsPreBrownianReal T
                     (fun t ↦ IsPreBrownianReal.measurable_mk (h := hX) t) gf') ω
           + (1 / 2) * ∫ s in Set.Ioc 0 T,

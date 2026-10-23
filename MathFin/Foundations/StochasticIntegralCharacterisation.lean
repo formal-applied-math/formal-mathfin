@@ -419,8 +419,8 @@ theorem sIntegral_dct (hB : IsPreBrownianReal B μ) (X : ℕ → ℝ≥0 → Ω 
 /-! ### The integral against `M` extends the Riemann–Stieltjes integral -/
 
 /-- **The integral against `M` is an extension of the Riemann–Stieltjes integral**, in the sense of
-BrownianMotion's `IsRiemannStieltjesExtension`: on elementary processes it is the Riemann–Stieltjes sum
-against `M` stopped at `T`, and it respects linearity, indistinguishability and dominated
+BrownianMotion's `IsRiemannStieltjesExtension`: on elementary processes it is the Riemann–Stieltjes
+sum against `M` stopped at `T`, and it respects linearity, indistinguishability and dominated
 convergence. -/
 theorem isRiemannStieltjesExtension (hB : IsPreBrownianReal B μ) :
     IsRiemannStieltjesExtension μ (integrator T hBmeas φ hB) (natFiltration hBmeas)

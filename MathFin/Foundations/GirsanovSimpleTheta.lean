@@ -62,7 +62,7 @@ lemma simpleDoleansExp_zero (s : ℕ → ℝ≥0) (d : ℕ → Ω → ℝ) (N : 
   induction N with
   | zero => rfl
   | succ n ih =>
-    show simpleDoleansExp (X := X) s d n 0 ω * cellExp (X := X) (s n) (s (n + 1)) (d n) 0 ω = 1
+    change simpleDoleansExp (X := X) s d n 0 ω * cellExp (X := X) (s n) (s (n + 1)) (d n) 0 ω = 1
     rw [ih, cellExp_zero, mul_one]
 
 /-- The simple Doléans exponential is strictly positive (a product of exponentials). -/
@@ -71,7 +71,7 @@ lemma simpleDoleansExp_pos (s : ℕ → ℝ≥0) (d : ℕ → Ω → ℝ) (N : �
   induction N with
   | zero => exact one_pos
   | succ n ih =>
-    show 0 < simpleDoleansExp (X := X) s d n t ω * cellExp (X := X) (s n) (s (n + 1)) (d n) t ω
+    change 0 < simpleDoleansExp (X := X) s d n t ω * cellExp (X := X) (s n) (s (n + 1)) (d n) t ω
     exact mul_pos ih (Real.exp_pos _)
 
 /-- **The simple (piecewise-constant adapted) drift** `∑_{i<N} c_i · (s_{i+1}∧t − s_i∧t)`, clamped
@@ -128,7 +128,7 @@ lemma simpleDoleansExp_eq_exp_sum (s : ℕ → ℝ≥0) (d : ℕ → Ω → ℝ)
   induction N with
   | zero => simp [simpleDoleansExp]
   | succ n ih =>
-    show simpleDoleansExp (X := X) s d n t ω * cellExp (X := X) (s n) (s (n + 1)) (d n) t ω = _
+    change simpleDoleansExp (X := X) s d n t ω * cellExp (X := X) (s n) (s (n + 1)) (d n) t ω = _
     rw [ih, cellExp, ← Real.exp_add, Finset.sum_range_succ]
 
 /-- **The simple Girsanov spine.** `Z_t · exp(a·B^θ_t − ½a²t) = exp(a·X_0) · E^{a−c}_t`, where the
@@ -192,7 +192,9 @@ theorem simpleDoleansExp_integral_eq_one (s : ℕ → ℝ≥0) (hs : Monotone s)
     (hd_bdd : ∀ i ω, |d i ω| ≤ K) (N : ℕ) (T : ℝ≥0) :
     ∫ ω, simpleDoleansExp (X := X) s d N T ω ∂P = 1 := by
   have hmart := simpleDoleansExp_isMartingale (X := X) (P := P) s hs d hd hd_bdd N
-  have hmean := hmart.setIntegral_eq (i := 0) (j := T) (zero_le : (0:ℝ≥0) ≤ T) (s := Set.univ) MeasurableSet.univ
+  have hmean :=
+      hmart.setIntegral_eq (i := 0) (j := T) (zero_le : (0:ℝ≥0) ≤ T) (s := Set.univ)
+      MeasurableSet.univ
   simp only [Measure.restrict_univ] at hmean
   calc ∫ ω, simpleDoleansExp (X := X) s d N T ω ∂P
       = ∫ ω, simpleDoleansExp (X := X) s d N 0 ω ∂P := hmean.symm
@@ -408,12 +410,12 @@ include hX in
 `Q`.** For a partition covering `[0,T]` (`s_0 = 0`, `T ≤ s_N`) and bounded adapted multipliers `c`,
 under `Q = P.withDensity(E^{−c}_T)` the drift-corrected process
 `B^θ_t = X_t + ∑_i c_i (s_{i+1}∧t − s_i∧t)` has, on `[0,T]`: zero start, Gaussian increments
-`N(0,t−s)`, and independent increments (`HasIndepIncrements`), which fix its finite-dimensional
-laws on `[0,T]`; path continuity is not stated. One application of the exponential characterization
+`N(0,t−s)`, and independent increments (`HasIndepIncrements`), which fix its finite-dimensional laws
+on `[0,T]`; path continuity is not stated. One application of the exponential characterization
 `isQBrownianMotion_of_expMartingale` to `isExpQMartingale_BthetaSimple` — no characteristic-function
 chain re-derived (the whole payoff of the abstraction). This is the general bounded-*adapted*-θ
-Girsanov for the simple case, strictly beyond constant θ, on the existing tower — no adapted-integrand
-Itô formula. -/
+Girsanov for the simple case, strictly beyond constant θ, on the existing tower — no
+adapted-integrand Itô formula. -/
 theorem Btheta_simple_isQBrownianMotion (s : ℕ → ℝ≥0) (hs : Monotone s) (hs0 : s 0 = 0)
     (c : ℕ → Ω → ℝ) (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :

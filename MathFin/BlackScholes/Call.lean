@@ -242,7 +242,7 @@ theorem bs_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
     unfold bsTerminal
     have h_exp : Real.exp ((r - σ^2 / 2) * T + σ * Real.sqrt T * z)
                 = Real.exp μ_log * Real.exp (ν_log * z) := by
-      show Real.exp ((r - σ^2 / 2) * T + σ * Real.sqrt T * z)
+      change Real.exp ((r - σ^2 / 2) * T + σ * Real.sqrt T * z)
             = Real.exp ((r - σ^2 / 2) * T) * Real.exp (σ * Real.sqrt T * z)
       exact Real.exp_add _ _
     rw [h_exp]

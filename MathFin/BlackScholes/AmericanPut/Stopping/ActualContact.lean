@@ -15,7 +15,8 @@ contact. Optimality and the dynamic programming principle are not assumed.
 
 ## Result
 
-Public entry points include `canonicalLogPath`, `canonicalGap`, `canonicalLogPath_exp`, `canonicalGap_continuous`.
+Public entry points include `canonicalLogPath`, `canonicalGap`, `canonicalLogPath_exp`,
+`canonicalGap_continuous`.
 -/
 
 @[expose] public section
@@ -125,7 +126,8 @@ theorem canonicalContactRule_exercise_before_expiry (hk : 0 ≤ k) (hW : Adapted
   exact (canonicalPrice_contact_iff hk _ (sub_pos.mpr hs)).mp he
 
 theorem brownianUsual_adapted :
-    @Adapted _ _ (completedMeasurableSpace gaussianLimit) _ _ _ brownianUsualFiltration brownian := by
+    @Adapted _ _ (completedMeasurableSpace gaussianLimit) _ _ _
+        brownianUsualFiltration brownian := by
   intro t
   exact (brownian_adapted t).mono (brownian_completedRaw_le_usual t) le_rfl
 

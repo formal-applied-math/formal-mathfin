@@ -18,7 +18,8 @@ an assumed strong maximum principle.
 
 ## Result
 
-Public entry points include `positiveBump`, `positiveBump_contDiff`, `positiveBump_hasDeriv`, `positiveBump_deriv2`.
+Public entry points include `positiveBump`, `positiveBump_contDiff`, `positiveBump_hasDeriv`,
+`positiveBump_deriv2`.
 -/
 
 @[expose] public section

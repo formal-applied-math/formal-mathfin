@@ -116,13 +116,14 @@ theorem tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound [IsFiniteMeasure μ]
 a family `f : ℕ → α → ℝ` with `f n ∈ L²`, a uniform second-moment bound `∫ (f n)² ≤ M`, a limit
 `g ∈ L¹`, and the hypothesis that **every subsequence has a further subsequence converging to `g`
 a.e.** satisfies `∫_A f n → ∫_A g`. This routes the composition of convergences (exp, sums,
-products) through the a.e. level — where continuity is free — instead of through a `TendstoInMeasure`
-algebra that Mathlib does not provide. The real sequence `∫_A f n` converges by the subsequence
-principle (`tendsto_of_subseq_tendsto`): each subsequence's a.e.-sub-subsequence gives convergence in
-measure (`tendstoInMeasure_of_tendsto_ae`), which `tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound`
-turns into the set-integral limit. This is the endpoint the continuous-Girsanov Doléans limit consumes:
-`f n = exp(a·B^θⁿ)·Z⁽ⁿ⁾`, whose stochastic part converges in measure (brick b) so every subsequence
-has an a.e.-convergent one, while the drift parts converge everywhere. -/
+products) through the a.e. level — where continuity is free — instead of through a
+`TendstoInMeasure` algebra that Mathlib does not provide. The real sequence `∫_A f n` converges by
+the subsequence principle (`tendsto_of_subseq_tendsto`): each subsequence's a.e.-sub-subsequence
+gives convergence in measure (`tendstoInMeasure_of_tendsto_ae`), which
+`tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound` turns into the set-integral limit. This is the
+endpoint the continuous-Girsanov Doléans limit consumes: `f n = exp(a·B^θⁿ)·Z⁽ⁿ⁾`, whose stochastic
+part converges in measure (brick b) so every subsequence has an a.e.-convergent one, while the drift
+parts converge everywhere. -/
 theorem tendsto_setIntegral_of_subseq_ae_of_sq_bound [IsFiniteMeasure μ]
     {f : ℕ → α → ℝ} {g : α → ℝ} (hf : ∀ n, MemLp (f n) 2 μ)
     {M : ℝ} (hM : ∀ n, ∫ x, (f n x) ^ 2 ∂μ ≤ M) (hg : MemLp g 1 μ)
@@ -138,12 +139,12 @@ theorem tendsto_setIntegral_of_subseq_ae_of_sq_bound [IsFiniteMeasure μ]
   exact tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound
     (fun k ↦ hf (ns (ms k))) (fun k ↦ hM (ns (ms k))) hg hconv A
 
-/-- **Fatou `L²`-membership of an a.e.-subsequence limit.** If every `f n ∈ L²` with a uniform second
-moment `∫ (f n)² ≤ M`, and some subsequence has `f (msₖ) → g` a.e., then `g ∈ L²`: Fatou on the
-squared enorms, `∫⁻ ‖g²‖ₑ ≤ liminf ∫⁻ ‖f(msₖ)²‖ₑ = liminf ∫ f(msₖ)² ≤ M < ∞`. No finiteness of `μ`
-is needed (pure Fatou) — the limit-side companion to the finite-measure Vitali producers above, and
-the single principle behind an a.e.-subsequential `L²` limit inheriting its family's uniform second
-moment (both the Girsanov continuous and predictable Doléans densities consume it). -/
+/-- **Fatou `L²`-membership of an a.e.-subsequence limit.** If every `f n ∈ L²` with a uniform
+second moment `∫ (f n)² ≤ M`, and some subsequence has `f (msₖ) → g` a.e., then `g ∈ L²`: Fatou on
+the squared enorms, `∫⁻ ‖g²‖ₑ ≤ liminf ∫⁻ ‖f(msₖ)²‖ₑ = liminf ∫ f(msₖ)² ≤ M < ∞`. No finiteness of
+`μ` is needed (pure Fatou) — the limit-side companion to the finite-measure Vitali producers above,
+and the single principle behind an a.e.-subsequential `L²` limit inheriting its family's uniform
+second moment (both the Girsanov continuous and predictable Doléans densities consume it). -/
 theorem memLp_two_of_subseq_ae_of_sq_bound {f : ℕ → α → ℝ} {g : α → ℝ}
     (hf : ∀ n, MemLp (f n) 2 μ) (hmeas : ∀ n, Measurable (f n))
     {M : ℝ} (hM : ∀ n, ∫ x, (f n x) ^ 2 ∂μ ≤ M)

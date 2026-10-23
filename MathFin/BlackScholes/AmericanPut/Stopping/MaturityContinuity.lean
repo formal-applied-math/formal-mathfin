@@ -15,7 +15,8 @@ stopping rule is assumed. Nearly optimal admissible rules suffice.
 
 ## Result
 
-Public entry points include `americanPutValue_continuous_horizon`, `brownianAmericanPut_continuous_horizon`, `brownianUsualAmericanPut_continuous_horizon`.
+Public entry points include `americanPutValue_continuous_horizon`,
+`brownianAmericanPut_continuous_horizon`, `brownianUsualAmericanPut_continuous_horizon`.
 -/
 
 @[expose] public section
@@ -37,7 +38,8 @@ theorem americanPutValue_continuous_horizon {Ω : Type*} [MeasurableSpace Ω]
   constructor
   · intro a ha
     obtain ⟨_,⟨θ,rfl⟩,hθ⟩ := exists_lt_of_lt_csSup
-      (exerciseValues_nonempty (P := P) (𝓕 := 𝓕) (W := W) (K := K) (r := r) (q := q) (σ := σ) (S := S) (T := T)) ha
+      (exerciseValues_nonempty (P := P) (𝓕 := 𝓕) (W := W) (K := K) (r := r) (q := q) (σ := σ)
+          (S := S) (T := T)) ha
     have he := expectedReward_fixed_truncate_tendsto (P := P) (q := q) (σ := σ)
       hW hpaths hK hr hS hT θ
     filter_upwards [he.eventually (Ioi_mem_nhds hθ)] with n hn
@@ -47,7 +49,8 @@ theorem americanPutValue_continuous_horizon {Ω : Type*} [MeasurableSpace Ω]
         americanPutValue P 𝓕 W K r q σ S (Tn n)-localizationEps n <
           ∫ ω, putReward W K r q σ S θ.time ω ∂P := by
       obtain ⟨_,⟨θ,rfl⟩,hθ⟩ := exists_lt_of_lt_csSup
-        (exerciseValues_nonempty (P := P) (𝓕 := 𝓕) (W := W) (K := K) (r := r) (q := q) (σ := σ) (S := S) (T := Tn n))
+        (exerciseValues_nonempty (P := P) (𝓕 := 𝓕) (W := W) (K := K) (r := r) (q := q) (σ := σ)
+            (S := S) (T := Tn n))
         (sub_lt_self _ (localizationEps_pos n))
       exact ⟨θ,hθ⟩
     choose θ hθ using happrox

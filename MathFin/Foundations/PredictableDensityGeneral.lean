@@ -79,7 +79,7 @@ noncomputable def simpleAssemblyOfMeasure (T : ℝ≥0) (hBmeas : ∀ t, Measura
     TBoundedSP T hBmeas →ₗ[ℝ] Lp ℝ 2 ν where
   toFun V := (memLp_uncurry_of_isFiniteMeasure hBmeas ν V.val).toLp _
   map_add' V W := by
-    show (memLp_uncurry_of_isFiniteMeasure hBmeas ν ((V + W) : TBoundedSP T hBmeas).val).toLp _
+    change (memLp_uncurry_of_isFiniteMeasure hBmeas ν ((V + W) : TBoundedSP T hBmeas).val).toLp _
       = _
     rw [Submodule.coe_add,
       ← MemLp.toLp_add (memLp_uncurry_of_isFiniteMeasure hBmeas ν V.val)
@@ -87,7 +87,7 @@ noncomputable def simpleAssemblyOfMeasure (T : ℝ≥0) (hBmeas : ∀ t, Measura
     congr 1
     exact ItoIntegralL2.uncurry_coe_add hBmeas V.val W.val
   map_smul' c V := by
-    show (memLp_uncurry_of_isFiniteMeasure hBmeas ν ((c • V) : TBoundedSP T hBmeas).val).toLp _
+    change (memLp_uncurry_of_isFiniteMeasure hBmeas ν ((c • V) : TBoundedSP T hBmeas).val).toLp _
       = _
     rw [Submodule.coe_smul, RingHom.id_apply,
       ← MemLp.toLp_const_smul c (memLp_uncurry_of_isFiniteMeasure hBmeas ν V.val)]
@@ -158,7 +158,7 @@ lemma inner_simpleAssemblyOfMeasure_iocSP_T (T : ℝ≥0) (hBmeas : ∀ t, Measu
           = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z := by
       rw [hz, uncurry_iocSP_T_eq hBmeas hab hbT hF]
     rw [hSA]
-    show (g : ℝ≥0 × Ω → ℝ) z * (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z = _
+    change (g : ℝ≥0 × Ω → ℝ) z * (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z = _
     by_cases hz_in : z ∈ Set.Ioc a b ×ˢ F
     · rw [Set.indicator_of_mem hz_in, Set.indicator_of_mem hz_in, mul_one]
     · rw [Set.indicator_of_notMem hz_in, Set.indicator_of_notMem hz_in, mul_zero]

@@ -13,11 +13,12 @@ public import MathFin.Foundations.ItoFormulaUnrestricted
 property in **explicit** form. This file packages it into Degenne's `IsLocalMartingale` *typeclass*.
 
 The one missing ingredient was the **adaptedness** of the explicit residual `M` (so that the
-`σ_N`-stopped indicator process is `StronglyAdapted`, hence a martingale): `M_t = f(t,B_t) − f(0,B_0)
-− ∫₀ᵗ drift`, and the drift primitive `D_t = ∫₀ᵗ drift` is `𝓕_t`-measurable because, after clamping
-the integrand's time to `[0,t]` (so each slice is `𝓕_t`-measurable), it is jointly strongly
-measurable (Carathéodory: continuous in `s`, `𝓕_t`-measurable in `ω`), and the integral of a jointly
-measurable function is measurable (`StronglyMeasurable.integral_prod_right`). With `M` adapted,
+`σ_N`-stopped indicator process is `StronglyAdapted`, hence a martingale):
+`M_t = f(t,B_t) − f(0,B_0) − ∫₀ᵗ drift`, and the drift primitive `D_t = ∫₀ᵗ drift` is
+`𝓕_t`-measurable because, after clamping the integrand's time to `[0,t]` (so each slice is
+`𝓕_t`-measurable), it is jointly strongly measurable (Carathéodory: continuous in `s`,
+`𝓕_t`-measurable in `ω`), and the integral of a jointly measurable function is measurable
+(`StronglyMeasurable.integral_prod_right`). With `M` adapted,
 `StronglyAdapted.stoppedProcess_indicator` and the all-time agreement
 `indistinguishable_on_stochInterval` assemble `Locally (Martingale ∧ cadlag)` with localizer `σ_N`.
 -/
@@ -68,7 +69,8 @@ lemma driftPrimitive_stronglyMeasurable (hBmeas : ∀ t, Measurable (B t))
     exact hdrift.comp (continuous_id.min continuous_const)
   -- now switch to `𝓕_t` as the ambient σ-algebra for the joint-measurability + integral lemmas
   letI : MeasurableSpace Ω := natFiltration hBmeas t
-  -- the uncurried clamped integrand is jointly strongly measurable (Carathéodory + swap + indicator)
+  -- the uncurried clamped integrand is jointly strongly measurable (Carathéodory + swap +
+  -- indicator)
   have huncurry : StronglyMeasurable
       (Function.uncurry fun (ω : Ω) (s : ℝ≥0) ↦
         (Set.Ioc 0 t).indicator (fun s ↦ g s ω) s) := by

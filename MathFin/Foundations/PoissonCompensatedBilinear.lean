@@ -17,15 +17,15 @@ full **covariance** of the compensated Poisson random measure:
   `𝔼[Ñ(C)·Ñ(D)] = ν̂(C ∩ D)`   for measurable finite-intensity `C, D`.
 
 `Ñ` is thus an *orthogonal martingale measure* with (deterministic) intensity `ν̂`: increments on
-disjoint regions are uncorrelated, and the covariance of general increments is the intensity of their
-overlap. The proof decomposes `C = (C∩D) ⊔ (C\D)` and `D = (C∩D) ⊔ (D\C)` into three disjoint pieces
-whose counts are independent (the independent-scattering field `indep_of_disjoint_region`); the three
-disjoint cross-pairs vanish (`integral_mul_compensated_eq_zero`) and the diagonal `𝔼[Ñ(C∩D)²]` is
-`ν̂(C∩D)`.
+disjoint regions are uncorrelated, and the covariance of general increments is the intensity of
+their overlap. The proof decomposes `C = (C∩D) ⊔ (C\D)` and `D = (C∩D) ⊔ (D\C)` into three disjoint
+pieces whose counts are independent (the independent-scattering field `indep_of_disjoint_region`);
+the three disjoint cross-pairs vanish (`integral_mul_compensated_eq_zero`) and the diagonal
+`𝔼[Ñ(C∩D)²]` is `ν̂(C∩D)`.
 
-This covariance is the bilinear core the compensated-integral isometry is built on (the jump analogue
-of `WienerIntegralL2.covariance_increment_aux`), and the first rung of the Itô–Lévy integral
-*operator* (the CLM over the characterised predictable `L²`).
+This covariance is the bilinear core the compensated-integral isometry is built on (the jump
+analogue of `WienerIntegralL2.covariance_increment_aux`), and the first rung of the Itô–Lévy
+integral *operator* (the CLM over the characterised predictable `L²`).
 
 ## Provenance
 
@@ -55,7 +55,7 @@ theorem ae_count_ne_top (N : PoissonRandomMeasure P ν) {B : Set (ℝ × E)}
     ext ω; simp [Set.mem_preimage]
   rw [hset, ← Measure.map_apply (N.measurable_eval hB) (measurableSet_singleton ⊤),
     N.poisson_law hB hfin]
-  show poissonMeasureENN (referenceIntensity ν B).toNNReal {⊤} = 0
+  change poissonMeasureENN (referenceIntensity ν B).toNNReal {⊤} = 0
   unfold poissonMeasureENN
   rw [Measure.map_apply (by fun_prop) (measurableSet_singleton ⊤),
     show (fun n : ℕ => (n : ℝ≥0∞)) ⁻¹' {(⊤ : ℝ≥0∞)} = ∅ from by
@@ -84,7 +84,7 @@ theorem compensated_mul_compensated_disjoint (N : PoissonRandomMeasure P ν) {X 
     (hYfin : referenceIntensity ν Y ≠ ⊤) :
     ∫ ω, N.compensated X ω * N.compensated Y ω ∂P = 0 := by
   refine integral_mul_compensated_eq_zero N hY hYfin ?_
-  show Measurable[N.regionSigma Y] fun ω => (N.N ω X).toReal - (referenceIntensity ν X).toReal
+  change Measurable[N.regionSigma Y] fun ω => (N.N ω X).toReal - (referenceIntensity ν X).toReal
   have hc : Measurable[N.regionSigma Y] fun ω => N.N ω X :=
     (measurable_iff_comap_le.mpr le_rfl).mono (le_iSup₂_of_le X ⟨hdisj, hX⟩ le_rfl) le_rfl
   exact hc.ennreal_toReal.sub measurable_const
@@ -116,7 +116,8 @@ theorem compensated_covariance (N : PoissonRandomMeasure P ν) {C D : Set (ℝ �
   have hdD : ∀ᵐ ω ∂P, N.compensated D ω
       = N.compensated (C ∩ D) ω + N.compensated (D \ C) ω := by
     have h := compensated_add_of_disjoint N hIms hD'ms hID' hIfin hD'fin
-    rwa [show (C ∩ D) ∪ (D \ C) = D from by rw [Set.inter_comm]; exact Set.inter_union_sdiff D C] at h
+    rwa [show (C ∩ D) ∪ (D \ C) =
+        D from by rw [Set.inter_comm]; exact Set.inter_union_sdiff D C] at h
   -- L² membership ⇒ integrability of every cross product
   have hL2 : ∀ {S : Set (ℝ × E)}, MeasurableSet S → referenceIntensity ν S ≠ ⊤ →
       MemLp (N.compensated S) 2 P := fun hS hSf => memLp_compensated N hS hSf
@@ -185,7 +186,7 @@ disjoint from `p`. -/
 private lemma compensated_measurable_regionSigma (N : PoissonRandomMeasure P ν)
     {p q : Set (ℝ × E)} (hpq : Disjoint p q) (hpms : MeasurableSet p) :
     Measurable[N.regionSigma q] (N.compensated p) := by
-  show Measurable[N.regionSigma q] fun ω => (N.N ω p).toReal - (referenceIntensity ν p).toReal
+  change Measurable[N.regionSigma q] fun ω => (N.N ω p).toReal - (referenceIntensity ν p).toReal
   have hc : Measurable[N.regionSigma q] fun ω => N.N ω p :=
     (measurable_iff_comap_le.mpr le_rfl).mono (le_iSup₂_of_le p ⟨hpq, hpms⟩ le_rfl) le_rfl
   exact hc.ennreal_toReal.sub measurable_const
@@ -230,10 +231,10 @@ private lemma integral_adapted_mul_compensated_sq_sub (N : PoissonRandomMeasure 
 
   `𝔼[φ · Ñ(C) · Ñ(D)] = 𝔼[φ] · ν̂(C ∩ D)`.
 
-This is `compensated_covariance` with a weight (`φ ≡ 1` recovers it). Decompose `C, D` into the three
-disjoint pieces `C∩D`, `C\D`, `D\C` (all still after `s`); the weighted product expands into the
-diagonal `φ · Ñ(C∩D)²` plus three cross pieces `φ · Ñ(p) · Ñ(q)` with `p, q` disjoint. Each cross
-piece pairs to zero (`integral_mul_compensated_eq_zero`, the weighted factor `φ · Ñ(p)` being
+This is `compensated_covariance` with a weight (`φ ≡ 1` recovers it). Decompose `C, D` into the
+three disjoint pieces `C∩D`, `C\D`, `D\C` (all still after `s`); the weighted product expands into
+the diagonal `φ · Ñ(C∩D)²` plus three cross pieces `φ · Ñ(p) · Ñ(q)` with `p, q` disjoint. Each
+cross piece pairs to zero (`integral_mul_compensated_eq_zero`, the weighted factor `φ · Ñ(p)` being
 `regionSigma q`-measurable); the diagonal is `𝔼[φ] · ν̂(C∩D)`
 (`integral_adapted_mul_compensated_sq_sub`). Every product is integrable because a past-adapted
 factor is independent of the future increment it multiplies. -/
@@ -289,7 +290,8 @@ theorem integral_adapted_bilinear_future (N : PoissonRandomMeasure P ν) {s : �
     have hX : Measurable[N.regionSigma q] (fun ω => φ ω * N.compensated p ω) :=
       (hφreg hqsub).mul (compensated_measurable_regionSigma N hpq hpms)
     have hfield : Indep (N.regionSigma q)
-        (MeasurableSpace.comap (fun ω => N.N ω q) inferInstance) P := N.indep_of_disjoint_region hqms
+        (MeasurableSpace.comap (fun ω => N.N ω q) inferInstance) P :=
+            N.indep_of_disjoint_region hqms
     have hraw : IndepFun (fun ω => φ ω * N.compensated p ω) (fun ω => N.N ω q) P :=
       (IndepFun_iff_Indep _ _ _).mpr
         (indep_of_indep_of_le_left hfield (measurable_iff_comap_le.mp hX))
@@ -385,7 +387,8 @@ theorem integral_bilinear_pairing (N : PoissonRandomMeasure P ν)
     ne_top_of_le_ne_top hboxafin (measure_mono Set.inter_subset_left)
   have hfutfin : referenceIntensity ν (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Ioi sb ×ˢ Set.univ)) ≠ ⊤ :=
     ne_top_of_le_ne_top hboxafin (measure_mono Set.inter_subset_left)
-  -- geometry: `boxb ⊆` future, past `⟂` future, past `∪` future `= boxa`, `futPart ∩ boxb = boxa ∩ boxb`
+  -- geometry: `boxb ⊆` future, past `⟂` future, past `∪` future `= boxa`,
+  -- `futPart ∩ boxb = boxa ∩ boxb`
   have hIicIoi : Disjoint (Set.Iic sb ×ˢ (Set.univ : Set E)) (Set.Ioi sb ×ˢ Set.univ) :=
     Set.disjoint_left.mpr fun ⟨x, e⟩ hx hxD =>
       absurd (Set.mem_Iic.mp (Set.mem_prod.mp hx).1)
@@ -415,7 +418,8 @@ theorem integral_bilinear_pairing (N : PoissonRandomMeasure P ν)
     rw [Real.norm_eq_abs, abs_mul]
     exact mul_le_mul (hφaB ω) (hφbB ω) (abs_nonneg _) ((abs_nonneg _).trans (hφaB ω))
   have hφint : Integrable (fun ω => φa ω * φb ω) P :=
-    (memLp_top_of_bound hφ.measurable.aestronglyMeasurable (Ca * Cb) (ae_of_all _ hbound)).integrable
+    (memLp_top_of_bound hφ.measurable.aestronglyMeasurable (Ca * Cb)
+        (ae_of_all _ hbound)).integrable
       le_top
   -- `Ñ(boxa) = Ñ(pastPart) + Ñ(futPart)` a.e.
   have hdecomp : ∀ᵐ ω ∂P, N.compensated (Set.Ioc sa ta ×ˢ Aa) ω

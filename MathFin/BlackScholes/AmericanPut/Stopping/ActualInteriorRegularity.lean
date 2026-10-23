@@ -15,7 +15,9 @@ This does not establish smooth fit or free-boundary regularity.
 
 ## Result
 
-Public entry points include `exists_canonicalContinuation_cylinder`, `canonicalPrice_locally_eq_smooth_solution`, `canonicalPrice_contDiffAt`, `canonicalPrice_contDiffOn`.
+Public entry points include `exists_canonicalContinuation_cylinder`,
+`canonicalPrice_locally_eq_smooth_solution`, `canonicalPrice_contDiffAt`,
+`canonicalPrice_contDiffOn`.
 -/
 
 @[expose] public section
@@ -85,7 +87,7 @@ theorem canonicalPrice_pricingOperator {k h : ℝ} (hk : 0 ≤ k) {z : ℝ × �
   simpa only [ht.deriv_eq,hx.deriv.deriv_eq,hx.deriv_eq,he.self_of_nhds] using hpde
 
 theorem canonicalPrice_continuation_pde {k h x t : ℝ} (hk : 0 ≤ k)
-    (hz : (x,t) ∈ canonicalContinuationRegion k h) :
+    (hz : (x, t) ∈ canonicalContinuationRegion k h) :
     deriv (fun s => canonicalPrice k h x s) t =
       deriv (deriv (fun y => canonicalPrice k h y t)) x +
         (k-h-1) * deriv (fun y => canonicalPrice k h y t) x -

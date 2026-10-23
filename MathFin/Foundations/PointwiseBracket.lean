@@ -235,7 +235,7 @@ theorem coeFn_bandAssembly {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     (stepSP hBmeas hcd hdT hZm hZb).val)).trans
     (Filter.Eventually.of_forall fun p ↦ ?_)
   obtain ⟨t, ω⟩ := p
-  show ⇑(stepSP hBmeas hcd hdT hZm hZb).val t ω
+  change ⇑(stepSP hBmeas hcd hdT hZm hZb).val t ω
       = (Set.Ioc c d).indicator (fun _ ↦ (1 : ℝ)) t * Z ω
   rw [SimpleProcess.apply_eq]
   have hb0 : (stepSP hBmeas hcd hdT hZm hZb).val.valueBot = fun _ ↦ (0 : ℝ) := rfl
@@ -271,7 +271,7 @@ theorem bandGen_support {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), p.1 ≤ c →
       (bandGen (μ := μ) T hBmeas hcd hdT hZm C hZb : ℝ≥0 × Ω → ℝ) p = 0 := by
     filter_upwards [coeFn_bandAssembly (T := T) hBmeas hcd hdT hZm hZb] with p hcoe hpc
-    show ⇑(simpleAssembly_T (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb)) p = 0
+    change ⇑(simpleAssembly_T (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb)) p = 0
     rw [hcoe]
     show (Set.Ioc c d).indicator (fun _ ↦ (1 : ℝ)) p.1 * Z p.2 = 0
     rw [Set.indicator_of_notMem (fun hc ↦ absurd hc.1 (not_lt.mpr hpc)), zero_mul]
@@ -285,7 +285,7 @@ theorem bandGen_support_after {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), d < p.1 →
       (bandGen (μ := μ) T hBmeas hcd hdT hZm C hZb : ℝ≥0 × Ω → ℝ) p = 0 := by
   filter_upwards [coeFn_bandAssembly (T := T) hBmeas hcd hdT hZm hZb] with p hcoe hpd
-  show ⇑(simpleAssembly_T (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb)) p = 0
+  change ⇑(simpleAssembly_T (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb)) p = 0
   rw [hcoe]
   show (Set.Ioc c d).indicator (fun _ ↦ (1 : ℝ)) p.1 * Z p.2 = 0
   rw [Set.indicator_of_notMem (fun hc ↦ absurd hc.2 (not_le.mpr hpd)), zero_mul]
@@ -388,7 +388,7 @@ theorem integrable_bracketRep (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   (integrable_bandSq T hBmeas φ a b
     (MeasurableSet.univ (α := Ω))).integral_prod_right.congr
     (Filter.Eventually.of_forall fun ω ↦ by
-      show ∫ u, bandSq (μ := μ) T hBmeas φ a b Set.univ (u, ω) ∂(timeMeasure_T T)
+      change ∫ u, bandSq (μ := μ) T hBmeas φ a b Set.univ (u, ω) ∂(timeMeasure_T T)
           = bracketRep (μ := μ) T hBmeas φ a b ω
       rw [integral_section_bandSq T hBmeas φ hbT Set.univ ω,
         Set.indicator_of_mem (Set.mem_univ ω)])
@@ -407,7 +407,7 @@ private theorem ae_integrableOn_section (T : ℝ≥0) (hBmeas : ∀ t, Measurabl
     ∀ᵐ ω ∂μ, IntegrableOn (fun u ↦ ((φ : ℝ≥0 × Ω → ℝ) (u, ω)) ^ 2) (Set.Ioc a b) timeMeasure := by
   filter_upwards [(integrable_bandSq (μ := μ) T hBmeas φ a b
     (MeasurableSet.univ (α := Ω))).swap.prod_right_ae] with ω hω
-  show Integrable (fun u ↦ ((φ : ℝ≥0 × Ω → ℝ) (u, ω)) ^ 2)
+  change Integrable (fun u ↦ ((φ : ℝ≥0 × Ω → ℝ) (u, ω)) ^ 2)
     (timeMeasure.restrict (Set.Ioc a b))
   rw [← restrict_timeMeasure_T T hbT]
   exact (integrable_indicator_iff measurableSet_Ioc).mp
@@ -639,7 +639,7 @@ theorem condExp_bandGen_second_moment (hB : IsPreBrownianReal B μ) (T : ℝ≥0
   have hint : Integrable (fun ω ↦ (Z ω * (B d ω - B c ω)) ^ 2) μ :=
     (MemLp.mul (hf := hZinf) (hφ := memLp_increment hB hBmeas hcd)).integrable_sq.congr
       (Filter.Eventually.of_forall fun ω ↦ by
-        show (((fun ω ↦ B d ω - B c ω) * Z) ω) ^ 2 = (Z ω * (B d ω - B c ω)) ^ 2
+        change (((fun ω ↦ B d ω - B c ω) * Z) ω) ^ 2 = (Z ω * (B d ω - B c ω)) ^ 2
         rw [Pi.mul_apply, mul_comm])
   have hzero : ⇑(itoProcessCLM hB T a hBmeas
       (bandGen (μ := μ) T hBmeas hcd (hdb.trans hbT) hZm C hZb)) =ᵐ[μ] 0 := by

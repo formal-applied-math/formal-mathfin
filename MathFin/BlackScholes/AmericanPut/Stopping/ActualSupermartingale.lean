@@ -14,7 +14,8 @@ solution. The waiting inequality supplies the conditional supermartingale bound.
 
 ## Result
 
-Public entry points include `canonicalPrice_transition`, `canonicalDiscountedPrice`, `canonicalDiscountedPrice_initial`, `canonicalDiscountedPrice_gap`.
+Public entry points include `canonicalPrice_transition`, `canonicalDiscountedPrice`,
+`canonicalDiscountedPrice_initial`, `canonicalDiscountedPrice_gap`.
 -/
 
 @[expose] public section
@@ -125,7 +126,8 @@ theorem canonicalDiscountedPrice_condExp_le {k h : ℝ} (hk : 0 ≤ k) (x : ℝ)
   rw [hj] at ht
   filter_upwards [ht] with ω htω
   rw [htω]
-  have hc := canonicalPrice_transition (h := h) hk hij hjT (brownianLogState (k-h-1) (Real.sqrt 2) x i ω)
+  have hc :=
+      canonicalPrice_transition (h := h) hk hij hjT (brownianLogState (k-h-1) (Real.sqrt 2) x i ω)
   simpa only [brownianHeatFlow,f,integral_const_mul,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num),
     canonicalDiscountedPrice,min_eq_left (hij.trans hjT)] using hc
 
@@ -159,7 +161,8 @@ theorem canonicalDiscountedPrice_usual_supermartingale {k h : ℝ} (hk : 0 ≤ k
     Supermartingale (canonicalDiscountedPrice k h x T) brownianUsualFiltration
       (completedMeasure gaussianLimit) := by
   have hu := bounded_supermartingale_completion gaussianLimit
-    (canonicalDiscountedPrice_supermartingale (h := h) hk x T) (canonicalDiscountedPrice_bound hk x T)
+    (canonicalDiscountedPrice_supermartingale (h := h) hk x T)
+        (canonicalDiscountedPrice_bound hk x T)
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact bounded_continuous_supermartingale_rightCont (supermartingale_ambientNullAugmentation hu)
     (canonicalDiscountedPrice_continuous hk x T) (canonicalDiscountedPrice_bound hk x T)

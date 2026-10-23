@@ -15,7 +15,9 @@ supermartingale property. Completing the ambient measure space is separate.
 
 ## Result
 
-Public entry points include `supermartingale_of_setIntegral_ge`, `bounded_continuous_supermartingale_rightCont`, `ambientNullAugmentation`, `supermartingale_ambientNullAugmentation`.
+Public entry points include `supermartingale_of_setIntegral_ge`,
+`bounded_continuous_supermartingale_rightCont`, `ambientNullAugmentation`,
+`supermartingale_ambientNullAugmentation`.
 -/
 
 @[expose] public section
@@ -81,6 +83,7 @@ theorem supermartingale_ambientNullAugmentation (hU : Supermartingale U 𝓕 P) 
     Supermartingale U (ambientNullAugmentation 𝓕 P) P := by
   refine ⟨fun t => (hU.stronglyAdapted t).mono le_sup_left,?_,hU.integrable⟩
   intro i j hij
-  exact (MathFin.ItoLocalMartingale.condExp_sup_nulls (𝓕.le i) (hU.integrable j)).trans_le (hU.2.1 i j hij)
+  exact (MathFin.ItoLocalMartingale.condExp_sup_nulls (𝓕.le i) (hU.integrable j)).trans_le
+      (hU.2.1 i j hij)
 
 end MathFin.BlackScholes.AmericanPut.Stopping

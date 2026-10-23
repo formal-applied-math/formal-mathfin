@@ -10,7 +10,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.ActualTestFunctions
 /-! # Strict signs of stopped generator integrals 
 ## Result
 
-Public entry points include `integral_pos_of_ae_pos`, `planeDrift_pos`, `planeDrift_neg`, `expected_rectangle_drift_pos`.
+Public entry points include `integral_pos_of_ae_pos`, `planeDrift_pos`, `planeDrift_neg`,
+`expected_rectangle_drift_pos`.
 -/
 
 @[expose] public section
@@ -32,7 +33,7 @@ theorem integral_pos_of_ae_pos {Ω : Type*} [MeasurableSpace Ω] {μ : Measure �
 
 theorem planeDrift_pos {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
     {t : ℝ≥0} (ht : 0 < t) (ω : ℝ≥0 → ℝ)
-    (hp : ∀ s ≤ t, 0 < planeGenerator G (s,brownian s ω)) :
+    (hp : ∀ s ≤ t, 0 < planeGenerator G (s, brownian s ω)) :
     0 < planeDrift G t ω := by
   let ν := MathFin.ItoIntegralL2.timeMeasure.restrict (Ioc 0 t)
   haveI : NeZero ν := ⟨by
@@ -51,7 +52,7 @@ theorem planeDrift_pos {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
 
 theorem planeDrift_neg {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
     {t : ℝ≥0} (ht : 0 < t) (ω : ℝ≥0 → ℝ)
-    (hp : ∀ s ≤ t, planeGenerator G (s,brownian s ω) < 0) :
+    (hp : ∀ s ≤ t, planeGenerator G (s, brownian s ω) < 0) :
     planeDrift G t ω < 0 := by
   let ν := MathFin.ItoIntegralL2.timeMeasure.restrict (Ioc 0 t)
   haveI : NeZero ν := ⟨by

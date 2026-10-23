@@ -132,7 +132,7 @@ theorem integral_oneFactorPD_sq {π ρ : ℝ} (hρ0 : 0 ≤ ρ) (hρ1 : ρ < 1) 
 Gaussian threshold model with asset correlation `ρ ∈ [0, 1)`: `F` and the `εᵢ` are independent
 standard normals on any probability space, and `i ≠ j`. -/
 theorem oneFactor_measureReal_inter_default {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
-    [IsProbabilityMeasure P] {ι : Type*} [Fintype ι] {π ρ : ℝ} {F : Ω → ℝ} {ε : ι → Ω → ℝ}
+    [IsProbabilityMeasure P] {ι : Type*} [Finite ι] {π ρ : ℝ} {F : Ω → ℝ} {ε : ι → Ω → ℝ}
     (hF : HasLaw F (gaussianReal 0 1) P) (hε : ∀ i, HasLaw (ε i) (gaussianReal 0 1) P)
     (hεind : iIndepFun ε P) (hFε : F ⟂ᵢ[P] fun ω i ↦ ε i ω) (hρ0 : 0 ≤ ρ) (hρ1 : ρ < 1)
     {i j : ι} (hij : i ≠ j) :

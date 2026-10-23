@@ -18,7 +18,8 @@ elapsed times, away from the spatial boundary.
 
 ## Result
 
-Public entry points include `flatRpow`, `flatRpow_zero`, `flatRpow_smooth`, `flatRpow_neg_three_halves`.
+Public entry points include `flatRpow`, `flatRpow_zero`, `flatRpow_smooth`,
+`flatRpow_neg_three_halves`.
 -/
 
 @[expose] public section

@@ -106,7 +106,7 @@ theorem jumpDiffusionCallPrice_zero {S K r σ : ℝ} (hS : 0 < S) (hK : 0 < K) (
   have hw : σ * Real.sqrt τ * ((id y - (r - σ ^ 2 / 2) * τ) / (σ * Real.sqrt τ))
       = y - (r - σ ^ 2 / 2) * τ :=
     mul_div_cancel₀ _ (mul_pos hσ (Real.sqrt_pos.2 (NNReal.coe_pos.2 hτ))).ne'
-  show rexp (-r * τ) * max (S * rexp y - K) 0
+  change rexp (-r * τ) * max (S * rexp y - K) 0
     = rexp (-r * τ) * max (bsTerminal S r σ τ
       ((id y - (r - σ ^ 2 / 2) * τ) / (σ * Real.sqrt τ)) - K) 0
   rw [bsTerminal, hw, show (r - σ ^ 2 / 2) * (τ : ℝ) + (y - (r - σ ^ 2 / 2) * τ) = y by ring]
@@ -124,7 +124,7 @@ theorem jumpDiffusionPutPrice_zero {S K r σ : ℝ} (hS : 0 < S) (hK : 0 < K) (h
   have hw : σ * Real.sqrt τ * ((id y - (r - σ ^ 2 / 2) * τ) / (σ * Real.sqrt τ))
       = y - (r - σ ^ 2 / 2) * τ :=
     mul_div_cancel₀ _ (mul_pos hσ (Real.sqrt_pos.2 (NNReal.coe_pos.2 hτ))).ne'
-  show rexp (-r * τ) * max (K - S * rexp y) 0
+  change rexp (-r * τ) * max (K - S * rexp y) 0
     = rexp (-r * τ) * max (K - bsTerminal S r σ τ
       ((id y - (r - σ ^ 2 / 2) * τ) / (σ * Real.sqrt τ))) 0
   rw [bsTerminal, hw, show (r - σ ^ 2 / 2) * (τ : ℝ) + (y - (r - σ ^ 2 / 2) * τ) = y by ring]
@@ -158,7 +158,7 @@ theorem jumpDiffusionProcess (b σ : ℝ) (ν : Measure ℝ) [IsProbabilityMeasu
       (b * ((t - s : ℝ≥0) : ℝ))
     rw [mul_zero, zero_add] at h
     refine h.congr (ae_of_all _ fun ω ↦ ?_)
-    show (b * (t : ℝ) + σ * B t ω) - (b * s + σ * B s ω)
+    change (b * (t : ℝ) + σ * B t ω) - (b * s + σ * B s ω)
       = b * ((t - s : ℝ≥0) : ℝ) + σ * (B t ω - B s ω)
     rw [NNReal.coe_sub hst]
     ring

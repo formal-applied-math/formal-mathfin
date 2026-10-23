@@ -18,7 +18,8 @@ Nonnegativity follows from the proved price monotonicity, not an assumption.
 
 ## Result
 
-Public entry points include `timeIncrement`, `incrementGauge`, `incrementDrift`, `timeIncrement_continuousOn`.
+Public entry points include `timeIncrement`, `incrementGauge`, `incrementDrift`,
+`timeIncrement_continuousOn`.
 -/
 
 @[expose] public section
@@ -72,7 +73,8 @@ theorem timeIncrement_equation (hp : DividendPutSolution k h p b)
   have hd₀ : DifferentiableAt ℝ (p x) t :=
     (hs₀.comp t (show ContDiffAt ℝ ∞ (fun s : ℝ => (x,s)) t by fun_prop)).differentiableAt (by simp)
   have hd₁ : DifferentiableAt ℝ (p x) (t+δ) :=
-    (hs₁.comp (t+δ) (show ContDiffAt ℝ ∞ (fun s : ℝ => (x,s)) (t+δ) by fun_prop)).differentiableAt (by simp)
+    (hs₁.comp (t+δ) (show ContDiffAt ℝ ∞ (fun s : ℝ => (x,s)) (t+δ) by fun_prop)).differentiableAt
+        (by simp)
   have hsx₀ : ContDiffAt ℝ 2 (fun y => p y t) x := by
     simpa only [Function.comp_def] using
       (hs₀.of_le (WithTop.coe_le_coe.mpr le_top)).comp x
@@ -120,7 +122,8 @@ theorem incrementGauge_equation (hp : DividendPutSolution k h p b)
     simpa only [Function.comp_def] using hs.comp x
       (show ContDiffAt ℝ 2 (fun y : ℝ => (y,t)) x by fun_prop)
   have hst : DifferentiableAt ℝ (timeIncrement p δ x) t :=
-    (hs.comp t (show ContDiffAt ℝ 2 (fun s : ℝ => (x,s)) t by fun_prop)).differentiableAt (by norm_num)
+    (hs.comp t (show ContDiffAt ℝ 2 (fun s : ℝ => (x,s)) t by fun_prop)).differentiableAt
+        (by norm_num)
   have hf : ProfileData ((k-h-1)-0) k (profile (k-h-1) k) := by
     simpa only [sub_zero] using profile_data (β := k-h-1) hp.rate_pos.le
   have he := gauge_equation (c := 0) (d := 0) hf hsx hst (hp.timeIncrement_equation hδ ht hx)

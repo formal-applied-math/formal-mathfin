@@ -20,7 +20,8 @@ does not assert a strictly negative boundary speed at every positive time.
 
 ## Result
 
-Public entry points include `boundary_antitoneOn`, `boundary_deriv_nonpos`, `boundary_deriv_neg_of_curvature_neg`, `zeroDividend_price_mono_time`.
+Public entry points include `boundary_antitoneOn`, `boundary_deriv_nonpos`,
+`boundary_deriv_neg_of_curvature_neg`, `zeroDividend_price_mono_time`.
 -/
 
 @[expose] public section

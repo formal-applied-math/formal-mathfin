@@ -666,7 +666,7 @@ private lemma calibVar_key (κ : ℝ) (hκ : κ ≠ 0) (𝕋 : ℝ≥0) :
     (show EqOn (fun s : ℝ ↦ κ ^ 2 * (vasicekBondB κ s) ^ 2)
       (fun s : ℝ ↦ (1 - Real.exp (-(κ * s))) ^ 2) (Set.uIcc (0 : ℝ) (𝕋 : ℝ))
       from fun s _ ↦ ?_)
-  show κ ^ 2 * ((1 - Real.exp (-(κ * s))) / κ) ^ 2 = (1 - Real.exp (-(κ * s))) ^ 2
+  change κ ^ 2 * ((1 - Real.exp (-(κ * s))) / κ) ^ 2 = (1 - Real.exp (-(κ * s))) ^ 2
   field_simp
 
 /-- **The convexity-correction integral in isolation**:

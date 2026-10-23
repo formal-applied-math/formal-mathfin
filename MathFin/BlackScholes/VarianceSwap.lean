@@ -181,7 +181,7 @@ lemma integral_excess_return_eq_zero (S_0 r σ T : ℝ) (hT : 0 ≤ T) :
       integrable_exp_mul_gaussianReal (σ * Real.sqrt T)
     refine (h1.const_mul (S_0 * Real.exp ((r - σ ^ 2 / 2) * T))).congr
       (Filter.Eventually.of_forall fun z ↦ ?_)
-    show S_0 * Real.exp ((r - σ ^ 2 / 2) * T) * Real.exp (σ * Real.sqrt T * z)
+    change S_0 * Real.exp ((r - σ ^ 2 / 2) * T) * Real.exp (σ * Real.sqrt T * z)
         = S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
     rw [mul_assoc, ← Real.exp_add]
   rw [integral_div, integral_sub hint (integrable_const _),

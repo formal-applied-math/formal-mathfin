@@ -16,7 +16,8 @@ approaching first contact; no martingale property is assumed for the limit.
 
 ## Result
 
-Public entry points include `martingale_of_bounded_limits`, `stoppedCandidate_martingale_of_rule_limit`.
+Public entry points include `martingale_of_bounded_limits`,
+`stoppedCandidate_martingale_of_rule_limit`.
 -/
 
 @[expose] public section

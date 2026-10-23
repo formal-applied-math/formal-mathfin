@@ -14,7 +14,8 @@ The process is frozen after its finite horizon.
 
 ## Result
 
-Public entry points include `bellmanAux`, `finiteBellman`, `bellmanAux_measurable`, `bellmanAux_integrable`.
+Public entry points include `bellmanAux`, `finiteBellman`, `bellmanAux_measurable`,
+`bellmanAux_integrable`.
 -/
 
 @[expose] public section
@@ -72,7 +73,8 @@ theorem finiteBellman_recursion {N i : ℕ} (hi : i < N) :
 theorem finiteBellman_stronglyAdapted (hZ : Adapted 𝓕 Z) (N : ℕ) :
     StronglyAdapted 𝓕 (finiteBellman P 𝓕 Z N) := by
   intro i
-  exact ((bellmanAux_measurable hZ (N-i) (min i N)).mono (𝓕.mono (min_le_left _ _)) le_rfl).stronglyMeasurable
+  exact ((bellmanAux_measurable hZ (N-i) (min i N)).mono (𝓕.mono (min_le_left _ _))
+      le_rfl).stronglyMeasurable
 
 theorem finiteBellman_integrable (hZ : ∀ i, Integrable (Z i) P) (N i : ℕ) :
     Integrable (finiteBellman P 𝓕 Z N i) P := bellmanAux_integrable hZ _ _
@@ -103,7 +105,8 @@ theorem bellmanAux_le_supermartingale {U : ℕ → Ω → ℝ}
   induction n generalizing i with
   | zero => exact hdom i
   | succ n ih =>
-    have hc := condExp_mono (m := 𝓕 i) (bellmanAux_integrable hi n (i+1)) (hU.integrable (i+1)) (ih (i+1))
+    have hc :=
+        condExp_mono (m := 𝓕 i) (bellmanAux_integrable hi n (i+1)) (hU.integrable (i+1)) (ih (i+1))
     filter_upwards [hdom i,hc,hU.2.1 i (i+1) (Nat.le_succ i)] with ω hz hc hu
     exact max_le hz (hc.trans hu)
 
