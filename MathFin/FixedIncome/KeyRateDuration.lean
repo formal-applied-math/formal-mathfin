@@ -79,8 +79,9 @@ theorem hasDerivAt_bondPriceKeyRate_update [DecidableEq ι] (s : Finset ι) (t :
 /-- **Key-rate partials sum to the parallel-shift derivative.** On any curve `k`, if `D j` is
 the partial derivative `∂P/∂kⱼ` for every node `j ∈ s`, then the price along the parallel shift
 `ε ↦ P(k + ε·1)` has derivative `Σⱼ D j` at `ε = 0`. The partials are taken as hypotheses, so
-the statement holds for whatever `∂P/∂kⱼ` is — `hasDerivAt_bondPriceKeyRate_update` supplies one
-canonical choice, used by `sum_deriv_keyRate_eq_deriv_bondPriceDisc` below. -/
+the statement holds for whatever `∂P/∂kⱼ` is — `hasDerivAt_bondPriceKeyRate_update` computes one
+such witness in closed form; `sum_deriv_keyRate_eq_deriv_bondPriceDisc` below uses it only for
+existence (`differentiableAt.hasDerivAt`) and feeds the `deriv`s themselves. -/
 theorem hasDerivAt_bondPriceKeyRate_parallel [DecidableEq ι] (s : Finset ι) (t : ι → ℕ)
     (c k : ι → ℝ) {D : ι → ℝ}
     (hD : ∀ j ∈ s,

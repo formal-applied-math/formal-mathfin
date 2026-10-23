@@ -785,5 +785,5 @@ import MathFin.FixedIncome.BondForward
 import MathFin.FixedIncome.FxForwardParity
 -- Loan amortization: bullet, equal-principal, and level-payment against annuityValue
 import MathFin.FixedIncome.LoanAmortization
--- Key-rate partials sum to the parallel-shift derivative dP/dy
+-- Key-rate partials sum to the parallel-shift derivative; on a flat curve, to dP/dy
 import MathFin.FixedIncome.KeyRateDuration
