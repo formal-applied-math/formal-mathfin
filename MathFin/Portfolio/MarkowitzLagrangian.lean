@@ -269,9 +269,10 @@ omit [Fintype ι] in
 sense): the covariance matrix of square-integrable returns is symmetric
 (`covariance_comm`) and its quadratic form is the variance of `∑ vᵢ Rᵢ`
 (`covariance_kernel_psd`). -/
-theorem posSemidef_covariance {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+theorem posSemidef_covariance [Finite ι] {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
     [IsFiniteMeasure P] (R : ι → Ω → ℝ) (hR : ∀ i, MemLp (R i) 2 P) :
     (Matrix.of fun i j ↦ cov[R i, R j; P]).PosSemidef := by
+  cases nonempty_fintype ι
   refine PosSemidef.of_dotProduct_mulVec_nonneg (IsHermitian.ext fun i j ↦ by
     simp only [of_apply, star_trivial]; exact covariance_comm _ _) fun v ↦ ?_
   refine (covariance_kernel_psd Finset.univ R (fun i _ ↦ hR i) v).trans_eq ?_

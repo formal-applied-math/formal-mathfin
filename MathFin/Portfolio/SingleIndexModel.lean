@@ -165,6 +165,7 @@ theorem variance_singleIndex_portfolio (hRM : MemLp RM 2 P)
     (hεε : ∀ i j, i ≠ j → cov[ε i, ε j; P] = 0) (hσM : Var[RM; P] = σM ^ 2) :
     Var[∑ i ∈ s, w i • (β i • RM + ε i); P] =
       (∑ i ∈ s, w i * β i) ^ 2 * σM ^ 2 + ∑ i ∈ s, w i ^ 2 * Var[ε i; P] := by
+  classical
   rw [← portfolioVarN_covariance_eq_variance s w (fun i ↦ β i • RM + ε i)
     fun i _ ↦ (hRM.const_smul _).add (hε i)]
   simp_rw [covariance_singleIndex β σM hRM hε hRMε hεε hσM]

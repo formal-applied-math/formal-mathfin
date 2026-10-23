@@ -171,6 +171,7 @@ theorem neg_inv_le_and_le_one_of_covariance {Ω : Type*} {mΩ : MeasurableSpace 
     (hvar : ∀ i, Var[X i; μ] = σ2) (hcov : ∀ i j, i ≠ j → cov[X i, X j; μ] = ρ * σ2)
     (hn : 2 ≤ Fintype.card n) :
     -1 / ((Fintype.card n : ℝ) - 1) ≤ ρ ∧ ρ ≤ 1 := by
+  classical
   refine (posSemidef_equicorrelationMatrix_iff hn).1 <|
     posSemidef_iff_dotProduct_mulVec.2 ⟨isHermitian_equicorrelationMatrix, fun x ↦ ?_⟩
   have hpsd : 0 ≤ portfolioVarN univ x fun i j ↦ cov[X i, X j; μ] :=

@@ -58,6 +58,7 @@ theorem portfolioVarN_equicorrelated_eq_herfindahl (s : Finset ι) (w : ι → �
     (σ : ι → ι → ℝ) (v ρ : ℝ) (h_var : ∀ i ∈ s, σ i i = v)
     (h_cov : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → σ i j = ρ * v) :
     portfolioVarN s w σ = v * ((1 - ρ) * herfindahl s w + ρ * (∑ i ∈ s, w i) ^ 2) := by
+  classical
   have hterm (i : ι) (hi : i ∈ s) (j : ι) (hj : j ∈ s) : w i * w j * σ i j =
       ρ * v * (w i * w j) + (1 - ρ) * v * (if i = j then w i * w j else 0) := by
     by_cases hij : i = j

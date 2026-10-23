@@ -192,10 +192,12 @@ omit [Fintype ι] in
 /-- `M` is a copula. -/
 theorem isCopula_comonotoneCopula : IsCopula (comonotoneCopula ι) where
   isProbabilityMeasure :=
-    Measure.isProbabilityMeasure_map (measurable_pi_lambda _ fun _ ↦ measurable_id).aemeasurable
+    Measure.isProbabilityMeasure_map
+      (measurable_pi_lambda (fun t (_ : ι) ↦ t) fun _ ↦ measurable_id).aemeasurable
   map_eval i := by
     rw [comonotoneCopula,
-      Measure.map_map (measurable_pi_apply i) (measurable_pi_lambda _ fun _ ↦ measurable_id)]
+      Measure.map_map (measurable_pi_apply i)
+        (measurable_pi_lambda (fun t (_ : ι) ↦ t) fun _ ↦ measurable_id)]
     exact Measure.map_id
 
 /-- `M(u) = minᵢ uᵢ` on `[0, 1]^ι`: the comonotonicity copula attains the upper Fréchet–Hoeffding
