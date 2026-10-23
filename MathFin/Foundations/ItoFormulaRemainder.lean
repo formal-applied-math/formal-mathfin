@@ -113,7 +113,8 @@ finite); the companion to `integral_increment_pow6`. -/
 theorem integrable_increment_pow6 (t₀ t₁ : ℝ≥0) :
     Integrable (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 6) μ := by
   have hg : Integrable (fun x : ℝ ↦ x ^ 6) (gaussianReal 0 (nndist (t₁ : ℝ) (t₀ : ℝ))) := by
-    have h := (memLp_id_gaussianReal (μ := (0 : ℝ)) (v := nndist (t₁ : ℝ) (t₀ : ℝ)) 6).integrable_norm_pow
+    have h :=
+        (memLp_id_gaussianReal (μ := (0 : ℝ)) (v := nndist (t₁ : ℝ) (t₀ : ℝ)) 6).integrable_norm_pow
       (p := 6) (by norm_num)
     simp only [id_eq, Real.norm_eq_abs] at h
     have hfe : (fun x : ℝ ↦ |x| ^ 6) = fun x : ℝ ↦ x ^ 6 :=
@@ -121,7 +122,8 @@ theorem integrable_increment_pow6 (t₀ t₁ : ℝ≥0) :
     rwa [hfe] at h
   have hmap : Integrable (fun x : ℝ ↦ x ^ 6) (Measure.map (B t₁ - B t₀) μ) := by
     rw [(hB.hasLaw_sub t₁ t₀).map_eq]; exact hg
-  exact (integrable_map_measure hmap.aestronglyMeasurable (hB.hasLaw_sub t₁ t₀).aemeasurable).mp hmap
+  exact (integrable_map_measure hmap.aestronglyMeasurable (hB.hasLaw_sub t₁ t₀).aemeasurable).mp
+      hmap
 
 /-- **The Itô–Taylor remainder vanishes in `L²`.** For `f ∈ C³` with `|f‴| ≤ Cf3`,
 `∑ₖ Rₖ → 0` in `L²(μ)` along the uniform partition of `[0,T]`. -/
@@ -135,9 +137,12 @@ theorem tendsto_ito_remainder
           (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ) atTop (𝓝 0) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hCf3 : 0 ≤ Cf3 := le_trans (abs_nonneg _) (hf3 0)
-  have hfm : Measurable f := (continuous_iff_continuousAt.mpr fun x ↦ (hf x).continuousAt).measurable
-  have hf'm : Measurable f' := (continuous_iff_continuousAt.mpr fun x ↦ (hf' x).continuousAt).measurable
-  have hf''m : Measurable f'' := (continuous_iff_continuousAt.mpr fun x ↦ (hf'' x).continuousAt).measurable
+  have hfm : Measurable f :=
+      (continuous_iff_continuousAt.mpr fun x ↦ (hf x).continuousAt).measurable
+  have hf'm : Measurable f' :=
+      (continuous_iff_continuousAt.mpr fun x ↦ (hf' x).continuousAt).measurable
+  have hf''m : Measurable f'' :=
+      (continuous_iff_continuousAt.mpr fun x ↦ (hf'' x).continuousAt).measurable
   have hmono : ∀ n, Monotone (unifPart T n) := fun n a b hab ↦ by simp only [unifPart]; gcongr
   -- per-step squared remainder: measurable, and `≤ Cf3²·(ΔBₖ)⁶`
   have hRk_meas : ∀ n k, Measurable (fun ω ↦ discreteTaylorRemainder f f' f''
@@ -158,7 +163,8 @@ theorem tendsto_ito_remainder
       rw [← abs_pow, abs_of_nonneg (by positivity)]
     calc (discreteTaylorRemainder f f' f'' (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2
         = |discreteTaylorRemainder f f' f'' (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)|
-            * |discreteTaylorRemainder f f' f'' (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)| := by
+            * |discreteTaylorRemainder f f' f'' (B (unifPart T n k) ω)
+                (B (unifPart T n (k + 1)) ω)| := by
           rw [sq]; exact (abs_mul_abs_self _).symm
       _ ≤ (Cf3 * |B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω| ^ 3)
             * (Cf3 * |B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω| ^ 3) :=

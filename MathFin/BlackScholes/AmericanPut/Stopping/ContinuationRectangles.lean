@@ -26,7 +26,7 @@ def InContinuationRectangle (k h x : ℝ) (T : ℝ≥0) (R : ℝ) (δ : ℝ≥0)
   ∀ s : ℝ≥0, s ≤ δ → ∀ y : ℝ, |y-x| ≤ R → (y,(T : ℝ)-(s : ℝ)) ∈ canonicalContinuationRegion k h
 
 theorem exists_continuationRectangle {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ≥0}
-    (hp : (x,(T : ℝ)) ∈ canonicalContinuationRegion k h) :
+    (hp : (x, (T : ℝ)) ∈ canonicalContinuationRegion k h) :
     ∃ R : ℝ, 0 < R ∧ ∃ δ : ℝ≥0, 0 < δ ∧ δ < T ∧ InContinuationRectangle k h x T R δ := by
   obtain ⟨ε,hε,hball⟩ := Metric.isOpen_iff.mp (canonicalContinuationRegion_isOpen hk) _ hp
   have hT : (0 : ℝ) < T := hp.1

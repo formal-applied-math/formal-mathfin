@@ -85,7 +85,7 @@ lemma geom_mean_le_arith_mean_n {n : ℕ} (f : Fin n → ℝ)
   have h_w_nn : ∀ i ∈ Finset.univ, 0 ≤ w i := fun _ _ ↦ hn_inv_nn
   have h_f_nn : ∀ i ∈ Finset.univ, 0 ≤ f i := fun i _ ↦ h_nn i
   have h_sum_w : ∑ i ∈ Finset.univ, w i = 1 := by
-    show ∑ _ : Fin n, ((n : ℝ))⁻¹ = 1
+    change ∑ _ : Fin n, ((n : ℝ))⁻¹ = 1
     rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
     field_simp
   -- Apply Mathlib weighted AM-GM with `w` and `z := f`.
@@ -96,7 +96,7 @@ lemma geom_mean_le_arith_mean_n {n : ℕ} (f : Fin n → ℝ)
   have h_mul := mul_le_mul_of_nonneg_left h hn_pos.le
   -- Now LHS: n * ∏, RHS: n * ∑ (1/n) * f = ∑ f.
   have h_rhs_simp : (n : ℝ) * ∑ i : Fin n, w i * f i = ∑ i : Fin n, f i := by
-    show (n : ℝ) * ∑ i : Fin n, ((n : ℝ))⁻¹ * f i = ∑ i : Fin n, f i
+    change (n : ℝ) * ∑ i : Fin n, ((n : ℝ))⁻¹ * f i = ∑ i : Fin n, f i
     rw [← Finset.mul_sum, ← mul_assoc, mul_inv_cancel₀ hn_ne, one_mul]
   rw [h_rhs_simp] at h_mul
   exact h_mul

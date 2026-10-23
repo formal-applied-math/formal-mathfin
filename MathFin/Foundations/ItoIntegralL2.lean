@@ -173,7 +173,7 @@ theorem itoSimple_sq_integral (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Mea
   calc ∫ ω, (itoSimple hBmeas V ω) ^ 2 ∂μ
       = ∫ ω, ∑ p ∈ V.value.support, ∑ q ∈ V.value.support, a p ω * a q ω ∂μ := by
         refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
-        show itoSimple hBmeas V ω ^ 2
+        change itoSimple hBmeas V ω ^ 2
           = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support, a p ω * a q ω
         rw [show itoSimple hBmeas V ω = ∑ p ∈ V.value.support, a p ω from by
               rw [itoSimple_apply]; rfl, sq, Finset.sum_mul_sum]
@@ -201,7 +201,7 @@ lemma lp_two_norm_sq {α : Type*} {mα : MeasurableSpace α} {ν : Measure α}
   rw [← h]
   refine integral_congr_ae ?_
   filter_upwards with a
-  show (g a) * (g a) = (g a) ^ 2
+  change (g a) * (g a) = (g a) ^ 2
   ring
 
 /-- **The Itô isometry in `Lp`-norm form.** `‖itoSimpleLp V‖²` equals the predictable-
@@ -329,7 +329,7 @@ lemma uncurry_ae_eq_sum_rectTerm_of_ae_fst_ne_zero {m : MeasurableSpace (ℝ≥0
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     Function.uncurry ⇑V =ᵐ[ν] fun z ↦ ∑ p ∈ V.value.support, rectTerm hBmeas V p z := by
   filter_upwards [hν] with z hz
-  show ⇑V z.1 z.2 = _
+  change ⇑V z.1 z.2 = _
   rw [SimpleProcess.apply_eq, Set.indicator_of_notMem (by simpa using hz), zero_add, Finsupp.sum]
   refine Finset.sum_congr rfl fun p _ ↦ ?_
   rw [rectTerm, elemIntegrand, Set.indicator_apply, Set.indicator_apply]
@@ -516,7 +516,7 @@ theorem assembly_isometry (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measura
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     ‖itoAssembly (μ := μ) hB hBmeas V‖ = ‖simpleAssembly (μ := μ) hBmeas V‖ := by
   have hsq : ‖itoAssembly (μ := μ) hB hBmeas V‖ ^ 2 = ‖simpleAssembly (μ := μ) hBmeas V‖ ^ 2 := by
-    show ‖(itoSimpleLp hB hBmeas V : Lp ℝ 2 μ)‖ ^ 2 = ‖simpleProcessL2 (μ := μ) hBmeas V‖ ^ 2
+    change ‖(itoSimpleLp hB hBmeas V : Lp ℝ 2 μ)‖ ^ 2 = ‖simpleProcessL2 (μ := μ) hBmeas V‖ ^ 2
     rw [itoSimpleLp_norm_sq hB hBmeas V, simpleProcessL2_norm_sq hBmeas V]
   exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp hsq
 

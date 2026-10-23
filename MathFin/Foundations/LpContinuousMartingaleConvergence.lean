@@ -268,7 +268,7 @@ private lemma constProc_martingale {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 
   refine ⟨fun t ↦ (hM.stronglyMeasurable _).mono (h_le_shifted t), fun s _t _hst ↦ ?_⟩
   have hM_meas : StronglyMeasurable[(shiftedFiltration 𝓕 n).seq s] (M (n : ℝ)) :=
     (hM.stronglyMeasurable _).mono (h_le_shifted s)
-  show μ[fun ω ↦ M (n : ℝ) ω | (shiftedFiltration 𝓕 n).seq s] =ᵐ[μ] fun ω ↦ M (n : ℝ) ω
+  change μ[fun ω ↦ M (n : ℝ) ω | (shiftedFiltration 𝓕 n).seq s] =ᵐ[μ] fun ω ↦ M (n : ℝ) ω
   rw [condExp_of_stronglyMeasurable ((shiftedFiltration 𝓕 n).le _) hM_meas (hM.integrable _)]
 
 private lemma incrementProc_eq_sub (M : ℝ → Ω → ℝ) (n : ℕ) :
@@ -295,7 +295,7 @@ private lemma incrementProc_isRightContinuous
   have h_mapsto : Set.MapsTo shift (Set.Ioi a) (Set.Ioi (shift a)) := fun t ht ↦ by
     have hlt : (a : ℝ) < (t : ℝ) := by
       exact_mod_cast ht
-    show shift a < shift t
+    change shift a < shift t
     simp only [shift_def]
     linarith
   exact h_f_rc.comp h_shift_cont.continuousWithinAt h_mapsto
@@ -441,7 +441,7 @@ private lemma sup_increment_measure_tendsto_zero
         (fun ω ↦ ‖incrementProc M n 1 ω‖)
           = fun ω ↦ ‖M ((n : ℝ) + 1) ω - M (n : ℝ) ω‖ := by
       funext ω
-      show ‖M ((n : ℝ) + ((1 : ℝ≥0) : ℝ)) ω - _‖ = _
+      change ‖M ((n : ℝ) + ((1 : ℝ≥0) : ℝ)) ω - _‖ = _
       rw [NNReal.coe_one]
     rw [h_endpoint]
     exact setIntegral_le_integral (increment_integrable hp hM hbound n).norm
@@ -473,7 +473,7 @@ private lemma incrementProc_bddAbove_ae
   filter_upwards [h_ne_top] with ω hω
   refine ⟨(⨆ i : Set.Iic (1 : ℝ≥0), ENNReal.ofReal ‖incrementProc M n i ω‖).toReal, ?_⟩
   rintro _ ⟨i, rfl⟩
-  show ‖incrementProc M n (i : ℝ≥0) ω‖ ≤
+  change ‖incrementProc M n (i : ℝ≥0) ω‖ ≤
     (⨆ j : Set.Iic (1 : ℝ≥0), ENNReal.ofReal ‖incrementProc M n j ω‖).toReal
   rw [show ‖incrementProc M n (i : ℝ≥0) ω‖ =
         (ENNReal.ofReal ‖incrementProc M n (i : ℝ≥0) ω‖).toReal from
@@ -525,22 +525,22 @@ theorem lp_continuous_martingale_tendstoInMeasure
       exact norm_add_le _ _
     by_cases hAB : ε / 2 ≤ ‖M t ω - M (n : ℝ) ω‖
     · left
-      show ε / 2 ≤ ⨆ i : Set.Iic (1 : ℝ≥0), ‖incrementProc M n i ω‖
+      change ε / 2 ≤ ⨆ i : Set.Iic (1 : ℝ≥0), ‖incrementProc M n i ω‖
       refine hAB.trans ?_
       set s : ℝ≥0 := ⟨t - (n : ℝ), by linarith⟩
       have h_s_le_one : s ≤ 1 := by
         rw [← NNReal.coe_le_coe, NNReal.coe_one]
-        show t - (n : ℝ) ≤ 1
+        change t - (n : ℝ) ≤ 1
         linarith
       rw [show M t ω - M (n : ℝ) ω = incrementProc M n s ω by
-        show _ = M ((n : ℝ) + (s : ℝ)) ω - M (n : ℝ) ω
+        change _ = M ((n : ℝ) + (s : ℝ)) ω - M (n : ℝ) ω
         congr 2
-        show t = (n : ℝ) + (t - (n : ℝ))
+        change t = (n : ℝ) + (t - (n : ℝ))
         ring]
       exact le_ciSup (f := fun i : Set.Iic (1 : ℝ≥0) ↦ ‖incrementProc M n i ω‖) h_bdd
         ⟨s, h_s_le_one⟩
     · right
-      show ε / 2 ≤ ‖M (n : ℝ) ω - L ω‖
+      change ε / 2 ≤ ‖M (n : ℝ) ω - L ω‖
       have hAB' : ‖M t ω - M (n : ℝ) ω‖ < ε / 2 := not_le.mp hAB
       linarith [le_trans hω h_tri]
   have h_bound : ∀ᶠ t in (Filter.atTop : Filter ℝ),

@@ -135,10 +135,9 @@ docstring pretending to be a module.
 Tier 1 Foundations machinery (Brownian motion construction, Wiener
 integral, Doob L^p, quadratic variation) is only useful to the library
 when downstream modules can *consume* it. Until that bridge exists, the
-Foundations work sits as 4664+ LOC of dead code from the pricing modules'
-perspective.
+Foundations work is dead code from the pricing modules' perspective.
 
-Bridges are **additive**, not replacing: a new file `Foundations/X.lean`
+Bridges are **additive**, not replacing: a new file `Bridges/X.lean`
 introduces a constructor `XHyp.of_isPreBrownian` (or similar) that
 discharges an existing hypothesis (`BSCallHyp`, `BachelierHyp`,
 `BrownianMartingaleHyp`, …) from a single Brownian-motion primitive.
@@ -170,19 +169,26 @@ module. Bridges promote it to actually load-bearing.
   but use Roman replacements where the Greek is reserved (e.g. `Sg_inv`
   for `Σ_inv` since capital sigma is a Lean reserved token).
 
-## What's intentionally *not* in the library
+## What the library does not prove
 
-- **Path-wise Itô lemma** in full generality: requires the Mathlib Itô
-  integral. Drift-coefficient form (`Foundations/ItoLemma.lean`) is in;
-  the L²-limit glue is gated.
-- **Full Girsanov**: same Mathlib gating.
-- **Continuous-time Poisson process** (interarrival exponential,
-  superposition, thinning): Mathlib has discrete `PoissonPMF` only.
-- **BM pathology theorems** (reflection on continuous paths,
-  nowhere-differentiability, law of iterated logarithm): Mathlib + BM
-  package don't ship them yet.
+The corpus marks each result it states but does not prove in full as a `reduced_core`, and
+`python3 -m tools.verify.coverage_report` gives the current count; [`coverage.md`](coverage.md)
+records each one's scope. As of 2026-10-23 there are 16, in four groups.
 
-These appear in [`coverage.md`](coverage.md) as `reduced_core` with
-explicit notes about the gating dependency. They are NOT counted toward
-the `delivery-ready` total. The roadmap revisits them as Mathlib infra
-lands.
+- **Brownian path properties.** The reflection principle, nowhere differentiability and the law of
+  the iterated logarithm are recorded as fields of a structure, not derived. (BrownianMotion's own
+  law of the iterated logarithm is still a `sorry` at our pin.) The reflection identity for ±1
+  walks, the algebraic core of the discrete reflection principle, is proved in
+  `Binomial/PathReflection.lean`.
+- **Stochastic calculus beyond the proved cases.** Itô's formula is proved for `C³` functions of
+  Brownian motion with no growth condition, and for Itô processes with bounded adapted coefficients;
+  Girsanov's theorem for bounded predictable `θ`. Still reduced: the two-dimensional Itô formula,
+  Girsanov for general progressive `θ` under Novikov, Novikov's condition itself, and Lévy's
+  characterization of Brownian motion.
+- **Markov chains.** The strong Markov property, the recurrence criterion, uniqueness of the
+  stationary distribution, the ergodic theorem and convergence to equilibrium.
+- **Single results elsewhere.** The first arrival of a Poisson process is exponential; the
+  Heynen–Kat two-asset barrier at zero correlation and Stulz's call on the maximum at zero strike;
+  the decay of the first three Hermite modes under the Vasicek law.
+
+None of these counts toward the delivery total (`full` + `library_wrapper`).

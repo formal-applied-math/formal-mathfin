@@ -30,10 +30,13 @@ Specialisations:
 | Black-76 (`black_futures_formula`) | `F · e^{−rT}` | `e^{−rT}` | underlying is the *forward* |
 | BS-Merton dividends | `S · e^{−qT}` | `e^{−rT}` | continuous dividend yield `q` |
 | Garman-Kohlhagen FX | `S · e^{−r_f T}` | `e^{−r_d T}` | foreign-rate-discounted asset |
-| KMV-Merton credit | `V` (firm) | `e^{−rT}` (debt) | strike = face debt; `d_2` is distance to default |
+| KMV-Merton credit | `V` (firm) | `e^{−rT}` | strike = face debt; `d_2` = distance to default |
 | Swaption (Black model) | `A_annuity · F` | `A_annuity` | annuity numéraire |
 | Quanto-adjusted | drift-shifted | `e^{−r_dom T}` | correlation adjustment in drift |
-| Margrabe exchange (`margrabe_eq_bsVGarman`) | `S¹₀` | `1` | 2nd asset is the strike; `σ` = effective vol `√(σ₁²+σ₂²−2ρσ₁σ₂)`; no discounting (S²-numeraire) |
+| Margrabe exchange (`margrabe_eq_bsVGarman`) | `S¹₀` | `1` | 2nd asset is the strike (see below) |
+
+In the Margrabe row `σ` is the effective volatility `√(σ₁²+σ₂²−2ρσ₁σ₂)`, and there is no
+discounting: the second asset is the numéraire.
 
 This is the **change-of-numéraire** principle in elementary form: BS pricing
 is a single computation, parameterised by what the underlying and the

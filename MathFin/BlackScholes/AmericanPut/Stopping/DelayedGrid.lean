@@ -11,7 +11,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.UsualGridMarkov
 /-! # Optimal finite-grid exercise after a deterministic waiting time 
 ## Result
 
-Public entry points include `delayedGridTime`, `delayedGridTime_mono`, `delayedGridFiltration`, `delayedBellmanAux_eq_markov`.
+Public entry points include `delayedGridTime`, `delayedGridTime_mono`, `delayedGridFiltration`,
+`delayedBellmanAux_eq_markov`.
 -/
 
 @[expose] public section
@@ -71,7 +72,8 @@ theorem delayedGridReward_adapted (K r q σ x : ℝ) (u T δ : ℝ≥0) :
 
 theorem delayedGridReward_integrable {K r q σ x : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
     (u T δ : ℝ≥0) (i : ℕ) : Integrable (delayedGridReward K r q σ x u T δ i) gaussianLimit :=
-  putReward_integrable measurable_brownian_uncurry gaussianLimit hK hr (Real.exp_pos x).le measurable_const
+  putReward_integrable measurable_brownian_uncurry gaussianLimit hK hr (Real.exp_pos x).le
+      measurable_const
 
 theorem delayedGridReward_eq (K r q σ x : ℝ) (u T δ : ℝ≥0) :
     delayedGridReward K r q σ x u T δ = fun i ω => Real.exp (-r*(u : ℝ))*

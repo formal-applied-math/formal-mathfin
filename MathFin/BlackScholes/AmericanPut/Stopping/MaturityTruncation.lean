@@ -11,7 +11,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.LocalizationTimes
 /-! # Stability of stopping rewards under small maturity changes 
 ## Result
 
-Public entry points include `BoundedRule.truncate`, `continuous_reward_truncation`, `putReward_time_continuous`, `expectedReward_truncate_tendsto`.
+Public entry points include `BoundedRule.truncate`, `continuous_reward_truncation`,
+`putReward_time_continuous`, `expectedReward_truncate_tendsto`.
 -/
 
 @[expose] public section
@@ -87,7 +88,8 @@ theorem expectedReward_truncate_tendsto {P : Measure Ω} [IsProbabilityMeasure P
     · exact Eventually.of_forall (fun ω => continuous_reward_truncation
         (putReward_time_continuous hpaths K r q σ S ω) hT (fun n => (θ n).le_horizon ω))
   simpa only [integral_sub (putReward_integrable hW P hK hr hS (θ _).measurable_time)
-    (putReward_integrable hW P hK hr hS ((θ _).truncate T).measurable_time),integral_zero] using hlim
+    (putReward_integrable hW P hK hr hS ((θ _).truncate T).measurable_time),integral_zero] using
+        hlim
 
 theorem expectedReward_fixed_truncate_tendsto {P : Measure Ω} [IsProbabilityMeasure P]
     {W : ℝ≥0 → Ω → ℝ} (hW : Measurable W.uncurry)
@@ -98,7 +100,8 @@ theorem expectedReward_fixed_truncate_tendsto {P : Measure Ω} [IsProbabilityMea
       (𝓝 (∫ ω, putReward W K r q σ S θ.time ω ∂P)) := by
   apply tendsto_integral_of_dominated_convergence (fun _ => K)
   · intro n
-    exact (putReward_measurable hW K r q σ S (θ.truncate (Tn n)).measurable_time).aestronglyMeasurable
+    exact (putReward_measurable hW K r q σ S
+        (θ.truncate (Tn n)).measurable_time).aestronglyMeasurable
   · exact integrable_const K
   · intro n
     apply Eventually.of_forall

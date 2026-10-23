@@ -98,6 +98,11 @@ services:
       # unaffected because it checks out the whole repo.
       - ../Challenge.lean:/app/Challenge.lean
       - ../Solution.lean:/app/Solution.lean
+      # The `MathFinExamples` and `MathFinTest` default targets, for the same reason.
+      - ../MathFinExamples:/app/MathFinExamples
+      - ../MathFinExamples.lean:/app/MathFinExamples.lean
+      - ../MathFinTest:/app/MathFinTest
+      - ../MathFinTest.lean:/app/MathFinTest.lean
       - ../lakefile.lean:/app/lakefile.lean
       - ../lake-manifest.json:/app/lake-manifest.json
       - ../lean-toolchain:/app/lean-toolchain
@@ -153,6 +158,11 @@ services:
       # unaffected because it checks out the whole repo.
       - ../Challenge.lean:/app/Challenge.lean
       - ../Solution.lean:/app/Solution.lean
+      # The `MathFinExamples` and `MathFinTest` default targets, for the same reason.
+      - ../MathFinExamples:/app/MathFinExamples
+      - ../MathFinExamples.lean:/app/MathFinExamples.lean
+      - ../MathFinTest:/app/MathFinTest
+      - ../MathFinTest.lean:/app/MathFinTest.lean
       - ../lakefile.lean:/app/lakefile.lean
       - ../lake-manifest.json:/app/lake-manifest.json
       - ../lean-toolchain:/app/lean-toolchain

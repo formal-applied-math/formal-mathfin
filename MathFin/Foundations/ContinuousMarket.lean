@@ -174,8 +174,8 @@ theorem increment_integral_zero {Q : Measure Ω} [IsProbabilityMeasure Q]
 /-- **Forward continuous first FTAP: an equivalent martingale measure precludes simple-strategy
 arbitrage.** If `Q` is an EMM for the discounted price `S`, then no simple strategy has gains that
 are `P`-a.s. nonnegative and strictly positive on a `P`-non-null set. Each increment integrates to
-`0` under `Q` (`increment_integral_zero`), so the whole gain does; transporting the `P`-nonnegativity
-to `Q` (via `Q ≈ P`), the zero-mean nonnegative gain vanishes `Q`-a.s.
+`0` under `Q` (`increment_integral_zero`), so the whole gain does; transporting the
+`P`-nonnegativity to `Q` (via `Q ≈ P`), the zero-mean nonnegative gain vanishes `Q`-a.s.
 (`ae_zero_of_nonneg_of_integral_zero`), hence `P`-a.s. -/
 theorem isEMM_noArbitrageSimple {S : ℝ≥0 → Ω → F} {Q : Measure Ω}
     (h : IsEMM (P := P) (𝓕 := 𝓕) S Q) : NoArbitrageSimple (P := P) (𝓕 := 𝓕) S := by

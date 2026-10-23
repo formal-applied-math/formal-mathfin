@@ -28,8 +28,8 @@ cross terms vanish by `ν̂(boxᵢ ∩ boxⱼ) = 0` rather than an interval-over
 
 Mirrors our continuous `ItoIntegralL2.simpleProcessL2_norm_sq`; consumes B1
 (`compensated_simple_isometry`), whose Poisson-random-measure object's field shape is consulted from
-`cgarryZA/LevyStochCalc` (Apache-2.0, cited) — a faithful rendering of Applebaum 2009 Def. 2.3.1. The
-isometry proved here (and in B1) is our own: LevyStochCalc states it as its cited **axiom #6**
+`cgarryZA/LevyStochCalc` (Apache-2.0, cited) — a faithful rendering of Applebaum 2009 Def. 2.3.1.
+The isometry proved here (and in B1) is our own: LevyStochCalc states it as its cited **axiom #6**
 (`itoIsometry_compensated_unified_existence`); we prove it. The extension to a continuous-integral
 CLM over the *characterised* predictable `L²` (their axiom #6 in full generality) needs a
 marked-predictable `σ`-algebra + density argument built from scratch for the PRM filtration — a
@@ -95,7 +95,8 @@ theorem simpleIntegrand_sq_integral
   -- product term: shape, integrability, value
   have hprodform : ∀ i j : ℕ × ℕ, (fun p : Ω × (ℝ × E) => a i p * a j p)
       = fun p => (φ i.1 i.2 p.1 * φ j.1 j.2 p.1)
-          * ((box i).indicator (fun _ => (1 : ℝ)) p.2 * (box j).indicator (fun _ => (1 : ℝ)) p.2) := by
+          * ((box i).indicator (fun _ => (1 : ℝ)) p.2 *
+              (box j).indicator (fun _ => (1 : ℝ)) p.2) := by
     intro i j; funext p; simp only [ha]; ring
   have hint : ∀ i j : ℕ × ℕ,
       Integrable (fun p => a i p * a j p) (P.prod (referenceIntensity ν)) := by
@@ -137,7 +138,7 @@ theorem simpleIntegrand_sq_integral
             ∂(P.prod (referenceIntensity ν))
       = ∫ p, ∑ i ∈ I, ∑ j ∈ I, a i p * a j p ∂(P.prod (referenceIntensity ν)) := by
         refine integral_congr_ae (Filter.Eventually.of_forall fun p => ?_)
-        show (∑ j ∈ Finset.range Nt, ∑ l ∈ Finset.range m,
+        change (∑ j ∈ Finset.range Nt, ∑ l ∈ Finset.range m,
               φ j l p.1
                 * (Set.Ioc (t j) (t (j + 1)) ×ˢ A l).indicator (fun _ => (1 : ℝ)) p.2) ^ 2
             = ∑ i ∈ I, ∑ j ∈ I, a i p * a j p
@@ -161,9 +162,10 @@ theorem simpleIntegrand_sq_integral
         simp only [hI, Finset.sum_product]
 
 /-- **The Itô–Lévy isometry in norm form.** `𝔼[(∫ H dÑ)²] = ‖H‖²_{L²(dP ⊗ dt ⊗ dν)}`: the
-compensated integral of the simple integrand `H(ω,z) = ∑ⱼ∑ₗ φⱼₗ(ω)·𝟙_{(tⱼ,tⱼ₊₁]×Aₗ}(z)` has the
-same `L²(P)`-norm as `H` has in `L²(P ⊗ ν̂)`. Combines B1's `compensated_simple_isometry` with the
-integrand-norm computation; this is the norm identity the compensated-integral CLM completes from. -/
+compensated integral of the simple integrand `H(ω,z) = ∑ⱼ∑ₗ φⱼₗ(ω)·𝟙_{(tⱼ,tⱼ₊₁]×Aₗ}(z)` has the same
+`L²(P)`-norm as `H` has in `L²(P ⊗ ν̂)`. Combines B1's `compensated_simple_isometry` with the
+integrand-norm computation; this is the norm identity the compensated-integral CLM completes from.
+-/
 theorem compensated_integral_isometry (N : PoissonRandomMeasure P ν)
     {Nt m : ℕ} {t : ℕ → ℝ} (ht0 : 0 ≤ t 0) (hmono : Monotone t)
     {A : ℕ → Set E} (hAms : ∀ l, MeasurableSet (A l)) (hAfin : ∀ l, ν (A l) ≠ ⊤)

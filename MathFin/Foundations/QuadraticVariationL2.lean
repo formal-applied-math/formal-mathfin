@@ -191,12 +191,12 @@ theorem sum_increment_sq_sub_sq_integral (hBmeas : ∀ t, Measurable (B t))
   calc ∫ ω, (∑ k ∈ Finset.range n, (B (s (k + 1)) ω - B (s k) ω) ^ 2 - (s n : ℝ)) ^ 2 ∂μ
       = ∫ ω, (∑ k ∈ Finset.range n, Y k ω) ^ 2 ∂μ := by
         refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
-        show (∑ k ∈ Finset.range n, (B (s (k + 1)) ω - B (s k) ω) ^ 2 - (s n : ℝ)) ^ 2
+        change (∑ k ∈ Finset.range n, (B (s (k + 1)) ω - B (s k) ω) ^ 2 - (s n : ℝ)) ^ 2
           = (∑ k ∈ Finset.range n, Y k ω) ^ 2
         rw [hrw ω]
     _ = ∫ ω, ∑ k ∈ Finset.range n, ∑ l ∈ Finset.range n, Y k ω * Y l ω ∂μ := by
         refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
-        show (∑ k ∈ Finset.range n, Y k ω) ^ 2
+        change (∑ k ∈ Finset.range n, Y k ω) ^ 2
           = ∑ k ∈ Finset.range n, ∑ l ∈ Finset.range n, Y k ω * Y l ω
         rw [sq, Finset.sum_mul_sum]
     _ = ∑ k ∈ Finset.range n, ∑ l ∈ Finset.range n, ∫ ω, Y k ω * Y l ω ∂μ := by
@@ -300,7 +300,7 @@ theorem tendstoInMeasure_qv (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
       ENNReal.toReal_ofNat, ← one_div, ← Real.sqrt_eq_rpow]
     congr 2
     refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
-    show ‖(∑ k ∈ Finset.range n,
+    change ‖(∑ k ∈ Finset.range n,
           (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) - (T : ℝ)‖ ^ (2 : ℝ)
         = ((∑ k ∈ Finset.range n,
           (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) - (T : ℝ)) ^ 2

@@ -563,7 +563,7 @@ theorem cdsLosses_eq_riskyAnnuity_mul (r lam T : ℝ) :
       rw [hazardSurvival_eq_const_survival]
       rfl
     rw [hS, sub_zero]
-    show rexp (-(r * s)) * lam * rexp (-(lam * s)) = lam * rexp (-((r + lam) * s))
+    change rexp (-(r * s)) * lam * rexp (-(lam * s)) = lam * rexp (-((r + lam) * s))
     rw [mul_comm (rexp (-(r * s))) lam, mul_assoc, ← Real.exp_add]
     congr 1
     ring_nf

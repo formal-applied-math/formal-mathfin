@@ -19,7 +19,8 @@ the usual augmented filtration is a separate verification obligation.
 
 ## Result
 
-Public entry points include `brownianFiltration`, `brownian_filtered`, `brownian_adapted`, `brownianAmericanPut`.
+Public entry points include `brownianFiltration`, `brownian_filtered`, `brownian_adapted`,
+`brownianAmericanPut`.
 -/
 
 @[expose] public section
@@ -48,7 +49,8 @@ noncomputable def brownianAmericanPut (K r q σ S : ℝ) (T : ℝ≥0) : ℝ :=
 theorem brownianAmericanPut_bounds {K r q σ S : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S)
     (T : ℝ≥0) : max (K-S) 0 ≤ brownianAmericanPut K r q σ S T ∧
       brownianAmericanPut K r q σ S T ≤ K :=
-  ⟨payoff_le_value measurable_brownian_uncurry isBrownianReal_brownian.eval_zero_ae_eq_zero hK hr hS,
+  ⟨payoff_le_value measurable_brownian_uncurry
+      isBrownianReal_brownian.eval_zero_ae_eq_zero hK hr hS,
     value_le_strike measurable_brownian_uncurry hK hr hS⟩
 
 theorem brownianAmericanPut_at_expiry {K r q σ S : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) :
@@ -65,7 +67,8 @@ theorem brownianAmericanPut_convexOn_spot {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 
 
 theorem brownianAmericanPut_continuousOn_spot {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r) (T : ℝ≥0) :
     ContinuousOn (fun S => brownianAmericanPut K r q σ S T) (Set.Ici 0) :=
-  value_continuousOn_spot measurable_brownian_uncurry isBrownianReal_brownian.eval_zero_ae_eq_zero hK hr
+  value_continuousOn_spot measurable_brownian_uncurry
+      isBrownianReal_brownian.eval_zero_ae_eq_zero hK hr
 
 /-- The in-the-money contact threshold of the actual Brownian stopping value.
 It is not assumed positive or smooth. Those facts are still to be proved. -/
@@ -82,11 +85,13 @@ theorem brownianExerciseBoundary_at_expiry {K r q σ : ℝ} (hK : 0 ≤ K) (hr :
 
 theorem brownianExerciseBoundary_antitone {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r) :
     Antitone (brownianExerciseBoundary K r q σ) :=
-  threshold_antitone_horizon measurable_brownian_uncurry isBrownianReal_brownian.eval_zero_ae_eq_zero hK hr
+  threshold_antitone_horizon measurable_brownian_uncurry
+      isBrownianReal_brownian.eval_zero_ae_eq_zero hK hr
 
 theorem brownianExerciseBoundary_contact_set {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r) (T : ℝ≥0) :
     {S | 0 ≤ S ∧ S ≤ K ∧ brownianAmericanPut K r q σ S T = K-S} =
       Set.Icc 0 (brownianExerciseBoundary K r q σ T) :=
-  exerciseSet_eq_interval measurable_brownian_uncurry isBrownianReal_brownian.eval_zero_ae_eq_zero hK hr
+  exerciseSet_eq_interval measurable_brownian_uncurry
+      isBrownianReal_brownian.eval_zero_ae_eq_zero hK hr
 
 end MathFin.BlackScholes.AmericanPut.Stopping

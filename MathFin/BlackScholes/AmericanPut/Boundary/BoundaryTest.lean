@@ -18,7 +18,8 @@ assumed.
 
 ## Result
 
-Public entry points include `curve_hasDeriv`, `boundary_test_time_nonneg`, `boundary_test_residual_pos`.
+Public entry points include `curve_hasDeriv`, `boundary_test_time_nonneg`,
+`boundary_test_residual_pos`.
 -/
 
 @[expose] public section

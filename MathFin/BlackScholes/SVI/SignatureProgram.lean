@@ -32,7 +32,8 @@ noncomputable def symbolicCoeffList (n : ℕ) (Q : Polynomial ParameterRing) : L
 def signVariationsList (ss : List SignType) : ℕ :=
   ((ss.filter (· ≠ 0)).destutter (· ≠ ·)).length - 1
 
-/-- The program computing the sign variations of `Q` read at degree `n` (`variationProgram_eval`). -/
+/-- The program computing the sign variations of `Q` read at degree `n` (`variationProgram_eval`).
+-/
 noncomputable def variationProgram (n : ℕ) (Q : Polynomial ParameterRing) : SignProgram ℕ :=
   (signListProgram (symbolicCoeffList n Q)).bind fun ss ↦ .pure (signVariationsList ss)
 
@@ -46,7 +47,8 @@ theorem variationProgram_eval (p : Params) (n : ℕ) (Q : Polynomial ParameterRi
     signVariationsList, signVariations, coeffList, hd, List.map_map, hc]
   rfl
 
-/-- The program computing the signature test of the `i`-th universal matrix at size `n` (`signatureProgram_eval`). -/
+/-- The program computing the signature test of the `i`-th universal matrix at size `n`
+(`signatureProgram_eval`). -/
 noncomputable def signatureProgram (n : ℕ) (i : Fin 4) : SignProgram ℤ :=
   let Q := (universalMatrices n i).charpoly
   (variationProgram n Q).bind fun v ↦

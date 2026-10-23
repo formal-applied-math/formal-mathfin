@@ -61,7 +61,8 @@ noncomputable def SignProgram.eval {α : Type*} (p : Params) : SignProgram α �
     simp only [bind, eval]
     cases SignType.sign (parameterEval p f) <;> simp_all
 
-/-- The sign formula with the same value as a Boolean sign program (`SignProgram.eval_toFormula`). -/
+/-- The sign formula with the same value as a Boolean sign program (`SignProgram.eval_toFormula`).
+-/
 def SignProgram.toFormula : SignProgram Bool → SignFormula
   | .pure b => .truth b
   | .query f neg zero pos =>

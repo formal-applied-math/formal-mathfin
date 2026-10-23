@@ -75,6 +75,7 @@ variable {Ω : Type*} [Fintype Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}
   [MeasurableSingletonClass Ω] (𝓕 : Filtration ℕ mΩ)
   (P : Measure Ω) [IsProbabilityMeasure P] (S : ℕ → Ω → ℝ) (T : ℕ)
 
+omit [Fintype Ω] in
 /-- On a full-support measure a null set is empty — hence any two full-support
 measures on `Ω` are mutually absolutely continuous. -/
 private lemma eq_empty_of_pos_singleton {μ : Measure Ω} (hμ : ∀ ω, 0 < μ {ω})
@@ -114,6 +115,7 @@ noncomputable def gainsSubspace : Submodule ℝ (Ω → ℝ) :=
   Submodule.span ℝ
     { g | ∃ t, t < T ∧ ∃ A : Set Ω, MeasurableSet[𝓕 t] A ∧ g = incrementIndicator S t A }
 
+omit [Fintype Ω] in
 /-- The martingale transform is additive in the strategy. -/
 private lemma martingaleTransform_add (φ ψ : ℕ → Ω → ℝ) (n : ℕ) :
     martingaleTransform (φ + ψ) S n
@@ -121,6 +123,7 @@ private lemma martingaleTransform_add (φ ψ : ℕ → Ω → ℝ) (n : ℕ) :
   funext ω
   simp only [martingaleTransform, Pi.add_apply, add_mul, Finset.sum_add_distrib]
 
+omit [Fintype Ω] in
 /-- The martingale transform is homogeneous in the strategy. -/
 private lemma martingaleTransform_smul (c : ℝ) (φ : ℕ → Ω → ℝ) (n : ℕ) :
     martingaleTransform (c • φ) S n = c • martingaleTransform φ S n := by
@@ -128,7 +131,7 @@ private lemma martingaleTransform_smul (c : ℝ) (φ : ℕ → Ω → ℝ) (n : 
   simp only [martingaleTransform, Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
   exact Finset.sum_congr rfl fun k _ ↦ by ring
 
-omit [MeasurableSingletonClass Ω] in
+omit [MeasurableSingletonClass Ω] [Fintype Ω] in
 /-- Every element of the attainable-gains subspace is the discounted gains of a
 predictable strategy. (`span`-induction: the generators are the gains of the
 single-period indicator strategies, and predictable gains are closed under the
@@ -188,15 +191,16 @@ theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage �
   rw [eq_empty_of_pos_singleton hP hnull] at hmem
   simp at hmem
 
-omit [IsProbabilityMeasure P] in
+omit [IsProbabilityMeasure P] [Fintype Ω] in
 /-- **Backward direction**: no arbitrage ⟹ an equivalent martingale measure
 exists. The separating-dual `q` of the gains subspace, normalised to a
 probability `Q`, is the EMM: strict positivity gives `Q ~ P`, and the
 annihilation of every increment-indicator gives the martingale property via the
 conditional-expectation characterisation. -/
-theorem exists_isEMM_of_noArbitrage (hS : StronglyAdapted 𝓕 S)
+theorem exists_isEMM_of_noArbitrage [Finite Ω] (hS : StronglyAdapted 𝓕 S)
     (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
     ∃ Q, IsEMM 𝓕 P S T Q := by
+  cases nonempty_fintype Ω
   classical
   obtain ⟨q, hq_pos, hq_dual⟩ :=
     exists_pos_dual_of_disjoint_stdSimplex (gainsSubspace 𝓕 S T)
@@ -245,12 +249,12 @@ theorem exists_isEMM_of_noArbitrage (hS : StronglyAdapted 𝓕 S)
     integral_sub Integrable.of_finite.integrableOn Integrable.of_finite.integrableOn] at hkey
   linarith [hkey]
 
-omit [Nonempty Ω] [IsProbabilityMeasure P] in
+omit [Nonempty Ω] [IsProbabilityMeasure P] [Fintype Ω] in
 /-- **Forward direction**: an equivalent martingale measure precludes arbitrage.
 Under the EMM `Q`, the discounted gains telescope to `∫ G_T dQ = 0`; a
 non-negative integrand with zero integral is `0` a.e., and equivalence transports
 this back to `P`. -/
-theorem noArbitrage_of_isEMM (hS : StronglyAdapted 𝓕 S)
+theorem noArbitrage_of_isEMM [Finite Ω] (hS : StronglyAdapted 𝓕 S)
     {Q : Measure Ω} (hQ : IsEMM 𝓕 P S T Q) : NoArbitrage 𝓕 P S T := by
   haveI := hQ.prob
   intro φ hφ hpos
@@ -286,12 +290,12 @@ theorem noArbitrage_of_isEMM (hS : StronglyAdapted 𝓕 S)
     (integral_eq_zero_iff_of_nonneg_ae hposQ Integrable.of_finite).mp hGint
   exact hQ.Pabs.ae_eq hzeroQ
 
-omit [IsProbabilityMeasure P] in
+omit [IsProbabilityMeasure P] [Fintype Ω] in
 /-- **Finite-Ω Fundamental Theorem of Asset Pricing** (Harrison–Pliska; the
 finite case of Dalang–Morton–Willinger): a finite-horizon, single-asset market
 on a finite full-support probability space has no arbitrage **iff** it admits an
 equivalent martingale measure. -/
-theorem ftap_discrete (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :
+theorem ftap_discrete [Finite Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :
     NoArbitrage 𝓕 P S T ↔ ∃ Q, IsEMM 𝓕 P S T Q :=
   ⟨fun hNA ↦ exists_isEMM_of_noArbitrage 𝓕 P S T hS hP hNA,
    fun ⟨_, hQ⟩ ↦ noArbitrage_of_isEMM 𝓕 P S T hS hQ⟩
@@ -304,12 +308,13 @@ constant position, and `Q[· | ⊥]` is the plain expectation (`condExp_bot`). T
 market is then the one-period market of `Foundations/FTAPOnePeriod.lean` for the increment
 `S 1 − S 0`. -/
 
-omit [Nonempty Ω] [IsProbabilityMeasure P] in
+omit [Nonempty Ω] [IsProbabilityMeasure P] [Fintype Ω] in
 /-- **At horizon `1` the discrete-time EMM is the one-period EMM.** With `𝓕 0 = ⊥` and `S`
 adapted, `Q` is an equivalent martingale measure for the one-step market iff it is one for
 the one-period excess return `S 1 − S 0`: the one-step martingale condition
 `S 0 = E_Q[S 1]` (the price `S 0` being a constant) is `E_Q[S 1 − S 0] = 0`. -/
-theorem isEMM_one_iff_onePeriod (hS : StronglyAdapted 𝓕 S) (h0 : 𝓕 0 = ⊥) {Q : Measure Ω} :
+theorem isEMM_one_iff_onePeriod [Finite Ω] (hS : StronglyAdapted 𝓕 S) (h0 : 𝓕 0 = ⊥)
+    {Q : Measure Ω} :
     IsEMM 𝓕 P S 1 Q ↔ OnePeriod.IsEMM P (S 1 - S 0) Q := by
   have hS0 : StronglyMeasurable[𝓕 0] (S 0) := hS 0
   rw [h0] at hS0
@@ -323,7 +328,7 @@ theorem isEMM_one_iff_onePeriod (hS : StronglyAdapted 𝓕 S) (h0 : 𝓕 0 = ⊥
     rw [h0, condExp_bot, hc] at hm
     obtain ⟨_, hcQ⟩ := hm.exists
     refine ⟨hQ.prob, hQ.absP, hQ.Pabs, Integrable.of_finite, ?_⟩
-    show ∫ ω, (S 1 ω - S 0 ω) ∂Q = 0
+    change ∫ ω, (S 1 ω - S 0 ω) ∂Q = 0
     rw [integral_sub Integrable.of_finite Integrable.of_finite, hmean Q]
     exact sub_eq_zero.mpr hcQ.symm
   · intro hQ
@@ -395,7 +400,7 @@ theorem IsEMM.increment {F : Type*} [NormedAddCommGroup F] [InnerProductSpace �
     rw [← integral_condExp (𝓕.le 0)]
     exact integral_congr_ae (h.martingale.condExp_ae_eq (zero_le : (0 : ℝ≥0) ≤ u))
   refine ⟨h.isProb, h.ac, h.ac', (h.martingale.integrable t).sub (h.martingale.integrable s), ?_⟩
-  show ∫ ω, (S t ω - S s ω) ∂Q = 0
+  change ∫ ω, (S t ω - S s ω) ∂Q = 0
   rw [integral_sub (h.martingale.integrable t) (h.martingale.integrable s), hmean t, hmean s,
     sub_self]
 

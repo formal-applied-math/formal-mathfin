@@ -84,8 +84,9 @@ noncomputable def processToLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
   (memLp_uncurry_of_bdd_adapted_cont T hBmeas hadap hcont hbdd).toLp (Function.uncurry σ)
 
-/-- **The realization agrees with `σ` a.e.** `processToLp T σ =ᵐ[trimMeasure_T T] Function.uncurry σ`
-— the identification that lets Itô-integral computations read the class back as the process. -/
+/-- **The realization agrees with `σ` a.e.**
+`processToLp T σ =ᵐ[trimMeasure_T T] Function.uncurry σ` — the identification that lets Itô-integral
+computations read the class back as the process. -/
 theorem processToLp_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     {σ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (σ t))
@@ -99,7 +100,8 @@ theorem processToLp_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 Dropping the continuity hypothesis: the Itô integral's domain is the *predictable* `L²` space, so a
 bounded process that is already strongly predictable needs no continuity to be realized — the
 `aestronglyMeasurable` it carries is exactly what `MemLp.of_bound` consumes. The continuous
-realization above is the special case `IsStronglyPredictable` = `isStronglyPredictable_of_bdd_adapted_cont`. -/
+realization above is the special case `IsStronglyPredictable` =
+`isStronglyPredictable_of_bdd_adapted_cont`. -/
 
 /-- **A bounded predictable process is `L²` over `trimMeasure_T T`.** Predictable + bounded on the
 finite measure `trimMeasure_T T` ⟹ `MemLp.of_bound`; the continuity of

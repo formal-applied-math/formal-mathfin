@@ -98,7 +98,7 @@ lemma itoIntegralCLM_T_stepφTD (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ →
       = (memLp_riemannφTD hB hBmeas hφ_meas hφ_bdd T n).toLp (riemannφTD hBmeas φ T n) := by
   rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange T hBmeas)
         ⟨1, fun V ↦ by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas V).le⟩]
-  show itoSimpleLp hB hBmeas (stepφTD hBmeas hφ_meas hφ_bdd T n).val = _
+  change itoSimpleLp hB hBmeas (stepφTD hBmeas hφ_meas hφ_bdd T n).val = _
   rw [itoSimpleLp]
   exact (MemLp.toLp_eq_toLp_iff _ _).mpr
     (Filter.Eventually.of_forall fun ω ↦ itoSimple_stepφTD hBmeas hφ_meas hφ_bdd T n ω)
@@ -112,7 +112,7 @@ lemma uncurry_stepφTD (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ → 
     Function.uncurry ⇑(stepφTD hBmeas hφ_meas hφ_bdd T n).val (s, ω)
       = ∑ k ∈ Finset.range n, (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
           (fun _ ↦ φ (unifPart T n k) (B (unifPart T n k) ω)) s := by
-  show ⇑(stepφTD hBmeas hφ_meas hφ_bdd T n).val s ω = _
+  change ⇑(stepφTD hBmeas hφ_meas hφ_bdd T n).val s ω = _
   rw [stepφTD, AddSubmonoidClass.coe_finsetSum, coe_finsetSum_apply,
     ← Finset.sum_attach (Finset.range n) (fun k ↦
       (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator

@@ -15,18 +15,19 @@ separation of a closed convex **cone** `C ⊆ (ι → ℝ)` produces a positive 
 functional. Two faces of the same Hahn–Banach principle live here:
 
 * `exists_pos_separating_of_cone_disjoint_simplex` — a cone disjoint from the whole standard simplex
-  admits a **strictly** positive functional `q` (`> 0` at every coordinate) that is `≤ 0` on the cone.
-  This is the FTAP separating functional: the attainable-gains cone misses the simplex (no arbitrage)
-  ⟹ the equivalent martingale measure. It generalizes the subspace kernel
+  admits a **strictly** positive functional `q` (`> 0` at every coordinate) that is `≤ 0` on the
+  cone. This is the FTAP separating functional: the attainable-gains cone misses the simplex (no
+  arbitrage) ⟹ the equivalent martingale measure. It generalizes the subspace kernel
   `exists_pos_dual_of_disjoint_stdSimplex` (two-sided `= 0`) to a cone (one-sided `≤ 0`).
-* `exists_separating_of_not_mem_cone` — a single point outside a closed convex cone is separated by a
-  functional `p` that is `≤ 0` on the cone and `> 0` at the point. This is the coherent-risk
+* `exists_separating_of_not_mem_cone` — a single point outside a closed convex cone is separated by
+  a functional `p` that is `≤ 0` on the cone and `> 0` at the point. This is the coherent-risk
   representing density: a rejected position separated from the acceptance cone.
 
 Both rest on two shared atoms — `functional_eq_sum_single` (basis expansion of a functional) and
 `functional_nonneg_on_cone` (a functional bounded below on a cone is `≥ 0` on it; the cone's
 nonnegative-scaling homogeneity is what turns a separation bound into a sign). The separations
-themselves are Mathlib's `geometric_hahn_banach_compact_closed` and `geometric_hahn_banach_point_closed`.
+themselves are Mathlib's `geometric_hahn_banach_compact_closed` and
+`geometric_hahn_banach_point_closed`.
 
 ## API at this pin
 The cone is a `C : Set (ι → ℝ)` carrying `Convex ℝ C`, `IsClosed C`, and homogeneity
@@ -65,7 +66,7 @@ private lemma functional_eq_sum_single {ι : Type*} [Fintype ι] [DecidableEq ι
 /-- A functional bounded below by a negative `u` on a cone `C` is nonnegative on `C`: a ray
 `c ∈ C` with `f c < 0` is unbounded below on `C` (scale by `(u-1)/f c ≥ 0`), contradicting the
 bound. Shared atom of the two cone-separation theorems below. -/
-private lemma functional_nonneg_on_cone {ι : Type*} [Fintype ι] {C : Set (ι → ℝ)}
+private lemma functional_nonneg_on_cone {ι : Type*} {C : Set (ι → ℝ)}
     (hCcone : ∀ ⦃x⦄, x ∈ C → ∀ ⦃c : ℝ⦄, 0 ≤ c → c • x ∈ C)
     {f : StrongDual ℝ (ι → ℝ)} {u : ℝ} (hu : u < 0) (hlb : ∀ y ∈ C, u < f y) :
     ∀ c ∈ C, 0 ≤ f c := by
@@ -79,11 +80,12 @@ private lemma functional_nonneg_on_cone {ι : Type*} [Fintype ι] {C : Set (ι �
   have hval : f (((u - 1) / f c) • c) = u - 1 := by rw [map_smul, smul_eq_mul]; field_simp
   have hlt2 := hlb _ hmem; rw [hval] at hlt2; linarith
 
-/-- **Cone separation root.** A closed convex cone `C ⊆ (ι → ℝ)` disjoint from the standard
-simplex admits a strictly-positive functional `q` that is `≤ 0` on `C` (a separating supporting
-functional). The geometric heart shared by the FTAP (gains cone), the coherent-risk
-representation (acceptance cone), and superhedging (super-replication cone). Generalizes
-`exists_pos_dual_of_disjoint_stdSimplex` (subspace ⇒ two-sided `= 0`) to a cone (one-sided `≤ 0`). -/
+/-- **Cone separation root.** A closed convex cone `C ⊆ (ι → ℝ)` disjoint from the standard simplex
+admits a strictly-positive functional `q` that is `≤ 0` on `C` (a separating supporting functional).
+The geometric heart shared by the FTAP (gains cone), the coherent-risk representation (acceptance
+cone), and superhedging (super-replication cone). Generalizes
+`exists_pos_dual_of_disjoint_stdSimplex` (subspace ⇒ two-sided `= 0`) to a cone (one-sided `≤ 0`).
+-/
 theorem exists_pos_separating_of_cone_disjoint_simplex
     {ι : Type*} [Fintype ι]
     (C : Set (ι → ℝ)) (hCconv : Convex ℝ C) (hCclosed : IsClosed C)

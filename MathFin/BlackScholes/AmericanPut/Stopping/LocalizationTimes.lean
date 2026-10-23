@@ -16,7 +16,8 @@ are continuous and adapted, so their first zeros are actual stopping rules.
 
 ## Result
 
-Public entry points include `localizationEps`, `localizationEps_pos`, `localizationEps_tendsto`, `localizationMargin`.
+Public entry points include `localizationEps`, `localizationEps_pos`, `localizationEps_tendsto`,
+`localizationMargin`.
 -/
 
 @[expose] public section
@@ -176,6 +177,7 @@ theorem interiorRule_tendsto_contact (hZ : Adapted 𝓕 Z) (hW : Adapted 𝓕 W)
   · intro u hu
     exact interiorRule_eventually_after hZ hW hcZ hcW hnonneg hterminal ω hu
   · intro u hu
-    exact Eventually.of_forall (fun n => (interiorRule_le_contact hZ hW hcZ hcW hterminal n ω).trans_lt hu)
+    exact Eventually.of_forall
+        (fun n => (interiorRule_le_contact hZ hW hcZ hcW hterminal n ω).trans_lt hu)
 
 end MathFin.BlackScholes.AmericanPut.Stopping

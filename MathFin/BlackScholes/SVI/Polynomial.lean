@@ -31,7 +31,8 @@ noncomputable def polyB (p : Params) : ℝ[X] :=
   C p.b * (C (1+p.rho)*X^2 - C (1-p.rho))
 /-- The polynomial with values `K p`. -/
 noncomputable def polyK (p : Params) : ℝ[X] := C p.sigma*X^2 + C (2*p.m)*X - C p.sigma
-/-- The rationalised Durrleman numerator as a polynomial, with values `numerator p` (`eval_polynomial`). -/
+/-- The rationalised Durrleman numerator as a polynomial, with values `numerator p`
+(`eval_polynomial`). -/
 noncomputable def polynomial (p : Params) : ℝ[X] :=
   C (4*p.sigma)*polyD*(2*polyA p*polyD - polyK p*polyB p)^2 -
     C p.sigma*polyA p*(polyB p)^2*polyD*(polyA p + C 8*X) +

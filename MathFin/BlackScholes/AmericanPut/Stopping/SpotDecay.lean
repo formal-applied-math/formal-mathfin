@@ -16,7 +16,8 @@ and nearly optimal rules transfer this fact to the American supremum.
 
 ## Result
 
-Public entry points include `putReward_eventually_zero`, `expectedReward_tendsto_zero_spot`, `americanPutValue_spot_seq_decay`, `americanPutValue_spot_decay`.
+Public entry points include `putReward_eventually_zero`, `expectedReward_tendsto_zero_spot`,
+`americanPutValue_spot_seq_decay`, `americanPutValue_spot_decay`.
 -/
 
 @[expose] public section

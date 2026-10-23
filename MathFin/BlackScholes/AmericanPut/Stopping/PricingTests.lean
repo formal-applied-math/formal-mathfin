@@ -14,7 +14,8 @@ point, derivatives below belong to the smooth test, not to the option price.
 
 ## Result
 
-Public entry points include `pricingTestKernel`, `pricingTestKernel_contDiff`, `pricingTestKernel_eq_brownian`, `pricingTestKernel_generator`.
+Public entry points include `pricingTestKernel`, `pricingTestKernel_contDiff`,
+`pricingTestKernel_eq_brownian`, `pricingTestKernel_generator`.
 -/
 
 @[expose] public section
@@ -58,10 +59,10 @@ theorem pricingTestKernel_generator {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 
   ring
 
 theorem canonicalPrice_upper_pricing_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ≥0}
-    (hp : (x,(T : ℝ)) ∈ canonicalContinuationRegion k h)
+    (hp : (x, (T : ℝ)) ∈ canonicalContinuationRegion k h)
     {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 3 F)
-    (h0 : F (x,(T : ℝ)) = canonicalPrice k h x (T : ℝ))
-    (htouch : ∀ᶠ z in 𝓝 (x,(T : ℝ)), canonicalPrice k h z.1 z.2 ≤ F z) :
+    (h0 : F (x, (T : ℝ)) = canonicalPrice k h x (T : ℝ))
+    (htouch : ∀ᶠ z in 𝓝 (x, (T : ℝ)), canonicalPrice k h z.1 z.2 ≤ F z) :
     deriv (fun t => F (x,t)) (T : ℝ) ≤
       deriv (deriv (fun y => F (y,(T : ℝ)))) x +
       (k-h-1)*deriv (fun y => F (y,(T : ℝ))) x - k*F (x,(T : ℝ)) := by
@@ -73,7 +74,8 @@ theorem canonicalPrice_upper_pricing_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ�
     convert! (show Continuous (fun z : ℝ × ℝ =>
       (x+(k-h-1)*z.1+Real.sqrt 2*z.2,(T : ℝ)-z.1)) by fun_prop).tendsto (0,0) using 1
     simp
-  have hbound : ∀ᶠ z in 𝓝 (0,0), canonicalDiscountedPlane k h x T z ≤ pricingTestKernel F k h x T z := by
+  have hbound : ∀ᶠ z in 𝓝 (0,0),
+      canonicalDiscountedPlane k h x T z ≤ pricingTestKernel F k h x T z := by
     filter_upwards [hmap.eventually htouch] with z hz
     exact mul_le_mul_of_nonneg_left hz (Real.exp_pos _).le
   have hh := canonicalPrice_upper_generator_test hk hp hkernel hinit hbound
@@ -81,10 +83,10 @@ theorem canonicalPrice_upper_pricing_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ�
   linarith
 
 theorem canonicalPrice_lower_pricing_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ≥0}
-    (hp : (x,(T : ℝ)) ∈ canonicalContinuationRegion k h)
+    (hp : (x, (T : ℝ)) ∈ canonicalContinuationRegion k h)
     {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 3 F)
-    (h0 : F (x,(T : ℝ)) = canonicalPrice k h x (T : ℝ))
-    (htouch : ∀ᶠ z in 𝓝 (x,(T : ℝ)), F z ≤ canonicalPrice k h z.1 z.2) :
+    (h0 : F (x, (T : ℝ)) = canonicalPrice k h x (T : ℝ))
+    (htouch : ∀ᶠ z in 𝓝 (x, (T : ℝ)), F z ≤ canonicalPrice k h z.1 z.2) :
     deriv (deriv (fun y => F (y,(T : ℝ)))) x +
       (k-h-1)*deriv (fun y => F (y,(T : ℝ))) x - k*F (x,(T : ℝ)) ≤
       deriv (fun t => F (x,t)) (T : ℝ) := by
@@ -96,7 +98,8 @@ theorem canonicalPrice_lower_pricing_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ�
     convert! (show Continuous (fun z : ℝ × ℝ =>
       (x+(k-h-1)*z.1+Real.sqrt 2*z.2,(T : ℝ)-z.1)) by fun_prop).tendsto (0,0) using 1
     simp
-  have hbound : ∀ᶠ z in 𝓝 (0,0), pricingTestKernel F k h x T z ≤ canonicalDiscountedPlane k h x T z := by
+  have hbound : ∀ᶠ z in 𝓝 (0,0),
+      pricingTestKernel F k h x T z ≤ canonicalDiscountedPlane k h x T z := by
     filter_upwards [hmap.eventually htouch] with z hz
     exact mul_le_mul_of_nonneg_left hz (Real.exp_pos _).le
   have hh := canonicalPrice_lower_generator_test hk hp hkernel hinit hbound

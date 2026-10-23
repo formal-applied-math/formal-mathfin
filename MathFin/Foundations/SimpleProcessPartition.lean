@@ -15,16 +15,18 @@ public import MathFin.Foundations.UnifIntegrableL2
 
 The simple-θ Girsanov theorem `MathFin.isExpQMartingale_BthetaSimple` consumes a **single monotone
 partition** `s : ℕ → ℝ≥0` with `𝓕_{s i}`-measurable multipliers `c : ℕ → Ω → ℝ`. The Itô-integral
-density family (`ItoIntegralL2.simpleAssembly`, dense by `simpleAssembly_T_denseRange`) is indexed by
-`ProbabilityTheory.SimpleProcess`, whose `value : (ℝ≥0 × ℝ≥0) →₀ (Ω → ℝ)` is a `Finsupp` over
-**arbitrary overlapping intervals**. This file marshals the latter into the former: sort all interval
-endpoints into a common partition, and read the per-cell multiplier off the process value.
+density family (`ItoIntegralL2.simpleAssembly`, dense by `simpleAssembly_T_denseRange`) is indexed
+by `ProbabilityTheory.SimpleProcess`, whose `value : (ℝ≥0 × ℝ≥0) →₀ (Ω → ℝ)` is a `Finsupp` over
+**arbitrary overlapping intervals**. This file marshals the latter into the former: sort all
+interval endpoints into a common partition, and read the per-cell multiplier off the process value.
 
 The payoff (downstream): a bounded predictable θ is approximated in `L²` by clamped simple processes
 `Vⁿ` (free from `simpleAssembly_T_denseRange` + `clampSP`), each marshalled to `(sⁿ, cⁿ)`, so the
-simple exponential-martingale identity passes to the limit exactly as in the continuous-adapted case.
+simple exponential-martingale identity passes to the limit exactly as in the continuous-adapted
+case.
 
-This module builds the partition side first: the endpoint set and the monotone partition `marshalPart`.
+This module builds the partition side first: the endpoint set and the monotone partition
+`marshalPart`.
 -/
 
 @[expose] public section
@@ -62,7 +64,8 @@ lemma marshalEndpoints_nonempty (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
   ⟨0, zero_mem_marshalEndpoints hBmeas T V⟩
 
 /-- **Every cell boundary is `≤ T`.** `0 ≤ T`; `T ≤ T`; a left endpoint `p.1 ≤ p.2 ≤ T`; a right
-endpoint `p.2 ≤ T` — the last two using the clamp hypothesis `hle` and `V.le_of_mem_support_value`. -/
+endpoint `p.2 ≤ T` — the last two using the clamp hypothesis `hle` and `V.le_of_mem_support_value`.
+-/
 lemma marshalEndpoints_le_T (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas))
     (hle : ∀ p ∈ V.value.support, p.2 ≤ T) :
@@ -76,7 +79,8 @@ lemma marshalEndpoints_le_T (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
   · exact hle p hp
 
 /-- The monotone partition read off the sorted endpoint set: the `i`-th smallest boundary for
-`i < card`, clamped to `T` beyond. This is the `s : ℕ → ℝ≥0` fed to `isExpQMartingale_BthetaSimple`. -/
+`i < card`, clamped to `T` beyond. This is the `s : ℕ → ℝ≥0` fed to `isExpQMartingale_BthetaSimple`.
+-/
 noncomputable def marshalPart (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (i : ℕ) : ℝ≥0 :=
   if h : i < (marshalEndpoints hBmeas T V).card then
@@ -197,7 +201,8 @@ lemma marshalPart_le_iff (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     ((marshalEndpoints hBmeas T V).orderEmbOfFin rfl).le_iff_le]
   exact Fin.mk_le_mk
 
-/-- Every cell boundary is realized: `x ∈ marshalEndpoints → x = marshalPart k` for some `k < card`. -/
+/-- Every cell boundary is realized: `x ∈ marshalEndpoints → x = marshalPart k` for some `k < card`.
+-/
 lemma exists_marshalPart_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) {x : ℝ≥0}
     (hx : x ∈ marshalEndpoints hBmeas T V) :
@@ -299,7 +304,8 @@ lemma marshalPart_card_sub_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
   have hpos : 0 < (marshalEndpoints hBmeas T V).card :=
     Finset.card_pos.mpr (marshalEndpoints_nonempty hBmeas T V)
   refine le_antisymm ?_ ?_
-  · have hlt : (marshalEndpoints hBmeas T V).card - 1 < (marshalEndpoints hBmeas T V).card := by omega
+  · have hlt : (marshalEndpoints hBmeas T V).card - 1 <
+      (marshalEndpoints hBmeas T V).card := by omega
     rw [marshalPart, dif_pos hlt]
     exact marshalEndpoints_le_T hBmeas T V hle _ (Finset.orderEmbOfFin_mem _ _ _)
   · obtain ⟨k, hk_card, hk⟩ := exists_marshalPart_eq hBmeas T V (T_mem_marshalEndpoints hBmeas T V)
@@ -327,9 +333,10 @@ lemma marshalDrift_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
   · rw [if_pos hc, if_pos hc]
   · rw [if_neg hc, if_neg hc, zero_mul, mul_zero]
 
-/-- **Cell-constancy.** On the enumerated cell `(sᵢ, sᵢ₊₁]` the step process `V` is constant, equal to
-the per-cell multiplier: `⇑V t ω = marshalMult i ω` for `t` in the cell. (The `⊥` atom of `apply_eq`
-drops since `t > sᵢ ≥ 0`; each interval indicator matches the covering test via `mem_Ioc_iff_cover`.) -/
+/-- **Cell-constancy.** On the enumerated cell `(sᵢ, sᵢ₊₁]` the step process `V` is constant, equal
+to the per-cell multiplier: `⇑V t ω = marshalMult i ω` for `t` in the cell. (The `⊥` atom of
+`apply_eq` drops since `t > sᵢ ≥ 0`; each interval indicator matches the covering test via
+`mem_Ioc_iff_cover`.) -/
 lemma marshalMult_eq_uncurry (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (hle : ∀ p ∈ V.value.support, p.2 ≤ T)
     {i : ℕ} {t : ℝ≥0} (ht1 : marshalPart hBmeas T V i < t)
@@ -347,16 +354,17 @@ lemma marshalMult_eq_uncurry (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
 
 /-! ### The clamped marshalled step process (Rung 1 approximant)
 
-For a dense simple approximant `V` of a bounded predictable `θ`, `marshalStepSP` is the single-partition
-step process on the marshalled cells whose per-cell multiplier is the `[−C,C]`-clamp of `marshalMult`.
-Since the marshalled cells are disjoint, clamping the multipliers clamps the *process*, so the L²
-distance to `θ̂` only shrinks (`clampM` is a contraction toward any `|·| ≤ C` target). Mirrors the
-adapted Riemann bridge `ItoIntegralRiemannBridgeAdapted.stepσ` with the uniform grid replaced by the
-marshalled partition and `θ(tₖ)` replaced by `clampM C (marshalMult · )`. -/
+For a dense simple approximant `V` of a bounded predictable `θ`, `marshalStepSP` is the
+single-partition step process on the marshalled cells whose per-cell multiplier is the
+`[−C,C]`-clamp of `marshalMult`. Since the marshalled cells are disjoint, clamping the multipliers
+clamps the *process*, so the L² distance to `θ̂` only shrinks (`clampM` is a contraction toward any
+`|·| ≤ C` target). Mirrors the adapted Riemann bridge `ItoIntegralRiemannBridgeAdapted.stepσ` with
+the uniform grid replaced by the marshalled partition and `θ(tₖ)` replaced by
+`clampM C (marshalMult · )`. -/
 
 /-- **The clamped marshalled step process** `∑ᵢ clampM C (marshalMult i) · 𝟙_{(sᵢ, sᵢ₊₁]}`, a
-`TBoundedSP`: each per-cell multiplier is `𝓕_{sᵢ}`-measurable (adaptedness of `marshalMult`, preserved
-by `clampM`) and bounded by `C`; each cell has right endpoint `≤ T`. -/
+`TBoundedSP`: each per-cell multiplier is `𝓕_{sᵢ}`-measurable (adaptedness of `marshalMult`,
+preserved by `clampM`) and bounded by `C`; each cell has right endpoint `≤ T`. -/
 noncomputable def marshalStepSP (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (hle : ∀ p ∈ V.value.support, p.2 ≤ T)
     {C : ℝ} (hC : 0 ≤ C) (N : ℕ) : TBoundedSP T hBmeas :=
@@ -390,7 +398,7 @@ lemma uncurry_marshalStepSP (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
       = ∑ i ∈ Finset.range N,
           (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
             (fun _ ↦ clampM C (marshalMult hBmeas T V i ω)) s := by
-  show ⇑(marshalStepSP hBmeas T V hle hC N).val s ω = _
+  change ⇑(marshalStepSP hBmeas T V hle hC N).val s ω = _
   rw [marshalStepSP, AddSubmonoidClass.coe_finsetSum, coe_finsetSum_apply,
     ← Finset.sum_attach (Finset.range N) (fun i ↦
       (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
@@ -426,7 +434,8 @@ lemma sum_cell_indicator_eq_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
         rw [if_neg (fun h ↦ absurd h.2 (not_le.mpr h2)), if_neg (not_le.mpr h2),
           if_neg (not_le.mpr (hab.trans_lt h2))]; ring
   simp_rw [hsub]
-  rw [Finset.sum_range_sub (fun i ↦ (Set.Iic (marshalPart hBmeas T V i)).indicator (fun _ ↦ (1 : ℝ)) s),
+  rw [Finset.sum_range_sub
+      (fun i ↦ (Set.Iic (marshalPart hBmeas T V i)).indicator (fun _ ↦ (1 : ℝ)) s),
     hmpN, marshalPart_zero hBmeas T V hle,
     Set.indicator_of_mem (Set.mem_Iic.mpr hsT),
     Set.indicator_of_notMem (by simp only [Set.mem_Iic, not_le]; exact hs0)]
@@ -434,7 +443,8 @@ lemma sum_cell_indicator_eq_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
 
 /-- **The clamped marshalled process is the clamp of `V`'s process** on `(0, T]`: cell-constancy
 turns each per-cell multiplier into `clampM C (⇑V s)` on its cell, and the cells' partition of unity
-collapses the indicator sum. This is the identity behind the L² contraction `‖Ṽⁿ − θ̂‖ ≤ ‖Vⁿ − θ̂‖`. -/
+collapses the indicator sum. This is the identity behind the L² contraction `‖Ṽⁿ − θ̂‖ ≤ ‖Vⁿ − θ̂‖`.
+-/
 lemma uncurry_marshalStepSP_eq_clamp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (hle : ∀ p ∈ V.value.support, p.2 ≤ T)
     {C : ℝ} (hC : 0 ≤ C) {N : ℕ} (hmpN : marshalPart hBmeas T V N = T)
@@ -507,9 +517,9 @@ lemma uncurry_marshalStepSP_ae_eq_clamp (hBmeas : ∀ t, Measurable (B t)) (T : 
   exact uncurry_marshalStepSP_eq_clamp hBmeas T V hle hC hmpN hz.1 hz.2 z.2
 
 /-- **The clamp contracts in `L²`.** The clamped marshalled approximant is at least as close to `θ̂`
-as the raw approximant `V`: `‖Ṽ − θ̂‖ ≤ ‖V − θ̂‖`. Both norms are `eLpNorm`s of differences; the a.e.
-identity `⇑Ṽ = clampM C (⇑V)` and the pointwise contraction `clampM_dist_le` (with `|θ| ≤ C`) give the
-bound. -/
+as the raw approximant `V`: `‖Ṽ − θ̂‖ ≤ ‖V − θ̂‖`. Both norms are `eLpNorm`s of differences; the
+a.e. identity `⇑Ṽ = clampM C (⇑V)` and the pointwise contraction `clampM_dist_le` (with `|θ| ≤ C`)
+give the bound. -/
 lemma norm_simpleAssembly_marshalStepSP_sub_le (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (hle : ∀ p ∈ V.value.support, p.2 ≤ T)
     {C : ℝ} (hC : 0 ≤ C) {N : ℕ} (hmpN : marshalPart hBmeas T V N = T)
@@ -560,10 +570,10 @@ theorem tendsto_simpleAssembly_marshalStepSP (T : ℝ≥0)
 /-- **The clamped approximant's Itô integral converges to `∫θ dB`.** Given a raw approximating
 sequence `V n → θ̂` in the integrand `L²` (from `simpleAssembly_T_denseRange`), the *clamped*
 marshalled Itô integrals `itoAssembly_T (marshalStepSP (V n))` converge in `L²(μ)` to
-`itoIntegralCLM_T θ̂ = ∫θ dB`. Proof: the contraction gives `simpleAssembly_T (marshalStepSP (V n)) →
-θ̂` (`tendsto_simpleAssembly_marshalStepSP`), then the CLM is continuous and agrees with the
-elementary integral on simple processes. The predictable analogue of `tendstoInMeasure_riemannσ`'s
-`L²` input. -/
+`itoIntegralCLM_T θ̂ = ∫θ dB`. Proof: the contraction gives
+`simpleAssembly_T (marshalStepSP (V n)) → θ̂` (`tendsto_simpleAssembly_marshalStepSP`), then the CLM
+is continuous and agrees with the elementary integral on simple processes. The predictable analogue
+of `tendstoInMeasure_riemannσ`'s `L²` input. -/
 theorem tendsto_itoAssembly_marshalStepSP (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
@@ -583,8 +593,8 @@ theorem tendsto_itoAssembly_marshalStepSP (hB : IsPreBrownianReal B μ) (T : ℝ
     ((itoIntegralCLM_T hB T hBmeas).continuous.tendsto _).comp
       (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
 
-/-- **A raw approximating sequence for `θ̂`.** From the density of the simple-process embedding, there
-is a sequence `V : ℕ → TBoundedSP` with `simpleAssembly_T (V n) → θ̂`. -/
+/-- **A raw approximating sequence for `θ̂`.** From the density of the simple-process embedding,
+there is a sequence `V : ℕ → TBoundedSP` with `simpleAssembly_T (V n) → θ̂`. -/
 lemma exists_approxSeq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) :
     ∃ V : ℕ → TBoundedSP T hBmeas,

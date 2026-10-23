@@ -13,12 +13,12 @@ public import MathFin.Foundations.PoissonThinning
 
 `JumpDiffusionHyp Q Λ Z N J` (`BlackScholes/JumpDiffusionMixing.lean`) is a Merton-type
 jump-diffusion at a fixed horizon (any i.i.d. jump law; the Gaussian-jump `MertonHyp` is not an
-instance as stated): a standard normal diffusion sample `Z`, a `Poisson(Λ)` jump count `N` and i.i.d.
-log-jump sizes `J 0, J 1, …`, the count independent of the sizes. Sorting the jumps by a
-measurable set `A` of sizes (for instance `A = (0, ∞)`, the up-jumps) is a thinning of the
-Poisson count by i.i.d. marks, so `PoissonThinning.thinned_streams_of_iid_marks` applies: the
-number of jumps with size in `A` and the number with size in `Aᶜ` are independent Poisson
-counts with means `Λ·P(J₀ ∈ A)` and `Λ·P(J₀ ∉ A)`.
+instance as stated): a standard normal diffusion sample `Z`, a `Poisson(Λ)` jump count `N` and
+i.i.d. log-jump sizes `J 0, J 1, …`, the count independent of the sizes. Sorting the jumps by a
+measurable set `A` of sizes (for instance `A = (0, ∞)`, the up-jumps) is a thinning of the Poisson
+count by i.i.d. marks, so `PoissonThinning.thinned_streams_of_iid_marks` applies: the number of
+jumps with size in `A` and the number with size in `Aᶜ` are independent Poisson counts with means
+`Λ·P(J₀ ∈ A)` and `Λ·P(J₀ ∉ A)`.
 
 ## Main results
 
@@ -37,10 +37,10 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} {Λ : ℝ≥0}
 
 namespace JumpDiffusionHyp
 
-/-- **The jumps of a Merton-type jump-diffusion split into independent Poisson streams.** In the model
-`JumpDiffusionHyp Q Λ Z N J` and for a measurable set `A` of jump sizes, with
-`p = Q(J₀ ∈ A)`, the number of the `N` jumps whose size lies in `A` is `Poisson(p·Λ)`, the number
-whose size lies in `Aᶜ` is `Poisson((1 − p)·Λ)`, and the two counts are independent. -/
+/-- **The jumps of a Merton-type jump-diffusion split into independent Poisson streams.** In the
+model `JumpDiffusionHyp Q Λ Z N J` and for a measurable set `A` of jump sizes, with `p = Q(J₀ ∈ A)`,
+the number of the `N` jumps whose size lies in `A` is `Poisson(p·Λ)`, the number whose size lies in
+`Aᶜ` is `Poisson((1 − p)·Λ)`, and the two counts are independent. -/
 theorem jumpCounts_split (h : JumpDiffusionHyp Q Λ Z N J) {A : Set ℝ} (hA : MeasurableSet A) :
     Q.map (fun ω ↦ PoissonThinning.marksIn J A (N ω) ω)
         = poissonMeasure ((Q (J 0 ⁻¹' A)).toNNReal * Λ) ∧

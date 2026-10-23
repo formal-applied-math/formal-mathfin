@@ -27,7 +27,9 @@ theorem min_time_tendsto_firstContact {g : ℝ≥0 → ℝ} (hc : Continuous g)
   apply tendsto_order.mpr
   constructor
   · intro a ha
-    obtain ⟨t,ht,hmin⟩ := isCompact_Icc.exists_isMinOn (nonempty_Icc.mpr (show (0 : ℝ≥0) ≤ a from zero_le)) hc.continuousOn
+    obtain ⟨t,ht,hmin⟩ :=
+        isCompact_Icc.exists_isMinOn (nonempty_Icc.mpr (show (0 : ℝ≥0) ≤ a from zero_le))
+        hc.continuousOn
     have hpos : 0 < g t := hp t (ht.2.trans_lt ha)
     filter_upwards [hs.eventually (gt_mem_nhds hpos)] with n hn
     apply lt_min _ ha

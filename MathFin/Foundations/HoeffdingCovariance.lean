@@ -30,10 +30,10 @@ inclusion–exclusion. The identity is stated for the law of `(X, Y)` on `ℝ²`
 ## Consequences
 
 * **Covariance is monotone in the joint CDF** (`covariance_le_covariance_of_cdf_le`; QRM Exercise
-  Book Ex. 7.14). Two pairs with the same marginal laws whose joint CDFs are pointwise ordered
-  have ordered covariances, and so ordered correlations. The marginals fix the subtracted term
-  and the variances, and the joint CDF enters linearly. Combined with the Fréchet–Hoeffding bounds
-  on joint CDFs (proved for copulas in `Foundations/Copula.lean`), this is the mechanism by which comonotone
+  Book Ex. 7.14). Two pairs with the same marginal laws whose joint CDFs are pointwise ordered have
+  ordered covariances, and so ordered correlations. The marginals fix the subtracted term and the
+  variances, and the joint CDF enters linearly. Combined with the Fréchet–Hoeffding bounds on joint
+  CDFs (proved for copulas in `Foundations/Copula.lean`), this is the mechanism by which comonotone
   (resp. countermonotone) dependence attains the largest (resp. smallest) correlation for given
   marginals (MFE (2015) Theorem 7.28).
 * **Default-correlation bounds** (`le_covariance_indicator_one`, `covariance_indicator_one_le`;
@@ -321,7 +321,8 @@ theorem integrable_cdf_sub_mul_fst_snd (h₁ : MemLp Prod.fst 2 μ) (h₂ : MemL
     (integrable_layer_mul h₁ h₂).integral_prod_right
   have hprod : Integrable (fun p : ℝ × ℝ ↦ (∫ x, layer x.1 p.1 ∂μ) * ∫ x, layer x.2 p.2 ∂μ) := by
     rw [Measure.volume_eq_prod]
-    exact (integrable_layer_comp measurable_fst (h₁.integrable one_le_two)).integral_prod_right.mul_prod
+    exact (integrable_layer_comp measurable_fst
+        (h₁.integrable one_le_two)).integral_prod_right.mul_prod
       (integrable_layer_comp measurable_snd (h₂.integrable one_le_two)).integral_prod_right
   exact (hint.sub hprod).congr (ae_of_all _ integral_layer_mul_sub)
 

@@ -17,7 +17,8 @@ not silently treated as pointwise adaptation on exceptional null outcomes.
 
 ## Result
 
-Public entry points include `martingale_of_setIntegral_eq_real`, `martingale_smaller_filtration`, `locally_bounded_localMartingale_is_martingale`, `bounded_localMartingale_is_martingale`.
+Public entry points include `martingale_of_setIntegral_eq_real`, `martingale_smaller_filtration`,
+`locally_bounded_localMartingale_is_martingale`, `bounded_localMartingale_is_martingale`.
 -/
 
 @[expose] public section
@@ -67,9 +68,12 @@ theorem locally_bounded_localMartingale_is_martingale (hX : IsLocalMartingale X 
     have heq : (fun n => Y n t ω) =ᶠ[atTop] (fun _ => X t ω) := by
       filter_upwards [hlarge] with n hn
       have hle : (t : WithTop ℝ≥0) ≤ τ n ω :=
-        (show (t : WithTop ℝ≥0) ≤ (t+1 : ℝ≥0) by exact_mod_cast le_add_of_nonneg_right zero_le).trans hn.le
+        (show (t : WithTop ℝ≥0) ≤
+            (t+1 : ℝ≥0) by exact_mod_cast le_add_of_nonneg_right zero_le).trans hn.le
       have hpos : (⊥ : WithTop ℝ≥0) < τ n ω :=
-        (show (⊥ : WithTop ℝ≥0) < (t+1 : ℝ≥0) by change (0 : WithTop ℝ≥0) < _; exact_mod_cast (show (0 : ℝ≥0) < t+1 by positivity)).trans hn
+        (show (⊥ : WithTop ℝ≥0) < (t+1 : ℝ≥0) by
+          change (0 : WithTop ℝ≥0) < _
+          exact_mod_cast (show (0 : ℝ≥0) < t+1 by positivity)).trans hn
       exact (stoppedProcess_eq_of_le hle).trans
         (indicator_of_mem (show ω ∈ {ω | ⊥ < τ n ω} from hpos) _)
     exact tendsto_const_nhds.congr' heq.symm
@@ -80,7 +84,8 @@ theorem locally_bounded_localMartingale_is_martingale (hX : IsLocalMartingale X 
       (Eventually.of_forall (hC t le_rfl))
   apply martingale_of_setIntegral_eq_real hadapt hint
   intro i j hij s hs
-  have hconv (t : ℝ≥0) : Tendsto (fun n => ∫ ω in s, Y n t ω ∂P) atTop (𝓝 (∫ ω in s, X t ω ∂P)) := by
+  have hconv (t : ℝ≥0) : Tendsto (fun n => ∫ ω in s, Y n t ω ∂P) atTop
+      (𝓝 (∫ ω in s, X t ω ∂P)) := by
     obtain ⟨C,hC⟩ := hYbound t
     exact tendsto_integral_of_dominated_convergence (fun _ => C)
       (fun n => ((hY n).integrable t).aestronglyMeasurable.restrict) (integrable_const C)

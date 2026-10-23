@@ -127,7 +127,7 @@ lemma tendsto_crr_drift_quotient {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :
   have hh_ne : h ≠ 0 := hh
   have h_sq_ne : h^2 ≠ 0 := pow_ne_zero 2 hh_ne
   -- Goal: ((Num h / h²) / ((sinh-like)/h)) = Num h / (h · (sinh-like))
-  show (2 * Real.exp (r * h^2) - Real.exp (σ * h) - Real.exp (-(σ * h))) / h^2
+  change (2 * Real.exp (r * h^2) - Real.exp (σ * h) - Real.exp (-(σ * h))) / h^2
       / ((Real.exp (σ * h) - Real.exp (-(σ * h))) / h)
       = _
   rcases eq_or_ne (Real.exp (σ * h) - Real.exp (-(σ * h))) 0 with hden0 | hden0

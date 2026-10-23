@@ -57,17 +57,20 @@ theorem ito_formula_L2
   have hf'm : Measurable f' :=
     (continuous_iff_continuousAt.mpr fun x ↦ (hf' x).continuousAt).measurable
   have hf''m : Measurable f'' := hf''_cont.measurable
-  have hfm : Measurable f := (continuous_iff_continuousAt.mpr fun x ↦ (hf x).continuousAt).measurable
+  have hfm : Measurable f :=
+      (continuous_iff_continuousAt.mpr fun x ↦ (hf x).continuousAt).measurable
   have hA1 := tendsto_weighted_qv (μ := μ) hB hBmeas hBcont (g := f'') hf''_cont hf2 T
   have hA2 := tendsto_ito_remainder hB hBmeas T hf hf' hf'' hf3
   set Isum : ℕ → Ω → ℝ := fun n ω ↦ ∑ k ∈ Finset.range n,
       f' (B (unifPart T n k) ω) * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) with hIsum
   set QV : ℕ → Ω → ℝ := fun n ω ↦ ∑ k ∈ Finset.range n,
-      f'' (B (unifPart T n k) ω) * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 with hQVdef
+      f'' (B (unifPart T n k) ω) *
+          (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 with hQVdef
   set Rem : ℕ → Ω → ℝ := fun n ω ↦ ∑ k ∈ Finset.range n,
-      discreteTaylorRemainder f f' f'' (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω) with hRemdef
+      discreteTaylorRemainder f f' f'' (B (unifPart T n k) ω)
+          (B (unifPart T n (k + 1)) ω) with hRemdef
   set I2 : Ω → ℝ := fun ω ↦ ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure
-  show Tendsto (fun n ↦ ∫ ω, (Isum n ω - (f (B T ω) - f (B 0 ω) - (1 / 2) * I2 ω)) ^ 2 ∂μ)
+  change Tendsto (fun n ↦ ∫ ω, (Isum n ω - (f (B T ω) - f (B 0 ω) - (1 / 2) * I2 ω)) ^ 2 ∂μ)
     atTop (𝓝 0)
   -- `L²` membership of the second-order integral and the two discrete sums
   have hI2_memLp : MemLp I2 2 μ := memLp_pathIntegral (μ := μ) hB hBmeas hBcont hf''_cont hf2 T
@@ -145,7 +148,7 @@ theorem ito_formula_L2
   calc ∫ ω, (Isum n ω - (f (B T ω) - f (B 0 ω) - (1 / 2) * I2 ω)) ^ 2 ∂μ
       = ∫ ω, (-(1 / 2) * (QV n ω - I2 ω) - Rem n ω) ^ 2 ∂μ := by
         refine integral_congr_ae (Eventually.of_forall fun ω ↦ ?_)
-        show (Isum n ω - (f (B T ω) - f (B 0 ω) - 1 / 2 * I2 ω)) ^ 2
+        change (Isum n ω - (f (B T ω) - f (B 0 ω) - 1 / 2 * I2 ω)) ^ 2
           = (-(1 / 2) * (QV n ω - I2 ω) - Rem n ω) ^ 2
         rw [hpt ω]
     _ ≤ ∫ ω, ((1 / 2) * (QV n ω - I2 ω) ^ 2 + 2 * Rem n ω ^ 2) ∂μ := by

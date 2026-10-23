@@ -16,7 +16,8 @@ axioms. This file does not assert the zero-number theorem or boundary convexity.
 
 ## Result
 
-Public entry points include `straightPrice_equation`, `straightPrice_fit`, and `straightPrice_dominates`.
+Public entry points include `straightPrice_equation`, `straightPrice_fit`, and
+`straightPrice_dominates`.
 -/
 
 @[expose] public section
@@ -37,7 +38,8 @@ theorem rootProfile_hasDerivAt (u v z : ℝ) :
     HasDerivAt (rootProfile u v)
       ((u * (Real.exp (v * z) * v) - v * (Real.exp (u * z) * u)) / (u - v)) z := by
   unfold rootProfile
-  simpa only [id_eq, mul_one, Pi.sub_apply] using (((((hasDerivAt_id z).const_mul v).exp).const_mul u).sub
+  simpa only [id_eq, mul_one, Pi.sub_apply] using
+      (((((hasDerivAt_id z).const_mul v).exp).const_mul u).sub
     ((((hasDerivAt_id z).const_mul u).exp).const_mul v)).div_const (u - v)
 
 theorem rootProfile_deriv (u v z : ℝ) :
@@ -52,7 +54,8 @@ theorem rootProfile_deriv2 (u v z : ℝ) :
   rw [show deriv (rootProfile u v) = fun y =>
     (u * (Real.exp (v * y) * v) - v * (Real.exp (u * y) * u)) / (u - v) from
       funext (rootProfile_deriv u v)]
-  simpa only [id_eq, mul_one, Pi.sub_apply] using (((((((hasDerivAt_id z).const_mul v).exp).mul_const v).const_mul u).sub
+  simpa only [id_eq, mul_one, Pi.sub_apply] using
+      (((((((hasDerivAt_id z).const_mul v).exp).mul_const v).const_mul u).sub
     (((((hasDerivAt_id z).const_mul u).exp).mul_const u).const_mul v)).div_const
       (u - v)).deriv
 

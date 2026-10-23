@@ -174,7 +174,7 @@ lemma integrable_indicator_branch {F σ : ℝ} (hF : 0 < F) (hσ : 0 < σ) {B : 
     Integrable (fun K ↦ (cointossPhi F σ K).toNNReal • B.indicator h K)
       (volume.restrict (Ioi 0)) := by
   rw [← integrable_withDensity_iff_integrable_smul (measurable_cointossPhi F σ).real_toNNReal]
-  show Integrable (B.indicator h)
+  change Integrable (B.indicator h)
     ((volume.restrict (Ioi 0)).withDensity fun K ↦ ENNReal.ofReal (cointossPhi F σ K))
   rw [← map_cointossBranch hF hσ,
     integrable_map_measure (hh.indicator hB).aestronglyMeasurable (by fun_prop)]

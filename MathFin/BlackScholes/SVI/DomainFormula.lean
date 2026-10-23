@@ -43,7 +43,8 @@ noncomputable def nonnegativeAtom (f : ParameterRing) : SignFormula :=
     · exact Or.inl he.symm
     · exact Or.inr he
 
-/-- The sign formula for the parameter domain `σ > 0`, `b ≥ 0`, `ρ² ≤ 1` together with the variance gate (`domainFormula_iff`). -/
+/-- The sign formula for the parameter domain `σ > 0`, `b ≥ 0`, `ρ² ≤ 1` together with the variance
+gate (`domainFormula_iff`). -/
 noncomputable def domainFormula : SignFormula :=
   let a : ParameterRing := MvPolynomial.X (0 : Fin 5)
   let b : ParameterRing := MvPolynomial.X (1 : Fin 5)

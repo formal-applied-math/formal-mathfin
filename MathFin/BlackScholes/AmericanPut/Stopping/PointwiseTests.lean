@@ -15,7 +15,8 @@ Strict drift then contradicts the integrated test inequality.
 
 ## Result
 
-Public entry points include `exists_driverRectangle_subset`, `exists_continuationRectangle_in_nhds`, `canonicalPrice_upper_pointwise_test`, `canonicalPrice_lower_pointwise_test`.
+Public entry points include `exists_driverRectangle_subset`, `exists_continuationRectangle_in_nhds`,
+`canonicalPrice_upper_pointwise_test`, `canonicalPrice_lower_pointwise_test`.
 -/
 
 @[expose] public section
@@ -26,7 +27,7 @@ open Set Filter MeasureTheory ProbabilityTheory
 open scoped NNReal Topology
 
 theorem exists_driverRectangle_subset (k h : ℝ) {U : Set (ℝ × ℝ)}
-    (hU : U ∈ 𝓝 (0,0)) {R₀ : ℝ} (hR₀ : 0 < R₀)
+    (hU : U ∈ 𝓝 (0, 0)) {R₀ : ℝ} (hR₀ : 0 < R₀)
     {δ₀ : ℝ≥0} (hδ₀ : 0 < δ₀) :
     ∃ R : ℝ, 0 < R ∧ R ≤ R₀ ∧ ∃ δ : ℝ≥0,
       0 < δ ∧ δ ≤ δ₀ ∧ driverRectangle k h R δ ⊆ U := by
@@ -68,8 +69,8 @@ theorem exists_driverRectangle_subset (k h : ℝ) {U : Set (ℝ × ℝ)}
     rwa [hinv] at hh
 
 theorem exists_continuationRectangle_in_nhds {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ≥0}
-    (hp : (x,(T : ℝ)) ∈ canonicalContinuationRegion k h)
-    {U : Set (ℝ × ℝ)} (hU : U ∈ 𝓝 (0,0)) :
+    (hp : (x, (T : ℝ)) ∈ canonicalContinuationRegion k h)
+    {U : Set (ℝ × ℝ)} (hU : U ∈ 𝓝 (0, 0)) :
     ∃ R : ℝ, 0 < R ∧ ∃ δ : ℝ≥0, 0 < δ ∧ δ < T ∧
       InContinuationRectangle k h x T R δ ∧ driverRectangle k h R δ ⊆ U := by
   obtain ⟨R₀,hR₀,δ₀,hδ₀,hδT,hrect⟩ := exists_continuationRectangle hk hp
@@ -80,10 +81,10 @@ theorem exists_continuationRectangle_in_nhds {k h x : ℝ} (hk : 0 ≤ k) {T : �
 /-- A compact C3 test touching the discounted actual price from above has
 nonnegative backward-driver generator. -/
 theorem canonicalPrice_upper_pointwise_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ≥0}
-    (hp : (x,(T : ℝ)) ∈ canonicalContinuationRegion k h)
+    (hp : (x, (T : ℝ)) ∈ canonicalContinuationRegion k h)
     {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) (hc : HasCompactSupport G)
-    (h0 : G (0,0) = canonicalPrice k h x (T : ℝ))
-    (htouch : ∀ᶠ z in 𝓝 (0,0), canonicalDiscountedPlane k h x T z ≤ G z) :
+    (h0 : G (0, 0) = canonicalPrice k h x (T : ℝ))
+    (htouch : ∀ᶠ z in 𝓝 (0, 0), canonicalDiscountedPlane k h x T z ≤ G z) :
     0 ≤ planeGenerator G (0,0) := by
   by_contra! hneg
   have hn : ∀ᶠ z in 𝓝 (0,0), planeGenerator G z < 0 :=
@@ -95,10 +96,10 @@ theorem canonicalPrice_upper_pointwise_test {k h x : ℝ} (hk : 0 ≤ k) {T : �
   exact (not_lt_of_ge hnonneg) hnegative
 
 theorem canonicalPrice_lower_pointwise_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ≥0}
-    (hp : (x,(T : ℝ)) ∈ canonicalContinuationRegion k h)
+    (hp : (x, (T : ℝ)) ∈ canonicalContinuationRegion k h)
     {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) (hc : HasCompactSupport G)
-    (h0 : G (0,0) = canonicalPrice k h x (T : ℝ))
-    (htouch : ∀ᶠ z in 𝓝 (0,0), G z ≤ canonicalDiscountedPlane k h x T z) :
+    (h0 : G (0, 0) = canonicalPrice k h x (T : ℝ))
+    (htouch : ∀ᶠ z in 𝓝 (0, 0), G z ≤ canonicalDiscountedPlane k h x T z) :
     planeGenerator G (0,0) ≤ 0 := by
   by_contra! hpos
   have hn : ∀ᶠ z in 𝓝 (0,0), 0 < planeGenerator G z :=
@@ -133,10 +134,10 @@ theorem exists_compact_test {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 3 F) (z 
   rw [hy,one_mul]
 
 theorem canonicalPrice_upper_generator_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ≥0}
-    (hp : (x,(T : ℝ)) ∈ canonicalContinuationRegion k h)
+    (hp : (x, (T : ℝ)) ∈ canonicalContinuationRegion k h)
     {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 3 F)
-    (h0 : F (0,0) = canonicalPrice k h x (T : ℝ))
-    (htouch : ∀ᶠ z in 𝓝 (0,0), canonicalDiscountedPlane k h x T z ≤ F z) :
+    (h0 : F (0, 0) = canonicalPrice k h x (T : ℝ))
+    (htouch : ∀ᶠ z in 𝓝 (0, 0), canonicalDiscountedPlane k h x T z ≤ F z) :
     0 ≤ planeGenerator F (0,0) := by
   obtain ⟨G,hG,hc,he⟩ := exists_compact_test hF (0,0)
   rw [← planeGenerator_congr he]
@@ -145,10 +146,10 @@ theorem canonicalPrice_upper_generator_test {k h x : ℝ} (hk : 0 ≤ k) {T : �
   rwa [hez]
 
 theorem canonicalPrice_lower_generator_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ≥0}
-    (hp : (x,(T : ℝ)) ∈ canonicalContinuationRegion k h)
+    (hp : (x, (T : ℝ)) ∈ canonicalContinuationRegion k h)
     {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 3 F)
-    (h0 : F (0,0) = canonicalPrice k h x (T : ℝ))
-    (htouch : ∀ᶠ z in 𝓝 (0,0), F z ≤ canonicalDiscountedPlane k h x T z) :
+    (h0 : F (0, 0) = canonicalPrice k h x (T : ℝ))
+    (htouch : ∀ᶠ z in 𝓝 (0, 0), F z ≤ canonicalDiscountedPlane k h x T z) :
     planeGenerator F (0,0) ≤ 0 := by
   obtain ⟨G,hG,hc,he⟩ := exists_compact_test hF (0,0)
   rw [← planeGenerator_congr he]

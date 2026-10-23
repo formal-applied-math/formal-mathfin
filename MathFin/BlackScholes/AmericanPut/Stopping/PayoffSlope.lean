@@ -16,7 +16,8 @@ unbounded. This supplies a constant dominating function for stopped slopes.
 
 ## Result
 
-Public entry points include `putPayoff_sub_bounds`, `putPayoff_norm_sub_le`, `putPayoff_hasDerivAt_neg`, `discountedPutSlope`.
+Public entry points include `putPayoff_sub_bounds`, `putPayoff_norm_sub_le`,
+`putPayoff_hasDerivAt_neg`, `discountedPutSlope`.
 -/
 
 @[expose] public section
@@ -92,7 +93,7 @@ theorem discountedPutSlope_bound {k t : ℝ} (hk : 0 ≤ k) (ht : 0 ≤ t) (b x 
     exact (mul_le_mul_of_nonneg_left hp (Real.exp_pos _).le).trans
       (by simpa only [one_mul] using mul_le_mul_of_nonneg_right he (norm_nonneg (x-b)))
 
-theorem discountedPutSlope_eq_exp {k b x t D : ℝ} (hx : x+D ≤ 0) (hb : b+D ≤ 0) :
+theorem discountedPutSlope_eq_exp {k b x t D : ℝ} (hx : x + D ≤ 0) (hb : b + D ≤ 0) :
     discountedPutSlope k b x t D = -Real.exp (-k*t+D)*slope Real.exp b x := by
   rw [discountedPutSlope,putPayoff_of_nonpos hx,putPayoff_of_nonpos hb]
   simp only [Real.exp_add,slope,vsub_eq_sub,smul_eq_mul,div_eq_mul_inv]

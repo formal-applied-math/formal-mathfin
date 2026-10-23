@@ -175,12 +175,12 @@ theorem measurable_bracketRep (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       = fun ω ↦ ∫ u, (Set.Ioc a b ×ˢ (Set.univ : Set Ω)).indicator
           (fun z ↦ ((φ : ℝ≥0 × Ω → ℝ) z) ^ 2) (u, ω) ∂ItoIntegralL2.timeMeasure := by
     funext ω
-    show (∫ u in Set.Ioc a b, ((φ : ℝ≥0 × Ω → ℝ) (u, ω)) ^ 2 ∂ItoIntegralL2.timeMeasure)
+    change (∫ u in Set.Ioc a b, ((φ : ℝ≥0 × Ω → ℝ) (u, ω)) ^ 2 ∂ItoIntegralL2.timeMeasure)
       = ∫ u, (Set.Ioc a b ×ˢ (Set.univ : Set Ω)).indicator
           (fun z ↦ ((φ : ℝ≥0 × Ω → ℝ) z) ^ 2) (u, ω) ∂ItoIntegralL2.timeMeasure
     rw [← integral_indicator measurableSet_Ioc]
     refine integral_congr_ae (Filter.Eventually.of_forall fun u ↦ ?_)
-    show (Set.Ioc a b).indicator (fun u' ↦ ((φ : ℝ≥0 × Ω → ℝ) (u', ω)) ^ 2) u
+    change (Set.Ioc a b).indicator (fun u' ↦ ((φ : ℝ≥0 × Ω → ℝ) (u', ω)) ^ 2) u
       = (Set.Ioc a b ×ˢ (Set.univ : Set Ω)).indicator
           (fun z ↦ ((φ : ℝ≥0 × Ω → ℝ) z) ^ 2) (u, ω)
     by_cases hu : u ∈ Set.Ioc a b
@@ -225,7 +225,7 @@ omit [IsProbabilityMeasure μ] in
 @[simp] theorem bracketProcess_zero (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (ω : Ω) :
     bracketProcess (μ := μ) T hBmeas φ 0 ω = 0 := by
-  show bracketRep (μ := μ) T hBmeas φ 0 (min 0 T) ω = 0
+  change bracketRep (μ := μ) T hBmeas φ 0 (min 0 T) ω = 0
   rw [min_eq_left (show (0 : ℝ≥0) ≤ T from bot_le), bracketRep, Set.Ioc_self,
     Measure.restrict_empty, integral_zero_measure]
 
@@ -290,7 +290,7 @@ theorem condExp_sq_sub_bracket (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
   have e1 : (μ[fun ω ↦ Mb ω * Ma ω | natFiltration hBmeas a]) =ᵐ[μ] fun ω ↦ Ma ω * Ma ω := by
     refine (condExp_mul_of_aestronglyMeasurable_right hMaAe hcross hMbi).trans ?_
     filter_upwards [itoIntegralProcessGen_isMartingale hB T hBmeas φ hab] with ω hω
-    show (μ[Mb | natFiltration hBmeas a]) ω * Ma ω = Ma ω * Ma ω
+    change (μ[Mb | natFiltration hBmeas a]) ω * Ma ω = Ma ω * Ma ω
     rw [hω]
   have e2 : (μ[fun ω ↦ Ma ω ^ 2 | natFiltration hBmeas a]) =ᵐ[μ] fun ω ↦ Ma ω ^ 2 :=
     condExp_of_aestronglyMeasurable' ((natFiltration hBmeas).le a) (hMaAe.pow 2) hMa2
@@ -300,7 +300,7 @@ theorem condExp_sq_sub_bracket (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
       =ᵐ[μ] fun _ ↦ (0 : ℝ) := by
     refine (condExp_sub hcross hMa2 _).trans ?_
     filter_upwards [e1, e2] with ω h1 h2
-    show (μ[fun ω ↦ Mb ω * Ma ω | natFiltration hBmeas a]) ω
+    change (μ[fun ω ↦ Mb ω * Ma ω | natFiltration hBmeas a]) ω
         - (μ[fun ω ↦ Ma ω ^ 2 | natFiltration hBmeas a]) ω = 0
     rw [h1, h2, sq]
     ring
@@ -310,11 +310,11 @@ theorem condExp_sq_sub_bracket (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     refine (condExp_congr_ae ?_).trans ((condExp_sub hAbi hAai _).trans ?_)
     · filter_upwards [bracketRep_add T hBmeas φ (show (0 : ℝ≥0) ≤ a from bot_le) hab hbT]
         with ω h
-      show bracketRep (μ := μ) T hBmeas φ a b ω
+      change bracketRep (μ := μ) T hBmeas φ a b ω
           = bracketRep (μ := μ) T hBmeas φ 0 b ω - bracketRep (μ := μ) T hBmeas φ 0 a ω
       linarith
     · filter_upwards [e3] with ω h
-      show (μ[Ab | natFiltration hBmeas a]) ω - (μ[Aa | natFiltration hBmeas a]) ω
+      change (μ[Ab | natFiltration hBmeas a]) ω - (μ[Aa | natFiltration hBmeas a]) ω
           = (μ[Ab | natFiltration hBmeas a]) ω - Aa ω
       rw [h]
   -- `M_b² = (M_b − M_a)² + C + (C + M_a²)`, and `μ[C|𝓕_a] = 0`
@@ -332,7 +332,7 @@ theorem condExp_sq_sub_bracket (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     ring
   refine (condExp_sub hMb2 hAbi _).trans ?_
   filter_upwards [eS, condExp_band_second_moment hB T hBmeas φ hab hbT, eB] with ω h1 h2 h3
-  show (μ[fun ω ↦ Mb ω ^ 2 | natFiltration hBmeas a]) ω
+  change (μ[fun ω ↦ Mb ω ^ 2 | natFiltration hBmeas a]) ω
       - (μ[Ab | natFiltration hBmeas a]) ω = Ma ω ^ 2 - Aa ω
   rw [h1, h2, h3]; ring
 
