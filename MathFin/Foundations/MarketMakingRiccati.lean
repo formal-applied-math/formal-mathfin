@@ -16,11 +16,11 @@ reduces, via a quadratic (LQ) approximation of the trade-intensity Hamiltonians,
 Riccati system whose solution is a closed-form proxy for the value function `θ(t, q)`.
 
 This Riccati is the LQ-**approximation** view, not the fundamental structure: for exponential
-intensities the exact single-asset problem is *linearisable* by a Hopf–Cole change of variables into a
-linear ODE system (Guéant–Lehalle–Fernandez-Tapia), the deeper and more faithful target (not
+intensities the exact single-asset problem is *linearisable* by a Hopf–Cole change of variables into
+a linear ODE system (Guéant–Lehalle–Fernandez-Tapia), the deeper and more faithful target (not
 formalised here; the matrix-exponential derivative it needs is Mathlib's
-`hasDerivAt_exp_smul_const`). We formalise the tractable approximate closed form
-(see `MatrixMarketMakingRiccati` for the multi-asset analogue and the full landscape note).
+`hasDerivAt_exp_smul_const`). We formalise the tractable approximate closed form (see
+`MatrixMarketMakingRiccati` for the multi-asset analogue and the full landscape note).
 
 Specialised here to a **single asset** (`d = 1`), we verify, in three layers:
 
@@ -36,16 +36,16 @@ Specialised here to a **single asset** (`d = 1`), we verify, in three layers:
 
 ## Scope (mirroring `AlmgrenChriss.lean`)
 
-We verify the closed-form solution of the **approximate** (quadratic-Hamiltonian) HJ equation.
-Out of scope: the stochastic optimal-control substrate (existence/uniqueness of the true value
-function solving the exact HJ equation, and the verification theorem linking `θ` to optimal
-quotes — controlled marked-point-process control beyond the current pin); that the approximate
-value function approximates the true one (justified numerically in the paper); the exact Hopf–Cole
-linearisation (the fundamental structure; Mathlib's `hasDerivAt_exp_smul_const` covers the
-matrix-exponential calculus it needs, so what is missing is the construction itself); and deriving
-`δ̃_ξ` from the intensity sup (it is defined by its known closed form from Guéant [18] /
-Guéant–Lehalle–Fernandez-Tapia [20]). The multi-asset **approximate** matrix Riccati is now discharged
-in `MatrixMarketMakingRiccati`.
+We verify the closed-form solution of the **approximate** (quadratic-Hamiltonian) HJ equation. Out
+of scope: the stochastic optimal-control substrate (existence/uniqueness of the true value function
+solving the exact HJ equation, and the verification theorem linking `θ` to optimal quotes —
+controlled marked-point-process control beyond the current pin); that the approximate value function
+approximates the true one (justified numerically in the paper); the exact Hopf–Cole linearisation
+(the fundamental structure; Mathlib's `hasDerivAt_exp_smul_const` covers the matrix-exponential
+calculus it needs, so what is missing is the construction itself); and deriving `δ̃_ξ` from the
+intensity sup (it is defined by its known closed form from Guéant [18] /
+Guéant–Lehalle–Fernandez-Tapia [20]). The multi-asset **approximate** matrix Riccati is now
+discharged in `MatrixMarketMakingRiccati`.
 -/
 
 @[expose] public section
@@ -134,7 +134,8 @@ theorem valueFunction_satisfies_approxHJ
 
 /-! ## §3  Closed-form quotes — constant spread + inventory-linear skew (Models A & B) -/
 
-/-- **Exponential-intensity quote map** `δ̃_ξ(p) = p + c` (Guéant [18] / GLFT [20]); `c` is the model
+/-- **Exponential-intensity quote map** `δ̃_ξ(p) = p + c` (Guéant [18] / GLFT [20]); `c` is the
+model
     constant (`quoteConstA`/`quoteConstB`). Defined, not re-derived from the intensity sup. -/
 noncomputable def expIntensityQuote (c p : ℝ) : ℝ := p + c
 
@@ -152,13 +153,15 @@ noncomputable def mmQuoteBid (A B : ℝ → ℝ) (z c t q : ℝ) : ℝ :=
 noncomputable def mmQuoteAsk (A B : ℝ → ℝ) (z c t q : ℝ) : ℝ :=
   expIntensityQuote c (-2 * A t * q + A t * z - B t)
 
-/-- **Constant half-spread**: `(δ̌ᵃ + δ̌ᵇ) / 2 = A(t) · z + c`, independent of inventory `q`. Holds for
+/-- **Constant half-spread**: `(δ̌ᵃ + δ̌ᵇ) / 2 = A(t) · z + c`, independent of inventory `q`. Holds
+for
     both models via the constant `c` (`quoteConstA` for Model A, `quoteConstB` for Model B). -/
 theorem mmHalfSpread_const (A B : ℝ → ℝ) (z c t q : ℝ) :
     (mmQuoteAsk A B z c t q + mmQuoteBid A B z c t q) / 2 = A t * z + c := by
   unfold mmQuoteAsk mmQuoteBid expIntensityQuote; ring
 
-/-- **Inventory-linear skew**: `(δ̌ᵃ − δ̌ᵇ) / 2 = −2 · A(t) · q − B(t)` (the constant `c` cancels). -/
+/-- **Inventory-linear skew**: `(δ̌ᵃ − δ̌ᵇ) / 2 = −2 · A(t) · q − B(t)` (the constant `c` cancels).
+-/
 theorem mmSkew_linear (A B : ℝ → ℝ) (z c t q : ℝ) :
     (mmQuoteAsk A B z c t q - mmQuoteBid A B z c t q) / 2 = -2 * A t * q - B t := by
   unfold mmQuoteAsk mmQuoteBid expIntensityQuote; ring

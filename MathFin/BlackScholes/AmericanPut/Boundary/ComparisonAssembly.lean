@@ -21,7 +21,8 @@ is separate from these classical-contract results.
 
 ## Result
 
-Public entry points include `dividend_curvature_of_comparison_inputs`, `zeroDividend_curvature_of_comparison_inputs`, `stock_curvature_of_comparison_inputs`.
+Public entry points include `dividend_curvature_of_comparison_inputs`,
+`zeroDividend_curvature_of_comparison_inputs`, `stock_curvature_of_comparison_inputs`.
 -/
 
 @[expose] public section
@@ -71,7 +72,8 @@ theorem stock_curvature_of_comparison_inputs {k h : ℝ}
   have hs : ContDiffAt ℝ 2 b (normalizedTime σ expiry T) :=
     (hp.boundary_smooth.contDiffAt (Ioi_mem_nhds ht)).of_le (WithTop.coe_le_coe.mpr le_top)
   apply deriv2_stockBoundary_pos_of_nonneg hE hσ hT
-    (fun t ht => ((hp.boundary_smooth.contDiffAt (Ioi_mem_nhds ht)).differentiableAt (by simp)).hasDerivAt)
+    (fun t ht =>
+        ((hp.boundary_smooth.contDiffAt (Ioi_mem_nhds ht)).differentiableAt (by simp)).hasDerivAt)
     (((hs.derivWithin (m := 1) (by norm_num)).differentiableAt (by norm_num)).hasDerivAt)
     (dividend_curvature_of_comparison_inputs hp hinterval _ ht)
   exact (hspeed _ ht).ne

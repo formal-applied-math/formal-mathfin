@@ -69,10 +69,10 @@ theorem binomial_replicatingPortfolio_unique
   have hexp : Real.exp (-r) * Real.exp r = 1 := by
     rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
   refine Prod.ext ?_ ?_
-  · show Δ = (V_u - V_d) / (S₀ * (u - d))
+  · change Δ = (V_u - V_d) / (S₀ * (u - d))
     rw [eq_div_iff (mul_ne_zero hS₀.ne' hud)]
     linear_combination h_up - h_down
-  · show B = Real.exp (-r) * (u * V_d - d * V_u) / (u - d)
+  · change B = Real.exp (-r) * (u * V_d - d * V_u) / (u - d)
     rw [eq_div_iff hud]
     linear_combination Real.exp (-r) * (u * h_down - d * h_up) - B * (u - d) * hexp
 

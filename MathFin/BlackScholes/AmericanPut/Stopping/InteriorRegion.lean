@@ -17,7 +17,8 @@ inside continuation, where physical time is strictly below maturity.
 
 ## Result
 
-Public entry points include `planeClassicalGap`, `planeClassicalGap_continuous`, `planeClassicalGap_eq`, `interiorRegion`.
+Public entry points include `planeClassicalGap`, `planeClassicalGap_continuous`,
+`planeClassicalGap_eq`, `interiorRegion`.
 -/
 
 @[expose] public section
@@ -104,7 +105,8 @@ theorem brownianInteriorRule_mem_region {p : ℝ → ℝ → ℝ} {b : ℝ → �
         (classicalGap_continuous hp continuous_brownian T) continuous_brownian ω hlt
       exact ⟨hh.1.le,hh.2.1.le,hh.2.2.le⟩
     · subst t
-      exact interiorRule_at_positive_exit (classicalGap_adapted hp brownian_adapted T) brownian_adapted
+      exact interiorRule_at_positive_exit (classicalGap_adapted hp brownian_adapted T)
+          brownian_adapted
         (classicalGap_continuous hp continuous_brownian T) continuous_brownian ω hpos
   have htT : t ≤ T := ht.trans ((brownianInteriorRule hp T n).le_horizon ω)
   refine ⟨⟨⟨t.coe_nonneg,by exact_mod_cast htT⟩,?_,(abs_le.mp hm.2.1).2⟩,?_,hm.2.2⟩

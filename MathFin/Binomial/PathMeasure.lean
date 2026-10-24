@@ -132,7 +132,8 @@ theorem binomialPrice_eq_sum (u d r q : ℝ) (hq : crrUpProb u d r = q) (g : ℝ
             (∏ i, if y i then q else 1 - q) * g (S * u * ∏ i, if y i then u else d)
           + (1 - q) * ∑ y : Fin n → Bool,
             (∏ i, if y i then q else 1 - q) * g (S * d * ∏ i, if y i then u else d) := by
-      rw [← (Fin.consEquiv fun _ : Fin (n + 1) ↦ Bool).sum_comp, Fintype.sum_prod_type, Fintype.sum_bool,
+      rw [← (Fin.consEquiv fun _ : Fin (n + 1) ↦ Bool).sum_comp, Fintype.sum_prod_type,
+          Fintype.sum_bool,
         mul_sum, mul_sum]
       simp only [Fin.consEquiv, Equiv.coe_fn_mk, Fin.prod_univ_succ, Fin.cons_zero,
         Fin.cons_succ, Bool.false_eq_true, ↓reduceIte, mul_assoc]

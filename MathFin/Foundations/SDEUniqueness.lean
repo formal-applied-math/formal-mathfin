@@ -50,7 +50,7 @@ namespace MathFin
 `g t ≤ K·G t = 0` with `g ≥ 0` gives `g t = 0`. -/
 theorem gronwall_zero_of_le_const_mul_integral {g : ℝ → ℝ} {K b : ℝ}
     (hg0 : ∀ t, 0 ≤ g t) (hgc : ContinuousOn g (Set.Ici 0))
-    (hle : ∀ t ∈ Set.Icc 0 b, g t ≤ K * ∫ s in (0:ℝ)..t, g s) :
+    (hle : ∀ t ∈ Set.Icc 0 b, g t ≤ K * ∫ s in (0 : ℝ)..t, g s) :
     ∀ t ∈ Set.Icc 0 b, g t = 0 := by
   intro t ht
   obtain ⟨ht0, htb⟩ := ht
@@ -116,7 +116,7 @@ private lemma drift_energy_le {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω
     {X Y : ℝ → Ω → ℝ} {s : ℝ} (hs : 0 ≤ s)
     (hfL2 : ∀ᵐ ω ∂μ,
       MemLp (fun u ↦ μ_coef (X u ω) - μ_coef (Y u ω)) 2 (volume.restrict (Set.Ioc 0 s)))
-    (hLHSint : Integrable (fun ω ↦ (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) μ)
+    (hLHSint : Integrable (fun ω ↦ (∫ u in (0 : ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) μ)
     (hprodXY : Integrable (Function.uncurry fun u ω ↦ (X u ω - Y u ω) ^ 2)
       ((volume.restrict (Set.uIoc 0 s)).prod μ)) :
     (∫ ω, (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2 ∂μ)
@@ -186,17 +186,17 @@ theorem sde_pathwise_uniqueness
     {Cdrift Cdiff : ℝ} (hCd : 0 ≤ Cdrift)
     (hXYint : ∀ s, 0 ≤ s → Integrable (fun ω ↦ (X s ω - Y s ω) ^ 2) μ)
     (hDint : ∀ s, 0 ≤ s →
-      Integrable (fun ω ↦ (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) μ)
+      Integrable (fun ω ↦ (∫ u in (0 : ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) μ)
     (hJint : ∀ s, 0 ≤ s → Integrable (fun ω ↦ ((Iσ X) s ω - (Iσ Y) s ω) ^ 2) μ)
     (hEcont : ContinuousOn (fun s ↦ ∫ ω, (X s ω - Y s ω) ^ 2 ∂μ) (Set.Ici 0))
     (hdecomp : ∀ s, 0 ≤ s → ∀ᵐ ω ∂μ, X s ω - Y s ω
-      = (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) + ((Iσ X) s ω - (Iσ Y) s ω))
+      = (∫ u in (0 : ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) + ((Iσ X) s ω - (Iσ Y) s ω))
     (hdrift : ∀ s, 0 ≤ s →
-      (∫ ω, (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2 ∂μ)
-        ≤ Cdrift * s * ∫ u in (0:ℝ)..s, (∫ ω, (X u ω - Y u ω) ^ 2 ∂μ))
+      (∫ ω, (∫ u in (0 : ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2 ∂μ)
+        ≤ Cdrift * s * ∫ u in (0 : ℝ)..s, (∫ ω, (X u ω - Y u ω) ^ 2 ∂μ))
     (hIso : ∀ s, 0 ≤ s →
       (∫ ω, ((Iσ X) s ω - (Iσ Y) s ω) ^ 2 ∂μ)
-        ≤ Cdiff * ∫ u in (0:ℝ)..s, (∫ ω, (X u ω - Y u ω) ^ 2 ∂μ)) :
+        ≤ Cdiff * ∫ u in (0 : ℝ)..s, (∫ ω, (X u ω - Y u ω) ^ 2 ∂μ)) :
     ∀ t, 0 ≤ t → ∀ᵐ ω ∂μ, X t ω = Y t ω := by
   -- the L² energy of the state error
   set E : ℝ → ℝ := fun s ↦ ∫ ω, (X s ω - Y s ω) ^ 2 ∂μ

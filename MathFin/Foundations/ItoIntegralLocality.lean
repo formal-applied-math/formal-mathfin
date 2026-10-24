@@ -383,7 +383,7 @@ private lemma coe_stepSP {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t)) {a' b 
         TBoundedSP T hBmeas).val.valueBot ω) t = 0 := by
     simp [ItoIntegralBrownian.stepSP]
   rw [hbot, zero_add]
-  show (Finsupp.single (a', b) ψ).sum
+  change (Finsupp.single (a', b) ψ).sum
       (fun p v ↦ (Set.Ioc p.1 p.2).indicator (fun _ ↦ v ω) t) = _
   rw [Finsupp.sum_single_index (by simp)]
 
@@ -753,7 +753,8 @@ theorem itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after (T u : ℝ≥0) (huT
     filter_upwards [hφ, ae_fst_mem_Ioc_trimMeasure_T (μ := μ) T hBmeas] with z hz hzT hznot
     rw [hz (by by_contra hc; exact hznot ⟨⟨hzT.1, not_lt.mp hc⟩, Set.mem_univ _⟩)]
     ring
-  have hnorm : ‖(condExpL2 ℝ ℝ ((ItoIntegralL2.natFiltration hBmeas).le u) X : Lp ℝ 2 μ)‖ = ‖X‖ := by
+  have hnorm :
+      ‖(condExpL2 ℝ ℝ ((ItoIntegralL2.natFiltration hBmeas).le u) X : Lp ℝ 2 μ)‖ = ‖X‖ := by
     have hsq : ‖itoProcessCLM hB T u hBmeas φ‖ ^ 2 = ‖X‖ ^ 2 := by
       rw [itoProcessCLM_norm_sq hB huT hBmeas φ, hband, hX, itoIntegralCLM_T_norm hB T hBmeas φ,
         ItoIntegralL2.lp_two_norm_sq φ]

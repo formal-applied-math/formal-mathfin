@@ -96,7 +96,7 @@ with equality. -/
 lemma convexOn_sub_const_id (a : ℝ) :
     ConvexOn ℝ Set.univ (fun K : ℝ ↦ a - K) := by
   refine ⟨convex_univ, fun K₁ _ K₂ _ s t _ _ hst ↦ ?_⟩
-  show a - (s • K₁ + t • K₂) ≤ s • (a - K₁) + t • (a - K₂)
+  change a - (s • K₁ + t • K₂) ≤ s • (a - K₁) + t • (a - K₂)
   simp only [smul_eq_mul]
   -- Equality (affine functions are tight): `s·a + t·a = a` via `s + t = 1`.
   have h_sa_ta : s * a + t * a = a := by linear_combination a * hst
@@ -136,12 +136,12 @@ theorem convexOn_integral_call {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Mea
   integral_convexOn_of_integrand_ae convex_univ (ae_of_all _ fun ω ↦ convexOn_call_payoff (X ω))
     fun k _ ↦ (hX.sub (integrable_const k)).pos_part
 
-/-- **The call price is strictly convex in the strike wherever the law charges every interval.**
-For an integrable `X` under a finite measure `μ` and a convex set `s` of strikes such that
-`μ {k₁ < X < k₂} ≠ 0` whenever `k₁ < k₂` lie in `s`, `k ↦ ∫ (X − k)⁺ dμ` is strictly convex on
-`s`: every butterfly spread `a C(k₁) + b C(k₂) − C(a k₁ + b k₂)` (`a, b > 0`, `a + b = 1`) with
-distinct strikes `k₁ ≠ k₂` in `s` has a positive price. Its payoff is nonnegative (`convexOn_call_payoff`), and
-positive when `k₁ < X < k₂`, where the call struck at `k₂` pays nothing. -/
+/-- **The call price is strictly convex in the strike wherever the law charges every interval.** For
+an integrable `X` under a finite measure `μ` and a convex set `s` of strikes such that
+`μ {k₁ < X < k₂} ≠ 0` whenever `k₁ < k₂` lie in `s`, `k ↦ ∫ (X − k)⁺ dμ` is strictly convex on `s`:
+every butterfly spread `a C(k₁) + b C(k₂) − C(a k₁ + b k₂)` (`a, b > 0`, `a + b = 1`) with distinct
+strikes `k₁ ≠ k₂` in `s` has a positive price. Its payoff is nonnegative (`convexOn_call_payoff`),
+and positive when `k₁ < X < k₂`, where the call struck at `k₂` pays nothing. -/
 theorem strictConvexOn_integral_call {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
     [IsFiniteMeasure μ] {X : Ω → ℝ} (hX : Integrable X μ) {s : Set ℝ} (hs : Convex ℝ s)
     (hμ : ∀ k₁ ∈ s, ∀ k₂ ∈ s, k₁ < k₂ → μ {ω | k₁ < X ω ∧ X ω < k₂} ≠ 0) :

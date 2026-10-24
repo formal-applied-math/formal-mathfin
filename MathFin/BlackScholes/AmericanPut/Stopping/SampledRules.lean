@@ -11,7 +11,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.AmericanValue
 /-! # Discrete rules sampled at arbitrary deterministic increasing times 
 ## Result
 
-Public entry points include `sampledFiltration`, `DiscreteRule.toSampledRule`, `bellmanAux_const_mul`.
+Public entry points include `sampledFiltration`, `DiscreteRule.toSampledRule`,
+`bellmanAux_const_mul`.
 -/
 
 @[expose] public section

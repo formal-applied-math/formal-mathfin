@@ -15,7 +15,8 @@ dominated convergence of difference quotients along the actual contact rules.
 
 ## Result
 
-Public entry points include `normalized_putReward_eq_logPayoff`, `actualContactSlope`, `actualContactSlope_bound`, `actualContactSlope_measurable`.
+Public entry points include `normalized_putReward_eq_logPayoff`, `actualContactSlope`,
+`actualContactSlope_bound`, `actualContactSlope_measurable`.
 -/
 
 @[expose] public section

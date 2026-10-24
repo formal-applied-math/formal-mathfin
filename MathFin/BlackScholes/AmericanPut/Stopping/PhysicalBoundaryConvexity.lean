@@ -9,14 +9,14 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.ActualBoundaryNormalizat
 
 /-! # Convexity of the actual American put option boundary in physical units
 
-The parameter hypotheses are exactly positive strike, risk-free interest rate
-and volatility, with nonnegative dividend yield at most the risk-free interest
-rate. The time variable is time-to-expiry. These are convex-function results; classical second-derivative
-existence is not asserted.
+The parameter hypotheses are exactly positive strike, risk-free interest rate and volatility, with
+nonnegative dividend yield at most the risk-free interest rate. The time variable is time-to-expiry.
+These are convex-function results; classical second-derivative existence is not asserted.
 
 ## Result
 
-Public entry points include `brownianUsualLogBoundary_convexOn`, `brownianUsualStockBoundary_strictConvexOn`, and `brownianUsualStockBoundary_strictAntiOn`.
+Public entry points include `brownianUsualLogBoundary_convexOn`,
+`brownianUsualStockBoundary_strictConvexOn`, and `brownianUsualStockBoundary_strictAntiOn`.
 -/
 
 @[expose] public section
@@ -101,14 +101,14 @@ theorem zeroDividend_brownianUsualStockBoundary_strictConvexOn {K r σ : ℝ}
   brownianUsualStockBoundary_strictConvexOn hK hr le_rfl hr.le hσ
 
 theorem liuRange_brownianUsualLogBoundary_convexOn {K r q σ : ℝ}
-    (hK : 0 < K) (hq : 0 ≤ q) (hσ : 0 < σ) (hliu : q+σ^2/2 ≤ r) :
+    (hK : 0 < K) (hq : 0 ≤ q) (hσ : 0 < σ) (hliu : q + σ ^ 2 / 2 ≤ r) :
     ConvexOn ℝ (Ioi 0)
       (fun τ : ℝ => Real.log (brownianUsualExerciseBoundary K r q σ τ.toNNReal/K)) := by
   have ha : 0 < σ^2/2 := by positivity
   exact brownianUsualLogBoundary_convexOn hK (by linarith) hq (by linarith) hσ
 
 theorem liuRange_brownianUsualStockBoundary_strictConvexOn {K r q σ : ℝ}
-    (hK : 0 < K) (hq : 0 ≤ q) (hσ : 0 < σ) (hliu : q+σ^2/2 ≤ r) :
+    (hK : 0 < K) (hq : 0 ≤ q) (hσ : 0 < σ) (hliu : q + σ ^ 2 / 2 ≤ r) :
     StrictConvexOn ℝ (Ioi 0)
       (fun τ : ℝ => brownianUsualExerciseBoundary K r q σ τ.toNNReal) := by
   have ha : 0 < σ^2/2 := by positivity

@@ -18,7 +18,8 @@ At zero dividends the contract is equivalent to the existing CCJZ contract.
 
 ## Result
 
-Public entry points include `dividendSpatialOperator`, `normalized_dividend_regime`, `liu_condition_normalization`, `DividendPutSolution`.
+Public entry points include `dividendSpatialOperator`, `normalized_dividend_regime`,
+`liu_condition_normalization`, `DividendPutSolution`.
 -/
 
 @[expose] public section

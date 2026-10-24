@@ -135,9 +135,10 @@ def _source(ref: str, path: str) -> str | None:
 
 
 def misattributed(ref: str = "HEAD") -> dict[str, str]:
-    """Contributor-added `MathFin/` files whose header does not name the contributor."""
+    """Contributor-added Lean source files (library, examples, tests) whose header does not name the contributor."""
     added_by = first_authors(ref)
-    files = _git("ls-tree", "-r", "--name-only", ref, "--", "MathFin").split()
+    files = _git("ls-tree", "-r", "--name-only", ref, "--",
+                 "MathFin", "MathFinExamples", "MathFinTest").split()
     problems = {}
     for path in files:
         who = added_by.get(path)

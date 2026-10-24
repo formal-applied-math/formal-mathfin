@@ -55,7 +55,7 @@ lemma integrable_id_mul_gaussianPDFReal_volume :
   have h_eq : (fun z : ℝ ↦ (gaussianPDF (0 : ℝ) 1 z).toReal • id z)
             = (fun z : ℝ ↦ z * gaussianPDFReal 0 1 z) := by
     funext z
-    show (gaussianPDF (0 : ℝ) 1 z).toReal • z = z * gaussianPDFReal 0 1 z
+    change (gaussianPDF (0 : ℝ) 1 z).toReal • z = z * gaussianPDFReal 0 1 z
     unfold gaussianPDF
     rw [ENNReal.toReal_ofReal (gaussianPDFReal_nonneg _ _ _)]
     simp [smul_eq_mul, mul_comm]

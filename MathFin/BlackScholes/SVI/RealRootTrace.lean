@@ -33,7 +33,7 @@ theorem realRootEval_mk (c : ℝ) (r : ℕ) (hr : 0 < r) (p : ℝ[X]) :
 /-- In a repeated real-root component, every element differs from its value
 at the root by a nilpotent. -/
 theorem realRoot_nilpotent_remainder (c : ℝ) (r : ℕ) (hr : 0 < r)
-    (x : AdjoinRoot ((X-C c)^r)) :
+    (x : AdjoinRoot ((X - C c) ^ r)) :
     IsNilpotent (x - algebraMap ℝ _ (realRootEval c r hr x)) := by
   induction x using AdjoinRoot.induction_on with
   | ih p =>
@@ -52,7 +52,7 @@ theorem realRoot_nilpotent_remainder (c : ℝ) (r : ℕ) (hr : 0 < r)
 /-- A root of multiplicity r contributes r times its evaluation to the
 algebra trace. This is the key boundary-safe multiplicity identity. -/
 theorem trace_realRoot_component (c : ℝ) (r : ℕ) (hr : 0 < r)
-    (x : AdjoinRoot ((X-C c)^r)) :
+    (x : AdjoinRoot ((X - C c) ^ r)) :
     Algebra.trace ℝ _ x = (r : ℝ) * realRootEval c r hr x := by
   have hf : (X-C c)^r ≠ (0 : ℝ[X]) := pow_ne_zero _ (X_sub_C_ne_zero c)
   let pb := AdjoinRoot.powerBasis hf

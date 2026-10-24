@@ -57,7 +57,7 @@ theorem matrixCertificate_iff (P : ℝ[X]) (hd : P.natDegree ≤ 10) :
 /-- The full boundary-safe determinant certificate for the smooth,
 positive-variance SVI Durrleman condition. -/
 theorem svi_matrixCertificate_iff (p : Params) (hs : 0 < p.sigma)
-    (hb : 0 ≤ p.b) (hr : 0 ≤ 1-p.rho^2) (hg : varianceGate p) :
+    (hb : 0 ≤ p.b) (hr : 0 ≤ 1 - p.rho ^ 2) (hg : varianceGate p) :
     matrixCertificate (polynomial p) ↔ ∀ k : ℝ, 0 ≤ durrleman p k := by
   rw [matrixCertificate_iff_criticalCertificate _ (degree_le_ten p)]
   exact svi_criticalCertificate_iff p hs hb hr hg

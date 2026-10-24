@@ -15,7 +15,8 @@ on the causal kernel, allowing Mathlib's parameter-convolution theorem to apply.
 
 ## Result
 
-Public entry points include `causalBoundaryIntegral`, `compact_causalBoundaryIntegral_smooth`, `heatBoundaryExtension_eq_causalBoundaryIntegral`, `compact_heatBoundaryExtension_smooth`.
+Public entry points include `causalBoundaryIntegral`, `compact_causalBoundaryIntegral_smooth`,
+`heatBoundaryExtension_eq_causalBoundaryIntegral`, `compact_heatBoundaryExtension_smooth`.
 -/
 
 @[expose] public section

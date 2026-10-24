@@ -168,7 +168,8 @@ attribute [blueprint "thm:continuous-ftap" (title := "Continuous-time first FTAP
   machinery. -/)]
   MathFin.discountedGBM_isMartingale
 
-attribute [blueprint "thm:martingale-representation" (title := "Martingale representation (terminal form)")
+attribute [blueprint "thm:martingale-representation"
+  (title := "Martingale representation (terminal form)")
   (statement := /-- Every square-integrable $\mathcal{F}^B_T$-measurable claim is its
   own mean plus an Itô integral, $F = E[F] + \int_0^T \varphi\,dB$, for a *unique*
   integrand $\varphi$. The Itô isometry's range is closed, hence orthogonally
@@ -178,7 +179,8 @@ attribute [blueprint "thm:martingale-representation" (title := "Martingale repre
   isometry. -/)]
   MathFin.exists_itoIntegral_representation
 
-attribute [blueprint "thm:martingale-representation-process" (title := "Martingale representation (process form)")
+attribute [blueprint "thm:martingale-representation-process"
+  (title := "Martingale representation (process form)")
   (statement := /-- Every square-integrable martingale on the Brownian filtration is its
   initial value plus an Itô integral process, $M_t = M_0 + (\varphi\cdot B)_t$ for
   $t \le T$. The terminal form supplies the integrand; the martingale property spreads it
@@ -271,7 +273,8 @@ attribute [blueprint "thm:carr-madan" (title := "Carr–Madan static replication
   specializes to the variance-swap $1/K^2$ strip. -/)]
   MathFin.carrMadan_spanning
 
-attribute [blueprint "thm:binomial-representation" (title := "Binomial martingale representation (completeness)")
+attribute [blueprint "thm:binomial-representation"
+  (title := "Binomial martingale representation (completeness)")
   (statement := /-- On the binomial tree every martingale is the discrete
   stochastic integral of a *predictable* hedge: $H = \Delta M/\Delta S$, fixed
   before the flip — completeness, the second pillar of the FTAP, purely

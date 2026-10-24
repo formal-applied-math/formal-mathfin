@@ -25,7 +25,7 @@ variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} [IsProbabilityMeasur
 theorem discrete_stopped_martingale_of_before
     (ha : StronglyAdapted 𝓕 U) (hi : ∀ i, Integrable (U i) P)
     (hτ : IsStoppingTime 𝓕 (fun ω => (τ ω : WithTop ℕ)))
-    (hbefore : ∀ i ω, i < τ ω → P[U (i+1) | 𝓕 i] ω = U i ω) :
+    (hbefore : ∀ i ω, i < τ ω → P[U (i + 1) | 𝓕 i] ω = U i ω) :
     Martingale (stoppedProcess U (fun ω => (τ ω : WithTop ℕ))) 𝓕 P := by
   apply martingale_of_condExp_sub_eq_zero_nat (ha.stoppedProcess_of_discrete hτ)
     (fun i => integrable_stoppedValue ℕ ((isStoppingTime_const 𝓕 i).min hτ) hi

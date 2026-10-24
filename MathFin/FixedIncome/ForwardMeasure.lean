@@ -90,7 +90,7 @@ theorem forwardMeasure_price {Q : Measure Ω} (X : Ω → ℝ) (r T : ℝ) :
   simp only [div_one, one_mul] at h
   rw [forwardMeasure, h]
   refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
-  show X ω / Real.exp (r * T) = Real.exp (-(r * T)) * X ω
+  change X ω / Real.exp (r * T) = Real.exp (-(r * T)) * X ω
   rw [div_eq_mul_inv, ← Real.exp_neg, mul_comm]
 
 /-- **The forward price is the `Q^T`-expectation of the spot**: given the EMM

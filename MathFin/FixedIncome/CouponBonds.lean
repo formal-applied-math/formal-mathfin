@@ -74,7 +74,7 @@ lemma hasDerivAt_neg_log_zcb_T (r t T : ℝ) :
     HasDerivAt (fun T' ↦ -Real.log (zcb r t T')) r T := by
   have h_eq : ∀ T' : ℝ, -Real.log (zcb r t T') = r * (T' - t) := by
     intro T'
-    show -Real.log (Real.exp (-(r * (T' - t)))) = r * (T' - t)
+    change -Real.log (Real.exp (-(r * (T' - t)))) = r * (T' - t)
     rw [Real.log_exp]
     ring
   have h_lin : HasDerivAt (fun T' : ℝ ↦ r * (T' - t)) r T := by

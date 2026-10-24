@@ -14,7 +14,8 @@ This proves price positivity without a classical PDE or optimal stopping rule.
 
 ## Result
 
-Public entry points include `gaussian_put_integral_pos`, `brownian_put_maturity_reward_pos`, `brownianAmericanPut_pos`, `brownianUsualAmericanPut_pos`.
+Public entry points include `gaussian_put_integral_pos`, `brownian_put_maturity_reward_pos`,
+`brownianAmericanPut_pos`, `brownianUsualAmericanPut_pos`.
 -/
 
 @[expose] public section

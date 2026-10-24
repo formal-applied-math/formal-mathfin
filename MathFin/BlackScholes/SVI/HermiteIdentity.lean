@@ -30,7 +30,8 @@ open Polynomial
 private theorem unit_trace_signature (f q : ℝ[X]) (hf : IsUnit f) :
     formSignature (weightedTraceForm f q).toQuadraticMap = 0 := by
   have hf0 := hf.ne_zero
-  letI : FiniteDimensional ℝ (AdjoinRoot f) := Module.Finite.of_basis (AdjoinRoot.powerBasis hf0).basis
+  letI : FiniteDimensional ℝ (AdjoinRoot f) :=
+      Module.Finite.of_basis (AdjoinRoot.powerBasis hf0).basis
   have hd : Module.finrank ℝ (AdjoinRoot f) = 0 := by
     rw [(AdjoinRoot.powerBasis hf0).finrank, AdjoinRoot.powerBasis_dim]
     exact natDegree_eq_zero_of_isUnit hf
@@ -68,7 +69,8 @@ theorem weightedTraceForm_signature (f q : ℝ[X]) (hf : f ≠ 0) :
     have hrp : 0 < r := Nat.pos_of_ne_zero hr
     have ha := (associated_normalize p).pow_pow (n := r)
     rw [weightedTraceForm_associated_signature _ _ q ha, ha.roots_eq]
-    have hi : Irreducible (normalize p) := (associated_normalize p).irreducible_iff.mp hp.irreducible
+    have hi : Irreducible (normalize p) :=
+        (associated_normalize p).irreducible_iff.mp hp.irreducible
     rcases monic_real_irreducible_cases (normalize p) (monic_normalize hp.ne_zero) hi with
       ⟨c, hc⟩ | ⟨a,b,hb,hp⟩
     · rw [hc, weightedTraceForm_realRoot_signature c r hrp q]

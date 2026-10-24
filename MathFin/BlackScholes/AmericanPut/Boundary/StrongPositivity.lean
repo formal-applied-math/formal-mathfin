@@ -47,7 +47,8 @@ theorem positive_later_of_positive_point {U D : ℝ → ℝ → ℝ} {β a T M x
   obtain ⟨l,r,⟨hl,hr⟩,hsub⟩ := hnear.exists_Ioo_subset
   let ρ := min ((x-l)/2) (min ((r-x)/2) ((y-β)/2))
   have hρ : 0 < ρ := lt_min (by linarith) (lt_min (by linarith) (by linarith))
-  have hρl : ρ < x-l := by have := min_le_left ((x-l)/2) (min ((r-x)/2) ((y-β)/2)); dsimp [ρ]; linarith
+  have hρl : ρ < x-l := by
+    have := min_le_left ((x-l)/2) (min ((r-x)/2) ((y-β)/2)); dsimp [ρ]; linarith
   have hρr : ρ < r-x := by
     have hh := (min_le_right ((x-l)/2) (min ((r-x)/2) ((y-β)/2))).trans (min_le_left _ _)
     change ρ ≤ (r-x)/2 at hh

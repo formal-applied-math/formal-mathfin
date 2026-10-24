@@ -10,7 +10,8 @@ public import MathFin.BlackScholes.AmericanPut.Boundary.ParabolicValley
 /-! # Removing smoothing from the three-point maximum principle 
 ## Result
 
-Public entry points include `three_point_bound_of_positive_superlevels`, `parabolic_three_point_bound`.
+Public entry points include `three_point_bound_of_positive_superlevels`,
+`parabolic_three_point_bound`.
 -/
 
 @[expose] public section

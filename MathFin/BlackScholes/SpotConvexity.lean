@@ -52,7 +52,7 @@ lemma convexOn_call_payoff_spot (K : ℝ) :
     ConvexOn ℝ Set.univ (fun S : ℝ ↦ max (S - K) 0) := by
   refine ConvexOn.sup ⟨convex_univ, fun a _ b _ s t _ _ hst ↦ ?_⟩
     (convexOn_const (0 : ℝ) convex_univ)
-  show s • a + t • b - K ≤ s • (a - K) + t • (b - K)
+  change s • a + t • b - K ≤ s • (a - K) + t • (b - K)
   simp only [smul_eq_mul]
   have h_kk : s * K + t * K = K := by linear_combination K * hst
   linarith

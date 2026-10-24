@@ -20,7 +20,8 @@ which is proved in `ComparisonUnimodality`; neither is a pricing-contract field.
 
 ## Result
 
-Public entry points include `lineDifference`, `lineDifference_continuousOn`, `lineDifference_contDiffAt`, `lineDifference_equation`.
+Public entry points include `lineDifference`, `lineDifference_continuousOn`,
+`lineDifference_contDiffAt`, `lineDifference_equation`.
 -/
 
 @[expose] public section
@@ -88,7 +89,8 @@ theorem lineDifference_fit (hp : ContinuousBoundaryPutSolution k h p b) {T : ℝ
     rw [hn, zero_div]
   have hnum := (hp.smooth_fit T hT).sub hqd.hasDerivWithinAt
   have hden := (shiftedProfile_hasDeriv_x (d := d) hf (b T) T).hasDerivWithinAt (s := Ici (b T))
-  have hquot : HasDerivWithinAt (fun x => straightDifference p k h c d x T) 0 (Ici (b T)) (b T) := by
+  have hquot : HasDerivWithinAt (fun x => straightDifference p k h c d x T) 0
+      (Ici (b T)) (b T) := by
     convert! hnum.div hden (hf.pos _).ne' using 1
     simp only [Pi.sub_apply, sub_self, zero_mul, hn, zero_div]
   refine ⟨?_, ?_⟩
@@ -146,7 +148,8 @@ theorem lineDifference_no_positive_rectangle (hp : ContinuousBoundaryPutSolution
   obtain ⟨hzero,hd⟩ := lineDifference_fit hp (ha.trans_le haT) hcontact
   have hpos := terminal_hopf (D := D)
     (M := -(k - h - 1 - c + 2 * negativeRoot (k - h - 1 - c) k)) hL haT hu hux hut
-    (fun y t hy _ hat htT => (lineDifference_equation hp (ha.trans hat) (hinside y t hy hat htT)).ge)
+    (fun y t hy _ hat htT =>
+        (lineDifference_equation hp (ha.trans hat) (hinside y t hy hat htT)).ge)
     (fun y t _ _ _ _ => by
       have := (profile_slope_bounds (β := k - h - 1 - c) hp.rate_pos y).1
       dsimp [D]
@@ -162,7 +165,8 @@ theorem zeroDividend_no_positive_rectangle {k c d : ℝ} {p : ℝ → ℝ → �
     (hline : ∀ t ∈ Icc a T, b t ≤ d - c * t) (hcontact : b T = d - c * T)
     (hbottom : ∀ y ∈ Icc 0 L, 0 < lineDifference p k 0 c d y a)
     (hright : ∀ t ∈ Icc a T, 0 < lineDifference p k 0 c d L t) : False :=
-  lineDifference_no_positive_rectangle (dividendPutSolution_zero_iff.mpr hp).toContinuousBoundaryPutSolution
+  lineDifference_no_positive_rectangle
+      (dividendPutSolution_zero_iff.mpr hp).toContinuousBoundaryPutSolution
     hL ha haT hline hcontact hbottom hright
 
 end MathFin.BlackScholes.AmericanPut.Boundary.Comparison

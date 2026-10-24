@@ -531,7 +531,7 @@ theorem variance (h : BSCallHyp μ S_0 K r σ T Z) :
         - (K * Real.exp (-r * T) * Phi (-(bsd2 S_0 K r σ T))
             - S_0 * Phi (-(bsd1 S_0 K r σ T))) ^ 2 := by
   rw [variance_eq_sub (memLp2_payoff h)]
-  show ∫ ω, payoff S_0 K r σ T (Z ω) ^ 2 ∂μ
+  change ∫ ω, payoff S_0 K r σ T (Z ω) ^ 2 ∂μ
       - (∫ ω, payoff S_0 K r σ T (Z ω) ∂μ) ^ 2 = _
   rw [secondMoment h, mean_eq_bsPut h]
 
@@ -757,7 +757,7 @@ theorem memLp2_mcCallPayoff (h : BSCallHyp μ S_0 K r σ T Z) :
   rw [memLp_two_iff_integrable_sq_norm (aestronglyMeasurable_mcCallPayoff h)]
   refine (integrable_congr ?_).mp hint2
   filter_upwards with ω
-  show mcCallPayoff S_0 K r σ T (Z ω) ^ 2 = ‖mcCallPayoff S_0 K r σ T (Z ω)‖ ^ 2
+  change mcCallPayoff S_0 K r σ T (Z ω) ^ 2 = ‖mcCallPayoff S_0 K r σ T (Z ω)‖ ^ 2
   rw [Real.norm_eq_abs, sq_abs]
 
 /-- The mean of one sampled call payoff is the Black–Scholes call price: MathFin's
@@ -1064,7 +1064,7 @@ theorem mc_call_variance (h : BSCallHyp μ S_0 K r σ T Z) :
         - (S_0 * Phi (bsd1 S_0 K r σ T)
             - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T)) ^ 2 := by
   rw [variance_eq_sub (memLp2_mcCallPayoff h)]
-  show ∫ ω, mcCallPayoff S_0 K r σ T (Z ω) ^ 2 ∂μ
+  change ∫ ω, mcCallPayoff S_0 K r σ T (Z ω) ^ 2 ∂μ
       - (∫ ω, mcCallPayoff S_0 K r σ T (Z ω) ∂μ) ^ 2 = _
   rw [secondMoment_mcCallPayoff h, mean_mcCallPayoff_eq_bsCall h]
 
@@ -1242,7 +1242,8 @@ theorem mc_call_clt_canonical (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT :
         (Var[fun ω ↦ mcCallPayoff S_0 K r σ T (ω 0); canonicalEnsemble]).toNNReal) := by
   have h : BSCallHyp canonicalEnsemble S_0 K r σ T (fun ω ↦ ω 0) :=
     ⟨hS_0, hK, hσ, hT, hasLaw_canonical 0⟩
-  have hclt := mc_call_clt (Z := fun (i : ℕ) (ω : ℕ → ℝ) ↦ ω i) h hasLaw_canonical iIndepFun_canonical
+  have hclt :=
+      mc_call_clt (Z := fun (i : ℕ) (ω : ℕ → ℝ) ↦ ω i) h hasLaw_canonical iIndepFun_canonical
   rw [mean_mcCallPayoff_eq_bsCall h] at hclt
   rw [bsV, ← neg_mul]
   exact hclt

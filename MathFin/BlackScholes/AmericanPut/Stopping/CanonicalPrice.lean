@@ -16,7 +16,8 @@ classical contract uses nonnegative times. No PDE or boundary is postulated.
 
 ## Result
 
-Public entry points include `canonicalPrice`, `canonicalPrice_continuous`, `canonicalPrice_initial`, `canonicalPrice_bounds`.
+Public entry points include `canonicalPrice`, `canonicalPrice_continuous`, `canonicalPrice_initial`,
+`canonicalPrice_bounds`.
 -/
 
 @[expose] public section
@@ -55,7 +56,8 @@ theorem canonicalPrice_initial {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) :
   let μ := completedMeasure gaussianLimit
   have hz : ∀ᵐ ω ∂μ, brownian 0 ω = 0 := isBrownianReal_brownian.eval_zero_ae_eq_zero
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
-  have hh := value_at_expiry (P := μ) (𝓕 := brownianUsualFiltration) (K := 1) (q := h) (σ := Real.sqrt 2)
+  have hh :=
+      value_at_expiry (P := μ) (𝓕 := brownianUsualFiltration) (K := 1) (q := h) (σ := Real.sqrt 2)
     brownian_completed_measurable hz
     (by norm_num) hk (Real.exp_pos x).le
   simpa only [canonicalPrice, brownianUsualAmericanPut, putPayoff, Real.toNNReal_zero] using hh

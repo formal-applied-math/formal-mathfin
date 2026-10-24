@@ -330,7 +330,8 @@ This is what makes the stages one argument rather than three. Stage 2 hands back
 are the same number. No hypothesis that the denominator is nonzero is needed —
 in the degenerate case both sides are `0`, which is precisely the behaviour the
 issue's statement must not be allowed to hide. -/
-theorem cond_toReal_eq [IsProbabilityMeasure μ] (E H : Set Ω) (hE : MeasurableSet E) (hH : MeasurableSet H)
+theorem cond_toReal_eq [IsProbabilityMeasure μ] (E H : Set Ω) (hE : MeasurableSet E)
+    (hH : MeasurableSet H)
     {a c t : ℝ} (ha : (μ[E | H]).toReal = a) (hc : (μ[E | Hᶜ]).toReal = c)
     (ht : (μ H).toReal = t) :
     (μ[H | E]).toReal = a * t / (a * t + c * (1 - t)) := by
@@ -371,7 +372,8 @@ theorem cond_buy_low_toReal (H B : Set Ω) {p : ℝ} (hp0 : 0 ≤ p)
 /-- **The posterior after a buy is exactly `postBuy`.** Stage 3's `postBuy` was a
 real function of two real numbers with no measure in sight; this is the theorem
 that makes it the model's posterior. -/
-theorem postBuy_eq [IsProbabilityMeasure μ] (H B : Set Ω) (hB : MeasurableSet B) (hH : MeasurableSet H)
+theorem postBuy_eq [IsProbabilityMeasure μ] (H B : Set Ω) (hB : MeasurableSet B)
+    (hH : MeasurableSet H)
     {θ p : ℝ} (hp0 : 0 ≤ p) (ht : (μ H).toReal = θ)
     (hhigh : 2 * μ[B | H] = 1 + ENNReal.ofReal p)
     (hlow : 2 * μ[B | Hᶜ] + ENNReal.ofReal p = 1) :
@@ -389,7 +391,8 @@ buy ones swapped, and the same seam lemma does the work.
 Only `μ Hᶜ ≠ 0` (that is, `θ ≠ 1`) is taken as a hypothesis. Its mirror
 `μ H ≠ 0` is *derived*: at a degenerate prior `cond` collapses to the zero
 measure, so `hhigh` would read `0 = 1 + p`. -/
-theorem postSell_eq [IsProbabilityMeasure μ] (H B : Set Ω) (hB : MeasurableSet B) (hH : MeasurableSet H)
+theorem postSell_eq [IsProbabilityMeasure μ] (H B : Set Ω) (hB : MeasurableSet B)
+    (hH : MeasurableSet H)
     {θ p : ℝ} (hp0 : 0 ≤ p) (ht : (μ H).toReal = θ) (hHc0 : μ Hᶜ ≠ 0)
     (hhigh : 2 * μ[B | H] = 1 + ENNReal.ofReal p)
     (hlow : 2 * μ[B | Hᶜ] + ENNReal.ofReal p = 1) :

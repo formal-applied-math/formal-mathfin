@@ -18,7 +18,8 @@ The process need only be jointly measurable for these elementary facts.
 
 ## Result
 
-Public entry points include `putReward`, `putReward_measurable`, `putReward_nonneg`, `putReward_le_strike`.
+Public entry points include `putReward`, `putReward_measurable`, `putReward_nonneg`,
+`putReward_le_strike`.
 -/
 
 @[expose] public section

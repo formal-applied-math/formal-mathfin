@@ -51,14 +51,16 @@ theorem quadraticRayFormula_eval (a u v z : ParameterRing) (p : Params) :
     Bool.or_eq_true, nonnegativeAtom_eval, positiveAtom_eval, zeroAtom_eval,
     map_add, map_mul, map_pow, map_sub, map_ofNat]
 
-/-- The sign formula for one wing of slope `s` at zero scale: its branch quadratic is nonnegative on the ray `w ≥ a`. -/
+/-- The sign formula for one wing of slope `s` at zero scale: its branch quadratic is nonnegative on
+the ray `w ≥ a`. -/
 noncomputable def sigmaZeroBranchFormula (s : ParameterRing) : SignFormula :=
   let a : ParameterRing := MvPolynomial.X (0 : Fin 5)
   let m : ParameterRing := MvPolynomial.X (3 : Fin 5)
   quadraticRayFormula a (1-MvPolynomial.C (1/4 : ℝ)*s^2)
     (2*(a-s*m)-s^2) ((a-s*m)^2)
 
-/-- The sign formula for the zero-scale slice: `σ = 0`, `b ≥ 0`, `ρ² ≤ 1`, `a > 0`, and both wing conditions (`sigmaZeroFormula_eval`). -/
+/-- The sign formula for the zero-scale slice: `σ = 0`, `b ≥ 0`, `ρ² ≤ 1`, `a > 0`, and both wing
+conditions (`sigmaZeroFormula_eval`). -/
 noncomputable def sigmaZeroFormula : SignFormula :=
   let a : ParameterRing := MvPolynomial.X (0 : Fin 5)
   let b : ParameterRing := MvPolynomial.X (1 : Fin 5)

@@ -171,7 +171,7 @@ theorem expectileGap_expectile (hY : Integrable Y P) (hα : α ∈ Ioo 0 1) :
       have he' : expectileGap α Y P e ≤ 0 := he
       nlinarith [expectileGap_sub_le (α := α) hY h.le, mul_pos hc (sub_pos.2 h)]
     · have he' : r ≤ e := he
-      show expectileGap α Y P e ≤ 0
+      change expectileGap α Y P e ≤ 0
       nlinarith [expectileGap_sub_le (α := α) hY he', mul_nonneg hc.le (sub_nonneg.2 he')]
   rw [expectile, hset, csInf_Ici, hr]
 
@@ -261,7 +261,7 @@ theorem strictlyElicits_expectileLoss (hα : α ∈ Ioo 0 1) :
     ((hp2 e).const_mul α).add ((hn2 e).const_mul (1 - α))
   refine ⟨hS, fun e he ↦ ?_⟩
   have he' : e ≠ expectile α id μ := he
-  show ∫ y, expectileLoss α (expectile α id μ) y ∂μ < ∫ y, expectileLoss α e y ∂μ
+  change ∫ y, expectileLoss α (expectile α id μ) y ∂μ < ∫ y, expectileLoss α e y ∂μ
   set r := expectile α id μ
   have hgap : α * ∫ y, max (y - r) 0 ∂μ - (1 - α) * ∫ y, max (r - y) 0 ∂μ = 0 :=
     expectileGap_expectile hint hα

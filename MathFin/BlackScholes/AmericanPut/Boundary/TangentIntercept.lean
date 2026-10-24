@@ -16,7 +16,8 @@ and remains to be derived from the actual American/European value comparison.
 
 ## Result
 
-Public entry points include `tangentIntercept`, `tangentIntercept_hasDeriv`, `boundaryRatio_hasDeriv`, `negative_stays_negative_of_deriv_nonpos`.
+Public entry points include `tangentIntercept`, `tangentIntercept_hasDeriv`,
+`boundaryRatio_hasDeriv`, `negative_stays_negative_of_deriv_nonpos`.
 -/
 
 @[expose] public section

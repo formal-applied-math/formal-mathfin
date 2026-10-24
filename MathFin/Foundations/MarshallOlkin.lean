@@ -257,7 +257,7 @@ theorem marshallOlkin_diagonal_pos (hrate : ∀ i, 0 < rate i)
     have h0 : 1 < T 0 ω := hω 0
     have h1 : 1 < T 1 ω := hω 1
     have h2 : T 2 ω ≤ 1 := hω 2
-    show min (T 0 ω) (T 2 ω) = min (T 1 ω) (T 2 ω)
+    change min (T 0 ω) (T 2 ω) = min (T 1 ω) (T 2 ω)
     rw [min_eq_right (h2.trans h0.le), min_eq_right (h2.trans h1.le)]
   have hpos (i : Fin 3) : P (T i ⁻¹' ![Ioi (1 : ℝ), Ioi 1, Iic 1] i) ≠ 0 := by
     rw [← Measure.map_apply_of_aemeasurable (hT i).aemeasurable (hmeas i), (hT i).map_eq]

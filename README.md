@@ -190,6 +190,33 @@ lake build
 library itself are compiled from source. [`CONTRIBUTING.md`](CONTRIBUTING.md) describes a prebuilt
 Docker image and a faster edit-and-check loop for contributors.
 
+## Using the library in a project
+
+Create a Lean project whose [`lean-toolchain`](lean-toolchain) matches the library's, and add the
+dependency to its `lakefile.toml`:
+
+```toml
+[[require]]
+name = "MathFin"
+git = "https://github.com/formal-applied-math/formal-mathfin"
+rev = "v1.6.0"
+```
+
+Then fetch it and the prebuilt Mathlib files:
+
+```bash
+lake update
+lake exe cache get
+lake build
+```
+
+and import it with `import MathFin`. Each release tag fixes the Lean toolchain, Mathlib and
+BrownianMotion together; to follow `main` instead, use `rev = "main"` with the toolchain from that
+revision. The first build compiles BrownianMotion and the library from source.
+[`MathFinTest/Readme.lean`](MathFinTest/Readme.lean) is such a client: it imports only `MathFin`
+and states the theorem quoted above, and a weekly workflow builds it in a fresh project that
+requires this repository.
+
 ## Verification
 
 A successful `lake build` checks every proof in the library. The benchmark entries are not Lake
@@ -231,13 +258,15 @@ Comparator below).
 
 ## Documentation
 
+- [`docs/beginners-manual.md`](docs/beginners-manual.md): Lean and the library for mathematicians who
+  have not used Lean, with exercises.
 - [`docs/coverage.md`](docs/coverage.md): a dated log of status changes and corrections, with
   verification evidence.
 - [`docs/blueprint.md`](docs/blueprint.md): a dependency graph from Brownian motion to Black–Scholes,
   generated from the Lean source.
 - [`docs/mathematical-architecture.md`](docs/mathematical-architecture.md): the principles the
   library is organized around, and the theorems that connect them.
-- [`MathFin/Examples.lean`](MathFin/Examples.lean): five representative proofs.
+- [`MathFinExamples/Tour.lean`](MathFinExamples/Tour.lean): five representative proofs.
 - [`docs/open-problems.md`](docs/open-problems.md): a survey of open problems in mathematical
   finance.
 - [`docs/status.md`](docs/status.md): where the program stands, and its backlog, the

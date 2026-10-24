@@ -264,13 +264,15 @@ theorem portfolioVariance_le_of_lagrangian_FOC {Sg : Matrix ι ι ℝ} (hSg : Sg
   rw [portfolioVariance_univ, portfolioVariance_univ]
   linarith
 
+omit [Fintype ι] in
 /-- **Covariance matrices are positive semidefinite** (in Mathlib's `Matrix.PosSemidef`
 sense): the covariance matrix of square-integrable returns is symmetric
 (`covariance_comm`) and its quadratic form is the variance of `∑ vᵢ Rᵢ`
 (`covariance_kernel_psd`). -/
-theorem posSemidef_covariance {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+theorem posSemidef_covariance [Finite ι] {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
     [IsFiniteMeasure P] (R : ι → Ω → ℝ) (hR : ∀ i, MemLp (R i) 2 P) :
     (Matrix.of fun i j ↦ cov[R i, R j; P]).PosSemidef := by
+  cases nonempty_fintype ι
   refine PosSemidef.of_dotProduct_mulVec_nonneg (IsHermitian.ext fun i j ↦ by
     simp only [of_apply, star_trivial]; exact covariance_comm _ _) fun v ↦ ?_
   refine (covariance_kernel_psd Finset.univ R (fun i _ ↦ hR i) v).trans_eq ?_
@@ -351,10 +353,12 @@ theorem marginalVariance_minVarWeightTwo {σ₁ σ₂ ρ : ℝ} (hD : minVarDeno
   have hDdef : minVarDenom σ₁ σ₂ ρ = σ₁ ^ 2 - 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2 := rfl
   rw [marginalVariance_univ]
   fin_cases i
-  · simp [covTwo, mulVec, dotProduct, Fin.sum_univ_two]
+  · simp only [mulVec, dotProduct, covTwo, Nat.reduceAdd, Fin.zero_eta, Fin.isValue, of_apply,
+      cons_val', cons_val_fin_one, cons_val_zero, Fin.sum_univ_two, cons_val_one]
     refine mul_right_cancel₀ hD ?_
     linear_combination (σ₁ ^ 2 - ρ * σ₁ * σ₂) * hw + ρ * σ₁ * σ₂ * hDdef - hV
-  · simp [covTwo, mulVec, dotProduct, Fin.sum_univ_two]
+  · simp only [mulVec, dotProduct, covTwo, Nat.reduceAdd, Fin.mk_one, Fin.isValue, of_apply,
+      cons_val', cons_val_fin_one, cons_val_one, Fin.sum_univ_two, cons_val_zero]
     refine mul_right_cancel₀ hD ?_
     linear_combination (ρ * σ₁ * σ₂ - σ₂ ^ 2) * hw + σ₂ ^ 2 * hDdef - hV
 

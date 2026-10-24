@@ -17,7 +17,9 @@ not by asserting that the price has a classical PDE there.
 
 ## Result
 
-Public entry points include `twoSidedStrip`, `twoSidedStrip_isCompact`, `DividendPutSolution.no_positive_max_off_boundary`, `DividendPutSolution.obstacle_comparison_of_local_tests`.
+Public entry points include `twoSidedStrip`, `twoSidedStrip_isCompact`,
+`DividendPutSolution.no_positive_max_off_boundary`,
+`DividendPutSolution.obstacle_comparison_of_local_tests`.
 -/
 
 @[expose] public section
@@ -81,9 +83,11 @@ theorem DividendPutSolution.no_positive_max_off_boundary
     simpa only [Function.comp_def] using
       hU.comp x (show ContDiffAt ℝ 2 (fun y : ℝ => (y,t)) x by fun_prop)
   have hpt : DifferentiableAt ℝ (p x) t :=
-    (hps2.comp t (show ContDiffAt ℝ 2 (fun s : ℝ => (x,s)) t by fun_prop)).differentiableAt (by norm_num)
+    (hps2.comp t (show ContDiffAt ℝ 2 (fun s : ℝ => (x,s)) t by fun_prop)).differentiableAt
+        (by norm_num)
   have hUt : DifferentiableAt ℝ (U x) t :=
-    (hU.comp t (show ContDiffAt ℝ 2 (fun s : ℝ => (x,s)) t by fun_prop)).differentiableAt (by norm_num)
+    (hU.comp t (show ContDiffAt ℝ 2 (fun s : ℝ => (x,s)) t by fun_prop)).differentiableAt
+        (by norm_num)
   have hdt := deriv_nonneg_at_left_max (hUt.sub hpt) htime
   rw [deriv_sub hUt hpt] at hdt
   have hdx : deriv (fun y => U y t) x = deriv (fun y => p y t) x := by

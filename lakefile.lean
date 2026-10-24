@@ -2,8 +2,14 @@ import Lake
 open Lake DSL
 
 package MathFin where
+  -- Mathlib's own syntax-linter set (line length, whitespace, `show` misuse,
+  -- headers, unused `Fintype` and `Decidable` instances, …), run at elaboration
+  -- so its findings are build warnings. `weak.` because the options are declared
+  -- by Mathlib, which loads after the lakefile is read.
   leanOptions := #[
-    ⟨`autoImplicit, false⟩
+    ⟨`autoImplicit, false⟩,
+    ⟨`relaxedAutoImplicit, false⟩,
+    ⟨`weak.linter.mathlibStandardSet, true⟩
   ]
   -- Advisory environment-linter gate. `lake lint` runs Batteries' canonical
   -- `runLinter` over the MathFin package's declarations — the SAME mechanism
@@ -25,12 +31,22 @@ package MathFin where
 -- `MathFin.*` submodule, not just those reachable from the umbrella's
 -- imports. This guarantees `lake build` compiles every file under
 -- `MathFin/` — including leaf modules nothing imports, such as
--- `MathFin.AxiomAudit` (the build-enforced axioms-clean harness) and
--- `MathFin.Examples` (the curated tour). Without it, an unimported file
--- could rot silently.
+-- `MathFin.AxiomAudit` (the build-enforced axioms-clean harness). Without it,
+-- an unimported file could rot silently.
 @[default_target]
 lean_lib MathFin where
   globs := #[.andSubmodules `MathFin]
+
+-- Worked examples and API tests, outside `MathFin/` so the library never imports
+-- them. Both import only the umbrella `MathFin`, as a downstream project does, and
+-- are default targets so a plain `lake build` checks them.
+@[default_target]
+lean_lib MathFinExamples where
+  globs := #[.andSubmodules `MathFinExamples]
+
+@[default_target]
+lean_lib MathFinTest where
+  globs := #[.andSubmodules `MathFinTest]
 
 -- Palomar registry submission (https://palomar-registry.org). `Challenge.lean`
 -- is the small, Mathlib-only statement of record that a mathematical reader is

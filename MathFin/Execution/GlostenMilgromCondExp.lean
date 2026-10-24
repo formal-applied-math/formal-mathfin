@@ -87,9 +87,9 @@ theorem measureReal_mul_ask_add_measureReal_mul_bid [IsFiniteMeasure μ] {H B : 
     integral_piecewise hB (integrable_const _).integrableOn (integrable_const _).integrableOn,
     setIntegral_const, setIntegral_const, smul_eq_mul, smul_eq_mul]
 
-/-- **One-step martingale identity for beliefs, in closed form.** Weighting the posterior after a buy and after a
-sell by the probabilities of a buy and of a sell, `(1 + p(2θ − 1))/2` and `(1 − p(2θ − 1))/2`
-(`spread_pos_of_model` derives these), returns the prior `θ`. -/
+/-- **One-step martingale identity for beliefs, in closed form.** Weighting the posterior after a
+buy and after a sell by the probabilities of a buy and of a sell, `(1 + p(2θ − 1))/2` and
+`(1 − p(2θ − 1))/2` (`spread_pos_of_model` derives these), returns the prior `θ`. -/
 theorem buyProb_mul_postBuy_add_sellProb_mul_postSell {θ p : ℝ} (hb : 1 + p * (2 * θ - 1) ≠ 0)
     (hs : 1 - p * (2 * θ - 1) ≠ 0) :
     (1 + p * (2 * θ - 1)) / 2 * postBuy θ p + (1 - p * (2 * θ - 1)) / 2 * postSell θ p = θ := by

@@ -18,7 +18,8 @@ PDE is a separate, still open obligation.
 
 ## Result
 
-Public entry points include `candidate_stopped_integrable`, `value_le_supermartingale_candidate`, `value_eq_of_contact_martingale`.
+Public entry points include `candidate_stopped_integrable`, `value_le_supermartingale_candidate`,
+`value_eq_of_contact_martingale`.
 -/
 
 @[expose] public section

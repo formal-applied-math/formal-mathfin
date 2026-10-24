@@ -73,7 +73,6 @@ theorem formSignature_prod {V W : Type*} [AddCommGroup V] [Module ℝ V]
     have hf := f.map_app x.2
     simp only [QuadraticMap.weightedSumSquares_apply, smul_eq_mul] at he hf
     rw [he, hf]
-
   rw [formSignature_eq_of_equivalent he,
     formSignature_eq_of_equivalent (show QuadraticMap.Equivalent Q _ from ⟨e⟩),
     formSignature_eq_of_equivalent (show QuadraticMap.Equivalent R _ from ⟨f⟩)]

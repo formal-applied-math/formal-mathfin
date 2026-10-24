@@ -325,7 +325,8 @@ regime, fully derived.** For `X_t = X₀ + A_t + σ·B_t` with `A` a
 equipartition squared-increment sums of `X` over `[0, T]` converge in mean
 square to `σ²·T = ∫₀ᵀ σ² ds`: the **drift contributes nothing** to the
 quadratic variation. -/
-theorem tendsto_qv_ito_process (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
+theorem tendsto_qv_ito_process (hB : IsPreBrownianReal B μ)
+    (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     {X A : ℝ≥0 → Ω → ℝ} {X₀ : Ω → ℝ} {σ Ca : ℝ} (hCa : 0 ≤ Ca)
     (hX : ∀ t ω, X t ω = X₀ ω + A t ω + σ * B t ω)
     (hA_meas : ∀ t, Measurable (A t))

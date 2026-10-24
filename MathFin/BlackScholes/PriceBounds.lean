@@ -82,7 +82,7 @@ private lemma bsV_eq_riskNeutralExpectation
   rw [h_exp] at h_form
   -- Goal: bsV K r σ S_0 T = ∫ ... ∂Q
   -- bsV's def matches h_form's RHS exactly after the normalisation above.
-  show S_0 * Phi (bsd1 S_0 K r σ T) -
+  change S_0 * Phi (bsd1 S_0 K r σ T) -
         K * Real.exp (-(r * T)) * Phi (bsd2 S_0 K r σ T) = _
   exact h_form.symm
 
@@ -98,7 +98,7 @@ private lemma bsP_eq_riskNeutralExpectation
   have h_form := bs_put_formula h
   have h_exp : Real.exp (-r * T) = Real.exp (-(r * T)) := by congr 1; ring
   rw [h_exp] at h_form
-  show K * Real.exp (-(r * T)) * Phi (-bsd2 S_0 K r σ T) -
+  change K * Real.exp (-(r * T)) * Phi (-bsd2 S_0 K r σ T) -
         S_0 * Phi (-bsd1 S_0 K r σ T) = _
   exact h_form.symm
 

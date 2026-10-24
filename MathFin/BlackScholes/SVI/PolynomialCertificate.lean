@@ -42,7 +42,7 @@ theorem criticalCertificate_iff (P : ℝ[X]) :
 
 /-- All SVI degree branches under the exact polynomial variance gate. -/
 theorem svi_criticalCertificate_iff (p : Params) (hs : 0 < p.sigma)
-    (hb : 0 ≤ p.b) (hr : 0 ≤ 1-p.rho^2) (hg : varianceGate p) :
+    (hb : 0 ≤ p.b) (hr : 0 ≤ 1 - p.rho ^ 2) (hg : varianceGate p) :
     criticalCertificate (polynomial p) ↔ ∀ k : ℝ, 0 ≤ durrleman p k := by
   rw [criticalCertificate_iff,
     durrleman_nonneg_iff p hs ((varianceGate_iff p hs hb hr).mp hg)]
