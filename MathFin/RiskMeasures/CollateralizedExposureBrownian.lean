@@ -22,11 +22,12 @@ the process itself evaluated `Δ` earlier — never an opaque scalar.
   no junk value is ever read off by a proved result.
 * `collateralizedExposure_brownian_gaussian`: for `V t = m + σ B t` with `B` an actual pre-Brownian
   motion (`IsPreBrownianReal`), `0 < Δ ≤ t`, `σ > 0`, the collateralized exposure has closed form
-  `E[(V_t - V_{t-Δ})⁺] = σ√Δ · φ(0)`. The law of `V_t - V_{t-Δ} = σ(B_t - B_{t-Δ})` is derived
+  `E[(V_t - V_{t-Δ})⁺] = σ√Δ · φ(0)`. The law of the increment `B_t - B_{t-Δ}` is derived
   (not hypothesized) from the Brownian finite-dimensional laws (`MathFin.hasLaw_increment`, over
-  Mathlib's `IsPreBrownianReal.hasLaw_sub`) via the Gaussian-scaling lemma `gaussianReal_const_mul`,
-  standardized to a driver `Z ~ N(0,1)` and fed into `CVA.expectedExposure_gaussian` — the same
-  machinery as `ExposureMeasures.lean`'s Gaussian exposure measures. The mean is `0` (an increment
+  Mathlib's `IsPreBrownianReal.hasLaw_sub`), standardized to a driver `Z ~ N(0,1)` by
+  `hasLaw_sub_div_of_gaussianReal`, so that `V_t - V_{t-Δ} = σ√Δ · Z` with the σ-scale entering
+  as the volatility parameter of `CVA.expectedExposure_gaussian` — the same machinery as
+  `ExposureMeasures.lean`'s Gaussian exposure measures. The mean is `0` (an increment
   of a driftless driver), so the standardized argument `d = a/(b√s)` collapses to `0` and the
   answer is the bare Gaussian density `φ(0)` scaled by the volatility of the increment.
 

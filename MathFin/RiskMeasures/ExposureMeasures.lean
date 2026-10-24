@@ -12,8 +12,9 @@ public import MathFin.RiskMeasures.GaussianValueAtRisk
 /-!
 # Expected negative exposure, exposure VaR, and netting subadditivity
 
-Three exposure measures built directly on `MathFin.CVA.expectedExposure` (`V : ℝ → Ω₁ → ℝ` an
-actual exposure process, `ν` its measure), never on a bare closed-form definition:
+Three exposure-measure results on the CVA exposure-process substrate (`V : ℝ → Ω₁ → ℝ` an
+actual exposure process, `ν` its measure): ENE (via `CVA.expectedExposure`), PFE (via
+`MathFin.valueAtRisk`), and netting subadditivity:
 
 * `expectedNegativeExposure` — `ENE(s) = E_ν[(-V_s)⁺]`, a genuine integral parallel to
   `CVA.expectedExposure`. `expectedNegativeExposure_eq_sub_integral` proves
