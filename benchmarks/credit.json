@@ -431,7 +431,7 @@
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (collateralized exposure / CSAs)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.collateralizedExposure_brownian_gaussian (MathFin/RiskMeasures/CollateralizedExposureBrownian.lean). SCOPE: the law of the lagged increment is DERIVED (not hypothesized) from MathFin's own hasLaw_increment (over Mathlib's IsPreBrownianReal.hasLaw_sub, from the Brownian process's finite-dimensional Gaussian laws), standardized to a unit-normal driver by hasLaw_sub_div_of_gaussianReal; the closed form follows from CVA.expectedExposure_gaussian at mean zero, with the σ-scale as its volatility parameter. Single collateral lag Δ, one Brownian driver; no margin-call dynamics beyond the fixed lag."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.collateralizedExposure_brownian_gaussian (MathFin/RiskMeasures/CollateralizedExposureBrownian.lean). SCOPE: the law of the lagged increment is DERIVED (not hypothesized) from MathFin's own hasLaw_increment (from the Brownian process's finite-dimensional Gaussian laws), standardized to a unit-normal driver by hasLaw_sub_div_of_gaussianReal; the closed form follows from CVA.expectedExposure_gaussian at mean zero, with the σ-scale as its volatility parameter. Single collateral lag Δ, one Brownian driver; no margin-call dynamics beyond the fixed lag."
       }
     },
     {

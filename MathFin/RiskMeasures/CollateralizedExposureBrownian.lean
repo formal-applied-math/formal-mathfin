@@ -23,8 +23,8 @@ the process itself evaluated `Δ` earlier — never an opaque scalar.
 * `collateralizedExposure_brownian_gaussian`: for `V t = m + σ B t` with `B` an actual pre-Brownian
   motion (`IsPreBrownianReal`), `0 < Δ ≤ t`, `σ > 0`, the collateralized exposure has closed form
   `E[(V_t - V_{t-Δ})⁺] = σ√Δ · φ(0)`. The law of the increment `B_t - B_{t-Δ}` is derived
-  (not hypothesized) from the Brownian finite-dimensional laws (`MathFin.hasLaw_increment`, over
-  Mathlib's `IsPreBrownianReal.hasLaw_sub`), standardized to a driver `Z ~ N(0,1)` by
+  (not hypothesized) from the Brownian finite-dimensional laws (`MathFin.hasLaw_increment`),
+  standardized to a driver `Z ~ N(0,1)` by
   `hasLaw_sub_div_of_gaussianReal`, so that `V_t - V_{t-Δ} = σ√Δ · Z` with the σ-scale entering
   as the volatility parameter of `CVA.expectedExposure_gaussian` — the same machinery as
   `ExposureMeasures.lean`'s Gaussian exposure measures. The mean is `0` (an increment
@@ -53,7 +53,7 @@ noncomputable def collateralizedExposure (V : ℝ≥0 → Ω → ℝ) (Δ t : �
 /-- **Collateralized exposure under a Brownian-driven process, in closed form**: for
 `V_t = m + σ B_t` with `B` an actual pre-Brownian motion, `σ > 0` and `0 < Δ ≤ t`,
 `E[(V_t - V_{t-Δ})⁺] = σ√Δ · φ(0)`. The law of the collateralized difference is derived from
-`MathFin.hasLaw_increment` (over Mathlib's `IsPreBrownianReal.hasLaw_sub`), not hypothesized. -/
+`MathFin.hasLaw_increment`, not hypothesized. -/
 theorem collateralizedExposure_brownian_gaussian [IsProbabilityMeasure P] {B : ℝ≥0 → Ω → ℝ}
     (hB : IsPreBrownianReal B P) (m σ : ℝ) (hσ : 0 < σ) {Δ t : ℝ≥0} (hΔpos : 0 < Δ)
     (hΔt : Δ ≤ t) :
