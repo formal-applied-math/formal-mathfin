@@ -86,9 +86,9 @@ Adaptedness (`hXadapted` etc.) is recorded because it is what makes `β, δ` adm
 integrand/drift data (provenance: MathFin's `ItoIntegralL2.natFiltration`-adapted
 integrands), but the generator-matching core is a per-time statement and does not use it.
 
-Path continuity (`hXcont` etc., added in stage 2) is the pointwise input of
+Path continuity (`hXcont` etc.) is the pointwise input of
 `GyongyMimicry.continuous_marginal_integrand`, which *proves* the derivative/expectation
-interchange that stage 1 carried as the hypothesis `hucont`. The full Gyöngy theorem needs
+interchange instead of carrying it as a hypothesis. The full Gyöngy theorem needs
 no path continuity (there the marginal-flow identity holds only a.e. in `t`); continuity in
 `s` is what upgrades the weak equation to *every* time `t`, and is recorded here as data. -/
 structure BoundedItoProcess (Ω : Type*) [mΩ : MeasurableSpace Ω] where
@@ -116,7 +116,7 @@ structure BoundedItoProcess (Ω : Type*) [mΩ : MeasurableSpace Ω] where
   hδadapted : ∀ t, StronglyMeasurable[ℱ t] (δ t)
   hβbdd : ∀ t ω, |β t ω| ≤ B
   hδbdd : ∀ t ω, |δ t ω| ≤ D
-  /- path continuity (stage 2) -/
+  /- path continuity -/
   hXcont : ∀ ω, Continuous fun t => X t ω
   hβcont : ∀ ω, Continuous fun t => β t ω
   hδcont : ∀ ω, Continuous fun t => δ t ω
@@ -128,8 +128,8 @@ section Smoothness
 /-- From `ContDiff ℝ 2 f` plus the two `HasDerivAt` links pinning `f'` and `f''` as the
 first and second derivatives of `f`, the second derivative `f''` is continuous — the `C²`
 half (continuous second derivative) of the test-function class of Bagaria ch. 9 / Thm 9.6's
-proof. This replaces stage 1's bare `hf''meas : Measurable f''`: measurability of `f''`
-(and of `f'' ∘ X_t`, see `GyongyMimicry.measurable_f2_comp`) is now *derived* from the smoothness
+proof. No `Measurable f''` hypothesis is needed: measurability of `f''`
+(and of `f'' ∘ X_t`, see `GyongyMimicry.measurable_f2_comp`) is *derived* from the smoothness
 package.
 
 Route: `contDiff_succ_iff_deriv` turns `ContDiff ℝ 2 f` into `ContDiff ℝ 1 (deriv f)`;
@@ -186,8 +186,8 @@ theorem stronglyMeasurable_test (X : ℝ → Ω → ℝ) (t : ℝ) {f : ℝ → 
     (hf : Measurable f) : StronglyMeasurable[sigmaGen X t] (fun ω => f (X t ω)) :=
   (measurable_comp_comap hf).stronglyMeasurable
 
-/-- **Measurability of `f'' ∘ X`** (stage 2 — the derived replacement for stage 1's
-`hf''meas`): continuity of `f''` (obtained from `ContDiff ℝ 2 f` via
+/-- **Measurability of `f'' ∘ X`** (derived, not hypothesized):
+continuity of `f''` (obtained from `ContDiff ℝ 2 f` via
 `GyongyMimicry.continuous_f2_of_contDiff2`) composed with the measurability of `X` gives Borel
 measurability of `f'' ∘ X`. -/
 theorem measurable_f2_comp {X : Ω → ℝ} (hX : Measurable X) {f'' : ℝ → ℝ}
@@ -286,8 +286,8 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
 noncomputable def generatorIntegrand (X β δ : ℝ → Ω → ℝ) (f' f'' : ℝ → ℝ) (s : ℝ) : Ω → ℝ :=
   fun ω => f' (X s ω) * β s ω + 1 / 2 * (f'' (X s ω) * (δ s ω * δ s ω))
 
-/-- **Continuity of the expectation of the generator integrand** (stage 2 — this *proves*
-stage 1's `hucont` hypothesis, the DCT interchange, from the structure's own data): the map
+/-- **Continuity of the expectation of the generator integrand** (the DCT interchange,
+*proved* from the structure's own data rather than hypothesized): the map
 `s ↦ ∫ ω, generatorIntegrand X β δ f' f'' s ω ∂μ` is continuous on `ℝ`.
 
 Proof: pointwise in `ω`, `s ↦ generatorIntegrand … s ω` is continuous (path continuity of
@@ -374,13 +374,13 @@ theorem continuous_marginal_integrand (P : BoundedItoProcess Ω) {f' f'' : ℝ �
 
 /-- The engine behind the constructed marginal-flow weak equations
 (`GyongyMimicry.marginal_flow_weak_equation_constructed` and
-`GyongyMimicry.marginal_flow_weak_equation_fn_constructed`), in the *band* form (dispatch-11):
+`GyongyMimicry.marginal_flow_weak_equation_fn_constructed`), in the *band* form:
 the integrated Itô-drift identity is consumed only through the filter equality `=ᶠ[𝓝 t]`,
 so it suffices that it hold on an open band `Ioo 0 T` around `t` — exactly the shape in
 which the constructed instance supplies it (see the `Constructed` section).
 
-Everything stage 1 hypothesized beyond `hitoid` is now *proved* (stage 2), so it appears
-here only as derived `have`s:
+The two facts that could have been carried as hypotheses — measurability of `f''` and
+continuity of `u` — appear here only as derived `have`s:
 * `hf''meas` — from `h2 : ContDiff ℝ 2 f` plus the `HasDerivAt` chain, via
   `GyongyMimicry.continuous_f2_of_contDiff2` and `GyongyMimicry.measurable_f2_comp`;
 * `hucont` — from `GyongyMimicry.continuous_marginal_integrand` (DCT interchange), fed by the
@@ -398,7 +398,7 @@ private theorem hasDerivAt_marginal_flow_core (P : BoundedItoProcess Ω) {f f' f
     HasDerivAt (fun s => ∫ ω, f (P.X s ω) ∂μ)
       (∫ ω, f' (P.X t ω) * driftCoeff μ P.X P.β t ω ∂μ
         + 1 / 2 * ∫ ω, f'' (P.X t ω) * diffCoeffSq μ P.X P.δ t ω ∂μ) t := by
-  -- stage 2: the two former hypotheses are now derived, not assumed
+  -- measurability of `f''` and continuity of `u` are derived below, not assumed
   have hf'diff : Differentiable ℝ f' := fun x => (hf' x).differentiableAt
   have hf'meas : Measurable f' := hf'diff.continuous.measurable
   have hf''cont : Continuous f'' := continuous_f2_of_contDiff2 h2 hf hf'
@@ -436,7 +436,7 @@ section Transfer
 open MathFin ItoIntegralL2
 open scoped NNReal
 
-/-- **The `timeMeasure` ↔ interval-integral bridge** (dispatch-11, step (ii) — the
+/-- **The `timeMeasure` ↔ interval-integral bridge** (the
 definitional transfer of the adapted assembly's time integral into the
 `intervalIntegral` form the marginal-flow machinery consumes): since
 `ItoIntegralL2.timeMeasure = Measure.comap ((↑) : ℝ≥0 → ℝ) volume`, a `timeMeasure`
@@ -497,11 +497,11 @@ open MeasureTheory ProbabilityTheory Filter Topology
 open MathFin ItoIntegralL2 ItoIntegralProcessGeneral
 open scoped NNReal ENNReal
 
-/-! ### The constructed instance — `hitoid` dropped (dispatch 11)
+/-! ### The constructed instance — `hitoid` discharged
 
 The concrete instantiation of the abstract `BoundedItoProcess` from the landed adapted
-assembly `ItoDriftConditional.itoDrift_expectation_identity_adapted`, closing the dispatch-10
-residual: `X t = c + ∫₀ᵗ β + M t` (`driftPrim`-form; `β, δ` bounded adapted
+assembly `ItoDriftConditional.itoDrift_expectation_identity_adapted`, for which the engine's
+`hitoid` is proved below: `X t = c + ∫₀ᵗ β + M t` (`driftPrim`-form; `β, δ` bounded adapted
 path-continuous; `M` an adapted version of the CLM Itô integral of `δ` on `[0, T]`; `X`
 path-continuous), reindexed to the real time axis by `t ↦ X_{t⁺}` (`Real.toNNReal`).
 
@@ -511,10 +511,9 @@ path-continuous), reindexed to the real time axis by `t ↦ X_{t⁺}` (`Real.toN
 * `hitoid_constructed_terminal` — the weakened `hitoid` at the horizon `↑T`, with no
   hypotheses beyond the assembly's own.
 * `hitoid_constructed_band` — the `hitoid` on the open band `(0, ↑T)`, the form the
-  marginal-flow engine consumes; dispatch-12 discharged its residual hypothesis
-  `hMconsist` (horizon consistency of the CLM integral — now proved upstream as
-  `itoProcessCLM_consist`/`mMeq_frozen`), so it needs only the same
-  horizon-`T` pinning `hMeq` as the terminal identity.
+  marginal-flow engine consumes; the horizon consistency of the CLM integral is available
+  (`itoProcessCLM_consist`/`mMeq_frozen`), so only the same horizon-`T` pinning `hMeq` as
+  the terminal identity is needed.
 * `marginal_flow_weak_equation_constructed` — **the generator-matching core of Bagaria
   ch. 9 / Thm 9.6 for the constructed process**: on `(0, ↑T)` the marginal flow solves the
   weak forward equation generated by the Gyöngy coefficients of the reindexed process. -/
@@ -543,7 +542,7 @@ theorem stronglyMeasurable_X_hXrel
   exact (((AdaptedDrift.stronglyMeasurable_driftPath hBmeas hβadap hβcont hβbdd t).measurable.const_add c).add
     (hMadap t).measurable).stronglyMeasurable
 
-/-- **The concrete `BoundedItoProcess` instance** (dispatch-11, step (iii)): the abstract
+/-- **The concrete `BoundedItoProcess` instance**: the abstract
 ℝ-indexed structure of this file, instantiated from the constructed process `X = c + ∫β + M`
 by real-time reindexing `t ↦ t⁺` and the natural Brownian filtration
 `𝓕_s = 𝓕ᴮ_{s⁺}`. Every field is *derived*: measurability of `X` from
@@ -597,7 +596,7 @@ noncomputable def constructedBoundedItoProcess
   hδcont := fun ω ↦ (hδcont ω).comp continuous_real_toNNReal
 
 /-- **The genuine generator integrand of the constructed process, on the real time axis**
-(the `u` of the marginal-flow machinery, step (iii) of the dispatch-10 residual): at real
+(the `u` of the marginal-flow machinery): at real
 time `x` this is
 
   `u x = 𝔼[f'(X_{x⁺})·β_{x⁺}] + ½·𝔼[f''(X_{x⁺})·δ²_{x⁺}]`,
@@ -726,8 +725,8 @@ theorem hitoid_constructed_terminal
   rw [hident, timeMeasure_Ioc_eq_interval]
   rfl
 
-/-- **Step (iii), band form — the weakened `hitoid` on the open band `(0, ↑T)`: DISCHARGED
-(dispatch 12)**. The band form the marginal-flow engine consumes (`=ᶠ[𝓝 t]` for `t` in
+/-- **Band form — the weakened `hitoid` on the open band `(0, ↑T)`: DISCHARGED**. The band
+form the marginal-flow engine consumes (`=ᶠ[𝓝 t]` for `t` in
 the band) is now *proved* from the horizon-`T` pinning `hMeq` — no residual hypothesis:
 the earlier `hMconsist` gap (the same `M` representing the CLM Itô integral at every
 horizon `τ ≤ T`) is closed by `ae_eq_itoProcessCLM_min` (the cross-horizon
@@ -834,7 +833,7 @@ theorem hitoid_constructed_band
   -- assemble: the horizon and band identities for the reversion read for `X` verbatim
   rw [← hXeqfrz (Real.toNNReal s) le_rfl, ← hXeqfrz 0 (by simp), hident, hbandeq]
 
-/-- **The final theorem (dispatch-11) — the generator-matching core of Bagaria ch. 9 /
+/-- **The weak forward equation — the generator-matching core of Bagaria ch. 9 /
 Thm 9.6 for the constructed process**: on the open band `(0, ↑T)` the marginal flow
 `s ↦ 𝔼[f(X_{s⁺})]` of the constructed Itô process `X = c + ∫β + M` is differentiable,
 with derivative the `(a, b²)`-generator of the **Gyöngy coefficients of the reindexed

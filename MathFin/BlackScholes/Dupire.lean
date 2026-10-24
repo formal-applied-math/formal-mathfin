@@ -18,7 +18,7 @@ classical proof tests the forward equation against the call payoff `(x − K)⁺
 by parts twice (`(x − K)⁺'' = δ_K`). That step has no honest counterpart here: `(x − K)⁺` is
 not `C²`, so it is outside the test class of the landed weak forward equation
 (`GyongyMimicry.marginal_flow_weak_equation_fn_constructed`), and evaluating at `x = K` is the
-the pointwise-density route is not taken here. Instead the strike is
+the pointwise-density route — the route this module does not take. Instead the strike is
 smeared first: every smooth compactly supported strike density `ψ` yields a legitimate test
 function `f_ψ` (its double primitive) which *is* the static call book
 `∫ ψ(K)(x − K)⁺ dK` (Carr–Madan, `MathFin.carrMadan_spanning`). Fubini then turns
@@ -32,8 +32,7 @@ function `f_ψ` (its double primitive) which *is* the static call book
 * `integral_payoff_eq_integral_call` — Fubini: `𝔼[∫ψ(K)(X_s − K)⁺dK] = ∫ψ(K)C(s, K)dK`.
 * `breedenLitzenberger_weak` — `∫ ψ''(K) C(s, K) dK = 𝔼ψ(X_s)` for any integrable law.
 * `forward_eq_weak_zeroRate` — `GyongyMimicry.marginal_flow_weak_equation_fn_constructed` at
-  `β = 0`, drift term erased (the honest weak form of the (t, x) forward equation; handoff
-  sub-goal (1)).
+  `β = 0`, drift term erased (the honest weak form of the (t, x) forward equation).
 * **`dupire_weak`** (headline) — `d/dT ∫ψ(K)C(T, K)dK = ½·𝔼[ψ(X_T)·b̂²(T, X_T)]`.
 
 Together, `dupire_weak` and `breedenLitzenberger_weak` say `∂_T C = ½·b̂²(T, ·)·∂²_K C` in
@@ -68,7 +67,8 @@ namespace MathFin.Dupire
 
 /-- **The call-price surface** of an `ℝ≥0`-indexed price process `X` under the pricing
 measure `μ` (zero rates): `C(s, K) = 𝔼[(X_{s⁺} − K)⁺]`. A *definition* — never a free
-variable of any theorem below (no theorem's statement mentions the surface it prices). -/
+variable of any theorem below (every `C` in a statement below is this
+defined surface; no theorem takes a call surface as a hypothesis). -/
 noncomputable def callSurface {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
     (X : ℝ≥0 → Ω → ℝ) (s K : ℝ) : ℝ :=
   ∫ ω, max (X (Real.toNNReal s) ω - K) 0 ∂μ
@@ -384,7 +384,7 @@ On a strike window `Ioo a b` and a time window `Ioo (t − ε) (t + ε)`:
 
 Each derivative (`CK`, `CKK`, `Ct`) is pinned to the defined `callSurface` by its own
 `HasDerivAt` hypothesis. **No hypothesis relates `Ct` to `CKK`**: the relation
-`2·C_T = b̂²·C_KK` is the conclusion, derived from `dupire_weak` (anti-echo invariant).
+`2·C_T = b̂²·C_KK` is the conclusion, derived from `dupire_weak`, not hypothesized.
 Non-vacuity: Bachelier (`δ ≡ δ₀ > 0`, `X = c + δ₀B`) satisfies all of them, with
 `C_T = ½δ₀²φ_t(K)`, `C_KK = φ_t(K) > 0`, `b̂² ≡ δ₀²` (no Lean witness here).
 
@@ -400,15 +400,15 @@ Non-vacuity: Bachelier (`δ ≡ δ₀ > 0`, `X = c + δ₀B`) satisfies all of t
 * `continuous_callSurface` — `K ↦ C(s, K)` is 1-Lipschitz.
 * `hasDerivAt_integral_mul_callSurface` — `d/ds ∫ψ C(s, ·) = ∫ψ C_T(t, ·)` (dominated
   differentiation under the integral).
-* `dupire_ae_window`, **`dupire_ae`** (P1) — a.e. on `{X_t ∈ window}`,
+* `dupire_ae_window`, **`dupire_ae`** — a.e. on `{X_t ∈ window}`,
   `b̂²(t, X_t) = 2·C_T(t, X_t) / C_KK(X_t)`: the Dupire ratio is a version of `𝔼[δ_t² | X_t]`.
-* **`dupire_pointwise_coeff`**, **`dupire_pointwise`** (P2, Thm 9.5 proper) — for any version of
+* **`dupire_pointwise_coeff`**, **`dupire_pointwise`** (Thm 9.5 proper) — for any version of
   `b̂²(t, ·)` continuous on the window, the identity holds at *every* strike with `C_KK > 0`.
-* **`dupire_localVol`** (P3) — Def 9.4's Markov case `δ_s = v(s, X_s)` (carried as `hδloc`;
+* **`dupire_localVol`** — Def 9.4's Markov case `δ_s = v(s, X_s)` (carried as `hδloc`;
   SDE existence is not proved): `v(t, K)² = 2·C_T / C_KK`.
 
-Deviation from the originally planned P2 route: instead of `eqOn_open_of_ae_eq` (which would need the
-continuous version to be pushed through `law(X_t)` with a measurable-set side condition), P2 argues
+Rather than push the continuous version through `law(X_t)` via `eqOn_open_of_ae_eq` (which
+would need a measurable-set side condition), `dupire_pointwise_coeff` argues
 by contradiction on a small strike interval, where `law(X_t)` has positive mass
 `∫ C_KK > 0`.
 -/
@@ -591,7 +591,7 @@ section Pointwise
 open Set MathFin.GyongyMimicry
 open scoped ENNReal
 
-/-- **P1 on a sub-window (the analytic core of `dupire_ae`).** For `a < p ≤ q < b`, a.e. on
+/-- **On a sub-window (the analytic core of `dupire_ae`).** For `a < p ≤ q < b`, a.e. on
 `{X_t ∈ Ioo p q}` the Borel version `b̂²(t, ·) = bfn t` of the Gyöngy coefficient equals the
 Dupire ratio `2·C_T(t, ·)/C_KK` at `X_t`. Proof (steps a–d):
 (a) `law(X_t) = C_KK · Leb` on `Ioc p q` (`law_restrict_eq_withDensity`);
@@ -738,7 +738,7 @@ section Pointwise
 
 open Set MathFin.GyongyMimicry
 
-/-- **P1 — `dupire_ae`: the Dupire ratio is a version of `𝔼[δ_t² | X_t]` on the window**
+/-- **`dupire_ae`: the Dupire ratio is a version of `𝔼[δ_t² | X_t]` on the window**
 (Bagaria ch. 9 Thm 9.5 ∘ Thm 9.7, pointwise modulo a null set, zero rates). For the driftless
 constructed Itô process and a call surface carrying the regularity hypotheses `hCK`, `hCKK`,
 `hCKKc`, `hCt`, `hCtc` on `Ioo a b` (each derivative pinned to the *defined* `callSurface` on its
@@ -797,7 +797,7 @@ theorem dupire_ae
   rw [hbfeq t ω]
   exact hω (p, q) ⟨hp1, (hp2.trans hq1).le, hq2⟩ ⟨hp2, hq1⟩
 
-/-- **P2, coefficient form — continuous-version uniqueness.** If `v2` is a version of
+/-- **Continuous-version uniqueness, coefficient form.** If `v2` is a version of
 `b̂²(t, ·) = 𝔼[δ_t² | X_t = ·]` on the window (`hv2rep`) that is continuous there (`hv2c`), then
 at *every* strike of the window with `C_KK > 0`,
 
@@ -806,7 +806,7 @@ at *every* strike of the window with `C_KK > 0`,
 Proof by contradiction: if the two continuous sides differed at `K₀`, they would differ on a
 small interval `(c, d]` around `K₀` where `C_KK > 0`; that interval has `law(X_t)`-mass
 `∫_c^d C_KK > 0` (`law_Ioc_eq_ofReal_integral`), contradicting `dupire_ae` + `hv2rep`, which make
-them agree a.e. on `{X_t ∈ window}`. (Replaces the `eqOn_open_of_ae_eq` route.) -/
+them agree a.e. on `{X_t ∈ window}`. -/
 theorem dupire_pointwise_coeff
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
@@ -880,7 +880,7 @@ theorem dupire_pointwise_coeff
   rw [Measure.map_apply hXm measurableSet_Ioc, hnull] at hmass
   exact (ENNReal.ofReal_pos.2 hint_pos).ne' hmass.symm
 
-/-- **P2 — `dupire_pointwise` (Bagaria ch. 9 Thm 9.5 proper, zero rates).** If `σloc` is a local
+/-- **`dupire_pointwise` (Bagaria ch. 9 Thm 9.5 proper, zero rates).** If `σloc` is a local
 volatility in the lognormal convention, i.e. `σloc(K)²·K²` is a version of `𝔼[δ_t² | X_t = K]`
 on the window (`hσrep`), continuous there (`hσc`), and the window lies in `K > 0` (`ha`), then at
 every strike of the window with `C_KK > 0`
@@ -923,7 +923,7 @@ theorem dupire_pointwise
   have hK2 : K ^ 2 ≠ 0 := pow_ne_zero 2 (by linarith [hK.1])
   rw [mul_comm (K ^ 2), ← div_div, ← h, mul_div_assoc, div_self hK2, mul_one]
 
-/-- **P3 — `dupire_localVol` (Def 9.4, the Markov case).** If the diffusion coefficient of the
+/-- **`dupire_localVol` (Def 9.4, the Markov case).** If the diffusion coefficient of the
 constructed process is a function of the state, `δ_s = v(s, X_s)` (`hδloc`: the local-vol SDE's
 fixed point, *carried* — SDE existence is not proved here), with `v(t, ·)` Borel and continuous
 on the window, then at every strike of the window with `C_KK > 0`
