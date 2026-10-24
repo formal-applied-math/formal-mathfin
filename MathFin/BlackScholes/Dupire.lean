@@ -11,14 +11,14 @@ public import MathFin.BlackScholes.CallSpreadDigital
 
 
 /-!
-# Dupire's formula, distributional form (Route W)
+# Dupire's formula, distributional form
 
 Bagaria ch. 9 Thm 9.5 at zero rates reads `σ²_loc(T, K) = 2·∂_T C / (K²·∂²_K C)`. The
 classical proof tests the forward equation against the call payoff `(x − K)⁺` and integrates
 by parts twice (`(x − K)⁺'' = δ_K`). That step has no honest counterpart here: `(x − K)⁺` is
 not `C²`, so it is outside the test class of the landed weak forward equation
 (`GyongyMimicry.marginal_flow_weak_equation_fn_constructed`), and evaluating at `x = K` is the
-pointwise-density move ("Route C") rejected in `memos/item10-memo.md`. Instead the strike is
+the pointwise-density route is not taken here. Instead the strike is
 smeared first: every smooth compactly supported strike density `ψ` yields a legitimate test
 function `f_ψ` (its double primitive) which *is* the static call book
 `∫ ψ(K)(x − K)⁺ dK` (Carr–Madan, `MathFin.carrMadan_spanning`). Fubini then turns
@@ -31,8 +31,9 @@ function `f_ψ` (its double primitive) which *is* the static call book
 * `call_spanning_compactSupport` — the test-function factory `ψ ↦ f_ψ`.
 * `integral_payoff_eq_integral_call` — Fubini: `𝔼[∫ψ(K)(X_s − K)⁺dK] = ∫ψ(K)C(s, K)dK`.
 * `breedenLitzenberger_weak` — `∫ ψ''(K) C(s, K) dK = 𝔼ψ(X_s)` for any integrable law.
-* `forward_eq_weak_zeroRate` — GyongyScratch :1281 at `β = 0`, drift term erased (the honest
-  weak form of the (t, x) forward equation; handoff sub-goal (1)).
+* `forward_eq_weak_zeroRate` — `GyongyMimicry.marginal_flow_weak_equation_fn_constructed` at
+  `β = 0`, drift term erased (the honest weak form of the (t, x) forward equation; handoff
+  sub-goal (1)).
 * **`dupire_weak`** (headline) — `d/dT ∫ψ(K)C(T, K)dK = ½·𝔼[ψ(X_T)·b̂²(T, X_T)]`.
 
 Together, `dupire_weak` and `breedenLitzenberger_weak` say `∂_T C = ½·b̂²(T, ·)·∂²_K C` in
@@ -41,11 +42,13 @@ distributional form, with no density, no Tanaka formula, and no regularity hypot
 
 ## Not claimed here
 
-* The pointwise ratio at a single strike (Route P, item 21): it needs a continuous density of
-  `law(X_T)` near `K` and a continuous version of `b̂²` (memo §3 "Route P").
+* The pointwise ratio at a single strike without regularity hypotheses: the version proved
+  in the second half of this file (`dupire_pointwise`) carries C²-in-`K` / C¹-in-`T`
+  regularity of the call surface (with continuous `C_KK`, jointly continuous `C_T`) plus a
+  continuous version of `b̂²` as hypotheses.
 * Nonzero rates / lognormal `δ = σ_loc·S`: the process class is `BoundedItoProcess`
-  (bounded drift and diffusion); the flat-vol check (Ex. 9.2) is therefore analytic —
-  `dupireRatio_flat` in `ForwardSmileScratch.lean`.
+  (bounded drift and diffusion); the lognormal flat-vol check (Ex. 9.2) is therefore outside
+  this module's bounded-coefficient class.
 * Existence of the local-vol diffusion that reproduces `C` (`GyongyMimicry.gyongy_mimicry_gated`).
 -/
 
@@ -65,7 +68,7 @@ namespace MathFin.Dupire
 
 /-- **The call-price surface** of an `ℝ≥0`-indexed price process `X` under the pricing
 measure `μ` (zero rates): `C(s, K) = 𝔼[(X_{s⁺} − K)⁺]`. A *definition* — never a free
-variable of any theorem below (the anti-echo invariant of the item-20 spec). -/
+variable of any theorem below (no theorem's statement mentions the surface it prices). -/
 noncomputable def callSurface {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
     (X : ℝ≥0 → Ω → ℝ) (s K : ℝ) : ℝ :=
   ∫ ω, max (X (Real.toNNReal s) ω - K) 0 ∂μ
@@ -247,8 +250,8 @@ section Dupire
 
 open MathFin.GyongyMimicry
 
-/-- **The weak forward (Fokker–Planck) equation at zero rates** — handoff sub-goal (1) in its
-honest weak form: `GyongyMimicry.marginal_flow_weak_equation_fn_constructed` (GyongyScratch :1281)
+/-- **The weak forward (Fokker–Planck) equation at zero rates** — in its
+honest weak form: `GyongyMimicry.marginal_flow_weak_equation_fn_constructed`,
 specialized to the driftless constructed process `X = c + M` (`β := 0`, `M` the Itô integral
 of the bounded adapted `δ`), with the drift term erased. For every test function `f` of the
 landed class (`C²`, bounded `f', f'', f'''`),
@@ -258,7 +261,7 @@ landed class (`C²`, bounded `f', f'', f'''`),
 where `b̂²(t, ·)` is any Borel representation (`hbfn`) of the Gyöngy coefficient
 `𝔼[δ_t² | X_t]`. The drift coefficient `𝔼[β_t | X_t] = 𝔼[0 | X_t]` is literally `0`
 (`condExp_zero`), and `∫β = 0` (`AdaptedDrift.driftPath` of `0`), so the β-side
-hypotheses of :1281 are discharged here, not carried. -/
+hypotheses of the general form are discharged here, not carried. -/
 theorem forward_eq_weak_zeroRate
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
@@ -304,7 +307,7 @@ theorem forward_eq_weak_zeroRate
   simpa using key
 
 /-- **Dupire's formula, distributional form (Bagaria ch. 9 Thm 9.5 ∘ Thm 9.7, zero rates) —
-the item-20 headline.** For the driftless constructed Itô process `X = c + ∫δ dB` (bounded
+the headline of the distributional half.** For the driftless constructed Itô process `X = c + ∫δ dB` (bounded
 adapted `δ`) and every smooth compactly supported strike density `ψ`, the `ψ`-pairing of the
 *defined* call surface `C(s, K) = 𝔼[(X_{s⁺} − K)⁺]` is differentiable in maturity on
 `(0, ↑T)`, with
@@ -317,7 +320,9 @@ adapted `δ`) and every smooth compactly supported strike density `ψ`, the `ψ`
 no Tanaka formula and no regularity hypothesis on `C`: the call payoff `(x − K)⁺` (not `C²`) is
 never tested directly; it is smeared against `ψ` first (`call_spanning_compactSupport`), and
 the smeared payoff `f_ψ` is a legitimate test function of `forward_eq_weak_zeroRate`. The
-pointwise ratio `σ²_loc = 2∂_T C / (K² ∂²_K C)` is Route P (item 21), not claimed here. -/
+pointwise ratio `σ²_loc = 2∂_T C / (K² ∂²_K C)` at a single strike is proved in the pointwise
+half of this file (`dupire_pointwise`), under carried regularity hypotheses on the call
+surface. -/
 theorem dupire_weak
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
@@ -362,12 +367,11 @@ end MathFin.Dupire
 
 
 /-!
-# Dupire's formula, pointwise form (Route P, item 21)
+# Dupire's formula, pointwise form
 
 The pointwise ratio `σ²_loc(T, K) = 2·∂_T C / (K²·∂²_K C)` at a single strike, under explicit
-carried regularity hypotheses on the *defined* `callSurface` (contract:
-`memos/item-dupire-opus-memo.md` §3 "Route P"). The item-20 prefix above is unchanged; its
-"Not claimed here" bullet on Route P is superseded by this section.
+carried regularity hypotheses on the *defined* `callSurface`, derived on top of the
+distributional half above.
 
 ## Hypotheses (carried, never derived)
 
@@ -382,7 +386,7 @@ Each derivative (`CK`, `CKK`, `Ct`) is pinned to the defined `callSurface` by it
 `HasDerivAt` hypothesis. **No hypothesis relates `Ct` to `CKK`**: the relation
 `2·C_T = b̂²·C_KK` is the conclusion, derived from `dupire_weak` (anti-echo invariant).
 Non-vacuity: Bachelier (`δ ≡ δ₀ > 0`, `X = c + δ₀B`) satisfies all of them, with
-`C_T = ½δ₀²φ_t(K)`, `C_KK = φ_t(K) > 0`, `b̂² ≡ δ₀²` (memo §3 audit; no Lean witness here).
+`C_T = ½δ₀²φ_t(K)`, `C_KK = φ_t(K) > 0`, `b̂² ≡ δ₀²` (no Lean witness here).
 
 ## Proved
 
@@ -403,7 +407,7 @@ Non-vacuity: Bachelier (`δ ≡ δ₀ > 0`, `X = c + δ₀B`) satisfies all of t
 * **`dupire_localVol`** (P3) — Def 9.4's Markov case `δ_s = v(s, X_s)` (carried as `hδloc`;
   SDE existence is not proved): `v(t, K)² = 2·C_T / C_KK`.
 
-Deviation from the memo's P2 route: instead of `eqOn_open_of_ae_eq` (which would need the
+Deviation from the originally planned P2 route: instead of `eqOn_open_of_ae_eq` (which would need the
 continuous version to be pushed through `law(X_t)` with a measurable-set side condition), P2 argues
 by contradiction on a small strike interval, where `law(X_t)` has positive mass
 `∫ C_KK > 0`.
@@ -589,7 +593,7 @@ open scoped ENNReal
 
 /-- **P1 on a sub-window (the analytic core of `dupire_ae`).** For `a < p ≤ q < b`, a.e. on
 `{X_t ∈ Ioo p q}` the Borel version `b̂²(t, ·) = bfn t` of the Gyöngy coefficient equals the
-Dupire ratio `2·C_T(t, ·)/C_KK` at `X_t`. Proof (memo §3 Route P, steps a–d):
+Dupire ratio `2·C_T(t, ·)/C_KK` at `X_t`. Proof (steps a–d):
 (a) `law(X_t) = C_KK · Leb` on `Ioc p q` (`law_restrict_eq_withDensity`);
 (b) for every test `ψ` supported in `Ioo p q`, `∫ψ C_T(t, ·) = ½𝔼[ψ(X_t) b̂²(t, X_t)]` by
 `HasDerivAt.unique` between `hasDerivAt_integral_mul_callSurface` and `dupire_weak`;
@@ -802,7 +806,7 @@ at *every* strike of the window with `C_KK > 0`,
 Proof by contradiction: if the two continuous sides differed at `K₀`, they would differ on a
 small interval `(c, d]` around `K₀` where `C_KK > 0`; that interval has `law(X_t)`-mass
 `∫_c^d C_KK > 0` (`law_Ioc_eq_ofReal_integral`), contradicting `dupire_ae` + `hv2rep`, which make
-them agree a.e. on `{X_t ∈ window}`. (Replaces the memo's `eqOn_open_of_ae_eq` route.) -/
+them agree a.e. on `{X_t ∈ window}`. (Replaces the `eqOn_open_of_ae_eq` route.) -/
 theorem dupire_pointwise_coeff
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))

@@ -79,8 +79,8 @@ section Process
 /-- A one-dimensional Itô process with bounded coefficients, in the shape the
 generator-matching core consumes: a triple of processes `X, β, δ` against a filtration `ℱ`,
 with `X` carrying the dynamics `dX = β dt + δ dW` (the decomposition itself is *not* encoded
-here — it enters through the Itô-drift hypothesis `hitoid` of
-`GyongyMimicry.time_derivative_marginals`; see the module docstring for the gating).
+here — it enters through the Itô-drift hypothesis `hitoid` of the marginal-flow engine
+(`GyongyMimicry.hasDerivAt_marginal_flow_core`); see the module docstring for the gating).
 
 Adaptedness (`hXadapted` etc.) is recorded because it is what makes `β, δ` admissible Itô
 integrand/drift data (provenance: MathFin's `ItoIntegralL2.natFiltration`-adapted
@@ -161,12 +161,12 @@ theorem sigmaGen_le (X : ℝ → Ω → ℝ) (t : ℝ) (hX : Measurable (X t)) :
   hX.comap_le
 
 /-- Gyöngy's drift coefficient at time `t`, as a random variable:
-`a_t = 𝔜[β_t | σ(X_t)]`. (A conditional expectation is defined only up to μ-a.e.
+`a_t = 𝔼[β_t | σ(X_t)]`. (A conditional expectation is defined only up to μ-a.e.
 equality; all statements below integrate, so the representative is irrelevant.) -/
 noncomputable def driftCoeff (μ : Measure Ω) (X β : ℝ → Ω → ℝ) (t : ℝ) : Ω → ℝ :=
   μ[β t | sigmaGen X t]
 
-/-- Gyöngy's squared-diffusion coefficient: `b²_t = 𝔜[δ_t² | σ(X_t)]`. -/
+/-- Gyöngy's squared-diffusion coefficient: `b²_t = 𝔼[δ_t² | σ(X_t)]`. -/
 noncomputable def diffCoeffSq (μ : Measure Ω) (X δ : ℝ → Ω → ℝ) (t : ℝ) : Ω → ℝ :=
   μ[(fun ω => δ t ω * δ t ω) | sigmaGen X t]
 
@@ -194,8 +194,8 @@ theorem measurable_f2_comp {X : Ω → ℝ} (hX : Measurable X) {f'' : ℝ → �
     (hf''cont : Continuous f'') : Measurable (fun ω => f'' (X ω)) :=
   hf''cont.measurable.comp hX
 
-/-- Bounded measurable functions are integrable under a finite (a fortiori probability)
-measure. -/
+/-- Bounded measurable functions are integrable under a probability measure (the standing
+hypothesis on `μ` in this section). -/
 theorem integrable_of_bounded {g : Ω → ℝ} (hg : Measurable g) (C : ℝ) (hC : ∀ ω, |g ω| ≤ C) :
     Integrable g μ :=
   Integrable.of_bound hg.aestronglyMeasurable C
@@ -203,7 +203,7 @@ theorem integrable_of_bounded {g : Ω → ℝ} (hg : Measurable g) (C : ℝ) (hC
 
 /-- **The tower identity** — the engine of Gyöngy's proof (Bagaria ch. 9 / Thm 9.6, the
 "condition on `X_t`" step): an `m`-measurable factor `h` crosses the conditional
-expectation, `𝔼[h · g] = 𝔼[h · 𝔜[g | m]]`. -/
+expectation, `𝔼[h · g] = 𝔼[h · 𝔼[g | m]]`. -/
 theorem tower_identity {m : MeasurableSpace Ω} (hm : m ≤ mΩ) {h g : Ω → ℝ}
     (hh : StronglyMeasurable[m] h) (hgh : Integrable (h * g) μ) (hg : Integrable g μ) :
     ∫ ω, h ω * g ω ∂μ = ∫ ω, h ω * μ[g | m] ω ∂μ := by
@@ -372,12 +372,12 @@ theorem continuous_marginal_integrand (P : BoundedItoProcess Ω) {f' f'' : ℝ �
     (bound_integrable := integrable_const _)
     (h_lim := Eventually.of_forall fun ω => (hpoint ω).continuousAt)
 
-/-- The engine behind `GyongyMimicry.time_derivative_marginals` and
-`GyongyMimicry.marginal_flow_weak_equation` (HasDerivAt form), in the *band* form (dispatch-11):
+/-- The engine behind the constructed marginal-flow weak equations
+(`GyongyMimicry.marginal_flow_weak_equation_constructed` and
+`GyongyMimicry.marginal_flow_weak_equation_fn_constructed`), in the *band* form (dispatch-11):
 the integrated Itô-drift identity is consumed only through the filter equality `=ᶠ[𝓝 t]`,
 so it suffices that it hold on an open band `Ioo 0 T` around `t` — exactly the shape in
-which the constructed instance supplies it (see the `Constructed` section); the
-`∀ s > 0` form of `GyongyMimicry.hasDerivAt_marginal_flow` is the case `T = t + 1`.
+which the constructed instance supplies it (see the `Constructed` section).
 
 Everything stage 1 hypothesized beyond `hitoid` is now *proved* (stage 2), so it appears
 here only as derived `have`s:
@@ -841,7 +841,7 @@ with derivative the `(a, b²)`-generator of the **Gyöngy coefficients of the re
 process**,
 
   `d/dt 𝔼[f(X_{t⁺})] = 𝔼[f'(X_{t⁺}) · a] + ½·𝔼[f''(X_{t⁺}) · b²]`,
-  `a = 𝔜[β_{⟨t⟩} | σ(X_{⟨t⟩})]`, `b² = 𝔜[δ²_{⟨t⟩} | σ(X_{⟨t⟩})]`,
+  `a = 𝔼[β_{⟨t⟩} | σ(X_{⟨t⟩})]`, `b² = 𝔼[δ²_{⟨t⟩} | σ(X_{⟨t⟩})]`,
 
 driven by the *real* integrated Itô–drift identity (`ItoDriftConditional.itoDrift_expectation_identity_adapted`,
 transferred) rather than the `hitoid` hypothesis. This is the computation whose
@@ -937,9 +937,9 @@ private theorem exists_coeffFn_comp {Ω : Type*} [MeasurableSpace Ω]
 set_option linter.unusedVariables false in
 /-- **Layer 1, drift coefficient function (item 11 / memo Route 1)**: for the
 constructed-process data of the `marginal_flow_weak_equation_constructed` instance (same
-hypotheses shape), Gyöngy's drift coefficient `a_t = 𝔜[β_t | σ(X_t)]` *is* a Borel function
+hypotheses shape), Gyöngy's drift coefficient `a_t = 𝔼[β_t | σ(X_t)]` *is* a Borel function
 of the current state, pointwise: `∃ â : ℝ → ℝ`, `Measurable â` and
-`driftCoeff 𝔜 X β t ω = â (X_t ω)` for every `ω` — the `(t, ·)`-section of Thm 9.6's
+`driftCoeff 𝔼 X β t ω = â (X_t ω)` for every `ω` — the `(t, ·)`-section of Thm 9.6's
 `a(t, x) = 𝔼[β_t | X_t = x]` as a genuine deterministic function.
 
 Engine: `stronglyMeasurable_condExp` (unconditional in this Mathlib rev) +
@@ -961,8 +961,8 @@ theorem exists_driftCoeff_fn
     stronglyMeasurable_condExp
 
 /-- **Layer 1, squared-diffusion coefficient function (item 11 / memo Route 1)**: the twin
-of `GyongyMimicry.exists_driftCoeff_fn` for `b²_t = 𝔜[δ_t² | σ(X_t)]`:
-`∃ b̂² : ℝ → ℝ`, `Measurable b̂²` and `diffCoeffSq 𝔜 X δ t ω = b̂² (X_t ω)` pointwise —
+of `GyongyMimicry.exists_driftCoeff_fn` for `b²_t = 𝔼[δ_t² | σ(X_t)]`:
+`∃ b̂² : ℝ → ℝ`, `Measurable b̂²` and `diffCoeffSq 𝔼 X δ t ω = b̂² (X_t ω)` pointwise —
 the `(t, ·)`-section of Thm 9.6's `b²(t, x) = 𝔼[δ_t² | X_t = x]`.
 
 Range-side nonnegativity note (the memo's optional clause): `0 ≤ b̂² x` on the range holds
