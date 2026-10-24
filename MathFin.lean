@@ -120,6 +120,8 @@ import MathFin.Foundations.Bisection
 import MathFin.Foundations.Quantile
 import MathFin.Foundations.NormalQuantile
 import MathFin.Foundations.NormalTail
+-- The Student-t law: density in closed form, the ν = 1 Cauchy anchor, the tail first moment
+import MathFin.Foundations.StudentT
 -- QRM foundations: quantile convergence, copulas and Sklar's theorem, Hoeffding's covariance
 -- identity, Marshall–Olkin common shocks, correlation fallacies, extreme value theory (GEV, GPD,
 -- maxima of Poisson-many losses)
@@ -630,13 +632,15 @@ import MathFin.RiskMeasures.ValueAtRisk
 import MathFin.RiskMeasures.GaussianValueAtRisk
 -- Expected shortfall: Rockafellar–Uryasev for every law, coherence, dual representation; the
 -- Gaussian ES closed form; VaR by bisection; VaR superadditivity; closed forms and tail ratios;
--- elicitability (VaR elicitable, ES not); Bernoulli mixtures and the Basel IRB limit theorem
+-- VaR and ES of the Student-t law (McNeil–Frey–Embrechts closed forms); elicitability
+-- (VaR elicitable, ES not); Bernoulli mixtures and the Basel IRB limit theorem
 import MathFin.RiskMeasures.ExpectedShortfall
 import MathFin.RiskMeasures.GaussianExpectedShortfall
 import MathFin.RiskMeasures.ValueAtRiskBisection
 import MathFin.RiskMeasures.VaRSuperadditivity
 import MathFin.RiskMeasures.DiscreteVaR
 import MathFin.RiskMeasures.RiskClosedForms
+import MathFin.RiskMeasures.StudentTValueAtRisk
 import MathFin.RiskMeasures.Elicitability
 import MathFin.RiskMeasures.JointElicitability
 import MathFin.RiskMeasures.Expectile

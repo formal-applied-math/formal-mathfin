@@ -26,6 +26,41 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The Student-t law: VaR and ES at the law (2026-10-22)
+
+Five entries added to `benchmarks/quantitative_risk_management.json`, all `full`.
+Corpus 658 → 663 (after merging `origin/main` to resolve a 370-commit divergence; the
+delta this section itself contributed was 535 → 540 before that merge).
+
+Mathlib has no Student-t law at the pin. `Foundations/StudentT.lean` builds it as Lebesgue measure
+with density `k_ν/∫k_ν`, `k_ν(x) = (1 + x²/ν)^(-(ν+1)/2)`, computes the normalizing constant (a
+Gamma mixture of Gaussian kernels, integrals exchanged), anchors `ν = 1` at Mathlib's
+`cauchyMeasure 0 1`, and evaluates the tail first moment. `RiskMeasures/StudentTValueAtRisk.lean`
+states VaR and ES of `μ + σT` through the library's `valueAtRisk` and `expectedShortfall`
+(McNeil, Frey and Embrechts 2015, Example 2.15); ES goes through the Acerbi–Tasche formula.
+
+| Benchmark ID | Mathematical conclusion | Lean module and declaration | Faithfulness |
+|---|---|---|---|
+| `qrm-student-t-density` | For ν > 0, the Student-t law built as Lebesgue measure with density k_ν/∫k_ν, k_ν(x) = (1 + x²/ν)^(-(ν+1)/2), has density Γ((ν+1)/2)/(√(νπ)Γ(ν/2))·(1 + x²/ν)^(-(ν+1)/2). | `MathFin/Foundations/StudentT.lean`, `MathFin.studentTPDFReal_eq` | `full` |
+| `qrm-student-t-cauchy` | The Student-t law with ν = 1 is Mathlib's standard Cauchy law: studentTMeasure 1 = cauchyMeasure 0 1. | `MathFin/Foundations/StudentT.lean`, `MathFin.studentTMeasure_one` | `full` |
+| `qrm-student-t-var` | For T ~ t_ν, σ ≥ 0 and α ∈ (0, 1): VaR_α(μ + σT) = μ + σ·t_ν⁻¹(α), with t_ν⁻¹(α) the quantile of the law. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_of_hasLaw_studentTMeasure` | `full` |
+| `qrm-student-t-es` | For T ~ t_ν, ν > 1, σ ≥ 0 and α ∈ (0, 1): ES_α(μ + σT) = μ + σ·g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α). | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.expectedShortfall_of_hasLaw_studentTMeasure` | `full` |
+| `qrm-student-t-var-le-es` | For ν > 1 and α ∈ (0, 1), q ≤ g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α), the general VaR ≤ ES read through the two closed forms. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.quantile_studentTMeasure_le_expectedShortfall_closedForm` | `full` |
+
+What is not covered:
+- `t_ν⁻¹(α)` is the generic `quantile` of the law; no closed form for it is given.
+- `qrm-student-t-var-le-es` benchmarks the inequality between the two closed forms; the
+  measure-level `valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure` is not itself a
+  benchmark entry.
+- The construction as the law of `Z/√(V/ν)` (independent normal and χ²) is not formalized.
+
+Verification:
+- The default `lake build` passed, including the curated `AxiomAudit.lean` (three new Student-t
+  guards) and the regenerated `AxiomAuditGen.lean`.
+- `lake lint` passed.
+- The ledger reports 663 fresh, 0 stale and 0 missing entries (after the subsequent merge with
+  `origin/main`); the five new entries were verified with `lake env lean`.
+
 ### Every module connected: the coherence pass (2026-10-21)
 
 A coherence pass found 41 modules that imported nothing from the library and that nothing

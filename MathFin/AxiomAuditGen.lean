@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (742 MathFin constants, 29 upstream). Citations
+  corpus (747 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -1343,6 +1343,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.expectedShortfall_of_hasLaw_lomaxMeasure
 
+/-- info: 'MathFin.expectedShortfall_of_hasLaw_studentTMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.expectedShortfall_of_hasLaw_studentTMeasure
+
 /-- info: 'MathFin.expectedUtility_mix' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.expectedUtility_mix
@@ -2567,6 +2571,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.quantile_map
 
+/-- info: 'MathFin.quantile_studentTMeasure_le_expectedShortfall_closedForm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.quantile_studentTMeasure_le_expectedShortfall_closedForm
+
 /-- info: 'MathFin.quantoForward_of_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.quantoForward_of_gaussian
@@ -2723,6 +2731,14 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.strictlyJointlyElicits_fisslerZiegelExpScore
 
+/-- info: 'MathFin.studentTMeasure_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.studentTMeasure_one
+
+/-- info: 'MathFin.studentTPDFReal_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.studentTPDFReal_eq
+
 /-- info: 'MathFin.submartingale_optional_sampling' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.submartingale_optional_sampling
@@ -2874,6 +2890,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.valueAtRisk_of_hasLaw_gaussianReal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.valueAtRisk_of_hasLaw_gaussianReal
+
+/-- info: 'MathFin.valueAtRisk_of_hasLaw_studentTMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.valueAtRisk_of_hasLaw_studentTMeasure
 
 /-- info: 'MathFin.valueAtRisk_portfolio_add_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
