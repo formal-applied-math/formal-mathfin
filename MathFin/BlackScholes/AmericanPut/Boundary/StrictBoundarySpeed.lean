@@ -69,7 +69,8 @@ theorem boundary_no_flat_tail (hp : DividendPutSolution k h p b)
         (by rw [hflat t (ha.le.trans hat.le)]; exact hpoint x t hx.le htT (Or.inl hx)))
   have hpos (x t : ℝ) (hx : 0 ≤ x) (hat : a ≤ t) (htT : t ≤ T) (hi : 0 < x ∨ t < T) :
       0 < u x t :=
-    hp.incrementGauge_pos_on_flat_tail (by norm_num) hA hflat (hpoint x t hx htT hi) (ha.trans_le hat)
+    hp.incrementGauge_pos_on_flat_tail (by norm_num) hA hflat (hpoint x t hx htT hi)
+        (ha.trans_le hat)
   have hfit := hp.incrementGauge_fit_of_same_boundary (δ := 1) (by norm_num) hT
     (by rw [hflat (T+1) (by linarith [ha.trans haT]),hflat T (ha.le.trans haT.le)])
   rw [hflat T (ha.le.trans haT.le)] at hfit

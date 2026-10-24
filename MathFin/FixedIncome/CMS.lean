@@ -68,14 +68,13 @@ adjustment on the swap layer of `MathFin/FixedIncome/InterestRateSwap.lean`
   `1 + y > 0` and the cash flows are nonnegative. It is a standalone bond fact;
   nothing here connects it to the CMS rate.
 
-Scope: what lands here is the convexity of the rate functional, the annuity
-measure, the Jensen gap under it, and the compact-range replication identity.
-The convexity adjustment itself — `𝔼^{T_p}[S_T] − S₀`, which needs the change of
-measure from `Qᴬ` to the payment-date forward measure and a model for the curve —
-is not formalized. The spanning is the compact-strike-range version (`[L, U]`
-with `L > −C`); the unbounded-window passage (tail analysis) is not here either. The swap-rate functional is *not* a log payoff, so the seed consumes
-`carrMadan_spanning` — the shared core of which `carrMadan_log_spanning` is the
-log instance (its proof is one instantiation).
+Scope: what lands here is the convexity of the rate functional, the annuity measure, the Jensen gap
+under it, and the compact-range replication identity. The convexity adjustment itself —
+`𝔼^{T_p}[S_T] − S₀`, which needs the change of measure from `Qᴬ` to the payment-date forward measure
+and a model for the curve — is not formalized. The spanning is the compact-strike-range version
+(`[L, U]` with `L > −C`); the unbounded-window passage (tail analysis) is not here either. The
+swap-rate functional is *not* a log payoff, so the seed consumes `carrMadan_spanning` — the shared
+core of which `carrMadan_log_spanning` is the log instance (its proof is one instantiation).
 
 ## Result
 
@@ -124,7 +123,7 @@ private theorem annuity_update_eq {ι : Type*} [DecidableEq ι] (δ : ℝ) (P : 
       = ∑ i ∈ s, Function.update P n x i := Finset.sum_erase_add s _ hn
   have hrest : ∑ i ∈ s.erase n, Function.update P n x i = ∑ i ∈ s.erase n, P i :=
     Finset.sum_congr rfl fun i hi ↦ Function.update_of_ne (Finset.ne_of_mem_erase hi) x P
-  show δ * ∑ i ∈ s, Function.update P n x i = δ * ((∑ i ∈ s.erase n, P i) + x)
+  change δ * ∑ i ∈ s, Function.update P n x i = δ * ((∑ i ∈ s.erase n, P i) + x)
   rw [← hsum, hrest, Function.update_self]
 
 /-- **The bridge to the swap layer**: the par rate of the updated curve *is*
@@ -134,7 +133,7 @@ theorem parSwapRate_update_eq {ι : Type*} [DecidableEq ι] (P0 δ x : ℝ) (P :
     parSwapRate P0 (Function.update P n x n)
         (annuity δ (Function.update P n x) s)
       = cmsCurveRate P0 δ (∑ i ∈ s.erase n, P i) x := by
-  show (P0 - Function.update P n x n) / (annuity δ (Function.update P n x) s)
+  change (P0 - Function.update P n x n) / (annuity δ (Function.update P n x) s)
       = cmsCurveRate P0 δ (∑ i ∈ s.erase n, P i) x
   rw [Function.update_self, annuity_update_eq δ P s hn x]
   rfl
@@ -184,7 +183,7 @@ theorem hasDerivAt_cmsCurveRate (P0 δ C x : ℝ) (hx : C + x ≠ 0) (hδ : δ �
     HasDerivAt.fun_div hf hd hdx
   rw [show cmsCurveRate P0 δ C = fun y : ℝ ↦ (P0 - y) / (δ * (y + C)) from by
       funext y
-      show (P0 - y) / (δ * (C + y)) = (P0 - y) / (δ * (y + C))
+      change (P0 - y) / (δ * (C + y)) = (P0 - y) / (δ * (y + C))
       rw [add_comm C y],
     show (-(P0 + C) / (δ * (C + x) ^ 2))
       = (((-1 : ℝ) * (δ * (x + C)) - (P0 - x) * (δ * 1)) / (δ * (x + C)) ^ 2) from by
@@ -226,7 +225,8 @@ there the denominator stays `≥ C > 0`. -/
 private theorem differentiableOn_cmsCurveRate (P0 δ C : ℝ) (hδ : 0 < δ) (hC : 0 < C) :
     DifferentiableOn ℝ (cmsCurveRate P0 δ C) (Set.Ici 0) :=
   fun x hx ↦ ((hasDerivAt_cmsCurveRate P0 δ C x
-    (ne_of_gt (show (0 : ℝ) < C + x by linarith [Set.mem_Ici.1 hx])) hδ.ne').differentiableAt).differentiableWithinAt
+    (ne_of_gt (show (0 : ℝ) < C + x by linarith [Set.mem_Ici.1 hx]))
+        hδ.ne').differentiableAt).differentiableWithinAt
 
 /-- Continuity on the nonnegative half-line — the regularity Jensen consumes. -/
 private theorem continuousOn_cmsCurveRate (P0 δ C : ℝ) (hδ : 0 < δ) (hC : 0 < C) :
@@ -240,7 +240,7 @@ inequality `(u(C+x)+v(C+y))⁻¹ ≤ u(C+x)⁻¹ + v(C+y)⁻¹` is the AM–GM i
 private theorem convexOn_inv_shift (C : ℝ) (hC : 0 < C) :
     ConvexOn ℝ (Set.Ici (0 : ℝ)) (fun x : ℝ ↦ (C + x)⁻¹) := by
   refine ⟨convex_Ici 0, fun x hx y hy u v hu hv huv ↦ ?_⟩
-  show (C + (u * x + v * y))⁻¹ ≤ u * (C + x)⁻¹ + v * (C + y)⁻¹
+  change (C + (u * x + v * y))⁻¹ ≤ u * (C + x)⁻¹ + v * (C + y)⁻¹
   have hx0 : (0 : ℝ) ≤ x := Set.mem_Ici.1 hx
   have hy0 : (0 : ℝ) ≤ y := Set.mem_Ici.1 hy
   have hxa : 0 < C + x := by linarith
@@ -360,7 +360,7 @@ theorem annuityMeasure_price {Q : Measure Ω} (r T δ : ℝ) (P : Ω → ι → 
       = ∫ ω, Real.exp (-(r * T)) * (S ω * annuityRandom δ P s ω) ∂Q := by
     rw [one_mul]
     refine integral_congr_ae (ae_of_all _ fun ω ↦ ?_)
-    show S ω * annuityRandom δ P s ω / Real.exp (r * T)
+    change S ω * annuityRandom δ P s ω / Real.exp (r * T)
       = Real.exp (-(r * T)) * (S ω * annuityRandom δ P s ω)
     rw [div_eq_mul_inv, Real.exp_neg]
     ring
@@ -369,8 +369,8 @@ theorem annuityMeasure_price {Q : Measure Ω} (r T δ : ℝ) (P : Ω → ι → 
 
 /-! ### 4. The headline: the Jensen gap under the annuity measure -/
 
--- the Jensen application carries heavy higher-order unification
 set_option maxHeartbeats 1000000 in
+-- the Jensen application carries heavy higher-order unification
 /-- **The Jensen gap of the CMS rate functional under `Qᴬ`** (the headline). Let
 `S = cmsCurveRate P₀ δ C`, with `P₀` and `C` deterministic; it is convex on
 `[0, ∞)`. Every nonnegative `W` with `W` and `S ∘ W` integrable under the annuity
@@ -421,8 +421,8 @@ end Annuity
 
 /-! ### 5. The replication seed: Carr–Madan spanning of the rate functional -/
 
--- the Carr–Madan instantiation carries heavy higher-order unification
 set_option maxHeartbeats 1000000 in
+-- the Carr–Madan instantiation carries heavy higher-order unification
 /-- **The replication seed**: the CMS rate functional spanned as cash + forward
 + static OTM option strips on the discount factor (Carr–Madan, compact strike
 range `[L, U]` with `L > −C`). The strip weights are

@@ -17,13 +17,13 @@ identity:
 
 The instances:
 
-| object                | rate `r(u)`                    | quantity                                      |
-|-----------------------|--------------------------------|-----------------------------------------------|
-| Zero-coupon bond      | risk-free rate `r`             | `P(t) = exp(−r·(T−t))`                        |
-| Hazard credit         | hazard intensity `h`           | `S(t) = exp(−h·(T−t))`                        |
-| Survival w/ curve     | hazard function `h(u)`         | `S(t) = exp(−∫₀^t h(u) du)`  (`HazardCurve`)  |
-| Force of mortality    | force `μ(u)`                   | survival = `exp(−∫₀^t μ(u) du)` (`Mortality`) |
-| Vasicek deterministic | drift toward `θ`               | `r(t) = θ + (r₀−θ)·exp(−κt)` (no integral)    |
+| object | rate `r(u)` | quantity |
+|---|---|---|
+| Zero-coupon bond | risk-free rate `r` | `P(t) = exp(−r·(T−t))` |
+| Hazard credit | hazard intensity `h` | `S(t) = exp(−h·(T−t))` |
+| Survival w/ curve | hazard function `h(u)` | `S(t) = exp(−∫₀^t h(u) du)`  (`HazardCurve`) |
+| Force of mortality | force `μ(u)` | survival = `exp(−∫₀^t μ(u) du)` (`Mortality`) |
+| Vasicek deterministic | drift toward `θ` | `r(t) = θ + (r₀−θ)·exp(−κt)` (no integral) |
 
 ## The dual identity: rate as negative-log-derivative
 

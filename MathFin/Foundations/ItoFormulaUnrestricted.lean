@@ -21,8 +21,8 @@ is a **continuous local martingale** on the null-augmented Brownian filtration.
 
 ## Strategy — localize in space *and* time, glue with the exit times
 
-The single gating ingredient is the genuine localizing sequence `exitTime` (`ExitTime.lean`).
-The local-martingale property is delivered here in **explicit form** (a localizing sequence + per-`N`
+The single gating ingredient is the genuine localizing sequence `exitTime` (`ExitTime.lean`). The
+local-martingale property is delivered here in **explicit form** (a localizing sequence + per-`N`
 continuous true martingales agreeing with `M` on the stochastic intervals) — this *is* the textbook
 definition of a continuous local martingale; the packaging into Degenne's `IsLocalMartingale`
 *typeclass* is `ito_formula_unrestricted` in `ItoFormulaUnrestrictedLocMart.lean` (it consumes the
@@ -30,10 +30,10 @@ all-time-agreement step below). Three steps:
 
 * **Double truncation** (this section). `fTrunc N (t, x) = f(cut N t, cut N x)` cuts **both**
   arguments smoothly onto the compact square `[−M₀(N+1), M₀(N+1)]²`, on which the continuous
-  partials of `f` are bounded by constants. The chain rule gives `fTrunc N`'s six partials in
-  closed form, each globally bounded — so `ito_formula_td_process` applies, giving a `[0,∞)`
-  integrand `Fᴺ` and the truncated Itô identity. The Itô integral of `Fᴺ` admits a global
-  **true-martingale** continuous modification `Mₙ` (`exists_continuous_martingale_modification_infinite`).
+  partials of `f` are bounded by constants. The chain rule gives `fTrunc N`'s six partials in closed
+  form, each globally bounded — so `ito_formula_td_process` applies, giving a `[0,∞)` integrand `Fᴺ`
+  and the truncated Itô identity. The Itô integral of `Fᴺ` admits a global **true-martingale**
+  continuous modification `Mₙ` (`exists_continuous_martingale_modification_infinite`).
 * **Agreement on `{· ≤ σ_N}`**, where `σ_N = min(exitTime N, N)`. There `t ≤ N` (time cut inert)
   and `|B_s| ≤ N` for `s ≤ t` (space cut inert), so `fTrunc N = f`, `drift_trunc = drift`, hence
   `Mₙ_t =ᵐ M_t` on `{t ≤ σ_N}` — the per-`t` agreement the headline `ito_formula_unrestricted_local`
@@ -124,7 +124,8 @@ lemma continuous_timeMeasure_primitive {h : ℝ≥0 → ℝ} (hh : Continuous h)
     · refine (continuousAt_congr ?_).mpr (continuousAt_const (y := (0 : ℝ)))
       have hs00 : s = 0 := le_antisymm (not_lt.mp hs0) (zero_le)
       filter_upwards with t
-      exact Set.indicator_of_notMem (by rw [hs00]; exact fun hmem ↦ lt_irrefl 0 (Set.mem_Ioc.mp hmem).1) h
+      exact Set.indicator_of_notMem
+          (by rw [hs00]; exact fun hmem ↦ lt_irrefl 0 (Set.mem_Ioc.mp hmem).1) h
 
 namespace SummitC
 
@@ -141,13 +142,15 @@ noncomputable def fTruncX (f_x : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ
   f_x (S.cut N t) (S.cut N x) * S.cutD1 N x
 /-- `∂_tt fTrunc = f_tt·(φₙ' t)² + f_t·φₙ''(t)`. -/
 noncomputable def fTruncTT (f_t f_tt : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ) (t x : ℝ) : ℝ :=
-  f_tt (S.cut N t) (S.cut N x) * (S.cutD1 N t * S.cutD1 N t) + f_t (S.cut N t) (S.cut N x) * S.cutD2 N t
+  f_tt (S.cut N t) (S.cut N x) * (S.cutD1 N t * S.cutD1 N t) +
+      f_t (S.cut N t) (S.cut N x) * S.cutD2 N t
 /-- `∂_tx fTrunc = f_tx·φₙ'(x)·φₙ'(t)`. -/
 noncomputable def fTruncTX (f_tx : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ) (t x : ℝ) : ℝ :=
   f_tx (S.cut N t) (S.cut N x) * S.cutD1 N x * S.cutD1 N t
 /-- `∂_xx fTrunc = f_xx·(φₙ' x)² + f_x·φₙ''(x)`. -/
 noncomputable def fTruncXX (f_x f_xx : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ) (t x : ℝ) : ℝ :=
-  f_xx (S.cut N t) (S.cut N x) * (S.cutD1 N x * S.cutD1 N x) + f_x (S.cut N t) (S.cut N x) * S.cutD2 N x
+  f_xx (S.cut N t) (S.cut N x) * (S.cutD1 N x * S.cutD1 N x) +
+      f_x (S.cut N t) (S.cut N x) * S.cutD2 N x
 /-- `∂_xxx fTrunc = f_xxx·(φₙ' x)³ + 3 f_xx·φₙ'(x)·φₙ''(x) + f_x·φₙ'''(x)`. -/
 noncomputable def fTruncXXX (f_x f_xx f_xxx : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ) (t x : ℝ) : ℝ :=
   f_xxx (S.cut N t) (S.cut N x) * (S.cutD1 N x * S.cutD1 N x * S.cutD1 N x)

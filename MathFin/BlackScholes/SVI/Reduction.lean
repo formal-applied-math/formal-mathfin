@@ -60,7 +60,8 @@ def B (p : Params) (t : ℝ) : ℝ :=
 def K (p : Params) (t : ℝ) : ℝ := p.sigma * t^2 + 2 * p.m * t - p.sigma
 /-- The log-strike `K p t/(2t)` parametrised by `t > 0`. -/
 noncomputable def strike (p : Params) (t : ℝ) : ℝ := K p t / (2 * t)
-/-- The rationalised Durrleman numerator, a polynomial in `t` with the sign of `g` at `strike p t` (`sign_at_strike`). -/
+/-- The rationalised Durrleman numerator, a polynomial in `t` with the sign of `g` at `strike p t`
+(`sign_at_strike`). -/
 def numerator (p : Params) (t : ℝ) : ℝ :=
   4 * p.sigma * D t * (2 * A p t * D t - K p t * B p t)^2 -
     p.sigma * A p t * (B p t)^2 * D t * (A p t + 8*t) +

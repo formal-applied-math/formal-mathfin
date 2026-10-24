@@ -18,7 +18,8 @@ assumed. The stationary positive profile removes the discount term.
 
 ## Result
 
-Public entry points include `canonicalIncrementGauge`, `canonicalIncrementGauge_continuous`, `canonicalIncrementGauge_contDiffAt`, `canonicalIncrementGauge_equation`.
+Public entry points include `canonicalIncrementGauge`, `canonicalIncrementGauge_continuous`,
+`canonicalIncrementGauge_contDiffAt`, `canonicalIncrementGauge_equation`.
 -/
 
 @[expose] public section
@@ -59,7 +60,8 @@ theorem canonicalIncrementGauge_equation {k h δ x t : ℝ} (hk : 0 < k)
     simpa only [Function.comp_def] using hs.comp x
       (show ContDiffAt ℝ 2 (fun y : ℝ => (y,t)) x by fun_prop)
   have hst : DifferentiableAt ℝ (canonicalTimeIncrement k h δ x) t :=
-    (hs.comp t (show ContDiffAt ℝ 2 (fun s : ℝ => (x,s)) t by fun_prop)).differentiableAt (by norm_num)
+    (hs.comp t (show ContDiffAt ℝ 2 (fun s : ℝ => (x,s)) t by fun_prop)).differentiableAt
+        (by norm_num)
   have hf : ProfileData ((k-h-1)-0) k (profile (k-h-1) k) := by
     simpa only [sub_zero] using profile_data (β := k-h-1) hk.le
   have he := gauge_equation (c := 0) (d := 0) hf hsx hst
@@ -129,7 +131,7 @@ theorem canonicalIncrementGauge_pos_on_flat_tail {k h δ A x t : ℝ} (hk : 0 < 
 
 theorem canonicalIncrementGauge_fit_of_same_boundary {k h δ t : ℝ} (hk : 0 < k)
     (hh : 0 ≤ h) (hhk : h ≤ k) (hδ : 0 ≤ δ) (ht : 0 < t)
-    (heq : canonicalLogBoundary k h (t+δ) = canonicalLogBoundary k h t) :
+    (heq : canonicalLogBoundary k h (t + δ) = canonicalLogBoundary k h t) :
     canonicalIncrementGauge k h δ (canonicalLogBoundary k h t) t = 0 ∧
       HasDerivAt (fun x => canonicalIncrementGauge k h δ x t) 0
         (canonicalLogBoundary k h t) := by

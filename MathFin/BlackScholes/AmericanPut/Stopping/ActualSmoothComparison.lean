@@ -14,7 +14,8 @@ identification theorem takes that comparator and its PDE/boundary data explicitl
 
 ## Result
 
-Public entry points include `pricingOperator_neg`, `canonicalPrice_smooth_subsolution`, `neg_canonicalPrice_smooth_subsolution`, `canonicalPrice_le_smooth_on_cylinder`.
+Public entry points include `pricingOperator_neg`, `canonicalPrice_smooth_subsolution`,
+`neg_canonicalPrice_smooth_subsolution`, `canonicalPrice_le_smooth_on_cylinder`.
 -/
 
 @[expose] public section
@@ -68,9 +69,9 @@ theorem canonicalPrice_le_smooth_on_cylinder {k h : ℝ} (hk : 0 ≤ k)
     (hF : ContinuousOn F (Icc L R ×ˢ Icc a T))
     (hFs : ContDiffOn ℝ 3 F (Ioo L R ×ˢ Ioo a T))
     (hpde : ∀ z ∈ Ioo L R ×ˢ Ioo a T, 0 ≤ pricingOperator k h F z)
-    (hbottom : ∀ x ∈ Icc L R, canonicalPrice k h x a ≤ F (x,a))
-    (hleft : ∀ t ∈ Icc a T, canonicalPrice k h L t ≤ F (L,t))
-    (hright : ∀ t ∈ Icc a T, canonicalPrice k h R t ≤ F (R,t)) :
+    (hbottom : ∀ x ∈ Icc L R, canonicalPrice k h x a ≤ F (x, a))
+    (hleft : ∀ t ∈ Icc a T, canonicalPrice k h L t ≤ F (L, t))
+    (hright : ∀ t ∈ Icc a T, canonicalPrice k h R t ≤ F (R, t)) :
     ∀ z ∈ Icc L R ×ˢ Icc a T, canonicalPrice k h z.1 z.2 ≤ F z :=
   smoothPricingSubsolution_le hk haT (canonicalPrice_continuous hk).continuousOn hF hFs
     (fun z hz => canonicalPrice_smooth_subsolution hk z (hcont hz)) hpde hbottom hleft hright
@@ -81,9 +82,9 @@ theorem smooth_le_canonicalPrice_on_cylinder {k h : ℝ} (hk : 0 ≤ k)
     (hF : ContinuousOn F (Icc L R ×ˢ Icc a T))
     (hFs : ContDiffOn ℝ 3 F (Ioo L R ×ˢ Ioo a T))
     (hpde : ∀ z ∈ Ioo L R ×ˢ Ioo a T, pricingOperator k h F z ≤ 0)
-    (hbottom : ∀ x ∈ Icc L R, F (x,a) ≤ canonicalPrice k h x a)
-    (hleft : ∀ t ∈ Icc a T, F (L,t) ≤ canonicalPrice k h L t)
-    (hright : ∀ t ∈ Icc a T, F (R,t) ≤ canonicalPrice k h R t) :
+    (hbottom : ∀ x ∈ Icc L R, F (x, a) ≤ canonicalPrice k h x a)
+    (hleft : ∀ t ∈ Icc a T, F (L, t) ≤ canonicalPrice k h L t)
+    (hright : ∀ t ∈ Icc a T, F (R, t) ≤ canonicalPrice k h R t) :
     ∀ z ∈ Icc L R ×ˢ Icc a T, F z ≤ canonicalPrice k h z.1 z.2 := by
   have hh := smoothPricingSubsolution_le hk haT (canonicalPrice_continuous hk).neg.continuousOn
     hF.neg hFs.neg (fun z hz => neg_canonicalPrice_smooth_subsolution hk z (hcont hz))
@@ -104,9 +105,9 @@ theorem canonicalPrice_eq_smooth_on_cylinder {k h : ℝ} (hk : 0 ≤ k)
     (hF : ContinuousOn F (Icc L R ×ˢ Icc a T))
     (hFs : ContDiffOn ℝ 3 F (Ioo L R ×ˢ Ioo a T))
     (hpde : ∀ z ∈ Ioo L R ×ˢ Ioo a T, pricingOperator k h F z = 0)
-    (hbottom : ∀ x ∈ Icc L R, F (x,a) = canonicalPrice k h x a)
-    (hleft : ∀ t ∈ Icc a T, F (L,t) = canonicalPrice k h L t)
-    (hright : ∀ t ∈ Icc a T, F (R,t) = canonicalPrice k h R t) :
+    (hbottom : ∀ x ∈ Icc L R, F (x, a) = canonicalPrice k h x a)
+    (hleft : ∀ t ∈ Icc a T, F (L, t) = canonicalPrice k h L t)
+    (hright : ∀ t ∈ Icc a T, F (R, t) = canonicalPrice k h R t) :
     ∀ z ∈ Icc L R ×ˢ Icc a T, canonicalPrice k h z.1 z.2 = F z := by
   have hu := canonicalPrice_le_smooth_on_cylinder hk haT hcont hF hFs
     (fun z hz => (hpde z hz).ge) (fun x hx => (hbottom x hx).ge)

@@ -18,7 +18,8 @@ compactly supported continuous data.
 
 ## Result
 
-Public entry points include `contDiffOn_compact_parameter_integral`, `heatKernel_contDiffAt`, `compact_heatFlow_contDiff`, `compact_exponential_bound`.
+Public entry points include `contDiffOn_compact_parameter_integral`, `heatKernel_contDiffAt`,
+`compact_heatFlow_contDiff`, `compact_exponential_bound`.
 -/
 
 @[expose] public section

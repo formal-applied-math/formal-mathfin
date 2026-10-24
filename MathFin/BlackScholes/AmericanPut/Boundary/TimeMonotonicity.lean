@@ -18,7 +18,8 @@ removed pointwise. No time monotonicity is assumed in the pricing contract.
 
 ## Result
 
-Public entry points include `dividendSpatialOperator_sub_const_mul`, `penalizedDelay`, `penalizedDelay_local_subsolution`, `penalizedDelay_le_price`.
+Public entry points include `dividendSpatialOperator_sub_const_mul`, `penalizedDelay`,
+`penalizedDelay_local_subsolution`, `penalizedDelay_le_price`.
 -/
 
 @[expose] public section
@@ -74,7 +75,8 @@ theorem penalizedDelay_local_subsolution (hp : DividendPutSolution k h p b)
     simpa only [Function.comp_def] using hW.comp x
       (show ContDiffAt ℝ 2 (fun y : ℝ => (y,t)) x by fun_prop)
   have hDt : DifferentiableAt ℝ (delayedPrice p a x) t :=
-    (hD.comp t (show ContDiffAt ℝ 2 (fun s : ℝ => (x,s)) t by fun_prop)).differentiableAt (by norm_num)
+    (hD.comp t (show ContDiffAt ℝ 2 (fun s : ℝ => (x,s)) t by fun_prop)).differentiableAt
+        (by norm_num)
   have hWt := (localizationBarrier_hasDeriv_t k h x t).differentiableAt
   unfold penalizedDelay
   rw [deriv_fun_sub hDt (hWt.const_mul ε),deriv_const_mul_field,

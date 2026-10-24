@@ -376,7 +376,7 @@ theorem crr_tendsto_gaussian_inDistribution {r σ T : ℝ} (hσ : 0 < σ) (hT : 
     funext n
     haveI := isProbabilityMeasure_crrStepMeasure (hp n).1 (hp n).2
     rw [charFun_convPow, charFun_crrStepMeasure t (hp n).1 (hp n).2]
-  show Tendsto (fun n : ℕ ↦ charFun (convPow (crrStepMeasure r σ T n) n) t) atTop
+  change Tendsto (fun n : ℕ ↦ charFun (convPow (crrStepMeasure r σ T n) n) t) atTop
     (𝓝 (charFun (gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal) t))
   rw [heq]
   exact crr_charFun_pow_tendsto_gaussian hσ hT t
@@ -562,7 +562,7 @@ theorem binomialPrice_call_tendsto_bs {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT :
         ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) := by
     refine ((tendsto_integral_put hσ hT hS₀ hna).const_mul (Real.exp (-(r * T)))).congr'
       (Filter.eventually_atTop.mpr ⟨1, fun n hn ↦ ?_⟩)
-    show Real.exp (-(r * T)) * (∫ x, max (K - S₀ * Real.exp x) 0
+    change Real.exp (-(r * T)) * (∫ x, max (K - S₀ * Real.exp x) 0
           ∂(convPow (crrStepMeasure r σ T n) n))
         = binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
           (fun x ↦ max (K - x) 0) n S₀
@@ -571,7 +571,7 @@ theorem binomialPrice_call_tendsto_bs {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT :
   -- Binomial put-call parity (eventually) lifts the convergence to the call.
   refine (hput.add_const (S₀ - K * Real.exp (-(r * T)))).congr'
     (Filter.eventually_atTop.mpr ⟨1, fun n hn ↦ ?_⟩)
-  show binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
+  change binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
         (fun x ↦ max (K - x) 0) n S₀ + (S₀ - K * Real.exp (-(r * T)))
       = binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
         (fun x ↦ max (x - K) 0) n S₀

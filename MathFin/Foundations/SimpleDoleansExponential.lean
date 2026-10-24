@@ -208,7 +208,8 @@ theorem condExp_expCell_eq_one {c : Ω → ℝ} {r : ℝ≥0}
   set gr : Ω → ℝ := fun ω ↦ Real.exp (-((c ω) ^ 2 * ((t : ℝ) - (r : ℝ)) / 2)) with hgrdef
   have hgr_sm : StronglyMeasurable[(𝓕 r : MeasurableSpace Ω)] gr :=
     Real.continuous_exp.comp_stronglyMeasurable
-      ((by fun_prop : Continuous fun x : ℝ ↦ -(x ^ 2 * ((t : ℝ) - (r : ℝ)) / 2)).comp_stronglyMeasurable
+      ((by fun_prop : Continuous fun x : ℝ ↦
+          -(x ^ 2 * ((t : ℝ) - (r : ℝ)) / 2)).comp_stronglyMeasurable
         hc)
   -- Domination bound reused for both `ft` and `gr·ft`.
   have hbnd_int : Integrable (fun ω ↦ Real.exp (K * (X t ω - X r ω))
@@ -284,12 +285,14 @@ private lemma integrable_cellIncrement {c : Ω → ℝ} (hc_meas : Measurable c)
   have hXp : Measurable (X p) := ((hX.stronglyAdapted p).mono (𝓕.le p)).measurable
   have hΔlaw : HasLaw (fun ω ↦ X q ω - X p ω) (gaussianReal 0 (nndist (q : ℝ) (p : ℝ))) P :=
     hX.hasLaw_sub q p
-  have hpqr : (0 : ℝ) ≤ NNReal.toReal q - NNReal.toReal p := sub_nonneg.mpr (NNReal.coe_le_coe.mpr hpq)
+  have hpqr : (0 : ℝ) ≤ NNReal.toReal q - NNReal.toReal p :=
+      sub_nonneg.mpr (NNReal.coe_le_coe.mpr hpq)
   refine Integrable.mono'
     ((integrable_exp_mul_of_hasLaw hΔlaw K).add (integrable_exp_mul_of_hasLaw hΔlaw (-K)))
     (by fun_prop) (Filter.Eventually.of_forall fun ω ↦ ?_)
   rw [Real.norm_of_nonneg (Real.exp_nonneg _)]
-  have hstep : Real.exp (c ω * (X q ω - X p ω) - (c ω) ^ 2 * (NNReal.toReal q - NNReal.toReal p) / 2)
+  have hstep : Real.exp
+      (c ω * (X q ω - X p ω) - (c ω) ^ 2 * (NNReal.toReal q - NNReal.toReal p) / 2)
       ≤ Real.exp (c ω * (X q ω - X p ω)) :=
     Real.exp_le_exp.mpr (by nlinarith [sq_nonneg (c ω), hpqr])
   refine hstep.trans ?_
@@ -330,7 +333,7 @@ theorem cellExp_isMartingale {a b : ℝ≥0} (hab : a ≤ b) {c : Ω → ℝ}
           stronglyMeasurable_const))
     · rw [funext fun ω ↦ cellExp_of_le_left hab hua ω]; exact stronglyMeasurable_const
   refine ⟨hadapt, fun s t hst ↦ ?_⟩
-  show P[fun ω ↦ cellExp (X := X) a b c t ω | (𝓕 s : MeasurableSpace Ω)]
+  change P[fun ω ↦ cellExp (X := X) a b c t ω | (𝓕 s : MeasurableSpace Ω)]
     =ᵐ[P] fun ω ↦ cellExp (X := X) a b c s ω
   rcases le_total t a with hta | hta
   · -- (A) `t ≤ a`: both `1`.
@@ -379,7 +382,8 @@ theorem cellExp_isMartingale {a b : ℝ≥0} (hab : a ≤ b) {c : Ω → ℝ}
       congr 1; ring
     rw [hfactor]
     have hpull := condExp_mul_of_stronglyMeasurable_left (m := (𝓕 s : MeasurableSpace Ω))
-      (hadapt s) (hfactor ▸ hcell_int t) (integrable_cellIncrement (𝓕 := 𝓕) hc_meas hK s (min b t) hsβ)
+      (hadapt s) (hfactor ▸ hcell_int t)
+          (integrable_cellIncrement (𝓕 := 𝓕) hc_meas hK s (min b t) hsβ)
     refine hpull.trans ?_
     filter_upwards [condExp_expCell_eq_one (P := P) (𝓕 := 𝓕) (X := X) hcs hK hsβ] with ω hg
     rw [Pi.mul_apply, show (P[(fun ω ↦ Real.exp (c ω * (X (min b t) ω - X s ω)
@@ -457,7 +461,7 @@ theorem mul_cellExp_isMartingale {M : ℝ≥0 → Ω → ℝ} (hM : Martingale M
             mul_le_mul_of_nonneg_left hGle (abs_nonneg _)
         _ = _ := by ring
   refine ⟨fun t ↦ (hM.1 t).mul (hG_mart.1 t), fun s t hst ↦ ?_⟩
-  show P[fun ω ↦ M t ω * cellExp (X := X) p q c t ω | (𝓕 s : MeasurableSpace Ω)]
+  change P[fun ω ↦ M t ω * cellExp (X := X) p q c t ω | (𝓕 s : MeasurableSpace Ω)]
     =ᵐ[P] fun ω ↦ M s ω * cellExp (X := X) p q c s ω
   rcases le_total p s with hps | hsp
   · -- (I) `p ≤ s`: `M` frozen, pull out the `𝓕_s`-measurable `M_p`, `cellExp` martingale.
@@ -516,7 +520,7 @@ lemma simpleDoleansExp_frozen (s : ℕ → ℝ≥0) (hs : Monotone s) (d : ℕ �
   | succ n ih =>
     intro u ω hu
     have hsn : s n ≤ s (n + 1) := hs (Nat.le_succ n)
-    show simpleDoleansExp (X := X) s d n u ω * cellExp (X := X) (s n) (s (n + 1)) (d n) u ω
+    change simpleDoleansExp (X := X) s d n u ω * cellExp (X := X) (s n) (s (n + 1)) (d n) u ω
         = simpleDoleansExp (X := X) s d n (s (n + 1)) ω
           * cellExp (X := X) (s n) (s (n + 1)) (d n) (s (n + 1)) ω
     rw [ih u ω (hsn.trans hu), ih (s (n + 1)) ω hsn,

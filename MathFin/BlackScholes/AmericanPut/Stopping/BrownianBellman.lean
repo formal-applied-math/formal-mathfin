@@ -16,7 +16,8 @@ no classical pricing solution is assumed.
 
 ## Result
 
-Public entry points include `cappedGridTime`, `cappedGridTime_mono`, `brownianGridMarkovAux`, `brownianGridMarkovAux_bound`.
+Public entry points include `cappedGridTime`, `cappedGridTime_mono`, `brownianGridMarkovAux`,
+`brownianGridMarkovAux_bound`.
 -/
 
 @[expose] public section
@@ -128,7 +129,8 @@ theorem brownianGridPrice_eq_gridValue {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 �
     (T : ℝ≥0) {δ : ℝ≥0} (hδ : 0 < δ) (x : ℝ) :
     brownianGridPrice K r q σ T δ x =
       gridAmericanPutValue gaussianLimit brownianFiltration brownian K r q σ (Real.exp x) T δ := by
-  rw [gridValue_eq_bellman measurable_brownian_uncurry brownian_adapted hK hr (Real.exp_pos x).le hδ]
+  rw [gridValue_eq_bellman measurable_brownian_uncurry brownian_adapted hK hr
+      (Real.exp_pos x).le hδ]
   have he := bellmanAux_eq_brownianGridMarkovAux
     (fun i => discountedLogPayoff_continuous K r (cappedGridTime T δ i))
     (fun i y => discountedLogPayoff_bound hK hr (cappedGridTime T δ i) y)
@@ -155,6 +157,7 @@ theorem brownianGridPrice_tendsto {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
         K r q σ (Real.exp x) T (gridStep n) :=
     funext (fun n => brownianGridPrice_eq_gridValue hK hr T (gridStep_pos n) x)
   rw [he]
-  exact gridValue_tendsto_americanValue measurable_brownian_uncurry continuous_brownian hK hr (Real.exp_pos x).le
+  exact gridValue_tendsto_americanValue measurable_brownian_uncurry continuous_brownian hK hr
+      (Real.exp_pos x).le
 
 end MathFin.BlackScholes.AmericanPut.Stopping

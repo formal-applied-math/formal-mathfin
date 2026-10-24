@@ -13,14 +13,15 @@ public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 
 The finite-horizon follow-on (`exists_continuous_localMartingale_modification`) gives, for each
 horizon `T = n`, an everywhere-continuous local-martingale modification `Xₙ` of the band-restricted
-integrand. Horizon consistency (`itoProcessL2Inf_eq_itoProcessCLM`) makes every `Xₙ` a modification of
-the *same* unbounded-horizon process `itoProcessL2Inf · f` on `[0,n]`, so on a co-null set the `Xₙ`
-agree on overlaps (`indistinguishable_of_modification_on`). Gluing them — at time `t` read the horizon
-`⌈t⌉₊+1`, which is strictly above `t` — yields a single process `gluedProc` continuous on **all** of
-`ℝ≥0`, a modification of `itoProcessL2Inf · f` at **every** `t`, and adapted to the null-augmented
-filtration. Its martingale property is the **global** `itoProcessL2Inf_isMartingale` transported across
-the augmentation by `condExp_sup_nulls` — no horizon clamp is needed (unlike the `[0,T]` follow-on),
-because the unbounded-horizon process is genuinely a martingale on the whole half-line.
+integrand. Horizon consistency (`itoProcessL2Inf_eq_itoProcessCLM`) makes every `Xₙ` a modification
+of the *same* unbounded-horizon process `itoProcessL2Inf · f` on `[0,n]`, so on a co-null set the
+`Xₙ` agree on overlaps (`indistinguishable_of_modification_on`). Gluing them — at time `t` read the
+horizon `⌈t⌉₊+1`, which is strictly above `t` — yields a single process `gluedProc` continuous on
+**all** of `ℝ≥0`, a modification of `itoProcessL2Inf · f` at **every** `t`, and adapted to the
+null-augmented filtration. Its martingale property is the **global** `itoProcessL2Inf_isMartingale`
+transported across the augmentation by `condExp_sup_nulls` — no horizon clamp is needed (unlike the
+`[0,T]` follow-on), because the unbounded-horizon process is genuinely a martingale on the whole
+half-line.
 -/
 
 @[expose] public section
@@ -65,7 +66,8 @@ lemma horizonProc_adapted (n : ℕ) (i : ℝ≥0) :
 
 /-- **Pairwise indistinguishability on overlaps.** For `m ≤ n`, the two horizon processes agree
 a.e.-pathwise on `[0,m)`: both are continuous and both modify `itoProcessL2Inf · f` there, so
-`indistinguishable_of_modification_on` upgrades the a.e.-at-each-`t` agreement to a.e.-for-all-`t`. -/
+`indistinguishable_of_modification_on` upgrades the a.e.-at-each-`t` agreement to a.e.-for-all-`t`.
+-/
 lemma horizonProc_agree (m n : ℕ) (hmn : m ≤ n) :
     ∀ᵐ ω ∂μ, ∀ t < (m : ℝ≥0),
       horizonProc hB hBmeas hBcont f m t ω = horizonProc hB hBmeas hBcont f n t ω := by
@@ -78,9 +80,9 @@ lemma horizonProc_agree (m n : ℕ) (hmn : m ≤ n) :
   exact (horizonProc_mod_inf hB hBmeas hBcont f m t htm).trans
     (horizonProc_mod_inf hB hBmeas hBcont f n t htn).symm
 
-/-- **The glued unbounded-horizon process.** At time `t` it reads the horizon `⌈t⌉₊+1` (strictly above
-`t`), restricted to the good set `G`. On `G` all horizons agree on overlaps, so this is a single
-continuous path; off the `μ`-null `Gᶜ` it is `0`. -/
+/-- **The glued unbounded-horizon process.** At time `t` it reads the horizon `⌈t⌉₊+1` (strictly
+above `t`), restricted to the good set `G`. On `G` all horizons agree on overlaps, so this is a
+single continuous path; off the `μ`-null `Gᶜ` it is `0`. -/
 noncomputable def gluedProc (G : Set Ω) (t : ℝ≥0) (ω : Ω) : ℝ :=
   G.indicator (fun ω ↦ horizonProc hB hBmeas hBcont f (⌈t⌉₊ + 1) t ω) ω
 

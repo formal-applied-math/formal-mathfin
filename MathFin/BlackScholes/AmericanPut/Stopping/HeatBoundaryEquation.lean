@@ -10,7 +10,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.CompactKernelDerivative
 /-! # Heat equation for the continuous compact-data boundary integral 
 ## Result
 
-Public entry points include `heatPartial`, `heatPartial_smoothAt`, `heatPartial_time`, `heatPartial_space`.
+Public entry points include `heatPartial`, `heatPartial_smoothAt`, `heatPartial_time`,
+`heatPartial_space`.
 -/
 
 @[expose] public section
@@ -31,13 +32,13 @@ theorem heatPartial_smoothAt {F : ℝ × ℝ → ℝ} {z : ℝ × ℝ}
   (hF.fderiv_right (by simp)).clm_apply contDiffAt_const
 
 theorem heatPartial_time {F : ℝ × ℝ → ℝ} {t x : ℝ}
-    (hF : DifferentiableAt ℝ F (t,x)) :
+    (hF : DifferentiableAt ℝ F (t, x)) :
     HasDerivAt (fun s => F (s,x)) (heatPartial F (1,0) (t,x)) t := by
   convert! hF.hasFDerivAt.comp_hasDerivAt t
     ((hasDerivAt_id t).prodMk (hasDerivAt_const t x)) using 1
 
 theorem heatPartial_space {F : ℝ × ℝ → ℝ} {t x : ℝ}
-    (hF : DifferentiableAt ℝ F (t,x)) :
+    (hF : DifferentiableAt ℝ F (t, x)) :
     HasDerivAt (fun y => F (t,y)) (heatPartial F (0,1) (t,x)) x := by
   convert! hF.hasFDerivAt.comp_hasDerivAt x
     ((hasDerivAt_const x t).prodMk (hasDerivAt_id x)) using 1
@@ -51,13 +52,16 @@ theorem boundaryKernelPlane_smoothAt {z : ℝ × ℝ} (hx : 0 < z.2) :
 theorem boundaryKernelPlane_equation (t : ℝ) {x : ℝ} (hx : 0 < x) :
     heatPartial boundaryKernelPlane (1,0) (t,x) =
       (1/2)*heatPartial (heatPartial boundaryKernelPlane (0,1)) (0,1) (t,x) := by
-  have ht := heatPartial_time (t := t) ((boundaryKernelPlane_smoothAt hx).differentiableAt (by simp))
+  have ht :=
+      heatPartial_time (t := t) ((boundaryKernelPlane_smoothAt hx).differentiableAt (by simp))
   have hd := heatPartial_space
-    ((heatPartial_smoothAt (boundaryKernelPlane_smoothAt (z := (t,x)) hx) (0,1)).differentiableAt (by simp))
+    ((heatPartial_smoothAt (boundaryKernelPlane_smoothAt (z := (t,x)) hx) (0,1)).differentiableAt
+        (by simp))
   have he : (fun y => heatPartial boundaryKernelPlane (0,1) (t,y)) =ᶠ[𝓝 x]
       deriv (causalHeatBoundaryKernel t) := by
     filter_upwards [lt_mem_nhds hx] with y hy
-    exact (heatPartial_space ((boundaryKernelPlane_smoothAt hy).differentiableAt (by simp))).deriv.symm
+    exact (heatPartial_space
+        ((boundaryKernelPlane_smoothAt hy).differentiableAt (by simp))).deriv.symm
   rw [← ht.deriv,← hd.deriv,he.deriv_eq]
   exact causalHeatBoundaryKernel_equation t hx
 

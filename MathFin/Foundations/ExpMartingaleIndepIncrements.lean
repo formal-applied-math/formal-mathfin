@@ -55,7 +55,7 @@ theorem condExp_exp_eq_of_indep_increment {s t : ι} (hX : StronglyAdapted 𝓕 
   have hsplit : (fun ω ↦ Real.exp (X t ω))
       = (fun ω ↦ Real.exp (X s ω)) * fun ω ↦ Real.exp (X t ω - X s ω) := by
     funext ω
-    show Real.exp (X t ω) = Real.exp (X s ω) * Real.exp (X t ω - X s ω)
+    change Real.exp (X t ω) = Real.exp (X s ω) * Real.exp (X t ω - X s ω)
     rw [← Real.exp_add]
     congr 1
     ring
@@ -94,7 +94,7 @@ theorem martingale_exp_sub_of_indep_increments {ψ : ι → ℝ} (hX : StronglyA
     condExp_smul _ _ _
   have hcond := condExp_exp_eq_of_indep_increment hX (hindep s t hst) (hint t)
     (Integrable.of_integral_ne_zero (by rw [hmean s t hst]; exact (Real.exp_pos _).ne'))
-  show P[fun ω ↦ Real.exp (X t ω - ψ t) | 𝓕 s] =ᵐ[P] fun ω ↦ Real.exp (X s ω - ψ s)
+  change P[fun ω ↦ Real.exp (X t ω - ψ t) | 𝓕 s] =ᵐ[P] fun ω ↦ Real.exp (X s ω - ψ s)
   rw [hfun]
   filter_upwards [hsmul, hcond] with ω h1 h2
   rw [h1, Pi.smul_apply, h2, hmean s t hst, smul_eq_mul, ← mul_assoc, ← Real.exp_add,

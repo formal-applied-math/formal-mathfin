@@ -103,10 +103,10 @@ theorem ito_formula_expBrownian (hBmeas : ∀ t, Measurable (B t))
 
 with the genuine continuous Itô integral `itoIntegralCLM_T` carrying the diffusion, **named**:
 `gfx =ᵐ [σ·Ŝ(·)]`. So the decomposition is `dŜ = σŜ dB + mŜ dt`, coefficients and all. The
-**`f = S₀·exp` special case of `ito_formula_itoProcess`** — the Itô process `X_t = (m−σ²/2)t + σ B_t`
-(`X₀ = 0`, drift `b = m−σ²/2`): there `f' = f'' = S₀·exp`, so the general drift
-`f'(X)·b + ½f''(X)·σ² = S₀ exp(X)·(m−σ²/2) + ½σ²·S₀ exp(X) = m·Ŝ` (the time-localization `−σ²/2`
-plus the Itô second-order `½σ²`). **Setting `m = 0` makes the drift vanish**
+**`f = S₀·exp` special case of `ito_formula_itoProcess`** — the Itô process
+`X_t = (m−σ²/2)t + σ B_t` (`X₀ = 0`, drift `b = m−σ²/2`): there `f' = f'' = S₀·exp`, so the general
+drift `f'(X)·b + ½f''(X)·σ² = S₀ exp(X)·(m−σ²/2) + ½σ²·S₀ exp(X) = m·Ŝ` (the time-localization
+`−σ²/2` plus the Itô second-order `½σ²`). **Setting `m = 0` makes the drift vanish**
 (`discountedGBM_eq_itoIntegral`) — the Itô-integral reading of the discounted-GBM martingale,
 grounding it on the continuous Itô integral rather than the explicit Wald exponential. -/
 theorem ito_formula_gbm (hBmeas : ∀ t, Measurable (B t))
@@ -130,7 +130,8 @@ theorem ito_formula_gbm (hBmeas : ∀ t, Measurable (B t))
     (fun y ↦ (Real.hasDerivAt_exp y).const_mul S₀)
     (fun y ↦ (Real.hasDerivAt_exp y).const_mul S₀)
     (lam := 1) (C := |S₀|) zero_le_one hexp hexp hexp
-  -- on `[0, T]` the inner offset `X₀ = 0` drops out and the drift `b·f' + ½σ²f''` collapses to `m·Ŝ`
+  -- on `[0, T]` the inner offset `X₀ = 0` drops out and the drift `b·f' + ½σ²f''` collapses to
+  -- `m·Ŝ`
   simp only [zero_add] at hname
   refine ⟨gfx, hname, ?_⟩
   filter_upwards [hgfx] with ω hω

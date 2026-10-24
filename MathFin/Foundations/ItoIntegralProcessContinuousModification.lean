@@ -38,13 +38,12 @@ continuous and adapted for every `ω`). It is **not** proved here.
 ## Coherence
 
 Pure consumption + assembly. Degenne's general càdlàg modification, `cadlagModif` in
-`StochasticIntegral/Quasimartingale/CadlagModificationBanach.lean`, has no `sorry` at our
-pin, but it is a modification only for a right-continuous filtration, and adapted only if that
-filtration is also complete: the usual conditions, which `natFiltration` does not carry. So this result is
-not a duplicate, and the `L²`-continuity + Doob route yields a genuinely **continuous** (not
-merely càdlàg) version. Nothing of the isometry, density, or martingale property is reproved —
-the maximal inequality is Degenne's, the continuous approximants are B3's, the density is
-B1b's.
+`StochasticIntegral/Quasimartingale/CadlagModificationBanach.lean`, has no `sorry` at our pin, but
+it is a modification only for a right-continuous filtration, and adapted only if that filtration is
+also complete: the usual conditions, which `natFiltration` does not carry. So this result is not a
+duplicate, and the `L²`-continuity + Doob route yields a genuinely **continuous** (not merely
+càdlàg) version. Nothing of the isometry, density, or martingale property is reproved — the maximal
+inequality is Degenne's, the continuous approximants are B3's, the density is B1b's.
 
 See `docs/superpowers/specs/2026-06-26-ito-continuous-modification-design.md`.
 -/
@@ -304,7 +303,8 @@ theorem itoContinuousMod_modification (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
       funext fun n ↦ (itoProcessCLM_simpleAssembly_T hB T t hBmeas (V n)).symm
     rw [hrw]
     exact ((itoProcessCLM hB T t hBmeas).continuous.tendsto φ).comp hsa
-  have heLp : Tendsto (fun n ↦ eLpNorm (F n - ⇑(itoProcessCLM hB T t hBmeas φ)) 2 μ) atTop (𝓝 0) := by
+  have heLp : Tendsto (fun n ↦ eLpNorm (F n - ⇑(itoProcessCLM hB T t hBmeas φ)) 2 μ)
+      atTop (𝓝 0) := by
     refine (Lp.tendsto_Lp_iff_tendsto_eLpNorm'' F
       (fun n ↦ memLp_itoSimpleProcess hB hBmeas (V n).val t)
       (⇑(itoProcessCLM hB T t hBmeas φ)) (Lp.memLp _)).mp ?_

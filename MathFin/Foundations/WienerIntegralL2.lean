@@ -245,7 +245,7 @@ private lemma inner_wienerIncrementLp_eq (hB : IsPreBrownianReal B μ)
         with ω hωI hωJ
       rw [show (wienerIncrementLp B hB i : Ω → ℝ) ω = B i.1.2 ω - B i.1.1 ω from hωI,
           show (wienerIncrementLp B hB j : Ω → ℝ) ω = B j.1.2 ω - B j.1.1 ω from hωJ]
-      show (B j.1.2 ω - B j.1.1 ω) * (B i.1.2 ω - B i.1.1 ω) = _
+      change (B j.1.2 ω - B j.1.1 ω) * (B i.1.2 ω - B i.1.1 ω) = _
       ring
     rw [integral_congr_ae h_eq]
     exact covariance_increment_aux hB i.1.1 i.1.2 j.1.1 j.1.2 i.2.1 j.2.1
@@ -328,11 +328,11 @@ private lemma setIntegral_Ioc_eq_zero_of_orthogonal {T : ℝ≥0}
         exact MeasureTheory.L2.inner_indicatorConstLp_one (𝕜 := ℝ)
           i.measurableSet_interval i.restrict_interval_ne_top g
       rw [h_indicator_inner]
-      show ∫ x, _ ∂((volume.restrict _).restrict i.interval) = _
+      change ∫ x, _ ∂((volume.restrict _).restrict i.interval) = _
       rw [Measure.restrict_restrict i.measurableSet_interval]
-      show ∫ x in i.interval ∩ Set.Ioc (0 : ℝ) (T : ℝ), g x ∂volume = _
+      change ∫ x in i.interval ∩ Set.Ioc (0 : ℝ) (T : ℝ), g x ∂volume = _
       rw [show i.interval ∩ Set.Ioc (0 : ℝ) (T : ℝ) = Set.Ioc (max a 0) (min b (T : ℝ)) by
-            show Set.Ioc (max a 0) (min b (T : ℝ)) ∩ Set.Ioc (0 : ℝ) (T : ℝ) = _
+            change Set.Ioc (max a 0) (min b (T : ℝ)) ∩ Set.Ioc (0 : ℝ) (T : ℝ) = _
             rw [Set.Ioc_inter_Ioc, max_eq_left ha'_nn, min_eq_left hb'_T]]
     rw [← h_inner_to_int]
     exact h_orth i
@@ -432,7 +432,7 @@ lemma Lp_real_two_norm_sq {α : Type*} {mα : MeasurableSpace α} (ν : Measure 
   rw [← h]
   refine integral_congr_ae ?_
   filter_upwards with ω
-  show (g ω) * (g ω) = (g ω) ^ 2
+  change (g ω) * (g ω) = (g ω) ^ 2
   ring
 
 /-- Itô isometry, integral form. For every `f ∈ L²([0, T])`,

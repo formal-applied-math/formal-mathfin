@@ -202,7 +202,7 @@ lemma lp_two_norm_sq {α : Type*} {mα : MeasurableSpace α} {μ : Measure α} (
   rw [L2.inner_def] at h
   rw [← h]
   refine integral_congr_ae (Filter.Eventually.of_forall fun a => ?_)
-  show (g a) * (g a) = (g a) ^ 2
+  change (g a) * (g a) = (g a) ^ 2
   ring
 
 /-- Each box term of the elementary integral is in `L²(P)`. -/
@@ -355,7 +355,8 @@ term-by-term by `pair_integral_eq` — i.e. the compensated integral into `L²(P
 theorem assembly_isometry (N : PoissonRandomMeasure P ν) (V : levySimpleModule N) :
     ‖intAssembly N V‖ = ‖emb N V‖ := by
   have hsq : ‖intAssembly N V‖ ^ 2 = ‖emb N V‖ ^ 2 := by
-    show ‖(intSumLp N V : Lp ℝ 2 P)‖ ^ 2 = ‖(embLp N V : Lp ℝ 2 (P.prod (referenceIntensity ν)))‖ ^ 2
+    change ‖(intSumLp N V : Lp ℝ 2 P)‖ ^ 2 =
+        ‖(embLp N V : Lp ℝ 2 (P.prod (referenceIntensity ν)))‖ ^ 2
     rw [lp_two_norm_sq, lp_two_norm_sq]
     rw [show (∫ ω, ((intSumLp N V : Ω → ℝ) ω) ^ 2 ∂P) = ∫ ω, (intSum N V ω) ^ 2 ∂P from
         integral_congr_ae (by
@@ -374,8 +375,8 @@ theorem assembly_isometry (N : PoissonRandomMeasure P ν) (V : levySimpleModule 
 /-- **The `L²(dP ⊗ dν̂)` closure of the marked simple integrands** — the domain of the extended
 Itô–Lévy integral. Concretely the topological closure of `emb`'s range: every element is an `L²`
 limit of marked simple integrands `∑_b φ_b · 𝟙_{box b}`. Defining the target *as* this closure makes
-the extension's density hypothesis a soft topological fact (`embCorestrict_denseRange`), sidestepping
-an explicit marked-predictable `σ`-algebra characterisation. -/
+the extension's density hypothesis a soft topological fact (`embCorestrict_denseRange`),
+sidestepping an explicit marked-predictable `σ`-algebra characterisation. -/
 noncomputable def levyClosure (N : PoissonRandomMeasure P ν) :
     Submodule ℝ (Lp ℝ 2 (P.prod (referenceIntensity ν))) :=
   (LinearMap.range (emb N)).topologicalClosure
@@ -410,24 +411,25 @@ embedding `embCorestrict` (`LinearMap.extendOfNorm`). -/
 noncomputable def itoLevyIntegralL2 (N : PoissonRandomMeasure P ν) :
     levyClosure N →L[ℝ] Lp ℝ 2 P := by
   -- `refine … ?_; exact` rather than a bare `(intAssembly N).extendOfNorm (embCorestrict N)`: the
-  -- CLM goal type pins `Eₗ = ↥(levyClosure N)` with its seminormed-group instances, so `exact` bridges
-  -- the `Submodule.addCommMonoid` vs seminormed `AddCommMonoid` diamond in one cheap `isDefEq`.
-  -- (docs/patterns.md — "extendOfNorm into a submodule".)
+  -- CLM goal type pins `Eₗ = ↥(levyClosure N)` with its seminormed-group instances, so `exact`
+  -- bridges the `Submodule.addCommMonoid` vs seminormed `AddCommMonoid` diamond in one cheap
+  -- `isDefEq`. (docs/patterns.md — "extendOfNorm into a submodule".)
   refine LinearMap.extendOfNorm (E := ↥(levySimpleModule N)) (F := Lp ℝ 2 P) (intAssembly N) ?_
   exact embCorestrict N
 
 set_option maxHeartbeats 1000000 in
-/-- **The Itô–Lévy `L²` isometry, in full generality** — LevyStochCalc's cited axiom #6: on the whole
-`L²` closure `levyClosure`, `‖itoLevyIntegralL2 H‖ = ‖H‖`. The compensated-Poisson stochastic integral
-is an `L²` isometry — proven on marked simple integrands (`assembly_isometry`, summing the
+-- the `extendOfNorm` instance diamond, explained in the proof
+/-- **The Itô–Lévy `L²` isometry, in full generality** — LevyStochCalc's cited axiom #6: on the
+whole `L²` closure `levyClosure`, `‖itoLevyIntegralL2 H‖ = ‖H‖`. The compensated-Poisson stochastic
+integral is an `L²` isometry — proven on marked simple integrands (`assembly_isometry`, summing the
 overlapping-box bilinear pairing) and extended by continuity to their closure. -/
 theorem itoLevyIntegralL2_norm (N : PoissonRandomMeasure P ν) (H : levyClosure N) :
     ‖itoLevyIntegralL2 N H‖ = ‖H‖ := by
   have key : ∀ V : levySimpleModule N, ‖intAssembly N V‖ = ‖embCorestrict N V‖ :=
     fun V => by rw [Submodule.coe_norm]; exact assembly_isometry N V
   -- `unfold` exposes the def's already-bridged `extendOfNorm` term; discharging the isometry kernel
-  -- against the submodule codomain re-triggers the instance diamond (a heavy but finite `whnf`), hence
-  -- the raised `maxHeartbeats` above. (docs/patterns.md — "extendOfNorm into a submodule".)
+  -- against the submodule codomain re-triggers the instance diamond (a heavy but finite `whnf`),
+  -- hence the raised `maxHeartbeats` above. (docs/patterns.md — "extendOfNorm into a submodule".)
   unfold itoLevyIntegralL2
   exact LinearMap.norm_extendOfNorm_eq_of_isometry (embCorestrict_denseRange N) key H
 

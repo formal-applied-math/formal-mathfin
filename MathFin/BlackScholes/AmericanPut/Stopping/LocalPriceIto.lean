@@ -31,7 +31,7 @@ theorem brownianPriceKernel_localization_zero_drift {p : ℝ → ℝ → ℝ} {b
     {K r q σ x₀ T t w : ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hσ : 0 < σ) (ht : t < T)
-    (hx : b (σ^2/2*(T-t)) < x₀+(r-q-σ^2/2)*t+σ*w) :
+    (hx : b (σ ^ 2 / 2 * (T - t)) < x₀ + (r - q - σ ^ 2 / 2) * t + σ * w) :
     ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧
       G =ᶠ[𝓝 (t,w)] (fun z => brownianPriceKernel p K r q σ x₀ T z.1 z.2) ∧
       ∀ᶠ z in 𝓝 (t,w), planeGenerator G z = 0 := by
@@ -66,16 +66,18 @@ theorem local_price_ito {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} {K r q σ x₀ T t w : ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hσ : 0 < σ) (ht : t < T)
-    (hx : b (σ^2/2*(T-t)) < x₀+(r-q-σ^2/2)*t+σ*w) :
+    (hx : b (σ ^ 2 / 2 * (T - t)) < x₀ + (r - q - σ ^ 2 / 2) * t + σ * w) :
     ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧
       G =ᶠ[𝓝 (t,w)] (fun z => brownianPriceKernel p K r q σ x₀ T z.1 z.2) ∧
       (∀ᶠ z in 𝓝 (t,w), planeGenerator G z = 0) ∧
       ∃ M : ℝ≥0 → Ω → ℝ, (∀ ω, Continuous (fun s => M s ω)) ∧
-        IsLocalMartingale M (MathFin.ItoIntegralProcessLocalMartingaleGeneral.augFiltration (μ := P) hmeas) P ∧
+        IsLocalMartingale M
+            (MathFin.ItoIntegralProcessLocalMartingaleGeneral.augFiltration (μ := P) hmeas) P ∧
         ∀ s : ℝ≥0, (fun ω => G (s,W s ω)-G (0,W 0 ω)) =ᵐ[P]
           (fun ω => M s ω + ∫ u in Set.Ioc 0 s,
             planeGenerator G (u,W u ω) ∂MathFin.ItoIntegralL2.timeMeasure) := by
-  obtain ⟨G,hG,hcompact,heq,hzero⟩ := brownianPriceKernel_localization_zero_drift (K := K) hp hσ ht hx
+  obtain ⟨G,hG,hcompact,heq,hzero⟩ :=
+      brownianPriceKernel_localization_zero_drift (K := K) hp hσ ht hx
   exact ⟨G,hG,hcompact,heq,hzero,plane_ito_localMartingale hW hmeas hpaths hG⟩
 
 end MathFin.BlackScholes.AmericanPut.Stopping

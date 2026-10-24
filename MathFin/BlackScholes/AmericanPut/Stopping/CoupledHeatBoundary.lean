@@ -14,7 +14,8 @@ The two fixed-point equations give exact matching where that cutoff is one.
 
 ## Result
 
-Public entry points include `causalBoundarySub`, `causalBoundarySub_dist`, `coupledBoundaryStep`, `coupledBoundaryStep_contracting`.
+Public entry points include `causalBoundarySub`, `causalBoundarySub_dist`, `coupledBoundaryStep`,
+`coupledBoundaryStep_contracting`.
 -/
 
 @[expose] public section
@@ -43,7 +44,7 @@ noncomputable def coupledBoundaryStep {a : ℝ} (χ : ℝ →ᵇ ℝ) (L : ℝ)
     causalBoundarySub g₁ (crossBoundaryCausal χ L p.1))
 
 theorem coupledBoundaryStep_contracting {a D L : ℝ} (hL : 0 < L) (hD : 0 ≤ D)
-    (χ : ℝ →ᵇ ℝ) (hχ : ∀ t, ‖χ t‖ ≤ 1) (hstop : ∀ t, a+D < t → χ t = 0)
+    (χ : ℝ →ᵇ ℝ) (hχ : ∀ t, ‖χ t‖ ≤ 1) (hstop : ∀ t, a + D < t → χ t = 0)
     (g₀ g₁ : CausalBoundaryData a) :
     ContractingWith ⟨boundaryArrivalMass L D,boundaryArrivalMass_nonneg hL⟩
       (coupledBoundaryStep χ L g₀ g₁) := by
@@ -57,7 +58,7 @@ theorem coupledBoundaryStep_contracting {a D L : ℝ} (hL : 0 < L) (hD : 0 ≤ D
       (mul_le_mul_of_nonneg_left (le_max_left _ _) (boundaryArrivalMass_nonneg hL))
 
 theorem exists_coupled_boundary_inputs {a D L : ℝ} (hL : 0 < L) (hD : 0 ≤ D)
-    (χ : ℝ →ᵇ ℝ) (hχ : ∀ t, ‖χ t‖ ≤ 1) (hstop : ∀ t, a+D < t → χ t = 0)
+    (χ : ℝ →ᵇ ℝ) (hχ : ∀ t, ‖χ t‖ ≤ 1) (hstop : ∀ t, a + D < t → χ t = 0)
     (g₀ g₁ : CausalBoundaryData a) :
     ∃ f₀ f₁ : CausalBoundaryData a,
       (∀ t, f₀.1 t+χ t*heatBoundaryExtension f₁.1 L t = g₀.1 t) ∧
@@ -76,7 +77,7 @@ theorem exists_coupled_boundary_inputs {a D L : ℝ} (hL : 0 < L) (hD : 0 ≤ D)
     linarith
 
 theorem exists_coupled_compact_boundary_inputs {a D L : ℝ} (hL : 0 < L) (hD : 0 ≤ D)
-    (χ : ℝ →ᵇ ℝ) (hχ : ∀ t, ‖χ t‖ ≤ 1) (hstop : ∀ t, a+D < t → χ t = 0)
+    (χ : ℝ →ᵇ ℝ) (hχ : ∀ t, ‖χ t‖ ≤ 1) (hstop : ∀ t, a + D < t → χ t = 0)
     (hcχ : HasCompactSupport (χ : ℝ → ℝ)) (g₀ g₁ : CausalBoundaryData a)
     (hc₀ : HasCompactSupport (g₀.1 : ℝ → ℝ)) (hc₁ : HasCompactSupport (g₁.1 : ℝ → ℝ)) :
     ∃ f₀ f₁ : CausalBoundaryData a,

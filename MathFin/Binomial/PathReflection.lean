@@ -164,12 +164,12 @@ lemma walkPos_reflectAfter_ge (τ : ℕ) (ω : Fin n → Bool) {k : ℕ} (hτk :
       (∑ i ∈ Pτ, walkStep (reflectAfter τ ω i)) +
       (∑ i ∈ Pτk, walkStep (reflectAfter τ ω i)) := by
     unfold walkPos
-    show ∑ i ∈ Pk, walkStep (reflectAfter τ ω i) = _
+    change ∑ i ∈ Pk, walkStep (reflectAfter τ ω i) = _
     rw [h_union, Finset.sum_union h_disj]
   have h_split_ω : walkPos ω k =
       (∑ i ∈ Pτ, walkStep (ω i)) + (∑ i ∈ Pτk, walkStep (ω i)) := by
     unfold walkPos
-    show ∑ i ∈ Pk, walkStep (ω i) = _
+    change ∑ i ∈ Pk, walkStep (ω i) = _
     rw [h_union, Finset.sum_union h_disj]
   have h_τ_eq : walkPos ω τ = ∑ i ∈ Pτ, walkStep (ω i) := rfl
   have h_prefix :
@@ -329,7 +329,7 @@ theorem reflectAtFirstHit_involutive (a : ℤ) :
       HitsLevel.reflectAfter_firstHit ω a h1
     have h_τ_eq : firstHit (reflectAfter (firstHit ω a h1) ω) a h2 = firstHit ω a h1 :=
       firstHit_reflectAfter_firstHit ω a h1
-    show reflectAtFirstHit a (reflectAtFirstHit a ω) = ω
+    change reflectAtFirstHit a (reflectAtFirstHit a ω) = ω
     unfold reflectAtFirstHit
     rw [dif_pos h1]
     rw [dif_pos h2]

@@ -161,7 +161,8 @@ theorem norm_sq_increment_le {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) :
       Measure.restrict_apply measurableSet_Ioc,
       Set.inter_eq_left.2 (Set.Ioc_subset_Ioc zero_le hbT), timeMeasure_Ioc]
   have hle : bracketMeasure (μ := μ) T hBmeas (processToLp T hBmeas hadap hcont hbdd)
-      (Set.Ioc a b ×ˢ (Set.univ : Set Ω)) ≤ ENNReal.ofReal (C ^ 2) * ENNReal.ofReal ((b : ℝ) - a) := by
+      (Set.Ioc a b ×ˢ (Set.univ : Set Ω)) ≤ ENNReal.ofReal (C ^ 2) *
+          ENNReal.ofReal ((b : ℝ) - a) := by
     rw [bracketMeasure_eq, sqWeight, withDensity_apply _ hS, ← htrim, ← setLIntegral_const]
     exact setLIntegral_mono_ae measurable_const.aemeasurable (by
       filter_upwards [hbound] with z hz _ using hz)
@@ -273,7 +274,8 @@ theorem integral_abs_weighted_qv_sub_le {n : ℕ} (hn : n ≠ 0) :
   have hCa : 0 ≤ Ca := by simpa using (abs_nonneg _).trans (hA (zero_le_one' ℝ≥0) ω₀)
   have hbr_int := ((memLp_weighted_qv_sub hB T (v := fun s ω ↦ w s ω * σ s ω ^ 2)
     (fun s ↦ (((hw_adap s).mul ((hadap s).pow 2)).mono ((natFiltration hBmeas).le s)).measurable)
-    (hw_cont.mono fun ω h ↦ h.mul ((hcont ω).pow 2).continuousOn) (abs_mul_sq_le hbdd hw_bdd) n).integrable
+    (hw_cont.mono fun ω h ↦ h.mul ((hcont ω).pow 2).continuousOn)
+        (abs_mul_sq_le hbdd hw_bdd) n).integrable
     one_le_two).abs
   have hrate : (n : ℝ) * ((Ca * (T / n)) ^ 2 + 2 * (Ca * (T / n)) * √(C ^ 2 * (T / n)))
       = (Ca * T) ^ 2 / n + 2 * (Ca * T) * √(C ^ 2 * (T / n)) := by
@@ -366,7 +368,8 @@ theorem tendsto_weighted_qv_adapted :
   have hfr := ((hd.sqrt.mul_const (√(C ^ 2 * T))).const_mul 2).add hd
   -- the Brownian term
   have hbr := tendsto_integral_abs_weighted_qv hB T hBmeas (v := fun s ω ↦ w s ω * σ s ω ^ 2)
-    (fun s ↦ (hw_adap s).mul ((hadap s).pow 2)) (hw_cont.mono fun ω h ↦ h.mul ((hcont ω).pow 2).continuousOn)
+    (fun s ↦ (hw_adap s).mul ((hadap s).pow 2))
+        (hw_cont.mono fun ω h ↦ h.mul ((hcont ω).pow 2).continuousOn)
     (abs_mul_sq_le hbdd hw_bdd)
   have hlim := ((hdc.add hfr).const_mul Cw).add hbr
   simp only [mul_zero, Real.sqrt_zero, zero_mul, add_zero] at hlim
@@ -387,7 +390,8 @@ theorem tendsto_qv_adapted :
           (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω) ^ 2
         - ∫ s in Set.Ioc 0 T, σ s ω ^ 2 ∂ItoIntegralL2.timeMeasure| ∂μ) atTop (𝓝 0) := by
   simpa using tendsto_weighted_qv_adapted hB T hBmeas hadap hcont hbdd hA hX
-    (w := fun _ _ ↦ (1 : ℝ)) (fun _ ↦ stronglyMeasurable_const) (Eventually.of_forall fun _ ↦ continuousOn_const)
+    (w := fun _ _ ↦ (1 : ℝ)) (fun _ ↦ stronglyMeasurable_const)
+        (Eventually.of_forall fun _ ↦ continuousOn_const)
     (Cw := 1) fun _ _ ↦ abs_one.le
 
 end QV

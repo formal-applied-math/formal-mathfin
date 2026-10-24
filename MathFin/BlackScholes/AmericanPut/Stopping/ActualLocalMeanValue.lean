@@ -17,7 +17,8 @@ martingale gives an exact local exit representation.
 
 ## Result
 
-Public entry points include `brownianLogState_continuous`, `brownianLogState_usual_adapted`, `actualRectangleExitRule`, `actualRectangleExitTime`.
+Public entry points include `brownianLogState_continuous`, `brownianLogState_usual_adapted`,
+`actualRectangleExitRule`, `actualRectangleExitTime`.
 -/
 
 @[expose] public section
@@ -79,8 +80,10 @@ theorem actualRectangleExit_le_contact {k h : ℝ} (hk : 0 ≤ k) {x R : ℝ} {T
   by_contra! hlt
   have hs := rectangleExitRule_before (brownianLogState_usual_adapted (k-h-1) (Real.sqrt 2) x)
     (brownianLogState_continuous (k-h-1) (Real.sqrt 2) x) ω hlt
-  have hp := hrect (τ.time ω) hs.2.le (brownianLogState (k-h-1) (Real.sqrt 2) x (τ.time ω) ω) hs.1.le
-  have hz := canonicalContactRule_contact (h := h) hk brownianUsual_adapted continuous_brownian x T ω
+  have hp :=
+      hrect (τ.time ω) hs.2.le (brownianLogState (k-h-1) (Real.sqrt 2) x (τ.time ω) ω) hs.1.le
+  have hz :=
+      canonicalContactRule_contact (h := h) hk brownianUsual_adapted continuous_brownian x T ω
   change canonicalGap brownian k h x T (τ.time ω) ω = 0 at hz
   have ht : (τ.time ω : ℝ) ≤ T := by exact_mod_cast τ.le_horizon ω
   have hg : 0 < canonicalGap brownian k h x T (τ.time ω) ω := by
@@ -109,7 +112,8 @@ theorem canonicalPrice_rectangle_meanValue {k h : ℝ} (hk : 0 ≤ k) {x R : ℝ
     funext ω
     have hle := actualRectangleExit_le_contact hk hrect ω
     change canonicalDiscountedPrice k h x T
-      (min (actualRectangleExitTime k h x R δ ω) (brownianUsualActualContactTime (h := h) hk x T ω)) ω = _
+      (min (actualRectangleExitTime k h x R δ ω) (brownianUsualActualContactTime (h := h) hk x T ω))
+          ω = _
     rw [min_eq_left hle]
     have ht : actualRectangleExitTime k h x R δ ω ≤ T := (ρ.le_horizon ω).trans hδT
     simp only [canonicalDiscountedPrice,min_eq_left ht]

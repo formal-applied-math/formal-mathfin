@@ -82,7 +82,7 @@ theorem tendsto_call_spread {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measur
     have hh : 0 < h := hh
     have hlip := abs_call_payoff_sub_le (X ω) K (K + h)
     rw [sub_add_cancel_left, abs_neg, abs_of_pos hh] at hlip
-    show ‖(max (X ω - K) 0 - max (X ω - (K + h)) 0) / h‖ ≤ 1
+    change ‖(max (X ω - K) 0 - max (X ω - (K + h)) 0) / h‖ ≤ 1
     rwa [Real.norm_eq_abs, abs_div, abs_of_pos hh, div_le_one hh]
   · -- and tends to the digital payoff `1_{X > K}`
     by_cases hω : K < X ω
@@ -152,7 +152,7 @@ theorem tendsto_call_spread_left {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : M
     have hh : 0 < h := hh
     have hlip := abs_call_payoff_sub_le (X ω) (K - h) K
     rw [sub_sub_cancel_left, abs_neg, abs_of_pos hh] at hlip
-    show ‖(max (X ω - (K - h)) 0 - max (X ω - K) 0) / h‖ ≤ 1
+    change ‖(max (X ω - (K - h)) 0 - max (X ω - K) 0) / h‖ ≤ 1
     rwa [Real.norm_eq_abs, abs_div, abs_of_pos hh, div_le_one hh]
   · -- and tends to the digital payoff `1_{X ≥ K}`
     by_cases hω : K ≤ X ω

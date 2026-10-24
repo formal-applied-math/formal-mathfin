@@ -15,7 +15,8 @@ exercise time. The possibly shorter last interval and maturity zero are included
 
 ## Result
 
-Public entry points include `cappedGridFiltration`, `rounded_grid_time_eq`, `GridRule.toDiscreteRule`, `GridRule.toDiscreteRule_time`.
+Public entry points include `cappedGridFiltration`, `rounded_grid_time_eq`,
+`GridRule.toDiscreteRule`, `GridRule.toDiscreteRule_time`.
 -/
 
 @[expose] public section
@@ -68,7 +69,7 @@ theorem GridRule.toDiscreteRule_time (θ : GridRule 𝓕 T δ) (hδ : 0 < δ) (�
 /-- A rule for `cappedGridFiltration` read back in physical time, stopping at the capped grid
 time `min (η.time ω*δ) T`. -/
 noncomputable def DiscreteRule.toPhysicalBoundedRule
-    (η : DiscreteRule (cappedGridFiltration 𝓕 T δ) ⌈T/δ⌉₊) (hδ : 0 < δ) : BoundedRule 𝓕 T where
+    (η : DiscreteRule (cappedGridFiltration 𝓕 T δ) ⌈T / δ⌉₊) (hδ : 0 < δ) : BoundedRule 𝓕 T where
   time := fun ω => min ((η.time ω : ℝ≥0)*δ) T
   stopping := by
     intro t
@@ -93,7 +94,7 @@ noncomputable def DiscreteRule.toPhysicalBoundedRule
 /-- `DiscreteRule.toPhysicalBoundedRule` together with the proof that its times lie in
 `exerciseGrid T δ`. -/
 noncomputable def DiscreteRule.toPhysicalGridRule
-    (η : DiscreteRule (cappedGridFiltration 𝓕 T δ) ⌈T/δ⌉₊) (hδ : 0 < δ) : GridRule 𝓕 T δ := by
+    (η : DiscreteRule (cappedGridFiltration 𝓕 T δ) ⌈T / δ⌉₊) (hδ : 0 < δ) : GridRule 𝓕 T δ := by
   refine ⟨η.toPhysicalBoundedRule hδ,?_⟩
   intro ω
   apply Finset.mem_image.mpr

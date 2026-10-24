@@ -191,14 +191,15 @@ theorem thinned_streams {M K : Ω → ℕ} (hM : Measurable M) (hK : Measurable 
 section IidMarks
 
 open Finset
-open scoped Classical
 
 variable {α : Type*} {mα : MeasurableSpace α}
 
+open scoped Classical in
 /-- The number of the first `n` marks `Y 0 ω, …, Y (n - 1) ω` that lie in `A`. -/
 noncomputable def marksIn (Y : ℕ → Ω → α) (A : Set α) (n : ℕ) (ω : Ω) : ℕ :=
   ((range n).filter fun i ↦ Y i ω ∈ A).card
 
+open scoped Classical in
 /-- The event that the indices `i < n` with `Y i ∈ A` are exactly `S ⊆ range n` is the
 intersection of the events `{Y i ∈ A}` (`i ∈ S`) and `{Y i ∉ A}` (`i ∉ S`), `i < n`. -/
 lemma setOf_filter_eq (Y : ℕ → Ω → α) (A : Set α) {n : ℕ} {S : Finset ℕ}
@@ -226,12 +227,14 @@ lemma setOf_filter_eq (Y : ℕ → Ω → α) (A : Set α) {n : ℕ} {S : Finset
       rw [if_pos hiS] at hi'
       exact ⟨hi, hi'⟩
 
+open scoped Classical in
 lemma measurableSet_setOf_filter_eq {Y : ℕ → Ω → α} (hY : ∀ i, Measurable (Y i)) {A : Set α}
     (hA : MeasurableSet A) {n : ℕ} {S : Finset ℕ} (hS : S ⊆ range n) :
     MeasurableSet {ω | (range n).filter (fun i ↦ Y i ω ∈ A) = S} := by
   rw [setOf_filter_eq Y A hS]
   exact Finset.measurableSet_biInter _ fun i _ ↦ hY i (by split_ifs; exacts [hA, hA.compl])
 
+open scoped Classical in
 /-- **The pattern of marks.** For i.i.d. marks, the probability that the indices `i < n` with
 `Y i ∈ A` are exactly `S ⊆ range n` is `pᵏ (1 − p)ⁿ⁻ᵏ`, `p = P(Y 0 ∈ A)`, `k = #S`. -/
 lemma measure_setOf_filter_eq [IsProbabilityMeasure μ] {Y : ℕ → Ω → α}
@@ -259,6 +262,7 @@ lemma measure_setOf_filter_eq [IsProbabilityMeasure μ] {Y : ℕ → Ω → α}
     hind.measure_inter_preimage_eq_mul (range n) (sets := fun i ↦ if i ∈ S then A else Aᶜ) hmeas,
     prod_congr rfl hfac, prod_ite, prod_const, prod_const, hc1, hc2]
 
+open scoped Classical in
 /-- The event "exactly `j` of the first `n` marks lie in `A`" is the disjoint union, over the
 `j`-element subsets `S` of `range n`, of the events "the marks in `A` are exactly `S`". -/
 lemma setOf_marksIn_eq (Y : ℕ → Ω → α) (A : Set α) (n j : ℕ) :
@@ -272,12 +276,14 @@ lemma setOf_marksIn_eq (Y : ℕ → Ω → α) (A : Set α) (n j : ℕ) :
   · rintro ⟨S, ⟨-, hS⟩, rfl⟩
     exact hS
 
+open scoped Classical in
 lemma measurableSet_marksIn_eq {Y : ℕ → Ω → α} (hY : ∀ i, Measurable (Y i)) {A : Set α}
     (hA : MeasurableSet A) (n j : ℕ) : MeasurableSet {ω | marksIn Y A n ω = j} := by
   rw [setOf_marksIn_eq]
   exact Finset.measurableSet_biUnion _ fun S hS ↦
     measurableSet_setOf_filter_eq hY hA (mem_powersetCard.1 hS).1
 
+open scoped Classical in
 /-- **The binomial count of i.i.d. marks.** For i.i.d. marks, the number of the first `n` marks
 in `A` is `Binomial(n, p)`, `p = P(Y 0 ∈ A)`:
 `P(#{i < n : Y i ∈ A} = j) = C(n, j) pʲ (1 − p)ⁿ⁻ʲ`. -/
@@ -298,6 +304,7 @@ theorem measure_marksIn_eq [IsProbabilityMeasure μ] {Y : ℕ → Ω → α}
       hST ((show (range n).filter (fun i ↦ Y i ω ∈ A) = S from h₁).symm.trans h₂)
   · exact fun S hS ↦ measurableSet_setOf_filter_eq hY hA (mem_powersetCard.1 hS).1
 
+open scoped Classical in
 /-- The count of marks in `A` among the first `n`, as a function of `n` and of the whole mark
 sequence, is measurable. -/
 lemma measurable_marksIn_uncurry {A : Set α} (hA : MeasurableSet A) :
@@ -311,6 +318,7 @@ lemma measurable_marksIn_uncurry {A : Set α} (hA : MeasurableSet A) :
   exact MeasurableSet.iUnion fun n ↦ (measurableSet_singleton n).prod
     (measurableSet_marksIn_eq (fun i ↦ measurable_pi_apply i) hA n j)
 
+open scoped Classical in
 /-- **Thinning by i.i.d. marks (Theorem 3.3.10, the marking derived).** Let `N` be a `Poisson(r)`
 count and `Y 0, Y 1, …` i.i.d. marks independent of `N`, and let `A` be a measurable set of marks,
 `p = P(Y 0 ∈ A)`. Then the number of the first `N` marks in `A` and the number in `Aᶜ` are

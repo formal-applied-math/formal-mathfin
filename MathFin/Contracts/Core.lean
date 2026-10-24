@@ -34,6 +34,7 @@ the corpus entry that forces it; see
 * `Contract.pathPV_both`, `Contract.pathPV_scale` — `pathPV` is additive over
   `both` and homogeneous over `scale`. These are what `Contracts/Pricing.lean`
   integrates to get linearity of `value`.
+* `Contract.pathPV_const` — a constant discount factor comes out of `pathPV`.
 
 ## Source
 
@@ -125,5 +126,11 @@ theorem Contract.pathPV_scale (D : ℝ≥0 → ℝ) (s : Scenario ι)
   simp only [pathPV, cashflows, List.map_map]
   rw [← List.sum_map_mul_left]
   exact congrArg List.sum (List.map_congr_left fun p _ ↦ by simp; ring)
+
+/-- A constant discount factor comes out of `pathPV`: discounting every cashflow by `a` is
+discounting the undiscounted present value by `a`. -/
+theorem Contract.pathPV_const (a : ℝ) (s : Scenario ι) (c : Contract ι) :
+    c.pathPV (fun _ ↦ a) s = a * c.pathPV (fun _ ↦ 1) s := by
+  simp [pathPV, List.sum_map_mul_left]
 
 end MathFin.Contracts

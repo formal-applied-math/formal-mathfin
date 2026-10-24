@@ -18,7 +18,8 @@ stochastic verification obligations.
 
 ## Result
 
-Public entry points include `classicalLogSpot`, `classicalCandidate`, `scaled_classical_payoff`, `classicalCandidate_bounds`.
+Public entry points include `classicalLogSpot`, `classicalCandidate`, `scaled_classical_payoff`,
+`classicalCandidate_bounds`.
 -/
 
 @[expose] public section
@@ -66,7 +67,8 @@ theorem classicalCandidate_bounds {k h K r q σ S : ℝ} {p : ℝ → ℝ → �
     (hp.dominates _ _ ht)
   have hhi := hp.bounded (classicalLogSpot W K r q σ S (min t T) ω) _ ht
   have he : Real.exp (-r*(min t T : ℝ)) ≤ 1 :=
-    Real.exp_le_one_iff.mpr (mul_nonpos_of_nonpos_of_nonneg (neg_nonpos.mpr hr) (min t T).coe_nonneg)
+    Real.exp_le_one_iff.mpr
+        (mul_nonpos_of_nonpos_of_nonneg (neg_nonpos.mpr hr) (min t T).coe_nonneg)
   dsimp only [classicalCandidate]
   constructor
   · exact mul_nonneg (Real.exp_pos _).le (mul_nonneg hK hlo)
@@ -84,7 +86,8 @@ theorem classicalCandidate_dominates {k h K r q σ S : ℝ} {p : ℝ → ℝ →
     mul_nonneg (by positivity) (sub_nonneg.mpr (by exact_mod_cast ht))
   simpa only [classicalCandidate,min_eq_left ht,putReward,scaled_classical_payoff W hK hS] using
     mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left
-      (hp.dominates (classicalLogSpot W K r q σ S t ω) _ htime) hK.le) (Real.exp_pos (-r*(t : ℝ))).le
+      (hp.dominates (classicalLogSpot W K r q σ S t ω) _ htime) hK.le)
+          (Real.exp_pos (-r*(t : ℝ))).le
 
 theorem classicalCandidate_continuous {k h K r q σ S : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     (hp : DividendPutSolution k h p b) {W : ℝ≥0 → Ω → ℝ}

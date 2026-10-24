@@ -50,7 +50,8 @@ theorem gridIndex_stopping {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} 
     IsStoppingTime (gridFiltration 𝓕 δ) (fun ω => (gridIndex θ δ ω : ℕ∞)) := by
   intro i
   change MeasurableSet[𝓕 ((i : ℝ≥0)*δ)] {ω | (gridIndex θ δ ω : ℕ∞) ≤ i}
-  simpa only [ENat.natCast_le_natCast,WithTop.coe_le_coe,gridIndex_le_iff θ hδ] using θ.stopping ((i : ℝ≥0)*δ)
+  simpa only [ENat.natCast_le_natCast,WithTop.coe_le_coe,gridIndex_le_iff θ hδ] using
+      θ.stopping ((i : ℝ≥0)*δ)
 
 theorem gridIndex_bounded {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
     (θ : BoundedRule 𝓕 T) (ω : Ω) : gridIndex θ δ ω ≤ ⌈T/δ⌉₊ :=
@@ -86,7 +87,8 @@ theorem gridValue_time_tendsto {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω�
     Tendsto (fun n => (gridIndex θ (gridStep n) ω : ℝ≥0)*gridStep n)
       atTop (𝓝 (θ.time ω)) := by
   apply NNReal.tendsto_coe.mp
-  have hh := (tendsto_nat_ceil_mul_div_atTop (R := ℝ) (a := (θ.time ω : ℝ)) (θ.time ω).coe_nonneg).comp
+  have hh :=
+      (tendsto_nat_ceil_mul_div_atTop (R := ℝ) (a := (θ.time ω : ℝ)) (θ.time ω).coe_nonneg).comp
     (tendsto_atTop_add_const_right atTop 1 tendsto_natCast_atTop_atTop)
   have hceil (x : ℝ≥0) : ⌈x⌉₊ = ⌈(x : ℝ)⌉₊ := by
     apply Nat.le_antisymm

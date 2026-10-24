@@ -107,7 +107,7 @@ lemma itoIntegralCLM_T_stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 �
       = (memLp_riemannσ hB hBmeas hadap hbdd T n).toLp (riemannσ (B := B) θ T n) := by
   rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange T hBmeas)
         ⟨1, fun V ↦ by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas V).le⟩]
-  show itoSimpleLp hB hBmeas (stepσ hBmeas hadap hbdd T n).val = _
+  change itoSimpleLp hB hBmeas (stepσ hBmeas hadap hbdd T n).val = _
   rw [itoSimpleLp]
   exact (MemLp.toLp_eq_toLp_iff _ _).mpr
     (Filter.Eventually.of_forall fun ω ↦ itoSimple_stepσ hBmeas hadap hbdd T n ω)
@@ -121,7 +121,7 @@ lemma uncurry_stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω →
     Function.uncurry ⇑(stepσ hBmeas hadap hbdd T n).val (s, ω)
       = ∑ k ∈ Finset.range n, (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
           (fun _ ↦ θ (unifPart T n k) ω) s := by
-  show ⇑(stepσ hBmeas hadap hbdd T n).val s ω = _
+  change ⇑(stepσ hBmeas hadap hbdd T n).val s ω = _
   rw [stepσ, AddSubmonoidClass.coe_finsetSum, coe_finsetSum_apply,
     ← Finset.sum_attach (Finset.range n) (fun k ↦
       (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator

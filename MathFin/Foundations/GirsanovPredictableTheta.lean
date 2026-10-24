@@ -13,10 +13,10 @@ public import MathFin.Foundations.DriftProcessModification
 
 /-! # Bounded **predictable**-θ Girsanov — the increments of `B^θ` under `Q` (Rung 1)
 
-Generalizes the continuous-adapted Girsanov theorem (`GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted`)
-to a bounded **predictable** market price of risk `θ` — the honest domain of the Itô `L²` integral,
-with no continuity assumed. The route (Route B) is the density-approximation front half over the
-spine-free architecture:
+Generalizes the continuous-adapted Girsanov theorem
+(`GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted`) to a bounded **predictable** market price
+of risk `θ` — the honest domain of the Itô `L²` integral, with no continuity assumed. The route
+(Route B) is the density-approximation front half over the spine-free architecture:
 
 * approximate `θ̂ ∈ Lp 2 (trimMeasure_T T)` by clamped, marshalled simple processes `Ṽⁿ`
   (`SimpleProcessPartition`), each in single-partition `(sⁿ, cⁿ)` form so the simple exponential
@@ -46,10 +46,11 @@ open ItoIntegralRiemannBridge SimpleDoleansMoments ItoIntegralProcessContinuousM
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {B : ℝ≥0 → Ω → ℝ}
 
 /-- **Bridge: the marshalled simple drift is the honest step-process drift.** The `simpleDrift`
-produced by `isExpQMartingale_BthetaSimple` on the marshalled partition `(marshalPart, clampM∘marshalMult)`
-equals the elementary `driftSimpleProcess` of the clamped step process `marshalStepSP` — both are the
-Lebesgue integral `∫₀ᵘ ⇑(marshalStepSP)(s,ω) ds` of the same step function. This routes the drift term
-into the drift-modification tower (`driftContinuousMod` and its honest-integral bridge). -/
+produced by `isExpQMartingale_BthetaSimple` on the marshalled partition
+`(marshalPart, clampM∘marshalMult)` equals the elementary `driftSimpleProcess` of the clamped step
+process `marshalStepSP` — both are the Lebesgue integral `∫₀ᵘ ⇑(marshalStepSP)(s,ω) ds` of the same
+step function. This routes the drift term into the drift-modification tower (`driftContinuousMod`
+and its honest-integral bridge). -/
 lemma simpleDrift_marshalStepSP_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (hle : ∀ p ∈ V.value.support, p.2 ≤ T)
     {C : ℝ} (hC : 0 ≤ C) (N : ℕ) (u : ℝ≥0) (ω : Ω) :
@@ -83,7 +84,8 @@ lemma simpleDrift_marshalStepSP_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ�
           (fun _ ↦ clampM C (marshalMult hBmeas T V i ω)) s) (Set.Ioc (0 : ℝ≥0) u) :=
     fun s _ ↦ uncurry_marshalStepSP hBmeas T V hle hC N s ω
   have hint : ∀ i ∈ Finset.range N,
-      Integrable (fun s ↦ (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
+      Integrable
+          (fun s ↦ (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
         (fun _ ↦ clampM C (marshalMult hBmeas T V i ω)) s)
         (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) u)) :=
     fun i _ ↦ (integrable_const _).indicator measurableSet_Ioc
@@ -92,17 +94,19 @@ lemma simpleDrift_marshalStepSP_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ�
   rw [setIntegral_indicator measurableSet_Ioc, setIntegral_const, smul_eq_mul, measureReal_def,
     htoReal i (marshalPart_mono hBmeas T V hle (Nat.le_succ i)), mul_comm]
 
-/-- **Bridge: the marshalled quadratic variation is the honest `∫₀ᵀ(step)²`.** The discrete quadratic
-variation `∑ cᵢ²·Δτ` (the drift half of the marshalled Doléans exponent) equals the time-integral of
-the *squared* clamped step process. On `(0,T]` the cells partition, so `(⇑(marshalStepSP))² =
-∑ᵢ 𝟙_{cellᵢ}·cᵢ²` (the squared cell-constancy), and integrating the disjoint indicators recovers the
-discrete sum. This routes the quadratic variation, like the drift, into the `L²`-slice machinery. -/
+/-- **Bridge: the marshalled quadratic variation is the honest `∫₀ᵀ(step)²`.** The discrete
+quadratic variation `∑ cᵢ²·Δτ` (the drift half of the marshalled Doléans exponent) equals the
+time-integral of the *squared* clamped step process. On `(0,T]` the cells partition, so
+`(⇑(marshalStepSP))² = ∑ᵢ 𝟙_{cellᵢ}·cᵢ²` (the squared cell-constancy), and integrating the disjoint
+indicators recovers the discrete sum. This routes the quadratic variation, like the drift, into the
+`L²`-slice machinery. -/
 lemma simpleQuadVar_marshalStepSP_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (hle : ∀ p ∈ V.value.support, p.2 ≤ T)
     {C : ℝ} (hC : 0 ≤ C) {N : ℕ} (hmpN : marshalPart hBmeas T V N = T) (ω : Ω) :
     simpleQuadVar (marshalPart hBmeas T V)
         (fun i ω ↦ clampM C (marshalMult hBmeas T V i ω)) N T ω
-      = ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑(marshalStepSP hBmeas T V hle hC N).val s ω) ^ 2 ∂timeMeasure := by
+      = ∫ s in Set.Ioc (0 : ℝ≥0) T,
+          (⇑(marshalStepSP hBmeas T V hle hC N).val s ω) ^ 2 ∂timeMeasure := by
   haveI : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) :=
     ⟨by rw [Measure.restrict_apply_univ, timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
   have htoReal : ∀ i : ℕ, marshalPart hBmeas T V i ≤ marshalPart hBmeas T V (i + 1) →
@@ -177,8 +181,8 @@ variable {μ : Measure Ω} [IsProbabilityMeasure μ]
 omit [IsProbabilityMeasure μ] in
 /-- **Slice-energy domination ⟹ convergence in measure.** If `dist(fₙ ω, g ω) ≤ K·√(Dₙ ω)` a.e. for
 a nonnegative, integrable `Dₙ` whose `μ`-mean vanishes, then `fₙ → g` in measure. The single
-convergence principle behind both the marshalled drift and the marshalled quadratic variation: each is
-an `∫₀ᵗ`-functional of the integrand controlled — via interval Cauchy–Schwarz — by the common
+convergence principle behind both the marshalled drift and the marshalled quadratic variation: each
+is an `∫₀ᵗ`-functional of the integrand controlled — via interval Cauchy–Schwarz — by the common
 `L²`-slice energy `Dₙ = ∫₀ᵀ(⇑Ṽⁿ − ⇑θ̂)²`, and `∫_μ Dₙ = ‖simpleAssembly_T Ṽⁿ − θ̂‖² → 0`. -/
 lemma tendstoInMeasure_of_ae_dist_le_sqrt {f : ℕ → Ω → ℝ} {g : Ω → ℝ} {D : ℕ → Ω → ℝ} {K : ℝ}
     (hK : 0 ≤ K) (hDnn : ∀ n, 0 ≤ᵐ[μ] D n) (hDint : ∀ n, Integrable (D n) μ)
@@ -227,7 +231,8 @@ lemma tendstoInMeasure_of_ae_dist_le_sqrt {f : ℕ → Ω → ℝ} {g : Ω → �
         exact absurd (hrd.trans (hω.trans_eq (by rw [← hK0, zero_mul]))) (not_le.mpr hrpos)
       exact tendsto_const_nhds.congr fun n ↦ (hz n).symm
     · -- `K > 0`: `r ≤ dist ≤ K√(Dₙ)` forces `Dₙ ≥ (r/K)²`, whose measure vanishes
-      have hε'pos : (0 : ℝ≥0∞) < ENNReal.ofReal ((r / K) ^ 2) := ENNReal.ofReal_pos.mpr (by positivity)
+      have hε'pos : (0 : ℝ≥0∞) < ENNReal.ofReal ((r / K) ^ 2) :=
+          ENNReal.ofReal_pos.mpr (by positivity)
       refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds
         (hDmeasure (ENNReal.ofReal ((r / K) ^ 2)) hε'pos) (fun _ ↦ zero_le)
         (fun n ↦ measure_mono_ae ?_)
@@ -240,7 +245,7 @@ lemma tendstoInMeasure_of_ae_dist_le_sqrt {f : ℕ → Ω → ℝ} {g : Ω → �
       have hsq : (r / K) ^ 2 ≤ D n ω := by
         have hss := Real.sq_sqrt hωnn
         nlinarith [Real.sqrt_nonneg (D n ω), hrK, div_nonneg hrpos.le hKpos.le, hss]
-      show ENNReal.ofReal ((r / K) ^ 2) ≤ edist (D n ω) 0
+      change ENNReal.ofReal ((r / K) ^ 2) ≤ edist (D n ω) 0
       rw [edist_dist, Real.dist_eq, sub_zero, abs_of_nonneg hωnn]
       exact ENNReal.ofReal_le_ofReal hsq
 
@@ -261,8 +266,9 @@ lemma integral_sqrt_le_sqrt_integral {D : Ω → ℝ} (hDnn : 0 ≤ᵐ[μ] D) (h
 
 omit [IsProbabilityMeasure μ] in
 /-- **`L¹` domination ⟹ convergence in measure.** If `dist(fₙ ω, g ω) ≤ hₙ ω` a.e. for an integrable
-`hₙ` whose `μ`-mean vanishes, then `fₙ → g` in measure: the difference converges in `L¹(μ)`, whence in
-measure. The `L¹`-form companion of `tendstoInMeasure_of_ae_dist_le_sqrt`, for a two-term dominator. -/
+`hₙ` whose `μ`-mean vanishes, then `fₙ → g` in measure: the difference converges in `L¹(μ)`, whence
+in measure. The `L¹`-form companion of `tendstoInMeasure_of_ae_dist_le_sqrt`, for a two-term
+dominator. -/
 lemma tendstoInMeasure_of_ae_dist_le_of_tendsto_integral {f : ℕ → Ω → ℝ} {g : Ω → ℝ} {h : ℕ → Ω → ℝ}
     (hf : ∀ n, AEStronglyMeasurable (f n) μ) (hg : AEStronglyMeasurable g μ)
     (hhint : ∀ n, Integrable (h n) μ)
@@ -279,7 +285,8 @@ lemma tendstoInMeasure_of_ae_dist_le_of_tendsto_integral {f : ℕ → Ω → ℝ
           refine lintegral_congr fun ω ↦ ?_
           rw [Pi.sub_apply, Real.enorm_eq_ofReal_abs, Real.dist_eq]
       _ ≤ ∫⁻ ω, ENNReal.ofReal (h n ω) ∂μ :=
-          lintegral_mono_ae (by filter_upwards [hdom n] with ω hω; exact ENNReal.ofReal_le_ofReal hω)
+          lintegral_mono_ae
+              (by filter_upwards [hdom n] with ω hω; exact ENNReal.ofReal_le_ofReal hω)
       _ = ENNReal.ofReal (∫ ω, h n ω ∂μ) :=
           (ofReal_integral_eq_lintegral_ofReal (hhint n) hnn).symm
   refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds ?_ (fun _ ↦ zero_le) hbnd
@@ -327,7 +334,8 @@ lemma tendstoInMeasure_marshalDrift (T : ℝ≥0)
   have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) :=
     ⟨aestronglyMeasurable_of_aestronglyMeasurable_trim (natFiltration hBmeas).predictable_le_prod
       (Lp.aestronglyMeasurable θhat),
-     by rw [← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod (Lp.aestronglyMeasurable θhat)]
+     by rw [← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod
+         (Lp.aestronglyMeasurable θhat)]
         exact (Lp.memLp θhat).2⟩
   have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑θhat (s, ω)) 2 (timeMeasure_T T) := by
     filter_upwards [hg_prod.1.prodMk_right, hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
@@ -369,10 +377,10 @@ lemma tendstoInMeasure_marshalDrift (T : ℝ≥0)
 
 /-- **The marshalled quadratic variations converge in measure to `∫₀ᵀθ² ds`.** For a raw
 approximating sequence `V n → θ̂`, the discrete quadratic variations `∑ cᵢ²·Δτ` of the clamped
-marshalled approximants (the drift half of the marshalled Doléans exponent) converge in `μ`-measure to
-`∫₀ᵀ(⇑θ̂)² ds`. Writing `Q − L = 2∫step·(step − θ̂) − Dₙ` and using the deterministic bound `|step| ≤ C`
-on `(0,T]`, `|Q − L| ≤ 2C√T·√(Dₙ) + Dₙ` (finite-measure `L¹ ≤ L²`), which vanishes in `L¹(μ)` since
-`∫Dₙ = ‖simpleAssembly_T Ṽⁿ − θ̂‖² → 0` and `∫√Dₙ ≤ √(∫Dₙ)`. -/
+marshalled approximants (the drift half of the marshalled Doléans exponent) converge in `μ`-measure
+to `∫₀ᵀ(⇑θ̂)² ds`. Writing `Q − L = 2∫step·(step − θ̂) − Dₙ` and using the deterministic bound
+`|step| ≤ C` on `(0,T]`, `|Q − L| ≤ 2C√T·√(Dₙ) + Dₙ` (finite-measure `L¹ ≤ L²`), which vanishes in
+`L¹(μ)` since `∫Dₙ = ‖simpleAssembly_T Ṽⁿ − θ̂‖² → 0` and `∫√Dₙ ≤ √(∫Dₙ)`. -/
 lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
@@ -406,7 +414,8 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
   have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) :=
     ⟨aestronglyMeasurable_of_aestronglyMeasurable_trim (natFiltration hBmeas).predictable_le_prod
       (Lp.aestronglyMeasurable θhat),
-     by rw [← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod (Lp.aestronglyMeasurable θhat)]
+     by rw [← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod
+         (Lp.aestronglyMeasurable θhat)]
         exact (Lp.memLp θhat).2⟩
   have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑θhat (s, ω)) 2 (timeMeasure_T T) := by
     filter_upwards [hg_prod.1.prodMk_right, hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
@@ -420,7 +429,8 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
     unfold SimpleDoleansMoments.simpleQuadVar
     refine Finset.measurable_sum _ fun i _ ↦ ?_
     exact (((measurable_clampM_comp hBmeas
-      (stronglyMeasurable_marshalMult hBmeas T (V n).val i).measurable).pow_const 2).mul_const _).mono
+      (stronglyMeasurable_marshalMult hBmeas T (V n).val i).measurable).pow_const 2).mul_const
+          _).mono
       ((natFiltration hBmeas).le _) le_rfl
   have hLmeas : AEStronglyMeasurable
       (fun ω ↦ ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑θhat (s, ω)) ^ 2 ∂timeMeasure) μ :=
@@ -434,7 +444,8 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
         ≤ 2 * C * Real.sqrt (T : ℝ) * Real.sqrt (D n ω) + D n ω := by
     intro n
     filter_upwards [hg_slice] with ω hωg
-    have hmpN : marshalPart hBmeas T (V n).val ((marshalEndpoints hBmeas T (V n).val).card - 1) = T :=
+    have hmpN : marshalPart hBmeas T (V n).val
+        ((marshalEndpoints hBmeas T (V n).val).card - 1) = T :=
       marshalPart_card_sub_one hBmeas T (V n).val (V n).property
     have hQeq : simpleQuadVar (marshalPart hBmeas T (V n).val)
         (fun i ω ↦ clampM C (marshalMult hBmeas T (V n).val i ω))
@@ -572,8 +583,8 @@ section Assembly
 
 variable {μ : Measure Ω} [IsProbabilityMeasure μ] (hB : IsPreBrownianReal B μ)
 
-/-- The predictable Itô integral `∫₀ᵀ θ dB` as a genuine function — a chosen `Lp`-representative of the
-CLM value `itoIntegralCLM_T θ̂`. Predictable analogue of `itoIntCont`. -/
+/-- The predictable Itô integral `∫₀ᵀ θ dB` as a genuine function — a chosen `Lp`-representative of
+the CLM value `itoIntegralCLM_T θ̂`. Predictable analogue of `itoIntCont`. -/
 noncomputable def itoIntPred (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) :
     Ω → ℝ :=
@@ -587,16 +598,16 @@ noncomputable def ZTpred (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : 
   contDoleansExp (itoIntPred hB T hBmeas hpred hbdd)
     (fun s ω ↦ ⇑(processToLpPredictable (μ := μ) T hBmeas hpred hbdd) (s, ω)) T
 
-/-- The predictable drift-corrected process `B^θ_u = B_u + driftContinuousMod θ̂ u` — `driftContinuousMod`
-is the genuinely-`𝓕`-adapted modification of the honest drift `∫₀ᵘθ ds`. -/
+/-- The predictable drift-corrected process `B^θ_u = B_u + driftContinuousMod θ̂ u` —
+`driftContinuousMod` is the genuinely-`𝓕`-adapted modification of the honest drift `∫₀ᵘθ ds`. -/
 noncomputable def BthetaPred (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C)
     (u : ℝ≥0) (ω : Ω) : ℝ :=
   B u ω + driftContinuousMod T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd) u ω
 
 omit hB in
-/-- **Bridge: the marshalled stochastic sum is the elementary Itô sum of the step process.** With all
-marshalled partition points `≤ T`, the clamps `min(sⱼ,T)` in `simpleStochSum` drop, so it equals
+/-- **Bridge: the marshalled stochastic sum is the elementary Itô sum of the step process.** With
+all marshalled partition points `≤ T`, the clamps `min(sⱼ,T)` in `simpleStochSum` drop, so it equals
 `itoSimple (marshalStepSP)` (`∑ clampM·ΔB`). This routes the stochastic exponent into the marshalled
 Itô convergence `tendstoInMeasure_marshalStochSum`. -/
 lemma simpleStochSum_marshalStepSP_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
@@ -612,10 +623,11 @@ lemma simpleStochSum_marshalStepSP_eq (hBmeas : ∀ t, Measurable (B t)) (T : �
     min_eq_left (le_trans (hmono (le_of_lt (Finset.mem_range.mp hi))) hmpN.le)]
 
 /-- **The approximant densities converge a.e. along subsequences to `Z_T`.** For every subsequence
-`ns`, a further subsequence `ms` has `Zⁿ_T → Z_T` a.e.: `exists_subseq_tendsto_ae₂` fuses the stochastic
-exponent's convergence (`tendstoInMeasure_marshalStochSum`, bridged to `simpleStochSum`) with the
-quadratic variation's (`tendstoInMeasure_marshalQuadVar`), and `exp(−· − ½·)` (`simpleDoleansExp_neg_eq`)
-is pushed to the common a.e. limit. Predictable analogue of `tendsto_Zn_ae_subseq`. -/
+`ns`, a further subsequence `ms` has `Zⁿ_T → Z_T` a.e.: `exists_subseq_tendsto_ae₂` fuses the
+stochastic exponent's convergence (`tendstoInMeasure_marshalStochSum`, bridged to `simpleStochSum`)
+with the quadratic variation's (`tendstoInMeasure_marshalQuadVar`), and `exp(−· − ½·)`
+(`simpleDoleansExp_neg_eq`) is pushed to the common a.e. limit. Predictable analogue of
+`tendsto_Zn_ae_subseq`. -/
 lemma tendsto_ZTpred_ae_subseq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
@@ -680,9 +692,10 @@ lemma clampM_marshalMult_abs_le {C : ℝ} (hC : 0 ≤ C) (hBmeas : ∀ t, Measur
     |clampM C (marshalMult hBmeas T V.val i ω)| ≤ C := clampM_abs_le hC _
 
 include hB in
-/-- **The predictable limit density is in `L²`.** Fatou (`memLp_two_of_subseq_ae_of_sq_bound`) on the
-approximant densities: each `Zⁿ ∈ L²` (`memLp_simpleDoleans_two`), `∫(Zⁿ)² ≤ exp(C²T)`
-(`sq_integral_simpleDoleans_le`), and `Zⁿ → Z_T` a.e. along a subsequence (`tendsto_ZTpred_ae_subseq`). -/
+/-- **The predictable limit density is in `L²`.** Fatou (`memLp_two_of_subseq_ae_of_sq_bound`) on
+the approximant densities: each `Zⁿ ∈ L²` (`memLp_simpleDoleans_two`), `∫(Zⁿ)² ≤ exp(C²T)`
+(`sq_integral_simpleDoleans_le`), and `Zⁿ → Z_T` a.e. along a subsequence
+(`tendsto_ZTpred_ae_subseq`). -/
 lemma memLp_ZTpred_two (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
@@ -697,16 +710,19 @@ lemma memLp_ZTpred_two (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (fun n ↦ SimpleDoleansMoments.memLp_simpleDoleans_two (X := B) (P := μ)
       (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
       (marshalPart_zero hBmeas T (V n).val (V n).property)
-      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n))
+          (clampM_marshalMult_abs_le hC hBmeas T (V n))
       _ (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge)
     (fun n ↦ SimpleDoleansMoments.measurable_simpleDoleans (X := B) (P := μ)
       (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
-      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n)) _ T)
+      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n))
+          (clampM_marshalMult_abs_le hC hBmeas T (V n)) _ T)
     (M := Real.exp (C ^ 2 * (T : ℝ)))
     (fun n ↦ SimpleDoleansMoments.sq_integral_simpleDoleans_le (X := B) (P := μ)
       (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
       (marshalPart_zero hBmeas T (V n).val (V n).property)
-      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n))
+          (clampM_marshalMult_abs_le hC hBmeas T (V n))
       _ (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge) ?_
   obtain ⟨ms, _, hae⟩ := tendsto_ZTpred_ae_subseq hB T hBmeas hpred hC hbdd V hV id tendsto_id
   simp only [id_eq] at hae
@@ -723,10 +739,11 @@ lemma memLp_ZTpred_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
   (memLp_ZTpred_two hB hBmeas T hpred hC hbdd V hV).mono_exponent (by norm_num)
 
 include hB in
-/-- **The mixed-time product converges to `g = D_u·Z_T` a.e. along a subsequence (the engine's `hsub`).**
-Refine the density a.e.-subsequence (`tendsto_ZTpred_ae_subseq`) by the marshalled drift's convergence
-in measure (`tendstoInMeasure_marshalDrift`, bridged to `simpleDrift`): a further subsequence makes the
-drift converge a.e. too, then `exp(a·(B + drift) − ½a²·)·Zⁿ` converges to `exp(a·B^θ − ½a²·)·Z_T` a.e. -/
+/-- **The mixed-time product converges to `g = D_u·Z_T` a.e. along a subsequence (the engine's
+`hsub`).** Refine the density a.e.-subsequence (`tendsto_ZTpred_ae_subseq`) by the marshalled
+drift's convergence in measure (`tendstoInMeasure_marshalDrift`, bridged to `simpleDrift`): a
+further subsequence makes the drift converge a.e. too, then `exp(a·(B + drift) − ½a²·)·Zⁿ` converges
+to `exp(a·B^θ − ½a²·)·Z_T` a.e. -/
 lemma tendsto_fnPred_ae_subseq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
@@ -793,20 +810,23 @@ lemma memLp_gpred_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (fun n ↦ SimpleDoleansMoments.memLp_mixedProduct_two (X := B) (P := μ)
       (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
       (marshalPart_zero hBmeas T (V n).val (V n).property)
-      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n))
+          (clampM_marshalMult_abs_le hC hBmeas T (V n))
       a _ huT (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge)
     (fun n ↦ (SimpleDoleansMoments.measurable_driftExp (X := B) (P := μ) (𝓕 := natFiltration hBmeas)
       (marshalPart_mono hBmeas T (V n).val (V n).property)
       (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) a _ u).mul
       (SimpleDoleansMoments.measurable_simpleDoleans (X := B) (P := μ) (𝓕 := natFiltration hBmeas)
         (marshalPart_mono hBmeas T (V n).val (V n).property)
-        (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n)) _ T))
+        (stronglyMeasurable_clampM_marshalMult hBmeas T (V n))
+            (clampM_marshalMult_abs_le hC hBmeas T (V n)) _ T))
     (M := 2⁻¹ * (Real.exp (4 * |a| * C * (T : ℝ)) * (∫ ω, Real.exp (4 * a * B u ω) ∂μ)
         + Real.exp (6 * C ^ 2 * (T : ℝ))))
     (fun n ↦ SimpleDoleansMoments.sq_integral_mixedProduct_le (X := B) (P := μ)
       (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
       (marshalPart_zero hBmeas T (V n).val (V n).property)
-      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n))
+          (clampM_marshalMult_abs_le hC hBmeas T (V n))
       a _ huT (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge)
     (tendsto_fnPred_ae_subseq hB hBmeas T hpred hC hbdd V hV a huT id tendsto_id
       |>.imp fun ms hms ↦ by simpa only [id_eq] using hms)).mono_exponent (by norm_num)
@@ -837,13 +857,15 @@ lemma integral_ZTpred_eq_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (fun n ↦ SimpleDoleansMoments.memLp_simpleDoleans_two (X := B) (P := μ)
       (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
       (marshalPart_zero hBmeas T (V n).val (V n).property)
-      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n))
+          (clampM_marshalMult_abs_le hC hBmeas T (V n))
       _ (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge)
     (M := Real.exp (C ^ 2 * (T : ℝ)))
     (fun n ↦ SimpleDoleansMoments.sq_integral_simpleDoleans_le (X := B) (P := μ)
       (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
       (marshalPart_zero hBmeas T (V n).val (V n).property)
-      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n))
+          (clampM_marshalMult_abs_le hC hBmeas T (V n))
       _ (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge)
     (memLp_ZTpred_one hB hBmeas T hpred hC hbdd V hV)
     (fun ns hns ↦ (tendsto_ZTpred_ae_subseq hB T hBmeas hpred hC hbdd V hV ns hns).imp
@@ -863,22 +885,24 @@ lemma isProbabilityMeasure_predGirsanov (hBmeas : ∀ t, Measurable (B t)) (T : 
       ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) := by
   refine ⟨?_⟩
   rw [withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ,
-    ← ofReal_integral_eq_lintegral_ofReal ((memLp_ZTpred_one hB hBmeas T hpred hC hbdd V hV).integrable le_rfl)
+    ← ofReal_integral_eq_lintegral_ofReal
+        ((memLp_ZTpred_one hB hBmeas T hpred hC hbdd V hV).integrable le_rfl)
       (ae_of_all _ fun ω ↦ (contDoleansExp_pos _ _ _ _).le),
     integral_ZTpred_eq_one hB hBmeas T hpred hC hbdd V hV, ENNReal.ofReal_one]
 
 /-! ### The exponential-martingale data and the increment laws under `Q` -/
 
 include hB in
-/-- **Predictable bounded-θ exponential-martingale data.** For a bounded (`|θ| ≤ C`) predictable market
-price of risk `θ` — the honest domain of the Itô `L²` integral — under `Q = μ.withDensity(Z_T)` with the
-Doléans density `Z_T = exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds)`, the drift-corrected process
-`B^θ_u = B_u + driftContinuousMod θ̂ u` is `𝓕`-adapted, starts at `0` a.e. `Q`, and every
-`exp(a·B^θ − ½a²·)` is a `Q`-martingale on `[0,T]`. The martingale field is the limit of the simple-θ
-identity (`isExpQMartingale_BthetaSimple` on the clamped marshalled approximants `Ṽⁿ`): transported to
-`μ`, both sides pass through the a.e.-subsequence engine (`tendsto_setIntegral_of_subseq_ae_of_sq_bound`),
-and the simple identity forces the limits equal. Predictable analogue of `isExpQMartingale_BthetaCont`,
-with the marshalled density-approximation front half in place of the uniform grid. -/
+/-- **Predictable bounded-θ exponential-martingale data.** For a bounded (`|θ| ≤ C`) predictable
+market price of risk `θ` — the honest domain of the Itô `L²` integral — under
+`Q = μ.withDensity(Z_T)` with the Doléans density `Z_T = exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds)`, the
+drift-corrected process `B^θ_u = B_u + driftContinuousMod θ̂ u` is `𝓕`-adapted, starts at `0` a.e.
+`Q`, and every `exp(a·B^θ − ½a²·)` is a `Q`-martingale on `[0,T]`. The martingale field is the limit
+of the simple-θ identity (`isExpQMartingale_BthetaSimple` on the clamped marshalled approximants
+`Ṽⁿ`): transported to `μ`, both sides pass through the a.e.-subsequence engine
+(`tendsto_setIntegral_of_subseq_ae_of_sq_bound`), and the simple identity forces the limits equal.
+Predictable analogue of `isExpQMartingale_BthetaCont`, with the marshalled density-approximation
+front half in place of the uniform grid. -/
 theorem isExpQMartingale_BthetaPredictable (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (V : ℕ → TBoundedSP T hBmeas)
@@ -916,20 +940,23 @@ theorem isExpQMartingale_BthetaPredictable (hBmeas : ∀ t, Measurable (B t)) {�
           * simpleDoleansExp (X := B) (marshalPart hBmeas T (V n).val)
               (fun i ω ↦ -(clampM C (marshalMult hBmeas T (V n).val i ω)))
               ((marshalEndpoints hBmeas T (V n).val).card - 1) T ω) ∂μ) atTop
-          (𝓝 (∫ ω in A, (Real.exp (a * BthetaPred (μ := μ) T hBmeas hpred hbdd u ω - a ^ 2 * (u : ℝ) / 2)
+          (𝓝 (∫ ω in A,
+              (Real.exp (a * BthetaPred (μ := μ) T hBmeas hpred hbdd u ω - a ^ 2 * (u : ℝ) / 2)
             * ZTpred hB T hBmeas hpred hbdd ω) ∂μ)) := fun u huT ↦
       tendsto_setIntegral_of_subseq_ae_of_sq_bound
         (fun n ↦ SimpleDoleansMoments.memLp_mixedProduct_two (X := B) (P := μ)
           (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
           (marshalPart_zero hBmeas T (V n).val (V n).property)
-          (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+          (stronglyMeasurable_clampM_marshalMult hBmeas T (V n))
+              (clampM_marshalMult_abs_le hC hBmeas T (V n))
           a _ huT (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge)
         (M := 2⁻¹ * (Real.exp (4 * |a| * C * (T : ℝ)) * (∫ ω, Real.exp (4 * a * B u ω) ∂μ)
             + Real.exp (6 * C ^ 2 * (T : ℝ))))
         (fun n ↦ SimpleDoleansMoments.sq_integral_mixedProduct_le (X := B) (P := μ)
           (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
           (marshalPart_zero hBmeas T (V n).val (V n).property)
-          (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+          (stronglyMeasurable_clampM_marshalMult hBmeas T (V n))
+              (clampM_marshalMult_abs_le hC hBmeas T (V n))
           a _ huT (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge)
         (memLp_gpred_one hB hBmeas T hpred hC hbdd V hV a huT)
         (fun ns hns ↦ tendsto_fnPred_ae_subseq hB hBmeas T hpred hC hbdd V hV a huT ns hns) A
@@ -957,12 +984,14 @@ theorem isExpQMartingale_BthetaPredictable (hBmeas : ∀ t, Measurable (B t)) {�
         ((marshalEndpoints hBmeas T (V n).val).card - 1)
         (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge).martingale a hst' ht'T hA
       rwa [setIntegral_withDensity_ofReal (SimpleDoleansMoments.measurable_simpleDoleans (X := B)
-            (P := μ) (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
+            (P := μ) (𝓕 := natFiltration hBmeas)
+                (marshalPart_mono hBmeas T (V n).val (V n).property)
             (stronglyMeasurable_clampM_marshalMult hBmeas T (V n))
             (clampM_marshalMult_abs_le hC hBmeas T (V n)) _ T).aestronglyMeasurable
           (fun ω ↦ (simpleDoleansExp_pos _ _ _ _ ω).le) _ hAmΩ,
         setIntegral_withDensity_ofReal (SimpleDoleansMoments.measurable_simpleDoleans (X := B)
-            (P := μ) (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
+            (P := μ) (𝓕 := natFiltration hBmeas)
+                (marshalPart_mono hBmeas T (V n).val (V n).property)
             (stronglyMeasurable_clampM_marshalMult hBmeas T (V n))
             (clampM_marshalMult_abs_le hC hBmeas T (V n)) _ T).aestronglyMeasurable
           (fun ω ↦ (simpleDoleansExp_pos _ _ _ _ ω).le) _ hAmΩ] at hfield
@@ -1003,9 +1032,9 @@ theorem Btheta_isQBrownianMotion_predictable (hBmeas : ∀ t, Measurable (B t)) 
     (isExpQMartingale_BthetaPredictable hB hBmeas hpred hC hbdd T V hV)
 
 include hB in
-/-- **Bounded-predictable-θ Girsanov, clean form.** For a bounded predictable market price of risk `θ`
-(no approximating sequence in the hypotheses — one is obtained internally via `exists_approxSeq`, and
-the conclusion `ZTpred`/`BthetaPred` depends only on `θ`), under
+/-- **Bounded-predictable-θ Girsanov, clean form.** For a bounded predictable market price of risk
+`θ` (no approximating sequence in the hypotheses — one is obtained internally via
+`exists_approxSeq`, and the conclusion `ZTpred`/`BthetaPred` depends only on `θ`), under
 `Q = μ.withDensity(exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds))` the drift-corrected process
 `B^θ_u = B_u + driftContinuousMod θ̂ u` starts at `0`, has `𝒩(0,t−s)` increments, and has
 independent increments, on `[0,T]`. The benchmark-facing form of

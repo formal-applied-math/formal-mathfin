@@ -12,9 +12,10 @@ public import MathFin.RiskMeasures.AcceptanceSet
 # Worst-case loss: a concrete coherent risk measure
 
 The most conservative coherent risk measure, `worstCase X = maxᵢ (-Xᵢ)`, is a concrete instance of
-`IsCoherentRisk`. Its Artzner–Delbaen–Eber–Heath representation (from `coherentRisk_isLUB`) specialises
-to the supremum of expected loss over the *entire* probability simplex — making the abstract
-representation tangible: the worst case over states equals the worst case over all mixtures of states.
+`IsCoherentRisk`. Its Artzner–Delbaen–Eber–Heath representation (from `coherentRisk_isLUB`)
+specialises to the supremum of expected loss over the *entire* probability simplex — making the
+abstract representation tangible: the worst case over states equals the worst case over all mixtures
+of states.
 
 ## Main results
 * `MathFin.worstCase_isCoherent` — worst-case loss satisfies the four ADEH axioms
@@ -37,7 +38,7 @@ lemma le_worstCase (X : ι → ℝ) (i : ι) : - X i ≤ worstCase X :=
   Finset.le_sup' (fun i ↦ - X i) (Finset.mem_univ i)
 
 /-- Any uniform upper bound on the `-Xᵢ` bounds `worstCase X` above. -/
-lemma worstCase_le {X : ι → ℝ} {a : ℝ} (h : ∀ i, - X i ≤ a) : worstCase X ≤ a :=
+lemma worstCase_le {X : ι → ℝ} {a : ℝ} (h : ∀ i, -X i ≤ a) : worstCase X ≤ a :=
   Finset.sup'_le Finset.univ_nonempty (fun i ↦ - X i) (fun i _ ↦ h i)
 
 /-- Worst-case loss satisfies the four ADEH coherent-risk axioms. -/

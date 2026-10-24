@@ -16,7 +16,8 @@ not across the exercise boundary or at expiry.
 
 ## Result
 
-Public entry points include `deriv2_mul_at`, `shiftedProfile_hasDeriv_x`, `shiftedProfile_deriv2_x`, `shiftedProfile_hasDeriv_t`.
+Public entry points include `deriv2_mul_at`, `shiftedProfile_hasDeriv_x`, `shiftedProfile_deriv2_x`,
+`shiftedProfile_hasDeriv_t`.
 -/
 
 @[expose] public section
