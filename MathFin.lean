@@ -440,6 +440,7 @@ import MathFin.BlackScholes.Spreads
 -- order Breeden–Litzenberger, for any law with a finite mean); the call price is differentiable
 -- in the strike exactly where the law has no atom, and there its derivative is minus the digital
 import MathFin.BlackScholes.CallSpreadDigital
+import MathFin.BlackScholes.Dupire
 import MathFin.BlackScholes.Lookback
 import MathFin.BlackScholes.BarrierParity
 import MathFin.BlackScholes.PowerOption
