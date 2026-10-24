@@ -87,7 +87,7 @@ noncomputable def potentialFutureExposure (V : ℝ → Ω₁ → ℝ) (ν : Meas
 is the Gaussian value-at-risk closed form at `V_s`'s own law `N(m, (σ√s)²)` — a corollary composing
 the law of `V_s` (`gaussianReal_const_mul`, `gaussianReal_const_add`) with
 `valueAtRisk_of_hasLaw_gaussianReal`. -/
-theorem potentialFutureExposure_gaussian [IsProbabilityMeasure ν] {Z : Ω₁ → ℝ}
+theorem potentialFutureExposure_gaussian {Z : Ω₁ → ℝ}
     (hZ : HasLaw Z (gaussianReal 0 1) ν) (m σ s α : ℝ) (hσ : 0 < σ) (hs : 0 < s)
     (hα : α ∈ Ioo 0 1) :
     potentialFutureExposure (fun s ω ↦ m + σ * √s * Z ω) ν s α
