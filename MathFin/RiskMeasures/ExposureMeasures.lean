@@ -70,8 +70,9 @@ theorem expectedNegativeExposure_gaussian [IsProbabilityMeasure ν] {Z : Ω₁ �
   have hVi : Integrable (fun ω ↦ a + b * √s * Z ω) ν :=
     (integrable_const a).add (hZi.const_mul (b * √s))
   have hmean : ∫ ω, (a + b * √s * Z ω) ∂ν = a := by
-    rw [integral_add (integrable_const a) (hZi.const_mul (b * √s)), integral_const, probReal_univ,
-      one_smul, integral_const_mul, hZ.integral_eq, integral_id_gaussianReal, mul_zero, add_zero]
+    rw [(gaussianReal_const_add (gaussianReal_const_mul hZ (b * √s)) a).integral_eq,
+      integral_id_gaussianReal]
+    ring
   rw [expectedNegativeExposure_eq_sub_integral hVi, hmean, expectedExposure,
     expectedExposure_gaussian hZ hb hs]
 
@@ -88,7 +89,7 @@ is the Gaussian value-at-risk closed form at `V_s`'s own law `N(m, (σ√s)²)` 
 the law of `V_s` (`gaussianReal_const_mul`, `gaussianReal_const_add`) with
 `valueAtRisk_of_hasLaw_gaussianReal`. -/
 theorem potentialFutureExposure_gaussian {Z : Ω₁ → ℝ}
-    (hZ : HasLaw Z (gaussianReal 0 1) ν) (m σ s α : ℝ) (hσ : 0 < σ)
+    (hZ : HasLaw Z (gaussianReal 0 1) ν) (m σ s α : ℝ) (hσ : 0 ≤ σ)
     (hα : α ∈ Ioo 0 1) :
     potentialFutureExposure (fun s ω ↦ m + σ * √s * Z ω) ν s α
       = gaussianVaR m (σ * √s) (PhiInv α) := by
