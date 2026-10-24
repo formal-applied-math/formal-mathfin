@@ -25,7 +25,8 @@ actual exposure process, `ν` its measure): ENE (via `CVA.expectedExposure`), PF
 * `potentialFutureExposure` (PFE) — the value-at-risk of the exposure process at a fixed time,
   `PFE_α(s) = VaR_α(V_s)` (`MathFin.valueAtRisk`, the genuine `α`-quantile of `V_s`'s law, not a
   new definition). `potentialFutureExposure_gaussian` derives the closed form for the Gaussian
-  exposure model of `CVA.cva_gaussian` by composing two already-real pieces: the law of
+  exposure model of `CVA.cva_gaussian` (`Z ~ N(0,1)`, `σ ≥ 0`, `α ∈ (0,1)`) by composing two
+  already-real pieces: the law of
   `V_s = m + σ√s Z` (from the Gaussian-stability lemmas `gaussianReal_const_mul`,
   `gaussianReal_const_add`) and `valueAtRisk_of_hasLaw_gaussianReal`.
 * `integral_posPart_finsetSum_le` — netting reduces exposure: for a finite family
@@ -86,10 +87,10 @@ negative). -/
 noncomputable def potentialFutureExposure (V : ℝ → Ω₁ → ℝ) (ν : Measure Ω₁) (s α : ℝ) : ℝ :=
   MathFin.valueAtRisk (V s) ν α
 
-/-- **Gaussian PFE**: for the exposure process `V_s = m + σ√s Z` of `CVA.cva_gaussian`, `PFE_α(s)`
-is the Gaussian value-at-risk closed form at `V_s`'s own law `N(m, (σ√s)²)` — a corollary composing
-the law of `V_s` (`gaussianReal_const_mul`, `gaussianReal_const_add`) with
-`valueAtRisk_of_hasLaw_gaussianReal`. -/
+/-- **Gaussian PFE**: for `Z ~ N(0,1)`, `σ ≥ 0`, `α ∈ (0,1)`, and the exposure process
+`V_s = m + σ√s Z` of `CVA.cva_gaussian`, `PFE_α(s)` is the Gaussian value-at-risk closed form at
+`V_s`'s own law `N(m, (σ√s)²)` — a corollary composing the law of `V_s` (`gaussianReal_const_mul`,
+`gaussianReal_const_add`) with `valueAtRisk_of_hasLaw_gaussianReal`. -/
 theorem potentialFutureExposure_gaussian {Z : Ω₁ → ℝ}
     (hZ : HasLaw Z (gaussianReal 0 1) ν) (m σ s α : ℝ) (hσ : 0 ≤ σ)
     (hα : α ∈ Ioo 0 1) :
