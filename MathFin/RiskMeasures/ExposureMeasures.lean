@@ -88,7 +88,7 @@ is the Gaussian value-at-risk closed form at `V_s`'s own law `N(m, (σ√s)²)` 
 the law of `V_s` (`gaussianReal_const_mul`, `gaussianReal_const_add`) with
 `valueAtRisk_of_hasLaw_gaussianReal`. -/
 theorem potentialFutureExposure_gaussian {Z : Ω₁ → ℝ}
-    (hZ : HasLaw Z (gaussianReal 0 1) ν) (m σ s α : ℝ) (hσ : 0 < σ) (hs : 0 < s)
+    (hZ : HasLaw Z (gaussianReal 0 1) ν) (m σ s α : ℝ) (hσ : 0 < σ)
     (hα : α ∈ Ioo 0 1) :
     potentialFutureExposure (fun s ω ↦ m + σ * √s * Z ω) ν s α
       = gaussianVaR m (σ * √s) (PhiInv α) := by
