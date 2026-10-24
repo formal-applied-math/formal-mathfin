@@ -59,8 +59,9 @@ Public API (all in namespace `MathFin.GyongyMimicry`):
   `generatorIntegrand` — the measure-theory and integrability utilities of the core
   (`sigmaGen_le` and `stronglyMeasurable_test` are consumed by `MathFin.Dupire`);
 * `reindexed`, `stronglyMeasurable_X_hXrel` — the real-time reindexing `t ↦ X_{t⁺}` and
-  the adaptedness lemma for the constructed instance's measurability fields (both
-  consumed by `MathFin.Dupire`);
+  the adaptedness lemma for the constructed instance's measurability fields
+  (`reindexed` is consumed by `MathFin.Dupire`; `stronglyMeasurable_X_hXrel` by
+  `constructedBoundedItoProcess`'s `hXmeas`/`hXadapted` fields);
 * `timeMeasure_Ioc_eq_interval` — the `timeMeasure` → `intervalIntegral` bridge;
 * `constructedBoundedItoProcess`, `constructedGenIntegrandExp` (+ `_coe`), the discharged
   drift hypotheses `hitoid_constructed_terminal` / `hitoid_constructed_band`, and the weak
