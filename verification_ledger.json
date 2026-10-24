@@ -1868,9 +1868,9 @@
     "mf-expected-negative-exposure-gaussian": {
       "benchmark_file": "credit.json",
       "date": "2026-10-24",
-      "elapsed_s": 15.7,
-      "input_hash": "695576b7813f707e597c9236aa4cf13ef59a2b64b9da1df4e4faed79b1e45d93",
-      "verified_at_commit": "3fa3acd"
+      "elapsed_s": 5.5,
+      "input_hash": "0a8865ca6595b983adffff4e9b5d5558ee35682c1c9cedc88b9a1cd50bea1e01",
+      "verified_at_commit": "b39a95a"
     },
     "mf-expectile-elicitable": {
       "benchmark_file": "risk_measures.json",
@@ -3107,9 +3107,9 @@
     "mf-netting-exposure-subadditivity": {
       "benchmark_file": "credit.json",
       "date": "2026-10-24",
-      "elapsed_s": 15.3,
-      "input_hash": "3bff093334a5d988e1b8c5781f161350d904db2acda008294fe4e5d99afe7f20",
-      "verified_at_commit": "3fa3acd"
+      "elapsed_s": 5.4,
+      "input_hash": "a297212366a67441a1eb68316531a6629a6d663467bbc6608b6f3e408de74bad",
+      "verified_at_commit": "b39a95a"
     },
     "mf-newton-raphson-fixed-at-root": {
       "benchmark_file": "black_scholes.json",
@@ -3198,9 +3198,9 @@
     "mf-potential-future-exposure-gaussian": {
       "benchmark_file": "credit.json",
       "date": "2026-10-24",
-      "elapsed_s": 17.3,
-      "input_hash": "651bb86f56eb3f2ccb424c86cf9755d0ac81aa7ad2a4579c387fba2907579403",
-      "verified_at_commit": "3fa3acd"
+      "elapsed_s": 4.6,
+      "input_hash": "fa1a467e41eeec600b81c6dd518c5381c5e07e88d23c138f828947e9ca6fa1f9",
+      "verified_at_commit": "b39a95a"
     },
     "mf-power-forward-price": {
       "benchmark_file": "black_scholes.json",
