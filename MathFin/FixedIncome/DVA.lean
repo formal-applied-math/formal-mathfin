@@ -57,9 +57,11 @@ noncomputable def dva (LGDBank : ℝ) (D : ℝ → ℝ) (V : ℝ → Ω₁ → �
     (ν : Measure Ω₁) (μ : Measure Ω₂) : ℝ :=
   cva LGDBank D (fun s ω ↦ -(V s ω)) τBank T ν μ
 
-/-- **DVA with Gaussian exposure, no wrong-way risk**: a genuine corollary of `cva_gaussian`,
-applied to the mirrored exposure `-(m(s) + σ(s)√s Z) = -m(s) + σ(s)√s·(-Z)`; `gaussianReal_neg`
-keeps the driver `-Z` standard normal. -/
+/-- **DVA with Gaussian exposure, no wrong-way risk**: `dva` equals `LGDBank · ∫₀..T D(s) ·
+[(-m(s))·Φ((-m(s))/(σ(s)√s)) + σ(s)√s·φ((-m(s))/(σ(s)√s))] · defaultDensity h s ds` —
+`cva_gaussian`'s right-hand side with `m` replaced by `-m`. Proved as a genuine corollary of
+`cva_gaussian`, applied to the mirrored exposure `-(m(s) + σ(s)√s Z) = -m(s) + σ(s)√s·(-Z)`;
+`gaussianReal_neg` keeps the driver `-Z` standard normal. -/
 theorem dva_gaussian [IsProbabilityMeasure ν] [IsProbabilityMeasure μ]
     {h : ℝ → ℝ} (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s) {τBank : Ω₂ → ℝ}
     (hτ : Measurable τBank)
