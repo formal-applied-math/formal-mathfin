@@ -18,7 +18,7 @@ classical proof tests the forward equation against the call payoff `(x − K)⁺
 by parts twice (`(x − K)⁺'' = δ_K`). That step has no honest counterpart here: `(x − K)⁺` is
 not `C²`, so it is outside the test class of the landed weak forward equation
 (`GyongyMimicry.marginal_flow_weak_equation_fn_constructed`), and evaluating at `x = K` is the
-the pointwise-density route — the route this module does not take. Instead the strike is
+pointwise-density route — the route this module does not take. Instead the strike is
 smeared first: every smooth compactly supported strike density `ψ` yields a legitimate test
 function `f_ψ` (its double primitive) which *is* the static call book
 `∫ ψ(K)(x − K)⁺ dK` (Carr–Madan, `MathFin.carrMadan_spanning`). Fubini then turns
