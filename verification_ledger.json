@@ -1854,9 +1854,9 @@
     "mf-dva-cva-mirror": {
       "benchmark_file": "credit.json",
       "date": "2026-10-24",
-      "elapsed_s": 17.2,
-      "input_hash": "554d0d6e46c994a1f224ba56320c0a6f46ebf21fa3f139007e56c1efdbc9c8ed",
-      "verified_at_commit": "3fa3acd"
+      "elapsed_s": 4.1,
+      "input_hash": "4529ce06652a71384e21d843fdbe756aeee77eccc5497bd2bbfeac1358e655d3",
+      "verified_at_commit": "643080b"
     },
     "mf-exchange-numeraire": {
       "benchmark_file": "exotic_options.json",
@@ -1868,9 +1868,9 @@
     "mf-expected-negative-exposure-gaussian": {
       "benchmark_file": "credit.json",
       "date": "2026-10-24",
-      "elapsed_s": 5.3,
-      "input_hash": "3e7ebc187089f33959e73dc271c978d0421980be0c4979b7005f255faf58ada2",
-      "verified_at_commit": "6a7f422"
+      "elapsed_s": 5.2,
+      "input_hash": "bf790faa4213a94380bb4230bb49b5853f191e1b28b0ec668549dbf7c198cd87",
+      "verified_at_commit": "643080b"
     },
     "mf-expectile-elicitable": {
       "benchmark_file": "risk_measures.json",
@@ -3107,9 +3107,9 @@
     "mf-netting-exposure-subadditivity": {
       "benchmark_file": "credit.json",
       "date": "2026-10-24",
-      "elapsed_s": 5.2,
-      "input_hash": "c95cb1e6de92e3268f1b59d3e4e0c77114297ae86699c106d48a50324b7bed17",
-      "verified_at_commit": "6a7f422"
+      "elapsed_s": 5.8,
+      "input_hash": "7ce9662132d8eea1c23284d40e7eed810af141f7346c606e3b3ce77b10261f0f",
+      "verified_at_commit": "643080b"
     },
     "mf-newton-raphson-fixed-at-root": {
       "benchmark_file": "black_scholes.json",
@@ -3198,9 +3198,9 @@
     "mf-potential-future-exposure-gaussian": {
       "benchmark_file": "credit.json",
       "date": "2026-10-24",
-      "elapsed_s": 5.3,
-      "input_hash": "ff694d5e6a1e1f65758808d2050af6520f331ac2599a9f988efd02a74e927a1c",
-      "verified_at_commit": "6a7f422"
+      "elapsed_s": 5.4,
+      "input_hash": "929c505cc2474a36b344e5eaa4dd8ce460d5c5b862b0a5f7afaae8a84a18a3c2",
+      "verified_at_commit": "643080b"
     },
     "mf-power-forward-price": {
       "benchmark_file": "black_scholes.json",
