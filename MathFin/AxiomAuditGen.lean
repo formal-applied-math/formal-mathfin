@@ -1344,7 +1344,8 @@ namespace MathFin.AxiomAuditGen
 #print axioms MathFin.expectedShortfall_of_hasLaw_lomaxMeasure
 
 /-- info: 'MathFin.expectedShortfall_of_hasLaw_studentTMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.expectedShortfall_of_hasLaw_studentTMeasure
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.expectedShortfall_of_hasLaw_studentTMeasure
 
 /-- info: 'MathFin.expectedUtility_mix' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2571,7 +2572,8 @@ namespace MathFin.AxiomAuditGen
 #print axioms MathFin.quantile_map
 
 /-- info: 'MathFin.quantile_studentTMeasure_le_expectedShortfall_closedForm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.quantile_studentTMeasure_le_expectedShortfall_closedForm
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.quantile_studentTMeasure_le_expectedShortfall_closedForm
 
 /-- info: 'MathFin.quantoForward_of_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2730,10 +2732,12 @@ namespace MathFin.AxiomAuditGen
 #print axioms MathFin.strictlyJointlyElicits_fisslerZiegelExpScore
 
 /-- info: 'MathFin.studentTMeasure_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.studentTMeasure_one
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.studentTMeasure_one
 
 /-- info: 'MathFin.studentTPDFReal_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.studentTPDFReal_eq
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.studentTPDFReal_eq
 
 /-- info: 'MathFin.submartingale_optional_sampling' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2888,7 +2892,8 @@ namespace MathFin.AxiomAuditGen
 #print axioms MathFin.valueAtRisk_of_hasLaw_gaussianReal
 
 /-- info: 'MathFin.valueAtRisk_of_hasLaw_studentTMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.valueAtRisk_of_hasLaw_studentTMeasure
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.valueAtRisk_of_hasLaw_studentTMeasure
 
 /-- info: 'MathFin.valueAtRisk_portfolio_add_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
