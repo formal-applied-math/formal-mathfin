@@ -597,6 +597,7 @@ import MathFin.Portfolio.ConvexQPKKT
 import MathFin.Performance.Ratios
 import MathFin.Performance.RatiosExtended
 import MathFin.Performance.DownsideMetrics
+import MathFin.Performance.RelativeDrawdown
 import MathFin.Performance.Kelly
 import MathFin.Performance.KellyNumeraire
 import MathFin.Performance.FracDiffWeights
