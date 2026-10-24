@@ -2202,4 +2202,25 @@ maturity iff total variance does; the raw-SVI family form. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.SVI.bsSmile_calendar_free_iff
 
+/-! ### SABR: the ATM limit, the backbone law, the ATM Black-76 price (2026-10-22)
+
+Hagan–Kumar–Lesniewski–Woodward 2002. `tendsto_sabrImpliedVol_atm`: the printed smile formula
+(eq. 2.17a-c, `⋯` dropped) tends to the ATM formula (eq. 2.18) as `K → f`, `K ≠ f`, the `0/0`
+of `z/x(z)` resolved by `x'(0) = 1`. `hasDerivAt_log_sabrBackbone`: along `α / f^(1-β)`,
+`d log σ / df = (β − 1)/f`. `sabrATMVol_black_futures_price`: Black-76 at eq. 2.18's vol, from
+`black_futures_formula_atm`. The singular-perturbation derivation and any error bound against
+the SABR model are not proved. -/
+
+/-- info: 'MathFin.tendsto_sabrImpliedVol_atm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.tendsto_sabrImpliedVol_atm
+
+/-- info: 'MathFin.hasDerivAt_log_sabrBackbone' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.hasDerivAt_log_sabrBackbone
+
+/-- info: 'MathFin.sabrATMVol_black_futures_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.sabrATMVol_black_futures_price
+
 end MathFin.AxiomAudit

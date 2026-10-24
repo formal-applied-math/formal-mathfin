@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -78,6 +78,23 @@ theorem black_futures_price_eq_bsVGarman {Ω : Type*} {mΩ : MeasurableSpace Ω}
       = bsVGarman (F * Real.exp (-(r * T))) K (Real.exp (-(r * T))) σ T := by
   rw [black_futures_formula h r, neg_mul]
   exact black76_RHS_eq_bsVGarman F K r σ T h.S_0_pos h.K_pos
+
+/-- **The at-the-money Black-76 call**: at strike `K = F`, `d₁ = σ√T/2 = −d₂`, so the
+discounted expected futures-call payoff is `e^{−rT} · F · (2Φ(σ√T/2) − 1)`. Derived from
+`black_futures_formula` and `Φ(x) + Φ(−x) = 1`. -/
+theorem black_futures_formula_atm {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {F σ T : ℝ} {Z : Ω → ℝ}
+    (h : BSCallHyp Q F F 0 σ T Z) (r : ℝ) :
+    ∫ ω, Real.exp (-r * T) * max (bsTerminal F 0 σ T (Z ω) - F) 0 ∂Q
+      = Real.exp (-r * T) * F * (2 * Phi (σ * Real.sqrt T / 2) - 1) := by
+  have hd1 : bsd1 F F 0 σ T = σ * Real.sqrt T / 2 := by
+    have hs : Real.sqrt T ≠ 0 := (Real.sqrt_pos.mpr h.T_pos).ne'
+    rw [bsd1, div_self h.S_0_pos.ne', Real.log_one, div_eq_iff (mul_ne_zero h.σ_pos.ne' hs)]
+    linear_combination (-(σ ^ 2) / 2) * Real.mul_self_sqrt h.T_pos.le
+  have hd2 : bsd2 F F 0 σ T = -(σ * Real.sqrt T / 2) := by rw [bsd2, hd1]; ring
+  rw [black_futures_formula h r, hd2, hd1]
+  linear_combination (-(Real.exp (-r * T) * F)) * Phi_add_Phi_neg (σ * Real.sqrt T / 2)
 
 /-! ## Black model for swaptions (folded from `Swaption.lean`)
 

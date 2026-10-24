@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (742 MathFin constants, 29 upstream). Citations
+  corpus (745 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -1731,6 +1731,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.hasDerivAt_jumpDiffusionDigitalPrice_strike
 
+/-- info: 'MathFin.hasDerivAt_log_sabrBackbone' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.hasDerivAt_log_sabrBackbone
+
 /-- info: 'MathFin.hasDerivAt_matrixRiccatiCoeff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.hasDerivAt_matrixRiccatiCoeff
@@ -2615,6 +2619,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.rollSpread_eq_two_mul_sqrt
 
+/-- info: 'MathFin.sabrATMVol_black_futures_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.sabrATMVol_black_futures_price
+
 /-- info: 'MathFin.saccrEAD_mono' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.saccrEAD_mono
@@ -2802,6 +2810,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.tendsto_realizedVariance_gbm_L2' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.tendsto_realizedVariance_gbm_L2
+
+/-- info: 'MathFin.tendsto_sabrImpliedVol_atm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.tendsto_sabrImpliedVol_atm
 
 /-- info: 'MathFin.tendsto_stulzCallMax_zero_strike_betterOfTwo' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
