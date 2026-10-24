@@ -537,8 +537,10 @@ theorem continuous_callSurface {s : ℝ} (hX : Integrable (X (Real.toNNReal s)) 
   simpa using h
 
 /-- **Maturity derivative under the strike integral.** If `s ↦ C(s, K)` has derivative
-`C_T(s, K)` on the rectangle `Ioo (t − ε) (t + ε) × Ioo a b`, jointly continuous there, then for
-a continuous `ψ` compactly supported in `Ioo a b`,
+`C_T(s, K)` on the rectangle `Ioo (t − ε) (t + ε) × Ioo a b`, jointly continuous there, and
+every time-`s` marginal integrable (`hXint : ∀ s : ℝ≥0, Integrable (X s) μ` — used for
+`continuous_callSurface` at each `s` and for the dominating bound), then for a continuous `ψ`
+compactly supported in `Ioo a b`,
 `d/ds ∫ ψ(K) C(s, K) dK = ∫ ψ(K) C_T(t, K) dK` at `s = t`
 (`hasDerivAt_integral_of_dominated_loc_of_deriv_le`; the bound is `sup |C_T| · |ψ|` on a compact
 sub-rectangle). -/

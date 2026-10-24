@@ -54,6 +54,13 @@ Public API (all in namespace `MathFin.GyongyMimicry`):
 * `tower_identity`, `expectation_beta_eq_a`, `expectation_deltaSq_eq_b2` — the
   generator-matching identities;
 * `continuous_marginal_integrand` — the derivative/expectation interchange (proved);
+* `continuous_f2_of_contDiff2`, `sigmaGen_le`, `measurable_comp_comap`,
+  `stronglyMeasurable_test`, `measurable_f2_comp`, `integrable_of_bounded`,
+  `generatorIntegrand` — the measure-theory and integrability utilities of the core
+  (`sigmaGen_le` and `stronglyMeasurable_test` are consumed by `MathFin.Dupire`);
+* `reindexed`, `stronglyMeasurable_X_hXrel` — the real-time reindexing `t ↦ X_{t⁺}` and
+  the adaptedness lemma for the constructed instance's measurability fields (both
+  consumed by `MathFin.Dupire`);
 * `timeMeasure_Ioc_eq_interval` — the `timeMeasure` → `intervalIntegral` bridge;
 * `constructedBoundedItoProcess`, `constructedGenIntegrandExp` (+ `_coe`), the discharged
   drift hypotheses `hitoid_constructed_terminal` / `hitoid_constructed_band`, and the weak
