@@ -2288,10 +2288,12 @@ namespace MathFin.AxiomAuditGen
 #print axioms MathFin.martingale_representation
 
 /-- info: 'MathFin.maxRelativeDrawdown_const_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.maxRelativeDrawdown_const_mul
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.maxRelativeDrawdown_const_mul
 
 /-- info: 'MathFin.maximumDrawdown_scale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.maximumDrawdown_scale
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.maximumDrawdown_scale
 
 /-- info: 'MathFin.measureReal_iInter_default_eq_integral_pow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2598,7 +2600,8 @@ namespace MathFin.AxiomAuditGen
 #print axioms MathFin.reflection_principle_card
 
 /-- info: 'MathFin.relativeDrawdown_const_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.relativeDrawdown_const_mul
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.relativeDrawdown_const_mul
 
 /-- info: 'MathFin.replicating_payoff_down' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
