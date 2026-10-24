@@ -1732,7 +1732,8 @@ namespace MathFin.AxiomAuditGen
 #print axioms MathFin.hasDerivAt_jumpDiffusionDigitalPrice_strike
 
 /-- info: 'MathFin.hasDerivAt_log_sabrBackbone' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.hasDerivAt_log_sabrBackbone
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.hasDerivAt_log_sabrBackbone
 
 /-- info: 'MathFin.hasDerivAt_matrixRiccatiCoeff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2619,7 +2620,8 @@ namespace MathFin.AxiomAuditGen
 #print axioms MathFin.rollSpread_eq_two_mul_sqrt
 
 /-- info: 'MathFin.sabrATMVol_black_futures_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.sabrATMVol_black_futures_price
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.sabrATMVol_black_futures_price
 
 /-- info: 'MathFin.saccrEAD_mono' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2810,7 +2812,8 @@ namespace MathFin.AxiomAuditGen
 #print axioms MathFin.tendsto_realizedVariance_gbm_L2
 
 /-- info: 'MathFin.tendsto_sabrImpliedVol_atm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.tendsto_sabrImpliedVol_atm
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.tendsto_sabrImpliedVol_atm
 
 /-- info: 'MathFin.tendsto_stulzCallMax_zero_strike_betterOfTwo' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
