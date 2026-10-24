@@ -173,7 +173,7 @@ noncomputable def diffCoeffSq (μ : Measure Ω) (X δ : ℝ → Ω → ℝ) (t :
 omit mΩ in
 /-- Elementary Doob–Dynkin half: `f ∘ X` is `σ(X)`-measurable for Borel-measurable `f`.
 One line from the definition of `MeasurableSpace.comap`. (The full factorization form of
-Doob–Dynkin in this Mathlib rev is `MeasureTheory.exists_eq_measurable_comp`.) -/
+Doob–Dynkin in this Mathlib rev is `MeasureTheory.StronglyMeasurable.exists_eq_measurable_comp`.) -/
 theorem measurable_comp_comap {X : Ω → ℝ} {f : ℝ → ℝ} (hf : Measurable f) :
     Measurable[Real.measurableSpace.comap X] (fun ω => f (X ω)) := by
   intro s hs
@@ -501,9 +501,10 @@ open scoped NNReal ENNReal
 
 The concrete instantiation of the abstract `BoundedItoProcess` from the landed adapted
 assembly `ItoDriftConditional.itoDrift_expectation_identity_adapted`, for which the engine's
-`hitoid` is proved below: `X t = c + ∫₀ᵗ β + M t` (`driftPrim`-form; `β, δ` bounded adapted
-path-continuous; `M` an adapted version of the CLM Itô integral of `δ` on `[0, T]`; `X`
-path-continuous), reindexed to the real time axis by `t ↦ X_{t⁺}` (`Real.toNNReal`).
+`hitoid` is proved below: `X t = c + ∫₀ᵗ β + M t` (`AdaptedDrift.driftPath`-form; `β, δ`
+bounded adapted path-continuous; `M` an adapted version of the CLM Itô integral of `δ` on
+`[0, T]`; `X` path-continuous), reindexed to the real time axis by `t ↦ X_{t⁺}`
+(`Real.toNNReal`).
 
 * `constructedBoundedItoProcess` — the abstract structure's fields, all derived.
 * `constructedGenIntegrandExp` — the genuine generator integrand on the real time axis,
