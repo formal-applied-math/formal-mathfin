@@ -18,7 +18,8 @@ actual exposure process, `ν` its measure): ENE (via `CVA.expectedExposure`), PF
 
 * `expectedNegativeExposure` — `ENE(s) = E_ν[(-V_s)⁺]`, a genuine integral parallel to
   `CVA.expectedExposure`. `expectedNegativeExposure_eq_sub_integral` proves
-  `ENE = EE - E[V]` from the pointwise identity `(-x)⁺ = x⁺ - x` and integral linearity;
+  `ENE = EE - E[V]` for integrable `V_s`, from the pointwise identity `(-x)⁺ = x⁺ - x` and
+  integral linearity;
   `expectedNegativeExposure_gaussian` is its Gaussian closed form, a corollary of
   `CVA.expectedExposure_gaussian` composed with that identity.
 * `potentialFutureExposure` (PFE) — the value-at-risk of the exposure process at a fixed time,
@@ -51,8 +52,8 @@ variable {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁} {ν : Measure Ω₁}
 noncomputable def expectedNegativeExposure (V : ℝ → Ω₁ → ℝ) (ν : Measure Ω₁) (s : ℝ) : ℝ :=
   ∫ ω, max (-(V s ω)) 0 ∂ν
 
-/-- **ENE = EE − E[V]**: a genuine measure-theoretic identity, from `(-x)⁺ = x⁺ - x` pointwise
-and integral linearity. -/
+/-- **ENE = EE − E[V]**: for `V_s` integrable, a genuine measure-theoretic identity from
+`(-x)⁺ = x⁺ - x` pointwise and integral linearity. -/
 theorem expectedNegativeExposure_eq_sub_integral {V : ℝ → Ω₁ → ℝ} {s : ℝ}
     (hV : Integrable (V s) ν) :
     expectedNegativeExposure V ν s = expectedExposure V ν s - ∫ ω, V s ω ∂ν := by
