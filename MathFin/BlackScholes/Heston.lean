@@ -87,8 +87,8 @@ Itô drift of exp-affine-of-(logS, V) along a Heston solution — i.e. process
 existence plus the 2D correlated Itô formula — both out of reach of the library's current substrate (no path-continuous process
 layer for this class; no unbounded-drift Itô engine; the `itoDrift`-family
 identities are bounded-coefficient only). It is recorded as `hestonTransform_expectation_gated`: stated with the gate as an
-explicit hypothesis (the profile's expectation-invariance along the solution),
-proved from it trivially — with the gate as a checkable hypothesis.
+explicit, checkable hypothesis (the profile's expectation-invariance along the solution),
+proved from it trivially.
 -/
 
 @[expose] public section
