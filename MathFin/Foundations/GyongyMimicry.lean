@@ -390,7 +390,7 @@ which the constructed instance supplies it (see the `Constructed` section).
 The two facts that could have been carried as hypotheses — measurability of `f''` and
 continuity of `u` — appear here only as derived `have`s:
 * `hf''meas` — from `h2 : ContDiff ℝ 2 f` plus the `HasDerivAt` chain, via
-  `GyongyMimicry.continuous_f2_of_contDiff2` and `GyongyMimicry.measurable_f2_comp`;
+  `GyongyMimicry.continuous_f2_of_contDiff2` and `Continuous.measurable`;
 * `hucont` — from `GyongyMimicry.continuous_marginal_integrand` (DCT interchange), fed by the
   path-continuity fields of `BoundedItoProcess` and the derivative bounds. -/
 private theorem hasDerivAt_marginal_flow_core (P : BoundedItoProcess Ω) {f f' f'' : ℝ → ℝ}
