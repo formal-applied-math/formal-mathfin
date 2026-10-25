@@ -108,6 +108,12 @@ import MathFin.Foundations.MartingaleTransform
 import MathFin.Foundations.DoobLpMaximalInequality
 import MathFin.Foundations.ExtendOfNormIsometry
 import MathFin.Foundations.WienerIntegralL2
+-- The exponential-affine engine: generator invariance for OU/CIR affine diffusions and
+-- the Riccati flow (the deterministic core of the affine-term-structure method)
+import MathFin.Foundations.ExpAffine
+-- The CIR variance process as an explicit squared-OU construction: exact Gaussian laws
+-- and the mean dynamics E[V t] = theta(1 - e^{-kt}) + v0 e^{-kt}
+import MathFin.Foundations.CIRSquaredOU
 import MathFin.Foundations.WienerIntegralGaussian
 -- Wiener integral of a step indicator is the increment (∫𝟙_{(s,t]} dB = B_t − B_s)
 import MathFin.Foundations.WienerIntegralIndicator
@@ -441,6 +447,9 @@ import MathFin.BlackScholes.Spreads
 -- in the strike exactly where the law has no atom, and there its derivative is minus the digital
 import MathFin.BlackScholes.CallSpreadDigital
 import MathFin.BlackScholes.Dupire
+-- The Heston 2D affine transform at the generator/PDE level: the rho-shifted Riccati
+-- closed forms, the pricing PDE, and the gated characteristic-exponent expectation
+import MathFin.BlackScholes.Heston
 import MathFin.BlackScholes.Lookback
 import MathFin.BlackScholes.BarrierParity
 import MathFin.BlackScholes.PowerOption

@@ -1553,6 +1553,22 @@
     "formalization_status": "full",
     "formalization_scope": "Full formal proof, MathFin/BlackScholes/Dupire.lean. Route P: Breeden-Litzenberger strike derivatives via one-sided HasDerivAt, the weak forward equation from the Gyongy mimicry engine (MathFin/Foundations/GyongyMimicry.lean), law-of-X_t = C_KK * Lebesgue on the window, and a Lebesgue-a.e. coefficient transfer. The distributional form (dupire_weak) and the Markov local-vol corollary (dupire_localVol) are in the same module. Axioms-clean."
    }
+  },
+  {
+   "id": "mf-heston-affine-pde",
+   "name": "Heston Affine-Transform Pricing PDE",
+   "description": "The 2D exponential-affine ansatz for the Heston model satisfies the pricing PDE: with Bx constant and Bv, A the explicit rho-shifted Riccati closed forms, d/ds Phi(s,x,v) + L Phi(s,x,v) = 0 at every (s,x,v), where L is the Heston generator (r - v/2) d_x + k(t - v) d_v + (v/2) d_xx + rho xi v d_xv + (xi^2 v/2) d_vv. Strip: 0 < u < 1, xi != 0.",
+   "domain": "mathematical_finance",
+   "code": {
+    "lean": "import MathFin.BlackScholes.Heston\n\nopen scoped NNReal\n\nnamespace MathFin\nopen ExpAffine Heston\n\n/-- The Heston pricing PDE at the explicit affine transform: the calendar-time\nprofile built from the rho-shifted Riccati closed forms solves\n`d/ds Phi + L Phi = 0` against the Heston generator. -/\ntheorem heston_affine_pde (r κ θ ξ ρ u T : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u)\n    (hu2 : u < 1) (hκ : κ ≠ 0) (hθ : θ ≠ 0) (t x v : ℝ) :\n    deriv (fun s => hestonProfile u (fun w => hestonA r κ θ ξ ρ u (T - w))\n        (fun w => hestonBv κ ξ ρ u (T - w)) s x v) t\n      + hestonGenerator r κ θ ξ ρ (hestonProfile u (fun w => hestonA r κ θ ξ ρ u (T - w))\n          (fun w => hestonBv κ ξ ρ u (T - w)) t) x v = 0 :=\n  MathFin.Heston.hestonTransform_pde r κ θ ξ ρ u T hξ hu1 hu2 hκ hθ t x v\n\nend MathFin\n"
+   },
+   "metadata": {
+    "chapter": 14,
+    "reference": "Heston affine transform, pricing PDE (Bagaria ch. 14, Prop 14.5; Heston 1993)",
+    "difficulty": "advanced",
+    "formalization_status": "full",
+    "formalization_scope": "Full formal proof, MathFin/BlackScholes/Heston.lean. The 2D exponential-affine family, the Heston generator with the correlated cross term, the rho-shifted Riccati closed forms (Moebius denominator, admissible strip 0 < u < 1 forcing gamma > |k - rho xi u|), and the calendar-time PDE verification. The expectation form of the transform is stated with the expectation-invariance as an explicit gate hypothesis (hestonTransform_expectation_gated) — the library has no 2D correlated Ito-drift engine to discharge it. Axioms-clean."
+   }
   }
  ]
 }
