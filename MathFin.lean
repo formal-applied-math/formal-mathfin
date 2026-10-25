@@ -448,7 +448,7 @@ import MathFin.BlackScholes.Spreads
 import MathFin.BlackScholes.CallSpreadDigital
 import MathFin.BlackScholes.Dupire
 -- The Heston 2D affine transform at the generator/PDE level: the rho-shifted Riccati
--- closed forms, the pricing PDE, and the gated characteristic-exponent expectation
+-- closed forms, the pricing PDE, and the gated real-moment expectation
 import MathFin.BlackScholes.Heston
 import MathFin.BlackScholes.Lookback
 import MathFin.BlackScholes.BarrierParity

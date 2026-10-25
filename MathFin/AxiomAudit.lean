@@ -2202,8 +2202,6 @@ maturity iff total variance does; the raw-SVI family form. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.SVI.bsSmile_calendar_free_iff
 
-end MathFin.AxiomAudit
-
 /-! ### Dupire: the distributional headline and the pointwise Thm 9.5 (2026-10-25)
 
 Bagaria ch. 9, zero rates, on the driftless Itô process `X = c + M` with `M` a hypothesized
@@ -2228,3 +2226,5 @@ bounded-coefficient process class. -/
 /-- info: 'MathFin.Dupire.dupire_pointwise' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Dupire.dupire_pointwise
+
+end MathFin.AxiomAudit

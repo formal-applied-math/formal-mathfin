@@ -43,7 +43,7 @@ the Calc 14.6 ψ-equation `ψ' = bψ + ½dψ²` plus the constant `½(u² − u)
 the x-row of the drift (the coupling `−v/2` of variance into log-spot); `â' = ru +
 κθ b̂` (`hasDerivAt_hestonA`). The real moment `M(u) = E[e^{u log S_T}]` is the
 transform at real `u`; the characteristic function is the same system at `iu` — the
-complex route is out of scope here (lesson 0022, Gap 3 / dispatch note).
+complex route is out of scope here.
 
 **Sign bookkeeping** (worked on paper, then verified numerically and symbolically
 before formalizing — the engine's discipline): the closed forms are the Möbius
@@ -100,7 +100,7 @@ open MeasureTheory ExpAffine
 /-! ### The 2D exponential-affine family and its partial derivatives -/
 
 /-- The 2D exponential-affine family `E_{A,Bx,Bv}(x,v) = e^(A + Bx·x + Bv·v)`
-(dispatch notation). Curried so that each partial derivative is a 1D derivative of
+Curried so that each partial derivative is a 1D derivative of
 an honest `expAffine` member — the whole substrate reuses the engine's helpers. -/
 noncomputable def expAffine2 (A Bx Bv x v : ℝ) : ℝ := Real.exp (A + Bx * x + Bv * v)
 
