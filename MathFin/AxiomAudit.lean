@@ -2203,3 +2203,28 @@ maturity iff total variance does; the raw-SVI family form. -/
 #print axioms MathFin.SVI.bsSmile_calendar_free_iff
 
 end MathFin.AxiomAudit
+
+/-! ### Dupire: the distributional headline and the pointwise Thm 9.5 (2026-10-25)
+
+Bagaria ch. 9, zero rates, on the driftless Itô process `X = c + M` with `M` a hypothesized
+version of `∫δ dB` (pinned to the CLM integral a.e. at each `t` by `hMeq`). `dupire_weak` (Thm 9.5 ∘
+Thm 9.7 in distributional form): for every smooth compactly supported strike density `ψ`,
+`d/dT ∫ ψ(K) C(T, K) dK = ½ · 𝔼[ψ(X_T) · b̂²(T, X_T)]` — together with `breedenLitzenberger_weak`
+this is `∂_T C = ½ · b̂²(T, ·) · ∂²_K C` in `D'(ℝ_K)`, with no density, no Tanaka formula and no
+regularity hypothesis on the call surface: the payoff `(x − K)⁺`, not `C²`, is smeared against
+`ψ` first (Carr–Madan spanning). `dupire_pointwise` (Thm 9.5 proper): when `σloc(K)²·K²` is a
+continuous version of `𝔼[δ_t² | X_t = K]` on a strike window, `σloc(K)² = 2·∂_T C / (K²·∂²_K C)`
+at every strike with `C_KK > 0`, the regularity of the defined `callSurface` carried as
+hypotheses, never derived. The weak forward equation consumed here
+(`GyongyMimicry.marginal_flow_weak_equation_fn_constructed`) is pinned transitively through the
+`dupire_weak` guard; the mimicry-existence direction (`GyongyMimicry.gyongy_mimicry_gated`) has
+no guard in this audit. Nonzero rates and the lognormal flat-vol check are outside the
+bounded-coefficient process class. -/
+
+/-- info: 'MathFin.Dupire.dupire_weak' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Dupire.dupire_weak
+
+/-- info: 'MathFin.Dupire.dupire_pointwise' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Dupire.dupire_pointwise

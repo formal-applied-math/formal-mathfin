@@ -252,8 +252,9 @@ open MathFin.GyongyMimicry
 
 /-- **The weak forward (Fokker–Planck) equation at zero rates** — in its
 honest weak form: `GyongyMimicry.marginal_flow_weak_equation_fn_constructed`,
-specialized to the driftless constructed process `X = c + M` (`β := 0`, `M` the Itô integral
-of the bounded adapted `δ`), with the drift term erased. For every test function `f` of the
+specialized to the driftless process `X = c + M` (`β := 0`, with `M` a hypothesized adapted
+process equal a.e. at each `t` (`hMeq`) to the CLM Itô integral of the bounded adapted `δ`),
+with the drift term erased. For every test function `f` of the
 landed class (`C²`, bounded `f', f'', f'''`),
 
   `d/dt 𝔼[f(X_{t⁺})] = ½ · 𝔼[f''(X_{t⁺}) · b̂²(t, X_{t⁺})]`  on `(0, ↑T)`,
@@ -307,8 +308,9 @@ theorem forward_eq_weak_zeroRate
   simpa using key
 
 /-- **Dupire's formula, distributional form (Bagaria ch. 9 Thm 9.5 ∘ Thm 9.7, zero rates) —
-the headline of the distributional half.** For the driftless constructed Itô process `X = c + ∫δ dB` (bounded
-adapted `δ`) and every smooth compactly supported strike density `ψ`, the `ψ`-pairing of the
+the headline of the distributional half.** For the driftless Itô process `X = c + M` (`M` a hypothesized adapted process equal a.e. at
+each `t` (`hMeq`) to the CLM Itô integral `∫δ dB` of the bounded adapted `δ`) and every smooth
+compactly supported strike density `ψ`, the `ψ`-pairing of the
 *defined* call surface `C(s, K) = 𝔼[(X_{s⁺} − K)⁺]` is differentiable in maturity on
 `(0, ↑T)`, with
 
@@ -746,7 +748,8 @@ open Set MathFin.GyongyMimicry
 
 /-- **`dupire_ae`: the Dupire ratio is a version of `𝔼[δ_t² | X_t]` on the window**
 (Bagaria ch. 9 Thm 9.5 ∘ Thm 9.7, pointwise modulo a null set, zero rates). For the driftless
-constructed Itô process and a call surface carrying the regularity hypotheses `hCK`, `hCKK`,
+hypothesized Itô process `X = c + M`, with `M` a version of `∫δ dB` as in `dupire_weak`, and
+a call surface carrying the regularity hypotheses `hCK`, `hCKK`,
 `hCKKc`, `hCt`, `hCtc` on `Ioo a b` (each derivative pinned to the *defined* `callSurface` on its
 own; none relates `Ct` to `CKK`),
 
@@ -930,8 +933,9 @@ theorem dupire_pointwise
   rw [mul_comm (K ^ 2), ← div_div, ← h, mul_div_assoc, div_self hK2, mul_one]
 
 /-- **`dupire_localVol` (Def 9.4, the Markov case).** If the diffusion coefficient of the
-constructed process is a function of the state, `δ_s = v(s, X_s)` (`hδloc`: the local-vol SDE's
-fixed point, *carried* — SDE existence is not proved here), with `v(t, ·)` Borel and continuous
+hypothesized process `X = c + M` (as in `dupire_weak`) is a function of the state,
+`δ_s = v(s, X_s)` (`hδloc`: the local-vol SDE's fixed point, *carried* — SDE existence is not
+proved here), with `v(t, ·)` Borel and continuous
 on the window, then at every strike of the window with `C_KK > 0`
 
   `v(t, K)² = 2·∂_T C(t, K) / ∂²_K C(t, K)`
