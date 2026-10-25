@@ -397,7 +397,7 @@ Non-vacuity: Bachelier (`δ ≡ δ₀ > 0`, `X = c + δ₀B`) satisfies all of t
 * `strikeDeriv2_callSurface_nonneg` — `C_KK ≥ 0` on the window.
 * `law_Ioc_eq_ofReal_integral`, `law_restrict_eq_withDensity` — on every `Ioc p q` inside the
   window, `law(X_t)` *is* `C_KK · Leb` (FTC + `Measure.ext_of_Ioc`).
-* `continuous_callSurface` — `K ↦ C(s, K)` is 1-Lipschitz.
+* `continuous_callSurface` — `K ↦ C(s, K)` is continuous (proved via a `1`-Lipschitz bound).
 * `hasDerivAt_integral_mul_callSurface` — `d/ds ∫ψ C(s, ·) = ∫ψ C_T(t, ·)` (dominated
   differentiation under the integral).
 * `dupire_ae_window`, **`dupire_ae`** — a.e. on `{X_t ∈ window}`,
@@ -524,7 +524,10 @@ open Set
 variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
   {X : ℝ≥0 → Ω → ℝ}
 
-/-- `K ↦ C(s, K)` is `1`-Lipschitz (the payoff is, `abs_call_payoff_sub_le`), hence continuous. -/
+/-- `K ↦ C(s, K)` is continuous. Proof route: the payoff is `1`-Lipschitz
+(`abs_call_payoff_sub_le`), so the surface is `1`-Lipschitz
+(`LipschitzWith.of_dist_le_mul`); the Lipschitz bound is the proof's engine, not a conclusion
+of this statement, which exposes `Continuous` only. -/
 theorem continuous_callSurface {s : ℝ} (hX : Integrable (X (Real.toNNReal s)) μ) :
     Continuous (callSurface μ X s) := by
   have hcall (k : ℝ) : Integrable (fun ω => max (X (Real.toNNReal s) ω - k) 0) μ :=
