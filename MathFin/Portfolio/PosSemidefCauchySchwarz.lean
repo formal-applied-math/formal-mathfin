@@ -142,6 +142,8 @@ theorem posSemidef_cauchySchwarz (hpsd : Sig.PosSemidef) (x y : ι → ℝ) :
         = (x ⬝ᵥ (Sig *ᵥ y)) ^ 2 / (y ⬝ᵥ (Sig *ᵥ y)) := by
       field_simp
     rw [h2q, ht2] at hQt
+    -- `field_simp` uses `hYpos`'s positivity to clear the `1 / Y` denominators
+    -- without flipping the inequalities (the sign of `Y` is not otherwise used)
     have hsq : (x ⬝ᵥ (Sig *ᵥ y)) ^ 2 ≤ (x ⬝ᵥ (Sig *ᵥ x)) * (y ⬝ᵥ (Sig *ᵥ y)) := by
       field_simp at hQt ⊢
       linarith
@@ -168,10 +170,11 @@ conditions of the risk-penalized QP
 `min −μ ⬝ᵥ x + (t₁/2) · x ⬝ᵥ (Sig *ᵥ x)`, with `Sig` positive semidefinite and
 `t₁ > 0`, then for every feasible competitor `y`
 
-`pricedReturn μ t₁ x1 y ≤ pricedReturn μ t₁ x1 x1`,
+`pricedReturn μ t₁ Sig x1 y ≤ pricedReturn μ t₁ Sig x1 x1`,
 
-i.e. `x1` maximizes the priced return at a price of risk proportional to the
-competitor's own risk over the whole feasible set. Route:
+i.e. `x1` maximizes the priced return over the whole feasible set: the charge
+`t₁ · √(x1 ⬝ᵥ (Sig *ᵥ x1)) · √(y ⬝ᵥ (Sig *ᵥ y))` is proportional to the
+competitor's own risk, at a price calibrated on `x1`. Route:
 stationarity rearranged to `μ = t₁ • Sig *ᵥ x1 + ∑ u k • a k` turns the return
 gap into `t₁ · (Q − X)` plus the complementary-slackness terms (nonpositive at
 any feasible `y`), and the bilinear term is bounded by Cauchy–Schwarz for the
