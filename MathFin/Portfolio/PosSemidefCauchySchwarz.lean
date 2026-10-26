@@ -26,7 +26,8 @@ public theorems:
   the quadratic form of `Sig` at `x - t • y`, which is nonnegative for every
   real `t` by PSD-ness, and case-splits on `y ⬝ᵥ (Sig *ᵥ y) = 0`: in the
   degenerate branch the square reads `0 ≤ X - 2t·Q` for all `t`, forcing
-  `Q = 0` (either sign of `Q` drives the square negative past `t = X/(2Q)`);
+  `Q = 0` (either sign of `Q` drives the square negative once `t` passes
+  `X/(2Q)` on its own side);
   in the nondegenerate branch, evaluating at `t = Q / Y` collapses the square
   to `0 ≤ X - Q²/Y`, i.e. `Q² ≤ X·Y`, which `X, Y ≥ 0` turn into the
   square-root bound.
@@ -180,7 +181,7 @@ gap into `t₁ · (Q − X)` plus the complementary-slackness terms (nonpositive
 any feasible `y`), and the bilinear term is bounded by Cauchy–Schwarz for the
 PSD form. Note `x1`'s own primal feasibility is *not* assumed: complementary
 slackness alone forces `u k = 0` at every `k` where `a k ⬝ᵥ x1 > b k`, exactly
-as for `kkt_sufficient` in `MathFin.Portfolio.ConvexQPKKT` -/
+as for `kkt_sufficient` in `MathFin.Portfolio.ConvexQPKKT`. -/
 theorem pricedReturn_le_of_kkt {ι κ : Type*} [Fintype ι] [Fintype κ]
     {μ : ι → ℝ} {Sig : Matrix ι ι ℝ} (hpsd : Sig.PosSemidef) {t₁ : ℝ} (ht₁ : 0 < t₁)
     {a : κ → ι → ℝ} {b : κ → ℝ} {x1 : ι → ℝ} {u : κ → ℝ}
