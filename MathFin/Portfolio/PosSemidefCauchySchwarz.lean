@@ -197,27 +197,21 @@ theorem pricedReturn_le_of_kkt {ι κ : Type*} [Fintype ι] [Fintype κ]
   simp only [pricedReturn]
   conv_rhs => rw [mul_assoc]
   rw [Real.mul_self_sqrt hX]
-  -- stationarity dot-product identities against `y` and against `x1`
-  have hstaty : μ ⬝ᵥ y = t₁ * (x1 ⬝ᵥ (Sig *ᵥ y)) + ∑ k, u k * (a k ⬝ᵥ y) := by
-    have h2 : y ⬝ᵥ (-μ + t₁ • Sig *ᵥ x1) = y ⬝ᵥ (-∑ k, u k • a k) := by rw [hstat]
-    rw [dotProduct_add, dotProduct_neg, dotProduct_comm y μ, dotProduct_smul,
-      dotProduct_mulVec_symm_comm hC y x1, dotProduct_neg, dotProduct_sum] at h2
-    have h3 : ∀ k, y ⬝ᵥ (u k • a k) = u k * (a k ⬝ᵥ y) := by
+  -- stationarity dot-product identity against any vector `z`
+  have hstatdot : ∀ z : ι → ℝ,
+      μ ⬝ᵥ z = t₁ * (x1 ⬝ᵥ (Sig *ᵥ z)) + ∑ k, u k * (a k ⬝ᵥ z) := by
+    intro z
+    have h2 : z ⬝ᵥ (-μ + t₁ • Sig *ᵥ x1) = z ⬝ᵥ (-∑ k, u k • a k) := by rw [hstat]
+    rw [dotProduct_add, dotProduct_neg, dotProduct_comm z μ, dotProduct_smul,
+      dotProduct_mulVec_symm_comm hC z x1, dotProduct_neg, dotProduct_sum] at h2
+    have h3 : ∀ k, z ⬝ᵥ (u k • a k) = u k * (a k ⬝ᵥ z) := by
       intro k
-      rw [dotProduct_smul, dotProduct_comm y (a k)]
+      rw [dotProduct_smul, dotProduct_comm z (a k)]
       simp only [smul_eq_mul]
     simp only [h3, smul_eq_mul] at h2
     linarith
-  have hstatx : μ ⬝ᵥ x1 = t₁ * (x1 ⬝ᵥ (Sig *ᵥ x1)) + ∑ k, u k * (a k ⬝ᵥ x1) := by
-    have h2 : x1 ⬝ᵥ (-μ + t₁ • Sig *ᵥ x1) = x1 ⬝ᵥ (-∑ k, u k • a k) := by rw [hstat]
-    rw [dotProduct_add, dotProduct_neg, dotProduct_comm x1 μ, dotProduct_smul,
-      dotProduct_mulVec_symm_comm hC x1 x1, dotProduct_neg, dotProduct_sum] at h2
-    have h3 : ∀ k, x1 ⬝ᵥ (u k • a k) = u k * (a k ⬝ᵥ x1) := by
-      intro k
-      rw [dotProduct_smul, dotProduct_comm x1 (a k)]
-      simp only [smul_eq_mul]
-    simp only [h3, smul_eq_mul] at h2
-    linarith
+  have hstaty := hstatdot y
+  have hstatx := hstatdot x1
   -- return gap = t₁ (Q − X) + the complementary-slackness terms
   have hgap : μ ⬝ᵥ y - μ ⬝ᵥ x1
       = t₁ * (x1 ⬝ᵥ (Sig *ᵥ y) - x1 ⬝ᵥ (Sig *ᵥ x1))
