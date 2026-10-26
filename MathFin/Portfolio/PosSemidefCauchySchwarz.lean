@@ -33,8 +33,11 @@ public theorems:
 * **Bilinearity** (`quad_expansion_add_smul`): the quadratic form of *any*
   matrix (symmetry not needed) at `u + k • v` splits into the two square terms
   and the two cross terms — the algebraic engine behind the completed square.
-* **Constrained-Sharpe-ratio maximization** (`constrained_sharpe_maximized`):
-  the tradeoff form of the Markowitz mean-variance problem. If `x1` satisfies
+* **Price-of-risk tradeoff maximization** (`pricedReturn_le_of_kkt`, over the
+  priced-return objective `pricedReturn μ t₁ Sig x1 y`, the return with the
+  price of risk `t₁ · √(x1 ⬝ᵥ (Sig *ᵥ x1))` charged per unit of the holder's
+  own risk): the tradeoff form of the Markowitz mean-variance problem. If
+  `x1` satisfies
   the KKT stationarity, dual-feasibility and complementary-slackness conditions
   of the risk-penalized QP `min -μ ⬝ᵥ x + (t₁/2) · x ⬝ᵥ (Sig *ᵥ x)` (with `Sig`
   PSD and `t₁ > 0`; the KKT machinery is that of `MathFin.Portfolio.ConvexQPKKT`),
@@ -149,35 +152,47 @@ theorem posSemidef_cauchySchwarz (hpsd : Sig.PosSemidef) (x y : ι → ℝ) :
     rw [← Real.sqrt_mul hX (y ⬝ᵥ (Sig *ᵥ y))]
     exact habs
 
-/-- **The constrained-Sharpe-ratio maximization** (the tradeoff form): if `x1`
+/-- The **priced return** of `y` at the price of risk `t₁ · √(x1 ⬝ᵥ (Sig *ᵥ x1))`
+calibrated on the benchmark `x1`: the return `μ ⬝ᵥ y` minus the charge
+`t₁ · √(x1 ⬝ᵥ (Sig *ᵥ x1)) · √(y ⬝ᵥ (Sig *ᵥ y))` — the price `t₁ · √(x1 ⬝ᵥ (Sig *ᵥ x1))`
+per unit of the holder's own risk `√(y ⬝ᵥ (Sig *ᵥ y))`. Maximizing it over a
+feasible set is the risk-adjusted (tradeoff) form of portfolio selection. -/
+noncomputable def pricedReturn (μ : ι → ℝ) (t₁ : ℝ) (Sig : Matrix ι ι ℝ)
+    (x1 y : ι → ℝ) : ℝ :=
+  μ ⬝ᵥ y - t₁ * Real.sqrt (x1 ⬝ᵥ (Sig *ᵥ x1)) * Real.sqrt (y ⬝ᵥ (Sig *ᵥ y))
+
+/-- **The price-of-risk tradeoff form of the Markowitz mean-variance problem**
+(the risk-adjusted-return half of the constrained-Sharpe-ratio claim): if `x1`
 satisfies the KKT stationarity, dual feasibility and complementary-slackness
 conditions of the risk-penalized QP
 `min −μ ⬝ᵥ x + (t₁/2) · x ⬝ᵥ (Sig *ᵥ x)`, with `Sig` positive semidefinite and
 `t₁ > 0`, then for every feasible competitor `y`
 
-`μ ⬝ᵥ y − t₁·√(x1 ⬝ᵥ (Sig *ᵥ x1)) · √(y ⬝ᵥ (Sig *ᵥ y))
-  ≤ μ ⬝ᵥ x1 − t₁ · (x1 ⬝ᵥ (Sig *ᵥ x1))`,
+`pricedReturn μ t₁ x1 y ≤ pricedReturn μ t₁ x1 x1`,
 
-i.e. `x1` maximizes the return gap at a price of risk proportional to the
-competitor's own risk — the Markowitz/KKT tradeoff-form conclusion. Route:
+i.e. `x1` maximizes the priced return at a price of risk proportional to the
+competitor's own risk over the whole feasible set. Route:
 stationarity rearranged to `μ = t₁ • Sig *ᵥ x1 + ∑ u k • a k` turns the return
 gap into `t₁ · (Q − X)` plus the complementary-slackness terms (nonpositive at
 any feasible `y`), and the bilinear term is bounded by Cauchy–Schwarz for the
 PSD form. Note `x1`'s own primal feasibility is *not* assumed: complementary
 slackness alone forces `u k = 0` at every `k` where `a k ⬝ᵥ x1 > b k`, exactly
 as for `kkt_sufficient` in `MathFin.Portfolio.ConvexQPKKT` -/
-theorem constrained_sharpe_maximized {ι κ : Type*} [Fintype ι] [Fintype κ]
+theorem pricedReturn_le_of_kkt {ι κ : Type*} [Fintype ι] [Fintype κ]
     {μ : ι → ℝ} {Sig : Matrix ι ι ℝ} (hpsd : Sig.PosSemidef) {t₁ : ℝ} (ht₁ : 0 < t₁)
     {a : κ → ι → ℝ} {b : κ → ℝ} {x1 : ι → ℝ} {u : κ → ℝ}
     (hu_nonneg : ∀ k, 0 ≤ u k)
     (hstat : -μ + t₁ • Sig *ᵥ x1 = -∑ k, u k • a k)
     (hcs : ∀ k, u k * (a k ⬝ᵥ x1 - b k) = 0)
     {y : ι → ℝ} (hfeasy : ∀ k, a k ⬝ᵥ y ≤ b k) :
-    μ ⬝ᵥ y - t₁ * Real.sqrt (x1 ⬝ᵥ (Sig *ᵥ x1)) * Real.sqrt (y ⬝ᵥ (Sig *ᵥ y))
-      ≤ μ ⬝ᵥ x1 - t₁ * (x1 ⬝ᵥ (Sig *ᵥ x1)) := by
+    pricedReturn μ t₁ Sig x1 y ≤ pricedReturn μ t₁ Sig x1 x1 := by
   have hC : Sig.IsSymm := isHermitian_iff_isSymm.mp hpsd.isHermitian
   have hX : 0 ≤ x1 ⬝ᵥ (Sig *ᵥ x1) := by
     simpa using hpsd.dotProduct_mulVec_nonneg x1
+  -- unfold the priced returns; at the benchmark itself the charge is `t₁ · X`
+  simp only [pricedReturn]
+  conv_rhs => rw [mul_assoc]
+  rw [Real.mul_self_sqrt hX]
   -- stationarity dot-product identities against `y` and against `x1`
   have hstaty : μ ⬝ᵥ y = t₁ * (x1 ⬝ᵥ (Sig *ᵥ y)) + ∑ k, u k * (a k ⬝ᵥ y) := by
     have h2 : y ⬝ᵥ (-μ + t₁ • Sig *ᵥ x1) = y ⬝ᵥ (-∑ k, u k • a k) := by rw [hstat]

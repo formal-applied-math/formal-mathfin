@@ -38,11 +38,12 @@ square on the quadratic form of `Sig` at `x − t • y` is nonnegative for ever
 the branch `y ⬝ᵥ (Sig *ᵥ y) = 0` forces `x ⬝ᵥ (Sig *ᵥ y) = 0` (either sign of the cross
 term drives the square negative once `t` passes `X/(2Q)` on its own side), the other
 evaluates at `t = Q/Y` to collapse the square to `Q² ≤ X·Y`. The application is the
-tradeoff form of the Markowitz mean-variance problem (`constrained_sharpe_maximized`): a
+tradeoff form of the Markowitz mean-variance problem (`pricedReturn_le_of_kkt`, stated
+over the priced-return objective `pricedReturn μ t₁ Sig x1 y` — return minus the price of
+risk `t₁·√(x1 ⬝ᵥ (Sig *ᵥ x1))` charged per unit of the holder's own risk): a
 KKT point — stationarity, dual feasibility, complementary slackness — of
-`min −μ ⬝ᵥ x + (t₁/2) · x ⬝ᵥ (Sig *ᵥ x)` with `Sig` PSD and `t₁ > 0` maximizes, over the
-whole feasible set, return minus a price of risk `t₁·√(x1 ⬝ᵥ (Sig *ᵥ x1))` charged on the
-competitor's own risk `√(y ⬝ᵥ (Sig *ᵥ y))`. As in `ConvexQPKKT`'s sufficiency, `x1`'s own
+`min −μ ⬝ᵥ x + (t₁/2) · x ⬝ᵥ (Sig *ᵥ x)` with `Sig` PSD and `t₁ > 0` maximizes the priced
+return over the whole feasible set. As in `ConvexQPKKT`'s sufficiency, `x1`'s own
 feasibility is not assumed (complementary slackness alone forces `u k = 0` where `x1`
 violates the constraint). KKT necessity is not claimed. A third public theorem,
 `quad_expansion_add_smul`, is the bilinear split of a quadratic form at `u + k • v`
