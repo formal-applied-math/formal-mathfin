@@ -9,18 +9,18 @@ public import Mathlib
 public import MathFin.Portfolio.ConvexQPKKT
 
 /-!
-# Cauchy-Schwarz for positive semidefinite forms, and constrained-Sharpe maximization
+# Cauchy–Schwarz for positive semidefinite forms, and constrained-Sharpe maximization
 
-The Cauchy-Schwarz inequality for the semi-inner product `⟨u, v⟩ = u ⬝ᵥ (Sig *ᵥ v)`
+The Cauchy–Schwarz inequality for the semi-inner product `⟨u, v⟩ = u ⬝ᵥ (Sig *ᵥ v)`
 induced by a positive semidefinite matrix form `Sig` over `ι → ℝ`, and its
 application to the tradeoff form of the Markowitz mean-variance problem. Three
 public theorems:
 
-* **PSD-form Cauchy-Schwarz** (`posSemidef_cauchySchwarz`): for `Sig` positive
+* **PSD-form Cauchy–Schwarz** (`posSemidef_cauchySchwarz`): for `Sig` positive
   semidefinite, `|x ⬝ᵥ (Sig *ᵥ y)| ≤ √(x ⬝ᵥ (Sig *ᵥ x)) · √(y ⬝ᵥ (Sig *ᵥ y))`.
-  This is the classical Cauchy-Schwarz inequality for the semi-inner product
+  This is the classical Cauchy–Schwarz inequality for the semi-inner product
   `⟨u, v⟩ = u ⬝ᵥ (Sig *ᵥ v)` induced by a PSD form (Horn & Johnson, *Matrix
-  Analysis*, the Cauchy-Schwarz inequality for semi-inner products). The form
+  Analysis*, the Cauchy–Schwarz inequality for semi-inner products). The form
   is degenerate when `Sig` is singular (it is a semi-inner product, not an
   inner product), but the bound is two-sided. The proof completes the square on
   the quadratic form of `Sig` at `x - t • y`, which is nonnegative for every
@@ -47,7 +47,7 @@ public theorems:
   return gap into `t₁ · (Q - X)` plus the complementary-slackness terms
   (nonpositive at any feasible `y`, by
   `kkt_complementary_term_nonneg`), and the bilinear term is bounded by the
-  PSD-form Cauchy-Schwarz inequality above.
+  PSD-form Cauchy–Schwarz inequality above.
 
 No claim is made here that an optimal solution is a KKT point (KKT necessity);
 this module certifies candidates, matching the scope of

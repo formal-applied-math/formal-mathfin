@@ -882,7 +882,7 @@
       },
       "metadata": {
         "chapter": 11,
-        "reference": "Cauchy–Schwarz inequality for semi-inner products (Horn & Johnson, Matrix Analysis); application: the tradeoff form of the Markowitz mean-variance problem (Merton 1972), via the KKT sufficiency of ConvexQPKKT",
+        "reference": "Cauchy–Schwarz inequality for semi-inner products (Horn & Johnson, Matrix Analysis); application: the tradeoff form of the Markowitz mean-variance problem (Merton 1972)",
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.posSemidef_cauchySchwarz (MathFin/Portfolio/PosSemidefCauchySchwarz.lean), completed-square proof with the degenerate branch forcing the cross term to zero. SCOPE: the bound is two-sided; no lower bound on the bilinear form is claimed separately, and no KKT necessity is involved."
