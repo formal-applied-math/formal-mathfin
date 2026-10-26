@@ -230,7 +230,7 @@ identity for the constructed process, with no hypothesized `M`), `BlackScholes/F
 `BlackScholes/HeynenKatTwoAssetBarrier`, `BlackScholes/BasketMomentMatching`,
 `FixedIncome/{Inflation, CVA, DefaultDensity, TimingAdjustment, VasicekMarketPriceOfRisk,
 NelsonSiegelSvensson, ABCDVolatility, GSRPiecewiseVol}`, `RiskMeasures/{DiscreteVaR, TrancheLoss,
-JointElicitability, ComponentVaR}`, `Portfolio/{SingleIndexModel, ConvexQPKKT}`,
+JointElicitability, ComponentVaR}`, `Portfolio/{SingleIndexModel, ConvexQPKKT, PosSemidefCauchySchwarz}`,
 `Execution/RollSpread`, `Performance/{FracDiffWeights, LabelUniqueness, BetSizeSigmoid,
 PurgedCV}`, `DeFi/{UniswapMechanics, Aave, Compound, Dai}` and
 `Commodities/{FisherSraffaOwnRate, TheoryOfStorage, AR1OUCalibration}`. The batch also reworked
