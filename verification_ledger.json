@@ -3191,9 +3191,9 @@
     "mf-psd-cauchy-schwarz": {
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-10-27",
-      "elapsed_s": 2.9,
-      "input_hash": "096b305f4439d438a508d4cc1c455557b14bb16377417078a529abab7f527ef8",
-      "verified_at_commit": "1d09f5a"
+      "elapsed_s": 2.8,
+      "input_hash": "777e62bfda2b519d0487077cc59fc952e26a0400bc92dcaa363fcf92086d366b",
+      "verified_at_commit": "637d53c"
     },
     "mf-purged-cv-no-leakage-brownian": {
       "benchmark_file": "portfolio_and_performance.json",
