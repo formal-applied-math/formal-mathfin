@@ -3192,8 +3192,8 @@
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-10-27",
       "elapsed_s": 3.3,
-      "input_hash": "a1905291d4c4a19da714e4e58a50e332bba0fcb29cf5fe60c22e3b5fe899c64d",
-      "verified_at_commit": "95001e1"
+      "input_hash": "0c7df3ae3f380f7dbf8070007cd171346754fb97c13280288f1107d04eaee515",
+      "verified_at_commit": "a42429a"
     },
     "mf-purged-cv-no-leakage-brownian": {
       "benchmark_file": "portfolio_and_performance.json",
