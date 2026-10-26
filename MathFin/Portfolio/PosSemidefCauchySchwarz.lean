@@ -62,7 +62,7 @@ variable {ι : Type*} [Fintype ι] {Sig : Matrix ι ι ℝ}
 /-- **Bilinearity of the quadratic form** at `u + k • v`: the quadratic form of
 any matrix (symmetry not needed) splits into the two square terms and the two
 cross terms. -/
-theorem quad_expansion_add_smul (u v : ι → ℝ) (k : ℝ) :
+lemma quad_expansion_add_smul (u v : ι → ℝ) (k : ℝ) :
     (u + k • v) ⬝ᵥ (Sig *ᵥ (u + k • v))
       = u ⬝ᵥ (Sig *ᵥ u) + k * (u ⬝ᵥ (Sig *ᵥ v) + v ⬝ᵥ (Sig *ᵥ u))
         + k ^ 2 * (v ⬝ᵥ (Sig *ᵥ v)) := by

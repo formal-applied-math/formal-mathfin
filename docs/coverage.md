@@ -49,7 +49,6 @@ violates the constraint). KKT necessity is not claimed. A third public theorem,
 (no symmetry needed).
 
 ### Every module connected: the coherence pass (2026-10-21)
-### Every module connected: the coherence pass (2026-10-21)
 
 A coherence pass found 41 modules that imported nothing from the library and that nothing
 imported, and 47 more that nothing imported or cited. Each now has a bridge: a proved theorem tying
