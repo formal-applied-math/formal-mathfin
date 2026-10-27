@@ -1513,7 +1513,7 @@
       "date": "2026-10-28",
       "elapsed_s": 4.0,
       "input_hash": "766dcd8750a3e3696c9765b7fcfdcaca5d97838850617879e382ff2214bc0592",
-      "verified_at_commit": null
+      "verified_at_commit": "89a1811"
     },
     "mf-cml-decomposition-unique": {
       "benchmark_file": "portfolio_and_performance.json",
@@ -1849,7 +1849,7 @@
       "date": "2026-10-28",
       "elapsed_s": 4.0,
       "input_hash": "539cbecf607a8573bd1e2dbf8092b998bb60c3b3f8e6cfaf289f6da6576614d5",
-      "verified_at_commit": null
+      "verified_at_commit": "89a1811"
     },
     "mf-dupire-tilted-smile-local-skew": {
       "benchmark_file": "black_scholes.json",
@@ -2206,7 +2206,7 @@
       "date": "2026-10-28",
       "elapsed_s": 4.0,
       "input_hash": "85d11523414c00c7d7be445e75a426a3e059252be3637b6d81999c6dd4b067bd",
-      "verified_at_commit": null
+      "verified_at_commit": "89a1811"
     },
     "mf-heynen-kat-independent-bs-factor": {
       "benchmark_file": "exotic_options.json",
