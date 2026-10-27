@@ -1847,9 +1847,9 @@
     "mf-dupire-local-vol": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-10-28",
-      "elapsed_s": 4.2,
-      "input_hash": "3c0ab9a803654fcedbf3f5d83dfb2be141eaca3ebf0132b38a4c0692a340cd9c",
-      "verified_at_commit": "297e6c6"
+      "elapsed_s": 4.3,
+      "input_hash": "305cb3076cbcaefe1ead1a78578ac132170990c3c26cecd2e3ee22e0b2795cb5",
+      "verified_at_commit": "c5bd197"
     },
     "mf-dupire-tilted-smile-local-skew": {
       "benchmark_file": "black_scholes.json",
