@@ -521,7 +521,7 @@ bounded adapted path-continuous; `M` an adapted version of the CLM Itô integral
   hypotheses beyond the assembly's own.
 * `hitoid_constructed_band` — the `hitoid` on the open band `(0, ↑T)`, the form the
   marginal-flow engine consumes; the horizon consistency of the CLM integral is available
-  (`itoProcessCLM_consist`/`mMeq_frozen`), so only the same horizon-`T` pinning `hMeq` as
+  (`itoProcessCLM_consist`/`ae_eq_itoProcessCLM_min`), so only the same horizon-`T` pinning `hMeq` as
   the terminal identity is needed.
 * `marginal_flow_weak_equation_constructed` — **the generator-matching core of Bagaria
   ch. 9 / Thm 9.6 for the constructed process**: on `(0, ↑T)` the marginal flow solves the
@@ -854,9 +854,9 @@ process**,
 driven by the *real* integrated Itô–drift identity (`ItoDriftConditional.itoDrift_expectation_identity_adapted`,
 transferred) rather than the `hitoid` hypothesis. This is the computation whose
 uniqueness-up-to-marginals content is Gyöngy's theorem; the mimicking diffusion's
-*existence* remains separately gated (see the module docstring). Dispatch-12 closed the
+*existence* remains separately gated (see the module docstring). The constructed flow closed the
 last adapter gap: the horizon-consistency of the CLM integral is proved upstream
-(`itoProcessCLM_consist`/`mMeq_frozen`), so this theorem needs only the
+(`itoProcessCLM_consist`/`ae_eq_itoProcessCLM_min`), so this theorem needs only the
 same horizon-`T` pinning `hMeq` as the terminal identity — no residual hypothesis. -/
 theorem marginal_flow_weak_equation_constructed
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
@@ -943,7 +943,7 @@ private theorem exists_coeffFn_comp {Ω : Type*} [MeasurableSpace Ω]
   exact ⟨a, ha.measurable, fun ω => congrFun haeq ω⟩
 
 set_option linter.unusedVariables false in
-/-- **Layer 1, drift coefficient function (item 11 / memo Route 1)**: for the
+/-- **Layer 1, drift coefficient function**: for the
 constructed-process data of the `marginal_flow_weak_equation_constructed` instance (same
 hypotheses shape), Gyöngy's drift coefficient `a_t = 𝔼[β_t | σ(X_t)]` *is* a Borel function
 of the current state, pointwise: `∃ â : ℝ → ℝ`, `Measurable â` and
@@ -968,7 +968,7 @@ theorem exists_driftCoeff_fn
   exists_coeffFn_comp (reindexed X) (driftCoeff μ (reindexed X) (reindexed β) t) t
     stronglyMeasurable_condExp
 
-/-- **Layer 1, squared-diffusion coefficient function (item 11 / memo Route 1)**: the twin
+/-- **Layer 1, squared-diffusion coefficient function**: the twin
 of `GyongyMimicry.exists_driftCoeff_fn` for `b²_t = 𝔼[δ_t² | σ(X_t)]`:
 `∃ b̂² : ℝ → ℝ`, `Measurable b̂²` and `diffCoeffSq 𝔼 X δ t ω = b̂² (X_t ω)` pointwise —
 the `(t, ·)`-section of Thm 9.6's `b²(t, x) = 𝔼[δ_t² | X_t = x]`.
@@ -983,7 +983,7 @@ theorem exists_diffCoeffSq_fn
   exists_coeffFn_comp (reindexed X) (diffCoeffSq μ (reindexed X) (reindexed δ) t) t
     stronglyMeasurable_condExp
 
-/-- **Layer 1 headline (item 11 / memo Route 1)** — the `:1078` weak forward equation
+/-- **Layer 1 headline** — the weak forward equation
 restated with the composed Borel coefficient functions: on the band `(0, ↑T)` the marginal
 flow of the constructed process is differentiable with derivative
 
@@ -1187,7 +1187,7 @@ private theorem hitoid_constructed_fn_Ioc
       intervalIntegral.integral_congr fun x _ => htr x
     rw [hterm, hI]
 
-/-! ### Layer 2 — gated constructed-process mimicry (memo Route 2, the Thm 9.6 headline)
+/-! ### Layer 2 — gated constructed-process mimicry (the Thm 9.6 headline)
 
 The mimicking process `Y` is carried as **data** on its own probability space (`ν`), *not*
 constructed (weak existence for merely-measurable coefficients is the `:203–205` gate);
@@ -1195,7 +1195,7 @@ the Y-side dynamics enter as the integrated forward identity `hyflow` (the expec
 characterization — lesson 0038: "an expectation characterization suffices for the mimicry
 conclusion, which is distributional"). The analytic core — uniqueness of measure-flow
 solutions of the deterministic-coefficient weak forward equation — is carried as the
-explicit hypothesis `hgate` (the item-19 `hestonTransform_expectation_gated` house pattern:
+explicit hypothesis `hgate` (the `hestonTransform_expectation_gated` house pattern:
 the named gate isolates exactly what is not provable at this pin, memo §1c).
 
 The assembly: after Layer 1 the forward equation's right-hand side depends on the process
@@ -1204,7 +1204,7 @@ only through its current one-time marginal, so the law flows `s ↦ ν.map (Y s)
 and the gate converts the two flow-solutions into equal one-time marginals. -/
 
 set_option linter.unusedVariables false in
-/-- **Layer 2 headline (item 11 / memo Route 2) — Thm 9.6's one-time-marginal mimicry modulo
+/-- **Layer 2 headline — Thm 9.6's one-time-marginal mimicry modulo
 the named flow-uniqueness gate.** Given
 
 * (i) the constructed `X` (the `:1078` data) with Layer-1 coefficient functions

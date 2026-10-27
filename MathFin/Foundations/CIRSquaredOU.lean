@@ -204,11 +204,11 @@ private lemma ouWiener_sq_integrable (hB : IsPreBrownianReal B μ) {k : ℝ} (hk
 /-! ### The OU process -/
 
 /-- **The OU fluctuation process** (explicit solution, no SDE solver):
-`X_t = e^{−(k/2)t}·(x₀ + s·∫₀ᵗ e^{(k/2)u} dB_u)` — the dispatch's literal shape,
+`X_t = e^{−(k/2)t}·(x₀ + s·∫₀ᵗ e^{(k/2)u} dB_u)` — the exact shape,
 with the stochastic integral instantiated as the stack's Wiener integral
 `wienerIntegralLp B hB t (ouKernelLp hk t)`. Per `t` this is a random variable with
 an exact Gaussian law (`ouProcess_hasLaw` below); the path-level reading
-(continuity/adaptedness) is blocked at this pin (see the module header, wall 4). -/
+(continuity/adaptedness) is blocked at this pin (see the module header, blocker 4). -/
 noncomputable def ouProcess (hB : IsPreBrownianReal B μ) (k s x0 : ℝ)
     (hk : 0 < k) (t : ℝ≥0) (ω : Ω) : ℝ :=
   Real.exp (-(k / 2 * (t : ℝ))) * (x0
@@ -378,9 +378,9 @@ theorem ouProcess_integral_sq (hB : IsPreBrownianReal B μ) {k : ℝ} (hk : 0 < 
     ouWiener_integral_sq, hfin]
   ring
 
-/-! ### The drift decomposition (the dispatch's requested shape) -/
+/-! ### The drift decomposition -/
 
-/-- **The deterministic drift integral** (the `b` of the dispatch's shape):
+/-- **The deterministic drift integral** (the `b` of the decomposition):
 `∫₀ᵗ −(k/2)·x₀·e^{−(k/2)u} du = x₀·(e^{−(k/2)t} − 1)` — FTC with antiderivative
 `x₀·e^{−(k/2)u}`. -/
 theorem ouDrift_integral {k : ℝ} (x0 t : ℝ) :
@@ -408,9 +408,9 @@ theorem ouDrift_integral {k : ℝ} (x0 t : ℝ) :
   ring
 
 omit [IsProbabilityMeasure μ] in
-/-- **The drift+fluctuation decomposition** (the dispatch's shape, as a pointwise
+/-- **The drift+fluctuation decomposition** (as a pointwise
 identity — honest scope: the fluctuation term is *not* an Itô-integral process, see
-the module header, wall 2): `X_t = x₀ + ∫₀ᵗ b + s·e^{−(k/2)t}·∫₀ᵗ e^{(k/2)u} dB_u`
+the module header, blocker 2): `X_t = x₀ + ∫₀ᵗ b + s·e^{−(k/2)t}·∫₀ᵗ e^{(k/2)u} dB_u`
 with `b_u = −(k/2)·x₀·e^{−(k/2)u}`, combined via `ouDrift_integral`. -/
 theorem ouProcess_drift_shape (hB : IsPreBrownianReal B μ) {k : ℝ} (hk : 0 < k)
     (s x0 : ℝ) (t : ℝ≥0) (ω : Ω) :

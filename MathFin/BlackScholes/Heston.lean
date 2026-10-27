@@ -30,7 +30,7 @@ lemma below is `(c₀ + c₁ v)` with the **x-coefficient identically zero** —
 Riccati equation `Bx' = 0` (the log-spot gradient is conserved). Matching
 `∂_t Φ + LΦ = 0` (the *backward* pricing equation; Bagaria's Calc 14.6 states the
 forward form `∂_t u = Lu`, same matching with negated coefficients — the engine's
-`cirBondProfile_pde` did the same flip) gives the **calendar-time** system
+`affineBondPrice_solves_pde` did the same flip) gives the **calendar-time** system
 
 `Bx' = 0`,  `Bv' = u/2 − u²/2 + (κ − ρξu) Bv − (ξ²/2) Bv²`,  `A' = −r·u − κθ·Bv`,
 
@@ -259,7 +259,7 @@ constant-forced Riccati `b' = c + b₁b + db²` (`c = ½(u²−u)`, `b₁ = ρξ
 Möbius member solving it from `b̂(0) = 0` is derived exactly like the engine's
 `cirBondB` (partial fractions against the fixed points, `b(0) = 0` imposed); the
 `â`-antiderivative integrates `κθ·b̂` in closed form (log of the shared
-denominator), mirroring `cirBondLogA`.
+denominator), mirroring `cirBondA`.
 
 Guards (module header): the strip `0 < u < 1`, `ξ ≠ 0` forces `γ > |κ − ρξu|` and
 `D(τ) > 0` for all real `τ`; `κ, θ` enter only through cancellations (`κ ≠ 0`,
@@ -429,7 +429,7 @@ theorem hasDerivAt_hestonBv (κ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u)
 
 /-- **The `A`-flow ODE.** `â' = r·u + κθ·b̂` — the integral half of the Riccati
 system (`φ' = aψ + ½cψ²`, eq. 14.5, in the Heston roles: the x-row contributes
-`r·u`, the v-row `κθ·b̂`). Proof: `hasDerivAt_cirBondLogA` idiom — the log's
+`r·u`, the v-row `κθ·b̂`). Proof: the `hasDerivAt_cirBondA` idiom — the log's
 derivative via `.div_const` + `.log`, cleaned by the key lemma
 `(γ + κ − ρξu)(D(τ) − 2γe^{γτ}) = ξ²(u² − u)(e^{γτ} − 1)` (pure ring after the
 γ-relation). Guards: the strip, plus `κ ≠ 0`, `θ ≠ 0` (the cancellation step). -/
@@ -550,7 +550,7 @@ theorem hasDerivAt_hestonA (r κ θ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 
 /-- **Calendar-time `Bv`-flow.** `B(t) = b̂(T − t)` solves
 `B' = u/2 − u²/2 + (κ − ρξu)B − (ξ²/2)B²` — exactly the `hB` hypothesis of
 `hestonProfile_pde` (chain rule: `B'(t) = −b̂'(T − t)`; the engine's
-`hasDerivAt_cirBondCalendarB` flip). -/
+the calendar-time flip of `hasDerivAt_cirBondB`). -/
 theorem hasDerivAt_hestonBvCalendar (κ ξ ρ u T : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u)
     (hu2 : u < 1) (t : ℝ) :
     HasDerivAt (fun w => hestonBv κ ξ ρ u (T - w))
@@ -589,7 +589,7 @@ theorem hasDerivAt_hestonACalendar (r κ θ ξ ρ u T : ℝ) (hξ : ξ ≠ 0) (h
   rw [hval] at hcomp
   exact hcomp
 
-/-! ### The PDE headline (mirrors `cirBondProfile_pde` / `cirBondPrice_pde`) -/
+/-! ### The PDE headline (mirrors `affineBondPrice_solves_pde` / `cirBondPrice_solves_pde`) -/
 
 /-- The **candidate transform profile** `Φ(t, x, v) = e^{A(t) + u·x + B(t)·v}` with
 terminal data `Φ(T, x, v) = e^{u·x}` (the real-moment transform
@@ -605,7 +605,7 @@ theorem hestonProfile_terminal (u : ℝ) (A B : ℝ → ℝ) (T x v : ℝ)
     hestonProfile u A B T x v = Real.exp (u * x) := by
   simp only [hestonProfile, hAT, hBT, zero_mul, add_zero, zero_add]
 
-/-- **The PDE verification (hypothesis version, the `cirBondProfile_pde` mirror).**
+/-- **The PDE verification (hypothesis version, the `affineBondPrice_solves_pde` mirror).**
 For any coefficient flows `A, B` solving the calendar-time Heston Riccati system
 
 `B' = u/2 − u²/2 + (κ − ρξu)B − (ξ²/2)B²`,  `A' = −r·u − κθ·B`,
@@ -647,7 +647,7 @@ theorem hestonProfile_pde (r κ θ ξ ρ u : ℝ) (A B : ℝ → ℝ)
   rw [htime', hf, hestonGenerator_expAffine2]
   ring
 
-/-- **The PDE verification (explicit version, the `cirBondPrice_pde` mirror).**
+/-- **The PDE verification (explicit version, the `cirBondPrice_solves_pde` mirror).**
 The transform profile built from the explicit Möbius flows
 `A(t) = â(T − t)`, `B(t) = b̂(T − t)` satisfies `∂_t Φ + L Φ = 0` for every
 `(t, x, v)`. Guards: the strip `0 < u < 1`, `ξ ≠ 0`, `κ ≠ 0`, `θ ≠ 0`. -/
