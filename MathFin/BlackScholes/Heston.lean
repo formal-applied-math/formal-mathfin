@@ -549,8 +549,8 @@ theorem hasDerivAt_hestonA (r κ θ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 
 
 /-- **Calendar-time `Bv`-flow.** `B(t) = b̂(T − t)` solves
 `B' = u/2 − u²/2 + (κ − ρξu)B − (ξ²/2)B²` — exactly the `hB` hypothesis of
-`hestonProfile_pde` (chain rule: `B'(t) = −b̂'(T − t)`; the engine's
-the calendar-time flip of `hasDerivAt_cirBondB`). -/
+`hestonProfile_pde` (chain rule: `B'(t) = −b̂'(T − t)`; the engine's `hasDerivAt_cirBondB`, flipped to
+calendar time). -/
 theorem hasDerivAt_hestonBvCalendar (κ ξ ρ u T : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u)
     (hu2 : u < 1) (t : ℝ) :
     HasDerivAt (fun w => hestonBv κ ξ ρ u (T - w))
@@ -675,10 +675,11 @@ theorem hestonTransform_terminal (r κ θ ξ ρ u T x v : ℝ) (hξ : ξ ≠ 0) 
 
 /-! ### The gated residue (stated, not proved)
 
-`E[e^{u·log S_T}] = Φ(0, x₀, v₀)` — the E-level half of lesson 0022's Gap 3 — needs
-the Itô drift of `exp-affine-of-(logS, V)` along a Heston solution: a 2D
-correlated Itô formula on a process that does not exist at this pin (item 18,
-findings 1–4). The theorem below isolates exactly that content as `hGate` — the
+`E[e^{u·log S_T}] = Φ(0, x₀, v₀)` — the E-level half of the affine expectation
+identity — needs the Itô drift of `exp-affine-of-(logS, V)` along a Heston
+solution: a 2D correlated Itô formula on a process that does not exist at this
+pin (no path-continuous modification is constructible here). The theorem below
+isolates exactly that content as `hGate` — the
 profile's expectation invariance along the candidate solution, the statement the
 Itô drift cancellation would produce — and proves the headline from it. The PDE
 half (`hestonTransform_pde` + terminal) is unconditional; `hGate` is the honest

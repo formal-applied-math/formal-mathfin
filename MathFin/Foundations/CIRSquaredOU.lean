@@ -26,11 +26,12 @@ Honest scope, recorded as content: existence is landed at the level the current
 substrate supports — explicit per-`t` Gaussian random variables with exact laws and
 moments (`ouProcess_hasLaw`, `ouProcess_integral`, `ouProcess_integral_sq`), not
 path-level processes. The bounded-coefficient Itô-drift engines do not apply to this
-construction for four independent reasons: the OU drift `−(k/2)·X_u` has linear
-growth (unbounded, so outside every `|β| ≤ Db` hypothesis); the deterministic-drift
+construction for four independent reasons: (1) the OU drift `−(k/2)·X_u` has linear
+growth (unbounded, so outside every `|β| ≤ Db` hypothesis); (2) the deterministic-drift
 decomposition's residual is mean-reverting rather than a martingale, so no
-`hMeq`-pinning can hold; the exponential integrand is not globally bounded; and no
-path-continuous modification of the `L²` Itô integral is constructed in the library.
+`hMeq`-pinning can hold; (3) the exponential integrand is not globally bounded; and
+(4) no path-continuous modification of the `L²` Itô integral is constructed in the
+library.
 The E-level headline needs only that `B₁`, `B₂` are each pre-Brownian — independence
 of the pair is *not* used (expectations add regardless); the full law of `V` (via the
 Lévy characterization of the normalized square root) would need it and is future work.

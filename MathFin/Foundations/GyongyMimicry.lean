@@ -956,7 +956,7 @@ coefficient's σ(X_t)-strong-measurability is unconditional), so the statement c
 Itô-process hypotheses: it is available at any measurability level of the underlying data,
 in particular for the constructed process of `marginal_flow_weak_equation_constructed`.
 
-Range-side bound note (the memo's optional clause): the condExp a.e. bound
+Range-side bound note (an optional strengthening, omitted): the condExp a.e. bound
 `|â (X_t ω)| ≤ B` a.e. is *not* included — the honest free form is a.e. only (the
 factorization is pointwise but `|μ[g | m]| ≤ B` holds a.e.), and Layer 2 hypothesizes global
 bounds on the coefficient functions as data instead. OMITTED, marked here. -/
@@ -973,7 +973,7 @@ of `GyongyMimicry.exists_driftCoeff_fn` for `b²_t = 𝔼[δ_t² | σ(X_t)]`:
 `∃ b̂² : ℝ → ℝ`, `Measurable b̂²` and `diffCoeffSq 𝔼 X δ t ω = b̂² (X_t ω)` pointwise —
 the `(t, ·)`-section of Thm 9.6's `b²(t, x) = 𝔼[δ_t² | X_t = x]`.
 
-Range-side nonnegativity note (the memo's optional clause): `0 ≤ b̂² x` on the range holds
+Range-side nonnegativity note (an optional strengthening, omitted): `0 ≤ b̂² x` on the range holds
 only a.e. via `condExp` nonnegativity, and is *not* included. OMITTED, marked here. -/
 theorem exists_diffCoeffSq_fn
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
@@ -1190,13 +1190,14 @@ private theorem hitoid_constructed_fn_Ioc
 /-! ### Layer 2 — gated constructed-process mimicry (the Thm 9.6 headline)
 
 The mimicking process `Y` is carried as **data** on its own probability space (`ν`), *not*
-constructed (weak existence for merely-measurable coefficients is the `:203–205` gate);
+constructed (weak existence for merely-measurable coefficients is precisely what the
+gate hypotheses defer);
 the Y-side dynamics enter as the integrated forward identity `hyflow` (the expectation
-characterization — lesson 0038: "an expectation characterization suffices for the mimicry
-conclusion, which is distributional"). The analytic core — uniqueness of measure-flow
+characterization — an expectation characterization suffices for the mimicry conclusion,
+which is distributional). The analytic core — uniqueness of measure-flow
 solutions of the deterministic-coefficient weak forward equation — is carried as the
 explicit hypothesis `hgate` (the `hestonTransform_expectation_gated` house pattern:
-the named gate isolates exactly what is not provable at this pin, memo §1c).
+the named gate isolates exactly what is not provable at this pin).
 
 The assembly: after Layer 1 the forward equation's right-hand side depends on the process
 only through its current one-time marginal, so the law flows `s ↦ ν.map (Y s)` and
@@ -1207,7 +1208,7 @@ set_option linter.unusedVariables false in
 /-- **Layer 2 headline — Thm 9.6's one-time-marginal mimicry modulo
 the named flow-uniqueness gate.** Given
 
-* (i) the constructed `X` (the `:1078` data) with Layer-1 coefficient functions
+* (i) the constructed `X` of the Layer-1 weak forward equation with coefficient functions
   `afn = â`, `bfn = b̂²` (Borel, representing the Gyöngy coefficients pointwise);
 * (ii) `hyflow` — the Y-side integrated forward identity for the test class: for every
   `C²`-bounded-derivative test function (with the third-derivative data the X-side
@@ -1225,7 +1226,7 @@ conclusion modulo the named gate.
 
 Statement strength: the gate's conclusion is *measure-level* (`ρ s = η s`), so of Thm 9.6's
 test class only the continuity `h2 : ContDiff ℝ 2 f` (through the measurability of `f` in
-the `integral_map` transports) is consumed — the mimicry holds for every `C¹`-admissible
+the `integral_map` transports) is consumed — the mimicry holds for every `C²`-admissible
 test, not just the third-differentiable class the X-side identities pay for. -/
 theorem gyongy_mimicry_gated
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
