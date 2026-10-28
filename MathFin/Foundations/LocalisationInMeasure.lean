@@ -22,9 +22,15 @@ on all of `Ω`. This file collects what that needs, without stopping times.
   Mathlib's `tendstoInMeasure_ae_unique` on an event.
 * **Continuous paths stay bounded** (`tendsto_measure_compl_abs_le`): the events "the path stays
   in `[−N, N]` up to `T`" exhaust `Ω` in probability.
-* **Continuous paths that agree at each time agree as paths** (`ae_forall_eq_of_continuousOn`),
-  on `[0, T]` and on an event: the analogue, for a closed interval, of Degenne's
-  `indistinguishable_of_modification_on`, which is stated on an open set.
+* **Continuous modifications are indistinguishable** (`ae_forall_eq_of_continuousOn`) on
+  `[0, T]`: the analogue, for a closed interval, of Degenne's
+  `indistinguishable_of_modification_on`, which is stated on an open set. On events that shrink
+  with time the paths agree up to a random time (`ae_forall_eq_of_continuousOn_of_antitone`), and
+  two processes with continuous paths that are, at each time, limits in measure of the same
+  sequence are indistinguishable (`ae_forall_eq_of_tendstoInMeasure`).
+* **Reading a process at a random level** (`measurableSet_forall_abs_le`,
+  `measurable_apply_countable`): for continuous paths "bounded by `R` on `[0, T]`" is an event, and
+  `ω ↦ f (n ω) ω` is measurable for a measurable `n` with countably many values.
 -/
 
 @[expose] public section
@@ -114,18 +120,81 @@ theorem exists_nat_abs_le_Icc {T : ℝ≥0} {x : ℝ≥0 → ℝ} (hx : Continuo
   obtain ⟨N, hN⟩ := exists_nat_ge R
   exact ⟨N, fun t ht ↦ (hR t ht).trans hN⟩
 
-/-- **Two processes with continuous paths that agree at each time agree as paths.** If almost
-every path of `Y` and of `Y'` is continuous on `[0, T]`, and at each `t ∈ [0, T]` they agree almost
-everywhere on an event `A`, then almost everywhere on `A` they agree at every `t ∈ [0, T]`: on a
-countable dense set of times, and so everywhere by continuity. -/
-theorem ae_forall_eq_of_continuousOn {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
-    {T : ℝ≥0} {Y Y' : ℝ≥0 → Ω → ℝ} (hY : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ Y t ω) (Icc 0 T))
-    (hY' : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ Y' t ω) (Icc 0 T)) {A : Set Ω}
-    (h : ∀ t ∈ Icc 0 T, ∀ᵐ ω ∂μ, ω ∈ A → Y t ω = Y' t ω) :
-    ∀ᵐ ω ∂μ, ω ∈ A → ∀ t ∈ Icc 0 T, Y t ω = Y' t ω := by
+/-- **Two processes with continuous paths that agree at each time agree as paths, up to a random
+time.** If almost every path of `Y` and of `Y'` is continuous on `[0, T]`, the event `A t` shrinks
+as `t` grows, and at each `t ∈ [0, T]` the processes agree almost everywhere on `A t`, then almost
+everywhere they agree at every `t ∈ [0, T]` with `ω ∈ A t`: at `0` and on a countable dense set of
+times, and so at `t`, approached from the left, by continuity. The events need not be
+measurable. -/
+theorem ae_forall_eq_of_continuousOn_of_antitone {Ω E : Type*} [MeasurableSpace Ω]
+    [TopologicalSpace E] [T2Space E] {μ : Measure Ω} {T : ℝ≥0} {Y Y' : ℝ≥0 → Ω → E}
+    (hY : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ Y t ω) (Icc 0 T))
+    (hY' : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ Y' t ω) (Icc 0 T)) {A : ℝ≥0 → Set Ω} (hA : Antitone A)
+    (h : ∀ t ∈ Icc 0 T, ∀ᵐ ω ∂μ, ω ∈ A t → Y t ω = Y' t ω) :
+    ∀ᵐ ω ∂μ, ∀ t ∈ Icc 0 T, ω ∈ A t → Y t ω = Y' t ω := by
   obtain ⟨D, hDI, hDc, hDd⟩ := exists_countable_dense_Icc T
-  filter_upwards [hY, hY', (ae_ball_iff hDc).2 fun t ht ↦ h t (hDI ht)] with ω h1 h2 h3 hω
-  exact EqOn.of_subset_closure (fun t ht ↦ h3 t ht hω) h1 h2 hDI hDd
+  filter_upwards [hY, hY', (ae_ball_iff hDc).2 fun t ht ↦ h t (hDI ht),
+    h 0 (left_mem_Icc.2 zero_le)] with ω h1 h2 hD h0 t ht hAt
+  rcases eq_zero_or_pos t with rfl | htpos
+  · exact h0 hAt
+  have hsub : Icc 0 t ⊆ Icc 0 T := Icc_subset_Icc_right ht.2
+  exact EqOn.of_subset_closure (s := Ioo 0 t ∩ D) (fun s hs ↦ hD s hs.2 (hA hs.1.2.le hAt))
+    (h1.mono hsub) (h2.mono hsub) (fun s hs ↦ Ioo_subset_Icc_self hs.1)
+    ((closure_Ioo htpos.ne).symm.subset.trans (closure_minimal (fun s hs ↦
+      isOpen_Ioo.inter_closure ⟨hs, hDd ⟨zero_le, hs.2.le.trans ht.2⟩⟩) isClosed_closure))
+    (right_mem_Icc.2 zero_le)
+
+/-- **Two modifications with continuous paths are indistinguishable on `[0, T]`.** If almost every
+path of `Y` and of `Y'` is continuous on `[0, T]` and `Y t = Y' t` almost everywhere at each
+`t ∈ [0, T]`, then almost everywhere `Y t = Y' t` at every `t ∈ [0, T]`. -/
+theorem ae_forall_eq_of_continuousOn {Ω E : Type*} [MeasurableSpace Ω] [TopologicalSpace E]
+    [T2Space E] {μ : Measure Ω} {T : ℝ≥0} {Y Y' : ℝ≥0 → Ω → E}
+    (hY : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ Y t ω) (Icc 0 T))
+    (hY' : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ Y' t ω) (Icc 0 T))
+    (h : ∀ t ∈ Icc 0 T, Y t =ᵐ[μ] Y' t) :
+    ∀ᵐ ω ∂μ, ∀ t ∈ Icc 0 T, Y t ω = Y' t ω :=
+  (ae_forall_eq_of_continuousOn_of_antitone (A := fun _ ↦ univ) hY hY' antitone_const
+    fun t ht ↦ (h t ht).mono fun _ h _ ↦ h).mono fun ω h t ht ↦ h t ht (mem_univ ω)
+
+/-- **Two processes with continuous paths that are, at each time, limits in measure of the same
+sequence are indistinguishable** on `[0, T]`. -/
+theorem ae_forall_eq_of_tendstoInMeasure {Ω E : Type*} [MeasurableSpace Ω] [EMetricSpace E]
+    {μ : Measure Ω} {T : ℝ≥0} {Y Y' : ℝ≥0 → Ω → E}
+    (hY : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ Y t ω) (Icc 0 T))
+    (hY' : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ Y' t ω) (Icc 0 T)) {g : ℝ≥0 → ℕ → Ω → E}
+    (hg : ∀ t ∈ Icc 0 T, TendstoInMeasure μ (g t) atTop (Y t))
+    (hg' : ∀ t ∈ Icc 0 T, TendstoInMeasure μ (g t) atTop (Y' t)) :
+    ∀ᵐ ω ∂μ, ∀ t ∈ Icc 0 T, Y t ω = Y' t ω :=
+  ae_forall_eq_of_continuousOn hY hY' fun t ht ↦ tendstoInMeasure_ae_unique (hg t ht) (hg' t ht)
+
+/-- "The path stays in `[−R, R]` on a countable set of times" is an event. -/
+theorem measurableSet_forall_abs_le_of_countable {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {D : Set ℝ≥0} (hD : D.Countable) {X : ℝ≥0 → Ω → ℝ} (hXm : ∀ t ∈ D, Measurable (X t))
+    (R : ℝ) : MeasurableSet {ω | ∀ t ∈ D, |X t ω| ≤ R} := by
+  simp only [ofPred_forall]
+  exact .biInter hD fun t ht ↦
+    measurableSet_le (continuous_abs.measurable.comp (hXm t ht)) measurable_const
+
+/-- For a process with continuous paths, "the path stays in `[−R, R]` on `[0, T]`" is an event:
+it is the event "bounded by `R` on a countable dense set of times" (`abs_le_of_dense`). -/
+theorem measurableSet_forall_abs_le {Ω : Type*} {mΩ : MeasurableSpace Ω} {T : ℝ≥0}
+    {X : ℝ≥0 → Ω → ℝ} (hXm : ∀ t ∈ Icc 0 T, Measurable (X t))
+    (hXc : ∀ ω, ContinuousOn (fun t ↦ X t ω) (Icc 0 T)) (R : ℝ) :
+    MeasurableSet {ω | ∀ t ∈ Icc 0 T, |X t ω| ≤ R} := by
+  obtain ⟨D, hDI, hDc, hDd⟩ := exists_countable_dense_Icc T
+  refine (measurableSet_forall_abs_le_of_countable hDc (fun t ht ↦ hXm t (hDI ht)) R).congr ?_
+  ext ω
+  simp only [mem_ofPred_eq]
+  exact ⟨fun h t ht ↦ abs_le_of_dense hDI hDd (hXc ω) h ht, fun h t ht ↦ h t (hDI ht)⟩
+
+/-- **A family read at a random index is measurable**: for a countable index, `ω ↦ f (n ω) ω` is
+measurable when `n` and each `f i` are. It is the first step of Mathlib's `Measurable.find`. -/
+theorem measurable_apply_countable {Ω ι β : Type*} {mΩ : MeasurableSpace Ω} [MeasurableSpace ι]
+    [Countable ι] [MeasurableSingletonClass ι] [MeasurableSpace β] {f : ι → Ω → β}
+    (hf : ∀ i, Measurable (f i)) {n : Ω → ι} (hn : Measurable n) :
+    Measurable fun ω ↦ f (n ω) ω :=
+  (measurable_from_prod_countable_left (f := fun p : Ω × ι ↦ f p.2 p.1) hf).comp
+    (measurable_id.prodMk hn)
 
 /-- **A process with continuous paths stays in `[−N, N]` up to `T` with probability tending to
 `1`.** The events are not assumed measurable. Their complements are covered by the
@@ -137,10 +206,8 @@ theorem tendsto_measure_compl_abs_le {Ω : Type*} [MeasurableSpace Ω] {μ : Mea
     Tendsto (fun N : ℕ ↦ μ {ω | ∀ t ∈ Icc 0 T, |X t ω| ≤ N}ᶜ) atTop (𝓝 0) := by
   obtain ⟨D, hDI, hDc, hDd⟩ := exists_countable_dense_Icc T
   set G : ℕ → Set Ω := fun N ↦ {ω | ∀ t ∈ D, |X t ω| ≤ N}
-  have hGm (N : ℕ) : MeasurableSet (G N) := by
-    simp only [G, ofPred_forall]
-    exact MeasurableSet.biInter hDc fun t _ ↦
-      measurableSet_le (continuous_abs.measurable.comp (hXm t)) measurable_const
+  have hGm (N : ℕ) : MeasurableSet (G N) :=
+    measurableSet_forall_abs_le_of_countable hDc (fun t _ ↦ hXm t) N
   have hGlim := tendsto_measure_iInter_atTop (μ := μ) (s := fun N ↦ (G N)ᶜ)
     (fun N ↦ (hGm N).compl.nullMeasurableSet)
     (fun N M hNM ↦ compl_subset_compl.2 fun ω hω t ht ↦ (hω t ht).trans (Nat.cast_le.2 hNM))
@@ -162,6 +229,15 @@ theorem tendsto_measure_compl_abs_le {Ω : Type*} [MeasurableSpace Ω] {μ : Mea
         · exact Or.inl hc
     _ ≤ μ {ω | ¬ContinuousOn (fun t ↦ X t ω) (Icc 0 T)} + μ (G N)ᶜ := measure_union_le _ _
     _ = μ (G N)ᶜ := by rw [hnull, zero_add]
+
+/-- **An adapted process with continuous paths stays in `[−N, N]` up to `T` with probability
+tending to `1`** (`tendsto_measure_compl_abs_le`). -/
+theorem tendsto_measure_compl_abs_le_of_stronglyAdapted {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ≥0 mΩ} {T : ℝ≥0} {X : ℝ≥0 → Ω → ℝ}
+    (hX : StronglyAdapted 𝓕 X) (hXc : ∀ ω, Continuous fun t ↦ X t ω) :
+    Tendsto (fun N : ℕ ↦ μ {ω | ∀ t ∈ Icc 0 T, |X t ω| ≤ N}ᶜ) atTop (𝓝 0) :=
+  tendsto_measure_compl_abs_le (fun t ↦ ((hX t).mono (𝓕.le t)).measurable)
+    (.of_forall fun ω ↦ (hXc ω).continuousOn)
 
 end LocalisationInMeasure
 end MathFin

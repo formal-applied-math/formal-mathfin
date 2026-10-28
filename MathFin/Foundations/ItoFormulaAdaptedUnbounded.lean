@@ -63,7 +63,7 @@ theorem ae_localItoProcess_eq :
         = adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas (clip_adapted hadap N)
             (clip_continuous hcont N) (abs_clip_le N σ)) x₀ (clip N b) s ω := by
   filter_upwards [ae_localItoIntegral_eq hB T hBmeas hBcont hadap hcont] with ω hω N hσ hb s hs
-  rw [localItoProcess, adaptedItoProcess, hω N hσ s hs,
+  rw [localItoProcess, adaptedItoProcess, hω N s hs fun r hr ↦ hσ r ⟨hr.1, hr.2.trans hs.2⟩,
     driftPath_congr fun r hr ↦ (clip_eq_self (hb r ⟨zero_le, hr.2.trans hs.2⟩)).symm]
   rfl
 
@@ -97,14 +97,8 @@ theorem ito_formula_adapted_unbounded_le {t : ℝ≥0} (ht : t ≤ T) :
             + f_x s (localItoProcess (μ := μ) T hBmeas hadap hcont x₀ b s ω) * b s ω
             + 1 / 2 * (f_xx s (localItoProcess (μ := μ) T hBmeas hadap hcont x₀ b s ω)
               * σ s ω ^ 2)) ∂timeMeasure := by
-  have hm {c : ℝ≥0 → Ω → ℝ}
-      (hc : ∀ s, StronglyMeasurable[(natFiltration hBmeas s : MeasurableSpace Ω)] (c s))
-      (s : ℝ≥0) : Measurable (c s) :=
-    ((hc s).mono ((natFiltration hBmeas).le s)).measurable
-  have hAσ := tendsto_measure_compl_abs_le (μ := μ) (T := T) (hm hadap)
-    (Eventually.of_forall fun ω ↦ (hcont ω).continuousOn)
-  have hAb := tendsto_measure_compl_abs_le (μ := μ) (T := T) (hm hb_adap)
-    (Eventually.of_forall fun ω ↦ (hb_cont ω).continuousOn)
+  have hAσ := tendsto_measure_compl_abs_le_of_stronglyAdapted (μ := μ) (T := T) hadap hcont
+  have hAb := tendsto_measure_compl_abs_le_of_stronglyAdapted (μ := μ) (T := T) hb_adap hb_cont
   refine tendstoInMeasure_of_ae_eqOn
     (A := fun N : ℕ ↦ {ω | ∀ s ∈ Icc 0 T, |σ s ω| ≤ N} ∩ {ω | ∀ s ∈ Icc 0 T, |b s ω| ≤ N})
     (tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds (by simpa using hAσ.add hAb)
@@ -119,7 +113,8 @@ theorem ito_formula_adapted_unbounded_le {t : ℝ≥0} (ht : t ≤ T) :
     have hk' := Finset.mem_range.1 hk
     have h1 : unifPart t n k ∈ Icc 0 T := ⟨zero_le, (unifPart_le_T hk'.le).trans ht⟩
     have h2 : unifPart t n (k + 1) ∈ Icc 0 T := ⟨zero_le, (unifPart_le_T hk').trans ht⟩
-    rw [hX N hω.1 hω.2 _ h1, hM N hω.1 _ h1, hM N hω.1 _ h2]
+    rw [hX N hω.1 hω.2 _ h1, hM N _ h1 fun r hr ↦ hω.1 r ⟨hr.1, hr.2.trans h1.2⟩,
+      hM N _ h2 fun r hr ↦ hω.1 r ⟨hr.1, hr.2.trans h2.2⟩]
     rfl
   · filter_upwards [ae_localItoProcess_eq hB T hBmeas hBcont hadap hcont x₀] with ω hX hω
     rw [hX N hω.1 hω.2 t ⟨zero_le, ht⟩]

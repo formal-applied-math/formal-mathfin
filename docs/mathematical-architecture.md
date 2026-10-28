@@ -47,7 +47,8 @@ stochastic integral make functionals of `X` computable.
   `SummitC.fTrunc` that `ItoFormulaUnrestricted` built for functions of Brownian motion. The bounds
   on `σ` and `b` go the same way: for continuous adapted `σ`, `∫ σ dB` is the limit in probability
   of its Riemann sums (`ItoIntegralLocalised.localItoIntegral`, glued from the integrals of `σ`
-  clipped to `[−N, N]`, no stopping times), and the formula holds along `x₀ + ∫ b ds + ∫ σ dB`
+  clipped to `[−N, N]`, no stopping times; adapted, and independent of the horizon `T` up to
+  indistinguishability on `[0, T]`), and the formula holds along `x₀ + ∫ b ds + ∫ σ dB`
   (`ItoFormulaAdapted.ito_formula_adapted_unbounded_le`). The identity of processes is the
   next rung.
 

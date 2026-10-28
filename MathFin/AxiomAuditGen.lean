@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (751 MathFin constants, 29 upstream). Citations
+  corpus (753 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -414,6 +414,14 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.ItoIntegralLocalised.ae_localItoIntegral_eq_itoContinuousMod' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoIntegralLocalised.ae_localItoIntegral_eq_itoContinuousMod
+
+/-- info: 'MathFin.ItoIntegralLocalised.ae_localItoIntegral_eq_of_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralLocalised.ae_localItoIntegral_eq_of_le
+
+/-- info: 'MathFin.ItoIntegralLocalised.stronglyAdapted_localItoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralLocalised.stronglyAdapted_localItoIntegral
 
 /-- info: 'MathFin.ItoIntegralLocalised.tendstoInMeasure_riemannσ_localItoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

@@ -4325,23 +4325,23 @@
     "sc-ito-formula-adapted-c2-every-time": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-28",
-      "elapsed_s": 4.6,
-      "input_hash": "70c7bdcb6f2b7d0ba238e13eece44f6a0f24c74ce6154a9e53f2ec47463dac90",
-      "verified_at_commit": "0443417"
+      "elapsed_s": 55.3,
+      "input_hash": "1eacc1e6a98fd6bbafb8554096b2d4a96bb64c2b0975fdf76fa79f7302617b2d",
+      "verified_at_commit": "da38564"
     },
     "sc-ito-formula-adapted-time-dependent": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-28",
-      "elapsed_s": 103.7,
-      "input_hash": "0199a306a7aa1ad2d4058be5dd34348a71f35c715ae8778c9cb15008f4a04e22",
-      "verified_at_commit": "0443417"
+      "elapsed_s": 33.9,
+      "input_hash": "7f984f1a413970dee5ae7ed0177d7e45e0b7831b6af056373ac5e5f94a98e55e",
+      "verified_at_commit": "da38564"
     },
     "sc-ito-formula-adapted-unbounded-coefficients": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-28",
-      "elapsed_s": 71.3,
-      "input_hash": "6c8830a8765032da4d5230579f990dae957d991e89f19dc3101b4c35538860d3",
-      "verified_at_commit": "0443417"
+      "elapsed_s": 59.8,
+      "input_hash": "e36f7bf04d4e81d745bc8ce1330006d89fa0b7a1b503778e1bc165072720a898",
+      "verified_at_commit": "da38564"
     },
     "sc-ito-formula-gbm": {
       "benchmark_file": "stochastic_calculus.json",
@@ -4458,9 +4458,9 @@
     "sc-ito-integral-continuous-adapted-unbounded": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-28",
-      "elapsed_s": 38.1,
-      "input_hash": "0351e8be9384b2dd23fc769f6d19bda178f1fec179f05740951dd5bf9c8fb2cc",
-      "verified_at_commit": "0443417"
+      "elapsed_s": 50.0,
+      "input_hash": "5ac2c832947799e8156c0b17ca5d35d5f16a3a58fce6b5e59262c39b6abcf243",
+      "verified_at_commit": "da38564"
     },
     "sc-ito-is-stochastic-integral": {
       "benchmark_file": "stochastic_calculus.json",
