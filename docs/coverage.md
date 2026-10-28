@@ -26,6 +26,19 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The unbounded Itô integral, adapted (2026-10-28)
+
+No entries added; corpus stays at 662. `sc-ito-integral-continuous-adapted-unbounded` gains two
+theorems. `localItoIntegral t` now reads, on each path, the integral of `σ` clipped at the least
+integer bounding the path on `[0, t]` rather than on `[0, T]`, so it is adapted to the natural
+filtration of `B` (`stronglyAdapted_localItoIntegral`): the level is `𝓕_t`-measurable, its
+sublevel sets being decided on a countable dense set of times, and each clipped integral is
+predictable. Built at horizons `T ≤ T′` it is almost surely the same path on `[0, T]`
+(`ae_localItoIntegral_eq_of_le`). The gluing needs the clipped integrals to agree up to a random
+time, `LocalisationInMeasure.ae_forall_eq_of_continuousOn_of_antitone`. The adaptedness holds at
+every time and on every path, for the uncompleted filtration. Still not covered: the
+local-martingale property, the adaptedness of `localItoProcess`.
+
 ### Itô's formula with unbounded coefficients (2026-10-28)
 
 Two entries added, `sc-ito-integral-continuous-adapted-unbounded` and
@@ -37,7 +50,7 @@ left-point Riemann sums `∑ σ(tₖ)(B_{tₖ₊₁} − B_{tₖ})` converge to 
 is continuous on `[0, T]`, and for bounded `σ` it is the `L²` integral. It is glued from the
 integrals `M^N` of `σ` clipped to `[−N, N]` (`clampM`), which agree where the clipping is inactive
 because limits in measure are local; every path of `σ` is bounded on `[0, T]`, so every path is
-read from some `M^N`. No stopping times are used. Along `X = x₀ + ∫ b ds + ∫ σ dB` with `σ`, `b`
+read from some `M^N` (since revised to read, at each `t`, the level on `[0, t]`; see above). No stopping times are used. Along `X = x₀ + ∫ b ds + ∫ σ dB` with `σ`, `b`
 continuous adapted and unbounded, Itô's formula for `f(t, x)` with jointly continuous `f_t`, `f_x`,
 `f_xx` holds at each `t ≤ T` in the Riemann-sum reading (`ito_formula_adapted_unbounded_le`; the
 `C²` case `ito_formula_adapted_unbounded_C2_le`), from the bounded formula on the events where `σ`
@@ -45,7 +58,8 @@ and `b` stay in `[−N, N]`.
 
 Safe wording: "the Itô integral of a continuous adapted integrand, as the limit in probability of
 its Riemann sums, and Itô's formula along an Itô process with continuous adapted coefficients, at
-each fixed time". Not covered: the local-martingale property of the integral, predictable
+each fixed time". Not covered: the local-martingale property of the integral (adaptedness: see
+"The unbounded Itô integral, adapted"), predictable
 integrands with only almost surely finite energy, a random start, the formula as an identity of
 processes, several driving Brownian motions.
 

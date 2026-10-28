@@ -280,12 +280,10 @@ theorem ae_itoContinuousMod_eq_of_le {t : ℝ≥0} (ht : t ≤ T) :
       (Eventually.of_forall fun ω ↦ ?_)).trans
       (itoContinuousMod_modification hB T hBmeas hBcont φT (hs.trans ht)).symm
     rw [hLp]
-  filter_upwards [ae_forall_eq_of_continuousOn (A := univ)
-      (itoContinuousMod_continuousOn hB t hBmeas hBcont φt)
-      ((itoContinuousMod_continuousOn hB T hBmeas hBcont φT).mono fun ω h ↦
-        h.mono (Icc_subset_Icc_right ht))
-      fun s hs ↦ (hmod s hs.2).mono fun ω h _ ↦ h] with ω hω
-  exact hω (mem_univ ω)
+  exact ae_forall_eq_of_continuousOn (itoContinuousMod_continuousOn hB t hBmeas hBcont φt)
+    ((itoContinuousMod_continuousOn hB T hBmeas hBcont φT).mono fun ω h ↦
+      h.mono (Icc_subset_Icc_right ht))
+    fun s hs ↦ hmod s hs.2
 
 variable {T hBmeas x₀} in
 /-- Two Itô processes with the same start and drift whose martingale parts agree on a set of

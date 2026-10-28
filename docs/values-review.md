@@ -130,6 +130,62 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-28 — corpus 662, modules 628 — the unbounded Itô integral, adapted (#346, item 1)
+
+Scope: the first item of #346. No entries were added. `sc-ito-integral-continuous-adapted-unbounded` gains two theorems: adaptedness and horizon independence. `localItoIntegral t` now reads, on each path, the clipped integral at the least integer bounding the path on `[0, t]`, not on `[0, T]`. Three read-only reviewers read the diff, split by lens:
+- prose against statement, first principles and concept clarity (5, 7);
+- mathematics, architecture and elegance (1, 4, 8);
+- coherence, slop and idiom (2, 3, 6).
+
+None found a wrong statement, a dead hypothesis or a circularity. Every finding acted on was confirmed against the code.
+
+### Upgrades executed
+
+- **Indistinguishability up to a random time.** `ae_forall_eq_of_continuousOn_of_antitone`: two processes with continuous paths that agree at each time on a shrinking event `A t` agree, almost surely, at every `t` with `ω ∈ A t`. The proof approaches `t` from the left through `Ioo 0 t ∩ D`. It makes `ae_clipItoMod_eq` time-local, which is what the adapted gluing needs.
+- **The modification lemma takes Degenne's shape.** `ae_forall_eq_of_continuousOn` took an event `A`, but its two remaining callers passed `A := univ` and unwrapped `mem_univ`. It now takes `Y t =ᵐ[μ] Y' t`, as BrownianMotion's `indistinguishable_of_modification_on` does, and is a corollary of the antitone lemma. `ae_itoContinuousMod_eq_of_le` is now a single term. `ae_forall_eq_of_tendstoInMeasure` composes it with `tendstoInMeasure_ae_unique` and serves both horizon independence and the bounded case. All three lemmas are stated for a general target (`T2Space`, or `EMetricSpace` for the last), not just `ℝ`.
+- **One measurability lemma.** `measurableSet_forall_abs_le_of_countable` is shared by `tendsto_measure_compl_abs_le` and the new `measurableSet_forall_abs_le`, which closes with `MeasurableSet.congr`.
+- **A countable index.** `measurable_apply_countable`, for `ω ↦ f (n ω) ω`, takes any countable index with measurable singletons, which is what its callee needs. It is the first step of Mathlib's `Measurable.find`.
+- **#346 item 4, done.** `tendsto_measure_compl_abs_le_of_stronglyAdapted` takes a `StronglyAdapted` process. It replaces the `hm` helper in `ito_formula_adapted_unbounded_le` and the inline copy in the Riemann-sum characterisation. Eight other copies of the boilerplate remain in older modules.
+- **Register.** `ae_localItoIntegral_eq` now indexes pairs as `(n, n + k)` instead of a `rcases … absurd` branch. The closure step is now a term.
+
+### The standing first pass: prose against statement
+
+- **Wrong index.** The module docstring said that on the event "σ stays in `[−N, N]`" the integrands `clip n σ` and `clip N σ` are the same. It is the event for `n`, up to `t`.
+- **A missing ingredient.** "The level at `t` reads `σ` only on `[0, t]`, so the integral is adapted" omitted the predictability of each `M^N`. The docstring now also says what the gluing buys. Reading the level on `[0, T]` gives the same process up to indistinguishability, but one not shown adapted. The adaptedness itself holds on every path, for the uncompleted filtration.
+- **A dropped hypothesis.** The localisation module's bullet called two limits in measure "the same path" without continuity, which would make it only a modification.
+- **Overstated scope.** The entry's scope said the antitone lemma gives agreement "at every time". It gives agreement at every time at which the event holds. The architecture doc said "the same on every horizon". The statement is: for `T ≤ T′`, indistinguishable on `[0, T]`.
+- **Junk values.** The description now says that past `T` the values are not the integral, though adaptedness holds at every time.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: the time-local `ae_clipItoMod_eq`, which is the mathematical content of the gluing. Next: the local-martingale property (backlog 1).
+- **Coherence.** Exemplar: `ae_forall_eq_of_continuousOn`, now Degenne-shaped. Next: upstream `measurable_apply_countable` as the first step of `Measurable.find`, and the closed-interval indistinguishability lemma (#315).
+- **Zero slop.** Exemplar: one countable-set measurability proof where there were two. Next:
+  - `ItoFormulaUnrestricted.indistinguishable_on_stochInterval` is the antitone lemma with `A t = {t ≤ σ}`, proved by hand on all of `ℝ≥0`;
+  - an all-time form of the antitone lemma would make it a corollary;
+  - `ae_eq_through_positive_time`, in the American-put stopping module, is its strict relative.
+- **Architectural ingenuity.** Exemplar: `LocalisationInMeasure` now carries the whole toolkit for gluing at a random level. Next: make `ae_localItoProcess_eq` time-local once stopping times consume it. Until then its callers would gain more threading than it saves.
+- **First principles.** Exemplar: the antitone lemma assumes no measurability of the events.
+- **Idiomatic register.** Next: Mathlib order for names (`continuous_clip`), carried over from the last review.
+- **Concept clarity.** Next: a horizon-free integral on `ℝ≥0`, glued across `T ∈ ℕ` by `ae_localItoIntegral_eq_of_le`, so that `T` leaves the public API.
+- **Beautiful math.** Exemplar: horizon independence proved by noting that both integrals are limits of the same Riemann sums.
+
+### Ranked backlog
+
+1. The local-martingale property. It needs four things:
+   - `τ_N = inf{t : |σ_t| ≥ N}` as a stopping time for the raw natural filtration. The open-set hitting-time lemma needs right-continuity, so prove it directly with `measurableSet_forall_abs_le` and compactness.
+   - The fact that σ stays in `[−N, N]` on `[0, s]` for `s ≤ τ_N`. This fails at `s = 0` when `|σ₀| > N`, so either take an `Ico` form of `ae_clipItoMod_eq` or prove the integral is `0` at time `0`.
+   - A repair on `augFiltration`, as `itoLocalMod` does, because Degenne's `IsLocalMartingale` needs every path càdlàg.
+   - Freezing past `T`.
+2. A horizon-free integral on `ℝ≥0`, and the adaptedness of `localItoProcess`.
+3. Predictability of `localItoIntegral`, since the level `t ↦ pathLevel t` is left-continuous.
+4. Rederive `indistinguishable_on_stochInterval` from an all-time antitone lemma.
+5. The rest of #346: predictable integrands; the one-variable stack as corollaries; the `unifPart` simp lemmas with #308; the eight remaining copies of the adapted-measurability boilerplate.
+
+### Evidence
+
+`lake build` is green through the daemon's startup build. `AxiomAuditGen` is regenerated (782 guards). `formalization.yaml` is fresh. The ledger re-verified the four entries whose inputs changed: 662 fresh, none stale or missing.
+
 ## 2026-10-28 — corpus 662, modules 628 — Itô's formula for adapted coefficients, localised (#309)
 
 Scope: the branch closing #309. Four entries came in, all `full`: the formula for every `C²` `f` at

@@ -57,8 +57,8 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   the term $`f_t(s, X_s)`$
   ([`ito_formula_adapted_td_local_le`](MathFin/Foundations/ItoFormulaAdaptedTD.lean)). The bounds
   on $`\sigma`$ and $`b`$ can be dropped: for continuous adapted $`\sigma`$ the integral
-  $`\int \sigma\,dB`$ is built by clipping $`\sigma`$ to $`[-N, N]`$ and is the limit in
-  probability of its Riemann sums
+  $`\int \sigma\,dB`$ is built by clipping $`\sigma`$ to $`[-N, N]`$, is adapted, and is the
+  limit in probability of its Riemann sums
   ([`localItoIntegral`](MathFin/Foundations/ItoIntegralLocalised.lean)), and the formula holds
   along $`x_0 + \int b\,ds + \int \sigma\,dB`$
   ([`ito_formula_adapted_unbounded_le`](MathFin/Foundations/ItoFormulaAdaptedUnbounded.lean)).
