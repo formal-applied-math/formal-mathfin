@@ -130,6 +130,73 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-28 — corpus 662, modules 628 — Itô's formula for adapted coefficients, localised (#309)
+
+Scope: the branch closing #309. Four entries came in, all `full`: the formula for every `C²` `f` at
+each fixed `t ≤ T`, for `f(t, x)`, the Itô integral of an unbounded continuous adapted integrand,
+and the formula along an Itô process with unbounded coefficients. Corpus 658 → 662. Three
+read-only reviewers read the diff against main, split by lens:
+- mathematics (lenses 1, 5, 8);
+- architecture and concept clarity (4, 7);
+- coherence, slop and idiom (2, 3, 6).
+
+Every finding acted on was confirmed against the code and adjudicated here. The mathematics
+reviewer found no dead hypotheses and no circularity.
+
+### Upgrades executed
+
+- **The `C²` formula is a corollary.** All three reviewers found the same slop. `ito_formula_adapted_local` re-derived, with its own cutoff (`exists_bddDeriv_eqOn_Icc` and a private copy of `abs_mul_le_of`), the space localisation that `ito_formula_adapted_td_local` already carries out. Its `_le` step was a line-for-line copy of the time-dependent one. `ito_formula_adapted_local_le` is now the `f_t = 0` case of `ito_formula_adapted_td_local_le`, as `ito_formula_adapted_unbounded_C2_le` already was. About 150 lines are gone, and so is `ItoFormulaAdaptedLocal`: its horizon lemmas and the bounded-`f'` identification moved into `ItoFormulaAdaptedTD`.
+- **The layering is right side up.** The construction of the integral (`ItoIntegralLocalised`) imported a formula module, and opened its namespace, only to get eight generic lemmas. Those lemmas now live in `Foundations/LocalisationInMeasure`, which imports only Mathlib:
+  - limits in measure are local, in both directions;
+  - continuous paths stay bounded with probability tending to `1`;
+  - continuous processes that agree at each time agree as paths.
+
+  The three convergence-in-measure lemmas are stated for any `EDist` or `EMetricSpace` target, not only `ℝ`. `ae_eq_of_tendstoInMeasure_of_eqOn` now uses Mathlib's `TendstoInMeasure.comp` directly instead of the `exists_seq_tendsto_ae_comp` wrapper.
+- **Upstream lemmas consumed.** `ae_localItoIntegral_eq_itoContinuousMod` used the local lemma with `fun _ _ _ ↦ rfl`, the same sequence on both sides, which is Mathlib's `tendstoInMeasure_ae_unique`. It now cites `tendstoInMeasure_ae_unique`. Three `.congr (fun _ ↦ EventuallyEq.rfl) h` calls are `TendstoInMeasure.congr_right`.
+- **One technique, one route.** `ae_itoContinuousMod_eq_of_le` applied Degenne's lemma on `[0, t)` and then handled the endpoint separately. It is now one call to `ae_forall_eq_of_continuousOn` on `[0, t]`, as the integral's own uniqueness proof already did.
+- **`pathLevel` is an `sInf`.** It no longer needs `classical` or a proof argument, and `abs_le_pathLevel` now needs continuity only on `[0, T]`.
+- **Register.** One `by exact` became a term, two `rw … at h; exact h.le` became `simpa`, and one `exact_mod_cast` became `Nat.cast_le.2`.
+
+### The standing first pass: prose against statement
+
+- **"Every `t ≤ T`" for a statement at each fixed `t`.** This appeared in the README, the architecture doc, and two entry names (now "…, at Each Fixed Time"); four descriptions now say "each". The same prose also read "every `t`" as the formula holding for all `t` at once, which it does not.
+- **An undisclosed limitation.** `localItoIntegral` reads, on each path, the clipping level of the whole path on `[0, T]`, so its value at `t` is not shown adapted. Before, the entry's description disclosed only the missing local-martingale property. The description, the scope and the module docstring now say so, and the definition's docstring says it is the integral on `[0, T]` only.
+- **A hypothesis that is not there.** The integral entry's scope listed `b` among the continuous adapted inputs; the integral has no `b`.
+- **Construction misdescribed.** The README said the integral is "built as the limit in probability" of its Riemann sums. It is built by clipping and is shown to be that limit.
+- **Smaller.** The architecture doc named theorems by module, not by namespace. The new module docstring called its path lemma Degenne's, though it is an analogue proved independently. The TD docstring dropped "continuous" from the hypothesis on `f'` and the restriction to `[0, T]`.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: the Itô integral of an unbounded continuous integrand with no stopping times, glued from the clipped integrals by locality of limits in measure. Next: an adapted gluing (below), which would make it a local martingale.
+- **Coherence.** Exemplar: `ae_forall_eq_of_continuousOn`, three lines on Mathlib's `EqOn.of_subset_closure` and `ae_ball_iff`. Next, upstream:
+  - to BrownianMotion: `indistinguishable_of_modification_on` for a separable set;
+  - to Mathlib: `ae_eq_of_tendstoInMeasure_of_eqOn`, the local form of `tendstoInMeasure_ae_unique`.
+- **Zero slop.** Exemplar: the `C²` formula as `f_t = 0`. Next: the same move for the one-variable stack on main. `ito_formula_adapted_against` and `ito_formula_of_tendsto` repeat the time-dependent pair with one term fewer, including the subsequence extraction and the integrability block.
+- **Architectural ingenuity.** Exemplar: `LocalisationInMeasure`, one neutral home for the event-wise localisation that three modules use. Next: a `tendsto_measure_compl_abs_le` for adapted processes with continuous paths. It would remove the `((hadap s).mono ((natFiltration hBmeas).le s)).measurable` boilerplate, which appears ten times in seven files.
+- **First principles.** Next: the bounds `hbt` and `hbx` of `ito_formula_adapted_td_against` are used only on `[0, T]`.
+- **Idiomatic register.** Next: Mathlib order for names (`continuous_clip`, not `clip_continuous`), in a library-wide pass.
+- **Concept clarity.** Exemplar: the module docstrings now say which reading of `∫ f'(X) dM` each theorem uses and where the two agree. Next: the measurability API for `localItoIntegral` and `localItoProcess`.
+- **Beautiful math.** Next: the formula as an identity of processes, for all `t` at once almost surely, from the continuity of both sides.
+
+### Ranked backlog
+
+1. Adapted localisation: clip at the level of the path on `[0, t]`, not on `[0, T]`. Then `localItoIntegral` is adapted and consistent across horizons, and the local-martingale property follows.
+2. Relax the integral's inputs to predictable integrands with almost surely continuous paths, so that `∫ f_x dM = ∫ f_x σ dB` becomes an almost-sure identity.
+3. The one-variable Itô stack as corollaries of the time-dependent one.
+4. Base-module tidies, batched because they re-verify most of the stochastic corpus (#308):
+   - move `continuous_clampM` next to `clampM`, and derive `measurable_clampM` from it;
+   - replace the inline copy in `GirsanovPredictableTheta`;
+   - add `@[simp]` lemmas `unifPart_zero` and `unifPart_self`; the first is proved by hand fourteen times in nine files.
+5. Upstream: the separable-set indistinguishability lemma to BrownianMotion, and the local uniqueness of limits in measure to Mathlib (#315).
+6. The formula as an identity of processes. A random start and several Brownian motions both wait on filtration generality.
+7. A bridge to `ItoFormulaUnrestricted`'s residual reading of the formula for functions of Brownian motion.
+
+Items 1–4 are filed as #346, which also points to #308 and #315.
+
+### Evidence
+
+`lake build` is green through the daemon's startup build (9,392 jobs), with `AxiomAudit` and `AxiomAuditGen` (780 guards) passing. The ledger re-verified every entry whose inputs changed: 662 fresh, none stale or missing. The python gates pass (62 passed, 1 skipped). `AxiomAuditGen` and `formalization.yaml` are regenerated.
+
 ## 2026-10-21 — corpus 657, modules 625 — the coherence pass: every module connected
 
 Scope: the whole library, read for coherence, mathematical and financial, after the #248–#284

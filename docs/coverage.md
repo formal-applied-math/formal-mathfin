@@ -71,7 +71,7 @@ an Itô process with bounded adapted continuous coefficients, at each fixed time
 integral as a limit in probability of Riemann sums". Not covered: unbounded coefficients, a random
 start, the formula as an identity of processes, several driving Brownian motions. Issue #309, part 3.
 
-### Itô's formula for every `C²` function and every time (2026-10-28)
+### Itô's formula for every `C²` function, at each fixed time (2026-10-28)
 
 One entry added, `sc-ito-formula-adapted-c2-every-time` (`full`). Corpus 658 → 659.
 
@@ -84,10 +84,10 @@ on the uniform partitions of `[0, t]` converge in probability to
 `[0, T]` converge in probability to the `L²` Itô integral of `f'(X)σ`
 (`tendstoInMeasure_riemannStieltjes_itoIntegral`), the stochastic integral of
 `sc-ito-formula-adapted`; both are limits in probability of the same sums.
-The proof localises in space (`f` composed with `SmoothTrunc.cut` on the event that the path stays
-in `[−N, N]`) and reaches `t < T` through the formula at horizon `t`, the two constructions being
-indistinguishable on `[0, t]` (`itoProcessCLM_consist`, BrownianMotion's
-`indistinguishable_of_modification_on`).
+The formula is the case `f_t = 0` of `ito_formula_adapted_td_local_le` (next section), which
+localises in space on the event that the path stays in `[−N, N]` and reaches `t < T` through the
+formula at horizon `t`, the two constructions being the same path on `[0, t]`
+(`itoProcessCLM_consist`, `LocalisationInMeasure.ae_forall_eq_of_continuousOn`).
 
 Safe wording: "Itô's formula for every `C²` function of an Itô process with bounded adapted
 continuous coefficients, at each fixed time, with the stochastic integral as a limit in

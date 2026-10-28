@@ -49,15 +49,16 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   $`f(X_T) - f(x_0) = \int_0^T f'(X_s)\sigma_s\,dB_s
   + \int_0^T \big(f'(X_s) b_s + \tfrac12 f''(X_s)\sigma_s^2\big)\,ds`$ almost surely
   ([`ito_formula_adapted`](MathFin/Foundations/ItoFormulaAdapted.lean)). For every $`f \in C^2`$,
-  with no bound on $`f'`$ or $`f''`$, and every $`t \le T`$, the left-point Riemann sums of $`f'(X)`$
+  with no bound on $`f'`$ or $`f''`$, and each fixed $`t \le T`$, the left-point Riemann sums of $`f'(X)`$
   against $`M = \int \sigma\,dB`$ converge in probability to
   $`f(X_t) - f(x_0) - \int_0^t \big(f'(X_s) b_s + \tfrac12 f''(X_s)\sigma_s^2\big)\,ds`$
-  ([`ito_formula_adapted_local_le`](MathFin/Foundations/ItoFormulaAdaptedLocal.lean)), and the
+  ([`ito_formula_adapted_local_le`](MathFin/Foundations/ItoFormulaAdaptedTD.lean)), and the
   same holds for $`f(t, x)`$ with jointly continuous $`f_t`$, $`f_x`$, $`f_{xx}`$, the drift gaining
   the term $`f_t(s, X_s)`$
   ([`ito_formula_adapted_td_local_le`](MathFin/Foundations/ItoFormulaAdaptedTD.lean)). The bounds
   on $`\sigma`$ and $`b`$ can be dropped: for continuous adapted $`\sigma`$ the integral
-  $`\int \sigma\,dB`$ is built as the limit in probability of its Riemann sums
+  $`\int \sigma\,dB`$ is built by clipping $`\sigma`$ to $`[-N, N]`$ and is the limit in
+  probability of its Riemann sums
   ([`localItoIntegral`](MathFin/Foundations/ItoIntegralLocalised.lean)), and the formula holds
   along $`x_0 + \int b\,ds + \int \sigma\,dB`$
   ([`ito_formula_adapted_unbounded_le`](MathFin/Foundations/ItoFormulaAdaptedUnbounded.lean)).

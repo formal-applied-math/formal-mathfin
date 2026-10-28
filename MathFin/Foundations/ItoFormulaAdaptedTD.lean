@@ -5,8 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoFormulaAdaptedLocal
+public import MathFin.Foundations.ItoFormulaAdapted
 public import MathFin.Foundations.ItoFormulaUnrestricted
+public import MathFin.Foundations.ItoIntegralCrossHorizon
+public import MathFin.Foundations.LocalisationInMeasure
 
 /-! # Itô's formula for `f(t, X_t)` along an Itô process with adapted coefficients
 
@@ -18,9 +20,13 @@ probability to
 
 `f(t, X_t) − f(0, x₀) − ∫₀ᵗ (f_t + f_x b + ½ f_xx σ²)(s, X_s) ds`
 
-(`ito_formula_adapted_td_local_le`). No bound on `f` or its derivatives is assumed.
-
-The route is the one of `ItoFormulaAdaptedLocal`, with one more term.
+(`ito_formula_adapted_td_local_le`). No bound on `f` or its derivatives is assumed, so
+`∫ f_x(·, X) dM` cannot be the `L²` Itô integral: it is the limit in probability of the sums, and
+the theorem says that the limit exists. A `C²` function `f(x)` is the case `f_t = 0`
+(`ito_formula_adapted_local_le`). When `f'` is continuous and bounded the same sums on `[0, T]`
+converge in probability to the `L²` Itô integral of `f'(X)·σ`, the integral of `ito_formula_adapted`
+(`tendstoInMeasure_riemannStieltjes_itoIntegral`): where both readings of `∫ f'(X) dM` are
+defined, they are limits in probability of the same sums.
 
 * **Along one path** (`ito_formula_td_of_tendsto`). The discrete formula
   `discrete_ito_formula_2d` adds the sum `∑ f_t Δt` to those of the time-independent case. Its
@@ -28,17 +34,24 @@ The route is the one of `ItoFormulaAdaptedLocal`, with one more term.
   (`abs_discreteTaylorRemainder2D_le_of_osc`), so the remainders vanish along a continuous path
   with bounded quadratic variation: uniform continuity on the compact `[0, T] × [−R, R]`
   (`tendsto_sum_discreteTaylorRemainder2D`). No third derivative is needed.
-* **Bounded partials** (`ito_formula_adapted_td_against`). The sums converge as before, the
-  weights `f_x(s, X_s)` and `f_xx(s, X_s)` being predictable as continuous functions of the time
-  and of the process (`comp_time_adaptedItoProcess_isStronglyPredictable`), and `∑ f_t Δt`
-  converges pathwise as a Riemann–Stieltjes sum against the drift path of the rate `1`.
-* **Localisation** (`ito_formula_adapted_td_local`). The double cutoff `SummitC.fTrunc`, which
-  `ItoFormulaUnrestricted` built for functions of Brownian motion, is `f` on `[0, T] × [−N, N]`
-  once its level exceeds `T` and `N`, and has bounded partials.
-* **Every `t ≤ T`** (`ito_formula_adapted_td_local_le`), from the formula at horizon `t`.
+* **Bounded partials** (`ito_formula_adapted_td_against`). The sums converge as in
+  `ito_formula_adapted_against`, the weights `f_x(s, X_s)` and `f_xx(s, X_s)` being predictable as
+  continuous functions of the time and of the process
+  (`comp_time_adaptedItoProcess_isStronglyPredictable`), and `∑ f_t Δt` converges pathwise as a
+  Riemann–Stieltjes sum against the drift path of the rate `1`.
+* **Localisation in space** (`ito_formula_adapted_td_local`). The double cutoff `SummitC.fTrunc`,
+  which `ItoFormulaUnrestricted` built for functions of Brownian motion, is `f` on
+  `[0, T] × [−N, N]` once its level exceeds `T` and `N`, and has bounded partials. On the event
+  that the path of `X` stays in `[−N, N]` up to `T` the Riemann sums of `f` and of the cutoff
+  coincide; the events exhaust `Ω` in probability (`tendsto_measure_compl_abs_le`), and
+  convergence in measure is local (`tendstoInMeasure_of_eqOn`).
+* **Each `t ≤ T`** (`ito_formula_adapted_td_local_le`), from the formula at horizon `t`. The
+  martingale parts built at horizons `t` and `T` are almost surely the same path on `[0, t]`
+  (`ae_itoContinuousMod_eq_of_le`): their `L²` integrals agree at each time
+  (`itoProcessCLM_consist`) and both continuous modifications are continuous on `[0, t]`.
 
 `ItoFormulaAdaptedUnbounded` removes the bounds on `σ` and `b`. Not here: the formula as an
-identity of processes.
+identity of processes (all `t` at once, almost surely).
 -/
 
 @[expose] public section
@@ -49,7 +62,7 @@ namespace ItoFormulaAdapted
 open MeasureTheory ProbabilityTheory Filter Topology Set
 open ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessGeneral ItoIntegralBrownian
   QuadraticVariationL2 ItoIntegralProcessContinuousModification AdaptedDrift AdaptedRiemannStieltjes
-  AdaptedQuadraticVariation ItoIntegralAgainstMartingale SummitC
+  AdaptedQuadraticVariation ItoIntegralAgainstMartingale SummitC LocalisationInMeasure
 open scoped NNReal ENNReal
 
 /-! ### Along one path -/
@@ -72,8 +85,8 @@ theorem abs_discreteTaylorRemainder2D_le_of_osc {f f_t f_x f_xx : ℝ → ℝ �
         + discreteTaylorRemainder (fun u ↦ f t₀ u) (fun u ↦ f_x t₀ u) (fun u ↦ f_xx t₀ u) x y := by
     unfold discreteTaylorRemainder2D discreteTaylorRemainder
     ring
-  have hd (s : ℝ) : HasDerivAt (fun r ↦ f r y - f_t t₀ x * r) (f_t s y - f_t t₀ x) s := by
-    exact ((hf_t s y).sub ((hasDerivAt_id s).const_mul (f_t t₀ x))).congr_deriv (by simp)
+  have hd (s : ℝ) : HasDerivAt (fun r ↦ f r y - f_t t₀ x * r) (f_t s y - f_t t₀ x) s :=
+    ((hf_t s y).sub ((hasDerivAt_id s).const_mul (f_t t₀ x))).congr_deriv (by simp)
   have h1 := (convex_uIcc t₀ t₁).norm_image_sub_le_of_norm_hasDerivWithin_le
     (fun s _ ↦ (hd s).hasDerivWithinAt) (fun s hs ↦ (Real.norm_eq_abs _).trans_le (hηt s hs))
     left_mem_uIcc right_mem_uIcc
@@ -138,16 +151,14 @@ theorem tendsto_sum_discreteTaylorRemainder2D (T : ℝ≥0) {f f_t f_x f_xx : �
             abs_of_nonneg (sub_nonneg.2 hs.1)]
           exact ⟨by linarith [hs.2, hmesh, min_le_left δt δx],
             (hosc k hk).trans_le (min_le_left _ _)⟩)
-      rw [Real.dist_eq] at h
-      exact h.le
+      simpa only [Real.dist_eq] using h.le
     · have h := hfx ((unifPart T (ν i) k : ℝ), u)
         ⟨(hmem hk.le).1, uIcc_subset_Icc (hmem hk.le).2 (hmem (Nat.succ_le_of_lt hk)).2 hu⟩ _
         (hmem hk.le) (by
           rw [Prod.dist_eq, max_lt_iff, Real.dist_eq, Real.dist_eq, sub_self, abs_zero]
           exact ⟨hδx, ((abs_sub_left_of_mem_uIcc hu).trans_lt (hosc k hk)).trans_le
             (min_le_right _ _)⟩)
-      rw [Real.dist_eq] at h
-      exact h.le
+      simpa only [Real.dist_eq] using h.le
   have hsum_t : ∑ k ∈ Finset.range (ν i),
       ((unifPart T (ν i) (k + 1) : ℝ) - unifPart T (ν i) k) ≤ T := by
     rw [Finset.sum_range_sub (fun k ↦ (unifPart T (ν i) k : ℝ))]
@@ -248,6 +259,43 @@ theorem comp_time_adaptedItoProcess_isStronglyPredictable {g : ℝ → ℝ → �
       fun _ _ ↦ NNReal.continuous_coe.continuousWithinAt
   exact hg.comp_stronglyMeasurable (StronglyMeasurable.prodMk ht
     (adaptedItoProcess_isStronglyPredictable hB T hBmeas hBcont φ hb_adap hb_cont hb_bdd x₀))
+
+/-! ### The horizon -/
+
+include hB hBcont in
+/-- **The martingale part does not depend on the horizon.** For `t ≤ T` the continuous
+modifications of `M = ∫ σ dB` built at horizons `t` and `T` are almost surely the same path on
+`[0, t]`: they are modifications of each other there (`itoProcessCLM_consist`), and both paths are
+continuous on `[0, t]` (`ae_forall_eq_of_continuousOn`). -/
+theorem ae_itoContinuousMod_eq_of_le {t : ℝ≥0} (ht : t ≤ T) :
+    ∀ᵐ ω ∂μ, ∀ s ∈ Icc 0 t,
+      itoContinuousMod t hBmeas (processToLp (μ := μ) t hBmeas hadap hcont hbdd) s ω
+        = itoContinuousMod T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd) s ω := by
+  set φT := processToLp (μ := μ) T hBmeas hadap hcont hbdd
+  set φt := processToLp (μ := μ) t hBmeas hadap hcont hbdd
+  have hmod (s : ℝ≥0) (hs : s ≤ t) : (fun ω ↦ itoContinuousMod t hBmeas φt s ω)
+      =ᵐ[μ] fun ω ↦ itoContinuousMod T hBmeas φT s ω := by
+    have hLp := itoProcessCLM_consist hB hBmeas hs ht hadap hcont hbdd
+    refine ((itoContinuousMod_modification hB t hBmeas hBcont φt hs).trans
+      (Eventually.of_forall fun ω ↦ ?_)).trans
+      (itoContinuousMod_modification hB T hBmeas hBcont φT (hs.trans ht)).symm
+    rw [hLp]
+  filter_upwards [ae_forall_eq_of_continuousOn (A := univ)
+      (itoContinuousMod_continuousOn hB t hBmeas hBcont φt)
+      ((itoContinuousMod_continuousOn hB T hBmeas hBcont φT).mono fun ω h ↦
+        h.mono (Icc_subset_Icc_right ht))
+      fun s hs ↦ (hmod s hs.2).mono fun ω h _ ↦ h] with ω hω
+  exact hω (mem_univ ω)
+
+variable {T hBmeas x₀} in
+/-- Two Itô processes with the same start and drift whose martingale parts agree on a set of
+times agree there. -/
+theorem adaptedItoProcess_eq_of_eqOn {T' : ℝ≥0} {φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)}
+    {φ' : Lp ℝ 2 (trimMeasure_T (μ := μ) T' hBmeas)} {ω : Ω} {S : Set ℝ≥0}
+    (h : ∀ s ∈ S, itoContinuousMod T' hBmeas φ' s ω = itoContinuousMod T hBmeas φ s ω)
+    {s : ℝ≥0} (hs : s ∈ S) :
+    adaptedItoProcess T' hBmeas φ' x₀ b s ω = adaptedItoProcess T hBmeas φ x₀ b s ω := by
+  simp only [adaptedItoProcess, h s hs]
 
 /-! ### The formula with bounded partials -/
 
@@ -475,6 +523,75 @@ theorem ito_formula_adapted_td_local_le {t : ℝ≥0} (ht : t ≤ T) :
     congr 1
     refine setIntegral_congr_fun measurableSet_Ioc fun s hs ↦ ?_
     rw [adaptedItoProcess_eq_of_eqOn hω (Ioc_subset_Icc_self hs)]
+
+/-! ### `C²` functions of the process -/
+
+include hB hBcont hb_adap hb_cont hb_bdd in
+/-- **Itô's formula for a `C²` function of an Itô process with adapted coefficients.** Let `B` be
+a Brownian motion with every path continuous, `σ` and `b` bounded, adapted to the natural
+filtration of `B` and with every path continuous, `X = x₀ + ∫ b ds + M` with `M = ∫ σ dB` built at
+horizon `T` (`adaptedItoProcess`, `itoContinuousMod`), and `f` twice differentiable with `f''`
+continuous. For `t ≤ T` the left-point Riemann–Stieltjes sums of `f'(X)` against `M` on the
+uniform partitions of `[0, t]` converge in probability to
+
+`f(X_t) − f(x₀) − ∫₀ᵗ (f'(X_s) b_s + ½ f''(X_s) σ_s²) ds`.
+
+No bound on `f'` or `f''` is assumed. The case `f_t = 0` of `ito_formula_adapted_td_local_le`. -/
+theorem ito_formula_adapted_local_le {f f' f'' : ℝ → ℝ} (hf : ∀ x, HasDerivAt f (f' x) x)
+    (hf' : ∀ x, HasDerivAt f' (f'' x) x) (hf'' : Continuous f'') {t : ℝ≥0} (ht : t ≤ T) :
+    TendstoInMeasure μ (fun n ω ↦ ∑ k ∈ Finset.range n,
+        f' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd) x₀ b
+          (unifPart t n k) ω)
+        * (itoContinuousMod T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd)
+            (unifPart t n (k + 1)) ω
+          - itoContinuousMod T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd)
+            (unifPart t n k) ω)) atTop
+      fun ω ↦ f (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd)
+          x₀ b t ω) - f x₀
+        - ∫ s in Ioc 0 t, (f' (adaptedItoProcess T hBmeas
+              (processToLp (μ := μ) T hBmeas hadap hcont hbdd) x₀ b s ω) * b s ω
+            + 1 / 2 * (f'' (adaptedItoProcess T hBmeas
+              (processToLp (μ := μ) T hBmeas hadap hcont hbdd) x₀ b s ω)
+              * σ s ω ^ 2)) ∂timeMeasure := by
+  have hf'c : Continuous f' := Differentiable.continuous fun x ↦ (hf' x).differentiableAt
+  refine (ito_formula_adapted_td_local_le hB T hBmeas hBcont hadap hcont hbdd hb_adap hb_cont
+    hb_bdd x₀ (f := fun _ x ↦ f x) (f_t := fun _ _ ↦ 0) (fun t x ↦ hasDerivAt_const t (f x))
+    (fun _ x ↦ hf x) (fun _ x ↦ hf' x) continuous_const (hf'c.comp continuous_snd)
+    (hf''.comp continuous_snd) ht).congr_right (Eventually.of_forall fun ω ↦ ?_)
+  simp only [zero_add]
+
+include hB hBcont hb_adap hb_cont hb_bdd in
+/-- **With `f'` bounded, the Riemann sums converge to the `L²` Itô integral.** For `f'`
+continuous and bounded, the left-point Riemann–Stieltjes sums of `f'(X)` against `M = ∫ σ dB` on
+the uniform partitions of `[0, T]` converge in probability to the Itô integral of the class of
+`f'(X)·σ`, the stochastic integral of `ito_formula_adapted`. -/
+theorem tendstoInMeasure_riemannStieltjes_itoIntegral {f' : ℝ → ℝ} (hf'c : Continuous f')
+    {C₁ : ℝ} (hf1 : ∀ x, |f' x| ≤ C₁) :
+    TendstoInMeasure μ (fun n ω ↦ ∑ k ∈ Finset.range n,
+        f' (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd) x₀ b
+          (unifPart T n k) ω)
+        * (itoContinuousMod T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd)
+            (unifPart T n (k + 1)) ω
+          - itoContinuousMod T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd)
+            (unifPart T n k) ω)) atTop
+      (itoIntegralCLM_T hB T hBmeas (processToLpPredictable T hBmeas
+        (comp_adaptedItoProcess_mul_isStronglyPredictable hB T hBmeas hBcont hadap hcont
+          (processToLp (μ := μ) T hBmeas hadap hcont hbdd) hb_adap hb_cont hb_bdd x₀ hf'c)
+        (abs_comp_mul_le hf1 hbdd _))) := by
+  set φT := processToLp (μ := μ) T hBmeas hadap hcont hbdd
+  have hpred := comp_adaptedItoProcess_isStronglyPredictable hB T hBmeas hBcont φT hb_adap
+    hb_cont hb_bdd x₀ hf'c
+  rw [← itoIntegralAgainst_weightLp hB T hBmeas φT hpred (fun s ω ↦ hf1 _) _ ?_]
+  · exact tendstoInMeasure_riemannStieltjes hB T hBmeas φT
+      (fun t ht ↦ itoContinuousMod_modification hB T hBmeas hBcont φT ht) hpred
+      ((ae_continuousOn_adaptedItoProcess hB T hBmeas hBcont φT hb_cont hb_bdd x₀).mono
+        fun ω h ↦ hf'c.comp_continuousOn h) fun s ω ↦ hf1 _
+  · filter_upwards [processToLpPredictable_coeFn (μ := μ) T hBmeas
+        (comp_adaptedItoProcess_mul_isStronglyPredictable hB T hBmeas hBcont hadap hcont φT
+          hb_adap hb_cont hb_bdd x₀ hf'c) (abs_comp_mul_le hf1 hbdd _),
+      processToLp_coeFn (μ := μ) T hBmeas hadap hcont hbdd] with z h1 h2
+    rw [h1, h2]
+    exact mul_comm _ _
 
 end ItoFormulaAdapted
 end MathFin

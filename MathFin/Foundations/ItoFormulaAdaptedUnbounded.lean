@@ -38,7 +38,7 @@ namespace ItoFormulaAdapted
 
 open MeasureTheory ProbabilityTheory Filter Topology Set
 open ItoIntegralL2 ItoIntegralBrownian QuadraticVariationL2 ItoIntegralProcessContinuousModification
-  AdaptedDrift ItoIntegralLocalised
+  AdaptedDrift ItoIntegralLocalised LocalisationInMeasure
 open scoped NNReal ENNReal
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
@@ -148,8 +148,7 @@ theorem ito_formula_adapted_unbounded_C2_le {f f' f'' : ℝ → ℝ}
   refine (ito_formula_adapted_unbounded_le hB T hBmeas hBcont hadap hcont hb_adap hb_cont x₀
     (f := fun _ x ↦ f x) (f_t := fun _ _ ↦ 0) (fun t x ↦ hasDerivAt_const t (f x))
     (fun _ x ↦ hf x) (fun _ x ↦ hf' x) continuous_const (hf'c.comp continuous_snd)
-    (hf''.comp continuous_snd) ht).congr (fun _ ↦ EventuallyEq.rfl)
-    (Eventually.of_forall fun ω ↦ ?_)
+    (hf''.comp continuous_snd) ht).congr_right (Eventually.of_forall fun ω ↦ ?_)
   simp only [zero_add]
 
 end ItoFormulaAdapted

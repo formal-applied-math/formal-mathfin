@@ -39,16 +39,16 @@ stochastic integral make functionals of `X` computable.
   `L²` claim — the Clark–Ocone direction, #182 — is still open.
 - Since 2026-10-28 ([#309](https://github.com/formal-applied-math/formal-mathfin/issues/309)) Itô's
   formula along `dX = b dt + σ dB` with bounded adapted continuous coefficients holds for every `f ∈ C²`
-  and at every `t ≤ T` (`ItoFormulaAdaptedLocal.ito_formula_adapted_local_le`). The integral
+  and at each fixed `t ≤ T` (`ItoFormulaAdapted.ito_formula_adapted_local_le`). The integral
   `∫ f'(X) dM` is there the limit in probability of left-point Riemann sums; for bounded `f'` the same
   sums converge to the `L²` integral of `f'(X)σ` (`tendstoInMeasure_riemannStieltjes_itoIntegral`).
   The same holds for `f(t, x)` with jointly continuous `f_t`, `f_x`, `f_xx`
-  (`ItoFormulaAdaptedTD.ito_formula_adapted_td_local_le`), localised by the double cutoff
+  (`ItoFormulaAdapted.ito_formula_adapted_td_local_le`, of which the `C²` formula is the case `f_t = 0`), localised by the double cutoff
   `SummitC.fTrunc` that `ItoFormulaUnrestricted` built for functions of Brownian motion. The bounds
   on `σ` and `b` go the same way: for continuous adapted `σ`, `∫ σ dB` is the limit in probability
   of its Riemann sums (`ItoIntegralLocalised.localItoIntegral`, glued from the integrals of `σ`
   clipped to `[−N, N]`, no stopping times), and the formula holds along `x₀ + ∫ b ds + ∫ σ dB`
-  (`ItoFormulaAdaptedUnbounded.ito_formula_adapted_unbounded_le`). The identity of processes is the
+  (`ItoFormulaAdapted.ito_formula_adapted_unbounded_le`). The identity of processes is the
   next rung.
 
 ### Pillar III — The probabilistic ⟷ analytic duality (generator / Feynman–Kac / PDE)

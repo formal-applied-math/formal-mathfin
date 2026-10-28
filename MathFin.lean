@@ -252,7 +252,7 @@ import MathFin.Foundations.AdaptedRiemannStieltjes
 import MathFin.Foundations.AdaptedDrift
 import MathFin.Foundations.ItoFormulaAdapted
 -- Itô's formula for adapted coefficients, localised to every C² f and every t ≤ T
-import MathFin.Foundations.ItoFormulaAdaptedLocal
+import MathFin.Foundations.LocalisationInMeasure
 -- Itô's formula for f(t, X_t) along an Itô process with adapted coefficients, every t ≤ T
 import MathFin.Foundations.ItoFormulaAdaptedTD
 -- The Itô integral of an unbounded continuous adapted integrand, by localisation

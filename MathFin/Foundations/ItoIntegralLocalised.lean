@@ -5,8 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoFormulaAdaptedLocal
+public import MathFin.Foundations.ItoIntegralCrossHorizon
+public import MathFin.Foundations.ItoIntegralProcessContinuousModification
 public import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
+public import MathFin.Foundations.LocalisationInMeasure
 
 /-! # The Itô integral of an unbounded continuous adapted integrand
 
@@ -23,7 +25,8 @@ in measure to `M^n_t` and `M^N_t` (`tendstoInMeasure_riemannσ_itoContinuousMod`
 measure are local (`ae_eq_of_tendstoInMeasure_of_eqOn`), so `M^n = M^N` almost surely on the event,
 at each time and then, by continuity, on all of `[0, T]` (`ae_clipItoMod_eq`). Every path of `σ`
 is bounded on `[0, T]` by some integer, the least being `pathLevel`, and `localItoIntegral` reads
-`M^N` at `N = pathLevel ω`.
+`M^N` at that level. The level reads the whole path on `[0, T]`, so `localItoIntegral t` is not
+shown adapted; it is the integral on `[0, T]` only.
 
 * `tendstoInMeasure_riemannσ_localItoIntegral`: for `t ≤ T` the Riemann sums of `σ` on `[0, t]`
   converge in probability to `localItoIntegral t`. This characterises the integral: it is the
@@ -42,7 +45,7 @@ namespace ItoIntegralLocalised
 open MeasureTheory ProbabilityTheory Filter Topology Set
 open ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessGeneral ItoIntegralBrownian
   QuadraticVariationL2 ItoIntegralProcessContinuousModification ItoIntegralRiemannBridge
-  ItoFormulaAdapted
+  LocalisationInMeasure
 open scoped NNReal ENNReal
 
 /-! ### Clipping -/
@@ -72,20 +75,18 @@ theorem clip_adapted {Ω : Type*} {mΩ : MeasurableSpace Ω} {𝓕 : Filtration 
     StronglyMeasurable[𝓕 t] (clip N σ t) :=
   (continuous_clampM N).comp_stronglyMeasurable (hadap t)
 
-/-- The least integer bounding a path continuous on `[0, T]` (`exists_nat_abs_le_Icc`). -/
-noncomputable def pathLevel (T : ℝ≥0) {x : ℝ≥0 → ℝ} (hx : Continuous x) : ℕ := by
-  classical
-  exact Nat.find (exists_nat_abs_le_Icc (T := T) hx.continuousOn)
+/-- The least integer bounding the path `x` on `[0, T]`; `0` when there is none. -/
+noncomputable def pathLevel (T : ℝ≥0) (x : ℝ≥0 → ℝ) : ℕ :=
+  sInf {N : ℕ | ∀ t ∈ Icc 0 T, |x t| ≤ N}
 
-theorem abs_le_pathLevel {T : ℝ≥0} {x : ℝ≥0 → ℝ} (hx : Continuous x) :
-    ∀ t ∈ Icc 0 T, |x t| ≤ pathLevel T hx := by
-  classical
-  exact Nat.find_spec (exists_nat_abs_le_Icc (T := T) hx.continuousOn)
+/-- A path continuous on `[0, T]` is bounded there by its level (`exists_nat_abs_le_Icc`). -/
+theorem abs_le_pathLevel {T : ℝ≥0} {x : ℝ≥0 → ℝ} (hx : ContinuousOn x (Icc 0 T)) :
+    ∀ t ∈ Icc 0 T, |x t| ≤ pathLevel T x :=
+  Nat.sInf_mem (exists_nat_abs_le_Icc hx)
 
-theorem pathLevel_le {T : ℝ≥0} {x : ℝ≥0 → ℝ} (hx : Continuous x) {N : ℕ}
-    (h : ∀ t ∈ Icc 0 T, |x t| ≤ N) : pathLevel T hx ≤ N := by
-  classical
-  exact Nat.find_min' _ h
+theorem pathLevel_le {T : ℝ≥0} {x : ℝ≥0 → ℝ} {N : ℕ} (h : ∀ t ∈ Icc 0 T, |x t| ≤ N) :
+    pathLevel T x ≤ N :=
+  Nat.sInf_le h
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
@@ -107,8 +108,7 @@ theorem tendstoInMeasure_riemannσ_itoContinuousMod {C : ℝ} (hbdd : ∀ t ω, 
   have h := (itoContinuousMod_modification hB T hBmeas hBcont
     (processToLp (μ := μ) T hBmeas hadap hcont hbdd) ht).symm
   rw [itoProcessCLM_consist hB hBmeas le_rfl ht hadap hcont hbdd, itoProcessCLM_terminal_eq] at h
-  exact (tendstoInMeasure_riemannσ hB hBmeas hadap hcont hbdd t).congr
-    (fun _ ↦ EventuallyEq.rfl) h
+  exact (tendstoInMeasure_riemannσ hB hBmeas hadap hcont hbdd t).congr_right h
 
 /-! ### The clipped integrals -/
 
@@ -139,9 +139,10 @@ theorem ae_clipItoMod_eq {n N : ℕ} (hnN : n ≤ N) :
 /-! ### The integral -/
 
 /-- **The Itô integral of a continuous adapted integrand**, possibly unbounded: on each path, the
-continuous Itô integral of `σ` clipped at the least integer bounding that path on `[0, T]`. -/
+continuous Itô integral of `σ` clipped at the least integer bounding that path on `[0, T]`. It is
+the integral on `[0, T]` only; past `T` its value carries no meaning. -/
 noncomputable def localItoIntegral (t : ℝ≥0) (ω : Ω) : ℝ :=
-  clipItoMod (μ := μ) T hBmeas hadap hcont (pathLevel T (hcont ω)) t ω
+  clipItoMod (μ := μ) T hBmeas hadap hcont (pathLevel T fun s ↦ σ s ω) t ω
 
 include hB hBcont in
 /-- Almost surely, wherever `σ` stays in `[−N, N]` up to `T`, the integral is `M^N` on `[0, T]`. -/
@@ -156,7 +157,7 @@ theorem ae_localItoIntegral_eq :
     · filter_upwards [ae_clipItoMod_eq hB T hBmeas hBcont hadap hcont hnN] with ω hω _ using hω
     · exact Eventually.of_forall fun ω h ↦ absurd h hNn.not_ge
   filter_upwards [ae_all_iff.2 fun n ↦ ae_all_iff.2 (h n)] with ω hω N hN t ht
-  exact hω _ N (pathLevel_le (hcont ω) hN) (abs_le_pathLevel (hcont ω)) t ht
+  exact hω _ N (pathLevel_le hN) (abs_le_pathLevel (hcont ω).continuousOn) t ht
 
 include hB hBcont in
 /-- **Almost every path of the integral is continuous on `[0, T]`.** -/
@@ -167,8 +168,8 @@ theorem ae_continuousOn_localItoIntegral :
     ae_all_iff.2 fun N ↦ itoContinuousMod_continuousOn hB T hBmeas hBcont
       (processToLp (μ := μ) T hBmeas (clip_adapted hadap N) (clip_continuous hcont N)
         (abs_clip_le N σ))] with ω hω hc
-  exact (hc (pathLevel T (hcont ω))).congr fun t ht ↦
-    hω _ (abs_le_pathLevel (hcont ω)) t ht
+  exact (hc (pathLevel T fun s ↦ σ s ω)).congr fun t ht ↦
+    hω _ (abs_le_pathLevel (hcont ω).continuousOn) t ht
 
 include hB hBcont in
 /-- **The integral is the limit in probability of its Riemann sums.** For `t ≤ T` the left-point
@@ -199,10 +200,10 @@ theorem ae_localItoIntegral_eq_itoContinuousMod {C : ℝ} (hbdd : ∀ t ω, |σ 
   filter_upwards [ae_forall_eq_of_continuousOn (A := univ)
     (ae_continuousOn_localItoIntegral hB T hBmeas hBcont hadap hcont)
     (itoContinuousMod_continuousOn hB T hBmeas hBcont _) fun t ht ↦
-      ae_eq_of_tendstoInMeasure_of_eqOn
+      (tendstoInMeasure_ae_unique
         (tendstoInMeasure_riemannσ_localItoIntegral hB T hBmeas hBcont hadap hcont ht.2)
-        (tendstoInMeasure_riemannσ_itoContinuousMod hB T hBmeas hBcont hadap hcont hbdd ht.2)
-        fun _ _ _ ↦ rfl] with ω hω
+        (tendstoInMeasure_riemannσ_itoContinuousMod hB T hBmeas hBcont hadap hcont hbdd ht.2)).mono
+        fun _ h _ ↦ h] with ω hω
   exact hω (mem_univ ω)
 
 end ItoIntegralLocalised
