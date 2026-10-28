@@ -251,6 +251,14 @@ import MathFin.Foundations.AdaptedRiemannStieltjes
 -- ds
 import MathFin.Foundations.AdaptedDrift
 import MathFin.Foundations.ItoFormulaAdapted
+-- Itô's formula for adapted coefficients, localised to every C² f and every t ≤ T
+import MathFin.Foundations.ItoFormulaAdaptedLocal
+-- Itô's formula for f(t, X_t) along an Itô process with adapted coefficients, every t ≤ T
+import MathFin.Foundations.ItoFormulaAdaptedTD
+-- The Itô integral of an unbounded continuous adapted integrand, by localisation
+import MathFin.Foundations.ItoIntegralLocalised
+-- Itô's formula along an Itô process with unbounded adapted coefficients
+import MathFin.Foundations.ItoFormulaAdaptedUnbounded
 -- Deterministic drift Riemann-convergence (α4 brick b-tail): ∑θ(tₖ)²·Δτ → ∫₀ᵀθ²ds
 import MathFin.Foundations.DriftRiemannConvergence
 -- Continuous adapted-θ Girsanov assembly (α4 (c)): convergence core toward
