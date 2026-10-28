@@ -26,6 +26,75 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Itô's formula with unbounded coefficients (2026-10-28)
+
+Two entries added, `sc-ito-integral-continuous-adapted-unbounded` and
+`sc-ito-formula-adapted-unbounded-coefficients` (both `full`). Corpus 660 → 662.
+
+For `σ` adapted to the natural filtration of `B` with every path continuous, and not bounded, the
+Itô integral `∫ σ dB` on `[0, T]` is `ItoIntegralLocalised.localItoIntegral`: for each `t ≤ T` the
+left-point Riemann sums `∑ σ(tₖ)(B_{tₖ₊₁} − B_{tₖ})` converge to it in probability, almost every path
+is continuous on `[0, T]`, and for bounded `σ` it is the `L²` integral. It is glued from the
+integrals `M^N` of `σ` clipped to `[−N, N]` (`clampM`), which agree where the clipping is inactive
+because limits in measure are local; every path of `σ` is bounded on `[0, T]`, so every path is
+read from some `M^N`. No stopping times are used. Along `X = x₀ + ∫ b ds + ∫ σ dB` with `σ`, `b`
+continuous adapted and unbounded, Itô's formula for `f(t, x)` with jointly continuous `f_t`, `f_x`,
+`f_xx` holds at each `t ≤ T` in the Riemann-sum reading (`ito_formula_adapted_unbounded_le`; the
+`C²` case `ito_formula_adapted_unbounded_C2_le`), from the bounded formula on the events where `σ`
+and `b` stay in `[−N, N]`.
+
+Safe wording: "the Itô integral of a continuous adapted integrand, as the limit in probability of
+its Riemann sums, and Itô's formula along an Itô process with continuous adapted coefficients, at
+each fixed time". Not covered: the local-martingale property of the integral, predictable
+integrands with only almost surely finite energy, a random start, the formula as an identity of
+processes, several driving Brownian motions.
+
+### Itô's formula for `f(t, X_t)` (2026-10-28)
+
+One entry added, `sc-ito-formula-adapted-time-dependent` (`full`). Corpus 659 → 660.
+
+For the same `X`, and `f(t, x)` with partials `f_t`, `f_x`, `f_xx` jointly continuous and no bound
+on `f` or its partials, and `t ≤ T`, the left-point Riemann–Stieltjes sums
+`∑ f_x(tₖ, X_{tₖ})(M_{tₖ₊₁} − M_{tₖ})` on the uniform partitions of `[0, t]` converge in probability
+to `f(t, X_t) − f(0, x₀) − ∫₀ᵗ (f_t + f_x b + ½ f_xx σ²)(s, X_s) ds`
+(`ItoFormulaAdapted.ito_formula_adapted_td_local_le`). With `f_t`, `f_x`, `f_xx` bounded the formula
+at `T` is an almost-sure identity, the stochastic integral being the `L²` integral against `M` of
+the weight `f_x(s, X_s)` (`ito_formula_adapted_td_against`). The pathwise core needs no third
+derivative: the two-variable Taylor remainder is at most `η Δt + η (ΔX)²` once `f_t` and `f_xx`
+oscillate by less than `η` on a cell (`abs_discreteTaylorRemainder2D_le_of_osc`), and uniform
+continuity on `[0, T] × [−R, R]` makes the sum vanish. Localisation reuses the double cutoff
+`SummitC.fTrunc` of `ItoFormulaUnrestricted`; the horizon reduction is
+`ae_itoContinuousMod_eq_of_le`, shared with the time-independent entry.
+
+Safe wording: "Itô's formula for `f(t, X_t)`, `f` with jointly continuous `f_t`, `f_x`, `f_xx`, along
+an Itô process with bounded adapted continuous coefficients, at each fixed time, with the stochastic
+integral as a limit in probability of Riemann sums". Not covered: unbounded coefficients, a random
+start, the formula as an identity of processes, several driving Brownian motions. Issue #309, part 3.
+
+### Itô's formula for every `C²` function, at each fixed time (2026-10-28)
+
+One entry added, `sc-ito-formula-adapted-c2-every-time` (`full`). Corpus 658 → 659.
+
+For `X = x₀ + ∫ b ds + M`, `M = ∫ σ dB`, with `σ`, `b` bounded, adapted to the natural filtration of
+`B` and with every path continuous, `f` twice differentiable with `f''` continuous and no bound on
+`f'` or `f''`, and `t ≤ T`, the left-point Riemann–Stieltjes sums `∑ f'(X_{tₖ})(M_{tₖ₊₁} − M_{tₖ})`
+on the uniform partitions of `[0, t]` converge in probability to
+`f(X_t) − f(x₀) − ∫₀ᵗ (f'(X) b + ½ f''(X) σ²) ds`
+(`ItoFormulaAdapted.ito_formula_adapted_local_le`). For bounded continuous `f'` the same sums on
+`[0, T]` converge in probability to the `L²` Itô integral of `f'(X)σ`
+(`tendstoInMeasure_riemannStieltjes_itoIntegral`), the stochastic integral of
+`sc-ito-formula-adapted`; both are limits in probability of the same sums.
+The formula is the case `f_t = 0` of `ito_formula_adapted_td_local_le` (next section), which
+localises in space on the event that the path stays in `[−N, N]` and reaches `t < T` through the
+formula at horizon `t`, the two constructions being the same path on `[0, t]`
+(`itoProcessCLM_consist`, `LocalisationInMeasure.ae_forall_eq_of_continuousOn`).
+
+Safe wording: "Itô's formula for every `C²` function of an Itô process with bounded adapted
+continuous coefficients, at each fixed time, with the stochastic integral as a limit in
+probability of Riemann sums". Not covered: an `L²` or local stochastic integral of `f'(X)σ` for
+unbounded `f'`, unbounded coefficients, time-dependent `f(t, x)`, a random start, the formula as an
+identity of processes, a Brownian motion continuous only almost surely. Issue #309, parts 1 and 2.
+
 ### Every module connected: the coherence pass (2026-10-21)
 
 A coherence pass found 41 modules that imported nothing from the library and that nothing
