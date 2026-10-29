@@ -251,6 +251,14 @@ import MathFin.Foundations.AdaptedRiemannStieltjes
 -- ds
 import MathFin.Foundations.AdaptedDrift
 import MathFin.Foundations.ItoFormulaAdapted
+-- Itô's formula for adapted coefficients, localised to every C² f and every t ≤ T
+import MathFin.Foundations.LocalisationInMeasure
+-- Itô's formula for f(t, X_t) along an Itô process with adapted coefficients, every t ≤ T
+import MathFin.Foundations.ItoFormulaAdaptedTD
+-- The Itô integral of an unbounded continuous adapted integrand, by localisation
+import MathFin.Foundations.ItoIntegralLocalised
+-- Itô's formula along an Itô process with unbounded adapted coefficients
+import MathFin.Foundations.ItoFormulaAdaptedUnbounded
 -- Deterministic drift Riemann-convergence (α4 brick b-tail): ∑θ(tₖ)²·Δτ → ∫₀ᵀθ²ds
 import MathFin.Foundations.DriftRiemannConvergence
 -- Continuous adapted-θ Girsanov assembly (α4 (c)): convergence core toward
@@ -470,6 +478,7 @@ import MathFin.Binomial.CRRConvergence
 import MathFin.Binomial.DriftLimit
 import MathFin.Binomial.Bermudan
 import MathFin.Binomial.MartingaleRepresentation
+import MathFin.Binomial.EuropeanReplication
 -- Phase 13 additions:
 import MathFin.Binomial.Girsanov
 import MathFin.Binomial.SecondFTAP
@@ -690,8 +699,10 @@ import MathFin.Actuarial.ActuarialInsurance
 import MathFin.Contracts.Core
 import MathFin.Contracts.Adapted
 import MathFin.Contracts.Pricing
-import MathFin.Contracts.BlackScholes
-import MathFin.Contracts.CappedCall
+import MathFin.Contracts.Instruments.Options
+import MathFin.Contracts.Models.BlackScholes
+import MathFin.Contracts.Models.Binomial
+import MathFin.Contracts.Models.BinomialLimit
 
 -- Execution: market microstructure — the Glosten-Milgrom adverse-selection
 -- spread, plus a six-point model witnessing that its hypotheses are satisfiable

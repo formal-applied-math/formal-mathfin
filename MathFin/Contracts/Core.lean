@@ -18,7 +18,7 @@ a stochastic model is a law on that type, and appears only from
 Every other payoff in this library — `BlackScholes/Call.lean`, `Digital.lean`,
 `CappedCall.lean` — is written inline as a lambda inside the integral that prices
 it, so the payoff and the model are the same syntactic object. This file
-separates them, which is what lets `Contracts/CappedCall.lean` price a capped
+separates them, which is what lets `Contracts/Models/BlackScholes.lean` price a capped
 call by *composing* two European call values rather than by evaluating a third
 integral.
 

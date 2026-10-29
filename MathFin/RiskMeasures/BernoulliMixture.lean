@@ -42,8 +42,10 @@ the others. Dependence between defaults comes only from the common `Q`.
 * `defaultCorrelation_eq`: `ρ_Y = Var(Q)/(π₁(1 − π₁))`, and `defaultCorrelation_nonneg`.
 * `oneFactorPD`: the conditional default probability `p(f)` of the one-factor Gaussian model.
 * `oneFactor_asset_le_iff`, `oneFactor_default_iff`: the threshold event is the mixture event.
+* `oneFactor_bernoulliMixture`: the one-factor model satisfies the mixture hypotheses.
 * `oneFactor_measureReal_iInter_default`: `πₖ = ∫ p(x)^k dN(0,1)(x)` in the Gaussian model.
 * `oneFactor_measureReal_default`: each obligor defaults with probability `π`.
+* `oneFactor_measureReal_inter_default_sub_mul`: the default covariance is `Var(p(F))`.
 -/
 
 @[expose] public section
@@ -185,28 +187,43 @@ theorem oneFactor_default_iff {π ρ : ℝ} (hρ : ρ < 1) (f e : ℝ) :
     √ρ * f + √(1 - ρ) * e ≤ PhiInv π ↔ Phi e ≤ oneFactorPD π ρ f := by
   rw [oneFactor_asset_le_iff hρ, oneFactorPD, strictMono_Phi.le_iff_le]
 
+omit [IsProbabilityMeasure P] [Fintype ι] in
+/-- **The one-factor Gaussian threshold model is a Bernoulli mixture.** With `F` and the `εᵢ`
+independent standard normals, the mixing variable `Q = p(F)` and the variables `Uᵢ = Φ(εᵢ)`
+satisfy the hypotheses of the mixture theorems: `Q ∈ [0, 1]`, the `Uᵢ` are independent uniforms
+on `(0, 1)` (the probability integral transform), and `Q` is independent of them. The threshold
+events are the mixture events `{Uᵢ ≤ Q}` (`oneFactor_default_iff`). -/
+theorem oneFactor_bernoulliMixture {π ρ : ℝ} {F : Ω → ℝ} {ε : ι → Ω → ℝ}
+    (hF : HasLaw F (gaussianReal 0 1) P) (hε : ∀ i, HasLaw (ε i) (gaussianReal 0 1) P)
+    (hεind : iIndepFun ε P) (hFε : F ⟂ᵢ[P] fun ω i ↦ ε i ω) :
+    AEMeasurable (fun ω ↦ oneFactorPD π ρ (F ω)) P ∧
+      (∀ᵐ ω ∂P, oneFactorPD π ρ (F ω) ∈ Icc 0 1) ∧
+      (∀ i, HasLaw (fun ω ↦ Phi (ε i ω)) (volume.restrict (Ioo 0 1)) P) ∧
+      iIndepFun (fun i ω ↦ Phi (ε i ω)) P ∧
+      (fun ω ↦ oneFactorPD π ρ (F ω)) ⟂ᵢ[P] fun ω i ↦ Phi (ε i ω) := by
+  have hPhi : Measurable Phi := continuous_Phi.measurable
+  refine ⟨(measurable_oneFactorPD π ρ).comp_aemeasurable hF.aemeasurable,
+    ae_of_all _ fun ω ↦ Ioo_subset_Icc_self (Phi_mem_Ioo _), fun i ↦ ?_,
+    hεind.comp (fun _ ↦ Phi) fun _ ↦ hPhi,
+    hFε.comp (measurable_oneFactorPD π ρ)
+      (measurable_pi_lambda _ fun i ↦ hPhi.comp (measurable_pi_apply i))⟩
+  have h := hasLaw_cdf (hε i) (by rw [cdf_gaussianReal_zero_one]; exact continuous_Phi)
+  simpa only [cdf_gaussianReal_zero_one] using h
+
 omit [Fintype ι] in
 /-- **Joint default probabilities in the one-factor Gaussian threshold model** (QRM Exercise Book,
 Ex. 11.9). With `F` and the `εᵢ` independent standard normals, every group `s` of obligors
-defaults jointly with probability `∫ p(x)^|s| dN(0,1)(x)`. -/
+defaults jointly with probability `∫ p(x)^|s| dN(0,1)(x)`: the model is a Bernoulli mixture
+(`oneFactor_bernoulliMixture`), so this is `measureReal_iInter_default_eq_integral_pow`. -/
 theorem oneFactor_measureReal_iInter_default [Finite ι] {π ρ : ℝ} {F : Ω → ℝ} {ε : ι → Ω → ℝ}
     (hF : HasLaw F (gaussianReal 0 1) P) (hε : ∀ i, HasLaw (ε i) (gaussianReal 0 1) P)
     (hεind : iIndepFun ε P) (hFε : F ⟂ᵢ[P] fun ω i ↦ ε i ω) (hρ : ρ < 1) (s : Finset ι) :
     P.real (⋂ i ∈ s, {ω | √ρ * F ω + √(1 - ρ) * ε i ω ≤ PhiInv π}) =
       ∫ x, oneFactorPD π ρ x ^ s.card ∂gaussianReal 0 1 := by
-  have hPhi : Measurable Phi := continuous_Phi.measurable
-  -- the probability integral transform makes the `Φ(εᵢ)` uniform
-  have hU (i : ι) : HasLaw (fun ω ↦ Phi (ε i ω)) (volume.restrict (Ioo 0 1)) P := by
-    have h := hasLaw_cdf (hε i) (by rw [cdf_gaussianReal_zero_one]; exact continuous_Phi)
-    simpa only [cdf_gaussianReal_zero_one] using h
-  have hmix := measureReal_iInter_default_eq_integral_pow (Q := fun ω ↦ oneFactorPD π ρ (F ω))
-    (U := fun i ω ↦ Phi (ε i ω)) ((measurable_oneFactorPD π ρ).comp_aemeasurable hF.aemeasurable)
-    (ae_of_all _ fun ω ↦ Ioo_subset_Icc_self (Phi_mem_Ioo _)) hU
-    (hεind.comp (fun _ ↦ Phi) fun _ ↦ hPhi)
-    (hFε.comp (measurable_oneFactorPD π ρ)
-      (measurable_pi_lambda _ fun i ↦ hPhi.comp (measurable_pi_apply i))) s
+  obtain ⟨hQ, hQ01, hU, hUind, hQU⟩ := oneFactor_bernoulliMixture (π := π) (ρ := ρ) hF hε hεind hFε
   simp_rw [oneFactor_default_iff hρ]
-  rw [hmix, ← hF.integral_comp (((measurable_oneFactorPD π ρ).pow_const _).aestronglyMeasurable)]
+  rw [measureReal_iInter_default_eq_integral_pow hQ hQ01 hU hUind hQU s,
+    ← hF.integral_comp (((measurable_oneFactorPD π ρ).pow_const _).aestronglyMeasurable)]
   rfl
 
 omit [IsProbabilityMeasure P] in
@@ -234,5 +251,24 @@ theorem oneFactor_measureReal_default {π ρ : ℝ} {F e : Ω → ℝ}
   rw [hlaw.measureReal_eq (p := (· ≤ PhiInv π)) measurableSet_Iic]
   change (gaussianReal 0 1).real (Iic (PhiInv π)) = π
   rw [← cdf_eq_real, cdf_gaussianReal_zero_one, Phi_PhiInv hπ]
+
+omit [Fintype ι] in
+/-- **The default covariance in the one-factor Gaussian threshold model is a variance**
+(QRM Exercise Book, Ex. 11.4a in the Gaussian model). For distinct obligors,
+`P(Dᵢ ∩ Dⱼ) − P(Dᵢ) P(Dⱼ) = Var(p(F))`, the variance of the conditional default probability: the
+model is a Bernoulli mixture (`oneFactor_bernoulliMixture`), so this is
+`measureReal_inter_default_sub_mul`. -/
+theorem oneFactor_measureReal_inter_default_sub_mul [Finite ι] {π ρ : ℝ} {F : Ω → ℝ}
+    {ε : ι → Ω → ℝ} (hF : HasLaw F (gaussianReal 0 1) P)
+    (hε : ∀ i, HasLaw (ε i) (gaussianReal 0 1) P) (hεind : iIndepFun ε P)
+    (hFε : F ⟂ᵢ[P] fun ω i ↦ ε i ω) (hρ : ρ < 1) {i j : ι} (hij : i ≠ j) :
+    P.real ({ω | √ρ * F ω + √(1 - ρ) * ε i ω ≤ PhiInv π} ∩
+          {ω | √ρ * F ω + √(1 - ρ) * ε j ω ≤ PhiInv π}) -
+        P.real {ω | √ρ * F ω + √(1 - ρ) * ε i ω ≤ PhiInv π} *
+          P.real {ω | √ρ * F ω + √(1 - ρ) * ε j ω ≤ PhiInv π} =
+      Var[fun ω ↦ oneFactorPD π ρ (F ω); P] := by
+  obtain ⟨hQ, hQ01, hU, hUind, hQU⟩ := oneFactor_bernoulliMixture (π := π) (ρ := ρ) hF hε hεind hFε
+  simp_rw [oneFactor_default_iff hρ]
+  exact measureReal_inter_default_sub_mul hQ hQ01 hU hUind hQU hij
 
 end MathFin

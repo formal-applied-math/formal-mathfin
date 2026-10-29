@@ -41,6 +41,10 @@ this says that a centred Gaussian law with unit variances and covariance `r` is
   off Mathlib's `IsGaussian.map_eq_gaussianReal`.
 * `eq_bivariateNormalLaw`: a Gaussian law on `ℝ²` with centred coordinates, unit variances and
   covariance `r` (`r² ≤ 1`) is `bivariateNormalLaw r`.
+* `gaussianPair`, `hasGaussianLaw_gaussianPair`, `integral_gaussianPair`,
+  `variance_gaussianPair`, `covariance_gaussianPair`: `(μ₀ + σ₀ X, μ₁ + σ₁ Y)` is a Gaussian pair
+  with means `μ`, variances `σ²` and covariance `r σ₀ σ₁` (`r² ≤ 1` for the variances), so every
+  two-asset Gaussian model has a realization.
 * `bivariateGaussianHyp_bivariateNormalLaw`, `condExp_fst_bivariateNormalLaw`: the pair satisfies
   the hypotheses `BivariateGaussianHyp` of `Foundations/BivariateGaussian.lean`, so
   `E[X | Y] = r Y` almost surely.
@@ -539,5 +543,75 @@ theorem tendsto_bivariateNormalCDF_atTop_fst (b r : ℝ) :
   rw [hPhi]
   simp only [bivariateNormalCDF_eq_law, measureReal_def]
   exact (ENNReal.tendsto_toReal (measure_ne_top _ _)).comp hlim
+
+/-! ### A Gaussian pair with any means, volatilities and correlation -/
+
+/-- The Cholesky pair shifted and scaled: coordinate `i` is `μᵢ + σᵢ Zᵢ`, where `(Z₀, Z₁)` is the
+pair of coordinates of `ℝ × ℝ`. Under `bivariateNormalLaw r` with `r² ≤ 1` it is a Gaussian pair
+with means `μ`, volatilities `|σ|` and covariance `r σ₀ σ₁`, so a two-asset model with any such
+parameters has a realization. -/
+noncomputable def gaussianPair (μ σ : Fin 2 → ℝ) : Fin 2 → ℝ × ℝ → ℝ :=
+  fun i q ↦ μ i + σ i * ![q.1, q.2] i
+
+lemma gaussianPair_zero (μ σ : Fin 2 → ℝ) :
+    gaussianPair μ σ 0 = fun q ↦ μ 0 + σ 0 * q.1 := rfl
+
+lemma gaussianPair_one (μ σ : Fin 2 → ℝ) :
+    gaussianPair μ σ 1 = fun q ↦ μ 1 + σ 1 * q.2 := rfl
+
+/-- **The pair is jointly Gaussian**, for every `r`: it is a translate of a continuous linear
+image of the Gaussian measure `bivariateNormalLaw r`. -/
+theorem hasGaussianLaw_gaussianPair (r : ℝ) (μ σ : Fin 2 → ℝ) :
+    HasGaussianLaw (fun q i ↦ gaussianPair μ σ i q) (bivariateNormalLaw r) := by
+  let L : ℝ × ℝ →L[ℝ] Fin 2 → ℝ :=
+    ContinuousLinearMap.pi ![σ 0 • ContinuousLinearMap.fst ℝ ℝ ℝ,
+      σ 1 • ContinuousLinearMap.snd ℝ ℝ ℝ]
+  have h : (fun q i ↦ gaussianPair μ σ i q) = (μ + ·) ∘ L := by
+    ext q i
+    fin_cases i <;> simp [gaussianPair, L]
+  refine ⟨?_⟩
+  rw [h, ← Measure.map_map (measurable_const_add μ) L.measurable]
+  infer_instance
+
+lemma memLp_gaussianPair (r : ℝ) (μ σ : Fin 2 → ℝ) (i : Fin 2) :
+    MemLp (gaussianPair μ σ i) 2 (bivariateNormalLaw r) := by
+  revert i
+  refine Fin.forall_fin_two.2 ⟨?_, ?_⟩
+  · rw [gaussianPair_zero]
+    exact (memLp_const (μ 0)).add ((memLp_fst_bivariateNormalLaw r).const_mul (σ 0))
+  · rw [gaussianPair_one]
+    exact (memLp_const (μ 1)).add ((memLp_snd_bivariateNormalLaw r).const_mul (σ 1))
+
+lemma integral_gaussianPair (r : ℝ) (μ σ : Fin 2 → ℝ) (i : Fin 2) :
+    ∫ q, gaussianPair μ σ i q ∂bivariateNormalLaw r = μ i := by
+  have h₀ := (memLp_fst_bivariateNormalLaw r).integrable one_le_two
+  have h₁ := (memLp_snd_bivariateNormalLaw r).integrable one_le_two
+  revert i
+  refine Fin.forall_fin_two.2 ⟨?_, ?_⟩
+  · simp [gaussianPair_zero, integral_add (integrable_const _) (h₀.const_mul _),
+      integral_const_mul, integral_fst_bivariateNormalLaw]
+  · simp [gaussianPair_one, integral_add (integrable_const _) (h₁.const_mul _),
+      integral_const_mul, integral_snd_bivariateNormalLaw]
+
+lemma variance_gaussianPair {r : ℝ} (hr : r ^ 2 ≤ 1) (μ σ : Fin 2 → ℝ) (i : Fin 2) :
+    Var[gaussianPair μ σ i; bivariateNormalLaw r] = σ i ^ 2 := by
+  revert i
+  refine Fin.forall_fin_two.2 ⟨?_, ?_⟩
+  · rw [gaussianPair_zero, variance_const_add (by fun_prop), variance_const_mul,
+      variance_fst_bivariateNormalLaw hr]
+    simp
+  · rw [gaussianPair_one, variance_const_add (by fun_prop), variance_const_mul,
+      variance_snd_bivariateNormalLaw]
+    simp
+
+/-- **The parameter `r` is the correlation of the pair**: `Cov = r σ₀ σ₁`, for every `r`. -/
+theorem covariance_gaussianPair (r : ℝ) (μ σ : Fin 2 → ℝ) :
+    cov[gaussianPair μ σ 0, gaussianPair μ σ 1; bivariateNormalLaw r] = r * σ 0 * σ 1 := by
+  have h₀ := ((memLp_fst_bivariateNormalLaw r).const_mul (σ 0)).integrable one_le_two
+  have h₁ := ((memLp_snd_bivariateNormalLaw r).const_mul (σ 1)).integrable one_le_two
+  rw [gaussianPair_zero, gaussianPair_one, covariance_const_add_left h₀,
+    covariance_const_add_right h₁, covariance_const_mul_left, covariance_const_mul_right,
+    covariance_fst_snd_bivariateNormalLaw]
+  ring
 
 end MathFin
