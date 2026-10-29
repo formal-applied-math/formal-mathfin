@@ -20,7 +20,8 @@ perturbation gives the price of European options via Black's formula with an
 `σ_B(K, f)` as a function of today's forward `f` and strike `K` (eqs. 2.17a-c):
 
 `σ_B(K,f) = α / [(fK)^((1-β)/2) · (1 + (1-β)²/24 · log²(f/K) + (1-β)⁴/1920 · log⁴(f/K) + ⋯)]
-  · (z / x(z)) · (1 + [(1-β)²/24 · α²/(fK)^(1-β) + ρβνα/4/(fK)^((1-β)/2) + (2-3ρ²)/24 · ν²] t_ex + ⋯)`
+  · (z / x(z)) · (1 + [(1-β)²/24 · α²/(fK)^(1-β)
+    + ρβνα/4/(fK)^((1-β)/2) + (2-3ρ²)/24 · ν²] t_ex + ⋯)`
 
 where `z = (ν/α)(fK)^((1-β)/2) log(f/K)` and
 `x(z) = log((√(1-2ρz+z²) + z - ρ)/(1-ρ))` (eqs. 2.17b-c).
@@ -61,7 +62,8 @@ open design question (issue #100). What is proved concerns the *printed* formula
   `d/df log (α / f^(1-β)) = (β - 1) / f` (`f, α > 0`).
 * `sabrBackbone_pos` — the backbone is positive for `α, f > 0`.
 * `sabrATMVol_bsV_gt_backbone_bsV` — whenever eq. 2.18's bracketed correction,
-  scaled by `t_ex`, is positive, the ATM Black call priced at `sabrATMVol` is
+  scaled by `t_ex`, is positive, the ATM Black call (the statement's zero-rate,
+  spot = strike = `f` instantiation, `0 < T`) priced at `sabrATMVol` is
   strictly above the same call priced at the backbone (via
   `bsV_strictMonoOn_sigma`, `BlackScholes/ImpliedVolatility.lean`).
 * `sabrATMVol_black_futures_price` — the ATM option priced, as the paper prescribes, by
@@ -110,7 +112,10 @@ theorem sabrBackbone_pos {f α : ℝ} (β : ℝ) (hf : 0 < f) (hα : 0 < α) :
 strictly exceeds the bare backbone `sabrBackbone` — and, by `bsV_strictMonoOn_sigma`
 (`BlackScholes/ImpliedVolatility.lean`, the strict monotonicity of the Black call
 price in its vol input), the ATM Black call priced at `sabrATMVol` is strictly more
-expensive than the same option priced at the backbone alone. The positivity of
+expensive than the same option priced at the backbone alone. The call compared is the
+statement's `bsV f 0 σ f T` instantiation: spot and strike both the forward `f`, rate
+`r = 0`, maturity `T` with `0 < T` (`hT`) — the same zero-rate, spot = strike = `f`
+call `sabrATMVol_black_futures_price` below spells out in full. The positivity of
 the correction is a hypothesis (`hbracket`), not proved; the conclusion is the strict
 monotonicity of the Black call in its vol, applied to `backbone < backbone · (1 + c)`. -/
 theorem sabrATMVol_bsV_gt_backbone_bsV {f α β ρ ν tex T : ℝ} (hf : 0 < f) (hα : 0 < α)
