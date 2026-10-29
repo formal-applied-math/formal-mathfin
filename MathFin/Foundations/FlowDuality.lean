@@ -170,7 +170,7 @@ lemma linAdjIm (b v ξ t s x : ℝ) :
   ring
 
 /-- The `s`-derivative of `adjRe`. -/
-lemma hasDerivAt_adjRe_s (b v ξ t x : ℝ) :
+lemma hasDerivAt_adjRe_s (b v ξ t x s : ℝ) :
     HasDerivAt (fun s => adjRe b v ξ t s x)
       ((ξ ^ 2 * v / 2) * adjRe b v ξ t s x + ξ * b * adjIm b v ξ t s x) s := by
   have he : HasDerivAt (fun s => Real.exp (-(ξ ^ 2 * v / 2) * (t - s)))
@@ -204,7 +204,7 @@ lemma hasDerivAt_adjRe_s (b v ξ t x : ℝ) :
   exact hraw
 
 /-- The `s`-derivative of `adjIm`. -/
-lemma hasDerivAt_adjIm_s (b v ξ t x : ℝ) :
+lemma hasDerivAt_adjIm_s (b v ξ t x s : ℝ) :
     HasDerivAt (fun s => adjIm b v ξ t s x)
       ((ξ ^ 2 * v / 2) * adjIm b v ξ t s x - ξ * b * adjRe b v ξ t s x) s := by
   have he : HasDerivAt (fun s => Real.exp (-(ξ ^ 2 * v / 2) * (t - s)))
@@ -257,5 +257,78 @@ lemma abs_adjRe_le {b v ξ t s x : ℝ} (hv : 0 < v) (hst : s ≤ t) :
     simpa using havg
   rw [adjRe]
   linarith [hbound, hexple]
+
+
+/-! ### The pairing layer
+
+Against a probability measure, the pairing with a bounded measurable function
+is bounded by the sup bound; the integrated identity then makes every
+admissible pairing Lipschitz-continuous in time. -/
+
+/-- The pairing of a bounded measurable function against a probability measure
+is bounded by the sup bound. -/
+lemma abs_pairing_le {μ : Measure ℝ} (hμ : IsProbabilityMeasure μ) {g : ℝ → ℝ} {C : ℝ}
+    (hmeas : Measurable g) (hg : ∀ x, |g x| ≤ C) : |∫ y, g y ∂μ| ≤ C := by
+  have h1 : |∫ y, g y ∂μ| ≤ ∫ y, |g y| ∂μ := abs_integral_le_integral_abs
+  have h2 : ∫ y, |g y| ∂μ ≤ ∫ y, C ∂μ := by
+    have hm1 : Measurable (fun y => |g y| : ℝ → ℝ) := Measurable.abs hmeas
+    refine integral_mono_of_nonneg (ae_of_all μ (fun x => abs_nonneg (g x)))
+      (integrable_const C) (ae_of_all μ hg)
+  rw [integral_const] at h2
+  simp at h2
+  linarith [h1, h2]
+
+/-- The increment of an admissible pairing over an interval, both endpoints in
+`[0, T]`: the difference of pairings is the oriented integral of the pairing
+integrand. -/
+lemma pairing_increment {b v T : ℝ} {ρ : ℝ → Measure ℝ} (hρ : IsWeakForwardFlow b v T ρ)
+    {g g' g'' g''' : ℝ → ℝ} {C0 C1 C2 C3 : ℝ}
+    (h1 : ∀ x, HasDerivAt g (g' x) x) (h2 : ∀ x, HasDerivAt g' (g'' x) x)
+    (h3 : ∀ x, HasDerivAt g'' (g''' x) x)
+    (h0 : ∀ x, |g x| ≤ C0) (hb1 : ∀ x, |g' x| ≤ C1) (hb2 : ∀ x, |g'' x| ≤ C2)
+    (hb3 : ∀ x, |g''' x| ≤ C3)
+    {s₀ s : ℝ} (hs₀ : s₀ ∈ Set.Icc 0 T) (hs : s ∈ Set.Icc 0 T) :
+    ∫ y, g y ∂(ρ s) - ∫ y, g y ∂(ρ s₀)
+      = ∫ r in s₀..s, (b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r)) := by
+  obtain ⟨hprob, hident⟩ := hρ
+  have hgc : Continuous g := continuous_iff_continuousAt.mpr fun x ↦ (h1 x).continuousAt
+  have hg'c : Continuous g' := continuous_iff_continuousAt.mpr fun x ↦ (h2 x).continuousAt
+  have hg''c : Continuous g'' := continuous_iff_continuousAt.mpr fun x ↦ (h3 x).continuousAt
+  set w : ℝ → ℝ := fun r => b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r) with hw
+  have ident : ∀ u ∈ Set.Ioc 0 T,
+      ∫ y, g y ∂(ρ u) = ∫ y, g y ∂(ρ 0) + ∫ r in (0)..u, w r ∧
+      IntervalIntegrable w volume 0 u := fun u hu =>
+    hident g g' g'' g''' C0 C1 C2 C3 h1 h2 h3 h0 hb1 hb2 hb3 u hu
+  have interior : ∀ {u₁ u₂ : ℝ}, 0 < u₁ → 0 < u₂ → u₁ ≤ T → u₂ ≤ T →
+      ∫ y, g y ∂(ρ u₂) - ∫ y, g y ∂(ρ u₁) = ∫ r in u₁..u₂, w r := by
+    intro u₁ u₂ hu₁ hu₂ hu₁T hu₂T
+    have hI1 := ident u₁ ⟨hu₁, hu₁T⟩
+    have hI2 := ident u₂ ⟨hu₂, hu₂T⟩
+    rcases le_total u₂ u₁ with hle | hle
+    · have hsub : IntervalIntegrable w volume u₂ u₁ := hI1.2.mono_set
+        (Set.uIcc_subset_uIcc (Set.mem_uIcc_of_le (le_of_lt hu₂) hle)
+          (Set.mem_uIcc_of_le (le_of_lt hu₁) le_rfl))
+      have hadd := intervalIntegral.integral_add_adjacent_intervals hI2.2 hsub
+      rw [hI2.1, hI1.1, ← hadd, intervalIntegral.integral_symm u₂ u₁]
+      ring
+    · have hsub : IntervalIntegrable w volume u₁ u₂ := hI2.2.mono_set
+        (Set.uIcc_subset_uIcc (Set.mem_uIcc_of_le (le_of_lt hu₁) hle)
+          (Set.mem_uIcc_of_le (le_of_lt hu₂) le_rfl))
+      have hadd := intervalIntegral.integral_add_adjacent_intervals hI1.2 hsub
+      rw [hI2.1, hI1.1, ← hadd]
+      ring
+  rcases eq_or_lt_of_le hs₀.1 with h0 | h0pos
+  · subst h0
+    rcases eq_or_lt_of_le hs.1 with h1eq | h1pos
+    · subst h1eq; rw [sub_self, intervalIntegral.integral_same]
+    · linarith [(ident s ⟨h1pos, hs.2⟩).1]
+  · rcases eq_or_lt_of_le hs.1 with h1eq | h1pos
+    · subst h1eq
+      have hI1 := ident s₀ ⟨h0pos, hs₀.2⟩
+      have hsym : (∫ r in s₀..(0:ℝ), w r) = -(∫ r in (0)..s₀, w r) :=
+        intervalIntegral.integral_symm 0 s₀
+      rw [hI1.1, hsym]
+      ring
+    · exact interior h0pos h1pos hs₀.2 hs.2
 
 end MathFin
