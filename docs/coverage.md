@@ -203,6 +203,107 @@ probability of Riemann sums". Not covered: an `L²` or local stochastic integral
 unbounded `f'`, unbounded coefficients, time-dependent `f(t, x)`, a random start, the formula as an
 identity of processes, a Brownian motion continuous only almost surely. Issue #309, parts 1 and 2.
 
+### The Student-t law: VaR and ES at the law (2026-10-22)
+
+Five entries added to `benchmarks/quantitative_risk_management.json`, all `full`.
+
+Mathlib has no Student-t law at the pin. `Foundations/StudentT.lean` builds it as Lebesgue measure
+with density `k_ν/∫k_ν`, `k_ν(x) = (1 + x²/ν)^(-(ν+1)/2)`, computes the normalizing constant (a
+Gamma mixture of Gaussian kernels, integrals exchanged), anchors `ν = 1` at Mathlib's
+`cauchyMeasure 0 1`, and evaluates the tail first moment. `RiskMeasures/StudentTValueAtRisk.lean`
+states VaR and ES of `μ + σT` through the library's `valueAtRisk` and `expectedShortfall`
+(McNeil, Frey and Embrechts 2015, Example 2.15); ES goes through the Acerbi–Tasche formula.
+
+| Benchmark ID | Mathematical conclusion | Lean module and declaration | Faithfulness |
+|---|---|---|---|
+| `qrm-student-t-density` | For ν > 0, the Student-t law built as Lebesgue measure with density k_ν/∫k_ν, k_ν(x) = (1 + x²/ν)^(-(ν+1)/2), has density Γ((ν+1)/2)/(√(νπ)Γ(ν/2))·(1 + x²/ν)^(-(ν+1)/2). | `MathFin/Foundations/StudentT.lean`, `MathFin.studentTPDFReal_eq` | `full` |
+| `qrm-student-t-cauchy` | The Student-t law with ν = 1 is Mathlib's standard Cauchy law: studentTMeasure 1 = cauchyMeasure 0 1. | `MathFin/Foundations/StudentT.lean`, `MathFin.studentTMeasure_one` | `full` |
+| `qrm-student-t-var` | For T ~ t_ν, σ ≥ 0 and α ∈ (0, 1): VaR_α(μ + σT) = μ + σ·t_ν⁻¹(α), with t_ν⁻¹(α) the quantile of the law. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_of_hasLaw_studentTMeasure` | `full` |
+| `qrm-student-t-es` | For T ~ t_ν, ν > 1, σ ≥ 0 and α ∈ (0, 1): ES_α(μ + σT) = μ + σ·g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α). | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.expectedShortfall_of_hasLaw_studentTMeasure` | `full` |
+| `qrm-student-t-var-le-es` | For T ~ t_ν, ν > 1 and α ∈ (0, 1): VaR_α(μ + σT) ≤ ES_α(μ + σT), the general VaR ≤ ES at the law. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure` | `full` |
+
+What is not covered:
+- `t_ν⁻¹(α)` is the generic `quantile` of the law; no closed form for it is given.
+- The same inequality read through the two closed forms,
+  `quantile_studentTMeasure_le_expectedShortfall_closedForm`, is not itself a benchmark entry.
+- The construction as the law of `Z/√(V/ν)` (independent normal and χ²) is not formalized.
+
+Verification:
+- The default `lake build` passed, including the curated `AxiomAudit.lean` (three new Student-t
+  guards) and the regenerated `AxiomAuditGen.lean`.
+- `lake lint` passed.
+- The five new entries were verified with `lake env lean`.
+
+### Fixed-income building blocks (#277; issues #69, #108; 2026-10-23)
+
+Seven `full` entries, each derived from library machinery:
+
+- **Interest-rate parity** (`no_arbitrage.json`; #108). Covered parity `F = S·e^{(r_d−r_f)T}` is
+  `forward_price_from_no_arbitrage` with the foreign zero-coupon bond as the asset
+  (`mf-covered-interest-parity`; the one-period discrete form is
+  `covered_interest_parity_discrete`). Uncovered parity in its risk-neutral form,
+  `E_Q[S_T] = S·e^{(r_d−r_f)T}`, is `expected_terminal_eq_forward` under the Garman–Kohlhagen
+  hypothesis (the physical-measure UIP is not claimed — and it is the same
+  `expected_terminal_eq_forward` as `mf-forward-price` (`benchmarks/black_scholes.json`), at drift
+  `r_d − r_f` instead of a generic `r`, not a second derivation). The agreement — `F = E_Q[S_T]`,
+  not a restatement of either closed form on its own — is `mf-covered-eq-uncovered-interest-parity`;
+  the risk-neutral half above is `uncovered_interest_parity` inside that entry's cited proof, not a
+  claim of the entry's own type.
+- **Bond forward** (`interest_rates.json`). `forward_price_from_no_arbitrage` with the
+  coupon-stripped bond as the spot (`mf-bond-forward-from-no-arbitrage`).
+- **Key-rate duration** (`interest_rates.json`; partially addresses #69). With one spot rate per
+  cashflow, the partials `∂P/∂kⱼ` sum to the parallel-shift derivative on any curve, and on a flat
+  curve with `1 + y ≠ 0` to `dP/dy` through
+  `hasDerivAt_bondPriceDisc` (`mf-key-rate-partials-sum-to-yield-derivative`). This differs from
+  #69's ask in two ways: discrete annual compounding `(1 + kⱼ)^{tⱼ}` rather than continuous
+  `exp(−rⱼTⱼ)`, and the un-normalised partials `∂P/∂kⱼ`, not the durations
+  `KRDⱼ = −(1/P)·∂P/∂kⱼ`, which this module does not define. Interpolated key-rate nodes are not
+  modelled either.
+- **Clean and dirty price** (`interest_rates.json`). For `1 + y > 0`, with next coupon `cⱼ`
+  (`j ∈ s`, `tⱼ = 1`, all `tᵢ ≥ 1`), as `f ↑ 1` the dirty price tends to the next period's dirty
+  price plus `cⱼ`, and the clean price (accruing `cⱼ`) to the next period's clean price
+  (`mf-dirty-price-drops-by-coupon`, `mf-clean-price-continuous-at-coupon-date`).
+- **Level-payment loan** (`interest_rates.json`). With principal `B₀ = annuityValue N A r Δt`
+  and period rate `e^{rΔt} − 1`, after `n ≤ N` payments the balance is
+  `annuityValue (N − n) A r Δt` (`mf-level-payment-balance-annuity`). The module's
+  `levelPaymentBalance_eq_zero` corollary (balance is zero at `N`) is not itself a benchmark
+  entry.
+
+### SABR: the ATM limit, the backbone law, the ATM Black-76 price (2026-10-22)
+
+Three `full` entries in `BlackScholes/SABRImpliedVol.lean`, on Hagan–Kumar–Lesniewski–Woodward
+(2002), answering the three items named on issue #100.
+
+- **`mf-sabr-implied-vol-atm-limit`** (`tendsto_sabrImpliedVol_atm`): the printed smile formula
+  (eq. 2.17a-c, `⋯` dropped) tends to the ATM formula (eq. 2.18) as `K → f`, `K ≠ f`, for
+  `f > 0`, `α ≠ 0`, `ν ≠ 0`, `ρ ≠ 1`. The `0/0` of `z/x(z)` at `K = f` is resolved by
+  `x(0) = 0`, `x'(0) = 1` (`hasDerivAt_sabrX_zero`); `ν = 0` is excluded (`z ≡ 0` there).
+- **`mf-sabr-backbone-law`** (`hasDerivAt_log_sabrBackbone_exp`): along `α / f^(1-β)`,
+  `d log σ / d log f = β − 1` for `α > 0`, i.e. `v ↦ log σ(e^v)` has derivative `β − 1`; it is
+  the chain rule through `exp` applied to `hasDerivAt_log_sabrBackbone`
+  (`d log σ / df = (β − 1)/f` for `f, α > 0`).
+- **`mf-sabr-atm-black76-price`** (`sabrATMVol_black_futures_price`, from
+  `black_futures_formula_atm` in `Futures/Black76.lean`): under the Black-76 hypothesis at
+  `σ = sabrATMVol f α β ρ ν T` (the vol's own `t_ex` fixed to the option's expiry `T`, not an
+  independent variable), the discounted expected ATM call payoff is `e^{−rT} f (2Φ(σ√T/2) − 1)`.
+  The hypothesis includes `σ_ATM > 0`, which is assumed, not proved.
+
+All three are about the printed formulas. Nothing is derived from the SABR SDE, and there is no
+error bound against the model's implied volatility (issue #100's `O(T²)` statement stays open).
+
+### A mean–variance KKT point and the mean–standard-deviation tradeoff (2026-10-27)
+
+One entry added, `mf-mean-variance-kkt-mean-sd-tradeoff` (`full`).
+
+`Portfolio/PosSemidefCauchySchwarz.lean` states the tradeoff form of the Markowitz mean–variance
+problem (`pricedReturn_le_of_kkt`): a KKT point `x1` (stationarity, dual feasibility,
+complementary slackness) of `min −μ ⬝ᵥ x + (t₁/2) · x ⬝ᵥ (Sig *ᵥ x)` with `Sig` PSD and `t₁ ≥ 0`
+maximizes the mean–standard-deviation objective `μ ⬝ᵥ y − t₁·√(x1 ⬝ᵥ (Sig *ᵥ x1))·√(y ⬝ᵥ (Sig *ᵥ y))`
+over the whole feasible set. The cross term is bounded by Cauchy–Schwarz for the semi-inner
+product `u ⬝ᵥ (Sig *ᵥ v)` (`posSemidef_cauchySchwarz`, a completed-square proof). As in
+`ConvexQPKKT`'s sufficiency, `x1`'s own feasibility is not assumed (complementary slackness alone
+forces `u k = 0` where `x1` violates the constraint). KKT necessity is not claimed.
+
 ### Every module connected: the coherence pass (2026-10-21)
 
 A coherence pass found 41 modules that imported nothing from the library and that nothing

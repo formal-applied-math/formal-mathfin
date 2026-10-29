@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 import MathFin
 
@@ -396,6 +396,18 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.sharpeRatio_affine_invariant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.sharpeRatio_affine_invariant
+
+/-- info: 'MathFin.studentTMeasure_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.studentTMeasure_one
+
+/-- info: 'MathFin.studentTPDFReal_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.studentTPDFReal_eq
+
+/-- info: 'MathFin.expectedShortfall_of_hasLaw_studentTMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.expectedShortfall_of_hasLaw_studentTMeasure
 
 /-! ## Certified cross-domain bridges -/
 
@@ -2219,5 +2231,56 @@ maturity iff total variance does; the raw-SVI family form. -/
 /-- info: 'MathFin.SVI.bsSmile_calendar_free_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.SVI.bsSmile_calendar_free_iff
+
+/-! ### SABR: the ATM limit, the backbone law, the ATM Black-76 price (2026-10-22)
+
+Hagan–Kumar–Lesniewski–Woodward 2002. `tendsto_sabrImpliedVol_atm`: the printed smile formula
+(eq. 2.17a-c, `⋯` dropped) tends to the ATM formula (eq. 2.18) as `K → f`, `K ≠ f`, the `0/0`
+of `z/x(z)` resolved by `x'(0) = 1`. `hasDerivAt_log_sabrBackbone`: along `α / f^(1-β)`,
+`d log σ / df = (β − 1)/f`; `hasDerivAt_log_sabrBackbone_exp`: the log-log form
+`d log σ / d log f = β − 1`. `sabrATMVol_black_futures_price`: Black-76 at eq. 2.18's vol, from
+`black_futures_formula_atm`. The singular-perturbation derivation and any error bound against
+the SABR model are not proved. -/
+
+/-- info: 'MathFin.tendsto_sabrImpliedVol_atm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.tendsto_sabrImpliedVol_atm
+
+/-- info: 'MathFin.hasDerivAt_log_sabrBackbone' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.hasDerivAt_log_sabrBackbone
+
+/-- info: 'MathFin.hasDerivAt_log_sabrBackbone_exp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.hasDerivAt_log_sabrBackbone_exp
+
+/-- info: 'MathFin.sabrATMVol_black_futures_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.sabrATMVol_black_futures_price
+
+/-! ### Dupire: the distributional headline and the pointwise Thm 9.5 (2026-10-25)
+
+Bagaria ch. 9, zero rates, on the driftless Itô process `X = c + M` with `M` a hypothesized
+version of `∫δ dB` (pinned to the CLM integral a.e. at each `t` by `hMeq`). `dupire_weak` (Thm 9.5 ∘
+Thm 9.7 in distributional form): for every smooth compactly supported strike density `ψ`,
+`d/dT ∫ ψ(K) C(T, K) dK = ½ · 𝔼[ψ(X_T) · b̂²(T, X_T)]` — together with `breedenLitzenberger_weak`
+this is `∂_T C = ½ · b̂²(T, ·) · ∂²_K C` in `D'(ℝ_K)`, with no density, no Tanaka formula and no
+regularity hypothesis on the call surface: the payoff `(x − K)⁺`, not `C²`, is smeared against
+`ψ` first (Carr–Madan spanning). `dupire_pointwise` (Thm 9.5 proper): when `σloc(K)²·K²` is a
+continuous version of `𝔼[δ_t² | X_t = K]` on a strike window, `σloc(K)² = 2·∂_T C / (K²·∂²_K C)`
+at every strike with `C_KK > 0`, the regularity of the defined `callSurface` carried as
+hypotheses, never derived. The weak forward equation consumed here
+(`GyongyMimicry.marginal_flow_weak_equation_fn_constructed`) is pinned transitively through the
+`dupire_weak` guard; the mimicry-existence direction (`GyongyMimicry.gyongy_mimicry_gated`) has
+no guard in this audit. Nonzero rates and the lognormal flat-vol check are outside the
+bounded-coefficient process class. -/
+
+/-- info: 'MathFin.Dupire.dupire_weak' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Dupire.dupire_weak
+
+/-- info: 'MathFin.Dupire.dupire_pointwise' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Dupire.dupire_pointwise
 
 end MathFin.AxiomAudit

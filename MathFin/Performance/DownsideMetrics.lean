@@ -117,6 +117,11 @@ private theorem listMaximum_nonneg (xs : List ℝ) : 0 ≤ listMaximum xs := by
   | nil => exact le_rfl
   | cons x xs ih => exact ih.trans (le_max_right _ _)
 
+/-- Every member of a list is at most its `listMaximum`. -/
+theorem le_listMaximum {x : ℝ} : ∀ {xs : List ℝ}, x ∈ xs → x ≤ listMaximum xs
+  | _ :: _, .head _ => le_max_left _ _
+  | _ :: _, .tail _ h => (le_listMaximum h).trans (le_max_right _ _)
+
 private theorem listMaximum_map_mul (c : ℝ) (hc : 0 ≤ c) (xs : List ℝ) :
     listMaximum (xs.map fun x => c * x) = c * listMaximum xs := by
   induction xs with
