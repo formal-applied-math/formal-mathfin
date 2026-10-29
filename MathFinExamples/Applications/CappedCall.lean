@@ -29,7 +29,7 @@ payoff, not from any property of `Φ`; `BSMarket.call_sub_mem_Icc` states it.
 ## What the library supplies
 
 * `MathFin.Contracts.cappedCall`, `cappedCall_payoff_eq`: the contract and its payoff.
-* `MathFin.Contracts.value_cappedCall`: its Black–Scholes value.
+* `MathFin.Contracts.BlackScholes.value_cappedCall`: its Black–Scholes value.
 * `MathFin.BSCallHyp.of_isPreBrownian`: the model certificate, from a pre-Brownian motion.
 * `MathFin.Contracts.Contract.pathPV_const`: a constant discount comes out of a present value.
 
@@ -118,7 +118,7 @@ noncomputable def normal (m : BSMarket Q) (T : ℝ≥0) : Ω → ℝ :=
 
 /-- The index, read off at `T`. -/
 noncomputable def index (m : BSMarket Q) (T : ℝ≥0) : Unit → ℝ≥0 → Ω → ℝ :=
-  bsAssets m.spot m.rate m.vol T (m.normal T)
+  BlackScholes.assets m.spot m.rate m.vol T (m.normal T)
 
 /-- The discount factor to `T`, as the constant curve the pricing theorems take: every cashflow
 of the contracts priced here falls at `T`. -/
@@ -160,7 +160,7 @@ theorem value_contract [IsProbabilityMeasure Q] (c : CappedCallSheet)
     (m : BSMarket Q) :
     c.contract.value Q (m.discountTo c.maturity) (m.index c.maturity)
       = m.call c.strike c.maturity - m.call c.cap c.maturity :=
-  value_cappedCall (m.certificate c.strike_pos c.maturity_pos)
+  BlackScholes.value_cappedCall (m.certificate c.strike_pos c.maturity_pos)
     (m.certificate (c.strike_pos.trans_le c.strike_le_cap) c.maturity_pos)
 
 /-- **The price respects the payoff's bounds.** The payoff lies between `0` and `cap − strike` in

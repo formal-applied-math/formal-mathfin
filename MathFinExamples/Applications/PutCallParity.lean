@@ -32,8 +32,8 @@ spot and rate, whatever its volatility, prices both quotes.
   in every scenario.
 * `MathFin.Contracts.value_europeanCall_eq_put_add_forward`: so it is worth the put plus the
   forward, in any model where both are integrable.
-* `MathFin.Contracts.value_forward`: the forward's Black–Scholes value.
-* The closed forms `MathFin.Contracts.value_europeanCall` and `value_europeanPut` are not
+* `MathFin.Contracts.BlackScholes.value_forward`: the forward's Black–Scholes value.
+* The closed forms `MathFin.Contracts.BlackScholes.value_europeanCall` and `value_europeanPut` are not
   needed: parity goes through `value_forward`, so the check holds whatever the volatility.
 
 ## What it does not
@@ -113,9 +113,9 @@ driver price the call and the put, at the sheet's spot and rate, at exactly the 
 def IsBSConsistent (q : QuoteSheet) (Q : Measure Ω) : Prop :=
   ∃ σ > 0, ∃ Z : Ω → ℝ, HasLaw Z (gaussianReal 0 1) Q ∧
     (europeanCall q.strike q.maturity).value Q (fun _ ↦ q.discount)
-        (bsAssets q.spot q.rate σ q.maturity Z) = q.call ∧
+        (BlackScholes.assets q.spot q.rate σ q.maturity Z) = q.call ∧
       (europeanPut q.strike q.maturity).value Q (fun _ ↦ q.discount)
-        (bsAssets q.spot q.rate σ q.maturity Z) = q.put
+        (BlackScholes.assets q.spot q.rate σ q.maturity Z) = q.put
 
 /-- **Put–call parity, through the contracts.** If a Black–Scholes market prices both quotes, the
 parity gap is `0`: the call is worth the put plus the forward
@@ -127,10 +127,10 @@ theorem parityGap_eq_zero {q : QuoteSheet} {Q : Measure Ω} [IsProbabilityMeasur
   have hBS : BSCallHyp Q q.spot q.strike q.rate σ q.maturity Z :=
     ⟨q.spot_pos, q.strike_pos, hσ, NNReal.coe_pos.mpr q.maturity_pos, hZ⟩
   have hparity := value_europeanCall_eq_put_add_forward Q _ _
-    (integrable_europeanPut_pathPV hZ q.spot q.strike q.rate σ q.maturity)
-    (integrable_forward_pathPV hZ q.spot q.strike q.rate σ q.maturity)
+    (BlackScholes.integrable_europeanPut_pathPV hZ q.spot q.strike q.rate σ q.maturity)
+    (BlackScholes.integrable_forward_pathPV hZ q.spot q.strike q.rate σ q.maturity)
   rw [discount] at hC hP
-  rw [hC, hP, value_forward hBS] at hparity
+  rw [hC, hP, BlackScholes.value_forward hBS] at hparity
   rw [parityGap, discount, hparity]
   ring
 

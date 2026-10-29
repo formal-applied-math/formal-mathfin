@@ -1922,8 +1922,8 @@ pricing-measure theorems were conditioned on a hypothesis with no exhibited witn
 
 /-! ### The contracts tower: pricing by composition, not by a third integral (2026-08-17)
 
-`MathFin/Contracts/{Core,Adapted,Pricing,Instruments/Options,Models/BlackScholes}.lean` separates a payoff's
-*meaning* — reified as `Payoff`/`Contract` data, independent of any stochastic model — from the
+`MathFin/Contracts/` (the language in `Core`, `Adapted` and `Pricing`; the instruments in
+`Instruments/`; one file per model in `Models/`) separates a payoff's *meaning* — reified as `Payoff`/`Contract` data, independent of any stochastic model — from the
 model that prices it. Every payoff elsewhere in this library is written inline as a lambda inside
 the integral that prices it, so the payoff and the model are the same syntactic object; here they
 are not, and that separation is what buys the capped call its headline: `cappedCall K₁ K₂ T` is
@@ -1931,10 +1931,16 @@ are not, and that separation is what buys the capped call its headline: `cappedC
 the composed object really pays `min(max(S − K₁, 0), K₂ − K₁)`, and `value_cappedCall` prices it as
 the *difference of two already-proved `europeanCall` values* — by `Contract.value_both` and
 `Contract.value_scale` alone, with no integral touched a third time. The instruments and what they
-pay are in `Contracts/Instruments/Options.lean`, with no model; `Contracts/Models/BlackScholes.lean` prices them, and
-reduces each of `europeanCall`, `europeanPut` and `digitalCall` to the library's existing closed
+pay are in `Contracts/Instruments/Options.lean`, with no model; `Contracts/Models/BlackScholes.lean`
+prices them, and reduces each of `europeanCall`, `europeanPut` and `digitalCall` to the library's existing closed
 forms exactly once; every composed instrument built from them afterward prices by algebra on those
 three values rather than by a fresh integration argument.
+
+A second model prices the same terms (2026-10-28). `Contracts/Models/Binomial.lean` reads the
+underlying off coin-flip paths and gives each European payoff its tree price; there every contract
+is integrable, because the model is bounded (`Contract.integrable_pathPV_of_bounded`).
+`tendsto_binomial_value_europeanCall` then shows that `europeanCall K T`, one term, has CRR values
+converging to its Black–Scholes value. The contract stays fixed and only the model moves.
 
 The layered design and the framing "the contract is not the model" are due to Paul Bilokon, *The
 Contract Is Not the Model* (working paper, 9 August 2026), with code at
@@ -1945,9 +1951,13 @@ module's `## Source` section for the full credit line. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.cappedCall_payoff_eq
 
-/-- info: 'MathFin.Contracts.value_cappedCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.Contracts.BlackScholes.value_cappedCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.Contracts.value_cappedCall
+#print axioms MathFin.Contracts.BlackScholes.value_cappedCall
+
+/-- info: 'MathFin.Contracts.tendsto_binomial_value_europeanCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.tendsto_binomial_value_europeanCall
 
 /-! ### The bracket is conditional (2026-08-27)
 

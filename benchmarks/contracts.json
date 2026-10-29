@@ -72,14 +72,14 @@
       "description": "The reified European call contract europeanCall K T -- a Payoff literally built from max, sub, obs and const nodes rather than an inline lambda -- prices under the single-asset Black-Scholes model to the closed-form call formula S_0 Phi(d_1) - K e^{-rT} Phi(d_2). The proof reduces Contract.value to the exact integral MathFin.bs_call_formula already computes; no new Black-Scholes content is proved here.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Contracts.Models.BlackScholes\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The reified European call prices to the Black-Scholes call formula. -/\ntheorem value_europeanCall' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :\n    (europeanCall K T).value Q (fun _ ↦ Real.exp (-r * T)) (bsAssets S_0 r σ T Z)\n      = S_0 * Phi (bsd1 S_0 K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) :=\n  MathFin.Contracts.value_europeanCall h\n"
+        "lean": "import MathFin.Contracts.Models.BlackScholes\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The reified European call prices to the Black-Scholes call formula. -/\ntheorem value_europeanCall' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :\n    (europeanCall K T).value Q (fun _ ↦ Real.exp (-r * T)) (BlackScholes.assets S_0 r σ T Z)\n      = S_0 * Phi (bsd1 S_0 K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) :=\n  MathFin.Contracts.BlackScholes.value_europeanCall h\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Black-Scholes European call formula (Hull 15.6, Shreve 4.5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. value_europeanCall in MathFin/Contracts/Models/BlackScholes.lean: Contract.value_pay unfolds Contract.value on a single pay node to the discounted payoff integral, then MathFin.bs_call_formula closes it directly -- no new Black-Scholes content, the whole content is the reduction. bsAssets is constant in t and equal to the terminal log-normal price bsTerminal at every time (no path is supplied), under the BSCallHyp integrability/law hypothesis bundle the underlying closed form already requires. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
+        "formalization_scope": "Full formal proof. value_europeanCall in MathFin/Contracts/Models/BlackScholes.lean: Contract.value_pay unfolds Contract.value on a single pay node to the discounted payoff integral, then MathFin.bs_call_formula closes it directly -- no new Black-Scholes content, the whole content is the reduction. BlackScholes.assets is constant in t and equal to the terminal log-normal price bsTerminal at every time (no path is supplied), under the BSCallHyp integrability/law hypothesis bundle the underlying closed form already requires. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
       }
     },
     {
@@ -88,14 +88,14 @@
       "description": "The reified European put contract europeanPut K T prices under the single-asset Black-Scholes model to the closed-form put formula K e^{-rT} Phi(-d_2) - S_0 Phi(-d_1). The proof reduces Contract.value to the exact integral MathFin.bs_put_formula already computes; no new Black-Scholes content is proved here.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Contracts.Models.BlackScholes\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The reified European put prices to the Black-Scholes put formula. -/\ntheorem value_europeanPut' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :\n    (europeanPut K T).value Q (fun _ ↦ Real.exp (-r * T)) (bsAssets S_0 r σ T Z)\n      = K * Real.exp (-r * T) * Phi (-(bsd2 S_0 K r σ T)) - S_0 * Phi (-(bsd1 S_0 K r σ T)) :=\n  MathFin.Contracts.value_europeanPut h\n"
+        "lean": "import MathFin.Contracts.Models.BlackScholes\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The reified European put prices to the Black-Scholes put formula. -/\ntheorem value_europeanPut' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :\n    (europeanPut K T).value Q (fun _ ↦ Real.exp (-r * T)) (BlackScholes.assets S_0 r σ T Z)\n      = K * Real.exp (-r * T) * Phi (-(bsd2 S_0 K r σ T)) - S_0 * Phi (-(bsd1 S_0 K r σ T)) :=\n  MathFin.Contracts.BlackScholes.value_europeanPut h\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Black-Scholes European put formula (Hull 16.6, Shreve 4.5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. value_europeanPut in MathFin/Contracts/Models/BlackScholes.lean: the same Contract.value_pay reduction as the call, closed by MathFin.bs_put_formula -- no new Black-Scholes content, the whole content is the reduction. bsAssets is constant in t and equal to the terminal log-normal price bsTerminal at every time (no path is supplied), under the BSCallHyp integrability/law hypothesis bundle the underlying closed form already requires. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
+        "formalization_scope": "Full formal proof. value_europeanPut in MathFin/Contracts/Models/BlackScholes.lean: the same Contract.value_pay reduction as the call, closed by MathFin.bs_put_formula -- no new Black-Scholes content, the whole content is the reduction. BlackScholes.assets is constant in t and equal to the terminal log-normal price bsTerminal at every time (no path is supplied), under the BSCallHyp integrability/law hypothesis bundle the underlying closed form already requires. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
       }
     },
     {
@@ -104,14 +104,14 @@
       "description": "The reified cash-or-nothing digital call digitalCall K T -- pays 1 at T iff S_T > K -- prices under the single-asset Black-Scholes model to e^{-rT} Phi(d_2). The proof reduces Contract.value to the exact integral MathFin.bs_cash_or_nothing_formula already computes; no new Black-Scholes content is proved here.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Contracts.Models.BlackScholes\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The reified cash-or-nothing digital call prices to the Black-Scholes\ncash-or-nothing formula. -/\ntheorem value_digitalCall' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :\n    (digitalCall K T).value Q (fun _ ↦ Real.exp (-r * T)) (bsAssets S_0 r σ T Z)\n      = Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) :=\n  MathFin.Contracts.value_digitalCall h\n"
+        "lean": "import MathFin.Contracts.Models.BlackScholes\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The reified cash-or-nothing digital call prices to the Black-Scholes\ncash-or-nothing formula. -/\ntheorem value_digitalCall' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :\n    (digitalCall K T).value Q (fun _ ↦ Real.exp (-r * T)) (BlackScholes.assets S_0 r σ T Z)\n      = Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) :=\n  MathFin.Contracts.BlackScholes.value_digitalCall h\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Cash-or-nothing digital option pricing (Hull 26.4). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. value_digitalCall in MathFin/Contracts/Models/BlackScholes.lean: the same Contract.value_pay reduction, closed by MathFin.bs_cash_or_nothing_formula -- no new Black-Scholes content, the whole content is the reduction. bsAssets is constant in t and equal to the terminal log-normal price bsTerminal at every time (no path is supplied), under the BSCallHyp integrability/law hypothesis bundle the underlying closed form already requires. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
+        "formalization_scope": "Full formal proof. value_digitalCall in MathFin/Contracts/Models/BlackScholes.lean: the same Contract.value_pay reduction, closed by MathFin.bs_cash_or_nothing_formula -- no new Black-Scholes content, the whole content is the reduction. BlackScholes.assets is constant in t and equal to the terminal log-normal price bsTerminal at every time (no path is supplied), under the BSCallHyp integrability/law hypothesis bundle the underlying closed form already requires. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
       }
     },
     {
@@ -136,7 +136,7 @@
       "description": "The capped call's Black-Scholes value -- the price of cappedCall K1 K2 T under the single-asset Black-Scholes model -- is the difference of the two europeanCall closed forms, obtained by Contract.value_both and Contract.value_scale applied to value_europeanCall twice: composition, not a third integral, produces the price. The integrability hypotheses Contract.value_both would otherwise need are discharged internally (domination against the terminal asset price's Gaussian MGF), not left for the caller to supply.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Contracts.Models.BlackScholes\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The capped call's Black-Scholes value is the difference of the two European\ncall values, by composition -- no integral is touched a third time. -/\ntheorem value_cappedCall' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K₁ K₂ r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ}\n    (h₁ : BSCallHyp Q S_0 K₁ r σ T Z) (h₂ : BSCallHyp Q S_0 K₂ r σ T Z) :\n    (cappedCall K₁ K₂ T).value Q (fun _ ↦ Real.exp (-r * T)) (bsAssets S_0 r σ T Z)\n      = (S_0 * Phi (bsd1 S_0 K₁ r σ T) - K₁ * Real.exp (-r * T) * Phi (bsd2 S_0 K₁ r σ T))\n      - (S_0 * Phi (bsd1 S_0 K₂ r σ T) - K₂ * Real.exp (-r * T) * Phi (bsd2 S_0 K₂ r σ T)) :=\n  MathFin.Contracts.value_cappedCall h₁ h₂\n"
+        "lean": "import MathFin.Contracts.Models.BlackScholes\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The capped call's Black-Scholes value is the difference of the two European\ncall values, by composition -- no integral is touched a third time. -/\ntheorem value_cappedCall' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K₁ K₂ r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ}\n    (h₁ : BSCallHyp Q S_0 K₁ r σ T Z) (h₂ : BSCallHyp Q S_0 K₂ r σ T Z) :\n    (cappedCall K₁ K₂ T).value Q (fun _ ↦ Real.exp (-r * T)) (BlackScholes.assets S_0 r σ T Z)\n      = (S_0 * Phi (bsd1 S_0 K₁ r σ T) - K₁ * Real.exp (-r * T) * Phi (bsd2 S_0 K₁ r σ T))\n      - (S_0 * Phi (bsd1 S_0 K₂ r σ T) - K₂ * Real.exp (-r * T) * Phi (bsd2 S_0 K₂ r σ T)) :=\n  MathFin.Contracts.BlackScholes.value_cappedCall h₁ h₂\n"
       },
       "metadata": {
         "chapter": 9,
@@ -144,6 +144,70 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. value_cappedCall in MathFin/Contracts/Models/BlackScholes.lean: cappedCall K1 K2 T's Contract.value under the single-asset Black-Scholes model is exactly the difference of the two value_europeanCall closed forms, by Contract.value_both and Contract.value_scale applied to value_europeanCall twice and closed by ring -- Contract.value is never unfolded and no integral is touched a third time. The Integrable hypotheses Contract.value_both needs are discharged internally by integrable_europeanCall_pathPV (the positive part of S_T − K, with the terminal asset price bsTerminal integrable as a function of a standard normal), so the caller supplies only the BSCallHyp bundle each leg's value_europeanCall already needs -- a real strengthening over the bare linearity lemma, which would otherwise leave two Integrable side-conditions for the caller. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-bounded-model-integrable",
+      "name": "Every Contract Is Integrable in a Bounded Model",
+      "description": "In a model whose every coordinate X i t is measurable and bounded, every Contract's discounted pathwise payoff is integrable against any finite measure, so the additivity of Contract.value applies to any two contracts with no per-instrument integrability argument. Lognormal models such as Black-Scholes are not bounded and are not covered.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Adapted\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin.Contracts\n\nvariable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- In a measurable, bounded model every contract's discounted payoff is integrable. -/\ntheorem integrable_pathPV_of_bounded' {Q : Measure Ω} [IsFiniteMeasure Q]\n    (D : ℝ≥0 → ℝ) {X : ι → ℝ≥0 → Ω → ℝ} (hXm : ∀ i t, Measurable (X i t))\n    (hXb : ∀ i t, ∃ C, ∀ ω, |X i t ω| ≤ C) (c : Contract ι) :\n    Integrable (fun ω ↦ c.pathPV D (fun i t ↦ X i t ω)) Q :=\n  Contract.integrable_pathPV_of_bounded D hXm hXb c\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Contract.integrable_pathPV_of_bounded in MathFin/Contracts/Adapted.lean: structural induction over Contract (zero, pay, both, scale), with each pay leg bounded by Payoff.exists_bound_eval (a structural induction over Payoff: each binary constructor combines two bounds, an indicator is bounded by 1) and measurable by Payoff.measurable_eval, then Integrable.of_bound. Requires every coordinate X i t to be bounded uniformly in the outcome, at every time; the binomial tree satisfies this, lognormal models do not. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-binomial-european-payoff",
+      "name": "A European Payoff's Binomial Value Is Its Tree Price",
+      "description": "In the binomial model with step length h and per-step rate rho (paths of i.i.d. coin flips that go up with probability q = crrUpProb u d rho, the underlying at time t the spot after floor(t/h) flips, cash discounted by e^(-rho t/h)), a single cash flow at a maturity T with T/h = N, paying g of the underlying at T, is worth the N-step backward-induction price binomialPrice u d rho g N S0. Only q in [0, 1] is assumed, not no-arbitrage.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.Binomial\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- A European payoff's value in the binomial model is its tree price. -/\ntheorem value_pay_eq_binomialPrice' {u d ρ h : ℝ} {q : ℝ≥0} (hq : q ≤ 1)\n    (hqcrr : crrUpProb u d ρ = q) (S₀ : ℝ) {T : ℝ≥0} {N : ℕ} (hTN : (T : ℝ) / h = N)\n    {a : Payoff Unit} {g : ℝ → ℝ} (hg : ∀ s : Scenario Unit, a.eval s = g (s () T)) :\n    (Contract.pay T a).value (coinFlipMeasure q hq) (Binomial.discount ρ h)\n        (Binomial.assets S₀ u d h)\n      = binomialPrice u d ρ g N S₀ :=\n  Binomial.value_pay_eq_binomialPrice hq hqcrr S₀ hTN hg\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cox, Ross and Rubinstein, Option pricing: a simplified approach (J. Financial Economics, 1979); Shreve, Stochastic Calculus for Finance I, ch. 1-2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Binomial.value_pay_eq_binomialPrice in MathFin/Contracts/Models/Binomial.lean: Contract.value_pay reduces the contract's value to the integral of its discounted payoff, the hypothesis hg identifies that payoff with g of the spot after N flips, and binomialPrice_eq_integral_coinFlipMeasure (MathFin/Binomial/PathMeasure.lean, the tree price as an expectation over Ionescu-Tulcea coin-flip paths) closes it. The payoff must depend on the underlying at T only; path-dependent payoffs are expressible in the model but not priced here. Single underlying. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-binomial-capped-call",
+      "name": "Capped Call in the Binomial Model by Composition",
+      "description": "In the binomial model, the capped call cappedCall K1 K2 T (a long call at K1 and a short call at K2) is worth the difference of the two N-step tree call prices, for any strikes. It is priced by composition (Contract.value_both and Contract.value_scale), and the integrability that composition needs holds for every contract in the binomial model.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.Binomial\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- The capped call's binomial value is the difference of two tree call prices. -/\ntheorem value_cappedCall_binomial' {u d ρ h : ℝ} {q : ℝ≥0} (hq : q ≤ 1)\n    (hqcrr : crrUpProb u d ρ = q) (S₀ K₁ K₂ : ℝ) {T : ℝ≥0} {N : ℕ}\n    (hTN : (T : ℝ) / h = N) :\n    (cappedCall K₁ K₂ T).value (coinFlipMeasure q hq) (Binomial.discount ρ h)\n        (Binomial.assets S₀ u d h)\n      = binomialPrice u d ρ (fun S ↦ max (S - K₁) 0) N S₀\n        - binomialPrice u d ρ (fun S ↦ max (S - K₂) 0) N S₀ :=\n  Binomial.value_cappedCall hq hqcrr S₀ K₁ hTN K₂\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Capped call / bull spread decomposition (Hull 12.3); Cox, Ross and Rubinstein (1979). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Binomial.value_cappedCall in MathFin/Contracts/Models/Binomial.lean: Contract.value_both and Contract.value_scale split the composed contract, Binomial.integrable_pathPV discharges both integrability side conditions (the spot after finitely many flips is measurable and bounded, so Contract.integrable_pathPV_of_bounded applies to every contract), and Binomial.value_europeanCall prices each leg. The same contract term is priced in Black-Scholes by mf-contract-capped-call-value. Single underlying, observing only at T. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-binomial-to-black-scholes",
+      "name": "One Contract in Two Models: CRR Value Converges to Black-Scholes Value",
+      "description": "The European call europeanCall K T, a single contract term, priced in the n-step Cox-Ross-Rubinstein tree over [0, T] (step T/n, per-step rate rT/n, up and down factors e^(+-sigma sqrt(T/n)), up-probability crrProb r sigma T n), has values that converge as n -> infinity to its value in the Black-Scholes model, under the Black-Scholes hypotheses (S0, K, sigma, T > 0, standard normal driver) and |r| sqrt(T) < sigma.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.BinomialLimit\n\nopen MeasureTheory Filter\nopen scoped NNReal Topology\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The call's value in the n-step CRR tree tends to its Black-Scholes value. -/\ntheorem tendsto_binomial_value_europeanCall' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S₀ K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (hbs : BSCallHyp Q S₀ K r σ T Z)\n    (hrT : |r| * Real.sqrt T < σ) :\n    Tendsto (fun n : ℕ ↦ (europeanCall K T).value\n        (coinFlipMeasure (crrProb r σ T n).toNNReal (Real.toNNReal_le_one.mpr\n          (crrProb_mem_Icc (fun _ hn ↦ binomialNoArb_crr hbs.T_pos hrT hn) n).2))\n        (Binomial.discount (crrPerStepRate r T n) (crrStep T n))\n        (Binomial.assets S₀ (crrUp σ T n) (crrDown σ T n) (crrStep T n))) atTop\n      (𝓝 ((europeanCall K T).value Q (fun _ ↦ Real.exp (-r * T))\n        (BlackScholes.assets S₀ r σ T Z))) :=\n  tendsto_binomial_value_europeanCall hbs hrT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cox, Ross and Rubinstein, Option pricing: a simplified approach (J. Financial Economics, 1979); Hull, Options, Futures and Other Derivatives, ch. 13. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. tendsto_binomial_value_europeanCall in MathFin/Contracts/Models/BinomialLimit.lean composes three proved results: Binomial.value_europeanCall (each tree value is the n-step tree price, using T / (T/n) = n), binomialPrice_call_tendsto_bs_closed (MathFin/Binomial/CRRCharFun.lean and CRRClosedForm.lean: the CRR call prices converge to the Black-Scholes closed form, by characteristic functions, Levy continuity and put-call parity), and BlackScholes.value_europeanCall (that closed form is the Black-Scholes value of the same contract). The condition |r| sqrt(T) < sigma makes every tree with n >= 1 arbitrage-free (binomialNoArb_crr) and, with the degenerate n = 0 tree, keeps every up-probability in [0, 1] (crrProb_mem_Icc). European call only; no rate of convergence. Axioms-clean."
       }
     }
   ]
