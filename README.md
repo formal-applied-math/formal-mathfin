@@ -142,11 +142,11 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   discounted price is a martingale started at $`S_0`$ (with $`D(0) = 1`$), the forward is
   worth $`S_0 - K D(T)`$ and a call less a put is worth the same
   ([`value_europeanCall_sub_put_of_martingale`](MathFin/Contracts/Parity.lean)). Under a
-  stochastic discount factor $`D_t = e^{-\int_0^t r_s\,ds}`$, a schedule of fixed cash flows is
-  worth its value on the zero curve $`P(0, t) = \mathbb{E}[D_t]`$
+  stochastic discount factor $`D_t`$, integrable at the payment dates, a schedule of fixed cash
+  flows is worth its value on the zero curve $`P(0, t) = \mathbb{E}[D_t]`$
   ([`valueDisc_fixedFlows_eq_value`](MathFin/Contracts/Models/ShortRate.lean)), so a coupon bond
-  in the Vasicek, Hull–White and two-piece GSR models is worth the sum of those models' bond
-  prices.
+  discounted by $`e^{-\int_0^t r_s\,ds}`$ in the Vasicek, Hull–White and two-piece GSR models
+  is worth the sum of those models' bond prices.
 
 ## Contents
 

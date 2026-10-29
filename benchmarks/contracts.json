@@ -399,7 +399,7 @@
         "reference": "Vasicek, An equilibrium characterization of the term structure, J. Financial Economics 5 (1977); Brigo and Mercurio (2006), sec. 3.2.1. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. valueDisc_fixedFlows_vasicek in MathFin/Contracts/Models/ShortRate.lean: valueDisc_fixedFlows_of_zeroCurve_eq at the curve A(t) exp(-B(t) r0), which is vasicekBondPrice_affine (the Gaussian Laplace transform of the integrated rate). Integrability of each discount factor follows from its integral being positive (Integrable.of_integral_ne_zero). The integrated rate is the Wiener representation vasicekIntegratedRate; that it is the time integral of a solution of the Vasicek SDE is VasicekSDEGaussian's, not restated. Time-0 prices only; P(t, T) for t > 0 is not formalized. Axioms-clean."
+        "formalization_scope": "Full formal proof. valueDisc_fixedFlows_vasicek in MathFin/Contracts/Models/ShortRate.lean: valueDisc_fixedFlows_of_zeroCurve_eq at the curve A(t) exp(-B(t) r0), which is vasicekBondPrice_affine (the Gaussian Laplace transform of the integrated rate). Integrability of each discount factor follows from its integral being positive (Integrable.of_integral_ne_zero). The integrated rate is taken in its Wiener representation (vasicekIntegratedRate); it is not derived here as the time integral of a solution of the Vasicek SDE. Time-0 prices only; P(t, T) for t > 0 is not formalized. Axioms-clean."
       }
     },
     {
