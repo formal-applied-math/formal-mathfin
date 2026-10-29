@@ -730,9 +730,12 @@ import MathFin.Contracts.Core
 import MathFin.Contracts.Adapted
 import MathFin.Contracts.Pricing
 import MathFin.Contracts.Instruments.Options
+import MathFin.Contracts.Instruments.FixedIncome
+import MathFin.Contracts.Parity
 import MathFin.Contracts.Models.BlackScholes
 import MathFin.Contracts.Models.Binomial
 import MathFin.Contracts.Models.BinomialLimit
+import MathFin.Contracts.Risk
 
 -- Execution: market microstructure — the Glosten-Milgrom adverse-selection
 -- spread, plus a six-point model witnessing that its hypotheses are satisfiable

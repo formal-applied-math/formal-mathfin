@@ -130,6 +130,45 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-29 — corpus 705, modules 651 — the contract in any model, bonds and swaps, and the risk of a position
+
+Scope: the three contracts items after the binomial hedge. Nine entries were added to `contracts.json` (all `full`); corpus 696 → 705. Three modules were added: `Contracts/Parity.lean`, `Contracts/Instruments/FixedIncome.lean` and `Contracts/Risk.lean`.
+
+### Upgrades executed
+
+- **Model-free first, models as instances.**
+  - The forward and put–call parity are proved in any model whose discounted price is a martingale started at `S₀` with `D(0) = 1` (`value_forward_of_martingale`, `value_europeanCall_sub_put_of_martingale`).
+  - The put's integrability follows from the underlying's, so neither option carries an integrability hypothesis.
+  - `BlackScholes.value_forward` is now an instance of `value_forward_of_integral`, not a separate computation.
+- **The library's fixed-income prices are contract values.** A fixed schedule is one recursive contract (`fixedFlows`). `bondPriceDisc` and `annuityValue` are its present values at a yield and on the flat curve. The payer swap's floating leg telescopes to `P(T₀) − P(Tₙ)`, so the swap's value is `payerSwapValue` and its zero is `parSwapRate`, both consumed from `FixedIncome/`.
+- **Risk reads the contract, not a new random variable.**
+  - `Contract.loss` is the price paid less the path PV.
+  - The book bound is `expectedShortfall_add_le` read through `pathPV_both`.
+  - The hedged binomial seller's zero risk is the replication identity `pathPV_eq_value_add_gains` read pointwise.
+  - The two constant-loss lemmas the proofs needed (`valueAtRisk_const`, `expectedShortfall_const`) went to `RiskMeasures/ValueAtRisk.lean`, the module they are about.
+
+### The standing first pass: prose against statement
+
+- The parity entries and the README landmark name both normalizations the statement takes (`X 0 = S₀`, `D 0 = 1`) and say no integrability hypothesis is needed. The statement has none.
+- The swap entries say "deterministic curve" and "the floating coupons are fixed by the curve". The legs take `P : ℝ≥0 → ℝ`, a function of time only.
+- The risk entries name the measure the risk is taken under (`P`, any probability measure) and say it need not be a pricing measure.
+
+### Lens gradients
+
+- **Architectural ingenuity.** Exemplar: one martingale lemma prices the forward in every model, and Black–Scholes reduces to it. Next: the binomial forward as the same instance.
+- **Inspired math.** Next: a stochastic discount factor `D : ℝ≥0 → Ω → ℝ`, so that floating legs observe a rate instead of reading a curve. That is the rates tower's step into contracts.
+- **Concept clarity.** Next: the swap's par rate stated as the forward swap rate of a contract measure (the annuity numéraire), once the discount factor is stochastic.
+
+### Ranked backlog
+
+1. Stochastic discount factors in `Contract.value`, starting from the Vasicek and Hull–White zero-coupon bonds (#287).
+2. The binomial forward as an instance of `value_forward_of_martingale`.
+3. Expected shortfall of a hedged position in Black–Scholes under discrete rebalancing (a nonzero bound, not zero).
+
+### Evidence
+
+Every new module and the nine snippets pass in the daemon (the snippets as combined files inlining the unbuilt modules). `AxiomAuditGen` is regenerated (840 guards), and `formalization.yaml` is fresh. The new and stale ledger rows are verified on GitHub runners (`ledger-sweep.yml`). The full build is CI's.
+
 ## 2026-10-29 — corpus 696, modules 648 — seven contributed PRs, brought into the library's graph
 
 Scope: seven PRs from Yang Ye (#270 #271 #277 #281 #342 #343 #344), merged into one integration branch with merge commits, then maintainer follow-ups. The batch adds 25 entries (all `full`), for a corpus of 671 → 696. Seventeen modules arrive: Student-t VaR and ES, exposure measures, DVA, bond and FX forwards, key-rate duration, clean and dirty price, loan amortization, relative drawdown, SABR, Gyöngy and Dupire, Heston, CIR as a sum of squared OU processes, and PSD Cauchy–Schwarz. The contributed `Foundations/ExpAffine.lean` was folded into Heston, and `Foundations/CIRSquaredOU.lean` moved to `FixedIncome/`. #325 (barrier closed forms) is held; see backlog item 1.

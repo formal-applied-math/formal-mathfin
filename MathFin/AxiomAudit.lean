@@ -2001,6 +2001,10 @@ converging to its Black–Scholes value. The contract stays fixed and only the m
 In the tree the value is also the cost of a hedge (2026-10-29): `pathPV_eq_value_add_gains` writes
 a European contract's discounted payoff, on every path, as its value plus the gains of a
 predictable strategy in the discounted spot.
+Beyond a single model (2026-10-29): put–call parity holds in closed form in every model whose
+discounted price is a martingale (`value_europeanCall_sub_put_of_martingale`); a swap on a
+deterministic curve is worth `payerSwapValue` (`value_payerSwap`); and the hedged binomial seller
+has zero value-at-risk under every law of the flips (`Binomial.valueAtRisk_hedged_eq_zero`).
 
 The layered design and the framing "the contract is not the model" are due to Paul Bilokon, *The
 Contract Is Not the Model* (working paper, 9 August 2026), with code at
@@ -2022,6 +2026,18 @@ module's `## Source` section for the full credit line. -/
 /-- info: 'MathFin.Contracts.Binomial.pathPV_eq_value_add_gains' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.Binomial.pathPV_eq_value_add_gains
+
+/-- info: 'MathFin.Contracts.value_europeanCall_sub_put_of_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.value_europeanCall_sub_put_of_martingale
+
+/-- info: 'MathFin.Contracts.value_payerSwap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.value_payerSwap
+
+/-- info: 'MathFin.Contracts.Binomial.valueAtRisk_hedged_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.Binomial.valueAtRisk_hedged_eq_zero
 
 /-! ### The bracket is conditional (2026-08-27)
 
