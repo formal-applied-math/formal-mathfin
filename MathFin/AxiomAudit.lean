@@ -1409,6 +1409,42 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoIntegralLocalised.exists_continuous_localMartingale_localItoIntegral
 
+-- The Itô integral of a predictable integrand with almost surely continuous paths
+-- (`Foundations/ItoIntegralLocalisedPredictable.lean`): `predItoIntegral` glues the `L²` integrals
+-- of the clipped integrands at a level read on a countable dense set of times; it is the limit in
+-- probability of its Riemann sums (`ItoIntegralPredictableRiemann`), indistinguishable integrands
+-- have indistinguishable integrals, and it has a continuous local-martingale version for the
+-- null-augmented filtration, localised by the exit times of a repaired version of `σ`.
+/-- info: 'MathFin.ItoIntegralLocalised.ae_predItoIntegral_congr' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralLocalised.ae_predItoIntegral_congr
+
+/-- info: 'MathFin.ItoIntegralLocalised.exists_continuous_localMartingale_predItoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralLocalised.exists_continuous_localMartingale_predItoIntegral
+
+-- `∫ w dM = ∫ w σ dB` for `M = localItoIntegral σ`: the Riemann–Stieltjes sums of a predictable,
+-- almost surely continuous weight against `M` converge in probability to `predItoIntegral (w σ)`.
+/-- info: 'MathFin.ItoIntegralLocalised.tendstoInMeasure_riemannStieltjes_localItoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralLocalised.tendstoInMeasure_riemannStieltjes_localItoIntegral
+
+-- Itô's formula as an identity of processes (`Foundations/ItoFormulaAdaptedProcess.lean`): almost
+-- surely, at every `t ∈ [0, T]` at once, `f(t, X_t) = f(0, x₀) + ∫₀ᵗ (…) ds + (∫ f_x(·, X) σ dB)_t`
+-- with unbounded continuous adapted `σ`, `b`; the stochastic term is a continuous local martingale
+-- for the null-augmented filtration. No Doob–Meyer theorem is used.
+/-- info: 'MathFin.ItoFormulaAdapted.ito_formula_adapted_unbounded_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoFormulaAdapted.ito_formula_adapted_unbounded_process
+
+/-- info: 'MathFin.ItoFormulaAdapted.exists_localMartingale_ito_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoFormulaAdapted.exists_localMartingale_ito_formula
+
+/-- info: 'MathFin.ItoFormulaAdapted.ito_formula_adapted_unbounded_C2_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoFormulaAdapted.ito_formula_adapted_unbounded_C2_process
+
 -- The [0,∞) crown (`Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean`): the per-horizon
 -- continuous local martingales are glued — horizon consistency (`itoProcessL2Inf_eq_itoProcessCLM`,
 -- itself resting on the `[0,T]` `SimpleProcess` clamp) makes each a modification of the SAME
