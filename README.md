@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 658 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 624 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 671 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 637 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 16 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -48,7 +48,20 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   coefficients, and $`f \in C^2`$ with $`f'`$ and $`f''`$ bounded,
   $`f(X_T) - f(x_0) = \int_0^T f'(X_s)\sigma_s\,dB_s
   + \int_0^T \big(f'(X_s) b_s + \tfrac12 f''(X_s)\sigma_s^2\big)\,ds`$ almost surely
-  ([`ito_formula_adapted`](MathFin/Foundations/ItoFormulaAdapted.lean)).
+  ([`ito_formula_adapted`](MathFin/Foundations/ItoFormulaAdapted.lean)). For every $`f \in C^2`$,
+  with no bound on $`f'`$ or $`f''`$, and each fixed $`t \le T`$, the left-point Riemann sums of $`f'(X)`$
+  against $`M = \int \sigma\,dB`$ converge in probability to
+  $`f(X_t) - f(x_0) - \int_0^t \big(f'(X_s) b_s + \tfrac12 f''(X_s)\sigma_s^2\big)\,ds`$
+  ([`ito_formula_adapted_local_le`](MathFin/Foundations/ItoFormulaAdaptedTD.lean)), and the
+  same holds for $`f(t, x)`$ with jointly continuous $`f_t`$, $`f_x`$, $`f_{xx}`$, the drift gaining
+  the term $`f_t(s, X_s)`$
+  ([`ito_formula_adapted_td_local_le`](MathFin/Foundations/ItoFormulaAdaptedTD.lean)). The bounds
+  on $`\sigma`$ and $`b`$ can be dropped: for continuous adapted $`\sigma`$ the integral
+  $`\int \sigma\,dB`$ is built by clipping $`\sigma`$ to $`[-N, N]`$, is adapted, and is the
+  limit in probability of its Riemann sums
+  ([`localItoIntegral`](MathFin/Foundations/ItoIntegralLocalised.lean)), and the formula holds
+  along $`x_0 + \int b\,ds + \int \sigma\,dB`$
+  ([`ito_formula_adapted_unbounded_le`](MathFin/Foundations/ItoFormulaAdaptedUnbounded.lean)).
 
 - **Girsanov's theorem.** For bounded predictable $`\theta`$, let
   $`dQ = \exp\big(-\int_0^T \theta\,dB - \tfrac12 \int_0^T \theta^2\,dt\big)\,dP`$. On $`[0,T]`$,
@@ -117,6 +130,16 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   strike $`0`$ and to $`0`$ at large strikes
   ([`butterflyFreeFormula_iff_isNormalizedCallPrice`](MathFin/BlackScholes/SVI/TailCondition.lean)).
 
+- **One contract, two models.** Payoffs are written as data in a contract language, separately from
+  the models that price them, so the same term `europeanCall K T` is priced both in the
+  Black–Scholes model and in the binomial tree. Its values in the $`n`$-step Cox–Ross–Rubinstein
+  tree converge to its Black–Scholes value whenever $`|r|\sqrt{T} < \sigma`$
+  ([`tendsto_binomial_value_europeanCall`](MathFin/Contracts/Models/BinomialLimit.lean)). In the
+  tree, under no-arbitrage, a contract paying $`g(S_T)`$ is worth the cost of its hedge: on every
+  path, its discounted payoff is its value plus the gains of a predictable strategy in the
+  discounted spot
+  ([`pathPV_eq_value_add_gains`](MathFin/Contracts/Models/Binomial.lean)).
+
 ## Contents
 
 | Area | Topics |
@@ -133,11 +156,11 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 | Dependence and extremes | copulas and Sklar's theorem (continuous margins), Fréchet–Hoeffding bounds, Hoeffding's covariance identity, Marshall–Olkin common shocks; GEV and GPD domains of attraction, maxima of Poisson-many losses |
 | Credit portfolios | Bernoulli mixtures, the one-factor Gaussian threshold model, and the Basel IRB formula as the limit of portfolio VaR |
 | Market microstructure | Avellaneda–Stoikov market making, the Glosten–Milgrom spread |
-| Other | a contract language that separates payoffs from pricing models; survival models, mortality and annuities; compound Poisson losses; constant-product AMMs |
+| Other | a contract language that separates payoffs from pricing models, with prices in Black–Scholes and the binomial tree; survival models, mortality and annuities; compound Poisson losses; constant-product AMMs |
 
 ## Limitations
 
-- Sixteen of the 658 results are reduced cores. Twelve assume a structure whose fields include the
+- Sixteen of the 671 results are reduced cores. Twelve assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, Lévy's characterization, the two-dimensional Itô formula,
@@ -199,7 +222,7 @@ dependency to its `lakefile.toml`:
 [[require]]
 name = "MathFin"
 git = "https://github.com/formal-applied-math/formal-mathfin"
-rev = "v1.6.0"
+rev = "v1.7.0"
 ```
 
 Then fetch it and the prebuilt Mathlib files:
@@ -267,6 +290,10 @@ Comparator below).
 - [`docs/mathematical-architecture.md`](docs/mathematical-architecture.md): the principles the
   library is organized around, and the theorems that connect them.
 - [`MathFinExamples/Tour.lean`](MathFinExamples/Tour.lean): five representative proofs.
+- [`MathFinExamples/Applications/`](MathFinExamples/Applications): the library applied to concrete
+  problems: a capped call, put–call parity on quotes, a binomial tree, a Gaussian risk report, a
+  bootstrapped curve, default correlation in a credit pool and a minimum-variance portfolio. Each
+  ends in one statement the build checks.
 - [`docs/open-problems.md`](docs/open-problems.md): a survey of open problems in mathematical
   finance.
 - [`docs/status.md`](docs/status.md): where the program stands, and its backlog, the

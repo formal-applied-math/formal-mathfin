@@ -3,7 +3,13 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
+import MathFinExamples.Applications.BinomialTree
+import MathFinExamples.Applications.Bootstrapping
 import MathFinExamples.Applications.CappedCall
+import MathFinExamples.Applications.CreditCorrelation
+import MathFinExamples.Applications.GaussianRiskReport
+import MathFinExamples.Applications.MinimumVariance
+import MathFinExamples.Applications.PutCallParity
 import MathFinExamples.Tour
 
 /-!
