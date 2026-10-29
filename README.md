@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 662 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 628 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 664 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 630 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 16 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -150,7 +150,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Sixteen of the 662 results are reduced cores. Twelve assume a structure whose fields include the
+- Sixteen of the 664 results are reduced cores. Twelve assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, Lévy's characterization, the two-dimensional Itô formula,
@@ -280,6 +280,10 @@ Comparator below).
 - [`docs/mathematical-architecture.md`](docs/mathematical-architecture.md): the principles the
   library is organized around, and the theorems that connect them.
 - [`MathFinExamples/Tour.lean`](MathFinExamples/Tour.lean): five representative proofs.
+- [`MathFinExamples/Applications/`](MathFinExamples/Applications): the library applied to concrete
+  problems: a capped call, put–call parity on quotes, a binomial tree, a Gaussian risk report, a
+  bootstrapped curve, default correlation in a credit pool and a minimum-variance portfolio. Each
+  ends in one statement the build checks.
 - [`docs/open-problems.md`](docs/open-problems.md): a survey of open problems in mathematical
   finance.
 - [`docs/status.md`](docs/status.md): where the program stands, and its backlog, the

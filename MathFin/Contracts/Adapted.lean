@@ -27,10 +27,10 @@ this file's results.
 `Payoff.aemeasurable_eval` weakens `measurable_eval`'s hypothesis from
 `Measurable` to `AEMeasurable` — the strength the tower's own pricing
 hypotheses actually supply (`BSCallHyp`'s `Z_law : HasLaw Z (gaussianReal 0 1)
-Q` gives only `AEMeasurable Z`, never `Measurable Z`). Unlike its two
-siblings, it **is** consumed: `Contracts/CappedCall.lean`'s
-`integrable_europeanCall_pathPV` calls it directly, in place of hand-rolling
-the same measurability argument against `bsAssets`.
+Q` gives only `AEMeasurable Z`, never `Measurable Z`). It has no consumer
+now either: the integrability lemmas of `Contracts/Models/BlackScholes.lean` build each
+reified payoff from integrable pieces (`Integrable.pos_part`, `.sub`,
+`.const_mul`), which carry their own measurability.
 
 ## Main definitions
 
