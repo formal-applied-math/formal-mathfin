@@ -37,7 +37,7 @@ private lemma martingaleTransform_succ (A M : ℕ → Ω → ℝ) (n : ℕ) :
     martingaleTransform A M (n + 1) =
       martingaleTransform A M n + fun ω ↦ A (n + 1) ω * (M (n + 1) ω - M n ω) := by
   funext ω
-  show ∑ k ∈ Finset.range (n + 1), _ = _
+  change ∑ k ∈ Finset.range (n + 1), _ = _
   rw [Finset.sum_range_succ]
   rfl
 

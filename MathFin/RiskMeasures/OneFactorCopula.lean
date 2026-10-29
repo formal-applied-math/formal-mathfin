@@ -43,15 +43,18 @@ variable {n : ℕ}
 
 /-! ### The factors of `stdNormalFactors` -/
 
-private lemma hasLaw_fst_stdNormalFactors :
+/-- On the factor space the systematic factor `z₀` is standard normal. -/
+lemma hasLaw_fst_stdNormalFactors :
     HasLaw (Prod.fst : ℝ × (Fin n → ℝ) → ℝ) (gaussianReal 0 1) (stdNormalFactors n) :=
   measurePreserving_fst.hasLaw
 
-private lemma hasLaw_snd_apply_stdNormalFactors (i : Fin n) :
+/-- On the factor space each idiosyncratic factor `zᵢ` is standard normal. -/
+lemma hasLaw_snd_apply_stdNormalFactors (i : Fin n) :
     HasLaw (fun z : ℝ × (Fin n → ℝ) ↦ z.2 i) (gaussianReal 0 1) (stdNormalFactors n) :=
   ((measurePreserving_eval (fun _ : Fin n ↦ gaussianReal 0 1) i).comp measurePreserving_snd).hasLaw
 
-private lemma iIndepFun_snd_stdNormalFactors :
+/-- On the factor space the idiosyncratic factors are independent. -/
+lemma iIndepFun_snd_stdNormalFactors :
     iIndepFun (fun i (z : ℝ × (Fin n → ℝ)) ↦ z.2 i) (stdNormalFactors n) := by
   refine (iIndepFun_iff_map_fun_eq_pi_map fun i ↦
     (hasLaw_snd_apply_stdNormalFactors i).aemeasurable).2 ?_
@@ -59,7 +62,8 @@ private lemma iIndepFun_snd_stdNormalFactors :
     Measure.map_snd_prod, measure_univ, one_smul]
   exact congrArg Measure.pi (funext fun i ↦ (hasLaw_snd_apply_stdNormalFactors i).map_eq.symm)
 
-private lemma indepFun_fst_snd_stdNormalFactors :
+/-- On the factor space the systematic factor is independent of the idiosyncratic ones. -/
+lemma indepFun_fst_snd_stdNormalFactors :
     (Prod.fst : ℝ × (Fin n → ℝ) → ℝ) ⟂ᵢ[stdNormalFactors n] fun z i ↦ z.2 i :=
   indepFun_prod (X := (id : ℝ → ℝ)) (Y := (id : (Fin n → ℝ) → Fin n → ℝ)) measurable_id
     measurable_id
@@ -132,7 +136,7 @@ theorem integral_oneFactorPD_sq {π ρ : ℝ} (hρ0 : 0 ≤ ρ) (hρ1 : ρ < 1) 
 Gaussian threshold model with asset correlation `ρ ∈ [0, 1)`: `F` and the `εᵢ` are independent
 standard normals on any probability space, and `i ≠ j`. -/
 theorem oneFactor_measureReal_inter_default {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
-    [IsProbabilityMeasure P] {ι : Type*} [Fintype ι] {π ρ : ℝ} {F : Ω → ℝ} {ε : ι → Ω → ℝ}
+    [IsProbabilityMeasure P] {ι : Type*} [Finite ι] {π ρ : ℝ} {F : Ω → ℝ} {ε : ι → Ω → ℝ}
     (hF : HasLaw F (gaussianReal 0 1) P) (hε : ∀ i, HasLaw (ε i) (gaussianReal 0 1) P)
     (hεind : iIndepFun ε P) (hFε : F ⟂ᵢ[P] fun ω i ↦ ε i ω) (hρ0 : 0 ≤ ρ) (hρ1 : ρ < 1)
     {i j : ι} (hij : i ≠ j) :

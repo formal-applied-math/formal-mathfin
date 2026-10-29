@@ -22,7 +22,8 @@ open Real ProbabilityTheory Set
 
 theorem sigmaZero_variance_hasDerivAt (p : Params) (hs : p.sigma = 0) (k : ℝ) (hk : k ≠ p.m) :
     HasDerivAt (variance p) (slope p k) k := by
-  have hpos : 0 < (k - p.m)^2 + p.sigma^2 := by rw [hs]; simpa using sq_pos_of_ne_zero (sub_ne_zero.mpr hk)
+  have hpos : 0 < (k - p.m)^2 +
+      p.sigma^2 := by rw [hs]; simpa using sq_pos_of_ne_zero (sub_ne_zero.mpr hk)
   have hx := (hasDerivAt_id k).sub_const p.m
   have hr := ((hx.pow 2).add_const (p.sigma^2)).sqrt (ne_of_gt hpos)
   have h := ((hx.const_mul p.rho).add hr).const_mul p.b |>.const_add p.a
@@ -30,7 +31,8 @@ theorem sigmaZero_variance_hasDerivAt (p : Params) (hs : p.sigma = 0) (k : ℝ) 
 
 theorem sigmaZero_slope_hasDerivAt (p : Params) (hs : p.sigma = 0) (k : ℝ) (hk : k ≠ p.m) :
     HasDerivAt (slope p) (curvature p k) k := by
-  have hpos : 0 < (k - p.m)^2 + p.sigma^2 := by rw [hs]; simpa using sq_pos_of_ne_zero (sub_ne_zero.mpr hk)
+  have hpos : 0 < (k - p.m)^2 +
+      p.sigma^2 := by rw [hs]; simpa using sq_pos_of_ne_zero (sub_ne_zero.mpr hk)
   have hroot : Real.sqrt ((k - p.m)^2 + p.sigma^2) ≠ 0 :=
     ne_of_gt (Real.sqrt_pos.mpr hpos)
   have hx := (hasDerivAt_id k).sub_const p.m
@@ -64,7 +66,9 @@ theorem sigmaZero_blackPlus_hasDerivAt (p : Params) (hs : p.sigma = 0) (k : ℝ)
     (hw : 0 < variance p k) :
     HasDerivAt (blackPlus p)
       (blackMinusSlope p k + slope p k / (2*rootVariance p k)) k := by
-  have h := (sigmaZero_blackMinus_hasDerivAt p hs k hk hw).add (sigmaZero_rootVariance_hasDerivAt p hs k hk hw)
+  have h :=
+      (sigmaZero_blackMinus_hasDerivAt p hs k hk hw).add
+      (sigmaZero_rootVariance_hasDerivAt p hs k hk hw)
   convert h using 1 <;> try rfl
   funext x
   dsimp [blackPlus, blackMinus]
@@ -73,8 +77,11 @@ theorem sigmaZero_blackPlus_hasDerivAt (p : Params) (hs : p.sigma = 0) (k : ℝ)
 theorem sigmaZero_logBlackCall_hasDerivAt (p : Params) (hs : p.sigma = 0) (k : ℝ) (hk : k ≠ p.m)
     (hw : 0 < variance p k) :
     HasDerivAt (logBlackCall p) (Real.exp k * blackDelta p k) k := by
-  have hp := (MathFin.hasDerivAt_Phi (blackPlus p k)).comp k (sigmaZero_blackPlus_hasDerivAt p hs k hk hw)
-  have hm := (MathFin.hasDerivAt_Phi (blackMinus p k)).comp k (sigmaZero_blackMinus_hasDerivAt p hs k hk hw)
+  have hp :=
+      (MathFin.hasDerivAt_Phi (blackPlus p k)).comp k (sigmaZero_blackPlus_hasDerivAt p hs k hk hw)
+  have hm :=
+      (MathFin.hasDerivAt_Phi (blackMinus p k)).comp k
+      (sigmaZero_blackMinus_hasDerivAt p hs k hk hw)
   have h := hp.sub ((Real.hasDerivAt_exp k).mul hm)
   convert h using 1 <;> try rfl
   rw [black_density_identity p k hw]
@@ -119,18 +126,18 @@ theorem sigmaZero_variance_right (p : Params) (hs : p.sigma = 0) (k : ℝ)
 theorem sigmaZero_variance_at_m (p : Params) (hs : p.sigma = 0) :
     variance p p.m = p.a := by simp [variance, hs]
 
-theorem leftSlope_nonpos (p : Params) (hb : 0 ≤ p.b) (hr : 0 ≤ 1-p.rho^2) :
+theorem leftSlope_nonpos (p : Params) (hb : 0 ≤ p.b) (hr : 0 ≤ 1 - p.rho ^ 2) :
     leftSlope p ≤ 0 := by
   have : p.rho ≤ 1 := by nlinarith [sq_nonneg (p.rho-1)]
   exact mul_nonpos_of_nonneg_of_nonpos hb (sub_nonpos.mpr this)
 
-theorem rightSlope_nonneg (p : Params) (hb : 0 ≤ p.b) (hr : 0 ≤ 1-p.rho^2) :
+theorem rightSlope_nonneg (p : Params) (hb : 0 ≤ p.b) (hr : 0 ≤ 1 - p.rho ^ 2) :
     0 ≤ rightSlope p := by
   have : -1 ≤ p.rho := by nlinarith [sq_nonneg (p.rho+1)]
   exact mul_nonneg hb (by linarith)
 
 theorem sigmaZero_variance_ge (p : Params) (hs : p.sigma = 0)
-    (hb : 0 ≤ p.b) (hr : 0 ≤ 1-p.rho^2) (k : ℝ) : p.a ≤ variance p k := by
+    (hb : 0 ≤ p.b) (hr : 0 ≤ 1 - p.rho ^ 2) (k : ℝ) : p.a ≤ variance p k := by
   rcases le_total k p.m with hk | hk
   · rw [sigmaZero_variance_left p hs k hk]
     have := mul_nonneg_of_nonpos_of_nonpos (leftSlope_nonpos p hb hr) (sub_nonpos.mpr hk)
@@ -140,7 +147,7 @@ theorem sigmaZero_variance_ge (p : Params) (hs : p.sigma = 0)
     linarith
 
 theorem sigmaZero_variance_pos_iff (p : Params) (hs : p.sigma = 0)
-    (hb : 0 ≤ p.b) (hr : 0 ≤ 1-p.rho^2) :
+    (hb : 0 ≤ p.b) (hr : 0 ≤ 1 - p.rho ^ 2) :
     (∀ k : ℝ, 0 < variance p k) ↔ 0 < p.a := by
   constructor
   · intro h

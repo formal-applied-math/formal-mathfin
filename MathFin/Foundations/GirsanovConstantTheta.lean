@@ -161,7 +161,7 @@ theorem girsanovMeasure_isProbabilityMeasure
   have hgpos : ∀ ω, 0 < g ω := fun ω ↦ Real.exp_pos _
   have hgfactor : g = fun ω ↦ Real.exp (-(θ ^ 2 * (T : ℝ) / 2)) * Real.exp (-θ * X T ω) := by
     funext ω
-    show Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2)
+    change Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2)
         = Real.exp (-(θ ^ 2 * (T : ℝ) / 2)) * Real.exp (-θ * X T ω)
     rw [show -θ * X T ω - θ ^ 2 * (T : ℝ) / 2
           = -(θ ^ 2 * (T : ℝ) / 2) + -θ * X T ω from by ring, Real.exp_add]
@@ -262,18 +262,19 @@ theorem Btheta_increment_map_eq_gaussianReal
   haveI : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
       (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
-  exact increment_map_eq_gaussianReal_of_expMartingale (isExpQMartingale_Btheta (X := X) (𝓕 := 𝓕) θ T) hst htT
+  exact increment_map_eq_gaussianReal_of_expMartingale
+      (isExpQMartingale_Btheta (X := X) (𝓕 := 𝓕) θ T) hst htT
 
-/-- **Constant-θ distributional Girsanov: `B^θ` has the increments of a `Q`-Brownian motion.**
-Under `Q = P.withDensity(exp(−θ X_T − ½θ² T))` the drift-corrected process `B^θ_t = X_t + θ t` has,
-on `[0,T]`: zero start `B^θ_0 = 0` a.e. `Q`, Gaussian increments `B^θ_t − B^θ_s ~ N(0, t−s)`, and
+/-- **Constant-θ distributional Girsanov: `B^θ` has the increments of a `Q`-Brownian motion.** Under
+`Q = P.withDensity(exp(−θ X_T − ½θ² T))` the drift-corrected process `B^θ_t = X_t + θ t` has, on
+`[0,T]`: zero start `B^θ_0 = 0` a.e. `Q`, Gaussian increments `B^θ_t − B^θ_s ~ N(0, t−s)`, and
 independent increments (`HasIndepIncrements`). Together these fix every finite-dimensional law of
 `B^θ` under `Q` on `[0,T]` to that of a standard Brownian motion; path continuity is not stated. One
 application of `isQBrownianMotion_of_expMartingale` to the constant-θ exponential martingale
-(`isExpQMartingale_Btheta`), reached on the existing tower (Bayes engine + Wald exponentials) with no
-adapted-integrand Itô formula. The bounded-*adapted*-θ statements are delivered separately, by
-`GirsanovSimpleTheta` (piecewise-constant), `GirsanovAdaptedTheta` (bounded continuous
-adapted) and `GirsanovPredictableTheta` (bounded predictable). -/
+(`isExpQMartingale_Btheta`), reached on the existing tower (Bayes engine + Wald exponentials) with
+no adapted-integrand Itô formula. The bounded-*adapted*-θ statements are delivered separately, by
+`GirsanovSimpleTheta` (piecewise-constant), `GirsanovAdaptedTheta` (bounded continuous adapted) and
+`GirsanovPredictableTheta` (bounded predictable). -/
 theorem Btheta_isQBrownianMotion
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
     {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]

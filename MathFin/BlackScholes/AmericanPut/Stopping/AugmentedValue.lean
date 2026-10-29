@@ -15,7 +15,8 @@ be confused with completing that space by all subsets of null sets.
 
 ## Result
 
-Public entry points include `BoundedRule.enlargeFiltration`, `americanPutValue_mono_filtration`, `brownianRightAugFiltration`, `brownianFiltration_le_rightAug`.
+Public entry points include `BoundedRule.enlargeFiltration`, `americanPutValue_mono_filtration`,
+`brownianRightAugFiltration`, `brownianFiltration_le_rightAug`.
 -/
 
 @[expose] public section
@@ -52,8 +53,10 @@ noncomputable def brownianRightAugFiltration :=
 theorem brownianFiltration_le_rightAug : brownianFiltration ≤ brownianRightAugFiltration :=
   le_trans le_sup_left (ambientNullAugmentation brownianFiltration gaussianLimit).le_rightCont
 
-instance brownianRightAugFiltration_isRightContinuous : brownianRightAugFiltration.IsRightContinuous :=
-  inferInstanceAs ((ambientNullAugmentation brownianFiltration gaussianLimit).rightCont.IsRightContinuous)
+instance brownianRightAugFiltration_isRightContinuous :
+    brownianRightAugFiltration.IsRightContinuous :=
+  inferInstanceAs
+      ((ambientNullAugmentation brownianFiltration gaussianLimit).rightCont.IsRightContinuous)
 
 theorem brownianRightAugFiltration_contains_null {s : Set (ℝ≥0 → ℝ)}
     (hs : MeasurableSet s) (hnull : gaussianLimit s = 0) (t : ℝ≥0) :
@@ -72,9 +75,11 @@ theorem brownianClassicalCandidate_rightAug_supermartingale {K r q σ S : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 ≤ K) (hr : 0 ≤ r) (hσ : 0 < σ) (T : ℝ≥0) :
-    Supermartingale (classicalCandidate brownian K r q σ S p T) brownianRightAugFiltration gaussianLimit := by
+    Supermartingale (classicalCandidate brownian K r q σ S p T) brownianRightAugFiltration
+        gaussianLimit := by
   apply bounded_continuous_supermartingale_rightCont
-    (supermartingale_ambientNullAugmentation (brownianClassicalCandidate_supermartingale hp hK hr hσ T))
+    (supermartingale_ambientNullAugmentation
+        (brownianClassicalCandidate_supermartingale hp hK hr hσ T))
     (classicalCandidate_continuous hp continuous_brownian T) (C := K)
   intro t ω
   obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp brownian hK hr T t ω
@@ -90,7 +95,8 @@ theorem brownianRightAugAmericanPut_eq_raw {K r q σ S : ℝ}
       (brownianClassicalCandidate_rightAug_supermartingale hp hK.le hr hσ T)
       (classicalCandidate_continuous hp continuous_brownian T) (C := K)
       (fun t ω => by
-        obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp brownian hK.le hr T t ω
+        obtain ⟨hlo,hhi⟩ :=
+            classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp brownian hK.le hr T t ω
         simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi)
       (fun _ ht ω => classicalCandidate_dominates hp brownian hK hS ht ω)
     rw [integral_congr_ae (classicalCandidate_initial isBrownianReal_brownian.eval_zero_ae_eq_zero

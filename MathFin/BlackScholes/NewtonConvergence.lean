@@ -237,7 +237,7 @@ theorem newtonSeq_error_le_geometric
               (abs_nonneg _)
         _ ≤ 1 / 2 * |newtonSeq f f' x₀ n - r| :=
             mul_le_mul_of_nonneg_right h_coeff (abs_nonneg _)
-    show |newtonStep f f' (newtonSeq f f' x₀ n) - r| ≤ (1 / 2) ^ (n + 1) * |x₀ - r|
+    change |newtonStep f f' (newtonSeq f f' x₀ n) - r| ≤ (1 / 2) ^ (n + 1) * |x₀ - r|
     calc |newtonStep f f' (newtonSeq f f' x₀ n) - r|
         ≤ L / (2 * m) * (newtonSeq f f' x₀ n - r) ^ 2 := h_step
       _ ≤ 1 / 2 * |newtonSeq f f' x₀ n - r| := h_half

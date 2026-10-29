@@ -161,6 +161,7 @@ lemma portfolioVarN_covariance_eq_mul_equicorrelation {Ω : Type*} {mΩ : Measur
   simp only [hkernel, portfolioVarN, mul_sum]
   exact sum_congr rfl fun i _ ↦ sum_congr rfl fun j _ ↦ by ring
 
+omit [DecidableEq n] in
 /-- **A common correlation of random variables obeys the equicorrelation bound**: if
 square-integrable `X₁, …, X_d` (`d ≥ 2`) have a common variance `σ² > 0` and a common pairwise
 covariance `ρ σ²`, then `−1/(d − 1) ≤ ρ ≤ 1`. Their covariance kernel is `σ²` times the
@@ -170,6 +171,7 @@ theorem neg_inv_le_and_le_one_of_covariance {Ω : Type*} {mΩ : MeasurableSpace 
     (hvar : ∀ i, Var[X i; μ] = σ2) (hcov : ∀ i j, i ≠ j → cov[X i, X j; μ] = ρ * σ2)
     (hn : 2 ≤ Fintype.card n) :
     -1 / ((Fintype.card n : ℝ) - 1) ≤ ρ ∧ ρ ≤ 1 := by
+  classical
   refine (posSemidef_equicorrelationMatrix_iff hn).1 <|
     posSemidef_iff_dotProduct_mulVec.2 ⟨isHermitian_equicorrelationMatrix, fun x ↦ ?_⟩
   have hpsd : 0 ≤ portfolioVarN univ x fun i j ↦ cov[X i, X j; μ] :=

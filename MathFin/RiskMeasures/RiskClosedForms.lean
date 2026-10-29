@@ -164,7 +164,8 @@ theorem cdf_paretoMeasure_of_le (ht : 0 < t) (hr : 0 < r) (hx : t ≤ x) :
   rw [cdf_eq_real, ← compl_Ioi, probReal_compl_eq_one_sub measurableSet_Ioi, paretoMeasure,
     measureReal_def, withDensity_apply _ measurableSet_Ioi,
     setLIntegral_congr_fun measurableSet_Ioi fun _ hy ↦ paretoPDF_of_le (hx.trans (le_of_lt hy)),
-    ← ofReal_integral_eq_lintegral_ofReal hint hnn, ENNReal.toReal_ofReal (integral_nonneg_of_ae hnn),
+    ← ofReal_integral_eq_lintegral_ofReal hint hnn,
+        ENNReal.toReal_ofReal (integral_nonneg_of_ae hnn),
     integral_const_mul, integral_Ioi_rpow_of_lt (by linarith) hx0,
     div_rpow ht.le hx0.le, show -(r + 1) + 1 = -r by ring, rpow_neg hx0.le]
   field_simp
@@ -361,7 +362,7 @@ theorem medianShortfall_eq_valueAtRisk [IsProbabilityMeasure P] (hX : AEMeasurab
         ENNReal.toReal_ofReal (sub_nonneg.2 (hv ▸ monotone_cdf (P.map X) hvx))]
       ring
     · rw [Ioc_eq_empty_of_le (not_le.1 hvx).le, measure_empty, mul_zero, ENNReal.toReal_zero]
-  show quantile _ (1 / 2) = quantile (P.map X) ((1 + α) / 2)
+  change quantile _ (1 / 2) = quantile (P.map X) ((1 + α) / 2)
   unfold quantile
   congr 1
   ext x

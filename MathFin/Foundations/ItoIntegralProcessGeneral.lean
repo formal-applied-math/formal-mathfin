@@ -99,14 +99,14 @@ noncomputable def itoProcessLM (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)
     TBoundedSP T hBmeas →ₗ[ℝ] Lp ℝ 2 μ where
   toFun V := itoSimpleProcessLp hB hBmeas V.val t
   map_add' V W := by
-    show itoSimpleProcessLp hB hBmeas ((V + W).val) t = _
+    change itoSimpleProcessLp hB hBmeas ((V + W).val) t = _
     rw [Submodule.coe_add, itoSimpleProcessLp, itoSimpleProcessLp, itoSimpleProcessLp,
         ← MemLp.toLp_add (memLp_itoSimpleProcess hB hBmeas V.val t)
           (memLp_itoSimpleProcess hB hBmeas W.val t)]
     congr 1
     exact itoSimpleProcess_add hBmeas V.val W.val t
   map_smul' c V := by
-    show itoSimpleProcessLp hB hBmeas ((c • V).val) t = _
+    change itoSimpleProcessLp hB hBmeas ((c • V).val) t = _
     rw [Submodule.coe_smul, itoSimpleProcessLp, itoSimpleProcessLp, RingHom.id_apply,
         ← MemLp.toLp_const_smul c (memLp_itoSimpleProcess hB hBmeas V.val t)]
     congr 1
@@ -154,7 +154,8 @@ theorem condExp_itoSimple_eq (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
       =ᵐ[μ] fun ω ↦ itoSimpleProcess hBmeas V t ω := by
   have hT'eq : itoSimpleProcess hBmeas V (max t T) = itoSimple hBmeas V :=
     itoSimpleProcess_eq_itoSimple hBmeas V fun p hp ↦ (hVT p hp).trans (le_max_right t T)
-  simpa only [hT'eq] using (itoSimpleProcess_isMartingale hB hBmeas V).2 t (max t T) (le_max_left t T)
+  simpa only [hT'eq] using (itoSimpleProcess_isMartingale hB hBmeas V).2 t (max t T)
+      (le_max_left t T)
 
 /-- **The key identity.** The general Itô integral at time `t` is the
 conditional-expectation projection of its terminal value `∫₀ᵀ φ dB` onto `𝓕_t`:
@@ -179,7 +180,8 @@ theorem itoProcessCLM_eq_condExpL2 (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (
   refine Lp.ext ?_
   simp only [itoSimpleProcessLp, itoSimpleLp]
   filter_upwards [(memLp_itoSimpleProcess hB hBmeas V.val t).coeFn_toLp,
-    (memLp_itoSimple hB hBmeas V.val).condExpL2_ae_eq_condExp (𝕜 := ℝ) ((natFiltration hBmeas).le t),
+    (memLp_itoSimple hB hBmeas V.val).condExpL2_ae_eq_condExp (𝕜 := ℝ)
+        ((natFiltration hBmeas).le t),
     condExp_itoSimple_eq hB T t hBmeas V.val V.property] with ω hω1 hω2 hω3
   rw [hω1, ← hω3, hω2]
 

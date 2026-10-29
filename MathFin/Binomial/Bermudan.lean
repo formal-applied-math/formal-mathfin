@@ -37,10 +37,10 @@ Results:
 namespace MathFin
 
 open Finset
-open Classical
 
 variable {ι : Type*} {v : ι → ℝ}
 
+open scoped Classical in
 /-- **Bermudan sandwich**: `Eur ⊆ Berm ⊆ Amer` ⇒ the optimal-stopping values
 are ordered `European ≤ Bermudan ≤ American` — enlarging the exercise set never
 lowers the value. The financial content is the monotonicity of `Finset.sup'`
@@ -63,6 +63,7 @@ interpolating the European (`binomialPrice`) and American (`americanPrice`) Bell
 recursions over an admissible early-exercise step set `E ⊆ ℕ`, with the sandwich as
 a genuine price ordering. -/
 
+open scoped Classical in
 /-- **Bermudan option price** on the CRR tree with early-exercise steps `E ⊆ ℕ`
 (steps-remaining at which early exercise is allowed): the Bellman recursion takes
 `max(intrinsic, continuation)` exactly at steps in `E`, the bare discounted
@@ -77,9 +78,11 @@ noncomputable def bermudanPrice (E : Set ℕ) (u d r : ℝ) (g : ℝ → ℝ) : 
         binomialOptionPriceOnePeriod u d r
           (bermudanPrice E u d r g n (S * u)) (bermudanPrice E u d r g n (S * d))
 
+open scoped Classical in
 @[simp] lemma bermudanPrice_zero (E : Set ℕ) (u d r : ℝ) (g : ℝ → ℝ) (S : ℝ) :
     bermudanPrice E u d r g 0 S = g S := rfl
 
+open scoped Classical in
 lemma bermudanPrice_succ (E : Set ℕ) (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
     bermudanPrice E u d r g (n + 1) S =
       if (n + 1) ∈ E then
@@ -89,6 +92,7 @@ lemma bermudanPrice_succ (E : Set ℕ) (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ)
         binomialOptionPriceOnePeriod u d r
           (bermudanPrice E u d r g n (S * u)) (bermudanPrice E u d r g n (S * d)) := rfl
 
+open scoped Classical in
 /-- `bermudanPrice ∅ = binomialPrice`: never exercising early is the European price. -/
 lemma bermudanPrice_empty (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
     bermudanPrice ∅ u d r g n S = binomialPrice u d r g n S := by
@@ -98,6 +102,7 @@ lemma bermudanPrice_empty (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
     rw [bermudanPrice_succ, if_neg (by simp), ih (S * u), ih (S * d),
         ← binomialPrice_succ_eq_onePeriod]
 
+open scoped Classical in
 /-- `bermudanPrice univ = americanPrice`: always allowing exercise is the American price. -/
 lemma bermudanPrice_univ (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
     bermudanPrice Set.univ u d r g n S = americanPrice u d r g n S := by
@@ -107,6 +112,7 @@ lemma bermudanPrice_univ (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
     rw [bermudanPrice_succ, if_pos (Set.mem_univ _), ih (S * u), ih (S * d),
         ← americanPrice_succ]
 
+open scoped Classical in
 /-- **Monotone in the exercise set**: enlarging the admissible early-exercise set
 never lowers the price (`BinomialNoArb` makes the continuation monotone). -/
 lemma bermudanPrice_mono {u d r : ℝ} (h : BinomialNoArb u d r) (g : ℝ → ℝ)
@@ -124,6 +130,7 @@ lemma bermudanPrice_mono {u d r : ℝ} (h : BinomialNoArb u d r) (g : ℝ → �
       · rw [if_pos h2]; exact le_trans hcont (le_max_right _ _)
       · rw [if_neg h2]; exact hcont
 
+open scoped Classical in
 /-- **Bermudan sandwich (genuine price-tree form)**: `European ≤ Bermudan ≤
 American` for any admissible early-exercise set `E`, at every step and spot —
 the three legs are the actual discounted-expectation CRR recursions, not an

@@ -33,9 +33,12 @@ WORKDIR /app
 # `lakefile.lean` declares as `lean_lib`s. The bare `lake build` below builds
 # every declared target, so omitting them fails the image build outright --
 # publish-verify-image has been red since 2dedd2e for exactly this reason.
+# The same holds for the `MathFinExamples` and `MathFinTest` libraries.
 COPY lakefile.lean lean-toolchain lake-manifest.json MathFin.lean \
-     Challenge.lean Solution.lean ./
+     Challenge.lean Solution.lean MathFinExamples.lean MathFinTest.lean ./
 COPY MathFin/ MathFin/
+COPY MathFinExamples/ MathFinExamples/
+COPY MathFinTest/ MathFinTest/
 RUN elan toolchain install "$(cat lean-toolchain)" \
     && lean --version \
     && lake --version \

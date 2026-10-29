@@ -24,12 +24,12 @@ finite-dimensional law of `B^θ` under `Q` on `[0,T]` to that of a standard Brow
 continuity is not stated.
 
 The route is **spine-free**: rather than build a continuous Doléans stochastic exponential and prove
-it is a martingale (a Novikov-flavoured crux), we pass the *simple* exponential-martingale identity to
-the limit. The `unifPart`-partition approximants `c⁽ⁿ⁾_i = θ(tᵢ)` give, per `n`, the simple identity
-`∫_A exp(a·Yⁿ − ½)·Z⁽ⁿ⁾_T dμ = …`; the stochastic exponent `Wⁿ = ∑θ(tᵢ)ΔBᵢ → ∫θdB` in `L²` (brick b),
-the drift parts converge everywhere (the drift Riemann lemmas), and the set-integral limit goes
-through the a.e.-subsequence endpoint `tendsto_setIntegral_of_subseq_ae_of_sq_bound`. Then
-`isQBrownianMotion_of_expMartingale` reads off those three properties.
+it is a martingale (a Novikov-flavoured crux), we pass the *simple* exponential-martingale identity
+to the limit. The `unifPart`-partition approximants `c⁽ⁿ⁾_i = θ(tᵢ)` give, per `n`, the simple
+identity `∫_A exp(a·Yⁿ − ½)·Z⁽ⁿ⁾_T dμ = …`; the stochastic exponent `Wⁿ = ∑θ(tᵢ)ΔBᵢ → ∫θdB` in `L²`
+(brick b), the drift parts converge everywhere (the drift Riemann lemmas), and the set-integral
+limit goes through the a.e.-subsequence endpoint `tendsto_setIntegral_of_subseq_ae_of_sq_bound`.
+Then `isQBrownianMotion_of_expMartingale` reads off those three properties.
 -/
 
 @[expose] public section
@@ -71,20 +71,6 @@ noncomputable def itoIntCont (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 �
     Ω → ℝ :=
   ⇑(itoIntegralCLM_T hB T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd))
 
-include hB in
-/-- **The Riemann–Itô sums converge in measure to `∫₀ᵀ θ dB`.** From the `L²` convergence
-(`itoIntegralCLM_T_of_bdd_adapted_cont`, brick b) via `tendstoInMeasure_of_tendsto_Lp`, transported
-from the `Lp` classes to the genuine `riemannσ` functions. -/
-lemma tendstoInMeasure_riemannσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
-    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
-    (hcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :
-    TendstoInMeasure μ (fun n ↦ riemannσ (B := B) θ T n) atTop
-      (itoIntCont hB hBmeas hadap hcont hbdd T) := by
-  refine TendstoInMeasure.congr
-    (fun n ↦ (memLp_riemannσ hB hBmeas hadap hbdd T n).coeFn_toLp) EventuallyEq.rfl ?_
-  exact tendstoInMeasure_of_tendsto_Lp
-    (itoIntegralCLM_T_of_bdd_adapted_cont hB hBmeas hadap hcont hbdd T)
-
 omit hB in
 /-- The discrete quadratic-drift Riemann sum `∑_{k<n} θ(tₖ)²·(t_{k+1} − tₖ)` (the drift half of the
 approximant Doléans exponent), → `∫₀ᵀθ²ds` by `tendsto_driftSq_riemannSum`. -/
@@ -96,7 +82,8 @@ omit hB mΩ in
 /-- **The approximant Doléans density in `exp`-form.** The simple Doléans density `E^{−c⁽ⁿ⁾}_T` for
 the `unifPart`-partition multipliers `c⁽ⁿ⁾_i = θ(tᵢ)` is `exp(−Wⁿ − ½·driftSqSumⁿ)`, where
 `Wⁿ = riemannσ = ∑θ(tᵢ)ΔBᵢ` is the Riemann–Itô sum and `driftSqSumⁿ = ∑θ(tᵢ)²Δτᵢ` the quadratic
-drift. All partition points `≤ T`, so the clamps `min(tⱼ,T)` in `simpleDoleansExp_eq_exp_sum` drop. -/
+drift. All partition points `≤ T`, so the clamps `min(tⱼ,T)` in `simpleDoleansExp_eq_exp_sum` drop.
+-/
 lemma simpleDoleansExp_neg_eq {θ : ℝ≥0 → Ω → ℝ} (T : ℝ≥0) (n : ℕ) (ω : Ω) :
     simpleDoleansExp (X := B) (unifPart T n) (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω
       = Real.exp (-riemannσ (B := B) θ T n ω - 2⁻¹ * driftSqSum θ T n ω) := by
@@ -105,7 +92,8 @@ lemma simpleDoleansExp_neg_eq {θ : ℝ≥0 → Ω → ℝ} (T : ℝ≥0) (n : �
   rw [riemannσ, driftSqSum, Finset.mul_sum, ← Finset.sum_neg_distrib, ← Finset.sum_sub_distrib]
   refine Finset.sum_congr rfl fun k hk ↦ ?_
   have hk1 : k + 1 ≤ n := Finset.mem_range.mp hk
-  rw [min_eq_left (unifPart_le_T hk1), min_eq_left (unifPart_le_T (le_of_lt (Finset.mem_range.mp hk)))]
+  rw [min_eq_left (unifPart_le_T hk1),
+      min_eq_left (unifPart_le_T (le_of_lt (Finset.mem_range.mp hk)))]
   ring
 
 include hB in
@@ -126,12 +114,12 @@ lemma exists_subseq_riemannσ_ae (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥
   obtain ⟨ms, hms, hae⟩ := hconv.exists_seq_tendsto_ae
   exact ⟨ms, hms, hae⟩
 
-
 include hB in
-/-- **Uniform `L²` bound on the approximant densities.** `∫ (Zⁿ_T)² ≤ exp(C²T)`, uniform in `n` — the
-`s = unifPart T n`, `c = θ(tᵢ)` instance of the partition-generic `sq_integral_simpleDoleans_le`. The
-grid's last point `unifPart T n n = T` supplies the generic's `T ≤ s N` coverage; `n = 0` is the
-constant-`1` density. Feeds the a.e.-subsequence engine's `L²` bound for the density limit `Zⁿ → Z`. -/
+/-- **Uniform `L²` bound on the approximant densities.** `∫ (Zⁿ_T)² ≤ exp(C²T)`, uniform in `n` —
+the `s = unifPart T n`, `c = θ(tᵢ)` instance of the partition-generic
+`sq_integral_simpleDoleans_le`. The grid's last point `unifPart T n n = T` supplies the generic's
+`T ≤ s N` coverage; `n = 0` is the constant-`1` density. Feeds the a.e.-subsequence engine's `L²`
+bound for the density limit `Zⁿ → Z`. -/
 lemma sq_integral_Zn_le (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
@@ -205,10 +193,12 @@ include hB in
 lemma integral_Zn_eq_one (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
-    ∫ ω, simpleDoleansExp (X := B) (unifPart T n) (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω ∂μ = 1 := by
+    ∫ ω, simpleDoleansExp (X := B) (unifPart T n) (fun i ω ↦ -(θ (unifPart T n i) ω)) n
+        T ω ∂μ = 1 := by
   haveI : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
   exact simpleDoleansExp_integral_eq_one (X := B) (𝓕 := natFiltration hBmeas) (unifPart T n)
-    (unifPart_mono T n) _ (fun i ↦ (hadap _).neg) (fun i ω ↦ by simpa using hbdd (unifPart T n i) ω) n T
+    (unifPart_mono T n) _ (fun i ↦ (hadap _).neg)
+        (fun i ω ↦ by simpa using hbdd (unifPart T n i) ω) n T
 
 include hB in
 /-- Measurability of the approximant density — the grid instance of `measurable_simpleDoleans`. -/
@@ -289,8 +279,8 @@ lemma isProbabilityMeasure_contGirsanov (hBmeas : ∀ t, Measurable (B t)) {θ :
 
 include hB in
 /-- **Uniform `L⁴` bound on the approximant densities.** `∫ (Zⁿ_T)⁴ ≤ exp(6C²T)` — the grid instance
-of `quad_integral_simpleDoleans_le`; `n = 0` is the constant-`1` density. Needed for the Hölder step of
-the mixed-time product `L²` bound. -/
+of `quad_integral_simpleDoleans_le`; `n = 0` is the constant-`1` density. Needed for the Hölder step
+of the mixed-time product `L²` bound. -/
 lemma quad_integral_Zn_le (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
@@ -306,7 +296,8 @@ lemma quad_integral_Zn_le (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → �
       (unifPart_mono T n) (by simp [unifPart]) (fun i ↦ hadap _) (fun i ω ↦ hbdd _ ω) n hlast.ge
 
 omit hB mΩ in
-/-- The `unifPart` simple drift is bounded by `C·u` for `u ≤ T` (all `n`; `n = 0` is the empty sum). -/
+/-- The `unifPart` simple drift is bounded by `C·u` for `u ≤ T` (all `n`; `n = 0` is the empty sum).
+-/
 lemma simpleDriftUnif_abs_le {θ : ℝ≥0 → Ω → ℝ} {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0)
     {u : ℝ≥0} (huT : u ≤ T) (n : ℕ) (ω : Ω) :
     |simpleDrift (unifPart T n) (fun i ω ↦ θ (unifPart T n i) ω) n u ω| ≤ C * (u : ℝ) := by
@@ -323,8 +314,9 @@ lemma simpleDriftUnif_abs_le {θ : ℝ≥0 → Ω → ℝ} {C : ℝ} (hbdd : ∀
 include hB in
 omit [IsProbabilityMeasure μ] in
 /-- **Uniform `L⁴` bound on the drift-corrected exponentials `Dⁿ_u`.** `∫ (Dⁿ_u)⁴ ≤ exp(4|a|CT)·M₄`
-with `M₄ = ∫ exp(4a·B_u)` (the Gaussian 4·`a`-MGF, `n`-independent): `(Dⁿ_u)⁴ = exp(4a·Yⁿ_u − 2a²u) ≤
-exp(4|a|CT)·exp(4a·B_u)` since the drift is bounded and `−2a²u ≤ 0`. -/
+with `M₄ = ∫ exp(4a·B_u)` (the Gaussian 4·`a`-MGF, `n`-independent):
+`(Dⁿ_u)⁴ = exp(4a·Yⁿ_u − 2a²u) ≤ exp(4|a|CT)·exp(4a·B_u)` since the drift is bounded and
+`−2a²u ≤ 0`. -/
 lemma quad_integral_Dn_le (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (a : ℝ) (T : ℝ≥0) {u : ℝ≥0} (huT : u ≤ T) (n : ℕ) :
@@ -365,7 +357,8 @@ lemma quad_integral_Dn_le (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → �
       ≤ ∫ ω, Real.exp (4 * |a| * C * (T : ℝ)) * Real.exp (4 * a * B u ω) ∂μ :=
         integral_mono_of_nonneg (ae_of_all _ fun ω ↦ by positivity) (hMGF.const_mul _)
           (ae_of_all _ hpt)
-    _ = Real.exp (4 * |a| * C * (T : ℝ)) * ∫ ω, Real.exp (4 * a * B u ω) ∂μ := integral_const_mul _ _
+    _ = Real.exp (4 * |a| * C * (T : ℝ)) * ∫ ω,
+        Real.exp (4 * a * B u ω) ∂μ := integral_const_mul _ _
 
 /-! ### The continuous drift `∫₀ᵘθds`: basics and `𝓕`-adaptedness -/
 
@@ -388,7 +381,8 @@ lemma contDrift_abs_le {θ : ℝ≥0 → Ω → ℝ} (hcont : ∀ ω, Continuous
 omit hB in
 /-- **The continuous drift is `𝓕_u`-adapted (all `u`).** The everywhere-limit of the
 `𝓕_u`-strongly-measurable left-endpoint Riemann sums over the partition of `[0,u]` itself
-(`tendsto_riemannSum_setIntegral`); each partition point `≤ u` so its `θ`-value is `𝓕_u`-measurable. -/
+(`tendsto_riemannSum_setIntegral`); each partition point `≤ u` so its `θ`-value is `𝓕_u`-measurable.
+-/
 lemma stronglyMeasurable_contDrift (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     (hcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (u : ℝ≥0) :
@@ -491,7 +485,8 @@ lemma memLp_fn_two (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → �
     {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (a : ℝ) (T : ℝ≥0) {u : ℝ≥0} (huT : u ≤ T) (n : ℕ) :
     MemLp (fun ω ↦ Real.exp (a * (B u ω + simpleDrift (unifPart T n)
         (fun i ω ↦ θ (unifPart T n i) ω) n u ω) - a ^ 2 * (u : ℝ) / 2)
-      * simpleDoleansExp (X := B) (unifPart T n) (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω) 2 μ := by
+      * simpleDoleansExp (X := B) (unifPart T n) (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω) 2
+          μ := by
   have hDmeas := measurable_Dn hBmeas hadap a T u n
   have hZmeas := measurable_Zn hB hBmeas hadap hbdd T n
   -- `Measurable.mul` concludes in the `Pi` form `g * h`, while the goal's `MemLp`
@@ -586,10 +581,11 @@ lemma memLp_g_one (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → �
     (memLp_contD_two hB hBmeas hadap hcont hbdd a T huT)
 
 include hB in
-/-- **The mixed-time product converges to `g` a.e. along a subsequence (the engine's `hsub`).** Every
-subsequence `ns` has a further one `ms` along which `Dⁿ_u·Zⁿ_T → Dᵤ·Z_T` a.e.: the density part
-converges a.e. (`exists_subseq_riemannσ_ae` + `simpleDoleansExp_neg_eq`), the drift part converges
-everywhere (`tendsto_riemannSum_setIntegral_clamp`), and the product of a.e. limits is a.e. -/
+/-- **The mixed-time product converges to `g` a.e. along a subsequence (the engine's `hsub`).**
+Every subsequence `ns` has a further one `ms` along which `Dⁿ_u·Zⁿ_T → Dᵤ·Z_T` a.e.: the density
+part converges a.e. (`exists_subseq_riemannσ_ae` + `simpleDoleansExp_neg_eq`), the drift part
+converges everywhere (`tendsto_riemannSum_setIntegral_clamp`), and the product of a.e. limits is
+a.e. -/
 lemma tendsto_fn_ae_subseq (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     (hcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (a : ℝ)
@@ -614,7 +610,8 @@ lemma tendsto_fn_ae_subseq (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → 
         (fun i ω ↦ θ (unifPart T (ns (ms k)) i) ω) (ns (ms k)) u ω) atTop
         (𝓝 (contDrift θ u ω)) :=
       (tendsto_riemannSum_setIntegral_clamp (hcont ω) (fun s ↦ hbdd s ω) T huT).comp hnsms
-    exact (Real.continuous_exp.tendsto _).comp (((hdrift.const_add (B u ω)).const_mul a).sub_const _)
+    exact (Real.continuous_exp.tendsto _).comp
+        (((hdrift.const_add (B u ω)).const_mul a).sub_const _)
   exact hD.mul hZ
 
 /-! ### The continuous exponential-martingale data and the increment laws under `Q` -/
@@ -622,11 +619,12 @@ lemma tendsto_fn_ae_subseq (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → 
 include hB in
 /-- **Continuous bounded-adapted-θ exponential-martingale data.** For a bounded (`|θ| ≤ C`) adapted
 continuous `θ`, under `Q = μ.withDensity(Z_T)` with the Doléans density
-`Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)`, the drift-corrected process `B^θ_u = B_u + ∫₀ᵘθ ds` is `𝓕`-adapted,
-starts at `0` a.e. `Q`, and every `exp(a·B^θ − ½a²·)` is a `Q`-martingale on `[0,T]`. The martingale
-field is the limit of the simple-θ identity (`isExpQMartingale_BthetaSimple` on the `unifPart`
-approximants): transported to `μ`, both sides pass through the a.e.-subsequence engine
-(`tendsto_setIntegral_of_subseq_ae_of_sq_bound`), and the simple identity forces the limits equal. -/
+`Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)`, the drift-corrected process `B^θ_u = B_u + ∫₀ᵘθ ds` is
+`𝓕`-adapted, starts at `0` a.e. `Q`, and every `exp(a·B^θ − ½a²·)` is a `Q`-martingale on `[0,T]`.
+The martingale field is the limit of the simple-θ identity (`isExpQMartingale_BthetaSimple` on the
+`unifPart` approximants): transported to `μ`, both sides pass through the a.e.-subsequence engine
+(`tendsto_setIntegral_of_subseq_ae_of_sq_bound`), and the simple identity forces the limits equal.
+-/
 theorem isExpQMartingale_BthetaCont (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     (hcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :

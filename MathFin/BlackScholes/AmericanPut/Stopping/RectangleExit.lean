@@ -10,7 +10,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.FirstContact
 /-! # Admissible exit from a backward space-time rectangle 
 ## Result
 
-Public entry points include `rectangleMargin`, `rectangleMargin_continuous`, `rectangleMargin_adapted`, `rectangleMargin_nonneg`.
+Public entry points include `rectangleMargin`, `rectangleMargin_continuous`,
+`rectangleMargin_adapted`, `rectangleMargin_nonneg`.
 -/
 
 @[expose] public section
@@ -39,7 +40,8 @@ theorem rectangleMargin_adapted (ha : Adapted 𝓕 X) (x R : ℝ) (δ : ℝ≥0)
   intro t
   have ht := ha t
   letI : MeasurableSpace Ω := 𝓕 t
-  exact measurable_const.max ((measurable_const.sub (ht.sub measurable_const).abs).min measurable_const)
+  exact measurable_const.max
+      ((measurable_const.sub (ht.sub measurable_const).abs).min measurable_const)
 
 omit [MeasurableSpace Ω] in
 theorem rectangleMargin_nonneg (x R : ℝ) (δ t : ℝ≥0) (ω : Ω) : 0 ≤ rectangleMargin X x R δ t ω :=
@@ -67,7 +69,7 @@ theorem rectangleExitRule_before (ha : Adapted 𝓕 X) (hc : ∀ ω, Continuous 
   exact ⟨hh.1,by exact_mod_cast hh.2⟩
 
 theorem rectangleExitRule_pos (ha : Adapted 𝓕 X) (hc : ∀ ω, Continuous (fun t => X t ω))
-    {x R : ℝ} {δ : ℝ≥0} (hδ : 0 < δ) (ω : Ω) (hstart : |X 0 ω-x| < R) :
+    {x R : ℝ} {δ : ℝ≥0} (hδ : 0 < δ) (ω : Ω) (hstart : |X 0 ω - x| < R) :
     0 < (rectangleExitRule ha hc x R δ).time ω := by
   have hz := (firstContactTime_mem (rectangleMargin_continuous hc x R δ)
     (rectangleMargin_terminal x R δ) ω).2

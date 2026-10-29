@@ -15,7 +15,9 @@ quotients have the same limit, proving the actual boundary derivative.
 
 ## Result
 
-Public entry points include `canonicalPrice_slope_le_contactSlope`, `canonicalPrice_slope_ge_payoff`, `canonicalPrice_slope_tendsto_boundary`, `canonicalPrice_smooth_fit`.
+Public entry points include `canonicalPrice_slope_le_contactSlope`,
+`canonicalPrice_slope_ge_payoff`, `canonicalPrice_slope_tendsto_boundary`,
+`canonicalPrice_smooth_fit`.
 -/
 
 @[expose] public section
@@ -68,14 +70,16 @@ theorem canonicalPrice_slope_tendsto_boundary {k h : ℝ} (hk : 0 < k) (hh : 0 �
       (𝓝[>] (canonicalLogBoundary k h (T : ℝ)))
       (𝓝 (-Real.exp (canonicalLogBoundary k h (T : ℝ)))) := by
   have hTR : 0 < (T : ℝ) := by exact_mod_cast hT
-  have hlo := (putPayoff_hasDerivAt_neg (canonicalLogBoundary_neg hk hh hhk hTR)).tendsto_slope.mono_left
+  have hlo :=
+      (putPayoff_hasDerivAt_neg (canonicalLogBoundary_neg hk hh hhk hTR)).tendsto_slope.mono_left
     (nhdsGT_le_nhdsNE (canonicalLogBoundary k h (T : ℝ)))
   have hhi := actualContactSlope_integral_tendsto hk hh hhk hT
   apply tendsto_of_tendsto_of_tendsto_of_le_of_le' hlo hhi
   · filter_upwards [self_mem_nhdsWithin] with x hx
     exact canonicalPrice_slope_ge_payoff hk hh hhk hTR hx
   · filter_upwards [self_mem_nhdsWithin] with x hx
-    exact canonicalPrice_slope_le_contactSlope hk.le (show canonicalLogBoundary k h (T : ℝ) < x from hx) T
+    exact canonicalPrice_slope_le_contactSlope hk.le
+        (show canonicalLogBoundary k h (T : ℝ) < x from hx) T
 
 /-- The exact one-sided derivative required by `DividendPutSolution.smooth_fit`,
 now proved for the actual stopping price without a classical-solution premise. -/

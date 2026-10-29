@@ -15,7 +15,8 @@ smooth fit and the PDE are not assumptions.
 
 ## Result
 
-Public entry points include `brownianUsualActualContactRule_value_preserving`, `brownianUsualActualContactRule_martingale`, `canonicalPrice_contact_meanValue`.
+Public entry points include `brownianUsualActualContactRule_value_preserving`,
+`brownianUsualActualContactRule_martingale`, `canonicalPrice_contact_meanValue`.
 -/
 
 @[expose] public section
@@ -39,7 +40,8 @@ theorem brownianUsualActualContactRule_value_preserving {k h : ℝ} (hk : 0 ≤ 
   have hc (ω : ℝ≥0 → ℝ) : canonicalDiscountedPrice k h x T (τ.time ω) ω =
       putReward brownian 1 k h (Real.sqrt 2) (Real.exp x) τ.time ω := by
     have hg := canonicalDiscountedPrice_gap k h x T (τ.time ω) ω
-    have hz := canonicalContactRule_contact (h := h) hk brownianUsual_adapted continuous_brownian x T ω
+    have hz :=
+        canonicalContactRule_contact (h := h) hk brownianUsual_adapted continuous_brownian x T ω
     change canonicalGap brownian k h x T (τ.time ω) ω = 0 at hz
     rw [hz,mul_zero] at hg
     have hh := sub_eq_zero.mp hg
@@ -66,9 +68,11 @@ theorem brownianUsualActualContactRule_martingale {k h : ℝ} (hk : 0 ≤ k) (x 
 
 /-- Mean-value identity at any bounded observation rule, capped at first contact. -/
 theorem canonicalPrice_contact_meanValue {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) (T : ℝ≥0)
-    (η : @BoundedRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit) brownianUsualFiltration T) :
+    (η : @BoundedRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit)
+        brownianUsualFiltration T) :
     (∫ ω, canonicalDiscountedPrice k h x T
-      (min (@BoundedRule.time _ (completedMeasurableSpace gaussianLimit) brownianUsualFiltration T η ω)
+      (min (@BoundedRule.time _ (completedMeasurableSpace gaussianLimit)
+          brownianUsualFiltration T η ω)
         (brownianUsualActualContactTime (h := h) hk x T ω)) ω ∂completedMeasure gaussianLimit) =
       canonicalPrice k h x (T : ℝ) := by
   let μ := completedMeasure gaussianLimit
@@ -77,7 +81,8 @@ theorem canonicalPrice_contact_meanValue {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) (T
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   have hh := expected_stoppedValue_eq_initial (P := μ)
     (brownianUsualActualContactRule_martingale (h := h) hk x T)
-    (fun ω => (canonicalDiscountedPrice_continuous hk x T ω).comp (continuous_id.min continuous_const))
+    (fun ω =>
+        (canonicalDiscountedPrice_continuous hk x T ω).comp (continuous_id.min continuous_const))
     (fun t ω => canonicalDiscountedPrice_bound hk x T _ ω) η
   simp only [zero_min] at hh
   rw [integral_congr_ae hinit] at hh

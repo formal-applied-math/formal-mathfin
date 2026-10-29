@@ -18,7 +18,8 @@ terminal time, spatial derivative across the boundary, or Hopf axiom is used.
 
 ## Result
 
-Public entry points include `expBarrier`, `expBarrier_smooth`, `expBarrier_hasDeriv`, `expBarrier_deriv2`.
+Public entry points include `expBarrier`, `expBarrier_smooth`, `expBarrier_hasDeriv`,
+`expBarrier_deriv2`.
 -/
 
 @[expose] public section

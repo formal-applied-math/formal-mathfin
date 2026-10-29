@@ -17,7 +17,8 @@ proves the interior martingale properties from the PDE and Ito's formula.
 
 ## Result
 
-Public entry points include `brownianInteriorRule`, `brownianInteriorRule_tendsto`, `brownian_contact_martingale_of_interior_localMartingales`.
+Public entry points include `brownianInteriorRule`, `brownianInteriorRule_tendsto`,
+`brownian_contact_martingale_of_interior_localMartingales`.
 -/
 
 @[expose] public section
@@ -51,9 +52,11 @@ theorem brownian_contact_martingale_of_interior_localMartingales
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 < K) (hr : 0 ≤ r) (hS : 0 < S) (T : ℝ≥0)
     (hlocal : ∀ n, IsLocalMartingale (fun t ω => classicalCandidate brownian K r q σ S p T
-      (min t ((brownianInteriorRule (K := K) (S := S) hp T n).time ω)) ω) brownianAugFiltration gaussianLimit) :
+      (min t ((brownianInteriorRule (K := K) (S := S) hp T n).time ω)) ω) brownianAugFiltration
+          gaussianLimit) :
     Martingale (fun t ω => classicalCandidate brownian K r q σ S p T
-      (min t ((brownianClassicalContactRule hp hK hS T).time ω)) ω) brownianFiltration gaussianLimit :=
+      (min t ((brownianClassicalContactRule hp hK hS T).time ω)) ω) brownianFiltration
+          gaussianLimit :=
   stoppedCandidate_martingale_of_rule_limit hp brownian_adapted continuous_brownian hK.le hr
     (brownianClassicalContactRule hp hK hS T) (brownianInteriorRule hp T)
     (Eventually.of_forall (brownianInteriorRule_tendsto hp hK hS T))

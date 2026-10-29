@@ -185,6 +185,19 @@ Delivery/status docs:
 - `docs/roadmap.md`: strategy (depth before breadth; how breadth is admitted); the phase log is `docs/archive/roadmap-history.md`.
 - `docs/bridges.md`: catalogue of Foundations/ → pricing-module bridges.
 - `docs/patterns.md`: distilled Lean proof patterns from prior phases.
+- `docs/design.md`: principles for definitions and statements, including the
+  junk-value rule (a term called a price/expectation/probability carries the
+  conditions that make it one).
+- `docs/beginners-manual.md`: Lean + the library for mathematicians; its
+  exercises are checked in `MathFinTest/Manual.lean`.
+
+`MathFinExamples/` (worked demonstrations) and `MathFinTest/` (API checks:
+the README's Lean, the manual's exercises) are separate default-target
+`lean_lib`s that import only the umbrella `MathFin`; nothing in `MathFin/`
+imports them. They are bind-mounted in both compose services like
+`Challenge.lean`/`Solution.lean`, and `.github/workflows/downstream.yml`
+builds `MathFinTest/Readme.lean` weekly in a fresh project that `require`s
+the repo.
 
 Docker notes:
 - `docker/Dockerfile.verify` installs Lean (via elan), prebuilds the

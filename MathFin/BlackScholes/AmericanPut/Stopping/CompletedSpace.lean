@@ -14,7 +14,8 @@ to the same filtration regarded inside the completed ambient space.
 
 ## Result
 
-Public entry points include `completedMeasure`, `ambient_le_completion`, `completion_trim_original`, `integral_completion_original`.
+Public entry points include `completedMeasure`, `ambient_le_completion`, `completion_trim_original`,
+`integral_completion_original`.
 -/
 
 @[expose] public section
@@ -53,7 +54,8 @@ noncomputable def completedAmbientFiltration (𝓕 : Filtration ℝ≥0 mΩ) :
   mono' := fun _ _ h => 𝓕.mono h
   le' := fun t => (𝓕.le t).trans (ambient_le_completion P)
 
-instance completion_isProbabilityMeasure [IsProbabilityMeasure P] : IsProbabilityMeasure (completedMeasure P) :=
+instance completion_isProbabilityMeasure [IsProbabilityMeasure P] : IsProbabilityMeasure
+    (completedMeasure P) :=
   ⟨by change P Set.univ = 1; exact measure_univ⟩
 
 instance completedMeasure_isComplete : (completedMeasure P).IsComplete :=

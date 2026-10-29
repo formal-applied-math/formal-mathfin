@@ -180,7 +180,8 @@ lemma hasDerivAt_bsd1_tau (S K r σ : ℝ) (hσ : 0 < σ)
     funext t; rfl
   rw [← h_fun_eq]
   convert h_quot using 1 <;> try rfl
-  -- Value: ((r+σ²/2)τ - log(S/K))/(2 σ τ √τ) = ((r+σ²/2)(σ√τ) - (log + (r+σ²/2)τ)(σ/(2√τ))) / (σ√τ)²
+  -- Value: ((r+σ²/2)τ - log(S/K))/(2 σ τ √τ) = ((r+σ²/2)(σ√τ) - (log + (r+σ²/2)τ)(σ/(2√τ))) /
+  -- (σ√τ)²
   field_simp
   rw [h_sqrt_sq]
   ring

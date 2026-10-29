@@ -62,7 +62,7 @@ theorem covariance_linear_of_unit [IsFiniteMeasure P] {U V : Ω → ℝ} {ρ : �
     (hcov : cov[U, V; P] = ρ) (p q a b : ℝ) :
     cov[fun ω ↦ p * U ω + q * V ω, fun ω ↦ a * U ω + b * V ω; P]
       = p * a + (p * b + q * a) * ρ + q * b := by
-  show cov[(fun ω ↦ p * U ω) + (fun ω ↦ q * V ω), (fun ω ↦ a * U ω) + (fun ω ↦ b * V ω); P] = _
+  change cov[(fun ω ↦ p * U ω) + (fun ω ↦ q * V ω), (fun ω ↦ a * U ω) + (fun ω ↦ b * V ω); P] = _
   rw [covariance_add_left (hmU.const_mul p) (hmV.const_mul q)
       ((hmU.const_mul a).add (hmV.const_mul b)),
     covariance_add_right (hmU.const_mul p) (hmU.const_mul a) (hmV.const_mul b),

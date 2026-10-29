@@ -14,7 +14,8 @@ continuous-time dynamic programming, without assuming an optimal continuous rule
 
 ## Result
 
-Public entry points include `brownianAmericanPut_wait_integral`, `brownianLogState_integral`, `brownianAmericanPut_wait`, `canonicalPrice_wait`.
+Public entry points include `brownianAmericanPut_wait_integral`, `brownianLogState_integral`,
+`brownianAmericanPut_wait`, `canonicalPrice_wait`.
 -/
 
 @[expose] public section
@@ -36,7 +37,10 @@ theorem brownianAmericanPut_wait_integral {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 
       (brownianLogState (r-q-σ^2/2) σ x u ω))
     (f := fun ω => Real.exp (-r*(u : ℝ))*brownianAmericanPut K r q σ
       (Real.exp (brownianLogState (r-q-σ^2/2) σ x u ω)) T)
-    (fun n => (measurable_const.mul ((brownianGridPrice_continuous hK hr q σ T (gridStep n)).measurable.comp hX)).aestronglyMeasurable)
+    (fun n =>
+        (measurable_const.mul
+        ((brownianGridPrice_continuous hK hr q σ T (gridStep n)).measurable.comp
+        hX)).aestronglyMeasurable)
     (integrable_const K)
     (fun n => Eventually.of_forall (fun ω => by
       have hb := brownianGridMarkovAux_bound
@@ -49,7 +53,8 @@ theorem brownianAmericanPut_wait_integral {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 
         ((mul_le_mul_of_nonneg_right he hK).trans (by simp))))
     (Eventually.of_forall (fun ω => tendsto_const_nhds.mul
       (brownianGridPrice_tendsto hK hr T (brownianLogState (r-q-σ^2/2) σ x u ω))))
-  exact le_of_tendsto hc (Eventually.of_forall (fun n => delayedGridPrice_le_american hK hr u T (gridStep_pos n) x))
+  exact le_of_tendsto hc
+      (Eventually.of_forall (fun n => delayedGridPrice_le_american hK hr u T (gridStep_pos n) x))
 
 theorem brownianLogState_integral {f : ℝ → ℝ} (hf : Continuous f) (β σ x : ℝ) (u : ℝ≥0) :
     (∫ ω, f (brownianLogState β σ x u ω) ∂gaussianLimit) =
@@ -83,7 +88,9 @@ theorem canonicalPrice_wait {k h : ℝ} (hk : 0 ≤ k) (u T : ℝ≥0) (x : ℝ)
       canonicalPrice k h y (t : ℝ) := by
     simp only [canonicalPrice,Real.toNNReal_coe]
     exact (brownianUsualAmericanPut_eq_raw_of_pos (by norm_num) hk (Real.exp_pos y) t).symm
-  simp only [hprice,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num),div_self (show (2 : ℝ) ≠ 0 by norm_num)] at he
+  simp only
+      [hprice,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num),div_self (show (2 : ℝ) ≠ 0 by norm_num)]
+      at he
   exact he
 
 end MathFin.BlackScholes.AmericanPut.Stopping

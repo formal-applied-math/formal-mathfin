@@ -15,7 +15,8 @@ No Brownian law, usual-filtration property or PDE solution is needed here.
 
 ## Result
 
-Public entry points include `exerciseGrid`, `zero_mem_exerciseGrid`, `maturity_mem_exerciseGrid`, `rounded_time_stopping`.
+Public entry points include `exerciseGrid`, `zero_mem_exerciseGrid`, `maturity_mem_exerciseGrid`,
+`rounded_time_stopping`.
 -/
 
 @[expose] public section
@@ -91,7 +92,8 @@ theorem expectedReward_roundUp_tendsto {P : Measure Ω} [IsProbabilityMeasure P]
       atTop (𝓝 (∫ ω, putReward W K r q σ S θ.time ω ∂P)) := by
   apply tendsto_integral_of_dominated_convergence (fun _ => K)
   · intro n
-    exact (putReward_measurable hW K r q σ S (θ.roundUp (gridStep_pos n)).measurable_time).aestronglyMeasurable
+    exact (putReward_measurable hW K r q σ S
+        (θ.roundUp (gridStep_pos n)).measurable_time).aestronglyMeasurable
   · exact integrable_const K
   · intro n
     apply Eventually.of_forall

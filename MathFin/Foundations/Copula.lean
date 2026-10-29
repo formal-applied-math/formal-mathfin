@@ -188,11 +188,16 @@ theorem independenceCopula_real_Iic (u : ι → ℝ) (hu : ∀ i, u i ∈ Icc 0 
   rw [independenceCopula, ← pi_univ_Iic, measureReal_def, Measure.pi_pi, ENNReal.toReal_prod]
   exact Finset.prod_congr rfl fun i _ ↦ uniformIoo_real_Iic (hu i).1 (hu i).2
 
+omit [Fintype ι] in
 /-- `M` is a copula. -/
 theorem isCopula_comonotoneCopula : IsCopula (comonotoneCopula ι) where
-  isProbabilityMeasure := Measure.isProbabilityMeasure_map (by fun_prop)
+  isProbabilityMeasure :=
+    Measure.isProbabilityMeasure_map
+      (measurable_pi_lambda (fun t (_ : ι) ↦ t) fun _ ↦ measurable_id).aemeasurable
   map_eval i := by
-    rw [comonotoneCopula, Measure.map_map (measurable_pi_apply i) (by fun_prop)]
+    rw [comonotoneCopula,
+      Measure.map_map (measurable_pi_apply i)
+        (measurable_pi_lambda (fun t (_ : ι) ↦ t) fun _ ↦ measurable_id)]
     exact Measure.map_id
 
 /-- `M(u) = minᵢ uᵢ` on `[0, 1]^ι`: the comonotonicity copula attains the upper Fréchet–Hoeffding
@@ -243,7 +248,8 @@ theorem countermonotoneCopula_real_Iic (u : Fin 2 → ℝ) (hu : ∀ i, u i ∈ 
   have hsup : Ioo (1 - u 1) (u 0) ⊆ Icc (1 - u 1) (u 0) ∩ Ioo 0 1 := fun t ht ↦
     ⟨Ioo_subset_Icc_self ht, by linarith [ht.1, (hu 1).2], by linarith [ht.2, (hu 0).2]⟩
   rw [le_antisymm ((measure_mono hsub).trans_eq Real.volume_Icc)
-    ((Real.volume_Ioo.symm.trans_le (measure_mono hsup))), ENNReal.toReal_ofReal', sub_sub_eq_add_sub]
+    ((Real.volume_Ioo.symm.trans_le (measure_mono hsup))), ENNReal.toReal_ofReal',
+        sub_sub_eq_add_sub]
 
 end Fundamental
 
@@ -264,7 +270,8 @@ theorem not_exists_isCopula_frechetLower {ι : Type*} [Fintype ι]
   classical
   rintro ⟨C, hC, hW⟩
   have := hC.isProbabilityMeasure
-  obtain ⟨e⟩ := Function.Embedding.nonempty_of_card_le (by simpa using hι : Fintype.card (Fin 3) ≤ _)
+  obtain ⟨e⟩ :=
+      Function.Embedding.nonempty_of_card_le (by simpa using hι : Fintype.card (Fin 3) ≤ _)
   set A : ι → Set (ι → ℝ) := fun a ↦ {v | v a ≤ 1 / 2}
   have hA (a : ι) : C (A a) = ENNReal.ofReal (1 / 2) := by
     rw [← ofReal_measureReal, hC.measureReal_coord_le a (by norm_num) (by norm_num)]

@@ -16,7 +16,8 @@ elementary bounds `0<=p<=1` suffice.
 
 ## Result
 
-Public entry points include `rootProfile_exp_lower`, `rootProfile_exp_upper`, `leadingWeight`, `leadingWeight_pos`.
+Public entry points include `rootProfile_exp_lower`, `rootProfile_exp_upper`, `leadingWeight`,
+`leadingWeight_pos`.
 -/
 
 @[expose] public section
@@ -180,7 +181,8 @@ before any epsilon shift is applied. -/
 theorem straightDifference_right_negative {k h c d : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     (hp : ContinuousBoundaryPutSolution k h p b) (hc : 0 < c) (hd : d ≤ 0) :
     ∃ X : ℝ, 0 < X ∧ ∀ x, X ≤ x → ∀ t, 0 ≤ t → straightDifference p k h c d x t < 0 := by
-  obtain ⟨X, hX, htail⟩ := straightDifference_uniform_tail hp hc hd (show (0 : ℝ) < 1 / 2 by norm_num)
+  obtain ⟨X, hX, htail⟩ :=
+      straightDifference_uniform_tail hp hc hd (show (0 : ℝ) < 1 / 2 by norm_num)
   refine ⟨X, hX, ?_⟩
   intro x hx t ht
   have hb := (abs_lt.mp (htail x hx t ht)).2
@@ -194,6 +196,7 @@ theorem zeroDividend_uniform_tail {k c d : ℝ} {p : ℝ → ℝ → ℝ} {b : �
     ∃ X : ℝ, 0 < X ∧ ∀ x, X ≤ x → ∀ t, 0 ≤ t →
       |normalizedDifference p (profile (k - 1 - c) k) (fun _ => 1) c d x t + 1| < ε := by
   simpa only [straightDifference, sub_zero, profile, ↓reduceIte] using
-    straightDifference_uniform_tail (dividendPutSolution_zero_iff.mpr hp).toContinuousBoundaryPutSolution hc hd hε
+    straightDifference_uniform_tail
+        (dividendPutSolution_zero_iff.mpr hp).toContinuousBoundaryPutSolution hc hd hε
 
 end MathFin.BlackScholes.AmericanPut.Boundary.Comparison

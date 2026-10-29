@@ -11,7 +11,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.ActualContact
 /-! # Bellman identification and attained optimality on physical exercise grids 
 ## Result
 
-Public entry points include `gridReward_adapted`, `gridReward_integrable`, `optimalGridRule`, `gridValue_eq_bellman`.
+Public entry points include `gridReward_adapted`, `gridReward_integrable`, `optimalGridRule`,
+`gridValue_eq_bellman`.
 -/
 
 @[expose] public section
@@ -81,7 +82,8 @@ theorem optimalGridRule_payoffs_tendsto (hW : Measurable W.uncurry) (ha : Adapte
 noncomputable def canonicalOptimalGridRule (k h x t : ℝ) (n : ℕ) :
     @GridRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit)
       brownianUsualFiltration t.toNNReal (gridStep n) :=
-  @optimalGridRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit) brownianUsualFiltration brownian
+  @optimalGridRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit)
+      brownianUsualFiltration brownian
     (completedMeasure gaussianLimit) brownianUsual_adapted 1 k h (Real.sqrt 2) (Real.exp x)
     t.toNNReal (gridStep n) (gridStep_pos n)
 

@@ -96,7 +96,7 @@ theorem uncurry_cellStep (n : ℕ) (k : {x // x ∈ Finset.range n}) (z : ℝ≥
     Function.uncurry ⇑(cellStep T hBmeas hadap hbdd n k).val z
       = (Set.Ioc (unifPart T n k.1) (unifPart T n (k.1 + 1))).indicator
           (fun _ ↦ σ (unifPart T n k.1) z.2) z.1 := by
-  show ⇑(cellStep T hBmeas hadap hbdd n k).val z.1 z.2 = _
+  change ⇑(cellStep T hBmeas hadap hbdd n k).val z.1 z.2 = _
   rw [SimpleProcess.apply_eq]
   simp only [cellStep, stepSP]
   rw [Finsupp.sum_single_index (by simp)]

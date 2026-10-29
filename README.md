@@ -48,7 +48,20 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   coefficients, and $`f \in C^2`$ with $`f'`$ and $`f''`$ bounded,
   $`f(X_T) - f(x_0) = \int_0^T f'(X_s)\sigma_s\,dB_s
   + \int_0^T \big(f'(X_s) b_s + \tfrac12 f''(X_s)\sigma_s^2\big)\,ds`$ almost surely
-  ([`ito_formula_adapted`](MathFin/Foundations/ItoFormulaAdapted.lean)).
+  ([`ito_formula_adapted`](MathFin/Foundations/ItoFormulaAdapted.lean)). For every $`f \in C^2`$,
+  with no bound on $`f'`$ or $`f''`$, and each fixed $`t \le T`$, the left-point Riemann sums of $`f'(X)`$
+  against $`M = \int \sigma\,dB`$ converge in probability to
+  $`f(X_t) - f(x_0) - \int_0^t \big(f'(X_s) b_s + \tfrac12 f''(X_s)\sigma_s^2\big)\,ds`$
+  ([`ito_formula_adapted_local_le`](MathFin/Foundations/ItoFormulaAdaptedTD.lean)), and the
+  same holds for $`f(t, x)`$ with jointly continuous $`f_t`$, $`f_x`$, $`f_{xx}`$, the drift gaining
+  the term $`f_t(s, X_s)`$
+  ([`ito_formula_adapted_td_local_le`](MathFin/Foundations/ItoFormulaAdaptedTD.lean)). The bounds
+  on $`\sigma`$ and $`b`$ can be dropped: for continuous adapted $`\sigma`$ the integral
+  $`\int \sigma\,dB`$ is built by clipping $`\sigma`$ to $`[-N, N]`$, is adapted, and is the
+  limit in probability of its Riemann sums
+  ([`localItoIntegral`](MathFin/Foundations/ItoIntegralLocalised.lean)), and the formula holds
+  along $`x_0 + \int b\,ds + \int \sigma\,dB`$
+  ([`ito_formula_adapted_unbounded_le`](MathFin/Foundations/ItoFormulaAdaptedUnbounded.lean)).
 
 - **Girsanov's theorem.** For bounded predictable $`\theta`$, let
   $`dQ = \exp\big(-\int_0^T \theta\,dB - \tfrac12 \int_0^T \theta^2\,dt\big)\,dP`$. On $`[0,T]`$,
@@ -117,6 +130,16 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   strike $`0`$ and to $`0`$ at large strikes
   ([`butterflyFreeFormula_iff_isNormalizedCallPrice`](MathFin/BlackScholes/SVI/TailCondition.lean)).
 
+- **One contract, two models.** Payoffs are written as data in a contract language, separately from
+  the models that price them, so the same term `europeanCall K T` is priced both in the
+  Black–Scholes model and in the binomial tree. Its values in the $`n`$-step Cox–Ross–Rubinstein
+  tree converge to its Black–Scholes value whenever $`|r|\sqrt{T} < \sigma`$
+  ([`tendsto_binomial_value_europeanCall`](MathFin/Contracts/Models/BinomialLimit.lean)). In the
+  tree, under no-arbitrage, a contract paying $`g(S_T)`$ is worth the cost of its hedge: on every
+  path, its discounted payoff is its value plus the gains of a predictable strategy in the
+  discounted spot
+  ([`pathPV_eq_value_add_gains`](MathFin/Contracts/Models/Binomial.lean)).
+
 ## Contents
 
 | Area | Topics |
@@ -133,7 +156,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 | Dependence and extremes | copulas and Sklar's theorem (continuous margins), Fréchet–Hoeffding bounds, Hoeffding's covariance identity, Marshall–Olkin common shocks; GEV and GPD domains of attraction, maxima of Poisson-many losses |
 | Credit portfolios | Bernoulli mixtures, the one-factor Gaussian threshold model, and the Basel IRB formula as the limit of portfolio VaR |
 | Market microstructure | Avellaneda–Stoikov market making, the Glosten–Milgrom spread |
-| Other | a contract language that separates payoffs from pricing models; survival models, mortality and annuities; compound Poisson losses; constant-product AMMs |
+| Other | a contract language that separates payoffs from pricing models, with prices in Black–Scholes and the binomial tree; survival models, mortality and annuities; compound Poisson losses; constant-product AMMs |
 
 ## Limitations
 
@@ -190,6 +213,33 @@ lake build
 library itself are compiled from source. [`CONTRIBUTING.md`](CONTRIBUTING.md) describes a prebuilt
 Docker image and a faster edit-and-check loop for contributors.
 
+## Using the library in a project
+
+Create a Lean project whose [`lean-toolchain`](lean-toolchain) matches the library's, and add the
+dependency to its `lakefile.toml`:
+
+```toml
+[[require]]
+name = "MathFin"
+git = "https://github.com/formal-applied-math/formal-mathfin"
+rev = "v1.7.0"
+```
+
+Then fetch it and the prebuilt Mathlib files:
+
+```bash
+lake update
+lake exe cache get
+lake build
+```
+
+and import it with `import MathFin`. Each release tag fixes the Lean toolchain, Mathlib and
+BrownianMotion together; to follow `main` instead, use `rev = "main"` with the toolchain from that
+revision. The first build compiles BrownianMotion and the library from source.
+[`MathFinTest/Readme.lean`](MathFinTest/Readme.lean) is such a client: it imports only `MathFin`
+and states the theorem quoted above, and a weekly workflow builds it in a fresh project that
+requires this repository.
+
 ## Verification
 
 A successful `lake build` checks every proof in the library. The benchmark entries are not Lake
@@ -231,13 +281,19 @@ Comparator below).
 
 ## Documentation
 
+- [`docs/beginners-manual.md`](docs/beginners-manual.md): Lean and the library for mathematicians who
+  have not used Lean, with exercises.
 - [`docs/coverage.md`](docs/coverage.md): a dated log of status changes and corrections, with
   verification evidence.
 - [`docs/blueprint.md`](docs/blueprint.md): a dependency graph from Brownian motion to Black–Scholes,
   generated from the Lean source.
 - [`docs/mathematical-architecture.md`](docs/mathematical-architecture.md): the principles the
   library is organized around, and the theorems that connect them.
-- [`MathFin/Examples.lean`](MathFin/Examples.lean): five representative proofs.
+- [`MathFinExamples/Tour.lean`](MathFinExamples/Tour.lean): five representative proofs.
+- [`MathFinExamples/Applications/`](MathFinExamples/Applications): the library applied to concrete
+  problems: a capped call, put–call parity on quotes, a binomial tree, a Gaussian risk report, a
+  bootstrapped curve, default correlation in a credit pool and a minimum-variance portfolio. Each
+  ends in one statement the build checks.
 - [`docs/open-problems.md`](docs/open-problems.md): a survey of open problems in mathematical
   finance.
 - [`docs/status.md`](docs/status.md): where the program stands, and its backlog, the

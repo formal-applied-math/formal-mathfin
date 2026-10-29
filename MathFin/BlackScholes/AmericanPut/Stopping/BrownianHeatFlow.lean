@@ -11,7 +11,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianModel
 /-! # Heat evolution as an actual Brownian expectation, including time zero 
 ## Result
 
-Public entry points include `brownianHeatFlow`, `brownianHeatFlow_zero`, `brownianHeatFlow_continuous`, `brownianHeatFlow_bound`.
+Public entry points include `brownianHeatFlow`, `brownianHeatFlow_zero`,
+`brownianHeatFlow_continuous`, `brownianHeatFlow_bound`.
 -/
 
 @[expose] public section
@@ -43,7 +44,8 @@ theorem brownianHeatFlow_continuous {f : ℝ → ℝ} {C : ℝ}
     exact (hf.measurable.comp (measurable_const.add (measurable_brownian z.1))).aestronglyMeasurable
   · exact fun z => Eventually.of_forall (fun ω => hbound (z.2+brownian z.1 ω))
   · exact integrable_const C
-  · exact Eventually.of_forall (fun ω => hf.comp (continuous_snd.add ((continuous_brownian ω).comp continuous_fst)))
+  · exact Eventually.of_forall
+      (fun ω => hf.comp (continuous_snd.add ((continuous_brownian ω).comp continuous_fst)))
 
 theorem brownianHeatFlow_bound {f : ℝ → ℝ} {C : ℝ}
     (hbound : ∀ x, ‖f x‖ ≤ C) (t : ℝ≥0) (x : ℝ) : ‖brownianHeatFlow f t x‖ ≤ C := by

@@ -17,7 +17,8 @@ stopped martingale, as well as existence of the classical pair.
 
 ## Result
 
-Public entry points include `brownianClassicalContactRule`, `brownian_price_identification_of_martingales`, `brownian_boundary_curvature_of_martingales`.
+Public entry points include `brownianClassicalContactRule`,
+`brownian_price_identification_of_martingales`, `brownian_boundary_curvature_of_martingales`.
 -/
 
 @[expose] public section
@@ -39,9 +40,11 @@ theorem brownian_price_identification_of_martingales {K r q σ S : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} {T : ℝ≥0}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 < K) (hr : 0 ≤ r) (hS : 0 < S)
-    (hsuper : Supermartingale (classicalCandidate brownian K r q σ S p T) brownianFiltration gaussianLimit)
+    (hsuper : Supermartingale (classicalCandidate brownian K r q σ S p T)
+        brownianFiltration gaussianLimit)
     (hmart : Martingale (fun t ω => classicalCandidate brownian K r q σ S p T
-      (min t ((brownianClassicalContactRule hp hK hS T).time ω)) ω) brownianFiltration gaussianLimit) :
+      (min t ((brownianClassicalContactRule hp hK hS T).time ω)) ω) brownianFiltration
+          gaussianLimit) :
     brownianAmericanPut K r q σ S T = K*p (Real.log (S/K)) (σ^2/2*(T : ℝ)) :=
   classical_price_eq_value_of_contact_verification hp measurable_brownian_uncurry brownian_adapted
     continuous_brownian isBrownianReal_brownian.eval_zero_ae_eq_zero hK hr hS hsuper hmart
@@ -56,12 +59,14 @@ theorem brownian_boundary_curvature_of_martingales {K r q σ : ℝ}
       Supermartingale (classicalCandidate brownian K r q σ S p T) brownianFiltration gaussianLimit)
     (hmart : ∀ (T : ℝ≥0) (S : ℝ) (hS : 0 < S),
       Martingale (fun t ω => classicalCandidate brownian K r q σ S p T
-        (min t ((brownianClassicalContactRule hp hK hS T).time ω)) ω) brownianFiltration gaussianLimit)
+        (min t ((brownianClassicalContactRule hp hK hS T).time ω)) ω)
+            brownianFiltration gaussianLimit)
     {τ : ℝ} (hτ : 0 < τ) :
     0 < deriv (deriv (fun s : ℝ => brownianExerciseBoundary K r q σ s.toNNReal)) τ := by
   apply brownian_boundary_curvature_of_price_identification hp hK hr hσ _ hτ
   intro u hu S hS
   simpa only [Real.coe_toNNReal u hu.le] using
-    brownian_price_identification_of_martingales hp hK hr hS (hsuper u.toNNReal S hS) (hmart u.toNNReal S hS)
+    brownian_price_identification_of_martingales hp hK hr hS (hsuper u.toNNReal S hS)
+        (hmart u.toNNReal S hS)
 
 end MathFin.BlackScholes.AmericanPut.Stopping

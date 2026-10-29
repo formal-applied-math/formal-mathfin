@@ -140,7 +140,7 @@ private theorem weighted_fluctuation_integral_le
   calc ∫ ω, (∑ k ∈ Finset.range n, a k ω) ^ 2 ∂μ
       = ∫ ω, ∑ k ∈ Finset.range n, ∑ l ∈ Finset.range n, a k ω * a l ω ∂μ := by
         refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
-        show (∑ k ∈ Finset.range n, a k ω) ^ 2
+        change (∑ k ∈ Finset.range n, a k ω) ^ 2
           = ∑ k ∈ Finset.range n, ∑ l ∈ Finset.range n, a k ω * a l ω
         rw [sq, Finset.sum_mul_sum]
     _ = ∑ k ∈ Finset.range n, ∑ l ∈ Finset.range n, ∫ ω, a k ω * a l ω ∂μ := by
@@ -286,7 +286,8 @@ theorem tendsto_riemann_continuous {h : ℝ≥0 → ℝ} (hcont : Continuous h)
           exact (div_lt_iff₀ hδ).mp hn_gt
   -- the step function integrates to the Riemann sum
   have hstep_integ : ∀ n, ∫ s in Set.Ioc 0 T, F n s ∂ν
-      = ∑ k ∈ Finset.range n, h (unifPart T n k) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
+      = ∑ k ∈ Finset.range n,
+          h (unifPart T n k) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
     intro n
     have hInt : ∀ k ∈ Finset.range n,
         Integrable ((Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
@@ -517,13 +518,13 @@ theorem tendsto_weighted_qv_process_of_ae_continuous
   set Rsum : ℕ → Ω → ℝ := fun n ω ↦ ∑ k ∈ Finset.range n,
       w (unifPart T n k) ω * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) with hRsum
   set Ipath : Ω → ℝ := fun ω ↦ ∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure with hIpath
-  show Tendsto (fun n ↦ ∫ ω, (Ssum n ω - Ipath ω) ^ 2 ∂μ) atTop (𝓝 0)
+  change Tendsto (fun n ↦ ∫ ω, (Ssum n ω - Ipath ω) ^ 2 ∂μ) atTop (𝓝 0)
   -- **Term I**: the fluctuation `Ssum − Rsum → 0` in `L²` (= `tendsto_weighted_fluctuation`)
   have hTermI : Tendsto (fun n ↦ ∫ ω, (Ssum n ω - Rsum n ω) ^ 2 ∂μ) atTop (𝓝 0) := by
     refine (tendsto_congr fun n ↦ ?_).mp
       (tendsto_weighted_fluctuation hB hBmeas hw_adapt hC0 hw_bdd T)
     refine integral_congr_ae (Eventually.of_forall fun ω ↦ ?_)
-    show (∑ k ∈ Finset.range n, w (unifPart T n k) ω
+    change (∑ k ∈ Finset.range n, w (unifPart T n k) ω
           * ((B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
             - ((unifPart T n (k + 1) : ℝ) - unifPart T n k))) ^ 2 = (Ssum n ω - Rsum n ω) ^ 2
     have hbase : (∑ k ∈ Finset.range n, w (unifPart T n k) ω

@@ -18,7 +18,8 @@ at any boundary shared by the two time slices.
 
 ## Result
 
-Public entry points include `incrementGauge_pos_above_strike`, `incrementGauge_pos_on_flat_tail`, `incrementGauge_fit_of_same_boundary`.
+Public entry points include `incrementGauge_pos_above_strike`, `incrementGauge_pos_on_flat_tail`,
+`incrementGauge_fit_of_same_boundary`.
 -/
 
 @[expose] public section
@@ -67,7 +68,7 @@ theorem incrementGauge_pos_on_flat_tail (hp : DividendPutSolution k h p b)
   · exact hp.incrementGauge_pos_above_strike hδ (by norm_num) hA
 
 theorem incrementGauge_fit_of_same_boundary (hp : DividendPutSolution k h p b)
-    {δ t : ℝ} (hδ : 0 ≤ δ) (ht : 0 < t) (heq : b (t+δ) = b t) :
+    {δ t : ℝ} (hδ : 0 ≤ δ) (ht : 0 < t) (heq : b (t + δ) = b t) :
     incrementGauge p k h δ (b t) t = 0 ∧
       HasDerivAt (fun x => incrementGauge p k h δ x t) 0 (b t) := by
   have htδ := add_pos_of_pos_of_nonneg ht hδ

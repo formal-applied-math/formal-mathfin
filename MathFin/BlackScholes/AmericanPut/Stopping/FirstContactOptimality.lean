@@ -16,7 +16,8 @@ then recover the expected value at first contact by ordered optional sampling.
 
 ## Result
 
-Public entry points include `expected_firstContact_eq_initial`, `firstContact_expectedReward_eq_initial`.
+Public entry points include `expected_firstContact_eq_initial`,
+`firstContact_expectedReward_eq_initial`.
 -/
 
 @[expose] public section
@@ -41,7 +42,8 @@ theorem expected_firstContact_eq_initial
   have hUi (η : BoundedRule 𝓕 T) : Integrable (fun ω => U (η.time ω) ω) P :=
     candidate_stopped_integrable hU hUc hUb η
   have hZi (η : BoundedRule 𝓕 T) : Integrable (fun ω => Z (η.time ω) ω) P :=
-    (integrable_const D).mono' (hZm.comp (η.measurable_time.prodMk measurable_id)).aestronglyMeasurable
+    (integrable_const D).mono'
+        (hZm.comp (η.measurable_time.prodMk measurable_id)).aestronglyMeasurable
       (Eventually.of_forall (fun ω => hZb _ ω))
   let G : ℕ → Ω → ℝ := fun n ω => U ((θ n).time ω) ω-Z ((θ n).time ω) ω
   have hGi (n : ℕ) : Integrable (G n) P := (hUi (θ n)).sub (hZi (θ n))

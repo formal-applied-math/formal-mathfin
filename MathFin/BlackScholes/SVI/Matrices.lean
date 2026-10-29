@@ -46,7 +46,8 @@ signature, including singular matrices, is proved in MatrixSignature.lean. -/
 noncomputable def signatureTest {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ) : ℤ :=
   (M.charpoly.signVariations : ℤ) - ((M.charpoly.comp (-X)).signVariations : ℤ)
 
-/-- The four denominator-cleared Hermite matrices of `P'` with weights `X²P²`, `XP²`, `X²P`, `XP`. -/
+/-- The four denominator-cleared Hermite matrices of `P'` with weights `X²P²`, `XP²`, `X²P`, `XP`.
+-/
 noncomputable def certificateMatrices (P : ℝ[X]) : Fin 4 →
     Matrix (Fin P.derivative.natDegree) (Fin P.derivative.natDegree) ℝ :=
   ![clearedHermite P.derivative (X^2*P^2) P.derivative.natDegree,
@@ -54,7 +55,8 @@ noncomputable def certificateMatrices (P : ℝ[X]) : Fin 4 →
     clearedHermite P.derivative (X^2*P) P.derivative.natDegree,
     clearedHermite P.derivative (X*P) P.derivative.natDegree]
 
-/-- The signed combination of the four signature tests, which is four times `badCriticalCount` for a nonconstant polynomial of degree at most ten (`matrixCountFour_eq`). -/
+/-- The signed combination of the four signature tests, which is four times `badCriticalCount` for a
+nonconstant polynomial of degree at most ten (`matrixCountFour_eq`). -/
 noncomputable def matrixCountFour (P : ℝ[X]) : ℤ :=
   signatureTest (certificateMatrices P 0) + signatureTest (certificateMatrices P 1) -
     signatureTest (certificateMatrices P 2) - signatureTest (certificateMatrices P 3)

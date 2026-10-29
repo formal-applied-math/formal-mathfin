@@ -93,7 +93,7 @@ theorem statePricePricing_convexOn
     ConvexOn ℝ (Set.univ : Set ℝ) (fun K ↦ ∑ i ∈ s, q i * g i K) := by
   refine ⟨convex_univ, fun K₁ _ K₂ _ a b ha hb hab ↦ ?_⟩
   -- Goal: Σ q i · g i (a • K₁ + b • K₂) ≤ a • (Σ q i · g i K₁) + b • (Σ q i · g i K₂).
-  show ∑ i ∈ s, q i * g i (a • K₁ + b • K₂)
+  change ∑ i ∈ s, q i * g i (a • K₁ + b • K₂)
         ≤ a • (∑ i ∈ s, q i * g i K₁) + b • (∑ i ∈ s, q i * g i K₂)
   simp only [smul_eq_mul]
   rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]

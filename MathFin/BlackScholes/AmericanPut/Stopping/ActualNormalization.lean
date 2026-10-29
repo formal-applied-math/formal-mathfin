@@ -14,7 +14,8 @@ argument uses neither a classical pricing solution nor boundary regularity.
 
 ## Result
 
-Public entry points include `brownianUsualAmericanPut_normalization_log`, `brownianUsualAmericanPut_normalization`, `brownianAmericanPut_normalization`.
+Public entry points include `brownianUsualAmericanPut_normalization_log`,
+`brownianUsualAmericanPut_normalization`, `brownianAmericanPut_normalization`.
 -/
 
 @[expose] public section

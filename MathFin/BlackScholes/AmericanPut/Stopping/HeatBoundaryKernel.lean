@@ -17,7 +17,8 @@ It does not yet construct a finite-interval boundary solution.
 
 ## Result
 
-Public entry points include `heatBoundaryKernel`, `heatKernel_hasDeriv_time`, `heatKernel_hasDeriv_space`, `heatBoundaryKernel_smoothAt`.
+Public entry points include `heatBoundaryKernel`, `heatKernel_hasDeriv_time`,
+`heatKernel_hasDeriv_space`, `heatBoundaryKernel_smoothAt`.
 -/
 
 @[expose] public section

@@ -17,7 +17,8 @@ needs continuity, not a bounded velocity at expiry.
 
 ## Result
 
-Public entry points include `second_deriv_nonpos_at_local_max`, `deriv_nonneg_at_left_max`, `movingStrip`, `movingStrip_isCompact`.
+Public entry points include `second_deriv_nonpos_at_local_max`, `deriv_nonneg_at_left_max`,
+`movingStrip`, `movingStrip_isCompact`.
 -/
 
 @[expose] public section
@@ -166,7 +167,8 @@ theorem parabolic_maximum {u D : ℝ → ℝ → ℝ} {b : ℝ → ℝ} {R a T :
   have hε : 0 < ε := div_pos hpos (by positivity)
   let v : ℝ → ℝ → ℝ := fun x t => u x t - ε * (t - a + 1)
   have hv : ContinuousOn (fun z : ℝ × ℝ => v z.1 z.2) (movingStrip b R a T) :=
-    hu.sub (continuousOn_const.mul ((continuousOn_snd.sub continuousOn_const).add continuousOn_const))
+    hu.sub
+        (continuousOn_const.mul ((continuousOn_snd.sub continuousOn_const).add continuousOn_const))
   have hdt (x t : ℝ) (hat : a < t) (htT : t ≤ T) (hbx : b t < x) (hxR : x < R) :
       HasDerivAt (v x) (deriv (u x) t - ε) t := by
     convert! (htd x t hat htT hbx hxR).hasDerivAt.sub

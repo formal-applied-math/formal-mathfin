@@ -110,7 +110,7 @@ lemma itoSimple_stepSP {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t)) {a b : �
     (hφ : Measurable[natFiltration hBmeas a] φ) {M : ℝ} (hφM : ∀ ω, |φ ω| ≤ M) (ω : Ω) :
     itoSimple hBmeas (stepSP hBmeas hab hbT hφ hφM).val ω = φ ω * (B b ω - B a ω) := by
   rw [itoSimple_apply]
-  show (Finsupp.single (a, b) φ).sum (fun p v ↦ v ω * (B p.2 ω - B p.1 ω))
+  change (Finsupp.single (a, b) φ).sum (fun p v ↦ v ω * (B p.2 ω - B p.1 ω))
       = φ ω * (B b ω - B a ω)
   rw [Finsupp.sum_single_index (by simp)]
 
@@ -233,7 +233,7 @@ lemma tendsto_clampM_sub_sq_integral {X : Ω → ℝ} (hX : MemLp X 2 μ) :
         hX.aemeasurable).pow_const 2 |>.aestronglyMeasurable)
     hXsq
     (fun m ↦ ae_of_all _ fun ω ↦ by
-      show ‖(clampM (m : ℝ) (X ω) - X ω) ^ 2‖ ≤ (X ω) ^ 2
+      change ‖(clampM (m : ℝ) (X ω) - X ω) ^ 2‖ ≤ (X ω) ^ 2
       rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _), ← sq_abs (X ω),
           ← sq_abs (clampM (m : ℝ) (X ω) - X ω)]
       exact pow_le_pow_left₀ (abs_nonneg _)
@@ -281,7 +281,7 @@ lemma itoIntegralCLM_T_truncStep (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0
       = (memLp_truncRiemannFn hB hBmeas T n m).toLp (truncRiemannFn hBmeas T n m) := by
   rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
         ⟨1, fun V ↦ by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas V).le⟩]
-  show ItoIntegralL2.itoSimpleLp hB hBmeas (truncStep hBmeas T n m).val = _
+  change ItoIntegralL2.itoSimpleLp hB hBmeas (truncStep hBmeas T n m).val = _
   rw [ItoIntegralL2.itoSimpleLp]
   exact (MemLp.toLp_eq_toLp_iff _ _).mpr
     (Filter.Eventually.of_forall fun ω ↦ itoSimple_truncStep hBmeas T n m ω)
@@ -323,7 +323,8 @@ lemma tendsto_integral_truncRiemann_sub_sq (hBmeas : ∀ t, Measurable (B t)) (T
             * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) :=
     fun m ↦ integral_truncRiemann_sub_sq hB hBmeas T n m
   simp_rw [heq]
-  have h0 : (0 : ℝ) = ∑ k ∈ Finset.range n, (0 : ℝ) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
+  have h0 : (0 : ℝ) = ∑ k ∈ Finset.range n,
+      (0 : ℝ) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
     simp only [zero_mul, Finset.sum_const_zero]
   rw [h0]
   exact tendsto_finsetSum _ fun k _ ↦
@@ -386,13 +387,15 @@ unbounded-`L²` discrete isometry. -/
 theorem itoIntegralCLM_T_brownian (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
     ∃ gB : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
       itoIntegralCLM_T hB T hBmeas gB
-        = (memLp_halfD hB hBmeas T).toLp (fun ω ↦ (1 / 2 : ℝ) * (B T ω ^ 2 - B 0 ω ^ 2 - (T : ℝ))) := by
+        = (memLp_halfD hB hBmeas T).toLp
+            (fun ω ↦ (1 / 2 : ℝ) * (B T ω ^ 2 - B 0 ω ^ 2 - (T : ℝ))) := by
   set c := (memLp_halfD hB hBmeas T).toLp
     (fun ω ↦ (1 / 2 : ℝ) * (B T ω ^ 2 - B 0 ω ^ 2 - (T : ℝ))) with hc
   -- Diagonal truncation level `M n` making the truncation error `< 1/(n+1)`.
   have hMex : ∀ n, ∃ m, ∫ ω, (truncRiemannFn hBmeas T n m ω - riemannFn hBmeas T n ω) ^ 2 ∂μ
       < 1 / (n + 1) := fun n ↦
-    ((tendsto_integral_truncRiemann_sub_sq hB hBmeas T n).eventually_lt_const (by positivity)).exists
+    ((tendsto_integral_truncRiemann_sub_sq hB hBmeas T n).eventually_lt_const
+        (by positivity)).exists
   choose M hM using hMex
   -- Truncation error → 0 (squeeze by `1/(n+1)`).
   have herr : Tendsto (fun n ↦ ∫ ω,
@@ -415,7 +418,8 @@ theorem itoIntegralCLM_T_brownian (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥
     rw [tendsto_iff_norm_sub_tendsto_zero]
     refine squeeze_zero (fun n ↦ norm_nonneg _) (fun n ↦ ?_) (by simpa using hb1.add hb2)
     calc ‖(memLp_truncRiemannFn hB hBmeas T n (M n)).toLp (truncRiemannFn hBmeas T n (M n)) - c‖
-        = dist ((memLp_truncRiemannFn hB hBmeas T n (M n)).toLp (truncRiemannFn hBmeas T n (M n))) c :=
+        = dist
+            ((memLp_truncRiemannFn hB hBmeas T n (M n)).toLp (truncRiemannFn hBmeas T n (M n))) c :=
           (dist_eq_norm _ _).symm
       _ ≤ dist ((memLp_truncRiemannFn hB hBmeas T n (M n)).toLp (truncRiemannFn hBmeas T n (M n)))
             ((memLp_riemannFn hB hBmeas T n).toLp (riemannFn hBmeas T n))

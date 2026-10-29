@@ -308,7 +308,7 @@ theorem ito_isometry_discrete_bilinear
   calc ∫ ω, (∑ k ∈ Finset.range N, a k ω) * (∑ k ∈ Finset.range N, b k ω) ∂μ
       = ∫ ω, ∑ j ∈ Finset.range N, ∑ k ∈ Finset.range N, a j ω * b k ω ∂μ := by
         refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
-        show (∑ k ∈ Finset.range N, a k ω) * (∑ k ∈ Finset.range N, b k ω)
+        change (∑ k ∈ Finset.range N, a k ω) * (∑ k ∈ Finset.range N, b k ω)
           = ∑ j ∈ Finset.range N, ∑ k ∈ Finset.range N, a j ω * b k ω
         rw [Finset.sum_mul_sum]
     _ = ∑ j ∈ Finset.range N, ∑ k ∈ Finset.range N, ∫ ω, a j ω * b k ω ∂μ := by

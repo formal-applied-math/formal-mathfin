@@ -17,7 +17,8 @@ still a separate obligation; strict logarithmic curvature is not asserted.
 
 ## Result
 
-Public entry points include `dividend_stock_curvature`, `zeroDividend_stock_curvature`, `remainingTimeBoundary`, `deriv2_comp_neg`.
+Public entry points include `dividend_stock_curvature`, `zeroDividend_stock_curvature`,
+`remainingTimeBoundary`, `deriv2_comp_neg`.
 -/
 
 @[expose] public section
@@ -65,7 +66,7 @@ theorem zeroDividend_remainingTime_curvature {k : ℝ} {p : ℝ → ℝ → ℝ}
 /-- The strict stock-curvature milestone on Liu's restricted parameter range.
 This specializes the new proof, not Liu's published argument. -/
 theorem liuRange_remainingTime_curvature {k h : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : DividendPutSolution k h p b) (_hLiu : h+1 ≤ k) {E σ τ : ℝ}
+    (hp : DividendPutSolution k h p b) (_hLiu : h + 1 ≤ k) {E σ τ : ℝ}
     (hE : 0 < E) (hσ : 0 < σ) (hτ : 0 < τ) :
     0 < deriv (deriv (remainingTimeBoundary E σ b)) τ :=
   dividend_remainingTime_curvature hp hE hσ hτ

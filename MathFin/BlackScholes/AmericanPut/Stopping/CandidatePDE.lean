@@ -17,7 +17,8 @@ the exercise boundary, or martingale consequence of Ito's formula, is assumed.
 
 ## Result
 
-Public entry points include `brownianPriceKernel`, `affinePrice_hasDeriv_time`, `brownianPriceKernel_hasDeriv_time`, `brownianPriceKernel_deriv_space`.
+Public entry points include `brownianPriceKernel`, `affinePrice_hasDeriv_time`,
+`brownianPriceKernel_hasDeriv_time`, `brownianPriceKernel_deriv_space`.
 -/
 
 @[expose] public section
@@ -101,7 +102,7 @@ theorem brownianPriceKernel_contDiffAt {p : ℝ → ℝ → ℝ} {b : ℝ → �
     {K r q σ x₀ T t w : ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hσ : 0 < σ) (ht : t < T)
-    (hx : b (σ^2/2*(T-t)) < x₀+(r-q-σ^2/2)*t+σ*w) :
+    (hx : b (σ ^ 2 / 2 * (T - t)) < x₀ + (r - q - σ ^ 2 / 2) * t + σ * w) :
     ContDiffAt ℝ ∞ (fun z : ℝ × ℝ => brownianPriceKernel p K r q σ x₀ T z.1 z.2) (t,w) := by
   have htime : 0 < σ^2/2*(T-t) := mul_pos (by positivity) (sub_pos.mpr ht)
   have hcomp : ContDiffAt ℝ ∞ (fun z : ℝ × ℝ =>
@@ -118,7 +119,7 @@ theorem brownianPriceKernel_heat_equation {p : ℝ → ℝ → ℝ} {b : ℝ →
     {K r q σ x₀ T t w : ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hσ : 0 < σ) (ht : t < T)
-    (hx : b (σ^2/2*(T-t)) < x₀+(r-q-σ^2/2)*t+σ*w) :
+    (hx : b (σ ^ 2 / 2 * (T - t)) < x₀ + (r - q - σ ^ 2 / 2) * t + σ * w) :
     deriv (fun s => brownianPriceKernel p K r q σ x₀ T s w) t +
       (1/2)*deriv (deriv (fun y => brownianPriceKernel p K r q σ x₀ T t y)) w = 0 := by
   have htime : 0 < σ^2/2*(T-t) := mul_pos (by positivity) (sub_pos.mpr ht)

@@ -15,7 +15,8 @@ normalization. No classical solution or boundary smoothness is assumed.
 
 ## Result
 
-Public entry points include `brownianUsualExerciseBoundary_eq_scaled_canonical` and `brownianUsualLogBoundary_normalization`.
+Public entry points include `brownianUsualExerciseBoundary_eq_scaled_canonical` and
+`brownianUsualLogBoundary_normalization`.
 -/
 
 @[expose] public section

@@ -17,7 +17,9 @@ parts of Steps 4 and 5, not the positive-interval or zero-number invariant.
 
 ## Result
 
-Public entry points include `straightDifference_boundary_nonpos`, `straightDifference_le_of_initial_le`, `straightDifference_positive_at_earlier_time`, `zeroDividend_le_of_initial_le`.
+Public entry points include `straightDifference_boundary_nonpos`,
+`straightDifference_le_of_initial_le`, `straightDifference_positive_at_earlier_time`,
+`zeroDividend_le_of_initial_le`.
 -/
 
 @[expose] public section
@@ -73,7 +75,8 @@ theorem straightDifference_le_of_initial_le (hp : ContinuousBoundaryPutSolution 
     exact hbt.trans hRpos.le
   have hv : ContinuousOn (fun z : ℝ × ℝ => v z.1 z.2 - ε) (movingStrip b R a T) :=
     ((normalizedDifference_continuousOn (d := d) hp hf hg).mono
-      (show movingStrip b R a T ⊆ {z | 0 ≤ z.2} from fun _ ht => ha.trans ht.1)).sub continuousOn_const
+      (show movingStrip b R a T ⊆ {z | 0 ≤ z.2} from fun _ ht => ha.trans ht.1)).sub
+          continuousOn_const
   have hdt (y t : ℝ) (hat : a < t) (_ : t ≤ T) (hby : b t < y) (_ : y < R) :
       DifferentiableAt ℝ (fun s => v y s - ε) t := by
     have hs : ContDiffAt ℝ 2 (fun z : ℝ × ℝ => v z.1 z.2) (y,t) :=
@@ -122,6 +125,7 @@ theorem zeroDividend_le_of_initial_le {k c d : ℝ} {p : ℝ → ℝ → ℝ} {b
   have hi : ∀ y, b a ≤ y → straightDifference p k 0 c d y a ≤ ε := by
     simpa only [straightDifference, sub_zero, profile, ↓reduceIte] using hinit
   simpa only [straightDifference, sub_zero, profile, ↓reduceIte] using
-    straightDifference_le_of_initial_le (dividendPutSolution_zero_iff.mpr hp).toContinuousBoundaryPutSolution hc hd ha hε hi haT hx
+    straightDifference_le_of_initial_le
+        (dividendPutSolution_zero_iff.mpr hp).toContinuousBoundaryPutSolution hc hd ha hε hi haT hx
 
 end MathFin.BlackScholes.AmericanPut.Boundary.Comparison
