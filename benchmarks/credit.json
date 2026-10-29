@@ -386,6 +386,21 @@
       }
     },
     {
+      "id": "mf-expected-exposure-gaussian-law",
+      "name": "Expected Exposure, Gaussian Closed Form at the Law",
+      "domain": "mathematical_finance",
+      "description": "EE(s) = E[V_s⁺]. For V_s ~ N(m, v) with v > 0, EE(s) = m Φ(m/√v) + √v φ(m/√v), with φ the standard normal density. Only the law of V_s is assumed, not a representation of V_s.",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.ExposureMeasures\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- Expected exposure of a Gaussian exposure, at its law. -/\ntheorem expected_exposure_gaussian_law {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} {V : ℝ → Ω₁ → ℝ} {s m : ℝ} {v : ℝ≥0}\n    (hV : HasLaw (V s) (gaussianReal m v) ν) (hv : 0 < v) :\n    CVA.expectedExposure V ν s\n      = m * Phi (m / √(v : ℝ)) + √(v : ℝ) * gaussianPDFReal 0 1 (m / √(v : ℝ)) :=\n  CVA.expectedExposure_of_hasLaw_gaussianReal hV hv\n"
+      },
+      "metadata": {
+        "reference": "J. C. Hull, Options, Futures, and Other Derivatives (CVA/exposure chapter): expected exposure",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.expectedExposure_of_hasLaw_gaussianReal (MathFin/RiskMeasures/ExposureMeasures.lean): the identity on a standard normal space has law N(0, 1), so z ↦ m + √v z has law N(m, v) (gaussianReal_const_add, gaussianReal_const_mul); integrating max(·, 0) through both laws (HasLaw.integral_comp) reduces EE to CVA.expectedExposure_gaussian, the Bachelier call at b = √v, s = 1. SCOPE: one fixed time s; the law of V_s is a hypothesis; v = 0 is excluded."
+      }
+    },
+    {
       "id": "mf-potential-future-exposure-gaussian",
       "name": "Potential Future Exposure, Gaussian Closed Form",
       "domain": "mathematical_finance",
