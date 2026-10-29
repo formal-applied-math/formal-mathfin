@@ -225,6 +225,150 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. tendsto_binomial_value_europeanCall in MathFin/Contracts/Models/BinomialLimit.lean composes three proved results: Binomial.value_europeanCall (each tree value is the n-step tree price, using T / (T/n) = n), binomialPrice_call_tendsto_bs_closed (MathFin/Binomial/CRRCharFun.lean and CRRClosedForm.lean: the CRR call prices converge to the Black-Scholes closed form, by characteristic functions, Levy continuity and put-call parity), and BlackScholes.value_europeanCall (that closed form is the Black-Scholes value of the same contract). The condition |r| sqrt(T) < sigma makes every tree with n >= 1 arbitrage-free (binomialNoArb_crr) and, with the degenerate n = 0 tree, keeps every up-probability in [0, 1] (crrProb_mem_Icc). European call only; no rate of convergence. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-contract-forward-risk-neutral",
+      "name": "The Forward's Value in Any Risk-Neutral Model",
+      "domain": "mathematical_finance",
+      "description": "In any model whose discounted price t -> D(t) X(t) is a martingale under a probability measure Q, starting from the constant S0 with D(0) = 1, the forward contract struck at K and maturing at T has Contract.value S0 - K D(T). No integrability hypothesis is needed; Q need not be equivalent to any physical measure.",
+      "code": {
+        "lean": "import MathFin.Contracts.Parity\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- The forward's value in any risk-neutral model. -/\ntheorem value_forward_of_martingale' {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}\n    [IsProbabilityMeasure Q] {𝓕 : Filtration ℝ≥0 mΩ} {D : ℝ≥0 → ℝ}\n    {X : Unit → ℝ≥0 → Ω → ℝ} {S₀ K : ℝ} {T : ℝ≥0}\n    (hM : Martingale (fun t ω ↦ D t * X () t ω) 𝓕 Q) (hD₀ : D 0 = 1)\n    (hX₀ : ∀ ω, X () 0 ω = S₀) :\n    (forward K T).value Q D X = S₀ - K * D T :=\n  value_forward_of_martingale hM hD₀ hX₀\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "Hull, Options, Futures, and Other Derivatives, ch. 5 (forward prices); Shreve, Stochastic Calculus for Finance II, Section 5.6.2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. value_forward_of_martingale in MathFin/Contracts/Parity.lean: the martingale property between 0 and T (Martingale.condExp_ae_eq through integral_condExp) gives E_Q[D(T) X(T)] = S0 (integral_discounted_of_martingale), and value_forward_of_integral prices the forward from that mean. BlackScholes.value_forward is an instance of value_forward_of_integral. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-parity-risk-neutral",
+      "name": "Put-Call Parity in Closed Form in Any Risk-Neutral Model",
+      "domain": "mathematical_finance",
+      "description": "In any model whose discounted price t -> D(t) X(t) is a martingale under a probability measure Q, starting from the constant S0 with D(0) = 1, the European call and put struck at K with maturity T satisfy C - P = S0 - K D(T) as Contract.values. No integrability hypothesis on either option is needed: the put's integrability follows from the underlying's.",
+      "code": {
+        "lean": "import MathFin.Contracts.Parity\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- Put–call parity in closed form in any risk-neutral model. -/\ntheorem value_europeanCall_sub_put_of_martingale' {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q] {𝓕 : Filtration ℝ≥0 mΩ} {D : ℝ≥0 → ℝ}\n    {X : Unit → ℝ≥0 → Ω → ℝ} {S₀ K : ℝ} {T : ℝ≥0}\n    (hM : Martingale (fun t ω ↦ D t * X () t ω) 𝓕 Q) (hD₀ : D 0 = 1)\n    (hX₀ : ∀ ω, X () 0 ω = S₀) :\n    (europeanCall K T).value Q D X - (europeanPut K T).value Q D X = S₀ - K * D T :=\n  value_europeanCall_sub_put_of_martingale hM hD₀ hX₀\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Stoll, The relationship between put and call option prices, J. Finance 24 (1969); Hull, Options, Futures, and Other Derivatives, ch. 11. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. value_europeanCall_sub_put_of_martingale in MathFin/Contracts/Parity.lean: the pathwise identity call = put + forward (value_europeanCall_eq_put_add_forward), the put's integrability from the discounted underlying's (integrable_europeanPut_pathPV, by cases on D(T) = 0), and the forward's value value_forward_of_martingale. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-coupon-bond-yield",
+      "name": "A Coupon Bond as a Contract Is Worth bondPriceDisc at Its Yield",
+      "domain": "mathematical_finance",
+      "description": "A schedule of fixed cash flows c_i at integer times t_i (i < n), written as a contract, is worth sum_i c_i / (1 + y)^(t_i) in every model under any probability measure, when discounted at the yield y with annual compounding, (1 + y)^(-tau), and 1 + y >= 0. This is the library's bondPriceDisc, the price its durations and convexities are taken of.",
+      "code": {
+        "lean": "import MathFin.Contracts.Instruments.FixedIncome\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- A coupon bond, as a contract, is worth `bondPriceDisc` at its yield. -/\ntheorem value_fixedFlows_yieldDiscount {ι Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}\n    [IsProbabilityMeasure Q] (X : ι → ℝ≥0 → Ω → ℝ) {y : ℝ} (hy : 0 ≤ 1 + y) (t : ℕ → ℕ)\n    (c : ℕ → ℝ) (n : ℕ) :\n    (fixedFlows (fun i ↦ (t i : ℝ≥0)) c n : Contract ι).value Q (yieldDiscount y) X\n      = bondPriceDisc (Finset.range n) t c y :=\n  Contract.value_eq_of_pathPV_eq X fun s ↦ pathPV_fixedFlows_yieldDiscount hy s t c n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "Fabozzi, Bond Markets, Analysis, and Strategies, ch. 2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. fixedFlows, pathPV_fixedFlows_yieldDiscount and Contract.value_eq_of_pathPV_eq in MathFin/Contracts/Instruments/FixedIncome.lean: the contract's present value is sum_i D(t_i) c_i (pathPV_fixedFlows, by induction on the schedule), and at D = (1 + y)^(-tau) each term is c_i / (1 + y)^(t_i) (Real.rpow_neg, Real.rpow_natCast). A contract that observes nothing is worth its present value under any probability measure. Integer payment times only, matching bondPriceDisc. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-level-annuity-zcb",
+      "name": "Level Payments as a Contract Are annuityValue on the Flat Curve",
+      "domain": "mathematical_finance",
+      "description": "n payments of c at Delta t, 2 Delta t, ..., n Delta t, written as a contract and discounted on the flat continuous curve zcb r 0, have present value sum_{i<n} c e^(-r (i+1) Delta t), the library's annuityValue n c r Delta t, along every scenario.",
+      "code": {
+        "lean": "import MathFin.Contracts.Instruments.FixedIncome\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- Level payments, as a contract, are `annuityValue` on the flat curve. -/\ntheorem pathPV_fixedFlows_zcb' {ι : Type*} (s : Scenario ι) (n : ℕ) (c r : ℝ) (Δt : ℝ≥0) :\n    (fixedFlows (fun i ↦ (i + 1 : ℝ≥0) * Δt) (fun _ ↦ c) n : Contract ι).pathPV\n        (fun τ ↦ zcb r 0 τ) s = annuityValue n c r Δt :=\n  pathPV_fixedFlows_zcb s n c r Δt\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "Fabozzi, Bond Markets, Analysis, and Strategies, ch. 2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. pathPV_fixedFlows_zcb in MathFin/Contracts/Instruments/FixedIncome.lean: pathPV_fixedFlows termwise against the definition of annuityValue (MathFin/FixedIncome/CouponBonds.lean). Flat continuously compounded curve only. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-payer-swap-value",
+      "name": "A Payer Swap on a Deterministic Curve Is Worth payerSwapValue",
+      "domain": "mathematical_finance",
+      "description": "On a deterministic discount curve P with nonzero discount factors at the payment dates T_0, ..., T_n and accrual delta != 0, the payer swap contract (receive at each T_(i+1) delta times the simple forward rate the curve implies for [T_i, T_(i+1)], pay delta K) is worth P(T_0) - P(T_n) - K A in every model under any probability measure, with A = delta sum_{i<n} P(T_(i+1)) the annuity: the floating leg telescopes. The floating coupons are fixed by the curve (deterministic rates).",
+      "code": {
+        "lean": "import MathFin.Contracts.Instruments.FixedIncome\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- A payer swap on a deterministic curve is worth `payerSwapValue`. -/\ntheorem value_payerSwap' {ι Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}\n    [IsProbabilityMeasure Q] (X : ι → ℝ≥0 → Ω → ℝ) {P : ℝ≥0 → ℝ} {T : ℕ → ℝ≥0} {δ : ℝ}\n    (n : ℕ) (hδ : δ ≠ 0) (hP : ∀ i, P (T i) ≠ 0) (K : ℝ) :\n    (payerSwap P T δ n K : Contract ι).value Q P X\n      = payerSwapValue (P (T 0)) (P (T n)) K\n          (annuity δ (fun i ↦ P (T (i + 1))) (Finset.range n)) :=\n  value_payerSwap n X hδ hP K\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Hull, Options, Futures, and Other Derivatives, ch. 7; Brigo and Mercurio, Interest Rate Models, Section 1.5. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. value_payerSwap in MathFin/Contracts/Instruments/FixedIncome.lean: the floating leg's coupons delta fraForwardRate (P(T_i)) (P(T_(i+1))) delta discount to P(T_i) - P(T_(i+1)) and telescope to P(T_0) - P(T_n) (pathPV_floatingLeg, by induction); the fixed leg is K times annuity (pathPV_fixedLeg); payerSwapValue is MathFin/FixedIncome/InterestRateSwap.lean's. Deterministic curve only: the floating rates are the curve's forward rates, known in advance. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-payer-swap-par-rate",
+      "name": "A Payer Swap Contract Is Worth Zero Exactly at the Par Rate",
+      "domain": "mathematical_finance",
+      "description": "On a deterministic discount curve P with nonzero discount factors at the payment dates, accrual delta != 0 and a nonzero annuity A, the payer swap contract with fixed rate K has Contract.value 0 if and only if K = (P(T_0) - P(T_n)) / A, the par swap rate.",
+      "code": {
+        "lean": "import MathFin.Contracts.Instruments.FixedIncome\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- A payer swap contract is worth zero exactly at the par rate. -/\ntheorem value_payerSwap_eq_zero_iff' {ι Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}\n    [IsProbabilityMeasure Q] (X : ι → ℝ≥0 → Ω → ℝ) {P : ℝ≥0 → ℝ} {T : ℕ → ℝ≥0} {δ : ℝ}\n    (n : ℕ) (hδ : δ ≠ 0) (hP : ∀ i, P (T i) ≠ 0)\n    (hA : annuity δ (fun i ↦ P (T (i + 1))) (Finset.range n) ≠ 0) (K : ℝ) :\n    (payerSwap P T δ n K : Contract ι).value Q P X = 0\n      ↔ K = parSwapRate (P (T 0)) (P (T n))\n        (annuity δ (fun i ↦ P (T (i + 1))) (Finset.range n)) :=\n  value_payerSwap_eq_zero_iff n X hδ hP hA K\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Hull, Options, Futures, and Other Derivatives, ch. 7. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. value_payerSwap_eq_zero_iff in MathFin/Contracts/Instruments/FixedIncome.lean: value_payerSwap, then payerSwapValue_eq_zero_iff (MathFin/FixedIncome/InterestRateSwap.lean). Deterministic curve only. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-book-es-subadditive",
+      "name": "A Book's Expected Shortfall Is at Most the Sum of Its Contracts'",
+      "domain": "mathematical_finance",
+      "description": "For contracts a, b bought at prices p_a, p_b, with integrable discounted payoffs under a probability measure P on the outcomes, the loss of holding both (bought at p_a + p_b) has expected shortfall at every level alpha in (0, 1) at most the sum of the two positions' expected shortfalls. P is the measure the risk is measured under and need not be a pricing measure.",
+      "code": {
+        "lean": "import MathFin.Contracts.Risk\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- A book's expected shortfall is at most the sum of its contracts'. -/\ntheorem expectedShortfall_loss_both_le' {ι Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {D : ℝ≥0 → ℝ} {X : ι → ℝ≥0 → Ω → ℝ} {α : ℝ}\n    (hα : α ∈ Set.Ioo 0 1) {a b : Contract ι}\n    (ha : Integrable (fun ω ↦ a.pathPV D (scenarioAt X ω)) P)\n    (hb : Integrable (fun ω ↦ b.pathPV D (scenarioAt X ω)) P) (pa pb : ℝ) :\n    expectedShortfall ((Contract.both a b).loss (pa + pb) D X) P α\n      ≤ expectedShortfall (a.loss pa D X) P α + expectedShortfall (b.loss pb D X) P α :=\n  expectedShortfall_loss_both_le hα ha hb pa pb\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "Artzner, Delbaen, Eber and Heath, Coherent measures of risk, Math. Finance 9 (1999); McNeil, Frey and Embrechts, Quantitative Risk Management (2015), Section 2.3. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. expectedShortfall_loss_both_le in MathFin/Contracts/Risk.lean: the book's loss is the sum of the positions' losses (Contract.pathPV_both), and expected shortfall is subadditive (expectedShortfall_add_le, MathFin/RiskMeasures/ExpectedShortfall.lean). Contract.loss p c = p - pathPV is the loss of the position bought at p. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-long-call-var-le-premium",
+      "name": "A Long Call's Value-at-Risk Is at Most Its Premium",
+      "domain": "mathematical_finance",
+      "description": "For a nonnegative discount factor D(T) and an a.e.-measurable discounted payoff, the position long the European call bought at price p has value-at-risk at most p at every level alpha in (0, 1), under any probability measure on the outcomes: the call never pays a negative amount, and VaR is monotone.",
+      "code": {
+        "lean": "import MathFin.Contracts.Risk\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- A long call's value-at-risk is at most its premium. -/\ntheorem valueAtRisk_loss_europeanCall_le' {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {D : ℝ≥0 → ℝ} {α : ℝ} (hα : α ∈ Set.Ioo 0 1)\n    {X : Unit → ℝ≥0 → Ω → ℝ} {K : ℝ} {T : ℝ≥0} (hD : 0 ≤ D T)\n    (hm : AEMeasurable (fun ω ↦ (europeanCall K T).pathPV D (scenarioAt X ω)) P) (p : ℝ) :\n    valueAtRisk ((europeanCall K T).loss p D X) P α ≤ p :=\n  valueAtRisk_loss_europeanCall_le hα hD hm p\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "McNeil, Frey and Embrechts, Quantitative Risk Management (2015), Section 2.2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. valueAtRisk_loss_europeanCall_le in MathFin/Contracts/Risk.lean: valueAtRisk_loss_le_of_nonneg (valueAtRisk_mono against the constant loss p, and valueAtRisk_const, MathFin/RiskMeasures/ValueAtRisk.lean) applied to the call's nonnegative discounted payoff. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-binomial-hedged-zero-risk",
+      "name": "A Hedged Binomial Seller Has Zero Value-at-Risk and Expected Shortfall",
+      "domain": "mathematical_finance",
+      "description": "In the binomial model under no-arbitrage with S0 != 0, for a single cash flow at T = N steps paying g of the underlying at T, there is a predictable strategy H such that, under every probability measure P on coin-flip paths and at every level alpha in (0, 1), the seller who receives the contract's risk-neutral Contract.value and follows H has loss pathPV - (value + gains) with value-at-risk 0 and expected shortfall 0: the loss is 0 on every path.",
+      "code": {
+        "lean": "import MathFin.Contracts.Risk\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- A hedged binomial seller has zero value-at-risk and expected shortfall. -/\ntheorem valueAtRisk_hedged_eq_zero' {u d ρ h : ℝ} {q : ℝ≥0} (hq : q ≤ 1)\n    (hqcrr : crrUpProb u d ρ = q) (S₀ : ℝ) {T : ℝ≥0} {N : ℕ} (hTN : (T : ℝ) / h = N)\n    (hna : BinomialNoArb u d ρ) (hS₀ : S₀ ≠ 0) {a : Payoff Unit} {g : ℝ → ℝ}\n    (hg : ∀ s : Scenario Unit, a.eval s = g (s () T)) :\n    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H n)) ∧\n      ∀ (P : Measure (ℕ → Bool)) [IsProbabilityMeasure P], ∀ α ∈ Set.Ioo (0 : ℝ) 1,\n        let L := fun ω ↦\n          (Contract.pay T a).pathPV (Binomial.discount ρ h) (scenarioAt (Binomial.assets S₀ u d h) ω)\n          - ((Contract.pay T a).value (coinFlipMeasure q hq) (Binomial.discount ρ h)\n              (Binomial.assets S₀ u d h)\n            + ∑ k ∈ Finset.range N,\n              H k ω * (discountedSpot S₀ u d ρ (k + 1) ω - discountedSpot S₀ u d ρ k ω))\n        valueAtRisk L P α = 0 ∧ expectedShortfall L P α = 0 :=\n  Binomial.valueAtRisk_hedged_eq_zero hq hqcrr S₀ hTN hna hS₀ hg\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cox, Ross and Rubinstein (1979); Shreve, Stochastic Calculus for Finance I, Theorem 1.2.2; McNeil, Frey and Embrechts, Quantitative Risk Management (2015), Section 2.2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Binomial.valueAtRisk_hedged_eq_zero in MathFin/Contracts/Risk.lean: Binomial.pathPV_eq_value_add_gains makes the hedged loss identically 0, and valueAtRisk_const, expectedShortfall_const (MathFin/RiskMeasures/ValueAtRisk.lean) evaluate a constant loss. European payoffs of the underlying at T only. Axioms-clean."
+      }
     }
   ]
 }

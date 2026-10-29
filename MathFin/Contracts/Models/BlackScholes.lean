@@ -5,7 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Contracts.Instruments.Options
+public import MathFin.Contracts.Parity
 public import MathFin.BlackScholes.Digital
 public import MathFin.BlackScholes.Put
 public import MathFin.BlackScholes.Forward
@@ -147,17 +147,13 @@ theorem integrable_forward_pathPV {Q : Measure Ω} [IsProbabilityMeasure Q] {Z :
   exact ((integrable_bsTerminal hZ S_0 r σ T).sub (integrable_const K)).const_mul _
 
 /-- **The forward's Black–Scholes value** is `S₀ − K e^{−rT}`: the discounted terminal price has
-mean `S₀` (`discounted_terminal_eq_S0`). -/
+mean `S₀` (`discounted_terminal_eq_S0`), so this is `value_forward_of_integral`. -/
 theorem value_forward {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :
     (forward K T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
-      = S_0 - K * Real.exp (-r * T) := by
-  have h₀ := discounted_terminal_eq_S0 h
-  rw [← neg_mul] at h₀
-  rw [forward, Contract.value_pay]
-  simp only [Payoff.eval, scenarioAt, assets, mul_sub]
-  rw [integral_sub ((integrable_bsTerminal h.Z_law S_0 r σ T).const_mul _) (integrable_const _),
-    h₀, integral_const, probReal_univ, one_smul, mul_comm]
+      = S_0 - K * Real.exp (-r * T) :=
+  value_forward_of_integral ((integrable_bsTerminal h.Z_law S_0 r σ T).const_mul _)
+    (by simpa [assets, neg_mul] using discounted_terminal_eq_S0 h)
 
 /-- **The capped call's Black–Scholes value, by composition, not by a third integral.**
 `cappedCall K₁ K₂ T`'s value under the single-asset Black–Scholes model is the difference
