@@ -26,6 +26,18 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Every worked example has a model (2026-10-29)
+
+One entry added, `mf-gaussian-pair-any-moments` (`full`); corpus 668 → 669. `gaussianPair` in
+`Foundations/BivariateNormalCDF.lean` shifts and scales the Cholesky pair. It is jointly Gaussian,
+with any given means and volatilities and with covariance `r σ₀ σ₁`; the variances need `r² ≤ 1`.
+The two worked examples that quantified over models without exhibiting one now exhibit one:
+- the Gaussian risk report has `Book.isRealization_gaussianPair`, and its `sample_checked` opens
+  with the witness;
+- the minimum-variance portfolio has `AssetPair.exists_returns` for its variance clause.
+
+All six #340 examples now come with a model for their statements.
+
 ### One contract, two models: the binomial tree for the contracts tower (2026-10-28)
 
 Four entries added, all `full`: `mf-contract-bounded-model-integrable`,

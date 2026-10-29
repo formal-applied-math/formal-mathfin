@@ -18,7 +18,8 @@ the two are correlated. This file
    `z = Φ⁻¹(α)`, and its expected shortfall as the mean of the loss over its `α`-tail, a tail of
    mass exactly `1 − α` (`gaussian_loss_report`);
 3. reads off the law of the combined loss from the joint Gaussian law of the book
-   (`IsRealization.hasLaw_add`), so the same report applies to the whole book;
+   (`IsRealization.hasLaw_add`), so the same report applies to the whole book, and exhibits a
+   realization of every book on the Cholesky pair (`Book.isRealization_gaussianPair`);
 4. proves the diversification benefit for every such book: the combined VaR at every level
    `α ∈ [1/2, 1)` is at most the sum of the standalone ones, from the Gaussian closed forms
    (`IsRealization.valueAtRisk_add_le`); the combined ES is, at every level, because ES is
@@ -27,7 +28,8 @@ the two are correlated. This file
    standalone volatilities of `5` and `5`.
 
 `sample_checked` is the single statement the build certifies. It holds for every jointly Gaussian
-pair of losses with the sample's means, volatilities and correlation, on any probability space.
+pair of losses with the sample's means, volatilities and correlation, on any probability space,
+and it exhibits one such pair, so it is not a statement about an empty class.
 
 ## What the library supplies
 
@@ -38,6 +40,9 @@ pair of losses with the sample's means, volatilities and correlation, on any pro
   formula `expectedShortfall_eq_acerbiTasche` with its correction term gone.
 * `MathFin.hasLaw_portfolio_gaussianReal`: a linear combination of a Gaussian vector is Gaussian,
   with the Markowitz variance.
+* `MathFin.gaussianPair`, with `hasGaussianLaw_gaussianPair` and its moments:
+  `(μ₀ + σ₀ X, μ₁ + σ₁ Y)` on the Cholesky pair is a Gaussian pair with any given means,
+  volatilities and correlation.
 * `MathFin.gaussianVaR_subadditive`: the closed form of VaR is subadditive in the volatility.
 * `MathFin.expectedShortfall_add_le`: ES is subadditive, for any integrable losses.
 
@@ -45,8 +50,8 @@ pair of losses with the sample's means, volatilities and correlation, on any pro
 
 The report is for one horizon, and the losses are exactly Gaussian with known parameters:
 estimating the means, volatilities and correlation, fat tails, and the nonlinearity of option
-positions are outside the model. No realization of the book is constructed here: the check is
-quantified over every jointly Gaussian pair with the book's moments. The level `α` stays
+positions are outside the model. The check is quantified over every jointly Gaussian pair with
+the book's moments; one such pair is constructed, on `ℝ × ℝ`. The level `α` stays
 symbolic: the report is in terms of `z = Φ⁻¹(α)` and `ϕ(z)`, and no numerical value of `Φ⁻¹` is
 proved here.
 
@@ -174,6 +179,16 @@ theorem IsRealization.expectedShortfall_add_le [IsProbabilityMeasure P] (h : b.I
   MathFin.expectedShortfall_add_le (integrable_of_hasLaw_gaussianReal (h.hasLaw 0))
     (integrable_of_hasLaw_gaussianReal (h.hasLaw 1)) hα
 
+/-- **Every book has a realization**: on the Cholesky pair `bivariateNormalLaw ρ`, position `i`
+losing `μᵢ + σᵢ Zᵢ` (`gaussianPair`) has the book's joint Gaussian law. So the report is not about
+an empty class of models. -/
+theorem isRealization_gaussianPair (b : Book) :
+    b.IsRealization (bivariateNormalLaw b.corr) (gaussianPair b.mean b.vol) where
+  gaussian := hasGaussianLaw_gaussianPair _ _ _
+  mean := integral_gaussianPair _ _ _
+  var := variance_gaussianPair (by nlinarith [b.corr_mem.1, b.corr_mem.2]) _ _
+  cov := covariance_gaussianPair _ _ _
+
 end Book
 
 /-- An illustrative book: two positions whose losses have means `−1` and `−1/2` (both expected to
@@ -197,9 +212,10 @@ theorem sample_jointVol : sample.jointVol = 8 := by
 
 /-! ### The check -/
 
-/-- **The risk report for `sample`**, the statement this file's build certifies. In every jointly
-Gaussian realization of the book, at every level `α ∈ [1/2, 1)`, with `z = Φ⁻¹(α)` and
-`ϕ` the standard normal density:
+/-- **The risk report for `sample`**, the statement this file's build certifies. The book has a
+realization, on the Cholesky pair (`Book.isRealization_gaussianPair`). In every jointly Gaussian
+realization of the book, at every level `α ∈ [1/2, 1)`, with `z = Φ⁻¹(α)` and `ϕ` the standard
+normal density:
 - the standalone VaRs are `−1 + 5z` and `−1/2 + 5z`, and the combined VaR is `−3/2 + 8z`, so
   diversification saves `2z ≥ 0`;
 - the standalone ESs are `−1 + 5ϕ(z)/(1 − α)` and `−1/2 + 5ϕ(z)/(1 − α)`, and the combined ES is
@@ -207,6 +223,7 @@ Gaussian realization of the book, at every level `α ∈ [1/2, 1)`, with `z = Φ
 - the combined loss exceeds its VaR with probability exactly `1 − α`, and its ES is the integral
   of the combined loss over that event divided by `1 − α`. -/
 theorem sample_checked :
+    sample.IsRealization (bivariateNormalLaw sample.corr) (gaussianPair sample.mean sample.vol) ∧
     ∀ {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω) [IsProbabilityMeasure P]
       (X : Fin 2 → Ω → ℝ), sample.IsRealization P X → ∀ α ∈ Ico (1 / 2 : ℝ) 1,
       (valueAtRisk (X 0) P α = -1 + 5 * PhiInv α ∧
@@ -223,7 +240,7 @@ theorem sample_checked :
       P.real {ω | valueAtRisk (fun ω ↦ X 0 ω + X 1 ω) P α < X 0 ω + X 1 ω} = 1 - α ∧
       expectedShortfall (fun ω ↦ X 0 ω + X 1 ω) P α = (1 - α)⁻¹ *
         ∫ ω in {ω | valueAtRisk (fun ω ↦ X 0 ω + X 1 ω) P α < X 0 ω + X 1 ω}, X 0 ω + X 1 ω ∂P := by
-  intro Ω _ P _ X h α hα
+  refine ⟨sample.isRealization_gaussianPair, fun {Ω} _ P _ X h α hα ↦ ?_⟩
   have hα' : α ∈ Ioo 0 1 := ⟨by linarith [hα.1], hα.2⟩
   obtain ⟨hV, hE, htail, hmean⟩ := gaussian_loss_report h.hasLaw_add sample.jointVol_pos hα'
   obtain ⟨hV₀, hE₀, -⟩ := gaussian_loss_report (h.hasLaw 0) (sample.vol_pos 0) hα'
