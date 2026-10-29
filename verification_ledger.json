@@ -1697,6 +1697,27 @@
       "input_hash": "e121cd777dc091309b1b0b69c1a7666728bbbde40c2fe82fcd9ed4a4c6206a5f",
       "verified_at_commit": "e601fa9"
     },
+    "mf-contract-coupon-bond-gsr": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-29",
+      "elapsed_s": 5.4,
+      "input_hash": "a29f8c5650c4beb991dfcad7eab1bd50fa76025523ee4a1806c8cb25ff08bbd3",
+      "verified_at_commit": "ac3d2fb"
+    },
+    "mf-contract-coupon-bond-hull-white": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-29",
+      "elapsed_s": 5.7,
+      "input_hash": "8cfe938a2e378d919b650b0bb1e66b0447e3cc625219ecf71b3bb86562b9e9f7",
+      "verified_at_commit": "ac3d2fb"
+    },
+    "mf-contract-coupon-bond-vasicek": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-29",
+      "elapsed_s": 5.4,
+      "input_hash": "8a98b8cf9c24d1a381f81356176872a7e4943e2cdbd583cc121747ba2fb69044",
+      "verified_at_commit": "ac3d2fb"
+    },
     "mf-contract-coupon-bond-yield": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-29",
@@ -1731,6 +1752,13 @@
       "elapsed_s": 4.5,
       "input_hash": "2fb476ba09dd390d7d1946cdba2b215fd2c723c854f146af580e3cc9f3fce3d3",
       "verified_at_commit": "331e4a2"
+    },
+    "mf-contract-fixed-flows-zero-curve": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-29",
+      "elapsed_s": 4.7,
+      "input_hash": "577e49ee97cd9939032add1694b8af58fa18c9fb7c543943ae31f23d3f1cac72",
+      "verified_at_commit": "ac3d2fb"
     },
     "mf-contract-forward-risk-neutral": {
       "benchmark_file": "contracts.json",
