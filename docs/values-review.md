@@ -158,7 +158,7 @@ Scope: replication in the tree, then stated for a contract. Two entries were add
 
 ### Evidence
 
-(EVIDENCE-LEDGER)
+`lake build` is green through the daemon's startup build. Both new snippets and the curated `AxiomAudit.lean` pass in the daemon. `AxiomAuditGen` is regenerated (795 guards). `formalization.yaml` is fresh. The Python gates pass. Of the five ledger rows the batch made stale or new, three were verified locally; the daemon then hit its memory cap, and the last two were verified on GitHub runners (`ledger-sweep.yml`, run 40815552039), leaving 671 fresh, 0 stale, 0 missing.
 
 ## 2026-10-29 — corpus 669, modules 630 — every worked example has a model
 
