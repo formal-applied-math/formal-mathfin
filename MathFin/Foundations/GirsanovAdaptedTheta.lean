@@ -71,20 +71,6 @@ noncomputable def itoIntCont (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 �
     Ω → ℝ :=
   ⇑(itoIntegralCLM_T hB T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd))
 
-include hB in
-/-- **The Riemann–Itô sums converge in measure to `∫₀ᵀ θ dB`.** From the `L²` convergence
-(`itoIntegralCLM_T_of_bdd_adapted_cont`, brick b) via `tendstoInMeasure_of_tendsto_Lp`, transported
-from the `Lp` classes to the genuine `riemannσ` functions. -/
-lemma tendstoInMeasure_riemannσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
-    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
-    (hcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :
-    TendstoInMeasure μ (fun n ↦ riemannσ (B := B) θ T n) atTop
-      (itoIntCont hB hBmeas hadap hcont hbdd T) := by
-  refine TendstoInMeasure.congr
-    (fun n ↦ (memLp_riemannσ hB hBmeas hadap hbdd T n).coeFn_toLp) EventuallyEq.rfl ?_
-  exact tendstoInMeasure_of_tendsto_Lp
-    (itoIntegralCLM_T_of_bdd_adapted_cont hB hBmeas hadap hcont hbdd T)
-
 omit hB in
 /-- The discrete quadratic-drift Riemann sum `∑_{k<n} θ(tₖ)²·(t_{k+1} − tₖ)` (the drift half of the
 approximant Doléans exponent), → `∫₀ᵀθ²ds` by `tendsto_driftSq_riemannSum`. -/
@@ -127,7 +113,6 @@ lemma exists_subseq_riemannσ_ae (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥
     fun ε hε ↦ (tendstoInMeasure_riemannσ hB hBmeas hadap hcont hbdd T ε hε).comp hns
   obtain ⟨ms, hms, hae⟩ := hconv.exists_seq_tendsto_ae
   exact ⟨ms, hms, hae⟩
-
 
 include hB in
 /-- **Uniform `L²` bound on the approximant densities.** `∫ (Zⁿ_T)² ≤ exp(C²T)`, uniform in `n` —

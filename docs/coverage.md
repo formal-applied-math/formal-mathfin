@@ -26,6 +26,183 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The binomial value is the cost of its hedge (2026-10-29)
+
+Two entries added, both `full`: `mf-binomial-european-replication` and `mf-contract-binomial-hedge`;
+corpus 669 → 671. `binomialPrice_replication` in `Binomial/EuropeanReplication.lean` applies the
+discrete martingale representation to the discounted tree value and the discounted spot. Under
+no-arbitrage and `S₀ ≠ 0`, it gives a predictable strategy whose gains, added to the tree price,
+are the discounted payoff `e^{−rN} g(S_N)` on every path. `Binomial.pathPV_eq_value_add_gains`
+states this for a contract: a single cash flow paying `g` of the underlying at step `N` has
+discounted payoff equal to its `Contract.value` plus those gains. Scope: European payoffs of the
+terminal spot only. The identity is pathwise; the measure enters only through the value.
+
+### Every worked example has a model (2026-10-29)
+
+One entry added, `mf-gaussian-pair-any-moments` (`full`); corpus 668 → 669. `gaussianPair` in
+`Foundations/BivariateNormalCDF.lean` shifts and scales the Cholesky pair. It is jointly Gaussian,
+with any given means and volatilities and with covariance `r σ₀ σ₁`; the variances need `r² ≤ 1`.
+The two worked examples that quantified over models without exhibiting one now exhibit one:
+- the Gaussian risk report has `Book.isRealization_gaussianPair`, and its `sample_checked` opens
+  with the witness;
+- the minimum-variance portfolio has `AssetPair.exists_returns` for its variance clause.
+
+All six #340 examples now come with a model for their statements.
+
+### One contract, two models: the binomial tree for the contracts tower (2026-10-28)
+
+Four entries added, all `full`: `mf-contract-bounded-model-integrable`,
+`mf-contract-binomial-european-payoff`, `mf-contract-binomial-capped-call` and
+`mf-contract-binomial-to-black-scholes`. Corpus 664 → 668.
+
+`Contracts/Models/Binomial.lean` is the second model for the instruments of
+`Contracts/Instruments/Options.lean`. The underlying is read off coin-flip paths (the spot after
+`⌊t / h⌋` flips), and a European payoff is worth its backward-induction tree price. The file
+contains only the translation. Everything about the tree is in `Binomial/`:
+- `measurable_spotPath` and `abs_spotPath_le` are new in `Binomial/PathMeasure.lean`;
+- `crrProb_mem_Icc` is new in `Binomial/CRRConvergence.lean`. It was proved inline twice in
+  `Binomial/CRRCharFun.lean`, and both copies now call it.
+
+Every contract is integrable in the tree, because the model is bounded. That is a general fact,
+`Contract.integrable_pathPV_of_bounded` in `Contracts/Adapted.lean`, and it gives
+`Payoff.measurable_eval` its first consumer. So the capped call is priced by composition with no
+integrability lemma of its own.
+
+`Contracts/Models/BinomialLimit.lean` proves that `europeanCall K T`, one term, has CRR values
+converging to its Black–Scholes value. It composes three results already proved: the tree value
+is the tree price, the CRR prices converge to the closed form, and the closed form is the
+Black–Scholes value. The hypothesis `|r| √T < σ` keeps every tree arbitrage-free. Only the call
+is covered, and no convergence rate is given.
+
+Each model file now has its own namespace: `Contracts.BlackScholes` (with `bsAssets` renamed to
+`BlackScholes.assets`) and `Contracts.Binomial`. Four entries' snippets change with the rename:
+`mf-contract-european-call`, `mf-contract-european-put`, `mf-contract-digital-cash-or-nothing`
+and `mf-contract-capped-call-value`. Their statements are otherwise unchanged.
+
+### The library applied: six worked examples (2026-10-28)
+
+Two entries added, `qrm-es-tail-mean` and `qrm-one-factor-default-covariance` (both `full`).
+Corpus 662 → 664. Six worked applications in `MathFinExamples/Applications/` (#334–#339), each
+ending in one `sample_checked` statement that the default build checks. They are not corpus
+entries:
+- put–call parity as a check on quoted prices;
+- a binomial tree checked for no-arbitrage, hedging and parity, and a separate CRR market for its
+  Black–Scholes limit;
+- a risk report for a Gaussian book;
+- a bootstrapped discount curve, with repricing and uniqueness;
+- default correlation in a one-factor credit pool;
+- a minimum-variance portfolio.
+
+The examples exposed three gaps in the library, now filled:
+- `Contracts.forward`, `pathPV_europeanCall_eq_put_add_forward` and
+  `value_europeanCall_eq_put_add_forward`: put–call parity read through the contract layer, with
+  `integrable_europeanCall_pathPV` made public (it was a private lemma of the former
+  `Contracts/CappedCall.lean`);
+- `measureReal_valueAtRisk_lt` and `expectedShortfall_eq_setIntegral_tail`: for an atomless law,
+  ES is the mean of the tail;
+- `oneFactor_measureReal_inter_default_sub_mul`: in the Gaussian model, the default covariance is
+  `Var(p(F))`.
+
+The contract modules are reorganized along the tower's own thesis, that the contract is not
+the model:
+- `Core` holds the language, `Adapted` its measurability, `Pricing` the model-agnostic value
+  (now with `Contract.value_pay`);
+- `Instruments/Options` holds the instruments and what they pay, with parity in any model;
+- `Models/BlackScholes` holds one model and the instruments' prices in it.
+
+`Contracts/CappedCall.lean` is gone. Its definition and payoff identity are in
+`Instruments/Options`, and its price is in `Models/BlackScholes`. Two entries' imports change with it (`mf-contract-capped-call`,
+`mf-contract-capped-call-value`); their statements do not.
+
+Some checks are statements about a probabilistic model: the risk report, the credit pool and
+the variance clause of the minimum-variance portfolio. These hold on every realization of the
+model, on any probability space, but none of them proves that a realization exists. No example
+computes a numerical value of `Φ`, `Φ⁻¹` or a Black–Scholes price. These stay symbolic, and the
+exponentials that appear are bounded through `1 + x ≤ eˣ`.
+
+### The unbounded Itô integral, adapted (2026-10-28)
+
+No entries added; corpus stays at 662. `sc-ito-integral-continuous-adapted-unbounded` gains two
+theorems. `localItoIntegral t` now reads, on each path, the integral of `σ` clipped at the least
+integer bounding the path on `[0, t]` rather than on `[0, T]`, so it is adapted to the natural
+filtration of `B` (`stronglyAdapted_localItoIntegral`): the level is `𝓕_t`-measurable, its
+sublevel sets being decided on a countable dense set of times, and each clipped integral is
+predictable. Built at horizons `T ≤ T′` it is almost surely the same path on `[0, T]`
+(`ae_localItoIntegral_eq_of_le`). The gluing needs the clipped integrals to agree up to a random
+time, `LocalisationInMeasure.ae_forall_eq_of_continuousOn_of_antitone`. The adaptedness holds at
+every time and on every path, for the uncompleted filtration. Still not covered: the
+local-martingale property, the adaptedness of `localItoProcess`.
+
+### Itô's formula with unbounded coefficients (2026-10-28)
+
+Two entries added, `sc-ito-integral-continuous-adapted-unbounded` and
+`sc-ito-formula-adapted-unbounded-coefficients` (both `full`). Corpus 660 → 662.
+
+For `σ` adapted to the natural filtration of `B` with every path continuous, and not bounded, the
+Itô integral `∫ σ dB` on `[0, T]` is `ItoIntegralLocalised.localItoIntegral`: for each `t ≤ T` the
+left-point Riemann sums `∑ σ(tₖ)(B_{tₖ₊₁} − B_{tₖ})` converge to it in probability, almost every path
+is continuous on `[0, T]`, and for bounded `σ` it is the `L²` integral. It is glued from the
+integrals `M^N` of `σ` clipped to `[−N, N]` (`clampM`), which agree where the clipping is inactive
+because limits in measure are local; every path of `σ` is bounded on `[0, T]`, so every path is
+read from some `M^N` (since revised to read, at each `t`, the level on `[0, t]`; see above). No stopping times are used. Along `X = x₀ + ∫ b ds + ∫ σ dB` with `σ`, `b`
+continuous adapted and unbounded, Itô's formula for `f(t, x)` with jointly continuous `f_t`, `f_x`,
+`f_xx` holds at each `t ≤ T` in the Riemann-sum reading (`ito_formula_adapted_unbounded_le`; the
+`C²` case `ito_formula_adapted_unbounded_C2_le`), from the bounded formula on the events where `σ`
+and `b` stay in `[−N, N]`.
+
+Safe wording: "the Itô integral of a continuous adapted integrand, as the limit in probability of
+its Riemann sums, and Itô's formula along an Itô process with continuous adapted coefficients, at
+each fixed time". Not covered: the local-martingale property of the integral (adaptedness: see
+"The unbounded Itô integral, adapted"), predictable
+integrands with only almost surely finite energy, a random start, the formula as an identity of
+processes, several driving Brownian motions.
+
+### Itô's formula for `f(t, X_t)` (2026-10-28)
+
+One entry added, `sc-ito-formula-adapted-time-dependent` (`full`). Corpus 659 → 660.
+
+For the same `X`, and `f(t, x)` with partials `f_t`, `f_x`, `f_xx` jointly continuous and no bound
+on `f` or its partials, and `t ≤ T`, the left-point Riemann–Stieltjes sums
+`∑ f_x(tₖ, X_{tₖ})(M_{tₖ₊₁} − M_{tₖ})` on the uniform partitions of `[0, t]` converge in probability
+to `f(t, X_t) − f(0, x₀) − ∫₀ᵗ (f_t + f_x b + ½ f_xx σ²)(s, X_s) ds`
+(`ItoFormulaAdapted.ito_formula_adapted_td_local_le`). With `f_t`, `f_x`, `f_xx` bounded the formula
+at `T` is an almost-sure identity, the stochastic integral being the `L²` integral against `M` of
+the weight `f_x(s, X_s)` (`ito_formula_adapted_td_against`). The pathwise core needs no third
+derivative: the two-variable Taylor remainder is at most `η Δt + η (ΔX)²` once `f_t` and `f_xx`
+oscillate by less than `η` on a cell (`abs_discreteTaylorRemainder2D_le_of_osc`), and uniform
+continuity on `[0, T] × [−R, R]` makes the sum vanish. Localisation reuses the double cutoff
+`SummitC.fTrunc` of `ItoFormulaUnrestricted`; the horizon reduction is
+`ae_itoContinuousMod_eq_of_le`, shared with the time-independent entry.
+
+Safe wording: "Itô's formula for `f(t, X_t)`, `f` with jointly continuous `f_t`, `f_x`, `f_xx`, along
+an Itô process with bounded adapted continuous coefficients, at each fixed time, with the stochastic
+integral as a limit in probability of Riemann sums". Not covered: unbounded coefficients, a random
+start, the formula as an identity of processes, several driving Brownian motions. Issue #309, part 3.
+
+### Itô's formula for every `C²` function, at each fixed time (2026-10-28)
+
+One entry added, `sc-ito-formula-adapted-c2-every-time` (`full`). Corpus 658 → 659.
+
+For `X = x₀ + ∫ b ds + M`, `M = ∫ σ dB`, with `σ`, `b` bounded, adapted to the natural filtration of
+`B` and with every path continuous, `f` twice differentiable with `f''` continuous and no bound on
+`f'` or `f''`, and `t ≤ T`, the left-point Riemann–Stieltjes sums `∑ f'(X_{tₖ})(M_{tₖ₊₁} − M_{tₖ})`
+on the uniform partitions of `[0, t]` converge in probability to
+`f(X_t) − f(x₀) − ∫₀ᵗ (f'(X) b + ½ f''(X) σ²) ds`
+(`ItoFormulaAdapted.ito_formula_adapted_local_le`). For bounded continuous `f'` the same sums on
+`[0, T]` converge in probability to the `L²` Itô integral of `f'(X)σ`
+(`tendstoInMeasure_riemannStieltjes_itoIntegral`), the stochastic integral of
+`sc-ito-formula-adapted`; both are limits in probability of the same sums.
+The formula is the case `f_t = 0` of `ito_formula_adapted_td_local_le` (next section), which
+localises in space on the event that the path stays in `[−N, N]` and reaches `t < T` through the
+formula at horizon `t`, the two constructions being the same path on `[0, t]`
+(`itoProcessCLM_consist`, `LocalisationInMeasure.ae_forall_eq_of_continuousOn`).
+
+Safe wording: "Itô's formula for every `C²` function of an Itô process with bounded adapted
+continuous coefficients, at each fixed time, with the stochastic integral as a limit in
+probability of Riemann sums". Not covered: an `L²` or local stochastic integral of `f'(X)σ` for
+unbounded `f'`, unbounded coefficients, time-dependent `f(t, x)`, a random start, the formula as an
+identity of processes, a Brownian motion continuous only almost surely. Issue #309, parts 1 and 2.
+
 ### Every module connected: the coherence pass (2026-10-21)
 
 A coherence pass found 41 modules that imported nothing from the library and that nothing
@@ -1252,6 +1429,7 @@ What is not covered:
 | `qrm-es-subadditive` | For integrable losses X, Y on one probability space and α ∈ (0, 1): ES_α(X + Y) ≤ ES_α(X) + ES_α(Y). | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_add_le` | `full` |
 | `qrm-es-coherent` | For α ∈ (0, 1), X ↦ ES_α(X) satisfies the four coherence axioms (monotonicity, translation invariance, positive homogeneity, subadditivity) on the integrable losses of any probability space. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_isCoherentRiskMeasure` | `full` |
 | `qrm-es-acerbi-tasche` | For an integrable loss X, α ∈ (0, 1) and q = VaR_α(X): ES_α(X) = (1−α)⁻¹(E[X·1{X > q}] + q·(1 − α − P(X > q))), the correction term accounting for an atom at q. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_eq_acerbiTasche` | `full` |
+| `qrm-es-tail-mean` | For an integrable loss X whose law has a continuous CDF and α ∈ (0, 1), with q = VaR_α(X): the tail {X > q} has probability exactly 1 − α, and ES_α(X) = (1−α)⁻¹ E[X·1{X > q}], the mean of X over that tail. The Acerbi–Tasche correction term vanishes. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_eq_setIntegral_tail` | `full` |
 | `qrm-es-dual-representation` | For an integrable loss X and α ∈ (0, 1), ES_α(X) is the greatest value of E[D·X] over densities D with 0 ≤ D ≤ (1−α)⁻¹ a.s. and E[D] = 1; the maximum is attained. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.isGreatest_integral_mul_expectedShortfall` | `full` |
 | `qrm-es-monotone-level` | For an integrable loss X and 0 < α ≤ β < 1, ES_α(X) ≤ ES_β(X). | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_mono_level` | `full` |
 | `qrm-es-adeh-representation` | On a finite probability space, X ↦ ES_α(−X) satisfies the ADEH axioms (IsCoherentRisk), so ES_α(−X) is the least upper bound of the expected losses ∑ qᵢ(−Xᵢ) over its representing probability vectors. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_isLUB_representingSet` | `full` |
@@ -1291,6 +1469,7 @@ What is not covered:
 | `qrm-quantile-convergence` | If Xₙ → Y almost surely and the α-quantile of Y is unique (F_Y(x) > α for every x above it), then the α-quantiles of the laws of Xₙ converge to the α-quantile of the law of Y. | `MathFin/Foundations/QuantileConvergence.lean`, `MathFin.tendsto_quantile_of_tendsto_ae` | `full` |
 | `qrm-bernoulli-mixture-moments` | For defaults Yᵢ = 1{Uᵢ ≤ Q} with Q ∈ [0, 1], Uᵢ iid uniform and independent of Q: the probability that every obligor in a set s defaults is E[Q^|s|]. | `MathFin/RiskMeasures/BernoulliMixture.lean`, `MathFin.measureReal_iInter_default_eq_integral_pow` | `full` |
 | `qrm-default-correlation` | In the exchangeable Bernoulli mixture, the default correlation of two distinct obligors equals Var(Q)/(E[Q](1 − E[Q])) (hence is nonnegative, defaultCorrelation_nonneg). | `MathFin/RiskMeasures/BernoulliMixture.lean`, `MathFin.defaultCorrelation_eq` | `full` |
+| `qrm-one-factor-default-covariance` | In the one-factor Gaussian threshold model (F and ε₁, …, εₙ independent standard normals, asset correlation ρ < 1, default when √ρ F + √(1 − ρ) εᵢ ≤ Φ⁻¹(π)), two distinct obligors satisfy P(Dᵢ ∩ Dⱼ) − P(Dᵢ)P(Dⱼ) = Var(p(F)), with p(f) = Φ((Φ⁻¹(π) − √ρ f)/√(1 − ρ)) the default probability given the factor. | `MathFin/RiskMeasures/BernoulliMixture.lean`, `MathFin.oneFactor_measureReal_inter_default_sub_mul` | `full` |
 | `qrm-one-factor-pd` | For independent N(0, 1) factor F and idiosyncratic ε, π ∈ (0, 1) and ρ ∈ [0, 1]: P(√ρ F + √(1 − ρ) ε ≤ Φ⁻¹(π)) = π. | `MathFin/RiskMeasures/BernoulliMixture.lean`, `MathFin.oneFactor_measureReal_default` | `full` |
 | `qrm-large-portfolio-lln` | In the one-factor Gaussian threshold model with pairwise independent N(0, 1) idiosyncratic terms (any factor F, any π, ρ < 1), the default fraction of the first m obligors converges almost surely to p(F) = Φ((Φ⁻¹(π) − √ρ F)/√(1 − ρ)). | `MathFin/RiskMeasures/VasicekIRB.lean`, `MathFin.tendsto_oneFactorLossFraction_ae` | `full` |
 | `qrm-basel-irb-formula` | In the one-factor Gaussian threshold model (standard normal factor, pairwise independent standard normal idiosyncratic terms, α ∈ (0, 1), ρ < 1), VaR_α of the default fraction of the first m obligors converges as m → ∞ to Φ((Φ⁻¹(π) + √ρ·Φ⁻¹(α))/√(1 − ρ)) (asrfQuantile), the worst-case default rate at the core of the Basel IRB formula. Loss given default, expected-loss subtraction and the maturity adjustment are not modelled. | `MathFin/RiskMeasures/VasicekIRB.lean`, `MathFin.tendsto_valueAtRisk_oneFactorLossFraction` | `full` |
