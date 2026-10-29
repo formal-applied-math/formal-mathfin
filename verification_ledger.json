@@ -1655,6 +1655,13 @@
       "input_hash": "e962d22c17cd5be8be7fc131600b5626fbf7bf35bea0abef6bcbabb76a36c335",
       "verified_at_commit": "331e4a2"
     },
+    "mf-contract-binomial-hedged-zero-risk": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-29",
+      "elapsed_s": 10.6,
+      "input_hash": "fd97a622f264ed6b5f06c017f79d696cf15e24209677ef56bc83b55bae095bf5",
+      "verified_at_commit": "231f5b1"
+    },
     "mf-contract-binomial-to-black-scholes": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-29",
@@ -2036,9 +2043,9 @@
     "mf-fissler-ziegel-joint-elicitability": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-10-29",
-      "elapsed_s": 5.0,
-      "input_hash": "ce9384cd07830960825dac47c907d0a471b5329473ecd29b1d2f6b2734c105ec",
-      "verified_at_commit": "331e4a2"
+      "elapsed_s": 10.0,
+      "input_hash": "99c361d57787bfe49477cb09d729de0d2784450823f18afe49056e7bb9ceee29",
+      "verified_at_commit": "231f5b1"
     },
     "mf-fixedincome-fra": {
       "benchmark_file": "interest_rates.json",
@@ -4164,9 +4171,9 @@
     "qrm-es-monotone-level": {
       "benchmark_file": "quantitative_risk_management.json",
       "date": "2026-10-29",
-      "elapsed_s": 4.8,
-      "input_hash": "679907b04aeb298e87c2c34294e2bdf990c198b636b58048a0b182cf3c0971a7",
-      "verified_at_commit": "331e4a2"
+      "elapsed_s": 11.4,
+      "input_hash": "2a85b1740290e1780076f46d71d6fc122dc2937066d67a2eaa3a22ad677da781",
+      "verified_at_commit": "231f5b1"
     },
     "qrm-es-not-elicitable": {
       "benchmark_file": "quantitative_risk_management.json",
@@ -4318,9 +4325,9 @@
     "qrm-large-portfolio-lln": {
       "benchmark_file": "quantitative_risk_management.json",
       "date": "2026-10-29",
-      "elapsed_s": 4.9,
-      "input_hash": "9145a95811a4ca1dbbcdf14bec06ef79dc4a6277e89ccf98aa7c1bde5362d1a3",
-      "verified_at_commit": "331e4a2"
+      "elapsed_s": 10.9,
+      "input_hash": "32b13ad79e966f3e7c1189e66d5a20e220c75bf92fa93fcb0b5afdc542dd8174",
+      "verified_at_commit": "231f5b1"
     },
     "qrm-marshall-olkin-ftd": {
       "benchmark_file": "quantitative_risk_management.json",
@@ -4444,9 +4451,9 @@
     "qrm-square-root-of-time": {
       "benchmark_file": "quantitative_risk_management.json",
       "date": "2026-10-29",
-      "elapsed_s": 5.2,
-      "input_hash": "ce4df57d49c1a4bd27c67bdd0855e3e41cef45f9967fe439a4220f557d2ccb22",
-      "verified_at_commit": "331e4a2"
+      "elapsed_s": 10.4,
+      "input_hash": "4db256ef7d5ff9eacbdba47b8d126b3201b5d4a5ea3a6a1a220f9c76ae4f8be1",
+      "verified_at_commit": "231f5b1"
     },
     "qrm-student-t-cauchy": {
       "benchmark_file": "quantitative_risk_management.json",
@@ -4465,9 +4472,9 @@
     "qrm-student-t-es": {
       "benchmark_file": "quantitative_risk_management.json",
       "date": "2026-10-29",
-      "elapsed_s": 4.9,
-      "input_hash": "5d7a8e5ace4da4c3146269615199b33c246faf993553927e61fe60eaedc4c424",
-      "verified_at_commit": "0e9e865"
+      "elapsed_s": 13.2,
+      "input_hash": "a03ab9be29bd82c03b5ddf95ac5062a8452bf7882463b8aca3f8ffaa25b14266",
+      "verified_at_commit": "231f5b1"
     },
     "qrm-student-t-var": {
       "benchmark_file": "quantitative_risk_management.json",
