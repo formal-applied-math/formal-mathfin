@@ -2019,12 +2019,19 @@
       "input_hash": "f451a11512559a3b0367ff589d7614f8dc5b37a4e8df9d5b3070165c8e6a7ba7",
       "verified_at_commit": "331e4a2"
     },
+    "mf-expected-exposure-gaussian-law": {
+      "benchmark_file": "credit.json",
+      "date": "2026-10-29",
+      "elapsed_s": 5.7,
+      "input_hash": "5359e949232f1a3fc26721708c7565a8c83f77e7f5857c19986f7ac91c5afc02",
+      "verified_at_commit": "3e53735"
+    },
     "mf-expected-negative-exposure-gaussian": {
       "benchmark_file": "credit.json",
       "date": "2026-10-29",
-      "elapsed_s": 4.1,
-      "input_hash": "2d5422d3314518369676003f5ac5c7ac64bed36871d9cd8987fcf77de2150a83",
-      "verified_at_commit": "e601fa9"
+      "elapsed_s": 7.3,
+      "input_hash": "044a1087752c12cb2ba386a4144a4815c4b9682d8bfbc1799e347b2bf5d73538",
+      "verified_at_commit": "3e53735"
     },
     "mf-expectile-elicitable": {
       "benchmark_file": "risk_measures.json",
@@ -3387,9 +3394,9 @@
     "mf-potential-future-exposure-gaussian": {
       "benchmark_file": "credit.json",
       "date": "2026-10-29",
-      "elapsed_s": 4.2,
-      "input_hash": "b025d55b9c4bdd9a1709bf4d490a361ea4f55159af6821c182f8d839fcbcffce",
-      "verified_at_commit": "e601fa9"
+      "elapsed_s": 6.1,
+      "input_hash": "fae6180f43563c2a35c320fa5fe4c9093a068cea6e6a5740c4e81f60e90d3ef6",
+      "verified_at_commit": "3e53735"
     },
     "mf-power-forward-price": {
       "benchmark_file": "black_scholes.json",
