@@ -26,6 +26,47 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The library applied: six worked examples (2026-10-28)
+
+Two entries added, `qrm-es-tail-mean` and `qrm-one-factor-default-covariance` (both `full`).
+Corpus 662 → 664. Six worked applications in `MathFinExamples/Applications/` (#334–#339), each
+ending in one `sample_checked` statement that the default build checks. They are not corpus
+entries:
+- put–call parity as a check on quoted prices;
+- a binomial tree checked for no-arbitrage, hedging and parity, and a separate CRR market for its
+  Black–Scholes limit;
+- a risk report for a Gaussian book;
+- a bootstrapped discount curve, with repricing and uniqueness;
+- default correlation in a one-factor credit pool;
+- a minimum-variance portfolio.
+
+The examples exposed three gaps in the library, now filled:
+- `Contracts.forward`, `pathPV_europeanCall_eq_put_add_forward` and
+  `value_europeanCall_eq_put_add_forward`: put–call parity read through the contract layer, with
+  `integrable_europeanCall_pathPV` made public (it was a private lemma of the former
+  `Contracts/CappedCall.lean`);
+- `measureReal_valueAtRisk_lt` and `expectedShortfall_eq_setIntegral_tail`: for an atomless law,
+  ES is the mean of the tail;
+- `oneFactor_measureReal_inter_default_sub_mul`: in the Gaussian model, the default covariance is
+  `Var(p(F))`.
+
+The contract modules are reorganized along the tower's own thesis, that the contract is not
+the model:
+- `Core` holds the language, `Adapted` its measurability, `Pricing` the model-agnostic value
+  (now with `Contract.value_pay`);
+- `Instruments/Options` holds the instruments and what they pay, with parity in any model;
+- `Models/BlackScholes` holds one model and the instruments' prices in it.
+
+`Contracts/CappedCall.lean` is gone. Its definition and payoff identity are in
+`Instruments/Options`, and its price is in `Models/BlackScholes`. Two entries' imports change with it (`mf-contract-capped-call`,
+`mf-contract-capped-call-value`); their statements do not.
+
+Some checks are statements about a probabilistic model: the risk report, the credit pool and
+the variance clause of the minimum-variance portfolio. These hold on every realization of the
+model, on any probability space, but none of them proves that a realization exists. No example
+computes a numerical value of `Φ`, `Φ⁻¹` or a Black–Scholes price. These stay symbolic, and the
+exponentials that appear are bounded through `1 + x ≤ eˣ`.
+
 ### The unbounded Itô integral, adapted (2026-10-28)
 
 No entries added; corpus stays at 662. `sc-ito-integral-continuous-adapted-unbounded` gains two
@@ -1335,6 +1376,7 @@ What is not covered:
 | `qrm-es-subadditive` | For integrable losses X, Y on one probability space and α ∈ (0, 1): ES_α(X + Y) ≤ ES_α(X) + ES_α(Y). | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_add_le` | `full` |
 | `qrm-es-coherent` | For α ∈ (0, 1), X ↦ ES_α(X) satisfies the four coherence axioms (monotonicity, translation invariance, positive homogeneity, subadditivity) on the integrable losses of any probability space. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_isCoherentRiskMeasure` | `full` |
 | `qrm-es-acerbi-tasche` | For an integrable loss X, α ∈ (0, 1) and q = VaR_α(X): ES_α(X) = (1−α)⁻¹(E[X·1{X > q}] + q·(1 − α − P(X > q))), the correction term accounting for an atom at q. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_eq_acerbiTasche` | `full` |
+| `qrm-es-tail-mean` | For an integrable loss X whose law has a continuous CDF and α ∈ (0, 1), with q = VaR_α(X): the tail {X > q} has probability exactly 1 − α, and ES_α(X) = (1−α)⁻¹ E[X·1{X > q}], the mean of X over that tail. The Acerbi–Tasche correction term vanishes. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_eq_setIntegral_tail` | `full` |
 | `qrm-es-dual-representation` | For an integrable loss X and α ∈ (0, 1), ES_α(X) is the greatest value of E[D·X] over densities D with 0 ≤ D ≤ (1−α)⁻¹ a.s. and E[D] = 1; the maximum is attained. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.isGreatest_integral_mul_expectedShortfall` | `full` |
 | `qrm-es-monotone-level` | For an integrable loss X and 0 < α ≤ β < 1, ES_α(X) ≤ ES_β(X). | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_mono_level` | `full` |
 | `qrm-es-adeh-representation` | On a finite probability space, X ↦ ES_α(−X) satisfies the ADEH axioms (IsCoherentRisk), so ES_α(−X) is the least upper bound of the expected losses ∑ qᵢ(−Xᵢ) over its representing probability vectors. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_isLUB_representingSet` | `full` |
@@ -1374,6 +1416,7 @@ What is not covered:
 | `qrm-quantile-convergence` | If Xₙ → Y almost surely and the α-quantile of Y is unique (F_Y(x) > α for every x above it), then the α-quantiles of the laws of Xₙ converge to the α-quantile of the law of Y. | `MathFin/Foundations/QuantileConvergence.lean`, `MathFin.tendsto_quantile_of_tendsto_ae` | `full` |
 | `qrm-bernoulli-mixture-moments` | For defaults Yᵢ = 1{Uᵢ ≤ Q} with Q ∈ [0, 1], Uᵢ iid uniform and independent of Q: the probability that every obligor in a set s defaults is E[Q^|s|]. | `MathFin/RiskMeasures/BernoulliMixture.lean`, `MathFin.measureReal_iInter_default_eq_integral_pow` | `full` |
 | `qrm-default-correlation` | In the exchangeable Bernoulli mixture, the default correlation of two distinct obligors equals Var(Q)/(E[Q](1 − E[Q])) (hence is nonnegative, defaultCorrelation_nonneg). | `MathFin/RiskMeasures/BernoulliMixture.lean`, `MathFin.defaultCorrelation_eq` | `full` |
+| `qrm-one-factor-default-covariance` | In the one-factor Gaussian threshold model (F and ε₁, …, εₙ independent standard normals, asset correlation ρ < 1, default when √ρ F + √(1 − ρ) εᵢ ≤ Φ⁻¹(π)), two distinct obligors satisfy P(Dᵢ ∩ Dⱼ) − P(Dᵢ)P(Dⱼ) = Var(p(F)), with p(f) = Φ((Φ⁻¹(π) − √ρ f)/√(1 − ρ)) the default probability given the factor. | `MathFin/RiskMeasures/BernoulliMixture.lean`, `MathFin.oneFactor_measureReal_inter_default_sub_mul` | `full` |
 | `qrm-one-factor-pd` | For independent N(0, 1) factor F and idiosyncratic ε, π ∈ (0, 1) and ρ ∈ [0, 1]: P(√ρ F + √(1 − ρ) ε ≤ Φ⁻¹(π)) = π. | `MathFin/RiskMeasures/BernoulliMixture.lean`, `MathFin.oneFactor_measureReal_default` | `full` |
 | `qrm-large-portfolio-lln` | In the one-factor Gaussian threshold model with pairwise independent N(0, 1) idiosyncratic terms (any factor F, any π, ρ < 1), the default fraction of the first m obligors converges almost surely to p(F) = Φ((Φ⁻¹(π) − √ρ F)/√(1 − ρ)). | `MathFin/RiskMeasures/VasicekIRB.lean`, `MathFin.tendsto_oneFactorLossFraction_ae` | `full` |
 | `qrm-basel-irb-formula` | In the one-factor Gaussian threshold model (standard normal factor, pairwise independent standard normal idiosyncratic terms, α ∈ (0, 1), ρ < 1), VaR_α of the default fraction of the first m obligors converges as m → ∞ to Φ((Φ⁻¹(π) + √ρ·Φ⁻¹(α))/√(1 − ρ)) (asrfQuantile), the worst-case default rate at the core of the Basel IRB formula. Loss given default, expected-loss subtraction and the maturity adjustment are not modelled. | `MathFin/RiskMeasures/VasicekIRB.lean`, `MathFin.tendsto_valueAtRisk_oneFactorLossFraction` | `full` |

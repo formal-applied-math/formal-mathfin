@@ -36,6 +36,15 @@ Three rungs, all in scope:
 table was written. What shipped is narrower, deliberately: see the second amendment in
 §3, item 2, for the reversal and why it stands.
 
+*Amended 2026-10-28.* The module layout now follows the thesis in the title:
+- `Core`, `Adapted` and `Pricing` hold the language, its measurability and the model-agnostic
+  value;
+- `Instruments/` holds the instruments and what they pay, with no model (`Instruments/Options`);
+- `Models/` holds the models and the instruments' prices in each (`Models/BlackScholes`).
+
+The capped call no longer has a module of its own: its definition is in `Instruments/Options` and
+its price is in `Models/BlackScholes`.
+
 Rung (c) is the point. A reified contract whose price is a machine-checked
 Black–Scholes formula does not exist anywhere, including in the source paper,
 whose pricing layer is a `structure` and one `congrArg`.

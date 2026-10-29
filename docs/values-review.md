@@ -130,6 +130,68 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-28 — corpus 664, modules 628 — the library applied: six worked examples (#334–#339)
+
+Scope: six worked applications in `MathFinExamples/Applications/`, each ending in one `sample_checked` statement: put–call parity on quotes, a binomial tree, a Gaussian risk report, a bootstrapped curve, default correlation in a credit pool, and a minimum-variance portfolio. Also the library gaps they exposed. Two entries were added (`qrm-es-tail-mean`, `qrm-one-factor-default-covariance`, both `full`); corpus 662 → 664. Three read-only reviewers read the diff, split by lens:
+- prose against statement (the standing first pass);
+- coherence, slop and idiom (2, 3, 6);
+- mathematics, architecture and elegance (1, 4, 5, 7, 8).
+
+Every finding acted on was confirmed against the code.
+
+### Upgrades executed
+
+- **Parity through the contract layer.** `Contracts.forward`, `pathPV_europeanCall_eq_put_add_forward` and `value_europeanCall_eq_put_add_forward`. The path identity is Mathlib's `max_zero_sub_max_neg_zero_eq_self`, not a case split. `value_forward` gives the forward's Black–Scholes value.
+- **One integrability idiom.** `integrable_europeanCall_pathPV` is now public and two lines: the positive part of an integrable `S_T − K`, needing only the Gaussian driver. It replaces a private 25-line domination ladder in `CappedCall.lean` that took a full `BSCallHyp`. The put and forward lemmas are its siblings.
+- **ES is the tail mean without atoms.** `measureReal_valueAtRisk_lt` and `expectedShortfall_eq_setIntegral_tail`: with a continuous CDF the tail has mass exactly `1 − α`, and the Acerbi–Tasche correction vanishes.
+- **The one-factor model is a Bernoulli mixture, as a lemma.** `oneFactor_bernoulliMixture` returns the five mixture hypotheses for `Q = p(F)`, `Uᵢ = Φ(εᵢ)`. Before, they were inlined in one proof. `oneFactor_measureReal_iInter_default` and the new `oneFactor_measureReal_inter_default_sub_mul` (default covariance `= Var(p(F))`) are now the generic theorems after `oneFactor_default_iff`. The first draft of the covariance theorem had copied the generic proof line for line.
+- **A witness, not just a universal.** The four coordinate lemmas of `stdNormalFactors` (`OneFactorCopula.lean`) are public, and the credit example's check exhibits a realization of its model.
+- **The library's theorem, not a re-proof.** The binomial example cites `binomialPrice_callPut_parity`; its hand-written `parity` duplicated it.
+- **ES diversification by coherence.** The risk report proves ES subadditivity from `expectedShortfall_add_le`, at every level and for any integrable losses. Only VaR goes through the Gaussian closed form at `α ≥ 1/2`, which is the instructive contrast with `VaRSuperadditivity.lean`.
+- **Register.** `trans_eq` in place of `rw`/`exact` pairs; `sample_df` passed whole; snake_case theorem names (`gaussian_loss_report`, `defaultCorrelation_eq_and_nonneg`).
+- **The contract is not the model, in the module layout too.** `Contracts/Models/BlackScholes.lean` had defined the instruments as well as pricing them, and `Contracts/CappedCall.lean` mixed a definition with a price. Now:
+  - `Core`, `Adapted` and `Pricing` hold the language, its measurability and the model-agnostic value (with `Contract.value_pay`, formerly private to the model file);
+  - `Instruments/Options` holds the instruments, what they pay and parity in any model;
+  - `Models/BlackScholes` holds one model and the prices in it.
+
+  The axis is in the path. The next instrument goes beside `Instruments/Options`, and the next
+  model beside `Models/BlackScholes`.
+
+### The standing first pass: prose against statement
+
+- **An arbitrage the Lean does not state.** The parity check said the negative cost "is an arbitrage". It proves only `parityGap < 0`, with the forward costed at `S₀ − K e^{−rT}` by definition. Replication is not formalized, and the prose now says so.
+- **One story that was two.** The binomial example's CRR limit is for a separate market (σ = 20%, r = 5%), not the sample tree (u = 1.1, d = 0.9), which is not a CRR tree.
+- **A hypothesis the prose dropped.** "The combined ES at any level" against a theorem assuming `α ≥ 1/2`. It is now true as stated, by the coherence route above.
+- **Three points called a curve.** "Every forward rate is positive": the check covers three discount factors and defines no forward rate.
+- **Vacuity, disclosed.** The risk report and the minimum-variance portfolio quantify over realizations whose existence is unproved. Both now say so in "What it does not". The credit example now exhibits one.
+- **Smaller.** Lemmas listed under "what the library supplies" but unused (`crrUpProb_mem_Ioo`, the closed forms in the parity example). Numeric remarks not marked as unproved. A corpus description claiming nonnegativity its statement does not contain. "Joint" for a marginal probability. An integrability hypothesis missing from a module bullet.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: bootstrapping's uniqueness, `eq_df` (the only curve that reprices the strip). Next: strict positivity of the default correlation when `ρ > 0` (backlog 3), the one-factor content that every mixture lacks.
+- **Coherence.** Exemplar: `oneFactor_bernoulliMixture`. Next: `value_forward` from `HasLaw Z (gaussianReal 0 1)` alone; `discounted_terminal_eq_S0` asks for `BSCallHyp` it does not use.
+- **Zero slop.** Exemplar: the integrability lemmas are one term each. Next: the `max (x − K) 0 = max (K − x) 0 + (x − K)` split survives inside `binomialPrice_callPut_parity`.
+- **Architectural ingenuity.** Exemplar: parity is proved once, at the payoff level, and priced by the forward. Next: `bs_put_call_parity` re-derived from it, so the library keeps one parity proof.
+- **First principles.** Next: parity's inconsistency for every pricing measure under which the discounted underlying has mean `S₀`, not only for Black–Scholes (backlog 1).
+- **Idiomatic register.** Next: σ-parametrized Gaussian VaR/ES corollaries; the `(s²).toNNReal` shim in `gaussian_loss_report` says the library wants them.
+- **Concept clarity.** Next: one sheet shape. Five examples use `sources : List String`, while the capped call uses `Clause` with a locator. `AssetPair` carries no validity fields.
+- **Beautiful math.** Exemplar: the risk report's two diversification theorems side by side, one by coherence and one by Gaussianity.
+
+### Ranked backlog
+
+1. Model-free parity: the forward's value from `E[e^{−rT} S_T] = S₀` alone, so the quote check rules out every such pricing measure, not just Black–Scholes. It belongs with the next contracts batch (strategies, notes, swaps).
+2. Existence of a realization for the Gaussian book and the minimum-variance pair, by an affine image of `stdNormalVec` (`Foundations/BivariateNormalCDF.lean`), about 40 lines, shared by both.
+3. Credit: `ρ > 0 → ρ_D > 0` (`p` is strictly monotone and `F` has no atoms); `ρ_D` in closed form through `N₂(z, z; ρ)`.
+4. Binomial: tie the hedge to `binomial_replicatingPortfolio_unique` (the only arbitrage-free price), and make the sample tree a CRR tree.
+5. Bootstrapping: certify the whole curve (`df (n + 1) = df n / 1.03` for the flat tail), and lift `eq_df` into `FixedIncome/Bootstrapping.lean`.
+6. Minimum variance: `w ≠ w* → var > V_min`, and the diversification condition `V_min < min(σ₁², σ₂²) ⟺ ρ < min(σ₁/σ₂, σ₂/σ₁)` as a library theorem.
+7. Lift `gaussian_loss_report`, σ-form, into `RiskMeasures/GaussianExpectedShortfall.lean`; state the tail mean as a set average `⨍`.
+8. One sheet record shape across the examples.
+
+### Evidence
+
+`lake build` is green through the daemon's startup build, including `MathFinExamples`. `AxiomAuditGen` is regenerated. `formalization.yaml` is fresh. The Python gates pass. The ledger re-verified every entry whose inputs changed: the last six on GitHub runners (`ledger-sweep.yml`, run 40801914937), leaving 664 fresh, 0 stale, 0 missing.
+
 ## 2026-10-28 — corpus 662, modules 628 — the unbounded Itô integral, adapted (#346, item 1)
 
 Scope: the first item of #346. No entries were added. `sc-ito-integral-continuous-adapted-unbounded` gains two theorems: adaptedness and horizon independence. `localItoIntegral t` now reads, on each path, the clipped integral at the least integer bounding the path on `[0, t]`, not on `[0, T]`. Three read-only reviewers read the diff, split by lens:

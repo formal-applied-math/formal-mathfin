@@ -1922,15 +1922,16 @@ pricing-measure theorems were conditioned on a hypothesis with no exhibited witn
 
 /-! ### The contracts tower: pricing by composition, not by a third integral (2026-08-17)
 
-`MathFin/Contracts/{Core,Adapted,Pricing,BlackScholes,CappedCall}.lean` separates a payoff's
+`MathFin/Contracts/{Core,Adapted,Pricing,Instruments/Options,Models/BlackScholes}.lean` separates a payoff's
 *meaning* — reified as `Payoff`/`Contract` data, independent of any stochastic model — from the
 model that prices it. Every payoff elsewhere in this library is written inline as a lambda inside
 the integral that prices it, so the payoff and the model are the same syntactic object; here they
-are not, and that separation is what buys `CappedCall.lean` its headline: `cappedCall K₁ K₂ T` is
+are not, and that separation is what buys the capped call its headline: `cappedCall K₁ K₂ T` is
 *defined* as a long call at `K₁` composed with a short call at `K₂`, `cappedCall_payoff_eq` proves
 the composed object really pays `min(max(S − K₁, 0), K₂ − K₁)`, and `value_cappedCall` prices it as
 the *difference of two already-proved `europeanCall` values* — by `Contract.value_both` and
-`Contract.value_scale` alone, with no integral touched a third time. `Contracts/BlackScholes.lean`
+`Contract.value_scale` alone, with no integral touched a third time. The instruments and what they
+pay are in `Contracts/Instruments/Options.lean`, with no model; `Contracts/Models/BlackScholes.lean` prices them, and
 reduces each of `europeanCall`, `europeanPut` and `digitalCall` to the library's existing closed
 forms exactly once; every composed instrument built from them afterward prices by algebra on those
 three values rather than by a fresh integration argument.

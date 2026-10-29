@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (753 MathFin constants, 29 upstream). Citations
+  corpus (756 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -1363,6 +1363,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.expectedShortfall_eq_acerbiTasche
 
+/-- info: 'MathFin.expectedShortfall_eq_setIntegral_tail' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.expectedShortfall_eq_setIntegral_tail
+
 /-- info: 'MathFin.expectedShortfall_isCoherentRiskMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.expectedShortfall_isCoherentRiskMeasure
@@ -2343,6 +2347,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.measureReal_poisson_max_gpd
 
+/-- info: 'MathFin.measureReal_valueAtRisk_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.measureReal_valueAtRisk_lt
+
 /-- info: 'MathFin.measure_eq_of_integral_call_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.measure_eq_of_integral_call_eq
@@ -2506,6 +2514,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.oneFactor_measureReal_inter_default' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.oneFactor_measureReal_inter_default
+
+/-- info: 'MathFin.oneFactor_measureReal_inter_default_sub_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.oneFactor_measureReal_inter_default_sub_mul
 
 /-- info: 'MathFin.ouSigmaSqFromVar_variance_ouStepResidual' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
