@@ -33,8 +33,8 @@ spot and rate, whatever its volatility, prices both quotes.
 * `MathFin.Contracts.value_europeanCall_eq_put_add_forward`: so it is worth the put plus the
   forward, in any model where both are integrable.
 * `MathFin.Contracts.BlackScholes.value_forward`: the forward's Black–Scholes value.
-* The closed forms `MathFin.Contracts.BlackScholes.value_europeanCall` and `value_europeanPut` are not
-  needed: parity goes through `value_forward`, so the check holds whatever the volatility.
+* The closed forms `MathFin.Contracts.BlackScholes.value_europeanCall` and `value_europeanPut` are
+  not needed: parity goes through `value_forward`, so the check holds whatever the volatility.
 
 ## What it does not
 

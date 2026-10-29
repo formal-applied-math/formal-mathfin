@@ -130,6 +130,34 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-29 — corpus 669, modules 630 — every worked example has a model
+
+Scope: the realization gap that #340 was closed with. One entry was added, `mf-gaussian-pair-any-moments` (`full`); corpus 668 → 669.
+
+### Upgrades executed
+
+- **The abstraction lifted, not repeated.** Both examples needed a Gaussian pair with given moments. It is one definition in the library, `gaussianPair` in `Foundations/BivariateNormalCDF.lean`, not two constructions in two example files. It is built on the Cholesky pair the file already had. Its law is Mathlib's instances for linear images and translates, and its moments are Mathlib's affine variance and covariance lemmas applied to the pair's.
+- **No vacuous checks left.** `Book.isRealization_gaussianPair` realizes every book, and `sample_checked` in the risk report now opens with the witness. `AssetPair.exists_returns` does the same for the minimum-variance variance clause. The "no realization is constructed" disclosures are replaced by what is now true.
+
+### The standing first pass: prose against statement
+
+- The new description says the variances need `r² ≤ 1` and that the law and the covariance hold for every `r`, which matches the lemmas' hypotheses.
+- "So every two-asset Gaussian model has a realization": "two-asset" is in the claim, and the statement is about `Fin 2`.
+
+### Lens gradients
+
+- **Coherence.** Exemplar: four lemmas, each a few Mathlib lemmas applied to existing ones. Next: Mathlib's `multivariateGaussian` on `EuclideanSpace ℝ (Fin 2)` is still not identified with `bivariateNormalLaw` (the file says so).
+- **Concept clarity.** Next: `AssetPair` still carries no validity fields, so `exists_returns` takes `ρ² ≤ 1` as a hypothesis where a `Book` gets it from `corr_mem` (carried over from the earlier block, item 8).
+
+### Ranked backlog
+
+1. The `n`-asset version: a Gaussian vector with any mean and positive semidefinite covariance, as the image of `stdNormalVec` under a square root of the covariance, for a multi-position risk report.
+2. Validity fields on `AssetPair`, matching `Book`.
+
+### Evidence
+
+(EVIDENCE-LEDGER)
+
 ## 2026-10-28 — corpus 668, modules 630 — one contract, two models: the binomial tree
 
 Scope: a second model for the contracts tower (`Contracts/Models/Binomial.lean`) and a bridge between the two models (`Contracts/Models/BinomialLimit.lean`). Four entries were added, all `full`; corpus 664 → 668. The maintainer asked, mid-batch, that `Contracts/` not carry what belongs elsewhere, and that request shaped the result.
@@ -224,7 +252,7 @@ Every finding acted on was confirmed against the code.
 ### Ranked backlog
 
 1. Model-free parity: the forward's value from `E[e^{−rT} S_T] = S₀` alone, so the quote check rules out every such pricing measure, not just Black–Scholes. It belongs with the next contracts batch (strategies, notes, swaps).
-2. Existence of a realization for the Gaussian book and the minimum-variance pair, by an affine image of `stdNormalVec` (`Foundations/BivariateNormalCDF.lean`), about 40 lines, shared by both.
+2. Existence of a realization for the Gaussian book and the minimum-variance pair, by an affine image of `stdNormalVec` (`Foundations/BivariateNormalCDF.lean`), about 40 lines, shared by both. *Done 2026-10-29: `gaussianPair`, on the Cholesky pair rather than `stdNormalVec`.*
 3. Credit: `ρ > 0 → ρ_D > 0` (`p` is strictly monotone and `F` has no atoms); `ρ_D` in closed form through `N₂(z, z; ρ)`.
 4. Binomial: tie the hedge to `binomial_replicatingPortfolio_unique` (the only arbitrage-free price), and make the sample tree a CRR tree.
 5. Bootstrapping: certify the whole curve (`df (n + 1) = df n / 1.03` for the flat tail), and lift `eq_df` into `FixedIncome/Bootstrapping.lean`.

@@ -19,7 +19,7 @@ their correlation. This file
 4. proves that no other weight does better, that `w*` is a critical point of the variance under
    the budget constraint, and that, for any square-integrable returns with these volatilities and
    this correlation, the lower bound and the value at `w*` are statements about the variance of
-   the portfolio's return;
+   the portfolio's return, and that such returns exist (`AssetPair.exists_returns`);
 5. reads off the diversification benefit: the minimum variance is below that of either asset
    alone.
 
@@ -34,14 +34,16 @@ their correlation. This file
 * `MathFin.isConstrainedVarianceCriticalPoint_minVarWeightTwo`: `w*` satisfies the Lagrangian
   first-order condition under the budget constraint.
 * `MathFin.portfolioVarTwo_eq_variance`: the closed form is the variance of the portfolio return.
+* `MathFin.gaussianPair`, `variance_gaussianPair`, `covariance_gaussianPair`: a pair of returns with
+  any given volatilities and correlation, on the Cholesky pair.
 
 ## What it does not
 
 The weights are fixed for one period and may be negative (short positions are allowed). Expected
 returns play no part: this is the minimum-variance portfolio, not a mean–variance optimum. The
 volatilities and correlation are taken as known; estimating them is outside the model. The
-variance clause is quantified over square-integrable returns with the given moments; no such pair
-is constructed here.
+variance clause is quantified over square-integrable returns with the given moments, and one such
+pair is constructed (Gaussian, on `ℝ × ℝ`); nothing in the clause depends on that choice.
 
 ## Source
 
@@ -96,6 +98,21 @@ theorem sample_minVar : minPortfolioVarTwo sample.vol₁ sample.vol₂ sample.co
   rw [minPortfolioVarTwo, sample_denom]
   norm_num [sample]
 
+/-- **Returns with these moments exist**, whenever the correlation is in `[−1, 1]`: on the
+Cholesky pair, `R₁ = σ₁ Z₁` and `R₂ = σ₂ Z₂` (`gaussianPair` with zero means) are
+square-integrable with the pair's volatilities and correlation. So a statement about every such
+pair of returns is not about an empty class. -/
+theorem AssetPair.exists_returns (a : AssetPair) (hcorr : a.corr ^ 2 ≤ 1) :
+    ∃ R₁ R₂ : ℝ × ℝ → ℝ, MemLp R₁ 2 (bivariateNormalLaw a.corr) ∧
+      MemLp R₂ 2 (bivariateNormalLaw a.corr) ∧ Var[R₁; bivariateNormalLaw a.corr] = a.vol₁ ^ 2 ∧
+      Var[R₂; bivariateNormalLaw a.corr] = a.vol₂ ^ 2 ∧
+      cov[R₁, R₂; bivariateNormalLaw a.corr] = a.corr * a.vol₁ * a.vol₂ :=
+  ⟨gaussianPair 0 ![a.vol₁, a.vol₂] 0, gaussianPair 0 ![a.vol₁, a.vol₂] 1,
+    memLp_gaussianPair _ _ _ _, memLp_gaussianPair _ _ _ _,
+    by simpa using variance_gaussianPair hcorr 0 ![a.vol₁, a.vol₂] 0,
+    by simpa using variance_gaussianPair hcorr 0 ![a.vol₁, a.vol₂] 1,
+    by simpa using covariance_gaussianPair a.corr 0 ![a.vol₁, a.vol₂]⟩
+
 /-! ### The check -/
 
 /-- **The allocation check for `sample`**, the statement this file's build certifies:
@@ -103,7 +120,8 @@ theorem sample_minVar : minPortfolioVarTwo sample.vol₁ sample.vol₂ sample.co
 - every weight gives a variance of at least `0.03375`, with equality at `3/4`;
 - `3/4` is a critical point of the variance under the budget constraint;
 - `0.03375` is below the variance `0.04` of asset 1 alone and `0.09` of asset 2 alone;
-- for any square-integrable returns with these volatilities and this correlation, the variance of
+- square-integrable returns with these volatilities and this correlation exist, and for any such
+  returns the variance of
   the portfolio return with weight `w` on asset 1 is at least `0.03375`, and is `0.03375` at
   `w = 3/4`. -/
 theorem sample_checked :
@@ -114,6 +132,11 @@ theorem sample_checked :
       IsConstrainedVarianceCriticalPoint Finset.univ
         (covTwo sample.vol₁ sample.vol₂ sample.corr) 0 ![3 / 4, 1 - 3 / 4] ∧
       (0.03375 : ℝ) < sample.vol₁ ^ 2 ∧ (0.03375 : ℝ) < sample.vol₂ ^ 2 ∧
+      (∃ R₁ R₂ : ℝ × ℝ → ℝ, MemLp R₁ 2 (bivariateNormalLaw sample.corr) ∧
+        MemLp R₂ 2 (bivariateNormalLaw sample.corr) ∧
+        Var[R₁; bivariateNormalLaw sample.corr] = sample.vol₁ ^ 2 ∧
+        Var[R₂; bivariateNormalLaw sample.corr] = sample.vol₂ ^ 2 ∧
+        cov[R₁, R₂; bivariateNormalLaw sample.corr] = sample.corr * sample.vol₁ * sample.vol₂) ∧
       ∀ {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω) [IsFiniteMeasure P] (R₁ R₂ : Ω → ℝ),
         MemLp R₁ 2 P → MemLp R₂ 2 P → Var[R₁; P] = sample.vol₁ ^ 2 →
         Var[R₂; P] = sample.vol₂ ^ 2 → cov[R₁, R₂; P] = sample.corr * sample.vol₁ * sample.vol₂ →
@@ -127,7 +150,8 @@ theorem sample_checked :
   have hat : portfolioVarTwo sample.vol₁ sample.vol₂ sample.corr (3 / 4) = 0.03375 := by
     rw [← sample_weight, portfolioVarTwo_at_minVarWeight hD.ne', sample_minVar]
   refine ⟨sample_weight, sample_minVar, hge, hat, ?_, by norm_num [sample],
-    by norm_num [sample], fun P _ R₁ R₂ h₁ h₂ hv₁ hv₂ hc ↦ ⟨fun w ↦ ?_, ?_⟩⟩
+    by norm_num [sample], sample.exists_returns (by norm_num [sample]),
+    fun P _ R₁ R₂ h₁ h₂ hv₁ hv₂ hc ↦ ⟨fun w ↦ ?_, ?_⟩⟩
   · simpa only [sample_weight] using isConstrainedVarianceCriticalPoint_minVarWeightTwo hD.ne'
   · exact (hge w).trans_eq (portfolioVarTwo_eq_variance h₁ h₂ hv₁ hv₂ hc w)
   · exact (portfolioVarTwo_eq_variance h₁ h₂ hv₁ hv₂ hc _).symm.trans hat
