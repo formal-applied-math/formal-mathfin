@@ -53,7 +53,7 @@ sources:
     author_endorsement: n/a
     note: Canonical results whose textbook statements the wider corpus tracks.
 status:
-  scope: 661 theorems across continuous-time stochastic processes and mathematical finance, built on Mathlib + BrownianMotion; 645 delivery-ready (full + library-wrapper).
+  scope: 674 theorems across continuous-time stochastic processes and mathematical finance, built on Mathlib + BrownianMotion; 658 delivery-ready (full + library-wrapper).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms:
@@ -251,9 +251,9 @@ alignment:
       status: full 34 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: stochastic_calculus (Saporito, Stochastic Processes)
-      lean: 52 statements
+      lean: 56 statements
       module: benchmarks/stochastic_calculus.json
-      status: full 49 · wrapper 0 · reduced 3 · placeholder 0
+      status: full 53 · wrapper 0 · reduced 3 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
       lean: 11 statements
