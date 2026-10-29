@@ -58,7 +58,8 @@ QuantLib's 16-branch `switch` (barrier type × call/put × strike-vs-barrier) se
 **Scope, disclosed honestly**: as with the two-asset barrier file, this is a transcription
 cross-check, not a from-first-principles reflection-principle derivation of the barrier density.
 The in–out identity here is a real check on the 16-branch table (a misplaced `+`/`−` sign on any
-one of the 16 QuantLib branches breaks it), but — like `HeynenKatTwoAssetBarrier.lean`'s
+one of the 14 sign-bearing QuantLib branches breaks it; the other two branches are the constant
+`0`), but — like `HeynenKatTwoAssetBarrier.lean`'s
 down-out/up-out check — it holds by pure term cancellation once the table is fixed, so it does
 not independently re-derive `B₁, B₂, B₃, B₄` themselves from a stochastic argument. The `variance
 = 0` and `(H/S)^{2μ}` overflow edge cases QuantLib special-cases numerically, and the
@@ -161,7 +162,8 @@ strike-vs-barrier regime, the down-knock-in and down-knock-out values (QuantLib'
 `DownOut` switch cases, `η = 1` throughout) sum to the vanilla digital α-factor `B₁`. A genuine
 cross-check on the 16-branch transcription: each of the four `(isCall, xGeH)` branches cancels
 its `B₂, B₃, B₄` terms against the paired branch independently (so a transposed sign on any one
-of the eight `Down*` branches would break exactly that case). -/
+of the seven sign-bearing `Down*` branches would break exactly that case; the eighth, the
+knock-out put with `X < H`, is the constant `0`). -/
 theorem bboDownIn_add_DownOut (S X H mu σ T : ℝ) (isCall xGeH : Bool) :
     bboDownInAlpha S X H mu σ T isCall xGeH + bboDownOutAlpha S X H mu σ T isCall xGeH
       = bboB1 S X mu σ T isCall := by

@@ -31,7 +31,7 @@ of scope. **`CA` is also call-only**: QuantLib's `CA` is commented
 `calculate()` via the put–call spot-reflection symmetry (strike `X ↦ S²/X`, barrier `H ↦ S²/H`,
 barrier direction mirrored, the `CA`-call result on the transformed inputs scaled by `X/S`) rather
 than a second closed form — that symmetry transform is not formalized here either. The knock-in
-case (`CIA = vanilla − CA`) is, as in `SoftBarrierOption.lean` and `BinaryBarrierOption.lean`,
+case (`CIA = vanilla − CA`) is, as with the knock-out side of `SoftBarrierOption.lean`,
 QuantLib's own *definition* via in–out parity rather than an independent closed form, so it is
 not separately formalized.
 
