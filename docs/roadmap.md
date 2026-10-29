@@ -65,8 +65,7 @@ The concrete next rungs, each tracked by an issue:
   them, the jump-diffusion process itself, which the library so far constructs only without jumps.
 * **One encoding per concept.** The bivariate normal on Mathlib's Gaussian API, and one
   parametrisation of the one-factor model
-  ([#286](https://github.com/formal-applied-math/formal-mathfin/issues/286)); the Student-t law
-  ([#285](https://github.com/formal-applied-math/formal-mathfin/issues/285)).
+  ([#286](https://github.com/formal-applied-math/formal-mathfin/issues/286)).
 
 ## What stays out
 
