@@ -876,6 +876,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.BracketCompensator.condExp_sq_sub_bracket. SCOPE, stated honestly. (1) The bracket is bracketProcess, the omega-wise time-integral of the squared predictable representative of phi, clamped at the horizon; it is proved ADAPTED here (Adapted (natFiltration hBmeas) (bracketProcess ...)), a.e. nondecreasing and zero at 0 -- but it is still NOT identified with a pathwise quadratic variation, since no limit of sums along partitions is taken anywhere. (2) The conclusion is the conditional-expectation identity, not a bundled Martingale structure for t -> M_t^2 - bracket_t: M is an Lp-valued process and supplies only a.e. adaptedness, which Martingale does not accept (the same gap MarketCompletenessInPrice.pricePathCondExp works around elsewhere). (3) M is an Ito integral against a Brownian motion on a bounded horizon [0,T], not a general continuous L^2 martingale, so this is not the Doob-Meyer decomposition -- existence and uniqueness of a compensator for an arbitrary submartingale is not proved. (4) a <= b <= T."
       }
+    },
+    {
+      "id": "mf-cir-squared-ou-mean",
+      "name": "CIR Variance Mean Dynamics via the Squared-OU Construction",
+      "description": "The CIR variance process V t = (X1 t)^2 + (X2 t)^2, with each Xi the explicit OU fluctuation e^{-kt/2}(x_{i0} + s int_0^t e^{ku/2} dBu), has mean E[V t] = theta(1 - e^{-kt}) + v0 e^{-kt}, where theta = 2s^2/k (the Feller-borderline parametrization of dV = k(theta - V) dt + 2s sqrt(V) dW).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.CIRSquaredOU\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\nnamespace MathFin\nopen CIRSquaredOU\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\nvariable {B1 B2 : ℝ≥0 → Ω → ℝ}\n\n/-- The CIR mean dynamics for the explicit squared-OU variance process. -/\ntheorem cir_squared_ou_mean (hB1 : IsPreBrownianReal B1 μ)\n    (hB2 : IsPreBrownianReal B2 μ) {k : ℝ} (hk : 0 < k) (s x10 x20 : ℝ)\n    (t : ℝ≥0) :\n    ∫ ω, cirVariance hB1 hB2 k s x10 x20 hk t ω ∂μ\n      = cirTheta s k * (1 - Real.exp (-(k * (t : ℝ))))\n        + (x10 ^ 2 + x20 ^ 2) * Real.exp (-(k * (t : ℝ))) :=\n  MathFin.CIRSquaredOU.cirVariance_mean hB1 hB2 hk s x10 x20 t\n\nend MathFin\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "CIR mean dynamics via the explicit squared-OU construction (Cox-Ingersoll-Ross 1985, Feller borderline)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, MathFin/Foundations/CIRSquaredOU.lean. Explicit OU fluctuations from the deterministic Wiener integral (WienerIntegralL2), exact Gaussian laws, and the mean dynamics by adding the component second moments. Existence is at the per-t random-variable level (the library has no path-continuous modification and no unbounded-drift Ito engine — disclosed in the module docstring); independence of B1, B2 is not used. Axioms-clean."
+      }
     }
   ]
 }

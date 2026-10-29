@@ -108,6 +108,12 @@ import MathFin.Foundations.MartingaleTransform
 import MathFin.Foundations.DoobLpMaximalInequality
 import MathFin.Foundations.ExtendOfNormIsometry
 import MathFin.Foundations.WienerIntegralL2
+-- The exponential-affine engine: generator invariance for OU/CIR affine diffusions and
+-- the Riccati flow (the deterministic core of the affine-term-structure method)
+import MathFin.Foundations.ExpAffine
+-- The CIR variance process as an explicit squared-OU construction: exact Gaussian laws
+-- and the mean dynamics E[V t] = theta(1 - e^{-kt}) + v0 e^{-kt}
+import MathFin.Foundations.CIRSquaredOU
 import MathFin.Foundations.WienerIntegralGaussian
 -- Wiener integral of a step indicator is the increment (∫𝟙_{(s,t]} dB = B_t − B_s)
 import MathFin.Foundations.WienerIntegralIndicator
@@ -293,6 +299,7 @@ import MathFin.Foundations.ItoFormulaAdaptedDriftConstructed
 -- Cross-horizon consistency of the CLM Itô integral: one pinned `M` (`hMeq`) represents
 -- the CLM integral at every horizon `τ ≤ T` (band-transfer kernel + freeze law)
 import MathFin.Foundations.ItoIntegralCrossHorizon
+import MathFin.Foundations.GyongyMimicry
 import MathFin.FixedIncome.HullWhiteCalibration
 import MathFin.BlackScholes.MonteCarloPricer
 -- Martingale representation, step 3: the Doléans exponential of a deterministic step
@@ -452,6 +459,10 @@ import MathFin.BlackScholes.Spreads
 -- order Breeden–Litzenberger, for any law with a finite mean); the call price is differentiable
 -- in the strike exactly where the law has no atom, and there its derivative is minus the digital
 import MathFin.BlackScholes.CallSpreadDigital
+import MathFin.BlackScholes.Dupire
+-- The Heston 2D affine transform at the generator/PDE level: the rho-shifted Riccati
+-- closed forms, the pricing PDE, and the gated real-moment expectation
+import MathFin.BlackScholes.Heston
 import MathFin.BlackScholes.Lookback
 import MathFin.BlackScholes.BarrierParity
 import MathFin.BlackScholes.PowerOption
