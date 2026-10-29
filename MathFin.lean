@@ -475,6 +475,7 @@ import MathFin.Binomial.CRRConvergence
 import MathFin.Binomial.DriftLimit
 import MathFin.Binomial.Bermudan
 import MathFin.Binomial.MartingaleRepresentation
+import MathFin.Binomial.EuropeanReplication
 -- Phase 13 additions:
 import MathFin.Binomial.Girsanov
 import MathFin.Binomial.SecondFTAP

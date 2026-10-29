@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 669 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 635 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 671 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 637 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 16 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -130,6 +130,16 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   strike $`0`$ and to $`0`$ at large strikes
   ([`butterflyFreeFormula_iff_isNormalizedCallPrice`](MathFin/BlackScholes/SVI/TailCondition.lean)).
 
+- **One contract, two models.** Payoffs are written as data in a contract language, separately from
+  the models that price them, so the same term `europeanCall K T` is priced both in the
+  Black–Scholes model and in the binomial tree. Its values in the $`n`$-step Cox–Ross–Rubinstein
+  tree converge to its Black–Scholes value whenever $`|r|\sqrt{T} < \sigma`$
+  ([`tendsto_binomial_value_europeanCall`](MathFin/Contracts/Models/BinomialLimit.lean)). In the
+  tree, under no-arbitrage, a contract paying $`g(S_T)`$ is worth the cost of its hedge: on every
+  path, its discounted payoff is its value plus the gains of a predictable strategy in the
+  discounted spot
+  ([`pathPV_eq_value_add_gains`](MathFin/Contracts/Models/Binomial.lean)).
+
 ## Contents
 
 | Area | Topics |
@@ -146,11 +156,11 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 | Dependence and extremes | copulas and Sklar's theorem (continuous margins), Fréchet–Hoeffding bounds, Hoeffding's covariance identity, Marshall–Olkin common shocks; GEV and GPD domains of attraction, maxima of Poisson-many losses |
 | Credit portfolios | Bernoulli mixtures, the one-factor Gaussian threshold model, and the Basel IRB formula as the limit of portfolio VaR |
 | Market microstructure | Avellaneda–Stoikov market making, the Glosten–Milgrom spread |
-| Other | a contract language that separates payoffs from pricing models; survival models, mortality and annuities; compound Poisson losses; constant-product AMMs |
+| Other | a contract language that separates payoffs from pricing models, with prices in Black–Scholes and the binomial tree; survival models, mortality and annuities; compound Poisson losses; constant-product AMMs |
 
 ## Limitations
 
-- Sixteen of the 669 results are reduced cores. Twelve assume a structure whose fields include the
+- Sixteen of the 671 results are reduced cores. Twelve assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, Lévy's characterization, the two-dimensional Itô formula,

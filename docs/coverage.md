@@ -26,6 +26,17 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The binomial value is the cost of its hedge (2026-10-29)
+
+Two entries added, both `full`: `mf-binomial-european-replication` and `mf-contract-binomial-hedge`;
+corpus 669 → 671. `binomialPrice_replication` in `Binomial/EuropeanReplication.lean` applies the
+discrete martingale representation to the discounted tree value and the discounted spot. Under
+no-arbitrage and `S₀ ≠ 0`, it gives a predictable strategy whose gains, added to the tree price,
+are the discounted payoff `e^{−rN} g(S_N)` on every path. `Binomial.pathPV_eq_value_add_gains`
+states this for a contract: a single cash flow paying `g` of the underlying at step `N` has
+discounted payoff equal to its `Contract.value` plus those gains. Scope: European payoffs of the
+terminal spot only. The identity is pathwise; the measure enters only through the value.
+
 ### Every worked example has a model (2026-10-29)
 
 One entry added, `mf-gaussian-pair-any-moments` (`full`); corpus 668 → 669. `gaussianPair` in

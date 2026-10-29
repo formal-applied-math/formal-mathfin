@@ -1941,6 +1941,9 @@ underlying off coin-flip paths and gives each European payoff its tree price; th
 is integrable, because the model is bounded (`Contract.integrable_pathPV_of_bounded`).
 `tendsto_binomial_value_europeanCall` then shows that `europeanCall K T`, one term, has CRR values
 converging to its Black–Scholes value. The contract stays fixed and only the model moves.
+In the tree the value is also the cost of a hedge (2026-10-29): `pathPV_eq_value_add_gains` writes
+a European contract's discounted payoff, on every path, as its value plus the gains of a
+predictable strategy in the discounted spot.
 
 The layered design and the framing "the contract is not the model" are due to Paul Bilokon, *The
 Contract Is Not the Model* (working paper, 9 August 2026), with code at
@@ -1958,6 +1961,10 @@ module's `## Source` section for the full credit line. -/
 /-- info: 'MathFin.Contracts.tendsto_binomial_value_europeanCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.tendsto_binomial_value_europeanCall
+
+/-- info: 'MathFin.Contracts.Binomial.pathPV_eq_value_add_gains' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.Binomial.pathPV_eq_value_add_gains
 
 /-! ### The bracket is conditional (2026-08-27)
 
