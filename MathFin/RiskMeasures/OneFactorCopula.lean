@@ -43,15 +43,18 @@ variable {n : ℕ}
 
 /-! ### The factors of `stdNormalFactors` -/
 
-private lemma hasLaw_fst_stdNormalFactors :
+/-- On the factor space the systematic factor `z₀` is standard normal. -/
+lemma hasLaw_fst_stdNormalFactors :
     HasLaw (Prod.fst : ℝ × (Fin n → ℝ) → ℝ) (gaussianReal 0 1) (stdNormalFactors n) :=
   measurePreserving_fst.hasLaw
 
-private lemma hasLaw_snd_apply_stdNormalFactors (i : Fin n) :
+/-- On the factor space each idiosyncratic factor `zᵢ` is standard normal. -/
+lemma hasLaw_snd_apply_stdNormalFactors (i : Fin n) :
     HasLaw (fun z : ℝ × (Fin n → ℝ) ↦ z.2 i) (gaussianReal 0 1) (stdNormalFactors n) :=
   ((measurePreserving_eval (fun _ : Fin n ↦ gaussianReal 0 1) i).comp measurePreserving_snd).hasLaw
 
-private lemma iIndepFun_snd_stdNormalFactors :
+/-- On the factor space the idiosyncratic factors are independent. -/
+lemma iIndepFun_snd_stdNormalFactors :
     iIndepFun (fun i (z : ℝ × (Fin n → ℝ)) ↦ z.2 i) (stdNormalFactors n) := by
   refine (iIndepFun_iff_map_fun_eq_pi_map fun i ↦
     (hasLaw_snd_apply_stdNormalFactors i).aemeasurable).2 ?_
@@ -59,7 +62,8 @@ private lemma iIndepFun_snd_stdNormalFactors :
     Measure.map_snd_prod, measure_univ, one_smul]
   exact congrArg Measure.pi (funext fun i ↦ (hasLaw_snd_apply_stdNormalFactors i).map_eq.symm)
 
-private lemma indepFun_fst_snd_stdNormalFactors :
+/-- On the factor space the systematic factor is independent of the idiosyncratic ones. -/
+lemma indepFun_fst_snd_stdNormalFactors :
     (Prod.fst : ℝ × (Fin n → ℝ) → ℝ) ⟂ᵢ[stdNormalFactors n] fun z i ↦ z.2 i :=
   indepFun_prod (X := (id : ℝ → ℝ)) (Y := (id : (Fin n → ℝ) → Fin n → ℝ)) measurable_id
     measurable_id

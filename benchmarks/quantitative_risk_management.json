@@ -195,6 +195,22 @@
       }
     },
     {
+      "id": "qrm-es-tail-mean",
+      "name": "Expected Shortfall as the Tail Mean of an Atomless Loss",
+      "description": "For an integrable loss X whose law has a continuous CDF and α ∈ (0, 1), with q = VaR_α(X): the tail {X > q} has probability exactly 1 − α, and ES_α(X) = (1−α)⁻¹ E[X·1{X > q}], the mean of X over that tail. The Acerbi–Tasche correction term vanishes.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.ExpectedShortfall\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem expectedShortfall_eq_setIntegral_tail_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {α : ℝ} [IsProbabilityMeasure P] (hX : Integrable X P) (hF : Continuous (cdf (P.map X))) (hα : α ∈ Ioo 0 1) :\n    P.real {ω | valueAtRisk X P α < X ω} = 1 - α ∧\n      expectedShortfall X P α = (1 - α)⁻¹ * ∫ ω in {ω | valueAtRisk X P α < X ω}, X ω ∂P :=\n  ⟨MathFin.measureReal_valueAtRisk_lt hX.aemeasurable hF hα,\n    MathFin.expectedShortfall_eq_setIntegral_tail hX hF hα⟩\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Acerbi–Tasche (2002); MFE (2015) Proposition 8.13",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. A continuous CDF gives F(VaR_α) = α, so P(X > VaR_α) = 1 − α and the correction term of the Acerbi–Tasche formula is zero. The hypothesis is continuity of the CDF of the law of X, not a density. Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "qrm-es-dual-representation",
       "name": "Dual Representation of Expected Shortfall",
       "description": "For an integrable loss X and α ∈ (0, 1), ES_α(X) is the greatest value of E[D·X] over densities D with 0 ≤ D ≤ (1−α)⁻¹ a.s. and E[D] = 1; the maximum is attained.",
@@ -816,6 +832,22 @@
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. π₂ − π₁² = Var(Q). Lives in MathFin/RiskMeasures/BernoulliMixture.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "qrm-one-factor-default-covariance",
+      "name": "Default Covariance in the One-Factor Gaussian Threshold Model",
+      "description": "In the one-factor Gaussian threshold model (F and ε₁, …, εₙ independent standard normals, asset correlation ρ < 1, default when √ρ F + √(1 − ρ) εᵢ ≤ Φ⁻¹(π)), two distinct obligors satisfy P(Dᵢ ∩ Dⱼ) − P(Dᵢ)P(Dⱼ) = Var(p(F)), with p(f) = Φ((Φ⁻¹(π) − √ρ f)/√(1 − ρ)) the default probability given the factor.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.BernoulliMixture\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem oneFactor_measureReal_inter_default_sub_mul_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {ι : Type*} [Fintype ι] {π ρ : ℝ} {F : Ω → ℝ} {ε : ι → Ω → ℝ} (hF : HasLaw F (gaussianReal 0 1) P) (hε : ∀ i, HasLaw (ε i) (gaussianReal 0 1) P) (hεind : iIndepFun ε P) (hFε : F ⟂ᵢ[P] fun ω i ↦ ε i ω) (hρ : ρ < 1) {i j : ι} (hij : i ≠ j) :\n    P.real ({ω | √ρ * F ω + √(1 - ρ) * ε i ω ≤ PhiInv π} ∩ {ω | √ρ * F ω + √(1 - ρ) * ε j ω ≤ PhiInv π}) - P.real {ω | √ρ * F ω + √(1 - ρ) * ε i ω ≤ PhiInv π} * P.real {ω | √ρ * F ω + √(1 - ρ) * ε j ω ≤ PhiInv π} = Var[fun ω ↦ oneFactorPD π ρ (F ω); P] :=\n  MathFin.oneFactor_measureReal_inter_default_sub_mul hF hε hεind hFε hρ hij\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "QRM Exercise Book Ex. 11.4(a), 11.9",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. π₂ and π₁ are the second and first moments of p(F) (oneFactor_measureReal_iInter_default), and π₂ − π₁² = Var(p(F)). Lives in MathFin/RiskMeasures/BernoulliMixture.lean. Axioms-clean."
       }
     },
     {

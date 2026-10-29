@@ -53,6 +53,7 @@ Acerbi and Tasche (`expectedShortfall_eq_acerbiTasche`).
 * `expectedShortfall_add_le`: subadditivity of ES.
 * `expectedShortfall_isCoherentRiskMeasure`: ES is a coherent risk measure.
 * `expectedShortfall_eq_acerbiTasche`: the Acerbi–Tasche formula.
+* `expectedShortfall_eq_setIntegral_tail`: without atoms, ES is the mean of the `α`-tail.
 * `isGreatest_integral_mul_expectedShortfall`: the dual representation of ES.
 * `expectedShortfall_isCoherentRisk`: on a finite probability space ES satisfies the ADEH axioms
   of `RiskMeasures/AcceptanceSet.lean`, so the finite representation theorem
@@ -226,6 +227,25 @@ theorem expectedShortfall_eq_acerbiTasche (hX : Integrable X P) (hα : α ∈ Io
       setIntegral_const, smul_eq_mul, mul_comm]
   rw [← rockafellarUryasev_valueAtRisk hX hα, rockafellarUryasev, hpos]
   field_simp
+  ring
+
+/-- **Without atoms the `α`-tail has mass `1 − α`**: if the law of `X` has a continuous CDF, then
+`P(X > VaR_α(X)) = 1 − α`. -/
+theorem measureReal_valueAtRisk_lt (hX : AEMeasurable X P) (hF : Continuous (cdf (P.map X)))
+    (hα : α ∈ Ioo 0 1) : P.real {ω | valueAtRisk X P α < X ω} = 1 - α := by
+  have := Measure.isProbabilityMeasure_map hX
+  rw [show {ω | valueAtRisk X P α < X ω} = X ⁻¹' (Iic (valueAtRisk X P α))ᶜ by ext; simp,
+    ← map_measureReal_apply_of_aemeasurable hX measurableSet_Iic.compl,
+    probReal_compl_eq_one_sub measurableSet_Iic, ← cdf_eq_real, valueAtRisk, cdf_quantile hF hα]
+
+/-- **Without atoms ES is the mean of the tail**: if the law of `X` has a continuous CDF, the
+correction term of `expectedShortfall_eq_acerbiTasche` vanishes and
+`ES_α(X) = (1 − α)⁻¹ E[X·𝟙{X > VaR_α(X)}]`. The tail event has mass `1 − α`
+(`measureReal_valueAtRisk_lt`), so this is the mean of `X` over it. -/
+theorem expectedShortfall_eq_setIntegral_tail (hX : Integrable X P)
+    (hF : Continuous (cdf (P.map X))) (hα : α ∈ Ioo 0 1) :
+    expectedShortfall X P α = (1 - α)⁻¹ * ∫ ω in {ω | valueAtRisk X P α < X ω}, X ω ∂P := by
+  rw [expectedShortfall_eq_acerbiTasche hX hα, measureReal_valueAtRisk_lt hX.aemeasurable hF hα]
   ring
 
 /-- The mass strictly below the `α`-quantile is at most `α`: under the quantile transform, the
