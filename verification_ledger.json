@@ -3272,6 +3272,13 @@
       "input_hash": "5ee36df94d442483a69417ade33102f3c93149687c76e38b46866f312023f157",
       "verified_at_commit": "331e4a2"
     },
+    "mf-relative-drawdown-scale-invariant": {
+      "benchmark_file": "portfolio_and_performance.json",
+      "date": "2026-10-29",
+      "elapsed_s": 4.4,
+      "input_hash": "1de3a3eb9083919f3ba338f31e39f07821604989a1d12d2d3fccb098fb2619e5",
+      "verified_at_commit": "4bc48e3"
+    },
     "mf-replication-martingale-price": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-10-29",
