@@ -45,6 +45,16 @@ table was written. What shipped is narrower, deliberately: see the second amendm
 The capped call no longer has a module of its own: its definition is in `Instruments/Options` and
 its price is in `Models/BlackScholes`.
 
+Two rules keep the layout clean as models are added (same date):
+- each model file has its own namespace (`Contracts.BlackScholes`, `Contracts.Binomial`), so the
+  same instrument's value can be stated in each model under the same name;
+- a `Contracts` file proves only statements that mention a `Payoff` or a `Contract`. Facts about
+  the model itself live with the model. The binomial spot's bound and the CRR up-probability's
+  range are in `Binomial/`, and `Models/Binomial` only translates contracts into the tree.
+
+A bridge between two models gets its own file (`Models/BinomialLimit`), so that neither model
+imports the other.
+
 Rung (c) is the point. A reified contract whose price is a machine-checked
 Black–Scholes formula does not exist anywhere, including in the source paper,
 whose pricing layer is a `structure` and one `congrArg`.

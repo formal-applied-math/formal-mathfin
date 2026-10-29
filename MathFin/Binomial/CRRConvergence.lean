@@ -27,6 +27,8 @@ This file proves:
 3. **CRR probability limit**: `p_n → 1/2` as `n → ∞`. This implies
    `4 p_n (1 − p_n) → 1`, which gives the variance limit
    `n · σ² Δt · 4 p_n (1 − p_n) → σ² T`.
+4. **`p_n` is a probability at every `n`** (`crrProb_mem_Icc`), given no-arbitrage at each
+   `n ≥ 1` — which `binomialNoArb_crr` supplies when `|r| √T < σ`.
 
 ## Scope
 
@@ -135,6 +137,16 @@ lemma binomialNoArb_crr {r σ T : ℝ} (hT : 0 < T) (hrT : |r| * Real.sqrt T < �
     exact Real.exp_lt_exp.mpr hbound.1
   · change Real.exp (r * crrStep T n) < Real.exp (σ * Real.sqrt (crrStep T n))
     exact Real.exp_lt_exp.mpr hbound.2
+
+/-- **The CRR up-probability is a probability at every `n`**: by no-arbitrage for `n ≥ 1`, and at
+the degenerate `n = 0`, where no-arbitrage fails, because the up-probability is `0` there
+(`crrProb_zero`). -/
+lemma crrProb_mem_Icc {r σ T : ℝ}
+    (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n))
+    (n : ℕ) : crrProb r σ T n ∈ Set.Icc 0 1 := by
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · simp [crrProb_zero]
+  · exact Set.Ioo_subset_Icc_self (crrUpProb_mem_Ioo (hna n hn))
 
 /-! ### One-step risk-neutral martingale identity (algebraic, exact) -/
 

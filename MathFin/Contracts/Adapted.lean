@@ -8,7 +8,7 @@ module
 public import MathFin.Contracts.Core
 
 /-!
-# A payoff is measurable, and adapted to its observation times
+# A payoff is measurable, adapted to its observation times, and integrable in a bounded model
 
 A `Payoff` is data, not yet a random variable: `Payoff.eval` only produces one
 once it is applied to a `Scenario`. This file supplies the missing link —
@@ -31,6 +31,13 @@ Q` gives only `AEMeasurable Z`, never `Measurable Z`). It has no consumer
 now either: the integrability lemmas of `Contracts/Models/BlackScholes.lean` build each
 reified payoff from integrable pieces (`Integrable.pos_part`, `.sub`,
 `.const_mul`), which carry their own measurability.
+
+`Contract.integrable_pathPV_of_bounded` is the consumer `measurable_eval` was waiting for: in a
+model whose every coordinate is bounded, every contract's discounted payoff is integrable against
+any finite measure. Measurability comes from `measurable_eval`, and the bound from
+`Payoff.exists_bound_eval`, a structural induction like the others. A finite-state model such as
+the binomial tree is bounded, so there `Contract.value_both` needs no per-instrument
+integrability lemma (`Contracts/Models/Binomial.lean`).
 
 ## Main definitions
 
@@ -62,6 +69,9 @@ reified payoff from integrable pieces (`Integrable.pos_part`, `.sub`,
   by `filter_upwards`) — not a direct induction into `AEMeasurable`, whose
   `indicatorLt` case would need a `NullMeasurableSet` this route avoids
   producing.
+* `Payoff.exists_bound_eval` — against a model with bounded coordinates, a payoff is bounded.
+* `Contract.integrable_pathPV_of_bounded` — against a finite measure and a measurable, bounded
+  model, every contract's discounted payoff is integrable.
 
 ## Source
 
@@ -182,5 +192,52 @@ theorem Payoff.measurable_eval_of_obsTimes_le
   | indicatorLt a b ha hb =>
       obtain ⟨hl, hr⟩ := obsTimes_append_le hle
       exact Measurable.ite (measurableSet_lt (ha hl) (hb hr)) measurable_const measurable_const
+
+/-- Evaluating a payoff against a model whose every coordinate is bounded is bounded: each
+constructor combines two bounds into one, and an indicator is bounded by `1`. -/
+theorem Payoff.exists_bound_eval (e : Payoff ι) {X : ι → ℝ≥0 → Ω → ℝ}
+    (hX : ∀ i t, ∃ C, ∀ ω, |X i t ω| ≤ C) : ∃ C, ∀ ω, |e.eval (fun i t ↦ X i t ω)| ≤ C := by
+  induction e with
+  | const c => exact ⟨|c|, fun _ ↦ le_rfl⟩
+  | obs i t => exact hX i t
+  | add a b ha hb =>
+      obtain ⟨⟨Ca, ha⟩, ⟨Cb, hb⟩⟩ := And.intro ha hb
+      exact ⟨Ca + Cb, fun ω ↦ (abs_add_le _ _).trans (add_le_add (ha ω) (hb ω))⟩
+  | sub a b ha hb =>
+      obtain ⟨⟨Ca, ha⟩, ⟨Cb, hb⟩⟩ := And.intro ha hb
+      exact ⟨Ca + Cb, fun ω ↦ (abs_sub _ _).trans (add_le_add (ha ω) (hb ω))⟩
+  | mul a b ha hb =>
+      obtain ⟨⟨Ca, ha⟩, ⟨Cb, hb⟩⟩ := And.intro ha hb
+      exact ⟨Ca * Cb, fun ω ↦ (abs_mul _ _).trans_le
+        (mul_le_mul (ha ω) (hb ω) (abs_nonneg _) ((abs_nonneg _).trans (ha ω)))⟩
+  | max a b ha hb =>
+      obtain ⟨⟨Ca, ha⟩, ⟨Cb, hb⟩⟩ := And.intro ha hb
+      exact ⟨Max.max Ca Cb, fun ω ↦ abs_max_le_max_abs_abs.trans (max_le_max (ha ω) (hb ω))⟩
+  | min a b ha hb =>
+      obtain ⟨⟨Ca, ha⟩, ⟨Cb, hb⟩⟩ := And.intro ha hb
+      exact ⟨Max.max Ca Cb, fun ω ↦ abs_min_le_max_abs_abs.trans (max_le_max (ha ω) (hb ω))⟩
+  | indicatorLt a b _ _ => exact ⟨1, fun ω ↦ by simp only [Payoff.eval]; split_ifs <;> simp⟩
+
+/-- **A bounded model prices every contract.** Against a finite measure and a measurable model
+whose every coordinate is bounded, every contract's discounted payoff is integrable, so
+`Contract.value_both` applies to any two contracts with no further hypothesis. A finite-state
+model such as the binomial tree is bounded; a lognormal one is not, and there each instrument's
+integrability is proved on its own (`Contracts/Models/BlackScholes.lean`). -/
+theorem Contract.integrable_pathPV_of_bounded {Q : Measure Ω} [IsFiniteMeasure Q]
+    (D : ℝ≥0 → ℝ) {X : ι → ℝ≥0 → Ω → ℝ} (hXm : ∀ i t, Measurable (X i t))
+    (hXb : ∀ i t, ∃ C, ∀ ω, |X i t ω| ≤ C) (c : Contract ι) :
+    Integrable (fun ω ↦ c.pathPV D (fun i t ↦ X i t ω)) Q := by
+  induction c with
+  | zero => simp [Contract.pathPV, Contract.cashflows]
+  | pay t a =>
+      obtain ⟨C, hC⟩ := a.exists_bound_eval hXb
+      simp only [Contract.pathPV, Contract.cashflows, List.map_cons, List.map_nil,
+        List.sum_cons, List.sum_nil, add_zero]
+      exact (Integrable.of_bound (a.measurable_eval X hXm).aestronglyMeasurable C
+        (.of_forall hC)).const_mul _
+  | both a b ha hb =>
+      simp only [Contract.pathPV_both]
+      exact ha.add hb
+  | scale r a ha => simpa only [Contract.pathPV_scale] using ha.const_mul r
 
 end MathFin.Contracts

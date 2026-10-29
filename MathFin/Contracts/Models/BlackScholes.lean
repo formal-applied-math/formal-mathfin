@@ -14,12 +14,14 @@ public import MathFin.BlackScholes.Forward
 # The contracts priced in the Black–Scholes model
 
 `Contracts/Instruments/Options.lean` defines the instruments and says what they pay; this file
-prices them in one model. `bsAssets` is the single-asset Black–Scholes market as a model map, and
-each instrument's `Contract.value` under it is the closed form `MathFin/BlackScholes/` already
-proves. Another model gets its own file of the same shape; the instruments do not change.
+prices them in one model. `BlackScholes.assets` is the single-asset Black–Scholes market as a
+model map, and each instrument's `Contract.value` under it is the closed form
+`MathFin/BlackScholes/` already proves. Another model gets its own file of the same shape and its
+own namespace (`Contracts/Models/Binomial.lean`, `Contracts.Binomial`); the instruments do not
+change.
 
-`bsAssets` is constant in `t`: every instrument priced here observes the underlying only at its
-maturity `T`, so the model's value at other times is irrelevant to what gets priced. A
+`BlackScholes.assets` is constant in `t`: every instrument priced here observes the underlying
+only at its maturity `T`, so the model's value at other times is irrelevant to what gets priced. A
 path-dependent instrument needs the full path and is deferred.
 
 Nothing new is proved about Black–Scholes here. A single cash flow's value is the integral of
@@ -30,7 +32,7 @@ no third integral is evaluated.
 
 ## Main definitions
 
-* `bsAssets` — the single-asset Black–Scholes model as a model map `Unit → ℝ≥0 → Ω → ℝ`,
+* `BlackScholes.assets` — the single-asset Black–Scholes model as a model map `Unit → ℝ≥0 → Ω → ℝ`,
   constant in `t` and equal to `bsTerminal` at every time.
 
 ## Main results
@@ -71,46 +73,46 @@ written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 open MeasureTheory ProbabilityTheory Real
 open scoped NNReal
 
-namespace MathFin.Contracts
+namespace MathFin.Contracts.BlackScholes
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
 
 /-- The single-asset Black–Scholes market as a model map. Every instrument in
 this file observes only at `T`, so the value at other times is irrelevant; a
 path-dependent instance needs the full GBM path and is deferred. -/
-noncomputable def bsAssets (S_0 r σ T : ℝ) (Z : Ω → ℝ) : Unit → ℝ≥0 → Ω → ℝ :=
+noncomputable def assets (S_0 r σ T : ℝ) (Z : Ω → ℝ) : Unit → ℝ≥0 → Ω → ℝ :=
   fun _ _ ω ↦ bsTerminal S_0 r σ T (Z ω)
 
 /-- The reified European call prices to the Black–Scholes call formula: the value of
-`europeanCall K T` under `bsAssets` is exactly `bs_call_formula`'s right-hand side. -/
+`europeanCall K T` under `BlackScholes.assets` is exactly `bs_call_formula`'s right-hand side. -/
 theorem value_europeanCall {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :
-    (europeanCall K T).value Q (fun _ ↦ Real.exp (-r * T)) (bsAssets S_0 r σ T Z)
+    (europeanCall K T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
       = S_0 * Phi (bsd1 S_0 K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) := by
   rw [europeanCall, Contract.value_pay]
   exact MathFin.bs_call_formula h
 
 /-- The reified cash-or-nothing digital call prices to the Black–Scholes
-cash-or-nothing formula: the value of `digitalCall K T` under `bsAssets` is exactly
+cash-or-nothing formula: the value of `digitalCall K T` under `BlackScholes.assets` is exactly
 `bs_cash_or_nothing_formula`'s right-hand side. -/
 theorem value_digitalCall {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :
-    (digitalCall K T).value Q (fun _ ↦ Real.exp (-r * T)) (bsAssets S_0 r σ T Z)
+    (digitalCall K T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
       = Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) := by
   rw [digitalCall, Contract.value_pay]
-  have heq (ω : Ω) : Payoff.eval (scenarioAt (bsAssets S_0 r σ T Z) ω)
+  have heq (ω : Ω) : Payoff.eval (scenarioAt (assets S_0 r σ T Z) ω)
       ((Payoff.const K).indicatorLt (Payoff.obs () T))
         = (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (bsTerminal S_0 r σ T (Z ω)) := by
-    simp [Payoff.eval, scenarioAt, bsAssets, Set.indicator_apply, Set.mem_Ioi]
+    simp [Payoff.eval, scenarioAt, assets, Set.indicator_apply, Set.mem_Ioi]
     congr 1
   simp only [heq]
   exact MathFin.bs_cash_or_nothing_formula h
 
 /-- The reified European put prices to the Black–Scholes put formula: the value of
-`europeanPut K T` under `bsAssets` is exactly `bs_put_formula`'s right-hand side. -/
+`europeanPut K T` under `BlackScholes.assets` is exactly `bs_put_formula`'s right-hand side. -/
 theorem value_europeanPut {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :
-    (europeanPut K T).value Q (fun _ ↦ Real.exp (-r * T)) (bsAssets S_0 r σ T Z)
+    (europeanPut K T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
       = K * Real.exp (-r * T) * Phi (-(bsd2 S_0 K r σ T)) - S_0 * Phi (-(bsd1 S_0 K r σ T)) := by
   rw [europeanPut, Contract.value_pay]
   exact MathFin.bs_put_formula h
@@ -120,9 +122,9 @@ the positive part of `S_T − K`, and `S_T` is integrable (`integrable_bsTermina
 theorem integrable_europeanCall_pathPV {Q : Measure Ω} [IsProbabilityMeasure Q] {Z : Ω → ℝ}
     (hZ : HasLaw Z (gaussianReal 0 1) Q) (S_0 K r σ : ℝ) (T : ℝ≥0) :
     Integrable (fun ω ↦ (europeanCall K T).pathPV (fun _ ↦ Real.exp (-r * T))
-      (scenarioAt (bsAssets S_0 r σ T Z) ω)) Q := by
+      (scenarioAt (assets S_0 r σ T Z) ω)) Q := by
   simp only [europeanCall, europeanCallPayoff, Contract.pathPV, Contract.cashflows, Payoff.eval,
-    scenarioAt, bsAssets, List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
+    scenarioAt, assets, List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
   exact ((integrable_bsTerminal hZ S_0 r σ T).sub (integrable_const K)).pos_part.const_mul _
 
 /-- The reified put's discounted payoff is integrable when the underlying is lognormal: it is the
@@ -130,8 +132,8 @@ positive part of `K − S_T`, and `S_T` is integrable (`integrable_bsTerminal`).
 theorem integrable_europeanPut_pathPV {Q : Measure Ω} [IsProbabilityMeasure Q] {Z : Ω → ℝ}
     (hZ : HasLaw Z (gaussianReal 0 1) Q) (S_0 K r σ : ℝ) (T : ℝ≥0) :
     Integrable (fun ω ↦ (europeanPut K T).pathPV (fun _ ↦ Real.exp (-r * T))
-      (scenarioAt (bsAssets S_0 r σ T Z) ω)) Q := by
-  simp only [europeanPut, Contract.pathPV, Contract.cashflows, Payoff.eval, scenarioAt, bsAssets,
+      (scenarioAt (assets S_0 r σ T Z) ω)) Q := by
+  simp only [europeanPut, Contract.pathPV, Contract.cashflows, Payoff.eval, scenarioAt, assets,
     List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
   exact ((integrable_const K).sub (integrable_bsTerminal hZ S_0 r σ T)).pos_part.const_mul _
 
@@ -139,8 +141,8 @@ theorem integrable_europeanPut_pathPV {Q : Measure Ω} [IsProbabilityMeasure Q] 
 theorem integrable_forward_pathPV {Q : Measure Ω} [IsProbabilityMeasure Q] {Z : Ω → ℝ}
     (hZ : HasLaw Z (gaussianReal 0 1) Q) (S_0 K r σ : ℝ) (T : ℝ≥0) :
     Integrable (fun ω ↦ (forward K T).pathPV (fun _ ↦ Real.exp (-r * T))
-      (scenarioAt (bsAssets S_0 r σ T Z) ω)) Q := by
-  simp only [forward, Contract.pathPV, Contract.cashflows, Payoff.eval, scenarioAt, bsAssets,
+      (scenarioAt (assets S_0 r σ T Z) ω)) Q := by
+  simp only [forward, Contract.pathPV, Contract.cashflows, Payoff.eval, scenarioAt, assets,
     List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
   exact ((integrable_bsTerminal hZ S_0 r σ T).sub (integrable_const K)).const_mul _
 
@@ -148,12 +150,12 @@ theorem integrable_forward_pathPV {Q : Measure Ω} [IsProbabilityMeasure Q] {Z :
 mean `S₀` (`discounted_terminal_eq_S0`). -/
 theorem value_forward {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :
-    (forward K T).value Q (fun _ ↦ Real.exp (-r * T)) (bsAssets S_0 r σ T Z)
+    (forward K T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
       = S_0 - K * Real.exp (-r * T) := by
   have h₀ := discounted_terminal_eq_S0 h
   rw [← neg_mul] at h₀
   rw [forward, Contract.value_pay]
-  simp only [Payoff.eval, scenarioAt, bsAssets, mul_sub]
+  simp only [Payoff.eval, scenarioAt, assets, mul_sub]
   rw [integral_sub ((integrable_bsTerminal h.Z_law S_0 r σ T).const_mul _) (integrable_const _),
     h₀, integral_const, probReal_univ, one_smul, mul_comm]
 
@@ -167,16 +169,16 @@ one more inline payoff lambda. -/
 theorem value_cappedCall {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K₁ K₂ r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ}
     (h₁ : BSCallHyp Q S_0 K₁ r σ T Z) (h₂ : BSCallHyp Q S_0 K₂ r σ T Z) :
-    (cappedCall K₁ K₂ T).value Q (fun _ ↦ Real.exp (-r * T)) (bsAssets S_0 r σ T Z)
+    (cappedCall K₁ K₂ T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
       = (S_0 * Phi (bsd1 S_0 K₁ r σ T) - K₁ * Real.exp (-r * T) * Phi (bsd2 S_0 K₁ r σ T))
       - (S_0 * Phi (bsd1 S_0 K₂ r σ T) - K₂ * Real.exp (-r * T) * Phi (bsd2 S_0 K₂ r σ T)) := by
   have hi₁ := integrable_europeanCall_pathPV h₁.Z_law S_0 K₁ r σ T
   have hi₂ : Integrable (fun ω ↦ (Contract.scale (-1) (europeanCall K₂ T)).pathPV
-      (fun _ ↦ Real.exp (-r * T)) (scenarioAt (bsAssets S_0 r σ T Z) ω)) Q := by
+      (fun _ ↦ Real.exp (-r * T)) (scenarioAt (assets S_0 r σ T Z) ω)) Q := by
     simp only [Contract.pathPV_scale]
     exact (integrable_europeanCall_pathPV h₂.Z_law S_0 K₂ r σ T).const_mul _
   rw [cappedCall, Contract.value_both _ _ _ _ _ hi₁ hi₂,
     Contract.value_scale, value_europeanCall h₁, value_europeanCall h₂]
   ring
 
-end MathFin.Contracts
+end MathFin.Contracts.BlackScholes

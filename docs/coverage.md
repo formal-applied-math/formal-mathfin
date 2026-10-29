@@ -26,6 +26,36 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### One contract, two models: the binomial tree for the contracts tower (2026-10-28)
+
+Four entries added, all `full`: `mf-contract-bounded-model-integrable`,
+`mf-contract-binomial-european-payoff`, `mf-contract-binomial-capped-call` and
+`mf-contract-binomial-to-black-scholes`. Corpus 664 → 668.
+
+`Contracts/Models/Binomial.lean` is the second model for the instruments of
+`Contracts/Instruments/Options.lean`. The underlying is read off coin-flip paths (the spot after
+`⌊t / h⌋` flips), and a European payoff is worth its backward-induction tree price. The file
+contains only the translation. Everything about the tree is in `Binomial/`:
+- `measurable_spotPath` and `abs_spotPath_le` are new in `Binomial/PathMeasure.lean`;
+- `crrProb_mem_Icc` is new in `Binomial/CRRConvergence.lean`. It was proved inline twice in
+  `Binomial/CRRCharFun.lean`, and both copies now call it.
+
+Every contract is integrable in the tree, because the model is bounded. That is a general fact,
+`Contract.integrable_pathPV_of_bounded` in `Contracts/Adapted.lean`, and it gives
+`Payoff.measurable_eval` its first consumer. So the capped call is priced by composition with no
+integrability lemma of its own.
+
+`Contracts/Models/BinomialLimit.lean` proves that `europeanCall K T`, one term, has CRR values
+converging to its Black–Scholes value. It composes three results already proved: the tree value
+is the tree price, the CRR prices converge to the closed form, and the closed form is the
+Black–Scholes value. The hypothesis `|r| √T < σ` keeps every tree arbitrage-free. Only the call
+is covered, and no convergence rate is given.
+
+Each model file now has its own namespace: `Contracts.BlackScholes` (with `bsAssets` renamed to
+`BlackScholes.assets`) and `Contracts.Binomial`. Four entries' snippets change with the rename:
+`mf-contract-european-call`, `mf-contract-european-put`, `mf-contract-digital-cash-or-nothing`
+and `mf-contract-capped-call-value`. Their statements are otherwise unchanged.
+
 ### The library applied: six worked examples (2026-10-28)
 
 Two entries added, `qrm-es-tail-mean` and `qrm-one-factor-default-covariance` (both `full`).

@@ -130,6 +130,50 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-28 — corpus 668, modules 630 — one contract, two models: the binomial tree
+
+Scope: a second model for the contracts tower (`Contracts/Models/Binomial.lean`) and a bridge between the two models (`Contracts/Models/BinomialLimit.lean`). Four entries were added, all `full`; corpus 664 → 668. The maintainer asked, mid-batch, that `Contracts/` not carry what belongs elsewhere, and that request shaped the result.
+
+### Upgrades executed
+
+- **The contracts layer translates, and the model's facts live with the model.** The first draft put the spot's measurability and bound, a risk-neutral measure with its instance, and the CRR up-probability's range in the contracts file. Now:
+  - `measurable_spotPath` and `abs_spotPath_le` are in `Binomial/PathMeasure.lean`;
+  - the measure is the existing `coinFlipMeasure q` with `crrUpProb u d ρ = q`, in the shape `binomialPrice_eq_integral_coinFlipMeasure` already uses, so there is no new definition;
+  - `crrProb_mem_Icc` is in `Binomial/CRRConvergence.lean`.
+
+  The rule is now in the tower spec: a `Contracts` file proves only statements that mention a `Payoff` or a `Contract`.
+- **One proof where there were two.** `crrProb_mem_Icc` replaces two identical inline proofs in `Binomial/CRRCharFun.lean`.
+- **A general lemma in place of per-instrument ones.** `Contract.integrable_pathPV_of_bounded`: in a bounded model every contract is integrable. It gives `Payoff.measurable_eval` its first consumer, and the binomial capped call composes with no integrability lemma of its own.
+- **A namespace per model.** `Contracts.BlackScholes` and `Contracts.Binomial`, so one instrument's value has the same name in each model. `bsAssets` became `BlackScholes.assets`.
+- **A step length in the model.** The contract `europeanCall K T` is one term priced in every tree, whatever the number of steps. That is what lets `tendsto_binomial_value_europeanCall` state the CRR limit for one instrument in two models instead of for two pricing functions.
+
+### The standing first pass: prose against statement
+
+- The binomial descriptions say "only `q ∈ [0, 1]` is assumed, not no-arbitrage", which is true of every theorem except `value_forward`, and that one says no-arbitrage.
+- The limit's description names its one extra hypothesis (`|r| √T < σ`) and its limits: the call only, no rate.
+- "A genuine path, so a path-dependent instrument already has the model it needs": the module says so, and the scope fields say path-dependent payoffs are not priced here.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: the limit theorem, in which the contract stays fixed and only the model moves. Next: the put's limit, and a path-dependent instrument in the tree (backlog 1, 3).
+- **Coherence.** Exemplar: `value_pay_eq_binomialPrice` is `binomialPrice_eq_integral_coinFlipMeasure` read through `Contract.value_pay`, with nothing reproved.
+- **Zero slop.** Exemplar: the inline duplicate in `CRRCharFun` is gone. Next: `BlackScholes/CappedCall.lean` is a pure real identity filed under a model's directory (backlog 4).
+- **Architectural ingenuity.** Exemplar: the bridge is its own file, so neither model imports the other.
+- **Concept clarity.** Next: every statement repeats the triple `(Q, D, X)`. A `Model` structure would make the "same contract, other model" story visible in the types (backlog 5).
+
+### Ranked backlog
+
+1. The put and the digital through the same limit. `tendsto_integral_put` is already in `CRRCharFun`.
+2. Value = hedge cost in the tree: a contract's binomial value is the initial cost of its replicating strategy (`binomial_martingale_representation`, `binomial_replicatingPortfolio_unique`). This is the next item of the contracts plan.
+3. A path-dependent instrument priced in the tree, such as a barrier digital through `Binomial/BarrierReflection.lean`.
+4. Move `cappedCall_eq_bull_spread` out of `BlackScholes/` to a model-free payoff-identity module, so that `Instruments/Options` imports nothing from a model's directory.
+5. A `Contracts.Model` structure bundling the pricing measure, the discount and the model map.
+6. Model-free parity (carried over from the previous block, item 1).
+
+### Evidence
+
+`lake build` is green through the daemon's startup build, including both axiom audits and `MathFinExamples`. `AxiomAuditGen` is regenerated (789 guards). `formalization.yaml` is fresh. The Python gates pass. The ledger re-verified the 20 entries whose inputs changed, locally through the daemon, leaving 668 fresh, 0 stale, 0 missing.
+
 ## 2026-10-28 — corpus 664, modules 628 — the library applied: six worked examples (#334–#339)
 
 Scope: six worked applications in `MathFinExamples/Applications/`, each ending in one `sample_checked` statement: put–call parity on quotes, a binomial tree, a Gaussian risk report, a bootstrapped curve, default correlation in a credit pool, and a minimum-variance portfolio. Also the library gaps they exposed. Two entries were added (`qrm-es-tail-mean`, `qrm-one-factor-default-covariance`, both `full`); corpus 662 → 664. Three read-only reviewers read the diff, split by lens:
