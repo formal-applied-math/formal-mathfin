@@ -727,6 +727,7 @@ import MathFin.Contracts.Parity
 import MathFin.Contracts.Models.BlackScholes
 import MathFin.Contracts.Models.Binomial
 import MathFin.Contracts.Models.BinomialLimit
+import MathFin.Contracts.Models.ShortRate
 import MathFin.Contracts.Risk
 
 -- Execution: market microstructure — the Glosten-Milgrom adverse-selection
