@@ -501,12 +501,7 @@ lemma tendsto_integral_put {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT : 0 < T) (hS
         ∂(convPow (crrStepMeasure r σ T n) n)) atTop
       (𝓝 (∫ x, max (K - S₀ * Real.exp x) 0
         ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) := by
-  -- `n = 0` is degenerate (`crrProb_zero`) and no-arbitrage is impossible there,
-  -- but the `0 ≤ p ≤ 1` bound the limit consumes survives it anyway.
-  have hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := fun n ↦ by
-    rcases Nat.eq_zero_or_pos n with rfl | hn
-    · simp
-    · exact ⟨(crrUpProb_mem_Ioo (hna n hn)).1.le, (crrUpProb_mem_Ioo (hna n hn)).2.le⟩
+  have hp (n : ℕ) : 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := crrProb_mem_Icc hna n
   have hcont : Continuous (fun x : ℝ ↦ max (K - S₀ * Real.exp x) 0) := by fun_prop
   have hbound : ∀ x : ℝ, ‖max (K - S₀ * Real.exp x) 0‖ ≤ |K| := fun x ↦ by
     rw [Real.norm_eq_abs, abs_of_nonneg (le_max_right _ _)]
@@ -539,12 +534,7 @@ theorem binomialPrice_call_tendsto_bs {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT :
       (𝓝 (Real.exp (-(r * T)) * ∫ x, max (K - S₀ * Real.exp x) 0
           ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal)
         + (S₀ - K * Real.exp (-(r * T))))) := by
-  -- `n = 0` is degenerate (`crrProb_zero`) and no-arbitrage is impossible there,
-  -- but the `0 ≤ p ≤ 1` bound the limit consumes survives it anyway.
-  have hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := fun n ↦ by
-    rcases Nat.eq_zero_or_pos n with rfl | hn
-    · simp
-    · exact ⟨(crrUpProb_mem_Ioo (hna n hn)).1.le, (crrUpProb_mem_Ioo (hna n hn)).2.le⟩
+  have hp (n : ℕ) : 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := crrProb_mem_Icc hna n
   -- Put payoff: measurable, and bounded on `(0,∞)` by `|K|` (since `S₀eˣ > 0`).
   have hmeas : Measurable (fun y : ℝ ↦ max (K - y) 0) := by fun_prop
   have hbd : ∀ y : ℝ, 0 < y → |max (K - y) 0| ≤ |K| := fun y hy ↦ by

@@ -52,6 +52,14 @@ noncomputable def riemannσ (θ : ℝ≥0 → Ω → ℝ) (T : ℝ≥0) (n : ℕ
   ∑ k ∈ Finset.range n, θ (unifPart T n k) ω
     * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)
 
+omit hB mΩ in
+/-- The Riemann–Itô sum on `[0, T]` depends only on the integrand on `[0, T]`. -/
+lemma riemannσ_congr {θ θ' : ℝ≥0 → Ω → ℝ} {T : ℝ≥0} {ω : Ω}
+    (h : ∀ s ∈ Set.Icc 0 T, θ s ω = θ' s ω) (n : ℕ) :
+    riemannσ (B := B) θ T n ω = riemannσ (B := B) θ' T n ω :=
+  Finset.sum_congr rfl fun k hk ↦ by
+    rw [h _ ⟨zero_le, unifPart_le_T (Finset.mem_range.1 hk).le⟩]
+
 omit [IsProbabilityMeasure μ] in
 /-- `MemLp` of the adapted Riemann sum, by **domination**: each term `θ(tₖ)·ΔBₖ` is a bounded
 (`|θ| ≤ C`) measurable coefficient times an `L²` increment, hence `L²` (`‖θ·Δ‖ ≤ ‖C·Δ‖`). No
@@ -211,6 +219,19 @@ theorem itoIntegralCLM_T_of_bdd_adapted_cont (hBmeas : ∀ t, Measurable (B t))
   rw [← htarget]
   exact (Filter.tendsto_congr key).mp
     (((itoIntegralCLM_T hB T hBmeas).continuous.tendsto _).comp hLp)
+
+/-- **The Riemann–Itô sums converge in measure to `∫₀ᵀ θ dB`.** From the `L²` convergence
+`itoIntegralCLM_T_of_bdd_adapted_cont` via `tendstoInMeasure_of_tendsto_Lp`, transported from the
+`Lp` classes to the `riemannσ` functions. -/
+theorem tendstoInMeasure_riemannσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    (hcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :
+    TendstoInMeasure μ (fun n ↦ riemannσ (B := B) θ T n) atTop
+      ⇑(itoIntegralCLM_T hB T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd)) := by
+  refine TendstoInMeasure.congr
+    (fun n ↦ (memLp_riemannσ hB hBmeas hadap hbdd T n).coeFn_toLp) EventuallyEq.rfl ?_
+  exact tendstoInMeasure_of_tendsto_Lp
+    (itoIntegralCLM_T_of_bdd_adapted_cont hB hBmeas hadap hcont hbdd T)
 
 end ItoIntegralRiemannBridge
 end MathFin

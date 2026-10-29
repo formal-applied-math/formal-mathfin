@@ -60,27 +60,6 @@ open scoped NNReal ENNReal Topology
 open ItoIntegralL2 ItoIntegralBrownian ItoIntegralCLM ItoIntegralProcess ItoIntegralProcessGeneral
 open ItoIntegralProcessL2Infinite ItoIntegralProcessLocalMartingaleGeneral
 
-namespace SmoothTrunc
-
-/-- On the plateau `|y| < 1` where `φ = id`, the second derivative vanishes: `φ'' y = 0`
-(`φ'` is locally the constant `1`, so its derivative is `0`). -/
-lemma phi''_eq_zero_of_lt (S : SmoothTrunc) {y : ℝ} (hy : |y| < 1) : S.φ'' y = 0 := by
-  have h2 : HasDerivAt S.φ' 0 y :=
-    (hasDerivAt_const y (1 : ℝ)).congr_of_eventuallyEq (by
-      filter_upwards [(isOpen_lt continuous_abs continuous_const).mem_nhds hy] with z hz
-      exact S.phi'_eq_one_of_lt hz)
-  exact (S.hasDeriv₂ y).unique h2
-
-/-- For `|x| < n + 1` the second cutoff derivative vanishes: `φₙ''(x) = 0` (it is the identity
-there). -/
-lemma cutD2_eq_zero_of_abs_lt (S : SmoothTrunc) {n : ℕ} {x : ℝ} (hx : |x| < (n : ℝ) + 1) :
-    S.cutD2 n x = 0 := by
-  have hn1 : (0 : ℝ) < (n : ℝ) + 1 := by positivity
-  rw [cutD2, S.phi''_eq_zero_of_lt (by rw [abs_div, abs_of_pos hn1, div_lt_one hn1]; exact hx),
-    zero_div]
-
-end SmoothTrunc
-
 /-- **The drift primitive is continuous.** `t ↦ ∫_{(0,t]} h dτ` for continuous `h` and
 `τ = timeMeasure` (finite on compacts): dominated convergence, the integrand `t ↦ 𝟙_{(0,t]}(s)·h(s)`
 having its only discontinuity in `t` at the τ-null point `t = s`. -/
@@ -313,12 +292,18 @@ lemma fTruncXXX_bdd (S : SmoothTrunc) (N : ℕ)
     exact mul_le_mul_of_nonneg_left (hBxx t x) (by norm_num)
   · exact abs_mul_le_of (hBx t x) (S.cutD3_bdd N x)
 
-/-! ### Joint continuity of the two partials `ito_formula_td_process` requires -/
+/-! ### Joint continuity of the partials -/
 
 /-- `p ↦ (φₙ p.1, φₙ p.2)` is continuous. -/
 private lemma continuous_cut_pair (S : SmoothTrunc) (N : ℕ) :
     Continuous fun p : ℝ × ℝ ↦ ((S.cut N p.1, S.cut N p.2) : ℝ × ℝ) :=
   ((S.continuous_cut N).comp continuous_fst).prodMk ((S.continuous_cut N).comp continuous_snd)
+
+lemma fTruncT_continuous (S : SmoothTrunc) (N : ℕ)
+    (hf_t_cont : Continuous fun p : ℝ × ℝ ↦ f_t p.1 p.2) :
+    Continuous fun p : ℝ × ℝ ↦ fTruncT f_t S N p.1 p.2 := by
+  simp only [fTruncT]
+  exact (hf_t_cont.comp (continuous_cut_pair S N)).mul ((S.continuous_cutD1 N).comp continuous_fst)
 
 lemma fTruncX_continuous (S : SmoothTrunc) (N : ℕ)
     (hf_x_cont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2) :
@@ -351,15 +336,29 @@ lemma fTrunc_eq_of (S : SmoothTrunc) {N : ℕ} {s y : ℝ} (hs : |s| ≤ (N : �
     fTrunc f S N s y = f s y := by
   unfold fTrunc; rw [(cut_inactive S hs).1, (cut_inactive S hy).1]
 
+/-- On the inert region `fTruncT N = f_t`. -/
+lemma fTruncT_eq_of (S : SmoothTrunc) {N : ℕ} {s y : ℝ} (hs : |s| ≤ (N : ℝ))
+    (hy : |y| ≤ (N : ℝ)) : fTruncT f_t S N s y = f_t s y := by
+  rw [fTruncT, (cut_inactive S hs).1, (cut_inactive S hy).1, (cut_inactive S hs).2.1, mul_one]
+
+/-- On the inert region `fTruncX N = f_x`. -/
+lemma fTruncX_eq_of (S : SmoothTrunc) {N : ℕ} {s y : ℝ} (hs : |s| ≤ (N : ℝ))
+    (hy : |y| ≤ (N : ℝ)) : fTruncX f_x S N s y = f_x s y := by
+  rw [fTruncX, (cut_inactive S hs).1, (cut_inactive S hy).1, (cut_inactive S hy).2.1, mul_one]
+
+/-- On the inert region `fTruncXX N = f_xx`. -/
+lemma fTruncXX_eq_of (S : SmoothTrunc) {N : ℕ} {s y : ℝ} (hs : |s| ≤ (N : ℝ))
+    (hy : |y| ≤ (N : ℝ)) : fTruncXX f_x f_xx S N s y = f_xx s y := by
+  rw [fTruncXX, (cut_inactive S hs).1, (cut_inactive S hy).1, (cut_inactive S hy).2.1,
+    (cut_inactive S hy).2.2]
+  ring
+
 /-- On the inert region the truncated drift is the true drift. -/
 lemma truncDrift_eq_of (S : SmoothTrunc) {N : ℕ} {s y : ℝ}
     (hs : |s| ≤ (N : ℝ)) (hy : |y| ≤ (N : ℝ)) :
     fTruncT f_t S N s y + (1 / 2) * fTruncXX f_x f_xx S N s y
       = f_t s y + (1 / 2) * f_xx s y := by
-  obtain ⟨hcs, hc1s, _⟩ := cut_inactive S hs
-  obtain ⟨hcy, hc1y, hc2y⟩ := cut_inactive S hy
-  unfold fTruncT fTruncXX
-  rw [hcs, hcy, hc1s, hc1y, hc2y]; ring
+  rw [fTruncT_eq_of S hs hy, fTruncXX_eq_of S hs hy]
 
 end SummitC
 

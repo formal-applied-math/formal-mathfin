@@ -29,6 +29,7 @@ is load-bearing.
 
 ## Main results
 
+* `Contract.value_pay` — a single cash flow is worth the integral of its discounted payoff.
 * `Contract.value_scale`, `Contract.value_both` — `value` is homogeneous and additive,
   inherited from `pathPV_scale` and `pathPV_both`. The two carry different hypotheses on
   purpose: `value_scale` needs none, because `integral_const_mul` holds unconditionally in
@@ -95,6 +96,14 @@ against a model `X` that reifies each `Scenario` observation as a random variabl
 noncomputable def Contract.value (Q : Measure Ω) (D : ℝ≥0 → ℝ)
     (X : ι → ℝ≥0 → Ω → ℝ) (c : Contract ι) : ℝ :=
   ∫ ω, c.pathPV D (scenarioAt X ω) ∂Q
+
+/-- **The value of a single cash flow** is the integral of its discounted payoff. Every
+instrument that pays once (`Contracts/Instruments/Options.lean`) reaches its closed form in a
+model by rewriting through this lemma. -/
+theorem Contract.value_pay (Q : Measure Ω) (D : ℝ≥0 → ℝ) (X : ι → ℝ≥0 → Ω → ℝ) (t : ℝ≥0)
+    (a : Payoff ι) :
+    (Contract.pay t a).value Q D X = ∫ ω, D t * a.eval (scenarioAt X ω) ∂Q := by
+  simp [Contract.value, Contract.pathPV, Contract.cashflows]
 
 /-- `value` is homogeneous under `scale`, unconditionally: `integral_const_mul` holds even
 off the integrable set (both sides are `0` there), so no integrability hypothesis is needed. -/

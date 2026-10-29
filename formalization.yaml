@@ -136,9 +136,9 @@ alignment:
       status: full 2 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 23 statements
+      lean: 24 statements
       module: benchmarks/binomial.json
-      status: full 23 · wrapper 0 · reduced 0 · placeholder 0
+      status: full 24 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
       lean: 96 statements
@@ -166,9 +166,9 @@ alignment:
       status: full 2 · wrapper 2 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 9 statements
+      lean: 14 statements
       module: benchmarks/contracts.json
-      status: full 9 · wrapper 0 · reduced 0 · placeholder 0
+      status: full 14 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
       lean: 23 statements
@@ -241,9 +241,9 @@ alignment:
       status: full 54 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: McNeil, Frey and Embrechts, Quantitative Risk Management (2015), with each entry's `reference`
-      lean: 67 statements
+      lean: 69 statements
       module: benchmarks/quantitative_risk_management.json
-      status: full 67 · wrapper 0 · reduced 0 · placeholder 0
+      status: full 69 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
       lean: 34 statements
@@ -251,14 +251,14 @@ alignment:
       status: full 34 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: stochastic_calculus (Saporito, Stochastic Processes)
-      lean: 51 statements
+      lean: 55 statements
       module: benchmarks/stochastic_calculus.json
-      status: full 48 · wrapper 0 · reduced 3 · placeholder 0
+      status: full 52 · wrapper 0 · reduced 3 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 10 statements
+      lean: 11 statements
       module: benchmarks/stochastic_foundations.json
-      status: full 10 · wrapper 0 · reduced 0 · placeholder 0
+      status: full 11 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Robert Martin, ButterflyFreeSVI, https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a; Roper (2010), Theorem 2.1; Gatheral and Jacquier (2014), Lemma 2.2; MathFin issue #174"
       lean: 4 statements

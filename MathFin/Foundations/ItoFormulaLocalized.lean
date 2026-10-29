@@ -215,6 +215,23 @@ lemma cutD1_eq_one_of_abs_lt (S : SmoothTrunc) {n : ℕ} {x : ℝ} (hx : |x| < (
   rw [cutD1]
   exact S.phi'_eq_one_of_lt (by rw [abs_div, abs_of_pos hn1, div_lt_one hn1]; exact hx)
 
+/-- On the plateau `|y| < 1` where `φ = id`, the second derivative vanishes: `φ'' y = 0`
+(`φ'` is locally the constant `1`, so its derivative is `0`). -/
+lemma phi''_eq_zero_of_lt (S : SmoothTrunc) {y : ℝ} (hy : |y| < 1) : S.φ'' y = 0 := by
+  have h2 : HasDerivAt S.φ' 0 y :=
+    (hasDerivAt_const y (1 : ℝ)).congr_of_eventuallyEq (by
+      filter_upwards [(isOpen_lt continuous_abs continuous_const).mem_nhds hy] with z hz
+      exact S.phi'_eq_one_of_lt hz)
+  exact (S.hasDeriv₂ y).unique h2
+
+/-- For `|x| < n + 1` the second cutoff derivative vanishes: `φₙ''(x) = 0` (it is the identity
+there). -/
+lemma cutD2_eq_zero_of_abs_lt (S : SmoothTrunc) {n : ℕ} {x : ℝ} (hx : |x| < (n : ℝ) + 1) :
+    S.cutD2 n x = 0 := by
+  have hn1 : (0 : ℝ) < (n : ℝ) + 1 := by positivity
+  rw [cutD2, S.phi''_eq_zero_of_lt (by rw [abs_div, abs_of_pos hn1, div_lt_one hn1]; exact hx),
+    zero_div]
+
 /-- The inner rescaling `x ↦ x/(n+1)` has derivative `1/(n+1)`. -/
 private lemma hasDerivAt_div_succ (n : ℕ) (x : ℝ) :
     HasDerivAt (fun y ↦ y / ((n : ℝ) + 1)) (1 / ((n : ℝ) + 1)) x := by
