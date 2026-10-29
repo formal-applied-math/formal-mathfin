@@ -156,7 +156,7 @@ Scope: the realization gap that #340 was closed with. One entry was added, `mf-g
 
 ### Evidence
 
-(EVIDENCE-LEDGER)
+`lake build` is green through the daemon's startup build, including `MathFinExamples`. `AxiomAuditGen` is regenerated (793 guards). `formalization.yaml` is fresh. The Python gates pass. The 27 ledger rows the edit to `BivariateNormalCDF` made stale were re-verified, partly locally and the rest on GitHub runners (`ledger-sweep.yml`, runs 40811435597 and 40812292912, the first losing one shard to a broken Mathlib cache download), leaving 669 fresh, 0 stale, 0 missing.
 
 ## 2026-10-28 — corpus 668, modules 630 — one contract, two models: the binomial tree
 
