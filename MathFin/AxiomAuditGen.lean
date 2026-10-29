@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (816 MathFin constants, 29 upstream). Citations
+  corpus (827 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -491,6 +491,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoFormulaAdapted.ae_continuousOn_adaptedItoProcess
 
+/-- info: 'MathFin.ItoFormulaAdapted.exists_localMartingale_ito_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoFormulaAdapted.exists_localMartingale_ito_formula
+
 /-- info: 'MathFin.ItoFormulaAdapted.ito_formula_adapted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoFormulaAdapted.ito_formula_adapted
@@ -511,9 +515,17 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoFormulaAdapted.ito_formula_adapted_unbounded_C2_le
 
+/-- info: 'MathFin.ItoFormulaAdapted.ito_formula_adapted_unbounded_C2_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoFormulaAdapted.ito_formula_adapted_unbounded_C2_process
+
 /-- info: 'MathFin.ItoFormulaAdapted.ito_formula_adapted_unbounded_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoFormulaAdapted.ito_formula_adapted_unbounded_le
+
+/-- info: 'MathFin.ItoFormulaAdapted.ito_formula_adapted_unbounded_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoFormulaAdapted.ito_formula_adapted_unbounded_process
 
 /-- info: 'MathFin.ItoFormulaAdapted.tendstoInMeasure_riemannStieltjes_itoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -539,6 +551,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoIntegralLocalised.ae_continuousOn_localItoIntegral
 
+/-- info: 'MathFin.ItoIntegralLocalised.ae_continuousOn_predItoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralLocalised.ae_continuousOn_predItoIntegral
+
 /-- info: 'MathFin.ItoIntegralLocalised.ae_localItoIntegral_eq_itoContinuousMod' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoIntegralLocalised.ae_localItoIntegral_eq_itoContinuousMod
@@ -547,13 +563,41 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoIntegralLocalised.ae_localItoIntegral_eq_of_le
 
+/-- info: 'MathFin.ItoIntegralLocalised.ae_predItoIntegral_congr' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralLocalised.ae_predItoIntegral_congr
+
+/-- info: 'MathFin.ItoIntegralLocalised.ae_predItoIntegral_eq_localItoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralLocalised.ae_predItoIntegral_eq_localItoIntegral
+
+/-- info: 'MathFin.ItoIntegralLocalised.exists_continuous_localMartingale_localItoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralLocalised.exists_continuous_localMartingale_localItoIntegral
+
+/-- info: 'MathFin.ItoIntegralLocalised.exists_continuous_localMartingale_predItoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralLocalised.exists_continuous_localMartingale_predItoIntegral
+
 /-- info: 'MathFin.ItoIntegralLocalised.stronglyAdapted_localItoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoIntegralLocalised.stronglyAdapted_localItoIntegral
 
+/-- info: 'MathFin.ItoIntegralLocalised.stronglyAdapted_predItoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralLocalised.stronglyAdapted_predItoIntegral
+
+/-- info: 'MathFin.ItoIntegralLocalised.tendstoInMeasure_riemannStieltjes_localItoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralLocalised.tendstoInMeasure_riemannStieltjes_localItoIntegral
+
 /-- info: 'MathFin.ItoIntegralLocalised.tendstoInMeasure_riemannσ_localItoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoIntegralLocalised.tendstoInMeasure_riemannσ_localItoIntegral
+
+/-- info: 'MathFin.ItoIntegralLocalised.tendstoInMeasure_riemannσ_predItoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralLocalised.tendstoInMeasure_riemannσ_predItoIntegral
 
 /-- info: 'MathFin.ItoIntegralProcess.itoSimpleProcessLp_l2_continuous' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

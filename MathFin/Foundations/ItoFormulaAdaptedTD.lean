@@ -50,8 +50,8 @@ defined, they are limits in probability of the same sums.
   (`ae_itoContinuousMod_eq_of_le`): their `L²` integrals agree at each time
   (`itoProcessCLM_consist`) and both continuous modifications are continuous on `[0, t]`.
 
-`ItoFormulaAdaptedUnbounded` removes the bounds on `σ` and `b`. Not here: the formula as an
-identity of processes (all `t` at once, almost surely).
+`ItoFormulaAdaptedUnbounded` removes the bounds on `σ` and `b`, and `ItoFormulaAdaptedProcess`
+states the formula as an identity of processes (all `t` at once, almost surely).
 -/
 
 @[expose] public section
