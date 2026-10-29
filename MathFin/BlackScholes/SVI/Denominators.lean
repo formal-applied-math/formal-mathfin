@@ -26,7 +26,8 @@ open Polynomial
 noncomputable def companion (f : ℝ[X]) (n : ℕ) : Matrix (Fin n) (Fin n) ℝ :=
   f.leadingCoeff⁻¹ • scaledCompanion f n
 
-/-- The Hermite matrix of `f` with weight `q` at size `n`: entry `(i, j)` is `∑ᵣ qᵣ·tr(Cⁱ⁺ʲ⁺ʳ)` for the companion matrix `C`. -/
+/-- The Hermite matrix of `f` with weight `q` at size `n`: entry `(i, j)` is `∑ᵣ qᵣ·tr(Cⁱ⁺ʲ⁺ʳ)` for
+the companion matrix `C`. -/
 noncomputable def hermite (f q : ℝ[X]) (n : ℕ) : Matrix (Fin n) (Fin n) ℝ :=
   fun i j ↦ ∑ r ∈ q.support,
     q.coeff r * Matrix.trace ((companion f n) ^ (i.val + j.val + r))

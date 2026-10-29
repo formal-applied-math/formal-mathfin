@@ -16,7 +16,8 @@ the drift has been proved zero on the entire interior-stopped trajectory.
 
 ## Result
 
-Public entry points include `ae_eq_through_positive_time`, `brownianInteriorRule_ito_representation`.
+Public entry points include `ae_eq_through_positive_time`,
+`brownianInteriorRule_ito_representation`.
 -/
 
 @[expose] public section

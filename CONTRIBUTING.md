@@ -128,6 +128,13 @@ The CI pipeline runs `pytest tests/ -q` → `python3 -m tools.verify.ledger stat
 - Match the surrounding code's tactic style. `field_simp; ring` for
   algebraic close-outs. `bs_identity` for BS-family derivations. See
   `docs/patterns.md` for the distilled pattern catalogue.
+- Before adding a definition or a hypothesis structure, read `docs/design.md`.
+  In particular, a theorem that calls a term a price, an expectation or a
+  probability carries the conditions that make it one: Lean's `x / 0 = 0` and
+  the zero integral of a non-integrable function look like real values.
+- Worked demonstrations go in `MathFinExamples/` and API checks in
+  `MathFinTest/`. Both import only `MathFin`, and nothing in `MathFin/` imports
+  them.
 
 ## Upstream contributions
 

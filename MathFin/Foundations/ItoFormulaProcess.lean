@@ -160,7 +160,8 @@ theorem ito_formula_td_process
     exact (hF_fx.filter_mono (ae_mono hle_tT)).trans hgfxt_eq.symm
   -- the stochastic term is the Itô process `(f_x ● B)_t`
   have hstoch_lp : itoProcessL2Inf hB t hBmeas F = itoIntegralCLM_T hB t hBmeas gfxt := by
-    rw [itoProcessL2Inf_eq_itoProcessCLM hB t t hBmeas (le_refl t) F, hrestr, itoProcessCLM_terminal_eq]
+    rw [itoProcessL2Inf_eq_itoProcessCLM hB t t hBmeas (le_refl t) F, hrestr,
+        itoProcessCLM_terminal_eq]
   filter_upwards [hMt] with ω hω
   show f (t : ℝ) (B t ω) - f 0 (B 0 ω)
       = (itoProcessL2Inf hB t hBmeas F) ω

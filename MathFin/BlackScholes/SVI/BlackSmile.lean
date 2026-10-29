@@ -28,7 +28,8 @@ noncomputable def rootVariance (p : Params) (k : ℝ) : ℝ := Real.sqrt (varian
 /-- The Black term `d₊ = −k/√w + √w/2` at log-strike `k`. -/
 noncomputable def blackPlus (p : Params) (k : ℝ) : ℝ := -k / rootVariance p k + rootVariance p k / 2
 /-- The Black term `d₋ = −k/√w − √w/2` at log-strike `k`. -/
-noncomputable def blackMinus (p : Params) (k : ℝ) : ℝ := -k / rootVariance p k - rootVariance p k / 2
+noncomputable def blackMinus (p : Params) (k : ℝ) : ℝ := -k / rootVariance p k -
+    rootVariance p k / 2
 /-- The explicit derivative of `blackMinus` in log-strike (`blackMinus_hasDerivAt`). -/
 noncomputable def blackMinusSlope (p : Params) (k : ℝ) : ℝ :=
   -1 / rootVariance p k + k*slope p k / (2*(rootVariance p k)^3) - slope p k / (4*rootVariance p k)
@@ -37,7 +38,8 @@ noncomputable def blackMinusSlope (p : Params) (k : ℝ) : ℝ :=
 noncomputable def logBlackCall (p : Params) (k : ℝ) : ℝ :=
   MathFin.Phi (blackPlus p k) - Real.exp k * MathFin.Phi (blackMinus p k)
 
-/-- The explicit derivative of `logBlackCall` in log-strike, divided by `eᵏ`: the smile term minus `Φ(d₋)`. -/
+/-- The explicit derivative of `logBlackCall` in log-strike, divided by `eᵏ`: the smile term minus
+`Φ(d₋)`. -/
 noncomputable def blackDelta (p : Params) (k : ℝ) : ℝ :=
   gaussianPDFReal 0 1 (blackMinus p k) * slope p k / (2*rootVariance p k) -
     MathFin.Phi (blackMinus p k)

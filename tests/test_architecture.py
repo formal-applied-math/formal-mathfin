@@ -33,8 +33,7 @@ IMPORT_RE = re.compile(r"^(?:public\s+)?(?:meta\s+)?import\s+(?:all\s+)?(MathFin
 SNIPPET_IMPORT_RE = re.compile(r"^import\s+(MathFin(?:\.[\w']+)+)", re.M)
 
 # Aggregators: they import everything, so an edge from them shows nothing.
-AGGREGATORS = frozenset({"MathFin.AxiomAudit", "MathFin.AxiomAuditGen", "MathFin.Blueprint",
-                         "MathFin.Examples"})
+AGGREGATORS = frozenset({"MathFin.AxiomAudit", "MathFin.AxiomAuditGen", "MathFin.Blueprint"})
 
 # module -> open issue whose work adds its consumer. Keep it short-lived.
 STAGING: dict[str, str] = {}

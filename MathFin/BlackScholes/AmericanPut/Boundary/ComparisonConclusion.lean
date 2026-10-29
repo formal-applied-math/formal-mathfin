@@ -22,7 +22,8 @@ The modular stock-curvature consequence below takes strict speed as an argument;
 
 ## Result
 
-Public entry points include `dividend_log_curvature`, `dividend_curvature_claim`, `zeroDividend_weak_curvature_claim`, `liuRange_curvature_claim`.
+Public entry points include `dividend_log_curvature`, `dividend_curvature_claim`,
+`zeroDividend_weak_curvature_claim`, `liuRange_curvature_claim`.
 -/
 
 @[expose] public section

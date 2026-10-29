@@ -2,7 +2,9 @@
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
+-/
 
+/-
 The definitions and proofs here are our own, following this library's conventions: Mathlib's
 `MeasureTheory`/`ProbabilityTheory`, a concrete complementary-CDF survival function, and the
 conditional measure `cond`. Yosuke Ito's Isabelle/HOL AFP entry "Actuarial Mathematics"
@@ -40,7 +42,8 @@ For readers coming from the AFP entry, our declarations line up with its `Surviv
 ## Main results
 
 * `survivalFunction_zero` — `S_X(0) = 1` (`X > 0` a.e.).
-* `survivalFunction_antitone`, `survivalFunction_le_one` — the survival function decreases in `[0, 1]`.
+* `survivalFunction_antitone`, `survivalFunction_le_one` — the survival function decreases in
+  `[0, 1]`.
 * `survive_zero` — `₀pₓ = 1` for a life alive at `x`.
 * `survive_eq_survivalFunction_ratio` — `tpₓ = S_X(x+t) / S_X(x)` for `t ≥ 0`, the survival-ratio
   keystone: the conditional-probability definition of `survive` collapses to the ratio.
@@ -107,15 +110,16 @@ lemma survivalFunction_antitone [IsProbabilityMeasure P] : Antitone (survivalFun
   intro x y hxy
   exact ENNReal.toReal_mono (measure_ne_top P _) (measure_mono (alive_subset_alive hxy))
 
-/-- `₀pₓ = 1`: a life alive at age `x` survives `0` further years with certainty. AFP: `ccdfTx_0_1`. -/
+/-- `₀pₓ = 1`: a life alive at age `x` survives `0` further years with certainty. AFP: `ccdfTx_0_1`.
+-/
 lemma survive_zero [IsProbabilityMeasure P] (hX : Measurable X) (x : ℝ)
     (hx : P (alive X x) ≠ 0) : survive P X 0 x = 1 := by
   rw [survive, add_zero, cond_apply (measurableSet_alive hX x), Set.inter_self,
     ENNReal.inv_mul_cancel hx (measure_ne_top P _), ENNReal.toReal_one]
 
-/-- **The survival ratio** `tpₓ = S_X(x+t) / S_X(x)` for `t ≥ 0` — the survival-ratio keystone (AFP: `ccdfTx_ccdfX`).
-Conditioning on survival to age `x`, a further `t` years of survival has probability the ratio of
-the two unconditional survival probabilities. -/
+/-- **The survival ratio** `tpₓ = S_X(x+t) / S_X(x)` for `t ≥ 0` — the survival-ratio keystone (AFP:
+`ccdfTx_ccdfX`). Conditioning on survival to age `x`, a further `t` years of survival has
+probability the ratio of the two unconditional survival probabilities. -/
 lemma survive_eq_survivalFunction_ratio (hX : Measurable X) (x : ℝ)
     {t : ℝ} (ht : 0 ≤ t) :
     survive P X t x = survivalFunction P X (x + t) / survivalFunction P X x := by

@@ -19,6 +19,22 @@
       }
     },
     {
+      "id": "mf-gaussian-pair-any-moments",
+      "name": "A Gaussian Pair With Any Means, Volatilities and Correlation",
+      "domain": "mathematical_finance",
+      "description": "For any means mu, scales sigma and correlation r with r^2 <= 1, the pair (mu_0 + sigma_0 X, mu_1 + sigma_1 Y), with (X, Y) the library's Cholesky pair bivariateNormalLaw r, is jointly Gaussian with means mu, variances sigma_i^2 and covariance r sigma_0 sigma_1. So every two-asset Gaussian model with these parameters has a realization.",
+      "code": {
+        "lean": "import MathFin.Foundations.BivariateNormalCDF\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- A Gaussian pair with any means, volatilities and correlation `r ∈ [-1, 1]`. -/\ntheorem exists_gaussianPair {r : ℝ} (hr : r ^ 2 ≤ 1) (μ σ : Fin 2 → ℝ) :\n    HasGaussianLaw (fun q i ↦ gaussianPair μ σ i q) (bivariateNormalLaw r) ∧\n      (∀ i, ∫ q, gaussianPair μ σ i q ∂bivariateNormalLaw r = μ i) ∧\n      (∀ i, Var[gaussianPair μ σ i; bivariateNormalLaw r] = σ i ^ 2) ∧\n      cov[gaussianPair μ σ 0, gaussianPair μ σ 1; bivariateNormalLaw r] = r * σ 0 * σ 1 :=\n  ⟨hasGaussianLaw_gaussianPair r μ σ, integral_gaussianPair r μ σ, variance_gaussianPair hr μ σ,\n    covariance_gaussianPair r μ σ⟩\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "P. Billingsley, Probability and Measure, 3rd ed. (1995), §29 (the multivariate normal law; Cholesky construction of a correlated pair)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. gaussianPair and its four lemmas in MathFin/Foundations/BivariateNormalCDF.lean: the vector of coordinates is a translate of a continuous linear image of the Gaussian measure bivariateNormalLaw r (Mathlib's IsGaussian instances for linear images and translates), and the moments follow from the Cholesky pair's (integral_fst/snd, variance_fst/snd, covariance_fst_snd_bivariateNormalLaw) through Mathlib's variance_const_add, variance_const_mul and covariance_const_add/const_mul lemmas. Two coordinates only; the variances need r^2 <= 1, the law and the covariance hold for every r. Used by MathFinExamples/Applications/GaussianRiskReport.lean and MinimumVariance.lean to exhibit a realization of their models."
+      }
+    },
+    {
       "id": "mf-hoeffding-bivariate-normal",
       "name": "Hoeffding's Covariance Identity at the Bivariate Normal",
       "domain": "mathematical_finance",

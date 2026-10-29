@@ -11,7 +11,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.ContinuousHeatSmoothing
 /-! # Gaussian evolution of a smooth test payoff stays below the classical price 
 ## Result
 
-Public entry points include `linearPriceKernel`, `linearPriceEvolution_eventuallyEq_kernel`, `linearPriceKernel_contDiffAt`, `heatFlow_affine_hasDeriv`.
+Public entry points include `linearPriceKernel`, `linearPriceEvolution_eventuallyEq_kernel`,
+`linearPriceKernel_contDiffAt`, `heatFlow_affine_hasDeriv`.
 -/
 
 @[expose] public section
@@ -56,7 +57,8 @@ theorem heatFlow_affine_hasDeriv {f : ℝ → ℝ} (hf : Continuous f) (hc : Has
   let y := x+α*(t-a)
   have hd : DifferentiableAt ℝ (fun z : ℝ × ℝ => feynmanU f z.1 z.2) (u,y) :=
     ((compact_continuous_heatFlow_contDiff hf hc).contDiffAt
-      ((isOpen_lt continuous_const continuous_fst).mem_nhds (by dsimp [u]; linarith))).differentiableAt (by norm_num)
+      ((isOpen_lt continuous_const continuous_fst).mem_nhds
+          (by dsimp [u]; linarith))).differentiableAt (by norm_num)
   let A := fderiv ℝ (fun z : ℝ × ℝ => feynmanU f z.1 z.2) (u,y)
   have hdu : HasDerivAt (fun s => feynmanU f s y) (A (1,0)) u := by
     simpa only [Function.comp_def,id_eq] using hd.hasFDerivAt.comp_hasDerivAt u
@@ -114,10 +116,12 @@ theorem linearPriceEvolution_le_classical {k h a T : ℝ} {p : ℝ → ℝ → �
   · intro x t ht _ _
     have he := linearPriceEvolution_eventuallyEq_kernel (k := k) (h := h) (x := x) hf.continuous ht
     have het : linearPriceEvolution f k h a x =ᶠ[𝓝 t] linearPriceKernel f k h a x := by
-      simpa only [Function.comp_def,id_eq] using he.comp_tendsto (continuousAt_const.prodMk continuousAt_id)
+      simpa only [Function.comp_def,id_eq] using he.comp_tendsto
+          (continuousAt_const.prodMk continuousAt_id)
     have hex : (fun y => linearPriceEvolution f k h a y t) =ᶠ[𝓝 x]
         (fun y => linearPriceKernel f k h a y t) := by
-      simpa only [Function.comp_def,id_eq] using he.comp_tendsto (continuousAt_id.prodMk continuousAt_const)
+      simpa only [Function.comp_def,id_eq] using he.comp_tendsto
+          (continuousAt_id.prodMk continuousAt_const)
     unfold dividendSpatialOperator
     rw [het.deriv_eq,hex.deriv_eq,hex.deriv.deriv_eq,he.self_of_nhds]
     exact (linearPriceKernel_equation hf.continuous hc ht).le

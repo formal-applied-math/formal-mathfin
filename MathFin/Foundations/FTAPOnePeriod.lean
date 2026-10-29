@@ -120,7 +120,8 @@ theorem exists_isEMM_of_pos_tails (hY : Measurable Y) (hYint : Integrable Y P)
     rw [Real.norm_eq_abs, abs_of_pos (hZpos ω)]
     simp only [hZdef]; split_ifs <;> [exact le_max_left _ _; exact le_max_right _ _]
   have hZint : Integrable Z P :=
-    ⟨hZmeas.aestronglyMeasurable, HasFiniteIntegral.of_bounded (Filter.Eventually.of_forall hZbound)⟩
+    ⟨hZmeas.aestronglyMeasurable,
+        HasFiniteIntegral.of_bounded (Filter.Eventually.of_forall hZbound)⟩
   have hZYint : Integrable (fun ω ↦ Z ω * Y ω) P :=
     hYint.bdd_mul hZmeas.aestronglyMeasurable (Filter.Eventually.of_forall hZbound)
   -- `∫ Z·g = λ·∫_s g + μ·∫_sᶜ g`
@@ -224,7 +225,7 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
         by_cases hωs : ω ∈ s
         · exact hYs ω hωs
         · have hz : -Y ω = 0 := hω hωs
-          show (0 : ℝ) ≤ Y ω
+          change (0 : ℝ) ≤ Y ω
           linarith
     exact exists_isEMM_of_pos_tails P Y hY hYint ha_pos hc_neg
 

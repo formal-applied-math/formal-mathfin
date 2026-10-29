@@ -21,8 +21,8 @@ is a **continuous local martingale** on the null-augmented Brownian filtration.
 
 ## Strategy — localize in space *and* time, glue with the exit times
 
-The single gating ingredient is the genuine localizing sequence `exitTime` (`ExitTime.lean`).
-The local-martingale property is delivered here in **explicit form** (a localizing sequence + per-`N`
+The single gating ingredient is the genuine localizing sequence `exitTime` (`ExitTime.lean`). The
+local-martingale property is delivered here in **explicit form** (a localizing sequence + per-`N`
 continuous true martingales agreeing with `M` on the stochastic intervals) — this *is* the textbook
 definition of a continuous local martingale; the packaging into Degenne's `IsLocalMartingale`
 *typeclass* is `ito_formula_unrestricted` in `ItoFormulaUnrestrictedLocMart.lean` (it consumes the
@@ -30,10 +30,10 @@ all-time-agreement step below). Three steps:
 
 * **Double truncation** (this section). `fTrunc N (t, x) = f(cut N t, cut N x)` cuts **both**
   arguments smoothly onto the compact square `[−M₀(N+1), M₀(N+1)]²`, on which the continuous
-  partials of `f` are bounded by constants. The chain rule gives `fTrunc N`'s six partials in
-  closed form, each globally bounded — so `ito_formula_td_process` applies, giving a `[0,∞)`
-  integrand `Fᴺ` and the truncated Itô identity. The Itô integral of `Fᴺ` admits a global
-  **true-martingale** continuous modification `Mₙ` (`exists_continuous_martingale_modification_infinite`).
+  partials of `f` are bounded by constants. The chain rule gives `fTrunc N`'s six partials in closed
+  form, each globally bounded — so `ito_formula_td_process` applies, giving a `[0,∞)` integrand `Fᴺ`
+  and the truncated Itô identity. The Itô integral of `Fᴺ` admits a global **true-martingale**
+  continuous modification `Mₙ` (`exists_continuous_martingale_modification_infinite`).
 * **Agreement on `{· ≤ σ_N}`**, where `σ_N = min(exitTime N, N)`. There `t ≤ N` (time cut inert)
   and `|B_s| ≤ N` for `s ≤ t` (space cut inert), so `fTrunc N = f`, `drift_trunc = drift`, hence
   `Mₙ_t =ᵐ M_t` on `{t ≤ σ_N}` — the per-`t` agreement the headline `ito_formula_unrestricted_local`
@@ -59,27 +59,6 @@ open MeasureTheory ProbabilityTheory Filter Topology
 open scoped NNReal ENNReal Topology
 open ItoIntegralL2 ItoIntegralBrownian ItoIntegralCLM ItoIntegralProcess ItoIntegralProcessGeneral
 open ItoIntegralProcessL2Infinite ItoIntegralProcessLocalMartingaleGeneral
-
-namespace SmoothTrunc
-
-/-- On the plateau `|y| < 1` where `φ = id`, the second derivative vanishes: `φ'' y = 0`
-(`φ'` is locally the constant `1`, so its derivative is `0`). -/
-lemma phi''_eq_zero_of_lt (S : SmoothTrunc) {y : ℝ} (hy : |y| < 1) : S.φ'' y = 0 := by
-  have h2 : HasDerivAt S.φ' 0 y :=
-    (hasDerivAt_const y (1 : ℝ)).congr_of_eventuallyEq (by
-      filter_upwards [(isOpen_lt continuous_abs continuous_const).mem_nhds hy] with z hz
-      exact S.phi'_eq_one_of_lt hz)
-  exact (S.hasDeriv₂ y).unique h2
-
-/-- For `|x| < n + 1` the second cutoff derivative vanishes: `φₙ''(x) = 0` (it is the identity
-there). -/
-lemma cutD2_eq_zero_of_abs_lt (S : SmoothTrunc) {n : ℕ} {x : ℝ} (hx : |x| < (n : ℝ) + 1) :
-    S.cutD2 n x = 0 := by
-  have hn1 : (0 : ℝ) < (n : ℝ) + 1 := by positivity
-  rw [cutD2, S.phi''_eq_zero_of_lt (by rw [abs_div, abs_of_pos hn1, div_lt_one hn1]; exact hx),
-    zero_div]
-
-end SmoothTrunc
 
 /-- **The drift primitive is continuous.** `t ↦ ∫_{(0,t]} h dτ` for continuous `h` and
 `τ = timeMeasure` (finite on compacts): dominated convergence, the integrand `t ↦ 𝟙_{(0,t]}(s)·h(s)`
@@ -124,7 +103,8 @@ lemma continuous_timeMeasure_primitive {h : ℝ≥0 → ℝ} (hh : Continuous h)
     · refine (continuousAt_congr ?_).mpr (continuousAt_const (y := (0 : ℝ)))
       have hs00 : s = 0 := le_antisymm (not_lt.mp hs0) (zero_le)
       filter_upwards with t
-      exact Set.indicator_of_notMem (by rw [hs00]; exact fun hmem ↦ lt_irrefl 0 (Set.mem_Ioc.mp hmem).1) h
+      exact Set.indicator_of_notMem
+          (by rw [hs00]; exact fun hmem ↦ lt_irrefl 0 (Set.mem_Ioc.mp hmem).1) h
 
 namespace SummitC
 
@@ -141,13 +121,15 @@ noncomputable def fTruncX (f_x : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ
   f_x (S.cut N t) (S.cut N x) * S.cutD1 N x
 /-- `∂_tt fTrunc = f_tt·(φₙ' t)² + f_t·φₙ''(t)`. -/
 noncomputable def fTruncTT (f_t f_tt : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ) (t x : ℝ) : ℝ :=
-  f_tt (S.cut N t) (S.cut N x) * (S.cutD1 N t * S.cutD1 N t) + f_t (S.cut N t) (S.cut N x) * S.cutD2 N t
+  f_tt (S.cut N t) (S.cut N x) * (S.cutD1 N t * S.cutD1 N t) +
+      f_t (S.cut N t) (S.cut N x) * S.cutD2 N t
 /-- `∂_tx fTrunc = f_tx·φₙ'(x)·φₙ'(t)`. -/
 noncomputable def fTruncTX (f_tx : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ) (t x : ℝ) : ℝ :=
   f_tx (S.cut N t) (S.cut N x) * S.cutD1 N x * S.cutD1 N t
 /-- `∂_xx fTrunc = f_xx·(φₙ' x)² + f_x·φₙ''(x)`. -/
 noncomputable def fTruncXX (f_x f_xx : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ) (t x : ℝ) : ℝ :=
-  f_xx (S.cut N t) (S.cut N x) * (S.cutD1 N x * S.cutD1 N x) + f_x (S.cut N t) (S.cut N x) * S.cutD2 N x
+  f_xx (S.cut N t) (S.cut N x) * (S.cutD1 N x * S.cutD1 N x) +
+      f_x (S.cut N t) (S.cut N x) * S.cutD2 N x
 /-- `∂_xxx fTrunc = f_xxx·(φₙ' x)³ + 3 f_xx·φₙ'(x)·φₙ''(x) + f_x·φₙ'''(x)`. -/
 noncomputable def fTruncXXX (f_x f_xx f_xxx : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ) (t x : ℝ) : ℝ :=
   f_xxx (S.cut N t) (S.cut N x) * (S.cutD1 N x * S.cutD1 N x * S.cutD1 N x)
@@ -310,12 +292,18 @@ lemma fTruncXXX_bdd (S : SmoothTrunc) (N : ℕ)
     exact mul_le_mul_of_nonneg_left (hBxx t x) (by norm_num)
   · exact abs_mul_le_of (hBx t x) (S.cutD3_bdd N x)
 
-/-! ### Joint continuity of the two partials `ito_formula_td_process` requires -/
+/-! ### Joint continuity of the partials -/
 
 /-- `p ↦ (φₙ p.1, φₙ p.2)` is continuous. -/
 private lemma continuous_cut_pair (S : SmoothTrunc) (N : ℕ) :
     Continuous fun p : ℝ × ℝ ↦ ((S.cut N p.1, S.cut N p.2) : ℝ × ℝ) :=
   ((S.continuous_cut N).comp continuous_fst).prodMk ((S.continuous_cut N).comp continuous_snd)
+
+lemma fTruncT_continuous (S : SmoothTrunc) (N : ℕ)
+    (hf_t_cont : Continuous fun p : ℝ × ℝ ↦ f_t p.1 p.2) :
+    Continuous fun p : ℝ × ℝ ↦ fTruncT f_t S N p.1 p.2 := by
+  simp only [fTruncT]
+  exact (hf_t_cont.comp (continuous_cut_pair S N)).mul ((S.continuous_cutD1 N).comp continuous_fst)
 
 lemma fTruncX_continuous (S : SmoothTrunc) (N : ℕ)
     (hf_x_cont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2) :
@@ -348,15 +336,29 @@ lemma fTrunc_eq_of (S : SmoothTrunc) {N : ℕ} {s y : ℝ} (hs : |s| ≤ (N : �
     fTrunc f S N s y = f s y := by
   unfold fTrunc; rw [(cut_inactive S hs).1, (cut_inactive S hy).1]
 
+/-- On the inert region `fTruncT N = f_t`. -/
+lemma fTruncT_eq_of (S : SmoothTrunc) {N : ℕ} {s y : ℝ} (hs : |s| ≤ (N : ℝ))
+    (hy : |y| ≤ (N : ℝ)) : fTruncT f_t S N s y = f_t s y := by
+  rw [fTruncT, (cut_inactive S hs).1, (cut_inactive S hy).1, (cut_inactive S hs).2.1, mul_one]
+
+/-- On the inert region `fTruncX N = f_x`. -/
+lemma fTruncX_eq_of (S : SmoothTrunc) {N : ℕ} {s y : ℝ} (hs : |s| ≤ (N : ℝ))
+    (hy : |y| ≤ (N : ℝ)) : fTruncX f_x S N s y = f_x s y := by
+  rw [fTruncX, (cut_inactive S hs).1, (cut_inactive S hy).1, (cut_inactive S hy).2.1, mul_one]
+
+/-- On the inert region `fTruncXX N = f_xx`. -/
+lemma fTruncXX_eq_of (S : SmoothTrunc) {N : ℕ} {s y : ℝ} (hs : |s| ≤ (N : ℝ))
+    (hy : |y| ≤ (N : ℝ)) : fTruncXX f_x f_xx S N s y = f_xx s y := by
+  rw [fTruncXX, (cut_inactive S hs).1, (cut_inactive S hy).1, (cut_inactive S hy).2.1,
+    (cut_inactive S hy).2.2]
+  ring
+
 /-- On the inert region the truncated drift is the true drift. -/
 lemma truncDrift_eq_of (S : SmoothTrunc) {N : ℕ} {s y : ℝ}
     (hs : |s| ≤ (N : ℝ)) (hy : |y| ≤ (N : ℝ)) :
     fTruncT f_t S N s y + (1 / 2) * fTruncXX f_x f_xx S N s y
       = f_t s y + (1 / 2) * f_xx s y := by
-  obtain ⟨hcs, hc1s, _⟩ := cut_inactive S hs
-  obtain ⟨hcy, hc1y, hc2y⟩ := cut_inactive S hy
-  unfold fTruncT fTruncXX
-  rw [hcs, hcy, hc1s, hc1y, hc2y]; ring
+  rw [fTruncT_eq_of S hs hy, fTruncXX_eq_of S hs hy]
 
 end SummitC
 

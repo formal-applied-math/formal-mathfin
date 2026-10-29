@@ -18,7 +18,8 @@ No boundary time derivative is used.
 
 ## Result
 
-Public entry points include `canonicalPrice_spatial_test_in_exercise`, `canonicalPrice_no_positive_convex_lower_max`, `convex_subsolution_le_canonicalPrice_on_strip`.
+Public entry points include `canonicalPrice_spatial_test_in_exercise`,
+`canonicalPrice_no_positive_convex_lower_max`, `convex_subsolution_le_canonicalPrice_on_strip`.
 -/
 
 @[expose] public section
@@ -31,7 +32,7 @@ open scoped Topology ContDiff
 theorem canonicalPrice_spatial_test_in_exercise {k h x t : ℝ} {F : ℝ → ℝ}
     (hk : 0 < k) (hh : 0 ≤ h) (hhk : h ≤ k) (ht : 0 < t)
     (hx : x ≤ canonicalLogBoundary k h t) (hF : ContDiffAt ℝ 2 F x)
-    (hm : IsLocalMax (fun y => F y-canonicalPrice k h y t) x) :
+    (hm : IsLocalMax (fun y => F y - canonicalPrice k h y t) x) :
     deriv (deriv F) x ≤ -Real.exp x := by
   have hdF := hF.differentiableAt (by norm_num)
   have hfit := canonicalPrice_hasDerivAt_exercise hk hh hhk ht hx
@@ -43,7 +44,8 @@ theorem canonicalPrice_spatial_test_in_exercise {k h x t : ℝ} {F : ℝ → ℝ
   have hg : ContDiffAt ℝ 2 (fun y : ℝ => 1-Real.exp y) x := by fun_prop
   have hdg : deriv G x = 0 := by
     change deriv (fun y => F y-(1-Real.exp y)) x = 0
-    rw [deriv_fun_sub hdF (hg.differentiableAt (by norm_num)),deriv_const_sub',Real.deriv_exp,hslope]
+    rw [deriv_fun_sub hdF
+        (hg.differentiableAt (by norm_num)),deriv_const_sub',Real.deriv_exp,hslope]
     ring
   have hsecond : deriv (deriv G) x = deriv (deriv F) x+Real.exp x := by
     simpa only [G,iteratedDeriv_succ,iteratedDeriv_zero,deriv_const_sub',Real.deriv_exp,
@@ -54,7 +56,8 @@ theorem canonicalPrice_spatial_test_in_exercise {k h x t : ℝ} {F : ℝ → ℝ
     rw [canonicalPrice_exercise_value hk hh hhk ht hx,
       canonicalPrice_exercise_value hk hh hhk ht ((show y < x from hyx).le.trans hx)] at hy
     exact hy
-  have he := second_deriv_nonpos_at_left_stationary_max (hF.continuousAt.sub hg.continuousAt) hdg hgm
+  have he :=
+      second_deriv_nonpos_at_left_stationary_max (hF.continuousAt.sub hg.continuousAt) hdg hgm
   change deriv (deriv G) x ≤ 0 at he
   rw [hsecond] at he
   linarith
@@ -116,7 +119,8 @@ theorem convex_subsolution_le_canonicalPrice_on_strip {k h T : ℝ} {U : ℝ →
   intro z hz
   by_contra! hn
   let V : ℝ × ℝ → ℝ := fun z => U z.1 z.2-canonicalPrice k h z.1 z.2
-  have hVc : ContinuousOn V (twoSidedStrip L R T) := hUc.sub (canonicalPrice_continuous hk.le).continuousOn
+  have hVc : ContinuousOn V (twoSidedStrip L R T) :=
+      hUc.sub (canonicalPrice_continuous hk.le).continuousOn
   obtain ⟨w,hw,hmax⟩ := hQ.exists_isMaxOn ⟨z,hz⟩ hVc
   have hpos : 0 < V w := (sub_pos.mpr hn).trans_le (hmax hz)
   obtain ⟨hw0,hwT,hwL,hwR⟩ := hw

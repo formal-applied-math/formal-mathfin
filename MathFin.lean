@@ -210,9 +210,11 @@ import MathFin.Foundations.UnifIntegrableL2
 import MathFin.Foundations.SDEExistence
 -- Pathwise SDE uniqueness via the L²-energy Grönwall argument (#19)
 import MathFin.Foundations.SDEUniqueness
--- The assembled drift's pathwise realization: convergence + coeFn = driftContinuousMod (SDE-existence bridge)
+-- The assembled drift's pathwise realization: convergence + coeFn = driftContinuousMod
+-- (SDE-existence bridge)
 import MathFin.Foundations.DriftProcessModification
--- The strong solution as a pathwise process: slicing the Picard fixed point (pathwise SDE existence)
+-- The strong solution as a pathwise process: slicing the Picard fixed point (pathwise SDE
+-- existence)
 import MathFin.Foundations.SDEPathwise
 -- The general-integrand Itô process as a continuous local martingale (null-augmented filtration)
 import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
@@ -245,15 +247,26 @@ import MathFin.Foundations.AdaptedStochasticIntegralFreezing
 import MathFin.Foundations.AdaptedQuadraticVariation
 -- First-order term of the adapted Itô formula (martingale part): ∑ w(tₖ)ΔMₖ → ∫ w dM in L²
 import MathFin.Foundations.AdaptedRiemannStieltjes
--- The drift of the adapted Itô formula: A = ∫b ds is Lipschitz, predictable, and ∑ g(tₖ)ΔAₖ → ∫ g·b ds
+-- The drift of the adapted Itô formula: A = ∫b ds is Lipschitz, predictable, and ∑ g(tₖ)ΔAₖ → ∫ g·b
+-- ds
 import MathFin.Foundations.AdaptedDrift
 import MathFin.Foundations.ItoFormulaAdapted
+-- Itô's formula for adapted coefficients, localised to every C² f and every t ≤ T
+import MathFin.Foundations.LocalisationInMeasure
+-- Itô's formula for f(t, X_t) along an Itô process with adapted coefficients, every t ≤ T
+import MathFin.Foundations.ItoFormulaAdaptedTD
+-- The Itô integral of an unbounded continuous adapted integrand, by localisation
+import MathFin.Foundations.ItoIntegralLocalised
+-- Itô's formula along an Itô process with unbounded adapted coefficients
+import MathFin.Foundations.ItoFormulaAdaptedUnbounded
 -- Deterministic drift Riemann-convergence (α4 brick b-tail): ∑θ(tₖ)²·Δτ → ∫₀ᵀθ²ds
 import MathFin.Foundations.DriftRiemannConvergence
--- Continuous adapted-θ Girsanov assembly (α4 (c)): convergence core toward Btheta_isQBrownianMotion_adapted
+-- Continuous adapted-θ Girsanov assembly (α4 (c)): convergence core toward
+-- Btheta_isQBrownianMotion_adapted
 import MathFin.Foundations.GirsanovAdaptedTheta
 -- Rung 1 (bounded predictable θ Girsanov, Route B): marshal a SimpleProcess into single-partition
--- (s,c) form; generic simple-Doléans moment bounds; the predictable distributional Girsanov theorem.
+-- (s,c) form; generic simple-Doléans moment bounds; the predictable distributional Girsanov
+-- theorem.
 import MathFin.Foundations.SimpleProcessPartition
 import MathFin.Foundations.GirsanovSimpleDoleansMoments
 import MathFin.Foundations.GirsanovPredictableTheta
@@ -466,6 +479,7 @@ import MathFin.Binomial.CRRConvergence
 import MathFin.Binomial.DriftLimit
 import MathFin.Binomial.Bermudan
 import MathFin.Binomial.MartingaleRepresentation
+import MathFin.Binomial.EuropeanReplication
 -- Phase 13 additions:
 import MathFin.Binomial.Girsanov
 import MathFin.Binomial.SecondFTAP
@@ -647,7 +661,8 @@ import MathFin.RiskMeasures.VasicekIRB
 import MathFin.RiskMeasures.TrancheLoss
 import MathFin.RiskMeasures.SACCRExposure
 -- Phase 1 (convex-duality unification): fundamental superhedging bound — every EMM prices a claim
--- at most its super-replication cost (the pricing-side companion of the coherent-risk representation)
+-- at most its super-replication cost (the pricing-side companion of the coherent-risk
+-- representation)
 import MathFin.Foundations.SuperhedgingDuality
 -- LSV calibration: the leverage-posterior core (L²·E[v | S = K] = σ_loc²)
 import MathFin.BlackScholes.LSVLeverage
@@ -685,8 +700,10 @@ import MathFin.Actuarial.ActuarialInsurance
 import MathFin.Contracts.Core
 import MathFin.Contracts.Adapted
 import MathFin.Contracts.Pricing
-import MathFin.Contracts.BlackScholes
-import MathFin.Contracts.CappedCall
+import MathFin.Contracts.Instruments.Options
+import MathFin.Contracts.Models.BlackScholes
+import MathFin.Contracts.Models.Binomial
+import MathFin.Contracts.Models.BinomialLimit
 
 -- Execution: market microstructure — the Glosten-Milgrom adverse-selection
 -- spread, plus a six-point model witnessing that its hypotheses are satisfiable

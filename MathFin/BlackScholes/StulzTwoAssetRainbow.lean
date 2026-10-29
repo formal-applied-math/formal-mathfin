@@ -264,7 +264,7 @@ lemma tendsto_stulzY1_zero_strike {S1 b1 σ1 T : ℝ} (hS1 : 0 < S1) (hσ1 : 0 <
       (tendsto_neg_atBot_atTop.comp Real.tendsto_log_nhdsGT_zero)).congr' ?_
     filter_upwards [self_mem_nhdsWithin] with K hK
     rw [Function.comp_apply, Real.log_div hS1.ne' (Set.mem_Ioi.mp hK).ne', sub_eq_add_neg]
-  show Tendsto (fun K ↦ (Real.log (S1 / K) + (b1 + σ1 ^ 2 / 2) * T) / (σ1 * Real.sqrt T)) _ _
+  change Tendsto (fun K ↦ (Real.log (S1 / K) + (b1 + σ1 ^ 2 / 2) * T) / (σ1 * Real.sqrt T)) _ _
   exact (tendsto_atTop_add_const_right _ _ hlog).atTop_div_const
     (mul_pos hσ1 (Real.sqrt_pos.mpr hT))
 

@@ -88,7 +88,7 @@ theorem variance_pos_iff_A_pos (p : Params) (hs : 0 < p.sigma) :
 
 /-- Exact admissibility, including b=0 and rho=±1 with a=0. -/
 theorem varianceGate_iff (p : Params) (hs : 0 < p.sigma) (hb : 0 ≤ p.b)
-    (hr : 0 ≤ 1-p.rho^2) :
+    (hr : 0 ≤ 1 - p.rho ^ 2) :
     varianceGate p ↔ ∀ k : ℝ, 0 < variance p k := by
   by_cases hb0 : p.b = 0
   · simp [varianceGate, variance, hb0]

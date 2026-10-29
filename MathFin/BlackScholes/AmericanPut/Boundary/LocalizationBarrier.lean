@@ -14,7 +14,8 @@ spatial endpoints. It tends to zero pointwise as the multiple tends to zero.
 
 ## Result
 
-Public entry points include `localizationBarrier`, `localizationBarrier_pos`, `localizationBarrier_contDiff`, `localizationBarrier_hasDeriv_x`.
+Public entry points include `localizationBarrier`, `localizationBarrier_pos`,
+`localizationBarrier_contDiff`, `localizationBarrier_hasDeriv_x`.
 -/
 
 @[expose] public section

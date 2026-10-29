@@ -16,7 +16,8 @@ infima, not a usual-filtration or continuous-time debut theorem assumption.
 
 ## Result
 
-Public entry points include `measurable_zero_hit`, `firstContactTime`, `firstContactTime_mem`, `firstContactTime_le_iff`.
+Public entry points include `measurable_zero_hit`, `firstContactTime`, `firstContactTime_mem`,
+`firstContactTime_le_iff`.
 -/
 
 @[expose] public section
@@ -41,7 +42,8 @@ theorem measurable_zero_hit (hadapt : Adapted 𝓕 Z)
       · intro s
         exact (hadapt s).mono (𝓕.mono (s.property.2.trans hut)) le_rfl |>.ennreal_ofReal
       · intro ω
-        exact (ENNReal.continuous_ofReal.comp ((hcont ω).comp continuous_subtype_val)).upperSemicontinuous
+        exact (ENNReal.continuous_ofReal.comp
+            ((hcont ω).comp continuous_subtype_val)).upperSemicontinuous
     have heq : (⨅ s : Icc (0 : ℝ≥0) u, fun ω => ENNReal.ofReal (Z s ω)) = M := by
       funext ω
       simp only [iInf_apply,M]

@@ -15,7 +15,8 @@ Their common absolute bound is what permits dominated convergence.
 
 ## Result
 
-Public entry points include `exists_smooth_compact_minorant`, `exists_smooth_compact_minorant_sequence`.
+Public entry points include `exists_smooth_compact_minorant`,
+`exists_smooth_compact_minorant_sequence`.
 -/
 
 @[expose] public section

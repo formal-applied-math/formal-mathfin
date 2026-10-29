@@ -1531,12 +1531,12 @@ so a stubbed statement can **never** report `success: true` — that field alone
 failure while a `sorry` is in the file. The signal to read is `errors: []` at the sorry count you
 expected, not `success`. Getting a statement to *elaborate* — the types, the implicit-argument
 resolution, the right hypothesis bundle — is usually the hard part of a contracts-tower proof;
-once it typechecks with a `sorry`, the proof itself is often short (`value_pay_eq` was one `simp`
+once it typechecks with a `sorry`, the proof itself is often short (`Contract.value_pay` was one `simp`
 call once its statement stopped fighting elaboration).
 
 ### Reify-then-reduce: `simp only` to the existing theorem's exact shape, then `exact`
 
-Every `value_*` theorem in `BlackScholes.lean` and `CappedCall.lean` follows the same shape: unfold
+Every `value_*` theorem in `Contracts/Models/BlackScholes.lean` follows the same shape: unfold
 the reified contract's semantics with a targeted `simp only [...]` list until the goal is
 *syntactically* the integral an existing closed-form theorem already proves, then close with
 `exact`/`rw` against that theorem — no new integral is ever touched. The one discipline that keeps
@@ -1544,14 +1544,15 @@ this from becoming eleven near-duplicate `simp only` lists is to extract the sha
 one lemma once a second call site needs it:
 
 ```lean
-private theorem value_pay_eq {ι : Type*} (Q : Measure Ω) (D : ℝ≥0 → ℝ)
-    (X : ι → ℝ≥0 → Ω → ℝ) (t : ℝ≥0) (a : Payoff ι) :
+theorem Contract.value_pay (Q : Measure Ω) (D : ℝ≥0 → ℝ) (X : ι → ℝ≥0 → Ω → ℝ) (t : ℝ≥0)
+    (a : Payoff ι) :
     (Contract.pay t a).value Q D X = ∫ ω, D t * a.eval (scenarioAt X ω) ∂Q := by
   simp [Contract.value, Contract.pathPV, Contract.cashflows]
 ```
 
 `value_europeanCall`, `value_europeanPut` and `value_digitalCall` each then close with
-`rw [<def>, value_pay_eq]` followed by the one line that invokes the target theorem. Two
+`rw [<def>, Contract.value_pay]` followed by the one line that invokes the target theorem. The
+lemma is model-agnostic, so it lives in `Contracts/Pricing.lean`, where every model file finds it. Two
 guardrails make the pattern honest rather than a shortcut: never escalate the `simp only` list to a
 bare `simp` (an unbounded simp set can accidentally discharge — or silently reshape — the very goal
 the reduction is supposed to leave intact for the target theorem to close), and never edit the

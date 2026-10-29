@@ -376,7 +376,7 @@ theorem crr_tendsto_gaussian_inDistribution {r σ T : ℝ} (hσ : 0 < σ) (hT : 
     funext n
     haveI := isProbabilityMeasure_crrStepMeasure (hp n).1 (hp n).2
     rw [charFun_convPow, charFun_crrStepMeasure t (hp n).1 (hp n).2]
-  show Tendsto (fun n : ℕ ↦ charFun (convPow (crrStepMeasure r σ T n) n) t) atTop
+  change Tendsto (fun n : ℕ ↦ charFun (convPow (crrStepMeasure r σ T n) n) t) atTop
     (𝓝 (charFun (gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal) t))
   rw [heq]
   exact crr_charFun_pow_tendsto_gaussian hσ hT t
@@ -501,12 +501,7 @@ lemma tendsto_integral_put {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT : 0 < T) (hS
         ∂(convPow (crrStepMeasure r σ T n) n)) atTop
       (𝓝 (∫ x, max (K - S₀ * Real.exp x) 0
         ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) := by
-  -- `n = 0` is degenerate (`crrProb_zero`) and no-arbitrage is impossible there,
-  -- but the `0 ≤ p ≤ 1` bound the limit consumes survives it anyway.
-  have hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := fun n ↦ by
-    rcases Nat.eq_zero_or_pos n with rfl | hn
-    · simp
-    · exact ⟨(crrUpProb_mem_Ioo (hna n hn)).1.le, (crrUpProb_mem_Ioo (hna n hn)).2.le⟩
+  have hp (n : ℕ) : 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := crrProb_mem_Icc hna n
   have hcont : Continuous (fun x : ℝ ↦ max (K - S₀ * Real.exp x) 0) := by fun_prop
   have hbound : ∀ x : ℝ, ‖max (K - S₀ * Real.exp x) 0‖ ≤ |K| := fun x ↦ by
     rw [Real.norm_eq_abs, abs_of_nonneg (le_max_right _ _)]
@@ -539,12 +534,7 @@ theorem binomialPrice_call_tendsto_bs {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT :
       (𝓝 (Real.exp (-(r * T)) * ∫ x, max (K - S₀ * Real.exp x) 0
           ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal)
         + (S₀ - K * Real.exp (-(r * T))))) := by
-  -- `n = 0` is degenerate (`crrProb_zero`) and no-arbitrage is impossible there,
-  -- but the `0 ≤ p ≤ 1` bound the limit consumes survives it anyway.
-  have hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := fun n ↦ by
-    rcases Nat.eq_zero_or_pos n with rfl | hn
-    · simp
-    · exact ⟨(crrUpProb_mem_Ioo (hna n hn)).1.le, (crrUpProb_mem_Ioo (hna n hn)).2.le⟩
+  have hp (n : ℕ) : 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := crrProb_mem_Icc hna n
   -- Put payoff: measurable, and bounded on `(0,∞)` by `|K|` (since `S₀eˣ > 0`).
   have hmeas : Measurable (fun y : ℝ ↦ max (K - y) 0) := by fun_prop
   have hbd : ∀ y : ℝ, 0 < y → |max (K - y) 0| ≤ |K| := fun y hy ↦ by
@@ -562,7 +552,7 @@ theorem binomialPrice_call_tendsto_bs {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT :
         ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) := by
     refine ((tendsto_integral_put hσ hT hS₀ hna).const_mul (Real.exp (-(r * T)))).congr'
       (Filter.eventually_atTop.mpr ⟨1, fun n hn ↦ ?_⟩)
-    show Real.exp (-(r * T)) * (∫ x, max (K - S₀ * Real.exp x) 0
+    change Real.exp (-(r * T)) * (∫ x, max (K - S₀ * Real.exp x) 0
           ∂(convPow (crrStepMeasure r σ T n) n))
         = binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
           (fun x ↦ max (K - x) 0) n S₀
@@ -571,7 +561,7 @@ theorem binomialPrice_call_tendsto_bs {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT :
   -- Binomial put-call parity (eventually) lifts the convergence to the call.
   refine (hput.add_const (S₀ - K * Real.exp (-(r * T)))).congr'
     (Filter.eventually_atTop.mpr ⟨1, fun n hn ↦ ?_⟩)
-  show binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
+  change binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
         (fun x ↦ max (K - x) 0) n S₀ + (S₀ - K * Real.exp (-(r * T)))
       = binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
         (fun x ↦ max (x - K) 0) n S₀

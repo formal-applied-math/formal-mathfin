@@ -11,7 +11,8 @@ public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
 /-! # Strict decrease and strict exponential convexity without derivatives 
 ## Result
 
-Public entry points include `strictAntiOn_of_convex_antitone_no_flat_tail`, `strictConvexOn_exp_of_convex_injective`.
+Public entry points include `strictAntiOn_of_convex_antitone_no_flat_tail`,
+`strictConvexOn_exp_of_convex_injective`.
 -/
 
 @[expose] public section

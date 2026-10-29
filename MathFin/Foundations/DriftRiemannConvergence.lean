@@ -25,7 +25,8 @@ continuous Doléans exponent `−∫θdB − ½∫θ²ds`: the drift term `∑ �
 
 * `tendsto_riemannSum_setIntegral` — left-endpoint Riemann sums → the time-integral of a bounded
   continuous integrand.
-* `tendsto_driftSq_riemannSum` — the `θ²` specialization consumed by the continuous Doléans exponent.
+* `tendsto_driftSq_riemannSum` — the `θ²` specialization consumed by the continuous Doléans
+  exponent.
 -/
 
 @[expose] public section
@@ -40,9 +41,9 @@ open ItoIntegralL2 ItoIntegralBrownian ItoIntegralRiemannBridge
 `∑_{k<n} g(tₖ)·(min(t_{k+1},u) − min(tₖ,u))` (with `tₖ = unifPart T n k`) converge to
 `∫ s in (0,u], g s ∂timeMeasure`. Same cell-indicator step function + dominated convergence as
 `tendsto_riemannSum_setIntegral`, but integrated over `(0,u] ⊆ (0,T]` (so `cell_collapse` still
-applies) with the clamped cell weights `timeMeasure((tₖ,t_{k+1}] ∩ (0,u]) = min(t_{k+1},u) − min(tₖ,u)`.
-This is the horizon-`u` variant the continuous-Girsanov assembly needs for `simpleDriftⁿ_u → ∫₀ᵘθds`
-at intermediate times. -/
+applies) with the clamped cell weights
+`timeMeasure((tₖ,t_{k+1}] ∩ (0,u]) = min(t_{k+1},u) − min(tₖ,u)`. This is the horizon-`u` variant
+the continuous-Girsanov assembly needs for `simpleDriftⁿ_u → ∫₀ᵘθds` at intermediate times. -/
 theorem tendsto_riemannSum_setIntegral_clamp {g : ℝ≥0 → ℝ} (hg : Continuous g) {C : ℝ}
     (hbdd : ∀ s, |g s| ≤ C) (T : ℝ≥0) {u : ℝ≥0} (huT : u ≤ T) :
     Tendsto (fun n ↦ ∑ k ∈ Finset.range n, g (unifPart T n k)

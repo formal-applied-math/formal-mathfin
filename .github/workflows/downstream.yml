@@ -1,0 +1,68 @@
+name: downstream
+
+# Build a fresh Lake project that requires this repository, exactly as the README's
+# "Using the library" section tells a reader to, and compile MathFinTest/Readme.lean
+# in it: the file imports only the umbrella `MathFin` and restates the theorem the
+# README quotes. It checks what build.yml cannot: that the dependency declaration
+# resolves from a clean workspace, that the Mathlib cache downloads for it, and that
+# the umbrella exports what the README shows.
+#
+# Weekly and on demand, not per push: the downstream workspace compiles BrownianMotion
+# and the whole library from source, which build.yml already does for each push.
+
+on:
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      rev:
+        description: 'Commit, branch or tag of formal-mathfin to require (default: this run''s commit)'
+        required: false
+
+concurrency:
+  group: downstream
+  cancel-in-progress: true
+
+jobs:
+  downstream:
+    name: fresh project requiring formal-mathfin
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      REV: ${{ inputs.rev || github.sha }}
+    steps:
+      - name: Checkout (for the toolchain pin and the test file only)
+        uses: actions/checkout@v4
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Create the downstream project
+        run: |
+          mkdir "$RUNNER_TEMP/downstream"
+          cd "$RUNNER_TEMP/downstream"
+          cp "$GITHUB_WORKSPACE/lean-toolchain" .
+          cat > lakefile.toml <<EOF
+          name = "downstream"
+          defaultTargets = ["Downstream"]
+
+          [[require]]
+          name = "MathFin"
+          git = "https://github.com/formal-applied-math/formal-mathfin"
+          rev = "$REV"
+
+          [[lean_lib]]
+          name = "Downstream"
+          EOF
+          cp "$GITHUB_WORKSPACE/MathFinTest/Readme.lean" Downstream.lean
+          cat lakefile.toml
+
+      - name: lake update + Mathlib cache + lake build
+        working-directory: ${{ runner.temp }}/downstream
+        run: |
+          lake update
+          lake exe cache get
+          lake build

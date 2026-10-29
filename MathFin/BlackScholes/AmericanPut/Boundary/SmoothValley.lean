@@ -17,7 +17,8 @@ endpoints. These elementary functions will be used for parabolic comparison.
 
 ## Result
 
-Public entry points include `smoothPositive`, `smoothPositiveSlope`, `smoothMinimum`, `smoothValley`.
+Public entry points include `smoothPositive`, `smoothPositiveSlope`, `smoothMinimum`,
+`smoothValley`.
 -/
 
 @[expose] public section

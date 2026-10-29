@@ -48,13 +48,13 @@ under `Q := P.withDensity (Z_T)` on `[0, T]`: for `s ≤ t ≤ T` and `A ∈ �
 `D_t` and `D_s` over `A` agree.
 
 The generality over the full-martingale form `changeOfMeasure_setIntegral_eq` is that `Z · D` itself
-need **not** be a martingale — only its `[0,T]`-restriction need agree with an honest martingale `M`.
-This is exactly the simple-θ Girsanov situation, where the tilted-density identity `Z · D =ᵐ E^{a−c}`
-(`simple_spine_ae`) holds only on `[0,T]` (beyond the last partition point `Z · D` diverges from the
-Doléans martingale `E^{a−c}` by a forward Wald factor). The mechanism is unchanged: `∫_A D_u dQ =
-∫_A Z_u D_u dP` (withDensity conversion + Bayes pull-out, using `hmix`, `hZ`, `hDsm`, none of which
-touch `M`), then `Z_u D_u =ᵐ M_u` and `M`'s martingale property close the loop. No stochastic
-calculus, only conditional expectations. -/
+need **not** be a martingale — only its `[0,T]`-restriction need agree with an honest martingale
+`M`. This is exactly the simple-θ Girsanov situation, where the tilted-density identity
+`Z · D =ᵐ E^{a−c}` (`simple_spine_ae`) holds only on `[0,T]` (beyond the last partition point
+`Z · D` diverges from the Doléans martingale `E^{a−c}` by a forward Wald factor). The mechanism is
+unchanged: `∫_A D_u dQ = ∫_A Z_u D_u dP` (withDensity conversion + Bayes pull-out, using `hmix`,
+`hZ`, `hDsm`, none of which touch `M`), then `Z_u D_u =ᵐ M_u` and `M`'s martingale property close
+the loop. No stochastic calculus, only conditional expectations. -/
 theorem changeOfMeasure_setIntegral_eq_of_ae_martingale
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
     {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]

@@ -276,7 +276,7 @@ discount factor, on positive factors, the FRA value is strictly antitone — aff
 theorem strictAntiOn_fraValue (p δ K : ℝ) (hδ : δ ≠ 0) (hpos : 0 < 1 + δ * K) :
     StrictAntiOn (fun x : ℝ ↦ fraValue δ x (fraForwardRate p x δ) K) (Set.Ioi 0) := by
   intro x hx y hy hxy
-  show fraValue δ y (fraForwardRate p y δ) K < fraValue δ x (fraForwardRate p x δ) K
+  change fraValue δ y (fraForwardRate p y δ) K < fraValue δ x (fraForwardRate p x δ) K
   rw [fraValue_affine_of_newUnknown p δ K x hδ (ne_of_gt hx),
     fraValue_affine_of_newUnknown p δ K y hδ (ne_of_gt hy)]
   linarith [mul_lt_mul_of_pos_right hxy hpos]
@@ -350,15 +350,15 @@ value in the new factor `x` is `(P0 − K·A) − x`: affine with slope `−1`, 
 strictly decreasing with **no** positivity condition (`strictAnti_payerSwapValue`). -/
 theorem payerSwapValue_affine_of_newUnknown (P0 K A x : ℝ) :
     payerSwapValue P0 x K A = (P0 - K * A) - 1 * x := by
-  show P0 - x - K * A = (P0 - K * A) - 1 * x
+  change P0 - x - K * A = (P0 - K * A) - 1 * x
   ring
 
 /-- Swap monotonicity, known schedule: strictly antitone on all of `ℝ`. -/
 theorem strictAnti_payerSwapValue (P0 K A : ℝ) :
     StrictAnti (fun x : ℝ ↦ payerSwapValue P0 x K A) := by
   intro x y hxy
-  show payerSwapValue P0 y K A < payerSwapValue P0 x K A
-  show P0 - y - K * A < P0 - x - K * A
+  change payerSwapValue P0 y K A < payerSwapValue P0 x K A
+  change P0 - y - K * A < P0 - x - K * A
   linarith
 
 /-- **Swap threshold**, known schedule: the negated value at level `−c` has
@@ -366,7 +366,7 @@ threshold `P0 − K·A − c`. -/
 theorem swapThreshold (P0 K A c lo hi : ℝ) (x : ℝ) (_hx : x ∈ Set.Icc lo hi) :
     -(payerSwapValue P0 x K A) < -c ↔ x < P0 - K * A - c := by
   have h : payerSwapValue P0 x K A = P0 - K * A - x := by
-    show P0 - x - K * A = P0 - K * A - x
+    change P0 - x - K * A = P0 - K * A - x
     ring
   rw [h, neg_sub]
   simpa only [one_mul, div_one] using threshold_affine (P0 - K * A) 1 c x one_pos
@@ -389,7 +389,7 @@ theorem swapStep_tendsto (P0 K A c lo hi : ℝ) (hσ : P0 - K * A - c ∈ Set.Ic
 at the bootstrapped factor `P0 − K·A` — consuming `payerSwapValue_eq_zero_iff`. -/
 theorem swapRoot_is_par (P0 K A : ℝ) (hA : A ≠ 0) : parSwapRate P0 (P0 - K * A) A = K := by
   have h0 : payerSwapValue P0 (P0 - K * A) K A = 0 := by
-    show P0 - (P0 - K * A) - K * A = 0
+    change P0 - (P0 - K * A) - K * A = 0
     ring
   exact ((payerSwapValue_eq_zero_iff P0 (P0 - K * A) K hA).mp h0).symm
 
@@ -399,7 +399,7 @@ one accrual at the new factor): value `(P0 − K·A₀) − (1 + K·δ)·x` — 
 covered when `1 + K·δ > 0`. -/
 theorem payerSwapValue_affine_lastCoupon (P0 K A₀ δ x : ℝ) :
     payerSwapValue P0 x K (A₀ + δ * x) = (P0 - K * A₀) - (1 + K * δ) * x := by
-  show P0 - x - K * (A₀ + δ * x) = (P0 - K * A₀) - (1 + K * δ) * x
+  change P0 - x - K * (A₀ + δ * x) = (P0 - K * A₀) - (1 + K * δ) * x
   ring
 
 /-- Same, with the annuity in the `annuity δ P s` form. -/
@@ -414,7 +414,7 @@ the slope condition `1 + K·δ > 0`. -/
 theorem strictAnti_payerSwapValue_lastCoupon (P0 K A₀ δ : ℝ) (hpos : 0 < 1 + K * δ) :
     StrictAnti (fun x : ℝ ↦ payerSwapValue P0 x K (A₀ + δ * x)) := by
   intro x y hxy
-  show payerSwapValue P0 y K (A₀ + δ * y) < payerSwapValue P0 x K (A₀ + δ * x)
+  change payerSwapValue P0 y K (A₀ + δ * y) < payerSwapValue P0 x K (A₀ + δ * x)
   rw [payerSwapValue_affine_lastCoupon, payerSwapValue_affine_lastCoupon]
   linarith [mul_lt_mul_of_pos_right hxy hpos]
 

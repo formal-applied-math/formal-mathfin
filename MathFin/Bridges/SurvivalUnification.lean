@@ -73,7 +73,7 @@ theorem survivalFunction_eq_hazardSurvival (hnn : ∀ s, 0 ≤ h s) (hτ : Measu
     (hcdf : ∀ a, 0 ≤ a → P {ω | τ ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival h a)) {t : ℝ}
     (ht : 0 ≤ t) : SurvivalModel.survivalFunction P τ t = hazardSurvival h t := by
   have hQ : hazardSurvival h t ≤ 1 := by
-    show Real.exp (-∫ u in (0 : ℝ)..t, h u) ≤ 1
+    change Real.exp (-∫ u in (0 : ℝ)..t, h u) ≤ 1
     exact Real.exp_le_one_iff.2 (neg_nonpos.2 (intervalIntegral.integral_nonneg ht fun s _ ↦ hnn s))
   have hcompl : SurvivalModel.alive τ t = {ω | τ ω ≤ t}ᶜ := by
     ext ω

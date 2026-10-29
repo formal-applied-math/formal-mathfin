@@ -16,7 +16,8 @@ differentiable across the free boundary.
 
 ## Result
 
-Public entry points include `second_deriv_nonpos_at_left_stationary_max`, `spatial_test_at_boundary`.
+Public entry points include `second_deriv_nonpos_at_left_stationary_max`,
+`spatial_test_at_boundary`.
 -/
 
 @[expose] public section

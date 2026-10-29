@@ -14,7 +14,8 @@ two-sided touching test at terminal time; continuity recovers the terminal slice
 
 ## Result
 
-Public entry points include `pricingOperator`, `SmoothPricingSubsolutionOn`, `pricingOperator_barrier`, `smoothPricingSubsolution_le_before_terminal`.
+Public entry points include `pricingOperator`, `SmoothPricingSubsolutionOn`,
+`pricingOperator_barrier`, `smoothPricingSubsolution_le_before_terminal`.
 -/
 
 @[expose] public section
@@ -38,7 +39,7 @@ def SmoothPricingSubsolutionOn (k h : ℝ) (u : ℝ × ℝ → ℝ) (U : Set (�
 
 theorem pricingOperator_barrier {F G : ℝ × ℝ → ℝ} {z : ℝ × ℝ}
     (hF : DifferentiableAt ℝ F z) (k h M T : ℝ) (ht : z.2 < T)
-    (he : G =ᶠ[𝓝 z] (fun y => F y + M/(T-y.2))) :
+    (he : G =ᶠ[𝓝 z] (fun y => F y + M / (T - y.2))) :
     pricingOperator k h G z = pricingOperator k h F z + M/(T-z.2)^2 + k*(M/(T-z.2)) := by
   have hne : T-z.2 ≠ 0 := ne_of_gt (sub_pos.mpr ht)
   have hdt : HasDerivAt (fun t => M/(T-t)) (M/(T-z.2)^2) z.2 := by
@@ -65,9 +66,9 @@ theorem smoothPricingSubsolution_le_before_terminal {k h : ℝ} (hk : 0 ≤ k)
     (hFs : ContDiffOn ℝ 3 F (Ioo L R ×ˢ Ioo a T))
     (hsub : SmoothPricingSubsolutionOn k h u (Ioo L R ×ˢ Ioo a T))
     (hsuper : ∀ z ∈ Ioo L R ×ˢ Ioo a T, 0 ≤ pricingOperator k h F z)
-    (hbottom : ∀ x ∈ Icc L R, u (x,a) ≤ F (x,a))
-    (hleft : ∀ t ∈ Icc a T, u (L,t) ≤ F (L,t))
-    (hright : ∀ t ∈ Icc a T, u (R,t) ≤ F (R,t)) :
+    (hbottom : ∀ x ∈ Icc L R, u (x, a) ≤ F (x, a))
+    (hleft : ∀ t ∈ Icc a T, u (L, t) ≤ F (L, t))
+    (hright : ∀ t ∈ Icc a T, u (R, t) ≤ F (R, t)) :
     ∀ z ∈ Icc L R ×ˢ Ico a T, u z ≤ F z := by
   intro z hz
   by_contra! hpos
@@ -144,13 +145,14 @@ theorem smoothPricingSubsolution_le {k h : ℝ} (hk : 0 ≤ k)
     (hFs : ContDiffOn ℝ 3 F (Ioo L R ×ˢ Ioo a T))
     (hsub : SmoothPricingSubsolutionOn k h u (Ioo L R ×ˢ Ioo a T))
     (hsuper : ∀ z ∈ Ioo L R ×ˢ Ioo a T, 0 ≤ pricingOperator k h F z)
-    (hbottom : ∀ x ∈ Icc L R, u (x,a) ≤ F (x,a))
-    (hleft : ∀ t ∈ Icc a T, u (L,t) ≤ F (L,t))
-    (hright : ∀ t ∈ Icc a T, u (R,t) ≤ F (R,t)) :
+    (hbottom : ∀ x ∈ Icc L R, u (x, a) ≤ F (x, a))
+    (hleft : ∀ t ∈ Icc a T, u (L, t) ≤ F (L, t))
+    (hright : ∀ t ∈ Icc a T, u (R, t) ≤ F (R, t)) :
     ∀ z ∈ Icc L R ×ˢ Icc a T, u z ≤ F z := by
   have he : closure (Icc L R ×ˢ Ico a T) = Icc L R ×ˢ Icc a T := by
     rw [closure_prod_eq,isClosed_Icc.closure_eq,closure_Ico haT.ne]
-  have hh := smoothPricingSubsolution_le_before_terminal hk hu hF hFs hsub hsuper hbottom hleft hright
+  have hh :=
+      smoothPricingSubsolution_le_before_terminal hk hu hF hFs hsub hsuper hbottom hleft hright
   intro z hz
   apply le_on_closure hh
   · rwa [he]

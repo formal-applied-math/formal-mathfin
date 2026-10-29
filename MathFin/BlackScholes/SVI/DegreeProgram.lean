@@ -21,7 +21,9 @@ namespace MathFin
 namespace SVI
 open Polynomial
 
-/-- A sign program reading off, from the top coefficient down, the first index `≤ n` whose coefficient of the universal polynomial is nonzero, with its sign; `(0, s)` with the sign of the constant coefficient if none is. -/
+/-- A sign program reading off, from the top coefficient down, the first index `≤ n` whose
+coefficient of the universal polynomial is nonzero, with its sign; `(0, s)` with the sign of the
+constant coefficient if none is. -/
 noncomputable def degreeProgram : ℕ → SignProgram (ℕ × SignType)
   | 0 => (signQuery (universalPolynomial.coeff 0)).bind fun s ↦ .pure (0,s)
   | n+1 => .query (universalPolynomial.coeff (n+1))

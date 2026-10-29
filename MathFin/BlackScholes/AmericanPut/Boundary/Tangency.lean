@@ -20,7 +20,9 @@ corollary uses the stronger classical contract.
 
 ## Result
 
-Public entry points include `lineDifference_on_line_pos`, `no_contact_of_past_line_below_and_terminal_positive`, `no_isolated_contact_of_positive_intervals`, `curvature_nonneg_of_tangent_intervals`.
+Public entry points include `lineDifference_on_line_pos`,
+`no_contact_of_past_line_below_and_terminal_positive`, `no_isolated_contact_of_positive_intervals`,
+`curvature_nonneg_of_tangent_intervals`.
 -/
 
 @[expose] public section
@@ -111,7 +113,8 @@ theorem no_isolated_contact_of_positive_intervals (hp : ContinuousBoundaryPutSol
   have hposU : 0 < straightDifference p k h c d (d - c * U) U := by
     simpa only [lineDifference, movingLineTransform, zero_add] using
       lineDifference_on_line_pos hp (hT.trans hTU) hbU
-  obtain ⟨x₁,hx₁,hpos⟩ := straightDifference_positive_at_earlier_time hp hc hd hT.le hTU.le hbU.le hposU
+  obtain ⟨x₁,hx₁,hpos⟩ :=
+      straightDifference_positive_at_earlier_time hp hc hd hT.le hTU.le hbU.le hposU
   exact no_contact_of_past_line_below_and_terminal_positive hp hA hAT hcontact
     (fun t ht => hnear ⟨hlA.trans_le ht.1,ht.2.trans hr⟩ ht.2.ne) hx₁ hpos hinterval
 

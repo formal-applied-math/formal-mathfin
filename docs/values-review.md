@@ -107,6 +107,11 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   targets; it may not assert a property the entry does not deliver
   ("Existence and Uniqueness" on a uniqueness entry, "Convexity" where only a
   second derivative is stated).
+- **Junk values, inside the first pass.** For every price, expectation, probability or rate the
+  session's prose names: does the statement carry the condition that makes the Lean term mean it
+  (integrability, a non-zero denominator, `≠ ∞`, a non-null conditioning event)? Where it does not,
+  the term may be Lean's totalized `0` and the prose describes nothing. The rule and the library's
+  cases are in [`design.md`](design.md#2-a-junk-value-never-gets-a-financial-meaning).
 - **Record**: append a review block below, headed
   `## YYYY-MM-DD — corpus <N> — <one-line title>` (the freshness test parses
   the date and the `corpus <N>` count anywhere in the heading; a
@@ -124,6 +129,293 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 (per-lens exemplar → next upgrade; upgrades executed + ranked backlog). Earlier entries are historical
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
+
+## 2026-10-29 — corpus 671, modules 631 — the binomial value is the cost of its hedge
+
+Scope: replication in the tree, then stated for a contract. Two entries were added, `mf-binomial-european-replication` and `mf-contract-binomial-hedge` (both `full`); corpus 669 → 671. One module was added, `Binomial/EuropeanReplication.lean`.
+
+### Upgrades executed
+
+- **The layering rule held.** The tree facts are in `Binomial/`: the two one-step martingales, the nondegeneracy of a node, and the replication theorem. The `Contracts` file gets only the statement that mentions a contract. That statement is a three-line proof: rewrite the value to the tree price, then use the replication identity.
+- **Consumed, not reproved.** The strategy comes from `binomial_martingale_representation`, which the library already had for a general one-step martingale. This batch supplies the two martingales it needs: the discounted tree value (`binomialPrice_succ`) and the discounted spot (`crrUpProb_mul_up_add`).
+
+### The standing first pass: prose against statement
+
+- Both descriptions say "European payoffs of the terminal spot / the underlying at T only", and both statements take `g (S_N)` (via `hg`).
+- "Predictable" is glossed as "`H_k` depends only on the first `k` flips", which is `PathAdaptedAt k (H k)`.
+- The replication entry says the identity holds "along every coin-flip path", with no measure; the statement is `∀ ω`.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: the value is shown to be a price twice over, as an expectation and as a hedge's cost. Next: the self-financing portfolio as an object (cash plus `H_k` shares) whose terminal wealth is the payoff, rather than the gains sum alone.
+- **Concept clarity.** Next: the strategy is existential. The explicit delta `(V_up − V_down) / (S̃_up − S̃_down)` would make the hedge readable.
+
+### Ranked backlog
+
+1. The explicit delta-hedge formula for the strategy.
+2. Path-dependent payoffs: replication for a contract paying a function of the whole path up to `N`. The model map is already a genuine path.
+3. The American case: the Snell envelope's hedge with consumption (`Binomial/SnellEnvelope.lean`).
+
+### Evidence
+
+`lake build` is green through the daemon's startup build. Both new snippets and the curated `AxiomAudit.lean` pass in the daemon. `AxiomAuditGen` is regenerated (795 guards). `formalization.yaml` is fresh. The Python gates pass. Of the five ledger rows the batch made stale or new, three were verified locally; the daemon then hit its memory cap, and the last two were verified on GitHub runners (`ledger-sweep.yml`, run 40815552039), leaving 671 fresh, 0 stale, 0 missing.
+
+## 2026-10-29 — corpus 669, modules 630 — every worked example has a model
+
+Scope: the realization gap that #340 was closed with. One entry was added, `mf-gaussian-pair-any-moments` (`full`); corpus 668 → 669.
+
+### Upgrades executed
+
+- **The abstraction lifted, not repeated.** Both examples needed a Gaussian pair with given moments. It is one definition in the library, `gaussianPair` in `Foundations/BivariateNormalCDF.lean`, not two constructions in two example files. It is built on the Cholesky pair the file already had. Its law is Mathlib's instances for linear images and translates, and its moments are Mathlib's affine variance and covariance lemmas applied to the pair's.
+- **No vacuous checks left.** `Book.isRealization_gaussianPair` realizes every book, and `sample_checked` in the risk report now opens with the witness. `AssetPair.exists_returns` does the same for the minimum-variance variance clause. The "no realization is constructed" disclosures are replaced by what is now true.
+
+### The standing first pass: prose against statement
+
+- The new description says the variances need `r² ≤ 1` and that the law and the covariance hold for every `r`, which matches the lemmas' hypotheses.
+- "So every two-asset Gaussian model has a realization": "two-asset" is in the claim, and the statement is about `Fin 2`.
+
+### Lens gradients
+
+- **Coherence.** Exemplar: four lemmas, each a few Mathlib lemmas applied to existing ones. Next: Mathlib's `multivariateGaussian` on `EuclideanSpace ℝ (Fin 2)` is still not identified with `bivariateNormalLaw` (the file says so).
+- **Concept clarity.** Next: `AssetPair` still carries no validity fields, so `exists_returns` takes `ρ² ≤ 1` as a hypothesis where a `Book` gets it from `corr_mem` (carried over from the earlier block, item 8).
+
+### Ranked backlog
+
+1. The `n`-asset version: a Gaussian vector with any mean and positive semidefinite covariance, as the image of `stdNormalVec` under a square root of the covariance, for a multi-position risk report.
+2. Validity fields on `AssetPair`, matching `Book`.
+
+### Evidence
+
+`lake build` is green through the daemon's startup build, including `MathFinExamples`. `AxiomAuditGen` is regenerated (793 guards). `formalization.yaml` is fresh. The Python gates pass. The 27 ledger rows the edit to `BivariateNormalCDF` made stale were re-verified, partly locally and the rest on GitHub runners (`ledger-sweep.yml`, runs 40811435597 and 40812292912, the first losing one shard to a broken Mathlib cache download), leaving 669 fresh, 0 stale, 0 missing.
+
+## 2026-10-28 — corpus 668, modules 630 — one contract, two models: the binomial tree
+
+Scope: a second model for the contracts tower (`Contracts/Models/Binomial.lean`) and a bridge between the two models (`Contracts/Models/BinomialLimit.lean`). Four entries were added, all `full`; corpus 664 → 668. The maintainer asked, mid-batch, that `Contracts/` not carry what belongs elsewhere, and that request shaped the result.
+
+### Upgrades executed
+
+- **The contracts layer translates, and the model's facts live with the model.** The first draft put the spot's measurability and bound, a risk-neutral measure with its instance, and the CRR up-probability's range in the contracts file. Now:
+  - `measurable_spotPath` and `abs_spotPath_le` are in `Binomial/PathMeasure.lean`;
+  - the measure is the existing `coinFlipMeasure q` with `crrUpProb u d ρ = q`, in the shape `binomialPrice_eq_integral_coinFlipMeasure` already uses, so there is no new definition;
+  - `crrProb_mem_Icc` is in `Binomial/CRRConvergence.lean`.
+
+  The rule is now in the tower spec: a `Contracts` file proves only statements that mention a `Payoff` or a `Contract`.
+- **One proof where there were two.** `crrProb_mem_Icc` replaces two identical inline proofs in `Binomial/CRRCharFun.lean`.
+- **A general lemma in place of per-instrument ones.** `Contract.integrable_pathPV_of_bounded`: in a bounded model every contract is integrable. It gives `Payoff.measurable_eval` its first consumer, and the binomial capped call composes with no integrability lemma of its own.
+- **A namespace per model.** `Contracts.BlackScholes` and `Contracts.Binomial`, so one instrument's value has the same name in each model. `bsAssets` became `BlackScholes.assets`.
+- **A step length in the model.** The contract `europeanCall K T` is one term priced in every tree, whatever the number of steps. That is what lets `tendsto_binomial_value_europeanCall` state the CRR limit for one instrument in two models instead of for two pricing functions.
+
+### The standing first pass: prose against statement
+
+- The binomial descriptions say "only `q ∈ [0, 1]` is assumed, not no-arbitrage", which is true of every theorem except `value_forward`, and that one says no-arbitrage.
+- The limit's description names its one extra hypothesis (`|r| √T < σ`) and its limits: the call only, no rate.
+- "A genuine path, so a path-dependent instrument already has the model it needs": the module says so, and the scope fields say path-dependent payoffs are not priced here.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: the limit theorem, in which the contract stays fixed and only the model moves. Next: the put's limit, and a path-dependent instrument in the tree (backlog 1, 3).
+- **Coherence.** Exemplar: `value_pay_eq_binomialPrice` is `binomialPrice_eq_integral_coinFlipMeasure` read through `Contract.value_pay`, with nothing reproved.
+- **Zero slop.** Exemplar: the inline duplicate in `CRRCharFun` is gone. Next: `BlackScholes/CappedCall.lean` is a pure real identity filed under a model's directory (backlog 4).
+- **Architectural ingenuity.** Exemplar: the bridge is its own file, so neither model imports the other.
+- **Concept clarity.** Next: every statement repeats the triple `(Q, D, X)`. A `Model` structure would make the "same contract, other model" story visible in the types (backlog 5).
+
+### Ranked backlog
+
+1. The put and the digital through the same limit. `tendsto_integral_put` is already in `CRRCharFun`.
+2. Value = hedge cost in the tree: a contract's binomial value is the initial cost of its replicating strategy (`binomial_martingale_representation`, `binomial_replicatingPortfolio_unique`). This is the next item of the contracts plan.
+3. A path-dependent instrument priced in the tree, such as a barrier digital through `Binomial/BarrierReflection.lean`.
+4. Move `cappedCall_eq_bull_spread` out of `BlackScholes/` to a model-free payoff-identity module, so that `Instruments/Options` imports nothing from a model's directory.
+5. A `Contracts.Model` structure bundling the pricing measure, the discount and the model map.
+6. Model-free parity (carried over from the previous block, item 1).
+
+### Evidence
+
+`lake build` is green through the daemon's startup build, including both axiom audits and `MathFinExamples`. `AxiomAuditGen` is regenerated (789 guards). `formalization.yaml` is fresh. The Python gates pass. The ledger re-verified the 20 entries whose inputs changed, locally through the daemon, leaving 668 fresh, 0 stale, 0 missing.
+
+## 2026-10-28 — corpus 664, modules 628 — the library applied: six worked examples (#334–#339)
+
+Scope: six worked applications in `MathFinExamples/Applications/`, each ending in one `sample_checked` statement: put–call parity on quotes, a binomial tree, a Gaussian risk report, a bootstrapped curve, default correlation in a credit pool, and a minimum-variance portfolio. Also the library gaps they exposed. Two entries were added (`qrm-es-tail-mean`, `qrm-one-factor-default-covariance`, both `full`); corpus 662 → 664. Three read-only reviewers read the diff, split by lens:
+- prose against statement (the standing first pass);
+- coherence, slop and idiom (2, 3, 6);
+- mathematics, architecture and elegance (1, 4, 5, 7, 8).
+
+Every finding acted on was confirmed against the code.
+
+### Upgrades executed
+
+- **Parity through the contract layer.** `Contracts.forward`, `pathPV_europeanCall_eq_put_add_forward` and `value_europeanCall_eq_put_add_forward`. The path identity is Mathlib's `max_zero_sub_max_neg_zero_eq_self`, not a case split. `value_forward` gives the forward's Black–Scholes value.
+- **One integrability idiom.** `integrable_europeanCall_pathPV` is now public and two lines: the positive part of an integrable `S_T − K`, needing only the Gaussian driver. It replaces a private 25-line domination ladder in `CappedCall.lean` that took a full `BSCallHyp`. The put and forward lemmas are its siblings.
+- **ES is the tail mean without atoms.** `measureReal_valueAtRisk_lt` and `expectedShortfall_eq_setIntegral_tail`: with a continuous CDF the tail has mass exactly `1 − α`, and the Acerbi–Tasche correction vanishes.
+- **The one-factor model is a Bernoulli mixture, as a lemma.** `oneFactor_bernoulliMixture` returns the five mixture hypotheses for `Q = p(F)`, `Uᵢ = Φ(εᵢ)`. Before, they were inlined in one proof. `oneFactor_measureReal_iInter_default` and the new `oneFactor_measureReal_inter_default_sub_mul` (default covariance `= Var(p(F))`) are now the generic theorems after `oneFactor_default_iff`. The first draft of the covariance theorem had copied the generic proof line for line.
+- **A witness, not just a universal.** The four coordinate lemmas of `stdNormalFactors` (`OneFactorCopula.lean`) are public, and the credit example's check exhibits a realization of its model.
+- **The library's theorem, not a re-proof.** The binomial example cites `binomialPrice_callPut_parity`; its hand-written `parity` duplicated it.
+- **ES diversification by coherence.** The risk report proves ES subadditivity from `expectedShortfall_add_le`, at every level and for any integrable losses. Only VaR goes through the Gaussian closed form at `α ≥ 1/2`, which is the instructive contrast with `VaRSuperadditivity.lean`.
+- **Register.** `trans_eq` in place of `rw`/`exact` pairs; `sample_df` passed whole; snake_case theorem names (`gaussian_loss_report`, `defaultCorrelation_eq_and_nonneg`).
+- **The contract is not the model, in the module layout too.** `Contracts/Models/BlackScholes.lean` had defined the instruments as well as pricing them, and `Contracts/CappedCall.lean` mixed a definition with a price. Now:
+  - `Core`, `Adapted` and `Pricing` hold the language, its measurability and the model-agnostic value (with `Contract.value_pay`, formerly private to the model file);
+  - `Instruments/Options` holds the instruments, what they pay and parity in any model;
+  - `Models/BlackScholes` holds one model and the prices in it.
+
+  The axis is in the path. The next instrument goes beside `Instruments/Options`, and the next
+  model beside `Models/BlackScholes`.
+
+### The standing first pass: prose against statement
+
+- **An arbitrage the Lean does not state.** The parity check said the negative cost "is an arbitrage". It proves only `parityGap < 0`, with the forward costed at `S₀ − K e^{−rT}` by definition. Replication is not formalized, and the prose now says so.
+- **One story that was two.** The binomial example's CRR limit is for a separate market (σ = 20%, r = 5%), not the sample tree (u = 1.1, d = 0.9), which is not a CRR tree.
+- **A hypothesis the prose dropped.** "The combined ES at any level" against a theorem assuming `α ≥ 1/2`. It is now true as stated, by the coherence route above.
+- **Three points called a curve.** "Every forward rate is positive": the check covers three discount factors and defines no forward rate.
+- **Vacuity, disclosed.** The risk report and the minimum-variance portfolio quantify over realizations whose existence is unproved. Both now say so in "What it does not". The credit example now exhibits one.
+- **Smaller.** Lemmas listed under "what the library supplies" but unused (`crrUpProb_mem_Ioo`, the closed forms in the parity example). Numeric remarks not marked as unproved. A corpus description claiming nonnegativity its statement does not contain. "Joint" for a marginal probability. An integrability hypothesis missing from a module bullet.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: bootstrapping's uniqueness, `eq_df` (the only curve that reprices the strip). Next: strict positivity of the default correlation when `ρ > 0` (backlog 3), the one-factor content that every mixture lacks.
+- **Coherence.** Exemplar: `oneFactor_bernoulliMixture`. Next: `value_forward` from `HasLaw Z (gaussianReal 0 1)` alone; `discounted_terminal_eq_S0` asks for `BSCallHyp` it does not use.
+- **Zero slop.** Exemplar: the integrability lemmas are one term each. Next: the `max (x − K) 0 = max (K − x) 0 + (x − K)` split survives inside `binomialPrice_callPut_parity`.
+- **Architectural ingenuity.** Exemplar: parity is proved once, at the payoff level, and priced by the forward. Next: `bs_put_call_parity` re-derived from it, so the library keeps one parity proof.
+- **First principles.** Next: parity's inconsistency for every pricing measure under which the discounted underlying has mean `S₀`, not only for Black–Scholes (backlog 1).
+- **Idiomatic register.** Next: σ-parametrized Gaussian VaR/ES corollaries; the `(s²).toNNReal` shim in `gaussian_loss_report` says the library wants them.
+- **Concept clarity.** Next: one sheet shape. Five examples use `sources : List String`, while the capped call uses `Clause` with a locator. `AssetPair` carries no validity fields.
+- **Beautiful math.** Exemplar: the risk report's two diversification theorems side by side, one by coherence and one by Gaussianity.
+
+### Ranked backlog
+
+1. Model-free parity: the forward's value from `E[e^{−rT} S_T] = S₀` alone, so the quote check rules out every such pricing measure, not just Black–Scholes. It belongs with the next contracts batch (strategies, notes, swaps).
+2. Existence of a realization for the Gaussian book and the minimum-variance pair, by an affine image of `stdNormalVec` (`Foundations/BivariateNormalCDF.lean`), about 40 lines, shared by both. *Done 2026-10-29: `gaussianPair`, on the Cholesky pair rather than `stdNormalVec`.*
+3. Credit: `ρ > 0 → ρ_D > 0` (`p` is strictly monotone and `F` has no atoms); `ρ_D` in closed form through `N₂(z, z; ρ)`.
+4. Binomial: tie the hedge to `binomial_replicatingPortfolio_unique` (the only arbitrage-free price), and make the sample tree a CRR tree.
+5. Bootstrapping: certify the whole curve (`df (n + 1) = df n / 1.03` for the flat tail), and lift `eq_df` into `FixedIncome/Bootstrapping.lean`.
+6. Minimum variance: `w ≠ w* → var > V_min`, and the diversification condition `V_min < min(σ₁², σ₂²) ⟺ ρ < min(σ₁/σ₂, σ₂/σ₁)` as a library theorem.
+7. Lift `gaussian_loss_report`, σ-form, into `RiskMeasures/GaussianExpectedShortfall.lean`; state the tail mean as a set average `⨍`.
+8. One sheet record shape across the examples.
+
+### Evidence
+
+`lake build` is green through the daemon's startup build, including `MathFinExamples`. `AxiomAuditGen` is regenerated. `formalization.yaml` is fresh. The Python gates pass. The ledger re-verified every entry whose inputs changed: the last six on GitHub runners (`ledger-sweep.yml`, run 40801914937), leaving 664 fresh, 0 stale, 0 missing.
+
+## 2026-10-28 — corpus 662, modules 628 — the unbounded Itô integral, adapted (#346, item 1)
+
+Scope: the first item of #346. No entries were added. `sc-ito-integral-continuous-adapted-unbounded` gains two theorems: adaptedness and horizon independence. `localItoIntegral t` now reads, on each path, the clipped integral at the least integer bounding the path on `[0, t]`, not on `[0, T]`. Three read-only reviewers read the diff, split by lens:
+- prose against statement, first principles and concept clarity (5, 7);
+- mathematics, architecture and elegance (1, 4, 8);
+- coherence, slop and idiom (2, 3, 6).
+
+None found a wrong statement, a dead hypothesis or a circularity. Every finding acted on was confirmed against the code.
+
+### Upgrades executed
+
+- **Indistinguishability up to a random time.** `ae_forall_eq_of_continuousOn_of_antitone`: two processes with continuous paths that agree at each time on a shrinking event `A t` agree, almost surely, at every `t` with `ω ∈ A t`. The proof approaches `t` from the left through `Ioo 0 t ∩ D`. It makes `ae_clipItoMod_eq` time-local, which is what the adapted gluing needs.
+- **The modification lemma takes Degenne's shape.** `ae_forall_eq_of_continuousOn` took an event `A`, but its two remaining callers passed `A := univ` and unwrapped `mem_univ`. It now takes `Y t =ᵐ[μ] Y' t`, as BrownianMotion's `indistinguishable_of_modification_on` does, and is a corollary of the antitone lemma. `ae_itoContinuousMod_eq_of_le` is now a single term. `ae_forall_eq_of_tendstoInMeasure` composes it with `tendstoInMeasure_ae_unique` and serves both horizon independence and the bounded case. All three lemmas are stated for a general target (`T2Space`, or `EMetricSpace` for the last), not just `ℝ`.
+- **One measurability lemma.** `measurableSet_forall_abs_le_of_countable` is shared by `tendsto_measure_compl_abs_le` and the new `measurableSet_forall_abs_le`, which closes with `MeasurableSet.congr`.
+- **A countable index.** `measurable_apply_countable`, for `ω ↦ f (n ω) ω`, takes any countable index with measurable singletons, which is what its callee needs. It is the first step of Mathlib's `Measurable.find`.
+- **#346 item 4, done.** `tendsto_measure_compl_abs_le_of_stronglyAdapted` takes a `StronglyAdapted` process. It replaces the `hm` helper in `ito_formula_adapted_unbounded_le` and the inline copy in the Riemann-sum characterisation. Eight other copies of the boilerplate remain in older modules.
+- **Register.** `ae_localItoIntegral_eq` now indexes pairs as `(n, n + k)` instead of a `rcases … absurd` branch. The closure step is now a term.
+
+### The standing first pass: prose against statement
+
+- **Wrong index.** The module docstring said that on the event "σ stays in `[−N, N]`" the integrands `clip n σ` and `clip N σ` are the same. It is the event for `n`, up to `t`.
+- **A missing ingredient.** "The level at `t` reads `σ` only on `[0, t]`, so the integral is adapted" omitted the predictability of each `M^N`. The docstring now also says what the gluing buys. Reading the level on `[0, T]` gives the same process up to indistinguishability, but one not shown adapted. The adaptedness itself holds on every path, for the uncompleted filtration.
+- **A dropped hypothesis.** The localisation module's bullet called two limits in measure "the same path" without continuity, which would make it only a modification.
+- **Overstated scope.** The entry's scope said the antitone lemma gives agreement "at every time". It gives agreement at every time at which the event holds. The architecture doc said "the same on every horizon". The statement is: for `T ≤ T′`, indistinguishable on `[0, T]`.
+- **Junk values.** The description now says that past `T` the values are not the integral, though adaptedness holds at every time.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: the time-local `ae_clipItoMod_eq`, which is the mathematical content of the gluing. Next: the local-martingale property (backlog 1).
+- **Coherence.** Exemplar: `ae_forall_eq_of_continuousOn`, now Degenne-shaped. Next: upstream `measurable_apply_countable` as the first step of `Measurable.find`, and the closed-interval indistinguishability lemma (#315).
+- **Zero slop.** Exemplar: one countable-set measurability proof where there were two. Next:
+  - `ItoFormulaUnrestricted.indistinguishable_on_stochInterval` is the antitone lemma with `A t = {t ≤ σ}`, proved by hand on all of `ℝ≥0`;
+  - an all-time form of the antitone lemma would make it a corollary;
+  - `ae_eq_through_positive_time`, in the American-put stopping module, is its strict relative.
+- **Architectural ingenuity.** Exemplar: `LocalisationInMeasure` now carries the whole toolkit for gluing at a random level. Next: make `ae_localItoProcess_eq` time-local once stopping times consume it. Until then its callers would gain more threading than it saves.
+- **First principles.** Exemplar: the antitone lemma assumes no measurability of the events.
+- **Idiomatic register.** Next: Mathlib order for names (`continuous_clip`), carried over from the last review.
+- **Concept clarity.** Next: a horizon-free integral on `ℝ≥0`, glued across `T ∈ ℕ` by `ae_localItoIntegral_eq_of_le`, so that `T` leaves the public API.
+- **Beautiful math.** Exemplar: horizon independence proved by noting that both integrals are limits of the same Riemann sums.
+
+### Ranked backlog
+
+1. The local-martingale property. It needs four things:
+   - `τ_N = inf{t : |σ_t| ≥ N}` as a stopping time for the raw natural filtration. The open-set hitting-time lemma needs right-continuity, so prove it directly with `measurableSet_forall_abs_le` and compactness.
+   - The fact that σ stays in `[−N, N]` on `[0, s]` for `s ≤ τ_N`. This fails at `s = 0` when `|σ₀| > N`, so either take an `Ico` form of `ae_clipItoMod_eq` or prove the integral is `0` at time `0`.
+   - A repair on `augFiltration`, as `itoLocalMod` does, because Degenne's `IsLocalMartingale` needs every path càdlàg.
+   - Freezing past `T`.
+2. A horizon-free integral on `ℝ≥0`, and the adaptedness of `localItoProcess`.
+3. Predictability of `localItoIntegral`, since the level `t ↦ pathLevel t` is left-continuous.
+4. Rederive `indistinguishable_on_stochInterval` from an all-time antitone lemma.
+5. The rest of #346: predictable integrands; the one-variable stack as corollaries; the `unifPart` simp lemmas with #308; the eight remaining copies of the adapted-measurability boilerplate.
+
+### Evidence
+
+`lake build` is green through the daemon's startup build. `AxiomAuditGen` is regenerated (782 guards). `formalization.yaml` is fresh. The ledger re-verified the four entries whose inputs changed: 662 fresh, none stale or missing.
+
+## 2026-10-28 — corpus 662, modules 628 — Itô's formula for adapted coefficients, localised (#309)
+
+Scope: the branch closing #309. Four entries came in, all `full`: the formula for every `C²` `f` at
+each fixed `t ≤ T`, for `f(t, x)`, the Itô integral of an unbounded continuous adapted integrand,
+and the formula along an Itô process with unbounded coefficients. Corpus 658 → 662. Three
+read-only reviewers read the diff against main, split by lens:
+- mathematics (lenses 1, 5, 8);
+- architecture and concept clarity (4, 7);
+- coherence, slop and idiom (2, 3, 6).
+
+Every finding acted on was confirmed against the code and adjudicated here. The mathematics
+reviewer found no dead hypotheses and no circularity.
+
+### Upgrades executed
+
+- **The `C²` formula is a corollary.** All three reviewers found the same slop. `ito_formula_adapted_local` re-derived, with its own cutoff (`exists_bddDeriv_eqOn_Icc` and a private copy of `abs_mul_le_of`), the space localisation that `ito_formula_adapted_td_local` already carries out. Its `_le` step was a line-for-line copy of the time-dependent one. `ito_formula_adapted_local_le` is now the `f_t = 0` case of `ito_formula_adapted_td_local_le`, as `ito_formula_adapted_unbounded_C2_le` already was. About 150 lines are gone, and so is `ItoFormulaAdaptedLocal`: its horizon lemmas and the bounded-`f'` identification moved into `ItoFormulaAdaptedTD`.
+- **The layering is right side up.** The construction of the integral (`ItoIntegralLocalised`) imported a formula module, and opened its namespace, only to get eight generic lemmas. Those lemmas now live in `Foundations/LocalisationInMeasure`, which imports only Mathlib:
+  - limits in measure are local, in both directions;
+  - continuous paths stay bounded with probability tending to `1`;
+  - continuous processes that agree at each time agree as paths.
+
+  The three convergence-in-measure lemmas are stated for any `EDist` or `EMetricSpace` target, not only `ℝ`. `ae_eq_of_tendstoInMeasure_of_eqOn` now uses Mathlib's `TendstoInMeasure.comp` directly instead of the `exists_seq_tendsto_ae_comp` wrapper.
+- **Upstream lemmas consumed.** `ae_localItoIntegral_eq_itoContinuousMod` used the local lemma with `fun _ _ _ ↦ rfl`, the same sequence on both sides, which is Mathlib's `tendstoInMeasure_ae_unique`. It now cites `tendstoInMeasure_ae_unique`. Three `.congr (fun _ ↦ EventuallyEq.rfl) h` calls are `TendstoInMeasure.congr_right`.
+- **One technique, one route.** `ae_itoContinuousMod_eq_of_le` applied Degenne's lemma on `[0, t)` and then handled the endpoint separately. It is now one call to `ae_forall_eq_of_continuousOn` on `[0, t]`, as the integral's own uniqueness proof already did.
+- **`pathLevel` is an `sInf`.** It no longer needs `classical` or a proof argument, and `abs_le_pathLevel` now needs continuity only on `[0, T]`.
+- **Register.** One `by exact` became a term, two `rw … at h; exact h.le` became `simpa`, and one `exact_mod_cast` became `Nat.cast_le.2`.
+
+### The standing first pass: prose against statement
+
+- **"Every `t ≤ T`" for a statement at each fixed `t`.** This appeared in the README, the architecture doc, and two entry names (now "…, at Each Fixed Time"); four descriptions now say "each". The same prose also read "every `t`" as the formula holding for all `t` at once, which it does not.
+- **An undisclosed limitation.** `localItoIntegral` reads, on each path, the clipping level of the whole path on `[0, T]`, so its value at `t` is not shown adapted. Before, the entry's description disclosed only the missing local-martingale property. The description, the scope and the module docstring now say so, and the definition's docstring says it is the integral on `[0, T]` only.
+- **A hypothesis that is not there.** The integral entry's scope listed `b` among the continuous adapted inputs; the integral has no `b`.
+- **Construction misdescribed.** The README said the integral is "built as the limit in probability" of its Riemann sums. It is built by clipping and is shown to be that limit.
+- **Smaller.** The architecture doc named theorems by module, not by namespace. The new module docstring called its path lemma Degenne's, though it is an analogue proved independently. The TD docstring dropped "continuous" from the hypothesis on `f'` and the restriction to `[0, T]`.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: the Itô integral of an unbounded continuous integrand with no stopping times, glued from the clipped integrals by locality of limits in measure. Next: an adapted gluing (below), which would make it a local martingale.
+- **Coherence.** Exemplar: `ae_forall_eq_of_continuousOn`, three lines on Mathlib's `EqOn.of_subset_closure` and `ae_ball_iff`. Next, upstream:
+  - to BrownianMotion: `indistinguishable_of_modification_on` for a separable set;
+  - to Mathlib: `ae_eq_of_tendstoInMeasure_of_eqOn`, the local form of `tendstoInMeasure_ae_unique`.
+- **Zero slop.** Exemplar: the `C²` formula as `f_t = 0`. Next: the same move for the one-variable stack on main. `ito_formula_adapted_against` and `ito_formula_of_tendsto` repeat the time-dependent pair with one term fewer, including the subsequence extraction and the integrability block.
+- **Architectural ingenuity.** Exemplar: `LocalisationInMeasure`, one neutral home for the event-wise localisation that three modules use. Next: a `tendsto_measure_compl_abs_le` for adapted processes with continuous paths. It would remove the `((hadap s).mono ((natFiltration hBmeas).le s)).measurable` boilerplate, which appears ten times in seven files.
+- **First principles.** Next: the bounds `hbt` and `hbx` of `ito_formula_adapted_td_against` are used only on `[0, T]`.
+- **Idiomatic register.** Next: Mathlib order for names (`continuous_clip`, not `clip_continuous`), in a library-wide pass.
+- **Concept clarity.** Exemplar: the module docstrings now say which reading of `∫ f'(X) dM` each theorem uses and where the two agree. Next: the measurability API for `localItoIntegral` and `localItoProcess`.
+- **Beautiful math.** Next: the formula as an identity of processes, for all `t` at once almost surely, from the continuity of both sides.
+
+### Ranked backlog
+
+1. Adapted localisation: clip at the level of the path on `[0, t]`, not on `[0, T]`. Then `localItoIntegral` is adapted and consistent across horizons, and the local-martingale property follows.
+2. Relax the integral's inputs to predictable integrands with almost surely continuous paths, so that `∫ f_x dM = ∫ f_x σ dB` becomes an almost-sure identity.
+3. The one-variable Itô stack as corollaries of the time-dependent one.
+4. Base-module tidies, batched because they re-verify most of the stochastic corpus (#308):
+   - move `continuous_clampM` next to `clampM`, and derive `measurable_clampM` from it;
+   - replace the inline copy in `GirsanovPredictableTheta`;
+   - add `@[simp]` lemmas `unifPart_zero` and `unifPart_self`; the first is proved by hand fourteen times in nine files.
+5. Upstream: the separable-set indistinguishability lemma to BrownianMotion, and the local uniqueness of limits in measure to Mathlib (#315).
+6. The formula as an identity of processes. A random start and several Brownian motions both wait on filtration generality.
+7. A bridge to `ItoFormulaUnrestricted`'s residual reading of the formula for functions of Brownian motion.
+
+Items 1–4 are filed as #346, which also points to #308 and #315.
+
+### Evidence
+
+`lake build` is green through the daemon's startup build (9,392 jobs), with `AxiomAudit` and `AxiomAuditGen` (780 guards) passing. The ledger re-verified every entry whose inputs changed: 662 fresh, none stale or missing. The python gates pass (62 passed, 1 skipped). `AxiomAuditGen` and `formalization.yaml` are regenerated.
 
 ## 2026-10-21 — corpus 657, modules 625 — the coherence pass: every module connected
 

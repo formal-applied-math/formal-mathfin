@@ -221,7 +221,7 @@ theorem pathAdaptedAt_snellAux (hZ : ∀ n, PathAdaptedAt n (Z n)) :
       · simp
       · rw [Function.update_of_ne hi', Function.update_of_ne hi']
         exact hω i (by omega)
-    show max _ _ = max _ _
+    change max _ _ = max _ _
     rw [hZ k ω ω' hω, h_child true, h_child false]
 
 /-- **Minimality clause (Snell)**: any pathwise supermartingale `U` dominating
@@ -292,7 +292,7 @@ theorem snellAux_eq_discounted_americanPrice (u d r : ℝ) (g : ℝ → ℝ) (S�
         ring
       rw [hexp]
       ring
-    show max _ _ = _
+    change max _ _ = _
     rw [americanPrice_succ,
       mul_max_of_nonneg _ _ (Real.exp_pos (-r * (k : ℝ))).le]
     exact congrArg₂ max rfl h_cont
@@ -373,7 +373,7 @@ lemma pathAdaptedAt_discounted_americanPrice (u d r : ℝ) (g : ℝ → ℝ) (S�
     (N k : ℕ) :
     PathAdaptedAt k (fun ω ↦ Real.exp (-r * k) *
       americanPrice u d r g (N - k) (spotPath S₀ u d k ω)) := fun ω ω' h ↦ by
-  show Real.exp (-r * k) * americanPrice u d r g (N - k) (spotPath S₀ u d k ω)
+  change Real.exp (-r * k) * americanPrice u d r g (N - k) (spotPath S₀ u d k ω)
       = Real.exp (-r * k) * americanPrice u d r g (N - k) (spotPath S₀ u d k ω')
   rw [pathAdaptedAt_spotPath S₀ u d k ω ω' h]
 

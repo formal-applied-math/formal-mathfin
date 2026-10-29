@@ -89,7 +89,7 @@ private lemma log_ratio_gaussianPDFReal_eq {r v : ℝ≥0} (hv : v ≠ 0) (hr : 
   have hA : Real.log (gaussianPDFReal 0 (r * v) x)
       = -(Real.log (2 * π * ((r : ℝ) * (v : ℝ)))) / 2
         - x ^ 2 / (2 * ((r : ℝ) * (v : ℝ))) := by
-    show Real.log ((Real.sqrt (2 * π * ((r * v : ℝ≥0) : ℝ)))⁻¹ *
+    change Real.log ((Real.sqrt (2 * π * ((r * v : ℝ≥0) : ℝ)))⁻¹ *
         Real.exp (-(x - 0) ^ 2 / (2 * ((r * v : ℝ≥0) : ℝ)))) = _
     rw [sub_zero, hrvcoe]
     rw [Real.log_mul (by positivity :
@@ -99,7 +99,7 @@ private lemma log_ratio_gaussianPDFReal_eq {r v : ℝ≥0} (hv : v ≠ 0) (hr : 
     ring
   have hB : Real.log (gaussianPDFReal 0 v x)
       = -(Real.log (2 * π * (v : ℝ))) / 2 - x ^ 2 / (2 * (v : ℝ)) := by
-    show Real.log ((Real.sqrt (2 * π * (v : ℝ≥0) : ℝ))⁻¹ *
+    change Real.log ((Real.sqrt (2 * π * (v : ℝ≥0) : ℝ))⁻¹ *
         Real.exp (-(x - 0) ^ 2 / (2 * (v : ℝ≥0) : ℝ))) = _
     rw [sub_zero]
     rw [Real.log_mul (by positivity : (0 : ℝ) < (Real.sqrt (2 * π * (v : ℝ)))⁻¹).ne'
@@ -170,7 +170,7 @@ theorem kl_gaussianReal_var_ratio {r v : ℝ≥0} (hv : v ≠ 0) (hr : r ≠ 0) 
   have hllr : llr (gaussianReal 0 (r * v)) (gaussianReal 0 v)
       =ᵐ[volume] fun x ↦ Real.log (gaussianPDFReal 0 (r * v) x / gaussianPDFReal 0 v x) := by
     filter_upwards [hcomb] with x hx
-    show Real.log (((gaussianReal 0 (r * v)).rnDeriv (gaussianReal 0 v) x).toReal) = _
+    change Real.log (((gaussianReal 0 (r * v)).rnDeriv (gaussianReal 0 v) x).toReal) = _
     rw [hP, hx, hreal x,
       ENNReal.toReal_ofReal
         (div_nonneg (gaussianPDFReal_nonneg _ _ x) (gaussianPDFReal_nonneg _ _ x))]
@@ -381,7 +381,7 @@ theorem sqrtBias_oneSided {Y : α → ℝ} (hYnn : ∀ ω, 0 ≤ Y ω)
     · have := hint.1
       fun_prop
     · filter_upwards [] with ω
-      show |c * (Real.sqrt (Y ω) - Real.sqrt (sigma * sigma)) ^ 2|
+      change |c * (Real.sqrt (Y ω) - Real.sqrt (sigma * sigma)) ^ 2|
           ≤ |2 * c * Y ω + 2 * c * (sigma * sigma)|
       rw [abs_of_nonneg (mul_nonneg (le_of_lt hcpos) (sq_nonneg _)),
         abs_of_nonneg (by nlinarith [hcpos, hYnn ω, sq_nonneg (sigma * sigma)])]
@@ -444,14 +444,14 @@ theorem sqrtBias_absGaussianSample {v : ℝ≥0} (hv : v ≠ 0) :
         have hxneg : -x = Real.sqrt (v : ℝ) := by
           rw [← abs_of_neg (not_le.mp hx0)]
           exact habsx
-        show x = -Real.sqrt (v : ℝ)
+        change x = -Real.sqrt (v : ℝ)
         linarith
     refine measure_mono_null hsub ?_
     rw [measure_union_null (measure_singleton _) (measure_singleton _)]
   have hnd : (gaussianReal 0 v)
       {x : ℝ | x ^ 2 ≠ Real.sqrt (v : ℝ) * Real.sqrt (v : ℝ)} ≠ 0 := by
     have hmeas : MeasurableSet {x : ℝ | x ^ 2 = Real.sqrt (v : ℝ) * Real.sqrt (v : ℝ)} := by
-      show MeasurableSet ((fun x : ℝ ↦ x ^ 2) ⁻¹' {Real.sqrt (v : ℝ) * Real.sqrt (v : ℝ)})
+      change MeasurableSet ((fun x : ℝ ↦ x ^ 2) ⁻¹' {Real.sqrt (v : ℝ) * Real.sqrt (v : ℝ)})
       exact MeasurableSet.preimage (measurableSet_singleton _) (by fun_prop)
     have hcompl : {x : ℝ | x ^ 2 ≠ Real.sqrt (v : ℝ) * Real.sqrt (v : ℝ)}
         = {x : ℝ | x ^ 2 = Real.sqrt (v : ℝ) * Real.sqrt (v : ℝ)}ᶜ := by

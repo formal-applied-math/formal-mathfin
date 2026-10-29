@@ -11,15 +11,17 @@ public import MathFin.Foundations.ConvexDuality
 /-!
 # Coherent risk measures: the Artzner–Delbaen–Eber–Heath representation (finite state)
 
-A coherent risk measure `ρ` on `ι → ℝ` (finite state space) is, by its four ADEH axioms, the supremum
-of expected loss `∑ qᵢ (-Xᵢ)` over a set of representing probability measures `q`. The geometric content
-is convex duality: the **acceptance cone** `{X | ρ X ≤ 0}` is a closed convex cone, and a rejected
-position is separated from it by a representing density — the *same* Hahn–Banach separation that gives
-the FTAP its equivalent martingale measure (here via the point-from-cone primitive
-`MathFin.exists_separating_of_not_mem_cone`). This is the risk-side face of the convex-duality unification.
+A coherent risk measure `ρ` on `ι → ℝ` (finite state space) is, by its four ADEH axioms, the
+supremum of expected loss `∑ qᵢ (-Xᵢ)` over a set of representing probability measures `q`. The
+geometric content is convex duality: the **acceptance cone** `{X | ρ X ≤ 0}` is a closed convex
+cone, and a rejected position is separated from it by a representing density — the *same*
+Hahn–Banach separation that gives the FTAP its equivalent martingale measure (here via the
+point-from-cone primitive `MathFin.exists_separating_of_not_mem_cone`). This is the risk-side face
+of the convex-duality unification.
 
-The representation is stated as `IsLUB` (ρ X is the least upper bound of the expected losses), which is
-the precise "ρ = sup over measures" statement without the conditionally-complete-lattice `iSup` overhead.
+The representation is stated as `IsLUB` (ρ X is the least upper bound of the expected losses), which
+is the precise "ρ = sup over measures" statement without the conditionally-complete-lattice `iSup`
+overhead.
 
 ## Main results
 * `MathFin.IsCoherentRisk` — the four ADEH axioms
@@ -65,20 +67,20 @@ lemma acceptance_closed (hρ : IsCoherentRisk ρ) : IsClosed {X : ι → ℝ | �
 
 /-- `0` is acceptable. -/
 lemma zero_mem (hρ : IsCoherentRisk ρ) : (0 : ι → ℝ) ∈ {X : ι → ℝ | ρ X ≤ 0} := by
-  show ρ 0 ≤ 0; rw [hρ.rho_zero]
+  change ρ 0 ≤ 0; rw [hρ.rho_zero]
 
 /-- The acceptance set is a cone (positive homogeneity). -/
 lemma cone (hρ : IsCoherentRisk ρ) :
     ∀ ⦃x⦄, x ∈ {X : ι → ℝ | ρ X ≤ 0} → ∀ ⦃c : ℝ⦄, 0 ≤ c → c • x ∈ {X : ι → ℝ | ρ X ≤ 0} := by
   intro x hx c hc
-  show ρ (c • x) ≤ 0
+  change ρ (c • x) ≤ 0
   rw [hρ.posHom c hc]
   exact mul_nonpos_of_nonneg_of_nonpos hc hx
 
 /-- The acceptance set is convex. -/
 lemma convex_acceptance (hρ : IsCoherentRisk ρ) : Convex ℝ {X : ι → ℝ | ρ X ≤ 0} := by
   intro X hX Y hY a b ha hb _
-  show ρ (a • X + b • Y) ≤ 0
+  change ρ (a • X + b • Y) ≤ 0
   calc ρ (a • X + b • Y) ≤ ρ (a • X) + ρ (b • Y) := hρ.subadditive _ _
     _ = a * ρ X + b * ρ Y := by rw [hρ.posHom a ha, hρ.posHom b hb]
     _ ≤ 0 := by
@@ -89,7 +91,7 @@ lemma convex_acceptance (hρ : IsCoherentRisk ρ) : Convex ℝ {X : ι → ℝ |
 /-- Every nonnegative position is acceptable (monotonicity). -/
 lemma nonneg_mem (hρ : IsCoherentRisk ρ) {X : ι → ℝ} (hX : ∀ i, 0 ≤ X i) :
     X ∈ {X : ι → ℝ | ρ X ≤ 0} := by
-  show ρ X ≤ 0
+  change ρ X ≤ 0
   have h := hρ.monotone 0 X (by intro i; simpa using hX i)
   rwa [hρ.rho_zero] at h
 
@@ -101,19 +103,19 @@ def representingSet {ι : Type*} [Fintype ι] (ρ : (ι → ℝ) → ℝ) : Set 
   {q | (∀ i, 0 ≤ q i) ∧ (∑ i, q i = 1) ∧ ∀ Z ∈ {Y : ι → ℝ | ρ Y ≤ 0}, 0 ≤ ∑ i, q i * Z i}
 
 /-- **Coherent-risk representation (Artzner–Delbaen–Eber–Heath, finite state).** A coherent risk
-measure `ρ` is the supremum of expected loss over its representing probability measures: `ρ X` is the
-least upper bound of `{∑ qᵢ (-Xᵢ) | q ∈ representingSet ρ}`. The upper bound is cash-invariance; the
-least-upper-bound is the point-from-cone separation of the rejected position `X + (ρX - ε)·1` from the
-acceptance cone, normalised to a representing density. -/
+measure `ρ` is the supremum of expected loss over its representing probability measures: `ρ X` is
+the least upper bound of `{∑ qᵢ (-Xᵢ) | q ∈ representingSet ρ}`. The upper bound is cash-invariance;
+the least-upper-bound is the point-from-cone separation of the rejected position `X + (ρX - ε)·1`
+from the acceptance cone, normalised to a representing density. -/
 theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] {ρ : (ι → ℝ) → ℝ}
     (hρ : IsCoherentRisk ρ) (X : ι → ℝ) :
     IsLUB ((fun q ↦ ∑ i, q i * (- X i)) '' representingSet ρ) (ρ X) := by
   classical
   constructor
   · rintro y ⟨q, ⟨hq_nn, hq_sum, hq_rep⟩, rfl⟩
-    show ∑ i, q i * (- X i) ≤ ρ X
+    change ∑ i, q i * (- X i) ≤ ρ X
     have hmem : (fun i ↦ X i + ρ X) ∈ {Y : ι → ℝ | ρ Y ≤ 0} := by
-      show ρ (fun i ↦ X i + ρ X) ≤ 0
+      change ρ (fun i ↦ X i + ρ X) ≤ 0
       rw [hρ.cashInvariant X (ρ X)]; simp
     have h0 := hq_rep _ hmem
     have hexp : ∑ i, q i * (X i + ρ X) = (∑ i, q i * X i) + ρ X := by
@@ -131,7 +133,7 @@ theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] {ρ : (ι → ℝ) → ℝ}
     have hε_pos : 0 < ε := by rw [hε]; linarith
     set X' : ι → ℝ := fun i ↦ X i + (ρ X - ε) with hX'
     have hX'_notin : X' ∉ {Y : ι → ℝ | ρ Y ≤ 0} := by
-      show ¬ ρ X' ≤ 0
+      change ¬ ρ X' ≤ 0
       rw [hX', hρ.cashInvariant X (ρ X - ε), not_le]; linarith
     obtain ⟨p, hp_le, hp_pos⟩ := exists_separating_of_not_mem_cone
       {Y : ι → ℝ | ρ Y ≤ 0} hρ.convex_acceptance hρ.acceptance_closed hρ.cone hρ.zero_mem hX'_notin

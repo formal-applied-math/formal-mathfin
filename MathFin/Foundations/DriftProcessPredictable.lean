@@ -43,8 +43,9 @@ exceptional null set — and the theorem applies to the raw `natFiltration` dire
 * `driftSimpleProcess_eq_setIntegral` — the honest-integral bridge
   `driftSimpleProcess V t ω = ∫₀ᵗ ⇑V(s,ω) ds` (against `timeMeasure`).
 * `driftSimpleProcessLp` — the elementary drift packaged as an element of `E`.
-* `driftSimpleProcessLp_norm_le` — the energy bound `‖driftSimpleProcessLp V‖ ≤ T·‖simpleAssembly_T V‖`
-  (Tonelli → pointwise Cauchy–Schwarz → Fubini → the outer `∫₀ᵀ`).
+* `driftSimpleProcessLp_norm_le` — the energy bound
+  `‖driftSimpleProcessLp V‖ ≤ T·‖simpleAssembly_T V‖` (Tonelli → pointwise Cauchy–Schwarz → Fubini →
+  the outer `∫₀ᵀ`).
 * `driftProcessAssembled` — **the keystone**: `g ↦ (t ↦ ∫₀ᵗ g(s,·) ds)` as a CLM
   `E →L E`. Because it is a CLM into the predictable trim space `E`, it is linear,
   bounded (`‖·‖ ≤ T‖·‖`), and predictable — all for free. That routing through `E`,
@@ -102,7 +103,9 @@ theorem driftSimpleProcess_stronglyAdapted (hBmeas : ∀ t, Measurable (B t))
       (fun ω ↦ V.value p ω * (((min p.2 t : ℝ≥0) : ℝ) - ((min p.1 t : ℝ≥0) : ℝ))) := by
     intro p hp
     by_cases ht : p.1 ≤ t
-    · exact (((V.measurable_value p).mono ((natFiltration hBmeas).mono ht) le_rfl).stronglyMeasurable).mul
+    · exact
+        (((V.measurable_value p).mono ((natFiltration hBmeas).mono ht)
+        le_rfl).stronglyMeasurable).mul
         stronglyMeasurable_const
     · rw [not_le] at ht
       have h1 : min p.1 t = t := min_eq_right ht.le
@@ -148,8 +151,8 @@ theorem driftContinuousMod_isStronglyPredictable (T : ℝ≥0) (hBmeas : ∀ t, 
     driftSimpleProcess_isStronglyPredictable hBmeas
       ((approxSeq T hBmeas φ).choose n).val)
 
-/-- **The assembled drift is fixed-time `𝓕`-adapted.** At each `t`, `driftContinuousMod T φ t` is the
-pointwise `limUnder` of the elementary drifts `driftSimpleProcess (approxSeq φ)ₙ t`, each
+/-- **The assembled drift is fixed-time `𝓕`-adapted.** At each `t`, `driftContinuousMod T φ t` is
+the pointwise `limUnder` of the elementary drifts `driftSimpleProcess (approxSeq φ)ₙ t`, each
 `𝓕 t`-strongly-measurable (`driftSimpleProcess_stronglyAdapted`), and `StronglyMeasurable.limUnder`
 lifts adaptedness to the limit — the pointwise-in-time companion of
 `driftContinuousMod_isStronglyPredictable`, feeding the `IsExpQMartingale.adapted` field of the
@@ -297,20 +300,24 @@ theorem driftSimpleProcess_smul (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
 noncomputable def driftSimpleProcessLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration hBmeas)) :
     Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
-  (memLp_uncurry_driftSimpleProcess T hBmeas V).toLp (Function.uncurry (driftSimpleProcess hBmeas V))
+  (memLp_uncurry_driftSimpleProcess T hBmeas V).toLp
+      (Function.uncurry (driftSimpleProcess hBmeas V))
 
-/-- **The drift energy bound** — the relative `L²` bound that makes the drift a bounded operator
-on `E`: `‖driftSimpleProcessLp V‖ ≤ T·‖simpleAssembly_T V‖`. Tonelli turns the `E`-norm into
-`∫₀ᵀ∫_Ω (drift)² `; the pointwise Cauchy–Schwarz bound `(drift)² ≤ T·∫₀ᵀ(⇑V)²` and Fubini
-collapse the inner double integral to `T·‖simpleAssembly_T V‖²`; the outer `∫₀ᵀ` adds the last `T`. -/
-theorem driftSimpleProcessLp_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (V : TBoundedSP T hBmeas) :
-    ‖driftSimpleProcessLp (μ := μ) T hBmeas V.val‖ ≤ (T : ℝ) * ‖simpleAssembly_T (μ := μ) T hBmeas V‖ := by
+/-- **The drift energy bound** — the relative `L²` bound that makes the drift a bounded operator on
+`E`: `‖driftSimpleProcessLp V‖ ≤ T·‖simpleAssembly_T V‖`. Tonelli turns the `E`-norm into
+`∫₀ᵀ∫_Ω (drift)² `; the pointwise Cauchy–Schwarz bound `(drift)² ≤ T·∫₀ᵀ(⇑V)²` and Fubini collapse
+the inner double integral to `T·‖simpleAssembly_T V‖²`; the outer `∫₀ᵀ` adds the last `T`. -/
+theorem driftSimpleProcessLp_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (V : TBoundedSP T hBmeas) :
+    ‖driftSimpleProcessLp (μ := μ) T hBmeas V.val‖ ≤ (T : ℝ) *
+        ‖simpleAssembly_T (μ := μ) T hBmeas V‖ := by
   set 𝓕 := natFiltration (mΩ := mΩ) hBmeas
   have hpredD := driftSimpleProcess_isStronglyPredictable hBmeas V.val
   have hmemD := memLp_uncurry_driftSimpleProcess (μ := μ) T hBmeas V.val
   have hmemV := memLp_uncurry_trim_T (μ := μ) T hBmeas V.val
   -- both `E`-norms², via `lp_two_norm_sq` + `coeFn_toLp` + `integral_trim`, as product integrals.
-  have hnorm : ∀ (g : ℝ≥0 → Ω → ℝ) (hg : MemLp (Function.uncurry g) 2 (trimMeasure_T (μ := μ) T hBmeas)),
+  have hnorm : ∀ (g : ℝ≥0 → Ω → ℝ)
+      (hg : MemLp (Function.uncurry g) 2 (trimMeasure_T (μ := μ) T hBmeas)),
       StronglyMeasurable[𝓕.predictable] (Function.uncurry g) →
       ‖hg.toLp (Function.uncurry g)‖ ^ 2
         = ∫ z, (Function.uncurry g z) ^ 2 ∂((timeMeasure_T T).prod μ) := by
@@ -373,7 +380,7 @@ noncomputable def driftProcessLM (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)
     TBoundedSP T hBmeas →ₗ[ℝ] Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) where
   toFun V := driftSimpleProcessLp (μ := μ) T hBmeas V.val
   map_add' V W := by
-    show driftSimpleProcessLp (μ := μ) T hBmeas ((V + W).val) = _
+    change driftSimpleProcessLp (μ := μ) T hBmeas ((V + W).val) = _
     rw [Submodule.coe_add, driftSimpleProcessLp, driftSimpleProcessLp, driftSimpleProcessLp,
         ← MemLp.toLp_add (memLp_uncurry_driftSimpleProcess T hBmeas V.val)
           (memLp_uncurry_driftSimpleProcess T hBmeas W.val)]
@@ -381,7 +388,7 @@ noncomputable def driftProcessLM (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)
     funext z
     exact congrFun (driftSimpleProcess_add hBmeas V.val W.val z.1) z.2
   map_smul' c V := by
-    show driftSimpleProcessLp (μ := μ) T hBmeas ((c • V).val) = _
+    change driftSimpleProcessLp (μ := μ) T hBmeas ((c • V).val) = _
     rw [Submodule.coe_smul, driftSimpleProcessLp, driftSimpleProcessLp, RingHom.id_apply,
         ← MemLp.toLp_const_smul c (memLp_uncurry_driftSimpleProcess T hBmeas V.val)]
     congr 1
@@ -403,7 +410,8 @@ theorem driftProcessAssembled_simpleAssembly (T : ℝ≥0) (hBmeas : ∀ t, Meas
     (V : TBoundedSP T hBmeas) :
     driftProcessAssembled (μ := μ) T hBmeas (simpleAssembly_T (μ := μ) T hBmeas V)
       = driftSimpleProcessLp (μ := μ) T hBmeas V.val := by
-  rw [driftProcessAssembled, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
+  rw [driftProcessAssembled,
+      LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
     ⟨(T : ℝ), fun W ↦ driftSimpleProcessLp_norm_le T hBmeas W⟩]
   rfl
 

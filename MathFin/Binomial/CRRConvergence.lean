@@ -27,6 +27,8 @@ This file proves:
 3. **CRR probability limit**: `p_n → 1/2` as `n → ∞`. This implies
    `4 p_n (1 − p_n) → 1`, which gives the variance limit
    `n · σ² Δt · 4 p_n (1 − p_n) → σ² T`.
+4. **`p_n` is a probability at every `n`** (`crrProb_mem_Icc`), given no-arbitrage at each
+   `n ≥ 1` — which `binomialNoArb_crr` supplies when `|r| √T < σ`.
 
 ## Scope
 
@@ -131,10 +133,20 @@ lemma binomialNoArb_crr {r σ T : ℝ} (hT : 0 < T) (hrT : |r| * Real.sqrt T < �
       _ < σ * Real.sqrt (crrStep T n) := mul_lt_mul_of_pos_right hkey hsqrt
   rw [abs_lt] at hbound
   refine ⟨Real.exp_pos _, ?_, ?_⟩
-  · show Real.exp (-(σ * Real.sqrt (crrStep T n))) < Real.exp (r * crrStep T n)
+  · change Real.exp (-(σ * Real.sqrt (crrStep T n))) < Real.exp (r * crrStep T n)
     exact Real.exp_lt_exp.mpr hbound.1
-  · show Real.exp (r * crrStep T n) < Real.exp (σ * Real.sqrt (crrStep T n))
+  · change Real.exp (r * crrStep T n) < Real.exp (σ * Real.sqrt (crrStep T n))
     exact Real.exp_lt_exp.mpr hbound.2
+
+/-- **The CRR up-probability is a probability at every `n`**: by no-arbitrage for `n ≥ 1`, and at
+the degenerate `n = 0`, where no-arbitrage fails, because the up-probability is `0` there
+(`crrProb_zero`). -/
+lemma crrProb_mem_Icc {r σ T : ℝ}
+    (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n))
+    (n : ℕ) : crrProb r σ T n ∈ Set.Icc 0 1 := by
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · simp [crrProb_zero]
+  · exact Set.Ioo_subset_Icc_self (crrUpProb_mem_Ioo (hna n hn))
 
 /-! ### One-step risk-neutral martingale identity (algebraic, exact) -/
 
@@ -256,7 +268,8 @@ Formally: substitute `h_n = √(T/n)`. Then
   `p_n = (e^{r·h_n²} - e^{-σ·h_n}) / (e^{σ·h_n} - e^{-σ·h_n})`.
 
 Multiply numerator and denominator by `1/h_n`:
-  `p_n = [(e^{r·h_n²} - 1)/h_n − (e^{-σ·h_n} − 1)/h_n] / [(e^{σ·h_n} − 1)/h_n − (e^{-σ·h_n} − 1)/h_n]`.
+  `p_n = N / D` with `N = (e^{r·h_n²} - 1)/h_n − (e^{-σ·h_n} − 1)/h_n` and
+  `D = (e^{σ·h_n} − 1)/h_n − (e^{-σ·h_n} − 1)/h_n`.
 
 As `h_n → 0`:
   - `(e^{r h_n²} − 1)/h_n → 0`
@@ -338,7 +351,7 @@ theorem crrProb_tendsto_half {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     Real.sq_sqrt h_step_pos.le
   -- Show: crrProb r σ T n = [the composition output]
   -- Compose pulls back through `h_p_form` once we identify rT/n with r·(√(T/n))² etc.
-  show ((fun h : ℝ ↦
+  change ((fun h : ℝ ↦
           ((Real.exp (r * h^2) - 1) / h - (Real.exp (-(σ * h)) - 1) / h)
             / ((Real.exp (σ * h) - 1) / h - (Real.exp (-(σ * h)) - 1) / h))
           ∘ fun n : ℕ ↦ Real.sqrt (crrStep T n)) n = crrProb r σ T n

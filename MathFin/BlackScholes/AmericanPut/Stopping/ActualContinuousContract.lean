@@ -15,7 +15,9 @@ classical assembly, this theorem has no remaining boundary-smoothness premise.
 
 ## Result
 
-Public entry points include `canonicalPrice_continuousBoundaryPutSolution`, `zeroDividend_canonicalPrice_continuousBoundaryPutSolution`, `liuRange_canonicalPrice_continuousBoundaryPutSolution`.
+Public entry points include `canonicalPrice_continuousBoundaryPutSolution`,
+`zeroDividend_canonicalPrice_continuousBoundaryPutSolution`,
+`liuRange_canonicalPrice_continuousBoundaryPutSolution`.
 -/
 
 @[expose] public section
@@ -68,7 +70,7 @@ theorem zeroDividend_canonicalPrice_continuousBoundaryPutSolution {k : ℝ} (hk 
   canonicalPrice_continuousBoundaryPutSolution hk le_rfl hk.le
 
 theorem liuRange_canonicalPrice_continuousBoundaryPutSolution {k h : ℝ}
-    (hh : 0 ≤ h) (hliu : h+1 ≤ k) :
+    (hh : 0 ≤ h) (hliu : h + 1 ≤ k) :
     ContinuousBoundaryPutSolution k h (canonicalPrice k h) (canonicalLogBoundary k h) :=
   canonicalPrice_continuousBoundaryPutSolution (by linarith) hh (by linarith)
 

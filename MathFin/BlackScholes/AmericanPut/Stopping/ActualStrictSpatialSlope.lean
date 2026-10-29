@@ -41,7 +41,8 @@ theorem canonicalPrice_spatial_deriv_gt_exercise {k h x t : ℝ} (hk : 0 < k)
   have hstrict : 1-Real.exp x < canonicalStockPrice k h (Real.exp x) t :=
     (le_max_left _ _).trans_lt ((canonicalPrice_strict_continuation_iff hk.le x ht).mpr hBS)
   have hsec := (canonicalStockPrice_convexOn (h := h) hk.le t).slope_le_deriv hB.le
-    (Real.exp_pos x).le hBS (canonicalStockPrice_differentiableAt_spatial hk hh hhk ht (Real.exp_pos x))
+    (Real.exp_pos x).le hBS
+        (canonicalStockPrice_differentiableAt_spatial hk hh hhk ht (Real.exp_pos x))
   have hsecpos : -1 < slope (fun S => canonicalStockPrice k h S t) B (Real.exp x) := by
     simp only [slope,vsub_eq_sub,smul_eq_mul,← div_eq_inv_mul,hcontact]
     apply (lt_div_iff₀ (sub_pos.mpr hBS)).mpr

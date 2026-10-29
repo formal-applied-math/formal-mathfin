@@ -17,6 +17,10 @@ on:
     paths:
       - 'MathFin/**'
       - 'MathFin.lean'
+      - 'MathFinExamples/**'
+      - 'MathFinExamples.lean'
+      - 'MathFinTest/**'
+      - 'MathFinTest.lean'
       - 'lakefile.lean'
       - 'lake-manifest.json'
       - 'lean-toolchain'

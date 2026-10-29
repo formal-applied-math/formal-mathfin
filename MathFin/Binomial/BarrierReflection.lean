@@ -110,7 +110,8 @@ theorem binomial_maximal_distribution_card (a : ℤ) (ha : 0 < a) :
   -- The three hit-set slices, with the ≥-barrier slices' hit condition dissolved by IVT.
   have e1 : (univ.filter (fun ω : Fin n → Bool ↦ HitsLevel a ω ∧ a < walkPos ω n)).card
       = (univ.filter (fun ω : Fin n → Bool ↦ a < walkPos ω n)).card := by
-    rw [← Fintype.card_subtype, ← Fintype.card_subtype]; exact Fintype.card_congr (hitAboveEquiv a ha)
+    rw [← Fintype.card_subtype, ← Fintype.card_subtype]; exact Fintype.card_congr
+        (hitAboveEquiv a ha)
   have e2 : (univ.filter (fun ω : Fin n → Bool ↦ HitsLevel a ω ∧ walkPos ω n = a)).card
       = (univ.filter (fun ω : Fin n → Bool ↦ walkPos ω n = a)).card := by
     rw [← Fintype.card_subtype, ← Fintype.card_subtype]; exact Fintype.card_congr (hitAtEquiv a ha)

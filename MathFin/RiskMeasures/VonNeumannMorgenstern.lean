@@ -116,13 +116,13 @@ theorem mix_zero (p q : ι → ℝ) : mix 0 p q = q := by
 /-- Mixing a lottery with itself is a no-op, at any weight. -/
 theorem mix_self (α : ℝ) (p : ι → ℝ) : mix α p p = p := by
   funext i
-  show α * p i + (1 - α) * p i = p i
+  change α * p i + (1 - α) * p i = p i
   ring
 
 /-- Swapping the two lotteries complements the weight. -/
 theorem mix_comm (α : ℝ) (p q : ι → ℝ) : mix α p q = mix (1 - α) q p := by
   funext i
-  show α * p i + (1 - α) * q i = (1 - α) * q i + (1 - (1 - α)) * p i
+  change α * p i + (1 - α) * q i = (1 - α) * q i + (1 - (1 - α)) * p i
   ring
 
 /-- **Reduction of compound lotteries**: mixing `q` into a mixture of `p` and
@@ -131,7 +131,7 @@ resulting distribution matters" assumption. -/
 theorem mix_compound (α β : ℝ) (p q : ι → ℝ) :
     mix α (mix β p q) q = mix (α * β) p q := by
   funext i
-  show α * (β * p i + (1 - β) * q i) + (1 - α) * q i
+  change α * (β * p i + (1 - β) * q i) + (1 - α) * q i
       = α * β * p i + (1 - α * β) * q i
   ring
 
@@ -139,7 +139,7 @@ theorem mix_compound (α β : ℝ) (p q : ι → ℝ) :
 theorem mix_nonneg {α : ℝ} (hα : 0 ≤ α) (hα1 : α ≤ 1) {p q : ι → ℝ}
     (hp : ∀ i, 0 ≤ p i) (hq : ∀ i, 0 ≤ q i) (i : ι) :
     0 ≤ mix α p q i := by
-  show 0 ≤ α * p i + (1 - α) * q i
+  change 0 ≤ α * p i + (1 - α) * q i
   exact add_nonneg (mul_nonneg hα (hp i)) (mul_nonneg (by linarith) (hq i))
 
 /-- A mixture of probability vectors is a probability vector. Together with

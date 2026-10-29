@@ -16,7 +16,8 @@ of expected generator integrals for tests touching from above or below.
 
 ## Result
 
-Public entry points include `brownianLogState_adapted`, `rawRectangleExitRule`, `rawRectangleExitRule_time`, `canonicalDiscountedPlane`.
+Public entry points include `brownianLogState_adapted`, `rawRectangleExitRule`,
+`rawRectangleExitRule_time`, `canonicalDiscountedPlane`.
 -/
 
 @[expose] public section
@@ -111,10 +112,10 @@ theorem canonicalPrice_rectangle_upper_test {k h : ℝ} (hk : 0 ≤ k)
     {x R : ℝ} {T δ : ℝ≥0} (hδT : δ ≤ T)
     (hrect : InContinuationRectangle k h x T R δ)
     {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) (hc : HasCompactSupport G)
-    (h0 : G (0,0) = canonicalPrice k h x (T : ℝ))
+    (h0 : G (0, 0) = canonicalPrice k h x (T : ℝ))
     (hupper : ∀ᵐ ω ∂gaussianLimit,
       let s := (rawRectangleExitRule k h x R δ).time ω
-      canonicalDiscountedPrice k h x T s ω ≤ G (s,brownian s ω)) :
+      canonicalDiscountedPrice k h x T s ω ≤ G (s, brownian s ω)) :
     0 ≤ ∫ ω, planeDrift G ((rawRectangleExitRule k h x R δ).time ω) ω ∂gaussianLimit := by
   let θ := rawRectangleExitRule k h x R δ
   obtain ⟨A,hA⟩ := hc.exists_bound_of_continuous hG.continuous
@@ -129,10 +130,10 @@ theorem canonicalPrice_rectangle_lower_test {k h : ℝ} (hk : 0 ≤ k)
     {x R : ℝ} {T δ : ℝ≥0} (hδT : δ ≤ T)
     (hrect : InContinuationRectangle k h x T R δ)
     {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) (hc : HasCompactSupport G)
-    (h0 : G (0,0) = canonicalPrice k h x (T : ℝ))
+    (h0 : G (0, 0) = canonicalPrice k h x (T : ℝ))
     (hlower : ∀ᵐ ω ∂gaussianLimit,
       let s := (rawRectangleExitRule k h x R δ).time ω
-      G (s,brownian s ω) ≤ canonicalDiscountedPrice k h x T s ω) :
+      G (s, brownian s ω) ≤ canonicalDiscountedPrice k h x T s ω) :
     (∫ ω, planeDrift G ((rawRectangleExitRule k h x R δ).time ω) ω ∂gaussianLimit) ≤ 0 := by
   let θ := rawRectangleExitRule k h x R δ
   obtain ⟨A,hA⟩ := hc.exists_bound_of_continuous hG.continuous
@@ -149,7 +150,7 @@ theorem canonicalPrice_rectangle_upper_test_of_patch {k h : ℝ} (hk : 0 ≤ k)
     {x R : ℝ} (hR : 0 < R) {T δ : ℝ≥0} (hδ : 0 < δ) (hδT : δ ≤ T)
     (hrect : InContinuationRectangle k h x T R δ)
     {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) (hc : HasCompactSupport G)
-    (h0 : G (0,0) = canonicalPrice k h x (T : ℝ))
+    (h0 : G (0, 0) = canonicalPrice k h x (T : ℝ))
     (hpatch : ∀ z ∈ driverRectangle k h R δ, canonicalDiscountedPlane k h x T z ≤ G z) :
     0 ≤ ∫ ω, planeDrift G ((rawRectangleExitRule k h x R δ).time ω) ω ∂gaussianLimit := by
   apply canonicalPrice_rectangle_upper_test hk hδT hrect hG hc h0
@@ -163,7 +164,7 @@ theorem canonicalPrice_rectangle_lower_test_of_patch {k h : ℝ} (hk : 0 ≤ k)
     {x R : ℝ} (hR : 0 < R) {T δ : ℝ≥0} (hδ : 0 < δ) (hδT : δ ≤ T)
     (hrect : InContinuationRectangle k h x T R δ)
     {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) (hc : HasCompactSupport G)
-    (h0 : G (0,0) = canonicalPrice k h x (T : ℝ))
+    (h0 : G (0, 0) = canonicalPrice k h x (T : ℝ))
     (hpatch : ∀ z ∈ driverRectangle k h R δ, G z ≤ canonicalDiscountedPlane k h x T z) :
     (∫ ω, planeDrift G ((rawRectangleExitRule k h x R δ).time ω) ω ∂gaussianLimit) ≤ 0 := by
   apply canonicalPrice_rectangle_lower_test hk hδT hrect hG hc h0

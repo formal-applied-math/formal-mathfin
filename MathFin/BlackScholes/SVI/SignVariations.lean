@@ -127,7 +127,8 @@ theorem signVariations_eq_pos_roots (P : ℝ[X]) (hs : P.Splits) :
     P.signVariations = P.roots.countP (0 < ·) := by
   have hpos := P.roots_countP_pos_le_signVariations
   have hneg := (P.comp (-X)).roots_countP_pos_le_signVariations
-  simp only [roots_comp_neg_X, Multiset.countP_map, neg_pos, ← Multiset.countP_eq_card_filter] at hneg
+  simp only
+      [roots_comp_neg_X, Multiset.countP_map, neg_pos, ← Multiset.countP_eq_card_filter] at hneg
   have hbound := signVariations_pair_bound P
   have hsum := root_sign_partition P.roots
   rw [count_roots, rootMultiplicity_eq_natTrailingDegree', ← hs.natDegree_eq_card_roots] at hsum
