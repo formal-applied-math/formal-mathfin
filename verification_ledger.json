@@ -2903,10 +2903,10 @@
     },
     "mf-marshall-olkin-default-covariance": {
       "benchmark_file": "credit.json",
-      "date": "2026-10-23",
-      "elapsed_s": 4.8,
-      "input_hash": "4a78a8f78cbfd00928ca69b1568bba4bc1894e35ccc5f74095d1588f78b2ef53",
-      "verified_at_commit": "27aa365"
+      "date": "2026-10-29",
+      "elapsed_s": 10.7,
+      "input_hash": "081da9eab4838aeedbdb273161105b3e1da242ea835c45f07962448b08224882",
+      "verified_at_commit": "ccad283"
     },
     "mf-merton-1973-no-early-exercise": {
       "benchmark_file": "black_scholes.json",
