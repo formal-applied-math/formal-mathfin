@@ -1400,6 +1400,15 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoIntegralProcessLocalMartingaleGeneral.exists_continuous_localMartingale_modification
 
+-- The Itô integral of an unbounded continuous adapted integrand
+-- (`Foundations/ItoIntegralLocalisedLocalMartingale.lean`): `localItoIntegral` is, up to
+-- indistinguishability on `[0, T]`, a continuous `IsLocalMartingale` for the null-augmented
+-- Brownian filtration, localised by the exit times of `σ` (closed hit set, so stopping times of
+-- the raw filtration). Up to `exitTime σ N` it is the clipped integral `M^N`, a martingale.
+/-- info: 'MathFin.ItoIntegralLocalised.exists_continuous_localMartingale_localItoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoIntegralLocalised.exists_continuous_localMartingale_localItoIntegral
+
 -- The [0,∞) crown (`Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean`): the per-horizon
 -- continuous local martingales are glued — horizon consistency (`itoProcessL2Inf_eq_itoProcessCLM`,
 -- itself resting on the `[0,T]` `SimpleProcess` clamp) makes each a modification of the SAME
