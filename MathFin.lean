@@ -608,6 +608,8 @@ import MathFin.Portfolio.RiskParityFOC
 import MathFin.Portfolio.BlackLittermanND
 -- Convex QP KKT sufficiency/uniqueness and a feasible-ratio-test step bound
 import MathFin.Portfolio.ConvexQPKKT
+-- PSD-form Cauchy–Schwarz and the constrained-Sharpe tradeoff form
+import MathFin.Portfolio.PosSemidefCauchySchwarz
 
 -- Performance
 import MathFin.Performance.Ratios

@@ -887,6 +887,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.indepFun_of_purged (MathFin/Performance/PurgedCV.lean): lt_or_lt_of_not_overlapsTest turns survival of purging into strict separation of the spans, and IsSpanLabel.indepFun_of_le applies Mathlib's weak Markov property IsPreBrownianReal.indepFun_shift. SCOPE: labels are measurable functions of the increment family (B u − B s)_{s,u ∈ span} (IsSpanLabel) over deterministic spans; the conclusion is pairwise independence; features, embargo and joint independence of folds are not treated."
       }
+    },
+    {
+      "id": "mf-psd-cauchy-schwarz",
+      "name": "Cauchy-Schwarz for Positive Semidefinite Forms",
+      "description": "|x ⬝ᵥ (Sig *ᵥ y)| ≤ √(x ⬝ᵥ (Sig *ᵥ x)) · √(y ⬝ᵥ (Sig *ᵥ y)) for Sig positive semidefinite — the Cauchy–Schwarz inequality for the semi-inner product induced by a PSD form. Two-sided despite degeneracy. Re-export of MathFin.posSemidef_cauchySchwarz.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Portfolio.PosSemidefCauchySchwarz\n\nopen Matrix MathFin\n\ntheorem posSemidef_cauchySchwarz_thm {ι : Type*} [Fintype ι] (Sig : Matrix ι ι ℝ)\n    (hpsd : Sig.PosSemidef) (x y : ι → ℝ) :\n    |x ⬝ᵥ (Sig *ᵥ y)| ≤ Real.sqrt (x ⬝ᵥ (Sig *ᵥ x)) * Real.sqrt (y ⬝ᵥ (Sig *ᵥ y)) :=\n  MathFin.posSemidef_cauchySchwarz hpsd x y\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Cauchy–Schwarz inequality for semi-inner products (Horn & Johnson, Matrix Analysis); application: the tradeoff form of the Markowitz mean-variance problem (Merton 1972)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.posSemidef_cauchySchwarz (MathFin/Portfolio/PosSemidefCauchySchwarz.lean), completed-square proof with the degenerate branch forcing the cross term to zero. SCOPE: the bound is two-sided; no lower bound on the bilinear form is claimed separately, and no KKT necessity is involved."
+      }
     }
   ]
 }

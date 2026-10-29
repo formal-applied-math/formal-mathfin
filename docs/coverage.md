@@ -291,6 +291,29 @@ Three `full` entries in `BlackScholes/SABRImpliedVol.lean`, on Hagan–Kumar–L
 All three are about the printed formulas. Nothing is derived from the SABR SDE, and there is no
 error bound against the model's implied volatility (issue #100's `O(T²)` statement stays open).
 
+### PSD-form Cauchy–Schwarz and the constrained-Sharpe tradeoff (2026-10-27)
+
+One entry added, `mf-psd-cauchy-schwarz` (`full`). Corpus 658 → 659.
+
+`Portfolio/PosSemidefCauchySchwarz.lean` proves the Cauchy–Schwarz inequality for the
+semi-inner product `⟨u, v⟩ = u ⬝ᵥ (Sig *ᵥ v)` induced by a positive semidefinite matrix
+form (`posSemidef_cauchySchwarz`): `|x ⬝ᵥ (Sig *ᵥ y)| ≤ √(x ⬝ᵥ (Sig *ᵥ x)) · √(y ⬝ᵥ (Sig *ᵥ y))`.
+The form is degenerate when `Sig` is singular, but the bound is two-sided: the completed
+square on the quadratic form of `Sig` at `x − t • y` is nonnegative for every real `t`;
+the branch `y ⬝ᵥ (Sig *ᵥ y) = 0` forces `x ⬝ᵥ (Sig *ᵥ y) = 0` (either sign of the cross
+term drives the square negative once `t` passes `X/(2Q)` on its own side), the other
+evaluates at `t = Q/Y` to collapse the square to `Q² ≤ X·Y`. The application is the
+tradeoff form of the Markowitz mean-variance problem (`pricedReturn_le_of_kkt`, stated
+over the priced-return objective `pricedReturn μ t₁ Sig x1 y` — return minus the price of
+risk `t₁·√(x1 ⬝ᵥ (Sig *ᵥ x1))` charged per unit of the holder's own risk): a
+KKT point — stationarity, dual feasibility, complementary slackness — of
+`min −μ ⬝ᵥ x + (t₁/2) · x ⬝ᵥ (Sig *ᵥ x)` with `Sig` PSD and `t₁ > 0` maximizes the priced
+return over the whole feasible set. As in `ConvexQPKKT`'s sufficiency, `x1`'s own
+feasibility is not assumed (complementary slackness alone forces `u k = 0` where `x1`
+violates the constraint). KKT necessity is not claimed. A third public theorem,
+`quad_expansion_add_smul`, is the bilinear split of a quadratic form at `u + k • v`
+(no symmetry needed).
+
 ### Every module connected: the coherence pass (2026-10-21)
 
 A coherence pass found 41 modules that imported nothing from the library and that nothing

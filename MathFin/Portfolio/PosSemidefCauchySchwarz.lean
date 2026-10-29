@@ -1,0 +1,237 @@
+/-
+Copyright (c) 2026 Yang Ye. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yang Ye
+-/
+module
+
+public import Mathlib
+public import MathFin.Portfolio.ConvexQPKKT
+
+/-!
+# Cauchy–Schwarz for positive semidefinite forms, and constrained-Sharpe maximization
+
+The Cauchy–Schwarz inequality for the semi-inner product `⟨u, v⟩ = u ⬝ᵥ (Sig *ᵥ v)`
+induced by a positive semidefinite matrix form `Sig` over `ι → ℝ`, and its
+application to the tradeoff form of the Markowitz mean-variance problem. Three
+public theorems:
+
+* **PSD-form Cauchy–Schwarz** (`posSemidef_cauchySchwarz`): for `Sig` positive
+  semidefinite, `|x ⬝ᵥ (Sig *ᵥ y)| ≤ √(x ⬝ᵥ (Sig *ᵥ x)) · √(y ⬝ᵥ (Sig *ᵥ y))`.
+  This is the classical Cauchy–Schwarz inequality for the semi-inner product
+  `⟨u, v⟩ = u ⬝ᵥ (Sig *ᵥ v)` induced by a PSD form (Horn & Johnson, *Matrix
+  Analysis*, the Cauchy–Schwarz inequality for semi-inner products). The form
+  is degenerate when `Sig` is singular (it is a semi-inner product, not an
+  inner product), but the bound is two-sided. The proof completes the square on
+  the quadratic form of `Sig` at `x - t • y`, which is nonnegative for every
+  real `t` by PSD-ness, and case-splits on `y ⬝ᵥ (Sig *ᵥ y) = 0`: in the
+  degenerate branch the square reads `0 ≤ X - 2t·Q` for all `t`, forcing
+  `Q = 0` (either sign of `Q` drives the square negative once `t` passes
+  `X/(2Q)` on its own side);
+  in the nondegenerate branch, evaluating at `t = Q / Y` collapses the square
+  to `0 ≤ X - Q²/Y`, i.e. `Q² ≤ X·Y`, which `X, Y ≥ 0` turn into the
+  square-root bound.
+* **Bilinearity** (`quad_expansion_add_smul`): the quadratic form of *any*
+  matrix (symmetry not needed) at `u + k • v` splits into the two square terms
+  and the two cross terms — the algebraic engine behind the completed square.
+* **Price-of-risk tradeoff maximization** (`pricedReturn_le_of_kkt`, over the
+  priced-return objective `pricedReturn μ t₁ Sig x1 y`, the return with the
+  price of risk `t₁ · √(x1 ⬝ᵥ (Sig *ᵥ x1))` charged per unit of the holder's
+  own risk): the tradeoff form of the Markowitz mean-variance problem. If
+  `x1` satisfies
+  the KKT stationarity, dual-feasibility and complementary-slackness conditions
+  of the risk-penalized QP `min -μ ⬝ᵥ x + (t₁/2) · x ⬝ᵥ (Sig *ᵥ x)` (with `Sig`
+  PSD and `t₁ > 0`; the KKT machinery is that of `MathFin.Portfolio.ConvexQPKKT`),
+  then for every feasible competitor `y`:
+  `μ ⬝ᵥ y - t₁·√(x1 ⬝ᵥ (Sig *ᵥ x1)) · √(y ⬝ᵥ (Sig *ᵥ y)) ≤ μ ⬝ᵥ x1 - t₁ · (x1 ⬝ᵥ (Sig *ᵥ x1))`.
+  Route: stationarity rearranged to `μ = t₁ • Sig *ᵥ x1 + ∑ u k • a k` turns the
+  return gap into `t₁ · (Q - X)` plus the complementary-slackness terms
+  (nonpositive at any feasible `y`, by
+  `kkt_complementary_term_nonneg`), and the bilinear term is bounded by the
+  PSD-form Cauchy–Schwarz inequality above.
+
+No claim is made here that an optimal solution is a KKT point (KKT necessity);
+this module certifies candidates, matching the scope of
+`MathFin.Portfolio.ConvexQPKKT`.
+-/
+
+@[expose] public section
+
+namespace MathFin
+
+open Matrix
+
+variable {ι : Type*} [Fintype ι] {Sig : Matrix ι ι ℝ}
+
+/-- **Bilinearity of the quadratic form** at `u + k • v`: the quadratic form of
+any matrix (symmetry not needed) splits into the two square terms and the two
+cross terms. -/
+lemma quad_expansion_add_smul (u v : ι → ℝ) (k : ℝ) :
+    (u + k • v) ⬝ᵥ (Sig *ᵥ (u + k • v))
+      = u ⬝ᵥ (Sig *ᵥ u) + k * (u ⬝ᵥ (Sig *ᵥ v) + v ⬝ᵥ (Sig *ᵥ u))
+        + k ^ 2 * (v ⬝ᵥ (Sig *ᵥ v)) := by
+  simp only [Matrix.mulVec_add, Matrix.mulVec_smul, add_dotProduct, dotProduct_add,
+    dotProduct_smul, smul_dotProduct, smul_eq_mul]
+  ring
+
+/-- **Cauchy–Schwarz for a positive semidefinite bilinear form**: for `Sig` PSD,
+
+`|x ⬝ᵥ (Sig *ᵥ y)| ≤ √(x ⬝ᵥ (Sig *ᵥ x)) · √(y ⬝ᵥ (Sig *ᵥ y))`.
+
+The form `⟨u, v⟩ = u ⬝ᵥ (Sig *ᵥ v)` is a semi-inner product only (degenerate
+when `Sig` is singular), but the bound is two-sided. Proof: the quadratic form
+of `Sig` is nonnegative at `x − t • y` for every real `t` (completing the
+square); if `y ⬝ᵥ (Sig *ᵥ y) = 0` this reads `0 ≤ X − 2t·Q` for all `t`, which
+forces `Q = 0` (either sign of `Q` drives the square negative once `t` passes
+`X/(2Q)` on its own side); otherwise evaluating at `t = Q / Y` collapses the
+completed square to `0 ≤ X − Q²/Y`, i.e. `Q² ≤ X·Y`, and `X, Y ≥ 0` turn that
+into the square-root bound. -/
+theorem posSemidef_cauchySchwarz (hpsd : Sig.PosSemidef) (x y : ι → ℝ) :
+    |x ⬝ᵥ (Sig *ᵥ y)| ≤
+      Real.sqrt (x ⬝ᵥ (Sig *ᵥ x)) * Real.sqrt (y ⬝ᵥ (Sig *ᵥ y)) := by
+  have hC : Sig.IsSymm := isHermitian_iff_isSymm.mp hpsd.isHermitian
+  have hX : 0 ≤ x ⬝ᵥ (Sig *ᵥ x) := by
+    simpa using hpsd.dotProduct_mulVec_nonneg x
+  -- the completed square: the quadratic form of `Sig` at `x - t • y`
+  have key : ∀ t : ℝ, 0 ≤
+      x ⬝ᵥ (Sig *ᵥ x) - 2 * t * (x ⬝ᵥ (Sig *ᵥ y)) + t ^ 2 * (y ⬝ᵥ (Sig *ᵥ y)) := by
+    intro t
+    have h0 : 0 ≤ (x + (-t) • y) ⬝ᵥ (Sig *ᵥ (x + (-t) • y)) := by
+      simpa using hpsd.dotProduct_mulVec_nonneg (x + (-t) • y)
+    have h0' : (x + (-t) • y) ⬝ᵥ (Sig *ᵥ (x + (-t) • y))
+        = x ⬝ᵥ (Sig *ᵥ x) - 2 * t * (x ⬝ᵥ (Sig *ᵥ y))
+          + t ^ 2 * (y ⬝ᵥ (Sig *ᵥ y)) := by
+      rw [quad_expansion_add_smul x y (-t), dotProduct_mulVec_symm_comm hC y x]
+      ring
+    rw [h0'] at h0
+    exact h0
+  by_cases hY0 : y ⬝ᵥ (Sig *ᵥ y) = 0
+  · -- degenerate: `Y = 0`; the completed square reads `0 ≤ X − 2t·Q` for all
+    -- `t`, which forces `Q = 0` (either sign of `Q` kills the square)
+    have hQ0 : x ⬝ᵥ (Sig *ᵥ y) = 0 := by
+      by_contra hc
+      rcases lt_or_gt_of_ne hc with hQneg | hQpos
+      · have hneg := key (x ⬝ᵥ (Sig *ᵥ x) / (2 * x ⬝ᵥ (Sig *ᵥ y)) - 1)
+        rw [hY0] at hneg
+        simp only [mul_zero, add_zero] at hneg
+        have hnz : (2:ℝ) * x ⬝ᵥ (Sig *ᵥ y) ≠ 0 := by linarith
+        have hexp : 2 * ((x ⬝ᵥ (Sig *ᵥ x) / (2 * x ⬝ᵥ (Sig *ᵥ y)) - 1)
+            * (x ⬝ᵥ (Sig *ᵥ y))) = x ⬝ᵥ (Sig *ᵥ x) - 2 * x ⬝ᵥ (Sig *ᵥ y) := by
+          field_simp
+        linarith
+      · have hneg := key (x ⬝ᵥ (Sig *ᵥ x) / (2 * x ⬝ᵥ (Sig *ᵥ y)) + 1)
+        rw [hY0] at hneg
+        simp only [mul_zero, add_zero] at hneg
+        have hnz : (2:ℝ) * x ⬝ᵥ (Sig *ᵥ y) ≠ 0 := by linarith
+        have hexp : 2 * ((x ⬝ᵥ (Sig *ᵥ x) / (2 * x ⬝ᵥ (Sig *ᵥ y)) + 1)
+            * (x ⬝ᵥ (Sig *ᵥ y))) = x ⬝ᵥ (Sig *ᵥ x) + 2 * x ⬝ᵥ (Sig *ᵥ y) := by
+          field_simp
+        linarith
+    rw [hY0, Real.sqrt_zero, mul_zero, hQ0]
+    exact abs_zero.le
+  · -- nondegenerate: evaluate the completed square at `t = Q / Y`
+    have hYne : y ⬝ᵥ (Sig *ᵥ y) ≠ 0 := fun h => hY0 h
+    have hYpos : (0:ℝ) < y ⬝ᵥ (Sig *ᵥ y) := by
+      have hy : y ⬝ᵥ (Sig *ᵥ y) ≥ 0 := by
+        simpa using hpsd.dotProduct_mulVec_nonneg y
+      exact lt_of_le_of_ne hy (fun hc => hYne hc.symm)
+    have hQt := key (x ⬝ᵥ (Sig *ᵥ y) / y ⬝ᵥ (Sig *ᵥ y))
+    have h2q : 2 * (x ⬝ᵥ (Sig *ᵥ y) / y ⬝ᵥ (Sig *ᵥ y)) * (x ⬝ᵥ (Sig *ᵥ y))
+        = 2 * (x ⬝ᵥ (Sig *ᵥ y)) ^ 2 / (y ⬝ᵥ (Sig *ᵥ y)) := by
+      field_simp
+    have ht2 : ((x ⬝ᵥ (Sig *ᵥ y)) / (y ⬝ᵥ (Sig *ᵥ y))) ^ 2 * (y ⬝ᵥ (Sig *ᵥ y))
+        = (x ⬝ᵥ (Sig *ᵥ y)) ^ 2 / (y ⬝ᵥ (Sig *ᵥ y)) := by
+      field_simp
+    rw [h2q, ht2] at hQt
+    -- `field_simp` uses `hYpos`'s positivity to clear the `1 / Y` denominators
+    -- without flipping the inequalities (the sign of `Y` is not otherwise used)
+    have hsq : (x ⬝ᵥ (Sig *ᵥ y)) ^ 2 ≤ (x ⬝ᵥ (Sig *ᵥ x)) * (y ⬝ᵥ (Sig *ᵥ y)) := by
+      field_simp at hQt ⊢
+      linarith
+    have habs : |x ⬝ᵥ (Sig *ᵥ y)|
+        ≤ Real.sqrt ((x ⬝ᵥ (Sig *ᵥ x)) * (y ⬝ᵥ (Sig *ᵥ y))) := by
+      rw [← Real.sqrt_sq_eq_abs]
+      exact Real.sqrt_le_sqrt hsq
+    rw [← Real.sqrt_mul hX (y ⬝ᵥ (Sig *ᵥ y))]
+    exact habs
+
+/-- The **priced return** of `y` at the price of risk `t₁ · √(x1 ⬝ᵥ (Sig *ᵥ x1))`
+calibrated on the benchmark `x1`: the return `μ ⬝ᵥ y` minus the charge
+`t₁ · √(x1 ⬝ᵥ (Sig *ᵥ x1)) · √(y ⬝ᵥ (Sig *ᵥ y))` — the price `t₁ · √(x1 ⬝ᵥ (Sig *ᵥ x1))`
+per unit of the holder's own risk `√(y ⬝ᵥ (Sig *ᵥ y))`. Maximizing it over a
+feasible set is the risk-adjusted (tradeoff) form of portfolio selection. -/
+noncomputable def pricedReturn (μ : ι → ℝ) (t₁ : ℝ) (Sig : Matrix ι ι ℝ)
+    (x1 y : ι → ℝ) : ℝ :=
+  μ ⬝ᵥ y - t₁ * Real.sqrt (x1 ⬝ᵥ (Sig *ᵥ x1)) * Real.sqrt (y ⬝ᵥ (Sig *ᵥ y))
+
+/-- **The price-of-risk tradeoff form of the Markowitz mean-variance problem**
+(the risk-adjusted-return half of the constrained-Sharpe-ratio claim): if `x1`
+satisfies the KKT stationarity, dual feasibility and complementary-slackness
+conditions of the risk-penalized QP
+`min −μ ⬝ᵥ x + (t₁/2) · x ⬝ᵥ (Sig *ᵥ x)`, with `Sig` positive semidefinite and
+`t₁ > 0`, then for every feasible competitor `y`
+
+`pricedReturn μ t₁ Sig x1 y ≤ pricedReturn μ t₁ Sig x1 x1`,
+
+i.e. `x1` maximizes the priced return over the whole feasible set: the charge
+`t₁ · √(x1 ⬝ᵥ (Sig *ᵥ x1)) · √(y ⬝ᵥ (Sig *ᵥ y))` is proportional to the
+competitor's own risk, at a price calibrated on `x1`. Route:
+stationarity rearranged to `μ = t₁ • Sig *ᵥ x1 + ∑ u k • a k` turns the return
+gap into `t₁ · (Q − X)` plus the complementary-slackness terms (nonpositive at
+any feasible `y`), and the bilinear term is bounded by Cauchy–Schwarz for the
+PSD form. Note `x1`'s own primal feasibility is *not* assumed: complementary
+slackness alone forces `u k = 0` at every `k` where `a k ⬝ᵥ x1 > b k`, exactly
+as for `kkt_sufficient` in `MathFin.Portfolio.ConvexQPKKT`. -/
+theorem pricedReturn_le_of_kkt {ι κ : Type*} [Fintype ι] [Fintype κ]
+    {μ : ι → ℝ} {Sig : Matrix ι ι ℝ} (hpsd : Sig.PosSemidef) {t₁ : ℝ} (ht₁ : 0 < t₁)
+    {a : κ → ι → ℝ} {b : κ → ℝ} {x1 : ι → ℝ} {u : κ → ℝ}
+    (hu_nonneg : ∀ k, 0 ≤ u k)
+    (hstat : -μ + t₁ • Sig *ᵥ x1 = -∑ k, u k • a k)
+    (hcs : ∀ k, u k * (a k ⬝ᵥ x1 - b k) = 0)
+    {y : ι → ℝ} (hfeasy : ∀ k, a k ⬝ᵥ y ≤ b k) :
+    pricedReturn μ t₁ Sig x1 y ≤ pricedReturn μ t₁ Sig x1 x1 := by
+  have hC : Sig.IsSymm := isHermitian_iff_isSymm.mp hpsd.isHermitian
+  have hX : 0 ≤ x1 ⬝ᵥ (Sig *ᵥ x1) := by
+    simpa using hpsd.dotProduct_mulVec_nonneg x1
+  -- unfold the priced returns; at the benchmark itself the charge is `t₁ · X`
+  simp only [pricedReturn]
+  conv_rhs => rw [mul_assoc]
+  rw [Real.mul_self_sqrt hX]
+  -- stationarity dot-product identity against any vector `z`
+  have hstatdot : ∀ z : ι → ℝ,
+      μ ⬝ᵥ z = t₁ * (x1 ⬝ᵥ (Sig *ᵥ z)) + ∑ k, u k * (a k ⬝ᵥ z) := by
+    intro z
+    have h2 : z ⬝ᵥ (-μ + t₁ • Sig *ᵥ x1) = z ⬝ᵥ (-∑ k, u k • a k) := by rw [hstat]
+    rw [dotProduct_add, dotProduct_neg, dotProduct_comm z μ, dotProduct_smul,
+      dotProduct_mulVec_symm_comm hC z x1, dotProduct_neg, dotProduct_sum] at h2
+    have h3 : ∀ k, z ⬝ᵥ (u k • a k) = u k * (a k ⬝ᵥ z) := by
+      intro k
+      rw [dotProduct_smul, dotProduct_comm z (a k)]
+      simp only [smul_eq_mul]
+    simp only [h3, smul_eq_mul] at h2
+    linarith
+  have hstaty := hstatdot y
+  have hstatx := hstatdot x1
+  -- return gap = t₁ (Q − X) + the complementary-slackness terms
+  have hgap : μ ⬝ᵥ y - μ ⬝ᵥ x1
+      = t₁ * (x1 ⬝ᵥ (Sig *ᵥ y) - x1 ⬝ᵥ (Sig *ᵥ x1))
+        + (∑ k, u k * (a k ⬝ᵥ y) - ∑ k, u k * (a k ⬝ᵥ x1)) := by
+    rw [hstaty, hstatx]
+    ring
+  have hcsle : 0 ≤ ∑ k, u k * (a k ⬝ᵥ x1 - a k ⬝ᵥ y) :=
+    kkt_complementary_term_nonneg hu_nonneg hcs hfeasy
+  have hsumsplit : ∑ k, u k * (a k ⬝ᵥ y) - ∑ k, u k * (a k ⬝ᵥ x1)
+      = -∑ k, u k * (a k ⬝ᵥ x1 - a k ⬝ᵥ y) := by
+    rw [← Finset.sum_neg_distrib, ← Finset.sum_sub_distrib]
+    exact Finset.sum_congr rfl fun k _ => by ring
+  -- Cauchy–Schwarz bounds the bilinear term; assemble
+  have hQle : x1 ⬝ᵥ (Sig *ᵥ y)
+      ≤ Real.sqrt (x1 ⬝ᵥ (Sig *ᵥ x1)) * Real.sqrt (y ⬝ᵥ (Sig *ᵥ y)) :=
+    (le_abs_self _).trans (posSemidef_cauchySchwarz hpsd x1 y)
+  have e1 : t₁ * (x1 ⬝ᵥ (Sig *ᵥ y)) ≤ t₁ * (Real.sqrt (x1 ⬝ᵥ (Sig *ᵥ x1))
+      * Real.sqrt (y ⬝ᵥ (Sig *ᵥ y))) := mul_le_mul_of_nonneg_left hQle ht₁.le
+  have e3 : t₁ * (x1 ⬝ᵥ (Sig *ᵥ y) - x1 ⬝ᵥ (Sig *ᵥ x1))
+      = t₁ * (x1 ⬝ᵥ (Sig *ᵥ y)) - t₁ * (x1 ⬝ᵥ (Sig *ᵥ x1)) := by ring
+  linarith [hgap, hsumsplit, hcsle, e1, e3]
+
+end MathFin

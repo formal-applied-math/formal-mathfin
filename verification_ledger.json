@@ -3251,6 +3251,13 @@
       "input_hash": "e624d8137aa4217859d79038cc98af1097e686fff052cb4844794e6f71cbf026",
       "verified_at_commit": "331e4a2"
     },
+    "mf-psd-cauchy-schwarz": {
+      "benchmark_file": "portfolio_and_performance.json",
+      "date": "2026-10-29",
+      "elapsed_s": 5.3,
+      "input_hash": "777e62bfda2b519d0487077cc59fc952e26a0400bc92dcaa363fcf92086d366b",
+      "verified_at_commit": "cc9286a"
+    },
     "mf-purged-cv-no-leakage-brownian": {
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-10-29",
