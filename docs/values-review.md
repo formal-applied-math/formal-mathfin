@@ -190,7 +190,7 @@ Every finding acted on was confirmed against the code.
 
 ### Evidence
 
-`lake build` is green through the daemon's startup build, including `MathFinExamples`. `AxiomAuditGen` is regenerated. `formalization.yaml` is fresh. The Python gates pass. The ledger re-verified every entry whose inputs changed (EVIDENCE-LEDGER).
+`lake build` is green through the daemon's startup build, including `MathFinExamples`. `AxiomAuditGen` is regenerated. `formalization.yaml` is fresh. The Python gates pass. The ledger re-verified every entry whose inputs changed: the last six on GitHub runners (`ledger-sweep.yml`, run 40801914937), leaving 664 fresh, 0 stale, 0 missing.
 
 ## 2026-10-28 — corpus 662, modules 628 — the unbounded Itô integral, adapted (#346, item 1)
 
