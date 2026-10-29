@@ -259,8 +259,16 @@ import MathFin.Foundations.LocalisationInMeasure
 import MathFin.Foundations.ItoFormulaAdaptedTD
 -- The Itô integral of an unbounded continuous adapted integrand, by localisation
 import MathFin.Foundations.ItoIntegralLocalised
+-- The Itô integral of an unbounded continuous adapted integrand is a local martingale
+import MathFin.Foundations.ItoIntegralLocalisedLocalMartingale
 -- Itô's formula along an Itô process with unbounded adapted coefficients
 import MathFin.Foundations.ItoFormulaAdaptedUnbounded
+-- Riemann sums of a bounded predictable integrand with almost surely continuous paths
+import MathFin.Foundations.ItoIntegralPredictableRiemann
+-- The Itô integral of a predictable integrand with almost surely continuous paths
+import MathFin.Foundations.ItoIntegralLocalisedPredictable
+-- Itô's formula as an identity of processes; its stochastic term is a local martingale
+import MathFin.Foundations.ItoFormulaAdaptedProcess
 -- Deterministic drift Riemann-convergence (α4 brick b-tail): ∑θ(tₖ)²·Δτ → ∫₀ᵀθ²ds
 import MathFin.Foundations.DriftRiemannConvergence
 -- Continuous adapted-θ Girsanov assembly (α4 (c)): convergence core toward

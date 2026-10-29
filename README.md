@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 706 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 672 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 709 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 675 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 16 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -62,6 +62,13 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   ([`localItoIntegral`](MathFin/Foundations/ItoIntegralLocalised.lean)), and the formula holds
   along $`x_0 + \int b\,ds + \int \sigma\,dB`$
   ([`ito_formula_adapted_unbounded_le`](MathFin/Foundations/ItoFormulaAdaptedUnbounded.lean)).
+  Almost surely the formula holds at every $`t \le T`$ at once, as an identity of processes whose
+  stochastic term is the integral $`\int_0^t f_x(s, X_s)\sigma_s\,dB_s`$
+  ([`ito_formula_adapted_unbounded_process`](MathFin/Foundations/ItoFormulaAdaptedProcess.lean));
+  both that integral and $`\int \sigma\,dB`$ have versions that are continuous local
+  martingales for the null-augmented Brownian filtration
+  ([`exists_localMartingale_ito_formula`](MathFin/Foundations/ItoFormulaAdaptedProcess.lean),
+  [`exists_continuous_localMartingale_localItoIntegral`](MathFin/Foundations/ItoIntegralLocalisedLocalMartingale.lean)).
 
 - **Girsanov's theorem.** For bounded predictable $`\theta`$, let
   $`dQ = \exp\big(-\int_0^T \theta\,dB - \tfrac12 \int_0^T \theta^2\,dt\big)\,dP`$. On $`[0,T]`$,
@@ -163,7 +170,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Sixteen of the 706 results are reduced cores. Twelve assume a structure whose fields include the
+- Sixteen of the 709 results are reduced cores. Twelve assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, Lévy's characterization, the two-dimensional Itô formula,
@@ -186,9 +193,11 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   inequalities. Butterfly-freeness is proved as a list of properties of the call price as a
   function of the strike; the risk-neutral law is not constructed from them. At $`\sigma = 0`$
   convexity of the call is not tied to Durrleman's condition.
-- Itô's formula for an Itô process is proved at a fixed time, for bounded adapted continuous
-  coefficients and $`f`$ with bounded $`f'`$ and $`f''`$. It does not yet cover
-  $`f(x) = e^x`$ or $`x^2`$, or coefficients of an SDE solution.
+- Itô's formula for an Itô process is proved on a finite horizon $`[0, T]`$, for a process built
+  from a single Brownian motion with continuous adapted coefficients and a deterministic starting
+  point. Itô's formula for a continuous semimartingale not built from $`B`$ is not proved, and
+  neither is a quadratic-variation process for a general continuous local martingale, which is
+  what keeps Lévy's characterization a reduced core.
 - The jump-diffusion results on a process assume the properties listed above
   (`JumpDiffusionProcess`). A process with them is constructed only without jumps, as Brownian
   motion with drift. A change of measure on the process that alters the jump rate or the jump law

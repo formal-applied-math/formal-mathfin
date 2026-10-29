@@ -18,9 +18,10 @@ The one missing ingredient was the **adaptedness** of the explicit residual `M` 
 `𝓕_t`-measurable because, after clamping the integrand's time to `[0,t]` (so each slice is
 `𝓕_t`-measurable), it is jointly strongly measurable (Carathéodory: continuous in `s`,
 `𝓕_t`-measurable in `ω`), and the integral of a jointly measurable function is measurable
-(`StronglyMeasurable.integral_prod_right`). With `M` adapted,
-`StronglyAdapted.stoppedProcess_indicator` and the all-time agreement
-`indistinguishable_on_stochInterval` assemble `Locally (Martingale ∧ cadlag)` with localizer `σ_N`.
+(`StronglyMeasurable.integral_prod_right`). With `M` adapted, the all-time agreement
+`indistinguishable_on_stochInterval` and `martingale_stoppedProcess_of_ae_eq` (the `σ_N`-stopped
+indicator process of a process agreeing with a martingale up to `σ_N` is a martingale) assemble
+`Locally (Martingale ∧ cadlag)` with localizer `σ_N`.
 -/
 
 @[expose] public section
@@ -192,40 +193,8 @@ theorem ito_formula_unrestricted (hB : IsPreBrownianReal B μ)
   have hindist : ∀ᵐ ω ∂μ, ⊥ < σ N ω → ∀ u : ℝ≥0,
       (u : WithTop ℝ≥0) ≤ σ N ω → M u ω = Mₙ u ω :=
     indistinguishable_on_stochInterval hMcont hMₙcont hagreeM
-  set τN : Ω → WithTop ℝ≥0 := σ N with hτN
-  have hτstop : IsStoppingTime (augFiltration (μ := μ) hBmeas) τN := hσloc.isStoppingTime N
-  have hZmart : Martingale (stoppedProcess (fun i ↦ {ω | ⊥ < τN ω}.indicator (Mₙ i)) τN)
-      (augFiltration (μ := μ) hBmeas) μ :=
-    hMₙmart.stoppedProcess_indicator (fun ω ↦ (hMₙcadlag ω).right_continuous) hτstop
-  -- `Y =ᵐ Z` at each time (indistinguishability handles the random evaluation point)
-  have hYZ : ∀ i, (fun ω ↦ stoppedProcess (fun j ↦ {ω | ⊥ < τN ω}.indicator (M j)) τN i ω)
-      =ᵐ[μ] fun ω ↦ stoppedProcess (fun j ↦ {ω | ⊥ < τN ω}.indicator (Mₙ j)) τN i ω := by
-    intro i
-    filter_upwards [hindist] with ω hω
-    by_cases hpos : ⊥ < τN ω
-    · have hmem : ω ∈ {ω | ⊥ < τN ω} := hpos
-      rcases le_total (i : WithTop ℝ≥0) (τN ω) with hle | hge
-      · rw [stoppedProcess_eq_of_le hle, stoppedProcess_eq_of_le hle,
-          Set.indicator_of_mem hmem, Set.indicator_of_mem hmem]
-        exact hω hpos i hle
-      · rw [stoppedProcess_eq_of_ge hge, stoppedProcess_eq_of_ge hge,
-          Set.indicator_of_mem hmem, Set.indicator_of_mem hmem]
-        obtain ⟨v, hv⟩ := WithTop.ne_top_iff_exists.mp (ne_top_of_le_ne_top WithTop.coe_ne_top hge)
-        refine hω hpos (τN ω).untopA (le_of_eq ?_)
-        rw [← hv]; rfl
-    · have hnmem : ω ∉ {ω | ⊥ < τN ω} := hpos
-      have hle : τN ω ≤ (i : WithTop ℝ≥0) := (not_lt.mp hpos).trans bot_le
-      rw [stoppedProcess_eq_of_ge hle, stoppedProcess_eq_of_ge hle,
-        Set.indicator_of_notMem hnmem, Set.indicator_of_notMem hnmem]
-  refine ⟨⟨hMadapt.stoppedProcess_indicator (fun ω ↦ (hMcadlag ω).right_continuous) hτstop,
-    fun i j hij ↦ ?_⟩, isStable_isCadlag M hMcadlag τN hτstop⟩
-  calc μ[fun ω ↦ stoppedProcess (fun j ↦ {ω | ⊥ < τN ω}.indicator (M j)) τN j ω
-          | augFiltration (μ := μ) hBmeas i]
-      =ᵐ[μ] μ[fun ω ↦ stoppedProcess (fun j ↦ {ω | ⊥ < τN ω}.indicator (Mₙ j)) τN j ω
-          | augFiltration (μ := μ) hBmeas i] := condExp_congr_ae (hYZ j)
-    _ =ᵐ[μ] (fun ω ↦ stoppedProcess (fun j ↦ {ω | ⊥ < τN ω}.indicator (Mₙ j)) τN i ω) :=
-        hZmart.2 i j hij
-    _ =ᵐ[μ] (fun ω ↦ stoppedProcess (fun j ↦ {ω | ⊥ < τN ω}.indicator (M j)) τN i ω) :=
-        (hYZ i).symm
+  have hτstop : IsStoppingTime (augFiltration (μ := μ) hBmeas) (σ N) := hσloc.isStoppingTime N
+  exact ⟨martingale_stoppedProcess_of_ae_eq hτstop hMadapt (fun ω ↦ (hMcadlag ω).right_continuous)
+    hMₙmart (fun ω ↦ (hMₙcadlag ω).right_continuous) hindist, isStable_isCadlag M hMcadlag _ hτstop⟩
 
 end MathFin
