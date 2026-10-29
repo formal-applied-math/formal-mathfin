@@ -1537,6 +1537,86 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.discountedCallBrownian_heat_equation and MathFin.hasDerivAt_discountedCallBrownian_x (MathFin/BlackScholes/PDEFromIto.lean). The discounted price equals e^{−rT}·feynmanU(ξ ↦ (e^ξ − K)⁺)(σ²(T − t), log S₀ + (r − σ²/2)T + σx) (bsV_eq_discount_feynmanU); ∂_t moves only the time slot and ∂_x only the space slot, so feynmanU_heat_equation gives the result. The delta identity is hasDerivAt_bsV_S composed with ∂_x gbmValue. SCOPE: the pointwise PDE for t < T; the Itô-integral representation of f(t, B_t), which needs growth bounds up to third order and a localization away from T, is not proved."
       }
+    },
+    {
+      "id": "mf-sabr-implied-vol-atm-limit",
+      "name": "SABR Implied Vol Formula Tends to the ATM Formula as K -> f",
+      "domain": "mathematical_finance",
+      "description": "The printed SABR implied-volatility formula sigma_B(K, f) of Hagan-Kumar-Lesniewski-Woodward (eq. 2.17a-c, higher-order terms dropped) tends to their at-the-money formula (eq. 2.18) as the strike K tends to the forward f, K != f, for f > 0, alpha != 0, nu != 0, rho != 1 and any beta, t_ex. At K = f the z/x(z) factor is 0/0; the limit is resolved from x(0) = 0 and x'(0) = 1. The singular-perturbation derivation of eq. 2.17 and any error bound against the true SABR implied volatility are not formalized here.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.SABRImpliedVol\n\nopen MathFin Filter Topology\n\ntheorem sabr_implied_vol_atm_limit_thm {f α β ρ ν tex : ℝ} (hf : 0 < f) (hα : α ≠ 0)\n    (hν : ν ≠ 0) (hρ : ρ ≠ 1) :\n    Tendsto (fun K ↦ sabrImpliedVol K f α β ρ ν tex) (𝓝[≠] f)\n      (𝓝 (sabrATMVol f α β ρ ν tex)) :=\n  tendsto_sabrImpliedVol_atm hf hα hν hρ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002, eqs. 2.17a-c and 2.18",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the K -> f limit of the printed formula. Lives in MathFin/BlackScholes/SABRImpliedVol.lean (tendsto_sabrImpliedVol_atm, via hasDerivAt_sabrX_zero, tendsto_div_sabrX, tendsto_sabrZ). Axioms-clean. LIMITS: the statement is about the two printed truncations (eq. 2.17a with its '...' terms dropped, and eq. 2.18), not about the SABR model: the singular-perturbation derivation, the SABR SDE's transition density, and any O(t_ex^2) error bound against the true implied volatility (issue #100's full ask) are not formalized. The hypotheses are weaker than the paper's (rho != 1 rather than |rho| < 1; alpha, nu nonzero rather than positive). nu = 0 (the CEV limit) is excluded: there z is identically 0."
+      }
+    },
+    {
+      "id": "mf-sabr-backbone-law",
+      "name": "SABR Backbone Law: d log sigma / d log f = beta - 1",
+      "domain": "mathematical_finance",
+      "description": "Along the SABR leading-order at-the-money volatility curve sigma(f) = alpha / f^(1-beta) (Hagan-Kumar-Lesniewski-Woodward, section 3, the backbone), d log sigma / d log f = beta - 1: the map v -> log sigma(e^v) has derivative beta - 1 at every v, for alpha > 0. The t_ex correction of eq. 2.18 is not covered.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.SABRImpliedVol\n\nopen MathFin\n\ntheorem sabr_backbone_law_thm (β : ℝ) {α : ℝ} (hα : 0 < α) (v : ℝ) :\n    HasDerivAt (fun w ↦ Real.log (sabrBackbone (Real.exp w) α β)) (β - 1) v :=\n  hasDerivAt_log_sabrBackbone_exp β hα v\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002, section 3 and eq. 2.18",
+        "difficulty": "introductory",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Lives in MathFin/BlackScholes/SABRImpliedVol.lean (hasDerivAt_log_sabrBackbone_exp, the log-log form, from hasDerivAt_log_sabrBackbone, d log sigma / df = (beta - 1)/f, by the chain rule through exp). Axioms-clean. LIMITS: the law is proved for the leading-order backbone alpha / f^(1-beta) only; the t_ex correction term of eq. 2.18 is not included, and nothing is said about the SABR model's ATM implied volatility."
+      }
+    },
+    {
+      "id": "mf-sabr-atm-black76-price",
+      "name": "SABR ATM Price as Black-76 at the ATM Vol",
+      "domain": "mathematical_finance",
+      "description": "Hagan-Kumar-Lesniewski-Woodward price European options by Black's formula at the SABR implied vol; at the money that vol is eq. 2.18, with the vol's time-to-expiry argument instantiated at the option's own expiry T. Under the Black-76 hypothesis (forward f, strike f, zero drift, standard-normal driver) at vol sigma_ATM = sabrATMVol f alpha beta rho nu T, the discounted expected call payoff E[e^(-rT) max(F_T - f, 0)] equals e^(-rT) f (2 Phi(sigma_ATM sqrt(T) / 2) - 1). That the SABR dynamics themselves produce this price is not proved here. The Black-76 hypothesis includes sigma_ATM > 0, which is assumed, not proved.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.SABRImpliedVol\n\nopen MathFin MeasureTheory ProbabilityTheory\n\ntheorem sabr_atm_black76_price_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q] {f α β ρ ν T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q f f 0 (sabrATMVol f α β ρ ν T) T Z) (r : ℝ) :\n    ∫ ω, Real.exp (-r * T) * max (bsTerminal f 0 (sabrATMVol f α β ρ ν T) T (Z ω) - f) 0 ∂Q\n      = Real.exp (-r * T) * f * (2 * Phi (sabrATMVol f α β ρ ν T * Real.sqrt T / 2) - 1) :=\n  sabrATMVol_black_futures_price h r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002, eq. 2.18; Black (1976)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The ATM Black-76 closed form is derived in MathFin/Futures/Black76.lean (black_futures_formula_atm: from black_futures_formula, d1 = sigma sqrt(T)/2 = -d2 at K = F, and Phi(x) + Phi(-x) = 1) and instantiated at sabrATMVol in MathFin/BlackScholes/SABRImpliedVol.lean (sabrATMVol_black_futures_price), with the vol's own time-to-expiry argument fixed to the option's T (not left as an independent free variable) so the statement is the SABR ATM pricing claim it reads as. Axioms-clean. LIMITS: this is Black's formula evaluated at eq. 2.18's vol, the pricing rule the paper prescribes; it is not derived from the SABR SDE, and no bound on the gap to the SABR model's actual ATM price is given. BSCallHyp at sigma_ATM requires sabrATMVol > 0, which is a hypothesis, not proved."
+      }
+    },
+    {
+      "id": "mf-dupire-local-vol",
+      "name": "Dupire Local-Volatility Formula",
+      "description": "Dupire's local-vol formula at zero rates, for a driftless X = c + ∫δ dB with δ bounded, adapted and path-continuous (so lognormal models are outside the class): if σ_loc(K)²K² is a continuous version of E[δ_t² | X_t = K] on a strike window and the call surface C(t,K) = E[(X_t − K)⁺] is C² in strike (continuous C_KK) and C¹ in time (jointly continuous C_T), these regularity conditions being assumed, then σ_loc(K)² = 2C_T/(K²C_KK) at every strike of the window with C_KK > 0. Existence of a local-vol diffusion reproducing C is not proved.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.Dupire\n\nopen MeasureTheory ProbabilityTheory Set\nopen scoped NNReal\n\nnamespace MathFin\nopen Dupire GyongyMimicry\nopen ItoIntegralL2 ItoIntegralProcessGeneral\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n\n/-- Dupire's local-volatility formula (Bagaria ch. 9 Thm 9.5, zero rates): on a strike\nwindow where the call surface is `C²` in strike and `C¹` in calendar time and `C_KK > 0`,\na lognormal-convention local volatility satisfies\n`σloc(K)² = 2·∂_T C(t, K) / (K²·∂²_K C(t, K))` at every strike of the window with\n`C_KK > 0`. -/\ntheorem dupire_local_vol_ratio\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))\n    {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ}\n    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))\n    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)\n    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)\n    {M : ℝ≥0 → Ω → ℝ}\n    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))\n    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas\n      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))\n    {X : ℝ≥0 → Ω → ℝ} (c : ℝ)\n    (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)\n    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + M t ω)\n    (t : ℝ) (ht : 0 < t) (htT : Real.toNNReal t < T)\n    {a b ε : ℝ} (ha : 0 ≤ a) (hε : 0 < ε) {CK CKK : ℝ → ℝ} {Ct : ℝ → ℝ → ℝ}\n    (hCK : ∀ K ∈ Ioo a b, HasDerivAt (callSurface μ X t) (CK K) K)\n    (hCKK : ∀ K ∈ Ioo a b, HasDerivAt CK (CKK K) K)\n    (hCKKc : ContinuousOn CKK (Ioo a b))\n    (hCt : ∀ s ∈ Ioo (t - ε) (t + ε), ∀ K ∈ Ioo a b,\n      HasDerivAt (fun s' => callSurface μ X s' K) (Ct s K) s)\n    (hCtc : ContinuousOn (Function.uncurry Ct) (Ioo (t - ε) (t + ε) ×ˢ Ioo a b))\n    {σloc : ℝ → ℝ} (hσc : ContinuousOn σloc (Ioo a b))\n    (hσrep : ∀ᵐ ω ∂μ, X (Real.toNNReal t) ω ∈ Ioo a b →\n      diffCoeffSq μ (reindexed X) (reindexed δ) t ω\n        = σloc (X (Real.toNNReal t) ω) ^ 2 * X (Real.toNNReal t) ω ^ 2) :\n    ∀ K ∈ Ioo a b, 0 < CKK K → σloc K ^ 2 = 2 * Ct t K / (K ^ 2 * CKK K) :=\n  MathFin.Dupire.dupire_pointwise hB hBmeas hδadap hδcont hδbdd hMadap hMeq c hXcont hXrel\n    t ht htT ha hε hCK hCKK hCKKc hCt hCtc hσc hσrep\n\nend MathFin\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Dupire's local-vol formula (Bagaria ch. 9 Thm 9.5; Dupire 1994)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, MathFin/BlackScholes/Dupire.lean. Breeden-Litzenberger strike derivatives via one-sided HasDerivAt, the weak forward equation of MathFin/Foundations/GyongyMimicry.lean (marginal_flow_weak_equation_fn_constructed), law-of-X_t = C_KK * Lebesgue on the window, and a Lebesgue-a.e. coefficient transfer. The distributional form (dupire_weak) and the Markov local-vol corollary (dupire_localVol) are in the same module. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-heston-affine-pde",
+      "name": "Heston Affine-Transform Pricing PDE",
+      "description": "The 2D exponential-affine ansatz for the Heston model satisfies the pricing PDE: with Bx constant and Bv, A the explicit rho-shifted Riccati closed forms, d/ds Phi(s,x,v) + L Phi(s,x,v) = 0 at every (s,x,v), where L is the Heston generator (r - v/2) d_x + kappa(theta - v) d_v + (v/2) d_xx + rho xi v d_xv + (xi^2 v/2) d_vv. Strip: 0 < u < 1, xi != 0. That this profile equals E[e^{u log S_T}] is not proved; the Heston process is not constructed.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.Heston\n\nopen scoped NNReal\n\nnamespace MathFin\nopen Heston\n\n/-- The Heston pricing PDE at the explicit affine transform: the calendar-time\nprofile built from the rho-shifted Riccati closed forms solves\n`d/ds Phi + L Phi = 0` against the Heston generator. -/\ntheorem heston_affine_pde (r κ θ ξ ρ u T : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u)\n    (hu2 : u < 1) (t x v : ℝ) :\n    deriv (fun s => hestonProfile u (fun w => hestonA r κ θ ξ ρ u (T - w))\n        (fun w => hestonBv κ ξ ρ u (T - w)) s x v) t\n      + hestonGenerator r κ θ ξ ρ (hestonProfile u (fun w => hestonA r κ θ ξ ρ u (T - w))\n          (fun w => hestonBv κ ξ ρ u (T - w)) t) x v = 0 :=\n  MathFin.Heston.hestonTransform_pde r κ θ ξ ρ u T hξ hu1 hu2 t x v\n\nend MathFin\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Heston affine transform, pricing PDE (Bagaria ch. 14, Prop 14.5; Heston 1993)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, MathFin/BlackScholes/Heston.lean. The 2D exponential-affine family, the Heston generator with the correlated cross term, the rho-shifted Riccati closed forms (Moebius denominator, admissible strip 0 < u < 1 forcing gamma > |k - rho xi u|), and the calendar-time PDE verification. The expectation form of the transform (that the profile is E[e^{u log S_T}]) is not proved: it needs the Heston process and a 2D correlated Ito formula, which the library does not have. Axioms-clean."
+      }
     }
   ]
 }

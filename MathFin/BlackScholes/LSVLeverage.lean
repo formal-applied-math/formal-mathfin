@@ -44,7 +44,8 @@ stochastic-process hypotheses:
 ## Scope
 
 * Not proved here: Thm 11.2's *iff* content, that the leverage-defined model reprices the
-  market (it needs Gyöngy's mimicking theorem with flow uniqueness, weak existence on the
+  market (it needs Gyöngy's mimicking theorem with flow uniqueness, which
+  `GyongyMimicry.gyongy_mimicry_gated` takes as a hypothesis, weak existence on the
   local-vol side, the Dupire surface formula on a non-Gaussian carrier, and the McKean–Vlasov
   existence question, which is not settled in general); §11.3's grid and particle machinery;
   every decimal figure of the chapter's tables (22.9%, 26.9%, 0.98, 1.09 → 0.71), since the
