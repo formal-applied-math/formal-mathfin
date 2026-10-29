@@ -2008,9 +2008,9 @@
     "mf-dva-cva-mirror": {
       "benchmark_file": "credit.json",
       "date": "2026-10-29",
-      "elapsed_s": 5.0,
-      "input_hash": "a6e940d12cfe2100d52b562af828e0f9ebe96ecfde0f98acf3bce3aea9d15d15",
-      "verified_at_commit": "e601fa9"
+      "elapsed_s": 11.2,
+      "input_hash": "b2d3c4920a8d5d8fbc2683d5111816dcab3f6260e3b65b4c850552dd78b50561",
+      "verified_at_commit": "013d72d"
     },
     "mf-exchange-numeraire": {
       "benchmark_file": "exotic_options.json",
@@ -3303,9 +3303,9 @@
     "mf-netting-exposure-subadditivity": {
       "benchmark_file": "credit.json",
       "date": "2026-10-29",
-      "elapsed_s": 5.4,
-      "input_hash": "f7df87d42e0abedd95d730c05fdfce638a2114d43f53e650c670c547be54eeba",
-      "verified_at_commit": "e601fa9"
+      "elapsed_s": 14.9,
+      "input_hash": "4e0b2e5ddbe7ab7c50f4daf807766d6295cd956da51cb779a8b7e82573ab7449",
+      "verified_at_commit": "013d72d"
     },
     "mf-newton-raphson-fixed-at-root": {
       "benchmark_file": "black_scholes.json",
