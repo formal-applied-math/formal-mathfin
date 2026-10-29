@@ -365,6 +365,9 @@ import MathFin.BlackScholes.AsianGeometric
 -- Geometric-average Asian: n-date driver law + closed-form price via effective-BS reduction
 import MathFin.BlackScholes.AsianGeometricN
 import MathFin.BlackScholes.ImpliedVolatility
+-- SABR (Hagan-Kumar-Lesniewski-Woodward 2002) lognormal implied-vol asymptotic
+-- approximation: eq. 2.17 -> eq. 2.18 as K -> f, backbone law, ATM Black-76 price
+import MathFin.BlackScholes.SABRImpliedVol
 import MathFin.BlackScholes.LognormalMoments
 import MathFin.BlackScholes.VarianceSwap
 -- Merton (1976) jump-diffusion: Poisson-mixture price, compensation
