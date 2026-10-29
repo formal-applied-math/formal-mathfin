@@ -5,10 +5,10 @@
   "entries": {
     "bm-cor-5.3.4": {
       "benchmark_file": "brownian_motion.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.1,
       "input_hash": "1e7f8e1a119d2b27a159f719c1b5fa0aea52e804bb1c24b00c0736d298936287",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "bm-def-5.1.1": {
       "benchmark_file": "brownian_motion.json",
@@ -40,10 +40,10 @@
     },
     "bm-thm-5.1.4": {
       "benchmark_file": "brownian_motion.json",
-      "date": "2026-10-25",
-      "elapsed_s": 6.3,
+      "date": "2026-10-29",
+      "elapsed_s": 4.3,
       "input_hash": "86b3638bf0b21254d9591138aac58d74fe059d129c06b57977a925c8cfdfcb99",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "bm-thm-5.1.5": {
       "benchmark_file": "brownian_motion.json",
@@ -82,10 +82,10 @@
     },
     "ce-freezing-lemma": {
       "benchmark_file": "conditional_expectation.json",
-      "date": "2026-10-25",
-      "elapsed_s": 6.2,
+      "date": "2026-10-29",
+      "elapsed_s": 4.2,
       "input_hash": "495557817f6650e24b8ceb626c3ebfd62073bdd5525015e5aceb96e6c3ff9ef1",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "ce-prop-2.1.11-independence": {
       "benchmark_file": "conditional_expectation.json",
@@ -145,10 +145,10 @@
     },
     "cm-thm-4.3.9": {
       "benchmark_file": "continuous_martingales.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.0,
       "input_hash": "591effb2237c9b8afc37b6f5f05a4f363019c1b3760047031fbb89b7b5d65cb1",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "cv-cond-exp-tower": {
       "benchmark_file": "cross_validated.json",
@@ -271,10 +271,10 @@
     },
     "gir-discounted-gbm-no-arbitrage": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-10-25",
-      "elapsed_s": 6.3,
+      "date": "2026-10-29",
+      "elapsed_s": 4.4,
       "input_hash": "4e8c002b32f47e1778d966e17482904c33defe6bdda0ce717e05d0e54424981c",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "gir-gaussian-esscher-tilt": {
       "benchmark_file": "girsanov_finance.json",
@@ -282,6 +282,13 @@
       "elapsed_s": 5.1,
       "input_hash": "2ee1a279de930e2bbd60e9d781a50dbfba0ae061d74c53f76c2587268ff80823",
       "verified_at_commit": "1669d91"
+    },
+    "gir-market-completeness": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-10-29",
+      "elapsed_s": 4.4,
+      "input_hash": "794e1bdc6806d0669280855a26c9ecb0d985ebc5ed3a1414cb0c732d0a1b933a",
+      "verified_at_commit": "df5d4c8"
     },
     "gir-martingale-reindex": {
       "benchmark_file": "girsanov_finance.json",
@@ -383,10 +390,10 @@
     },
     "mart-thm-2.2.9": {
       "benchmark_file": "martingales.json",
-      "date": "2026-10-25",
+      "date": "2026-10-29",
       "elapsed_s": 2.3,
       "input_hash": "481336e4f8e2f71dda484d2078b6dad09cdff4e748629e9134c36e0c41f4f434",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mart-thm-2.3.6": {
       "benchmark_file": "martingales.json",
@@ -404,10 +411,10 @@
     },
     "mart-thm-2.4.6": {
       "benchmark_file": "martingales.json",
-      "date": "2026-10-25",
-      "elapsed_s": 3.5,
+      "date": "2026-10-29",
+      "elapsed_s": 2.3,
       "input_hash": "6c529017d39cbc9ba2ff566403a3d27a4361a94a4f37fdaa88cdb9f5b2616959",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mart-thm-2.5.1": {
       "benchmark_file": "martingales.json",
@@ -467,10 +474,10 @@
     },
     "mc-thm-1.3.12": {
       "benchmark_file": "markov_chains.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.6,
+      "date": "2026-10-29",
+      "elapsed_s": 4.1,
       "input_hash": "6c13d5b228438b1eb81b6bd1dd3b4856ab8a8bffba33ebccb70eed7b9e4b274f",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mc-thm-1.4.25": {
       "benchmark_file": "markov_chains.json",
@@ -544,10 +551,10 @@
     },
     "mf-american-intrinsic-bound": {
       "benchmark_file": "binomial.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.6,
+      "date": "2026-10-29",
+      "elapsed_s": 4.4,
       "input_hash": "ea5ce2c4573a1d7b4c181b1b4117e14e9d3ffc0eb8ba97327f1f32463a212d52",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-american-put-ae-horizon-invariance": {
       "benchmark_file": "black_scholes.json",
@@ -684,10 +691,10 @@
     },
     "mf-bachelier-call": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.6,
+      "date": "2026-10-29",
+      "elapsed_s": 4.4,
       "input_hash": "ad2907c36cecdabe64ca88456cb7ad37893ebabc1655511d8cbead90f36c070b",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-bachelier-delta": {
       "benchmark_file": "black_scholes.json",
@@ -838,10 +845,10 @@
     },
     "mf-black-futures": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.3,
+      "date": "2026-10-29",
+      "elapsed_s": 4.2,
       "input_hash": "8fcc015d5e4766315690300d58008578ee36ae38f8e2616c02378faaca13944a",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-black-litterman-1d-mean": {
       "benchmark_file": "portfolio_and_performance.json",
@@ -1027,10 +1034,10 @@
     },
     "mf-bootstrap-solve-second": {
       "benchmark_file": "interest_rates.json",
-      "date": "2026-10-25",
-      "elapsed_s": 5.1,
+      "date": "2026-10-29",
+      "elapsed_s": 4.4,
       "input_hash": "4e9ec3beae13e9bbf0e37595c0bf092a09a3385cfe8005ef3c9d3c6c21c47b83",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-bootstrap-swap-strip-reprices": {
       "benchmark_file": "interest_rates.json",
@@ -1104,10 +1111,10 @@
     },
     "mf-bs-gaussian-smoothing": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.5,
       "input_hash": "783de7fe22e49e58363670e952c1f2c4942145cb4c93fe7705696bfd6d0c778c",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-bs-heat-equation-brownian-coordinate": {
       "benchmark_file": "black_scholes.json",
@@ -1265,17 +1272,17 @@
     },
     "mf-bsV-le-S": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.4,
       "input_hash": "95b1553c81afd7dd2e2d33dbeb7c61e84e9531033b0bbd2be3efac43f043b711",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-bsd1-K-deriv": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.3,
       "input_hash": "abe1303046da5cbf0dc7258cfca3e7fba22d209105822643a4afeb4840dc4890",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-bsd2-K-deriv": {
       "benchmark_file": "black_scholes.json",
@@ -1356,10 +1363,10 @@
     },
     "mf-capm-beta-linearity-two": {
       "benchmark_file": "portfolio_and_performance.json",
-      "date": "2026-10-25",
+      "date": "2026-10-29",
       "elapsed_s": 4.2,
       "input_hash": "f1d41421c3a58e0396e00855dd4815f8a1d19dac1a46f70b77dc0a030d200b3c",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-capm-beta-market": {
       "benchmark_file": "portfolio_and_performance.json",
@@ -1447,17 +1454,17 @@
     },
     "mf-cash-or-nothing": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.6,
       "input_hash": "3571d654ac617a719a88876951edc447a3b7f301dd057d896c02dbfe7bf50fcd",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-cds-fair-spread": {
       "benchmark_file": "credit.json",
-      "date": "2026-10-25",
-      "elapsed_s": 5.1,
+      "date": "2026-10-29",
+      "elapsed_s": 4.3,
       "input_hash": "d71aa5d408d593273032a2dac131f40ee93cf87efc54559b047d62b7fe9a765c",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-cds-protection-leg-expectation": {
       "benchmark_file": "credit.json",
@@ -1496,10 +1503,10 @@
     },
     "mf-cir-bond-loading-riccati": {
       "benchmark_file": "interest_rates.json",
-      "date": "2026-10-25",
-      "elapsed_s": 5.1,
+      "date": "2026-10-29",
+      "elapsed_s": 4.5,
       "input_hash": "7755986f3a4aab702f615b266597ae1f2410122e860e4ca3e1950d6140321991",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-cir-closed-form-bond-pde": {
       "benchmark_file": "interest_rates.json",
@@ -1517,10 +1524,10 @@
     },
     "mf-cml-equation": {
       "benchmark_file": "portfolio_and_performance.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.2,
+      "date": "2026-10-29",
+      "elapsed_s": 4.1,
       "input_hash": "bca3f93f86ae14b57863df3b9e139c33a3a270ce8a7bd491881811d5fb5f8ce6",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-cml-mean-at-stdev": {
       "benchmark_file": "portfolio_and_performance.json",
@@ -1616,9 +1623,9 @@
     "mf-contract-binomial-european-payoff": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-29",
-      "elapsed_s": 171.3,
+      "elapsed_s": 4.5,
       "input_hash": "d89367b715aebf9e172e59bfd7360cf21c2a9b7c44e58142be3a2bfa8977692f",
-      "verified_at_commit": "952a40b"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-contract-binomial-hedge": {
       "benchmark_file": "contracts.json",
@@ -1727,10 +1734,10 @@
     },
     "mf-cpmm-impermanent-loss-nonpositive": {
       "benchmark_file": "defi.json",
-      "date": "2026-10-25",
-      "elapsed_s": 5.0,
+      "date": "2026-10-29",
+      "elapsed_s": 4.4,
       "input_hash": "17b9c803e1517b62b6af57630359cdcc5ab699d918d3e6df74d31c683fa5e418",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-cpmm-lp-expected-value-lognormal": {
       "benchmark_file": "defi.json",
@@ -1809,6 +1816,13 @@
       "input_hash": "451520f249779b907eaef94dc2e72265033e1d1f14e0df68dcab40483ae2ef7f",
       "verified_at_commit": "1669d91"
     },
+    "mf-crr-log-return-moments-limit": {
+      "benchmark_file": "binomial.json",
+      "date": "2026-10-29",
+      "elapsed_s": 4.4,
+      "input_hash": "14d71b937ae29a1c2faa780c18576890db7fddd036b55510045b1599967e5c41",
+      "verified_at_commit": "df5d4c8"
+    },
     "mf-crr-one-step-martingale": {
       "benchmark_file": "binomial.json",
       "date": "2026-10-29",
@@ -1839,10 +1853,10 @@
     },
     "mf-cvar-rockafellar-uryasev": {
       "benchmark_file": "risk_measures.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.6,
+      "date": "2026-10-29",
+      "elapsed_s": 4.1,
       "input_hash": "67f2840aa15d39e32e2e0dfb55c4607741381839aaac2948247b2ce74b29fae4",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-dai-stability-fee-continuous-rate": {
       "benchmark_file": "defi.json",
@@ -1867,10 +1881,10 @@
     },
     "mf-drift-estimator-differenced-law": {
       "benchmark_file": "portfolio_and_performance.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.4,
+      "date": "2026-10-29",
+      "elapsed_s": 4.2,
       "input_hash": "b22ddcda332959736812adcd7550e38090989c806995b1c6dd1ffa713cd864e3",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-dupire-tilted-smile-local-skew": {
       "benchmark_file": "black_scholes.json",
@@ -1972,10 +1986,10 @@
     },
     "mf-ftap-discrete-complete": {
       "benchmark_file": "no_arbitrage.json",
-      "date": "2026-10-25",
-      "elapsed_s": 6.3,
+      "date": "2026-10-29",
+      "elapsed_s": 4.2,
       "input_hash": "e0e95c4a0ca923d2ac4db79b19eed3eb7bf06410935e860b8f3c05aba32276e4",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-ftap-discrete-one-period": {
       "benchmark_file": "no_arbitrage.json",
@@ -2035,10 +2049,10 @@
     },
     "mf-garman-kohlhagen": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.6,
+      "date": "2026-10-29",
+      "elapsed_s": 4.5,
       "input_hash": "a9d140a18cbf3c4421a99c72937aff558dba0545ab23f0d73ccc8485257151ea",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-gaussian-cvar-additive-rho-one": {
       "benchmark_file": "risk_measures.json",
@@ -2084,10 +2098,10 @@
     },
     "mf-gaussian-cvar-subadditive": {
       "benchmark_file": "risk_measures.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.9,
+      "date": "2026-10-29",
+      "elapsed_s": 4.1,
       "input_hash": "4e4f1fe2dba0f34b4d1118bf04380cc75022bc49379646141ff30f6606f8c50c",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-gaussian-cvar-translation": {
       "benchmark_file": "risk_measures.json",
@@ -2147,10 +2161,10 @@
     },
     "mf-gaussian-var-standard": {
       "benchmark_file": "risk_measures.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.6,
+      "date": "2026-10-29",
+      "elapsed_s": 4.1,
       "input_hash": "34f28e16f27aa26df379fb6db294c2203eba6e53d0d1e6349f832250d23b593a",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-gaussian-var-subadditive": {
       "benchmark_file": "risk_measures.json",
@@ -2231,10 +2245,10 @@
     },
     "mf-hazard-survival-const": {
       "benchmark_file": "credit.json",
-      "date": "2026-10-25",
-      "elapsed_s": 5.1,
+      "date": "2026-10-29",
+      "elapsed_s": 4.5,
       "input_hash": "096e2537506a2ba02b94eeeca15cd946088afa4491013da5950bfebea91a2e97",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-herfindahl-cauchy-schwarz": {
       "benchmark_file": "risk_measures.json",
@@ -2266,10 +2280,10 @@
     },
     "mf-hull-white-futures-forward-gap": {
       "benchmark_file": "interest_rates.json",
-      "date": "2026-10-25",
-      "elapsed_s": 5.1,
+      "date": "2026-10-29",
+      "elapsed_s": 4.5,
       "input_hash": "07c7ebedb9817d8744bd834d7c0a7446dde9abb95333d58a2f3fe4d4362b52f2",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-hull-white-reprices-curve": {
       "benchmark_file": "interest_rates.json",
@@ -2315,10 +2329,10 @@
     },
     "mf-information-ratio-scale-invariant": {
       "benchmark_file": "portfolio_and_performance.json",
-      "date": "2026-10-25",
+      "date": "2026-10-29",
       "elapsed_s": 4.2,
       "input_hash": "81bcfd2547fe8b8bba0fc41017b972566b8cb4b83ff203c2f759bd56328ba039",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-insurance-premium-principles": {
       "benchmark_file": "actuarial.json",
@@ -2399,10 +2413,10 @@
     },
     "mf-jump-diffusion-call-law-invariance": {
       "benchmark_file": "jumps_and_variance_swaps.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.5,
       "input_hash": "e72d3a00d4e1a3bbe65752ecee2b8f30722ad15aefb664402e097648151f284b",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-jump-diffusion-call-strict-bounds": {
       "benchmark_file": "jumps_and_variance_swaps.json",
@@ -2441,10 +2455,10 @@
     },
     "mf-jump-diffusion-digital-strike-derivative": {
       "benchmark_file": "jumps_and_variance_swaps.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.6,
+      "date": "2026-10-29",
+      "elapsed_s": 4.4,
       "input_hash": "66aee2e0c397a17c6486da8cefbbc565952fe63ac06c349979d0293d4ac84784",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-jump-diffusion-discounted-price-martingale": {
       "benchmark_file": "jumps_and_variance_swaps.json",
@@ -2483,24 +2497,24 @@
     },
     "mf-jump-diffusion-identifiability": {
       "benchmark_file": "jumps_and_variance_swaps.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.4,
       "input_hash": "6983410463c7fae519d8e711283ab9682b9f3f52b96721f315e06f77f5cd1a5c",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-jump-diffusion-implied-vol-above-sigma": {
       "benchmark_file": "jumps_and_variance_swaps.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.4,
       "input_hash": "6c49b364c658fb3f2ff1d0b6750c2bf8a33c9c907ce150baf690bb9c23aa46bf",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-jump-diffusion-implied-vol-every-date": {
       "benchmark_file": "jumps_and_variance_swaps.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.6,
       "input_hash": "71e68f0028b19bb1522d0a9bba144679f6a85b4a2206c3ecdaa0c47e20026d1b",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-jump-diffusion-incompleteness": {
       "benchmark_file": "jumps_and_variance_swaps.json",
@@ -2784,10 +2798,10 @@
     },
     "mf-lognormal-cov-differential": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.5,
       "input_hash": "989556f6370b40e8272802e7de00954848f55dafb1a01b9914c3fbcadf1b5312",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-lookback-call-ge-bs-call": {
       "benchmark_file": "exotic_options.json",
@@ -2917,10 +2931,10 @@
     },
     "mf-markowitz-variance-random-returns": {
       "benchmark_file": "portfolio_and_performance.json",
-      "date": "2026-10-25",
+      "date": "2026-10-29",
       "elapsed_s": 4.2,
       "input_hash": "a0e9a3cca32dcbda195c3b23b0d33cc7b225556387bd430a1523c0dfb82cc6e9",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-marshall-olkin-default-covariance": {
       "benchmark_file": "credit.json",
@@ -2952,10 +2966,10 @@
     },
     "mf-merton-call-increasing-in-vol": {
       "benchmark_file": "jumps_and_variance_swaps.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.5,
       "input_hash": "7b21170af8a279e1b3977460da85654dfccb03588ab42e4855486c193ee828c0",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-merton-call-series": {
       "benchmark_file": "jumps_and_variance_swaps.json",
@@ -3029,10 +3043,10 @@
     },
     "mf-merton-jump-count-split": {
       "benchmark_file": "jumps_and_variance_swaps.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.4,
       "input_hash": "13bd862a44c6b922d99583444b6d7d1f9133eec45559e5a28b8a0d9102e9061e",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-merton-log-contract-variance": {
       "benchmark_file": "jumps_and_variance_swaps.json",
@@ -3134,10 +3148,10 @@
     },
     "mf-monte-carlo-put-call-consistency": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.6,
       "input_hash": "600af5531931986543f990b41a3bc526dc105fad601318479172f44f4794e4e5",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-netting-exposure-subadditivity": {
       "benchmark_file": "credit.json",
@@ -3281,10 +3295,10 @@
     },
     "mf-quanto-forward-grounded": {
       "benchmark_file": "exotic_options.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.5,
       "input_hash": "26dfe86bda3e9a70180222ca33f1e85a60080759d08ae78371e5b613fcbfd9b3",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-reflection-principle-counting": {
       "benchmark_file": "binomial.json",
@@ -3414,10 +3428,10 @@
     },
     "mf-snell-doob-decomposition": {
       "benchmark_file": "stochastic_foundations.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.4,
       "input_hash": "6dfbe3efaf86fbdb66092206ee4ee697b08b8f5214e2a3c15fcaeda2a297086e",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-snell-optional-sampling": {
       "benchmark_file": "stochastic_foundations.json",
@@ -3463,10 +3477,10 @@
     },
     "mf-state-price-pricing-linear": {
       "benchmark_file": "no_arbitrage.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.2,
       "input_hash": "f336b3cc81364d9993fde06263beb636e11f3464a94e253a625b178d3e6b3e76",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-state-price-risk-neutral": {
       "benchmark_file": "no_arbitrage.json",
@@ -3519,10 +3533,10 @@
     },
     "mf-survival-ccdf-ratio": {
       "benchmark_file": "actuarial.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.8,
+      "date": "2026-10-29",
+      "elapsed_s": 11.0,
       "input_hash": "d843b19fc1bcd09c0123e4edc0905a36fab5221568500421a7979b65e35cbd6b",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-survival-ccdf-zero": {
       "benchmark_file": "actuarial.json",
@@ -3666,10 +3680,10 @@
     },
     "mf-utility-acceptance-not-cone": {
       "benchmark_file": "risk_measures.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.1,
       "input_hash": "2b5da8b27d294ccf369193b0009ff0a16b7b8cf9d915f4b3e19ab3a3f195272d",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "mf-variance-swap-drift-immunity": {
       "benchmark_file": "jumps_and_variance_swaps.json",
@@ -3902,6 +3916,13 @@
       "input_hash": "a5dc01d5d3cb5178bc09971ea733d1b70dc57657da71927342fbd3ab51f36c41",
       "verified_at_commit": "1669d91"
     },
+    "qrm-creditmetrics-default-absorbing-monotone": {
+      "benchmark_file": "quantitative_risk_management.json",
+      "date": "2026-10-29",
+      "elapsed_s": 4.1,
+      "input_hash": "58282b05cb6f463176cadb137a82bf3870b1ad762eea760546259870d5622c5c",
+      "verified_at_commit": "df5d4c8"
+    },
     "qrm-creditmetrics-gaussian-threshold-row-stochastic": {
       "benchmark_file": "quantitative_risk_management.json",
       "date": "2026-10-29",
@@ -4002,10 +4023,10 @@
     },
     "qrm-es-tail-mean": {
       "benchmark_file": "quantitative_risk_management.json",
-      "date": "2026-10-28",
-      "elapsed_s": 84.0,
+      "date": "2026-10-29",
+      "elapsed_s": 4.1,
       "input_hash": "399a83fdf5b8cd4de6fac23fcc755291642afb06777c8bfd18779e7607cc9c33",
-      "verified_at_commit": "630815d"
+      "verified_at_commit": "df5d4c8"
     },
     "qrm-es-var-ratio-exponential": {
       "benchmark_file": "quantitative_risk_management.json",
@@ -4114,10 +4135,10 @@
     },
     "qrm-gpd-mean-excess": {
       "benchmark_file": "quantitative_risk_management.json",
-      "date": "2026-10-25",
-      "elapsed_s": 6.3,
+      "date": "2026-10-29",
+      "elapsed_s": 4.2,
       "input_hash": "0e3098a74244951220cef5f2b314cb3a3baf5eb31cc3040a051c87fc7ee19e27",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "qrm-hoeffding-covariance": {
       "benchmark_file": "quantitative_risk_management.json",
@@ -4177,10 +4198,10 @@
     },
     "qrm-probability-integral-transform": {
       "benchmark_file": "quantitative_risk_management.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.2,
+      "date": "2026-10-29",
+      "elapsed_s": 4.3,
       "input_hash": "28757626ce8597666c8505bc5e03d5c3caa474135b3cc9906fb076f2ee9af24f",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "qrm-quantile-convergence": {
       "benchmark_file": "quantitative_risk_management.json",
@@ -4254,10 +4275,10 @@
     },
     "qrm-square-root-of-time": {
       "benchmark_file": "quantitative_risk_management.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.7,
+      "date": "2026-10-29",
+      "elapsed_s": 4.3,
       "input_hash": "ce4df57d49c1a4bd27c67bdd0855e3e41cef45f9967fe439a4220f557d2ccb22",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "qrm-systematic-floor": {
       "benchmark_file": "quantitative_risk_management.json",
@@ -4443,10 +4464,10 @@
     },
     "sc-ito-formula-td-process": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-25",
-      "elapsed_s": 5.4,
+      "date": "2026-10-29",
+      "elapsed_s": 4.3,
       "input_hash": "b4b10f66171254ca184011bcc5dcc656ca78aa58d77dc11805d372027c594d1d",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "sc-ito-formula-unrestricted-islocalmartingale": {
       "benchmark_file": "stochastic_calculus.json",
@@ -4485,10 +4506,10 @@
     },
     "sc-ito-general-martingale": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.2,
+      "date": "2026-10-29",
+      "elapsed_s": 4.3,
       "input_hash": "d93ed90fd85b78b399a99e72dfb4b41088bf5275974852c028106dc2989c6274",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "sc-ito-general-terminal-isometry": {
       "benchmark_file": "stochastic_calculus.json",
@@ -4583,10 +4604,10 @@
     },
     "sc-levy-integral-clm-isometry": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-25",
-      "elapsed_s": 4.2,
+      "date": "2026-10-29",
+      "elapsed_s": 4.3,
       "input_hash": "f3d82ab2635420ae9e8d65289843cd245a96097d673c040c2e20de50bc2e3810",
-      "verified_at_commit": "7c982c1"
+      "verified_at_commit": "df5d4c8"
     },
     "sc-levy-isometry-compensated-simple": {
       "benchmark_file": "stochastic_calculus.json",
