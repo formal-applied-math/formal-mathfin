@@ -369,6 +369,86 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.survive_eq_exp_neg_integral (MathFin/Bridges/SurvivalUnification.lean). SCOPE: the survival function of τ is the credit curve hazardSurvival h (survivalFunction_eq_hazardSurvival) and ₜpₓ is the survival ratio (SurvivalModel.survive_eq_survivalFunction_ratio); the interval integral splits. The law of τ is hypothesized; survive_coxDefaultTime shows the hypotheses hold for the constructed Cox default time when h is positive with ∫₀ᵗ h → ∞. Deterministic hazard only."
       }
+    },
+    {
+      "id": "mf-expected-negative-exposure-gaussian",
+      "name": "Expected Negative Exposure, Gaussian Closed Form",
+      "domain": "mathematical_finance",
+      "description": "ENE(s) = E[(-V_s)+] is a genuine integral parallel to CVA's expected positive exposure EE. ENE = EE - E[V] is proved from the pointwise identity (-x)+ = x+ - x and integral linearity. For the Gaussian exposure V_s = a + b*sqrt(s)*Z of CVA.expectedExposure_gaussian, this gives E[(a+b*sqrt(s)*Z)-] = E[(a+b*sqrt(s)*Z)+] - a in closed form.",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.ExposureMeasures\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The expected negative exposure of a Gaussian exposure, in closed form. -/\ntheorem expected_negative_exposure_gaussian {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} [IsProbabilityMeasure ν] {Z : Ω₁ → ℝ}\n    (hZ : HasLaw Z (gaussianReal 0 1) ν) {a b s : ℝ} (hb : 0 < b) (hs : 0 < s) :\n    CVA.expectedNegativeExposure (fun s ω ↦ a + b * √s * Z ω) ν s\n      = a * Phi (a / (b * √s)) + b * √s * gaussianPDFReal 0 1 (a / (b * √s)) - a :=\n  MathFin.CVA.expectedNegativeExposure_gaussian hZ hb hs\n\n"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "J. C. Hull, Options, Futures, and Other Derivatives (CVA/exposure chapter): expected negative exposure",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.expectedNegativeExposure_gaussian (MathFin/RiskMeasures/ExposureMeasures.lean). SCOPE: ENE = EE - E[V] is a genuine measure-theoretic identity (expectedNegativeExposure_eq_sub_integral) from the pointwise identity (-x)+ = x+ - x and integral linearity; composed with CVA.expectedExposure_gaussian for the closed form. Same single-Gaussian-driver scope as mf-cva-gaussian-exposure: only the marginal law of V_s enters."
+      }
+    },
+    {
+      "id": "mf-potential-future-exposure-gaussian",
+      "name": "Potential Future Exposure as a Genuine Value-at-Risk",
+      "domain": "mathematical_finance",
+      "description": "PFE_α(s) = VaR_α(V_s), the α-level value-at-risk of the exposure process at time s (MathFin.valueAtRisk, the genuine α-quantile of V_s's law). For the Gaussian exposure model V_s = m + σ√s Z of CVA.cva_gaussian, this is a corollary composing the law of V_s (gaussianReal_const_mul, gaussianReal_const_add) with valueAtRisk_of_hasLaw_gaussianReal: PFE_α(s) = gaussianVaR m (σ√s) Φ⁻¹(α). This is the raw α-quantile of V_s, which equals the standard \"quantile of exposure\" PFE only when that quantile is nonnegative.",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.ExposureMeasures\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- Potential future exposure of a Gaussian exposure is the Gaussian VaR of its own law. -/\ntheorem potential_future_exposure_gaussian {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} {Z : Ω₁ → ℝ}\n    (hZ : HasLaw Z (gaussianReal 0 1) ν) (m σ s α : ℝ) (hσ : 0 ≤ σ)\n    (hα : α ∈ Ioo 0 1) :\n    CVA.potentialFutureExposure (fun s ω ↦ m + σ * √s * Z ω) ν s α\n      = gaussianVaR m (σ * √s) (PhiInv α) :=\n  MathFin.CVA.potentialFutureExposure_gaussian hZ m σ s α hσ hα\n\n"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "J. C. Hull, Options, Futures, and Other Derivatives (CVA/exposure chapter): potential future exposure",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.potentialFutureExposure_gaussian (MathFin/RiskMeasures/ExposureMeasures.lean). SCOPE: PFE is defined as the genuine value-at-risk MathFin.valueAtRisk of the exposure process's own law, never a bare closed form; the Gaussian instance composes the derived law of V_s (via the Gaussian-stability lemmas gaussianReal_const_mul/gaussianReal_const_add) with the general valueAtRisk_of_hasLaw_gaussianReal. This entry proves the raw α-quantile of V_s; it matches Hull's \"quantile of exposure\" PFE only when that quantile is nonnegative (the Gaussian closed form here can be negative). Single fixed time slice s, single Gaussian driver."
+      }
+    },
+    {
+      "id": "mf-netting-exposure-subadditivity",
+      "name": "Netting Reduces Exposure: Subadditivity of Positive Part Under Summation",
+      "domain": "mathematical_finance",
+      "description": "For a finite family of integrable real-valued exposures V : ι → Ω → ℝ on a common measure, E[(Σᵢ Vᵢ)+] ≤ Σᵢ E[Vᵢ+] — netting a portfolio of exposures under one counterparty never increases expected positive exposure. Proved via the pointwise subadditivity of max(·,0) (max_add_add_le_max_add_max), summed over the finite index set, then integrated.",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.ExposureMeasures\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- Netting reduces expected positive exposure. -/\ntheorem netting_exposure_subadditivity {Ω₁ ι : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} (s : Finset ι) {V : ι → Ω₁ → ℝ} (hV : ∀ i ∈ s, Integrable (V i) ν) :\n    ∫ ω, max (∑ i ∈ s, V i ω) 0 ∂ν ≤ ∑ i ∈ s, ∫ ω, max (V i ω) 0 ∂ν :=\n  MathFin.CVA.integral_posPart_finsetSum_le s hV\n\n"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "McNeil, Frey, Embrechts, Quantitative Risk Management (netting of credit exposures); J. C. Hull, Options, Futures, and Other Derivatives (netting agreements)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.integral_posPart_finsetSum_le (MathFin/RiskMeasures/ExposureMeasures.lean). SCOPE: a genuine finite-sum subadditivity inequality for integrable real-valued exposures sharing one measure; no netting-set/collateral mechanics beyond the inequality itself."
+      }
+    },
+    {
+      "id": "mf-collateralized-exposure-brownian",
+      "name": "Collateralized Exposure Under a Brownian-Driven Process, in Closed Form",
+      "domain": "mathematical_finance",
+      "description": "For an exposure V_t = m + σ B_t driven by an actual pre-Brownian motion B (IsPreBrownianReal), lagged collateral C_t = V_{t-Δ} substituted as a real earlier value of the same process, σ > 0 and 0 < Δ ≤ t: E[(V_t - V_{t-Δ})+] = σ√Δ · φ(0). The law of the collateralized difference σ(B_t - B_{t-Δ}) is derived from the Brownian increment's law (hasLaw_increment), standardized to a driver Z ~ N(0,1), and fed into the Gaussian expected-exposure closed form.",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.CollateralizedExposureBrownian\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- Collateralized exposure under a Brownian-driven process, in closed form. -/\ntheorem collateralized_exposure_brownian {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B P) (m σ : ℝ)\n    (hσ : 0 < σ) {Δ t : ℝ≥0} (hΔpos : 0 < Δ) (hΔt : Δ ≤ t) :\n    ∫ ω, CVA.collateralizedExposure (fun t ω ↦ m + σ * B t ω) Δ t ω ∂P\n      = σ * √(Δ : ℝ) * gaussianPDFReal 0 1 0 :=\n  MathFin.CVA.collateralizedExposure_brownian_gaussian hB m σ hσ hΔpos hΔt\n\n"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "J. C. Hull, Options, Futures, and Other Derivatives (collateralized exposure / CSAs)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.collateralizedExposure_brownian_gaussian (MathFin/RiskMeasures/CollateralizedExposureBrownian.lean). SCOPE: the law of the lagged increment is DERIVED (not hypothesized) from MathFin's own hasLaw_increment (from the Brownian process's finite-dimensional Gaussian laws), standardized to a unit-normal driver by hasLaw_sub_div_of_gaussianReal; the closed form follows from CVA.expectedExposure_gaussian at mean zero, with the σ-scale as its volatility parameter. Single collateral lag Δ, one Brownian driver; no margin-call dynamics beyond the fixed lag."
+      }
+    },
+    {
+      "id": "mf-dva-cva-mirror",
+      "name": "DVA as a Structural Mirror of CVA",
+      "domain": "mathematical_finance",
+      "description": "Debt valuation adjustment is the counterparty's expected loss — equivalently, the bank's own gain — on the bank's own default: dva is defined as CVA.cva applied to the bank's own default time and the exposure seen from the bank's side, -V. dva_gaussian is the Gaussian closed form, a genuine corollary of CVA.cva_gaussian applied to the mirrored exposure -(m(s)+σ(s)√s Z) = -m(s)+σ(s)√s·(-Z), using gaussianReal_neg to keep the driver standard normal.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.DVA\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- DVA with a Gaussian exposure, the structural mirror of CVA.cva_gaussian. -/\ntheorem dva_cva_mirror {Ω₁ Ω₂ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {m₂ : MeasurableSpace Ω₂} {ν : Measure Ω₁} {μ : Measure Ω₂} [IsProbabilityMeasure ν]\n    [IsProbabilityMeasure μ] {h : ℝ → ℝ} (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s)\n    {τBank : Ω₂ → ℝ} (hτ : Measurable τBank)\n    (hcdf : ∀ a, 0 ≤ a → μ {ω | τBank ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival h a))\n    {D : ℝ → ℝ} (hD : Measurable D) {C : ℝ} (hDb : ∀ s, |D s| ≤ C) {m σ : ℝ → ℝ}\n    (hm : Measurable m) (hσ : Measurable σ) {M S : ℝ} (hmb : ∀ s, |m s| ≤ M)\n    (hσpos : ∀ s, 0 < σ s) (hσb : ∀ s, σ s ≤ S) {Z : Ω₁ → ℝ} (hZm : Measurable Z)\n    (hZ : HasLaw Z (gaussianReal 0 1) ν) (LGDBank : ℝ) {T : ℝ} (hT : 0 ≤ T) :\n    CVA.dva LGDBank D (fun s ω ↦ m s + σ s * √s * Z ω) τBank T ν μ\n      = LGDBank * ∫ s in (0:ℝ)..T, D s * ((-m s) * Phi ((-m s) / (σ s * √s))\n          + σ s * √s * gaussianPDFReal 0 1 ((-m s) / (σ s * √s))) * DefaultDensity.defaultDensity h s :=\n  MathFin.CVA.dva_gaussian hh hnn hτ hcdf hD hDb hm hσ hmb hσpos hσb hZm hZ LGDBank hT\n\n"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "J. C. Hull, Options, Futures, and Other Derivatives (bilateral CVA/DVA)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.dva_gaussian (MathFin/FixedIncome/DVA.lean). SCOPE: dva is defined as cva applied to the negated exposure and the bank's own default time; dva_gaussian is a genuine corollary of cva_gaussian via gaussianReal_neg. Single-factor mirror only: the bank's own default is independent of the exposure (cva's own assumption, read for the bank's side), not a jointly-modelled bilateral default between bank and counterparty."
+      }
     }
   ]
 }

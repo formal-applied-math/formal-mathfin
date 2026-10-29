@@ -563,6 +563,8 @@ import MathFin.FixedIncome.DefaultDensity
 -- CVA under exposure independent of default (Fubini reduction; Gaussian expected exposure in
 -- closed form)
 import MathFin.FixedIncome.CVA
+-- DVA as a genuine corollary of CVA: negate the exposure, swap in the bank's own default time
+import MathFin.FixedIncome.DVA
 -- Phase 41: Vasicek SDE closed-form (full SDE, mean + variance)
 import MathFin.FixedIncome.VasicekSDE
 -- OU generator on polynomials: the Hermite spectral layer of the OU/Vasicek family
@@ -643,6 +645,11 @@ import MathFin.RiskMeasures.WorstCaseRisk
 -- Gaussian closed forms identified as the VaR of the law at z = Φ⁻¹(α)
 import MathFin.RiskMeasures.ValueAtRisk
 import MathFin.RiskMeasures.GaussianValueAtRisk
+-- Expected negative exposure, exposure VaR (PFE) and netting subadditivity, built on the real
+-- CVA expected-exposure substrate; collateralized exposure under an actual Brownian-driven
+-- process (lagged collateral is a real earlier value of the process, not an opaque scalar)
+import MathFin.RiskMeasures.ExposureMeasures
+import MathFin.RiskMeasures.CollateralizedExposureBrownian
 -- Expected shortfall: Rockafellar–Uryasev for every law, coherence, dual representation; the
 -- Gaussian ES closed form; VaR by bisection; VaR superadditivity; closed forms and tail ratios;
 -- VaR and ES of the Student-t law (McNeil–Frey–Embrechts closed forms); elicitability
