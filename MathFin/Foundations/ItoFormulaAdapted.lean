@@ -45,7 +45,9 @@ four sums converge at almost every `ω`, and the path-level statement `ito_formu
 finishes.
 
 The statement is at the terminal time `T`, for bounded coefficients and bounded derivatives.
-Localisation to unbounded `f'`, `f''` or coefficients is not here.
+`ItoFormulaAdaptedTD` extends it to every `f ∈ C²`, and to `f(t, x)`, at each `t ≤ T`, with the
+stochastic integral read as a limit in probability of Riemann sums, and
+`ItoFormulaAdaptedUnbounded` to unbounded coefficients.
 -/
 
 @[expose] public section

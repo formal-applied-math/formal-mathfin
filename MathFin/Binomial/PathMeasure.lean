@@ -35,6 +35,8 @@ library's other probabilistic form of the price, `binomialPrice_eq_integral_conv
   over the `2^N` flip sequences weighted by their probabilities.
 * `binomialPrice_eq_sum` — the backward recursion unrolled into that finite sum.
 * `binomialPrice_eq_integral_coinFlipMeasure` — the price as an expectation over paths.
+* `measurable_spotPath`, `abs_spotPath_le` — the spot after `k` flips is a measurable, bounded
+  function of the path.
 -/
 
 @[expose] public section
@@ -174,5 +176,20 @@ theorem binomialPrice_eq_integral_coinFlipMeasure (u d r : ℝ) (g : ℝ → ℝ
         (integral_comp_flips q hq N fun x ↦ g (S₀ * ∏ i, if x i then u else d)).symm
     _ = ∫ ω, g (spotPath S₀ u d N ω) ∂coinFlipMeasure q hq :=
         integral_congr_ae (ae_of_all _ fun ω ↦ (hspot ω).symm)
+
+/-- The spot after `k` flips is a measurable function of the path. -/
+theorem measurable_spotPath (S₀ u d : ℝ) (k : ℕ) : Measurable (spotPath S₀ u d k) :=
+  measurable_const.mul (Finset.measurable_prod _ fun i _ ↦
+    (measurable_of_countable fun b : Bool ↦ if b then u else d).comp (measurable_pi_apply i))
+
+/-- The spot after `k` flips is at most `|S₀| · max(|u|, |d|)ᵏ` in absolute value, along every
+path. -/
+theorem abs_spotPath_le (S₀ u d : ℝ) (k : ℕ) (ω : ℕ → Bool) :
+    |spotPath S₀ u d k ω| ≤ |S₀| * max |u| |d| ^ k := by
+  rw [spotPath, abs_mul, abs_prod]
+  gcongr
+  calc ∏ i ∈ range k, |if ω i then u else d| ≤ ∏ _i ∈ range k, max |u| |d| :=
+        prod_le_prod (fun _ _ ↦ abs_nonneg _) fun i _ ↦ by split_ifs <;> simp
+    _ = max |u| |d| ^ k := by simp
 
 end MathFin
