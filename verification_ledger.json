@@ -1620,12 +1620,19 @@
       "input_hash": "d89367b715aebf9e172e59bfd7360cf21c2a9b7c44e58142be3a2bfa8977692f",
       "verified_at_commit": "952a40b"
     },
+    "mf-contract-binomial-hedge": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-29",
+      "elapsed_s": 5.6,
+      "input_hash": "e962d22c17cd5be8be7fc131600b5626fbf7bf35bea0abef6bcbabb76a36c335",
+      "verified_at_commit": "50edcaa"
+    },
     "mf-contract-binomial-to-black-scholes": {
       "benchmark_file": "contracts.json",
-      "date": "2026-10-28",
-      "elapsed_s": 18.8,
-      "input_hash": "b11df1bf6f60ab46c95ed964b24ee31b761398dcaae8bde4f2be84e6a63e48e7",
-      "verified_at_commit": "436150e"
+      "date": "2026-10-29",
+      "elapsed_s": 5.4,
+      "input_hash": "051d6465fd882318ed3241a35b3ef1b1d899cfe5a5701aaaa876797e5742ecfa",
+      "verified_at_commit": "50edcaa"
     },
     "mf-contract-bounded-model-integrable": {
       "benchmark_file": "contracts.json",
