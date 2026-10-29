@@ -794,6 +794,13 @@
       "input_hash": "3097fd6d25fc8226928e60cb3c51377eb45e0bfb0d12972c3ec68db437427b89",
       "verified_at_commit": "436150e"
     },
+    "mf-binomial-european-replication": {
+      "benchmark_file": "binomial.json",
+      "date": "2026-10-29",
+      "elapsed_s": 102.5,
+      "input_hash": "4c434dd7a802c1e16e86bae8021d59244df61629387d96b01807e9a994b59305",
+      "verified_at_commit": "952a40b"
+    },
     "mf-binomial-girsanov-RN-norm": {
       "benchmark_file": "binomial.json",
       "date": "2026-10-23",
@@ -1601,17 +1608,17 @@
     },
     "mf-contract-binomial-capped-call": {
       "benchmark_file": "contracts.json",
-      "date": "2026-10-28",
-      "elapsed_s": 24.4,
-      "input_hash": "8cfffa59a711d3112c804e383fef2ff10446ebb164c067c8cd7d23a46b4c4416",
-      "verified_at_commit": "436150e"
+      "date": "2026-10-29",
+      "elapsed_s": 106.6,
+      "input_hash": "bf9c4276d04a1e34dc1c1213715755adf625d76eb3b412ca99f9cd552f6ab9a1",
+      "verified_at_commit": "952a40b"
     },
     "mf-contract-binomial-european-payoff": {
       "benchmark_file": "contracts.json",
-      "date": "2026-10-28",
-      "elapsed_s": 48.2,
-      "input_hash": "e96148a876d96cc4e097389b7eb254b8864c517a8b585174111faefa72cac01b",
-      "verified_at_commit": "436150e"
+      "date": "2026-10-29",
+      "elapsed_s": 171.3,
+      "input_hash": "d89367b715aebf9e172e59bfd7360cf21c2a9b7c44e58142be3a2bfa8977692f",
+      "verified_at_commit": "952a40b"
     },
     "mf-contract-binomial-to-black-scholes": {
       "benchmark_file": "contracts.json",
