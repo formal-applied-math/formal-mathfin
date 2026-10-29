@@ -17,26 +17,28 @@ public import MathFin.Foundations.ItoFormulaAdaptedDrift
 /-! # Gyöngy mimicry — the generator-matching core and the weak forward equation
 
 Bagaria ch. 9 / Thm 9.6 (Gyöngy 1986): for an Itô process `dX_t = β_t dt + δ_t dW_t` with
-bounded adapted `β, δ`, the Markov diffusion with coefficients
+bounded adapted `β, δ` and uniformly nondegenerate diffusion (`δ_t² ≥ λ > 0`), the Markov
+diffusion with coefficients
 `a(t, x) = 𝔼[β_t | X_t = x]`, `b²(t, x) = 𝔼[δ_t² | X_t = x]` has the same one-time
-marginals as `X`. The full theorem is gated on the existence of the mimicking diffusion `Y`
-(an SDE with merely-measurable coefficients — outside MathFin's Lipschitz/Picard
-`SDEExistence.lean`); what this module builds is the proof's engine:
+marginals as `X`. The existence and uniqueness of the mimicking diffusion `Y` (an SDE with
+merely-measurable coefficients, outside MathFin's Lipschitz/Picard `SDEExistence.lean`) are
+not proved; this module proves the generator-matching part of the argument and states the
+mimicry under a flow-uniqueness hypothesis:
 
 * the **generator-matching identities** `𝔼[f'(X_t) β_t] = 𝔼[f'(X_t) a_t]` and
   `𝔼[f''(X_t) δ_t²] = 𝔼[f''(X_t) b²_t]` (tower step + Doob–Dynkin measurability);
 * the **weak forward equation** for the marginal flow of the *constructed* adapted
   process — the dynamics carried as explicit data (`X t = c + driftPath β t + M t`, `M`
-  pinned to the CLM Itô integral by `hMeq`; the honest stand-in for a general
-  Itô-decomposition predicate):
+  pinned to the CLM Itô integral by `hMeq`, in place of a general Itô-decomposition
+  predicate):
   * `marginal_flow_weak_equation_constructed` — the `HasDerivAt` form at `t` with
     `Real.toNNReal t < T`;
   * `marginal_flow_weak_equation_fn_constructed` — the same with the
     conditional-expectation coefficients replaced by Borel coefficient functions
     `â, b̂² : ℝ → ℝ → ℝ` (the Doob–Dynkin upgrade);
 * the **Doob–Dynkin coefficient-function layer** (`exists_driftCoeff_fn`,
-  `exists_diffCoeffSq_fn`) and the gated headline `gyongy_mimicry_gated` —
-  one-time-marginal mimicry of `X` by a data-carried `Y`, modulo the flow-uniqueness gate.
+  `exists_diffCoeffSq_fn`) and `gyongy_mimicry_gated` — one-time-marginal mimicry of `X`
+  by a given `Y`, under a flow-uniqueness hypothesis.
 
 This module consumes the adapted integrated Itô–drift identity
 (`ItoDriftConditional.itoDrift_expectation_identity_adapted`), the cross-horizon
@@ -48,7 +50,7 @@ consistency of the CLM integral (`ae_eq_itoProcessCLM_min`,
 
 Public API (all in namespace `MathFin.GyongyMimicry`):
 
-* `BoundedItoProcess` — the Itô-decomposition data as hypotheses (the honest stand-in);
+* `BoundedCoeffData` — bounded, path-continuous `X, β, δ` (the Itô relation is not a field);
 * `sigmaGen`, `driftCoeff`, `diffCoeffSq` — the conditioning σ-algebra and the Gyöngy
   coefficients as conditional expectations;
 * `tower_identity`, `expectation_beta_eq_a`, `expectation_deltaSq_eq_b2` — the
@@ -59,15 +61,14 @@ Public API (all in namespace `MathFin.GyongyMimicry`):
   `generatorIntegrand` — the measure-theory and integrability utilities of the core
   (`sigmaGen_le` and `stronglyMeasurable_test` are consumed by `MathFin.Dupire`);
 * `reindexed`, `stronglyMeasurable_X_hXrel` — the real-time reindexing `t ↦ X_{t⁺}` and
-  the adaptedness lemma for the constructed instance's measurability fields
-  (`reindexed` is consumed by `MathFin.Dupire`; `stronglyMeasurable_X_hXrel` by
-  `constructedBoundedItoProcess`'s `hXmeas`/`hXadapted` fields);
+  the adaptedness lemma behind the constructed instance's measurability field
+  (`reindexed` is consumed by `MathFin.Dupire`);
 * `timeMeasure_Ioc_eq_interval` — the `timeMeasure` → `intervalIntegral` bridge;
-* `constructedBoundedItoProcess`, `constructedGenIntegrandExp` (+ `_coe`), the discharged
-  drift hypotheses `hitoid_constructed_terminal` / `hitoid_constructed_band`, and the weak
+* `constructedCoeffData`, `constructedGenIntegrandExp` (+ `_coe`), the integrated drift
+  identities `hitoid_constructed_terminal` / `hitoid_constructed_band`, and the weak
   forward equation in both forms;
 * `exists_driftCoeff_fn`, `exists_diffCoeffSq_fn`, `marginal_flow_weak_equation_fn_constructed`,
-  `gyongy_mimicry_gated` — the coefficient-function layer and the gated headline.
+  `gyongy_mimicry_gated` — the coefficient functions and the mimicry statement.
 
 Supporting lemmas (`integrable_testβ`, `integrable_testδsq`, `hasDerivAt_marginal_flow_core`,
 `constructedGenIntegrandExp_eq`, `exists_coeffFn_comp`,
@@ -84,44 +85,31 @@ open scoped Interval
 
 section Process
 
-/-- A one-dimensional Itô process with bounded coefficients, in the shape the
-generator-matching core consumes: a triple of processes `X, β, δ` against a filtration `ℱ`,
-with `X` carrying the dynamics `dX = β dt + δ dW` (the decomposition itself is *not* encoded
-here — it enters through the Itô-drift hypothesis `hitoid` of the marginal-flow engine
-(`GyongyMimicry.hasDerivAt_marginal_flow_core`); see the module docstring for the gating).
+/-- Bounded, path-continuous coefficient data; the Itô relation is not a field. A triple of
+processes `X, β, δ` with `|β| ≤ B`, `|δ| ≤ D`, each measurable at every time and continuous in
+time along every path. The dynamics `dX = β dt + δ dW` enter only through the integrated
+Itô-drift hypothesis `hitoid` of `GyongyMimicry.hasDerivAt_marginal_flow_core`, which
+`constructedCoeffData` supplies for the constructed process.
 
-Adaptedness (`hXadapted` etc.) is recorded because it is what makes `β, δ` admissible Itô
-integrand/drift data (provenance: MathFin's `ItoIntegralL2.natFiltration`-adapted
-integrands), but the generator-matching core is a per-time statement and does not use it.
-
-Path continuity (`hXcont` etc.) is the pointwise input of
-`GyongyMimicry.continuous_marginal_integrand`, which *proves* the derivative/expectation
-interchange instead of carrying it as a hypothesis. The full Gyöngy theorem needs
-no path continuity (there the marginal-flow identity holds only a.e. in `t`); continuity in
-`s` is what upgrades the weak equation to *every* time `t`, and is recorded here as data. -/
-structure BoundedItoProcess (Ω : Type*) [mΩ : MeasurableSpace Ω] where
-  /-- the state process `X_t = X_0 + ∫β + ∫δ dW` (the decomposition itself is hypothesized
-  through `hitoid` at the consumers) -/
+Path continuity is the pointwise input of `GyongyMimicry.continuous_marginal_integrand`,
+which proves the derivative/expectation interchange; it is what makes the weak equation hold
+at every time `t` rather than for almost every `t`. -/
+structure BoundedCoeffData (Ω : Type*) [mΩ : MeasurableSpace Ω] where
+  /-- the state process -/
   X : ℝ → Ω → ℝ
   /-- the drift rate process, `|β_t| ≤ B` -/
   β : ℝ → Ω → ℝ
   /-- the diffusion coefficient process, `|δ_t| ≤ D` -/
   δ : ℝ → Ω → ℝ
-  /-- the filtration the coefficients are adapted to -/
-  ℱ : ℝ → MeasurableSpace Ω
   /-- the (constant) bound on the drift rate -/
   B : ℝ
   /-- the (constant) bound on the diffusion coefficient -/
   D : ℝ
   Bpos : 0 ≤ B
   Dpos : 0 ≤ D
-  hFle : ∀ t, ℱ t ≤ mΩ
   hXmeas : ∀ t, Measurable (X t)
   hβmeas : ∀ t, Measurable (β t)
   hδmeas : ∀ t, Measurable (δ t)
-  hXadapted : ∀ t, StronglyMeasurable[ℱ t] (X t)
-  hβadapted : ∀ t, StronglyMeasurable[ℱ t] (β t)
-  hδadapted : ∀ t, StronglyMeasurable[ℱ t] (δ t)
   hβbdd : ∀ t ω, |β t ω| ≤ B
   hδbdd : ∀ t ω, |δ t ω| ≤ D
   /- path continuity -/
@@ -227,7 +215,7 @@ section Matching
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
 
 /-- Integrability of the drift test-product `f'(X_t) · β_t`, from the two bounds. -/
-private theorem integrable_testβ (P : BoundedItoProcess Ω) (t : ℝ) {f' : ℝ → ℝ}
+private theorem integrable_testβ (P : BoundedCoeffData Ω) (t : ℝ) {f' : ℝ → ℝ}
     (hf'meas : Measurable f') {C : ℝ} (hfbdd : ∀ x, |f' x| ≤ C) :
     Integrable (fun ω => f' (P.X t ω) * P.β t ω) μ := by
   refine integrable_of_bounded ((hf'meas.comp (P.hXmeas t)).mul (P.hβmeas t)) (C * P.B)
@@ -239,7 +227,7 @@ private theorem integrable_testβ (P : BoundedItoProcess Ω) (t : ℝ) {f' : ℝ
         (le_trans (abs_nonneg _) (hfbdd 0))
 
 /-- Integrability of the diffusion test-product `f''(X_t) · δ_t²`, from the two bounds. -/
-private theorem integrable_testδsq (P : BoundedItoProcess Ω) (t : ℝ) {f'' : ℝ → ℝ}
+private theorem integrable_testδsq (P : BoundedCoeffData Ω) (t : ℝ) {f'' : ℝ → ℝ}
     (hf''meas : Measurable f'') {C : ℝ} (hfbdd : ∀ x, |f'' x| ≤ C) :
     Integrable (fun ω => f'' (P.X t ω) * (P.δ t ω * P.δ t ω)) μ := by
   refine integrable_of_bounded
@@ -260,7 +248,7 @@ private theorem integrable_testδsq (P : BoundedItoProcess Ω) (t : ℝ) {f'' : 
 /-- **Generator matching, drift** (Bagaria ch. 9 / Thm 9.6, first tower step):
 `𝔼[f'(X_t) · β_t] = 𝔼[f'(X_t) · a_t]` — `f'(X_t)` is a function of `X_t` alone, so it
 passes through the conditional expectation as a constant. -/
-theorem expectation_beta_eq_a (P : BoundedItoProcess Ω) (t : ℝ) {f' : ℝ → ℝ}
+theorem expectation_beta_eq_a (P : BoundedCoeffData Ω) (t : ℝ) {f' : ℝ → ℝ}
     (hf'meas : Measurable f') {C : ℝ} (hfbdd : ∀ x, |f' x| ≤ C) :
     ∫ ω, f' (P.X t ω) * P.β t ω ∂μ = ∫ ω, f' (P.X t ω) * driftCoeff μ P.X P.β t ω ∂μ :=
   tower_identity (sigmaGen_le P.X t (P.hXmeas t))
@@ -270,7 +258,7 @@ theorem expectation_beta_eq_a (P : BoundedItoProcess Ω) (t : ℝ) {f' : ℝ →
 
 /-- **Generator matching, diffusion** (Bagaria ch. 9 / Thm 9.6, second tower step):
 `𝔼[f''(X_t) · δ_t²] = 𝔼[f''(X_t) · b²_t]`. -/
-theorem expectation_deltaSq_eq_b2 (P : BoundedItoProcess Ω) (t : ℝ) {f'' : ℝ → ℝ}
+theorem expectation_deltaSq_eq_b2 (P : BoundedCoeffData Ω) (t : ℝ) {f'' : ℝ → ℝ}
     (hf''meas : Measurable f'') {C : ℝ} (hfbdd : ∀ x, |f'' x| ≤ C) :
     ∫ ω, f'' (P.X t ω) * (P.δ t ω * P.δ t ω) ∂μ
       = ∫ ω, f'' (P.X t ω) * diffCoeffSq μ P.X P.δ t ω ∂μ :=
@@ -305,7 +293,7 @@ measurable. The filter-form dominated convergence theorem for integrals
 (`MeasureTheory.tendsto_integral_filter_of_dominated_convergence`, index filter `𝓝 t`,
 countably generated because `ℝ` is first-countable) then gives continuity at every `t` —
 no sequential bridging needed. -/
-theorem continuous_marginal_integrand (P : BoundedItoProcess Ω) {f' f'' : ℝ → ℝ}
+theorem continuous_marginal_integrand (P : BoundedCoeffData Ω) {f' f'' : ℝ → ℝ}
     (hf'cont : Continuous f') (hf''cont : Continuous f'')
     {C1 C2 : ℝ} (hf'bd : ∀ x, |f' x| ≤ C1) (hf''bd : ∀ x, |f'' x| ≤ C2) :
     Continuous (fun s => ∫ ω, generatorIntegrand P.X P.β P.δ f' f'' s ω ∂μ) := by
@@ -392,8 +380,8 @@ continuity of `u` — appear here only as derived `have`s:
 * `hf''meas` — from `h2 : ContDiff ℝ 2 f` plus the `HasDerivAt` chain, via
   `GyongyMimicry.continuous_f2_of_contDiff2` and `Continuous.measurable`;
 * `hucont` — from `GyongyMimicry.continuous_marginal_integrand` (DCT interchange), fed by the
-  path-continuity fields of `BoundedItoProcess` and the derivative bounds. -/
-private theorem hasDerivAt_marginal_flow_core (P : BoundedItoProcess Ω) {f f' f'' : ℝ → ℝ}
+  path-continuity fields of `BoundedCoeffData` and the derivative bounds. -/
+private theorem hasDerivAt_marginal_flow_core (P : BoundedCoeffData Ω) {f f' f'' : ℝ → ℝ}
     (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
     (h2 : ContDiff ℝ 2 f)
     {C1 C2 : ℝ} (hf'bd : ∀ x, |f' x| ≤ C1) (hf''bd : ∀ x, |f'' x| ≤ C2)
@@ -452,7 +440,7 @@ integral over the time band `(0, T]` *is* the Lebesgue integral over `(0, ↑T)`
 coe-reindexing, read as an `intervalIntegral` by `intervalIntegral.integral_of_le`.
 
 Route: `(comap c ν).restrict S = comap c (ν.restrict (c '' S))`
-(`MeasurableEmbedding.restrict_comap` at the MathFin-landed embedding
+(`MeasurableEmbedding.restrict_comap` at the embedding
 `ItoIntegralL2.measurableEmbedding_nnrealCoe`), `map c (comap c ν') = ν'.restrict (range c)`
 (`MeasurableEmbedding.map_comap`, with `range c ⊇ c '' S`), and
 `MeasurableEmbedding.integral_map` moves the integral to the `volume` side. Unconditional:
@@ -505,23 +493,25 @@ open MeasureTheory ProbabilityTheory Filter Topology
 open MathFin ItoIntegralL2 ItoIntegralProcessGeneral
 open scoped NNReal ENNReal
 
-/-! ### The constructed instance — `hitoid` discharged
+/-! ### The constructed instance and its `hitoid`
 
-The concrete instantiation of the abstract `BoundedItoProcess` from the landed adapted
-assembly `ItoDriftConditional.itoDrift_expectation_identity_adapted`, for which the engine's
-`hitoid` is proved below: `X t = c + ∫₀ᵗ β + M t` (`AdaptedDrift.driftPath`-form; `β, δ`
+The concrete instantiation of `BoundedCoeffData` from the adapted integrated Itô-drift
+identity `ItoDriftConditional.itoDrift_expectation_identity_adapted`, for which the
+`hitoid` hypothesis of the marginal-flow core is proved below: `X t = c + ∫₀ᵗ β + M t`
+(`AdaptedDrift.driftPath`-form; `β, δ`
 bounded adapted path-continuous; `M` an adapted version of the CLM Itô integral of `δ` on
 `[0, T]`; `X` path-continuous), reindexed to the real time axis by `t ↦ X_{t⁺}`
 (`Real.toNNReal`).
 
-* `constructedBoundedItoProcess` — the abstract structure's fields, all derived.
-* `constructedGenIntegrandExp` — the genuine generator integrand on the real time axis,
+* `constructedCoeffData` — the abstract structure's fields, all derived.
+* `constructedGenIntegrandExp` — the generator integrand on the real time axis,
   `u x = 𝔼[f'(X_{x⁺})·β_{x⁺}] + ½·𝔼[f''(X_{x⁺})·δ²_{x⁺}]`.
 * `hitoid_constructed_terminal` — the weakened `hitoid` at the horizon `↑T`, with no
   hypotheses beyond the assembly's own.
 * `hitoid_constructed_band` — the `hitoid` on the open band `(0, ↑T)`, the form the
   marginal-flow engine consumes; the horizon consistency of the CLM integral is available
-  (`itoProcessCLM_consist`/`ae_eq_itoProcessCLM_min`), so only the same horizon-`T` pinning `hMeq` as
+  (`itoProcessCLM_consist`/`ae_eq_itoProcessCLM_min`), so only the same horizon-`T` pinning `hMeq`
+  as
   the terminal identity is needed.
 * `marginal_flow_weak_equation_constructed` — **the generator-matching core of Bagaria
   ch. 9 / Thm 9.6 for the constructed process**: on `(0, ↑T)` the marginal flow solves the
@@ -529,12 +519,11 @@ bounded adapted path-continuous; `M` an adapted version of the CLM Itô integral
 
 /-- The real-time reindexing of an `ℝ≥0`-indexed process: negative real times are
 identified with `0` (`X_{t⁺} = X_{max t 0}`). This is the concrete `ℝ`-indexed face of
-the constructed process — and the process of the `BoundedItoProcess` instance below. -/
+the constructed process — and the process of the `BoundedCoeffData` instance below. -/
 abbrev reindexed {Ω : Type*} (X : ℝ≥0 → Ω → ℝ) (s : ℝ) (ω : Ω) : ℝ := X (Real.toNNReal s) ω
 
-/-- The constructed process is adapted (the one new measurability fact of the landed
-assembly, `AdaptedDrift.stronglyMeasurable_driftPath` + `hMadap` through the decomposition
-`hXrel`). -/
+/-- The constructed process is adapted (`AdaptedDrift.stronglyMeasurable_driftPath` + `hMadap`
+through the decomposition `hXrel`). -/
 theorem stronglyMeasurable_X_hXrel
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {B : ℝ≥0 → Ω → ℝ}
     (hBmeas : ∀ t, Measurable (B t))
@@ -548,18 +537,19 @@ theorem stronglyMeasurable_X_hXrel
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
     (t : ℝ≥0) : StronglyMeasurable[natFiltration hBmeas t] (X t) := by
   rw [hXrel t]
-  exact (((AdaptedDrift.stronglyMeasurable_driftPath hBmeas hβadap hβcont hβbdd t).measurable.const_add c).add
+  exact (((AdaptedDrift.stronglyMeasurable_driftPath hBmeas hβadap hβcont hβbdd
+  t).measurable.const_add c).add
     (hMadap t).measurable).stronglyMeasurable
 
-/-- **The concrete `BoundedItoProcess` instance**: the abstract
+/-- **The concrete `BoundedCoeffData` instance**: the abstract
 ℝ-indexed structure of this file, instantiated from the constructed process `X = c + ∫β + M`
 by real-time reindexing `t ↦ t⁺` and the natural Brownian filtration
 `𝓕_s = 𝓕ᴮ_{s⁺}`. Every field is *derived*: measurability of `X` from
-`GyongyMimicry.stronglyMeasurable_X_hXrel` (the decomposition + `AdaptedDrift.stronglyMeasurable_driftPath`),
-adaptedness directly from the assembly's data, path continuity from the assembly's
+`GyongyMimicry.stronglyMeasurable_X_hXrel` (the decomposition +
+`AdaptedDrift.stronglyMeasurable_driftPath`), path continuity from the assembly's
 path-continuity hypotheses composed with `continuous_real_toNNReal`, and the coefficient
 bounds from the assembly's (with `B = |Db|`, `D = |Dd|`). -/
-noncomputable def constructedBoundedItoProcess
+noncomputable def constructedCoeffData
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {B : ℝ≥0 → Ω → ℝ}
     (hBmeas : ∀ t, Measurable (B t))
     {β : ℝ≥0 → Ω → ℝ}
@@ -575,16 +565,14 @@ noncomputable def constructedBoundedItoProcess
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω) :
-    BoundedItoProcess Ω where
+    BoundedCoeffData Ω where
   X := reindexed X
   β := reindexed β
   δ := reindexed δ
-  ℱ := fun s => natFiltration hBmeas (Real.toNNReal s)
   B := |Db|
   D := |Dd|
   Bpos := abs_nonneg Db
   Dpos := abs_nonneg Dd
-  hFle := fun s => (natFiltration hBmeas).le (Real.toNNReal s)
   hXmeas := fun s ↦
     (stronglyMeasurable_X_hXrel hBmeas hβadap hβcont hβbdd hMadap c hXrel
       (Real.toNNReal s)).measurable.mono ((natFiltration hBmeas).le (Real.toNNReal s)) le_rfl
@@ -594,17 +582,13 @@ noncomputable def constructedBoundedItoProcess
   hδmeas := fun s ↦
     (hδadap (Real.toNNReal s)).measurable.mono
       ((natFiltration hBmeas).le (Real.toNNReal s)) le_rfl
-  hXadapted := fun s ↦
-    stronglyMeasurable_X_hXrel hBmeas hβadap hβcont hβbdd hMadap c hXrel (Real.toNNReal s)
-  hβadapted := fun s ↦ hβadap (Real.toNNReal s)
-  hδadapted := fun s ↦ hδadap (Real.toNNReal s)
   hβbdd := fun s ω ↦ (hβbdd (Real.toNNReal s) ω).trans (le_abs_self Db)
   hδbdd := fun s ω ↦ (hδbdd (Real.toNNReal s) ω).trans (le_abs_self Dd)
   hXcont := fun ω ↦ (hXcont ω).comp continuous_real_toNNReal
   hβcont := fun ω ↦ (hβcont ω).comp continuous_real_toNNReal
   hδcont := fun ω ↦ (hδcont ω).comp continuous_real_toNNReal
 
-/-- **The genuine generator integrand of the constructed process, on the real time axis**
+/-- **The generator integrand of the constructed process, on the real time axis**
 (the `u` of the marginal-flow machinery): at real
 time `x` this is
 
@@ -698,9 +682,10 @@ private theorem constructedGenIntegrandExp_eq
         + 1 / 2 * (f'' (reindexed X x ω) * (reindexed δ x ω * reindexed δ x ω))) ∂μ
   rw [integral_add h1 (h2i.const_mul (1 / 2)), integral_const_mul]
 
-/-- **Step (iii), terminal form — the weakened `hitoid` for the constructed instance at the
-horizon**: the integrated Itô–drift identity of the landed assembly, transferred to the
-interval-integral form, for the constructed process and its genuine generator integrand.
+/-- **Terminal form of `hitoid` for the constructed instance, at the horizon**: the
+integrated Itô–drift identity `ItoDriftConditional.itoDrift_expectation_identity_adapted`,
+transferred to the interval-integral form, for the constructed process and its generator
+integrand.
 No hypotheses beyond the assembly's own. -/
 theorem hitoid_constructed_terminal
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
@@ -734,19 +719,18 @@ theorem hitoid_constructed_terminal
   rw [hident, timeMeasure_Ioc_eq_interval]
   rfl
 
-/-- **Band form — the weakened `hitoid` on the open band `(0, ↑T)`: DISCHARGED**. The band
-form the marginal-flow engine consumes (`=ᶠ[𝓝 t]` for `t` in
-the band) is now *proved* from the horizon-`T` pinning `hMeq` — no residual hypothesis:
-the earlier `hMconsist` gap (the same `M` representing the CLM Itô integral at every
-horizon `τ ≤ T`) is closed by `ae_eq_itoProcessCLM_min` (the cross-horizon
-consistency lemma), consumed here through the **frozen reversion** `t ↦ M (min t τ)`:
+/-- **Band form of `hitoid` on the open band `(0, ↑T)`**, the form the marginal-flow core
+consumes (`=ᶠ[𝓝 t]` for `t` in the band), proved from the horizon-`T` pinning `hMeq` alone.
+That the same `M` represents the CLM Itô integral at every horizon `τ ≤ T` is
+`ae_eq_itoProcessCLM_min` (cross-horizon consistency), used through the **frozen
+reversion** `t ↦ M (min t τ)`:
 
 * `ae_eq_itoProcessCLM_min` shows the reversion represents the τ-horizon CLM
   process at *every* time — at `t ≤ τ` by the cross-horizon consistency
   (`itoProcessCLM_consist`), past `τ` by the freeze law
   (`itoProcessCLM_eq_terminal_of_ge`);
 * the reversion is adapted (`𝓕_{min t τ} ≤ 𝓕_t`) and path-continuous (`min` is
-  continuous, `M` is along `X`), so the landed adapted identity re-runs at the interior
+  continuous, `M` is along `X`), so the adapted identity re-runs at the interior
   horizon `τ = ↑s` for the reverted process;
 * the reverted process agrees with `X` *pointwise* at every time `t ≤ τ` (there
   `min t τ = t`), so the identity at the horizon and on the band reads verbatim as the
@@ -816,12 +800,12 @@ theorem hitoid_constructed_band
     intro t ht
     funext ω
     simp only [hXfrz, hMfrz, hXrel t, min_eq_left ht]
-  -- the landed adapted identity, re-run at the interior horizon for the reversion
+  -- the adapted identity, re-run at the interior horizon for the reversion
   have hident := ItoDriftConditional.itoDrift_expectation_identity_adapted hB hBmeas hδadap
     hδcont hδbdd hMadapτ hMeqτ hβadap hβcont hβbdd c (Eventually.of_forall hXfrzcont)
     (fun t => rfl) hf hf'
     hf'' hg1 hg2 hg3 (T := Real.toNNReal s) (M := Mfrz) (X := Xfrz)
-  -- the time-band integrand transfers to the genuine generator integrand of `X`
+  -- the time-band integrand transfers to the generator integrand of `X`
   have hbandeq : ∫ s2 in Set.Ioc (0:ℝ≥0) (Real.toNNReal s),
       ((∫ ω, f' (Xfrz s2 ω) * β s2 ω ∂μ)
         + (1 / 2) * (∫ ω, f'' (Xfrz s2 ω) * (δ s2 ω * δ s2 ω) ∂μ))
@@ -851,13 +835,13 @@ process**,
   `d/dt 𝔼[f(X_{t⁺})] = 𝔼[f'(X_{t⁺}) · a] + ½·𝔼[f''(X_{t⁺}) · b²]`,
   `a = 𝔼[β_{⟨t⟩} | σ(X_{⟨t⟩})]`, `b² = 𝔼[δ²_{⟨t⟩} | σ(X_{⟨t⟩})]`,
 
-driven by the *real* integrated Itô–drift identity (`ItoDriftConditional.itoDrift_expectation_identity_adapted`,
+driven by the *real* integrated Itô–drift identity
+(`ItoDriftConditional.itoDrift_expectation_identity_adapted`,
 transferred) rather than the `hitoid` hypothesis. This is the computation whose
 uniqueness-up-to-marginals content is Gyöngy's theorem; the mimicking diffusion's
-*existence* remains separately gated (see the module docstring). The constructed flow closed the
-last adapter gap: the horizon-consistency of the CLM integral is proved upstream
-(`itoProcessCLM_consist`/`ae_eq_itoProcessCLM_min`), so this theorem needs only the
-same horizon-`T` pinning `hMeq` as the terminal identity — no residual hypothesis. -/
+*existence* is not proved (see the module docstring). The horizon consistency of the CLM
+integral (`itoProcessCLM_consist`/`ae_eq_itoProcessCLM_min`) means this theorem needs only
+the same horizon-`T` pinning `hMeq` as the terminal identity. -/
 theorem marginal_flow_weak_equation_constructed
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
@@ -892,7 +876,7 @@ theorem marginal_flow_weak_equation_constructed
     have h2lt : ((Real.toNNReal t : ℝ)) < (T:ℝ) := NNReal.coe_lt_coe.mpr htT
     rwa [h1] at h2lt
   refine hasDerivAt_marginal_flow_core
-    (constructedBoundedItoProcess hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd hMadap c
+    (constructedCoeffData hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd hMadap c
       hXcont hXrel)
     hf hf' h2 hg1 hg2 (constructedGenIntegrandExp μ X β δ f' f'') ?_ ?_ t ht htlT
   · exact constructedGenIntegrandExp_eq hBmeas hβadap hβcont hβbdd hδadap hδbdd hMadap c
@@ -910,16 +894,16 @@ end Constructed
 
 
 /-!
-# The Doob–Dynkin coefficient-function layer and the gated mimicry (Thm 9.6's Y-side)
+# The Doob–Dynkin coefficient functions and the mimicry statement (Thm 9.6's Y-side)
 
 The Ω-level conditional-expectation coefficients `driftCoeff`/`diffCoeffSq` of the
-*constructed* process are upgraded to genuine Borel coefficient *functions*
+*constructed* process are upgraded to Borel coefficient *functions*
 `â, b̂² : ℝ → ℝ → ℝ` via the Doob–Dynkin lemma
 (`MeasureTheory.StronglyMeasurable.exists_eq_measurable_comp`) — the coefficients of
-Thm 9.6 in genuine `(t, x)` form. On top of it, `gyongy_mimicry_gated` — one-time-marginal
-mimicry of the constructed `X` by a data-carried `Y`, modulo the *flow-uniqueness gate*
-(the test-function form of martingale-problem uniqueness; `Y`'s existence with
-merely-measurable coefficients and weak-uniqueness are the gated remainder).
+Thm 9.6 in `(t, x)` form. On top of it, `gyongy_mimicry_gated` — one-time-marginal
+mimicry of the constructed `X` by a given `Y`, under a *flow-uniqueness hypothesis*
+(the test-function form of martingale-problem uniqueness); `Y`'s existence with
+merely-measurable coefficients and that uniqueness are not proved.
 -/
 
 
@@ -929,7 +913,7 @@ open MeasureTheory ProbabilityTheory Filter Topology
 open MathFin ItoIntegralL2 ItoIntegralProcessGeneral
 open scoped NNReal ENNReal
 
-/-- The general Doob–Dynkin factorization step (private engine of Layer 1): a
+/-- The general Doob–Dynkin factorization step: a
 `σ(X_t)`-strongly-measurable random variable is a Borel function of `X_t` — *pointwise*, with
 a measurable version. This is `MeasureTheory.StronglyMeasurable.exists_eq_measurable_comp`
 (Doob–Dynkin, `FactorsThrough.lean`) read at `sigmaGen X t = Real.measurableSpace.comap (X t)`
@@ -942,13 +926,12 @@ private theorem exists_coeffFn_comp {Ω : Type*} [MeasurableSpace Ω]
   obtain ⟨a, ha, haeq⟩ := hg.exists_eq_measurable_comp
   exact ⟨a, ha.measurable, fun ω => congrFun haeq ω⟩
 
-set_option linter.unusedVariables false in
-/-- **Layer 1, drift coefficient function**: for the
+/-- **Drift coefficient function**: for the
 constructed-process data of the `marginal_flow_weak_equation_constructed` instance (same
 hypotheses shape), Gyöngy's drift coefficient `a_t = 𝔼[β_t | σ(X_t)]` *is* a Borel function
 of the current state, pointwise: `∃ â : ℝ → ℝ`, `Measurable â` and
 `driftCoeff 𝔼 X β t ω = â (X_t ω)` for every `ω` — the `(t, ·)`-section of Thm 9.6's
-`a(t, x) = 𝔼[β_t | X_t = x]` as a genuine deterministic function.
+`a(t, x) = 𝔼[β_t | X_t = x]` as a deterministic function.
 
 Engine: `stronglyMeasurable_condExp` (unconditional in this Mathlib rev) +
 `GyongyMimicry.exists_coeffFn_comp`. Doob–Dynkin needs no dynamics data at all (the
@@ -956,10 +939,8 @@ coefficient's σ(X_t)-strong-measurability is unconditional), so the statement c
 Itô-process hypotheses: it is available at any measurability level of the underlying data,
 in particular for the constructed process of `marginal_flow_weak_equation_constructed`.
 
-Range-side bound note (an optional strengthening, omitted): the condExp a.e. bound
-`|â (X_t ω)| ≤ B` a.e. is *not* included — the honest free form is a.e. only (the
-factorization is pointwise but `|μ[g | m]| ≤ B` holds a.e.), and Layer 2 hypothesizes global
-bounds on the coefficient functions as data instead. OMITTED, marked here. -/
+The bound `|â (X_t ω)| ≤ B` holds only a.e. (the factorization is pointwise but
+`|μ[g | m]| ≤ B` holds a.e.) and is not part of the statement. -/
 theorem exists_driftCoeff_fn
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
     {X : ℝ≥0 → Ω → ℝ} {β : ℝ≥0 → Ω → ℝ} (t : ℝ) :
@@ -968,13 +949,13 @@ theorem exists_driftCoeff_fn
   exists_coeffFn_comp (reindexed X) (driftCoeff μ (reindexed X) (reindexed β) t) t
     stronglyMeasurable_condExp
 
-/-- **Layer 1, squared-diffusion coefficient function**: the twin
+/-- **Squared-diffusion coefficient function**: the twin
 of `GyongyMimicry.exists_driftCoeff_fn` for `b²_t = 𝔼[δ_t² | σ(X_t)]`:
 `∃ b̂² : ℝ → ℝ`, `Measurable b̂²` and `diffCoeffSq 𝔼 X δ t ω = b̂² (X_t ω)` pointwise —
 the `(t, ·)`-section of Thm 9.6's `b²(t, x) = 𝔼[δ_t² | X_t = x]`.
 
-Range-side nonnegativity note (an optional strengthening, omitted): `0 ≤ b̂² x` on the range holds
-only a.e. via `condExp` nonnegativity, and is *not* included. OMITTED, marked here. -/
+Nonnegativity `0 ≤ b̂² (X_t ω)` holds only a.e. (`condExp` nonnegativity) and is not part of
+the statement. -/
 theorem exists_diffCoeffSq_fn
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
     {X : ℝ≥0 → Ω → ℝ} {δ : ℝ≥0 → Ω → ℝ} (t : ℝ) :
@@ -983,17 +964,17 @@ theorem exists_diffCoeffSq_fn
   exists_coeffFn_comp (reindexed X) (diffCoeffSq μ (reindexed X) (reindexed δ) t) t
     stronglyMeasurable_condExp
 
-/-- **Layer 1 headline** — the weak forward equation
+/-- **The weak forward equation in coefficient-function form**: the weak forward equation
 restated with the composed Borel coefficient functions: on the band `(0, ↑T)` the marginal
 flow of the constructed process is differentiable with derivative
 
   `d/dt 𝔼[f(X_{t⁺})] = 𝔼[f'(X_{t⁺}) · â(t, X_{t⁺})] + ½ · 𝔼[f''(X_{t⁺}) · b̂²(t, X_{t⁺})]`,
 
 where `â, b̂² : ℝ → ℝ → ℝ` are any Borel coefficient *functions* representing the Gyöngy
-coefficients pointwise (`hafn`, `hbfn` — provided at every time by `GyongyMimicry.exists_driftCoeff_fn`
-and `GyongyMimicry.exists_diffCoeffSq_fn`). This is the program's first theorem with genuine
-`(t, x)`-form coefficients: the generator no longer mentions the Ω-level conditional
-expectations, only deterministic functions of the state.
+coefficients pointwise (`hafn`, `hbfn` — provided at every time by
+`GyongyMimicry.exists_driftCoeff_fn`
+and `GyongyMimicry.exists_diffCoeffSq_fn`). The generator no longer mentions the Ω-level
+conditional expectations, only deterministic functions of the state.
 
 Proof: `marginal_flow_weak_equation_constructed` plus funext-level congruence transport of the
 two integrands (the representations are pointwise `∀ ω`, so `integral_congr_ae` needs no
@@ -1050,8 +1031,8 @@ theorem marginal_flow_weak_equation_fn_constructed
   exact marginal_flow_weak_equation_constructed hB hBmeas hβadap hβcont hβbdd hδadap hδcont
     hδbdd hMadap hMeq c hXcont hXrel hf hf' h2 hf'' hg1 hg2 hg3 t ht htT
 
-/-- The Layer-1 congruence transport at the level of the constructed generator integrand
-(private engine of Layer 2): `constructedGenIntegrandExp` — the Ω-level conditional
+/-- The congruence transport at the level of the constructed generator integrand:
+`constructedGenIntegrandExp` — the Ω-level conditional
 expectation form `𝔼[f'(X_{x⁺})·β_{x⁺}] + ½·𝔼[f''(X_{x⁺})·δ²_{x⁺}]` — equals the
 coefficient-function form `𝔼[f'(X_{x⁺})·â(x, X_{x⁺})] + ½·𝔼[f''(X_{x⁺})·b̂²(x, X_{x⁺})]`
 whenever `afn`/`bfn` represent the Gyöngy coefficients pointwise. Route: the two
@@ -1096,7 +1077,7 @@ private theorem constructedGenIntegrandExp_fn
         = (∫ ω, f' (reindexed X x ω)
             * driftCoeff μ (reindexed X) (reindexed β) x ω ∂μ) :=
           expectation_beta_eq_a
-            (constructedBoundedItoProcess hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd
+            (constructedCoeffData hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd
               hMadap c hXcont hXrel) x hf'meas hg1
       _ = (∫ ω, f' (X (Real.toNNReal x) ω) * afn x (X (Real.toNNReal x) ω) ∂μ) :=
           integral_congr_ae (Eventually.of_forall fun ω => by
@@ -1109,7 +1090,7 @@ private theorem constructedGenIntegrandExp_fn
         = (∫ ω, f'' (reindexed X x ω)
             * diffCoeffSq μ (reindexed X) (reindexed δ) x ω ∂μ) :=
           expectation_deltaSq_eq_b2
-            (constructedBoundedItoProcess hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd
+            (constructedCoeffData hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd
               hMadap c hXcont hXrel) x hf''meas hg2
       _ = (∫ ω, f'' (X (Real.toNNReal x) ω) * bfn x (X (Real.toNNReal x) ω) ∂μ) :=
           integral_congr_ae (Eventually.of_forall fun ω => by
@@ -1121,9 +1102,9 @@ private theorem constructedGenIntegrandExp_fn
   rw [e1, e2]
 
 /-- The integrated forward identity of the constructed process in **coefficient-function
-form**, on the whole time band `(0, ↑T]` (private engine of Layer 2): for every test
+form**, on the whole time band `(0, ↑T]`: for every test
 function of the class, `∫ g(X_{s⁺}) = ∫ g(X_0) + ∫_{(0,s]} (𝔼[g'(X_{x⁺})·â(x, X_{x⁺})] +
-½ 𝔼[g''(X_{x⁺})·b̂²(x, X_{x⁺})]) dx`. Assembled from the two landed `hitoid` forms —
+½ 𝔼[g''(X_{x⁺})·b̂²(x, X_{x⁺})]) dx`. Assembled from the two `hitoid` forms —
 `hitoid_constructed_band` on the open band, `hitoid_constructed_terminal` at the horizon —
 with the integrand transported by `GyongyMimicry.constructedGenIntegrandExp_fn`. -/
 private theorem hitoid_constructed_fn_Ioc
@@ -1187,47 +1168,43 @@ private theorem hitoid_constructed_fn_Ioc
       intervalIntegral.integral_congr fun x _ => htr x
     rw [hterm, hI]
 
-/-! ### Layer 2 — gated constructed-process mimicry (the Thm 9.6 headline)
+/-! ### Mimicry under a flow-uniqueness hypothesis (the Thm 9.6 conclusion)
 
-The mimicking process `Y` is carried as **data** on its own probability space (`ν`), *not*
-constructed (weak existence for merely-measurable coefficients is precisely what the
-gate hypotheses defer);
-the Y-side dynamics enter as the integrated forward identity `hyflow` (the expectation
-characterization — an expectation characterization suffices for the mimicry conclusion,
-which is distributional). The analytic core — uniqueness of measure-flow
-solutions of the deterministic-coefficient weak forward equation — is carried as the
-explicit hypothesis `hgate` (the `hestonTransform_expectation_gated` house pattern:
-the named gate isolates exactly what is not provable at this pin).
+The mimicking process `Y` is given on its own probability space (`ν`), *not* constructed
+(weak existence for merely-measurable coefficients is not proved); its dynamics enter as the
+integrated forward identity `hyflow`, which suffices because the conclusion is
+distributional. Uniqueness of measure-flow solutions of the deterministic-coefficient weak
+forward equation is the explicit hypothesis `hgate`.
 
-The assembly: after Layer 1 the forward equation's right-hand side depends on the process
-only through its current one-time marginal, so the law flows `s ↦ ν.map (Y s)` and
-`s ↦ μ.map (X_{s⁺})` both solve the *same* measure-level equation from the same initial law,
-and the gate converts the two flow-solutions into equal one-time marginals. -/
+After `marginal_flow_weak_equation_fn_constructed` the forward equation's right-hand side
+depends on the process only through its current one-time marginal, so the law flows
+`s ↦ ν.map (Y s)` and `s ↦ μ.map (X_{s⁺})` both solve the *same* measure-level equation from
+the same initial law, and `hgate` turns the two solutions into equal one-time marginals. -/
 
-set_option linter.unusedVariables false in
-/-- **Layer 2 headline — Thm 9.6's one-time-marginal mimicry modulo
-the named flow-uniqueness gate.** Given
+/-- **Thm 9.6's one-time-marginal mimicry, under a flow-uniqueness hypothesis.** Given
 
-* (i) the constructed `X` of the Layer-1 weak forward equation with coefficient functions
-  `afn = â`, `bfn = b̂²` (Borel, representing the Gyöngy coefficients pointwise);
+* (i) the constructed `X` of `marginal_flow_weak_equation_fn_constructed` with coefficient
+  functions `afn = â`, `bfn = b̂²` (Borel, representing the Gyöngy coefficients pointwise);
 * (ii) `hyflow` — the Y-side integrated forward identity for the test class: for every
-  `C²`-bounded-derivative test function (with the third-derivative data the X-side
-  substrate requires), `∫ f(Y_s) = ∫ f(Y_0) + ∫_{(0,s]} (𝔼[f'(Y_x)·â(x, Y_x)] +
-  ½ 𝔼[f''(Y_x)·b̂²(x, Y_x)]) dx` on `s ∈ (0, ↑T]` — the expectation characterization of
-  `dY = â(t,Y) dt + b(t,Y) dW`, `Y`'s existence thereby carried as data;
+  `C²` test function with bounded first, second and third derivatives (the third
+  derivative is what the X-side identities require), `∫ f(Y_s) = ∫ f(Y_0) +
+  ∫_{(0,s]} (𝔼[f'(Y_x)·â(x, Y_x)] + ½ 𝔼[f''(Y_x)·b̂²(x, Y_x)]) dx` on `s ∈ (0, ↑T]` — the
+  expectation characterization of `dY = â(t,Y) dt + b(t,Y) dW`;
 * (iii) `hY0law` — `Y_0` has the same law as `X_0` (`HasLaw` form);
 * (iv) `hgate` — flow uniqueness: two probability-measure flows solving the weak forward
-  equation of `GyongyMimicry.marginal_flow_weak_equation_fn_constructed` (integrated form, test
-  functions in the class) from the same initial law coincide;
+  equation of `GyongyMimicry.marginal_flow_weak_equation_fn_constructed` (integrated form,
+  every test function of the class) from the same initial law coincide;
 
-then at every `t ∈ (0, ↑T]` and every test `f`, `∫ f(Y_t) ∂ν = ∫ f(X_{t⁺}) ∂μ` — the
-one-time marginals of `Y` mimic those of the constructed `X`, Bagaria ch. 9 / Thm 9.6's
-conclusion modulo the named gate.
+then at every `t ∈ (0, ↑T]` and every `C²` test `f`, `∫ f(Y_t) ∂ν = ∫ f(X_{t⁺}) ∂μ` — the
+one-time marginals of `Y` mimic those of the constructed `X`.
 
-Statement strength: the gate's conclusion is *measure-level* (`ρ s = η s`), so of Thm 9.6's
-test class only the continuity `h2 : ContDiff ℝ 2 f` (through the measurability of `f` in
-the `integral_map` transports) is consumed — the mimicry holds for every `C²`-admissible
-test, not just the third-differentiable class the X-side identities pay for. -/
+No nondegeneracy of `δ` is assumed. Without it (Gyöngy's theorem needs `δ² ≥ λ > 0`) the
+forward equation with the merely measurable coefficients `â, b̂²` can have several
+measure-flow solutions from the same initial law, and then `hgate` is false.
+
+The conclusion is *measure-level* (`ρ s = η s`), so of the test-function data only
+`h2 : ContDiff ℝ 2 f` (through the measurability of `f` in the `integral_map` transports) is
+used for `f`. -/
 theorem gyongy_mimicry_gated
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
@@ -1254,9 +1231,8 @@ theorem gyongy_mimicry_gated
       = afn s (X (Real.toNNReal s) ω))
     (hbfnRep : ∀ (s : ℝ) (ω : Ω), diffCoeffSq μ (reindexed X) (reindexed δ) s ω
       = bfn s (X (Real.toNNReal s) ω))
-    {C1 C2 C3 : ℝ}
     (hY0law : HasLaw (Y 0) (μ.map fun ω => X 0 ω) ν)
-    (hyflow : ∀ (f f' f'' f''' : ℝ → ℝ),
+    (hyflow : ∀ (f f' f'' f''' : ℝ → ℝ) (C1 C2 C3 : ℝ),
       (∀ x, HasDerivAt f (f' x) x) → (∀ x, HasDerivAt f' (f'' x) x) → ContDiff ℝ 2 f →
       (∀ x, HasDerivAt f'' (f''' x) x) →
       (∀ x, |f' x| ≤ C1) → (∀ x, |f'' x| ≤ C2) → (∀ x, |f''' x| ≤ C3) →
@@ -1266,7 +1242,7 @@ theorem gyongy_mimicry_gated
           + 1 / 2 * (∫ ω, f'' (Y x ω) * bfn x (Y x ω) ∂ν)))
     (hgate : ∀ (ρ η : ℝ → Measure ℝ),
       (∀ s, IsProbabilityMeasure (ρ s)) → (∀ s, IsProbabilityMeasure (η s)) →
-      (∀ (g g' g'' g''' : ℝ → ℝ),
+      (∀ (g g' g'' g''' : ℝ → ℝ) (C1 C2 C3 : ℝ),
         (∀ x, HasDerivAt g (g' x) x) → (∀ x, HasDerivAt g' (g'' x) x) → ContDiff ℝ 2 g →
         (∀ x, HasDerivAt g'' (g''' x) x) →
         (∀ x, |g' x| ≤ C1) → (∀ x, |g'' x| ≤ C2) → (∀ x, |g''' x| ≤ C3) →
@@ -1274,7 +1250,7 @@ theorem gyongy_mimicry_gated
         ∫ y, g y ∂(ρ s) = ∫ y, g y ∂(ρ 0)
           + ∫ x in (0)..s, ((∫ y, g' y * afn x y ∂(ρ x))
             + 1 / 2 * (∫ y, g'' y * bfn x y ∂(ρ x)))) →
-      (∀ (g g' g'' g''' : ℝ → ℝ),
+      (∀ (g g' g'' g''' : ℝ → ℝ) (C1 C2 C3 : ℝ),
         (∀ x, HasDerivAt g (g' x) x) → (∀ x, HasDerivAt g' (g'' x) x) → ContDiff ℝ 2 g →
         (∀ x, HasDerivAt g'' (g''' x) x) →
         (∀ x, |g' x| ≤ C1) → (∀ x, |g'' x| ≤ C2) → (∀ x, |g''' x| ≤ C3) →
@@ -1287,13 +1263,13 @@ theorem gyongy_mimicry_gated
     {f : ℝ → ℝ} (h2 : ContDiff ℝ 2 f)
     (t : ℝ) (ht : 0 < t) (htT : t ≤ (T:ℝ)) :
     ∫ ω, f (Y t ω) ∂ν = ∫ ω, f (X (Real.toNNReal t) ω) ∂μ := by
-  -- the X-side state maps are measurable (the constructed instance's own field)
+  -- the X-side state maps are measurable (a field of the constructed instance)
   have hXm : ∀ s : ℝ, Measurable fun ω => X (Real.toNNReal s) ω := fun s =>
-    (constructedBoundedItoProcess hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd hMadap c
+    (constructedCoeffData hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd hMadap c
       hXcont hXrel).hXmeas s
   have hfmeas : Measurable f := h2.continuous.measurable
   -- the Y-side law flow solves the weak forward equation (map form), from `hyflow`
-  have hρflow : ∀ (g g' g'' g''' : ℝ → ℝ),
+  have hρflow : ∀ (g g' g'' g''' : ℝ → ℝ) (C1 C2 C3 : ℝ),
       (∀ x, HasDerivAt g (g' x) x) → (∀ x, HasDerivAt g' (g'' x) x) → ContDiff ℝ 2 g →
       (∀ x, HasDerivAt g'' (g''' x) x) →
       (∀ x, |g' x| ≤ C1) → (∀ x, |g'' x| ≤ C2) → (∀ x, |g''' x| ≤ C3) →
@@ -1301,8 +1277,8 @@ theorem gyongy_mimicry_gated
       ∫ y, g y ∂(Measure.map (Y s) ν) = ∫ y, g y ∂(Measure.map (Y 0) ν)
         + ∫ x in (0)..s, ((∫ y, g' y * afn x y ∂(Measure.map (Y x) ν))
           + 1 / 2 * (∫ y, g'' y * bfn x y ∂(Measure.map (Y x) ν))) := by
-    intro g g' g'' g''' hgd1 hgd2 hgd3 hgd4 hgb1 hgb2 hgb3 s hs
-    have hy := hyflow g g' g'' g''' hgd1 hgd2 hgd3 hgd4 hgb1 hgb2 hgb3 s hs
+    intro g g' g'' g''' C1 C2 C3 hgd1 hgd2 hgd3 hgd4 hgb1 hgb2 hgb3 s hs
+    have hy := hyflow g g' g'' g''' C1 C2 C3 hgd1 hgd2 hgd3 hgd4 hgb1 hgb2 hgb3 s hs
     have hgm : Measurable g := hgd3.continuous.measurable
     have hgd' : Differentiable ℝ g' := fun x => (hgd2 x).differentiableAt
     have hgm' : Measurable g' := hgd'.continuous.measurable
@@ -1328,7 +1304,7 @@ theorem gyongy_mimicry_gated
     exact hy
   -- the X-side law flow solves the same equation (map form), from the integrated
   -- coefficient-function identity of the constructed process
-  have hηflow : ∀ (g g' g'' g''' : ℝ → ℝ),
+  have hηflow : ∀ (g g' g'' g''' : ℝ → ℝ) (C1 C2 C3 : ℝ),
       (∀ x, HasDerivAt g (g' x) x) → (∀ x, HasDerivAt g' (g'' x) x) → ContDiff ℝ 2 g →
       (∀ x, HasDerivAt g'' (g''' x) x) →
       (∀ x, |g' x| ≤ C1) → (∀ x, |g'' x| ≤ C2) → (∀ x, |g''' x| ≤ C3) →
@@ -1339,7 +1315,7 @@ theorem gyongy_mimicry_gated
             ∂(Measure.map (fun ω => X (Real.toNNReal x) ω) μ))
           + 1 / 2 * (∫ y, g'' y * bfn x y
             ∂(Measure.map (fun ω => X (Real.toNNReal x) ω) μ))) := by
-    intro g g' g'' g''' hgd1 hgd2 hgd3 hgd4 hgb1 hgb2 hgb3 s hs
+    intro g g' g'' g''' C1 C2 C3 hgd1 hgd2 hgd3 hgd4 hgb1 hgb2 hgb3 s hs
     have hx := hitoid_constructed_fn_Ioc hB hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd
       hMadap hMeq c hXcont hXrel hafnRep hbfnRep g g' g'' g''' hgd1 hgd2 hgd3 hgd4 hgb1 hgb2
       hgb3 hs
@@ -1387,7 +1363,7 @@ theorem gyongy_mimicry_gated
   have h0 : Measure.map (Y 0) ν = Measure.map (fun ω => X (Real.toNNReal 0) ω) μ := by
     rw [hz]
     exact hY0law.map_eq
-  -- the gate: two flows solving the same equation from the same initial law coincide
+  -- flow uniqueness: two flows solving the same equation from the same initial law coincide
   have hfin := hgate (fun s => Measure.map (Y s) ν)
     (fun s => Measure.map (fun ω => X (Real.toNNReal s) ω) μ) hρprob hηprob hρflow hηflow h0
     t ⟨ht, htT⟩

@@ -63,7 +63,8 @@ lemma integrable_studentTKernel (hν : 0 < ν) : Integrable (studentTKernel ν) 
     (by simp; linarith)).comp_div (sqrt_pos.2 hν).ne').congr <| ae_of_all _ fun x ↦ by
       simp only [studentTKernel, norm_eq_abs, sq_abs, div_pow, sq_sqrt hν.le]
 
-/-- The normalizing constant `C_ν = ∫ k_ν`. -/
+/-- The normalizing constant `C_ν = ∫ k_ν`; positive for `ν > 0`
+(`studentTNormConst_pos`). For `ν ≤ 0` the value is junk. -/
 noncomputable def studentTNormConst (ν : ℝ) : ℝ := ∫ x, studentTKernel ν x
 
 lemma studentTNormConst_pos (hν : 0 < ν) : 0 < studentTNormConst ν :=
@@ -146,7 +147,8 @@ theorem studentTNormConst_eq (hν : 0 < ν) :
 
 /-! ### The density and the law -/
 
-/-- The standard Student-t density `g_ν(x) = k_ν(x) / C_ν`. -/
+/-- The standard Student-t density `g_ν(x) = k_ν(x) / C_ν`; a probability density for `ν > 0`
+(`integral_studentTPDFReal`). For `ν ≤ 0` the value is junk. -/
 noncomputable def studentTPDFReal (ν x : ℝ) : ℝ := studentTKernel ν x / studentTNormConst ν
 
 /-- The Student-t density as an `ℝ≥0∞`-valued function. -/
@@ -176,7 +178,8 @@ lemma lintegral_studentTPDF (hν : 0 < ν) : ∫⁻ x, studentTPDF ν x = 1 := b
     (ae_of_all _ fun x ↦ (studentTPDFReal_pos hν x).le), integral_studentTPDFReal hν,
     ENNReal.ofReal_one]
 
-/-- The standard **Student-t law** with `ν` degrees of freedom. -/
+/-- The standard **Student-t law** with `ν` degrees of freedom; a probability measure for `ν > 0`
+(`isProbabilityMeasure_studentTMeasure`). For `ν ≤ 0` the value is junk. -/
 noncomputable def studentTMeasure (ν : ℝ) : Measure ℝ := volume.withDensity (studentTPDF ν)
 
 lemma isProbabilityMeasure_studentTMeasure (hν : 0 < ν) :

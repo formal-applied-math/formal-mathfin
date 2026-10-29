@@ -33,8 +33,9 @@ much smaller" than the displayed terms, but nonzero). Neither that derivation no
 any error bound against the true SABR implied volatility is formalized here: the
 two-factor SDE's transition density and its short-time (heat-kernel /
 geodesic-distance) asymptotics do not exist in this repo or in
-Mathlib/BrownianMotion, and the rigorous statement of the expansion is itself an
-open design question (issue #100). What is proved concerns the *printed* formulas
+Mathlib/BrownianMotion. The rigorous form of the expansion (an error bound against the
+SABR model's implied volatility) is not formalized. What is proved concerns the *printed*
+formulas
 (eq. 2.17a-c with the `⋯` dropped, and eq. 2.18):
 
 * At `K = f` the general formula is `0/0` in its `z / x(z)` factor (`z = 0`,
@@ -44,7 +45,7 @@ open design question (issue #100). What is proved concerns the *printed* formula
   `z / x(z) → 1`.
 * The *backbone law* (section 3): along the leading-order ATM curve
   `f ↦ α / f^(1-β)`, `d log σ / d log f = β - 1`, stated as the derivative of
-  `log ∘ sabrBackbone` in `f`.
+  `v ↦ log (sabrBackbone (e^v))` in `v = log f`.
 
 ## Main definitions
 
@@ -58,8 +59,9 @@ open design question (issue #100). What is proved concerns the *printed* formula
 
 * `tendsto_sabrImpliedVol_atm` — eq. 2.17a tends to eq. 2.18 as `K → f`
   (for `f > 0`, `α ≠ 0`, `ν ≠ 0`, `ρ ≠ 1`, any `β`, `t_ex`).
-* `hasDerivAt_log_sabrBackbone` — the backbone law
-  `d/df log (α / f^(1-β)) = (β - 1) / f` (`f, α > 0`).
+* `hasDerivAt_log_sabrBackbone` — `d/df log (α / f^(1-β)) = (β - 1) / f` (`f, α > 0`).
+* `hasDerivAt_log_sabrBackbone_exp` — the backbone law in log-log form:
+  `d/dv log (α / (e^v)^(1-β)) = β - 1` (`α > 0`).
 * `sabrBackbone_pos` — the backbone is positive for `α, f > 0`.
 * `sabrATMVol_bsV_gt_backbone_bsV` — whenever eq. 2.18's bracketed correction,
   scaled by `t_ex`, is positive, the ATM Black call (the statement's zero-rate,
@@ -271,10 +273,8 @@ theorem tendsto_sabrImpliedVol_atm {f α β ρ ν tex : ℝ} (hf : 0 < f) (hα :
 
 /-! ### The backbone law -/
 
-/-- **The SABR backbone law** (Hagan-Kumar-Lesniewski-Woodward section 3): along the
-leading-order ATM curve `σ(f) = α / f^(1-β)`, `d log σ / df = (β - 1) / f`, i.e.
-`d log σ / d log f = β - 1` (`β = 1`: flat; `β = 0`: `σ ∝ 1/f`). Holds for `f > 0`,
-`α > 0`. -/
+/-- Along the leading-order ATM curve `σ(f) = α / f^(1-β)`, `d log σ / df = (β - 1) / f`,
+for `f > 0`, `α > 0`. The log-log form is `hasDerivAt_log_sabrBackbone_exp`. -/
 theorem hasDerivAt_log_sabrBackbone {f α : ℝ} (β : ℝ) (hf : 0 < f) (hα : 0 < α) :
     HasDerivAt (fun x ↦ Real.log (sabrBackbone x α β)) ((β - 1) / f) f := by
   have hev : (fun x ↦ Real.log α - (1 - β) * Real.log x) =ᶠ[𝓝 f]
@@ -285,5 +285,15 @@ theorem hasDerivAt_log_sabrBackbone {f α : ℝ} (β : ℝ) (hf : 0 < f) (hα : 
   refine (hd.congr_of_eventuallyEq hev.symm).congr_deriv ?_
   field_simp
   ring
+
+/-- **The SABR backbone law** (Hagan-Kumar-Lesniewski-Woodward section 3): along the
+leading-order ATM curve `σ(f) = α / f^(1-β)`, `d log σ / d log f = β - 1`, i.e. the map
+`v ↦ log σ(e^v)` has derivative `β - 1` at every `v` (`β = 1`: flat; `β = 0`: `σ ∝ 1/f`).
+Holds for `α > 0`. -/
+theorem hasDerivAt_log_sabrBackbone_exp (β : ℝ) {α : ℝ} (hα : 0 < α) (v : ℝ) :
+    HasDerivAt (fun w ↦ Real.log (sabrBackbone (Real.exp w) α β)) (β - 1) v := by
+  have h := (hasDerivAt_log_sabrBackbone β (Real.exp_pos v) hα).comp v (Real.hasDerivAt_exp v)
+  rw [div_mul_cancel₀ _ (Real.exp_pos v).ne'] at h
+  exact h
 
 end MathFin

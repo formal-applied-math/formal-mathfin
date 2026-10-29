@@ -130,6 +130,53 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-29 — corpus 696, modules 648 — seven contributed PRs, brought into the library's graph
+
+Scope: seven PRs from Yang Ye (#270 #271 #277 #281 #342 #343 #344), merged into one integration branch with merge commits, then maintainer follow-ups. The batch adds 25 entries (all `full`), for a corpus of 671 → 696. Seventeen modules arrive: Student-t VaR and ES, exposure measures, DVA, bond and FX forwards, key-rate duration, clean and dirty price, loan amortization, relative drawdown, SABR, Gyöngy and Dupire, Heston, CIR as a sum of squared OU processes, and PSD Cauchy–Schwarz. The contributed `Foundations/ExpAffine.lean` was folded into Heston, and `Foundations/CIRSquaredOU.lean` moved to `FixedIncome/`. #325 (barrier closed forms) is held; see backlog item 1.
+
+### Upgrades executed
+
+- **Consumed, not reproved.**
+  - The PSD Cauchy–Schwarz drops a 65-line expansion for Mathlib's `LinearMap.BilinForm.apply_mul_apply_le_of_forall_zero_le` on `Matrix.toBilin'`.
+  - The CIR-as-squared-OU mean now reads the OU law from `vasicekShortRate_hasLaw_gaussian` instead of recomputing it, and moves to `FixedIncome/` beside the Vasicek tower.
+  - DVA is stated through the expected negative exposure it mirrors (`dva_eq_integral_expectedNegativeExposure`).
+- **One graph.**
+  - Heston's ρ-shifted Riccati coefficient is tied to the CIR Riccati solution (`hestonGamma_eq_cirGamma`), so the Heston module connects to the rates tower rather than standing alone.
+  - The contributed exp-affine helpers live in Heston, their one consumer.
+- **Junk values named.**
+  - PFE is redefined as the value-at-risk of `max(V, 0)`, so it is a quantile by construction (`potentialFutureExposure_eq_max`).
+  - Discount-at-yield statements carry `0 < 1 + y`.
+- **Fields that did no work were removed.** `BoundedItoProcess` was a structure with unused fields; it is now `BoundedCoeffData`, holding only what Gyöngy's argument reads.
+
+### The standing first pass: prose against statement
+
+All 25 new descriptions were read against their statements. Each disclosure the statement forces is in its description:
+
+- the SABR derivation and the SABR dynamics are not formalized, and σ_ATM > 0 is assumed;
+- the Heston process is not constructed;
+- Dupire assumes the surface's regularity and does not prove that a local-vol diffusion exists;
+- key-rate durations are not defined, only the partials;
+- KKT necessity is not proved;
+- the CIR SDE itself is not proved.
+
+The contributed prose lost its process residue, its "cross-checked" claims and its chapter citations that did not match.
+
+### Lens gradients
+
+- **Mathlib coherence.** Exemplar: Cauchy–Schwarz as a three-line consumer of the bilinear-form lemma. Next: the Student-t law as a Mathlib-shaped `ProbabilityTheory.studentT` with the Cauchy case as a lemma, which the module's interface already suggests.
+- **Architectural ingenuity.** Exemplar: the Heston–CIR bridge. Next: the Heston characteristic function as `E[e^{u log S_T}]` once a Heston process exists. That needs CIR existence, which is upstream work.
+- **Concept clarity.** Next: key-rate durations as a tenor-indexed curve with interpolation, not one node per cash flow.
+
+### Ranked backlog
+
+1. #325 back with the reductions named on the PR (partial time → full barrier at `t₁ = T`; binary → `bs_cash_or_nothing_formula`).
+2. Key-rate durations on a tenor grid.
+3. The Student-t law upstream.
+
+### Evidence
+
+The daemon checks of every follow-up file pass: `KeyRateDuration`, `CIRSquaredOU`, `Heston`, `GyongyMimicry`, `Dupire`, `PosSemidefCauchySchwarz`. `AxiomAuditGen` is regenerated (822 guards). `formalization.yaml` is fresh. The Python gates pass except the ledger rows for the new entries, which are verified on GitHub runners (`ledger-sweep.yml`). The full build is CI's.
+
 ## 2026-10-29 — corpus 671, modules 631 — the binomial value is the cost of its hedge
 
 Scope: replication in the tree, then stated for a contract. Two entries were added, `mf-binomial-european-replication` and `mf-contract-binomial-hedge` (both `full`); corpus 669 → 671. One module was added, `Binomial/EuropeanReplication.lean`.
@@ -518,7 +565,7 @@ entries they cite, and 35 docstrings needed fixes, all applied. By kind:
 
 ### Ranked backlog
 
-1. The Student-t law, then VaR and ES at it (#285, carried).
+1. The Student-t law, then VaR and ES at it (#285, carried) — delivered 2026-10-29 (#270).
 2. Gaussian EPE and PFE at the law, then collateralized EPE (#287, second half).
 3. Margrabe under the `S²`-numéraire measure; the chooser's step derived (#291).
 4. One-factor credit: one law, heterogeneous thresholds, recovery, joint migration (#293).
@@ -705,7 +752,7 @@ changed prose in 50 Lean files. What it found, by kind:
 
 ### Ranked backlog
 
-1. The Student-t law, then VaR and ES at it (#285; reopens #270).
+1. The Student-t law, then VaR and ES at it (#285; reopens #270) — delivered 2026-10-29 (#270).
 2. `BivariateNormalCDF` on Mathlib's Gaussian API; the copula bridged to the one-factor default
    model, with one parametrization of `ρ` (#286).
 3. One Wiener-integral bond-price lemma (Vasicek, Hull–White, GSR); Gaussian EPE and PFE stated at

@@ -108,12 +108,6 @@ import MathFin.Foundations.MartingaleTransform
 import MathFin.Foundations.DoobLpMaximalInequality
 import MathFin.Foundations.ExtendOfNormIsometry
 import MathFin.Foundations.WienerIntegralL2
--- The exponential-affine engine: generator invariance for OU/CIR affine diffusions and
--- the Riccati flow (the deterministic core of the affine-term-structure method)
-import MathFin.Foundations.ExpAffine
--- The CIR variance process as an explicit squared-OU construction: exact Gaussian laws
--- and the mean dynamics E[V t] = theta(1 - e^{-kt}) + v0 e^{-kt}
-import MathFin.Foundations.CIRSquaredOU
 import MathFin.Foundations.WienerIntegralGaussian
 -- Wiener integral of a step indicator is the increment (∫𝟙_{(s,t]} dB = B_t − B_s)
 import MathFin.Foundations.WienerIntegralIndicator
@@ -574,7 +568,8 @@ import MathFin.FixedIncome.DefaultDensity
 -- CVA under exposure independent of default (Fubini reduction; Gaussian expected exposure in
 -- closed form)
 import MathFin.FixedIncome.CVA
--- DVA as a genuine corollary of CVA: negate the exposure, swap in the bank's own default time
+-- DVA from CVA: negate the exposure, swap in the bank's own default time; DVA as the integral
+-- of the expected negative exposure
 import MathFin.FixedIncome.DVA
 -- Phase 41: Vasicek SDE closed-form (full SDE, mean + variance)
 import MathFin.FixedIncome.VasicekSDE
@@ -582,6 +577,8 @@ import MathFin.FixedIncome.VasicekSDE
 import MathFin.Foundations.OUSpectral
 -- Itô→pricing bridge: Vasicek terminal law derived (Wiener integral is Gaussian)
 import MathFin.FixedIncome.VasicekSDEGaussian
+-- Sum of two squared OU fluctuations: mean θ(1 − e^{−kt}) + v₀e^{−kt}, the borderline CIR mean
+import MathFin.FixedIncome.CIRSquaredOU
 -- Vasicek zero-coupon bond price: the affine term structure (Gaussian Laplace transform)
 import MathFin.FixedIncome.VasicekBondPrice
 -- Vasicek real-world vs. risk-neutral terminal mean; an Esscher tilt reproducing the
@@ -619,7 +616,7 @@ import MathFin.Portfolio.RiskParityFOC
 import MathFin.Portfolio.BlackLittermanND
 -- Convex QP KKT sufficiency/uniqueness and a feasible-ratio-test step bound
 import MathFin.Portfolio.ConvexQPKKT
--- PSD-form Cauchy–Schwarz and the constrained-Sharpe tradeoff form
+-- PSD-form Cauchy–Schwarz and the mean–standard-deviation tradeoff at a mean–variance KKT point
 import MathFin.Portfolio.PosSemidefCauchySchwarz
 
 -- Performance
@@ -658,9 +655,9 @@ import MathFin.RiskMeasures.WorstCaseRisk
 -- Gaussian closed forms identified as the VaR of the law at z = Φ⁻¹(α)
 import MathFin.RiskMeasures.ValueAtRisk
 import MathFin.RiskMeasures.GaussianValueAtRisk
--- Expected negative exposure, exposure VaR (PFE) and netting subadditivity, built on the real
--- CVA expected-exposure substrate; collateralized exposure under an actual Brownian-driven
--- process (lagged collateral is a real earlier value of the process, not an opaque scalar)
+-- Expected negative exposure, potential future exposure (the VaR of V⁺) and netting
+-- subadditivity on the CVA expected-exposure substrate; collateralized exposure under a
+-- Brownian-driven process, the collateral the same process a lag earlier
 import MathFin.RiskMeasures.ExposureMeasures
 import MathFin.RiskMeasures.CollateralizedExposureBrownian
 -- Expected shortfall: Rockafellar–Uryasev for every law, coherence, dual representation; the

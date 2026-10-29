@@ -437,14 +437,14 @@
     {
       "id": "mf-relative-drawdown-scale-invariant",
       "name": "Relative Drawdown Is Invariant Under Scaling the Equity Curve",
-      "description": "For an equity curve E on a finite time grid and c > 0, the relative drawdown 1 − E_t / max_{s≤t} E_s (running peak = Mathlib's partialSups) of c·E equals that of E at every time t, and so does the maximum relative drawdown up to every t; by contrast the absolute maximumDrawdown of c·E is c times that of E. No positivity assumption on E is needed (a zero running peak gives relative drawdown 1 on both sides by the x/0 = 0 convention).",
+      "description": "For an equity curve E on a finite time grid and c > 0, the relative drawdown 1 − E_t / max_{s≤t} E_s (running peak = Mathlib's partialSups) of c·E equals that of E at every time t, and so does the maximum relative drawdown up to every t; by contrast the absolute maximumDrawdown of c·E is c times that of E. The identity holds for every E; the value is a drawdown fraction only where the running peak is positive.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Performance.DownsideMetrics\nimport MathFin.Performance.RelativeDrawdown\n\nopen MathFin\n\ntheorem relative_drawdown_scale_invariant_full {n : ℕ} (E : Fin n → ℝ) {c : ℝ} (hc : 0 < c) :\n    relativeDrawdown (fun s ↦ c * E s) = relativeDrawdown E ∧\n      maxRelativeDrawdown (fun s ↦ c * E s) = maxRelativeDrawdown E ∧\n      maximumDrawdown (fun s ↦ c * E s) = c * maximumDrawdown E :=\n  ⟨relativeDrawdown_const_mul hc E, maxRelativeDrawdown_const_mul hc E,\n    maximumDrawdown_scale E c hc.le⟩\n"
+        "lean": "import MathFin.Performance.RelativeDrawdown\n\nopen MathFin\n\ntheorem relative_drawdown_scale_invariant_full {n : ℕ} (E : Fin n → ℝ) {c : ℝ} (hc : 0 < c) :\n    relativeDrawdown (fun s ↦ c * E s) = relativeDrawdown E ∧\n      maxRelativeDrawdown (fun s ↦ c * E s) = maxRelativeDrawdown E ∧\n      maximumDrawdown (fun s ↦ c * E s) = c * maximumDrawdown E :=\n  ⟨relativeDrawdown_const_mul hc E, maxRelativeDrawdown_const_mul hc E,\n    maximumDrawdown_scale E c hc.le⟩\n"
       },
       "metadata": {
         "chapter": 15,
-        "reference": "Relative (percentage) drawdown, e.g. C. Bacon, Practical Portfolio Performance Measurement and Attribution, 2nd ed. (2008), Ch. 4; absolute maximum drawdown and Calmar ratio (Young 1991)",
+        "reference": "Relative (percentage) drawdown, e.g. C. Bacon, Practical Portfolio Performance Measurement and Attribution, 2nd ed. (2008); absolute maximum drawdown and Calmar ratio (Young 1991)",
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Running peak is partialSups; positive scaling commutes with it because multiplication by c > 0 is an order isomorphism (OrderIso.mulLeft₀ + map_partialSups). The Lean results hold over any locally-finite-order-bot time index; the snippet instantiates Fin n to contrast with MathFin.maximumDrawdown. Lives in MathFin/Performance/RelativeDrawdown.lean. Axioms-clean."
@@ -889,19 +889,19 @@
       }
     },
     {
-      "id": "mf-psd-cauchy-schwarz",
-      "name": "Cauchy-Schwarz for Positive Semidefinite Forms",
-      "description": "|x ⬝ᵥ (Sig *ᵥ y)| ≤ √(x ⬝ᵥ (Sig *ᵥ x)) · √(y ⬝ᵥ (Sig *ᵥ y)) for Sig positive semidefinite — the Cauchy–Schwarz inequality for the semi-inner product induced by a PSD form. Two-sided despite degeneracy. Re-export of MathFin.posSemidef_cauchySchwarz.",
+      "id": "mf-mean-variance-kkt-mean-sd-tradeoff",
+      "name": "A Mean–Variance KKT Point Maximizes the Mean–Standard-Deviation Objective",
+      "description": "Let Σ be positive semidefinite, t₁ ≥ 0, and let x₁ satisfy the KKT stationarity, dual-feasibility and complementary-slackness conditions of the risk-penalized problem min −μ·x + (t₁/2)·x'Σx subject to linear constraints a_k·x ≤ b_k. Then for every feasible y, μ·y − t₁√(x₁'Σx₁)·√(y'Σy) ≤ μ·x₁ − t₁·x₁'Σx₁: x₁ maximizes the mean–standard-deviation objective at the price of risk t₁√(x₁'Σx₁). KKT necessity is not proved.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Portfolio.PosSemidefCauchySchwarz\n\nopen Matrix MathFin\n\ntheorem posSemidef_cauchySchwarz_thm {ι : Type*} [Fintype ι] (Sig : Matrix ι ι ℝ)\n    (hpsd : Sig.PosSemidef) (x y : ι → ℝ) :\n    |x ⬝ᵥ (Sig *ᵥ y)| ≤ Real.sqrt (x ⬝ᵥ (Sig *ᵥ x)) * Real.sqrt (y ⬝ᵥ (Sig *ᵥ y)) :=\n  MathFin.posSemidef_cauchySchwarz hpsd x y\n"
+        "lean": "import MathFin.Portfolio.PosSemidefCauchySchwarz\n\nopen Matrix MathFin\n\ntheorem mean_variance_kkt_mean_sd_tradeoff {ι κ : Type*} [Fintype ι] [Fintype κ]\n    {μ : ι → ℝ} {Sig : Matrix ι ι ℝ} (hpsd : Sig.PosSemidef) {t₁ : ℝ} (ht₁ : 0 ≤ t₁)\n    {a : κ → ι → ℝ} {b : κ → ℝ} {x1 : ι → ℝ} {u : κ → ℝ}\n    (hu_nonneg : ∀ k, 0 ≤ u k)\n    (hstat : -μ + t₁ • Sig *ᵥ x1 = -∑ k, u k • a k)\n    (hcs : ∀ k, u k * (a k ⬝ᵥ x1 - b k) = 0)\n    {y : ι → ℝ} (hfeasy : ∀ k, a k ⬝ᵥ y ≤ b k) :\n    μ ⬝ᵥ y - t₁ * Real.sqrt (x1 ⬝ᵥ (Sig *ᵥ x1)) * Real.sqrt (y ⬝ᵥ (Sig *ᵥ y)) ≤\n      μ ⬝ᵥ x1 - t₁ * Real.sqrt (x1 ⬝ᵥ (Sig *ᵥ x1)) * Real.sqrt (x1 ⬝ᵥ (Sig *ᵥ x1)) :=\n  pricedReturn_le_of_kkt hpsd ht₁ hu_nonneg hstat hcs hfeasy\n"
       },
       "metadata": {
         "chapter": 11,
-        "reference": "Cauchy–Schwarz inequality for semi-inner products (Horn & Johnson, Matrix Analysis); application: the tradeoff form of the Markowitz mean-variance problem (Merton 1972)",
+        "reference": "Mean–variance portfolio selection in risk-penalized form and its mean–standard-deviation tradeoff, the standard penalty equivalence (Markowitz, 'Portfolio Selection', J. Finance 7(1), 1952); KKT sufficiency for convex quadratic programs (Boyd & Vandenberghe, Convex Optimization, 2004)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.posSemidef_cauchySchwarz (MathFin/Portfolio/PosSemidefCauchySchwarz.lean), completed-square proof with the degenerate branch forcing the cross term to zero. SCOPE: the bound is two-sided; no lower bound on the bilinear form is claimed separately, and no KKT necessity is involved."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.pricedReturn_le_of_kkt (MathFin/Portfolio/PosSemidefCauchySchwarz.lean), with pricedReturn unfolded in the statement. Stationarity turns the return gap into t₁(x₁'Σy − x₁'Σx₁) plus complementary-slackness terms, nonpositive at feasible y (kkt_complementary_term_nonneg, MathFin/Portfolio/ConvexQPKKT.lean); the cross term is bounded by Cauchy–Schwarz for the PSD form (posSemidef_cauchySchwarz). The right side's charge is t₁√(x₁'Σx₁)² = t₁·x₁'Σx₁. x₁'s own feasibility is not assumed. SCOPE: sufficiency only; KKT necessity is not proved."
       }
     }
   ]

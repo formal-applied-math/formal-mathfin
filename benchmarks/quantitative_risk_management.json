@@ -1112,7 +1112,7 @@
       "domain": "mathematical_finance",
       "description": "The Student-t law studentTMeasure ν (built in MathFin as Lebesgue measure with density k_ν/∫k_ν, k_ν(x) = (1 + x²/ν)^(-(ν+1)/2)) has, for ν > 0, the textbook density g_ν(x) = Γ((ν+1)/2)/(√(νπ)Γ(ν/2))·(1 + x²/ν)^(-(ν+1)/2): the normalizing integral ∫k_ν equals √(νπ)Γ(ν/2)/Γ((ν+1)/2).",
       "code": {
-        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem studentTPDFReal_eq_thm {ν : ℝ} (hν : 0 < ν) (x : ℝ) :\n    studentTPDFReal ν x = Real.Gamma ((ν + 1) / 2) / (√(ν * Real.pi) * Real.Gamma (ν / 2)) *\n      (1 + x ^ 2 / ν) ^ (-(ν + 1) / 2) :=\n  MathFin.studentTPDFReal_eq hν x\n"
+        "lean": "import MathFin.Foundations.StudentT\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem studentTPDFReal_eq_thm {ν : ℝ} (hν : 0 < ν) (x : ℝ) :\n    studentTPDFReal ν x = Real.Gamma ((ν + 1) / 2) / (√(ν * Real.pi) * Real.Gamma (ν / 2)) *\n      (1 + x ^ 2 / ν) ^ (-(ν + 1) / 2) :=\n  MathFin.studentTPDFReal_eq hν x\n"
       },
       "metadata": {
         "chapter": 2,
@@ -1142,16 +1142,16 @@
       "id": "qrm-student-t-var-le-es",
       "name": "VaR Bounded by ES for a Student-t Loss",
       "domain": "mathematical_finance",
-      "description": "For the Student-t law t_ν with ν > 1 and α ∈ (0, 1), the VaR and ES closed forms satisfy q ≤ g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α), read off the library's general VaR ≤ ES.",
+      "description": "For a loss μ + σT with T ~ t_ν, ν > 1 and α ∈ (0, 1): VaR_α(μ + σT) ≤ ES_α(μ + σT), the library's general VaR ≤ ES at the Student-t law. The module also reads the inequality through the two closed forms, q ≤ g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α).",
       "code": {
-        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem quantile_studentTMeasure_le_expectedShortfall_closedForm_thm {ν α : ℝ} (hν : 1 < ν)\n    (hα : α ∈ Ioo 0 1) :\n    quantile (studentTMeasure ν) α ≤\n      studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *\n        ((ν + quantile (studentTMeasure ν) α ^ 2) / (ν - 1)) :=\n  MathFin.quantile_studentTMeasure_le_expectedShortfall_closedForm hν hα\n"
+        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure_thm {Ω : Type*}\n    {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {T : Ω → ℝ}\n    {ν μ σ α : ℝ} (hν : 1 < ν) (hT : HasLaw T (studentTMeasure ν) P) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk (fun ω ↦ μ + σ * T ω) P α ≤ expectedShortfall (fun ω ↦ μ + σ * T ω) P α :=\n  MathFin.valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure hν hT hα\n"
       },
       "metadata": {
         "chapter": 2,
         "reference": "MFE (2015) Example 2.15",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: valueAtRisk_le_expectedShortfall applied to the identity under the Student-t law, rewritten with the Student-t VaR and ES theorems; the inequality is not reproved from scratch. Lives in MathFin/RiskMeasures/StudentTValueAtRisk.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure: valueAtRisk_le_expectedShortfall at the integrable loss μ + σT (integrable_of_hasLaw_studentTMeasure, ν > 1). The closed-form reading, quantile_studentTMeasure_le_expectedShortfall_closedForm, applies the same inequality to the identity under the law and rewrites with the Student-t VaR and ES theorems. Lives in MathFin/RiskMeasures/StudentTValueAtRisk.lean. Axioms-clean."
       }
     },
     {
@@ -1176,7 +1176,7 @@
       "domain": "mathematical_finance",
       "description": "The Student-t law with ν = 1 degree of freedom equals Mathlib's standard Cauchy law: studentTMeasure 1 = cauchyMeasure 0 1.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.StudentTValueAtRisk\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem studentTMeasure_one_thm : studentTMeasure 1 = cauchyMeasure 0 1 :=\n  MathFin.studentTMeasure_one\n"
+        "lean": "import MathFin.Foundations.StudentT\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem studentTMeasure_one_thm : studentTMeasure 1 = cauchyMeasure 0 1 :=\n  MathFin.studentTMeasure_one\n"
       },
       "metadata": {
         "chapter": 2,

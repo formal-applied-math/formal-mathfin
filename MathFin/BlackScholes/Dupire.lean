@@ -15,8 +15,8 @@ public import MathFin.BlackScholes.CallSpreadDigital
 
 Bagaria ch. 9 Thm 9.5 at zero rates reads `σ²_loc(T, K) = 2·∂_T C / (K²·∂²_K C)`. The
 classical proof tests the forward equation against the call payoff `(x − K)⁺` and integrates
-by parts twice (`(x − K)⁺'' = δ_K`). That step has no honest counterpart here: `(x − K)⁺` is
-not `C²`, so it is outside the test class of the landed weak forward equation
+by parts twice (`(x − K)⁺'' = δ_K`). That step is not available here: `(x − K)⁺` is
+not `C²`, so it is outside the test class of the weak forward equation
 (`GyongyMimicry.marginal_flow_weak_equation_fn_constructed`), and evaluating at `x = K` is
 the pointwise-density route — the route this module does not take. Instead the strike is
 smeared first: every smooth compactly supported strike density `ψ` yields a legitimate test
@@ -32,7 +32,7 @@ function `f_ψ` (its double primitive) which *is* the static call book
 * `integral_payoff_eq_integral_call` — Fubini: `𝔼[∫ψ(K)(X_s − K)⁺dK] = ∫ψ(K)C(s, K)dK`.
 * `breedenLitzenberger_weak` — `∫ ψ''(K) C(s, K) dK = 𝔼ψ(X_s)` for any integrable law.
 * `forward_eq_weak_zeroRate` — `GyongyMimicry.marginal_flow_weak_equation_fn_constructed` at
-  `β = 0`, drift term erased (the honest weak form of the (t, x) forward equation).
+  `β = 0`, drift term erased (the weak form of the (t, x) forward equation).
 * **`dupire_weak`** (headline) — `d/dT ∫ψ(K)C(T, K)dK = ½·𝔼[ψ(X_T)·b̂²(T, X_T)]`.
 
 Together, `dupire_weak` and `breedenLitzenberger_weak` say `∂_T C = ½·b̂²(T, ·)·∂²_K C` in
@@ -45,9 +45,9 @@ distributional form, with no density, no Tanaka formula, and no regularity hypot
   in the second half of this file (`dupire_pointwise`) carries C²-in-`K` / C¹-in-`T`
   regularity of the call surface (with continuous `C_KK`, jointly continuous `C_T`) plus a
   continuous version of `b̂²` as hypotheses.
-* Nonzero rates / lognormal `δ = σ_loc·S`: the process class is `BoundedItoProcess`
-  (bounded drift and diffusion); the lognormal flat-vol check (Ex. 9.2) is therefore outside
-  this module's bounded-coefficient class.
+* Nonzero rates / lognormal `δ = σ_loc·S`: the process class has bounded drift and
+  diffusion (`GyongyMimicry.BoundedCoeffData`); the lognormal flat-vol check (Ex. 9.2) is
+  therefore outside this module's bounded-coefficient class.
 * Existence of the local-vol diffusion that reproduces `C` (`GyongyMimicry.gyongy_mimicry_gated`).
 -/
 
@@ -166,7 +166,8 @@ section TestFunction
 
 /-- **The test-function factory (Carr–Madan + double primitive).** For a smooth compactly
 supported strike density `ψ`, the double primitive `f_ψ(x) = ∫_L^x ∫_L^y ψ` (from a level `L`
-left of `supp ψ`) is a legitimate test function of the landed weak forward equation —
+left of `supp ψ`) is a test function of the weak forward equation
+(`GyongyMimicry.marginal_flow_weak_equation_fn_constructed`) —
 `f_ψ'' = ψ`, `C²`, bounded `f_ψ'`, `ψ`, `f_ψ''' = ψ'` — *and* it is the payoff of the static
 call book with strike density `ψ`: `f_ψ S = ∫ K, ψ K · (S − K)⁺ dK` for every `S`
 (`span_of_vanish_left`, i.e. `MathFin.carrMadan_spanning`). Note `f_ψ` itself is unbounded
@@ -250,12 +251,12 @@ section Dupire
 
 open MathFin.GyongyMimicry
 
-/-- **The weak forward (Fokker–Planck) equation at zero rates** — in its
-honest weak form: `GyongyMimicry.marginal_flow_weak_equation_fn_constructed`,
+/-- **The weak forward (Fokker–Planck) equation at zero rates**, in weak form:
+`GyongyMimicry.marginal_flow_weak_equation_fn_constructed`,
 specialized to the driftless process `X = c + M` (`β := 0`, with `M` a hypothesized adapted
 process equal a.e. at each `t` (`hMeq`) to the CLM Itô integral of the bounded adapted `δ`),
 with the drift term erased. For every test function `f` of the
-landed class (`C²`, bounded `f', f'', f'''`),
+class (`C²`, bounded `f', f'', f'''`),
 
   `d/dt 𝔼[f(X_{t⁺})] = ½ · 𝔼[f''(X_{t⁺}) · b̂²(t, X_{t⁺})]`  on `(0, ↑T)`,
 
@@ -308,7 +309,8 @@ theorem forward_eq_weak_zeroRate
   simpa using key
 
 /-- **Dupire's formula, distributional form (Bagaria ch. 9 Thm 9.5 ∘ Thm 9.7, zero rates) —
-the headline of the distributional half.** For the driftless Itô process `X = c + M` (`M` a hypothesized adapted process equal a.e. at
+the headline of the distributional half.** For the driftless Itô process `X = c + M` (`M` a
+hypothesized adapted process equal a.e. at
 each `t` (`hMeq`) to the CLM Itô integral `∫δ dB` of the bounded adapted `δ`) and every smooth
 compactly supported strike density `ψ`, the `ψ`-pairing of the
 *defined* call surface `C(s, K) = 𝔼[(X_{s⁺} − K)⁺]` is differentiable in maturity on
@@ -878,7 +880,8 @@ theorem dupire_pointwise_coeff
   have hmass := law_Ioc_eq_ofReal_integral hXm hXint hCK hCKK hCKKc hc.1 (by linarith) hd.2
   have hint_pos : 0 < ∫ K in (K₀ - r / 2)..(K₀ + r / 2), CKK K :=
     intervalIntegral.intervalIntegral_pos_of_pos_on
-      ((hCKKc.mono (by rw [uIcc_of_le (by linarith)]; exact Icc_subset_Ioo hc.1 hd.2)).intervalIntegrable)
+      ((hCKKc.mono
+        (by rw [uIcc_of_le (by linarith)]; exact Icc_subset_Ioo hc.1 hd.2)).intervalIntegrable)
       (fun K hK => (hIcc K (Ioo_subset_Icc_self hK)).2) (by linarith)
   -- ... yet `X_t` a.s. avoids it
   have hnull : μ (Xt ⁻¹' Ioc (K₀ - r / 2) (K₀ + r / 2)) = 0 := by
@@ -942,7 +945,8 @@ on the window, then at every strike of the window with `C_KK > 0`
 
 — Thm 9.5 verbatim for the (arithmetic) local-vol model; with `v = σ_loc·x` it is the textbook
 `σ_loc² = 2C_T/(K²C_KK)`. Here `𝔼[δ_t² | X_t] = v(t, X_t)²` exactly
-(`condExp_of_stronglyMeasurable`, `GyongyMimicry.stronglyMeasurable_test`), so `v(t, ·)²` is a continuous
+(`condExp_of_stronglyMeasurable`, `GyongyMimicry.stronglyMeasurable_test`), so `v(t, ·)²` is a
+continuous
 version and `dupire_pointwise_coeff` applies. -/
 theorem dupire_localVol
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]

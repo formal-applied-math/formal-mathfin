@@ -5,8 +5,7 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
-public import MathFin.Foundations.ExpAffine
+public import MathFin.FixedIncome.CIRRiccati
 
 /-!
 # The Heston affine transform at the generator/PDE level (2D)
@@ -19,18 +18,18 @@ so x = log S obeys `dx = (r − v/2) dt + √v dW¹` (Itô) and the generator on
 functions `f : ℝ → ℝ → ℝ` is
 
 `Lf = (r − v/2) ∂_x f + κ(θ − v) ∂_v f + (v/2) ∂_xx f + ρ ξ v ∂_xv f + (ξ² v/2) ∂_vv f`
-(`hestonGenerator`; the cross term `ρ ξ v ∂_xv` is the genuinely new 2D piece —
-at the Itô level this is the missing-correlation term; at the
-generator level it is pure calculus).
+(`hestonGenerator`; the cross term `ρ ξ v ∂_xv` is the new 2D piece, carrying the
+correlation; at the generator level it is pure calculus).
 
 The recipe is Bagaria ch. 14, Prop 14.5 (invariance test `Lu/u ∈
 span{gᵢ}`) and eq. 14.4 (`L e^(φ+ψx) = [μ(x)(ψ + ½ v(x) ψ²)] e^(φ+ψx)`). The 2D
-reading-off: with exponent-gradient `(Bx, Bv) = (u, ψ)`, the bracket of the engine
+reading-off: with exponent-gradient `(Bx, Bv) = (u, ψ)`, the bracket of the generator
 lemma below is `(c₀ + c₁ v)` with the **x-coefficient identically zero** — the third
 Riccati equation `Bx' = 0` (the log-spot gradient is conserved). Matching
 `∂_t Φ + LΦ = 0` (the *backward* pricing equation; Bagaria's Calc 14.6 states the
-forward form `∂_t u = Lu`, same matching with negated coefficients — the engine's
-`affineBondPrice_solves_pde` did the same flip) gives the **calendar-time** system
+forward form `∂_t u = Lu`, same matching with negated coefficients, the flip
+`affineBondPrice_solves_pde` in `FixedIncome/AffineTermStructurePDE` also makes) gives the
+**calendar-time** system
 
 `Bx' = 0`,  `Bv' = u/2 − u²/2 + (κ − ρξu) Bv − (ξ²/2) Bv²`,  `A' = −r·u − κθ·Bv`,
 
@@ -45,63 +44,66 @@ the x-row of the drift (the coupling `−v/2` of variance into log-spot); `â' =
 transform at real `u`; the characteristic function is the same system at `iu` — the
 complex route is out of scope here.
 
-**Sign bookkeeping** (worked on paper, then verified numerically and symbolically
-before formalizing — the engine's discipline): the closed forms are the Möbius
-members
+The closed forms are the Möbius members
 
 `b̂(τ) = (u² − u)(e^{γτ} − 1) / ((γ + κ − ρξu)e^{γτ} + (γ − κ + ρξu))`,
 `γ = √((κ − ρξu)² + ξ²(u − u²))`  (the ρ-shifted CIR root: `cirGamma`'s
 `√(κ² + 2ξ²)` under `κ ↦ κ − ρξu` plus the u-dependent piece),
 
 `â(τ) = ruτ + (2κθ/ξ²)[((γ + κ − ρξu)/2)τ − log(D(τ)/(2γ))]`,  `D` the shared
-denominator. Checks run: (i) the ODE residuals vanish after the single substitution
-`γ² = (κ − ρξu)² + ξ²(u − u²)` (the Lean `rw` step); (ii) RK4 integration of the
-system matches the closed forms to ~1e-17 at κ=1.7, θ=0.5, ξ=0.9, ρ=−0.6, u=0.35;
-(iii) the degenerate ξ=0 case reproduces the exact Gaussian-moment answer
-`b̂(τ) = ((u²−u)/2)(1 − e^{−κτ})/κ` (log-spot is Gaussian when v is deterministic).
+denominator. The ODE residuals vanish after the single substitution
+`γ² = (κ − ρξu)² + ξ²(u − u²)`.
 
-**Relation to the 1D engine** (`MathFin.ExpAffine`): the 1D derivative helpers are
-imported from there. The Bv-flow could **not** reuse `riccatiFlow` (undiscounted
-`ψ' = −κψ + (σ²/2)ψ²`: right quadratic sign, but no constant term) nor a bond
-`B`-factor (`B' = 1 − κB − (ξ²/2)B²`: has the constant, wrong quadratic sign — the
-bond's discount sign). The Heston Bv-ODE needs the general-constant Möbius member
-with the characteristic-function quadratic sign `+½ξ²ψ²`, so the flow is
-**re-derived** with the engine's proof idiom: quotient rule, one coefficient
-rewrite, `field_simp`, `ring`.
+The `Bv`-equation has a constant term `½(u² − u)` and the quadratic sign `+½ξ²ψ²` of
+the characteristic-function side, so it is neither the CIR bond `B`-factor
+(`B' = 1 − κB − (ξ²/2)B²`, `FixedIncome.CIRRiccati`) nor a constant-free Bernoulli
+equation; its Möbius solution is derived here by the quotient rule, one coefficient
+rewrite, `field_simp` and `ring`.
 
-**Guards — the admissible strip (honest deviation from the engine's raw guards).**
-The engine's `hasDerivAt_riccatiFlow` needed only `2κ − ξ²ψ₀(1 − e^{−κt}) ≠ 0`
-because its discriminant `κ² + 2ξ²` is always nonnegative. The Heston discriminant
+**Guards — the admissible strip.** The CIR discriminant `κ² + 2ξ²` is always
+nonnegative; the Heston discriminant
 `γ² = (κ − ρξu)² + ξ²(u − u²)` is **not** always nonnegative (it → −∞ as
 u → ±∞ when |ρ| < 1): off the strip the closed form silently degenerates (γ = 0 in
 Lean's `Real.sqrt`) and is *false* as an ODE solution. This is Bagaria's Thm 14.7
 proviso made concrete — the Riccati explosion / moment-existence strip. The flow
 lemmas below take the clean sufficient hypothesis `0 < u < 1`, `ξ ≠ 0`, which
-forces `γ > |κ − ρξu|`, hence `D(τ) > 0` for **all** real τ (no per-τ guard at
-all — stronger than the engine's); `κ` and `θ` enter the flow facts without sign
-hypotheses (κ ≠ 0, θ ≠ 0 only where cancellation needs them — the deterministic
-layer again needs no Feller-type condition).
+forces `γ > |κ − ρξu|`, hence `D(τ) > 0` for **all** real τ (no per-τ guard);
+`κ` and `θ` enter the flow facts with no hypotheses at all (the deterministic layer
+needs no Feller-type condition).
 
-**Gated residue.** The E-level headline `E[e^{u log S_T}] = Φ(0, x₀, v₀)` needs the
-Itô drift of exp-affine-of-(logS, V) along a Heston solution — i.e. process
-existence plus the 2D correlated Itô formula — both out of reach of the library's current substrate (no path-continuous process
-layer for this class; no unbounded-drift Itô engine; the `itoDrift`-family
-identities are bounded-coefficient only). It is recorded as `hestonTransform_expectation_gated`: stated with the gate as an
-explicit, checkable hypothesis (the profile's expectation-invariance along the solution),
-proved from it trivially.
+**Not proved.** That the profile at `(0, x₀, v₀)` equals `E[e^{u log S_T}]` is not
+proved: it needs a Heston process (existence of the square-root SDE, unbounded
+coefficients) and the 2D correlated Itô formula, neither of which the library has. This
+module is the generator/PDE level only.
 -/
 
 @[expose] public section
 
 namespace MathFin.Heston
 
-open MeasureTheory ExpAffine
+/-! ### The 1D exponential-affine family -/
+
+/-- The exponential-affine family `x ↦ e^(φ + ψ x)` (Bagaria ch. 14, eq. 14.4). -/
+noncomputable def expAffine (φ ψ x : ℝ) : ℝ := Real.exp (φ + ψ * x)
+
+/-- The affine inner function `y ↦ φ + ψ * y` has derivative `ψ`. -/
+theorem hasDerivAt_affine (φ ψ x : ℝ) : HasDerivAt (fun y => φ + ψ * y) ψ x := by
+  simpa using ((hasDerivAt_id x).const_mul ψ).const_add φ
+
+/-- Second derivative of the exponential-affine family: `ψ² * e^(φ + ψ x)`. -/
+theorem deriv_deriv_expAffine (φ ψ : ℝ) :
+    deriv (deriv (expAffine φ ψ)) = fun x => ψ ^ 2 * expAffine φ ψ x := by
+  have h1 : deriv (expAffine φ ψ) = fun x => Real.exp (φ + ψ * x) * ψ :=
+    funext fun x => (hasDerivAt_affine φ ψ x).exp.deriv
+  funext x
+  rw [h1, ((hasDerivAt_affine φ ψ x).exp.mul_const ψ).deriv]
+  simp only [expAffine]
+  ring
 
 /-! ### The 2D exponential-affine family and its partial derivatives -/
 
-/-- The 2D exponential-affine family `E_{A,Bx,Bv}(x,v) = e^(A + Bx·x + Bv·v)`
-Curried so that each partial derivative is a 1D derivative of
-an honest `expAffine` member — the whole substrate reuses the engine's helpers. -/
+/-- The 2D exponential-affine family `E_{A,Bx,Bv}(x,v) = e^(A + Bx·x + Bv·v)`,
+curried so that each partial derivative is a 1D derivative of an `expAffine` member. -/
 noncomputable def expAffine2 (A Bx Bv x v : ℝ) : ℝ := Real.exp (A + Bx * x + Bv * v)
 
 /-- x-frozen bridge: `E_{A,Bx,Bv}(·, v)` is the 1D member `expAffine (A + Bv·v) Bx`. -/
@@ -182,7 +184,7 @@ theorem deriv_expAffine2_xv (A Bx Bv x : ℝ) :
   simp only [hfun]
   exact (hderiv w).deriv
 
-/-! ### The Heston generator and the 2D engine lemma -/
+/-! ### The Heston generator on the exponential-affine family -/
 
 /-- The **Heston generator** on test functions `f : ℝ → ℝ → ℝ` (x = log-spot,
 v = variance):
@@ -198,7 +200,7 @@ noncomputable def hestonGenerator (r κ θ ξ ρ : ℝ) (f : ℝ → ℝ → ℝ
     + ρ * ξ * v * deriv (fun w => deriv (fun y => f y w) x) v
     + ξ ^ 2 * v / 2 * deriv (deriv (f x)) v
 
-/-- **The 2D engine lemma.** The Heston generator applied to a member of the 2D
+/-- **The generator on the 2D family.** The Heston generator applied to a member of the 2D
 exponential-affine family is an affine-in-`v` bracket times the function itself:
 
 `L E = ((r·Bx + κθ·Bv) + (Bx²/2 + ρξ·Bx·Bv + ξ²Bv²/2 − κBv − Bx/2)·v) · E`
@@ -206,7 +208,7 @@ exponential-affine family is an affine-in-`v` bracket times the function itself:
 — Bagaria ch. 14, eq. 14.4 in the 2D Heston roles: drift `(r − v/2, κ(θ − v))` and
 covariance `v·[[1, ρξ], [ρξ, ξ²]]` are both affine in `(x, v)`, so the bracket is
 affine (in fact x-free). The cross term `ρξ·Bx·Bv` inside the v-coefficient is the
-new 2D content (`cirGenerator_expAffine` has no analogue). -/
+new 2D content. -/
 theorem hestonGenerator_expAffine2 (r κ θ ξ ρ A Bx Bv : ℝ) :
     hestonGenerator r κ θ ξ ρ (expAffine2 A Bx Bv)
       = fun x v => ((r * Bx + κ * θ * Bv)
@@ -219,7 +221,7 @@ theorem hestonGenerator_expAffine2 (r κ θ ξ ρ A Bx Bv : ℝ) :
     deriv_expAffine2_v A Bx Bv x]
   ring
 
-/-- **The 2D invariance (bracket) corollary.** The bracket of the engine lemma is
+/-- **The 2D invariance (bracket) corollary.** The bracket of `hestonGenerator_expAffine2` is
 affine in `v` with intercept `c₀ = r·Bx + κθ·Bv` and slope
 `c₁ = Bx²/2 + ρξ·Bx·Bv + ξ²Bv²/2 − κBv − Bx/2`. Matching the backward pricing
 equation `∂_tΦ + LΦ = 0` against `∂_tΦ/Φ = A' + Bx'·x + Bv'·v` reads off the
@@ -256,20 +258,28 @@ constant-forced Riccati `b' = c + b₁b + db²` (`c = ½(u²−u)`, `b₁ = ρξ
 `d = ½ξ²`) — Calc 14.6's ψ-equation plus the x-row's constant. Its linearization
 (Calc 14.10's substitution) has characteristic roots `(b₁ ± γ)/2` with
 `γ² = b₁² − 4cd = (κ − ρξu)² + ξ²(u − u²)` — the ρ-shifted `cirGamma`. The
-Möbius member solving it from `b̂(0) = 0` is derived exactly like the engine's
-`cirBondB` (partial fractions against the fixed points, `b(0) = 0` imposed); the
+Möbius member solving it from `b̂(0) = 0` is derived like `cirBondB`
+in `FixedIncome/CIRRiccati` (partial fractions against the fixed points, `b(0) = 0` imposed); the
 `â`-antiderivative integrates `κθ·b̂` in closed form (log of the shared
 denominator), mirroring `cirBondA`.
 
 Guards (module header): the strip `0 < u < 1`, `ξ ≠ 0` forces `γ > |κ − ρξu|` and
-`D(τ) > 0` for all real `τ`; `κ, θ` enter only through cancellations (`κ ≠ 0`,
-`θ ≠ 0` where noted). -/
+`D(τ) > 0` for all real `τ`; `κ, θ` carry no hypotheses. -/
 
 /-- The Heston characteristic root `γ = √((κ − ρξu)² + ξ²(u − u²))` — `cirGamma`'s
 `√(κ² + 2ξ²)` with the ρ-shifted mean reversion `κ ↦ κ − ρξu` and the
 moment-dependent piece. -/
 noncomputable def hestonGamma (κ ξ ρ u : ℝ) : ℝ :=
   Real.sqrt ((κ - ρ * ξ * u) ^ 2 + ξ ^ 2 * (u - u ^ 2))
+
+/-- **Heston's root is the CIR root, shifted.** For `0 ≤ u ≤ 1`, the Heston characteristic root
+is `cirGamma` (`FixedIncome/CIRRiccati.lean`) at mean reversion `κ − ρξu` and volatility
+`ξ√((u − u²)/2)`. -/
+theorem hestonGamma_eq_cirGamma (κ ξ ρ : ℝ) {u : ℝ} (hu₀ : 0 ≤ u) (hu₁ : u ≤ 1) :
+    hestonGamma κ ξ ρ u = cirGamma (κ - ρ * ξ * u) (ξ * Real.sqrt ((u - u ^ 2) / 2)) := by
+  have h : 0 ≤ (u - u ^ 2) / 2 := by nlinarith
+  rw [hestonGamma, cirGamma, mul_pow, Real.sq_sqrt h]
+  ring_nf
 
 /-- The shared Möbius denominator `D(τ) = (γ + κ − ρξu)e^{γτ} + (γ − κ + ρξu)`
 (positive on the strip for every real `τ`). -/
@@ -296,7 +306,7 @@ noncomputable def hestonA (r κ θ ξ ρ u τ : ℝ) : ℝ :=
     * ((hestonGamma κ ξ ρ u + κ - ρ * ξ * u) / 2 * τ
         - Real.log (hestonBvDenom κ ξ ρ u τ / (2 * hestonGamma κ ξ ρ u)))
 
-/-! #### γ-plumbing (private, mirrors `cirGamma_sq` / `cirGamma_abs_lt`) -/
+/-! #### γ-plumbing (private) -/
 
 private theorem hestonGamma_sq (κ ξ ρ u : ℝ) (hu1 : 0 < u) (hu2 : u < 1) :
     hestonGamma κ ξ ρ u ^ 2 = (κ - ρ * ξ * u) ^ 2 + ξ ^ 2 * (u - u ^ 2) := by
@@ -362,10 +372,10 @@ theorem hestonA_at_zero (r κ θ ξ ρ u : ℝ) (hγ : hestonGamma κ ξ ρ u �
 
 /-- **The `Bv` Riccati ODE.** The Möbius closed form solves
 `b̂' = ½(u² − u) + (ρξu − κ)b̂ + ½ξ²b̂²` — the Calc 14.6 ψ-equation in the Heston
-roles with the x-row's constant. Proof idiom: the engine's `hasDerivAt_cirBondB`
+roles with the x-row's constant. Proof: as `hasDerivAt_cirBondB`
 (quotient rule, the coefficient rewrite `ξ²/2 = ((κ−ρξu)² − γ²)/(2(u²−u))` from
-`γ² = (κ−ρξu)² + ξ²(u−u²)`, then `field_simp`/`ring` — the residual is a polynomial
-identity, verified symbolically before formalizing). -/
+`γ² = (κ−ρξu)² + ξ²(u−u²)`, then `field_simp`/`ring`; the residual is a polynomial
+identity). -/
 theorem hasDerivAt_hestonBv (κ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u) (hu2 : u < 1) :
     HasDerivAt (hestonBv κ ξ ρ u)
       ((u ^ 2 - u) / 2 + (ρ * ξ * u - κ) * hestonBv κ ξ ρ u τ
@@ -373,7 +383,7 @@ theorem hasDerivAt_hestonBv (κ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u)
   have hc : ξ ^ 2 * (u ^ 2 - u) = (κ - ρ * ξ * u) ^ 2 - hestonGamma κ ξ ρ u ^ 2 := by
     rw [hestonGamma_sq κ ξ ρ u hu1 hu2]
     ring
-  -- derivative building blocks (engine idiom)
+  -- derivative building blocks
   have hlin : HasDerivAt (fun s : ℝ => hestonGamma κ ξ ρ u * s) (hestonGamma κ ξ ρ u) τ := by
     simpa using (hasDerivAt_id τ).const_mul (hestonGamma κ ξ ρ u)
   have hexp : HasDerivAt (fun s : ℝ => Real.exp (hestonGamma κ ξ ρ u * s))
@@ -386,7 +396,7 @@ theorem hasDerivAt_hestonBv (κ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u)
         * Real.exp (hestonGamma κ ξ ρ u * s) + (hestonGamma κ ξ ρ u - κ + ρ * ξ * u))
       ((hestonGamma κ ξ ρ u + κ - ρ * ξ * u)
         * (Real.exp (hestonGamma κ ξ ρ u * τ) * hestonGamma κ ξ ρ u)) τ := by
-    simpa using hasDerivAt_add' (hexp.const_mul (hestonGamma κ ξ ρ u + κ - ρ * ξ * u))
+    simpa using (hexp.const_mul (hestonGamma κ ξ ρ u + κ - ρ * ξ * u)).fun_add
       (hasDerivAt_const τ (hestonGamma κ ξ ρ u - κ + ρ * ξ * u))
   have hDne : hestonBvDenom κ ξ ρ u τ ≠ 0 :=
     ne_of_gt (hestonBvDenom_pos κ ξ ρ u τ hξ hu1 hu2)
@@ -394,7 +404,7 @@ theorem hasDerivAt_hestonBv (κ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u)
   have hq := hnum.div hden hDne
   -- the value identity, cleared deterministically: strip the outer `D²`, expand the
   -- remaining products, then one `linear_combination` with the γ-relation `hc`
-  -- (multiplier `−(u²−u)(E−1)²/2`, verified symbolically before formalizing)
+  -- (multiplier `−(u²−u)(E−1)²/2`)
   have hval :
       (((u ^ 2 - u) * (Real.exp (hestonGamma κ ξ ρ u * τ) * hestonGamma κ ξ ρ u) *
           ((hestonGamma κ ξ ρ u + κ - ρ * ξ * u) * Real.exp (hestonGamma κ ξ ρ u * τ) +
@@ -432,9 +442,8 @@ system (`φ' = aψ + ½cψ²`, eq. 14.5, in the Heston roles: the x-row contribu
 `r·u`, the v-row `κθ·b̂`). Proof: the `hasDerivAt_cirBondA` idiom — the log's
 derivative via `.div_const` + `.log`, cleaned by the key lemma
 `(γ + κ − ρξu)(D(τ) − 2γe^{γτ}) = ξ²(u² − u)(e^{γτ} − 1)` (pure ring after the
-γ-relation). Guards: the strip, plus `κ ≠ 0`, `θ ≠ 0` (the cancellation step). -/
-theorem hasDerivAt_hestonA (r κ θ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u) (hu2 : u < 1)
-    (hκ : κ ≠ 0) (hθ : θ ≠ 0) :
+γ-relation). Guard: the strip. -/
+theorem hasDerivAt_hestonA (r κ θ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u) (hu2 : u < 1) :
     HasDerivAt (hestonA r κ θ ξ ρ u) (r * u + κ * θ * hestonBv κ ξ ρ u τ) τ := by
   have hγpos : 0 < hestonGamma κ ξ ρ u := hestonGamma_pos κ ξ ρ u hξ hu1 hu2
   have hγne : hestonGamma κ ξ ρ u ≠ 0 := ne_of_gt hγpos
@@ -472,7 +481,7 @@ theorem hasDerivAt_hestonA (r κ θ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 
         * Real.exp (hestonGamma κ ξ ρ u * s) + (hestonGamma κ ξ ρ u - κ + ρ * ξ * u))
       ((hestonGamma κ ξ ρ u + κ - ρ * ξ * u)
         * (Real.exp (hestonGamma κ ξ ρ u * τ) * hestonGamma κ ξ ρ u)) τ := by
-    simpa using hasDerivAt_add' (hexp.const_mul (hestonGamma κ ξ ρ u + κ - ρ * ξ * u))
+    simpa using (hexp.const_mul (hestonGamma κ ξ ρ u + κ - ρ * ξ * u)).fun_add
       (hasDerivAt_const τ (hestonGamma κ ξ ρ u - κ + ρ * ξ * u))
   have h2γ : (2 : ℝ) * hestonGamma κ ξ ρ u ≠ 0 := mul_ne_zero (by norm_num) hγne
   have hdiv := hdenf.div_const (2 * hestonGamma κ ξ ρ u)
@@ -489,7 +498,7 @@ theorem hasDerivAt_hestonA (r κ θ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 
                 * (Real.exp (hestonGamma κ ξ ρ u * τ) * hestonGamma κ ξ ρ u))
               / (2 * hestonGamma κ ξ ρ u))
             / (hestonBvDenom κ ξ ρ u τ / (2 * hestonGamma κ ξ ρ u)))) τ :=
-    (hasDerivAt_sub' hterm2 hlog).const_mul (2 * κ * θ / ξ ^ 2)
+    (hterm2.fun_sub hlog).const_mul (2 * κ * θ / ξ ^ 2)
   have hsum : HasDerivAt (hestonA r κ θ ξ ρ u)
       (r * u + (2 * κ * θ / ξ ^ 2)
         * ((hestonGamma κ ξ ρ u + κ - ρ * ξ * u) / 2
@@ -497,7 +506,7 @@ theorem hasDerivAt_hestonA (r κ θ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 
                 * (Real.exp (hestonGamma κ ξ ρ u * τ) * hestonGamma κ ξ ρ u))
               / (2 * hestonGamma κ ξ ρ u))
             / (hestonBvDenom κ ξ ρ u τ / (2 * hestonGamma κ ξ ρ u)))) τ :=
-    hasDerivAt_add' hterm1 hterm3
+    hterm1.fun_add hterm3
   -- the value identity: clean the nested division, then the key lemma
   have hstep1 : (((hestonGamma κ ξ ρ u + κ - ρ * ξ * u)
           * (Real.exp (hestonGamma κ ξ ρ u * τ) * hestonGamma κ ξ ρ u))
@@ -512,7 +521,6 @@ theorem hasDerivAt_hestonA (r κ θ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 
             * Real.exp (hestonGamma κ ξ ρ u * τ) / hestonBvDenom κ ξ ρ u τ)
       = κ * θ * ((u ^ 2 - u) * (Real.exp (hestonGamma κ ξ ρ u * τ) - 1)
           / hestonBvDenom κ ξ ρ u τ) := by
-    have hκθ : κ * θ ≠ 0 := mul_ne_zero hκ hθ
     have hcore : (2 / ξ ^ 2)
           * ((hestonGamma κ ξ ρ u + κ - ρ * ξ * u) / 2
             - (hestonGamma κ ξ ρ u + κ - ρ * ξ * u) * hestonGamma κ ξ ρ u
@@ -539,7 +547,7 @@ theorem hasDerivAt_hestonA (r κ θ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 
             * ((hestonGamma κ ξ ρ u + κ - ρ * ξ * u) / 2
               - (hestonGamma κ ξ ρ u + κ - ρ * ξ * u) * hestonGamma κ ξ ρ u
                 * Real.exp (hestonGamma κ ξ ρ u * τ) / hestonBvDenom κ ξ ρ u τ)) := by
-              field_simp
+              ring
       _ = κ * θ * ((u ^ 2 - u) * (Real.exp (hestonGamma κ ξ ρ u * τ) - 1)
             / hestonBvDenom κ ξ ρ u τ) := by rw [hcore]
   rw [hstep1, hmain] at hsum
@@ -549,8 +557,7 @@ theorem hasDerivAt_hestonA (r κ θ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 
 
 /-- **Calendar-time `Bv`-flow.** `B(t) = b̂(T − t)` solves
 `B' = u/2 − u²/2 + (κ − ρξu)B − (ξ²/2)B²` — exactly the `hB` hypothesis of
-`hestonProfile_pde` (chain rule: `B'(t) = −b̂'(T − t)`; the engine's `hasDerivAt_cirBondB`, flipped to
-calendar time). -/
+`hestonProfile_pde` (chain rule: `B'(t) = −b̂'(T − t)`). -/
 theorem hasDerivAt_hestonBvCalendar (κ ξ ρ u T : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u)
     (hu2 : u < 1) (t : ℝ) :
     HasDerivAt (fun w => hestonBv κ ξ ρ u (T - w))
@@ -575,7 +582,7 @@ theorem hasDerivAt_hestonBvCalendar (κ ξ ρ u T : ℝ) (hξ : ξ ≠ 0) (hu1 :
 /-- **Calendar-time `A`-flow.** `A(t) = â(T − t)` solves `A' = −r·u − κθ·B(t)` —
 exactly the `hA` hypothesis of `hestonProfile_pde`. -/
 theorem hasDerivAt_hestonACalendar (r κ θ ξ ρ u T : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u)
-    (hu2 : u < 1) (hκ : κ ≠ 0) (hθ : θ ≠ 0) (t : ℝ) :
+    (hu2 : u < 1) (t : ℝ) :
     HasDerivAt (fun w => hestonA r κ θ ξ ρ u (T - w))
       (-(r * u) - κ * θ * hestonBv κ ξ ρ u (T - t)) t := by
   have hts : HasDerivAt (fun w : ℝ => T - w) (-1) t := by
@@ -585,7 +592,7 @@ theorem hasDerivAt_hestonACalendar (r κ θ ξ ρ u T : ℝ) (hξ : ξ ≠ 0) (h
     ring
   have hcomp : HasDerivAt (fun w : ℝ => hestonA r κ θ ξ ρ u (T - w))
       ((r * u + κ * θ * hestonBv κ ξ ρ u (T - t)) * (-1)) t :=
-    (hasDerivAt_hestonA r κ θ ξ ρ u (T - t) hξ hu1 hu2 hκ hθ).comp t hts
+    (hasDerivAt_hestonA r κ θ ξ ρ u (T - t) hξ hu1 hu2).comp t hts
   rw [hval] at hcomp
   exact hcomp
 
@@ -615,9 +622,9 @@ the transform profile satisfies the **backward pricing equation**
 `∂_t Φ + L Φ = 0`,  `L = hestonGenerator r κ θ ξ ρ`,
 
 for every `(t, x, v)` (no `t < T` hypothesis needed — the identity holds
-identically; the terminal condition is `hestonProfile_terminal`). Note the
-contrast with the engine's bond PDEs: no discount term on the right — the funding
-rate `r` sits inside the drift of `x`, and the payoff `e^{ux}` carries no
+identically; the terminal condition is `hestonProfile_terminal`). Unlike the bond PDEs
+of `FixedIncome/AffineTermStructurePDE` there is no discount term on the right: the
+funding rate `r` sits inside the drift of `x`, and the payoff `e^{ux}` carries no
 discounting. -/
 theorem hestonProfile_pde (r κ θ ξ ρ u : ℝ) (A B : ℝ → ℝ)
     (hB : ∀ s, HasDerivAt B (u / 2 - u ^ 2 / 2 + κ * B s - ρ * ξ * u * B s
@@ -631,7 +638,7 @@ theorem hestonProfile_pde (r κ θ ξ ρ u : ℝ) (A B : ℝ → ℝ)
       (-(r * u) - κ * θ * B t
         + (u / 2 - u ^ 2 / 2 + κ * B t - ρ * ξ * u * B t - ξ ^ 2 / 2 * B t ^ 2) * v) t := by
     simpa only [add_zero] using
-      hasDerivAt_add' (hasDerivAt_add' (hA t) (hasDerivAt_const t (u * x))) ((hB t).mul_const v)
+      ((hA t).fun_add (hasDerivAt_const t (u * x))).fun_add ((hB t).mul_const v)
   have htime : HasDerivAt (fun s : ℝ => hestonProfile u A B s x v)
       (Real.exp (A t + u * x + B t * v)
         * (-(r * u) - κ * θ * B t
@@ -650,9 +657,9 @@ theorem hestonProfile_pde (r κ θ ξ ρ u : ℝ) (A B : ℝ → ℝ)
 /-- **The PDE verification (explicit version, the `cirBondPrice_solves_pde` mirror).**
 The transform profile built from the explicit Möbius flows
 `A(t) = â(T − t)`, `B(t) = b̂(T − t)` satisfies `∂_t Φ + L Φ = 0` for every
-`(t, x, v)`. Guards: the strip `0 < u < 1`, `ξ ≠ 0`, `κ ≠ 0`, `θ ≠ 0`. -/
+`(t, x, v)`. Guards: the strip `0 < u < 1`, `ξ ≠ 0`. -/
 theorem hestonTransform_pde (r κ θ ξ ρ u T : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u)
-    (hu2 : u < 1) (hκ : κ ≠ 0) (hθ : θ ≠ 0) (t x v : ℝ) :
+    (hu2 : u < 1) (t x v : ℝ) :
     deriv (fun s => hestonProfile u (fun w => hestonA r κ θ ξ ρ u (T - w))
         (fun w => hestonBv κ ξ ρ u (T - w)) s x v) t
       + hestonGenerator r κ θ ξ ρ (hestonProfile u (fun w => hestonA r κ θ ξ ρ u (T - w))
@@ -660,7 +667,7 @@ theorem hestonTransform_pde (r κ θ ξ ρ u T : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 
   hestonProfile_pde r κ θ ξ ρ u (fun w => hestonA r κ θ ξ ρ u (T - w))
     (fun w => hestonBv κ ξ ρ u (T - w))
     (fun s => hasDerivAt_hestonBvCalendar κ ξ ρ u T hξ hu1 hu2 s)
-    (fun s => hasDerivAt_hestonACalendar r κ θ ξ ρ u T hξ hu1 hu2 hκ hθ s) t x v
+    (fun s => hasDerivAt_hestonACalendar r κ θ ξ ρ u T hξ hu1 hu2 s) t x v
 
 /-- Terminal condition of the explicit transform: `Φ(T, x, v) = e^{u·x}`
 (`â(0) = 0`, `b̂(0) = 0`). -/
@@ -672,47 +679,5 @@ theorem hestonTransform_terminal (r κ θ ξ ρ u T x v : ℝ) (hξ : ξ ≠ 0) 
   hestonProfile_terminal u _ _ T x v
     (by simpa using hestonA_at_zero r κ θ ξ ρ u (hestonGamma_ne_zero κ ξ ρ u hξ hu1 hu2))
     (by simpa using hestonBv_at_zero κ ξ ρ u)
-
-/-! ### The gated residue (stated, not proved)
-
-`E[e^{u·log S_T}] = Φ(0, x₀, v₀)` — the E-level half of the affine expectation
-identity — needs the Itô drift of `exp-affine-of-(logS, V)` along a Heston
-solution: a 2D correlated Itô formula on a process that does not exist at this
-pin (no path-continuous modification is constructible here). The theorem below
-isolates exactly that content as `hGate` — the
-profile's expectation invariance along the candidate solution, the statement the
-Itô drift cancellation would produce — and proves the headline from it. The PDE
-half (`hestonTransform_pde` + terminal) is unconditional; `hGate` is the honest
-gate, in the sense of the affine engine's recorded PDE-vs-expectation gap. -/
-
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-
-/-- **Gated residue.** Let `(X, V)` be a candidate Heston solution path
-(`X t ω` = log-spot, `V t ω` = variance) from `(x₀, v₀)`, and let the coefficient
-flows `A, B` carry the terminal data. If the profile is
-expectation-invariant along the solution (`hGate` — the martingale property that
-the 2D Itô drift cancellation would give, gated at this pin), then
-
-`E[e^{u·X_T}] = Φ(0, x₀, v₀) = e^{A(0) + u·x₀ + B(0)·v₀}`. -/
-theorem hestonTransform_expectation_gated (u x₀ v₀ : ℝ) (A B : ℝ → ℝ) (T : ℝ)
-    (X V : ℝ → Ω → ℝ)
-    (hAT : A T = 0) (hBT : B T = 0)
-    (hX₀ : ∀ ω, X 0 ω = x₀) (hV₀ : ∀ ω, V 0 ω = v₀)
-    (hGate : ∀ s : ℝ, ∫ ω, hestonProfile u A B T (X T ω) (V T ω) ∂μ
-      = ∫ ω, hestonProfile u A B s (X s ω) (V s ω) ∂μ) :
-    ∫ ω, Real.exp (u * X T ω) ∂μ = hestonProfile u A B 0 x₀ v₀ := by
-  have hterm : ∀ ω, hestonProfile u A B T (X T ω) (V T ω) = Real.exp (u * X T ω) :=
-    fun ω => hestonProfile_terminal u A B T _ _ hAT hBT
-  have hinit : ∀ ω, hestonProfile u A B 0 (X 0 ω) (V 0 ω)
-      = hestonProfile u A B 0 x₀ v₀ := by
-    intro ω
-    simp only [hestonProfile, hX₀, hV₀]
-  calc ∫ ω, Real.exp (u * X T ω) ∂μ
-      = ∫ ω, hestonProfile u A B T (X T ω) (V T ω) ∂μ :=
-        (integral_congr_ae (ae_of_all μ hterm)).symm
-    _ = ∫ ω, hestonProfile u A B 0 (X 0 ω) (V 0 ω) ∂μ := hGate 0
-    _ = ∫ ω, hestonProfile u A B 0 x₀ v₀ ∂μ := integral_congr_ae (ae_of_all μ hinit)
-    _ = hestonProfile u A B 0 x₀ v₀ := by simp
-
 
 end MathFin.Heston

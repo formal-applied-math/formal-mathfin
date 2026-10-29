@@ -201,9 +201,9 @@ alignment:
       status: full 21 · wrapper 0 · reduced 1 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 57 statements
+      lean: 58 statements
       module: benchmarks/interest_rates.json
-      status: full 56 · wrapper 0 · reduced 1 · placeholder 0
+      status: full 57 · wrapper 0 · reduced 1 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
       lean: 83 statements
@@ -251,9 +251,9 @@ alignment:
       status: full 34 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: stochastic_calculus (Saporito, Stochastic Processes)
-      lean: 56 statements
+      lean: 55 statements
       module: benchmarks/stochastic_calculus.json
-      status: full 53 · wrapper 0 · reduced 3 · placeholder 0
+      status: full 52 · wrapper 0 · reduced 3 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
       lean: 11 statements

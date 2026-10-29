@@ -202,11 +202,10 @@ continuous coefficients, at each fixed time, with the stochastic integral as a l
 probability of Riemann sums". Not covered: an `L²` or local stochastic integral of `f'(X)σ` for
 unbounded `f'`, unbounded coefficients, time-dependent `f(t, x)`, a random start, the formula as an
 identity of processes, a Brownian motion continuous only almost surely. Issue #309, parts 1 and 2.
+
 ### The Student-t law: VaR and ES at the law (2026-10-22)
 
 Five entries added to `benchmarks/quantitative_risk_management.json`, all `full`.
-Corpus 658 → 663 (after merging `origin/main` to resolve a 370-commit divergence; the
-delta this section itself contributed was 535 → 540 before that merge).
 
 Mathlib has no Student-t law at the pin. `Foundations/StudentT.lean` builds it as Lebesgue measure
 with density `k_ν/∫k_ν`, `k_ν(x) = (1 + x²/ν)^(-(ν+1)/2)`, computes the normalizing constant (a
@@ -221,25 +220,23 @@ states VaR and ES of `μ + σT` through the library's `valueAtRisk` and `expecte
 | `qrm-student-t-cauchy` | The Student-t law with ν = 1 is Mathlib's standard Cauchy law: studentTMeasure 1 = cauchyMeasure 0 1. | `MathFin/Foundations/StudentT.lean`, `MathFin.studentTMeasure_one` | `full` |
 | `qrm-student-t-var` | For T ~ t_ν, σ ≥ 0 and α ∈ (0, 1): VaR_α(μ + σT) = μ + σ·t_ν⁻¹(α), with t_ν⁻¹(α) the quantile of the law. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_of_hasLaw_studentTMeasure` | `full` |
 | `qrm-student-t-es` | For T ~ t_ν, ν > 1, σ ≥ 0 and α ∈ (0, 1): ES_α(μ + σT) = μ + σ·g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α). | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.expectedShortfall_of_hasLaw_studentTMeasure` | `full` |
-| `qrm-student-t-var-le-es` | For ν > 1 and α ∈ (0, 1), q ≤ g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α), the general VaR ≤ ES read through the two closed forms. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.quantile_studentTMeasure_le_expectedShortfall_closedForm` | `full` |
+| `qrm-student-t-var-le-es` | For T ~ t_ν, ν > 1 and α ∈ (0, 1): VaR_α(μ + σT) ≤ ES_α(μ + σT), the general VaR ≤ ES at the law. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure` | `full` |
 
 What is not covered:
 - `t_ν⁻¹(α)` is the generic `quantile` of the law; no closed form for it is given.
-- `qrm-student-t-var-le-es` benchmarks the inequality between the two closed forms; the
-  measure-level `valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure` is not itself a
-  benchmark entry.
+- The same inequality read through the two closed forms,
+  `quantile_studentTMeasure_le_expectedShortfall_closedForm`, is not itself a benchmark entry.
 - The construction as the law of `Z/√(V/ν)` (independent normal and χ²) is not formalized.
 
 Verification:
 - The default `lake build` passed, including the curated `AxiomAudit.lean` (three new Student-t
   guards) and the regenerated `AxiomAuditGen.lean`.
 - `lake lint` passed.
-- The ledger reports 663 fresh, 0 stale and 0 missing entries (after the subsequent merge with
-  `origin/main`); the five new entries were verified with `lake env lean`.
+- The five new entries were verified with `lake env lean`.
 
 ### Fixed-income building blocks (#277; issues #69, #108; 2026-10-23)
 
-Seven `full` entries, corpus 658 → 665, each derived from library machinery:
+Seven `full` entries, each derived from library machinery:
 
 - **Interest-rate parity** (`no_arbitrage.json`; #108). Covered parity `F = S·e^{(r_d−r_f)T}` is
   `forward_price_from_no_arbitrage` with the foreign zero-coupon bond as the asset
@@ -262,7 +259,7 @@ Seven `full` entries, corpus 658 → 665, each derived from library machinery:
   `exp(−rⱼTⱼ)`, and the un-normalised partials `∂P/∂kⱼ`, not the durations
   `KRDⱼ = −(1/P)·∂P/∂kⱼ`, which this module does not define. Interpolated key-rate nodes are not
   modelled either.
-- **Clean and dirty price** (`interest_rates.json`). For `1 + y ≠ 0`, with next coupon `cⱼ`
+- **Clean and dirty price** (`interest_rates.json`). For `1 + y > 0`, with next coupon `cⱼ`
   (`j ∈ s`, `tⱼ = 1`, all `tᵢ ≥ 1`), as `f ↑ 1` the dirty price tends to the next period's dirty
   price plus `cⱼ`, and the clean price (accruing `cⱼ`) to the next period's clean price
   (`mf-dirty-price-drops-by-coupon`, `mf-clean-price-continuous-at-coupon-date`).
@@ -281,38 +278,31 @@ Three `full` entries in `BlackScholes/SABRImpliedVol.lean`, on Hagan–Kumar–L
   (eq. 2.17a-c, `⋯` dropped) tends to the ATM formula (eq. 2.18) as `K → f`, `K ≠ f`, for
   `f > 0`, `α ≠ 0`, `ν ≠ 0`, `ρ ≠ 1`. The `0/0` of `z/x(z)` at `K = f` is resolved by
   `x(0) = 0`, `x'(0) = 1` (`hasDerivAt_sabrX_zero`); `ν = 0` is excluded (`z ≡ 0` there).
-- **`mf-sabr-backbone-law`** (`hasDerivAt_log_sabrBackbone`): along `α / f^(1-β)`,
-  `d log σ / df = (β − 1)/f` for `f, α > 0`.
-- **`mf-sabr-atm-black76-price`** (`sabrATMVol_black_futures_price`, from the new
+- **`mf-sabr-backbone-law`** (`hasDerivAt_log_sabrBackbone_exp`): along `α / f^(1-β)`,
+  `d log σ / d log f = β − 1` for `α > 0`, i.e. `v ↦ log σ(e^v)` has derivative `β − 1`; it is
+  the chain rule through `exp` applied to `hasDerivAt_log_sabrBackbone`
+  (`d log σ / df = (β − 1)/f` for `f, α > 0`).
+- **`mf-sabr-atm-black76-price`** (`sabrATMVol_black_futures_price`, from
   `black_futures_formula_atm` in `Futures/Black76.lean`): under the Black-76 hypothesis at
   `σ = sabrATMVol f α β ρ ν T` (the vol's own `t_ex` fixed to the option's expiry `T`, not an
   independent variable), the discounted expected ATM call payoff is `e^{−rT} f (2Φ(σ√T/2) − 1)`.
+  The hypothesis includes `σ_ATM > 0`, which is assumed, not proved.
 
 All three are about the printed formulas. Nothing is derived from the SABR SDE, and there is no
 error bound against the model's implied volatility (issue #100's `O(T²)` statement stays open).
 
-### PSD-form Cauchy–Schwarz and the constrained-Sharpe tradeoff (2026-10-27)
+### A mean–variance KKT point and the mean–standard-deviation tradeoff (2026-10-27)
 
-One entry added, `mf-psd-cauchy-schwarz` (`full`). Corpus 658 → 659.
+One entry added, `mf-mean-variance-kkt-mean-sd-tradeoff` (`full`).
 
-`Portfolio/PosSemidefCauchySchwarz.lean` proves the Cauchy–Schwarz inequality for the
-semi-inner product `⟨u, v⟩ = u ⬝ᵥ (Sig *ᵥ v)` induced by a positive semidefinite matrix
-form (`posSemidef_cauchySchwarz`): `|x ⬝ᵥ (Sig *ᵥ y)| ≤ √(x ⬝ᵥ (Sig *ᵥ x)) · √(y ⬝ᵥ (Sig *ᵥ y))`.
-The form is degenerate when `Sig` is singular, but the bound is two-sided: the completed
-square on the quadratic form of `Sig` at `x − t • y` is nonnegative for every real `t`;
-the branch `y ⬝ᵥ (Sig *ᵥ y) = 0` forces `x ⬝ᵥ (Sig *ᵥ y) = 0` (either sign of the cross
-term drives the square negative once `t` passes `X/(2Q)` on its own side), the other
-evaluates at `t = Q/Y` to collapse the square to `Q² ≤ X·Y`. The application is the
-tradeoff form of the Markowitz mean-variance problem (`pricedReturn_le_of_kkt`, stated
-over the priced-return objective `pricedReturn μ t₁ Sig x1 y` — return minus the price of
-risk `t₁·√(x1 ⬝ᵥ (Sig *ᵥ x1))` charged per unit of the holder's own risk): a
-KKT point — stationarity, dual feasibility, complementary slackness — of
-`min −μ ⬝ᵥ x + (t₁/2) · x ⬝ᵥ (Sig *ᵥ x)` with `Sig` PSD and `t₁ > 0` maximizes the priced
-return over the whole feasible set. As in `ConvexQPKKT`'s sufficiency, `x1`'s own
-feasibility is not assumed (complementary slackness alone forces `u k = 0` where `x1`
-violates the constraint). KKT necessity is not claimed. A third public theorem,
-`quad_expansion_add_smul`, is the bilinear split of a quadratic form at `u + k • v`
-(no symmetry needed).
+`Portfolio/PosSemidefCauchySchwarz.lean` states the tradeoff form of the Markowitz mean–variance
+problem (`pricedReturn_le_of_kkt`): a KKT point `x1` (stationarity, dual feasibility,
+complementary slackness) of `min −μ ⬝ᵥ x + (t₁/2) · x ⬝ᵥ (Sig *ᵥ x)` with `Sig` PSD and `t₁ ≥ 0`
+maximizes the mean–standard-deviation objective `μ ⬝ᵥ y − t₁·√(x1 ⬝ᵥ (Sig *ᵥ x1))·√(y ⬝ᵥ (Sig *ᵥ y))`
+over the whole feasible set. The cross term is bounded by Cauchy–Schwarz for the semi-inner
+product `u ⬝ᵥ (Sig *ᵥ v)` (`posSemidef_cauchySchwarz`, a completed-square proof). As in
+`ConvexQPKKT`'s sufficiency, `x1`'s own feasibility is not assumed (complementary slackness alone
+forces `u k = 0` where `x1` violates the constraint). KKT necessity is not claimed.
 
 ### Every module connected: the coherence pass (2026-10-21)
 

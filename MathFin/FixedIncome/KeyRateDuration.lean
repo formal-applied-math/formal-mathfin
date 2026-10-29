@@ -14,8 +14,8 @@ public import MathFin.FixedIncome.DurationSensitivity
 `MacaulayModified` prices a bond off a single flat yield, `P(y) = Σ cᵢ / (1 + y)^{tᵢ}`
 (`bondPriceDisc`), and `DurationSensitivity` differentiates it: `P'(y) = -ModNum(y)`
 (`hasDerivAt_bondPriceDisc`).
-Key-rate analysis refines the flat yield to a curve: cashflow `i` is discounted at its own
-tenor's spot rate `kᵢ`,
+Key-rate analysis refines the flat yield to a curve: cashflow `i` is discounted at its own rate
+`kᵢ` (one node per cashflow, not a tenor-indexed curve),
 
   `P(k) = Σ cᵢ / (1 + kᵢ)^{tᵢ}`     (`bondPriceKeyRate`).
 
@@ -48,7 +48,7 @@ namespace MathFin
 
 variable {ι : Type*}
 
-/-- Bond price with cashflow `i` discounted at its own tenor's spot rate `k i`,
+/-- Bond price with cashflow `i` discounted at its own rate `k i` (one node per cashflow),
 annual compounding. On a flat curve it is `bondPriceDisc`. -/
 noncomputable def bondPriceKeyRate (s : Finset ι) (t : ι → ℕ) (c k : ι → ℝ) : ℝ :=
   ∑ i ∈ s, c i / (1 + k i) ^ t i

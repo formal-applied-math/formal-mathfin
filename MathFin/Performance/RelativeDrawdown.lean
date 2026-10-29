@@ -21,8 +21,8 @@ drawdown at every date. This is why relative drawdown, not absolute drawdown, co
 portfolios of different sizes, or denominated in different currencies at a fixed conversion
 rate.
 
-The invariance holds for every equity curve, with no positivity hypothesis on `E`: Lean's
-`x / 0 = 0` convention makes both sides `1` at a zero peak.
+The identity holds for every `E`; the value is a drawdown fraction only where the running peak
+is positive.
 
 ## Main results
 
@@ -44,7 +44,8 @@ namespace MathFin
 variable {ι : Type*} [Preorder ι] [LocallyFiniteOrderBot ι]
 
 /-- Relative drawdown `1 − E t / max_{s ≤ t} E s` of an equity curve `E` at time `t`: the
-fraction of the running peak lost by time `t`. -/
+fraction of the running peak lost by time `t`. It is a drawdown fraction only where
+`partialSups E t > 0`; elsewhere the value is junk. -/
 noncomputable def relativeDrawdown (E : ι → ℝ) (t : ι) : ℝ := 1 - E t / partialSups E t
 
 /-- Maximum relative drawdown up to time `t`: the largest relative drawdown at any `s ≤ t`. -/
@@ -69,13 +70,8 @@ theorem relativeDrawdown_const_mul {c : ℝ} (hc : 0 < c) (E : ι → ℝ) :
 
 /-- The maximum relative drawdown up to any time is scale invariant. -/
 theorem maxRelativeDrawdown_const_mul {c : ℝ} (hc : 0 < c) (E : ι → ℝ) :
-    maxRelativeDrawdown (fun s ↦ c * E s) = maxRelativeDrawdown E := by
-  unfold maxRelativeDrawdown
-  rw [relativeDrawdown_const_mul hc]
-
-private theorem le_listMaximum {x : ℝ} : ∀ {xs : List ℝ}, x ∈ xs → x ≤ listMaximum xs
-  | _ :: _, .head _ => le_max_left _ _
-  | _ :: _, .tail _ h => (le_listMaximum h).trans (le_max_right _ _)
+    maxRelativeDrawdown (fun s ↦ c * E s) = maxRelativeDrawdown E :=
+  congrArg (fun f t ↦ partialSups f t) (relativeDrawdown_const_mul hc E)
 
 /-- Every chronological peak-to-trough decline `E s − E t` (`s ≤ t`) of a finite path is at
 most its `maximumDrawdown`. -/

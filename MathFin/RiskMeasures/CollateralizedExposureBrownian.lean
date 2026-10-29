@@ -13,23 +13,20 @@ public import MathFin.Foundations.GaussianMoments
 /-!
 # Collateralized exposure under a Brownian-driven process
 
-Collateral is modelled as an actual composition of the exposure process — `C t := V (t - Δ)`,
-the process itself evaluated `Δ` earlier — never an opaque scalar.
+Collateral is the exposure process itself evaluated `Δ` earlier, `C t := V (t - Δ)`: a two-way
+CSA with zero threshold and zero minimum transfer amount, posted with a lag `Δ` (the margin
+period of risk).
 
 * `collateralizedExposure V Δ t ω = max (V t ω - V (t - Δ) ω) 0`, time indexed by `ℝ≥0` to match
-  `IsPreBrownianReal`. The lag `t - Δ` is `ℝ≥0` truncated subtraction, so for `Δ > t` it collapses
-  to `0` (i.e. `C_t` would silently become `V_0`); the theorem below guards this with `Δ ≤ t`, so
-  no junk value is ever read off by a proved result.
-* `collateralizedExposure_brownian_gaussian`: for `V t = m + σ B t` with `B` an actual pre-Brownian
-  motion (`IsPreBrownianReal`), `0 < Δ ≤ t`, `σ > 0`, the collateralized exposure has closed form
-  `E[(V_t - V_{t-Δ})⁺] = σ√Δ · φ(0)`. The law of the increment `B_t - B_{t-Δ}` is derived
-  (not hypothesized) from the Brownian finite-dimensional laws (`MathFin.hasLaw_increment`),
-  standardized to a driver `Z ~ N(0,1)` by
-  `hasLaw_sub_div_of_gaussianReal`, so that `V_t - V_{t-Δ} = σ√Δ · Z` with the σ-scale entering
-  as the volatility parameter of `CVA.expectedExposure_gaussian` — the same machinery as
-  `ExposureMeasures.lean`'s Gaussian exposure measures. The mean is `0` (an increment
-  of a driftless driver), so the standardized argument `d = a/(b√s)` collapses to `0` and the
-  answer is the bare Gaussian density `φ(0)` scaled by the volatility of the increment.
+  `IsPreBrownianReal`. The lag `t - Δ` is `ℝ≥0` truncated subtraction, so for `Δ > t` it is `0`
+  and `C_t` is `V_0`; the theorem below assumes `Δ ≤ t`.
+* `collateralizedExposure_brownian_gaussian`: for `V t = m + σ B t` with `B` a pre-Brownian
+  motion (`IsPreBrownianReal`), `0 < Δ ≤ t` and `σ > 0`, the expected collateralized exposure is
+  `E[(V_t - V_{t-Δ})⁺] = σ√Δ · φ(0)`. The level `m` drops out of the increment
+  `V_t - V_{t-Δ} = σ (B_t - B_{t-Δ})`, whose law comes from the Brownian finite-dimensional laws
+  (`MathFin.hasLaw_increment`); standardized to `Z ~ N(0,1)` by `hasLaw_sub_div_of_gaussianReal`,
+  it is `σ√Δ · Z`, and `CVA.expectedExposure_gaussian` at mean `0` gives the answer, the density
+  `φ(0)` scaled by the volatility of the increment.
 
 ## References
 
@@ -46,14 +43,14 @@ open scoped NNReal
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
 
 /-- Collateralized exposure at time `t` with lag `Δ`: `max(V_t - C_t, 0)` with the lagged
-collateral `C_t := V_{t-Δ}` substituted as an actual earlier value of the same process. -/
+collateral `C_t := V_{t-Δ}`, the same process `Δ` earlier. -/
 noncomputable def collateralizedExposure (V : ℝ≥0 → Ω → ℝ) (Δ t : ℝ≥0) (ω : Ω) : ℝ :=
   max (V t ω - V (t - Δ) ω) 0
 
 /-- **Collateralized exposure under a Brownian-driven process, in closed form**: for
-`V_t = m + σ B_t` with `B` an actual pre-Brownian motion, `σ > 0` and `0 < Δ ≤ t`,
-`E[(V_t - V_{t-Δ})⁺] = σ√Δ · φ(0)`. The law of the collateralized difference is derived from
-`MathFin.hasLaw_increment`, not hypothesized. -/
+`V_t = m + σ B_t` with `B` a pre-Brownian motion, `σ > 0` and `0 < Δ ≤ t`,
+`E[(V_t - V_{t-Δ})⁺] = σ√Δ · φ(0)`; the level `m` drops out. The law of the increment comes from
+`MathFin.hasLaw_increment`. -/
 theorem collateralizedExposure_brownian_gaussian [IsProbabilityMeasure P] {B : ℝ≥0 → Ω → ℝ}
     (hB : IsPreBrownianReal B P) (m σ : ℝ) (hσ : 0 < σ) {Δ t : ℝ≥0} (hΔpos : 0 < Δ)
     (hΔt : Δ ≤ t) :

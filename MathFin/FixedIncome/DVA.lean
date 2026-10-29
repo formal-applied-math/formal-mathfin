@@ -6,34 +6,35 @@ Authors: Yang Ye
 module
 
 public import Mathlib
-public import MathFin.FixedIncome.CVA
+public import MathFin.RiskMeasures.ExposureMeasures
 
 /-!
 # DVA as a CVA mirror
 
-Debt valuation adjustment is the counterparty's expected loss — equivalently, the bank's own
-gain — on the bank's *own* default: structurally `CVA.cva` applied to the bank's own default
-time/hazard and the exposure seen from the bank's side, `-V` (`cva`'s own convention has `V > 0`
-as the counterparty owing the bank, an asset to the bank; the bank owes the counterparty exactly
-when `V < 0`, which is the liability regime `-V > 0` mirrors — on the bank's own default the
-counterparty does not recover that liability in full, a loss to the counterparty that is booked
-as a gain to the bank, since its own liability is extinguished). This file proves that mirror as
-a genuine corollary of `cva`'s own definition and of `cva_gaussian` (`dva_gaussian`), never as an
-independent construction.
+Debt valuation adjustment is the counterparty's expected loss on the bank's *own* default, a gain
+to the bank: `CVA.cva` applied to the bank's own default time and hazard and to the exposure seen
+from the bank's side, `-V`. In `cva`'s convention `V > 0` means the counterparty owes the bank; the
+bank owes the counterparty when `V < 0`, the regime `-V > 0`. On the bank's own default the
+counterparty does not recover that liability in full, a loss to the counterparty booked as a gain
+to the bank, whose liability is extinguished. The file defines `dva` from `cva` and derives its
+integral and Gaussian forms from `cva`'s.
 
-**What is modelled, honestly**: `cva`'s own independence hypothesis — the default time
-independent of the exposure (no wrong-way risk) — carries over unchanged, now read as "the bank's
-own default is independent of the exposure". This is the single-factor mirror: the bank's default
-time and the counterparty's default time are not jointly modelled here, so no statement is made
-about a correlated bilateral picture (bank and counterparty defaults together, wrong-way risk on
-either leg). A full bilateral CVA/DVA model would need that joint law; it is out of scope.
+`cva`'s independence hypothesis (the default time independent of the exposure, no wrong-way risk)
+carries over unchanged, read as "the bank's own default is independent of the exposure". The
+bank's and the counterparty's default times are not jointly modelled, so nothing is stated about a
+correlated bilateral picture (both defaults together, wrong-way risk on either leg); that needs
+their joint law and is out of scope.
 
 ## Main results
 
 * `dva`: the bank's own-default mirror of `CVA.cva`.
-* `dva_gaussian`: the Gaussian closed form, a corollary of `CVA.cva_gaussian` applied to the
-  mirrored exposure `-(m(s) + σ(s)√s Z) = -m(s) + σ(s)√s·(-Z)`, using `gaussianReal_neg` to keep
-  the driver standard normal.
+* `dva_eq_integral_expectedNegativeExposure`: with the bank's default independent of the
+  exposure and a deterministic continuous hazard,
+  `DVA = LGD_B · ∫₀ᵀ D(s) · ENE(s) · λ(s)Q(s) ds`, the integral of the expected negative exposure
+  (`CVA.integral_exposure_eq` at `-V`).
+* `dva_gaussian`: the Gaussian closed form, from `CVA.cva_gaussian` at the mirrored exposure
+  `-(m(s) + σ(s)√s Z) = -m(s) + σ(s)√s·(-Z)`, with `gaussianReal_neg` keeping the driver standard
+  normal.
 
 ## References
 
@@ -49,19 +50,36 @@ open MeasureTheory Real ProbabilityTheory MathFin.DefaultDensity
 variable {Ω₁ Ω₂ : Type*} {m₁ : MeasurableSpace Ω₁} {m₂ : MeasurableSpace Ω₂}
   {ν : Measure Ω₁} {μ : Measure Ω₂}
 
-/-- **DVA**: the bank's own-default mirror of `cva` — the bank's own default time `τBank`, applied
-to the exposure `-V` seen from the bank's side; any hazard structure enters only through the CDF
-hypothesis of `dva_gaussian`, exactly as in `cva_gaussian`. Inherits `cva`'s no-wrong-way-risk
-(independence) assumption, now read for the bank's own default. -/
+/-- **DVA**: the bank's own-default mirror of `cva`, at the bank's own default time `τBank` and
+the exposure `-V` seen from the bank's side. Default is independent of the exposure because `cva`
+is an integral over the product measure `ν.prod μ`. -/
 noncomputable def dva (LGDBank : ℝ) (D : ℝ → ℝ) (V : ℝ → Ω₁ → ℝ) (τBank : Ω₂ → ℝ) (T : ℝ)
     (ν : Measure Ω₁) (μ : Measure Ω₂) : ℝ :=
   cva LGDBank D (fun s ω ↦ -(V s ω)) τBank T ν μ
 
+/-- **DVA is the integral of the expected negative exposure**: with the bank's default time
+`τBank` of deterministic continuous hazard `h ≥ 0` (CDF hypothesis `hcdf`), measurable `D`,
+jointly measurable `V`, `T ≥ 0` and the integrand jointly integrable,
+`DVA = LGD_B · ∫₀ᵀ D(s) · ENE(s) · λ(s)Q(s) ds`. This is `integral_exposure_eq` at `-V`, whose
+expected exposure is `expectedNegativeExposure V`. -/
+theorem dva_eq_integral_expectedNegativeExposure [IsProbabilityMeasure ν]
+    [IsProbabilityMeasure μ] {h : ℝ → ℝ} (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s)
+    {τBank : Ω₂ → ℝ} (hτ : Measurable τBank)
+    (hcdf : ∀ a, 0 ≤ a → μ {ω | τBank ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival h a))
+    {D : ℝ → ℝ} (hD : Measurable D) {V : ℝ → Ω₁ → ℝ} (hV : Measurable (Function.uncurry V))
+    (LGDBank : ℝ) {T : ℝ} (hT : 0 ≤ T)
+    (hint : Integrable (fun p : Ω₁ × Ω₂ ↦
+      (Set.Iic T).indicator D (τBank p.2) * max (-V (τBank p.2) p.1) 0) (ν.prod μ)) :
+    dva LGDBank D V τBank T ν μ
+      = LGDBank * ∫ s in (0:ℝ)..T, D s * expectedNegativeExposure V ν s * defaultDensity h s :=
+  congrArg (LGDBank * ·)
+    (integral_exposure_eq (V := fun s ω ↦ -(V s ω)) hh hnn hτ hcdf hD hV.neg hT hint)
+
 /-- **DVA with Gaussian exposure, no wrong-way risk**: `dva` equals `LGDBank · ∫₀..T D(s) ·
 [(-m(s))·Φ((-m(s))/(σ(s)√s)) + σ(s)√s·φ((-m(s))/(σ(s)√s))] · defaultDensity h s ds` —
-`cva_gaussian`'s right-hand side with `m` replaced by `-m`. Proved as a genuine corollary of
-`cva_gaussian`, applied to the mirrored exposure `-(m(s) + σ(s)√s Z) = -m(s) + σ(s)√s·(-Z)`;
-`gaussianReal_neg` keeps the driver `-Z` standard normal. -/
+`cva_gaussian`'s right-hand side with `m` replaced by `-m`, from `cva_gaussian` at the mirrored
+exposure `-(m(s) + σ(s)√s Z) = -m(s) + σ(s)√s·(-Z)`; `gaussianReal_neg` keeps the driver `-Z`
+standard normal. -/
 theorem dva_gaussian [IsProbabilityMeasure ν] [IsProbabilityMeasure μ]
     {h : ℝ → ℝ} (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s) {τBank : Ω₂ → ℝ}
     (hτ : Measurable τBank)

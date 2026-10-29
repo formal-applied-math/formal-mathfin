@@ -39,8 +39,8 @@ They differ only in how `P_n` is chosen:
 
 The bullet and equal-principal closed forms are proved by induction on the
 shared `balance` recurrence; the level-payment one, by induction on
-`levelPaymentBalance` directly (`balance_levelPayment` ties the two
-recurrences together but is not used in that proof).
+`levelPaymentBalance` directly, through the one-period annuity identity
+`annuityValue_succ_mul_exp_sub` (`CouponBonds.lean`).
 
 ## Result
 
@@ -52,8 +52,6 @@ recurrences together but is not used in that proof).
   `B_n = B_0 · (1 - n / N)`.
 * `levelPaymentBalance`, `balance_levelPayment` — the level-payment balance,
   and that it is `balance` with principal `A - I_n`.
-* `annuityValue_succ_mul_exp_sub` — one period of an annuity's value:
-  `A_{m+1}·e^{rΔt} - A = A_m`.
 * `levelPaymentBalance_eq_annuityValue`, `levelPaymentBalance_eq_zero` — the
   balance after `n` level payments is `annuityValue (N - n) A r Δt`, and zero
   at `N`.
@@ -121,21 +119,6 @@ theorem balance_levelPayment (B0 A i : ℝ) (n : ℕ) :
   | succ k ih =>
     simp only [balance, levelPaymentBalance, ih, Nat.add_sub_cancel]
     ring
-
-/-- One period of an annuity: carrying the value of `m + 1` payments forward one
-period and paying the first leaves the value of the other `m`,
-`A_{m+1}·e^{rΔt} - A = A_m`. -/
-theorem annuityValue_succ_mul_exp_sub (m : ℕ) (A r Δt : ℝ) :
-    annuityValue (m + 1) A r Δt * Real.exp (r * Δt) - A = annuityValue m A r Δt := by
-  rw [annuityValue, annuityValue, Finset.sum_range_succ', add_mul, Finset.sum_mul,
-    mul_assoc A, ← Real.exp_add]
-  simp only [Nat.cast_zero, zero_add, one_mul, neg_add_cancel, Real.exp_zero, mul_one,
-    add_sub_cancel_right]
-  refine Finset.sum_congr rfl fun i _ ↦ ?_
-  rw [mul_assoc, ← Real.exp_add]
-  congr 2
-  push_cast
-  ring
 
 /-- **Level-payment schedule against `annuityValue`.** A loan whose principal
 `B₀` is the value `annuityValue N A r Δt` of `N` level payments `A`, at period
