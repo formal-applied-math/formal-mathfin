@@ -42,6 +42,7 @@ Subadditivity of expected shortfall, the one coherence axiom that value-at-risk 
 * `integrableOn_valueAtRisk`: an integrable loss has an integrable VaR curve.
 * `valueAtRisk_le_expectedShortfall`: `VaR_α ≤ ES_α`.
 * `expectedShortfall_add_const`, `expectedShortfall_const_mul`, `expectedShortfall_mono`.
+* `valueAtRisk_const`, `expectedShortfall_const`: a constant loss is its own VaR and ES.
 -/
 
 @[expose] public section
@@ -199,5 +200,18 @@ theorem expectedShortfall_mono (hX : Integrable X P) (hY : Integrable Y P) (hXY 
     ((integrableOn_valueAtRisk hY).mono_set (Ioo_subset_Ioo_left hα.1.le)) measurableSet_Ioo
     fun u hu ↦ valueAtRisk_mono hX.aemeasurable hY.aemeasurable hXY ⟨hα.1.trans hu.1, hu.2⟩)
     (inv_nonneg.2 h1α.le)
+
+/-- The value-at-risk of a constant loss is the constant. -/
+theorem valueAtRisk_const (c : ℝ) (hα : α ∈ Ioo 0 1) :
+    valueAtRisk (fun _ ↦ c) P α = c := by
+  rw [valueAtRisk, Measure.map_const, measure_univ, one_smul, quantile_dirac c hα]
+
+/-- The expected shortfall of a constant loss is the constant. -/
+theorem expectedShortfall_const (c : ℝ) (hα : α ∈ Ioo 0 1) :
+    expectedShortfall (fun _ ↦ c) P α = c := by
+  have h1α : (1 - α) ≠ 0 := (sub_pos.2 hα.2).ne'
+  rw [expectedShortfall, setIntegral_congr_fun measurableSet_Ioo
+    fun u hu ↦ valueAtRisk_const (P := P) c ⟨hα.1.trans hu.1, hu.2⟩, setIntegral_const,
+    Real.volume_real_Ioo_of_le hα.2.le, smul_eq_mul, ← mul_assoc, inv_mul_cancel₀ h1α, one_mul]
 
 end MathFin

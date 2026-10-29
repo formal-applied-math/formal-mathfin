@@ -26,6 +26,30 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Contracts in any model, bonds and swaps, and the risk of a position (2026-10-29)
+
+Nine entries added, all `full`, in `contracts.json`.
+- **Any risk-neutral model.** `Contracts/Parity.lean` prices the forward from one fact about
+  the model: the discounted underlying at `T` is integrable with mean `S₀`. When the discounted
+  price is a `Q`-martingale from `S₀` with `D(0) = 1`, the forward is worth `S₀ − K D(T)` and
+  `C − P = S₀ − K D(T)`, with no integrability hypotheses
+  (`mf-contract-forward-risk-neutral`, `mf-contract-parity-risk-neutral`).
+  `BlackScholes.value_forward` is now an instance of `value_forward_of_integral`.
+- **Bonds and swaps.** `Contracts/Instruments/FixedIncome.lean` writes a schedule of fixed cash
+  flows as a contract (`fixedFlows`), worth `∑ D(tᵢ) cᵢ` in every model. At a yield it is
+  `bondPriceDisc` (`mf-contract-coupon-bond-yield`). Level payments on the flat continuous curve
+  are `annuityValue` (`mf-contract-level-annuity-zcb`). A payer swap on a deterministic curve,
+  whose floating coupons are the curve's FRA forward rates, is worth `payerSwapValue` and is
+  worth zero exactly at the par rate (`mf-contract-payer-swap-value`,
+  `mf-contract-payer-swap-par-rate`). Scope: deterministic curves, so floating rates are known
+  in advance; yields with integer payment times.
+- **Risk of a position.** `Contracts/Risk.lean` defines the loss of a position bought at `p` as
+  `p − pathPV`, measured under any law `P` of the outcomes. A book's expected shortfall is at
+  most the sum of its contracts' (`mf-contract-book-es-subadditive`); a long call's VaR is at most
+  its premium (`mf-contract-long-call-var-le-premium`); in the binomial tree a hedged seller's loss
+  is zero on every path, so its VaR and ES are zero under every law of the flips
+  (`mf-contract-binomial-hedged-zero-risk`).
+
 ### The binomial value is the cost of its hedge (2026-10-29)
 
 Two entries added, both `full`: `mf-binomial-european-replication` and `mf-contract-binomial-hedge`;
