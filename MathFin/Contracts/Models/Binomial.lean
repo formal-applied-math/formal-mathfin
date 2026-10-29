@@ -8,6 +8,7 @@ module
 public import MathFin.Contracts.Adapted
 public import MathFin.Contracts.Instruments.Options
 public import MathFin.Binomial.PathMeasure
+public import MathFin.Binomial.EuropeanReplication
 
 /-!
 # The contracts priced in the binomial model
@@ -31,6 +32,11 @@ paths. Every contract is integrable here, because the spot after finitely many f
 (`integrable_pathPV`), so a composed instrument is priced by composition with no integrability
 side conditions to prove.
 
+The value is also a price in the sense of replication. Under no-arbitrage, a European contract's
+discounted payoff is, on every path, its value plus the gains of a predictable strategy in the
+discounted spot (`pathPV_eq_value_add_gains`). The strategy comes from the tree
+(`binomialPrice_replication`, `Binomial/EuropeanReplication.lean`).
+
 ## Main definitions
 
 * `Binomial.assets` — the binomial market with step `h` as a model map.
@@ -44,6 +50,9 @@ side conditions to prove.
   price of its payoff.
 * `Binomial.value_forward` — under no-arbitrage the forward is worth `S₀ − K e^{−ρN}`.
 * `Binomial.value_cappedCall` — the capped call is worth the difference of two call values.
+* `Binomial.pathPV_eq_value_add_gains` — a European contract's value is the cost of its hedge: on
+  every path its discounted payoff is its value plus the gains of a predictable strategy in the
+  discounted spot.
 
 ## Source
 
@@ -145,5 +154,27 @@ theorem value_cappedCall (K₂ : ℝ) :
     (integrable_pathPV hq S₀ u d h _ _), Contract.value_scale,
     value_europeanCall hq hqcrr S₀ K hTN, value_europeanCall hq hqcrr S₀ K₂ hTN]
   ring
+
+/-- **A European contract's binomial value is the cost of its hedge.** Under no-arbitrage, with
+paths drawn under the risk-neutral up-probability and `S₀ ≠ 0`, there is a predictable strategy
+`H` (`H_k` depends only on the first `k` flips) such that, on every path, the contract's
+discounted payoff is its value plus the strategy's gains in the discounted spot
+`S̃_k = e^{−ρk} S_k`:
+
+  `pathPV = value + ∑_{k<N} H_k (S̃_{k+1} − S̃_k)`.
+
+So the value is not only an expectation: it is the initial capital that replicates the
+contract. -/
+theorem pathPV_eq_value_add_gains (hna : BinomialNoArb u d ρ) (hS₀ : S₀ ≠ 0) {a : Payoff Unit}
+    {g : ℝ → ℝ} (hg : ∀ s : Scenario Unit, a.eval s = g (s () T)) :
+    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H n)) ∧ ∀ ω,
+      (Contract.pay T a).pathPV (discount ρ h) (scenarioAt (assets S₀ u d h) ω)
+        = (Contract.pay T a).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)
+          + ∑ k ∈ Finset.range N,
+            H k ω * (discountedSpot S₀ u d ρ (k + 1) ω - discountedSpot S₀ u d ρ k ω) := by
+  obtain ⟨H, hH, hrep⟩ := binomialPrice_replication hna hS₀ g N
+  refine ⟨H, hH, fun ω ↦ ?_⟩
+  rw [value_pay_eq_binomialPrice hq hqcrr S₀ hTN hg, ← hrep ω]
+  simp [Contract.pathPV, Contract.cashflows, hg, scenarioAt, assets, discount, hTN]
 
 end MathFin.Contracts.Binomial

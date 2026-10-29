@@ -130,6 +130,36 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-29 — corpus 671, modules 631 — the binomial value is the cost of its hedge
+
+Scope: replication in the tree, then stated for a contract. Two entries were added, `mf-binomial-european-replication` and `mf-contract-binomial-hedge` (both `full`); corpus 669 → 671. One module was added, `Binomial/EuropeanReplication.lean`.
+
+### Upgrades executed
+
+- **The layering rule held.** The tree facts are in `Binomial/`: the two one-step martingales, the nondegeneracy of a node, and the replication theorem. The `Contracts` file gets only the statement that mentions a contract. That statement is a three-line proof: rewrite the value to the tree price, then use the replication identity.
+- **Consumed, not reproved.** The strategy comes from `binomial_martingale_representation`, which the library already had for a general one-step martingale. This batch supplies the two martingales it needs: the discounted tree value (`binomialPrice_succ`) and the discounted spot (`crrUpProb_mul_up_add`).
+
+### The standing first pass: prose against statement
+
+- Both descriptions say "European payoffs of the terminal spot / the underlying at T only", and both statements take `g (S_N)` (via `hg`).
+- "Predictable" is glossed as "`H_k` depends only on the first `k` flips", which is `PathAdaptedAt k (H k)`.
+- The replication entry says the identity holds "along every coin-flip path", with no measure; the statement is `∀ ω`.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: the value is shown to be a price twice over, as an expectation and as a hedge's cost. Next: the self-financing portfolio as an object (cash plus `H_k` shares) whose terminal wealth is the payoff, rather than the gains sum alone.
+- **Concept clarity.** Next: the strategy is existential. The explicit delta `(V_up − V_down) / (S̃_up − S̃_down)` would make the hedge readable.
+
+### Ranked backlog
+
+1. The explicit delta-hedge formula for the strategy.
+2. Path-dependent payoffs: replication for a contract paying a function of the whole path up to `N`. The model map is already a genuine path.
+3. The American case: the Snell envelope's hedge with consumption (`Binomial/SnellEnvelope.lean`).
+
+### Evidence
+
+`lake build` is green through the daemon's startup build. Both new snippets and the curated `AxiomAudit.lean` pass in the daemon. `AxiomAuditGen` is regenerated (795 guards). `formalization.yaml` is fresh. The Python gates pass. Of the five ledger rows the batch made stale or new, three were verified locally; the daemon then hit its memory cap, and the last two were verified on GitHub runners (`ledger-sweep.yml`, run 40815552039), leaving 671 fresh, 0 stale, 0 missing.
+
 ## 2026-10-29 — corpus 669, modules 630 — every worked example has a model
 
 Scope: the realization gap that #340 was closed with. One entry was added, `mf-gaussian-pair-any-moments` (`full`); corpus 668 → 669.

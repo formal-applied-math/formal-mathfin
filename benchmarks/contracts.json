@@ -195,6 +195,22 @@
       }
     },
     {
+      "id": "mf-contract-binomial-hedge",
+      "name": "A European Contract's Binomial Value Is the Cost of Its Hedge",
+      "domain": "mathematical_finance",
+      "description": "In the binomial model under no-arbitrage, with paths drawn under the risk-neutral up-probability and S0 != 0, a single cash flow at T = N steps paying g of the underlying at T has a predictable strategy H in the discounted spot such that, on every path, the contract's discounted payoff equals its Contract.value plus the strategy's gains sum_{k<N} H_k (S~_{k+1} - S~_k).",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.Binomial\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- A European contract's binomial value is the cost of its hedge. -/\ntheorem pathPV_eq_value_add_gains' {u d ρ h : ℝ} {q : ℝ≥0} (hq : q ≤ 1)\n    (hqcrr : crrUpProb u d ρ = q) (S₀ : ℝ) {T : ℝ≥0} {N : ℕ} (hTN : (T : ℝ) / h = N)\n    (hna : BinomialNoArb u d ρ) (hS₀ : S₀ ≠ 0) {a : Payoff Unit} {g : ℝ → ℝ}\n    (hg : ∀ s : Scenario Unit, a.eval s = g (s () T)) :\n    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H n)) ∧ ∀ ω,\n      (Contract.pay T a).pathPV (Binomial.discount ρ h) (scenarioAt (Binomial.assets S₀ u d h) ω)\n        = (Contract.pay T a).value (coinFlipMeasure q hq) (Binomial.discount ρ h)\n            (Binomial.assets S₀ u d h)\n          + ∑ k ∈ Finset.range N,\n            H k ω * (discountedSpot S₀ u d ρ (k + 1) ω - discountedSpot S₀ u d ρ k ω) :=\n  Binomial.pathPV_eq_value_add_gains hq hqcrr S₀ hTN hna hS₀ hg\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cox, Ross and Rubinstein (1979); Shreve, Stochastic Calculus for Finance I, Theorem 1.2.2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Binomial.pathPV_eq_value_add_gains in MathFin/Contracts/Models/Binomial.lean: Binomial.value_pay_eq_binomialPrice identifies the contract's value with the tree price, and binomialPrice_replication (MathFin/Binomial/EuropeanReplication.lean, the discrete martingale representation) supplies the strategy; the contract's pathPV at T is e^(-rho N) g(S_N). European payoffs of the underlying at T only. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-contract-binomial-to-black-scholes",
       "name": "One Contract in Two Models: CRR Value Converges to Black-Scholes Value",
       "description": "The European call europeanCall K T, a single contract term, priced in the n-step Cox-Ross-Rubinstein tree over [0, T] (step T/n, per-step rate rT/n, up and down factors e^(+-sigma sqrt(T/n)), up-probability crrProb r sigma T n), has values that converge as n -> infinity to its value in the Black-Scholes model, under the Black-Scholes hypotheses (S0, K, sigma, T > 0, standard normal driver) and |r| sqrt(T) < sigma.",
