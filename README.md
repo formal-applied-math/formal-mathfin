@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 709 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 675 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 713 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 679 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 16 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -148,7 +148,12 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   ([`pathPV_eq_value_add_gains`](MathFin/Contracts/Models/Binomial.lean)). In any model whose
   discounted price is a martingale started at $`S_0`$ (with $`D(0) = 1`$), the forward is
   worth $`S_0 - K D(T)`$ and a call less a put is worth the same
-  ([`value_europeanCall_sub_put_of_martingale`](MathFin/Contracts/Parity.lean)).
+  ([`value_europeanCall_sub_put_of_martingale`](MathFin/Contracts/Parity.lean)). Under a
+  stochastic discount factor $`D_t`$, integrable at the payment dates, a schedule of fixed cash
+  flows is worth its value on the zero curve $`P(0, t) = \mathbb{E}[D_t]`$
+  ([`valueDisc_fixedFlows_eq_value`](MathFin/Contracts/Models/ShortRate.lean)), so a coupon bond
+  discounted by $`e^{-\int_0^t r_s\,ds}`$ in the Vasicek, Hull–White and two-piece GSR models
+  is worth the sum of those models' bond prices.
 
 ## Contents
 
@@ -166,11 +171,11 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 | Dependence and extremes | copulas and Sklar's theorem (continuous margins), Fréchet–Hoeffding bounds, Hoeffding's covariance identity, Marshall–Olkin common shocks; GEV and GPD domains of attraction, maxima of Poisson-many losses |
 | Credit portfolios | Bernoulli mixtures, the one-factor Gaussian threshold model, and the Basel IRB formula as the limit of portfolio VaR |
 | Market microstructure | Avellaneda–Stoikov market making, the Glosten–Milgrom spread |
-| Other | a contract language that separates payoffs from pricing models, with prices in Black–Scholes and the binomial tree; survival models, mortality and annuities; compound Poisson losses; constant-product AMMs |
+| Other | a contract language that separates payoffs from pricing models, with prices in Black–Scholes, the binomial tree and the Gaussian short-rate models; survival models, mortality and annuities; compound Poisson losses; constant-product AMMs |
 
 ## Limitations
 
-- Sixteen of the 709 results are reduced cores. Twelve assume a structure whose fields include the
+- Sixteen of the 713 results are reduced cores. Twelve assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, Lévy's characterization, the two-dimensional Itô formula,

@@ -369,6 +369,70 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Binomial.valueAtRisk_hedged_eq_zero in MathFin/Contracts/Risk.lean: Binomial.pathPV_eq_value_add_gains makes the hedged loss identically 0, and valueAtRisk_const, expectedShortfall_const (MathFin/RiskMeasures/ValueAtRisk.lean) evaluate a constant loss. European payoffs of the underlying at T only. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-contract-fixed-flows-zero-curve",
+      "name": "Under a Stochastic Discount Factor, a Fixed Schedule Is Priced off the Zero Curve",
+      "domain": "mathematical_finance",
+      "description": "For a stochastic discount factor D : time -> outcome -> R, a probability measure Q, and a schedule of fixed cash flows c_i at times t_i (i < n) with each D(t_i) Q-integrable, the schedule's value under D (the Q-expectation of its present value discounted along each outcome's path of D) equals its Contract.value on the deterministic curve P(0, t) = E_Q[D(t)], in every model. The stochastic discount factor reaches a contract that observes nothing only through its zero curve.",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.ShortRate\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- A fixed schedule under a stochastic discount factor is worth its value on the zero curve. -/\ntheorem valueDisc_fixedFlows_zeroCurve {ι Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}\n    [IsProbabilityMeasure Q] {D : ℝ≥0 → Ω → ℝ} (X : ι → ℝ≥0 → Ω → ℝ) (t : ℕ → ℝ≥0)\n    (c : ℕ → ℝ) (n : ℕ) (hD : ∀ i < n, Integrable (D (t i)) Q) :\n    (fixedFlows t c n : Contract ι).valueDisc Q D X\n      = (fixedFlows t c n : Contract ι).value Q (zeroCurve Q D) X :=\n  valueDisc_fixedFlows_eq_value X t c n hD\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "Brigo and Mercurio, Interest Rate Models: Theory and Practice, 2nd ed. (2006), sec. 1.2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Contract.valueDisc, zeroCurve and valueDisc_fixedFlows_eq_value in MathFin/Contracts/Models/ShortRate.lean: the path PV of fixedFlows is sum_i D(t_i) c_i (pathPV_fixedFlows), the integral of the finite sum splits (integral_finsetSum, integral_mul_const), and the result is value_fixedFlows on the curve t -> E_Q[D t]. Contracts whose cash flows depend on the scenario are not covered. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-coupon-bond-vasicek",
+      "name": "A Coupon Bond in the Vasicek Model Is Worth the Sum of Its Affine Bond Prices",
+      "domain": "mathematical_finance",
+      "description": "In the Vasicek model, with the integrated short rate R(t) = M(t) + sigma * (Wiener integral of the integrated kernel) from r0 (kappa > 0) and the discount factor D(t) = exp(-R(t)), the schedule paying c_i at t_i (i < n), valued under D as a contract in any model, is worth sum_i A(t_i) exp(-B(t_i) r0) c_i, with A, B the Vasicek affine coefficients. The Brownian measure is read as the pricing measure; no change of measure is built. No integrability hypothesis is needed.",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.ShortRate\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- A coupon bond in the Vasicek model is worth the sum of its affine bond prices. -/\ntheorem valueDisc_coupon_bond_vasicek {ι Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (r₀ θ σ : ℝ)\n    {κ : ℝ} (hκ : 0 < κ) (X : ι → ℝ≥0 → Ω → ℝ) (t : ℕ → ℝ≥0) (c : ℕ → ℝ) (n : ℕ) :\n    (fixedFlows t c n : Contract ι).valueDisc μ\n        (shortRateDiscount (vasicekIntegratedRate hB r₀ θ σ hκ)) X\n      = ∑ i ∈ Finset.range n,\n          vasicekBondA θ σ κ (t i) * Real.exp (-(vasicekBondB κ (t i) * r₀)) * c i :=\n  valueDisc_fixedFlows_vasicek hB r₀ θ σ hκ X t c n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "Vasicek, An equilibrium characterization of the term structure, J. Financial Economics 5 (1977); Brigo and Mercurio (2006), sec. 3.2.1. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. valueDisc_fixedFlows_vasicek in MathFin/Contracts/Models/ShortRate.lean: valueDisc_fixedFlows_of_zeroCurve_eq at the curve A(t) exp(-B(t) r0), which is vasicekBondPrice_affine (the Gaussian Laplace transform of the integrated rate). Integrability of each discount factor follows from its integral being positive (Integrable.of_integral_ne_zero). The integrated rate is taken in its Wiener representation (vasicekIntegratedRate); it is not derived here as the time integral of a solution of the Vasicek SDE. Time-0 prices only; P(t, T) for t > 0 is not formalized. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-coupon-bond-hull-white",
+      "name": "A Coupon Bond in the Hull-White Model Is Worth the Sum of Its Affine Bond Prices",
+      "domain": "mathematical_finance",
+      "description": "In the Hull-White model with continuous forcing theta (kappa > 0), with the integrated short rate R(t) in its Wiener representation from r0 and the discount factor D(t) = exp(-R(t)), the schedule paying c_i at t_i (i < n), valued under D as a contract in any model, is worth sum_i A(t_i) exp(-B(t_i) r0) c_i, with B the Vasicek coefficient and A = HullWhite.bondA carrying theta. The Brownian measure is read as the pricing measure; no change of measure is built. No integrability hypothesis is needed.",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.ShortRate\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- A coupon bond in the Hull–White model is worth the sum of its affine bond prices. -/\ntheorem valueDisc_coupon_bond_hullWhite {ι Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) {θ : ℝ → ℝ}\n    (hθ : Continuous θ) (κ σ r₀ : ℝ) (hκ : 0 < κ) (X : ι → ℝ≥0 → Ω → ℝ) (t : ℕ → ℝ≥0)\n    (c : ℕ → ℝ) (n : ℕ) :\n    (fixedFlows t c n : Contract ι).valueDisc μ\n        (shortRateDiscount (HullWhite.bondRate hB θ κ σ r₀ hκ)) X\n      = ∑ i ∈ Finset.range n,\n          HullWhite.bondA θ σ κ (t i) * Real.exp (-(vasicekBondB κ (t i) * r₀)) * c i :=\n  valueDisc_fixedFlows_hullWhite hB hθ κ σ r₀ hκ X t c n\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "Hull and White, Pricing interest-rate-derivative securities, Rev. Financial Studies 3(4) (1990); Brigo and Mercurio (2006), sec. 3.3. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. valueDisc_fixedFlows_hullWhite in MathFin/Contracts/Models/ShortRate.lean: valueDisc_fixedFlows_of_zeroCurve_eq at the curve HullWhite.bondA(t) exp(-B(t) r0), which is HullWhite.bondPrice_affine. Integrability of each discount factor follows from its integral being positive. The forcing theta is a given continuous function; its calibration to an initial curve is HullWhiteCalibration's, not used here. Time-0 prices only. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-coupon-bond-gsr",
+      "name": "A Coupon Bond in the Two-Piece GSR Model Is Worth the Sum of Its Gaussian Bond Prices",
+      "domain": "mathematical_finance",
+      "description": "In the Gaussian short-rate model with mean reversion kappa > 0 and volatility sigma1 before a switch time T* and sigma2 after, with the integrated short rate R(t) in its Wiener representation from r0 and the discount factor D(t) = exp(-R(t)), the schedule paying c_i at dates t_i >= T* (i < n), valued under D as a contract in any model, is worth sum_i exp(-M(t_i) + V(t_i)/2) c_i, with M the Vasicek integrated mean and V = gsrBondV the GSR variance. The Brownian measure is read as the pricing measure. Payment dates before T* are not covered.",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.ShortRate\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- A coupon bond in the two-piece GSR model is worth the sum of its Gaussian bond prices. -/\ntheorem valueDisc_coupon_bond_gsr {ι Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (r₀ θ σ1 σ2 : ℝ)\n    {κ : ℝ} (hκ : 0 < κ) (Tstar : ℝ≥0) (X : ι → ℝ≥0 → Ω → ℝ) (t : ℕ → ℝ≥0) (c : ℕ → ℝ)\n    (n : ℕ) (ht : ∀ i < n, Tstar ≤ t i) :\n    (fixedFlows t c n : Contract ι).valueDisc μ\n        (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) X\n      = ∑ i ∈ Finset.range n, Real.exp (-(vasicekIntegratedMean r₀ θ κ (t i))\n          + gsrBondV κ σ1 σ2 (Tstar : ℝ) (t i) / 2) * c i :=\n  valueDisc_fixedFlows_gsr hB r₀ θ σ1 σ2 hκ Tstar X t c n ht\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "Andersen and Piterbarg, Interest Rate Modeling, vol. 2 (2010), ch. 10. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. valueDisc_fixedFlows_gsr in MathFin/Contracts/Models/ShortRate.lean: valueDisc_fixedFlows_of_zeroCurve_eq at the curve exp(-M(t) + gsrBondV(t)/2), which is gsrBondPrice_eq, valid for t >= T*. Integrability of each discount factor follows from its integral being positive. Two volatility pieces only. Time-0 prices only. Axioms-clean."
+      }
     }
   ]
 }

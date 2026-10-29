@@ -130,6 +130,37 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-29 — corpus 713, modules 656 — stochastic discount factors, and bonds in the Gaussian short-rate models
+
+Scope: the rates tower's first step into contracts, after #287. Four entries were added to `contracts.json` (all `full`); corpus 709 → 713. One module was added: `Contracts/Models/ShortRate.lean`.
+
+### Upgrades executed
+
+- **The stochastic discount factor generalises `value`, definitionally.** `Contract.valueDisc` discounts each outcome by its own path `t ↦ D t ω`. The deterministic `value` is the constant case by `rfl` (`valueDisc_const`), so no existing theorem is restated.
+- **One model-free theorem, three instances.** A fixed schedule sees a stochastic `D` only through its zero curve `𝔼[D t]` (`valueDisc_fixedFlows_eq_value`). Vasicek, Hull–White and GSR are one-line instances that consume the bond prices in `FixedIncome/`.
+- **Integrability is not a hypothesis of the instances.** It follows from the bond price being nonzero (`Integrable.of_integral_ne_zero`), so the model theorems carry only their models' assumptions.
+
+### The standing first pass: prose against statement
+
+- The README sentence first stated the zero-curve theorem for `D = e^{−∫r}` with no integrability hypothesis. The theorem is for any `D` that is integrable at the payment dates, and the README now says so. The bond instances name `e^{−∫r}`.
+- One `formalization_scope` credited another module with deriving the integrated Vasicek rate from the SDE. It now says only what this entry uses: the Wiener representation.
+- Every instance names the measure as the pricing measure with no change of measure, and GSR restricts to dates after the volatility switch, as `gsrBondPrice_eq` does.
+
+### Lens gradients
+
+- **Inspired math.** Next: a floating leg under a stochastic `D`, the floating rate observed at the reset date. Valuing it needs `P(t, T)` at `t > 0` for these models, which the library does not have: the conditional Laplace transform of the integrated rate.
+- **Concept clarity.** Next: the par swap rate as a forward swap rate under the annuity numéraire, once the floating leg exists.
+
+### Ranked backlog
+
+1. `P(t, T)` for the Gaussian short-rate models, as a conditional expectation, and the floating leg on it.
+2. The binomial forward as an instance of `value_forward_of_martingale`.
+3. Lévy's characterization (#179), blocked on BM's Doob–Meyer.
+
+### Evidence
+
+The module and the four snippets pass in the daemon as combined files. `AxiomAuditGen` is regenerated, and `formalization.yaml` is fresh. The ledger rows are verified on GitHub runners, and the rows that only one side of the merge changed are restored by input hash. The full build is CI's.
+
 ## 2026-10-29 — corpus 708, modules 655 — the Itô integral as a local martingale, Itô's formula as an identity of processes
 
 Scope: the first two stochastic-calculus items of #346. Three entries were added to `stochastic_calculus.json` (all `full`); corpus 705 → 708. Four modules were added: `ItoIntegralLocalisedLocalMartingale`, `ItoIntegralPredictableRiemann`, `ItoIntegralLocalisedPredictable` and `ItoFormulaAdaptedProcess`, all in `Foundations/`.
