@@ -1525,9 +1525,9 @@
     "mf-cir-squared-ou-mean": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-29",
-      "elapsed_s": 5.7,
-      "input_hash": "38f49dd51982e233b95d12739be6fc1dbda802cf677cad9cf0719e906c3dd4ea",
-      "verified_at_commit": "0e9e865"
+      "elapsed_s": 46.4,
+      "input_hash": "2c9114db1cd50f63f4e4a0d15087afdf9d4671bae29de53f51a38b0132fe8f5f",
+      "verified_at_commit": "db36ac3"
     },
     "mf-clean-price-continuous-at-coupon-date": {
       "benchmark_file": "interest_rates.json",

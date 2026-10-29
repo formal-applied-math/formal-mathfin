@@ -49,6 +49,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
   {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ}
 
+omit [IsProbabilityMeasure μ] in
 /-- The second moment of a Gaussian random variable: `X ~ N(m, v)` gives
 `𝔼[X²] = m² + v` (`variance_eq_sub` on the law). -/
 theorem integral_sq_of_hasLaw_gaussianReal {X : Ω → ℝ} {m : ℝ} {v : ℝ≥0}
