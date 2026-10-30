@@ -264,7 +264,7 @@ theorem tendsto_ito_remainder_td
           (unifPart T n k) (unifPart T n (k + 1))
           (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ) atTop (𝓝 0) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hmono : ∀ n, Monotone (unifPart T n) := fun n a b hab ↦ by simp only [unifPart]; gcongr
+  have hmono : ∀ n, Monotone (unifPart T n) := unifPart_mono T
   -- integrability of the dominator, hence of the squared remainder (per-step `L²`)
   have hdom_int : ∀ n k, Integrable (fun ω ↦
       3 * Ctt ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 4
@@ -286,10 +286,9 @@ theorem tendsto_ito_remainder_td
     (Eventually.of_forall fun n ↦ integral_nonneg fun ω ↦ sq_nonneg _) ?_
     (by simpa using tendsto_const_div_atTop_nhds_zero_nat (K * (T : ℝ) ^ 3))
   filter_upwards [eventually_gt_atTop 0] with n hn
-  have hn0 : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
   have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast hn
   have hΔ : ∀ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) / n :=
-    fun k _ ↦ by simp only [unifPart]; push_cast; field_simp; ring
+    fun k _ ↦ unifPart_succ_sub T n k
   have hTn_nn : (0 : ℝ) ≤ (T : ℝ) / n := div_nonneg (NNReal.coe_nonneg T) (Nat.cast_nonneg n)
   have hTn_le : (T : ℝ) / n ≤ T := div_le_self (NNReal.coe_nonneg T) hn1
   -- per-step expectation bound `E[Rₖ²] ≤ K·(T/n)³`

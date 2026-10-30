@@ -163,6 +163,6 @@ theorem value_powerCall {Q : Measure Ω} [IsProbabilityMeasure Q]
   rw [powerCall, Contract.value_pay]
   refine Eq.trans ?_ (bs_power_call_formula a ha hK h)
   refine integral_congr_ae (.of_forall fun ω ↦ ?_)
-  simp only [Payoff.eval, Payoff.eval_pow, scenarioAt, assets, bsPowerTerminal]
+  simp [Payoff.eval, scenarioAt, assets, bsPowerTerminal]
 
 end MathFin.Contracts.BlackScholes
