@@ -20,8 +20,9 @@ real inner-product space `F` (the `d`-asset market is `F = EuclideanSpace ℝ (F
 probability space `(Ω, P)`: no arbitrage ⟺ there is an equivalent martingale measure
 `Q ~ P` with `Y` integrable and `E_Q[Y] = 0 ∈ F`.
 
-This is the `d`-asset generalisation of the scalar `Foundations/FTAPOnePeriod.lean`. The forward
-direction is `MathFin.emm_implies_no_arbitrage` (`Foundations/FTAP.lean`) at horizon `1`.
+This is the `d`-asset generalisation of the scalar `Foundations/FTAPOnePeriod.lean`, which is
+its `F = ℝ` corollary and has no proofs of its own. The forward direction is
+`MathFin.emm_implies_no_arbitrage` (`Foundations/FTAP.lean`) at horizon `1`.
 Because `θ` ranges over the **finite-dimensional** `F`, the equivalent martingale measure
 is **explicit**: the backward direction minimises the smooth convex softplus
 potential `θ ↦ E[log(1 + exp⟪θ,Y⟫)]`. The

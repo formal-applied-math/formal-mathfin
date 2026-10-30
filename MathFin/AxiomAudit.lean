@@ -1520,9 +1520,8 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 -- General-Ω one-period FTAP (`FTAPOnePeriod.lean`): NoArbitrage ⟺ ∃ EMM for a
 -- scalar L⁰ return on an arbitrary probability space (Föllmer–Schied §1.2 /
--- one-period DMW). Backward via the bounded-density reduction to L¹, the scalar
--- no-arbitrage dichotomy, and the two-region balancing `withDensity` — no
--- Hahn–Banach, no Kreps–Yan.
+-- one-period DMW). A corollary of the vector theorem at `F = ℝ` (the logistic tilt
+-- below) — no Hahn–Banach, no Kreps–Yan.
 /-- info: 'MathFin.OnePeriod.ftap_one_period' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.OnePeriod.ftap_one_period
