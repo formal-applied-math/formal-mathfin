@@ -121,10 +121,8 @@ theorem brownian_zeroDividend_boundary_conclusions {K r σ : ℝ}
     (hp : NormalizedPutSolution (normalizedRate r σ) p b)
     (hK : 0 < K) (hr : 0 ≤ r) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :
     (0 ≤ deriv (deriv (fun s : ℝ => Real.log (brownianExerciseBoundary K r 0 σ s.toNNReal/K))) τ) ∧
-      0 < deriv (deriv (fun s : ℝ => brownianExerciseBoundary K r 0 σ s.toNNReal)) τ := by
-  have hp' : DividendPutSolution (normalizedRate r σ) (normalizedRate 0 σ) p b := by
-    simpa only [normalizedRate,mul_zero,zero_div] using dividendPutSolution_zero_iff.mpr hp
-  exact brownian_boundary_conclusions hp' hK hr hσ hτ
+      0 < deriv (deriv (fun s : ℝ => brownianExerciseBoundary K r 0 σ s.toNNReal)) τ :=
+  brownian_boundary_conclusions (q := 0) (by simpa [normalizedRate] using hp) hK hr hσ hτ
 
 /-- Liu's physical parameter range as an explicit financial milestone.
 This specializes the new proof rather than formalizing Liu's published argument. -/
