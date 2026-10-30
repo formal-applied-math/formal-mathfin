@@ -72,6 +72,11 @@ to the deterministic-part closed form `vasicekDeterministic`. -/
 noncomputable def vasicekSDEMean (r_0 θ κ t : ℝ) : ℝ :=
   r_0 * Real.exp (-(κ * t)) + θ * (1 - Real.exp (-(κ * t)))
 
+/-- The SDE mean is the deterministic closed form `vasicekDeterministic`. -/
+theorem vasicekSDEMean_eq_deterministic (r_0 θ κ t : ℝ) :
+    vasicekSDEMean r_0 θ κ t = vasicekDeterministic r_0 θ κ t := by
+  unfold vasicekSDEMean vasicekDeterministic; ring
+
 /-- **Vasicek SDE variance**: `σ² · (1 − e^{−2κt}) / (2κ)`. The L² norm
 of the deterministic integrand `e^{−κ(t−·)}` on `[0, t]` against `dB`,
 via the simple-Itô isometry. -/

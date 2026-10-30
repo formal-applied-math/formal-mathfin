@@ -206,21 +206,8 @@ private lemma gsrKernelLp_integral_sq {κ : ℝ} (hκ : 0 < κ) (σ1 σ2 : ℝ) 
     (hTstarT : (Tstar : ℝ) ≤ (T : ℝ)) :
     (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (gsrKernelLp hκ σ1 σ2 (Tstar : ℝ) T u) ^ 2 ∂volume)
       = gsrBondV κ σ1 σ2 (Tstar : ℝ) (T : ℝ) := by
-  rw [show (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (gsrKernelLp hκ σ1 σ2 (Tstar : ℝ) T u) ^ 2 ∂volume)
-        = ∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (gsrKernel σ1 σ2 (Tstar : ℝ) κ (T : ℝ) u) ^ 2 ∂volume by
-      refine integral_congr_ae ?_
-      filter_upwards [(gsrKernel_memLp hκ σ1 σ2 (Tstar : ℝ) T).coeFn_toLp] with u hu
-      rw [gsrKernelLp, hu]]
-  exact gsrKernel_integral_sq_eq hκ σ1 σ2 (Tstar : ℝ) (T : ℝ) Tstar.2 hTstarT
-
-/-- The centred diffusion law for the GSR kernel: `∫₀ᵀ σ(u)g(u) dB_u` is centred
-Gaussian with variance `gsrBondV κ σ₁ σ₂ T* T`. -/
-private lemma gsrWienerLaw (hB : IsPreBrownianReal B μ) {κ : ℝ} (hκ : 0 < κ)
-    (σ1 σ2 : ℝ) (Tstar T : ℝ≥0) (hTstarT : (Tstar : ℝ) ≤ (T : ℝ)) :
-    HasLaw (fun ω ↦ wienerIntegralLp B hB T (gsrKernelLp hκ σ1 σ2 (Tstar : ℝ) T) ω)
-      (gaussianReal 0 (gsrBondV κ σ1 σ2 (Tstar : ℝ) (T : ℝ)).toNNReal) μ := by
-  have h0 := wienerIntegralLp_hasLaw_gaussian hB T (gsrKernelLp hκ σ1 σ2 (Tstar : ℝ) T)
-  rwa [gsrKernelLp_integral_sq hκ σ1 σ2 Tstar T hTstarT] at h0
+  exact (gsrKernel_memLp hκ σ1 σ2 (Tstar : ℝ) T).integral_sq_toLp.trans
+    (gsrKernel_integral_sq_eq hκ σ1 σ2 (Tstar : ℝ) (T : ℝ) Tstar.2 hTstarT)
 
 /-- **The GSR integrated short rate**, *defined* by its Wiener representation: deterministic
 mean (the Vasicek mean, unchanged — only the volatility axis is piecewise here) plus the
@@ -239,7 +226,8 @@ theorem gsrIntegratedRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ) (r₀ θ
     HasLaw (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar T)
       (gaussianReal (vasicekIntegratedMean r₀ θ κ (T : ℝ))
         (gsrBondV κ σ1 σ2 (Tstar : ℝ) (T : ℝ)).toNNReal) μ := by
-  have hW := gsrWienerLaw hB hκ σ1 σ2 Tstar T hTstarT
+  have hW := wienerIntegralLp_hasLaw_gaussian_of_integral_sq hB T
+    (gsrKernelLp hκ σ1 σ2 (Tstar : ℝ) T) (gsrKernelLp_integral_sq hκ σ1 σ2 Tstar T hTstarT)
   have hShift := gaussianReal_const_add hW (vasicekIntegratedMean r₀ θ κ (T : ℝ))
   convert hShift using 2 <;> first | rfl | ring
 

@@ -9,6 +9,7 @@ public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.Forward
 public import MathFin.Foundations.Esscher
+public import MathFin.Foundations.EquivMeasure
 
 /-!
 # Static Girsanov: the risk-neutral measure as a Gaussian change of measure
@@ -132,6 +133,22 @@ theorem esscherTilt_isProbabilityMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω}
       ← Measure.map_apply hWmeas MeasurableSet.univ,
       (hasLaw_esscher_tilt c hWmeas hW).map_eq]
   exact measure_univ
+
+/-- **The Esscher-tilted measure is equivalent to `P`.** It is a probability measure
+(`esscherTilt_isProbabilityMeasure`), `Q ≪ P` as every density change is, and `P ≪ Q` because
+the density `exp(c·W − c²/2)` is strictly positive (`absolutelyContinuous_withDensity_ofReal`):
+the two measures have the same null sets. -/
+theorem esscherTilt_isEquivProbMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {P : Measure Ω} {W : Ω → ℝ} (c : ℝ)
+    (hWmeas : Measurable W) (hW : HasLaw W (gaussianReal 0 1) P) :
+    IsProbabilityMeasure
+        (P.withDensity (fun ω ↦ ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2)))) ∧
+      P.withDensity (fun ω ↦ ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2))) ≪ P ∧
+      P ≪ P.withDensity (fun ω ↦ ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2))) :=
+  ⟨esscherTilt_isProbabilityMeasure c hWmeas hW, withDensity_absolutelyContinuous _ _,
+    absolutelyContinuous_withDensity_ofReal P
+      (Real.measurable_exp.comp ((hWmeas.const_mul c).sub_const _)).aemeasurable
+      (ae_of_all _ fun _ ↦ Real.exp_pos _)⟩
 
 /-- **The risk-neutral measure, derived** (static Girsanov capstone). Given a
 standard-normal physical driver `W` under `P`, there **exists** a probability

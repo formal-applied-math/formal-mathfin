@@ -49,22 +49,11 @@ open WienerIntegralL2
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ}
 
-/-- **Zero start**: `B_0 = 0` a.s., since `∫ (B_0)² = min(0,0) = 0`. -/
-private lemma brownian_start_zero' (hB : IsPreBrownianReal B μ) : B 0 =ᵐ[μ] 0 := by
-  have hmem : MemLp (B 0) 2 μ := (hB.isGaussianProcess.hasGaussianLaw_eval 0).memLp_two
-  have hint : Integrable (fun ω ↦ B 0 ω * B 0 ω) μ := hmem.integrable_mul hmem
-  have hsq : ∫ ω, B 0 ω * B 0 ω ∂μ = 0 := by
-    rw [integral_mul_eval hB 0 0]; simp
-  have h0 : (fun ω ↦ B 0 ω * B 0 ω) =ᵐ[μ] 0 :=
-    (integral_eq_zero_iff_of_nonneg (fun ω ↦ mul_self_nonneg _) hint).mp hsq
-  filter_upwards [h0] with ω hω
-  exact mul_self_eq_zero.mp hω
-
 /-- **The `n`-date geometric-Asian log-driver is Gaussian.** For a pre-Brownian motion `B`
 and averaging dates `τ : Fin n → ℝ≥0` all `≤ T`, the average of the Brownian values
 `(1/n) ∑ᵢ B_{τᵢ}` — the Gaussian part of the log geometric average — has the centred
 Gaussian law `N(0, (1/n²) ∑ᵢ∑ⱼ min(τᵢ,τⱼ))`, the variance coming from the Brownian
-covariance `∫ B_u·B_v = min(u,v)`. The `n = 2` case recovers `asianGeom_driver_hasLaw`. -/
+covariance `∫ B_u·B_v = min(u,v)`. `asianGeom_driver_hasLaw` is its `n = 2` case. -/
 theorem geomAsianN_driver_hasLaw (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     {n : ℕ} (hn : 0 < n) (τ : Fin n → ℝ≥0) (hτT : ∀ i, τ i ≤ T) :
     HasLaw (fun ω ↦ (∑ i, B (τ i) ω) / n)
@@ -89,11 +78,10 @@ theorem geomAsianN_driver_hasLaw (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     rw [hf_eq]
     have hsmul := Lp.coeFn_smul (n : ℝ)⁻¹ (∑ i, wienerIncrementLp B hB (idx i))
     have hsum := Lp.coeFn_finsetSum (Finset.univ) (fun i ↦ wienerIncrementLp B hB (idx i))
-    filter_upwards [hsmul, hsum, brownian_start_zero' hB, ae_all_iff.mpr hincr]
+    filter_upwards [hsmul, hsum, hB.eval_zero_ae_eq_zero, ae_all_iff.mpr hincr]
       with ω h1 h2 hz hincrω
     simp only [Pi.smul_apply, smul_eq_mul] at h1
     rw [h1, h2, Finset.sum_apply]
-    simp only [Pi.zero_apply] at hz
     rw [div_eq_inv_mul]
     congr 1
     refine Finset.sum_congr rfl (fun i _ ↦ ?_)

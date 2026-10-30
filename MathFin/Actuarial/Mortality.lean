@@ -59,9 +59,8 @@ noncomputable def survivalFromForce (μ : ℝ → ℝ) (t : ℝ) : ℝ :=
 
 /-- `S(0) = 1` (no mortality before age `0`). -/
 lemma survivalFromForce_at_zero (μ : ℝ → ℝ) :
-    survivalFromForce μ 0 = 1 := by
-  unfold survivalFromForce survivalFromIntensity cumulativeIntensity
-  rw [integral_same, neg_zero, Real.exp_zero]
+    survivalFromForce μ 0 = 1 :=
+  survivalFromIntensity_zero μ
 
 /-- Survival is strictly positive (an instance of the `ExponentialDiscount`
 principle `discount_pos`). -/
@@ -70,20 +69,12 @@ lemma survivalFromForce_pos (μ : ℝ → ℝ) (t : ℝ) :
 
 /-- **Force of mortality as the negative log-derivative of survival** — the
 recovery direction `μ(t) = −d/dt log S(t)` that the classical definition
-`μ(t) = −S'(t)/S(t)` encodes. For continuous `μ`, the cumulative force
-`H(t) = ∫₀^t μ` has derivative `μ(t)` by the FTC, and the
-`ExponentialDiscount` principle `rate_eq_neg_log_deriv` then gives the
-log-derivative form against `S = survivalFromForce μ`. -/
+`μ(t) = −S'(t)/S(t)` encodes: for continuous `μ`, the mortality instance of
+`hasDerivAt_neg_log_survivalFromIntensity`. -/
 theorem force_eq_neg_log_deriv_survival {μ : ℝ → ℝ} (t : ℝ)
     (hμ : Continuous μ) :
-    HasDerivAt (fun s ↦ -(Real.log (survivalFromForce μ s))) (μ t) t := by
-  have hH : HasDerivAt (forceCumulative μ) (μ t) t :=
-    intervalIntegral.integral_hasDerivAt_right
-      (hμ.intervalIntegrable 0 t)
-      (hμ.stronglyMeasurableAtFilter _ _)
-      hμ.continuousAt
-  simpa only [survivalFromForce, survivalFromIntensity, forceCumulative] using
-    rate_eq_neg_log_deriv hH
+    HasDerivAt (fun s ↦ -(Real.log (survivalFromForce μ s))) (μ t) t :=
+  hasDerivAt_neg_log_survivalFromIntensity hμ t
 
 /-- **Gompertz cumulative force** in closed form:
 `∫₀^t B · e^{c u} du = (B/c) · (e^{c t} − 1)` for `c ≠ 0`. -/

@@ -73,10 +73,7 @@ noncomputable def BoundedRule.binary {i j : ℝ≥0} (hij : i ≤ j) (A : Set Ω
 def BoundedRule.capTime {T : ℝ≥0} (τ : BoundedRule 𝓕 T) (t : ℝ≥0) : BoundedRule 𝓕 T where
   time := fun ω => min t (τ.time ω)
   stopping := by
-    intro s
-    convert! ((isStoppingTime_const 𝓕 t) s).union (τ.stopping s) using 1
-    ext ω
-    simp only [mem_ofPred_eq,WithTop.coe_le_coe,min_le_iff,mem_union]
+    convert! (isStoppingTime_const 𝓕 t).min τ.stopping using 1
   le_horizon := fun ω => (min_le_right _ _).trans (τ.le_horizon ω)
 
 /-- The rule `τ` stopped no later than `BoundedRule.binary hij A hA`. -/
@@ -84,10 +81,7 @@ noncomputable def BoundedRule.capBinary {T i j : ℝ≥0} (τ : BoundedRule 𝓕
     (hij : i ≤ j) (A : Set Ω) (hA : MeasurableSet[𝓕 i] A) : BoundedRule 𝓕 T where
   time := fun ω => min ((BoundedRule.binary hij A hA).time ω) (τ.time ω)
   stopping := by
-    intro t
-    convert! ((BoundedRule.binary hij A hA).stopping t).union (τ.stopping t) using 1
-    ext ω
-    simp only [mem_ofPred_eq,WithTop.coe_le_coe,min_le_iff,mem_union]
+    convert! (BoundedRule.binary hij A hA).stopping.min τ.stopping using 1
   le_horizon := fun ω => (min_le_right _ _).trans (τ.le_horizon ω)
 
 variable {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ} {C : ℝ} {T : ℝ≥0}

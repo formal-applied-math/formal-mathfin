@@ -8,6 +8,7 @@ module
 public import MathFin.Foundations.ItoFormulaGBM
 public import MathFin.Foundations.ItoIntegralLocality
 public import MathFin.Foundations.ItoIntegralProcessIsometry
+public import MathFin.Foundations.SimpleDoleansExponential
 
 /-!
 # The Doléans exponential of a deterministic step integrand is an Itô integral
@@ -205,14 +206,34 @@ theorem constDoleans_shift_sub_one_mem_range (hBmeas : ∀ t, Measurable (B t))
 
 /-- The Doléans exponential of a deterministic step integrand
 `h = Σ hₖ·1_{(sₖ, sₖ₊₁]}` over a monotone partition, evaluated at the horizon.
-The arithmetic shape of each cell matches `SimpleDoleansExponential.cellExp`
-(`c·ΔX − c²·Δt/2`). `B` is explicit: Task 4 instantiates it at a `B` that the
+It is the simple Doléans exponential `simpleDoleansExp` with constant multipliers, read at
+`s N` (`stepDoleansExp_eq_simpleDoleansExp`). `B` is explicit: Task 4 instantiates it at a `B` that the
 statement of the orthogonality hypothesis does not otherwise pin down. -/
 noncomputable def stepDoleansExp (B : ℝ≥0 → Ω → ℝ) (s : ℕ → ℝ≥0) (h : ℕ → ℝ)
     (N : ℕ) (ω : Ω) : ℝ :=
   ∏ k ∈ Finset.range N,
     Real.exp (h k * (B (s (k + 1)) ω - B (s k) ω)
       - h k ^ 2 * ((s (k + 1) : ℝ) - (s k : ℝ)) / 2)
+
+omit mΩ hB in
+/-- **The step exponential is the simple one with constant multipliers.** Over a monotone
+partition, `stepDoleansExp B s h N` is the simple Doléans exponential
+`simpleDoleansExp s (fun k _ ↦ h k) N` evaluated at the last partition point `s N`: each
+cell factor `cellExp (s k) (s (k+1)) h_k` has stopped moving by then
+(`cellExp_of_ge_right`), and so has the running product (`simpleDoleansExp_frozen`). -/
+theorem stepDoleansExp_eq_simpleDoleansExp {s : ℕ → ℝ≥0} (hs : Monotone s) (h : ℕ → ℝ)
+    (N : ℕ) (ω : Ω) :
+    stepDoleansExp B s h N ω = simpleDoleansExp (X := B) s (fun k _ ↦ h k) N (s N) ω := by
+  induction N with
+  | zero => simp [stepDoleansExp, simpleDoleansExp]
+  | succ n ih =>
+    have hsn : s n ≤ s (n + 1) := hs n.le_succ
+    calc stepDoleansExp B s h (n + 1) ω
+        = stepDoleansExp B s h n ω * Real.exp (h n * (B (s (n + 1)) ω - B (s n) ω)
+            - h n ^ 2 * ((s (n + 1) : ℝ) - (s n : ℝ)) / 2) := Finset.prod_range_succ _ _
+      _ = simpleDoleansExp (X := B) s (fun k _ ↦ h k) n (s (n + 1)) ω
+            * cellExp (X := B) (s n) (s (n + 1)) (fun _ ↦ h n) (s (n + 1)) ω := by
+        rw [ih, simpleDoleansExp_frozen s hs _ n _ ω hsn, cellExp_of_ge_right hsn le_rfl]
 
 /-- Every moment of a step Doléans exponential exists — the induction's integrability
 feed. Stated for the exponential of the *increment sum* with an arbitrary scale `c`,

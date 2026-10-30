@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -116,6 +116,32 @@ lemma integral_sq_sub_var_gaussianReal (v : ℝ≥0) :
     rw [measureReal_def, measure_univ, ENNReal.toReal_one]
   rw [integral_sub hint2 (integrable_const _), integral_sq_gaussianReal, integral_const, huniv,
       one_smul, sub_self]
+
+/-- The second moment of a Gaussian random variable: `X ~ N(m, v)` gives
+`𝔼[X²] = m² + v` (`variance_eq_sub` on the law). -/
+theorem integral_sq_of_hasLaw_gaussianReal {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {μ : Measure Ω} {X : Ω → ℝ} {m : ℝ} {v : ℝ≥0}
+    (hX : HasLaw X (gaussianReal m v) μ) : ∫ ω, X ω ^ 2 ∂μ = m ^ 2 + v := by
+  have h := variance_eq_sub (memLp_id_gaussianReal' (μ := m) (v := v) 2 (by simp))
+  simp only [variance_id_gaussianReal, Pi.pow_apply, id] at h
+  rw [integral_id_gaussianReal] at h
+  have hc := hX.integral_comp (f := fun x : ℝ ↦ x ^ 2) (by fun_prop)
+  simp only [Function.comp_def] at hc
+  rw [hc]
+  linarith
+
+/-- `Real.exp (α · X) ∘ Z` is integrable when `Z` has a Gaussian law (the law supplies the
+required `AEMeasurable`). Shared helper for `waldExponential_isMartingale`, the marginal
+exponential moments in `BrownianExpMoment` and the exponential-of-a-Gaussian integrability
+(`α = 1`). -/
+lemma _root_.ProbabilityTheory.integrable_exp_mul_of_hasLaw {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {P : Measure Ω} {Z : Ω → ℝ} {m : ℝ} {v : ℝ≥0}
+    (hZ : HasLaw Z (gaussianReal m v) P) (α : ℝ) :
+    Integrable (fun ω ↦ Real.exp (α * Z ω)) P := by
+  rw [show (fun ω ↦ Real.exp (α * Z ω)) = (fun x ↦ Real.exp (α * x)) ∘ Z from rfl]
+  refine Integrable.comp_aemeasurable ?_ hZ.aemeasurable
+  rw [hZ.map_eq]
+  exact integrable_exp_mul_gaussianReal α
 
 /-! ### Brownian increments -/
 

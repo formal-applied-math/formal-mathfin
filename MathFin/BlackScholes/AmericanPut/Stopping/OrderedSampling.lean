@@ -27,10 +27,7 @@ variable {Ω : Type*} [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹Measura
 def BoundedRule.minimum {T : ℝ≥0} (θ η : BoundedRule 𝓕 T) : BoundedRule 𝓕 T where
   time := fun ω => min (θ.time ω) (η.time ω)
   stopping := by
-    intro t
-    convert! (θ.stopping t).union (η.stopping t) using 1
-    ext ω
-    simp only [mem_ofPred_eq,WithTop.coe_le_coe,min_le_iff,mem_union]
+    convert! θ.stopping.min η.stopping using 1
   le_horizon := fun ω => (min_le_left _ _).trans (θ.le_horizon ω)
 
 theorem expected_gridValue_tendsto {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}

@@ -7,7 +7,6 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.FirstContact
 public import MathFin.BlackScholes.AmericanPut.Stopping.ClassicalCandidate
-public import MathFin.BlackScholes.AmericanPut.Boundary.DividendContact
 
 /-!
 # The classical-price first-contact rule
