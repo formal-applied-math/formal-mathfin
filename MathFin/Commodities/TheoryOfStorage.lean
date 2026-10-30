@@ -133,8 +133,9 @@ theorem storageForward_from_no_arbitrage {ι : Type*} (s : Finset ι) (q S : ι 
     (∑ i ∈ s, q i * (S i - F) = 0) ↔ F = S₀ / DF + C - Y := by
   have hsum : ∑ i ∈ s, q i * (S i - F) = ∑ i ∈ s, q i * ((S i - C + Y) - (F - C + Y)) :=
     Finset.sum_congr rfl fun i _ ↦ by ring
-  rw [hsum, forward_price_from_no_arbitrage s q (fun i ↦ S i - C + Y) DF S₀ (F - C + Y) hDF
-    h_bond h_carry]
+  rw [hsum]
+  refine (forward_price_from_no_arbitrage s q (fun i ↦ S i - C + Y) DF S₀ (F - C + Y) hDF
+    h_bond h_carry).trans ?_
   constructor <;> intro h <;> linarith
 
 /-- **The forward does not see availability.** With zero rates (`∑ q = 1`), the spot at the
