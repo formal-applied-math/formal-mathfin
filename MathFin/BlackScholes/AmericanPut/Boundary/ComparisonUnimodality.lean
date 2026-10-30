@@ -19,8 +19,7 @@ or initial spatial derivative trace is a premise of this route.
 ## Result
 
 Public entry points include `straightDifference_three_point_bound`,
-`straightDifference_superlevel_interval`, `straightDifference_positive_interval`,
-`zeroDividend_positive_interval`.
+`straightDifference_superlevel_interval`, `straightDifference_positive_interval`.
 -/
 
 @[expose] public section
@@ -95,12 +94,5 @@ theorem straightDifference_positive_interval (hp : ContinuousBoundaryPutSolution
     (hc : 0 < c) (hd : d ≤ 0) {t : ℝ} (ht : 0 < t) :
     OrdConnected {x | b t < x ∧ 0 < straightDifference p k h c d x t} :=
   straightDifference_superlevel_interval hp hc hd ht le_rfl
-
-/-- Zero-dividend propagation checkpoint, on the original solution contract. -/
-theorem zeroDividend_positive_interval (hp : NormalizedPutSolution k p b)
-    (hc : 0 < c) (hd : d ≤ 0) {t : ℝ} (ht : 0 < t) :
-    OrdConnected {x | b t < x ∧ 0 < straightDifference p k 0 c d x t} :=
-  straightDifference_positive_interval
-      (dividendPutSolution_zero_iff.mpr hp).toContinuousBoundaryPutSolution hc hd ht
 
 end MathFin.BlackScholes.AmericanPut.Boundary.Comparison

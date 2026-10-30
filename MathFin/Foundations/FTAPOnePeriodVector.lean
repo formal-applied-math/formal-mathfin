@@ -538,7 +538,7 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
     set Q : Measure Ω := P.withDensity (fun ω ↦ ENNReal.ofReal (dens ω)) with hQ
     have hofReal_meas : Measurable (fun ω ↦ ENNReal.ofReal (dens ω)) :=
       ENNReal.measurable_ofReal.comp hdmeas
-    obtain ⟨hQprob, hQP, hPQ⟩ := isEquivProbMeasure_withDensity P hdmeas hdpos hdint hdsum
+    obtain ⟨hQprob, hQP, hPQ⟩ := isEquivProbMeasure_withDensity P hdpos hdint hdsum
     rw [← hQ] at hQprob hQP hPQ
     haveI := hQprob
     have hdY_int : Integrable (fun ω ↦ dens ω • Y ω) P := by
@@ -600,7 +600,7 @@ theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) 
   have hd_ofReal_meas : Measurable (fun ω ↦ ENNReal.ofReal (dens ω)) :=
     ENNReal.measurable_ofReal.comp hd_meas
   obtain ⟨hPt_prob, hPt_ll_P, hP_ll_Pt⟩ :=
-    isEquivProbMeasure_withDensity P hd_meas hd_pos hd_int hd_sum
+    isEquivProbMeasure_withDensity P hd_pos hd_int hd_sum
   rw [← hPtdef] at hPt_prob hPt_ll_P hP_ll_Pt
   haveI := hPt_prob
   have hdY_int : Integrable (fun ω ↦ dens ω • Y ω) P := by

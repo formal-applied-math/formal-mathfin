@@ -211,9 +211,7 @@ theorem simpleGirsanovMeasure_isProbabilityMeasure (s : ℕ → ℝ≥0) (hs : M
     IsProbabilityMeasure
       (P.withDensity fun ω ↦ ENNReal.ofReal (simpleDoleansExp (X := X) s d N T ω)) := by
   have hmart := simpleDoleansExp_isMartingale (X := X) (P := P) s hs d hd hd_bdd N
-  have hZmeas : Measurable (fun ω ↦ simpleDoleansExp (X := X) s d N T ω) :=
-    ((hmart.1 T).mono (𝓕.le T)).measurable
-  exact (isEquivProbMeasure_withDensity P hZmeas (fun ω ↦ simpleDoleansExp_pos s d N T ω)
+  exact (isEquivProbMeasure_withDensity P (fun ω ↦ simpleDoleansExp_pos s d N T ω)
     (hmart.integrable T) (simpleDoleansExp_integral_eq_one s hs d hd hd_bdd N T)).1
 
 /-- **Adaptedness of the simple drift.** `simpleDrift s c N u` is `𝓕_u`-measurable when the

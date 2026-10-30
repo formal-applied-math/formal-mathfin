@@ -154,7 +154,7 @@ theorem exists_isEMM_of_pos_tails (hY : Measurable Y) (hYint : Integrable Y P)
   set Q : Measure Ω := P.withDensity (fun ω ↦ ENNReal.ofReal (Z ω)) with hQdef
   have hofReal_meas : Measurable (fun ω ↦ ENNReal.ofReal (Z ω)) :=
     ENNReal.measurable_ofReal.comp hZmeas
-  obtain ⟨hQprob, hQP, hPQ⟩ := isEquivProbMeasure_withDensity P hZmeas hZpos hZint hZsum
+  obtain ⟨hQprob, hQP, hPQ⟩ := isEquivProbMeasure_withDensity P hZpos hZint hZsum
   rw [← hQdef] at hQprob hQP hPQ
   haveI := hQprob
   have hYintQ : Integrable Y Q := by
@@ -270,7 +270,7 @@ theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) 
   have hd_ofReal_meas : Measurable (fun ω ↦ ENNReal.ofReal (d ω)) :=
     ENNReal.measurable_ofReal.comp hd_meas
   obtain ⟨hPt_prob, hPt_ll_P, hP_ll_Pt⟩ :=
-    isEquivProbMeasure_withDensity P hd_meas hd_pos hd_int hd_sum
+    isEquivProbMeasure_withDensity P hd_pos hd_int hd_sum
   rw [← hPtdef] at hPt_prob hPt_ll_P hP_ll_Pt
   haveI := hPt_prob
   -- `Y` is `P̃`-integrable: `|Y · d| ≤ κ⁻¹` is bounded

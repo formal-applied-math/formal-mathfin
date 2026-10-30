@@ -113,10 +113,11 @@ theorem straightDifference_positive_at_earlier_time (hp : ContinuousBoundaryPutS
   have := straightDifference_le_of_initial_le hp hc hd ha le_rfl hinit haT hx
   linarith
 
-/-- Zero-dividend checkpoint using the original published-proof solution
-contract and `g=1`. It is a maximum principle, not a convexity claim. -/
+/-- At zero dividends the second comparison profile is the constant `1`, and
+`straightDifference_le_of_initial_le` reads in terms of `normalizedDifference`.
+It is a maximum principle, not a convexity claim. -/
 theorem zeroDividend_le_of_initial_le {k c d : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : NormalizedPutSolution k p b) (hc : 0 < c) (hd : d ≤ 0)
+    (hp : ContinuousBoundaryPutSolution k 0 p b) (hc : 0 < c) (hd : d ≤ 0)
     {a ε : ℝ} (ha : 0 ≤ a) (hε : 0 ≤ ε)
     (hinit : ∀ x, b a ≤ x →
       normalizedDifference p (profile (k - 1 - c) k) (fun _ => 1) c d x a ≤ ε)
@@ -125,7 +126,6 @@ theorem zeroDividend_le_of_initial_le {k c d : ℝ} {p : ℝ → ℝ → ℝ} {b
   have hi : ∀ y, b a ≤ y → straightDifference p k 0 c d y a ≤ ε := by
     simpa only [straightDifference, sub_zero, profile, ↓reduceIte] using hinit
   simpa only [straightDifference, sub_zero, profile, ↓reduceIte] using
-    straightDifference_le_of_initial_le
-        (dividendPutSolution_zero_iff.mpr hp).toContinuousBoundaryPutSolution hc hd ha hε hi haT hx
+    straightDifference_le_of_initial_le hp hc hd ha hε hi haT hx
 
 end MathFin.BlackScholes.AmericanPut.Boundary.Comparison
