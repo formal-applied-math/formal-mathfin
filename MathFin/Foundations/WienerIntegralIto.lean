@@ -89,7 +89,6 @@ lemma measurePreserving_fst_trimMeasure_T (T : ℝ≥0) (hBmeas : ∀ t, Measura
     trim_measurableSet_eq _ ((measurable_fst_predictable 𝓕) hA), ← Set.prod_univ,
     Measure.prod_prod, measure_univ, mul_one]
 
-/-- The deterministic embedding. -/
 /-- **The deterministic integrands inside the Itô space**: the isometry
 `L²((0, T]) → L²(trimMeasure_T T)` sending `f` to the process `(s, ω) ↦ f s`, the composite of
 composition with the coercion `ℝ≥0 → ℝ` and with the time coordinate. -/
