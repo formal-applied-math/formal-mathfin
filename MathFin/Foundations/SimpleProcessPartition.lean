@@ -358,7 +358,7 @@ For a dense simple approximant `V` of a bounded predictable `θ`, `marshalStepSP
 single-partition step process on the marshalled cells whose per-cell multiplier is the
 `[−C,C]`-clamp of `marshalMult`. Since the marshalled cells are disjoint, clamping the multipliers
 clamps the *process*, so the L² distance to `θ̂` only shrinks (`clampM` is a contraction toward any
-`|·| ≤ C` target). Mirrors the adapted Riemann bridge `ItoIntegralRiemannBridgeAdapted.stepσ` with
+`|·| ≤ C` target). Mirrors the adapted Riemann bridge `ItoIntegralBrownian.stepσ` with
 the uniform grid replaced by the marshalled partition and `θ(tₖ)` replaced by
 `clampM C (marshalMult · )`. -/
 
