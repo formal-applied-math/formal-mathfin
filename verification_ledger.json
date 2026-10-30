@@ -1326,6 +1326,13 @@
       "input_hash": "90c4fa99442e2485a4fb65369f2c8ddf8a631f1026625050d734ef1ffc5eeef0",
       "verified_at_commit": "c55d62c"
     },
+    "mf-calendar-arbitrage-total-variance": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-10-30",
+      "elapsed_s": 6.5,
+      "input_hash": "b018523fdaaf45638308931b240a589591a1dddba23912cd2ba227d29e9fe558",
+      "verified_at_commit": "ebb473e"
+    },
     "mf-call-price-convex-in-strike": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-10-30",
@@ -3803,6 +3810,41 @@
       "elapsed_s": 5.5,
       "input_hash": "fb378ad0819d3b8e9ef77992ed2b430f51d847c0bb80ae0edafbbea5d04e6ea7",
       "verified_at_commit": "c55d62c"
+    },
+    "mf-svi-butterfly-free-sign-formula": {
+      "benchmark_file": "svi_certificate.json",
+      "date": "2026-10-30",
+      "elapsed_s": 7.0,
+      "input_hash": "32896af12385cd7f2b76378a0137184d638aa989ac4e7c71af47d17d0189de51",
+      "verified_at_commit": "ebb473e"
+    },
+    "mf-svi-calendar-free-iff": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-10-30",
+      "elapsed_s": 9.4,
+      "input_hash": "9048195ec71e87b6b0e8b8b25f59077d0fdc59c2f11ba6f47ed8b858c2f42d2d",
+      "verified_at_commit": "ebb473e"
+    },
+    "mf-svi-call-convex-iff-durrleman": {
+      "benchmark_file": "svi_certificate.json",
+      "date": "2026-10-30",
+      "elapsed_s": 17.2,
+      "input_hash": "ad6d1e78430dde783d72e0c7266b6a261981b43000e2193912ffe3aa0f76aa6f",
+      "verified_at_commit": "ebb473e"
+    },
+    "mf-svi-durrleman-sign-formula": {
+      "benchmark_file": "svi_certificate.json",
+      "date": "2026-10-30",
+      "elapsed_s": 6.0,
+      "input_hash": "1cc4131556fe4d32726e3e59e7eeaef5453a23c208d748e7f1d7260a2248c735",
+      "verified_at_commit": "ebb473e"
+    },
+    "mf-svi-strike-convexity-sign-formula": {
+      "benchmark_file": "svi_certificate.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.8,
+      "input_hash": "b462476c015c360dca77a964a1a69c4fbeccd001c9d672a964ab06ecfafe7a41",
+      "verified_at_commit": "ebb473e"
     },
     "mf-swaption-parity": {
       "benchmark_file": "interest_rates.json",
