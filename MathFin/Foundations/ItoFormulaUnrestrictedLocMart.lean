@@ -9,10 +9,10 @@ public import MathFin.Foundations.ItoFormulaAdaptedProcess
 public import MathFin.Foundations.ItoFormulaUnrestricted
 public import MathFin.Foundations.LevyCharacterization
 
-/-! # Summit C — the unrestricted-`C³` Itô formula as a local martingale
+/-! # Summit C — the unrestricted-`C²` Itô formula as a local martingale
 
-For a general `C³` function `f` (six partials, all jointly continuous, **no** growth or
-boundedness hypothesis) the Itô residual
+For a general `C²` function `f` (`f_t`, `f_x`, `f_xx` with `HasDerivAt` witnesses, all jointly
+continuous together with `f`, **no** growth or boundedness hypothesis) the Itô residual
 `M_t = f(t, B_t) − f(0, B_0) − ∫₀ᵗ (f_t + ½ f_xx)(s, B_s) ds` (`itoResidual`) is a continuous local
 martingale for the null-augmented Brownian filtration, localised by `σ_N = min(τ_N, N)`, `τ_N` the
 exit time of `B` from `[−N, N]` (`sigmaSeq`).
@@ -26,8 +26,7 @@ a local martingale because it is indistinguishable from the stopped continuous l
 Itô's formula for `B` regarded as an Itô process with `σ = 1`, `b = 0`
 (`exists_localMartingale_ito_formula`, `ae_localItoIntegral_one_eq`), and bounded, since up to `σ_N`
 `|B| ≤ N` and `t ≤ N` while `f`, `f_t`, `f_xx` are bounded on that compact square; a bounded local
-martingale is a martingale (`bounded_localMartingale_is_martingale`). Only `f`, `f_t`, `f_x`,
-`f_xx` are used; the hypotheses on `f_tt`, `f_tx`, `f_xxx` are carried by the statements.
+martingale is a martingale (`bounded_localMartingale_is_martingale`).
 
 `M` is adapted to the null-augmented filtration (`residual_stronglyMeasurable`): the drift primitive
 `D_t = ∫₀ᵗ (f_t + ½ f_xx)(s, B_s) ds` is `𝓕_t`-measurable (`driftPrimitive_stronglyMeasurable`)
@@ -296,30 +295,24 @@ theorem martingale_stoppedProcess_itoResidual (hB : IsPreBrownianReal B μ)
   exact bounded_localMartingale_is_martingale (isLocalMartingale_congr_ae hloc hadapt hcad hind)
     hadapt hbound
 
-/-- **The unrestricted-`C³` Itô formula — Summit C, in Degenne's `IsLocalMartingale` typeclass.**
-For a general `C³` `f` (six partials, all jointly continuous, **no** growth or boundedness), the
+/-- **The unrestricted-`C²` Itô formula — Summit C, in Degenne's `IsLocalMartingale` typeclass.**
+For a general `C²` `f` (`f_t`, `f_x`, `f_xx` and `f` jointly continuous, **no** growth or
+boundedness), the
 compensated residual `M_t = f(t,B_t) − f(0,B_0) − ∫₀ᵗ(f_t+½f_xx)ds` is everywhere-continuous,
 satisfies the Itô identity by construction, and is a genuine **`IsLocalMartingale`** on the
 null-augmented Brownian filtration, localised by `σ_N = min(τ_N, N)`, `τ_N` the exit time of `B`
 from `[−N, N]`: stopped there it is a bounded martingale
-(`martingale_stoppedProcess_itoResidual`). Only `f`, `f_t`, `f_x`, `f_xx` and their continuity
-enter the proof; the other partials are hypotheses of the statement. -/
+(`martingale_stoppedProcess_itoResidual`). -/
 theorem ito_formula_unrestricted (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
-    {f f_t f_x f_xx f_tt f_tx f_xxx : ℝ → ℝ → ℝ}
+    {f f_t f_x f_xx : ℝ → ℝ → ℝ}
     (hf_t : ∀ t x, HasDerivAt (fun s ↦ f s x) (f_t t x) t)
-    (_hf_tt : ∀ t x, HasDerivAt (fun s ↦ f_t s x) (f_tt t x) t)
-    (_hf_tx : ∀ t x, HasDerivAt (fun u ↦ f_t t u) (f_tx t x) x)
     (hf_x : ∀ t x, HasDerivAt (fun u ↦ f t u) (f_x t x) x)
     (hf_xx : ∀ t x, HasDerivAt (fun u ↦ f_x t u) (f_xx t x) x)
-    (_hf_xxx : ∀ t x, HasDerivAt (fun u ↦ f_xx t u) (f_xxx t x) x)
     (hf_cont : Continuous fun p : ℝ × ℝ ↦ f p.1 p.2)
     (hf_t_cont : Continuous fun p : ℝ × ℝ ↦ f_t p.1 p.2)
     (hf_x_cont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2)
-    (hf_xx_cont : Continuous fun p : ℝ × ℝ ↦ f_xx p.1 p.2)
-    (_hf_tt_cont : Continuous fun p : ℝ × ℝ ↦ f_tt p.1 p.2)
-    (_hf_tx_cont : Continuous fun p : ℝ × ℝ ↦ f_tx p.1 p.2)
-    (_hf_xxx_cont : Continuous fun p : ℝ × ℝ ↦ f_xxx p.1 p.2) :
+    (hf_xx_cont : Continuous fun p : ℝ × ℝ ↦ f_xx p.1 p.2) :
     ∃ M : ℝ≥0 → Ω → ℝ,
       (∀ ω, Continuous fun t ↦ M t ω) ∧
       IsLocalMartingale M (augFiltration (μ := μ) hBmeas) μ ∧
@@ -335,25 +328,19 @@ theorem ito_formula_unrestricted (hB : IsPreBrownianReal B μ)
       ((isLocalizingSequence_sigma (μ := μ) hBmeas hBcont).isStoppingTime N)⟩⟩,
     fun t ↦ Filter.Eventually.of_forall fun ω ↦ by simp only [itoResidual]; ring⟩
 
-/-- **The unrestricted-`C³` Itô formula in explicit local-martingale form.** The same residual `M`
+/-- **The unrestricted-`C²` Itô formula in explicit local-martingale form.** The same residual `M`
 and the localizing sequence `σ_N = min(τ_N, N)`; for each `N` a continuous true martingale `Mₙ`
 (`M` stopped at `σ_N`, zeroed where `σ_N = 0`) with `M = Mₙ` on `{t ≤ σ_N}`. -/
 theorem ito_formula_unrestricted_local (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
-    {f f_t f_x f_xx f_tt f_tx f_xxx : ℝ → ℝ → ℝ}
+    {f f_t f_x f_xx : ℝ → ℝ → ℝ}
     (hf_t : ∀ t x, HasDerivAt (fun s ↦ f s x) (f_t t x) t)
-    (_hf_tt : ∀ t x, HasDerivAt (fun s ↦ f_t s x) (f_tt t x) t)
-    (_hf_tx : ∀ t x, HasDerivAt (fun u ↦ f_t t u) (f_tx t x) x)
     (hf_x : ∀ t x, HasDerivAt (fun u ↦ f t u) (f_x t x) x)
     (hf_xx : ∀ t x, HasDerivAt (fun u ↦ f_x t u) (f_xx t x) x)
-    (_hf_xxx : ∀ t x, HasDerivAt (fun u ↦ f_xx t u) (f_xxx t x) x)
     (hf_cont : Continuous fun p : ℝ × ℝ ↦ f p.1 p.2)
     (hf_t_cont : Continuous fun p : ℝ × ℝ ↦ f_t p.1 p.2)
     (hf_x_cont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2)
-    (hf_xx_cont : Continuous fun p : ℝ × ℝ ↦ f_xx p.1 p.2)
-    (_hf_tt_cont : Continuous fun p : ℝ × ℝ ↦ f_tt p.1 p.2)
-    (_hf_tx_cont : Continuous fun p : ℝ × ℝ ↦ f_tx p.1 p.2)
-    (_hf_xxx_cont : Continuous fun p : ℝ × ℝ ↦ f_xxx p.1 p.2) :
+    (hf_xx_cont : Continuous fun p : ℝ × ℝ ↦ f_xx p.1 p.2) :
     ∃ M : ℝ≥0 → Ω → ℝ,
       (∀ ω, Continuous fun t ↦ M t ω) ∧
       (∀ t : ℝ≥0, (fun ω ↦ f (t : ℝ) (B t ω) - f 0 (B 0 ω)) =ᵐ[μ]

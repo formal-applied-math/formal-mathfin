@@ -37,7 +37,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Main results
 
-- **Itô's formula.** For every $`C^3`$ function $`f(t,x)`$, with no growth condition,
+- **Itô's formula.** For every $`C^2`$ function $`f(t,x)`$, with no growth condition,
   $`f(t,B_t) - f(0,B_0) - \int_0^t \big(\partial_t f + \tfrac12 \partial_x^2 f\big)(s,B_s)\,ds`$
   is a continuous local martingale
   ([`ito_formula_unrestricted`](MathFin/Foundations/ItoFormulaUnrestrictedLocMart.lean)). When the
