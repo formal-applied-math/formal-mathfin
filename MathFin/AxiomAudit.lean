@@ -1556,34 +1556,24 @@ coefficients (Summit C). -/
 
 /-! ## The unrestricted-`C³` Itô formula via stopping-time localization (Summit C)
 
-`ItoFormulaUnrestricted.lean`: for a general `C³` `f` (six partials, all jointly continuous, **no**
-growth or boundedness hypothesis), the compensated process `M_t = f(t,B_t) − f(0,B_0) − ∫₀ᵗ drift`
-is everywhere-continuous, satisfies the Itô identity by construction, and is a **continuous local
-martingale in explicit form** (`ito_formula_unrestricted_local`): a localizing sequence
-`σ_N = min(τ_N, N) ↑ ⊤` plus per-`N` continuous **true** martingales `Mₙ` agreeing with `M` on the
-stochastic interval `{t ≤ σ_N}`. The engine is the double cutoff `f(φₙ·, φₙ·)` (time *and* space),
-whose globally-bounded derivatives let `ito_formula_td_process` apply; the cuts are inert on
-`{t ≤ σ_N}`, where `Mₙ` agrees with `M`. The all-time agreement `indistinguishable_on_stochInterval`
-lifts the per-`t` agreement to the whole stochastic interval (dense rationals + continuity). -/
+`ItoFormulaUnrestrictedLocMart.lean`: for a general `C³` `f` (six partials, all jointly continuous,
+**no** growth or boundedness hypothesis), the compensated process
+`M_t = f(t,B_t) − f(0,B_0) − ∫₀ᵗ drift` is everywhere-continuous, satisfies the Itô identity by
+construction, and is a genuine `IsLocalMartingale` on the null-augmented Brownian filtration
+(`ito_formula_unrestricted`) and a **continuous local martingale in explicit form**
+(`ito_formula_unrestricted_local`): a localizing sequence `σ_N = min(τ_N, N) ↑ ⊤` plus per-`N`
+continuous **true** martingales `Mₙ` agreeing with `M` on the stochastic interval `{t ≤ σ_N}`.
+Both come from `martingale_stoppedProcess_itoResidual`: `M` stopped at `σ_N` is a bounded
+(`|B| ≤ N`, `t ≤ N`) local martingale, because it is indistinguishable from the continuous local
+martingale of Itô's formula for the Itô process `B` (`σ = 1`, `b = 0`; `B` is `localItoIntegral` of
+`1`, `ae_localItoIntegral_one_eq`), stopped; a bounded local martingale is a martingale. `M` is
+adapted (`residual_stronglyMeasurable`), the drift integral being `𝓕_t`-measurable
+(`driftPrimitive_stronglyMeasurable`: time-clamping the integrand, Carathéodory,
+`StronglyMeasurable.integral_prod_right`). -/
 
 /-- info: 'MathFin.ito_formula_unrestricted_local' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ito_formula_unrestricted_local
-
-/-- info: 'MathFin.indistinguishable_on_stochInterval' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.indistinguishable_on_stochInterval
-
-/-! ## Summit C in Degenne's `IsLocalMartingale` typeclass
-
-`ItoFormulaUnrestrictedLocMart.lean`: the unrestricted-`C³` residual `M` is a genuine
-`IsLocalMartingale` on the null-augmented Brownian filtration (`ito_formula_unrestricted`). The one
-ingredient beyond the explicit form is the **adaptedness** of `M` (`residual_stronglyMeasurable`),
-i.e. of the drift primitive `D_t = ∫₀ᵗ drift` (`driftPrimitive_stronglyMeasurable`): time-clamping
-the integrand makes every slice `𝓕_t`-measurable, so it is jointly strongly measurable (Carathéodory)
-and the integral is `𝓕_t`-measurable (`StronglyMeasurable.integral_prod_right`). With `M` adapted,
-`StronglyAdapted.stoppedProcess_indicator` + the all-time agreement assemble `Locally (Martingale ∧
-cadlag)` with the exit-time localizer `σ_N`. -/
 
 /-- info: 'MathFin.ito_formula_unrestricted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
