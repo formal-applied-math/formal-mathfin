@@ -552,9 +552,9 @@
     "mf-american-intrinsic-bound": {
       "benchmark_file": "binomial.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.1,
-      "input_hash": "1799f38c0b3636c9ae477563187fd77cc3eef7c7b5f664357b7f44fada6de3e2",
-      "verified_at_commit": "705d349"
+      "elapsed_s": 11.3,
+      "input_hash": "259f804a689fb099f2fe0733f58e0924b6955e4c9ea2cd62a3ef30058bff1c1e",
+      "verified_at_commit": "d3d6ba6"
     },
     "mf-american-put-ae-horizon-invariance": {
       "benchmark_file": "black_scholes.json",
@@ -587,9 +587,9 @@
     "mf-american-supermartingale": {
       "benchmark_file": "binomial.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.9,
-      "input_hash": "8d6d105c6d90a6b3975a144807448e7447661a5e594b43fd3ca7b5b482d200e9",
-      "verified_at_commit": "705d349"
+      "elapsed_s": 8.5,
+      "input_hash": "012cb84f681e8c615dc88171b958aa47e1f0bdc4bdf967aa262b79d246d3b157",
+      "verified_at_commit": "d3d6ba6"
     },
     "mf-annuity-closed-form": {
       "benchmark_file": "interest_rates.json",
