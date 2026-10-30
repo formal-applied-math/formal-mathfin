@@ -5,30 +5,30 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoIntegralRiemannBridge
+public import MathFin.Foundations.ItoIntegralBrownian
 public import MathFin.Foundations.AdaptedProcessToLp
 
 /-! # Riemann ↔ CLM bridge for a bounded **adapted continuous** integrand `θ`
 
-`ItoIntegralRiemannBridge.itoIntegralCLM_T_of_bdd_cont` handles the special integrand `φ ∘ B`
-(a bounded continuous function of the current Brownian value). This file generalizes it to an
-**arbitrary bounded adapted continuous** process `θ : ℝ≥0 → Ω → ℝ` — the integrand shape the
-general adapted Girsanov theorem needs (the market price of risk is a genuine adapted process,
-not a function of `B_s` alone).
+For an **arbitrary bounded adapted continuous** process `θ : ℝ≥0 → Ω → ℝ` — the integrand shape
+the general adapted Girsanov theorem needs (the market price of risk is a genuine adapted process,
+not a function of `B_s` alone) — the uniform-partition Riemann–Itô sums `riemannσ θ T n =
+∑_{k<n} θ(tₖ)·(B_{t_{k+1}} − B_{tₖ})` (`ItoRiemannSum`) converge in `L²(μ)` to
+`itoIntegralCLM_T (processToLp θ)` — the genuine continuous Itô integral of the σ-realization
+`processToLp θ` (`AdaptedProcessToLp`). This is the one bridge: the integrands `φ ∘ B` and
+`(s, B_s) ↦ φ(s, B_s)` of `ItoIntegralRiemannBridge` and `ItoIntegralRiemannBridgeTD` are special
+cases of it.
 
-For such a `θ` the uniform-partition Riemann–Itô sums `∑_{k<n} θ(tₖ)·(B_{t_{k+1}} − B_{tₖ})`
-converge in `L²(μ)` to `itoIntegralCLM_T (processToLp θ)` — the genuine continuous Itô integral
-of the σ-realization `processToLp θ` (`AdaptedProcessToLp`). The proof mirrors the `φ∘B` template
-line-for-line, with two changes: the bounded coefficient `φ(B_{tₖ})` becomes the general adapted
-`θ(tₖ)` (`𝓕_{tₖ}`-measurable + bounded — exactly `stepSP`'s requirement), and the `L²`-membership
-of the Riemann sum is obtained by plain domination (bounded · increment) rather than the
-increment-independence route, so no `AdaptedAt`-vs-`natFiltration` bridge is needed. The a.e.
-convergence reuses the same partition-cell collapse (`cell_collapse`) — now against `θ`'s own
+The coefficient `θ(tₖ)` is `𝓕_{tₖ}`-measurable and bounded — exactly `stepSP`'s requirement — so the
+left-endpoint step process is directly a `TBoundedSP`, and the `L²`-membership of the Riemann sum
+is obtained by plain domination (`memLp_riemannσ`), so no `AdaptedAt`-vs-`natFiltration` bridge is
+needed. The a.e. convergence uses the partition-cell collapse (`cell_collapse`) against `θ`'s own
 path continuity.
 
 ## Main results
 
 * `itoIntegralCLM_T_of_bdd_adapted_cont` — `∑ θ(tₖ)·ΔBₖ → itoIntegralCLM_T (processToLp θ)` in `L²`.
+* `tendstoInMeasure_riemannσ` — the same, in measure.
 -/
 
 @[expose] public section
@@ -36,7 +36,7 @@ path continuity.
 namespace MathFin
 namespace ItoIntegralRiemannBridge
 
-open MeasureTheory ProbabilityTheory Filter Topology NNReal ENNReal MathFin.QuadraticVariationL2
+open MeasureTheory ProbabilityTheory Filter Topology NNReal ENNReal
 open scoped MeasureTheory NNReal ENNReal InnerProductSpace
 open ItoIntegralL2 ItoIntegralCLM ItoIsometryAdapted ItoIntegralBrownian
 
@@ -46,38 +46,110 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
 include hB
 
 omit hB in
-/-- The uniform-partition Riemann–Itô sum for a general adapted integrand `θ`:
-`∑_{k<n} θ(tₖ)·(B_{t_{k+1}} − B_{tₖ})`. -/
-noncomputable def riemannσ (θ : ℝ≥0 → Ω → ℝ) (T : ℝ≥0) (n : ℕ) (ω : Ω) : ℝ :=
-  ∑ k ∈ Finset.range n, θ (unifPart T n k) ω
-    * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)
+/-- The simple-process coercion is additive over a finite sum (pointwise). -/
+lemma coe_finsetSum_apply {ι' : Type*} (hBmeas : ∀ t, Measurable (B t)) (s : Finset ι')
+    (W : ι' → SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (i : ℝ≥0) (ω : Ω) :
+    ⇑(∑ k ∈ s, W k) i ω = ∑ k ∈ s, ⇑(W k) i ω := by
+  classical
+  induction s using Finset.induction with
+  | empty => simp
+  | insert a s ha ih =>
+    rw [Finset.sum_insert ha, SimpleProcess.coe_add, Pi.add_apply, Pi.add_apply, ih,
+      Finset.sum_insert ha]
 
-omit hB mΩ in
-/-- The Riemann–Itô sum on `[0, T]` depends only on the integrand on `[0, T]`. -/
-lemma riemannσ_congr {θ θ' : ℝ≥0 → Ω → ℝ} {T : ℝ≥0} {ω : Ω}
-    (h : ∀ s ∈ Set.Icc 0 T, θ s ω = θ' s ω) (n : ℕ) :
-    riemannσ (B := B) θ T n ω = riemannσ (B := B) θ' T n ω :=
-  Finset.sum_congr rfl fun k hk ↦ by
-    rw [h _ ⟨zero_le, unifPart_le_T (Finset.mem_range.1 hk).le⟩]
+omit hB in
+/-- On `(0,T]`, the cell-indicator sum collapses to the unique containing cell's value,
+whose left endpoint is within `T/n` of `s` (the `Nat.find` partition-cell argument). -/
+lemma cell_collapse (T : ℝ≥0) (n : ℕ) (hn : 0 < n) (s : ℝ≥0) (hs : s ∈ Set.Ioc 0 T)
+    (v : ℕ → ℝ) :
+    ∃ k, k < n ∧ (∑ j ∈ Finset.range n,
+        (Set.Ioc (unifPart T n j) (unifPart T n (j + 1))).indicator (fun _ ↦ v j) s) = v k
+      ∧ |(unifPart T n k : ℝ) - s| ≤ (T : ℝ) / n := by
+  have hmono : Monotone (unifPart T n) := unifPart_mono T n
+  have hlast : unifPart T n n = T := unifPart_self T hn.ne'
+  have hgap : ∀ k, (unifPart T n (k + 1) : ℝ) - unifPart T n k = (T : ℝ) / n :=
+    unifPart_succ_sub T n
+  have hex : ∃ k, s ≤ unifPart T n (k + 1) :=
+    ⟨n - 1, by rw [Nat.sub_add_cancel hn, hlast]; exact hs.2⟩
+  set K := Nat.find hex
+  have hKspec : s ≤ unifPart T n (K + 1) := Nat.find_spec hex
+  have hKle : K ≤ n - 1 := Nat.find_le (by rw [Nat.sub_add_cancel hn, hlast]; exact hs.2)
+  have hKlt : K < n := lt_of_le_of_lt hKle (Nat.sub_lt hn one_pos)
+  have hlow : unifPart T n K < s := by
+    rcases Nat.eq_zero_or_pos K with hK0 | hKpos
+    · rw [hK0, unifPart_zero]; exact hs.1
+    · have hmin := Nat.find_min hex (m := K - 1) (Nat.sub_lt hKpos one_pos)
+      have hK1 : K - 1 + 1 = K := by omega
+      rw [hK1] at hmin
+      exact not_le.mp hmin
+  refine ⟨K, hKlt, ?_, ?_⟩
+  · rw [Finset.sum_eq_single K]
+    · rw [Set.indicator_of_mem]; exact ⟨hlow, hKspec⟩
+    · intro l _ hlK
+      apply Set.indicator_of_notMem
+      rintro ⟨hl1, hl2⟩
+      rcases lt_or_gt_of_ne hlK with hlt | hgt
+      · exact (Nat.find_min hex hlt) hl2
+      · exact absurd hl1 (not_lt.mpr (le_trans hKspec (hmono (Nat.succ_le_of_lt hgt))))
+    · intro hKnot; exact absurd (Finset.mem_range.mpr hKlt) hKnot
+  · rw [abs_le]
+    have hcoe_low : (unifPart T n K : ℝ) < s := by exact_mod_cast hlow
+    have hcoe_hi : (s : ℝ) ≤ unifPart T n (K + 1) := by exact_mod_cast hKspec
+    have hg := hgap K
+    have hTn : (0 : ℝ) ≤ (T : ℝ) / n := div_nonneg (NNReal.coe_nonneg T) (Nat.cast_nonneg n)
+    exact ⟨by nlinarith [hcoe_low, hcoe_hi, hg], by nlinarith [hcoe_low, hTn]⟩
 
-omit [IsProbabilityMeasure μ] in
-/-- `MemLp` of the adapted Riemann sum, by **domination**: each term `θ(tₖ)·ΔBₖ` is a bounded
-(`|θ| ≤ C`) measurable coefficient times an `L²` increment, hence `L²` (`‖θ·Δ‖ ≤ ‖C·Δ‖`). No
-increment-independence / `AdaptedAt` needed for membership. -/
-lemma memLp_riemannσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
-    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
-    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
-    MemLp (riemannσ (B := B) θ T n) 2 μ := by
-  unfold riemannσ
-  refine memLp_finsetSum _ fun k _ ↦ ?_
-  have hΔ : MemLp (fun ω ↦ B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) 2 μ :=
-    hB.isGaussianProcess.hasGaussianLaw_sub.memLp_two
-  have hθm : StronglyMeasurable (θ (unifPart T n k)) :=
-    (hadap (unifPart T n k)).mono ((natFiltration hBmeas).le _)
-  refine (hΔ.const_mul C).mono
-    (hθm.aestronglyMeasurable.mul hΔ.aestronglyMeasurable) (ae_of_all _ fun ω ↦ ?_)
-  rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_mul, abs_mul]
-  exact mul_le_mul_of_nonneg_right ((hbdd (unifPart T n k) ω).trans (le_abs_self C)) (abs_nonneg _)
+omit hB in
+/-- **The left-endpoint step functions converge where the function is continuous.** At a time
+`s ∈ (0, T]` at which `g` is continuous within `[0, T]`, the cell-indicator sums
+`∑ⱼ 𝟙_{(tⱼ, tⱼ₊₁]}(s)·g(tⱼ)` tend to `g s`: the cell containing `s` has its left endpoint in
+`[0, T]`, within `T/n` of `s` (`cell_collapse`). -/
+lemma tendsto_sum_indicator_unifPart (T : ℝ≥0) {s : ℝ≥0} (hs : s ∈ Set.Ioc 0 T) {g : ℝ≥0 → ℝ}
+    (hg : ContinuousWithinAt g (Set.Icc 0 T) s) :
+    Tendsto (fun n ↦ ∑ j ∈ Finset.range n,
+      (Set.Ioc (unifPart T n j) (unifPart T n (j + 1))).indicator (fun _ ↦ g (unifPart T n j)) s)
+      atTop (𝓝 (g s)) := by
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  obtain ⟨δ, hδ, hδc⟩ := Metric.continuousWithinAt_iff.mp hg ε hε
+  obtain ⟨N, hN⟩ := exists_nat_gt ((T : ℝ) / δ)
+  refine ⟨max N 1, fun n hn ↦ ?_⟩
+  have hn1 : 0 < n := one_pos.trans_le ((le_max_right _ _).trans hn)
+  obtain ⟨k, hk, hval, hclose⟩ := cell_collapse T n hn1 s hs (fun j ↦ g (unifPart T n j))
+  rw [hval]
+  refine hδc ⟨zero_le, unifPart_le_T hk.le⟩ ?_
+  rw [NNReal.dist_eq]
+  refine hclose.trans_lt ?_
+  rw [div_lt_iff₀ (Nat.cast_pos.2 hn1), mul_comm]
+  exact (div_lt_iff₀ hδ).mp (hN.trans_le (Nat.cast_le.2 ((le_max_left _ _).trans hn)))
+
+omit hB in
+/-- On `(0, T]` the left-endpoint step function is `0` or a value of `g`, so a bound on `g`
+bounds it. -/
+lemma abs_sum_indicator_unifPart_le (T : ℝ≥0) (n : ℕ) {s : ℝ≥0} (hs : s ∈ Set.Ioc 0 T)
+    {g : ℝ≥0 → ℝ} {C : ℝ} (hC : 0 ≤ C) (hg : ∀ t, |g t| ≤ C) :
+    |∑ j ∈ Finset.range n,
+      (Set.Ioc (unifPart T n j) (unifPart T n (j + 1))).indicator (fun _ ↦ g (unifPart T n j)) s|
+      ≤ C := by
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · simpa using hC
+  · obtain ⟨k, _, hval, _⟩ := cell_collapse T n hn s hs (fun j ↦ g (unifPart T n j))
+    exact hval ▸ hg _
+
+omit hB in
+/-- If `∫ (Fₙ − G)² → 0` then `‖⟦Fₙ⟧ − ⟦G⟧‖ → 0`, any measure. The single-fixed-limit
+variant of `ItoIntegralBrownian.tendsto_norm_toLp_sub` (which compares two *sequences*
+`Fₙ, Gₙ`); kept as a separate lemma because the `G`-shape genuinely differs. The generic
+`L²` facts `ItoIntegralL2.lp_two_norm_sq` / `ItoIntegralBrownian.lp_dist_sq` it rests on. -/
+lemma tendsto_norm_toLp_sub' {α : Type*} {m : MeasurableSpace α} {ν : Measure α}
+    {F : ℕ → α → ℝ} {G : α → ℝ} (hF : ∀ n, MemLp (F n) 2 ν) (hG : MemLp G 2 ν)
+    (h : Tendsto (fun n ↦ ∫ z, (F n z - G z) ^ 2 ∂ν) atTop (𝓝 0)) :
+    Tendsto (fun n ↦ ‖(hF n).toLp (F n) - hG.toLp G‖) atTop (𝓝 0) := by
+  have heq : (fun n ↦ ‖(hF n).toLp (F n) - hG.toLp G‖)
+      = fun n ↦ Real.sqrt (∫ z, (F n z - G z) ^ 2 ∂ν) := by
+    funext n; rw [← lp_dist_sq (hF n) hG, Real.sqrt_sq (norm_nonneg _)]
+  rw [heq]
+  simpa only [Function.comp_def, Real.sqrt_zero] using (Real.continuous_sqrt.tendsto 0).comp h
 
 omit hB in
 /-- The **bounded left-endpoint step process** for a general adapted `θ`:

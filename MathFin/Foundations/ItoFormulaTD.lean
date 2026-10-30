@@ -330,12 +330,15 @@ theorem ito_formula_td_L2_bddDeriv
   have hcore := ito_formula_td_L2 hB hBmeas hBcont T hf_t hf_tt hf_tx hf_x hf_xx
     hf_xxx hf_xx_cont hbd_t hbd_xx hbd_tt hbd_tx hbd_xxx
   have hcoreI : Tendsto (fun n ↦
-      ∫ ω, (riemannφTD hBmeas f_x T n ω - I ω) ^ 2 ∂μ) atTop (𝓝 0) := hcore
-  have hcore_Lp : Tendsto (fun n ↦ (memLp_riemannφTD hB hBmeas hfx_meas hbd_x T n).toLp
-      (riemannφTD hBmeas f_x T n)) atTop (𝓝 (hI_memLp.toLp I)) :=
-    tendsto_iff_norm_sub_tendsto_zero.mpr
-      (tendsto_norm_toLp_sub' (fun n ↦ memLp_riemannφTD hB hBmeas hfx_meas hbd_x T n)
-        hI_memLp hcoreI)
+      ∫ ω, (riemannσ (B := B) (fun s ω ↦ f_x s (B s ω)) T n ω - I ω) ^ 2 ∂μ) atTop (𝓝 0) :=
+    hcore
+  have hRmem (n : ℕ) : MemLp (riemannσ (B := B) (fun s ω ↦ f_x s (B s ω)) T n) 2 μ :=
+    memLp_riemannσ hB hBmeas (fun t ↦ stronglyMeasurable_comp_eval hBmeas (hfx_meas t) t)
+      (fun _ _ ↦ hbd_x _ _) T n
+  have hcore_Lp : Tendsto (fun n ↦
+      (hRmem n).toLp (riemannσ (B := B) (fun s ω ↦ f_x s (B s ω)) T n))
+      atTop (𝓝 (hI_memLp.toLp I)) :=
+    tendsto_iff_norm_sub_tendsto_zero.mpr (tendsto_norm_toLp_sub' hRmem hI_memLp hcoreI)
   -- both are the `L²` limit of the same sums ⇒ they coincide
   have huniq : hI_memLp.toLp I = itoIntegralCLM_T hB T hBmeas gfx :=
     tendsto_nhds_unique hcore_Lp hgfx

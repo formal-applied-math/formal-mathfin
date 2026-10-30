@@ -237,6 +237,8 @@ import MathFin.Foundations.ItoSquaringIdentity
 import MathFin.Foundations.DiscreteItoPolynomial
 -- Continuous-time L² Itô formula for `f(x) = x²`: `∑ B ΔB → ½(B_T² − B_0² − T)`
 import MathFin.Foundations.ItoFormulaSquaredL2
+-- The Riemann-Itô sum `riemannσ`: the one left-endpoint sum every bridge below is a case of
+import MathFin.Foundations.ItoRiemannSum
 -- Keystone: `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` as a genuine `itoIntegralCLM_T` identity
 -- (the continuous Itô integral's first real consumer)
 import MathFin.Foundations.ItoIntegralBrownian
