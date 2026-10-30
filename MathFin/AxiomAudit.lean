@@ -2213,9 +2213,7 @@ than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen
 #guard_msgs in
 #print axioms MathFin.strictlyElicits_fisslerZiegelExpScore
 
-/-- info: 'MathFin.isElicitable_quantile_lowerExpectedShortfall' depends on axioms: [propext,
- Classical.choice,
- Quot.sound] -/
+/-- info: 'MathFin.isElicitable_quantile_lowerExpectedShortfall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.isElicitable_quantile_lowerExpectedShortfall
 
