@@ -93,6 +93,7 @@ import MathFin.Foundations.ContinuousMarket
 import MathFin.Foundations.ChangeOfMeasure
 import MathFin.Foundations.Girsanov
 import MathFin.Foundations.ExpMartingaleQBrownian
+import MathFin.Foundations.ExpMartingaleBrownian
 import MathFin.Foundations.GirsanovConstantTheta
 import MathFin.Foundations.SimpleDoleansExponential
 import MathFin.Foundations.GirsanovSimpleTheta
