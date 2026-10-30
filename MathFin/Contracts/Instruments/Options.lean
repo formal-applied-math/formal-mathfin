@@ -27,8 +27,7 @@ The capped call is *defined* by composition, as a long call at `K₁` and a shor
 * `europeanCallPayoff` — the call's payoff on its own.
 * `europeanCall`, `europeanPut`, `digitalCall`, `forward` — the single-maturity instruments.
 * `cappedCall` — a long `europeanCall K₁ T` combined with a short `europeanCall K₂ T`.
-* `Payoff.pow`, `powerCall` — integer powers of a payoff (`Payoff.eval_pow`), and the call on
-  `S_T ^ a`.
+* `powerCall` — the call on `S_T ^ a`, the power being the payoff language's `rpow` node.
 * `exchangeOption` — pays `max (S¹_T − S²_T) 0`.
 
 ## Main results
@@ -87,21 +86,10 @@ noncomputable def europeanPut (K : ℝ) (T : ℝ≥0) : Contract Unit :=
 noncomputable def digitalCall (K : ℝ) (T : ℝ≥0) : Contract Unit :=
   .pay T (.indicatorLt (.const K) (.obs () T))
 
-/-- The `n`-th power of a payoff, built from `Payoff.mul`. -/
-noncomputable def Payoff.pow {ι : Type*} (e : Payoff ι) : ℕ → Payoff ι
-  | 0 => .const 1
-  | n + 1 => .mul (e.pow n) e
-
-/-- Evaluating `Payoff.pow` is the real power of the evaluation. -/
-theorem Payoff.eval_pow {ι : Type*} (s : Scenario ι) (e : Payoff ι) (n : ℕ) :
-    (e.pow n).eval s = e.eval s ^ n := by
-  induction n with
-  | zero => simp [Payoff.pow, Payoff.eval]
-  | succ n ih => simp [Payoff.pow, Payoff.eval, ih, pow_succ]
-
-/-- The reified power call: pays `max (S_T ^ a - K) 0` at maturity `T`. -/
+/-- The reified power call: pays `max (S_T ^ a - K) 0` at maturity `T`, the power being the
+payoff language's `rpow` node at the natural exponent `a`. -/
 noncomputable def powerCall (a : ℕ) (K : ℝ) (T : ℝ≥0) : Contract Unit :=
-  .pay T (.max (.sub ((Payoff.obs () T).pow a) (.const K)) (.const 0))
+  .pay T (.max (.sub (.rpow (.obs () T) a) (.const K)) (.const 0))
 
 /-- The reified exchange option (Margrabe) on two underlyings indexed by `Fin 2`: pays
 `max (S¹_T - S²_T) 0` at maturity `T`. -/
