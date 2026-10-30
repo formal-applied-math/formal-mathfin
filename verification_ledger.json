@@ -4052,9 +4052,9 @@
     "mf-worstcase-risk-representation": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.8,
-      "input_hash": "8790bfd41d11385e4854b27c9704af01a7bca0509e5df05839fc01131fc7e48f",
-      "verified_at_commit": "5059a36"
+      "elapsed_s": 4.2,
+      "input_hash": "0186d003ad63931a18b42e643c3080c1527527780636e8cb3cb32825d0665661",
+      "verified_at_commit": "d2daa8b"
     },
     "mf-zcb-convexity": {
       "benchmark_file": "interest_rates.json",
