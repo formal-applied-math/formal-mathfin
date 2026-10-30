@@ -213,7 +213,7 @@
     {
       "id": "mf-gaussian-var-subadditive",
       "name": "Gaussian VaR Subadditivity",
-      "description": "For joint-gaussian losses L_i ~ N(μ_i, σ_i²) with correlation ρ ≤ 1 and right-tail z ≥ 0: VaR(L₁+L₂) ≤ VaR(L₁) + VaR(L₂) — subadditivity of the closed-form Gaussian VaR (the genuine content is the joint-stdev triangle inequality).",
+      "description": "For joint-gaussian losses L_i ~ N(μ_i, σ_i²) with correlation ρ ≤ 1 and right-tail z ≥ 0: VaR(L₁+L₂) ≤ VaR(L₁) + VaR(L₂) for the closed-form function gaussianVaR on parameters (ρ free), not for random variables — subadditivity of the closed-form Gaussian VaR (the genuine content is the joint-stdev triangle inequality).",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_subadditive_thm {μ₁ μ₂ σ₁ σ₂ ρ z : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) (hz : 0 ≤ z) :\n    MathFin.gaussianVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2)) z ≤\n      MathFin.gaussianVaR μ₁ σ₁ z + MathFin.gaussianVaR μ₂ σ₂ z :=\n  MathFin.gaussianVaR_subadditive h₁ h₂ hρ hz\n"
@@ -229,7 +229,7 @@
     {
       "id": "mf-gaussian-cvar-subadditive",
       "name": "Gaussian CVaR Subadditivity",
-      "description": "Same setup as gaussian VaR subadditivity with level α < 1: CVaR(L₁+L₂) ≤ CVaR(L₁) + CVaR(L₂). Gives CVaR coherence in the gaussian family.",
+      "description": "Same parameter setup as the closed-form VaR subadditivity with level α < 1: the closed-form CVaR at the combined volatility is at most the sum of the closed forms. A statement about the real function gaussianCVaR on parameters (σ_i ≥ 0, ρ ≤ 1 free), not about random variables; for jointly Gaussian random variables see mf-gaussian-cvar-subadditive-jointly-gaussian.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_cvar_subadditive_thm {μ₁ μ₂ σ₁ σ₂ ρ z α : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) (hα : α < 1) :\n    MathFin.gaussianCVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2)) z α ≤\n      MathFin.gaussianCVaR μ₁ σ₁ z α + MathFin.gaussianCVaR μ₂ σ₂ z α :=\n  MathFin.gaussianCVaR_subadditive h₁ h₂ hρ hα\n"
@@ -240,6 +240,38 @@
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via joint-stdev triangle inequality + PDF non-negativity + linarith. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-var-subadditive-jointly-gaussian",
+      "name": "VaR Subadditivity for Jointly Gaussian Losses",
+      "description": "For a jointly Gaussian pair (X, Y) of losses and a level α ∈ (0, 1) with α ≥ 1/2: VaR_α(X + Y) ≤ VaR_α(X) + VaR_α(Y). A statement about random variables, with no hypothesis on the correlation; value-at-risk is not subadditive for general laws, and for a Gaussian pair with correlation below one the inequality fails below the median (see qrm-var-gaussian-subadditive-iff).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.VaRSuperadditivity\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_add_le_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X Y : Ω → ℝ}\n    (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1) (hα₂ : 1 / 2 ≤ α) :\n    valueAtRisk (fun ω ↦ X ω + Y ω) P α ≤ valueAtRisk X P α + valueAtRisk Y P α :=\n  MathFin.valueAtRisk_add_le_of_hasGaussianLaw h hα hα₂\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Gaussian VaR subadditivity (McNeil-Frey-Embrechts, Quantitative Risk Management, Ch 2.3; QRM Exercise Book Ex. 2.22)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. VaR of each Gaussian loss and of the sum is E + sd Φ⁻¹(α); the standard deviation is subadditive (discriminant of t ↦ Var(tX + Y)); Φ⁻¹(α) ≥ 0 for α ≥ 1/2. Lives in MathFin/RiskMeasures/VaRSuperadditivity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-cvar-subadditive-jointly-gaussian",
+      "name": "Closed-Form CVaR Subadditivity for Jointly Gaussian Losses",
+      "description": "For a jointly Gaussian pair (X, Y) with Var X, Var Y and Var(X + Y) positive and α ∈ (0, 1): the closed form gaussianCVaR at mean E X + E Y and volatility sd(X + Y) is at most the sum of the closed forms at the margins (E X, sd X) and (E Y, sd Y), at the normal quantile Φ⁻¹(α). Derived from the subadditivity of expected shortfall on the general coherence structure and the Gaussian closed form of expected shortfall; the bare-parameter statement is mf-gaussian-cvar-subadditive.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem gaussianCVaR_sd_add_le_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X Y : Ω → ℝ}\n    (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1)\n    (hX : 0 < Var[X; P]) (hY : 0 < Var[Y; P]) (hXY : 0 < Var[fun ω ↦ X ω + Y ω; P]) :\n    gaussianCVaR (P[X] + P[Y]) √Var[fun ω ↦ X ω + Y ω; P] (PhiInv α) α ≤\n      gaussianCVaR P[X] √Var[X; P] (PhiInv α) α + gaussianCVaR P[Y] √Var[Y; P] (PhiInv α) α :=\n  MathFin.gaussianCVaR_sd_add_le h hα hX hY hXY\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Coherence of expected shortfall (Acerbi-Tasche 2002) on the Gaussian family; McNeil-Frey-Embrechts Ch 2.3",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, a corollary of expectedShortfall_add_le (the subadditivity axiom of expectedShortfall_isCoherentRiskMeasure) and expectedShortfall_of_hasGaussianLaw. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {

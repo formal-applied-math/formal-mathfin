@@ -7,52 +7,55 @@ module
 
 public import Mathlib
 public import MathFin.RiskMeasures.Gaussian
+public import MathFin.RiskMeasures.GaussianExpectedShortfall
 
 /-!
-# Coherent risk measure axioms (gaussian case)
+# Coherence of Gaussian value-at-risk and expected shortfall
 
-For losses `L ~ N(μ, σ²)` and gaussian aggregations, both VaR and CVaR satisfy
-the four coherent-risk-measure axioms of Artzner–Delbaen–Eber–Heath (1999):
+The closed forms `gaussianVaR μ σ z = μ + σ z` and `gaussianCVaR μ σ z α = μ + σ ϕ(z)/(1 − α)`
+(`RiskMeasures/Gaussian.lean`) are the value-at-risk and the expected shortfall of a loss
+`L ~ N(μ, σ²)` at the normal quantile `z = Φ⁻¹(α)` (`valueAtRisk_of_hasLaw_gaussianReal`,
+`expectedShortfall_of_hasLaw_gaussianReal`). This file records how the four axioms of Artzner,
+Delbaen, Eber and Heath (1999) read on them.
 
-* **Translation invariance**: `ρ(L + c) = ρ(L) + c`.
-* **Positive homogeneity**: `ρ(λ·L) = λ·ρ(L)` for `λ ≥ 0`.
-* **Monotonicity (parameter form)**: if `μ₁ ≤ μ₂` and `σ₁ = σ₂`, then
-  `ρ(L₁) ≤ ρ(L₂)` for right-tail quantiles `z ≥ 0`.
-* **Subadditivity**: for joint-gaussian `L₁ + L₂ ~ N(μ₁ + μ₂, σ₊²)` with
-  `σ₊² = σ₁² + 2 ρ σ₁ σ₂ + σ₂²`, `|ρ| ≤ 1`, `σ_i ≥ 0`, and `z ≥ 0`:
-  `ρ(L₁ + L₂) ≤ ρ(L₁) + ρ(L₂)`.
+**Expected shortfall.** It is coherent on every integrable loss, Gaussian or not
+(`expectedShortfall_isCoherentRiskMeasure`, an instance of the library's one coherence structure
+`IsCoherentRiskMeasure`). Gaussian laws are closed under `L + c` and `λ L`
+(`gaussianReal_add_const`, `gaussianReal_const_mul`), so translation, homogeneity and monotonicity
+of Gaussian expected shortfall need nothing Gaussian: they are the structure's axioms. What the
+Gaussian family adds is the closed form of the sum. A jointly Gaussian pair has a Gaussian sum, so
+the structure's `ES(X + Y) ≤ ES X + ES Y` is the parameter inequality
+`gaussianCVaR_sd_add_le`, with the variance of the sum in the volatility slot.
 
-In general (non-gaussian) distributions, VaR can fail subadditivity, which is
-why CVaR (which is subadditive in all settings) is preferred for capital
-adequacy. Within the gaussian family, both work.
+**Value-at-risk.** It is not coherent in general (`RiskMeasures/VaRSuperadditivity.lean`), but on a
+jointly Gaussian pair at a level `α ≥ 1/2` it is subadditive
+(`valueAtRisk_add_le_of_hasGaussianLaw` there), because `VaR = E + sd Φ⁻¹(α)` and the standard
+deviation is subadditive (`variance_add_le_sq`).
 
-These are statements about the closed forms `gaussianVaR μ σ z` and `gaussianCVaR μ σ z α` as
-functions of the parameters, not about a risk measure on random variables. The general structure
-is `IsCoherentRiskMeasure` (`RiskMeasures/Coherent.lean`), and expected shortfall is an instance
-(`expectedShortfall_isCoherentRiskMeasure`); the Gaussian CVaR is the expected shortfall of a
-normal law (`expectedShortfall_of_hasLaw_gaussianReal`). The bare-real axioms here are not derived
-from the general ones, because that needs the laws of `L + c`, `λ L` and of a jointly Gaussian
-sum to be Gaussian with the stated parameters, which is more than the one-line parameter algebra
-below. Gaussian VaR is not an `IsCoherentRiskMeasure` for general laws, so only the parameter
-statements are made for it.
+**The parameter formulas.** `gaussianVaR_translation`, `gaussianCVaR_translation`,
+`gaussianVaR_positiveHomogeneity`, `gaussianCVaR_positiveHomogeneity`, `gaussianVaR_monotone_mean`,
+`gaussianCVaR_monotone_mean`, `joint_stdev_le`, `gaussianVaR_subadditive` and
+`gaussianCVaR_subadditive` are identities and inequalities about the two real functions `μ + σ z`
+and `μ + σ ϕ(z)/(1 − α)` on all real parameters, including `σ < 0` and `α ≥ 1`, where neither is
+the risk measure of any law. They stay as parameter algebra for that reason: a derivation from the
+structure would carry the hypotheses `σ > 0` and `α ∈ (0, 1)` and, for subadditivity, would have to
+realise an arbitrary `(σ₁, σ₂, ρ)` as a jointly Gaussian pair, and it would prove strictly less.
+In `gaussianVaR_subadditive` and `gaussianCVaR_subadditive` the correlation `ρ` is a free
+parameter; the random-variable theorems are the cases at the correlation the pair actually has.
 
 Results:
 
-* `gaussianVaR_translation`, `gaussianCVaR_translation`: translation invariance.
-* `gaussianVaR_positiveHomogeneity`, `gaussianCVaR_positiveHomogeneity`:
-  positive homogeneity.
-* `gaussianVaR_monotone_mean`, `gaussianCVaR_monotone_mean`: monotonicity in
-  the mean (right-tail).
-* `joint_stdev_le`: `√(σ₁² + 2 ρ σ₁ σ₂ + σ₂²) ≤ σ₁ + σ₂` for `|ρ| ≤ 1` and
-  `σ_i ≥ 0`. The substantive analytic content of gaussian subadditivity.
-* `gaussianVaR_subadditive`, `gaussianCVaR_subadditive`: subadditivity.
+* `gaussianCVaR_sd_add_le`: the closed-form CVaR of a jointly Gaussian pair is subadditive, with
+  the exact volatility of the sum; a corollary of the coherence of expected shortfall.
+* `joint_stdev_le`: `√(σ₁² + 2 ρ σ₁ σ₂ + σ₂²) ≤ σ₁ + σ₂` for `ρ ≤ 1` and `σ_i ≥ 0`.
+* The parameter formulas listed above.
 -/
 
 @[expose] public section
 
 namespace MathFin
 
-open Real ProbabilityTheory
+open Real MeasureTheory Set ProbabilityTheory
 
 /-- **VaR translation invariance**: `VaR(L + c) = VaR(L) + c`. -/
 lemma gaussianVaR_translation (μ σ z c : ℝ) :
@@ -138,5 +141,22 @@ lemma gaussianCVaR_subadditive {μ₁ μ₂ σ₁ σ₂ ρ z α : ℝ}
       (σ₁ + σ₂) * (gaussianPDFReal 0 1 z / (1 - α)) :=
     mul_le_mul_of_nonneg_right h_stdev h_factor_nn
   linarith
+
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X Y : Ω → ℝ} {α : ℝ}
+
+/-- **Closed-form CVaR is subadditive on jointly Gaussian losses**: for a jointly Gaussian pair
+`(X, Y)` with nondegenerate `X`, `Y` and `X + Y`, the closed form `gaussianCVaR` at the
+mean `E X + E Y` and the standard deviation of `X + Y` is at most the sum of the closed forms at
+the margins. It is the subadditivity of expected shortfall (`expectedShortfall_add_le`) read
+through the Gaussian laws of `X`, `Y` and `X + Y`. -/
+theorem gaussianCVaR_sd_add_le (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1)
+    (hX : 0 < Var[X; P]) (hY : 0 < Var[Y; P]) (hXY : 0 < Var[fun ω ↦ X ω + Y ω; P]) :
+    gaussianCVaR (P[X] + P[Y]) √Var[fun ω ↦ X ω + Y ω; P] (PhiInv α) α ≤
+      gaussianCVaR P[X] √Var[X; P] (PhiInv α) α + gaussianCVaR P[Y] √Var[Y; P] (PhiInv α) α := by
+  have := h.isProbabilityMeasure
+  have key := expectedShortfall_add_le h.fst.integrable h.snd.integrable hα
+  rwa [expectedShortfall_of_hasGaussianLaw h.fun_add hXY hα,
+    expectedShortfall_of_hasGaussianLaw h.fst hX hα, expectedShortfall_of_hasGaussianLaw h.snd hY hα,
+    integral_add h.fst.integrable h.snd.integrable] at key
 
 end MathFin

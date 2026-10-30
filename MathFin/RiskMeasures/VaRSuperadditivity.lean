@@ -372,12 +372,36 @@ end Pareto
 
 section Gaussian
 
-/-- VaR of a Gaussian random variable in terms of its mean and variance. -/
-private lemma valueAtRisk_of_hasGaussianLaw' {Z : Ω → ℝ} (hZ : HasGaussianLaw Z P)
-    (hα : α ∈ Ioo 0 1) : valueAtRisk Z P α = P[Z] + √Var[Z; P] * PhiInv α := by
-  have := hZ.isProbabilityMeasure
-  rw [valueAtRisk_of_hasLaw_gaussianReal ⟨hZ.aemeasurable, hZ.map_eq_gaussianReal⟩ hα, gaussianVaR,
-    Real.coe_toNNReal _ (variance_nonneg Z P)]
+/-- **The standard deviation is subadditive**: `Var(X + Y) ≤ (sd X + sd Y)²` for square-integrable
+`X, Y`, the discriminant of the nonnegative quadratic `t ↦ Var(t X + Y)`. -/
+lemma variance_add_le_sq [IsProbabilityMeasure P] {X Y : Ω → ℝ} (hX : MemLp X 2 P)
+    (hY : MemLp Y 2 P) : Var[X + Y; P] ≤ (√Var[X; P] + √Var[Y; P]) ^ 2 := by
+  have hq (t : ℝ) : 0 ≤ Var[X; P] * (t * t) + (2 * cov[X, Y; P]) * t + Var[Y; P] := by
+    have := variance_nonneg (t • X + Y) P
+    rw [variance_add (hX.const_smul t) hY, variance_smul, covariance_smul_left] at this
+    linarith
+  have hd := discrim_le_zero hq
+  have hc : cov[X, Y; P] ≤ √Var[X; P] * √Var[Y; P] := by
+    rw [← sqrt_mul (variance_nonneg _ _)]
+    refine le_trans (le_abs_self _) ?_
+    rw [← sqrt_sq_eq_abs]
+    exact sqrt_le_sqrt (by unfold discrim at hd; nlinarith)
+  rw [variance_add hX hY, add_sq, sq_sqrt (variance_nonneg _ _), sq_sqrt (variance_nonneg _ _)]
+  linarith
+
+/-- **Gaussian VaR is subadditive at levels above the median**: for a jointly Gaussian pair,
+`VaR_α(X + Y) ≤ VaR_α(X) + VaR_α(Y)` when `α ≥ 1/2`. `VaR = E + sd Φ⁻¹(α)` and the standard
+deviation is subadditive, so no hypothesis on the correlation is needed. -/
+theorem valueAtRisk_add_le_of_hasGaussianLaw {X Y : Ω → ℝ}
+    (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1) (hα₂ : 1 / 2 ≤ α) :
+    valueAtRisk (fun ω ↦ X ω + Y ω) P α ≤ valueAtRisk X P α + valueAtRisk Y P α := by
+  have := h.isProbabilityMeasure
+  rw [valueAtRisk_of_hasGaussianLaw h.fun_add hα, valueAtRisk_of_hasGaussianLaw h.fst hα,
+    valueAtRisk_of_hasGaussianLaw h.snd hα, integral_add h.fst.integrable h.snd.integrable]
+  have hσ : √Var[fun ω ↦ X ω + Y ω; P] ≤ √Var[X; P] + √Var[Y; P] := by
+    rw [← sqrt_sq (add_nonneg (sqrt_nonneg Var[X; P]) (sqrt_nonneg Var[Y; P]))]
+    exact sqrt_le_sqrt (variance_add_le_sq h.fst.memLp_two h.snd.memLp_two)
+  nlinarith [mul_le_mul_of_nonneg_right hσ ((PhiInv_nonneg_iff hα).2 hα₂)]
 
 /-- **Gaussian VaR is subadditive exactly above the median** (QRM Exercise Book, Exercise 2.22):
 for a jointly Gaussian pair `(X₁, X₂)` with correlation below one
@@ -387,6 +411,7 @@ theorem valueAtRisk_add_le_iff_of_hasGaussianLaw {X₁ X₂ : Ω → ℝ}
     (hcorr : cov[X₁, X₂; P] < √Var[X₁; P] * √Var[X₂; P]) (hα : α ∈ Ioo 0 1) :
     valueAtRisk (fun ω ↦ X₁ ω + X₂ ω) P α ≤ valueAtRisk X₁ P α + valueAtRisk X₂ P α ↔
       1 / 2 ≤ α := by
+  refine ⟨fun hle ↦ ?_, valueAtRisk_add_le_of_hasGaussianLaw h hα⟩
   have := h.isProbabilityMeasure
   have h₁ := h.fst
   have h₂ := h.snd
@@ -398,15 +423,11 @@ theorem valueAtRisk_add_le_iff_of_hasGaussianLaw {X₁ X₂ : Ω → ℝ}
     calc √Var[fun ω ↦ X₁ ω + X₂ ω; P] < √((√Var[X₁; P] + √Var[X₂; P]) ^ 2) :=
           sqrt_lt_sqrt (variance_nonneg _ P) (by rw [hvar]; nlinarith)
       _ = √Var[X₁; P] + √Var[X₂; P] := sqrt_sq (by positivity)
-  rw [valueAtRisk_of_hasGaussianLaw' h.fun_add hα, valueAtRisk_of_hasGaussianLaw' h₁ hα,
-    valueAtRisk_of_hasGaussianLaw' h₂ hα, integral_add h₁.integrable h₂.integrable,
-    ← PhiInv_nonneg_iff hα]
-  constructor
-  · intro hle
-    by_contra! hz
-    nlinarith [mul_lt_mul_of_neg_right hσ hz]
-  · intro hz
-    nlinarith [mul_le_mul_of_nonneg_right hσ.le hz]
+  rw [valueAtRisk_of_hasGaussianLaw h.fun_add hα, valueAtRisk_of_hasGaussianLaw h₁ hα,
+    valueAtRisk_of_hasGaussianLaw h₂ hα, integral_add h₁.integrable h₂.integrable] at hle
+  rw [← PhiInv_nonneg_iff hα]
+  by_contra! hz
+  nlinarith [mul_lt_mul_of_neg_right hσ hz]
 
 end Gaussian
 
