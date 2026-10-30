@@ -566,23 +566,23 @@
     "mf-american-put-ge-bsm-european-put": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.6,
-      "input_hash": "007ba38fa95a369e4e6c87e84ad6d732d58a97b3d769ec2a2087c6890cfe70c1",
-      "verified_at_commit": "2fe72a0"
+      "elapsed_s": 5.7,
+      "input_hash": "feeb14260f75ee9430978d0db75379b792e02ac605d78461a0f5d4777e1c8d31",
+      "verified_at_commit": "22c01b5"
     },
     "mf-american-put-log-boundary-convex": {
       "benchmark_file": "american_put_boundary.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.9,
-      "input_hash": "30a627f848faecd81521fc9e452151e3e2a25e3c9f5ae8f72c56708548577cf1",
-      "verified_at_commit": "2fe72a0"
+      "elapsed_s": 6.0,
+      "input_hash": "dc4f3b9aa3d247a310e28c84fc1bb28728a983007dba5f818dad1eb7fabc4048",
+      "verified_at_commit": "22c01b5"
     },
     "mf-american-put-stock-boundary-strict-convex": {
       "benchmark_file": "american_put_boundary.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.9,
-      "input_hash": "60dc4f348ca21769dfb16b2e7b8e44943ff5bfc48697dc04d49ae6eeabba5245",
-      "verified_at_commit": "2fe72a0"
+      "elapsed_s": 6.0,
+      "input_hash": "02d3b0d784e48121a8856a59aaa815e8771b162ca6c555e4d9428ce7e2662f72",
+      "verified_at_commit": "22c01b5"
     },
     "mf-american-supermartingale": {
       "benchmark_file": "binomial.json",
@@ -2078,9 +2078,9 @@
     "mf-dupire-local-vol": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.7,
-      "input_hash": "a1d1b50e93c55d8ec2a194589466caeba0b36fa4b62571282289d36f049b2402",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 5.2,
+      "input_hash": "d482fc4060ad8c65dad2736e0cede597011c99a96759238e1168a05e56810e37",
+      "verified_at_commit": "22c01b5"
     },
     "mf-dupire-tilted-smile-local-skew": {
       "benchmark_file": "black_scholes.json",
@@ -2561,16 +2561,16 @@
     "mf-ito-drift-expectation-constructed": {
       "benchmark_file": "stochastic_foundations.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.3,
-      "input_hash": "b27a116ffbb393a45457f9c0d4c4ffdac2876a50c1316926ac517c6b253fb8c8",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 6.0,
+      "input_hash": "277a8b11e474b7116e81a8239d0051ebe98888a02c02014a24b26a76221c23cc",
+      "verified_at_commit": "22c01b5"
     },
     "mf-ito-drift-expectation-discrete-route": {
       "benchmark_file": "stochastic_foundations.json",
       "date": "2026-10-30",
-      "elapsed_s": 6.4,
-      "input_hash": "b3d04630bfd919bc5009e44899b20e89474ba5ecf2d57a21a3103e6964255180",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 4.2,
+      "input_hash": "4b01b92e0a8d469a92a7b55b5438482b807bc9f1a542dac9925ef059ea17d201",
+      "verified_at_commit": "22c01b5"
     },
     "mf-joint-stdev-triangle": {
       "benchmark_file": "risk_measures.json",
@@ -4710,37 +4710,37 @@
     "sc-ito-formula-adapted": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.1,
-      "input_hash": "7b22d328dabde6c145dd09282addf35d23ea21cb04266a2d8a179ff066240f1b",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 6.0,
+      "input_hash": "f58a0faf9b8dbf12a44a20862410e8b283c0e9e78f293cf4dee16b516ba9d7fa",
+      "verified_at_commit": "22c01b5"
     },
     "sc-ito-formula-adapted-c2-every-time": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.3,
-      "input_hash": "3c11c31d902d6534c7c7734f8cd2864441e85777fd6d305e26c5fcc65ab2b400",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 5.8,
+      "input_hash": "6b87910b92865bbf59ed6a0e8c4ff5f4a133fbb2ab21ee5f01d834ced0b3934e",
+      "verified_at_commit": "22c01b5"
     },
     "sc-ito-formula-adapted-process": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.0,
-      "input_hash": "bbd6abbd491ed2d8146399ac820e0232e83678c4e3bb38f52cecedad8bcb97af",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 6.1,
+      "input_hash": "acd8b4c73bc2c4141566dacbd634d595677ca2a109874c83dbb6c39a082a2225",
+      "verified_at_commit": "22c01b5"
     },
     "sc-ito-formula-adapted-time-dependent": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.0,
-      "input_hash": "3f2f8f77436e08f5748e6879bf9599a41de9be8b7f402eb19071d4bd5975f7c2",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 4.5,
+      "input_hash": "c9010827e8887308d7fea1dac6c50e3d74523bc6d8414b2518ce09545a817d43",
+      "verified_at_commit": "22c01b5"
     },
     "sc-ito-formula-adapted-unbounded-coefficients": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.6,
-      "input_hash": "e1fa38d02f66b8ff1ab776617c5e37d5e2e51baa33ef4be19133e0ef83c1843f",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 4.4,
+      "input_hash": "0c6d66542a61504c4a7d0f317a42d2ee6788109956168b2b1651f8245dd1ec6b",
+      "verified_at_commit": "22c01b5"
     },
     "sc-ito-formula-gbm": {
       "benchmark_file": "stochastic_calculus.json",
@@ -4766,23 +4766,23 @@
     "sc-ito-formula-td-process": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.1,
-      "input_hash": "e3141672127c26cc08a8180c4602df7607470155b3db68d3b7666bf88c8abc56",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 4.3,
+      "input_hash": "db6f53b5931e3dd40f41265183ea1a969e78297d7d6e29aa65446a1d0718849c",
+      "verified_at_commit": "22c01b5"
     },
     "sc-ito-formula-unrestricted-islocalmartingale": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 3.8,
-      "input_hash": "b5e424ea8c6c5e199f5ec4b75ce9a0e59151bdb78279e72df218b75ba2c2c8af",
-      "verified_at_commit": "e85ae53"
+      "elapsed_s": 5.7,
+      "input_hash": "48726d39b4110d7c3f1de85a90a1f1e72982523d5a746700b432ac09703ab7ab",
+      "verified_at_commit": "22c01b5"
     },
     "sc-ito-formula-unrestricted-local": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.5,
-      "input_hash": "fae58083606bc1e4ee812f1e5b130e5208d0fb75a7dbee94c18bcc8a92743314",
-      "verified_at_commit": "e85ae53"
+      "elapsed_s": 5.4,
+      "input_hash": "e8493c0736059132e0bc5a96f745391ca0305e95d01e30559430d144f01a8c2c",
+      "verified_at_commit": "22c01b5"
     },
     "sc-ito-general-continuous-modification": {
       "benchmark_file": "stochastic_calculus.json",
@@ -4836,9 +4836,9 @@
     "sc-ito-infinite-local-martingale": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.2,
-      "input_hash": "25f881fbc0c8b4e5dab3f668c7a05a11f29bbd1f95b7a816240e29cc00006ba4",
-      "verified_at_commit": "c55d62c"
+      "elapsed_s": 3.8,
+      "input_hash": "ab13e413c1c09672d86f028c98d7ecc7d002526371e2c73a6e28f5f8aee5f82d",
+      "verified_at_commit": "22c01b5"
     },
     "sc-ito-integral-against-drifted-price": {
       "benchmark_file": "stochastic_calculus.json",
@@ -4857,23 +4857,23 @@
     "sc-ito-integral-continuous-adapted-unbounded": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.5,
-      "input_hash": "a1c2c25dd53e0e4595e29b279e44f0e9210c29f56f51b5ad9b8621b888b0e42a",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 4.7,
+      "input_hash": "2238249ed8f06505bc08f1e3537512199f3c12e07d9d14482b7a45f0a20b6633",
+      "verified_at_commit": "22c01b5"
     },
     "sc-ito-integral-predictable-ae-continuous": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.5,
-      "input_hash": "2f550170945abc89beac18726c406a3fcc324c4e4cc7de1a3c8016255cbabf03",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 5.6,
+      "input_hash": "514204099f23126634fe722cc3969d5330184d679499d02c89f91a2e379d8a64",
+      "verified_at_commit": "22c01b5"
     },
     "sc-ito-integral-unbounded-local-martingale": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
       "elapsed_s": 5.2,
-      "input_hash": "e9d10795ba317f8b5014a2165fed0a21869caf91b298dbcc8bdd4020ff293121",
-      "verified_at_commit": "07ebe22"
+      "input_hash": "23daa3ecbf9992f092172ec941bf44accc617587b3ea83b9f1ef0a4e5aafba6a",
+      "verified_at_commit": "22c01b5"
     },
     "sc-ito-is-stochastic-integral": {
       "benchmark_file": "stochastic_calculus.json",
