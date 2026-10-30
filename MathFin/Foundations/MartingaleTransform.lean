@@ -36,6 +36,12 @@ variable {Ω : Type*} {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ 
 noncomputable def martingaleTransform (A M : ℕ → Ω → F) (n : ℕ) (ω : Ω) : ℝ :=
   ∑ k ∈ Finset.range n, ⟪A (k + 1) ω, M (k + 1) ω - M k ω⟫_ℝ
 
+/-- **The scalar martingale transform** (`F = ℝ`): `∑_{k<n} A_{k+1}(ω) * (M_{k+1}(ω) − M_k(ω))`,
+the textbook discrete stochastic integral. -/
+theorem martingaleTransform_real (A M : ℕ → Ω → ℝ) (n : ℕ) (ω : Ω) :
+    martingaleTransform A M n ω = ∑ k ∈ Finset.range n, A (k + 1) ω * (M (k + 1) ω - M k ω) := by
+  simp only [martingaleTransform, Real.inner_apply]
+
 @[simp] lemma martingaleTransform_zero (A M : ℕ → Ω → F) :
     martingaleTransform A M 0 = 0 := by
   funext ω; simp [martingaleTransform]
