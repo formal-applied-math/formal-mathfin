@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.Portfolio.TangentPortfolio
 public import MathFin.Portfolio.Markowitz
+public import MathFin.Performance.Ratios
 
 /-!
 # Markowitz cross-product FOC derived from Sharpe-ratio maximization
@@ -40,6 +41,8 @@ loop between the optimization-theoretic and algebraic perspectives.
 * `expectedReturnTwo`, `varianceTwo`, `marginalVarOne`, `marginalVarTwo`,
   `sharpeSqTwo`: definitions (`varianceTwo` is `portfolioVarTwo` of
   `Portfolio/Markowitz.lean` with the weight as first argument).
+* `sharpeSqTwo_eq_sharpeRatio_sq`: `Sh²(w)` is the squared `sharpeRatio` of the portfolio
+  return (zero risk-free rate) at volatility `√V(w)`.
 * `varianceTwo_eq_w_dot_Sigma_w`: `V = w · (Σw)₁ + (1 − w) · (Σw)₂` (the
   self-dot identity).
 * `hasDerivAt_varianceTwo`: `V'(w) = 2 · ((Σw)₁ − (Σw)₂)`.
@@ -73,6 +76,15 @@ noncomputable def marginalVarTwo (w σ₁ σ₂ ρ : ℝ) : ℝ :=
 /-- Two-asset Sharpe-ratio squared as a function of weight `w`. -/
 noncomputable def sharpeSqTwo (w r₁ r₂ σ₁ σ₂ ρ : ℝ) : ℝ :=
   (expectedReturnTwo w r₁ r₂)^2 / (varianceTwo w σ₁ σ₂ ρ)
+
+/-- **The two-asset Sharpe ratio squared is the squared Sharpe ratio** of the portfolio return
+with zero risk-free rate (`returns` are excess returns): `Sh²(w) = sharpeRatio E(w) 0 σ(w) ^ 2`,
+with `σ(w) = √V(w)` the portfolio volatility. `V(w)` is the variance of `w R₁ + (1 − w) R₂`
+(`portfolioVarTwo_eq_variance`, `Portfolio/MarkowitzLagrangian.lean`). -/
+theorem sharpeSqTwo_eq_sharpeRatio_sq (w r₁ r₂ σ₁ σ₂ ρ : ℝ) (hV : 0 ≤ varianceTwo w σ₁ σ₂ ρ) :
+    sharpeSqTwo w r₁ r₂ σ₁ σ₂ ρ
+      = sharpeRatio (expectedReturnTwo w r₁ r₂) 0 (√(varianceTwo w σ₁ σ₂ ρ)) ^ 2 := by
+  rw [sharpeSqTwo, sharpeRatio, sub_zero, div_pow, Real.sq_sqrt hV]
 
 /-- **Self-dot identity for V**: `V(w) = w · (Σw)₁ + (1 − w) · (Σw)₂`. -/
 lemma varianceTwo_eq_w_dot_Sigma_w (w σ₁ σ₂ ρ : ℝ) :

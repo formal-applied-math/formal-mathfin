@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.Performance.Ratios
+public import MathFin.Portfolio.CAPM
 
 /-!
 # Extended performance ratios: Sortino, Treynor, Information, gain-to-pain, upside capture
@@ -20,8 +21,8 @@ Standard quant performance metrics beyond the basic Sharpe ratio:
 * **Information ratio** `IR = (μ_p - μ_b) / σ_active`, with `σ_active` the
   tracking error (std-dev of `R_p − R_b`). Measures active management skill.
 * **Tracking error squared** `trackingErrorSq := σ_p² − 2·cov + σ_b²` — the
-  `Var(R_p − R_b)` expansion taken as the *definition* (no random variables
-  enter this file; the variance-level identity is not formalized here).
+  `Var(R_p − R_b)` expansion in terms of the input moments, tied to the variance of
+  the active return by `trackingErrorSq_eq_variance_sub`.
 
 Sortino, Treynor, and IR are all instances of `(a − b)/d`. Their
 *scale-invariance* lemmas are one-line consequences of the algebraic master
@@ -49,9 +50,12 @@ comparable to `1` at all.
 Results:
 
 * `sortinoRatio`, `sortinoRatio_scale_invariant`, `sortinoRatio_translation`.
-* `treynorRatio`, `treynorRatio_scale_invariant`.
+* `treynorRatio`, `treynorRatio_scale_invariant`, `treynorRatio_eq_sharpeRatio_mul` (Treynor
+  is Sharpe rescaled by `σ / β`) and `treynorRatio_eq_of_jensenAlpha_eq_zero` (on the security
+  market line every asset has the market's Treynor ratio).
 * `informationRatio`, `informationRatio_scale_invariant`.
-* `trackingErrorSq`, `trackingErrorSq_self`, `trackingErrorSq_ge_diff_sq`.
+* `trackingErrorSq`, `trackingErrorSq_self`, `trackingErrorSq_ge_diff_sq`,
+  `trackingErrorSq_eq_variance_sub`.
 * `gainToPain`, `gainToPain_nonneg`, `one_le_gainToPain_iff`.
 * `upCapture`, `upCapture_smul`.
 -/
@@ -60,7 +64,7 @@ Results:
 
 namespace MathFin
 
-open Real
+open Real MeasureTheory ProbabilityTheory
 
 /-- **Sortino ratio** `(μ - target) / σ_down`. Inputs are the mean, the target
 return, and the downside semi-deviation. -/
@@ -94,6 +98,26 @@ lemma treynorRatio_scale_invariant {c : ℝ} (hc : c ≠ 0) (μ r_f β : ℝ) :
   unfold treynorRatio
   exact diff_div_scale_invariant hc μ r_f β
 
+/-- **Treynor is Sharpe rescaled**: for a nonzero beta and a nonzero volatility `σ`,
+`T = S · σ / β`, with `S = sharpeRatio μ r_f σ`. With `β = Cov(R, R_m) / Var(R_m)`
+(`MathFin.beta`) and `σ = √Var(R)` the factor `σ / β` is `σ_m / ρ`, the market volatility over
+the correlation. -/
+lemma treynorRatio_eq_sharpeRatio_mul {σ β : ℝ} (hσ : σ ≠ 0) (hβ : β ≠ 0) (μ r_f : ℝ) :
+    treynorRatio μ r_f β = sharpeRatio μ r_f σ * (σ / β) := by
+  unfold treynorRatio sharpeRatio
+  field_simp
+
+/-- **On the security market line every asset has the market's Treynor ratio**: if Jensen's alpha
+vanishes (`MathFin.jensenAlpha`) and the beta is nonzero, the Treynor ratio of the asset is the
+market risk premium `E[R_m] − r_f`. -/
+lemma treynorRatio_eq_of_jensenAlpha_eq_zero {eR rf β eRm : ℝ}
+    (h : jensenAlpha eR rf β eRm = 0) (hβ : β ≠ 0) : treynorRatio eR rf β = eRm - rf := by
+  rw [jensenAlpha_eq_zero_iff] at h
+  unfold treynorRatio
+  rw [h, securityMarketLine]
+  field_simp
+  ring
+
 /-- **Information ratio** `(μ_p - μ_b) / σ_active`, with `σ_active` the
 tracking error. -/
 noncomputable def informationRatio (μ_p μ_b σ_active : ℝ) : ℝ :=
@@ -109,11 +133,24 @@ lemma informationRatio_scale_invariant {c : ℝ} (hc : c ≠ 0)
   exact diff_div_scale_invariant hc μ_p μ_b σ_active
 
 /-- **Tracking error squared**, defined as `σ_p² − 2·cov + σ_b²` — the
-familiar expansion of `Var(R_p − R_b)` in terms of the input moments, taken
-here as the model definition. The variance-level identity itself is not
-formalized in this file (its inputs are bare reals, not random variables). -/
+familiar expansion of `Var(R_p − R_b)` in terms of the input moments. Its inputs are bare
+reals; `trackingErrorSq_eq_variance_sub` ties it to the variance of the active return. -/
 noncomputable def trackingErrorSq (σ_p σ_b cov : ℝ) : ℝ :=
   σ_p ^ 2 - 2 * cov + σ_b ^ 2
+
+/-- **Tracking error squared is the variance of the active return**: for square-integrable
+returns `R_p`, `R_b` of a portfolio and its benchmark, with `σ_p = √Var(R_p)`,
+`σ_b = √Var(R_b)` and `cov = Cov(R_p, R_b)`, `trackingErrorSq σ_p σ_b cov = Var(R_p − R_b)`.
+The tracking error `σ_active` of `informationRatio` is the square root of this. -/
+theorem trackingErrorSq_eq_variance_sub {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+    [IsFiniteMeasure P] {R_p R_b : Ω → ℝ} (hp : MemLp R_p 2 P) (hb : MemLp R_b 2 P) :
+    trackingErrorSq √(Var[R_p; P]) √(Var[R_b; P]) cov[R_p, R_b; P]
+      = Var[fun ω ↦ R_p ω - R_b ω; P] := by
+  have h := variance_fun_add hp (hb.const_mul (-1))
+  rw [variance_const_mul, covariance_const_mul_right] at h
+  rw [show (fun ω ↦ R_p ω - R_b ω) = fun ω ↦ R_p ω + -1 * R_b ω by ext; ring, h,
+    trackingErrorSq, Real.sq_sqrt (variance_nonneg _ _), Real.sq_sqrt (variance_nonneg _ _)]
+  ring
 
 /-- **Self-benchmark vanishing**: when the benchmark equals the portfolio
 (`σ_p = σ_b` and `cov = σ_p²`), the tracking error vanishes. -/

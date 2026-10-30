@@ -11,9 +11,12 @@ public import MathFin.RiskMeasures.ExpectedShortfall
 /-!
 # Elicitability: value-at-risk is elicitable, expected shortfall is not
 
-A functional `T` of laws on `ℝ` is **elicitable** on a class `C` of laws if it is the unique
-minimizer of an expected score: some scoring function `S(x, y)` makes `T μ` the unique minimizer
-of `x ↦ ∫ S(x, y) dμ(y)` for every `μ ∈ C` (Gneiting 2011; McNeil–Frey–Embrechts (2015), §9.3).
+A functional `T` of laws on `ℝ`, with values in any type `V`, is **elicitable** on a class `C` of
+laws if it is the unique minimizer of an expected score: some scoring function `S(x, y)` makes
+`T μ` the unique minimizer of `x ↦ ∫ S(x, y) dμ(y)` for every `μ ∈ C` (Gneiting 2011;
+McNeil–Frey–Embrechts (2015), §9.3). Real-valued functionals (`V = ℝ`) are the single-valued case;
+a **jointly** elicitable pair `(T₁, T₂)` is elicitability at `V = ℝ × ℝ`
+(`RiskMeasures/JointElicitability.lean`).
 Elicitability is what makes a risk forecast comparable with realized losses: competing forecasts
 are ranked by their average realized scores (QRM Exercise Book, Exercises 9.5 and 9.16).
 
@@ -63,16 +66,17 @@ open scoped NNReal ENNReal
 /-! ### Elicitability and convex level sets -/
 
 /-- The scoring function `S` **strictly elicits** the functional `T` on the class `C` of laws on
-`ℝ`: for every `μ ∈ C` each expected score `∫ S x y dμ(y)` is finite, and `T μ` is the unique
-minimizer of `x ↦ ∫ S x y dμ(y)`. -/
-def StrictlyElicits (S : ℝ → ℝ → ℝ) (T : Measure ℝ → ℝ) (C : Set (Measure ℝ)) : Prop :=
+`ℝ`, with values in `V`: for every `μ ∈ C` each expected score `∫ S x y dμ(y)` is finite, and
+`T μ` is the unique minimizer of `x ↦ ∫ S x y dμ(y)` over `x : V`. -/
+def StrictlyElicits {V : Type*} (S : V → ℝ → ℝ) (T : Measure ℝ → V) (C : Set (Measure ℝ)) :
+    Prop :=
   ∀ μ ∈ C, (∀ x, Integrable (S x) μ) ∧ ∀ x, x ≠ T μ → ∫ y, S (T μ) y ∂μ < ∫ y, S x y ∂μ
 
 /-- A functional of laws is **elicitable** on `C` if some scoring function strictly elicits it. -/
-def IsElicitable (T : Measure ℝ → ℝ) (C : Set (Measure ℝ)) : Prop :=
+def IsElicitable {V : Type*} (T : Measure ℝ → V) (C : Set (Measure ℝ)) : Prop :=
   ∃ S, StrictlyElicits S T C
 
-variable {S : ℝ → ℝ → ℝ} {T : Measure ℝ → ℝ} {C : Set (Measure ℝ)}
+variable {V : Type*} {S : V → ℝ → ℝ} {T : Measure ℝ → V} {C : Set (Measure ℝ)}
 
 /-- The integral against a mixture of laws is the mixture of the integrals. -/
 lemma integral_mixture {f : ℝ → ℝ} {μ ν : Measure ℝ} (hμ : Integrable f μ)
