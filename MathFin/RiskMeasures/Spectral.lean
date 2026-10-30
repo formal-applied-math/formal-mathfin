@@ -46,8 +46,8 @@ mixture of expected shortfalls above.
   weighted sum and its algebra.
 * `isCoherentRiskMeasure_spectralRiskFinite_expectedShortfall`: a convex combination of expected
   shortfalls is a coherent risk measure.
-* `isCoherentRisk_spectralRiskFinite_expectedShortfall`: on a finite space it is coherent in the
-  Artzner–Delbaen–Eber–Heath sense for positions.
+* `spectralRiskFinite_expectedShortfall_isLUB_representingSet`: on a finite space the mixture is
+  the supremum of expected loss over its representing set.
 * `spectralRiskMeasure`, `esSpectrum`.
 * `spectralRiskMeasure_one`: the constant spectrum gives the mean.
 * `spectralRiskMeasure_esSpectrum`: the expected-shortfall spectrum gives expected shortfall.
@@ -147,18 +147,18 @@ theorem isCoherentRiskMeasure_spectralRiskFinite_expectedShortfall [IsProbabilit
     simp only [spectralRiskFinite, mul_add, Finset.sum_add_distrib]
 
 /-- **Mixtures of expected shortfall in the ADEH framework**: on a finite probability space,
-`X ↦ ∑ₖ wₖ ES_{αₖ}(−X)` is a coherent risk measure of positions in the sense of Artzner, Delbaen,
-Eber and Heath (`IsCoherentRisk`), so `coherentRisk_isLUB` represents it as a supremum of expected
-losses. This is `IsCoherentRiskMeasure.isCoherentRisk_neg` applied to
-`isCoherentRiskMeasure_spectralRiskFinite_expectedShortfall`. -/
-theorem isCoherentRisk_spectralRiskFinite_expectedShortfall {κ : Type*} [Fintype κ]
+`L ↦ ∑ₖ wₖ ES_{αₖ}(L)` is a coherent risk measure
+(`isCoherentRiskMeasure_spectralRiskFinite_expectedShortfall`), so `coherentRisk_isLUB` represents
+it as a supremum of expected losses over its representing set. -/
+theorem spectralRiskFinite_expectedShortfall_isLUB_representingSet {κ : Type*} [Fintype κ]
     [MeasurableSpace κ] [MeasurableSingletonClass κ] (Q : Measure κ) [IsProbabilityMeasure Q]
     (s : Finset ι) {w α : ι → ℝ} (hw : ∀ k ∈ s, 0 ≤ w k) (hw1 : ∑ k ∈ s, w k = 1)
-    (hα : ∀ k ∈ s, α k ∈ Ioo 0 1) :
-    IsCoherentRisk fun X : κ → ℝ ↦
-      spectralRiskFinite s w fun k ↦ expectedShortfall (fun i ↦ -X i) Q (α k) :=
-  (isCoherentRiskMeasure_spectralRiskFinite_expectedShortfall (P := Q) s hw hw1
-    hα).isCoherentRisk_neg
+    (hα : ∀ k ∈ s, α k ∈ Ioo 0 1) (L : κ → ℝ) :
+    IsLUB ((fun q ↦ ∑ i, q i * L i) ''
+        representingSet fun L : κ → ℝ ↦ spectralRiskFinite s w fun k ↦ expectedShortfall L Q (α k))
+      (spectralRiskFinite s w fun k ↦ expectedShortfall L Q (α k)) :=
+  coherentRisk_isLUB
+    (isCoherentRiskMeasure_spectralRiskFinite_expectedShortfall (P := Q) s hw hw1 hα) L
 
 /-! ### The spectral risk of a loss -/
 

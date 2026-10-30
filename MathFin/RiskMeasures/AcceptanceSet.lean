@@ -7,24 +7,31 @@ module
 
 public import Mathlib
 public import MathFin.Foundations.ConvexDuality
+public import MathFin.RiskMeasures.Coherent
 
 /-!
 # Coherent risk measures: the Artzner–Delbaen–Eber–Heath representation (finite state)
 
-A coherent risk measure `ρ` on `ι → ℝ` (finite state space) is, by its four ADEH axioms, the
-supremum of expected loss `∑ qᵢ (-Xᵢ)` over a set of representing probability measures `q`. The
-geometric content is convex duality: the **acceptance cone** `{X | ρ X ≤ 0}` is a closed convex
-cone, and a rejected position is separated from it by a representing density — the *same*
-Hahn–Banach separation that gives the FTAP its equivalent martingale measure (here via the
-point-from-cone primitive `MathFin.exists_separating_of_not_mem_cone`). This is the risk-side face
-of the convex-duality unification.
+A coherent risk measure `ρ` of losses on a finite state space `ι` (`IsCoherentRiskMeasure`) is, by
+its four ADEH axioms, the supremum of expected loss `∑ qᵢ Lᵢ` over a set of representing
+probability vectors `q`. The geometric content is convex duality: the **acceptance cone**
+`{L | ρ L ≤ 0}` is a closed convex cone, and a rejected loss is separated from it by a representing
+density — the *same* Hahn–Banach separation that gives the FTAP its equivalent martingale measure
+(here via the point-from-cone primitive `MathFin.exists_separating_of_not_mem_cone`). This is the
+risk-side face of the convex-duality unification.
 
-The representation is stated as `IsLUB` (ρ X is the least upper bound of the expected losses), which
+The representation is stated as `IsLUB` (ρ L is the least upper bound of the expected losses), which
 is the precise "ρ = sup over measures" statement without the conditionally-complete-lattice `iSup`
 overhead.
 
+The state space carries any finite measure `P`: the axioms are required on `P`-integrable losses
+and almost surely, and on a finite space that implies the pointwise order, which is all the
+separation uses. The representing vectors `q` are scenarios and need not be absolutely continuous
+with respect to `P` in any sense the statement tracks.
+
 ## Main results
-* `MathFin.IsCoherentRisk` — the four ADEH axioms
+* `MathFin.IsCoherentRiskMeasure.acceptance_closed`, `.convex_acceptance`, `.cone`: the acceptance
+  set `{L | ρ L ≤ 0}` is a closed convex cone.
 * `MathFin.coherentRisk_isLUB` — the representation
 -/
 
@@ -32,160 +39,94 @@ overhead.
 
 namespace MathFin
 
+open MeasureTheory
 
-/-- The four Artzner–Delbaen–Eber–Heath axioms of a coherent risk measure on a finite state space:
-monotonicity, cash-invariance, positive homogeneity, subadditivity. -/
-structure IsCoherentRisk {ι : Type*} [Fintype ι] (ρ : (ι → ℝ) → ℝ) : Prop where
-  monotone : ∀ X Y : ι → ℝ, (∀ i, X i ≤ Y i) → ρ Y ≤ ρ X
-  cashInvariant : ∀ (X : ι → ℝ) (m : ℝ), ρ (fun i ↦ X i + m) = ρ X - m
-  posHom : ∀ (l : ℝ), 0 ≤ l → ∀ X : ι → ℝ, ρ (l • X) = l * ρ X
-  subadditive : ∀ X Y : ι → ℝ, ρ (X + Y) ≤ ρ X + ρ Y
+namespace IsCoherentRiskMeasure
+variable {ι : Type*} [Fintype ι] [MeasurableSpace ι] [MeasurableSingletonClass ι]
+  {P : Measure ι} [IsFiniteMeasure P] {ρ : (ι → ℝ) → ℝ}
 
-namespace IsCoherentRisk
-variable {ι : Type*} [Fintype ι] {ρ : (ι → ℝ) → ℝ}
-
-/-- `ρ 0 = 0` (positive homogeneity at `l = 2`). -/
-lemma rho_zero (hρ : IsCoherentRisk ρ) : ρ 0 = 0 := by
-  have h := hρ.posHom 2 (by norm_num) 0
-  rw [smul_zero] at h; linarith
-
-/-- A coherent risk measure is convex (subadditive + positively homogeneous). -/
-lemma convexOn (hρ : IsCoherentRisk ρ) : ConvexOn ℝ Set.univ ρ := by
-  refine ⟨convex_univ, fun x _ y _ a b ha hb _ ↦ ?_⟩
-  have hsub := hρ.subadditive (a • x) (b • y)
-  rw [hρ.posHom a ha, hρ.posHom b hb] at hsub
-  simpa [smul_eq_mul] using hsub
-
-/-- A finite-state coherent risk measure is continuous (a finite convex function on `ℝ^ι`). -/
-lemma continuous (hρ : IsCoherentRisk ρ) : Continuous ρ := by
-  rw [← continuousOn_univ]
-  exact hρ.convexOn.continuousOn isOpen_univ
-
-/-- The acceptance set `{X | ρ X ≤ 0}` is closed (ρ is continuous). -/
-lemma acceptance_closed (hρ : IsCoherentRisk ρ) : IsClosed {X : ι → ℝ | ρ X ≤ 0} :=
+/-- The acceptance set `{L | ρ L ≤ 0}` is closed (ρ is continuous). -/
+lemma acceptance_closed (hρ : IsCoherentRiskMeasure P ρ) : IsClosed {L : ι → ℝ | ρ L ≤ 0} :=
   isClosed_le hρ.continuous continuous_const
 
+omit [Fintype ι] [MeasurableSingletonClass ι] [IsFiniteMeasure P] in
 /-- `0` is acceptable. -/
-lemma zero_mem (hρ : IsCoherentRisk ρ) : (0 : ι → ℝ) ∈ {X : ι → ℝ | ρ X ≤ 0} := by
-  change ρ 0 ≤ 0; rw [hρ.rho_zero]
+lemma zero_mem (hρ : IsCoherentRiskMeasure P ρ) : (0 : ι → ℝ) ∈ {L : ι → ℝ | ρ L ≤ 0} :=
+  hρ.rho_zero.le
 
 /-- The acceptance set is a cone (positive homogeneity). -/
-lemma cone (hρ : IsCoherentRisk ρ) :
-    ∀ ⦃x⦄, x ∈ {X : ι → ℝ | ρ X ≤ 0} → ∀ ⦃c : ℝ⦄, 0 ≤ c → c • x ∈ {X : ι → ℝ | ρ X ≤ 0} := by
-  intro x hx c hc
-  change ρ (c • x) ≤ 0
-  rw [hρ.posHom c hc]
-  exact mul_nonpos_of_nonneg_of_nonpos hc hx
+lemma cone (hρ : IsCoherentRiskMeasure P ρ) :
+    ∀ ⦃L⦄, L ∈ {L : ι → ℝ | ρ L ≤ 0} → ∀ ⦃c : ℝ⦄, 0 ≤ c → c • L ∈ {L : ι → ℝ | ρ L ≤ 0} :=
+  fun _ hL _ hc ↦ (hρ.const_mul .of_finite hc).trans_le (mul_nonpos_of_nonneg_of_nonpos hc hL)
 
 /-- The acceptance set is convex. -/
-lemma convex_acceptance (hρ : IsCoherentRisk ρ) : Convex ℝ {X : ι → ℝ | ρ X ≤ 0} := by
-  intro X hX Y hY a b ha hb _
-  change ρ (a • X + b • Y) ≤ 0
-  calc ρ (a • X + b • Y) ≤ ρ (a • X) + ρ (b • Y) := hρ.subadditive _ _
-    _ = a * ρ X + b * ρ Y := by rw [hρ.posHom a ha, hρ.posHom b hb]
-    _ ≤ 0 := by
-        have h1 : a * ρ X ≤ 0 := mul_nonpos_of_nonneg_of_nonpos ha hX
-        have h2 : b * ρ Y ≤ 0 := mul_nonpos_of_nonneg_of_nonpos hb hY
-        linarith
+lemma convex_acceptance (hρ : IsCoherentRiskMeasure P ρ) : Convex ℝ {L : ι → ℝ | ρ L ≤ 0} := by
+  simpa using hρ.convexOn_univ.convex_le 0
 
-/-- Every nonnegative position is acceptable (monotonicity). -/
-lemma nonneg_mem (hρ : IsCoherentRisk ρ) {X : ι → ℝ} (hX : ∀ i, 0 ≤ X i) :
-    X ∈ {X : ι → ℝ | ρ X ≤ 0} := by
-  change ρ X ≤ 0
-  have h := hρ.monotone 0 X (by intro i; simpa using hX i)
-  rwa [hρ.rho_zero] at h
+/-- Every nonpositive loss (a gain in every state) is acceptable (monotonicity). -/
+lemma nonpos_mem (hρ : IsCoherentRiskMeasure P ρ) {L : ι → ℝ} (hL : L ≤ 0) :
+    L ∈ {L : ι → ℝ | ρ L ≤ 0} :=
+  (hρ.mono_of_le hL).trans_eq hρ.rho_zero
 
-end IsCoherentRisk
+end IsCoherentRiskMeasure
 
-/-- The representing set: probability vectors that price every acceptable position nonnegatively
+/-- The representing set: probability vectors that price every acceptable loss nonpositively
 (the densities separating the acceptance cone). -/
 def representingSet {ι : Type*} [Fintype ι] (ρ : (ι → ℝ) → ℝ) : Set (ι → ℝ) :=
-  {q | (∀ i, 0 ≤ q i) ∧ (∑ i, q i = 1) ∧ ∀ Z ∈ {Y : ι → ℝ | ρ Y ≤ 0}, 0 ≤ ∑ i, q i * Z i}
+  {q | (∀ i, 0 ≤ q i) ∧ (∑ i, q i = 1) ∧ ∀ Z ∈ {Y : ι → ℝ | ρ Y ≤ 0}, ∑ i, q i * Z i ≤ 0}
+
+/-- A probability vector prices a shifted loss at the shifted price. -/
+private lemma sum_mul_add_const {ι : Type*} [Fintype ι] {q : ι → ℝ} (hq : ∑ i, q i = 1)
+    (L : ι → ℝ) (m : ℝ) : ∑ i, q i * (L i + m) = ∑ i, q i * L i + m := by
+  simp [mul_add, Finset.sum_add_distrib, ← Finset.sum_mul, hq]
 
 /-- **Coherent-risk representation (Artzner–Delbaen–Eber–Heath, finite state).** A coherent risk
-measure `ρ` is the supremum of expected loss over its representing probability measures: `ρ X` is
-the least upper bound of `{∑ qᵢ (-Xᵢ) | q ∈ representingSet ρ}`. The upper bound is cash-invariance;
-the least-upper-bound is the point-from-cone separation of the rejected position `X + (ρX - ε)·1`
-from the acceptance cone, normalised to a representing density. -/
-theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] {ρ : (ι → ℝ) → ℝ}
-    (hρ : IsCoherentRisk ρ) (X : ι → ℝ) :
-    IsLUB ((fun q ↦ ∑ i, q i * (- X i)) '' representingSet ρ) (ρ X) := by
+measure `ρ` of losses is the supremum of expected loss over its representing probability vectors:
+`ρ L` is the least upper bound of `{∑ qᵢ Lᵢ | q ∈ representingSet ρ}`. The upper bound is
+cash-invariance; the least-upper-bound is the point-from-cone separation of the rejected loss
+`L − b`, for an upper bound `b < ρ L`, from the acceptance cone, normalised to a representing
+density. -/
+theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] [MeasurableSpace ι]
+    [MeasurableSingletonClass ι] {P : Measure ι} [IsFiniteMeasure P] {ρ : (ι → ℝ) → ℝ}
+    (hρ : IsCoherentRiskMeasure P ρ) (L : ι → ℝ) :
+    IsLUB ((fun q ↦ ∑ i, q i * L i) '' representingSet ρ) (ρ L) := by
   classical
   constructor
-  · rintro y ⟨q, ⟨hq_nn, hq_sum, hq_rep⟩, rfl⟩
-    change ∑ i, q i * (- X i) ≤ ρ X
-    have hmem : (fun i ↦ X i + ρ X) ∈ {Y : ι → ℝ | ρ Y ≤ 0} := by
-      change ρ (fun i ↦ X i + ρ X) ≤ 0
-      rw [hρ.cashInvariant X (ρ X)]; simp
-    have h0 := hq_rep _ hmem
-    have hexp : ∑ i, q i * (X i + ρ X) = (∑ i, q i * X i) + ρ X := by
-      rw [show (∑ i, q i * (X i + ρ X)) = ∑ i, (q i * X i + q i * ρ X) from
-            Finset.sum_congr rfl fun i _ ↦ by ring, Finset.sum_add_distrib,
-          ← Finset.sum_mul, hq_sum, one_mul]
-    rw [hexp] at h0
-    have hneg : ∑ i, q i * (-X i) = - ∑ i, q i * X i := by
-      rw [← Finset.sum_neg_distrib]; exact Finset.sum_congr rfl fun i _ ↦ by ring
-    rw [hneg]; linarith
+  · rintro _ ⟨q, ⟨-, hq₁, hq⟩, rfl⟩
+    have hmem : (fun i ↦ L i + -ρ L) ∈ {Y : ι → ℝ | ρ Y ≤ 0} :=
+      ((hρ.add_const .of_finite _).trans (add_neg_cancel _)).le
+    have := hq _ hmem
+    rw [sum_mul_add_const hq₁] at this
+    linarith
   · intro b hb
     by_contra hlt
     rw [not_le] at hlt
-    set ε := ρ X - b with hε
-    have hε_pos : 0 < ε := by rw [hε]; linarith
-    set X' : ι → ℝ := fun i ↦ X i + (ρ X - ε) with hX'
-    have hX'_notin : X' ∉ {Y : ι → ℝ | ρ Y ≤ 0} := by
-      change ¬ ρ X' ≤ 0
-      rw [hX', hρ.cashInvariant X (ρ X - ε), not_le]; linarith
-    obtain ⟨p, hp_le, hp_pos⟩ := exists_separating_of_not_mem_cone
-      {Y : ι → ℝ | ρ Y ≤ 0} hρ.convex_acceptance hρ.acceptance_closed hρ.cone hρ.zero_mem hX'_notin
-    have hp_nonpos : ∀ i, p i ≤ 0 := by
-      intro i
-      have hsi : (Pi.single i (1 : ℝ)) ∈ {Y : ι → ℝ | ρ Y ≤ 0} := by
-        apply hρ.nonneg_mem
-        intro j
-        simp only [Pi.single_apply]
-        split_ifs <;> norm_num
-      have hle := hp_le _ hsi
-      simp only [Pi.single_apply, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq',
-        Finset.mem_univ, if_true] at hle
-      exact hle
-    have hsum_p_neg : ∑ i, p i < 0 := by
-      by_contra hge
-      rw [not_lt] at hge
-      have hsum_zero : ∑ i, p i = 0 :=
-        le_antisymm (Finset.sum_nonpos fun i _ ↦ hp_nonpos i) hge
-      have hp_zero : ∀ i, p i = 0 := fun i ↦
-        (Finset.sum_eq_zero_iff_of_nonpos fun i _ ↦ hp_nonpos i).mp hsum_zero i (Finset.mem_univ i)
-      have hpX'0 : ∑ i, p i * X' i = 0 :=
-        Finset.sum_eq_zero fun i _ ↦ by rw [hp_zero i, zero_mul]
-      linarith [hp_pos]
-    set S := ∑ i, p i with hS
-    have hS_ne : S ≠ 0 := ne_of_lt hsum_p_neg
-    set q : ι → ℝ := fun i ↦ p i / S with hq_def
-    have hq_nn : ∀ i, 0 ≤ q i := fun i ↦ by
-      rw [hq_def, div_nonneg_iff]; right; exact ⟨hp_nonpos i, le_of_lt hsum_p_neg⟩
-    have hq_sum : ∑ i, q i = 1 := by
-      have hh : ∑ i, q i = (∑ i, p i) / S := by rw [hq_def, ← Finset.sum_div]
-      rw [hh, ← hS]; exact div_self hS_ne
-    have hq_rep : ∀ Z ∈ {Y : ι → ℝ | ρ Y ≤ 0}, 0 ≤ ∑ i, q i * Z i := by
-      intro Z hZ
-      have hpZ := hp_le Z hZ
-      have heq : ∑ i, q i * Z i = (∑ i, p i * Z i) / S := by
-        rw [hq_def, Finset.sum_div]; exact Finset.sum_congr rfl fun i _ ↦ by rw [div_mul_eq_mul_div]
-      rw [heq, div_nonneg_iff]; right; exact ⟨hpZ, le_of_lt hsum_p_neg⟩
-    have hq_mem : q ∈ representingSet ρ := ⟨hq_nn, hq_sum, hq_rep⟩
-    have hle_b : ∑ i, q i * (- X i) ≤ b := hb ⟨q, hq_mem, rfl⟩
-    have hqX'_neg : ∑ i, q i * X' i < 0 := by
-      have heq : ∑ i, q i * X' i = (∑ i, p i * X' i) / S := by
-        rw [hq_def, Finset.sum_div]; exact Finset.sum_congr rfl fun i _ ↦ by rw [div_mul_eq_mul_div]
-      rw [heq]; exact div_neg_of_pos_of_neg hp_pos hsum_p_neg
-    have hX'_exp : ∑ i, q i * X' i = (∑ i, q i * X i) + (ρ X - ε) := by
-      rw [hX', show (∑ i, q i * (X i + (ρ X - ε))) = ∑ i, (q i * X i + q i * (ρ X - ε)) from
-            Finset.sum_congr rfl fun i _ ↦ by ring, Finset.sum_add_distrib,
-          ← Finset.sum_mul, hq_sum, one_mul]
-    have hnegX : ∑ i, q i * (-X i) = - ∑ i, q i * X i := by
-      rw [← Finset.sum_neg_distrib]; exact Finset.sum_congr rfl fun i _ ↦ by ring
-    rw [hnegX] at hle_b
-    rw [hX'_exp] at hqX'_neg
-    linarith [hle_b, hqX'_neg]
+    have hL' : (fun i ↦ L i + -b) ∉ {Y : ι → ℝ | ρ Y ≤ 0} := by
+      change ¬ ρ _ ≤ 0
+      rw [hρ.add_const .of_finite, not_le]; linarith
+    obtain ⟨p, hp_le, hp_pos⟩ := exists_separating_of_not_mem_cone _ hρ.convex_acceptance
+      hρ.acceptance_closed hρ.cone hρ.zero_mem hL'
+    have hp_nonneg (i : ι) : 0 ≤ p i := by
+      have hle := hp_le _ (hρ.nonpos_mem (L := -Pi.single i 1) fun j ↦ by
+        simp only [Pi.neg_apply, Pi.single_apply, Pi.zero_apply]
+        split_ifs <;> norm_num)
+      simpa [Pi.single_apply] using hle
+    have hS : 0 < ∑ i, p i := by
+      refine lt_of_le_of_ne (Finset.sum_nonneg fun i _ ↦ hp_nonneg i) fun h0 ↦ ?_
+      have hp0 := (Finset.sum_eq_zero_iff_of_nonneg fun i _ ↦ hp_nonneg i).1 h0.symm
+      simp [hp0] at hp_pos
+    set S := ∑ i, p i
+    have hq_mem : (fun i ↦ p i / S) ∈ representingSet ρ :=
+      ⟨fun i ↦ div_nonneg (hp_nonneg i) hS.le, by rw [← Finset.sum_div, div_self hS.ne'],
+        fun Z hZ ↦ by
+          simp_rw [div_mul_eq_mul_div, ← Finset.sum_div]
+          exact div_nonpos_of_nonpos_of_nonneg (hp_le Z hZ) hS.le⟩
+    have hle := hb ⟨_, hq_mem, rfl⟩
+    have hq₁ : ∑ i, p i / S = 1 := hq_mem.2.1
+    have hpos : 0 < ∑ i, p i / S * (L i + -b) := by
+      simp_rw [div_mul_eq_mul_div, ← Finset.sum_div]
+      exact div_pos hp_pos hS
+    rw [sum_mul_add_const hq₁] at hpos
+    linarith
 
 end MathFin

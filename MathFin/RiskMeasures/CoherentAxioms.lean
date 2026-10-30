@@ -26,6 +26,16 @@ In general (non-gaussian) distributions, VaR can fail subadditivity, which is
 why CVaR (which is subadditive in all settings) is preferred for capital
 adequacy. Within the gaussian family, both work.
 
+These are statements about the closed forms `gaussianVaR μ σ z` and `gaussianCVaR μ σ z α` as
+functions of the parameters, not about a risk measure on random variables. The general structure
+is `IsCoherentRiskMeasure` (`RiskMeasures/Coherent.lean`), and expected shortfall is an instance
+(`expectedShortfall_isCoherentRiskMeasure`); the Gaussian CVaR is the expected shortfall of a
+normal law (`expectedShortfall_of_hasLaw_gaussianReal`). The bare-real axioms here are not derived
+from the general ones, because that needs the laws of `L + c`, `λ L` and of a jointly Gaussian
+sum to be Gaussian with the stated parameters, which is more than the one-line parameter algebra
+below. Gaussian VaR is not an `IsCoherentRiskMeasure` for general laws, so only the parameter
+statements are made for it.
+
 Results:
 
 * `gaussianVaR_translation`, `gaussianCVaR_translation`: translation invariance.

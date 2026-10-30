@@ -221,6 +221,7 @@ bracket as `Z²·(d−c)`, so the two right-hand sides are the same object. **Ho
 | CT.8 | **Contracts → Foundations — parity in any risk-neutral model.** `Contracts/Parity.lean`: a discounted price that is a `Q`-martingale from `S₀` (`Martingale.condExp_ae_eq` through `integral_condExp`) prices the forward and closes put–call parity, with no integrability hypotheses; `BlackScholes.value_forward` is the instance `value_forward_of_integral`. What it buys: the forward and parity no longer depend on a model's closed form. | `Contracts/Parity.lean`, `Contracts/Models/BlackScholes.lean` | NEW (2026-10-29); WIRED (corpus `mf-contract-forward-risk-neutral`, `mf-contract-parity-risk-neutral`) |
 | CT.5 | **Contracts → Binomial — the value is the hedge's cost.** `Contracts/Models/Binomial.pathPV_eq_value_add_gains` joins `Binomial.value_pay_eq_binomialPrice` with `binomialPrice_replication` (`Binomial/EuropeanReplication.lean`, the discrete martingale representation applied to the discounted tree value and the discounted spot). Under no-arbitrage, a European contract's discounted payoff is, on every path, its value plus the gains of a predictable strategy in the discounted spot. What it buys: `Contract.value` in the tree is a replication price, not only an expectation. | `Contracts/Models/Binomial.lean`, `Binomial/EuropeanReplication.lean` | NEW (2026-10-29); WIRED (corpus `mf-contract-binomial-hedge`, `mf-binomial-european-replication`) |
 | CT.2 | **Contracts → Foundations — a contract's value is conditional-expectation machinery, not a new pricing primitive.** `Contracts/Pricing.value_deliverAsset` prices the single-cashflow contract that simply delivers a `Q`-martingale asset `S` at `T`, undiscounted, by chaining `Martingale.condExp_ae_eq` through `integral_condExp` — the same conditional-expectation route `Contract.value_process_martingale` uses (`martingale_condExp`) to show a contract's own value process is itself a `Q`-martingale. What it buys: `Contract.value` is shown to *be* an instance of pricing-by-conditional-expectation, not a freestanding integral with its own theory. Deliberately stops short of `ContinuousMarket.IsEMM`: both theorems need only `Martingale S 𝓕 Q` and `[IsProbabilityMeasure Q]`, never the mutual-absolute-continuity `ac`/`ac'` content that makes a martingale measure an *equivalent* one — that content stays load-bearing where it already is, in `ContinuousMarket.isEMM_noArbitrageSimple`. | `Contracts/Pricing.lean` | NEW (2026-08-17); WIRED (corpus `mf-contract-value-deliver-asset`) |
+| BIN.FTAP | **Binomial → Foundations — the multi-period tree as an instance of the discrete FTAP.** `Binomial/MultiPeriodFTAP.isEMM_horizonSpot`: on `Fin T → Bool` with the real-world law `horizonMeasure T p` (the first `T` flips of `coinFlipMeasure p`, full support for `0 < p < 1`), the filtration `horizonFiltration T` (whose preimage under `flips T` is `flipFiltration`, `comap_flips_horizonFiltration`) and the frozen discounted spot `horizonSpot T`, `BinomialNoArb` makes `horizonMeasure T (crrUpProb u d r)` an `IsEMM` of `Foundations/FTAPDiscrete`: `martingale_discountedSpot` transported along `flips T`. `ftap_discrete` then gives `NoArbitrage`, and an explicit first-period strategy gives the converse, so `noArbitrage_horizonSpot_iff` reads `NoArbitrage ↔ BinomialNoArb u d r` (for `S₀ > 0`, `0 < d < u`, `T ≥ 1`). **Honest scope:** existence of the EMM, not uniqueness; `multi_period_FTAP_marginals` stays algebraic. | `Binomial/MultiPeriodFTAP.lean`, `Binomial/PathMeasure.lean`, `Foundations/FTAPDiscrete.lean` | NEW (2026-10-30); WIRED (corpus `mf-binomial-multi-period-emm`, `mf-binomial-multi-period-no-arbitrage-iff`) |
 
 ## Bridges planned but deferred
 
@@ -249,7 +250,7 @@ Mathlib's weak-type `maximal_ineq` and fills in the strong-type form.
 ## Summit A — continuous-time Itô formula (2026-06-02)
 
 The bounded-derivative continuous-time L² Itô formula (`ito_formula_L2_bddDeriv`,
-`Foundations/ItoFormulaCLM.lean`) is a five-module chain that reuses, rather than
+`Foundations/ItoFormulaCLM.lean`) is a four-module chain that reuses, rather than
 reinvents, the Mathlib / BrownianMotion-package machinery:
 
 - **A1** `WeightedQuadraticVariation.lean` — weighted QV via the weak-Markov/Gaussian-
@@ -259,12 +260,14 @@ reinvents, the Mathlib / BrownianMotion-package machinery:
 - **A2** `ItoFormulaRemainder.lean` + `GaussianMoments.integral_pow6_gaussianReal` — the
   Gaussian 6th moment reuses Degenne's `centralMoment_two_mul_gaussianReal` (package); the
   cubic Taylor bound reuses Mathlib's `Convex.norm_image_sub_le_of_norm_hasDerivWithin_le`.
-- **A3** `ItoIntegralRiemannBridge.lean` — generalizes `ItoIntegralBrownian.itoIntegralCLM_T_brownian`
-  (integrand `id → φ`), reusing the entire `stepSP` / `simpleAssembly_T` / `itoIntegralCLM_T`
-  CLM stack; the trim-L² limit reuses `memLp_uncurry_trim_T` + Mathlib's
+- **A3** `ItoIntegralRiemannBridgeTD.lean` — generalizes `ItoIntegralBrownian.itoIntegralCLM_T_brownian`
+  (integrand `id → φ(t, ·)`) as the `θ s ω = φ(s, B_s ω)` case of the adapted bridge
+  (`ItoIntegralRiemannBridgeAdapted.itoIntegralCLM_T_of_bdd_adapted_cont`, one Riemann–Itô sum
+  `riemannσ` in `ItoRiemannSum.lean`), reusing the entire `stepSP` / `simpleAssembly_T` /
+  `itoIntegralCLM_T` CLM stack; the trim-L² limit reuses `memLp_uncurry_trim_T` + Mathlib's
   `aestronglyMeasurable_of_tendsto_ae` / `tendsto_integral_of_dominated_convergence`.
-- **A-core / A4** `ItoFormulaC2.lean` / `ItoFormulaCLM.lean` — assemble `DiscreteIto.discrete_ito_formula`
-  with A1/A2/A3 via uniqueness of L² limits.
+- **A-core / A4** `ItoFormulaTD.lean` / `ItoFormulaCLM.lean` — assemble `DiscreteIto.discrete_ito_formula_2d`
+  with A1/A2/A3 via uniqueness of L² limits; `ito_formula_L2_bddDeriv` is the `f_t = 0` case.
 
 **Bridge opportunity:** the one clean upstream candidate remains `IsPiSystem` for
 `ElementaryPredictableSet` (off the Summit-A critical path; see
@@ -365,7 +368,9 @@ coherent-risk (risk) towers one Hahn–Banach theorem. The cone-separation root
 `exists_separating_of_not_mem_cone` share two atoms (`functional_eq_sum_single`,
 `functional_nonneg_on_cone`); the FTAP kernel `ConvexSeparation.exists_pos_dual_of_disjoint_stdSimplex`
 is **re-derived** from the root (pricing side), and `RiskMeasures/AcceptanceSet.coherentRisk_isLUB` (the
-finite-state ADEH representation, with `RiskMeasures/WorstCaseRisk.worstCase_isLUB` a concrete instance —
+finite-state ADEH representation of an `IsCoherentRiskMeasure`, the library's one coherence structure,
+in the loss convention; the positions convention of the ADEH paper is the same structure at `L ↦ ρ(−L)`,
+`RiskMeasures/PositionsConvention.isCoherentRiskMeasure_count_neg_iff`, with `RiskMeasures/WorstCaseRisk.worstCase_isLUB` a concrete instance —
 worst-case loss = sup over the whole simplex) is its risk-side instance.
 Superhedging: the bound `SuperhedgingDuality.emm_le_superReplication` (every martingale probability
 vector prices a claim below any super-replication cost) is a direct sum swap, not an instance of the root;

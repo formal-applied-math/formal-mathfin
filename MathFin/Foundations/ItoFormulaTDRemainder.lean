@@ -25,8 +25,8 @@ space (`abs_taylor1_le`), a mean-value bound on the space-section of `f_t`
 (`abs_sub_le_of_hasDerivAt`), and the 1D cubic bound `abs_discreteTaylorRemainder_le`
 applied to the `t₀`-section. Under Brownian scaling `E[R²] = O(Δt³)` (the Gaussian
 moments `E[ΔB²] = Δt`, `E[ΔB⁶] = 15Δt³`), so Cauchy–Schwarz on the sum gives
-`E[(∑ₖ Rₖ)²] ≤ n·∑ₖ E[Rₖ²] = O(n⁻¹) → 0` — the same rate as the time-independent
-remainder `tendsto_ito_remainder`.
+`E[(∑ₖ Rₖ)²] ≤ n·∑ₖ E[Rₖ²] = O(n⁻¹) → 0`; the time-independent remainder is the case
+`f_t = 0`.
 -/
 
 @[expose] public section
@@ -264,7 +264,7 @@ theorem tendsto_ito_remainder_td
           (unifPart T n k) (unifPart T n (k + 1))
           (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ) atTop (𝓝 0) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hmono : ∀ n, Monotone (unifPart T n) := fun n a b hab ↦ by simp only [unifPart]; gcongr
+  have hmono : ∀ n, Monotone (unifPart T n) := unifPart_mono T
   -- integrability of the dominator, hence of the squared remainder (per-step `L²`)
   have hdom_int : ∀ n k, Integrable (fun ω ↦
       3 * Ctt ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 4
@@ -286,10 +286,9 @@ theorem tendsto_ito_remainder_td
     (Eventually.of_forall fun n ↦ integral_nonneg fun ω ↦ sq_nonneg _) ?_
     (by simpa using tendsto_const_div_atTop_nhds_zero_nat (K * (T : ℝ) ^ 3))
   filter_upwards [eventually_gt_atTop 0] with n hn
-  have hn0 : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
   have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast hn
   have hΔ : ∀ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) / n :=
-    fun k _ ↦ by simp only [unifPart]; push_cast; field_simp; ring
+    fun k _ ↦ unifPart_succ_sub T n k
   have hTn_nn : (0 : ℝ) ≤ (T : ℝ) / n := div_nonneg (NNReal.coe_nonneg T) (Nat.cast_nonneg n)
   have hTn_le : (T : ℝ) / n ≤ T := div_le_self (NNReal.coe_nonneg T) hn1
   -- per-step expectation bound `E[Rₖ²] ≤ K·(T/n)³`

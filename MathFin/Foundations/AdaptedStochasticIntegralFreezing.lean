@@ -198,8 +198,8 @@ theorem sum_freezingDefect {n : ℕ} (hn : n ≠ 0) :
     Finset.sum_range_sub (fun k ↦
       itoProcessCLM hB T (unifPart T n k) hBmeas (processToLp T hBmeas hadap hcont hbdd)) n,
     ← map_sum, ← map_sum, ← stepσ_eq_sum_cellStep, itoIntegralCLM_T_stepσ hB hBmeas hadap hbdd T n]
-  have h0 : unifPart T n 0 = 0 := by simp [unifPart]
-  have hT : unifPart T n n = T := by simp [unifPart, hn]
+  have h0 : unifPart T n 0 = 0 := unifPart_zero T n
+  have hT : unifPart T n n = T := unifPart_self T hn
   rw [h0, hT, itoProcessCLM_zero_time, sub_zero, itoProcessCLM_terminal_eq]
 
 /-- **The defects carry the whole freezing error**: their squared norms sum to the squared norm of

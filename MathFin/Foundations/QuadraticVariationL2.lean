@@ -9,6 +9,7 @@ public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.ItoIsometryAdapted
 public import MathFin.Foundations.GaussianMoments
+public import MathFin.Foundations.UnifPart
 
 /-!
 # The L² quadratic variation of Brownian motion
@@ -232,10 +233,6 @@ theorem sum_increment_sq_sub_sq_le (hBmeas : ∀ t, Measurable (B t))
         nlinarith [hδ k hk, hΔ0]
     _ = 2 * δ * (s n : ℝ) := by rw [← Finset.mul_sum, htel]
 
-omit hB in
-/-- The uniform partition of `[0, T]`: the `n`-th refinement places its `k`-th node at `kT/n`. -/
-noncomputable def unifPart (T : ℝ≥0) (n k : ℕ) : ℝ≥0 := (k : ℝ≥0) / (n : ℝ≥0) * T
-
 /-- **Brownian motion has quadratic variation `T` (textbook L² form).** Along the uniform
 partition of `[0, T]` into `n` pieces, the sum of squared increments converges to `T` in mean
 square: `E[(∑_{k<n} (B_{(k+1)T/n} − B_{kT/n})² − T)²] → 0`. Immediate from the mesh bound
@@ -249,19 +246,11 @@ theorem tendsto_qv (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
     (Eventually.of_forall fun n ↦ integral_nonneg fun ω ↦ sq_nonneg _) ?_
     (tendsto_const_div_atTop_nhds_zero_nat (2 * (T : ℝ) ^ 2))
   filter_upwards [eventually_gt_atTop 0] with n hn
-  have hn0 : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-  have hnR : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-  have hmono : Monotone (unifPart T n) := fun a b hab ↦ by
-    simp only [unifPart]; gcongr
-  have hs0 : unifPart T n 0 = 0 := by simp [unifPart]
-  have hsn : unifPart T n n = T := by simp only [unifPart, div_self hn0, one_mul]
-  have hgap : ∀ k ∈ Finset.range n, (unifPart T n (k + 1) : ℝ) - unifPart T n k ≤ (T : ℝ) / n := by
-    intro k _
-    have : (unifPart T n (k + 1) : ℝ) - unifPart T n k = (T : ℝ) / n := by
-      simp only [unifPart]; push_cast; field_simp; ring
-    exact le_of_eq this
-  have hbound := sum_increment_sq_sub_sq_le hB hBmeas hmono hs0 n hgap
-  rw [hsn] at hbound
+  have hgap : ∀ k ∈ Finset.range n, (unifPart T n (k + 1) : ℝ) - unifPart T n k ≤ (T : ℝ) / n :=
+    fun k _ ↦ (unifPart_succ_sub T n k).le
+  have hbound := sum_increment_sq_sub_sq_le hB hBmeas (unifPart_mono T n) (unifPart_zero T n) n
+    hgap
+  rw [unifPart_self T hn.ne'] at hbound
   rw [show (2 : ℝ) * (T : ℝ) ^ 2 / (n : ℝ) = 2 * ((T : ℝ) / n) * T from by ring]
   exact hbound
 

@@ -5,7 +5,7 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoFormulaAdapted
+public import MathFin.Foundations.ItoFormulaAdaptedTD
 public import MathFin.Foundations.ItoFormulaTDRemainder
 public import MathFin.Foundations.ItoFormulaAdaptedDrift
 public import MathFin.Foundations.ItoIntegralCrossHorizon

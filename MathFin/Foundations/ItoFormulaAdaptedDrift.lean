@@ -123,7 +123,7 @@ and an `X` with `X t = c + ∫₀ᵗ β_s ds + M t` (`hXrel`) whose paths are co
 the module docstring).
 
 `ΔX` over a cell splits into the drift increment plus the martingale increment. The proof is
-the partition/Taylor skeleton of `ItoFormulaC2` at the path `k ↦ X_{tₖ}`
+the partition/Taylor skeleton of `ItoFormulaTD` (with `f_t = 0`) at the path `k ↦ X_{tₖ}`
 (`MathFin.discrete_ito_formula` — an exact per-path identity), with the three terms
 dispatched by: pathwise Riemann sums (drift), the summed weighted increment isometry at the
 adapted weight `f''(X)` (martingale square), and a cubic-moment bound (Taylor remainder).
@@ -825,9 +825,7 @@ private lemma uniform_band_split (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0
       = ∑ k ∈ Finset.range n,
           ∫ z in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) ×ˢ (Set.univ : Set Ω),
             F z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
-  have hTn : unifPart T n n = T := by
-    have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-    simp only [unifPart, div_self hne, one_mul]
+  have hTn : unifPart T n n = T := unifPart_self T hn.ne'
   have hintOn : ∀ m : ℕ, m ≤ n →
       IntegrableOn F ((Set.Ioc (0:ℝ≥0) (unifPart T n m)) ×ˢ (Set.univ : Set Ω))
         (trimMeasure_T (μ := μ) T hBmeas) := by
@@ -846,17 +844,14 @@ private lemma uniform_band_split (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0
       intro hm hmT
       rcases Nat.eq_zero_or_pos m with hm0 | hm0
       · subst hm0
-        have h0 : unifPart T n 0 = 0 := by
-          unfold unifPart
-          norm_num
-        rw [Finset.range_one, Finset.sum_singleton, h0]
+        rw [Finset.range_one, Finset.sum_singleton, unifPart_zero]
       · have hmt : unifPart T n m ≤ unifPart T n (m + 1) :=
           unifPart_mono T n (Nat.le_succ m)
         have hunion : (Set.Ioc (0:ℝ≥0) (unifPart T n m) ×ˢ (Set.univ : Set Ω))
             ∪ (Set.Ioc (unifPart T n m) (unifPart T n (m + 1)) ×ˢ (Set.univ : Set Ω))
             = (Set.Ioc (0:ℝ≥0) (unifPart T n (m + 1))) ×ˢ (Set.univ : Set Ω) := by
           rw [← Set.union_prod, Set.Ioc_union_Ioc_eq_Ioc
-            (show (0:ℝ≥0) ≤ unifPart T n m from by simp only [unifPart]; positivity) hmt]
+            zero_le hmt]
         have hdisj : Disjoint
             ((Set.Ioc (0:ℝ≥0) (unifPart T n m)) ×ˢ (Set.univ : Set Ω))
             ((Set.Ioc (unifPart T n m) (unifPart T n (m + 1))) ×ˢ (Set.univ : Set Ω)) :=
@@ -1772,10 +1767,8 @@ theorem gapSum_le (n : ℕ) (hn : 0 < n) {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
   -- the cell lengths telescope to `T`; the band energies telescope to `‖φ − δⁿ‖²`
   have hsumcell : ∑ k ∈ Finset.range n, cell k = (T : ℝ) := by
     rw [Finset.sum_range_sub (fun k ↦ ((unifPart T n k : ℝ)))]
-    have hnT : unifPart T n n = T := by
-      have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-      simp only [unifPart, div_self hne, one_mul]
-    have h0 : unifPart T n 0 = 0 := by simp only [unifPart]; norm_num
+    have hnT : unifPart T n n = T := unifPart_self T hn.ne'
+    have h0 : unifPart T n 0 = 0 := unifPart_zero T n
     rw [hnT, h0]; simp
   have hbandsum : ∑ k ∈ Finset.range n, bandE k
       = ∫ z in Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω),
@@ -2654,9 +2647,7 @@ private theorem stepValue_eq_sum {m J : ℕ} (hJm : J ≤ m) (ω : Ω) :
           * (B (unifPart T m (j + 1)) ω - B (unifPart T m j) ω) := by
   induction J with
   | zero =>
-    have h0 : unifPart T m 0 = 0 := by
-      simp only [unifPart, Nat.cast_zero, zero_div, zero_mul]
-    rw [h0]
+    rw [unifPart_zero]
     simp
   | succ J ihJ =>
     have hJm' : J < m := Nat.lt_of_succ_le hJm
@@ -3320,10 +3311,8 @@ theorem driftSum_expect_tendsto (hBmeas : ∀ t, Measurable (B t))
     rcases Nat.eq_zero_or_pos n with rfl | hn
     · simp only [Finset.range_zero, Finset.sum_empty, abs_zero]
       exact mul_nonneg (mul_nonneg hC1 (abs_nonneg Db)) (NNReal.coe_nonneg T)
-    · have hnT : unifPart T n n = T := by
-        have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-        simp only [unifPart, div_self hne, one_mul]
-      have h0 : unifPart T n 0 = 0 := by simp only [unifPart]; norm_num
+    · have hnT : unifPart T n n = T := unifPart_self T hn.ne'
+      have h0 : unifPart T n 0 = 0 := unifPart_zero T n
       calc |∑ k ∈ Finset.range n, g (X (unifPart T n k) ω)
             * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)|
           ≤ ∑ k ∈ Finset.range n, |g (X (unifPart T n k) ω)
@@ -3474,15 +3463,6 @@ only the limit `0`, and the bounds below are what the proofs establish:
   (`abs_discreteTaylorRemainder_le` + `pow3_add_le` + `trueIncr_pow3_le`). -/
 
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- The uniform-cell length: `(tₖ₊₁ − tₖ) = T/n`. -/
-private theorem cellLen_eq {T : ℝ≥0} {n : ℕ} (k : ℕ) :
-    ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) / (n : ℝ) := by
-  simp only [unifPart]
-  push_cast
-  field_simp
-  ring
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- The `(n+1)`-divergence and the `1/(n+1)` null sequence over the naturals. -/
 private theorem tendsto_nat_add_one_atTop :
     Tendsto (fun n : ℕ ↦ ((n : ℝ) + 1)) atTop atTop := by
@@ -3592,7 +3572,7 @@ theorem quadDriftSqSum_tendsto (hBmeas : ∀ t, Measurable (B t)) {β : ℝ≥0 
                 - driftPath β (unifPart T n k) ω) ^ 2‖ ≤ _
           rw [Real.norm_eq_abs]
           have h := hbound ω
-          rw [cellLen_eq (T := T) (n := n) k] at h
+          rw [unifPart_succ_sub T n k] at h
           linarith)
     calc |∫ ω, g (X (unifPart T n k) ω)
             * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2 ∂μ|
@@ -3604,7 +3584,7 @@ theorem quadDriftSqSum_tendsto (hBmeas : ∀ t, Measurable (B t)) {β : ℝ≥0 
             (integrable_const _) (Eventually.of_forall fun ω ↦ hbound ω)
       _ = C2 * Db ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 2 := by
           rw [integral_const]; simp
-      _ = C2 * Db ^ 2 * ((T : ℝ) / (n : ℝ)) ^ 2 := by rw [cellLen_eq k]
+      _ = C2 * Db ^ 2 * ((T : ℝ) / (n : ℝ)) ^ 2 := by rw [unifPart_succ_sub T n k]
   -- squeeze: the absolute sums die, hence the signed sums die
   have hboundtendsto : Tendsto (fun n : ℕ ↦ |∑ k ∈ Finset.range n,
       ∫ ω, g (X (unifPart T n k) ω)
@@ -3825,7 +3805,7 @@ theorem quadCrossSum_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω �
             (((unifPart T n (k + 1) : ℝ) - unifPart T n k)
               * Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k))
             = ((T : ℝ) / (n : ℝ)) * Real.sqrt ((T : ℝ) / (n : ℝ)) := fun k _ ↦ by
-          rw [cellLen_eq (T := T) (n := n) k]
+          rw [unifPart_succ_sub T n k]
         have hsumlast : ((n : ℝ)) * (((T : ℝ) / (n : ℝ)) * Real.sqrt ((T : ℝ) / (n : ℝ)))
             = (T : ℝ) * Real.sqrt ((T : ℝ) / (n : ℝ)) := by
           field_simp
@@ -4117,7 +4097,7 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
       have hn0r : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn
       have hcellen : ∀ k : ℕ, k ∈ Finset.range n →
           ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = ((T : ℝ) / (n : ℝ)) :=
-        fun k _ ↦ cellLen_eq (T := T) (n := n) k
+        fun k _ ↦ unifPart_succ_sub T n k
       set gR : Ω → ℝ := fun ω : Ω ↦ ∑ k ∈ Finset.range n,
         discreteTaylorRemainder f f' f'' (X (unifPart T n k) ω)
           (X (unifPart T n (k + 1)) ω) with hgR
@@ -4558,12 +4538,10 @@ theorem itoDrift_expectation_identity_adapted
           + (∫ ω, ∑ k ∈ Finset.range n, discreteTaylorRemainder f f' f''
               (X (unifPart T n k) ω) (X (unifPart T n (k + 1)) ω) ∂μ) := by
     intro n hn
-    have hTnn : unifPart T n n = T := by
-      have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-      simp only [unifPart, div_self hne, one_mul]
-    have hTn0 : unifPart T n 0 = 0 := by simp only [unifPart]; norm_num
+    have hTnn : unifPart T n n = T := unifPart_self T hn.ne'
+    have hTn0 : unifPart T n 0 = 0 := unifPart_zero T n
     have hcellen : ∀ k : ℕ, ((unifPart T n (k + 1) : ℝ) - unifPart T n k)
-        = (T : ℝ) / (n : ℝ) := fun k ↦ cellLen_eq (T := T) (n := n) k
+        = (T : ℝ) / (n : ℝ) := fun k ↦ unifPart_succ_sub T n k
     have hcellT : ∀ k : ℕ, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ≤ (T : ℝ) := by
       intro k
       rw [hcellen k]

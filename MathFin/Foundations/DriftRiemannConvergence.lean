@@ -5,7 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoIntegralRiemannBridge
+public import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
 
 /-! # Deterministic drift Riemann-convergence (Girsanov α4 brick b-tail)
 

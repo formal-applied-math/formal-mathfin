@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 717 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 684 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 721 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 688 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 16 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -48,7 +48,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   coefficients, and $`f \in C^2`$ with $`f'`$ and $`f''`$ bounded,
   $`f(X_T) - f(x_0) = \int_0^T f'(X_s)\sigma_s\,dB_s
   + \int_0^T \big(f'(X_s) b_s + \tfrac12 f''(X_s)\sigma_s^2\big)\,ds`$ almost surely
-  ([`ito_formula_adapted`](MathFin/Foundations/ItoFormulaAdapted.lean)). For every $`f \in C^2`$,
+  ([`ito_formula_adapted`](MathFin/Foundations/ItoFormulaAdaptedTD.lean)). For every $`f \in C^2`$,
   with no bound on $`f'`$ or $`f''`$, and each fixed $`t \le T`$, the left-point Riemann sums of $`f'(X)`$
   against $`M = \int \sigma\,dB`$ converge in probability to
   $`f(X_t) - f(x_0) - \int_0^t \big(f'(X_s) b_s + \tfrac12 f''(X_s)\sigma_s^2\big)\,ds`$
@@ -96,9 +96,10 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   one-period theorem holds on any probability space with finitely many assets
   ([`ftap_one_period_vector`](MathFin/Foundations/FTAPOnePeriodVector.lean)).
 
-- **Coherent risk measures.** On a finite state space, a coherent risk measure satisfies
-  $`\rho(X) = \sup_{q \in \mathcal{Q}_\rho} \mathbb{E}_q[-X]`$, where $`\mathcal{Q}_\rho`$ is the
-  set of probability vectors that give every acceptable position a nonnegative price
+- **Coherent risk measures.** On a finite state space, a coherent risk measure of losses
+  ([`IsCoherentRiskMeasure`](MathFin/RiskMeasures/Coherent.lean)) satisfies
+  $`\rho(L) = \sup_{q \in \mathcal{Q}_\rho} \mathbb{E}_q[L]`$, where $`\mathcal{Q}_\rho`$ is the
+  set of probability vectors that give every acceptable loss, $`\rho(Z) \le 0`$, a nonpositive price
   ([`coherentRisk_isLUB`](MathFin/RiskMeasures/AcceptanceSet.lean)). This theorem and the finite
   fundamental theorem are both derived from the cone-separation lemmas in
   [`ConvexDuality.lean`](MathFin/Foundations/ConvexDuality.lean).
@@ -156,9 +157,11 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   is worth the sum of those models' bond prices. A one-period payer swap is a forward-rate
   agreement worth `fraValue`
   ([`value_payerSwap_one_eq_fraValue`](MathFin/Contracts/Instruments/FixedIncome.lean)), and the power
-  call and the exchange option are worth their Black–Scholes closed forms
+  call, the exchange option and the geometric-average Asian call are worth their Black–Scholes
+  closed forms
   ([`value_powerCall`](MathFin/Contracts/Models/BlackScholes.lean),
-  [`value_exchangeOption`](MathFin/Contracts/Models/BlackScholesExchange.lean)).
+  [`value_exchangeOption`](MathFin/Contracts/Models/BlackScholesExchange.lean),
+  [`value_geomAsianCall`](MathFin/Contracts/Models/BlackScholesAsian.lean)).
 
 ## Contents
 
@@ -180,7 +183,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Sixteen of the 717 results are reduced cores. Twelve assume a structure whose fields include the
+- Sixteen of the 721 results are reduced cores. Twelve assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, the two-dimensional Itô formula,
@@ -282,7 +285,9 @@ Comparator below).
 
 - **Comparator.** [`Challenge.lean`](Challenge.lean) states the coherent-risk representation
   theorem, with a witness that its hypothesis is satisfiable, using only Mathlib;
-  [`Solution.lean`](Solution.lean) proves both from the library.
+  [`Solution.lean`](Solution.lean) proves both from the library, converting the Challenge's
+  positions convention to the library's loss convention with
+  [`isCoherentRiskMeasure_count_neg_iff`](MathFin/RiskMeasures/PositionsConvention.lean).
   [Comparator](https://github.com/leanprover/comparator), configured by
   [`comparator.json`](comparator.json), checks that the two files state the same theorems and that
   the proofs use only the three standard axioms. It accepted both at commit `06f88ca` and is not

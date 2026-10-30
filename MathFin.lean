@@ -103,6 +103,8 @@ import MathFin.Foundations.SimpleDoleansExponential
 import MathFin.Foundations.GirsanovSimpleTheta
 import MathFin.Foundations.Numeraire
 import MathFin.Foundations.BrownianQuadraticVariation
+-- The uniform partition of [0, T] (and [s, t]): the one equipartition of the Itô stack
+import MathFin.Foundations.UnifPart
 import MathFin.Foundations.QuadraticVariationL2
 import MathFin.Foundations.ExpMin
 import MathFin.Foundations.NoArbitrageCore
@@ -235,6 +237,8 @@ import MathFin.Foundations.ItoSquaringIdentity
 import MathFin.Foundations.DiscreteItoPolynomial
 -- Continuous-time L² Itô formula for `f(x) = x²`: `∑ B ΔB → ½(B_T² − B_0² − T)`
 import MathFin.Foundations.ItoFormulaSquaredL2
+-- The Riemann-Itô sum `riemannσ`: the one left-endpoint sum every bridge below is a case of
+import MathFin.Foundations.ItoRiemannSum
 -- Keystone: `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` as a genuine `itoIntegralCLM_T` identity
 -- (the continuous Itô integral's first real consumer)
 import MathFin.Foundations.ItoIntegralBrownian
@@ -244,8 +248,6 @@ import MathFin.Foundations.ItoIntegralLocality
 -- Summit A: bounded-derivative continuous-time Itô formula in L² (CLM-identified)
 import MathFin.Foundations.WeightedQuadraticVariation
 import MathFin.Foundations.ItoFormulaRemainder
-import MathFin.Foundations.ItoFormulaC2
-import MathFin.Foundations.ItoIntegralRiemannBridge
 -- Riemann↔CLM bridge for a bounded adapted continuous integrand θ (α4 brick b): ∫θdB CLM
 import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
 -- Step B1 of the adapted-coefficient Itô formula: freezing the integrand on a partition
@@ -661,6 +663,11 @@ import MathFin.RiskMeasures.UtilityDerivation
 -- the mixture, and the vNM axioms verified for the induced preference (the soundness half,
 -- plus invariance of the preference under positive affine rescaling of the utility)
 import MathFin.RiskMeasures.VonNeumannMorgenstern
+-- The one coherence structure: the four ADEH axioms for losses, ρ(0) = 0, convexity, and (finite
+-- state) pointwise monotonicity and continuity
+import MathFin.RiskMeasures.Coherent
+-- The positions convention of the ADEH paper is the loss convention at L ↦ ρ(−L)
+import MathFin.RiskMeasures.PositionsConvention
 -- Phase 1 (convex-duality unification): coherent-risk ADEH representation — acceptance cone
 -- separation giving the representing probability measures (risk-side Hahn–Banach)
 import MathFin.RiskMeasures.AcceptanceSet
@@ -742,6 +749,7 @@ import MathFin.Contracts.Instruments.FixedIncome
 import MathFin.Contracts.Parity
 import MathFin.Contracts.Models.BlackScholes
 import MathFin.Contracts.Models.BlackScholesExchange
+import MathFin.Contracts.Models.BlackScholesAsian
 import MathFin.Contracts.Models.Binomial
 import MathFin.Contracts.Models.BinomialLimit
 import MathFin.Contracts.Models.ShortRate
@@ -822,6 +830,7 @@ import MathFin.Commodities.TheoryOfStorage
 -- AR(1) <-> Ornstein-Uhlenbeck parameter inversion for commodity calibration
 import MathFin.Commodities.AR1OUCalibration
 import MathFin.Binomial.PathMeasure
+import MathFin.Binomial.MultiPeriodFTAP
 import MathFin.BlackScholes.JumpDiffusionThinning
 import MathFin.Bridges.ABCDBlack76
 import MathFin.Bridges.AmericanPutEuropeanBound

@@ -247,6 +247,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.value_exchangeOption
 
+/-- info: 'MathFin.Contracts.BlackScholes.value_geomAsianCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.value_geomAsianCall
+
 /-- info: 'MathFin.Contracts.BlackScholes.value_powerCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.value_powerCall
@@ -2243,6 +2247,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.integral_sub_cond_gpdMeasure
 
+/-- info: 'MathFin.isCoherentRiskMeasure_count_neg_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.isCoherentRiskMeasure_count_neg_iff
+
 /-- info: 'MathFin.isCoherentRiskMeasure_spectralRiskMeasure_sum_esSpectrum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.isCoherentRiskMeasure_spectralRiskMeasure_sum_esSpectrum
@@ -2250,6 +2258,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.isCopula_copulaOf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.isCopula_copulaOf
+
+/-- info: 'MathFin.isEMM_horizonSpot' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.isEMM_horizonSpot
 
 /-- info: 'MathFin.isEMM_one_iff_onePeriod' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2715,6 +2727,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.newtonStep_quadratic_error
 
+/-- info: 'MathFin.noArbitrage_horizonSpot_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.noArbitrage_horizonSpot_iff
+
 /-- info: 'MathFin.noArbitrage_of_emm_multi' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.noArbitrage_of_emm_multi
@@ -2727,9 +2743,9 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.not_differentiableAt_jumpDiffusionCallPrice_strike
 
-/-- info: 'MathFin.not_exists_isCoherentRisk_log_acceptance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.not_exists_isCoherentRiskMeasure_log_acceptance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.not_exists_isCoherentRisk_log_acceptance
+#print axioms MathFin.not_exists_isCoherentRiskMeasure_log_acceptance
 
 /-- info: 'MathFin.not_exists_isCopula_frechetLower' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

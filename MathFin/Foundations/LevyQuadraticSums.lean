@@ -380,28 +380,6 @@ theorem sum_integral_abs_cube_le (hA : IsSlowClock A) (hM : Martingale M 𝓕 P)
 
 end Partition
 
-/-! ### The uniform partition of `[s, t]` -/
-
-/-- The uniform partition of `[s, t]` into `n` cells: the library's `unifPart` of `[0, t − s]`,
-shifted to start at `s`. -/
-noncomputable def unifPartIcc (s t : ℝ≥0) (n k : ℕ) : ℝ≥0 := s + unifPart (t - s) n k
-
-theorem unifPartIcc_mono (s t : ℝ≥0) (n : ℕ) : Monotone (unifPartIcc s t n) :=
-  fun _ _ hij ↦ by unfold unifPartIcc; gcongr; exact unifPart_mono _ n hij
-
-theorem unifPartIcc_zero (s t : ℝ≥0) (n : ℕ) : unifPartIcc s t n 0 = s := by
-  simp [unifPartIcc, unifPart]
-
-theorem unifPartIcc_self {s t : ℝ≥0} (hst : s ≤ t) {n : ℕ} (hn : n ≠ 0) :
-    unifPartIcc s t n n = t := by
-  have hn0 : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.2 hn
-  simp only [unifPartIcc, unifPart, div_self hn0, one_mul, add_tsub_cancel_of_le hst]
-
-theorem unifPartIcc_succ_sub {s t : ℝ≥0} (hst : s ≤ t) (n k : ℕ) :
-    ((unifPartIcc s t n (k + 1) : ℝ) - unifPartIcc s t n k) = ((t : ℝ) - s) / n := by
-  rw [unifPartIcc, unifPartIcc, NNReal.coe_add, NNReal.coe_add, add_sub_add_left_eq_sub,
-    AdaptedQuadraticVariation.unifPart_succ_sub, NNReal.coe_sub hst]
-
 /-- The largest increment of `M` over the cells of the uniform partition of `[s, t]`. -/
 noncomputable def maxIncr (M : ℝ≥0 → Ω → ℝ) (s t : ℝ≥0) (n : ℕ) (ω : Ω) : ℝ :=
   ((range n).sup fun k ↦ ‖M (unifPartIcc s t n (k + 1)) ω - M (unifPartIcc s t n k) ω‖₊ : ℝ≥0)

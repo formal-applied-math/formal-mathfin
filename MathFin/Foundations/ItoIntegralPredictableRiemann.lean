@@ -144,7 +144,7 @@ theorem riemannσ_one {t : ℝ≥0} {n : ℕ} (hn : n ≠ 0) (ω : Ω) :
     riemannσ (B := B) (fun _ _ ↦ (1 : ℝ)) t n ω = B t ω - B 0 ω := by
   simp only [riemannσ, one_mul]
   rw [Finset.sum_range_sub (fun k ↦ B (unifPart t n k) ω)]
-  simp [unifPart, hn]
+  rw [unifPart_self t hn, unifPart_zero]
 
 include hB in
 /-- **The Brownian increment is the Itô integral of `1`**, at each time: the Riemann sums of `1`
