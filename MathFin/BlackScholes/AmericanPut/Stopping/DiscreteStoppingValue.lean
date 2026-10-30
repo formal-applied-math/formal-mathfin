@@ -6,12 +6,18 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.FiniteBellmanOptimality
+public import MathFin.BlackScholes.AmericanPut.Stopping.Rules
 
-/-! # Bellman identification with a supremum over discrete stopping rules 
+/-! # Bellman identification of the stopping value over `ℕ`
+
+For an adapted integrable reward process on a discrete filtration, `stoppingValue` (the supremum
+over all rules with horizon `N`) is the expectation of the finite Bellman envelope at index `0`,
+and the Bellman first-contact rule attains it.
+
 ## Result
 
-Public entry points include `DiscreteRule`, `DiscreteRule.zero`, `discreteStoppingValue`,
-`finiteBellmanRule`.
+Public entry points include `finiteBellmanRule`, `stoppingValue_eq_bellman`,
+`finiteBellmanRule_attains_value`.
 -/
 
 @[expose] public section
@@ -22,51 +28,28 @@ open Set Filter MeasureTheory ProbabilityTheory
 
 variable {Ω : Type*} [MeasurableSpace Ω]
 
-/-- An exercise rule indexed by `ℕ`: an `𝓕`-stopping time bounded by the horizon `N`. -/
-structure DiscreteRule (𝓕 : Filtration ℕ ‹MeasurableSpace Ω›) (N : ℕ) where
-  /-- The index at which the rule exercises. -/
-  time : Ω → ℕ
-  stopping : IsStoppingTime 𝓕 (fun ω => (time ω : WithTop ℕ))
-  le_horizon : ∀ ω, time ω ≤ N
-
-/-- The rule that exercises immediately, at index `0`. -/
-def DiscreteRule.zero (𝓕 : Filtration ℕ ‹MeasurableSpace Ω›) (N : ℕ) : DiscreteRule 𝓕 N :=
-  ⟨fun _ => 0,isStoppingTime_const 𝓕 0,fun _ => Nat.zero_le _⟩
-
-instance discreteRule_nonempty (𝓕 : Filtration ℕ ‹MeasurableSpace Ω›) (N : ℕ) :
-    Nonempty (DiscreteRule 𝓕 N) := ⟨DiscreteRule.zero 𝓕 N⟩
-
-/-- The supremum of the expected payoffs `∫ ω, Z (θ.time ω) ω ∂P` over all discrete rules with
-horizon `N`. -/
-noncomputable def discreteStoppingValue (P : Measure Ω) (𝓕 : Filtration ℕ ‹MeasurableSpace Ω›)
-    (Z : ℕ → Ω → ℝ) (N : ℕ) : ℝ :=
-  sSup (range (fun θ : DiscreteRule 𝓕 N => ∫ ω, Z (θ.time ω) ω ∂P))
-
 /-- The Bellman first-contact time of `Z`, packaged as a discrete rule with horizon `N`. -/
 noncomputable def finiteBellmanRule {P : Measure Ω} {𝓕 : Filtration ℕ ‹MeasurableSpace Ω›}
-    {Z : ℕ → Ω → ℝ} (ha : Adapted 𝓕 Z) (N : ℕ) : DiscreteRule 𝓕 N :=
+    {Z : ℕ → Ω → ℝ} (ha : Adapted 𝓕 Z) (N : ℕ) : StoppingRule 𝓕 N :=
   ⟨finiteBellmanContact P 𝓕 Z N,finiteBellmanContact_stopping ha N,finiteBellmanContact_le N⟩
 
-theorem discreteStoppingValue_eq_bellman {P : Measure Ω} [IsProbabilityMeasure P]
+theorem stoppingValue_eq_bellman {P : Measure Ω} [IsProbabilityMeasure P]
     {𝓕 : Filtration ℕ ‹MeasurableSpace Ω›} {Z : ℕ → Ω → ℝ}
     (ha : Adapted 𝓕 Z) (hi : ∀ i, Integrable (Z i) P) (N : ℕ) :
-    discreteStoppingValue P 𝓕 Z N = ∫ ω, finiteBellman P 𝓕 Z N 0 ω ∂P := by
-  have hb : BddAbove (range (fun θ : DiscreteRule 𝓕 N => ∫ ω, Z (θ.time ω) ω ∂P)) := by
-    refine ⟨∫ ω, finiteBellman P 𝓕 Z N 0 ω ∂P,?_⟩
-    rintro _ ⟨θ,rfl⟩
-    exact expected_discrete_payoff_le_bellman ha hi θ.stopping θ.le_horizon
+    stoppingValue P 𝓕 Z N = ∫ ω, finiteBellman P 𝓕 Z N 0 ω ∂P := by
+  have hle (θ : StoppingRule 𝓕 N) :
+      (∫ ω, Z (θ.time ω) ω ∂P) ≤ ∫ ω, finiteBellman P 𝓕 Z N 0 ω ∂P :=
+    expected_discrete_payoff_le_bellman ha hi θ.stopping θ.le_horizon
   apply le_antisymm
-  · apply csSup_le (range_nonempty _)
-    rintro _ ⟨θ,rfl⟩
-    exact expected_discrete_payoff_le_bellman ha hi θ.stopping θ.le_horizon
+  · exact stoppingValue_le univ_nonempty fun θ _ ↦ hle θ
   · rw [← finiteBellmanContact_expected_payoff ha hi N]
-    exact le_csSup hb ⟨finiteBellmanRule ha N,rfl⟩
+    exact integral_le_stoppingValue (fun θ _ ↦ hle θ) (mem_univ (finiteBellmanRule ha N))
 
 theorem finiteBellmanRule_attains_value {P : Measure Ω} [IsProbabilityMeasure P]
     {𝓕 : Filtration ℕ ‹MeasurableSpace Ω›} {Z : ℕ → Ω → ℝ}
     (ha : Adapted 𝓕 Z) (hi : ∀ i, Integrable (Z i) P) (N : ℕ) :
-    (∫ ω, Z ((finiteBellmanRule (P := P) ha N).time ω) ω ∂P) = discreteStoppingValue P 𝓕 Z N := by
-  rw [discreteStoppingValue_eq_bellman ha hi N]
+    (∫ ω, Z ((finiteBellmanRule (P := P) ha N).time ω) ω ∂P) = stoppingValue P 𝓕 Z N := by
+  rw [stoppingValue_eq_bellman ha hi N]
   exact finiteBellmanContact_expected_payoff ha hi N
 
 end MathFin.BlackScholes.AmericanPut.Stopping

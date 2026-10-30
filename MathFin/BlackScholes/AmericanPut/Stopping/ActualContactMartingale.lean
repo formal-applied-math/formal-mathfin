@@ -68,10 +68,10 @@ theorem brownianUsualActualContactRule_martingale {k h : ℝ} (hk : 0 ≤ k) (x 
 
 /-- Mean-value identity at any bounded observation rule, capped at first contact. -/
 theorem canonicalPrice_contact_meanValue {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) (T : ℝ≥0)
-    (η : @BoundedRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit)
+    (η : @StoppingRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit) ℝ≥0 _
         brownianUsualFiltration T) :
     (∫ ω, canonicalDiscountedPrice k h x T
-      (min (@BoundedRule.time _ (completedMeasurableSpace gaussianLimit)
+      (min (@StoppingRule.time _ (completedMeasurableSpace gaussianLimit) ℝ≥0 _
           brownianUsualFiltration T η ω)
         (brownianUsualActualContactTime (h := h) hk x T ω)) ω ∂completedMeasure gaussianLimit) =
       canonicalPrice k h x (T : ℝ) := by

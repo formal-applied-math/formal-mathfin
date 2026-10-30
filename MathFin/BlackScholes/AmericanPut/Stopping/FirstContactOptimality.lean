@@ -35,13 +35,13 @@ theorem expected_firstContact_eq_initial
     (hUb : ∀ t ω, ‖U t ω‖ ≤ C) (hZm : Measurable Z.uncurry)
     (hZc : ∀ ω, Continuous (fun t => Z t ω)) (hZb : ∀ t ω, ‖Z t ω‖ ≤ D)
     (hdom : ∀ t, t ≤ T → ∀ ω, Z t ω ≤ U t ω)
-    (τ : BoundedRule 𝓕 T) (hbefore : ∀ ω t, t < τ.time ω → Z t ω < U t ω)
-    (θ : ℕ → BoundedRule 𝓕 T)
+    (τ : StoppingRule 𝓕 T) (hbefore : ∀ ω t, t < τ.time ω → Z t ω < U t ω)
+    (θ : ℕ → StoppingRule 𝓕 T)
     (happrox : Tendsto (fun n => ∫ ω, Z ((θ n).time ω) ω ∂P) atTop (𝓝 (∫ ω, U 0 ω ∂P))) :
     (∫ ω, U (τ.time ω) ω ∂P) = ∫ ω, U 0 ω ∂P := by
-  have hUi (η : BoundedRule 𝓕 T) : Integrable (fun ω => U (η.time ω) ω) P :=
+  have hUi (η : StoppingRule 𝓕 T) : Integrable (fun ω => U (η.time ω) ω) P :=
     candidate_stopped_integrable hU hUc hUb η
-  have hZi (η : BoundedRule 𝓕 T) : Integrable (fun ω => Z (η.time ω) ω) P :=
+  have hZi (η : StoppingRule 𝓕 T) : Integrable (fun ω => Z (η.time ω) ω) P :=
     (integrable_const D).mono'
         (hZm.comp (η.measurable_time.prodMk measurable_id)).aestronglyMeasurable
       (Eventually.of_forall (fun ω => hZb _ ω))
@@ -56,7 +56,7 @@ theorem expected_firstContact_eq_initial
     apply squeeze_zero (fun n => integral_nonneg (hG0 n)) hupper
     simpa only [sub_self] using (tendsto_const_nhds (x := ∫ ω, U 0 ω ∂P)).sub happrox
   obtain ⟨ns,hns,hgap⟩ := exists_subseq_gap_tendsto_zero hGi hG0 hGe
-  let η : ℕ → BoundedRule 𝓕 T := fun n => (θ (ns n)).minimum τ
+  let η : ℕ → StoppingRule 𝓕 T := fun n => (θ (ns n)).minimum τ
   have htime : ∀ᵐ ω ∂P, Tendsto (fun n => (η n).time ω) atTop (𝓝 (τ.time ω)) := by
     filter_upwards [hgap] with ω hω
     exact min_time_tendsto_firstContact ((hUc ω).sub (hZc ω))
@@ -79,9 +79,9 @@ theorem firstContact_expectedReward_eq_initial
     (hUb : ∀ t ω, ‖U t ω‖ ≤ C) (hZm : Measurable Z.uncurry)
     (hZc : ∀ ω, Continuous (fun t => Z t ω)) (hZb : ∀ t ω, ‖Z t ω‖ ≤ D)
     (hdom : ∀ t, t ≤ T → ∀ ω, Z t ω ≤ U t ω)
-    (τ : BoundedRule 𝓕 T) (hbefore : ∀ ω t, t < τ.time ω → Z t ω < U t ω)
+    (τ : StoppingRule 𝓕 T) (hbefore : ∀ ω t, t < τ.time ω → Z t ω < U t ω)
     (hcontact : ∀ᵐ ω ∂P, U (τ.time ω) ω = Z (τ.time ω) ω)
-    (θ : ℕ → BoundedRule 𝓕 T)
+    (θ : ℕ → StoppingRule 𝓕 T)
     (happrox : Tendsto (fun n => ∫ ω, Z ((θ n).time ω) ω ∂P) atTop (𝓝 (∫ ω, U 0 ω ∂P))) :
     (∫ ω, Z (τ.time ω) ω ∂P) = ∫ ω, U 0 ω ∂P := by
   rw [← integral_congr_ae hcontact]

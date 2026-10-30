@@ -15,7 +15,7 @@ be confused with completing that space by all subsets of null sets.
 
 ## Result
 
-Public entry points include `BoundedRule.enlargeFiltration`, `americanPutValue_mono_filtration`,
+Public entry points include `StoppingRule.enlargeFiltration`, `americanPutValue_mono_filtration`,
 `brownianRightAugFiltration`, `brownianFiltration_le_rightAug`.
 -/
 
@@ -31,8 +31,8 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 
 /-- The rule `θ` reread in a larger filtration `𝓖 ≥ 𝓕`: the same exercise time, still a
 stopping time and still bounded by `T`. -/
-def BoundedRule.enlargeFiltration {𝓕 𝓖 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
-    {T : ℝ≥0} (θ : BoundedRule 𝓕 T) (hFG : 𝓕 ≤ 𝓖) : BoundedRule 𝓖 T where
+def StoppingRule.enlargeFiltration {𝓕 𝓖 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
+    {T : ℝ≥0} (θ : StoppingRule 𝓕 T) (hFG : 𝓕 ≤ 𝓖) : StoppingRule 𝓖 T where
   time := θ.time
   stopping := fun t => hFG t _ (θ.stopping t)
   le_horizon := θ.le_horizon
@@ -42,8 +42,7 @@ theorem americanPutValue_mono_filtration {P : Measure Ω} [IsProbabilityMeasure 
     {K r q σ S : ℝ} {T : ℝ≥0} (hFG : 𝓕 ≤ 𝓖)
     (hW : Measurable W.uncurry) (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) :
     americanPutValue P 𝓕 W K r q σ S T ≤ americanPutValue P 𝓖 W K r q σ S T := by
-  apply csSup_le exerciseValues_nonempty
-  rintro _ ⟨θ,rfl⟩
+  refine stoppingValue_le univ_nonempty fun θ _ ↦ ?_
   exact expectedReward_le_value hW hK hr hS (θ.enlargeFiltration hFG)
 
 /-- The right-continuous regularization of the raw Brownian filtration after adjoining the

@@ -11,7 +11,7 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.LocalizationTimes
 /-! # Stability of stopping rewards under small maturity changes 
 ## Result
 
-Public entry points include `BoundedRule.truncate`, `continuous_reward_truncation`,
+Public entry points include `StoppingRule.truncate`, `continuous_reward_truncation`,
 `putReward_time_continuous`, `expectedReward_truncate_tendsto`.
 -/
 
@@ -25,7 +25,7 @@ open scoped NNReal Topology
 variable {Ω : Type*} [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
 
 /-- The rule `θ` capped at the new horizon `U`, stopping at `min (θ.time ω) U`. -/
-def BoundedRule.truncate {T : ℝ≥0} (θ : BoundedRule 𝓕 T) (U : ℝ≥0) : BoundedRule 𝓕 U where
+def StoppingRule.truncate {T : ℝ≥0} (θ : StoppingRule 𝓕 T) (U : ℝ≥0) : StoppingRule 𝓕 U where
   time := fun ω => min (θ.time ω) U
   stopping := by
     convert! θ.stopping.min (isStoppingTime_const 𝓕 U) using 1
@@ -65,7 +65,7 @@ theorem expectedReward_truncate_tendsto {P : Measure Ω} [IsProbabilityMeasure P
     (hpaths : ∀ ω, Continuous (fun t => W t ω))
     {K r q σ S : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S)
     {T : ℝ≥0} {Tn : ℕ → ℝ≥0} (hT : Tendsto Tn atTop (𝓝 T))
-    (θ : ∀ n, BoundedRule 𝓕 (Tn n)) :
+    (θ : ∀ n, StoppingRule 𝓕 (Tn n)) :
     Tendsto (fun n => (∫ ω, putReward W K r q σ S (θ n).time ω ∂P) -
       ∫ ω, putReward W K r q σ S ((θ n).truncate T).time ω ∂P) atTop (𝓝 0) := by
   have hlim : Tendsto (fun n => ∫ ω,
@@ -95,7 +95,7 @@ theorem expectedReward_fixed_truncate_tendsto {P : Measure Ω} [IsProbabilityMea
     {W : ℝ≥0 → Ω → ℝ} (hW : Measurable W.uncurry)
     (hpaths : ∀ ω, Continuous (fun t => W t ω))
     {K r q σ S : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S)
-    {T : ℝ≥0} {Tn : ℕ → ℝ≥0} (hT : Tendsto Tn atTop (𝓝 T)) (θ : BoundedRule 𝓕 T) :
+    {T : ℝ≥0} {Tn : ℕ → ℝ≥0} (hT : Tendsto Tn atTop (𝓝 T)) (θ : StoppingRule 𝓕 T) :
     Tendsto (fun n => ∫ ω, putReward W K r q σ S (θ.truncate (Tn n)).time ω ∂P) atTop
       (𝓝 (∫ ω, putReward W K r q σ S θ.time ω ∂P)) := by
   apply tendsto_integral_of_dominated_convergence (fun _ => K)
