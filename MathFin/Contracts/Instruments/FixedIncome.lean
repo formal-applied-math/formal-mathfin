@@ -31,7 +31,8 @@ for a floating leg that pays the simple forward rate the curve implies for each 
 (`pathPV_floatingLeg`), the fixed leg is `K` times the annuity (`pathPV_fixedLeg`), so the payer
 swap is worth `payerSwapValue` (`value_payerSwap`), and it is worth zero exactly at the par rate
 (`value_payerSwap_eq_zero_iff`). The floating coupons are fixed by the curve: this is the
-deterministic-rates case, where a floating rate is known in advance.
+deterministic-rates case, where a floating rate is known in advance. With one accrual period
+the swap is a forward-rate agreement, worth `fraValue` (`value_payerSwap_one_eq_fraValue`).
 
 ## Main definitions
 
@@ -43,7 +44,8 @@ deterministic-rates case, where a floating rate is known in advance.
 
 * `pathPV_fixedFlows`, `value_fixedFlows`, `pathPV_fixedFlows_yieldDiscount`,
   `pathPV_fixedFlows_zcb`.
-* `pathPV_floatingLeg`, `pathPV_fixedLeg`, `value_payerSwap`, `value_payerSwap_eq_zero_iff`.
+* `pathPV_floatingLeg`, `pathPV_fixedLeg`, `value_payerSwap`, `value_payerSwap_eq_zero_iff`,
+  `value_payerSwap_one_eq_fraValue`.
 
 ## Source
 
@@ -168,6 +170,19 @@ theorem value_payerSwap {Q : Measure Ω} [IsProbabilityMeasure Q] (X : ι → �
     rw [payerSwap, Contract.pathPV_both, Contract.pathPV_scale, pathPV_floatingLeg n hδ hP,
       pathPV_fixedLeg, payerSwapValue]
     ring
+
+/-- **A forward-rate agreement is a one-period payer swap.** With one accrual period `[T₀, T₁]`
+the swap's floating coupon is the simple forward rate `fraForwardRate (P T₀) (P T₁) δ` and the
+fixed coupon is `δK`, both paid at `T₁`; its value in every model is `fraValue`
+(`FixedIncome/FRA.lean`): `δ · P(T₁) · (F − K)`. -/
+theorem value_payerSwap_one_eq_fraValue {Q : Measure Ω} [IsProbabilityMeasure Q]
+    (X : ι → ℝ≥0 → Ω → ℝ) (hδ : δ ≠ 0) (hP : ∀ i, P (T i) ≠ 0) (K : ℝ) :
+    (payerSwap P T δ 1 K : Contract ι).value Q P X
+      = fraValue δ (P (T 1)) (fraForwardRate (P (T 0)) (P (T 1)) δ) K := by
+  rw [value_payerSwap 1 X hδ hP, fraValue_forwardRate_eq_discount_difference _ _ _ _ hδ (hP 1),
+    payerSwapValue, annuity]
+  simp only [Finset.sum_range_one, zero_add]
+  ring
 
 /-- **A payer swap is worth zero exactly at the par swap rate.** -/
 theorem value_payerSwap_eq_zero_iff {Q : Measure Ω} [IsProbabilityMeasure Q]
