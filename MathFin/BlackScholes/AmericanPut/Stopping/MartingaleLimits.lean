@@ -55,7 +55,7 @@ theorem stoppedCandidate_martingale_of_rule_limit {W : ℝ≥0 → Ω → ℝ}
     {k h K r q σ S : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} {T : ℝ≥0}
     (hp : DividendPutSolution k h p b) (hadapt : Adapted 𝓕 W)
     (hpaths : ∀ ω, Continuous (fun t => W t ω)) (hK : 0 ≤ K) (hr : 0 ≤ r)
-    (θ : BoundedRule 𝓕 T) (θn : ℕ → BoundedRule 𝓕 T)
+    (θ : StoppingRule 𝓕 T) (θn : ℕ → StoppingRule 𝓕 T)
     (hθ : ∀ᵐ ω ∂P, Tendsto (fun n => (θn n).time ω) atTop (𝓝 (θ.time ω)))
     (hmart : ∀ n, Martingale (fun t ω => classicalCandidate W K r q σ S p T
       (min t ((θn n).time ω)) ω) 𝓕 P) :

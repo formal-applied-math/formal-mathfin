@@ -35,7 +35,7 @@ variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} [IsProbabilityMeasur
 
 theorem candidate_stopped_integrable
     (hU : Supermartingale U 𝓕 P) (hcont : ∀ ω, Continuous (fun t => U t ω))
-    (hbound : ∀ t ω, ‖U t ω‖ ≤ C) (θ : BoundedRule 𝓕 T) :
+    (hbound : ∀ t ω, ‖U t ω‖ ≤ C) (θ : StoppingRule 𝓕 T) :
     Integrable (fun ω => U (θ.time ω) ω) P := by
   have hmeas : Measurable U.uncurry :=
     measurable_uncurry_of_continuous_of_measurable hcont
@@ -50,8 +50,7 @@ theorem value_le_supermartingale_candidate
     (hbound : ∀ t ω, ‖U t ω‖ ≤ C)
     (hdom : ∀ t, t ≤ T → ∀ ω, putReward W K r q σ S (fun _ => t) ω ≤ U t ω) :
     americanPutValue P 𝓕 W K r q σ S T ≤ ∫ ω, U 0 ω ∂P := by
-  apply csSup_le exerciseValues_nonempty
-  rintro _ ⟨θ,rfl⟩
+  refine stoppingValue_le univ_nonempty fun θ _ ↦ ?_
   exact (integral_mono
     (putReward_integrable hW P hK hr hS θ.measurable_time)
     (candidate_stopped_integrable hU hcont hbound θ)
@@ -65,7 +64,7 @@ theorem value_eq_of_contact_martingale
     (hU : Supermartingale U 𝓕 P) (hcont : ∀ ω, Continuous (fun t => U t ω))
     (hbound : ∀ t ω, ‖U t ω‖ ≤ C)
     (hdom : ∀ t, t ≤ T → ∀ ω, putReward W K r q σ S (fun _ => t) ω ≤ U t ω)
-    (θ : BoundedRule 𝓕 T)
+    (θ : StoppingRule 𝓕 T)
     (hcontact : ∀ᵐ ω ∂P, U (θ.time ω) ω = putReward W K r q σ S θ.time ω)
     (hmart : Martingale (fun t ω => U (min t (θ.time ω)) ω) 𝓕 P) :
     americanPutValue P 𝓕 W K r q σ S T = ∫ ω, U 0 ω ∂P := by

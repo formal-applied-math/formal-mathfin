@@ -34,7 +34,7 @@ variable {K r q σ S : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
 applied to the classical gap `classicalGap brownian K r q σ S p T`. -/
 noncomputable def brownianInteriorRule
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
-    (T : ℝ≥0) (n : ℕ) : BoundedRule brownianFiltration T :=
+    (T : ℝ≥0) (n : ℕ) : StoppingRule brownianFiltration T :=
   interiorRule (Z := classicalGap brownian K r q σ S p T)
     (classicalGap_adapted hp brownian_adapted T) brownian_adapted
     (classicalGap_continuous hp continuous_brownian T) continuous_brownian T n

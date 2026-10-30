@@ -16,7 +16,8 @@ threshold are unchanged. No PDE or boundary regularity is used.
 
 ## Result
 
-Public entry points include `aeAmericanPutValue_eq` and `aeExerciseThreshold_eq`.
+Public entry points include `aeAmericanPutValue`, `aeAmericanPutValue_eq` and
+`aeExerciseThreshold_eq`.
 -/
 
 @[expose] public section
@@ -47,13 +48,13 @@ noncomputable def finiteTime (θ : AEBoundedRule P 𝓕 T) (ω : Ω) : ℝ≥0 :
 
 /-- The rule truncated at the horizon: the pointwise bounded rule with time
 `min (θ.time ω) T`. -/
-noncomputable def clip (θ : AEBoundedRule P 𝓕 T) : BoundedRule 𝓕 T :=
-  BoundedRule.ofWithTop (fun ω => min (θ.time ω) T)
+noncomputable def clip (θ : AEBoundedRule P 𝓕 T) : StoppingRule 𝓕 T :=
+  StoppingRule.ofWithTop (fun ω => min (θ.time ω) T)
     (θ.stopping.min_const T) (fun ω => min_le_right (θ.time ω) T)
 
 theorem clip_time_coe (θ : AEBoundedRule P 𝓕 T) (ω : Ω) :
     ((θ.clip.time ω : ℝ≥0) : WithTop ℝ≥0) = min (θ.time ω) T :=
-  BoundedRule.ofWithTop_coe_time _ _ _ ω
+  StoppingRule.ofWithTop_coe_time _ _ _ ω
 
 theorem clip_time_coe_ae_eq (θ : AEBoundedRule P 𝓕 T) :
     (fun ω => ((θ.clip.time ω : ℝ≥0) : WithTop ℝ≥0)) =ᵐ[P] θ.time := by
@@ -73,73 +74,46 @@ theorem clip_expectedReward (θ : AEBoundedRule P 𝓕 T)
   filter_upwards [θ.clip_time_ae_eq] with ω hω
   simp only [putReward,hω]
 
-theorem reward_integrable [IsFiniteMeasure P] (θ : AEBoundedRule P 𝓕 T)
-    {W : ℝ≥0 → Ω → ℝ} (hW : Measurable W.uncurry) {K r q σ S : ℝ}
-    (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) :
-    Integrable (fun ω => putReward W K r q σ S θ.finiteTime ω) P := by
-  apply (putReward_integrable (q := q) (σ := σ) hW P hK hr hS θ.clip.measurable_time).congr
-  filter_upwards [θ.clip_time_ae_eq] with ω hω
-  simp only [putReward,hω]
-
 end AEBoundedRule
 
-namespace BoundedRule
+namespace StoppingRule
 
 variable {P : Measure Ω} {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T : ℝ≥0}
 
 /-- A pointwise bounded rule read as an almost-surely bounded one. -/
-def toAEBoundedRule (θ : BoundedRule 𝓕 T) : AEBoundedRule P 𝓕 T where
+def toAEBoundedRule (θ : StoppingRule 𝓕 T) : AEBoundedRule P 𝓕 T where
   time := fun ω => θ.time ω
   stopping := θ.stopping
   ae_le_horizon := Filter.Eventually.of_forall (fun ω => WithTop.coe_le_coe.mpr (θ.le_horizon ω))
 
-theorem toAEBoundedRule_finiteTime (θ : BoundedRule 𝓕 T) :
+theorem toAEBoundedRule_finiteTime (θ : StoppingRule 𝓕 T) :
     (θ.toAEBoundedRule (P := P)).finiteTime = θ.time := by
   funext ω
   simp only [AEBoundedRule.finiteTime,toAEBoundedRule,WithTop.untopD_coe]
 
-end BoundedRule
+end StoppingRule
 
-/-- The expected discounted put rewards ranging over all almost-surely bounded rules. -/
-noncomputable def aeExerciseValues (P : Measure Ω) (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›)
-    (W : ℝ≥0 → Ω → ℝ) (K r q σ S : ℝ) (T : ℝ≥0) : Set ℝ :=
-  range (fun θ : AEBoundedRule P 𝓕 T => ∫ ω, putReward W K r q σ S θ.finiteTime ω ∂P)
-
-/-- Supremum of `aeExerciseValues`, the put value over almost-surely bounded rules. -/
+/-- The American put value over almost-surely bounded rules: the supremum of the expected
+discounted put rewards at `finiteTime`. -/
 noncomputable def aeAmericanPutValue (P : Measure Ω) (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›)
     (W : ℝ≥0 → Ω → ℝ) (K r q σ S : ℝ) (T : ℝ≥0) : ℝ :=
-  sSup (aeExerciseValues P 𝓕 W K r q σ S T)
+  sSup (range (fun θ : AEBoundedRule P 𝓕 T => ∫ ω, putReward W K r q σ S θ.finiteTime ω ∂P))
 
-theorem aeExerciseValues_eq (P : Measure Ω) (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›)
-    (W : ℝ≥0 → Ω → ℝ) (K r q σ S : ℝ) (T : ℝ≥0) :
-    aeExerciseValues P 𝓕 W K r q σ S T = exerciseValues P 𝓕 W K r q σ S T := by
-  apply Subset.antisymm
-  · rintro _ ⟨θ,rfl⟩
-    exact ⟨θ.clip,θ.clip_expectedReward W K r q σ S⟩
-  · rintro _ ⟨θ,rfl⟩
-    refine ⟨θ.toAEBoundedRule,?_⟩
-    change (∫ ω, putReward W K r q σ S (θ.toAEBoundedRule (P := P)).finiteTime ω ∂P) = _
-    rw [θ.toAEBoundedRule_finiteTime]
-
+/-- Clipping at the horizon and reading a bounded rule as an almost-surely bounded one realise
+the same expected rewards, so the two suprema range over the same set. -/
 theorem aeAmericanPutValue_eq (P : Measure Ω) (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›)
     (W : ℝ≥0 → Ω → ℝ) (K r q σ S : ℝ) (T : ℝ≥0) :
     aeAmericanPutValue P 𝓕 W K r q σ S T = americanPutValue P 𝓕 W K r q σ S T := by
-  unfold aeAmericanPutValue americanPutValue
-  rw [aeExerciseValues_eq]
-
-theorem aeExerciseValues_nonempty (P : Measure Ω) (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›)
-    (W : ℝ≥0 → Ω → ℝ) (K r q σ S : ℝ) (T : ℝ≥0) :
-    (aeExerciseValues P 𝓕 W K r q σ S T).Nonempty := by
-  rw [aeExerciseValues_eq]
-  exact exerciseValues_nonempty
-
-theorem aeExerciseValues_bddAbove (P : Measure Ω) [IsProbabilityMeasure P]
-    (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) {W : ℝ≥0 → Ω → ℝ}
-    (hW : Measurable W.uncurry) {K r q σ S : ℝ} (T : ℝ≥0)
-    (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) :
-    BddAbove (aeExerciseValues P 𝓕 W K r q σ S T) := by
-  rw [aeExerciseValues_eq]
-  exact exerciseValues_bddAbove hW hK hr hS
+  unfold aeAmericanPutValue americanPutValue stoppingValue
+  congr 1
+  apply Subset.antisymm
+  · rintro _ ⟨θ,rfl⟩
+    exact ⟨θ.clip,mem_univ _,θ.clip_expectedReward W K r q σ S⟩
+  · rintro _ ⟨θ,-,rfl⟩
+    refine ⟨θ.toAEBoundedRule,?_⟩
+    change (∫ ω, putReward W K r q σ S (θ.toAEBoundedRule (P := P)).finiteTime ω ∂P) = _
+    rw [θ.toAEBoundedRule_finiteTime]
+    rfl
 
 /-- Supremum of the spots `S` in `[0,K]` at which `aeAmericanPutValue` equals the immediate
 payoff `K-S`. -/

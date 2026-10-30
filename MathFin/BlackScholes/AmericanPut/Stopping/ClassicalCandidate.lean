@@ -132,7 +132,7 @@ theorem classical_price_eq_value_of_verification [MeasurableSpace Ω]
     (hpaths : ∀ ω, Continuous (fun t => W t ω)) (hzero : ∀ᵐ ω ∂P, W 0 ω = 0)
     (hK : 0 < K) (hr : 0 ≤ r) (hS : 0 < S)
     (hsuper : Supermartingale (classicalCandidate W K r q σ S p T) 𝓕 P)
-    (θ : BoundedRule 𝓕 T)
+    (θ : StoppingRule 𝓕 T)
     (hcontact : ∀ᵐ ω ∂P, classicalCandidate W K r q σ S p T (θ.time ω) ω =
       putReward W K r q σ S θ.time ω)
     (hmart : Martingale (fun t ω => classicalCandidate W K r q σ S p T
