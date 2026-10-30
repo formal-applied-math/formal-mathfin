@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.BlackScholes.PDE
+public import MathFin.Contracts.Pricing
 
 /-!
 # Knock-in / knock-out barrier parity (in–out parity)
@@ -31,6 +32,8 @@ honest specialisations of it and the parity reads as an identity about *values*.
 ## Results
 
 * `discountedValue`: `D · E_Q[g]`, the discounted risk-neutral value functional.
+* `discountedValue_eq_contract_value`: it is `Contract.value` of the contract that pays the
+  observed variable `g` at time `0`, so the barrier values are values in the contracts tower.
 * `knockInValue` / `knockOutValue` / `vanillaValue`: the three barrier values.
 * `barrier_payoff_partition`: the pathwise split `𝟙_A·f + 𝟙_{Aᶜ}·f = f`.
 * `knockIn_add_knockOut_eq_vanilla`: in–out parity `V_in + V_out = V_vanilla`.
@@ -54,6 +57,17 @@ files had been spelling out inline; named here so in–out parity is an identity
 about values rather than raw integrals. -/
 noncomputable def discountedValue (D : ℝ) (Q : Measure Ω) (g : Ω → ℝ) : ℝ :=
   D * ∫ ω, g ω ∂Q
+
+/-- **`discountedValue` is `Contract.value`.** `D · E_Q[g]` is the value, under the pricing measure
+`Q` and the constant discount factor `D`, of the contract that pays the observable `g` at time `0`
+(`Contract.pay`, `Payoff.obs`), in the model whose single observable is `g`. The barrier values
+below are this with `g` the knock-in, knock-out or vanilla payoff. -/
+theorem discountedValue_eq_contract_value (D : ℝ) (Q : Measure Ω) (g : Ω → ℝ) :
+    discountedValue D Q g
+      = (Contracts.Contract.pay 0 (Contracts.Payoff.obs () 0)).value Q (fun _ ↦ D)
+          (fun _ _ ↦ g) := by
+  simp only [discountedValue, Contracts.Contract.value_pay, Contracts.Payoff.eval,
+    Contracts.scenarioAt, integral_const_mul]
 
 /-- **Knock-in value**: the option pays the payoff `f` only on the barrier-hit
 event `A`, so its value is the discounted expectation of `𝟙_A · f`. -/

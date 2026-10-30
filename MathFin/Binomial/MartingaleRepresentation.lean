@@ -38,6 +38,17 @@ first `n` flips `ω 0, …, ω (n−1)`. -/
 def PathAdaptedAt (n : ℕ) (X : (ℕ → Bool) → ℝ) : Prop :=
   ∀ ω ω' : ℕ → Bool, (∀ i, i < n → ω i = ω' i) → X ω = X ω'
 
+/-- Fixing the `n`-th flip of a function of the first `n + 1` flips leaves a function of the
+first `n`. -/
+lemma PathAdaptedAt.fixFlip {n : ℕ} {f : (ℕ → Bool) → ℝ} (hf : PathAdaptedAt (n + 1) f)
+    (b : Bool) :
+    PathAdaptedAt n fun ω ↦ f (Function.update ω n b) := fun ω ω' h ↦
+  hf _ _ fun i hi ↦ by
+    rcases eq_or_ne i n with rfl | hin
+    · simp
+    · rw [Function.update_of_ne hin, Function.update_of_ne hin]
+      exact h i (by omega)
+
 variable {q : ℝ} {M S : ℕ → (ℕ → Bool) → ℝ}
 
 /-- The **node-wise hedge ratio** (discrete delta): the change in `M` over the change in `S`
@@ -94,17 +105,10 @@ theorem binomial_martingale_representation
   refine ⟨hedgeRatio M S, ?_, ?_⟩
   · -- predictability: the hedge ratio depends only on the first `n` flips
     intro n ω ω' hω
-    have key : ∀ b : Bool,
+    have key (b : Bool) :
         M (n + 1) (Function.update ω n b) = M (n + 1) (Function.update ω' n b) ∧
-        S (n + 1) (Function.update ω n b) = S (n + 1) (Function.update ω' n b) := by
-      intro b
-      have hagree : ∀ i, i < n + 1 → Function.update ω n b i = Function.update ω' n b i := by
-        intro i hi
-        rcases eq_or_ne i n with rfl | hi'
-        · simp
-        · rw [Function.update_of_ne hi', Function.update_of_ne hi']
-          exact hω i (by omega)
-      exact ⟨hM_adapt (n + 1) _ _ hagree, hS_adapt (n + 1) _ _ hagree⟩
+        S (n + 1) (Function.update ω n b) = S (n + 1) (Function.update ω' n b) :=
+      ⟨(hM_adapt (n + 1)).fixFlip b ω ω' hω, (hS_adapt (n + 1)).fixFlip b ω ω' hω⟩
     simp only [hedgeRatio]
     rw [(key true).1, (key true).2, (key false).1, (key false).2]
   · -- the representation telescopes from the one-step identity
