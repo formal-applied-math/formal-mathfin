@@ -178,8 +178,8 @@ theorem ito_formula_of_tendsto (T : ℝ≥0) {f f' f'' : ℝ → ℝ}
   refine tendsto_nhds_unique (tendsto_const_nhds.congr' ?_) hlim
   filter_upwards [hν.eventually (eventually_ne_atTop 0)] with i hi
   have h := discrete_ito_formula (ν i) (fun k ↦ x (unifPart T (ν i) k)) f f' f''
-  have hT : unifPart T (ν i) (ν i) = T := by simp [unifPart, hi]
-  have h0 : unifPart T (ν i) 0 = 0 := by simp [unifPart]
+  have hT : unifPart T (ν i) (ν i) = T := unifPart_self T hi
+  have h0 : unifPart T (ν i) 0 = 0 := unifPart_zero T (ν i)
   simp only [hT, h0] at h
   rw [h, ← Finset.sum_add_distrib]
   congr 2

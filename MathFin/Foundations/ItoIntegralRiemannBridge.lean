@@ -134,12 +134,9 @@ lemma cell_collapse (T : ℝ≥0) (n : ℕ) (hn : 0 < n) (s : ℝ≥0) (hs : s �
         (Set.Ioc (unifPart T n j) (unifPart T n (j + 1))).indicator (fun _ ↦ v j) s) = v k
       ∧ |(unifPart T n k : ℝ) - s| ≤ (T : ℝ) / n := by
   have hmono : Monotone (unifPart T n) := unifPart_mono T n
-  have hlast : unifPart T n n = T := by
-    have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-    simp only [unifPart, div_self hne, one_mul]
-  have hgap : ∀ k, (unifPart T n (k + 1) : ℝ) - unifPart T n k = (T : ℝ) / n := fun k ↦ by
-    have hn0 : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-    simp only [unifPart]; push_cast; field_simp; ring
+  have hlast : unifPart T n n = T := unifPart_self T hn.ne'
+  have hgap : ∀ k, (unifPart T n (k + 1) : ℝ) - unifPart T n k = (T : ℝ) / n :=
+    unifPart_succ_sub T n
   have hex : ∃ k, s ≤ unifPart T n (k + 1) :=
     ⟨n - 1, by rw [Nat.sub_add_cancel hn, hlast]; exact hs.2⟩
   set K := Nat.find hex
@@ -148,7 +145,7 @@ lemma cell_collapse (T : ℝ≥0) (n : ℕ) (hn : 0 < n) (s : ℝ≥0) (hs : s �
   have hKlt : K < n := lt_of_le_of_lt hKle (Nat.sub_lt hn one_pos)
   have hlow : unifPart T n K < s := by
     rcases Nat.eq_zero_or_pos K with hK0 | hKpos
-    · rw [hK0]; simpa [unifPart] using hs.1
+    · rw [hK0, unifPart_zero]; exact hs.1
     · have hmin := Nat.find_min hex (m := K - 1) (Nat.sub_lt hKpos one_pos)
       have hK1 : K - 1 + 1 = K := by omega
       rw [hK1] at hmin

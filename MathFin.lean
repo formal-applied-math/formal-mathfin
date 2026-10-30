@@ -103,6 +103,8 @@ import MathFin.Foundations.SimpleDoleansExponential
 import MathFin.Foundations.GirsanovSimpleTheta
 import MathFin.Foundations.Numeraire
 import MathFin.Foundations.BrownianQuadraticVariation
+-- The uniform partition of [0, T] (and [s, t]): the one equipartition of the Itô stack
+import MathFin.Foundations.UnifPart
 import MathFin.Foundations.QuadraticVariationL2
 import MathFin.Foundations.ExpMin
 import MathFin.Foundations.NoArbitrageCore

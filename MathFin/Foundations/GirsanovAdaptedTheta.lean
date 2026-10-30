@@ -131,10 +131,9 @@ lemma sq_integral_Zn_le (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω 
         (fun i ω ↦ -(θ (unifPart T 0 i) ω)) 0 T ω = 1 := fun ω ↦ rfl
     simp only [h1, one_pow, integral_const, probReal_univ, smul_eq_mul, mul_one]
     exact Real.one_le_exp (by positivity)
-  · have hlast : unifPart T n n = T := by
-      rw [unifPart, div_self (Nat.cast_ne_zero.mpr hn.ne'), one_mul]
+  · have hlast : unifPart T n n = T := unifPart_self T hn.ne'
     exact sq_integral_simpleDoleans_le (X := B) (𝓕 := natFiltration hBmeas) (P := μ)
-      (unifPart_mono T n) (by simp [unifPart]) (fun i ↦ hadap _) (fun i ω ↦ hbdd _ ω) n hlast.ge
+      (unifPart_mono T n) (unifPart_zero T n) (fun i ↦ hadap _) (fun i ω ↦ hbdd _ ω) n hlast.ge
 
 omit hB mΩ in
 /-- **Per-path Doléans convergence.** If the Riemann–Itô sums `riemannσ` along a subsequence
@@ -183,10 +182,9 @@ lemma memLp_Zn_two (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → �
   haveI : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · exact memLp_const 1
-  · have hlast : unifPart T n n = T := by
-      rw [unifPart, div_self (Nat.cast_ne_zero.mpr hn.ne'), one_mul]
+  · have hlast : unifPart T n n = T := unifPart_self T hn.ne'
     exact memLp_simpleDoleans_two (X := B) (𝓕 := natFiltration hBmeas) (P := μ)
-      (unifPart_mono T n) (by simp [unifPart]) (fun i ↦ hadap _) (fun i ω ↦ hbdd _ ω) n hlast.ge
+      (unifPart_mono T n) (unifPart_zero T n) (fun i ↦ hadap _) (fun i ω ↦ hbdd _ ω) n hlast.ge
 
 include hB in
 /-- Unit `P`-mean of the approximant density: `∫ Zⁿ_T = 1`. -/
@@ -290,10 +288,9 @@ lemma quad_integral_Zn_le (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → �
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · simp only [simpleDoleansExp, one_pow, integral_const, probReal_univ, smul_eq_mul, mul_one]
     exact Real.one_le_exp (by positivity)
-  · have hlast : unifPart T n n = T := by
-      rw [unifPart, div_self (Nat.cast_ne_zero.mpr hn.ne'), one_mul]
+  · have hlast : unifPart T n n = T := unifPart_self T hn.ne'
     exact quad_integral_simpleDoleans_le (X := B) (𝓕 := natFiltration hBmeas) (P := μ)
-      (unifPart_mono T n) (by simp [unifPart]) (fun i ↦ hadap _) (fun i ω ↦ hbdd _ ω) n hlast.ge
+      (unifPart_mono T n) (unifPart_zero T n) (fun i ↦ hadap _) (fun i ω ↦ hbdd _ ω) n hlast.ge
 
 omit hB mΩ in
 /-- The `unifPart` simple drift is bounded by `C·u` for `u ≤ T` (all `n`; `n = 0` is the empty sum).
@@ -306,9 +303,8 @@ lemma simpleDriftUnif_abs_le {θ : ℝ≥0 → Ω → ℝ} {C : ℝ} (hbdd : ∀
   · subst hn0
     simp only [simpleDrift, Finset.range_zero, Finset.sum_empty, abs_zero]
     exact mul_nonneg hC0 u.coe_nonneg
-  · have hlast : unifPart T n n = T := by
-      rw [unifPart, div_self (Nat.cast_ne_zero.mpr hn.ne'), one_mul]
-    exact simpleDrift_abs_le (unifPart_mono T n) (by simp [unifPart]) (fun i ω ↦ hbdd _ ω) n
+  · have hlast : unifPart T n n = T := unifPart_self T hn.ne'
+    exact simpleDrift_abs_le (unifPart_mono T n) (unifPart_zero T n) (fun i ω ↦ hbdd _ ω) n
       (huT.trans_eq hlast.symm) ω
 
 include hB in
@@ -446,10 +442,9 @@ lemma integrable_Zn_four (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω
   haveI : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · simp only [simpleDoleansExp, one_pow]; exact integrable_const 1
-  · have hlast : unifPart T n n = T := by
-      rw [unifPart, div_self (Nat.cast_ne_zero.mpr hn.ne'), one_mul]
+  · have hlast : unifPart T n n = T := unifPart_self T hn.ne'
     exact integrable_simpleDoleans_four (X := B) (𝓕 := natFiltration hBmeas) (P := μ)
-      (unifPart_mono T n) (by simp [unifPart]) (fun i ↦ hadap _) (fun i ω ↦ hbdd _ ω) n hlast.ge
+      (unifPart_mono T n) (unifPart_zero T n) (fun i ↦ hadap _) (fun i ω ↦ hbdd _ ω) n hlast.ge
 
 include hB in
 omit [IsProbabilityMeasure μ] in
@@ -676,10 +671,9 @@ theorem isExpQMartingale_BthetaCont (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ
             * simpleDoleansExp (X := B) (unifPart T n)
                 (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω) ∂μ := by
       intro n hn
-      have hlast : unifPart T n n = T := by
-        rw [unifPart, div_self (Nat.cast_ne_zero.mpr (by omega)), one_mul]
+      have hlast : unifPart T n n = T := unifPart_self T (by omega)
       have hfield := (isExpQMartingale_BthetaSimple (X := B) (𝓕 := natFiltration hBmeas) (P := μ)
-        (unifPart T n) (unifPart_mono T n) (by simp [unifPart]) (fun i ω ↦ θ (unifPart T n i) ω)
+        (unifPart T n) (unifPart_mono T n) (unifPart_zero T n) (fun i ω ↦ θ (unifPart T n i) ω)
         (fun i ↦ hadap (unifPart T n i)) (fun i ω ↦ hbdd (unifPart T n i) ω) n hlast.ge).martingale
         a hst' ht'T hA
       rwa [setIntegral_withDensity_ofReal

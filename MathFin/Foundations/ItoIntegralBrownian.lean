@@ -114,21 +114,7 @@ lemma itoSimple_stepSP {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t)) {a b : �
       = φ ω * (B b ω - B a ω)
   rw [Finsupp.sum_single_index (by simp)]
 
-/-! ### The uniform partition and adaptedness of `B` to its own filtration -/
-
-/-- The uniform partition points `unifPart T n = (k/n)·T` are monotone in `k`. -/
-lemma unifPart_mono (T : ℝ≥0) (n : ℕ) : Monotone (unifPart T n) :=
-  fun a b hab ↦ by simp only [unifPart]; gcongr
-
-/-- A partition point `unifPart T n j ≤ T` whenever `j ≤ n`. -/
-lemma unifPart_le_T {T : ℝ≥0} {n j : ℕ} (hj : j ≤ n) : unifPart T n j ≤ T := by
-  rcases Nat.eq_zero_or_pos n with hn | hn
-  · subst hn; simp only [Nat.le_zero] at hj; subst hj; simp [unifPart]
-  · rw [unifPart]
-    have h1 : (j : ℝ≥0) / n ≤ 1 := by
-      rw [div_le_one (by exact_mod_cast hn)]; exact_mod_cast hj
-    calc (j : ℝ≥0) / n * T ≤ 1 * T := by gcongr
-      _ = T := one_mul T
+/-! ### Adaptedness of `B` to its own filtration -/
 
 /-- `B s` is measurable with respect to the natural filtration at `s`: the
 natural filtration at `s` is `⨆ j ≤ s, comap (B j)`, which contains `comap (B s)`. -/

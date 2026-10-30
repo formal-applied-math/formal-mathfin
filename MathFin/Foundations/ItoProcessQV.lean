@@ -67,22 +67,15 @@ private lemma qv_bound (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable
       ≤ (3 * (Ca ^ 2 * (T : ℝ) ^ 2) ^ 2 + 12 * σ ^ 2 * Ca ^ 2 * (T : ℝ) ^ 3
           + 6 * σ ^ 4 * (T : ℝ) ^ 2) / n := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hn0 : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
   have hn1 : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
   have hnR : (0 : ℝ) < (n : ℝ) := by linarith
-  have hmono : Monotone (unifPart T n) := fun a b hab ↦ by
-    simp only [unifPart]; gcongr
-  have hs0 : unifPart T n 0 = 0 := by simp [unifPart]
-  have hsn : unifPart T n n = T := by
-    simp only [unifPart, div_self hn0, one_mul]
+  have hmono : Monotone (unifPart T n) := unifPart_mono T n
+  have hs0 : unifPart T n 0 = 0 := unifPart_zero T n
+  have hsn : unifPart T n n = T := unifPart_self T hn.ne'
   have hle : ∀ k, unifPart T n k ≤ unifPart T n (k + 1) := fun k ↦
     hmono (Nat.le_succ k)
-  have hgapeq : ∀ k, (unifPart T n (k + 1) : ℝ) - unifPart T n k = (T : ℝ) / n := by
-    intro k
-    simp only [unifPart]
-    push_cast
-    field_simp
-    ring
+  have hgapeq : ∀ k, (unifPart T n (k + 1) : ℝ) - unifPart T n k = (T : ℝ) / n :=
+    unifPart_succ_sub T n
   -- abbreviations for the three pieces
   set E : Ω → ℝ := fun ω ↦ ∑ k ∈ Finset.range n,
     (A (unifPart T n (k + 1)) ω - A (unifPart T n k) ω) ^ 2 with hE

@@ -217,10 +217,8 @@ theorem ito_formula_td_L2
     intro ω
     have hd := discrete_ito_formula_2d n (fun k ↦ (unifPart T n k : ℝ))
       (fun k ↦ B (unifPart T n k) ω) f f_t f_x f_xx
-    have hnn : unifPart T n n = T := by
-      have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-      simp only [unifPart, div_self hne, one_mul]
-    have hz : unifPart T n 0 = 0 := by simp [unifPart]
+    have hnn : unifPart T n n = T := unifPart_self T hn.ne'
+    have hz : unifPart T n 0 = 0 := unifPart_zero T n
     rw [hnn, hz, NNReal.coe_zero] at hd
     simp only [hIsum, hTsum, hQVw, hRem]
     linarith [hd]
