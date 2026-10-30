@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.RiskMeasures.ValueAtRisk
 public import MathFin.RiskMeasures.AcceptanceSet
+public import MathFin.RiskMeasures.Coherent
 
 /-!
 # Expected shortfall is coherent: the Rockafellar–Uryasev theorem for every integrable loss
@@ -48,15 +49,13 @@ Acerbi and Tasche (`expectedShortfall_eq_acerbiTasche`).
 * `rockafellarUryasev`: the objective `c ↦ c + (1 − α)⁻¹ E[(X − c)⁺]`.
 * `isLeast_rockafellarUryasev`: `ES_α(X)` is its minimum; `rockafellarUryasev_valueAtRisk`: the
   minimum is attained at `VaR_α(X)`.
-* `IsCoherentRiskMeasure`: the four axioms of Artzner, Delbaen, Eber and Heath for a risk
-  measure on the integrable losses of a probability space.
 * `expectedShortfall_add_le`: subadditivity of ES.
 * `expectedShortfall_isCoherentRiskMeasure`: ES is a coherent risk measure.
 * `expectedShortfall_eq_acerbiTasche`: the Acerbi–Tasche formula.
 * `expectedShortfall_eq_setIntegral_tail`: without atoms, ES is the mean of the `α`-tail.
 * `isGreatest_integral_mul_expectedShortfall`: the dual representation of ES.
-* `expectedShortfall_isCoherentRisk`: on a finite probability space ES satisfies the ADEH axioms
-  of `RiskMeasures/AcceptanceSet.lean`, so the finite representation theorem
+* `expectedShortfall_isLUB_representingSet`: on a finite probability space ES is a coherent risk
+  measure of `RiskMeasures/AcceptanceSet.lean`, so the finite representation theorem
   `coherentRisk_isLUB` applies to it.
 -/
 
@@ -177,20 +176,6 @@ theorem expectedShortfall_add_le (hX : Integrable X P) (hY : Integrable Y P)
         linarith
     _ = expectedShortfall X P α + expectedShortfall Y P α := by
         rw [rockafellarUryasev_valueAtRisk hX hα, rockafellarUryasev_valueAtRisk hY hα]
-
-omit [IsProbabilityMeasure P] in
-/-- The four axioms of a **coherent risk measure** (Artzner, Delbaen, Eber and Heath 1999;
-McNeil–Frey–Embrechts, Definition 2.18) for a functional `ρ` on the integrable losses of
-`(Ω, P)`: monotonicity, translation invariance, positive homogeneity and subadditivity. A loss is
-signed as a loss, so a larger `X` is worse and `ρ` increases with it. `RiskMeasures/AcceptanceSet`
-states the same axioms for positions on a finite state space (`IsCoherentRisk`). -/
-structure IsCoherentRiskMeasure (P : Measure Ω) (ρ : (Ω → ℝ) → ℝ) : Prop where
-  mono : ∀ ⦃X Y : Ω → ℝ⦄, Integrable X P → Integrable Y P → X ≤ᵐ[P] Y → ρ X ≤ ρ Y
-  add_const : ∀ ⦃X : Ω → ℝ⦄, Integrable X P → ∀ m : ℝ, ρ (fun ω ↦ X ω + m) = ρ X + m
-  const_mul : ∀ ⦃X : Ω → ℝ⦄, Integrable X P → ∀ ⦃c : ℝ⦄, 0 ≤ c →
-    ρ (fun ω ↦ c * X ω) = c * ρ X
-  add_le : ∀ ⦃X Y : Ω → ℝ⦄, Integrable X P → Integrable Y P →
-    ρ (fun ω ↦ X ω + Y ω) ≤ ρ X + ρ Y
 
 /-- **Expected shortfall is a coherent risk measure** on the integrable losses (Acerbi and Tasche
 2002; McNeil–Frey–Embrechts, Proposition 8.13 context). -/
@@ -407,54 +392,17 @@ theorem expectedShortfall_mono_level (hX : Integrable X P) (hα : α ∈ Ioo 0 1
 
 /-! ### Finite state spaces: ES in the ADEH framework -/
 
-/-- On a finite probability space, `X ↦ ES_α(−X)` satisfies the four axioms of Artzner, Delbaen,
-Eber and Heath for positions (`IsCoherentRisk`, `RiskMeasures/AcceptanceSet.lean`). A position `X`
-is a gain, so its loss is `−X`. -/
-theorem expectedShortfall_isCoherentRisk {ι : Type*} [Fintype ι] [MeasurableSpace ι]
-    [MeasurableSingletonClass ι] (P : Measure ι) [IsProbabilityMeasure P] (hα : α ∈ Ioo 0 1) :
-    IsCoherentRisk fun X : ι → ℝ ↦ expectedShortfall (fun i ↦ -X i) P α where
-  monotone X Y hXY := expectedShortfall_mono .of_finite .of_finite
-    (ae_of_all _ fun i ↦ neg_le_neg (hXY i)) hα
-  cashInvariant X m := by
-    simp_rw [neg_add]
-    rw [expectedShortfall_add_const .of_finite hα, sub_eq_add_neg]
-  posHom l hl X := by
-    simp_rw [Pi.smul_apply, smul_eq_mul, ← mul_neg]
-    exact expectedShortfall_const_mul .of_finite hα hl
-  subadditive X Y := by
-    simp_rw [Pi.add_apply, neg_add]
-    exact expectedShortfall_add_le .of_finite .of_finite hα
-
-/-- **From losses to positions**: on a finite space, every coherent risk measure of losses
-(`IsCoherentRiskMeasure`) gives the coherent risk measure of positions `X ↦ ρ(−X)` in the sense of
-Artzner, Delbaen, Eber and Heath (`IsCoherentRisk`, `RiskMeasures/AcceptanceSet.lean`). A position
-`X` is a gain, so its loss is `−X`. `expectedShortfall_isCoherentRisk` is the case of expected
-shortfall. -/
-theorem IsCoherentRiskMeasure.isCoherentRisk_neg {ι : Type*} [Fintype ι] [MeasurableSpace ι]
-    [MeasurableSingletonClass ι] {P : Measure ι} [IsFiniteMeasure P] {ρ : (ι → ℝ) → ℝ}
-    (hρ : IsCoherentRiskMeasure P ρ) : IsCoherentRisk fun X : ι → ℝ ↦ ρ fun i ↦ -X i where
-  monotone X Y hXY := hρ.mono .of_finite .of_finite (ae_of_all _ fun i ↦ neg_le_neg (hXY i))
-  cashInvariant X m := by
-    simp_rw [neg_add]
-    rw [hρ.add_const .of_finite, sub_eq_add_neg]
-  posHom l hl X := by
-    simp_rw [Pi.smul_apply, smul_eq_mul, ← mul_neg]
-    exact hρ.const_mul .of_finite hl
-  subadditive X Y := by
-    simp_rw [Pi.add_apply, neg_add]
-    exact hρ.add_le .of_finite .of_finite
-
-/-- **ES has an ADEH representation**: on a finite probability space, `ES_α(−X)` is the least upper
-bound of the expected losses `∑ qᵢ (−Xᵢ)` over the representing set of `X ↦ ES_α(−X)`
-(`coherentRisk_isLUB` applied to `expectedShortfall_isCoherentRisk`). The dual representation
-`isGreatest_integral_mul_expectedShortfall` says the same supremum is attained over the densities
-bounded by `(1 − α)⁻¹`. That this set *is* the representing set is not proved here. -/
+/-- **ES has an ADEH representation**: on a finite probability space, `ES_α(L)` is the least upper
+bound of the expected losses `∑ qᵢ Lᵢ` over the representing set of `ES_α`
+(`coherentRisk_isLUB` applied to `expectedShortfall_isCoherentRiskMeasure`). The dual
+representation `isGreatest_integral_mul_expectedShortfall` says the same supremum is attained over
+the densities bounded by `(1 − α)⁻¹`. That this set *is* the representing set is not proved
+here. -/
 theorem expectedShortfall_isLUB_representingSet {ι : Type*} [Fintype ι] [MeasurableSpace ι]
     [MeasurableSingletonClass ι] (P : Measure ι) [IsProbabilityMeasure P] (hα : α ∈ Ioo 0 1)
-    (X : ι → ℝ) :
-    IsLUB ((fun q ↦ ∑ i, q i * (-X i)) ''
-        representingSet fun X : ι → ℝ ↦ expectedShortfall (fun i ↦ -X i) P α)
-      (expectedShortfall (fun i ↦ -X i) P α) :=
-  coherentRisk_isLUB (expectedShortfall_isCoherentRisk P hα) X
+    (L : ι → ℝ) :
+    IsLUB ((fun q ↦ ∑ i, q i * L i) '' representingSet fun L : ι → ℝ ↦ expectedShortfall L P α)
+      (expectedShortfall L P α) :=
+  coherentRisk_isLUB (expectedShortfall_isCoherentRiskMeasure hα) L
 
 end MathFin

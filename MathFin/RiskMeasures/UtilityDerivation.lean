@@ -29,11 +29,12 @@ Two properties of the acceptance set follow from properties of `u`:
 A convex acceptance set gives a *convex* risk measure `ρ(X) = inf {m | X + m acceptable}`
 (Föllmer and Schied, *Convex measures of risk and trading constraints*, Finance Stoch. 6 (2002),
 429–447, whose case study is the shortfall risk of an expected-loss constraint). It does not give
-a *coherent* one. The acceptance set of a coherent risk measure is a cone (`IsCoherentRisk.cone`,
-`RiskMeasures/AcceptanceSet.lean`), and a risk-averse utility's acceptance set need not be one:
-`not_exists_isCoherentRisk_log_acceptance` exhibits a position that log utility accepts while
-rejecting three times that position, so no coherent risk measure has that acceptance set. Neither
-the construction of `ρ` from the acceptance set nor its convexity is formalized here.
+a *coherent* one. The acceptance set of a coherent risk measure is a cone
+(`IsCoherentRiskMeasure.cone`, `RiskMeasures/AcceptanceSet.lean`; a loss `L` is acceptable when
+the position `−L` is), and a risk-averse utility's acceptance set need not be one:
+`not_exists_isCoherentRiskMeasure_log_acceptance` exhibits a position that log utility accepts
+while rejecting three times that position, so no coherent risk measure has that acceptance set.
+Neither the construction of `ρ` from the acceptance set nor its convexity is formalized here.
 
 The von Neumann–Morgenstern layer gives two more facts about acceptance:
 
@@ -53,8 +54,8 @@ on a fair coin at odds `2`: the fraction `1/4` has positive growth, the fraction
   `acceptableUnderUtility_zero`.
 * `acceptableUnderUtility_affine_iff`, `acceptableUnderUtility_mix`.
 * `acceptableUnderUtility_log_iff_kellyGrowth`.
-* `not_exists_isCoherentRisk_log_acceptance`: the log-utility acceptance set of the fair coin is
-  the acceptance set of no coherent risk measure.
+* `not_exists_isCoherentRiskMeasure_log_acceptance`: the log-utility acceptance set of the fair
+  coin is the acceptance set of no coherent risk measure.
 -/
 
 @[expose] public section
@@ -76,7 +77,7 @@ Pointwise concavity gives `α u(W + X) + (1 − α) u(W + Y) ≤ u(W + αX + (1 
 Taking expectations with `p ≥ 0` and using `u(W) ≤ E[u(W + X)]`, `u(W) ≤ E[u(W + Y)]` gives the
 claim. A convex acceptance set is the acceptance set of a convex risk measure (not formalized
 here); it need not be the acceptance set of a coherent one
-(`not_exists_isCoherentRisk_log_acceptance`). -/
+(`not_exists_isCoherentRiskMeasure_log_acceptance`). -/
 theorem acceptableUnderUtility_convex
     {ι : Type*} (s : Finset ι) (p : ι → ℝ) (u : ℝ → ℝ) (W : ℝ)
     (hp_nonneg : ∀ i ∈ s, 0 ≤ p i)
@@ -178,22 +179,26 @@ lemma kellyGrowth_half_two_three_quarters_neg : kellyGrowth (1 / 2) 2 (3 / 4) < 
 /-- **The log-utility acceptance set is not a cone, so no coherent risk measure has it.** On a
 fair coin at unit wealth, log utility accepts the Kelly bet `X = (1/2, −1/4)` (fraction `1/4` at
 odds `2`, positive expected log-growth) and rejects `3X = (3/2, −3/4)` (fraction `3/4`, negative
-growth). The acceptance set `{X | ρ X ≤ 0}` of a coherent risk measure is closed under
-nonnegative scaling (`IsCoherentRisk.cone`), so it is not this set. Log utility is concave on
-positive wealth, and both positions keep wealth positive: risk aversion makes an acceptance set
-convex (`acceptableUnderUtility_convex`), not a cone. -/
-theorem not_exists_isCoherentRisk_log_acceptance :
-    ¬∃ ρ : (Fin 2 → ℝ) → ℝ, IsCoherentRisk ρ ∧
-      ∀ X, ρ X ≤ 0 ↔ acceptableUnderUtility Finset.univ ![1 / 2, 1 / 2] Real.log 1 X := by
-  rintro ⟨ρ, hρ, hA⟩
+growth). A loss `L` is acceptable when the position `−L` is. The acceptance set `{L | ρ L ≤ 0}` of
+a coherent risk measure, for any finite measure on the two states, is closed under nonnegative
+scaling (`IsCoherentRiskMeasure.cone`), so it is not the set of losses of acceptable positions.
+Log utility is concave on positive wealth, and both positions keep wealth positive: risk aversion
+makes an acceptance set convex (`acceptableUnderUtility_convex`), not a cone. -/
+theorem not_exists_isCoherentRiskMeasure_log_acceptance :
+    ¬∃ (P : MeasureTheory.Measure (Fin 2)) (_ : MeasureTheory.IsFiniteMeasure P) (ρ : (Fin 2 → ℝ) → ℝ),
+      IsCoherentRiskMeasure P ρ ∧
+      ∀ L, ρ L ≤ 0 ↔ acceptableUnderUtility Finset.univ ![1 / 2, 1 / 2] Real.log 1 (-L) := by
+  rintro ⟨P, _, ρ, hρ, hA⟩
   rw [show (![1 / 2, 1 / 2] : Fin 2 → ℝ) = ![1 / 2, 1 - 1 / 2] by norm_num] at hA
-  have hX : (![1 / 4 * 2, -(1 / 4)] : Fin 2 → ℝ) ∈ {X : Fin 2 → ℝ | ρ X ≤ 0} :=
-    (hA _).2 ((acceptableUnderUtility_log_iff_kellyGrowth _ _ _).2
-      kellyGrowth_half_two_quarter_pos.le)
-  have h3X : ρ ((3 : ℝ) • (![1 / 4 * 2, -(1 / 4)] : Fin 2 → ℝ)) ≤ 0 := hρ.cone hX (by norm_num)
-  have hv : (3 : ℝ) • (![1 / 4 * 2, -(1 / 4)] : Fin 2 → ℝ) = ![3 / 4 * 2, -(3 / 4)] := by
+  have hX : -(![1 / 4 * 2, -(1 / 4)] : Fin 2 → ℝ) ∈ {L : Fin 2 → ℝ | ρ L ≤ 0} :=
+    (hA _).2 (by
+      rw [neg_neg]
+      exact (acceptableUnderUtility_log_iff_kellyGrowth _ _ _).2
+        kellyGrowth_half_two_quarter_pos.le)
+  have h3X : ρ ((3 : ℝ) • -(![1 / 4 * 2, -(1 / 4)] : Fin 2 → ℝ)) ≤ 0 := hρ.cone hX (by norm_num)
+  have hv : -((3 : ℝ) • -(![1 / 4 * 2, -(1 / 4)] : Fin 2 → ℝ)) = ![3 / 4 * 2, -(3 / 4)] := by
     norm_num
-  rw [hv, hA, acceptableUnderUtility_log_iff_kellyGrowth] at h3X
+  rw [hA, hv, acceptableUnderUtility_log_iff_kellyGrowth] at h3X
   exact absurd h3X (not_le.2 kellyGrowth_half_two_three_quarters_neg)
 
 end MathFin
