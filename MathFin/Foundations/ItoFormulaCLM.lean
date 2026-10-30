@@ -5,30 +5,24 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoFormulaC2
-public import MathFin.Foundations.ItoIntegralRiemannBridge
+public import MathFin.Foundations.ItoFormulaTD
 
-/-! # CLM-identified continuous-time Itô formula (L²)
+/-! # CLM-identified continuous-time Itô formula (L²), time-independent case
 
-Identifies the named-limit Itô formula (`ito_formula_L2`, A-core) with the genuine
-continuous Itô integral `itoIntegralCLM_T` (A3). For `f ∈ C³` with bounded `f′, f″, f‴`,
+For `f ∈ C³` with bounded `f′, f″, f‴`,
 
   `f(B_T) − f(B_0) =ᵐ[μ] itoIntegralCLM_T gf' + ½∫₀ᵀ f″(B_s) ds`,
 
-where `gf'` is the Itô-`L²` realization of `s ↦ f′(B_s)`. The named limit `I` of the
-Riemann–Itô sums (A-core) and the CLM integral (A3) are *both* the `L²`-limit of the same
-sums `∑ f′(B_{tₖ})·ΔBₖ`, so by uniqueness of `L²` limits they coincide a.e.
-
-`I ∈ L²` (needed to take the `toLp` class) because `f` is Lipschitz (`f′` bounded), so
-`f(B_T)` is dominated by `|f 0| + C₁·|B_T|`, an `L²` function.
+where `gf'` is the Itô-`L²` realization of `s ↦ f′(B_s)`. This is the `f(t, x) = f(x)`
+(`f_t = 0`) instance of the time-dependent formula `ito_formula_td_L2_bddDeriv`
+(`ItoFormulaTD`); there is no separate time-independent proof.
 -/
 
 @[expose] public section
 
 namespace MathFin
 
-open MeasureTheory ProbabilityTheory Filter QuadraticVariationL2 ItoIntegralCLM
-  ItoIntegralBrownian ItoIntegralRiemannBridge
+open MeasureTheory ProbabilityTheory Filter ItoIntegralCLM ItoIntegralBrownian
 open scoped NNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
@@ -55,48 +49,19 @@ theorem ito_formula_L2_bddDeriv
       (fun ω ↦ f (B T ω) - f (B 0 ω)) =ᵐ[μ]
         (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gf') ω
           + (1 / 2) * ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure) := by
-  have hf'_cont : Continuous f' := continuous_iff_continuousAt.mpr fun x ↦ (hf' x).continuousAt
-  have hf''_cont : Continuous f'' := continuous_iff_continuousAt.mpr fun x ↦ (hf'' x).continuousAt
-  have hf_cont : Continuous f := continuous_iff_continuousAt.mpr fun x ↦ (hf x).continuousAt
-  obtain ⟨gf', hname, hgf'⟩ := itoIntegralCLM_T_of_bdd_cont hB hBmeas hBcont hf'_cont hf1 T
+  obtain ⟨gf', hname, hae⟩ := ito_formula_td_L2_bddDeriv hB hBmeas hBcont T
+    (f := fun _ ↦ f) (f_t := fun _ _ ↦ 0) (f_x := fun _ ↦ f') (f_xx := fun _ ↦ f'')
+    (f_tt := fun _ _ ↦ 0) (f_tx := fun _ _ ↦ 0) (f_xxx := fun _ ↦ f''')
+    (fun t _ ↦ hasDerivAt_const t _) (fun t _ ↦ hasDerivAt_const t _)
+    (fun _ _ ↦ hasDerivAt_const _ _) (fun _ x ↦ hf x) (fun _ x ↦ hf' x) (fun _ x ↦ hf'' x)
+    ((continuous_iff_continuousAt.mpr fun x ↦ (hf' x).continuousAt).comp continuous_snd)
+    ((continuous_iff_continuousAt.mpr fun x ↦ (hf'' x).continuousAt).comp continuous_snd)
+    (Ct := 0) (C1 := C1) (C2 := C2) (Ctt := 0) (Ctx := 0) (Cxxx := C3)
+    (by simp) (fun _ x ↦ hf1 x) (fun _ x ↦ hf2 x) (by simp) (by simp) (fun _ x ↦ hf3 x)
   refine ⟨gf', hname, ?_⟩
-  set I : Ω → ℝ := fun ω ↦ f (B T ω) - f (B 0 ω)
-    - (1 / 2) * ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure with hI
-  -- `f` is `C₁`-Lipschitz, so `f(B_t)` is dominated by `|f 0| + C₁·|B_t| ∈ L²`
-  have hlip : ∀ x : ℝ, |f x| ≤ |f 0| + C1 * |x| := fun x ↦ by
-    have h := (convex_uIcc (0 : ℝ) x).norm_image_sub_le_of_norm_hasDerivWithin_le
-      (fun u _ ↦ (hf u).hasDerivWithinAt) (fun u _ ↦ by rw [Real.norm_eq_abs]; exact hf1 u)
-      Set.left_mem_uIcc Set.right_mem_uIcc
-    rw [Real.norm_eq_abs, Real.norm_eq_abs, sub_zero] at h
-    have h2 : |f x| - |f 0| ≤ |f x - f 0| := abs_sub_abs_le_abs_sub _ _
-    linarith [h, h2]
-  have hfB : ∀ t : ℝ≥0, MemLp (fun ω ↦ f (B t ω)) 2 μ := fun t ↦ by
-    refine MemLp.mono ((memLp_const (μ := μ) |f 0|).add
-        ((memLp_eval hB t).norm.const_mul C1))
-      ((hf_cont.measurable.comp (hBmeas t)).aestronglyMeasurable) (ae_of_all _ fun ω ↦ ?_)
-    calc ‖f (B t ω)‖ = |f (B t ω)| := Real.norm_eq_abs _
-      _ ≤ |f 0| + C1 * ‖B t ω‖ := by rw [Real.norm_eq_abs]; exact hlip (B t ω)
-      _ ≤ ‖|f 0| + C1 * ‖B t ω‖‖ := le_abs_self _
-  have hI_memLp : MemLp I 2 μ :=
-    ((hfB T).sub (hfB 0)).sub
-      ((memLp_pathIntegral hB hBmeas hBcont hf''_cont hf2 T).const_mul (1 / 2))
-  -- A-core: the Riemann sums converge in `L²` to `I`; lift to `Lp`
-  have hcore := ito_formula_L2 hB hBmeas hBcont T hf hf' hf'' hf2 hf3
-  have hRmem (n : ℕ) : MemLp (riemannσ (B := B) (fun s ω ↦ f' (B s ω)) T n) 2 μ :=
-    memLp_riemannσ hB hBmeas (fun t ↦ stronglyMeasurable_comp_eval hBmeas hf'_cont.measurable t)
-      (fun _ _ ↦ hf1 _) T n
-  have hcore_Lp : Tendsto (fun n ↦ (hRmem n).toLp (riemannσ (B := B) (fun s ω ↦ f' (B s ω)) T n))
-      atTop (𝓝 (hI_memLp.toLp I)) :=
-    tendsto_iff_norm_sub_tendsto_zero.mpr (tendsto_norm_toLp_sub' hRmem hI_memLp hcore)
-  -- both limits are the same `L²` limit ⇒ they coincide
-  have huniq : hI_memLp.toLp I = itoIntegralCLM_T hB T hBmeas gf' :=
-    tendsto_nhds_unique hcore_Lp hgf'
-  have hae : I =ᵐ[μ] (itoIntegralCLM_T hB T hBmeas gf') := by
-    rw [← huniq]; exact (hI_memLp.coeFn_toLp).symm
   filter_upwards [hae] with ω hω
-  rw [hI] at hω
-  simp only at hω
-  linarith [hω]
+  simp only [zero_add] at hω
+  rw [hω, integral_const_mul]
 
 omit hB in
 /-- **Continuity discharged.** The bounded-derivative Itô formula for the continuous

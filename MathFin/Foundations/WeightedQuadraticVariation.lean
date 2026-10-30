@@ -13,11 +13,10 @@ public import MathFin.Foundations.ItoIntegralL2
 The second-order term of Itô's lemma. For a **bounded adapted weight process** `w` with
 continuous paths, the `w`-weighted sum of squared Brownian increments along the uniform
 partition of `[0,T]` converges in `L²(μ)` to the pathwise integral `∫₀ᵀ w_s ds`
-(`tendsto_weighted_qv_process`). The classical instantiations are `w s ω = g (B s ω)` for
-bounded continuous `g` (`tendsto_weighted_qv`, the use case `g = f″` of the
-time-independent Itô formula) and `w s ω = h (s, B s ω)` for jointly continuous bounded
-`h` (the time-dependent Itô formula's `h = f_xx`) — the fluctuation engine never cared
-where the weight came from, only that it is adapted and bounded.
+(`tendsto_weighted_qv_process`). The classical instantiation is `w s ω = h (s, B s ω)` for
+jointly continuous bounded `h` (the time-dependent Itô formula's `h = f_xx`; the
+time-independent weight `g (B s ω)` is the case of `h` constant in time) — the fluctuation
+engine never cared where the weight came from, only that it is adapted and bounded.
 
 This generalizes `QuadraticVariationL2.tendsto_qv` (the `w ≡ 1` case, limit `T`). The
 proof splits the difference into
@@ -582,26 +581,6 @@ theorem tendsto_weighted_qv_process
   tendsto_weighted_qv_process_of_ae_continuous hB hBmeas hw_adapt hC0 hw_bdd T
     (Eventually.of_forall fun ω ↦ (hw_cont ω).continuousOn)
 
-/-- **Weighted quadratic variation.** For bounded continuous `g`, the `g(B)`-weighted sum
-of squared increments along the uniform partition of `[0,T]` converges in `L²(μ)` to
-`∫₀ᵀ g(B_s) ds`. The continuous-weight generalization of `tendsto_qv`; the instantiation
-`w s ω = g (B s ω)` of `tendsto_weighted_qv_process`. -/
-theorem tendsto_weighted_qv
-    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ B s ω))
-    {g : ℝ → ℝ} (hg_cont : Continuous g) {C : ℝ} (hg_bdd : ∀ x, |g x| ≤ C) (T : ℝ≥0) :
-    Tendsto (fun n : ℕ ↦
-        ∫ ω, (∑ k ∈ Finset.range n,
-                g (B (unifPart T n k) ω)
-                  * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
-              - ∫ s in Set.Ioc 0 T, g (B s ω) ∂ItoIntegralL2.timeMeasure) ^ 2 ∂μ)
-      atTop (𝓝 0) :=
-  tendsto_weighted_qv_process hB hBmeas
-    (w := fun s ω ↦ g (B s ω))
-    (fun _s ↦ adaptedAt_comp_eval le_rfl hg_cont.measurable)
-    (fun ω ↦ hg_cont.comp (hBcont ω))
-    (le_trans (abs_nonneg _) (hg_bdd 0))
-    (fun _s _ω ↦ hg_bdd _) T
-
 omit hB in
 /-- The pathwise integral `ω ↦ ∫₀ᵀ w_s(ω) ds` of a bounded measurable process with
 continuous paths lies in `L²(μ)`: it is measurable (a pointwise limit of the measurable
@@ -615,20 +594,6 @@ theorem memLp_pathIntegral_process [IsFiniteMeasure μ]
   MemLp.of_bound (measurable_pathIntegral hw_meas hw_cont T).aestronglyMeasurable
     (C * T) (Eventually.of_forall fun ω ↦ by
       rw [Real.norm_eq_abs]; exact abs_pathIntegral_le hw_cont hC0 hw_bdd T ω)
-
-/-- The pathwise second-order term `ω ↦ ∫₀ᵀ g(B_s ω) ds` of a bounded continuous weight
-lies in `L²(μ)`. The instantiation `w s ω = g (B s ω)` of `memLp_pathIntegral_process`. -/
-theorem memLp_pathIntegral (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ B s ω)) {g : ℝ → ℝ} (hg_cont : Continuous g)
-    {C : ℝ} (hg_bdd : ∀ x, |g x| ≤ C) (T : ℝ≥0) :
-    MemLp (fun ω ↦ ∫ s in Set.Ioc 0 T, g (B s ω) ∂ItoIntegralL2.timeMeasure) 2 μ := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  exact memLp_pathIntegral_process (μ := μ)
-    (w := fun s ω ↦ g (B s ω))
-    (fun s ↦ hg_cont.measurable.comp (hBmeas s))
-    (fun ω ↦ hg_cont.comp (hBcont ω))
-    (le_trans (abs_nonneg _) (hg_bdd 0))
-    (fun _s _ω ↦ hg_bdd _) T
 
 omit hB in
 /-- `memLp_pathIntegral_process` for a weight whose paths are continuous on `[0, T]` only almost

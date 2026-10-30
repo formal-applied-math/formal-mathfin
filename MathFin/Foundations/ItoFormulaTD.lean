@@ -11,7 +11,7 @@ public import MathFin.Foundations.ItoIntegralRiemannBridgeTD
 
 /-! # Time-dependent Itô formula in `L²` (named-limit + CLM-identified)
 
-Summit A′: the time-dependent analogue of `ito_formula_L2` / `ito_formula_L2_bddDeriv`.
+Summit A′: the time-dependent analogue of `ito_formula_L2_bddDeriv`, of which that is the `f_t = 0` case.
 For `f(t, x)` of class `C^{1,2}` with the displayed bounded higher partials,
 
   `f(T, B_T) − f(0, B_0) =ᵐ[μ] itoIntegralCLM_T gfx + ∫₀ᵀ (f_t + ½ f_xx)(s, B_s) ds`,

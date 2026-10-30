@@ -123,7 +123,7 @@ and an `X` with `X t = c + ∫₀ᵗ β_s ds + M t` (`hXrel`) whose paths are co
 the module docstring).
 
 `ΔX` over a cell splits into the drift increment plus the martingale increment. The proof is
-the partition/Taylor skeleton of `ItoFormulaC2` at the path `k ↦ X_{tₖ}`
+the partition/Taylor skeleton of `ItoFormulaTD` (with `f_t = 0`) at the path `k ↦ X_{tₖ}`
 (`MathFin.discrete_ito_formula` — an exact per-path identity), with the three terms
 dispatched by: pathwise Riemann sums (drift), the summed weighted increment isometry at the
 adapted weight `f''(X)` (martingale square), and a cubic-moment bound (Taylor remainder).

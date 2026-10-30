@@ -25,8 +25,8 @@ space (`abs_taylor1_le`), a mean-value bound on the space-section of `f_t`
 (`abs_sub_le_of_hasDerivAt`), and the 1D cubic bound `abs_discreteTaylorRemainder_le`
 applied to the `t₀`-section. Under Brownian scaling `E[R²] = O(Δt³)` (the Gaussian
 moments `E[ΔB²] = Δt`, `E[ΔB⁶] = 15Δt³`), so Cauchy–Schwarz on the sum gives
-`E[(∑ₖ Rₖ)²] ≤ n·∑ₖ E[Rₖ²] = O(n⁻¹) → 0` — the same rate as the time-independent
-remainder `tendsto_ito_remainder`.
+`E[(∑ₖ Rₖ)²] ≤ n·∑ₖ E[Rₖ²] = O(n⁻¹) → 0`; the time-independent remainder is the case
+`f_t = 0`.
 -/
 
 @[expose] public section

@@ -9,13 +9,13 @@ public import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
 
 /-! # Riemann ↔ CLM bridge for bounded jointly-continuous time-dependent integrands
 
-Generalizes `ItoIntegralRiemannBridge.itoIntegralCLM_T_of_bdd_cont` (integrand `φ ∘ B`)
+Generalizes the Riemann ↔ CLM bridge for an integrand `φ ∘ B` (the case of `φ` constant in time)
 to a **time-dependent** integrand `(s, ω) ↦ φ(s, B_s ω)` for bounded jointly continuous
 `φ : ℝ → ℝ → ℝ`. The uniform-partition Riemann–Itô sums `∑ φ(tₖ, B_{tₖ})·ΔBₖ` converge
 in `L²(μ)` to the genuine continuous Itô integral `itoIntegralCLM_T gφ`, where `gφ` is
 the trim-`L²` realization of `s ↦ φ(s, B_s)`.
 
-Like the `φ ∘ B` bridge, this is the adapted bridge (`itoIntegralCLM_T_of_bdd_adapted_cont`)
+Like the `φ ∘ B` case, this is the adapted bridge (`itoIntegralCLM_T_of_bdd_adapted_cont`)
 at the integrand `θ s ω = φ(s, B_s ω)`: the time slot is the *deterministic* node, so `θ` is
 adapted and bounded, and `s ↦ φ(s, B_s ω)` is continuous by joint continuity composed with
 `s ↦ (s, B_s ω)`. The time-dependent Itô formula consumes this at `φ = f_x`.

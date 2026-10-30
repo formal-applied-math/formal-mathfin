@@ -248,8 +248,6 @@ import MathFin.Foundations.ItoIntegralLocality
 -- Summit A: bounded-derivative continuous-time Itô formula in L² (CLM-identified)
 import MathFin.Foundations.WeightedQuadraticVariation
 import MathFin.Foundations.ItoFormulaRemainder
-import MathFin.Foundations.ItoFormulaC2
-import MathFin.Foundations.ItoIntegralRiemannBridge
 -- Riemann↔CLM bridge for a bounded adapted continuous integrand θ (α4 brick b): ∫θdB CLM
 import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
 -- Step B1 of the adapted-coefficient Itô formula: freezing the integrand on a partition

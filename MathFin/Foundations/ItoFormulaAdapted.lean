@@ -10,7 +10,7 @@ public import MathFin.Foundations.AdaptedRiemannStieltjes
 public import MathFin.Foundations.AdaptedDrift
 public import MathFin.Foundations.ItoFormulaRemainder
 
-/-! # Itô's formula for an Itô process with adapted coefficients
+/-! # The Itô process with adapted coefficients, and the convergences behind its Itô formula
 
 Let `B` be a Brownian motion every path of which is continuous, and let `σ` and `b` be bounded
 processes, adapted to the natural filtration of `B`, every path of which is continuous. Fix a
@@ -19,16 +19,14 @@ horizon `T` and a deterministic starting point `x₀`, and let
 `X_t = x₀ + ∫₀ᵗ b_s ds + ∫₀ᵗ σ_s dB_s`
 
 (`adaptedItoProcess`: the pathwise drift integral plus the continuous modification of the
-stochastic integral). For `f` twice continuously differentiable with `f'` and `f''` bounded,
-
-`f(X_T) − f(x₀) = ∫₀ᵀ f'(X_s) σ_s dB_s + ∫₀ᵀ (f'(X_s) b_s + ½ f''(X_s) σ_s²) ds`
-
-almost surely (`ito_formula_adapted`).
+stochastic integral). This module builds the process and proves the three convergences in
+measure that Itô's formula for it is assembled from; the formula itself is in
+`ItoFormulaAdaptedTD` (`ito_formula_adapted`, `ito_formula_adapted_td_against`), where the
+one-variable `f(x)` is the case `f_t = 0` of `f(t, x)`.
 
 `X` is a functional of the path of `B`, not a function of `(t, B_t)`, so the formula does not
-reduce to the one for functions of Brownian motion. The proof is the classical one. On the
-uniform partition of `[0, T]` the discrete formula `discrete_ito_formula` splits
-`f(X_T) − f(X_0)` into four sums:
+reduce to the one for functions of Brownian motion. The classical proof splits `f(X_T) − f(X_0)`
+on the uniform partition of `[0, T]` by the discrete formula into sums that converge:
 
 * `∑ f'(X_{tₖ}) ΔAₖ → ∫ f'(X) b ds` on every path where `X` is continuous
   (`tendsto_sum_mul_driftPath_sub`);
@@ -36,18 +34,12 @@ uniform partition of `[0, T]` the discrete formula `discrete_ito_formula` splits
   mean-square convergence `tendsto_itoIntegralAgainst_stepσ`);
 * `∑ f''(X_{tₖ}) (ΔXₖ)² → ∫ f''(X) σ² ds` in measure (`tendstoInMeasure_weighted_qv_adapted`,
   from the `L¹` convergence `tendsto_weighted_qv_adapted`);
-* the Taylor remainders, at most `ρ(maxₖ|ΔXₖ|) · ∑ (ΔXₖ)²` for `ρ` the modulus of continuity
-  of `f''` on the range of the path, tend to `0` on every continuous path along which
-  `∑ (ΔXₖ)²` stays bounded (`tendsto_sum_discreteTaylorRemainder`).
+* the Taylor remainders, which are controlled by the modulus of continuity of the second
+  derivative on the range of the path (`abs_discreteTaylorRemainder_le_of_abs_sub_le`) and the
+  uniform smallness of the increments of a continuous path
+  (`eventually_abs_sub_unifPart_lt`).
 
-The limits in measure hold almost surely along a common subsequence of partitions. Along it all
-four sums converge at almost every `ω`, and the path-level statement `ito_formula_of_tendsto`
-finishes.
-
-The statement is at the terminal time `T`, for bounded coefficients and bounded derivatives.
-`ItoFormulaAdaptedTD` extends it to every `f ∈ C²`, and to `f(t, x)`, at each `t ≤ T`, with the
-stochastic integral read as a limit in probability of Riemann sums, and
-`ItoFormulaAdaptedUnbounded` to unbounded coefficients.
+The limits in measure hold almost surely along a common subsequence of partitions.
 -/
 
 @[expose] public section
@@ -112,80 +104,6 @@ theorem abs_discreteTaylorRemainder_le_of_abs_sub_le {f f' f'' : ℝ → ℝ}
         - (f x - f x - f' x * (x - x) - 1 / 2 * f'' x * (x - x) ^ 2)
       = discreteTaylorRemainder f f' f'' x y from by unfold discreteTaylorRemainder; ring] at h
   exact h.trans_eq (by rw [mul_assoc, ← sq, sq_abs])
-
-/-- **The Taylor remainders vanish along a continuous path with bounded squared-increment
-sums.** The path stays in a compact interval, on which `f''` is uniformly continuous, so once
-the increments are small each remainder is at most `η (Δx)²`
-(`abs_discreteTaylorRemainder_le_of_abs_sub_le`), and the sum at most `η Q`. -/
-theorem tendsto_sum_discreteTaylorRemainder (T : ℝ≥0) {f f' f'' : ℝ → ℝ}
-    (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
-    (hf'' : Continuous f'') {x : ℝ≥0 → ℝ} (hx : ContinuousOn x (Icc 0 T)) {ν : ℕ → ℕ}
-    (hν : Tendsto ν atTop atTop) {Q : ℝ}
-    (hQ : ∀ᶠ i in atTop, ∑ k ∈ Finset.range (ν i),
-      (x (unifPart T (ν i) (k + 1)) - x (unifPart T (ν i) k)) ^ 2 ≤ Q) :
-    Tendsto (fun i ↦ ∑ k ∈ Finset.range (ν i), discreteTaylorRemainder f f' f''
-      (x (unifPart T (ν i) k)) (x (unifPart T (ν i) (k + 1)))) atTop (𝓝 0) := by
-  obtain ⟨R, hR⟩ := isCompact_Icc.exists_bound_of_continuousOn hx
-  refine Metric.tendsto_nhds.2 fun ε hε ↦ ?_
-  have hη : 0 < ε / (|Q| + 1) := by positivity
-  obtain ⟨δ, hδ, hfδ⟩ := Metric.uniformContinuousOn_iff.1
-    (isCompact_Icc.uniformContinuousOn_of_continuous hf''.continuousOn (s := Icc (-R) R)) _ hη
-  filter_upwards [hν.eventually (eventually_abs_sub_unifPart_lt T hx hδ), hQ] with i hosc hQi
-  have hmem {k : ℕ} (hk : k ≤ ν i) : x (unifPart T (ν i) k) ∈ Icc (-R) R :=
-    abs_le.1 (hR _ ⟨zero_le, unifPart_le_T hk⟩)
-  rw [Real.dist_eq, sub_zero]
-  calc |∑ k ∈ Finset.range (ν i), discreteTaylorRemainder f f' f''
-          (x (unifPart T (ν i) k)) (x (unifPart T (ν i) (k + 1)))|
-      ≤ ∑ k ∈ Finset.range (ν i), ε / (|Q| + 1)
-          * (x (unifPart T (ν i) (k + 1)) - x (unifPart T (ν i) k)) ^ 2 :=
-        (Finset.abs_sum_le_sum_abs _ _).trans (Finset.sum_le_sum fun k hk ↦ by
-          have hk' := Finset.mem_range.mp hk
-          refine abs_discreteTaylorRemainder_le_of_abs_sub_le hf hf' fun t ht ↦ ?_
-          rw [← Real.dist_eq]
-          refine (hfδ _ (uIcc_subset_Icc (hmem hk'.le) (hmem hk') ht) _ (hmem hk'.le) ?_).le
-          rw [Real.dist_eq]
-          exact (abs_sub_left_of_mem_uIcc ht).trans_lt (hosc k hk'))
-    _ = ε / (|Q| + 1) * ∑ k ∈ Finset.range (ν i),
-          (x (unifPart T (ν i) (k + 1)) - x (unifPart T (ν i) k)) ^ 2 := by
-        rw [Finset.mul_sum]
-    _ ≤ ε / (|Q| + 1) * |Q| := by gcongr; exact hQi.trans (le_abs_self Q)
-    _ < ε := by
-        rw [div_mul_eq_mul_div, div_lt_iff₀ (by positivity)]
-        nlinarith [abs_nonneg Q]
-
-/-- **Itô's formula along one path.** Let `x = c + a + m` be a path continuous on `[0, T]`,
-and `f ∈ C²`. If, along a sequence of uniform partitions, the Riemann–Stieltjes sums of `f'(x)`
-against `a` and against `m` converge to `D` and `I`, the weighted squared-increment sums with
-weight `f''(x)` converge to `W`, and the squared-increment sums stay bounded, then
-`f(x_T) − f(x_0) = D + I + ½ W`. The discrete formula holds on each partition, and its Taylor
-remainders vanish in the limit. -/
-theorem ito_formula_of_tendsto (T : ℝ≥0) {f f' f'' : ℝ → ℝ}
-    (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
-    (hf'' : Continuous f'') {x a m : ℝ≥0 → ℝ} {c : ℝ} (hxam : ∀ t, x t = c + a t + m t)
-    (hx : ContinuousOn x (Icc 0 T)) {ν : ℕ → ℕ} (hν : Tendsto ν atTop atTop) {D I W Q : ℝ}
-    (hD : Tendsto (fun i ↦ ∑ k ∈ Finset.range (ν i), f' (x (unifPart T (ν i) k))
-      * (a (unifPart T (ν i) (k + 1)) - a (unifPart T (ν i) k))) atTop (𝓝 D))
-    (hI : Tendsto (fun i ↦ ∑ k ∈ Finset.range (ν i), f' (x (unifPart T (ν i) k))
-      * (m (unifPart T (ν i) (k + 1)) - m (unifPart T (ν i) k))) atTop (𝓝 I))
-    (hW : Tendsto (fun i ↦ ∑ k ∈ Finset.range (ν i), f'' (x (unifPart T (ν i) k))
-      * (x (unifPart T (ν i) (k + 1)) - x (unifPart T (ν i) k)) ^ 2) atTop (𝓝 W))
-    (hQ : ∀ᶠ i in atTop, ∑ k ∈ Finset.range (ν i),
-      (x (unifPart T (ν i) (k + 1)) - x (unifPart T (ν i) k)) ^ 2 ≤ Q) :
-    f (x T) - f (x 0) = D + I + 1 / 2 * W := by
-  have hlim := ((hD.add hI).add (hW.const_mul (1 / 2))).add
-    (tendsto_sum_discreteTaylorRemainder T hf hf' hf'' hx hν hQ)
-  rw [add_zero] at hlim
-  refine tendsto_nhds_unique (tendsto_const_nhds.congr' ?_) hlim
-  filter_upwards [hν.eventually (eventually_ne_atTop 0)] with i hi
-  have h := discrete_ito_formula (ν i) (fun k ↦ x (unifPart T (ν i) k)) f f' f''
-  have hT : unifPart T (ν i) (ν i) = T := unifPart_self T hi
-  have h0 : unifPart T (ν i) 0 = 0 := unifPart_zero T (ν i)
-  simp only [hT, h0] at h
-  rw [h, ← Finset.sum_add_distrib]
-  congr 2
-  refine Finset.sum_congr rfl fun k _ ↦ ?_
-  rw [hxam, hxam]
-  ring
 
 /-! ### Convergence in measure -/
 
@@ -366,126 +284,6 @@ theorem abs_comp_mul_le {g : ℝ → ℝ} {C₁ C : ℝ} (hg : ∀ x, |g x| ≤ 
     |g (X s ω) * σ s ω| ≤ C₁ * C :=
   (abs_mul _ _).trans_le
     (mul_le_mul (hg _) (hbdd s ω) (abs_nonneg _) ((abs_nonneg _).trans (hg 0)))
-
-/-! ### The formula -/
-
-variable {f f' f'' : ℝ → ℝ}
-  (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
-  (hf'' : Continuous f'') {C₁ C₂ : ℝ} (hf1 : ∀ x, |f' x| ≤ C₁) (hf2 : ∀ x, |f'' x| ≤ C₂)
-
-include hf hf'' hf2 in
-/-- **Itô's formula, with the stochastic integral taken against `M = σ●B`.** For
-`X = x₀ + ∫ b ds + ∫ σ dB` with `σ`, `b` bounded, adapted and path-continuous, and `f ∈ C²`
-with `f'`, `f''` bounded, almost surely
-
-`f(X_T) − f(x₀) = ∫₀ᵀ f'(X) dM + ∫₀ᵀ (f'(X_s) b_s + ½ f''(X_s) σ_s²) ds`,
-
-where `∫ f'(X) dM` is the integral against `M` of the class of the weight `f'(X)` (`weightLp`).
-
-Along a subsequence of the uniform partitions the Riemann–Stieltjes sums against `M`, the
-weighted quadratic variation and the quadratic variation converge almost surely. On such a path,
-where `X` is also continuous, `ito_formula_of_tendsto` applies. -/
-theorem ito_formula_adapted_against :
-    (fun ω ↦ f (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd)
-        x₀ b T ω) - f x₀) =ᵐ[μ] fun ω ↦
-      itoIntegralAgainstCLM hB T hBmeas (processToLp T hBmeas hadap hcont hbdd)
-          (weightLp T hBmeas (processToLp T hBmeas hadap hcont hbdd)
-            (comp_adaptedItoProcess_isStronglyPredictable hB T hBmeas hBcont _ hb_adap hb_cont
-              hb_bdd x₀ (Differentiable.continuous fun x ↦ (hf' x).differentiableAt))
-            fun s ω ↦ hf1 (adaptedItoProcess T hBmeas
-              (processToLp (μ := μ) T hBmeas hadap hcont hbdd) x₀ b s ω)) ω
-        + ∫ s in Ioc 0 T, (f' (adaptedItoProcess T hBmeas
-              (processToLp (μ := μ) T hBmeas hadap hcont hbdd) x₀ b s ω) * b s ω
-            + 1 / 2 * (f'' (adaptedItoProcess T hBmeas
-              (processToLp (μ := μ) T hBmeas hadap hcont hbdd) x₀ b s ω)
-              * σ s ω ^ 2)) ∂timeMeasure := by
-  have hf'c : Continuous f' := Differentiable.continuous fun x ↦ (hf' x).differentiableAt
-  set φ := processToLp (μ := μ) T hBmeas hadap hcont hbdd
-  set X := adaptedItoProcess T hBmeas φ x₀ b
-  have hXc : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ X t ω) (Icc 0 T) :=
-    ae_continuousOn_adaptedItoProcess hB T hBmeas hBcont φ hb_cont hb_bdd x₀
-  have hpred : IsStronglyPredictable (natFiltration hBmeas) X :=
-    adaptedItoProcess_isStronglyPredictable hB T hBmeas hBcont φ hb_adap hb_cont hb_bdd x₀
-  have hX (t : ℝ≥0) (ht : t ≤ T) :=
-    adaptedItoProcess_ae_eq hB T hBmeas hBcont φ x₀ (b := b) ht
-  have hXm (t : ℝ≥0) : AEStronglyMeasurable (X t) μ :=
-    ((hpred.stronglyAdapted t).mono ((natFiltration hBmeas).le t)).aestronglyMeasurable
-  -- the three limits in measure
-  have hM := tendstoInMeasure_riemannStieltjes hB T hBmeas φ
-    (fun t ht ↦ itoContinuousMod_modification hB T hBmeas hBcont φ ht)
-    (comp_adaptedItoProcess_isStronglyPredictable hB T hBmeas hBcont φ hb_adap hb_cont hb_bdd
-      x₀ hf'c) (hXc.mono fun ω h ↦ hf'c.comp_continuousOn h) fun s ω ↦ hf1 (X s ω)
-  have hW := tendstoInMeasure_weighted_qv_adapted hB T hBmeas hadap hcont hbdd
-    (abs_driftPath_sub_le hb_cont hb_bdd) (X₀ := fun _ ↦ x₀) hX hXm
-    (fun s ↦ hf''.comp_stronglyMeasurable (hpred.stronglyAdapted s))
-    (hXc.mono fun ω h ↦ hf''.comp_continuousOn h) fun s ω ↦ hf2 (X s ω)
-  have hQ := tendstoInMeasure_weighted_qv_adapted hB T hBmeas hadap hcont hbdd
-    (abs_driftPath_sub_le hb_cont hb_bdd) (X₀ := fun _ ↦ x₀) hX hXm (w := fun _ _ ↦ (1 : ℝ))
-    (fun _ ↦ stronglyMeasurable_const) (Eventually.of_forall fun _ ↦ continuousOn_const)
-    (Cw := 1) fun _ _ ↦ abs_one.le
-  -- a common subsequence along which all three converge almost surely
-  obtain ⟨n₁, hn₁, h1⟩ := hM.exists_seq_tendsto_ae
-  obtain ⟨n₂, hn₂, h2⟩ := exists_seq_tendsto_ae_comp hW hn₁
-  obtain ⟨n₃, hn₃, h3⟩ := exists_seq_tendsto_ae_comp hQ (hn₁.comp hn₂)
-  have hν : Tendsto (fun i ↦ n₁ (n₂ (n₃ i))) atTop atTop :=
-    hn₁.tendsto_atTop.comp (hn₂.tendsto_atTop.comp hn₃.tendsto_atTop)
-  filter_upwards [h1, h2, h3, hXc, adaptedItoProcess_zero hB T hBmeas hBcont φ x₀ (b := b)]
-    with ω h1 h2 h3 hc h0
-  have key := ito_formula_of_tendsto T hf hf' hf'' (x := fun t ↦ X t ω)
-    (a := fun t ↦ driftPath b t ω) (m := fun t ↦ itoContinuousMod T hBmeas φ t ω)
-    (fun _ ↦ rfl) hc hν
-    ((tendsto_sum_mul_driftPath_sub hb_cont hb_bdd T ω (g := fun s ↦ f' (X s ω))
-      (hf'c.comp_continuousOn hc) fun s ↦ hf1 (X s ω)).comp hν)
-    (h1.comp (hn₂.tendsto_atTop.comp hn₃.tendsto_atTop)) (h2.comp hn₃.tendsto_atTop)
-    ((Tendsto.eventually_lt_const (lt_add_one _) h3).mono fun i hi ↦ by
-      simpa only [one_mul, Function.comp_apply] using hi.le)
-  rw [show X 0 ω = x₀ from h0] at key
-  have hi1 : IntegrableOn (fun s ↦ f' (X s ω) * b s ω) (Ioc 0 T) timeMeasure :=
-    (((hf'c.comp_continuousOn hc).mul (hb_cont ω).continuousOn).integrableOn_compact
-      isCompact_Icc).mono_set Ioc_subset_Icc_self
-  have hi2 : IntegrableOn (fun s ↦ f'' (X s ω) * σ s ω ^ 2) (Ioc 0 T) timeMeasure :=
-    (((hf''.comp_continuousOn hc).mul ((hcont ω).pow 2).continuousOn).integrableOn_compact
-      isCompact_Icc).mono_set Ioc_subset_Icc_self
-  rw [integral_add hi1 (hi2.const_mul _), integral_const_mul]
-  linarith
-
-include hf hf'' hf2 in
-/-- **Itô's formula for an Itô process with adapted coefficients.** Let `B` be a Brownian
-motion with every path continuous, `σ` and `b` bounded, adapted to the natural filtration of `B`
-and with every path continuous, and `X = x₀ + ∫ b ds + ∫ σ dB` (`adaptedItoProcess`). For
-`f ∈ C²` with `f'` and `f''` bounded, almost surely
-
-`f(X_T) − f(x₀) = ∫₀ᵀ f'(X_s) σ_s dB_s + ∫₀ᵀ (f'(X_s) b_s + ½ f''(X_s) σ_s²) ds`.
-
-The stochastic integral is the Itô integral at horizon `T` of the class of the bounded
-predictable process `f'(X)·σ`. -/
-theorem ito_formula_adapted :
-    (fun ω ↦ f (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd)
-        x₀ b T ω) - f x₀) =ᵐ[μ] fun ω ↦
-      itoIntegralCLM_T hB T hBmeas (processToLpPredictable T hBmeas
-          (comp_adaptedItoProcess_mul_isStronglyPredictable hB T hBmeas hBcont hadap hcont
-            (processToLp (μ := μ) T hBmeas hadap hcont hbdd) hb_adap hb_cont hb_bdd x₀
-            (Differentiable.continuous fun x ↦ (hf' x).differentiableAt))
-          (abs_comp_mul_le hf1 hbdd _)) ω
-        + ∫ s in Ioc 0 T, (f' (adaptedItoProcess T hBmeas
-              (processToLp (μ := μ) T hBmeas hadap hcont hbdd) x₀ b s ω) * b s ω
-            + 1 / 2 * (f'' (adaptedItoProcess T hBmeas
-              (processToLp (μ := μ) T hBmeas hadap hcont hbdd) x₀ b s ω)
-              * σ s ω ^ 2)) ∂timeMeasure := by
-  rw [← itoIntegralAgainst_weightLp hB T hBmeas _
-    (comp_adaptedItoProcess_isStronglyPredictable hB T hBmeas hBcont _ hb_adap hb_cont hb_bdd
-      x₀ (Differentiable.continuous fun x ↦ (hf' x).differentiableAt))
-    (fun s ω ↦ hf1 _) _ ?_]
-  · exact ito_formula_adapted_against hB T hBmeas hBcont hadap hcont hbdd hb_adap hb_cont hb_bdd
-      x₀ hf hf' hf'' hf1 hf2
-  · filter_upwards [processToLpPredictable_coeFn (μ := μ) T hBmeas
-        (comp_adaptedItoProcess_mul_isStronglyPredictable hB T hBmeas hBcont hadap hcont
-          (processToLp (μ := μ) T hBmeas hadap hcont hbdd) hb_adap hb_cont hb_bdd x₀
-          (Differentiable.continuous fun x ↦ (hf' x).differentiableAt))
-        (abs_comp_mul_le hf1 hbdd _),
-      processToLp_coeFn (μ := μ) T hBmeas hadap hcont hbdd] with z h1 h2
-    rw [h1, h2]
-    exact mul_comm _ _
 
 end ItoFormulaAdapted
 end MathFin

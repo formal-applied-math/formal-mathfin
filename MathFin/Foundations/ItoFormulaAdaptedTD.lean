@@ -559,6 +559,79 @@ theorem ito_formula_adapted_local_le {f f' f'' : ℝ → ℝ} (hf : ∀ x, HasDe
   simp only [zero_add]
 
 include hB hBcont hb_adap hb_cont hb_bdd in
+/-- **Itô's formula, with the stochastic integral taken against `M = σ●B`.** For
+`X = x₀ + ∫ b ds + ∫ σ dB` with `σ`, `b` bounded, adapted and path-continuous, and `f ∈ C²`
+with `f'`, `f''` bounded, almost surely
+
+`f(X_T) − f(x₀) = ∫₀ᵀ f'(X) dM + ∫₀ᵀ (f'(X_s) b_s + ½ f''(X_s) σ_s²) ds`,
+
+where `∫ f'(X) dM` is the integral against `M` of the class of the weight `f'(X)` (`weightLp`).
+The case `f_t = 0` of `ito_formula_adapted_td_against`. -/
+theorem ito_formula_adapted_against {f f' f'' : ℝ → ℝ} (hf : ∀ x, HasDerivAt f (f' x) x)
+    (hf' : ∀ x, HasDerivAt f' (f'' x) x) (hf'' : Continuous f'') {C₁ C₂ : ℝ}
+    (hf1 : ∀ x, |f' x| ≤ C₁) (hf2 : ∀ x, |f'' x| ≤ C₂) :
+    (fun ω ↦ f (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd)
+        x₀ b T ω) - f x₀) =ᵐ[μ] fun ω ↦
+      itoIntegralAgainstCLM hB T hBmeas (processToLp T hBmeas hadap hcont hbdd)
+          (weightLp T hBmeas (processToLp T hBmeas hadap hcont hbdd)
+            (comp_adaptedItoProcess_isStronglyPredictable hB T hBmeas hBcont _ hb_adap hb_cont
+              hb_bdd x₀ (Differentiable.continuous fun x ↦ (hf' x).differentiableAt))
+            fun s ω ↦ hf1 (adaptedItoProcess T hBmeas
+              (processToLp (μ := μ) T hBmeas hadap hcont hbdd) x₀ b s ω)) ω
+        + ∫ s in Ioc 0 T, (f' (adaptedItoProcess T hBmeas
+              (processToLp (μ := μ) T hBmeas hadap hcont hbdd) x₀ b s ω) * b s ω
+            + 1 / 2 * (f'' (adaptedItoProcess T hBmeas
+              (processToLp (μ := μ) T hBmeas hadap hcont hbdd) x₀ b s ω)
+              * σ s ω ^ 2)) ∂timeMeasure := by
+  have hf'c : Continuous f' := Differentiable.continuous fun x ↦ (hf' x).differentiableAt
+  refine (ito_formula_adapted_td_against hB T hBmeas hBcont hadap hcont hbdd hb_adap hb_cont
+    hb_bdd x₀ (f := fun _ x ↦ f x) (f_t := fun _ _ ↦ 0) (f_x := fun _ ↦ f') (f_xx := fun _ ↦ f'')
+    (fun t x ↦ hasDerivAt_const t (f x)) (fun _ x ↦ hf x) (fun _ x ↦ hf' x) continuous_const
+    (hf'c.comp continuous_snd) (hf''.comp continuous_snd) (Ct := 0) (by simp)
+    (fun _ x ↦ hf1 x) (fun _ x ↦ hf2 x)).mono fun ω h ↦ ?_
+  simpa only [zero_add] using h
+
+include hB hBcont hb_adap hb_cont hb_bdd in
+/-- **Itô's formula for an Itô process with adapted coefficients.** Let `B` be a Brownian
+motion with every path continuous, `σ` and `b` bounded, adapted to the natural filtration of `B`
+and with every path continuous, and `X = x₀ + ∫ b ds + ∫ σ dB` (`adaptedItoProcess`). For
+`f ∈ C²` with `f'` and `f''` bounded, almost surely
+
+`f(X_T) − f(x₀) = ∫₀ᵀ f'(X_s) σ_s dB_s + ∫₀ᵀ (f'(X_s) b_s + ½ f''(X_s) σ_s²) ds`.
+
+The stochastic integral is the Itô integral at horizon `T` of the class of the bounded
+predictable process `f'(X)·σ`. -/
+theorem ito_formula_adapted {f f' f'' : ℝ → ℝ} (hf : ∀ x, HasDerivAt f (f' x) x)
+    (hf' : ∀ x, HasDerivAt f' (f'' x) x) (hf'' : Continuous f'') {C₁ C₂ : ℝ}
+    (hf1 : ∀ x, |f' x| ≤ C₁) (hf2 : ∀ x, |f'' x| ≤ C₂) :
+    (fun ω ↦ f (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd)
+        x₀ b T ω) - f x₀) =ᵐ[μ] fun ω ↦
+      itoIntegralCLM_T hB T hBmeas (processToLpPredictable T hBmeas
+          (comp_adaptedItoProcess_mul_isStronglyPredictable hB T hBmeas hBcont hadap hcont
+            (processToLp (μ := μ) T hBmeas hadap hcont hbdd) hb_adap hb_cont hb_bdd x₀
+            (Differentiable.continuous fun x ↦ (hf' x).differentiableAt))
+          (abs_comp_mul_le hf1 hbdd _)) ω
+        + ∫ s in Ioc 0 T, (f' (adaptedItoProcess T hBmeas
+              (processToLp (μ := μ) T hBmeas hadap hcont hbdd) x₀ b s ω) * b s ω
+            + 1 / 2 * (f'' (adaptedItoProcess T hBmeas
+              (processToLp (μ := μ) T hBmeas hadap hcont hbdd) x₀ b s ω)
+              * σ s ω ^ 2)) ∂timeMeasure := by
+  rw [← itoIntegralAgainst_weightLp hB T hBmeas _
+    (comp_adaptedItoProcess_isStronglyPredictable hB T hBmeas hBcont _ hb_adap hb_cont hb_bdd
+      x₀ (Differentiable.continuous fun x ↦ (hf' x).differentiableAt))
+    (fun s ω ↦ hf1 _) _ ?_]
+  · exact ito_formula_adapted_against hB T hBmeas hBcont hadap hcont hbdd hb_adap hb_cont hb_bdd
+      x₀ hf hf' hf'' hf1 hf2
+  · filter_upwards [processToLpPredictable_coeFn (μ := μ) T hBmeas
+        (comp_adaptedItoProcess_mul_isStronglyPredictable hB T hBmeas hBcont hadap hcont
+          (processToLp (μ := μ) T hBmeas hadap hcont hbdd) hb_adap hb_cont hb_bdd x₀
+          (Differentiable.continuous fun x ↦ (hf' x).differentiableAt))
+        (abs_comp_mul_le hf1 hbdd _),
+      processToLp_coeFn (μ := μ) T hBmeas hadap hcont hbdd] with z h1 h2
+    rw [h1, h2]
+    exact mul_comm _ _
+
+include hB hBcont hb_adap hb_cont hb_bdd in
 /-- **With `f'` bounded, the Riemann sums converge to the `L²` Itô integral.** For `f'`
 continuous and bounded, the left-point Riemann–Stieltjes sums of `f'(X)` against `M = ∫ σ dB` on
 the uniform partitions of `[0, T]` converge in probability to the Itô integral of the class of
