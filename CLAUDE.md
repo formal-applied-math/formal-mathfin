@@ -116,6 +116,35 @@ recorded review by more than 12 entries, or the library by more than 15 modules 
 review heading records both: `— corpus N, modules M —`; a cadence threshold — did we refresh
 and act on the backlog — not a quality verdict).
 
+**The first step of any development, before a line is written: find what the library
+already has.** This applies to a theorem, a definition, a bridge, a refactor, a tool, a doc
+or an agent brief. Search three layers, in this order:
+
+1. The library's own program. Grep `MathFin/` for the object, read the module docstrings
+   of the section it belongs to, and look for a hypothesis bundle, framework or general
+   lemma the new work should land in (`IsExpQMartingale`, `riemannσ`, `sampledFiltration`,
+   `statePricePricing`, `Contract.value`, `numeraireMeasure`, …).
+2. BrownianMotion.
+3. Mathlib (`scripts/loogle.sh`, or grep the pinned sources).
+
+New work extends or instantiates what it finds. If the existing statement is too narrow,
+generalise it and make the old one an instance. Never build a parallel object beside it.
+A brief to an agent names the existing target it must land in.
+
+The cost of skipping this was measured. On 2026-10-29 a Lévy design reached for
+`charFun` while `IsExpQMartingale` already carried the argument for all four Girsanov
+variants. The audit that followed (#357–#364, #366–#368) found about 60 parallel
+developments:
+- the Riemann–Itô sum defined five times;
+- the American-put free-boundary problem written as three structures;
+- two forward measures;
+- a binomial tower built beside Mathlib's `Martingale` and the library's FTAP;
+- copies of Mathlib lemmas, one of them deprecated upstream.
+
+Each was a gate-green, sorry-free module that nobody had connected to the rest. The values
+review's coherence lens asks the same question after the fact; this step asks it first,
+when the answer is cheap.
+
 **The last step of every session, before anything is called done: read the
 prose against its own statement.** For every docstring, corpus `description`,
 and doc paragraph the session touched, ask whether it claims more than the
