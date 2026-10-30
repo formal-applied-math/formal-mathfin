@@ -804,9 +804,9 @@
     "mf-binomial-girsanov-RN-norm": {
       "benchmark_file": "binomial.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.1,
-      "input_hash": "88f184152d0c5c823b0f4d364ba165ff3c0b34faa71a4d00adb9f5b7a4ac0d00",
-      "verified_at_commit": "705d349"
+      "elapsed_s": 9.5,
+      "input_hash": "b4fb0702ce42d9fdf367fd0bd4e475f1b2f9f5e7e6ad89ba1e3041c50bfa3299",
+      "verified_at_commit": "65a2934"
     },
     "mf-binomial-law-of-one-price": {
       "benchmark_file": "binomial.json",
@@ -1672,9 +1672,9 @@
     "mf-contract-binomial-european-payoff": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-30",
-      "elapsed_s": 3.7,
-      "input_hash": "e4c0af7322da85b45ecca58494a1630bfaeef5e26c426910b6fbc4da4b7382a8",
-      "verified_at_commit": "705d349"
+      "elapsed_s": 7.9,
+      "input_hash": "b0246e7d2570ae7c6aeb9d587675807644fc5dd9aff001826e957e9ac2b4a4fe",
+      "verified_at_commit": "65a2934"
     },
     "mf-contract-binomial-hedge": {
       "benchmark_file": "contracts.json",
