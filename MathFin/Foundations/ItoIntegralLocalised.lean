@@ -41,7 +41,8 @@ integral is adapted, at every time and on every path. Reading instead the level 
   `[0, T]`.
 * `ae_localItoIntegral_eq_itoContinuousMod`: for bounded `σ` it is the `L²` construction.
 
-Not here: the local-martingale property of `localItoIntegral`.
+The local-martingale property, localised by the exit times of `σ`, is
+`exists_continuous_localMartingale_localItoIntegral` (`ItoIntegralLocalisedLocalMartingale`).
 -/
 
 @[expose] public section

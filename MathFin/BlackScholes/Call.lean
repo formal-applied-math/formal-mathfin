@@ -126,6 +126,22 @@ theorem integrable_bsTerminal {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measu
   rw [hZ.map_eq]
   exact integrable_bsTerminal_gaussianReal S_0 r σ T
 
+/-- The discounted Black–Scholes call payoff driven by a standard normal is integrable: it is the
+positive part of an integrable function. -/
+theorem integrable_bsCall_payoff {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}
+    {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) Q) (S_0 K r σ T : ℝ) :
+    Integrable (fun ω ↦ Real.exp (-r * T) * max (bsTerminal S_0 r σ T (Z ω) - K) 0) Q :=
+  have := hZ.isProbabilityMeasure
+  ((integrable_bsTerminal hZ S_0 r σ T).sub' (integrable_const K)).pos_part.const_mul _
+
+/-- The discounted Black–Scholes put payoff driven by a standard normal is integrable: it is the
+positive part of an integrable function. -/
+theorem integrable_bsPut_payoff {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}
+    {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) Q) (S_0 K r σ T : ℝ) :
+    Integrable (fun ω ↦ Real.exp (-r * T) * max (K - bsTerminal S_0 r σ T (Z ω)) 0) Q :=
+  have := hZ.isProbabilityMeasure
+  ((integrable_const K).sub' (integrable_bsTerminal hZ S_0 r σ T)).pos_part.const_mul _
+
 /-- Alternative form for `d₂`: `bsd2 = (log(S_0/K) + (r − σ²/2)T) / (σ√T)`. -/
 lemma bsd2_eq {S_0 K r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     bsd2 S_0 K r σ T = (Real.log (S_0 / K) + (r - σ^2 / 2) * T) / (σ * Real.sqrt T) := by

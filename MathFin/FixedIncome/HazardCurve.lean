@@ -52,9 +52,8 @@ noncomputable def hazardSurvival (h : ℝ → ℝ) (t : ℝ) : ℝ :=
   survivalFromIntensity h t
 
 /-- `S(0) = 1`. -/
-lemma hazardSurvival_at_zero (h : ℝ → ℝ) : hazardSurvival h 0 = 1 := by
-  unfold hazardSurvival survivalFromIntensity cumulativeIntensity
-  rw [integral_same, neg_zero, Real.exp_zero]
+lemma hazardSurvival_at_zero (h : ℝ → ℝ) : hazardSurvival h 0 = 1 :=
+  survivalFromIntensity_zero h
 
 /-- Hazard survival is strictly positive (an instance of the
 `ExponentialDiscount` principle `discount_pos`; holds regardless of hazard
@@ -63,21 +62,13 @@ lemma hazardSurvival_pos (h : ℝ → ℝ) (t : ℝ) : 0 < hazardSurvival h t :=
   discount_pos _
 
 /-- **Hazard intensity as the negative log-derivative of survival** — the
-recovery direction `h(t) = −d/dt log S(t)`. For continuous `h`, the
-cumulative hazard `H(t) = ∫₀^t h` has derivative `h(t)` by the FTC, and the
-`ExponentialDiscount` principle `rate_eq_neg_log_deriv` gives the
-log-derivative form against `S = hazardSurvival h`. Mirrors
-`force_eq_neg_log_deriv_survival` in `Actuarial/Mortality.lean` — the credit
-and actuarial recoveries are the same identity. -/
+recovery direction `h(t) = −d/dt log S(t)`: for continuous `h`, the credit instance of
+`hasDerivAt_neg_log_survivalFromIntensity`, as `force_eq_neg_log_deriv_survival` in
+`Actuarial/Mortality.lean` is the actuarial one. -/
 theorem hazard_eq_neg_log_deriv_survival {h : ℝ → ℝ} (t : ℝ)
     (hh : Continuous h) :
-    HasDerivAt (fun s ↦ -(Real.log (hazardSurvival h s))) (h t) t := by
-  have hH : HasDerivAt (cumHazard h) (h t) t :=
-    intervalIntegral.integral_hasDerivAt_right
-      (hh.intervalIntegrable 0 t)
-      (hh.stronglyMeasurableAtFilter _ _)
-      hh.continuousAt
-  simpa only [hazardSurvival, survivalFromIntensity, cumHazard] using rate_eq_neg_log_deriv hH
+    HasDerivAt (fun s ↦ -(Real.log (hazardSurvival h s))) (h t) t :=
+  hasDerivAt_neg_log_survivalFromIntensity hh t
 
 /-- For a constant hazard `h_0`, `H(t) = h_0 · t`. -/
 lemma cumHazard_const (h_0 t : ℝ) :

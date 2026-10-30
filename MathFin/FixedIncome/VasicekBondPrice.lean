@@ -101,12 +101,6 @@ noncomputable def vasicekBondV (κ T : ℝ) : ℝ :=
 
 /-! ### The integrated kernel is an `L²` integrand -/
 
-/-- The restricted volume measure on `(0, T]` is finite. -/
-private instance vasicekBond_finite_restrict (T : ℝ≥0) :
-    IsFiniteMeasure (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) :=
-  ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, Real.volume_Ioc];
-      exact ENNReal.ofReal_lt_top⟩
-
 /-- The integrated kernel is in `L²((0, T])`: on the support it lies in
 `[0, 1/κ]` (for `κ > 0`), hence is bounded. -/
 lemma vasicekIntegratedKernel_memLp {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
@@ -236,27 +230,14 @@ noncomputable def vasicekIntegratedRate (hB : IsPreBrownianReal B μ) (r₀ θ �
 lemma vasicekIntegratedKernelLp_integral_sq {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
     (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernelLp hκ T u) ^ 2 ∂volume)
       = vasicekBondV κ (T : ℝ) := by
-  rw [show (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernelLp hκ T u) ^ 2 ∂volume)
-        = ∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernel κ T u) ^ 2 ∂volume by
-      refine integral_congr_ae ?_
-      filter_upwards [(vasicekIntegratedKernel_memLp hκ T).coeFn_toLp] with u hu
-      rw [vasicekIntegratedKernelLp, hu]]
-  exact vasicekIntegratedKernel_integral_sq hκ.ne' T
+  exact (vasicekIntegratedKernel_memLp hκ T).integral_sq_toLp.trans
+    (vasicekIntegratedKernel_integral_sq hκ.ne' T)
 
 /-- `V(T) ≥ 0` (it is an integral of a square). -/
 lemma vasicekBondV_nonneg {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
     (0 : ℝ) ≤ vasicekBondV κ (T : ℝ) := by
   rw [← vasicekIntegratedKernelLp_integral_sq hκ T]
   exact integral_nonneg fun u ↦ sq_nonneg _
-
-/-- **The centred diffusion law.** `σ∫₀ᵀ g dB`'s core — the Wiener integral of the integrated
-kernel — is centred Gaussian with variance `V(T)`; consumed by
-`vasicekIntegratedRate_hasLaw_gaussian`. -/
-private lemma vasicekWienerLaw (hB : IsPreBrownianReal B μ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
-    HasLaw (fun ω ↦ wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
-      (gaussianReal 0 (vasicekBondV κ (T : ℝ)).toNNReal) μ := by
-  have h0 := wienerIntegralLp_hasLaw_gaussian hB T (vasicekIntegratedKernelLp hκ T)
-  rwa [vasicekIntegratedKernelLp_integral_sq hκ T] at h0
 
 /-- **Integrated Vasicek short rate is Gaussian.** The integrated rate
 `∫₀ᵀ r_s ds = M(T) + σ∫₀ᵀ g dB` has law `N(M(T), σ²V(T))` — the affine map
@@ -267,7 +248,8 @@ theorem vasicekIntegratedRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ)
     HasLaw (vasicekIntegratedRate hB r₀ θ σ hκ T)
       (gaussianReal (vasicekIntegratedMean r₀ θ κ (T : ℝ))
         (σ ^ 2 * vasicekBondV κ (T : ℝ)).toNNReal) μ := by
-  have hW := vasicekWienerLaw hB hκ T
+  have hW := wienerIntegralLp_hasLaw_gaussian_of_integral_sq hB T (vasicekIntegratedKernelLp hκ T)
+    (vasicekIntegratedKernelLp_integral_sq hκ T)
   have hV_nonneg : (0 : ℝ) ≤ vasicekBondV κ (T : ℝ) := vasicekBondV_nonneg hκ T
   have hShift := gaussianReal_const_add (gaussianReal_const_mul hW σ)
     (vasicekIntegratedMean r₀ θ κ (T : ℝ))

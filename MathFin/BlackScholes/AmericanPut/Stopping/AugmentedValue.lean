@@ -25,6 +25,7 @@ namespace MathFin.BlackScholes.AmericanPut.Stopping
 
 open Set Filter MeasureTheory ProbabilityTheory Boundary
 open scoped NNReal Topology
+open MathFin.ItoLocalMartingale (nullAugmentation supermartingale_nullAugmentation)
 
 variable {Ω : Type*} [MeasurableSpace Ω]
 
@@ -48,22 +49,22 @@ theorem americanPutValue_mono_filtration {P : Measure Ω} [IsProbabilityMeasure 
 /-- The right-continuous regularization of the raw Brownian filtration after adjoining the
 `gaussianLimit`-null ambient sets. -/
 noncomputable def brownianRightAugFiltration :=
-  (ambientNullAugmentation brownianFiltration gaussianLimit).rightCont
+  (nullAugmentation brownianFiltration gaussianLimit).rightCont
 
 theorem brownianFiltration_le_rightAug : brownianFiltration ≤ brownianRightAugFiltration :=
-  le_trans le_sup_left (ambientNullAugmentation brownianFiltration gaussianLimit).le_rightCont
+  le_trans le_sup_left (nullAugmentation brownianFiltration gaussianLimit).le_rightCont
 
 instance brownianRightAugFiltration_isRightContinuous :
     brownianRightAugFiltration.IsRightContinuous :=
   inferInstanceAs
-      ((ambientNullAugmentation brownianFiltration gaussianLimit).rightCont.IsRightContinuous)
+      ((nullAugmentation brownianFiltration gaussianLimit).rightCont.IsRightContinuous)
 
 theorem brownianRightAugFiltration_contains_null {s : Set (ℝ≥0 → ℝ)}
     (hs : MeasurableSet s) (hnull : gaussianLimit s = 0) (t : ℝ≥0) :
     MeasurableSet[brownianRightAugFiltration t] s := by
-  apply (ambientNullAugmentation brownianFiltration gaussianLimit).le_rightCont t
+  apply (nullAugmentation brownianFiltration gaussianLimit).le_rightCont t
   apply (show MathFin.ItoLocalMartingale.nullsAlg _ gaussianLimit ≤
-    ambientNullAugmentation brownianFiltration gaussianLimit t from le_sup_right)
+    nullAugmentation brownianFiltration gaussianLimit t from le_sup_right)
   exact MeasurableSpace.measurableSet_generateFrom ⟨hs,hnull⟩
 
 /-- The finite-horizon American put value of the constructed Brownian model, taken over the
@@ -78,7 +79,7 @@ theorem brownianClassicalCandidate_rightAug_supermartingale {K r q σ S : ℝ}
     Supermartingale (classicalCandidate brownian K r q σ S p T) brownianRightAugFiltration
         gaussianLimit := by
   apply bounded_continuous_supermartingale_rightCont
-    (supermartingale_ambientNullAugmentation
+    (supermartingale_nullAugmentation
         (brownianClassicalCandidate_supermartingale hp hK hr hσ T))
     (classicalCandidate_continuous hp continuous_brownian T) (C := K)
   intro t ω

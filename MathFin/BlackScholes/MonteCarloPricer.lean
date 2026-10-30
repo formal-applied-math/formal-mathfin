@@ -10,6 +10,7 @@ public import MathFin.Foundations.StandardNormal
 public import MathFin.BlackScholes.Put
 public import MathFin.BlackScholes.PutGreeks
 public import MathFin.BlackScholes.LognormalMoments
+public import MathFin.Foundations.GaussianMoments
 
 /-!
 # Monte Carlo pricing of the European put
@@ -76,17 +77,18 @@ Public API (all in `namespace MathFin.MonteCarlo`):
   `σ_H² = e^{-2rT}·M₂ − P²`.
 
 Call layer (the unbounded case `C(z) = e^{-rT}·max(S_T(z) − K, 0)`, where the put's
-constant bound is replaced by domination through the discounted terminal):
+constant bound is unavailable: `L¹` comes from the positive part of an integrable function,
+`L²` from domination through the discounted terminal):
 
 * `mcCallPayoff` — the discounted European call payoff as a function of the draw;
-* `integrable_exp_of_hasLaw`, `integrable_sq_terminal` — the Gaussian law-transfer
+* `integrable_sq_terminal` — the Gaussian law-transfer
   integrability engines (`exp(c·Z)` integrable under a standard-normal law; `S_T²`
   integrable) that replace boundedness for the unbounded payoff;
 * `integrable_discountedTerminal` — integrability of the domination envelope
   `e^{-rT}·S_T`; `integral_discountedTerminal_eq` — the discounted-forward identity
   `𝔼[e^{-rT}·S_T] = S₀`;
-* `integrable_mcCallPayoff`, `memLp2_mcCallPayoff` — the call's `L¹` and `L²`
-  integrability, by domination;
+* `integrable_mcCallPayoff` — the call's `L¹` integrability (`integrable_bsCall_payoff`);
+  `memLp2_mcCallPayoff` — its `L²` integrability, by domination;
 * `mean_mcCallPayoff_eq_bsCall` — the call bridge
   `𝔼[C] = S₀·Φ(d₁) − K·e^{-rT}·Φ(d₂)`;
 * `mcCallMean` — the sample-mean Monte Carlo estimator for the call;
@@ -543,9 +545,11 @@ The call is the honest case: the payoff `C(z) = e^{-rT}·max(S_T(z) − K, 0)` i
 **unbounded**, so the put's constant-bound route (`MemLp.of_bound`) is gone. What
 replaces it:
 
-* **Integrability** by domination: `0 ≤ C ≤ e^{-rT}·S_T` (the discounted terminal),
-  whose integral is exactly `S₀` — the discounted-forward identity
-  `E[e^{-rT}·S_T] = S₀`. The engine is Mathlib's own Gaussian L¹ fact
+* **Integrability**: `C` is the positive part of the integrable `e^{-rT}·(S_T − K)`
+  (`integrable_bsCall_payoff`, in `Call`). The discounted terminal `e^{-rT}·S_T`, with
+  `0 ≤ C ≤ e^{-rT}·S_T`, is the domination envelope for `L²` below; its integral is exactly
+  `S₀`, the discounted-forward identity `E[e^{-rT}·S_T] = S₀`. The engine is Mathlib's own
+  Gaussian L¹ fact
   `integrable_exp_mul_gaussianReal` (`exp(t·x)` is integrable for `N(μ,v)`),
   transferred to the ensemble by `integrable_map_measure`.
 * **L² membership** from the same domination squared, via
@@ -604,17 +608,6 @@ private theorem aestronglyMeasurable_mcCallPayoff (h : BSCallHyp μ S_0 K r σ T
   aestronglyMeasurable_comp_of_hasLaw h.Z_law
     (by unfold mcCallPayoff bsTerminal; fun_prop)
 
-omit [IsProbabilityMeasure μ] in
-/-- Gaussian exponential integrability, transferred: `exp(c·Z)` is integrable
-whenever `Z` is standard normal — Mathlib's `integrable_exp_mul_gaussianReal`
-pulled through the law. This is the call variant's replacement for boundedness. -/
-theorem integrable_exp_of_hasLaw (hZ : HasLaw Z (gaussianReal 0 1) μ) (c : ℝ) :
-    Integrable (fun ω ↦ Real.exp (c * Z ω)) μ := by
-  have hsrc : Integrable (fun x : ℝ ↦ Real.exp (c * x)) (μ.map Z) := by
-    rw [hZ.map_eq]
-    exact integrable_exp_mul_gaussianReal c
-  exact (integrable_map_measure hsrc.aestronglyMeasurable hZ.aemeasurable).mp hsrc
-
 /-- **Integrability of the squared terminal** — the L² envelope: `S_T²` is
 integrable, being `S₀²·e^{2μ_log}·exp(2ν·Z)` with `exp(2ν·Z)` Gaussian-integrable.
 (Facts not numbers: no closed form needed here — the closed form is
@@ -659,28 +652,8 @@ theorem integrable_sq_terminal (h : BSCallHyp μ S_0 K r σ T Z) :
 `e^{-rT}·S_T` for the call payoff (the put used the constant `e^{-rT}·K`; the call's
 envelope is genuinely unbounded). -/
 theorem integrable_discountedTerminal (h : BSCallHyp μ S_0 K r σ T Z) :
-    Integrable (fun ω ↦ Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω)) μ := by
-  obtain ⟨hS_0, hK, hσ, hT, hZ⟩ := h
-  have hsrc : Integrable (fun x : ℝ ↦ S_0 * Real.exp ((r - σ^2 / 2) * T)
-      * Real.exp (-r * T) * Real.exp (σ * Real.sqrt T * x)) (μ.map Z) := by
-    rw [hZ.map_eq]
-    exact (integrable_exp_mul_gaussianReal (σ * Real.sqrt T)).const_mul _
-  have hcomp := (integrable_map_measure hsrc.aestronglyMeasurable hZ.aemeasurable).mp hsrc
-  have hpt : ∀ ω : Ω, (fun x : ℝ ↦ S_0 * Real.exp ((r - σ^2 / 2) * T)
-      * Real.exp (-r * T) * Real.exp (σ * Real.sqrt T * x)) (Z ω)
-      = Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω) := by
-    intro ω
-    have h1 : Real.exp ((r - σ^2 / 2) * T + σ * Real.sqrt T * Z ω)
-        = Real.exp ((r - σ^2 / 2) * T) * Real.exp (σ * Real.sqrt T * Z ω) :=
-      Real.exp_add _ _
-    unfold bsTerminal
-    rw [h1]
-    ring
-  have hae : (fun x : ℝ ↦ S_0 * Real.exp ((r - σ^2 / 2) * T)
-      * Real.exp (-r * T) * Real.exp (σ * Real.sqrt T * x)) ∘ Z
-      =ᵐ[μ] (fun ω ↦ Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω)) :=
-    Filter.Eventually.of_forall fun ω ↦ hpt ω
-  exact (integrable_congr hae).mp hcomp
+    Integrable (fun ω ↦ Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω)) μ :=
+  (integrable_bsTerminal h.Z_law S_0 r σ T).const_mul _
 
 /-- **The discounted-forward identity**: `E[e^{-rT}·S_T] = S₀`. The risk-neutral
 engine's spot-price identity, read off the same transfer that proves integrability:
@@ -715,15 +688,11 @@ theorem integral_discountedTerminal_eq (h : BSCallHyp μ S_0 K r σ T Z) :
     rw [mul_assoc, ← Real.exp_add, ← Real.exp_add, h0, Real.exp_zero, mul_one]
   rw [hsplit2]
 
-/-- **Call integrability**: the sampled call payoff is integrable, by domination
-`0 ≤ C ≤ e^{-rT}·S_T` with the discounted terminal integrable — the honest case,
-where boundedness fails and domination replaces it. -/
+/-- **Call integrability**: the sampled call payoff is integrable (`integrable_bsCall_payoff`) —
+the honest case, where boundedness fails. -/
 theorem integrable_mcCallPayoff (h : BSCallHyp μ S_0 K r σ T Z) :
-    Integrable (fun ω ↦ mcCallPayoff S_0 K r σ T (Z ω)) μ := by
-  refine (integrable_discountedTerminal h).mono' (aestronglyMeasurable_mcCallPayoff h) ?_
-  filter_upwards with ω
-  rw [Real.norm_eq_abs, abs_of_nonneg (mcCallPayoff_nonneg S_0 K r σ T _)]
-  exact mcCallPayoff_le_terminal h.S_0_pos h.K_pos.le r σ T _
+    Integrable (fun ω ↦ mcCallPayoff S_0 K r σ T (Z ω)) μ :=
+  integrable_bsCall_payoff h.Z_law S_0 K r σ T
 
 /-- The sampled call payoff is in L² — the CLT hypothesis, proved by domination
 `‖C‖² ≤ (e^{-rT}·S_T)²` with `S_T²` integrable (`memLp_two_iff_integrable_sq_norm`

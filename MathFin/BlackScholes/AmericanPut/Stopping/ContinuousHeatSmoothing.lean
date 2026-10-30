@@ -14,7 +14,7 @@ No derivatives of the initial datum are taken.
 
 ## Result
 
-Public entry points include `heatKernel_smoothAt`, `compact_continuous_heatFlow_smooth`,
+Public entry points include `compact_continuous_heatFlow_smooth`,
 `compact_continuous_heatFlow_contDiff`.
 -/
 
@@ -25,11 +25,6 @@ namespace MathFin.BlackScholes.AmericanPut.Stopping
 open Set Filter MeasureTheory
 open MathFin.FeynmanKacHeatEquation
 open scoped Topology ContDiff Convolution
-
-theorem heatKernel_smoothAt {t x : ℝ} (ht : 0 < t) :
-    ContDiffAt ℝ ∞ (fun z : ℝ × ℝ => heatKernel z.1 z.2) (t,x) := by
-  unfold heatKernel
-  fun_prop (disch := positivity)
 
 theorem compact_continuous_heatFlow_smooth {f : ℝ → ℝ}
     (hf : Continuous f) (hc : HasCompactSupport f) :

@@ -10,7 +10,7 @@ public import Mathlib
 /-!
 # Equivalent probability measure from a positive normalised density
 
-A measurable, strictly-positive, `P`-integrable density `g` with `∫ g ∂P = 1` defines an
+A strictly-positive, `P`-integrable density `g` with `∫ g ∂P = 1` defines an
 **equivalent probability measure** `P.withDensity (fun ω ↦ ENNReal.ofReal (g ω))`: it is a
 probability measure (total mass `∫ g = 1`) and mutually absolutely continuous with `P`
 (`withDensity` is always `≪ P`, and `P ≪` it because the density is a.e. nonzero).
@@ -27,23 +27,30 @@ namespace MathFin
 
 open MeasureTheory
 
-/-- A measurable, strictly-positive, `P`-integrable density `g` with `∫ g ∂P = 1` makes
+/-- A density that is a.e. strictly positive makes `P` absolutely continuous with respect to
+`P.withDensity (fun ω ↦ ENNReal.ofReal (g ω))`: the density vanishes only on a `P`-null set.
+(The other direction, `withDensity ≪ P`, is `withDensity_absolutelyContinuous` and needs
+nothing.) -/
+theorem absolutelyContinuous_withDensity_ofReal {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    (P : Measure Ω) {g : Ω → ℝ} (hmeas : AEMeasurable g P) (hpos : ∀ᵐ ω ∂P, 0 < g ω) :
+    P ≪ P.withDensity (fun ω ↦ ENNReal.ofReal (g ω)) :=
+  withDensity_absolutelyContinuous' hmeas.ennreal_ofReal
+    (hpos.mono fun _ hω ↦ ENNReal.ofReal_pos.mpr hω |>.ne')
+
+/-- A strictly-positive, `P`-integrable density `g` with `∫ g ∂P = 1` makes
 `Q = P.withDensity (fun ω ↦ ENNReal.ofReal (g ω))` a probability measure equivalent to `P`:
-`IsProbabilityMeasure Q`, `Q ≪ P`, and `P ≪ Q`. -/
+`IsProbabilityMeasure Q`, `Q ≪ P`, and `P ≪ Q`. (Measurability is not assumed: the
+integrability of `g` already makes it a.e.-measurable, which is all `withDensity` needs.) -/
 theorem isEquivProbMeasure_withDensity {Ω : Type*} {mΩ : MeasurableSpace Ω} (P : Measure Ω)
-    {g : Ω → ℝ} (hmeas : Measurable g) (hpos : ∀ ω, 0 < g ω) (hint : Integrable g P)
+    {g : Ω → ℝ} (hpos : ∀ ω, 0 < g ω) (hint : Integrable g P)
     (hsum : ∫ ω, g ω ∂P = 1) :
     IsProbabilityMeasure (P.withDensity (fun ω ↦ ENNReal.ofReal (g ω))) ∧
       P.withDensity (fun ω ↦ ENNReal.ofReal (g ω)) ≪ P ∧
       P ≪ P.withDensity (fun ω ↦ ENNReal.ofReal (g ω)) := by
-  have hofReal_meas : Measurable (fun ω ↦ ENNReal.ofReal (g ω)) :=
-    ENNReal.measurable_ofReal.comp hmeas
   refine ⟨⟨?_⟩, withDensity_absolutelyContinuous _ _,
-    withDensity_absolutelyContinuous' hofReal_meas.aemeasurable
-      (Filter.Eventually.of_forall fun ω ↦ ?_)⟩
-  · rw [withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ,
-      ← ofReal_integral_eq_lintegral_ofReal hint
-        (Filter.Eventually.of_forall fun ω ↦ (hpos ω).le), hsum, ENNReal.ofReal_one]
-  · simp only [ne_eq, ENNReal.ofReal_eq_zero, not_le]; exact hpos ω
+    absolutelyContinuous_withDensity_ofReal P hint.aemeasurable (ae_of_all _ hpos)⟩
+  rw [withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ,
+    ← ofReal_integral_eq_lintegral_ofReal hint (ae_of_all _ fun ω ↦ (hpos ω).le), hsum,
+    ENNReal.ofReal_one]
 
 end MathFin

@@ -57,8 +57,10 @@ kernel-derivative terms separately (`curve_sq_ratio_le` / `curve_abs_ratio_le` +
 
 Step 4 is the capstone `bsV_satisfies_bs_pde_via_feynmanKac`: the PDE assembly
 `−V_τ + ½σ²S²V_SS + rSV_S − rV = e^{−rτ}σ²(½U_xx − U_t) = 0` via `feynmanU_heat_equation` and the
-operator cancellation `−(r−σ²/2) − ½σ² + r = 0`, on top of the in-place Greeks above. The benchmark
-`sc-bs-pde-feynman-kac` re-exports it.
+operator cancellation `−(r−σ²/2) − ½σ² + r = 0`, on top of the in-place Greeks above. Those three
+derivatives are heat-kernel integrals; the theorem also identifies them with the closed-form Greeks
+of `BlackScholes/PDE.lean` (`hasDerivAt_bsV_tau`, `hasDerivAt_bsV_S`, `hasDerivAt_deriv_bsV_S`),
+by uniqueness of the derivative. The benchmark `sc-bs-pde-feynman-kac` re-exports it.
 -/
 
 @[expose] public section
@@ -288,18 +290,28 @@ probabilistically-grounded re-derivation of `bs_pde_holds` — closing the two-t
 `feynmanU` load-bearing for the PDE. (The hard differentiability work — uniform domination,
 differentiation under the integral — already lives in `hasDerivAt_feynmanU_comp` and the Greeks;
 `feynmanU_heat_equation` supplies only the algebraic kernel identity `∂_t K = ½ ∂_xx K`, and the
-operator vanishing is then exact algebra.) -/
+operator vanishing is then exact algebra.) The three derivatives, being derivatives of `bsV`, are
+the closed-form theta, delta and gamma of `PDE.lean`; the last three conjuncts say so
+(`HasDerivAt.unique`), so the Feynman–Kac Greeks and the closed-form ones are the same numbers. -/
 theorem bsV_satisfies_bs_pde_via_feynmanKac {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     ∃ Vτ VS VSS : ℝ,
       HasDerivAt (fun τ' ↦ bsV K r σ S τ') Vτ τ ∧
       HasDerivAt (fun S' ↦ bsV K r σ S' τ) VS S ∧
       HasDerivAt (fun S' ↦ deriv (fun S'' ↦ bsV K r σ S'' τ) S') VSS S ∧
-      -Vτ + (1 / 2) * σ ^ 2 * S ^ 2 * VSS + r * S * VS - r * bsV K r σ S τ = 0 := by
-  refine ⟨_, _, _, hasDerivAt_bsV_tau_fk hK hσ hS hτ, hasDerivAt_bsV_S_fk hK hσ hτ hS,
-    hasDerivAt_deriv_of_eventually
-      ((eventually_gt_nhds hS).mono fun _ hS' ↦ hasDerivAt_bsV_S_fk hK hσ hτ hS')
-      (hasDerivAt_bsV_SS_fk (r := r) hK hσ hτ hS), ?_⟩
+      -Vτ + (1 / 2) * σ ^ 2 * S ^ 2 * VSS + r * S * VS - r * bsV K r σ S τ = 0 ∧
+      Vτ = σ * S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (2 * Real.sqrt τ)
+        + r * K * Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ) ∧
+      VS = Phi (bsd1 S K r σ τ) ∧
+      VSS = gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ) := by
+  have hVτ := hasDerivAt_bsV_tau_fk (r := r) hK hσ hS hτ
+  have hVS := hasDerivAt_bsV_S_fk (r := r) hK hσ hτ hS
+  have hVSS := hasDerivAt_deriv_of_eventually
+    ((eventually_gt_nhds hS).mono fun _ hS' ↦ hasDerivAt_bsV_S_fk (r := r) hK hσ hτ hS')
+    (hasDerivAt_bsV_SS_fk (r := r) hK hσ hτ hS)
+  refine ⟨_, _, _, hVτ, hVS, hVSS, ?_, hVτ.unique (hasDerivAt_bsV_tau hK hσ hS hτ),
+    hVS.unique (hasDerivAt_bsV_S hK hσ hS hτ),
+    hVSS.unique (hasDerivAt_deriv_bsV_S hK hσ hS hτ)⟩
   · have ht₀ : (0 : ℝ) < σ ^ 2 * τ := by positivity
     have hSne : S ≠ 0 := hS.ne'
     set c₀ : ℝ := Real.log S + (r - σ ^ 2 / 2) * τ

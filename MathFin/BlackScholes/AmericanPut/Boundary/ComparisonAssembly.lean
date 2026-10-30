@@ -21,8 +21,7 @@ is separate from these classical-contract results.
 
 ## Result
 
-Public entry points include `dividend_curvature_of_comparison_inputs`,
-`zeroDividend_curvature_of_comparison_inputs`, `stock_curvature_of_comparison_inputs`.
+Public entry points include `dividend_curvature_of_comparison_inputs`, `stock_curvature_of_comparison_inputs`.
 -/
 
 @[expose] public section
@@ -46,16 +45,6 @@ theorem dividend_curvature_of_comparison_inputs {k h : ℝ}
   have hspeed := hp.boundary_deriv_neg_of_curvature_neg ht (lt_of_not_ge hn)
   exact hn (curvature_nonneg_of_tangent_intervals hp ht hspeed hd.le
     (hinterval (-deriv b t) (b t - t * deriv b t) (neg_pos.mpr hspeed) hd))
-
-/-- Zero dividends with the original CCJZ contract. The interval invariant
-is supplied in `ComparisonConclusion`, and the conclusion is weak log curvature, not CCJZ's
-strict log curvature theorem. -/
-theorem zeroDividend_curvature_of_comparison_inputs {k : ℝ}
-    {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} (hp : NormalizedPutSolution k p b)
-    (hinterval : ∀ c d : ℝ, 0 < c → d < 0 → ∀ t, 0 < t →
-      OrdConnected {x | b t < x ∧ 0 < straightDifference p k 0 c d x t}) :
-    ∀ t, 0 < t → 0 ≤ deriv (deriv b) t :=
-  dividend_curvature_of_comparison_inputs (dividendPutSolution_zero_iff.mpr hp) hinterval
 
 /-- The requested STRICT stock-boundary curvature consequence of the same
 conditional proof. `stockBoundary` uses the existing calendar-time convention;

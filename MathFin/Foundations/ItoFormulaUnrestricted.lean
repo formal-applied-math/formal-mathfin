@@ -364,25 +364,6 @@ end SummitC
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
 
-/-- **The path stays confined up to the exit time.** On `{s ≤ τ_N}` with `0 < s`, `|B_s| ≤ N`:
-for `u < s ≤ τ_N` the exit has not happened (`|B_u| < N`), and left-continuity carries the bound
-to the boundary value at `s`. -/
-lemma abs_le_N_of_le_exitTime (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
-    {N : ℕ} {s : ℝ≥0} {ω : Ω} (hs0 : 0 < s)
-    (h : (s : WithTop ℝ≥0) ≤ exitTime B N ω) : |B s ω| ≤ (N : ℝ) := by
-  have hbelow : ∀ u : ℝ≥0, u < s → |B u ω| < (N : ℝ) := by
-    intro u hu
-    by_contra hN
-    rw [not_lt] at hN
-    have hle : exitTime B N ω ≤ (u : WithTop ℝ≥0) :=
-      (exitTime_le_iff hBcont N u ω).mpr ⟨u, ⟨zero_le, le_refl u⟩, hN⟩
-    exact absurd hle (not_le.mpr (lt_of_lt_of_le (by exact_mod_cast hu) h))
-  have htend : Tendsto (fun u : ℝ≥0 ↦ |B u ω|) (𝓝[<] s) (𝓝 (|B s ω|)) :=
-    (continuous_abs.comp (hBcont ω)).continuousWithinAt
-  haveI : (𝓝[<] s).NeBot := nhdsWithin_Iio_neBot' ⟨0, hs0⟩ le_rfl
-  exact le_of_tendsto htend
-    (eventually_nhdsWithin_of_forall fun u hu ↦ le_of_lt (hbelow u hu))
-
 /-- The exit time capped at the level: `σ_N = min(τ_N, N)`. Capping the **time** keeps `t ≤ N` on
 `{t ≤ σ_N}`, where the truncation's time cut is inert; still a genuine localizing sequence (the
 exit times localize, and `min` with `N ↑ ⊤` preserves all three properties). -/

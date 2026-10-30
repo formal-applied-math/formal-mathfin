@@ -20,8 +20,8 @@ separating-hyperplane theorem — the attainable-gains cone misses the positive 
 strictly-positive functional (the EMM) separates them; price `= ⟨EMM, payoff⟩`.
 - **Root:** `Foundations/ConvexSeparation.exists_pos_dual_of_disjoint_stdSimplex` — its own docstring:
   *"the separating hyperplane **is** the equivalent martingale measure."*
-- **Instances of the root:** `FTAPMultiState` and `FTAPDiscrete`. `FTAPOnePeriodVector` (and its scalar
-  case `FTAPOnePeriod`) proves the one-period FTAP by an independent construction, and `FTAPTwoState` by
+- **Instances of the root:** `FTAPMultiState` and `FTAPDiscrete`. `FTAPOnePeriodVector` (its scalar
+  case `FTAPOnePeriod` is a corollary with no proof of its own) proves the one-period FTAP by an independent construction, and `FTAPTwoState` by
   explicit weights; since 2026-10-21 each is bridged to the multi-state notion, so the two proofs are
   shown to agree (`hasEMM_multi_state_iff_exists_isEMM`, `hasEMM_two_state_iff_multi`). The pricing
   functional side: `StatePrices`, `Bridges/ConvexPricingFunctional` (the EMM as a convexity-preserving

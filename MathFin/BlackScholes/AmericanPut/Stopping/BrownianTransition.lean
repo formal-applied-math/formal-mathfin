@@ -12,7 +12,8 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianHeatFlow
 ## Result
 
 Public entry points include `brownianLogState`, `brownian_scaled_increment_heatFlow`,
-`brownian_condExp_transition`, `brownianLogState_condExp_transition`.
+`brownian_condExp_transition`, `IsGaussianMarkov`,
+`brownianLogState_isGaussianMarkov`.
 -/
 
 @[expose] public section
@@ -67,11 +68,20 @@ theorem brownian_condExp_transition {f : ℝ → ℝ} (hf : Continuous f) {C : �
     (hf.comp (show Continuous (fun y : ℝ => X ω+σ*y) by fun_prop)).aestronglyMeasurable
   exact hmap.trans (brownian_scaled_increment_heatFlow hf hij σ (X ω))
 
-theorem brownianLogState_condExp_transition {f : ℝ → ℝ} (hf : Continuous f) {C : ℝ}
-    (hb : ∀ x, ‖f x‖ ≤ C) {i j : ℝ≥0} (hij : i ≤ j) (β σ x : ℝ) :
-    gaussianLimit[fun ω => f (brownianLogState β σ x j ω) | brownianFiltration i] =ᵐ[gaussianLimit]
+/-- The **Gaussian Markov property** of a log state `L` with drift `β` and volatility `σ` in the
+filtration `𝓕` under `P`: for bounded continuous `f` and `i ≤ j`, the conditional expectation of
+`f (L j)` given `𝓕 i` is the `brownianHeatFlow` of `f` over the variance `σ^2*(j-i)`, started at the
+drift-shifted `L i`. -/
+def IsGaussianMarkov {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω)
+    (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (β σ : ℝ) (L : ℝ≥0 → Ω → ℝ) : Prop :=
+  ∀ ⦃f : ℝ → ℝ⦄ ⦃C : ℝ⦄, Continuous f → (∀ y, ‖f y‖ ≤ C) → ∀ ⦃i j : ℝ≥0⦄, i ≤ j →
+    P[fun ω => f (L j ω) | 𝓕 i] =ᵐ[P]
       fun ω => brownianHeatFlow f (σ^2*((j : ℝ)-(i : ℝ))).toNNReal
-        (brownianLogState β σ x i ω+β*((j : ℝ)-(i : ℝ))) := by
+        (L i ω+β*((j : ℝ)-(i : ℝ)))
+
+theorem brownianLogState_isGaussianMarkov (β σ x : ℝ) :
+    IsGaussianMarkov gaussianLimit brownianFiltration β σ (brownianLogState β σ x) := by
+  intro f C hf hb i j hij
   let X : (ℝ≥0 → ℝ) → ℝ := fun ω => brownianLogState β σ x i ω+β*((j : ℝ)-(i : ℝ))
   have hX : Measurable[brownianFiltration i] X :=
     (measurable_const.add (measurable_const.mul (brownian_adapted i))).add measurable_const

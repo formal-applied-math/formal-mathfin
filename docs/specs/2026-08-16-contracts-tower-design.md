@@ -55,6 +55,15 @@ Two rules keep the layout clean as models are added (same date):
 A bridge between two models gets its own file (`Models/BinomialLimit`), so that neither model
 imports the other.
 
+*Amended 2026-10-29.* Three files sit beside the models rather than in them:
+- `Parity` prices the forward and closes put–call parity in any model whose discounted price is a
+  martingale, so each model's forward is an instance (`BlackScholes.value_forward`);
+- `Instruments/FixedIncome` holds bonds and swaps, which observe nothing and so are worth their
+  present value in every model; the swap's floating coupons are fixed by a deterministic curve;
+- `Risk` measures a position's loss under a law of the outcomes that need not be the pricing
+  measure. The VaR and ES of a constant loss, a fact about risk measures, live in
+  `RiskMeasures/ValueAtRisk`, by the rule above.
+
 Rung (c) is the point. A reified contract whose price is a machine-checked
 Black–Scholes formula does not exist anywhere, including in the source paper,
 whose pricing layer is a `structure` and one `congrArg`.

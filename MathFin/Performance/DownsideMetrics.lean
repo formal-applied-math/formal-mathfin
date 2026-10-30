@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Aleksey Salkutsan
+Authors: Aleksey Salkutsan, Yang Ye
 -/
 module
 
@@ -107,52 +107,50 @@ theorem omegaRatio_threshold_identity {ι : Type*} [Fintype ι]
     _ = (finiteExpectedReturn m - threshold) / omegaDownside m threshold := by
           rw [omega_upside_sub_downside]
 
-/-- Maximum of a finite list, with zero as the empty-list baseline. -/
-def listMaximum : List ℝ → ℝ
-  | [] => 0
-  | x :: xs => max x (listMaximum xs)
+/-- The running peak is positively homogeneous: multiplication by `c > 0` is an order
+isomorphism, so it commutes with the finite suprema defining `partialSups`. This is the
+group-with-zero version of Mathlib's `[Group α]` lemma `partialSups_const_mul`. -/
+theorem partialSups_const_mul₀ {ι : Type*} [Preorder ι] [LocallyFiniteOrderBot ι]
+    {G₀ : Type*} [GroupWithZero G₀] [SemilatticeSup G₀] [PosMulReflectLT G₀] {c : G₀}
+    (hc : 0 < c) (E : ι → G₀) (t : ι) :
+    partialSups (fun s ↦ c * E s) t = c * partialSups E t :=
+  map_partialSups (OrderIso.mulLeft₀ c hc) E t
 
-private theorem listMaximum_nonneg (xs : List ℝ) : 0 ≤ listMaximum xs := by
-  induction xs with
-  | nil => exact le_rfl
-  | cons x xs ih => exact ih.trans (le_max_right _ _)
-
-private theorem listMaximum_map_mul (c : ℝ) (hc : 0 ≤ c) (xs : List ℝ) :
-    listMaximum (xs.map fun x => c * x) = c * listMaximum xs := by
-  induction xs with
-  | nil => simp [listMaximum]
-  | cons x xs ih =>
-      simp only [List.map_cons, listMaximum]
-      rw [ih]
-      by_cases h : x ≤ listMaximum xs
-      · rw [max_eq_right h, max_eq_right (mul_le_mul_of_nonneg_left h hc)]
-      · have h' : listMaximum xs ≤ x := le_of_not_ge h
-        rw [max_eq_left h', max_eq_left (mul_le_mul_of_nonneg_left h' hc)]
-
-/-- All chronologically admissible peak-to-trough losses of a finite price path. -/
-noncomputable def drawdownCandidates {n : ℕ} (price : Fin n → ℝ) : List ℝ :=
-  (((Finset.univ : Finset (Fin n)).product Finset.univ).toList).map fun ij =>
-    if ij.1 ≤ ij.2 then price ij.1 - price ij.2 else 0
-
-private theorem drawdownCandidates_scale {n : ℕ} (price : Fin n → ℝ) (c : ℝ) :
-    drawdownCandidates (fun i => c * price i) =
-      (drawdownCandidates price).map fun x => c * x := by
-  simp [drawdownCandidates, List.map_map, mul_sub]
-
-/-- Maximum drawdown of a finite price path. -/
+/-- **Maximum drawdown** of a finite price path: the largest decline `max_{s ≤ t} E s − E t` of
+the path below its running peak (Mathlib's `partialSups`), which is the largest chronological
+peak-to-trough loss `E s − E t`, `s ≤ t` (`sub_le_maximumDrawdown`). The empty path has drawdown
+`0`. -/
 noncomputable def maximumDrawdown {n : ℕ} (price : Fin n → ℝ) : ℝ :=
-  listMaximum (drawdownCandidates price)
+  ⨆ t, partialSups price t - price t
+
+/-- The decline below the running peak at any date is at most the maximum drawdown. -/
+theorem partialSups_sub_le_maximumDrawdown {n : ℕ} (price : Fin n → ℝ) (t : Fin n) :
+    partialSups price t - price t ≤ maximumDrawdown price :=
+  le_ciSup (f := fun t ↦ partialSups price t - price t) (Set.finite_range _).bddAbove t
+
+/-- Every chronological peak-to-trough decline `E s − E t` (`s ≤ t`) of a finite path is at
+most its `maximumDrawdown`. -/
+theorem sub_le_maximumDrawdown {n : ℕ} (E : Fin n → ℝ) {s t : Fin n} (hst : s ≤ t) :
+    E s - E t ≤ maximumDrawdown E :=
+  (sub_le_sub_right (le_partialSups_of_le E hst) _).trans (partialSups_sub_le_maximumDrawdown E t)
 
 /-- Maximum drawdown is nonnegative, including for an empty path. -/
 theorem maximumDrawdown_nonneg {n : ℕ} (price : Fin n → ℝ) :
     0 ≤ maximumDrawdown price :=
-  listMaximum_nonneg _
+  Real.iSup_nonneg fun t ↦ sub_nonneg.2 (le_partialSups_of_le price (le_refl t))
 
 /-- Maximum drawdown is positively homogeneous for nonnegative scaling. -/
 theorem maximumDrawdown_scale {n : ℕ} (price : Fin n → ℝ) (c : ℝ) (hc : 0 ≤ c) :
     maximumDrawdown (fun i => c * price i) = c * maximumDrawdown price := by
-  unfold maximumDrawdown
-  rw [drawdownCandidates_scale, listMaximum_map_mul c hc]
+  rcases hc.eq_or_lt with rfl | hc
+  · have h0 (t : Fin n) : partialSups (fun _ : Fin n ↦ (0 : ℝ)) t = 0 :=
+      le_antisymm (partialSups_le _ _ _ fun _ _ ↦ le_rfl)
+        (le_partialSups_of_le (fun _ : Fin n ↦ (0 : ℝ)) (le_refl t))
+    simp [maximumDrawdown, h0]
+  · rw [maximumDrawdown, maximumDrawdown, Real.mul_iSup_of_nonneg hc.le]
+    refine iSup_congr fun t ↦ ?_
+    rw [partialSups_const_mul₀ hc]
+    ring
 
 /-- Calmar ratio: annual return divided by maximum drawdown. -/
 noncomputable def calmarRatio (annualReturn maxDrawdown : ℝ) : ℝ :=

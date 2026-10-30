@@ -7,6 +7,8 @@ module
 
 public import Mathlib
 public import MathFin.Foundations.EquivMeasure
+public import MathFin.Foundations.FTAP
+public import MathFin.Foundations.NoArbitrageCore
 
 /-!
 # One-period FTAP on a general probability space (finite-dimensional market)
@@ -18,7 +20,9 @@ real inner-product space `F` (the `d`-asset market is `F = EuclideanSpace ℝ (F
 probability space `(Ω, P)`: no arbitrage ⟺ there is an equivalent martingale measure
 `Q ~ P` with `Y` integrable and `E_Q[Y] = 0 ∈ F`.
 
-This is the `d`-asset generalisation of the scalar `Foundations/FTAPOnePeriod.lean`.
+This is the `d`-asset generalisation of the scalar `Foundations/FTAPOnePeriod.lean`, which is
+its `F = ℝ` corollary and has no proofs of its own. The forward direction is
+`MathFin.emm_implies_no_arbitrage` (`Foundations/FTAP.lean`) at horizon `1`.
 Because `θ` ranges over the **finite-dimensional** `F`, the equivalent martingale measure
 is **explicit**: the backward direction minimises the smooth convex softplus
 potential `θ ↦ E[log(1 + exp⟪θ,Y⟫)]`. The
@@ -91,19 +95,52 @@ structure IsEMM (Q : Measure Ω) : Prop where
   int  : Integrable Y Q
   fair : ∫ ω, Y ω ∂Q = 0
 
-omit [IsProbabilityMeasure P] [MeasurableSpace F] [BorelSpace F] in
-/-- **Forward direction**: an equivalent martingale measure precludes arbitrage.
-Under `Q`, `∫ ⟪θ, Y⟫ ∂Q = ⟪θ, E_Q[Y]⟫ = 0`, so a non-negative `⟪θ, Y⟫` is `0` a.e.;
-equivalence transports this back to `P`. -/
-theorem noArbitrage_of_isEMM {Q : Measure Ω} (hQ : IsEMM P Y Q) : NoArbitrage P Y := by
+omit [IsProbabilityMeasure P] in
+/-- **Forward direction**: an equivalent martingale measure precludes arbitrage. The one-period
+market is the horizon-`1` market with `𝓕 0 = ⊥`, `S 0 = 0`, `S 1 = ⟪θ, Y⟫` and the constant
+strategy `1`: `E_Q[⟪θ, Y⟫] = ⟪θ, E_Q[Y]⟫ = 0` makes `S` a `Q`-martingale up to the horizon, and
+`MathFin.emm_implies_no_arbitrage` does the rest. -/
+theorem noArbitrage_of_isEMM (hY : Measurable Y) {Q : Measure Ω} (hQ : IsEMM P Y Q) :
+    NoArbitrage P Y := by
   haveI := hQ.prob
   intro θ hpos
-  have hposQ : 0 ≤ᵐ[Q] (fun ω ↦ inner ℝ θ (Y ω)) := hQ.absP.ae_le hpos
+  -- the two-step filtration `⊥ ≤ mΩ`
+  obtain ⟨𝓕, h0, h1⟩ : ∃ 𝓕 : Filtration ℕ mΩ, 𝓕 0 = ⊥ ∧ 𝓕 1 = mΩ :=
+    ⟨{ seq := fun n ↦ if n = 0 then ⊥ else mΩ
+       mono' := fun a b hab ↦ by
+         dsimp only
+         split_ifs with ha hb hb
+         · exact le_rfl
+         · exact bot_le
+         · exact absurd (Nat.le_zero.mp (hb ▸ hab)) ha
+         · exact le_rfl
+       le' := fun n ↦ by
+         split_ifs
+         · exact bot_le
+         · exact le_rfl }, rfl, rfl⟩
+  let S : ℕ → Ω → ℝ := fun n ω ↦ if n = 0 then 0 else inner ℝ θ (Y ω)
+  have hS0 : S 0 = 0 := funext fun ω ↦ if_pos rfl
+  have hS1 : S 1 = fun ω ↦ inner ℝ θ (Y ω) := funext fun ω ↦ if_neg one_ne_zero
   have hint : ∫ ω, inner ℝ θ (Y ω) ∂Q = 0 := by
     rw [integral_inner hQ.int, hQ.fair, inner_zero_right]
-  have hzeroQ : (fun ω ↦ inner ℝ θ (Y ω)) =ᵐ[Q] 0 :=
-    (integral_eq_zero_iff_of_nonneg_ae hposQ (hQ.int.const_inner θ)).mp hint
-  exact hQ.Pabs.ae_eq hzeroQ
+  have hnull : P {ω | 0 < inner ℝ θ (Y ω)} = 0 := by
+    have := emm_implies_no_arbitrage (T := 1) (𝓕 := 𝓕) (S := S) hQ.absP hQ.Pabs
+      (fun t ht ↦ by
+        rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ht with rfl | rfl
+        · rw [hS0]; exact stronglyMeasurable_zero
+        · rw [hS1, h1]; exact (measurable_const.inner hY).stronglyMeasurable)
+      (fun t ht ↦ by
+        rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ht with rfl | rfl
+        · rw [hS0]; exact integrable_zero _ _ _
+        · rw [hS1]; exact hQ.int.const_inner θ)
+      (fun t ht ↦ by
+        obtain rfl : t = 0 := Nat.lt_one_iff.mp ht
+        rw [h0, condExp_bot, hS1, hint, hS0]
+        exact Filter.Eventually.of_forall fun ω ↦ by simp)
+      (fun _ _ ↦ (1 : ℝ)) (fun _ _ ↦ stronglyMeasurable_const) ⟨1, fun _ _ _ ↦ by simp⟩
+      (by filter_upwards [hpos] with ω h; simpa [S] using h)
+    simpa [S] using this
+  exact ae_eq_zero_of_nonneg_of_null_pos hpos hnull
 
 /-! ### The softplus potential and its logistic derivative
 
@@ -538,7 +575,7 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
     set Q : Measure Ω := P.withDensity (fun ω ↦ ENNReal.ofReal (dens ω)) with hQ
     have hofReal_meas : Measurable (fun ω ↦ ENNReal.ofReal (dens ω)) :=
       ENNReal.measurable_ofReal.comp hdmeas
-    obtain ⟨hQprob, hQP, hPQ⟩ := isEquivProbMeasure_withDensity P hdmeas hdpos hdint hdsum
+    obtain ⟨hQprob, hQP, hPQ⟩ := isEquivProbMeasure_withDensity P hdpos hdint hdsum
     rw [← hQ] at hQprob hQP hPQ
     haveI := hQprob
     have hdY_int : Integrable (fun ω ↦ dens ω • Y ω) P := by
@@ -600,7 +637,7 @@ theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) 
   have hd_ofReal_meas : Measurable (fun ω ↦ ENNReal.ofReal (dens ω)) :=
     ENNReal.measurable_ofReal.comp hd_meas
   obtain ⟨hPt_prob, hPt_ll_P, hP_ll_Pt⟩ :=
-    isEquivProbMeasure_withDensity P hd_meas hd_pos hd_int hd_sum
+    isEquivProbMeasure_withDensity P hd_pos hd_int hd_sum
   rw [← hPtdef] at hPt_prob hPt_ll_P hP_ll_Pt
   haveI := hPt_prob
   have hdY_int : Integrable (fun ω ↦ dens ω • Y ω) P := by
@@ -633,6 +670,6 @@ no measurable selection, and **no non-redundancy hypothesis**. -/
 theorem ftap_one_period_vector (hY : Measurable Y) :
     NoArbitrage P Y ↔ ∃ Q, IsEMM P Y Q :=
   ⟨fun hNA ↦ exists_isEMM_of_noArbitrage P Y hY hNA,
-   fun ⟨_, hQ⟩ ↦ noArbitrage_of_isEMM P Y hQ⟩
+   fun ⟨_, hQ⟩ ↦ noArbitrage_of_isEMM P Y hY hQ⟩
 
 end MathFin.OnePeriodVector

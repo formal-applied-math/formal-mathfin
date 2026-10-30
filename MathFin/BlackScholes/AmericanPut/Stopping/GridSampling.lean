@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.Rules
+public import MathFin.Foundations.ContinuousMarket
 
 /-!
 # Sampling continuous-time stopping rules on a uniform grid
@@ -28,12 +29,12 @@ open scoped NNReal Topology
 
 variable {Ω : Type*} [MeasurableSpace Ω]
 
-/-- The continuous filtration sampled at the uniform grid times `i*δ`. -/
+/-- The continuous filtration sampled at the uniform grid times `i*δ`: the sampled filtration
+`ContinuousMarket.sampledFiltration` along the schedule `i ↦ i*δ`. -/
 def gridFiltration (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (δ : ℝ≥0) :
-    Filtration ℕ ‹MeasurableSpace Ω› where
-  seq := fun i => 𝓕 ((i : ℝ≥0)*δ)
-  mono' := fun _ _ hij => 𝓕.mono (mul_le_mul_of_nonneg_right (by exact_mod_cast hij) zero_le)
-  le' := fun i => 𝓕.le _
+    Filtration ℕ ‹MeasurableSpace Ω› :=
+  ContinuousMarket.sampledFiltration 𝓕 (t := fun i : ℕ => (i : ℝ≥0)*δ)
+    fun _ _ hij => mul_le_mul_of_nonneg_right (by exact_mod_cast hij) zero_le
 
 /-- The first grid index at or after a rule's time, `⌈θ.time ω/δ⌉₊`. -/
 noncomputable def gridIndex {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T : ℝ≥0}

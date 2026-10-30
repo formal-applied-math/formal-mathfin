@@ -12,7 +12,7 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.UsualGridMarkov
 ## Result
 
 Public entry points include `delayedGridTime`, `delayedGridTime_mono`, `delayedGridFiltration`,
-`delayedBellmanAux_eq_markov`.
+`delayedGridReward`.
 -/
 
 @[expose] public section
@@ -30,32 +30,7 @@ theorem delayedGridTime_mono (u T δ : ℝ≥0) : Monotone (delayedGridTime u T 
 
 /-- The Brownian filtration sampled along the delayed grid times. -/
 noncomputable def delayedGridFiltration (u T δ : ℝ≥0) :=
-  sampledFiltration brownianFiltration (delayedGridTime u T δ) (delayedGridTime_mono u T δ)
-
-theorem delayedBellmanAux_eq_markov {Z : ℕ → ℝ → ℝ} {C : ℝ}
-    (hc : ∀ i, Continuous (Z i)) (hb : ∀ i x, ‖Z i x‖ ≤ C)
-    (u T δ : ℝ≥0) (β σ x : ℝ) (n i : ℕ) :
-    bellmanAux gaussianLimit (delayedGridFiltration u T δ)
-      (fun j ω => Z j (brownianLogState β σ x (delayedGridTime u T δ j) ω)) n i =ᵐ[gaussianLimit]
-      fun ω => brownianGridMarkovAux Z T δ β σ n i
-        (brownianLogState β σ x (delayedGridTime u T δ i) ω) := by
-  induction n generalizing i with
-  | zero => exact Eventually.of_forall (fun _ => rfl)
-  | succ n ih =>
-    have hcond := condExp_congr_ae (m := delayedGridFiltration u T δ i) (ih (i+1))
-    have ht := brownianLogState_condExp_transition
-      (brownianGridMarkovAux_continuous hc hb T δ β σ n (i+1))
-      (brownianGridMarkovAux_bound hb T δ β σ n (i+1))
-      (delayedGridTime_mono u T δ (Nat.le_succ i)) β σ x
-    have hdt : (delayedGridTime u T δ (i+1) : ℝ)-(delayedGridTime u T δ i : ℝ) =
-        (cappedGridTime T δ (i+1) : ℝ)-(cappedGridTime T δ i : ℝ) := by
-      simp only [delayedGridTime,NNReal.coe_add]
-      ring
-    rw [hdt] at ht
-    filter_upwards [hcond,ht] with ω hω htω
-    change max _ _ = max _ _
-    rw [hω]
-    exact congrArg (max _) htω
+  ContinuousMarket.sampledFiltration brownianFiltration (delayedGridTime_mono u T δ)
 
 /-- The discounted put reward from spot `Real.exp x`, exercised at the deterministic time
 `delayedGridTime u T δ i`. -/
@@ -103,10 +78,19 @@ theorem delayedGrid_bellman_eq {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
     (fun i ω => discountedLogPayoff K r (cappedGridTime T δ i)
       (brownianLogState (r-q-σ^2/2) σ x (delayedGridTime u T δ i) ω))
     (Real.exp_pos (-r*(u : ℝ))).le ⌈T/δ⌉₊ 0
-  have he := delayedBellmanAux_eq_markov
-    (fun i => discountedLogPayoff_continuous K r (cappedGridTime T δ i))
-    (fun i y => discountedLogPayoff_bound hK hr (cappedGridTime T δ i) y)
-    u T δ (r-q-σ^2/2) σ x ⌈T/δ⌉₊ 0
+  have he : bellmanAux gaussianLimit (delayedGridFiltration u T δ)
+      (fun i ω => discountedLogPayoff K r (cappedGridTime T δ i)
+        (brownianLogState (r-q-σ^2/2) σ x (delayedGridTime u T δ i) ω)) ⌈T/δ⌉₊ 0 =ᵐ[gaussianLimit]
+      fun ω => brownianGridMarkovAux (fun i => discountedLogPayoff K r (cappedGridTime T δ i))
+        (cappedGridTime T δ) (r-q-σ^2/2) σ ⌈T/δ⌉₊ 0
+        (brownianLogState (r-q-σ^2/2) σ x (delayedGridTime u T δ 0) ω) := by
+    have h := bellmanAux_eq_brownianGridMarkovAux (delayedGridTime_mono u T δ)
+      (brownianLogState_isGaussianMarkov (r-q-σ^2/2) σ x)
+      (fun i => discountedLogPayoff_continuous K r (cappedGridTime T δ i))
+      (fun i y => discountedLogPayoff_bound hK hr (cappedGridTime T δ i) y) ⌈T/δ⌉₊ 0
+    rw [brownianGridMarkovAux_add_left _ u (s' := delayedGridTime u T δ)
+      (s := cappedGridTime T δ) (fun _ => rfl)] at h
+    exact h
   filter_upwards [hm,he] with ω hmω heω
   rw [hmω,heω]
   simp [brownianGridPrice,delayedGridTime,cappedGridTime]

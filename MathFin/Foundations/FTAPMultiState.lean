@@ -9,6 +9,7 @@ public import Mathlib
 public import MathFin.Foundations.FTAPTwoState
 public import MathFin.Foundations.ConvexSeparation
 public import MathFin.Foundations.FTAPOnePeriodVector
+public import MathFin.Foundations.StatePrices
 
 /-!
 # Multi-state FTAP (both directions)
@@ -84,6 +85,8 @@ the EMM. Together with the forward direction this is the biconditional
 * `hasEMM_multi_iff_not_hasArbitrage`: the multi-state FTAP biconditional.
 * `hasEMM_two_state_iff_not_hasArbitrage`: the two-state FTAP biconditional.
 * `hasEMM_multi_state_iff_exists_isEMM`: the measure form of the finite-state EMM.
+* `exists_statePrices_of_hasEMM`: an EMM for the excess return `S − S₀/DF` is the state-price
+  vector `DF · q` of the no-arbitrage derivations (`Foundations/NoArbitrageDerivations.lean`).
 -/
 
 @[expose] public section
@@ -311,5 +314,24 @@ theorem hasEMM_multi_state_iff_exists_isEMM {N M : ℕ} [NeZero N] (z : Fin M �
   exact OnePeriodVector.ftap_one_period_vector P _ (measurable_of_finite _)
 
 end MeasureForm
+
+/-- **State prices from an EMM.** If the one-asset market with terminal values `S` and the
+excess return `S i − S₀/DF` (the asset's value against its forward `S₀/DF`) has an EMM `p`,
+then `q = DF · p` is a strictly positive state-price vector that prices the unit bond at `DF`
+and the asset at `S₀` — exactly the bond and stock constraints of
+`putCall_parity_from_no_arbitrage` and `forward_price_from_no_arbitrage`. -/
+theorem exists_statePrices_of_hasEMM {N : ℕ} (S : Fin N → ℝ) {DF : ℝ} (S₀ : ℝ) (hDF : 0 < DF)
+    (h : HasEMM_multi_state (M := 1) fun _ i ↦ S i - S₀ / DF) :
+    ∃ q : Fin N → ℝ, (∀ i, 0 < q i) ∧ ∑ i, q i = DF ∧
+      statePricePricing Finset.univ q S = S₀ := by
+  obtain ⟨p, hp, hsum, hz⟩ := h
+  have hmean : ∑ i, p i * S i = S₀ / DF := by
+    have h0 := hz 0
+    simp only [mul_sub, Finset.sum_sub_distrib, ← Finset.sum_mul, hsum, one_mul] at h0
+    linarith
+  refine ⟨fun i ↦ DF * p i, fun i ↦ mul_pos hDF (hp i), ?_, ?_⟩
+  · rw [← Finset.mul_sum, hsum, mul_one]
+  · simp only [statePricePricing, mul_assoc, ← Finset.mul_sum, hmean]
+    field_simp
 
 end MathFin

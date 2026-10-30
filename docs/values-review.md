@@ -130,6 +130,154 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-29 — corpus 713, modules 656 — stochastic discount factors, and bonds in the Gaussian short-rate models
+
+Scope: the rates tower's first step into contracts, after #287. Four entries were added to `contracts.json` (all `full`); corpus 709 → 713. One module was added: `Contracts/Models/ShortRate.lean`.
+
+### Upgrades executed
+
+- **The stochastic discount factor generalises `value`, definitionally.** `Contract.valueDisc` discounts each outcome by its own path `t ↦ D t ω`. The deterministic `value` is the constant case by `rfl` (`valueDisc_const`), so no existing theorem is restated.
+- **One model-free theorem, three instances.** A fixed schedule sees a stochastic `D` only through its zero curve `𝔼[D t]` (`valueDisc_fixedFlows_eq_value`). Vasicek, Hull–White and GSR are one-line instances that consume the bond prices in `FixedIncome/`.
+- **Integrability is not a hypothesis of the instances.** It follows from the bond price being nonzero (`Integrable.of_integral_ne_zero`), so the model theorems carry only their models' assumptions.
+
+### The standing first pass: prose against statement
+
+- The README sentence first stated the zero-curve theorem for `D = e^{−∫r}` with no integrability hypothesis. The theorem is for any `D` that is integrable at the payment dates, and the README now says so. The bond instances name `e^{−∫r}`.
+- One `formalization_scope` credited another module with deriving the integrated Vasicek rate from the SDE. It now says only what this entry uses: the Wiener representation.
+- Every instance names the measure as the pricing measure with no change of measure, and GSR restricts to dates after the volatility switch, as `gsrBondPrice_eq` does.
+
+### Lens gradients
+
+- **Inspired math.** Next: a floating leg under a stochastic `D`, the floating rate observed at the reset date. Valuing it needs `P(t, T)` at `t > 0` for these models, which the library does not have: the conditional Laplace transform of the integrated rate.
+- **Concept clarity.** Next: the par swap rate as a forward swap rate under the annuity numéraire, once the floating leg exists.
+
+### Ranked backlog
+
+1. `P(t, T)` for the Gaussian short-rate models, as a conditional expectation, and the floating leg on it.
+2. The binomial forward as an instance of `value_forward_of_martingale`.
+3. Lévy's characterization (#179), blocked on BM's Doob–Meyer.
+
+### Evidence
+
+The module and the four snippets pass in the daemon as combined files. `AxiomAuditGen` is regenerated, and `formalization.yaml` is fresh. The ledger rows are verified on GitHub runners, and the rows that only one side of the merge changed are restored by input hash. The full build is CI's.
+
+## 2026-10-29 — corpus 708, modules 655 — the Itô integral as a local martingale, Itô's formula as an identity of processes
+
+Scope: the first two stochastic-calculus items of #346. Three entries were added to `stochastic_calculus.json` (all `full`); corpus 705 → 708. Four modules were added: `ItoIntegralLocalisedLocalMartingale`, `ItoIntegralPredictableRiemann`, `ItoIntegralLocalisedPredictable` and `ItoFormulaAdaptedProcess`, all in `Foundations/`.
+
+### Upgrades executed
+
+- **Degenne's local martingale, not a local definition.** The headline is `IsLocalMartingale` from BrownianMotion, for the null-augmented Brownian filtration (`augFiltration`), which its càdlàg-on-every-path requirement forces. The localizing sequence is the exit times of the clipped integrand, and each stopped process is a `Martingale` by BM's `stoppedProcess_indicator`. BM's Doob–Meyer, `sorry` at the pin, is not on the path.
+- **`ExitTime` generalised, not copied.** The exit-time lemmas now take a measurable process instead of the one they were written for (`isStoppingTime_exitTime_of_measurable`, `isLocalizingSequence_exitTime_of_measurable`), and `ItoFormulaUnrestrictedLocMart` consumes them instead of keeping its own copies.
+- **Itô's formula is now about processes.** The fixed-time limits in probability (`ito_formula_adapted_unbounded_le`) and the Riemann–Stieltjes convergence of the predictable integral are glued at every `t` by `ae_forall_eq_of_continuousOn`. The `C²` case is the `f_t = 0` instance, not a separate proof.
+
+### The standing first pass: prose against statement
+
+- Every description says the filtration is the natural, uncompleted one for the hypotheses and the null-augmented one for the local-martingale conclusion; the statements take `natFiltration` and conclude for `augFiltration`.
+- "Up to indistinguishability" is what the statements give: an `∃ X` agreeing with the integral almost surely at every `t ∈ [0, T]` at once, not the integral itself.
+- The README limitation that said Itô's formula for an Itô process does not cover `eˣ` or `x²` is replaced: it now names what is still missing (a semimartingale not built from `B`, and a QV process for a general continuous local martingale).
+
+### Lens gradients
+
+- **Mathlib/Degenne coherence.** Exemplar: the conclusion is BM's `IsLocalMartingale`. Next: state the integral for a general continuous local martingale integrator once BM's Doob–Meyer is proved upstream.
+- **First principles.** Next: Lévy's characterization (#179). It needs a QV process for an arbitrary continuous local martingale, and so it waits on the same upstream theorem.
+
+### Ranked backlog
+
+1. Stochastic discount factors in `Contract.value` (the rates tower's step into contracts).
+2. Lévy's characterization (#179), blocked on BM's Doob–Meyer.
+3. Itô's formula with a random `F₀`-measurable starting point.
+
+### Evidence
+
+Every new module passes in the daemon, with 0 sorries. `AxiomAuditGen` is regenerated and `formalization.yaml` is fresh. The new and stale ledger rows are verified on GitHub runners (`ledger-sweep.yml`). The full build is CI's.
+
+## 2026-10-29 — corpus 705, modules 651 — the contract in any model, bonds and swaps, and the risk of a position
+
+Scope: the three contracts items after the binomial hedge. Nine entries were added to `contracts.json` (all `full`); corpus 696 → 705. Three modules were added: `Contracts/Parity.lean`, `Contracts/Instruments/FixedIncome.lean` and `Contracts/Risk.lean`.
+
+### Upgrades executed
+
+- **Model-free first, models as instances.**
+  - The forward and put–call parity are proved in any model whose discounted price is a martingale started at `S₀` with `D(0) = 1` (`value_forward_of_martingale`, `value_europeanCall_sub_put_of_martingale`).
+  - The put's integrability follows from the underlying's, so neither option carries an integrability hypothesis.
+  - `BlackScholes.value_forward` is now an instance of `value_forward_of_integral`, not a separate computation.
+- **The library's fixed-income prices are contract values.** A fixed schedule is one recursive contract (`fixedFlows`). `bondPriceDisc` and `annuityValue` are its present values at a yield and on the flat curve. The payer swap's floating leg telescopes to `P(T₀) − P(Tₙ)`, so the swap's value is `payerSwapValue` and its zero is `parSwapRate`, both consumed from `FixedIncome/`.
+- **Risk reads the contract, not a new random variable.**
+  - `Contract.loss` is the price paid less the path PV.
+  - The book bound is `expectedShortfall_add_le` read through `pathPV_both`.
+  - The hedged binomial seller's zero risk is the replication identity `pathPV_eq_value_add_gains` read pointwise.
+  - The two constant-loss lemmas the proofs needed (`valueAtRisk_const`, `expectedShortfall_const`) went to `RiskMeasures/ValueAtRisk.lean`, the module they are about.
+
+### The standing first pass: prose against statement
+
+- The parity entries and the README landmark name both normalizations the statement takes (`X 0 = S₀`, `D 0 = 1`) and say no integrability hypothesis is needed. The statement has none.
+- The swap entries say "deterministic curve" and "the floating coupons are fixed by the curve". The legs take `P : ℝ≥0 → ℝ`, a function of time only.
+- The risk entries name the measure the risk is taken under (`P`, any probability measure) and say it need not be a pricing measure.
+
+### Lens gradients
+
+- **Architectural ingenuity.** Exemplar: one martingale lemma prices the forward in every model, and Black–Scholes reduces to it. Next: the binomial forward as the same instance.
+- **Inspired math.** Next: a stochastic discount factor `D : ℝ≥0 → Ω → ℝ`, so that floating legs observe a rate instead of reading a curve. That is the rates tower's step into contracts.
+- **Concept clarity.** Next: the swap's par rate stated as the forward swap rate of a contract measure (the annuity numéraire), once the discount factor is stochastic.
+
+### Ranked backlog
+
+1. Stochastic discount factors in `Contract.value`, starting from the Vasicek and Hull–White zero-coupon bonds (#287).
+2. The binomial forward as an instance of `value_forward_of_martingale`.
+3. Expected shortfall of a hedged position in Black–Scholes under discrete rebalancing (a nonzero bound, not zero).
+
+### Evidence
+
+Every new module and the nine snippets pass in the daemon (the snippets as combined files inlining the unbuilt modules). `AxiomAuditGen` is regenerated (840 guards), and `formalization.yaml` is fresh. The new and stale ledger rows are verified on GitHub runners (`ledger-sweep.yml`). The full build is CI's.
+
+## 2026-10-29 — corpus 696, modules 648 — seven contributed PRs, brought into the library's graph
+
+Scope: seven PRs from Yang Ye (#270 #271 #277 #281 #342 #343 #344), merged into one integration branch with merge commits, then maintainer follow-ups. The batch adds 25 entries (all `full`), for a corpus of 671 → 696. Seventeen modules arrive: Student-t VaR and ES, exposure measures, DVA, bond and FX forwards, key-rate duration, clean and dirty price, loan amortization, relative drawdown, SABR, Gyöngy and Dupire, Heston, CIR as a sum of squared OU processes, and PSD Cauchy–Schwarz. The contributed `Foundations/ExpAffine.lean` was folded into Heston, and `Foundations/CIRSquaredOU.lean` moved to `FixedIncome/`. #325 (barrier closed forms) is held; see backlog item 1.
+
+### Upgrades executed
+
+- **Consumed, not reproved.**
+  - The PSD Cauchy–Schwarz drops a 65-line expansion for Mathlib's `LinearMap.BilinForm.apply_mul_apply_le_of_forall_zero_le` on `Matrix.toBilin'`.
+  - The CIR-as-squared-OU mean now reads the OU law from `vasicekShortRate_hasLaw_gaussian` instead of recomputing it, and moves to `FixedIncome/` beside the Vasicek tower.
+  - DVA is stated through the expected negative exposure it mirrors (`dva_eq_integral_expectedNegativeExposure`).
+- **One graph.**
+  - Heston's ρ-shifted Riccati coefficient is tied to the CIR Riccati solution (`hestonGamma_eq_cirGamma`), so the Heston module connects to the rates tower rather than standing alone.
+  - The contributed exp-affine helpers live in Heston, their one consumer.
+- **Junk values named.**
+  - PFE is redefined as the value-at-risk of `max(V, 0)`, so it is a quantile by construction (`potentialFutureExposure_eq_max`).
+  - Discount-at-yield statements carry `0 < 1 + y`.
+- **Fields that did no work were removed.** `BoundedItoProcess` was a structure with unused fields; it is now `BoundedCoeffData`, holding only what Gyöngy's argument reads.
+
+### The standing first pass: prose against statement
+
+All 25 new descriptions were read against their statements. Each disclosure the statement forces is in its description:
+
+- the SABR derivation and the SABR dynamics are not formalized, and σ_ATM > 0 is assumed;
+- the Heston process is not constructed;
+- Dupire assumes the surface's regularity and does not prove that a local-vol diffusion exists;
+- key-rate durations are not defined, only the partials;
+- KKT necessity is not proved;
+- the CIR SDE itself is not proved.
+
+The contributed prose lost its process residue, its "cross-checked" claims and its chapter citations that did not match.
+
+### Lens gradients
+
+- **Mathlib coherence.** Exemplar: Cauchy–Schwarz as a three-line consumer of the bilinear-form lemma. Next: the Student-t law as a Mathlib-shaped `ProbabilityTheory.studentT` with the Cauchy case as a lemma, which the module's interface already suggests.
+- **Architectural ingenuity.** Exemplar: the Heston–CIR bridge. Next: the Heston characteristic function as `E[e^{u log S_T}]` once a Heston process exists. That needs CIR existence, which is upstream work.
+- **Concept clarity.** Next: key-rate durations as a tenor-indexed curve with interpolation, not one node per cash flow.
+
+### Ranked backlog
+
+1. #325 back with the reductions named on the PR (partial time → full barrier at `t₁ = T`; binary → `bs_cash_or_nothing_formula`).
+2. Key-rate durations on a tenor grid.
+3. The Student-t law upstream.
+
+### Evidence
+
+The daemon checks of every follow-up file pass: `KeyRateDuration`, `CIRSquaredOU`, `Heston`, `GyongyMimicry`, `Dupire`, `PosSemidefCauchySchwarz`. `AxiomAuditGen` is regenerated (822 guards). `formalization.yaml` is fresh. The Python gates pass except the ledger rows for the new entries, which are verified on GitHub runners (`ledger-sweep.yml`). The full build is CI's.
+
 ## 2026-10-29 — corpus 671, modules 631 — the binomial value is the cost of its hedge
 
 Scope: replication in the tree, then stated for a contract. Two entries were added, `mf-binomial-european-replication` and `mf-contract-binomial-hedge` (both `full`); corpus 669 → 671. One module was added, `Binomial/EuropeanReplication.lean`.
@@ -518,7 +666,7 @@ entries they cite, and 35 docstrings needed fixes, all applied. By kind:
 
 ### Ranked backlog
 
-1. The Student-t law, then VaR and ES at it (#285, carried).
+1. The Student-t law, then VaR and ES at it (#285, carried) — delivered 2026-10-29 (#270).
 2. Gaussian EPE and PFE at the law, then collateralized EPE (#287, second half).
 3. Margrabe under the `S²`-numéraire measure; the chooser's step derived (#291).
 4. One-factor credit: one law, heterogeneous thresholds, recovery, joint migration (#293).
@@ -705,7 +853,7 @@ changed prose in 50 Lean files. What it found, by kind:
 
 ### Ranked backlog
 
-1. The Student-t law, then VaR and ES at it (#285; reopens #270).
+1. The Student-t law, then VaR and ES at it (#285; reopens #270) — delivered 2026-10-29 (#270).
 2. `BivariateNormalCDF` on Mathlib's Gaussian API; the copula bridged to the one-factor default
    model, with one parametrization of `ρ` (#286).
 3. One Wiener-integral bond-price lemma (Vasicek, Hull–White, GSR); Gaussian EPE and PFE stated at
@@ -1955,7 +2103,7 @@ Second panel (6 fix-now, 7 nits, all applied):
 8. **Smaller items:**
    - one model-free put–call parity, from which the four existing parities follow;
    - "American put ≥ Black–Scholes put" at `q = 0`, a cheap edge between the two towers;
-   - the American put's `brownianLogState_condExp_transition` as the rate-0 `condExp_comp`, and
+   - the American put's `brownianLogState_isGaussianMarkov` as the rate-0 `condExp_comp`, and
      `brownian_condExp_transition` taking integrability and measurability as hypotheses (its
      bound and continuity supply only those);
    - the second panel's deferred proof nits (above);

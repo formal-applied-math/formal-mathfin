@@ -58,12 +58,6 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
 /-- The Vasicek diffusion kernel `s ↦ e^{−κ(T−s)}`. -/
 noncomputable def vasicekKernel (κ T : ℝ) : ℝ → ℝ := fun s ↦ Real.exp (-(κ * (T - s)))
 
-/-- The restricted volume measure on `(0, T]` is finite. -/
-private instance vasicek_finite_restrict (T : ℝ≥0) :
-    IsFiniteMeasure (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) :=
-  ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, Real.volume_Ioc];
-      exact ENNReal.ofReal_lt_top⟩
-
 /-- The kernel is in `L²((0, T])` (continuous, bounded by `1` on the support
 for `κ ≥ 0`). -/
 lemma vasicekKernel_memLp (κ : ℝ) (hκ : 0 ≤ κ) (T : ℝ≥0) :
@@ -137,20 +131,9 @@ theorem vasicekShortRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ)
       (gaussianReal (vasicekSDEMean r₀ θ κ (T : ℝ)) (vasicekSDEVariance σ κ (T : ℝ)).toNNReal)
           μ := by
   -- The Wiener integral of the kernel is Gaussian, centred, variance = ∫ kernel².
-  have hW : HasLaw (fun ω ↦ wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω)
-      (gaussianReal 0 (∫ s in Set.Ioc (0 : ℝ) (T : ℝ),
-        (vasicekKernelLp κ hκ.le T s) ^ 2 ∂volume).toNNReal) μ :=
-    wienerIntegralLp_hasLaw_gaussian hB T _
-  -- Replace the L² representative's integral by the kernel's (a.e. equal).
-  have hInt : (∫ s in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekKernelLp κ hκ.le T s) ^ 2 ∂volume)
-      = (1 - Real.exp (-(2 * κ * T))) / (2 * κ) := by
-    rw [show (∫ s in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekKernelLp κ hκ.le T s) ^ 2 ∂volume)
-          = ∫ s in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekKernel κ T s) ^ 2 ∂volume by
-        refine integral_congr_ae ?_
-        filter_upwards [(vasicekKernel_memLp κ hκ.le T).coeFn_toLp] with s hs
-        rw [vasicekKernelLp, hs]]
-    exact vasicekKernel_integral_sq κ hκ.ne' T
-  rw [hInt] at hW
+  have hW := wienerIntegralLp_hasLaw_gaussian_of_integral_sq hB T (vasicekKernelLp κ hκ.le T)
+    ((vasicekKernel_memLp κ hκ.le T).integral_sq_toLp.trans
+      (vasicekKernel_integral_sq κ hκ.ne' T))
   -- Scale by σ then shift by the mean; the affine map sends N(0, ∫kernel²) to N(mean, σ²·∫kernel²).
   have hkernel_nonneg : (0 : ℝ) ≤ (1 - Real.exp (-(2 * κ * (T : ℝ)))) / (2 * κ) := by
     simpa [vasicekSDEVariance] using vasicekSDEVariance_nonneg 1 hκ (NNReal.coe_nonneg T)

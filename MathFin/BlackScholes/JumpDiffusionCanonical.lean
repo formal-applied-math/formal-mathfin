@@ -20,7 +20,7 @@ on `ℝ × ℕ × (ℕ → ℝ)` with the product of `N(0, 1)`, `Poisson(Λ)` an
 (`jumpDiffusionMeasure`), the coordinates satisfy them (`jumpDiffusionHyp_canonical`). So the
 `JumpDiffusionHyp` theorems are not vacuous; their remaining hypotheses on the model are
 conditions on `Λ` and `ν`, such as `∫ eˣ dν < ∞` (`integrable_exp_canonical_jump`). With Gaussian
-jumps the same model is a Merton model (`mertonHyp_canonical`).
+jumps the same model is Merton's (`JumpDiffusionHyp.call_eq_mertonCallPrice`).
 
 It also shows that the call depends on the model only through `Λ` and the law of the jumps. On
 any probability space satisfying `JumpDiffusionHyp`, the jump sizes are i.i.d., so their sequence
@@ -85,7 +85,7 @@ theorem jumpDiffusionHyp_canonical (Λ : ℝ≥0) (ν : Measure ℝ) [IsProbabil
     (indepFun_iff_hasLaw_prodMk_prod (measurePreserving_fst.comp hsnd).hasLaw
       hsizes.hasLaw).2 hsnd.hasLaw
   refine ⟨⟨(measurePreserving_fst (μ := gaussianReal 0 1)).hasLaw,
-    (measurePreserving_fst.comp hsnd).hasLaw, hJm, ?_, fun i ↦ (hJ i).identDistrib (hJ 0),
+    (measurePreserving_fst.comp hsnd).hasLaw, ?_, fun i ↦ (hJ i).identDistrib (hJ 0),
     hZ.comp measurable_id measurable_snd,
     indepFun_prodMk_of_indepFun_prodMk measurable_fst.aemeasurable
       (measurable_fst.comp measurable_snd).aemeasurable
@@ -137,7 +137,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} {Λ : ℝ≥0}
 `ν` the law of `J₀`. -/
 lemma map_jumps (h : JumpDiffusionHyp Q Λ Z N J) :
     Q.map (fun ω i ↦ J i ω) = Measure.infinitePi fun _ : ℕ ↦ Q.map (J 0) := by
-  rw [h.J_indep.map_fun_eq_infinitePi_map h.J_meas]
+  rw [h.J_indep.map_fun_eq_infinitePi_map₀' h.aemeasurable_J]
   congr 1
   funext i
   exact (h.J_ident i).map_eq
@@ -158,7 +158,7 @@ theorem call_eq_integral_infinitePi (h : JumpDiffusionHyp Q Λ Z N J)
   refine integral_congr_ae (ae_of_all _ fun n ↦ ?_)
   have hg : Measurable fun x : ℕ → ℝ ↦ bsV K r σ (S_0 * rexp (-κ + ∑ i ∈ Finset.range n, x i)) T :=
     (measurable_bsV_spot K r σ T).comp (by fun_prop)
-  exact (integral_map (measurable_pi_lambda _ h.J_meas).aemeasurable
+  exact (integral_map h.aemeasurable_jumps
     hg.aestronglyMeasurable).symm
 
 end JumpDiffusionHyp

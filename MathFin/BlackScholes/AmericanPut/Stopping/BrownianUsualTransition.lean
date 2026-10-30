@@ -26,6 +26,7 @@ namespace MathFin.BlackScholes.AmericanPut.Stopping
 
 open Set Filter MeasureTheory ProbabilityTheory
 open scoped NNReal Topology
+open MathFin.ItoLocalMartingale (nullAugmentation supermartingale_nullAugmentation)
 
 /-- The `brownianHeatFlow` of `f` over time `(σ^2*(T-min t T)).toNNReal`, started from the log
 state `brownianLogState β σ x (min t T) ω` shifted by `β*(T-min t T)`. -/
@@ -67,7 +68,7 @@ theorem brownianTerminalValue_eq_condExp {f : ℝ → ℝ} {C : ℝ}
     gaussianLimit[fun ω => f (brownianLogState β σ x T ω) | brownianFiltration t] =ᵐ[gaussianLimit]
       brownianTerminalValue f β σ x T t := by
   by_cases ht : t ≤ T
-  · convert! brownianLogState_condExp_transition hf hb ht β σ x using 1
+  · convert! brownianLogState_isGaussianMarkov β σ x hf hb ht using 1
     ext ω
     simp only [brownianTerminalValue,min_eq_left ht]
   · have hTt := le_of_not_ge ht
@@ -101,22 +102,19 @@ theorem brownianTerminalValue_usual_martingale {f : ℝ → ℝ} {C : ℝ}
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   have hu' :=
       bounded_continuous_supermartingale_rightCont
-      (supermartingale_ambientNullAugmentation hu) hc hbound
+      (supermartingale_nullAugmentation hu) hc hbound
   have hn' :=
-      bounded_continuous_supermartingale_rightCont (supermartingale_ambientNullAugmentation hn)
+      bounded_continuous_supermartingale_rightCont (supermartingale_nullAugmentation hn)
     (fun ω => (hc ω).neg) (fun t ω => by simpa only [Pi.neg_apply,norm_neg] using hbound t ω)
   apply martingale_iff.mpr
   refine ⟨hu',?_⟩
   convert! hn'.neg using 1
   simp only [neg_neg]
 
-theorem brownianLogState_usual_condExp_transition {f : ℝ → ℝ} (hf : Continuous f) {C : ℝ}
-    (hb : ∀ y, ‖f y‖ ≤ C) {i j : ℝ≥0} (hij : i ≤ j) (β σ x : ℝ) :
-    (completedMeasure gaussianLimit)[fun ω =>
-        f (brownianLogState β σ x j ω) | brownianUsualFiltration i]
-      =ᵐ[completedMeasure gaussianLimit]
-      fun ω => brownianHeatFlow f (σ^2*((j : ℝ)-(i : ℝ))).toNNReal
-        (brownianLogState β σ x i ω+β*((j : ℝ)-(i : ℝ))) := by
+theorem brownianLogState_usual_isGaussianMarkov (β σ x : ℝ) :
+    @IsGaussianMarkov (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit)
+      (completedMeasure gaussianLimit) brownianUsualFiltration β σ (brownianLogState β σ x) := by
+  intro f C hf hb i j hij
   have he := (brownianTerminalValue_usual_martingale hf hb β σ x j).2 i j hij
   rw [brownianTerminalValue_at_maturity f β σ x le_rfl] at he
   convert! he using 1

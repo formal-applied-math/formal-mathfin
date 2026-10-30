@@ -151,25 +151,6 @@ theorem varianceSwap_log_contribution {S_0 : ℝ} (hS : 0 < S_0)
   rw [integral_log_forward_div_bsTerminal_eq hS]
   field_simp
 
-/-- **Terminal price is the forward in expectation** — the standard-normal-driver
-form of `Forward.expected_terminal_eq_forward`: `E[S_T] = F = S_0·e^{rT}`. -/
-lemma integral_bsTerminal_eq_forward (S_0 r σ T : ℝ) (hT : 0 ≤ T) :
-    ∫ z, S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z) ∂(gaussianReal 0 1)
-      = S_0 * Real.exp (r * T) := by
-  rw [integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0),
-      show (fun z ↦ gaussianPDFReal 0 1 z •
-            (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)))
-          = (fun z ↦ S_0 * Real.exp ((r - σ ^ 2 / 2) * T) *
-              (Real.exp (σ * Real.sqrt T * z) * gaussianPDFReal 0 1 z)) from
-        funext fun z ↦ by rw [smul_eq_mul, Real.exp_add]; ring,
-      integral_const_mul, integral_exp_mul_gaussianPDFReal_univ,
-      show S_0 * Real.exp ((r - σ ^ 2 / 2) * T) * Real.exp ((σ * Real.sqrt T) ^ 2 / 2)
-          = S_0 * (Real.exp ((r - σ ^ 2 / 2) * T) * Real.exp ((σ * Real.sqrt T) ^ 2 / 2))
-        from by ring,
-      ← Real.exp_add,
-      show (r - σ ^ 2 / 2) * T + (σ * Real.sqrt T) ^ 2 / 2 = r * T from by
-        rw [mul_pow, Real.sq_sqrt hT]; ring]
-
 /-- **Zero excess-return moment**: `E[(S_T − F)/F] = 0`, immediate from
 `E[S_T] = F` (`integral_bsTerminal_eq_forward`). -/
 lemma integral_excess_return_eq_zero (S_0 r σ T : ℝ) (hT : 0 ≤ T) :

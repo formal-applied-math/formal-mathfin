@@ -24,6 +24,7 @@ namespace MathFin.BlackScholes.AmericanPut.Stopping
 
 open Set Filter MeasureTheory ProbabilityTheory Boundary
 open scoped NNReal Topology
+open MathFin.ItoLocalMartingale (nullAugmentation supermartingale_nullAugmentation)
 
 theorem canonicalPrice_transition {k h : ℝ} (hk : 0 ≤ k) {i j T : ℝ≥0}
     (hij : i ≤ j) (hjT : j ≤ T) (x : ℝ) :
@@ -118,7 +119,7 @@ theorem canonicalDiscountedPrice_condExp_le {k h : ℝ} (hk : 0 ≤ k) (x : ℝ)
     change ‖Real.exp (-k*(j : ℝ))*canonicalPrice k h y ((T : ℝ)-(j : ℝ))‖ ≤ 1
     rw [Real.norm_eq_abs,abs_of_nonneg (mul_nonneg (Real.exp_pos _).le hp0)]
     exact (mul_le_mul_of_nonneg_left hhi (Real.exp_pos _).le).trans (by simpa using he)
-  have ht := brownianLogState_condExp_transition hf hb hij (k-h-1) (Real.sqrt 2) x
+  have ht := brownianLogState_isGaussianMarkov (k-h-1) (Real.sqrt 2) x hf hb hij
   have hj : (fun ω => f (brownianLogState (k-h-1) (Real.sqrt 2) x j ω)) =
       canonicalDiscountedPrice k h x T j := by
     funext ω
@@ -164,7 +165,7 @@ theorem canonicalDiscountedPrice_usual_supermartingale {k h : ℝ} (hk : 0 ≤ k
     (canonicalDiscountedPrice_supermartingale (h := h) hk x T)
         (canonicalDiscountedPrice_bound hk x T)
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
-  exact bounded_continuous_supermartingale_rightCont (supermartingale_ambientNullAugmentation hu)
+  exact bounded_continuous_supermartingale_rightCont (supermartingale_nullAugmentation hu)
     (canonicalDiscountedPrice_continuous hk x T) (canonicalDiscountedPrice_bound hk x T)
 
 end MathFin.BlackScholes.AmericanPut.Stopping

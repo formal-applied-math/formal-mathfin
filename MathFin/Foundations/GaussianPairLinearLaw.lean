@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.Foundations.BivariateNormalCDF
+public import MathFin.Foundations.GaussianMoments
 
 /-!
 # Linear combinations of a correlated standard Gaussian pair
@@ -31,7 +32,6 @@ such as the cross-moment of a basket (`BlackScholes/BasketMomentMatching.lean`).
 * `sq_le_one_of_covariance_unit` — a covariance of unit-variance variables has `ρ² ≤ 1`.
 * `hasLaw_bivariateNormalLaw_of_gaussianPair` — `(U, V) ~ bivariateNormalLaw ρ`.
 * `hasLaw_linear_gaussianPair` — `aU + bV ~ N(0, a² + 2abρ + b²)`.
-* `integrable_exp_of_hasLaw_gaussianReal` — `e^X` is integrable for a real Gaussian `X`.
 * `integral_exp_linear_gaussianPair` — `𝔼[e^{aU + bV}] = e^{(a² + 2abρ + b²)/2}`.
 -/
 
@@ -129,15 +129,6 @@ theorem hasLaw_linear_gaussianPair {U V : Ω → ℝ} {ρ : ℝ}
     (by rw [hV.variance_eq, variance_id_gaussianReal, NNReal.coe_one]) hcov
   exact HasLaw.comp ⟨by fun_prop, map_linear_bivariateNormalLaw hρ a b⟩
     (hasLaw_bivariateNormalLaw_of_gaussianPair hUV hU hV hcov)
-
-/-- **The exponential of a real Gaussian is integrable**: `e^X ∈ L¹` for `X ~ N(m, v)`
-(Mathlib's `integrable_exp_mul_gaussianReal` at slope `1`, transported along the law). -/
-theorem integrable_exp_of_hasLaw_gaussianReal {X : Ω → ℝ} {m : ℝ} {v : ℝ≥0}
-    (hX : HasLaw X (gaussianReal m v) P) : Integrable (fun ω ↦ Real.exp (X ω)) P := by
-  rw [show (fun ω ↦ Real.exp (X ω)) = Real.exp ∘ X from rfl]
-  refine Integrable.comp_aemeasurable ?_ hX.aemeasurable
-  rw [hX.map_eq]
-  simpa only [one_mul] using integrable_exp_mul_gaussianReal (μ := m) (v := v) 1
 
 /-- **Exponential moment of a linear combination of a correlated standard Gaussian pair**:
 `𝔼[e^{aU + bV}] = e^{(a² + 2abρ + b²)/2}`, the moment generating function of

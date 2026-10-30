@@ -27,6 +27,8 @@ Results:
 
 * `annuityValue`, `annuityValue_closed_form`: definition and geometric-series
   closed form.
+* `annuityValue_succ_mul_exp_sub`: one period of an annuity's value,
+  `A_{m+1}·e^{rΔt} - A = A_m`.
 * `hasDerivAt_neg_log_zcb_T`: `-∂_T log B(t, T) = r` (forward = spot under flat
   curve).
 * `couponBondPrice_strictAnti`: bond price strictly decreasing in `r`, for
@@ -66,6 +68,21 @@ lemma annuityValue_closed_form (n : ℕ) (c r Δt : ℝ)
     sub_ne_zero.mpr (Ne.symm h)
   have h_x_minus_one_ne : Real.exp (-(r * Δt)) - 1 ≠ 0 := sub_ne_zero.mpr h
   field_simp
+  ring
+
+/-- One period of an annuity: carrying the value of `m + 1` payments forward one
+period and paying the first leaves the value of the other `m`,
+`A_{m+1}·e^{rΔt} - A = A_m`. -/
+theorem annuityValue_succ_mul_exp_sub (m : ℕ) (A r Δt : ℝ) :
+    annuityValue (m + 1) A r Δt * Real.exp (r * Δt) - A = annuityValue m A r Δt := by
+  rw [annuityValue, annuityValue, Finset.sum_range_succ', add_mul, Finset.sum_mul,
+    mul_assoc A, ← Real.exp_add]
+  simp only [Nat.cast_zero, zero_add, one_mul, neg_add_cancel, Real.exp_zero, mul_one,
+    add_sub_cancel_right]
+  refine Finset.sum_congr rfl fun i _ ↦ ?_
+  rw [mul_assoc, ← Real.exp_add]
+  congr 2
+  push_cast
   ring
 
 /-- **Forward = spot under a flat curve**: under a constant short rate `r`, the

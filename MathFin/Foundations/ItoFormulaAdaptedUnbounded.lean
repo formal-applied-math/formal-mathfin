@@ -28,7 +28,9 @@ formula is `ito_formula_adapted_td_local_le`, and its Riemann sums and limit are
 events exhaust `Ω` in probability (`tendsto_measure_compl_abs_le`), and convergence in measure is
 local (`tendstoInMeasure_of_ae_eqOn`).
 
-Not here: the formula as an identity of processes, and a random starting point.
+The formula as an identity of processes, all `t ∈ [0, T]` at once with the stochastic integral
+of `f_x(·, X) σ`, is `ito_formula_adapted_unbounded_process` (`ItoFormulaAdaptedProcess`). Not
+here: a random starting point.
 -/
 
 @[expose] public section

@@ -10,6 +10,7 @@ public import MathFin.BlackScholes.JumpDiffusionOptionPrices
 public import MathFin.BlackScholes.GaussianSmoothing
 public import MathFin.BlackScholes.Put
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianModel
+public import MathFin.Foundations.BrownianMartingale
 
 /-!
 # Brownian motion with drift is a jump-diffusion without jumps

@@ -5,10 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Contracts.Instruments.Options
+public import MathFin.Contracts.Parity
 public import MathFin.BlackScholes.Digital
 public import MathFin.BlackScholes.Put
 public import MathFin.BlackScholes.Forward
+public import MathFin.BlackScholes.PowerCall
 
 /-!
 # The contracts priced in the Black–Scholes model
@@ -41,10 +42,7 @@ no third integral is evaluated.
   `bs_call_formula`, `bs_put_formula` and `bs_cash_or_nothing_formula` respectively.
 * `value_forward` — the forward is worth `S₀ − K e^{−rT}`.
 * `value_cappedCall` — the capped call is worth the difference of two call values.
-* `integrable_europeanCall_pathPV`, `integrable_europeanPut_pathPV`,
-  `integrable_forward_pathPV` — the discounted payoffs are integrable when the driver is
-  standard normal, which is what `Contract.value_both` and
-  `value_europeanCall_eq_put_add_forward` need.
+* `value_powerCall` — the power call is `bs_power_call_formula`.
 
 ## Source
 
@@ -117,47 +115,14 @@ theorem value_europeanPut {Q : Measure Ω} [IsProbabilityMeasure Q]
   rw [europeanPut, Contract.value_pay]
   exact MathFin.bs_put_formula h
 
-/-- The reified call's discounted payoff is integrable when the underlying is lognormal: it is
-the positive part of `S_T − K`, and `S_T` is integrable (`integrable_bsTerminal`). -/
-theorem integrable_europeanCall_pathPV {Q : Measure Ω} [IsProbabilityMeasure Q] {Z : Ω → ℝ}
-    (hZ : HasLaw Z (gaussianReal 0 1) Q) (S_0 K r σ : ℝ) (T : ℝ≥0) :
-    Integrable (fun ω ↦ (europeanCall K T).pathPV (fun _ ↦ Real.exp (-r * T))
-      (scenarioAt (assets S_0 r σ T Z) ω)) Q := by
-  simp only [europeanCall, europeanCallPayoff, Contract.pathPV, Contract.cashflows, Payoff.eval,
-    scenarioAt, assets, List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
-  exact ((integrable_bsTerminal hZ S_0 r σ T).sub (integrable_const K)).pos_part.const_mul _
-
-/-- The reified put's discounted payoff is integrable when the underlying is lognormal: it is the
-positive part of `K − S_T`, and `S_T` is integrable (`integrable_bsTerminal`). -/
-theorem integrable_europeanPut_pathPV {Q : Measure Ω} [IsProbabilityMeasure Q] {Z : Ω → ℝ}
-    (hZ : HasLaw Z (gaussianReal 0 1) Q) (S_0 K r σ : ℝ) (T : ℝ≥0) :
-    Integrable (fun ω ↦ (europeanPut K T).pathPV (fun _ ↦ Real.exp (-r * T))
-      (scenarioAt (assets S_0 r σ T Z) ω)) Q := by
-  simp only [europeanPut, Contract.pathPV, Contract.cashflows, Payoff.eval, scenarioAt, assets,
-    List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
-  exact ((integrable_const K).sub (integrable_bsTerminal hZ S_0 r σ T)).pos_part.const_mul _
-
-/-- The reified forward's discounted payoff is integrable when the underlying is lognormal. -/
-theorem integrable_forward_pathPV {Q : Measure Ω} [IsProbabilityMeasure Q] {Z : Ω → ℝ}
-    (hZ : HasLaw Z (gaussianReal 0 1) Q) (S_0 K r σ : ℝ) (T : ℝ≥0) :
-    Integrable (fun ω ↦ (forward K T).pathPV (fun _ ↦ Real.exp (-r * T))
-      (scenarioAt (assets S_0 r σ T Z) ω)) Q := by
-  simp only [forward, Contract.pathPV, Contract.cashflows, Payoff.eval, scenarioAt, assets,
-    List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
-  exact ((integrable_bsTerminal hZ S_0 r σ T).sub (integrable_const K)).const_mul _
-
 /-- **The forward's Black–Scholes value** is `S₀ − K e^{−rT}`: the discounted terminal price has
-mean `S₀` (`discounted_terminal_eq_S0`). -/
+mean `S₀` (`discounted_terminal_eq_S0`), so this is `value_forward_of_integral`. -/
 theorem value_forward {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :
     (forward K T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
-      = S_0 - K * Real.exp (-r * T) := by
-  have h₀ := discounted_terminal_eq_S0 h
-  rw [← neg_mul] at h₀
-  rw [forward, Contract.value_pay]
-  simp only [Payoff.eval, scenarioAt, assets, mul_sub]
-  rw [integral_sub ((integrable_bsTerminal h.Z_law S_0 r σ T).const_mul _) (integrable_const _),
-    h₀, integral_const, probReal_univ, one_smul, mul_comm]
+      = S_0 - K * Real.exp (-r * T) :=
+  value_forward_of_integral ((integrable_bsTerminal h.Z_law S_0 r σ T).const_mul _)
+    (by simpa [assets, neg_mul] using discounted_terminal_eq_S0 h)
 
 /-- **The capped call's Black–Scholes value, by composition, not by a third integral.**
 `cappedCall K₁ K₂ T`'s value under the single-asset Black–Scholes model is the difference
@@ -172,13 +137,32 @@ theorem value_cappedCall {Q : Measure Ω} [IsProbabilityMeasure Q]
     (cappedCall K₁ K₂ T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
       = (S_0 * Phi (bsd1 S_0 K₁ r σ T) - K₁ * Real.exp (-r * T) * Phi (bsd2 S_0 K₁ r σ T))
       - (S_0 * Phi (bsd1 S_0 K₂ r σ T) - K₂ * Real.exp (-r * T) * Phi (bsd2 S_0 K₂ r σ T)) := by
-  have hi₁ := integrable_europeanCall_pathPV h₁.Z_law S_0 K₁ r σ T
+  have hX := (integrable_bsTerminal h₁.Z_law S_0 r σ T).const_mul (Real.exp (-r * T))
+  have hi₁ : Integrable (fun ω ↦ (europeanCall K₁ T).pathPV (fun _ ↦ Real.exp (-r * T))
+      (scenarioAt (assets S_0 r σ T Z) ω)) Q := integrable_europeanCall_pathPV hX
   have hi₂ : Integrable (fun ω ↦ (Contract.scale (-1) (europeanCall K₂ T)).pathPV
       (fun _ ↦ Real.exp (-r * T)) (scenarioAt (assets S_0 r σ T Z) ω)) Q := by
     simp only [Contract.pathPV_scale]
-    exact (integrable_europeanCall_pathPV h₂.Z_law S_0 K₂ r σ T).const_mul _
+    exact (integrable_europeanCall_pathPV hX).const_mul _
   rw [cappedCall, Contract.value_both _ _ _ _ _ hi₁ hi₂,
     Contract.value_scale, value_europeanCall h₁, value_europeanCall h₂]
   ring
+
+/-- **The power call's Black–Scholes value** is the call price at the effective spot and
+volatility of `bs_power_call_formula`: `S_T ^ a` is lognormal again, so the value of
+`powerCall a K T` is `Š₀ Φ(d̃₁) − K e^{−rT} Φ(d̃₂)` with `Š₀ = bsPowerEffectiveSpot` and
+volatility `aσ`. -/
+theorem value_powerCall {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (a : ℕ) (ha : 0 < a) (hK : 0 < K)
+    (h : BSCallHyp Q S_0 K r σ T Z) :
+    (powerCall a K T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
+      = bsPowerEffectiveSpot S_0 r σ T a *
+          Phi (bsd1 (bsPowerEffectiveSpot S_0 r σ T a) K r ((a : ℝ) * σ) T)
+        - K * Real.exp (-r * T) *
+          Phi (bsd2 (bsPowerEffectiveSpot S_0 r σ T a) K r ((a : ℝ) * σ) T) := by
+  rw [powerCall, Contract.value_pay]
+  refine Eq.trans ?_ (bs_power_call_formula a ha hK h)
+  refine integral_congr_ae (.of_forall fun ω ↦ ?_)
+  simp only [Payoff.eval, Payoff.eval_pow, scenarioAt, assets, bsPowerTerminal]
 
 end MathFin.Contracts.BlackScholes
