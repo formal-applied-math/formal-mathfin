@@ -29,8 +29,9 @@ discrete analogues of `Cox.cdsAnnuity`, `Cox.cdsLosses` and `Cox.cdsFairSpreadTV
 The Cox default time of `FixedIncome/Cox.lean`, built by inverting a unit-exponential clock
 through the cumulative hazard, has `S = hazardSurvival h` (`cox_cdf_timeVarying`), so under it the
 CDS contract is worth the grid legs of the hazard curve (`value_cdsBuyer_coxDefaultTime`). Against
-the continuous legs: with no discounting the grid losses telescope to the default probability
-`1 − S(T)` for every grid, which is `Cox.cdsLosses 0 h T` (`cdsLossesGrid_one_eq_cdsLosses`). With
+the continuous legs: with no discounting the grid losses on any grid from `0` to `T` telescope to
+the default probability `1 − S(T)`, which is `Cox.cdsLosses 0 h T`
+(`cdsLossesGrid_one_eq_cdsLosses`). With
 discounting the grid legs approximate the continuous ones; that is not proved.
 
 ## Main definitions
