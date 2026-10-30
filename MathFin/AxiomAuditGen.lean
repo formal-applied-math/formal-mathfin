@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (832 MathFin constants, 29 upstream). Citations
+  corpus (833 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -2239,6 +2239,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.integral_sub_cond_gpdMeasure
 
+/-- info: 'MathFin.isCoherentRiskMeasure_count_neg_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.isCoherentRiskMeasure_count_neg_iff
+
 /-- info: 'MathFin.isCoherentRiskMeasure_spectralRiskMeasure_sum_esSpectrum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.isCoherentRiskMeasure_spectralRiskMeasure_sum_esSpectrum
@@ -2731,9 +2735,9 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.not_differentiableAt_jumpDiffusionCallPrice_strike
 
-/-- info: 'MathFin.not_exists_isCoherentRisk_log_acceptance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.not_exists_isCoherentRiskMeasure_log_acceptance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.not_exists_isCoherentRisk_log_acceptance
+#print axioms MathFin.not_exists_isCoherentRiskMeasure_log_acceptance
 
 /-- info: 'MathFin.not_exists_isCopula_frechetLower' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

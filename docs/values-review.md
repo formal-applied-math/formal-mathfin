@@ -2861,8 +2861,9 @@ Judgment calls were taken as proposed:
    - Make the Gaussian VaR of a `HasGaussianLaw` variable public. It is now duplicated between
      `VaRSuperadditivity` and `GaussianRiskMarkowitz`.
    - Prove `medianShortfall_eq_valueAtRisk` through `quantile_le_iff`, not by unfolding `sInf`.
-   - Add a named `correlation` (written inline four times) and a transfer lemma
-     `IsCoherentRiskMeasure → IsCoherentRisk` on finite spaces.
+   - Add a named `correlation` (written inline four times). (The transfer lemma
+     `IsCoherentRiskMeasure → IsCoherentRisk` became the removal of `IsCoherentRisk`, #364:
+     one structure, `IsCoherentRiskMeasure`.)
 7. **Breadth still open from the triage.**
    - Sklar's theorem for general margins (the distributional transform).
    - The Clayton copula as a measure (gamma frailty).

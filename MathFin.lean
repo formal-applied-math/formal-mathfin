@@ -661,6 +661,11 @@ import MathFin.RiskMeasures.UtilityDerivation
 -- the mixture, and the vNM axioms verified for the induced preference (the soundness half,
 -- plus invariance of the preference under positive affine rescaling of the utility)
 import MathFin.RiskMeasures.VonNeumannMorgenstern
+-- The one coherence structure: the four ADEH axioms for losses, ρ(0) = 0, convexity, and (finite
+-- state) pointwise monotonicity and continuity
+import MathFin.RiskMeasures.Coherent
+-- The positions convention of the ADEH paper is the loss convention at L ↦ ρ(−L)
+import MathFin.RiskMeasures.PositionsConvention
 -- Phase 1 (convex-duality unification): coherent-risk ADEH representation — acceptance cone
 -- separation giving the representing probability measures (risk-side Hahn–Banach)
 import MathFin.RiskMeasures.AcceptanceSet

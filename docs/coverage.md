@@ -1579,7 +1579,7 @@ What is not covered:
 | `qrm-es-tail-mean` | For an integrable loss X whose law has a continuous CDF and α ∈ (0, 1), with q = VaR_α(X): the tail {X > q} has probability exactly 1 − α, and ES_α(X) = (1−α)⁻¹ E[X·1{X > q}], the mean of X over that tail. The Acerbi–Tasche correction term vanishes. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_eq_setIntegral_tail` | `full` |
 | `qrm-es-dual-representation` | For an integrable loss X and α ∈ (0, 1), ES_α(X) is the greatest value of E[D·X] over densities D with 0 ≤ D ≤ (1−α)⁻¹ a.s. and E[D] = 1; the maximum is attained. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.isGreatest_integral_mul_expectedShortfall` | `full` |
 | `qrm-es-monotone-level` | For an integrable loss X and 0 < α ≤ β < 1, ES_α(X) ≤ ES_β(X). | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_mono_level` | `full` |
-| `qrm-es-adeh-representation` | On a finite probability space, X ↦ ES_α(−X) satisfies the ADEH axioms (IsCoherentRisk), so ES_α(−X) is the least upper bound of the expected losses ∑ qᵢ(−Xᵢ) over its representing probability vectors. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_isLUB_representingSet` | `full` |
+| `qrm-es-adeh-representation` | On a finite probability space, ES_α is a coherent risk measure of losses (IsCoherentRiskMeasure), so ES_α(L) is the least upper bound of the expected losses ∑ qᵢ Lᵢ over its representing probability vectors, those q with ∑ qᵢ Zᵢ ≤ 0 on every loss Z with ES_α(Z) ≤ 0. That this representing set is the set of densities bounded by (1 − α)⁻¹ is not proved here. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_isLUB_representingSet` | `full` |
 | `qrm-gaussian-es` | For a loss X ~ N(m, v) with v > 0 and α ∈ (0, 1): ES_α(X) = gaussianCVaR m √v (Φ⁻¹(α)) α = m + √v·ϕ(Φ⁻¹(α))/(1 − α). | `MathFin/RiskMeasures/GaussianExpectedShortfall.lean`, `MathFin.expectedShortfall_of_hasLaw_gaussianReal` | `full` |
 | `qrm-var-bisection` | For any loss X, α ∈ (0, 1) and a bracket with P(X ≤ lo) < α ≤ P(X ≤ hi), bisection on x ↦ P(X ≤ x) against α converges to VaR_α(X) (with error at most (hi − lo)/2^(n+1) after n steps, abs_bisectMid_sub_valueAtRisk_le). | `MathFin/RiskMeasures/ValueAtRiskBisection.lean`, `MathFin.tendsto_bisectMid_valueAtRisk` | `full` |
 | `qrm-var-superadditive-bernoulli` | For d independent Bernoulli(p) losses Y₁,…,Y_d (values in {0,1}, p ∈ (0,1)) and α ∈ (0, 1): ∑ VaR_α(Yᵢ) < VaR_α(∑ Yᵢ) if and only if (1 − p)^d < α ≤ 1 − p. So VaR is superadditive for such losses whenever d ≥ 2 and α lies in that range. | `MathFin/RiskMeasures/VaRSuperadditivity.lean`, `MathFin.valueAtRisk_sum_bernoulli_superadditive_iff` | `full` |
@@ -2708,7 +2708,8 @@ prior corpus audit, not a verification of this addition.
 > (the root); the FTAP kernel `exists_pos_dual_of_disjoint_stdSimplex` **re-derived in place** from it
 > (signature byte-identical → no consumer churn); `mf-coherent-risk-representation`
 > (`RiskMeasures/AcceptanceSet.coherentRisk_isLUB`, the finite-state ADEH representation stated as an
-> `IsLUB`, acceptance-set closedness *derived* from the four axioms, not assumed);
+> `IsLUB`, acceptance-set closedness *derived* from the four axioms, not assumed; since #364 stated
+> for the library's one coherence structure `IsCoherentRiskMeasure`, in the loss convention);
 > `mf-worstcase-risk-representation` (`RiskMeasures/WorstCaseRisk.worstCase_isLUB`, a concrete instance
 > — worst-case loss = sup over the whole probability simplex); and `mf-superhedging-emm-bound`
 > (`Foundations/SuperhedgingDuality.emm_le_superReplication`, every equivalent martingale measure

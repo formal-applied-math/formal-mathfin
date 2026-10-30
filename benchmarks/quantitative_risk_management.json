@@ -245,17 +245,17 @@
     {
       "id": "qrm-es-adeh-representation",
       "name": "ES in the ADEH Representation (Finite State)",
-      "description": "On a finite probability space, X ↦ ES_α(−X) satisfies the ADEH axioms (IsCoherentRisk), so ES_α(−X) is the least upper bound of the expected losses ∑ qᵢ(−Xᵢ) over its representing probability vectors.",
+      "description": "On a finite probability space, ES_α is a coherent risk measure of losses (IsCoherentRiskMeasure), so ES_α(L) is the least upper bound of the expected losses ∑ qᵢ Lᵢ over its representing probability vectors, those q with ∑ qᵢ Zᵢ ≤ 0 on every loss Z with ES_α(Z) ≤ 0. That this representing set is the set of densities bounded by (1 − α)⁻¹ is not proved here.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.ExpectedShortfall\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem expectedShortfall_isLUB_representingSet_thm {α : ℝ} {ι : Type*} [Fintype ι] [MeasurableSpace ι] [MeasurableSingletonClass ι] (P : Measure ι) [IsProbabilityMeasure P] (hα : α ∈ Ioo 0 1) (X : ι → ℝ) :\n    IsLUB ((fun q ↦ ∑ i, q i * (-X i)) '' representingSet fun X : ι → ℝ ↦ expectedShortfall (fun i ↦ -X i) P α) (expectedShortfall (fun i ↦ -X i) P α) :=\n  MathFin.expectedShortfall_isLUB_representingSet P hα X\n\n"
+        "lean": "import MathFin.RiskMeasures.ExpectedShortfall\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem expectedShortfall_isLUB_representingSet_thm {α : ℝ} {ι : Type*} [Fintype ι] [MeasurableSpace ι] [MeasurableSingletonClass ι] (P : Measure ι) [IsProbabilityMeasure P] (hα : α ∈ Ioo 0 1) (L : ι → ℝ) :\n    IsLUB ((fun q ↦ ∑ i, q i * L i) '' representingSet fun L : ι → ℝ ↦ expectedShortfall L P α) (expectedShortfall L P α) :=\n  MathFin.expectedShortfall_isLUB_representingSet P hα L\n\n"
       },
       "metadata": {
         "chapter": 8,
         "reference": "Artzner–Delbaen–Eber–Heath (1999); MFE (2015) Section 8.1.3 (finite state)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. ES coherence plugged into the existing finite-state ADEH theorem coherentRisk_isLUB. Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. ES coherence (expectedShortfall_isCoherentRiskMeasure, in the library's loss-convention structure IsCoherentRiskMeasure) plugged into the finite-state ADEH theorem coherentRisk_isLUB. Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. The representing set is that of the acceptance set {Z : ES_α(Z) ≤ 0}; the dual representation over densities bounded by (1 − α)⁻¹ is the separate theorem isGreatest_integral_mul_expectedShortfall, and their identification is not proved. Axioms-clean."
       }
     },
     {

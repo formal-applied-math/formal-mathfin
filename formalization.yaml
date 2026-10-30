@@ -5,7 +5,7 @@
 version: v0.4
 project:
   name: formal-mathfin
-  description: "A Lean 4 library of formally verified mathematical finance, built on Mathlib and Rémy Degenne's BrownianMotion package. The declarations registered from this repository are the Artzner–Delbaen–Eber–Heath representation theorem for coherent risk measures on a finite state space — a coherent risk measure is the least upper bound of expected loss over its representing set of probability vectors, obtained by separating a rejected position from the acceptance cone — together with the coherence of worst-case loss, which witnesses on a nonempty state space that the representation theorem's hypothesis is satisfiable. They sit in a wider corpus covering continuous-time stochastic processes and mathematical finance: the Itô integral and Itô formula, Girsanov's theorem and the equivalent martingale measure, martingale representation and market completeness, SDE existence and uniqueness, the fundamental theorem of asset pricing, and Black–Scholes pricing and its exotics."
+  description: "A Lean 4 library of formally verified mathematical finance, built on Mathlib and Rémy Degenne's BrownianMotion package. The declarations registered from this repository are the Artzner–Delbaen–Eber–Heath representation theorem for coherent risk measures on a finite state space — a coherent risk measure is the least upper bound of expected loss over its representing set of probability vectors, obtained by separating a rejected loss from the acceptance cone — together with the coherence of worst-case loss, which witnesses on a nonempty state space that the representation theorem's hypothesis is satisfiable. They sit in a wider corpus covering continuous-time stochastic processes and mathematical finance: the Itô integral and Itô formula, Girsanov's theorem and the equivalent martingale measure, martingale representation and market completeness, SDE existence and uniqueness, the fundamental theorem of asset pricing, and Black–Scholes pricing and its exotics."
   authors:
     - Raphael Coelho
   license: Apache-2.0
@@ -53,7 +53,7 @@ sources:
     author_endorsement: n/a
     note: Canonical results whose textbook statements the wider corpus tracks.
 status:
-  scope: 717 theorems across continuous-time stochastic processes and mathematical finance, built on Mathlib + BrownianMotion; 702 delivery-ready (full + library-wrapper).
+  scope: 718 theorems across continuous-time stochastic processes and mathematical finance, built on Mathlib + BrownianMotion; 703 delivery-ready (full + library-wrapper).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms:
@@ -246,9 +246,9 @@ alignment:
       status: full 74 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 34 statements
+      lean: 35 statements
       module: benchmarks/risk_measures.json
-      status: full 34 · wrapper 0 · reduced 0 · placeholder 0
+      status: full 35 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: stochastic_calculus (Saporito, Stochastic Processes)
       lean: 58 statements
