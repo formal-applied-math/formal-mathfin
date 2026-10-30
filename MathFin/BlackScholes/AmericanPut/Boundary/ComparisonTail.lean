@@ -188,15 +188,14 @@ theorem straightDifference_right_negative {k h c d : ℝ} {p : ℝ → ℝ → �
   have hb := (abs_lt.mp (htail x hx t ht)).2
   linarith
 
-/-- Zero-dividend checkpoint, with the original solution contract and the
-constant second profile. This is tail control, not a curvature theorem. -/
+/-- At zero dividends, `straightDifference_uniform_tail` with the constant second
+profile `1`. This is tail control, not a curvature theorem. -/
 theorem zeroDividend_uniform_tail {k c d : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : NormalizedPutSolution k p b) (hc : 0 < c) (hd : d ≤ 0)
+    (hp : ContinuousBoundaryPutSolution k 0 p b) (hc : 0 < c) (hd : d ≤ 0)
     {ε : ℝ} (hε : 0 < ε) :
     ∃ X : ℝ, 0 < X ∧ ∀ x, X ≤ x → ∀ t, 0 ≤ t →
       |normalizedDifference p (profile (k - 1 - c) k) (fun _ => 1) c d x t + 1| < ε := by
   simpa only [straightDifference, sub_zero, profile, ↓reduceIte] using
-    straightDifference_uniform_tail
-        (dividendPutSolution_zero_iff.mpr hp).toContinuousBoundaryPutSolution hc hd hε
+    straightDifference_uniform_tail hp hc hd hε
 
 end MathFin.BlackScholes.AmericanPut.Boundary.Comparison

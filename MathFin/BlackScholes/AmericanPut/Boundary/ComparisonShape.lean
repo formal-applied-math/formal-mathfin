@@ -216,14 +216,13 @@ theorem normalizedDifference_initial_superlevel {p : ℝ → ℝ → ℝ} {b : �
     rw [normalizedDifference_initial hp (profile_data hp.rate_pos.le) d hx.le]
   · simp [hx]
 
-/-- Zero-dividend milestone stated directly using the existing CCJZ contract
-and the constant second profile, not a different pricing-solution definition. -/
+/-- At zero dividends, `normalizedDifference_initial_superlevel` with the constant
+second profile `1`. -/
 theorem zeroDividend_initial_superlevel {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : NormalizedPutSolution k p b) (hc : 0 < c) {ε : ℝ} (hε : -1 < ε) (d : ℝ) :
+    (hp : ContinuousBoundaryPutSolution k 0 p b) (hc : 0 < c) {ε : ℝ} (hε : -1 < ε) (d : ℝ) :
     Set.OrdConnected {x | 0 < x ∧ ε < normalizedDifference p
       (profile (k - 1 - c) k) (fun _ => 1) c d x 0} := by
   simpa only [sub_zero, profile, ↓reduceIte] using
-    normalizedDifference_initial_superlevel
-        (dividendPutSolution_zero_iff.mpr hp).toContinuousBoundaryPutSolution hc hε d
+    normalizedDifference_initial_superlevel hp hc hε d
 
 end MathFin.BlackScholes.AmericanPut.Boundary.Comparison

@@ -21,7 +21,7 @@ does not assert a strictly negative boundary speed at every positive time.
 ## Result
 
 Public entry points include `boundary_antitoneOn`, `boundary_deriv_nonpos`,
-`boundary_deriv_neg_of_curvature_neg`, `zeroDividend_price_mono_time`.
+`boundary_deriv_neg_of_curvature_neg`, `price_mono_time`.
 -/
 
 @[expose] public section
@@ -73,14 +73,5 @@ theorem boundary_deriv_neg_of_curvature_neg (hp : DividendPutSolution k h p b)
   linarith
 
 end DividendPutSolution
-
-theorem zeroDividend_price_mono_time {k : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : NormalizedPutSolution k p b) (x : ℝ) {s t : ℝ} (hs : 0 ≤ s) (hst : s ≤ t) :
-    p x s ≤ p x t :=
-  (dividendPutSolution_zero_iff.mpr hp).price_mono_time x hs hst
-
-theorem zeroDividend_boundary_antitoneOn {k : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : NormalizedPutSolution k p b) : AntitoneOn b (Ici 0) :=
-  (dividendPutSolution_zero_iff.mpr hp).boundary_antitoneOn
 
 end MathFin.BlackScholes.AmericanPut.Boundary

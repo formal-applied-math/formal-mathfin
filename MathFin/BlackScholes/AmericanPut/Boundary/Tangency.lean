@@ -137,15 +137,4 @@ theorem curvature_nonneg_of_tangent_intervals (hp : DividendPutSolution k h p b)
   convert ht hne using 1
   ring
 
-/-- Zero-dividend version of the same conditional local curvature result. -/
-theorem zeroDividend_curvature_nonneg_of_tangent_intervals {k : ℝ}
-    {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} (hp : NormalizedPutSolution k p b)
-    {T : ℝ} (hT : 0 < T) (hspeed : deriv b T < 0)
-    (hintercept : b T - T * deriv b T ≤ 0)
-    (hinterval : ∀ t, 0 < t → OrdConnected
-      {x | b t < x ∧ 0 < straightDifference p k 0 (-deriv b T) (b T - T * deriv b T) x t}) :
-    0 ≤ deriv (deriv b) T :=
-  curvature_nonneg_of_tangent_intervals (dividendPutSolution_zero_iff.mpr hp)
-    hT hspeed hintercept hinterval
-
 end MathFin.BlackScholes.AmericanPut.Boundary.Comparison

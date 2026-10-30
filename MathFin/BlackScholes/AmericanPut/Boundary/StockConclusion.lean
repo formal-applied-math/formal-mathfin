@@ -17,7 +17,7 @@ still a separate obligation; strict logarithmic curvature is not asserted.
 
 ## Result
 
-Public entry points include `dividend_stock_curvature`, `zeroDividend_stock_curvature`,
+Public entry points include `dividend_stock_curvature`,
 `remainingTimeBoundary`, `deriv2_comp_neg`.
 -/
 
@@ -30,12 +30,6 @@ theorem dividend_stock_curvature {k h : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ 
     {E σ expiry T : ℝ} (hE : 0 < E) (hσ : 0 < σ) (hT : T < expiry) :
     0 < deriv (deriv (stockBoundary E σ expiry b)) T :=
   Comparison.stock_curvature_of_strict_speed hp (fun _ ht => hp.boundary_deriv_neg ht) hE hσ hT
-
-theorem zeroDividend_stock_curvature {k : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : NormalizedPutSolution k p b)
-    {E σ expiry T : ℝ} (hE : 0 < E) (hσ : 0 < σ) (hT : T < expiry) :
-    0 < deriv (deriv (stockBoundary E σ expiry b)) T :=
-  dividend_stock_curvature (dividendPutSolution_zero_iff.mpr hp) hE hσ hT
 
 /-- Stock-price boundary in time remaining: `E*Real.exp (b (σ^2/2*τ))`. -/
 noncomputable def remainingTimeBoundary (E σ : ℝ) (b : ℝ → ℝ) (τ : ℝ) : ℝ :=
@@ -56,12 +50,6 @@ theorem dividend_remainingTime_curvature {k h : ℝ} {p : ℝ → ℝ → ℝ} {
     simp [remainingTimeBoundary,stockBoundary,normalizedTime]
   rw [hfun,deriv2_comp_neg]
   exact dividend_stock_curvature hp hE hσ (neg_neg_of_pos hτ)
-
-theorem zeroDividend_remainingTime_curvature {k : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : NormalizedPutSolution k p b) {E σ τ : ℝ}
-    (hE : 0 < E) (hσ : 0 < σ) (hτ : 0 < τ) :
-    0 < deriv (deriv (remainingTimeBoundary E σ b)) τ :=
-  dividend_remainingTime_curvature (dividendPutSolution_zero_iff.mpr hp) hE hσ hτ
 
 /-- The strict stock-curvature milestone on Liu's restricted parameter range.
 This specializes the new proof, not Liu's published argument. -/
