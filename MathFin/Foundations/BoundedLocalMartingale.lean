@@ -5,12 +5,14 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.PlaneIto
+public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 
 /-!
 # Bounded local martingales and smaller filtrations
 
-Promotion is proved by dominated convergence of localized set integrals.
+Promotion is proved by dominated convergence of localized set integrals. The file lives in
+`Foundations/` because the promotion is general: the American-put stopping development and the
+localisation of Lévy's characterisation (`LevyCharacterization`) both use it.
 No unproved upstream optional-sampling or uniform-integrability result is used.
 Adaptation to the target filtration is explicit; a local property alone is
 not silently treated as pointwise adaptation on exceptional null outcomes.
@@ -23,7 +25,7 @@ Public entry points include `martingale_of_setIntegral_eq_real`, `martingale_sma
 
 @[expose] public section
 
-namespace MathFin.BlackScholes.AmericanPut.Stopping
+namespace MathFin
 
 open MeasureTheory ProbabilityTheory Set Filter
 open scoped NNReal Topology
@@ -102,4 +104,4 @@ theorem bounded_localMartingale_is_martingale (hX : IsLocalMartingale X 𝓕 P)
   locally_bounded_localMartingale_is_martingale hX hadapt
     (fun _ => ⟨C,fun t _ ω => hbound t ω⟩)
 
-end MathFin.BlackScholes.AmericanPut.Stopping
+end MathFin
