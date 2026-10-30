@@ -21,7 +21,7 @@ case of that which is constant in time.
 
 The coefficient `θ(tₖ)` is `𝓕_{tₖ}`-measurable and bounded — exactly `stepSP`'s requirement — so the
 left-endpoint step process is directly a `TBoundedSP`, and the `L²`-membership of the Riemann sum
-is obtained by plain domination (`memLp_riemannσ`), so no `AdaptedAt`-vs-`natFiltration` bridge is
+is obtained by plain domination (`memLp_riemannσ`), so no adaptedness argument is
 needed. The a.e. convergence uses the partition-cell collapse (`cell_collapse`) against `θ`'s own
 path continuity.
 

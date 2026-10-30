@@ -28,7 +28,8 @@ This file contains:
 2. Single-period option pricing formula `binomialOptionPriceOnePeriod`.
 3. **No-arbitrage replication theorem**: cost of the replicating portfolio
    equals `binomialOptionPriceOnePeriod`.
-4. Multi-period (`N`-step) backward-induction price `binomialPrice`.
+4. The multi-period (`N`-step) backward-induction price with early exercise on a step set
+   `E` (`bermudanPrice`), and its European case `binomialPrice` (`E = ∅`).
 
 The bridge to Black-Scholes (CRR convergence) is proved in
 `Binomial/CRRCharFun.lean` (`binomialPrice_call_tendsto_bs`).
@@ -145,31 +146,77 @@ theorem replicating_payoff_down {S_0 u d r V_u V_d : ℝ}
 
 /-! ### Multi-period (N-step) backward-induction pricing -/
 
-/-- Backward-induction binomial tree price.
+open scoped Classical in
+/-- **The binomial tree price with early exercise at the steps in `E`.**
+
+`bermudanPrice E u d r g n S` is the time-0 value with `n` time steps remaining, current
+asset price `S`, and payoff `g` (applied at maturity, and at any step with `k` steps remaining
+for `k ∈ E`). The Bellman recursion takes `max(intrinsic, continuation)` exactly at the
+steps in `E` and the bare discounted risk-neutral continuation otherwise. This is the one
+recursion of the tree: `E = ∅` is the European price (`binomialPrice`) and `E = univ` the
+American price (`americanPrice`). -/
+noncomputable def bermudanPrice (E : Set ℕ) (u d r : ℝ) (g : ℝ → ℝ) : ℕ → ℝ → ℝ
+  | 0, S => g S
+  | n + 1, S =>
+      if (n + 1) ∈ E then
+        max (g S) (binomialOptionPriceOnePeriod u d r
+          (bermudanPrice E u d r g n (S * u)) (bermudanPrice E u d r g n (S * d)))
+      else
+        binomialOptionPriceOnePeriod u d r
+          (bermudanPrice E u d r g n (S * u)) (bermudanPrice E u d r g n (S * d))
+
+/-- At maturity (`n = 0`) the price is the payoff `g S`. -/
+@[simp]
+lemma bermudanPrice_zero (E : Set ℕ) (u d r : ℝ) (g : ℝ → ℝ) (S : ℝ) :
+    bermudanPrice E u d r g 0 S = g S := rfl
+
+/-- Bellman step at an exercise date (`n + 1 ∈ E`): the max of intrinsic value and
+continuation. -/
+lemma bermudanPrice_succ_of_mem {E : Set ℕ} {n : ℕ} (hn : n + 1 ∈ E) (u d r : ℝ) (g : ℝ → ℝ)
+    (S : ℝ) :
+    bermudanPrice E u d r g (n + 1) S = max (g S) (binomialOptionPriceOnePeriod u d r
+      (bermudanPrice E u d r g n (S * u)) (bermudanPrice E u d r g n (S * d))) := by
+  rw [bermudanPrice, if_pos hn]
+
+/-- Bellman step off the exercise set (`n + 1 ∉ E`): the bare continuation. -/
+lemma bermudanPrice_succ_of_notMem {E : Set ℕ} {n : ℕ} (hn : n + 1 ∉ E) (u d r : ℝ)
+    (g : ℝ → ℝ) (S : ℝ) :
+    bermudanPrice E u d r g (n + 1) S = binomialOptionPriceOnePeriod u d r
+      (bermudanPrice E u d r g n (S * u)) (bermudanPrice E u d r g n (S * d)) := by
+  rw [bermudanPrice, if_neg hn]
+
+/-- **Supermartingale clause**: the one-period continuation never exceeds the price. -/
+lemma bermudanPrice_supermartingale (E : Set ℕ) (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
+    binomialOptionPriceOnePeriod u d r (bermudanPrice E u d r g n (S * u))
+      (bermudanPrice E u d r g n (S * d)) ≤ bermudanPrice E u d r g (n + 1) S := by
+  by_cases hn : n + 1 ∈ E
+  · rw [bermudanPrice_succ_of_mem hn]; exact le_max_right _ _
+  · rw [bermudanPrice_succ_of_notMem hn]
+
+/-- **Dominance clause**: at maturity and at every exercise date the price dominates the
+intrinsic value. -/
+lemma le_bermudanPrice {E : Set ℕ} {n : ℕ} (hn : n = 0 ∨ n ∈ E) (u d r : ℝ) (g : ℝ → ℝ)
+    (S : ℝ) : g S ≤ bermudanPrice E u d r g n S := by
+  cases n with
+  | zero => exact le_rfl
+  | succ m =>
+    rw [bermudanPrice_succ_of_mem (hn.resolve_left (Nat.succ_ne_zero m))]
+    exact le_max_left _ _
+
+/-- Backward-induction binomial tree price: the European price, never exercising early
+(`bermudanPrice ∅`).
 
 `binomialPrice u d r g n S` returns the time-0 option value with `n` time steps
 remaining, current asset price `S`, and payoff function `g : ℝ → ℝ` (applied at
 maturity). At each step, the price is the risk-neutral expectation discounted
 by `e^{-r}`. -/
-noncomputable def binomialPrice (u d r : ℝ) (g : ℝ → ℝ) : ℕ → ℝ → ℝ
-  | 0, S => g S
-  | n + 1, S =>
-      Real.exp (-r) *
-        (crrUpProb u d r * binomialPrice u d r g n (S * u) +
-         (1 - crrUpProb u d r) * binomialPrice u d r g n (S * d))
+noncomputable def binomialPrice (u d r : ℝ) (g : ℝ → ℝ) : ℕ → ℝ → ℝ :=
+  bermudanPrice ∅ u d r g
 
 /-- At maturity (`n = 0`) the binomial price is the payoff `g S`. -/
 @[simp]
 lemma binomialPrice_zero (u d r : ℝ) (g : ℝ → ℝ) (S : ℝ) :
     binomialPrice u d r g 0 S = g S := rfl
-
-/-- One-step backward recursion: the price at `n+1` is the discounted risk-neutral
-average of the prices at the up/down successors. -/
-lemma binomialPrice_succ (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
-    binomialPrice u d r g (n + 1) S =
-      Real.exp (-r) *
-        (crrUpProb u d r * binomialPrice u d r g n (S * u) +
-         (1 - crrUpProb u d r) * binomialPrice u d r g n (S * d)) := rfl
 
 /-- **One-step consistency**: `binomialPrice u d r g (n+1) S` equals
 `binomialOptionPriceOnePeriod u d r V_u V_d` where `V_u, V_d` are the
@@ -178,8 +225,17 @@ theorem binomialPrice_succ_eq_onePeriod (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ
     binomialPrice u d r g (n + 1) S =
       binomialOptionPriceOnePeriod u d r
         (binomialPrice u d r g n (S * u))
-        (binomialPrice u d r g n (S * d)) := by
-  rw [binomialPrice_succ, binomialOptionPriceOnePeriod]
+        (binomialPrice u d r g n (S * d)) :=
+  bermudanPrice_succ_of_notMem (Set.notMem_empty _) u d r g S
+
+/-- One-step backward recursion: the price at `n+1` is the discounted risk-neutral
+average of the prices at the up/down successors. -/
+lemma binomialPrice_succ (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
+    binomialPrice u d r g (n + 1) S =
+      Real.exp (-r) *
+        (crrUpProb u d r * binomialPrice u d r g n (S * u) +
+         (1 - crrUpProb u d r) * binomialPrice u d r g n (S * d)) :=
+  binomialPrice_succ_eq_onePeriod u d r g n S
 
 /-- **Linearity of the binomial price** in the payoff function. -/
 lemma binomialPrice_add (u d r : ℝ) (g h : ℝ → ℝ) (n : ℕ) (S : ℝ) :

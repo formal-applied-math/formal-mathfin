@@ -19,18 +19,15 @@ intrinsic payoff `g : ℝ → ℝ` (e.g. `S ↦ max(S − K, 0)` for a call) has
 
 with `V_0(S) = g(S)`, where `p = crrUpProb u d r`. `n` counts steps remaining.
 
-This file defines `americanPrice` and proves:
+This is the exercise-everywhere case of the tree's one recursion `bermudanPrice`
+(`Binomial/Model.lean`); its dominance and supermartingale clauses
+(`le_bermudanPrice`, `bermudanPrice_supermartingale`), its Snell-envelope characterization
+(`Binomial/SnellEnvelope.lean`) and its monotonicity in the exercise set, hence the
+European ≤ American ordering (`Binomial/Bermudan.lean`), all apply to it.
 
-* `americanPrice_ge_intrinsic`: the American price dominates the intrinsic payoff,
-  `g(S) ≤ V_n(S)` for all `n, S`.
-* `americanPrice_supermartingale`: the discounted continuation value at step `n+1`
-  is at most the American price, i.e. the discounted price process is a
-  supermartingale under the risk-neutral measure.
-* `binomialPrice_le_americanPrice`: the American price dominates the European
-  price with the same terminal payoff. The American has weakly more optionality
-  (early-exercise) — this is the formal expression of that intuition.
-
-No new infrastructure beyond `Binomial/Model.lean` is needed.
+This file defines `americanPrice`, with the one-step Bellman equation
+`americanPrice_succ`, and proves `binomialOptionPriceOnePeriod_mono`, the monotonicity of
+the one-period continuation.
 -/
 
 @[expose] public section
@@ -39,17 +36,12 @@ namespace MathFin
 
 open Real
 
-/-- American option price in the binomial tree.
-
-Bellman recursion: at each step, take the maximum of immediate exercise (`g S`)
-and the discounted expected continuation. `n` counts steps remaining; `g` is
+/-- American option price in the binomial tree: the Bellman recursion taking, at each
+step, the maximum of immediate exercise (`g S`) and the discounted expected continuation,
+i.e. `bermudanPrice` with early exercise at every step. `n` counts steps remaining; `g` is
 the intrinsic payoff function. -/
-noncomputable def americanPrice (u d r : ℝ) (g : ℝ → ℝ) : ℕ → ℝ → ℝ
-  | 0, S => g S
-  | n + 1, S => max (g S)
-      (binomialOptionPriceOnePeriod u d r
-        (americanPrice u d r g n (S * u))
-        (americanPrice u d r g n (S * d)))
+noncomputable def americanPrice (u d r : ℝ) (g : ℝ → ℝ) : ℕ → ℝ → ℝ :=
+  bermudanPrice Set.univ u d r g
 
 /-- At maturity (`n = 0`), the American price equals the intrinsic payoff. -/
 @[simp]
@@ -61,35 +53,11 @@ lemma americanPrice_succ (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
     americanPrice u d r g (n + 1) S = max (g S)
       (binomialOptionPriceOnePeriod u d r
         (americanPrice u d r g n (S * u))
-        (americanPrice u d r g n (S * d))) := rfl
-
-/-- **Intrinsic-value bound**: `g(S) ≤ V_n(S)` for all `n, S`.
-
-Immediate: at step 0 they are equal; at later steps the recursion takes a `max`
-that contains `g S` as a candidate. -/
-lemma americanPrice_ge_intrinsic (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
-    g S ≤ americanPrice u d r g n S := by
-  cases n with
-  | zero => simp
-  | succ n => rw [americanPrice_succ]; exact le_max_left _ _
-
-/-- **Supermartingale property** (discrete form): the one-period continuation
-value at `V_{n+1}` is bounded above by `V_{n+1}` itself. In other words, the
-discounted American price process is a supermartingale under the risk-neutral
-measure.
-
-Immediate from the Bellman max: `V_{n+1}(S) = max(g(S), continuation(n+1, S))
-≥ continuation(n+1, S)`. -/
-lemma americanPrice_supermartingale (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
-    binomialOptionPriceOnePeriod u d r
-      (americanPrice u d r g n (S * u))
-      (americanPrice u d r g n (S * d))
-        ≤ americanPrice u d r g (n + 1) S := by
-  rw [americanPrice_succ]; exact le_max_right _ _
+        (americanPrice u d r g n (S * d))) :=
+  bermudanPrice_succ_of_mem (Set.mem_univ _) u d r g S
 
 /-- Monotonicity of the one-period continuation: if `V_u ≤ V_u'` and
-`V_d ≤ V_d'`, then the one-period prices satisfy the same ordering.
-Required for the European → American domination proof. -/
+`V_d ≤ V_d'`, then the one-period prices satisfy the same ordering. -/
 lemma binomialOptionPriceOnePeriod_mono {u d r V_u V_u' V_d V_d' : ℝ}
     (h : BinomialNoArb u d r) (hu : V_u ≤ V_u') (hd : V_d ≤ V_d') :
     binomialOptionPriceOnePeriod u d r V_u V_d
@@ -108,28 +76,5 @@ lemma binomialOptionPriceOnePeriod_mono {u d r V_u V_u' V_d V_d' : ℝ}
       mul_le_mul_of_nonneg_left hd h_q_pos.le
     linarith
   exact mul_le_mul_of_nonneg_left h_sum h_exp_pos.le
-
-/-- **American ≥ European**: for the same intrinsic payoff `g`, the American
-price dominates the European price at every step and every spot.
-
-Proof: induction on the step count. At `n = 0` both equal `g(S)`. The
-inductive step uses the supermartingale property (`V_{n+1}^{Am} ≥
-continuation^{Am}`), monotonicity of the continuation in its arguments, and
-the European recursion `V_{n+1}^{Eu} = continuation^{Eu}`. -/
-theorem binomialPrice_le_americanPrice {u d r : ℝ} (h : BinomialNoArb u d r)
-    (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
-    binomialPrice u d r g n S ≤ americanPrice u d r g n S := by
-  induction n generalizing S with
-  | zero => simp [binomialPrice_zero]
-  | succ n ih =>
-    calc binomialPrice u d r g (n + 1) S
-        = binomialOptionPriceOnePeriod u d r
-            (binomialPrice u d r g n (S * u))
-            (binomialPrice u d r g n (S * d)) := binomialPrice_succ_eq_onePeriod u d r g n S
-      _ ≤ binomialOptionPriceOnePeriod u d r
-            (americanPrice u d r g n (S * u))
-            (americanPrice u d r g n (S * d)) :=
-          binomialOptionPriceOnePeriod_mono h (ih (S * u)) (ih (S * d))
-      _ ≤ americanPrice u d r g (n + 1) S := americanPrice_supermartingale u d r g n S
 
 end MathFin

@@ -66,7 +66,8 @@ theorem planeResidual_zero (G : ℝ × ℝ → ℝ) (ω : ℝ≥0 → ℝ) : pla
 theorem planeResidual_localMartingale {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) :
     IsLocalMartingale (planeResidual G) brownianAugFiltration gaussianLimit := by
   obtain ⟨M,hMc,hM,he⟩ := plane_ito_localMartingale
-    isBrownianReal_brownian.toIsPreBrownianReal measurable_brownian continuous_brownian hG
+    isBrownianReal_brownian.toIsPreBrownianReal measurable_brownian continuous_brownian
+    (hG.of_le (by norm_num))
   apply localMartingale_of_ae_path_eq hM
     (fun t => (planeResidual_stronglyAdapted hG t).mono (brownianFiltration_le_aug t))
     (planeResidual_continuous hG)
