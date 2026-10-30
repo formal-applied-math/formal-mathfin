@@ -7,16 +7,18 @@ module
 
 public import MathFin.Foundations.SimpleProcessPartition
 public import MathFin.Foundations.GirsanovSimpleDoleansMoments
-public import MathFin.Foundations.GirsanovAdaptedTheta
+public import MathFin.Foundations.GirsanovSimpleTheta
+public import MathFin.Foundations.UnifIntegrableL2
 public import MathFin.Foundations.DriftProcessPredictable
 public import MathFin.Foundations.DriftProcessModification
 
 /-! # Bounded **predictable**-θ Girsanov — the increments of `B^θ` under `Q` (Rung 1)
 
 Generalizes the continuous-adapted Girsanov theorem
-(`GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted`) to a bounded **predictable** market price
-of risk `θ` — the honest domain of the Itô `L²` integral, with no continuity assumed. The route
-(Route B) is the density-approximation front half over the spine-free architecture:
+(`Btheta_isQBrownianMotion_adapted`, which `GirsanovAdaptedTheta` now derives from this file) to a
+bounded **predictable** market price of risk `θ` — the honest domain of the Itô `L²` integral, with
+no continuity assumed. The route (Route B) is the density-approximation front half over the
+spine-free architecture:
 
 * approximate `θ̂ ∈ Lp 2 (trimMeasure_T T)` by clamped, marshalled simple processes `Ṽⁿ`
   (`SimpleProcessPartition`), each in single-partition `(sⁿ, cⁿ)` form so the simple exponential
@@ -44,6 +46,15 @@ open ItoIntegralL2 ItoIntegralProcess ItoIntegralCLM ItoIsometryAdapted ItoInteg
 open ItoIntegralRiemannBridge SimpleDoleansMoments ItoIntegralProcessContinuousModification
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {B : ℝ≥0 → Ω → ℝ}
+
+/-- The Doléans density in `exp`-form `exp(−W − ½∫₀ᵀθ²ds)`, parameterized by the Itô integral
+`W = ∫₀ᵀθ dB` (a chosen `Lp`-representative). -/
+noncomputable def contDoleansExp (W : Ω → ℝ) (θ : ℝ≥0 → Ω → ℝ) (T : ℝ≥0) (ω : Ω) : ℝ :=
+  Real.exp (-W ω - 2⁻¹ * ∫ s in Set.Ioc (0 : ℝ≥0) T, (θ s ω) ^ 2 ∂timeMeasure)
+
+omit mΩ in
+lemma contDoleansExp_pos (W : Ω → ℝ) (θ : ℝ≥0 → Ω → ℝ) (T : ℝ≥0) (ω : Ω) :
+    0 < contDoleansExp W θ T ω := Real.exp_pos _
 
 /-- **Bridge: the marshalled simple drift is the honest step-process drift.** The `simpleDrift`
 produced by `isExpQMartingale_BthetaSimple` on the marshalled partition
@@ -583,8 +594,21 @@ section Assembly
 
 variable {μ : Measure Ω} [IsProbabilityMeasure μ] (hB : IsPreBrownianReal B μ)
 
+omit [IsProbabilityMeasure μ] in
+/-- **The withDensity transport `∫_A h dQ = ∫_A h·Z dμ`** for a nonnegative `AEStronglyMeasurable`
+density `Z` (an `Lp`-representative density is only a.e. strongly measurable, so the `AEMeasurable`
+variant is needed; a measurable density is a special case). -/
+lemma setIntegral_withDensity_ofReal {Z : Ω → ℝ} (hZ : AEStronglyMeasurable Z μ)
+    (hZpos : ∀ ω, 0 ≤ Z ω) (h : Ω → ℝ) {A : Set Ω} (hA : MeasurableSet A) :
+    ∫ ω in A, h ω ∂(μ.withDensity fun ω ↦ ENNReal.ofReal (Z ω)) = ∫ ω in A, h ω * Z ω ∂μ := by
+  rw [setIntegral_withDensity_eq_setIntegral_toReal_smul₀ hZ.aemeasurable.ennreal_ofReal.restrict
+    (ae_of_all _ fun _ ↦ ENNReal.ofReal_lt_top) h hA]
+  refine setIntegral_congr_ae hA (ae_of_all _ fun ω _ ↦ ?_)
+  rw [ENNReal.toReal_ofReal (hZpos ω), smul_eq_mul, mul_comm]
+
 /-- The predictable Itô integral `∫₀ᵀ θ dB` as a genuine function — a chosen `Lp`-representative of
-the CLM value `itoIntegralCLM_T θ̂`. Predictable analogue of `itoIntCont`. -/
+the CLM value `itoIntegralCLM_T θ̂`. Predictable counterpart of `itoIntCont` (they agree:
+`itoIntPred_eq_itoIntCont`). -/
 noncomputable def itoIntPred (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) :
     Ω → ℝ :=

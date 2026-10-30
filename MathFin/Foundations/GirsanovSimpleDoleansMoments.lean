@@ -39,8 +39,8 @@ namespace MathFin
 
 /- The generic simple-Doléans moment bounds live in their own namespace: their
 `simpleDoleansExp_neg_eq` / `simpleDoleansExp_scaled_eq` / `sq_mul_le_half_add_pow4` are the
-*partition-generic* forms, distinct from (and, in the values-unification pass, subsuming) the
-`unifPart`-grid specializations of the same names in `GirsanovAdaptedTheta`. -/
+*partition-generic* forms (they subsume the `unifPart`-grid specializations that
+`GirsanovAdaptedTheta` once carried). -/
 namespace SimpleDoleansMoments
 
 open MeasureTheory ProbabilityTheory
