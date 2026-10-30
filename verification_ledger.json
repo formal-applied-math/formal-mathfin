@@ -563,6 +563,27 @@
       "input_hash": "6ed28c53573f7be900fb298b3b598918c0c0bfd3c05303d4b8e419bea0a73b18",
       "verified_at_commit": "331e4a2"
     },
+    "mf-american-put-ge-bsm-european-put": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-10-30",
+      "elapsed_s": 4.5,
+      "input_hash": "be31c6104df64131566630ce18b8ba287a7caa6e95a545f3621c3435c3778313",
+      "verified_at_commit": "3485142"
+    },
+    "mf-american-put-log-boundary-convex": {
+      "benchmark_file": "american_put_boundary.json",
+      "date": "2026-10-30",
+      "elapsed_s": 4.2,
+      "input_hash": "2c9f576f011cb75a101ac897162ff0e650b04e1067673ee40283e30830e7b7a5",
+      "verified_at_commit": "3485142"
+    },
+    "mf-american-put-stock-boundary-strict-convex": {
+      "benchmark_file": "american_put_boundary.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.5,
+      "input_hash": "b7a4c140cb8b2a030bb1b3f58ae5434ee0af14027f2ef682af7a35cfeb4da19c",
+      "verified_at_commit": "3485142"
+    },
     "mf-american-supermartingale": {
       "benchmark_file": "binomial.json",
       "date": "2026-10-30",
