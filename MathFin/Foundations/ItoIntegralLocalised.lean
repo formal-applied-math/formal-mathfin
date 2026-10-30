@@ -43,6 +43,22 @@ integral is adapted, at every time and on every path. Reading instead the level 
 
 The local-martingale property, localised by the exit times of `σ`, is
 `exists_continuous_localMartingale_localItoIntegral` (`ItoIntegralLocalisedLocalMartingale`).
+
+`localItoIntegral` is the continuous-adapted case of `predItoIntegral`
+(`ItoIntegralLocalisedPredictable`), the same construction for a predictable integrand whose paths
+are continuous only almost surely; that module proves the two agree up to indistinguishability on
+`[0, T]` (`ae_predItoIntegral_eq_localItoIntegral`). It is kept as its own definition, not made
+`predItoIntegral` at `isStronglyPredictable_of_bdd_adapted_cont`, for these reasons.
+* The agreement is only almost sure, and the pathwise object is the one the library states results
+  about: `localItoProcess`, the Itô formula for it, and four corpus entries
+  (`sc-ito-integral-continuous-adapted-unbounded`, `sc-ito-integral-unbounded-local-martingale`,
+  `sc-ito-formula-adapted-unbounded-coefficients`, `sc-ito-formula-adapted-process`) state their
+  theorems about `localItoIntegral` and the process built on it.
+* Its level `pathLevel` is the exact bound of a continuous path on `[0, t]`, so the integral is
+  adapted and the clipped integrals agree on the nose (`ae_localItoIntegral_eq`) with no countable
+  dense set (`denseLevel`) and no predictable `L²` embedding (`processToLpPredictable`).
+* The dependency runs this way: the predictable module imports this one and its local-martingale
+  companion, so the identification would first move the whole predictable construction below them.
 -/
 
 @[expose] public section

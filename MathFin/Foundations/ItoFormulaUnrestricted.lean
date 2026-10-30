@@ -9,46 +9,28 @@ public import MathFin.Foundations.ItoFormulaLocalized
 public import MathFin.Foundations.ItoFormulaProcess
 public import MathFin.Foundations.ExitTime
 
-/-! # The unrestricted-`C³` Itô formula via stopping-time localization (Summit C)
+/-! # The double cutoff of Summit C, and the capped exit-time localizer
 
-The process Itô formula `ito_formula_td_process` requires **globally bounded** derivatives. This
-file removes the bound entirely: for a general `C³` `f` (the six partials continuous, no growth
-or boundedness hypothesis), the compensated process
+The Itô formulas with bounded derivatives (`ito_formula_td_process`) are extended to a general
+`C^{1,2}` function by cutting `f` off, in time and in space, onto a compact square where its
+continuous partials are bounded. This file holds that cutoff and the localizer that makes it inert.
 
-  `M_t = f(t, B_t) − f(0, B_0) − ∫₀ᵗ (f_t + ½f_xx)(s, B_s) ds`
+* `SummitC.fTrunc N (t, x) = f(φₙ t, φₙ x)`, with `SummitC.fTruncT`, `fTruncX`, `fTruncXX` its
+  partials in closed form by the chain rule (`fTrunc_hasDerivAt_t`, `_x`, `_xx`), each globally
+  bounded (`fTruncT_bdd`, …), jointly continuous, and equal to the partials of `f` where
+  `|t|, |x| ≤ N` (`fTrunc_eq_of`, …). The adapted Itô formula
+  `ito_formula_adapted_td_local` (`ItoFormulaAdaptedTD`) localises in space with it.
+* `sigmaSeq B N = min(τ_N, N)`, the exit time of `B` from `[−N, N]` capped at the level, and
+  `isLocalizingSequence_sigma`: a localizing sequence for the null-augmented Brownian filtration.
+  On `{t ≤ σ_N}` both the space cut and the time cut are inert.
+* `continuous_timeMeasure_primitive`: the primitive `t ↦ ∫_{(0,t]} h` of a continuous `h` is
+  continuous.
 
-is a **continuous local martingale** on the null-augmented Brownian filtration.
-
-## Strategy — localize in space *and* time, glue with the exit times
-
-The single gating ingredient is the genuine localizing sequence `exitTime` (`ExitTime.lean`). The
-local-martingale property is delivered here in **explicit form** (a localizing sequence + per-`N`
-continuous true martingales agreeing with `M` on the stochastic intervals) — this *is* the textbook
-definition of a continuous local martingale; the packaging into Degenne's `IsLocalMartingale`
-*typeclass* is `ito_formula_unrestricted` in `ItoFormulaUnrestrictedLocMart.lean` (it consumes the
-all-time-agreement step below). Three steps:
-
-* **Double truncation** (this section). `fTrunc N (t, x) = f(cut N t, cut N x)` cuts **both**
-  arguments smoothly onto the compact square `[−M₀(N+1), M₀(N+1)]²`, on which the continuous
-  partials of `f` are bounded by constants. The chain rule gives `fTrunc N`'s six partials in closed
-  form, each globally bounded — so `ito_formula_td_process` applies, giving a `[0,∞)` integrand `Fᴺ`
-  and the truncated Itô identity. The Itô integral of `Fᴺ` admits a global **true-martingale**
-  continuous modification `Mₙ` (`exists_continuous_martingale_modification_infinite`).
-* **Agreement on `{· ≤ σ_N}`**, where `σ_N = min(exitTime N, N)`. There `t ≤ N` (time cut inert)
-  and `|B_s| ≤ N` for `s ≤ t` (space cut inert), so `fTrunc N = f`, `drift_trunc = drift`, hence
-  `Mₙ_t =ᵐ M_t` on `{t ≤ σ_N}` — the per-`t` agreement the headline `ito_formula_unrestricted_local`
-  returns. As `N → ∞` the exit times escape, so `M` is *locally* a true martingale.
-* **All-time indistinguishability** (`indistinguishable_on_stochInterval`). The per-`t` agreement
-  lifts to `∀ᵐ ω, ∀ u ≤ σ_N, M_u = Mₙ_u` (continuity + countable rationals + `Set.EqOn.closure`).
-  This is the all-time-agreement crux consumed by the `IsLocalMartingale`-typeclass wrapper
-  (`ItoFormulaUnrestrictedLocMart.lean`, `ito_formula_unrestricted`), which stops the indicator
-  processes and invokes `Martingale.stoppedProcess_indicator`. That wrapper is **complete** — the
-  one remaining ingredient, the drift-integral adaptedness of `M`, is discharged via
-  `StronglyMeasurable.integral_prod_right` (a time-clamped Carathéodory argument).
-
-The time cut is essential: `cut N` confines `x`, but a general `C³` `f` has `t`-derivatives
-unbounded over `t ∈ ℝ`; capping the localizer at `N` keeps `t ≤ N` so the time cut is inert
-exactly where the agreement is used.
+The unrestricted-`C³` Itô formula itself, the residual `f(t, B_t) − f(0, B_0) − ∫₀ᵗ (f_t + ½ f_xx)
+ds` being a local martingale localised by `sigmaSeq`, is `ito_formula_unrestricted`
+(`ItoFormulaUnrestrictedLocMart`). It is derived from the process formula for an Itô process with
+unbounded coefficients (`exists_localMartingale_ito_formula`) at `σ = 1`, `b = 0`, not from this
+cutoff.
 -/
 
 @[expose] public section
@@ -119,23 +101,10 @@ noncomputable def fTruncT (f_t : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ
 /-- `∂_x fTrunc = f_x(φₙ t, φₙ x)·φₙ'(x)`. -/
 noncomputable def fTruncX (f_x : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ) (t x : ℝ) : ℝ :=
   f_x (S.cut N t) (S.cut N x) * S.cutD1 N x
-/-- `∂_tt fTrunc = f_tt·(φₙ' t)² + f_t·φₙ''(t)`. -/
-noncomputable def fTruncTT (f_t f_tt : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ) (t x : ℝ) : ℝ :=
-  f_tt (S.cut N t) (S.cut N x) * (S.cutD1 N t * S.cutD1 N t) +
-      f_t (S.cut N t) (S.cut N x) * S.cutD2 N t
-/-- `∂_tx fTrunc = f_tx·φₙ'(x)·φₙ'(t)`. -/
-noncomputable def fTruncTX (f_tx : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ) (t x : ℝ) : ℝ :=
-  f_tx (S.cut N t) (S.cut N x) * S.cutD1 N x * S.cutD1 N t
 /-- `∂_xx fTrunc = f_xx·(φₙ' x)² + f_x·φₙ''(x)`. -/
 noncomputable def fTruncXX (f_x f_xx : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ) (t x : ℝ) : ℝ :=
   f_xx (S.cut N t) (S.cut N x) * (S.cutD1 N x * S.cutD1 N x) +
       f_x (S.cut N t) (S.cut N x) * S.cutD2 N x
-/-- `∂_xxx fTrunc = f_xxx·(φₙ' x)³ + 3 f_xx·φₙ'(x)·φₙ''(x) + f_x·φₙ'''(x)`. -/
-noncomputable def fTruncXXX (f_x f_xx f_xxx : ℝ → ℝ → ℝ) (S : SmoothTrunc) (N : ℕ) (t x : ℝ) : ℝ :=
-  f_xxx (S.cut N t) (S.cut N x) * (S.cutD1 N x * S.cutD1 N x * S.cutD1 N x)
-    + 3 * f_xx (S.cut N t) (S.cut N x) * S.cutD1 N x * S.cutD2 N x
-    + f_x (S.cut N t) (S.cut N x) * S.cutD3 N x
-
 /-- `∂_t fTrunc` exists with value `fTruncT` (chain rule through the time cut). -/
 lemma fTrunc_hasDerivAt_t (hf_t : ∀ t x, HasDerivAt (fun s ↦ f s x) (f_t t x) t)
     (S : SmoothTrunc) (N : ℕ) (t x : ℝ) :
@@ -147,28 +116,6 @@ lemma fTrunc_hasDerivAt_x (hf_x : ∀ t x, HasDerivAt (fun u ↦ f t u) (f_x t x
     (S : SmoothTrunc) (N : ℕ) (t x : ℝ) :
     HasDerivAt (fun u ↦ fTrunc f S N t u) (fTruncX f_x S N t x) x :=
   (hf_x (S.cut N t) (S.cut N x)).comp x (S.cut_hasDerivAt N x)
-
-/-- `∂_t fTruncT = fTruncTT` (product rule, `t`-derivative). -/
-lemma fTrunc_hasDerivAt_tt (hf_tt : ∀ t x, HasDerivAt (fun s ↦ f_t s x) (f_tt t x) t)
-    (S : SmoothTrunc) (N : ℕ) (t x : ℝ) :
-    HasDerivAt (fun s ↦ fTruncT f_t S N s x) (fTruncTT f_t f_tt S N t x) t := by
-  have hu : HasDerivAt (fun s ↦ f_t (S.cut N s) (S.cut N x))
-      (f_tt (S.cut N t) (S.cut N x) * S.cutD1 N t) t :=
-    (hf_tt (S.cut N t) (S.cut N x)).comp t (S.cut_hasDerivAt N t)
-  have hv : HasDerivAt (fun s ↦ S.cutD1 N s) (S.cutD2 N t) t := S.cutD1_hasDerivAt N t
-  rw [show fTruncTT f_t f_tt S N t x
-      = f_tt (S.cut N t) (S.cut N x) * S.cutD1 N t * S.cutD1 N t
-        + f_t (S.cut N t) (S.cut N x) * S.cutD2 N t from by unfold fTruncTT; ring]
-  exact hu.mul hv
-
-/-- `∂_x fTruncT = fTruncTX` (product rule, `x`-derivative; `φₙ'(t)` is constant in `x`). -/
-lemma fTrunc_hasDerivAt_tx (hf_tx : ∀ t x, HasDerivAt (fun u ↦ f_t t u) (f_tx t x) x)
-    (S : SmoothTrunc) (N : ℕ) (t x : ℝ) :
-    HasDerivAt (fun u ↦ fTruncT f_t S N t u) (fTruncTX f_tx S N t x) x := by
-  have h := ((hf_tx (S.cut N t) (S.cut N x)).comp x (S.cut_hasDerivAt N x)).mul_const (S.cutD1 N t)
-  rw [show fTruncTX f_tx S N t x
-      = f_tx (S.cut N t) (S.cut N x) * S.cutD1 N x * S.cutD1 N t from by unfold fTruncTX; ring]
-  exact h
 
 /-- `∂_x fTruncX = fTruncXX` (product rule, `x`-derivative). -/
 lemma fTrunc_hasDerivAt_xx (hf_xx : ∀ t x, HasDerivAt (fun u ↦ f_x t u) (f_xx t x) x)
@@ -182,33 +129,6 @@ lemma fTrunc_hasDerivAt_xx (hf_xx : ∀ t x, HasDerivAt (fun u ↦ f_x t u) (f_x
       = f_xx (S.cut N t) (S.cut N x) * S.cutD1 N x * S.cutD1 N x
         + f_x (S.cut N t) (S.cut N x) * S.cutD2 N x from by unfold fTruncXX; ring]
   exact hu.mul hv
-
-/-- `∂_x fTruncXX = fTruncXXX` (sum + product + chain rules). -/
-lemma fTrunc_hasDerivAt_xxx (hf_xx : ∀ t x, HasDerivAt (fun u ↦ f_x t u) (f_xx t x) x)
-    (hf_xxx : ∀ t x, HasDerivAt (fun u ↦ f_xx t u) (f_xxx t x) x)
-    (S : SmoothTrunc) (N : ℕ) (t x : ℝ) :
-    HasDerivAt (fun u ↦ fTruncXX f_x f_xx S N t u) (fTruncXXX f_x f_xx f_xxx S N t x) x := by
-  -- term 1 : f_xx(·,φₙ ·)·(φₙ' ·)²
-  have h_fxx : HasDerivAt (fun u ↦ f_xx (S.cut N t) (S.cut N u))
-      (f_xxx (S.cut N t) (S.cut N x) * S.cutD1 N x) x :=
-    (hf_xxx (S.cut N t) (S.cut N x)).comp x (S.cut_hasDerivAt N x)
-  have h_cD1 : HasDerivAt (fun u ↦ S.cutD1 N u) (S.cutD2 N x) x := S.cutD1_hasDerivAt N x
-  have h_cD1sq : HasDerivAt (fun u ↦ S.cutD1 N u * S.cutD1 N u)
-      (S.cutD2 N x * S.cutD1 N x + S.cutD1 N x * S.cutD2 N x) x := h_cD1.mul h_cD1
-  have hterm1 := h_fxx.mul h_cD1sq
-  -- term 2 : f_x(·,φₙ ·)·(φₙ'' ·)
-  have h_fx : HasDerivAt (fun u ↦ f_x (S.cut N t) (S.cut N u))
-      (f_xx (S.cut N t) (S.cut N x) * S.cutD1 N x) x :=
-    (hf_xx (S.cut N t) (S.cut N x)).comp x (S.cut_hasDerivAt N x)
-  have h_cD2 : HasDerivAt (fun u ↦ S.cutD2 N u) (S.cutD3 N x) x := S.cutD2_hasDerivAt N x
-  have hterm2 := h_fx.mul h_cD2
-  rw [show fTruncXXX f_x f_xx f_xxx S N t x
-      = f_xxx (S.cut N t) (S.cut N x) * S.cutD1 N x * (S.cutD1 N x * S.cutD1 N x)
-          + f_xx (S.cut N t) (S.cut N x)
-            * (S.cutD2 N x * S.cutD1 N x + S.cutD1 N x * S.cutD2 N x)
-        + (f_xx (S.cut N t) (S.cut N x) * S.cutD1 N x * S.cutD2 N x
-          + f_x (S.cut N t) (S.cut N x) * S.cutD3 N x) from by unfold fTruncXXX; ring]
-  exact hterm1.add hterm2
 
 /-! ### Constant bounds on the truncated partials -/
 
@@ -243,25 +163,6 @@ lemma fTruncX_bdd (S : SmoothTrunc) (N : ℕ)
   obtain ⟨B, hB⟩ := exists_bound_cut S N hcont
   exact ⟨B * S.M₁, fun t x ↦ abs_mul_le_of (hB t x) (S.cutD1_bdd N x)⟩
 
-lemma fTruncTX_bdd (S : SmoothTrunc) (N : ℕ)
-    (hcont : Continuous fun p : ℝ × ℝ ↦ f_tx p.1 p.2) :
-    ∃ C : ℝ, ∀ t x, |fTruncTX f_tx S N t x| ≤ C := by
-  obtain ⟨B, hB⟩ := exists_bound_cut S N hcont
-  exact ⟨B * S.M₁ * S.M₁,
-    fun t x ↦ abs_mul_le_of (abs_mul_le_of (hB t x) (S.cutD1_bdd N x)) (S.cutD1_bdd N t)⟩
-
-lemma fTruncTT_bdd (S : SmoothTrunc) (N : ℕ)
-    (hf_t_cont : Continuous fun p : ℝ × ℝ ↦ f_t p.1 p.2)
-    (hf_tt_cont : Continuous fun p : ℝ × ℝ ↦ f_tt p.1 p.2) :
-    ∃ C : ℝ, ∀ t x, |fTruncTT f_t f_tt S N t x| ≤ C := by
-  obtain ⟨Bt, hBt⟩ := exists_bound_cut S N hf_t_cont
-  obtain ⟨Btt, hBtt⟩ := exists_bound_cut S N hf_tt_cont
-  refine ⟨Btt * (S.M₁ * S.M₁) + Bt * S.M₂, fun t x ↦ ?_⟩
-  unfold fTruncTT
-  refine (abs_add_le _ _).trans (add_le_add ?_ ?_)
-  · exact abs_mul_le_of (hBtt t x) (abs_mul_le_of (S.cutD1_bdd N t) (S.cutD1_bdd N t))
-  · exact abs_mul_le_of (hBt t x) (S.cutD2_bdd N t)
-
 lemma fTruncXX_bdd (S : SmoothTrunc) (N : ℕ)
     (hf_x_cont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2)
     (hf_xx_cont : Continuous fun p : ℝ × ℝ ↦ f_xx p.1 p.2) :
@@ -273,24 +174,6 @@ lemma fTruncXX_bdd (S : SmoothTrunc) (N : ℕ)
   refine (abs_add_le _ _).trans (add_le_add ?_ ?_)
   · exact abs_mul_le_of (hBxx t x) (abs_mul_le_of (S.cutD1_bdd N x) (S.cutD1_bdd N x))
   · exact abs_mul_le_of (hBx t x) (S.cutD2_bdd N x)
-
-lemma fTruncXXX_bdd (S : SmoothTrunc) (N : ℕ)
-    (hf_x_cont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2)
-    (hf_xx_cont : Continuous fun p : ℝ × ℝ ↦ f_xx p.1 p.2)
-    (hf_xxx_cont : Continuous fun p : ℝ × ℝ ↦ f_xxx p.1 p.2) :
-    ∃ C : ℝ, ∀ t x, |fTruncXXX f_x f_xx f_xxx S N t x| ≤ C := by
-  obtain ⟨Bx, hBx⟩ := exists_bound_cut S N hf_x_cont
-  obtain ⟨Bxx, hBxx⟩ := exists_bound_cut S N hf_xx_cont
-  obtain ⟨Bxxx, hBxxx⟩ := exists_bound_cut S N hf_xxx_cont
-  refine ⟨Bxxx * (S.M₁ * S.M₁ * S.M₁) + 3 * Bxx * S.M₁ * S.M₂ + Bx * S.M₃, fun t x ↦ ?_⟩
-  unfold fTruncXXX
-  refine (abs_add_le _ _).trans (add_le_add ((abs_add_le _ _).trans (add_le_add ?_ ?_)) ?_)
-  · exact abs_mul_le_of (hBxxx t x)
-      (abs_mul_le_of (abs_mul_le_of (S.cutD1_bdd N x) (S.cutD1_bdd N x)) (S.cutD1_bdd N x))
-  · refine abs_mul_le_of (abs_mul_le_of ?_ (S.cutD1_bdd N x)) (S.cutD2_bdd N x)
-    rw [abs_mul, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 3)]
-    exact mul_le_mul_of_nonneg_left (hBxx t x) (by norm_num)
-  · exact abs_mul_le_of (hBx t x) (S.cutD3_bdd N x)
 
 /-! ### Joint continuity of the partials -/
 
@@ -353,13 +236,6 @@ lemma fTruncXX_eq_of (S : SmoothTrunc) {N : ℕ} {s y : ℝ} (hs : |s| ≤ (N : 
     (cut_inactive S hy).2.2]
   ring
 
-/-- On the inert region the truncated drift is the true drift. -/
-lemma truncDrift_eq_of (S : SmoothTrunc) {N : ℕ} {s y : ℝ}
-    (hs : |s| ≤ (N : ℝ)) (hy : |y| ≤ (N : ℝ)) :
-    fTruncT f_t S N s y + (1 / 2) * fTruncXX f_x f_xx S N s y
-      = f_t s y + (1 / 2) * f_xx s y := by
-  rw [fTruncT_eq_of S hs hy, fTruncXX_eq_of S hs hy]
-
 end SummitC
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
@@ -388,155 +264,5 @@ lemma isLocalizingSequence_sigma (hBmeas : ∀ t, Measurable (B t))
     exact lt_min hN1 hN2
   mono := Filter.Eventually.of_forall fun ω _ _ hNM ↦
     min_le_min (exitTime_monotone hBcont ω hNM) (by exact_mod_cast hNM)
-
-open SummitC
-
-variable {f f_t f_x f_xx f_tt f_tx f_xxx : ℝ → ℝ → ℝ}
-
-/-- **The unrestricted-`C³` Itô formula in explicit local-martingale form (Summit C).** For a
-general `C³` `f` (six partials with `HasDerivAt` witnesses, all jointly continuous — **no** growth
-or boundedness hypothesis), the compensated process
-
-  `M_t = f(t, B_t) − f(0, B_0) − ∫₀ᵗ (f_t + ½f_xx)(s, B_s) ds`
-
-is everywhere-continuous, satisfies the Itô identity by construction, and is a **continuous local
-martingale** in explicit form: there is a localizing sequence `σ_N = min(τ_N, N) ↑ ⊤` (`τ_N` the
-exit times) and, for each `N`, a continuous **true** martingale `Mₙ` on the null-augmented Brownian
-filtration with `M = Mₙ` on the stochastic interval `{t ≤ σ_N}`.
-
-The localization is genuine: `Mₙ` is the continuous global-martingale modification of the Itô
-integral of the time-and-space–truncated `fTrunc N = f(φₙ·, φₙ·)`, whose globally-bounded
-derivatives let `ito_formula_td_process` apply; on `{t ≤ σ_N}` the cuts are inert, so the truncated
-formula collapses to the true one and `Mₙ` agrees with `M`. As `N → ∞` the exit times escape, so
-`M` is locally a martingale on all of `[0, ∞)`. -/
-theorem ito_formula_unrestricted_local [IsProbabilityMeasure μ] (hB : IsPreBrownianReal B μ)
-    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
-    (hf_t : ∀ t x, HasDerivAt (fun s ↦ f s x) (f_t t x) t)
-    (hf_tt : ∀ t x, HasDerivAt (fun s ↦ f_t s x) (f_tt t x) t)
-    (hf_tx : ∀ t x, HasDerivAt (fun u ↦ f_t t u) (f_tx t x) x)
-    (hf_x : ∀ t x, HasDerivAt (fun u ↦ f t u) (f_x t x) x)
-    (hf_xx : ∀ t x, HasDerivAt (fun u ↦ f_x t u) (f_xx t x) x)
-    (hf_xxx : ∀ t x, HasDerivAt (fun u ↦ f_xx t u) (f_xxx t x) x)
-    (hf_cont : Continuous fun p : ℝ × ℝ ↦ f p.1 p.2)
-    (hf_t_cont : Continuous fun p : ℝ × ℝ ↦ f_t p.1 p.2)
-    (hf_x_cont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2)
-    (hf_xx_cont : Continuous fun p : ℝ × ℝ ↦ f_xx p.1 p.2)
-    (hf_tt_cont : Continuous fun p : ℝ × ℝ ↦ f_tt p.1 p.2)
-    (hf_tx_cont : Continuous fun p : ℝ × ℝ ↦ f_tx p.1 p.2)
-    (hf_xxx_cont : Continuous fun p : ℝ × ℝ ↦ f_xxx p.1 p.2) :
-    ∃ M : ℝ≥0 → Ω → ℝ,
-      (∀ ω, Continuous fun t ↦ M t ω) ∧
-      (∀ t : ℝ≥0, (fun ω ↦ f (t : ℝ) (B t ω) - f 0 (B 0 ω)) =ᵐ[μ]
-        (fun ω ↦ M t ω + ∫ s in Set.Ioc 0 t,
-          (f_t (s : ℝ) (B s ω) + (1 / 2) * f_xx (s : ℝ) (B s ω)) ∂ItoIntegralL2.timeMeasure)) ∧
-      ∃ σ : ℕ → Ω → WithTop ℝ≥0, IsLocalizingSequence (augFiltration (μ := μ) hBmeas) σ μ ∧
-        ∀ N : ℕ, ∃ Mₙ : ℝ≥0 → Ω → ℝ,
-          Martingale Mₙ (augFiltration (μ := μ) hBmeas) μ ∧
-          (∀ ω, Continuous fun t ↦ Mₙ t ω) ∧
-          ∀ t : ℝ≥0, ∀ᵐ ω ∂μ, (t : WithTop ℝ≥0) ≤ σ N ω → M t ω = Mₙ t ω := by
-  obtain ⟨S⟩ := smoothTrunc_exists
-  set M : ℝ≥0 → Ω → ℝ := fun t ω ↦
-    f (t : ℝ) (B t ω) - f 0 (B 0 ω)
-      - ∫ s in Set.Ioc 0 t, (f_t (s : ℝ) (B s ω) + (1 / 2) * f_xx (s : ℝ) (B s ω))
-        ∂ItoIntegralL2.timeMeasure with hM
-  -- continuity of `M` (the drift primitive is continuous; `f∘(↑·,B)` is continuous)
-  have hMcont : ∀ ω, Continuous fun t ↦ M t ω := by
-    intro ω
-    simp only [hM]
-    exact ((hf_cont.comp (NNReal.continuous_coe.prodMk (hBcont ω))).sub continuous_const).sub
-      (continuous_timeMeasure_primitive
-        ((hf_t_cont.comp (NNReal.continuous_coe.prodMk (hBcont ω))).add
-          (continuous_const.mul (hf_xx_cont.comp (NNReal.continuous_coe.prodMk (hBcont ω))))))
-  refine ⟨M, hMcont, fun t ↦ Filter.Eventually.of_forall fun ω ↦ by simp only [hM]; ring,
-    fun N ↦ sigmaSeq B N, isLocalizingSequence_sigma hBmeas hBcont, fun N ↦ ?_⟩
-  -- the truncated process formula at horizon `N`
-  obtain ⟨Ct, hCt⟩ := fTruncT_bdd S N hf_t_cont
-  obtain ⟨C1, hC1⟩ := fTruncX_bdd S N hf_x_cont
-  obtain ⟨C2, hC2⟩ := fTruncXX_bdd S N hf_x_cont hf_xx_cont
-  obtain ⟨Ctt, hCtt⟩ := fTruncTT_bdd S N hf_t_cont hf_tt_cont
-  obtain ⟨Ctx, hCtx⟩ := fTruncTX_bdd S N hf_tx_cont
-  obtain ⟨Cxxx, hCxxx⟩ := fTruncXXX_bdd S N hf_x_cont hf_xx_cont hf_xxx_cont
-  obtain ⟨F, hform, -, -⟩ := ito_formula_td_process hB hBmeas hBcont (N : ℝ≥0)
-    (f := fTrunc f S N) (f_t := fTruncT f_t S N) (f_x := fTruncX f_x S N)
-    (f_xx := fTruncXX f_x f_xx S N) (f_tt := fTruncTT f_t f_tt S N)
-    (f_tx := fTruncTX f_tx S N) (f_xxx := fTruncXXX f_x f_xx f_xxx S N)
-    (fTrunc_hasDerivAt_t hf_t S N) (fTrunc_hasDerivAt_tt hf_tt S N)
-    (fTrunc_hasDerivAt_tx hf_tx S N) (fTrunc_hasDerivAt_x hf_x S N)
-    (fTrunc_hasDerivAt_xx hf_xx S N) (fTrunc_hasDerivAt_xxx hf_xx hf_xxx S N)
-    (fTruncX_continuous S N hf_x_cont) (fTruncXX_continuous S N hf_x_cont hf_xx_cont)
-    hCt hC1 hC2 hCtt hCtx hCxxx
-  -- the continuous GLOBAL martingale modification of the truncated Itô integral
-  obtain ⟨X, hmodX, hcontX, hmartX⟩ :=
-    ItoLocalMartingaleInfinite.exists_continuous_martingale_modification_infinite hB hBmeas hBcont F
-  refine ⟨X, hmartX, hcontX, fun t ↦ ?_⟩
-  -- agreement `M t = X t` on `{t ≤ σ_N}`
-  have hN0 : |(0 : ℝ)| ≤ (N : ℝ) := by rw [abs_zero]; exact Nat.cast_nonneg N
-  rcases eq_zero_or_pos t with ht0 | ht0
-  · -- `t = 0`: both sides are `0` (`hform 0` gives `itoProcessL2Inf 0 F =ᵐ 0`)
-    subst ht0
-    filter_upwards [hform 0 zero_le, hmodX 0] with ω hf hmod _
-    simp only [hM, hmod, NNReal.coe_zero, Set.Ioc_self, MeasureTheory.setIntegral_empty,
-      add_zero, sub_self] at hf ⊢
-    linarith [hf]
-  · by_cases htN : t ≤ (N : ℝ≥0)
-    · filter_upwards [hform t htN, hmodX t, eval_zero_ae hB hBmeas] with ω hf hmod hB0 hev
-      have hexit : (t : WithTop ℝ≥0) ≤ exitTime B N ω := le_trans hev (min_le_left _ _)
-      have hBt : |B t ω| ≤ (N : ℝ) := abs_le_N_of_le_exitTime hBcont ht0 hexit
-      have htNr : (t : ℝ) ≤ (N : ℝ) := by exact_mod_cast htN
-      have hb1 : fTrunc f S N (t : ℝ) (B t ω) = f (t : ℝ) (B t ω) :=
-        fTrunc_eq_of S (by rw [abs_of_nonneg t.coe_nonneg]; exact htNr) hBt
-      have hb0 : fTrunc f S N 0 (B 0 ω) = f 0 (B 0 ω) := by
-        rw [hB0]; exact fTrunc_eq_of S hN0 hN0
-      have hdr : (∫ s in Set.Ioc 0 t, (fTruncT f_t S N (s : ℝ) (B s ω)
-            + (1 / 2) * fTruncXX f_x f_xx S N (s : ℝ) (B s ω)) ∂ItoIntegralL2.timeMeasure)
-          = ∫ s in Set.Ioc 0 t, (f_t (s : ℝ) (B s ω) + (1 / 2) * f_xx (s : ℝ) (B s ω))
-              ∂ItoIntegralL2.timeMeasure := by
-        refine setIntegral_congr_fun measurableSet_Ioc (fun s hs ↦ ?_)
-        have hsexit : (s : WithTop ℝ≥0) ≤ exitTime B N ω :=
-          le_trans (by exact_mod_cast hs.2) hexit
-        have hBs : |B s ω| ≤ (N : ℝ) := abs_le_N_of_le_exitTime hBcont hs.1 hsexit
-        have hsN : (s : ℝ) ≤ N := le_trans (by exact_mod_cast hs.2) htNr
-        exact truncDrift_eq_of S (by rw [abs_of_nonneg s.coe_nonneg]; exact hsN) hBs
-      rw [hb1, hb0, hdr] at hf
-      simp only [hM, hmod]
-      linarith [hf]
-    · -- `t > N`: vacuous, since `t ≤ σ_N ≤ N`
-      refine Filter.Eventually.of_forall fun ω hev ↦ ?_
-      exact absurd (by exact_mod_cast le_trans hev (min_le_right _ _) : t ≤ (N : ℝ≥0)) htN
-
-/-- **The indistinguishability upgrade.** Two continuous processes that agree a.s. at every
-deterministic time below a stopping time `σ` agree, a.s., on the whole stochastic interval
-`[0, σ]` — the per-deterministic-`t` modification lifted to all-`t` by continuity on the dense
-countable set, then to the closed interval by left-continuity at the boundary.
-
-This is the staging lemma for the `IsLocalMartingale`-typeclass wrapper of Summit C: it upgrades the
-per-`t` agreement that `ito_formula_unrestricted_local` returns to the all-time agreement a
-`Martingale.stoppedProcess_indicator` argument needs. It is consumed by `ito_formula_unrestricted`
-in `ItoFormulaUnrestrictedLocMart.lean`. -/
-lemma indistinguishable_on_stochInterval {M' X' : ℝ≥0 → Ω → ℝ} {σ : Ω → WithTop ℝ≥0}
-    (hM'cont : ∀ ω, Continuous fun t ↦ M' t ω) (hX'cont : ∀ ω, Continuous fun t ↦ X' t ω)
-    (hagree : ∀ t : ℝ≥0, ∀ᵐ ω ∂μ, (t : WithTop ℝ≥0) ≤ σ ω → M' t ω = X' t ω) :
-    ∀ᵐ ω ∂μ, ⊥ < σ ω → ∀ u : ℝ≥0, (u : WithTop ℝ≥0) ≤ σ ω → M' u ω = X' u ω := by
-  obtain ⟨D, D_count, D_dense⟩ := TopologicalSpace.exists_countable_dense ℝ≥0
-  have hco : ∀ᵐ ω ∂μ, ∀ d ∈ D, (d : WithTop ℝ≥0) ≤ σ ω → M' d ω = X' d ω :=
-    (ae_ball_iff D_count).mpr fun d _ ↦ hagree d
-  filter_upwards [hco] with ω hω hpos u hu
-  have hUopen : IsOpen {t : ℝ≥0 | (t : WithTop ℝ≥0) < σ ω} :=
-    isOpen_Iio.preimage WithTop.continuous_coe
-  have hEqU : Set.EqOn (fun t ↦ M' t ω) (fun t ↦ X' t ω) {t | (t : WithTop ℝ≥0) < σ ω} :=
-    Set.EqOn.of_subset_closure (fun d hd ↦ hω d hd.1 (le_of_lt hd.2))
-      (hM'cont ω).continuousOn (hX'cont ω).continuousOn Set.inter_subset_right
-      (subset_closure_dense_inter D_dense hUopen)
-  have humem : u ∈ closure {t : ℝ≥0 | (t : WithTop ℝ≥0) < σ ω} := by
-    rcases lt_or_eq_of_le hu with hlt | heq
-    · exact subset_closure hlt
-    · have hu0 : (0 : ℝ≥0) < u := by
-        have h : (0 : WithTop ℝ≥0) < (u : WithTop ℝ≥0) := by
-          rw [← heq] at hpos; simpa using hpos
-        rwa [← WithTop.coe_zero, WithTop.coe_lt_coe] at h
-      have hIio : Set.Iio u ⊆ {t : ℝ≥0 | (t : WithTop ℝ≥0) < σ ω} := fun s hs ↦ by
-        rw [Set.mem_ofPred_eq, ← heq, WithTop.coe_lt_coe]; exact hs
-      exact closure_mono hIio ((closure_Iio' (a := u) ⟨0, hu0⟩).ge Set.self_mem_Iic)
-  exact hEqU.closure (hM'cont ω) (hX'cont ω) humem
 
 end MathFin
