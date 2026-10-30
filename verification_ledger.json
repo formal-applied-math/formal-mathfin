@@ -563,6 +563,27 @@
       "input_hash": "6ed28c53573f7be900fb298b3b598918c0c0bfd3c05303d4b8e419bea0a73b18",
       "verified_at_commit": "331e4a2"
     },
+    "mf-american-put-ge-bsm-european-put": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.2,
+      "input_hash": "730579cc61316f8df328197bbadc9066ca7bfeb80470dabcbb81ef58e76c2d24",
+      "verified_at_commit": "04f0c30"
+    },
+    "mf-american-put-log-boundary-convex": {
+      "benchmark_file": "american_put_boundary.json",
+      "date": "2026-10-30",
+      "elapsed_s": 4.7,
+      "input_hash": "6c6ac4d5069277f9aaab67e647e4dbc471bb14a8b63028e3f207042d633a3651",
+      "verified_at_commit": "04f0c30"
+    },
+    "mf-american-put-stock-boundary-strict-convex": {
+      "benchmark_file": "american_put_boundary.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.6,
+      "input_hash": "b204aec58699102b6234878dd9b655d3c9c7ef303feebb83f02d67ebdc54966d",
+      "verified_at_commit": "04f0c30"
+    },
     "mf-american-supermartingale": {
       "benchmark_file": "binomial.json",
       "date": "2026-10-30",
@@ -1641,6 +1662,13 @@
       "input_hash": "28b16731d0b6e476cb974d842913bc14671a81ef644c3f66ee0ff012d7b34d93",
       "verified_at_commit": "1a0d988"
     },
+    "mf-contract-binomial-to-black-scholes": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.9,
+      "input_hash": "8f3d5e3df3d40ba3d2d22b458b449eda7b09c8c7562491b6c40f4bfb8d0c1287",
+      "verified_at_commit": "04f0c30"
+    },
     "mf-contract-book-es-subadditive": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-30",
@@ -2068,6 +2096,13 @@
       "input_hash": "8f66ab7eaa258f6a83d9d43c4ee1c7d3adc1fd082091ed65b81980b8524c1a9b",
       "verified_at_commit": "331e4a2"
     },
+    "mf-forward-measure-spot": {
+      "benchmark_file": "interest_rates.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.0,
+      "input_hash": "d9a1f45cc5a8c2da70667bad1f1e198ac14e1c150d3aa3015b23b4ac30cc43ca",
+      "verified_at_commit": "04f0c30"
+    },
     "mf-forward-price": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-10-30",
@@ -2390,6 +2425,20 @@
       "input_hash": "43a1047674534b5654bcd2d720b0c564e6b981edb1c984c098fd5a7d3144cdc2",
       "verified_at_commit": "331e4a2"
     },
+    "mf-hull-white-forward-measure-short-rate": {
+      "benchmark_file": "interest_rates.json",
+      "date": "2026-10-30",
+      "elapsed_s": 4.6,
+      "input_hash": "83a5d2c642c96099dc04ab52b4e12e76c3e9de59864370768fb0e8213922fa6e",
+      "verified_at_commit": "04f0c30"
+    },
+    "mf-hull-white-futures-forward-gap": {
+      "benchmark_file": "interest_rates.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.6,
+      "input_hash": "00773af11c0cc0802fc4aa4b8c9572b7040c8290ccc9d7ba7c00c3f446d385ba",
+      "verified_at_commit": "04f0c30"
+    },
     "mf-hull-white-reprices-curve": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-30",
@@ -2424,6 +2473,13 @@
       "elapsed_s": 5.2,
       "input_hash": "6284470e59e4a2aa850e0dc0fccad452fd07adf9dc1d5c9ae88ada9900fb8332",
       "verified_at_commit": "c55d62c"
+    },
+    "mf-inflation-hw-reconstitution-normaliser": {
+      "benchmark_file": "interest_rates.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.5,
+      "input_hash": "209671f9948192d92e8b1caa36e210751656b4f033f6f83e0f27e686fc185c48",
+      "verified_at_commit": "04f0c30"
     },
     "mf-information-ratio-scale-invariant": {
       "benchmark_file": "portfolio_and_performance.json",
@@ -4909,6 +4965,13 @@
       "elapsed_s": 4.4,
       "input_hash": "1151869fb254b640c7609ff75664e3bf0bbcaa96f2f11a00a8a1235686e82d3e",
       "verified_at_commit": "331e4a2"
+    },
+    "sc-thm-9.1.1": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.3,
+      "input_hash": "fcd4e38ddd091896667960f9c7c532fcd7ea1f90b2987f07353f88025c8eb728",
+      "verified_at_commit": "04f0c30"
     },
     "sc-thm-9.1.8": {
       "benchmark_file": "stochastic_calculus.json",
