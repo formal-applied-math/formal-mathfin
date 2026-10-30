@@ -30,7 +30,6 @@ driving Brownian motion of `√V`), which the mean computation does not use.
 
 Public API (all in namespace `MathFin.CIRSquaredOU`):
 
-* `integral_sq_of_hasLaw_gaussianReal` — `𝔼[X²] = m² + v` for `X ~ N(m, v)`;
 * `ouProcess`, `ouProcess_integral_sq` — the OU fluctuation and its second moment;
 * `cirTheta`, `cirTheta_borderline`, `cirVariance`, `cirVariance_nonneg`,
   `cirVariance_mean` — the long-run level, the sum of squares, its nonnegativity and
@@ -48,19 +47,6 @@ open MathFin WienerIntegralL2
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
   {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ}
-
-omit [IsProbabilityMeasure μ] in
-/-- The second moment of a Gaussian random variable: `X ~ N(m, v)` gives
-`𝔼[X²] = m² + v` (`variance_eq_sub` on the law). -/
-theorem integral_sq_of_hasLaw_gaussianReal {X : Ω → ℝ} {m : ℝ} {v : ℝ≥0}
-    (hX : HasLaw X (gaussianReal m v) μ) : ∫ ω, X ω ^ 2 ∂μ = m ^ 2 + v := by
-  have h := variance_eq_sub (memLp_id_gaussianReal' (μ := m) (v := v) 2 (by simp))
-  simp only [variance_id_gaussianReal, Pi.pow_apply, id] at h
-  rw [integral_id_gaussianReal] at h
-  have hc := hX.integral_comp (f := fun x : ℝ ↦ x ^ 2) (by fun_prop)
-  simp only [Function.comp_def] at hc
-  rw [hc]
-  linarith
 
 /-- The OU fluctuation `X_t = x₀e^{−(k/2)t} + s ∫₀ᵗ e^{−(k/2)(t−u)} dB_u`: the Vasicek short
 rate in its Wiener representation at mean level `0`, speed `k/2`, volatility `s`. -/

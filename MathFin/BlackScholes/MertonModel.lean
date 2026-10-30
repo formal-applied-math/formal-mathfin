@@ -112,22 +112,6 @@ theorem integral_discounted_bsTerminal {Z : Ω → ℝ} (hZ : HasLaw Z (gaussian
         ring
     _ = S_0 := by rw [show -r * T + r * T = 0 by ring, Real.exp_zero, mul_one]
 
-/-- The discounted Black–Scholes call payoff driven by a standard normal is integrable: it is the
-positive part of an integrable function. -/
-theorem integrable_bsCall_payoff {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) Q)
-    (S_0 K r σ T : ℝ) :
-    Integrable (fun ω ↦ rexp (-r * T) * max (bsTerminal S_0 r σ T (Z ω) - K) 0) Q :=
-  have := hZ.isProbabilityMeasure
-  ((integrable_bsTerminal hZ S_0 r σ T).sub' (integrable_const K)).pos_part.const_mul _
-
-/-- The discounted Black–Scholes put payoff driven by a standard normal is integrable: it is the
-positive part of an integrable function. -/
-theorem integrable_bsPut_payoff {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) Q)
-    (S_0 K r σ T : ℝ) :
-    Integrable (fun ω ↦ rexp (-r * T) * max (K - bsTerminal S_0 r σ T (Z ω)) 0) Q :=
-  have := hZ.isProbabilityMeasure
-  ((integrable_const K).sub' (integrable_bsTerminal hZ S_0 r σ T)).pos_part.const_mul _
-
 /-! ### The model -/
 
 /-- The terminal price of Merton's jump-diffusion at a diffusion sample `z`, a jump count `n`

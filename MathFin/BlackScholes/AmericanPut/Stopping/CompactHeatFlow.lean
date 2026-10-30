@@ -18,7 +18,7 @@ compactly supported continuous data.
 
 ## Result
 
-Public entry points include `contDiffOn_compact_parameter_integral`, `heatKernel_contDiffAt`,
+Public entry points include `contDiffOn_compact_parameter_integral`, `heatKernel_smoothAt`,
 `compact_heatFlow_contDiff`, `compact_exponential_bound`.
 -/
 
@@ -42,8 +42,8 @@ theorem contDiffOn_compact_parameter_integral {H : (ℝ × ℝ) → ℝ → ℝ}
   change ContDiffOn ℝ 2 (fun z => ∫ y, H z y*1) U at hh
   simpa only [mul_one] using hh
 
-theorem heatKernel_contDiffAt {t x : ℝ} (ht : 0 < t) :
-    ContDiffAt ℝ 2 (fun z : ℝ × ℝ => heatKernel z.1 z.2) (t,x) := by
+theorem heatKernel_smoothAt {t x : ℝ} (ht : 0 < t) :
+    ContDiffAt ℝ ∞ (fun z : ℝ × ℝ => heatKernel z.1 z.2) (t,x) := by
   unfold heatKernel
   fun_prop (disch := positivity)
 
@@ -54,7 +54,7 @@ theorem compact_heatFlow_contDiff {f : ℝ → ℝ} (hf : ContDiff ℝ 2 f) (hc 
   · intro z y _ hy
     simp [image_eq_zero_of_notMem_tsupport hy]
   · intro z hz
-    have hk := (heatKernel_contDiffAt (x := z.2-z.1.2) hz.1).comp z
+    have hk := ((heatKernel_smoothAt (x := z.2-z.1.2) hz.1).of_le (by simp)).comp z
       (show ContDiffAt ℝ 2 (fun z : (ℝ × ℝ) × ℝ => (z.1.1,z.2-z.1.2)) z by fun_prop)
     exact ((hf.contDiffAt.comp z contDiffAt_snd).mul hk).contDiffWithinAt
 

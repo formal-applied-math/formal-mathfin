@@ -26,6 +26,7 @@ namespace MathFin.BlackScholes.AmericanPut.Stopping
 
 open Set Filter MeasureTheory ProbabilityTheory
 open scoped NNReal Topology
+open MathFin.ItoLocalMartingale (nullAugmentation supermartingale_nullAugmentation)
 
 /-- The `brownianHeatFlow` of `f` over time `(σ^2*(T-min t T)).toNNReal`, started from the log
 state `brownianLogState β σ x (min t T) ω` shifted by `β*(T-min t T)`. -/
@@ -101,9 +102,9 @@ theorem brownianTerminalValue_usual_martingale {f : ℝ → ℝ} {C : ℝ}
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   have hu' :=
       bounded_continuous_supermartingale_rightCont
-      (supermartingale_ambientNullAugmentation hu) hc hbound
+      (supermartingale_nullAugmentation hu) hc hbound
   have hn' :=
-      bounded_continuous_supermartingale_rightCont (supermartingale_ambientNullAugmentation hn)
+      bounded_continuous_supermartingale_rightCont (supermartingale_nullAugmentation hn)
     (fun ω => (hc ω).neg) (fun t ω => by simpa only [Pi.neg_apply,norm_neg] using hbound t ω)
   apply martingale_iff.mpr
   refine ⟨hu',?_⟩

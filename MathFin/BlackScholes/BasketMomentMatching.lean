@@ -174,8 +174,8 @@ lemma integral_basketLognormalFactor {W : Ω → ℝ} (hW : HasLaw W (gaussianRe
 /-- The lognormal factor of a Gaussian driver is integrable. -/
 lemma integrable_basketLognormalFactor {W : Ω → ℝ} (hW : HasLaw W (gaussianReal 0 1) P)
     (σ T : ℝ) : Integrable (fun ω ↦ basketLognormalFactor σ T (W ω)) P :=
-  integrable_exp_of_hasLaw_gaussianReal
-    (gaussianReal_sub_const (gaussianReal_const_mul hW (σ * Real.sqrt T)) (σ ^ 2 * T / 2))
+  by simpa only [one_mul] using integrable_exp_mul_of_hasLaw
+    (gaussianReal_sub_const (gaussianReal_const_mul hW (σ * Real.sqrt T)) (σ ^ 2 * T / 2)) 1
 
 /-- **Cross-moment of two correlated lognormal factors**: for a jointly Gaussian pair of
 standard normals with covariance `ρ`, `𝔼[e^{σ₁√T·U − σ₁²T/2} · e^{σ₂√T·V − σ₂²T/2}] =
@@ -207,10 +207,11 @@ lemma integrable_basketLognormalFactor_mul {U V : Ω → ℝ} {ρ : ℝ}
     (hcov : cov[U, V; P] = ρ) (σ₁ σ₂ T : ℝ) :
     Integrable (fun ω ↦ basketLognormalFactor σ₁ T (U ω) * basketLognormalFactor σ₂ T (V ω))
       P := by
-  have h := integrable_exp_of_hasLaw_gaussianReal
+  have h := integrable_exp_mul_of_hasLaw
     (gaussianReal_sub_const
       (hasLaw_linear_gaussianPair hUV hU hV hcov (σ₁ * Real.sqrt T) (σ₂ * Real.sqrt T))
-      (σ₁ ^ 2 * T / 2 + σ₂ ^ 2 * T / 2))
+      (σ₁ ^ 2 * T / 2 + σ₂ ^ 2 * T / 2)) 1
+  simp only [one_mul] at h
   refine h.congr (ae_of_all _ fun ω ↦ ?_)
   simp only [basketLognormalFactor]
   rw [← Real.exp_add]

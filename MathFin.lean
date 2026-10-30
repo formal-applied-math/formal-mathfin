@@ -745,6 +745,7 @@ import MathFin.Execution.GlostenMilgromModel
 import MathFin.Execution.RollSpread
 -- Continuous-time American put option exercise-boundary geometry
 import MathFin.BlackScholes.AmericanPut.Stopping.PhysicalBoundaryConvexity
+import MathFin.BlackScholes.AmericanPut.Stopping.PlanePartial
 import MathFin.BlackScholes.AmericanPut.Stopping.AEHorizonValue
 -- QRM bridges: equicorrelation, Gaussian VaR/ES-optimal = Markowitz portfolios, the HHI
 -- systematic floor, and the square-root-of-time rule for GBM losses

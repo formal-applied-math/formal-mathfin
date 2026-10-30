@@ -30,7 +30,7 @@ theorem delayedGridTime_mono (u T δ : ℝ≥0) : Monotone (delayedGridTime u T 
 
 /-- The Brownian filtration sampled along the delayed grid times. -/
 noncomputable def delayedGridFiltration (u T δ : ℝ≥0) :=
-  sampledFiltration brownianFiltration (delayedGridTime u T δ) (delayedGridTime_mono u T δ)
+  ContinuousMarket.sampledFiltration brownianFiltration (delayedGridTime_mono u T δ)
 
 theorem delayedBellmanAux_eq_markov {Z : ℕ → ℝ → ℝ} {C : ℝ}
     (hc : ∀ i, Continuous (Z i)) (hb : ∀ i x, ‖Z i x‖ ≤ C)

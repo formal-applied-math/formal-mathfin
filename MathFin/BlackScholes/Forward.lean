@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.BlackScholes.Call
+public import MathFin.Foundations.StandardGaussianMGF
 
 /-!
 # Forward and futures pricing under the BS lognormal hypothesis
@@ -47,50 +48,79 @@ open scoped NNReal ENNReal
 
 /-! ### Risk-neutral expectation of terminal asset price -/
 
+/-- **`n`-th moment of the terminal price against the standard normal**:
+`∫ (bsTerminal z)^n dN(0,1) = S_0^n · exp(n·r·T + n(n−1)/2 · σ²T)` for `0 ≤ T`.
+
+Direct instance of the affine-shifted standard-normal MGF: with `α = n(r − σ²/2)T` and
+`β = nσ√T`, the integrand equals `S_0^n · exp(α + β·z)`, so the integral is
+`S_0^n · exp(α + β²/2)`. -/
+theorem integral_bsTerminal_pow_gaussianReal (S_0 r σ T : ℝ) (n : ℕ) (hT : 0 ≤ T) :
+    ∫ z, (bsTerminal S_0 r σ T z)^n ∂(gaussianReal 0 1) =
+      S_0^n *
+        Real.exp ((n : ℝ) * r * T + (n : ℝ) * ((n : ℝ) - 1) / 2 * σ^2 * T) := by
+  set α : ℝ := (n : ℝ) * (r - σ^2 / 2) * T with α_def
+  set β : ℝ := (n : ℝ) * σ * Real.sqrt T with β_def
+  have h_β_sq : β^2 = (n : ℝ)^2 * σ^2 * T := by
+    rw [β_def]; ring_nf; rw [Real.sq_sqrt hT]
+  have h_algebra :
+      α + β^2 / 2 =
+        (n : ℝ) * r * T + (n : ℝ) * ((n : ℝ) - 1) / 2 * σ^2 * T := by
+    rw [h_β_sq]; ring
+  have h_pow : ∀ z : ℝ,
+      (bsTerminal S_0 r σ T z)^n = S_0^n * Real.exp (α + β * z) := by
+    intro z
+    unfold bsTerminal
+    rw [mul_pow, ← Real.exp_nat_mul]
+    congr 2
+    rw [α_def, β_def]; ring
+  rw [integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0)]
+  simp_rw [smul_eq_mul, h_pow]
+  rw [show
+        (fun z : ℝ ↦ gaussianPDFReal 0 1 z * (S_0^n * Real.exp (α + β * z)))
+        =
+        (fun z ↦ S_0^n * (Real.exp (α + β * z) * gaussianPDFReal 0 1 z))
+      from funext (fun z ↦ by ring)]
+  rw [integral_const_mul, integral_exp_affine_gaussianPDFReal_univ, h_algebra]
+
+/-- **`n`-th moment of the terminal asset price** under `BSCallHyp`:
+`E_Q[S_T^n] = S_0^n · exp(n · r · T + n(n−1)/2 · σ²T)`, the HasLaw transfer of
+`integral_bsTerminal_pow_gaussianReal`. -/
+theorem nthMoment_terminal
+    {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (n : ℕ)
+    (h : BSCallHyp Q S_0 K r σ T Z) :
+    ∫ ω, (bsTerminal S_0 r σ T (Z ω))^n ∂Q =
+      S_0^n *
+        Real.exp ((n : ℝ) * r * T + (n : ℝ) * ((n : ℝ) - 1) / 2 * σ^2 * T) := by
+  obtain ⟨_hS_0, _hK, _hσ, hT, hZ⟩ := h
+  have h_meas : Measurable fun z : ℝ ↦ (bsTerminal S_0 r σ T z)^n := by
+    unfold bsTerminal; fun_prop
+  rw [show (fun ω ↦ (bsTerminal S_0 r σ T (Z ω))^n) =
+        (fun z ↦ (bsTerminal S_0 r σ T z)^n) ∘ Z from rfl,
+      hZ.integral_comp h_meas.aestronglyMeasurable]
+  exact integral_bsTerminal_pow_gaussianReal S_0 r σ T n hT.le
+
+/-- **Terminal price is the forward in expectation** — the standard-normal-driver
+form: `E[S_T] = F = S_0·e^{rT}`, the `n = 1` moment. -/
+lemma integral_bsTerminal_eq_forward (S_0 r σ T : ℝ) (hT : 0 ≤ T) :
+    ∫ z, S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z) ∂(gaussianReal 0 1)
+      = S_0 * Real.exp (r * T) := by
+  simpa [bsTerminal] using integral_bsTerminal_pow_gaussianReal S_0 r σ T 1 hT
+
 /-- **No-arbitrage forward price**: under `BSCallHyp`,
     `E_Q[S_T] = S_0 · e^{rT}`.
 
 This is the risk-neutral expectation of the terminal asset price, which is
-the no-arbitrage forward price `F` for delivery at time `T`. Derivation:
-HasLaw transfer to standard normal + `integral_exp_mul_gaussianPDFReal_univ`
-(Gaussian MGF) + BS algebra `(r - σ²/2)T + σ²T/2 = rT`. -/
+the no-arbitrage forward price `F` for delivery at time `T`: the `n = 1` case of
+`nthMoment_terminal`. -/
 theorem expected_terminal_eq_forward
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ T : ℝ} {Z : Ω → ℝ}
     (h : BSCallHyp Q S_0 K r σ T Z) :
     ∫ ω, bsTerminal S_0 r σ T (Z ω) ∂Q = S_0 * Real.exp (r * T) := by
-  obtain ⟨hS_0, hK, hσ, hT, hZ⟩ := h
-  set μ_log : ℝ := (r - σ^2 / 2) * T with μ_log_def
-  set ν_log : ℝ := σ * Real.sqrt T with ν_log_def
-  have hsqrT_pos : 0 < Real.sqrt T := Real.sqrt_pos.mpr hT
-  have hν_log_sq : ν_log^2 = σ^2 * T := by rw [ν_log_def, mul_pow, Real.sq_sqrt hT.le]
-  have h_algebra : μ_log + ν_log^2 / 2 = r * T := by rw [hν_log_sq]; ring
-  have h_term_meas : Measurable fun z : ℝ ↦ bsTerminal S_0 r σ T z := by
-    unfold bsTerminal; fun_prop
-  rw [show (fun ω ↦ bsTerminal S_0 r σ T (Z ω))
-        = (fun z ↦ bsTerminal S_0 r σ T z) ∘ Z from rfl,
-      hZ.integral_comp h_term_meas.aestronglyMeasurable,
-      integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0)]
-  -- Rewrite pdf · S_T(z) = S_0 · exp(μ_log) · (exp(ν_log · z) · pdf)
-  have h_factor : ∀ z : ℝ,
-      gaussianPDFReal 0 1 z • bsTerminal S_0 r σ T z
-        = S_0 * Real.exp μ_log * (Real.exp (ν_log * z) * gaussianPDFReal 0 1 z) := by
-    intro z
-    unfold bsTerminal
-    have h_exp : Real.exp ((r - σ^2 / 2) * T + σ * Real.sqrt T * z)
-                = Real.exp μ_log * Real.exp (ν_log * z) := by
-      change Real.exp ((r - σ^2 / 2) * T + σ * Real.sqrt T * z)
-            = Real.exp ((r - σ^2 / 2) * T) * Real.exp (σ * Real.sqrt T * z)
-      exact Real.exp_add _ _
-    rw [smul_eq_mul, h_exp]; ring
-  rw [show (fun z ↦ gaussianPDFReal 0 1 z • bsTerminal S_0 r σ T z)
-        = (fun z ↦ S_0 * Real.exp μ_log *
-            (Real.exp (ν_log * z) * gaussianPDFReal 0 1 z)) from funext h_factor]
-  rw [integral_const_mul, integral_exp_mul_gaussianPDFReal_univ]
-  rw [show S_0 * Real.exp μ_log * Real.exp (ν_log^2 / 2)
-        = S_0 * (Real.exp μ_log * Real.exp (ν_log^2 / 2)) from by ring,
-      ← Real.exp_add, h_algebra]
+  simpa using nthMoment_terminal 1 h
 
 /-! ### Discounted asset is a Q-martingale at maturity -/
 

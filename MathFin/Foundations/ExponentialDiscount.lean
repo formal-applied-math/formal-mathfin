@@ -47,6 +47,8 @@ identity as `rate_eq_neg_log_deriv` below.
 * `rate_eq_neg_log_deriv`: if `H` has derivative `H'(t)` at `t`, then
   `-d/dt log(exp(-H(t))) = H'(t)` at `t`. This is the universal
   "rate from quantity" recovery.
+* `survivalFromIntensity_zero`, `hasDerivAt_neg_log_survivalFromIntensity`: the survival of an
+  intensity starts at `1` and the intensity is its negative log-derivative.
 * `discount_pos`: `exp(-H) > 0` always (so all five discount/survival
   quantities are positive).
 -/
@@ -96,5 +98,18 @@ survival function. The single definition shared by the actuarial survival
 (`FixedIncome.HazardCurve.hazardSurvival`): one calculus, two domains. -/
 noncomputable def survivalFromIntensity (r : ℝ → ℝ) (t : ℝ) : ℝ :=
   Real.exp (-(cumulativeIntensity r t))
+
+/-- `S(0) = 1`: nothing accrues before time `0`. -/
+lemma survivalFromIntensity_zero (r : ℝ → ℝ) : survivalFromIntensity r 0 = 1 := by
+  rw [survivalFromIntensity, cumulativeIntensity, integral_same, neg_zero, Real.exp_zero]
+
+/-- **An intensity is the negative log-derivative of its survival**: for continuous `r`,
+`−d/dt log S(t) = r(t)` — the fundamental theorem of calculus for `cumulativeIntensity`
+followed by `rate_eq_neg_log_deriv`. -/
+theorem hasDerivAt_neg_log_survivalFromIntensity {r : ℝ → ℝ} (hr : Continuous r) (t : ℝ) :
+    HasDerivAt (fun s ↦ -(Real.log (survivalFromIntensity r s))) (r t) t :=
+  rate_eq_neg_log_deriv (H := cumulativeIntensity r)
+    (intervalIntegral.integral_hasDerivAt_right (hr.intervalIntegrable 0 t)
+      (hr.stronglyMeasurableAtFilter _ _) hr.continuousAt)
 
 end MathFin

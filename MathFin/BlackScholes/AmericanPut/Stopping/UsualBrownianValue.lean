@@ -21,23 +21,24 @@ namespace MathFin.BlackScholes.AmericanPut.Stopping
 
 open Set Filter MeasureTheory ProbabilityTheory Boundary
 open scoped NNReal Topology
+open MathFin.ItoLocalMartingale (nullAugmentation supermartingale_nullAugmentation)
 
 /-- The usual filtration of `brownian`: the completed raw filtration, null-augmented and then
 made right-continuous. -/
 noncomputable def brownianUsualFiltration :
     Filtration ℝ≥0 (completedMeasurableSpace gaussianLimit) :=
-  (ambientNullAugmentation (mΩ := completedMeasurableSpace gaussianLimit)
+  (nullAugmentation (m0 := completedMeasurableSpace gaussianLimit)
     (completedAmbientFiltration gaussianLimit brownianFiltration)
     (completedMeasure gaussianLimit)).rightCont
 
 theorem brownian_completedRaw_le_usual :
     completedAmbientFiltration gaussianLimit brownianFiltration ≤ brownianUsualFiltration :=
-  le_trans le_sup_left (ambientNullAugmentation (mΩ := completedMeasurableSpace gaussianLimit)
+  le_trans le_sup_left (nullAugmentation (m0 := completedMeasurableSpace gaussianLimit)
     (completedAmbientFiltration gaussianLimit brownianFiltration)
         (completedMeasure gaussianLimit)).le_rightCont
 
 instance brownianUsualFiltration_isRightContinuous : brownianUsualFiltration.IsRightContinuous :=
-  inferInstanceAs ((ambientNullAugmentation (mΩ := completedMeasurableSpace gaussianLimit)
+  inferInstanceAs ((nullAugmentation (m0 := completedMeasurableSpace gaussianLimit)
     (completedAmbientFiltration gaussianLimit brownianFiltration)
     (completedMeasure gaussianLimit)).rightCont.IsRightContinuous)
 
@@ -45,11 +46,11 @@ instance brownianUsualFiltration_isComplete :
     brownianUsualFiltration.IsComplete (completedMeasure gaussianLimit) := by
   constructor
   intro s hs t
-  apply (ambientNullAugmentation (mΩ := completedMeasurableSpace gaussianLimit)
+  apply (nullAugmentation (m0 := completedMeasurableSpace gaussianLimit)
     (completedAmbientFiltration gaussianLimit brownianFiltration)
     (completedMeasure gaussianLimit)).le_rightCont t
   apply (show MathFin.ItoLocalMartingale.nullsAlg _ (completedMeasure gaussianLimit) ≤
-    ambientNullAugmentation (mΩ := completedMeasurableSpace gaussianLimit)
+    nullAugmentation (m0 := completedMeasurableSpace gaussianLimit)
       (completedAmbientFiltration gaussianLimit brownianFiltration)
       (completedMeasure gaussianLimit) t from le_sup_right)
   exact MeasurableSpace.measurableSet_generateFrom ⟨measurableSet_of_null hs,hs⟩
@@ -82,7 +83,7 @@ theorem brownianClassicalCandidate_usual_supermartingale {K r q σ S : ℝ}
   have hu := bounded_supermartingale_completion gaussianLimit
     (brownianClassicalCandidate_supermartingale hp hK hr hσ T) hb
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
-  exact bounded_continuous_supermartingale_rightCont (supermartingale_ambientNullAugmentation hu)
+  exact bounded_continuous_supermartingale_rightCont (supermartingale_nullAugmentation hu)
     (classicalCandidate_continuous hp continuous_brownian T) hb
 
 theorem brownianUsualAmericanPut_eq_raw {K r q σ S : ℝ}

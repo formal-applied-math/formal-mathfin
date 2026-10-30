@@ -50,18 +50,6 @@ lemma integral_exp_mul_gaussianReal_zero (α : ℝ) (v : ℝ≥0) :
   rw [h]
   ring_nf
 
-/-- `Real.exp (α · X) ∘ Z` is integrable when `Z` has a Gaussian law (the law supplies the
-required `AEMeasurable`). Shared helper for `waldExponential_isMartingale` and the marginal
-exponential moments in `BrownianExpMoment`. -/
-lemma integrable_exp_mul_of_hasLaw {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    {P : Measure Ω} {Z : Ω → ℝ} {m : ℝ} {v : ℝ≥0}
-    (hZ : HasLaw Z (gaussianReal m v) P) (α : ℝ) :
-    Integrable (fun ω ↦ Real.exp (α * Z ω)) P := by
-  rw [show (fun ω ↦ Real.exp (α * Z ω)) = (fun x ↦ Real.exp (α * x)) ∘ Z from rfl]
-  refine Integrable.comp_aemeasurable ?_ hZ.aemeasurable
-  rw [hZ.map_eq]
-  exact integrable_exp_mul_gaussianReal α
-
 /-- **Standard-normal MGF** via `HasLaw` transfer: `𝔼[exp(a·Z)] = exp(a²/2)` for
 `Z ~ N(0,1)` — Mathlib's `mgf_gaussianReal` with `mgf` unfolded, kept as a rewrite handle. -/
 lemma integral_exp_mul_stdNormal {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}

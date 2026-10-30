@@ -41,10 +41,6 @@ no third integral is evaluated.
   `bs_call_formula`, `bs_put_formula` and `bs_cash_or_nothing_formula` respectively.
 * `value_forward` — the forward is worth `S₀ − K e^{−rT}`.
 * `value_cappedCall` — the capped call is worth the difference of two call values.
-* `integrable_europeanCall_pathPV`, `integrable_europeanPut_pathPV`,
-  `integrable_forward_pathPV` — the discounted payoffs are integrable when the driver is
-  standard normal, which is what `Contract.value_both` and
-  `value_europeanCall_eq_put_add_forward` need.
 
 ## Source
 
@@ -117,35 +113,6 @@ theorem value_europeanPut {Q : Measure Ω} [IsProbabilityMeasure Q]
   rw [europeanPut, Contract.value_pay]
   exact MathFin.bs_put_formula h
 
-/-- The reified call's discounted payoff is integrable when the underlying is lognormal: it is
-the positive part of `S_T − K`, and `S_T` is integrable (`integrable_bsTerminal`). -/
-theorem integrable_europeanCall_pathPV {Q : Measure Ω} [IsProbabilityMeasure Q] {Z : Ω → ℝ}
-    (hZ : HasLaw Z (gaussianReal 0 1) Q) (S_0 K r σ : ℝ) (T : ℝ≥0) :
-    Integrable (fun ω ↦ (europeanCall K T).pathPV (fun _ ↦ Real.exp (-r * T))
-      (scenarioAt (assets S_0 r σ T Z) ω)) Q := by
-  simp only [europeanCall, europeanCallPayoff, Contract.pathPV, Contract.cashflows, Payoff.eval,
-    scenarioAt, assets, List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
-  exact ((integrable_bsTerminal hZ S_0 r σ T).sub (integrable_const K)).pos_part.const_mul _
-
-/-- The reified put's discounted payoff is integrable when the underlying is lognormal: it is the
-positive part of `K − S_T`, and `S_T` is integrable (`integrable_bsTerminal`). -/
-theorem integrable_europeanPut_pathPV {Q : Measure Ω} [IsProbabilityMeasure Q] {Z : Ω → ℝ}
-    (hZ : HasLaw Z (gaussianReal 0 1) Q) (S_0 K r σ : ℝ) (T : ℝ≥0) :
-    Integrable (fun ω ↦ (europeanPut K T).pathPV (fun _ ↦ Real.exp (-r * T))
-      (scenarioAt (assets S_0 r σ T Z) ω)) Q := by
-  simp only [europeanPut, Contract.pathPV, Contract.cashflows, Payoff.eval, scenarioAt, assets,
-    List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
-  exact ((integrable_const K).sub (integrable_bsTerminal hZ S_0 r σ T)).pos_part.const_mul _
-
-/-- The reified forward's discounted payoff is integrable when the underlying is lognormal. -/
-theorem integrable_forward_pathPV {Q : Measure Ω} [IsProbabilityMeasure Q] {Z : Ω → ℝ}
-    (hZ : HasLaw Z (gaussianReal 0 1) Q) (S_0 K r σ : ℝ) (T : ℝ≥0) :
-    Integrable (fun ω ↦ (forward K T).pathPV (fun _ ↦ Real.exp (-r * T))
-      (scenarioAt (assets S_0 r σ T Z) ω)) Q := by
-  simp only [forward, Contract.pathPV, Contract.cashflows, Payoff.eval, scenarioAt, assets,
-    List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
-  exact ((integrable_bsTerminal hZ S_0 r σ T).sub (integrable_const K)).const_mul _
-
 /-- **The forward's Black–Scholes value** is `S₀ − K e^{−rT}`: the discounted terminal price has
 mean `S₀` (`discounted_terminal_eq_S0`), so this is `value_forward_of_integral`. -/
 theorem value_forward {Q : Measure Ω} [IsProbabilityMeasure Q]
@@ -168,11 +135,13 @@ theorem value_cappedCall {Q : Measure Ω} [IsProbabilityMeasure Q]
     (cappedCall K₁ K₂ T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
       = (S_0 * Phi (bsd1 S_0 K₁ r σ T) - K₁ * Real.exp (-r * T) * Phi (bsd2 S_0 K₁ r σ T))
       - (S_0 * Phi (bsd1 S_0 K₂ r σ T) - K₂ * Real.exp (-r * T) * Phi (bsd2 S_0 K₂ r σ T)) := by
-  have hi₁ := integrable_europeanCall_pathPV h₁.Z_law S_0 K₁ r σ T
+  have hX := (integrable_bsTerminal h₁.Z_law S_0 r σ T).const_mul (Real.exp (-r * T))
+  have hi₁ : Integrable (fun ω ↦ (europeanCall K₁ T).pathPV (fun _ ↦ Real.exp (-r * T))
+      (scenarioAt (assets S_0 r σ T Z) ω)) Q := integrable_europeanCall_pathPV hX
   have hi₂ : Integrable (fun ω ↦ (Contract.scale (-1) (europeanCall K₂ T)).pathPV
       (fun _ ↦ Real.exp (-r * T)) (scenarioAt (assets S_0 r σ T Z) ω)) Q := by
     simp only [Contract.pathPV_scale]
-    exact (integrable_europeanCall_pathPV h₂.Z_law S_0 K₂ r σ T).const_mul _
+    exact (integrable_europeanCall_pathPV hX).const_mul _
   rw [cappedCall, Contract.value_both _ _ _ _ _ hi₁ hi₂,
     Contract.value_scale, value_europeanCall h₁, value_europeanCall h₂]
   ring

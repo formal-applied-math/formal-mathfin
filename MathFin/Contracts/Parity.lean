@@ -68,6 +68,10 @@ theorem integrable_forward_pathPV [IsFiniteMeasure Q]
     List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero, mul_sub]
   exact hX.sub (integrable_const _)
 
+private theorem integrable_underlying (hX : Integrable (fun ω ↦ D T * X () T ω) Q)
+    (hD : D T ≠ 0) : Integrable (X () T) Q := by
+  simpa [← mul_assoc, inv_mul_cancel₀ hD] using hX.const_mul (D T)⁻¹
+
 /-- The put's discounted payoff is integrable whenever the discounted underlying is. -/
 theorem integrable_europeanPut_pathPV [IsFiniteMeasure Q]
     (hX : Integrable (fun ω ↦ D T * X () T ω) Q) :
@@ -76,9 +80,17 @@ theorem integrable_europeanPut_pathPV [IsFiniteMeasure Q]
     List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
   rcases eq_or_ne (D T) 0 with hD | hD
   · simp [hD]
-  · have hXT : Integrable (X () T) Q := by
-      simpa [← mul_assoc, inv_mul_cancel₀ hD] using hX.const_mul (D T)⁻¹
-    exact ((integrable_const K).sub hXT).pos_part.const_mul _
+  · exact ((integrable_const K).sub (integrable_underlying hX hD)).pos_part.const_mul _
+
+/-- The call's discounted payoff is integrable whenever the discounted underlying is. -/
+theorem integrable_europeanCall_pathPV [IsFiniteMeasure Q]
+    (hX : Integrable (fun ω ↦ D T * X () T ω) Q) :
+    Integrable (fun ω ↦ (europeanCall K T).pathPV D (scenarioAt X ω)) Q := by
+  simp only [europeanCall, europeanCallPayoff, Contract.pathPV, Contract.cashflows, Payoff.eval,
+    scenarioAt, List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
+  rcases eq_or_ne (D T) 0 with hD | hD
+  · simp [hD]
+  · exact ((integrable_underlying hX hD).sub (integrable_const K)).pos_part.const_mul _
 
 /-- **The forward's value in any model** in which the discounted underlying at `T` is integrable
 with mean `S₀`: the forward struck at `K` is worth `S₀ − K D(T)`. -/
