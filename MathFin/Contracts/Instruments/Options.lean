@@ -28,6 +28,8 @@ The capped call is *defined* by composition, as a long call at `K₁` and a shor
 * `europeanCall`, `europeanPut`, `digitalCall`, `forward` — the single-maturity instruments.
 * `cappedCall` — a long `europeanCall K₁ T` combined with a short `europeanCall K₂ T`.
 * `powerCall` — the call on `S_T ^ a`, the power being the payoff language's `rpow` node.
+* `geomAsianCall` — the call on the geometric average of the underlying over `n` dates, from
+  `Payoff.obsProd` and `rpow` at `1/n`.
 * `exchangeOption` — pays `max (S¹_T − S²_T) 0`.
 
 ## Main results
@@ -90,6 +92,24 @@ noncomputable def digitalCall (K : ℝ) (T : ℝ≥0) : Contract Unit :=
 payoff language's `rpow` node at the natural exponent `a`. -/
 noncomputable def powerCall (a : ℕ) (K : ℝ) (T : ℝ≥0) : Contract Unit :=
   .pay T (.max (.sub (.rpow (.obs () T) a) (.const K)) (.const 0))
+
+/-- The product of the observations of underlying `i` at the dates `ts`, built from `Payoff.mul`. -/
+def Payoff.obsProd {ι : Type*} (i : ι) : List ℝ≥0 → Payoff ι
+  | [] => .const 1
+  | t :: ts => .mul (.obs i t) (obsProd i ts)
+
+/-- Evaluating `Payoff.obsProd` is the product of the observed values. -/
+theorem Payoff.eval_obsProd {ι : Type*} (s : Scenario ι) (i : ι) (ts : List ℝ≥0) :
+    (Payoff.obsProd i ts).eval s = (ts.map (s i)).prod := by
+  induction ts with
+  | nil => simp [Payoff.obsProd, Payoff.eval]
+  | cons t ts ih => simp [Payoff.obsProd, Payoff.eval, ih]
+
+/-- The reified geometric-average Asian call over the `n` averaging dates `τ`: pays
+`max ((∏ᵢ S_{τᵢ}) ^ (1/n) - K) 0` at maturity `T`, the geometric average being `Payoff.obsProd`
+under the `rpow` node at the exponent `1/n`. -/
+noncomputable def geomAsianCall (K : ℝ) (T : ℝ≥0) {n : ℕ} (τ : Fin n → ℝ≥0) : Contract Unit :=
+  .pay T (.max (.sub (.rpow (.obsProd () (List.ofFn τ)) (n : ℝ≥0)⁻¹) (.const K)) (.const 0))
 
 /-- The reified exchange option (Margrabe) on two underlyings indexed by `Fin 2`: pays
 `max (S¹_T - S²_T) 0` at maturity `T`. -/
