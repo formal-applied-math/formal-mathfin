@@ -250,7 +250,7 @@ lemma martingaleTransform_holdFirst (c : ℝ) (hT : 0 < T) (x : Fin T → Bool) 
     martingaleTransform (fun s _ ↦ if s = 1 then c else 0) (horizonSpot T S₀ u d r) T x
       = c * (horizonSpot T S₀ u d r 1 x - horizonSpot T S₀ u d r 0 x) := by
   rw [martingaleTransform, Finset.sum_eq_single 0]
-  · simp
+  · simp [mul_comm]
   · intro k _ hk
     simp [hk]
   · intro h0

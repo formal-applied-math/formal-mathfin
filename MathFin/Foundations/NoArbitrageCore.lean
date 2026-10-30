@@ -10,15 +10,14 @@ public import Mathlib
 /-!
 # No-arbitrage core: a nonnegative zero-mean payoff vanishes
 
-The shared analytic heart of the forward FTAP, in every setting. A `Q`-integrable
+The shared analytic heart of the forward FTAP. A `Q`-integrable
 `f` that is `Q`-a.s. nonnegative with `∫ f dQ = 0` is `Q`-a.s. zero, so its positive set is
-`Q`-null (`ae_zero_of_nonneg_of_integral_zero`). Each forward-FTAP setting supplies the
-zero-integral its own way: the discrete-time `emm_implies_no_arbitrage` (which the one-period
-and finite-Ω forward directions instantiate) gets it from a martingale transform started at `0`
-(`martingale_nonneg_terminal_ae_zero`, below), while the continuous
-`ContinuousMarket.isEMM_noArbitrageSimple` gets it term-by-term from the pull-out property.
-Both then close through `ae_zero_of_nonneg_of_integral_zero`; `ae_eq_zero_of_nonneg_of_null_pos`
-turns the null positive set into the `=ᵐ 0` form of the no-arbitrage definitions.
+`Q`-null (`ae_zero_of_nonneg_of_integral_zero`). The zero integral comes from a martingale
+transform started at `0` (`martingale_nonneg_terminal_ae_zero`, below), which is what the
+discrete-time `emm_implies_no_arbitrage` does; the one-period, finite-Ω and continuous-time
+(`ContinuousMarket.isEMM_noArbitrageSimple`, through sampling) forward directions are its
+instances. `ae_eq_zero_of_nonneg_of_null_pos` turns the null positive set into
+the `=ᵐ 0` form of the no-arbitrage definitions.
 -/
 
 @[expose] public section

@@ -1485,6 +1485,12 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bs_discounted_isQMartingale
 
+-- The same measure as an equivalent martingale measure of the continuous-market frame, at the
+-- horizon `T` (`ContinuousMarket.IsEMM`).
+/-- info: 'MathFin.bs_discounted_isEMM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.bs_discounted_isEMM
+
 -- Multi-state single-period FTAP, now a biconditional (`FTAPMultiState.lean`):
 -- the backward direction (no arbitrage ⟹ EMM) via the separating-dual kernel.
 /-- info: 'MathFin.hasEMM_multi_iff_not_hasArbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -1758,14 +1764,13 @@ A model-agnostic continuous-market frame (`Foundations/ContinuousMarket.lean`): 
 martingale measure** for a discounted price process precludes arbitrage against **simple**
 (piecewise-constant, predictable, bounded) strategies — the honest, economically transparent
 meaning-1 scope (general admissible strategies, NFLVR, and the converse are the deferred
-Delbaen–Schachermayer meaning-2). The forward theorem is DIRECT: each predictable-weighted
-increment `⟪φᵢ, S(tᵢ₊₁) − S(tᵢ)⟫` integrates to `0` under `Q` via the bilinear
-conditional-expectation pull-out (`condExp_bilin_of_stronglyMeasurable_left` with `innerSL ℝ`) and
-the martingale property, the finite sum vanishes, and the shared closing primitive
-`ae_zero_of_nonneg_of_integral_zero` — the SAME step the discrete `emm_implies_no_arbitrage` uses,
-each setting supplying its own zero-integral — finishes. Instantiated at `F = ℝ` by the discounted
-GBM under its risk-neutral measure (`Q = P`, `discountedGBM_isMartingale` a full-horizon
-`P`-martingale). -/
+Delbaen–Schachermayer meaning-2). The notion carries a horizon `T`, like the discrete `IsEMM`: `S`
+is a `Q`-martingale on `[0, T]`. The forward theorem is the discrete one: a simple strategy is a
+discrete predictable strategy for the price sampled at its own dates (`martingale_comp_monotone`),
+its gains are the `F`-valued martingale transform (Theorem 2.2.9), and `emm_implies_no_arbitrage`
+(closing through `ae_zero_of_nonneg_of_integral_zero`) applies. Instantiated at `F = ℝ` by the discounted GBM under its risk-neutral measure (`Q = P`,
+`discountedGBM_isMartingale` a `P`-martingale on all of `ℝ≥0`, hence an EMM at every horizon) and by
+the Girsanov measure `bs_discounted_isEMM` (a martingale measure on `[0, T]` only). -/
 
 /-- info: 'MathFin.ae_zero_of_nonneg_of_integral_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

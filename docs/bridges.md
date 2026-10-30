@@ -411,18 +411,27 @@ function of `B_t`, and the Itô-integral QV exists only in expectation).
 `Foundations/ContinuousMarket` (the model-agnostic EMM frame) ↔ `Foundations/ContinuousFTAP`
 (the `F = ℝ` discounted-GBM instance) ↔ `Foundations/NoArbitrageCore` (shared with the discrete FTAP).
 
-- **ContinuousMarket → ContinuousFTAP.** `IsEMM` / `NoArbitrageSimple` / `isEMM_noArbitrageSimple`
-  (the general forward theorem) are instantiated by `discountedGBM_isEMM` /
-  `discountedGBM_noArbitrageSimple`, which package the existing `discountedGBM_isMartingale` (the
-  operational continuous FTAP) as a concrete EMM. The frame gives the GBM martingale property its
-  economic payoff: no simple-strategy arbitrage.
-- **NoArbitrageCore shared by discrete + continuous.** `ae_zero_of_nonneg_of_integral_zero` (nonneg +
-  zero mean ⟹ vanishes) is the common closing step of BOTH `FTAP.emm_implies_no_arbitrage` (discrete,
-  via a martingale transform; the one-period vector and the finite-Ω forward directions are its instances) and `ContinuousMarket.isEMM_noArbitrageSimple` (continuous, term-by-term
-  via the bilinear `condExp` pull-out). One argument, two settings; each supplies its own zero-integral.
+- **ContinuousMarket → ContinuousFTAP.** `IsEMM S T Q` (an EMM up to the horizon `T`, the same
+  shape as the discrete `IsEMM`) / `NoArbitrageSimple S T` / `isEMM_noArbitrageSimple` (the general
+  forward theorem) are instantiated by `discountedGBM_isEMM` / `discountedGBM_noArbitrageSimple`,
+  which package the existing `discountedGBM_isMartingale` (the operational continuous FTAP) as a
+  concrete EMM (`IsEMM.of_martingale`: a martingale on all of `ℝ≥0` is an EMM at every horizon).
+  The frame gives the GBM martingale property its economic payoff: no simple-strategy arbitrage.
+- **ContinuousMarket ← Girsanov (horizon `T`).** `Foundations/Girsanov.bs_discounted_isEMM`: the
+  physical-measure Girsanov measure `Q = P.withDensity Z_T` is an `IsEMM` of the discounted
+  Black–Scholes price at the horizon `T` — equivalence from the positive unit-mean density,
+  martingale from `bs_discounted_isQMartingale` plus `Q`-integrability (`Btheta_map_eq_gaussianReal`),
+  assembled by `martingale_stopped_of_setIntegral_eq`. The horizon is why `IsEMM` carries one.
+- **One forward theorem, discrete and continuous.** `FTAP.emm_implies_no_arbitrage` (discrete,
+  via the `F`-valued martingale transform of Theorem 2.2.9; the one-period vector and the finite-Ω
+  forward directions are its instances) is also the proof of `ContinuousMarket.isEMM_noArbitrageSimple`:
+  a simple strategy is a discrete predictable strategy for the price sampled at its own dates
+  (`martingale_comp_monotone`), and its gains are the martingale transform of the sampled price.
+  `increment_integrable` / `increment_integral_zero` (the bilinear `condExp` pull-out at arbitrary
+  times) remain for the pricing-measure argument of `PricingMeasureL2Density`.
 - **Seam to meaning 2.** `IsEMM`-on-a-process is exactly what Delbaen–Schachermayer produces, so the
   frame is a strict sub-object of the DS one and meaning 2 (NFLVR, admissible strategies, the converse)
-  is additive. The physical-measure Girsanov EMM `Q ≠ P` (bounded-horizon) is the meaning-1.5 bridge.
+  is additive. The physical-measure Girsanov EMM `Q ≠ P` is the horizon-`T` instance `bs_discounted_isEMM`, the meaning-1.5 bridge.
 
 ## Every module connected — the coherence pass (2026-10-21)
 
