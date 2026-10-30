@@ -4717,9 +4717,9 @@
     "sc-ito-formula-adapted-time-dependent": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.7,
-      "input_hash": "6eed273dfdd982965add8224a578efdd5d248cfcd60f3e60f016df036b7d85ec",
-      "verified_at_commit": "5eec1a1"
+      "elapsed_s": 5.2,
+      "input_hash": "8ec5543493177e60447f598fe0c609b84603f416c4498347b345c812638b6353",
+      "verified_at_commit": "d6a64c1"
     },
     "sc-ito-formula-adapted-unbounded-coefficients": {
       "benchmark_file": "stochastic_calculus.json",
