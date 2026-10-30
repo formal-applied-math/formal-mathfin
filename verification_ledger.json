@@ -1329,9 +1329,9 @@
     "mf-calendar-arbitrage-total-variance": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-10-30",
-      "elapsed_s": 6.0,
-      "input_hash": "6dfd8c7b9a220aeb1cefebb0c9e18fca373ab7d3b56701437e0add38c0eb7f5d",
-      "verified_at_commit": "705d349"
+      "elapsed_s": 6.5,
+      "input_hash": "b018523fdaaf45638308931b240a589591a1dddba23912cd2ba227d29e9fe558",
+      "verified_at_commit": "ebb473e"
     },
     "mf-call-price-convex-in-strike": {
       "benchmark_file": "black_scholes.json",
@@ -2078,9 +2078,9 @@
     "mf-dupire-tilted-smile-local-skew": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.1,
-      "input_hash": "d0feb6a3b3bb50a382a683dfa9b9c7dbf0b57fbfb31c591614e6040f2aa0ffd9",
-      "verified_at_commit": "ce38d8d"
+      "elapsed_s": 4.6,
+      "input_hash": "b6b3d5386e58cc3a229801660b61248343bb1e318d0dde5c8855f67b09daf874",
+      "verified_at_commit": "ddd0072"
     },
     "mf-dva-cva-mirror": {
       "benchmark_file": "credit.json",
@@ -3814,37 +3814,37 @@
     "mf-svi-butterfly-free-sign-formula": {
       "benchmark_file": "svi_certificate.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.1,
-      "input_hash": "9c6c71e452f184d4822e15c7981c93a3c591cbbc7421a0b409093af9b265817c",
-      "verified_at_commit": "705d349"
+      "elapsed_s": 7.0,
+      "input_hash": "32896af12385cd7f2b76378a0137184d638aa989ac4e7c71af47d17d0189de51",
+      "verified_at_commit": "ebb473e"
     },
     "mf-svi-calendar-free-iff": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.6,
-      "input_hash": "f1a16c9d832aebdb1a1949fe60d629f6b212bb273827bc6d93ffaba3a924c050",
-      "verified_at_commit": "705d349"
+      "elapsed_s": 9.4,
+      "input_hash": "9048195ec71e87b6b0e8b8b25f59077d0fdc59c2f11ba6f47ed8b858c2f42d2d",
+      "verified_at_commit": "ebb473e"
     },
     "mf-svi-call-convex-iff-durrleman": {
       "benchmark_file": "svi_certificate.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.5,
-      "input_hash": "6f14077c64dddbeb071af9db410f7d9096c6a54fa2d77243e8e15238932ed37a",
-      "verified_at_commit": "705d349"
+      "elapsed_s": 17.2,
+      "input_hash": "ad6d1e78430dde783d72e0c7266b6a261981b43000e2193912ffe3aa0f76aa6f",
+      "verified_at_commit": "ebb473e"
     },
     "mf-svi-durrleman-sign-formula": {
       "benchmark_file": "svi_certificate.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.5,
-      "input_hash": "7e413ad73a1cfd7503b7e1f94b8c59008a08f5b852d4be1bbf6fae2e1d642453",
-      "verified_at_commit": "705d349"
+      "elapsed_s": 6.0,
+      "input_hash": "1cc4131556fe4d32726e3e59e7eeaef5453a23c208d748e7f1d7260a2248c735",
+      "verified_at_commit": "ebb473e"
     },
     "mf-svi-strike-convexity-sign-formula": {
       "benchmark_file": "svi_certificate.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.3,
-      "input_hash": "d72008a435ef904fb1babd227164d6c56269b826a366e37fb559635b222088c7",
-      "verified_at_commit": "705d349"
+      "elapsed_s": 5.8,
+      "input_hash": "b462476c015c360dca77a964a1a69c4fbeccd001c9d672a964ab06ecfafe7a41",
+      "verified_at_commit": "ebb473e"
     },
     "mf-swaption-parity": {
       "benchmark_file": "interest_rates.json",

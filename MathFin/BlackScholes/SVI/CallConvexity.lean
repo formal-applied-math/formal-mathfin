@@ -22,19 +22,20 @@ for `σ > 0` and positive variance its convexity on `(0, ∞)` is equivalent to 
 namespace MathFin
 namespace SVI
 open Real ProbabilityTheory Set
+open ForwardSmile (dpl dmi blackForm)
 
 /-- The first derivative of `blackCall` in strike (`blackCall_hasDerivAt`). -/
 noncomputable def strikeDelta (p : Params) (K : ℝ) : ℝ := blackDelta p (Real.log K)
 /-- The second derivative of `blackCall` in strike: a positive Gaussian factor times Durrleman's
 function (`strikeDelta_hasDerivAt`). -/
 noncomputable def strikeDensity (p : Params) (K : ℝ) : ℝ :=
-  gaussianPDFReal 0 1 (blackMinus p (Real.log K)) / (K*rootVariance p (Real.log K)) *
-    durrleman p (Real.log K)
+  gaussianPDFReal 0 1 (dmi (Real.log K) (variance p (Real.log K))) /
+    (K*rootVariance p (Real.log K)) * durrleman p (Real.log K)
 
 theorem blackCall_hasDerivAt (p : Params) (hs : 0 < p.sigma) (K : ℝ) (hK : 0 < K)
     (hw : 0 < variance p (Real.log K)) :
     HasDerivAt (blackCall p) (strikeDelta p K) K := by
-  have h := (logBlackCall_hasDerivAt p hs (Real.log K) hw).comp K
+  have h := (blackForm_hasDerivAt p hs (Real.log K) hw).comp K
     (Real.hasDerivAt_log (ne_of_gt hK))
   convert h using 1 <;> try rfl
   simp only [Real.exp_log hK, strikeDelta]
@@ -52,7 +53,7 @@ theorem strikeDelta_hasDerivAt (p : Params) (hs : 0 < p.sigma) (K : ℝ) (hK : 0
 theorem strikeDensity_nonneg_iff (p : Params) (K : ℝ) (hK : 0 < K)
     (hw : 0 < variance p (Real.log K)) :
     0 ≤ strikeDensity p K ↔ 0 ≤ durrleman p (Real.log K) := by
-  have hp := gaussianPDFReal_pos 0 1 (blackMinus p (Real.log K)) (by norm_num)
+  have hp := gaussianPDFReal_pos 0 1 (dmi (Real.log K) (variance p (Real.log K))) (by norm_num)
   have hs := rootVariance_pos p (Real.log K) hw
   exact mul_nonneg_iff_of_pos_left (div_pos hp (mul_pos hK hs))
 
