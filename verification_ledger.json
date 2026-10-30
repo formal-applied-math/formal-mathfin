@@ -566,23 +566,23 @@
     "mf-american-put-ge-bsm-european-put": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.4,
-      "input_hash": "27dd8f0c3026ee330b0606431be09ad3777570c936227e455d963d83bf5d46f2",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 4.5,
+      "input_hash": "32b563dc66f948d60113e134f19cc5762a01b2614212da616232ae0ececa29a0",
+      "verified_at_commit": "e85ae53"
     },
     "mf-american-put-log-boundary-convex": {
       "benchmark_file": "american_put_boundary.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.1,
-      "input_hash": "bfaf68b9d51b17ea24e0e9884f5e42bfaa2ac61b3fa9a9a0722fbba41a8b7bde",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 4.4,
+      "input_hash": "cfdde600e1600724a2e5e393c9f3c24adc633d5162f3232fd64fe80087a3e41c",
+      "verified_at_commit": "e85ae53"
     },
     "mf-american-put-stock-boundary-strict-convex": {
       "benchmark_file": "american_put_boundary.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.3,
-      "input_hash": "40ccc62d8e7642be23ceb5dde52ebe2c3678c5f4d8ec573d324ff3f96b28a519",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 5.8,
+      "input_hash": "eeaec97bbc9ede808fa119d1254569060416b38ee67f7ba17adbf20497a2a7e1",
+      "verified_at_commit": "e85ae53"
     },
     "mf-american-supermartingale": {
       "benchmark_file": "binomial.json",
@@ -4759,16 +4759,16 @@
     "sc-ito-formula-unrestricted-islocalmartingale": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.9,
-      "input_hash": "088e7a89bc604fb6c319ef2984bdeee1e18089a387d051b61cc8dc2f13b050f7",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 3.8,
+      "input_hash": "b5e424ea8c6c5e199f5ec4b75ce9a0e59151bdb78279e72df218b75ba2c2c8af",
+      "verified_at_commit": "e85ae53"
     },
     "sc-ito-formula-unrestricted-local": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.1,
-      "input_hash": "3590c2922c80303d0069986f7f00f9871f585e99bf7604e9d342a8daf368814d",
-      "verified_at_commit": "07ebe22"
+      "elapsed_s": 5.5,
+      "input_hash": "fae58083606bc1e4ee812f1e5b130e5208d0fb75a7dbee94c18bcc8a92743314",
+      "verified_at_commit": "e85ae53"
     },
     "sc-ito-general-continuous-modification": {
       "benchmark_file": "stochastic_calculus.json",
@@ -4934,9 +4934,9 @@
     "sc-riemann-stieltjes-against-ito": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 6.6,
-      "input_hash": "c9bd7b47fd5f01c9c1773d85e406b6eaef808d87139d55ba2b79f71cc6be3851",
-      "verified_at_commit": "61729a7"
+      "elapsed_s": 5.8,
+      "input_hash": "599f1638c272e5095a95f8d8a72793b0c71b06b67ad949fa44cb5d9274d49c37",
+      "verified_at_commit": "e85ae53"
     },
     "sc-simple-dense-bracket": {
       "benchmark_file": "stochastic_calculus.json",
