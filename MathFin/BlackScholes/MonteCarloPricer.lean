@@ -77,7 +77,8 @@ Public API (all in `namespace MathFin.MonteCarlo`):
   `σ_H² = e^{-2rT}·M₂ − P²`.
 
 Call layer (the unbounded case `C(z) = e^{-rT}·max(S_T(z) − K, 0)`, where the put's
-constant bound is replaced by domination through the discounted terminal):
+constant bound is unavailable: `L¹` comes from the positive part of an integrable function,
+`L²` from domination through the discounted terminal):
 
 * `mcCallPayoff` — the discounted European call payoff as a function of the draw;
 * `integrable_sq_terminal` — the Gaussian law-transfer
@@ -86,8 +87,8 @@ constant bound is replaced by domination through the discounted terminal):
 * `integrable_discountedTerminal` — integrability of the domination envelope
   `e^{-rT}·S_T`; `integral_discountedTerminal_eq` — the discounted-forward identity
   `𝔼[e^{-rT}·S_T] = S₀`;
-* `integrable_mcCallPayoff`, `memLp2_mcCallPayoff` — the call's `L¹` and `L²`
-  integrability, by domination;
+* `integrable_mcCallPayoff` — the call's `L¹` integrability (`integrable_bsCall_payoff`);
+  `memLp2_mcCallPayoff` — its `L²` integrability, by domination;
 * `mean_mcCallPayoff_eq_bsCall` — the call bridge
   `𝔼[C] = S₀·Φ(d₁) − K·e^{-rT}·Φ(d₂)`;
 * `mcCallMean` — the sample-mean Monte Carlo estimator for the call;
@@ -544,9 +545,11 @@ The call is the honest case: the payoff `C(z) = e^{-rT}·max(S_T(z) − K, 0)` i
 **unbounded**, so the put's constant-bound route (`MemLp.of_bound`) is gone. What
 replaces it:
 
-* **Integrability** by domination: `0 ≤ C ≤ e^{-rT}·S_T` (the discounted terminal),
-  whose integral is exactly `S₀` — the discounted-forward identity
-  `E[e^{-rT}·S_T] = S₀`. The engine is Mathlib's own Gaussian L¹ fact
+* **Integrability**: `C` is the positive part of the integrable `e^{-rT}·(S_T − K)`
+  (`integrable_bsCall_payoff`, in `Call`). The discounted terminal `e^{-rT}·S_T`, with
+  `0 ≤ C ≤ e^{-rT}·S_T`, is the domination envelope for `L²` below; its integral is exactly
+  `S₀`, the discounted-forward identity `E[e^{-rT}·S_T] = S₀`. The engine is Mathlib's own
+  Gaussian L¹ fact
   `integrable_exp_mul_gaussianReal` (`exp(t·x)` is integrable for `N(μ,v)`),
   transferred to the ensemble by `integrable_map_measure`.
 * **L² membership** from the same domination squared, via
