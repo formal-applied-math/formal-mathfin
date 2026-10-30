@@ -15,8 +15,8 @@ from raw/usual American-value equality at positive spot.
 
 ## Result
 
-Public entry points include `brownianGridPrice_eq_usualGridValue`, `brownianGridPrice_tendsto_usual`,
-`brownianUsualAmericanPut_eq_raw_of_pos`.
+Public entry points include `brownianGridPrice_eq_usualGridValue`,
+`brownianGridPrice_tendsto_usual`, `brownianUsualAmericanPut_eq_raw_of_pos`.
 -/
 
 @[expose] public section
@@ -32,10 +32,11 @@ theorem brownianGridPrice_eq_usualGridValue {K r q σ : ℝ} (hK : 0 ≤ K) (hr 
       @gridAmericanPutValue (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit)
         (completedMeasure gaussianLimit) brownianUsualFiltration brownian
         K r q σ (Real.exp x) T δ := by
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
-  exact brownianGridPrice_eq_gridAmericanPutValue (P := completedMeasure gaussianLimit)
-    brownian_completed_measurable brownianUsual_adapted
-    isBrownianReal_brownian.eval_zero_ae_eq_zero brownianLogState_usual_isGaussianMarkov hK hr T hδ x
+  have hz : ∀ᵐ ω ∂completedMeasure gaussianLimit, brownian 0 ω = 0 :=
+    isBrownianReal_brownian.eval_zero_ae_eq_zero
+  exact @brownianGridPrice_eq_gridAmericanPutValue (completedMeasurableSpace gaussianLimit)
+    (completedMeasure gaussianLimit) _ brownianUsualFiltration brownian_completed_measurable
+    brownianUsual_adapted hz brownianLogState_usual_isGaussianMarkov _ _ _ _ hK hr T _ hδ x
 
 theorem brownianGridPrice_tendsto_usual {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
     (T : ℝ≥0) (x : ℝ) :
