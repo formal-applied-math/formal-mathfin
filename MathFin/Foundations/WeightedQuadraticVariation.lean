@@ -50,13 +50,13 @@ weighted-QV fluctuation's cross terms vanish. Immediate from the isometry kernel
 `integral_adapted_mul_increment_sq` (`E[χ·(ΔB)²] = E[χ]·(t₁−t₀)`) minus `(t₁−t₀)·E[χ]`. -/
 private theorem integral_adapted_mul_centered_sq
     (hBmeas : ∀ t, Measurable (B t)) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
-    {χ : Ω → ℝ} (hχ : AdaptedAt B t₀ χ) :
+    {χ : Ω → ℝ} (hχ : Measurable[ItoIntegralL2.natFiltration hBmeas t₀] χ) :
     ∫ ω, χ ω * ((B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) ∂μ = 0 := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hχm : Measurable χ := hχ.measurable hBmeas
+  have hχm : Measurable χ := hχ.mono ((ItoIntegralL2.natFiltration hBmeas).le t₀) le_rfl
   have hYm : Measurable (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) := by fun_prop
   have hindep : IndepFun χ (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) μ := by
-    have h := (adapted_indepFun_increment hB hBmeas ht hχ).comp
+    have h := (adapted_indepFun_increment (hB.isFilteredPreBrownian hBmeas) ht hχ).comp
       measurable_id (by fun_prop : Measurable (fun x : ℝ ↦ x ^ 2 - ((t₁ : ℝ) - t₀)))
     simpa [Function.comp_def] using h
   rw [hindep.integral_fun_mul_eq_mul_integral hχm.aestronglyMeasurable hYm.aestronglyMeasurable,
@@ -70,7 +70,7 @@ diagonal term is `≤ C²·2(Δtₖ)²` (pointwise `w² ≤ C²` plus
 `sum_increment_sq_sub_sq_integral`. -/
 private theorem weighted_fluctuation_integral_le
     (hBmeas : ∀ t, Measurable (B t))
-    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, AdaptedAt B s (w s))
+    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, Measurable[ItoIntegralL2.natFiltration hBmeas s] (w s))
     {C : ℝ} (hC : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
     ∫ ω, (∑ k ∈ Finset.range n,
         w (unifPart T n k) ω
@@ -84,7 +84,8 @@ private theorem weighted_fluctuation_integral_le
   set Y : ℕ → Ω → ℝ := fun k ω ↦ (B (t (k + 1)) ω - B (t k) ω) ^ 2 - ((t (k + 1) : ℝ) - t k)
     with hY_def
   set a : ℕ → Ω → ℝ := fun k ω ↦ w (t k) ω * Y k ω with ha_def
-  have hw_meas : ∀ s, Measurable (w s) := fun s ↦ (hw_adapt s).measurable hBmeas
+  have hw_meas : ∀ s, Measurable (w s) := fun s ↦
+    (hw_adapt s).mono ((ItoIntegralL2.natFiltration hBmeas).le s) le_rfl
   have hYL2 : ∀ k, MemLp (Y k) 2 μ := fun k ↦ memLp_increment_sq_centered_two hB (t k) (t (k + 1)) _
   have ha_aesm : ∀ k, AEStronglyMeasurable (a k) μ := fun k ↦
     (hw_meas (t k)).aestronglyMeasurable.mul (hYL2 k).aestronglyMeasurable
@@ -95,24 +96,26 @@ private theorem weighted_fluctuation_integral_le
       exact mul_le_mul_of_nonneg_right (hw_bdd _ _) (abs_nonneg _))
   have hint : ∀ k l, Integrable (fun ω ↦ a k ω * a l ω) μ :=
     fun k l ↦ (haL2 k).integrable_mul (haL2 l)
-  have hY_adapt : ∀ k, AdaptedAt B (t (k + 1)) (Y k) := fun k ↦
-    adaptedAt_increment_sq_sub (hmono (Nat.le_succ k)) le_rfl _
-  have ha_adapt : ∀ k, AdaptedAt B (t (k + 1)) (a k) := fun k ↦
-    ((hw_adapt (t k)).mono (hmono (Nat.le_succ k))).mul (hY_adapt k)
+  set 𝓕 := ItoIntegralL2.natFiltration hBmeas
+  have hY_adapt : ∀ k, Measurable[𝓕 (t (k + 1))] (Y k) := fun k ↦
+    measurable_increment_sq_sub (hB.isFilteredPreBrownian hBmeas)
+      (hmono (Nat.le_succ k)) le_rfl _
+  have ha_adapt : ∀ k, Measurable[𝓕 (t (k + 1))] (a k) := fun k ↦
+    ((hw_adapt (t k)).mono (𝓕.mono (hmono (Nat.le_succ k))) le_rfl).mul (hY_adapt k)
   have hcross : ∀ k ∈ Finset.range n, ∀ l ∈ Finset.range n, l ≠ k →
       ∫ ω, a k ω * a l ω ∂μ = 0 := by
     intro k _ l _ hlk
     rcases lt_or_gt_of_ne hlk with hlt | hgt
-    · have hχ : AdaptedAt B (t k) (fun ω ↦ a l ω * w (t k) ω) :=
-        ((ha_adapt l).mono (hmono (Nat.succ_le_of_lt hlt))).mul (hw_adapt (t k))
+    · have hχ : Measurable[𝓕 (t k)] (fun ω ↦ a l ω * w (t k) ω) :=
+        ((ha_adapt l).mono (𝓕.mono (hmono (Nat.succ_le_of_lt hlt))) le_rfl).mul (hw_adapt (t k))
       have h := integral_adapted_mul_centered_sq hB hBmeas (hmono (Nat.le_succ k)) hχ
       rw [show (fun ω ↦ a k ω * a l ω)
             = (fun ω ↦ (a l ω * w (t k) ω)
                 * ((B (t (k + 1)) ω - B (t k) ω) ^ 2 - ((t (k + 1) : ℝ) - t k)))
           from funext fun ω ↦ by simp only [ha_def, hY_def]; ring]
       exact h
-    · have hχ : AdaptedAt B (t l) (fun ω ↦ a k ω * w (t l) ω) :=
-        ((ha_adapt k).mono (hmono (Nat.succ_le_of_lt hgt))).mul (hw_adapt (t l))
+    · have hχ : Measurable[𝓕 (t l)] (fun ω ↦ a k ω * w (t l) ω) :=
+        ((ha_adapt k).mono (𝓕.mono (hmono (Nat.succ_le_of_lt hgt))) le_rfl).mul (hw_adapt (t l))
       have h := integral_adapted_mul_centered_sq hB hBmeas (hmono (Nat.le_succ l)) hχ
       rw [show (fun ω ↦ a k ω * a l ω)
             = (fun ω ↦ (a k ω * w (t l) ω)
@@ -156,7 +159,7 @@ rate `2C²T²/n`. Squeeze of the per-`n` bound `weighted_fluctuation_integral_le
 weighted analogue of the `tendsto_qv` rate `2T²/n`). -/
 private theorem tendsto_weighted_fluctuation
     (hBmeas : ∀ t, Measurable (B t))
-    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, AdaptedAt B s (w s))
+    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, Measurable[ItoIntegralL2.natFiltration hBmeas s] (w s))
     {C : ℝ} (hC : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0) :
     Tendsto (fun n : ℕ ↦
         ∫ ω, (∑ k ∈ Finset.range n,
@@ -471,7 +474,7 @@ there the weight is replaced by a version continuous on every path
 survive that replacement, which is why it is done for Term II only. -/
 theorem tendsto_weighted_qv_process_of_ae_continuous
     (hBmeas : ∀ t, Measurable (B t))
-    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, AdaptedAt B s (w s))
+    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, Measurable[ItoIntegralL2.natFiltration hBmeas s] (w s))
     {C : ℝ} (hC0 : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0)
     (hw_cont : ∀ᵐ ω ∂μ, ContinuousOn (fun s ↦ w s ω) (Set.Icc 0 T)) :
     Tendsto (fun n : ℕ ↦
@@ -481,7 +484,8 @@ theorem tendsto_weighted_qv_process_of_ae_continuous
               - ∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure) ^ 2 ∂μ)
       atTop (𝓝 0) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hw_meas : ∀ s, Measurable (w s) := fun s ↦ (hw_adapt s).measurable hBmeas
+  have hw_meas : ∀ s, Measurable (w s) := fun s ↦
+    (hw_adapt s).mono ((ItoIntegralL2.natFiltration hBmeas).le s) le_rfl
   set Ssum : ℕ → Ω → ℝ := fun n ω ↦ ∑ k ∈ Finset.range n,
       w (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 with hSsum
   set Rsum : ℕ → Ω → ℝ := fun n ω ↦ ∑ k ∈ Finset.range n,
@@ -569,7 +573,7 @@ uniform partition of `[0,T]` converges in `L²(μ)` to `∫₀ᵀ w_s ds`. Both 
 `tendsto_weighted_qv_process_of_ae_continuous` in which every path is continuous. -/
 theorem tendsto_weighted_qv_process
     (hBmeas : ∀ t, Measurable (B t))
-    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, AdaptedAt B s (w s))
+    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, Measurable[ItoIntegralL2.natFiltration hBmeas s] (w s))
     (hw_cont : ∀ ω, Continuous fun s ↦ w s ω)
     {C : ℝ} (hC0 : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0) :
     Tendsto (fun n : ℕ ↦
