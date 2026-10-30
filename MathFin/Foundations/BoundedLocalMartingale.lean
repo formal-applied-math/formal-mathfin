@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Robert Martin. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Robert Martin
+Authors: Robert Martin, Raphael Coelho
 -/
 module
 
@@ -20,7 +20,8 @@ not silently treated as pointwise adaptation on exceptional null outcomes.
 ## Result
 
 Public entry points include `martingale_of_setIntegral_eq_real`, `martingale_smaller_filtration`,
-`locally_bounded_localMartingale_is_martingale`, `bounded_localMartingale_is_martingale`.
+`locally_bounded_localMartingale_is_martingale`, `bounded_localMartingale_is_martingale`,
+`isLocalMartingale_congr_ae`.
 -/
 
 @[expose] public section
@@ -103,5 +104,23 @@ theorem bounded_localMartingale_is_martingale (hX : IsLocalMartingale X 𝓕 P)
     (hbound : ∀ t ω, ‖X t ω‖ ≤ C) : Martingale X 𝓕 P :=
   locally_bounded_localMartingale_is_martingale hX hadapt
     (fun _ => ⟨C,fun t _ ω => hbound t ω⟩)
+
+omit [IsFiniteMeasure P] in
+/-- **A process indistinguishable from a local martingale is one**, provided it is adapted with
+cadlag paths: the stopped processes are almost surely equal at each time, hence have the same
+conditional expectations, and the stopped `Y` is adapted. -/
+theorem isLocalMartingale_congr_ae {Y : ℝ≥0 → Ω → ℝ} (hX : IsLocalMartingale X 𝓕 P)
+    (hY : StronglyAdapted 𝓕 Y) (hYc : ∀ ω, IsCadlag fun t ↦ Y t ω)
+    (hXY : ∀ᵐ ω ∂P, ∀ t, X t ω = Y t ω) : IsLocalMartingale Y 𝓕 P := by
+  obtain ⟨τ, hτ, hloc⟩ := hX
+  refine ⟨τ, hτ, fun n ↦ ?_⟩
+  obtain ⟨hmart, -⟩ := hloc n
+  have ht (t : ℝ≥0) : (fun ω ↦ stoppedProcess (fun i ↦ {ω | ⊥ < τ n ω}.indicator (X i)) (τ n) t ω)
+      =ᵐ[P] fun ω ↦ stoppedProcess (fun i ↦ {ω | ⊥ < τ n ω}.indicator (Y i)) (τ n) t ω := by
+    filter_upwards [hXY] with ω h
+    simp only [stoppedProcess, Set.indicator_apply, h]
+  exact ⟨⟨hY.stoppedProcess_indicator (fun ω ↦ (hYc ω).right_continuous) (hτ.isStoppingTime n),
+    fun i j hij ↦ (condExp_congr_ae (ht j).symm).trans ((hmart.2 i j hij).trans (ht i))⟩,
+    isStable_isCadlag Y hYc _ (hτ.isStoppingTime n)⟩
 
 end MathFin

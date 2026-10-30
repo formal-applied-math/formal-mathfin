@@ -152,47 +152,6 @@ lemma tendsto_norm_toLp_sub' {α : Type*} {m : MeasurableSpace α} {ν : Measure
   simpa only [Function.comp_def, Real.sqrt_zero] using (Real.continuous_sqrt.tendsto 0).comp h
 
 omit hB in
-/-- The **bounded left-endpoint step process** for a general adapted `θ`:
-`∑_{k<n} θ(tₖ) · 𝟙_{(tₖ, t_{k+1}]}`. A `TBoundedSP` — each coefficient `θ(tₖ)` is
-`𝓕_{tₖ}`-measurable (adaptedness) and bounded by `C`. -/
-noncomputable def stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
-    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
-    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) : TBoundedSP T hBmeas :=
-  ∑ k ∈ (Finset.range n).attach,
-    stepSP hBmeas (a := unifPart T n k.1) (b := unifPart T n (k.1 + 1))
-      (unifPart_mono T n (Nat.le_succ k.1))
-      (unifPart_le_T (Finset.mem_range.mp k.2))
-      (φ := θ (unifPart T n k.1))
-      (hadap (unifPart T n k.1)).measurable
-      (M := C) (fun ω ↦ hbdd (unifPart T n k.1) ω)
-
-omit hB in
-/-- The step process integrates to the `θ`-Riemann sum. -/
-lemma itoSimple_stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
-    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
-    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) (ω : Ω) :
-    itoSimple hBmeas (stepσ hBmeas hadap hbdd T n).val ω = riemannσ (B := B) θ T n ω := by
-  rw [stepσ, AddSubmonoidClass.coe_finsetSum, itoSimple_sum, Finset.sum_apply, riemannσ,
-    ← Finset.sum_attach (Finset.range n) (fun k ↦
-      θ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω))]
-  refine Finset.sum_congr rfl fun k _ ↦ ?_
-  rw [itoSimple_stepSP]
-
-/-- **The CLM evaluated on `stepσ` is the `θ`-Riemann sum's `L²` class.** -/
-lemma itoIntegralCLM_T_stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
-    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
-    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
-    itoIntegralCLM_T hB T hBmeas
-        (simpleAssembly_T (μ := μ) T hBmeas (stepσ hBmeas hadap hbdd T n))
-      = (memLp_riemannσ hB hBmeas hadap hbdd T n).toLp (riemannσ (B := B) θ T n) := by
-  rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange T hBmeas)
-        ⟨1, fun V ↦ by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas V).le⟩]
-  change itoSimpleLp hB hBmeas (stepσ hBmeas hadap hbdd T n).val = _
-  rw [itoSimpleLp]
-  exact (MemLp.toLp_eq_toLp_iff _ _).mpr
-    (Filter.Eventually.of_forall fun ω ↦ itoSimple_stepσ hBmeas hadap hbdd T n ω)
-
-omit hB in
 /-- **The uncurried step process is a sum of cell indicators**:
 `uncurry (stepσ n) (s,ω) = ∑_{k<n} 𝟙_{(tₖ,t_{k+1}]}(s)·θ(tₖ)ω`. -/
 lemma uncurry_stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
