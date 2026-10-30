@@ -6,7 +6,6 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianModel
-public import MathFin.BlackScholes.AmericanPut.Boundary.DividendContact
 public import MathFin.BlackScholes.AmericanPut.Boundary.StockConclusion
 
 /-!

@@ -157,16 +157,4 @@ theorem lineDifference_no_positive_rectangle (hp : ContinuousBoundaryPutSolution
     hbottom (fun t hat _ => lineDifference_on_line_nonneg hp (ha.le.trans hat)) hright hzero hd
   exact (lt_irrefl 0) hpos
 
-/-- The same terminal-rectangle contradiction at zero dividends, stated with
-the original classical zero-dividend solution contract. -/
-theorem zeroDividend_no_positive_rectangle {k c d : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : NormalizedPutSolution k p b) {L a T : ℝ}
-    (hL : 0 < L) (ha : 0 < a) (haT : a ≤ T)
-    (hline : ∀ t ∈ Icc a T, b t ≤ d - c * t) (hcontact : b T = d - c * T)
-    (hbottom : ∀ y ∈ Icc 0 L, 0 < lineDifference p k 0 c d y a)
-    (hright : ∀ t ∈ Icc a T, 0 < lineDifference p k 0 c d L t) : False :=
-  lineDifference_no_positive_rectangle
-      (dividendPutSolution_zero_iff.mpr hp).toContinuousBoundaryPutSolution
-    hL ha haT hline hcontact hbottom hright
-
 end MathFin.BlackScholes.AmericanPut.Boundary.Comparison
