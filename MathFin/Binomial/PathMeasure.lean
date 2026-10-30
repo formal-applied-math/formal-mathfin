@@ -14,16 +14,15 @@ public import MathFin.Foundations.MarkovPathMeasure
 `binomialPrice u d r g N S₀` (`Binomial/Model.lean`) is the backward-induction price of the
 `N`-step CRR tree, and `Binomial/SnellEnvelope.lean` works on coin-flip paths `ω : ℕ → Bool`
 with the spot `spotPath S₀ u d N ω = S₀ · ∏_{i<N} (u if ωᵢ else d)`, without a measure on paths.
-Here the paths get one: `coinFlipMeasure q`, the Ionescu–Tulcea law of the Markov chain on `Bool`
-whose initial law and every transition law are `Bernoulli(q)` (`Foundations/MarkovPathMeasure`;
-a transition that ignores the current state makes the flips i.i.d.). With `q = crrUpProb u d r`
+Here the paths get one: `coinFlipMeasure q`, the infinite product of Mathlib's
+`bernoulliMeasure` on `Bool` (the law of i.i.d. `Bernoulli(q)` flips). With `q = crrUpProb u d r`
 the backward recursion is an expectation over whole paths under i.i.d. `Bernoulli(crrUpProb)`
 flips (risk-neutral under `BinomialNoArb`, `crrUpProb_mul_up_add`, which is not assumed here):
 
   `binomialPrice u d r g N S₀ = e^{−rN} · ∫ g(spotPath S₀ u d N ω) d(coinFlipMeasure q)(ω)`.
 
 The cylinder probabilities `q^{#up}(1 − q)^{#down}` are not assumed: they come from
-`markovPathMeasure_cylinder`, the factorization the Ionescu–Tulcea construction proves. The
+`Measure.infinitePi_pi`, the product-measure formula. The
 library's other probabilistic form of the price, `binomialPrice_eq_integral_convPow`
 (`Binomial/CRRCharFun.lean`), integrates over the law of the terminal log-return instead.
 
@@ -46,34 +45,49 @@ namespace MathFin
 open MeasureTheory ProbabilityTheory Finset
 open scoped ENNReal NNReal
 
-/-- The `Bernoulli(q)` law on `Bool` as a `PMF`: `true` with probability `q`, `false` with
-probability `1 − q`. -/
-noncomputable def coinPMF (q : ℝ≥0) (hq : q ≤ 1) : PMF Bool :=
-  PMF.ofFintype (fun b ↦ if b then (q : ℝ≥0∞) else 1 - q) (by
-    simp only [Fintype.sum_bool, Bool.false_eq_true, ↓reduceIte]
-    exact add_tsub_cancel_of_le (ENNReal.coe_le_one_iff.2 hq))
+/-- The law of one `Bernoulli(q)` flip on `Bool`: `true` with probability `q`, `false` with
+probability `1 − q` (Mathlib's `bernoulliMeasure`). -/
+noncomputable def coinMeasure (q : ℝ≥0) (hq : q ≤ 1) : Measure Bool :=
+  bernoulliMeasure true false ⟨q, q.2, by exact_mod_cast hq⟩
 
-lemma coinPMF_apply (q : ℝ≥0) (hq : q ≤ 1) (b : Bool) :
-    coinPMF q hq b = if b then (q : ℝ≥0∞) else 1 - q := rfl
+instance (q : ℝ≥0) (hq : q ≤ 1) : IsProbabilityMeasure (coinMeasure q hq) := by
+  unfold coinMeasure bernoulliMeasure
+  refine ⟨?_⟩
+  simp only [measure_univ]
 
-/-- The law of i.i.d. `Bernoulli(q)` coin flips on `ℕ → Bool`: the Markov-chain path measure
-(`markovPathMeasure`) whose initial law and whose transition law from every state are
-`Bernoulli(q)`. -/
+lemma coinMeasure_singleton (q : ℝ≥0) (hq : q ≤ 1) (b : Bool) :
+    coinMeasure q hq {b} = if b then (q : ℝ≥0∞) else 1 - q := by
+  cases b
+  · rw [coinMeasure, bernoulliMeasure_apply_of_notMem_of_mem _ (measurableSet_singleton _)
+      (by simp) (by simp)]
+    rw [← ENNReal.coe_one, ← ENNReal.coe_sub]
+    congr 1
+    ext
+    simp [NNReal.coe_sub hq]
+  · rw [coinMeasure, bernoulliMeasure_apply_of_mem_of_notMem _ (measurableSet_singleton _)
+      (by simp) (by simp)]
+    rfl
+
+/-- The law of i.i.d. `Bernoulli(q)` coin flips on `ℕ → Bool`: the infinite product of
+`Bernoulli(q)` measures. -/
 noncomputable def coinFlipMeasure (q : ℝ≥0) (hq : q ≤ 1) : Measure (ℕ → Bool) :=
-  markovPathMeasure (coinPMF q hq) fun _ ↦ coinPMF q hq
+  Measure.infinitePi fun _ ↦ coinMeasure q hq
 
 instance (q : ℝ≥0) (hq : q ≤ 1) : IsProbabilityMeasure (coinFlipMeasure q hq) := by
   unfold coinFlipMeasure
   infer_instance
 
 /-- **Cylinder probabilities of the coin-flip measure.** The event that a path agrees with
-`path` up to time `n` has probability `∏_{k ≤ n} Bernoulli(q)(path k)`: the Markov-chain
-factorization `markovPathMeasure_cylinder` with a state-independent transition law. -/
+`path` up to time `n` has probability `∏_{k ≤ n} Bernoulli(q)(path k)`: the product-measure
+formula `infinitePi_pi` on the box `∏_{k ≤ n} {path k}`. -/
 theorem coinFlipMeasure_cylinder (q : ℝ≥0) (hq : q ≤ 1) (path : ℕ → Bool) (n : ℕ) :
     coinFlipMeasure q hq (pathCylinder path n)
-      = ∏ k ∈ range (n + 1), coinPMF q hq (path k) := by
-  simp only [coinFlipMeasure, markovPathMeasure_cylinder, prod_range_succ' _ n]
-  exact mul_comm _ _
+      = ∏ k ∈ range (n + 1), if path k then (q : ℝ≥0∞) else 1 - q := by
+  have : pathCylinder path n = Set.pi (range (n + 1) : Finset ℕ) fun k ↦ {path k} := by
+    ext ω
+    simp [pathCylinder]
+  rw [this, coinFlipMeasure, Measure.infinitePi_pi _ fun _ _ ↦ measurableSet_singleton _]
+  exact prod_congr rfl fun k _ ↦ coinMeasure_singleton q hq _
 
 /-- The first `N` flips of a path. -/
 def flips (N : ℕ) (ω : ℕ → Bool) : Fin N → Bool := fun i ↦ ω i
@@ -96,7 +110,7 @@ lemma flips_preimage_singleton (n : ℕ) (x : Fin (n + 1) → Bool) :
 
 /-- The probability that the first `N` flips are `x` is `∏ᵢ Bernoulli(q)(xᵢ)`. -/
 theorem coinFlipMeasure_flips_preimage (q : ℝ≥0) (hq : q ≤ 1) (N : ℕ) (x : Fin N → Bool) :
-    coinFlipMeasure q hq (flips N ⁻¹' {x}) = ∏ i, coinPMF q hq (x i) := by
+    coinFlipMeasure q hq (flips N ⁻¹' {x}) = ∏ i, if x i then (q : ℝ≥0∞) else 1 - q := by
   cases N with
   | zero =>
     have huniv : flips 0 ⁻¹' {x} = Set.univ :=
@@ -111,12 +125,20 @@ theorem coinFlipMeasure_flips_preimage (q : ℝ≥0) (hq : q ≤ 1) (N : ℕ) (x
 `2^N` flip sequences `x` of `F x` weighted by `∏ᵢ Bernoulli(q)(xᵢ)`. -/
 theorem integral_comp_flips (q : ℝ≥0) (hq : q ≤ 1) (N : ℕ) (F : (Fin N → Bool) → ℝ) :
     ∫ ω, F (flips N ω) ∂coinFlipMeasure q hq
-      = ∑ x, (∏ i, (coinPMF q hq (x i)).toReal) * F x := by
+      = ∑ x, (∏ i, if x i then (q : ℝ) else 1 - q) * F x := by
   rw [← integral_map (measurable_flips N).aemeasurable
       (measurable_of_countable F).aestronglyMeasurable, integral_fintype Integrable.of_finite]
   refine sum_congr rfl fun x _ ↦ ?_
   rw [smul_eq_mul, measureReal_def, Measure.map_apply (measurable_flips N)
     (measurableSet_singleton x), coinFlipMeasure_flips_preimage, ENNReal.toReal_prod]
+  congr 1
+  refine prod_congr rfl fun i _ ↦ ?_
+  cases x i with
+  | false =>
+    simp only [Bool.false_eq_true, ↓reduceIte]
+    rw [ENNReal.toReal_sub_of_le (ENNReal.coe_le_one_iff.mpr hq) ENNReal.one_ne_top]
+    simp
+  | true => simp
 
 /-- **The backward recursion unrolled.** For `q = crrUpProb u d r`, the `N`-step binomial
 price is `e^{−rN}` times the sum over the `2^N` up/down sequences `x` of
@@ -149,7 +171,7 @@ horizon `N` and spot `S₀`,
 
   `binomialPrice u d r g N S₀ = e^{−rN} · ∫ g(spotPath S₀ u d N ω) d(coinFlipMeasure q)(ω)`,
 
-where `coinFlipMeasure q` is the Ionescu–Tulcea Markov-chain law of i.i.d. `Bernoulli(q)` flips
+where `coinFlipMeasure q` is the infinite product measure of i.i.d. `Bernoulli(q)` flips
 on `ℕ → Bool`. -/
 theorem binomialPrice_eq_integral_coinFlipMeasure (u d r : ℝ) (g : ℝ → ℝ) {q : ℝ≥0}
     (hq : q ≤ 1) (hqcrr : crrUpProb u d r = q) (N : ℕ) (S₀ : ℝ) :
@@ -161,21 +183,8 @@ theorem binomialPrice_eq_integral_coinFlipMeasure (u d r : ℝ) (g : ℝ → ℝ
     rfl
   rw [binomialPrice_eq_sum u d r (q : ℝ) hqcrr g N S₀]
   congr 1
-  calc ∑ x : Fin N → Bool, (∏ i, if x i then (q : ℝ) else 1 - q)
-          * g (S₀ * ∏ i, if x i then u else d)
-      = ∑ x : Fin N → Bool, (∏ i, (coinPMF q hq (x i)).toReal)
-          * g (S₀ * ∏ i, if x i then u else d) := by
-        refine sum_congr rfl fun x _ ↦ congrArg (· * _) (prod_congr rfl fun i _ ↦ ?_)
-        cases x i with
-        | false =>
-          simp only [coinPMF_apply, Bool.false_eq_true, ↓reduceIte]
-          rw [ENNReal.toReal_sub_of_le (ENNReal.coe_le_one_iff.mpr hq) ENNReal.one_ne_top]
-          simp
-        | true => simp [coinPMF_apply]
-    _ = ∫ ω, g (S₀ * ∏ i, if flips N ω i then u else d) ∂coinFlipMeasure q hq :=
-        (integral_comp_flips q hq N fun x ↦ g (S₀ * ∏ i, if x i then u else d)).symm
-    _ = ∫ ω, g (spotPath S₀ u d N ω) ∂coinFlipMeasure q hq :=
-        integral_congr_ae (ae_of_all _ fun ω ↦ (hspot ω).symm)
+  rw [integral_congr_ae (ae_of_all _ hspot), integral_comp_flips q hq N
+    fun x ↦ g (S₀ * ∏ i, if x i then u else d)]
 
 /-- The spot after `k` flips is a measurable function of the path. -/
 theorem measurable_spotPath (S₀ u d : ℝ) (k : ℕ) : Measurable (spotPath S₀ u d k) :=
