@@ -1655,6 +1655,48 @@
       "input_hash": "9990181a1b5fba2d27fe81129020ac7765b8866210004d27b2a9ebaf6e63216e",
       "verified_at_commit": "9d3a714"
     },
+    "mf-contract-binomial-capped-call": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-30",
+      "elapsed_s": 8.8,
+      "input_hash": "39f3430ef8a71de8163395603b710081c9a6b176e7bf7aec34ccf9d94cb51df0",
+      "verified_at_commit": "dcdc8f9"
+    },
+    "mf-contract-binomial-european-payoff": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-30",
+      "elapsed_s": 8.8,
+      "input_hash": "ba3a7ea082f533f22f6fcc7692406c50751e19afdf0c3fceecda02b16de18a9f",
+      "verified_at_commit": "dcdc8f9"
+    },
+    "mf-contract-binomial-hedge": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-30",
+      "elapsed_s": 6.5,
+      "input_hash": "8975dc94d4d6d11039bfb11c8f7d4231c3928dc3177244ed93c2e7634984e346",
+      "verified_at_commit": "dcdc8f9"
+    },
+    "mf-contract-binomial-hedged-zero-risk": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.5,
+      "input_hash": "ea1eb925dc51dba48db892900a98df852c48208cb6886668f1f3605e42f96dad",
+      "verified_at_commit": "dcdc8f9"
+    },
+    "mf-contract-binomial-to-black-scholes": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-30",
+      "elapsed_s": 3.8,
+      "input_hash": "7132df7983995f8f22308f373958519c5195878ff2ccc24d01829a5f726ea612",
+      "verified_at_commit": "dcdc8f9"
+    },
+    "mf-contract-book-es-subadditive": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-30",
+      "elapsed_s": 15.6,
+      "input_hash": "ddb958ce5c8d4bd86eced1f62b1ba286e04e2504510eb03514608bb7e92f0262",
+      "verified_at_commit": "dcdc8f9"
+    },
     "mf-contract-bounded-model-integrable": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-30",
@@ -1780,6 +1822,13 @@
       "elapsed_s": 5.5,
       "input_hash": "5c36d10dc4a91c0a75e35ed433a3562f184d7ff67dbb22d110db29260e26a12b",
       "verified_at_commit": "dced33a"
+    },
+    "mf-contract-long-call-var-le-premium": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-30",
+      "elapsed_s": 8.7,
+      "input_hash": "c50548a69dfad4a31120dd877d083a2d550744c256f64b8aa9a65122779a0f11",
+      "verified_at_commit": "dcdc8f9"
     },
     "mf-contract-parity-risk-neutral": {
       "benchmark_file": "contracts.json",
