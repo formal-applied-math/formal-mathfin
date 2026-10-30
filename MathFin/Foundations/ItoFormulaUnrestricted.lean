@@ -26,7 +26,7 @@ continuous partials are bounded. This file holds that cutoff and the localizer t
 * `continuous_timeMeasure_primitive`: the primitive `t ↦ ∫_{(0,t]} h` of a continuous `h` is
   continuous.
 
-The unrestricted-`C³` Itô formula itself, the residual `f(t, B_t) − f(0, B_0) − ∫₀ᵗ (f_t + ½ f_xx)
+The unrestricted-`C²` Itô formula itself, the residual `f(t, B_t) − f(0, B_0) − ∫₀ᵗ (f_t + ½ f_xx)
 ds` being a local martingale localised by `sigmaSeq`, is `ito_formula_unrestricted`
 (`ItoFormulaUnrestrictedLocMart`). It is derived from the process formula for an Itô process with
 unbounded coefficients (`exists_localMartingale_ito_formula`) at `σ = 1`, `b = 0`, not from this

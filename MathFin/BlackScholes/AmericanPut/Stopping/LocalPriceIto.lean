@@ -79,6 +79,7 @@ theorem local_price_ito {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
             planeGenerator G (u,W u ω) ∂MathFin.ItoIntegralL2.timeMeasure) := by
   obtain ⟨G,hG,hcompact,heq,hzero⟩ :=
       brownianPriceKernel_localization_zero_drift (K := K) hp hσ ht hx
-  exact ⟨G,hG,hcompact,heq,hzero,plane_ito_localMartingale hW hmeas hpaths hG⟩
+  exact ⟨G,hG,hcompact,heq,hzero,
+    plane_ito_localMartingale hW hmeas hpaths (hG.of_le (by norm_num))⟩
 
 end MathFin.BlackScholes.AmericanPut.Stopping

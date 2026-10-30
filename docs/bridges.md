@@ -221,7 +221,7 @@ bracket as `Z²·(d−c)`, so the two right-hand sides are the same object. **Ho
 | CT.8 | **Contracts → Foundations — parity in any risk-neutral model.** `Contracts/Parity.lean`: a discounted price that is a `Q`-martingale from `S₀` (`Martingale.condExp_ae_eq` through `integral_condExp`) prices the forward and closes put–call parity, with no integrability hypotheses; `BlackScholes.value_forward` is the instance `value_forward_of_integral`. What it buys: the forward and parity no longer depend on a model's closed form. | `Contracts/Parity.lean`, `Contracts/Models/BlackScholes.lean` | NEW (2026-10-29); WIRED (corpus `mf-contract-forward-risk-neutral`, `mf-contract-parity-risk-neutral`) |
 | CT.5 | **Contracts → Binomial — the value is the hedge's cost.** `Contracts/Models/Binomial.pathPV_eq_value_add_gains` joins `Binomial.value_pay_eq_binomialPrice` with `binomialPrice_replication` (`Binomial/EuropeanReplication.lean`, the discrete martingale representation applied to the discounted tree value and the discounted spot). Under no-arbitrage, a European contract's discounted payoff is, on every path, its value plus the gains of a predictable strategy in the discounted spot. What it buys: `Contract.value` in the tree is a replication price, not only an expectation. | `Contracts/Models/Binomial.lean`, `Binomial/EuropeanReplication.lean` | NEW (2026-10-29); WIRED (corpus `mf-contract-binomial-hedge`, `mf-binomial-european-replication`) |
 | CT.2 | **Contracts → Foundations — a contract's value is conditional-expectation machinery, not a new pricing primitive.** `Contracts/Pricing.value_deliverAsset` prices the single-cashflow contract that simply delivers a `Q`-martingale asset `S` at `T`, undiscounted, by chaining `Martingale.condExp_ae_eq` through `integral_condExp` — the same conditional-expectation route `Contract.value_process_martingale` uses (`martingale_condExp`) to show a contract's own value process is itself a `Q`-martingale. What it buys: `Contract.value` is shown to *be* an instance of pricing-by-conditional-expectation, not a freestanding integral with its own theory. Deliberately stops short of `ContinuousMarket.IsEMM`: both theorems need only `Martingale S 𝓕 Q` and `[IsProbabilityMeasure Q]`, never the mutual-absolute-continuity `ac`/`ac'` content that makes a martingale measure an *equivalent* one — that content stays load-bearing where it already is, in `ContinuousMarket.isEMM_noArbitrageSimple`. | `Contracts/Pricing.lean` | NEW (2026-08-17); WIRED (corpus `mf-contract-value-deliver-asset`) |
-| BIN.FTAP | **Binomial → Foundations — the multi-period tree as an instance of the discrete FTAP.** `Binomial/MultiPeriodFTAP.isEMM_horizonSpot`: on `Fin T → Bool` with the real-world law `horizonMeasure T p` (the first `T` flips of `coinFlipMeasure p`, full support for `0 < p < 1`), the filtration `horizonFiltration T` (whose preimage under `flips T` is `flipFiltration`, `comap_flips_horizonFiltration`) and the frozen discounted spot `horizonSpot T`, `BinomialNoArb` makes `horizonMeasure T (crrUpProb u d r)` an `IsEMM` of `Foundations/FTAPDiscrete`: `martingale_discountedSpot` transported along `flips T`. `ftap_discrete` then gives `NoArbitrage`, and an explicit first-period strategy gives the converse, so `noArbitrage_horizonSpot_iff` reads `NoArbitrage ↔ BinomialNoArb u d r` (for `S₀ > 0`, `0 < d < u`, `T ≥ 1`). **Honest scope:** existence of the EMM, not uniqueness; `multi_period_FTAP_marginals` stays algebraic. | `Binomial/MultiPeriodFTAP.lean`, `Binomial/PathMeasure.lean`, `Foundations/FTAPDiscrete.lean` | NEW (2026-10-30); WIRED (corpus `mf-binomial-multi-period-emm`, `mf-binomial-multi-period-no-arbitrage-iff`) |
+| BIN.FTAP | **Binomial → Foundations — the multi-period tree as an instance of the discrete FTAP.** `Binomial/MultiPeriodFTAP.isEMM_horizonSpot`: on `Fin T → Bool` with the real-world law `horizonMeasure T p` (the first `T` flips of `coinFlipMeasure p`, full support for `0 < p < 1`), the filtration `horizonFiltration T` (whose preimage under `flips T` is `flipFiltration`, `comap_flips_horizonFiltration`) and the frozen discounted spot `horizonSpot T`, `BinomialNoArb` makes `horizonMeasure T (crrUpProb u d r)` an `IsEMM` of `Foundations/FTAPDiscrete`: `martingale_discountedSpot` transported along `flips T`. `ftap_discrete` then gives `NoArbitrage`, and an explicit first-period strategy gives the converse, so `noArbitrage_horizonSpot_iff` reads `NoArbitrage ↔ BinomialNoArb u d r` (for `S₀ > 0`, `0 < d < u`, `T ≥ 1`). The EMM is unique (`IsEMM.eq_horizonMeasure`, `existsUnique_isEMM_horizonSpot`): on each history atom of `ℱₜ` the set-integral martingale property forces the conditional up-probability to `crrUpProb`, and induction on the prefix length gives every path its product probability. **Honest scope:** uniqueness of the EMM, not replication of claims; `multi_period_FTAP_marginals` stays algebraic. | `Binomial/MultiPeriodFTAP.lean`, `Binomial/PathMeasure.lean`, `Foundations/FTAPDiscrete.lean` | NEW (2026-10-30); WIRED (corpus `mf-binomial-multi-period-emm`, `mf-binomial-multi-period-no-arbitrage-iff`, `mf-binomial-multi-period-emm-unique`) |
 
 ## Bridges planned but deferred
 
@@ -411,18 +411,27 @@ function of `B_t`, and the Itô-integral QV exists only in expectation).
 `Foundations/ContinuousMarket` (the model-agnostic EMM frame) ↔ `Foundations/ContinuousFTAP`
 (the `F = ℝ` discounted-GBM instance) ↔ `Foundations/NoArbitrageCore` (shared with the discrete FTAP).
 
-- **ContinuousMarket → ContinuousFTAP.** `IsEMM` / `NoArbitrageSimple` / `isEMM_noArbitrageSimple`
-  (the general forward theorem) are instantiated by `discountedGBM_isEMM` /
-  `discountedGBM_noArbitrageSimple`, which package the existing `discountedGBM_isMartingale` (the
-  operational continuous FTAP) as a concrete EMM. The frame gives the GBM martingale property its
-  economic payoff: no simple-strategy arbitrage.
-- **NoArbitrageCore shared by discrete + continuous.** `ae_zero_of_nonneg_of_integral_zero` (nonneg +
-  zero mean ⟹ vanishes) is the common closing step of BOTH `FTAP.emm_implies_no_arbitrage` (discrete,
-  via a martingale transform; the one-period vector and the finite-Ω forward directions are its instances) and `ContinuousMarket.isEMM_noArbitrageSimple` (continuous, term-by-term
-  via the bilinear `condExp` pull-out). One argument, two settings; each supplies its own zero-integral.
+- **ContinuousMarket → ContinuousFTAP.** `IsEMM S T Q` (an EMM up to the horizon `T`, the same
+  shape as the discrete `IsEMM`) / `NoArbitrageSimple S T` / `isEMM_noArbitrageSimple` (the general
+  forward theorem) are instantiated by `discountedGBM_isEMM` / `discountedGBM_noArbitrageSimple`,
+  which package the existing `discountedGBM_isMartingale` (the operational continuous FTAP) as a
+  concrete EMM (`IsEMM.of_martingale`: a martingale on all of `ℝ≥0` is an EMM at every horizon).
+  The frame gives the GBM martingale property its economic payoff: no simple-strategy arbitrage.
+- **ContinuousMarket ← Girsanov (horizon `T`).** `Foundations/Girsanov.bs_discounted_isEMM`: the
+  physical-measure Girsanov measure `Q = P.withDensity Z_T` is an `IsEMM` of the discounted
+  Black–Scholes price at the horizon `T` — equivalence from the positive unit-mean density,
+  martingale from `bs_discounted_isQMartingale` plus `Q`-integrability (`Btheta_map_eq_gaussianReal`),
+  assembled by `martingale_stopped_of_setIntegral_eq`. The horizon is why `IsEMM` carries one.
+- **One forward theorem, discrete and continuous.** `FTAP.emm_implies_no_arbitrage` (discrete,
+  via the `F`-valued martingale transform of Theorem 2.2.9; the one-period vector and the finite-Ω
+  forward directions are its instances) is also the proof of `ContinuousMarket.isEMM_noArbitrageSimple`:
+  a simple strategy is a discrete predictable strategy for the price sampled at its own dates
+  (`martingale_comp_monotone`), and its gains are the martingale transform of the sampled price.
+  `increment_integrable` / `increment_integral_zero` (the bilinear `condExp` pull-out at arbitrary
+  times) remain for the pricing-measure argument of `PricingMeasureL2Density`.
 - **Seam to meaning 2.** `IsEMM`-on-a-process is exactly what Delbaen–Schachermayer produces, so the
   frame is a strict sub-object of the DS one and meaning 2 (NFLVR, admissible strategies, the converse)
-  is additive. The physical-measure Girsanov EMM `Q ≠ P` (bounded-horizon) is the meaning-1.5 bridge.
+  is additive. The physical-measure Girsanov EMM `Q ≠ P` is the horizon-`T` instance `bs_discounted_isEMM`, the meaning-1.5 bridge.
 
 ## Every module connected — the coherence pass (2026-10-21)
 
