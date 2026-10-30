@@ -1683,6 +1683,13 @@
       "input_hash": "9143b6b90bb9edd3bc38ac5ba17646786f917f79737dc8dac4b5470e516ef0ed",
       "verified_at_commit": "5965a92"
     },
+    "mf-contract-binomial-hedged-zero-risk": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-30",
+      "elapsed_s": 10.9,
+      "input_hash": "ae782ca011289ad22a409efa8ccbdfd516d91eeb331d8737578f9c3a9aaf800d",
+      "verified_at_commit": "660ae2d"
+    },
     "mf-contract-binomial-to-black-scholes": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-30",
@@ -1822,6 +1829,13 @@
       "elapsed_s": 5.5,
       "input_hash": "5c36d10dc4a91c0a75e35ed433a3562f184d7ff67dbb22d110db29260e26a12b",
       "verified_at_commit": "dced33a"
+    },
+    "mf-contract-long-call-var-le-premium": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-30",
+      "elapsed_s": 13.2,
+      "input_hash": "4a8f40e5d28e68469379db5d1d7b6b14ba8067350a886b41c63f6f6630612d35",
+      "verified_at_commit": "660ae2d"
     },
     "mf-contract-parity-risk-neutral": {
       "benchmark_file": "contracts.json",
