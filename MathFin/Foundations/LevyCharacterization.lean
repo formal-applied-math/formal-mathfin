@@ -99,7 +99,7 @@ theorem uniformIntegrable_of_integral_sq_le {f : ℕ → Ω → ℝ} {B : ℝ} (
   refine uniformIntegrable_of le_rfl ENNReal.one_ne_top (fun n ↦ (hf n).aestronglyMeasurable)
     fun ε hε ↦ ?_
   set C : ℝ≥0 := ((⌈B / ε⌉₊ + 1 : ℕ) : ℝ≥0) with hC
-  have hCpos : (0 : ℝ) < C := by rw [hC]; positivity
+  have hCpos : (0 : ℝ) < C := by rw [hC]; push_cast; positivity
   have hBC : B ≤ ε * C := by
     have h1 : B / ε ≤ C := by
       rw [hC]; push_cast; linarith [Nat.le_ceil (B / ε)]
@@ -157,6 +157,12 @@ theorem continuous_untopA_min (c : WithTop ℝ≥0) :
     simp only [← WithTop.coe_min, coe_untopA]
     exact continuous_id.min continuous_const
 
+/-- At time `0` the stopped time is `0`. -/
+theorem untopA_min_zero (c : WithTop ℝ≥0) : (min ((0 : ℝ≥0) : WithTop ℝ≥0) c).untopA = 0 := by
+  induction c using WithTop.recTopCoe with
+  | top => simp [coe_untopA]
+  | coe c => rw [← WithTop.coe_min, coe_untopA]; simp
+
 private lemma stoppedClock_sub (c : WithTop ℝ≥0) {p q : ℝ≥0} (hpq : p ≤ q) :
     0 ≤ (((min (q : WithTop ℝ≥0) c).untopA : ℝ≥0) : ℝ)
         - ((min (p : WithTop ℝ≥0) c).untopA : ℝ≥0) ∧
@@ -164,7 +170,9 @@ private lemma stoppedClock_sub (c : WithTop ℝ≥0) {p q : ℝ≥0} (hpq : p �
         - ((min (p : WithTop ℝ≥0) c).untopA : ℝ≥0) ≤ (q : ℝ) - p := by
   have hpq' : (p : ℝ) ≤ q := hpq
   induction c using WithTop.recTopCoe with
-  | top => simp [coe_untopA]
+  | top =>
+    simp only [min_top_right, coe_untopA]
+    exact ⟨sub_nonneg.2 hpq', le_rfl⟩
   | coe c =>
     simp only [← WithTop.coe_min, coe_untopA, NNReal.coe_min]
     rcases min_cases (p : ℝ) c with ⟨h1, _⟩ | ⟨h1, _⟩ <;>
@@ -173,7 +181,7 @@ private lemma stoppedClock_sub (c : WithTop ℝ≥0) {p q : ℝ≥0} (hpq : p �
 /-- **The stopped clock `t ∧ ρ` is a slow clock.** -/
 theorem isSlowClock_stoppedProcess (ρ : Ω → WithTop ℝ≥0) :
     IsSlowClock (stoppedProcess (fun t (_ : Ω) ↦ (t : ℝ)) ρ) where
-  zero ω := by simp [stoppedProcess]
+  zero ω := by simp [stoppedProcess, untopA_min_zero]
   sub_nonneg _ _ hpq ω := (stoppedClock_sub (ρ ω) hpq).1
   sub_le _ _ hpq ω := (stoppedClock_sub (ρ ω) hpq).2
 
@@ -244,17 +252,16 @@ theorem martingale_stoppedProcess_exitTime (hadapt : StronglyAdapted 𝓕 M)
     rw [stoppedProcess_indicator_eq hpos] at had
     refine locally_bounded_localMartingale_is_martingale hloc had fun T ↦
       ⟨((n + 1 : ℕ) : ℝ) ^ 2 + T, fun t ht ω ↦ ?_⟩
-    have hs : (((min (t : WithTop ℝ≥0) (exitTime M (n + 1) ω)).untopA : ℝ≥0) : ℝ) ≤ t := by
-      refine NNReal.coe_le_coe.2 (WithTop.untopA_le (min_le_left _ _))
-    have hs0 := NNReal.coe_nonneg (min (t : WithTop ℝ≥0) (exitTime M (n + 1) ω)).untopA
-    have hb := abs_stoppedProcess_le hcont hM0 n t ω
+    set s : ℝ≥0 := (min (t : WithTop ℝ≥0) (exitTime M (n + 1) ω)).untopA with hs
+    have hst : (s : ℝ) ≤ t := NNReal.coe_le_coe.2 (WithTop.untopA_le (min_le_left _ _))
+    have hb : |M s ω| ≤ ((n + 1 : ℕ) : ℝ) := abs_stoppedProcess_le hcont hM0 n t ω
+    have hsq : M s ω ^ 2 ≤ ((n + 1 : ℕ) : ℝ) ^ 2 := sq_le_sq' (abs_le.1 hb).1 (abs_le.1 hb).2
     have ht' : (t : ℝ) ≤ T := ht
-    show ‖M _ ω ^ 2 - _‖ ≤ _
+    show ‖M s ω ^ 2 - (s : ℝ)‖ ≤ _
     rw [Real.norm_eq_abs, abs_le]
-    change |M _ ω| ≤ _ at hb
-    have := sq_le_sq' (abs_le.1 hb).1 (abs_le.1 hb).2
-    constructor <;> nlinarith [sq_nonneg (M (min (t : WithTop ℝ≥0)
-      (exitTime M (n + 1) ω)).untopA ω)]
+    have := NNReal.coe_nonneg s
+    have := NNReal.coe_nonneg t
+    constructor <;> nlinarith [sq_nonneg (M s ω), sq_nonneg (((n + 1 : ℕ) : ℝ))]
 
 /-- The stopped exponential martingale identity over `𝓕_s`-sets, for the process stopped at the
 `n`-th exit time (`setIntegral_exp_eq` with the slow clock `t ∧ ρ_n`). -/
@@ -296,8 +303,10 @@ theorem tendsto_setIntegral_stopped_exp (hadapt : StronglyAdapted 𝓕 M)
   refine tendsto_setIntegral_of_integral_sq_le (B := Real.exp (a ^ 2 * (r : ℝ))) hf
     (fun n ↦ ?_) (fun n ↦ ?_) (.of_forall fun ω ↦ ?_) S
   · -- square integrable: bounded
+    beta_reduce
     refine (memLp_of_abs_le ((hf n).pow_const 2).aestronglyMeasurable
       (C := Real.exp (|a| * ((n + 1 : ℕ) : ℝ)) ^ 2) (fun ω ↦ ?_) 1).integrable le_rfl
+    beta_reduce
     rw [abs_pow, abs_of_pos (Real.exp_pos _)]
     exact pow_le_pow_left₀ (Real.exp_pos _).le
       (exp_le_exp_abs_mul (isSlowClock_stoppedProcess _) (abs_stoppedProcess_le hcont hM0 n)
@@ -306,18 +315,13 @@ theorem tendsto_setIntegral_stopped_exp (hadapt : StronglyAdapted 𝓕 M)
     have hone : ∫ ω, Real.exp (2 * a * stoppedProcess M (exitTime M (n + 1)) r ω
         - (2 * a) ^ 2 * stoppedProcess (fun t (_ : Ω) ↦ (t : ℝ)) (exitTime M (n + 1)) r ω / 2) ∂P
         = 1 := by
-      have h := setIntegral_stopped_exp_eq hadapt hcont hM0 hM hM2 n (2 * a) (zero_le r)
+      have h := setIntegral_stopped_exp_eq hadapt hcont hM0 hM hM2 n (2 * a) (zero_le : (0 : ℝ≥0) ≤ r)
         (S := Set.univ) MeasurableSet.univ
       simp only [Measure.restrict_univ] at h
       rw [h]
       have h0 : stoppedProcess M (exitTime M (n + 1)) 0 = 0 := by
         funext ω
-        have : (min ((0 : ℝ≥0) : WithTop ℝ≥0) (exitTime M (n + 1) ω)).untopA = 0 := by
-          generalize exitTime M (n + 1) ω = c
-          induction c using WithTop.recTopCoe with
-          | top => simp [coe_untopA]
-          | coe c => rw [← WithTop.coe_min, coe_untopA]; simp
-        simp only [stoppedProcess, this, hM0]; rfl
+        simp only [stoppedProcess, untopA_min_zero, hM0]; rfl
       have h0' := (isSlowClock_stoppedProcess (Ω := Ω) (exitTime M (n + 1))).zero
       simp [h0, h0']
     beta_reduce
@@ -329,17 +333,18 @@ theorem tendsto_setIntegral_stopped_exp (hadapt : StronglyAdapted 𝓕 M)
           refine integral_mono ?_ (((hexp n (2 * a)).integrable r).const_mul _) fun ω ↦ ?_
           · refine (memLp_of_abs_le ((hf n).pow_const 2).aestronglyMeasurable
               (C := Real.exp (|a| * ((n + 1 : ℕ) : ℝ)) ^ 2) (fun ω ↦ ?_) 1).integrable le_rfl
+            beta_reduce
             rw [abs_pow, abs_of_pos (Real.exp_pos _)]
             exact pow_le_pow_left₀ (Real.exp_pos _).le (exp_le_exp_abs_mul
               (isSlowClock_stoppedProcess _) (abs_stoppedProcess_le hcont hM0 n) a r ω) 2
           · rw [sq, ← Real.exp_add, ← Real.exp_add]
             refine Real.exp_le_exp.2 ?_
-            have := (isSlowClock_stoppedProcess (Ω := Ω) (exitTime M (n + 1))).le r ω
+            have := (isSlowClock_stoppedProcess (Ω := Ω) (exitTime M (n + 1))).apply_le r ω
             nlinarith [mul_le_mul_of_nonneg_left this (sq_nonneg a)]
       _ = Real.exp (a ^ 2 * (r : ℝ)) := by rw [integral_const_mul, hone, mul_one]
   · beta_reduce
     have hr : ∀ᶠ n : ℕ in atTop, (r : WithTop ℝ≥0) < exitTime M (n + 1) ω :=
-      WithTop.tendsto_nhds_top_iff.1
+      (WithTop.tendsto_nhds_top_iff _).1
         ((exitTime_tendsto_top hcont ω).comp (tendsto_add_atTop_nat 1)) r
     refine tendsto_const_nhds.congr' ?_
     filter_upwards [hr] with n hn

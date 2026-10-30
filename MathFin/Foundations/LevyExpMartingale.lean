@@ -153,7 +153,7 @@ theorem exp_le_exp_abs_mul (hA : IsSlowClock A) (hK : ∀ t ω, |M t ω| ≤ K) 
   refine Real.exp_le_exp.2 ?_
   have h1 : a * M r ω ≤ |a| * K := (le_abs_self _).trans (by
     rw [abs_mul]; exact mul_le_mul_of_nonneg_left (hK r ω) (abs_nonneg a))
-  have h2 : 0 ≤ a ^ 2 * A r ω / 2 := by have := hA.nonneg r ω; positivity
+  have h2 : 0 ≤ a ^ 2 * A r ω / 2 := by have := hA.apply_nonneg r ω; positivity
   linarith
 
 /-! ### One cell -/
@@ -240,8 +240,8 @@ theorem abs_integral_mul_exp_increment_sub_le (hA : IsSlowClock A) (hM : Marting
     constructor <;> linarith [Real.exp_pos (2 * |a| * K)]
   have iWF : Integrable (fun ω ↦ W ω * (Real.exp (a * (M q ω - M p ω)
       - a ^ 2 * (A q ω - A p ω) / 2) - 1)) P :=
-    (memLp_of_abs_le (hWm.mul ((Real.measurable_exp.comp (((measurable_const.mul hΔm).sub
-      (((measurable_const.mul hαm).div_const 2))))).sub measurable_const)).aestronglyMeasurable
+    (memLp_of_abs_le (by fun_prop : Measurable fun ω ↦ W ω * (Real.exp (a * (M q ω - M p ω)
+      - a ^ 2 * (A q ω - A p ω) / 2) - 1)).aestronglyMeasurable
       (C := C * (Real.exp (2 * |a| * K) + 1)) (fun ω ↦ by
         rw [abs_mul]
         exact mul_le_mul (hC ω) (hFb ω) (abs_nonneg _) ((abs_nonneg _).trans (hC ω))) 1).integrable

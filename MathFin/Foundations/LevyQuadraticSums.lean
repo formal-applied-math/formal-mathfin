@@ -119,10 +119,10 @@ theorem isSlowClock_id : IsSlowClock (Ω := Ω) fun t _ ↦ (t : ℝ) where
 
 variable {A : ℝ≥0 → Ω → ℝ}
 
-theorem IsSlowClock.nonneg (hA : IsSlowClock A) (r : ℝ≥0) (ω : Ω) : 0 ≤ A r ω := by
+theorem IsSlowClock.apply_nonneg (hA : IsSlowClock A) (r : ℝ≥0) (ω : Ω) : 0 ≤ A r ω := by
   simpa [hA.zero ω] using hA.sub_nonneg (zero_le : (0 : ℝ≥0) ≤ r) ω
 
-theorem IsSlowClock.le (hA : IsSlowClock A) (r : ℝ≥0) (ω : Ω) : A r ω ≤ r := by
+theorem IsSlowClock.apply_le (hA : IsSlowClock A) (r : ℝ≥0) (ω : Ω) : A r ω ≤ r := by
   simpa [hA.zero ω] using hA.sub_le (zero_le : (0 : ℝ≥0) ≤ r) ω
 
 /-! ### Martingale increments against a bounded past factor -/

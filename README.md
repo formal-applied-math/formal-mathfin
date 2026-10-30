@@ -175,10 +175,10 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Sixteen of the 713 results are reduced cores. Twelve assume a structure whose fields include the
+- Fifteen of the 713 results are reduced cores. Eleven assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
-  the general form of Girsanov's theorem, Lévy's characterization, the two-dimensional Itô formula,
+  the general form of Girsanov's theorem, the two-dimensional Itô formula,
   and five theorems on Markov chains. The other four prove special cases: the first interarrival
   time of a Poisson process is exponential; Stulz's call on the maximum is checked only in its
   zero-strike limit, and the Heynen–Kat two-asset barrier only at zero correlation, neither formula
@@ -201,8 +201,10 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 - Itô's formula for an Itô process is proved on a finite horizon $`[0, T]`$, for a process built
   from a single Brownian motion with continuous adapted coefficients and a deterministic starting
   point. Itô's formula for a continuous semimartingale not built from $`B`$ is not proved, and
-  neither is a quadratic-variation process for a general continuous local martingale, which is
-  what keeps Lévy's characterization a reduced core.
+  neither is a quadratic-variation process for a general continuous local martingale. Lévy's
+  characterization is proved with the bracket as a hypothesis: a continuous adapted local
+  martingale $`M`$ with $`M_0 = 0`$ such that $`M^2 - t`$ is a local martingale is a Brownian
+  motion.
 - The jump-diffusion results on a process assume the properties listed above
   (`JumpDiffusionProcess`). A process with them is constructed only without jumps, as Brownian
   motion with drift. A change of measure on the process that alters the jump rate or the jump law
