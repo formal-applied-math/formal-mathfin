@@ -9,6 +9,7 @@ public import MathFin.Contracts.Parity
 public import MathFin.BlackScholes.Digital
 public import MathFin.BlackScholes.Put
 public import MathFin.BlackScholes.Forward
+public import MathFin.BlackScholes.PowerCall
 
 /-!
 # The contracts priced in the Black–Scholes model
@@ -41,6 +42,7 @@ no third integral is evaluated.
   `bs_call_formula`, `bs_put_formula` and `bs_cash_or_nothing_formula` respectively.
 * `value_forward` — the forward is worth `S₀ − K e^{−rT}`.
 * `value_cappedCall` — the capped call is worth the difference of two call values.
+* `value_powerCall` — the power call is `bs_power_call_formula`.
 
 ## Source
 
@@ -145,5 +147,22 @@ theorem value_cappedCall {Q : Measure Ω} [IsProbabilityMeasure Q]
   rw [cappedCall, Contract.value_both _ _ _ _ _ hi₁ hi₂,
     Contract.value_scale, value_europeanCall h₁, value_europeanCall h₂]
   ring
+
+/-- **The power call's Black–Scholes value** is the call price at the effective spot and
+volatility of `bs_power_call_formula`: `S_T ^ a` is lognormal again, so the value of
+`powerCall a K T` is `Š₀ Φ(d̃₁) − K e^{−rT} Φ(d̃₂)` with `Š₀ = bsPowerEffectiveSpot` and
+volatility `aσ`. -/
+theorem value_powerCall {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (a : ℕ) (ha : 0 < a) (hK : 0 < K)
+    (h : BSCallHyp Q S_0 K r σ T Z) :
+    (powerCall a K T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
+      = bsPowerEffectiveSpot S_0 r σ T a *
+          Phi (bsd1 (bsPowerEffectiveSpot S_0 r σ T a) K r ((a : ℝ) * σ) T)
+        - K * Real.exp (-r * T) *
+          Phi (bsd2 (bsPowerEffectiveSpot S_0 r σ T a) K r ((a : ℝ) * σ) T) := by
+  rw [powerCall, Contract.value_pay]
+  refine Eq.trans ?_ (bs_power_call_formula a ha hK h)
+  refine integral_congr_ae (.of_forall fun ω ↦ ?_)
+  simp only [Payoff.eval, Payoff.eval_pow, scenarioAt, assets, bsPowerTerminal]
 
 end MathFin.Contracts.BlackScholes
