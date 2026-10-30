@@ -82,11 +82,12 @@ theorem ito_formula_L2_bddDeriv
       ((memLp_pathIntegral hB hBmeas hBcont hf''_cont hf2 T).const_mul (1 / 2))
   -- A-core: the Riemann sums converge in `L²` to `I`; lift to `Lp`
   have hcore := ito_formula_L2 hB hBmeas hBcont T hf hf' hf'' hf2 hf3
-  have hcore_Lp : Tendsto (fun n ↦ (memLp_riemannφ hB hBmeas hf'_cont.measurable hf1 T n).toLp
-        (riemannφ hBmeas f' T n)) atTop (𝓝 (hI_memLp.toLp I)) :=
-    tendsto_iff_norm_sub_tendsto_zero.mpr
-      (tendsto_norm_toLp_sub' (fun n ↦ memLp_riemannφ hB hBmeas hf'_cont.measurable hf1 T n)
-        hI_memLp hcore)
+  have hRmem (n : ℕ) : MemLp (riemannσ (B := B) (fun s ω ↦ f' (B s ω)) T n) 2 μ :=
+    memLp_riemannσ hB hBmeas (fun t ↦ stronglyMeasurable_comp_eval hBmeas hf'_cont.measurable t)
+      (fun _ _ ↦ hf1 _) T n
+  have hcore_Lp : Tendsto (fun n ↦ (hRmem n).toLp (riemannσ (B := B) (fun s ω ↦ f' (B s ω)) T n))
+      atTop (𝓝 (hI_memLp.toLp I)) :=
+    tendsto_iff_norm_sub_tendsto_zero.mpr (tendsto_norm_toLp_sub' hRmem hI_memLp hcore)
   -- both limits are the same `L²` limit ⇒ they coincide
   have huniq : hI_memLp.toLp I = itoIntegralCLM_T hB T hBmeas gf' :=
     tendsto_nhds_unique hcore_Lp hgf'

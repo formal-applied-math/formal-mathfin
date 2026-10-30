@@ -82,9 +82,8 @@ theorem itoSquared_L2_tendsto (hB : IsPreBrownianReal B μ)
       = (T : ℝ)
         - ∑ k ∈ Finset.range n, (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 := by
     intro n hn ω
-    have hn0 : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-    have hsn : unifPart T n n = T := by simp only [unifPart, div_self hn0, one_mul]
-    have hs0 : unifPart T n 0 = 0 := by simp [unifPart]
+    have hsn : unifPart T n n = T := unifPart_self T hn.ne'
+    have hs0 : unifPart T n 0 = 0 := unifPart_zero T n
     have h := discrete_squaring_identity n (fun k ↦ B (unifPart T n k) ω)
     rw [hsn, hs0] at h
     linarith

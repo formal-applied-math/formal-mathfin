@@ -552,32 +552,8 @@ theorem pathIntegral_expGrowth_memLp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
               Real.exp_nonneg (2 * c ^ 2 * (T : ℝ))]
   -- the uniform `L²` bound on the Riemann sums via discrete Cauchy–Schwarz
   set Bnd : ℝ := (T : ℝ) * ((T : ℝ) * A) with hBnd
-  have hgap_nonneg : ∀ n k, (0 : ℝ) ≤ (unifPart T n (k + 1) : ℝ) - unifPart T n k := by
-    intro n k
-    have : unifPart T n k ≤ unifPart T n (k + 1) := by
-      simp only [unifPart]
-      gcongr
-      simp
-    exact sub_nonneg.mpr (by exact_mod_cast this)
-  have hle_T : ∀ n k, k ≤ n → unifPart T n k ≤ T := by
-    intro n k hk
-    rcases Nat.eq_zero_or_pos n with hn0 | hn
-    · subst hn0; simp only [Nat.le_zero.mp hk]; simp [unifPart]
-    · have hkn : (k : ℝ≥0) ≤ (n : ℝ≥0) := by exact_mod_cast hk
-      have hnpos : (0 : ℝ≥0) < (n : ℝ≥0) := by exact_mod_cast hn
-      simp only [unifPart]
-      calc (k : ℝ≥0) / (n : ℝ≥0) * T ≤ 1 * T :=
-            mul_le_mul_of_nonneg_right ((div_le_one hnpos).mpr hkn) zero_le
-        _ = T := one_mul _
-  have hsumgap : ∀ n, 0 < n →
-      ∑ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) := by
-    intro n hn
-    rw [Finset.sum_range_sub (fun k ↦ (unifPart T n k : ℝ))]
-    have h1 : unifPart T n n = T := by
-      have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-      simp only [unifPart, div_self hne, one_mul]
-    have h0 : unifPart T n 0 = 0 := by simp [unifPart]
-    rw [h1, h0]; simp
+  have hgap_nonneg : ∀ n k, (0 : ℝ) ≤ (unifPart T n (k + 1) : ℝ) - unifPart T n k := fun n k ↦
+    sub_nonneg.mpr (by exact_mod_cast unifPart_mono T n k.le_succ)
   have hCS : ∀ n, ∀ ω, (Rsum n ω) ^ 2 ≤ (T : ℝ) *
       ∑ k ∈ Finset.range n, (w (unifPart T n k) (B (unifPart T n k) ω)) ^ 2
         * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
@@ -598,7 +574,8 @@ theorem pathIntegral_expGrowth_memLp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
           Real.mul_self_sqrt (hgap_nonneg n k)]
       have e2 : (∑ k ∈ Finset.range n,
             (Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 2) = (T : ℝ) := by
-        rw [← hsumgap n hn]; refine Finset.sum_congr rfl fun k _ ↦ Real.sq_sqrt (hgap_nonneg n k)
+        rw [← unifPart_mesh_sum T hn.ne']
+        exact Finset.sum_congr rfl fun k _ ↦ Real.sq_sqrt (hgap_nonneg n k)
       have e3 : (∑ k ∈ Finset.range n, (w (unifPart T n k) (B (unifPart T n k) ω)
             * Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 2)
           = ∑ k ∈ Finset.range n, (w (unifPart T n k) (B (unifPart T n k) ω)) ^ 2
@@ -657,10 +634,10 @@ theorem pathIntegral_expGrowth_memLp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
             refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum fun k hk ↦ ?_) (NNReal.coe_nonneg T)
             exact mul_le_mul_of_nonneg_right
               (hpoint _
-                  (hle_T n k (Nat.le_of_lt_succ (Nat.lt_succ_of_lt (Finset.mem_range.mp hk)))))
+                  (unifPart_le_T (Nat.le_of_lt_succ (Nat.lt_succ_of_lt (Finset.mem_range.mp hk)))))
               (hgap_nonneg n k)
         _ = Bnd := by
-            rw [← Finset.mul_sum, hsumgap n hn, hBnd]; ring
+            rw [← Finset.mul_sum, unifPart_mesh_sum T hn.ne', hBnd]; ring
   -- Fatou: lift the uniform bound to the limit `P`
   refine (memLp_two_iff_integrable_sq hP_meas.aestronglyMeasurable).mpr ?_
   refine ⟨(hP_meas.pow_const 2).aestronglyMeasurable, ?_⟩

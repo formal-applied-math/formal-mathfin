@@ -260,8 +260,10 @@ reinvents, the Mathlib / BrownianMotion-package machinery:
   Gaussian 6th moment reuses Degenne's `centralMoment_two_mul_gaussianReal` (package); the
   cubic Taylor bound reuses Mathlib's `Convex.norm_image_sub_le_of_norm_hasDerivWithin_le`.
 - **A3** `ItoIntegralRiemannBridge.lean` — generalizes `ItoIntegralBrownian.itoIntegralCLM_T_brownian`
-  (integrand `id → φ`), reusing the entire `stepSP` / `simpleAssembly_T` / `itoIntegralCLM_T`
-  CLM stack; the trim-L² limit reuses `memLp_uncurry_trim_T` + Mathlib's
+  (integrand `id → φ`) as the `θ s ω = φ(B_s ω)` case of the adapted bridge
+  (`ItoIntegralRiemannBridgeAdapted.itoIntegralCLM_T_of_bdd_adapted_cont`, one Riemann–Itô sum
+  `riemannσ` in `ItoRiemannSum.lean`), reusing the entire `stepSP` / `simpleAssembly_T` /
+  `itoIntegralCLM_T` CLM stack; the trim-L² limit reuses `memLp_uncurry_trim_T` + Mathlib's
   `aestronglyMeasurable_of_tendsto_ae` / `tendsto_integral_of_dominated_convergence`.
 - **A-core / A4** `ItoFormulaC2.lean` / `ItoFormulaCLM.lean` — assemble `DiscreteIto.discrete_ito_formula`
   with A1/A2/A3 via uniqueness of L² limits.
