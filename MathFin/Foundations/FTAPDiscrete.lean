@@ -8,7 +8,9 @@ module
 public import Mathlib
 public import MathFin.Foundations.ConvexSeparation
 public import MathFin.Foundations.MartingaleTransform
+public import MathFin.Foundations.FTAP
 public import MathFin.Foundations.FTAPOnePeriod
+public import MathFin.Foundations.NoArbitrageCore
 public import MathFin.Foundations.ContinuousMarket
 
 /-!
@@ -27,7 +29,8 @@ The backward direction is the geometric heart of the theorem: the attainable
 gains span a subspace of `Ω → ℝ` that, under no arbitrage, misses the standard
 simplex, so the separating-dual kernel `exists_pos_dual_of_disjoint_stdSimplex`
 (`Foundations/ConvexSeparation.lean`) produces a strictly-positive pricing
-functional — the EMM. The forward direction is martingale-transform telescoping.
+functional — the EMM. The forward direction is `MathFin.emm_implies_no_arbitrage`, shared with
+the one-period market.
 
 ## Scope
 
@@ -250,45 +253,23 @@ theorem exists_isEMM_of_noArbitrage [Finite Ω] (hS : StronglyAdapted 𝓕 S)
   linarith [hkey]
 
 omit [Nonempty Ω] [IsProbabilityMeasure P] [Fintype Ω] in
-/-- **Forward direction**: an equivalent martingale measure precludes arbitrage.
-Under the EMM `Q`, the discounted gains telescope to `∫ G_T dQ = 0`; a
-non-negative integrand with zero integral is `0` a.e., and equivalence transports
-this back to `P`. -/
+/-- **Forward direction**: an equivalent martingale measure precludes arbitrage. On a finite
+space every function is integrable and a strategy is bounded on the horizon, so this is
+`MathFin.emm_implies_no_arbitrage` at the horizon `T`. -/
 theorem noArbitrage_of_isEMM [Finite Ω] (hS : StronglyAdapted 𝓕 S)
     {Q : Measure Ω} (hQ : IsEMM 𝓕 P S T Q) : NoArbitrage 𝓕 P S T := by
   haveI := hQ.prob
+  haveI := Fintype.ofFinite Ω
   intro φ hφ hpos
-  -- Each one-step gain integrates to zero under `Q` (the pull-out + martingale step).
-  have hstep : ∀ k, k < T → ∫ ω, (φ (k + 1) * (S (k + 1) - S k)) ω ∂Q = 0 := by
-    intro k hk
-    have hcondS : Q[S (k + 1) - S k | 𝓕 k] =ᵐ[Q] 0 := by
-      have h1 := condExp_sub (μ := Q) (Integrable.of_finite (f := S (k + 1)))
-        (Integrable.of_finite (f := S k)) (𝓕 k)
-      have h2 : Q[S (k + 1) | 𝓕 k] =ᵐ[Q] S k := (hQ.mart k hk).symm
-      have h3 : Q[S k | 𝓕 k] = S k :=
-        condExp_of_stronglyMeasurable (𝓕.le k) (hS k) (Integrable.of_finite (μ := Q))
-      filter_upwards [h1, h2] with ω e1 e2
-      rw [Pi.zero_apply, e1, Pi.sub_apply, e2, congrFun h3 ω, sub_self]
-    have hpull0 : Q[φ (k + 1) * (S (k + 1) - S k) | 𝓕 k] =ᵐ[Q] 0 := by
-      have hpull := condExp_mul_of_stronglyMeasurable_left (μ := Q) (m := 𝓕 k)
-        (f := φ (k + 1)) (g := S (k + 1) - S k) (hφ k) Integrable.of_finite Integrable.of_finite
-      filter_upwards [hpull, hcondS] with ω ep ec
-      rw [Pi.zero_apply] at ec ⊢
-      rw [ep, Pi.mul_apply, ec, mul_zero]
-    rw [← integral_condExp (𝓕.le k), integral_congr_ae hpull0]; simp
-  -- Sum the steps: `∫ G_T dQ = 0`.
-  have hGint : ∫ ω, martingaleTransform φ S T ω ∂Q = 0 := by
-    have hsplit : ∀ ω, martingaleTransform φ S T ω
-        = ∑ k ∈ Finset.range T, φ (k + 1) ω * (S (k + 1) ω - S k ω) := fun ω ↦ by
-      rw [martingaleTransform]
-    simp_rw [hsplit]
-    rw [integral_finsetSum _ (fun k _ ↦ Integrable.of_finite)]
-    exact Finset.sum_eq_zero fun k hk ↦ hstep k (Finset.mem_range.mp hk)
-  -- `G_T ≥ 0` `Q`-a.e. (equivalence) and `∫ G_T = 0` give `G_T = 0` a.e.
-  have hposQ : 0 ≤ᵐ[Q] martingaleTransform φ S T := hQ.absP.ae_le hpos
-  have hzeroQ : martingaleTransform φ S T =ᵐ[Q] 0 :=
-    (integral_eq_zero_iff_of_nonneg_ae hposQ Integrable.of_finite).mp hGint
-  exact hQ.Pabs.ae_eq hzeroQ
+  exact ae_eq_zero_of_nonneg_of_null_pos hpos
+    (emm_implies_no_arbitrage hQ.absP hQ.Pabs (fun t _ ↦ hS t) (fun t _ ↦ Integrable.of_finite)
+      hQ.mart φ (fun t _ ↦ hφ t)
+      ⟨∑ n ∈ Finset.range (T + 1), ∑ ω', |φ n ω'|, fun n hn ω ↦
+        (Finset.single_le_sum (f := fun ω' ↦ |φ n ω'|) (fun _ _ ↦ abs_nonneg _)
+          (Finset.mem_univ ω)).trans
+          (Finset.single_le_sum (f := fun n ↦ ∑ ω', |φ n ω'|)
+            (fun _ _ ↦ Finset.sum_nonneg fun _ _ ↦ abs_nonneg _)
+            (Finset.mem_range.mpr (Nat.lt_succ_of_le hn)))⟩ hpos)
 
 omit [IsProbabilityMeasure P] [Fintype Ω] in
 /-- **Finite-Ω Fundamental Theorem of Asset Pricing** (Harrison–Pliska; the
