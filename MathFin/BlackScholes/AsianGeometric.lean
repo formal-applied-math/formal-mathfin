@@ -50,9 +50,12 @@ theorem asianGeom_driver_hasLaw (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
   have h := geomAsianN_driver_hasLaw hB T (n := 2) two_pos ![s, t]
     (fun i ↦ by fin_cases i <;> simpa)
   have hst' : (s : ℝ) ≤ t := hst
-  convert h using 3
-  · simp [Fin.sum_univ_two]
-  · simp [Fin.sum_univ_two, min_eq_left hst', min_comm]
-    ring
+  have hf : (fun ω ↦ (∑ i, B (![s, t] i) ω) / ((2 : ℕ) : ℝ)) = fun ω ↦ (B s ω + B t ω) / 2 := by
+    funext ω; simp [Fin.sum_univ_two]
+  have hv : (∑ i, ∑ j, min ((![s, t] i : ℝ≥0) : ℝ) ((![s, t] j : ℝ≥0) : ℝ)) / ((2 : ℕ) : ℝ) ^ 2
+      = (3 * (s : ℝ) + t) / 4 := by
+    simp [Fin.sum_univ_two, min_eq_left hst', min_eq_right hst'] <;> ring
+  rw [hf, hv] at h
+  exact h
 
 end MathFin
