@@ -577,6 +577,13 @@
       "input_hash": "d9e6afee3f0449df9628c34c4bfd727c13535517678114ca5c14fb6c4a5163a2",
       "verified_at_commit": "a44f072"
     },
+    "mf-american-put-stock-boundary-strict-convex": {
+      "benchmark_file": "american_put_boundary.json",
+      "date": "2026-10-30",
+      "elapsed_s": 4.3,
+      "input_hash": "d6038cff3caaf948f50d74e8264dbb710d7924871f037585a703681e9367f926",
+      "verified_at_commit": "714b087"
+    },
     "mf-american-supermartingale": {
       "benchmark_file": "binomial.json",
       "date": "2026-10-30",
@@ -4045,9 +4052,9 @@
     "mf-wiener-integral-is-ito-integral": {
       "benchmark_file": "stochastic_foundations.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.9,
-      "input_hash": "da28bd765850a00d7fb73d489c8f94ace2e07c8e54f6a6b07b730f08e244f60f",
-      "verified_at_commit": "99f214a"
+      "elapsed_s": 5.3,
+      "input_hash": "d4b347f9d8176caace065602c368a2e1e0b2957d7cedbf3574d82f90ab70e574",
+      "verified_at_commit": "714b087"
     },
     "mf-worstcase-risk-representation": {
       "benchmark_file": "risk_measures.json",
