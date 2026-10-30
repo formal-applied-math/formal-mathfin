@@ -825,9 +825,9 @@
     "mf-binomial-price-path-measure": {
       "benchmark_file": "binomial.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.7,
-      "input_hash": "cf46f445fc20b7bb30f573d695bd52aab38b3f9bbf4f3c48a4dd11f89d98b2b3",
-      "verified_at_commit": "3ff1357"
+      "elapsed_s": 30.1,
+      "input_hash": "0b1e5293ba7d05b1af68b83d1de64e3251fa577d2f705a01adf373387229cb1d",
+      "verified_at_commit": "f9df013"
     },
     "mf-binomial-replication": {
       "benchmark_file": "binomial.json",
