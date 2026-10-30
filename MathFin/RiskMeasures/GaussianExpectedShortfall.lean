@@ -31,6 +31,8 @@ supplies its meaning.
 * `rockafellarUryasev_of_hasLaw_gaussianReal`: the law-side objective equals `ruObjective`.
 * `expectedShortfall_of_hasLaw_gaussianReal`: `ES_α(X) = m + σ ϕ(Φ⁻¹(α))/(1 − α)` for
   `X ~ N(m, σ²)` with `σ > 0`.
+* `expectedShortfall_of_hasGaussianLaw`: the same for any Gaussian `X`, in terms of `E X` and
+  `Var X`.
 -/
 
 @[expose] public section
@@ -81,5 +83,13 @@ theorem expectedShortfall_of_hasLaw_gaussianReal {m : ℝ} {v : ℝ≥0} (hv : v
   rw [show rockafellarUryasev X P α = ruObjective m √(v : ℝ) α from
     funext (rockafellarUryasev_of_hasLaw_gaussianReal hX)] at h
   exact h.unique (gaussianCVaR_isLeast_ruObjective m _ _ α hσ (Phi_PhiInv hα) hα.2)
+
+/-- **The expected shortfall of a Gaussian random variable** in terms of its mean and variance:
+`ES_α(X) = E X + sd(X) ϕ(Φ⁻¹(α))/(1 − α)` when `Var X > 0`. -/
+theorem expectedShortfall_of_hasGaussianLaw (hX : HasGaussianLaw X P) (hv : 0 < Var[X; P])
+    (hα : α ∈ Ioo 0 1) :
+    expectedShortfall X P α = gaussianCVaR P[X] √Var[X; P] (PhiInv α) α := by
+  rw [expectedShortfall_of_hasLaw_gaussianReal (Real.toNNReal_pos.2 hv).ne'
+    ⟨hX.aemeasurable, hX.map_eq_gaussianReal⟩ hα, Real.coe_toNNReal _ (variance_nonneg X P)]
 
 end MathFin

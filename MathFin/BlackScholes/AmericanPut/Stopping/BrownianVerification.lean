@@ -33,7 +33,7 @@ Brownian model and its raw natural filtration. -/
 noncomputable def brownianClassicalContactRule {K r q σ S : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
-    (hK : 0 < K) (hS : 0 < S) (T : ℝ≥0) : BoundedRule brownianFiltration T :=
+    (hK : 0 < K) (hS : 0 < S) (T : ℝ≥0) : StoppingRule brownianFiltration T :=
   classicalContactRule (r := r) (q := q) (σ := σ) hp brownian_adapted continuous_brownian hK hS T
 
 theorem brownian_price_identification_of_martingales {K r q σ S : ℝ}

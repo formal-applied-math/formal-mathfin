@@ -42,11 +42,17 @@ Issue #362. Corpus 713 → 711 (`mf-merton-from-general-jump-law` and `mf-merton
   (`JumpDiffusionHyp.aemeasurable_J`). The compound-Poisson MGF lemmas lose their `hmeas`
   hypotheses (`mf-compound-poisson-mgf`, `mf-compound-poisson-mgf-random-count`,
   `mf-creditriskplus-sector-loss-mgf`).
-- `SVI.blackPlus`, `blackMinus`, `logBlackCall` are tied to ForwardSmile's `dpl`, `dmi`, `blackForm`
-  (`SVI.blackPlus_eq_dpl`, `SVI.blackMinus_eq_dmi`, `SVI.logBlackCall_eq_blackForm`, from `dpl_eq`,
-  `dmi_eq`), and Durrleman's function is `1 + smileDelta` for SVI
-  (`SVI.durrleman_eq_one_add_smileDelta`). The SVI definitions themselves remain, because six SVI
-  files use them in `√variance` form.
+- The SVI Black terms are ForwardSmile's: `SVI.blackPlus`, `blackMinus`, `logBlackCall` and
+  `black_density_identity` are removed in favour of `ForwardSmile.dpl`, `dmi`, `blackForm` and
+  `exp_mul_pdf_dmi` at the SVI total variance `variance p k` (with `SVI.dpl_eq_rootVariance` and
+  `dmi_eq_rootVariance` for the `√variance` forms). Renames: `blackPlus_hasDerivAt` to
+  `dpl_hasDerivAt`, `blackMinus_hasDerivAt` to `dmi_hasDerivAt`, `blackMinusSlope` to `dmiSlope`,
+  `logBlackCall_hasDerivAt` to `blackForm_hasDerivAt`, `logBlackCall_hasDerivWithinAt` to
+  `blackForm_hasDerivWithinAt`, the `sigmaZero_` variants likewise, `blackPlus_eq` to `dpl_eq_div`,
+  `tendsto_blackPlus_atBot(_iff)` to `tendsto_dpl_atBot(_iff)`, `eventually_le_blackPlus` to
+  `eventually_le_dpl`, `blackCall_le_Phi_blackPlus` to `blackCall_le_Phi_dpl`
+  (`mf-svi-butterfly-free-sign-formula` restates the changed names).
+  Durrleman's function is `1 + smileDelta` for SVI (`SVI.durrleman_eq_one_add_smileDelta`).
 - `BarrierParity.discountedValue` equals `Contract.value` of the one-payment contract
   (`discountedValue_eq_contract_value`); the barrier prices are not routed through contracts (#367).
 - `sc-bs-pde-feynman-kac` also concludes that the three Greeks are the closed-form ones: `Vτ`, `VS`
@@ -1422,7 +1428,7 @@ One entry added, `mf-svi-butterfly-free-sign-formula` (`full`). Corpus 445 → 4
 
 The strike-convexity certificate left out the large-strike behaviour. For raw SVI with `b ≥ 0`
 and positive variance, `d₊(k) → −∞` as `k → ∞` exactly when the right wing slope `b(1+ρ)` is below
-`2` (`tendsto_blackPlus_atBot_iff`), and the smiled call tends to `0` at large strikes exactly
+`2` (`tendsto_dpl_atBot_iff`), and the smiled call tends to `0` at large strikes exactly
 when it is (`tendsto_bsSmile_zero_iff`). The call is also between `(1 − K)⁺` and `1`, tends to `1`
 at strike `0`, and is nonincreasing once it is convex. So the strike-convexity formula with the
 one further atom `2 − b(1+ρ) > 0` holds exactly when `σ ≥ 0`, `b ≥ 0`, `ρ² ≤ 1`, the variance is

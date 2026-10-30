@@ -10,10 +10,10 @@ public import MathFin.Foundations.ItoFormulaUnrestrictedLocMart
 public import MathFin.BlackScholes.AmericanPut.Stopping.PlanePartial
 
 /-!
-# Ito's formula for globally C3 plane functions
+# Ito's formula for globally C2 plane functions
 
-This adapter derives all six partial derivatives required by MathFin's Ito
-theorem from one joint C3 hypothesis. The resulting local martingale uses the
+This adapter derives the three partial derivatives (`f_t`, `f_x`, `f_xx`) required by MathFin's Ito
+theorem from one joint C2 hypothesis. The resulting local martingale uses the
 upstream null-augmented Brownian filtration, explicitly, not the raw filtration.
 
 ## Result
@@ -51,28 +51,21 @@ theorem plane_ito_localMartingale {Ω : Type*} [MeasurableSpace Ω] {P : Measure
     [IsProbabilityMeasure P] {W : ℝ≥0 → Ω → ℝ}
     (hW : IsPreBrownianReal W P) (hmeas : ∀ t, Measurable (W t))
     (hpaths : ∀ ω, Continuous (fun t => W t ω))
-    {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) :
+    {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G) :
     ∃ M : ℝ≥0 → Ω → ℝ, (∀ ω, Continuous (fun t => M t ω)) ∧
       IsLocalMartingale M
           (MathFin.ItoIntegralProcessLocalMartingaleGeneral.augFiltration (μ := P) hmeas) P ∧
       ∀ t : ℝ≥0, (fun ω => G (t,W t ω)-G (0,W 0 ω)) =ᵐ[P]
         (fun ω => M t ω + ∫ s in Set.Ioc 0 t,
           planeGenerator G (s,W s ω) ∂MathFin.ItoIntegralL2.timeMeasure) := by
-  have ht : ContDiff ℝ 2 (planePartial G (1,0)) := planePartial_contDiff hG _
-  have hx : ContDiff ℝ 2 (planePartial G (0,1)) := planePartial_contDiff hG _
-  have htt : ContDiff ℝ 1 (planePartial (planePartial G (1,0)) (1,0)) := planePartial_contDiff ht _
-  have htx : ContDiff ℝ 1 (planePartial (planePartial G (1,0)) (0,1)) := planePartial_contDiff ht _
-  have hxx : ContDiff ℝ 1 (planePartial (planePartial G (0,1)) (0,1)) := planePartial_contDiff hx _
-  have hxxx : ContDiff ℝ 0 (planePartial (planePartial (planePartial G (0,1)) (0,1)) (0,1)) :=
-    planePartial_contDiff hxx _
+  have ht : ContDiff ℝ 1 (planePartial G (1,0)) := planePartial_contDiff hG _
+  have hx : ContDiff ℝ 1 (planePartial G (0,1)) := planePartial_contDiff hG _
+  have hxx : ContDiff ℝ 0 (planePartial (planePartial G (0,1)) (0,1)) :=
+    planePartial_contDiff hx _
   exact MathFin.ito_formula_unrestricted hW hmeas hpaths
     (fun t w => planePartial_hasDeriv_time (hG.differentiable (by norm_num) (t,w)))
-    (fun t w => planePartial_hasDeriv_time (ht.differentiable (by norm_num) (t,w)))
-    (fun t w => planePartial_hasDeriv_space (ht.differentiable (by norm_num) (t,w)))
     (fun t w => planePartial_hasDeriv_space (hG.differentiable (by norm_num) (t,w)))
     (fun t w => planePartial_hasDeriv_space (hx.differentiable (by norm_num) (t,w)))
-    (fun t w => planePartial_hasDeriv_space (hxx.differentiable (by norm_num) (t,w)))
-    hG.continuous ht.continuous hx.continuous hxx.continuous htt.continuous htx.continuous
-        hxxx.continuous
+    hG.continuous ht.continuous hx.continuous hxx.continuous
 
 end MathFin.BlackScholes.AmericanPut.Stopping

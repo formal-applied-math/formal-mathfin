@@ -116,7 +116,7 @@ theorem gridReward_eq_discountedLogPayoff (K r q σ x : ℝ) (T δ : ℝ≥0) :
       fun i ω => discountedLogPayoff K r (cappedGridTime T δ i)
         (brownianLogState (r-q-σ^2/2) σ x (cappedGridTime T δ i) ω) := by
   funext i ω
-  simp only [gridReward,putReward,MathFin.gbmValue,discountedLogPayoff,
+  simp only [gridReward,putRewardAt,putReward,MathFin.gbmValue,discountedLogPayoff,
     brownianLogState,cappedGridTime,Real.exp_add,mul_assoc]
 
 /-- Deterministic Gaussian recursion for the actual capped-grid put value. -/

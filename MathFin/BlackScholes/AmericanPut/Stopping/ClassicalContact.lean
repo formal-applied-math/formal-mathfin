@@ -100,7 +100,7 @@ theorem classicalGap_terminal (hp : DividendPutSolution k h p b)
 `firstContactRule`. -/
 noncomputable def classicalContactRule (hp : DividendPutSolution k h p b)
     (hadapt : Adapted 𝓕 W) (hpaths : ∀ ω, Continuous (fun t => W t ω))
-    (hK : 0 < K) (hS : 0 < S) (T : ℝ≥0) : BoundedRule 𝓕 T :=
+    (hK : 0 < K) (hS : 0 < S) (T : ℝ≥0) : StoppingRule 𝓕 T :=
   firstContactRule (Z := classicalGap W K r q σ S p T)
     (classicalGap_adapted hp hadapt T) (classicalGap_continuous hp hpaths T)
     (classicalGap_nonneg hp hK hS T) T (classicalGap_terminal hp hK hS T)

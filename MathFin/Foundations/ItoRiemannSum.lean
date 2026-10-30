@@ -68,7 +68,7 @@ lemma riemannσ_sub (θ θ' : ℝ≥0 → Ω → ℝ) (T : ℝ≥0) (n : ℕ) (�
 omit [IsProbabilityMeasure μ] in
 /-- `MemLp` of the adapted Riemann sum, by **domination**: each term `θ(tₖ)·ΔBₖ` is a bounded
 (`|θ| ≤ C`) measurable coefficient times an `L²` increment, hence `L²` (`‖θ·Δ‖ ≤ ‖C·Δ‖`). No
-increment-independence / `AdaptedAt` needed for membership. -/
+increment-independence / adaptedness needed for membership. -/
 lemma memLp_riemannσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :

@@ -561,10 +561,8 @@ noncomputable def smileN (σ ψ₁ T₀ ε k T : ℝ) : ℝ :=
 (`dupireRatio_eq`). `1 + smileDelta` has the algebraic form of Durrleman's function `g`, which
 `MathFin.SVI.durrleman` (`SVI/Reduction.lean`) defines for the SVI variance: where the two have the
 same total variance, slope and curvature they are equal (`SVI.durrleman_eq_one_add_smileDelta`).
-Likewise `dpl`/`dmi`/`blackForm`/`exp_mul_pdf_dmi` above are the abstract-variance forms of
-`SVI.blackPlus`/`blackMinus`/`logBlackCall`/`black_density_identity` (`SVI/BlackSmile.lean`), which
-are these at `w = SVI.variance p k` (`SVI.blackPlus_eq_dpl`, `SVI.blackMinus_eq_dmi`,
-`SVI.logBlackCall_eq_blackForm`). -/
+The SVI development (`SVI/BlackSmile.lean`) uses `dpl`, `dmi`, `blackForm` and `exp_mul_pdf_dmi`
+directly, at `w = SVI.variance p k`. -/
 noncomputable def smileDelta (σ ψ₁ T₀ ε k T : ℝ) : ℝ :=
   -k * wSlope σ ψ₁ T₀ ε T k / totalVar σ ψ₁ T₀ ε k T
     + wSlope σ ψ₁ T₀ ε T k ^ 2 * (k ^ 2 - totalVar σ ψ₁ T₀ ε k T

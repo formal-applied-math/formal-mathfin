@@ -24,6 +24,14 @@ property** (`itoProcessL2Inf_isMartingale`) and **adaptedness**
 (`itoProcessL2Inf_aeStronglyMeasurable`) hold on all of `ℝ≥0` directly from the
 conditional-expectation tower — no integrand gluing is needed.
 
+## The finite-horizon integral is the infinite-horizon one on a band
+
+`bandExtend T` extends a `[0,T]` integrand by zero to the `[0,∞)` predictable `L²` (a linear
+isometry, with `restrictToBand T` as left inverse), and
+`itoIntegralCLM_T_eq_itoIntegralL2_bandExtend` says `itoIntegralCLM_T T = itoIntegralL2 ∘
+bandExtend T`. Consistency between two finite horizons (`ItoIntegralCrossHorizon`) is then the
+equality of two extensions by zero.
+
 ## The `[0,∞)` continuous-local-martingale arc
 
 This is **step 1** (the L² process). Remaining:
@@ -125,6 +133,133 @@ lemma restrictToBand_simpleAssembly (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B
         (MemLp.coeFn_toLp (memLp_uncurry_trim hBmeas V)).filter_mono (ae_mono hmono)
     _ =ᵐ[trimMeasure_T (μ := μ) T hBmeas] ⇑(simpleProcessL2_T (μ := μ) T hBmeas V) :=
         (MemLp.coeFn_toLp (memLp_uncurry_trim_T T hBmeas V)).symm
+
+/-! ### Extension by zero: the isometric section of `restrictToBand`
+
+A `[0,T]` integrand is a `[0,∞)` integrand carried by the band `(0,T] × Ω`: `bandExtend T` is
+that inclusion, and `restrictToBand T` its left inverse. Composing `itoIntegralL2` with it is the
+`[0,T]` Itô integral (`itoIntegralCLM_T_eq_itoIntegralL2_bandExtend`), so horizon consistency
+between finite horizons is the equality of two extensions by zero. -/
+
+/-- The predictable trim gives no mass to the time origin `{0} × Ω`. -/
+lemma ae_fst_ne_zero_trim (hBmeas : ∀ u, Measurable (B u)) :
+    ∀ᵐ z ∂((timeMeasure.prod μ).trim
+      (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod), z.1 ≠ 0 := by
+  rw [Filter.eventually_iff, mem_ae_iff,
+    show {z : ℝ≥0 × Ω | z.1 ≠ 0}ᶜ = {(⊥ : ℝ≥0)} ×ˢ (Set.univ : Set Ω) from by ext z; simp,
+    trim_measurableSet_eq _ (MeasureTheory.measurableSet_predictable_singleton_bot_prod
+      (𝓕 := natFiltration (mΩ := mΩ) hBmeas) MeasurableSet.univ),
+    Measure.prod_prod, timeMeasure_singleton, zero_mul]
+
+/-- Restricting to the band `(0,T] × Ω` commutes with taking indicators: a.e.-equality in
+the `[0,T]` trim lifts to a.e.-equality of the band indicators in the `[0,∞)` trim. -/
+lemma indicator_band_ae_eq (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    {f g : ℝ≥0 × Ω → ℝ} (h : f =ᵐ[trimMeasure_T (μ := μ) T hBmeas] g) :
+    (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)).indicator f
+      =ᵐ[(timeMeasure.prod μ).trim (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod]
+        (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)).indicator g := by
+  rw [trimMeasure_T_eq_restrict] at h
+  filter_upwards [(ae_restrict_iff'
+    (MeasureTheory.measurableSet_predictable_Ioc_prod
+      (𝓕 := natFiltration (mΩ := mΩ) hBmeas) 0 T MeasurableSet.univ)).1 h] with z hz
+  by_cases hzs : z ∈ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)
+  · rw [Set.indicator_of_mem hzs, Set.indicator_of_mem hzs, hz hzs]
+  · rw [Set.indicator_of_notMem hzs, Set.indicator_of_notMem hzs]
+
+lemma memLp_indicator_band (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    MemLp ((Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)).indicator φ) 2
+      ((timeMeasure.prod μ).trim (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod) :=
+  (memLp_indicator_iff_restrict (MeasureTheory.measurableSet_predictable_Ioc_prod
+      (𝓕 := natFiltration (mΩ := mΩ) hBmeas) 0 T MeasurableSet.univ)).2
+    (by rw [← trimMeasure_T_eq_restrict]; exact Lp.memLp φ)
+
+/-- **Extension by zero** of a `[0,T]` integrand to the `[0,∞)` predictable `L²`: the
+isometric section of `restrictToBand`. -/
+noncomputable def bandExtend (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) :
+    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) →ₗᵢ[ℝ]
+      Lp ℝ 2 ((timeMeasure.prod μ).trim
+        (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod) where
+  toFun φ := (memLp_indicator_band T hBmeas φ).toLp
+    ((Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)).indicator φ)
+  map_add' φ ψ := by
+    refine Lp.ext ?_
+    filter_upwards [MemLp.coeFn_toLp (memLp_indicator_band T hBmeas (φ + ψ)),
+      Lp.coeFn_add ((memLp_indicator_band T hBmeas φ).toLp _)
+        ((memLp_indicator_band T hBmeas ψ).toLp _),
+      MemLp.coeFn_toLp (memLp_indicator_band T hBmeas φ),
+      MemLp.coeFn_toLp (memLp_indicator_band T hBmeas ψ),
+      indicator_band_ae_eq T hBmeas (Lp.coeFn_add φ ψ)] with z h1 h2 h3 h4 h5
+    simp only [h1, h2, h3, h4, h5, Pi.add_apply, Set.indicator_add']
+  map_smul' c φ := by
+    refine Lp.ext ?_
+    filter_upwards [MemLp.coeFn_toLp (memLp_indicator_band T hBmeas (c • φ)),
+      Lp.coeFn_smul c ((memLp_indicator_band T hBmeas φ).toLp _),
+      MemLp.coeFn_toLp (memLp_indicator_band T hBmeas φ),
+      indicator_band_ae_eq T hBmeas (Lp.coeFn_smul c φ)] with z h1 h2 h3 h4
+    simp only [h1, h2, h3, h4, Pi.smul_apply, RingHom.id_apply]
+    by_cases hz : z ∈ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)
+    · rw [Set.indicator_of_mem hz, Set.indicator_of_mem hz, Pi.smul_apply]
+    · rw [Set.indicator_of_notMem hz, Set.indicator_of_notMem hz, smul_zero]
+  norm_map' φ := by
+    rw [LinearMap.coe_mk, AddHom.coe_mk, Lp.norm_toLp, Lp.norm_def, eLpNorm_indicator_eq_eLpNorm_restrict
+      (MeasureTheory.measurableSet_predictable_Ioc_prod
+        (𝓕 := natFiltration (mΩ := mΩ) hBmeas) 0 T MeasurableSet.univ),
+      ← trimMeasure_T_eq_restrict]
+
+lemma bandExtend_coeFn (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    ⇑(bandExtend T hBmeas φ) =ᵐ[(timeMeasure.prod μ).trim
+        (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod]
+      (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)).indicator ⇑φ :=
+  MemLp.coeFn_toLp (memLp_indicator_band T hBmeas φ)
+
+/-- `restrictToBand` is a left inverse of `bandExtend`: a `[0,T]` integrand is unchanged by
+extending it by zero and restricting back. -/
+lemma restrictToBand_bandExtend (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    restrictToBand (μ := μ) T hBmeas (bandExtend T hBmeas φ) = φ := by
+  refine Lp.ext ?_
+  filter_upwards [restrictToBand_coeFn T hBmeas (bandExtend T hBmeas φ),
+    (bandExtend_coeFn T hBmeas φ).filter_mono
+      (ae_mono ((trimMeasure_T_eq_restrict T hBmeas).le.trans Measure.restrict_le_self)),
+    ae_fst_mem_Ioc_trimMeasure_T (μ := μ) T hBmeas] with z h1 h2 h3
+  rw [h1, h2]
+  exact Set.indicator_of_mem (show z ∈ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) from
+    ⟨h3, Set.mem_univ _⟩) _
+
+/-- A class carried by `(0,T] × Ω`, extended by zero, is the same function read in the
+`[0,∞)` trim. -/
+lemma bandExtend_toLp_ae_eq (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) {g : ℝ≥0 × Ω → ℝ}
+    (hg0 : ∀ z : ℝ≥0 × Ω, T < z.1 → g z = 0)
+    (hgm : MemLp g 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    ⇑(bandExtend T hBmeas (hgm.toLp g)) =ᵐ[(timeMeasure.prod μ).trim
+        (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod] g := by
+  filter_upwards [bandExtend_coeFn T hBmeas (hgm.toLp g),
+    indicator_band_ae_eq T hBmeas hgm.coeFn_toLp, ae_fst_ne_zero_trim hBmeas] with z h1 h2 h0
+  rw [h1, h2]
+  by_cases hz : z.1 ≤ T
+  · exact Set.indicator_of_mem (show z ∈ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) from
+    ⟨⟨pos_iff_ne_zero.2 h0, hz⟩, Set.mem_univ _⟩) _
+  · rw [Set.indicator_of_notMem (fun h => hz h.1.2), hg0 z (not_le.1 hz)]
+
+/-- On a `T`-bounded simple process, extension by zero turns the `[0,T]` embedding into the
+`[0,∞)` one. -/
+lemma bandExtend_simpleAssembly_T (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (V : TBoundedSP T hBmeas) :
+    bandExtend T hBmeas (simpleAssembly_T (μ := μ) T hBmeas V) = simpleAssembly hBmeas V.val := by
+  refine Lp.ext ?_
+  filter_upwards [bandExtend_coeFn T hBmeas (simpleAssembly_T (μ := μ) T hBmeas V),
+    indicator_band_ae_eq T hBmeas (memLp_uncurry_trim_T (μ := μ) T hBmeas V.val).coeFn_toLp,
+    (memLp_uncurry_trim (μ := μ) hBmeas V.val).coeFn_toLp,
+    ae_fst_ne_zero_trim hBmeas] with z h1 h2 h3 h0
+  refine h1.trans (h2.trans (Eq.trans ?_ h3.symm))
+  rcases z with ⟨t, ω⟩
+  by_cases ht : t ≤ T
+  · exact Set.indicator_of_mem (show (t, ω) ∈ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) from
+    ⟨⟨pos_iff_ne_zero.2 h0, ht⟩, Set.mem_univ _⟩) _
+  · rw [Set.indicator_of_notMem (fun h => ht h.1.2)]
+    exact (uncurry_eq_zero_of_lt V (not_le.1 ht) ω).symm
 
 /-! ### The `[0,T]` clamp of a simple process
 
@@ -367,6 +502,18 @@ lemma itoIntegralL2_simpleAssembly (hBmeas : ∀ t, Measurable (B t))
   rw [itoIntegralL2, LinearMap.extendOfNorm_eq (simpleAssembly_denseRange (μ := μ) hBmeas)
     ⟨1, fun W ↦ by rw [one_mul]; exact (assembly_isometry hB hBmeas W).le⟩]
   rfl
+
+/-- **The finite-horizon Itô integral is the infinite-horizon one on integrands carried by
+`(0,T]`.** -/
+theorem itoIntegralCLM_T_eq_itoIntegralL2_bandExtend (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    itoIntegralCLM_T hB T hBmeas φ = itoIntegralL2 hB hBmeas (bandExtend T hBmeas φ) :=
+  congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
+    (itoIntegralCLM_T hB T hBmeas).continuous
+    ((itoIntegralL2 hB hBmeas).continuous.comp (bandExtend T hBmeas).continuous)
+    (funext fun V => by
+      simp only [Function.comp_apply, itoIntegralCLM_T_simpleAssembly_T,
+        bandExtend_simpleAssembly_T, itoIntegralL2_simpleAssembly])) φ
 
 /-- **Simple-process increment-independence (the step-2 core).** For a simple
 process `V`, the conditional expectation of its `[0,∞)` integral onto `𝓕_t` is the

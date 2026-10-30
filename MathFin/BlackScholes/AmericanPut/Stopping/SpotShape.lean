@@ -64,8 +64,7 @@ variable [MeasurableSpace Ω] {P : Measure Ω} [IsProbabilityMeasure P]
 theorem value_antitone_spot (hW : Measurable W.uncurry) (hK : 0 ≤ K) (hr : 0 ≤ r) :
     AntitoneOn (fun S => americanPutValue P 𝓕 W K r q σ S T) (Ici 0) := by
   intro x hx y hy hxy
-  apply csSup_le exerciseValues_nonempty
-  rintro _ ⟨θ,rfl⟩
+  refine stoppingValue_le univ_nonempty fun θ _ ↦ ?_
   exact (integral_mono (putReward_integrable hW P hK hr hy θ.measurable_time)
     (putReward_integrable hW P hK hr hx θ.measurable_time)
     (fun ω => putReward_antitone W K r q σ θ.time ω hxy)).trans
@@ -77,8 +76,7 @@ theorem value_convexOn_spot (hW : Measurable W.uncurry) (hK : 0 ≤ K) (hr : 0 �
   intro x hx y hy a b ha hb hab
   change americanPutValue P 𝓕 W K r q σ (a*x+b*y) T ≤
     a*americanPutValue P 𝓕 W K r q σ x T+b*americanPutValue P 𝓕 W K r q σ y T
-  apply csSup_le exerciseValues_nonempty
-  rintro _ ⟨θ,rfl⟩
+  refine stoppingValue_le univ_nonempty fun θ _ ↦ ?_
   have hix := putReward_integrable (q := q) (σ := σ) hW P hK hr hx θ.measurable_time
   have hiy := putReward_integrable (q := q) (σ := σ) hW P hK hr hy θ.measurable_time
   have himix := putReward_integrable (q := q) (σ := σ) hW P hK hr

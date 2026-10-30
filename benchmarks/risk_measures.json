@@ -213,7 +213,7 @@
     {
       "id": "mf-gaussian-var-subadditive",
       "name": "Gaussian VaR Subadditivity",
-      "description": "For joint-gaussian losses L_i ~ N(μ_i, σ_i²) with correlation ρ ≤ 1 and right-tail z ≥ 0: VaR(L₁+L₂) ≤ VaR(L₁) + VaR(L₂) — subadditivity of the closed-form Gaussian VaR (the genuine content is the joint-stdev triangle inequality).",
+      "description": "For joint-gaussian losses L_i ~ N(μ_i, σ_i²) with correlation ρ ≤ 1 and right-tail z ≥ 0: VaR(L₁+L₂) ≤ VaR(L₁) + VaR(L₂) for the closed-form function gaussianVaR on parameters (ρ free), not for random variables — subadditivity of the closed-form Gaussian VaR (the genuine content is the joint-stdev triangle inequality).",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_subadditive_thm {μ₁ μ₂ σ₁ σ₂ ρ z : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) (hz : 0 ≤ z) :\n    MathFin.gaussianVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2)) z ≤\n      MathFin.gaussianVaR μ₁ σ₁ z + MathFin.gaussianVaR μ₂ σ₂ z :=\n  MathFin.gaussianVaR_subadditive h₁ h₂ hρ hz\n"
@@ -229,7 +229,7 @@
     {
       "id": "mf-gaussian-cvar-subadditive",
       "name": "Gaussian CVaR Subadditivity",
-      "description": "Same setup as gaussian VaR subadditivity with level α < 1: CVaR(L₁+L₂) ≤ CVaR(L₁) + CVaR(L₂). Gives CVaR coherence in the gaussian family.",
+      "description": "Same parameter setup as the closed-form VaR subadditivity with level α < 1: the closed-form CVaR at the combined volatility is at most the sum of the closed forms. A statement about the real function gaussianCVaR on parameters (σ_i ≥ 0, ρ ≤ 1 free), not about random variables; for jointly Gaussian random variables see mf-gaussian-cvar-subadditive-jointly-gaussian.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_cvar_subadditive_thm {μ₁ μ₂ σ₁ σ₂ ρ z α : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) (hα : α < 1) :\n    MathFin.gaussianCVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2)) z α ≤\n      MathFin.gaussianCVaR μ₁ σ₁ z α + MathFin.gaussianCVaR μ₂ σ₂ z α :=\n  MathFin.gaussianCVaR_subadditive h₁ h₂ hρ hα\n"
@@ -240,6 +240,38 @@
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via joint-stdev triangle inequality + PDF non-negativity + linarith. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-var-subadditive-jointly-gaussian",
+      "name": "VaR Subadditivity for Jointly Gaussian Losses",
+      "description": "For a jointly Gaussian pair (X, Y) of losses and a level α ∈ (0, 1) with α ≥ 1/2: VaR_α(X + Y) ≤ VaR_α(X) + VaR_α(Y). A statement about random variables, with no hypothesis on the correlation; value-at-risk is not subadditive for general laws, and for a Gaussian pair with correlation below one the inequality fails below the median (see qrm-var-gaussian-subadditive-iff).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.VaRSuperadditivity\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_add_le_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X Y : Ω → ℝ}\n    (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1) (hα₂ : 1 / 2 ≤ α) :\n    valueAtRisk (fun ω ↦ X ω + Y ω) P α ≤ valueAtRisk X P α + valueAtRisk Y P α :=\n  MathFin.valueAtRisk_add_le_of_hasGaussianLaw h hα hα₂\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Gaussian VaR subadditivity (McNeil-Frey-Embrechts, Quantitative Risk Management, Ch 2.3; QRM Exercise Book Ex. 2.22)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. VaR of each Gaussian loss and of the sum is E + sd Φ⁻¹(α); the standard deviation is subadditive (discriminant of t ↦ Var(tX + Y)); Φ⁻¹(α) ≥ 0 for α ≥ 1/2. Lives in MathFin/RiskMeasures/VaRSuperadditivity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-cvar-subadditive-jointly-gaussian",
+      "name": "Closed-Form CVaR Subadditivity for Jointly Gaussian Losses",
+      "description": "For a jointly Gaussian pair (X, Y) with Var X, Var Y and Var(X + Y) positive and α ∈ (0, 1): the closed form gaussianCVaR at mean E X + E Y and volatility sd(X + Y) is at most the sum of the closed forms at the margins (E X, sd X) and (E Y, sd Y), at the normal quantile Φ⁻¹(α). Derived from the subadditivity of expected shortfall on the general coherence structure and the Gaussian closed form of expected shortfall; the bare-parameter statement is mf-gaussian-cvar-subadditive.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem gaussianCVaR_sd_add_le_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X Y : Ω → ℝ}\n    (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1)\n    (hX : 0 < Var[X; P]) (hY : 0 < Var[Y; P]) (hXY : 0 < Var[fun ω ↦ X ω + Y ω; P]) :\n    gaussianCVaR (P[X] + P[Y]) √Var[fun ω ↦ X ω + Y ω; P] (PhiInv α) α ≤\n      gaussianCVaR P[X] √Var[X; P] (PhiInv α) α + gaussianCVaR P[Y] √Var[Y; P] (PhiInv α) α :=\n  MathFin.gaussianCVaR_sd_add_le h hα hX hY hXY\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Coherence of expected shortfall (Acerbi-Tasche 2002) on the Gaussian family; McNeil-Frey-Embrechts Ch 2.3",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, a corollary of expectedShortfall_add_le (the subadditivity axiom of expectedShortfall_isCoherentRiskMeasure) and expectedShortfall_of_hasGaussianLaw. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -335,23 +367,23 @@
         "reference": "Artzner–Delbaen–Eber–Heath 1999 (coherent measures of risk); finite-state representation via convex duality",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full proof of the finite-state ADEH representation re-exported from MathFin/RiskMeasures/AcceptanceSet.lean, in the loss convention of the library's single coherence structure MathFin.IsCoherentRiskMeasure (MathFin/RiskMeasures/Coherent.lean): monotone for the almost-sure order, ρ(L + m) = ρ(L) + m, positively homogeneous, subadditive, on the integrable losses of a finite measure on a finite state space. The measure is arbitrary: on a finite space the axioms imply the pointwise order, which is all the proof uses. ρ equals the supremum (stated as IsLUB) of expected loss ∑ qᵢ Lᵢ over its representing probability vectors, those q with ∑ qᵢ Zᵢ ≤ 0 on the acceptance set {Z : ρ Z ≤ 0}. Closedness of the acceptance set is derived from the axioms (ρ convex hence continuous on ℝ^ι), not assumed. The least-upper-bound direction separates the rejected loss L − b, for an upper bound b < ρ L, from the acceptance cone via the point-from-cone primitive MathFin.exists_separating_of_not_mem_cone and normalises the separating functional to a representing density — the same Hahn–Banach root as the FTAP. The positions convention of Artzner–Delbaen–Eber–Heath (ρ decreasing, ρ(X + m) = ρ(X) − m) is the same structure at L ↦ ρ(−L) with counting measure (MathFin.isCoherentRiskMeasure_count_neg_iff); the Challenge/Solution pair discharges the positions statement through it. Finite state space only. No axioms beyond Mathlib defaults."
+        "formalization_scope": "Full proof of the finite-state ADEH representation re-exported from MathFin/RiskMeasures/AcceptanceSet.lean, in the loss convention of the library's single coherence structure MathFin.IsCoherentRiskMeasure (MathFin/RiskMeasures/Coherent.lean): monotone for the almost-sure order, ρ(L + m) = ρ(L) + m, positively homogeneous, subadditive, on the integrable losses of a finite measure on a finite state space. The measure is arbitrary: on a finite space the axioms imply the pointwise order, which is all the proof uses. ρ equals the supremum (stated as IsLUB) of expected loss ∑ qᵢ Lᵢ over its representing probability vectors, those q with ∑ qᵢ Zᵢ ≤ 0 on the acceptance set {Z : ρ Z ≤ 0}. Closedness of the acceptance set is derived from the axioms (ρ convex hence continuous on ℝ^ι), not assumed. The least-upper-bound direction separates the rejected loss L − b, for an upper bound b < ρ L, from the acceptance cone via the point-from-cone primitive MathFin.exists_separating_of_not_mem_cone and normalises the separating functional to a representing density — the same Hahn–Banach root as the FTAP. The positions convention of Artzner–Delbaen–Eber–Heath (ρ decreasing, ρ(X + m) = ρ(X) − m) is the same structure at L ↦ ρ(−L) with counting measure (MathFin.isCoherentRiskMeasure_neg_iff); the Challenge/Solution pair discharges the positions statement through it. Finite state space only. No axioms beyond Mathlib defaults."
       }
     },
     {
       "id": "mf-coherent-positions-vs-losses",
       "name": "ADEH Axioms for Positions Are the Loss-Convention Axioms at L ↦ ρ(−L)",
-      "description": "On a finite state space, a functional ρ on payoffs satisfies the four Artzner–Delbaen–Eber–Heath axioms for positions (X ≤ Y ⟹ ρ(Y) ≤ ρ(X); ρ(X + m) = ρ(X) − m; ρ(l·X) = l·ρ(X) for l ≥ 0; ρ(X + Y) ≤ ρ(X) + ρ(Y)) if and only if L ↦ ρ(−L) is a coherent risk measure of losses (IsCoherentRiskMeasure) for counting measure on the states. The positions and loss conventions are one structure seen through the sign flip L = −X. Finite state space with counting measure only.",
+      "description": "On a finite state space, under any finite measure P charging every state (P{i} ≠ 0), a functional ρ on payoffs satisfies the four Artzner–Delbaen–Eber–Heath axioms for positions (X ≤ Y ⟹ ρ(Y) ≤ ρ(X); ρ(X + m) = ρ(X) − m; ρ(l·X) = l·ρ(X) for l ≥ 0; ρ(X + Y) ≤ ρ(X) + ρ(Y)) if and only if L ↦ ρ(−L) is a coherent risk measure of losses (IsCoherentRiskMeasure P). The positions and loss conventions are one structure seen through the sign flip L = −X. Finite state space only; counting measure is the model case.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.PositionsConvention\n\n/-- **Positions versus losses.** On a finite state space with counting measure, `ρ` satisfies the\n    four ADEH axioms for positions (monotone decreasing, `ρ (X + m) = ρ X − m`, positively\n    homogeneous, subadditive) iff `L ↦ ρ (−L)` is a coherent risk measure of losses. Re-exports\n    `MathFin.isCoherentRiskMeasure_count_neg_iff`. -/\ntheorem coherent_positions_iff_losses {ι : Type*} [Fintype ι] [MeasurableSpace ι]\n    [MeasurableSingletonClass ι] {ρ : (ι → ℝ) → ℝ} :\n    MathFin.IsCoherentRiskMeasure (MeasureTheory.Measure.count : MeasureTheory.Measure ι)\n        (fun L ↦ ρ (-L)) ↔\n      (∀ X Y : ι → ℝ, (∀ i, X i ≤ Y i) → ρ Y ≤ ρ X) ∧\n      (∀ X : ι → ℝ, ∀ m : ℝ, ρ (fun i ↦ X i + m) = ρ X - m) ∧\n      (∀ l : ℝ, 0 ≤ l → ∀ X : ι → ℝ, ρ (l • X) = l * ρ X) ∧\n      ∀ X Y : ι → ℝ, ρ (X + Y) ≤ ρ X + ρ Y :=\n  MathFin.isCoherentRiskMeasure_count_neg_iff\n"
+        "lean": "import MathFin.RiskMeasures.PositionsConvention\n\n/-- **Positions versus losses.** On a finite state space with a finite measure `P` charging every\n    state, `ρ` satisfies the four ADEH axioms for positions (monotone decreasing,\n    `ρ (X + m) = ρ X − m`, positively homogeneous, subadditive) iff `L ↦ ρ (−L)` is a coherent\n    risk measure of losses. Re-exports `MathFin.isCoherentRiskMeasure_neg_iff`. -/\ntheorem coherent_positions_iff_losses {ι : Type*} [Fintype ι] [MeasurableSpace ι]\n    [MeasurableSingletonClass ι] {P : MeasureTheory.Measure ι} [MeasureTheory.IsFiniteMeasure P]\n    (hP : ∀ i, P {i} ≠ 0) {ρ : (ι → ℝ) → ℝ} :\n    MathFin.IsCoherentRiskMeasure P (fun L ↦ ρ (-L)) ↔\n      (∀ X Y : ι → ℝ, (∀ i, X i ≤ Y i) → ρ Y ≤ ρ X) ∧\n      (∀ X : ι → ℝ, ∀ m : ℝ, ρ (fun i ↦ X i + m) = ρ X - m) ∧\n      (∀ l : ℝ, 0 ≤ l → ∀ X : ι → ℝ, ρ (l • X) = l * ρ X) ∧\n      ∀ X Y : ι → ℝ, ρ (X + Y) ≤ ρ X + ρ Y :=\n  MathFin.isCoherentRiskMeasure_neg_iff hP\n"
       },
       "metadata": {
         "chapter": 14,
         "reference": "Artzner–Delbaen–Eber–Heath 1999 (coherent measures of risk, positions convention); McNeil–Frey–Embrechts 2015, Definition 2.18 (loss convention)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full proof re-exported from MathFin/RiskMeasures/PositionsConvention.lean. The library has one coherence structure, IsCoherentRiskMeasure (MathFin/RiskMeasures/Coherent.lean), in the loss convention; the positions axioms are written out in the statement rather than bundled in a second structure. SCOPE: finite state space with counting measure, where almost-sure order is the pointwise order and every function is integrable; for a general measure space the two conventions are related by the same sign flip but the equivalence is not stated. The Challenge/Solution pair (Challenge.lean, Solution.lean) discharges the positions-convention representation theorem through this equivalence. No axioms beyond Mathlib defaults."
+        "formalization_scope": "Full proof re-exported from MathFin/RiskMeasures/PositionsConvention.lean. The library has one coherence structure, IsCoherentRiskMeasure (MathFin/RiskMeasures/Coherent.lean), in the loss convention; the positions axioms are written out in the statement rather than bundled in a second structure. SCOPE: finite state space with a finite measure charging every state (counting measure is the model case), where almost-sure order is the pointwise order and every function is integrable; for a measure with null states, or an infinite space, the two conventions are related by the same sign flip but the equivalence is not stated. The Challenge/Solution pair (Challenge.lean, Solution.lean) discharges the positions-convention representation theorem through this equivalence. No axioms beyond Mathlib defaults."
       }
     },
     {
@@ -367,7 +399,7 @@
         "reference": "Worst-case (sup-norm) coherent risk measure; concrete instance of the ADEH representation",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full proof re-exported from MathFin/RiskMeasures/WorstCaseRisk.lean: the worst-case loss maxᵢ Lᵢ is shown to be an IsCoherentRiskMeasure (the library's loss-convention structure) for counting measure on the states (worstCase_isCoherent), its acceptance set is the nonpositive orthant and its representing set is the entire probability simplex (representingSet_worstCase), so the abstract representation coherentRisk_isLUB specialises to IsLUB over stdSimplex. A concrete, recognisable instance making the finite-state ADEH representation tangible. The entry's statement is the representation only; coherence is the separate theorem worstCase_isCoherent. No axioms beyond Mathlib defaults."
+        "formalization_scope": "Full proof re-exported from MathFin/RiskMeasures/WorstCaseRisk.lean: the worst-case loss maxᵢ Lᵢ is shown to be an IsCoherentRiskMeasure (the library's loss-convention structure) for any measure charging every state, counting measure included (worstCase_isCoherent), its acceptance set is the nonpositive orthant and its representing set is the entire probability simplex (representingSet_worstCase), so the abstract representation coherentRisk_isLUB specialises to IsLUB over stdSimplex. A concrete, recognisable instance making the finite-state ADEH representation tangible. The entry's statement is the representation only; coherence is the separate theorem worstCase_isCoherent. No axioms beyond Mathlib defaults."
       }
     },
     {

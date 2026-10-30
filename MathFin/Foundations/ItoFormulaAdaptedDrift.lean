@@ -921,8 +921,8 @@ omit [IsProbabilityMeasure μ] in
 /-- **The per-cell weighted identity** (the stage-4 core): for an `𝓕_{tₖ}`-measurable
 weight `w`, the weighted second moment of the single rectangle `δ(tₖ)·ΔBₖ` is the frozen
 rectangle energy `𝔼[w·δ(tₖ)²]·(tₖ₊₁ − tₖ)` — the isometry kernel
-`integral_adapted_mul_increment_sq` at `χ = w·δ(tₖ)²` (adapted by the Doob–Dynkin bridge
-`adaptedAt_of_measurable_natural` and its closure under products). -/
+`integral_adapted_mul_increment_sq` at `χ = w·δ(tₖ)²` (`𝓕_{tₖ}`-measurable as a product of
+`𝓕_{tₖ}`-measurable factors). -/
 theorem weightedCellSq_step {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ}
     (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
@@ -940,20 +940,17 @@ theorem weightedCellSq_step {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal
     show w ω * (δ (unifPart T n k) ω
         * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 = _
     ring
-  have hχ : ItoIsometryAdapted.AdaptedAt B (unifPart T n k)
+  have hχ : Measurable[natFiltration hBmeas (unifPart T n k)]
       (fun ω ↦ w ω * (δ (unifPart T n k) ω * δ (unifPart T n k) ω)) :=
-    (adaptedAt_of_measurable_natural hBmeas hwm).mul
-      ((adaptedAt_of_measurable_natural hBmeas
-        (hδadap (unifPart T n k)).measurable).mul
-      (adaptedAt_of_measurable_natural hBmeas
-        (hδadap (unifPart T n k)).measurable))
+    hwm.mul ((hδadap (unifPart T n k)).measurable.mul (hδadap (unifPart T n k)).measurable)
   have hcongr2 : (∫ ω, w ω * δ (unifPart T n k) ω ^ 2 ∂μ)
       = ∫ ω, w ω * (δ (unifPart T n k) ω * δ (unifPart T n k) ω) ∂μ :=
     integral_congr_ae (Eventually.of_forall fun ω ↦ by
       change w ω * δ (unifPart T n k) ω ^ 2 = _
       rw [pow_two])
   rw [integral_congr_ae hcongr, hcongr2]
-  exact integral_adapted_mul_increment_sq hB hBmeas (unifPart_mono T n (Nat.le_succ k)) hχ
+  exact integral_adapted_mul_increment_sq (hB.isFilteredPreBrownian hBmeas)
+    (unifPart_mono T n (Nat.le_succ k)) hχ
 
 end StageFourB
 
@@ -2094,10 +2091,9 @@ private theorem integral_natMeasurable_mul_increment_pow4
     {χ : Ω → ℝ} (hχ : Measurable[natFiltration hBmeas t₀] χ) :
     ∫ ω, χ ω * (B t₁ ω - B t₀ ω) ^ 4 ∂μ
       = (∫ ω, χ ω ∂μ) * (3 * ((t₁ : ℝ) - t₀) ^ 2) := by
-  have hχ' := adaptedAt_of_measurable_natural hBmeas hχ
-  have hχm : Measurable χ := hχ'.measurable hBmeas
+  have hχm : Measurable χ := hχ.mono ((natFiltration hBmeas).le t₀) le_rfl
   have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) := (hBmeas t₁).sub (hBmeas t₀)
-  have hindep := adapted_indepFun_increment hB hBmeas ht hχ'
+  have hindep := adapted_indepFun_increment (hB.isFilteredPreBrownian hBmeas) ht hχ
   have hindep2 := hindep.comp (φ := (id : ℝ → ℝ)) (ψ := fun x : ℝ ↦ x ^ 4)
     measurable_id (by fun_prop)
   have key := hindep2.integral_fun_mul_eq_mul_integral
@@ -2153,11 +2149,7 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
     have hZm : Measurable[natFiltration hBmeas (s N)]
         (fun ω ↦ ∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) :=
       Finset.measurable_sum _ fun k hk ↦ hYm k (Finset.mem_range.mp hk)
-    have hZadapt : AdaptedAt B (s N)
-        (fun ω ↦ ∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) :=
-      adaptedAt_of_measurable_natural hBmeas hZm
-    have hyadapt : AdaptedAt B (s N) (φ N) :=
-      adaptedAt_of_measurable_natural hBmeas (hφmN N (Nat.le_refl N))
+    have hyadapt : Measurable[natFiltration hBmeas (s N)] (φ N) := hφmN N (Nat.le_refl N)
     -- the exact second moment via the discrete Itô isometry
     have hφL2 : ∀ k : ℕ, MemLp (φ k) 2 μ := fun k ↦
       MemLp.of_bound (((hφm k).mono ((natFiltration hBmeas).le _) le_rfl)).aestronglyMeasurable
@@ -2165,8 +2157,7 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
     have hZ2 : ∫ ω, (∑ k ∈ Finset.range N,
         φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 2 ∂μ
         = ∑ k ∈ Finset.range N, (∫ ω, (φ k ω) ^ 2 ∂μ) * ((s (k + 1) : ℝ) - s k) :=
-      ito_isometry_discrete hB hBmeas hsmono
-        (fun k ↦ adaptedAt_of_measurable_natural hBmeas (hφm k)) hφL2
+      ito_isometry_discrete (hB.isFilteredPreBrownian hBmeas) hsmono hφm hφL2
     -- the fourth moment of the last rectangle and its bound
     have hy4 : ∫ ω, (φ N ω * (B (s (N + 1)) ω - B (s N) ω)) ^ 4 ∂μ
         = (∫ ω, (φ N ω) ^ 4 ∂μ) * (3 * ((s (N + 1) : ℝ) - s N) ^ 2) := by
@@ -2208,8 +2199,8 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
         rw [Real.norm_eq_abs, pow_abs]
         exact abs_of_nonneg (by positivity : (0:ℝ) ≤
           (B (s (k + 1)) ω - B (s k) ω) ^ 4)
-      have hindep4 := (adapted_indepFun_increment hB hBmeas (hsmono (Nat.le_succ k))
-        (adaptedAt_of_measurable_natural hBmeas (hφm k))).comp
+      have hindep4 := (adapted_indepFun_increment (hB.isFilteredPreBrownian hBmeas)
+        (hsmono (Nat.le_succ k)) (hφm k)).comp
         (φ := fun x : ℝ ↦ x ^ 4) (ψ := fun x : ℝ ↦ x ^ 4) (by fun_prop) (by fun_prop)
       have hint4 : Integrable (fun ω ↦ (φ k ω) ^ 4
           * (B (s (k + 1)) ω - B (s k) ω) ^ 4) μ := hindep4.integrable_mul hφ4 hΔ4
@@ -2346,16 +2337,9 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
             (φ N ω * (B (s (N + 1)) ω - B (s N) ω))
           linarith)
     -- the martingale-difference zeros (odd kernels) and the weighted even term
-    have hZ3adapt : AdaptedAt B (s N) (fun ω ↦
-        (∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 3 * φ N ω) := by
-      obtain ⟨g, hg, hgf⟩ := hZadapt
-      obtain ⟨g', hg', hgf'⟩ := hyadapt
-      refine ⟨fun p ↦ (g p) ^ 3 * g' p, hg.pow_const 3 |>.mul hg', ?_⟩
-      funext ω
-      have h1 := congrFun hgf ω
-      have h2 := congrFun hgf' ω
-      rw [h1, h2]
-      rfl
+    have hZ3adapt : Measurable[natFiltration hBmeas (s N)] (fun ω ↦
+        (∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 3 * φ N ω) :=
+      (hZm.pow_const 3).mul hyadapt
     have hZY0 : ∫ ω, (∑ k ∈ Finset.range N,
           φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 3
         * (φ N ω * (B (s (N + 1)) ω - B (s N) ω)) ∂μ = 0 := by
@@ -2365,17 +2349,11 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
         = (fun ω ↦ ((∑ k ∈ Finset.range N,
               φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 3 * φ N ω)
           * (B (s (N + 1)) ω - B (s N) ω)) from by funext ω; ring]
-      exact integral_adapted_mul_increment hB hBmeas (hsmono (Nat.le_succ N)) hZ3adapt
-    have hcoef3 : AdaptedAt B (s N) (fun ω ↦
-        (∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) * (φ N ω) ^ 3) := by
-      obtain ⟨g, hg, hgf⟩ := hZadapt
-      obtain ⟨g', hg', hgf'⟩ := hyadapt
-      refine ⟨fun p ↦ g p * (g' p) ^ 3, hg.mul (hg'.pow_const 3), ?_⟩
-      funext ω
-      have h1 := congrFun hgf ω
-      have h2 := congrFun hgf' ω
-      rw [h1, h2]
-      rfl
+      exact integral_adapted_mul_increment (hB.isFilteredPreBrownian hBmeas)
+        (hsmono (Nat.le_succ N)) hZ3adapt
+    have hcoef3 : Measurable[natFiltration hBmeas (s N)] (fun ω ↦
+        (∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) * (φ N ω) ^ 3) :=
+      hZm.mul (hyadapt.pow_const 3)
     have hY30 : ∫ ω, (∑ k ∈ Finset.range N,
           φ k ω * (B (s (k + 1)) ω - B (s k) ω))
         * (φ N ω * (B (s (N + 1)) ω - B (s N) ω)) ^ 3 ∂μ = 0 := by
@@ -2385,8 +2363,8 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
           ((natFiltration hBmeas).le (s N)) le_rfl
       have hΔm3 : Measurable (fun ω ↦ (B (s (N + 1)) ω - B (s N) ω) ^ 3) :=
         hΔmeasN.pow_const 3
-      have hindep3 := (adapted_indepFun_increment hB hBmeas (hsmono (Nat.le_succ N))
-        hcoef3).comp (φ := (id : ℝ → ℝ)) (ψ := fun x : ℝ ↦ x ^ 3)
+      have hindep3 := (adapted_indepFun_increment (hB.isFilteredPreBrownian hBmeas)
+        (hsmono (Nat.le_succ N)) hcoef3).comp (φ := (id : ℝ → ℝ)) (ψ := fun x : ℝ ↦ x ^ 3)
         measurable_id (by fun_prop)
       have key := hindep3.integral_fun_mul_eq_mul_integral
         hcoefm.aestronglyMeasurable hΔm3.aestronglyMeasurable
@@ -2399,17 +2377,10 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
           * (B (s (N + 1)) ω - B (s N) ω) ^ 3) from by funext ω; ring]
       rw [key, integral_increment_pow3 hB (hsmono (Nat.le_succ N)), mul_zero]
     -- the even mixed term: isometry kernel at `χ = Z²φN²`
-    have hZ2adapt : AdaptedAt B (s N) (fun ω ↦
+    have hZ2adapt : Measurable[natFiltration hBmeas (s N)] (fun ω ↦
         (∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 2
-          * (φ N ω) ^ 2) := by
-      obtain ⟨g, hg, hgf⟩ := hZadapt
-      obtain ⟨g', hg', hgf'⟩ := hyadapt
-      refine ⟨fun p ↦ (g p) ^ 2 * (g' p) ^ 2, hg.pow_const 2 |>.mul (hg'.pow_const 2), ?_⟩
-      funext ω
-      have h1 := congrFun hgf ω
-      have h2 := congrFun hgf' ω
-      rw [h1, h2]
-      rfl
+          * (φ N ω) ^ 2) :=
+      (hZm.pow_const 2).mul (hyadapt.pow_const 2)
     have hZ2le : ∫ ω, (∑ k ∈ Finset.range N,
           φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 2 ∂μ
         ≤ D ^ 2 * ∑ k ∈ Finset.range N, ((s (k + 1) : ℝ) - s k) := by
@@ -2456,7 +2427,8 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
         = (fun ω ↦ ((∑ k ∈ Finset.range N,
               φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 2 * (φ N ω) ^ 2)
           * (B (s (N + 1)) ω - B (s N) ω) ^ 2) from by funext ω; ring]
-      exact integral_adapted_mul_increment_sq hB hBmeas (hsmono (Nat.le_succ N)) hZ2adapt
+      exact integral_adapted_mul_increment_sq (hB.isFilteredPreBrownian hBmeas)
+        (hsmono (Nat.le_succ N)) hZ2adapt
     have hZY2le : ∫ ω, (∑ k ∈ Finset.range N,
           φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 2
         * (φ N ω * (B (s (N + 1)) ω - B (s N) ω)) ^ 2 ∂μ

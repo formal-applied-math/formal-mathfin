@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 719 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 686 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 725 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 692 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 15 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -37,7 +37,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Main results
 
-- **Itô's formula.** For every $`C^3`$ function $`f(t,x)`$, with no growth condition,
+- **Itô's formula.** For every $`C^2`$ function $`f(t,x)`$, with no growth condition,
   $`f(t,B_t) - f(0,B_0) - \int_0^t \big(\partial_t f + \tfrac12 \partial_x^2 f\big)(s,B_s)\,ds`$
   is a continuous local martingale
   ([`ito_formula_unrestricted`](MathFin/Foundations/ItoFormulaUnrestrictedLocMart.lean)). When the
@@ -161,7 +161,13 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   closed forms
   ([`value_powerCall`](MathFin/Contracts/Models/BlackScholes.lean),
   [`value_exchangeOption`](MathFin/Contracts/Models/BlackScholesExchange.lean),
-  [`value_geomAsianCall`](MathFin/Contracts/Models/BlackScholesAsian.lean)).
+  [`value_geomAsianCall`](MathFin/Contracts/Models/BlackScholesAsian.lean)), and the chooser's
+  replicating portfolio of a call and a put at the chooser date is worth Rubinstein's closed form
+  ([`value_chooser`](MathFin/Contracts/Models/BlackScholesChooser.lean)). A credit default
+  swap on a payment grid, observing the default indicator, is worth the grid legs of the survival
+  curve against the Cox default time
+  ([`value_cdsBuyer_coxDefaultTime`](MathFin/Contracts/Models/DefaultTime.lean)); default is paid at
+  the end of its period, so these are the discretisations of the continuous Cox legs.
 
 ## Contents
 
@@ -183,7 +189,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Fifteen of the 719 results are reduced cores. Eleven assume a structure whose fields include the
+- Fifteen of the 725 results are reduced cores. Eleven assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, the two-dimensional Itô formula,
@@ -287,7 +293,7 @@ Comparator below).
   theorem, with a witness that its hypothesis is satisfiable, using only Mathlib;
   [`Solution.lean`](Solution.lean) proves both from the library, converting the Challenge's
   positions convention to the library's loss convention with
-  [`isCoherentRiskMeasure_count_neg_iff`](MathFin/RiskMeasures/PositionsConvention.lean).
+  [`isCoherentRiskMeasure_neg_iff`](MathFin/RiskMeasures/PositionsConvention.lean).
   [Comparator](https://github.com/leanprover/comparator), configured by
   [`comparator.json`](comparator.json), checks that the two files state the same theorems and that
   the proofs use only the three standard axioms. It accepted both at commit `06f88ca` and is not
