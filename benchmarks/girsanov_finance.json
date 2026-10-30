@@ -130,6 +130,22 @@
       }
     },
     {
+      "id": "gir-bs-emm-horizon",
+      "name": "The Black-Scholes Girsanov Measure Is an Equivalent Martingale Measure up to T",
+      "description": "The Girsanov measure Q = P.withDensity(exp(−θX_T − ½θ²T)), θ = (μ−r)/σ, is an equivalent martingale measure of the continuous-market frame at the horizon T for the discounted Black-Scholes price S_0·exp((μ−r−σ²/2)t + σX_t) under physical drift μ: Q is a probability measure mutually absolutely continuous with P, and the price stopped at T is a Q-martingale for the Brownian filtration. The martingale property holds on [0,T] only, which is why the notion carries the horizon; the forward FTAP for simple strategies trading up to T then applies to it.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.Girsanov\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\n/-- **The Black–Scholes Girsanov measure is an equivalent martingale measure up to `T`.** With\n    physical drift `μ`, rate `r`, volatility `σ ≠ 0` and `θ = (μ − r)/σ`, the measure\n    `Q = P.withDensity(exp(−θX_T − ½θ²T))` is a probability measure equivalent to `P` under which\n    the discounted price `S_0·exp((μ − r − σ²/2)t + σX_t)`, stopped at `T`, is a martingale: an\n    instance of the continuous-market frame `ContinuousMarket.IsEMM` at the horizon `T`.\n    Re-exports `MathFin.bs_discounted_isEMM`. -/\ntheorem bs_emm_horizon\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]\n    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]\n    {X : ℝ≥0 → Ω → ℝ} [IsFilteredPreBrownian X 𝓕 P]\n    (S_0 r μ σ : ℝ) (hσ : σ ≠ 0) (T : ℝ≥0) :\n    MathFin.ContinuousMarket.IsEMM (P := P) (𝓕 := 𝓕)\n      (fun (t : ℝ≥0) ω => S_0 * Real.exp ((μ - r - σ ^ 2 / 2) * (t : ℝ) + σ * X t ω)) T\n      (P.withDensity fun ω => ENNReal.ofReal\n        (Real.exp (-((μ - r) / σ) * X T ω - ((μ - r) / σ) ^ 2 * (T : ℝ) / 2))) :=\n  MathFin.bs_discounted_isEMM S_0 r μ σ hσ T\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Girsanov change of measure / risk-neutral pricing (Saporito Ch 9; Shreve II Ch 5.2-5.4)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, in MathFin/Foundations/Girsanov.lean. Equivalence: the density exp(−θX_T − ½θ²T) is positive (absolutelyContinuous_withDensity_ofReal gives P ≪ Q, Q ≪ P is withDensity_absolutelyContinuous) and Q is a probability measure (girsanovMeasure_isProbabilityMeasure: unit mean from the Wald exponential martingale). Martingale: the set-integral identity bs_discounted_isQMartingale on s ≤ t ≤ T, plus adaptedness and Q-integrability (under Q the drift-corrected X_t + θt has law N(0,t), Btheta_map_eq_gaussianReal, so the discounted price is S_0 times a Gaussian exponential), assembled by martingale_stopped_of_setIntegral_eq. HONEST SCOPE: the martingale property is on [0,T] only (the stopped process), not on all of ℝ≥0; constant market price of risk θ; the distributional Girsanov statement is not part of this entry. Axioms-clean."
+      }
+    },
+    {
       "id": "gir-thm-9.3.4",
       "name": "Martingale Representation Theorem (process form)",
       "description": "Corollary 9.3.4: every square-integrable martingale M on the Brownian filtration is its initial value plus an Itô integral process, M_t = M_0 + ∫₀ᵗ φ dB for every t ≤ T, with a predictable L² integrand φ.",
@@ -260,42 +276,42 @@
     {
       "id": "gir-continuous-emm-forward",
       "name": "Forward Continuous First FTAP: an EMM Precludes Simple-Strategy Arbitrage",
-      "description": "The forward direction of the continuous-time first fundamental theorem of asset pricing, model-agnostic: if Q is an equivalent martingale measure for a discounted price process S (Q ≈ P and S is a Q-martingale), then no simple (piecewise-constant, predictable, bounded) trading strategy has gains that are P-a.s. nonnegative and strictly positive on a P-non-null set.",
+      "description": "The forward direction of the continuous-time first fundamental theorem of asset pricing, model-agnostic: if Q is an equivalent martingale measure up to the horizon T for a discounted price process S (Q ≈ P and S is a Q-martingale on [0,T]), then no simple (piecewise-constant, predictable, bounded) trading strategy trading on [0,T] has gains that are P-a.s. nonnegative and strictly positive on a P-non-null set. The price takes values in a finite-dimensional real inner-product space (gains ⟨φ, ΔS⟩).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.ContinuousMarket\n\nopen MeasureTheory ProbabilityTheory MathFin.ContinuousMarket\nopen scoped NNReal\n\n/-- Forward continuous first FTAP: an equivalent martingale measure precludes simple-strategy\n    arbitrage. Re-export of `MathFin.ContinuousMarket.isEMM_noArbitrageSimple`. -/\ntheorem emm_precludes_simple_arbitrage\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}\n    {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F] [FiniteDimensional ℝ F]\n    {S : ℝ≥0 → Ω → F} {Q : Measure Ω} (h : IsEMM (P := P) (𝓕 := 𝓕) S Q) :\n    NoArbitrageSimple (P := P) (𝓕 := 𝓕) S :=\n  MathFin.ContinuousMarket.isEMM_noArbitrageSimple h\n"
+        "lean": "import MathFin.Foundations.ContinuousMarket\n\nopen MeasureTheory ProbabilityTheory MathFin.ContinuousMarket\nopen scoped NNReal\n\n/-- Forward continuous first FTAP: an equivalent martingale measure precludes simple-strategy\n    arbitrage up to the horizon. Re-export of `MathFin.ContinuousMarket.isEMM_noArbitrageSimple`. -/\ntheorem emm_precludes_simple_arbitrage\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}\n    {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F] [FiniteDimensional ℝ F]\n    {S : ℝ≥0 → Ω → F} {T : ℝ≥0} {Q : Measure Ω} (h : IsEMM (P := P) (𝓕 := 𝓕) S T Q) :\n    NoArbitrageSimple (P := P) (𝓕 := 𝓕) S T :=\n  MathFin.ContinuousMarket.isEMM_noArbitrageSimple h\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "First FTAP, forward direction, continuous time (Delbaen–Schachermayer; Shreve II Ch 5)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the forward direction against SIMPLE strategies (meaning-1 scope; general admissible strategies / NFLVR / the converse are meaning-2, deliberately out of scope). Each increment ⟨φᵢ, S(tᵢ₊₁)−S(tᵢ)⟩ integrates to 0 under Q via the bilinear conditional-expectation pull-out condExp_bilin_of_stronglyMeasurable_left with innerSL ℝ and the martingale property; the finite sum gives ∫gains dQ = 0; P-a.s. nonnegativity transports to Q via Q ≈ P; the zero-mean nonnegative gain vanishes (ae_zero_of_nonneg_of_integral_zero, shared with the discrete FTAP). Lives in MathFin/Foundations/ContinuousMarket.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof of the forward direction against SIMPLE strategies trading up to the EMM's horizon T (meaning-1 scope; general admissible strategies / NFLVR / the converse are meaning-2, deliberately out of scope). The EMM is a martingale on [0,T] (the process stopped at T is a Q-martingale), so the same statement covers a Q-martingale on all of ℝ≥0 at every T. Proof: a simple strategy sampled at its own trading dates is a discrete predictable strategy for the sampled price, which is a Q-martingale for the sampled filtration (martingale_comp_monotone); its gains are the martingale transform of the sampled price by the holdings, so the vector-valued discrete forward theorem emm_implies_no_arbitrage (the F-valued martingaleTransform, Theorem 2.2.9) applies. Lives in MathFin/Foundations/ContinuousMarket.lean. Axioms-clean."
       }
     },
     {
       "id": "gir-discounted-gbm-emm",
       "name": "The Discounted GBM is an Equivalent Martingale Measure (Q = P)",
-      "description": "A concrete instance of the continuous-market EMM frame at F = ℝ: when P is the risk-neutral measure (the driver X is a P-pre-Brownian), the discounted geometric Brownian motion e^{−rt}S_t is already a full-horizon P-martingale, so P is trivially its own equivalent martingale measure for it.",
+      "description": "A concrete instance of the continuous-market EMM frame at F = ℝ: when P is the risk-neutral measure (the driver X is a P-pre-Brownian), the discounted geometric Brownian motion e^{−rt}S_t is already a P-martingale on all of ℝ≥0, so P is trivially its own equivalent martingale measure for it, at every horizon T.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.ContinuousFTAP\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- The discounted GBM is a `ContinuousMarket.IsEMM` instance with `Q = P`. Re-export of\n    `MathFin.discountedGBM_isEMM`. -/\ntheorem discounted_gbm_isEMM\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}\n    [IsFilteredPreBrownian X 𝓕 P] [IsProbabilityMeasure P] (S_0 r σ : ℝ) :\n    MathFin.ContinuousMarket.IsEMM (P := P) (𝓕 := 𝓕)\n      (fun (t : ℝ≥0) ω => Real.exp (-r * t) *\n        (S_0 * Real.exp ((r - σ ^ 2 / 2) * t + σ * X t ω))) P :=\n  MathFin.discountedGBM_isEMM S_0 r σ\n"
+        "lean": "import MathFin.Foundations.ContinuousFTAP\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- The discounted GBM is a `ContinuousMarket.IsEMM` instance with `Q = P`. Re-export of\n    `MathFin.discountedGBM_isEMM`. -/\ntheorem discounted_gbm_isEMM\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}\n    [IsFilteredPreBrownian X 𝓕 P] [IsProbabilityMeasure P] (S_0 r σ : ℝ) (T : ℝ≥0) :\n    MathFin.ContinuousMarket.IsEMM (P := P) (𝓕 := 𝓕)\n      (fun (t : ℝ≥0) ω => Real.exp (-r * t) *\n        (S_0 * Real.exp ((r - σ ^ 2 / 2) * t + σ * X t ω))) T P :=\n  MathFin.discountedGBM_isEMM S_0 r σ T\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Risk-neutral pricing, equivalent martingale measure, continuous time (Saporito Ch 9; Shreve II Ch 5)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Packages discountedGBM_isMartingale as the frame's IsEMM at F = ℝ: isProb from IsProbabilityMeasure P, ac/ac' = AbsolutelyContinuous.rfl (Q = P), martingale = discountedGBM_isMartingale. HONEST SCOPE: uses Q = P (the risk-neutral measure is given). The physical-measure Girsanov EMM Q ≠ P is intrinsically bounded-horizon (Q = withDensity Z_T is a martingale measure only on [0,T], cf. bs_discounted_isQMartingale / gir-bs-emm-girsanov), so it does not satisfy the full-horizon IsEMM — a horizon-aware EMM is tracked as follow-up. Lives in MathFin/Foundations/ContinuousFTAP.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Packages discountedGBM_isMartingale as the frame's IsEMM at F = ℝ and any horizon T (IsEMM.of_martingale: a martingale on all of ℝ≥0 stopped at T is a martingale): isProb from IsProbabilityMeasure P, ac/ac' = AbsolutelyContinuous.rfl (Q = P). HONEST SCOPE: uses Q = P (the risk-neutral measure is given). The physical-measure Girsanov EMM Q ≠ P is the horizon-T instance gir-bs-emm-horizon. Lives in MathFin/Foundations/ContinuousFTAP.lean. Axioms-clean."
       }
     },
     {
       "id": "gir-discounted-gbm-no-arbitrage",
       "name": "No Simple-Strategy Arbitrage for the Discounted GBM",
-      "description": "The continuous-market forward FTAP made concrete: no simple (piecewise-constant, predictable, bounded) strategy trading the discounted geometric Brownian motion under its risk-neutral measure has gains that are P-a.s. nonnegative and strictly positive on a P-non-null set.",
+      "description": "The continuous-market forward FTAP made concrete: no simple (piecewise-constant, predictable, bounded) strategy trading the discounted geometric Brownian motion under its risk-neutral measure up to a horizon T has gains that are P-a.s. nonnegative and strictly positive on a P-non-null set.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.ContinuousFTAP\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- No simple-strategy arbitrage for the discounted GBM under its risk-neutral measure.\n    Re-export of `MathFin.discountedGBM_noArbitrageSimple`. -/\ntheorem discounted_gbm_no_arbitrage\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}\n    [IsFilteredPreBrownian X 𝓕 P] [IsProbabilityMeasure P] (S_0 r σ : ℝ) :\n    MathFin.ContinuousMarket.NoArbitrageSimple (P := P) (𝓕 := 𝓕)\n      (fun (t : ℝ≥0) ω => Real.exp (-r * t) *\n        (S_0 * Real.exp ((r - σ ^ 2 / 2) * t + σ * X t ω))) :=\n  MathFin.discountedGBM_noArbitrageSimple S_0 r σ\n"
+        "lean": "import MathFin.Foundations.ContinuousFTAP\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- No simple-strategy arbitrage for the discounted GBM under its risk-neutral measure.\n    Re-export of `MathFin.discountedGBM_noArbitrageSimple`. -/\ntheorem discounted_gbm_no_arbitrage\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}\n    [IsFilteredPreBrownian X 𝓕 P] [IsProbabilityMeasure P] (S_0 r σ : ℝ) (T : ℝ≥0) :\n    MathFin.ContinuousMarket.NoArbitrageSimple (P := P) (𝓕 := 𝓕)\n      (fun (t : ℝ≥0) ω => Real.exp (-r * t) *\n        (S_0 * Real.exp ((r - σ ^ 2 / 2) * t + σ * X t ω))) T :=\n  MathFin.discountedGBM_noArbitrageSimple S_0 r σ T\n"
       },
       "metadata": {
         "chapter": 9,

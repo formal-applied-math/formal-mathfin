@@ -17,8 +17,11 @@ measure precludes arbitrage, via the martingale-transform argument, on a general
 space and up to a finite horizon `T`. The hypotheses are the horizon-`T` ones (adapted,
 integrable, one-step martingale for `t < T`), so the finite-Ω market of `FTAPDiscrete.lean`
 and the one-period market of `FTAPOnePeriodVector.lean` (a two-step filtration with
-`𝓕 0 = ⊥`) are instances: their `noArbitrage_of_isEMM` call this theorem. The backward
-directions are proved in the narrower settings: on a finite full-support space over a finite
+`𝓕 0 = ⊥`) are instances: their `noArbitrage_of_isEMM` call this theorem. So does the
+continuous-time one, `ContinuousMarket.isEMM_noArbitrageSimple`, for the price sampled at a simple
+strategy's trading dates. The price is valued in a real inner-product space `F` (holdings in the
+same space, gains `⟪φ, ΔS⟫`), so the vector markets are instances too, not only the scalar one.
+The backward directions are proved in the narrower settings: on a finite full-support space over a finite
 horizon (`FTAPDiscrete.lean`), for one period on a general space (`FTAPOnePeriodVector.lean`,
 with the scalar `FTAPOnePeriod.lean` its `F = ℝ` case), and for one-period finite-state
 markets (`FTAPMultiState.lean`, whose two-state case is `FTAPTwoState.lean`).
@@ -36,33 +39,35 @@ measure precludes arbitrage.
 Given a discounted-price process `S` adapted and `Q`-integrable up to the horizon `T`, an
 equivalent probability measure `Q ≪≫ P` under which `S` is a martingale up to `T`
 (`S t = E_Q[S (t+1) | 𝓕 t]` for `t < T`), and a predictable strategy `φ` bounded up to `T`,
-the discounted P&L `V_T = ∑_{t<T} φ_{t+1}(ω) · (S_{t+1} − S_t)` cannot be `P`-a.s.
-nonnegative and strictly positive on a `P`-non-null set. A process that is a martingale for
-all times (`Martingale S 𝓕 Q`) satisfies the hypotheses at every horizon.
+the discounted P&L `V_T = ∑_{t<T} ⟪φ_{t+1}(ω), S_{t+1}(ω) − S_t(ω)⟫` (`martingaleTransform φ S T`;
+for a scalar price, `F = ℝ`, the product `φ_{t+1} · (S_{t+1} − S_t)`) cannot be `P`-a.s. nonnegative
+and strictly positive on a `P`-non-null set. A process that is a martingale for all times
+(`Martingale S 𝓕 Q`) satisfies the hypotheses at every horizon. The price and the holdings are
+valued in a real inner-product space `F` (several assets); the scalar theorem is the case `F = ℝ`.
 
 Proof: stop `S`, `φ` and `𝓕` at the horizon, which turns `S` into a genuine martingale and
 `φ` into a bounded predictable process, and apply `martingaleTransform_isMartingale`. -/
 theorem emm_implies_no_arbitrage
     {Ω : Type*} [m0 : MeasurableSpace Ω] {P : Measure Ω}
-    {T : ℕ} {𝓕 : Filtration ℕ m0} {S : ℕ → Ω → ℝ}
+    {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F] [CompleteSpace F]
+    {T : ℕ} {𝓕 : Filtration ℕ m0} {S : ℕ → Ω → F}
     {Q : Measure Ω} [IsProbabilityMeasure Q]
     (hQP : Q ≪ P) (hPQ : P ≪ Q)
     (hS_adapt : ∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t))
     (hS_int : ∀ t ≤ T, Integrable (S t) Q)
     (hS_mart : ∀ t < T, S t =ᵐ[Q] Q[S (t + 1) | 𝓕 t])
-    (φ : ℕ → Ω → ℝ)
+    (φ : ℕ → Ω → F)
     (hφ_pred : ∀ t < T, StronglyMeasurable[𝓕 t] (φ (t + 1)))
-    (hφ_bdd : ∃ K : ℝ, ∀ n ≤ T, ∀ ω, |φ n ω| ≤ K)
-    (hV_nonneg : ∀ᵐ ω ∂P,
-      0 ≤ ∑ t ∈ Finset.range T, φ (t + 1) ω * (S (t + 1) ω - S t ω)) :
-    P {ω | 0 < ∑ t ∈ Finset.range T, φ (t + 1) ω * (S (t + 1) ω - S t ω)} = 0 := by
+    (hφ_bdd : ∃ K : ℝ, ∀ n ≤ T, ∀ ω, ‖φ n ω‖ ≤ K)
+    (hV_nonneg : 0 ≤ᵐ[P] martingaleTransform φ S T) :
+    P {ω | 0 < martingaleTransform φ S T ω} = 0 := by
   -- stop the filtration, the price and the strategy at the horizon
   obtain ⟨𝓖, h𝓖⟩ : ∃ 𝓖 : Filtration ℕ m0, ∀ n, 𝓖 n = 𝓕 (min n T) :=
     ⟨{ seq := fun n ↦ 𝓕 (min n T)
        mono' := fun _ _ h ↦ 𝓕.mono (min_le_min_right T h)
        le' := fun n ↦ 𝓕.le _ }, fun _ ↦ rfl⟩
-  let S' : ℕ → Ω → ℝ := fun n ↦ S (min n T)
-  let φ' : ℕ → Ω → ℝ := fun n ω ↦ if n ≤ T then φ n ω else 0
+  let S' : ℕ → Ω → F := fun n ↦ S (min n T)
+  let φ' : ℕ → Ω → F := fun n ω ↦ if n ≤ T then φ n ω else 0
   have hS' : Martingale S' 𝓖 Q := by
     refine martingale_of_condExp_sub_eq_zero_nat
       (fun n ↦ by rw [h𝓖]; exact hS_adapt _ (min_le_right _ _))
@@ -87,8 +92,8 @@ theorem emm_implies_no_arbitrage
       rw [h]
       exact stronglyMeasurable_zero
   obtain ⟨K, hK⟩ := hφ_bdd
-  have hsum (ω : Ω) : martingaleTransform φ' S' T ω
-      = ∑ t ∈ Finset.range T, φ (t + 1) ω * (S (t + 1) ω - S t ω) := by
+  have hsum : martingaleTransform φ' S' T = martingaleTransform φ S T := by
+    funext ω
     refine Finset.sum_congr rfl fun t ht ↦ ?_
     have htT : t + 1 ≤ T := Finset.mem_range.mp ht
     simp only [φ', S', if_pos htT, min_eq_left htT, min_eq_left (t.le_succ.trans htT)]
@@ -99,10 +104,8 @@ theorem emm_implies_no_arbitrage
         split_ifs with h
         · exact (hK n h ω).trans (le_max_left _ _)
         · simp⟩
-  have hnull : Q {ω | 0 < martingaleTransform φ' S' T ω} = 0 :=
-    martingale_nonneg_terminal_ae_zero hV_mart (martingaleTransform_zero _ _)
-      (by filter_upwards [hQP.ae_le hV_nonneg] with ω h; rw [Pi.zero_apply, hsum]; exact h)
-  simp only [hsum] at hnull
-  exact hPQ hnull
+  rw [← hsum]
+  exact hPQ (martingale_nonneg_terminal_ae_zero hV_mart (martingaleTransform_zero _ _)
+    (by rw [hsum]; exact hQP.ae_le hV_nonneg))
 
 end MathFin
