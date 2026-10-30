@@ -283,6 +283,13 @@
       "input_hash": "2ee1a279de930e2bbd60e9d781a50dbfba0ae061d74c53f76c2587268ff80823",
       "verified_at_commit": "331e4a2"
     },
+    "gir-market-completeness": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-10-30",
+      "elapsed_s": 6.6,
+      "input_hash": "3e7268c4c840e7e3a3de963d062b35475ceeb205c24511c8eb99a70a67fe1e05",
+      "verified_at_commit": "4c212f8"
+    },
     "gir-martingale-reindex": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-10-30",
@@ -296,6 +303,27 @@
       "elapsed_s": 4.5,
       "input_hash": "04ffabbb2e21998b313571ba2928de7b9b5ce20ff50b192a02d9207265b29e5c",
       "verified_at_commit": "5eec1a1"
+    },
+    "gir-pricing-measure-density": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.8,
+      "input_hash": "0033c43f8258211d49d6bf9fa459bbf4400a512338e9e631d5a2b0e94b54a6fe",
+      "verified_at_commit": "4c212f8"
+    },
+    "gir-pricing-measure-unique": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.1,
+      "input_hash": "33965488b35596ad2e2b14d331d46da8ac8eb1f641c13f0dce12dec6482d128f",
+      "verified_at_commit": "4c212f8"
+    },
+    "gir-replication-in-price": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.0,
+      "input_hash": "27d24e5881fe87d69f59f5bc0fdf102f59e16f12ae3d7db6bd1b9779bb5a25c2",
+      "verified_at_commit": "4c212f8"
     },
     "gir-risk-neutral-drift-unique": {
       "benchmark_file": "girsanov_finance.json",
@@ -534,6 +562,27 @@
       "elapsed_s": 5.2,
       "input_hash": "6ed28c53573f7be900fb298b3b598918c0c0bfd3c05303d4b8e419bea0a73b18",
       "verified_at_commit": "331e4a2"
+    },
+    "mf-american-put-ge-bsm-european-put": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.5,
+      "input_hash": "f1dee5f741474ed2d3b2c7372cb949e1033c4a16ee3051e28cb452b894eb45c3",
+      "verified_at_commit": "4c212f8"
+    },
+    "mf-american-put-log-boundary-convex": {
+      "benchmark_file": "american_put_boundary.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.7,
+      "input_hash": "0b641bb7a0ceea3b9182d841d87127bde6ec4b9729b6bbbfbaadbcd6e2f36ea1",
+      "verified_at_commit": "4c212f8"
+    },
+    "mf-american-put-stock-boundary-strict-convex": {
+      "benchmark_file": "american_put_boundary.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.6,
+      "input_hash": "5607e3a0f4ac355be25a98ca25c4c2c4270326b027b2ecc3dfd7af78da37d1f4",
+      "verified_at_commit": "4c212f8"
     },
     "mf-american-supermartingale": {
       "benchmark_file": "binomial.json",
@@ -4748,6 +4797,13 @@
       "elapsed_s": 5.2,
       "input_hash": "25f881fbc0c8b4e5dab3f668c7a05a11f29bbd1f95b7a816240e29cc00006ba4",
       "verified_at_commit": "c55d62c"
+    },
+    "sc-ito-integral-against-drifted-price": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.5,
+      "input_hash": "738d793bd745814d750bd764e13e691c79ab53faf8e0b13fd658a108e42a3b92",
+      "verified_at_commit": "4c212f8"
     },
     "sc-ito-integral-band": {
       "benchmark_file": "stochastic_calculus.json",
