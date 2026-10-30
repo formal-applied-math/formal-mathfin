@@ -2819,8 +2819,8 @@ prior corpus audit, not a verification of this addition.
 > — for a scalar `L⁰` excess return on an **arbitrary** probability space, no
 > arbitrage ⟺ ∃ equivalent martingale measure `Q ~ P` with `Y` integrable and
 > `E_Q[Y] = 0` (`Foundations/FTAPOnePeriod.lean`, entry
-> `mf-ftap-one-period-general`), backward via a bounded-density reduction to `L¹`,
-> the scalar no-arbitrage dichotomy, and a two-region balancing `withDensity` —
+> `mf-ftap-one-period-general`), as the `F = ℝ` corollary of the d-asset theorem
+> `ftap_one_period_vector` (bounded-density reduction to `L¹`, logistic tilt) —
 > no Hahn–Banach, no Kreps–Yan. This is the genuine measure-theoretic step beyond
 > the finite-Ω **Harrison–Pliska** `ftap_discrete` (no arbitrage ⟺ ∃ EMM,
 > multi-period, finite Ω, scalar discounted asset; `Foundations/FTAPDiscrete.lean`,
@@ -3252,9 +3252,8 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > telescoping (`Foundations/FTAPDiscrete.lean`). (2) **General-Ω one-period
 > scalar FTAP** `ftap_one_period` (`mf-ftap-one-period-general`) — Föllmer–Schied
 > §1.2 for an arbitrary probability space and a single scalar `L⁰` excess return;
-> backward via a bounded-density reduction to `L¹`, the scalar no-arbitrage
-> dichotomy, and a two-region balancing `withDensity` — no Hahn–Banach, no
-> Kreps–Yan (`Foundations/FTAPOnePeriod.lean`). (3) **D-asset one-period FTAP**
+> as the `F = ℝ` corollary of the d-asset theorem (3) below, with no proof of its own
+> (`Foundations/FTAPOnePeriod.lean`). (3) **D-asset one-period FTAP**
 > `ftap_one_period_vector` (`mf-ftap-one-period-vector`) — Föllmer–Schied §1.2 for
 > any finite-dimensional inner-product space `F`; the Esscher/minimal-divergence
 > EMM minimises the convex softplus potential `θ ↦ ∫ log(1 + exp⟪θ,Y⟫)`, which

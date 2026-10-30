@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Foundations.StatePrices
 
 /-!
 # Core quant-finance results derived from no-arbitrage (first principles)
@@ -27,8 +28,12 @@ with two structural constraints:
 * **Stock pricing**: `∑ q i · S i = S_0`, where `S_0` is the time-0 spot
   price of the asset.
 
-A general claim with payoff `g : ι → ℝ` has time-0 price `Λ(g) := ∑ q i · g i`.
-This `Λ` is a non-negative linear functional.
+A general claim with payoff `g : ι → ℝ` has time-0 price `Λ(g) := statePricePricing s q g`
+(`Foundations/StatePrices.lean`, `∑ q i · g i`). This `Λ` is a non-negative linear
+functional, and its linearity lemmas (`statePricePricing_add`, `_smul`, `_const`) are what the
+derivations below use. The state prices are an EMM scaled by the discount factor: the bridge
+`exists_statePrices_of_hasEMM` (`Foundations/FTAPMultiState.lean`) produces `q` with the bond
+and stock constraints from `HasEMM_multi_state`.
 
 ## Why this is "first principles"
 
@@ -74,13 +79,14 @@ lemma max_sub_max_neg (x : ℝ) : max x 0 - max (-x) 0 = x :=
 
 In a finite-state market with non-negative state prices `q : ι → ℝ`,
 terminal asset values `S : ι → ℝ`, discount factor `DF = ∑ q i`, and spot
-price `S_0 = ∑ q i · S i`, the call price `C(K) = ∑ q i · max(S i − K, 0)`
-and the put price `P(K) = ∑ q i · max(K − S i, 0)` satisfy
+price `S_0 = statePricePricing s q S`, the call price
+`C(K) = statePricePricing s q (max(S − K, 0))` and the put price
+`P(K) = statePricePricing s q (max(K − S, 0))` satisfy
 
   `C(K) − P(K) = S_0 − K · DF`.
 
 The proof has *no reference to the Black-Scholes formula*. It uses only:
-* linearity of the pricing functional `Λ(g) := ∑ q i · g i`,
+* linearity of the pricing functional `statePricePricing s q`,
 * the pointwise payoff identity `max(S - K, 0) - max(K - S, 0) = S - K`
   (`max_sub_max_neg`),
 * the bond and stock pricing constraints.
@@ -92,25 +98,22 @@ theorem putCall_parity_from_no_arbitrage
     {ι : Type*} (s : Finset ι) (q : ι → ℝ) (S : ι → ℝ)
     (DF S₀ K : ℝ)
     (h_bond : ∑ i ∈ s, q i = DF)
-    (h_stock : ∑ i ∈ s, q i * S i = S₀) :
-    (∑ i ∈ s, q i * max (S i - K) 0) - (∑ i ∈ s, q i * max (K - S i) 0)
-      = S₀ - K * DF := by
-  -- Pointwise: q i · max(S i − K, 0) − q i · max(K − S i, 0) = q i · (S i − K).
-  have h_pointwise : ∀ i ∈ s,
-      q i * max (S i - K) 0 - q i * max (K - S i) 0 = q i * (S i - K) := by
-    intros i _
-    have h_identity : max (S i - K) 0 - max (K - S i) 0 = S i - K := by
+    (h_stock : statePricePricing s q S = S₀) :
+    statePricePricing s q (fun i ↦ max (S i - K) 0)
+      - statePricePricing s q (fun i ↦ max (K - S i) 0) = S₀ - K * DF := by
+  -- pointwise: `max(S i − K, 0) + (−1) · max(K − S i, 0) = S i + (−K)`
+  have h_payoff : (fun i ↦ max (S i - K) 0 + (-1) * max (K - S i) 0) = fun i ↦ S i + (-K) :=
+    funext fun i ↦ by
       have h := max_sub_max_neg (S i - K)
-      rwa [show -(S i - K) = K - S i from by ring] at h
-    linear_combination q i * h_identity
-  calc (∑ i ∈ s, q i * max (S i - K) 0) - (∑ i ∈ s, q i * max (K - S i) 0)
-      = ∑ i ∈ s, (q i * max (S i - K) 0 - q i * max (K - S i) 0) := by
-        rw [Finset.sum_sub_distrib]
-    _ = ∑ i ∈ s, q i * (S i - K) := Finset.sum_congr rfl h_pointwise
-    _ = ∑ i ∈ s, (q i * S i - K * q i) := Finset.sum_congr rfl (fun i _ ↦ by ring)
-    _ = (∑ i ∈ s, q i * S i) - K * (∑ i ∈ s, q i) := by
-        rw [Finset.sum_sub_distrib, ← Finset.mul_sum]
-    _ = S₀ - K * DF := by rw [h_bond, h_stock]
+      rw [show -(S i - K) = K - S i from by ring] at h
+      linarith
+  calc statePricePricing s q (fun i ↦ max (S i - K) 0)
+        - statePricePricing s q (fun i ↦ max (K - S i) 0)
+      = statePricePricing s q (fun i ↦ max (S i - K) 0 + (-1) * max (K - S i) 0) := by
+        rw [statePricePricing_add, statePricePricing_smul]; ring
+    _ = statePricePricing s q (fun i ↦ S i + (-K)) := by rw [h_payoff]
+    _ = S₀ - K * DF := by
+        rw [statePricePricing_add, statePricePricing_const, h_stock, h_bond]; ring
 
 /-- **Forward price from no-arbitrage** (first-principles derivation).
 
@@ -128,15 +131,13 @@ theorem forward_price_from_no_arbitrage
     {ι : Type*} (s : Finset ι) (q : ι → ℝ) (S : ι → ℝ)
     (DF S₀ F : ℝ) (hDF : DF ≠ 0)
     (h_bond : ∑ i ∈ s, q i = DF)
-    (h_stock : ∑ i ∈ s, q i * S i = S₀) :
-    (∑ i ∈ s, q i * (S i - F) = 0) ↔ F = S₀ / DF := by
+    (h_stock : statePricePricing s q S = S₀) :
+    statePricePricing s q (fun i ↦ S i - F) = 0 ↔ F = S₀ / DF := by
   -- Λ(S - F) = Λ(S) - F · Λ(1) = S_0 - F · DF.
-  have h_eval : ∑ i ∈ s, q i * (S i - F) = S₀ - F * DF := by
-    calc ∑ i ∈ s, q i * (S i - F)
-        = ∑ i ∈ s, (q i * S i - F * q i) := Finset.sum_congr rfl (fun i _ ↦ by ring)
-      _ = (∑ i ∈ s, q i * S i) - F * (∑ i ∈ s, q i) := by
-          rw [Finset.sum_sub_distrib, ← Finset.mul_sum]
-      _ = S₀ - F * DF := by rw [h_bond, h_stock]
+  have h_eval : statePricePricing s q (fun i ↦ S i - F) = S₀ - F * DF := by
+    rw [show (fun i ↦ S i - F) = fun i ↦ S i + (-F) from funext fun i ↦ sub_eq_add_neg _ _,
+      statePricePricing_add, statePricePricing_const, h_stock, h_bond]
+    ring
   rw [h_eval]
   constructor
   · intro h
@@ -151,8 +152,8 @@ theorem forward_price_eq_spot_div_discount
     {ι : Type*} (s : Finset ι) (q : ι → ℝ) (S : ι → ℝ)
     (DF S₀ : ℝ) (hDF : DF ≠ 0)
     (h_bond : ∑ i ∈ s, q i = DF)
-    (h_stock : ∑ i ∈ s, q i * S i = S₀) :
-    ∃! F : ℝ, ∑ i ∈ s, q i * (S i - F) = 0 := by
+    (h_stock : statePricePricing s q S = S₀) :
+    ∃! F : ℝ, statePricePricing s q (fun i ↦ S i - F) = 0 := by
   refine ⟨S₀ / DF, ?_, ?_⟩
   · exact (forward_price_from_no_arbitrage s q S DF S₀ (S₀ / DF) hDF h_bond h_stock).mpr rfl
   · intro F hF
