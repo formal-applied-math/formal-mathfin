@@ -96,9 +96,10 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   one-period theorem holds on any probability space with finitely many assets
   ([`ftap_one_period_vector`](MathFin/Foundations/FTAPOnePeriodVector.lean)).
 
-- **Coherent risk measures.** On a finite state space, a coherent risk measure satisfies
-  $`\rho(X) = \sup_{q \in \mathcal{Q}_\rho} \mathbb{E}_q[-X]`$, where $`\mathcal{Q}_\rho`$ is the
-  set of probability vectors that give every acceptable position a nonnegative price
+- **Coherent risk measures.** On a finite state space, a coherent risk measure of losses
+  ([`IsCoherentRiskMeasure`](MathFin/RiskMeasures/Coherent.lean)) satisfies
+  $`\rho(L) = \sup_{q \in \mathcal{Q}_\rho} \mathbb{E}_q[L]`$, where $`\mathcal{Q}_\rho`$ is the
+  set of probability vectors that give every acceptable loss, $`\rho(Z) \le 0`$, a nonpositive price
   ([`coherentRisk_isLUB`](MathFin/RiskMeasures/AcceptanceSet.lean)). This theorem and the finite
   fundamental theorem are both derived from the cone-separation lemmas in
   [`ConvexDuality.lean`](MathFin/Foundations/ConvexDuality.lean).
@@ -282,7 +283,9 @@ Comparator below).
 
 - **Comparator.** [`Challenge.lean`](Challenge.lean) states the coherent-risk representation
   theorem, with a witness that its hypothesis is satisfiable, using only Mathlib;
-  [`Solution.lean`](Solution.lean) proves both from the library.
+  [`Solution.lean`](Solution.lean) proves both from the library, converting the Challenge's
+  positions convention to the library's loss convention with
+  [`isCoherentRiskMeasure_count_neg_iff`](MathFin/RiskMeasures/PositionsConvention.lean).
   [Comparator](https://github.com/leanprover/comparator), configured by
   [`comparator.json`](comparator.json), checks that the two files state the same theorems and that
   the proofs use only the three standard axioms. It accepted both at commit `06f88ca` and is not
