@@ -7,18 +7,20 @@ module
 
 public import Mathlib
 public import MathFin.Actuarial.CompoundPoissonMGF
-public import MathFin.BlackScholes.MertonModel
+public import MathFin.BlackScholes.Forward
 public import MathFin.BlackScholes.PriceBounds
 public import MathFin.BlackScholes.SpotConvexity
 public import MathFin.Foundations.AffineMinorant
+public import MathFin.Foundations.GaussianMoments
+public import MathFin.Foundations.IndepFreezing
 public import MathFin.Foundations.NormalQuantile
 
 /-!
 # Jump-diffusions with an arbitrary jump law
 
-`BlackScholes/MertonModel.lean` prices Merton's jump-diffusion, whose log-jumps are Gaussian, so
-that with `n` jumps the terminal price is again a Black–Scholes terminal price. This file drops
-the Gaussian law. Under a probability measure `Q` the terminal price is
+Merton's jump-diffusion (`BlackScholes/MertonJumpDiffusion.lean`) has Gaussian log-jumps, so that
+with `n` jumps the terminal price is again a Black–Scholes terminal price. This file allows any
+jump law. Under a probability measure `Q` the terminal price is
 
   `S_T = S₀ · exp((r − σ²/2)T − κ + σ√T·Z + ∑_{i<N} Jᵢ)`  (`jumpDiffusionTerminal`),
 
@@ -48,15 +50,14 @@ the jumps together, and the diffusion sample is independent of the jumps (`JumpD
   1976): integrating out the count, the call is a Poisson mixture of Black–Scholes prices
   averaged over the jump sizes, `∫ n, 𝔼[C_BS(S₀e^{−κ + ∑_{i<n} Jᵢ})] ∂Poisson(Λ)`.
 
-Merton's model is this one with Gaussian jumps, `𝔼[e^J] = 1 + k`, and the compensator `κ = kΛ`
-(`JumpDiffusionHyp.toMertonHyp`). There `merton_call_given_jumps` prices the call with the count
-frozen at `n` in closed form and `merton_call_formula` sums the series;
-`BlackScholes/JumpDiffusionMerton.lean` reaches the same series from this file's general formula
-and Gaussian smoothing (`JumpDiffusionHyp.call_eq_mertonCallPrice`).
+Merton's model is this one with Gaussian jumps, `𝔼[e^J] = 1 + k`, and the compensator `κ = kΛ`.
+`BlackScholes/JumpDiffusionMerton.lean` derives Merton's call, put and discounted-terminal
+formulas from this file's general ones and Gaussian smoothing
+(`JumpDiffusionHyp.call_eq_mertonCallPrice`).
 
 ## Scope
 
-As in `MertonModel`, only the law of the price at maturity is modelled here. A price process
+Only the law of the price at maturity is modelled here. A price process
 with independent jump-diffusion increments, its martingale property and its prices at
 intermediate dates are in `BlackScholes/JumpDiffusionProcess.lean` and
 `BlackScholes/JumpDiffusionOptionPrices.lean`; such a process is constructed only without jumps.
@@ -230,17 +231,9 @@ theorem jumpDiffusion_call_le {S_0 K r σ T : ℝ} {Z Y : Ω → ℝ}
 
 /-- The terminal price of a jump-diffusion at a diffusion sample `z`, a jump count `n` and log-jump
 sizes `j`, with drift correction `κ`: `S₀ · exp((r − σ²/2)T − κ + σ√T·z + ∑_{i<n} jᵢ)`.
-Merton's `mertonTerminal` is this price with `κ = kΛ`
-(`mertonTerminal_eq_jumpDiffusionTerminal`). -/
+Merton's model takes `κ = kΛ`. -/
 noncomputable def jumpDiffusionTerminal (S_0 r σ T κ z : ℝ) (n : ℕ) (j : ℕ → ℝ) : ℝ :=
   S_0 * rexp ((r - σ ^ 2 / 2) * T - κ + σ * Real.sqrt T * z + ∑ i ∈ Finset.range n, j i)
-
-/-- Merton's terminal price is the jump-diffusion terminal price with the drift correction
-`κ = kΛ`. -/
-lemma mertonTerminal_eq_jumpDiffusionTerminal (S_0 r σ T k : ℝ) (Λ : ℝ≥0) (z : ℝ) (n : ℕ)
-    (j : ℕ → ℝ) :
-    mertonTerminal S_0 r σ T k Λ z n j = jumpDiffusionTerminal S_0 r σ T (k * Λ) z n j :=
-  rfl
 
 /-- The jump-diffusion terminal price with the jump part `−κ + ∑_{i<n} jᵢ` split off. -/
 lemma jumpDiffusionTerminal_eq (S_0 r σ T κ z : ℝ) (n : ℕ) (j : ℕ → ℝ) :
@@ -267,15 +260,13 @@ lemma measurable_neg_add_sum_range (κ : ℝ) :
 /-- **A jump-diffusion with an arbitrary jump law**: a standard normal diffusion sample `Z`, a
 jump count `N ∼ Poisson(Λ)` and i.i.d. log-jump sizes `Jᵢ`, with the count independent of the
 diffusion sample and the sizes together, and the diffusion sample independent of the sizes.
-This is `MertonHyp`'s independence structure with i.i.d. measurable jumps of any law in place
-of its Gaussian jumps (a `MertonHyp` is not an instance as stated: its jumps are only
-a.e.-measurable). Together the two independences say that `Z`, `N` and the jump sizes are
-mutually independent. -/
+The jump sizes are only a.e.-measurable, which `J_ident` already carries (`aemeasurable_J`).
+Together the two independences say that `Z`, `N` and the jump sizes are mutually independent.
+Merton's model is the case where the jumps are Gaussian (`JumpDiffusionMerton.lean`). -/
 structure JumpDiffusionHyp (Q : Measure Ω) (Λ : ℝ≥0) (Z : Ω → ℝ) (N : Ω → ℕ)
     (J : ℕ → Ω → ℝ) : Prop where
   Z_law : HasLaw Z (gaussianReal 0 1) Q
   N_law : HasLaw N (poissonMeasure Λ) Q
-  J_meas : ∀ i, Measurable (J i)
   J_indep : iIndepFun J Q
   J_ident : ∀ i, IdentDistrib (J i) (J 0) Q Q
   Z_indep_J : IndepFun Z (fun ω i ↦ J i ω) Q
@@ -284,6 +275,16 @@ structure JumpDiffusionHyp (Q : Measure Ω) (Λ : ℝ≥0) (Z : Ω → ℝ) (N :
 namespace JumpDiffusionHyp
 
 variable {Λ : ℝ≥0} {Z : Ω → ℝ} {N : Ω → ℕ} {J : ℕ → Ω → ℝ}
+
+/-- Each jump size is a.e.-measurable: it is identically distributed with `J 0`, and
+`IdentDistrib` carries a.e.-measurability. -/
+lemma aemeasurable_J (h : JumpDiffusionHyp Q Λ Z N J) (i : ℕ) : AEMeasurable (J i) Q :=
+  (h.J_ident i).aemeasurable_fst
+
+/-- The jump sizes are jointly a.e.-measurable. -/
+lemma aemeasurable_jumps (h : JumpDiffusionHyp Q Λ Z N J) :
+    AEMeasurable (fun ω i ↦ J i ω) Q :=
+  aemeasurable_pi_lambda _ h.aemeasurable_J
 
 /-- The jump count is independent of the jump sizes. -/
 lemma N_indep_J (h : JumpDiffusionHyp Q Λ Z N J) : IndepFun N (fun ω i ↦ J i ω) Q :=
@@ -295,13 +296,13 @@ lemma Z_indep_jumps (h : JumpDiffusionHyp Q Λ Z N J) :
     IndepFun Z (fun ω ↦ (N ω, fun i ↦ J i ω)) Q :=
   have := h.J_indep.isProbabilityMeasure
   indepFun_prodMk_of_indepFun_prodMk h.N_law.aemeasurable h.Z_law.aemeasurable
-    (measurable_pi_lambda _ h.J_meas).aemeasurable h.N_indep h.Z_indep_J
+    h.aemeasurable_jumps h.N_indep h.Z_indep_J
 
 /-- The jump part `−κ + ∑_{i<N} Jᵢ` is measurable. -/
 lemma aemeasurable_jumpPart (h : JumpDiffusionHyp Q Λ Z N J) (κ : ℝ) :
     AEMeasurable (fun ω ↦ -κ + ∑ i ∈ Finset.range (N ω), J i ω) Q :=
   (measurable_neg_add_sum_range κ).comp_aemeasurable
-    (h.N_law.aemeasurable.prodMk (measurable_pi_lambda _ h.J_meas).aemeasurable)
+    (h.N_law.aemeasurable.prodMk h.aemeasurable_jumps)
 
 /-- The jump part `−κ + ∑_{i<N} Jᵢ` is independent of the diffusion sample. -/
 lemma indepFun_jumpPart (h : JumpDiffusionHyp Q Λ Z N J) (κ : ℝ) :
@@ -315,7 +316,7 @@ lemma integral_exp_jumpPart (h : JumpDiffusionHyp Q Λ Z N J)
     (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) (κ : ℝ) :
     ∫ ω, rexp (-κ + ∑ i ∈ Finset.range (N ω), J i ω) ∂Q
       = rexp (-κ + Λ * (∫ ω, rexp (J 0 ω) ∂Q - 1)) := by
-  have h1 := compoundPoisson_mgf_of_indepFun Λ 1 J h.N_law h.J_indep h.J_meas h.J_ident
+  have h1 := compoundPoisson_mgf_of_indepFun Λ 1 J h.N_law h.J_indep h.J_ident
     h.N_indep_J (by simpa only [one_mul] using hJ)
   simp only [mgf, one_mul] at h1
   simp_rw [Real.exp_add]
@@ -394,7 +395,7 @@ theorem call_poisson_mixture (h : JumpDiffusionHyp Q Λ Z N J)
       = ∫ n, ∫ ω, bsV K r σ (S_0 * rexp (-κ + ∑ i ∈ Finset.range n, J i ω)) T ∂Q
           ∂(poissonMeasure Λ) := by
   have := h.J_indep.isProbabilityMeasure
-  have hJm : AEMeasurable (fun ω i ↦ J i ω) Q := (measurable_pi_lambda _ h.J_meas).aemeasurable
+  have hJm := h.aemeasurable_jumps
   have hg : Measurable fun p : ℕ × (ℕ → ℝ) ↦
       bsV K r σ (S_0 * rexp (-κ + ∑ i ∈ Finset.range p.1, p.2 i)) T :=
     (measurable_bsV_spot K r σ T).comp ((measurable_neg_add_sum_range κ).exp.const_mul S_0)

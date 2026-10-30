@@ -393,7 +393,6 @@ import MathFin.BlackScholes.MertonDominance
 import MathFin.BlackScholes.MertonClassicDisplay
 -- Merton's model derived: the jump-diffusion terminal price (Gaussian diffusion,
 -- Poisson count, i.i.d. lognormal jumps) prices to the Poisson mixture
-import MathFin.BlackScholes.MertonModel
 -- Merton Greeks: delta, gamma, vega as Poisson mixtures of Black–Scholes Greeks
 import MathFin.BlackScholes.MertonGreeks
 -- Merton's strike derivatives: the digital series and the density series (Poisson mixtures of
