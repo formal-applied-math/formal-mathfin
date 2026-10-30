@@ -822,6 +822,20 @@
       "input_hash": "6cf1e6b6698d15c08c977e64d0fdfe964285689fa41b0f4621dea0f8925f5e1e",
       "verified_at_commit": "1a0d988"
     },
+    "mf-binomial-multi-period-emm": {
+      "benchmark_file": "binomial.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.0,
+      "input_hash": "cccbc424a2fe7d6cd9e3e70882d0c402d238ccad45d85b5df64da69222c7a74a",
+      "verified_at_commit": "997cf46"
+    },
+    "mf-binomial-multi-period-no-arbitrage-iff": {
+      "benchmark_file": "binomial.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.6,
+      "input_hash": "1af3aa109aab60dc2bc38cbe4dea8911bf2dc814014f27e42a6a8833494fa2f1",
+      "verified_at_commit": "997cf46"
+    },
     "mf-binomial-price-path-measure": {
       "benchmark_file": "binomial.json",
       "date": "2026-10-30",
