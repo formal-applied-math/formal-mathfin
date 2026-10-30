@@ -20,12 +20,13 @@ first-derivative jump at the kink. No smoothness at the kink is assumed. -/
 namespace MathFin
 namespace SVI
 open Real ProbabilityTheory Set
+open ForwardSmile (dpl dmi blackForm)
 
 theorem sigmaZero_blackCall_hasDerivAt (p : Params) (hs : p.sigma = 0)
     (K : ℝ) (hK : 0 < K) (hk : Real.log K ≠ p.m)
     (hw : 0 < variance p (Real.log K)) :
     HasDerivAt (blackCall p) (strikeDelta p K) K := by
-  have h := (sigmaZero_logBlackCall_hasDerivAt p hs (Real.log K) hk hw).comp K
+  have h := (sigmaZero_blackForm_hasDerivAt p hs (Real.log K) hk hw).comp K
     (Real.hasDerivAt_log (ne_of_gt hK))
   convert h using 1 <;> try rfl
   simp only [Real.exp_log hK, strikeDelta]
@@ -45,7 +46,7 @@ theorem sigmaZero_blackCall_hasDerivWithinAt_left (p : Params) (hs : p.sigma = 0
     (ha : 0 < p.a) : HasDerivWithinAt (blackCall p)
       (branchDelta p (leftSlope p) p.m) (Iic (Real.exp p.m)) (Real.exp p.m) := by
   have hw : 0 < variance p p.m := by rwa [sigmaZero_variance_at_m p hs]
-  have h := logBlackCall_hasDerivWithinAt p (leftSlope p) p.m (Iic p.m) hw
+  have h := blackForm_hasDerivWithinAt p (leftSlope p) p.m (Iic p.m) hw
     (sigmaZero_variance_hasDerivWithinAt_left p hs)
   have hm : MapsTo Real.log (Iic (Real.exp p.m) ∩ Ioi 0) (Iic p.m) := by
     intro x hx
@@ -62,7 +63,7 @@ theorem sigmaZero_blackCall_hasDerivWithinAt_right (p : Params) (hs : p.sigma = 
     (ha : 0 < p.a) : HasDerivWithinAt (blackCall p)
       (branchDelta p (rightSlope p) p.m) (Ici (Real.exp p.m)) (Real.exp p.m) := by
   have hw : 0 < variance p p.m := by rwa [sigmaZero_variance_at_m p hs]
-  have h := logBlackCall_hasDerivWithinAt p (rightSlope p) p.m (Ici p.m) hw
+  have h := blackForm_hasDerivWithinAt p (rightSlope p) p.m (Ici p.m) hw
     (sigmaZero_variance_hasDerivWithinAt_right p hs)
   have hm : MapsTo Real.log (Ici (Real.exp p.m)) (Ici p.m) := by
     intro x hx
@@ -74,14 +75,14 @@ theorem sigmaZero_blackCall_hasDerivWithinAt_right (p : Params) (hs : p.sigma = 
 
 theorem sigmaZero_delta_jump (p : Params) :
     branchDelta p (rightSlope p) p.m - branchDelta p (leftSlope p) p.m =
-      gaussianPDFReal 0 1 (blackMinus p p.m) * p.b / rootVariance p p.m := by
+      gaussianPDFReal 0 1 (dmi p.m (variance p p.m)) * p.b / rootVariance p p.m := by
   unfold branchDelta leftSlope rightSlope
   ring
 
 theorem sigmaZero_delta_jump_nonneg (p : Params) (hb : 0 ≤ p.b)
     (hw : 0 < variance p p.m) :
     branchDelta p (leftSlope p) p.m ≤ branchDelta p (rightSlope p) p.m := by
-  have hp := (gaussianPDFReal_pos 0 1 (blackMinus p p.m) (by norm_num)).le
+  have hp := (gaussianPDFReal_pos 0 1 (dmi p.m (variance p p.m)) (by norm_num)).le
   have hr := (rootVariance_pos p p.m hw).le
   have hs : leftSlope p ≤ rightSlope p := by unfold leftSlope rightSlope; nlinarith
   unfold branchDelta
@@ -96,11 +97,15 @@ theorem blackCall_continuousOn (p : Params) (hw : ∀ k : ℝ, 0 < variance p k)
     ContinuousOn (blackCall p) (Ioi 0) := by
   have hr : Continuous (rootVariance p) := (variance_continuous p).sqrt
   have hn : ∀ k, rootVariance p k ≠ 0 := fun k ↦ ne_of_gt (rootVariance_pos p k (hw k))
-  have hm : Continuous (blackMinus p) := ((continuous_id.neg.div hr hn).sub (hr.div_const 2))
-  have hp : Continuous (blackPlus p) := ((continuous_id.neg.div hr hn).add (hr.div_const 2))
+  have hm : Continuous (fun k ↦ dmi k (variance p k)) := by
+    simp only [dmi_eq_rootVariance]
+    exact (continuous_id.neg.div hr hn).sub (hr.div_const 2)
+  have hp : Continuous (fun k ↦ dpl k (variance p k)) := by
+    simp only [dpl_eq_rootVariance]
+    exact (continuous_id.neg.div hr hn).add (hr.div_const 2)
   have hphi : Continuous MathFin.Phi := continuous_iff_continuousAt.mpr
     (fun x ↦ (MathFin.hasDerivAt_Phi x).continuousAt)
-  have hc : Continuous (logBlackCall p) := (hphi.comp hp).sub
+  have hc : Continuous (fun k ↦ blackForm k (variance p k)) := (hphi.comp hp).sub
     (Real.continuous_exp.mul (hphi.comp hm))
   exact hc.comp_continuousOn (Real.continuousOn_log.mono (fun x hx ↦ ne_of_gt hx))
 
