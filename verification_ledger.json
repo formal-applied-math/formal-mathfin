@@ -433,9 +433,9 @@
     "mart-thm-2.6.7": {
       "benchmark_file": "martingales.json",
       "date": "2026-10-30",
-      "elapsed_s": 3.9,
-      "input_hash": "637592d6b67feb7957a98216879fb13a95ffbddc6d93cfd073d004e286f8d992",
-      "verified_at_commit": "9d3a714"
+      "elapsed_s": 4.4,
+      "input_hash": "f6f5527c04458c11301cce4119ca4cdf836443aa852053a93f086e2e3d502193",
+      "verified_at_commit": "6e77f1c"
     },
     "mc-def-1.1.1": {
       "benchmark_file": "markov_chains.json",
