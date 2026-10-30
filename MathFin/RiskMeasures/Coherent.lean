@@ -54,9 +54,8 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
 /-- A measure that charges every point of a countable space sees all of it: a property holds
 almost everywhere exactly when it holds everywhere. Counting measure is the case `P {ω} = 1`. -/
 lemma ae_iff_forall_of_singleton_ne_zero {P : Measure Ω} {p : Ω → Prop} [Countable Ω]
-    [MeasurableSingletonClass Ω] (hP : ∀ ω, P {ω} ≠ 0) : (∀ᵐ ω ∂P, p ω) ↔ ∀ ω, p ω := by
-  rw [ae_iff_of_countable]
-  exact forall_congr' fun ω ↦ ⟨fun h ↦ h (hP ω), fun h _ ↦ h⟩
+    (hP : ∀ ω, P {ω} ≠ 0) : (∀ᵐ ω ∂P, p ω) ↔ ∀ ω, p ω :=
+  ae_iff_of_countable.trans <| forall_congr' fun ω ↦ ⟨fun h ↦ h (hP ω), fun h _ ↦ h⟩
 
 /-- The four axioms of a **coherent risk measure** (Artzner, Delbaen, Eber and Heath 1999;
 McNeil–Frey–Embrechts, Definition 2.18) for a functional `ρ` on the integrable losses of
