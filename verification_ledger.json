@@ -2197,16 +2197,16 @@
     "mf-ftap-multi-state-forward": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-10-30",
-      "elapsed_s": 6.0,
-      "input_hash": "6ebda77e4d482dc4fc322834f2b95a72a2c47abab28c4677f730740c3d081ee0",
-      "verified_at_commit": "9d3a714"
+      "elapsed_s": 5.0,
+      "input_hash": "f6e85c0354c490c20f2de78aed8eab61a3f48b662a52e2665fde3000fd6c3c6a",
+      "verified_at_commit": "b2df0b8"
     },
     "mf-ftap-multi-state-measure-form": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.5,
-      "input_hash": "524396a9ebfd098321eb386df8c4365d9c88d645e69da5e15ea9ba6788f9f9bb",
-      "verified_at_commit": "9d3a714"
+      "elapsed_s": 5.5,
+      "input_hash": "3544f95dd680d8452a0e16a9d4570816e90b641d5e5b96100230beb65048a336",
+      "verified_at_commit": "b2df0b8"
     },
     "mf-ftap-one-period-general": {
       "benchmark_file": "no_arbitrage.json",
@@ -2225,16 +2225,16 @@
     "mf-ftap-single-period-complete": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.6,
-      "input_hash": "1cafde2b118c2f90cff1bec949dc2d9bf308557b0c9ea97c914b3f0d3d3e6b1c",
-      "verified_at_commit": "9d3a714"
+      "elapsed_s": 5.6,
+      "input_hash": "eed31824ee43ae04f7abc68706dde8cb10460d9542a6386451731f5681a45f83",
+      "verified_at_commit": "b2df0b8"
     },
     "mf-ftap-two-state-iff": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-10-30",
-      "elapsed_s": 6.0,
-      "input_hash": "6314dc03fec623ac6d26458b93a8c1e46aa4ecd597c7371d4765d8860586b60e",
-      "verified_at_commit": "9d3a714"
+      "elapsed_s": 4.2,
+      "input_hash": "835816ad15b310457cbb46b19087f2b7f71713cff870fc9deafabd9cc5c906d8",
+      "verified_at_commit": "b2df0b8"
     },
     "mf-gamma-mgf": {
       "benchmark_file": "credit.json",
@@ -3535,8 +3535,8 @@
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-10-30",
       "elapsed_s": 4.5,
-      "input_hash": "2d4909cd59ef9a1232c652f1a42f63112cc8165e0ffa65de3002163f3adb48dc",
-      "verified_at_commit": "9d3a714"
+      "input_hash": "4d791a783045bc37946696ed746443d78b3362ec12c8757ddfdccfe981063f93",
+      "verified_at_commit": "b2df0b8"
     },
     "mf-rho": {
       "benchmark_file": "black_scholes.json",
@@ -3758,16 +3758,16 @@
     "mf-superhedging-bounded-below": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.7,
-      "input_hash": "47ff8f3a33864f6cf401dbaa11f5fda13eee0818f76792a5e956f237f86faa47",
-      "verified_at_commit": "9d3a714"
+      "elapsed_s": 4.6,
+      "input_hash": "77c9cde9e7140b0d029a1216eb8ab1624ea2aeddea65840f3669ce39bf808669",
+      "verified_at_commit": "b2df0b8"
     },
     "mf-superhedging-emm-bound": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-10-30",
-      "elapsed_s": 6.0,
-      "input_hash": "1646ea5cd13c419440e867bdfdb22705c32fab17080d7883ed0eb2ff541ed415",
-      "verified_at_commit": "9d3a714"
+      "elapsed_s": 5.5,
+      "input_hash": "57dbc2570cfbebdf305eadda8a0a5c25de13777f6f5e513afa06700c06ff6e96",
+      "verified_at_commit": "b2df0b8"
     },
     "mf-survival-at-zero": {
       "benchmark_file": "credit.json",
@@ -3891,16 +3891,16 @@
     "mf-triangle-arbitrage-ftap": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.5,
-      "input_hash": "3142d0bdf3aaa122848b6fd4edda9cb81b6bb3b97fe45e0850588396af12586f",
-      "verified_at_commit": "9d3a714"
+      "elapsed_s": 4.6,
+      "input_hash": "0f9a5d0e2888d1f8e86c7ba098a57545931a49814f08596f81dbe48db3d15fd7",
+      "verified_at_commit": "b2df0b8"
     },
     "mf-triangle-arbitrage-unique": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.0,
-      "input_hash": "512b807bd9ccfe913799ef04946bc0ceaebf347dd5de29545809b245b517da83",
-      "verified_at_commit": "9d3a714"
+      "elapsed_s": 5.5,
+      "input_hash": "3e2cf985376bd2e0769caac1bb13b169bdb6f5d86fd59d76c3ffa99408c39e17",
+      "verified_at_commit": "b2df0b8"
     },
     "mf-uncorrelated-gaussian-var-herfindahl": {
       "benchmark_file": "risk_measures.json",
