@@ -286,10 +286,15 @@ theorem abs_integral_mul_exp_increment_sub_le (hA : IsSlowClock A) (hM : Marting
       - a ^ 2 * (A q ω - A p ω) / 2) - 1 - (a * (M q ω - M p ω) + ((a * (M q ω - M p ω)) ^ 2 / 2
       - a ^ 2 * (A q ω - A p ω) / 2)))) P :=
     (iWF.sub iWG).congr (.of_forall fun ω ↦ by simp only [Pi.sub_apply]; ring)
+  have i1 : Integrable (fun ω ↦ κ * |M q ω - M p ω| ^ 3) P := iCube.const_mul κ
+  have i2 : Integrable (fun _ : Ω ↦ 2 * γ ^ 2) P := integrable_const _
+  have i3 : Integrable (fun ω ↦ γ * |a| * |M q ω - M p ω|) P := iAbsΔ.const_mul _
+  have i4 : Integrable (fun ω ↦ γ * (a ^ 2 / 2) * (M q ω - M p ω) ^ 2) P := iSq.const_mul _
+  have i12 : Integrable (fun ω ↦ κ * |M q ω - M p ω| ^ 3 + 2 * γ ^ 2) P := i1.add i2
+  have i123 : Integrable (fun ω ↦ κ * |M q ω - M p ω| ^ 3 + 2 * γ ^ 2
+      + γ * |a| * |M q ω - M p ω|) P := i12.add i3
   have ib : Integrable (fun ω ↦ κ * |M q ω - M p ω| ^ 3 + 2 * γ ^ 2 + γ * |a| * |M q ω - M p ω|
-      + γ * (a ^ 2 / 2) * (M q ω - M p ω) ^ 2) P :=
-    (((iCube.const_mul κ).add (integrable_const _)).add (iAbsΔ.const_mul _)).add
-      (iSq.const_mul _)
+      + γ * (a ^ 2 / 2) * (M q ω - M p ω) ^ 2) P := i123.add i4
   -- `E[Δ²] ≤ q − p`
   have hI2 : ∫ ω, (M q ω - M p ω) ^ 2 ∂P ≤ (q : ℝ) - p := by
     have h2 := integral_mul_sq_increment_sub hM hM2 hK hpq (V := fun _ ↦ (1 : ℝ))
@@ -303,11 +308,9 @@ theorem abs_integral_mul_exp_increment_sub_le (hA : IsSlowClock A) (hM : Marting
   have hC0 : 0 ≤ C := (abs_nonneg _).trans (hC (Classical.arbitrary Ω))
   rw [hFG]
   refine abs_integral_le_integral_abs.trans ((integral_mono iFG.abs (ib.const_mul C) hpt).trans ?_)
-  rw [integral_const_mul, integral_add (((iCube.const_mul κ).add (integrable_const _)).add
-      (iAbsΔ.const_mul _)) (iSq.const_mul _),
-    integral_add ((iCube.const_mul κ).add (integrable_const _)) (iAbsΔ.const_mul _),
-    integral_add (iCube.const_mul κ) (integrable_const _), integral_const_mul, integral_const_mul,
-    integral_const_mul, integral_const]
+  rw [integral_const_mul, integral_add i123 i4, integral_add i12 i3, integral_add i1 i2,
+    integral_const_mul, integral_const_mul, integral_const_mul, integral_const_mul,
+    integral_const]
   simp only [measureReal_def, measure_univ, ENNReal.toReal_one, one_smul]
   refine mul_le_mul_of_nonneg_left ?_ hC0
   have : γ * (a ^ 2 / 2) * ∫ ω, (M q ω - M p ω) ^ 2 ∂P ≤ γ ^ 2 :=
@@ -339,11 +342,13 @@ theorem integral_mul_exp_eq (a : ℝ) {s t : ℝ≥0} (hst : s ≤ t) {V : Ω �
     have : (s : ℝ) ≤ t := hst
     rw [hg]; have := sub_nonneg.2 this; positivity
   have hAad := stronglyAdapted_of_martingale_sq_sub hM hM2
+  have hAdiv (r : ℝ≥0) : StronglyMeasurable[𝓕 r] fun ω ↦ a ^ 2 * A r ω / 2 := by
+    simpa only [div_eq_mul_inv] using ((hAad r).const_mul (a ^ 2)).mul_const 2⁻¹
   have hMm (t : ℝ≥0) : Measurable (M t) := ((hM.stronglyAdapted t).mono (𝓕.le t)).measurable
   have hVm : Measurable V := (hV.mono (𝓕.le s)).measurable
   have hZsm (r : ℝ≥0) : StronglyMeasurable[𝓕 r] (Z r) :=
     Real.continuous_exp.comp_stronglyMeasurable
-      (((hM.stronglyAdapted r).const_mul a).sub (((hAad r).const_mul (a ^ 2)).div_const 2))
+      (((hM.stronglyAdapted r).const_mul a).sub (hAdiv r))
   have iVZ (r : ℝ≥0) : Integrable (fun ω ↦ V ω * Z r ω) P :=
     ((memLp_of_abs_le ((hZsm r).mono (𝓕.le r)).aestronglyMeasurable (C := Real.exp (|a| * K))
       (fun ω ↦ by rw [abs_of_pos (Real.exp_pos _)]; exact exp_le_exp_abs_mul hA hK a r ω)
@@ -436,10 +441,12 @@ set-integral identity `setIntegral_exp_eq` identifies the conditional expectatio
 theorem martingale_exp (a : ℝ) :
     Martingale (fun t ω ↦ Real.exp (a * M t ω - a ^ 2 * A t ω / 2)) 𝓕 P := by
   have hAad := stronglyAdapted_of_martingale_sq_sub hM hM2
+  have hAdiv (r : ℝ≥0) : StronglyMeasurable[𝓕 r] fun ω ↦ a ^ 2 * A r ω / 2 := by
+    simpa only [div_eq_mul_inv] using ((hAad r).const_mul (a ^ 2)).mul_const 2⁻¹
   have hZsm (r : ℝ≥0) : StronglyMeasurable[𝓕 r]
       (fun ω ↦ Real.exp (a * M r ω - a ^ 2 * A r ω / 2)) :=
     Real.continuous_exp.comp_stronglyMeasurable
-      (((hM.stronglyAdapted r).const_mul a).sub (((hAad r).const_mul (a ^ 2)).div_const 2))
+      (((hM.stronglyAdapted r).const_mul a).sub (hAdiv r))
   have hi (r : ℝ≥0) : Integrable (fun ω ↦ Real.exp (a * M r ω - a ^ 2 * A r ω / 2)) P :=
     (memLp_of_abs_le ((hZsm r).mono (𝓕.le r)).aestronglyMeasurable (C := Real.exp (|a| * K))
       (fun ω ↦ by rw [abs_of_pos (Real.exp_pos _)]; exact exp_le_exp_abs_mul hA hK a r ω)
