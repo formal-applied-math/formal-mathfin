@@ -19,7 +19,7 @@ Roper's Theorem 2.1). The smiled call always satisfies the bounds, so for raw SV
 and positive variance what convexity leaves open is the large-strike limit. The right wing of the
 variance has slope `b(1 + ρ)`, and
 
-* `tendsto_blackPlus_atBot_iff` — `d₊(k) → −∞` as `k → ∞`, the tail condition of
+* `tendsto_dpl_atBot_iff` — `d₊(k) → −∞` as `k → ∞`, the tail condition of
   Gatheral–Jacquier, *Arbitrage-free SVI volatility surfaces*, Lemma 2.2, holds exactly when
   `b(1 + ρ) < 2`;
 * `tendsto_bsSmile_zero_iff` — the SVI-smiled call tends to `0` at large strikes exactly when
@@ -41,6 +41,7 @@ namespace SVI
 
 open Filter Topology Set ProbabilityTheory MeasureTheory
 open scoped NNReal
+open ForwardSmile (dpl dmi blackForm)
 
 /-! ### The right wing of the variance -/
 
@@ -62,10 +63,10 @@ theorem variance_le_asymptote_add (p : Params) (hb : 0 ≤ p.b) {k : ℝ} (hk : 
   linarith [mul_le_mul_of_nonneg_left hu hb]
 
 /-- `d₊ = (w − 2k)/(2√w)` where the variance is positive. -/
-theorem blackPlus_eq (p : Params) (k : ℝ) (hw : 0 < variance p k) :
-    blackPlus p k = (variance p k - 2 * k) / (2 * rootVariance p k) := by
+theorem dpl_eq_div (p : Params) (k : ℝ) (hw : 0 < variance p k) :
+    dpl k (variance p k) = (variance p k - 2 * k) / (2 * rootVariance p k) := by
   have hr := rootVariance_pos p k hw
-  rw [← rootVariance_sq p k hw.le, blackPlus]
+  rw [dpl_eq_rootVariance, ← rootVariance_sq p k hw.le]
   field_simp
   ring
 
@@ -74,9 +75,9 @@ theorem blackPlus_eq (p : Params) (k : ℝ) (hw : 0 < variance p k) :
 /-- **A wing slope below `2` sends `d₊` to `−∞`.** With `r = √w`, `d₊ ≤ −M` is
 `w + 2Mr ≤ 2k`. Young's inequality `2Mr ≤ qw + M²/q` reduces it to a linear bound on `w`, which
 the asymptote supplies once `q` is small enough for `(1 + q)·slope < 2`. -/
-theorem tendsto_blackPlus_atBot (p : Params) (hb : 0 ≤ p.b)
+theorem tendsto_dpl_atBot (p : Params) (hb : 0 ≤ p.b)
     (hw : ∀ k : ℝ, 0 < variance p k) (hc : p.b * (1 + p.rho) < 2) :
-    Tendsto (blackPlus p) atTop atBot := by
+    Tendsto (fun k ↦ dpl k (variance p k)) atTop atBot := by
   refine tendsto_atBot.2 fun y ↦ ?_
   set c := p.b * (1 + p.rho)
   set M := max (-y) 1
@@ -102,15 +103,16 @@ theorem tendsto_blackPlus_atBot (p : Params) (hb : 0 ≤ p.b)
   have hyoung : 2 * M * rootVariance p k - q * variance p k ≤ M ^ 2 / q := by
     rw [← hr2, le_div_iff₀ hq]
     nlinarith [sq_nonneg (q * rootVariance p k - M)]
-  rw [blackPlus_eq p k (hw k)]
+  rw [dpl_eq_div p k (hw k)]
   exact ((div_le_iff₀ (by positivity)).2
     (by linarith : _ ≤ -M * (2 * rootVariance p k))).trans (neg_le.1 (le_max_left _ _))
 
 /-- **A wing slope of at least `2` keeps `d₊` bounded below**, and sends the variance above any
 level: eventually `d₊ ≥ −|a − 2m|/2` and `√w ≥ R`. -/
-theorem eventually_le_blackPlus (p : Params) (hb : 0 ≤ p.b)
+theorem eventually_le_dpl (p : Params) (hb : 0 ≤ p.b)
     (hw : ∀ k : ℝ, 0 < variance p k) (hc : 2 ≤ p.b * (1 + p.rho)) (R : ℝ) :
-    ∀ᶠ k in atTop, -(|p.a - 2 * p.m| / 2) ≤ blackPlus p k ∧ R ≤ rootVariance p k := by
+    ∀ᶠ k in atTop,
+      -(|p.a - 2 * p.m| / 2) ≤ dpl k (variance p k) ∧ R ≤ rootVariance p k := by
   filter_upwards [eventually_ge_atTop (max p.m (p.m + ((max R 1) ^ 2 - p.a) / 2))] with k hk
   have hkm : p.m ≤ k := (le_max_left _ _).trans hk
   have hk1 : p.m + ((max R 1) ^ 2 - p.a) / 2 ≤ k := (le_max_right _ _).trans hk
@@ -121,28 +123,28 @@ theorem eventually_le_blackPlus (p : Params) (hb : 0 ≤ p.b)
   have hRr : max R 1 ≤ rootVariance p k := Real.le_sqrt_of_sq_le (by linarith)
   have hr1 : 1 ≤ rootVariance p k := (le_max_right _ _).trans hRr
   refine ⟨?_, (le_max_left _ _).trans hRr⟩
-  rw [blackPlus_eq p k (hw k), le_div_iff₀ (by positivity)]
+  rw [dpl_eq_div p k (hw k), le_div_iff₀ (by positivity)]
   nlinarith [abs_nonneg (p.a - 2 * p.m), neg_abs_le (p.a - 2 * p.m),
     mul_nonneg (abs_nonneg (p.a - 2 * p.m)) (sub_nonneg.2 hr1)]
 
 /-- **The tail condition for raw SVI**: `d₊(k) → −∞` as `k → ∞` exactly when the right wing
 slope `b(1 + ρ)` is below `2`. -/
-theorem tendsto_blackPlus_atBot_iff (p : Params) (hb : 0 ≤ p.b)
+theorem tendsto_dpl_atBot_iff (p : Params) (hb : 0 ≤ p.b)
     (hw : ∀ k : ℝ, 0 < variance p k) :
-    Tendsto (blackPlus p) atTop atBot ↔ p.b * (1 + p.rho) < 2 := by
-  refine ⟨fun h ↦ not_le.1 fun hc ↦ ?_, tendsto_blackPlus_atBot p hb hw⟩
+    Tendsto (fun k ↦ dpl k (variance p k)) atTop atBot ↔ p.b * (1 + p.rho) < 2 := by
+  refine ⟨fun h ↦ not_le.1 fun hc ↦ ?_, tendsto_dpl_atBot p hb hw⟩
   obtain ⟨k, hlow, hk⟩ := ((tendsto_atBot.1 h (-(|p.a - 2 * p.m| / 2) - 1)).and
-    (eventually_le_blackPlus p hb hw hc 0)).exists
+    (eventually_le_dpl p hb hw hc 0)).exists
   linarith [hk.1]
 
 /-! ### The call price at large and small strikes -/
 
 /-- The SVI-smiled call is at most `Φ(d₊)`. -/
-theorem blackCall_le_Phi_blackPlus (p : Params) (K : ℝ) :
-    blackCall p K ≤ MathFin.Phi (blackPlus p (Real.log K)) := by
-  simp only [blackCall, logBlackCall]
+theorem blackCall_le_Phi_dpl (p : Params) (K : ℝ) :
+    blackCall p K ≤ MathFin.Phi (dpl (Real.log K) (variance p (Real.log K))) := by
+  simp only [blackCall, ForwardSmile.blackForm]
   linarith [mul_nonneg (Real.exp_pos (Real.log K)).le
-    (MathFin.Phi_nonneg (blackMinus p (Real.log K)))]
+    (MathFin.Phi_nonneg (dmi (Real.log K) (variance p (Real.log K))))]
 
 /-- The Black–Scholes hypothesis at the smile's volatility, on the standard normal space. -/
 theorem bsCallHyp_smile (p : Params) {K : ℝ} (hK : 0 < K) (hw : 0 < variance p (Real.log K)) :
@@ -163,19 +165,20 @@ theorem one_sub_le_bsSmile (p : Params) {K : ℝ} (hK : 0 < K)
 theorem bsSmile_le_one (p : Params) {K : ℝ} (hK : 0 < K) (hw : 0 < variance p (Real.log K)) :
     bsSmile p K ≤ 1 :=
   (blackCall_eq_bsSmile p K hK hw).symm.trans_le
-    ((blackCall_le_Phi_blackPlus p K).trans (MathFin.Phi_le_one _))
+    ((blackCall_le_Phi_dpl p K).trans (MathFin.Phi_le_one _))
 
 /-- **Under the tail condition the call vanishes at large strikes**: it lies between `0` and
 `Φ(d₊)`. -/
 theorem tendsto_bsSmile_zero (p : Params) (hb : 0 ≤ p.b)
     (hw : ∀ k : ℝ, 0 < variance p k) (hc : p.b * (1 + p.rho) < 2) :
     Tendsto (bsSmile p) atTop (𝓝 0) := by
-  have hΦ : Tendsto (fun K ↦ MathFin.Phi (blackPlus p (Real.log K))) atTop (𝓝 0) :=
-    tendsto_Phi_atBot.comp ((tendsto_blackPlus_atBot p hb hw hc).comp Real.tendsto_log_atTop)
+  have hΦ : Tendsto (fun K ↦ MathFin.Phi (dpl (Real.log K) (variance p (Real.log K)))) atTop
+      (𝓝 0) :=
+    tendsto_Phi_atBot.comp ((tendsto_dpl_atBot p hb hw hc).comp Real.tendsto_log_atTop)
   refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds hΦ ?_ ?_
   · filter_upwards [eventually_gt_atTop 0] with K hK using bsSmile_nonneg p hK (hw _)
   · filter_upwards [eventually_gt_atTop 0] with K hK
-    exact (blackCall_eq_bsSmile p K hK (hw _)).symm.trans_le (blackCall_le_Phi_blackPlus p K)
+    exact (blackCall_eq_bsSmile p K hK (hw _)).symm.trans_le (blackCall_le_Phi_dpl p K)
 
 /-- **With a wing slope of at least `2` the call does not vanish at large strikes.** Eventually
 `Φ(d₊) ≥ δ := Φ(−|a − 2m|/2) > 0`, while by the Mills bound
@@ -188,23 +191,24 @@ theorem not_tendsto_bsSmile_zero (p : Params) (hb : 0 ≤ p.b)
   have hδ : 0 < δ := (MathFin.Phi_mem_Ioo _).1
   obtain ⟨k, hsmall, ⟨hlow, hR⟩, hk0⟩ :=
     ((Real.tendsto_exp_atTop.eventually ((tendsto_order.1 h).2 (δ / 2) (half_pos hδ))).and
-      ((eventually_le_blackPlus p hb hw hc (4 / δ)).and (eventually_ge_atTop 0))).exists
+      ((eventually_le_dpl p hb hw hc (4 / δ)).and (eventually_ge_atTop 0))).exists
   have hr := rootVariance_pos p k (hw k)
   rw [← blackCall_eq_bsSmile p _ (Real.exp_pos k)
     (by rw [Real.log_exp]; exact hw k)] at hsmall
-  simp only [blackCall, logBlackCall, Real.log_exp] at hsmall
-  have hE : 0 ≤ Real.exp k * MathFin.Phi (blackMinus p k) :=
+  simp only [blackCall, ForwardSmile.blackForm, Real.log_exp] at hsmall
+  have hE : 0 ≤ Real.exp k * MathFin.Phi (dmi k (variance p k)) :=
     mul_nonneg (Real.exp_pos k).le (MathFin.Phi_nonneg _)
   -- the Mills bound, transported by `eᵏφ(d₋) = φ(d₊)`
-  have hmills : -blackMinus p k * (Real.exp k * MathFin.Phi (blackMinus p k)) ≤ 1 := by
-    have := mul_le_mul_of_nonneg_left (neg_mul_Phi_le_gaussianPDFReal (blackMinus p k))
+  have hmills :
+      -dmi k (variance p k) * (Real.exp k * MathFin.Phi (dmi k (variance p k))) ≤ 1 := by
+    have := mul_le_mul_of_nonneg_left (neg_mul_Phi_le_gaussianPDFReal (dmi k (variance p k)))
       (Real.exp_pos k).le
-    rw [← black_density_identity p k (hw k)] at this
-    linarith [gaussianPDFReal_zero_one_le_one (blackPlus p k)]
-  have hd : 2 / δ ≤ -blackMinus p k := by
+    rw [ForwardSmile.exp_mul_pdf_dmi (hw k)] at this
+    linarith [gaussianPDFReal_zero_one_le_one (dpl k (variance p k))]
+  have hd : 2 / δ ≤ -dmi k (variance p k) := by
     have h1 : 0 ≤ k / rootVariance p k := div_nonneg hk0 hr.le
     have h2 : 4 / δ / 2 = 2 / δ := by ring
-    simp only [blackMinus, neg_div]
+    simp only [dmi_eq_rootVariance, neg_div]
     linarith
   have h3 := (mul_le_mul_of_nonneg_right hd hE).trans hmills
   rw [div_mul_eq_mul_div, div_le_iff₀ hδ] at h3
@@ -258,13 +262,14 @@ are the two conditions of Gatheral–Jacquier's Lemma 2.2. -/
 theorem butterflyFreeFormula_iff (p : Params) :
     butterflyFreeFormula.eval p = true ↔
       0 ≤ p.sigma ∧ 0 ≤ p.b ∧ 0 ≤ 1 - p.rho ^ 2 ∧ (∀ k : ℝ, 0 < variance p k) ∧
-        ConvexOn ℝ (Ioi 0) (bsSmile p) ∧ Tendsto (blackPlus p) atTop atBot := by
+        ConvexOn ℝ (Ioi 0) (bsSmile p) ∧
+          Tendsto (fun k ↦ dpl k (variance p k)) atTop atBot := by
   rw [butterflyFreeFormula_eval]
   constructor
   · rintro ⟨⟨hs, hb, hr, hw, hcv⟩, hc⟩
-    exact ⟨hs, hb, hr, hw, hcv, tendsto_blackPlus_atBot p hb hw hc⟩
+    exact ⟨hs, hb, hr, hw, hcv, tendsto_dpl_atBot p hb hw hc⟩
   · rintro ⟨hs, hb, hr, hw, hcv, ht⟩
-    exact ⟨⟨hs, hb, hr, hw, hcv⟩, (tendsto_blackPlus_atBot_iff p hb hw).1 ht⟩
+    exact ⟨⟨hs, hb, hr, hw, hcv⟩, (tendsto_dpl_atBot_iff p hb hw).1 ht⟩
 
 /-- **Butterfly-free raw SVI as a finite sign formula.** `butterflyFreeFormula` holds exactly
 when `σ ≥ 0`, `b ≥ 0`, `ρ² ≤ 1`, the variance is positive at every log-strike, and the SVI-smiled

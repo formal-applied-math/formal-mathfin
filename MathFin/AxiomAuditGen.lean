@@ -231,6 +231,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.value_cappedCall
 
+/-- info: 'MathFin.Contracts.BlackScholes.value_chooser' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.value_chooser
+
 /-- info: 'MathFin.Contracts.BlackScholes.value_digitalCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.value_digitalCall
@@ -927,13 +931,13 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.SVI.fullCertificateFormula_iff
 
-/-- info: 'MathFin.SVI.tendsto_blackPlus_atBot_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.SVI.tendsto_blackPlus_atBot_iff
-
 /-- info: 'MathFin.SVI.tendsto_bsSmile_zero_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.SVI.tendsto_bsSmile_zero_iff
+
+/-- info: 'MathFin.SVI.tendsto_dpl_atBot_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.SVI.tendsto_dpl_atBot_iff
 
 /-- info: 'MathFin.StochasticIntegralCharacterisation.isStochasticIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2243,9 +2247,9 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.integral_sub_cond_gpdMeasure
 
-/-- info: 'MathFin.isCoherentRiskMeasure_count_neg_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.isCoherentRiskMeasure_neg_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.isCoherentRiskMeasure_count_neg_iff
+#print axioms MathFin.isCoherentRiskMeasure_neg_iff
 
 /-- info: 'MathFin.isCoherentRiskMeasure_spectralRiskMeasure_sum_esSpectrum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

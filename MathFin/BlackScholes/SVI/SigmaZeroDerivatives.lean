@@ -19,6 +19,7 @@ the two open wings and one-sided derivatives at their common endpoint. -/
 namespace MathFin
 namespace SVI
 open Real ProbabilityTheory Set
+open ForwardSmile (dpl dmi blackForm)
 
 theorem sigmaZero_variance_hasDerivAt (p : Params) (hs : p.sigma = 0) (k : ℝ) (hk : k ≠ p.m) :
     HasDerivAt (variance p) (slope p k) k := by
@@ -51,56 +52,57 @@ theorem sigmaZero_rootVariance_hasDerivAt (p : Params) (hs : p.sigma = 0) (k : �
     HasDerivAt (rootVariance p) (slope p k / (2*rootVariance p k)) k :=
   (sigmaZero_variance_hasDerivAt p hs k hk).sqrt (ne_of_gt hw)
 
-theorem sigmaZero_blackMinus_hasDerivAt (p : Params) (hs : p.sigma = 0) (k : ℝ) (hk : k ≠ p.m)
+theorem sigmaZero_dmi_hasDerivAt (p : Params) (hs : p.sigma = 0) (k : ℝ) (hk : k ≠ p.m)
     (hw : 0 < variance p k) :
-    HasDerivAt (blackMinus p) (blackMinusSlope p k) k := by
+    HasDerivAt (fun k ↦ dmi k (variance p k)) (dmiSlope p k) k := by
   have hr := sigmaZero_rootVariance_hasDerivAt p hs k hk hw
   have hn := ne_of_gt (rootVariance_pos p k hw)
   have h := (((hasDerivAt_id k).neg).div hr hn).sub (hr.div_const 2)
+  simp only [dmi_eq_rootVariance]
   convert h using 1 <;> try rfl
-  dsimp [blackMinusSlope]
+  dsimp [dmiSlope]
   field_simp
   ring
 
-theorem sigmaZero_blackPlus_hasDerivAt (p : Params) (hs : p.sigma = 0) (k : ℝ) (hk : k ≠ p.m)
+theorem sigmaZero_dpl_hasDerivAt (p : Params) (hs : p.sigma = 0) (k : ℝ) (hk : k ≠ p.m)
     (hw : 0 < variance p k) :
-    HasDerivAt (blackPlus p)
-      (blackMinusSlope p k + slope p k / (2*rootVariance p k)) k := by
+    HasDerivAt (fun k ↦ dpl k (variance p k))
+      (dmiSlope p k + slope p k / (2*rootVariance p k)) k := by
   have h :=
-      (sigmaZero_blackMinus_hasDerivAt p hs k hk hw).add
+      (sigmaZero_dmi_hasDerivAt p hs k hk hw).add
       (sigmaZero_rootVariance_hasDerivAt p hs k hk hw)
   convert h using 1 <;> try rfl
   funext x
-  dsimp [blackPlus, blackMinus]
+  simp only [dpl_eq_rootVariance, dmi_eq_rootVariance, Pi.add_apply]
   ring
 
-theorem sigmaZero_logBlackCall_hasDerivAt (p : Params) (hs : p.sigma = 0) (k : ℝ) (hk : k ≠ p.m)
+theorem sigmaZero_blackForm_hasDerivAt (p : Params) (hs : p.sigma = 0) (k : ℝ) (hk : k ≠ p.m)
     (hw : 0 < variance p k) :
-    HasDerivAt (logBlackCall p) (Real.exp k * blackDelta p k) k := by
+    HasDerivAt (fun k ↦ blackForm k (variance p k)) (Real.exp k * blackDelta p k) k := by
   have hp :=
-      (MathFin.hasDerivAt_Phi (blackPlus p k)).comp k (sigmaZero_blackPlus_hasDerivAt p hs k hk hw)
+      (MathFin.hasDerivAt_Phi (dpl k (variance p k))).comp k (sigmaZero_dpl_hasDerivAt p hs k hk hw)
   have hm :=
-      (MathFin.hasDerivAt_Phi (blackMinus p k)).comp k
-      (sigmaZero_blackMinus_hasDerivAt p hs k hk hw)
+      (MathFin.hasDerivAt_Phi (dmi k (variance p k))).comp k
+      (sigmaZero_dmi_hasDerivAt p hs k hk hw)
   have h := hp.sub ((Real.hasDerivAt_exp k).mul hm)
   convert h using 1 <;> try rfl
-  rw [black_density_identity p k hw]
+  rw [← ForwardSmile.exp_mul_pdf_dmi hw]
   dsimp [blackDelta]
   ring
 
 theorem sigmaZero_blackDelta_hasDerivAt (p : Params) (hs : p.sigma = 0) (k : ℝ) (hk : k ≠ p.m)
     (hw : 0 < variance p k) :
     HasDerivAt (blackDelta p)
-      (gaussianPDFReal 0 1 (blackMinus p k) / rootVariance p k * durrleman p k) k := by
-  have hm := sigmaZero_blackMinus_hasDerivAt p hs k hk hw
-  have hp := (MathFin.hasDerivAt_gaussianPDFReal_zero_one (blackMinus p k)).comp k hm
-  have hc := (MathFin.hasDerivAt_Phi (blackMinus p k)).comp k hm
+      (gaussianPDFReal 0 1 (dmi k (variance p k)) / rootVariance p k * durrleman p k) k := by
+  have hm := sigmaZero_dmi_hasDerivAt p hs k hk hw
+  have hp := (MathFin.hasDerivAt_gaussianPDFReal_zero_one (dmi k (variance p k))).comp k hm
+  have hc := (MathFin.hasDerivAt_Phi (dmi k (variance p k))).comp k hm
   have hr := sigmaZero_rootVariance_hasDerivAt p hs k hk hw
   have hn := ne_of_gt (rootVariance_pos p k hw)
   have h := ((hp.mul (sigmaZero_slope_hasDerivAt p hs k hk)).div (hr.const_mul 2)
     (mul_ne_zero (by norm_num) hn)).sub hc
   convert h using 1 <;> try rfl
-  dsimp [durrleman, blackMinusSlope, blackMinus]
+  simp only [durrleman, dmiSlope, dmi_eq_rootVariance, Function.comp_apply, Pi.mul_apply]
   rw [← rootVariance_sq p k hw.le]
   field_simp
   ring
@@ -173,33 +175,36 @@ theorem sigmaZero_curvature (p : Params) (hs : p.sigma = 0) (k : ℝ) :
 
 /-- `blackDelta` with the variance slope replaced by the constant slope `s` of a wing. -/
 noncomputable def branchDelta (p : Params) (s k : ℝ) : ℝ :=
-  gaussianPDFReal 0 1 (blackMinus p k) * s / (2*rootVariance p k) -
-    MathFin.Phi (blackMinus p k)
+  gaussianPDFReal 0 1 (dmi k (variance p k)) * s / (2*rootVariance p k) -
+    MathFin.Phi (dmi k (variance p k))
 
 /-- The log-price chain rule only needs a one-sided variance derivative. -/
-theorem logBlackCall_hasDerivWithinAt (p : Params) (s k : ℝ) (S : Set ℝ)
+theorem blackForm_hasDerivWithinAt (p : Params) (s k : ℝ) (S : Set ℝ)
     (hw : 0 < variance p k) (hv : HasDerivWithinAt (variance p) s S k) :
-    HasDerivWithinAt (logBlackCall p) (Real.exp k * branchDelta p s k) S k := by
+    HasDerivWithinAt (fun k ↦ blackForm k (variance p k)) (Real.exp k * branchDelta p s k) S
+      k := by
   have hr : HasDerivWithinAt (rootVariance p) (s / (2*rootVariance p k)) S k :=
     hv.sqrt (ne_of_gt hw)
   have hn := ne_of_gt (rootVariance_pos p k hw)
   let dm := -1 / rootVariance p k + k*s / (2*(rootVariance p k)^3) - s / (4*rootVariance p k)
-  have hm : HasDerivWithinAt (blackMinus p) dm S k := by
+  have hm : HasDerivWithinAt (fun k ↦ dmi k (variance p k)) dm S k := by
     have h := (((hasDerivWithinAt_id k S).neg).div hr hn).sub (hr.div_const 2)
+    simp only [dmi_eq_rootVariance]
     convert h using 1 <;> try rfl
     dsimp [dm]
     field_simp
     ring
-  have hp : HasDerivWithinAt (blackPlus p) (dm + s / (2*rootVariance p k)) S k := by
+  have hp : HasDerivWithinAt (fun k ↦ dpl k (variance p k)) (dm + s / (2*rootVariance p k)) S
+      k := by
     convert hm.add hr using 1 <;> try rfl
     funext x
-    dsimp [blackPlus, blackMinus]
+    simp only [dpl_eq_rootVariance, dmi_eq_rootVariance, Pi.add_apply]
     ring
-  have hp' := (MathFin.hasDerivAt_Phi (blackPlus p k)).comp_hasDerivWithinAt k hp
-  have hm' := (MathFin.hasDerivAt_Phi (blackMinus p k)).comp_hasDerivWithinAt k hm
+  have hp' := (MathFin.hasDerivAt_Phi (dpl k (variance p k))).comp_hasDerivWithinAt k hp
+  have hm' := (MathFin.hasDerivAt_Phi (dmi k (variance p k))).comp_hasDerivWithinAt k hm
   have h := hp'.sub ((Real.hasDerivAt_exp k).hasDerivWithinAt.mul hm')
   convert h using 1 <;> try rfl
-  rw [black_density_identity p k hw]
+  rw [← ForwardSmile.exp_mul_pdf_dmi hw]
   dsimp [branchDelta]
   ring
 

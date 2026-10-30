@@ -63,8 +63,9 @@ one-period operator. The structure:
    values are bounded; by monotonicity, the bound lifts; the one-period
    inequality closes the step.
 
-Used in `americanCallPrice_le_binomialPrice`. The Bellman-`max` structure
-of `americanPrice` makes both intrinsic and continuation bounds visible.
+Used in `call_intrinsic_le_binomialPrice`; `americanCallPrice_le_binomialPrice` then follows from
+the Snell minimality of `americanPrice` (the European price process is a martingale above the
+payoff).
 
 ### Algebraic-identity / counting-bijection decoupling
 

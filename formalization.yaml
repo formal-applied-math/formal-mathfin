@@ -166,9 +166,9 @@ alignment:
       status: full 2 · wrapper 2 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 31 statements
+      lean: 32 statements
       module: benchmarks/contracts.json
-      status: full 31 · wrapper 0 · reduced 0 · placeholder 0
+      status: full 32 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
       lean: 29 statements

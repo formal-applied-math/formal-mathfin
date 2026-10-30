@@ -24,7 +24,9 @@ where `F = S_0 · e^{rT}` is the forward price. The two terms are:
   and `E_Q[Z] = 0`.
 * `E_Q[(S_T - F)/F] = 0`: zero by `expected_terminal_eq_forward` (`E_Q[S_T] = F`).
 
-The result `(2/T)·σ²T/2 = σ²` says: under BS lognormal dynamics, the fair
+The identity for the whole log contract, `(2/T) · E_Q[log(F/S_T) + (S_T - F)/F] = σ²`
+(`varianceSwap_fairStrike`), is the no-jump case of `jumpDiffusion_logContract` and lives in
+`JumpDiffusionVarianceSwap.lean`. The result `(2/T)·σ²T/2 = σ²` says: under BS lognormal dynamics, the fair
 variance swap rate equals the squared volatility — exactly the relationship
 that makes BS implied volatility a "risk-neutral expected variance".
 
@@ -36,9 +38,6 @@ Results:
 * `varianceSwap_log_contribution`: the log-payoff piece
   `(2/T) · E_Q[log(F/S_T)] = σ²`.
 * `integral_bsTerminal_eq_forward`: `E[S_T] = F` (standard-normal-driver form).
-* `integral_excess_return_eq_zero`: `E[(S_T − F)/F] = 0`.
-* `varianceSwap_fairStrike`: the full Demeterfi-Derman-Kamal identity
-  `(2/T) · E[log(F/S_T) + (S_T − F)/F] = σ²`.
 
 Model-free, for any law of the log-return `Y` with `S_T = S_0e^Y`, `S_0 > 0`, `E|Y| < ∞` and
 `E[e^Y] < ∞`:
@@ -138,10 +137,8 @@ lemma integral_log_forward_div_bsTerminal_eq {S_0 : ℝ} (hS : 0 < S_0)
 replication piece scales to give the squared volatility.
 
 `(2/T) · E[log(F/S_T)] = σ²` under the BS lognormal hypothesis (with
-`F = S_0 · e^{rT}`). Combined with the zero excess-return moment
-`E[(S_T − F)/F] = 0` (from `expected_terminal_eq_forward`), this gives the
-full Demeterfi-Derman-Kamal log-replication identity for the variance swap
-fair strike. -/
+`F = S_0 · e^{rT}`). The whole log contract, with the zero excess-return term
+`E[(S_T − F)/F] = 0`, is `varianceSwap_fairStrike` (`JumpDiffusionVarianceSwap.lean`). -/
 theorem varianceSwap_log_contribution {S_0 : ℝ} (hS : 0 < S_0)
     (r σ T : ℝ) (hT : T ≠ 0) :
     (2 / T) *
@@ -150,37 +147,5 @@ theorem varianceSwap_log_contribution {S_0 : ℝ} (hS : 0 < S_0)
         ∂(gaussianReal 0 1)) = σ^2 := by
   rw [integral_log_forward_div_bsTerminal_eq hS]
   field_simp
-
-/-- **Zero excess-return moment**: `E[(S_T − F)/F] = 0`, immediate from
-`E[S_T] = F` (`integral_bsTerminal_eq_forward`). -/
-lemma integral_excess_return_eq_zero (S_0 r σ T : ℝ) (hT : 0 ≤ T) :
-    ∫ z, (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
-            - S_0 * Real.exp (r * T)) / (S_0 * Real.exp (r * T)) ∂(gaussianReal 0 1) = 0 := by
-  have hint : Integrable
-      (fun z ↦ S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)) (gaussianReal 0 1) := by
-    have h1 : Integrable (fun z ↦ Real.exp (σ * Real.sqrt T * z)) (gaussianReal 0 1) :=
-      integrable_exp_mul_gaussianReal (σ * Real.sqrt T)
-    refine (h1.const_mul (S_0 * Real.exp ((r - σ ^ 2 / 2) * T))).congr
-      (Filter.Eventually.of_forall fun z ↦ ?_)
-    change S_0 * Real.exp ((r - σ ^ 2 / 2) * T) * Real.exp (σ * Real.sqrt T * z)
-        = S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
-    rw [mul_assoc, ← Real.exp_add]
-  rw [integral_div, integral_sub hint (integrable_const _),
-      integral_bsTerminal_eq_forward S_0 r σ T hT, integral_const, measureReal_def,
-      measure_univ, ENNReal.toReal_one, one_smul, sub_self, zero_div]
-
-/-- **Variance swap fair strike** (Demeterfi-Derman-Kamal, full log-replication
-identity): `(2/T) · E[log(F/S_T) + (S_T − F)/F] = σ²`. Assembles the log
-contribution with the zero excess-return moment `E[(S_T − F)/F] = 0`. -/
-theorem varianceSwap_fairStrike {S_0 : ℝ} (hS : 0 < S_0) (r σ T : ℝ) (hT : 0 < T) :
-    (2 / T) *
-        ((∫ z, Real.log ((S_0 * Real.exp (r * T)) /
-              (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)))
-            ∂(gaussianReal 0 1))
-         + ∫ z, (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
-              - S_0 * Real.exp (r * T)) / (S_0 * Real.exp (r * T)) ∂(gaussianReal 0 1))
-      = σ ^ 2 := by
-  rw [integral_excess_return_eq_zero S_0 r σ T hT.le, add_zero]
-  exact varianceSwap_log_contribution hS r σ T hT.ne'
 
 end MathFin

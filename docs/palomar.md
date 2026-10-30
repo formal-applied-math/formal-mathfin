@@ -37,7 +37,7 @@ Two declarations are compared, both in namespace `ADEH`:
   bound* of expected loss over its representing set of probability vectors.
   Discharged against [`MathFin.coherentRisk_isLUB`](../MathFin/RiskMeasures/AcceptanceSet.lean)
   applied to `L ↦ ρ (-L)`, through
-  [`MathFin.isCoherentRiskMeasure_count_neg_iff`](../MathFin/RiskMeasures/PositionsConvention.lean).
+  [`MathFin.isCoherentRiskMeasure_neg_iff`](../MathFin/RiskMeasures/PositionsConvention.lean).
 - `ADEH.worstCase_isCoherentRisk` — worst-case loss satisfies the four
   coherence axioms. Discharged against
   [`MathFin.worstCase_isCoherent`](../MathFin/RiskMeasures/WorstCaseRisk.lean), transported along
@@ -70,8 +70,8 @@ registration does not make a repository an approved Challenge dependency. So
 structure, `MathFin.IsCoherentRiskMeasure`, in the *loss* convention of McNeil–Frey–Embrechts, and
 no copy of `IsCoherentRisk`: `Solution.lean` declares the Challenge's structure and
 `representingSet` with the same bodies, and discharges the theorems by the equivalence
-`MathFin.isCoherentRiskMeasure_count_neg_iff` (the positions axioms hold exactly when
-`L ↦ ρ (-L)` is an `IsCoherentRiskMeasure` for counting measure) together with the sign flip
+`MathFin.isCoherentRiskMeasure_neg_iff` (the positions axioms hold exactly when
+`L ↦ ρ (-L)` is an `IsCoherentRiskMeasure` for a finite measure charging every state) together with the sign flip
 `ADEH.representingSet ρ = MathFin.representingSet (fun L ↦ ρ (-L))`.
 
 That rule is why this result was submitted first. Its statement is expressible
