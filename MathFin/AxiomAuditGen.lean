@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (833 MathFin constants, 29 upstream). Citations
+  corpus (834 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -946,6 +946,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.SurvivalModel.survive_eq_survivalFunction_ratio' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.SurvivalModel.survive_eq_survivalFunction_ratio
+
+/-- info: 'MathFin.WienerIntegralIto.wienerIntegralLp_eq_itoIntegralCLM_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.WienerIntegralIto.wienerIntegralLp_eq_itoIntegralCLM_T
 
 /-- info: 'MathFin.WienerIntegralL2.integral_exp_neg_add_mul_wienerIntegralLp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
