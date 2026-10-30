@@ -45,7 +45,7 @@ lemma worstCase_le {L : ι → ℝ} {a : ℝ} (h : ∀ i, L i ≤ a) : worstCase
 
 /-- Worst-case loss satisfies the four ADEH coherent-risk axioms for any measure on the states
 that charges every state: the maximum does not see the weights, only which states are possible. -/
-lemma worstCase_isCoherent [MeasurableSpace ι] [MeasurableSingletonClass ι] {P : Measure ι}
+lemma worstCase_isCoherent [MeasurableSpace ι] {P : Measure ι}
     (hP : ∀ i, P {i} ≠ 0) : IsCoherentRiskMeasure P worstCase where
   mono X Y _ _ hXY :=
     worstCase_le fun i ↦ ((ae_iff_forall_of_singleton_ne_zero hP).1 hXY i).trans
