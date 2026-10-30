@@ -570,6 +570,13 @@
       "input_hash": "94eaf0d62710b8c87d3c628e2c24d0145e64960d8cac6cd056d43ba025317c2f",
       "verified_at_commit": "2fe72a0"
     },
+    "mf-american-put-ge-bsm-european-put": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-10-30",
+      "elapsed_s": 12.1,
+      "input_hash": "36e4d7c56e1a7cb8f833f74d36acbfd1a810f180fc9782900e3b8f678bf001c8",
+      "verified_at_commit": "ae28cab"
+    },
     "mf-american-put-log-boundary-convex": {
       "benchmark_file": "american_put_boundary.json",
       "date": "2026-10-30",
