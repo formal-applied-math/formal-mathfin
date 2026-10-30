@@ -116,7 +116,7 @@ automation:
   spend_usd: 0 (Mistral Labs beta)
   notes: "scout, not author: the pipeline opens the PR; a human reviews and merges, so no machine proof enters the library unreviewed"
 fidelity:
-  divergences: 15 reduced-core (a faithful but reduced formal core of the informal statement) and 18 library-wrappers (a thin restatement consuming a Mathlib/BrownianMotion lemma); 0 placeholders. The reduced-core entries are the honest divergences — each is itemised in docs/coverage.md.
+  divergences: 17 reduced-core (a faithful but reduced formal core of the informal statement) and 18 library-wrappers (a thin restatement consuming a Mathlib/BrownianMotion lemma); 0 placeholders. The reduced-core entries are the honest divergences — each is itemised in docs/coverage.md.
 review:
   status: continuous — an 8-lens values-review panel runs at each proof-content change (docs/values-review.md); cadence machine-enforced by test_values_review_is_current
   reviewers:
