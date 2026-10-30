@@ -46,31 +46,17 @@ noncomputable def quotientProdHom (f g : ℝ[X]) :
     ← aeval_algHom_apply, quotientProdHom_root]
   simp [AdjoinRoot.aeval_eq]
 
+/-- The map `ℝ[X]/(fg) → ℝ[X]/(f) × ℝ[X]/(g)` is Mathlib's Chinese remainder isomorphism
+`Ideal.quotientMulEquivQuotientProd` for the coprime ideals `(f)`, `(g)`, transported along
+`(fg) = (f)(g)`. -/
 theorem quotientProdHom_bijective (f g : ℝ[X]) (hc : IsCoprime f g) :
     Function.Bijective (quotientProdHom f g) := by
-  constructor
-  · intro x y h
-    obtain ⟨p, rfl⟩ := AdjoinRoot.mk_surjective x
-    obtain ⟨q, rfl⟩ := AdjoinRoot.mk_surjective y
-    rw [quotientProdHom_mk, quotientProdHom_mk, Prod.mk.injEq] at h
-    exact AdjoinRoot.mk_eq_mk.mpr
-      (hc.mul_dvd (AdjoinRoot.mk_eq_mk.mp h.1) (AdjoinRoot.mk_eq_mk.mp h.2))
-  · rintro ⟨x, y⟩
-    obtain ⟨p, rfl⟩ := AdjoinRoot.mk_surjective x
-    obtain ⟨q, rfl⟩ := AdjoinRoot.mk_surjective y
-    obtain ⟨u, v, huv⟩ := hc
-    let r := v*g*p + u*f*q
-    refine ⟨AdjoinRoot.mk (f*g) r, ?_⟩
-    rw [quotientProdHom_mk, Prod.mk.injEq]
-    constructor
-    · apply AdjoinRoot.mk_eq_mk.mpr
-      refine ⟨u*(q-p), ?_⟩
-      dsimp [r]
-      linear_combination p * huv
-    · apply AdjoinRoot.mk_eq_mk.mpr
-      refine ⟨v*(p-q), ?_⟩
-      dsimp [r]
-      linear_combination q * huv
+  let e := (Ideal.quotEquivOfEq (Ideal.span_singleton_mul_span_singleton f g).symm).trans
+    (Ideal.quotientMulEquivQuotientProd _ _ ((Ideal.isCoprime_span_singleton_iff f g).2 hc))
+  suffices ⇑(quotientProdHom f g) = e from this ▸ e.bijective
+  funext x
+  obtain ⟨p, rfl⟩ := AdjoinRoot.mk_surjective x
+  exact (quotientProdHom_mk f g p).trans (Prod.ext rfl rfl)
 
 /-- Chinese remainder decomposition at the algebra level, preserving the
 residue class of every polynomial. -/
