@@ -544,10 +544,10 @@
     },
     "mf-american-ge-european": {
       "benchmark_file": "binomial.json",
-      "date": "2026-10-29",
-      "elapsed_s": 5.5,
-      "input_hash": "156bfb15cf47500f3e094248e3a62067278de96d89851fc806ee16e272115a8d",
-      "verified_at_commit": "331e4a2"
+      "date": "2026-10-30",
+      "elapsed_s": 9.0,
+      "input_hash": "46364daf91a4bac7a228f952a40746086fae5434e1c67767e4f1d69f781a25cb",
+      "verified_at_commit": "51ccc51"
     },
     "mf-american-intrinsic-bound": {
       "benchmark_file": "binomial.json",
