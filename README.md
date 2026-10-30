@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 723 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 690 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 724 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 691 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 15 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -163,7 +163,11 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   [`value_exchangeOption`](MathFin/Contracts/Models/BlackScholesExchange.lean),
   [`value_geomAsianCall`](MathFin/Contracts/Models/BlackScholesAsian.lean)), and the chooser's
   replicating portfolio of a call and a put at the chooser date is worth Rubinstein's closed form
-  ([`value_chooser`](MathFin/Contracts/Models/BlackScholesChooser.lean)).
+  ([`value_chooser`](MathFin/Contracts/Models/BlackScholesChooser.lean)). A credit default
+  swap on a payment grid, observing the default indicator, is worth the grid legs of the survival
+  curve against the Cox default time
+  ([`value_cdsBuyer_coxDefaultTime`](MathFin/Contracts/Models/DefaultTime.lean)); default is paid at
+  the end of its period, so these are the discretisations of the continuous Cox legs.
 
 ## Contents
 
@@ -185,7 +189,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Fifteen of the 723 results are reduced cores. Eleven assume a structure whose fields include the
+- Fifteen of the 724 results are reduced cores. Eleven assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, the two-dimensional Itô formula,
