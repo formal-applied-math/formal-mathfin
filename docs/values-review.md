@@ -2103,7 +2103,7 @@ Second panel (6 fix-now, 7 nits, all applied):
 8. **Smaller items:**
    - one model-free put–call parity, from which the four existing parities follow;
    - "American put ≥ Black–Scholes put" at `q = 0`, a cheap edge between the two towers;
-   - the American put's `brownianLogState_condExp_transition` as the rate-0 `condExp_comp`, and
+   - the American put's `brownianLogState_isGaussianMarkov` as the rate-0 `condExp_comp`, and
      `brownian_condExp_transition` taking integrability and measurability as hypotheses (its
      bound and continuity supply only those);
    - the second panel's deferred proof nits (above);
