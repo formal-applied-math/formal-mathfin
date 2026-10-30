@@ -106,6 +106,12 @@ lemma mertonVol_pos {σ δ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (n : ℕ) :
     div_nonneg (mul_nonneg (Nat.cast_nonneg n) (sq_nonneg δ)) hT.le
   linarith
 
+/-- `mertonVol n² · T = σ²T + nδ²`: the conditional log-variance over the horizon. -/
+lemma mertonVol_sq_mul (σ δ : ℝ) {T : ℝ} (hT : 0 < T) (n : ℕ) :
+    mertonVol σ δ T n ^ 2 * T = σ ^ 2 * T + n * δ ^ 2 := by
+  have h0 : 0 ≤ σ ^ 2 + (n : ℝ) * δ ^ 2 / T := by positivity
+  rw [mertonVol, Real.sq_sqrt h0, add_mul, div_mul_cancel₀ _ hT.ne']
+
 /-! ### The conditional Black–Scholes values -/
 
 /-- The `n`-jump conditional Black–Scholes call value

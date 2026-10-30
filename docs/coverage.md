@@ -26,6 +26,35 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### One route to Merton's formula; one Black–Scholes family (2026-10-30)
+
+Issue #362. Corpus 713 → 711 (`mf-merton-from-general-jump-law` and `mf-merton-model-exists` removed).
+
+- `MertonHyp` and `BlackScholes/MertonModel.lean` are gone. Merton's call, put and the discounted
+  terminal price come from the general jump-diffusion: `JumpDiffusionHyp.call_eq_mertonCallPrice`,
+  `JumpDiffusionHyp.put_eq_mertonPutPrice` (put–call parity, `integral_discounted_put_payoff`) and
+  `JumpDiffusionHyp.discounted_terminal_merton`. `mf-merton-call-formula`, `mf-merton-put-formula`
+  and `mf-merton-discounted-terminal` are restated over `JumpDiffusionHyp` with a Gaussian first
+  jump (the discounted-terminal statement now needs only `0 ≤ T`). `mf-merton-from-general-jump-law`
+  duplicated the call entry; `mf-merton-model-exists` is subsumed by
+  `mf-jump-diffusion-model-exists`.
+- `JumpDiffusionHyp.J_meas` is removed: `IdentDistrib` already carries a.e.-measurability
+  (`JumpDiffusionHyp.aemeasurable_J`). The compound-Poisson MGF lemmas lose their `hmeas`
+  hypotheses (`mf-compound-poisson-mgf`, `mf-compound-poisson-mgf-random-count`,
+  `mf-creditriskplus-sector-loss-mgf`).
+- `SVI.blackPlus`, `blackMinus`, `logBlackCall` are tied to ForwardSmile's `dpl`, `dmi`, `blackForm`
+  (`SVI.blackPlus_eq_dpl`, `SVI.blackMinus_eq_dmi`, `SVI.logBlackCall_eq_blackForm`, from `dpl_eq`,
+  `dmi_eq`), and Durrleman's function is `1 + smileDelta` for SVI
+  (`SVI.durrleman_eq_one_add_smileDelta`). The SVI definitions themselves remain, because six SVI
+  files use them in `√variance` form.
+- `BarrierParity.discountedValue` equals `Contract.value` of the one-payment contract
+  (`discountedValue_eq_contract_value`); the barrier prices are not routed through contracts (#367).
+- `sc-bs-pde-feynman-kac` also concludes that the three Greeks are the closed-form ones: `Vτ`, `VS`
+  and `VSS` equal the heat-kernel expressions of `PDE.lean` (by `HasDerivAt.unique`).
+
+Safe wording: "Merton's call, put and discounted terminal price are corollaries of the general
+jump-diffusion mixing formula, with Gaussian log-jumps". Not covered: the price process with jumps.
+
 ### Contracts in any model, bonds and swaps, and the risk of a position (2026-10-29)
 
 Nine entries added, all `full`, in `contracts.json`.
@@ -1129,13 +1158,12 @@ Four entries added, all `full`: `mf-jump-diffusion-brownian-no-jumps`, `mf-bs-fo
   remaining maturity (`IsFilteredPreBrownian.condExp_call_eq_bsV`,
   `IsFilteredPreBrownian.condExp_put_eq_bsPut`).
 - A `JumpDiffusionHyp` model whose first log-jump is `N(log(1 + k) − δ²/2, δ²)` is a Merton model
-  (`JumpDiffusionHyp.toMertonHyp`), and the canonical model with that jump law gives a `MertonHyp`
-  (`mertonHyp_canonical`), so the Merton entries' hypotheses can be met.
+  (the canonical model with that jump law, `jumpDiffusionHyp_canonical`, satisfies the Merton entries'
+  hypotheses).
 
 Safe wording: "Brownian motion with drift is a jump-diffusion process without jumps, so the
 jump-diffusion process results contain the Black–Scholes model at every date before maturity, and
-Merton's model exists". Not covered: a jump-diffusion process with jumps (`Λ > 0`); `MertonHyp` as
-an instance of `JumpDiffusionHyp` (its jumps are only a.e.-measurable).
+Merton's model exists". Not covered: a jump-diffusion process with jumps (`Λ > 0`).
 
 ### Gaussian smoothing; Merton's 1976 series from the general route, at every date (2026-10-08)
 
@@ -1149,10 +1177,8 @@ Three entries added, all `full`: `mf-bs-gaussian-smoothing`, `mf-merton-from-gen
   mixing formula and adds the Gaussian log-shocks.
 - Merton's series from the general route (`BlackScholes/JumpDiffusionMerton.lean`): with
   log-jumps `N(log(1 + k) − δ²/2, δ²)` and the compensator `kΛ`, the general-law formula and
-  Gaussian smoothing give `mertonCallPrice` (`JumpDiffusionHyp.call_eq_mertonCallPrice`). The two
-  Merton towers now reach the same series. `MertonHyp` is still not an instance of
-  `JumpDiffusionHyp` (its jumps are only a.e.-measurable), so `merton_call_formula` keeps its own
-  proof.
+  Gaussian smoothing give `mertonCallPrice` (`JumpDiffusionHyp.call_eq_mertonCallPrice`). The
+  former second Merton tower was removed on 2026-10-30 (see that entry).
 - Merton's 1976 formula at every date: with Gaussian jumps at the compensated drift
   `b = r − σ²/2 − Λk`, the call price function is `mertonCallPrice` at the expected jump count
   `Λτ` (`jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice`), and for `t < T` the conditional
@@ -1165,8 +1191,7 @@ Safe wording: "averaging a Black–Scholes call over a lognormal spot factor is 
 at the shifted spot and the enlarged volatility; with lognormal jumps the general jump-diffusion
 formula is Merton's 1976 series, and in a log-price process with independent jump-diffusion
 increments, at the compensated drift `b = r − σ²/2 − Λk`, it is the conditional value of the call
-and the put at every date before maturity". Not covered: the existence of the process with jumps;
-`MertonHyp` as an instance of `JumpDiffusionHyp`.
+and the put at every date before maturity". Not covered: the existence of the process with jumps.
 
 ### Prices at every date; Merton's formula and the implied-volatility lift at every date (2026-10-08)
 
@@ -1222,7 +1247,7 @@ Five entries added, all `full`: `mf-jump-diffusion-model-exists`,
   under `N(0, 1) ⊗ Poisson(Λ) ⊗ ν^ℕ` satisfy `JumpDiffusionHyp`, with jumps of law `ν`.
   `JumpDiffusionHyp` can therefore be discharged for any `Λ` and `ν`; the remaining hypotheses on
   the model are `∫ eˣ dν < ∞` (`integrable_exp_canonical_jump`) and, for the implied-volatility
-  result, `Λ > 0` and `ν ≠ δ₀`. `MertonHyp` was witnessed later (`mertonHyp_canonical`).
+  result, `Λ > 0` and `ν ≠ δ₀`. The Gaussian-jump case was witnessed later (`jumpDiffusionHyp_canonical`).
 - The call depends only on `Λ` and the jump law, `JumpDiffusionHyp.call_eq_integral_infinitePi`:
   on any model with `𝔼[e^{J₀}] < ∞`, for `S₀, K, σ, T > 0`, it is
   `∫ n, ∫ x, C_BS(S₀e^{−κ + ∑_{i<n} xᵢ}) dν^ℕ dPoisson(Λ)`, with `ν` the law of `J₀`.
@@ -1282,7 +1307,7 @@ Four entries added, all `full`: `mf-jump-diffusion-mixing-formula`,
 `mf-jump-diffusion-call-dominates-bs`, `mf-jump-diffusion-compensator` and
 `mf-merton-general-jump-law`. Corpus 457 → 461.
 
-`BlackScholes/JumpDiffusionMixing.lean` drops the Gaussian jump law of `MertonModel`:
+`BlackScholes/JumpDiffusionMixing.lean` takes jumps of any law, not only Gaussian:
 
 - the mixing formula, `jumpDiffusion_call_eq_integral_bsV`: for `Z ∼ N(0, 1)` and a jump part `Y`
   independent of `Z` with `𝔼[e^Y] < ∞`,
@@ -1313,9 +1338,8 @@ Safe wording: "the mixing formula, Black–Scholes and spot bounds for a compens
 call, the compound-Poisson compensator, and Merton's Poisson-mixture formula for i.i.d. jumps of
 any law with a finite exponential moment, at maturity". Not covered: closed forms for specific
 non-Gaussian jump laws (Kou's double-exponential model needs its own integrals), the put and
-put–call parity, the price process, and Lévy processes beyond compound Poisson. `MertonModel` is
-not derived from this file: a `MertonHyp` is not a `JumpDiffusionHyp` as stated, because its jumps
-are only a.e.-measurable.
+put–call parity, the price process, and Lévy processes beyond compound Poisson. Merton's Gaussian case is derived from this file
+(`JumpDiffusionMerton.lean`).
 
 ### The Merton Greeks (2026-10-07)
 
@@ -1345,7 +1369,7 @@ weights `wₙcₙ` sum to one.
 
 Safe wording: "the Merton call's delta, gamma and vega as Poisson mixtures of Black–Scholes Greeks,
 with their signs and the shape of the price they imply". The Greeks are stated for
-`mertonCallPrice`, which `merton_call_formula` identifies with the model's expectation at each
+`mertonCallPrice`, which `JumpDiffusionHyp.call_eq_mertonCallPrice` identifies with the model's expectation at each
 spot. Not covered: the put Greeks, theta and rho, and sensitivities to the jump parameters `k`,
 `δ`, `Λ`.
 
@@ -1356,15 +1380,13 @@ Five entries added, all `full`: `mf-merton-call-formula`, `mf-merton-put-formula
 Corpus 447 → 452.
 
 `mertonCallPrice` was a definition: the Poisson mixture `∫ n, C_BS(spot_n, vol_n) ∂Poisson(Λ)`.
-`BlackScholes/MertonModel.lean` proves it is the price of the model. Under `MertonHyp`, a standard
-normal `Z`, a jump count `N ∼ Poisson(Λ)` and i.i.d. log-jumps `Jᵢ ∼ N(log(1+k) − δ²/2, δ²)`,
-mutually independent, the terminal price
+It is the price of the model: with a standard normal `Z`, a jump count `N ∼ Poisson(Λ)` and i.i.d.
+log-jumps `Jᵢ ∼ N(log(1+k) − δ²/2, δ²)`, mutually independent, the terminal price
 `S_T = S₀ exp((r − σ²/2)T − kΛ + σ√T·Z + ∑_{i<N} Jᵢ)` has
-`𝔼[e^{−rT}(S_T − K)⁺] = mertonCallPrice` (`merton_call_formula`), the put analogue
-(`merton_put_formula`) and `𝔼[e^{−rT}S_T] = S₀` (`merton_discounted_terminal`). With `n` jumps the
-total log-shock is a sum of independent Gaussians, so `S_T` is a Black–Scholes terminal price at
-`mertonSpot n` and `mertonVol n` (`mertonTerminal_eq_bsTerminal`, `MertonHyp.hasLaw_mertonStd`);
-the jump count is then integrated out by the freezing lemma.
+`𝔼[e^{−rT}(S_T − K)⁺] = mertonCallPrice` (`JumpDiffusionHyp.call_eq_mertonCallPrice`), the put
+analogue (`JumpDiffusionHyp.put_eq_mertonPutPrice`) and `𝔼[e^{−rT}S_T] = S₀`
+(`JumpDiffusionHyp.discounted_terminal_merton`). (Originally proved in `MertonModel.lean` with its
+own Poisson freezing; since 2026-10-30 these are corollaries of the general mixing formula.)
 
 The freezing lemma is `Foundations/IndepFreezing.integral_comp_prodMk_of_indepFun`:
 `𝔼[g(X, Y)] = ∫ x, 𝔼[g(x, Y)] d(law X)` for independent `X`, `Y`, from Mathlib's

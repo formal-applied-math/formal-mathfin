@@ -124,6 +124,23 @@ theorem expected_terminal_eq_forward
 
 /-! ### Discounted asset is a Q-martingale at maturity -/
 
+/-- The discounted Black–Scholes terminal price driven by a standard normal has mean `S₀`: the
+forward `𝔼[S_T] = S₀e^{rT}` (`integral_bsTerminal_eq_forward`), discounted. -/
+theorem integral_discounted_bsTerminal {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}
+    {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) Q) (S_0 r σ : ℝ) {T : ℝ} (hT : 0 ≤ T) :
+    ∫ ω, rexp (-r * T) * bsTerminal S_0 r σ T (Z ω) ∂Q = S_0 := by
+  have hmeas : Measurable (bsTerminal S_0 r σ T) := by
+    unfold bsTerminal
+    fun_prop
+  have hfwd : ∫ ω, bsTerminal S_0 r σ T (Z ω) ∂Q = S_0 * rexp (r * T) :=
+    (hZ.integral_comp hmeas.aestronglyMeasurable).trans
+      (integral_bsTerminal_eq_forward S_0 r σ T hT)
+  rw [integral_const_mul, hfwd]
+  calc rexp (-r * T) * (S_0 * rexp (r * T)) = S_0 * rexp (-r * T + r * T) := by
+        rw [Real.exp_add]
+        ring
+    _ = S_0 := by rw [show -r * T + r * T = 0 by ring, Real.exp_zero, mul_one]
+
 /-- **Discounted terminal price equals spot**: under `BSCallHyp`,
     `E_Q[e^{-rT} S_T] = S_0`. This is the integrated form of the
     risk-neutral martingale property at maturity. -/
@@ -133,10 +150,7 @@ theorem discounted_terminal_eq_S0
     {S_0 K r σ T : ℝ} {Z : Ω → ℝ}
     (h : BSCallHyp Q S_0 K r σ T Z) :
     ∫ ω, Real.exp (-(r * T)) * bsTerminal S_0 r σ T (Z ω) ∂Q = S_0 := by
-  rw [integral_const_mul, expected_terminal_eq_forward h]
-  rw [show Real.exp (-(r * T)) * (S_0 * Real.exp (r * T))
-        = S_0 * (Real.exp (-(r * T)) * Real.exp (r * T)) from by ring,
-      ← Real.exp_add,
-      show -(r * T) + r * T = 0 from by ring, Real.exp_zero, mul_one]
+  obtain ⟨_, _, _, hT, hZ⟩ := h
+  simpa only [neg_mul] using integral_discounted_bsTerminal hZ S_0 r σ hT.le
 
 end MathFin

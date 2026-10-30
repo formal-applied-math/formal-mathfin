@@ -17,8 +17,8 @@ a value `x`, averaging `g(x, Y)` over `Y` alone, and then averaging the result o
   `𝔼[g(X, Y)] = ∫ x, 𝔼[g(x, Y)] d(law X)`.
 
 This is the *freezing lemma*. When `X = N` is a count it is the law of total expectation over the
-number of jumps, the step every Poisson-mixture computation takes: the Merton jump-diffusion price
-(`BlackScholes/MertonModel.lean`) and the compound-Poisson moment generating function
+number of jumps, the step every Poisson-mixture computation takes: the jump-diffusion price,
+Merton's among them, and the compound-Poisson moment generating function
 (`Actuarial/CompoundPoissonMGF.lean`) both go through it. With `X` a jump part of any law it is
 the mixing formula of `BlackScholes/JumpDiffusionMixing.lean`: a jump-diffusion call is the
 Black–Scholes price averaged over the jumps.
