@@ -82,7 +82,6 @@ theorem geomAsianN_driver_hasLaw (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
       with ω h1 h2 hz hincrω
     simp only [Pi.smul_apply, smul_eq_mul] at h1
     rw [h1, h2, Finset.sum_apply]
-    simp only [Pi.zero_apply] at hz
     rw [div_eq_inv_mul]
     congr 1
     refine Finset.sum_congr rfl (fun i _ ↦ ?_)

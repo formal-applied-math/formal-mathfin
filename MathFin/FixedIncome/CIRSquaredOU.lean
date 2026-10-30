@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.FixedIncome.VasicekSDEGaussian
+public import MathFin.Foundations.GaussianMoments
 
 /-!
 # The mean of a sum of two squared OU fluctuations (the Feller-borderline CIR mean)
