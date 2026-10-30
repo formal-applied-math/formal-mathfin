@@ -37,9 +37,10 @@ device — it is exactly how the Itô integral is defined for unbounded integran
 
 1. `clampM` — truncation to `[−M, M]`; bounded, measurable, `𝓕`-preserving.
 2. `stepSP` — a single bounded adapted step `φ·𝟙_{(a,b]}` as a `TBoundedSP`.
-3. `truncStep n M` — the truncated left-endpoint process over `unifPart T n`.
-4. `itoSimple (truncStep n M) = ∑ clamp_M(B_{t_k})·ΔB_k` — the truncated sum.
-5. CLM evaluates: `itoIntegralCLM_T (simpleAssembly_T (truncStep n M))` is that
+3. `stepσ` — the left-endpoint step process of an adapted bounded `θ` over `unifPart T n`;
+   the truncated one is `stepσ` at `clampPath B M`.
+4. `itoSimple (stepσ θ) = ∑ θ(t_k)·ΔB_k` (`itoSimple_stepσ`) — at `clampPath B M` the truncated sum.
+5. CLM evaluates: `itoIntegralCLM_T (simpleAssembly_T (stepσ θ))` (`itoIntegralCLM_T_stepσ`) is that
    sum's `L²` class (`extendOfNorm_eq` + the assembly isometry).
 6. The truncated sums converge in `L²` to `½(B_T² − B₀² − T)`
    (`itoSquared_L2_tendsto_div2` + the truncation error → 0).
@@ -146,23 +147,6 @@ omit mΩ in
 lemma abs_clampPath_le (m : ℕ) (s : ℝ≥0) (ω : Ω) : |clampPath B m s ω| ≤ m :=
   clampM_abs_le (Nat.cast_nonneg m) _
 
-/-! ### The truncated left-endpoint process -/
-
-/-- The **truncated left-endpoint step process** over the uniform partition of
-`[0,T]` into `n` pieces, with coefficients clamped to `[−m, m]`:
-`∑_{k<n} clamp_m(B_{t_k}) · 𝟙_{(t_k, t_{k+1}]}`, `t_k = unifPart T n k`. A genuine
-bounded `TBoundedSP` (the clamp is what makes it bounded — `B_{t_k}` itself is
-not). Indexed over `(range n).attach` so each step sees `k < n` for `t_{k+1} ≤ T`. -/
-noncomputable def truncStep (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (n m : ℕ) :
-    TBoundedSP T hBmeas :=
-  ∑ k ∈ (Finset.range n).attach,
-    stepSP hBmeas (a := unifPart T n k.1) (b := unifPart T n (k.1 + 1))
-      (unifPart_mono T n (Nat.le_succ k.1))
-      (unifPart_le_T (Finset.mem_range.mp k.2))
-      (φ := fun ω ↦ clampM (m : ℝ) (B (unifPart T n k.1) ω))
-      (measurable_clampM_comp hBmeas (measurable_eval_natFiltration hBmeas (unifPart T n k.1)))
-      (M := (m : ℝ)) (fun ω ↦ clampM_abs_le (Nat.cast_nonneg m) (B (unifPart T n k.1) ω))
-
 /-- The elementary Itô integral is additive over a finite sum of simple processes. -/
 lemma itoSimple_sum (hBmeas : ∀ t, Measurable (B t)) {ι' : Type*} (s : Finset ι')
     (V : ι' → SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
@@ -172,14 +156,30 @@ lemma itoSimple_sum (hBmeas : ∀ t, Measurable (B t)) {ι' : Type*} (s : Finset
   | empty => funext ω; simp [itoSimple]
   | insert a s ha ih => rw [Finset.sum_insert ha, Finset.sum_insert ha, itoSimple_add, ih]
 
-/-- **The truncated step process integrates to the truncated Riemann sum.** -/
-lemma itoSimple_truncStep (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (n m : ℕ) (ω : Ω) :
-    itoSimple hBmeas (truncStep hBmeas T n m).val ω
-      = riemannσ (B := B) (clampPath B m) T n ω := by
-  rw [truncStep, AddSubmonoidClass.coe_finsetSum, itoSimple_sum, Finset.sum_apply]
-  simp only [riemannσ, clampPath]
-  rw [← Finset.sum_attach (Finset.range n) (fun k ↦
-    clampM (m : ℝ) (B (unifPart T n k) ω) * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω))]
+/-! ### The left-endpoint step process -/
+
+/-- The **bounded left-endpoint step process** for a general adapted `θ`:
+`∑_{k<n} θ(tₖ) · 𝟙_{(tₖ, t_{k+1}]}`. A `TBoundedSP` — each coefficient `θ(tₖ)` is
+`𝓕_{tₖ}`-measurable (adaptedness) and bounded by `C`. -/
+noncomputable def stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) : TBoundedSP T hBmeas :=
+  ∑ k ∈ (Finset.range n).attach,
+    stepSP hBmeas (a := unifPart T n k.1) (b := unifPart T n (k.1 + 1))
+      (unifPart_mono T n (Nat.le_succ k.1))
+      (unifPart_le_T (Finset.mem_range.mp k.2))
+      (φ := θ (unifPart T n k.1))
+      (hadap (unifPart T n k.1)).measurable
+      (M := C) (fun ω ↦ hbdd (unifPart T n k.1) ω)
+
+/-- The step process integrates to the `θ`-Riemann sum. -/
+lemma itoSimple_stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) (ω : Ω) :
+    itoSimple hBmeas (stepσ hBmeas hadap hbdd T n).val ω = riemannσ (B := B) θ T n ω := by
+  rw [stepσ, AddSubmonoidClass.coe_finsetSum, itoSimple_sum, Finset.sum_apply, riemannσ,
+    ← Finset.sum_attach (Finset.range n) (fun k ↦
+      θ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω))]
   refine Finset.sum_congr rfl fun k _ ↦ ?_
   rw [itoSimple_stepSP]
 
@@ -266,20 +266,19 @@ lemma memLp_riemannσ_clampPath (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     MemLp (riemannσ (B := B) (clampPath B m) T n) 2 μ :=
   memLp_riemannσ hB hBmeas (stronglyMeasurable_clampPath hBmeas m) (abs_clampPath_le m) T n
 
-/-- **The CLM evaluated on `truncStep` is the truncated Riemann sum's `L²` class.** This is
-where `itoIntegralCLM_T` gets a genuine consumer: the continuous Itô integral of the bounded
-step process is, by construction (`extendOfNorm_eq` + the assembly isometry), the `L²` class of
-`∑ clamp_m(B_{t_k})·ΔB_k`. -/
-lemma itoIntegralCLM_T_truncStep (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (n m : ℕ) :
-    itoIntegralCLM_T hB T hBmeas (simpleAssembly_T (μ := μ) T hBmeas (truncStep hBmeas T n m))
-      = (memLp_riemannσ_clampPath hB hBmeas T n m).toLp
-          (riemannσ (B := B) (clampPath B m) T n) := by
-  rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
+/-- **The CLM evaluated on `stepσ` is the `θ`-Riemann sum's `L²` class.** -/
+lemma itoIntegralCLM_T_stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
+    itoIntegralCLM_T hB T hBmeas
+        (simpleAssembly_T (μ := μ) T hBmeas (stepσ hBmeas hadap hbdd T n))
+      = (memLp_riemannσ hB hBmeas hadap hbdd T n).toLp (riemannσ (B := B) θ T n) := by
+  rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange T hBmeas)
         ⟨1, fun V ↦ by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas V).le⟩]
-  change ItoIntegralL2.itoSimpleLp hB hBmeas (truncStep hBmeas T n m).val = _
-  rw [ItoIntegralL2.itoSimpleLp]
+  change itoSimpleLp hB hBmeas (stepσ hBmeas hadap hbdd T n).val = _
+  rw [itoSimpleLp]
   exact (MemLp.toLp_eq_toLp_iff _ _).mpr
-    (Filter.Eventually.of_forall fun ω ↦ itoSimple_truncStep hBmeas T n m ω)
+    (Filter.Eventually.of_forall fun ω ↦ itoSimple_stepσ hBmeas hadap hbdd T n ω)
 
 /-- **The truncation error as a variance sum** (Itô isometry). -/
 lemma integral_truncRiemann_sub_sq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (n m : ℕ) :
@@ -423,11 +422,14 @@ theorem itoIntegralCLM_T_brownian (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥
   have hisom : Isometry (itoIntegralCLM_T hB T hBmeas) :=
     AddMonoidHomClass.isometry_of_norm _ (itoIntegralCLM_T_norm hB T hBmeas)
   set x : ℕ → Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
-    fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (truncStep hBmeas T n (M n)) with hxdef
+    fun n ↦ simpleAssembly_T (μ := μ) T hBmeas
+      (stepσ hBmeas (stronglyMeasurable_clampPath hBmeas (M n)) (abs_clampPath_le (M n)) T n)
+    with hxdef
   have hax : ∀ n, itoIntegralCLM_T hB T hBmeas (x n)
       = (memLp_riemannσ_clampPath hB hBmeas T n (M n)).toLp
           (riemannσ (B := B) (clampPath B (M n)) T n) :=
-    fun n ↦ itoIntegralCLM_T_truncStep hB hBmeas T n (M n)
+    fun n ↦ itoIntegralCLM_T_stepσ hB hBmeas (stronglyMeasurable_clampPath hBmeas (M n))
+      (abs_clampPath_le (M n)) T n
   have hxCauchy : CauchySeq x := by
     have haC : CauchySeq (fun n ↦ itoIntegralCLM_T hB T hBmeas (x n)) := by
       simp only [hax]; exact hA.cauchySeq
