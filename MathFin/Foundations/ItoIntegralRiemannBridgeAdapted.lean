@@ -15,9 +15,9 @@ the general adapted Girsanov theorem needs (the market price of risk is a genuin
 not a function of `B_s` alone) — the uniform-partition Riemann–Itô sums `riemannσ θ T n =
 ∑_{k<n} θ(tₖ)·(B_{t_{k+1}} − B_{tₖ})` (`ItoRiemannSum`) converge in `L²(μ)` to
 `itoIntegralCLM_T (processToLp θ)` — the genuine continuous Itô integral of the σ-realization
-`processToLp θ` (`AdaptedProcessToLp`). This is the one bridge: the integrands `φ ∘ B` and
-`(s, B_s) ↦ φ(s, B_s)` of `ItoIntegralRiemannBridge` and `ItoIntegralRiemannBridgeTD` are special
-cases of it.
+`processToLp θ` (`AdaptedProcessToLp`). This is the one bridge: the integrand
+`(s, B_s) ↦ φ(s, B_s)` of `ItoIntegralRiemannBridgeTD` is a special case of it, and `φ ∘ B` the
+case of that which is constant in time.
 
 The coefficient `θ(tₖ)` is `𝓕_{tₖ}`-measurable and bounded — exactly `stepSP`'s requirement — so the
 left-endpoint step process is directly a `TBoundedSP`, and the `L²`-membership of the Riemann sum

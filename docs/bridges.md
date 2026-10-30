@@ -250,7 +250,7 @@ Mathlib's weak-type `maximal_ineq` and fills in the strong-type form.
 ## Summit A — continuous-time Itô formula (2026-06-02)
 
 The bounded-derivative continuous-time L² Itô formula (`ito_formula_L2_bddDeriv`,
-`Foundations/ItoFormulaCLM.lean`) is a five-module chain that reuses, rather than
+`Foundations/ItoFormulaCLM.lean`) is a four-module chain that reuses, rather than
 reinvents, the Mathlib / BrownianMotion-package machinery:
 
 - **A1** `WeightedQuadraticVariation.lean` — weighted QV via the weak-Markov/Gaussian-
@@ -260,14 +260,14 @@ reinvents, the Mathlib / BrownianMotion-package machinery:
 - **A2** `ItoFormulaRemainder.lean` + `GaussianMoments.integral_pow6_gaussianReal` — the
   Gaussian 6th moment reuses Degenne's `centralMoment_two_mul_gaussianReal` (package); the
   cubic Taylor bound reuses Mathlib's `Convex.norm_image_sub_le_of_norm_hasDerivWithin_le`.
-- **A3** `ItoIntegralRiemannBridge.lean` — generalizes `ItoIntegralBrownian.itoIntegralCLM_T_brownian`
-  (integrand `id → φ`) as the `θ s ω = φ(B_s ω)` case of the adapted bridge
+- **A3** `ItoIntegralRiemannBridgeTD.lean` — generalizes `ItoIntegralBrownian.itoIntegralCLM_T_brownian`
+  (integrand `id → φ(t, ·)`) as the `θ s ω = φ(s, B_s ω)` case of the adapted bridge
   (`ItoIntegralRiemannBridgeAdapted.itoIntegralCLM_T_of_bdd_adapted_cont`, one Riemann–Itô sum
   `riemannσ` in `ItoRiemannSum.lean`), reusing the entire `stepSP` / `simpleAssembly_T` /
   `itoIntegralCLM_T` CLM stack; the trim-L² limit reuses `memLp_uncurry_trim_T` + Mathlib's
   `aestronglyMeasurable_of_tendsto_ae` / `tendsto_integral_of_dominated_convergence`.
-- **A-core / A4** `ItoFormulaC2.lean` / `ItoFormulaCLM.lean` — assemble `DiscreteIto.discrete_ito_formula`
-  with A1/A2/A3 via uniqueness of L² limits.
+- **A-core / A4** `ItoFormulaTD.lean` / `ItoFormulaCLM.lean` — assemble `DiscreteIto.discrete_ito_formula_2d`
+  with A1/A2/A3 via uniqueness of L² limits; `ito_formula_L2_bddDeriv` is the `f_t = 0` case.
 
 **Bridge opportunity:** the one clean upstream candidate remains `IsPiSystem` for
 `ElementaryPredictableSet` (off the Summit-A critical path; see

@@ -1232,7 +1232,7 @@ that is why they compose with our trims at all.
 
 `ae_fst_mem_Ioc_trimMeasure_T` — "trim-a.e. `z`, `z.1 ∈ Ioc 0 T`" — existed **six** times when the
 2026-08-07 audit looked: a `private lemma` in `ItoIntegralLocality`, four inline `have`s
-(`ItoIntegralRiemannBridge`, `…TD`, `…Adapted`, `SimpleProcessPartition`), and the public one added the
+(`ItoIntegralRiemannBridge` since retired, `…TD`, `…Adapted`, `SimpleProcessPartition`), and the public one added the
 day before in `ItoIntegralCLM` by someone who did not check. Five are now retired.
 
 The lesson is not "avoid duplication", which everyone already believes. It is that **the duplicate is

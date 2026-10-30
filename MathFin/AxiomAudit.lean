@@ -463,18 +463,6 @@ namespace MathFin.AxiomAudit
 
 /-! ## Summit A: bounded-derivative continuous-time Itô formula in L² (CLM-identified) -/
 
-/-- info: 'MathFin.tendsto_weighted_qv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.tendsto_weighted_qv
-
-/-- info: 'MathFin.tendsto_ito_remainder' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.tendsto_ito_remainder
-
-/-- info: 'MathFin.ItoIntegralRiemannBridge.itoIntegralCLM_T_of_bdd_cont' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.ItoIntegralRiemannBridge.itoIntegralCLM_T_of_bdd_cont
-
 /-- info: 'MathFin.ito_formula_L2_bddDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ito_formula_L2_bddDeriv

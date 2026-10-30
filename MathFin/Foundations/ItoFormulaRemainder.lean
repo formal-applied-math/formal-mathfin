@@ -9,16 +9,15 @@ public import MathFin.Foundations.GaussianMoments
 public import MathFin.Foundations.QuadraticVariationL2
 public import MathFin.Foundations.DiscreteIto
 
-/-! # The Itô–Taylor remainder vanishes in `L²`
+/-! # The Itô–Taylor remainder: the cubic bound and Brownian sixth moments
 
-The third (remainder) term of the discrete Itô formula `discrete_ito_formula`, summed
-along the uniform partition of `[0,T]`, converges to `0` in `L²(μ)` for `f ∈ C³` with
-bounded `f‴`. This is the term the continuous-time Itô formula discards.
-
-Each per-step remainder `Rₖ` is `O(|ΔBₖ|³)` (order-2 Taylor bound,
-`abs_discreteTaylorRemainder_le`), so `E[Rₖ²] = O(E[(ΔBₖ)⁶]) = O((Δtₖ)³)` (the Gaussian
-sixth moment `integral_pow6_gaussianReal`). Cauchy–Schwarz on the sum gives
-`E[(∑ₖ Rₖ)²] ≤ n·∑ₖ E[Rₖ²] = O(n·n·(T/n)³) = O(n⁻¹) → 0`.
+The third (remainder) term of the discrete Itô formula `discrete_ito_formula` is `O(|ΔBₖ|³)`
+for `f ∈ C³` with bounded `f‴` (order-2 Taylor bound, `abs_discreteTaylorRemainder_le`), so
+its square is controlled by the Brownian sixth moment `E[(ΔB)⁶] = 15 (Δt)³`
+(`integral_increment_pow6`, from the Gaussian `integral_pow6_gaussianReal`). The summed
+remainder along the uniform partition is shown to vanish in `L²` by
+`tendsto_ito_remainder_td` (`ItoFormulaTDRemainder`), of which the time-independent case is the
+instance `f_t = 0`.
 -/
 
 @[expose] public section
@@ -124,95 +123,5 @@ theorem integrable_increment_pow6 (t₀ t₁ : ℝ≥0) :
     rw [(hB.hasLaw_sub t₁ t₀).map_eq]; exact hg
   exact (integrable_map_measure hmap.aestronglyMeasurable (hB.hasLaw_sub t₁ t₀).aemeasurable).mp
       hmap
-
-/-- **The Itô–Taylor remainder vanishes in `L²`.** For `f ∈ C³` with `|f‴| ≤ Cf3`,
-`∑ₖ Rₖ → 0` in `L²(μ)` along the uniform partition of `[0,T]`. -/
-theorem tendsto_ito_remainder
-    (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
-    {f f' f'' f''' : ℝ → ℝ}
-    (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
-    (hf'' : ∀ x, HasDerivAt f'' (f''' x) x) {Cf3 : ℝ} (hf3 : ∀ x, |f''' x| ≤ Cf3) :
-    Tendsto (fun n : ℕ ↦ ∫ ω, (∑ k ∈ Finset.range n,
-        discreteTaylorRemainder f f' f''
-          (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ) atTop (𝓝 0) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hCf3 : 0 ≤ Cf3 := le_trans (abs_nonneg _) (hf3 0)
-  have hfm : Measurable f :=
-      (continuous_iff_continuousAt.mpr fun x ↦ (hf x).continuousAt).measurable
-  have hf'm : Measurable f' :=
-      (continuous_iff_continuousAt.mpr fun x ↦ (hf' x).continuousAt).measurable
-  have hf''m : Measurable f'' :=
-      (continuous_iff_continuousAt.mpr fun x ↦ (hf'' x).continuousAt).measurable
-  have hmono : ∀ n, Monotone (unifPart T n) := unifPart_mono T
-  -- per-step squared remainder: measurable, and `≤ Cf3²·(ΔBₖ)⁶`
-  have hRk_meas : ∀ n k, Measurable (fun ω ↦ discreteTaylorRemainder f f' f''
-      (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) := by
-    intro n k
-    unfold discreteTaylorRemainder
-    exact (((hfm.comp (hBmeas _)).sub (hfm.comp (hBmeas _))).sub
-      ((hf'm.comp (hBmeas _)).mul ((hBmeas _).sub (hBmeas _)))).sub
-      (((hf''m.comp (hBmeas _)).mul (((hBmeas _).sub (hBmeas _)).pow_const 2)).const_mul (1 / 2))
-  have hRsq_le : ∀ n k ω, (discreteTaylorRemainder f f' f''
-        (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2
-      ≤ Cf3 ^ 2 * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 6 := by
-    intro n k ω
-    have hb := abs_discreteTaylorRemainder_le hf hf' hf'' hf3
-      (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)
-    have he : |B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω| ^ 6
-        = (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 6 := by
-      rw [← abs_pow, abs_of_nonneg (by positivity)]
-    calc (discreteTaylorRemainder f f' f'' (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2
-        = |discreteTaylorRemainder f f' f'' (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)|
-            * |discreteTaylorRemainder f f' f'' (B (unifPart T n k) ω)
-                (B (unifPart T n (k + 1)) ω)| := by
-          rw [sq]; exact (abs_mul_abs_self _).symm
-      _ ≤ (Cf3 * |B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω| ^ 3)
-            * (Cf3 * |B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω| ^ 3) :=
-          mul_self_le_mul_self (abs_nonneg _) hb
-      _ = Cf3 ^ 2 * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 6 := by rw [← he]; ring
-  have hRsq_int : ∀ n k, Integrable (fun ω ↦ (discreteTaylorRemainder f f' f''
-      (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2) μ := by
-    intro n k
-    refine Integrable.mono'
-      ((integrable_increment_pow6 hB (unifPart T n k) (unifPart T n (k + 1))).const_mul (Cf3 ^ 2))
-      ((hRk_meas n k).pow_const 2).aestronglyMeasurable (Eventually.of_forall fun ω ↦ ?_)
-    rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
-    exact hRsq_le n k ω
-  -- squeeze: `∫ (∑ₖ Rₖ)² ≤ 15·Cf3²·T³/n → 0`
-  refine squeeze_zero' (g := fun n : ℕ ↦ 15 * Cf3 ^ 2 * (T : ℝ) ^ 3 / n)
-    (Eventually.of_forall fun n ↦ integral_nonneg fun ω ↦ sq_nonneg _) ?_
-    (by simpa using tendsto_const_div_atTop_nhds_zero_nat (15 * Cf3 ^ 2 * (T : ℝ) ^ 3))
-  filter_upwards [eventually_gt_atTop 0] with n hn
-  have hΔ : ∀ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) / n :=
-    fun k _ ↦ unifPart_succ_sub T n k
-  calc ∫ ω, (∑ k ∈ Finset.range n, discreteTaylorRemainder f f' f''
-            (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ
-      ≤ ∫ ω, (n : ℝ) * ∑ k ∈ Finset.range n, (discreteTaylorRemainder f f' f''
-            (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ := by
-        refine integral_mono_of_nonneg (Eventually.of_forall fun ω ↦ sq_nonneg _)
-          ((integrable_finsetSum _ fun k _ ↦ hRsq_int n k).const_mul _)
-          (Eventually.of_forall fun ω ↦ ?_)
-        have := sq_sum_le_card_mul_sum_sq (s := Finset.range n)
-          (f := fun k ↦ discreteTaylorRemainder f f' f''
-            (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω))
-        rwa [Finset.card_range] at this
-    _ = (n : ℝ) * ∑ k ∈ Finset.range n, ∫ ω, (discreteTaylorRemainder f f' f''
-            (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ := by
-        rw [integral_const_mul, integral_finsetSum _ fun k _ ↦ hRsq_int n k]
-    _ ≤ (n : ℝ) * ∑ k ∈ Finset.range n, 15 * Cf3 ^ 2 * ((T : ℝ) / n) ^ 3 := by
-        gcongr with k hk
-        calc ∫ ω, (discreteTaylorRemainder f f' f''
-              (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ
-            ≤ ∫ ω, Cf3 ^ 2 * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 6 ∂μ :=
-              integral_mono_of_nonneg (Eventually.of_forall fun ω ↦ sq_nonneg _)
-                ((integrable_increment_pow6 hB _ _).const_mul _)
-                (Eventually.of_forall fun ω ↦ hRsq_le n k ω)
-          _ = Cf3 ^ 2 * ∫ ω, (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 6 ∂μ :=
-              integral_const_mul _ _
-          _ = Cf3 ^ 2 * (15 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 3) := by
-              rw [integral_increment_pow6 hB (hmono n (Nat.le_succ k))]
-          _ = 15 * Cf3 ^ 2 * ((T : ℝ) / n) ^ 3 := by rw [hΔ k hk]; ring
-    _ = 15 * Cf3 ^ 2 * (T : ℝ) ^ 3 / n := by
-        rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]; field_simp
 
 end MathFin
