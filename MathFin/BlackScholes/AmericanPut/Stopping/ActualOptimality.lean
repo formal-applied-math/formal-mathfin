@@ -45,7 +45,8 @@ theorem canonicalRewardProcess_bound {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) (T t :
 /-- The stopping time of `brownianUsualActualContactRule`. -/
 noncomputable def brownianUsualActualContactTime {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) (T : ℝ≥0) :
     (ℝ≥0 → ℝ) → ℝ≥0 :=
-  @BoundedRule.time (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit) brownianUsualFiltration T
+  @StoppingRule.time (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit) ℝ≥0 _
+    brownianUsualFiltration T
     (brownianUsualActualContactRule (h := h) hk x T)
 
 theorem brownianUsualActualContactRule_optimal {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) (T : ℝ≥0) :
@@ -58,11 +59,11 @@ theorem brownianUsualActualContactRule_optimal {k h : ℝ} (hk : 0 ≤ k) (x : �
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   let U := canonicalDiscountedPrice k h x T
   let Z := canonicalRewardProcess k h x T
-  let τ : BoundedRule brownianUsualFiltration T :=
+  let τ : StoppingRule brownianUsualFiltration T :=
     canonicalContactRule (h := h) hk brownianUsual_adapted continuous_brownian x T
-  let θ : ℕ → BoundedRule brownianUsualFiltration T := fun n =>
+  let θ : ℕ → StoppingRule brownianUsualFiltration T := fun n =>
     (optimalGridRule μ brownianUsual_adapted 1 k h (Real.sqrt 2) (Real.exp x) T
-        (gridStep_pos n)).val
+        (gridStep_pos n))
   have hU := canonicalDiscountedPrice_usual_supermartingale (h := h) hk x T
   have hUc := canonicalDiscountedPrice_continuous (h := h) hk x T
   have hUb := canonicalDiscountedPrice_bound (h := h) hk x T
@@ -89,7 +90,7 @@ theorem brownianUsualActualContactRule_optimal {k h : ℝ} (hk : 0 ≤ k) (x : �
       Real.exp (-k*(min (τ.time ω) T : ℝ≥0))*canonicalGap brownian k h x T (τ.time ω) ω from
         canonicalDiscountedPrice_gap k h x T (τ.time ω) ω]
     rw [canonicalContactRule_contact hk brownianUsual_adapted continuous_brownian x T ω,mul_zero]
-  have hZrule (η : BoundedRule brownianUsualFiltration T) :
+  have hZrule (η : StoppingRule brownianUsualFiltration T) :
       (fun ω => Z (η.time ω) ω) = putReward brownian 1 k h (Real.sqrt 2) (Real.exp x) η.time := by
     funext ω
     unfold Z canonicalRewardProcess putReward

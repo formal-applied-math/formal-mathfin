@@ -35,7 +35,7 @@ theorem brownianLogState_adapted (β σ x : ℝ) :
 /-- The same rectangle exit rule as `actualRectangleExitRule`, built on the raw Brownian
 filtration. -/
 noncomputable def rawRectangleExitRule (k h x R : ℝ) (δ : ℝ≥0) :
-    BoundedRule brownianFiltration δ :=
+    StoppingRule brownianFiltration δ :=
   rectangleExitRule (brownianLogState_adapted (k-h-1) (Real.sqrt 2) x)
     (brownianLogState_continuous (k-h-1) (Real.sqrt 2) x) x R δ
 

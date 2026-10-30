@@ -10,9 +10,9 @@ by discharging them against the proof development in `MathFin/RiskMeasures/`.
 The Challenge states coherence for **positions** (a position is a gain, so `ρ`
 decreases and `ρ (X + m) = ρ X - m`); the library has one coherence structure,
 `MathFin.IsCoherentRiskMeasure`, stated for **losses**. The bridge is
-`MathFin.isCoherentRiskMeasure_count_neg_iff`
+`MathFin.isCoherentRiskMeasure_neg_iff`
 (`MathFin/RiskMeasures/PositionsConvention.lean`): on a finite state space with
-counting measure, `ρ` satisfies the four positions axioms exactly when
+a finite measure charging every state (here counting measure), `ρ` satisfies the four positions axioms exactly when
 `L ↦ ρ (-L)` is an `IsCoherentRiskMeasure`.
 
 * `MathFin.coherentRisk_isLUB` (`MathFin/RiskMeasures/AcceptanceSet.lean`) —
@@ -60,7 +60,8 @@ theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] {ρ : (ι → ℝ) → ℝ}
       rw [e] at this
       linarith
   have h := MathFin.coherentRisk_isLUB
-    (MathFin.isCoherentRiskMeasure_count_neg_iff.2
+    (MathFin.isCoherentRiskMeasure_neg_iff (P := MeasureTheory.Measure.count)
+      (fun i ↦ by simp) |>.2
       ⟨hρ.monotone, hρ.cashInvariant, hρ.posHom, hρ.subadditive⟩) (-X)
   rw [hrep] at h
   simpa only [neg_neg, Pi.neg_apply] using h
@@ -79,9 +80,9 @@ theorem worstCase_isCoherentRisk {ι : Type*} [Fintype ι] [Nonempty ι] :
   have h : MathFin.IsCoherentRiskMeasure (MeasureTheory.Measure.count : MeasureTheory.Measure ι)
       (fun L : ι → ℝ ↦
         (fun X : ι → ℝ ↦ Finset.univ.sup' Finset.univ_nonempty (fun i ↦ - X i)) (-L)) := by
-    rw [e]; exact MathFin.worstCase_isCoherent
-  obtain ⟨h₁, h₂, h₃, h₄⟩ := (MathFin.isCoherentRiskMeasure_count_neg_iff
-    (ρ := fun X : ι → ℝ ↦ Finset.univ.sup' Finset.univ_nonempty (fun i ↦ - X i))).1 h
+    rw [e]; exact MathFin.worstCase_isCoherent fun i ↦ by simp
+  obtain ⟨h₁, h₂, h₃, h₄⟩ := (MathFin.isCoherentRiskMeasure_neg_iff (P := MeasureTheory.Measure.count)
+    (fun i ↦ by simp) (ρ := fun X : ι → ℝ ↦ Finset.univ.sup' Finset.univ_nonempty (fun i ↦ - X i))).1 h
   exact ⟨h₁, h₂, h₃, h₄⟩
 
 end ADEH

@@ -23,6 +23,7 @@ price is convex in the strike.
 namespace MathFin
 namespace SVI
 open Real Set
+open ForwardSmile (dpl dmi blackForm)
 
 /-- The SVI-smiled Black–Scholes price in MathFin's existing price API,
 with spot, maturity and discount factor normalized to one. -/
@@ -32,14 +33,17 @@ noncomputable def bsSmile (p : Params) (K : ℝ) : ℝ :=
 theorem blackCall_eq_bsSmile (p : Params) (K : ℝ) (hK : 0 < K)
     (hw : 0 < variance p (Real.log K)) : blackCall p K = bsSmile p K := by
   have hn := ne_of_gt (rootVariance_pos p (Real.log K) hw)
-  have hd1 : MathFin.bsd1 1 K 0 (rootVariance p (Real.log K)) 1 = blackPlus p (Real.log K) := by
-    simp only [MathFin.bsd1, blackPlus, Real.sqrt_one, mul_one, zero_add, one_div, Real.log_inv]
+  have hd1 : MathFin.bsd1 1 K 0 (rootVariance p (Real.log K)) 1 =
+      dpl (Real.log K) (variance p (Real.log K)) := by
+    simp only [MathFin.bsd1, dpl_eq_rootVariance, Real.sqrt_one, mul_one, zero_add, one_div,
+      Real.log_inv]
     field_simp
-  have hd2 : MathFin.bsd2 1 K 0 (rootVariance p (Real.log K)) 1 = blackMinus p (Real.log K) := by
+  have hd2 : MathFin.bsd2 1 K 0 (rootVariance p (Real.log K)) 1 =
+      dmi (Real.log K) (variance p (Real.log K)) := by
     rw [MathFin.bsd2, hd1]
-    simp only [Real.sqrt_one, mul_one, blackPlus, blackMinus]
+    simp only [Real.sqrt_one, mul_one, dpl_eq_rootVariance, dmi_eq_rootVariance]
     ring
-  simp [blackCall, logBlackCall, bsSmile, MathFin.bsV, hd1, hd2, Real.exp_log hK]
+  simp [blackCall, ForwardSmile.blackForm, bsSmile, MathFin.bsV, hd1, hd2, Real.exp_log hK]
 
 /-- The certificate applies to the existing Black–Scholes function with SVI
 volatility substituted strike by strike, not a constant-volatility derivative. -/
