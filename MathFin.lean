@@ -118,6 +118,7 @@ import MathFin.Foundations.WienerIntegralL2
 import MathFin.Foundations.WienerIntegralGaussian
 -- Wiener integral of a step indicator is the increment (∫𝟙_{(s,t]} dB = B_t − B_s)
 import MathFin.Foundations.WienerIntegralIndicator
+import MathFin.Foundations.WienerIntegralIto
 -- Structural / principle modules:
 import MathFin.Foundations.StandardGaussianMGF
 import MathFin.Foundations.ExponentialDiscount

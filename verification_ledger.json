@@ -4049,6 +4049,13 @@
       "input_hash": "e1cbe8129983bb0035a85d387465bac2c5216f010e7735468d89d24cc47574e6",
       "verified_at_commit": "c55d62c"
     },
+    "mf-wiener-integral-is-ito-integral": {
+      "benchmark_file": "stochastic_foundations.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.9,
+      "input_hash": "da28bd765850a00d7fb73d489c8f94ace2e07c8e54f6a6b07b730f08e244f60f",
+      "verified_at_commit": "99f214a"
+    },
     "mf-worstcase-risk-representation": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-10-30",
