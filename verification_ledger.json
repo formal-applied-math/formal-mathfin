@@ -2754,6 +2754,13 @@
       "input_hash": "20941d8f2d8dea0a0dcfe015223792e1419ce8b4affc81324173c4ce8dca12ea",
       "verified_at_commit": "dfcd80c"
     },
+    "mf-jump-diffusion-log-contract-jump-bias": {
+      "benchmark_file": "jumps_and_variance_swaps.json",
+      "date": "2026-10-30",
+      "elapsed_s": 11.5,
+      "input_hash": "db8e662056b534bae3fc2fa518c98b37fa1d57e357dc93b3c7f13129ef7930b2",
+      "verified_at_commit": "1bb43d4"
+    },
     "mf-jump-diffusion-log-contract-on-process": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-10-30",
