@@ -39,6 +39,8 @@ AGGREGATORS = frozenset({"MathFin.AxiomAudit", "MathFin.AxiomAuditGen", "MathFin
 STAGING: dict[str, str] = {
     "MathFin.Foundations.LevyExpMartingale":
         "https://github.com/formal-applied-math/formal-mathfin/issues/179",
+    "MathFin.Foundations.ExpMartingaleBrownian":
+        "https://github.com/formal-applied-math/formal-mathfin/issues/179",
 }
 
 

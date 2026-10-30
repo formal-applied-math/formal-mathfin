@@ -95,6 +95,7 @@ import MathFin.Foundations.Girsanov
 import MathFin.Foundations.ExpMartingaleQBrownian
 import MathFin.Foundations.LevyQuadraticSums
 import MathFin.Foundations.LevyExpMartingale
+import MathFin.Foundations.ExpMartingaleBrownian
 import MathFin.Foundations.GirsanovConstantTheta
 import MathFin.Foundations.SimpleDoleansExponential
 import MathFin.Foundations.GirsanovSimpleTheta
