@@ -122,9 +122,7 @@ theorem expectation_pathIntegral_eq {w : ℝ≥0 → Ω → ℝ}
       exact hCT
     · have hΔ : ∀ k : ℕ, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ≥ 0 :=
         fun k ↦ sub_nonneg.mpr (by exact_mod_cast unifPart_mono T n (Nat.le_succ k))
-      have hnn : unifPart T n n = T := by
-        have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr (ne_of_gt hn)
-        simp only [unifPart, div_self hne, one_mul]
+      have hnn : unifPart T n n = T := unifPart_self T hn.ne'
       calc |∑ k ∈ Finset.range n,
             w (unifPart T n k) ω * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)|
           ≤ ∑ k ∈ Finset.range n,
@@ -141,9 +139,7 @@ theorem expectation_pathIntegral_eq {w : ℝ≥0 → Ω → ℝ}
         _ = C * ((unifPart T n n : ℝ) - unifPart T n 0) := by
             rw [Finset.sum_range_sub (fun k ↦ ((unifPart T n k : ℝ)))]
         _ = C * (T : ℝ) := by
-            rw [hnn]
-            simp only [unifPart, Nat.cast_zero, zero_div, zero_mul, NNReal.coe_zero,
-              sub_zero]
+            rw [hnn, unifPart_zero, NNReal.coe_zero, sub_zero]
   -- dominated convergence: `𝔼[R_n] → 𝔼[∫ w]`
   have hdct : Tendsto (fun n : ℕ ↦ ∫ ω, (∑ k ∈ Finset.range n,
       w (unifPart T n k) ω * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ∂μ)
