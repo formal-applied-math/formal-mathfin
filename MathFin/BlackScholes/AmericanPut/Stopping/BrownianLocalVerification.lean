@@ -44,7 +44,7 @@ theorem stoppedClassicalCandidate_stronglyAdapted {Ω : Type*} [MeasurableSpace 
     {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {W : ℝ≥0 → Ω → ℝ}
     {k h K r q σ S : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} {T : ℝ≥0}
     (hp : DividendPutSolution k h p b) (hadapt : Adapted 𝓕 W)
-    (hpaths : ∀ ω, Continuous (fun t => W t ω)) (θ : BoundedRule 𝓕 T) :
+    (hpaths : ∀ ω, Continuous (fun t => W t ω)) (θ : StoppingRule 𝓕 T) :
     StronglyAdapted 𝓕 (fun t ω => classicalCandidate W K r q σ S p T (min t (θ.time ω)) ω) := by
   have hA : StronglyAdapted 𝓕 (classicalCandidate W K r q σ S p T) :=
     fun t => (classicalCandidate_adapted hp hadapt T t).stronglyMeasurable
@@ -53,7 +53,7 @@ theorem stoppedClassicalCandidate_stronglyAdapted {Ω : Type*} [MeasurableSpace 
 theorem brownian_stoppedCandidate_martingale_of_local {K r q σ S : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} {T : ℝ≥0}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
-    (hK : 0 < K) (hr : 0 ≤ r) (θ : BoundedRule brownianFiltration T)
+    (hK : 0 < K) (hr : 0 ≤ r) (θ : StoppingRule brownianFiltration T)
     (hlocal : IsLocalMartingale (fun t ω => classicalCandidate brownian K r q σ S p T
       (min t (θ.time ω)) ω) brownianAugFiltration gaussianLimit) :
     Martingale (fun t ω => classicalCandidate brownian K r q σ S p T

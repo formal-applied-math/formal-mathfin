@@ -93,7 +93,7 @@ theorem planeDrift_norm_le {G : ℝ × ℝ → ℝ} {T t : ℝ≥0} {C : ℝ}
     ENNReal.toReal_ofReal t.coe_nonneg,mul_comm] using hh
 
 theorem planeResidual_stopped_martingale {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
-    {T : ℝ≥0} (θ : BoundedRule brownianFiltration T) {A C : ℝ}
+    {T : ℝ≥0} (θ : StoppingRule brownianFiltration T) {A C : ℝ}
     (hb : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖G (s,w)‖ ≤ A)
     (hL : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖planeGenerator G (s,w)‖ ≤ C) :
     Martingale (fun t ω => planeResidual G (min t (θ.time ω)) ω)
@@ -127,7 +127,7 @@ theorem planeResidual_stopped_martingale {G : ℝ × ℝ → ℝ} (hG : ContDiff
     ((planeDrift_norm_le hL hs ω).trans (mul_le_mul_of_nonneg_right (by exact_mod_cast hs) hC)))
 
 theorem planeResidual_expected_stopped_zero {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
-    {T : ℝ≥0} (θ : BoundedRule brownianFiltration T) {A C : ℝ}
+    {T : ℝ≥0} (θ : StoppingRule brownianFiltration T) {A C : ℝ}
     (hb : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖G (s,w)‖ ≤ A)
     (hL : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖planeGenerator G (s,w)‖ ≤ C) :
     (∫ ω, planeResidual G (θ.time ω) ω ∂gaussianLimit) = 0 := by
@@ -146,7 +146,7 @@ theorem planeDrift_stronglyAdapted {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3
     (planePartial_contDiff (planePartial_contDiff hG (0,1)) (0,1)).continuous t
 
 theorem planeDrift_stopped_integrable {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
-    {T : ℝ≥0} (θ : BoundedRule brownianFiltration T) {C : ℝ}
+    {T : ℝ≥0} (θ : StoppingRule brownianFiltration T) {C : ℝ}
     (hL : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖planeGenerator G (s,w)‖ ≤ C) :
     Integrable (fun ω => planeDrift G (θ.time ω) ω) gaussianLimit := by
   have hm := measurable_uncurry_of_continuous_of_measurable (planeDrift_continuous hG)
@@ -160,7 +160,7 @@ theorem planeDrift_stopped_integrable {G : ℝ × ℝ → ℝ} (hG : ContDiff �
       ((norm_nonneg _).trans (hL 0 zero_le 0)))
 
 theorem planeValue_stopped_integrable {G : ℝ × ℝ → ℝ} (hG : Continuous G)
-    {T : ℝ≥0} (θ : BoundedRule brownianFiltration T) {A : ℝ}
+    {T : ℝ≥0} (θ : StoppingRule brownianFiltration T) {A : ℝ}
     (hb : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖G (s,w)‖ ≤ A) :
     Integrable (fun ω => G (θ.time ω,brownian (θ.time ω) ω)) gaussianLimit := by
   apply (integrable_const A).mono'
@@ -171,7 +171,7 @@ theorem planeValue_stopped_integrable {G : ℝ × ℝ → ℝ} (hG : Continuous 
 
 /-- Dynkin's identity at any bounded raw Brownian stopping rule. -/
 theorem plane_dynkin_boundedRule {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
-    {T : ℝ≥0} (θ : BoundedRule brownianFiltration T) {A C : ℝ}
+    {T : ℝ≥0} (θ : StoppingRule brownianFiltration T) {A C : ℝ}
     (hb : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖G (s,w)‖ ≤ A)
     (hL : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖planeGenerator G (s,w)‖ ≤ C) :
     (∫ ω, G (θ.time ω,brownian (θ.time ω) ω) ∂gaussianLimit) =
@@ -203,7 +203,7 @@ theorem planeGenerator_hasCompactSupport {G : ℝ × ℝ → ℝ} (hc : HasCompa
 
 /-- Compactly supported C3 test functions discharge both boundedness obligations. -/
 theorem plane_dynkin_compact {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
-    (hc : HasCompactSupport G) {T : ℝ≥0} (θ : BoundedRule brownianFiltration T) :
+    (hc : HasCompactSupport G) {T : ℝ≥0} (θ : StoppingRule brownianFiltration T) :
     (∫ ω, G (θ.time ω,brownian (θ.time ω) ω) ∂gaussianLimit) =
       G (0,0) + ∫ ω, planeDrift G (θ.time ω) ω ∂gaussianLimit := by
   obtain ⟨A,hA⟩ := hc.exists_bound_of_continuous hG.continuous

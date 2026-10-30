@@ -15,8 +15,8 @@ public import MathFin.BlackScholes.JumpDiffusionBrownian
 
 In the Black–Scholes model two functionals of the price give the variance swap's fair strike
 `σ²`: the log contract of Demeterfi, Derman, Kamal and Zou, `(2/τ)·𝔼[log(F/S_τ) + (S_τ − F)/F]`
-with the forward `F = Se^{rτ}` (`varianceSwap_fairStrike`), and the expected realized variance
-(`tendsto_expected_bsLogPrice_equipartition_sum`); `VarianceSwapEquivalence.lean` records that
+with the forward `F = Se^{rτ}` (`varianceSwap_fairStrike`), and the expected realized
+variance (`tendsto_expected_bsLogPrice_equipartition_sum`); `VarianceSwapEquivalence.lean` records that
 they agree. With jumps they differ by the jump bias `2Λ𝔼[e^J − 1 − J − J²/2]`, which vanishes
 without jumps and, for downward jumps, is `≤ 0`, and `< 0` once `Λ > 0` and `ν{J < 0} ≠ 0`.
 
@@ -27,6 +27,8 @@ function is finite near `0` and at `1`, `S > 0` and `τ > 0`:
   `σ² + 2Λ𝔼[e^J − 1 − J]`. It is `(2/τ)(rτ − 𝔼[Y])` (`integral_logContract_of_integral_exp`) with
   the mean of `JumpDiffusionMoments.lean`; in Black–Scholes `rτ − 𝔼[Y]` is half the variance, and
   with jumps it differs from half the variance by `Λτ𝔼[e^J − 1 − J − J²/2]`;
+* `varianceSwap_fairStrike`: its case `Λ = 0`, the Black–Scholes fair strike `σ²`, stated for the
+  standard normal driver of the lognormal price;
 * `jumpDiffusion_logContract_sub_variance`: the log contract minus the variance of the log-return
   per unit time, `σ² + Λ𝔼[J²]`, is the jump bias;
 * `integral_jumpBias_nonpos`, `integral_jumpBias_neg`: the sign of `𝔼[e^J − 1 − J − J²/2]`, the
@@ -148,7 +150,7 @@ rate, the expected payoff `(2/τ)·𝔼[log(F/S_τ) + (S_τ − F)/F] = σ² + 2
 is the mean of `S_τ` (`integral_exp_jumpDiffusionIncrementLaw_of_compensated`), so its expected
 payoff is `(2/τ)(rτ − 𝔼[Y])` (`integral_logContract_of_integral_exp`), and `𝔼[Y] = (b + Λ𝔼[J])τ`
 (`integral_id_jumpDiffusionIncrementLaw`). Without jumps it is `σ²`, the Black–Scholes value
-(`varianceSwap_fairStrike`). -/
+(`varianceSwap_fairStrike`, its `Λ = 0` case). -/
 theorem jumpDiffusion_logContract {S r b σ : ℝ} (hS : 0 < S) {Λ : ℝ≥0} {ν : Measure ℝ}
     [IsProbabilityMeasure ν] (hν : 0 ∈ interior (integrableExpSet id ν))
     (hν1 : Integrable rexp ν) (hb : b = r - σ ^ 2 / 2 - Λ * (∫ x, rexp x ∂ν - 1)) {τ : ℝ≥0}
@@ -166,6 +168,39 @@ theorem jumpDiffusion_logContract {S r b σ : ℝ} (hS : 0 < S) {Λ : ℝ≥0} {
     integral_sub hν1 (integrable_const 1), integral_const, probReal_univ, one_smul,
     div_mul_eq_mul_div, div_eq_iff (NNReal.coe_ne_zero.2 hτ.ne')]
   ring
+
+/-- **Variance swap fair strike** (Demeterfi–Derman–Kamal): in Black–Scholes the log contract's
+expected payoff, scaled as a variance rate, is the squared volatility,
+`(2/T)·𝔼[log(F/S_T) + (S_T − F)/F] = σ²` with `F = S_0e^{rT}` and `S_T` driven by a standard
+normal. It is the case `Λ = 0` of `jumpDiffusion_logContract`: without jumps the log-return has the
+Gaussian law `N((r − σ²/2)T, σ²T)` (`jumpDiffusionIncrementLaw_zero`), which is the image of the
+standard normal under `z ↦ (r − σ²/2)T + σ√T·z`, and the jump bias `2Λ𝔼[e^J − 1 − J]` vanishes. -/
+theorem varianceSwap_fairStrike {S_0 : ℝ} (hS : 0 < S_0) (r σ T : ℝ) (hT : 0 < T) :
+    (2 / T) * ∫ z, (Real.log ((S_0 * Real.exp (r * T)) /
+              (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)))
+         + (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
+              - S_0 * Real.exp (r * T)) / (S_0 * Real.exp (r * T))) ∂(gaussianReal 0 1)
+      = σ ^ 2 := by
+  have hν : 0 ∈ interior (integrableExpSet id (gaussianReal 0 1)) := by
+    rw [integrableExpSet_id_gaussianReal, interior_univ]
+    exact Set.mem_univ 0
+  have hτ : 0 < T.toNNReal := Real.toNNReal_pos.2 hT
+  have h := jumpDiffusion_logContract (b := r - σ ^ 2 / 2) (r := r) (σ := σ) (Λ := 0) hS hν
+    (integrable_exp_gaussianReal 0 1) (by simp) hτ
+  have hlaw : HasLaw (fun z ↦ (r - σ ^ 2 / 2) * (T.toNNReal : ℝ) + σ * Real.sqrt T.toNNReal * z)
+      (gaussianReal ((r - σ ^ 2 / 2) * T.toNNReal) (.mk (σ ^ 2) (sq_nonneg _) * T.toNNReal))
+      (gaussianReal 0 1) := by
+    have := gaussianReal_const_add (gaussianReal_const_mul (HasLaw.id : HasLaw id (gaussianReal 0 1)
+      (gaussianReal 0 1)) (σ * Real.sqrt T.toNNReal)) ((r - σ ^ 2 / 2) * T.toNNReal)
+    rw [show σ * Real.sqrt T.toNNReal * 0 + (r - σ ^ 2 / 2) * T.toNNReal
+        = (r - σ ^ 2 / 2) * T.toNNReal by ring,
+      show (NNReal.mk ((σ * Real.sqrt T.toNNReal) ^ 2) (sq_nonneg _) * 1)
+        = .mk (σ ^ 2) (sq_nonneg _) * T.toNNReal from NNReal.eq (by
+          simp [mul_pow])] at this
+    exact this
+  rw [jumpDiffusionIncrementLaw_zero, ← hlaw.map_eq, integral_map hlaw.aemeasurable (by fun_prop),
+    Real.coe_toNNReal _ hT.le, NNReal.coe_zero, mul_zero, zero_mul, add_zero] at h
+  exact h
 
 /-- **The jump bias of the log contract.** Under the hypotheses of `jumpDiffusion_logContract`,
 the log contract minus the variance of the log-return per unit time, `Var[Y]/τ = σ² + Λ𝔼[J²]`

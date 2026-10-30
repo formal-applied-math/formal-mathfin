@@ -37,22 +37,16 @@ theorem americanPutValue_continuous_horizon {Ω : Type*} [MeasurableSpace Ω]
   apply tendsto_order.mpr
   constructor
   · intro a ha
-    obtain ⟨_,⟨θ,rfl⟩,hθ⟩ := exists_lt_of_lt_csSup
-      (exerciseValues_nonempty (P := P) (𝓕 := 𝓕) (W := W) (K := K) (r := r) (q := q) (σ := σ)
-          (S := S) (T := T)) ha
+    obtain ⟨θ,-,hθ⟩ := exists_lt_of_lt_stoppingValue ha univ_nonempty
     have he := expectedReward_fixed_truncate_tendsto (P := P) (q := q) (σ := σ)
       hW hpaths hK hr hS hT θ
     filter_upwards [he.eventually (Ioi_mem_nhds hθ)] with n hn
     exact hn.trans_le (expectedReward_le_value hW hK hr hS (θ.truncate (Tn n)))
   · intro c hc
-    have happrox (n : ℕ) : ∃ θ : BoundedRule 𝓕 (Tn n),
+    have happrox (n : ℕ) : ∃ θ : StoppingRule 𝓕 (Tn n),
         americanPutValue P 𝓕 W K r q σ S (Tn n)-localizationEps n <
-          ∫ ω, putReward W K r q σ S θ.time ω ∂P := by
-      obtain ⟨_,⟨θ,rfl⟩,hθ⟩ := exists_lt_of_lt_csSup
-        (exerciseValues_nonempty (P := P) (𝓕 := 𝓕) (W := W) (K := K) (r := r) (q := q) (σ := σ)
-            (S := S) (T := Tn n))
-        (sub_lt_self _ (localizationEps_pos n))
-      exact ⟨θ,hθ⟩
+          ∫ ω, putReward W K r q σ S θ.time ω ∂P :=
+      exists_expectedReward_gt_value_sub (P := P) (localizationEps_pos n)
     choose θ hθ using happrox
     have hd := expectedReward_truncate_tendsto (P := P) (q := q) (σ := σ)
       hW hpaths hK hr hS hT θ

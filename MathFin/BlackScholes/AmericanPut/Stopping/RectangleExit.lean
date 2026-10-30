@@ -55,7 +55,7 @@ theorem rectangleMargin_terminal (x R : ℝ) (δ : ℝ≥0) (ω : Ω) : rectangl
 
 /-- The first time the margin `rectangleMargin X x R δ` vanishes, as a rule with horizon `δ`. -/
 noncomputable def rectangleExitRule (ha : Adapted 𝓕 X) (hc : ∀ ω, Continuous (fun t => X t ω))
-    (x R : ℝ) (δ : ℝ≥0) : BoundedRule 𝓕 δ :=
+    (x R : ℝ) (δ : ℝ≥0) : StoppingRule 𝓕 δ :=
   firstContactRule (rectangleMargin_adapted ha x R δ) (rectangleMargin_continuous hc x R δ)
     (rectangleMargin_nonneg x R δ) δ (rectangleMargin_terminal x R δ)
 

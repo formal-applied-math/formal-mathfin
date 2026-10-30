@@ -113,7 +113,7 @@ theorem brownianUsualAmericanPut_eq_raw {K r q σ S : ℝ}
   have θbound := θ.le_horizon
   let μ := completedMeasure gaussianLimit
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
-  let θ' : BoundedRule brownianUsualFiltration T :=
+  let θ' : StoppingRule brownianUsualFiltration T :=
     { time := θtime
       stopping := fun t => brownian_completedRaw_le_usual t _ (θstop t)
       le_horizon := θbound }
