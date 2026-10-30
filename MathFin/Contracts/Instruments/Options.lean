@@ -30,6 +30,7 @@ The capped call is *defined* by composition, as a long call at `K₁` and a shor
 * `powerCall` — the call on `S_T ^ a`, the power being the payoff language's `rpow` node.
 * `geomAsianCall` — the call on the geometric average of the underlying over `n` dates, from
   `Payoff.obsProd` and `rpow` at `1/n`.
+* `chooser` — the chooser option as the static portfolio of a call and a put at the chooser date.
 * `exchangeOption` — pays `max (S¹_T − S²_T) 0`.
 
 ## Main results
@@ -110,6 +111,17 @@ theorem Payoff.eval_obsProd {ι : Type*} (s : Scenario ι) (i : ι) (ts : List �
 under the `rpow` node at the exponent `1/n`. -/
 noncomputable def geomAsianCall (K : ℝ) (T : ℝ≥0) {n : ℕ} (τ : Fin n → ℝ≥0) : Contract Unit :=
   .pay T (.max (.sub (.rpow (.obsProd () (List.ofFn τ)) (n : ℝ≥0)⁻¹) (.const K)) (.const 0))
+
+/-- The reified simple chooser option, by static replication. At the chooser date `t₁ ≤ T` the
+holder takes the more valuable of the call and the put, `max (C_{t₁}, P_{t₁})`; put–call parity
+at `t₁` (`MathFin.chooserPayoff_decompose_BS`) writes that as `C_{t₁} + max (K e^{−r(T−t₁)} −
+S_{t₁}, 0)`. The first term is what a call struck at `K` maturing at `T` is worth at `t₁`, the
+second pays at `t₁`, so the chooser is the call at `K, T` together with a put maturing at `t₁`
+struck at `K e^{−r(T−t₁)}`. The payoff language has no node for the conditional value at `t₁`,
+so this is the replicating portfolio, not the holder's choice written as a payoff; the rate `r`
+enters only through the put's strike. -/
+noncomputable def chooser (K r : ℝ) (T t₁ : ℝ≥0) : Contract Unit :=
+  .both (europeanCall K T) (europeanPut (K * Real.exp (-(r * ((T : ℝ) - t₁)))) t₁)
 
 /-- The reified exchange option (Margrabe) on two underlyings indexed by `Fin 2`: pays
 `max (S¹_T - S²_T) 0` at maturity `T`. -/

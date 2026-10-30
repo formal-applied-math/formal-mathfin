@@ -12,8 +12,8 @@ public import MathFin.RiskMeasures.AcceptanceSet
 # Worst-case loss: a concrete coherent risk measure
 
 The most conservative coherent risk measure of losses, `worstCase L = maxᵢ Lᵢ`, is a concrete
-instance of `IsCoherentRiskMeasure` on a finite state space with counting measure (every state
-counts, so almost-sure order is the pointwise order). Its Artzner–Delbaen–Eber–Heath
+instance of `IsCoherentRiskMeasure` on a finite state space under any measure that charges every
+state (so almost-sure order is the pointwise order); counting measure is the model case. Its Artzner–Delbaen–Eber–Heath
 representation (from `coherentRisk_isLUB`) specialises to the supremum of expected loss over the
 *entire* probability simplex — making the abstract representation tangible: the worst case over
 states equals the worst case over all mixtures of states.
@@ -43,11 +43,13 @@ lemma le_worstCase (L : ι → ℝ) (i : ι) : L i ≤ worstCase L :=
 lemma worstCase_le {L : ι → ℝ} {a : ℝ} (h : ∀ i, L i ≤ a) : worstCase L ≤ a :=
   Finset.sup'_le Finset.univ_nonempty L fun i _ ↦ h i
 
-/-- Worst-case loss satisfies the four ADEH coherent-risk axioms, for counting measure on the
-states. -/
-lemma worstCase_isCoherent [MeasurableSpace ι] [MeasurableSingletonClass ι] : IsCoherentRiskMeasure (Measure.count : Measure ι) worstCase where
+/-- Worst-case loss satisfies the four ADEH coherent-risk axioms for any measure on the states
+that charges every state: the maximum does not see the weights, only which states are possible. -/
+lemma worstCase_isCoherent [MeasurableSpace ι] [MeasurableSingletonClass ι] {P : Measure ι}
+    (hP : ∀ i, P {i} ≠ 0) : IsCoherentRiskMeasure P worstCase where
   mono X Y _ _ hXY :=
-    worstCase_le fun i ↦ ((ae_count_iff.1 hXY) i).trans (le_worstCase Y i)
+    worstCase_le fun i ↦ ((ae_iff_forall_of_singleton_ne_zero hP).1 hXY i).trans
+      (le_worstCase Y i)
   add_const X _ m := by
     refine le_antisymm (worstCase_le fun i ↦ ?_) ?_
     · have := le_worstCase X i
@@ -81,6 +83,6 @@ theorem worstCase_isLUB (L : ι → ℝ) :
   letI : MeasurableSpace ι := ⊤
   haveI : MeasurableSingletonClass ι := ⟨fun _ ↦ trivial⟩
   rw [← representingSet_worstCase]
-  exact coherentRisk_isLUB worstCase_isCoherent L
+  exact coherentRisk_isLUB (worstCase_isCoherent (P := Measure.count) fun i ↦ by simp) L
 
 end MathFin

@@ -370,7 +370,7 @@ coherent-risk (risk) towers one Hahn–Banach theorem. The cone-separation root
 is **re-derived** from the root (pricing side), and `RiskMeasures/AcceptanceSet.coherentRisk_isLUB` (the
 finite-state ADEH representation of an `IsCoherentRiskMeasure`, the library's one coherence structure,
 in the loss convention; the positions convention of the ADEH paper is the same structure at `L ↦ ρ(−L)`,
-`RiskMeasures/PositionsConvention.isCoherentRiskMeasure_count_neg_iff`, with `RiskMeasures/WorstCaseRisk.worstCase_isLUB` a concrete instance —
+`RiskMeasures/PositionsConvention.isCoherentRiskMeasure_neg_iff`, with `RiskMeasures/WorstCaseRisk.worstCase_isLUB` a concrete instance —
 worst-case loss = sup over the whole simplex) is its risk-side instance.
 Superhedging: the bound `SuperhedgingDuality.emm_le_superReplication` (every martingale probability
 vector prices a claim below any super-replication cost) is a direct sum swap, not an instance of the root;
