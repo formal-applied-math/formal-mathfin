@@ -1662,6 +1662,41 @@
       "input_hash": "9990181a1b5fba2d27fe81129020ac7765b8866210004d27b2a9ebaf6e63216e",
       "verified_at_commit": "9d3a714"
     },
+    "mf-contract-binomial-capped-call": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-30",
+      "elapsed_s": 4.9,
+      "input_hash": "62c28a20c60f1c7449a6520b06e0d65b8ff5995a3bdc818eacc0fc6c58077898",
+      "verified_at_commit": "5965a92"
+    },
+    "mf-contract-binomial-european-payoff": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-30",
+      "elapsed_s": 4.3,
+      "input_hash": "cad56c9393c73af42cf2c01917bf921daf6652d51bf07c4da7096c62e8e8c11d",
+      "verified_at_commit": "5965a92"
+    },
+    "mf-contract-binomial-hedge": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-30",
+      "elapsed_s": 6.0,
+      "input_hash": "9143b6b90bb9edd3bc38ac5ba17646786f917f79737dc8dac4b5470e516ef0ed",
+      "verified_at_commit": "5965a92"
+    },
+    "mf-contract-binomial-to-black-scholes": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.8,
+      "input_hash": "35ea875a6573c41c6c2899e1f7b2aa78488707e07c0f39c301f97ac05757522c",
+      "verified_at_commit": "5965a92"
+    },
+    "mf-contract-book-es-subadditive": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-30",
+      "elapsed_s": 5.7,
+      "input_hash": "af5ae8e7c4776fab4b428f356f3bb73464ba7071913707d965173af6c9c30bae",
+      "verified_at_commit": "5965a92"
+    },
     "mf-contract-bounded-model-integrable": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-30",
