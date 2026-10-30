@@ -88,7 +88,7 @@ load-bearing claim had outrun their consumers:
   feeds the FTAP-derived (provably non-negative) state prices into
   `callPrice_finiteState_butterfly_nonneg`, giving "no-arbitrage ⟹ butterfly
   spreads cost ≥ 0" — the principle's first downstream consumer.
-- `StandardGaussianMGF` — already load-bearing transitively: `PowerOption`
+- `StandardGaussianMGF` — already load-bearing transitively: `Forward`
   consumes it directly and `LognormalMoments` reaches it through the
   `nthMoment_terminal` hub.
 

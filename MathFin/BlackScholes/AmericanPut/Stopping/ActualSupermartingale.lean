@@ -24,6 +24,7 @@ namespace MathFin.BlackScholes.AmericanPut.Stopping
 
 open Set Filter MeasureTheory ProbabilityTheory Boundary
 open scoped NNReal Topology
+open MathFin.ItoLocalMartingale (nullAugmentation supermartingale_nullAugmentation)
 
 theorem canonicalPrice_transition {k h : ℝ} (hk : 0 ≤ k) {i j T : ℝ≥0}
     (hij : i ≤ j) (hjT : j ≤ T) (x : ℝ) :
@@ -164,7 +165,7 @@ theorem canonicalDiscountedPrice_usual_supermartingale {k h : ℝ} (hk : 0 ≤ k
     (canonicalDiscountedPrice_supermartingale (h := h) hk x T)
         (canonicalDiscountedPrice_bound hk x T)
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
-  exact bounded_continuous_supermartingale_rightCont (supermartingale_ambientNullAugmentation hu)
+  exact bounded_continuous_supermartingale_rightCont (supermartingale_nullAugmentation hu)
     (canonicalDiscountedPrice_continuous hk x T) (canonicalDiscountedPrice_bound hk x T)
 
 end MathFin.BlackScholes.AmericanPut.Stopping

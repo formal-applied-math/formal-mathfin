@@ -27,13 +27,6 @@ namespace MathFin.BlackScholes.AmericanPut.Stopping
 open Set Filter MeasureTheory ProbabilityTheory
 open scoped NNReal Topology
 
-/-- The `i`-th grid time `i*δ`, capped at the horizon `T`. -/
-def cappedGridTime (T δ : ℝ≥0) (i : ℕ) : ℝ≥0 := min ((i : ℝ≥0)*δ) T
-
-theorem cappedGridTime_mono (T δ : ℝ≥0) : Monotone (cappedGridTime T δ) := by
-  intro i j hij
-  exact min_le_min (mul_le_mul_of_nonneg_right (by exact_mod_cast hij) zero_le) le_rfl
-
 /-- Backward recursion in the log-spot variable `x`: stage `0` at index `i` is `Z i`, and stage
 `n+1` is the max of `Z i x` with the `brownianHeatFlow` of stage `n` at index `i+1`, run over
 the step from `cappedGridTime T δ i` to `cappedGridTime T δ (i+1)`. -/

@@ -126,9 +126,11 @@ theorem parityGap_eq_zero {q : QuoteSheet} {Q : Measure Ω} [IsProbabilityMeasur
   obtain ⟨σ, hσ, Z, hZ, hC, hP⟩ := h
   have hBS : BSCallHyp Q q.spot q.strike q.rate σ q.maturity Z :=
     ⟨q.spot_pos, q.strike_pos, hσ, NNReal.coe_pos.mpr q.maturity_pos, hZ⟩
-  have hparity := value_europeanCall_eq_put_add_forward Q _ _
-    (BlackScholes.integrable_europeanPut_pathPV hZ q.spot q.strike q.rate σ q.maturity)
-    (BlackScholes.integrable_forward_pathPV hZ q.spot q.strike q.rate σ q.maturity)
+  have hX := (integrable_bsTerminal hZ q.spot q.rate σ q.maturity).const_mul
+    (Real.exp (-q.rate * q.maturity))
+  have hparity := value_europeanCall_eq_put_add_forward Q (fun _ ↦ Real.exp (-q.rate * q.maturity))
+    (BlackScholes.assets q.spot q.rate σ q.maturity Z) (K := q.strike) (T := q.maturity)
+    (integrable_europeanPut_pathPV hX) (integrable_forward_pathPV hX)
   rw [discount] at hC hP
   rw [hC, hP, BlackScholes.value_forward hBS] at hparity
   rw [parityGap, discount, hparity]

@@ -28,13 +28,18 @@ open scoped NNReal Topology
 
 variable {Ω : Type*} [MeasurableSpace Ω]
 
-/-- The continuous filtration sampled at the capped grid times `min (i*δ) T`. -/
+/-- The `i`-th grid time `i*δ`, capped at the horizon `T`. -/
+def cappedGridTime (T δ : ℝ≥0) (i : ℕ) : ℝ≥0 := min ((i : ℝ≥0)*δ) T
+
+theorem cappedGridTime_mono (T δ : ℝ≥0) : Monotone (cappedGridTime T δ) := by
+  intro i j hij
+  exact min_le_min (mul_le_mul_of_nonneg_right (by exact_mod_cast hij) zero_le) le_rfl
+
+/-- The continuous filtration sampled at the capped grid times `min (i*δ) T`: the sampled
+filtration `ContinuousMarket.sampledFiltration` along `cappedGridTime T δ`. -/
 def cappedGridFiltration (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (T δ : ℝ≥0) :
-    Filtration ℕ ‹MeasurableSpace Ω› where
-  seq := fun i => 𝓕 (min ((i : ℝ≥0)*δ) T)
-  mono' := fun _ _ hij => 𝓕.mono (min_le_min
-    (mul_le_mul_of_nonneg_right (by exact_mod_cast hij) zero_le) le_rfl)
-  le' := fun _ => 𝓕.le _
+    Filtration ℕ ‹MeasurableSpace Ω› :=
+  ContinuousMarket.sampledFiltration 𝓕 (cappedGridTime_mono T δ)
 
 theorem rounded_grid_time_eq {T δ t : ℝ≥0} (hδ : 0 < δ) (ht : t ∈ exerciseGrid T δ) :
     min ((⌈t/δ⌉₊ : ℝ≥0)*δ) T = t := by

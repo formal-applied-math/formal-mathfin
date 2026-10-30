@@ -6,12 +6,14 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.CompactKernelDerivative
+public import MathFin.BlackScholes.AmericanPut.Stopping.PlanePartial
 
 /-! # Heat equation for the continuous compact-data boundary integral 
 ## Result
 
-Public entry points include `heatPartial`, `heatPartial_smoothAt`, `heatPartial_time`,
-`heatPartial_space`.
+Public entry points include `boundaryKernelPlane_equation`,
+`compact_causalBoundaryIntegral_equation`, `exists_halfLine_heat_boundary_solution`; the
+directional derivatives are `planePartial` (`PlanePartial`).
 -/
 
 @[expose] public section
@@ -21,28 +23,6 @@ namespace MathFin.BlackScholes.AmericanPut.Stopping
 open Set Filter MeasureTheory
 open scoped Topology ContDiff
 
-/-- The derivative of `F` at the plane point `z` along the direction `v`, read off the Fréchet
-derivative `fderiv ℝ F z`. -/
-noncomputable def heatPartial (F : ℝ × ℝ → ℝ) (v z : ℝ × ℝ) : ℝ :=
-  fderiv ℝ F z v
-
-theorem heatPartial_smoothAt {F : ℝ × ℝ → ℝ} {z : ℝ × ℝ}
-    (hF : ContDiffAt ℝ ∞ F z) (v : ℝ × ℝ) :
-    ContDiffAt ℝ ∞ (heatPartial F v) z :=
-  (hF.fderiv_right (by simp)).clm_apply contDiffAt_const
-
-theorem heatPartial_time {F : ℝ × ℝ → ℝ} {t x : ℝ}
-    (hF : DifferentiableAt ℝ F (t, x)) :
-    HasDerivAt (fun s => F (s,x)) (heatPartial F (1,0) (t,x)) t := by
-  convert! hF.hasFDerivAt.comp_hasDerivAt t
-    ((hasDerivAt_id t).prodMk (hasDerivAt_const t x)) using 1
-
-theorem heatPartial_space {F : ℝ × ℝ → ℝ} {t x : ℝ}
-    (hF : DifferentiableAt ℝ F (t, x)) :
-    HasDerivAt (fun y => F (t,y)) (heatPartial F (0,1) (t,x)) x := by
-  convert! hF.hasFDerivAt.comp_hasDerivAt x
-    ((hasDerivAt_const x t).prodMk (hasDerivAt_id x)) using 1
-
 /-- The causal heat boundary kernel as one function of the plane point `z = (t,x)`. -/
 noncomputable def boundaryKernelPlane (z : ℝ × ℝ) : ℝ := causalHeatBoundaryKernel z.1 z.2
 
@@ -50,17 +30,17 @@ theorem boundaryKernelPlane_smoothAt {z : ℝ × ℝ} (hx : 0 < z.2) :
     ContDiffAt ℝ ∞ boundaryKernelPlane z := causalHeatBoundaryKernel_smoothAt hx.ne'
 
 theorem boundaryKernelPlane_equation (t : ℝ) {x : ℝ} (hx : 0 < x) :
-    heatPartial boundaryKernelPlane (1,0) (t,x) =
-      (1/2)*heatPartial (heatPartial boundaryKernelPlane (0,1)) (0,1) (t,x) := by
+    planePartial boundaryKernelPlane (1,0) (t,x) =
+      (1/2)*planePartial (planePartial boundaryKernelPlane (0,1)) (0,1) (t,x) := by
   have ht :=
-      heatPartial_time (t := t) ((boundaryKernelPlane_smoothAt hx).differentiableAt (by simp))
-  have hd := heatPartial_space
-    ((heatPartial_smoothAt (boundaryKernelPlane_smoothAt (z := (t,x)) hx) (0,1)).differentiableAt
+      planePartial_hasDeriv_time (t := t) ((boundaryKernelPlane_smoothAt hx).differentiableAt (by simp))
+  have hd := planePartial_hasDeriv_space
+    ((planePartial_smoothAt (boundaryKernelPlane_smoothAt (z := (t,x)) hx) (0,1)).differentiableAt
         (by simp))
-  have he : (fun y => heatPartial boundaryKernelPlane (0,1) (t,y)) =ᶠ[𝓝 x]
+  have he : (fun y => planePartial boundaryKernelPlane (0,1) (t,y)) =ᶠ[𝓝 x]
       deriv (causalHeatBoundaryKernel t) := by
     filter_upwards [lt_mem_nhds hx] with y hy
-    exact (heatPartial_space
+    exact (planePartial_hasDeriv_space
         ((boundaryKernelPlane_smoothAt hy).differentiableAt (by simp))).deriv.symm
   rw [← ht.deriv,← hd.deriv,he.deriv_eq]
   exact causalHeatBoundaryKernel_equation t hx
@@ -68,18 +48,18 @@ theorem boundaryKernelPlane_equation (t : ℝ) {x : ℝ} (hx : 0 < x) :
 theorem compact_causalBoundaryIntegral_hasDeriv_time {g : ℝ → ℝ}
     (hg : Continuous g) (hc : HasCompactSupport g) {x : ℝ} (hx : 0 < x) (t : ℝ) :
     HasDerivAt (fun s => causalBoundaryIntegral g x s)
-      (∫ y, heatPartial boundaryKernelPlane (1,0) (t-y,x)*g y) t := by
+      (∫ y, planePartial boundaryKernelPlane (1,0) (t-y,x)*g y) t := by
   apply compact_kernelIntegral_hasDeriv hg hc (U := univ)
     (F := fun s y => boundaryKernelPlane (s-y,x))
-    (F' := fun s y => heatPartial boundaryKernelPlane (1,0) (s-y,x)) isOpen_univ
+    (F' := fun s y => planePartial boundaryKernelPlane (1,0) (s-y,x)) isOpen_univ
   · intro z _
     exact ((boundaryKernelPlane_smoothAt hx).continuousAt.comp
       (show ContinuousAt (fun z : ℝ × ℝ => (z.1-z.2,x)) z by fun_prop)).continuousWithinAt
   · intro z _
-    exact ((heatPartial_smoothAt (boundaryKernelPlane_smoothAt hx) (1,0)).continuousAt.comp
+    exact ((planePartial_smoothAt (boundaryKernelPlane_smoothAt hx) (1,0)).continuousAt.comp
       (show ContinuousAt (fun z : ℝ × ℝ => (z.1-z.2,x)) z by fun_prop)).continuousWithinAt
   · intro s _ y
-    convert! (heatPartial_time
+    convert! (planePartial_hasDeriv_time
       ((boundaryKernelPlane_smoothAt hx).differentiableAt (by simp))).comp s
       ((hasDerivAt_id s).sub_const y) using 1
     simp
@@ -89,19 +69,19 @@ theorem compact_planeIntegral_hasDeriv_space {g : ℝ → ℝ}
     (hg : Continuous g) (hc : HasCompactSupport g) {F : ℝ × ℝ → ℝ}
     (hF : ∀ z, 0 < z.2 → ContDiffAt ℝ ∞ F z) {x : ℝ} (hx : 0 < x) (t : ℝ) :
     HasDerivAt (fun x => ∫ y, F (t-y,x)*g y)
-      (∫ y, heatPartial F (0,1) (t-y,x)*g y) x := by
+      (∫ y, planePartial F (0,1) (t-y,x)*g y) x := by
   apply compact_kernelIntegral_hasDeriv hg hc (U := Ioi 0)
     (F := fun s y => F (t-y,s))
-    (F' := fun s y => heatPartial F (0,1) (t-y,s)) isOpen_Ioi
+    (F' := fun s y => planePartial F (0,1) (t-y,s)) isOpen_Ioi
   · intro z hz
     exact ((hF (t-z.2,z.1) hz.1).continuousAt.comp (f := fun w : ℝ × ℝ => (t-w.2,w.1))
       (show ContinuousAt (fun z : ℝ × ℝ => (t-z.2,z.1)) z by fun_prop)).continuousWithinAt
   · intro z hz
-    exact ((heatPartial_smoothAt (hF (t-z.2,z.1) hz.1) (0,1)).continuousAt.comp
+    exact ((planePartial_smoothAt (hF (t-z.2,z.1) hz.1) (0,1)).continuousAt.comp
       (f := fun w : ℝ × ℝ => (t-w.2,w.1))
       (show ContinuousAt (fun z : ℝ × ℝ => (t-z.2,z.1)) z by fun_prop)).continuousWithinAt
   · intro s hs y
-    exact heatPartial_space ((hF (t-y,s) hs).differentiableAt (by simp))
+    exact planePartial_hasDeriv_space ((hF (t-y,s) hs).differentiableAt (by simp))
   · exact hx
 
 theorem compact_causalBoundaryIntegral_equation {g : ℝ → ℝ}
@@ -110,10 +90,10 @@ theorem compact_causalBoundaryIntegral_equation {g : ℝ → ℝ}
       (1/2)*deriv (deriv (fun x => causalBoundaryIntegral g x t)) x := by
   have hF : ∀ z, 0 < z.2 → ContDiffAt ℝ ∞ boundaryKernelPlane z :=
     fun _ hz => boundaryKernelPlane_smoothAt hz
-  have hD : ∀ z, 0 < z.2 → ContDiffAt ℝ ∞ (heatPartial boundaryKernelPlane (0,1)) z :=
-    fun z hz => heatPartial_smoothAt (hF z hz) (0,1)
+  have hD : ∀ z, 0 < z.2 → ContDiffAt ℝ ∞ (planePartial boundaryKernelPlane (0,1)) z :=
+    fun z hz => planePartial_smoothAt (hF z hz) (0,1)
   have he : deriv (fun x => causalBoundaryIntegral g x t) =ᶠ[𝓝 x]
-      (fun x => ∫ y, heatPartial boundaryKernelPlane (0,1) (t-y,x)*g y) := by
+      (fun x => ∫ y, planePartial boundaryKernelPlane (0,1) (t-y,x)*g y) := by
     filter_upwards [lt_mem_nhds hx] with u hu
     exact (compact_planeIntegral_hasDeriv_space hg hc hF hu t).deriv
   rw [(compact_causalBoundaryIntegral_hasDeriv_time hg hc hx t).deriv,he.deriv_eq,
