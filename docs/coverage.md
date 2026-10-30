@@ -450,9 +450,10 @@ split by area. What each bridge proves, by area:
   Heynen–Kat at zero correlation as Black–Scholes times a barrier factor
   (`mf-heynen-kat-independent-bs-factor`, `reduced_core`); the normalised spread is standard normal
   (`mf-margrabe-normalized-spread-normal`); the GBM log return law (`mf-gbm-log-return-law`);
-  Haug's soft, partial-time-start, and binary barrier closed forms' internal sign/parity
-  cross-checks (`mf-soft-barrier-call-sub-put`, `mf-partial-time-barrier-down-add-up`,
-  `mf-binary-barrier-inout-parity`).
+  Haug's partial-time-start and binary barrier closed forms' in–out identities, with the
+  whole-life and cash-or-nothing price reductions (`mf-partial-time-barrier-down-add-up`,
+  `mf-binary-barrier-inout-parity`, both `reduced_core`; the soft-barrier transcription was
+  dropped from the corpus at review).
   `MargrabeGrounding`'s two existential theorems no longer claim to derive their hypothesis: they
   now exhibit the measure and driver.
 - **Structural** (`black_scholes.json`, `binomial.json`). The American put is at least the

@@ -3272,13 +3272,6 @@
       "input_hash": "010f3cb2a9c20119467934854525f28ea36667aa527ed0fee05e6d10eac3c436",
       "verified_at_commit": "affb4c7e"
     },
-    "mf-soft-barrier-call-sub-put": {
-      "benchmark_file": "exotic_options.json",
-      "date": "2026-10-30",
-      "elapsed_s": 3.4,
-      "input_hash": "e01485033416422636961347e792ff5ebe2b823668cf9fdb6e0f1948557010e4",
-      "verified_at_commit": "affb4c7e"
-    },
     "mf-sortino-scale-invariant": {
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-10-30",

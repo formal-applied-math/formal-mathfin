@@ -370,22 +370,6 @@
       }
     },
     {
-      "id": "mf-soft-barrier-call-sub-put",
-      "name": "Soft Barrier Knock-In: Call Minus Put",
-      "domain": "mathematical_finance",
-      "description": "Proves that, for Hart & Ross's soft-barrier (corridor [L,U]) knock-in closed form, the call-minus-put difference w(1) - w(-1) collapses to a form with every normal CDF term cancelled, leaving only the (A1-A2) and (B1-B2) corridor-reflection factors. A structural cross-check that the eta sign is threaded consistently through both the outer sign and all eight Phi arguments of the transcribed formula.",
-      "code": {
-        "lean": "import MathFin.BlackScholes.SoftBarrierOption\n\nopen MathFin\n\n/-- **Call minus put, soft-barrier knock-in.** Re-exports\n`MathFin.softBarrier_call_sub_put`. -/\ntheorem soft_barrier_call_sub_put (S X U L b r σ T : ℝ) :\n    softBarrierKnockIn 1 S X U L b r σ T - softBarrierKnockIn (-1) S X U L b r σ T\n      = (sbTerm1Coef S X b r σ T * (sbA1 S X U b σ - sbA2 S X L b σ)\n          - sbTerm2Coef S X b r σ T * (sbBB1 S X U b σ - sbBB2 S X L b σ)) / (U - L) :=\n  MathFin.softBarrier_call_sub_put S X U L b r σ T\n"
-      },
-      "metadata": {
-        "chapter": 14,
-        "reference": "Hart & Ross 1994, soft barrier options; Haug, The Complete Guide to Option Pricing Formulas, §\"Soft Barrier Options\"",
-        "difficulty": "intermediate",
-        "formalization_status": "full",
-        "formalization_scope": "Full proof, axioms-clean. Transcribed from, and cross-checked against, QuantLib's AnalyticSoftBarrierEngine::knockInValue (MathFin/BlackScholes/SoftBarrierOption.lean). SCOPE: an algebraic identity on the transcribed closed form -- w(eta=1) minus w(eta=-1), the two eta branches of knockInValue (eta=1 is Haug's soft-down-and-in call, eta=-1 his soft-up-and-in put; QuantLib keys eta off the option type alone, a convention this file inherits). NOT PROVED: that the soft-barrier formula is itself a discounted expected payoff under the corridor knock-in probability."
-      }
-    },
-    {
       "id": "mf-partial-time-barrier-down-add-up",
       "name": "Partial-Time Barrier: Down-Window Plus Up-Window",
       "domain": "mathematical_finance",
@@ -397,8 +381,8 @@
         "chapter": 14,
         "reference": "Haug, The Complete Guide to Option Pricing Formulas, §\"Partial-Time Barrier Options\"",
         "difficulty": "intermediate",
-        "formalization_status": "full",
-        "formalization_scope": "Full proof, axioms-clean. Transcribed from, and cross-checked against, QuantLib's AnalyticPartialTimeBarrierOptionEngine::CA (MathFin/BlackScholes/PartialTimeBarrierOption.lean), start-window call side only. SCOPE: an identity between the down- and up-window closed forms via bivariateNormalCDF_flip_snd. NOT PROVED: the end-window case (CoB1/CoB2), the put side, or that CA is itself a discounted expected barrier-knock payoff."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core. Re-export of MathFin.ptCA_down_add_up and MathFin.ptCA_down_monitored_full_life (MathFin/BlackScholes/PartialTimeBarrierOption.lean). The Haug/Heynen–Kat start-window closed form is transcribed, not derived: what is proved is (1) the in–out collapse CA(1) + CA(−1) to the t₁-free full-life down-and-out expression, via bivariateNormalCDF_flip_snd, and (2) the whole-life reduction — at t₁ = T (X ≥ H) the correlation is 1 and bivariateNormalCDF_one turns ptCA into that same standard-barrier closed form. The barrier density itself (the reflection-principle step behind the transcribed N₂ terms) is not proved; main's precedent for transcribed barriers proving no more than this is reduced_core (Heynen–Kat, Stulz). Axioms-clean."
       }
     },
     {
@@ -413,8 +397,8 @@
         "chapter": 14,
         "reference": "Rubinstein & Reiner 1991; Haug, The Complete Guide to Option Pricing Formulas, §\"Binary Barrier Options\"",
         "difficulty": "intermediate",
-        "formalization_status": "full",
-        "formalization_scope": "Full proof, axioms-clean. Transcribed from, and cross-checked against, QuantLib's AnalyticBinaryBarrierEngine_helper::payoffAtExpiry (MathFin/BlackScholes/BinaryBarrierOption.lean). SCOPE: an algebraic parity identity across the 16-branch transcription, decided by case split and ring. NOT PROVED: that the binary-barrier closed forms are themselves discounted expected knock-in/out digital payoffs."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core. Re-export of MathFin.bboDownIn_add_DownOut and MathFin.bboUpIn_add_UpOut (MathFin/BlackScholes/BinaryBarrierOption.lean), plus MathFin.bboB1_eq_Phi_bsd2 and MathFin.bboB1_cash_or_nothing_price. The Rubinstein–Reiner 16-branch closed form is transcribed, not derived: what is proved is the in–out parity branch-by-branch across all sixteen (barrier type, call/put, strike-vs-barrier) cases — the closed-form instance of knockIn_add_knockOut_eq_vanilla — and that the parity's vanilla leg at the risk-neutral drift μ = (r − σ²/2)/σ² is the discounted cash-or-nothing price bs_cash_or_nothing_formula proves (e^{−rT}·B₁ = e^{−rT}·Φ(d₂)). The barrier density itself is not proved; main's precedent for transcribed barriers proving no more than this is reduced_core (Heynen–Kat, Stulz). Axioms-clean."
       }
     }
   ]
