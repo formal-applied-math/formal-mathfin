@@ -159,4 +159,38 @@ lemma hasLaw_increment {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
       abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr hst))]
   rw [← hv]; exact hL
 
+/-! ### Sums and standardization of Gaussian variables -/
+
+/-- A sum of `n` independent `N(m, v)` variables is `N(n·m, n·v)`. -/
+theorem hasLaw_sum_range_gaussianReal {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}
+    {J : ℕ → Ω → ℝ} {m : ℝ} {v : ℝ≥0}
+    (hJ : ∀ i, HasLaw (J i) (gaussianReal m v) Q) (hind : iIndepFun J Q) (n : ℕ) :
+    HasLaw (∑ i ∈ Finset.range n, J i) (gaussianReal (n * m) (n * v)) Q := by
+  have := (hJ 0).isProbabilityMeasure
+  induction n with
+  | zero =>
+    simp only [Finset.sum_range_zero, Nat.cast_zero, zero_mul, gaussianReal_zero_var]
+    exact hasLaw_dirac_of_ae_eq (ae_of_all _ fun _ ↦ rfl)
+  | succ n ih =>
+    rw [Finset.sum_range_succ]
+    have h := (hind.indepFun_sum_range_succ₀ (fun i ↦ (hJ i).aemeasurable) n).hasLaw_add ih (hJ n)
+    rw [gaussianReal_conv_gaussianReal] at h
+    convert h using 2 <;> push_cast <;> ring
+
+/-- Standardizing a Gaussian: if `X ∼ N(μ, s²)` with `s > 0`, then `(X − μ)/s ∼ N(0, 1)`. -/
+theorem hasLaw_sub_div_of_gaussianReal {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}
+    {X : Ω → ℝ} {μ s : ℝ} {v : ℝ≥0}
+    (hX : HasLaw X (gaussianReal μ v) Q) (hs : 0 < s) (hv : (v : ℝ) = s ^ 2) :
+    HasLaw (fun ω ↦ (X ω - μ) / s) (gaussianReal 0 1) Q := by
+  have h := gaussianReal_const_mul (gaussianReal_sub_const hX μ) s⁻¹
+  have hparam : gaussianReal (s⁻¹ * (μ - μ)) (.mk (s⁻¹ ^ 2) (sq_nonneg _) * v)
+      = gaussianReal 0 1 := by
+    congr 1
+    · rw [sub_self, mul_zero]
+    · ext
+      rw [NNReal.coe_mul, NNReal.coe_mk, hv, NNReal.coe_one, inv_pow,
+        inv_mul_cancel₀ (pow_pos hs 2).ne']
+  rw [hparam] at h
+  simpa only [div_eq_inv_mul] using h
+
 end MathFin
