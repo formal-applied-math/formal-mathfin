@@ -302,8 +302,8 @@ compensated residual `M_t = f(t,B_t) − f(0,B_0) − ∫₀ᵗ(f_t+½f_xx)ds` i
 satisfies the Itô identity by construction, and is a genuine **`IsLocalMartingale`** on the
 null-augmented Brownian filtration, localised by `σ_N = min(τ_N, N)`, `τ_N` the exit time of `B`
 from `[−N, N]`: stopped there it is a bounded martingale
-(`martingale_stoppedProcess_itoResidual`). Only `f_t`, `f_x`, `f_xx` enter the proof; the
-higher partials are hypotheses of the statement. -/
+(`martingale_stoppedProcess_itoResidual`). Only `f`, `f_t`, `f_x`, `f_xx` and their continuity
+enter the proof; the other partials are hypotheses of the statement. -/
 theorem ito_formula_unrestricted (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
     {f f_t f_x f_xx f_tt f_tx f_xxx : ℝ → ℝ → ℝ}
