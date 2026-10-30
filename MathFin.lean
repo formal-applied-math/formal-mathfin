@@ -474,7 +474,6 @@ import MathFin.BlackScholes.Heston
 import MathFin.BlackScholes.Lookback
 import MathFin.BlackScholes.BarrierParity
 import MathFin.BlackScholes.BinaryBarrierOption
-import MathFin.BlackScholes.SoftBarrierOption
 -- Also consumes the bivariate normal CDF (Foundations/BivariateNormalCDF), like Stulz/Heynen-Kat below
 import MathFin.BlackScholes.PartialTimeBarrierOption
 import MathFin.BlackScholes.PowerOption

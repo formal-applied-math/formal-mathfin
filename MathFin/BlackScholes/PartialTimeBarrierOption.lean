@@ -7,6 +7,9 @@ module
 
 public import Mathlib
 public import MathFin.Foundations.BivariateNormalCDF
+public import MathFin.BlackScholes.BarrierParity
+public import MathFin.BlackScholes.Call
+public import MathFin.BlackScholes.HeynenKatTwoAssetBarrier
 
 /-!
 # Partial-time barrier options (start window, call): Haug's closed form
@@ -19,7 +22,10 @@ and soft barriers transcribed alongside this file, this genuinely needs the **bi
 CDF — the barrier-monitoring window `[0, t₁]` and the full life `[0, T]` are correlated
 (correlation `ρ = √(t₁/T)`, the two Brownian increments share the `[0, t₁]` leg) — which is why
 this file builds on the same `BivariateNormalCDF.lean` substrate (`bivariateNormalCDF`,
-`bivariateNormalCDF_flip_snd`) as `HeynenKatTwoAssetBarrier.lean`.
+`bivariateNormalCDF_flip_snd`) as `HeynenKatTwoAssetBarrier.lean`. Sources for the closed
+form: Heynen & Kat, "Partial barrier options", *Journal of Financial Engineering* 3 (1994);
+Haug, *The Complete Guide to Option Pricing Formulas*, 2nd ed. (2007), ch. 2, "Partial-Time
+Barrier Options" (the `A`-value table the engine's `CA` transcribes).
 
 **Scope, disclosed honestly**: QuantLib's `AnalyticPartialTimeBarrierOptionEngine` also prices
 the **end**-window case (`PartialBarrier::EndB1`/`EndB2`, barrier live only on `(t₁, T]`) via
@@ -31,11 +37,12 @@ of scope. **`CA` is also call-only**: QuantLib's `CA` is commented
 `calculate()` via the put–call spot-reflection symmetry (strike `X ↦ S²/X`, barrier `H ↦ S²/H`,
 barrier direction mirrored, the `CA`-call result on the transformed inputs scaled by `X/S`) rather
 than a second closed form — that symmetry transform is not formalized here either. The knock-in
-case (`CIA = vanilla − CA`) is, as with the knock-out side of `SoftBarrierOption.lean`,
-QuantLib's own *definition* via in–out parity rather than an independent closed form, so it is
-not separately formalized.
+case (`CIA = vanilla − CA`) is in–out parity — the closed-form instance of
+`BarrierParity.lean`'s `knockIn_add_knockOut_eq_vanilla` (the barrier-hit event and its
+complement partition the payoff) — rather than an independent closed form, so it is not
+separately formalized.
 
-Transcribed from, and cross-checked against, QuantLib's
+Transcribed from QuantLib's
 `ql/pricingengines/barrier/analyticpartialtimebarrieroptionengine.cpp` (`CA`, upstream commit
 `5f4811e`, 2026-10-16; contributed 2014 by Polytech'Nice Sophia Antipolis). We adopt a single
 constant volatility `σ` (QuantLib's engine reads a possibly term-structured Black vol evaluated
@@ -50,8 +57,8 @@ With cost-of-carry `b = r − q`, `ρ = √(t₁/T)`, `μ = (b − σ²/2)/σ²`
   `e₃ = e₁ + 2log(H/S)/(σ√t₁)`,  `e₄ = e₃ − σ√t₁`,
   `f₁ = (log(S/X) + 2log(H/S) + (b+σ²/2)T)/(σ√T)`,  `f₂ = f₁ − σ√T`,
 
-and `(H/S)^{2μ}`, `(H/S)^{2(μ+1)}` as `exp(·log·)` (as in `SoftBarrierOption.lean` and
-`BinaryBarrierOption.lean`), the
+and `(H/S)^{2μ}`, `(H/S)^{2(μ+1)}` as `exp(·log·)` (as in `BinaryBarrierOption.lean` and
+`HeynenKatTwoAssetBarrier.lean`), the
 start-window out-barrier **call** value (`η = 1` down, `η = −1` up) is
 
   `CA(η) = S·e^{(b−r)T}·(N₂(d₁, ηe₁; ηρ) − (H/S)^{2(μ+1)}·N₂(f₁, ηe₃; ηρ))`
@@ -77,15 +84,16 @@ namespace MathFin
 /-- **`ρ = √(t₁/T)`**, the correlation between the barrier-window and full-life log-returns. -/
 noncomputable def ptRho (t1 T : ℝ) : ℝ := Real.sqrt (t1 / T)
 
-/-- **`μ = (b − σ²/2)/σ²`**. -/
-noncomputable def ptMu (b σ : ℝ) : ℝ := (b - σ ^ 2 / 2) / σ ^ 2
+/-- **`μ = (b − σ²/2)/σ²`** — `hkMu`'s drift (`HeynenKatTwoAssetBarrier.lean`) divided by
+`σ²`, the same `hkMu`-style parameter the binary barrier's `mu` takes. -/
+noncomputable def ptMu (b σ : ℝ) : ℝ := hkMu b σ / σ ^ 2
 
-/-- **`d₁`**: the standard BS `d₁` against strike `X` over the full life `T`. -/
-noncomputable def ptD1 (S X b σ T : ℝ) : ℝ :=
-  (Real.log (S / X) + (b + σ ^ 2 / 2) * T) / (σ * Real.sqrt T)
+/-- **`d₁`**: the standard BS `d₁` (`bsd1`, `BlackScholes/Call.lean`) with the cost-of-carry
+`b` in the rate slot, against strike `X` over the full life `T`. -/
+noncomputable def ptD1 (S X b σ T : ℝ) : ℝ := bsd1 S X b σ T
 
-/-- **`d₂` = `d₁ − σ√T`**. -/
-noncomputable def ptD2 (S X b σ T : ℝ) : ℝ := ptD1 S X b σ T - σ * Real.sqrt T
+/-- **`d₂`** = `bsd2 S X b σ T` — `d₁ − σ√T`. -/
+noncomputable def ptD2 (S X b σ T : ℝ) : ℝ := bsd2 S X b σ T
 
 /-- **`e₁`**: the "distance" of the barrier `H` over the monitoring window `t₁`. -/
 noncomputable def ptE1 (S H b σ t1 : ℝ) : ℝ :=
@@ -152,5 +160,56 @@ theorem ptCA_down_add_up (S X H b r σ t1 T : ℝ) (ht1 : 0 ≤ t1) (hT : t1 ≤
   linear_combination S * Real.exp ((b - r) * T) * hd1
     - S * Real.exp ((b - r) * T) * ptHSmu1 S H b σ * hf1
     - X * Real.exp (-r * T) * hd2 + X * Real.exp (-r * T) * ptHSmu S H b σ * hf2
+
+/-- **Monitoring over the whole life is the standard barrier.** With the barrier live on
+`[0, T]` (i.e. `t₁ = T`) and the strike dominating the barrier (`X ≥ H`, the branch where the
+down-and-out closed form holds without a min inside the payoff), the start-window value
+`ptCA 1 … T T` reduces to the full-life down-and-out call closed form — the same `t₁`-free
+expression `ptCA_down_add_up` collapses to, here obtained directly: the correlation
+`ptRho T T = 1`, so `bivariateNormalCDF_one` turns each `N₂(a, b; 1)` into `Φ(min(a, b))`,
+and `X ≥ H` makes `d₁ ≤ e₁`, `f₁ ≤ e₃`, `d₂ ≤ e₂`, `f₂ ≤ e₄` (each pair differs exactly by
+`log(S/X) ≤ log(S/H)` over the same positive denominator), so every min is the `d`/`f` term. -/
+theorem ptCA_down_monitored_full_life (S X H b r σ T : ℝ) (hS : 0 < S) (hX : 0 < X)
+    (hH : 0 < H) (hXH : H ≤ X) (hσ : 0 < σ) (hT : 0 < T) :
+    ptCA 1 S X H b r σ T T
+      = S * Real.exp ((b - r) * T) *
+          (Phi (ptD1 S X b σ T) - ptHSmu1 S H b σ * Phi (ptF1 S X H b σ T))
+        - X * Real.exp (-r * T) *
+            (Phi (ptD2 S X b σ T) - ptHSmu S H b σ * Phi (ptF2 S X H b σ T)) := by
+  have hsqrt : 0 < σ * Real.sqrt T := mul_pos hσ (Real.sqrt_pos.mpr hT)
+  have hSdX : 0 < S / X := div_pos hS hX
+  have hSdH : 0 < S / H := div_pos hS hH
+  have hlog : Real.log (S / X) ≤ Real.log (S / H) :=
+    (Real.log_le_log_iff hSdX hSdH).mpr (by field_simp; linarith)
+  -- every `(d/e, f/e)` pair differs exactly by `log(S/X) ≤ log(S/H)` over the same
+  -- positive denominator `σ√T` (with `X ≥ H`), so `div_le_iff₀` reduces each to `hlog`
+  have hd1e1 : ptD1 S X b σ T ≤ ptE1 S H b σ T := by
+    unfold ptD1 ptE1 bsd1
+    rw [div_le_iff₀ hsqrt, div_mul_eq_mul_div, mul_div_cancel_right₀ _ hsqrt.ne']
+    linarith
+  have hF1decomp : ptF1 S X H b σ T
+      = ptD1 S X b σ T + 2 * Real.log (H / S) / (σ * Real.sqrt T) := by
+    simp only [ptF1, ptD1, bsd1]
+    rw [add_div, add_div]
+    ring
+  have hf1e3 : ptF1 S X H b σ T ≤ ptE3 S H b σ T := by
+    rw [hF1decomp]
+    simp only [ptE3]
+    linarith [hd1e1]
+  have hd2e2 : ptD2 S X b σ T ≤ ptE2 S H b σ T := by
+    unfold ptD2 ptE2
+    exact sub_le_sub_right hd1e1 _
+  have hf2e4 : ptF2 S X H b σ T ≤ ptE4 S H b σ T := by
+    unfold ptF2 ptE4
+    exact sub_le_sub_right hf1e3 _
+  have hrho : ptRho T T = 1 := by
+    unfold ptRho
+    rw [div_self hT.ne', Real.sqrt_one]
+  have hD1 := bivariateNormalCDF_one (ptD1 S X b σ T) (ptE1 S H b σ T)
+  have hF1 := bivariateNormalCDF_one (ptF1 S X H b σ T) (ptE3 S H b σ T)
+  have hD2 := bivariateNormalCDF_one (ptD2 S X b σ T) (ptE2 S H b σ T)
+  have hF2 := bivariateNormalCDF_one (ptF2 S X H b σ T) (ptE4 S H b σ T)
+  simp only [ptCA, one_mul, hrho, hD1, hF1, hD2, hF2,
+    min_eq_left hd1e1, min_eq_left hf1e3, min_eq_left hd2e2, min_eq_left hf2e4]
 
 end MathFin
