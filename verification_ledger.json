@@ -2260,9 +2260,9 @@
     "mf-gaussian-cvar-additive-rho-one": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.3,
-      "input_hash": "3ea913aea8f7445cef629e460a74940815c180a408857238a0af5358731f1f0b",
-      "verified_at_commit": "6969263"
+      "elapsed_s": 4.3,
+      "input_hash": "58c52e7f855f98e32ef8fe57d7b90aa95e54a45f7053d6ef7391cfc5e4e6f953",
+      "verified_at_commit": "3fea26a"
     },
     "mf-gaussian-cvar-affine": {
       "benchmark_file": "risk_measures.json",
@@ -2274,16 +2274,16 @@
     "mf-gaussian-cvar-monotone": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.5,
-      "input_hash": "dde9f41b5316e701ed4dd1416d4d2255c32e46c88a2ab95db89f468b6dd56704",
-      "verified_at_commit": "6969263"
+      "elapsed_s": 5.0,
+      "input_hash": "ee3b26c339cbaff547b6b46cde50b03c391bccbdf7268559e5564fb08079acc6",
+      "verified_at_commit": "3fea26a"
     },
     "mf-gaussian-cvar-pos-homog": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.1,
-      "input_hash": "e1e1419224c1cc77ee53b73fa74370e2c49e97da7522e3bc0aa66116a37f946b",
-      "verified_at_commit": "6969263"
+      "elapsed_s": 5.9,
+      "input_hash": "b9aadd8f5c2194247ef60b72cfa4821e8f4f36af745fb869bbde346e0b226ae5",
+      "verified_at_commit": "3fea26a"
     },
     "mf-gaussian-cvar-standard": {
       "benchmark_file": "risk_measures.json",
@@ -2302,16 +2302,23 @@
     "mf-gaussian-cvar-subadditive": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.5,
-      "input_hash": "3eff938b3c1e1521b4d82aa0ea414a7f79af172323ae57c4cde2a9013a5cc035",
-      "verified_at_commit": "6969263"
+      "elapsed_s": 5.1,
+      "input_hash": "1d9d4a96e895f25dccdfe6226a153906ed56e6867918e5c641584ae1232ddb85",
+      "verified_at_commit": "3fea26a"
+    },
+    "mf-gaussian-cvar-subadditive-jointly-gaussian": {
+      "benchmark_file": "risk_measures.json",
+      "date": "2026-10-30",
+      "elapsed_s": 4.6,
+      "input_hash": "9b33aea6b85d49fd80c621017fa23a275aef268f82eee6dd32e9621859682f27",
+      "verified_at_commit": "3fea26a"
     },
     "mf-gaussian-cvar-translation": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.5,
-      "input_hash": "e101bbbc506191f47bc1aa804cda2dceaef44b87624bad61b2df9933426495ac",
-      "verified_at_commit": "6969263"
+      "elapsed_s": 5.9,
+      "input_hash": "694eb2bc87c24e017055805019d63610153577ae1f7cec5fda63e82137746698",
+      "verified_at_commit": "3fea26a"
     },
     "mf-gaussian-factor-copula-pair-law": {
       "benchmark_file": "credit.json",
@@ -2337,9 +2344,9 @@
     "mf-gaussian-var-additive-rho-one": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.6,
-      "input_hash": "a20d0a827f3b5c9fdbeddb49022ed43897c29cf909838f67ae00eb80bb71c7e9",
-      "verified_at_commit": "6969263"
+      "elapsed_s": 4.8,
+      "input_hash": "62cac87edc1117322a61b1117b332cdc947484c5f2739cfbbb9c57df3b64b82f",
+      "verified_at_commit": "3fea26a"
     },
     "mf-gaussian-var-affine": {
       "benchmark_file": "risk_measures.json",
@@ -2351,16 +2358,16 @@
     "mf-gaussian-var-monotone": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-10-30",
-      "elapsed_s": 4.8,
-      "input_hash": "8d51d9f761b11a075b8f8841043549865d64b02cebf194bca68e9573663e3c63",
-      "verified_at_commit": "6969263"
+      "elapsed_s": 4.0,
+      "input_hash": "c50907f14e517fb1cf4ff1962aeb806d890d8ad3b4e97b0a97e2794ceb7d6b95",
+      "verified_at_commit": "3fea26a"
     },
     "mf-gaussian-var-pos-homog": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.2,
-      "input_hash": "9d764cc831c5a581e38042c892d8986a9545debe15a97ea27286862bfc5328f4",
-      "verified_at_commit": "6969263"
+      "elapsed_s": 5.5,
+      "input_hash": "bcb01e2c8b3fc62e7c0b74d3c6805b7182563eb943c08534516be1e9172e4c3a",
+      "verified_at_commit": "3fea26a"
     },
     "mf-gaussian-var-standard": {
       "benchmark_file": "risk_measures.json",
@@ -2372,9 +2379,9 @@
     "mf-gaussian-var-subadditive": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.3,
-      "input_hash": "0545b8aace8db5db5ef655cef507e64faea1469208b71df2382ad09b40bcbd48",
-      "verified_at_commit": "6969263"
+      "elapsed_s": 5.5,
+      "input_hash": "ea98d42fce9b1b07b422bd67771b0ea4ed37952777dd18b0ce02526c90998f48",
+      "verified_at_commit": "3fea26a"
     },
     "mf-gaussian-var-subadditive-jointly-gaussian": {
       "benchmark_file": "risk_measures.json",
@@ -2386,9 +2393,9 @@
     "mf-gaussian-var-translation": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.3,
-      "input_hash": "5e56b191943c987bd4d17505cecaa278554a6ba762d67e84c41fdbed1a3bb6b6",
-      "verified_at_commit": "6969263"
+      "elapsed_s": 4.6,
+      "input_hash": "966697e79d96329c2ad5c3b6322365c041bde7685c972bf023c4268b56a30e0e",
+      "verified_at_commit": "3fea26a"
     },
     "mf-gaussian-var-vol-scaling": {
       "benchmark_file": "risk_measures.json",
@@ -2582,9 +2589,9 @@
     "mf-joint-stdev-triangle": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.1,
-      "input_hash": "376a5cb336318c4ee19248006dfb7f9420a2142dbf51d50890c17d864e0b4099",
-      "verified_at_commit": "6969263"
+      "elapsed_s": 4.1,
+      "input_hash": "56fb2bfcbefab02cb9cc391aeeab26d14c3bf3d14798ae192c8e54e8a3ac285c",
+      "verified_at_commit": "3fea26a"
     },
     "mf-jump-diffusion-brownian-no-jumps": {
       "benchmark_file": "jumps_and_variance_swaps.json",
@@ -4367,9 +4374,9 @@
     "qrm-gaussian-es": {
       "benchmark_file": "quantitative_risk_management.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.3,
-      "input_hash": "8f195f627c705efc070a324062dc5b233ffdc6a0d9fd89c69bbc6cb53fb2cb1a",
-      "verified_at_commit": "5059a36"
+      "elapsed_s": 4.0,
+      "input_hash": "0e533699fe2df0c6f268496e4f5d66cf2259955187944c55e2ce22febdfe9c2b",
+      "verified_at_commit": "3fea26a"
     },
     "qrm-gaussian-quantile": {
       "benchmark_file": "quantitative_risk_management.json",
