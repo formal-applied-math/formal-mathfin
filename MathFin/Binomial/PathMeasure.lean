@@ -307,8 +307,8 @@ theorem martingale_of_oneStep {M : ℕ → (ℕ → Bool) → ℝ} (hM : ∀ n, 
   set A : (ℕ → Bool) → ℝ := fun ω ↦ M (n + 1) (Function.update ω n true)
   set B : (ℕ → Bool) → ℝ := fun ω ↦ M (n + 1) (Function.update ω n false)
   set ind : (ℕ → Bool) → ℝ := fun ω ↦ if ω n then 1 else 0
-  have hA := (hM (n + 1)).update (n := n) true
-  have hB := (hM (n + 1)).update (n := n) false
+  have hA := (hM (n + 1)).fixFlip (n := n) true
+  have hB := (hM (n + 1)).fixFlip (n := n) false
   have hdecomp : M (n + 1) = B + (A - B) * ind := by
     funext ω
     have e := Function.update_eq_self n ω

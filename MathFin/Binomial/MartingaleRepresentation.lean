@@ -40,7 +40,8 @@ def PathAdaptedAt (n : ℕ) (X : (ℕ → Bool) → ℝ) : Prop :=
 
 /-- Fixing the `n`-th flip of a function of the first `n + 1` flips leaves a function of the
 first `n`. -/
-lemma PathAdaptedAt.update {n : ℕ} {f : (ℕ → Bool) → ℝ} (hf : PathAdaptedAt (n + 1) f) (b : Bool) :
+lemma PathAdaptedAt.fixFlip {n : ℕ} {f : (ℕ → Bool) → ℝ} (hf : PathAdaptedAt (n + 1) f)
+    (b : Bool) :
     PathAdaptedAt n fun ω ↦ f (Function.update ω n b) := fun ω ω' h ↦
   hf _ _ fun i hi ↦ by
     rcases eq_or_ne i n with rfl | hin
@@ -107,7 +108,7 @@ theorem binomial_martingale_representation
     have key (b : Bool) :
         M (n + 1) (Function.update ω n b) = M (n + 1) (Function.update ω' n b) ∧
         S (n + 1) (Function.update ω n b) = S (n + 1) (Function.update ω' n b) :=
-      ⟨(hM_adapt (n + 1)).update b ω ω' hω, (hS_adapt (n + 1)).update b ω ω' hω⟩
+      ⟨(hM_adapt (n + 1)).fixFlip b ω ω' hω, (hS_adapt (n + 1)).fixFlip b ω ω' hω⟩
     simp only [hedgeRatio]
     rw [(key true).1, (key true).2, (key false).1, (key false).2]
   · -- the representation telescopes from the one-step identity
