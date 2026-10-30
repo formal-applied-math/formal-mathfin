@@ -46,12 +46,12 @@ open MeasureTheory ProbabilityTheory
 integrated against `Gamma(a, r)` is `(r / (r − (M_X(t) − 1)))^a`. -/
 theorem integral_compoundPoisson_mgf_gammaMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {μ : Measure Ω} {a r t : ℝ} (ha : 0 < a) (hr : 0 < r) (X : ℕ → Ω → ℝ)
-    (hindep : iIndepFun X μ) (hmeas : ∀ i, Measurable (X i))
-    (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) (hM : mgf (X 0) μ t < r + 1) :
+    (hindep : iIndepFun X μ) (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ)
+    (hM : mgf (X 0) μ t < r + 1) :
     ∫ lam, (∫ n, mgf (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ t ∂poissonMeasure lam.toNNReal)
         ∂gammaMeasure a r =
       (r / (r - (mgf (X 0) μ t - 1))) ^ a := by
-  simp_rw [mgf_range_sum_of_iid t X hindep hmeas hident]
+  simp_rw [mgf_range_sum_of_iid t X hindep hident]
   exact GammaPoissonMixturePgf.integral_integral_pow_poissonMeasure_gammaMeasure ha hr hM
 
 end MathFin

@@ -82,7 +82,7 @@ lemma mgf_logReturn (h : JumpDiffusionHyp Q Λ Z N J) {θ : ℝ}
     h.Z_indep_jumps.comp (measurable_const_mul (σ * Real.sqrt T)) measurable_sum_range_prod
   have hS : AEMeasurable (fun ω ↦ ∑ i ∈ Finset.range (N ω), J i ω) Q :=
     measurable_sum_range_prod.comp_aemeasurable
-      (h.N_law.aemeasurable.prodMk (measurable_pi_lambda _ h.J_meas).aemeasurable)
+      (h.N_law.aemeasurable.prodMk h.aemeasurable_jumps)
   have hsplit : (fun ω ↦ b * T + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω)
       = fun ω ↦ b * T + ((fun ω ↦ σ * Real.sqrt T * Z ω)
           + fun ω ↦ ∑ i ∈ Finset.range (N ω), J i ω) ω := by
@@ -91,7 +91,7 @@ lemma mgf_logReturn (h : JumpDiffusionHyp Q Λ Z N J) {θ : ℝ}
     ring
   rw [hsplit, mgf_const_add, hind.mgf_add' (h.Z_law.aemeasurable.const_mul _).aestronglyMeasurable
       hS.aestronglyMeasurable, mgf_const_mul, mgf_gaussianReal h.Z_law.map_eq,
-    compoundPoisson_mgf_of_indepFun Λ θ J h.N_law h.J_indep h.J_meas h.J_ident h.N_indep_J hJ,
+    compoundPoisson_mgf_of_indepFun Λ θ J h.N_law h.J_indep h.J_ident h.N_indep_J hJ,
     ← Real.exp_add, ← Real.exp_add]
   congr 1
   simp only [mul_pow, Real.sq_sqrt hT, NNReal.coe_one]

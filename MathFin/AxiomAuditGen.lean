@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (829 MathFin constants, 29 upstream). Citations
+  corpus (826 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -675,6 +675,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.JumpDiffusionHyp.discounted_terminal_eq_iff
 
+/-- info: 'MathFin.JumpDiffusionHyp.discounted_terminal_merton' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.JumpDiffusionHyp.discounted_terminal_merton
+
 /-- info: 'MathFin.JumpDiffusionHyp.impliedVol_gt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.JumpDiffusionHyp.impliedVol_gt
@@ -683,9 +687,9 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.JumpDiffusionHyp.jumpCounts_split
 
-/-- info: 'MathFin.JumpDiffusionHyp.toMertonHyp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.JumpDiffusionHyp.put_eq_mertonPutPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.JumpDiffusionHyp.toMertonHyp
+#print axioms MathFin.JumpDiffusionHyp.put_eq_mertonPutPrice
 
 /-- info: 'MathFin.JumpDiffusionProcess.condExp_call' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2639,10 +2643,6 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.mertonGamma_pos
 
-/-- info: 'MathFin.mertonHyp_canonical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.mertonHyp_canonical
-
 /-- info: 'MathFin.mertonJump_logContract_variance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.mertonJump_logContract_variance
@@ -2655,21 +2655,9 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.mertonVega_pos
 
-/-- info: 'MathFin.merton_call_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.merton_call_formula
-
-/-- info: 'MathFin.merton_discounted_terminal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.merton_discounted_terminal
-
 /-- info: 'MathFin.merton_put_call_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.merton_put_call_parity
-
-/-- info: 'MathFin.merton_put_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.merton_put_formula
 
 /-- info: 'MathFin.minPortfolioVarTwo_perfect_anticorr' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
