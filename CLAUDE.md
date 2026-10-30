@@ -131,6 +131,13 @@ New work extends or instantiates what it finds. If the existing statement is too
 generalise it and make the old one an instance. Never build a parallel object beside it.
 A brief to an agent names the existing target it must land in.
 
+When a duplicate goes, every caller moves to the surviving name, benchmark snippets
+included. A snippet restates its own statement and only cites the library lemma in its
+proof, so the entry's claim does not change; it re-verifies. A permanent alias would keep
+the duplicate it was meant to remove. Names a reader outside the library may depend on
+(the README, the beginners' manual, `MathFinTest/`, `MathFinExamples/`) get a Mathlib-style
+`@[deprecated (since := "YYYY-MM-DD")] alias old := new`, removed at the next release.
+
 The cost of skipping this was measured. On 2026-10-29 a Lévy design reached for
 `charFun` while `IsExpQMartingale` already carried the argument for all four Girsanov
 variants. The audit that followed (#357–#364, #366–#368) found about 60 parallel
