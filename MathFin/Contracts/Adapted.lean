@@ -59,17 +59,18 @@ integrability lemma (`Contracts/Models/Binomial.lean`).
   in the `obs` leaf; the six binary constructors combine two adapted pieces
   into one by the corresponding `Measurable.add`/`.sub`/`.mul`/`.max`/`.min`
   lemma, or `Measurable.ite` composed with `measurableSet_lt` for
-  `indicatorLt`.
+  `indicatorLt`; `rpow` keeps the adapted piece under `Measurable.pow_const`.
 * `Payoff.aemeasurable_eval` — the same conclusion as `measurable_eval`, from
   the weaker hypothesis that each `X i t` is only `AEMeasurable`. Built from
   `measurable_eval` applied to measurable representatives `(hX i t).mk (X i
   t)`, transported across the a.e. equality `e.eval X =ᵐ[μ] e.eval X'` proved
   by a second structural induction (each `obs` leaf contributes
   `AEMeasurable.ae_eq_mk`; the six binary constructors combine two a.e. facts
-  by `filter_upwards`) — not a direct induction into `AEMeasurable`, whose
-  `indicatorLt` case would need a `NullMeasurableSet` this route avoids
+  by `filter_upwards`, and `rpow` from the one) — not a direct induction into
+  `AEMeasurable`, whose `indicatorLt` case would need a `NullMeasurableSet` this route avoids
   producing.
-* `Payoff.exists_bound_eval` — against a model with bounded coordinates, a payoff is bounded.
+* `Payoff.exists_bound_eval` — against a model with bounded coordinates, a payoff is bounded
+  (a nonnegative power by `Real.abs_rpow_le_abs_rpow`).
 * `Contract.integrable_pathPV_of_bounded` — against a finite measure and a measurable, bounded
   model, every contract's discounted payoff is integrable.
 
@@ -113,6 +114,7 @@ def Payoff.obsTimes : Payoff ι → List ℝ≥0
   | .obs _ t => [t]
   | .add a b | .sub a b | .mul a b | .max a b | .min a b | .indicatorLt a b =>
       a.obsTimes ++ b.obsTimes
+  | .rpow a _ => a.obsTimes
 
 /-- Evaluating a payoff against a jointly-measurable model is measurable. -/
 theorem Payoff.measurable_eval (e : Payoff ι) (X : ι → ℝ≥0 → Ω → ℝ)
@@ -128,6 +130,7 @@ theorem Payoff.measurable_eval (e : Payoff ι) (X : ι → ℝ≥0 → Ω → �
   | min a b ha hb => exact ha.min hb
   | indicatorLt a b ha hb =>
       exact Measurable.ite (measurableSet_lt ha hb) measurable_const measurable_const
+  | rpow a p ha => exact ha.pow_const _
 
 /-- Evaluating a payoff against an a.e.-measurable model is a.e.-measurable: the strength a
 consumer whose model only satisfies `AEMeasurable` (e.g. `HasLaw.aemeasurable`, never
@@ -151,6 +154,7 @@ theorem Payoff.aemeasurable_eval {μ : Measure Ω} (e : Payoff ι) (X : ι → �
     | min a b ha hb => filter_upwards [ha, hb] with ω hae hbe; simp only [Payoff.eval, hae, hbe]
     | indicatorLt a b ha hb =>
         filter_upwards [ha, hb] with ω hae hbe; simp only [Payoff.eval, hae, hbe]
+    | rpow a p ha => filter_upwards [ha] with ω hae; simp only [Payoff.eval, hae]
   have hX'meas : ∀ i t, Measurable (X' i t) := fun i t ↦ (hX i t).measurable_mk
   exact (Payoff.measurable_eval e X' hX'meas).aemeasurable.congr (heq e).symm
 
@@ -192,9 +196,11 @@ theorem Payoff.measurable_eval_of_obsTimes_le
   | indicatorLt a b ha hb =>
       obtain ⟨hl, hr⟩ := obsTimes_append_le hle
       exact Measurable.ite (measurableSet_lt (ha hl) (hb hr)) measurable_const measurable_const
+  | rpow a p ha => exact (ha hle).pow_const _
 
 /-- Evaluating a payoff against a model whose every coordinate is bounded is bounded: each
-constructor combines two bounds into one, and an indicator is bounded by `1`. -/
+constructor combines its bounds into one, an indicator is bounded by `1`, and a nonnegative power
+by the power of the bound (`Real.abs_rpow_le_abs_rpow`). -/
 theorem Payoff.exists_bound_eval (e : Payoff ι) {X : ι → ℝ≥0 → Ω → ℝ}
     (hX : ∀ i t, ∃ C, ∀ ω, |X i t ω| ≤ C) : ∃ C, ∀ ω, |e.eval (fun i t ↦ X i t ω)| ≤ C := by
   induction e with
@@ -217,6 +223,10 @@ theorem Payoff.exists_bound_eval (e : Payoff ι) {X : ι → ℝ≥0 → Ω → 
       obtain ⟨⟨Ca, ha⟩, ⟨Cb, hb⟩⟩ := And.intro ha hb
       exact ⟨Max.max Ca Cb, fun ω ↦ abs_min_le_max_abs_abs.trans (max_le_max (ha ω) (hb ω))⟩
   | indicatorLt a b _ _ => exact ⟨1, fun ω ↦ by simp only [Payoff.eval]; split_ifs <;> simp⟩
+  | rpow a p ha =>
+      obtain ⟨C, hC⟩ := ha
+      exact ⟨C ^ (p : ℝ), fun ω ↦ (Real.abs_rpow_le_abs_rpow _ _).trans
+        (Real.rpow_le_rpow (abs_nonneg _) (hC ω) p.2)⟩
 
 /-- **A bounded model prices every contract.** Against a finite measure and a measurable model
 whose every coordinate is bounded, every contract's discounted payoff is integrable, so
