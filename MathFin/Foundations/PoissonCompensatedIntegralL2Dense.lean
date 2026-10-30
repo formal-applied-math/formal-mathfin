@@ -170,7 +170,7 @@ theorem compensated_integral_isometry (N : PoissonRandomMeasure P ν)
     {Nt m : ℕ} {t : ℕ → ℝ} (ht0 : 0 ≤ t 0) (hmono : Monotone t)
     {A : ℕ → Set E} (hAms : ∀ l, MeasurableSet (A l)) (hAfin : ∀ l, ν (A l) ≠ ⊤)
     (hAdisj : Pairwise (Function.onFun Disjoint A))
-    {φ : ℕ → ℕ → Ω → ℝ} (hadapt : ∀ j l, N.AdaptedAt (t j) (φ j l))
+    {φ : ℕ → ℕ → Ω → ℝ} (hadapt : ∀ j l, Measurable[N.pastFiltration (t j)] (φ j l))
     (hmemLp : ∀ j l, MemLp (φ j l) 2 P) :
     ∫ ω, (∑ j ∈ Finset.range Nt, ∑ l ∈ Finset.range m,
             φ j l ω * N.compensated (Set.Ioc (t j) (t (j + 1)) ×ˢ A l) ω) ^ 2 ∂P

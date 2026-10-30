@@ -128,7 +128,8 @@ theorem ito_formula_td_L2
   -- weight `f_xx(·, B)` (A1′), and the 2D Itô–Taylor remainder (A3′)
   have hA1 := tendsto_weighted_qv_process hB hBmeas
     (w := fun s ω ↦ f_xx s (B s ω))
-    (fun s ↦ adaptedAt_comp_eval le_rfl (hf_xxm s))
+    (fun s ↦ (hf_xxm s).comp
+      ((hB.isFilteredPreBrownian hBmeas).measurable_eval_of_le le_rfl))
     hwxx_cont hC20 (fun s ω ↦ hbd_xx _ _) T
   have hA2 := tendsto_riemann_L2_process (μ := μ)
     (w := fun s ω ↦ f_t s (B s ω))
