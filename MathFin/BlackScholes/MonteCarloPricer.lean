@@ -649,7 +649,7 @@ theorem integrable_sq_terminal (h : BSCallHyp μ S_0 K r σ T Z) :
 `e^{-rT}·S_T` for the call payoff (the put used the constant `e^{-rT}·K`; the call's
 envelope is genuinely unbounded). -/
 theorem integrable_discountedTerminal (h : BSCallHyp μ S_0 K r σ T Z) :
-    Integrable (fun ω ↦ Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω)) μ := by
+    Integrable (fun ω ↦ Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω)) μ :=
   (integrable_bsTerminal h.Z_law S_0 r σ T).const_mul _
 
 /-- **The discounted-forward identity**: `E[e^{-rT}·S_T] = S₀`. The risk-neutral
@@ -688,7 +688,7 @@ theorem integral_discountedTerminal_eq (h : BSCallHyp μ S_0 K r σ T Z) :
 /-- **Call integrability**: the sampled call payoff is integrable (`integrable_bsCall_payoff`) —
 the honest case, where boundedness fails. -/
 theorem integrable_mcCallPayoff (h : BSCallHyp μ S_0 K r σ T Z) :
-    Integrable (fun ω ↦ mcCallPayoff S_0 K r σ T (Z ω)) μ := by
+    Integrable (fun ω ↦ mcCallPayoff S_0 K r σ T (Z ω)) μ :=
   integrable_bsCall_payoff h.Z_law S_0 K r σ T
 
 /-- The sampled call payoff is in L² — the CLT hypothesis, proved by domination

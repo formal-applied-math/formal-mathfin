@@ -175,7 +175,7 @@ lemma integral_basketLognormalFactor {W : Ω → ℝ} (hW : HasLaw W (gaussianRe
 lemma integrable_basketLognormalFactor {W : Ω → ℝ} (hW : HasLaw W (gaussianReal 0 1) P)
     (σ T : ℝ) : Integrable (fun ω ↦ basketLognormalFactor σ T (W ω)) P :=
   by simpa only [one_mul] using integrable_exp_mul_of_hasLaw
-    (gaussianReal_sub_const (gaussianReal_const_mul hW (σ * Real.sqrt T)) (σ ^ 2 * T / 2)) 1
+      (gaussianReal_sub_const (gaussianReal_const_mul hW (σ * Real.sqrt T)) (σ ^ 2 * T / 2)) 1
 
 /-- **Cross-moment of two correlated lognormal factors**: for a jointly Gaussian pair of
 standard normals with covariance `ρ`, `𝔼[e^{σ₁√T·U − σ₁²T/2} · e^{σ₂√T·V − σ₂²T/2}] =

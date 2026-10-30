@@ -54,7 +54,8 @@ theorem compact_heatFlow_contDiff {f : ℝ → ℝ} (hf : ContDiff ℝ 2 f) (hc 
   · intro z y _ hy
     simp [image_eq_zero_of_notMem_tsupport hy]
   · intro z hz
-    have hk := ((heatKernel_smoothAt (x := z.2-z.1.2) hz.1).of_le (by simp)).comp z
+    have hk := ((heatKernel_smoothAt (x := z.2-z.1.2) hz.1).of_le
+      (WithTop.coe_le_coe.mpr le_top)).comp z
       (show ContDiffAt ℝ 2 (fun z : (ℝ × ℝ) × ℝ => (z.1.1,z.2-z.1.2)) z by fun_prop)
     exact ((hf.contDiffAt.comp z contDiffAt_snd).mul hk).contDiffWithinAt
 

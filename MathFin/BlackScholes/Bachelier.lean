@@ -90,7 +90,7 @@ theorem bachelier_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
       unfold bachelierTerminal; linear_combination -hcd
     have hmax := mul_max_of_nonneg (z - -d) 0 hc.le
     rw [mul_zero] at hmax
-    rw [smul_eq_mul, h, hmax]; ring
+    rw [smul_eq_mul, h, ← hmax]; ring
   rw [show (fun ω ↦ max (bachelierTerminal S_0 σ T (Z ω) - K) 0)
         = (fun z ↦ max (bachelierTerminal S_0 σ T z - K) 0) ∘ Z from rfl,
       hZ.integral_comp h_payoff_meas.aestronglyMeasurable,

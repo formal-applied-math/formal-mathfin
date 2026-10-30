@@ -282,7 +282,7 @@ theorem wienerIntegralLp_hasLaw_gaussian (hB : IsPreBrownianReal B μ) (T : ℝ�
 theorem _root_.MeasureTheory.MemLp.integral_sq_toLp {α : Type*} {mα : MeasurableSpace α}
     {ν : Measure α} {f : α → ℝ} (hf : MemLp f 2 ν) :
     ∫ x, (hf.toLp f x) ^ 2 ∂ν = ∫ x, f x ^ 2 ∂ν :=
-  integral_congr_ae <| hf.coeFn_toLp.mono fun _ hx ↦ by rw [hx]
+  integral_congr_ae <| hf.coeFn_toLp.mono fun _ hx ↦ by simp only [hx]
 
 /-- **`HasLaw` form with the variance given**: when `∫₀ᵀ f² = v`, the Wiener integral of `f` is
 `N(0, v)`. -/
