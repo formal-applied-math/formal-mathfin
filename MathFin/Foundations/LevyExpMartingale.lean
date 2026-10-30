@@ -9,15 +9,16 @@ public import MathFin.Foundations.LevyQuadraticSums
 public import MathFin.Foundations.ExpMartingaleQBrownian
 
 /-!
-# The exponential martingale of a martingale whose bracket is `t`
+# The exponential martingale of a martingale with a slow bracket
 
 The analytic core of the elementary route to Lévy's characterisation (issue #179). Let `M` be a
-bounded (`|M| ≤ K`) real process with every path continuous, such that `M` and `M² − t` are
-`Martingale`s for `𝓕`. Then for every real `a`,
+bounded (`|M| ≤ K`) real process with every path continuous, such that `M` and `M² − A` are
+`Martingale`s for `𝓕`, where `A` is a slow clock (`IsSlowClock`: `A₀ = 0`,
+`0 ≤ A_q − A_p ≤ q − p`; `A_t = t` or the stopped clock `t ∧ τ`). Then for every real `a`,
 
-  `t ↦ exp(a·M_t − a²t/2)` is a martingale              (`martingale_exp`),
+  `t ↦ exp(a·M_t − a²A_t/2)` is a martingale              (`martingale_exp`),
 
-and so `M` meets the library's exponential-martingale characterisation data
+and for the clock `A_t = t`, `M` meets the library's exponential-martingale characterisation data
 `IsExpQMartingale P 𝓕 M T` as soon as it starts at `0` (`isExpQMartingale`). From there
 `isQBrownianMotion_of_expMartingale` (`ExpMartingaleQBrownian`) delivers `N(0, t − s)`
 increments and independent increments: `M` is a Brownian motion in law.
@@ -27,39 +28,45 @@ the pin, where BrownianMotion's general Doob–Meyer decomposition is `sorry`.
 
 ## The argument: Itô's formula for `exp(a·x − a²r/2)`, one cell at a time
 
-Write `Zᵣ = exp(a·Mᵣ − a²r/2)` and fix a bounded `𝓕_s`-measurable `V`. Along the uniform
-partition `s = t₀ ≤ ⋯ ≤ tₙ = t`, telescope `V·(Z_t − Z_s) = ∑ₖ V·Z_{tₖ}·(e^{aΔₖ − c} − 1)`,
-with `Δₖ = M_{tₖ₊₁} − M_{tₖ}` and `c = a²(t − s)/(2n)`. On one cell, with `W = V·Z_{tₖ}` bounded
-and `𝓕_{tₖ}`-measurable, expand `e^{aΔ} = 1 + aΔ + a²Δ²/2 + R(aΔ)`:
+Write `Zᵣ = exp(a·Mᵣ − a²Aᵣ/2)` and fix a bounded `𝓕_s`-measurable `V`. Along the uniform
+partition `s = t₀ ≤ ⋯ ≤ tₙ = t`, telescope `V·(Z_t − Z_s) = ∑ₖ V·Z_{tₖ}·(e^{aΔₖ − cₖ} − 1)`,
+with `Δₖ = M_{tₖ₊₁} − M_{tₖ}` and `cₖ = a²(A_{tₖ₊₁} − A_{tₖ})/2 ∈ [0, γ]`, `γ = a²(t − s)/(2n)`.
+On one cell, with `W = V·Z_{tₖ}` bounded and `𝓕_{tₖ}`-measurable, compare `e^{aΔ−c} − 1` with its
+second-order expansion `G = aΔ + (a²/2)·(Δ² − ΔA)`:
 
-  `E[W·(e^{aΔ−c} − 1)] = e^{−c}·E[W·R(aΔ)] + ((1 + c)e^{−c} − 1)·E[W]`,
+  `E[W·(e^{aΔ−c} − 1)] = E[W·(e^{aΔ−c} − 1 − G)]`,
 
-because `E[W·Δ] = 0` and `E[W·(Δ² − Δt)] = 0` (`LevyQuadraticSums`: the martingale property of
-`M` and of `M² − t`) and `c = a²Δt/2` — the second-order term cancels *exactly*, the
-probabilistic form of `∂ᵣ + ½∂ₓₓ = 0`. The Taylor remainder is `|R(x)| ≤ |x|³e^{|x|}`
-(`abs_exp_sub_taylor_two_le`), and `|(1 + c)e^{−c} − 1| ≤ c²`
-(`abs_one_add_mul_exp_neg_sub_one_le`). Summing over the cells,
+because `E[W·Δ] = 0` and `E[W·(Δ² − ΔA)] = 0` (`LevyQuadraticSums`: the martingale property of
+`M` and of `M² − A`) — the second-order term cancels *exactly*, the probabilistic form of
+`∂ᵣ + ½∂ₓₓ = 0`. The remainder is bounded pointwise by
 
-  `|E[V·Z_t] − E[V·Z_s]| ≤ C·e^{|a|K}·(|a|³e^{2|a|K}·∑ₖ E|Δₖ|³ + (a²(t − s)/2)²/n)`,
+  `|e^{aΔ−c} − 1 − G| ≤ κ|Δ|³ + 2γ² + γ|a||Δ| + γ(a²/2)Δ²`,  `κ = |a|³e^{2|a|K}`
 
-and the cubic sums vanish (`LevyQuadraticSums.tendsto_sum_integral_abs_cube`). So the
-conditional moment-generating function is propagated cell by cell, and the cubic sums are the
-only global input — no ODE for `φ(t) = E[1_A e^{a(M_t − M_s)}]` has to be solved.
+(`abs_exp_sub_sub_le`: Taylor's remainder `|R(x)| ≤ |x|³e^{|x|}` and `|(1 + c)e^{−c} − 1| ≤ c²`),
+and `E[Δ²] = E[ΔA] ≤ q − p` absorbs the last term. A *random* clock only costs the cross term
+`γ|a||Δ|`, first order in `Δt` but only first order in `Δ`: summed over the cells it is
+`g|a|·E[maxₖ|Δₖ|] → 0`. Altogether
+
+  `|E[V·Z_t] − E[V·Z_s]| ≤ C·e^{|a|K}·(κ·∑ₖ E|Δₖ|³ + 3g²/n + g|a|·E[maxₖ|Δₖ|])`,  `g = a²(t − s)/2`,
+
+and the cubic sums and the largest increment vanish (`LevyQuadraticSums`). So the conditional
+moment-generating function is propagated cell by cell, and no ODE for
+`φ(t) = E[1_A e^{a(M_t − M_s)}]` has to be solved.
 
 ## Main results
 
 * `abs_integral_mul_exp_increment_sub_le` — the one-cell estimate.
 * `integral_mul_exp_eq` — `E[V·Z_t] = E[V·Z_s]` for bounded `𝓕_s`-measurable `V`.
-* `setIntegral_exp_eq` — the set-integral form over `A ∈ 𝓕_s`, as `IsExpQMartingale` states it.
-* `martingale_exp` — `t ↦ exp(a·M_t − a²t/2)` is a Mathlib `Martingale`.
-* `isExpQMartingale` — `M` (started at `0`) satisfies `IsExpQMartingale P 𝓕 M T` for every `T`.
+* `setIntegral_exp_eq` — the set-integral form over `S ∈ 𝓕_s`, as `IsExpQMartingale` states it.
+* `martingale_exp` — `t ↦ exp(a·M_t − a²A_t/2)` is a Mathlib `Martingale`.
+* `isExpQMartingale` — `M` (started at `0`, bracket `t`) satisfies `IsExpQMartingale P 𝓕 M T`.
 
 ## Scope
 
-`M` is **bounded** and **every** path is continuous. Extending to continuous local martingales
-with `M² − t` a local martingale needs a localisation step that is not here. The conclusion that
-`M` is a Brownian motion is `isQBrownianMotion_of_expMartingale` applied to `isExpQMartingale`. It
-gives the law on `[0, T]`, not independence of `M_t − M_s` from `𝓕_s`.
+`M` is **bounded** and **every** path is continuous. The localisation to continuous local
+martingales is `LevyCharacterization`, which uses the stopped clock `t ∧ τ` for `A`. The conclusion
+that `M` is a Brownian motion is `isQBrownianMotion_of_expMartingale` applied to
+`isExpQMartingale`; independence of `M_t − M_s` from `𝓕_s` is `ExpMartingaleBrownian`.
 -/
 
 @[expose] public section
@@ -99,235 +106,364 @@ theorem abs_one_add_mul_exp_neg_sub_one_le {c : ℝ} (hc : 0 ≤ c) :
   · nlinarith [mul_le_mul_of_nonneg_left h2 (by linarith : (0 : ℝ) ≤ 1 + c)]
   · nlinarith [mul_le_mul_of_nonneg_right h1 hpos.le]
 
-variable [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 mΩ} {M : ℝ≥0 → Ω → ℝ} {K : ℝ}
+/-- Pointwise form of the one-cell estimate. For `0 ≤ c ≤ γ`,
 
-/-- A bounded process has `exp(a·M_r − a²r/2) ≤ e^{|a|K}`. -/
-theorem exp_le_exp_abs_mul (hK : ∀ t ω, |M t ω| ≤ K) (a : ℝ) (r : ℝ≥0) (ω : Ω) :
-    Real.exp (a * M r ω - a ^ 2 * (r : ℝ) / 2) ≤ Real.exp (|a| * K) := by
+  `|e^{x−c} − 1 − (x + (x²/2 − c))| ≤ |x|³e^{|x|} + 2γ² + γ|x| + γ·x²/2`.
+
+Write `e^{x−c} = e^{−c}·e^x`, expand `e^x` to second order, and regroup as
+`e^{−c}·R(x) + ((1 + c)e^{−c} − 1) + (e^{−c} − 1)·(x + x²/2 − c)`. -/
+theorem abs_exp_sub_sub_le {x c γ : ℝ} (hc : 0 ≤ c) (hcγ : c ≤ γ) :
+    |Real.exp (x - c) - 1 - (x + (x ^ 2 / 2 - c))|
+      ≤ |x| ^ 3 * Real.exp |x| + 2 * γ ^ 2 + γ * |x| + γ * (x ^ 2 / 2) := by
+  have hR := abs_exp_sub_taylor_two_le x
+  have hd := abs_one_add_mul_exp_neg_sub_one_le hc
+  have he1 : Real.exp (-c) ≤ 1 := Real.exp_le_one_iff.2 (neg_nonpos.2 hc)
+  have he0 := Real.exp_pos (-c)
+  have hlin : |Real.exp (-c) - 1| ≤ c := by
+    rw [abs_le]
+    exact ⟨by linarith [Real.add_one_le_exp (-c)], by linarith⟩
+  have hid : Real.exp (x - c) - 1 - (x + (x ^ 2 / 2 - c))
+      = Real.exp (-c) * (Real.exp x - (1 + x + x ^ 2 / 2)) + ((1 + c) * Real.exp (-c) - 1)
+        + (Real.exp (-c) - 1) * (x + x ^ 2 / 2 - c) := by
+    rw [show Real.exp (x - c) = Real.exp (-c) * Real.exp x by rw [sub_eq_neg_add, Real.exp_add]]
+    ring
+  have h1 : |Real.exp (-c) * (Real.exp x - (1 + x + x ^ 2 / 2))| ≤ |x| ^ 3 * Real.exp |x| := by
+    rw [abs_mul, abs_of_pos he0]
+    exact (mul_le_of_le_one_left (abs_nonneg _) he1).trans hR
+  have h2 : |(1 + c) * Real.exp (-c) - 1| ≤ γ ^ 2 :=
+    hd.trans (pow_le_pow_left₀ hc hcγ 2)
+  have hx : |x + x ^ 2 / 2 - c| ≤ |x| + x ^ 2 / 2 + c :=
+    abs_le.2 ⟨by nlinarith [neg_abs_le x, sq_nonneg x], by nlinarith [le_abs_self x, sq_nonneg x]⟩
+  have h3 : |(Real.exp (-c) - 1) * (x + x ^ 2 / 2 - c)| ≤ γ * |x| + γ * (x ^ 2 / 2) + γ ^ 2 := by
+    rw [abs_mul]
+    have := mul_le_mul hlin hx (abs_nonneg _) hc
+    nlinarith [mul_le_mul_of_nonneg_right hcγ (abs_nonneg x), sq_nonneg x,
+      mul_le_mul_of_nonneg_right hcγ (by positivity : 0 ≤ x ^ 2 / 2),
+      mul_le_mul hcγ hcγ hc (hc.trans hcγ)]
+  rw [hid]
+  refine (abs_add_three _ _ _).trans ?_
+  linarith
+
+variable [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 mΩ} {M : ℝ≥0 → Ω → ℝ} {K : ℝ}
+  {A : ℝ≥0 → Ω → ℝ}
+
+/-- A bounded process on a slow clock has `exp(a·M_r − a²A_r/2) ≤ e^{|a|K}`. -/
+theorem exp_le_exp_abs_mul (hA : IsSlowClock A) (hK : ∀ t ω, |M t ω| ≤ K) (a : ℝ) (r : ℝ≥0)
+    (ω : Ω) : Real.exp (a * M r ω - a ^ 2 * A r ω / 2) ≤ Real.exp (|a| * K) := by
   refine Real.exp_le_exp.2 ?_
   have h1 : a * M r ω ≤ |a| * K := (le_abs_self _).trans (by
     rw [abs_mul]; exact mul_le_mul_of_nonneg_left (hK r ω) (abs_nonneg a))
-  have h2 : 0 ≤ a ^ 2 * (r : ℝ) / 2 := by positivity
+  have h2 : 0 ≤ a ^ 2 * A r ω / 2 := by have := hA.nonneg r ω; positivity
   linarith
 
 /-! ### One cell -/
 
 /-- **The one-cell estimate.** For `p ≤ q` and a bounded (`|W| ≤ C`) `𝓕_p`-measurable `W`,
 
-  `|E[W·(e^{a(M_q − M_p) − c} − 1)]| ≤ C·(|a|³e^{2|a|K}·E|M_q − M_p|³ + c²)`,
-  `c = a²(q − p)/2`.
+  `|E[W·(e^{aΔ − c} − 1)]| ≤ C·(κ·E|Δ|³ + 3γ² + γ|a|·E|Δ|)`,
 
-Expanding `e^{aΔ}` to second order, the first-order term `E[W·Δ]` and the second-order term
-`E[W·(Δ² − (q − p))]` vanish (`integral_mul_increment_eq_zero`,
-`integral_mul_sq_increment_sub`), which leaves the Taylor remainder and `((1 + c)e^{−c} − 1)·E[W]`. -/
-theorem abs_integral_mul_exp_increment_sub_le (hM : Martingale M 𝓕 P)
-    (hM2 : Martingale (fun t ω ↦ M t ω ^ 2 - (t : ℝ)) 𝓕 P) (hK : ∀ t ω, |M t ω| ≤ K) (a : ℝ)
+with `Δ = M_q − M_p`, `c = a²(A_q − A_p)/2`, `γ = a²(q − p)/2` and `κ = |a|³e^{2|a|K}`.
+
+The second-order expansion `e^{aΔ−c} − 1 ≈ G := aΔ + (a²/2)·((Δ)² − (A_q − A_p))` has
+`E[W·G] = 0` (`integral_mul_increment_eq_zero`, `integral_mul_sq_increment_sub`), so
+`E[W·(e^{aΔ−c} − 1)] = E[W·(e^{aΔ−c} − 1 − G)]`, and the pointwise remainder bound
+`abs_exp_sub_sub_le` (`c ≤ γ`) integrates, using `E[Δ²] = E[A_q − A_p] ≤ q − p`. The clock
+`A` need not be deterministic: only `0 ≤ A_q − A_p ≤ q − p` is used. -/
+theorem abs_integral_mul_exp_increment_sub_le (hA : IsSlowClock A) (hM : Martingale M 𝓕 P)
+    (hM2 : Martingale (fun t ω ↦ M t ω ^ 2 - A t ω) 𝓕 P) (hK : ∀ t ω, |M t ω| ≤ K) (a : ℝ)
     {p q : ℝ≥0} (hpq : p ≤ q) {W : Ω → ℝ} (hW : StronglyMeasurable[𝓕 p] W) {C : ℝ}
     (hC : ∀ ω, |W ω| ≤ C) :
-    |∫ ω, W ω * (Real.exp (a * (M q ω - M p ω) - a ^ 2 * ((q : ℝ) - p) / 2) - 1) ∂P|
+    |∫ ω, W ω * (Real.exp (a * (M q ω - M p ω) - a ^ 2 * (A q ω - A p ω) / 2) - 1) ∂P|
       ≤ C * (|a| ^ 3 * Real.exp (2 * |a| * K) * ∫ ω, |M q ω - M p ω| ^ 3 ∂P
-        + (a ^ 2 * ((q : ℝ) - p) / 2) ^ 2) := by
-  set c : ℝ := a ^ 2 * ((q : ℝ) - p) / 2 with hc
-  have hc0 : 0 ≤ c := by
-    have : (p : ℝ) ≤ q := hpq
-    rw [hc]; have := sub_nonneg.2 this; positivity
+        + 3 * (a ^ 2 * ((q : ℝ) - p) / 2) ^ 2
+        + a ^ 2 * ((q : ℝ) - p) / 2 * |a| * ∫ ω, |M q ω - M p ω| ∂P) := by
+  set γ : ℝ := a ^ 2 * ((q : ℝ) - p) / 2 with hγ
+  have hd0 : 0 ≤ (q : ℝ) - p := sub_nonneg.2 (NNReal.coe_le_coe.2 hpq)
+  have hγ0 : 0 ≤ γ := by positivity
   set κ : ℝ := |a| ^ 3 * Real.exp (2 * |a| * K)
+  have hAad := stronglyAdapted_of_martingale_sq_sub hM hM2
   have hMm (t : ℝ≥0) : Measurable (M t) := ((hM.stronglyAdapted t).mono (𝓕.le t)).measurable
+  have hAm (t : ℝ≥0) : Measurable (A t) := ((hAad t).mono (𝓕.le t)).measurable
   have hWm : Measurable W := (hW.mono (𝓕.le p)).measurable
   have hΔm : Measurable fun ω ↦ M q ω - M p ω := (hMm q).sub (hMm p)
+  have hαm : Measurable fun ω ↦ A q ω - A p ω := (hAm q).sub (hAm p)
   have hΔb (ω : Ω) := abs_sub_le_two_mul hK p q ω
-  -- the Taylor remainder
-  have hRb (ω : Ω) : |Real.exp (a * (M q ω - M p ω)) - (1 + a * (M q ω - M p ω)
-      + (a * (M q ω - M p ω)) ^ 2 / 2)| ≤ κ * |M q ω - M p ω| ^ 3 := by
-    refine (abs_exp_sub_taylor_two_le _).trans ?_
-    rw [abs_mul, mul_pow, mul_comm (|a| ^ 3), mul_assoc, mul_comm κ]
-    refine mul_le_mul_of_nonneg_left ?_ (by positivity)
-    refine mul_le_mul_of_nonneg_left (Real.exp_le_exp.2 ?_) (by positivity)
-    nlinarith [abs_nonneg a, hΔb ω]
-  have iW : Integrable W P :=
-    (memLp_of_abs_le hWm.aestronglyMeasurable hC 1).integrable le_rfl
+  have hα0 (ω : Ω) := hA.sub_nonneg hpq ω
+  have hαd (ω : Ω) := hA.sub_le hpq ω
+  -- bounded integrands
+  have iΔ : Integrable (fun ω ↦ M q ω - M p ω) P :=
+    (memLp_of_abs_le hΔm.aestronglyMeasurable hΔb 1).integrable le_rfl
+  have iAbsΔ : Integrable (fun ω ↦ |M q ω - M p ω|) P := iΔ.abs
   have iCube : Integrable (fun ω ↦ |M q ω - M p ω| ^ 3) P :=
     (memLp_of_abs_le (hΔm.abs.pow_const 3).aestronglyMeasurable (C := (2 * K) ^ 3) (fun ω ↦ by
       rw [abs_pow, abs_abs]; exact pow_le_pow_left₀ (abs_nonneg _) (hΔb ω) 3) 1).integrable le_rfl
-  have iR : Integrable (fun ω ↦ Real.exp (a * (M q ω - M p ω)) - (1 + a * (M q ω - M p ω)
-      + (a * (M q ω - M p ω)) ^ 2 / 2)) P :=
-    (memLp_of_abs_le (by fun_prop) (C := κ * (2 * K) ^ 3) (fun ω ↦ (hRb ω).trans
-      (mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (abs_nonneg _) (hΔb ω) 3)
-        (by positivity))) 1).integrable le_rfl
-  have iWR := iR.bdd_mul hWm.aestronglyMeasurable (.of_forall hC)
-  have iWΔ := ((memLp_of_abs_le (P := P) hΔm.aestronglyMeasurable hΔb 1).integrable le_rfl).bdd_mul
+  have iSq : Integrable (fun ω ↦ (M q ω - M p ω) ^ 2) P :=
+    (memLp_of_abs_le (hΔm.pow_const 2).aestronglyMeasurable (C := (2 * K) ^ 2) (fun ω ↦ by
+      rw [abs_pow]; exact pow_le_pow_left₀ (abs_nonneg _) (hΔb ω) 2) 1).integrable le_rfl
+  have iα : Integrable (fun ω ↦ A q ω - A p ω) P :=
+    (memLp_of_abs_le hαm.aestronglyMeasurable (C := (q : ℝ) - p) (fun ω ↦ by
+      rw [abs_of_nonneg (hα0 ω)]; exact hαd ω) 1).integrable le_rfl
+  have iW : Integrable W P :=
+    (memLp_of_abs_le hWm.aestronglyMeasurable hC 1).integrable le_rfl
+  -- the orthogonality: `E[W·G] = 0`
+  have iWΔ := iΔ.bdd_mul hWm.aestronglyMeasurable (.of_forall hC)
+  have iWY := (memLp_sq_increment_sub hA hM hM2 hK hpq 1).integrable le_rfl |>.bdd_mul
     hWm.aestronglyMeasurable (.of_forall hC)
-  have iWY := ((memLp_sq_increment_sub hM hK p q ((q : ℝ) - p) 1).integrable le_rfl).bdd_mul
-    hWm.aestronglyMeasurable (.of_forall hC)
-  have h1 := integral_mul_increment_eq_zero hM hpq hW hC
-  have h2 := integral_mul_sq_increment_sub hM hM2 hK hpq hW hC
-  -- the split: remainder, drift mismatch, and the two martingale terms
-  have hsplit : ∫ ω, W ω * (Real.exp (a * (M q ω - M p ω) - c) - 1) ∂P
-      = Real.exp (-c) * ∫ ω, W ω * (Real.exp (a * (M q ω - M p ω)) - (1 + a * (M q ω - M p ω)
-          + (a * (M q ω - M p ω)) ^ 2 / 2)) ∂P
-        + ((1 + c) * Real.exp (-c) - 1) * ∫ ω, W ω ∂P := by
-    have h0 : ∫ ω, (a * (W ω * (M q ω - M p ω))
-        + a ^ 2 / 2 * (W ω * ((M q ω - M p ω) ^ 2 - ((q : ℝ) - p)))) ∂P = 0 := by
-      rw [integral_add (iWΔ.const_mul a) (iWY.const_mul _), integral_const_mul,
-        integral_const_mul, h1, h2]
-      ring
-    have iA : Integrable (fun ω ↦ Real.exp (-c) * (W ω * (Real.exp (a * (M q ω - M p ω))
-        - (1 + a * (M q ω - M p ω) + (a * (M q ω - M p ω)) ^ 2 / 2)))) P := iWR.const_mul _
-    have iB : Integrable (fun ω ↦ ((1 + c) * Real.exp (-c) - 1) * W ω) P := iW.const_mul _
-    have iAB : Integrable (fun ω ↦ Real.exp (-c) * (W ω * (Real.exp (a * (M q ω - M p ω))
-        - (1 + a * (M q ω - M p ω) + (a * (M q ω - M p ω)) ^ 2 / 2)))
-        + ((1 + c) * Real.exp (-c) - 1) * W ω) P := iA.add iB
-    have iG : Integrable (fun ω ↦ Real.exp (-c) * (a * (W ω * (M q ω - M p ω))
-        + a ^ 2 / 2 * (W ω * ((M q ω - M p ω) ^ 2 - ((q : ℝ) - p))))) P :=
-      ((iWΔ.const_mul a).add (iWY.const_mul _)).const_mul _
-    rw [integral_congr_ae (g := fun ω ↦ Real.exp (-c) * (W ω * (Real.exp (a * (M q ω - M p ω))
-        - (1 + a * (M q ω - M p ω) + (a * (M q ω - M p ω)) ^ 2 / 2)))
-        + ((1 + c) * Real.exp (-c) - 1) * W ω + Real.exp (-c) * (a * (W ω * (M q ω - M p ω))
-        + a ^ 2 / 2 * (W ω * ((M q ω - M p ω) ^ 2 - ((q : ℝ) - p))))) (.of_forall fun ω ↦ by
-          rw [show Real.exp (a * (M q ω - M p ω) - c)
-            = Real.exp (-c) * Real.exp (a * (M q ω - M p ω)) by
-              rw [sub_eq_add_neg, Real.exp_add, mul_comm], hc]
-          ring),
-      integral_add iAB iG, integral_add iA iB, integral_const_mul, integral_const_mul,
-      integral_const_mul, h0]
+  have hWG : ∫ ω, W ω * (a * (M q ω - M p ω) + ((a * (M q ω - M p ω)) ^ 2 / 2
+      - a ^ 2 * (A q ω - A p ω) / 2)) ∂P = 0 := by
+    have h1 := integral_mul_increment_eq_zero hM hpq hW hC
+    have h2 := integral_mul_sq_increment_sub hM hM2 hK hpq hW hC
+    have : ∀ ω, W ω * (a * (M q ω - M p ω) + ((a * (M q ω - M p ω)) ^ 2 / 2
+        - a ^ 2 * (A q ω - A p ω) / 2))
+        = a * (W ω * (M q ω - M p ω))
+          + a ^ 2 / 2 * (W ω * ((M q ω - M p ω) ^ 2 - (A q ω - A p ω))) := fun ω ↦ by ring
+    simp_rw [this]
+    rw [integral_add (iWΔ.const_mul a) (iWY.const_mul _), integral_const_mul, integral_const_mul,
+      h1, h2]
     ring
-  rw [hsplit]
-  have hX : |∫ ω, W ω * (Real.exp (a * (M q ω - M p ω)) - (1 + a * (M q ω - M p ω)
-      + (a * (M q ω - M p ω)) ^ 2 / 2)) ∂P| ≤ C * (κ * ∫ ω, |M q ω - M p ω| ^ 3 ∂P) := by
-    refine (abs_integral_le_integral_abs).trans ?_
-    rw [← integral_const_mul, ← integral_const_mul]
-    refine integral_mono iWR.abs ((iCube.const_mul _).const_mul _) fun ω ↦ ?_
+  have iWG : Integrable (fun ω ↦ W ω * (a * (M q ω - M p ω) + ((a * (M q ω - M p ω)) ^ 2 / 2
+      - a ^ 2 * (A q ω - A p ω) / 2))) P := by
+    refine ((iWΔ.const_mul a).add (iWY.const_mul (a ^ 2 / 2))).congr (.of_forall fun ω ↦ ?_)
+    simp only [Pi.add_apply]
+    ring
+  -- `W·F` is bounded
+  have hFb (ω : Ω) : |Real.exp (a * (M q ω - M p ω) - a ^ 2 * (A q ω - A p ω) / 2) - 1|
+      ≤ Real.exp (2 * |a| * K) + 1 := by
+    have hy : a * (M q ω - M p ω) - a ^ 2 * (A q ω - A p ω) / 2 ≤ 2 * |a| * K := by
+      have : a * (M q ω - M p ω) ≤ |a| * (2 * K) := (le_abs_self _).trans (by
+        rw [abs_mul]; exact mul_le_mul_of_nonneg_left (hΔb ω) (abs_nonneg a))
+      have : 0 ≤ a ^ 2 * (A q ω - A p ω) / 2 := by have := hα0 ω; positivity
+      linarith
+    have := Real.exp_le_exp.2 hy
+    have := Real.exp_pos (a * (M q ω - M p ω) - a ^ 2 * (A q ω - A p ω) / 2)
+    rw [abs_le]
+    constructor <;> linarith [Real.exp_pos (2 * |a| * K)]
+  have iWF : Integrable (fun ω ↦ W ω * (Real.exp (a * (M q ω - M p ω)
+      - a ^ 2 * (A q ω - A p ω) / 2) - 1)) P :=
+    (memLp_of_abs_le (hWm.mul ((Real.measurable_exp.comp (((measurable_const.mul hΔm).sub
+      (((measurable_const.mul hαm).div_const 2))))).sub measurable_const)).aestronglyMeasurable
+      (C := C * (Real.exp (2 * |a| * K) + 1)) (fun ω ↦ by
+        rw [abs_mul]
+        exact mul_le_mul (hC ω) (hFb ω) (abs_nonneg _) ((abs_nonneg _).trans (hC ω))) 1).integrable
+      le_rfl
+  -- remove the second-order part
+  have hFG : ∫ ω, W ω * (Real.exp (a * (M q ω - M p ω) - a ^ 2 * (A q ω - A p ω) / 2) - 1) ∂P
+      = ∫ ω, W ω * (Real.exp (a * (M q ω - M p ω) - a ^ 2 * (A q ω - A p ω) / 2) - 1
+        - (a * (M q ω - M p ω) + ((a * (M q ω - M p ω)) ^ 2 / 2
+        - a ^ 2 * (A q ω - A p ω) / 2))) ∂P := by
+    have : ∀ ω, W ω * (Real.exp (a * (M q ω - M p ω) - a ^ 2 * (A q ω - A p ω) / 2) - 1
+        - (a * (M q ω - M p ω) + ((a * (M q ω - M p ω)) ^ 2 / 2 - a ^ 2 * (A q ω - A p ω) / 2)))
+        = W ω * (Real.exp (a * (M q ω - M p ω) - a ^ 2 * (A q ω - A p ω) / 2) - 1)
+          - W ω * (a * (M q ω - M p ω) + ((a * (M q ω - M p ω)) ^ 2 / 2
+            - a ^ 2 * (A q ω - A p ω) / 2)) := fun ω ↦ by ring
+    simp_rw [this]
+    rw [integral_sub iWF iWG, hWG, sub_zero]
+  -- the pointwise bound
+  have hpt (ω : Ω) : |W ω * (Real.exp (a * (M q ω - M p ω) - a ^ 2 * (A q ω - A p ω) / 2) - 1
+        - (a * (M q ω - M p ω) + ((a * (M q ω - M p ω)) ^ 2 / 2
+        - a ^ 2 * (A q ω - A p ω) / 2)))|
+      ≤ C * (κ * |M q ω - M p ω| ^ 3 + 2 * γ ^ 2 + γ * |a| * |M q ω - M p ω|
+        + γ * (a ^ 2 / 2) * (M q ω - M p ω) ^ 2) := by
+    have hc0 : 0 ≤ a ^ 2 * (A q ω - A p ω) / 2 := by have := hα0 ω; positivity
+    have hcγ : a ^ 2 * (A q ω - A p ω) / 2 ≤ γ := by
+      rw [hγ]; have := mul_le_mul_of_nonneg_left (hαd ω) (sq_nonneg a); linarith
+    have h := abs_exp_sub_sub_le (x := a * (M q ω - M p ω)) hc0 hcγ
+    rw [abs_mul a] at h
+    have hrem : (|a| * |M q ω - M p ω|) ^ 3 * Real.exp (|a| * |M q ω - M p ω|)
+        ≤ κ * |M q ω - M p ω| ^ 3 := by
+      calc (|a| * |M q ω - M p ω|) ^ 3 * Real.exp (|a| * |M q ω - M p ω|)
+          = |a| ^ 3 * |M q ω - M p ω| ^ 3 * Real.exp (|a| * |M q ω - M p ω|) := by ring
+        _ ≤ |a| ^ 3 * |M q ω - M p ω| ^ 3 * Real.exp (2 * |a| * K) :=
+          mul_le_mul_of_nonneg_left (Real.exp_le_exp.2 (by
+            have := mul_le_mul_of_nonneg_left (hΔb ω) (abs_nonneg a); linarith)) (by positivity)
+        _ = κ * |M q ω - M p ω| ^ 3 := by ring
+    have e2 : γ * ((a * (M q ω - M p ω)) ^ 2 / 2) = γ * (a ^ 2 / 2) * (M q ω - M p ω) ^ 2 := by
+      ring
     rw [abs_mul]
-    exact mul_le_mul (hC ω) (hRb ω) (abs_nonneg _) ((abs_nonneg _).trans (hC ω))
-  have hY : |∫ ω, W ω ∂P| ≤ C := by
-    simpa [measureReal_def] using norm_integral_le_of_norm_le_const (f := W) (μ := P)
-      (.of_forall fun ω ↦ (Real.norm_eq_abs _).le.trans (hC ω))
-  have he : Real.exp (-c) ≤ 1 := Real.exp_le_one_iff.2 (neg_nonpos.2 hc0)
-  have hd := abs_one_add_mul_exp_neg_sub_one_le hc0
-  have hA := mul_le_mul_of_nonneg_right he (abs_nonneg (∫ ω, W ω * (Real.exp (a * (M q ω
-    - M p ω)) - (1 + a * (M q ω - M p ω) + (a * (M q ω - M p ω)) ^ 2 / 2)) ∂P))
-  have hB := mul_le_mul hd hY (abs_nonneg _) (sq_nonneg c)
-  refine (abs_add_le _ _).trans ?_
-  rw [abs_mul, abs_mul, abs_of_pos (Real.exp_pos _)]
-  nlinarith
+    exact mul_le_mul (hC ω) (h.trans (by linarith [e2, hrem])) (abs_nonneg _)
+      ((abs_nonneg _).trans (hC ω))
+  have iFG : Integrable (fun ω ↦ W ω * (Real.exp (a * (M q ω - M p ω)
+      - a ^ 2 * (A q ω - A p ω) / 2) - 1 - (a * (M q ω - M p ω) + ((a * (M q ω - M p ω)) ^ 2 / 2
+      - a ^ 2 * (A q ω - A p ω) / 2)))) P :=
+    (iWF.sub iWG).congr (.of_forall fun ω ↦ by simp only [Pi.sub_apply]; ring)
+  have ib : Integrable (fun ω ↦ κ * |M q ω - M p ω| ^ 3 + 2 * γ ^ 2 + γ * |a| * |M q ω - M p ω|
+      + γ * (a ^ 2 / 2) * (M q ω - M p ω) ^ 2) P :=
+    (((iCube.const_mul κ).add (integrable_const _)).add (iAbsΔ.const_mul _)).add
+      (iSq.const_mul _)
+  -- `E[Δ²] ≤ q − p`
+  have hI2 : ∫ ω, (M q ω - M p ω) ^ 2 ∂P ≤ (q : ℝ) - p := by
+    have h2 := integral_mul_sq_increment_sub hM hM2 hK hpq (V := fun _ ↦ (1 : ℝ))
+      stronglyMeasurable_const (C := 1) (fun _ ↦ by simp)
+    simp only [one_mul] at h2
+    rw [integral_sub iSq iα, sub_eq_zero] at h2
+    rw [h2]
+    have := integral_mono iα (integrable_const ((q : ℝ) - p)) hαd
+    simpa [measureReal_def] using this
+  haveI : Nonempty Ω := nonempty_of_isProbabilityMeasure P
+  have hC0 : 0 ≤ C := (abs_nonneg _).trans (hC (Classical.arbitrary Ω))
+  rw [hFG]
+  refine abs_integral_le_integral_abs.trans ((integral_mono iFG.abs (ib.const_mul C) hpt).trans ?_)
+  rw [integral_const_mul, integral_add (((iCube.const_mul κ).add (integrable_const _)).add
+      (iAbsΔ.const_mul _)) (iSq.const_mul _),
+    integral_add ((iCube.const_mul κ).add (integrable_const _)) (iAbsΔ.const_mul _),
+    integral_add (iCube.const_mul κ) (integrable_const _), integral_const_mul, integral_const_mul,
+    integral_const_mul, integral_const]
+  simp only [measureReal_def, measure_univ, ENNReal.toReal_one, one_smul]
+  refine mul_le_mul_of_nonneg_left ?_ hC0
+  have : γ * (a ^ 2 / 2) * ∫ ω, (M q ω - M p ω) ^ 2 ∂P ≤ γ ^ 2 :=
+    (mul_le_mul_of_nonneg_left hI2 (by positivity)).trans_eq (by rw [hγ]; ring)
+  linarith
 
 /-! ### The exponential martingale -/
 
 section Exp
 
-variable (hM : Martingale M 𝓕 P) (hM2 : Martingale (fun t ω ↦ M t ω ^ 2 - (t : ℝ)) 𝓕 P)
+variable (hA : IsSlowClock A) (hM : Martingale M 𝓕 P)
+  (hM2 : Martingale (fun t ω ↦ M t ω ^ 2 - A t ω) 𝓕 P)
   (hK : ∀ t ω, |M t ω| ≤ K) (hcont : ∀ ω, Continuous fun t ↦ M t ω)
-include hM hM2 hK hcont
+include hA hM hM2 hK hcont
 
-/-- **`exp(a·M − a²t/2)` keeps its expectation against the bounded past.** For `s ≤ t` and a
-bounded `𝓕_s`-measurable `V`, `E[V·Z_t] = E[V·Z_s]` with `Zᵣ = exp(a·Mᵣ − a²r/2)`. Telescoping
+/-- **`exp(a·M − a²A/2)` keeps its expectation against the bounded past.** For `s ≤ t` and a
+bounded `𝓕_s`-measurable `V`, `E[V·Z_t] = E[V·Z_s]` with `Zᵣ = exp(a·Mᵣ − a²Aᵣ/2)`. Telescoping
 along the uniform partition of `[s, t]` and the one-cell estimate bound the difference by
-`C·e^{|a|K}·(|a|³e^{2|a|K}·∑ₖ E|Δₖ|³ + (a²(t − s)/2)²/n)`, which tends to `0`. -/
+`C·e^{|a|K}·(κ·∑ₖ E|Δₖ|³ + 3g²/n + g|a|·E[maxₖ|Δₖ|])`, `g = a²(t − s)/2`, which tends to `0`. -/
 theorem integral_mul_exp_eq (a : ℝ) {s t : ℝ≥0} (hst : s ≤ t) {V : Ω → ℝ}
     (hV : StronglyMeasurable[𝓕 s] V) {C : ℝ} (hC : ∀ ω, |V ω| ≤ C) :
-    ∫ ω, V ω * Real.exp (a * M t ω - a ^ 2 * (t : ℝ) / 2) ∂P
-      = ∫ ω, V ω * Real.exp (a * M s ω - a ^ 2 * (s : ℝ) / 2) ∂P := by
-  set Z : ℝ≥0 → Ω → ℝ := fun r ω ↦ Real.exp (a * M r ω - a ^ 2 * (r : ℝ) / 2) with hZ
+    ∫ ω, V ω * Real.exp (a * M t ω - a ^ 2 * A t ω / 2) ∂P
+      = ∫ ω, V ω * Real.exp (a * M s ω - a ^ 2 * A s ω / 2) ∂P := by
+  set Z : ℝ≥0 → Ω → ℝ := fun r ω ↦ Real.exp (a * M r ω - a ^ 2 * A r ω / 2) with hZ
   set κ : ℝ := |a| ^ 3 * Real.exp (2 * |a| * K)
   set C' : ℝ := C * Real.exp (|a| * K)
+  set g : ℝ := a ^ 2 * ((t : ℝ) - s) / 2 with hg
+  have hg0 : 0 ≤ g := by
+    have : (s : ℝ) ≤ t := hst
+    rw [hg]; have := sub_nonneg.2 this; positivity
+  have hAad := stronglyAdapted_of_martingale_sq_sub hM hM2
   have hMm (t : ℝ≥0) : Measurable (M t) := ((hM.stronglyAdapted t).mono (𝓕.le t)).measurable
   have hVm : Measurable V := (hV.mono (𝓕.le s)).measurable
   have hZsm (r : ℝ≥0) : StronglyMeasurable[𝓕 r] (Z r) :=
     Real.continuous_exp.comp_stronglyMeasurable
-      (((hM.stronglyAdapted r).const_mul a).sub stronglyMeasurable_const)
+      (((hM.stronglyAdapted r).const_mul a).sub (((hAad r).const_mul (a ^ 2)).div_const 2))
   have iVZ (r : ℝ≥0) : Integrable (fun ω ↦ V ω * Z r ω) P :=
     ((memLp_of_abs_le ((hZsm r).mono (𝓕.le r)).aestronglyMeasurable (C := Real.exp (|a| * K))
-      (fun ω ↦ by rw [abs_of_pos (Real.exp_pos _)]; exact exp_le_exp_abs_mul hK a r ω)
+      (fun ω ↦ by rw [abs_of_pos (Real.exp_pos _)]; exact exp_le_exp_abs_mul hA hK a r ω)
       1).integrable le_rfl).bdd_mul hVm.aestronglyMeasurable (.of_forall hC)
+  haveI : Nonempty Ω := nonempty_of_isProbabilityMeasure P
+  have hC0 : 0 ≤ C := (abs_nonneg _).trans (hC (Classical.arbitrary Ω))
+  have hC'0 : 0 ≤ C' := by positivity
   -- the bound along the `n`-th partition
   have hbound : ∀ᶠ n : ℕ in atTop, |∫ ω, V ω * Z t ω ∂P - ∫ ω, V ω * Z s ω ∂P|
       ≤ C' * (κ * ∑ k ∈ range n, ∫ ω, |M (unifPartIcc s t n (k + 1)) ω
-          - M (unifPartIcc s t n k) ω| ^ 3 ∂P + (a ^ 2 * ((t : ℝ) - s) / 2) ^ 2 / n) := by
+          - M (unifPartIcc s t n k) ω| ^ 3 ∂P + 3 * g ^ 2 / n
+          + g * |a| * ∫ ω, maxIncr M s t n ω ∂P) := by
     filter_upwards [eventually_ne_atTop 0] with n hn
     set π := unifPartIcc s t n
+    have hn' : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.2 hn
     have hcell (k : ℕ) : |∫ ω, V ω * (Z (π (k + 1)) ω - Z (π k) ω) ∂P|
-        ≤ C' * (κ * ∫ ω, |M (π (k + 1)) ω - M (π k) ω| ^ 3 ∂P
-          + (a ^ 2 * (((t : ℝ) - s) / n) / 2) ^ 2) := by
+        ≤ C' * (κ * ∫ ω, |M (π (k + 1)) ω - M (π k) ω| ^ 3 ∂P + 3 * (g / n) ^ 2
+          + g / n * |a| * ∫ ω, |M (π (k + 1)) ω - M (π k) ω| ∂P) := by
       have hsk : s ≤ π k := le_self_add
       have hfac (ω : Ω) : V ω * (Z (π (k + 1)) ω - Z (π k) ω) = (V ω * Z (π k) ω)
           * (Real.exp (a * (M (π (k + 1)) ω - M (π k) ω)
-            - a ^ 2 * ((π (k + 1) : ℝ) - π k) / 2) - 1) := by
+            - a ^ 2 * (A (π (k + 1)) ω - A (π k) ω) / 2) - 1) := by
         simp only [hZ]
-        rw [show a * M (π (k + 1)) ω - a ^ 2 * (π (k + 1) : ℝ) / 2
-          = (a * M (π k) ω - a ^ 2 * (π k : ℝ) / 2) + (a * (M (π (k + 1)) ω - M (π k) ω)
-            - a ^ 2 * ((π (k + 1) : ℝ) - π k) / 2) by ring, Real.exp_add]
+        rw [show a * M (π (k + 1)) ω - a ^ 2 * A (π (k + 1)) ω / 2
+          = (a * M (π k) ω - a ^ 2 * A (π k) ω / 2) + (a * (M (π (k + 1)) ω - M (π k) ω)
+            - a ^ 2 * (A (π (k + 1)) ω - A (π k) ω) / 2) by ring, Real.exp_add]
         ring
       simp_rw [hfac]
-      have h := abs_integral_mul_exp_increment_sub_le hM hM2 hK a
+      have h := abs_integral_mul_exp_increment_sub_le hA hM hM2 hK a
         (unifPartIcc_mono s t n k.le_succ) ((hV.mono (𝓕.mono hsk)).mul (hZsm (π k)))
         (C := C') (fun ω ↦ by
           show |V ω * Z (π k) ω| ≤ C'
           rw [abs_mul, abs_of_pos (Real.exp_pos _)]
-          exact mul_le_mul (hC ω) (exp_le_exp_abs_mul hK a _ ω) (Real.exp_pos _).le
+          exact mul_le_mul (hC ω) (exp_le_exp_abs_mul hA hK a _ ω) (Real.exp_pos _).le
             ((abs_nonneg _).trans (hC ω)))
-      exact h.trans_eq (by rw [← unifPartIcc_succ_sub hst n k])
+      have hlen : (a ^ 2 * (((unifPartIcc s t n (k + 1) : ℝ≥0) : ℝ) - unifPartIcc s t n k) / 2)
+          = g / n := by
+        rw [unifPartIcc_succ_sub hst n k, hg]; field_simp
+      rwa [hlen] at h
     have htel (ω : Ω) : V ω * Z t ω - V ω * Z s ω
         = ∑ k ∈ range n, V ω * (Z (π (k + 1)) ω - Z (π k) ω) := by
       have e1 : π n = t := unifPartIcc_self hst hn
       have e0 : π 0 = s := unifPartIcc_zero s t n
       rw [← mul_sum, sum_range_sub (fun k ↦ Z (π k) ω), e1, e0, mul_sub]
+    have hmaxI : Integrable (fun ω ↦ maxIncr M s t n ω) P :=
+      (memLp_of_abs_le (measurable_maxIncr hMm s t n).aestronglyMeasurable (C := 2 * K)
+        (fun ω ↦ by rw [abs_of_nonneg (maxIncr_nonneg s t n ω)]; exact maxIncr_le hK s t n ω)
+        1).integrable le_rfl
+    have hc1 (k : ℕ) (hk : k ∈ range n) :
+        ∫ ω, |M (π (k + 1)) ω - M (π k) ω| ∂P ≤ ∫ ω, maxIncr M s t n ω ∂P :=
+      integral_mono ((hM.integrable _).sub (hM.integrable _)).abs hmaxI fun ω ↦
+        abs_le_maxIncr s t hk ω
     rw [← integral_sub (iVZ t) (iVZ s), integral_congr_ae (.of_forall htel),
       integral_finsetSum _ fun k _ ↦ ((iVZ (π (k + 1))).sub (iVZ (π k))).congr (.of_forall fun ω ↦ by
         simp only [Pi.sub_apply, mul_sub])]
-    refine (abs_sum_le_sum_abs _ _).trans ((sum_le_sum fun k _ ↦ hcell k).trans_eq ?_)
-    rw [← mul_sum, sum_add_distrib, ← mul_sum, sum_const, card_range, nsmul_eq_mul]
-    have hn' : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.2 hn
+    refine (abs_sum_le_sum_abs _ _).trans ((sum_le_sum fun k _ ↦ hcell k).trans
+      ((sum_le_sum fun k hk ↦ mul_le_mul_of_nonneg_left (add_le_add_right
+        (mul_le_mul_of_nonneg_left (hc1 k hk) (mul_nonneg (div_nonneg hg0 n.cast_nonneg)
+          (abs_nonneg a))) _) hC'0).trans_eq ?_))
+    rw [← mul_sum, sum_add_distrib, sum_add_distrib, ← mul_sum, sum_const, sum_const, card_range,
+      nsmul_eq_mul, nsmul_eq_mul]
     field_simp
-  have hg : Tendsto (fun n : ℕ ↦ C' * (κ * ∑ k ∈ range n, ∫ ω, |M (unifPartIcc s t n (k + 1)) ω
-      - M (unifPartIcc s t n k) ω| ^ 3 ∂P + (a ^ 2 * ((t : ℝ) - s) / 2) ^ 2 / n))
-      atTop (𝓝 0) := by
-    simpa using ((tendsto_sum_integral_abs_cube hM hK hcont hst hM2).const_mul κ |>.add
-      (tendsto_const_div_atTop_nhds_zero_nat _)).const_mul C'
-  have h0 := ge_of_tendsto hg hbound
+  have hmax : Tendsto (fun n : ℕ ↦ ∫ ω, maxIncr M s t n ω ∂P) atTop (𝓝 0) := by
+    simpa using tendsto_integral_maxIncr_pow hM hK hcont s t one_ne_zero
+  have hlim : Tendsto (fun n : ℕ ↦ C' * (κ * ∑ k ∈ range n, ∫ ω, |M (unifPartIcc s t n (k + 1)) ω
+      - M (unifPartIcc s t n k) ω| ^ 3 ∂P + 3 * g ^ 2 / n
+      + g * |a| * ∫ ω, maxIncr M s t n ω ∂P)) atTop (𝓝 0) := by
+    simpa using ((((tendsto_sum_integral_abs_cube hA hM hK hcont hst hM2).const_mul κ).add
+      (tendsto_const_div_atTop_nhds_zero_nat (3 * g ^ 2))).add
+      (hmax.const_mul (g * |a|))).const_mul C'
+  have h0 := ge_of_tendsto hlim hbound
   exact sub_eq_zero.1 (abs_nonpos_iff.1 h0)
 
 /-- **The exponential martingale, over `𝓕_s`-sets**: for `s ≤ t` and `A ∈ 𝓕_s`,
-`∫_A exp(a·M_t − a²t/2) dP = ∫_A exp(a·M_s − a²s/2) dP`, which is the form
-`IsExpQMartingale.martingale` asks for. -/
-theorem setIntegral_exp_eq (a : ℝ) {s t : ℝ≥0} (hst : s ≤ t) {A : Set Ω}
-    (hA : MeasurableSet[𝓕 s] A) :
-    ∫ ω in A, Real.exp (a * M t ω - a ^ 2 * (t : ℝ) / 2) ∂P
-      = ∫ ω in A, Real.exp (a * M s ω - a ^ 2 * (s : ℝ) / 2) ∂P := by
-  have h := integral_mul_exp_eq hM hM2 hK hcont a hst
-    (stronglyMeasurable_one.indicator hA) (C := 1) (fun ω ↦ by
-      by_cases hω : ω ∈ A <;> simp [hω])
-  rw [← integral_indicator (𝓕.le s A hA), ← integral_indicator (𝓕.le s A hA)]
-  convert h using 2 <;> · funext ω; by_cases hω : ω ∈ A <;> simp [hω]
+`∫_A exp(a·M_t − a²A_t/2) dP = ∫_A exp(a·M_s − a²A_s/2) dP`, which is the form
+`IsExpQMartingale.martingale` asks for when the clock is `t`. -/
+theorem setIntegral_exp_eq (a : ℝ) {s t : ℝ≥0} (hst : s ≤ t) {S : Set Ω}
+    (hS : MeasurableSet[𝓕 s] S) :
+    ∫ ω in S, Real.exp (a * M t ω - a ^ 2 * A t ω / 2) ∂P
+      = ∫ ω in S, Real.exp (a * M s ω - a ^ 2 * A s ω / 2) ∂P := by
+  have h := integral_mul_exp_eq hA hM hM2 hK hcont a hst
+    (stronglyMeasurable_one.indicator hS) (C := 1) (fun ω ↦ by
+      by_cases hω : ω ∈ S <;> simp [hω])
+  rw [← integral_indicator (𝓕.le s S hS), ← integral_indicator (𝓕.le s S hS)]
+  convert h using 2 <;> · funext ω; by_cases hω : ω ∈ S <;> simp [hω]
 
-/-- **`exp(a·M_t − a²t/2)` is a martingale**, as Mathlib's `Martingale`: adapted, and the
+/-- **`exp(a·M_t − a²A_t/2)` is a martingale**, as Mathlib's `Martingale`: adapted, and the
 set-integral identity `setIntegral_exp_eq` identifies the conditional expectation
 (`ae_eq_condExp_of_forall_setIntegral_eq`). -/
 theorem martingale_exp (a : ℝ) :
-    Martingale (fun t ω ↦ Real.exp (a * M t ω - a ^ 2 * (t : ℝ) / 2)) 𝓕 P := by
+    Martingale (fun t ω ↦ Real.exp (a * M t ω - a ^ 2 * A t ω / 2)) 𝓕 P := by
+  have hAad := stronglyAdapted_of_martingale_sq_sub hM hM2
   have hZsm (r : ℝ≥0) : StronglyMeasurable[𝓕 r]
-      (fun ω ↦ Real.exp (a * M r ω - a ^ 2 * (r : ℝ) / 2)) :=
+      (fun ω ↦ Real.exp (a * M r ω - a ^ 2 * A r ω / 2)) :=
     Real.continuous_exp.comp_stronglyMeasurable
-      (((hM.stronglyAdapted r).const_mul a).sub stronglyMeasurable_const)
-  have hi (r : ℝ≥0) : Integrable (fun ω ↦ Real.exp (a * M r ω - a ^ 2 * (r : ℝ) / 2)) P :=
+      (((hM.stronglyAdapted r).const_mul a).sub (((hAad r).const_mul (a ^ 2)).div_const 2))
+  have hi (r : ℝ≥0) : Integrable (fun ω ↦ Real.exp (a * M r ω - a ^ 2 * A r ω / 2)) P :=
     (memLp_of_abs_le ((hZsm r).mono (𝓕.le r)).aestronglyMeasurable (C := Real.exp (|a| * K))
-      (fun ω ↦ by rw [abs_of_pos (Real.exp_pos _)]; exact exp_le_exp_abs_mul hK a r ω)
+      (fun ω ↦ by rw [abs_of_pos (Real.exp_pos _)]; exact exp_le_exp_abs_mul hA hK a r ω)
       1).integrable le_rfl
   exact ⟨hZsm, fun s t hst ↦ (ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le s) (hi t)
     (fun _ _ _ ↦ (hi s).integrableOn)
-    (fun A hA _ ↦ (setIntegral_exp_eq hM hM2 hK hcont a hst hA).symm)
+    (fun S hS _ ↦ (setIntegral_exp_eq hA hM hM2 hK hcont a hst hS).symm)
     (hZsm s).aestronglyMeasurable).symm⟩
+
+end Exp
 
 /-- **Lévy's characterisation, analytic core.** A bounded process `M` with continuous paths,
 started at `0`, such that `M` and `M² − t` are martingales, satisfies the library's
 exponential-martingale characterisation data `IsExpQMartingale P 𝓕 M T` for every horizon
 `T`. Composed with `isQBrownianMotion_of_expMartingale`, `M` has `N(0, t − s)` increments and
-independent increments on `[0, T]`. -/
-theorem isExpQMartingale (hM0 : M 0 =ᵐ[P] 0) (T : ℝ≥0) : IsExpQMartingale P 𝓕 M T where
+independent increments on `[0, T]`. It is `setIntegral_exp_eq` for the clock `A_t = t`. -/
+theorem isExpQMartingale (hM : Martingale M 𝓕 P)
+    (hM2 : Martingale (fun t ω ↦ M t ω ^ 2 - (t : ℝ)) 𝓕 P) (hK : ∀ t ω, |M t ω| ≤ K)
+    (hcont : ∀ ω, Continuous fun t ↦ M t ω) (hM0 : M 0 =ᵐ[P] 0) (T : ℝ≥0) :
+    IsExpQMartingale P 𝓕 M T where
   adapted := hM.stronglyAdapted
   zero_start := hM0
-  martingale a _ _ hst _ _ hA := setIntegral_exp_eq hM hM2 hK hcont a hst hA
-
-end Exp
+  martingale a _ _ hst _ _ hS :=
+    setIntegral_exp_eq (A := fun t _ ↦ (t : ℝ)) isSlowClock_id hM hM2 hK hcont a hst hS
 
 end LevyExpMartingale
 end MathFin

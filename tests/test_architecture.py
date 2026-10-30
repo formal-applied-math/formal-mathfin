@@ -36,12 +36,7 @@ SNIPPET_IMPORT_RE = re.compile(r"^import\s+(MathFin(?:\.[\w']+)+)", re.M)
 AGGREGATORS = frozenset({"MathFin.AxiomAudit", "MathFin.AxiomAuditGen", "MathFin.Blueprint"})
 
 # module -> open issue whose work adds its consumer. Keep it short-lived.
-STAGING: dict[str, str] = {
-    "MathFin.Foundations.LevyExpMartingale":
-        "https://github.com/formal-applied-math/formal-mathfin/issues/179",
-    "MathFin.Foundations.ExpMartingaleBrownian":
-        "https://github.com/formal-applied-math/formal-mathfin/issues/179",
-}
+STAGING: dict[str, str] = {}
 
 
 def _module_name(path: Path) -> str:

@@ -6,7 +6,8 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.OrderedSampling
-public import MathFin.BlackScholes.AmericanPut.Stopping.BoundedLocalMartingale
+public import MathFin.BlackScholes.AmericanPut.Stopping.PlaneIto
+public import MathFin.Foundations.BoundedLocalMartingale
 
 /-! # A bounded continuous supermartingale stopped at a value-preserving rule
 

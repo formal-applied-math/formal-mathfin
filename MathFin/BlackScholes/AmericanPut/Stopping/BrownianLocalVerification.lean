@@ -5,7 +5,8 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.BoundedLocalMartingale
+public import MathFin.BlackScholes.AmericanPut.Stopping.PlaneIto
+public import MathFin.Foundations.BoundedLocalMartingale
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianVerification
 
 /-!
