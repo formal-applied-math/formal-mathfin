@@ -28,10 +28,6 @@ intervals, which is exactly why `rect_increment_pairing` is the right tool.
 ## Results
 
 * `natFiltration` — the natural Brownian filtration `𝓕ᴮ_t = σ(B_u : u ≤ t)`.
-* `adaptedAt_of_measurable_natural` — the bridge from `natural B`-measurability (which
-  `SimpleProcess.value` carries) to `ItoIsometryAdapted.AdaptedAt` (factoring through the
-  past process), via Doob–Dynkin (`Measurable.exists_eq_measurable_comp`). This is what
-  lets the `AdaptedAt`-stated isometry core consume Degenne's `SimpleProcess`.
 * `elemIntegrand` — the elementary integrand `Z·1_{(a,b]}`, and `rectTerm` its instance at a
   simple process's band; `uncurry_ae_eq_sum_rectTerm_of_ae_fst_ne_zero` decomposes a simple
   process into its bands for **any** measure charging the time origin nothing, which is what
@@ -68,28 +64,6 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 noncomputable def natFiltration (hBmeas : ∀ t, Measurable (B t)) : Filtration ℝ≥0 mΩ :=
   Filtration.natural B (fun t ↦ (hBmeas t).stronglyMeasurable)
 
-/-- **Bridge to the past-process encoding.** A function measurable with respect to
-the natural Brownian filtration at `s` is `ItoIsometryAdapted.AdaptedAt B s` —
-it factors through the past process `ω ↦ (B u ω)_{u ≤ s}`. This is the
-Doob–Dynkin factorisation (`Measurable.exists_eq_measurable_comp`, valid since
-ℝ is a standard Borel space), and it is what makes the `AdaptedAt`-stated
-isometry core (`rect_increment_pairing` et al.) applicable to Degenne's
-`SimpleProcess`, whose `value` is `𝓕 p.1`-measurable. -/
-theorem adaptedAt_of_measurable_natural (hBmeas : ∀ t, Measurable (B t)) {s : ℝ≥0}
-    {f : Ω → ℝ} (hf : Measurable[natFiltration hBmeas s] f) :
-    ItoIsometryAdapted.AdaptedAt B s f := by
-  -- `natural B s = ⨆ u ≤ s, comap (B u) ≤ comap (pastProcess B s)`, since each
-  -- `B u` (u ≤ s) factors as `eval_u ∘ pastProcess`.
-  have hle : (natFiltration hBmeas s) ≤
-      MeasurableSpace.comap (ItoIsometryAdapted.pastProcess B s) inferInstance := by
-    refine iSup₂_le fun u hu ↦ ?_
-    have hBu : B u
-        = (fun p : Set.Iic s → ℝ ↦ p ⟨u, hu⟩) ∘ ItoIsometryAdapted.pastProcess B s := rfl
-    rw [hBu, ← MeasurableSpace.comap_comp]
-    exact MeasurableSpace.comap_mono (measurable_iff_comap_le.mp (measurable_pi_apply _))
-  obtain ⟨g, hg, hgeq⟩ := (hf.mono hle le_rfl).exists_eq_measurable_comp
-  exact ⟨g, hg, hgeq⟩
-
 /-- The **elementary Itô integral** of a simple process `V` against Brownian motion
 `B`, evaluated at the terminal time: `(V ● B)_⊤ = ∑ₚ V(p)·(B_{p.2} − B_{p.1})`,
 the increment sum with nothing truncated.
@@ -124,8 +98,8 @@ variable [IsProbabilityMeasure μ]
 
 /-- **Step 1 — `L²` membership.** The terminal Itô integral of a simple process is in
 `L²(μ)`: it is the finite sum `∑ₚ V(p)·(B_{p.2}−B_{p.1})`, and each summand is in `L²`
-by `memLp_adapted_mul_increment` — the coefficient `V(p)` is `𝓕_{p.1}`-measurable (hence
-`AdaptedAt` by the bridge) and bounded (hence `L²` on the probability space). -/
+by `memLp_adapted_mul_increment` — the coefficient `V(p)` is `𝓕_{p.1}`-measurable (the
+filtration the core is stated against) and bounded (hence `L²` on the probability space). -/
 theorem memLp_itoSimple (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     MemLp (itoSimple hBmeas V) 2 μ := by
@@ -133,8 +107,8 @@ theorem memLp_itoSimple (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurabl
         = fun ω ↦ ∑ p ∈ V.value.support, V.value p ω * (B p.2 ω - B p.1 ω)
       from funext fun ω ↦ by rw [itoSimple_apply]; rfl]
   refine memLp_finsetSum V.value.support (fun p hp ↦ ?_)
-  refine ItoIsometryAdapted.memLp_adapted_mul_increment hB hBmeas (V.le_of_mem_support_value p hp)
-    (adaptedAt_of_measurable_natural hBmeas (V.measurable_value p)) ?_
+  refine ItoIsometryAdapted.memLp_adapted_mul_increment (hB.isFilteredPreBrownian hBmeas)
+    (V.le_of_mem_support_value p hp) (V.measurable_value p) ?_
   exact MemLp.of_bound
     ((V.measurable_value p).mono ((natFiltration hBmeas).le p.1) le_rfl).aestronglyMeasurable
     V.valueBound (ae_of_all _ (V.value_le_valueBound p))
@@ -162,8 +136,8 @@ theorem itoSimple_sq_integral (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Mea
             * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
   set a : (ℝ≥0 × ℝ≥0) → Ω → ℝ := fun p ω ↦ V.value p ω * (B p.2 ω - B p.1 ω)
   have ha_L2 : ∀ p ∈ V.value.support, MemLp (a p) 2 μ := fun p hp ↦
-    ItoIsometryAdapted.memLp_adapted_mul_increment hB hBmeas (V.le_of_mem_support_value p hp)
-      (adaptedAt_of_measurable_natural hBmeas (V.measurable_value p))
+    ItoIsometryAdapted.memLp_adapted_mul_increment (hB.isFilteredPreBrownian hBmeas)
+      (V.le_of_mem_support_value p hp) (V.measurable_value p)
       (MemLp.of_bound
         ((V.measurable_value p).mono ((natFiltration hBmeas).le p.1) le_rfl).aestronglyMeasurable
         V.valueBound (ae_of_all _ (V.value_le_valueBound p)))
@@ -185,9 +159,8 @@ theorem itoSimple_sq_integral (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Mea
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
         refine Finset.sum_congr rfl fun p hp ↦ Finset.sum_congr rfl fun q hq ↦ ?_
-        exact ItoIsometryAdapted.rect_increment_pairing hB hBmeas
-          (adaptedAt_of_measurable_natural hBmeas (V.measurable_value p))
-          (adaptedAt_of_measurable_natural hBmeas (V.measurable_value q))
+        exact ItoIsometryAdapted.rect_increment_pairing (hB.isFilteredPreBrownian hBmeas)
+          (V.measurable_value p) (V.measurable_value q)
           (fun ω ↦ by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound p ω)
           (fun ω ↦ by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound q ω)
           (V.le_of_mem_support_value p hp) (V.le_of_mem_support_value q hq)

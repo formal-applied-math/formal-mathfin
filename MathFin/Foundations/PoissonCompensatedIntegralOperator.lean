@@ -43,7 +43,7 @@ measurable, so on the probability space it is `L²`. -/
 lemma IsLevySimple.memLp_coe {N : PoissonRandomMeasure P ν} {V : (ℝ × ℝ × Set E) →₀ (Ω → ℝ)}
     (hV : IsLevySimple N V) (b : ℝ × ℝ × Set E) : MemLp (V b) 2 P := by
   obtain ⟨C, _, hC⟩ := hV.bound_coe
-  have hm : Measurable (V b) := (show N.AdaptedAt b.1 (V b) from hV.measurable_coe b).measurable
+  have hm : Measurable (V b) := (hV.measurable_coe b).mono (N.pastFiltration.le b.1) le_rfl
   exact (memLp_top_of_bound hm.aestronglyMeasurable C
     (ae_of_all _ fun ω => by rw [Real.norm_eq_abs]; exact hC b ω)).mono_exponent le_top
 
@@ -154,7 +154,7 @@ lemma memLp_embFun (N : PoissonRandomMeasure P ν) (V : levySimpleModule N) :
   refine memLp_finsetSum V.1.support ?_
   intro b hb
   exact memLp_indicatorTerm (V.2.markMeasurable b hb) (V.2.markFinite b hb)
-    (show N.AdaptedAt b.1 (V.1 b) from V.2.measurable_coe b).measurable (V.2.memLp_coe b)
+    ((V.2.measurable_coe b).mono (N.pastFiltration.le b.1) le_rfl) (V.2.memLp_coe b)
 
 /-- The integrand embedding is additive in the integrand. -/
 lemma embFun_add (N : PoissonRandomMeasure P ν) (V W : levySimpleModule N) :
@@ -218,7 +218,7 @@ lemma memLp_embTerm (N : PoissonRandomMeasure P ν) (V : levySimpleModule N)
     MemLp (fun p : Ω × (ℝ × E) => V.1 b p.1 * (indexBox b).indicator (fun _ => (1 : ℝ)) p.2) 2
       (P.prod (referenceIntensity ν)) :=
   memLp_indicatorTerm (V.2.markMeasurable b hb) (V.2.markFinite b hb)
-    (show N.AdaptedAt b.1 (V.1 b) from V.2.measurable_coe b).measurable (V.2.memLp_coe b)
+    ((V.2.measurable_coe b).mono (N.pastFiltration.le b.1) le_rfl) (V.2.memLp_coe b)
 
 /-- A pair of elementary-integral box terms has an integrable product (`L² · L²`), in scalar-lambda
 form (so the double-sum `∫ = ∑∫` rewrites match). -/

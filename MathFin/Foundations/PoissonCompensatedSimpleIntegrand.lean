@@ -54,7 +54,7 @@ the coefficients are uniformly bounded. -/
 structure IsLevySimple (N : PoissonRandomMeasure P ν)
     (V : (ℝ × ℝ × Set E) →₀ (Ω → ℝ)) : Prop where
   /-- Each coefficient is adapted at its box's start. -/
-  adapted : ∀ b ∈ V.support, N.AdaptedAt b.1 (V b)
+  adapted : ∀ b ∈ V.support, Measurable[N.pastFiltration b.1] (V b)
   /-- Each box's mark is measurable. -/
   markMeasurable : ∀ b ∈ V.support, MeasurableSet b.2.2
   /-- Each box's mark has finite intensity. -/
@@ -67,7 +67,7 @@ namespace IsLevySimple
 /-- Off its support a coefficient is `0`, so a marked simple integrand's coefficient is adapted at
 `b.1` for **every** index `b`. -/
 lemma measurable_coe {N : PoissonRandomMeasure P ν} {V : (ℝ × ℝ × Set E) →₀ (Ω → ℝ)}
-    (hV : IsLevySimple N V) (b : ℝ × ℝ × Set E) : Measurable[N.pastSigma b.1] (V b) := by
+    (hV : IsLevySimple N V) (b : ℝ × ℝ × Set E) : Measurable[N.pastFiltration b.1] (V b) := by
   by_cases hb : b ∈ V.support
   · exact hV.adapted b hb
   · rw [Finsupp.notMem_support_iff.mp hb]; exact measurable_const

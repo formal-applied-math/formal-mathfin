@@ -157,9 +157,9 @@ theorem memLp_truncated_term (hBmeas : ∀ t, Measurable (B t))
   by_cases ht : p.1 ≤ t
   · -- active interval: adapted coefficient × increment over `[p.1, p.2 ∧ t]`
     rw [min_eq_left ht]
-    exact ItoIsometryAdapted.memLp_adapted_mul_increment hB hBmeas
+    exact ItoIsometryAdapted.memLp_adapted_mul_increment (hB.isFilteredPreBrownian hBmeas)
       (le_min (V.le_of_mem_support_value p hp) ht)
-      (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas (V.measurable_value p))
+      (V.measurable_value p)
       (memLp_value hB hBmeas V p)
   · -- interval entirely past `t`: both endpoints truncate to `t`, term is `0`
     push Not at ht
