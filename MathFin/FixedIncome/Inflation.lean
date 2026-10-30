@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.Foundations.Numeraire
 public import MathFin.Foundations.BrownianMartingale
+public import MathFin.FixedIncome.ForwardMeasure
 public import MathFin.FixedIncome.TimingAdjustment
 
 /-!
@@ -34,7 +35,7 @@ as an explicit multiplicative constant. The deterministic `D = −½B²V` is tie
 Hull–White model (`FixedIncome/HullWhiteCalibration`) by `integral_exp_hwD_forwardMeasure`. With
 `V = Var(r_S)` the variance of the Hull–White short rate, the reconstitution factor
 `exp(D − B(r_S − f(0,S)))` has mean `1` under the calibrated `S`-forward measure
-(`HullWhite.forwardMeasure`, `FixedIncome/TimingAdjustment`).
+(`MathFin.forwardMeasure` at the Hull–White bank account, `FixedIncome/TimingAdjustment`).
 
 ## Scope
 
@@ -65,43 +66,34 @@ nominal and real T-bond prices, `I₀` today's index and `I_T` the terminal inde
 index-linked bond, paying `I_T` at `T`, is priced on the real curve, `𝔼^{Qⁿ}[I_T/B_T]
 = I₀·Pʳ(0,T)`.
 
-In `forwardIndex_eq` and `breakeven_eq`, `Pⁿ₀T` enters only as the normalising constant
-`N₀` of the tilted measure `numeraireMeasure Qⁿ B_T 1 1 Pⁿ₀T`; the statements do **not**
-tie it to `𝔼^{Qⁿ}[1/B_T]`. When they agree and `1/B_T` is integrable, that measure is a
-probability measure — the nominal T-forward measure
-(`MathFin.numeraireMeasure_isProbabilityMeasure`); the identities themselves hold for any
-`Pⁿ₀T > 0`. -/
+In `forwardIndex_eq` and `breakeven_eq`, the numéraire measure is the nominal T-forward
+measure `MathFin.forwardMeasure Qⁿ B_T` (the T-bond numéraire against the money market), whose
+normalising constant is the nominal bond price, tied to the bank account by `hPn0T`:
+`Pⁿ₀T = 𝔼^{Qⁿ}[1/B_T]`. When `1/B_T` is integrable and `Qⁿ` is a probability measure it is a
+probability measure (`MathFin.forwardMeasure_isProbabilityMeasure`). -/
 namespace MathFin.Inflation.ZCSwap
 
 variable {Ω : Type*} [MeasurableSpace Ω] {Qn : Measure Ω}
 
 /-- **The forward index (eq. 17.6).** Under the Jarrow–Yildirim identification
 (`hident`: the index-linked bond priced on the real curve), the index under the
-numéraire measure of the T-bond — terminal value `1`, initial price `Pⁿ₀T` — is the
-real-curve/nominal-curve ratio:
+nominal T-forward measure (the numéraire measure of the T-bond, terminal value `1`, initial
+price `Pⁿ₀T = 𝔼^{Qⁿ}[1/B_T]`) is the real-curve/nominal-curve ratio:
 
   `𝔼^{Q^{n,T}}[I_T] = I₀ · Pʳ(0,T) / Pⁿ(0,T)`.
 
-That measure is the nominal T-forward measure when `Pⁿ₀T = 𝔼^{Qⁿ}[1/B_T]`, which the
-statement does not assume (see the section note). The proof is
-`MathFin.changeOfNumeraire` at `X := I_T`, `N_T ≡ 1`, `N₀ = Pⁿ₀T`, `B₀ = 1`, plus field
-algebra; no integrability hypothesis is needed. (A remark, not stated as a lemma here: under
-`numeraireMeasure Qn BT (fun _ ↦ Pn0T) 1 Pn0T`, whose density is `1/B_T`, the same integral
-is the left side of `hident` — the spot price `I₀·Pʳ(0,T)`, with no division by
-`Pⁿ(0,T)`.) -/
+The proof is `MathFin.forwardMeasure_price` at `X := I_T`, plus field algebra; no integrability
+hypothesis is needed. -/
 theorem forwardIndex_eq (BT : Ω → ℝ) (Pn0T Pr0T I0 : ℝ) (IT : Ω → ℝ)
     (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)
-    (hident : ∫ ω, IT ω / BT ω ∂Qn = I0 * Pr0T) :
-    ∫ ω, IT ω ∂(MathFin.numeraireMeasure Qn BT (fun _ ↦ 1) 1 Pn0T) = I0 * Pr0T / Pn0T := by
-  have h := MathFin.changeOfNumeraire (Q := Qn) (BT := BT) (NT := fun _ ↦ 1) (B0 := 1)
-    (N0 := Pn0T) IT measurable_const hBTmeas (fun _ ↦ zero_lt_one) hBTpos zero_le_one hPn0T
-  rw [eq_div_iff hPn0T.ne', mul_comm]
-  simpa [hident] using h
+    (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn) (hident : ∫ ω, IT ω / BT ω ∂Qn = I0 * Pr0T) :
+    ∫ ω, IT ω ∂(MathFin.forwardMeasure Qn BT) = I0 * Pr0T / Pn0T := by
+  subst hP
+  rw [eq_div_iff hPn0T.ne', mul_comm, MathFin.forwardMeasure_price IT hBTmeas hBTpos hPn0T, hident]
 
 /-- **The breakeven inflation rate (eq. 17.7).** A zero-coupon inflation swap pays
 `I_T/I₀ − (1+b)^T` at `T`; `b` is quoted as the breakeven. Fairness (`hfair`: under the
-T-bond numéraire measure — the nominal T-forward measure under the section's
-normalisation — the fixed leg `I₀(1+b)^T` matches the floating leg `I_T`)
+the nominal T-forward measure `forwardMeasure Qⁿ B_T` — the fixed leg `I₀(1+b)^T` matches the floating leg `I_T`)
 combined with eq. (17.6) — so under the identification `hident` — gives, for `I₀ > 0`, the
 curve-only breakeven identity
 
@@ -112,11 +104,11 @@ are simply terminal random variables). The breakeven is a *ratio of bond prices*
 physical-measure expectation of inflation — the chapter's central warning. -/
 theorem breakeven_eq (BT : Ω → ℝ) (Pn0T Pr0T I0 b : ℝ) (T : ℕ) (IT : Ω → ℝ)
     (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T) (hI0 : 0 < I0)
-    (hident : ∫ ω, IT ω / BT ω ∂Qn = I0 * Pr0T)
-    (hfair : ∫ ω, IT ω ∂(MathFin.numeraireMeasure Qn BT (fun _ ↦ 1) 1 Pn0T)
+    (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn) (hident : ∫ ω, IT ω / BT ω ∂Qn = I0 * Pr0T)
+    (hfair : ∫ ω, IT ω ∂(MathFin.forwardMeasure Qn BT)
       = I0 * (1 + b) ^ T) :
     (1 + b) ^ T = Pr0T / Pn0T := by
-  have hf := forwardIndex_eq BT Pn0T Pr0T I0 IT hBTpos hBTmeas hPn0T hident
+  have hf := forwardIndex_eq BT Pn0T Pr0T I0 IT hBTpos hBTmeas hPn0T hP hident
   rw [hfair, mul_div_assoc] at hf
   exact mul_left_cancel₀ hI0.ne' hf
 
@@ -296,7 +288,7 @@ theorem yoyConvexity_eq (mn mr Vn Vr ρ Bn Br Pn0T Pn0S Pr0T Pr0S Cov : ℝ)
 Hull–White model calibrated to a `C¹` forward curve `f0` (`HullWhite.theta`, short rate started
 at `f(0,0)`, `κ > 0`), let `V = σ²(1 − e^{−2κS})/(2κ)` be the variance of the short rate `r_S`
 (`HullWhite.integratedRate_hasLaw_gaussian`). Then for every factor `b`, under the `S`-forward
-measure `Q^S` (`HullWhite.forwardMeasure`),
+measure `Q^S` (`MathFin.forwardMeasure` at the Hull–White bank account),
 
   `𝔼^{Q^S}[exp(hwD b V − b·(r_S − f(0, S)))] = 1`.
 
@@ -310,7 +302,8 @@ theorem integral_exp_hwD_forwardMeasure [IsProbabilityMeasure μ] {B : NNReal �
     (hf0 : ContDiff ℝ 1 f0) (κ σ : ℝ) (hκ : 0 < κ) (S : NNReal) (b : ℝ) :
     ∫ ω, Real.exp (hwD b (vasicekSDEVariance σ κ S)
         - b * (HullWhite.integratedRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S ω - f0 S))
-      ∂HullWhite.forwardMeasure hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S = 1 := by
+      ∂forwardMeasure μ (fun ω ↦ Real.exp
+        (HullWhite.bondRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S ω)) = 1 := by
   have hlaw := gaussianReal_sub_const
     (HullWhite.shortRate_hasLaw_forwardMeasure hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S) (f0 S)
   have hm := mgf_gaussianReal hlaw.map_eq (-b)

@@ -3023,13 +3023,13 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.strictlyElicits_expectileLoss
 
+/-- info: 'MathFin.strictlyElicits_fisslerZiegelExpScore' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.strictlyElicits_fisslerZiegelExpScore
+
 /-- info: 'MathFin.strictlyElicits_pinballLoss' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.strictlyElicits_pinballLoss
-
-/-- info: 'MathFin.strictlyJointlyElicits_fisslerZiegelExpScore' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.strictlyJointlyElicits_fisslerZiegelExpScore
 
 /-- info: 'MathFin.studentTMeasure_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

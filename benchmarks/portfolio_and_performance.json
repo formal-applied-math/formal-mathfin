@@ -431,7 +431,7 @@
         "reference": "Omega ratio (Keating-Shadwick 2002); maximum drawdown and Calmar ratio (Young 1991)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Finite-state Omega ratio with normalized nonnegative weights, finite-path maximum drawdown over chronological peak-to-trough candidates, and positive-scaling Calmar invariance. Lives in MathFin/Performance/DownsideMetrics.lean. Axioms-clean."
+        "formalization_scope": "Finite-state Omega ratio with normalized nonnegative weights, finite-path maximum drawdown (the largest decline below the running peak, Mathlib's partialSups; the largest chronological peak-to-trough loss), and positive-scaling Calmar invariance. Lives in MathFin/Performance/DownsideMetrics.lean. Axioms-clean."
       }
     },
     {
