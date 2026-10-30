@@ -832,9 +832,9 @@
     "mf-binomial-multi-period-emm": {
       "benchmark_file": "binomial.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.7,
-      "input_hash": "600d65fb2bdc9aa9aed0592b46d1263a834b1397347d6a0f8bc4b618092f584c",
-      "verified_at_commit": "705d349"
+      "elapsed_s": 9.5,
+      "input_hash": "50ef748856a03446ab32a556c11857eb5583ecd765ab7591d0a8f4dc67828116",
+      "verified_at_commit": "d18a58b"
     },
     "mf-binomial-multi-period-no-arbitrage-iff": {
       "benchmark_file": "binomial.json",
