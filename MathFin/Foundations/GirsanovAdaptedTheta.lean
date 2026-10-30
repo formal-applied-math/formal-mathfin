@@ -28,9 +28,9 @@ conclusion across the identification:
   (`qBrownian_congr_modification`).
 
 For a bounded adapted continuous `θ`, under `Q = μ.withDensity Z_T` with the Doléans density
-`Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)`, the drift-corrected process `B^θ_u = B_u + ∫₀ᵘθ ds` starts at `0`,
-has `N(0,t−s)` increments, and has independent increments (`HasIndepIncrements`) on `[0,T]`, which
-together fix every finite-dimensional law of `B^θ` under `Q` on `[0,T]` to that of a standard
+`Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)`, the drift-corrected process `B^θ_u = B_u + ∫₀ᵘθ ds`
+starts at `0`, has `N(0,t−s)` increments, and has independent increments (`HasIndepIncrements`)
+on `[0,T]`, which together fix every finite-dimensional law of `B^θ` under `Q` on `[0,T]` to that of a standard
 Brownian motion; path continuity is not stated.
 -/
 
@@ -40,7 +40,7 @@ namespace MathFin
 
 open MeasureTheory ProbabilityTheory Filter NNReal
 open scoped NNReal ENNReal
-open ItoIntegralL2 ItoIntegralCLM
+open ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessContinuousModification
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ}
@@ -65,8 +65,8 @@ noncomputable def itoIntCont (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 �
 
 /-- **The Brownian-increments triple is invariant under a modification.** If `X` and `Y` agree
 `Q`-a.e. at every time `u ≤ T`, then zero start, `N(0,t−s)` increments and `HasIndepIncrements` on
-`[0,T]` for `X` under `Q` give the same for `Y`: each of the three depends on the process only through
-finitely many of its coordinates, up to `Q`-null sets. -/
+`[0,T]` for `X` under `Q` give the same for `Y`: each of the three depends on the process only
+through finitely many of its coordinates, up to `Q`-null sets. -/
 theorem qBrownian_congr_modification {Q : Measure Ω} {T : ℝ≥0} {X Y : ℝ≥0 → Ω → ℝ}
     (h : ∀ u ≤ T, X u =ᵐ[Q] Y u)
     (hX : (∀ᵐ ω ∂Q, X 0 ω = 0)
@@ -77,7 +77,7 @@ theorem qBrownian_congr_modification {Q : Measure Ω} {T : ℝ≥0} {X Y : ℝ�
       ∧ HasIndepIncrements (fun t : Set.Iic T ↦ Y t) Q := by
   obtain ⟨h0, hlaw, hind⟩ := hX
   refine ⟨?_, fun s t hst htT ↦ ?_, fun n t ht ↦ ?_⟩
-  · filter_upwards [h0, h 0 (zero_le _)] with ω h1 h2
+  · filter_upwards [h0, h 0 zero_le] with ω h1 h2
     rw [← h2]
     exact h1
   · rw [← hlaw hst htT]
@@ -92,25 +92,26 @@ variable (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
   (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
   (hcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0)
 
-/-- **The continuous Itô integral is the predictable one.** `θ` continuous and adapted is predictable,
-and its two realizations in `Lp ℝ 2 (trimMeasure_T T)` are the same class. -/
+/-- **The continuous Itô integral is the predictable one.** A continuous adapted `θ` is
+predictable, and its two realizations in `Lp ℝ 2 (trimMeasure_T T)` are the same class. -/
 theorem itoIntPred_eq_itoIntCont :
     itoIntPred hB T hBmeas (isStronglyPredictable_of_bdd_adapted_cont hBmeas hadap hcont) hbdd
       = itoIntCont hB hBmeas hadap hcont hbdd T := rfl
 
 /-- **The predictable Doléans density is the continuous one, a.e.** The two `exp`-forms differ only
-in the quadratic-variation integrand, `θ̂` against `θ`, and these agree on almost every `ω`-slice. -/
+in the quadratic-variation integrand, `θ̂` against `θ`, and these agree on almost every
+`ω`-slice. -/
 theorem ZTpred_ae_eq_contDoleansExp :
     ZTpred hB T hBmeas (isStronglyPredictable_of_bdd_adapted_cont hBmeas hadap hcont) hbdd
       =ᵐ[μ] contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T := by
   filter_upwards [processToLpPredictable_ae_slice (μ := μ) T hBmeas
     (isStronglyPredictable_of_bdd_adapted_cont hBmeas hadap hcont) hbdd] with ω hω
-  have hint : ∫ s in Set.Ioc (0 : ℝ≥0), (⇑(processToLpPredictable (μ := μ) T hBmeas
+  have hint : ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑(processToLpPredictable (μ := μ) T hBmeas
         (isStronglyPredictable_of_bdd_adapted_cont hBmeas hadap hcont) hbdd) (s, ω)) ^ 2
           ∂timeMeasure
       = ∫ s in Set.Ioc (0 : ℝ≥0) T, (θ s ω) ^ 2 ∂timeMeasure :=
     integral_congr_ae (hω.mono fun s hs ↦ by simp only [hs])
-  show contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) (fun s ω ↦
+  change contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) (fun s ω ↦
     ⇑(processToLpPredictable (μ := μ) T hBmeas
       (isStronglyPredictable_of_bdd_adapted_cont hBmeas hadap hcont) hbdd) (s, ω)) T ω
     = contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω
@@ -128,7 +129,7 @@ theorem BthetaPred_ae_eq_BthetaCont {u : ℝ≥0} (hu : u ≤ T) :
         (isStronglyPredictable_of_bdd_adapted_cont hBmeas hadap hcont) hbdd) hu,
     processToLpPredictable_ae_slice (μ := μ) T hBmeas
       (isStronglyPredictable_of_bdd_adapted_cont hBmeas hadap hcont) hbdd] with ω h1 h2
-  show B u ω + driftContinuousMod T hBmeas (processToLpPredictable (μ := μ) T hBmeas
+  change B u ω + driftContinuousMod T hBmeas (processToLpPredictable (μ := μ) T hBmeas
       (isStronglyPredictable_of_bdd_adapted_cont hBmeas hadap hcont) hbdd) u ω
     = B u ω + contDrift θ u ω
   rw [h1, contDrift]
@@ -163,7 +164,8 @@ theorem Btheta_isQBrownianMotion_adapted :
   have hZ : (fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω))
       =ᵐ[μ] fun ω ↦ ENNReal.ofReal
         (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω) :=
-    (ZTpred_ae_eq_contDoleansExp hB hBmeas hadap hcont hbdd T).mono fun ω h ↦ by rw [h]
+    (ZTpred_ae_eq_contDoleansExp hB hBmeas hadap hcont hbdd T).mono fun _ h ↦
+      congrArg ENNReal.ofReal h
   have h := Btheta_isQBrownianMotion_predictable_of_bdd hB hBmeas hpred hC hbdd T
   rw [withDensity_congr_ae hZ] at h
   exact qBrownian_congr_modification

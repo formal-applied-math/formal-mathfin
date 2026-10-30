@@ -16,8 +16,9 @@ public import MathFin.Foundations.DriftProcessModification
 
 Generalizes the continuous-adapted Girsanov theorem
 (`Btheta_isQBrownianMotion_adapted`, which `GirsanovAdaptedTheta` now derives from this file) to a
-bounded **predictable** market price of risk `θ` — the honest domain of the Itô `L²` integral, with no continuity assumed. The route
-(Route B) is the density-approximation front half over the spine-free architecture:
+bounded **predictable** market price of risk `θ` — the honest domain of the Itô `L²` integral, with
+no continuity assumed. The route (Route B) is the density-approximation front half over the
+spine-free architecture:
 
 * approximate `θ̂ ∈ Lp 2 (trimMeasure_T T)` by clamped, marshalled simple processes `Ṽⁿ`
   (`SimpleProcessPartition`), each in single-partition `(sⁿ, cⁿ)` form so the simple exponential
@@ -606,7 +607,8 @@ lemma setIntegral_withDensity_ofReal {Z : Ω → ℝ} (hZ : AEStronglyMeasurable
   rw [ENNReal.toReal_ofReal (hZpos ω), smul_eq_mul, mul_comm]
 
 /-- The predictable Itô integral `∫₀ᵀ θ dB` as a genuine function — a chosen `Lp`-representative of
-the CLM value `itoIntegralCLM_T θ̂`. Predictable counterpart of `itoIntCont` (they agree: `itoIntPred_eq_itoIntCont`). -/
+the CLM value `itoIntegralCLM_T θ̂`. Predictable counterpart of `itoIntCont` (they agree:
+`itoIntPred_eq_itoIntCont`). -/
 noncomputable def itoIntPred (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) :
     Ω → ℝ :=
