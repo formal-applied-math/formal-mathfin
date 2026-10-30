@@ -133,10 +133,10 @@ A brief to an agent names the existing target it must land in.
 
 When a duplicate goes, every caller moves to the surviving name, benchmark snippets
 included. A snippet restates its own statement and only cites the library lemma in its
-proof, so the entry's claim does not change; it re-verifies. A permanent alias would keep
-the duplicate it was meant to remove. Names a reader outside the library may depend on
-(the README, the beginners' manual, `MathFinTest/`, `MathFinExamples/`) get a Mathlib-style
-`@[deprecated (since := "YYYY-MM-DD")] alias old := new`, removed at the next release.
+proof, so the entry's claim does not change; it re-verifies. The README, the beginners'
+manual, `MathFinTest/` and `MathFinExamples/` move too. No alias of any kind is left
+behind, deprecated or not, because an alias keeps the duplicate it was meant to remove.
+The next release's notes list the renames.
 
 The cost of skipping this was measured. On 2026-10-29 a Lévy design reached for
 `charFun` while `IsExpQMartingale` already carried the argument for all four Girsanov
