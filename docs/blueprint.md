@@ -448,7 +448,7 @@ as a theorem.
 These are stated honestly as **not yet formalized**, gated on Mathlib
 infrastructure. See [`roadmap.md`](roadmap.md).
 
-- **Pathwise Itô's lemma, Lévy's characterization, SDE existence/uniqueness,
+- **Pathwise Itô's lemma, SDE existence/uniqueness,
   dynamic Girsanov** — downstream of the (built) `[0,T]` continuous Itô integral;
   this is the next gate. The infinite-horizon `L2Predictable` variant of the
   integral itself is now **delivered** (`itoIntegralL2` in

@@ -563,27 +563,6 @@
       "input_hash": "6ed28c53573f7be900fb298b3b598918c0c0bfd3c05303d4b8e419bea0a73b18",
       "verified_at_commit": "331e4a2"
     },
-    "mf-american-put-ge-bsm-european-put": {
-      "benchmark_file": "black_scholes.json",
-      "date": "2026-10-30",
-      "elapsed_s": 4.3,
-      "input_hash": "111eb5b70be0fc7837bbe794137e4e5221c6ba9f863650c3205aea82f094d366",
-      "verified_at_commit": "47c6c47"
-    },
-    "mf-american-put-log-boundary-convex": {
-      "benchmark_file": "american_put_boundary.json",
-      "date": "2026-10-30",
-      "elapsed_s": 4.5,
-      "input_hash": "90d551be2bb208548d0faa9f83e01e7dae30c9239191f75b2ba1392ac2de53f5",
-      "verified_at_commit": "47c6c47"
-    },
-    "mf-american-put-stock-boundary-strict-convex": {
-      "benchmark_file": "american_put_boundary.json",
-      "date": "2026-10-30",
-      "elapsed_s": 5.3,
-      "input_hash": "60f4b0368c273dc36f2d6da7074a709199a5013164e7c85762fbd2cb7a1811df",
-      "verified_at_commit": "47c6c47"
-    },
     "mf-american-supermartingale": {
       "benchmark_file": "binomial.json",
       "date": "2026-10-29",
@@ -821,13 +800,6 @@
       "elapsed_s": 4.4,
       "input_hash": "90aa7129c6b39547a415244e9c5810fc0a1624c3a8911230ffb433ed75d97796",
       "verified_at_commit": "331e4a2"
-    },
-    "mf-binomial-price-path-measure": {
-      "benchmark_file": "binomial.json",
-      "date": "2026-10-30",
-      "elapsed_s": 5.7,
-      "input_hash": "cf46f445fc20b7bb30f573d695bd52aab38b3f9bbf4f3c48a4dd11f89d98b2b3",
-      "verified_at_commit": "3ff1357"
     },
     "mf-binomial-replication": {
       "benchmark_file": "binomial.json",
@@ -1634,48 +1606,6 @@
       "input_hash": "30dd7cf5af27123841fbcc402a9724b9b3484f38d8892d016c50af3b58b3033b",
       "verified_at_commit": "a8fad1f"
     },
-    "mf-contract-binomial-capped-call": {
-      "benchmark_file": "contracts.json",
-      "date": "2026-10-30",
-      "elapsed_s": 5.5,
-      "input_hash": "8bb9a418f9e510a966833fb32b7c6c22516250205f9c9499ee0ddebb602b2423",
-      "verified_at_commit": "3ff1357"
-    },
-    "mf-contract-binomial-european-payoff": {
-      "benchmark_file": "contracts.json",
-      "date": "2026-10-30",
-      "elapsed_s": 5.4,
-      "input_hash": "4753f152214dc09fd47803c3f5e02fda1552cbf7d4c5b2c7a52e28a0fafc8325",
-      "verified_at_commit": "3ff1357"
-    },
-    "mf-contract-binomial-hedge": {
-      "benchmark_file": "contracts.json",
-      "date": "2026-10-30",
-      "elapsed_s": 4.6,
-      "input_hash": "322cefa76fd3ac7dcf84368983a6ed6c5255643fd28d8ed13c7043eaf87f8616",
-      "verified_at_commit": "3ff1357"
-    },
-    "mf-contract-binomial-hedged-zero-risk": {
-      "benchmark_file": "contracts.json",
-      "date": "2026-10-30",
-      "elapsed_s": 5.8,
-      "input_hash": "d1bb194d406c27ff1a12973fe5adbc42064c161c095a0cc83bfc27b72044b624",
-      "verified_at_commit": "3ff1357"
-    },
-    "mf-contract-binomial-to-black-scholes": {
-      "benchmark_file": "contracts.json",
-      "date": "2026-10-30",
-      "elapsed_s": 5.0,
-      "input_hash": "d7e50530a230cf73977f7d2235d5f347e1cfa9e1f05f7f78fcdc4390de8374d2",
-      "verified_at_commit": "3ff1357"
-    },
-    "mf-contract-book-es-subadditive": {
-      "benchmark_file": "contracts.json",
-      "date": "2026-10-30",
-      "elapsed_s": 5.5,
-      "input_hash": "bdab803043e9228c482494d571091bf69007b9c30e8fc3f62512265b40615882",
-      "verified_at_commit": "3ff1357"
-    },
     "mf-contract-bounded-model-integrable": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-29",
@@ -1773,13 +1703,6 @@
       "elapsed_s": 6.2,
       "input_hash": "eab37fc3105617cbf7c23c1da9310d5c5d16aa86c38dc971099049ec0ab21dba",
       "verified_at_commit": "e601fa9"
-    },
-    "mf-contract-long-call-var-le-premium": {
-      "benchmark_file": "contracts.json",
-      "date": "2026-10-30",
-      "elapsed_s": 6.3,
-      "input_hash": "b33c9f1409bc85db6411fc9b412f1144e3d004d6a8e629e8aa691dce25a91901",
-      "verified_at_commit": "3ff1357"
     },
     "mf-contract-parity-risk-neutral": {
       "benchmark_file": "contracts.json",
@@ -4964,13 +4887,6 @@
       "date": "2026-10-29",
       "elapsed_s": 4.4,
       "input_hash": "1151869fb254b640c7609ff75664e3bf0bbcaa96f2f11a00a8a1235686e82d3e",
-      "verified_at_commit": "331e4a2"
-    },
-    "sc-thm-9.1.1": {
-      "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-29",
-      "elapsed_s": 4.8,
-      "input_hash": "19e660feab3c6f8718df2ffc5ec008dc9e1e01a9bb1a05f5118221cb6bea5cb9",
       "verified_at_commit": "331e4a2"
     },
     "sc-thm-9.1.8": {
