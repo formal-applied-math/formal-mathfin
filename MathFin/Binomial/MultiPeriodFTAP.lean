@@ -30,6 +30,15 @@ converse is explicit: if `e^r ≤ d` or `u ≤ e^r`, holding `±1` unit over the
 arbitrage (`binomialNoArb_of_noArbitrage`). Together:
 `NoArbitrage ↔ BinomialNoArb u d r` for the multi-period tree (`noArbitrage_horizonSpot_iff`).
 
+The martingale measure is unique (`IsEMM.eq_horizonMeasure`, `existsUnique_isEMM_horizonSpot`).
+Node by node, on the atom `{y | y agrees with x on the first t flips}` of `ℱₜ`
+(`horizonAtom`), the martingale property in set-integral form gives
+`∫_A (S_{t+1} − S_t) dQ = 0`; on `A` the increment is `S_t(x) (e^{-r} u − 1)` or
+`S_t(x) (e^{-r} d − 1)` according to flip `t`, which forces the conditional up-probability to
+`crrUpProb` (`IsEMM.real_atom_flip`). Induction on the prefix length gives every atom its product
+probability (`IsEMM.real_horizonAtom`), and at `t = T` the atoms are the paths, so `Q` is
+`horizonMeasure T (crrUpProb u d r)` (`horizonMeasure_singleton`).
+
 ## Main results
 
 * `horizonFiltration`, `horizonMeasure`, `horizonSpot` — the market.
@@ -38,6 +47,9 @@ arbitrage (`binomialNoArb_of_noArbitrage`). Together:
   martingale measure for every real-world `horizonMeasure p`, `0 < p < 1`.
 * `noArbitrage_horizonSpot_iff` — `NoArbitrage ↔ BinomialNoArb u d r` (for `S₀ > 0`, `0 < d < u`,
   at least one period).
+* `IsEMM.eq_horizonMeasure` — under `BinomialNoArb` and `S₀ > 0`, every `IsEMM` of the market is
+  `horizonMeasure T (crrUpProb u d r)`; `existsUnique_isEMM_horizonSpot` packages existence and
+  uniqueness.
 -/
 
 @[expose] public section
@@ -142,15 +154,18 @@ lemma horizonSpot_flips {n : ℕ} (hn : n ≤ T) (ω : ℕ → Bool) :
   exact pathAdaptedAt_discountedSpot S₀ u d r n _ _ fun i hi ↦ by
     simp [padFlips, flips, lt_of_lt_of_le hi hn]
 
+lemma horizonSpot_revealed (n : ℕ) (x : Fin T → Bool) :
+    horizonSpot T S₀ u d r n (revealed T n x) = horizonSpot T S₀ u d r n x :=
+  pathAdaptedAt_discountedSpot S₀ u d r (min n T) _ _ fun i hi ↦ by
+    have hiT : i < T := lt_of_lt_of_le hi (min_le_right n T)
+    have hin : i < n := lt_of_lt_of_le hi (min_le_left n T)
+    simp [padFlips, revealed, hiT, hin]
+
 /-- The market price is adapted to `horizonFiltration`. -/
 lemma stronglyAdapted_horizonSpot : StronglyAdapted (horizonFiltration T) (horizonSpot T S₀ u d r) :=
   fun n ↦ by
-    have : horizonSpot T S₀ u d r n = horizonSpot T S₀ u d r n ∘ revealed T n := by
-      funext x
-      exact pathAdaptedAt_discountedSpot S₀ u d r (min n T) _ _ fun i hi ↦ by
-        have hiT : i < T := lt_of_lt_of_le hi (min_le_right n T)
-        have hin : i < n := lt_of_lt_of_le hi (min_le_left n T)
-        simp [padFlips, revealed, hiT, hin]
+    have : horizonSpot T S₀ u d r n = horizonSpot T S₀ u d r n ∘ revealed T n :=
+      funext fun x ↦ (horizonSpot_revealed n x).symm
     rw [this]
     exact ((measurable_of_countable _).comp
       (comap_measurable (revealed T n))).stronglyMeasurable
@@ -294,5 +309,214 @@ theorem noArbitrage_horizonSpot_iff (hS₀ : 0 < S₀) (hd : 0 < d) (hdu : d < u
   ⟨binomialNoArb_of_noArbitrage hS₀ hd hdu hT hp0 hp1, fun h ↦ noArbitrage_horizonSpot h S₀ hp0 hp1⟩
 
 end NoArbitrage
+
+section Uniqueness
+
+variable {T : ℕ} {S₀ u d r : ℝ}
+
+/-- One period of the market price: `S_{t+1} = S_t · e^{-r} · (u or d)` according to flip `t`. -/
+lemma horizonSpot_succ {t : ℕ} (ht : t < T) (y : Fin T → Bool) :
+    horizonSpot T S₀ u d r (t + 1) y
+      = horizonSpot T S₀ u d r t y * (Real.exp (-r) * if y ⟨t, ht⟩ then u else d) := by
+  have h1 : min (t + 1) T = t + 1 := min_eq_left ht
+  have h2 : min t T = t := min_eq_left ht.le
+  simp only [horizonSpot, discountedSpot, spotPath, h1, h2, Finset.prod_range_succ,
+    padFlips, dif_pos ht]
+  rw [show -(r * ((t + 1 : ℕ) : ℝ)) = -(r * t) + -r by push_cast; ring, Real.exp_add]
+  ring
+
+lemma horizonSpot_pos (hS₀ : 0 < S₀) (hd : 0 < d) (hu : 0 < u) (n : ℕ) (y : Fin T → Bool) :
+    0 < horizonSpot T S₀ u d r n y := by
+  unfold horizonSpot discountedSpot spotPath
+  refine mul_pos (Real.exp_pos _) (mul_pos hS₀ (Finset.prod_pos fun i _ ↦ ?_))
+  split_ifs <;> assumption
+
+/-- The **atom of `ℱₜ` through `x`**: the paths that agree with `x` on the first `t` flips. -/
+def horizonAtom (T t : ℕ) (x : Fin T → Bool) : Set (Fin T → Bool) :=
+  revealed T t ⁻¹' {revealed T t x}
+
+lemma measurableSet_horizonAtom (t : ℕ) (x : Fin T → Bool) :
+    MeasurableSet[horizonFiltration T t] (horizonAtom T t x) :=
+  ⟨{revealed T t x}, measurableSet_singleton _, rfl⟩
+
+lemma mem_horizonAtom {t : ℕ} {x y : Fin T → Bool} :
+    y ∈ horizonAtom T t x ↔ ∀ i : Fin T, (i : ℕ) < t → y i = x i := by
+  simp only [horizonAtom, Set.mem_preimage, Set.mem_singleton_iff, revealed, funext_iff]
+  refine forall_congr' fun i ↦ ?_
+  by_cases h : (i : ℕ) < t <;> simp [h]
+
+lemma horizonAtom_zero (x : Fin T → Bool) : horizonAtom T 0 x = Set.univ :=
+  Set.eq_univ_of_forall fun _ ↦ mem_horizonAtom.2 fun _ hi ↦ absurd hi (Nat.not_lt_zero _)
+
+lemma horizonAtom_horizon (x : Fin T → Bool) : horizonAtom T T x = {x} :=
+  Set.ext fun y ↦ by simp [mem_horizonAtom, funext_iff]
+
+lemma horizonAtom_succ {t : ℕ} (ht : t < T) (x : Fin T → Bool) :
+    horizonAtom T (t + 1) x = horizonAtom T t x ∩ {y | y ⟨t, ht⟩ = x ⟨t, ht⟩} := by
+  ext y
+  simp only [mem_horizonAtom, Set.mem_inter_iff, Set.mem_ofPred_eq]
+  refine ⟨fun h ↦ ⟨fun i hi ↦ h i (by omega), h _ (Nat.lt_succ_self t)⟩, fun ⟨h, h'⟩ i hi ↦ ?_⟩
+  rcases Nat.lt_succ_iff_lt_or_eq.1 hi with hi | hi
+  · exact h i hi
+  · have : i = ⟨t, ht⟩ := Fin.ext hi
+    rw [this]; exact h'
+
+lemma horizonSpot_eq_of_mem_horizonAtom {t : ℕ} {x y : Fin T → Bool} (hy : y ∈ horizonAtom T t x) :
+    horizonSpot T S₀ u d r t y = horizonSpot T S₀ u d r t x := by
+  rw [← horizonSpot_revealed t y, ← horizonSpot_revealed t x]
+  exact congrArg _ hy
+
+variable {P Q : Measure (Fin T → Bool)}
+
+/-- **The conditional up-probability of an equivalent martingale measure is `crrUpProb`.** If
+`Q` makes the discounted spot a martingale, then `Q` gives the up-flip at time `t` probability
+`crrUpProb` *conditionally on every history atom* of `ℱₜ`: the martingale property in set-integral
+form on the atom `A`, `∫_A (S_{t+1} − S_t) dQ = 0`, reads
+`S_t(x) · (e^{-r}(u · Q(A ∩ up) + d · Q(A ∩ down)) − Q(A)) = 0`, which together with
+`Q(A) = Q(A ∩ up) + Q(A ∩ down)` pins `Q(A ∩ up)/Q(A)` to `(e^r − d)/(u − d)`. -/
+theorem IsEMM.real_atom_up (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
+    (hQ : IsEMM (horizonFiltration T) P (horizonSpot T S₀ u d r) T Q) {t : ℕ} (ht : t < T)
+    (x : Fin T → Bool) :
+    Q.real (horizonAtom T t x ∩ {y | y ⟨t, ht⟩ = true})
+      = crrUpProb u d r * Q.real (horizonAtom T t x) := by
+  haveI := hQ.prob
+  set A := horizonAtom T t x
+  set U : Set (Fin T → Bool) := {y | y ⟨t, ht⟩ = true}
+  have hA : MeasurableSet A := (horizonFiltration T).le t _ (measurableSet_horizonAtom t x)
+  have hU : MeasurableSet U := MeasurableSet.of_discrete
+  have hspot : ∫ y in A, horizonSpot T S₀ u d r (t + 1) y ∂Q
+      = ∫ y in A, horizonSpot T S₀ u d r t y ∂Q := by
+    rw [← setIntegral_condExp ((horizonFiltration T).le t) Integrable.of_finite
+      (measurableSet_horizonAtom t x)]
+    exact setIntegral_congr_ae hA (by filter_upwards [hQ.mart t ht] with y hy _ using hy.symm)
+  set s := horizonSpot T S₀ u d r t x
+  have hs : 0 < s := horizonSpot_pos hS₀ h.d_pos (h.d_pos.trans h.d_lt_u) t x
+  -- split the atom along the next flip
+  have hsplit (F : (Fin T → Bool) → ℝ) : ∫ y in A, F y ∂Q
+      = ∫ y in A ∩ U, F y ∂Q + ∫ y in A \ U, F y ∂Q :=
+    (integral_inter_add_sdiff hU Integrable.of_finite.integrableOn).symm
+  -- on each half the increment is a constant multiple of `s`
+  have hup : ∫ y in A ∩ U, horizonSpot T S₀ u d r (t + 1) y ∂Q
+      = Q.real (A ∩ U) * (s * (Real.exp (-r) * u)) := by
+    rw [setIntegral_congr_fun (hA.inter hU) fun y hy ↦ by
+      rw [horizonSpot_succ ht, horizonSpot_eq_of_mem_horizonAtom hy.1, if_pos (show y ⟨t, ht⟩ = true from hy.2)],
+      setIntegral_const, smul_eq_mul]
+  have hdown : ∫ y in A \ U, horizonSpot T S₀ u d r (t + 1) y ∂Q
+      = Q.real (A \ U) * (s * (Real.exp (-r) * d)) := by
+    rw [setIntegral_congr_fun (hA.diff hU) fun y hy ↦ by
+      rw [horizonSpot_succ ht, horizonSpot_eq_of_mem_horizonAtom hy.1,
+        if_neg (show ¬ y ⟨t, ht⟩ = true from hy.2)],
+      setIntegral_const, smul_eq_mul]
+  have hnow : ∫ y in A, horizonSpot T S₀ u d r t y ∂Q = Q.real A * s := by
+    rw [setIntegral_congr_fun hA fun y hy ↦ horizonSpot_eq_of_mem_horizonAtom hy,
+      setIntegral_const, smul_eq_mul]
+  rw [hsplit, hup, hdown, hnow, ← measureReal_inter_add_sdiff (s := A) hU] at hspot
+  have he : Real.exp (-r) * Real.exp r = 1 := by rw [← Real.exp_add]; simp
+  have hud : u - d ≠ 0 := (sub_pos.2 h.d_lt_u).ne'
+  have key : (Real.exp (-r) * u - 1) * Q.real (A ∩ U) + (Real.exp (-r) * d - 1) * Q.real (A \ U)
+      = 0 := by
+    refine mul_left_cancel₀ hs.ne' ?_
+    linear_combination hspot
+  rw [crrUpProb, div_mul_eq_mul_div, eq_div_iff hud, ← measureReal_inter_add_sdiff (s := A) hU]
+  linear_combination Real.exp r * key - (u * Q.real (A ∩ U) + d * Q.real (A \ U)) * he
+
+/-- The conditional probability of either flip at time `t`, given a history atom: `crrUpProb` for
+up and `1 - crrUpProb` for down. -/
+theorem IsEMM.real_atom_flip (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
+    (hQ : IsEMM (horizonFiltration T) P (horizonSpot T S₀ u d r) T Q) {t : ℕ} (ht : t < T)
+    (x : Fin T → Bool) (b : Bool) :
+    Q.real (horizonAtom T t x ∩ {y | y ⟨t, ht⟩ = b})
+      = (if b then crrUpProb u d r else 1 - crrUpProb u d r) * Q.real (horizonAtom T t x) := by
+  have hup := IsEMM.real_atom_up hS₀ h hQ ht x
+  cases b
+  · haveI := hQ.prob
+    have hU : MeasurableSet {y : Fin T → Bool | y ⟨t, ht⟩ = true} := MeasurableSet.of_discrete
+    have hsum := measureReal_inter_add_sdiff (μ := Q) (s := horizonAtom T t x) hU
+    have hset : horizonAtom T t x ∩ {y | y ⟨t, ht⟩ = false}
+        = horizonAtom T t x \ {y | y ⟨t, ht⟩ = true} := by
+      ext y; simp
+    rw [hset, if_neg Bool.false_ne_true]
+    linear_combination hsum - hup
+  · simpa using hup
+
+/-- **Every history atom has the product-form probability.** Under an equivalent martingale
+measure `Q`, the paths agreeing with `x` on the first `t ≤ T` flips have probability
+`∏_{i<t} (q if xᵢ else 1 − q)`, `q = crrUpProb u d r`: induction on `t`, each period multiplying by
+the conditional probability of the flip (`IsEMM.real_atom_flip`). -/
+theorem IsEMM.real_horizonAtom (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
+    (hQ : IsEMM (horizonFiltration T) P (horizonSpot T S₀ u d r) T Q) (x : Fin T → Bool) :
+    ∀ t ≤ T, Q.real (horizonAtom T t x)
+      = ∏ i : Fin T, if (i : ℕ) < t then (if x i then crrUpProb u d r else 1 - crrUpProb u d r)
+          else 1 := by
+  intro t
+  induction t with
+  | zero =>
+    haveI := hQ.prob
+    intro _
+    simp [horizonAtom_zero]
+  | succ t ih =>
+    intro ht
+    have ht' : t < T := ht
+    rw [horizonAtom_succ ht', IsEMM.real_atom_flip hS₀ h hQ ht' x (x ⟨t, ht'⟩), ih ht'.le, mul_comm]
+    have hpt (i : Fin T) : (if (i : ℕ) < t + 1 then
+          (if x i then crrUpProb u d r else 1 - crrUpProb u d r) else 1)
+        = (if (i : ℕ) < t then (if x i then crrUpProb u d r else 1 - crrUpProb u d r) else 1)
+          * (if i = ⟨t, ht'⟩ then (if x i then crrUpProb u d r else 1 - crrUpProb u d r) else 1) := by
+      by_cases h1 : (i : ℕ) < t
+      · have : i ≠ ⟨t, ht'⟩ := fun e ↦ by simp [e] at h1
+        simp [h1, this, show (i : ℕ) < t + 1 by omega]
+      · by_cases h2 : i = ⟨t, ht'⟩
+        · subst h2; simp
+        · have : ¬ (i : ℕ) < t + 1 := by
+            have := Fin.val_ne_of_ne h2
+            simp only at this
+            omega
+          simp [h1, h2, this]
+    rw [Finset.prod_congr rfl fun i _ ↦ hpt i, Finset.prod_mul_distrib, Finset.prod_ite_eq']
+    simp
+
+lemma horizonMeasure_real_singleton (q : ℝ≥0) (hq : q ≤ 1) (x : Fin T → Bool) :
+    (horizonMeasure T q hq).real {x} = ∏ i, if x i then (q : ℝ) else 1 - q := by
+  rw [measureReal_def, horizonMeasure_singleton, ENNReal.toReal_prod]
+  refine Finset.prod_congr rfl fun i _ ↦ ?_
+  cases x i with
+  | false =>
+    simp only [Bool.false_eq_true, ↓reduceIte]
+    rw [ENNReal.toReal_sub_of_le (ENNReal.coe_le_one_iff.mpr hq) ENNReal.one_ne_top]
+    simp
+  | true => simp
+
+/-- **The equivalent martingale measure of the multi-period tree is unique.** Under
+`BinomialNoArb u d r` and `S₀ > 0`, every probability measure `Q` that makes the discounted spot
+a martingale for the filtration of the first `n` flips (`IsEMM`, for any reference measure `P`)
+is the law of `T` i.i.d. `Bernoulli(q)` flips with `q = crrUpProb u d r`. Node by node,
+`Q` gives the next flip conditional probability `q` on every history atom
+(`IsEMM.real_atom_flip`), so it gives each path the product probability
+(`IsEMM.real_horizonAtom` at `t = T`), which is `horizonMeasure_singleton`. -/
+theorem IsEMM.eq_horizonMeasure (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
+    (hQ : IsEMM (horizonFiltration T) P (horizonSpot T S₀ u d r) T Q) {q : ℝ≥0} (hq1 : q ≤ 1)
+    (hqcrr : crrUpProb u d r = q) : Q = horizonMeasure T q hq1 := by
+  haveI := hQ.prob
+  refine Measure.ext_iff_singleton.2 fun x ↦ ?_
+  refine (ENNReal.toReal_eq_toReal_iff' (measure_ne_top _ _) (measure_ne_top _ _)).1 ?_
+  change Q.real {x} = (horizonMeasure T q hq1).real {x}
+  rw [horizonMeasure_real_singleton, ← horizonAtom_horizon,
+    hQ.real_horizonAtom hS₀ h x T le_rfl]
+  refine Finset.prod_congr rfl fun i _ ↦ ?_
+  simp [i.2, hqcrr]
+
+/-- **The multi-period binomial market has a unique equivalent martingale measure.** Under
+`BinomialNoArb u d r` and `S₀ > 0`, for every real-world law of i.i.d. `Bernoulli(p)` flips,
+`0 < p < 1`, the `T`-period CRR market has exactly one `FTAPDiscrete.IsEMM`, the i.i.d.
+`Bernoulli(crrUpProb u d r)` law of the flips: existence is `isEMM_horizonSpot` and uniqueness
+`IsEMM.eq_horizonMeasure`. Uniqueness of the equivalent martingale measure is what the second
+fundamental theorem equates with completeness; replication of claims is not stated here. -/
+theorem existsUnique_isEMM_horizonSpot (hS₀ : 0 < S₀) (h : BinomialNoArb u d r) {p q : ℝ≥0}
+    (hp0 : 0 < p) (hp1 : p < 1) (hq1 : q ≤ 1) (hqcrr : crrUpProb u d r = q) :
+    ∃! Q, IsEMM (horizonFiltration T) (horizonMeasure T p hp1.le) (horizonSpot T S₀ u d r) T Q :=
+  ⟨horizonMeasure T q hq1, isEMM_horizonSpot h S₀ hp0 hp1 hq1 hqcrr,
+    fun _ hQ ↦ hQ.eq_horizonMeasure hS₀ h hq1 hqcrr⟩
+
+end Uniqueness
 
 end MathFin

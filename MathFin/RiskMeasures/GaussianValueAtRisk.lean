@@ -26,6 +26,7 @@ form is the value-at-risk of the law: for a loss `X ~ N(m, σ²)`,
 
 * `Phi_eq_iff`: `Φ z = α ↔ z = Φ⁻¹ α` for `α ∈ (0, 1)`.
 * `valueAtRisk_of_hasLaw_gaussianReal`: `VaR_α(X) = gaussianVaR m σ (Φ⁻¹ α)` for `X ~ N(m, σ²)`.
+* `valueAtRisk_of_hasGaussianLaw`: the same for any Gaussian `X`, in terms of `E X` and `Var X`.
 -/
 
 @[expose] public section
@@ -48,5 +49,13 @@ theorem valueAtRisk_of_hasLaw_gaussianReal {m : ℝ} {v : ℝ≥0}
     (hX : HasLaw X (gaussianReal m v) P) (hα : α ∈ Ioo 0 1) :
     valueAtRisk X P α = gaussianVaR m √(v : ℝ) (PhiInv α) := by
   rw [valueAtRisk_eq_quantile hX, quantile_gaussianReal m v hα, gaussianVaR]
+
+/-- **The value-at-risk of a Gaussian random variable** in terms of its mean and variance:
+`VaR_α(X) = E X + sd(X) Φ⁻¹(α)`. -/
+theorem valueAtRisk_of_hasGaussianLaw (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) :
+    valueAtRisk X P α = P[X] + √Var[X; P] * PhiInv α := by
+  have := hX.isProbabilityMeasure
+  rw [valueAtRisk_of_hasLaw_gaussianReal ⟨hX.aemeasurable, hX.map_eq_gaussianReal⟩ hα, gaussianVaR,
+    Real.coe_toNNReal _ (variance_nonneg X P)]
 
 end MathFin

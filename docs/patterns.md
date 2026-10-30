@@ -502,10 +502,10 @@ clauses there (dominance, supermartingale, adaptedness, minimality), then prove
 ONE induction — the identification `scalar recursion = discounted path object`
 — and every clause transports to the scalar object for free.
 
-Concrete: `snellAux_eq_discounted_americanPrice`
-(`Binomial/SnellEnvelope.lean`): `snell q Z N k ω = e^{−rk}·americanPrice
+Concrete: `snellAux_eq_discounted_bermudanPrice`
+(`Binomial/SnellEnvelope.lean`): `snell E q Z N k ω = e^{−rk}·bermudanPrice E
 (N−k) (S_k ω)`. Four abstract Snell clauses + one induction = the genuine
-supermartingale/intrinsic statements about `americanPrice`, with the
+supermartingale/intrinsic statements about `bermudanPrice`, with the
 node-average conditional expectation made explicit. Same instrument as the
 "this IS already that" structural reduction, but for *recursions* rather than
 single formulas.

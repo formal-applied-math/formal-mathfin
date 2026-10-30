@@ -195,14 +195,6 @@ lemma memLp_eval (s : ℝ≥0) : MemLp (B s) 2 μ :=
   (hB.isGaussianProcess.hasGaussianLaw_eval s).memLp_two
 
 omit mΩ [IsProbabilityMeasure μ] hB in
-/-- `clampM` preserves adaptedness: clamping an `𝓕_{t₀}`-adapted coefficient keeps it adapted. -/
-lemma adaptedAt_clampM {t₀ : ℝ≥0} {φ : Ω → ℝ} (M : ℝ)
-    (hφ : ItoIsometryAdapted.AdaptedAt B t₀ φ) :
-    ItoIsometryAdapted.AdaptedAt B t₀ (fun ω ↦ clampM M (φ ω)) := by
-  obtain ⟨g, hg, rfl⟩ := hφ
-  exact ⟨fun p ↦ clampM M (g p), (measurable_clampM M).comp hg, rfl⟩
-
-omit mΩ [IsProbabilityMeasure μ] hB in
 /-- `clamp_M(x) = x` once `|x| ≤ M`. -/
 lemma clampM_eq_self {M x : ℝ} (h : |x| ≤ M) : clampM M x = x := by
   rw [abs_le] at h
@@ -256,8 +248,9 @@ lemma memLp_riemannσ_brownian (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) 
     MemLp (riemannσ (B := B) B T n) 2 μ := by
   unfold riemannσ
   refine memLp_finsetSum _ fun k _ ↦ ?_
-  exact ItoIsometryAdapted.memLp_adapted_mul_increment hB hBmeas
-    (unifPart_mono T n (Nat.le_succ k)) (adaptedAt_eval le_rfl) (memLp_eval hB (unifPart T n k))
+  exact ItoIsometryAdapted.memLp_adapted_mul_increment (hB.isFilteredPreBrownian hBmeas)
+    (unifPart_mono T n (Nat.le_succ k)) (measurable_eval_natFiltration hBmeas _)
+    (memLp_eval hB (unifPart T n k))
 
 omit [IsProbabilityMeasure μ] in
 /-- `MemLp` of the truncated Riemann sum: `memLp_riemannσ` at the bounded integrand
@@ -293,8 +286,9 @@ lemma integral_truncRiemann_sub_sq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ�
             (clampM (m : ℝ) (B (unifPart T n k) ω) - B (unifPart T n k) ω)
               * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2)
       from funext fun ω ↦ congrArg (· ^ 2) (riemannσ_sub (B := B) (clampPath B m) B T n ω)]
-  refine ito_isometry_discrete hB hBmeas (unifPart_mono T n)
-    (fun k ↦ (adaptedAt_clampM _ (adaptedAt_eval le_rfl)).sub (adaptedAt_eval le_rfl))
+  refine ito_isometry_discrete (hB.isFilteredPreBrownian hBmeas) (unifPart_mono T n)
+    (fun k ↦ ((measurable_clampM _).comp (measurable_eval_natFiltration hBmeas _)).sub
+      (measurable_eval_natFiltration hBmeas _))
     (fun k ↦ MemLp.sub ?_ (memLp_eval hB (unifPart T n k)))
   exact MemLp.of_bound ((measurable_clampM (m : ℝ)).comp (hBmeas _)).aestronglyMeasurable (m : ℝ)
     (ae_of_all _ fun ω ↦ by rw [Real.norm_eq_abs]; exact clampM_abs_le (Nat.cast_nonneg m) _)

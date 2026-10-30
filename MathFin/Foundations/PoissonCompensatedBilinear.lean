@@ -163,18 +163,12 @@ All of it rests on the *single-increment* field `indep_of_disjoint_region` — n
 `σ`-algebra independence is assumed. Integrability of the triple products is bought by the same
 independence (a past-adapted factor is `⟂` any future increment it multiplies). -/
 
-/-- The past `σ`-algebra is monotone in time: `pastSigma s ≤ pastSigma s'` for `s ≤ s'`. -/
-private lemma pastSigma_mono (N : PoissonRandomMeasure P ν) {s s' : ℝ} (h : s ≤ s') :
-    N.pastSigma s ≤ N.pastSigma s' :=
-  iSup₂_le fun C hC => le_iSup₂_of_le C
-    ⟨hC.1.trans (Set.prod_mono (Set.Iic_subset_Iic.mpr h) le_rfl), hC.2⟩ le_rfl
-
-/-- The past `σ`-algebra at `s` sits inside the disjoint-region `σ`-algebra of any set lying
-strictly after `s` (`D ⊆ (s, ∞) × E`) — the generalisation of `pastSigma_le_regionSigma` from a
-future box to an arbitrary future set. -/
-private lemma pastSigma_le_regionSigma_sub (N : PoissonRandomMeasure P ν) {s : ℝ}
+/-- The past `σ`-algebra `pastFiltration s` sits inside the disjoint-region `σ`-algebra of any
+set lying strictly after `s` (`D ⊆ (s, ∞) × E`) — the generalisation of
+`pastFiltration_le_regionSigma` from a future box to an arbitrary future set. -/
+private lemma pastFiltration_le_regionSigma_sub (N : PoissonRandomMeasure P ν) {s : ℝ}
     {D : Set (ℝ × E)} (hD : D ⊆ Set.Ioi s ×ˢ Set.univ) :
-    N.pastSigma s ≤ N.regionSigma D := by
+    N.pastFiltration s ≤ N.regionSigma D := by
   refine iSup₂_le fun C hC => le_iSup₂_of_le C ⟨?_, hC.2⟩ le_rfl
   refine Set.disjoint_of_subset hC.1 hD (Set.disjoint_left.mpr ?_)
   rintro ⟨x, e⟩ hx hxD
@@ -195,14 +189,14 @@ private lemma compensated_measurable_regionSigma (N : PoissonRandomMeasure P ν)
 and `D ⊆ (s, ∞) × E`, `φ ⟂ Ñ(D)`. The set-level version of `adapted_indepFun_compensated`. -/
 private lemma adapted_indepFun_compensated_sub (N : PoissonRandomMeasure P ν) {s : ℝ}
     {D : Set (ℝ × E)} (hDms : MeasurableSet D) (hDsub : D ⊆ Set.Ioi s ×ˢ Set.univ)
-    {φ : Ω → ℝ} (hφ : N.AdaptedAt s φ) :
+    {φ : Ω → ℝ} (hφ : Measurable[N.pastFiltration s] φ) :
     IndepFun φ (N.compensated D) P := by
   have hfield : Indep (N.regionSigma D)
       (MeasurableSpace.comap (fun ω => N.N ω D) inferInstance) P :=
     N.indep_of_disjoint_region hDms
   have hφ_le : MeasurableSpace.comap φ inferInstance ≤ N.regionSigma D :=
-    le_trans (measurable_iff_comap_le.mp (show Measurable[N.pastSigma s] φ from hφ))
-      (pastSigma_le_regionSigma_sub N hDsub)
+    le_trans (measurable_iff_comap_le.mp hφ)
+      (pastFiltration_le_regionSigma_sub N hDsub)
   have hraw : IndepFun φ (fun ω => N.N ω D) P :=
     (IndepFun_iff_Indep _ _ _).mpr (indep_of_indep_of_le_left hfield hφ_le)
   have hcomp := hraw.comp (φ := (id : ℝ → ℝ))
@@ -215,7 +209,7 @@ private lemma adapted_indepFun_compensated_sub (N : PoissonRandomMeasure P ν) {
 `D ⊆ (s, ∞) × E`, `𝔼[φ · Ñ(D)²] = 𝔼[φ] · ν̂(D)`: `φ ⟂ Ñ(D)²` and `𝔼[Ñ(D)²] = ν̂(D)`. -/
 private lemma integral_adapted_mul_compensated_sq_sub (N : PoissonRandomMeasure P ν) {s : ℝ}
     {D : Set (ℝ × E)} (hDms : MeasurableSet D) (hDsub : D ⊆ Set.Ioi s ×ˢ Set.univ)
-    (hDfin : referenceIntensity ν D ≠ ⊤) {φ : Ω → ℝ} (hφ : N.AdaptedAt s φ)
+    (hDfin : referenceIntensity ν D ≠ ⊤) {φ : Ω → ℝ} (hφ : Measurable[N.pastFiltration s] φ)
     (hφint : Integrable φ P) :
     ∫ ω, φ ω * (N.compensated D ω) ^ 2 ∂P = (∫ ω, φ ω ∂P) * (referenceIntensity ν D).toReal := by
   have hindep2 := (adapted_indepFun_compensated_sub N hDms hDsub hφ).comp
@@ -242,7 +236,7 @@ theorem integral_adapted_bilinear_future (N : PoissonRandomMeasure P ν) {s : �
     {C D : Set (ℝ × E)} (hCms : MeasurableSet C) (hDms : MeasurableSet D)
     (hCsub : C ⊆ Set.Ioi s ×ˢ Set.univ) (hDsub : D ⊆ Set.Ioi s ×ˢ Set.univ)
     (hCfin : referenceIntensity ν C ≠ ⊤) (hDfin : referenceIntensity ν D ≠ ⊤)
-    {φ : Ω → ℝ} (hφ : N.AdaptedAt s φ) (hφint : Integrable φ P) :
+    {φ : Ω → ℝ} (hφ : Measurable[N.pastFiltration s] φ) (hφint : Integrable φ P) :
     ∫ ω, φ ω * N.compensated C ω * N.compensated D ω ∂P
       = (∫ ω, φ ω ∂P) * (referenceIntensity ν (C ∩ D)).toReal := by
   -- the three disjoint pieces, all still strictly after `s`
@@ -273,8 +267,8 @@ theorem integral_adapted_bilinear_future (N : PoissonRandomMeasure P ν) {s : �
       rw [Set.inter_comm]; exact Set.inter_union_sdiff D C] at h
   -- reusable measurability / integrability shorthands
   have hφreg : ∀ {q : Set (ℝ × E)}, q ⊆ Set.Ioi s ×ˢ Set.univ → Measurable[N.regionSigma q] φ :=
-    fun hq => (show Measurable[N.pastSigma s] φ from hφ).mono
-      (pastSigma_le_regionSigma_sub N hq) le_rfl
+    fun hq => hφ.mono
+      (pastFiltration_le_regionSigma_sub N hq) le_rfl
   have hÑint : ∀ {p : Set (ℝ × E)}, MeasurableSet p → referenceIntensity ν p ≠ ⊤ →
       Integrable (N.compensated p) P :=
     fun hp hpf => (memLp_compensated N hp hpf).integrable (by norm_num)
@@ -361,7 +355,7 @@ theorem integral_bilinear_pairing (N : PoissonRandomMeasure P ν)
     {Aa Ab : Set E} (hAa : MeasurableSet Aa) (hAb : MeasurableSet Ab)
     (hAafin : ν Aa ≠ ⊤) (hAbfin : ν Ab ≠ ⊤)
     {φa φb : Ω → ℝ} {Ca Cb : ℝ}
-    (hφa : N.AdaptedAt sa φa) (hφb : N.AdaptedAt sb φb)
+    (hφa : Measurable[N.pastFiltration sa] φa) (hφb : Measurable[N.pastFiltration sb] φb)
     (hφaB : ∀ ω, |φa ω| ≤ Ca) (hφbB : ∀ ω, |φb ω| ≤ Cb) :
     ∫ ω, (φa ω * N.compensated (Set.Ioc sa ta ×ˢ Aa) ω)
           * (φb ω * N.compensated (Set.Ioc sb tb ×ˢ Ab) ω) ∂P
@@ -411,14 +405,13 @@ theorem integral_bilinear_pairing (N : PoissonRandomMeasure P ν)
       = (Set.Ioc sa ta ×ˢ Aa) ∩ (Set.Ioc sb tb ×ˢ Ab) := by
     rw [Set.inter_assoc, Set.inter_eq_right.mpr hboxbsub]
   -- the weight `φa · φb` is adapted at `sb`, bounded, hence integrable
-  have hφ : N.AdaptedAt sb (fun ω => φa ω * φb ω) :=
-    ((show Measurable[N.pastSigma sa] φa from hφa).mono (pastSigma_mono N hab) le_rfl).mul
-      (show Measurable[N.pastSigma sb] φb from hφb)
+  have hφ : Measurable[N.pastFiltration sb] (fun ω => φa ω * φb ω) :=
+    (hφa.mono (N.pastFiltration.mono hab) le_rfl).mul hφb
   have hbound : ∀ ω, ‖φa ω * φb ω‖ ≤ Ca * Cb := fun ω => by
     rw [Real.norm_eq_abs, abs_mul]
     exact mul_le_mul (hφaB ω) (hφbB ω) (abs_nonneg _) ((abs_nonneg _).trans (hφaB ω))
   have hφint : Integrable (fun ω => φa ω * φb ω) P :=
-    (memLp_top_of_bound hφ.measurable.aestronglyMeasurable (Ca * Cb)
+    (memLp_top_of_bound (hφ.mono (N.pastFiltration.le sb) le_rfl).aestronglyMeasurable (Ca * Cb)
         (ae_of_all _ hbound)).integrable
       le_top
   -- `Ñ(boxa) = Ñ(pastPart) + Ñ(futPart)` a.e.
@@ -444,22 +437,22 @@ theorem integral_bilinear_pairing (N : PoissonRandomMeasure P ν)
       * N.compensated (Set.Ioc sb tb ×ˢ Ab) ω) P :=
     (((memLp_compensated N hpastms hpastfin).integrable_mul
         (memLp_compensated N hboxbms hboxbfin)).bdd_mul
-        hφ.measurable.aestronglyMeasurable (ae_of_all _ hbound)).congr
+        (hφ.mono (N.pastFiltration.le sb) le_rfl).aestronglyMeasurable (ae_of_all _ hbound)).congr
       (ae_of_all _ fun ω => by simp only [Pi.mul_apply]; ring)
   have hint_fut : Integrable (fun ω => φa ω * φb ω
       * N.compensated (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Ioi sb ×ˢ Set.univ)) ω
       * N.compensated (Set.Ioc sb tb ×ˢ Ab) ω) P :=
     (((memLp_compensated N hfutms hfutfin).integrable_mul
         (memLp_compensated N hboxbms hboxbfin)).bdd_mul
-        hφ.measurable.aestronglyMeasurable (ae_of_all _ hbound)).congr
+        (hφ.mono (N.pastFiltration.le sb) le_rfl).aestronglyMeasurable (ae_of_all _ hbound)).congr
       (ae_of_all _ fun ω => by simp only [Pi.mul_apply]; ring)
   rw [integral_add hint_past hint_fut]
   -- past term vanishes (weighted past-region factor `⟂` fresh future increment)
   have hXpast : Measurable[N.regionSigma (Set.Ioc sb tb ×ˢ Ab)]
       (fun ω => φa ω * φb ω
         * N.compensated (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Iic sb ×ˢ Set.univ)) ω) :=
-    ((show Measurable[N.pastSigma sb] (fun ω => φa ω * φb ω) from hφ).mono
-      (pastSigma_le_regionSigma_sub N hboxbsub) le_rfl).mul
+    (hφ.mono
+      (pastFiltration_le_regionSigma_sub N hboxbsub) le_rfl).mul
       (compensated_measurable_regionSigma N hpastdisjb hpastms)
   rw [integral_mul_compensated_eq_zero N hboxbms hboxbfin hXpast, zero_add,
     integral_adapted_bilinear_future N hfutms hboxbms hfutsub hboxbsub hfutfin hboxbfin hφ hφint,

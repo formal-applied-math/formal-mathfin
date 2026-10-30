@@ -612,7 +612,7 @@ Durrleman's `g`. Positivity certificates land in the house idiom
 
 ### 2. American boundary convexity for `0 < q < r` (§1) — solved in #212
 
-`Binomial/SnellEnvelope.americanPrice_is_snell_envelope` plus
+`Binomial/SnellEnvelope.bermudanPrice_is_snell_envelope` plus
 `Binomial/American`, `Bermudan`,
 `MertonAmericanCallTree`, `BlackScholes/Dividends`, and the convexity trio
 (`StrikeConvexity`, `PutStrikeConvexity`, `SpotConvexity`).
