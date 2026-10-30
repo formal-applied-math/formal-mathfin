@@ -927,13 +927,13 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.SVI.fullCertificateFormula_iff
 
-/-- info: 'MathFin.SVI.tendsto_blackPlus_atBot_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.SVI.tendsto_blackPlus_atBot_iff
-
 /-- info: 'MathFin.SVI.tendsto_bsSmile_zero_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.SVI.tendsto_bsSmile_zero_iff
+
+/-- info: 'MathFin.SVI.tendsto_dpl_atBot_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.SVI.tendsto_dpl_atBot_iff
 
 /-- info: 'MathFin.StochasticIntegralCharacterisation.isStochasticIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
