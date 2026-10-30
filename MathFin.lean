@@ -743,6 +743,7 @@ import MathFin.Contracts.Adapted
 import MathFin.Contracts.Pricing
 import MathFin.Contracts.Instruments.Options
 import MathFin.Contracts.Instruments.FixedIncome
+import MathFin.Contracts.Instruments.Credit
 import MathFin.Contracts.Parity
 import MathFin.Contracts.Models.BlackScholes
 import MathFin.Contracts.Models.BlackScholesExchange
@@ -751,6 +752,7 @@ import MathFin.Contracts.Models.BlackScholesChooser
 import MathFin.Contracts.Models.Binomial
 import MathFin.Contracts.Models.BinomialLimit
 import MathFin.Contracts.Models.ShortRate
+import MathFin.Contracts.Models.DefaultTime
 import MathFin.Contracts.Risk
 
 -- Execution: market microstructure — the Glosten-Milgrom adverse-selection
