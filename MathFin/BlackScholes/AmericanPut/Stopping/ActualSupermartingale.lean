@@ -119,7 +119,7 @@ theorem canonicalDiscountedPrice_condExp_le {k h : ℝ} (hk : 0 ≤ k) (x : ℝ)
     change ‖Real.exp (-k*(j : ℝ))*canonicalPrice k h y ((T : ℝ)-(j : ℝ))‖ ≤ 1
     rw [Real.norm_eq_abs,abs_of_nonneg (mul_nonneg (Real.exp_pos _).le hp0)]
     exact (mul_le_mul_of_nonneg_left hhi (Real.exp_pos _).le).trans (by simpa using he)
-  have ht := brownianLogState_condExp_transition hf hb hij (k-h-1) (Real.sqrt 2) x
+  have ht := brownianLogState_isGaussianMarkov (k-h-1) (Real.sqrt 2) x hf hb hij
   have hj : (fun ω => f (brownianLogState (k-h-1) (Real.sqrt 2) x j ω)) =
       canonicalDiscountedPrice k h x T j := by
     funext ω

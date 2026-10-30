@@ -45,7 +45,7 @@ theorem brownianAmericanPut_wait_integral {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 
     (fun n => Eventually.of_forall (fun ω => by
       have hb := brownianGridMarkovAux_bound
         (fun i y => discountedLogPayoff_bound hK hr (cappedGridTime T (gridStep n) i) y)
-        T (gridStep n) (r-q-σ^2/2) σ ⌈T/gridStep n⌉₊ 0
+        (cappedGridTime T (gridStep n)) (r-q-σ^2/2) σ ⌈T/gridStep n⌉₊ 0
         (brownianLogState (r-q-σ^2/2) σ x u ω)
       have he : Real.exp (-r*(u : ℝ)) ≤ 1 := Real.exp_le_one_iff.mpr (by nlinarith [u.coe_nonneg])
       rw [norm_mul,Real.norm_eq_abs,abs_of_pos (Real.exp_pos _)]

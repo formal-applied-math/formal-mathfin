@@ -503,6 +503,7 @@ ESCAPED_2026_09_25 = (
 UNRESOLVED_ALLOWLIST: dict[tuple[str, str], str] = {
     ("pp-prop-3.3.6", "P.mono"): "a field of the snippet's own structure `P`",
     ("pp-thm-3.3.10", ".sub"): "Mathlib's `Measurable.sub`, by dot notation on a term",
+    ("mart-thm-2.6.7", "MeasureTheory.Martingale.integrable"): "Mathlib's `Martingale.integrable`, cited by full name",
 }
 
 

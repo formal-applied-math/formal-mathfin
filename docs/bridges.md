@@ -415,7 +415,7 @@ function of `B_t`, and the Itô-integral QV exists only in expectation).
   economic payoff: no simple-strategy arbitrage.
 - **NoArbitrageCore shared by discrete + continuous.** `ae_zero_of_nonneg_of_integral_zero` (nonneg +
   zero mean ⟹ vanishes) is the common closing step of BOTH `FTAP.emm_implies_no_arbitrage` (discrete,
-  via a martingale transform) and `ContinuousMarket.isEMM_noArbitrageSimple` (continuous, term-by-term
+  via a martingale transform; the one-period vector and the finite-Ω forward directions are its instances) and `ContinuousMarket.isEMM_noArbitrageSimple` (continuous, term-by-term
   via the bilinear `condExp` pull-out). One argument, two settings; each supplies its own zero-integral.
 - **Seam to meaning 2.** `IsEMM`-on-a-process is exactly what Delbaen–Schachermayer produces, so the
   frame is a strict sub-object of the DS one and meaning 2 (NFLVR, admissible strategies, the converse)
