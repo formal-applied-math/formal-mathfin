@@ -580,9 +580,9 @@
     "mf-american-put-stock-boundary-strict-convex": {
       "benchmark_file": "american_put_boundary.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.6,
-      "input_hash": "5607e3a0f4ac355be25a98ca25c4c2c4270326b027b2ecc3dfd7af78da37d1f4",
-      "verified_at_commit": "4c212f8"
+      "elapsed_s": 10.9,
+      "input_hash": "854b8d5214fc115bb23dfafe0722c1ce7f1db62c5fbfc1b5dc524f35d1d8caa2",
+      "verified_at_commit": "7727ef7"
     },
     "mf-american-supermartingale": {
       "benchmark_file": "binomial.json",
@@ -4857,9 +4857,9 @@
     "sc-ito-integral-unbounded-local-martingale": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-10-30",
-      "elapsed_s": 5.2,
-      "input_hash": "dbb83676415374ba8625c690dfeb9ca5e9b34689eca3d72846c5a90e36023409",
-      "verified_at_commit": "5eec1a1"
+      "elapsed_s": 13.1,
+      "input_hash": "053a1b52317df751d03b883d76bb870bc7cc6f610118ea5fc1942234d8a84f7b",
+      "verified_at_commit": "7727ef7"
     },
     "sc-ito-is-stochastic-integral": {
       "benchmark_file": "stochastic_calculus.json",
