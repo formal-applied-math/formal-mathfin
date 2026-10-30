@@ -23,7 +23,8 @@ characterization at **two levels**:
 2. **One-step supermartingale**: `V (n+1) S ≥ e^{-r}·(q·V n (uS) + (1−q)·V n (dS))`
 
 is `americanPrice` (`americanPrice_is_snell_envelope`, with minimality from
-`americanPrice_le_of_supermartingale_dominating`).
+`americanPrice_le_of_supermartingale_dominating`, which is derived below from the path-space
+minimality).
 
 **Path-space level.** On coin-flip paths `ω : ℕ → Bool` — the same pathwise
 language as `Binomial/MartingaleRepresentation.lean`, where the conditional
@@ -50,6 +51,10 @@ statements about the American price become clauses of the characterization
 (`discounted_americanPrice_supermartingale`,
 `discounted_intrinsic_le_americanPrice`, `americanPrice_snell_minimal`).
 
+Merton's no-early-exercise theorem for the tree call (`americanCallPrice_le_binomialPrice`,
+`MertonAmericanCallTree.lean`) uses the scalar minimality with the European price process as the
+competitor.
+
 The remaining classical form — `americanPrice = sup over stopping times τ of
 E^Q[e^{−rτ} g(S_τ)]` — is downstream work on top of this file's path layer.
 
@@ -60,6 +65,7 @@ E^Q[e^{−rτ} g(S_τ)]` — is downstream work on top of this file's path layer
 * `spotPath`, `snellAux`, `snell`: the path-space objects.
 * `snellAux_ge_payoff` / `snellAux_supermartingale` / `pathAdaptedAt_snellAux` /
   `snellAux_le_of_supermartingale_of_ge`: the four Snell clauses on paths.
+* `crrUpProb_average_discounted`: the discounted node average, the one-period price at a node.
 * `snellAux_eq_discounted_americanPrice`: the identification theorem.
 * `discounted_americanPrice_supermartingale`, `discounted_intrinsic_le_americanPrice`,
   `americanPrice_snell_minimal`: the American-price corollaries on paths.
@@ -68,67 +74,6 @@ E^Q[e^{−rτ} g(S_τ)]` — is downstream work on top of this file's path layer
 @[expose] public section
 
 namespace MathFin
-
-/-- **Snell envelope upper bound**: any function `V : ℕ → ℝ → ℝ` that
-dominates the payoff (`hV_g`) and satisfies the one-step supermartingale
-condition (`hV_super`) is bounded below by `americanPrice` at every step
-and spot.
-
-Combined with `americanPrice_ge_intrinsic` and `americanPrice_supermartingale`
-(which show `americanPrice` itself satisfies both conditions), this gives
-the **Snell envelope characterization**: `americanPrice` is the smallest
-such `V`.
-
-Proof: induction on `n`. The base case `n = 0` uses `hV_g 0 S`. The
-inductive step uses (a) `hV_g (n+1) S` to bound the intrinsic side of the
-Bellman `max`, and (b) `hV_super n S` plus monotonicity of the one-step
-operator (`binomialOptionPriceOnePeriod_mono`) plus the IH to bound the
-continuation side. -/
-theorem americanPrice_le_of_supermartingale_dominating
-    {u d r : ℝ} (h : BinomialNoArb u d r) (g : ℝ → ℝ) (V : ℕ → ℝ → ℝ)
-    (hV_g : ∀ n S, g S ≤ V n S)
-    (hV_super : ∀ n S,
-      binomialOptionPriceOnePeriod u d r (V n (S * u)) (V n (S * d)) ≤
-        V (n + 1) S) :
-    ∀ n S, americanPrice u d r g n S ≤ V n S := by
-  intro n
-  induction n with
-  | zero =>
-    intro S
-    rw [americanPrice_zero]
-    exact hV_g 0 S
-  | succ n ih =>
-    intro S
-    rw [americanPrice_succ]
-    refine max_le (hV_g (n + 1) S) ?_
-    calc binomialOptionPriceOnePeriod u d r
-          (americanPrice u d r g n (S * u)) (americanPrice u d r g n (S * d))
-        ≤ binomialOptionPriceOnePeriod u d r (V n (S * u)) (V n (S * d)) :=
-          binomialOptionPriceOnePeriod_mono h (ih (S * u)) (ih (S * d))
-      _ ≤ V (n + 1) S := hV_super n S
-
-/-- **Snell envelope theorem (packaged form)**: `americanPrice u d r g` is
-the smallest function `V : ℕ → ℝ → ℝ` that simultaneously dominates the
-payoff and satisfies the one-step supermartingale property.
-
-The statement makes the universal characterization visible: for *any* V
-satisfying the two properties, `americanPrice ≤ V`. -/
-theorem americanPrice_is_snell_envelope
-    {u d r : ℝ} (h : BinomialNoArb u d r) (g : ℝ → ℝ) :
-    (∀ n S, g S ≤ americanPrice u d r g n S) ∧
-    (∀ n S,
-      binomialOptionPriceOnePeriod u d r
-        (americanPrice u d r g n (S * u)) (americanPrice u d r g n (S * d)) ≤
-      americanPrice u d r g (n + 1) S) ∧
-    (∀ (V : ℕ → ℝ → ℝ),
-      (∀ n S, g S ≤ V n S) →
-      (∀ n S,
-        binomialOptionPriceOnePeriod u d r (V n (S * u)) (V n (S * d)) ≤
-          V (n + 1) S) →
-      ∀ n S, americanPrice u d r g n S ≤ V n S) :=
-  ⟨americanPrice_ge_intrinsic u d r g,
-   americanPrice_supermartingale u d r g,
-   americanPrice_le_of_supermartingale_dominating h g⟩
 
 /-! ## The path-space Snell envelope
 
@@ -230,27 +175,44 @@ strictly larger competitor class than the scalar (Markov) form. Backward
 induction: at the horizon the envelope is the payoff; at the step, the
 Bellman max is squeezed because `U` beats the payoff directly and beats the
 continuation by the inductive hypothesis averaged through the node
-(convexity: `q ∈ [0,1]`) plus `U`'s own supermartingale property.
+(convexity: `q ∈ [0,1]`) plus `U`'s own supermartingale property. Only the
+supermartingale steps `k < H` before the horizon `H` are used, and the bound is
+for the envelope with `j` steps to go from time `k ≤ H - j`.
 (Adaptedness of `U` is not needed for the bound — only for reading the node
 average as a conditional expectation.) -/
-theorem snellAux_le_of_supermartingale_of_ge (hq0 : 0 ≤ q) (hq1 : q ≤ 1)
-    (hU_super : ∀ k ω, q * U (k + 1) (Function.update ω k true)
+theorem snellAux_le_of_supermartingale_of_ge {H : ℕ} (hq0 : 0 ≤ q) (hq1 : q ≤ 1)
+    (hU_super : ∀ k < H, ∀ ω, q * U (k + 1) (Function.update ω k true)
         + (1 - q) * U (k + 1) (Function.update ω k false) ≤ U k ω)
     (hU_ge : ∀ k ω, Z k ω ≤ U k ω) :
-    ∀ j k ω, snellAux q Z j k ω ≤ U k ω := by
+    ∀ j k ω, k + j ≤ H → snellAux q Z j k ω ≤ U k ω := by
   intro j
   induction j with
-  | zero => exact fun k ω ↦ hU_ge k ω
+  | zero => exact fun k ω _ ↦ hU_ge k ω
   | succ j ih =>
-    intro k ω
+    intro k ω hkj
     refine max_le (hU_ge k ω) ?_
     calc q * snellAux q Z j (k + 1) (Function.update ω k true)
           + (1 - q) * snellAux q Z j (k + 1) (Function.update ω k false)
         ≤ q * U (k + 1) (Function.update ω k true)
             + (1 - q) * U (k + 1) (Function.update ω k false) :=
-          add_le_add (mul_le_mul_of_nonneg_left (ih _ _) hq0)
-            (mul_le_mul_of_nonneg_left (ih _ _) (by linarith))
-      _ ≤ U k ω := hU_super k ω
+          add_le_add (mul_le_mul_of_nonneg_left (ih _ _ (by omega)) hq0)
+            (mul_le_mul_of_nonneg_left (ih _ _ (by omega)) (by linarith))
+      _ ≤ U k ω := hU_super k (by omega) ω
+
+/-- **One node of the discounted tree**: discounting the two children at `e^{-r(k+1)}` and
+averaging with the risk-neutral weights is `e^{-rk}` times the one-period price. -/
+lemma crrUpProb_average_discounted (u d r : ℝ) (k : ℕ) (a b : ℝ) :
+    crrUpProb u d r * (Real.exp (-r * (k + 1 : ℕ)) * a)
+      + (1 - crrUpProb u d r) * (Real.exp (-r * (k + 1 : ℕ)) * b)
+      = Real.exp (-r * k) * binomialOptionPriceOnePeriod u d r a b := by
+  unfold binomialOptionPriceOnePeriod
+  have hexp : Real.exp (-r * ((k : ℕ) + 1 : ℕ)) = Real.exp (-r * k) * Real.exp (-r) := by
+    rw [← Real.exp_add]
+    congr 1
+    push_cast
+    ring
+  rw [hexp]
+  ring
 
 /-- **Identification with the scalar Bellman recursion**: for the discounted
 intrinsic payoff `Z_n(ω) = e^{−rn}·g(S_n(ω))` and risk-neutral
@@ -282,20 +244,67 @@ theorem snellAux_eq_discounted_americanPrice (u d r : ℝ) (g : ℝ → ℝ) (S�
             (americanPrice u d r g j (spotPath S₀ u d k ω * u))
             (americanPrice u d r g j (spotPath S₀ u d k ω * d)) := by
       rw [ih (k + 1) (Function.update ω k true), ih (k + 1) (Function.update ω k false),
-        spotPath_update_succ_true, spotPath_update_succ_false]
-      unfold binomialOptionPriceOnePeriod
-      have hexp : Real.exp (-r * ((k : ℕ) + 1 : ℕ))
-          = Real.exp (-r * k) * Real.exp (-r) := by
-        rw [← Real.exp_add]
-        congr 1
-        push_cast
-        ring
-      rw [hexp]
-      ring
+        spotPath_update_succ_true, spotPath_update_succ_false, crrUpProb_average_discounted]
     change max _ _ = _
     rw [americanPrice_succ,
       mul_max_of_nonneg _ _ (Real.exp_pos (-r * (k : ℝ))).le]
     exact congrArg₂ max rfl h_cont
+
+/-- **Snell envelope upper bound (Markov form)**: any function `V : ℕ → ℝ → ℝ` that dominates the
+payoff (`hV_g`) and satisfies the one-step supermartingale condition (`hV_super`) is bounded below
+by `americanPrice` at every step and spot.
+
+Combined with `americanPrice_ge_intrinsic` and `americanPrice_supermartingale` (which show
+`americanPrice` itself satisfies both conditions), this gives the **Snell envelope
+characterization**: `americanPrice` is the smallest such `V`. It is the pathwise minimality
+(`snellAux_le_of_supermartingale_of_ge`) for the discounted process
+`U_k(ω) = e^{−rk}·V_{n−k}(S_k(ω))` along the spot path from `S`, whose supermartingale step is
+`hV_super` at the node (`crrUpProb_average_discounted`), against the discounted intrinsic payoff;
+by the identification theorem its envelope at time `0` is `americanPrice n S`. -/
+theorem americanPrice_le_of_supermartingale_dominating
+    {u d r : ℝ} (h : BinomialNoArb u d r) (g : ℝ → ℝ) (V : ℕ → ℝ → ℝ)
+    (hV_g : ∀ n S, g S ≤ V n S)
+    (hV_super : ∀ n S,
+      binomialOptionPriceOnePeriod u d r (V n (S * u)) (V n (S * d)) ≤
+        V (n + 1) S) :
+    ∀ n S, americanPrice u d r g n S ≤ V n S := by
+  intro n S
+  have key := snellAux_le_of_supermartingale_of_ge (q := crrUpProb u d r) (H := n)
+    (Z := fun m ω ↦ Real.exp (-r * m) * g (spotPath S u d m ω))
+    (U := fun k ω ↦ Real.exp (-r * k) * V (n - k) (spotPath S u d k ω))
+    (crrUpProb_mem_Ioo h).1.le (crrUpProb_mem_Ioo h).2.le
+    (fun k hk ω ↦ by
+      rw [spotPath_update_succ_true, spotPath_update_succ_false, crrUpProb_average_discounted,
+        show n - k = (n - (k + 1)) + 1 by omega]
+      exact mul_le_mul_of_nonneg_left (hV_super _ _) (Real.exp_pos _).le)
+    (fun k ω ↦ mul_le_mul_of_nonneg_left (hV_g _ _) (Real.exp_pos _).le)
+    n 0 (fun _ ↦ true) (by omega)
+  rwa [snellAux_eq_discounted_americanPrice, Nat.cast_zero, mul_zero, Real.exp_zero, one_mul,
+    Nat.sub_zero, one_mul, spotPath, Finset.prod_range_zero, mul_one] at key
+
+/-- **Snell envelope theorem (packaged form)**: `americanPrice u d r g` is
+the smallest function `V : ℕ → ℝ → ℝ` that simultaneously dominates the
+payoff and satisfies the one-step supermartingale property.
+
+The statement makes the universal characterization visible: for *any* V
+satisfying the two properties, `americanPrice ≤ V`. -/
+theorem americanPrice_is_snell_envelope
+    {u d r : ℝ} (h : BinomialNoArb u d r) (g : ℝ → ℝ) :
+    (∀ n S, g S ≤ americanPrice u d r g n S) ∧
+    (∀ n S,
+      binomialOptionPriceOnePeriod u d r
+        (americanPrice u d r g n (S * u)) (americanPrice u d r g n (S * d)) ≤
+      americanPrice u d r g (n + 1) S) ∧
+    (∀ (V : ℕ → ℝ → ℝ),
+      (∀ n S, g S ≤ V n S) →
+      (∀ n S,
+        binomialOptionPriceOnePeriod u d r (V n (S * u)) (V n (S * d)) ≤
+          V (n + 1) S) →
+      ∀ n S, americanPrice u d r g n S ≤ V n S) :=
+  ⟨americanPrice_ge_intrinsic u d r g,
+   americanPrice_supermartingale u d r g,
+   americanPrice_le_of_supermartingale_dominating h g⟩
+
 
 /-- **The discounted American price process is a supermartingale** along every
 path: for `k < N`, the risk-neutral node-average of the next-step discounted
@@ -362,8 +371,8 @@ theorem americanPrice_snell_minimal (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ)
     (N k : ℕ) (ω : ℕ → Bool) :
     Real.exp (-r * k) * americanPrice u d r g (N - k) (spotPath S₀ u d k ω) ≤ U k ω := by
   rw [← snellAux_eq_discounted_americanPrice]
-  exact snellAux_le_of_supermartingale_of_ge (crrUpProb_mem_Ioo hna).1.le
-    (crrUpProb_mem_Ioo hna).2.le hU_super hU_ge _ _ ω
+  exact snellAux_le_of_supermartingale_of_ge (H := k + (N - k)) (crrUpProb_mem_Ioo hna).1.le
+    (crrUpProb_mem_Ioo hna).2.le (fun k' _ ω ↦ hU_super k' ω) hU_ge _ _ ω le_rfl
 
 /-- **Adaptedness of the discounted American value process**: the discounted
 value at time `k` depends only on the first `k` flips — its
