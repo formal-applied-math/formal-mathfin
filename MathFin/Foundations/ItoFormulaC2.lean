@@ -138,10 +138,8 @@ theorem ito_formula_L2
       = -(1 / 2) * (QV n ω - I2 ω) - Rem n ω := by
     intro ω
     have hd := discrete_ito_formula n (fun k ↦ B (unifPart T n k) ω) f f' f''
-    have hnn : unifPart T n n = T := by
-      have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-      simp only [unifPart, div_self hne, one_mul]
-    have hz : unifPart T n 0 = 0 := by simp [unifPart]
+    have hnn : unifPart T n n = T := unifPart_self T hn.ne'
+    have hz : unifPart T n 0 = 0 := unifPart_zero T n
     rw [hnn, hz] at hd
     simp only [hIsum, hQVdef, hRemdef]
     linarith [hd]

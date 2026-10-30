@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 714 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 681 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 718 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 685 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 15 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -157,9 +157,11 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   is worth the sum of those models' bond prices. A one-period payer swap is a forward-rate
   agreement worth `fraValue`
   ([`value_payerSwap_one_eq_fraValue`](MathFin/Contracts/Instruments/FixedIncome.lean)), and the power
-  call and the exchange option are worth their Black–Scholes closed forms
+  call, the exchange option and the geometric-average Asian call are worth their Black–Scholes
+  closed forms
   ([`value_powerCall`](MathFin/Contracts/Models/BlackScholes.lean),
-  [`value_exchangeOption`](MathFin/Contracts/Models/BlackScholesExchange.lean)).
+  [`value_exchangeOption`](MathFin/Contracts/Models/BlackScholesExchange.lean),
+  [`value_geomAsianCall`](MathFin/Contracts/Models/BlackScholesAsian.lean)).
 
 ## Contents
 
@@ -181,7 +183,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Fifteen of the 714 results are reduced cores. Eleven assume a structure whose fields include the
+- Fifteen of the 718 results are reduced cores. Eleven assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, the two-dimensional Itô formula,

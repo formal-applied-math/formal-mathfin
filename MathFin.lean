@@ -103,6 +103,8 @@ import MathFin.Foundations.SimpleDoleansExponential
 import MathFin.Foundations.GirsanovSimpleTheta
 import MathFin.Foundations.Numeraire
 import MathFin.Foundations.BrownianQuadraticVariation
+-- The uniform partition of [0, T] (and [s, t]): the one equipartition of the Itô stack
+import MathFin.Foundations.UnifPart
 import MathFin.Foundations.QuadraticVariationL2
 import MathFin.Foundations.ExpMin
 import MathFin.Foundations.NoArbitrageCore
@@ -235,6 +237,8 @@ import MathFin.Foundations.ItoSquaringIdentity
 import MathFin.Foundations.DiscreteItoPolynomial
 -- Continuous-time L² Itô formula for `f(x) = x²`: `∑ B ΔB → ½(B_T² − B_0² − T)`
 import MathFin.Foundations.ItoFormulaSquaredL2
+-- The Riemann-Itô sum `riemannσ`: the one left-endpoint sum every bridge below is a case of
+import MathFin.Foundations.ItoRiemannSum
 -- Keystone: `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` as a genuine `itoIntegralCLM_T` identity
 -- (the continuous Itô integral's first real consumer)
 import MathFin.Foundations.ItoIntegralBrownian
@@ -743,6 +747,7 @@ import MathFin.Contracts.Instruments.FixedIncome
 import MathFin.Contracts.Parity
 import MathFin.Contracts.Models.BlackScholes
 import MathFin.Contracts.Models.BlackScholesExchange
+import MathFin.Contracts.Models.BlackScholesAsian
 import MathFin.Contracts.Models.Binomial
 import MathFin.Contracts.Models.BinomialLimit
 import MathFin.Contracts.Models.ShortRate
@@ -823,6 +828,7 @@ import MathFin.Commodities.TheoryOfStorage
 -- AR(1) <-> Ornstein-Uhlenbeck parameter inversion for commodity calibration
 import MathFin.Commodities.AR1OUCalibration
 import MathFin.Binomial.PathMeasure
+import MathFin.Binomial.MultiPeriodFTAP
 import MathFin.BlackScholes.JumpDiffusionThinning
 import MathFin.Bridges.ABCDBlack76
 import MathFin.Bridges.AmericanPutEuropeanBound

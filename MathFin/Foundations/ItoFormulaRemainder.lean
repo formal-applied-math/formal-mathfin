@@ -143,7 +143,7 @@ theorem tendsto_ito_remainder
       (continuous_iff_continuousAt.mpr fun x ↦ (hf' x).continuousAt).measurable
   have hf''m : Measurable f'' :=
       (continuous_iff_continuousAt.mpr fun x ↦ (hf'' x).continuousAt).measurable
-  have hmono : ∀ n, Monotone (unifPart T n) := fun n a b hab ↦ by simp only [unifPart]; gcongr
+  have hmono : ∀ n, Monotone (unifPart T n) := unifPart_mono T
   -- per-step squared remainder: measurable, and `≤ Cf3²·(ΔBₖ)⁶`
   have hRk_meas : ∀ n k, Measurable (fun ω ↦ discreteTaylorRemainder f f' f''
       (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) := by
@@ -183,9 +183,8 @@ theorem tendsto_ito_remainder
     (Eventually.of_forall fun n ↦ integral_nonneg fun ω ↦ sq_nonneg _) ?_
     (by simpa using tendsto_const_div_atTop_nhds_zero_nat (15 * Cf3 ^ 2 * (T : ℝ) ^ 3))
   filter_upwards [eventually_gt_atTop 0] with n hn
-  have hn0 : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
   have hΔ : ∀ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) / n :=
-    fun k _ ↦ by simp only [unifPart]; push_cast; field_simp; ring
+    fun k _ ↦ unifPart_succ_sub T n k
   calc ∫ ω, (∑ k ∈ Finset.range n, discreteTaylorRemainder f f' f''
             (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ
       ≤ ∫ ω, (n : ℝ) * ∑ k ∈ Finset.range n, (discreteTaylorRemainder f f' f''

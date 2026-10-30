@@ -162,7 +162,7 @@ theorem tendsto_sum_discreteTaylorRemainder2D (T : ℝ≥0) {f f_t f_x f_xx : �
   have hsum_t : ∑ k ∈ Finset.range (ν i),
       ((unifPart T (ν i) (k + 1) : ℝ) - unifPart T (ν i) k) ≤ T := by
     rw [Finset.sum_range_sub (fun k ↦ (unifPart T (ν i) k : ℝ))]
-    have h0 : unifPart T (ν i) 0 = 0 := by simp [unifPart]
+    have h0 : unifPart T (ν i) 0 = 0 := unifPart_zero T (ν i)
     rw [h0, NNReal.coe_zero, sub_zero]
     exact NNReal.coe_le_coe.2 (unifPart_le_T le_rfl)
   rw [Real.dist_eq, sub_zero]
@@ -218,8 +218,8 @@ theorem ito_formula_td_of_tendsto (T : ℝ≥0) {f f_t f_x f_xx : ℝ → ℝ �
   filter_upwards [hν.eventually (eventually_ne_atTop 0)] with i hi
   have h := discrete_ito_formula_2d (ν i) (fun k ↦ (unifPart T (ν i) k : ℝ))
     (fun k ↦ x (unifPart T (ν i) k)) f f_t f_x f_xx
-  have hT : unifPart T (ν i) (ν i) = T := by simp [unifPart, hi]
-  have h0 : unifPart T (ν i) 0 = 0 := by simp [unifPart]
+  have hT : unifPart T (ν i) (ν i) = T := unifPart_self T hi
+  have h0 : unifPart T (ν i) 0 = 0 := unifPart_zero T (ν i)
   simp only [hT, h0, NNReal.coe_zero] at h
   have hsplit : ∑ k ∈ Finset.range (ν i), f_x (unifPart T (ν i) k) (x (unifPart T (ν i) k))
         * (x (unifPart T (ν i) (k + 1)) - x (unifPart T (ν i) k))

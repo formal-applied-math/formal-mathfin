@@ -454,7 +454,7 @@
       "id": "mf-contract-power-call-black-scholes",
       "name": "The Reified Power Call Prices to the Effective Black-Scholes Call Formula",
       "domain": "mathematical_finance",
-      "description": "The power call contract powerCall a K T, a payoff built from max, sub, mul and const nodes that pays max(S_T^a - K, 0) at T for a natural exponent a > 0 and K > 0, is worth, under the single-asset Black-Scholes model with discount e^{-rT} and the BSCallHyp hypotheses, S^_0 Phi(d1) - K e^{-rT} Phi(d2), with S^_0 = bsPowerEffectiveSpot S_0 r sigma T a and d1, d2 taken at that spot and volatility a sigma.",
+      "description": "The power call contract powerCall a K T, a payoff built from max, sub and const nodes and the real-power rpow node at the natural exponent a that pays max(S_T^a - K, 0) at T for a natural exponent a > 0 and K > 0, is worth, under the single-asset Black-Scholes model with discount e^{-rT} and the BSCallHyp hypotheses, S^_0 Phi(d1) - K e^{-rT} Phi(d2), with S^_0 = bsPowerEffectiveSpot S_0 r sigma T a and d1, d2 taken at that spot and volatility a sigma.",
       "code": {
         "lean": "import MathFin.Contracts.Models.BlackScholes\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The reified power call prices to the effective Black-Scholes call formula. -/\ntheorem value_powerCall' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (a : ℕ) (ha : 0 < a) (hK : 0 < K)\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    (powerCall a K T).value Q (fun _ ↦ Real.exp (-r * T)) (BlackScholes.assets S_0 r σ T Z)\n      = bsPowerEffectiveSpot S_0 r σ T a *\n          Phi (bsd1 (bsPowerEffectiveSpot S_0 r σ T a) K r ((a : ℝ) * σ) T)\n        - K * Real.exp (-r * T) *\n          Phi (bsd2 (bsPowerEffectiveSpot S_0 r σ T a) K r ((a : ℝ) * σ) T) :=\n  BlackScholes.value_powerCall a ha hK h\n"
       },
@@ -463,7 +463,7 @@
         "reference": "Power options (Zhang, Exotic Options, 2nd ed.); Black-Scholes European call formula (Hull 15.6, Shreve 4.5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. value_powerCall in MathFin/Contracts/Models/BlackScholes.lean: Contract.value_pay unfolds the single pay node, Payoff.eval_pow identifies the evaluated power payoff with bsPowerTerminal, and MathFin.bs_power_call_formula closes it -- no new Black-Scholes content. Natural-number exponents only (Payoff.pow is iterated mul; the payoff language has no real power). BlackScholes.assets is the terminal log-normal price at every time; the BSCallHyp bundle is the one the underlying closed form requires. Not a legal instrument. Axioms-clean."
+        "formalization_scope": "Full formal proof. value_powerCall in MathFin/Contracts/Models/BlackScholes.lean: Contract.value_pay unfolds the single pay node, Real.rpow_natCast identifies the evaluated rpow payoff (exponent the natural a, read as an NNReal) with bsPowerTerminal, and MathFin.bs_power_call_formula closes it -- no new Black-Scholes content. Natural-number exponents only (the closed form is stated for natural a, although the rpow node carries any nonnegative real exponent). BlackScholes.assets is the terminal log-normal price at every time; the BSCallHyp bundle is the one the underlying closed form requires. Not a legal instrument. Axioms-clean."
       }
     },
     {
@@ -480,6 +480,22 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. value_exchangeOption in MathFin/Contracts/Models/BlackScholesExchange.lean: Contract.value_pay unfolds the single pay node and MathFin.margrabe_exchange_price (MathFin/BlackScholes/MargrabeGrounding.lean) closes it -- no new Margrabe content. The statement is under the model measure, not the S2-numeraire measure. BlackScholes.assets₂ reads the two terminals at every time (no path). Not a legal instrument. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-geometric-asian-black-scholes",
+      "name": "The Reified Geometric Asian Call Prices to the Effective Black-Scholes Call Formula",
+      "domain": "mathematical_finance",
+      "description": "The geometric-average Asian call contract geomAsianCall K T tau over n averaging dates tau_1,...,tau_n, a payoff built from max, sub, const, mul and obs nodes under the real-power rpow node at exponent 1/n that pays max((prod_i S_{tau_i})^(1/n) - K, 0) at T, is worth, under the Black-Scholes path S_u = S_0 exp((r - sigma^2/2) u + sigma B_u) of a pre-Brownian motion B with discount e^{-rT}, the call price S^_0 Phi(d1) - K e^{-rT} Phi(d2) at the effective spot S^_0 = geomAsianEffSpot and volatility geomAsianEffVol, provided every tau_i <= T, T > 0, S_0, K, sigma > 0 and the log-driver variance V_n = (1/n^2) sum_{i,j} min(tau_i, tau_j) is positive.",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.BlackScholesAsian\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The reified geometric Asian call prices to the effective Black-Scholes call formula. -/\ntheorem value_geomAsianCall' {μ : Measure Ω} [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ}\n    (hB : IsPreBrownianReal B μ) {T : ℝ≥0} {n : ℕ} (hn : 0 < n) (τ : Fin n → ℝ≥0)\n    (hτT : ∀ i, τ i ≤ T) {S_0 K r σ : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ)\n    (hT : 0 < (T : ℝ)) (hV : 0 < geomAsianVar τ) :\n    (geomAsianCall K T τ).value μ (fun _ ↦ Real.exp (-r * T)) (BlackScholes.pathAssets S_0 r σ B)\n      = geomAsianEffSpot S_0 r σ T τ *\n          Phi (bsd1 (geomAsianEffSpot S_0 r σ T τ) K r (geomAsianEffVol σ T τ) T)\n        - K * Real.exp (-r * T) *\n          Phi (bsd2 (geomAsianEffSpot S_0 r σ T τ) K r (geomAsianEffVol σ T τ) T) :=\n  BlackScholes.value_geomAsianCall hB hn τ hτT hS₀ hK hσ hT hV\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Geometric-average Asian options (Kemna-Vorst 1990; Zhang, Exotic Options, 2nd ed.); Black-Scholes European call formula (Hull 15.6, Shreve 4.5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. value_geomAsianCall in MathFin/Contracts/Models/BlackScholesAsian.lean: Contract.value_pay unfolds the single pay node, the observation product (Payoff.obsProd over the dates) under rpow at 1/n is rewritten as the product of per-date powers by Real.finsetProd_rpow, and MathFin.geomAsianN_call_price closes it -- no new Black-Scholes content. The model BlackScholes.pathAssets is the geometric Brownian path S_u = S_0 exp((r - sigma^2/2) u + sigma B_u) for a pre-Brownian B (IsPreBrownianReal), added with this entry. The payoff is paid once at maturity T on the n listed dates (all <= T); the closed form is the effective-spot, effective-volatility reduction of geomAsianN_call_price, and needs the log-driver variance V_n > 0 (a degenerate set of dates is excluded). Not a legal instrument. Axioms-clean."
       }
     }
   ]
