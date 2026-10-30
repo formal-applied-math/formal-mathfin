@@ -41,7 +41,8 @@ the risk measure of any law. They stay as parameter algebra for that reason: a d
 structure would carry the hypotheses `σ > 0` and `α ∈ (0, 1)` and, for subadditivity, would have to
 realise an arbitrary `(σ₁, σ₂, ρ)` as a jointly Gaussian pair, and it would prove strictly less.
 In `gaussianVaR_subadditive` and `gaussianCVaR_subadditive` the correlation `ρ` is a free
-parameter; the random-variable theorems are the cases at the correlation the pair actually has.
+parameter; `valueAtRisk_add_le_of_hasGaussianLaw` and `gaussianCVaR_sd_add_le` are the statements at the
+correlation a pair actually has.
 
 Results:
 
@@ -96,7 +97,7 @@ lemma gaussianCVaR_monotone_mean {μ₁ μ₂ σ z α : ℝ}
   linarith
 
 /-- **Joint-standard-deviation triangle inequality**:
-`√(σ₁² + 2 ρ σ₁ σ₂ + σ₂²) ≤ σ₁ + σ₂` whenever `|ρ| ≤ 1` and `σ_i ≥ 0`. This is
+`√(σ₁² + 2 ρ σ₁ σ₂ + σ₂²) ≤ σ₁ + σ₂` whenever `ρ ≤ 1` and `σ_i ≥ 0`. This is
 the substantive inequality behind gaussian subadditivity. -/
 lemma joint_stdev_le {σ₁ σ₂ ρ : ℝ}
     (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) :
@@ -110,7 +111,7 @@ lemma joint_stdev_le {σ₁ σ₂ ρ : ℝ}
   rwa [Real.sqrt_sq h_sum_nn] at this
 
 /-- **Gaussian VaR subadditivity**: for joint-gaussian `L₁ + L₂ ~ N(μ₁ + μ₂, σ₊²)`
-with `σ₊ = √(σ₁² + 2 ρ σ₁ σ₂ + σ₂²)` and `|ρ| ≤ 1`, `σ_i ≥ 0`, `z ≥ 0`:
+with `σ₊ = √(σ₁² + 2 ρ σ₁ σ₂ + σ₂²)` and `ρ ≤ 1`, `σ_i ≥ 0`, `z ≥ 0`:
 `VaR(L₁ + L₂) ≤ VaR(L₁) + VaR(L₂)`. -/
 lemma gaussianVaR_subadditive {μ₁ μ₂ σ₁ σ₂ ρ z : ℝ}
     (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) (hz : 0 ≤ z) :
