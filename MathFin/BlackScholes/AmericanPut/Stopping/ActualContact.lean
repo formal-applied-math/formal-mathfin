@@ -86,7 +86,7 @@ theorem canonicalGap_adapted (hk : 0 ≤ k) (hW : Adapted 𝓕 W) (x : ℝ) (T :
 /-- The rule stopping at the first zero of `canonicalGap`, that is, at first contact of the
 price with the payoff. -/
 noncomputable def canonicalContactRule (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
-    (hpaths : ∀ ω, Continuous (fun t => W t ω)) (x : ℝ) (T : ℝ≥0) : BoundedRule 𝓕 T :=
+    (hpaths : ∀ ω, Continuous (fun t => W t ω)) (x : ℝ) (T : ℝ≥0) : StoppingRule 𝓕 T :=
   firstContactRule (Z := canonicalGap W k h x T)
     (canonicalGap_adapted hk hW x T) (canonicalGap_continuous hk hpaths x T)
     (canonicalGap_nonneg hk x T) T (canonicalGap_terminal hk x T)
@@ -133,7 +133,8 @@ theorem brownianUsual_adapted :
 
 /-- Concrete admissible rule on the completed usual Brownian space. -/
 noncomputable def brownianUsualActualContactRule {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) (T : ℝ≥0) :
-    @BoundedRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit) brownianUsualFiltration T :=
+    @StoppingRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit) ℝ≥0 _
+      brownianUsualFiltration T :=
   @canonicalContactRule _ (completedMeasurableSpace gaussianLimit) brownianUsualFiltration
     brownian k h hk brownianUsual_adapted continuous_brownian x T
 

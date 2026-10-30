@@ -78,7 +78,7 @@ theorem localizationMargin_terminal (Z W : ℝ≥0 → Ω → ℝ) (T : ℝ≥0)
 /-- The rule stopping at the first zero of `localizationMargin Z W T n`, capped at `T`. -/
 noncomputable def interiorRule (hZ : Adapted 𝓕 Z) (hW : Adapted 𝓕 W)
     (hcZ : ∀ ω, Continuous (fun t => Z t ω)) (hcW : ∀ ω, Continuous (fun t => W t ω))
-    (T : ℝ≥0) (n : ℕ) : BoundedRule 𝓕 T :=
+    (T : ℝ≥0) (n : ℕ) : StoppingRule 𝓕 T :=
   firstContactRule (localizationMargin_adapted hZ hW T n)
     (localizationMargin_continuous hcZ hcW T n)
     (localizationMargin_nonneg Z W T n) T (localizationMargin_terminal Z W T n)

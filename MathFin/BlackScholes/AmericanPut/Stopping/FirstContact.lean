@@ -93,7 +93,7 @@ theorem firstContactTime_le_iff (hcont : ∀ ω, Continuous (fun t => Z t ω))
 `Z` that vanishes at the horizon `T`. -/
 noncomputable def firstContactRule (hadapt : Adapted 𝓕 Z)
     (hcont : ∀ ω, Continuous (fun t => Z t ω)) (hnonneg : ∀ t ω, 0 ≤ Z t ω)
-    (T : ℝ≥0) (hterminal : ∀ ω, Z T ω = 0) : BoundedRule 𝓕 T where
+    (T : ℝ≥0) (hterminal : ∀ ω, Z T ω = 0) : StoppingRule 𝓕 T where
   time := firstContactTime Z T
   stopping := by
     intro t

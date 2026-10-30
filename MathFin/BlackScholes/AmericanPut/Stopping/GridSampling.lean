@@ -38,16 +38,16 @@ def gridFiltration (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (δ : �
 
 /-- The first grid index at or after a rule's time, `⌈θ.time ω/δ⌉₊`. -/
 noncomputable def gridIndex {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T : ℝ≥0}
-    (θ : BoundedRule 𝓕 T) (δ : ℝ≥0) (ω : Ω) : ℕ :=
+    (θ : StoppingRule 𝓕 T) (δ : ℝ≥0) (ω : Ω) : ℕ :=
   ⌈θ.time ω / δ⌉₊
 
 theorem gridIndex_le_iff {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
-    (θ : BoundedRule 𝓕 T) (hδ : 0 < δ) (ω : Ω) (i : ℕ) :
+    (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) (ω : Ω) (i : ℕ) :
     gridIndex θ δ ω ≤ i ↔ θ.time ω ≤ (i : ℝ≥0)*δ := by
   simp only [gridIndex,Nat.ceil_le,div_le_iff₀ hδ]
 
 theorem gridIndex_stopping {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
-    (θ : BoundedRule 𝓕 T) (hδ : 0 < δ) :
+    (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) :
     IsStoppingTime (gridFiltration 𝓕 δ) (fun ω => (gridIndex θ δ ω : ℕ∞)) := by
   intro i
   change MeasurableSet[𝓕 ((i : ℝ≥0)*δ)] {ω | (gridIndex θ δ ω : ℕ∞) ≤ i}
@@ -55,7 +55,7 @@ theorem gridIndex_stopping {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} 
       θ.stopping ((i : ℝ≥0)*δ)
 
 theorem gridIndex_bounded {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
-    (θ : BoundedRule 𝓕 T) (ω : Ω) : gridIndex θ δ ω ≤ ⌈T/δ⌉₊ :=
+    (θ : StoppingRule 𝓕 T) (ω : Ω) : gridIndex θ δ ω ≤ ⌈T/δ⌉₊ :=
   Nat.ceil_mono (div_le_div_of_nonneg_right (θ.le_horizon ω) zero_le)
 
 theorem supermartingale_grid {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
@@ -68,7 +68,7 @@ theorem supermartingale_grid {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›
 theorem expected_gridValue_le {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
     {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}
     (hU : Supermartingale U 𝓕 P) {T δ : ℝ≥0}
-    (θ : BoundedRule 𝓕 T) (hδ : 0 < δ) :
+    (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) :
     (∫ ω, U ((gridIndex θ δ ω : ℝ≥0)*δ) ω ∂P) ≤ ∫ ω, U 0 ω ∂P := by
   have hh := (supermartingale_grid hU δ).neg.expected_stoppedValue_mono
     (isStoppingTime_const (gridFiltration 𝓕 δ) 0) (gridIndex_stopping θ hδ)
@@ -84,7 +84,7 @@ theorem gridStep_pos (n : ℕ) : 0 < gridStep n := by
   positivity
 
 theorem gridValue_time_tendsto {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T : ℝ≥0}
-    (θ : BoundedRule 𝓕 T) (ω : Ω) :
+    (θ : StoppingRule 𝓕 T) (ω : Ω) :
     Tendsto (fun n => (gridIndex θ (gridStep n) ω : ℝ≥0)*gridStep n)
       atTop (𝓝 (θ.time ω)) := by
   apply NNReal.tendsto_coe.mp
@@ -100,7 +100,7 @@ theorem gridValue_time_tendsto {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω�
   simpa [Function.comp_def,gridIndex,gridStep,div_eq_mul_inv,hceil] using hh
 
 theorem gridIndex_measurable {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
-    (θ : BoundedRule 𝓕 T) : Measurable (gridIndex θ δ) :=
+    (θ : StoppingRule 𝓕 T) : Measurable (gridIndex θ δ) :=
   Nat.measurable_ceil.comp (θ.measurable_time.div_const δ)
 
 /-- Bounded continuous-path optional stopping. This is derived from discrete
@@ -108,7 +108,7 @@ optional stopping, not assumed as an axiom or as a pricing-contract field. -/
 theorem expected_stoppedValue_le_initial {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
     {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}
     (hU : Supermartingale U 𝓕 P) (hcont : ∀ ω, Continuous (fun t => U t ω))
-    {C : ℝ} (hbound : ∀ t ω, ‖U t ω‖ ≤ C) {T : ℝ≥0} (θ : BoundedRule 𝓕 T) :
+    {C : ℝ} (hbound : ∀ t ω, ‖U t ω‖ ≤ C) {T : ℝ≥0} (θ : StoppingRule 𝓕 T) :
     (∫ ω, U (θ.time ω) ω ∂P) ≤ ∫ ω, U 0 ω ∂P := by
   have hmeas : Measurable U.uncurry :=
     measurable_uncurry_of_continuous_of_measurable hcont
@@ -129,7 +129,7 @@ theorem expected_stoppedValue_le_initial {𝓕 : Filtration ℝ≥0 ‹Measurabl
 theorem expected_stoppedValue_eq_initial {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
     {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}
     (hU : Martingale U 𝓕 P) (hcont : ∀ ω, Continuous (fun t => U t ω))
-    {C : ℝ} (hbound : ∀ t ω, ‖U t ω‖ ≤ C) {T : ℝ≥0} (θ : BoundedRule 𝓕 T) :
+    {C : ℝ} (hbound : ∀ t ω, ‖U t ω‖ ≤ C) {T : ℝ≥0} (θ : StoppingRule 𝓕 T) :
     (∫ ω, U (θ.time ω) ω ∂P) = ∫ ω, U 0 ω ∂P := by
   apply le_antisymm (expected_stoppedValue_le_initial hU.supermartingale hcont hbound θ)
   have hh := expected_stoppedValue_le_initial hU.neg.supermartingale

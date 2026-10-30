@@ -12,7 +12,7 @@ public import MathFin.Foundations.ContinuousMarket
 /-! # Discrete rules sampled at arbitrary deterministic increasing times 
 ## Result
 
-Public entry points include `DiscreteRule.toSampledRule`,
+Public entry points include `StoppingRule.toSampledRule`,
 `bellmanAux_const_mul`.
 -/
 
@@ -27,9 +27,9 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 
 /-- A discrete rule `η` for `ContinuousMarket.sampledFiltration 𝓕 hs` read back in continuous
 time as `ω ↦ s (η.time ω)`, with horizon `s N`. -/
-def DiscreteRule.toSampledRule {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
+def StoppingRule.toSampledRule {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
     {s : ℕ → ℝ≥0} {hs : Monotone s} {N : ℕ}
-    (η : DiscreteRule (ContinuousMarket.sampledFiltration 𝓕 hs) N) : BoundedRule 𝓕 (s N) where
+    (η : StoppingRule (ContinuousMarket.sampledFiltration 𝓕 hs) N) : StoppingRule 𝓕 (s N) where
   time := fun ω => s (η.time ω)
   stopping := by
     intro t
