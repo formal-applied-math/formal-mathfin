@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.AmericanWaiting
+public import MathFin.BlackScholes.AmericanPut.Stopping.ActualContact
 
 /-! # Supermartingality of the actual normalized American price
 
@@ -15,7 +16,7 @@ solution. The waiting inequality supplies the conditional supermartingale bound.
 ## Result
 
 Public entry points include `canonicalPrice_transition`, `canonicalDiscountedPrice`,
-`canonicalDiscountedPrice_initial`, `canonicalDiscountedPrice_gap`.
+`canonicalDiscountedPrice_initial`, `canonicalDiscountedPrice_eq_classicalCandidate`.
 -/
 
 @[expose] public section
@@ -55,55 +56,40 @@ theorem canonicalDiscountedPrice_initial (k h x : ℝ) (T : ℝ≥0) :
   filter_upwards [isBrownianReal_brownian.eval_zero_ae_eq_zero] with ω hω
   simp [canonicalDiscountedPrice,brownianLogState,hω]
 
-theorem canonicalDiscountedPrice_gap (k h x : ℝ) (T t : ℝ≥0) (ω : ℝ≥0 → ℝ) :
-    canonicalDiscountedPrice k h x T t ω-
-      putReward brownian 1 k h (Real.sqrt 2) (Real.exp x) (fun _ => min t T) ω =
-      Real.exp (-k*(min t T : ℝ≥0))*canonicalGap brownian k h x T t ω := by
-  have hp : putReward brownian 1 k h (Real.sqrt 2) (Real.exp x) (fun _ => min t T) ω =
-      Real.exp (-k*(min t T : ℝ≥0))*putPayoff (canonicalLogPath brownian k h x T t ω) := by
-    unfold putReward putPayoff
-    rw [canonicalLogPath_exp]
-    simp only [NNReal.coe_min]
-  rw [hp]
-  unfold canonicalDiscountedPrice canonicalGap
-  change _*canonicalPrice k h (canonicalLogPath brownian k h x T t ω) _-_ = _
-  simp only [NNReal.coe_min]
-  ring
+/-- The discounted price process is the classical candidate at strike `1`, rate `k`, dividend
+`h`, volatility `Real.sqrt 2` and spot `Real.exp x`. -/
+theorem canonicalDiscountedPrice_eq_classicalCandidate (k h x : ℝ) (T : ℝ≥0) :
+    canonicalDiscountedPrice k h x T =
+      classicalCandidate brownian 1 k h (Real.sqrt 2) (Real.exp x) (canonicalPrice k h) T := by
+  funext t ω
+  simp only [canonicalDiscountedPrice,classicalCandidate,classicalLogSpot_canonical,
+    sqrt_two_sq_div_two_mul,one_mul,brownianLogState]
 
 theorem canonicalDiscountedPrice_dominates {k h : ℝ} (hk : 0 ≤ k) (x : ℝ)
     (T t : ℝ≥0) (ω : ℝ≥0 → ℝ) :
-    putReward brownian 1 k h (Real.sqrt 2) (Real.exp x) (fun _ => min t T) ω ≤
+    frozenPutReward brownian 1 k h (Real.sqrt 2) (Real.exp x) T t ω ≤
       canonicalDiscountedPrice k h x T t ω := by
-  apply sub_nonneg.mp
-  rw [canonicalDiscountedPrice_gap]
-  exact mul_nonneg (Real.exp_pos _).le (canonicalGap_nonneg hk x T t ω)
+  rw [canonicalDiscountedPrice_eq_classicalCandidate]
+  exact sub_nonneg.mp (classicalGap_nonneg (W := brownian) (K := 1) (r := k) (q := h)
+    (σ := Real.sqrt 2) (S := Real.exp x) (canonicalPrice_putEnvelope hk) one_pos
+    (Real.exp_pos x) T t ω)
 
 theorem canonicalDiscountedPrice_bound {k h : ℝ} (hk : 0 ≤ k) (x : ℝ)
     (T t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ‖canonicalDiscountedPrice k h x T t ω‖ ≤ 1 := by
-  obtain ⟨hlo,hhi⟩ := canonicalPrice_bounds (h := h) hk
-    (brownianLogState (k-h-1) (Real.sqrt 2) x (min t T) ω) ((T : ℝ)-(min t T : ℝ≥0))
-  have hp0 : 0 ≤ canonicalPrice k h
-      (brownianLogState (k-h-1) (Real.sqrt 2) x (min t T) ω) ((T : ℝ)-(min t T : ℝ≥0)) :=
-    (le_max_right _ _).trans hlo
-  have he : Real.exp (-k*(min t T : ℝ≥0)) ≤ 1 := Real.exp_le_one_iff.mpr
-    (by nlinarith [(min t T).coe_nonneg])
-  rw [canonicalDiscountedPrice,Real.norm_eq_abs,abs_of_nonneg (mul_nonneg (Real.exp_pos _).le hp0)]
-  exact (mul_le_mul_of_nonneg_left hhi (Real.exp_pos _).le).trans (by simpa using he)
+  obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := h) (σ := Real.sqrt 2) (S := Real.exp x)
+    (canonicalPrice_putEnvelope hk) brownian zero_le_one hk T t ω
+  rw [canonicalDiscountedPrice_eq_classicalCandidate,Real.norm_eq_abs,abs_of_nonneg hlo]
+  exact hhi
 
 theorem canonicalDiscountedPrice_continuous {k h : ℝ} (hk : 0 ≤ k) (x : ℝ)
     (T : ℝ≥0) (ω : ℝ≥0 → ℝ) : Continuous (fun t => canonicalDiscountedPrice k h x T t ω) := by
-  have hw := (continuous_brownian ω).comp (continuous_id.min (continuous_const (y := T)))
-  exact (show Continuous (fun t : ℝ≥0 => Real.exp (-k*(min t T : ℝ≥0))) by fun_prop).mul
-    ((canonicalPrice_continuous hk).comp
-      ((show Continuous (fun t : ℝ≥0 => brownianLogState (k-h-1) (Real.sqrt 2) x (min t T) ω) by
-        unfold brownianLogState; fun_prop).prodMk (by fun_prop)))
+  rw [canonicalDiscountedPrice_eq_classicalCandidate]
+  exact classicalCandidate_continuous (canonicalPrice_putEnvelope hk) continuous_brownian T ω
 
 theorem canonicalDiscountedPrice_adapted {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) (T : ℝ≥0) :
     Adapted brownianFiltration (canonicalDiscountedPrice k h x T) := by
-  intro t
-  have hw := (brownian_adapted (min t T)).mono (brownianFiltration.mono (min_le_left _ _)) le_rfl
-  exact measurable_const.mul ((canonicalPrice_continuous hk).measurable.comp
-    ((measurable_const.add (measurable_const.mul hw)).prodMk measurable_const))
+  rw [canonicalDiscountedPrice_eq_classicalCandidate]
+  exact classicalCandidate_adapted (canonicalPrice_putEnvelope hk) brownian_adapted T
 
 theorem canonicalDiscountedPrice_condExp_le {k h : ℝ} (hk : 0 ≤ k) (x : ℝ)
     {i j T : ℝ≥0} (hij : i ≤ j) (hjT : j ≤ T) :

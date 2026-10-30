@@ -87,7 +87,7 @@ theorem interiorRegion_subset_continuation {p : ℝ → ℝ → ℝ} {b : ℝ �
   intro hx
   have ht' : Real.toNNReal z.1 < T := by
     exact_mod_cast (show (Real.toNNReal z.1 : ℝ) < T by rw [Real.coe_toNNReal _ hz.1.1.1]; exact ht)
-  have hzero := (classicalGap_zero_iff (W := fun _ (_ : Unit) => z.2) hp hK hS hσ ht' ()).mpr
+  have hzero := (classicalGap_zero_iff (W := fun _ (_ : Unit) => z.2) hp.toContinuousBoundaryPutSolution hK hS hσ ht' ()).mpr
     (by simpa [classicalLogSpot,Real.coe_toNNReal _ hz.1.1.1] using hx)
   change planeClassicalGap p K r q σ S T z = 0 at hzero
   linarith [hz.2.1,localizationEps_pos n]
@@ -101,13 +101,13 @@ theorem brownianInteriorRule_mem_region {p : ℝ → ℝ → ℝ} {b : ℝ → �
   have hm : localizationEps n ≤ classicalGap brownian K r q σ S p T t ω ∧
       |brownian t ω| ≤ (n : ℝ)+1 ∧ (t : ℝ)+localizationEps n ≤ T := by
     rcases lt_or_eq_of_le ht with hlt | heq
-    · have hh := interiorRule_before (classicalGap_adapted hp brownian_adapted T) brownian_adapted
-        (classicalGap_continuous hp continuous_brownian T) continuous_brownian ω hlt
+    · have hh := interiorRule_before (classicalGap_adapted hp.toPutEnvelope brownian_adapted T) brownian_adapted
+        (classicalGap_continuous hp.toPutEnvelope continuous_brownian T) continuous_brownian ω hlt
       exact ⟨hh.1.le,hh.2.1.le,hh.2.2.le⟩
     · subst t
-      exact interiorRule_at_positive_exit (classicalGap_adapted hp brownian_adapted T)
+      exact interiorRule_at_positive_exit (classicalGap_adapted hp.toPutEnvelope brownian_adapted T)
           brownian_adapted
-        (classicalGap_continuous hp continuous_brownian T) continuous_brownian ω hpos
+        (classicalGap_continuous hp.toPutEnvelope continuous_brownian T) continuous_brownian ω hpos
   have htT : t ≤ T := ht.trans ((brownianInteriorRule hp T n).le_horizon ω)
   refine ⟨⟨⟨t.coe_nonneg,by exact_mod_cast htT⟩,?_,(abs_le.mp hm.2.1).2⟩,?_,hm.2.2⟩
   · linarith [(abs_le.mp hm.2.1).1]
