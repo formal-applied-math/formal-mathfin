@@ -41,7 +41,7 @@ date `Tₚ` needs the change of measure to the `Tₚ`-forward measure.
 
 ## Main results
 
-* `SwapModel.integral_discount_mul_bond`, `SwapModel.integral_annuity_mul`,
+* `SwapModel.integral_annuity_mul`,
   `SwapModel.isProbabilityMeasure`, `valueDisc_pay_swapRate`, `valueDisc_cmsCaplet`,
   `valueDisc_cmsFloorlet`, `valueDisc_cmsSwaplet`, `SwapModel.integral_swapRate`.
 -/
@@ -109,13 +109,6 @@ omit [IsProbabilityMeasure Q] in
 theorem SwapModel.D_pos (h : SwapModel Q 𝓕 D X σ b T n δ) (ω : Ω) : 0 < D (T 0) ω :=
   (h.hasBondPrice 1 (Finset.mem_Icc.2 ⟨le_rfl, h.n_pos⟩)).D_pos ω
 
-/-- **The tower property**: `𝔼[D (T 0) · P(T₀, Tᵢ)] = P(0, Tᵢ)`, the zero curve
-(`HasBondPrice.integral_discount`). -/
-theorem SwapModel.integral_discount_mul_bond (h : SwapModel Q 𝓕 D X σ b T n δ) {i : ℕ}
-    (hi : i ∈ Finset.Icc 1 n) :
-    ∫ ω, D (T 0) ω * X (b i) (T 0) ω ∂Q = zeroCurve Q D (T i) :=
-  (h.hasBondPrice i hi).integral_discount
-
 omit [IsProbabilityMeasure Q] in
 theorem SwapModel.annuity_pos (h : SwapModel Q 𝓕 D X σ b T n δ) (ω : Ω) :
     0 < CMS.annuityRandom δ (swapCurve X b (T 0)) (Finset.Icc 1 n) ω :=
@@ -150,7 +143,7 @@ theorem SwapModel.integral_annuity_mul (h : SwapModel Q 𝓕 D X σ b T n δ) :
   simp_rw [e]
   rw [integral_const_mul, integral_finsetSum _ fun i hi ↦ (h.hasBondPrice i hi).integrable_discount_mul,
     annuity]
-  exact congrArg _ (Finset.sum_congr rfl fun i hi ↦ h.integral_discount_mul_bond hi)
+  exact congrArg _ (Finset.sum_congr rfl fun i hi ↦ (h.hasBondPrice i hi).integral_discount)
 
 theorem SwapModel.annuity0_pos (h : SwapModel Q 𝓕 D X σ b T n δ) :
     0 < annuity δ (fun i ↦ zeroCurve Q D (T i)) (Finset.Icc 1 n) := by
@@ -244,7 +237,7 @@ theorem SwapModel.integral_swapRate (h : SwapModel Q 𝓕 D X σ b T n δ) :
     rw [hω, parSwapRate, div_mul_cancel₀ _ (h.annuity_pos ω).ne']
     ring
   rw [integral_congr_ae e, integral_sub (h.integrable_D0)
-    ((h.hasBondPrice n hn).integrable_discount_mul), h.integral_discount_mul_bond hn]
+    ((h.hasBondPrice n hn).integrable_discount_mul), (h.hasBondPrice n hn).integral_discount]
   rfl
 
 /-! ### The convexity adjustment, for a rate paid at its fixing date -/
