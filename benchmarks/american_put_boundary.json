@@ -42,6 +42,38 @@
           "note": "Ported from Robert Martin's Apache-2.0 AmericanPutConvexity development. The proof and formalization were substantially AI-assisted; see docs/american-put-boundary.md. Verification evidence for this port is recorded separately in the repository's generated axiom audit and verification ledger."
         }
       }
+    },
+    {
+      "id": "mf-ju-zhong-raw-eq-stable",
+      "name": "Ju-Zhong Quadratic Approximation: NaN Fix Preserves Semantics",
+      "description": "For every nonzero risk-free rate r, the pre-fix Ju-Zhong (1999) modified quadratic-approximation price juValueRaw (computing alpha/h = (2r/sigma^2)/(1 - e^{-rT}) directly, which is 0/0 at r = 0) equals the post-fix, limit-stable price juValue (using rho, the removable-singularity extension of alpha/h, extended by its limit 2/(sigma^2 T) at r = 0), identically in the critical price S* and the spot S. This is the algebraic identity behind QuantLib's rewrite of juquadraticengine.cpp that removes a NaN at r = 0: the rewrite changes nothing for r != 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JuZhongZeroRateLimit\n\nopen MathFin\n\ntheorem ju_zhong_raw_eq_stable_thm (φ K q : ℝ) {σ T r : ℝ} (hσ : σ ≠ 0) (hT : T ≠ 0)\n    (hr : r ≠ 0) (Sk S : ℝ) :\n    MathFin.juValueRaw φ K q σ T r Sk S = MathFin.juValue φ K q σ T r Sk S :=\n  MathFin.juValueRaw_eq_juValue φ K q hσ hT hr Sk S\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "N. Ju and R. Zhong, \"An approximate formula for pricing American options\", Journal of Derivatives 7(2) (1999), 31-40 (the quadratic approximation rewritten here as QuantLib's juquadraticengine.cpp).",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, identically in the critical price S* and spot S, for every r != 0. Pure algebra: alpha*(X/hA) = (alpha*X)/hA holds in Lean even when hA = 0, so no hypothesis on hA or on 1 - chi is needed. Lives in MathFin/BlackScholes/JuZhongZeroRateLimit.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-ju-zhong-zero-rate-limit",
+      "name": "Ju-Zhong Quadratic Approximation: Conditional Zero-Rate Limit",
+      "description": "Let S*(r) be any American-option critical-price function with S*(r) -> S0 > 0 as r -> 0+. If the Ju-Zhong (1999) early-exercise premium coefficient hA(0, S0) is nonzero and 1 - chi(0, S0, S) is nonzero, the pre-fix Ju-Zhong price juValueRaw along (r, S*(r)) tends to the post-fix price juValue at (0, S0) as r -> 0+. The critical price's existence, uniqueness and continuity in r (the Barone-Adesi-Whaley Newton fixed point) are hypotheses, not derived; so are the two nonvanishing side conditions, which QuantLib's rewrite checks for neither. The headline conditional limit confirming the removable-singularity rewrite is correct at the money it applies to.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JuZhongZeroRateLimit\n\nopen MathFin Filter Topology\n\ntheorem ju_zhong_zero_rate_limit_thm {φ K q σ T S S₀ : ℝ} {Sk : ℝ → ℝ}\n    (hφ : φ = 1 ∨ φ = -1) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hS : 0 < S)\n    (hSk : Tendsto Sk (𝓝[>] 0) (𝓝 S₀)) (hS₀ : 0 < S₀)\n    (hA₀ : MathFin.juHA φ K q σ T 0 S₀ ≠ 0) (hχ₀ : 1 - MathFin.juChi φ K q σ T 0 S₀ S ≠ 0) :\n    Tendsto (fun r => MathFin.juValueRaw φ K q σ T r (Sk r) S) (𝓝[>] 0)\n      (𝓝 (MathFin.juValue φ K q σ T 0 S₀ S)) :=\n  MathFin.tendsto_juValueRaw_zero_rate hφ hK hσ hT hS hSk hS₀ hA₀ hχ₀\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "N. Ju and R. Zhong, \"An approximate formula for pricing American options\", Journal of Derivatives 7(2) (1999), 31-40 (the quadratic approximation rewritten here as QuantLib's juquadraticengine.cpp).",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, conditional on continuity of the critical price at 0+ with a positive limit S0 (hSk, hS0), and on the two side conditions hA(0, S0) != 0 and 1 - chi(0, S0, S) != 0 (hA0, hchi0 above), neither of which QuantLib's rewrite checks. The critical price's existence, uniqueness and continuity (the BAW Newton fixed point) are not derived; S*(r) is an input function. Lives in MathFin/BlackScholes/JuZhongZeroRateLimit.lean. Axioms-clean."
+      }
     }
   ]
 }
