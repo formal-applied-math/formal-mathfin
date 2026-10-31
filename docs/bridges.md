@@ -422,11 +422,13 @@ function of `B_t`, and the Itô-integral QV exists only in expectation).
   Black–Scholes price at the horizon `T` — equivalence from the positive unit-mean density,
   martingale from `bs_discounted_isQMartingale` plus `Q`-integrability (`Btheta_map_eq_gaussianReal`),
   assembled by `martingale_stopped_of_setIntegral_eq`. The horizon is why `IsEMM` carries one.
-- **One forward theorem, discrete and continuous.** `FTAP.emm_implies_no_arbitrage` (discrete,
+- **One forward theorem, discrete and continuous.** `FTAP.IsEMM.noArbitrage` (discrete,
   via the `F`-valued martingale transform of Theorem 2.2.9; the one-period vector and the finite-Ω
   forward directions are its instances) is also the proof of `ContinuousMarket.isEMM_noArbitrageSimple`:
-  a simple strategy is a discrete predictable strategy for the price sampled at its own dates
-  (`martingale_comp_monotone`), and its gains are the martingale transform of the sampled price.
+  `IsEMM.sampled` makes the price sampled at a simple strategy's own dates a discrete `IsEMM`
+  (both horizon-`T` notions are a frozen martingale, `martingale_min_iff`), the strategy is a
+  discrete predictable one (`SimpleStrategy.toDiscrete`), and its gains are the martingale
+  transform of the sampled price (`SimpleStrategy.gains_eq_martingaleTransform`).
   `integral_inner_sub_eq_zero` (the bilinear `condExp` pull-out, over any index; the same lemma
   gives the discrete martingale transform) serves the pricing-measure argument of
   `PricingMeasureL2Density`.
