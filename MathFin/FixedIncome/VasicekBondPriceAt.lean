@@ -17,24 +17,28 @@ public import MathFin.Foundations.WienerIntegralFiltration
 `P(0, T) = 𝔼[exp(−∫₀ᵀ r_s ds)] = A(T)·exp(−B(T) r₀)`. This file prices it at a later time `t`,
 given the information `𝓕_t = σ(B_s : s ≤ t)` of the driving Brownian motion:
 
-  `𝔼[exp(−∫_t^T r_s ds) | 𝓕_t] = A(T − t)·exp(−B(T − t)·r_t)`   almost surely,
+  `𝔼[exp(−∫₀ᵀ r_s ds) | 𝓕_t] = exp(−∫₀ᵗ r_s ds)·A(T − t)·exp(−B(T − t)·r_t)`   almost surely,
 
-with `A`, `B` the coefficients of the time-`0` price at the remaining maturity `T − t`: the
-Vasicek model is time-homogeneous, so the price depends on `t` only through `r_t` and `T − t`.
+so the price at `t` of one unit paid at `T`, the conditional mean of the discount over `[t, T]`, is
+`A(T − t)·exp(−B(T − t)·r_t)`, with `A`, `B` the coefficients of the time-`0` price at the remaining
+maturity `T − t`: the Vasicek model is time-homogeneous, so the price depends on `t` only through
+`r_t` and `T − t`.
 
 The integrated rate is carried in its Wiener representation (`vasicekIntegratedRate`), so
-`∫_t^T r_s ds = ∫₀ᵀ r − ∫₀ᵗ r` is the difference of two Wiener integrals over different horizons.
-Given the past (`Foundations/WienerIntegralFiltration.lean`, `condExp_exp_wienerIntegralLp`),
-the integrated kernel `g_T(u) = (1 − e^{−κ(T−u)})/κ` of the horizon `T` restricted to `(0, t]` is
-`g_t + B(T − t)·e^{−κ(t−u)}`: the past part of `∫_t^T r_s ds` depends on the past only through the
+`∫₀ᵀ r` and `∫₀ᵗ r` are Wiener integrals over different horizons. Given the past
+(`Foundations/WienerIntegralFiltration.lean`, `condExp_exp_wienerIntegralLp`), the integrated
+kernel `g_T(u) = (1 − e^{−κ(T−u)})/κ` of the horizon `T`, restricted to `(0, t]`, is
+`g_t + B(T − t)·e^{−κ(t−u)}`: the past part of `∫₀ᵀ r` depends on the past through `∫₀ᵗ r` and the
 Wiener integral `∫₀ᵗ e^{−κ(t−u)} dB_u`, which is `(r_t − mean)/σ`; and the remainder is an
-independent centred Gaussian of variance `∫_t^T g_T² = V(T − t)`.
+independent centred Gaussian of variance `∫_t^T g_T² = V(T − t)`. The bridge to
+`bondPrice` is `Contracts/Models/VasicekBond.lean`.
 
 ## Main results
 
 * `kernelRestrict_vasicekIntegratedKernelLp` — `g_T|_{(0,t]} = g_t + B(T − t)·e^{−κ(t−·)}`.
 * `integral_sq_vasicekIntegratedKernelLp_Ioc` — `∫_t^T g_T² = V(T − t)`.
-* `vasicekBondPrice_condExp` — the conditional bond price, affine in `r_t`.
+* `vasicekIntegratedMean_sub` — the mean identity `M(t) − M(T) = −θ(τ − B(τ)) − B(τ) m_t`.
+* `vasicekBondPrice_condExp` — the conditional discount factor, affine in `r_t`.
 -/
 
 @[expose] public section

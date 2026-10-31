@@ -30,10 +30,13 @@ the post-`t` process, independent of `𝓕_t` (`shift_indep_natural`).
 ## Main results
 
 * `kernelRestrict` — restriction of a kernel on `(0, T]` to `(0, t]`, a continuous linear map.
-* `wienerIntegralLp_past_aestronglyMeasurable` — the past part is `𝓕_t`-measurable.
-* `wienerIntegralLp_future_indep` — the remainder is independent of `𝓕_t`.
-* `condExp_exp_neg_wienerIntegralLp` — the conditional Laplace transform
-  `𝔼[e^{−c∫₀ᵀ f dB} | 𝓕_t] = e^{−c∫₀ᵗ f dB}·e^{c²∫_t^T f²/2}`.
+* `mem_lpMeas_of_stepIndicator` — a continuous linear image of kernels is `m`-measurable as soon
+  as the images of the step indicators are.
+* `wienerIntegralLp_past_mem_lpMeas`, `wienerIntegralLp_future_mem_lpMeas` — the past part is
+  `𝓕_t`-measurable and the remainder is measurable for the post-`t` increments (`postσ`), hence
+  independent of `𝓕_t`.
+* `condExp_exp_wienerIntegralLp` — the conditional Laplace transform
+  `𝔼[e^{a + b∫₀ᵗ h dB − c∫₀ᵀ f dB} | 𝓕_t] = e^{a + b∫₀ᵗ h dB − c∫₀ᵗ f dB}·e^{c²∫_t^T f²/2}`.
 -/
 
 @[expose] public section
@@ -141,7 +144,8 @@ lemma mem_lpMeas_of_stepIndicator (hm : m ≤ mΩ)
 
 /-- The Brownian increment, as an element of `Lp`, is `m`-measurable when its endpoints are. -/
 lemma wienerIncrementLp_mem_lpMeas (hB : IsPreBrownianReal B μ)
-    (i : StepIndex T) (h1 : StronglyMeasurable[m] (B i.1.1)) (h2 : StronglyMeasurable[m] (B i.1.2)) :
+    (i : StepIndex T) (h1 : StronglyMeasurable[m] (B i.1.1))
+    (h2 : StronglyMeasurable[m] (B i.1.2)) :
     wienerIncrementLp B hB i ∈ lpMeas ℝ ℝ m 2 μ := by
   rw [mem_lpMeas_iff_aestronglyMeasurable]
   exact (h2.sub h1).aestronglyMeasurable.congr (MemLp.coeFn_toLp (memLp_increment_two hB i)).symm

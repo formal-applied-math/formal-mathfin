@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (846 MathFin constants, 29 upstream). Citations
+  corpus (849 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -286,6 +286,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.Contracts.Payoff.measurable_eval_of_obsTimes_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.Payoff.measurable_eval_of_obsTimes_le
+
+/-- info: 'MathFin.Contracts.bondPrice_vasicek' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.bondPrice_vasicek
 
 /-- info: 'MathFin.Contracts.cappedCall_payoff_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1386,6 +1390,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.condExp_comp_prodMk_of_indep' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.condExp_comp_prodMk_of_indep
+
+/-- info: 'MathFin.condExp_exp_wienerIntegralLp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.condExp_exp_wienerIntegralLp
 
 /-- info: 'MathFin.condExp_shift_eq_integral_gaussianLimit' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3338,6 +3346,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.vasicekBondPrice_affine' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.vasicekBondPrice_affine
+
+/-- info: 'MathFin.vasicekBondPrice_condExp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.vasicekBondPrice_condExp
 
 /-- info: 'MathFin.vasicekBondPrice_girsanov' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
