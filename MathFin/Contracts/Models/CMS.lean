@@ -241,7 +241,7 @@ theorem valueDisc_cmsSwaplet (h : SwapModel Q 𝓕 D X σ b T n δ) :
 
 /-- **The forward swap rate is the annuity-measure mean of the swap rate**:
 `𝔼^A[S] = (P(0, T₀) − P(0, Tₙ)) / A(0)`, the par swap rate of the zero curve (`parSwapRate`).
-No adjustment: the swap rate is a martingale in its own annuity measure. -/
+No adjustment at the fixing date: the `Qᴬ`-mean of the swap rate is the time-0 par rate. -/
 theorem SwapModel.integral_swapRate (h : SwapModel Q 𝓕 D X σ b T n δ) :
     ∫ ω, X σ (T 0) ω ∂(swapAnnuityMeasure Q D X b T n δ)
       = parSwapRate (zeroCurve Q D (T 0)) (zeroCurve Q D (T n))
