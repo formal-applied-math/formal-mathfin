@@ -62,14 +62,14 @@ theorem stoppedCandidate_martingale_of_rule_limit {W : ℝ≥0 → Ω → ℝ}
     Martingale (fun t ω => classicalCandidate W K r q σ S p T (min t (θ.time ω)) ω) 𝓕 P := by
   have hb : ∀ t ω, ‖classicalCandidate W K r q σ S p T t ω‖ ≤ K := by
     intro t ω
-    obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp W hK hr T t ω
+    obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp.toPutEnvelope W hK hr T t ω
     simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
   apply martingale_of_bounded_limits
     (stoppedClassicalCandidate_stronglyAdapted hp hadapt hpaths θ) hmart
     (fun t ω => hb _ ω) (fun n t ω => hb _ ω)
   intro t
   filter_upwards [hθ] with ω hω
-  exact ((classicalCandidate_continuous hp hpaths T ω).tendsto (min t (θ.time ω))).comp
+  exact ((classicalCandidate_continuous hp.toPutEnvelope hpaths T ω).tendsto (min t (θ.time ω))).comp
     (tendsto_const_nhds.min hω)
 
 end MathFin.BlackScholes.AmericanPut.Stopping

@@ -8,7 +8,6 @@ module
 public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.Forward
-public import MathFin.Foundations.Numeraire
 
 /-!
 # Delta as stock-numeraire probability: `Φ(d_1) = Q^(S)(S_T > K)`
@@ -17,11 +16,11 @@ Under the risk-neutral measure `Q`, `Φ(d_2)` is the exercise probability
 (formalised in `BlackScholes.RiskNeutralProbabilities`). The other Φ in the
 BS formula, `Φ(d_1)`, has a *different* probabilistic interpretation: it is
 the exercise probability **under the stock-numeraire measure** `Q^(S)`,
-defined via the Radon-Nikodym density
+the numéraire measure with Radon-Nikodym density
 
   `dQ^(S)/dQ := e^{−rT} · S_T / S_0`.
 
-This file derives that identification in three parts.
+This file derives that identification in two parts.
 
 ## Part 1: asset-payoff integral identity
 
@@ -36,18 +35,15 @@ exercise region `{z > −d_2}`, `integral_exp_mul_gaussianPDFReal_Ioi` for
 the completing-the-square step, and the BS algebraic identity
 `(r − σ²/2)T + σ²T/2 = rT`.
 
-## Part 2: stock-numeraire measure construction
+## Part 2: the identification
 
-`stockNumeraireDensity`, `stockNumeraireMeasure`: the Radon-Nikodym
-density `e^{−rT} · S_T / S_0` and the resulting measure via
-`Measure.withDensity`.
+The stock-numeraire measure is not a separate object: it is `Foundations.Numeraire`'s
+`numeraireMeasure Q (fun _ ↦ e^{rT}) (fun ω ↦ S_T(Z ω)) 1 S_0`, the instance `B_T = e^{rT}`,
+`B₀ = 1`, `N = S` of the general change of numéraire, whose density
+`(N_T·B₀)/(N₀·B_T)` is `e^{−rT} · S_T / S_0`.
 
-The density integrates to 1 (`discounted_terminal_eq_S0` from `Forward.lean`),
-so `stockNumeraireMeasure` is a probability measure.
-
-## Part 3: the identification
-
-`stockNumeraire_exercise_probability`: `Q^(S)({ω | S_T(Z ω) > K}) = Φ(d_1)`.
+`stockNumeraire_exercise_probability`: `∫ 1_{S_T(Z ω) > K} · e^{−rT} S_T(Z ω)/S_0 dQ = Φ(d_1)`,
+the `Q^(S)`-probability of the exercise event, `Q^(S) = numeraireMeasure …` as above.
 
 This closes the structural narrative on the BS formula:
 
@@ -139,39 +135,16 @@ theorem bsCall_asset_piece_integral
       S_0 * (Real.exp μ_log * Real.exp (ν_log ^ 2 / 2)) * Phi d_1 from by ring,
       ← Real.exp_add, h_algebra]
 
-/-! ## Part 2: stock-numeraire measure -/
-
-/-- **Stock-numeraire Radon-Nikodym density**: the density of `Q^(S)` w.r.t.
-`Q` is `e^{−rT} · S_T / S_0`. -/
-noncomputable def stockNumeraireDensity {Ω : Type*}
-    (S_0 r σ T : ℝ) (Z : Ω → ℝ) : Ω → ℝ≥0∞ :=
-  fun ω ↦ ENNReal.ofReal (Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω) / S_0)
-
-/-- **Stock-numeraire measure**: `Q^(S) := Q.withDensity (e^{−rT} · S_T / S_0)`. -/
-noncomputable def stockNumeraireMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    (Q : Measure Ω) (S_0 r σ T : ℝ) (Z : Ω → ℝ) : Measure Ω :=
-  Q.withDensity (stockNumeraireDensity S_0 r σ T Z)
-
-/-- **Stock-numeraire density is non-negative** (as a real). -/
-lemma stockNumeraireDensity_real_nonneg
-    {Ω : Type*}
-    {S_0 r σ T : ℝ} (hS_0 : 0 < S_0) (Z : Ω → ℝ) (ω : Ω) :
-    0 ≤ Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω) / S_0 := by
-  apply div_nonneg
-  · exact mul_nonneg (Real.exp_nonneg _) (by
-      unfold bsTerminal
-      exact mul_nonneg hS_0.le (Real.exp_nonneg _))
-  · exact hS_0.le
-
-/-! ## Part 3: the identification -/
+/-! ## Part 2: the identification -/
 
 /-- **Delta as stock-numeraire exercise probability**: under the risk-neutral
 hypothesis `BSCallHyp`,
 
-  `Q^(S)({ω | S_T(Z ω) > K}) = Φ(d_1)`,
+  `∫ 1_{S_T(Z ω) > K} · e^{−rT} S_T(Z ω) / S_0 ∂Q = Φ(d_1)`,
 
-where `Q^(S) = Q.withDensity (e^{−rT} · S_T / S_0)` is the stock-numeraire
-measure.
+the `Q^(S)`-probability of the exercise event for the stock-numeraire measure
+`Q^(S) = Q.withDensity (e^{−rT} · S_T / S_0)`, that is `numeraireMeasure` at `B_T = e^{rT}`,
+`B₀ = 1`, `N = S`.
 
 This is the companion to `riskNeutralProb_S_T_gt_K`
 (`Q({S_T > K}) = Φ(d_2)`): under change of numeraire from money market to
@@ -222,35 +195,5 @@ theorem stockNumeraire_exercise_probability
     rw [show Real.exp (-r * T) = Real.exp (-(r * T)) from by congr 1; ring]
     field_simp]
   rw [div_self hS_0.ne', mul_one, h_exp, one_mul]
-
-/-! ## Part 4: the stock numéraire as an instance of the abstract backbone -/
-
-/-- **The stock-numéraire measure is the abstract numéraire measure** at the
-money-market/stock instance `B_T = e^{rT}`, `B₀ = 1`, `N = S`. Concretely
-
-  `stockNumeraireMeasure Q S₀ r σ T Z
-     = numeraireMeasure Q (fun _ ↦ e^{rT}) (fun ω ↦ S_T(Z ω)) 1 S₀`,
-
-exhibiting the Black–Scholes stock numéraire (`dQ^(S)/dQ = e^{−rT}·S_T/S₀`) as a
-special case of the general change of numéraire `Foundations.Numeraire`
-(`dQ^N/dQ = (N_T·B₀)/(N₀·B_T)`). The two densities agree because `e^{−rT} = 1/e^{rT}`,
-and the leading `B₀ = 1` and the money-market `N₀ = S₀`, `B_T = e^{rT}` read off
-the ratio. -/
-theorem stockNumeraireMeasure_eq_numeraireMeasure
-    {Ω : Type*} {mΩ : MeasurableSpace Ω} (Q : Measure Ω)
-    (S_0 r σ T : ℝ) (Z : Ω → ℝ) :
-    stockNumeraireMeasure Q S_0 r σ T Z
-      = numeraireMeasure Q (fun _ ↦ Real.exp (r * T))
-          (fun ω ↦ bsTerminal S_0 r σ T (Z ω)) 1 S_0 := by
-  have hd : stockNumeraireDensity S_0 r σ T Z
-      = numeraireDensity (fun _ ↦ Real.exp (r * T))
-          (fun ω ↦ bsTerminal S_0 r σ T (Z ω)) 1 S_0 := by
-    unfold stockNumeraireDensity numeraireDensity
-    funext ω
-    congr 1
-    rw [neg_mul, Real.exp_neg]
-    ring
-  unfold stockNumeraireMeasure numeraireMeasure
-  rw [hd]
 
 end MathFin

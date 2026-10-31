@@ -101,7 +101,7 @@
     {
       "id": "mf-gaussian-var-translation",
       "name": "Gaussian VaR Translation Invariance",
-      "description": "VaR(L + c) = VaR(L) + c — the closed-form Gaussian VaR functional satisfies translation invariance (the Artzner-Delbaen-Eber-Heath coherent-risk axiom).",
+      "description": "gaussianVaR (μ + c) σ z = gaussianVaR μ σ z + c for all real μ, σ, z, c: translation of the closed-form function μ + σ z in its location parameter, the parameter form of the Artzner-Delbaen-Eber-Heath translation axiom. A statement about real numbers, not about random variables or a risk measure.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_translation_thm (μ σ z c : ℝ) :\n    MathFin.gaussianVaR (μ + c) σ z = MathFin.gaussianVaR μ σ z + c :=\n  MathFin.gaussianVaR_translation μ σ z c\n"
@@ -117,7 +117,7 @@
     {
       "id": "mf-gaussian-cvar-translation",
       "name": "Gaussian CVaR Translation Invariance",
-      "description": "CVaR(L + c) = CVaR(L) + c — translation invariance of the closed-form Gaussian CVaR.",
+      "description": "gaussianCVaR (μ + c) σ z α = gaussianCVaR μ σ z α + c for all real μ, σ, z, α, c: location shift of the closed form μ + σ φ(z)/(1 − α), the parameter form of the translation axiom. A statement about real numbers, not about random variables or a risk measure.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_cvar_translation_thm (μ σ z α c : ℝ) :\n    MathFin.gaussianCVaR (μ + c) σ z α =\n      MathFin.gaussianCVaR μ σ z α + c :=\n  MathFin.gaussianCVaR_translation μ σ z α c\n"
@@ -133,7 +133,7 @@
     {
       "id": "mf-gaussian-var-pos-homog",
       "name": "Gaussian VaR Positive Homogeneity",
-      "description": "VaR(λ·L) = λ·VaR(L) for λ ≥ 0 — positive homogeneity of the closed-form Gaussian VaR (an Artzner-Delbaen-Eber-Heath coherent-risk axiom).",
+      "description": "gaussianVaR (λ μ) (|λ| σ) z = λ · gaussianVaR μ σ z for λ ≥ 0 and all real μ, σ, z: scaling both parameters of the closed form μ + σ z, the parameter form of the Artzner-Delbaen-Eber-Heath positive-homogeneity axiom. A statement about real numbers, not about random variables or a risk measure.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_pos_homog_thm (μ σ z : ℝ) {l : ℝ} (hl : 0 ≤ l) :\n    MathFin.gaussianVaR (l * μ) (|l| * σ) z = l * MathFin.gaussianVaR μ σ z :=\n  MathFin.gaussianVaR_positiveHomogeneity μ σ z hl\n"
@@ -149,7 +149,7 @@
     {
       "id": "mf-gaussian-cvar-pos-homog",
       "name": "Gaussian CVaR Positive Homogeneity",
-      "description": "CVaR(λ·L) = λ·CVaR(L) for λ ≥ 0.",
+      "description": "gaussianCVaR (λ μ) (|λ| σ) z α = λ · gaussianCVaR μ σ z α for λ ≥ 0 and all real μ, σ, z, α: scaling both parameters of the closed form μ + σ φ(z)/(1 − α), the parameter form of the positive-homogeneity axiom. A statement about real numbers, not about random variables or a risk measure.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_cvar_pos_homog_thm (μ σ z α : ℝ) {l : ℝ} (hl : 0 ≤ l) :\n    MathFin.gaussianCVaR (l * μ) (|l| * σ) z α =\n      l * MathFin.gaussianCVaR μ σ z α :=\n  MathFin.gaussianCVaR_positiveHomogeneity μ σ z α hl\n"
@@ -165,7 +165,7 @@
     {
       "id": "mf-gaussian-var-monotone",
       "name": "Gaussian VaR Monotonicity in Mean",
-      "description": "If μ₁ ≤ μ₂ and the volatilities match, VaR(L₁) ≤ VaR(L₂) — monotonicity of the closed-form Gaussian VaR (parameter form).",
+      "description": "gaussianVaR μ₁ σ z ≤ gaussianVaR μ₂ σ z when μ₁ ≤ μ₂, for the same real σ and z: monotonicity of the closed form μ + σ z in the mean parameter. Not the Artzner-Delbaen-Eber-Heath monotonicity axiom, which orders random variables.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_monotone_thm {μ₁ μ₂ σ z : ℝ} (hμ : μ₁ ≤ μ₂) :\n    MathFin.gaussianVaR μ₁ σ z ≤ MathFin.gaussianVaR μ₂ σ z :=\n  MathFin.gaussianVaR_monotone_mean hμ\n"
@@ -181,7 +181,7 @@
     {
       "id": "mf-gaussian-cvar-monotone",
       "name": "Gaussian CVaR Monotonicity in Mean",
-      "description": "If μ₁ ≤ μ₂ and the volatilities match, CVaR(L₁) ≤ CVaR(L₂).",
+      "description": "gaussianCVaR μ₁ σ z α ≤ gaussianCVaR μ₂ σ z α when μ₁ ≤ μ₂, for the same real σ, z and α: monotonicity of the closed form μ + σ φ(z)/(1 − α) in the mean parameter. Not the Artzner-Delbaen-Eber-Heath monotonicity axiom, which orders random variables.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_cvar_monotone_thm {μ₁ μ₂ σ z α : ℝ} (hμ : μ₁ ≤ μ₂) :\n    MathFin.gaussianCVaR μ₁ σ z α ≤ MathFin.gaussianCVaR μ₂ σ z α :=\n  MathFin.gaussianCVaR_monotone_mean hμ\n"
@@ -212,8 +212,8 @@
     },
     {
       "id": "mf-gaussian-var-subadditive",
-      "name": "Gaussian VaR Subadditivity",
-      "description": "For joint-gaussian losses L_i ~ N(μ_i, σ_i²) with correlation ρ ≤ 1 and right-tail z ≥ 0: VaR(L₁+L₂) ≤ VaR(L₁) + VaR(L₂) for the closed-form function gaussianVaR on parameters (ρ free), not for random variables — subadditivity of the closed-form Gaussian VaR (the genuine content is the joint-stdev triangle inequality).",
+      "name": "Closed-Form Gaussian VaR Is Subadditive in the Parameters",
+      "description": "For real parameters μ₁, μ₂, σ₁, σ₂ ≥ 0, a free ρ ≤ 1 and z ≥ 0: gaussianVaR (μ₁ + μ₂) √(σ₁² + 2ρσ₁σ₂ + σ₂²) z ≤ gaussianVaR μ₁ σ₁ z + gaussianVaR μ₂ σ₂ z, for the closed form μ + σ z. Not a statement about random variables: for a jointly Gaussian pair see mf-gaussian-var-subadditive-jointly-gaussian (α ≥ 1/2) and qrm-var-gaussian-subadditive-iff. The genuine content is the triangle inequality for the combined volatility.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_subadditive_thm {μ₁ μ₂ σ₁ σ₂ ρ z : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) (hz : 0 ≤ z) :\n    MathFin.gaussianVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2)) z ≤\n      MathFin.gaussianVaR μ₁ σ₁ z + MathFin.gaussianVaR μ₂ σ₂ z :=\n  MathFin.gaussianVaR_subadditive h₁ h₂ hρ hz\n"
@@ -228,7 +228,7 @@
     },
     {
       "id": "mf-gaussian-cvar-subadditive",
-      "name": "Gaussian CVaR Subadditivity",
+      "name": "Closed-Form Gaussian CVaR Is Subadditive in the Parameters",
       "description": "Same parameter setup as the closed-form VaR subadditivity with level α < 1: the closed-form CVaR at the combined volatility is at most the sum of the closed forms. A statement about the real function gaussianCVaR on parameters (σ_i ≥ 0, ρ ≤ 1 free), not about random variables; for jointly Gaussian random variables see mf-gaussian-cvar-subadditive-jointly-gaussian.",
       "domain": "mathematical_finance",
       "code": {
@@ -264,14 +264,14 @@
       "description": "For a jointly Gaussian pair (X, Y) with Var X, Var Y and Var(X + Y) positive and α ∈ (0, 1): the closed form gaussianCVaR at mean E X + E Y and volatility sd(X + Y) is at most the sum of the closed forms at the margins (E X, sd X) and (E Y, sd Y), at the normal quantile Φ⁻¹(α). Derived from the subadditivity of expected shortfall on the general coherence structure and the Gaussian closed form of expected shortfall; the bare-parameter statement is mf-gaussian-cvar-subadditive.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem gaussianCVaR_sd_add_le_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X Y : Ω → ℝ}\n    (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1)\n    (hX : 0 < Var[X; P]) (hY : 0 < Var[Y; P]) (hXY : 0 < Var[fun ω ↦ X ω + Y ω; P]) :\n    gaussianCVaR (P[X] + P[Y]) √Var[fun ω ↦ X ω + Y ω; P] (PhiInv α) α ≤\n      gaussianCVaR P[X] √Var[X; P] (PhiInv α) α + gaussianCVaR P[Y] √Var[Y; P] (PhiInv α) α :=\n  MathFin.gaussianCVaR_sd_add_le h hα hX hY hXY\n"
+        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem gaussianCVaR_sd_add_le_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X Y : Ω → ℝ}\n    (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1)\n    (_hX : 0 < Var[X; P]) (_hY : 0 < Var[Y; P])\n    (_hXY : 0 < Var[fun ω ↦ X ω + Y ω; P]) :\n    gaussianCVaR (P[X] + P[Y]) √Var[fun ω ↦ X ω + Y ω; P] (PhiInv α) α ≤\n      gaussianCVaR P[X] √Var[X; P] (PhiInv α) α + gaussianCVaR P[Y] √Var[Y; P] (PhiInv α) α :=\n  MathFin.gaussianCVaR_sd_add_le h hα\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Coherence of expected shortfall (Acerbi-Tasche 2002) on the Gaussian family; McNeil-Frey-Embrechts Ch 2.3",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof, a corollary of expectedShortfall_add_le (the subadditivity axiom of expectedShortfall_isCoherentRiskMeasure) and expectedShortfall_of_hasGaussianLaw. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, a corollary of expectedShortfall_add_le (the subadditivity axiom of expectedShortfall_isCoherentRiskMeasure) and expectedShortfall_of_hasGaussianLaw. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean. The library theorem holds without the three positivity hypotheses (a degenerate Gaussian is a.s. constant); the entry keeps them, so its claim is the nondegenerate case."
       }
     },
     {

@@ -16,7 +16,7 @@ Subadditivity, `ρ(X + Y) ≤ ρ(X) + ρ(Y)`, is the coherence axiom that expres
 merging two positions should not create risk. Value-at-risk fails it. This file proves three
 situations from McNeil–Frey–Embrechts, *Quantitative Risk Management* (2015), Section 2.3.5, and
 the QRM Exercise Book, in which VaR is **superadditive**, `VaR_α(X + Y) > VaR_α(X) + VaR_α(Y)`,
-and one law family in which it is subadditive exactly at the levels used in practice.
+and one law family in which it is subadditive at the levels used in practice, for every correlation.
 
 * **Independent defaults** (Exercises 2.20 and 2.27). For `d` independent `{0, 1}`-valued losses
   that each occur with probability `p`, VaR is superadditive exactly when
@@ -30,7 +30,9 @@ and one law family in which it is subadditive exactly at the levels used in prac
   increases risk at every confidence level.
 * **Jointly Gaussian losses** (Exercise 2.22). For a Gaussian pair with correlation below one,
   VaR is subadditive exactly when `α ≥ 1/2` (`valueAtRisk_add_le_iff_of_hasGaussianLaw`): on a
-  Gaussian pair it holds at the levels used in practice and fails below the median.
+  Gaussian pair it holds at the levels used in practice, whatever the correlation
+  (`valueAtRisk_add_le_of_hasGaussianLaw`, from the subadditivity of the standard deviation,
+  `variance_add_le_sq`), and fails below the median when the correlation is below one.
 
 Expected shortfall is subadditive for every pair of integrable losses
 (`RiskMeasures/ExpectedShortfall.lean`); the contrast is the reason the Basel III market-risk
@@ -47,6 +49,9 @@ framework replaced VaR by ES.
 * `cdf_conv_paretoMeasure_half`: the sum of two independent `Pareto(1, 1/2)` losses has CDF
   `1 − 2√(x − 1)/x` on `[2, ∞)`.
 * `valueAtRisk_add_gt_of_paretoHalf`: VaR is superadditive at every level for them.
+* `variance_add_le_sq`: the standard deviation is subadditive, `Var(X + Y) ≤ (sd X + sd Y)²`.
+* `valueAtRisk_add_le_of_hasGaussianLaw`: for a jointly Gaussian pair, VaR is subadditive at every
+  level `α ≥ 1/2`, for every correlation.
 * `valueAtRisk_add_le_iff_of_hasGaussianLaw`: for a Gaussian pair with correlation `< 1`,
   subadditivity holds iff `α ≥ 1/2`.
 -/

@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.PlaneIto
+public import MathFin.BlackScholes.AmericanPut.Boundary.DividendProblem
 
 /-!
 # Zero-drift smooth Ito localizations of the classical price

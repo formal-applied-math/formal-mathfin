@@ -133,7 +133,7 @@
     {
       "id": "mf-american-ge-european",
       "name": "American ≥ European",
-      "description": "binomialPrice ≤ americanPrice for the same intrinsic g. The American option dominates the European with the same payoff — the early-exercise feature can only add value.",
+      "description": "Under BinomialNoArb u d r, binomialPrice ≤ americanPrice for the same intrinsic g. The American option dominates the European with the same payoff — the early-exercise feature can only add value.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Binomial.Bermudan\n\nopen MathFin\n\ntheorem american_ge_european_thm {u d r : ℝ} (h : MathFin.BinomialNoArb u d r)\n    (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :\n    MathFin.binomialPrice u d r g n S ≤ MathFin.americanPrice u d r g n S :=\n  MathFin.bermudanPrice_mono h g (Set.empty_subset _) n S\n"
@@ -351,7 +351,7 @@
         "reference": "S. E. Shreve, Stochastic Calculus for Finance I: The Binomial Asset Pricing Model, Springer (2004), §4.5; R. C. Merton, Theory of Rational Option Pricing, Bell J. Econ. Manag. Sci. 4(1) (1973) 141–183",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.americanCallPrice_eq_binomialPrice (MathFin/Binomial/MertonAmericanCallTree.lean): americanCallPrice_le_binomialPrice by induction from call_one_period_continuation_dominates_intrinsic, and bermudanPrice_mono for the exercise sets empty subset univ (Binomial/Bermudan). SCOPE: the discrete tree, no dividends, r ≥ 0, K ≥ 0. The continuous-time American = European statement is not part of this entry (mf-merton-1973-no-early-exercise proves the strict dominance bsV > S₀ − K only)."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.americanCallPrice_eq_binomialPrice (MathFin/Binomial/MertonAmericanCallTree.lean): the case E = univ of bermudanCallPrice_eq_binomialPrice, proved by the Snell minimality of bermudanPrice E against the European price process (a martingale above the payoff, by induction from call_one_period_continuation_dominates_intrinsic), and bermudanPrice_mono for the exercise sets empty subset E (Binomial/Bermudan). SCOPE: the discrete tree, no dividends, r ≥ 0, K ≥ 0. The continuous-time American = European statement is not part of this entry (mf-merton-1973-no-early-exercise proves the strict dominance bsV > S₀ − K only)."
       }
     },
     {

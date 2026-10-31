@@ -656,8 +656,7 @@ lemma simpleStochSum_marshalStepSP_eq (hBmeas : ∀ t, Measurable (B t)) (T : �
 `ns`, a further subsequence `ms` has `Zⁿ_T → Z_T` a.e.: `exists_subseq_tendsto_ae₂` fuses the
 stochastic exponent's convergence (`tendstoInMeasure_marshalStochSum`, bridged to `simpleStochSum`)
 with the quadratic variation's (`tendstoInMeasure_marshalQuadVar`), and `exp(−· − ½·)`
-(`simpleDoleansExp_neg_eq`) is pushed to the common a.e. limit. Predictable analogue of
-`tendsto_Zn_ae_subseq`. -/
+(`simpleDoleansExp_neg_eq`) is pushed to the common a.e. limit. -/
 lemma tendsto_ZTpred_ae_subseq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
@@ -823,7 +822,7 @@ include hB in
 /-- **The limit `g = D_u·Z_T` is in `L¹`.** Fatou (`memLp_two_of_subseq_ae_of_sq_bound`) gives
 `g ∈ L²` from the mixed-product `L²` membership + uniform second moment (`memLp_mixedProduct_two`,
 `sq_integral_mixedProduct_le`) and the product a.e.-subsequence (`tendsto_fnPred_ae_subseq`), then
-`L² ⊆ L¹`. Predictable analogue of `memLp_g_one`. -/
+`L² ⊆ L¹`. -/
 lemma memLp_gpred_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
@@ -936,8 +935,7 @@ drift-corrected process `B^θ_u = B_u + driftContinuousMod θ̂ u` is `𝓕`-ada
 of the simple-θ identity (`isExpQMartingale_BthetaSimple` on the clamped marshalled approximants
 `Ṽⁿ`): transported to `μ`, both sides pass through the a.e.-subsequence engine
 (`tendsto_setIntegral_of_subseq_ae_of_sq_bound`), and the simple identity forces the limits equal.
-Predictable analogue of `isExpQMartingale_BthetaCont`, with the marshalled density-approximation
-front half in place of the uniform grid. -/
+The front half is the marshalled density approximation of a predictable `θ` by simple integrands. -/
 theorem isExpQMartingale_BthetaPredictable (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (V : ℕ → TBoundedSP T hBmeas)

@@ -112,25 +112,11 @@ noncomputable def dmi (k w : ℝ) : ℝ := (-k - w / 2) / Real.sqrt w
 /-- `d₊ = −k/√w + √w/2`: the form in which `d₊` is written when `w` is a squared root variance
 (for `w ≤ 0` both sides are `0`, as `√w = 0`). -/
 theorem dpl_eq (k w : ℝ) : dpl k w = -k / Real.sqrt w + Real.sqrt w / 2 := by
-  rcases lt_or_ge 0 w with hw | hw
-  · have h : Real.sqrt w * Real.sqrt w = w := Real.mul_self_sqrt hw.le
-    have hs : Real.sqrt w ≠ 0 := (Real.sqrt_pos.2 hw).ne'
-    rw [dpl, add_div]
-    congr 1
-    calc w / 2 / Real.sqrt w = Real.sqrt w * Real.sqrt w / 2 / Real.sqrt w := by rw [h]
-      _ = Real.sqrt w / 2 := by field_simp
-  · simp [dpl, Real.sqrt_eq_zero_of_nonpos hw]
+  rw [dpl, add_div, div_right_comm, Real.div_sqrt]
 
 /-- `d₋ = −k/√w − √w/2`, as `dpl_eq`. -/
 theorem dmi_eq (k w : ℝ) : dmi k w = -k / Real.sqrt w - Real.sqrt w / 2 := by
-  rcases lt_or_ge 0 w with hw | hw
-  · have h : Real.sqrt w * Real.sqrt w = w := Real.mul_self_sqrt hw.le
-    have hs : Real.sqrt w ≠ 0 := (Real.sqrt_pos.2 hw).ne'
-    rw [dmi, sub_div]
-    congr 1
-    calc w / 2 / Real.sqrt w = Real.sqrt w * Real.sqrt w / 2 / Real.sqrt w := by rw [h]
-      _ = Real.sqrt w / 2 := by field_simp
-  · simp [dmi, Real.sqrt_eq_zero_of_nonpos hw]
+  rw [dmi, sub_div, div_right_comm, Real.div_sqrt]
 
 /-- The Black-76 call normalized by the forward: `c(k,w) = Φ(d₊) − e^k·Φ(d₋)`,
 the zero-rates `bsV` in `(k, w)` coordinates. -/

@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoFormulaAdapted
-public import MathFin.Foundations.ItoFormulaUnrestricted
+public import MathFin.Foundations.ItoFormulaCutoff
 public import MathFin.Foundations.ItoIntegralCrossHorizon
 public import MathFin.Foundations.LocalisationInMeasure
 
@@ -40,7 +40,7 @@ defined, they are limits in probability of the same sums.
   (`comp_time_adaptedItoProcess_isStronglyPredictable`), and `∑ f_t Δt` converges pathwise as a
   Riemann–Stieltjes sum against the drift path of the rate `1`.
 * **Localisation in space** (`ito_formula_adapted_td_local`). The double cutoff `SummitC.fTrunc`,
-  which `ItoFormulaUnrestricted` built for functions of Brownian motion, is `f` on
+  which `ItoFormulaCutoff` built for functions of Brownian motion, is `f` on
   `[0, T] × [−N, N]` once its level exceeds `T` and `N`, and has bounded partials. On the event
   that the path of `X` stays in `[−N, N]` up to `T` the Riemann sums of `f` and of the cutoff
   coincide; the events exhaust `Ω` in probability (`tendsto_measure_compl_abs_le`), and

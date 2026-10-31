@@ -35,7 +35,7 @@ noncomputable def strikeDensity (p : Params) (K : ℝ) : ℝ :=
 theorem blackCall_hasDerivAt (p : Params) (hs : 0 < p.sigma) (K : ℝ) (hK : 0 < K)
     (hw : 0 < variance p (Real.log K)) :
     HasDerivAt (blackCall p) (strikeDelta p K) K := by
-  have h := (blackForm_hasDerivAt p hs (Real.log K) hw).comp K
+  have h := (blackForm_hasDerivAt p (Real.log K) (variance_hasDerivAt p hs _) hw).comp K
     (Real.hasDerivAt_log (ne_of_gt hK))
   convert h using 1 <;> try rfl
   simp only [Real.exp_log hK, strikeDelta]
@@ -44,7 +44,8 @@ theorem blackCall_hasDerivAt (p : Params) (hs : 0 < p.sigma) (K : ℝ) (hK : 0 <
 theorem strikeDelta_hasDerivAt (p : Params) (hs : 0 < p.sigma) (K : ℝ) (hK : 0 < K)
     (hw : 0 < variance p (Real.log K)) :
     HasDerivAt (strikeDelta p) (strikeDensity p K) K := by
-  have h := (blackDelta_hasDerivAt p hs (Real.log K) hw).comp K
+  have h := (blackDelta_hasDerivAt p (Real.log K) (variance_hasDerivAt p hs _)
+    (slope_hasDerivAt p hs _) hw).comp K
     (Real.hasDerivAt_log (ne_of_gt hK))
   convert h using 1 <;> try rfl
   dsimp [strikeDensity]

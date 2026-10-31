@@ -83,7 +83,8 @@ inductive Payoff (ι : Type*) where
   | indicatorLt (a b : Payoff ι)
   /-- A nonnegative real power. The exponent is an `ℝ≥0`, so `eval` stays continuous in the
   observations and bounded on bounded scenarios; there is no `exp` or `log` node, since `log` is
-  unbounded near `0`. -/
+  unbounded near `0`. Meaningful on nonnegative observations: at a negative base `Real.rpow` is
+  the junk value `|x|^p cos(pπ)`, which no model theorem here reaches (spots are positive). -/
   | rpow (a : Payoff ι) (p : ℝ≥0)
 
 /-- Interpret a `Payoff` against a `Scenario`, producing its realized value. -/
