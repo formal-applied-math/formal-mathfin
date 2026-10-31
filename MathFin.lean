@@ -232,6 +232,7 @@ import MathFin.Foundations.SDEPathwise
 -- The general-integrand Itô process as a continuous local martingale (null-augmented filtration)
 import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 -- The unbounded-horizon Itô process: the L² process, horizon consistency (the [0,∞) climb)
+import MathFin.Foundations.ItoIntegralProcessL2Inf
 import MathFin.Foundations.ItoIntegralProcessL2Infinite
 -- The [0,∞) crown: the unbounded-horizon Itô integral as a continuous local martingale on ℝ≥0
 import MathFin.Foundations.ItoIntegralProcessLocalMartingaleInfinite
