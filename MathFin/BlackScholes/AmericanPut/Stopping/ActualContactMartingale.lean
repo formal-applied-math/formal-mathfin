@@ -39,9 +39,7 @@ theorem brownianUsualActualContactRule_value_preserving {k h : ℝ} (hk : 0 ≤ 
   let τ := brownianUsualActualContactRule (h := h) hk x T
   have hc (ω : ℝ≥0 → ℝ) : canonicalDiscountedPrice k h x T (τ.time ω) ω =
       putReward brownian 1 k h (Real.sqrt 2) (Real.exp x) τ.time ω := by
-    exact classicalContactRule_contact (K := 1) (r := k) (q := h) (σ := Real.sqrt 2)
-      (canonicalPrice_putEnvelope (h := h) hk) brownianUsual_adapted continuous_brownian one_pos
-      (Real.exp_pos x) T ω
+    exact canonicalContactRule_contact hk brownianUsual_adapted continuous_brownian x T ω
   change (∫ ω, canonicalDiscountedPrice k h x T (τ.time ω) ω ∂μ) = _
   rw [integral_congr_ae (Eventually.of_forall hc),integral_congr_ae hinit]
   simp only [integral_const,probReal_univ,one_smul]

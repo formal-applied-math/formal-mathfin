@@ -21,7 +21,7 @@ Optimality and the dynamic programming principle are not assumed.
 ## Result
 
 Public entry points include `classicalLogSpot_canonical`, `normalizedRate_sqrt_two`,
-`canonicalContactRule`, `canonicalContactRule_price_eq`,
+`canonicalContactRule`, `canonicalContactRule_contact`, `canonicalContactRule_price_eq`,
 `canonicalContactRule_continuation_before`.
 -/
 
@@ -91,6 +91,36 @@ theorem canonicalContactRule_exercise_before_expiry (hk : 0 ≤ k) (hW : Adapted
       canonicalStockBoundary k h ((T : ℝ)-(s : ℝ)) :=
   (canonicalPrice_contact_iff hk _ (sub_pos.mpr (by exact_mod_cast ht))).mp
     (canonicalContactRule_price_eq hk hW hpaths x T ω)
+
+/-- The discounted actual price along the Brownian log-state: the classical candidate of the
+actual price `canonicalPrice k h`, at strike `1`, rate `k`, dividend `h`, volatility
+`Real.sqrt 2` and spot `Real.exp x`. -/
+noncomputable abbrev canonicalDiscountedPrice (k h x : ℝ) (T : ℝ≥0) :=
+  classicalCandidate brownian 1 k h (Real.sqrt 2) (Real.exp x) (canonicalPrice k h) T
+
+section Brownian
+
+variable [MeasurableSpace (ℝ≥0 → ℝ)] {𝓖 : Filtration ℝ≥0 ‹MeasurableSpace (ℝ≥0 → ℝ)›}
+
+/-- At first contact the discounted actual price equals the discounted reward. -/
+theorem canonicalContactRule_contact (hk : 0 ≤ k) (hW : Adapted 𝓖 brownian)
+    (hpaths : ∀ ω, Continuous (fun t => brownian t ω)) (x : ℝ) (T : ℝ≥0) (ω : ℝ≥0 → ℝ) :
+    let θ := canonicalContactRule (h := h) hk hW hpaths x T
+    canonicalDiscountedPrice k h x T (θ.time ω) ω =
+      putReward brownian 1 k h (Real.sqrt 2) (Real.exp x) θ.time ω :=
+  classicalContactRule_contact (K := 1) (r := k) (q := h) (σ := Real.sqrt 2)
+    (canonicalPrice_putEnvelope (h := h) hk) hW hpaths one_pos (Real.exp_pos x) T ω
+
+/-- Before first contact the discounted actual price strictly exceeds the discounted reward. -/
+theorem canonicalContactRule_reward_lt (hk : 0 ≤ k) (hW : Adapted 𝓖 brownian)
+    (hpaths : ∀ ω, Continuous (fun t => brownian t ω)) (x : ℝ) (T : ℝ≥0) (ω : ℝ≥0 → ℝ)
+    {t : ℝ≥0} (ht : t < (canonicalContactRule (h := h) hk hW hpaths x T).time ω) :
+    frozenPutReward brownian 1 k h (Real.sqrt 2) (Real.exp x) T t ω <
+      canonicalDiscountedPrice k h x T t ω :=
+  classicalContactRule_reward_lt (K := 1) (r := k) (q := h) (σ := Real.sqrt 2)
+    (canonicalPrice_putEnvelope (h := h) hk) hW hpaths one_pos (Real.exp_pos x) ω ht
+
+end Brownian
 
 theorem brownianUsual_adapted :
     @Adapted _ _ (completedMeasurableSpace gaussianLimit) _ _ _

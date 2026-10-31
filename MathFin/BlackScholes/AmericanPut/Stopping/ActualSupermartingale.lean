@@ -30,12 +30,6 @@ open Set Filter MeasureTheory ProbabilityTheory Boundary
 open scoped NNReal Topology
 open MathFin.ItoLocalMartingale (nullAugmentation supermartingale_nullAugmentation)
 
-/-- The discounted actual price along the Brownian log-state: the classical candidate of the
-actual price `canonicalPrice k h`, at strike `1`, rate `k`, dividend `h`, volatility
-`Real.sqrt 2` and spot `Real.exp x`. -/
-noncomputable abbrev canonicalDiscountedPrice (k h x : ℝ) (T : ℝ≥0) :=
-  classicalCandidate brownian 1 k h (Real.sqrt 2) (Real.exp x) (canonicalPrice k h) T
-
 /-- The candidate in the normalized conventions: `Real.exp (-k*(min t T))` times the canonical
 price at the Brownian log-state at remaining time `T-min t T`. -/
 theorem canonicalDiscountedPrice_apply (k h x : ℝ) (T t : ℝ≥0) (ω : ℝ≥0 → ℝ) :
