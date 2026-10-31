@@ -39,6 +39,10 @@ independent of the past, with the exponential moments of a centred Gaussian of v
 * `kernelRestrict_vasicekIntegratedKernelLp` — `g_T|_{(0,t]} = g_t + B(T − t)·e^{−κ(t−·)}`.
 * `integral_sq_vasicekIntegratedKernelLp_Ioc` — `∫_t^T g_T² = V(T − t)`.
 * `vasicekIntegratedMean_sub` — the mean identity `M(t) − M(T) = −θ(τ − B(τ)) − B(τ) m_t`.
+* `condExp_exp_neg_integratedRate` — the conditional discount factor of any Gaussian short rate
+  with the integrated Vasicek kernel, from the mean identity `M(t) − M(T) = −c − B(T − t)·m`
+  alone; the Hull–White bond price (`FixedIncome/HullWhiteBondPriceAt.lean`) is its other
+  instance.
 * `vasicekBondPrice_condExp` — the conditional discount factor, affine in `r_t`.
 -/
 
@@ -131,7 +135,8 @@ theorem condExp_exp_neg_integratedRate [IsProbabilityMeasure μ] (hB : IsPreBrow
     (hM : M_t - M_T = -c - vasicekBondB κ ((T - t : ℝ≥0) : ℝ) * m) :
     μ[fun ω ↦ Real.exp (-(M_T + σ * wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω))
         | Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable) t]
-      =ᵐ[μ] fun ω ↦ Real.exp (-(M_t + σ * wienerIntegralLp B hB t (vasicekIntegratedKernelLp hκ t) ω))
+      =ᵐ[μ] fun ω ↦
+        Real.exp (-(M_t + σ * wienerIntegralLp B hB t (vasicekIntegratedKernelLp hκ t) ω))
         * (Real.exp (-c + σ ^ 2 * vasicekBondV κ ((T - t : ℝ≥0) : ℝ) / 2)
           * Real.exp (-(vasicekBondB κ ((T - t : ℝ≥0) : ℝ)
             * (m + σ * wienerIntegralLp B hB t (vasicekKernelLp κ hκ.le t) ω)))) := by
