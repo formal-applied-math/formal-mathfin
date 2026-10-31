@@ -95,17 +95,17 @@ theorem stopped_martingale_of_expected_value_eq
       (Eventually.of_forall (fun ω => hb _ ω))
   have hmean (t : ℝ≥0) : (∫ ω, X t ω ∂P) = ∫ ω, U 0 ω ∂P :=
     (integral_congr_ae (.of_forall fun ω ↦ congrArg (U · ω) (min_comm t (τ.time ω)))).trans
-      (expected_value_eq_before_optimal_rule hU hc hb τ hopt (τ.min (.constant 𝓕 t t le_rfl))
-        fun _ ↦ min_le_left _ _)
+      (expected_value_eq_before_optimal_rule hU hc hb τ hopt
+        (τ.minimum (.constant 𝓕 t t le_rfl)) fun _ ↦ min_le_left _ _)
   apply martingale_of_setIntegral_eq ha hi
   intro i j hij A hA
   have hAm : MeasurableSet A := 𝓕.le i A hA
-  let η := τ.min (StoppingRule.binary hij A hA)
+  let η := τ.minimum (StoppingRule.binary hij A hA)
   have hη : (∫ ω, U (η.time ω) ω ∂P) = ∫ ω, U 0 ω ∂P :=
     expected_value_eq_before_optimal_rule hU hc hb τ hopt η (fun _ => min_le_left _ _)
   have he : (fun ω => U (η.time ω) ω) = A.piecewise (X i) (X j) := by
     funext ω
-    by_cases hω : ω ∈ A <;> simp [η,StoppingRule.min_time,StoppingRule.binary,X,hω,min_comm]
+    by_cases hω : ω ∈ A <;> simp [η,StoppingRule.minimum_time,StoppingRule.binary,X,hω,min_comm]
   rw [he,integral_piecewise hAm (hi i).integrableOn (hi j).integrableOn] at hη
   have hj := (integral_add_compl hAm (hi j)).trans (hmean j)
   linarith
