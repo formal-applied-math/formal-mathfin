@@ -84,6 +84,15 @@ def extend (θ : StoppingRule 𝓕 T) (hTU : T ≤ U) : StoppingRule 𝓕 U wher
   stopping := θ.stopping
   le_horizon := fun ω => (θ.le_horizon ω).trans hTU
 
+/-- The rule that stops at the first of `θ` and `η`; it keeps the horizon of `θ`. -/
+def min (θ : StoppingRule 𝓕 T) (η : StoppingRule 𝓕 U) : StoppingRule 𝓕 T where
+  time := fun ω => Min.min (θ.time ω) (η.time ω)
+  stopping := by simpa only [WithTop.coe_min] using θ.stopping.min η.stopping
+  le_horizon := fun ω => (min_le_left _ _).trans (θ.le_horizon ω)
+
+theorem min_time (θ : StoppingRule 𝓕 T) (η : StoppingRule 𝓕 U) (ω : Ω) :
+    (θ.min η).time ω = Min.min (θ.time ω) (η.time ω) := rfl
+
 /-- Any ordinary `WithTop`-valued stopping time bounded by the finite horizon
 has exactly the finite representation used here. No admissible finite-horizon
 stopping rules are lost by using index-valued times. -/

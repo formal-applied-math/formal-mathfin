@@ -17,7 +17,7 @@ integrals, which is exactly the martingale criterion.
 
 ## Result
 
-Public entry points include `StoppingRule.binary`, `StoppingRule.capTime`, `StoppingRule.capBinary`,
+Public entry points include `StoppingRule.binary`,
 `expected_value_eq_before_optimal_rule`.
 -/
 
@@ -69,21 +69,6 @@ noncomputable def StoppingRule.binary {i j : ℝ≥0} (hij : i ≤ j) (A : Set �
     · exact hij
     · exact le_rfl
 
-/-- The rule `τ` stopped no later than the deterministic time `t`. -/
-def StoppingRule.capTime {T : ℝ≥0} (τ : StoppingRule 𝓕 T) (t : ℝ≥0) : StoppingRule 𝓕 T where
-  time := fun ω => min t (τ.time ω)
-  stopping := by
-    convert! (isStoppingTime_const 𝓕 t).min τ.stopping using 1
-  le_horizon := fun ω => (min_le_right _ _).trans (τ.le_horizon ω)
-
-/-- The rule `τ` stopped no later than `StoppingRule.binary hij A hA`. -/
-noncomputable def StoppingRule.capBinary {T i j : ℝ≥0} (τ : StoppingRule 𝓕 T)
-    (hij : i ≤ j) (A : Set Ω) (hA : MeasurableSet[𝓕 i] A) : StoppingRule 𝓕 T where
-  time := fun ω => min ((StoppingRule.binary hij A hA).time ω) (τ.time ω)
-  stopping := by
-    convert! (StoppingRule.binary hij A hA).stopping.min τ.stopping using 1
-  le_horizon := fun ω => (min_le_right _ _).trans (τ.le_horizon ω)
-
 variable {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ} {C : ℝ} {T : ℝ≥0}
 
 theorem expected_value_eq_before_optimal_rule
@@ -109,16 +94,18 @@ theorem stopped_martingale_of_expected_value_eq
     (integrable_const C).mono' ((ha t).mono (𝓕.le t)).aestronglyMeasurable
       (Eventually.of_forall (fun ω => hb _ ω))
   have hmean (t : ℝ≥0) : (∫ ω, X t ω ∂P) = ∫ ω, U 0 ω ∂P :=
-    expected_value_eq_before_optimal_rule hU hc hb τ hopt (τ.capTime t) (fun _ => min_le_right _ _)
+    (integral_congr_ae (.of_forall fun ω ↦ congrArg (U · ω) (min_comm t (τ.time ω)))).trans
+      (expected_value_eq_before_optimal_rule hU hc hb τ hopt (τ.min (.constant 𝓕 t t le_rfl))
+        fun _ ↦ min_le_left _ _)
   apply martingale_of_setIntegral_eq ha hi
   intro i j hij A hA
   have hAm : MeasurableSet A := 𝓕.le i A hA
-  let η := τ.capBinary hij A hA
+  let η := τ.min (StoppingRule.binary hij A hA)
   have hη : (∫ ω, U (η.time ω) ω ∂P) = ∫ ω, U 0 ω ∂P :=
-    expected_value_eq_before_optimal_rule hU hc hb τ hopt η (fun _ => min_le_right _ _)
+    expected_value_eq_before_optimal_rule hU hc hb τ hopt η (fun _ => min_le_left _ _)
   have he : (fun ω => U (η.time ω) ω) = A.piecewise (X i) (X j) := by
     funext ω
-    by_cases hω : ω ∈ A <;> simp [η,StoppingRule.capBinary,StoppingRule.binary,X,hω]
+    by_cases hω : ω ∈ A <;> simp [η,StoppingRule.min_time,StoppingRule.binary,X,hω,min_comm]
   rw [he,integral_piecewise hAm (hi i).integrableOn (hi j).integrableOn] at hη
   have hj := (integral_add_compl hAm (hi j)).trans (hmean j)
   linarith
