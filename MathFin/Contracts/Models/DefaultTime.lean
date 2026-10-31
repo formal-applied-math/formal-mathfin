@@ -32,7 +32,8 @@ CDS contract is worth the grid legs of the hazard curve (`value_cdsBuyer_coxDefa
 the continuous legs: with no discounting the grid losses on any grid from `0` to `T` telescope to
 the default probability `1 − S(T)`, which is `Cox.cdsLosses 0 h T`
 (`cdsLossesGrid_one_eq_cdsLosses`). With
-discounting the grid legs approximate the continuous ones; that is not proved.
+discounting the grid legs converge to the continuous ones as the mesh goes to zero
+(`Contracts/Models/DefaultTimeMesh.lean`).
 
 ## Main definitions
 
