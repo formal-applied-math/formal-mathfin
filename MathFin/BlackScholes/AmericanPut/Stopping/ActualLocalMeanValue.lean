@@ -83,14 +83,9 @@ theorem actualRectangleExit_le_contact {k h : ℝ} (hk : 0 ≤ k) {x R : ℝ} {T
     (brownianLogState_continuous (k-h-1) (Real.sqrt 2) x) ω hlt
   have hp :=
       hrect (τ.time ω) hs.2.le (brownianLogState (k-h-1) (Real.sqrt 2) x (τ.time ω) ω) hs.1.le
-  have hz :=
-      canonicalContactRule_contact (h := h) hk brownianUsual_adapted continuous_brownian x T ω
-  change canonicalGap brownian k h x T (τ.time ω) ω = 0 at hz
-  have ht : (τ.time ω : ℝ) ≤ T := by exact_mod_cast τ.le_horizon ω
-  have hg : 0 < canonicalGap brownian k h x T (τ.time ω) ω := by
-    simpa only [canonicalGap,canonicalLogPath,brownianLogState,NNReal.coe_min,
-      min_eq_left (τ.le_horizon ω),min_eq_left ht] using sub_pos.mpr hp.2
-  exact (ne_of_gt hg) hz
+  have hz := canonicalContactRule_price_eq (h := h) hk brownianUsual_adapted
+    continuous_brownian x T ω
+  exact hp.2.ne' hz
 
 theorem canonicalPrice_rectangle_meanValue {k h : ℝ} (hk : 0 ≤ k) {x R : ℝ} {T δ : ℝ≥0}
     (hδT : δ ≤ T) (hrect : InContinuationRectangle k h x T R δ) :

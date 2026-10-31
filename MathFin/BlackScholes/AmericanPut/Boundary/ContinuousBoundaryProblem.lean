@@ -25,7 +25,7 @@ price is unique), and the price is smooth near each continuation point.
 
 ## Result
 
-Public entry points include `ContinuousBoundaryPutSolution`, `boundary_nonpos`,
+Public entry points include `PutEnvelope`, `ContinuousBoundaryPutSolution`, `boundary_nonpos`,
 `contact_iff`, `contact_in_stock_units`, `boundary_unique`, `price_contDiffAt`.
 -/
 
@@ -36,19 +36,27 @@ namespace MathFin.BlackScholes.AmericanPut.Boundary
 open Set Filter
 open scoped Topology ContDiff
 
+/-- The four properties of a put price that the stopping verification uses before any PDE:
+`p x t` is continuous in `(x, t)` for `t ≥ 0`, equals the payoff at expiry, dominates the
+payoff, and is at most the strike (here normalized to `1`). Pairs are `(log spot, time remaining)`.
+No boundary, equation or regularity is assumed, so it is satisfied by the stopping value itself
+as well as by any classical solution. -/
+structure PutEnvelope (p : ℝ → ℝ → ℝ) : Prop where
+  price_continuous : ContinuousOn (fun z : ℝ × ℝ => p z.1 z.2) {z | 0 ≤ z.2}
+  initial : ∀ x, p x 0 = putPayoff x
+  dominates : ∀ x t, 0 ≤ t → putPayoff x ≤ p x t
+  bounded : ∀ x t, 0 ≤ t → p x t ≤ 1
+
 /-- Classical normalized put solution in the regime `0 ≤ h ≤ k`, `0 < k`, with a continuous
 boundary `b`. Pairs are `(log spot, time remaining)`; boundary derivatives are one-sided. -/
-structure ContinuousBoundaryPutSolution (k h : ℝ) (p : ℝ → ℝ → ℝ) (b : ℝ → ℝ) : Prop where
+structure ContinuousBoundaryPutSolution (k h : ℝ) (p : ℝ → ℝ → ℝ) (b : ℝ → ℝ) : Prop
+    extends PutEnvelope p where
   rate_pos : 0 < k
   dividend_nonneg : 0 ≤ h
   dividend_le_rate : h ≤ k
   boundary_initial : b 0 = 0
   boundary_continuous : ContinuousOn b (Ici 0)
-  price_continuous : ContinuousOn (fun z : ℝ × ℝ => p z.1 z.2) {z | 0 ≤ z.2}
   price_smooth : ContDiffOn ℝ ∞ (fun z : ℝ × ℝ => p z.1 z.2) (continuationRegion b)
-  initial : ∀ x, p x 0 = putPayoff x
-  dominates : ∀ x t, 0 ≤ t → putPayoff x ≤ p x t
-  bounded : ∀ x t, 0 ≤ t → p x t ≤ 1
   exercise : ∀ x t, 0 < t → x ≤ b t → p x t = 1 - Real.exp x
   continuation : ∀ x t, 0 < t → b t < x → putPayoff x < p x t
   equation : ∀ x t, 0 < t → b t < x →
