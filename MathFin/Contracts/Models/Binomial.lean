@@ -177,3 +177,28 @@ theorem pathPV_eq_value_add_gains (hna : BinomialNoArb u d ρ) (hS₀ : S₀ ≠
   simp [Contract.pathPV, Contract.cashflows, hg, scenarioAt, assets, discount, hTN]
 
 end MathFin.Contracts.Binomial
+
+namespace MathFin
+
+open Contracts
+
+/-- **Put-call parity at the binomial level**: `call = put + (S − K·e^{−nr})`. The call is the
+put plus the forward on every path (`value_europeanCall_eq_put_add_forward`), and in the tree the
+forward is worth `S − K e^{−nr}` (`Binomial.value_forward`); the contracts' values are the tree
+prices (`Binomial.value_europeanCall`, `Binomial.value_europeanPut`) for the step length `1`
+and the risk-neutral up-probability. -/
+lemma binomialPrice_callPut_parity {u d r K : ℝ} (h : BinomialNoArb u d r) (n : ℕ) (S : ℝ) :
+    binomialPrice u d r (fun x ↦ max (x - K) 0) n S
+      = binomialPrice u d r (fun x ↦ max (K - x) 0) n S
+        + (S - K * Real.exp (-(n : ℝ) * r)) := by
+  have hp := crrUpProb_mem_Ioo h
+  have hq : (⟨crrUpProb u d r, hp.1.le⟩ : ℝ≥0) ≤ 1 := hp.2.le
+  have hTN : (((n : ℝ≥0) : ℝ)) / 1 = n := by simp
+  have := value_europeanCall_eq_put_add_forward (K := K) (T := (n : ℝ≥0))
+    (coinFlipMeasure _ hq) (Binomial.discount r 1) (Binomial.assets S u d 1)
+    (Binomial.integrable_pathPV hq S u d 1 _ _) (Binomial.integrable_pathPV hq S u d 1 _ _)
+  rw [Binomial.value_europeanCall hq rfl S K hTN, Binomial.value_europeanPut hq rfl S K hTN,
+    Binomial.value_forward hq rfl S K hTN h] at this
+  rw [this, show -(n : ℝ) * r = -(r * n) by ring]
+
+end MathFin
