@@ -220,6 +220,20 @@
       "input_hash": "0cc1afeb75017c779f2738530866288d98c57a645fe288964fed5e3141e99f0d",
       "verified_at_commit": "c55d62c"
     },
+    "gir-bs-emm-girsanov": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-10-31",
+      "elapsed_s": 4.5,
+      "input_hash": "b7d33161d87f8c8b332e367d5672b8adfcbfa190610e8771d93752959bf6085d",
+      "verified_at_commit": "d60b4ca"
+    },
+    "gir-bs-emm-horizon": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-10-31",
+      "elapsed_s": 5.1,
+      "input_hash": "339855c4c798332e26380e94bbfaac9d210988f638cc0fa8b17db3dd0fd57d6c",
+      "verified_at_commit": "d60b4ca"
+    },
     "gir-change-of-measure-engine": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-10-29",
@@ -276,6 +290,13 @@
       "input_hash": "2ee1a279de930e2bbd60e9d781a50dbfba0ae061d74c53f76c2587268ff80823",
       "verified_at_commit": "331e4a2"
     },
+    "gir-market-completeness": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-10-31",
+      "elapsed_s": 8.2,
+      "input_hash": "a3a07bf593649fea2ec90db0b38e839fb24894462ec663939ae88a462889a136",
+      "verified_at_commit": "d60b4ca"
+    },
     "gir-martingale-reindex": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-10-31",
@@ -289,6 +310,27 @@
       "elapsed_s": 5.5,
       "input_hash": "aff0dca5c3920487424fe6e409fd96f471ea512fefe9f1b0170ceee72677377d",
       "verified_at_commit": "3b990d0"
+    },
+    "gir-pricing-measure-density": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-10-31",
+      "elapsed_s": 5.6,
+      "input_hash": "a2c7fa99ac663f340cc4725263f859f0ded480701305a7dc5c65ddc248ac38e1",
+      "verified_at_commit": "d60b4ca"
+    },
+    "gir-pricing-measure-unique": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-10-31",
+      "elapsed_s": 6.1,
+      "input_hash": "6113e93f9e664ee730cf6fd0a8cee071280865077052a7ffac4b1385622ddaae",
+      "verified_at_commit": "d60b4ca"
+    },
+    "gir-replication-in-price": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-10-31",
+      "elapsed_s": 7.6,
+      "input_hash": "50f758af700f12b0fb08ce286b7b996870245a4a2dc9abffdec41c25ba9202ee",
+      "verified_at_commit": "d60b4ca"
     },
     "gir-risk-neutral-drift-unique": {
       "benchmark_file": "girsanov_finance.json",
@@ -527,6 +569,34 @@
       "elapsed_s": 5.7,
       "input_hash": "2081a6d5c90e08fa28761b3243347a64f09459a6c827bf5721d2357a864e48cd",
       "verified_at_commit": "924cd26"
+    },
+    "mf-american-put-ge-bsm-european-put": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-10-31",
+      "elapsed_s": 5.2,
+      "input_hash": "a1ac28677dbfb7774f068dc455d2d8149d8973127a331f66a7e2f079a0142657",
+      "verified_at_commit": "d60b4ca"
+    },
+    "mf-american-put-log-boundary-convex": {
+      "benchmark_file": "american_put_boundary.json",
+      "date": "2026-10-31",
+      "elapsed_s": 7.0,
+      "input_hash": "9fdfc8f98b6f1799c63f968d8d1bf0ca29455cd806f552826e7271dea4cc429c",
+      "verified_at_commit": "d60b4ca"
+    },
+    "mf-american-put-optimal-rule-stopped-martingale": {
+      "benchmark_file": "american_put_boundary.json",
+      "date": "2026-10-31",
+      "elapsed_s": 5.1,
+      "input_hash": "96d988c33f249e05c003bda7f7b6803c63869717d12db359678714be20f8c786",
+      "verified_at_commit": "d60b4ca"
+    },
+    "mf-american-put-stock-boundary-strict-convex": {
+      "benchmark_file": "american_put_boundary.json",
+      "date": "2026-10-31",
+      "elapsed_s": 5.9,
+      "input_hash": "9eaf56f58ce957d8e64a4b039bedcfdcb12e2b2015fdc37a85dea6f0762b9520",
+      "verified_at_commit": "d60b4ca"
     },
     "mf-american-supermartingale": {
       "benchmark_file": "binomial.json",
@@ -5007,6 +5077,13 @@
       "elapsed_s": 5.4,
       "input_hash": "2eac6993850c31f8ae16f6424555cc6c20d691a740c21c0505b07f40f891992d",
       "verified_at_commit": "3b990d0"
+    },
+    "sc-ito-integral-against-drifted-price": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-10-31",
+      "elapsed_s": 5.6,
+      "input_hash": "3edadc3652b813501bd7d2ea8ff8e8035b7b131608cdfc34d2e6910c48ef73b4",
+      "verified_at_commit": "d60b4ca"
     },
     "sc-ito-integral-band": {
       "benchmark_file": "stochastic_calculus.json",
