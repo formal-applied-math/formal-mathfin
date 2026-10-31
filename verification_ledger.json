@@ -1714,9 +1714,9 @@
     "mf-contract-bond-price-hullwhite": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 4.9,
-      "input_hash": "63b0f2ba60fc611bed5621a685fcc5392cfaf76e09d9bfff81bef1cb86efc17f",
-      "verified_at_commit": "955691c"
+      "elapsed_s": 33.7,
+      "input_hash": "ab1d6069f0fa2a82ea88188bb50813872de96b3c52374b6492428ad495aff88d",
+      "verified_at_commit": "ff4a529"
     },
     "mf-contract-bond-price-vasicek": {
       "benchmark_file": "contracts.json",
