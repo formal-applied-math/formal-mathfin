@@ -1987,9 +1987,9 @@
     "mf-crr-american-call-tendsto-bs": {
       "benchmark_file": "binomial.json",
       "date": "2026-10-31",
-      "elapsed_s": 5.6,
-      "input_hash": "ec253275ede77bb6dcf7896b3ee71677a3638b0d305abcc53653268795e1a2a8",
-      "verified_at_commit": "e88bd8b"
+      "elapsed_s": 13.2,
+      "input_hash": "0fb88cf9372cb3dc818d92b8be9225838295131a1d0dd7a3df1ff66616650701",
+      "verified_at_commit": "57f8ab2"
     },
     "mf-crr-bs-call-convergence": {
       "benchmark_file": "binomial.json",
