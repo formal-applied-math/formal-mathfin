@@ -104,7 +104,7 @@ theorem bs_discounted_isEMM
     {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
     {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
     (S_0 r μ σ : ℝ) (hσ : σ ≠ 0) (T : ℝ≥0) :
-    ContinuousMarket.IsEMM (P := P) (𝓕 := 𝓕)
+    ContinuousMarket.IsEMM 𝓕 P
       (fun (t : ℝ≥0) ω ↦ S_0 * Real.exp ((μ - r - σ ^ 2 / 2) * (t : ℝ) + σ * X t ω)) T
       (P.withDensity fun ω ↦ ENNReal.ofReal
         (Real.exp (-((μ - r) / σ) * X T ω - ((μ - r) / σ) ^ 2 * (T : ℝ) / 2))) := by
@@ -115,10 +115,9 @@ theorem bs_discounted_isEMM
   have hmeasX (u : ℝ≥0) : Measurable (X u) := ((hX.stronglyAdapted u).mono (𝓕.le u)).measurable
   have hcont (t : ℝ≥0) : Continuous fun x : ℝ ↦ S_0 * Real.exp ((μ - r - σ ^ 2 / 2) * (t : ℝ) + σ * x) := by
     fun_prop
-  refine ⟨inferInstance, withDensity_absolutelyContinuous _ _,
-    absolutelyContinuous_withDensity_ofReal P
+  refine ⟨isEquivProbMeasure_withDensity_of_isProbabilityMeasure P
       (Real.measurable_exp.comp (((hmeasX T).const_mul (-θ)).sub_const _)).aemeasurable
-      (ae_of_all _ fun _ ↦ Real.exp_pos _),
+      (ae_of_all _ fun _ ↦ Real.exp_pos _) inferInstance,
     ContinuousMarket.martingale_stopped_of_setIntegral_eq
       (fun t _ ↦ (hcont t).comp_stronglyMeasurable (hX.stronglyAdapted t)) (fun t htT ↦ ?_)
       (fun s t hst htT A hA ↦ ?_)⟩

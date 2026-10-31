@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Foundations.EquivMeasure
 public import MathFin.Foundations.FTAP
 public import MathFin.Foundations.NoArbitrageCore
 
@@ -17,7 +18,7 @@ pricing (FTAP), parametric over a finite-dimensional real inner-product-space-va
 discounted price process `S : ℝ≥0 → Ω → F`. The Black–Scholes model (`ContinuousFTAP.lean`)
 instantiates it at `F = ℝ`; a multi-asset model would instantiate at `F = Fin n → ℝ`.
 
-* `IsEMM S T Q` — `Q` is an equivalent martingale measure for `S` up to the horizon `T`:
+* `IsEMM 𝓕 P S T Q` — `Q` is an equivalent martingale measure for `S` up to the horizon `T`:
   `Q ≈ P` (mutual absolute continuity) and `S` is a `Q`-martingale w.r.t. the filtration `𝓕` on
   `{t ≤ T}`, i.e. the process stopped at `T` is a `Q`-martingale. This matches the discrete
   `MathFin.IsEMM` (`FTAPDiscrete.lean`), which also takes a horizon `T`, and it is what an
@@ -28,7 +29,7 @@ instantiates it at `F = ℝ`; a multi-asset model would instantiate at `F = Fin 
   finitely many trading dates `time : Fin (N+1) → ℝ≥0` and `𝓕`-measurable bounded holdings
   `hold : Fin N → Ω → F` between consecutive dates.
 * `SimpleStrategy.gains` — the discounted terminal gains of a simple strategy against `S`.
-* `NoArbitrageSimple S T` — no simple strategy trading up to `T` has gains that are `P`-a.s.
+* `NoArbitrageSimple 𝓕 P S T` — no simple strategy trading up to `T` has gains that are `P`-a.s.
   nonnegative and strictly positive on a `P`-non-null set.
 * `martingale_stopped_of_setIntegral_eq` — the way an `IsEMM` is built: adaptedness, integrability
   and the set-integral martingale identity on `[0, T]` give the stopped martingale.
@@ -51,8 +52,8 @@ times, and the general stochastic integral `∫ φ dS`). Absent by design:
 * general **admissible** strategies (not just piecewise-constant) and the general stochastic
   integral `∫ φ dS` against a semimartingale;
 * **NFLVR** (no free lunch with vanishing risk) and its distinction from plain no-arbitrage;
-* the **converse** direction `NoArbitrageSimple S T → ∃ Q, IsEMM S T Q`, and closedness of the
-  set of claims super-replicable from zero wealth (the Kreps–Yan / Hahn–Banach core DS needs).
+* the **converse** direction `NoArbitrageSimple 𝓕 P S T → ∃ Q, IsEMM 𝓕 P S T Q`, and closedness
+  of the set of claims super-replicable from zero wealth (the Kreps–Yan / Hahn–Banach core DS needs).
 
 `IsEMM` here is stated *on a process* `S`, exactly the object Delbaen–Schachermayer's theorem
 would produce — so this frame is a strict sub-object of the DS one, and extending it to
@@ -85,10 +86,8 @@ price process `S`: `Q` is a probability measure mutually absolutely continuous w
 (`Q ≈ P`), and `S` is a `Q`-martingale w.r.t. the filtration `𝓕` on `{t ≤ T}` — stated as the
 process `t ↦ S (min t T)` stopped at the horizon being a `Q`-martingale. A `Q`-martingale on all
 of `ℝ≥0` is an EMM for every `T`. -/
-structure IsEMM (S : ℝ≥0 → Ω → F) (T : ℝ≥0) (Q : Measure Ω) : Prop where
-  isProb : IsProbabilityMeasure Q
-  ac : Q ≪ P
-  ac' : P ≪ Q
+structure IsEMM (𝓕 : Filtration ℝ≥0 mΩ) (P : Measure Ω) (S : ℝ≥0 → Ω → F) (T : ℝ≥0)
+    (Q : Measure Ω) : Prop extends IsEquivProbMeasure P Q where
   martingale : Martingale (fun t ↦ S (min t T)) 𝓕 Q
 
 /-- **The way an EMM's martingale is built.** A process that is `𝓕`-adapted and `Q`-integrable on
@@ -138,7 +137,8 @@ noncomputable def SimpleStrategy.gains (ψ : SimpleStrategy 𝓕 F)
 /-- **No simple-strategy arbitrage up to `T`**: no simple strategy trading on `[0, T]` (its last
 date is `≤ T`) has gains against `S` that are `P`-a.s. nonnegative and strictly positive on a
 `P`-non-null set. -/
-def NoArbitrageSimple (S : ℝ≥0 → Ω → F) (T : ℝ≥0) : Prop :=
+def NoArbitrageSimple (𝓕 : Filtration ℝ≥0 mΩ) (P : Measure Ω) (S : ℝ≥0 → Ω → F) (T : ℝ≥0) :
+    Prop :=
   ∀ ψ : SimpleStrategy 𝓕 F, ψ.time (Fin.last ψ.N) ≤ T → (0 ≤ᵐ[P] fun ω ↦ ψ.gains S ω) →
     P {ω | 0 < ψ.gains S ω} = 0
 
@@ -211,24 +211,24 @@ variable {S : ℝ≥0 → Ω → F} {T : ℝ≥0} {Q : Measure Ω}
 /-- **A martingale on all of `ℝ≥0` is an EMM at every horizon**, when its measure is an equivalent
 probability measure. -/
 theorem of_martingale [IsProbabilityMeasure Q] (hS : Martingale S 𝓕 Q) (hQP : Q ≪ P)
-    (hPQ : P ≪ Q) (T : ℝ≥0) : IsEMM (P := P) (𝓕 := 𝓕) S T Q :=
-  ⟨inferInstance, hQP, hPQ, martingale_stopped_of_setIntegral_eq (fun t _ ↦ hS.1 t)
+    (hPQ : P ≪ Q) (T : ℝ≥0) : IsEMM 𝓕 P S T Q :=
+  ⟨⟨inferInstance, hQP, hPQ⟩, martingale_stopped_of_setIntegral_eq (fun t _ ↦ hS.1 t)
     (fun t _ ↦ hS.integrable t) fun _ _ hst _ _ hA ↦ (hS.setIntegral_eq hst hA).symm⟩
 
 omit [FiniteDimensional ℝ F] in
 /-- Before the horizon the price is `𝓕`-adapted. -/
-theorem adapted (h : IsEMM (P := P) (𝓕 := 𝓕) S T Q) {t : ℝ≥0} (ht : t ≤ T) :
+theorem adapted (h : IsEMM 𝓕 P S T Q) {t : ℝ≥0} (ht : t ≤ T) :
     StronglyMeasurable[𝓕 t] (S t) := by
   simpa only [min_eq_left ht] using h.martingale.1 t
 
 /-- Before the horizon the price is `Q`-integrable. -/
-theorem integrable (h : IsEMM (P := P) (𝓕 := 𝓕) S T Q) {t : ℝ≥0} (ht : t ≤ T) :
+theorem integrable (h : IsEMM 𝓕 P S T Q) {t : ℝ≥0} (ht : t ≤ T) :
     Integrable (S t) Q := by
   simpa only [min_eq_left ht] using h.martingale.integrable t
 
 omit [FiniteDimensional ℝ F] in
 /-- **The martingale property before the horizon**: `Q[S t | 𝓕 s] = S s` for `s ≤ t ≤ T`. -/
-theorem condExp_eq (h : IsEMM (P := P) (𝓕 := 𝓕) S T Q) {s t : ℝ≥0} (hst : s ≤ t)
+theorem condExp_eq (h : IsEMM 𝓕 P S T Q) {s t : ℝ≥0} (hst : s ≤ t)
     (ht : t ≤ T) : Q[S t | 𝓕 s] =ᵐ[Q] S s := by
   simpa only [min_eq_left ht, min_eq_left (hst.trans ht)] using h.martingale.condExp_ae_eq hst
 
@@ -247,7 +247,7 @@ gains `ψ.gains S` are the martingale transform of the sampled price by the hold
 `emm_implies_no_arbitrage` (`FTAP.lean`) applies, and the continuous theorem has no argument of
 its own. -/
 theorem isEMM_noArbitrageSimple {S : ℝ≥0 → Ω → F} {T : ℝ≥0} {Q : Measure Ω}
-    (h : IsEMM (P := P) (𝓕 := 𝓕) S T Q) : NoArbitrageSimple (P := P) (𝓕 := 𝓕) S T := by
+    (h : IsEMM 𝓕 P S T Q) : NoArbitrageSimple 𝓕 P S T := by
   intro ψ hψT hnonneg
   haveI := h.isProb
   obtain ⟨K, hK⟩ := ψ.bdd

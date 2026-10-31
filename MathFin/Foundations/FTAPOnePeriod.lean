@@ -59,7 +59,7 @@ def NoArbitrage : Prop :=
 
 /-- **Equivalent martingale measure** (one period, scalar): `Q ~ P`, `Y` is `Q`-integrable,
 and `E_Q[Y] = 0`. This is the library's one-period notion `OnePeriodVector.IsEMM` at
-`F = ℝ`, with the same fields `prob`, `absP`, `Pabs`, `int`, `fair`. -/
+`F = ℝ`, with the same fields `toIsEquivProbMeasure` (`isProb`, `ac`, `ac'`), `int`, `fair`. -/
 abbrev IsEMM (Q : Measure Ω) : Prop :=
   OnePeriodVector.IsEMM P Y Q
 

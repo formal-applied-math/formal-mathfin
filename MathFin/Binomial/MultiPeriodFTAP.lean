@@ -210,8 +210,8 @@ theorem isEMM_horizonSpot (h : BinomialNoArb u d r) (S₀ : ℝ) {p q : ℝ≥0}
     have := (crrUpProb_mem_Ioo h).2
     rw [hqcrr] at this
     exact_mod_cast this
-  refine ⟨inferInstance, absolutelyContinuous_of_pos (horizonMeasure_pos T hp0 hp1),
-    absolutelyContinuous_of_pos (horizonMeasure_pos T hq0 hq1'), fun t ht ↦ ?_⟩
+  refine ⟨⟨inferInstance, absolutelyContinuous_of_pos (horizonMeasure_pos T hp0 hp1),
+    absolutelyContinuous_of_pos (horizonMeasure_pos T hq0 hq1')⟩, fun t ht ↦ ?_⟩
   refine ae_eq_condExp_of_forall_setIntegral_eq ((horizonFiltration T).le t) Integrable.of_finite
     (fun s _ _ ↦ Integrable.of_finite.integrableOn) (fun s hs _ ↦ ?_)
     (stronglyAdapted_horizonSpot t).aestronglyMeasurable
@@ -379,7 +379,7 @@ theorem IsEMM.real_atom_up (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
     (x : Fin T → Bool) :
     Q.real (horizonAtom T t x ∩ {y | y ⟨t, ht⟩ = true})
       = crrUpProb u d r * Q.real (horizonAtom T t x) := by
-  haveI := hQ.prob
+  haveI := hQ.isProb
   set A := horizonAtom T t x
   set U : Set (Fin T → Bool) := {y | y ⟨t, ht⟩ = true}
   have hA : MeasurableSet A := (horizonFiltration T).le t _ (measurableSet_horizonAtom t x)
@@ -429,7 +429,7 @@ theorem IsEMM.real_atom_flip (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
       = (if b then crrUpProb u d r else 1 - crrUpProb u d r) * Q.real (horizonAtom T t x) := by
   have hup := IsEMM.real_atom_up hS₀ h hQ ht x
   cases b
-  · haveI := hQ.prob
+  · haveI := hQ.isProb
     have hU : MeasurableSet {y : Fin T → Bool | y ⟨t, ht⟩ = true} := MeasurableSet.of_discrete
     have hsum := measureReal_inter_add_sdiff (μ := Q) (s := horizonAtom T t x) hU
     have hset : horizonAtom T t x ∩ {y | y ⟨t, ht⟩ = false}
@@ -451,7 +451,7 @@ theorem IsEMM.real_horizonAtom (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
   intro t
   induction t with
   | zero =>
-    haveI := hQ.prob
+    haveI := hQ.isProb
     intro _
     simp [horizonAtom_zero]
   | succ t ih =>
@@ -496,7 +496,7 @@ is the law of `T` i.i.d. `Bernoulli(q)` flips with `q = crrUpProb u d r`. Node b
 theorem IsEMM.eq_horizonMeasure (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
     (hQ : IsEMM (horizonFiltration T) P (horizonSpot T S₀ u d r) T Q) {q : ℝ≥0} (hq1 : q ≤ 1)
     (hqcrr : crrUpProb u d r = q) : Q = horizonMeasure T q hq1 := by
-  haveI := hQ.prob
+  haveI := hQ.isProb
   refine Measure.ext_iff_singleton.2 fun x ↦ ?_
   refine (ENNReal.toReal_eq_toReal_iff' (measure_ne_top _ _) (measure_ne_top _ _)).1 ?_
   change Q.real {x} = (horizonMeasure T q hq1).real {x}

@@ -69,7 +69,7 @@ already a `P`-martingale, so `P` is trivially its own EMM for it, at every horiz
 of the model-agnostic `ContinuousMarket.IsEMM` frame at `F = ℝ`. (The physical-measure Girsanov EMM
 `Q ≠ P` is a martingale measure only on `[0, T]`: `bs_discounted_isEMM`.) -/
 theorem discountedGBM_isEMM [IsProbabilityMeasure P] (S_0 r σ : ℝ) (T : ℝ≥0) :
-    ContinuousMarket.IsEMM (P := P) (𝓕 := 𝓕)
+    ContinuousMarket.IsEMM 𝓕 P
       (fun (t : ℝ≥0) ω ↦ Real.exp (-r * t) *
         (S_0 * Real.exp ((r - σ ^ 2 / 2) * t + σ * X t ω))) T P :=
   ContinuousMarket.IsEMM.of_martingale (discountedGBM_isMartingale S_0 r σ)
@@ -80,7 +80,7 @@ frame's forward FTAP (`isEMM_noArbitrageSimple`) applied to the EMM `discountedG
 (piecewise-constant, predictable, bounded) strategy trading the discounted GBM up to `T` has gains
 that are `P`-a.s. nonnegative and strictly positive on a `P`-non-null set. -/
 theorem discountedGBM_noArbitrageSimple [IsProbabilityMeasure P] (S_0 r σ : ℝ) (T : ℝ≥0) :
-    ContinuousMarket.NoArbitrageSimple (P := P) (𝓕 := 𝓕)
+    ContinuousMarket.NoArbitrageSimple 𝓕 P
       (fun (t : ℝ≥0) ω ↦ Real.exp (-r * t) *
         (S_0 * Real.exp ((r - σ ^ 2 / 2) * t + σ * X t ω))) T :=
   ContinuousMarket.isEMM_noArbitrageSimple (discountedGBM_isEMM S_0 r σ T)

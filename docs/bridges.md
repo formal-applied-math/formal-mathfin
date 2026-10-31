@@ -411,8 +411,8 @@ function of `B_t`, and the Itô-integral QV exists only in expectation).
 `Foundations/ContinuousMarket` (the model-agnostic EMM frame) ↔ `Foundations/ContinuousFTAP`
 (the `F = ℝ` discounted-GBM instance) ↔ `Foundations/NoArbitrageCore` (shared with the discrete FTAP).
 
-- **ContinuousMarket → ContinuousFTAP.** `IsEMM S T Q` (an EMM up to the horizon `T`, the same
-  shape as the discrete `IsEMM`) / `NoArbitrageSimple S T` / `isEMM_noArbitrageSimple` (the general
+- **ContinuousMarket → ContinuousFTAP.** `IsEMM 𝓕 P S T Q` (an EMM up to the horizon `T`, the same
+  shape as the discrete `IsEMM`) / `NoArbitrageSimple 𝓕 P S T` / `isEMM_noArbitrageSimple` (the general
   forward theorem) are instantiated by `discountedGBM_isEMM` / `discountedGBM_noArbitrageSimple`,
   which package the existing `discountedGBM_isMartingale` (the operational continuous FTAP) as a
   concrete EMM (`IsEMM.of_martingale`: a martingale on all of `ℝ≥0` is an EMM at every horizon).
