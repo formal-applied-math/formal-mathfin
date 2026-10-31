@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -37,17 +37,17 @@ adjustment on the swap layer of `MathFin/FixedIncome/InterestRateSwap.lean`
   `S''(x) = 2(P₀+C)/(δ(C+x)³)`, positive when `P₀ + C > 0`.
 * **The annuity measure.** `annuityMeasure`: the change-of-numéraire measure
   with the annuity `A_T` in the numéraire seat against the money market
-  `B_t = e^{rt}` — an execution of `MathFin.changeOfNumeraire`
+  `B = 1/D`, `D` the discount factor to the fixing date, random in general
+  (`D = e^{−rT}` is the deterministic money market) — an execution of
+  `MathFin.changeOfNumeraire`
   (`Foundations/Numeraire.lean`), alongside the stock and the `T`-bond (the
   forward measure of `FixedIncome/ForwardMeasure.lean`). `annuityMeasure_price`
-  proves `A₀·𝔼^{Qᴬ}[S] = 𝔼^Q[e^{−rT}·S·A_T]` — `Qᴬ`-expectations price
+  proves `A₀·𝔼^{Qᴬ}[S] = 𝔼^Q[D·S·A_T]` — `Qᴬ`-expectations price
   annuity-settled payoffs `S·A_T`; `annuityMeasure_isProbabilityMeasure` proves
   `Qᴬ` is a probability *given the annuity repricing condition*
-  `𝔼^Q[e^{−rT}A_T] = A₀` — that normalization is where the martingale content
-  enters, and it is taken as an explicit hypothesis. The money market is the
-  deterministic `e^{rT}` while the curve `P` is random, a simplification: a
-  stochastic-rate model would need a random `B_T`, which the numéraire engine
-  accepts.
+  `𝔼^Q[D·A_T] = A₀` — that normalization is where the martingale content
+  enters, and it is taken as an explicit hypothesis (`Contracts/Models/CMS.lean` derives it
+  from the tower property when the curve is the bond prices of `D`).
 * **The headline.** `cmsCurveRate_jensenGap_nonneg`: Jensen under the annuity measure
   (Mathlib's `ConvexOn.map_integral_le`) gives
 
@@ -69,9 +69,11 @@ adjustment on the swap layer of `MathFin/FixedIncome/InterestRateSwap.lean`
   nothing here connects it to the CMS rate.
 
 Scope: what lands here is the convexity of the rate functional, the annuity measure, the Jensen gap
-under it, and the compact-range replication identity. The convexity adjustment itself —
-`𝔼^{T_p}[S_T] − S₀`, which needs the change of measure from `Qᴬ` to the payment-date forward measure
-and a model for the curve — is not formalized. The spanning is the compact-strike-range version
+under it, and the compact-range replication identity. `Contracts/Models/CMS.lean` prices CMS
+contracts under the annuity measure with the curve tied to the bond prices of a stochastic discount
+factor, and restates the Jensen gap for the swap rate. The convexity adjustment for a rate paid at a
+later date — `𝔼^{T_p}[S_T] − S₀`, which needs the change of measure from `Qᴬ` to the payment-date
+forward measure — is not formalized. The spanning is the compact-strike-range version
 (`[L, U]` with `L > −C`); the unbounded-window passage (tail analysis) is not here either. The
 swap-rate functional is *not* a log payoff, so the seed consumes `carrMadan_spanning` — the shared
 core of which `carrMadan_log_spanning` is the log instance (its proof is one instantiation).
@@ -304,66 +306,61 @@ private theorem annuityRandom_pos {δ : ℝ} (hδ : 0 < δ) {P : Ω → ι → �
   annuity_pos hδ (fun i hi ↦ hP ω i hi) hs
 
 /-- **The annuity measure** `Qᴬ`: the change-of-numéraire measure with the
-annuity `A_T` in the numéraire seat against the money market `B_t = e^{rt}` —
-an execution of `MathFin.changeOfNumeraire`, alongside the stock and the
-`T`-bond (the forward measure of `FixedIncome/ForwardMeasure.lean`).
-Density: `dQᴬ/dQ = A_T·e^{−rT}/A₀`. -/
-noncomputable def annuityMeasure (Q : Measure Ω) (r T δ : ℝ) (P : Ω → ι → ℝ)
+annuity `A_T` in the numéraire seat against the money market `B_T = 1/D`, `D` the (random)
+discount factor to the fixing date — an execution of `MathFin.changeOfNumeraire`, alongside the
+stock and the `T`-bond (the forward measure of `FixedIncome/ForwardMeasure.lean`).
+Density: `dQᴬ/dQ = A_T·D/A₀`. A deterministic money market `e^{rT}` is `D = e^{−rT}`. -/
+noncomputable def annuityMeasure (Q : Measure Ω) (D : Ω → ℝ) (δ : ℝ) (P : Ω → ι → ℝ)
     (s : Finset ι) (A0 : ℝ) : Measure Ω :=
-  numeraireMeasure Q (fun _ ↦ Real.exp (r * T)) (annuityRandom δ P s) 1 A0
+  numeraireMeasure Q (fun ω ↦ (D ω)⁻¹) (annuityRandom δ P s) 1 A0
 
 /-- **The annuity measure is a probability measure** under the annuity-repricing
-condition `𝔼^Q[e^{−rT}·A_T] = A₀` — the numéraire engine's normalization
-`𝔼^Q[N_T/B_T] = N₀/B₀` read with `N = A`, `B` the money market. This hypothesis
+condition `𝔼^Q[D·A_T] = A₀` — the numéraire engine's normalization
+`𝔼^Q[N_T/B_T] = N₀/B₀` read with `N = A`, `B = 1/D` the money market. This hypothesis
 is where the martingale content of the CMS construction enters; it is taken
 explicitly. -/
-theorem annuityMeasure_isProbabilityMeasure {Q : Measure Ω} (r T δ : ℝ)
-    (P : Ω → ι → ℝ) (s : Finset ι) (A0 : ℝ) (hδ : 0 < δ) (hs : s.Nonempty)
-    (hP : ∀ ω i, i ∈ s → 0 < P ω i) (hA0 : 0 < A0)
-    (hint : Integrable (fun ω ↦ annuityRandom δ P s ω * Real.exp (-(r * T))) Q)
-    (hrepr : ∫ ω, annuityRandom δ P s ω * Real.exp (-(r * T)) ∂Q = A0) :
-    IsProbabilityMeasure (annuityMeasure Q r T δ P s A0) := by
+theorem annuityMeasure_isProbabilityMeasure {Q : Measure Ω} (D : Ω → ℝ) (δ : ℝ)
+    (P : Ω → ι → ℝ) (s : Finset ι) (A0 : ℝ) (hD : ∀ ω, 0 < D ω) (hδ : 0 < δ)
+    (hs : s.Nonempty) (hP : ∀ ω i, i ∈ s → 0 < P ω i) (hA0 : 0 < A0)
+    (hint : Integrable (fun ω ↦ annuityRandom δ P s ω * D ω) Q)
+    (hrepr : ∫ ω, annuityRandom δ P s ω * D ω ∂Q = A0) :
+    IsProbabilityMeasure (annuityMeasure Q D δ P s A0) := by
   have hpos : ∀ ω, 0 < annuityRandom δ P s ω := fun ω ↦ annuityRandom_pos hδ hs hP ω
-  have hdiv : (fun ω : Ω ↦ annuityRandom δ P s ω / Real.exp (r * T))
-      = fun ω ↦ annuityRandom δ P s ω * Real.exp (-(r * T)) := by
-    funext ω
-    rw [Real.exp_neg]
-    field_simp
-  refine numeraireMeasure_isProbabilityMeasure hpos (fun ω ↦ Real.exp_pos _) one_pos hA0
+  have hdiv : (fun ω : Ω ↦ annuityRandom δ P s ω / (D ω)⁻¹)
+      = fun ω ↦ annuityRandom δ P s ω * D ω := funext fun ω ↦ div_inv_eq_mul _ _
+  exact numeraireMeasure_isProbabilityMeasure hpos (fun ω ↦ inv_pos.2 (hD ω)) one_pos hA0
     (by rw [hdiv]; exact hint) (by rw [hdiv, hrepr]; simp)
 
 /-- **The annuity-measure pricing identity** — the annuity in the numéraire seat.
 For any `S`,
 
-  `A₀ · 𝔼^{Qᴬ}[S] = 𝔼^Q[e^{−rT} · S · A_T]`,
+  `A₀ · 𝔼^{Qᴬ}[S] = 𝔼^Q[D · S · A_T]`,
 
 an execution of `changeOfNumeraire`: `Qᴬ`-expectations price the annuity-settled
 payoff `S·A_T`. (A claim paying `S` itself at `T` would be priced through
 `S/A_T`; the random `A_T` stays on the `Q` side.) -/
-theorem annuityMeasure_price {Q : Measure Ω} (r T δ : ℝ) (P : Ω → ι → ℝ)
-    (s : Finset ι) (A0 : ℝ) (S : Ω → ℝ) (hδ : 0 < δ) (hs : s.Nonempty)
-    (hP : ∀ ω i, i ∈ s → 0 < P ω i) (hA0 : 0 < A0)
+theorem annuityMeasure_price {Q : Measure Ω} (D : Ω → ℝ) (δ : ℝ) (P : Ω → ι → ℝ)
+    (s : Finset ι) (A0 : ℝ) (S : Ω → ℝ) (hD : ∀ ω, 0 < D ω) (hDm : Measurable D)
+    (hδ : 0 < δ) (hs : s.Nonempty) (hP : ∀ ω i, i ∈ s → 0 < P ω i) (hA0 : 0 < A0)
     (hAmeas : Measurable (annuityRandom δ P s)) :
-    A0 * ∫ ω, S ω ∂(annuityMeasure Q r T δ P s A0)
-      = ∫ ω, Real.exp (-(r * T)) * (S ω * annuityRandom δ P s ω) ∂Q := by
+    A0 * ∫ ω, S ω ∂(annuityMeasure Q D δ P s A0)
+      = ∫ ω, D ω * (S ω * annuityRandom δ P s ω) ∂Q := by
   have hpos : ∀ ω, 0 < annuityRandom δ P s ω := fun ω ↦ annuityRandom_pos hδ hs hP ω
-  have h := changeOfNumeraire (Q := Q) (BT := fun _ ↦ Real.exp (r * T))
+  have h := changeOfNumeraire (Q := Q) (BT := fun ω ↦ (D ω)⁻¹)
     (NT := annuityRandom δ P s) (B0 := (1 : ℝ)) (N0 := A0)
     (fun ω ↦ S ω * annuityRandom δ P s ω) hAmeas
-    measurable_const hpos (fun ω ↦ Real.exp_pos _) (by norm_num) hA0
+    hDm.inv hpos (fun ω ↦ inv_pos.2 (hD ω)) (by norm_num) hA0
   have hcongr : ∀ ω : Ω, annuityRandom δ P s ω ≠ 0 →
       S ω * annuityRandom δ P s ω / annuityRandom δ P s ω = S ω := by
     intro ω hY
     simp [hY]
   rw [integral_congr_ae (ae_of_all _ fun ω ↦ hcongr ω (ne_of_gt (hpos ω)))] at h
-  have h2 : 1 * ∫ ω, S ω * annuityRandom δ P s ω / Real.exp (r * T) ∂Q
-      = ∫ ω, Real.exp (-(r * T)) * (S ω * annuityRandom δ P s ω) ∂Q := by
+  have h2 : 1 * ∫ ω, S ω * annuityRandom δ P s ω / (D ω)⁻¹ ∂Q
+      = ∫ ω, D ω * (S ω * annuityRandom δ P s ω) ∂Q := by
     rw [one_mul]
-    refine integral_congr_ae (ae_of_all _ fun ω ↦ ?_)
-    change S ω * annuityRandom δ P s ω / Real.exp (r * T)
-      = Real.exp (-(r * T)) * (S ω * annuityRandom δ P s ω)
-    rw [div_eq_mul_inv, Real.exp_neg]
-    ring
+    exact integral_congr_ae (ae_of_all _ fun ω ↦ by
+      show S ω * annuityRandom δ P s ω / (D ω)⁻¹ = D ω * (S ω * annuityRandom δ P s ω)
+      rw [div_inv_eq_mul, mul_comm])
   rw [← h2]
   exact h
 
@@ -379,21 +376,21 @@ measure `Qᴬ` of the previous section satisfies `S(𝔼^{Qᴬ}[W]) ≤ 𝔼^{Q�
 is used only as one; `W` is not linked to the curve `P` that defines `Qᴬ`, and no
 martingale property is assumed. This is not the CMS convexity adjustment
 `𝔼^{T_p}[S_T] − S₀`. -/
-theorem cmsCurveRate_jensenGap_nonneg {Q : Measure Ω} (r T δ P0 C A0 x₀ : ℝ)
-    (P : Ω → ι → ℝ) (s : Finset ι) (W : Ω → ℝ) (hδ : 0 < δ) (hC : 0 < C)
+theorem cmsCurveRate_jensenGap_nonneg {Q : Measure Ω} (D : Ω → ℝ) (δ P0 C A0 x₀ : ℝ)
+    (P : Ω → ι → ℝ) (s : Finset ι) (W : Ω → ℝ) (hD : ∀ ω, 0 < D ω) (hδ : 0 < δ) (hC : 0 < C)
     (hPC : 0 ≤ P0 + C) (hs : s.Nonempty) (hP : ∀ ω i, i ∈ s → 0 < P ω i)
     (hA0 : 0 < A0)
-    (hint : Integrable (fun ω ↦ annuityRandom δ P s ω * Real.exp (-(r * T))) Q)
-    (hrepr : ∫ ω, annuityRandom δ P s ω * Real.exp (-(r * T)) ∂Q = A0)
+    (hint : Integrable (fun ω ↦ annuityRandom δ P s ω * D ω) Q)
+    (hrepr : ∫ ω, annuityRandom δ P s ω * D ω ∂Q = A0)
     (hWpos : ∀ ω, 0 ≤ W ω)
-    (hWint : Integrable W (annuityMeasure Q r T δ P s A0))
+    (hWint : Integrable W (annuityMeasure Q D δ P s A0))
     (hSint : Integrable (fun ω ↦ cmsCurveRate P0 δ C (W ω))
-      (annuityMeasure Q r T δ P s A0))
-    (hfwd : ∫ ω, W ω ∂(annuityMeasure Q r T δ P s A0) = x₀) :
+      (annuityMeasure Q D δ P s A0))
+    (hfwd : ∫ ω, W ω ∂(annuityMeasure Q D δ P s A0) = x₀) :
     cmsCurveRate P0 δ C x₀
-      ≤ ∫ ω, cmsCurveRate P0 δ C (W ω) ∂(annuityMeasure Q r T δ P s A0) := by
-  haveI hprob := annuityMeasure_isProbabilityMeasure r T δ P s A0 hδ hs hP hA0 hint hrepr
-  have hfs : ∀ᵐ ω ∂(annuityMeasure Q r T δ P s A0), W ω ∈ Set.Ici (0 : ℝ) :=
+      ≤ ∫ ω, cmsCurveRate P0 δ C (W ω) ∂(annuityMeasure Q D δ P s A0) := by
+  haveI hprob := annuityMeasure_isProbabilityMeasure D δ P s A0 hD hδ hs hP hA0 hint hrepr
+  have hfs : ∀ᵐ ω ∂(annuityMeasure Q D δ P s A0), W ω ∈ Set.Ici (0 : ℝ) :=
     ae_of_all _ fun ω ↦ Set.mem_Ici.2 (hWpos ω)
   have hj := ConvexOn.map_integral_le (f := W) (g := cmsCurveRate P0 δ C)
     (s := Set.Ici (0 : ℝ)) (cmsCurveRate_convexOn P0 δ C hδ hC hPC)
@@ -401,20 +398,20 @@ theorem cmsCurveRate_jensenGap_nonneg {Q : Measure Ω} (r T δ P0 C A0 x₀ : �
   rwa [hfwd] at hj
 
 /-- The Jensen gap itself: `𝔼^{Qᴬ}[S(W)] − S(𝔼^{Qᴬ}[W]) ≥ 0`. -/
-theorem cmsCurveRate_jensenGap_sub_nonneg {Q : Measure Ω} (r T δ P0 C A0 x₀ : ℝ)
-    (P : Ω → ι → ℝ) (s : Finset ι) (W : Ω → ℝ) (hδ : 0 < δ) (hC : 0 < C)
+theorem cmsCurveRate_jensenGap_sub_nonneg {Q : Measure Ω} (D : Ω → ℝ) (δ P0 C A0 x₀ : ℝ)
+    (P : Ω → ι → ℝ) (s : Finset ι) (W : Ω → ℝ) (hD : ∀ ω, 0 < D ω) (hδ : 0 < δ) (hC : 0 < C)
     (hPC : 0 ≤ P0 + C) (hs : s.Nonempty) (hP : ∀ ω i, i ∈ s → 0 < P ω i)
     (hA0 : 0 < A0)
-    (hint : Integrable (fun ω ↦ annuityRandom δ P s ω * Real.exp (-(r * T))) Q)
-    (hrepr : ∫ ω, annuityRandom δ P s ω * Real.exp (-(r * T)) ∂Q = A0)
+    (hint : Integrable (fun ω ↦ annuityRandom δ P s ω * D ω) Q)
+    (hrepr : ∫ ω, annuityRandom δ P s ω * D ω ∂Q = A0)
     (hWpos : ∀ ω, 0 ≤ W ω)
-    (hWint : Integrable W (annuityMeasure Q r T δ P s A0))
+    (hWint : Integrable W (annuityMeasure Q D δ P s A0))
     (hSint : Integrable (fun ω ↦ cmsCurveRate P0 δ C (W ω))
-      (annuityMeasure Q r T δ P s A0))
-    (hfwd : ∫ ω, W ω ∂(annuityMeasure Q r T δ P s A0) = x₀) :
-    0 ≤ ∫ ω, cmsCurveRate P0 δ C (W ω) ∂(annuityMeasure Q r T δ P s A0)
+      (annuityMeasure Q D δ P s A0))
+    (hfwd : ∫ ω, W ω ∂(annuityMeasure Q D δ P s A0) = x₀) :
+    0 ≤ ∫ ω, cmsCurveRate P0 δ C (W ω) ∂(annuityMeasure Q D δ P s A0)
       - cmsCurveRate P0 δ C x₀ :=
-  sub_nonneg.2 (cmsCurveRate_jensenGap_nonneg r T δ P0 C A0 x₀ P s W hδ hC hPC hs hP hA0 hint
+  sub_nonneg.2 (cmsCurveRate_jensenGap_nonneg D δ P0 C A0 x₀ P s W hD hδ hC hPC hs hP hA0 hint
     hrepr hWpos hWint hSint hfwd)
 
 end Annuity

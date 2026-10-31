@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (861 MathFin constants, 29 upstream). Citations
+  corpus (868 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -291,6 +291,22 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.Payoff.measurable_eval_of_obsTimes_le
 
+/-- info: 'MathFin.Contracts.SwapModel.cmsCurveRate_integral_le_forwardSwapRate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.SwapModel.cmsCurveRate_integral_le_forwardSwapRate
+
+/-- info: 'MathFin.Contracts.SwapModel.integral_swapRate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.SwapModel.integral_swapRate
+
+/-- info: 'MathFin.Contracts.SwapModel.valueDisc_cmsSwaplet_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.SwapModel.valueDisc_cmsSwaplet_eq
+
+/-- info: 'MathFin.Contracts.SwapModel.zeroCurve_mul_forwardSwapRate_le_valueDisc_cmsSwaplet' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.SwapModel.zeroCurve_mul_forwardSwapRate_le_valueDisc_cmsSwaplet
+
 /-- info: 'MathFin.Contracts.bondPrice_hullWhite' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.bondPrice_hullWhite
@@ -355,6 +371,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.valueDisc_caplet_vasicek
 
+/-- info: 'MathFin.Contracts.valueDisc_cmsCaplet' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.valueDisc_cmsCaplet
+
 /-- info: 'MathFin.Contracts.valueDisc_fixedFlows_eq_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.valueDisc_fixedFlows_eq_value
@@ -370,6 +390,14 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.Contracts.valueDisc_fixedFlows_vasicek' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.valueDisc_fixedFlows_vasicek
+
+/-- info: 'MathFin.Contracts.valueDisc_payerSwaption' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.valueDisc_payerSwaption
+
+/-- info: 'MathFin.Contracts.valueDisc_payerSwaption_black_forwardSwapRate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.valueDisc_payerSwaption_black_forwardSwapRate
 
 /-- info: 'MathFin.Contracts.value_cdsBuyer_coxDefaultTime' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
