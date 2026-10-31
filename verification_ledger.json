@@ -4814,10 +4814,10 @@
     },
     "sc-ito-formula-unrestricted-local": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-10-30",
-      "elapsed_s": 5.1,
-      "input_hash": "328bc17b89f0215c7ee17b077e7f5a3a7d34af7ee8831a314540ba0b6cc1b33b",
-      "verified_at_commit": "c890859"
+      "date": "2026-10-31",
+      "elapsed_s": 5.9,
+      "input_hash": "fde701eb63e6726588450d343c9615ce4d30be1b777d5c3520c3c97d44d68f18",
+      "verified_at_commit": "3560e2e"
     },
     "sc-ito-general-continuous-modification": {
       "benchmark_file": "stochastic_calculus.json",
