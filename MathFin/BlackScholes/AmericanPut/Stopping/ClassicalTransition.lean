@@ -129,19 +129,15 @@ theorem brownianClassicalCandidate_supermartingale {K r q σ S : ℝ} {p : ℝ �
   refine ⟨hadapt,?_,hint⟩
   intro i j hij
   change gaussianLimit[U j | brownianFiltration i] ≤ᵐ[gaussianLimit] U i
+  have hfreeze (j : ℝ≥0) (hj : T ≤ j) : U j = U T := by
+    funext ω
+    simp only [U,classicalCandidate,min_eq_right hj,min_self]
   by_cases hjT : j ≤ T
   · exact classicalCandidate_condExp_le_before_maturity hE hw hK hσ hij hjT
-  · have hTj : T ≤ j := (le_of_not_ge hjT)
-    have hj : U j = U T := by
-      funext ω
-      simp only [U,classicalCandidate,min_eq_right hTj,min_self]
-    rw [hj]
+  · rw [hfreeze j (not_le.mp hjT).le]
     by_cases hiT : i ≤ T
     · exact classicalCandidate_condExp_le_before_maturity hE hw hK hσ hiT le_rfl
-    · have hTi : T ≤ i := le_of_not_ge hiT
-      have hi : U i = U T := by
-        funext ω
-        simp only [U,classicalCandidate,min_eq_right hTi,min_self]
-      rw [← hi,condExp_of_stronglyMeasurable (brownianFiltration.le i) (hadapt i) (hint i)]
+    · rw [← hfreeze i (not_le.mp hiT).le,
+        condExp_of_stronglyMeasurable (brownianFiltration.le i) (hadapt i) (hint i)]
 
 end MathFin.BlackScholes.AmericanPut.Stopping

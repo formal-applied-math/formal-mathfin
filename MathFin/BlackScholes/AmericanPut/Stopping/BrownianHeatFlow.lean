@@ -83,8 +83,8 @@ theorem linearPriceEvolution_initial (f : ℝ → ℝ) (k h a x : ℝ) :
 
 theorem linearPriceEvolution_continuous {f : ℝ → ℝ} {C : ℝ}
     (hf : Continuous f) (hbound : ∀ x, ‖f x‖ ≤ C) (k h a : ℝ) :
-    Continuous (fun z : ℝ × ℝ => linearPriceEvolution f k h a z.1 z.2) := by
-  exact (show Continuous (fun z : ℝ × ℝ => Real.exp (-k*(z.2-a))) by fun_prop).mul
+    Continuous (fun z : ℝ × ℝ => linearPriceEvolution f k h a z.1 z.2) :=
+  (show Continuous (fun z : ℝ × ℝ => Real.exp (-k*(z.2-a))) by fun_prop).mul
     ((brownianHeatFlow_continuous hf hbound).comp
       (show Continuous (fun z : ℝ × ℝ => ((2*(z.2-a)).toNNReal,z.1+(k-h-1)*(z.2-a))) by fun_prop))
 
