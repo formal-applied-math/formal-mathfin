@@ -32,11 +32,11 @@ model `X` carries them as observed processes. `BondModel` says the underlying `b
 
 ## What is not here
 
-Lognormality of `L` under the forward measure is a hypothesis. That the Gaussian short-rate
-models (Vasicek, Hull–White, GSR) produce it needs their bond prices `P(t, T)` at `t > 0`, the
-conditional Laplace transform of the integrated rate, which the library does not have; the
-model theorems of `ShortRate.lean` give `P(0, T)` only. CMS rates are not covered: a CMS
-payoff observes a swap rate, a ratio of bond-price sums, which `Payoff` cannot express.
+Lognormality of `L` under the forward measure is a hypothesis. The Vasicek bond prices
+`P(t, T)` at `t > 0` are in the library (`bondPrice_vasicek`,
+`Contracts/Models/VasicekBond.lean`), but the lognormality is not derived from them; Hull–White
+and the two-piece GSR are not covered. CMS rates are not covered: a CMS payoff observes a swap
+rate, a ratio of bond-price sums, which `Payoff` cannot express.
 
 ## Main definitions
 

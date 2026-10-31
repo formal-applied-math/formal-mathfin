@@ -120,6 +120,7 @@ import MathFin.Foundations.WienerIntegralGaussian
 -- Wiener integral of a step indicator is the increment (∫𝟙_{(s,t]} dB = B_t − B_s)
 import MathFin.Foundations.WienerIntegralIndicator
 import MathFin.Foundations.WienerIntegralIto
+import MathFin.Foundations.WienerIntegralFiltration
 -- Structural / principle modules:
 import MathFin.Foundations.StandardGaussianMGF
 import MathFin.Foundations.ExponentialDiscount
@@ -599,6 +600,8 @@ import MathFin.FixedIncome.VasicekSDEGaussian
 import MathFin.FixedIncome.CIRSquaredOU
 -- Vasicek zero-coupon bond price: the affine term structure (Gaussian Laplace transform)
 import MathFin.FixedIncome.VasicekBondPrice
+-- Vasicek bond price at t > 0: the conditional discount factor is affine in the short rate
+import MathFin.FixedIncome.VasicekBondPriceAt
 -- Vasicek real-world vs. risk-neutral terminal mean; an Esscher tilt reproducing the
 -- risk-neutral terminal law
 import MathFin.FixedIncome.VasicekMarketPriceOfRisk
@@ -756,6 +759,7 @@ import MathFin.Contracts.Models.Binomial
 import MathFin.Contracts.Models.BinomialLimit
 import MathFin.Contracts.Models.Caplet
 import MathFin.Contracts.Models.ShortRate
+import MathFin.Contracts.Models.VasicekBond
 import MathFin.Contracts.Models.DefaultTime
 import MathFin.Contracts.Risk
 

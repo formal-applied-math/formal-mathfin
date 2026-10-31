@@ -937,6 +937,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.levelPaymentBalance_eq_annuityValue (MathFin/FixedIncome/LoanAmortization.lean): induction on n, unfolding levelPaymentBalance directly against the one-period annuity identity annuityValue_succ_mul_exp_sub, A_{m+1}·e^{rΔt} − A = A_m, for annuityValue (MathFin/FixedIncome/CouponBonds.lean). SCOPE: constant rate, continuously-compounded discounting matched to the period rate."
       }
+    },
+    {
+      "id": "mf-vasicek-bond-price-at-t",
+      "name": "Vasicek Bond Price at Time t > 0: A(T-t) exp(-B(T-t) r_t)",
+      "description": "Vasicek model with kappa > 0, the integrated short rate int_0^T r_s ds carried in its Wiener representation (vasicekIntegratedRate), the measure read as the pricing measure, and F_t the natural filtration of the driving Brownian motion (measurable sections). For t <= T, E[exp(-int_0^T r_s ds) | F_t] = exp(-int_0^t r_s ds) * A(T-t) * exp(-B(T-t) * r_t) almost surely, where r_t = vasicekSDEMean + sigma * int_0^t e^{-kappa(t-u)} dB_u is the short rate in its Wiener representation and A, B are the coefficients of the time-0 price (mf-vasicek-bond-price) at the remaining maturity T - t. Dividing by the F_t-known discount factor exp(-int_0^t r_s ds), the price at t of one unit paid at T is A(T-t) * exp(-B(T-t) * r_t); the division is the entry mf-contract-bond-price-vasicek.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.VasicekBondPriceAt\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The Vasicek bond price at time `t`**: the conditional mean of the discount factor given\nthe past is `exp(−∫₀ᵗ r)·A(T − t)·exp(−B(T − t)·r_t)`. -/\ntheorem vasicek_bond_price_cond_exp\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measurable (B s))\n    (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) {t T : ℝ≥0} (htT : t ≤ T) :\n    μ[fun ω ↦ Real.exp (-vasicekIntegratedRate hB r₀ θ σ hκ T ω)\n        | Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable) t]\n      =ᵐ[μ] fun ω ↦ Real.exp (-vasicekIntegratedRate hB r₀ θ σ hκ t ω)\n        * (vasicekBondA θ σ κ ((T - t : ℝ≥0) : ℝ)\n          * Real.exp (-(vasicekBondB κ ((T - t : ℝ≥0) : ℝ)\n            * (vasicekSDEMean r₀ θ κ t + vasicekDiffusionTerm hB κ σ hκ.le t ω)))) :=\n  MathFin.vasicekBondPrice_condExp hB hBm r₀ θ σ hκ htT\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Vasicek 1977 short-rate model; Brigo and Mercurio, Interest Rate Models, 2nd ed., section 3.2.1 (the bond price P(t,T) = A(t,T) exp(-B(t,T) r(t)))",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. vasicekBondPrice_condExp in MathFin/FixedIncome/VasicekBondPriceAt.lean, from the conditional Laplace transform of the Wiener integral (condExp_exp_wienerIntegralLp, mf-wiener-conditional-laplace) at the integrated kernel g_T: restricted to (0,t] it is g_t + B(T-t) e^{-kappa(t-.)} (kernelRestrict_vasicekIntegratedKernelLp), so the past part of the discount depends on the past only through the Wiener integral of e^{-kappa(t-.)}, which is (r_t - mean)/sigma; the independent remainder has the exponential moments of a centred Gaussian of variance int_t^T g_T^2 = V(T-t) (integral_sq_vasicekIntegratedKernelLp_Ioc), and the mean shift is the identity M(t) - M(T) = -theta (tau - B(tau)) - B(tau) m_t (vasicekIntegratedMean_sub). SCOPE: the integrated rate and the short rate are carried in their Wiener representations (as in mf-vasicek-bond-price; that they solve the SDE and the time-order swap are cited, not proved); the measure is read as the pricing measure; the filtration is the natural one of B. Vasicek only (constant theta): Hull-White and the two-piece GSR are not covered. Axioms-clean."
+      }
     }
   ]
 }
