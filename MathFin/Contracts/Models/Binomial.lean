@@ -157,24 +157,48 @@ theorem value_cappedCall (K₂ : ℝ) :
 
 /-- **A European contract's binomial value is the cost of its hedge.** Under no-arbitrage, with
 paths drawn under the risk-neutral up-probability and `S₀ ≠ 0`, there is a predictable strategy
-`H` (`H_k` depends only on the first `k` flips) such that, on every path, the contract's
+`H` (`H_{k+1}` depends only on the first `k` flips) such that, on every path, the contract's
 discounted payoff is its value plus the strategy's gains in the discounted spot
-`S̃_k = e^{−ρk} S_k`:
+`S̃_k = e^{−ρk} S_k`, its `martingaleTransform`:
 
-  `pathPV = value + ∑_{k<N} H_k (S̃_{k+1} − S̃_k)`.
+  `pathPV = value + ∑_{k<N} H_{k+1} (S̃_{k+1} − S̃_k)`.
 
 So the value is not only an expectation: it is the initial capital that replicates the
 contract. -/
 theorem pathPV_eq_value_add_gains (hna : BinomialNoArb u d ρ) (hS₀ : S₀ ≠ 0) {a : Payoff Unit}
     {g : ℝ → ℝ} (hg : ∀ s : Scenario Unit, a.eval s = g (s () T)) :
-    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H n)) ∧ ∀ ω,
+    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H (n + 1))) ∧ ∀ ω,
       (Contract.pay T a).pathPV (discount ρ h) (scenarioAt (assets S₀ u d h) ω)
         = (Contract.pay T a).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)
-          + ∑ k ∈ Finset.range N,
-            H k ω * (discountedSpot S₀ u d ρ (k + 1) ω - discountedSpot S₀ u d ρ k ω) := by
+          + martingaleTransform H (discountedSpot S₀ u d ρ) N ω := by
   obtain ⟨H, hH, hrep⟩ := binomialPrice_replication hna hS₀ g N
   refine ⟨H, hH, fun ω ↦ ?_⟩
   rw [value_pay_eq_binomialPrice hq hqcrr S₀ hTN hg, ← hrep ω]
   simp [Contract.pathPV, Contract.cashflows, hg, scenarioAt, assets, discount, hTN]
 
 end MathFin.Contracts.Binomial
+
+namespace MathFin
+
+open Contracts
+
+/-- **Put-call parity at the binomial level**: `call = put + (S − K·e^{−nr})`. The call is the
+put plus the forward on every path (`value_europeanCall_eq_put_add_forward`), and in the tree the
+forward is worth `S − K e^{−nr}` (`Binomial.value_forward`); the contracts' values are the tree
+prices (`Binomial.value_europeanCall`, `Binomial.value_europeanPut`) for the step length `1`
+and the risk-neutral up-probability. -/
+lemma binomialPrice_callPut_parity {u d r K : ℝ} (h : BinomialNoArb u d r) (n : ℕ) (S : ℝ) :
+    binomialPrice u d r (fun x ↦ max (x - K) 0) n S
+      = binomialPrice u d r (fun x ↦ max (K - x) 0) n S
+        + (S - K * Real.exp (-(n : ℝ) * r)) := by
+  have hp := crrUpProb_mem_Ioo h
+  have hq : (⟨crrUpProb u d r, hp.1.le⟩ : ℝ≥0) ≤ 1 := hp.2.le
+  have hTN : (((n : ℝ≥0) : ℝ)) / 1 = n := by simp
+  have := value_europeanCall_eq_put_add_forward (K := K) (T := (n : ℝ≥0))
+    (coinFlipMeasure _ hq) (Binomial.discount r 1) (Binomial.assets S u d 1)
+    (Binomial.integrable_pathPV hq S u d 1 _ _) (Binomial.integrable_pathPV hq S u d 1 _ _)
+  rw [Binomial.value_europeanCall hq rfl S K hTN, Binomial.value_europeanPut hq rfl S K hTN,
+    Binomial.value_forward hq rfl S K hTN h] at this
+  rw [this, show -(n : ℝ) * r = -(r * n) by ring]
+
+end MathFin
