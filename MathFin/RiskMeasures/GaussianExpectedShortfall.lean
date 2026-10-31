@@ -31,8 +31,8 @@ supplies its meaning.
 * `rockafellarUryasev_of_hasLaw_gaussianReal`: the law-side objective equals `ruObjective`.
 * `expectedShortfall_of_hasLaw_gaussianReal`: `ES_α(X) = m + σ ϕ(Φ⁻¹(α))/(1 − α)` for
   `X ~ N(m, σ²)` with `σ > 0`.
-* `expectedShortfall_of_hasGaussianLaw`: the same for any Gaussian `X`, in terms of `E X` and
-  `Var X`.
+* `expectedShortfall_of_hasGaussianLaw`: the same for any Gaussian `X` (degenerate included), in
+  terms of `E X` and `Var X`.
 -/
 
 @[expose] public section
@@ -85,11 +85,18 @@ theorem expectedShortfall_of_hasLaw_gaussianReal {m : ℝ} {v : ℝ≥0} (hv : v
   exact h.unique (gaussianCVaR_isLeast_ruObjective m _ _ α hσ (Phi_PhiInv hα) hα.2)
 
 /-- **The expected shortfall of a Gaussian random variable** in terms of its mean and variance:
-`ES_α(X) = E X + sd(X) ϕ(Φ⁻¹(α))/(1 − α)` when `Var X > 0`. -/
-theorem expectedShortfall_of_hasGaussianLaw (hX : HasGaussianLaw X P) (hv : 0 < Var[X; P])
-    (hα : α ∈ Ioo 0 1) :
+`ES_α(X) = E X + sd(X) ϕ(Φ⁻¹(α))/(1 − α)`. A degenerate (`Var X = 0`) Gaussian is almost surely
+constant, its own expected shortfall (`expectedShortfall_const`). -/
+theorem expectedShortfall_of_hasGaussianLaw (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) :
     expectedShortfall X P α = gaussianCVaR P[X] √Var[X; P] (PhiInv α) α := by
-  rw [expectedShortfall_of_hasLaw_gaussianReal (Real.toNNReal_pos.2 hv).ne'
-    ⟨hX.aemeasurable, hX.map_eq_gaussianReal⟩ hα, Real.coe_toNNReal _ (variance_nonneg X P)]
+  rcases (variance_nonneg X P).eq_or_lt with hv | hv
+  · have h0 : X =ᵐ[P] fun _ ↦ P[X] := (evariance_eq_zero_iff hX.aemeasurable).1
+      (by rw [← hX.memLp_two.ofReal_variance_eq, ← hv, ENNReal.ofReal_zero])
+    have hc := expectedShortfall_const (P := P) P[X] hα
+    rw [← hv, Real.sqrt_zero, gaussianCVaR, zero_mul, add_zero, ← hc]
+    exact le_antisymm (expectedShortfall_mono hX.integrable (integrable_const _) h0.le hα)
+      (expectedShortfall_mono (integrable_const _) hX.integrable h0.symm.le hα)
+  · rw [expectedShortfall_of_hasLaw_gaussianReal (Real.toNNReal_pos.2 hv).ne'
+      ⟨hX.aemeasurable, hX.map_eq_gaussianReal⟩ hα, Real.coe_toNNReal _ (variance_nonneg X P)]
 
 end MathFin

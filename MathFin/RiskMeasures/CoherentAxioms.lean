@@ -145,18 +145,17 @@ lemma gaussianCVaR_subadditive {μ₁ μ₂ σ₁ σ₂ ρ z α : ℝ}
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X Y : Ω → ℝ} {α : ℝ}
 
 /-- **Closed-form CVaR is subadditive on jointly Gaussian losses**: for a jointly Gaussian pair
-`(X, Y)` with nondegenerate `X`, `Y` and `X + Y`, the closed form `gaussianCVaR` at the
+`(X, Y)` (degenerate margins allowed), the closed form `gaussianCVaR` at the
 mean `E X + E Y` and the standard deviation of `X + Y` is at most the sum of the closed forms at
 the margins. It is the subadditivity of expected shortfall (`expectedShortfall_add_le`) read
 through the Gaussian laws of `X`, `Y` and `X + Y`. -/
-theorem gaussianCVaR_sd_add_le (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1)
-    (hX : 0 < Var[X; P]) (hY : 0 < Var[Y; P]) (hXY : 0 < Var[fun ω ↦ X ω + Y ω; P]) :
+theorem gaussianCVaR_sd_add_le (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1) :
     gaussianCVaR (P[X] + P[Y]) √Var[fun ω ↦ X ω + Y ω; P] (PhiInv α) α ≤
       gaussianCVaR P[X] √Var[X; P] (PhiInv α) α + gaussianCVaR P[Y] √Var[Y; P] (PhiInv α) α := by
   have := h.isProbabilityMeasure
   have key := expectedShortfall_add_le h.fst.integrable h.snd.integrable hα
-  rwa [expectedShortfall_of_hasGaussianLaw h.fun_add hXY hα,
-    expectedShortfall_of_hasGaussianLaw h.fst hX hα, expectedShortfall_of_hasGaussianLaw h.snd hY hα,
+  rwa [expectedShortfall_of_hasGaussianLaw h.fun_add hα,
+    expectedShortfall_of_hasGaussianLaw h.fst hα, expectedShortfall_of_hasGaussianLaw h.snd hα,
     integral_add h.fst.integrable h.snd.integrable] at key
 
 end MathFin

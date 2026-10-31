@@ -63,8 +63,8 @@ one-period operator. The structure:
    values are bounded; by monotonicity, the bound lifts; the one-period
    inequality closes the step.
 
-Used in `call_intrinsic_le_binomialPrice`; `americanCallPrice_le_binomialPrice` then follows from
-the Snell minimality of `americanPrice` (the European price process is a martingale above the
+Used in `call_intrinsic_le_binomialPrice`; `bermudanCallPrice_eq_binomialPrice` then follows from
+the Snell minimality of `bermudanPrice E` (the European price process is a martingale above the
 payoff).
 
 ### Algebraic-identity / counting-bijection decoupling

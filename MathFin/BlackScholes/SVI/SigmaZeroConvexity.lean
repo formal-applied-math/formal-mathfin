@@ -26,7 +26,7 @@ theorem sigmaZero_blackCall_hasDerivAt (p : Params) (hs : p.sigma = 0)
     (K : ℝ) (hK : 0 < K) (hk : Real.log K ≠ p.m)
     (hw : 0 < variance p (Real.log K)) :
     HasDerivAt (blackCall p) (strikeDelta p K) K := by
-  have h := (sigmaZero_blackForm_hasDerivAt p hs (Real.log K) hk hw).comp K
+  have h := (blackForm_hasDerivAt p (Real.log K) (sigmaZero_variance_hasDerivAt p hs _ hk) hw).comp K
     (Real.hasDerivAt_log (ne_of_gt hK))
   convert h using 1 <;> try rfl
   simp only [Real.exp_log hK, strikeDelta]
@@ -36,7 +36,8 @@ theorem sigmaZero_strikeDelta_hasDerivAt (p : Params) (hs : p.sigma = 0)
     (K : ℝ) (hK : 0 < K) (hk : Real.log K ≠ p.m)
     (hw : 0 < variance p (Real.log K)) :
     HasDerivAt (strikeDelta p) (strikeDensity p K) K := by
-  have h := (sigmaZero_blackDelta_hasDerivAt p hs (Real.log K) hk hw).comp K
+  have h := (blackDelta_hasDerivAt p (Real.log K) (sigmaZero_variance_hasDerivAt p hs _ hk)
+    (sigmaZero_slope_hasDerivAt p hs _ hk) hw).comp K
     (Real.hasDerivAt_log (ne_of_gt hK))
   convert h using 1 <;> try rfl
   dsimp [strikeDensity]
