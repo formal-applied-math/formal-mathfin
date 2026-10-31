@@ -37,139 +37,116 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Main results
 
-- **Itô's formula.** For every $`C^2`$ function $`f(t,x)`$, with no growth condition,
+- **Itô's formula.** For $`f(t,x)`$ with continuous $`f`$, $`\partial_t f`$, $`\partial_x f`$ and
+  $`\partial_x^2 f`$, and no growth condition, the process
   $`f(t,B_t) - f(0,B_0) - \int_0^t \big(\partial_t f + \tfrac12 \partial_x^2 f\big)(s,B_s)\,ds`$
   is a continuous local martingale
-  ([`ito_formula_unrestricted`](MathFin/Foundations/ItoFormulaUnrestrictedLocMart.lean)). When
-  $`\partial_t f, \partial_x f, \partial_x^2 f, \partial_t^2 f, \partial_t\partial_x f,
-  \partial_x^3 f`$ exist and are bounded and $`B`$ has continuous paths, its value at time $`T`$
-  is the Itô integral
-  $`\int_0^T \partial_x f(s,B_s)\,dB_s`$
-  ([`ito_formula_td_L2_bddDeriv`](MathFin/Foundations/ItoFormulaTD.lean)). For an Itô process
-  $`X_t = x_0 + \int_0^t b_s\,ds + \int_0^t \sigma_s\,dB_s`$ with bounded adapted continuous
-  coefficients, and $`f \in C^2`$ with $`f'`$ and $`f''`$ bounded,
-  $`f(X_T) - f(x_0) = \int_0^T f'(X_s)\sigma_s\,dB_s
-  + \int_0^T \big(f'(X_s) b_s + \tfrac12 f''(X_s)\sigma_s^2\big)\,ds`$ almost surely
-  ([`ito_formula_adapted`](MathFin/Foundations/ItoFormulaAdaptedTD.lean)). For every $`f \in C^2`$,
-  with no bound on $`f'`$ or $`f''`$, and each fixed $`t \le T`$, the left-point Riemann sums of $`f'(X)`$
-  against $`M = \int \sigma\,dB`$ converge in probability to
-  $`f(X_t) - f(x_0) - \int_0^t \big(f'(X_s) b_s + \tfrac12 f''(X_s)\sigma_s^2\big)\,ds`$
-  ([`ito_formula_adapted_local_le`](MathFin/Foundations/ItoFormulaAdaptedTD.lean)), and the
-  same holds for $`f(t, x)`$ with jointly continuous $`f_t`$, $`f_x`$, $`f_{xx}`$, the drift gaining
-  the term $`f_t(s, X_s)`$
-  ([`ito_formula_adapted_td_local_le`](MathFin/Foundations/ItoFormulaAdaptedTD.lean)). The bounds
-  on $`\sigma`$ and $`b`$ can be dropped: for continuous adapted $`\sigma`$ the integral
-  $`\int \sigma\,dB`$ is built by clipping $`\sigma`$ to $`[-N, N]`$, is adapted, and is the
-  limit in probability of its Riemann sums
-  ([`localItoIntegral`](MathFin/Foundations/ItoIntegralLocalised.lean)), and the formula holds
-  along $`x_0 + \int b\,ds + \int \sigma\,dB`$
-  ([`ito_formula_adapted_unbounded_le`](MathFin/Foundations/ItoFormulaAdaptedUnbounded.lean)).
-  Almost surely the formula holds at every $`t \le T`$ at once, as an identity of processes whose
-  stochastic term is the integral $`\int_0^t f_x(s, X_s)\sigma_s\,dB_s`$
-  ([`ito_formula_adapted_unbounded_process`](MathFin/Foundations/ItoFormulaAdaptedProcess.lean));
-  both that integral and $`\int \sigma\,dB`$ have versions that are continuous local
-  martingales for the null-augmented Brownian filtration
-  ([`exists_localMartingale_ito_formula`](MathFin/Foundations/ItoFormulaAdaptedProcess.lean),
-  [`exists_continuous_localMartingale_localItoIntegral`](MathFin/Foundations/ItoIntegralLocalisedLocalMartingale.lean)).
+  ([`ito_formula_unrestricted`](MathFin/Foundations/ItoFormulaUnrestrictedLocMart.lean)). For an
+  Itô process $`X = x_0 + \int b\,ds + \int \sigma\,dB`$ with continuous adapted coefficients and
+  no bounds on them or on $`f`$, almost surely, at every $`t \le T`$ at once,
+
+  ```math
+  f(t,X_t) - f(0,x_0) = \int_0^t f_x(s,X_s)\,\sigma_s\,dB_s
+    + \int_0^t \Big(f_t + f_x\,b_s + \tfrac12 f_{xx}\,\sigma_s^2\Big)(s,X_s)\,ds,
+  ```
+
+  and the stochastic integral has a version that is a continuous local martingale for the
+  augmented Brownian filtration
+  ([`ito_formula_adapted_unbounded_process`](MathFin/Foundations/ItoFormulaAdaptedProcess.lean),
+  [`exists_localMartingale_ito_formula`](MathFin/Foundations/ItoFormulaAdaptedProcess.lean)).
+
+- **Lévy's characterization.** A continuous adapted process $`M`$ with $`M_0 = 0`$ such that $`M`$
+  and $`M^2 - t`$ are local martingales for a filtration $`\mathcal{F}`$ is an
+  $`\mathcal{F}`$-Brownian motion
+  ([`isFilteredPreBrownian_of_localMartingale`](MathFin/Foundations/LevyCharacterization.lean)).
 
 - **Girsanov's theorem.** For bounded predictable $`\theta`$, let
-  $`dQ = \exp\big(-\int_0^T \theta\,dB - \tfrac12 \int_0^T \theta^2\,dt\big)\,dP`$. On $`[0,T]`$,
-  under $`Q`$, the process $`B_t + \int_0^t \theta_s\,ds`$ starts at $`0`$ and has independent
-  $`\mathcal{N}(0,t-s)`$ increments, so its finite-dimensional laws are those of a Brownian motion
+  $`dQ = \exp\big(-\int_0^T \theta\,dB - \tfrac12 \int_0^T \theta^2\,dt\big)\,dP`$. Under $`Q`$, on
+  $`[0,T]`$, the process $`B_t + \int_0^t \theta_s\,ds`$ starts at $`0`$ and has independent
+  $`\mathcal{N}(0,t-s)`$ increments
   ([`Btheta_isQBrownianMotion_predictable_of_bdd`](MathFin/Foundations/GirsanovPredictableTheta.lean),
-  stated for an adapted modification of the process, which has the same finite-dimensional laws).
+  stated for an adapted modification, which has the same finite-dimensional laws).
 
-- **Martingale representation.** Every square-integrable, $`\mathcal{F}^B_T`$-measurable random
-  variable $`H`$ can be written $`H = \mathbb{E}[H] + \int_0^T \varphi\,dB`$ for a unique
-  $`\varphi`$. In trading terms, each such claim is replicated from initial wealth
-  $`\mathbb{E}[H]`$ by a unique strategy
+- **Martingale representation.** Every square-integrable $`\mathcal{F}^B_T`$-measurable $`H`$ is
+  $`\mathbb{E}[H] + \int_0^T \varphi\,dB`$ for a unique $`\varphi`$: each such claim is replicated
+  from initial wealth $`\mathbb{E}[H]`$ by a unique strategy
   ([`exists_replicating_strategy`](MathFin/Foundations/MarketCompleteness.lean)).
 
-- **Stochastic differential equations.** If $`b`$ and $`\sigma`$ are Lipschitz with constants
-  $`L_b`$ and $`L_\sigma`$, the Picard map
-  $`X \mapsto \eta + \int_0^{\cdot} b(X)\,ds + \int_0^{\cdot} \sigma(X)\,dB`$ of
-  $`dX = b(X)\,dt + \sigma(X)\,dB`$ has a unique fixed point in the $`L^2`$ space of predictable
-  processes on $`[0,T]`$ whenever $`T L_b + \sqrt{T} L_\sigma < 1`$
+- **Stochastic differential equations.** For Lipschitz $`b`$ and $`\sigma`$ (constants $`L_b`$,
+  $`L_\sigma`$), the Picard map of $`dX = b(X)\,dt + \sigma(X)\,dB`$ has a unique fixed point in
+  the $`L^2`$ space of predictable processes on $`[0,T]`$ when $`T L_b + \sqrt{T} L_\sigma < 1`$
   ([`picardMap_exists_unique_fixedPoint`](MathFin/Foundations/SDEExistence.lean)).
 
-- **Fundamental theorem of asset pricing.** A market with one risky asset, finitely many periods
-  and a finite probability space of full support has no arbitrage if and only if it has an
-  equivalent martingale measure ([`ftap_discrete`](MathFin/Foundations/FTAPDiscrete.lean)). The
-  one-period theorem holds on any probability space with finitely many assets
+- **Fundamental theorem of asset pricing.** A finite-horizon market with one risky asset on a finite
+  probability space of full support has no arbitrage if and only if it has an equivalent martingale
+  measure ([`ftap_discrete`](MathFin/Foundations/FTAPDiscrete.lean)); the one-period theorem holds
+  on any probability space with finitely many assets
   ([`ftap_one_period_vector`](MathFin/Foundations/FTAPOnePeriodVector.lean)).
 
-- **Coherent risk measures.** On a finite state space, a coherent risk measure of losses
-  ([`IsCoherentRiskMeasure`](MathFin/RiskMeasures/Coherent.lean)) satisfies
-  $`\rho(L) = \sup_{q \in \mathcal{Q}_\rho} \mathbb{E}_q[L]`$, where $`\mathcal{Q}_\rho`$ is the
-  set of probability vectors that give every acceptable loss, $`\rho(Z) \le 0`$, a nonpositive price
-  ([`coherentRisk_isLUB`](MathFin/RiskMeasures/AcceptanceSet.lean)). This theorem and the finite
-  fundamental theorem are both derived from the cone-separation lemmas in
+- **Coherent risk measures.** On a finite state space a coherent risk measure of losses is
+  $`\rho(L) = \sup_{q \in \mathcal{Q}_\rho} \mathbb{E}_q[L]`$, the supremum over the probability
+  vectors that price every acceptable loss nonpositively
+  ([`coherentRisk_isLUB`](MathFin/RiskMeasures/AcceptanceSet.lean)). It and the finite FTAP both
+  come from the cone-separation lemmas in
   [`ConvexDuality.lean`](MathFin/Foundations/ConvexDuality.lean).
 
-- **The Black–Scholes PDE from Feynman–Kac.** The call price is written as a heat-kernel integral,
-  and the Black–Scholes PDE follows from the heat equation for the kernel, without differentiating
-  the closed-form price
+- **The Black–Scholes PDE from Feynman–Kac.** The call price is a heat-kernel integral, and the
+  PDE follows from the heat equation for the kernel, without differentiating the closed form
   ([`bsV_satisfies_bs_pde_via_feynmanKac`](MathFin/BlackScholes/PDEFromFeynmanKac.lean)).
 
-- **Jump-diffusions.** Let $`X`$ be adapted and start at $`0`$, with each increment $`X_t - X_s`$
+- **Jump-diffusions.** Let $`X`$ be adapted, start at $`0`$, and have increments over $`\tau`$
   independent of the past and distributed as $`b\tau + \sigma\sqrt{\tau}\,Z + \sum_{i<N} J_i`$,
-  where $`\tau = t - s`$, $`Z \sim \mathcal{N}(0,1)`$, $`N \sim \mathrm{Poisson}(\Lambda\tau)`$ and
-  the jumps $`J_i`$ are i.i.d. with law $`\nu`$, all independent. If $`S_0 \neq 0`$ and
-  $`\int e^x\,d\nu < \infty`$, the discounted price $`e^{-rt} S_0 e^{X_t}`$ is a martingale exactly
-  when $`b = r - \sigma^2/2 - \Lambda\big(\int e^x\,d\nu - 1\big)`$
-  ([`JumpDiffusionProcess.martingale_iff`](MathFin/BlackScholes/JumpDiffusionProcess.lean)). At that
-  drift, with Gaussian jumps and $`\sigma, S_0, K > 0`$, the conditional expectation of the
-  discounted call payoff at every date before maturity is Merton's 1976 series
+  with $`Z \sim \mathcal{N}(0,1)`$, $`N \sim \mathrm{Poisson}(\Lambda\tau)`$ and i.i.d. jumps of
+  law $`\nu`$, all independent. If $`S_0 \neq 0`$ and $`\int e^x\,d\nu < \infty`$, the discounted
+  price $`e^{-rt} S_0 e^{X_t}`$ is a martingale exactly when
+  $`b = r - \sigma^2/2 - \Lambda\big(\int e^x\,d\nu - 1\big)`$
+  ([`JumpDiffusionProcess.martingale_iff`](MathFin/BlackScholes/JumpDiffusionProcess.lean)). With
+  Gaussian jumps and $`\sigma, S_0, K > 0`$, the conditional value of the call at every date
+  before maturity is then Merton's 1976 series
   ([`condExp_call_eq_mertonCallPrice`](MathFin/BlackScholes/JumpDiffusionMerton.lean)).
 
-- **The American put.** In the Black–Scholes model with interest rate $`r > 0`$ and dividend yield
-  $`0 \le q \le r`$, the early-exercise boundary $`B(\tau)`$ of the American put is strictly convex
-  in the time to expiry, and $`\log(B(\tau)/K)`$ is convex
+- **The American put.** A supermartingale dominating the discounted reward bounds the value, and a
+  stopping rule attaining its initial value is optimal
+  ([`value_eq_of_attained`](MathFin/BlackScholes/AmericanPut/Stopping/Verification.lean)). With
+  $`r > 0`$ and dividend yield $`0 \le q \le r`$, the early-exercise boundary $`B(\tau)`$ is
+  strictly convex in the time to expiry and $`\log(B(\tau)/K)`$ is convex
   ([`PhysicalBoundaryConvexity.lean`](MathFin/BlackScholes/AmericanPut/Stopping/PhysicalBoundaryConvexity.lean),
-  described in [`docs/american-put-boundary.md`](docs/american-put-boundary.md)).
+  [`docs/american-put-boundary.md`](docs/american-put-boundary.md)).
 
-- **Raw SVI.** A fixed finite Boolean combination of signs of polynomials in the five parameters
-  $`(a, b, \rho, m, \sigma)`$ holds exactly when $`\sigma \ge 0`$, $`b \ge 0`$,
-  $`\rho^2 \le 1`$, the SVI total variance is positive at every log-strike, and the Black–Scholes call
-  with the SVI volatility substituted strike by strike is convex in the strike. For
-  $`\sigma > 0`$ that convexity is Durrleman's condition
+- **Raw SVI.** A fixed Boolean combination of polynomial signs in $`(a, b, \rho, m, \sigma)`$ holds
+  exactly when $`\sigma, b \ge 0`$, $`\rho^2 \le 1`$, the total variance is positive and the
+  Black–Scholes call with the SVI volatility is convex in the strike (Durrleman's condition for
+  $`\sigma > 0`$). With one more sign, $`b(1+\rho) < 2`$, it holds exactly when that call is also
+  nonincreasing, lies between $`(1-K)^+`$ and $`1`$, and has the limits of a call price
   ([`extendedCertificateFormula_iff_bsSmile_convex`](MathFin/BlackScholes/SVI/ExtendedFormula.lean),
-  [`bsSmile_convex_iff`](MathFin/BlackScholes/SVI/BlackScholesBridge.lean)).
-  With one more sign, $`b(1+\rho) < 2`$, the formula holds exactly when, in addition, that call
-  is nonincreasing in the strike, lies between $`(1-K)^+`$ and $`1`$, and tends to $`1`$ at
-  strike $`0`$ and to $`0`$ at large strikes
-  ([`butterflyFreeFormula_iff_isNormalizedCallPrice`](MathFin/BlackScholes/SVI/TailCondition.lean)).
+  [`butterflyFreeFormula_iff_isNormalizedCallPrice`](MathFin/BlackScholes/SVI/TailCondition.lean)).
 
-- **One contract, two models.** Payoffs are written as data in a contract language, separately from
-  the models that price them, so the same term `europeanCall K T` is priced both in the
-  Black–Scholes model and in the binomial tree. Its values in the $`n`$-step Cox–Ross–Rubinstein
-  tree converge to its Black–Scholes value whenever $`|r|\sqrt{T} < \sigma`$
-  ([`tendsto_binomial_value_europeanCall`](MathFin/Contracts/Models/BinomialLimit.lean)). In the
-  tree, under no-arbitrage, a contract paying $`g(S_T)`$ is worth the cost of its hedge: on every
-  path, its discounted payoff is its value plus the gains of a predictable strategy in the
-  discounted spot
-  ([`pathPV_eq_value_add_gains`](MathFin/Contracts/Models/Binomial.lean)). In any model whose
-  discounted price is a martingale started at $`S_0`$ (with $`D(0) = 1`$), the forward is
-  worth $`S_0 - K D(T)`$ and a call less a put is worth the same
-  ([`value_europeanCall_sub_put_of_martingale`](MathFin/Contracts/Parity.lean)). Under a
-  stochastic discount factor $`D_t`$, integrable at the payment dates, a schedule of fixed cash
-  flows is worth its value on the zero curve $`P(0, t) = \mathbb{E}[D_t]`$
-  ([`valueDisc_fixedFlows_eq_value`](MathFin/Contracts/Models/ShortRate.lean)), so a coupon bond
-  discounted by $`e^{-\int_0^t r_s\,ds}`$ in the Vasicek, Hull–White and two-piece GSR models
-  is worth the sum of those models' bond prices. A one-period payer swap is a forward-rate
-  agreement worth `fraValue`
-  ([`value_payerSwap_one_eq_fraValue`](MathFin/Contracts/Instruments/FixedIncome.lean)), and the power
-  call, the exchange option and the geometric-average Asian call are worth their Black–Scholes
-  closed forms
-  ([`value_powerCall`](MathFin/Contracts/Models/BlackScholes.lean),
-  [`value_exchangeOption`](MathFin/Contracts/Models/BlackScholesExchange.lean),
-  [`value_geomAsianCall`](MathFin/Contracts/Models/BlackScholesAsian.lean)), and the chooser's
-  replicating portfolio of a call and a put at the chooser date is worth Rubinstein's closed form
-  ([`value_chooser`](MathFin/Contracts/Models/BlackScholesChooser.lean)). A credit default
-  swap on a payment grid, observing the default indicator, is worth the grid legs of the survival
-  curve against the Cox default time
-  ([`value_cdsBuyer_coxDefaultTime`](MathFin/Contracts/Models/DefaultTime.lean)); default is paid at
-  the end of its period, so these are the discretisations of the continuous Cox legs.
+- **Contracts, separate from models.** Payoffs are terms of a contract language, priced by
+  interchangeable models:
+  - the values of `europeanCall K T` in the $`n`$-step CRR tree converge to its Black–Scholes
+    value when $`|r|\sqrt{T} < \sigma`$
+    ([`tendsto_binomial_value_europeanCall`](MathFin/Contracts/Models/BinomialLimit.lean));
+  - in any model whose discounted price is a martingale from $`S_0`$, a call less a put is worth
+    the forward, $`S_0 - K D(T)`$
+    ([`value_europeanCall_sub_put_of_martingale`](MathFin/Contracts/Parity.lean));
+  - the power call, the exchange option and the geometric Asian call are worth their Black–Scholes
+    closed forms, and the chooser's replicating portfolio is worth Rubinstein's
+    ([`Contracts/Models/`](MathFin/Contracts/Models)).
+
+- **Interest rates.** In Vasicek and in Hull–White with continuous forcing, discounting by
+  $`e^{-\int_0^t r_s\,ds}`$:
+  - the bond price at $`t`$ is $`A_t(T-t)\,e^{-B(T-t)\,r_t}`$ almost surely
+    ([`bondPrice_hullWhite`](MathFin/Contracts/Models/HullWhiteBond.lean));
+  - the bond put is a Black put on the bond, which is lognormal under the forward measure
+    (Jamshidian), and a caplet is $`1+\delta K`$ such puts
+    ([`valueDisc_bondPut_hullWhite`](MathFin/Contracts/Models/Jamshidian.lean),
+    [`valueDisc_caplet_eq_bondPut`](MathFin/Contracts/Models/Caplet.lean)).
+
+  For any discount factor, a swap rate tied to the bonds by a model bundle gives:
+  - the payer swaption as $`A(0)\,\mathbb{E}^A[(S-K)^+]`$ under the annuity measure;
+  - the CMS swaplet as its forward value plus an exact covariance adjustment
+    ([`valueDisc_payerSwaption`](MathFin/Contracts/Models/CMS.lean),
+    [`SwapModel.valueDisc_cmsSwaplet_eq`](MathFin/Contracts/Models/CMS.lean)).
 
 ## Contents
 
@@ -181,7 +158,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 | Option pricing | Black–Scholes prices and Greeks, the Black–Scholes PDE, implied volatility, dividends, FX (Garman–Kohlhagen), Bachelier, Black-76, jump-diffusions (Merton's formula and Greeks, Esscher pricing, incompleteness at one date), Breeden–Litzenberger, a polynomial-sign certificate for strike-convexity of raw SVI |
 | Exotic options | digital, exchange (Margrabe), chooser, barrier, lookback, geometric Asian, power and quanto options; spreads; variance swaps |
 | Lattice models | binomial replication, American and Bermudan options via the Snell envelope, Cox–Ross–Rubinstein convergence, André's reflection principle |
-| Fixed income and credit | bonds, duration and convexity, immunization, yield curves, forward rates, FRAs, swaps and swaptions, the forward measure, Vasicek, hazard rates, CDS, first-to-default, KMV–Merton |
+| Fixed income and credit | bonds, duration and convexity, immunization, yield curves, forward rates, FRAs, swaps, caps and caplets, swaptions and CMS under the annuity measure, the forward measure, Vasicek, Hull–White and GSR, Jamshidian's bond options, hazard rates, CDS, CVA, first-to-default, KMV–Merton |
 | Portfolio theory | Markowitz, CAPM, two-fund separation, the tangency portfolio, risk parity, Black–Litterman; Sharpe, Sortino, Treynor and information ratios; the Kelly criterion |
 | Risk measures | the quantile function; value-at-risk and expected shortfall for every law: Rockafellar–Uryasev, coherence of ES, its dual representation, VaR superadditivity, elicitability (VaR yes, ES no), expectiles; coherent and spectral risk measures, expected utility, concentration indices |
 | Dependence and extremes | copulas and Sklar's theorem (continuous margins), Fréchet–Hoeffding bounds, Hoeffding's covariance identity, Marshall–Olkin common shocks; GEV and GPD domains of attraction, maxima of Poisson-many losses |
@@ -200,9 +177,9 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   zero-strike limit, and the Heynen–Kat two-asset barrier only at zero correlation, neither formula
   being derived as an expected payoff; the Ornstein–Uhlenbeck Hermite modes decay at their
   eigenvalues only for degree at most 2.
-- Girsanov's theorem is proved only for bounded predictable $`\theta`$, and, as for $`B`$ itself,
-  only at the level of finite-dimensional laws: neither path continuity of the new process nor
-  independence of its increments from the past is stated.
+- Girsanov's theorem is proved only for bounded $`\theta`$ (predictable, or adapted with continuous
+  paths), and only at the level of finite-dimensional laws: neither path continuity of the new
+  process nor independence of its increments from the past is stated.
 - Of the second fundamental theorem, only the direction from completeness to uniqueness is proved:
   for a price $`S = S_0 + \int_0^t \sigma\,dB`$ with $`\sigma \neq 0`$ almost everywhere, a
   probability measure with square-integrable density with respect to $`P`$, under which $`S`$ is a
@@ -217,10 +194,9 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 - Itô's formula for an Itô process is proved on a finite horizon $`[0, T]`$, for a process built
   from a single Brownian motion with continuous adapted coefficients and a deterministic starting
   point. Itô's formula for a continuous semimartingale not built from $`B`$ is not proved, and
-  neither is a quadratic-variation process for a general continuous local martingale. Lévy's
-  characterization is proved with the bracket as a hypothesis: a continuous adapted local
-  martingale $`M`$ with $`M_0 = 0`$ such that $`M^2 - t`$ is a local martingale is a Brownian
-  motion.
+  neither is a quadratic-variation process for a general continuous local martingale, so Lévy's
+  characterization asks that $`M^2 - t`$ be a local martingale rather than that
+  $`\langle M\rangle_t = t`$.
 - The jump-diffusion results on a process assume the properties listed above
   (`JumpDiffusionProcess`). A process with them is constructed only without jumps, as Brownian
   motion with drift. A change of measure on the process that alters the jump rate or the jump law
@@ -231,6 +207,11 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   Convergence of the price process (Donsker's invariance principle) is not formalized.
 - The multi-period fundamental theorem and the representation of coherent risk measures are proved
   on finite probability spaces only.
+- Bond options and caplets are priced in Vasicek and in Hull–White with continuous forcing, where
+  the bond prices are derived. Elsewhere the observed bond is a hypothesis of the model bundle, and
+  so is the lognormality behind the Black-76 caplet and Black's swaption formula. The CMS
+  adjustment is exact for payment at the fixing date. Its sign is proved only when every bond but
+  the last is known at the fixing date.
 
 ## Building
 
@@ -298,8 +279,9 @@ Comparator below).
   [`isCoherentRiskMeasure_neg_iff`](MathFin/RiskMeasures/PositionsConvention.lean).
   [Comparator](https://github.com/leanprover/comparator), configured by
   [`comparator.json`](comparator.json), checks that the two files state the same theorems and that
-  the proofs use only the three standard axioms. It accepted the earlier Solution at commit `06f88ca`; the current
-  Solution, which converts positions to losses, has not been re-run, and Comparator is not run in CI; see [`docs/palomar.md`](docs/palomar.md).
+  the proofs use only the three standard axioms. It accepted an earlier Solution at commit
+  `06f88ca`. It has not been re-run on the current one and is not part of CI; see
+  [`docs/palomar.md`](docs/palomar.md).
 
 - **Benchmark.** Each entry in [`benchmarks/`](benchmarks) records a result's Lean statement, its
   status and its scope. The ledger runner, `tools/verify/ledger.py`, checks each entry's snippet
@@ -384,11 +366,11 @@ release. Both are in [`CITATION.cff`](CITATION.cff).
 ## Acknowledgements
 
 The library depends on Mathlib and on BrownianMotion, the formalization of Brownian motion and
-stochastic integration led by Rémy Degenne. The stochastic-processes part of the benchmark follows Yuri
-F. Saporito's *Stochastic Processes*. The contract language takes its design ideas, but no code, from Paul
-Bilokon's *The Contract Is Not the Model* (2026), and the survival models draw on Yosuke Ito's
-Archive of Formal Proofs entry on actuarial mathematics ([`docs/sources.md`](docs/sources.md)). The
-American put results are ported from Robert Martin's
+stochastic integration led by Rémy Degenne. The stochastic-processes part of the benchmark follows
+Yuri F. Saporito's *Stochastic Processes*. The contract language takes its design ideas, but no
+code, from Paul Bilokon's *The Contract Is Not the Model* (2026), and the survival models draw on
+Yosuke Ito's Archive of Formal Proofs entry on actuarial mathematics
+([`docs/sources.md`](docs/sources.md)). The American put results are ported from Robert Martin's
 [AmericanPutConvexity](https://github.com/robertmartin8/AmericanPutConvexity), and the SVI
 polynomial-sign certificate from his
 [ButterflyFreeSVI](https://github.com/robertmartin8/ButterflyFreeSVI).
