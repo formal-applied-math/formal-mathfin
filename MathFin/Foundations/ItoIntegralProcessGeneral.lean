@@ -12,8 +12,7 @@ public import MathFin.Foundations.ItoIntegralCLM
 
 B1a built the simple-integrand Itô integral `t ↦ (V●B)_t` as a continuous L²
 martingale. This file extends it to a **general** predictable integrand
-`φ ∈ Lp ℝ 2 (trimMeasure_T T)` (= Degenne's `L2Predictable` on `[0,T]`) by
-density: the process `t ↦ (φ●B)_t := ∫₀ᵗ φ dB` is a continuous L² martingale, with
+`φ ∈ Lp ℝ 2 (trimMeasure_T T)` (= Degenne's `L2Predictable` on `[0,T]`): the process `t ↦ (φ●B)_t := ∫₀ᵗ φ dB` is a continuous L² martingale, with
 the Itô contraction `‖(φ●B)_t‖ ≤ ‖φ‖` and the terminal Itô isometry
 `‖(φ●B)_T‖ = ‖φ‖`. The explicit time-indexed isometry
 `E[(φ●B)_t²] = ∫₀ᵗ E[φ_s²] ds` is proved in the companion module
