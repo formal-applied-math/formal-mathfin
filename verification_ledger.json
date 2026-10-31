@@ -1711,6 +1711,34 @@
       "input_hash": "1a094145987392dcca905815ac7fa6beb286dc901cab159684f383915a8103d2",
       "verified_at_commit": "42054f2"
     },
+    "mf-contract-bond-price-hullwhite": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-31",
+      "elapsed_s": 5.5,
+      "input_hash": "7ddace29615c13c1261d3f50ab3af9527b67a5b9a7294a8b6c805b069e0b24ca",
+      "verified_at_commit": "34b45ea"
+    },
+    "mf-contract-bond-price-vasicek": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-31",
+      "elapsed_s": 10.9,
+      "input_hash": "b5f98b33260f6fb67b8de9bf48ea854b4d50a8ebae44e7f4402a70e8c8aee54e",
+      "verified_at_commit": "34b45ea"
+    },
+    "mf-contract-bond-put-hullwhite": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-31",
+      "elapsed_s": 6.0,
+      "input_hash": "e183e42edbc453103fe7af53820d9011f08ea21a66f304002219accc505f01ce",
+      "verified_at_commit": "34b45ea"
+    },
+    "mf-contract-bond-put-vasicek": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-31",
+      "elapsed_s": 9.3,
+      "input_hash": "cde82d638a828ed7a863b47da000cd68895c0b5eb5b77e7dbab93191081af580",
+      "verified_at_commit": "34b45ea"
+    },
     "mf-contract-book-es-subadditive": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
@@ -1745,6 +1773,13 @@
       "elapsed_s": 4.7,
       "input_hash": "1b1671927325d453db57b959158918a32209f94494517f11f5317685c305582c",
       "verified_at_commit": "39ab57d"
+    },
+    "mf-contract-caplet-vasicek": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-31",
+      "elapsed_s": 5.5,
+      "input_hash": "0c54896bfacef4a3d0f641d9f91436bbd7dc0438353d66f9c771c4fc1a1b9909",
+      "verified_at_commit": "34b45ea"
     },
     "mf-contract-capped-call": {
       "benchmark_file": "contracts.json",
