@@ -16,7 +16,7 @@ restriction. No smoothness across the exercise boundary is assumed.
 ## Result
 
 Public entry points include `brownianHeatFlow_tendsto_of_bounded`,
-`linearPriceEvolution_le_classical_of_continuous`, `classicalPrice_gaussian_comparison`.
+`linearPriceEvolution_le_classical_of_continuous`, `DividendPutSolution.putWaiting`.
 -/
 
 @[expose] public section
@@ -53,13 +53,14 @@ theorem linearPriceEvolution_le_classical_of_continuous
       (fun n => (hm n).continuous) hb hlim _ _)
   exact le_of_tendsto hconv (Eventually.of_forall heach)
 
-theorem classicalPrice_gaussian_comparison
-    {k h a t : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : DividendPutSolution k h p b) (ha : 0 ≤ a) (hat : a ≤ t) (x : ℝ) :
-    linearPriceEvolution (fun y => p y a) k h a x t ≤ p x t := by
-  have hf : Continuous (fun y => p y a) := hp.price_continuous.comp_continuous
-    (continuous_id.prodMk continuous_const) (fun _ => ha)
-  exact linearPriceEvolution_le_classical_of_continuous hp ha hf
-    (fun y => hp.price_nonneg y ha) (fun _ => le_rfl) x t ⟨hat,le_rfl⟩
+/-- A classical solution waits: its price dominates its own Gaussian evolution, by the parabolic
+comparison with the continuous minorants of `fun y ↦ p y a`. -/
+theorem _root_.MathFin.BlackScholes.AmericanPut.Boundary.DividendPutSolution.putWaiting {k h : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
+    (hp : DividendPutSolution k h p b) : PutWaiting k h p where
+  evolution_le {a t} ha hat x := by
+    have hf : Continuous (fun y => p y a) := hp.price_continuous.comp_continuous
+      (continuous_id.prodMk continuous_const) (fun _ => ha)
+    exact linearPriceEvolution_le_classical_of_continuous hp ha hf
+      (fun y => hp.nonneg y ha) (fun _ => le_rfl) x t ⟨hat,le_rfl⟩
 
 end MathFin.BlackScholes.AmericanPut.Stopping

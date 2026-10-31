@@ -81,7 +81,7 @@ theorem brownianClassicalCandidate_usual_supermartingale {K r q σ S : ℝ}
     obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp.toPutEnvelope brownian hK hr T t ω
     simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
   have hu := bounded_supermartingale_completion gaussianLimit
-    (brownianClassicalCandidate_supermartingale hp hK hr hσ T) hb
+    (brownianClassicalCandidate_supermartingale hp.toPutEnvelope hp.putWaiting hK hr hσ T) hb
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact bounded_continuous_supermartingale_rightCont (supermartingale_nullAugmentation hu)
     (classicalCandidate_continuous hp.toPutEnvelope continuous_brownian T) hb

@@ -20,7 +20,7 @@ Optimality and the dynamic programming principle are not assumed.
 
 ## Result
 
-Public entry points include `classicalLogSpot_canonical`, `canonicalContactRule`,
+Public entry points include `classicalLogSpot_canonical`, `normalizedRate_sqrt_two`, `canonicalContactRule`,
 `canonicalContactRule_price_eq`, `canonicalContactRule_continuation_before`.
 -/
 
@@ -44,6 +44,11 @@ theorem classicalLogSpot_canonical (W : ℝ≥0 → Ω → ℝ) (k h x : ℝ) (t
 /-- At volatility `Real.sqrt 2` the normalized time `σ^2/2*s` is the physical time `s`. -/
 theorem sqrt_two_sq_div_two_mul (s : ℝ) : Real.sqrt 2^2/2*s = s := by
   rw [Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]
+  ring
+
+/-- At volatility `Real.sqrt 2` the normalized rate is the rate itself. -/
+theorem normalizedRate_sqrt_two (r : ℝ) : normalizedRate r (Real.sqrt 2) = r := by
+  rw [normalizedRate,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]
   ring
 
 variable [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}

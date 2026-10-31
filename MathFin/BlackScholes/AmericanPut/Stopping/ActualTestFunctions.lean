@@ -55,7 +55,8 @@ def driverRectangle (k h R : ℝ) (δ : ℝ≥0) : Set (ℝ × ℝ) :=
 theorem canonicalDiscountedPlane_path (k h x : ℝ) {T s : ℝ≥0} (hs : s ≤ T)
     (ω : ℝ≥0 → ℝ) :
     canonicalDiscountedPlane k h x T (s,brownian s ω) = canonicalDiscountedPrice k h x T s ω := by
-  simp only [canonicalDiscountedPlane,canonicalDiscountedPrice,min_eq_left hs,brownianLogState]
+  simp only [canonicalDiscountedPlane,canonicalDiscountedPrice_apply,min_eq_left hs,
+    brownianLogState]
 
 theorem rawRectangleExit_path_mem_ae (k h x : ℝ) {R : ℝ} (hR : 0 < R)
     {δ : ℝ≥0} (hδ : 0 < δ) :
@@ -103,7 +104,7 @@ theorem canonicalPrice_rectangle_meanValue_raw {k h : ℝ} (hk : 0 ≤ k)
           ((T : ℝ)-(actualRectangleExitTime k h x R δ ω : ℝ)) := by
     funext ω
     have ht : θ.time ω ≤ T := (θ.le_horizon ω).trans hδT
-    simp only [canonicalDiscountedPrice,min_eq_left ht]
+    simp only [canonicalDiscountedPrice_apply,min_eq_left ht]
     rfl
   rw [hfun]
   exact he

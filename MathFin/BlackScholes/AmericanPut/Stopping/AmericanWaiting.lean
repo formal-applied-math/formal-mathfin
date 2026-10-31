@@ -15,7 +15,7 @@ continuous-time dynamic programming, without assuming an optimal continuous rule
 ## Result
 
 Public entry points include `brownianAmericanPut_wait_integral`, `brownianLogState_integral`,
-`brownianAmericanPut_wait`, `canonicalPrice_wait`.
+`brownianAmericanPut_wait`, `canonicalPrice_wait`, `canonicalPrice_putWaiting`.
 -/
 
 @[expose] public section
@@ -92,5 +92,14 @@ theorem canonicalPrice_wait {k h : ℝ} (hk : 0 ≤ k) (u T : ℝ≥0) (x : ℝ)
       [hprice,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num),div_self (show (2 : ℝ) ≠ 0 by norm_num)]
       at he
   exact he
+
+/-- The actual price waits: dynamic programming (`canonicalPrice_wait`) in the form
+`PutWaiting` takes. -/
+theorem canonicalPrice_putWaiting {k h : ℝ} (hk : 0 ≤ k) : PutWaiting k h (canonicalPrice k h) where
+  evolution_le {a t} ha hat x := by
+    have he := canonicalPrice_wait (h := h) hk (t-a).toNNReal a.toNNReal x
+    rw [NNReal.coe_add,Real.coe_toNNReal _ (sub_nonneg.mpr hat),Real.coe_toNNReal _ ha,
+      sub_add_cancel] at he
+    exact he
 
 end MathFin.BlackScholes.AmericanPut.Stopping

@@ -63,7 +63,6 @@ theorem brownianUsualActualContactRule_optimal {k h : ℝ} (hk : 0 ≤ k) (x : �
     canonicalDiscountedPrice_dominates hk x T t ω
   have hbefore (ω : ℝ≥0 → ℝ) (t : ℝ≥0) (ht : t < τ.time ω) : Z t ω < U t ω := by
     change Z t ω < canonicalDiscountedPrice k h x T t ω
-    rw [canonicalDiscountedPrice_eq_classicalCandidate]
     exact classicalContactRule_reward_lt (K := 1) (r := k) (q := h) (σ := Real.sqrt 2)
       (canonicalPrice_putEnvelope (h := h) hk) brownianUsual_adapted continuous_brownian one_pos
       (Real.exp_pos x) ω ht
@@ -75,7 +74,6 @@ theorem brownianUsualActualContactRule_optimal {k h : ℝ} (hk : 0 ≤ k) (x : �
   have hcontact : ∀ᵐ ω ∂μ, U (τ.time ω) ω = Z (τ.time ω) ω := by
     refine Eventually.of_forall fun ω => ?_
     change canonicalDiscountedPrice k h x T (τ.time ω) ω = Z (τ.time ω) ω
-    rw [canonicalDiscountedPrice_eq_classicalCandidate]
     exact (classicalContactRule_contact (K := 1) (r := k) (q := h) (σ := Real.sqrt 2)
       (canonicalPrice_putEnvelope (h := h) hk) brownianUsual_adapted continuous_brownian one_pos
       (Real.exp_pos x) T ω).trans (congrFun (hZrule τ) ω).symm

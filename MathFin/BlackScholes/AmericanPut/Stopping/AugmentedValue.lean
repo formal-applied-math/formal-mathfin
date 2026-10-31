@@ -79,7 +79,7 @@ theorem brownianClassicalCandidate_rightAug_supermartingale {K r q σ S : ℝ}
         gaussianLimit := by
   apply bounded_continuous_supermartingale_rightCont
     (supermartingale_nullAugmentation
-        (brownianClassicalCandidate_supermartingale hp hK hr hσ T))
+        (brownianClassicalCandidate_supermartingale hp.toPutEnvelope hp.putWaiting hK hr hσ T))
     (classicalCandidate_continuous hp.toPutEnvelope continuous_brownian T) (C := K)
   intro t ω
   obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp.toPutEnvelope brownian hK hr T t ω

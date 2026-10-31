@@ -5,15 +5,19 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.ClassicalHeatComparison
+public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianHeatFlow
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianTransition
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianVerification
 
-/-! # Classical Gaussian comparison in physical time and price coordinates 
+/-! # Waiting in physical time and price coordinates: the supermartingale step
+
+The step is generic: it needs `PutEnvelope p` and `PutWaiting`, whoever supplies them.
+
 ## Result
 
-Public entry points include `classicalPrice_physical_transition`,
-`classicalCandidate_condExp_le_before_maturity`.
+Public entry points include `PutWaiting.physical_transition`,
+`classicalCandidate_condExp_le_before_maturity`,
+`brownianClassicalCandidate_supermartingale`.
 -/
 
 @[expose] public section
@@ -23,9 +27,11 @@ namespace MathFin.BlackScholes.AmericanPut.Stopping
 open Set Filter MeasureTheory ProbabilityTheory Boundary
 open scoped NNReal Topology
 
-theorem classicalPrice_physical_transition {K r q σ : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
-    (hK : 0 ≤ K) (hσ : 0 < σ) {i j T : ℝ≥0} (hij : i ≤ j) (hjT : j ≤ T) (x : ℝ) :
+/-- Waiting in physical time and price coordinates: from time `i` to `j ≤ T` at volatility `σ`,
+a price that waits at the normalized rates dominates its discounted heat flow. -/
+theorem PutWaiting.physical_transition {K r q σ : ℝ} {p : ℝ → ℝ → ℝ}
+    (hw : PutWaiting (normalizedRate r σ) (normalizedRate q σ) p) (hK : 0 ≤ K) (hσ : 0 < σ)
+    {i j T : ℝ≥0} (hij : i ≤ j) (hjT : j ≤ T) (x : ℝ) :
     Real.exp (-r*(j : ℝ))*K*
         brownianHeatFlow (fun y => p y (σ^2/2*((T : ℝ)-(j : ℝ))))
           (σ^2*((j : ℝ)-(i : ℝ))).toNNReal (x+(r-q-σ^2/2)*((j : ℝ)-(i : ℝ))) ≤
@@ -47,9 +53,9 @@ theorem classicalPrice_physical_transition {K r q σ : ℝ} {p : ℝ → ℝ →
     dsimp [normalizedRate,a,t]
     field_simp [ne_of_gt hσ]
     ring
-  have he := mul_le_mul_of_nonneg_left (classicalPrice_gaussian_comparison hp ha hat x)
+  have he := mul_le_mul_of_nonneg_left (hw.evolution_le ha hat x)
     (mul_nonneg (Real.exp_pos (-r*(i : ℝ))).le hK)
-  have hw : Real.exp (-r*(i : ℝ))*Real.exp (-normalizedRate r σ*(t-a)) =
+  have hexp : Real.exp (-r*(i : ℝ))*Real.exp (-normalizedRate r σ*(t-a)) =
       Real.exp (-r*(j : ℝ)) := by
     rw [← Real.exp_add]
     simp only [neg_mul]
@@ -59,13 +65,15 @@ theorem classicalPrice_physical_transition {K r q σ : ℝ} {p : ℝ → ℝ →
   dsimp only [linearPriceEvolution] at he
   rw [htime,hdrift] at he
   convert! he using 1
-  rw [← hw]
+  rw [← hexp]
   ring
 
-theorem classicalCandidate_condExp_le_before_maturity {K r q σ S : ℝ}
-    {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
-    (hK : 0 ≤ K) (hσ : 0 < σ) {i j T : ℝ≥0} (hij : i ≤ j) (hjT : j ≤ T) :
+/-- An envelope that waits makes the discounted candidate a supermartingale step: before
+maturity, its conditional expectation in the Brownian filtration is at most its present value. -/
+theorem classicalCandidate_condExp_le_before_maturity {K r q σ S : ℝ} {p : ℝ → ℝ → ℝ}
+    (hE : PutEnvelope p)
+    (hw : PutWaiting (normalizedRate r σ) (normalizedRate q σ) p) (hK : 0 ≤ K) (hσ : 0 < σ)
+    {i j T : ℝ≥0} (hij : i ≤ j) (hjT : j ≤ T) :
     gaussianLimit[classicalCandidate brownian K r q σ S p T j | brownianFiltration i]
         ≤ᵐ[gaussianLimit]
       classicalCandidate brownian K r q σ S p T i := by
@@ -74,17 +82,17 @@ theorem classicalCandidate_condExp_le_before_maturity {K r q σ S : ℝ}
   let X : (ℝ≥0 → ℝ) → ℝ := fun ω => classicalLogSpot brownian K r q σ S i ω+
     (r-q-σ^2/2)*((j : ℝ)-(i : ℝ))
   have ha : 0 ≤ a := mul_nonneg (by positivity) (sub_nonneg.mpr (by exact_mod_cast hjT))
-  have hpcont : Continuous (fun y => p y a) := hp.price_continuous.comp_continuous
+  have hpcont : Continuous (fun y => p y a) := hE.price_continuous.comp_continuous
     (continuous_id.prodMk continuous_const) (fun _ => ha)
   have hf : Continuous f := continuous_const.mul hpcont
   have hb (y : ℝ) : ‖f y‖ ≤ ‖Real.exp (-r*(j : ℝ))*K‖ := by
     have hpy : ‖p y a‖ ≤ 1 := by
-      rw [Real.norm_eq_abs,abs_of_nonneg (hp.price_nonneg y ha)]
-      exact hp.bounded y a ha
+      rw [Real.norm_eq_abs,abs_of_nonneg (hE.nonneg y ha)]
+      exact hE.bounded y a ha
     simpa only [f,norm_mul,mul_one] using
       mul_le_mul_of_nonneg_left hpy (norm_nonneg (Real.exp (-r*(j : ℝ))*K))
-  have hX : Measurable[brownianFiltration i] X := by
-    exact ((measurable_const.add (measurable_const.mul (brownian_adapted i))).add measurable_const)
+  have hX : Measurable[brownianFiltration i] X :=
+    (measurable_const.add (measurable_const.mul (brownian_adapted i))).add measurable_const
   have he := brownian_condExp_transition hf hb hij hX σ
   have heq : (fun ω => f (X ω+σ*(brownian j ω-brownian i ω))) =
       classicalCandidate brownian K r q σ S p T j := by
@@ -98,9 +106,46 @@ theorem classicalCandidate_condExp_le_before_maturity {K r q σ S : ℝ}
   rw [heq] at he
   filter_upwards [he] with ω hω
   rw [hω]
-  have hcomp := classicalPrice_physical_transition hp hK hσ hij hjT
+  have hcomp := hw.physical_transition hK hσ hij hjT
     (classicalLogSpot brownian K r q σ S i ω)
   simpa only [brownianHeatFlow,f,X,a,integral_const_mul,classicalCandidate,
     min_eq_left (hij.trans hjT),mul_assoc] using hcomp
+
+/-- An envelope that waits makes the discounted candidate a supermartingale in the Brownian
+filtration, frozen at maturity. -/
+theorem brownianClassicalCandidate_supermartingale {K r q σ S : ℝ} {p : ℝ → ℝ → ℝ}
+    (hE : PutEnvelope p)
+    (hw : PutWaiting (normalizedRate r σ) (normalizedRate q σ) p)
+    (hK : 0 ≤ K) (hr : 0 ≤ r) (hσ : 0 < σ) (T : ℝ≥0) :
+    Supermartingale (classicalCandidate brownian K r q σ S p T) brownianFiltration
+        gaussianLimit := by
+  let U := classicalCandidate brownian K r q σ S p T
+  have hadapt : StronglyAdapted brownianFiltration U :=
+    fun t => (classicalCandidate_adapted hE brownian_adapted T t).stronglyMeasurable
+  have hint (t : ℝ≥0) : Integrable (U t) gaussianLimit := by
+    apply (integrable_const K).mono'
+      ((hadapt t).mono (brownianFiltration.le t)).aestronglyMeasurable
+    apply Eventually.of_forall
+    intro ω
+    obtain ⟨hlo,hhi⟩ :=
+      classicalCandidate_bounds (q := q) (σ := σ) (S := S) hE brownian hK hr T t ω
+    simpa only [U,Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
+  refine ⟨hadapt,?_,hint⟩
+  intro i j hij
+  change gaussianLimit[U j | brownianFiltration i] ≤ᵐ[gaussianLimit] U i
+  by_cases hjT : j ≤ T
+  · exact classicalCandidate_condExp_le_before_maturity hE hw hK hσ hij hjT
+  · have hTj : T ≤ j := (le_of_not_ge hjT)
+    have hj : U j = U T := by
+      funext ω
+      simp only [U,classicalCandidate,min_eq_right hTj,min_self]
+    rw [hj]
+    by_cases hiT : i ≤ T
+    · exact classicalCandidate_condExp_le_before_maturity hE hw hK hσ hiT le_rfl
+    · have hTi : T ≤ i := le_of_not_ge hiT
+      have hi : U i = U T := by
+        funext ω
+        simp only [U,classicalCandidate,min_eq_right hTi,min_self]
+      rw [← hi,condExp_of_stronglyMeasurable (brownianFiltration.le i) (hadapt i) (hint i)]
 
 end MathFin.BlackScholes.AmericanPut.Stopping
