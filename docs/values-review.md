@@ -2438,7 +2438,7 @@ the sign formula, hygiene, conventions and the licence. The parent adjudicated.
    mirror of `certificateFormula`.
 4. **Port hygiene** (lens 6): scope `maxHeartbeats`, `maxRecDepth` and `open scoped Classical` to
    the declarations that need them; drop the redundant `public import Mathlib` lines; docstrings
-   for the remaining definitions (`numerator`, `rootVariance`, `blackPlus`, `blackMinus`).
+   for the remaining definitions (`numerator`, `rootVariance`).
 5. **Ask upstream for a LICENSE file.**
 6. **Carried.** The earlier 2026-10-04 and 2026-10-03 backlogs stand.
 

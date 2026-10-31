@@ -230,7 +230,7 @@ the weight `f_x(s, X_s)` (`ito_formula_adapted_td_against`). The pathwise core n
 derivative: the two-variable Taylor remainder is at most `η Δt + η (ΔX)²` once `f_t` and `f_xx`
 oscillate by less than `η` on a cell (`abs_discreteTaylorRemainder2D_le_of_osc`), and uniform
 continuity on `[0, T] × [−R, R]` makes the sum vanish. Localisation reuses the double cutoff
-`SummitC.fTrunc` of `ItoFormulaUnrestricted`; the horizon reduction is
+`SummitC.fTrunc` of `ItoFormulaCutoff`; the horizon reduction is
 `ae_itoContinuousMod_eq_of_le`, shared with the time-independent entry.
 
 Safe wording: "Itô's formula for `f(t, X_t)`, `f` with jointly continuous `f_t`, `f_x`, `f_xx`, along

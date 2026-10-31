@@ -133,7 +133,7 @@
     {
       "id": "mf-american-ge-european",
       "name": "American ≥ European",
-      "description": "binomialPrice ≤ americanPrice for the same intrinsic g. The American option dominates the European with the same payoff — the early-exercise feature can only add value.",
+      "description": "Under BinomialNoArb u d r, binomialPrice ≤ americanPrice for the same intrinsic g. The American option dominates the European with the same payoff — the early-exercise feature can only add value.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Binomial.Bermudan\n\nopen MathFin\n\ntheorem american_ge_european_thm {u d r : ℝ} (h : MathFin.BinomialNoArb u d r)\n    (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :\n    MathFin.binomialPrice u d r g n S ≤ MathFin.americanPrice u d r g n S :=\n  MathFin.bermudanPrice_mono h g (Set.empty_subset _) n S\n"

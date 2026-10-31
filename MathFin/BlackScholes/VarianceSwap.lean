@@ -24,11 +24,12 @@ where `F = S_0 · e^{rT}` is the forward price. The two terms are:
   and `E_Q[Z] = 0`.
 * `E_Q[(S_T - F)/F] = 0`: zero by `expected_terminal_eq_forward` (`E_Q[S_T] = F`).
 
-The identity for the whole log contract, `(2/T) · E_Q[log(F/S_T) + (S_T - F)/F] = σ²`
-(`varianceSwap_fairStrike`), is the no-jump case of `jumpDiffusion_logContract` and lives in
-`JumpDiffusionVarianceSwap.lean`. The result `(2/T)·σ²T/2 = σ²` says: under BS lognormal dynamics, the fair
-variance swap rate equals the squared volatility — exactly the relationship
-that makes BS implied volatility a "risk-neutral expected variance".
+The log piece alone gives `(2/T)·σ²T/2 = σ²`. The whole identity
+`(2/T) · E_Q[log(F/S_T) + (S_T − F)/F] = σ²` (`varianceSwap_fairStrike`) is the no-jump case of
+`jumpDiffusion_logContract` and lives in `JumpDiffusionVarianceSwap.lean`, with `E_Q[S_T] = F`
+from `expected_terminal_eq_forward` (`Forward.lean`). Under BS lognormal dynamics the fair
+variance swap rate equals the squared volatility, which is the relationship that makes BS implied
+volatility a "risk-neutral expected variance".
 
 Results:
 
@@ -37,7 +38,6 @@ Results:
   `E_Q[log(F/S_T)] = σ² T / 2`.
 * `varianceSwap_log_contribution`: the log-payoff piece
   `(2/T) · E_Q[log(F/S_T)] = σ²`.
-* `integral_bsTerminal_eq_forward`: `E[S_T] = F` (standard-normal-driver form).
 
 Model-free, for any law of the log-return `Y` with `S_T = S_0e^Y`, `S_0 > 0`, `E|Y| < ∞` and
 `E[e^Y] < ∞`:

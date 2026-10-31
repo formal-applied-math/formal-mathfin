@@ -25,9 +25,7 @@ This is the exercise-everywhere case of the tree's one recursion `bermudanPrice`
 (`Binomial/SnellEnvelope.lean`) and its monotonicity in the exercise set, hence the
 European ≤ American ordering (`Binomial/Bermudan.lean`), all apply to it.
 
-This file defines `americanPrice`, with the one-step Bellman equation
-`americanPrice_succ`, and proves `binomialOptionPriceOnePeriod_mono`, the monotonicity of
-the one-period continuation.
+This file defines `americanPrice`, with the one-step Bellman equation `americanPrice_succ`.
 -/
 
 @[expose] public section
@@ -55,26 +53,5 @@ lemma americanPrice_succ (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
         (americanPrice u d r g n (S * u))
         (americanPrice u d r g n (S * d))) :=
   bermudanPrice_succ_of_mem (Set.mem_univ _) u d r g S
-
-/-- Monotonicity of the one-period continuation: if `V_u ≤ V_u'` and
-`V_d ≤ V_d'`, then the one-period prices satisfy the same ordering. -/
-lemma binomialOptionPriceOnePeriod_mono {u d r V_u V_u' V_d V_d' : ℝ}
-    (h : BinomialNoArb u d r) (hu : V_u ≤ V_u') (hd : V_d ≤ V_d') :
-    binomialOptionPriceOnePeriod u d r V_u V_d
-      ≤ binomialOptionPriceOnePeriod u d r V_u' V_d' := by
-  have h_p := crrUpProb_mem_Ioo h
-  have h_p_pos : 0 < crrUpProb u d r := h_p.1
-  have h_p_lt_one : crrUpProb u d r < 1 := h_p.2
-  have h_q_pos : 0 < 1 - crrUpProb u d r := by linarith
-  have h_exp_pos : 0 < Real.exp (-r) := Real.exp_pos _
-  unfold binomialOptionPriceOnePeriod
-  have h_sum : crrUpProb u d r * V_u + (1 - crrUpProb u d r) * V_d
-            ≤ crrUpProb u d r * V_u' + (1 - crrUpProb u d r) * V_d' := by
-    have h1 : crrUpProb u d r * V_u ≤ crrUpProb u d r * V_u' :=
-      mul_le_mul_of_nonneg_left hu h_p_pos.le
-    have h2 : (1 - crrUpProb u d r) * V_d ≤ (1 - crrUpProb u d r) * V_d' :=
-      mul_le_mul_of_nonneg_left hd h_q_pos.le
-    linarith
-  exact mul_le_mul_of_nonneg_left h_sum h_exp_pos.le
 
 end MathFin

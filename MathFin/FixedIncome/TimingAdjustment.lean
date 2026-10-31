@@ -338,7 +338,8 @@ theorem shortRate_hasLaw_forwardMeasure (hB : IsPreBrownianReal B μ) (θ : ℝ 
   haveI := forwardMeasure_isProbabilityMeasure (Q := μ) (fun _ ↦ Real.exp_pos _)
     (integrable_one_div_exp_bondRate hB θ κ σ r₀ hκ S)
   have hlaw := integratedRate_hasLaw_gaussian hB θ κ σ r₀ hκ S
-  have hae : AEMeasurable (integratedRate hB θ κ σ r₀ hκ S) (forwardMeasure μ fun ω ↦ Real.exp (bondRate hB θ κ σ r₀ hκ S ω)) :=
+  have hae : AEMeasurable (integratedRate hB θ κ σ r₀ hκ S)
+      (forwardMeasure μ fun ω ↦ Real.exp (bondRate hB θ κ σ r₀ hκ S ω)) :=
     hlaw.aemeasurable.mono_ac (withDensity_absolutelyContinuous _ _)
   refine ⟨hae, (measure_eq_of_mgf_id_eq integrable_exp_mul_gaussianReal ?_).symm⟩
   rw [mgf_id_gaussianReal, mgf_id_map hae]
