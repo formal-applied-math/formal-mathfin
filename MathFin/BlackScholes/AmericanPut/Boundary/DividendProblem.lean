@@ -63,8 +63,9 @@ instance {k h : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} :
 
 /-- The CCJZ (2008), (1.1) zero-dividend contract, with the stopping-region extension and
 initial payoff on all log prices: the case `h = 0` of `DividendPutSolution`. The smoothness
-requirements describe the intended classical solution class; proving that the financial
-value belongs to it is a separate obligation. -/
+requirements describe the intended classical solution class. The actual stopping price is proved
+to satisfy the `ContinuousBoundaryPutSolution` part (`canonicalPrice_continuousBoundaryPutSolution`);
+smoothness of its boundary (`boundary_smooth`) is the remaining separate obligation. -/
 abbrev NormalizedPutSolution (k : ℝ) (p : ℝ → ℝ → ℝ) (b : ℝ → ℝ) : Prop :=
   DividendPutSolution k 0 p b
 

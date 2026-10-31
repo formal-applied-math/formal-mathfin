@@ -18,7 +18,8 @@ is derived from the stopping-time condition, not added as a separate restriction
 `stoppingValue` is the supremum of the expected stopped payoff `∫ Z (θ ω) ω ∂P` over a class `R`
 of rules (all rules by default), so the continuous-time American value, the discrete
 stopping value and the value over a finite exercise grid are this one definition at different
-payoffs, indices and classes.
+payoffs, indices and classes. As a bare `sSup` it is `0` for an empty class or an unbounded set
+of expected payoffs; the lemmas carry the nonemptiness, integrability and bound they need.
 
 ## Result
 
@@ -89,19 +90,8 @@ stopping rules are lost by using index-valued times. -/
 noncomputable def ofWithTop (τ : Ω → WithTop ι) (hτ : IsStoppingTime 𝓕 τ)
     (hbound : ∀ ω, τ ω ≤ T) : StoppingRule 𝓕 T where
   time := fun ω => (τ ω).untop (ne_top_of_le_ne_top WithTop.coe_ne_top (hbound ω))
-  stopping := by
-    have he :
-        (fun ω => ((τ ω).untop (ne_top_of_le_ne_top WithTop.coe_ne_top (hbound ω)) : WithTop ι)) =
-        τ := by
-      funext ω
-      exact WithTop.coe_untop _ _
-    rw [he]
-    exact hτ
-  le_horizon := by
-    intro ω
-    exact_mod_cast
-        (show ((τ ω).untop (ne_top_of_le_ne_top WithTop.coe_ne_top (hbound ω)) : WithTop ι) ≤ T by
-      simpa only [WithTop.coe_untop] using hbound ω)
+  stopping := by simpa only [WithTop.coe_untop] using hτ
+  le_horizon ω := WithTop.coe_le_coe.mp ((WithTop.coe_untop _ _).le.trans (hbound ω))
 
 theorem ofWithTop_coe_time (τ : Ω → WithTop ι) (hτ : IsStoppingTime 𝓕 τ)
     (hbound : ∀ ω, τ ω ≤ T) (ω : Ω) : ((ofWithTop τ hτ hbound).time ω : WithTop ι) = τ ω :=
@@ -116,16 +106,14 @@ end StoppingRule
 
 /-- The value of the stopping problem with payoff `Z`: the supremum of the expected stopped payoff
 `∫ Z (θ.time ω) ω ∂P` over a class `R` of rules with horizon `T` (all of them by default). With
-`Z` a payoff process, the integrand is Mathlib's `stoppedValue Z θ.time`
-(`StoppingRule.integral_eq_stoppedValue`). -/
+`Z` a payoff process, the integrand is Mathlib's `stoppedValue Z θ.time` (definitionally).
+
+This is Mathlib's junk-valued `sSup` and Bochner integral: it is the optimal-stopping value only
+when `R` is nonempty and the expected payoffs are integrable and bounded above, which is exactly
+what `integral_le_stoppingValue` and `stoppingValue_le` assume. -/
 noncomputable def stoppingValue (P : Measure Ω) (𝓕 : Filtration ι ‹MeasurableSpace Ω›)
     (Z : ι → Ω → ℝ) (T : ι) (R : Set (StoppingRule 𝓕 T) := univ) : ℝ :=
   sSup ((fun θ : StoppingRule 𝓕 T => ∫ ω, Z (θ.time ω) ω ∂P) '' R)
-
-theorem StoppingRule.integral_eq_stoppedValue [Nonempty ι] {𝓕 : Filtration ι ‹MeasurableSpace Ω›}
-    {T : ι} (P : Measure Ω) (Z : ι → Ω → ℝ) (θ : StoppingRule 𝓕 T) :
-    (∫ ω, Z (θ.time ω) ω ∂P) = ∫ ω, stoppedValue Z (fun ω => (θ.time ω : WithTop ι)) ω ∂P :=
-  rfl
 
 variable {P : Measure Ω} {𝓕 : Filtration ι ‹MeasurableSpace Ω›} {Z : ι → Ω → ℝ} {T : ι}
   {R : Set (StoppingRule 𝓕 T)}

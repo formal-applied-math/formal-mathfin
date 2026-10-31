@@ -67,8 +67,8 @@ theorem exists_expectedReward_gt_value_sub {ε : ℝ} (hε : 0 < ε) :
   exact ⟨θ,h⟩
 
 theorem value_le_strike (hW : Measurable W.uncurry)
-    (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) : americanPutValue P 𝓕 W K r q σ S T ≤ K := by
-  exact stoppingValue_le univ_nonempty fun θ _ ↦ expectedReward_le_strike hW hK hr hS θ
+    (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) : americanPutValue P 𝓕 W K r q σ S T ≤ K :=
+  stoppingValue_le univ_nonempty fun θ _ ↦ expectedReward_le_strike hW hK hr hS θ
 
 theorem value_nonneg (hW : Measurable W.uncurry)
     (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) : 0 ≤ americanPutValue P 𝓕 W K r q σ S T :=
@@ -96,9 +96,8 @@ theorem value_at_expiry (hW : Measurable W.uncurry) (hzero : ∀ᵐ ω ∂P, W 0
 
 theorem value_mono_horizon (hW : Measurable W.uncurry)
     (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) (hTU : T ≤ U) :
-    americanPutValue P 𝓕 W K r q σ S T ≤ americanPutValue P 𝓕 W K r q σ S U := by
-  exact stoppingValue_le univ_nonempty fun θ _ ↦
-    expectedReward_le_value hW hK hr hS (θ.extend hTU)
+    americanPutValue P 𝓕 W K r q σ S T ≤ americanPutValue P 𝓕 W K r q σ S U :=
+  stoppingValue_le univ_nonempty fun θ _ ↦ expectedReward_le_value hW hK hr hS (θ.extend hTU)
 
 /-- The deterministic maturity rule is admissible, so the American value
 dominates the European payoff expectation without any optimal-stopping theorem. -/
