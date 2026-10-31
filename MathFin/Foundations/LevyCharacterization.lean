@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.BoundedLocalMartingale
-public import MathFin.Foundations.StoppedProcessPaths
 public import MathFin.Foundations.ExitTime
 public import MathFin.Foundations.ExpMartingaleBrownian
 public import MathFin.Foundations.UnifIntegrableL2

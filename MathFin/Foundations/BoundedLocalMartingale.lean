@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 public import MathFin.Foundations.MartingaleSetIntegral
+public import MathFin.Foundations.StoppedProcessPaths
 
 /-!
 # Bounded local martingales and smaller filtrations
