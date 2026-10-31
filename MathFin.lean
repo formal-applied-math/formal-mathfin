@@ -407,6 +407,7 @@ import MathFin.BlackScholes.MertonStrikeGreeks
 import MathFin.BlackScholes.JumpDiffusionMixing
 -- Compensated jumps lift the Black–Scholes implied volatility strictly above σ
 import MathFin.BlackScholes.JumpImpliedVol
+import MathFin.BlackScholes.JuZhongZeroRateLimit
 -- The canonical jump-diffusion model: the hypotheses are satisfiable for every
 -- expected jump count and jump law, and the call depends only on these two
 import MathFin.BlackScholes.JumpDiffusionCanonical
