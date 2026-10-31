@@ -766,6 +766,8 @@ import MathFin.Execution.RollSpread
 import MathFin.BlackScholes.AmericanPut.Stopping.PhysicalBoundaryConvexity
 import MathFin.BlackScholes.AmericanPut.Stopping.PlanePartial
 import MathFin.BlackScholes.AmericanPut.Stopping.AEHorizonValue
+import MathFin.BlackScholes.AmericanPut.Stopping.ActualBoundaryExpiryLimit
+import MathFin.BlackScholes.AmericanQDPlusLimits
 -- QRM bridges: equicorrelation, Gaussian VaR/ES-optimal = Markowitz portfolios, the HHI
 -- systematic floor, and the square-root-of-time rule for GBM losses
 import MathFin.Portfolio.Equicorrelation
