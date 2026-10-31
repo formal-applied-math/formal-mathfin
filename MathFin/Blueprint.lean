@@ -277,8 +277,10 @@ attribute [blueprint "thm:binomial-representation"
   (title := "Binomial martingale representation (completeness)")
   (statement := /-- On the binomial tree every martingale is the discrete
   stochastic integral of a *predictable* hedge: $H = \Delta M/\Delta S$, fixed
-  before the flip — completeness, the second pillar of the FTAP, purely
-  algebraic and pathwise. -/)]
+  before the flip — completeness, the second pillar of the FTAP. The martingale
+  is Mathlib's, for the natural filtration of the flips; the conditional
+  expectation is the node average, so the proof is the one-period delta hedge,
+  telescoped. -/)]
   MathFin.binomial_martingale_representation
 
 attribute [blueprint "thm:crr-bs-convergence" (title := "CRR → Black–Scholes convergence")
