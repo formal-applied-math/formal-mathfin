@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (869 MathFin constants, 29 upstream). Citations
+  corpus (870 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -94,6 +94,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.condExp_stoppedValue_le_finiteBellman' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.BlackScholes.AmericanPut.Stopping.condExp_stoppedValue_le_finiteBellman
+
+/-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.expectedReward_eq_initial_iff_stopped_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.BlackScholes.AmericanPut.Stopping.expectedReward_eq_initial_iff_stopped_martingale
 
 /-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.finiteBellman_doob_decomposition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
