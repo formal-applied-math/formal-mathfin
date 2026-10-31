@@ -1784,9 +1784,9 @@
     "mf-contract-coupon-bond-vasicek": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 11.8,
-      "input_hash": "c749f844a4b34aba41493163b58e6f278dd7b51af9a3aae099e83b921dabf770",
-      "verified_at_commit": "35c996d"
+      "elapsed_s": 11.0,
+      "input_hash": "88a78ba029ff992ef3d953e6d2d7013dfe2d243275f31e26281529a11dbe420f",
+      "verified_at_commit": "9a264bb"
     },
     "mf-contract-coupon-bond-yield": {
       "benchmark_file": "contracts.json",
