@@ -67,8 +67,9 @@ noncomputable def linearPriceEvolution (f : ℝ → ℝ) (k h a x t : ℝ) : ℝ
   Real.exp (-k*(t-a))*brownianHeatFlow f (2*(t-a)).toNNReal (x+(k-h-1)*(t-a))
 
 /-- A put price `p` (pairs `(log spot, time remaining)`) *waits* at normalized rates `k`, `h`
-if it dominates its own discounted Gaussian evolution: continuing from remaining time `a` and
-waiting until `t` never beats exercising optimally from `t`. This is the one inequality the
+if it dominates its own discounted Gaussian evolution: for remaining times `0 ≤ a ≤ t`, the price
+at remaining time `t` is at least the discounted expectation of the price at remaining time `a`
+after a Brownian wait of length `t-a` (`linearPriceEvolution`). This is the one inequality the
 stopping verification needs beyond `PutEnvelope p`. Classical solutions satisfy it by the
 parabolic comparison (`DividendPutSolution.putWaiting`); the stopping value satisfies it by
 dynamic programming (`canonicalPrice_putWaiting`). -/
