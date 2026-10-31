@@ -141,6 +141,7 @@ theorem HasBondPrice.discount_mul_ae (h : HasBondPrice Q 𝓕 D X b T₀ T₁) :
   rw [hω, bondPrice]
   field_simp [(h.D_pos ω).ne']
 
+omit [IsProbabilityMeasure Q] in
 theorem HasBondPrice.integrable_discount_mul (h : HasBondPrice Q 𝓕 D X b T₀ T₁) :
     Integrable (fun ω ↦ D T₀ ω * X b T₀ ω) Q :=
   (integrable_condExp (m := 𝓕 T₀) (f := D T₁)).congr h.discount_mul_ae.symm
