@@ -39,6 +39,38 @@ namespace MathFin
 
 open MeasureTheory
 
+/-- **Positions from losses.** On a finite state space, for any finite measure `P`, if
+`L ↦ ρ (−L)` is a coherent risk measure of losses then `ρ` satisfies the four
+Artzner–Delbaen–Eber–Heath axioms for positions (monotone decreasing, `ρ (X + m) = ρ X − m`,
+positively homogeneous, subadditive). No support assumption: the converse is where the order on
+almost-sure classes must be pointwise (`isCoherentRiskMeasure_neg_iff`). -/
+theorem IsCoherentRiskMeasure.positions_of_neg {ι : Type*} [Fintype ι] [MeasurableSpace ι]
+    [MeasurableSingletonClass ι] {P : Measure ι} [IsFiniteMeasure P] {ρ : (ι → ℝ) → ℝ}
+    (hρ : IsCoherentRiskMeasure P (fun L ↦ ρ (-L))) :
+    (∀ X Y : ι → ℝ, (∀ i, X i ≤ Y i) → ρ Y ≤ ρ X) ∧
+      (∀ (X : ι → ℝ) (m : ℝ), ρ (fun i ↦ X i + m) = ρ X - m) ∧
+      (∀ l : ℝ, 0 ≤ l → ∀ X : ι → ℝ, ρ (l • X) = l * ρ X) ∧
+      ∀ X Y : ι → ℝ, ρ (X + Y) ≤ ρ X + ρ Y := by
+  refine ⟨fun X Y h ↦ ?_, fun X m ↦ ?_, fun l hl X ↦ ?_, fun X Y ↦ ?_⟩
+  · simpa only [neg_neg] using
+      hρ.mono_of_le (X := -Y) (Y := -X) fun i ↦ neg_le_neg (h i)
+  · have h := hρ.add_const (X := -fun i ↦ X i + m) .of_finite m
+    have e : (-fun ω ↦ (-fun i ↦ X i + m) ω + m) = X := by
+      ext i; simp only [Pi.neg_apply]; ring
+    change ρ (-fun ω ↦ (-fun i ↦ X i + m) ω + m) = ρ (-(-fun i ↦ X i + m)) + m at h
+    rw [e, neg_neg] at h
+    linarith
+  · have h := hρ.const_mul (X := -X) .of_finite hl
+    have e : (-fun ω ↦ l * (-X) ω) = l • X := by
+      ext i; simp only [Pi.neg_apply, Pi.smul_apply, smul_eq_mul]; ring
+    change ρ (-fun ω ↦ l * (-X) ω) = l * ρ (-(-X)) at h
+    rwa [e, neg_neg] at h
+  · have h := hρ.add_le (X := -X) (Y := -Y) .of_finite .of_finite
+    have e : (-fun ω ↦ (-X) ω + (-Y) ω) = X + Y := by
+      ext i; simp only [Pi.neg_apply, Pi.add_apply]; ring
+    change ρ (-fun ω ↦ (-X) ω + (-Y) ω) ≤ ρ (-(-X)) + ρ (-(-Y)) at h
+    rwa [e, neg_neg, neg_neg] at h
+
 /-- **Positions versus losses.** On a finite state space with a finite measure `P` charging every
 state (`P {i} ≠ 0`, so almost-sure order is the pointwise order), a functional
 `ρ : (ι → ℝ) → ℝ` satisfies the four Artzner–Delbaen–Eber–Heath axioms for positions
@@ -52,43 +84,23 @@ theorem isCoherentRiskMeasure_neg_iff {ι : Type*} [Fintype ι] [MeasurableSpace
       (∀ (X : ι → ℝ) (m : ℝ), ρ (fun i ↦ X i + m) = ρ X - m) ∧
       (∀ l : ℝ, 0 ≤ l → ∀ X : ι → ℝ, ρ (l • X) = l * ρ X) ∧
       ∀ X Y : ι → ℝ, ρ (X + Y) ≤ ρ X + ρ Y := by
-  constructor
-  · intro hρ
-    refine ⟨fun X Y h ↦ ?_, fun X m ↦ ?_, fun l hl X ↦ ?_, fun X Y ↦ ?_⟩
-    · simpa only [neg_neg] using
-        hρ.mono_of_le (X := -Y) (Y := -X) fun i ↦ neg_le_neg (h i)
-    · have h := hρ.add_const (X := -fun i ↦ X i + m) .of_finite m
-      have e : (-fun ω ↦ (-fun i ↦ X i + m) ω + m) = X := by
-        ext i; simp only [Pi.neg_apply]; ring
-      change ρ (-fun ω ↦ (-fun i ↦ X i + m) ω + m) = ρ (-(-fun i ↦ X i + m)) + m at h
-      rw [e, neg_neg] at h
-      linarith
-    · have h := hρ.const_mul (X := -X) .of_finite hl
-      have e : (-fun ω ↦ l * (-X) ω) = l • X := by
-        ext i; simp only [Pi.neg_apply, Pi.smul_apply, smul_eq_mul]; ring
-      change ρ (-fun ω ↦ l * (-X) ω) = l * ρ (-(-X)) at h
-      rwa [e, neg_neg] at h
-    · have h := hρ.add_le (X := -X) (Y := -Y) .of_finite .of_finite
-      have e : (-fun ω ↦ (-X) ω + (-Y) ω) = X + Y := by
-        ext i; simp only [Pi.neg_apply, Pi.add_apply]; ring
-      change ρ (-fun ω ↦ (-X) ω + (-Y) ω) ≤ ρ (-(-X)) + ρ (-(-Y)) at h
-      rwa [e, neg_neg, neg_neg] at h
-  · rintro ⟨hm, hc, hh, hs⟩
-    refine ⟨fun X Y _ _ h ↦ ?_, fun X _ m ↦ ?_, fun X _ c hc' ↦ ?_, fun X Y _ _ ↦ ?_⟩
-    · exact hm (-Y) (-X) fun i ↦ neg_le_neg ((ae_iff_forall_of_singleton_ne_zero hP).1 h i)
-    · have e : (-fun ω ↦ X ω + m) = fun i ↦ (-X) i + -m := by
-        ext i; simp only [Pi.neg_apply]; ring
-      change ρ (-fun ω ↦ X ω + m) = ρ (-X) + m
-      rw [e, hc (-X) (-m)]
-      ring
-    · have e : (-fun ω ↦ c * X ω) = c • -X := by
-        ext i; simp only [Pi.neg_apply, Pi.smul_apply, smul_eq_mul]; ring
-      change ρ (-fun ω ↦ c * X ω) = c * ρ (-X)
-      rw [e, hh c hc' (-X)]
-    · have e : (-fun ω ↦ X ω + Y ω) = -X + -Y := by
-        ext i; simp only [Pi.neg_apply, Pi.add_apply]; ring
-      change ρ (-fun ω ↦ X ω + Y ω) ≤ ρ (-X) + ρ (-Y)
-      rw [e]
-      exact hs (-X) (-Y)
+  refine ⟨IsCoherentRiskMeasure.positions_of_neg, ?_⟩
+  rintro ⟨hm, hc, hh, hs⟩
+  refine ⟨fun X Y _ _ h ↦ ?_, fun X _ m ↦ ?_, fun X _ c hc' ↦ ?_, fun X Y _ _ ↦ ?_⟩
+  · exact hm (-Y) (-X) fun i ↦ neg_le_neg ((ae_iff_forall_of_singleton_ne_zero hP).1 h i)
+  · have e : (-fun ω ↦ X ω + m) = fun i ↦ (-X) i + -m := by
+      ext i; simp only [Pi.neg_apply]; ring
+    change ρ (-fun ω ↦ X ω + m) = ρ (-X) + m
+    rw [e, hc (-X) (-m)]
+    ring
+  · have e : (-fun ω ↦ c * X ω) = c • -X := by
+      ext i; simp only [Pi.neg_apply, Pi.smul_apply, smul_eq_mul]; ring
+    change ρ (-fun ω ↦ c * X ω) = c * ρ (-X)
+    rw [e, hh c hc' (-X)]
+  · have e : (-fun ω ↦ X ω + Y ω) = -X + -Y := by
+      ext i; simp only [Pi.neg_apply, Pi.add_apply]; ring
+    change ρ (-fun ω ↦ X ω + Y ω) ≤ ρ (-X) + ρ (-Y)
+    rw [e]
+    exact hs (-X) (-Y)
 
 end MathFin

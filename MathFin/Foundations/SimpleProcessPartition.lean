@@ -628,8 +628,7 @@ theorem tendstoInMeasure_marshalStochSum (hB : IsPreBrownianReal B μ) (T : ℝ�
 
 /-- **The stochastic-exponent a.e.-subsequence extraction.** Every subsequence `ns` of the clamped
 stochastic exponents has a further subsequence converging a.e. to `∫θ dB` — the single stochastic
-input the a.e.-subsequence set-integral engine of the assembly needs (mirror of
-`exists_subseq_riemannσ_ae`). -/
+input the a.e.-subsequence set-integral engine of the assembly needs. -/
 theorem exists_subseq_marshalStochSum_ae (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)

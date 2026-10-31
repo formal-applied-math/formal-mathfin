@@ -203,9 +203,9 @@ namespace MathFin.AxiomAudit
 
 /-! ## Binomial trees -/
 
-/-- info: 'MathFin.americanCallPrice_le_binomialPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.bermudanCallPrice_eq_binomialPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
-#print axioms MathFin.americanCallPrice_le_binomialPrice
+#print axioms MathFin.bermudanCallPrice_eq_binomialPrice
 
 /-! ## Variance swap (QV limit) -/
 
@@ -1556,10 +1556,10 @@ coefficients (Summit C). -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.isLocalizingSequence_exitTime
 
-/-! ## The unrestricted-`C³` Itô formula via stopping-time localization (Summit C)
+/-! ## The unrestricted-`C²` Itô formula via stopping-time localization (Summit C)
 
-`ItoFormulaUnrestrictedLocMart.lean`: for a general `C³` `f` (six partials, all jointly continuous,
-**no** growth or boundedness hypothesis), the compensated process
+`ItoFormulaUnrestrictedLocMart.lean`: for a general `C²` `f` (`f_t`, `f_x`, `f_xx` with `HasDerivAt` witnesses, all four of
+`f, f_t, f_x, f_xx` jointly continuous, **no** growth or boundedness hypothesis), the compensated process
 `M_t = f(t,B_t) − f(0,B_0) − ∫₀ᵗ drift` is everywhere-continuous, satisfies the Itô identity by
 construction, and is a genuine `IsLocalMartingale` on the null-augmented Brownian filtration
 (`ito_formula_unrestricted`) and a **continuous local martingale in explicit form**
@@ -1675,8 +1675,8 @@ consistently: `changeOfNumeraire` is the invariance `N₀·𝔼^{Q^N}[X/N_T] = B
 measure-transport identity plus cancellation of `N_T` — no integrability hypothesis.
 `numeraireMeasure_isProbabilityMeasure` is the companion normalization (`N/B` a `Q`-martingale ⟹
 `Q^N` a probability measure). The abstract backbone is genuinely CONSUMED:
-`stockNumeraireMeasure_eq_numeraireMeasure` exhibits the Black–Scholes stock numéraire
-`dQ^(S)/dQ = e^{−rT}·S_T/S₀` as the instance `B_T = e^{rT}`, `B₀ = 1`, `N = S`. -/
+`numeraireMeasure` at `B_T = e^{rT}`, `B₀ = 1`, `N = S` is the Black–Scholes stock numéraire
+`dQ^(S)/dQ = e^{−rT}·S_T/S₀` (`stockNumeraire_exercise_probability`). -/
 
 /-- info: 'MathFin.changeOfNumeraire' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1686,9 +1686,9 @@ measure-transport identity plus cancellation of `N_T` — no integrability hypot
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.numeraireMeasure_isProbabilityMeasure
 
-/-- info: 'MathFin.stockNumeraireMeasure_eq_numeraireMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.stockNumeraire_exercise_probability' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.stockNumeraireMeasure_eq_numeraireMeasure
+#print axioms MathFin.stockNumeraire_exercise_probability
 
 /-! ## Two further numéraire seams: the Kelly portfolio ⟹ EMM, and the exchange option
 

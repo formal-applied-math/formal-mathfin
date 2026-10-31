@@ -63,15 +63,18 @@ theorem rootVariance_pos (p : Params) (k : ℝ) (hw : 0 < variance p k) :
 theorem rootVariance_sq (p : Params) (k : ℝ) (hw : 0 ≤ variance p k) :
     (rootVariance p k)^2 = variance p k := Real.sq_sqrt hw
 
-theorem rootVariance_hasDerivAt (p : Params) (hs : 0 < p.sigma) (k : ℝ)
+/-- The derivative of `√w`, given that of the SVI total variance `w`. -/
+theorem rootVariance_hasDerivAt (p : Params) (k : ℝ)
+    (hv : HasDerivAt (variance p) (slope p k) k)
     (hw : 0 < variance p k) :
     HasDerivAt (rootVariance p) (slope p k / (2*rootVariance p k)) k :=
-  (variance_hasDerivAt p hs k).sqrt (ne_of_gt hw)
+  hv.sqrt (ne_of_gt hw)
 
-theorem dmi_hasDerivAt (p : Params) (hs : 0 < p.sigma) (k : ℝ)
+theorem dmi_hasDerivAt (p : Params) (k : ℝ)
+    (hv : HasDerivAt (variance p) (slope p k) k)
     (hw : 0 < variance p k) :
     HasDerivAt (fun k ↦ dmi k (variance p k)) (dmiSlope p k) k := by
-  have hr := rootVariance_hasDerivAt p hs k hw
+  have hr := rootVariance_hasDerivAt p k hv hw
   have hn := ne_of_gt (rootVariance_pos p k hw)
   have h := (((hasDerivAt_id k).neg).div hr hn).sub (hr.div_const 2)
   simp only [dmi_eq_rootVariance]
@@ -80,21 +83,23 @@ theorem dmi_hasDerivAt (p : Params) (hs : 0 < p.sigma) (k : ℝ)
   field_simp
   ring
 
-theorem dpl_hasDerivAt (p : Params) (hs : 0 < p.sigma) (k : ℝ)
+theorem dpl_hasDerivAt (p : Params) (k : ℝ)
+    (hv : HasDerivAt (variance p) (slope p k) k)
     (hw : 0 < variance p k) :
     HasDerivAt (fun k ↦ dpl k (variance p k))
       (dmiSlope p k + slope p k / (2*rootVariance p k)) k := by
-  have h := (dmi_hasDerivAt p hs k hw).add (rootVariance_hasDerivAt p hs k hw)
+  have h := (dmi_hasDerivAt p k hv hw).add (rootVariance_hasDerivAt p k hv hw)
   convert h using 1 <;> try rfl
   funext x
   simp only [dpl_eq_rootVariance, dmi_eq_rootVariance, Pi.add_apply]
   ring
 
-theorem blackForm_hasDerivAt (p : Params) (hs : 0 < p.sigma) (k : ℝ)
+theorem blackForm_hasDerivAt (p : Params) (k : ℝ)
+    (hv : HasDerivAt (variance p) (slope p k) k)
     (hw : 0 < variance p k) :
     HasDerivAt (fun k ↦ blackForm k (variance p k)) (Real.exp k * blackDelta p k) k := by
-  have hp := (MathFin.hasDerivAt_Phi (dpl k (variance p k))).comp k (dpl_hasDerivAt p hs k hw)
-  have hm := (MathFin.hasDerivAt_Phi (dmi k (variance p k))).comp k (dmi_hasDerivAt p hs k hw)
+  have hp := (MathFin.hasDerivAt_Phi (dpl k (variance p k))).comp k (dpl_hasDerivAt p k hv hw)
+  have hm := (MathFin.hasDerivAt_Phi (dmi k (variance p k))).comp k (dmi_hasDerivAt p k hv hw)
   have h := hp.sub ((Real.hasDerivAt_exp k).mul hm)
   convert h using 1 <;> try rfl
   rw [← ForwardSmile.exp_mul_pdf_dmi hw]
@@ -102,17 +107,21 @@ theorem blackForm_hasDerivAt (p : Params) (hs : 0 < p.sigma) (k : ℝ)
   ring
 
 /-- The derivative of the strike delta is the positive Gaussian factor times
-Durrleman's expression. -/
-theorem blackDelta_hasDerivAt (p : Params) (hs : 0 < p.sigma) (k : ℝ)
+Durrleman's expression, given the derivatives of the total variance and of its slope (the
+regime-specific input: `variance_hasDerivAt`, `slope_hasDerivAt` for `σ > 0`, and their
+zero-scale counterparts off the kink). -/
+theorem blackDelta_hasDerivAt (p : Params) (k : ℝ)
+    (hv : HasDerivAt (variance p) (slope p k) k)
+    (hslope : HasDerivAt (slope p) (curvature p k) k)
     (hw : 0 < variance p k) :
     HasDerivAt (blackDelta p)
       (gaussianPDFReal 0 1 (dmi k (variance p k)) / rootVariance p k * durrleman p k) k := by
-  have hm := dmi_hasDerivAt p hs k hw
+  have hm := dmi_hasDerivAt p k hv hw
   have hp := (MathFin.hasDerivAt_gaussianPDFReal_zero_one (dmi k (variance p k))).comp k hm
   have hc := (MathFin.hasDerivAt_Phi (dmi k (variance p k))).comp k hm
-  have hr := rootVariance_hasDerivAt p hs k hw
+  have hr := rootVariance_hasDerivAt p k hv hw
   have hn := ne_of_gt (rootVariance_pos p k hw)
-  have h := ((hp.mul (slope_hasDerivAt p hs k)).div (hr.const_mul 2)
+  have h := ((hp.mul hslope).div (hr.const_mul 2)
     (mul_ne_zero (by norm_num) hn)).sub hc
   convert h using 1 <;> try rfl
   simp only [durrleman, dmiSlope, dmi_eq_rootVariance, Function.comp_apply, Pi.mul_apply]

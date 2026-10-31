@@ -54,7 +54,7 @@ statements about the price become clauses of the characterization
 `discounted_intrinsic_le_bermudanPrice`, `bermudanPrice_snell_minimal`).
 
 Monotonicity in the exercise set (`bermudanPrice_mono`, `Binomial/Bermudan.lean`) and Merton's
-no-early-exercise theorem for the tree call (`americanCallPrice_le_binomialPrice`,
+no-early-exercise theorem for the tree call (`bermudanCallPrice_eq_binomialPrice`,
 `MertonAmericanCallTree.lean`) are instances of the minimality, with another exercise-set price
 and the European price process as the competitor.
 

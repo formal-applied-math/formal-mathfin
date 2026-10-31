@@ -99,10 +99,7 @@ def NoArbitrage : Prop :=
 property is the one-step form up to `T` (the honest finite-horizon object: `S`
 need not be a `Q`-martingale past the horizon). At `T = 1` with `𝓕 0 = ⊥` this is the
 one-period notion for `S 1 − S 0` (`isEMM_one_iff_onePeriod`). -/
-structure IsEMM (Q : Measure Ω) : Prop where
-  prob : IsProbabilityMeasure Q
-  absP : Q ≪ P
-  Pabs : P ≪ Q
+structure IsEMM (Q : Measure Ω) : Prop extends IsEquivProbMeasure P Q where
   mart : ∀ t, t < T → S t =ᵐ[Q] Q[S (t + 1) | 𝓕 t]
 
 /-- `𝟙_A · (S_{t+1} − S_t)` — the discounted gain of holding one unit on the
@@ -231,7 +228,7 @@ theorem exists_isEMM_of_noArbitrage [Finite Ω] (hS : StronglyAdapted 𝓕 S)
     intro s hs; rw [eq_empty_of_pos_singleton hP hs]; exact measure_empty
   have hPQ : P ≪ Q := by
     intro s hs; rw [eq_empty_of_pos_singleton hQpos hs]; exact measure_empty
-  refine ⟨Q, hQprob, hQP, hPQ, fun t htT ↦ ?_⟩
+  refine ⟨Q, ⟨hQprob, hQP, hPQ⟩, fun t htT ↦ ?_⟩
   -- Martingale property via the conditional-expectation characterisation.
   refine ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le t) Integrable.of_finite
     (fun s _ _ ↦ Integrable.of_finite.integrableOn) (fun s hs _ ↦ ?_)
@@ -258,11 +255,11 @@ space every function is integrable and a strategy is bounded on the horizon, so 
 `MathFin.emm_implies_no_arbitrage` at the horizon `T`. -/
 theorem noArbitrage_of_isEMM [Finite Ω] (hS : StronglyAdapted 𝓕 S)
     {Q : Measure Ω} (hQ : IsEMM 𝓕 P S T Q) : NoArbitrage 𝓕 P S T := by
-  haveI := hQ.prob
+  haveI := hQ.isProb
   haveI := Fintype.ofFinite Ω
   intro φ hφ hpos
   exact ae_eq_zero_of_nonneg_of_null_pos hpos
-    (emm_implies_no_arbitrage hQ.absP hQ.Pabs (fun t _ ↦ hS t) (fun t _ ↦ Integrable.of_finite)
+    (emm_implies_no_arbitrage hQ.ac hQ.ac' (fun t _ ↦ hS t) (fun t _ ↦ Integrable.of_finite)
       hQ.mart φ (fun t _ ↦ hφ t)
       ⟨∑ n ∈ Finset.range (T + 1), ∑ ω', |φ n ω'|, fun n hn ω ↦ by
         rw [Real.norm_eq_abs]
@@ -305,17 +302,17 @@ theorem isEMM_one_iff_onePeriod [Finite Ω] (hS : StronglyAdapted 𝓕 S) (h0 : 
   have hmean (μ : Measure Ω) [IsProbabilityMeasure μ] : ∫ ω, S 0 ω ∂μ = c := by simp [hc]
   constructor
   · intro hQ
-    haveI := hQ.prob
+    haveI := hQ.isProb
     have hm := hQ.mart 0 Nat.zero_lt_one
     rw [h0, condExp_bot, hc] at hm
     obtain ⟨_, hcQ⟩ := hm.exists
-    refine ⟨hQ.prob, hQ.absP, hQ.Pabs, Integrable.of_finite, ?_⟩
+    refine ⟨hQ.toIsEquivProbMeasure, Integrable.of_finite, ?_⟩
     change ∫ ω, (S 1 ω - S 0 ω) ∂Q = 0
     rw [integral_sub Integrable.of_finite Integrable.of_finite, hmean Q]
     exact sub_eq_zero.mpr hcQ.symm
   · intro hQ
-    haveI := hQ.prob
-    refine ⟨hQ.prob, hQ.absP, hQ.Pabs, fun t ht ↦ ?_⟩
+    haveI := hQ.isProb
+    refine ⟨hQ.toIsEquivProbMeasure, fun t ht ↦ ?_⟩
     obtain rfl : t = 0 := by omega
     rw [h0, condExp_bot, hc]
     have hfair : ∫ ω, (S 1 ω - S 0 ω) ∂Q = 0 := hQ.fair
@@ -364,10 +361,10 @@ equivalent martingale measure, at the discrete horizon `T'`, for the sampled pri
 and the sampled filtration `n ↦ 𝓕 (t n)`. General Ω; the sampled martingale is
 `martingale_comp_monotone`. -/
 theorem IsEMM.sampled {S : ℝ≥0 → Ω → ℝ} {T : ℝ≥0} {Q : Measure Ω}
-    (h : IsEMM (P := P) (𝓕 := 𝓕) S T Q) {t : ℕ → ℝ≥0} (ht : Monotone t) (T' : ℕ)
+    (h : IsEMM 𝓕 P S T Q) {t : ℕ → ℝ≥0} (ht : Monotone t) (T' : ℕ)
     (hT' : t T' ≤ T) :
     MathFin.IsEMM (sampledFiltration 𝓕 ht) P (fun n ↦ S (t n)) T' Q :=
-  ⟨h.isProb, h.ac, h.ac', fun n hn ↦
+  ⟨h.toIsEquivProbMeasure, fun n hn ↦
     (h.condExp_eq (ht n.le_succ) ((ht hn).trans hT')).symm⟩
 
 /-- **A continuous-time EMM is a one-period EMM for every increment before the horizon.** If `Q`
@@ -377,13 +374,13 @@ dates `s`, `t ≤ T` it is an equivalent martingale measure, in the sense of
 constant holding: a martingale has constant expectation. -/
 theorem IsEMM.increment {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
     [FiniteDimensional ℝ F] {S : ℝ≥0 → Ω → F} {T : ℝ≥0} {Q : Measure Ω}
-    (h : IsEMM (P := P) (𝓕 := 𝓕) S T Q) {s t : ℝ≥0} (hs : s ≤ T) (ht : t ≤ T) :
+    (h : IsEMM 𝓕 P S T Q) {s t : ℝ≥0} (hs : s ≤ T) (ht : t ≤ T) :
     OnePeriodVector.IsEMM P (S t - S s) Q := by
   haveI := h.isProb
   have hmean {u : ℝ≥0} (hu : u ≤ T) : ∫ ω, S u ω ∂Q = ∫ ω, S 0 ω ∂Q := by
     rw [← integral_condExp (𝓕.le 0)]
     exact integral_congr_ae (h.condExp_eq zero_le hu)
-  refine ⟨h.isProb, h.ac, h.ac', (h.integrable ht).sub (h.integrable hs), ?_⟩
+  refine ⟨h.toIsEquivProbMeasure, (h.integrable ht).sub (h.integrable hs), ?_⟩
   change ∫ ω, (S t ω - S s ω) ∂Q = 0
   rw [integral_sub (h.integrable ht) (h.integrable hs), hmean ht, hmean hs, sub_self]
 

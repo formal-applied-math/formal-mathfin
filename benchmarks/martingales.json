@@ -148,7 +148,7 @@
         "reference": "Theorem 2.6.7",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Real derivation of FTAP (⇒ direction), stated at the horizon T (adapted, integrable and one-step martingale up to T, strategy bounded up to T; a full martingale satisfies these): stops the price, strategy and filtration at T, applies the martingale-transform theorem (shared with mart-thm-2.2.9 via `import MathFin.Foundations.MartingaleTransform`, not duplicated inline) to the stopped price under the EMM `Q`, then uses `Q ≪ P`, `ae_zero_of_nonneg_of_integral_zero` (NoArbitrageCore), and `P ≪ Q` to derive that arbitrage sets have `P`-measure zero. This one theorem is also the forward direction of the one-period vector FTAP and of the finite-Ω FTAP."
+        "formalization_scope": "Real derivation of FTAP (⇒ direction), the library lemma MathFin.emm_implies_no_arbitrage is stated at the horizon T (adapted, integrable and one-step martingale up to T, strategy bounded up to T); this entry restates it for a Q-martingale on all of ℕ and bounded φ, and derives it from that lemma, which stops the price, strategy and filtration at T, applies the martingale-transform theorem (shared with mart-thm-2.2.9 via `import MathFin.Foundations.MartingaleTransform`, not duplicated inline) to the stopped price under the EMM `Q`, then uses `Q ≪ P`, `ae_zero_of_nonneg_of_integral_zero` (NoArbitrageCore), and `P ≪ Q` to derive that arbitrage sets have `P`-measure zero. This one theorem is also the forward direction of the one-period vector FTAP and of the finite-Ω FTAP."
       }
     },
     {

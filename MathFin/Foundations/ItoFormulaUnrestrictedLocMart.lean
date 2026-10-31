@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoFormulaAdaptedProcess
-public import MathFin.Foundations.ItoFormulaUnrestricted
+public import MathFin.Foundations.ItoFormulaCutoff
 public import MathFin.Foundations.LevyCharacterization
 
 /-! # Summit C — the unrestricted-`C²` Itô formula as a local martingale
@@ -63,7 +63,7 @@ lemma driftPrimitive_stronglyMeasurable (hBmeas : ∀ t, Measurable (B t))
     f_t (↑(min s t)) (B (min s t) ω) + (1 / 2) * f_xx (↑(min s t)) (B (min s t) ω) with hg
   -- every clamped slice is `𝓕_t`-measurable (`min s t ≤ t`) — proved with `mΩ` still ambient
   have hBmin : ∀ s : ℝ≥0, StronglyMeasurable[natFiltration hBmeas t] (B (min s t)) := fun s ↦
-    ((measurable_eval_natFiltration hBmeas (min s t)).mono
+    ((stronglyAdapted_natFiltration hBmeas (min s t)).measurable.mono
       ((natFiltration hBmeas).mono (min_le_right s t)) le_rfl).stronglyMeasurable
   have hg_meas : ∀ s, StronglyMeasurable[natFiltration hBmeas t] (g s) := by
     intro s
@@ -124,9 +124,9 @@ lemma residual_stronglyMeasurable (hBmeas : ∀ t, Measurable (B t))
         - ∫ s in Set.Ioc 0 t,
             (f_t (s : ℝ) (B s ω) + (1 / 2) * f_xx (s : ℝ) (B s ω)) ∂timeMeasure) := by
   have hBt : StronglyMeasurable[natFiltration hBmeas t] (B t) :=
-    (measurable_eval_natFiltration hBmeas t).stronglyMeasurable
+    stronglyAdapted_natFiltration hBmeas t
   have hB0 : StronglyMeasurable[natFiltration hBmeas t] (B 0) :=
-    ((measurable_eval_natFiltration hBmeas 0).mono
+    ((stronglyAdapted_natFiltration hBmeas 0).measurable.mono
       ((natFiltration hBmeas).mono zero_le) le_rfl).stronglyMeasurable
   refine (StronglyMeasurable.sub ?_ ?_).sub
     (driftPrimitive_stronglyMeasurable hBmeas hBcont hf_t_cont hf_xx_cont t)

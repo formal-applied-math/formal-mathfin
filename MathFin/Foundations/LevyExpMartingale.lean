@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.LevyQuadraticSums
 public import MathFin.Foundations.ExpMartingaleQBrownian
+public import MathFin.Foundations.MartingaleSetIntegral
 
 /-!
 # The exponential martingale of a martingale with a slow bracket
@@ -436,8 +437,8 @@ theorem setIntegral_exp_eq (a : ℝ) {s t : ℝ≥0} (hst : s ≤ t) {S : Set Ω
   convert h using 2 <;> · funext ω; by_cases hω : ω ∈ S <;> simp [hω]
 
 /-- **`exp(a·M_t − a²A_t/2)` is a martingale**, as Mathlib's `Martingale`: adapted, and the
-set-integral identity `setIntegral_exp_eq` identifies the conditional expectation
-(`ae_eq_condExp_of_forall_setIntegral_eq`). -/
+set-integral identity `setIntegral_exp_eq` makes it a martingale
+(`martingale_of_setIntegral_eq`). -/
 theorem martingale_exp (a : ℝ) :
     Martingale (fun t ω ↦ Real.exp (a * M t ω - a ^ 2 * A t ω / 2)) 𝓕 P := by
   have hAad := stronglyAdapted_of_martingale_sq_sub hM hM2
@@ -451,10 +452,8 @@ theorem martingale_exp (a : ℝ) :
     (memLp_of_abs_le ((hZsm r).mono (𝓕.le r)).aestronglyMeasurable (C := Real.exp (|a| * K))
       (fun ω ↦ by rw [abs_of_pos (Real.exp_pos _)]; exact exp_le_exp_abs_mul hA hK a r ω)
       1).integrable le_rfl
-  exact ⟨hZsm, fun s t hst ↦ (ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le s) (hi t)
-    (fun _ _ _ ↦ (hi s).integrableOn)
-    (fun S hS _ ↦ (setIntegral_exp_eq hA hM hM2 hK hcont a hst hS).symm)
-    (hZsm s).aestronglyMeasurable).symm⟩
+  exact martingale_of_setIntegral_eq hZsm hi fun s t hst S hS ↦
+    (setIntegral_exp_eq hA hM hM2 hK hcont a hst hS).symm
 
 end Exp
 

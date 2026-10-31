@@ -111,6 +111,7 @@ import MathFin.Foundations.NoArbitrageCore
 import MathFin.Foundations.FTAP
 import MathFin.Foundations.OptionalSamplingInequality
 import MathFin.Foundations.LpContinuousMartingaleConvergence
+import MathFin.Foundations.MartingaleSetIntegral
 import MathFin.Foundations.MartingaleTransform
 import MathFin.Foundations.DoobLpMaximalInequality
 import MathFin.Foundations.ExtendOfNormIsometry
@@ -330,7 +331,7 @@ import MathFin.Foundations.PricePathDrift
 import MathFin.Foundations.PricingMeasureL2Density
 import MathFin.Foundations.ItoFormulaProcess
 import MathFin.Foundations.ExitTime
-import MathFin.Foundations.ItoFormulaUnrestricted
+import MathFin.Foundations.ItoFormulaCutoff
 import MathFin.Foundations.ItoFormulaUnrestrictedLocMart
 -- Phase 37: FTAP both directions, two-state market (adapted from Nagy 2026)
 import MathFin.Foundations.FTAPTwoState

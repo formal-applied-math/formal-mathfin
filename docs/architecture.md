@@ -180,11 +180,13 @@ records each one's scope. As of 2026-10-23 there are 16, in four groups.
   law of the iterated logarithm is still a `sorry` at our pin.) The reflection identity for ±1
   walks, the algebraic core of the discrete reflection principle, is proved in
   `Binomial/PathReflection.lean`.
-- **Stochastic calculus beyond the proved cases.** Itô's formula is proved for `C³` functions of
-  Brownian motion with no growth condition, and for Itô processes with bounded adapted coefficients;
+- **Stochastic calculus beyond the proved cases.** Itô's formula is proved for `C²` functions of
+  Brownian motion (`f`, `f_t`, `f_x`, `f_xx` jointly continuous, with `HasDerivAt` witnesses) with
+  no growth condition, in local-martingale form, and for Itô processes with bounded adapted coefficients;
   Girsanov's theorem for bounded predictable `θ`. Still reduced: the two-dimensional Itô formula,
-  Girsanov for general progressive `θ` under Novikov, Novikov's condition itself, and Lévy's
-  characterization of Brownian motion.
+  Girsanov for general progressive `θ` under Novikov, and Novikov's condition itself. Lévy's
+  characterization of Brownian motion is proved, with the bracket as the hypothesis that
+  `M² − t` is a local martingale.
 - **Markov chains.** The strong Markov property, the recurrence criterion, uniqueness of the
   stationary distribution, the ergodic theorem and convergence to equilibrium.
 - **Single results elsewhere.** The first arrival of a Poisson process is exponential; the

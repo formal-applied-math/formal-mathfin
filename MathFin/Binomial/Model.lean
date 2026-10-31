@@ -86,6 +86,18 @@ noncomputable def binomialOptionPriceOnePeriod (u d r V_u V_d : ℝ) : ℝ :=
   Real.exp (-r) *
     (crrUpProb u d r * V_u + (1 - crrUpProb u d r) * V_d)
 
+/-- Monotonicity of the one-period continuation: if `V_u ≤ V_u'` and
+`V_d ≤ V_d'`, then the one-period prices satisfy the same ordering. -/
+lemma binomialOptionPriceOnePeriod_mono {u d r V_u V_u' V_d V_d' : ℝ}
+    (h : BinomialNoArb u d r) (hu : V_u ≤ V_u') (hd : V_d ≤ V_d') :
+    binomialOptionPriceOnePeriod u d r V_u V_d
+      ≤ binomialOptionPriceOnePeriod u d r V_u' V_d' := by
+  have hp := crrUpProb_mem_Ioo h
+  have : 0 ≤ 1 - crrUpProb u d r := by linarith [hp.2]
+  unfold binomialOptionPriceOnePeriod
+  gcongr
+  exact hp.1.le
+
 /-- **No-arbitrage single-period replication.** For an asset with spot `S_0`
 and `BinomialNoArb u d r`, any contingent claim with payoffs `V_u` (in the up
 state `S_0 · u`) and `V_d` (down state `S_0 · d`) is replicated by

@@ -6,7 +6,9 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Foundations.EquivMeasure
 public import MathFin.Foundations.FTAP
+public import MathFin.Foundations.MartingaleSetIntegral
 public import MathFin.Foundations.NoArbitrageCore
 
 /-!
@@ -17,7 +19,7 @@ pricing (FTAP), parametric over a finite-dimensional real inner-product-space-va
 discounted price process `S : ℝ≥0 → Ω → F`. The Black–Scholes model (`ContinuousFTAP.lean`)
 instantiates it at `F = ℝ`; a multi-asset model would instantiate at `F = Fin n → ℝ`.
 
-* `IsEMM S T Q` — `Q` is an equivalent martingale measure for `S` up to the horizon `T`:
+* `IsEMM 𝓕 P S T Q` — `Q` is an equivalent martingale measure for `S` up to the horizon `T`:
   `Q ≈ P` (mutual absolute continuity) and `S` is a `Q`-martingale w.r.t. the filtration `𝓕` on
   `{t ≤ T}`, i.e. the process stopped at `T` is a `Q`-martingale. This matches the discrete
   `MathFin.IsEMM` (`FTAPDiscrete.lean`), which also takes a horizon `T`, and it is what an
@@ -28,17 +30,13 @@ instantiates it at `F = ℝ`; a multi-asset model would instantiate at `F = Fin 
   finitely many trading dates `time : Fin (N+1) → ℝ≥0` and `𝓕`-measurable bounded holdings
   `hold : Fin N → Ω → F` between consecutive dates.
 * `SimpleStrategy.gains` — the discounted terminal gains of a simple strategy against `S`.
-* `NoArbitrageSimple S T` — no simple strategy trading up to `T` has gains that are `P`-a.s.
+* `NoArbitrageSimple 𝓕 P S T` — no simple strategy trading up to `T` has gains that are `P`-a.s.
   nonnegative and strictly positive on a `P`-non-null set.
 * `martingale_stopped_of_setIntegral_eq` — the way an `IsEMM` is built: adaptedness, integrability
   and the set-integral martingale identity on `[0, T]` give the stopped martingale.
 * `isEMM_noArbitrageSimple` — the forward theorem. A simple strategy sampled at its own dates is
   a discrete predictable strategy, and the discrete forward theorem `emm_implies_no_arbitrage`
   (vector-valued, `FTAP.lean`) applies to the sampled price.
-* `increment_integrable`, `increment_integral_zero` — a bounded predictable weight against a
-  `Q`-martingale increment is `Q`-integrable with zero `Q`-mean. Public because the
-  pricing-measure argument of `PricingMeasureL2Density` is built out of exactly these, summed
-  over a simple process's bands.
 
 ## Scope: meaning-1 (operational) vs. meaning-2 (Delbaen–Schachermayer) FTAP
 
@@ -51,8 +49,8 @@ times, and the general stochastic integral `∫ φ dS`). Absent by design:
 * general **admissible** strategies (not just piecewise-constant) and the general stochastic
   integral `∫ φ dS` against a semimartingale;
 * **NFLVR** (no free lunch with vanishing risk) and its distinction from plain no-arbitrage;
-* the **converse** direction `NoArbitrageSimple S T → ∃ Q, IsEMM S T Q`, and closedness of the
-  set of claims super-replicable from zero wealth (the Kreps–Yan / Hahn–Banach core DS needs).
+* the **converse** direction `NoArbitrageSimple 𝓕 P S T → ∃ Q, IsEMM 𝓕 P S T Q`, and closedness
+  of the set of claims super-replicable from zero wealth (the Kreps–Yan / Hahn–Banach core DS needs).
 
 `IsEMM` here is stated *on a process* `S`, exactly the object Delbaen–Schachermayer's theorem
 would produce — so this frame is a strict sub-object of the DS one, and extending it to
@@ -85,10 +83,8 @@ price process `S`: `Q` is a probability measure mutually absolutely continuous w
 (`Q ≈ P`), and `S` is a `Q`-martingale w.r.t. the filtration `𝓕` on `{t ≤ T}` — stated as the
 process `t ↦ S (min t T)` stopped at the horizon being a `Q`-martingale. A `Q`-martingale on all
 of `ℝ≥0` is an EMM for every `T`. -/
-structure IsEMM (S : ℝ≥0 → Ω → F) (T : ℝ≥0) (Q : Measure Ω) : Prop where
-  isProb : IsProbabilityMeasure Q
-  ac : Q ≪ P
-  ac' : P ≪ Q
+structure IsEMM (𝓕 : Filtration ℝ≥0 mΩ) (P : Measure Ω) (S : ℝ≥0 → Ω → F) (T : ℝ≥0)
+    (Q : Measure Ω) : Prop extends IsEquivProbMeasure P Q where
   martingale : Martingale (fun t ↦ S (min t T)) 𝓕 Q
 
 /-- **The way an EMM's martingale is built.** A process that is `𝓕`-adapted and `Q`-integrable on
@@ -100,12 +96,9 @@ theorem martingale_stopped_of_setIntegral_eq {Q : Measure Ω} [IsFiniteMeasure Q
     (hset : ∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T → ∀ ⦃A : Set Ω⦄, MeasurableSet[𝓕 s] A →
       ∫ ω in A, S t ω ∂Q = ∫ ω in A, S s ω ∂Q) :
     Martingale (fun t ↦ S (min t T)) 𝓕 Q := by
-  have hadapt' (s : ℝ≥0) : StronglyMeasurable[𝓕 s] (S (min s T)) :=
-    (hadapt _ (min_le_right _ _)).mono (𝓕.mono (min_le_left _ _))
-  refine ⟨hadapt', fun s t hst ↦ ?_⟩
-  refine (ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le s) (hint _ (min_le_right _ _))
-    (fun A _ _ ↦ (hint _ (min_le_right _ _)).integrableOn) (fun A hA _ ↦ ?_)
-    (hadapt' s).aestronglyMeasurable).symm
+  refine martingale_of_setIntegral_eq
+    (fun s ↦ (hadapt _ (min_le_right _ _)).mono (𝓕.mono (min_le_left _ _)))
+    (fun s ↦ hint _ (min_le_right _ _)) fun s t hst A hA ↦ ?_
   by_cases hsT : s ≤ T
   · rw [min_eq_left hsT]
     exact (hset (le_min hst hsT) (min_le_right _ _) hA).symm
@@ -138,7 +131,8 @@ noncomputable def SimpleStrategy.gains (ψ : SimpleStrategy 𝓕 F)
 /-- **No simple-strategy arbitrage up to `T`**: no simple strategy trading on `[0, T]` (its last
 date is `≤ T`) has gains against `S` that are `P`-a.s. nonnegative and strictly positive on a
 `P`-non-null set. -/
-def NoArbitrageSimple (S : ℝ≥0 → Ω → F) (T : ℝ≥0) : Prop :=
+def NoArbitrageSimple (𝓕 : Filtration ℝ≥0 mΩ) (P : Measure Ω) (S : ℝ≥0 → Ω → F) (T : ℝ≥0) :
+    Prop :=
   ∀ ψ : SimpleStrategy 𝓕 F, ψ.time (Fin.last ψ.N) ≤ T → (0 ≤ᵐ[P] fun ω ↦ ψ.gains S ω) →
     P {ω | 0 < ψ.gains S ω} = 0
 
@@ -162,48 +156,6 @@ theorem martingale_comp_monotone {Q : Measure Ω} {S : ℝ≥0 → Ω → F}
     Martingale (fun n ↦ S (t n)) (sampledFiltration 𝓕 ht) Q :=
   ⟨fun n ↦ hS.1 (t n), fun i j hij ↦ hS.2 (t i) (t j) (ht hij)⟩
 
-/-- **A predictable-weighted increment `⟪φ, S t − S s⟫` is `Q`-integrable** when `φ` is bounded
-and `S` is a `Q`-martingale (so `S t`, `S s` are integrable): Cauchy–Schwarz bounds the inner
-product by `K · ‖S t − S s‖`, which is integrable. -/
-theorem increment_integrable {Q : Measure Ω}
-    {S : ℝ≥0 → Ω → F} (hS : Martingale S 𝓕 Q) {φ : Ω → F} {s t : ℝ≥0}
-    (hφ : StronglyMeasurable[𝓕 s] φ) {K : ℝ} (hφb : ∀ ω, ‖φ ω‖ ≤ K) :
-    Integrable (fun ω ↦ ⟪φ ω, S t ω - S s ω⟫_ℝ) Q := by
-  have hΔ : Integrable (fun ω ↦ S t ω - S s ω) Q := (hS.integrable t).sub (hS.integrable s)
-  refine Integrable.mono' (hΔ.norm.const_mul K)
-    (((hφ.mono (𝓕.le s)).aestronglyMeasurable).inner hΔ.aestronglyMeasurable) ?_
-  filter_upwards with ω
-  calc ‖⟪φ ω, S t ω - S s ω⟫_ℝ‖ ≤ ‖φ ω‖ * ‖S t ω - S s ω‖ := norm_inner_le_norm _ _
-    _ ≤ K * ‖S t ω - S s ω‖ := mul_le_mul_of_nonneg_right (hφb ω) (norm_nonneg _)
-
-/-- **A predictable-weighted martingale increment has zero `Q`-integral.** For a `Q`-martingale
-`S`, a `𝓕 s`-measurable bounded weight `φ`, and `s ≤ t`, the increment gain `⟪φ, S t − S s⟫`
-integrates to `0`: pull `φ` out of `Q[· | 𝓕 s]` and use `Q[S t − S s | 𝓕 s] = 0`. -/
-theorem increment_integral_zero {Q : Measure Ω} [IsProbabilityMeasure Q]
-    {S : ℝ≥0 → Ω → F} (hS : Martingale S 𝓕 Q) {φ : Ω → F} {s t : ℝ≥0} (hst : s ≤ t)
-    (hφ : StronglyMeasurable[𝓕 s] φ) {K : ℝ} (hφb : ∀ ω, ‖φ ω‖ ≤ K) :
-    ∫ ω, ⟪φ ω, S t ω - S s ω⟫_ℝ ∂Q = 0 := by
-  have hm : 𝓕 s ≤ mΩ := 𝓕.le s
-  have hΔ : Integrable (fun ω ↦ S t ω - S s ω) Q := (hS.integrable t).sub (hS.integrable s)
-  -- `Q[S t − S s | 𝓕 s] = 0`.
-  have hcond0 : Q[fun ω ↦ S t ω - S s ω | 𝓕 s] =ᵐ[Q] 0 := by
-    have hsub : Q[fun ω ↦ S t ω - S s ω | 𝓕 s] =ᵐ[Q] Q[S t | 𝓕 s] - Q[S s | 𝓕 s] :=
-      condExp_sub (hS.integrable t) (hS.integrable s) _
-    have h1 : Q[S t | 𝓕 s] =ᵐ[Q] S s := hS.2 s t hst
-    have h2 : Q[S s | 𝓕 s] = S s := condExp_of_stronglyMeasurable hm (hS.1 s) (hS.integrable s)
-    filter_upwards [hsub, h1] with ω hω h1ω
-    rw [hω, Pi.zero_apply, Pi.sub_apply, h1ω, h2, sub_self]
-  -- Pull out `φ` and collapse.
-  calc ∫ ω, ⟪φ ω, S t ω - S s ω⟫_ℝ ∂Q
-      = ∫ ω, (Q[fun ω ↦ ⟪φ ω, S t ω - S s ω⟫_ℝ | 𝓕 s]) ω ∂Q := (integral_condExp hm).symm
-    _ = ∫ ω, ⟪φ ω, (Q[fun ω ↦ S t ω - S s ω | 𝓕 s]) ω⟫_ℝ ∂Q :=
-        integral_congr_ae (condExp_bilin_of_stronglyMeasurable_left (innerSL ℝ) hφ
-          (increment_integrable hS hφ hφb) hΔ)
-    _ = 0 := by
-        refine integral_eq_zero_of_ae ?_
-        filter_upwards [hcond0] with ω hω
-        rw [hω]; simp
-
 namespace IsEMM
 
 variable {S : ℝ≥0 → Ω → F} {T : ℝ≥0} {Q : Measure Ω}
@@ -211,24 +163,24 @@ variable {S : ℝ≥0 → Ω → F} {T : ℝ≥0} {Q : Measure Ω}
 /-- **A martingale on all of `ℝ≥0` is an EMM at every horizon**, when its measure is an equivalent
 probability measure. -/
 theorem of_martingale [IsProbabilityMeasure Q] (hS : Martingale S 𝓕 Q) (hQP : Q ≪ P)
-    (hPQ : P ≪ Q) (T : ℝ≥0) : IsEMM (P := P) (𝓕 := 𝓕) S T Q :=
-  ⟨inferInstance, hQP, hPQ, martingale_stopped_of_setIntegral_eq (fun t _ ↦ hS.1 t)
+    (hPQ : P ≪ Q) (T : ℝ≥0) : IsEMM 𝓕 P S T Q :=
+  ⟨⟨inferInstance, hQP, hPQ⟩, martingale_stopped_of_setIntegral_eq (fun t _ ↦ hS.1 t)
     (fun t _ ↦ hS.integrable t) fun _ _ hst _ _ hA ↦ (hS.setIntegral_eq hst hA).symm⟩
 
 omit [FiniteDimensional ℝ F] in
 /-- Before the horizon the price is `𝓕`-adapted. -/
-theorem adapted (h : IsEMM (P := P) (𝓕 := 𝓕) S T Q) {t : ℝ≥0} (ht : t ≤ T) :
+theorem adapted (h : IsEMM 𝓕 P S T Q) {t : ℝ≥0} (ht : t ≤ T) :
     StronglyMeasurable[𝓕 t] (S t) := by
   simpa only [min_eq_left ht] using h.martingale.1 t
 
 /-- Before the horizon the price is `Q`-integrable. -/
-theorem integrable (h : IsEMM (P := P) (𝓕 := 𝓕) S T Q) {t : ℝ≥0} (ht : t ≤ T) :
+theorem integrable (h : IsEMM 𝓕 P S T Q) {t : ℝ≥0} (ht : t ≤ T) :
     Integrable (S t) Q := by
   simpa only [min_eq_left ht] using h.martingale.integrable t
 
 omit [FiniteDimensional ℝ F] in
 /-- **The martingale property before the horizon**: `Q[S t | 𝓕 s] = S s` for `s ≤ t ≤ T`. -/
-theorem condExp_eq (h : IsEMM (P := P) (𝓕 := 𝓕) S T Q) {s t : ℝ≥0} (hst : s ≤ t)
+theorem condExp_eq (h : IsEMM 𝓕 P S T Q) {s t : ℝ≥0} (hst : s ≤ t)
     (ht : t ≤ T) : Q[S t | 𝓕 s] =ᵐ[Q] S s := by
   simpa only [min_eq_left ht, min_eq_left (hst.trans ht)] using h.martingale.condExp_ae_eq hst
 
@@ -247,7 +199,7 @@ gains `ψ.gains S` are the martingale transform of the sampled price by the hold
 `emm_implies_no_arbitrage` (`FTAP.lean`) applies, and the continuous theorem has no argument of
 its own. -/
 theorem isEMM_noArbitrageSimple {S : ℝ≥0 → Ω → F} {T : ℝ≥0} {Q : Measure Ω}
-    (h : IsEMM (P := P) (𝓕 := 𝓕) S T Q) : NoArbitrageSimple (P := P) (𝓕 := 𝓕) S T := by
+    (h : IsEMM 𝓕 P S T Q) : NoArbitrageSimple 𝓕 P S T := by
   intro ψ hψT hnonneg
   haveI := h.isProb
   obtain ⟨K, hK⟩ := ψ.bdd

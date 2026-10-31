@@ -110,7 +110,7 @@ theorem stopped_martingale_of_expected_value_eq
       (Eventually.of_forall (fun ω => hb _ ω))
   have hmean (t : ℝ≥0) : (∫ ω, X t ω ∂P) = ∫ ω, U 0 ω ∂P :=
     expected_value_eq_before_optimal_rule hU hc hb τ hopt (τ.capTime t) (fun _ => min_le_right _ _)
-  apply martingale_of_setIntegral_eq_real ha hi
+  apply martingale_of_setIntegral_eq ha hi
   intro i j hij A hA
   have hAm : MeasurableSet A := 𝓕.le i A hA
   let η := τ.capBinary hij A hA
