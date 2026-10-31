@@ -1051,14 +1051,8 @@ theorem Btheta_isQBrownianMotion_predictable (hBmeas : ∀ t, Measurable (B t)) 
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (V : ℕ → TBoundedSP T hBmeas)
     (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
-    (∀ᵐ ω ∂(μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)),
-        BthetaPred (μ := μ) T hBmeas hpred hbdd 0 ω = 0)
-      ∧ (∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T →
-          (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)).map
-            (fun ω ↦ BthetaPred (μ := μ) T hBmeas hpred hbdd t ω
-              - BthetaPred (μ := μ) T hBmeas hpred hbdd s ω) = gaussianReal 0 (t - s))
-      ∧ HasIndepIncrements (fun t : Set.Iic T ↦ BthetaPred (μ := μ) T hBmeas hpred hbdd t)
-          (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) := by
+    IsBrownianOn (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) T
+      (BthetaPred (μ := μ) T hBmeas hpred hbdd) := by
   haveI : IsProbabilityMeasure (μ.withDensity fun ω ↦
       ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) :=
     isProbabilityMeasure_predGirsanov hB hBmeas T hpred hbdd V hV
@@ -1076,14 +1070,8 @@ independent increments, on `[0,T]`. The benchmark-facing form of
 theorem Btheta_isQBrownianMotion_predictable_of_bdd (hBmeas : ∀ t, Measurable (B t))
     {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :
-    (∀ᵐ ω ∂(μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)),
-        BthetaPred (μ := μ) T hBmeas hpred hbdd 0 ω = 0)
-      ∧ (∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T →
-          (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)).map
-            (fun ω ↦ BthetaPred (μ := μ) T hBmeas hpred hbdd t ω
-              - BthetaPred (μ := μ) T hBmeas hpred hbdd s ω) = gaussianReal 0 (t - s))
-      ∧ HasIndepIncrements (fun t : Set.Iic T ↦ BthetaPred (μ := μ) T hBmeas hpred hbdd t)
-          (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) := by
+    IsBrownianOn (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) T
+      (BthetaPred (μ := μ) T hBmeas hpred hbdd) := by
   obtain ⟨V, hV⟩ := exists_approxSeq (μ := μ) hBmeas T hpred hbdd
   exact Btheta_isQBrownianMotion_predictable hB hBmeas hpred hbdd T V hV
 
