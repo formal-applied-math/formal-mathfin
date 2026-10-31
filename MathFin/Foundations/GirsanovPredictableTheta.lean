@@ -319,7 +319,7 @@ energy `Dₙ = ∫₀ᵀ(⇑Ṽⁿ − ⇑θ̂)²` decays in `L¹(μ)` (`= ‖si
 measure. -/
 lemma tendstoInMeasure_marshalDrift (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
-    (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
+    (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
     (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)))
@@ -328,7 +328,6 @@ lemma tendstoInMeasure_marshalDrift (T : ℝ≥0)
         (marshalStepSP hBmeas T (V n).val (V n).property hC
           ((marshalEndpoints hBmeas T (V n).val).card - 1)).val u) atTop
       (driftContinuousMod T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd) u) := by
-  have hC : 0 ≤ C := nonneg_of_bdd μ hbdd
   set θhat := processToLpPredictable (μ := μ) T hBmeas hpred hbdd with hθhat
   set W : ℕ → TBoundedSP T hBmeas := fun n ↦ marshalStepSP hBmeas T (V n).val (V n).property hC
     ((marshalEndpoints hBmeas T (V n).val).card - 1) with hW
@@ -400,7 +399,7 @@ to `∫₀ᵀ(⇑θ̂)² ds`. Writing `Q − L = 2∫step·(step − θ̂) − D
 `|step| ≤ C` on `(0,T]`, `|Q − L| ≤ 2C√T·√(Dₙ) + Dₙ` (finite-measure `L¹ ≤ L²`), which vanishes in
 `L¹(μ)` since `∫Dₙ = ‖simpleAssembly_T Ṽⁿ − θ̂‖² → 0` and `∫√Dₙ ≤ √(∫Dₙ)`. -/
 lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
-    (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
+    (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
     (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
@@ -411,7 +410,6 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
       atTop
       (fun ω ↦ ∫ s in Set.Ioc (0 : ℝ≥0) T,
         (⇑(processToLpPredictable (μ := μ) T hBmeas hpred hbdd) (s, ω)) ^ 2 ∂timeMeasure) := by
-  have hC : 0 ≤ C := nonneg_of_bdd μ hbdd
   set θhat := processToLpPredictable (μ := μ) T hBmeas hpred hbdd with hθhat
   set W : ℕ → TBoundedSP T hBmeas := fun n ↦ marshalStepSP hBmeas T (V n).val (V n).property hC
     ((marshalEndpoints hBmeas T (V n).val).card - 1) with hW
@@ -682,14 +680,14 @@ lemma tendsto_ZTpred_ae_subseq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) 
       (fun i ω ↦ clampM C (marshalMult hBmeas T (V n).val i ω)) (N n) T) atTop
       (⇑(itoIntegralCLM_T hB T hBmeas θhat)) := by
     refine TendstoInMeasure.congr (fun n ↦ ?_) EventuallyEq.rfl
-      (tendstoInMeasure_marshalStochSum hB T hBmeas hpred hbdd V hV)
+      (tendstoInMeasure_marshalStochSum hB T hBmeas hpred hC hbdd V hV)
     exact ae_of_all _ fun ω ↦
       (simpleStochSum_marshalStepSP_eq hBmeas T (V n).val (V n).property hC (hmpN n) ω).symm
   -- quadratic variation → `∫θ̂²` in measure
   have hquad : TendstoInMeasure μ (fun n ↦ simpleQuadVar (marshalPart hBmeas T (V n).val)
       (fun i ω ↦ clampM C (marshalMult hBmeas T (V n).val i ω)) (N n) T) atTop
       (fun ω ↦ ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑θhat (s, ω)) ^ 2 ∂timeMeasure) :=
-    tendstoInMeasure_marshalQuadVar T hBmeas hpred hbdd V hV
+    tendstoInMeasure_marshalQuadVar T hBmeas hpred hC hbdd V hV
   obtain ⟨ms, hms, hstochae, hquadae⟩ := exists_subseq_tendsto_ae₂ hstoch hquad ns hns
   refine ⟨ms, hms, ?_⟩
   filter_upwards [hstochae, hquadae] with ω hωs hωq
@@ -800,7 +798,7 @@ lemma tendsto_fnPred_ae_subseq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
       ((marshalEndpoints hBmeas T (V n).val).card - 1) u) atTop
       (driftContinuousMod T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd) u) := by
     refine TendstoInMeasure.congr (fun n ↦ ?_) EventuallyEq.rfl
-      (tendstoInMeasure_marshalDrift T hBmeas hpred hbdd V hV huT)
+      (tendstoInMeasure_marshalDrift T hBmeas hpred hC hbdd V hV huT)
     exact ae_of_all _ fun ω ↦ (simpleDrift_marshalStepSP_eq hBmeas T (V n).val (V n).property hC
       ((marshalEndpoints hBmeas T (V n).val).card - 1) u ω).symm
   obtain ⟨b, hb, hDae⟩ := (show TendstoInMeasure μ (fun k ↦
