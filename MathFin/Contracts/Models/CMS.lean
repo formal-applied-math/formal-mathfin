@@ -32,7 +32,7 @@ and to the annuity, as `BondModel` does for the forward rate of a caplet.
 ## What is not here
 
 The swap rate is tied to the bond prices by a hypothesis (`rate_eq`) and the bond prices by
-`bond_eq`; no term-structure model is asserted. Payments at `T₀` only: a CMS rate paid at a later
+`hasBondPrice`; no term-structure model is asserted. Payments at `T₀` only: a CMS rate paid at a later
 date `Tₚ` needs the change of measure to the `Tₚ`-forward measure.
 
 ## Main definitions
@@ -77,17 +77,17 @@ def swapCurve (X : ι → ℝ≥0 → Ω → ℝ) (b : ℕ → ι) (T₀ : ℝ�
 
 /-- **A model with a swap rate.** The underlying `b i` carries the bond price `P(T₀, Tᵢ)` at
 `T₀ = T 0`, for the payment dates `i = 1, …, n`: a (positive, measurable) version of `bondPrice`
-of the stochastic discount factor `D`, whose value at the fixing date is positive. The underlying
+of the stochastic discount factor `D` (`HasBondPrice`), whose value at the fixing date is positive
+and integrable. The underlying
 `σ` carries the par swap rate at `T₀`, which is the par rate `(1 − P(T₀, Tₙ))/A` of the annuity
 `A = δ Σᵢ P(T₀, Tᵢ)` (`parSwapRate`, `annuityRandom`) almost surely. -/
 structure SwapModel (Q : Measure Ω) (𝓕 : Filtration ℝ≥0 mΩ) (D : ℝ≥0 → Ω → ℝ)
     (X : ι → ℝ≥0 → Ω → ℝ) (σ : ι) (b : ℕ → ι) (T : ℕ → ℝ≥0) (n : ℕ) (δ : ℝ) : Prop where
   δ_pos : 0 < δ
   n_pos : 0 < n
-  D_pos : ∀ ω, 0 < D (T 0) ω
+  hasBondPrice : ∀ i ∈ Finset.Icc 1 n, HasBondPrice Q 𝓕 D X (b i) (T 0) (T i)
   D_meas : Measurable (D (T 0))
-  integrable_D : ∀ i ≤ n, Integrable (D (T i)) Q
-  bond_eq : ∀ i ∈ Finset.Icc 1 n, X (b i) (T 0) =ᵐ[Q] bondPrice Q 𝓕 D (T 0) (T i)
+  integrable_D0 : Integrable (D (T 0)) Q
   bond_pos : ∀ ω, ∀ i ∈ Finset.Icc 1 n, 0 < X (b i) (T 0) ω
   bond_meas : ∀ i ∈ Finset.Icc 1 n, Measurable (X (b i) (T 0))
   rate_eq : X σ (T 0) =ᵐ[Q] fun ω ↦ parSwapRate 1 (X (b n) (T 0) ω)
@@ -106,26 +106,15 @@ variable {Q : Measure Ω} [IsProbabilityMeasure Q] {𝓕 : Filtration ℝ≥0 m�
 /-! ### The tower property, for the curve -/
 
 omit [IsProbabilityMeasure Q] in
-/-- **A discounted bond price is the discount factor at the payment date, in expectation**:
-`D (T 0) · P(T₀, Tᵢ)` is a version of `𝔼[D (T i) | 𝓕 (T 0)]`. -/
-theorem SwapModel.discount_mul_bond_ae (h : SwapModel Q 𝓕 D X σ b T n δ) {i : ℕ}
-    (hi : i ∈ Finset.Icc 1 n) :
-    (fun ω ↦ D (T 0) ω * X (b i) (T 0) ω) =ᵐ[Q] Q[D (T i) | 𝓕 (T 0)] := by
-  filter_upwards [h.bond_eq i hi] with ω hω
-  rw [hω, bondPrice]
-  field_simp [(h.D_pos ω).ne']
+theorem SwapModel.D_pos (h : SwapModel Q 𝓕 D X σ b T n δ) (ω : Ω) : 0 < D (T 0) ω :=
+  (h.hasBondPrice 1 (Finset.mem_Icc.2 ⟨le_rfl, h.n_pos⟩)).D_pos ω
 
-omit [IsProbabilityMeasure Q] in
-theorem SwapModel.integrable_discount_mul_bond (h : SwapModel Q 𝓕 D X σ b T n δ) {i : ℕ}
-    (hi : i ∈ Finset.Icc 1 n) : Integrable (fun ω ↦ D (T 0) ω * X (b i) (T 0) ω) Q :=
-  (integrable_condExp (m := 𝓕 (T 0)) (f := D (T i))).congr (h.discount_mul_bond_ae hi).symm
-
-/-- **The tower property**: `𝔼[D (T 0) · P(T₀, Tᵢ)] = P(0, Tᵢ)`, the zero curve. -/
+/-- **The tower property**: `𝔼[D (T 0) · P(T₀, Tᵢ)] = P(0, Tᵢ)`, the zero curve
+(`HasBondPrice.integral_discount`). -/
 theorem SwapModel.integral_discount_mul_bond (h : SwapModel Q 𝓕 D X σ b T n δ) {i : ℕ}
     (hi : i ∈ Finset.Icc 1 n) :
-    ∫ ω, D (T 0) ω * X (b i) (T 0) ω ∂Q = zeroCurve Q D (T i) := by
-  rw [integral_congr_ae (h.discount_mul_bond_ae hi), integral_condExp (𝓕.le (T 0))]
-  rfl
+    ∫ ω, D (T 0) ω * X (b i) (T 0) ω ∂Q = zeroCurve Q D (T i) :=
+  (h.hasBondPrice i hi).integral_discount
 
 omit [IsProbabilityMeasure Q] in
 theorem SwapModel.annuity_pos (h : SwapModel Q 𝓕 D X σ b T n δ) (ω : Ω) :
@@ -142,7 +131,7 @@ omit [IsProbabilityMeasure Q] in
 theorem SwapModel.integrable_annuity_mul (h : SwapModel Q 𝓕 D X σ b T n δ) :
     Integrable (fun ω ↦ CMS.annuityRandom δ (swapCurve X b (T 0)) (Finset.Icc 1 n) ω
       * D (T 0) ω) Q := by
-  have := (integrable_finsetSum _ fun i hi ↦ h.integrable_discount_mul_bond hi).const_mul δ
+  have := (integrable_finsetSum _ fun i hi ↦ (h.hasBondPrice i hi).integrable_discount_mul).const_mul δ
   refine this.congr (ae_of_all _ fun ω ↦ ?_)
   simp only [CMS.annuityRandom, annuity, swapCurve]
   rw [mul_assoc, Finset.sum_mul]
@@ -159,7 +148,7 @@ theorem SwapModel.integral_annuity_mul (h : SwapModel Q 𝓕 D X σ b T n δ) :
     rw [mul_assoc, Finset.sum_mul]
     exact congrArg _ (Finset.sum_congr rfl fun i _ ↦ mul_comm _ _)
   simp_rw [e]
-  rw [integral_const_mul, integral_finsetSum _ fun i hi ↦ h.integrable_discount_mul_bond hi,
+  rw [integral_const_mul, integral_finsetSum _ fun i hi ↦ (h.hasBondPrice i hi).integrable_discount_mul,
     annuity]
   exact congrArg _ (Finset.sum_congr rfl fun i hi ↦ h.integral_discount_mul_bond hi)
 
@@ -254,8 +243,8 @@ theorem SwapModel.integral_swapRate (h : SwapModel Q 𝓕 D X σ b T n δ) :
     filter_upwards [h.rate_eq] with ω hω
     rw [hω, parSwapRate, div_mul_cancel₀ _ (h.annuity_pos ω).ne']
     ring
-  rw [integral_congr_ae e, integral_sub (h.integrable_D 0 (Nat.zero_le _))
-    (h.integrable_discount_mul_bond hn), h.integral_discount_mul_bond hn]
+  rw [integral_congr_ae e, integral_sub (h.integrable_D0)
+    ((h.hasBondPrice n hn).integrable_discount_mul), h.integral_discount_mul_bond hn]
   rfl
 
 /-! ### The convexity adjustment, for a rate paid at its fixing date -/

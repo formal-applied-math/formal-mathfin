@@ -46,7 +46,9 @@ cannot express, so it is an observed underlying tied to the bond prices by a mod
 
 ## Main results
 
-* `HasBondPrice.integral_discount_mul`, `valueDisc_caplet_eq_bondPut`, `valueDisc_cap`,
+* `integral_discount_mul_eq_forward` (pricing at the forward measure),
+  `HasBondPrice.integral_discount` and `HasBondPrice.integral_discount_mul` (the tower property),
+  `bond_mul_capletPayoff`, `valueDisc_caplet_eq_bondPut`, `valueDisc_cap`,
   `valueDisc_cap_eq_bondPuts`, `valueDisc_caplet_black76`, `BondModel.integral_libor_forward`,
   `valueDisc_caplet_black76_forwardRate`.
 -/
@@ -112,6 +114,43 @@ structure BondModel (Q : Measure Ω) (𝓕 : Filtration ℝ≥0 mΩ) (D : ℝ≥
 variable {Q : Measure Ω} [IsProbabilityMeasure Q] {𝓕 : Filtration ℝ≥0 mΩ} {D : ℝ≥0 → Ω → ℝ}
   {X : ι → ℝ≥0 → Ω → ℝ} {b ℓ : ι} {T₀ T₁ : ℝ≥0} {δ : ℝ}
 
+/-- **Pricing at the forward measure.** For a positive integrable discount factor `D₀`, its
+expectation is positive, and `𝔼[D₀ · Y] = 𝔼[D₀]·𝔼^{Q^{D₀}}[Y]` for the forward measure
+`forwardMeasure Q (1/D₀)`: the change of numéraire `forwardMeasure_price`, written for the
+discount factor instead of the bank account. -/
+theorem integral_discount_mul_eq_forward {D₀ : Ω → ℝ} (hD : ∀ ω, 0 < D₀ ω)
+    (hDm : Measurable D₀) (hDi : Integrable D₀ Q) (Y : Ω → ℝ) :
+    0 < ∫ ω, D₀ ω ∂Q ∧ (∫ ω, D₀ ω ∂Q) * ∫ ω, Y ω ∂(forwardMeasure Q fun ω ↦ 1 / D₀ ω)
+      = ∫ ω, D₀ ω * Y ω ∂Q := by
+  have hB : ∀ ω, 0 < 1 / D₀ ω := fun ω ↦ one_div_pos.2 (hD ω)
+  have e1 : ∫ ω, 1 / (1 / D₀ ω) ∂Q = ∫ ω, D₀ ω ∂Q := by simp
+  have hP0 := integral_one_div_pos (Q := Q) hB (by simpa using hDi)
+  rw [e1] at hP0
+  have key := forwardMeasure_price (Q := Q) (B := fun ω ↦ 1 / D₀ ω) Y
+    (measurable_const.div hDm) hB (by simpa using hP0)
+  rw [e1] at key
+  refine ⟨hP0, key.trans (integral_congr_ae <| ae_of_all _ fun ω ↦ ?_)⟩
+  field_simp [(hD ω).ne']
+
+omit [IsProbabilityMeasure Q] in
+/-- **A discounted bond price is the discount factor at the payment date, in expectation**:
+`D T₀ · P(T₀, T₁)` is a version of `𝔼[D T₁ | 𝓕 T₀]`. -/
+theorem HasBondPrice.discount_mul_ae (h : HasBondPrice Q 𝓕 D X b T₀ T₁) :
+    (fun ω ↦ D T₀ ω * X b T₀ ω) =ᵐ[Q] Q[D T₁ | 𝓕 T₀] := by
+  filter_upwards [h.bond_eq] with ω hω
+  rw [hω, bondPrice]
+  field_simp [(h.D_pos ω).ne']
+
+theorem HasBondPrice.integrable_discount_mul (h : HasBondPrice Q 𝓕 D X b T₀ T₁) :
+    Integrable (fun ω ↦ D T₀ ω * X b T₀ ω) Q :=
+  (integrable_condExp (m := 𝓕 T₀) (f := D T₁)).congr h.discount_mul_ae.symm
+
+/-- **The tower property**: `𝔼[D T₀ · P(T₀, T₁)] = P(0, T₁)`, the zero curve. -/
+theorem HasBondPrice.integral_discount (h : HasBondPrice Q 𝓕 D X b T₀ T₁) :
+    ∫ ω, D T₀ ω * X b T₀ ω ∂Q = zeroCurve Q D T₁ := by
+  rw [integral_congr_ae h.discount_mul_ae, integral_condExp (𝓕.le T₀)]
+  rfl
+
 /-- **The bond price turns `D T₁` into `D T₀`**: for an `𝓕 T₀`-measurable `Y`,
 `𝔼[D T₁ · Y] = 𝔼[D T₀ · P(T₀, T₁) · Y]`. -/
 theorem HasBondPrice.integral_discount_mul (h : HasBondPrice Q 𝓕 D X b T₀ T₁) {Y : Ω → ℝ}
@@ -120,16 +159,23 @@ theorem HasBondPrice.integral_discount_mul (h : HasBondPrice Q 𝓕 D X b T₀ T
   have hcond : Q[fun ω ↦ Y ω * D T₁ ω | 𝓕 T₀] =ᵐ[Q] fun ω ↦ Y ω * (Q[D T₁ | 𝓕 T₀]) ω :=
     condExp_mul_of_stronglyMeasurable_left hY
       (hDY.congr (ae_of_all _ fun ω ↦ mul_comm _ _)) h.integrable_D
-  have hP : ∀ᵐ ω ∂Q, D T₀ ω * X b T₀ ω = (Q[D T₁ | 𝓕 T₀]) ω := by
-    filter_upwards [h.bond_eq] with ω hω
-    rw [hω, bondPrice]
-    field_simp [(h.D_pos ω).ne']
   calc ∫ ω, D T₁ ω * Y ω ∂Q = ∫ ω, Y ω * D T₁ ω ∂Q := by simp_rw [mul_comm]
     _ = ∫ ω, (Q[fun ω ↦ Y ω * D T₁ ω | 𝓕 T₀]) ω ∂Q := (integral_condExp (𝓕.le T₀)).symm
     _ = ∫ ω, Y ω * (Q[D T₁ | 𝓕 T₀]) ω ∂Q := integral_congr_ae hcond
     _ = ∫ ω, D T₀ ω * X b T₀ ω * Y ω ∂Q := integral_congr_ae <| by
-        filter_upwards [hP] with ω hω
-        rw [← hω]; ring
+        filter_upwards [h.discount_mul_ae] with ω hω
+        rw [hω]; ring
+
+/-- **The caplet payoff, valued at its reset date, is a bond put**: when `δ L = 1/P - 1`,
+`P · δ (L - K)⁺ = (1 + δK) (1/(1 + δK) - P)⁺`. -/
+lemma bond_mul_capletPayoff {P δ K : ℝ} (hP : 0 < P) (hδ : 0 < δ) (hK : 0 < 1 + δ * K) :
+    P * (δ * max (fraForwardRate 1 P δ - K) 0) = (1 + δ * K) * max (1 / (1 + δ * K) - P) 0 := by
+  have h : P * (δ * (fraForwardRate 1 P δ - K)) = (1 + δ * K) * (1 / (1 + δ * K) - P) := by
+    unfold fraForwardRate
+    field_simp
+    ring
+  rw [mul_max_of_nonneg _ _ hδ.le, mul_max_of_nonneg _ _ hP.le, mul_max_of_nonneg _ _ hK.le]
+  simpa using congrArg (max · 0) h
 
 /-- **A caplet is a multiple of a put on the bond** (the caplet–bond-put identity). In a model with
 bond prices, the caplet paying `δ (L(T₀, T₁) − K)⁺` at `T₁` is worth `(1 + δK)` puts on
@@ -148,21 +194,8 @@ theorem valueDisc_caplet_eq_bondPut (h : BondModel Q 𝓕 D X b ℓ T₀ T₁ δ
   rw [h.integral_discount_mul hY hint, ← integral_const_mul]
   refine integral_congr_ae ?_
   filter_upwards [h.libor_eq, h.bond_pos] with ω hL hP
-  have hδ := h.δ_pos
-  rw [hL, fraForwardRate]
-  have hc : (1 + δ * K) * (1 / (1 + δ * K) - X b T₀ ω)
-      = X b T₀ ω * (δ * ((1 / X b T₀ ω - 1) / δ - K)) := by
-    field_simp [hP.ne', hδ.ne', hK.ne']
-    ring
-  have e : X b T₀ ω * (δ * max ((1 / X b T₀ ω - 1) / δ - K) 0)
-      = (1 + δ * K) * max (1 / (1 + δ * K) - X b T₀ ω) 0 := by
-    rw [mul_max_of_nonneg _ _ hδ.le, mul_max_of_nonneg _ _ hP.le,
-      mul_max_of_nonneg _ _ hK.le]
-    simp only [mul_zero]
-    rw [hc]
-  calc D T₀ ω * X b T₀ ω * (δ * max ((1 / X b T₀ ω - 1) / δ - K) 0)
-      = D T₀ ω * (X b T₀ ω * (δ * max ((1 / X b T₀ ω - 1) / δ - K) 0)) := by ring
-    _ = _ := by rw [e]; ring
+  rw [hL, mul_assoc, bond_mul_capletPayoff hP h.δ_pos hK]
+  ring
 
 /-! ### Caps, and the Black-76 caplet -/
 
@@ -204,14 +237,8 @@ theorem valueDisc_caplet_black76 {Q' : Measure Ω} [IsProbabilityMeasure Q']
     (hL : X ℓ T₀ =ᵐ[Q'] fun ω ↦ bsTerminal F 0 σ T (Z ω)) :
     (caplet ℓ T₀ T₁ δ K).valueDisc Q D X = zeroCurve Q D T₁ * blackCaplet F K σ T δ := by
   subst hQ'
-  have hB : ∀ ω, 0 < 1 / D T₁ ω := fun ω ↦ one_div_pos.2 (hD ω)
-  have hP0 := integral_one_div_pos (Q := Q) hB (by simpa using hDi)
-  have key := forwardMeasure_price (Q := Q) (B := fun ω ↦ 1 / D T₁ ω)
-    (fun ω ↦ δ * max (X ℓ T₀ ω - K) 0) (measurable_const.div hDm) hB hP0
-  have e1 : ∫ ω, 1 / (1 / D T₁ ω) ∂Q = zeroCurve Q D T₁ := by simp [zeroCurve]
-  have e2 : ∫ ω, δ * max (X ℓ T₀ ω - K) 0 / (1 / D T₁ ω) ∂Q
-      = ∫ ω, D T₁ ω * (δ * max (X ℓ T₀ ω - K) 0) ∂Q :=
-    integral_congr_ae <| ae_of_all _ fun ω ↦ by field_simp [(hD ω).ne']
+  obtain ⟨-, key⟩ := integral_discount_mul_eq_forward hD hDm hDi
+    (fun ω ↦ δ * max (X ℓ T₀ ω - K) 0)
   have e3 : ∫ ω, δ * max (X ℓ T₀ ω - K) 0 ∂forwardMeasure Q (fun ω ↦ 1 / D T₁ ω)
       = δ * (F * Phi (bsd1 F K 0 σ T) - K * Phi (bsd2 F K 0 σ T)) := by
     rw [← show ∫ ω, max (bsTerminal F 0 σ T (Z ω) - K) 0 ∂forwardMeasure Q (fun ω ↦ 1 / D T₁ ω)
@@ -219,7 +246,8 @@ theorem valueDisc_caplet_black76 {Q' : Measure Ω} [IsProbabilityMeasure Q']
       simpa using black_futures_formula hZ 0, ← integral_const_mul]
     exact integral_congr_ae (hL.mono fun ω hω ↦ by simp only [hω])
   simp only [caplet, Contract.valueDisc_pay, capletPayoff, Payoff.eval, scenarioAt, blackCaplet]
-  rw [← e2, ← key, e1, e3]
+  rw [← key, e3]
+  rfl
 
 /-- **The forward rate has the forward rate of the zero curve as its mean at its own forward
 measure**: `𝔼^{T₁}[L(T₀, T₁)] = (P(0, T₀)/P(0, T₁) − 1)/δ` (`fraForwardRate`). -/
@@ -230,32 +258,20 @@ theorem BondModel.integral_libor_forward (h : BondModel Q 𝓕 D X b ℓ T₀ T�
     ∫ ω, X ℓ T₀ ω ∂Q' = fraForwardRate (zeroCurve Q D T₀) (zeroCurve Q D T₁) δ := by
   subst hQ'
   have hδ := h.δ_pos
-  have hB : ∀ ω, 0 < 1 / D T₁ ω := fun ω ↦ one_div_pos.2 (hD ω)
-  have hP0 := integral_one_div_pos (Q := Q) hB (by simpa using h.integrable_D)
-  have e1 : ∫ ω, 1 / (1 / D T₁ ω) ∂Q = zeroCurve Q D T₁ := by simp [zeroCurve]
-  rw [e1] at hP0
-  have key := forwardMeasure_price (Q := Q) (B := fun ω ↦ 1 / D T₁ ω) (X ℓ T₀)
-    (measurable_const.div hDm) hB (by simpa [zeroCurve] using hP0)
-  have e2 : ∫ ω, X ℓ T₀ ω / (1 / D T₁ ω) ∂Q = ∫ ω, D T₁ ω * X ℓ T₀ ω ∂Q :=
-    integral_congr_ae <| ae_of_all _ fun ω ↦ by field_simp [(hD ω).ne']
-  have hDP : Integrable (fun ω ↦ D T₀ ω * X b T₀ ω) Q := by
-    refine (integrable_condExp (m := 𝓕 T₀) (f := D T₁)).congr ?_
-    filter_upwards [h.bond_eq] with ω hω
-    rw [hω, bondPrice]
-    field_simp [(h.D_pos ω).ne']
+  obtain ⟨hpos, key⟩ := integral_discount_mul_eq_forward hD hDm h.integrable_D (X ℓ T₀)
   have e3 : ∫ ω, D T₁ ω * X ℓ T₀ ω ∂Q = (zeroCurve Q D T₀ - zeroCurve Q D T₁) / δ := by
     rw [h.integral_discount_mul h.libor_meas hint]
-    have e5 : ∫ ω, D T₁ ω ∂Q = ∫ ω, D T₀ ω * X b T₀ ω ∂Q := by
-      simpa using h.integral_discount_mul (Y := fun _ ↦ 1) stronglyMeasurable_const
-        (by simpa using h.integrable_D)
-    rw [zeroCurve, zeroCurve, e5, ← integral_sub hD0 hDP, ← integral_div]
+    rw [← h.integral_discount, zeroCurve, ← integral_sub hD0 h.integrable_discount_mul,
+      ← integral_div]
     refine integral_congr_ae ?_
     filter_upwards [h.libor_eq, h.bond_pos] with ω hL hP
     rw [hL, fraForwardRate]
     field_simp [hP.ne', hδ.ne']
-  rw [e1, e2, e3] at key
+  rw [e3] at key
+  have hz : zeroCurve Q D T₁ = ∫ ω, D T₁ ω ∂Q := rfl
+  rw [hz] at key ⊢
   rw [fraForwardRate]
-  field_simp [hP0.ne', hδ.ne'] at key ⊢
+  field_simp [hpos.ne', hδ.ne'] at key ⊢
   linear_combination key
 
 /-- **The Black-76 caplet formula, at the forward rate of the zero curve.** Under the hypotheses
