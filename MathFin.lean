@@ -180,6 +180,7 @@ import MathFin.Foundations.ItoIntegralL2
 -- 𝓕ᴮ_T is the countable supremum of dyadic cylinder σ-algebras (path continuity)
 import MathFin.Foundations.BrownianCylinderGeneration
 -- The Itô integral as a continuous linear isometry `Lp 2 trim_T → Lp 2 μ` on `[0,T]`
+import MathFin.Foundations.ItoIntegralHorizonDense
 import MathFin.Foundations.ItoIntegralCLM
 import MathFin.Foundations.LpMulIsometry
 import MathFin.Foundations.PredictableDensityGeneral

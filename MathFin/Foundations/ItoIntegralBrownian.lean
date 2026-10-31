@@ -258,9 +258,7 @@ lemma itoIntegralCLM_T_stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 �
     itoIntegralCLM_T hB T hBmeas
         (simpleAssembly_T (μ := μ) T hBmeas (stepσ hBmeas hadap hbdd T n))
       = (memLp_riemannσ hB hBmeas hadap hbdd T n).toLp (riemannσ (B := B) θ T n) := by
-  rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange T hBmeas)
-        ⟨1, fun V ↦ by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas V).le⟩]
-  change itoSimpleLp hB hBmeas (stepσ hBmeas hadap hbdd T n).val = _
+  rw [itoIntegralCLM_T_simpleAssembly_T]
   rw [itoSimpleLp]
   exact (MemLp.toLp_eq_toLp_iff _ _).mpr
     (Filter.Eventually.of_forall fun ω ↦ itoSimple_stepσ hBmeas hadap hbdd T n ω)

@@ -29,7 +29,7 @@ path-continuous `δ` in the process form:
 * `itoIntegralCLM_cross_horizon` — **the consistency kernel**: an integrand carried by
   `(0,τ] × Ω` integrates to the *same* `L²` random variable at horizon `τ` and at
   horizon `T ≥ τ`. Both are the infinite-horizon integral of the integrand extended by zero
-  (`itoIntegralCLM_T_eq_itoIntegralL2_bandExtend`), and the two extensions by zero are the same
+  (`itoIntegralCLM_T_apply`), and the two extensions by zero are the same
   class of the same function (`bandExtend_toLp_ae_eq`);
 * `itoProcessCLM_consist` — the process form: for `t ≤ τ ≤ T` the T-horizon CLM
   process of `processToLp δ` at `t` and the τ-horizon one agree (band-truncate the integrand
@@ -139,7 +139,7 @@ theorem itoProcessCLM_eq_terminal_of_ge (hB : IsPreBrownianReal B μ)
 integrates to the *same* `L²` random variable at horizon `τ` and at horizon `T ≥ τ`.
 
 Both are the infinite-horizon integral `itoIntegralL2` of the integrand extended by zero
-(`itoIntegralCLM_T_eq_itoIntegralL2_bandExtend`), and the two extensions by zero are the same
+(`itoIntegralCLM_T_apply`), and the two extensions by zero are the same
 class of the same function (`bandExtend_toLp_ae_eq`). -/
 theorem itoIntegralCLM_cross_horizon (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {τ T : ℝ≥0} (hτT : τ ≤ T)
@@ -147,11 +147,10 @@ theorem itoIntegralCLM_cross_horizon (hB : IsPreBrownianReal B μ)
     (hgmτ : MemLp g 2 (trimMeasure_T (μ := μ) τ hBmeas))
     (hgmT : MemLp g 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     itoIntegralCLM_T hB τ hBmeas (hgmτ.toLp g) = itoIntegralCLM_T hB T hBmeas (hgmT.toLp g) := by
-  rw [ItoIntegralProcessL2Infinite.itoIntegralCLM_T_eq_itoIntegralL2_bandExtend,
-    ItoIntegralProcessL2Infinite.itoIntegralCLM_T_eq_itoIntegralL2_bandExtend]
+  rw [itoIntegralCLM_T_apply, itoIntegralCLM_T_apply]
   congr 1
-  exact Lp.ext ((ItoIntegralProcessL2Infinite.bandExtend_toLp_ae_eq τ hBmeas hg0 hgmτ).trans
-    (ItoIntegralProcessL2Infinite.bandExtend_toLp_ae_eq T hBmeas
+  exact Lp.ext ((bandExtend_toLp_ae_eq τ hBmeas hg0 hgmτ).trans
+    (bandExtend_toLp_ae_eq T hBmeas
       (fun z hz ↦ hg0 z (hτT.trans_lt hz)) hgmT).symm)
 
 /-- **Cross-horizon consistency of the CLM process**: for the σ-realization `processToLp δ`
