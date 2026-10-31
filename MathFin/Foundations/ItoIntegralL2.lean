@@ -64,6 +64,11 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 noncomputable def natFiltration (hBmeas : ∀ t, Measurable (B t)) : Filtration ℝ≥0 mΩ :=
   Filtration.natural B (fun t ↦ (hBmeas t).stronglyMeasurable)
 
+/-- `B` is adapted to its own natural filtration (Mathlib's `Filtration.stronglyAdapted_natural`). -/
+theorem stronglyAdapted_natFiltration (hBmeas : ∀ t, Measurable (B t)) :
+    StronglyAdapted (natFiltration hBmeas) B :=
+  Filtration.stronglyAdapted_natural _
+
 /-- The **elementary Itô integral** of a simple process `V` against Brownian motion
 `B`, evaluated at the terminal time: `(V ● B)_⊤ = ∑ₚ V(p)·(B_{p.2} − B_{p.1})`,
 the increment sum with nothing truncated.

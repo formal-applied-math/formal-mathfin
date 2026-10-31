@@ -123,19 +123,11 @@ lemma itoSimple_stepSP {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t)) {a b : �
 
 /-! ### Adaptedness of `B` to its own filtration -/
 
-/-- `B s` is measurable with respect to the natural filtration at `s`: the
-natural filtration at `s` is `⨆ j ≤ s, comap (B j)`, which contains `comap (B s)`. -/
-lemma measurable_eval_natFiltration (hBmeas : ∀ t, Measurable (B t)) (s : ℝ≥0) :
-    Measurable[natFiltration hBmeas s] (B s) := by
-  have hle : MeasurableSpace.comap (B s) inferInstance ≤ natFiltration hBmeas s :=
-    le_iSup₂ (f := fun j (_ : j ≤ s) ↦ MeasurableSpace.comap (B j) inferInstance) s le_rfl
-  exact (measurable_iff_comap_le.mpr le_rfl).mono hle le_rfl
-
 /-- `φ(B_t)` is `𝓕_t`-strongly measurable for measurable `φ`. -/
 lemma stronglyMeasurable_comp_eval (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ}
     (hφ : Measurable φ) (t : ℝ≥0) :
     StronglyMeasurable[natFiltration hBmeas t] (fun ω ↦ φ (B t ω)) :=
-  (hφ.comp (measurable_eval_natFiltration hBmeas t)).stronglyMeasurable
+  (hφ.comp (stronglyAdapted_natFiltration hBmeas t).measurable).stronglyMeasurable
 
 /-- The clamped path is adapted: `clamp_m(B_t)` is `𝓕_t`-strongly measurable. -/
 lemma stronglyMeasurable_clampPath (hBmeas : ∀ t, Measurable (B t)) (m : ℕ) (t : ℝ≥0) :
@@ -249,7 +241,7 @@ lemma memLp_riemannσ_brownian (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) 
   unfold riemannσ
   refine memLp_finsetSum _ fun k _ ↦ ?_
   exact ItoIsometryAdapted.memLp_adapted_mul_increment (hB.isFilteredPreBrownian hBmeas)
-    (unifPart_mono T n (Nat.le_succ k)) (measurable_eval_natFiltration hBmeas _)
+    (unifPart_mono T n (Nat.le_succ k)) (stronglyAdapted_natFiltration hBmeas _).measurable
     (memLp_eval hB (unifPart T n k))
 
 omit [IsProbabilityMeasure μ] in
@@ -287,8 +279,8 @@ lemma integral_truncRiemann_sub_sq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ�
               * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2)
       from funext fun ω ↦ congrArg (· ^ 2) (riemannσ_sub (B := B) (clampPath B m) B T n ω)]
   refine ito_isometry_discrete (hB.isFilteredPreBrownian hBmeas) (unifPart_mono T n)
-    (fun k ↦ ((measurable_clampM _).comp (measurable_eval_natFiltration hBmeas _)).sub
-      (measurable_eval_natFiltration hBmeas _))
+    (fun k ↦ ((measurable_clampM _).comp (stronglyAdapted_natFiltration hBmeas _).measurable).sub
+      (stronglyAdapted_natFiltration hBmeas _).measurable)
     (fun k ↦ MemLp.sub ?_ (memLp_eval hB (unifPart T n k)))
   exact MemLp.of_bound ((measurable_clampM (m : ℝ)).comp (hBmeas _)).aestronglyMeasurable (m : ℝ)
     (ae_of_all _ fun ω ↦ by rw [Real.norm_eq_abs]; exact clampM_abs_le (Nat.cast_nonneg m) _)

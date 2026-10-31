@@ -35,11 +35,11 @@ derivative plus half the second space derivative. -/
 noncomputable def planeGenerator (G : ℝ × ℝ → ℝ) (z : ℝ × ℝ) : ℝ :=
   planePartial G (1,0) z + (1/2)*planePartial (planePartial G (0,1)) (0,1) z
 
-theorem planeGenerator_eq_partials {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) (t w : ℝ) :
+theorem planeGenerator_eq_partials {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G) (t w : ℝ) :
     planeGenerator G (t,w) = deriv (fun s => G (s,w)) t +
       (1/2)*deriv (deriv (fun y => G (t,y))) w := by
   have hd : Differentiable ℝ G := hG.differentiable (by norm_num)
-  have hx : ContDiff ℝ 2 (planePartial G (0,1)) := planePartial_contDiff hG _
+  have hx : ContDiff ℝ 1 (planePartial G (0,1)) := planePartial_contDiff hG _
   have he : (fun y => planePartial G (0,1) (t,y)) = deriv (fun y => G (t,y)) := by
     funext y
     exact (planePartial_hasDeriv_space (hd (t,y))).deriv.symm
