@@ -230,9 +230,9 @@
     "gir-bs-emm-horizon": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-10-31",
-      "elapsed_s": 4.5,
-      "input_hash": "fd4cbdabab71a6b8b06ce505e0a2ed203131697e2fb533e0a29920278d61b900",
-      "verified_at_commit": "c0f5874"
+      "elapsed_s": 19.6,
+      "input_hash": "3463e904f0852d31900858bd52e9e4bc2812e428989e853abf079e0b34302b7f",
+      "verified_at_commit": "a9ef49b"
     },
     "gir-change-of-measure-engine": {
       "benchmark_file": "girsanov_finance.json",
@@ -300,9 +300,9 @@
     "gir-martingale-reindex": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-10-31",
-      "elapsed_s": 3.8,
-      "input_hash": "308f35eceea857c43997502b7720c11d916924b810b07f6b19ab495dbf1d10bd",
-      "verified_at_commit": "c0f5874"
+      "elapsed_s": 17.1,
+      "input_hash": "acbaac8d018f5100d1d36f4989e3725400b2b9dd9d3e83ee7dbbfa04397ed8df",
+      "verified_at_commit": "a9ef49b"
     },
     "gir-mrt-range-surjective": {
       "benchmark_file": "girsanov_finance.json",
