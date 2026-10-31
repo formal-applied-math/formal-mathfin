@@ -34,13 +34,13 @@ theorem brownianClassicalCandidate_supermartingale {K r q σ S : ℝ}
         gaussianLimit := by
   let U := classicalCandidate brownian K r q σ S p T
   have hadapt : StronglyAdapted brownianFiltration U :=
-    fun t => (classicalCandidate_adapted hp brownian_adapted T t).stronglyMeasurable
+    fun t => (classicalCandidate_adapted hp.toPutEnvelope brownian_adapted T t).stronglyMeasurable
   have hint (t : ℝ≥0) : Integrable (U t) gaussianLimit := by
     apply (integrable_const K).mono'
       ((hadapt t).mono (brownianFiltration.le t)).aestronglyMeasurable
     apply Eventually.of_forall
     intro ω
-    obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp brownian hK hr T t ω
+    obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp.toPutEnvelope brownian hK hr T t ω
     simpa only [U,Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
   refine ⟨hadapt,?_,hint⟩
   intro i j hij
