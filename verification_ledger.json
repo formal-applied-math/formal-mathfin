@@ -1718,6 +1718,27 @@
       "input_hash": "81269fbd3a1942e6858b808828249d918fe6914b9dd2aec04045254a1a9a31ff",
       "verified_at_commit": "35c996d"
     },
+    "mf-contract-cap-bond-puts": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-31",
+      "elapsed_s": 6.1,
+      "input_hash": "40420952a56b53c89adf05cecf94a7b6d6386da86549a4672559548e2f0a6e47",
+      "verified_at_commit": "d91c472"
+    },
+    "mf-contract-caplet-black76": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-31",
+      "elapsed_s": 4.4,
+      "input_hash": "d2ac973e638b98b42f7f4f7e1a63ba4fe59122c51039f912a5a0443a63557046",
+      "verified_at_commit": "d91c472"
+    },
+    "mf-contract-caplet-bond-put": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-10-31",
+      "elapsed_s": 5.3,
+      "input_hash": "7cb911a65f37fd844b7ea33e06e3c977c60bcad3a9c7ebfeb190dee17a312de6",
+      "verified_at_commit": "d91c472"
+    },
     "mf-contract-capped-call": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
@@ -1749,16 +1770,16 @@
     "mf-contract-coupon-bond-gsr": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 5.2,
-      "input_hash": "d15eddb1b4e1ebb885665e5f21014035de52641f372a0395ad18ea3f80c2b83c",
-      "verified_at_commit": "4ed0a46"
+      "elapsed_s": 4.6,
+      "input_hash": "71b4760e9d483b48049813b744ac60b0b2fd1a9cf9b023c4c9f66c199019db6f",
+      "verified_at_commit": "d91c472"
     },
     "mf-contract-coupon-bond-hull-white": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 5.7,
-      "input_hash": "161ec8ddb2786f77434eb3e9626d5dfa330965857d3385a898c934c57459672e",
-      "verified_at_commit": "4ed0a46"
+      "elapsed_s": 6.4,
+      "input_hash": "5bb271b6115846ed8ca95a920f9743bacb680570300256127f746fb650bee8d8",
+      "verified_at_commit": "d91c472"
     },
     "mf-contract-coupon-bond-vasicek": {
       "benchmark_file": "contracts.json",
@@ -1812,9 +1833,9 @@
     "mf-contract-fixed-flows-zero-curve": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 5.2,
-      "input_hash": "bfc09d545de06dc778a95ea893bfbf793a3d84fefd16e31240c99e1a25df9abd",
-      "verified_at_commit": "4ed0a46"
+      "elapsed_s": 5.5,
+      "input_hash": "bece118cb1ef4afe887a3da26ae1f4550cfde02bc5c2ba4c17cbe36447494836",
+      "verified_at_commit": "d91c472"
     },
     "mf-contract-forward-risk-neutral": {
       "benchmark_file": "contracts.json",
@@ -2176,9 +2197,9 @@
     "mf-forward-measure-spot": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-31",
-      "elapsed_s": 5.7,
-      "input_hash": "167f2c3adefaecf439cd7bfff26a8aeae89feece470c865c88f7a82710ab67dc",
-      "verified_at_commit": "a7f7498"
+      "elapsed_s": 5.5,
+      "input_hash": "da8b3c2985d9f48218a04dd3a11fc15b2479df13d5a1dd7c613254f033e701d9",
+      "verified_at_commit": "d91c472"
     },
     "mf-forward-price": {
       "benchmark_file": "black_scholes.json",
@@ -2519,16 +2540,16 @@
     "mf-hull-white-forward-measure-short-rate": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-31",
-      "elapsed_s": 5.5,
-      "input_hash": "109bc57bb8e05877b7e4461ebc296c1ae6d5b486b48b396adbd51f7e62a5d1c6",
-      "verified_at_commit": "a7f7498"
+      "elapsed_s": 5.7,
+      "input_hash": "d62433b5d8948240a24dfdafca4013a6194739650cea3b3acc5dcca024e4cb30",
+      "verified_at_commit": "d91c472"
     },
     "mf-hull-white-futures-forward-gap": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-31",
-      "elapsed_s": 5.2,
-      "input_hash": "31d259190959f79bcb5d44eec1addaa77cd1adb25218f9f791ea3fd2816cdf97",
-      "verified_at_commit": "a7f7498"
+      "elapsed_s": 4.9,
+      "input_hash": "85587aee725b2dc0754b0b410e1e377c6532dd62aa872beb747ebcf4b96f35bf",
+      "verified_at_commit": "d91c472"
     },
     "mf-hull-white-reprices-curve": {
       "benchmark_file": "interest_rates.json",
@@ -2568,9 +2589,9 @@
     "mf-inflation-hw-reconstitution-normaliser": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-10-31",
-      "elapsed_s": 5.8,
-      "input_hash": "48c5fd9b6e7099b106e9dbdf84952694849266215ea3c010879cf8ac750c7cab",
-      "verified_at_commit": "a7f7498"
+      "elapsed_s": 4.5,
+      "input_hash": "7519d7f8d38630dd637b5b8741caaf1a3f2c4e29c385c95bfabf86b9715574f1",
+      "verified_at_commit": "d91c472"
     },
     "mf-information-ratio-scale-invariant": {
       "benchmark_file": "portfolio_and_performance.json",
