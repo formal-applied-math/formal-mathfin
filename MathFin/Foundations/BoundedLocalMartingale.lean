@@ -97,6 +97,45 @@ theorem bounded_localMartingale_is_martingale (hX : IsLocalMartingale X 𝓕 P)
   locally_bounded_localMartingale_is_martingale hX hadapt
     (fun _ => ⟨C,fun t _ ω => hbound t ω⟩)
 
+/-- **A continuous adapted local martingale stopped at a positive stopping time where it is
+locally bounded is a martingale.** Stopping a local martingale keeps it a local martingale
+(`IsStable.locally`); at a positive `ρ` the stopping indicator is inert
+(`stoppedProcess_indicator_eq`), so this is `locally_bounded_localMartingale_is_martingale`. -/
+theorem martingale_stoppedProcess_of_locally_bounded {ρ : Ω → WithTop ℝ≥0}
+    (hX : IsLocalMartingale X 𝓕 P) (hXad : StronglyAdapted 𝓕 X)
+    (hXc : ∀ ω, Continuous fun t ↦ X t ω) (hρ : IsStoppingTime 𝓕 ρ) (hpos : ∀ ω, ⊥ < ρ ω)
+    (hbound : ∀ T : ℝ≥0, ∃ C : ℝ, ∀ t, t ≤ T → ∀ ω, ‖stoppedProcess X ρ t ω‖ ≤ C) :
+    Martingale (stoppedProcess X ρ) 𝓕 P := by
+  have hloc := (isStable_martingale (𝓕 := 𝓕) (P := P)).locally X hX _ hρ
+  rw [stoppedProcess_indicator_eq hpos] at hloc
+  have had := hXad.stoppedProcess_indicator (fun ω ↦ (hXc ω).isCadlag.right_continuous) hρ
+  rw [stoppedProcess_indicator_eq hpos] at had
+  exact locally_bounded_localMartingale_is_martingale hloc had hbound
+
+omit [IsFiniteMeasure P] in
+/-- **A continuous local martingale is, along its localising sequence, a continuous martingale.**
+For `σ` the localising sequence of `X`, each `N` has a continuous martingale `Y` (`X` stopped at
+`σ N`, zeroed where `σ N = 0`) with `X t = Y t` almost surely on `{t ≤ σ N}`. The zeroing is
+invisible because `X 0 = 0` almost surely. -/
+theorem exists_martingale_eqOn (hX : IsLocalMartingale X 𝓕 P)
+    (hXc : ∀ ω, Continuous fun t ↦ X t ω) (hX0 : ∀ᵐ ω ∂P, X 0 ω = 0) :
+    ∃ σ : ℕ → Ω → WithTop ℝ≥0, IsLocalizingSequence 𝓕 σ P ∧ ∀ N, ∃ Y : ℝ≥0 → Ω → ℝ,
+      Martingale Y 𝓕 P ∧ (∀ ω, Continuous fun t ↦ Y t ω) ∧
+        ∀ t : ℝ≥0, ∀ᵐ ω ∂P, (t : WithTop ℝ≥0) ≤ σ N ω → X t ω = Y t ω := by
+  obtain ⟨σ, hσ, hloc⟩ := hX
+  refine ⟨σ, hσ, fun N ↦ ⟨_, (hloc N).1, fun ω ↦ ?_, fun t ↦ hX0.mono fun ω h0 hle ↦ ?_⟩⟩
+  · by_cases hpos : ⊥ < σ N ω
+    · simp only [stoppedProcess, Set.indicator_of_mem (show ω ∈ {ω | ⊥ < σ N ω} from hpos)]
+      exact (hXc ω).comp (continuous_untopA_min _)
+    · simp only [stoppedProcess, Set.indicator_of_notMem (show ω ∉ {ω | ⊥ < σ N ω} from hpos)]
+      exact continuous_const
+  · by_cases hpos : ⊥ < σ N ω
+    · rw [stoppedProcess_eq_of_le hle, Set.indicator_of_mem (show ω ∈ {ω | ⊥ < σ N ω} from hpos)]
+    · obtain rfl : t = 0 := le_antisymm (WithTop.coe_le_coe.1 (hle.trans (not_lt.1 hpos))) zero_le
+      rw [h0]
+      simp only [stoppedProcess]
+      rw [Set.indicator_of_notMem (show ω ∉ {ω | ⊥ < σ N ω} from hpos)]
+
 omit [IsFiniteMeasure P] in
 /-- **A process indistinguishable from a local martingale is one**, provided it is adapted with
 cadlag paths: the stopped processes are almost surely equal at each time, hence have the same
