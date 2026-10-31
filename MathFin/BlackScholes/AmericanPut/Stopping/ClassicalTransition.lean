@@ -125,11 +125,7 @@ theorem brownianClassicalCandidate_supermartingale {K r q σ S : ℝ} {p : ℝ �
   have hint (t : ℝ≥0) : Integrable (U t) gaussianLimit := by
     apply (integrable_const K).mono'
       ((hadapt t).mono (brownianFiltration.le t)).aestronglyMeasurable
-    apply Eventually.of_forall
-    intro ω
-    obtain ⟨hlo,hhi⟩ :=
-      classicalCandidate_bounds (q := q) (σ := σ) (S := S) hE brownian hK hr T t ω
-    simpa only [U,Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
+    exact Eventually.of_forall (classicalCandidate_norm_le hE brownian hK hr T t)
   refine ⟨hadapt,?_,hint⟩
   intro i j hij
   change gaussianLimit[U j | brownianFiltration i] ≤ᵐ[gaussianLimit] U i

@@ -77,9 +77,8 @@ theorem brownianClassicalCandidate_usual_supermartingale {K r q σ S : ℝ}
     (hK : 0 ≤ K) (hr : 0 ≤ r) (hσ : 0 < σ) (T : ℝ≥0) :
     Supermartingale (classicalCandidate brownian K r q σ S p T)
       brownianUsualFiltration (completedMeasure gaussianLimit) := by
-  have hb (t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ‖classicalCandidate brownian K r q σ S p T t ω‖ ≤ K := by
-    obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp.toPutEnvelope brownian hK hr T t ω
-    simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
+  have hb (t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ‖classicalCandidate brownian K r q σ S p T t ω‖ ≤ K :=
+    classicalCandidate_norm_le hp.toPutEnvelope brownian hK hr T t ω
   have hu := bounded_supermartingale_completion gaussianLimit
     (brownianClassicalCandidate_supermartingale hp.toPutEnvelope hp.putWaiting hK hr hσ T) hb
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
@@ -91,13 +90,11 @@ theorem brownianUsualAmericanPut_eq_raw {K r q σ S : ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 < K) (hr : 0 ≤ r) (hσ : 0 < σ) (hS : 0 < S) (T : ℝ≥0) :
     brownianUsualAmericanPut K r q σ S T = brownianAmericanPut K r q σ S T := by
-  have hb (t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ‖classicalCandidate brownian K r q σ S p T t ω‖ ≤ K := by
-    obtain ⟨hlo,hhi⟩ :=
-        classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp.toPutEnvelope brownian hK.le hr T t ω
-    simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
+  have hb (t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ‖classicalCandidate brownian K r q σ S p T t ω‖ ≤ K :=
+    classicalCandidate_norm_le hp.toPutEnvelope brownian hK.le hr T t ω
   have hU0 : StronglyMeasurable (classicalCandidate brownian K r q σ S p T 0) :=
-    ((classicalCandidate_adapted hp.toPutEnvelope brownian_adapted T 0).mono (brownianFiltration.le 0)
-        le_rfl).stronglyMeasurable
+    ((classicalCandidate_adapted hp.toPutEnvelope brownian_adapted T 0).mono
+      (brownianFiltration.le 0) le_rfl).stronglyMeasurable
   have hI0 := integral_completion_original gaussianLimit hU0
   have hinitial :=
       classicalCandidate_initial isBrownianReal_brownian.eval_zero_ae_eq_zero K r q σ S p T

@@ -55,7 +55,8 @@ theorem linearPriceEvolution_le_classical_of_continuous
 
 /-- A classical solution waits: its price dominates its own Gaussian evolution, by the parabolic
 comparison with the continuous minorants of `fun y ↦ p y a`. -/
-theorem _root_.MathFin.BlackScholes.AmericanPut.Boundary.DividendPutSolution.putWaiting {k h : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
+theorem _root_.MathFin.BlackScholes.AmericanPut.Boundary.DividendPutSolution.putWaiting
+    {k h : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     (hp : DividendPutSolution k h p b) : PutWaiting k h p where
   evolution_le {a t} ha hat x := by
     have hf : Continuous (fun y => p y a) := hp.price_continuous.comp_continuous

@@ -60,11 +60,9 @@ theorem canonicalDiscountedPrice_dominates {k h : ℝ} (hk : 0 ≤ k) (x : ℝ)
     (Real.exp_pos x) T t ω)
 
 theorem canonicalDiscountedPrice_bound {k h : ℝ} (hk : 0 ≤ k) (x : ℝ)
-    (T t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ‖canonicalDiscountedPrice k h x T t ω‖ ≤ 1 := by
-  obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := h) (σ := Real.sqrt 2) (S := Real.exp x)
+    (T t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ‖canonicalDiscountedPrice k h x T t ω‖ ≤ 1 :=
+  classicalCandidate_norm_le (q := h) (σ := Real.sqrt 2) (S := Real.exp x)
     (canonicalPrice_putEnvelope hk) brownian zero_le_one hk T t ω
-  rw [Real.norm_eq_abs,abs_of_nonneg hlo]
-  exact hhi
 
 theorem canonicalDiscountedPrice_continuous {k h : ℝ} (hk : 0 ≤ k) (x : ℝ)
     (T : ℝ≥0) (ω : ℝ≥0 → ℝ) : Continuous (fun t => canonicalDiscountedPrice k h x T t ω) :=

@@ -20,8 +20,9 @@ Optimality and the dynamic programming principle are not assumed.
 
 ## Result
 
-Public entry points include `classicalLogSpot_canonical`, `normalizedRate_sqrt_two`, `canonicalContactRule`,
-`canonicalContactRule_price_eq`, `canonicalContactRule_continuation_before`.
+Public entry points include `classicalLogSpot_canonical`, `normalizedRate_sqrt_two`,
+`canonicalContactRule`, `canonicalContactRule_price_eq`,
+`canonicalContactRule_continuation_before`.
 -/
 
 @[expose] public section

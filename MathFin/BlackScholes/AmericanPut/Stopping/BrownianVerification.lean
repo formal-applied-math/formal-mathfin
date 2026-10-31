@@ -34,7 +34,8 @@ noncomputable def brownianClassicalContactRule {K r q σ S : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 < K) (hS : 0 < S) (T : ℝ≥0) : StoppingRule brownianFiltration T :=
-  classicalContactRule (r := r) (q := q) (σ := σ) hp.toPutEnvelope brownian_adapted continuous_brownian hK hS T
+  classicalContactRule (r := r) (q := q) (σ := σ) hp.toPutEnvelope brownian_adapted
+    continuous_brownian hK hS T
 
 theorem brownian_price_identification_of_martingales {K r q σ S : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} {T : ℝ≥0}
@@ -46,8 +47,9 @@ theorem brownian_price_identification_of_martingales {K r q σ S : ℝ}
       (min t ((brownianClassicalContactRule hp hK hS T).time ω)) ω) brownianFiltration
           gaussianLimit) :
     brownianAmericanPut K r q σ S T = K*p (Real.log (S/K)) (σ^2/2*(T : ℝ)) :=
-  classical_price_eq_value_of_contact_verification hp.toPutEnvelope measurable_brownian_uncurry brownian_adapted
-    continuous_brownian isBrownianReal_brownian.eval_zero_ae_eq_zero hK hr hS hsuper hmart
+  classical_price_eq_value_of_contact_verification hp.toPutEnvelope
+    measurable_brownian_uncurry brownian_adapted continuous_brownian
+    isBrownianReal_brownian.eval_zero_ae_eq_zero hK hr hS hsuper hmart
 
 /-- The stochastic/PDE bridge with the remaining obligations exposed for the
 precise candidate and contact rule on the constructed probability space. -/

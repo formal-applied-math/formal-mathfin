@@ -48,7 +48,8 @@ theorem stoppedClassicalCandidate_stronglyAdapted {Ω : Type*} [MeasurableSpace 
     StronglyAdapted 𝓕 (fun t ω => classicalCandidate W K r q σ S p T (min t (θ.time ω)) ω) := by
   have hA : StronglyAdapted 𝓕 (classicalCandidate W K r q σ S p T) :=
     fun t => (classicalCandidate_adapted hp.toPutEnvelope hadapt T t).stronglyMeasurable
-  convert! hA.stoppedProcess (classicalCandidate_continuous hp.toPutEnvelope hpaths T) θ.stopping using 1
+  convert! hA.stoppedProcess (classicalCandidate_continuous hp.toPutEnvelope hpaths T)
+    θ.stopping using 1
 
 theorem brownian_stoppedCandidate_martingale_of_local {K r q σ S : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} {T : ℝ≥0}
