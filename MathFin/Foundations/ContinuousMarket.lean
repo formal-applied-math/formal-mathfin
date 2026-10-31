@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.Foundations.EquivMeasure
 public import MathFin.Foundations.FTAP
+public import MathFin.Foundations.MartingaleSetIntegral
 public import MathFin.Foundations.NoArbitrageCore
 
 /-!
@@ -99,12 +100,9 @@ theorem martingale_stopped_of_setIntegral_eq {Q : Measure Ω} [IsFiniteMeasure Q
     (hset : ∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T → ∀ ⦃A : Set Ω⦄, MeasurableSet[𝓕 s] A →
       ∫ ω in A, S t ω ∂Q = ∫ ω in A, S s ω ∂Q) :
     Martingale (fun t ↦ S (min t T)) 𝓕 Q := by
-  have hadapt' (s : ℝ≥0) : StronglyMeasurable[𝓕 s] (S (min s T)) :=
-    (hadapt _ (min_le_right _ _)).mono (𝓕.mono (min_le_left _ _))
-  refine ⟨hadapt', fun s t hst ↦ ?_⟩
-  refine (ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le s) (hint _ (min_le_right _ _))
-    (fun A _ _ ↦ (hint _ (min_le_right _ _)).integrableOn) (fun A hA _ ↦ ?_)
-    (hadapt' s).aestronglyMeasurable).symm
+  refine martingale_of_setIntegral_eq
+    (fun s ↦ (hadapt _ (min_le_right _ _)).mono (𝓕.mono (min_le_left _ _)))
+    (fun s ↦ hint _ (min_le_right _ _)) fun s t hst A hA ↦ ?_
   by_cases hsT : s ≤ T
   · rw [min_eq_left hsT]
     exact (hset (le_min hst hsT) (min_le_right _ _) hA).symm

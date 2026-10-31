@@ -111,6 +111,7 @@ import MathFin.Foundations.NoArbitrageCore
 import MathFin.Foundations.FTAP
 import MathFin.Foundations.OptionalSamplingInequality
 import MathFin.Foundations.LpContinuousMartingaleConvergence
+import MathFin.Foundations.MartingaleSetIntegral
 import MathFin.Foundations.MartingaleTransform
 import MathFin.Foundations.DoobLpMaximalInequality
 import MathFin.Foundations.ExtendOfNormIsometry
