@@ -616,6 +616,7 @@ import MathFin.FixedIncome.Inflation
 import MathFin.FixedIncome.ABCDVolatility
 -- GSR (Gaussian short rate): two-piece piecewise-constant-volatility bond price
 import MathFin.FixedIncome.GSRPiecewiseVol
+import MathFin.FixedIncome.GSRBondPriceAt
 
 -- Portfolio
 import MathFin.Portfolio.Markowitz
@@ -763,8 +764,10 @@ import MathFin.Contracts.Models.CMS
 import MathFin.Contracts.Models.ShortRate
 import MathFin.Contracts.Models.VasicekBond
 import MathFin.Contracts.Models.HullWhiteBond
+import MathFin.Contracts.Models.GSRBond
 import MathFin.Contracts.Models.Jamshidian
 import MathFin.Contracts.Models.DefaultTime
+import MathFin.Contracts.Models.DefaultTimeMesh
 import MathFin.Contracts.Risk
 
 -- Execution: market microstructure — the Glosten-Milgrom adverse-selection

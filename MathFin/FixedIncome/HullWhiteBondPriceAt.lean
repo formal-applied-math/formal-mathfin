@@ -128,4 +128,25 @@ theorem bondRate_condExp (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measurable 
   rw [bondA_shift]
   exact key
 
+/-- **The Hull–White coefficient at constant forcing is Vasicek's**: with `θ ≡ κ·θ_v` the affine
+coefficient `A(τ) = exp(−∫₀^τ θ B(τ − s) ds + σ²V(τ)/2)` is `vasicekBondA θ_v σ κ τ`, since
+`∫₀^τ B(τ − s) ds = (τ − B(τ))/κ` (`integral_vasicekIntegratedKernel`). -/
+lemma bondA_const (θ σ : ℝ) {κ : ℝ} (hκ : κ ≠ 0) (τ : ℝ) :
+    bondA (fun _ ↦ κ * θ) σ κ τ = vasicekBondA θ σ κ τ := by
+  have hmass : ∫ s in (0 : ℝ)..τ, vasicekBondB κ (τ - s) = (τ - vasicekBondB κ τ) / κ :=
+    integral_vasicekIntegratedKernel κ τ hκ
+  rw [bondA, vasicekBondA, intervalIntegral.integral_const_mul, hmass]
+  congr 2
+  field_simp
+
+omit [IsProbabilityMeasure μ] in
+/-- **The Hull–White short rate at constant forcing is Vasicek's**: with `θ ≡ κ·θ_v` the short rate
+`α(t) + σ∫₀ᵗ e^{−κ(t−u)} dB_u` is the Vasicek one, `vasicekSDEMean + vasicekDiffusionTerm`. -/
+lemma integratedRate_const (hB : IsPreBrownianReal B μ) (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ)
+    (t : ℝ≥0) (ω : Ω) :
+    integratedRate hB (fun _ ↦ κ * θ) κ σ r₀ hκ t ω
+      = vasicekSDEMean r₀ θ κ t + vasicekDiffusionTerm hB κ σ hκ.le t ω := by
+  rw [integratedRate, vasicekDiffusionTerm, deterministic_const _ _ _ _ hκ.ne',
+    mul_div_cancel_left₀ _ hκ.ne', vasicekSDEMean_eq_deterministic]
+
 end MathFin.HullWhite
