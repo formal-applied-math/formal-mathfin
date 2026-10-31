@@ -217,6 +217,7 @@ theorem expectedShortfall_const_mul_of_hasGaussianLaw (hX : HasGaussianLaw X P)
     (hα : α ∈ Ioo 0 1) {l : ℝ} (hl : 0 ≤ l) :
     expectedShortfall (fun ω ↦ l * X ω) P α =
       l * gaussianCVaR P[X] √Var[X; P] (PhiInv α) α := by
+  have := hX.isProbabilityMeasure
   rw [expectedShortfall_of_hasGaussianLaw
     (gaussianReal_const_mul (hasLaw_gaussianReal_of_hasGaussianLaw hX) l).hasGaussianLaw hα,
     variance_const_mul, integral_const_mul, Real.sqrt_mul (sq_nonneg l), Real.sqrt_sq_eq_abs,
