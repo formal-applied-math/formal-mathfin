@@ -31,8 +31,7 @@ namespace MathFin.BlackScholes.AmericanPut.Stopping
 open Set Filter MeasureTheory ProbabilityTheory Boundary
 open scoped NNReal Topology
 
-variable {Ω : Type*} [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
-  {W : ℝ≥0 → Ω → ℝ} {k h : ℝ}
+variable {Ω : Type*}
 
 /-- At strike `1`, spot `Real.exp x` and volatility `Real.sqrt 2` the strike-normalized log spot
 is `x + (k-h-1)*t + Real.sqrt 2 * W t`. -/
@@ -46,6 +45,9 @@ theorem classicalLogSpot_canonical (W : ℝ≥0 → Ω → ℝ) (k h x : ℝ) (t
 theorem sqrt_two_sq_div_two_mul (s : ℝ) : Real.sqrt 2^2/2*s = s := by
   rw [Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]
   ring
+
+variable [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
+  {W : ℝ≥0 → Ω → ℝ} {k h : ℝ}
 
 /-- The rule stopping at the first zero of the gap between the discounted price and the
 discounted payoff, that is, at first contact of the price with the payoff: the classical
@@ -62,8 +64,7 @@ theorem canonicalContactRule_price_eq (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
       putPayoff (x+(k-h-1)*(s : ℝ)+Real.sqrt 2*W s ω) := by
   have he := classicalContactRule_price_eq (K := 1) (r := k) (q := h) (σ := Real.sqrt 2)
     (canonicalPrice_putEnvelope (h := h) hk) hW hpaths one_pos (Real.exp_pos x) T ω
-  simp only [classicalLogSpot_canonical,sqrt_two_sq_div_two_mul] at he
-  exact he
+  simpa only [classicalLogSpot_canonical,sqrt_two_sq_div_two_mul] using he
 
 theorem canonicalContactRule_continuation_before (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
     (hpaths : ∀ ω, Continuous (fun t => W t ω)) (x : ℝ) (T : ℝ≥0) (ω : Ω)

@@ -37,8 +37,8 @@ open Set Filter
 open scoped Topology ContDiff
 
 /-- The four properties of a put price that the stopping verification uses before any PDE:
-`p x t` is continuous in `(x, t)` for `t ≥ 0`, equals the payoff at expiry, lies between the
-payoff and the strike (here normalized to `1`). Pairs are `(log spot, time remaining)`.
+`p x t` is continuous in `(x, t)` for `t ≥ 0`, equals the payoff at expiry, dominates the
+payoff, and is at most the strike (here normalized to `1`). Pairs are `(log spot, time remaining)`.
 No boundary, equation or regularity is assumed, so it is satisfied by the stopping value itself
 as well as by any classical solution. -/
 structure PutEnvelope (p : ℝ → ℝ → ℝ) : Prop where
