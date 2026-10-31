@@ -264,14 +264,14 @@
       "description": "For a jointly Gaussian pair (X, Y) with Var X, Var Y and Var(X + Y) positive and α ∈ (0, 1): the closed form gaussianCVaR at mean E X + E Y and volatility sd(X + Y) is at most the sum of the closed forms at the margins (E X, sd X) and (E Y, sd Y), at the normal quantile Φ⁻¹(α). Derived from the subadditivity of expected shortfall on the general coherence structure and the Gaussian closed form of expected shortfall; the bare-parameter statement is mf-gaussian-cvar-subadditive.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem gaussianCVaR_sd_add_le_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X Y : Ω → ℝ}\n    (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1)\n    (hX : 0 < Var[X; P]) (hY : 0 < Var[Y; P]) (hXY : 0 < Var[fun ω ↦ X ω + Y ω; P]) :\n    gaussianCVaR (P[X] + P[Y]) √Var[fun ω ↦ X ω + Y ω; P] (PhiInv α) α ≤\n      gaussianCVaR P[X] √Var[X; P] (PhiInv α) α + gaussianCVaR P[Y] √Var[Y; P] (PhiInv α) α :=\n  MathFin.gaussianCVaR_sd_add_le h hα hX hY hXY\n"
+        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem gaussianCVaR_sd_add_le_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X Y : Ω → ℝ}\n    (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1)\n    (_hX : 0 < Var[X; P]) (_hY : 0 < Var[Y; P])\n    (_hXY : 0 < Var[fun ω ↦ X ω + Y ω; P]) :\n    gaussianCVaR (P[X] + P[Y]) √Var[fun ω ↦ X ω + Y ω; P] (PhiInv α) α ≤\n      gaussianCVaR P[X] √Var[X; P] (PhiInv α) α + gaussianCVaR P[Y] √Var[Y; P] (PhiInv α) α :=\n  MathFin.gaussianCVaR_sd_add_le h hα\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Coherence of expected shortfall (Acerbi-Tasche 2002) on the Gaussian family; McNeil-Frey-Embrechts Ch 2.3",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof, a corollary of expectedShortfall_add_le (the subadditivity axiom of expectedShortfall_isCoherentRiskMeasure) and expectedShortfall_of_hasGaussianLaw. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, a corollary of expectedShortfall_add_le (the subadditivity axiom of expectedShortfall_isCoherentRiskMeasure) and expectedShortfall_of_hasGaussianLaw. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean. The library theorem holds without the three positivity hypotheses (a degenerate Gaussian is a.s. constant); the entry keeps them, so its claim is the nondegenerate case."
       }
     },
     {
