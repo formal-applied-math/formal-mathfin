@@ -92,30 +92,6 @@ theorem isBrownianReal_of_bounded_martingale (hM : Martingale M 𝓕 P)
 
 /-! ### The clock `t ∧ ρ` -/
 
-private lemma coe_untopA (x : ℝ≥0) : ((x : WithTop ℝ≥0)).untopA = x := rfl
-
-/-- `min t ρ`, read back in `ℝ≥0`, is again `min t ρ` in `WithTop ℝ≥0`. -/
-theorem coe_untopA_min (t : ℝ≥0) (c : WithTop ℝ≥0) :
-    (((min (t : WithTop ℝ≥0) c).untopA : ℝ≥0) : WithTop ℝ≥0) = min (t : WithTop ℝ≥0) c := by
-  induction c using WithTop.recTopCoe with
-  | top => rw [min_top_right]; rfl
-  | coe c => rw [← WithTop.coe_min, coe_untopA]
-
-/-- `t ↦ (t ∧ ρ)` is continuous. -/
-theorem continuous_untopA_min (c : WithTop ℝ≥0) :
-    Continuous fun t : ℝ≥0 ↦ (min (t : WithTop ℝ≥0) c).untopA := by
-  induction c using WithTop.recTopCoe with
-  | top => simp only [min_top_right]; exact continuous_id
-  | coe c =>
-    simp only [← WithTop.coe_min, coe_untopA]
-    exact continuous_id.min continuous_const
-
-/-- At time `0` the stopped time is `0`. -/
-theorem untopA_min_zero (c : WithTop ℝ≥0) : (min ((0 : ℝ≥0) : WithTop ℝ≥0) c).untopA = 0 := by
-  induction c using WithTop.recTopCoe with
-  | top => rw [min_top_right]; rfl
-  | coe c => rw [← WithTop.coe_min, coe_untopA]; simp
-
 private lemma stoppedClock_sub (c : WithTop ℝ≥0) {p q : ℝ≥0} (hpq : p ≤ q) :
     0 ≤ (((min (q : WithTop ℝ≥0) c).untopA : ℝ≥0) : ℝ)
         - ((min (p : WithTop ℝ≥0) c).untopA : ℝ≥0) ∧
@@ -142,6 +118,11 @@ theorem isSlowClock_stoppedProcess (ρ : Ω → WithTop ℝ≥0) :
 
 section Stopped
 
+/-- `M` and the clock `t` stopped at the `n`-th exit time of `|M|` from `(−n−1, n+1)`. -/
+local notation "Mρ" n:max => stoppedProcess M (exitTime M (n + 1))
+local notation "Aρ" n:max =>
+  stoppedProcess (fun (t : ℝ≥0) (_ : Ω) ↦ (t : ℝ)) (exitTime M (n + 1))
+
 /-- The exit time of `|M|` from `(−n−1, n+1)` is positive when `M₀ = 0`. -/
 theorem bot_lt_exitTime (hcont : ∀ ω, Continuous fun t ↦ M t ω) (hM0 : ∀ ω, M 0 ω = 0) (n : ℕ)
     (ω : Ω) : ⊥ < exitTime M (n + 1) ω := by
@@ -152,26 +133,12 @@ theorem bot_lt_exitTime (hcont : ∀ ω, Continuous fun t ↦ M t ω) (hM0 : ∀
   have : (1 : ℝ) ≤ ((n + 1 : ℕ) : ℝ) := by exact_mod_cast Nat.succ_pos n
   linarith
 
-/-- When every exit time is positive, the indicator in the stopped process is inert. -/
-theorem stoppedProcess_indicator_eq {ρ : Ω → WithTop ℝ≥0} (hρ : ∀ ω, ⊥ < ρ ω)
-    (X : ℝ≥0 → Ω → ℝ) :
-    stoppedProcess (fun i ↦ {ω | ⊥ < ρ ω}.indicator (X i)) ρ = stoppedProcess X ρ := by
-  funext t ω
-  simp only [stoppedProcess]
-  exact Set.indicator_of_mem (s := {ω : Ω | ⊥ < ρ ω}) (hρ ω) _
-
 /-- The stopped process is bounded by `n + 1`: up to the exit time, `|M| ≤ n + 1`. -/
 theorem abs_stoppedProcess_le (hcont : ∀ ω, Continuous fun t ↦ M t ω) (hM0 : ∀ ω, M 0 ω = 0)
     (n : ℕ) (t : ℝ≥0) (ω : Ω) :
-    |stoppedProcess M (exitTime M (n + 1)) t ω| ≤ ((n + 1 : ℕ) : ℝ) :=
+    |(Mρ n) t ω| ≤ ((n + 1 : ℕ) : ℝ) :=
   abs_le_of_le_exitTime hcont (bot_lt_exitTime hcont hM0 n ω) (by
     rw [coe_untopA_min]; exact min_le_right _ _)
-
-/-- The stopped process has continuous paths. -/
-theorem continuous_stoppedProcess (hcont : ∀ ω, Continuous fun t ↦ M t ω)
-    (ρ : Ω → WithTop ℝ≥0) (ω : Ω) :
-    Continuous fun t ↦ stoppedProcess M ρ t ω :=
-  (hcont ω).comp (continuous_untopA_min (ρ ω))
 
 /-- **Stopped at the exit time, `M` and `M² − t` are martingales.** For a local martingale `M`
 with continuous paths and `M₀ = 0`, the process `M` stopped at the exit time of `|M|` from
@@ -181,9 +148,7 @@ theorem martingale_stoppedProcess_exitTime (hadapt : StronglyAdapted 𝓕 M)
     (hcont : ∀ ω, Continuous fun t ↦ M t ω) (hM0 : ∀ ω, M 0 ω = 0)
     (hM : IsLocalMartingale M 𝓕 P)
     (hM2 : IsLocalMartingale (fun t ω ↦ M t ω ^ 2 - (t : ℝ)) 𝓕 P) (n : ℕ) :
-    Martingale (stoppedProcess M (exitTime M (n + 1))) 𝓕 P ∧
-      Martingale (fun t ω ↦ stoppedProcess M (exitTime M (n + 1)) t ω ^ 2
-        - stoppedProcess (fun (t : ℝ≥0) (_ : Ω) ↦ (t : ℝ)) (exitTime M (n + 1)) t ω) 𝓕 P := by
+    Martingale (Mρ n) 𝓕 P ∧ Martingale (fun t ω ↦ (Mρ n) t ω ^ 2 - (Aρ n) t ω) 𝓕 P := by
   have hρ : IsStoppingTime 𝓕 (exitTime M (n + 1)) :=
     isStoppingTime_exitTime_of_measurable (fun t ↦ (hadapt t).measurable) hcont (n + 1)
   have hpos := bot_lt_exitTime hcont hM0 n
@@ -191,30 +156,21 @@ theorem martingale_stoppedProcess_exitTime (hadapt : StronglyAdapted 𝓕 M)
     fun t ↦ ((hadapt t).pow 2).sub stronglyMeasurable_const
   have hUc : ∀ ω, Continuous fun t ↦ M t ω ^ 2 - (t : ℝ) := fun ω ↦
     ((hcont ω).pow 2).sub NNReal.continuous_coe
-  refine ⟨?_, ?_⟩
-  · have hloc := (isStable_martingale (𝓕 := 𝓕) (P := P)).locally M hM _ hρ
-    rw [stoppedProcess_indicator_eq hpos] at hloc
-    have had := hadapt.stoppedProcess_indicator (fun ω ↦ (hcont ω).isCadlag.right_continuous) hρ
-    rw [stoppedProcess_indicator_eq hpos] at had
-    exact bounded_localMartingale_is_martingale hloc had
-      (C := ((n + 1 : ℕ) : ℝ)) fun t ω ↦ by
-        rw [Real.norm_eq_abs]; exact abs_stoppedProcess_le hcont hM0 n t ω
-  · have hloc := (isStable_martingale (𝓕 := 𝓕) (P := P)).locally _ hM2 _ hρ
-    rw [stoppedProcess_indicator_eq hpos] at hloc
-    have had := hU.stoppedProcess_indicator (fun ω ↦ (hUc ω).isCadlag.right_continuous) hρ
-    rw [stoppedProcess_indicator_eq hpos] at had
-    refine locally_bounded_localMartingale_is_martingale hloc had fun T ↦
-      ⟨((n + 1 : ℕ) : ℝ) ^ 2 + T, fun t ht ω ↦ ?_⟩
-    set s : ℝ≥0 := (min (t : WithTop ℝ≥0) (exitTime M (n + 1) ω)).untopA with hs
-    have hst : (s : ℝ) ≤ t := NNReal.coe_le_coe.2 (WithTop.untopA_le (min_le_left _ _))
-    have hb : |M s ω| ≤ ((n + 1 : ℕ) : ℝ) := abs_stoppedProcess_le hcont hM0 n t ω
-    have hsq : M s ω ^ 2 ≤ ((n + 1 : ℕ) : ℝ) ^ 2 := sq_le_sq' (abs_le.1 hb).1 (abs_le.1 hb).2
-    have ht' : (t : ℝ) ≤ T := ht
-    show ‖M s ω ^ 2 - (s : ℝ)‖ ≤ _
-    rw [Real.norm_eq_abs, abs_le]
-    have := NNReal.coe_nonneg s
-    have := NNReal.coe_nonneg t
-    constructor <;> nlinarith [sq_nonneg (M s ω), sq_nonneg (((n + 1 : ℕ) : ℝ))]
+  refine ⟨martingale_stoppedProcess_of_locally_bounded hM hadapt hcont hρ hpos fun _ ↦
+      ⟨((n + 1 : ℕ) : ℝ), fun t _ ω ↦ by
+        rw [Real.norm_eq_abs]; exact abs_stoppedProcess_le hcont hM0 n t ω⟩,
+    martingale_stoppedProcess_of_locally_bounded hM2 hU hUc hρ hpos fun T ↦
+      ⟨((n + 1 : ℕ) : ℝ) ^ 2 + T, fun t ht ω ↦ ?_⟩⟩
+  set s : ℝ≥0 := (min (t : WithTop ℝ≥0) (exitTime M (n + 1) ω)).untopA with hs
+  have hst : (s : ℝ) ≤ t := NNReal.coe_le_coe.2 (WithTop.untopA_le (min_le_left _ _))
+  have hb : |M s ω| ≤ ((n + 1 : ℕ) : ℝ) := abs_stoppedProcess_le hcont hM0 n t ω
+  have hsq : M s ω ^ 2 ≤ ((n + 1 : ℕ) : ℝ) ^ 2 := sq_le_sq' (abs_le.1 hb).1 (abs_le.1 hb).2
+  have ht' : (t : ℝ) ≤ T := ht
+  show ‖M s ω ^ 2 - (s : ℝ)‖ ≤ _
+  rw [Real.norm_eq_abs, abs_le]
+  have := NNReal.coe_nonneg s
+  have := NNReal.coe_nonneg t
+  constructor <;> nlinarith [sq_nonneg (M s ω), sq_nonneg (((n + 1 : ℕ) : ℝ))]
 
 /-- The stopped exponential martingale identity over `𝓕_s`-sets, for the process stopped at the
 `n`-th exit time (`setIntegral_exp_eq` with the slow clock `t ∧ ρ_n`). -/
@@ -222,16 +178,48 @@ theorem setIntegral_stopped_exp_eq (hadapt : StronglyAdapted 𝓕 M)
     (hcont : ∀ ω, Continuous fun t ↦ M t ω) (hM0 : ∀ ω, M 0 ω = 0)
     (hM : IsLocalMartingale M 𝓕 P) (hM2 : IsLocalMartingale (fun t ω ↦ M t ω ^ 2 - (t : ℝ)) 𝓕 P)
     (n : ℕ) (a : ℝ) {s t : ℝ≥0} (hst : s ≤ t) {S : Set Ω} (hS : MeasurableSet[𝓕 s] S) :
-    ∫ ω in S, Real.exp (a * stoppedProcess M (exitTime M (n + 1)) t ω
-        - a ^ 2 * stoppedProcess (fun (t : ℝ≥0) (_ : Ω) ↦ (t : ℝ)) (exitTime M (n + 1)) t ω / 2) ∂P
-      = ∫ ω in S, Real.exp (a * stoppedProcess M (exitTime M (n + 1)) s ω
-        - a ^ 2 * stoppedProcess (fun (t : ℝ≥0) (_ : Ω) ↦ (t : ℝ)) (exitTime M (n + 1)) s ω / 2) ∂P :=
+    ∫ ω in S, Real.exp (a * (Mρ n) t ω - a ^ 2 * (Aρ n) t ω / 2) ∂P
+      = ∫ ω in S, Real.exp (a * (Mρ n) s ω - a ^ 2 * (Aρ n) s ω / 2) ∂P :=
   setIntegral_exp_eq (isSlowClock_stoppedProcess _)
     (martingale_stoppedProcess_exitTime hadapt hcont hM0 hM hM2 n).1
     (martingale_stoppedProcess_exitTime hadapt hcont hM0 hM hM2 n).2
     (abs_stoppedProcess_le hcont hM0 n) (continuous_stoppedProcess hcont _) a hst hS
 
 /-! ### The limit `n → ∞` -/
+
+/-- **The stopped exponentials are bounded in `L²`.** The square of the stopped exponential at
+`a` is dominated by `e^{a²r}` times the stopped exponential martingale at `2a`
+(`(t ∧ ρ) ≤ t`), which has expectation `1`. -/
+theorem integral_sq_stopped_exp_le (hadapt : StronglyAdapted 𝓕 M)
+    (hcont : ∀ ω, Continuous fun t ↦ M t ω) (hM0 : ∀ ω, M 0 ω = 0)
+    (hM : IsLocalMartingale M 𝓕 P) (hM2 : IsLocalMartingale (fun t ω ↦ M t ω ^ 2 - (t : ℝ)) 𝓕 P)
+    (a : ℝ) (r : ℝ≥0) (n : ℕ) :
+    ∫ ω, Real.exp (a * (Mρ n) r ω - a ^ 2 * (Aρ n) r ω / 2) ^ 2 ∂P
+      ≤ Real.exp (a ^ 2 * (r : ℝ)) := by
+  have hmart := martingale_stoppedProcess_exitTime hadapt hcont hM0 hM hM2 n
+  have hone : ∫ ω, Real.exp (2 * a * (Mρ n) r ω - (2 * a) ^ 2 * (Aρ n) r ω / 2) ∂P = 1 := by
+    have h := setIntegral_stopped_exp_eq hadapt hcont hM0 hM hM2 n (2 * a)
+      (zero_le : (0 : ℝ≥0) ≤ r) (S := Set.univ) MeasurableSet.univ
+    simp only [Measure.restrict_univ] at h
+    rw [h]
+    have h0 : (Mρ n) 0 = 0 := by
+      funext ω
+      simp only [stoppedProcess, untopA_min_zero, hM0]; rfl
+    have h0' := (isSlowClock_stoppedProcess (Ω := Ω) (exitTime M (n + 1))).zero
+    simp [h0, h0']
+  calc ∫ ω, Real.exp (a * (Mρ n) r ω - a ^ 2 * (Aρ n) r ω / 2) ^ 2 ∂P
+      ≤ ∫ ω, Real.exp (a ^ 2 * (r : ℝ)) *
+          Real.exp (2 * a * (Mρ n) r ω - (2 * a) ^ 2 * (Aρ n) r ω / 2) ∂P := by
+        refine integral_mono_of_nonneg (.of_forall fun ω ↦ sq_nonneg _)
+          (((martingale_exp (isSlowClock_stoppedProcess (exitTime M (n + 1))) hmart.1 hmart.2
+            (abs_stoppedProcess_le hcont hM0 n) (continuous_stoppedProcess hcont _)
+            (2 * a)).integrable r).const_mul _) (.of_forall fun ω ↦ ?_)
+        beta_reduce
+        rw [sq, ← Real.exp_add, ← Real.exp_add]
+        refine Real.exp_le_exp.2 ?_
+        have := (isSlowClock_stoppedProcess (Ω := Ω) (exitTime M (n + 1))).apply_le r ω
+        nlinarith [mul_le_mul_of_nonneg_left this (sq_nonneg a)]
+    _ = Real.exp (a ^ 2 * (r : ℝ)) := by rw [integral_const_mul, hone, mul_one]
 
 /-- **The stopped exponentials converge on sets.** For a fixed time `r`, a set `S`, and every
 `a`, the integrals over `S` of the stopped exponentials `exp(a·M^{ρₙ}_r − a²(r ∧ ρₙ)/2)` converge
@@ -243,55 +231,25 @@ theorem tendsto_setIntegral_stopped_exp (hadapt : StronglyAdapted 𝓕 M)
     (hcont : ∀ ω, Continuous fun t ↦ M t ω) (hM0 : ∀ ω, M 0 ω = 0)
     (hM : IsLocalMartingale M 𝓕 P) (hM2 : IsLocalMartingale (fun t ω ↦ M t ω ^ 2 - (t : ℝ)) 𝓕 P)
     (a : ℝ) (r : ℝ≥0) (S : Set Ω) :
-    Tendsto (fun n : ℕ ↦ ∫ ω in S, Real.exp (a * stoppedProcess M (exitTime M (n + 1)) r ω
-        - a ^ 2 * stoppedProcess (fun (t : ℝ≥0) (_ : Ω) ↦ (t : ℝ)) (exitTime M (n + 1)) r ω / 2) ∂P)
+    Tendsto (fun n : ℕ ↦ ∫ ω in S, Real.exp (a * (Mρ n) r ω - a ^ 2 * (Aρ n) r ω / 2) ∂P)
       atTop (𝓝 (∫ ω in S, Real.exp (a * M r ω - a ^ 2 * (r : ℝ) / 2) ∂P)) := by
   have hmart := martingale_stoppedProcess_exitTime hadapt hcont hM0 hM hM2
   have hexp (n : ℕ) (b : ℝ) := martingale_exp (isSlowClock_stoppedProcess
     (exitTime M (n + 1))) (hmart n).1 (hmart n).2 (abs_stoppedProcess_le hcont hM0 n)
     (continuous_stoppedProcess hcont _) b
-  have hf (n : ℕ) : Measurable fun ω ↦ Real.exp (a * stoppedProcess M (exitTime M (n + 1)) r ω
-      - a ^ 2 * stoppedProcess (fun (t : ℝ≥0) (_ : Ω) ↦ (t : ℝ)) (exitTime M (n + 1)) r ω / 2) :=
+  have hf (n : ℕ) : Measurable fun ω ↦ Real.exp (a * (Mρ n) r ω - a ^ 2 * (Aρ n) r ω / 2) :=
     (((hexp n a).stronglyAdapted r).mono (𝓕.le r)).measurable
-  have hbd (n : ℕ) (ω : Ω) : |Real.exp (a * stoppedProcess M (exitTime M (n + 1)) r ω
-      - a ^ 2 * stoppedProcess (fun (t : ℝ≥0) (_ : Ω) ↦ (t : ℝ)) (exitTime M (n + 1)) r ω / 2)|
+  have hbd (n : ℕ) (ω : Ω) : |Real.exp (a * (Mρ n) r ω - a ^ 2 * (Aρ n) r ω / 2)|
       ≤ Real.exp (|a| * ((n + 1 : ℕ) : ℝ)) := by
     rw [abs_of_pos (Real.exp_pos _)]
     exact exp_le_exp_abs_mul (isSlowClock_stoppedProcess _) (abs_stoppedProcess_le hcont hM0 n)
       a r ω
-  have hmem (n : ℕ) : MemLp (fun ω ↦ Real.exp (a * stoppedProcess M (exitTime M (n + 1)) r ω
-      - a ^ 2 * stoppedProcess (fun (t : ℝ≥0) (_ : Ω) ↦ (t : ℝ)) (exitTime M (n + 1)) r ω / 2)) 2 P :=
+  have hmem (n : ℕ) :
+      MemLp (fun ω ↦ Real.exp (a * (Mρ n) r ω - a ^ 2 * (Aρ n) r ω / 2)) 2 P :=
     (MemLp.of_bound (hf n).aestronglyMeasurable _
       (.of_forall fun ω ↦ by rw [Real.norm_eq_abs]; exact hbd n ω)).mono_exponent le_top
-  have hB (n : ℕ) : ∫ ω, (Real.exp (a * stoppedProcess M (exitTime M (n + 1)) r ω
-      - a ^ 2 * stoppedProcess (fun (t : ℝ≥0) (_ : Ω) ↦ (t : ℝ)) (exitTime M (n + 1)) r ω / 2)) ^ 2 ∂P
-      ≤ Real.exp (a ^ 2 * (r : ℝ)) := by
-    have hone : ∫ ω, Real.exp (2 * a * stoppedProcess M (exitTime M (n + 1)) r ω
-        - (2 * a) ^ 2 * stoppedProcess (fun (t : ℝ≥0) (_ : Ω) ↦ (t : ℝ)) (exitTime M (n + 1)) r ω / 2) ∂P
-        = 1 := by
-      have h := setIntegral_stopped_exp_eq hadapt hcont hM0 hM hM2 n (2 * a) (zero_le : (0 : ℝ≥0) ≤ r)
-        (S := Set.univ) MeasurableSet.univ
-      simp only [Measure.restrict_univ] at h
-      rw [h]
-      have h0 : stoppedProcess M (exitTime M (n + 1)) 0 = 0 := by
-        funext ω
-        simp only [stoppedProcess, untopA_min_zero, hM0]; rfl
-      have h0' := (isSlowClock_stoppedProcess (Ω := Ω) (exitTime M (n + 1))).zero
-      simp [h0, h0']
-    calc ∫ ω, Real.exp (a * stoppedProcess M (exitTime M (n + 1)) r ω
-          - a ^ 2 * stoppedProcess (fun (t : ℝ≥0) (_ : Ω) ↦ (t : ℝ)) (exitTime M (n + 1)) r ω / 2) ^ 2 ∂P
-        ≤ ∫ ω, Real.exp (a ^ 2 * (r : ℝ)) * Real.exp (2 * a * stoppedProcess M
-            (exitTime M (n + 1)) r ω - (2 * a) ^ 2 * stoppedProcess (fun (t : ℝ≥0) (_ : Ω) ↦ (t : ℝ))
-            (exitTime M (n + 1)) r ω / 2) ∂P := by
-          refine integral_mono ?_ (((hexp n (2 * a)).integrable r).const_mul _) fun ω ↦ ?_
-          · exact (hmem n).integrable_sq
-          · rw [sq, ← Real.exp_add, ← Real.exp_add]
-            refine Real.exp_le_exp.2 ?_
-            have := (isSlowClock_stoppedProcess (Ω := Ω) (exitTime M (n + 1))).apply_le r ω
-            nlinarith [mul_le_mul_of_nonneg_left this (sq_nonneg a)]
-      _ = Real.exp (a ^ 2 * (r : ℝ)) := by rw [integral_const_mul, hone, mul_one]
-  have hlim : ∀ᵐ ω ∂P, Tendsto (fun n : ℕ ↦ Real.exp (a * stoppedProcess M (exitTime M (n + 1)) r ω
-      - a ^ 2 * stoppedProcess (fun (t : ℝ≥0) (_ : Ω) ↦ (t : ℝ)) (exitTime M (n + 1)) r ω / 2)) atTop
+  have hlim : ∀ᵐ ω ∂P, Tendsto (fun n : ℕ ↦
+      Real.exp (a * (Mρ n) r ω - a ^ 2 * (Aρ n) r ω / 2)) atTop
       (𝓝 (Real.exp (a * M r ω - a ^ 2 * (r : ℝ) / 2))) := by
     refine .of_forall fun ω ↦ ?_
     have hr : ∀ᶠ n : ℕ in atTop, (r : WithTop ℝ≥0) < exitTime M (n + 1) ω :=
@@ -301,6 +259,7 @@ theorem tendsto_setIntegral_stopped_exp (hadapt : StronglyAdapted 𝓕 M)
     filter_upwards [hr] with n hn
     have hmin : min (r : WithTop ℝ≥0) (exitTime M (n + 1) ω) = r := min_eq_left hn.le
     simp only [stoppedProcess, hmin, coe_untopA]
+  have hB := fun n ↦ integral_sq_stopped_exp_le hadapt hcont hM0 hM hM2 a r n
   have hg : MemLp (fun ω ↦ Real.exp (a * M r ω - a ^ 2 * (r : ℝ) / 2)) 1 P :=
     (memLp_two_of_subseq_ae_of_sq_bound hmem hf hB ⟨id, hlim⟩).mono_exponent (by norm_num)
   exact tendsto_setIntegral_of_subseq_ae_of_sq_bound hmem hB hg

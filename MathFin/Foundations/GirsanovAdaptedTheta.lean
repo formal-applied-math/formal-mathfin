@@ -23,9 +23,9 @@ conclusion across the identification:
   almost every `ω`-slice (`processToLpPredictable_ae_slice`);
 * the predictable process `BthetaPred` is a modification of `BthetaCont` on `[0,T]`
   (`BthetaPred_ae_eq_BthetaCont`, by `driftContinuousMod_eq_setIntegral`);
-* the Brownian-increments triple under `Q` is invariant under an a.e.-equal change of density
-  (`Measure.withDensity_congr_ae`) and a modification of the process
-  (`qBrownian_congr_modification`).
+* being Brownian on `[0,T]` (`IsBrownianOn`) under `Q` is invariant under an a.e.-equal change of
+  density (`Measure.withDensity_congr_ae`) and a modification of the process
+  (`IsBrownianOn.congr_modification`).
 
 For a bounded adapted continuous `θ`, under `Q = μ.withDensity Z_T` with the Doléans density
 `Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)`, the drift-corrected process `B^θ_u = B_u + ∫₀ᵘθ ds`
@@ -62,29 +62,6 @@ noncomputable def itoIntCont (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 �
     (hcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :
     Ω → ℝ :=
   ⇑(itoIntegralCLM_T hB T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd))
-
-/-- **The Brownian-increments triple is invariant under a modification.** If `X` and `Y` agree
-`Q`-a.e. at every time `u ≤ T`, then zero start, `N(0,t−s)` increments and `HasIndepIncrements` on
-`[0,T]` for `X` under `Q` give the same for `Y`: each of the three depends on the process only
-through finitely many of its coordinates, up to `Q`-null sets. -/
-theorem qBrownian_congr_modification {Q : Measure Ω} {T : ℝ≥0} {X Y : ℝ≥0 → Ω → ℝ}
-    (h : ∀ u ≤ T, X u =ᵐ[Q] Y u)
-    (hX : (∀ᵐ ω ∂Q, X 0 ω = 0)
-      ∧ (∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T → Q.map (fun ω ↦ X t ω - X s ω) = gaussianReal 0 (t - s))
-      ∧ HasIndepIncrements (fun t : Set.Iic T ↦ X t) Q) :
-    (∀ᵐ ω ∂Q, Y 0 ω = 0)
-      ∧ (∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T → Q.map (fun ω ↦ Y t ω - Y s ω) = gaussianReal 0 (t - s))
-      ∧ HasIndepIncrements (fun t : Set.Iic T ↦ Y t) Q := by
-  obtain ⟨h0, hlaw, hind⟩ := hX
-  refine ⟨?_, fun s t hst htT ↦ ?_, fun n t ht ↦ ?_⟩
-  · filter_upwards [h0, h 0 zero_le] with ω h1 h2
-    rw [← h2]
-    exact h1
-  · rw [← hlaw hst htT]
-    exact Measure.map_congr ((h t htT).sub (h s (hst.trans htT))).symm
-  · exact iIndepFun.congr
-      (fun i ↦ (h (t i.succ) (t i.succ).2).sub (h (t i.castSucc) (t i.castSucc).2))
-      (hind n t ht)
 
 section Bridge
 
@@ -147,16 +124,9 @@ path continuity is not stated. The bounded predictable theorem
 `Btheta_isQBrownianMotion_predictable_of_bdd` at the (predictable) continuous `θ`, transported along
 `ZTpred_ae_eq_contDoleansExp` and `BthetaPred_ae_eq_BthetaCont`. -/
 theorem Btheta_isQBrownianMotion_adapted :
-    (∀ᵐ ω ∂(μ.withDensity fun ω ↦
-        ENNReal.ofReal (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω)),
-        BthetaCont B θ 0 ω = 0)
-      ∧ (∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T →
-          (μ.withDensity fun ω ↦
-              ENNReal.ofReal (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω)).map
-            (fun ω ↦ BthetaCont B θ t ω - BthetaCont B θ s ω) = gaussianReal 0 (t - s))
-      ∧ HasIndepIncrements (fun t : Set.Iic T ↦ BthetaCont B θ t)
-          (μ.withDensity fun ω ↦
-            ENNReal.ofReal (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω)) := by
+    IsBrownianOn (μ.withDensity fun ω ↦
+      ENNReal.ofReal (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω)) T
+      (BthetaCont B θ) := by
   have hpred := isStronglyPredictable_of_bdd_adapted_cont hBmeas hadap hcont
   have hZ : (fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω))
       =ᵐ[μ] fun ω ↦ ENNReal.ofReal
@@ -165,7 +135,7 @@ theorem Btheta_isQBrownianMotion_adapted :
       congrArg ENNReal.ofReal h
   have h := Btheta_isQBrownianMotion_predictable_of_bdd hB hBmeas hpred hbdd T
   rw [withDensity_congr_ae hZ] at h
-  exact qBrownian_congr_modification
+  exact IsBrownianOn.congr_modification
     (fun u hu ↦ (withDensity_absolutelyContinuous μ _).ae_eq
       (BthetaPred_ae_eq_BthetaCont hBmeas hadap hcont hbdd T hu)) h
 
