@@ -173,8 +173,7 @@ theorem noArbitrage_of_emm_multi {N M : ℕ} (z : Fin M → Fin N → ℝ)
   rw [hasArbitrage_multi_state_iff_not_noArbitrage z p.toMeasure hne, not_not]
   refine OnePeriodVector.noArbitrage_of_isEMM p.toMeasure (multiStateReturn z)
     (measurable_of_finite _)
-    ⟨inferInstance, Measure.AbsolutelyContinuous.rfl, Measure.AbsolutelyContinuous.rfl,
-      Integrable.of_finite, ?_⟩
+    ⟨⟨inferInstance, .rfl, .rfl⟩, Integrable.of_finite, ?_⟩
   rw [integral_fintype Integrable.of_finite]
   ext k
   simp only [hQ, multiStateReturn, WithLp.ofLp_sum, WithLp.ofLp_smul, Finset.sum_apply,

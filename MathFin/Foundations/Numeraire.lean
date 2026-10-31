@@ -102,8 +102,7 @@ theorem numeraireMeasure_isEquivProbMeasure
     (hNTpos : ∀ ω, 0 < NT ω) (hBTpos : ∀ ω, 0 < BT ω) (hB0 : 0 < B0) (hN0 : 0 < N0)
     (hint : Integrable (fun ω ↦ NT ω / BT ω) Q)
     (hmart : ∫ ω, NT ω / BT ω ∂Q = N0 / B0) :
-    IsProbabilityMeasure (numeraireMeasure Q BT NT B0 N0) ∧
-      numeraireMeasure Q BT NT B0 N0 ≪ Q ∧ Q ≪ numeraireMeasure Q BT NT B0 N0 := by
+    IsEquivProbMeasure Q (numeraireMeasure Q BT NT B0 N0) := by
   have heq : (fun ω ↦ NT ω * B0 / (N0 * BT ω)) = fun ω ↦ (B0 / N0) * (NT ω / BT ω) := by
     funext ω; ring
   refine isEquivProbMeasure_withDensity Q (g := fun ω ↦ NT ω * B0 / (N0 * BT ω))
@@ -120,7 +119,7 @@ theorem numeraireMeasure_isProbabilityMeasure
     (hint : Integrable (fun ω ↦ NT ω / BT ω) Q)
     (hmart : ∫ ω, NT ω / BT ω ∂Q = N0 / B0) :
     IsProbabilityMeasure (numeraireMeasure Q BT NT B0 N0) :=
-  (numeraireMeasure_isEquivProbMeasure hNTpos hBTpos hB0 hN0 hint hmart).1
+  (numeraireMeasure_isEquivProbMeasure hNTpos hBTpos hB0 hN0 hint hmart).isProb
 
 /-- **The change-of-numéraire theorem.** Price is numéraire-invariant:
 

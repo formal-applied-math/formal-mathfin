@@ -196,7 +196,7 @@ theorem girsanovMeasure_isProbabilityMeasure
         = ∫ ω, Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2) ∂P := rfl
       _ = ∫ ω, Real.exp (-θ * X 0 ω - θ ^ 2 * ((0 : ℝ≥0) : ℝ) / 2) ∂P := hmean.symm
       _ = 1 := hZ0
-  exact (isEquivProbMeasure_withDensity P hgpos hgint hgsum).1
+  exact (isEquivProbMeasure_withDensity P hgpos hgint hgsum).isProb
 
 /-- **The constant-θ drift-corrected process, packaged as exponential-martingale data.**
 For constant `θ`, the process `B^θ_u = X_u + θ u` is `𝓕`-adapted, starts at `0` a.e. under the

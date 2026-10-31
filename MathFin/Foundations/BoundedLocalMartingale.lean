@@ -6,6 +6,7 @@ Authors: Robert Martin, Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
+public import MathFin.Foundations.MartingaleSetIntegral
 
 /-!
 # Bounded local martingales and smaller filtrations
@@ -19,7 +20,7 @@ not silently treated as pointwise adaptation on exceptional null outcomes.
 
 ## Result
 
-Public entry points include `martingale_of_setIntegral_eq_real`, `martingale_smaller_filtration`,
+Public entry points include `martingale_smaller_filtration`,
 `locally_bounded_localMartingale_is_martingale`, `bounded_localMartingale_is_martingale`,
 `isLocalMartingale_congr_ae`.
 -/
@@ -34,18 +35,9 @@ open scoped NNReal Topology
 variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} [IsFiniteMeasure P]
   {𝓕 𝓖 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {X : ℝ≥0 → Ω → ℝ}
 
-theorem martingale_of_setIntegral_eq_real (hadapt : StronglyAdapted 𝓕 X)
-    (hint : ∀ t, Integrable (X t) P)
-    (heq : ∀ i j, i ≤ j → ∀ s, MeasurableSet[𝓕 i] s →
-      (∫ ω in s, X i ω ∂P) = ∫ ω in s, X j ω ∂P) : Martingale X 𝓕 P := by
-  refine ⟨hadapt,fun i j hij => ?_⟩
-  exact (ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le i) (hint j)
-    (fun _ _ _ => (hint i).integrableOn) (fun s hs _ => heq i j hij s hs)
-    (hadapt i).aestronglyMeasurable).symm
-
 theorem martingale_smaller_filtration (hFG : 𝓕 ≤ 𝓖) (hX : Martingale X 𝓖 P)
     (hadapt : StronglyAdapted 𝓕 X) : Martingale X 𝓕 P :=
-  martingale_of_setIntegral_eq_real hadapt hX.integrable
+  martingale_of_setIntegral_eq hadapt hX.integrable
     (fun _ _ hij _ hs => hX.setIntegral_eq hij (hFG _ _ hs))
 
 theorem locally_bounded_localMartingale_is_martingale (hX : IsLocalMartingale X 𝓕 P)
@@ -85,7 +77,7 @@ theorem locally_bounded_localMartingale_is_martingale (hX : IsLocalMartingale X 
     obtain ⟨C,hC⟩ := hbound t
     exact (integrable_const C).mono' ((hadapt t).mono (𝓕.le t)).aestronglyMeasurable
       (Eventually.of_forall (hC t le_rfl))
-  apply martingale_of_setIntegral_eq_real hadapt hint
+  apply martingale_of_setIntegral_eq hadapt hint
   intro i j hij s hs
   have hconv (t : ℝ≥0) : Tendsto (fun n => ∫ ω in s, Y n t ω ∂P) atTop
       (𝓝 (∫ ω in s, X t ω ∂P)) := by

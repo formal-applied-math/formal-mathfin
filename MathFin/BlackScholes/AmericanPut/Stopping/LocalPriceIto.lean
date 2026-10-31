@@ -57,7 +57,8 @@ theorem brownianPriceKernel_localization_zero_drift {p : ℝ → ℝ → ℝ} {b
       (fun y => brownianPriceKernel p K r q σ x₀ T z.1 y) :=
     hz.comp_tendsto (show Tendsto (fun y : ℝ => (z.1,y)) (𝓝 z.2) (𝓝 z) by
       convert! (continuous_const.prodMk continuous_id).tendsto z.2 using 1)
-  rw [show z = (z.1,z.2) from rfl,planeGenerator_eq_partials hG,htEq.deriv_eq,hxEq.deriv.deriv_eq]
+  rw [show z = (z.1,z.2) from rfl,planeGenerator_eq_partials (hG.of_le (by norm_num)),
+    htEq.deriv_eq,hxEq.deriv.deriv_eq]
   exact brownianPriceKernel_heat_equation hp hσ hzt hzx
 
 theorem local_price_ito {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}

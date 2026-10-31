@@ -48,7 +48,8 @@ theorem pricingTestKernel_generator {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 
       deriv (deriv (fun y => F (y,(T : ℝ)))) x +
       (k-h-1)*deriv (fun y => F (y,(T : ℝ))) x -
       deriv (fun t => F (x,t)) (T : ℝ) - k*F (x,(T : ℝ)) := by
-  rw [planeGenerator_eq_partials (pricingTestKernel_contDiff hF k h x T),
+  rw [planeGenerator_eq_partials
+      ((pricingTestKernel_contDiff hF k h x T).of_le (by norm_num)),
     pricingTestKernel_eq_brownian]
   have hd : DifferentiableAt ℝ (fun z : ℝ × ℝ => F (z.1,z.2))
       (x+(k-h-(Real.sqrt 2)^2/2)*0+Real.sqrt 2*0,(Real.sqrt 2)^2/2*((T : ℝ)-0)) :=

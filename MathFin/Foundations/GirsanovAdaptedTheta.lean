@@ -158,15 +158,12 @@ theorem Btheta_isQBrownianMotion_adapted :
           (μ.withDensity fun ω ↦
             ENNReal.ofReal (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω)) := by
   have hpred := isStronglyPredictable_of_bdd_adapted_cont hBmeas hadap hcont
-  have hC : 0 ≤ C := by
-    obtain ⟨ω⟩ := nonempty_of_isProbabilityMeasure μ
-    exact (abs_nonneg _).trans (hbdd 0 ω)
   have hZ : (fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω))
       =ᵐ[μ] fun ω ↦ ENNReal.ofReal
         (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω) :=
     (ZTpred_ae_eq_contDoleansExp hB hBmeas hadap hcont hbdd T).mono fun _ h ↦
       congrArg ENNReal.ofReal h
-  have h := Btheta_isQBrownianMotion_predictable_of_bdd hB hBmeas hpred hC hbdd T
+  have h := Btheta_isQBrownianMotion_predictable_of_bdd hB hBmeas hpred hbdd T
   rw [withDensity_congr_ae hZ] at h
   exact qBrownian_congr_modification
     (fun u hu ↦ (withDensity_absolutelyContinuous μ _).ae_eq
