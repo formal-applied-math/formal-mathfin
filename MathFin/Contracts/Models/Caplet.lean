@@ -32,10 +32,11 @@ model `X` carries them as observed processes. `BondModel` says the underlying `b
 
 ## What is not here
 
-Lognormality of `L` under the forward measure is a hypothesis here, and in the Gaussian short-rate
-models it is false: `L = (1/P − 1)/δ` is a shifted lognormal, since the bond `P` is lognormal
-(`bondPrice_vasicek`, `bondPrice_hullWhite`). There the caplet is priced through the bond put,
-as a Black put on the lognormal bond (`Contracts/Models/Jamshidian.lean`). The two-piece GSR is
+Lognormality of `L` under the forward measure is a hypothesis here. It does not hold in the
+Gaussian short-rate models (a remark, not a theorem here): the bond `P` is lognormal
+(`bondPrice_vasicek`, `bondPrice_hullWhite`), so `L = (1/P − 1)/δ` is a shifted lognormal. There
+the caplet is priced through the bond put, as a Black put on the lognormal bond
+(`Contracts/Models/Jamshidian.lean`). The two-piece GSR is
 not covered. CMS rates are not covered: a CMS payoff observes a swap
 rate, a ratio of bond-price sums, which `Payoff` cannot express.
 

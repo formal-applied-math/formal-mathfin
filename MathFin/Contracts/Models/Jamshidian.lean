@@ -39,9 +39,10 @@ property (`HasBondPrice.integral_discount_mul`), `𝔼^{T₀}[P(T₀, T₁)] = P
 ## What this is, and is not
 
 The measure `μ` is read as the pricing measure and the Wiener representation of the short rate is
-the model (as in `bondPrice_vasicek`). The caplet is *not* a Black-76 caplet in these models: the
-forward LIBOR `L = (1/P − 1)/δ` is a shifted lognormal, and `valueDisc_caplet_black76` is not
-applied; the caplet is `(1 + δK)` bond puts, which are Black puts on the lognormal bond.
+the model (as in `bondPrice_vasicek`). The caplet is *not* priced as a Black-76 caplet in these
+models: the forward LIBOR `L = (1/P − 1)/δ` of a lognormal bond is a shifted lognormal (a remark,
+not a theorem here), so the hypothesis of `valueDisc_caplet_black76` is not claimed and not used;
+the caplet is `(1 + δK)` bond puts, which are Black puts on the lognormal bond.
 -/
 
 @[expose] public section
