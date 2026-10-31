@@ -397,7 +397,15 @@ split by area. What each bridge proves, by area:
   payment discount); par swaps as coupon bonds in the bootstrap
   (`mf-bootstrap-par-swap-coupon-bond`, `mf-bootstrap-swap-strip-reprices`); the CMS par rate is
   convex and spanned on a compact strike range (`mf-cms-par-rate-convex`,
-  `mf-cms-par-rate-compact-spanning`); the OU Hermite modes decay at rate `nκ`, for `n ≤ 2` only
+  `mf-cms-par-rate-compact-spanning`); CMS as contracts on an observed swap rate, in a `SwapModel`
+  (bond prices and the annuity tie the swap rate, `Payoff` has no division): caplets are
+  annuity-measure expectations, the forward swap rate is the annuity-measure mean, the swaplet paid
+  at its fixing date is the forward value plus a covariance that is nonnegative when only the last
+  discount factor is random, and the payer swaption is Black's formula under a lognormal-swap-rate
+  hypothesis (`mf-contract-cms-caplet-annuity-measure`, `mf-contract-cms-forward-swap-rate`,
+  `mf-contract-cms-swaplet-adjustment`, `mf-contract-cms-swaplet-adjustment-nonneg`,
+  `mf-contract-cms-jensen-gap`, `mf-contract-payer-swaption-annuity-call`,
+  `mf-contract-payer-swaption-black`; payment at the fixing date only); the OU Hermite modes decay at rate `nκ`, for `n ≤ 2` only
   (`mf-ou-hermite-modes-decay`, `reduced_core`).
 - **Commodities** (`commodities.json`). The storage forward with convenience yield and the
   Sraffa own rate derived from `forward_price_from_no_arbitrage`
