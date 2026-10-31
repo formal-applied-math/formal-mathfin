@@ -502,6 +502,7 @@ import MathFin.Binomial.DriftLimit
 import MathFin.Binomial.Bermudan
 import MathFin.Binomial.MartingaleRepresentation
 import MathFin.Binomial.EuropeanReplication
+import MathFin.Binomial.FlipPaths
 -- Phase 13 additions:
 import MathFin.Binomial.Girsanov
 import MathFin.Binomial.SecondFTAP

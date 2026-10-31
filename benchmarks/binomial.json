@@ -213,33 +213,33 @@
     {
       "id": "mf-binomial-martingale-representation",
       "name": "Binomial Martingale Representation (Completeness)",
-      "description": "On the binomial tree, every martingale is its initial value plus the martingaleTransform (discrete stochastic integral) of a predictable hedge against the discounted asset -- market completeness, the second pillar of the FTAP.",
+      "description": "On the binomial tree with i.i.d. Bernoulli(q) coin flips, 0 < q < 1, every Mathlib Martingale M for the natural filtration of the flips is, on every path, its initial value plus the martingaleTransform (discrete stochastic integral) of a hedge A against a martingale S of the same filtration whose two children at every node differ; the hedge is StronglyAdapted for the filtration (A_{k+1} depends only on the first k flips) -- market completeness, the second pillar of the FTAP.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.MartingaleRepresentation\n\nopen MathFin\n\ntheorem binomial_martingale_representation_thm {q : ℝ} {M S : ℕ → (ℕ → Bool) → ℝ}\n    (hM_adapt : ∀ n, MathFin.PathAdaptedAt n (M n)) (hS_adapt : ∀ n, MathFin.PathAdaptedAt n (S n))\n    (hM_mart : ∀ n ω, q * M (n + 1) (Function.update ω n true) + (1 - q) * M (n + 1) (Function.update ω n false) = M n ω)\n    (hS_mart : ∀ n ω, q * S (n + 1) (Function.update ω n true) + (1 - q) * S (n + 1) (Function.update ω n false) = S n ω)\n    (hS_nondeg : ∀ n ω, S (n + 1) (Function.update ω n true) ≠ S (n + 1) (Function.update ω n false)) :\n    ∃ A : ℕ → (ℕ → Bool) → ℝ, (∀ n, MathFin.PathAdaptedAt n (A (n + 1))) ∧\n      ∀ N ω, M N ω = M 0 ω + MathFin.martingaleTransform A S N ω :=\n  MathFin.binomial_martingale_representation hM_adapt hS_adapt hM_mart hS_mart hS_nondeg\n"
+        "lean": "import MathFin.Binomial.MartingaleRepresentation\n\nopen MeasureTheory MathFin\nopen scoped NNReal\n\ntheorem binomial_martingale_representation_thm {q : ℝ≥0} (hq0 : 0 < q) (hq1 : q < 1)\n    {M S : ℕ → (ℕ → Bool) → ℝ}\n    (hM : Martingale M flipFiltration (coinFlipMeasure q hq1.le))\n    (hS : Martingale S flipFiltration (coinFlipMeasure q hq1.le))\n    (hS_nondeg : ∀ n ω, S (n + 1) (Function.update ω n true) ≠ S (n + 1) (Function.update ω n false)) :\n    ∃ A : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ A (n + 1)) ∧\n      ∀ N ω, M N ω = M 0 ω + martingaleTransform A S N ω :=\n  binomial_martingale_representation hq0 hq1 hM hS hS_nondeg\n"
       },
       "metadata": {
         "chapter": 7,
         "reference": "Discrete martingale representation / market completeness (Harrison-Pliska 1981)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: pathwise node-wise representation, hedge = (delta M)/(delta S), telescoped. Lives in MathFin/Binomial/MartingaleRepresentation.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. oneStep_of_martingale (MathFin/Binomial/PathMeasure.lean) turns a Martingale of flipFiltration under coinFlipMeasure q into the node-average identity on every path (condExp_flipFiltration_succ: the conditional expectation is the node average because the next flip is independent of the past; the almost-sure identity is pointwise because every cylinder has positive probability for 0 < q < 1); then the pathwise delta hedge repr_one_step (hedge = (delta M)/(delta S), MathFin/Binomial/FlipPaths.lean) telescopes. Lives in MathFin/Binomial/MartingaleRepresentation.lean. The space is the infinite coin-flip paths; flipFiltration is the pullback of the finite-horizon filtration of the multi-period market. Axioms-clean."
       }
     },
     {
       "id": "mf-binomial-european-replication",
       "name": "The Binomial Price of a European Claim Is the Cost of Its Hedge",
       "domain": "mathematical_finance",
-      "description": "Under no-arbitrage (0 < d < e^r < u) and S0 != 0, for every payoff g and horizon N there is a predictable strategy H (H_{k+1} depends only on the first k flips) such that, along every coin-flip path, e^(-rN) g(S_N) = binomialPrice u d r g N S0 + sum_{k<N} H_{k+1} (S~_{k+1} - S~_k) (the martingaleTransform of H against the discounted spot), where S~_k = e^(-rk) S_k is the discounted spot.",
+      "description": "Under no-arbitrage (0 < d < e^r < u) and S0 != 0, for every payoff g and horizon N there is a predictable strategy H (H_{k+1} is strongly measurable for the natural filtration of the first k coin flips, i.e. depends only on them) such that, along every coin-flip path, e^(-rN) g(S_N) = binomialPrice u d r g N S0 + sum_{k<N} H_{k+1} (S~_{k+1} - S~_k) (the martingaleTransform of H against the discounted spot), where S~_k = e^(-rk) S_k is the discounted spot.",
       "code": {
-        "lean": "import MathFin.Binomial.EuropeanReplication\n\nopen MathFin\n\n/-- The binomial price of a European claim is the initial capital of a hedge. -/\ntheorem binomialPrice_replication' {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : ℝ}\n    (hS₀ : S₀ ≠ 0) (g : ℝ → ℝ) (N : ℕ) :\n    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H (n + 1))) ∧ ∀ ω,\n      Real.exp (-(r * N)) * g (spotPath S₀ u d N ω) = binomialPrice u d r g N S₀\n        + martingaleTransform H (discountedSpot S₀ u d r) N ω :=\n  binomialPrice_replication h hS₀ g N\n"
+        "lean": "import MathFin.Binomial.MartingaleRepresentation\n\nopen MathFin\n\n/-- The binomial price of a European claim is the initial capital of a hedge. -/\ntheorem binomialPrice_replication' {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : ℝ}\n    (hS₀ : S₀ ≠ 0) (g : ℝ → ℝ) (N : ℕ) :\n    ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧ ∀ ω,\n      Real.exp (-(r * N)) * g (spotPath S₀ u d N ω) = binomialPrice u d r g N S₀\n        + martingaleTransform H (discountedSpot S₀ u d r) N ω :=\n  binomialPrice_replication h hS₀ g N\n"
       },
       "metadata": {
         "chapter": 7,
         "reference": "Cox, Ross and Rubinstein (1979); Shreve, Stochastic Calculus for Finance I, Theorem 1.2.2 (replication in the N-period binomial model)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. binomialPrice_replication in MathFin/Binomial/EuropeanReplication.lean: binomial_martingale_representation applied to two one-step martingales under crrUpProb u d r, the discounted tree value stopped at N (discountedTreeValue_step, from binomialPrice_succ) and the discounted spot (discountedSpot_step, from crrUpProb_mul_up_add), with nondegeneracy from d < u and S0 != 0. The strategy is the representation's node-wise delta. European payoffs of the terminal spot only; the identity is pathwise, with no measure on paths. Axioms-clean."
+        "formalization_scope": "Full formal proof. binomialPrice_replication in MathFin/Binomial/MartingaleRepresentation.lean: binomial_martingale_representation applied to two Mathlib martingales of flipFiltration under coinFlipMeasure (crrUpProb u d r), the discounted tree value stopped at N (martingale_discountedTreeValue, from binomialPrice_succ) and the discounted spot (martingale_discountedSpot, from crrUpProb_mul_up_add), with nondegeneracy from d < u and S0 != 0. The strategy is the representation's node-wise delta. European payoffs of the terminal spot only; the identity is pathwise, with no measure on paths. Axioms-clean."
       }
     },
     {
