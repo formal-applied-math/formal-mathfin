@@ -42,6 +42,22 @@
           "note": "Ported from Robert Martin's Apache-2.0 AmericanPutConvexity development. The proof and formalization were substantially AI-assisted; see docs/american-put-boundary.md. Verification evidence for this port is recorded separately in the repository's generated axiom audit and verification ledger."
         }
       }
+    },
+    {
+      "id": "mf-american-put-optimal-rule-stopped-martingale",
+      "name": "American Put Verification: A Contact Rule Attains the Initial Value Iff the Stopped Candidate Is a Martingale",
+      "description": "Let U be a bounded continuous supermartingale on a filtered finite measure space and theta an admissible stopping rule at whose time U equals the American put's discounted reward almost surely. Then the expected reward at theta equals the integral of U at time 0 if and only if the process U stopped at theta, t maps to U(min(t, theta)), is a martingale. The statement does not assume that U dominates the reward, and it does not identify U with the put's value.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.AmericanPut.Stopping.OptimalStoppedMartingale\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin.BlackScholes.AmericanPut.Stopping\n\ntheorem expected_reward_eq_initial_iff_stopped_martingale {Ω : Type*} [MeasurableSpace Ω]\n    {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {P : Measure Ω} [IsFiniteMeasure P]\n    {W U : ℝ≥0 → Ω → ℝ} {K r q σ S C : ℝ} {T : ℝ≥0}\n    (hU : Supermartingale U 𝓕 P) (hc : ∀ ω, Continuous (fun t => U t ω))\n    (hb : ∀ t ω, ‖U t ω‖ ≤ C) (θ : StoppingRule 𝓕 T)\n    (hcontact : ∀ᵐ ω ∂P, U (θ.time ω) ω = putReward W K r q σ S θ.time ω) :\n    (∫ ω, putReward W K r q σ S θ.time ω ∂P) = ∫ ω, U 0 ω ∂P ↔\n      Martingale (fun t ω => U (min t (θ.time ω)) ω) 𝓕 P :=\n  expectedReward_eq_initial_iff_stopped_martingale hU hc hb θ hcontact\n"
+      },
+      "metadata": {
+        "alignment_source": "MathFin",
+        "reference": "Verification theorem for optimal stopping (Peskir and Shiryaev, Optimal Stopping and Free-Boundary Problems, Ch. I): the stopped value process of an optimal rule is a martingale; MathFin values-review backlog item 1.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "The reward process W and the parameters K, r, q, sigma, S are arbitrary: only the contact identity U(theta) = putReward at theta is used. The forward direction is the ordered optional-sampling argument (every earlier bounded rule has the same mean, then pasting two observation times on a past event gives the set-integral criterion for a martingale); the reverse direction is bounded continuous-path optional stopping for a martingale. Boundedness and path continuity of U are required by both directions; dominating the reward by U is not."
+      }
     }
   ]
 }
