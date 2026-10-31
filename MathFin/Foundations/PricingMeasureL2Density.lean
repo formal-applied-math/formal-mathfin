@@ -31,7 +31,7 @@ isometry. So it suffices that it vanish on a dense set, and:
 * on a **single band** `Z·1_{(a,b]}` the integral is `Z·(S_b − S_a)`
   (`itoIntegralAgainst_elementary`, the price's increments being the Itô integral's), whose
   `Q`-mean is zero because `S` is a `Q`-martingale and `Z` is bounded and `𝓕_a`-measurable —
-  this is `ContinuousMarket.increment_integral_zero`, needing no stochastic integration at all;
+  this is `MathFin.integral_inner_sub_eq_zero`, needing no stochastic integration at all;
 * a **simple process** is the finite sum of its bands (`simpleAssemblyOfMeasure_eq_sum_bands`),
   so the functional vanishes there by linearity;
 * the simple processes are **dense** in `L²(⟨S⟩)`
@@ -154,9 +154,9 @@ theorem gainsFunctional_bandLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       simpa [Real.norm_eq_abs] using hC p hp ω)
     (bandLp T hBmeas σ V p) (coeFn_bandLp T hBmeas σ V hp)
   -- its `Q`-mean is zero: a bounded `𝓕_{p.1}`-measurable weight against a martingale increment
-  have hincr := ContinuousMarket.increment_integral_zero hmart hab
+  have hincr := integral_inner_sub_eq_zero hmart hab
     ((V.val.measurable_value p).stronglyMeasurable)
-    (K := C) (fun ω ↦ by simpa [Real.norm_eq_abs] using hC p hp ω)
+    (K := C) (.of_forall fun ω ↦ by simpa [Real.norm_eq_abs] using hC p hp ω)
   have hQac : Q ≪ μ := by rw [hQ]; exact withDensity_absolutelyContinuous _ _
   rw [gainsFunctional_apply, ← integral_eq_inner_density hD hQ]
   refine Eq.trans ?_ hincr

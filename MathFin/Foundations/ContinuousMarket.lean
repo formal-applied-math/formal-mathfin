@@ -37,10 +37,6 @@ instantiates it at `F = ℝ`; a multi-asset model would instantiate at `F = Fin 
 * `isEMM_noArbitrageSimple` — the forward theorem. A simple strategy sampled at its own dates is
   a discrete predictable strategy, and the discrete forward theorem `emm_implies_no_arbitrage`
   (vector-valued, `FTAP.lean`) applies to the sampled price.
-* `increment_integrable`, `increment_integral_zero` — a bounded predictable weight against a
-  `Q`-martingale increment is `Q`-integrable with zero `Q`-mean. Public because the
-  pricing-measure argument of `PricingMeasureL2Density` is built out of exactly these, summed
-  over a simple process's bands.
 
 ## Scope: meaning-1 (operational) vs. meaning-2 (Delbaen–Schachermayer) FTAP
 
@@ -159,48 +155,6 @@ theorem martingale_comp_monotone {Q : Measure Ω} {S : ℝ≥0 → Ω → F}
     (hS : Martingale S 𝓕 Q) {t : ℕ → ℝ≥0} (ht : Monotone t) :
     Martingale (fun n ↦ S (t n)) (sampledFiltration 𝓕 ht) Q :=
   ⟨fun n ↦ hS.1 (t n), fun i j hij ↦ hS.2 (t i) (t j) (ht hij)⟩
-
-/-- **A predictable-weighted increment `⟪φ, S t − S s⟫` is `Q`-integrable** when `φ` is bounded
-and `S` is a `Q`-martingale (so `S t`, `S s` are integrable): Cauchy–Schwarz bounds the inner
-product by `K · ‖S t − S s‖`, which is integrable. -/
-theorem increment_integrable {Q : Measure Ω}
-    {S : ℝ≥0 → Ω → F} (hS : Martingale S 𝓕 Q) {φ : Ω → F} {s t : ℝ≥0}
-    (hφ : StronglyMeasurable[𝓕 s] φ) {K : ℝ} (hφb : ∀ ω, ‖φ ω‖ ≤ K) :
-    Integrable (fun ω ↦ ⟪φ ω, S t ω - S s ω⟫_ℝ) Q := by
-  have hΔ : Integrable (fun ω ↦ S t ω - S s ω) Q := (hS.integrable t).sub (hS.integrable s)
-  refine Integrable.mono' (hΔ.norm.const_mul K)
-    (((hφ.mono (𝓕.le s)).aestronglyMeasurable).inner hΔ.aestronglyMeasurable) ?_
-  filter_upwards with ω
-  calc ‖⟪φ ω, S t ω - S s ω⟫_ℝ‖ ≤ ‖φ ω‖ * ‖S t ω - S s ω‖ := norm_inner_le_norm _ _
-    _ ≤ K * ‖S t ω - S s ω‖ := mul_le_mul_of_nonneg_right (hφb ω) (norm_nonneg _)
-
-/-- **A predictable-weighted martingale increment has zero `Q`-integral.** For a `Q`-martingale
-`S`, a `𝓕 s`-measurable bounded weight `φ`, and `s ≤ t`, the increment gain `⟪φ, S t − S s⟫`
-integrates to `0`: pull `φ` out of `Q[· | 𝓕 s]` and use `Q[S t − S s | 𝓕 s] = 0`. -/
-theorem increment_integral_zero {Q : Measure Ω} [IsProbabilityMeasure Q]
-    {S : ℝ≥0 → Ω → F} (hS : Martingale S 𝓕 Q) {φ : Ω → F} {s t : ℝ≥0} (hst : s ≤ t)
-    (hφ : StronglyMeasurable[𝓕 s] φ) {K : ℝ} (hφb : ∀ ω, ‖φ ω‖ ≤ K) :
-    ∫ ω, ⟪φ ω, S t ω - S s ω⟫_ℝ ∂Q = 0 := by
-  have hm : 𝓕 s ≤ mΩ := 𝓕.le s
-  have hΔ : Integrable (fun ω ↦ S t ω - S s ω) Q := (hS.integrable t).sub (hS.integrable s)
-  -- `Q[S t − S s | 𝓕 s] = 0`.
-  have hcond0 : Q[fun ω ↦ S t ω - S s ω | 𝓕 s] =ᵐ[Q] 0 := by
-    have hsub : Q[fun ω ↦ S t ω - S s ω | 𝓕 s] =ᵐ[Q] Q[S t | 𝓕 s] - Q[S s | 𝓕 s] :=
-      condExp_sub (hS.integrable t) (hS.integrable s) _
-    have h1 : Q[S t | 𝓕 s] =ᵐ[Q] S s := hS.2 s t hst
-    have h2 : Q[S s | 𝓕 s] = S s := condExp_of_stronglyMeasurable hm (hS.1 s) (hS.integrable s)
-    filter_upwards [hsub, h1] with ω hω h1ω
-    rw [hω, Pi.zero_apply, Pi.sub_apply, h1ω, h2, sub_self]
-  -- Pull out `φ` and collapse.
-  calc ∫ ω, ⟪φ ω, S t ω - S s ω⟫_ℝ ∂Q
-      = ∫ ω, (Q[fun ω ↦ ⟪φ ω, S t ω - S s ω⟫_ℝ | 𝓕 s]) ω ∂Q := (integral_condExp hm).symm
-    _ = ∫ ω, ⟪φ ω, (Q[fun ω ↦ S t ω - S s ω | 𝓕 s]) ω⟫_ℝ ∂Q :=
-        integral_congr_ae (condExp_bilin_of_stronglyMeasurable_left (innerSL ℝ) hφ
-          (increment_integrable hS hφ hφb) hΔ)
-    _ = 0 := by
-        refine integral_eq_zero_of_ae ?_
-        filter_upwards [hcond0] with ω hω
-        rw [hω]; simp
 
 namespace IsEMM
 

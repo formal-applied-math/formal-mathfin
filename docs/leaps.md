@@ -264,7 +264,7 @@ The pricing-measure argument is four steps, and none of them is stochastic integ
 element composed with an isometry — so continuity is `innerSL`'s and square-integrability of the
 density is exactly what buys it. On a band the integral is `Z·(S_b − S_a)`, a bounded predictable
 weight against a `Q`-martingale increment, whose mean is zero by a lemma that predates all of
-this (`ContinuousMarket.increment_integral_zero`, previously private). A simple process is the
+this (`integral_inner_sub_eq_zero`, previously the private `increment_integral_zero`). A simple process is the
 finite sum of its bands. And the simple processes are dense. That is the whole proof.
 
 **The abstraction boundary, again drawn deliberately.** Square-integrability of the density is
