@@ -1556,10 +1556,10 @@ coefficients (Summit C). -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.isLocalizingSequence_exitTime
 
-/-! ## The unrestricted-`C³` Itô formula via stopping-time localization (Summit C)
+/-! ## The unrestricted-`C²` Itô formula via stopping-time localization (Summit C)
 
-`ItoFormulaUnrestrictedLocMart.lean`: for a general `C³` `f` (six partials, all jointly continuous,
-**no** growth or boundedness hypothesis), the compensated process
+`ItoFormulaUnrestrictedLocMart.lean`: for a general `C²` `f` (`f_t`, `f_x`, `f_xx` with `HasDerivAt` witnesses, all four of
+`f, f_t, f_x, f_xx` jointly continuous, **no** growth or boundedness hypothesis), the compensated process
 `M_t = f(t,B_t) − f(0,B_0) − ∫₀ᵗ drift` is everywhere-continuous, satisfies the Itô identity by
 construction, and is a genuine `IsLocalMartingale` on the null-augmented Brownian filtration
 (`ito_formula_unrestricted`) and a **continuous local martingale in explicit form**

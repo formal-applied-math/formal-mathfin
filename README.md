@@ -40,8 +40,10 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 - **Itô's formula.** For every $`C^2`$ function $`f(t,x)`$, with no growth condition,
   $`f(t,B_t) - f(0,B_0) - \int_0^t \big(\partial_t f + \tfrac12 \partial_x^2 f\big)(s,B_s)\,ds`$
   is a continuous local martingale
-  ([`ito_formula_unrestricted`](MathFin/Foundations/ItoFormulaUnrestrictedLocMart.lean)). When the
-  partial derivatives of $`f`$ are bounded, its value at time $`T`$ is the Itô integral
+  ([`ito_formula_unrestricted`](MathFin/Foundations/ItoFormulaUnrestrictedLocMart.lean)). When
+  $`\partial_t f, \partial_x f, \partial_x^2 f, \partial_t^2 f, \partial_t\partial_x f,
+  \partial_x^3 f`$ exist and are bounded and $`B`$ has continuous paths, its value at time $`T`$
+  is the Itô integral
   $`\int_0^T \partial_x f(s,B_s)\,dB_s`$
   ([`ito_formula_td_L2_bddDeriv`](MathFin/Foundations/ItoFormulaTD.lean)). For an Itô process
   $`X_t = x_0 + \int_0^t b_s\,ds + \int_0^t \sigma_s\,dB_s`$ with bounded adapted continuous
@@ -296,8 +298,8 @@ Comparator below).
   [`isCoherentRiskMeasure_neg_iff`](MathFin/RiskMeasures/PositionsConvention.lean).
   [Comparator](https://github.com/leanprover/comparator), configured by
   [`comparator.json`](comparator.json), checks that the two files state the same theorems and that
-  the proofs use only the three standard axioms. It accepted both at commit `06f88ca` and is not
-  run in CI; see [`docs/palomar.md`](docs/palomar.md).
+  the proofs use only the three standard axioms. It accepted the earlier Solution at commit `06f88ca`; the current
+  Solution, which converts positions to losses, has not been re-run, and Comparator is not run in CI; see [`docs/palomar.md`](docs/palomar.md).
 
 - **Benchmark.** Each entry in [`benchmarks/`](benchmarks) records a result's Lean statement, its
   status and its scope. The ledger runner, `tools/verify/ledger.py`, checks each entry's snippet

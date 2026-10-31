@@ -11,9 +11,10 @@ public import MathFin.Foundations.ExitTime
 
 /-! # The double cutoff of Summit C, and the capped exit-time localizer
 
-The Itô formulas with bounded derivatives (`ito_formula_td_process`) are extended to a general
-`C^{1,2}` function by cutting `f` off, in time and in space, onto a compact square where its
-continuous partials are bounded. This file holds that cutoff and the localizer that makes it inert.
+The cutoff that lets the adapted Itô formula `ito_formula_adapted_td_local` localise in space:
+a `C^{1,2}` function `f` is cut off, in time and in space, onto a compact square where its
+continuous partials are bounded, so the bounded-derivative formulas (`ito_formula_td_process`)
+apply to it. This file holds that cutoff and the capped exit-time localizer that makes it inert.
 
 * `SummitC.fTrunc N (t, x) = f(φₙ t, φₙ x)`, with `SummitC.fTruncT`, `fTruncX`, `fTruncXX` its
   partials in closed form by the chain rule (`fTrunc_hasDerivAt_t`, `_x`, `_xx`), each globally
