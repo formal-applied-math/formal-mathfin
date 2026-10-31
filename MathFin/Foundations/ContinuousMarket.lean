@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.Foundations.EquivMeasure
 public import MathFin.Foundations.FTAP
+public import MathFin.Foundations.MartingaleFrozen
 public import MathFin.Foundations.MartingaleSetIntegral
 public import MathFin.Foundations.NoArbitrageCore
 
@@ -21,8 +22,8 @@ instantiates it at `F = ℝ`; a multi-asset model would instantiate at `F = Fin 
 
 * `IsEMM 𝓕 P S T Q` — `Q` is an equivalent martingale measure for `S` up to the horizon `T`:
   `Q ≈ P` (mutual absolute continuity) and `S` is a `Q`-martingale w.r.t. the filtration `𝓕` on
-  `{t ≤ T}`, i.e. the process stopped at `T` is a `Q`-martingale. This matches the discrete
-  `MathFin.IsEMM` (`FTAPDiscrete.lean`), which also takes a horizon `T`, and it is what an
+  `{t ≤ T}`, i.e. the process stopped at `T` is a `Q`-martingale. This is the discrete
+  `MathFin.IsEMM` (`FTAP.lean`) with `ℝ≥0` for `ℕ`, and `IsEMM.sampled` restricts it to one; it is what an
   equivalent measure obtained by a density change on `𝓕_T` can be: the Girsanov/Esscher measure
   makes the discounted Black–Scholes price a martingale on `[0, T]` and no further
   (`bs_discounted_isEMM`). A martingale on all of `ℝ≥0` is an EMM at every horizon.
@@ -34,9 +35,14 @@ instantiates it at `F = ℝ`; a multi-asset model would instantiate at `F = Fin 
   nonnegative and strictly positive on a `P`-non-null set.
 * `martingale_stopped_of_setIntegral_eq` — the way an `IsEMM` is built: adaptedness, integrability
   and the set-integral martingale identity on `[0, T]` give the stopped martingale.
-* `isEMM_noArbitrageSimple` — the forward theorem. A simple strategy sampled at its own dates is
-  a discrete predictable strategy, and the discrete forward theorem `emm_implies_no_arbitrage`
-  (vector-valued, `FTAP.lean`) applies to the sampled price.
+* `SimpleStrategy.schedule`, `SimpleStrategy.toDiscrete` — the strategy's trading dates as a
+  monotone schedule `ℕ → ℝ≥0`, and its holdings as a discrete predictable strategy for the price
+  sampled along it; `SimpleStrategy.gains_eq_martingaleTransform` says the gains are the
+  martingale transform of the sampled price by it.
+* `IsEMM.sampled` — a continuous-time EMM, sampled along a monotone schedule inside `[0, T]`, is a
+  discrete-time `MathFin.IsEMM`.
+* `isEMM_noArbitrageSimple` — the forward theorem: `IsEMM.sampled` along the strategy's schedule,
+  then the discrete forward theorem `MathFin.IsEMM.noArbitrage` (vector-valued, `FTAP.lean`).
 
 ## Scope: meaning-1 (operational) vs. meaning-2 (Delbaen–Schachermayer) FTAP
 
@@ -156,6 +162,77 @@ theorem martingale_comp_monotone {Q : Measure Ω} {S : ℝ≥0 → Ω → F}
     Martingale (fun n ↦ S (t n)) (sampledFiltration 𝓕 ht) Q :=
   ⟨fun n ↦ hS.1 (t n), fun i j hij ↦ hS.2 (t i) (t j) (ht hij)⟩
 
+namespace SimpleStrategy
+
+variable (ψ : SimpleStrategy 𝓕 F)
+
+/-- The **sampling schedule** of a simple strategy: its trading dates `time 0 ≤ ⋯ ≤ time N`,
+held at the last one. -/
+def schedule (n : ℕ) : ℝ≥0 := ψ.time ⟨min n ψ.N, Nat.lt_succ_of_le (min_le_right _ _)⟩
+
+omit [FiniteDimensional ℝ F] in
+theorem monotone_schedule : Monotone ψ.schedule := fun _ _ hab ↦
+  ψ.mono (Fin.mk_le_mk.mpr (min_le_min_right _ hab))
+
+omit [FiniteDimensional ℝ F] in
+/-- A strategy trading up to `T` has its whole schedule inside `[0, T]`. -/
+theorem schedule_le {T : ℝ≥0} (hψT : ψ.time (Fin.last ψ.N) ≤ T) (n : ℕ) : ψ.schedule n ≤ T :=
+  (ψ.mono (Fin.le_last _)).trans hψT
+
+omit [FiniteDimensional ℝ F] in
+theorem schedule_castSucc (i : Fin ψ.N) : ψ.schedule i = ψ.time i.castSucc :=
+  congrArg ψ.time (Fin.ext (min_eq_left i.2.le))
+
+omit [FiniteDimensional ℝ F] in
+theorem schedule_succ (i : Fin ψ.N) : ψ.schedule (i + 1) = ψ.time i.succ :=
+  congrArg ψ.time (Fin.ext (min_eq_left i.2))
+
+/-- The simple strategy as a **discrete** one: the holding in force over the `n`-th step of the
+schedule, `0` outside the trading window. -/
+def toDiscrete : ℕ → Ω → F := fun n ω ↦
+  if hn : 0 < n ∧ n ≤ ψ.N then ψ.hold ⟨n - 1, by omega⟩ ω else 0
+
+omit [FiniteDimensional ℝ F] in
+theorem toDiscrete_succ (i : Fin ψ.N) : ψ.toDiscrete (i + 1) = ψ.hold i := by
+  funext ω
+  simp only [toDiscrete]
+  rw [dif_pos ⟨by omega, i.2⟩]
+  rfl
+
+omit [FiniteDimensional ℝ F] in
+/-- The discrete strategy is predictable for the filtration sampled along the schedule. -/
+theorem toDiscrete_predictable :
+    ∀ t < ψ.N, StronglyMeasurable[sampledFiltration 𝓕 ψ.monotone_schedule t]
+      (ψ.toDiscrete (t + 1)) := fun n hn ↦ by
+  rw [show n + 1 = ((⟨n, hn⟩ : Fin ψ.N) : ℕ) + 1 from rfl, toDiscrete_succ]
+  change StronglyMeasurable[𝓕 (ψ.schedule n)] _
+  rw [schedule_castSucc ψ ⟨n, hn⟩]
+  exact ψ.meas ⟨n, hn⟩
+
+omit [FiniteDimensional ℝ F] in
+/-- The discrete strategy is bounded. -/
+theorem toDiscrete_bdd : ∃ K : ℝ, ∀ n ≤ ψ.N, ∀ ω, ‖ψ.toDiscrete n ω‖ ≤ K := by
+  obtain ⟨K, hK⟩ := ψ.bdd
+  refine ⟨max K 0, fun n _ ω ↦ ?_⟩
+  simp only [toDiscrete]
+  split_ifs
+  · exact (hK _ ω).trans (le_max_left _ _)
+  · simp
+
+omit [FiniteDimensional ℝ F] in
+/-- **The gains of a simple strategy are the martingale transform**, by its discrete holdings, of
+the price sampled along its schedule. -/
+theorem gains_eq_martingaleTransform (S : ℝ≥0 → Ω → F) :
+    ψ.gains S = martingaleTransform ψ.toDiscrete (fun n ↦ S (ψ.schedule n)) ψ.N := by
+  funext ω
+  unfold martingaleTransform SimpleStrategy.gains
+  rw [← Fin.sum_univ_eq_sum_range
+    (fun k ↦ ⟪ψ.toDiscrete (k + 1) ω, S (ψ.schedule (k + 1)) ω - S (ψ.schedule k) ω⟫_ℝ) ψ.N]
+  refine Finset.sum_congr rfl fun i _ ↦ ?_
+  rw [toDiscrete_succ, schedule_succ, schedule_castSucc]
+
+end SimpleStrategy
+
 namespace IsEMM
 
 variable {S : ℝ≥0 → Ω → F} {T : ℝ≥0} {Q : Measure Ω}
@@ -167,22 +244,37 @@ theorem of_martingale [IsProbabilityMeasure Q] (hS : Martingale S 𝓕 Q) (hQP :
   ⟨⟨inferInstance, hQP, hPQ⟩, martingale_stopped_of_setIntegral_eq (fun t _ ↦ hS.1 t)
     (fun t _ ↦ hS.integrable t) fun _ _ hst _ _ hA ↦ (hS.setIntegral_eq hst hA).symm⟩
 
-omit [FiniteDimensional ℝ F] in
 /-- Before the horizon the price is `𝓕`-adapted. -/
 theorem adapted (h : IsEMM 𝓕 P S T Q) {t : ℝ≥0} (ht : t ≤ T) :
-    StronglyMeasurable[𝓕 t] (S t) := by
-  simpa only [min_eq_left ht] using h.martingale.1 t
+    StronglyMeasurable[𝓕 t] (S t) :=
+  haveI := h.isProb
+  (martingale_min_iff.mp h.martingale).1 t ht
 
 /-- Before the horizon the price is `Q`-integrable. -/
-theorem integrable (h : IsEMM 𝓕 P S T Q) {t : ℝ≥0} (ht : t ≤ T) :
-    Integrable (S t) Q := by
-  simpa only [min_eq_left ht] using h.martingale.integrable t
+theorem integrable (h : IsEMM 𝓕 P S T Q) {t : ℝ≥0} (ht : t ≤ T) : Integrable (S t) Q :=
+  haveI := h.isProb
+  (martingale_min_iff.mp h.martingale).2.1 t ht
 
-omit [FiniteDimensional ℝ F] in
 /-- **The martingale property before the horizon**: `Q[S t | 𝓕 s] = S s` for `s ≤ t ≤ T`. -/
 theorem condExp_eq (h : IsEMM 𝓕 P S T Q) {s t : ℝ≥0} (hst : s ≤ t)
-    (ht : t ≤ T) : Q[S t | 𝓕 s] =ᵐ[Q] S s := by
-  simpa only [min_eq_left ht, min_eq_left (hst.trans ht)] using h.martingale.condExp_ae_eq hst
+    (ht : t ≤ T) : Q[S t | 𝓕 s] =ᵐ[Q] S s :=
+  haveI := h.isProb
+  ((martingale_min_iff.mp h.martingale).2.2 hst ht).symm
+
+/-- **A continuous-time EMM, sampled, is a discrete-time EMM.** If `Q` is an equivalent
+martingale measure up to `T` for the discounted price `S` in continuous time, then along
+any monotone schedule `t 0 ≤ t 1 ≤ ⋯` whose first `T' + 1` dates lie in `[0, T]` it is an
+equivalent martingale measure, at the discrete horizon `T'`, for the sampled price `n ↦ S (t n)`
+and the sampled filtration `n ↦ 𝓕 (t n)`. General Ω; the sampled martingale is built from the
+three consequences of `IsEMM` before the horizon (`martingale_min_iff`). -/
+theorem sampled (h : IsEMM 𝓕 P S T Q) {t : ℕ → ℝ≥0} (ht : Monotone t) (T' : ℕ)
+    (hT' : t T' ≤ T) :
+    MathFin.IsEMM (sampledFiltration 𝓕 ht) P (fun n ↦ S (t n)) T' Q :=
+  haveI := h.isProb
+  ⟨h.toIsEquivProbMeasure, martingale_min_iff.mpr
+    ⟨fun n hn ↦ h.adapted (t := t n) ((ht hn).trans hT'),
+      fun n hn ↦ h.integrable (t := t n) ((ht hn).trans hT'),
+      fun m n hmn hnT' ↦ (h.condExp_eq (s := t m) (t := t n) (ht hmn) ((ht hnT').trans hT')).symm⟩⟩
 
 end IsEMM
 
@@ -192,55 +284,16 @@ trading on `[0, T]` has gains that are `P`-a.s. nonnegative and strictly positiv
 `P`-non-null set.
 
 The proof is the discrete forward theorem. A simple strategy `ψ` is a discrete predictable
-strategy for the price sampled at its own trading dates (the schedule `n ↦ time (min n N)`, a
-monotone schedule inside `[0, T]`): the sampled price is a `Q`-martingale for the sampled
-filtration (`martingale_comp_monotone`), the holding `hold i` is predictable for it, and the
-gains `ψ.gains S` are the martingale transform of the sampled price by the holdings. So
-`emm_implies_no_arbitrage` (`FTAP.lean`) applies, and the continuous theorem has no argument of
-its own. -/
+strategy (`toDiscrete`) for the price sampled at its own trading dates (`schedule`, a monotone
+schedule inside `[0, T]`): the sampled price is a discrete EMM (`IsEMM.sampled`) and the gains
+`ψ.gains S` are the martingale transform of the sampled price by the holdings
+(`gains_eq_martingaleTransform`). So `MathFin.IsEMM.noArbitrage` (`FTAP.lean`) applies, and the
+continuous theorem has no argument of its own. -/
 theorem isEMM_noArbitrageSimple {S : ℝ≥0 → Ω → F} {T : ℝ≥0} {Q : Measure Ω}
-    (h : IsEMM 𝓕 P S T Q) : NoArbitrageSimple 𝓕 P S T := by
-  intro ψ hψT hnonneg
-  haveI := h.isProb
-  obtain ⟨K, hK⟩ := ψ.bdd
-  -- the sampling schedule: the trading dates, held at the last one
-  let t : ℕ → ℝ≥0 := fun n ↦ ψ.time ⟨min n ψ.N, Nat.lt_succ_of_le (min_le_right _ _)⟩
-  have ht : Monotone t := fun a b hab ↦ ψ.mono (Fin.mk_le_mk.mpr (min_le_min_right _ hab))
-  have htT (n : ℕ) : t n ≤ T := (ψ.mono (Fin.le_last _)).trans hψT
-  -- the holding in force over the `n`-th step, `0` outside the trading window
-  let φ : ℕ → Ω → F := fun n ω ↦
-    if hn : 0 < n ∧ n ≤ ψ.N then ψ.hold ⟨n - 1, by omega⟩ ω else 0
-  have hφ (i : Fin ψ.N) : φ (i + 1) = ψ.hold i := by
-    funext ω
-    simp only [φ]
-    rw [dif_pos ⟨by omega, i.2⟩]
-    rfl
-  have ht_castSucc (i : Fin ψ.N) : t i = ψ.time i.castSucc :=
-    congrArg ψ.time (Fin.ext (min_eq_left i.2.le))
-  have ht_succ (i : Fin ψ.N) : t (i + 1) = ψ.time i.succ :=
-    congrArg ψ.time (Fin.ext (min_eq_left i.2))
-  have hgain : martingaleTransform φ (fun n ↦ S (t n)) ψ.N = ψ.gains S := by
-    funext ω
-    unfold martingaleTransform SimpleStrategy.gains
-    rw [← Fin.sum_univ_eq_sum_range
-      (fun k ↦ ⟪φ (k + 1) ω, S (t (k + 1)) ω - S (t k) ω⟫_ℝ) ψ.N]
-    refine Finset.sum_congr rfl fun i _ ↦ ?_
-    rw [hφ, ht_succ, ht_castSucc]
-  have hmain := emm_implies_no_arbitrage (T := ψ.N) (𝓕 := sampledFiltration 𝓕 ht)
-    (S := fun n ↦ S (t n)) h.ac h.ac' (fun n _ ↦ h.adapted (htT n)) (fun n _ ↦ h.integrable (htT n))
-    (fun n _ ↦ (h.condExp_eq (ht n.le_succ) (htT _)).symm) φ
-    (fun n hn ↦ by
-      have hn' : (⟨n, hn⟩ : Fin ψ.N) + 1 = n + 1 := rfl
-      rw [← hn', hφ]
-      change StronglyMeasurable[𝓕 (t n)] _
-      rw [ht_castSucc ⟨n, hn⟩]
-      exact ψ.meas ⟨n, hn⟩)
-    ⟨max K 0, fun n _ ω ↦ by
-      simp only [φ]
-      split_ifs
-      · exact (hK _ ω).trans (le_max_left _ _)
-      · simp⟩
-    (by simpa only [hgain] using hnonneg)
-  simpa only [hgain] using hmain
+    (h : IsEMM 𝓕 P S T Q) : NoArbitrageSimple 𝓕 P S T := fun ψ hψT hnonneg ↦ by
+  rw [ψ.gains_eq_martingaleTransform] at hnonneg ⊢
+  have hzero := (h.sampled ψ.monotone_schedule ψ.N (ψ.schedule_le hψT _)).noArbitrage
+    ψ.toDiscrete ψ.toDiscrete_predictable ψ.toDiscrete_bdd hnonneg
+  exact measure_mono_null (fun ω hω ↦ ne_of_gt hω) (ae_iff.mp hzero)
 
 end MathFin.ContinuousMarket
