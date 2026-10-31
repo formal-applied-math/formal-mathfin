@@ -10,7 +10,7 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.Verification
 /-! # Ordered bounded continuous-time optional sampling 
 ## Result
 
-Public entry points include `StoppingRule.minimum`, `expected_gridValue_tendsto`,
+Public entry points include `expected_gridValue_tendsto`,
 `expected_stoppedValue_le_of_le`.
 -/
 
@@ -22,13 +22,6 @@ open Set Filter MeasureTheory
 open scoped NNReal Topology
 
 variable {Ω : Type*} [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
-
-/-- The pointwise minimum `fun ω => min (θ.time ω) (η.time ω)` of two rules with horizon `T`. -/
-def StoppingRule.minimum {T : ℝ≥0} (θ η : StoppingRule 𝓕 T) : StoppingRule 𝓕 T where
-  time := fun ω => min (θ.time ω) (η.time ω)
-  stopping := by
-    convert! θ.stopping.min η.stopping using 1
-  le_horizon := fun ω => (min_le_left _ _).trans (θ.le_horizon ω)
 
 theorem expected_gridValue_tendsto {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}
     (hU : Supermartingale U 𝓕 P) (hc : ∀ ω, Continuous (fun t => U t ω))
