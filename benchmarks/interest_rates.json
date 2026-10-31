@@ -419,6 +419,38 @@
       }
     },
     {
+      "id": "mf-vasicek-zero-meanreversion-limit",
+      "name": "Vasicek Bond Price at Vanishing Mean Reversion (kappa -> 0+)",
+      "domain": "mathematical_finance",
+      "description": "The Vasicek zero-coupon bond price's closed form exp(-M(T) + sigma^2*V(T)/2) (mf-vasicek-bond-price), for kappa > 0, tends as kappa -> 0+ to exp(-r0*T + sigma^2*T^3/6): the bond price of the driftless Gaussian short rate r_s = r0 + sigma*B_s, QuantLib PR#2599's fix for the small-kappa branch of Vasicek::A. The variance term V(T), a sum of three kappa^-3-order pieces that individually diverge, only converges as a sum; the limit is obtained by an explicit cubic-Taylor cancellation bound, not substitution (Lean's x/0 = 0 gives the closed form a different, wrong value exp(-theta*T) at kappa = 0).",
+      "code": {
+        "lean": "import MathFin.FixedIncome.VasicekZeroMeanReversionLimit\n\nopen Filter Topology MathFin\n\n/-- **The Vasicek bond price at vanishing mean reversion.** As kappa -> 0+, the closed-form\nVasicek bond price tends to exp(-r0*T + sigma^2*T^3/6), the price of the driftless Gaussian\nshort rate -- not to the kappa = 0 substitution value. -/\ntheorem vasicek_zero_meanreversion_limit_thm (r0 theta sigma T : ℝ) :\n    Tendsto (fun kappa => Real.exp (-(vasicekIntegratedMean r0 theta kappa T)\n        + sigma ^ 2 * vasicekBondV kappa T / 2))\n      (𝓝[>] 0) (𝓝 (Real.exp (-(r0 * T) + sigma ^ 2 * T ^ 3 / 6))) :=\n  MathFin.tendsto_vasicekBondPrice_zero_meanReversion r0 theta sigma T\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "O. Vasicek, An equilibrium characterization of the term structure, J. Financial Economics 5(2) (1977) 177-188 (the closed-form bond price taken to its kappa -> 0+ limit); QuantLib vasicek.cpp / GitHub PR #2599 (the small-mean-reversion branch of Vasicek::A this limit corresponds to)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof on the closed form exp(-M(T) + sigma^2*V(T)/2) of mf-vasicek-bond-price. Lives in MathFin/FixedIncome/VasicekZeroMeanReversionLimit.lean: tendsto_vasicekBondB_zero_meanReversion (B(T) -> T) and the quantitative cancellation abs_vasicekBondV_sub_le (|V(T) - T^3/3| <= 10*|kappa|*T^4 for |2*kappa*T| <= 1, from the cubic Taylor remainder of exp) give tendsto_vasicekBondV_zero_meanReversion (V(T) -> T^3/3) and tendsto_vasicekIntegratedMean_zero_meanReversion (M(T) -> r0*T), composed into tendsto_vasicekBondPrice_zero_meanReversion. SCOPE: a limit of the closed form, not a convergence statement about the underlying random variables integral_0^T r_s^kappa ds as kappa -> 0+; no convergence of the short-rate processes themselves is claimed. The kappa = 0 substitution (Lean's x/0 = 0) gives the different, wrong value exp(-theta*T) (vasicekBondPrice_closedForm_zero_meanReversion), stated in the same file as a contrast, not as part of this entry's claim. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-vasicek-zero-meanreversion-crosscheck",
+      "name": "Vasicek Zero-Mean-Reversion Limit Agrees with the Driftless Model Priced Directly",
+      "domain": "mathematical_finance",
+      "description": "The kappa -> 0+ limit of the Vasicek closed-form bond price (mf-vasicek-zero-meanreversion-limit) equals the bond price of the driftless Gaussian short rate r_s = r0 + sigma*B_s computed directly as a Wiener-integral expectation, with no Vasicek formula and no limit -- a second, independent route to exp(-r0*T + sigma^2*T^3/6) that agrees with the first.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.VasicekZeroMeanReversionLimit\n\nopen MeasureTheory ProbabilityTheory Filter Topology MathFin\nopen scoped NNReal\n\n/-- **Two independent routes to the same price.** The kappa -> 0+ limit of the Vasicek closed\nform agrees with the driftless Gaussian short rate's bond price, computed directly as a\nWiener-integral expectation with no Vasicek formula and no limit. -/\ntheorem vasicek_zero_meanreversion_crosscheck_thm\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (r0 theta sigma : ℝ) (T : ℝ≥0) :\n    Tendsto (fun kappa => Real.exp (-(vasicekIntegratedMean r0 theta kappa T)\n        + sigma ^ 2 * vasicekBondV kappa T / 2))\n      (𝓝[>] 0) (𝓝 (∫ ω, Real.exp (-(brownianIntegratedRate hB r0 sigma T ω)) ∂μ)) :=\n  MathFin.tendsto_vasicekBondPrice_brownianBondPrice hB r0 theta sigma T\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "O. Vasicek, An equilibrium characterization of the term structure, J. Financial Economics 5(2) (1977) 177-188; the driftless-model cross-check corresponds to the a -> 0 branch QuantLib PR #2599 fixes in vasicek.cpp",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Lives in MathFin/FixedIncome/VasicekZeroMeanReversionLimit.lean: brownianBondPrice_eq prices the driftless model r_s = r0 + sigma*B_s directly, via the Wiener bond-price lemma integral_exp_neg_add_mul_wienerIntegralLp on the integrated kernel u -> T - u (brownianIntegratedKernelLp, with integral of its square T^3/3 by brownianIntegratedKernelLp_integral_sq); tendsto_vasicekBondPrice_brownianBondPrice composes this with tendsto_vasicekBondPrice_zero_meanReversion. SCOPE: the driftless model's integrated rate is carried in its Wiener representation integral_0^T (r0 + sigma*B_s) ds = r0*T + sigma*integral_0^T (T-u) dB_u; the time-order-swap identity behind this (integral_0^T B_s ds = integral_0^T (T-u) dB_u) is the same cited, not proved, modelling bridge used by vasicekIntegratedRate elsewhere in this corpus. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-cir-bond-loading-riccati",
       "name": "CIR Affine Loading B(T) Solves the Riccati Equation",
       "domain": "mathematical_finance",
