@@ -13,14 +13,15 @@ public import MathFin.BlackScholes.AmericanPut.Boundary.Coordinates
 CCJZ (2008), (1.1), in normalized coordinates. Arguments are always `(x, t)`, with `x` the
 log price relative to strike and `t` the normalized time remaining. This file holds the
 ingredients the classical solution contracts are stated in: the normalized rate, the
-strike-normalized payoff, the continuation region of a candidate boundary, and the
+strike-normalized payoff, `PutEnvelope` (the payoff-level properties of any put price, classical
+or the stopping value itself), the continuation region of a candidate boundary, and the
 spatial operator. The contracts themselves are `ContinuousBoundaryPutSolution`,
 `DividendPutSolution` and its zero-dividend case `NormalizedPutSolution`.
 
 ## Result
 
 Public entry points include `normalizedRate`, `normalizedRate_pos`, `putPayoff`,
-`continuationRegion`, `dividendSpatialOperator`.
+`PutEnvelope`, `continuationRegion`, `dividendSpatialOperator`.
 -/
 @[expose] public section
 
@@ -48,6 +49,21 @@ noncomputable def dividendSpatialOperator (k h : ℝ) (f : ℝ → ℝ) (x : ℝ
   deriv (deriv f) x + (k - h - 1) * deriv f x - k * f x
 
 theorem putPayoff_nonneg (x : ℝ) : 0 ≤ putPayoff x := le_max_right _ _
+
+/-- The four properties of a put price that the stopping verification uses before any PDE:
+`p x t` is continuous in `(x, t)` for `t ≥ 0`, equals the payoff at expiry, dominates the
+payoff, and is at most the strike (here normalized to `1`). Pairs are `(log spot, time remaining)`.
+No boundary, equation or regularity is assumed, so it is satisfied by the stopping value itself
+as well as by any classical solution. -/
+structure PutEnvelope (p : ℝ → ℝ → ℝ) : Prop where
+  price_continuous : ContinuousOn (fun z : ℝ × ℝ => p z.1 z.2) {z | 0 ≤ z.2}
+  initial : ∀ x, p x 0 = putPayoff x
+  dominates : ∀ x t, 0 ≤ t → putPayoff x ≤ p x t
+  bounded : ∀ x t, 0 ≤ t → p x t ≤ 1
+
+theorem PutEnvelope.nonneg {p : ℝ → ℝ → ℝ} (hp : PutEnvelope p) (x : ℝ) {t : ℝ} (ht : 0 ≤ t) :
+    0 ≤ p x t :=
+  (putPayoff_nonneg x).trans (hp.dominates x t ht)
 
 theorem putPayoff_of_nonpos {x : ℝ} (hx : x ≤ 0) :
     putPayoff x = 1 - Real.exp x := by

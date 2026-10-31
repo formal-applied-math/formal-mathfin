@@ -12,7 +12,7 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianModel
 ## Result
 
 Public entry points include `brownianHeatFlow`, `brownianHeatFlow_zero`,
-`brownianHeatFlow_continuous`, `brownianHeatFlow_bound`.
+`brownianHeatFlow_continuous`, `brownianHeatFlow_bound`, `PutWaiting`.
 -/
 
 @[expose] public section
@@ -65,6 +65,16 @@ theorem brownianHeatFlow_eq_kernel {f : ℝ → ℝ} (hf : Continuous f) {t : �
 `x+(k-h-1)*(t-a)`, discounted by `exp (-k*(t-a))`. -/
 noncomputable def linearPriceEvolution (f : ℝ → ℝ) (k h a x t : ℝ) : ℝ :=
   Real.exp (-k*(t-a))*brownianHeatFlow f (2*(t-a)).toNNReal (x+(k-h-1)*(t-a))
+
+/-- A put price `p` (pairs `(log spot, time remaining)`) *waits* at normalized rates `k`, `h`
+if it dominates its own discounted Gaussian evolution: continuing from remaining time `a` and
+waiting until `t` never beats exercising optimally from `t`. This is the one inequality the
+stopping verification needs beyond `PutEnvelope p`. Classical solutions satisfy it by the
+parabolic comparison (`DividendPutSolution.putWaiting`); the stopping value satisfies it by
+dynamic programming (`canonicalPrice_putWaiting`). -/
+structure PutWaiting (k h : ℝ) (p : ℝ → ℝ → ℝ) : Prop where
+  evolution_le : ∀ {a t : ℝ}, 0 ≤ a → a ≤ t → ∀ x,
+    linearPriceEvolution (fun y ↦ p y a) k h a x t ≤ p x t
 
 theorem linearPriceEvolution_initial (f : ℝ → ℝ) (k h a x : ℝ) :
     linearPriceEvolution f k h a x a = f x := by
