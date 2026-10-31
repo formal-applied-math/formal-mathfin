@@ -529,6 +529,54 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. The CDS is cdsBuyer in MathFin/Contracts/Instruments/Credit.lean, two payFlows schedules (the protection leg and the negated premium leg) observing the default indicator process. value_cdsBuyer in MathFin/Contracts/Models/DefaultTime.lean: each leg's path value is a finite sum (pathPV_payFlows), the indicators are integrable with mean Q(tau <= u) = 1 - S(u), and Contract.value_both and value_scale combine the legs. measureReal_coxDefaultTime_le supplies Q(tau <= u) = 1 - hazardSurvival h u from cox_cdf_timeVarying (FixedIncome/Cox.lean). The contract is the discretisation of Cox.premiumLeg and Cox.protectionLeg, not those legs: the tower pays at fixed dates, so default is paid at the end of its period and the premium accrued within it is not paid. With no discounting the grid losses equal Cox.cdsLosses 0 h T on any grid with t 0 = 0, at its last date t n (cdsLossesGrid_one_eq_cdsLosses); with discounting, convergence of the grid legs to the continuous ones as the mesh shrinks is not proved. Also proved in the same module, not in this entry: the buyer's CDS has value zero exactly at the grid par spread (1 - R) losses / annuity (value_cdsBuyer_eq_zero_iff). Recovery is a constant; the discount factor is deterministic. Not a legal instrument. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-contract-caplet-bond-put",
+      "name": "A Caplet Is (1 + δK) Puts on the Zero-Coupon Bond",
+      "domain": "mathematical_finance",
+      "description": "In a model X with a stochastic discount factor D, D T0 > 0, D T1 integrable, in which an observed process b is the bond price P(T0,T1) = E[D T1 | F T0] / D T0 (a.e., positive) and an F T0-measurable process l is the simple forward rate (1/P - 1)/delta, delta > 0, the caplet paying delta (l(T0) - K)^+ at T1 is worth, for 1 + delta K > 0 and an integrable discounted payoff, (1 + delta K) times the put paying (1/(1 + delta K) - P(T0,T1))^+ at T0, both valued as E[D t * payoff] (Contract.valueDisc). The bond price is the conditional expectation, not a deterministic curve; no model for D is assumed, so Gaussian short-rate bond prices are not obtained.",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.Caplet\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- A caplet is `(1 + δK)` puts on the zero-coupon bond struck at `1/(1 + δK)`. -/\ntheorem valueDisc_caplet_eq_bondPut' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {𝓕 : Filtration ℝ≥0 mΩ} {D : ℝ≥0 → Ω → ℝ} {X : ι → ℝ≥0 → Ω → ℝ} {b ℓ : ι}\n    {T₀ T₁ : ℝ≥0} {δ K : ℝ} (h : BondModel Q 𝓕 D X b ℓ T₀ T₁ δ) (hK : 0 < 1 + δ * K)\n    (hint : Integrable (fun ω ↦ D T₁ ω * (δ * max (X ℓ T₀ ω - K) 0)) Q) :\n    (caplet ℓ T₀ T₁ δ K).valueDisc Q D X\n      = (1 + δ * K) * (bondPut b T₀ (1 / (1 + δ * K))).valueDisc Q D X :=\n  valueDisc_caplet_eq_bondPut h hK hint\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hull, Options, Futures and Other Derivatives, ch. 29 (caplets as puts on zero-coupon bonds, Black's model for caplets); Brigo and Mercurio, Interest Rate Models, 2nd ed., sections 1.4 and 1.5; Musiela and Rutkowski, Martingale Methods in Financial Modelling, ch. 12. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. valueDisc_caplet_eq_bondPut in MathFin/Contracts/Models/Caplet.lean: BondModel.integral_discount_mul turns E[D T1 * Y] into E[D T0 * P * Y] for an F T0-measurable Y by condExp_mul_of_stronglyMeasurable_left and integral_condExp, using D T0 * P = E[D T1 | F T0] a.e.; the pointwise identity P * delta * (L - K)^+ = (1 - (1 + delta K) P)^+ follows from delta L = 1/P - 1 and P > 0. SCOPE: bondPrice is defined for any stochastic discount factor, but the entry assumes (does not derive) that the observed bond process equals it a.e.; D is a hypothesis, so the Gaussian short-rate models are not instantiated (their P(t,T) at t > 0 is not in the library). The simple rate is an observed process tied to the bond by hypothesis, since Payoff has no division. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-cap-bond-puts",
+      "name": "A Cap Is the Sum of Its Caplets, and a Strip of Bond Puts",
+      "domain": "mathematical_finance",
+      "description": "The cap, the schedule of caplets with reset dates T i and payment dates T (i+1) paying delta (l_i(T i) - K)^+ (cap, a payFlows schedule), is worth the sum of its caplets' values E[D (T (i+1)) * delta (l_i(T i) - K)^+] when each discounted payoff is integrable, and, when every reset date carries a bond-price model (BondModel) and 1 + delta K > 0, equals (1 + delta K) times the sum of the values of the bond puts struck at 1/(1 + delta K) expiring at T i. Same hypotheses and scope as the caplet-bond-put entry for each period.",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.Caplet\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- A cap is the sum of its caplets, and `(1 + δK)` times a strip of bond puts. -/\ntheorem valueDisc_cap' {Q : Measure Ω} [IsProbabilityMeasure Q] {𝓕 : Filtration ℝ≥0 mΩ}\n    {D : ℝ≥0 → Ω → ℝ} {X : ι → ℝ≥0 → Ω → ℝ} (b ℓ : ℕ → ι) (T : ℕ → ℝ≥0) {δ K : ℝ} (n : ℕ)\n    (h : ∀ i < n, BondModel Q 𝓕 D X (b i) (ℓ i) (T i) (T (i + 1)) δ) (hK : 0 < 1 + δ * K)\n    (hint : ∀ i < n, Integrable\n      (fun ω ↦ D (T (i + 1)) ω * (δ * max (X (ℓ i) (T i) ω - K) 0)) Q) :\n    (cap ℓ T δ K n).valueDisc Q D X\n        = ∑ i ∈ Finset.range n, (caplet (ℓ i) (T i) (T (i + 1)) δ K).valueDisc Q D X ∧\n      (cap ℓ T δ K n).valueDisc Q D X\n        = (1 + δ * K) * ∑ i ∈ Finset.range n,\n            (bondPut (b i) (T i) (1 / (1 + δ * K))).valueDisc Q D X :=\n  ⟨valueDisc_cap ℓ T δ K n hint, valueDisc_cap_eq_bondPuts b ℓ T n h hK hint⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hull, Options, Futures and Other Derivatives, ch. 29 (caplets as puts on zero-coupon bonds, Black's model for caplets); Brigo and Mercurio, Interest Rate Models, 2nd ed., sections 1.4 and 1.5; Musiela and Rutkowski, Martingale Methods in Financial Modelling, ch. 12. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. valueDisc_cap (via Contract.valueDisc_payFlows in MathFin/Contracts/Models/ShortRate.lean, a finite sum of integrals with integrable terms) and valueDisc_cap_eq_bondPuts (each caplet by valueDisc_caplet_eq_bondPut) in MathFin/Contracts/Models/Caplet.lean. SCOPE: as for mf-contract-caplet-bond-put, the bond prices are assumed to be the conditional expectations of D and the rates are observed processes tied to them; no short-rate model is instantiated. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-contract-caplet-black76",
+      "name": "A Caplet Is P(0,T1) Times the Black-76 Caplet at the Zero Curve's Forward Rate",
+      "domain": "mathematical_finance",
+      "description": "In a BondModel for a stochastic discount factor D with D T1 > 0, measurable and integrable, D T0 integrable and D T1 * l(T0) integrable, let Q' be the T1-forward measure (forwardMeasure of the bank account 1/D T1) and suppose l(T0) = F exp(-sigma^2 T/2 + sigma sqrt(T) Z) Q'-a.e. with Z standard normal under Q' (BSCallHyp at drift 0). Then the caplet paying delta (l(T0) - K)^+ at T1 is worth P(0,T1) * delta * [F Phi(d1) - K Phi(d2)], the Black-76 caplet blackCaplet, with P(0,t) = E[D t] and F = (P(0,T0)/P(0,T1) - 1)/delta the forward rate of the zero curve. The lognormality of the forward rate under the forward measure is a hypothesis; it is not derived from a short-rate model.",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.Caplet\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The caplet is `P(0, T₁)` times the Black-76 caplet at the forward rate of the zero curve. -/\ntheorem valueDisc_caplet_black76_forwardRate' {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {𝓕 : Filtration ℝ≥0 mΩ} {D : ℝ≥0 → Ω → ℝ} {X : ι → ℝ≥0 → Ω → ℝ} {b ℓ : ι}\n    {T₀ T₁ : ℝ≥0} {δ : ℝ} (h : BondModel Q 𝓕 D X b ℓ T₀ T₁ δ)\n    {Q' : Measure Ω} [IsProbabilityMeasure Q']\n    (hQ' : Q' = forwardMeasure Q fun ω ↦ 1 / D T₁ ω) (hD : ∀ ω, 0 < D T₁ ω)\n    (hDm : Measurable (D T₁)) (hD0 : Integrable (D T₀) Q)\n    (hint : Integrable (fun ω ↦ D T₁ ω * X ℓ T₀ ω) Q) {K σ T F : ℝ} {Z : Ω → ℝ}\n    (hZ : BSCallHyp Q' F K 0 σ T Z)\n    (hL : X ℓ T₀ =ᵐ[Q'] fun ω ↦ bsTerminal F 0 σ T (Z ω)) :\n    (caplet ℓ T₀ T₁ δ K).valueDisc Q D X\n      = zeroCurve Q D T₁ * blackCaplet\n          (fraForwardRate (zeroCurve Q D T₀) (zeroCurve Q D T₁) δ) K σ T δ :=\n  valueDisc_caplet_black76_forwardRate h hQ' hD hDm hD0 hint hZ hL\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hull, Options, Futures and Other Derivatives, ch. 29 (caplets as puts on zero-coupon bonds, Black's model for caplets); Brigo and Mercurio, Interest Rate Models, 2nd ed., sections 1.4 and 1.5; Musiela and Rutkowski, Martingale Methods in Financial Modelling, ch. 12. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. valueDisc_caplet_black76_forwardRate in MathFin/Contracts/Models/Caplet.lean: forwardMeasure_price (change of numeraire, MathFin/FixedIncome/ForwardMeasure.lean) turns E[D T1 * Y] into P(0,T1) * E^{T1}[Y]; black_futures_formula (MathFin/Futures/Black76.lean) prices the call on the lognormal rate; BondModel.integral_libor_forward identifies the mean F of the lognormal with the zero curve's forward rate, from the bond tower property and the forward-measure identity. SCOPE: lognormality of l(T0) under Q', the standard Black-76 assumption, is a hypothesis; Vasicek, Hull-White and GSR bond prices at t > 0, which would supply it, are not in the library. The time parameter T of the lognormal is free (the Black variance time), not tied to T0. Axioms-clean."
+      }
     }
   ]
 }

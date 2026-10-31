@@ -70,8 +70,8 @@ Bochner junk value `0` and this is not a price measure. -/
 noncomputable def forwardMeasure (Q : Measure Ω) (B : Ω → ℝ) : Measure Ω :=
   numeraireMeasure Q B (fun _ ↦ (1 : ℝ)) 1 (∫ ω, 1 / B ω ∂Q)
 
-/-- A positive integrable function has positive integral against a probability measure. -/
-private lemma integral_one_div_pos {Q : Measure Ω} [IsProbabilityMeasure Q] {B : Ω → ℝ}
+/-- The integral `P(0, T) = 𝔼[1/B_T]` of a positive integrable discount factor is positive. -/
+lemma integral_one_div_pos {Q : Measure Ω} [IsProbabilityMeasure Q] {B : Ω → ℝ}
     (hB : ∀ ω, 0 < B ω) (hint : Integrable (fun ω ↦ 1 / B ω) Q) :
     0 < ∫ ω, 1 / B ω ∂Q := by
   rw [integral_pos_iff_support_of_nonneg (fun ω ↦ (one_div_pos.2 (hB ω)).le) hint]
