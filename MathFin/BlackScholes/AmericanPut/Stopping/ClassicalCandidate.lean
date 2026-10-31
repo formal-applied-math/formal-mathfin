@@ -21,7 +21,7 @@ stochastic verification obligations.
 ## Result
 
 Public entry points include `classicalLogSpot`, `classicalCandidate`, `scaled_classical_payoff`,
-`classicalCandidate_bounds`.
+`classicalCandidate_bounds`, `classicalCandidate_norm_le`.
 -/
 
 @[expose] public section
@@ -79,6 +79,12 @@ theorem classicalCandidate_bounds {K r q σ S : ℝ} {p : ℝ → ℝ → ℝ}
           (σ^2/2*((T : ℝ)-(min t T : ℝ)))) :=
         mul_le_mul_of_nonneg_right he (mul_nonneg hK hlo)
       _ ≤ K := by simpa only [one_mul,mul_one] using mul_le_mul_of_nonneg_left hhi hK
+
+theorem classicalCandidate_norm_le {K r q σ S : ℝ} {p : ℝ → ℝ → ℝ}
+    (hp : PutEnvelope p) (W : ℝ≥0 → Ω → ℝ) (hK : 0 ≤ K) (hr : 0 ≤ r) (T t : ℝ≥0) (ω : Ω) :
+    ‖classicalCandidate W K r q σ S p T t ω‖ ≤ K := by
+  obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp W hK hr T t ω
+  simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
 
 theorem classicalCandidate_dominates {K r q σ S : ℝ} {p : ℝ → ℝ → ℝ}
     (hp : PutEnvelope p) (W : ℝ≥0 → Ω → ℝ)
@@ -140,10 +146,8 @@ theorem classical_price_eq_value_of_verification [MeasurableSpace Ω]
     (hmart : Martingale (fun t ω => classicalCandidate W K r q σ S p T
       (min t (θ.time ω)) ω) 𝓕 P) :
     americanPutValue P 𝓕 W K r q σ S T = K*p (Real.log (S/K)) (σ^2/2*(T : ℝ)) := by
-  have hbound : ∀ t ω, ‖classicalCandidate W K r q σ S p T t ω‖ ≤ K := by
-    intro t ω
-    obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp W hK.le hr T t ω
-    simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
+  have hbound : ∀ t ω, ‖classicalCandidate W K r q σ S p T t ω‖ ≤ K :=
+    classicalCandidate_norm_le hp W hK.le hr T
   rw [value_eq_of_contact_martingale hW hK.le hr hS.le hsuper
     (classicalCandidate_continuous hp hpaths T) hbound
     (fun _ ht ω => classicalCandidate_dominates hp W hK hS ht ω) θ hcontact hmart,

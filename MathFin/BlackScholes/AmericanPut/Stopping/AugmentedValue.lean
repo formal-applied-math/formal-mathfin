@@ -79,11 +79,9 @@ theorem brownianClassicalCandidate_rightAug_supermartingale {K r q σ S : ℝ}
         gaussianLimit := by
   apply bounded_continuous_supermartingale_rightCont
     (supermartingale_nullAugmentation
-        (brownianClassicalCandidate_supermartingale hp hK hr hσ T))
+        (brownianClassicalCandidate_supermartingale hp.toPutEnvelope hp.putWaiting hK hr hσ T))
     (classicalCandidate_continuous hp.toPutEnvelope continuous_brownian T) (C := K)
-  intro t ω
-  obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp.toPutEnvelope brownian hK hr T t ω
-  simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
+  exact classicalCandidate_norm_le hp.toPutEnvelope brownian hK hr T
 
 theorem brownianRightAugAmericanPut_eq_raw {K r q σ S : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
@@ -94,10 +92,7 @@ theorem brownianRightAugAmericanPut_eq_raw {K r q σ S : ℝ}
   · have hu := value_le_supermartingale_candidate measurable_brownian_uncurry hK.le hr hS.le
       (brownianClassicalCandidate_rightAug_supermartingale hp hK.le hr hσ T)
       (classicalCandidate_continuous hp.toPutEnvelope continuous_brownian T) (C := K)
-      (fun t ω => by
-        obtain ⟨hlo,hhi⟩ :=
-            classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp.toPutEnvelope brownian hK.le hr T t ω
-        simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi)
+      (classicalCandidate_norm_le hp.toPutEnvelope brownian hK.le hr T)
       (fun _ ht ω => classicalCandidate_dominates hp.toPutEnvelope brownian hK hS ht ω)
     rw [integral_congr_ae (classicalCandidate_initial isBrownianReal_brownian.eval_zero_ae_eq_zero
       K r q σ S p T)] at hu

@@ -152,7 +152,7 @@ theorem classicalGap_zero_iff (hp : ContinuousBoundaryPutSolution k h p b)
   have htime : 0 < σ^2/2*((T : ℝ)-(t : ℝ)) :=
     mul_pos (by positivity) (sub_pos.mpr (by exact_mod_cast ht))
   rw [classicalGap_eq hK hS ht.le,← hp.contact_iff htime]
-  simp [(Real.exp_pos _).ne',hK.ne',sub_eq_zero]
+  simp only [mul_eq_zero,(Real.exp_pos _).ne',hK.ne',false_or,sub_eq_zero]
 
 theorem classicalContactRule_gap_pos (hp : PutEnvelope p)
     (hadapt : Adapted 𝓕 W) (hpaths : ∀ ω, Continuous (fun t => W t ω))
@@ -181,7 +181,7 @@ theorem classicalContactRule_price_eq (hp : PutEnvelope p)
   have hz := classicalContactRule_gap (r := r) (q := q) (σ := σ) hp hadapt hpaths hK hS T ω
   change classicalGap W K r q σ S p T (θ.time ω) ω = 0 at hz
   rw [classicalGap_eq hK hS (θ.le_horizon ω)] at hz
-  simpa [(Real.exp_pos _).ne',hK.ne',sub_eq_zero] using hz
+  simpa only [mul_eq_zero,(Real.exp_pos _).ne',hK.ne',false_or,sub_eq_zero] using hz
 
 /-- Before first contact the price strictly exceeds the payoff. -/
 theorem classicalContactRule_payoff_lt (hp : PutEnvelope p)

@@ -112,7 +112,7 @@ theorem canonicalPrice_rectangle_meanValue {k h : ℝ} (hk : 0 ≤ k) {x R : ℝ
           ω = _
     rw [min_eq_left hle]
     have ht : actualRectangleExitTime k h x R δ ω ≤ T := (ρ.le_horizon ω).trans hδT
-    simp only [canonicalDiscountedPrice,min_eq_left ht]
+    simp only [canonicalDiscountedPrice_apply,min_eq_left ht]
   rw [hfun] at he
   exact he
 

@@ -18,19 +18,23 @@ curvature, or convexity when `q > r`.
 below cover `0 ≤ q ≤ r`, the whole open region and both endpoints, and the proof
 is machine-checked and axiom-clean.
 
-**A second, conditional development also ships here.** About 36 of the 173 modules
-(~3,500 lines) reach neither headline theorem: the six `Stopping/Classical*` modules
-and `Boundary/{NearExpiry, IncrementPositivity, StrictBoundarySpeed, FlatTail,
-StockConclusion, …}`. They are stated over an assumed classical solution
-`Boundary.DividendPutSolution`, a 17-field structure that **nothing in this port shows
-inhabited**, and they terminate in `Stopping/ClassicalBridge.lean`'s
-`brownian_boundary_curvature_of_price_identification`, whose own docstring names
-`hprice` an outstanding verification obligation. Results on that track — including
-`brownianUsual_boundary_conclusions`, the only `B'' > 0` statement in the tree — are
-therefore of unknown vacuity. The two headline declarations carry no such hypothesis
-and route around the track entirely; that is the point of the stopping-value
-construction. The source development's classical-regularity results are present in the
-import closure but are **not claimed by these two entries**.
+**A second, conditional development also ships here.** The boundary-geometry modules
+`Boundary/{NearExpiry, IncrementPositivity, StrictBoundarySpeed, FlatTail, StockConclusion, …}`
+and the PDE-facing `Stopping/Classical*` modules (`ClassicalHeatComparison`,
+`ClassicalSupermartingale`, `ClassicalBridge`) are stated over an assumed classical solution
+`Boundary.DividendPutSolution`. That structure extends `ContinuousBoundaryPutSolution`, which the
+actual stopping price is proved to satisfy (`canonicalPrice_continuousBoundaryPutSolution`), so the
+only field **nothing in this port shows inhabited** is `boundary_smooth`, the smoothness of the
+exercise boundary at positive times. The conditional track terminates in
+`Stopping/ClassicalBridge.lean`'s `brownian_boundary_curvature_of_price_identification`, whose own
+docstring names `hprice` an outstanding verification obligation. Results on that track, including
+`brownianUsual_boundary_conclusions`, the only `B'' > 0` statement in the tree, are therefore of
+unknown vacuity. The classical candidate, first-contact rule and supermartingale step are not part
+of that caveat: they are stated for any `PutEnvelope` with `PutWaiting`, and the actual price is an
+instance. The two headline declarations carry no such hypothesis and route around the
+conditional track entirely; that is the point of the stopping-value construction. The source
+development's classical-regularity results are present in the import closure but are **not
+claimed by these two entries**.
 
 ## Public declarations and benchmark entries
 

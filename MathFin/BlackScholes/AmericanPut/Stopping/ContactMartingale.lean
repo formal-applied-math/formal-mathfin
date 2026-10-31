@@ -85,12 +85,8 @@ theorem brownianInteriorRule_martingale {p : ℝ → ℝ → ℝ} {b : ℝ → �
   have hXcont : ∀ ω, Continuous (fun t => X t ω) := fun ω =>
     ((classicalCandidate_continuous hp.toPutEnvelope continuous_brownian T ω).comp
       (continuous_id.min continuous_const)).sub continuous_const
-  have hb : ∀ t ω, ‖U t ω‖ ≤ K := by
-    intro t ω
-    obtain ⟨hlo,hhi⟩ :=
-        classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp.toPutEnvelope brownian hK.le hr T t ω
-    change ‖classicalCandidate brownian K r q σ S p T t ω‖ ≤ K
-    simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
+  have hb : ∀ t ω, ‖U t ω‖ ≤ K :=
+    classicalCandidate_norm_le (q := q) (σ := σ) (S := S) hp.toPutEnvelope brownian hK.le hr T
   obtain ⟨M,_hMcont,hM,heq⟩ := brownianInteriorRule_ito_representation hp hK hS hσ T n
   have hθ : IsStoppingTime brownianAugFiltration (fun ω => (θ.time ω : WithTop ℝ≥0)) :=
     fun t => brownianFiltration_le_aug t _ (θ.stopping t)

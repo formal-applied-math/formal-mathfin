@@ -33,7 +33,8 @@ theorem boundaryKernelPlane_equation (t : ℝ) {x : ℝ} (hx : 0 < x) :
     planePartial boundaryKernelPlane (1,0) (t,x) =
       (1/2)*planePartial (planePartial boundaryKernelPlane (0,1)) (0,1) (t,x) := by
   have ht :=
-      planePartial_hasDeriv_time (t := t) ((boundaryKernelPlane_smoothAt hx).differentiableAt (by simp))
+      planePartial_hasDeriv_time (t := t)
+        ((boundaryKernelPlane_smoothAt hx).differentiableAt (by simp))
   have hd := planePartial_hasDeriv_space
     ((planePartial_smoothAt (boundaryKernelPlane_smoothAt (z := (t,x)) hx) (0,1)).differentiableAt
         (by simp))
