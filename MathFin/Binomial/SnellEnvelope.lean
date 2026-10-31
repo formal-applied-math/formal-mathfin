@@ -7,7 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.Binomial.Model
-public import MathFin.Binomial.MartingaleRepresentation
+public import MathFin.Binomial.FlipPaths
 
 /-!
 # Snell envelope characterization of `bermudanPrice` — scalar and path-space
@@ -28,7 +28,7 @@ is `bermudanPrice E` (`bermudanPrice_is_snell_envelope`, with minimality from
 minimality).
 
 **Path-space level.** On coin-flip paths `ω : ℕ → Bool` — the same pathwise
-language as `Binomial/MartingaleRepresentation.lean`, where the conditional
+language as `Binomial/FlipPaths.lean`, where the conditional
 expectation w.r.t. the binomial filtration is the explicit node average
 `E[X_{k+1} | ℱ_k](ω) = q·X_{k+1}(up child) + (1−q)·X_{k+1}(down child)` —
 the envelope `snellAux E q Z j k` of a payoff *process* `Z` is defined by the
@@ -82,7 +82,7 @@ namespace MathFin
 
 Coin-flip paths `ω : ℕ → Bool`, payoff *processes* `Z : ℕ → (ℕ → Bool) → ℝ`,
 and the node-average conditional expectation, as in
-`Binomial/MartingaleRepresentation.lean`. -/
+`Binomial/FlipPaths.lean`. -/
 
 variable {E : Set ℕ} {q : ℝ} {Z U : ℕ → (ℕ → Bool) → ℝ}
 
