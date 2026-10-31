@@ -30,8 +30,9 @@ and the conclusion on the whole time axis. This module supplies both.
 
 This is the exponential-martingale form of Lévy's characterization: the hypothesis is that every
 `exp(a·Y − ½a²·)` is a martingale. Lévy's characterization in its usual form (a continuous local
-martingale with quadratic variation `⟨Y⟩_t = t` is a Brownian motion) needs Itô's formula to
-produce these exponential martingales, and is not proved here.
+martingale `M` with `M₀ = 0` and `M² − t` a local martingale is a Brownian motion) is proved from
+this theorem in `LevyCharacterization.lean`: the exponential martingales come from a cell-by-cell
+second-order expansion, not from Itô's formula.
 
 ## Main results
 

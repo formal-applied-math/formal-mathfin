@@ -20,9 +20,8 @@ Delbaen, Eber and Heath (1999) read on them.
 
 **Expected shortfall.** It is coherent on every integrable loss, Gaussian or not
 (`expectedShortfall_isCoherentRiskMeasure`, an instance of the library's one coherence structure
-`IsCoherentRiskMeasure`). Gaussian laws are closed under `L + c` and `λ L`
-(`gaussianReal_add_const`, `gaussianReal_const_mul`), so translation, homogeneity and monotonicity
-of Gaussian expected shortfall need nothing Gaussian: they are the structure's axioms. What the
+`IsCoherentRiskMeasure`). Translation, homogeneity and monotonicity of Gaussian expected shortfall need nothing
+Gaussian: they are the structure's axioms. What the
 Gaussian family adds is the closed form of the sum. A jointly Gaussian pair has a Gaussian sum, so
 the structure's `ES(X + Y) ≤ ES X + ES Y` is the parameter inequality
 `gaussianCVaR_sd_add_le`, with the variance of the sum in the volatility slot.

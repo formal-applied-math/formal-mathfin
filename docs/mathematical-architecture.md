@@ -31,7 +31,7 @@ strictly-positive functional (the EMM) separates them; price `= ⟨EMM, payoff�
 The engine of continuous-time models: every model is `dX = b dt + σ dB`, and Itô's formula + the
 stochastic integral make functionals of `X` computable.
 - **Library:** the Itô tower — `ItoIntegralCLM` (+ isometry), `QuadraticVariationL2`,
-  `ItoFormulaUnrestrictedLocMart` (general C³ as a continuous local martingale), `ItoFormulaGBM`.
+  `ItoFormulaUnrestrictedLocMart` (general C² — `f_t`, `f_x`, `f_xx` jointly continuous — as a continuous local martingale), `ItoFormulaGBM`.
 - Since 2026-08-07 ([#183](https://github.com/formal-applied-math/formal-mathfin/issues/183)) the tower
   states the `σ` in `dX = b dt + σ dB`, not merely that some `σ` exists: every rung from
   `ito_formula_td_L2_bddDeriv` down to `discountedGBM_eq_itoIntegral` names its integrand, ending at
@@ -44,7 +44,7 @@ stochastic integral make functionals of `X` computable.
   sums converge to the `L²` integral of `f'(X)σ` (`tendstoInMeasure_riemannStieltjes_itoIntegral`).
   The same holds for `f(t, x)` with jointly continuous `f_t`, `f_x`, `f_xx`
   (`ItoFormulaAdapted.ito_formula_adapted_td_local_le`, of which the `C²` formula is the case `f_t = 0`), localised by the double cutoff
-  `SummitC.fTrunc` that `ItoFormulaUnrestricted` built for functions of Brownian motion. The bounds
+  `SummitC.fTrunc` that `ItoFormulaCutoff` built for functions of Brownian motion. The bounds
   on `σ` and `b` go the same way: for continuous adapted `σ`, `∫ σ dB` is the limit in probability
   of its Riemann sums (`ItoIntegralLocalised.localItoIntegral`, glued from the integrals of `σ`
   clipped to `[−N, N]`, no stopping times; adapted, and independent of the horizon `T` up to

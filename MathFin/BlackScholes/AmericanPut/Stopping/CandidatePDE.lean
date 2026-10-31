@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.ClassicalContact
+public import MathFin.BlackScholes.AmericanPut.Boundary.DividendProblem
 
 /-!
 # The Brownian-coordinate PDE of the discounted classical-price candidate

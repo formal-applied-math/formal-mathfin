@@ -64,7 +64,9 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 /-- The **T-forward measure** `Q^T` for the bank account `B` (its terminal value `B_T`): the
 change-of-numéraire measure with the zero-coupon bond `P(·, T)` as numéraire, `N_T = 1`,
 `N_0 = P(0, T) = 𝔼^Q[1/B_T]`, against the reference `B_T`, `B_0 = 1`. Its density is
-`dQ^T/dQ = (1/B_T)/P(0,T)`. -/
+`dQ^T/dQ = (1/B_T)/P(0,T)`. It is a probability measure only when `B > 0` and `1/B` is
+integrable (`forwardMeasure_isProbabilityMeasure`); when `1/B` is not integrable, `∫ 1/B` is the
+Bochner junk value `0` and this is not a price measure. -/
 noncomputable def forwardMeasure (Q : Measure Ω) (B : Ω → ℝ) : Measure Ω :=
   numeraireMeasure Q B (fun _ ↦ (1 : ℝ)) 1 (∫ ω, 1 / B ω ∂Q)
 
@@ -78,9 +80,10 @@ private lemma integral_one_div_pos {Q : Measure Ω} [IsProbabilityMeasure Q] {B 
   rw [this, measure_univ]
   exact zero_lt_one
 
-/-- **The T-forward measure is a probability measure** (indeed equivalent to `Q`): the
-normalisation `𝔼^Q[N_T/B_T] = N_0/B_0` reads `𝔼^Q[1/B_T] = P(0,T)`, which is the definition
-of `P(0,T)`. This is the one probability lemma behind every forward measure of the library. -/
+/-- **The T-forward measure is a probability measure**: the normalisation
+`𝔼^Q[N_T/B_T] = N_0/B_0` reads `𝔼^Q[1/B_T] = P(0,T)`, which is the definition of `P(0,T)`.
+This is the one probability lemma behind every forward measure of the library. (Equivalence with
+`Q` is `numeraireMeasure_isEquivProbMeasure`, not proved here.) -/
 theorem forwardMeasure_isProbabilityMeasure {Q : Measure Ω} [IsProbabilityMeasure Q]
     {B : Ω → ℝ} (hB : ∀ ω, 0 < B ω) (hint : Integrable (fun ω ↦ 1 / B ω) Q) :
     IsProbabilityMeasure (forwardMeasure Q B) :=

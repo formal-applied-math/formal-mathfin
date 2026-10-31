@@ -78,13 +78,13 @@ theorem brownianClassicalCandidate_usual_supermartingale {K r q σ S : ℝ}
     Supermartingale (classicalCandidate brownian K r q σ S p T)
       brownianUsualFiltration (completedMeasure gaussianLimit) := by
   have hb (t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ‖classicalCandidate brownian K r q σ S p T t ω‖ ≤ K := by
-    obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp brownian hK hr T t ω
+    obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp.toPutEnvelope brownian hK hr T t ω
     simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
   have hu := bounded_supermartingale_completion gaussianLimit
     (brownianClassicalCandidate_supermartingale hp hK hr hσ T) hb
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact bounded_continuous_supermartingale_rightCont (supermartingale_nullAugmentation hu)
-    (classicalCandidate_continuous hp continuous_brownian T) hb
+    (classicalCandidate_continuous hp.toPutEnvelope continuous_brownian T) hb
 
 theorem brownianUsualAmericanPut_eq_raw {K r q σ S : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
@@ -93,10 +93,10 @@ theorem brownianUsualAmericanPut_eq_raw {K r q σ S : ℝ}
     brownianUsualAmericanPut K r q σ S T = brownianAmericanPut K r q σ S T := by
   have hb (t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ‖classicalCandidate brownian K r q σ S p T t ω‖ ≤ K := by
     obtain ⟨hlo,hhi⟩ :=
-        classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp brownian hK.le hr T t ω
+        classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp.toPutEnvelope brownian hK.le hr T t ω
     simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
   have hU0 : StronglyMeasurable (classicalCandidate brownian K r q σ S p T 0) :=
-    ((classicalCandidate_adapted hp brownian_adapted T 0).mono (brownianFiltration.le 0)
+    ((classicalCandidate_adapted hp.toPutEnvelope brownian_adapted T 0).mono (brownianFiltration.le 0)
         le_rfl).stronglyMeasurable
   have hI0 := integral_completion_original gaussianLimit hU0
   have hinitial :=
@@ -119,8 +119,8 @@ theorem brownianUsualAmericanPut_eq_raw {K r q σ S : ℝ}
       le_horizon := θbound }
   apply le_antisymm
   · have hu := value_le_supermartingale_candidate brownian_completed_measurable hK.le hr hS.le
-      hsuper (classicalCandidate_continuous hp continuous_brownian T) hb
-      (fun _ ht ω => classicalCandidate_dominates hp brownian hK hS ht ω)
+      hsuper (classicalCandidate_continuous hp.toPutEnvelope continuous_brownian T) hb
+      (fun _ ht ω => classicalCandidate_dominates hp.toPutEnvelope brownian hK hS ht ω)
     rw [hI0,integral_congr_ae hinitial] at hu
     simp only [integral_const,probReal_univ,one_smul] at hu
     rw [hprice]

@@ -48,12 +48,8 @@ theorem brownianUsualActualContactTime_le_of_downcrossing {k h : ℝ} (hk : 0 < 
     (show (T : ℝ)-(s : ℝ) ∈ Ici 0 from sub_nonneg.mpr hsR.le)
     (show (T : ℝ) ∈ Ici 0 from T.coe_nonneg)
     (sub_le_self _ s.coe_nonneg)
-  have hpath : canonicalLogPath brownian k h x T s ω =
-      x+(k-h-1)*(s : ℝ)+Real.sqrt 2*brownian s ω := by
-    simp only [canonicalLogPath,min_eq_left hs.le,min_eq_left hsR.le]
   have hlt := hcont.2
   dsimp only [mem_ofPred_eq] at hlt
-  rw [hpath] at hlt
   linarith
 
 theorem brownianUsualActualContactTime_tendsto_of_germ {k h : ℝ} (hk : 0 < k)
