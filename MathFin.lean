@@ -753,6 +753,7 @@ import MathFin.Contracts.Models.BlackScholesAsian
 import MathFin.Contracts.Models.BlackScholesChooser
 import MathFin.Contracts.Models.Binomial
 import MathFin.Contracts.Models.BinomialLimit
+import MathFin.Contracts.Models.Caplet
 import MathFin.Contracts.Models.ShortRate
 import MathFin.Contracts.Models.DefaultTime
 import MathFin.Contracts.Risk

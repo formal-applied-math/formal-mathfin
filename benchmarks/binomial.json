@@ -213,10 +213,10 @@
     {
       "id": "mf-binomial-martingale-representation",
       "name": "Binomial Martingale Representation (Completeness)",
-      "description": "On the binomial tree, every martingale is the discrete stochastic integral of a predictable hedge against the discounted asset -- market completeness, the second pillar of the FTAP.",
+      "description": "On the binomial tree, every martingale is its initial value plus the martingaleTransform (discrete stochastic integral) of a predictable hedge against the discounted asset -- market completeness, the second pillar of the FTAP.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.MartingaleRepresentation\n\nopen MathFin\n\ntheorem binomial_martingale_representation_thm {q : ℝ} {M S : ℕ → (ℕ → Bool) → ℝ}\n    (hM_adapt : ∀ n, MathFin.PathAdaptedAt n (M n)) (hS_adapt : ∀ n, MathFin.PathAdaptedAt n (S n))\n    (hM_mart : ∀ n ω, q * M (n + 1) (Function.update ω n true) + (1 - q) * M (n + 1) (Function.update ω n false) = M n ω)\n    (hS_mart : ∀ n ω, q * S (n + 1) (Function.update ω n true) + (1 - q) * S (n + 1) (Function.update ω n false) = S n ω)\n    (hS_nondeg : ∀ n ω, S (n + 1) (Function.update ω n true) ≠ S (n + 1) (Function.update ω n false)) :\n    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, MathFin.PathAdaptedAt n (H n)) ∧\n      ∀ N ω, M N ω = M 0 ω + ∑ k ∈ Finset.range N, H k ω * (S (k + 1) ω - S k ω) :=\n  MathFin.binomial_martingale_representation hM_adapt hS_adapt hM_mart hS_mart hS_nondeg\n"
+        "lean": "import MathFin.Binomial.MartingaleRepresentation\n\nopen MathFin\n\ntheorem binomial_martingale_representation_thm {q : ℝ} {M S : ℕ → (ℕ → Bool) → ℝ}\n    (hM_adapt : ∀ n, MathFin.PathAdaptedAt n (M n)) (hS_adapt : ∀ n, MathFin.PathAdaptedAt n (S n))\n    (hM_mart : ∀ n ω, q * M (n + 1) (Function.update ω n true) + (1 - q) * M (n + 1) (Function.update ω n false) = M n ω)\n    (hS_mart : ∀ n ω, q * S (n + 1) (Function.update ω n true) + (1 - q) * S (n + 1) (Function.update ω n false) = S n ω)\n    (hS_nondeg : ∀ n ω, S (n + 1) (Function.update ω n true) ≠ S (n + 1) (Function.update ω n false)) :\n    ∃ A : ℕ → (ℕ → Bool) → ℝ, (∀ n, MathFin.PathAdaptedAt n (A (n + 1))) ∧\n      ∀ N ω, M N ω = M 0 ω + MathFin.martingaleTransform A S N ω :=\n  MathFin.binomial_martingale_representation hM_adapt hS_adapt hM_mart hS_mart hS_nondeg\n"
       },
       "metadata": {
         "chapter": 7,
@@ -230,9 +230,9 @@
       "id": "mf-binomial-european-replication",
       "name": "The Binomial Price of a European Claim Is the Cost of Its Hedge",
       "domain": "mathematical_finance",
-      "description": "Under no-arbitrage (0 < d < e^r < u) and S0 != 0, for every payoff g and horizon N there is a predictable strategy H (H_k depends only on the first k flips) such that, along every coin-flip path, e^(-rN) g(S_N) = binomialPrice u d r g N S0 + sum_{k<N} H_k (S~_{k+1} - S~_k), where S~_k = e^(-rk) S_k is the discounted spot.",
+      "description": "Under no-arbitrage (0 < d < e^r < u) and S0 != 0, for every payoff g and horizon N there is a predictable strategy H (H_{k+1} depends only on the first k flips) such that, along every coin-flip path, e^(-rN) g(S_N) = binomialPrice u d r g N S0 + sum_{k<N} H_{k+1} (S~_{k+1} - S~_k) (the martingaleTransform of H against the discounted spot), where S~_k = e^(-rk) S_k is the discounted spot.",
       "code": {
-        "lean": "import MathFin.Binomial.EuropeanReplication\n\nopen MathFin\n\n/-- The binomial price of a European claim is the initial capital of a hedge. -/\ntheorem binomialPrice_replication' {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : ℝ}\n    (hS₀ : S₀ ≠ 0) (g : ℝ → ℝ) (N : ℕ) :\n    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H n)) ∧ ∀ ω,\n      Real.exp (-(r * N)) * g (spotPath S₀ u d N ω) = binomialPrice u d r g N S₀\n        + ∑ k ∈ Finset.range N,\n          H k ω * (discountedSpot S₀ u d r (k + 1) ω - discountedSpot S₀ u d r k ω) :=\n  binomialPrice_replication h hS₀ g N\n"
+        "lean": "import MathFin.Binomial.EuropeanReplication\n\nopen MathFin\n\n/-- The binomial price of a European claim is the initial capital of a hedge. -/\ntheorem binomialPrice_replication' {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : ℝ}\n    (hS₀ : S₀ ≠ 0) (g : ℝ → ℝ) (N : ℕ) :\n    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H (n + 1))) ∧ ∀ ω,\n      Real.exp (-(r * N)) * g (spotPath S₀ u d N ω) = binomialPrice u d r g N S₀\n        + martingaleTransform H (discountedSpot S₀ u d r) N ω :=\n  binomialPrice_replication h hS₀ g N\n"
       },
       "metadata": {
         "chapter": 7,

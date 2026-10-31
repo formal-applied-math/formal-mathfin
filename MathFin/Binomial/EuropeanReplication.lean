@@ -15,8 +15,9 @@ public import MathFin.Binomial.SnellEnvelope
 after `N` steps. This file proves it is also the initial capital of a hedge: under
 no-arbitrage there is a predictable strategy `H` such that, along every coin-flip path,
 
-  `e^{−rN} g(S_N) = binomialPrice u d r g N S₀ + ∑_{k<N} H_k (S̃_{k+1} − S̃_k)`,
+  `e^{−rN} g(S_N) = binomialPrice u d r g N S₀ + (H · S̃)_N`,
 
+the `martingaleTransform` `∑_{k<N} H_{k+1} (S̃_{k+1} − S̃_k)` of `H` against the discounted spot,
 where `S̃_k = e^{−rk} S_k` is the discounted spot (`binomialPrice_replication`). The proof
 is the discrete martingale representation theorem (`binomial_martingale_representation`)
 applied to two one-step martingales: the discounted tree value of the claim, stopped at `N`
@@ -122,17 +123,16 @@ lemma discountedSpot_update_ne {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : �
   exact h.d_lt_u.ne' (mul_left_cancel₀ hS (mul_left_cancel₀ (Real.exp_pos _).ne' heq))
 
 /-- **The tree price is the cost of a hedge.** Under no-arbitrage and `S₀ ≠ 0`, for every payoff
-`g` and horizon `N` there is a predictable strategy `H` (`H_k` depends only on the first `k`
-flips) whose gains in the discounted spot, added to the tree price, are the discounted payoff
-on every path:
+`g` and horizon `N` there is a predictable strategy `H` (`H_{k+1}` depends only on the first `k`
+flips) whose `martingaleTransform` against the discounted spot, added to the tree price, is the
+discounted payoff on every path:
 
-  `e^{−rN} g(S_N) = binomialPrice u d r g N S₀ + ∑_{k<N} H_k (S̃_{k+1} − S̃_k)`. -/
+  `e^{−rN} g(S_N) = binomialPrice u d r g N S₀ + ∑_{k<N} H_{k+1} (S̃_{k+1} − S̃_k)`. -/
 theorem binomialPrice_replication {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : ℝ} (hS₀ : S₀ ≠ 0)
     (g : ℝ → ℝ) (N : ℕ) :
-    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H n)) ∧ ∀ ω,
+    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H (n + 1))) ∧ ∀ ω,
       Real.exp (-(r * N)) * g (spotPath S₀ u d N ω) = binomialPrice u d r g N S₀
-        + ∑ k ∈ Finset.range N,
-          H k ω * (discountedSpot S₀ u d r (k + 1) ω - discountedSpot S₀ u d r k ω) := by
+        + martingaleTransform H (discountedSpot S₀ u d r) N ω := by
   obtain ⟨H, hH, hrep⟩ := binomial_martingale_representation
     (pathAdaptedAt_discountedTreeValue u d r g N S₀) (pathAdaptedAt_discountedSpot S₀ u d r)
     (discountedTreeValue_step u d r g N S₀) (discountedSpot_step h S₀)
