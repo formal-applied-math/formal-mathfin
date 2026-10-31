@@ -84,11 +84,13 @@ theorem expectedShortfall_of_hasLaw_gaussianReal {m : ℝ} {v : ℝ≥0} (hv : v
     funext (rockafellarUryasev_of_hasLaw_gaussianReal hX)] at h
   exact h.unique (gaussianCVaR_isLeast_ruObjective m _ _ α hσ (Phi_PhiInv hα) hα.2)
 
+omit [IsProbabilityMeasure P] in
 /-- **The expected shortfall of a Gaussian random variable** in terms of its mean and variance:
 `ES_α(X) = E X + sd(X) ϕ(Φ⁻¹(α))/(1 − α)`. A degenerate (`Var X = 0`) Gaussian is almost surely
 constant, its own expected shortfall (`expectedShortfall_const`). -/
 theorem expectedShortfall_of_hasGaussianLaw (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) :
     expectedShortfall X P α = gaussianCVaR P[X] √Var[X; P] (PhiInv α) α := by
+  have := hX.isProbabilityMeasure
   rcases (variance_nonneg X P).eq_or_lt with hv | hv
   · have h0 : X =ᵐ[P] fun _ ↦ P[X] := (evariance_eq_zero_iff hX.aemeasurable).1
       (by rw [← hX.memLp_two.ofReal_variance_eq, ← hv, ENNReal.ofReal_zero])

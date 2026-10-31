@@ -31,16 +31,25 @@ jointly Gaussian pair at a level `α ≥ 1/2` it is subadditive
 (`valueAtRisk_add_le_of_hasGaussianLaw` there), because `VaR = E + sd Φ⁻¹(α)` and the standard
 deviation is subadditive (`variance_add_le_sq`).
 
+**The random-variable side.** For a Gaussian loss `X`, the Gaussian laws of the affine images
+`X + c` and `λ X` (`gaussianReal_add_const`, `gaussianReal_const_mul`) turn the value-at-risk and
+the expected shortfall of the image into the closed forms at the transformed parameters, and the
+parameter identities below finish the proofs:
+`valueAtRisk_add_const_of_hasGaussianLaw`, `valueAtRisk_const_mul_of_hasGaussianLaw`,
+`expectedShortfall_add_const_of_hasGaussianLaw`, `expectedShortfall_const_mul_of_hasGaussianLaw`.
+(Translation and homogeneity of VaR and ES hold for every loss, `valueAtRisk_add_const`,
+`expectedShortfall_add_const`; what these state is that the closed form is carried along.)
+
 **The parameter formulas.** `gaussianVaR_translation`, `gaussianCVaR_translation`,
 `gaussianVaR_positiveHomogeneity`, `gaussianCVaR_positiveHomogeneity`, `gaussianVaR_monotone_mean`,
 `gaussianCVaR_monotone_mean`, `joint_stdev_le`, `gaussianVaR_subadditive` and
 `gaussianCVaR_subadditive` are identities and inequalities about the two real functions `μ + σ z`
 and `μ + σ ϕ(z)/(1 − α)` on all real parameters, including `σ < 0` and `α ≥ 1`, where neither is
-the risk measure of any law. They stay as parameter algebra for that reason: a derivation from the
-structure would carry the hypotheses `σ > 0` and `α ∈ (0, 1)` and, for subadditivity, would have to
-realise an arbitrary `(σ₁, σ₂, ρ)` as a jointly Gaussian pair, and it would prove strictly less.
-In `gaussianVaR_subadditive` and `gaussianCVaR_subadditive` the correlation `ρ` is a free
-parameter; `valueAtRisk_add_le_of_hasGaussianLaw` and `gaussianCVaR_sd_add_le` are the statements at the
+the risk measure of any law. They stay as parameter algebra for that reason, and the translation
+and homogeneity ones are the lemmas the random-variable theorems consume. Monotonicity in the mean
+orders the parameters at equal volatility, not random variables, so it keeps its parameter form. In `gaussianVaR_subadditive` and
+`gaussianCVaR_subadditive` the correlation `ρ` is a free parameter;
+`valueAtRisk_add_le_of_hasGaussianLaw` and `gaussianCVaR_sd_add_le` are the statements at the
 correlation a pair actually has.
 
 Results:
@@ -48,7 +57,8 @@ Results:
 * `gaussianCVaR_sd_add_le`: the closed-form CVaR of a jointly Gaussian pair is subadditive, with
   the exact volatility of the sum; a corollary of the coherence of expected shortfall.
 * `joint_stdev_le`: `√(σ₁² + 2 ρ σ₁ σ₂ + σ₂²) ≤ σ₁ + σ₂` for `ρ ≤ 1` and `σ_i ≥ 0`.
-* The parameter formulas listed above.
+* The parameter formulas listed above, and the four random-variable theorems that consume the
+  translation and homogeneity ones.
 -/
 
 @[expose] public section
@@ -157,5 +167,59 @@ theorem gaussianCVaR_sd_add_le (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) 
   rwa [expectedShortfall_of_hasGaussianLaw h.fun_add hα,
     expectedShortfall_of_hasGaussianLaw h.fst hα, expectedShortfall_of_hasGaussianLaw h.snd hα,
     integral_add h.fst.integrable h.snd.integrable] at key
+
+/-! ### The random-variable side: the affine images of a Gaussian loss -/
+
+/-- A Gaussian loss, as the law `N(E X, Var X)` of `RiskMeasures/Gaussian.lean`. -/
+private lemma hasLaw_gaussianReal_of_hasGaussianLaw (hX : HasGaussianLaw X P) :
+    HasLaw X (gaussianReal P[X] Var[X; P].toNNReal) P :=
+  ⟨hX.aemeasurable, hX.map_eq_gaussianReal⟩
+
+/-- **Translation of a Gaussian loss**, through the Gaussian law `N(E X + c, Var X)` of `X + c`:
+`VaR_α(X + c) = gaussianVaR (E X) (sd X) Φ⁻¹(α) + c`. The location shift of
+`gaussianVaR_translation`, read as the value-at-risk of the shifted loss. -/
+theorem valueAtRisk_add_const_of_hasGaussianLaw (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1)
+    (c : ℝ) :
+    valueAtRisk (fun ω ↦ X ω + c) P α = gaussianVaR P[X] √Var[X; P] (PhiInv α) + c := by
+  rw [valueAtRisk_of_hasLaw_gaussianReal
+    (gaussianReal_add_const (hasLaw_gaussianReal_of_hasGaussianLaw hX) c) hα,
+    Real.coe_toNNReal _ (variance_nonneg X P), gaussianVaR_translation]
+
+/-- **Positive homogeneity of a Gaussian loss**, through the Gaussian law
+`N(λ E X, λ² Var X)` of `λ X`: `VaR_α(λ X) = λ · gaussianVaR (E X) (sd X) Φ⁻¹(α)` for `λ ≥ 0`. The
+scaling of `gaussianVaR_positiveHomogeneity`, read as the value-at-risk of the scaled loss. -/
+theorem valueAtRisk_const_mul_of_hasGaussianLaw (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1)
+    {l : ℝ} (hl : 0 ≤ l) :
+    valueAtRisk (fun ω ↦ l * X ω) P α = l * gaussianVaR P[X] √Var[X; P] (PhiInv α) := by
+  rw [valueAtRisk_of_hasLaw_gaussianReal
+    (gaussianReal_const_mul (hasLaw_gaussianReal_of_hasGaussianLaw hX) l) hα,
+    NNReal.coe_mul, NNReal.coe_mk, Real.sqrt_mul (sq_nonneg l), Real.sqrt_sq_eq_abs,
+    Real.coe_toNNReal _ (variance_nonneg X P), gaussianVaR_positiveHomogeneity _ _ _ hl]
+
+/-- **Translation of a Gaussian loss**, expected shortfall: `ES_α(X + c) =
+gaussianCVaR (E X) (sd X) Φ⁻¹(α) α + c`, the Gaussian law of `X + c` through
+`expectedShortfall_of_hasGaussianLaw` and `gaussianCVaR_translation`. -/
+theorem expectedShortfall_add_const_of_hasGaussianLaw (hX : HasGaussianLaw X P)
+    (hα : α ∈ Ioo 0 1) (c : ℝ) :
+    expectedShortfall (fun ω ↦ X ω + c) P α =
+      gaussianCVaR P[X] √Var[X; P] (PhiInv α) α + c := by
+  have := hX.isProbabilityMeasure
+  rw [expectedShortfall_of_hasGaussianLaw
+    (gaussianReal_add_const (hasLaw_gaussianReal_of_hasGaussianLaw hX) c).hasGaussianLaw hα,
+    variance_add_const hX.aemeasurable.aestronglyMeasurable,
+    integral_add hX.integrable (integrable_const c)]
+  simp [gaussianCVaR_translation]
+
+/-- **Positive homogeneity of a Gaussian loss**, expected shortfall: `ES_α(λ X) =
+λ · gaussianCVaR (E X) (sd X) Φ⁻¹(α) α` for `λ ≥ 0`, the Gaussian law of `λ X` through
+`expectedShortfall_of_hasGaussianLaw` and `gaussianCVaR_positiveHomogeneity`. -/
+theorem expectedShortfall_const_mul_of_hasGaussianLaw (hX : HasGaussianLaw X P)
+    (hα : α ∈ Ioo 0 1) {l : ℝ} (hl : 0 ≤ l) :
+    expectedShortfall (fun ω ↦ l * X ω) P α =
+      l * gaussianCVaR P[X] √Var[X; P] (PhiInv α) α := by
+  rw [expectedShortfall_of_hasGaussianLaw
+    (gaussianReal_const_mul (hasLaw_gaussianReal_of_hasGaussianLaw hX) l).hasGaussianLaw hα,
+    variance_const_mul, integral_const_mul, Real.sqrt_mul (sq_nonneg l), Real.sqrt_sq_eq_abs,
+    gaussianCVaR_positiveHomogeneity _ _ _ _ hl]
 
 end MathFin
