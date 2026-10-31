@@ -421,11 +421,11 @@ options, and the `1/K²` density is exactly what a variance swap holds.
 ### Binomial martingale representation — market completeness ✅
 On the binomial tree (coin-flip paths, with the node-wise risk-neutral condition
 `q·X^U + (1−q)·X^D = X` — the explicit binomial conditional expectation), every martingale `M`
-is the discrete stochastic integral of a **predictable** hedge against the discounted asset:
-`M_N = M_0 + ∑_{k<N} H_k·(S_{k+1} − S_k)` (`binomial_martingale_representation`). The hedge is
-the node-wise delta `H = ΔM/ΔS`, predictable because it is fixed *before* the next flip is
-revealed; the proof is purely algebraic and pathwise (no measure theory), telescoping the
-one-step identity. The discrete companion of the abstract martingale-transform converse
+is its initial value plus the `martingaleTransform` of a **predictable** hedge against the
+discounted asset: `M_N = M_0 + ∑_{k<N} A_{k+1}·(S_{k+1} − S_k)`
+(`binomial_martingale_representation`). The hedge is the node-wise delta `A = ΔM/ΔS`,
+predictable because it is fixed *before* the next flip is revealed; the proof is purely algebraic and pathwise (no measure theory), telescoping the
+one-step identity. The converse of `martingaleTransform_isMartingale`
 (`Foundations/MartingaleTransform.lean`).
 → *Finance:* **completeness** — the second pillar of the FTAP: every contingent claim is
 replicable by a self-financing strategy, so the risk-neutral price is the *unique* arbitrage-free
