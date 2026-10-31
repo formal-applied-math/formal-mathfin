@@ -64,7 +64,8 @@ theorem canonicalContactRule_price_eq (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
       putPayoff (x+(k-h-1)*(s : ℝ)+Real.sqrt 2*W s ω) := by
   have he := classicalContactRule_price_eq (K := 1) (r := k) (q := h) (σ := Real.sqrt 2)
     (canonicalPrice_putEnvelope (h := h) hk) hW hpaths one_pos (Real.exp_pos x) T ω
-  simpa only [classicalLogSpot_canonical,sqrt_two_sq_div_two_mul] using he
+  simp only [classicalLogSpot_canonical,sqrt_two_sq_div_two_mul] at he
+  exact he
 
 theorem canonicalContactRule_continuation_before (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
     (hpaths : ∀ ω, Continuous (fun t => W t ω)) (x : ℝ) (T : ℝ≥0) (ω : Ω)
