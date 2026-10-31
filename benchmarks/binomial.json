@@ -232,7 +232,7 @@
       "domain": "mathematical_finance",
       "description": "Under no-arbitrage (0 < d < e^r < u) and S0 != 0, for every payoff g and horizon N there is a predictable strategy H (H_{k+1} is strongly measurable for the natural filtration of the first k coin flips, i.e. depends only on them) such that, along every coin-flip path, e^(-rN) g(S_N) = binomialPrice u d r g N S0 + sum_{k<N} H_{k+1} (S~_{k+1} - S~_k) (the martingaleTransform of H against the discounted spot), where S~_k = e^(-rk) S_k is the discounted spot.",
       "code": {
-        "lean": "import MathFin.Binomial.MartingaleRepresentation\n\nopen MathFin\n\n/-- The binomial price of a European claim is the initial capital of a hedge. -/\ntheorem binomialPrice_replication' {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : ℝ}\n    (hS₀ : S₀ ≠ 0) (g : ℝ → ℝ) (N : ℕ) :\n    ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧ ∀ ω,\n      Real.exp (-(r * N)) * g (spotPath S₀ u d N ω) = binomialPrice u d r g N S₀\n        + martingaleTransform H (discountedSpot S₀ u d r) N ω :=\n  binomialPrice_replication h hS₀ g N\n"
+        "lean": "import MathFin.Binomial.MartingaleRepresentation\n\nopen MeasureTheory MathFin\n\n/-- The binomial price of a European claim is the initial capital of a hedge. -/\ntheorem binomialPrice_replication' {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : ℝ}\n    (hS₀ : S₀ ≠ 0) (g : ℝ → ℝ) (N : ℕ) :\n    ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧ ∀ ω,\n      Real.exp (-(r * N)) * g (spotPath S₀ u d N ω) = binomialPrice u d r g N S₀\n        + martingaleTransform H (discountedSpot S₀ u d r) N ω :=\n  binomialPrice_replication h hS₀ g N\n"
       },
       "metadata": {
         "chapter": 7,
