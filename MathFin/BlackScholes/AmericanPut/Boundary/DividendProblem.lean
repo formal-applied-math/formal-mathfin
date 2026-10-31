@@ -57,10 +57,6 @@ structure DividendPutSolution (k h : ℝ) (p : ℝ → ℝ → ℝ) (b : ℝ →
     extends ContinuousBoundaryPutSolution k h p b where
   boundary_smooth : ContDiffOn ℝ ∞ b (Ioi 0)
 
-instance {k h : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} :
-    Coe (DividendPutSolution k h p b) (ContinuousBoundaryPutSolution k h p b) :=
-  ⟨DividendPutSolution.toContinuousBoundaryPutSolution⟩
-
 /-- The CCJZ (2008), (1.1) zero-dividend contract, with the stopping-region extension and
 initial payoff on all log prices: the case `h = 0` of `DividendPutSolution`. The smoothness
 requirements describe the intended classical solution class. The actual stopping price is proved

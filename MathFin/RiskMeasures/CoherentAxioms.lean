@@ -29,7 +29,7 @@ the structure's `ES(X + Y) ≤ ES X + ES Y` is the parameter inequality
 **Value-at-risk.** It is not coherent in general (`RiskMeasures/VaRSuperadditivity.lean`), but on a
 jointly Gaussian pair at a level `α ≥ 1/2` it is subadditive
 (`valueAtRisk_add_le_of_hasGaussianLaw` there), because `VaR = E + sd Φ⁻¹(α)` and the standard
-deviation is subadditive (`variance_add_le_sq`).
+deviation is subadditive (`sqrt_variance_add_le`).
 
 **The random-variable side.** For a Gaussian loss `X`, the Gaussian laws of the affine images
 `X + c` and `λ X` (`gaussianReal_add_const`, `gaussianReal_const_mul`) turn the value-at-risk and

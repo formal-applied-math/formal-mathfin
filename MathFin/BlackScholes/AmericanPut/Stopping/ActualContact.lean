@@ -36,19 +36,19 @@ variable {Ω : Type*}
 
 /-- At strike `1`, spot `Real.exp x` and volatility `Real.sqrt 2` the strike-normalized log spot
 is `x + (k-h-1)*t + Real.sqrt 2 * W t`. -/
-theorem classicalLogSpot_canonical (W : ℝ≥0 → Ω → ℝ) (k h x : ℝ) (t : ℝ≥0) (ω : Ω) :
+@[simp] theorem classicalLogSpot_canonical (W : ℝ≥0 → Ω → ℝ) (k h x : ℝ) (t : ℝ≥0) (ω : Ω) :
     classicalLogSpot W 1 k h (Real.sqrt 2) (Real.exp x) t ω =
       x+(k-h-1)*(t : ℝ)+Real.sqrt 2*W t ω := by
   simp only [classicalLogSpot,div_one,Real.log_exp,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]
   ring
 
 /-- At volatility `Real.sqrt 2` the normalized time `σ^2/2*s` is the physical time `s`. -/
-theorem sqrt_two_sq_div_two_mul (s : ℝ) : Real.sqrt 2^2/2*s = s := by
+@[simp] theorem sqrt_two_sq_div_two_mul (s : ℝ) : Real.sqrt 2^2/2*s = s := by
   rw [Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]
   ring
 
 /-- At volatility `Real.sqrt 2` the normalized rate is the rate itself. -/
-theorem normalizedRate_sqrt_two (r : ℝ) : normalizedRate r (Real.sqrt 2) = r := by
+@[simp] theorem normalizedRate_sqrt_two (r : ℝ) : normalizedRate r (Real.sqrt 2) = r := by
   rw [normalizedRate,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]
   ring
 
@@ -58,9 +58,9 @@ variable [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω�
 /-- The rule stopping at the first zero of the gap between the discounted price and the
 discounted payoff, that is, at first contact of the price with the payoff: the classical
 first-contact rule for the actual price. -/
-noncomputable def canonicalContactRule (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
+noncomputable abbrev canonicalContactRule (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
     (hpaths : ∀ ω, Continuous (fun t => W t ω)) (x : ℝ) (T : ℝ≥0) : StoppingRule 𝓕 T :=
-  classicalContactRule (K := 1) (r := k) (q := h) (σ := Real.sqrt 2)
+  classicalContactRule k h (Real.sqrt 2)
     (canonicalPrice_putEnvelope (h := h) hk) hW hpaths one_pos (Real.exp_pos x) T
 
 theorem canonicalContactRule_price_eq (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
@@ -70,8 +70,7 @@ theorem canonicalContactRule_price_eq (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
       putPayoff (x+(k-h-1)*(s : ℝ)+Real.sqrt 2*W s ω) := by
   have he := classicalContactRule_price_eq (K := 1) (r := k) (q := h) (σ := Real.sqrt 2)
     (canonicalPrice_putEnvelope (h := h) hk) hW hpaths one_pos (Real.exp_pos x) T ω
-  simp only [classicalLogSpot_canonical,sqrt_two_sq_div_two_mul] at he
-  exact he
+  simpa using he
 
 theorem canonicalContactRule_continuation_before (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
     (hpaths : ∀ ω, Continuous (fun t => W t ω)) (x : ℝ) (T : ℝ≥0) (ω : Ω)
@@ -81,7 +80,7 @@ theorem canonicalContactRule_continuation_before (hk : 0 ≤ k) (hW : Adapted �
     (σ := Real.sqrt 2) (canonicalPrice_putEnvelope (h := h) hk) hW hpaths one_pos
     (Real.exp_pos x) ω ht
   refine ⟨sub_pos.mpr (by exact_mod_cast htT),?_⟩
-  simpa only [classicalLogSpot_canonical,sqrt_two_sq_div_two_mul] using hlt
+  simpa using hlt
 
 theorem canonicalContactRule_exercise_before_expiry (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
     (hpaths : ∀ ω, Continuous (fun t => W t ω)) (x : ℝ) (T : ℝ≥0) (ω : Ω)
@@ -108,7 +107,7 @@ theorem canonicalContactRule_contact (hk : 0 ≤ k) (hW : Adapted 𝓖 brownian)
     let θ := canonicalContactRule (h := h) hk hW hpaths x T
     canonicalDiscountedPrice k h x T (θ.time ω) ω =
       putReward brownian 1 k h (Real.sqrt 2) (Real.exp x) θ.time ω :=
-  classicalContactRule_contact (K := 1) (r := k) (q := h) (σ := Real.sqrt 2)
+  classicalContactRule_contact
     (canonicalPrice_putEnvelope (h := h) hk) hW hpaths one_pos (Real.exp_pos x) T ω
 
 /-- Before first contact the discounted actual price strictly exceeds the discounted reward. -/
@@ -117,7 +116,7 @@ theorem canonicalContactRule_reward_lt (hk : 0 ≤ k) (hW : Adapted 𝓖 brownia
     {t : ℝ≥0} (ht : t < (canonicalContactRule (h := h) hk hW hpaths x T).time ω) :
     frozenPutReward brownian 1 k h (Real.sqrt 2) (Real.exp x) T t ω <
       canonicalDiscountedPrice k h x T t ω :=
-  classicalContactRule_reward_lt (K := 1) (r := k) (q := h) (σ := Real.sqrt 2)
+  classicalContactRule_reward_lt
     (canonicalPrice_putEnvelope (h := h) hk) hW hpaths one_pos (Real.exp_pos x) ω ht
 
 end Brownian
