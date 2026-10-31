@@ -345,7 +345,7 @@ lemma tendstoInMeasure_marshalDrift (T : ℝ≥0)
     simp_rw [heq]
     have h0 : Tendsto (fun n ↦ ‖simpleAssembly_T (μ := μ) T hBmeas (W n) - θhat‖) atTop (𝓝 0) :=
       tendsto_iff_norm_sub_tendsto_zero.mp
-        (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hbdd V hV)
+        (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
     simpa using h0.pow 2
   -- `θ̂` sliced is `L²` a.e.
   have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) :=
@@ -426,7 +426,7 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
     simp_rw [heq]
     have h0 : Tendsto (fun n ↦ ‖simpleAssembly_T (μ := μ) T hBmeas (W n) - θhat‖) atTop (𝓝 0) :=
       tendsto_iff_norm_sub_tendsto_zero.mp
-        (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hbdd V hV)
+        (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
     simpa using h0.pow 2
   have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) :=
     ⟨aestronglyMeasurable_of_aestronglyMeasurable_trim (natFiltration hBmeas).predictable_le_prod
