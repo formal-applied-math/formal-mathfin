@@ -1617,6 +1617,38 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, MathFin/BlackScholes/Heston.lean. The 2D exponential-affine family, the Heston generator with the correlated cross term, the rho-shifted Riccati closed forms (Moebius denominator, admissible strip 0 < u < 1 forcing gamma > |k - rho xi u|), and the calendar-time PDE verification. The expectation form of the transform (that the profile is E[e^{u log S_T}]) is not proved: it needs the Heston process and a 2D correlated Ito formula, which the library does not have. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-heston-small-vol-of-vol-blackscholes-limit",
+      "name": "Heston Transform Tends to Black-Scholes as Vol-of-Vol Vanishes",
+      "description": "The Heston transform profile built from the Riccati closed forms hestonA, hestonBv -- carrying the vol-of-vol parameter xi, which the closed forms' 2*kappa*theta/xi^2 prefactor makes discontinuous at xi = 0 -- tends as xi -> 0 (xi != 0) to the Black-Scholes real moment generating function E[e^{u log S_T}] for log S_T ~ N(x + r(T-t) - W/2, W), with integrated deterministic variance W = integral of theta + (v - theta)e^{-kappa s} over [0, T-t]. Proved for kappa > 0, 0 < u < 1, v, theta >= 0, t <= T, via the A-flow's FTC-integral representation (never expanding the catastrophic cancellation) and joint continuity of the Bv-flow across xi = 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.HestonSmallVolOfVol\n\nopen Filter Topology ProbabilityTheory\nopen scoped NNReal\n\nnamespace MathFin\nopen Heston\n\ntheorem heston_small_vol_of_vol_blackscholes_limit_thm {κ u : ℝ} (hκ : 0 < κ) (hu1 : 0 < u)\n    (hu2 : u < 1) (r θ ρ T t x v : ℝ) (hv : 0 ≤ v) (hθ : 0 ≤ θ) (htT : t ≤ T) :\n    Tendsto (fun ξ => hestonProfile u (fun w => hestonA r κ θ ξ ρ u (T - w))\n        (fun w => hestonBv κ ξ ρ u (T - w)) t x v) (𝓝[≠] 0)\n      (𝓝 (mgf id (gaussianReal (x + r * (T - t) - (vasicekIntegratedMean v θ κ (T - t)).toNNReal / 2)\n        (vasicekIntegratedMean v θ κ (T - t)).toNNReal) u)) :=\n  Heston.tendsto_hestonProfile_smallVolOfVol_blackScholes hκ hu1 hu2 r θ ρ T t x v hv hθ htT\n\nend MathFin\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Heston (1993), A closed-form solution for options with stochastic volatility with applications to bond and currency options, Review of Financial Studies 6(2), 327-343; the small-vol-of-vol branch matches QuantLib's AnalyticHestonEngine::chF Taylor expansion at sigma <= 1e-6",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, MathFin/BlackScholes/HestonSmallVolOfVol.lean. Builds on the pre-existing Heston.lean Riccati closed forms (hestonA, hestonBv) and FixedIncome/Vasicek.lean + VasicekBondPrice.lean for the deterministic xi=0 variance path; the A-flow limit is proved via its FTC-integral form, avoiding the closed form's own 2*kappa*theta/xi^2 cancellation. Scope inherited from Heston.lean: the real moment transform 0 < u < 1 at the Riccati level, not the complex characteristic function or the identification of the profile with E[e^{u log S_T}] for an actual Heston process. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-heston-zero-vol-of-vol-integrated-variance",
+      "name": "Integrated Deterministic Variance at Zero Vol-of-Vol",
+      "description": "At vol-of-vol xi = 0 the Heston variance follows the deterministic ODE dv = kappa(theta - v)dt, solved by vasicekDeterministic v0 theta kappa; its time integral over [0, tau] equals the closed form vasicekIntegratedMean v0 theta kappa tau = v0*B(tau) + theta*(tau - B(tau)), B(tau) = (1 - e^{-kappa*tau})/kappa. This is the total variance feeding the Heston-to-Black-Scholes small-vol-of-vol limit.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.HestonSmallVolOfVol\n\nnamespace MathFin\n\ntheorem heston_zero_vol_of_vol_integrated_variance_thm {κ : ℝ} (hκ : κ ≠ 0) (v₀ θ τ : ℝ) :\n    ∫ s in (0 : ℝ)..τ, vasicekDeterministic v₀ θ κ s = vasicekIntegratedMean v₀ θ κ τ :=\n  integral_vasicekDeterministic hκ v₀ θ τ\n\nend MathFin\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Heston (1993), A closed-form solution for options with stochastic volatility with applications to bond and currency options, Review of Financial Studies 6(2), 327-343 (the kappa(theta-v) mean-reversion drift at vol-of-vol zero); the integrated-mean closed form is the Vasicek short-rate identity (Vasicek 1977) applied to the variance process",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via FTC on vasicekIntegratedMean's derivative, MathFin/BlackScholes/HestonSmallVolOfVol.lean (reusing vasicekBondB, hasDerivAt_vasicekBondB from FixedIncome/VasicekBondPrice.lean and FixedIncome/AffineTermStructurePDE.lean). Axioms-clean."
+      }
     }
   ]
 }
