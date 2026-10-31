@@ -35,8 +35,9 @@ model `X` carries them as observed processes. `BondModel` says the underlying `b
 Lognormality of `L` under the forward measure is a hypothesis. The Vasicek bond prices
 `P(t, T)` at `t > 0` are in the library (`bondPrice_vasicek`,
 `Contracts/Models/VasicekBond.lean`), but the lognormality is not derived from them; Hull–White
-and the two-piece GSR are not covered. CMS rates are not covered: a CMS payoff observes a swap
-rate, a ratio of bond-price sums, which `Payoff` cannot express.
+and the two-piece GSR are not covered. CMS rates and swaptions are in
+`Contracts/Models/CMS.lean`: a swap rate is a ratio of bond-price sums, which `Payoff` cannot
+express, so it is an observed underlying tied to the bond prices by a model hypothesis.
 
 ## Main definitions
 
