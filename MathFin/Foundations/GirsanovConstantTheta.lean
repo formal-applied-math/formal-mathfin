@@ -279,14 +279,9 @@ theorem Btheta_isQBrownianMotion
     {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
     {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
     (θ : ℝ) (T : ℝ≥0) :
-    (∀ᵐ ω ∂(P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))),
-        X 0 ω + θ * ((0 : ℝ≥0) : ℝ) = 0)
-      ∧ (∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T →
-          (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))).map
-              (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))) = gaussianReal 0 (t - s))
-      ∧ HasIndepIncrements (fun (t : Set.Iic T) ω ↦ X t ω + θ * ((t : ℝ≥0) : ℝ))
-          (P.withDensity fun ω ↦ ENNReal.ofReal
-            (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) := by
+    IsBrownianOn (P.withDensity fun ω ↦
+      ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) T
+      fun t ω ↦ X t ω + θ * (t : ℝ) := by
   haveI : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
       (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
