@@ -16,12 +16,14 @@ public import MathFin.Foundations.BrownianMarkov
 # The Wiener integral given the past
 
 The Wiener integral `∫₀ᵀ f dB` of a deterministic kernel splits at a time `t ≤ T` into the part
-the past `𝓕_t = σ(B_s : s ≤ t)` has seen and an independent Gaussian remainder:
+the past `𝓕_t = σ(B_s : s ≤ t)` has seen and a remainder independent of the past:
 
-  `∫₀ᵀ f dB = ∫₀ᵗ f dB + N`,   `N ⟂ 𝓕_t`,   `N ~ 𝓝(0, ∫_t^T f²)`.
+  `∫₀ᵀ f dB = ∫₀ᵗ f dB + N`,   `N ⟂ 𝓕_t`,   `𝔼[e^{−cN}] = e^{c²∫_t^T f²/2}`,
 
-The past part is `wienerIntegralLp B hB t (kernelRestrict htT f)`, the Wiener integral over
-`(0, t]` of the restricted kernel, and the remainder is the difference. Both statements are
+the exponential moments of a centred Gaussian of variance `∫_t^T f²` (the Gaussian law of `N`
+itself is not stated). The past part is `wienerIntegralLp B hB t (kernelRestrict htT f)`, the
+Wiener integral over `(0, t]` of the restricted kernel, and the remainder is the difference. Both
+measurability statements are
 closed conditions on the kernel `f` (the Wiener integral is continuous, `lpMeas` is closed), so
 they are checked on step indicators, where the integral is a Brownian increment: the past
 increments `B_{s∧t}` are `𝓕_t`-measurable, and the remainders `B_{s∨t} − B_t` are increments of

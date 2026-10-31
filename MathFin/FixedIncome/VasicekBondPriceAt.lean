@@ -29,8 +29,9 @@ The integrated rate is carried in its Wiener representation (`vasicekIntegratedR
 (`Foundations/WienerIntegralFiltration.lean`, `condExp_exp_wienerIntegralLp`), the integrated
 kernel `g_T(u) = (1 − e^{−κ(T−u)})/κ` of the horizon `T`, restricted to `(0, t]`, is
 `g_t + B(T − t)·e^{−κ(t−u)}`: the past part of `∫₀ᵀ r` depends on the past through `∫₀ᵗ r` and the
-Wiener integral `∫₀ᵗ e^{−κ(t−u)} dB_u`, which is `(r_t − mean)/σ`; and the remainder is an
-independent centred Gaussian of variance `∫_t^T g_T² = V(T − t)`. The bridge to
+Wiener integral `∫₀ᵗ e^{−κ(t−u)} dB_u`, which is `(r_t − mean)/σ`; and the remainder is
+independent of the past, with the exponential moments of a centred Gaussian of variance
+`∫_t^T g_T² = V(T − t)`. The bridge to
 `bondPrice` is `Contracts/Models/VasicekBond.lean`.
 
 ## Main results
