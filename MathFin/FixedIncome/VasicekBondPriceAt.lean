@@ -39,6 +39,10 @@ independent of the past, with the exponential moments of a centred Gaussian of v
 * `kernelRestrict_vasicekIntegratedKernelLp` — `g_T|_{(0,t]} = g_t + B(T − t)·e^{−κ(t−·)}`.
 * `integral_sq_vasicekIntegratedKernelLp_Ioc` — `∫_t^T g_T² = V(T − t)`.
 * `vasicekIntegratedMean_sub` — the mean identity `M(t) − M(T) = −θ(τ − B(τ)) − B(τ) m_t`.
+* `condExp_exp_neg_integratedRate` — the conditional discount factor of any Gaussian short rate
+  with the integrated Vasicek kernel, from the mean identity `M(t) − M(T) = −c − B(T − t)·m`
+  alone; the Hull–White bond price (`FixedIncome/HullWhiteBondPriceAt.lean`) is its other
+  instance.
 * `vasicekBondPrice_condExp` — the conditional discount factor, affine in `r_t`.
 -/
 
@@ -115,6 +119,47 @@ lemma vasicekIntegratedMean_sub (r₀ θ : ℝ) {κ : ℝ} (hκ : κ ≠ 0) {t T
   field_simp
   ring
 
+/-- **The conditional discount factor of a Gaussian short rate, from the mean identity alone.**
+For any integrated rate `M_T + σ∫₀ᵀ g_T dB` (the integrated Vasicek kernel `g_T`, any deterministic
+part `M_T`), given the information `𝓕_t`,
+
+  `𝔼[exp(−(M_T + σ∫₀ᵀ g_T dB)) | 𝓕_t]
+      = exp(−(M_t + σ∫₀ᵗ g_t dB))·exp(−c + σ²V(T − t)/2)·exp(−B(T − t)(m + σ∫₀ᵗ e^{−κ(t−·)} dB))`
+
+almost surely, as soon as the deterministic parts satisfy `M_t − M_T = −c − B(T − t)·m`. The
+Vasicek model (`c = θ(τ − B(τ))`, `m` the mean of `r_t`) and the Hull–White model
+(`c = ∫_t^T θ B(T − ·)`, `m = α(t)`) are the two instances: they differ only in this identity. -/
+theorem condExp_exp_neg_integratedRate [IsProbabilityMeasure μ] (hB : IsPreBrownianReal B μ)
+    (hBm : ∀ s, Measurable (B s)) (σ : ℝ) {κ : ℝ} (hκ : 0 < κ) {t T : ℝ≥0} (htT : t ≤ T)
+    {M_t M_T c m : ℝ}
+    (hM : M_t - M_T = -c - vasicekBondB κ ((T - t : ℝ≥0) : ℝ) * m) :
+    μ[fun ω ↦ Real.exp (-(M_T + σ * wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω))
+        | Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable) t]
+      =ᵐ[μ] fun ω ↦
+        Real.exp (-(M_t + σ * wienerIntegralLp B hB t (vasicekIntegratedKernelLp hκ t) ω))
+        * (Real.exp (-c + σ ^ 2 * vasicekBondV κ ((T - t : ℝ≥0) : ℝ) / 2)
+          * Real.exp (-(vasicekBondB κ ((T - t : ℝ≥0) : ℝ)
+            * (m + σ * wienerIntegralLp B hB t (vasicekKernelLp κ hκ.le t) ω)))) := by
+  have hfun : (fun ω ↦ Real.exp (-(M_T + σ * wienerIntegralLp B hB T
+        (vasicekIntegratedKernelLp hκ T) ω)))
+      = fun ω ↦ Real.exp (-M_T + 0 * wienerIntegralLp B hB t 0 ω
+          - σ * wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω) := by
+    funext ω
+    congr 1
+    ring
+  rw [hfun]
+  refine (condExp_exp_wienerIntegralLp hB hBm htT 0 (vasicekIntegratedKernelLp hκ T) _ 0 σ).trans ?_
+  rw [kernelRestrict_vasicekIntegratedKernelLp hκ htT, map_add, map_smul,
+    integral_sq_vasicekIntegratedKernelLp_Ioc hκ htT]
+  filter_upwards [Lp.coeFn_add (wienerIntegralLp B hB t (vasicekIntegratedKernelLp hκ t))
+      (vasicekBondB κ ((T - t : ℝ≥0) : ℝ) • wienerIntegralLp B hB t (vasicekKernelLp κ hκ.le t)),
+    Lp.coeFn_smul (vasicekBondB κ ((T - t : ℝ≥0) : ℝ))
+      (wienerIntegralLp B hB t (vasicekKernelLp κ hκ.le t))] with ω h1 h2
+  rw [h1, Pi.add_apply, h2, Pi.smul_apply, smul_eq_mul, ← Real.exp_add, ← Real.exp_add,
+    ← Real.exp_add]
+  congr 1
+  linear_combination hM
+
 /-- **The Vasicek bond price at time `t`.** Given the information `𝓕_t` of the driving Brownian
 motion, the discount factor `exp(−∫₀ᵀ r)` along the Vasicek integrated rate has conditional mean
 
@@ -132,27 +177,9 @@ theorem vasicekBondPrice_condExp [IsProbabilityMeasure μ] (hB : IsPreBrownianRe
       =ᵐ[μ] fun ω ↦ Real.exp (-vasicekIntegratedRate hB r₀ θ σ hκ t ω)
         * (vasicekBondA θ σ κ ((T - t : ℝ≥0) : ℝ)
           * Real.exp (-(vasicekBondB κ ((T - t : ℝ≥0) : ℝ)
-            * (vasicekSDEMean r₀ θ κ t + vasicekDiffusionTerm hB κ σ hκ.le t ω)))) := by
-  have hfun : (fun ω ↦ Real.exp (-vasicekIntegratedRate hB r₀ θ σ hκ T ω))
-      = fun ω ↦ Real.exp (-vasicekIntegratedMean r₀ θ κ T
-          + 0 * wienerIntegralLp B hB t 0 ω
-          - σ * wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω) := by
-    funext ω
-    simp only [vasicekIntegratedRate]
-    congr 1
-    ring
-  rw [hfun]
-  refine (condExp_exp_wienerIntegralLp hB hBm htT 0 (vasicekIntegratedKernelLp hκ T) _ 0 σ).trans ?_
-  rw [kernelRestrict_vasicekIntegratedKernelLp hκ htT, map_add, map_smul,
-    integral_sq_vasicekIntegratedKernelLp_Ioc hκ htT]
-  filter_upwards [Lp.coeFn_add (wienerIntegralLp B hB t (vasicekIntegratedKernelLp hκ t))
-      (vasicekBondB κ ((T - t : ℝ≥0) : ℝ) • wienerIntegralLp B hB t (vasicekKernelLp κ hκ.le t)),
-    Lp.coeFn_smul (vasicekBondB κ ((T - t : ℝ≥0) : ℝ))
-      (wienerIntegralLp B hB t (vasicekKernelLp κ hκ.le t))] with ω h1 h2
-  rw [h1, Pi.add_apply, h2, Pi.smul_apply, smul_eq_mul]
-  simp only [vasicekBondA, vasicekDiffusionTerm, vasicekIntegratedRate, ← Real.exp_add]
-  congr 1
-  have := vasicekIntegratedMean_sub r₀ θ hκ.ne' htT
-  linear_combination this
+            * (vasicekSDEMean r₀ θ κ t + vasicekDiffusionTerm hB κ σ hκ.le t ω)))) :=
+  condExp_exp_neg_integratedRate hB hBm σ hκ htT (c := θ * (((T - t : ℝ≥0) : ℝ)
+      - vasicekBondB κ ((T - t : ℝ≥0) : ℝ))) (m := vasicekSDEMean r₀ θ κ t)
+    (vasicekIntegratedMean_sub r₀ θ hκ.ne' htT)
 
 end MathFin

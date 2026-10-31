@@ -130,6 +130,74 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-31 — corpus 742, modules 678 — elegance: does each headline proof read as its argument
+
+Scope: lens 8 alone, at the maintainer's bar ("mathematical highest quality … and beauty"), over the
+headline theorems of the coherence wave (#370–#411), plus the Jamshidian/Hull–White work (#367) this
+entry ships with. The maintainer's reading took five proofs (`value_eq_of_attained`, the classical
+supermartingale, `condExp_exp_wienerIntegralLp`, `IsEquivProbMeasure`,
+`binomial_martingale_representation`); three read-only reviewers took the rest (risk measures and the
+American put; pricing and the FTAP; stochastic calculus), each theorem judged *exemplary*, *sound but
+obscured* or *wrong shape*, with every proposed rewrite adjudicated before it was accepted.
+
+### Upgrades executed
+
+- **Jamshidian as one Gaussian step.** `HasBondPrice.valueDisc_bondPut_gaussian`: under the
+  T₀-forward measure a bond `a·e^{−βr}` with `r` Gaussian is lognormal, the put is a Black put, and
+  the mean of the lognormal is `P(0,T₁)/P(0,T₀)` by the tower property
+  (`HasBondPrice.integral_bond_forward`), with no algebra on the affine coefficients. Hull–White and
+  Vasicek puts and caplets are instances; Vasicek is Hull–White at constant forcing.
+- **One bond-price-at-t argument.** `condExp_exp_neg_integratedRate` is the lifted body of
+  `vasicekBondPrice_condExp`; its only model input is the identity between the deterministic parts,
+  so the Hull–White price is a three-line instance (`HullWhite.integratedMean_sub`).
+- `HasBondPrice` factored out of `BondModel`: the bond-price facts, without the forward rate, are all
+  the put needs.
+
+### The standing first pass: prose against statement
+
+The five new entries were read against their Lean: each says the underlying is hypothesised to be the
+bond price a.s., the put pays at T₀, and the caplet entries say they are not Black-76 caplets (the
+Vasicek forward rate is a shifted lognormal, a remark, not a theorem). No overstatement found.
+
+### Lens gradients
+
+8. Beauty, the panel's verdicts. Exemplary, leave them: `ftap_discrete`,
+   `noArbitrage_horizonSpot_iff`, `bermudanPrice` and `bermudanCallPrice_eq_binomialPrice`, the CDS
+   and cap values, `value_chooser` and parity, `itoIntegralCLM_T := itoIntegralL2 ∘ bandExtend` with
+   its cross-horizon consistency, the adapted Girsanov proof (12 lines, one idea per transport lemma),
+   and the proof of `martingale_of_setIntegral_eq`. Sound but obscured: Lévy's characterization (the
+   stopped pair spelled out ~25 times, one localisation recipe three times), the local Itô formula (a
+   9-hypothesis preamble twice, path continuity re-proved), the Itô process (`itoProcessCLM` is `rfl`
+   to the infinite-horizon process defined after it, which re-proves its four properties), and in
+   pricing the freeze-at-T step inlined in both FTAP directions, the `q`/`hq1`/`hqcrr` plumbing, the
+   caplet identity buried in its proof. Rejected as not buying clarity: a second coherence structure
+   (the #384 decision), an abstract Markov predicate, an `exerciseStep` abbreviation, and a new
+   `IsBrownianOn` beside BrownianMotion's `IsPreBrownianReal` / `IsFilteredPreBrownian`.
+
+### Ranked backlog
+
+1. Invert the Itô process architecture: infinite-horizon engine first,
+   `itoProcessCLM := itoProcessL2Inf.comp (bandExtend T)`, the terminal identities from
+   F_T-measurability; two of three density proofs go (in flight, `polish/stochastic-elegance`).
+2. `IsLocalMartingale.martingale_stoppedProcess_of_bound` and `.exists_martingale_eqOn` lifted; the
+   local Itô formula a corollary; stopped-process lemmas out of `LevyCharacterization` (in flight).
+3. The freeze lemma for both FTAP directions; `SimpleStrategy.toDiscrete`, so
+   `isEMM_noArbitrageSimple` applies the discrete theorem.
+4. `bond_mul_capletPayoff`, so the caplet is tower + identity; `integral_discount_mul_eq_forward`
+   replacing the inline forward-measure step in `Caplet.lean`.
+5. `crrUpProbNN : ℝ≥0`; `martingale_iff_setIntegral_eq` at `[SigmaFiniteFiltration μ 𝒢]`.
+6. The Girsanov conclusions through `IsFilteredPreBrownian`; VaR subadditivity from lifted
+   `covariance_le_sqrt_variance_mul` / `sqrt_variance_add_le`.
+7. GSR (two-piece volatility): its own `kernelRestrict` identity before `condExp_exp_neg_integratedRate`
+   applies; `bondPrice_vasicek` from `bondPrice_hullWhite`.
+
+### Evidence
+
+Reviewer claims about Mathlib/BrownianMotion checked against the pinned sources: Mathlib has only
+`martingale_of_setIntegral_eq_succ` (ℕ-indexed), so the general lemma stays; BrownianMotion has
+`IsFilteredPreBrownian` (`Gaussian/BrownianMotion.lean:284`), so no parallel Brownian predicate.
+Jamshidian branch: ledger sweep green on all 12 shards, fresh 742/742.
+
 ## 2026-10-31 — corpus 725, modules 669 — the coherence wave, read again after it landed
 
 Scope: everything the coherence audit (#357–#368) changed, #370–#404: about 250 files, 60 parallel
