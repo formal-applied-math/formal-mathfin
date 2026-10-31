@@ -277,7 +277,7 @@ theorem binomialNoArb_of_noArbitrage (hS₀ : 0 < S₀) (hd : 0 < d) (hdu : d < 
       (x : Fin T → Bool) :
       c * (S₀ * Real.exp (-r) * ((if x ⟨0, hT⟩ then u else d) - Real.exp r)) = 0 := by
     have h := hNA (fun s _ ↦ if s = 1 then c else 0) (fun _ _ ↦ stronglyMeasurable_const)
-      ⟨|c|, fun n _ _ ↦ by dsimp only; split_ifs <;> simp⟩
+      ⟨|c|, fun n _ _ ↦ by by_cases h : n = 1 <;> simp [h]⟩
       (Filter.Eventually.of_forall fun x ↦ by
         simpa only [Pi.zero_apply, martingaleTransform_holdFirst c hT, hgain] using hnn x)
     simpa only [Pi.zero_apply, martingaleTransform_holdFirst c hT, hgain] using
