@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Contracts.Models.Caplet
-public import MathFin.FixedIncome.VasicekBondPriceAt
+public import MathFin.Contracts.Models.HullWhiteBond
 
 /-!
 # Bond prices at `t > 0` in the Vasicek model
@@ -14,10 +14,12 @@ public import MathFin.FixedIncome.VasicekBondPriceAt
 `bondPrice Q 𝓕 D t T = 𝔼_Q[D T | 𝓕 t] / D t` (`Contracts/Models/Caplet.lean`) is the price at `t`
 of one unit paid at `T`, for any stochastic discount factor `D`. For the Vasicek discount factor
 `D t = exp(−∫₀ᵗ r)` and the natural filtration of the driving Brownian motion it is the affine
-form of the time-`0` price at the remaining maturity (`bondPrice_vasicek`), read off the
-conditional Laplace transform of the Wiener integral (`vasicekBondPrice_condExp`):
+form of the time-`0` price at the remaining maturity (`bondPrice_vasicek`):
 
   `P(t, T) = A(T − t)·exp(−B(T − t)·r_t)`.
+
+It is the Hull–White price (`bondPrice_hullWhite`) at the constant forcing `θ ≡ κθ_v`
+(`HullWhite.bondRate_const`, `HullWhite.bondA_const`, `HullWhite.integratedRate_const`).
 
 ## Main results
 
@@ -46,9 +48,12 @@ theorem bondPrice_vasicek (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measurable
       =ᵐ[μ] fun ω ↦ vasicekBondA θ σ κ ((T - t : ℝ≥0) : ℝ)
         * Real.exp (-(vasicekBondB κ ((T - t : ℝ≥0) : ℝ)
           * (vasicekSDEMean r₀ θ κ t + vasicekDiffusionTerm hB κ σ hκ.le t ω))) := by
-  filter_upwards [vasicekBondPrice_condExp hB hBm r₀ θ σ hκ htT] with ω h
-  change (μ[fun ω ↦ Real.exp (-vasicekIntegratedRate hB r₀ θ σ hκ T ω) | _]) ω
-    / Real.exp (-vasicekIntegratedRate hB r₀ θ σ hκ t ω) = _
-  rw [h, mul_div_cancel_left₀ _ (Real.exp_pos _).ne']
+  have hD : shortRateDiscount (vasicekIntegratedRate hB r₀ θ σ hκ)
+      = shortRateDiscount (HullWhite.bondRate hB (fun _ ↦ κ * θ) κ σ r₀ hκ) := by
+    funext T ω
+    simp only [shortRateDiscount, HullWhite.bondRate_const]
+  rw [hD]
+  filter_upwards [bondPrice_hullWhite hB hBm continuous_const κ σ r₀ hκ htT] with ω h
+  rw [h, HullWhite.bondA_const θ σ hκ.ne', HullWhite.integratedRate_const]
 
 end MathFin.Contracts
