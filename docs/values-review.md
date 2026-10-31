@@ -183,8 +183,8 @@ cutoff, not the formula; it is `ItoFormulaCutoff.lean`.
 
 ### Lens gradients
 
-1. Inspired math: exemplar `value_eq_of_attained` and the attained ⇔ martingale duality; next, state
-   that equivalence as one theorem and derive both tracks' directions from it.
+1. Inspired math: exemplar `value_eq_of_attained` and the attained ⇔ martingale duality, now one
+   theorem (`expectedReward_eq_initial_iff_stopped_martingale`, executed after this review).
 2. Coherence: exemplar `IsEquivProbMeasure` extended by every `IsEMM`; next, the binomial `snell` and
    `finiteBellman` are two unconnected Snell envelopes — one in `Foundations/`, the other its instance.
 3. Zero slop: exemplar `classicalCandidate_norm_le` replacing a six-line block at nine sites; next, the
