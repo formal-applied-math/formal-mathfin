@@ -23,8 +23,9 @@ of expected payoffs; the lemmas carry the nonemptiness, integrability and bound 
 
 ## Result
 
-Public entry points include `StoppingRule`, `StoppingRule.measurable_time`, `stoppingValue`,
-`integral_le_stoppingValue`, `stoppingValue_le`, `exists_lt_of_lt_stoppingValue`.
+Public entry points include `StoppingRule`, `StoppingRule.measurable_time`, `StoppingRule.minimum`,
+`stoppingValue`, `integral_le_stoppingValue`, `stoppingValue_le`,
+`exists_lt_of_lt_stoppingValue`.
 -/
 
 @[expose] public section
@@ -83,6 +84,16 @@ def extend (θ : StoppingRule 𝓕 T) (hTU : T ≤ U) : StoppingRule 𝓕 U wher
   time := θ.time
   stopping := θ.stopping
   le_horizon := fun ω => (θ.le_horizon ω).trans hTU
+
+/-- The rule that stops at the first of `θ` and `η`; it keeps the horizon of `θ`; for
+two rules with one horizon this is their pointwise minimum. -/
+def minimum (θ : StoppingRule 𝓕 T) (η : StoppingRule 𝓕 U) : StoppingRule 𝓕 T where
+  time := fun ω => min (θ.time ω) (η.time ω)
+  stopping := by simpa only [WithTop.coe_min] using θ.stopping.min η.stopping
+  le_horizon := fun ω => (min_le_left _ _).trans (θ.le_horizon ω)
+
+theorem minimum_time (θ : StoppingRule 𝓕 T) (η : StoppingRule 𝓕 U) (ω : Ω) :
+    (θ.minimum η).time ω = min (θ.time ω) (η.time ω) := rfl
 
 /-- Any ordinary `WithTop`-valued stopping time bounded by the finite horizon
 has exactly the finite representation used here. No admissible finite-horizon
