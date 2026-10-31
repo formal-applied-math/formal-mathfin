@@ -59,24 +59,6 @@ section Abstract
 variable {Q : Measure Ω} [IsProbabilityMeasure Q] {𝓕 : Filtration ℝ≥0 mΩ} {D : ℝ≥0 → Ω → ℝ}
   {X : ι → ℝ≥0 → Ω → ℝ} {b : ι} {T₀ T₁ : ℝ≥0}
 
-/-- **Pricing at the forward measure.** For a positive integrable discount factor `D₀`, its
-expectation is positive, and `𝔼[D₀ · Y] = 𝔼[D₀]·𝔼^{Q^{D₀}}[Y]` for the forward measure
-`forwardMeasure Q (1/D₀)`: the change of numéraire `forwardMeasure_price`, written for the
-discount factor instead of the bank account. -/
-theorem integral_discount_mul_eq_forward {D₀ : Ω → ℝ} (hD : ∀ ω, 0 < D₀ ω)
-    (hDm : Measurable D₀) (hDi : Integrable D₀ Q) (Y : Ω → ℝ) :
-    0 < ∫ ω, D₀ ω ∂Q ∧ (∫ ω, D₀ ω ∂Q) * ∫ ω, Y ω ∂(forwardMeasure Q fun ω ↦ 1 / D₀ ω)
-      = ∫ ω, D₀ ω * Y ω ∂Q := by
-  have hB : ∀ ω, 0 < 1 / D₀ ω := fun ω ↦ one_div_pos.2 (hD ω)
-  have e1 : ∫ ω, 1 / (1 / D₀ ω) ∂Q = ∫ ω, D₀ ω ∂Q := by simp
-  have hP0 := integral_one_div_pos (Q := Q) hB (by simpa using hDi)
-  rw [e1] at hP0
-  have key := forwardMeasure_price (Q := Q) (B := fun ω ↦ 1 / D₀ ω) Y
-    (measurable_const.div hDm) hB (by simpa using hP0)
-  rw [e1] at key
-  refine ⟨hP0, key.trans (integral_congr_ae <| ae_of_all _ fun ω ↦ ?_)⟩
-  field_simp [(hD ω).ne']
-
 /-- **The forward price of the bond**: under the `T₀`-forward measure (`forwardMeasure` of the bank
 account `1/D T₀`), `𝔼^{T₀}[P(T₀, T₁)] = P(0, T₁)/P(0, T₀)`. The tower property turns `D T₁` into
 `D T₀ · P(T₀, T₁)`, and the change of numéraire divides by `P(0, T₀)`. -/
@@ -85,10 +67,7 @@ theorem HasBondPrice.integral_bond_forward (h : HasBondPrice Q 𝓕 D X b T₀ T
     ∫ ω, X b T₀ ω ∂(forwardMeasure Q fun ω ↦ 1 / D T₀ ω)
       = zeroCurve Q D T₁ / zeroCurve Q D T₀ := by
   obtain ⟨hpos, key⟩ := integral_discount_mul_eq_forward h.D_pos hDm hD0 (X b T₀)
-  have e3 : ∫ ω, D T₀ ω * X b T₀ ω ∂Q = zeroCurve Q D T₁ := by
-    simpa [zeroCurve] using (h.integral_discount_mul (Y := fun _ ↦ 1) stronglyMeasurable_const
-      (by simpa using h.integrable_D)).symm
-  rw [e3] at key
+  rw [h.integral_discount] at key
   have hz : zeroCurve Q D T₀ = ∫ ω, D T₀ ω ∂Q := rfl
   rw [hz, eq_div_iff hpos.ne', mul_comm]
   exact key

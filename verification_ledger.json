@@ -1714,37 +1714,37 @@
     "mf-contract-bond-price-gsr": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 6.9,
-      "input_hash": "7ee7828a5935ae70ab9aaf325cb33edd7869b34ebdc808a80a1837c6ee06a2f3",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 7.0,
+      "input_hash": "f61bd5d2e70c97b3f533125e66abce45b6867eb7ed91787e54b03d795f0e85ca",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-bond-price-hullwhite": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 7.2,
-      "input_hash": "79c5b7d7fd6ccd0445f1269ca1c63e5a6fa78e9d51f31f0a4bcce79dd79dffed",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 5.4,
+      "input_hash": "67ed7a2d03b1e9a3078d7c5d318fe52da806990dd6324d251492ecffec6a5d51",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-bond-price-vasicek": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 4.6,
-      "input_hash": "8830c160b50ee138d22cd20e036a656a6b774990d3304ac6b253c26131b75128",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 4.2,
+      "input_hash": "74778f419d252ab0797dc6bcb818d567a400a69822e91479a0359ef870c730a6",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-bond-put-hullwhite": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 5.2,
-      "input_hash": "e62e1cc8f6def4f913f4ea3d6981336163962b8b3c24762f3984ca37dd06ae8a",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 5.3,
+      "input_hash": "14a763a733817dd6d36083015e233b99035c9be56ee9d1b90f5880ab999150a5",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-bond-put-vasicek": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 7.7,
-      "input_hash": "56a6b1ca6a3439fed93bc2a6ac1fa59a8c4f57c338fad973f90f3a69536d33ae",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 5.2,
+      "input_hash": "b8bbd3419e281384a5b9dd241853d824021a20c241f8cca988b1d1c27a276ee7",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-book-es-subadditive": {
       "benchmark_file": "contracts.json",
@@ -1763,30 +1763,30 @@
     "mf-contract-cap-bond-puts": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 17.2,
-      "input_hash": "ca31ae2982262a30d91d06e20e9fd60ba3c8712291322e6056cec41512341f0b",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 6.0,
+      "input_hash": "406ed5e16882fd5c5186362f8551b3d022b244a74b98c1072545b0a96958ee9c",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-caplet-black76": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 15.3,
-      "input_hash": "2bce8fbfc539b931234f5946fe5c8c68a5a4b228f60372e8fcd4a6ff94161a4e",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 5.7,
+      "input_hash": "bc655e6f0c7b3563e2b7e770313903138b0f6d0897972da69856e46e7da895f2",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-caplet-bond-put": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 10.6,
-      "input_hash": "8a5d7a54570e0cb70eaa8f6bf17079cee70e44ba99b874c6f85d6ec844d5b1a3",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 6.0,
+      "input_hash": "dfdbf9fe77896f7ac7185bbc1a9e25444dd8d95132dff43d69e6b7f86243339e",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-caplet-vasicek": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 4.8,
-      "input_hash": "15a7dd9dd741b17d81fa8de55755ae3d0586c363a985276ccdc5e1dfb7858766",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 4.2,
+      "input_hash": "09a62a6eb47941ce1a631b2a84b6968cea0569678c8cd517ce9e1177b0923018",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-capped-call": {
       "benchmark_file": "contracts.json",
@@ -1833,37 +1833,37 @@
     "mf-contract-cms-caplet-annuity-measure": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 5.5,
-      "input_hash": "73b8b482776f3d1f8d7c70415417af147c7c96e6f4e1c6b0e78e4452cb95024f",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 6.6,
+      "input_hash": "55822cb1c0e446a9f8a57bbb531d11015171fe3a8a437453d8011634e9ea03cd",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-cms-forward-swap-rate": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 14.2,
-      "input_hash": "fe5dfc6aca3795e5c440954c3d2ea68098426439d0d3b39146a4563a1301396a",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 7.0,
+      "input_hash": "33158c3ba07b98775e7e87211d30894c58cd53d93ac67721997ff0506f75657c",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-cms-jensen-gap": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 13.4,
-      "input_hash": "bc5db51f6fe2a0b1bfda55c595ecbbe4f16bd581404d690af94fcd6ae08b6f49",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 5.2,
+      "input_hash": "90017ba6657212238a78d21e192ff83e8ee3f03cd2ac0d592b7b840d2439ab61",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-cms-swaplet-adjustment": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 5.6,
-      "input_hash": "e8c5f6f3e9e1b1fc2f00480ca3815301c2d5305362d13d2eef12d1d985f307c1",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 4.8,
+      "input_hash": "4dac85f78209644a3ab6e9a589dd8aa717cd24cccd28bc159d8bd7a8777ab14b",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-cms-swaplet-adjustment-nonneg": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 13.0,
-      "input_hash": "eee0ea1f070fb2d1e4be66134625913bed9ecbe0dc1306e70856cc36d6971893",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 4.9,
+      "input_hash": "4bb0b52bf351a8b49917af1d5c7f7753526364b4bb51ee0aa09c97398041c5d1",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-coupon-bond-gsr": {
       "benchmark_file": "contracts.json",
@@ -2001,16 +2001,16 @@
     "mf-contract-payer-swaption-annuity-call": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 5.0,
-      "input_hash": "3aa82adabbde8431cb43c614e70ad2a0099a2713e22a7b89288e32bd33984023",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 5.4,
+      "input_hash": "046aa874462386f7d5e443ea6c7dfbccc21cb64289d7ba262185b0f15d17b310",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-payer-swaption-black": {
       "benchmark_file": "contracts.json",
       "date": "2026-10-31",
-      "elapsed_s": 4.9,
-      "input_hash": "f84e92369af92551b23c55922c47d309d51094104bde3ccc9847cf238d84fbb1",
-      "verified_at_commit": "d3a41ed"
+      "elapsed_s": 6.3,
+      "input_hash": "2d21dc2e0a48ae070f034f7a96066a8f0c9f12f6fbfb95d159be3316cb1053fb",
+      "verified_at_commit": "8f8384a"
     },
     "mf-contract-power-call-black-scholes": {
       "benchmark_file": "contracts.json",
