@@ -316,6 +316,7 @@ import MathFin.Foundations.ItoFormulaAdaptedDriftConstructed
 import MathFin.Foundations.ItoIntegralCrossHorizon
 import MathFin.Foundations.GyongyMimicry
 import MathFin.FixedIncome.HullWhiteCalibration
+import MathFin.FixedIncome.HullWhiteBondPriceAt
 import MathFin.BlackScholes.MonteCarloPricer
 -- Martingale representation, step 3: the Doléans exponential of a deterministic step
 -- integrand is an Itô integral (time locality of `∫·dB` + unbounded `𝓕_a`-scaling)
@@ -762,6 +763,8 @@ import MathFin.Contracts.Models.BinomialLimit
 import MathFin.Contracts.Models.Caplet
 import MathFin.Contracts.Models.ShortRate
 import MathFin.Contracts.Models.VasicekBond
+import MathFin.Contracts.Models.HullWhiteBond
+import MathFin.Contracts.Models.Jamshidian
 import MathFin.Contracts.Models.DefaultTime
 import MathFin.Contracts.Risk
 

@@ -32,19 +32,21 @@ model `X` carries them as observed processes. `BondModel` says the underlying `b
 
 ## What is not here
 
-Lognormality of `L` under the forward measure is a hypothesis. The Vasicek bond prices
-`P(t, T)` at `t > 0` are in the library (`bondPrice_vasicek`,
-`Contracts/Models/VasicekBond.lean`), but the lognormality is not derived from them; Hull–White
-and the two-piece GSR are not covered. CMS rates are not covered: a CMS payoff observes a swap
+Lognormality of `L` under the forward measure is a hypothesis here. It does not hold in the
+Gaussian short-rate models (a remark, not a theorem here): the bond `P` is lognormal
+(`bondPrice_vasicek`, `bondPrice_hullWhite`), so `L = (1/P − 1)/δ` is a shifted lognormal. There
+the caplet is priced through the bond put, as a Black put on the lognormal bond
+(`Contracts/Models/Jamshidian.lean`). The two-piece GSR is
+not covered. CMS rates are not covered: a CMS payoff observes a swap
 rate, a ratio of bond-price sums, which `Payoff` cannot express.
 
 ## Main definitions
 
-* `bondPrice`, `BondModel`, `capletPayoff`, `caplet`, `bondPut`, `cap`.
+* `bondPrice`, `HasBondPrice` (the bond price alone), `BondModel` (with the forward rate), `capletPayoff`, `caplet`, `bondPut`, `cap`.
 
 ## Main results
 
-* `BondModel.integral_discount_mul`, `valueDisc_caplet_eq_bondPut`, `valueDisc_cap`,
+* `HasBondPrice.integral_discount_mul`, `valueDisc_caplet_eq_bondPut`, `valueDisc_cap`,
   `valueDisc_cap_eq_bondPuts`, `valueDisc_caplet_black76`, `BondModel.integral_libor_forward`,
   `valueDisc_caplet_black76_forwardRate`.
 -/
@@ -87,16 +89,22 @@ noncomputable def bondPut (b : ι) (T : ℝ≥0) (k : ℝ) : Contract ι :=
 noncomputable def cap (ℓ : ℕ → ι) (T : ℕ → ℝ≥0) (δ K : ℝ) (n : ℕ) : Contract ι :=
   payFlows (fun i ↦ T (i + 1)) (fun i ↦ capletPayoff (ℓ i) (T i) δ K) n
 
-/-- **A model with bond prices.** The underlying `b` carries the bond price `P(T₀, T₁)` at `T₀`
-and `ℓ` the simply-compounded forward rate `L(T₀, T₁) = (1/P(T₀, T₁) − 1)/δ` it implies, both
-as processes of the model `X`; `𝓕` is the information at `T₀`, and `P(T₀, T₁)` is the
-conditional expectation `bondPrice` of the stochastic discount factor `D`. -/
-structure BondModel (Q : Measure Ω) (𝓕 : Filtration ℝ≥0 mΩ) (D : ℝ≥0 → Ω → ℝ)
-    (X : ι → ℝ≥0 → Ω → ℝ) (b ℓ : ι) (T₀ T₁ : ℝ≥0) (δ : ℝ) : Prop where
-  δ_pos : 0 < δ
+/-- **A model with a bond price.** The underlying `b` carries the bond price `P(T₀, T₁)` at `T₀`,
+the conditional expectation `bondPrice` of the stochastic discount factor `D` given the
+information `𝓕`, as a process of the model `X`. -/
+structure HasBondPrice (Q : Measure Ω) (𝓕 : Filtration ℝ≥0 mΩ) (D : ℝ≥0 → Ω → ℝ)
+    (X : ι → ℝ≥0 → Ω → ℝ) (b : ι) (T₀ T₁ : ℝ≥0) : Prop where
   D_pos : ∀ ω, 0 < D T₀ ω
   integrable_D : Integrable (D T₁) Q
   bond_eq : X b T₀ =ᵐ[Q] bondPrice Q 𝓕 D T₀ T₁
+
+/-- **A model with bond prices and forward rates.** Besides the bond price `P(T₀, T₁)`, the
+process `ℓ` carries the simply-compounded forward rate `L(T₀, T₁) = (1/P(T₀, T₁) − 1)/δ` it
+implies, adapted to the information `𝓕 T₀`. -/
+structure BondModel (Q : Measure Ω) (𝓕 : Filtration ℝ≥0 mΩ) (D : ℝ≥0 → Ω → ℝ)
+    (X : ι → ℝ≥0 → Ω → ℝ) (b ℓ : ι) (T₀ T₁ : ℝ≥0) (δ : ℝ) : Prop
+    extends HasBondPrice Q 𝓕 D X b T₀ T₁ where
+  δ_pos : 0 < δ
   bond_pos : ∀ᵐ ω ∂Q, 0 < X b T₀ ω
   libor_eq : X ℓ T₀ =ᵐ[Q] fun ω ↦ fraForwardRate 1 (X b T₀ ω) δ
   libor_meas : StronglyMeasurable[𝓕 T₀] (X ℓ T₀)
@@ -106,7 +114,7 @@ variable {Q : Measure Ω} [IsProbabilityMeasure Q] {𝓕 : Filtration ℝ≥0 m�
 
 /-- **The bond price turns `D T₁` into `D T₀`**: for an `𝓕 T₀`-measurable `Y`,
 `𝔼[D T₁ · Y] = 𝔼[D T₀ · P(T₀, T₁) · Y]`. -/
-theorem BondModel.integral_discount_mul (h : BondModel Q 𝓕 D X b ℓ T₀ T₁ δ) {Y : Ω → ℝ}
+theorem HasBondPrice.integral_discount_mul (h : HasBondPrice Q 𝓕 D X b T₀ T₁) {Y : Ω → ℝ}
     (hY : StronglyMeasurable[𝓕 T₀] Y) (hDY : Integrable (fun ω ↦ D T₁ ω * Y ω) Q) :
     ∫ ω, D T₁ ω * Y ω ∂Q = ∫ ω, D T₀ ω * X b T₀ ω * Y ω ∂Q := by
   have hcond : Q[fun ω ↦ Y ω * D T₁ ω | 𝓕 T₀] =ᵐ[Q] fun ω ↦ Y ω * (Q[D T₁ | 𝓕 T₀]) ω :=
