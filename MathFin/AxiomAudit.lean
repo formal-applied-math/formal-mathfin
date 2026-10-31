@@ -203,9 +203,9 @@ namespace MathFin.AxiomAudit
 
 /-! ## Binomial trees -/
 
-/-- info: 'MathFin.americanCallPrice_le_binomialPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.bermudanCallPrice_eq_binomialPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
-#print axioms MathFin.americanCallPrice_le_binomialPrice
+#print axioms MathFin.bermudanCallPrice_eq_binomialPrice
 
 /-! ## Variance swap (QV limit) -/
 
@@ -1675,8 +1675,8 @@ consistently: `changeOfNumeraire` is the invariance `N₀·𝔼^{Q^N}[X/N_T] = B
 measure-transport identity plus cancellation of `N_T` — no integrability hypothesis.
 `numeraireMeasure_isProbabilityMeasure` is the companion normalization (`N/B` a `Q`-martingale ⟹
 `Q^N` a probability measure). The abstract backbone is genuinely CONSUMED:
-`stockNumeraireMeasure_eq_numeraireMeasure` exhibits the Black–Scholes stock numéraire
-`dQ^(S)/dQ = e^{−rT}·S_T/S₀` as the instance `B_T = e^{rT}`, `B₀ = 1`, `N = S`. -/
+`numeraireMeasure` at `B_T = e^{rT}`, `B₀ = 1`, `N = S` is the Black–Scholes stock numéraire
+`dQ^(S)/dQ = e^{−rT}·S_T/S₀` (`stockNumeraire_exercise_probability`). -/
 
 /-- info: 'MathFin.changeOfNumeraire' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1686,9 +1686,9 @@ measure-transport identity plus cancellation of `N_T` — no integrability hypot
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.numeraireMeasure_isProbabilityMeasure
 
-/-- info: 'MathFin.stockNumeraireMeasure_eq_numeraireMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.stockNumeraire_exercise_probability' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.stockNumeraireMeasure_eq_numeraireMeasure
+#print axioms MathFin.stockNumeraire_exercise_probability
 
 /-! ## Two further numéraire seams: the Kelly portfolio ⟹ EMM, and the exchange option
 
