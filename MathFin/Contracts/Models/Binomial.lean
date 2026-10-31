@@ -8,7 +8,7 @@ module
 public import MathFin.Contracts.Adapted
 public import MathFin.Contracts.Instruments.Options
 public import MathFin.Binomial.PathMeasure
-public import MathFin.Binomial.EuropeanReplication
+public import MathFin.Binomial.MartingaleRepresentation
 
 /-!
 # The contracts priced in the binomial model
@@ -35,7 +35,7 @@ side conditions to prove.
 The value is also a price in the sense of replication. Under no-arbitrage, a European contract's
 discounted payoff is, on every path, its value plus the gains of a predictable strategy in the
 discounted spot (`pathPV_eq_value_add_gains`). The strategy comes from the tree
-(`binomialPrice_replication`, `Binomial/EuropeanReplication.lean`).
+(`binomialPrice_replication`, `Binomial/MartingaleRepresentation.lean`).
 
 ## Main definitions
 
@@ -157,7 +157,8 @@ theorem value_cappedCall (K₂ : ℝ) :
 
 /-- **A European contract's binomial value is the cost of its hedge.** Under no-arbitrage, with
 paths drawn under the risk-neutral up-probability and `S₀ ≠ 0`, there is a predictable strategy
-`H` (`H_{k+1}` depends only on the first `k` flips) such that, on every path, the contract's
+`H` (`H_{k+1}` is `ℱₖ`-strongly measurable for `flipFiltration`: it depends only on the first `k`
+flips) such that, on every path, the contract's
 discounted payoff is its value plus the strategy's gains in the discounted spot
 `S̃_k = e^{−ρk} S_k`, its `martingaleTransform`:
 
@@ -167,7 +168,7 @@ So the value is not only an expectation: it is the initial capital that replicat
 contract. -/
 theorem pathPV_eq_value_add_gains (hna : BinomialNoArb u d ρ) (hS₀ : S₀ ≠ 0) {a : Payoff Unit}
     {g : ℝ → ℝ} (hg : ∀ s : Scenario Unit, a.eval s = g (s () T)) :
-    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H (n + 1))) ∧ ∀ ω,
+    ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧ ∀ ω,
       (Contract.pay T a).pathPV (discount ρ h) (scenarioAt (assets S₀ u d h) ω)
         = (Contract.pay T a).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)
           + martingaleTransform H (discountedSpot S₀ u d ρ) N ω := by

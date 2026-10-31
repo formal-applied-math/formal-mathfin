@@ -101,7 +101,7 @@
     {
       "id": "mf-gaussian-var-translation",
       "name": "Gaussian VaR Translation Invariance",
-      "description": "gaussianVaR (μ + c) σ z = gaussianVaR μ σ z + c for all real μ, σ, z, c: translation of the closed-form function μ + σ z in its location parameter, the parameter form of the Artzner-Delbaen-Eber-Heath translation axiom. A statement about real numbers, not about random variables or a risk measure.",
+      "description": "gaussianVaR (μ + c) σ z = gaussianVaR μ σ z + c for all real μ, σ, z, c: translation of the closed-form function μ + σ z in its location parameter, the parameter form of the Artzner-Delbaen-Eber-Heath translation axiom. A statement about real numbers, not about random variables or a risk measure. The closed-form lemma behind mf-gaussian-var-translation-law.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_translation_thm (μ σ z c : ℝ) :\n    MathFin.gaussianVaR (μ + c) σ z = MathFin.gaussianVaR μ σ z + c :=\n  MathFin.gaussianVaR_translation μ σ z c\n"
@@ -117,7 +117,7 @@
     {
       "id": "mf-gaussian-cvar-translation",
       "name": "Gaussian CVaR Translation Invariance",
-      "description": "gaussianCVaR (μ + c) σ z α = gaussianCVaR μ σ z α + c for all real μ, σ, z, α, c: location shift of the closed form μ + σ φ(z)/(1 − α), the parameter form of the translation axiom. A statement about real numbers, not about random variables or a risk measure.",
+      "description": "gaussianCVaR (μ + c) σ z α = gaussianCVaR μ σ z α + c for all real μ, σ, z, α, c: location shift of the closed form μ + σ φ(z)/(1 − α), the parameter form of the translation axiom. A statement about real numbers, not about random variables or a risk measure. The closed-form lemma behind mf-gaussian-es-translation-law.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_cvar_translation_thm (μ σ z α c : ℝ) :\n    MathFin.gaussianCVaR (μ + c) σ z α =\n      MathFin.gaussianCVaR μ σ z α + c :=\n  MathFin.gaussianCVaR_translation μ σ z α c\n"
@@ -133,7 +133,7 @@
     {
       "id": "mf-gaussian-var-pos-homog",
       "name": "Gaussian VaR Positive Homogeneity",
-      "description": "gaussianVaR (λ μ) (|λ| σ) z = λ · gaussianVaR μ σ z for λ ≥ 0 and all real μ, σ, z: scaling both parameters of the closed form μ + σ z, the parameter form of the Artzner-Delbaen-Eber-Heath positive-homogeneity axiom. A statement about real numbers, not about random variables or a risk measure.",
+      "description": "gaussianVaR (λ μ) (|λ| σ) z = λ · gaussianVaR μ σ z for λ ≥ 0 and all real μ, σ, z: scaling both parameters of the closed form μ + σ z, the parameter form of the Artzner-Delbaen-Eber-Heath positive-homogeneity axiom. A statement about real numbers, not about random variables or a risk measure. The closed-form lemma behind mf-gaussian-var-pos-homog-law.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_pos_homog_thm (μ σ z : ℝ) {l : ℝ} (hl : 0 ≤ l) :\n    MathFin.gaussianVaR (l * μ) (|l| * σ) z = l * MathFin.gaussianVaR μ σ z :=\n  MathFin.gaussianVaR_positiveHomogeneity μ σ z hl\n"
@@ -149,7 +149,7 @@
     {
       "id": "mf-gaussian-cvar-pos-homog",
       "name": "Gaussian CVaR Positive Homogeneity",
-      "description": "gaussianCVaR (λ μ) (|λ| σ) z α = λ · gaussianCVaR μ σ z α for λ ≥ 0 and all real μ, σ, z, α: scaling both parameters of the closed form μ + σ φ(z)/(1 − α), the parameter form of the positive-homogeneity axiom. A statement about real numbers, not about random variables or a risk measure.",
+      "description": "gaussianCVaR (λ μ) (|λ| σ) z α = λ · gaussianCVaR μ σ z α for λ ≥ 0 and all real μ, σ, z, α: scaling both parameters of the closed form μ + σ φ(z)/(1 − α), the parameter form of the positive-homogeneity axiom. A statement about real numbers, not about random variables or a risk measure. The closed-form lemma behind mf-gaussian-es-pos-homog-law.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_cvar_pos_homog_thm (μ σ z α : ℝ) {l : ℝ} (hl : 0 ≤ l) :\n    MathFin.gaussianCVaR (l * μ) (|l| * σ) z α =\n      l * MathFin.gaussianCVaR μ σ z α :=\n  MathFin.gaussianCVaR_positiveHomogeneity μ σ z α hl\n"
@@ -272,6 +272,102 @@
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, a corollary of expectedShortfall_add_le (the subadditivity axiom of expectedShortfall_isCoherentRiskMeasure) and expectedShortfall_of_hasGaussianLaw. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean. The library theorem holds without the three positivity hypotheses (a degenerate Gaussian is a.s. constant); the entry keeps them, so its claim is the nondegenerate case."
+      }
+    },
+    {
+      "id": "mf-gaussian-var-of-law",
+      "name": "Value-at-Risk of a Gaussian Random Variable",
+      "description": "For a real random variable X with a Gaussian law (HasGaussianLaw, degenerate included) and a level α ∈ (0, 1): valueAtRisk X P α = E[X] + sd(X) Φ⁻¹(α), with sd(X) = √Var[X]. A statement about the random variable, with the mean and variance read off its law; the bare-parameter form is gaussianVaR in mf-gaussian-var-standard and mf-gaussian-var-affine.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk X P α = P[X] + √Var[X; P] * PhiInv α :=\n  MathFin.valueAtRisk_of_hasGaussianLaw hX hα\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "McNeil-Frey-Embrechts, Quantitative Risk Management, Ch 2.3 (VaR of a normal loss)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The law of X is N(E X, Var X) (HasGaussianLaw.map_eq_gaussianReal), whose quantile at α is m + σ Φ⁻¹(α) (quantile_gaussianReal). Lives in MathFin/RiskMeasures/GaussianValueAtRisk.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-es-of-law",
+      "name": "Expected Shortfall of a Gaussian Random Variable",
+      "description": "For a real random variable X with a Gaussian law (HasGaussianLaw, degenerate included) and a level α ∈ (0, 1): expectedShortfall X P α = gaussianCVaR E[X] sd(X) Φ⁻¹(α) α, i.e. E[X] + sd(X) ϕ(Φ⁻¹(α))/(1 − α) with sd(X) = √Var[X]. A statement about the random variable, with the mean and variance read off its law; a degenerate Gaussian is almost surely constant and its expected shortfall is that constant.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem expectedShortfall_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) :\n    expectedShortfall X P α = gaussianCVaR P[X] √Var[X; P] (PhiInv α) α :=\n  MathFin.expectedShortfall_of_hasGaussianLaw hX hα\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Acerbi-Tasche 2002; McNeil-Frey-Embrechts, Quantitative Risk Management, Ch 2.3 (ES of a normal loss)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. For Var X > 0 the Rockafellar-Uryasev minimiser of the Gaussian law N(E X, Var X) is the closed form (gaussianCVaR_isLeast_ruObjective); a degenerate Gaussian is a.s. constant (evariance_eq_zero_iff, expectedShortfall_const, expectedShortfall_mono). Lives in MathFin/RiskMeasures/GaussianExpectedShortfall.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-var-translation-law",
+      "name": "Value-at-Risk of a Translated Gaussian Loss",
+      "description": "For a Gaussian random variable X, a level α ∈ (0, 1) and a constant c: valueAtRisk (X + c) P α = gaussianVaR E[X] sd(X) Φ⁻¹(α) + c. A statement about the random variable X + c, through its Gaussian law N(E X + c, Var X); the parameter identity it consumes is mf-gaussian-var-translation.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_add_const_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) (c : ℝ) :\n    valueAtRisk (fun ω ↦ X ω + c) P α = gaussianVaR P[X] √Var[X; P] (PhiInv α) + c :=\n  MathFin.valueAtRisk_add_const_of_hasGaussianLaw hX hα c\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Coherent risk measure axioms - translation invariance (Artzner-Delbaen-Eber-Heath 1999)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Mathlib's gaussianReal_add_const gives X + c the law N(E X + c, Var X); valueAtRisk_of_hasLaw_gaussianReal and gaussianVaR_translation finish. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-var-pos-homog-law",
+      "name": "Value-at-Risk of a Scaled Gaussian Loss",
+      "description": "For a Gaussian random variable X, a level α ∈ (0, 1) and a scalar l ≥ 0: valueAtRisk (l · X) P α = l · gaussianVaR E[X] sd(X) Φ⁻¹(α). A statement about the random variable l · X, through its Gaussian law N(l E X, l² Var X); the parameter identity it consumes is mf-gaussian-var-pos-homog.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_const_mul_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) {l : ℝ} (hl : 0 ≤ l) :\n    valueAtRisk (fun ω ↦ l * X ω) P α = l * gaussianVaR P[X] √Var[X; P] (PhiInv α) :=\n  MathFin.valueAtRisk_const_mul_of_hasGaussianLaw hX hα hl\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Coherent risk measure axioms - positive homogeneity (Artzner-Delbaen-Eber-Heath 1999)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Mathlib's gaussianReal_const_mul gives l X the law N(l E X, l² Var X); the volatility √(l² Var X) = |l| sd X, then valueAtRisk_of_hasLaw_gaussianReal and gaussianVaR_positiveHomogeneity. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-es-translation-law",
+      "name": "Expected Shortfall of a Translated Gaussian Loss",
+      "description": "For a Gaussian random variable X, a level α ∈ (0, 1) and a constant c: expectedShortfall (X + c) P α = gaussianCVaR E[X] sd(X) Φ⁻¹(α) α + c. A statement about the random variable X + c, through its Gaussian law and the closed form of expected shortfall; the parameter identity it consumes is mf-gaussian-cvar-translation.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem expectedShortfall_add_const_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) (c : ℝ) :\n    expectedShortfall (fun ω ↦ X ω + c) P α =\n      gaussianCVaR P[X] √Var[X; P] (PhiInv α) α + c :=\n  MathFin.expectedShortfall_add_const_of_hasGaussianLaw hX hα c\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Coherent risk measure axioms - translation invariance (Artzner-Delbaen-Eber-Heath 1999); Acerbi-Tasche 2002",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. X + c is Gaussian with mean E X + c and variance Var X (gaussianReal_add_const, variance_add_const); expectedShortfall_of_hasGaussianLaw and gaussianCVaR_translation finish. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-es-pos-homog-law",
+      "name": "Expected Shortfall of a Scaled Gaussian Loss",
+      "description": "For a Gaussian random variable X, a level α ∈ (0, 1) and a scalar l ≥ 0: expectedShortfall (l · X) P α = l · gaussianCVaR E[X] sd(X) Φ⁻¹(α) α. A statement about the random variable l · X, through its Gaussian law and the closed form of expected shortfall; the parameter identity it consumes is mf-gaussian-cvar-pos-homog.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem expectedShortfall_const_mul_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) {l : ℝ} (hl : 0 ≤ l) :\n    expectedShortfall (fun ω ↦ l * X ω) P α =\n      l * gaussianCVaR P[X] √Var[X; P] (PhiInv α) α :=\n  MathFin.expectedShortfall_const_mul_of_hasGaussianLaw hX hα hl\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Coherent risk measure axioms - positive homogeneity (Artzner-Delbaen-Eber-Heath 1999); Acerbi-Tasche 2002",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. l X is Gaussian with mean l E X and variance l² Var X (gaussianReal_const_mul, variance_const_mul); expectedShortfall_of_hasGaussianLaw and gaussianCVaR_positiveHomogeneity finish. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
