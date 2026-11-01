@@ -224,41 +224,37 @@ generator `b · (·)' + v/2 · (·)''` maps each to a linear combination of the
 other, with no new functions appearing — the algebraic fact that drives the
 Volterra system in `pairing_cos_sin_eq`. -/
 
+/-- The inner linear map `y ↦ ξ * y` of every chain-rule step below. -/
+private lemma hasDerivAt_linMul (ξ x : ℝ) : HasDerivAt (fun y : ℝ => ξ * y) ξ x := by
+  simpa using (hasDerivAt_id x).const_mul ξ
+
 lemma hasDerivAt_cosMul (ξ x : ℝ) :
-    HasDerivAt (fun x => Real.cos (ξ * x)) (-ξ * Real.sin (ξ * x)) x := by
-  have hlin : HasDerivAt (fun y : ℝ => ξ * y) ξ x := by
-    simpa using (hasDerivAt_id x).const_mul ξ
-  exact ((Real.hasDerivAt_cos (ξ * x)).comp x hlin).congr_deriv (by ring)
+    HasDerivAt (fun x => Real.cos (ξ * x)) (-ξ * Real.sin (ξ * x)) x :=
+  ((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_linMul ξ x)).congr_deriv (by ring)
 
 lemma hasDerivAt_negSinMul (ξ x : ℝ) :
-    HasDerivAt (fun x => -ξ * Real.sin (ξ * x)) (-ξ ^ 2 * Real.cos (ξ * x)) x := by
-  have hlin : HasDerivAt (fun y : ℝ => ξ * y) ξ x := by
-    simpa using (hasDerivAt_id x).const_mul ξ
-  exact (((Real.hasDerivAt_sin (ξ * x)).comp x hlin).const_mul (-ξ)).congr_deriv (by ring)
+    HasDerivAt (fun x => -ξ * Real.sin (ξ * x)) (-ξ ^ 2 * Real.cos (ξ * x)) x :=
+  (((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_linMul ξ x)).const_mul (-ξ)).congr_deriv
+    (by ring)
 
 lemma hasDerivAt_negCosSqMul (ξ x : ℝ) :
-    HasDerivAt (fun x => -ξ ^ 2 * Real.cos (ξ * x)) (ξ ^ 3 * Real.sin (ξ * x)) x := by
-  have hlin : HasDerivAt (fun y : ℝ => ξ * y) ξ x := by
-    simpa using (hasDerivAt_id x).const_mul ξ
-  exact (((Real.hasDerivAt_cos (ξ * x)).comp x hlin).const_mul (-ξ ^ 2)).congr_deriv (by ring)
+    HasDerivAt (fun x => -ξ ^ 2 * Real.cos (ξ * x)) (ξ ^ 3 * Real.sin (ξ * x)) x :=
+  (((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_linMul ξ x)).const_mul
+    (-ξ ^ 2)).congr_deriv (by ring)
 
 lemma hasDerivAt_sinMul (ξ x : ℝ) :
-    HasDerivAt (fun x => Real.sin (ξ * x)) (ξ * Real.cos (ξ * x)) x := by
-  have hlin : HasDerivAt (fun y : ℝ => ξ * y) ξ x := by
-    simpa using (hasDerivAt_id x).const_mul ξ
-  exact ((Real.hasDerivAt_sin (ξ * x)).comp x hlin).congr_deriv (by ring)
+    HasDerivAt (fun x => Real.sin (ξ * x)) (ξ * Real.cos (ξ * x)) x :=
+  ((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_linMul ξ x)).congr_deriv (by ring)
 
 lemma hasDerivAt_cosMulScaled (ξ x : ℝ) :
-    HasDerivAt (fun x => ξ * Real.cos (ξ * x)) (-ξ ^ 2 * Real.sin (ξ * x)) x := by
-  have hlin : HasDerivAt (fun y : ℝ => ξ * y) ξ x := by
-    simpa using (hasDerivAt_id x).const_mul ξ
-  exact (((Real.hasDerivAt_cos (ξ * x)).comp x hlin).const_mul ξ).congr_deriv (by ring)
+    HasDerivAt (fun x => ξ * Real.cos (ξ * x)) (-ξ ^ 2 * Real.sin (ξ * x)) x :=
+  (((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_linMul ξ x)).const_mul ξ).congr_deriv
+    (by ring)
 
 lemma hasDerivAt_negSinSqMul (ξ x : ℝ) :
-    HasDerivAt (fun x => -ξ ^ 2 * Real.sin (ξ * x)) (-ξ ^ 3 * Real.cos (ξ * x)) x := by
-  have hlin : HasDerivAt (fun y : ℝ => ξ * y) ξ x := by
-    simpa using (hasDerivAt_id x).const_mul ξ
-  exact (((Real.hasDerivAt_sin (ξ * x)).comp x hlin).const_mul (-ξ ^ 2)).congr_deriv (by ring)
+    HasDerivAt (fun x => -ξ ^ 2 * Real.sin (ξ * x)) (-ξ ^ 3 * Real.cos (ξ * x)) x :=
+  (((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_linMul ξ x)).const_mul
+    (-ξ ^ 2)).congr_deriv (by ring)
 
 /-- The sup bounds for the `cos(ξ·)` derivative chain, bundled: `C0 = 1`, `C1 = |ξ|`,
 `C2 = ξ²`, `C3 = |ξ|³`. -/
@@ -377,19 +373,9 @@ lemma hasDerivWithinAt_cosPairing_sinPairing {b v T : ℝ} {μ : ℝ → Measure
   set k : ℝ → ℝ := fun r => b * ξ * (∫ y, Real.cos (ξ * y) ∂(μ r))
       - v / 2 * ξ ^ 2 * (∫ y, Real.sin (ξ * y) ∂(μ r)) with hkdef
   have hhcont : ContinuousOn h (Set.Icc 0 T) := by
-    have e1 : ContinuousOn (fun r => (-b * ξ) * (∫ y, Real.sin (ξ * y) ∂(μ r))) (Set.Icc 0 T) :=
-      continuousOn_const.mul hScont
-    have e2 : ContinuousOn (fun r => (v / 2 * ξ ^ 2) * (∫ y, Real.cos (ξ * y) ∂(μ r))) (Set.Icc 0 T) :=
-      continuousOn_const.mul hCcont
-    rw [hhdef]
-    exact e1.sub e2
+    rw [hhdef]; exact (continuousOn_const.mul hScont).sub (continuousOn_const.mul hCcont)
   have hkcont : ContinuousOn k (Set.Icc 0 T) := by
-    have e1 : ContinuousOn (fun r => (b * ξ) * (∫ y, Real.cos (ξ * y) ∂(μ r))) (Set.Icc 0 T) :=
-      continuousOn_const.mul hCcont
-    have e2 : ContinuousOn (fun r => (v / 2 * ξ ^ 2) * (∫ y, Real.sin (ξ * y) ∂(μ r))) (Set.Icc 0 T) :=
-      continuousOn_const.mul hScont
-    rw [hkdef]
-    exact e1.sub e2
+    rw [hkdef]; exact (continuousOn_const.mul hCcont).sub (continuousOn_const.mul hScont)
   have hCprim : ∀ s ∈ Set.Icc (0 : ℝ) T,
       (∫ y, Real.cos (ξ * y) ∂(μ s)) = (∫ y, Real.cos (ξ * y) ∂(μ 0)) + ∫ r in (0 : ℝ)..s, h r :=
     pairing_volterra_primitive hμ hT (hasDerivAt_cosMul ξ) (hasDerivAt_negSinMul ξ)
@@ -498,6 +484,17 @@ lemma pairing_cos_sin_eq {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
   · have := hUz; rw [hUdef] at this; linarith [this]
   · have := hWz; rw [hWdef] at this; linarith [this]
 
+/-- A real function bounded by `1` is, viewed through `Complex.ofReal`, integrable against any
+probability measure: the shared domination step behind all four integrability facts
+`weakForwardUniqueConst` needs for its `charFun`-splitting calc. -/
+private lemma integrable_ofReal_of_abs_le_one {μ : Measure ℝ} [IsProbabilityMeasure μ]
+    {g : ℝ → ℝ} (hgc : Continuous g) (hg : ∀ x, |g x| ≤ 1) :
+    Integrable (fun x => (g x : ℂ)) μ :=
+  Integrable.mono' (integrable_const (1 : ℝ))
+    (Complex.continuous_ofReal.comp hgc).aestronglyMeasurable
+    (Filter.Eventually.of_forall fun x => by
+      simp only [Complex.norm_real, Real.norm_eq_abs]; exact hg x)
+
 /-- Two probability-measure flows obeying the integrated weak forward equation
 with the same constant drift and variance, and sharing an initial law,
 coincide at every later time: weak uniqueness for the constant-coefficient
@@ -521,21 +518,13 @@ theorem weakForwardUniqueConst {ρ η : ℝ → Measure ℝ} {b v T : ℝ}
       rw [show ((ξ : ℂ) * (x : ℂ)) = ((ξ * x : ℝ) : ℂ) by push_cast; ring]
       rw [Complex.exp_mul_I, Complex.ofReal_cos, Complex.ofReal_sin]
     have hintρc : Integrable (fun x => (Real.cos (ξ * x) : ℂ)) (ρ s) :=
-      Integrable.mono' (integrable_const (1 : ℝ)) (by fun_prop)
-        (Filter.Eventually.of_forall fun x => by
-          simp only [Complex.norm_real, Real.norm_eq_abs]; exact Real.abs_cos_le_one _)
+      integrable_ofReal_of_abs_le_one (by fun_prop) fun x => Real.abs_cos_le_one (ξ * x)
     have hintρs : Integrable (fun x => (Real.sin (ξ * x) : ℂ)) (ρ s) :=
-      Integrable.mono' (integrable_const (1 : ℝ)) (by fun_prop)
-        (Filter.Eventually.of_forall fun x => by
-          simp only [Complex.norm_real, Real.norm_eq_abs]; exact Real.abs_sin_le_one _)
+      integrable_ofReal_of_abs_le_one (by fun_prop) fun x => Real.abs_sin_le_one (ξ * x)
     have hintηc : Integrable (fun x => (Real.cos (ξ * x) : ℂ)) (η s) :=
-      Integrable.mono' (integrable_const (1 : ℝ)) (by fun_prop)
-        (Filter.Eventually.of_forall fun x => by
-          simp only [Complex.norm_real, Real.norm_eq_abs]; exact Real.abs_cos_le_one _)
+      integrable_ofReal_of_abs_le_one (by fun_prop) fun x => Real.abs_cos_le_one (ξ * x)
     have hintηs : Integrable (fun x => (Real.sin (ξ * x) : ℂ)) (η s) :=
-      Integrable.mono' (integrable_const (1 : ℝ)) (by fun_prop)
-        (Filter.Eventually.of_forall fun x => by
-          simp only [Complex.norm_real, Real.norm_eq_abs]; exact Real.abs_sin_le_one _)
+      integrable_ofReal_of_abs_le_one (by fun_prop) fun x => Real.abs_sin_le_one (ξ * x)
     calc charFun (ρ s) ξ
         = ∫ x, Complex.exp ((ξ : ℂ) * (x : ℂ) * Complex.I) ∂(ρ s) := charFun_apply_real ξ
       _ = ∫ x, ((Real.cos (ξ * x) : ℂ) + (Real.sin (ξ * x) : ℂ) * Complex.I) ∂(ρ s) := by

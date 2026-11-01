@@ -195,6 +195,14 @@ named `abs_mul`-chain helper if the pattern recurs a third time; (3) the acknowl
 non-constant-coefficient extension, parked per the module's own docstring scope. None of the
 three is a correctness or honesty finding; all are optional follow-on polish.
 
+**Update (same day, post-review):** backlog item (2) landed — the pattern did recur (twice
+more, in fact). A pr-roll review series over this module's PR extracted seven shared private
+lemmas in total: `continuousOn_of_lipschitzOn_Icc`, `abs_cosChain_bounds`/`abs_sinChain_bounds`,
+`pairing_volterra_primitive`, `diff_pairing_lipschitz`, `abs_genLinComb_le` (the `abs_mul`-chain
+helper backlog item (2) names), `hasDerivAt_linMul`, and `integrable_ofReal_of_abs_le_one`. The
+file has no remaining literal-duplicate `calc`/proof blocks as of commit range `bc875698`
+through the round-4 fix. Backlog item (1) remains open (no second consumer yet).
+
 ## 2026-10-31 — corpus 742, modules 678 — elegance: does each headline proof read as its argument
 
 Scope: lens 8 alone, at the maintainer's bar ("mathematical highest quality … and beauty"), over the
