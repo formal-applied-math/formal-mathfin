@@ -130,6 +130,68 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-11-01 — corpus 758, modules 687 — removable singularities in two stochastic-volatility smile models
+
+Scope: a single-reviewer pass over this branch's own addition — SABR Floch-Kennedy's `beta -> 1`
+and `nu -> 0` expansion limits, and Heston's small-vol-of-vol limit to Black-Scholes (4 entries,
+corpus 754 -> 758) — not the upstream growth 742 -> 754 already absorbed from `origin/main`'s own
+merged PRs, which is on the maintainer's own cadence.
+
+### The standing first pass: prose against statement
+
+Four review-and-fix rounds plus an independent-model (Fable) pass, run twice (the second after
+fixing the first pass's five findings), closed with three consecutive clean rounds each time.
+Real overclaims caught and fixed, not cosmetic:
+
+- A line exceeded the repo's 100-character lint limit.
+- The Heston docstring and its benchmark `reference` field described QuantLib's
+  `AnalyticHestonEngine::chF` Taylor branch as taken "for sigma <= 1e-6" — incomplete; the actual
+  branch condition (verified against the live QuantLib source) is `sigma <= 1e-6 AND
+  kappa >= 1e-8`. Both fixed; a later Fable pass found the benchmark `reference` field had been
+  fixed in the module docstring but not synced to the benchmark JSON, and fixed that too.
+- The SABR module docstring and both SABR benchmark `reference` fields attributed the closed forms
+  directly to the Le Floc'h-Kennedy paper's printed equations; the paper itself was never
+  accessible (403 from SSRN and ResearchGate, confirmed independently twice). The actual source is
+  QuantLib's `sabr.cpp` (`SabrFlochKennedyVolatility`), verified term-for-term against the live
+  upstream source. Reattributed per this repo's "transcribed from QuantLib's `<file>`" standard
+  rather than presented as the paper's own equations with no equation numbers.
+- `tendsto_sabrFKDint_nu_zero`'s docstring claimed the limit held for "every alpha, y" without
+  disclosing that `alpha = 0` only holds through Lean's `x/0 = 0` junk value, not as a fact about
+  the (undefined) closed form — the same disclosure pattern the file already used for `beta = 1`
+  and `nu = 0`, now extended to `alpha`.
+- A docstring called `y = -log(F/k)` "the beta = 1 value" of a limit theorem, when the file's own
+  header states the actual value at `beta = 1` is the junk `0`. Changed "value" to "limit".
+- `docs/coverage.md` had no entry for the 4 new benchmark ids, breaking this repo's own convention
+  (the sibling SABR cluster entry at the same file). Added.
+
+### Lens gradients
+
+1. **Inspired math quality.** Exemplar: both headline limits resolve a genuine `0/0`/`infinity*0`
+   removable singularity in a closed-form engine's own building blocks, not a restated identity —
+   the Heston limit in particular reuses the existing Vasicek deterministic-variance machinery
+   directly rather than re-deriving it. Upgrade: none proposed this round.
+2. **Mathlib / BrownianMotion coherence.** The Heston module composes `mgf_id_gaussianReal`
+   (Mathlib) rather than re-deriving the moment-generating function; the SABR module reuses
+   `SABRImpliedVol.lean`'s `sabrX` and its zero-derivative lemma rather than re-proving the
+   difference-quotient argument. Upgrade: none proposed.
+7. **Concept clarity.** Post-fix exemplar: both module docstrings' "Scope" paragraphs now name
+   exactly what's not covered (the full Le Floc'h-Kennedy expansion's correction terms; the complex
+   characteristic function and the actual-Heston-process identification) rather than leaving the
+   boundary implicit. Upgrade: the provenance-attribution fix (QuantLib `sabr.cpp`, not the paper
+   directly) is a pattern worth checking across the corpus's other paper-cited transcriptions —
+   left as a backlog item, not executed this round.
+3–6, 8. No findings beyond the standing first pass above.
+
+### Evidence
+
+Two independent-model (Fable) passes (the first finding five real issues, the second — after
+fixing and re-running three more clean rounds — reporting clean) plus six total review rounds.
+Citations verified against the live QuantLib source (`sabr.cpp`, `analytichestonengine.cpp`,
+`coshestonengine.cpp`, `analyticptdhestonengine.cpp`, `hestonrndcalculator.cpp`) and the cited
+papers (Le Floc'h & Kennedy SSRN 2467231 2014, Heston 1993 RFS 6(2) 327-343), not just trusted
+strings. Zero `sorry`, `#print axioms` on every public declaration showing exactly `[propext,
+Classical.choice, Quot.sound]`. `lake build`/`lake lint` clean; ledger sweep dispatched.
+
 ## 2026-10-31 — corpus 742, modules 678 — elegance: does each headline proof read as its argument
 
 Scope: lens 8 alone, at the maintainer's bar ("mathematical highest quality … and beauty"), over the
