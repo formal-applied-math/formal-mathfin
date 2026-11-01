@@ -277,8 +277,9 @@ theorem tendsto_hestonProfile_smallVolOfVol_blackScholes {κ u : ℝ} (hκ : 0 <
     (hu2 : u < 1) (r θ ρ T t x v : ℝ) (hv : 0 ≤ v) (hθ : 0 ≤ θ) (htT : t ≤ T) :
     Tendsto (fun ξ => hestonProfile u (fun w => hestonA r κ θ ξ ρ u (T - w))
         (fun w => hestonBv κ ξ ρ u (T - w)) t x v) (𝓝[≠] 0)
-      (𝓝 (mgf id (gaussianReal (x + r * (T - t) - (vasicekIntegratedMean v θ κ (T - t)).toNNReal / 2)
-        (vasicekIntegratedMean v θ κ (T - t)).toNNReal) u)) := by
+      (𝓝 (mgf id
+        (gaussianReal (x + r * (T - t) - (vasicekIntegratedMean v θ κ (T - t)).toNNReal / 2)
+          (vasicekIntegratedMean v θ κ (T - t)).toNNReal) u)) := by
   rw [mgf_gaussianReal_logSpot, Real.coe_toNNReal _
     (vasicekIntegratedMean_nonneg hκ hv hθ (sub_nonneg.mpr htT))]
   exact tendsto_hestonProfile_smallVolOfVol hκ hu1 hu2 r θ ρ T t x v
