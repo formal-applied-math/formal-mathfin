@@ -200,6 +200,23 @@ private lemma continuousOn_of_lipschitzOn_Icc {f : ℝ → ℝ} {T L : ℝ} (hL0
           have hpos : (0 : ℝ) < L + 1 := by positivity
           field_simp
 
+/-- The generator's linear combination against a frequency, bounded by the sup-norm: the
+shared triangle-inequality step behind both components of `hFbound` in `pairing_cos_sin_eq`
+(the `ℝ × ℝ` Grönwall bound `‖F' x‖ ≤ K * ‖F x‖`). -/
+private lemma abs_genLinComb_le (b v ξ p q : ℝ) :
+    |b * ξ * p + v / 2 * ξ ^ 2 * q| ≤ (|b| * |ξ| + |v| / 2 * ξ ^ 2) * max |p| |q| := by
+  have hp : |p| ≤ max |p| |q| := le_max_left _ _
+  have hq : |q| ≤ max |p| |q| := le_max_right _ _
+  have hhalf : |v / 2| = |v| / 2 := by rw [abs_div]; norm_num
+  calc |b * ξ * p + v / 2 * ξ ^ 2 * q|
+      ≤ |b * ξ * p| + |v / 2 * ξ ^ 2 * q| := abs_add_le _ _
+    _ = |b| * |ξ| * |p| + |v| / 2 * ξ ^ 2 * |q| := by
+        rw [abs_mul, abs_mul, abs_mul, abs_mul, hhalf, abs_of_nonneg (sq_nonneg ξ)]
+    _ ≤ |b| * |ξ| * max |p| |q| + |v| / 2 * ξ ^ 2 * max |p| |q| :=
+        add_le_add (mul_le_mul_of_nonneg_left hp (by positivity))
+          (mul_le_mul_of_nonneg_left hq (by positivity))
+    _ = (|b| * |ξ| + |v| / 2 * ξ ^ 2) * max |p| |q| := by ring
+
 /-! ### Trigonometric test chains
 
 `cos(ξ·)` and `sin(ξ·)` have constant-coefficient derivative chains: the
@@ -460,27 +477,17 @@ lemma pairing_cos_sin_eq {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
   have hFbound : ∀ x ∈ Set.Ico (0 : ℝ) T, ‖F' x‖ ≤ K * ‖F x‖ := by
     intro x _
     rw [hF'def, hFdef, Prod.norm_mk, Prod.norm_mk]
-    have hUle : |U x| ≤ max |U x| |W x| := le_max_left _ _
-    have hWle : |W x| ≤ max |U x| |W x| := le_max_right _ _
-    have hhalf : |v / 2| = |v| / 2 := by rw [abs_div]; norm_num
     apply max_le
-    · calc |(-b * ξ * W x - v / 2 * ξ ^ 2 * U x)|
-          ≤ |b * ξ * W x| + |v / 2 * ξ ^ 2 * U x| :=
-            (abs_sub _ _).trans_eq (by rw [neg_mul, neg_mul, abs_neg])
-        _ = |b| * |ξ| * |W x| + |v| / 2 * ξ ^ 2 * |U x| := by
-            rw [abs_mul, abs_mul, abs_mul, abs_mul, hhalf, abs_of_nonneg (sq_nonneg ξ)]
-        _ ≤ |b| * |ξ| * max |U x| |W x| + |v| / 2 * ξ ^ 2 * max |U x| |W x| :=
-            add_le_add (mul_le_mul_of_nonneg_left hWle (by positivity))
-              (mul_le_mul_of_nonneg_left hUle (by positivity))
-        _ = K * max |U x| |W x| := by rw [hKdef]; ring
-    · calc |(b * ξ * U x - v / 2 * ξ ^ 2 * W x)|
-          ≤ |b * ξ * U x| + |v / 2 * ξ ^ 2 * W x| := abs_sub _ _
-        _ = |b| * |ξ| * |U x| + |v| / 2 * ξ ^ 2 * |W x| := by
-            rw [abs_mul, abs_mul, abs_mul, abs_mul, hhalf, abs_of_nonneg (sq_nonneg ξ)]
-        _ ≤ |b| * |ξ| * max |U x| |W x| + |v| / 2 * ξ ^ 2 * max |U x| |W x| :=
-            add_le_add (mul_le_mul_of_nonneg_left hUle (by positivity))
-              (mul_le_mul_of_nonneg_left hWle (by positivity))
-        _ = K * max |U x| |W x| := by rw [hKdef]; ring
+    · have heq : (-b * ξ * W x - v / 2 * ξ ^ 2 * U x)
+          = b * ξ * (-W x) + v / 2 * ξ ^ 2 * (-U x) := by ring
+      rw [heq]
+      have hb := abs_genLinComb_le b v ξ (-W x) (-U x)
+      rwa [abs_neg, abs_neg, max_comm, ← hKdef] at hb
+    · have heq : (b * ξ * U x - v / 2 * ξ ^ 2 * W x) = b * ξ * U x + v / 2 * ξ ^ 2 * (-W x) := by
+        ring
+      rw [heq]
+      have hb := abs_genLinComb_le b v ξ (U x) (-W x)
+      rwa [abs_neg, ← hKdef] at hb
   have hFzero := eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right hFcont hFderiv hF0 hFbound
   intro s hs
   have hz := hFzero s hs
