@@ -29,7 +29,7 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 ### American early-exercise approximations at their degenerate boundary (2026-11-01)
 
 Two independent small-parameter/boundary limits of American-option early-exercise engines,
-five entries, all `full`, in `benchmarks/american_put_boundary.json`. Corpus 749 → 754.
+five entries, all `full`, in `benchmarks/american_put_boundary.json`. Corpus 754 → 759.
 
 | Benchmark ID | Mathematical conclusion | Lean declaration |
 |---|---|---|

@@ -25,7 +25,7 @@ vector no-arbitrage condition at `F = ℝ` (`noArbitrage_iff_vector`: on `ℝ` t
 product `⟪θ, y⟫` is `θ · y`). So `ftap_one_period` is a corollary of
 `OnePeriodVector.ftap_one_period_vector` at `F = ℝ`, and carries no proof of its own: the
 backward direction (the L¹ tempering and the logistic tilt) and the forward direction
-(`MathFin.emm_implies_no_arbitrage`) are proved once, in the vector file. On a finite space
+(`MathFin.IsEMM.noArbitrage`) are proved once, in the vector file. On a finite space
 with trivial initial information, the one-step market of `Foundations/FTAPDiscrete.lean` is
 this market for `Y = S 1 − S 0` (`isEMM_one_iff_onePeriod`, `noArbitrage_one_iff_onePeriod`).
 

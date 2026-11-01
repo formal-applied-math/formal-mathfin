@@ -192,7 +192,7 @@ private lemma eq_of_ae_eq_of_pos {Ω : Type*} [MeasurableSpace Ω] [MeasurableSi
 
 /-- **An equivalent martingale measure for the `T`-period tree.** Under `BinomialNoArb u d r`,
 the law of the first `T` i.i.d. `Bernoulli(q)` flips with `q = crrUpProb u d r` is an equivalent
-martingale measure, in the sense of `FTAPDiscrete.IsEMM`, for the discounted spot, against the
+martingale measure, in the sense of `MathFin.IsEMM`, for the discounted spot, against the
 real-world law of i.i.d. `Bernoulli(p)` flips, any `0 < p < 1`: the martingale property
 `martingale_discountedSpot` transports along `flips T`. -/
 theorem isEMM_horizonSpot (h : BinomialNoArb u d r) (S₀ : ℝ) {p q : ℝ≥0} (hp0 : 0 < p)
@@ -207,8 +207,10 @@ theorem isEMM_horizonSpot (h : BinomialNoArb u d r) (S₀ : ℝ) {p q : ℝ≥0}
     have := (crrUpProb_mem_Ioo h).2
     rw [hqcrr] at this
     exact_mod_cast this
-  refine ⟨⟨inferInstance, absolutelyContinuous_of_pos (horizonMeasure_pos T hp0 hp1),
-    absolutelyContinuous_of_pos (horizonMeasure_pos T hq0 hq1')⟩, fun t ht ↦ ?_⟩
+  refine .of_condExp_succ
+    ⟨inferInstance, absolutelyContinuous_of_pos (horizonMeasure_pos T hp0 hp1),
+      absolutelyContinuous_of_pos (horizonMeasure_pos T hq0 hq1')⟩
+    (fun t _ ↦ stronglyAdapted_horizonSpot t) (fun t _ ↦ Integrable.of_finite) fun t ht ↦ ?_
   refine ae_eq_condExp_of_forall_setIntegral_eq ((horizonFiltration T).le t) Integrable.of_finite
     (fun s _ _ ↦ Integrable.of_finite.integrableOn) (fun s hs _ ↦ ?_)
     (stronglyAdapted_horizonSpot t).aestronglyMeasurable
@@ -274,7 +276,8 @@ theorem binomialNoArb_of_noArbitrage (hS₀ : 0 < S₀) (hd : 0 < d) (hdu : d < 
       0 ≤ c * (S₀ * Real.exp (-r) * ((if x ⟨0, hT⟩ then u else d) - Real.exp r)))
       (x : Fin T → Bool) :
       c * (S₀ * Real.exp (-r) * ((if x ⟨0, hT⟩ then u else d) - Real.exp r)) = 0 := by
-    have h := hNA (fun s _ ↦ if s = 1 then c else 0) (fun _ ↦ stronglyMeasurable_const)
+    have h := hNA (fun s _ ↦ if s = 1 then c else 0) (fun _ _ ↦ stronglyMeasurable_const)
+      ⟨|c|, fun n _ _ ↦ by by_cases h : n = 1 <;> simp [h]⟩
       (Filter.Eventually.of_forall fun x ↦ by
         simpa only [Pi.zero_apply, martingaleTransform_holdFirst c hT, hgain] using hnn x)
     simpa only [Pi.zero_apply, martingaleTransform_holdFirst c hT, hgain] using
@@ -385,7 +388,8 @@ theorem IsEMM.real_atom_up (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
       = ∫ y in A, horizonSpot T S₀ u d r t y ∂Q := by
     rw [← setIntegral_condExp ((horizonFiltration T).le t) Integrable.of_finite
       (measurableSet_horizonAtom t x)]
-    exact setIntegral_congr_ae hA (by filter_upwards [hQ.mart t ht] with y hy _ using hy.symm)
+    exact setIntegral_congr_ae hA
+      (by filter_upwards [hQ.condExp_eq t.le_succ (Nat.succ_le_of_lt ht)] with y hy _ using hy)
   set s := horizonSpot T S₀ u d r t x
   have hs : 0 < s := horizonSpot_pos hS₀ h.d_pos (h.d_pos.trans h.d_lt_u) t x
   -- split the atom along the next flip
@@ -504,7 +508,7 @@ theorem IsEMM.eq_horizonMeasure (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
 
 /-- **The multi-period binomial market has a unique equivalent martingale measure.** Under
 `BinomialNoArb u d r` and `S₀ > 0`, for every real-world law of i.i.d. `Bernoulli(p)` flips,
-`0 < p < 1`, the `T`-period CRR market has exactly one `FTAPDiscrete.IsEMM`, the i.i.d.
+`0 < p < 1`, the `T`-period CRR market has exactly one `MathFin.IsEMM`, the i.i.d.
 `Bernoulli(crrUpProb u d r)` law of the flips: existence is `isEMM_horizonSpot` and uniqueness
 `IsEMM.eq_horizonMeasure`. Uniqueness of the equivalent martingale measure is what the second
 fundamental theorem equates with completeness; replication of claims is not stated here. -/

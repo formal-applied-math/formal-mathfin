@@ -332,7 +332,8 @@ theorem condExp_exp_wienerIntegralLp (hB : IsPreBrownianReal B μ)
       =ᵐ[μ] fun ω ↦ Real.exp (a + b * wienerIntegralLp B hB t h ω
           - c * wienerIntegralLp B hB t (kernelRestrict htT f) ω)
         * Real.exp (c ^ 2 * (∫ s in Set.Ioc (t : ℝ) T, f s ^ 2) / 2) := by
-  have hle := (Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable)).le t
+  set 𝓕t := Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable) t
+  have hle : 𝓕t ≤ mΩ := (Filtration.natural B _).le t
   obtain ⟨P', hP'm, hPP'⟩ := mem_lpMeas_iff_aestronglyMeasurable.1
     (wienerIntegralLp_past_mem_lpMeas hB hBm htT f)
   obtain ⟨H', hH'm, hHH'⟩ := mem_lpMeas_iff_aestronglyMeasurable.1
@@ -346,9 +347,9 @@ theorem condExp_exp_wienerIntegralLp (hB : IsPreBrownianReal B μ)
     rw [Pi.add_apply, ← h2]
     rw [Pi.sub_apply] at h1
     linarith
-  set E1 : Ω → ℝ := fun ω ↦ Real.exp (a + b * H' ω - c * P' ω) with hE1def
-  set E2 : Ω → ℝ := fun ω ↦ Real.exp (-(c * N' ω)) with hE2def
-  have hE1 : StronglyMeasurable[Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable) t] E1 :=
+  set E1 : Ω → ℝ := fun ω ↦ Real.exp (a + b * H' ω - c * P' ω)
+  set E2 : Ω → ℝ := fun ω ↦ Real.exp (-(c * N' ω))
+  have hE1 : StronglyMeasurable[𝓕t] E1 :=
     Real.continuous_exp.comp_stronglyMeasurable
       ((stronglyMeasurable_const.add (hH'm.const_mul b)).sub (hP'm.const_mul c))
   have hE2 : StronglyMeasurable[postσ B t] E2 :=
@@ -356,8 +357,7 @@ theorem condExp_exp_wienerIntegralLp (hB : IsPreBrownianReal B μ)
   have hprod : (fun ω ↦ Real.exp (a + b * wienerIntegralLp B hB t h ω
       - c * wienerIntegralLp B hB T f ω)) =ᵐ[μ] E1 * E2 := by
     filter_upwards [hW, hHH'] with ω hw hh
-    rw [Pi.mul_apply, hE1def, hE2def]
-    simp only
+    dsimp only [E1, E2, Pi.mul_apply]
     rw [← Real.exp_add, hw, hh, Pi.add_apply]
     congr 1
     ring
@@ -376,28 +376,16 @@ theorem condExp_exp_wienerIntegralLp (hB : IsPreBrownianReal B μ)
     ((integrable_exp_mul_of_hasLaw (wienerIntegralLp_hasLaw_gaussian hB t
       (b • h - c • kernelRestrict htT f)) 1).const_mul (Real.exp a)).congr <| by
       filter_upwards [hlin, hPP', hHH'] with ω h1 h2 h3
-      rw [hE1def]
-      simp only
+      dsimp only [E1]
       rw [← Real.exp_add, one_mul, h1, ← h2, ← h3]
       congr 1
       ring
-  have hindep : Indep (postσ B t)
-      (Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable) t) μ :=
-    shift_indep_natural hB hBm t
-  have hIndFun : IndepFun E1 E2 μ :=
-    (IndepFun_iff_Indep _ _ _).2
-      (indep_of_indep_of_le_right (indep_of_indep_of_le_left hindep.symm hE1.measurable.comap_le)
-        hE2.measurable.comap_le)
-  have hint : Integrable (E1 * E2) μ := hIndFun.integrable_mul hE1int hE2int
-  have hcond1 := condExp_mul_of_stronglyMeasurable_left
-    (m := Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable) t) hE1 hint hE2int
-  have hcond2 : μ[E2 | Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable) t]
-      =ᵐ[μ] fun _ ↦ ∫ ω, E2 ω ∂μ := condExp_indep_eq (postσ_le hBm t) hle hE2 hindep
-  refine (condExp_congr_ae hprod).trans (hcond1.trans ?_)
-  filter_upwards [hcond2, hPP', hHH'] with ω h2 hP hH
-  rw [Pi.mul_apply, h2, hI_N, hE1def]
-  simp only
-  rw [hP, hH]
+  refine (condExp_congr_ae hprod).trans
+    ((condExp_mul_of_indep hle (postσ_le hBm t) (shift_indep_natural hB hBm t) hE1 hE2 hE1int
+      hE2int).trans ?_)
+  filter_upwards [hPP', hHH'] with ω hP hH
+  rw [hI_N]
+  simp only [E1, hP, hH]
 
 end Closure
 

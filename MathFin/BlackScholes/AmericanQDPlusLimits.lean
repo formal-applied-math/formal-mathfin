@@ -34,10 +34,13 @@ computes it over an abstract boundary `B`, with no fixed-point or pricing conten
 * `b ≠ B τ`, `B` only continuous at `τ`: `K₁₂, K₃ → 0`, and `nᵢ, dᵢ` tend to `e^{rτ}`,
   `e^{qτ}` when `B τ < b` and to `0` when `b < B τ` (`tendsto_qdfpK12_endpoint_ne` and
   siblings). The endpoint value is therefore discontinuous in `b` at `b = B τ`.
-* The differentiability hypothesis cannot be weakened to continuity: for the continuous
-  boundary `B s = b e^{-c √(τ-s)}`, which has `B τ = b` and `log (b / B(τ - m)) = c √m`,
-  `K₁₂ → e^{qτ} (√τ/σ) φ(c/σ)`, which differs from the value above when `c ≠ 0`
-  (`tendsto_qdfpK12_endpoint_holder`, `not_tendsto_qdfpK12_endpoint_holder`).
+* Differentiability is sufficient for the limit above, but continuity alone is not: for the
+  continuous boundary `B s = b e^{-c √(τ-s)}`, which has `B τ = b` and
+  `log (b / B(τ - m)) = c √m`, `K₁₂ → e^{qτ} (√τ/σ) φ(c/σ)`, which differs from the value
+  above when `c ≠ 0` (`tendsto_qdfpK12_endpoint_holder`, `not_tendsto_qdfpK12_endpoint_holder`).
+  This counterexample is nondifferentiable at `τ`, so it shows continuity alone does not pin
+  down the differentiable-case limit; it does not show differentiability is necessary for
+  convergence as such.
 
 ## References
 
@@ -374,7 +377,7 @@ theorem tendsto_qdfpDi_endpoint_ne {B : ℝ → ℝ} {r q σ τ b : ℝ} (hσ : 
     rw [mul_zero] at this
     exact this
 
-/-! ### The differentiability hypothesis is needed -/
+/-! ### Continuity alone does not pin down the differentiable-case limit -/
 
 /-- The boundary `B s = b e^{-c √(τ - s)}` used in `tendsto_qdfpK12_endpoint_holder` is
 continuous. -/

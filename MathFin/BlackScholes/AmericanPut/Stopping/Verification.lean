@@ -77,8 +77,9 @@ theorem value_eq_of_attained
   le_antisymm (value_le_supermartingale_candidate hW hK hr hS hU hcont hbound hdom)
     (hatt.ge.trans (expectedReward_le_value hW hK hr hS θ))
 
+omit [IsProbabilityMeasure P] in
 /-- A contact rule whose stopped candidate is a martingale attains the initial value. -/
-theorem expectedReward_eq_initial_of_contact_martingale
+theorem expectedReward_eq_initial_of_contact_martingale [IsFiniteMeasure P]
     (hcont : ∀ ω, Continuous (fun t => U t ω)) (hbound : ∀ t ω, ‖U t ω‖ ≤ C)
     (θ : StoppingRule 𝓕 T)
     (hcontact : ∀ᵐ ω ∂P, U (θ.time ω) ω = putReward W K r q σ S θ.time ω)
@@ -87,8 +88,7 @@ theorem expectedReward_eq_initial_of_contact_martingale
   have hh := expected_stoppedValue_eq_initial hmart
     (fun ω => (hcont ω).comp (continuous_id.min continuous_const))
     (fun t ω => hbound _ ω) θ
-  simp only [min_self,zero_min] at hh
-  exact (integral_congr_ae hcontact).symm.trans hh
+  exact (integral_congr_ae hcontact).symm.trans (by simpa only [min_self,zero_min] using hh)
 
 /-- Verification with an explicit admissible contact rule. Neither optimality
 nor equality with the stopping-value supremum is among the hypotheses. -/

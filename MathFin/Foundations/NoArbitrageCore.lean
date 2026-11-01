@@ -14,7 +14,7 @@ The shared analytic heart of the forward FTAP. A `Q`-integrable
 `f` that is `Q`-a.s. nonnegative with `∫ f dQ = 0` is `Q`-a.s. zero, so its positive set is
 `Q`-null (`ae_zero_of_nonneg_of_integral_zero`). The zero integral comes from a martingale
 transform started at `0` (`martingale_nonneg_terminal_ae_zero`, below), which is what the
-discrete-time `emm_implies_no_arbitrage` does; the one-period, finite-Ω and continuous-time
+discrete-time `IsEMM.noArbitrage` does; the one-period, finite-Ω and continuous-time
 (`ContinuousMarket.isEMM_noArbitrageSimple`, through sampling) forward directions are its
 instances. `ae_eq_zero_of_nonneg_of_null_pos` turns the null positive set into
 the `=ᵐ 0` form of the no-arbitrage definitions.

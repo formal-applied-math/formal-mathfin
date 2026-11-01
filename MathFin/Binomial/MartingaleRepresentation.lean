@@ -73,13 +73,8 @@ theorem binomial_martingale_representation (hq0 : 0 < q) (hq1 : q < 1)
     intro ω ω' hω
     have hM' := stronglyMeasurable_flipFiltration_iff.1 (hM.stronglyAdapted (n + 1))
     have hS' := stronglyMeasurable_flipFiltration_iff.1 (hS.stronglyAdapted (n + 1))
-    have h1 := hM'.fixFlip true ω ω' hω
-    have h2 := hM'.fixFlip false ω ω' hω
-    have h3 := hS'.fixFlip true ω ω' hω
-    have h4 := hS'.fixFlip false ω ω' hω
-    simp only at h1 h2 h3 h4
-    simp only [hedgeRatio, Nat.add_sub_cancel]
-    rw [h1, h2, h3, h4]
+    simp only [hedgeRatio, Nat.add_sub_cancel, hM'.fixFlip true ω ω' hω,
+      hM'.fixFlip false ω ω' hω, hS'.fixFlip true ω ω' hω, hS'.fixFlip false ω ω' hω]
   · -- the representation telescopes from the one-step identity
     intro N ω
     induction N with

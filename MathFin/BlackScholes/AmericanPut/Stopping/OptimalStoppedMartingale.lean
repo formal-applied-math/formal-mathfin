@@ -18,7 +18,8 @@ integrals, which is exactly the martingale criterion.
 ## Result
 
 Public entry points include `StoppingRule.binary`,
-`expected_value_eq_before_optimal_rule`.
+`expected_value_eq_before_optimal_rule`, `stopped_martingale_of_expected_value_eq`,
+`expectedReward_eq_initial_iff_stopped_martingale`.
 -/
 
 @[expose] public section
@@ -109,5 +110,23 @@ theorem stopped_martingale_of_expected_value_eq
   rw [he,integral_piecewise hAm (hi i).integrableOn (hi j).integrableOn] at hη
   have hj := (integral_add_compl hAm (hi j)).trans (hmean j)
   linarith
+
+/-- **A rule attains the initial value exactly when the stopped process is a martingale.** For a
+bounded continuous supermartingale `U` and an admissible rule `θ` at whose time `U` meets the
+discounted reward almost surely, the expected reward is `∫ U 0` if and only if `U` stopped at `θ`
+is a martingale. The two directions are `expectedReward_eq_initial_of_contact_martingale`
+(optional stopping of a martingale) and `stopped_martingale_of_expected_value_eq` (a
+value-preserving rule makes every earlier stopped mean constant). The hypotheses are the union of
+what the two directions need: neither domination of the reward by `U` nor measurability of the
+reward process is used. -/
+theorem expectedReward_eq_initial_iff_stopped_martingale {W : ℝ≥0 → Ω → ℝ} {K r q σ S : ℝ}
+    (hU : Supermartingale U 𝓕 P) (hc : ∀ ω, Continuous (fun t => U t ω))
+    (hb : ∀ t ω, ‖U t ω‖ ≤ C) (θ : StoppingRule 𝓕 T)
+    (hcontact : ∀ᵐ ω ∂P, U (θ.time ω) ω = putReward W K r q σ S θ.time ω) :
+    (∫ ω, putReward W K r q σ S θ.time ω ∂P) = ∫ ω, U 0 ω ∂P ↔
+      Martingale (fun t ω => U (min t (θ.time ω)) ω) 𝓕 P :=
+  ⟨fun h ↦ stopped_martingale_of_expected_value_eq hU hc hb θ
+      ((integral_congr_ae hcontact).trans h),
+    expectedReward_eq_initial_of_contact_martingale hc hb θ hcontact⟩
 
 end MathFin.BlackScholes.AmericanPut.Stopping

@@ -37,9 +37,10 @@ from the source equations; `φ = 1` is a call, `φ = −1` a put.
 * `put_intrinsic_le_parityBound` — the pointwise half of the put exit: under `DR ≥ 1`,
   `DR ≥ DQ`, `0 < S ≤ K`, `K − S ≤ K·DR − S·DQ ≤ bsPDiv`.
 * `bawPut_no_positive_root_zero_rate`, `bawPut_criticalPrice_eq_zero_zero_rate` — at `r = 0`
-  with `q ≥ 0` the BAW put critical-price equation has no positive root, so `S* = 0`. The
-  hypothesis `0 < S*₀` of the headline then fails: the rewrite alone does not handle these
-  puts, and the early exit is required as well.
+  with `q ≥ 0` the BAW put critical-price equation has no positive root: any `S* ≥ 0` solving
+  it must be `S* = 0`, excluding a positive critical price without asserting that `S* = 0`
+  itself solves the equation. Either way the hypothesis `0 < S*₀` of the headline fails: the
+  rewrite alone does not handle these puts, and the early exit is required as well.
 * `juVE_one`, `juVE_neg_one` — the European leg is `bsVDiv` / `bsPDiv`.
 
 ## Scoped out
@@ -416,8 +417,9 @@ lemma juLambda_neg_one_zero_neg (q : ℝ) {σ T : ℝ} (hσ : 0 < σ) (hT : 0 < 
 The equation (Li eq. (9), with `q_QD` at its `r = 0` value `juLambda (-1) q σ T 0`) is
 `K − S − p(S) = −S(1 − e^{−qT}Φ(−d₁(S)))/q_QD`. Its left side is `≤ 0` (parity at `r = 0` and
 a nonnegative call give `p(S) ≥ K − S·e^{−qT} ≥ K − S`); its right side is `> 0`
-(`q_QD < 0` and `1 − e^{−qT}Φ(−d₁) ≥ Φ(d₁) > 0`). So `S* = 0`, and with it `hA = 0`: the stable
-formula still divides by zero for such puts, and QuantLib's early exit in
+(`q_QD < 0` and `1 − e^{−qT}Φ(−d₁) ≥ Φ(d₁) > 0`). This excludes a positive root — it does not
+establish that `S = 0` itself solves the equation or that `hA = 0` there — but either way the
+stable formula divides by zero for such puts, and QuantLib's early exit in
 `juquadraticengine.cpp` is what handles `r = 0` there. The rewrite and the exit are jointly
 necessary. -/
 theorem bawPut_no_positive_root_zero_rate {K q σ T S : ℝ} (hK : 0 < K) (hσ : 0 < σ)
@@ -443,8 +445,9 @@ theorem bawPut_no_positive_root_zero_rate {K q σ T S : ℝ} (hK : 0 < K) (hσ :
   intro h
   linarith
 
-/-- **Corollary: the put critical price at `r = 0`, `q ≥ 0` is `0`.** Any `S* ≥ 0` solving the
-BAW put equation is `S* = 0`, so the hypothesis `0 < S*₀` of `tendsto_juValueRaw_zero_rate`
+/-- **Corollary: a positive put critical price at `r = 0`, `q ≥ 0` is excluded.** Any `S* ≥ 0`
+solving the BAW put equation is `S* = 0` — this excludes a positive root, not asserts that
+`S* = 0` itself solves the equation — so the hypothesis `0 < S*₀` of `tendsto_juValueRaw_zero_rate`
 cannot hold for such puts. -/
 theorem bawPut_criticalPrice_eq_zero_zero_rate {K q σ T Sstar : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     (hT : 0 < T) (hq : 0 ≤ q) (hSstar : 0 ≤ Sstar)
