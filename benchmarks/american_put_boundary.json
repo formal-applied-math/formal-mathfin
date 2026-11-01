@@ -87,7 +87,7 @@
       },
       "metadata": {
         "chapter": 9,
-        "reference": "Andersen, Lake & Offengenden, \"High-performance American option pricing\", Journal of Computational Finance (2016); QuantLib's qdfpamericanengine.cpp; QuantLib PR#1534.",
+        "reference": "Andersen, Lake & Offengenden, \"High-performance American option pricing\", Journal of Computational Finance (2016); QuantLib's qdfpamericanengine.cpp (the xMax function, 0 < r, 0 <= q <= r cell -- unchanged by PR#1534, which only added the r <= 0 / q < 0 double-boundary cells from the distinct 2021 Andersen-Lake \"Fast American Option Pricing: The Double-Boundary Case\" paper).",
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, MathFin/BlackScholes/AmericanPut/Stopping/ActualBoundaryExpiryLimit.lean (tendsto_brownianUsualExerciseBoundary_expiry), a corollary composing the existing American-put boundary convexity stack's continuity-at-expiry result (canonicalStockBoundary_continuousAt) with its normalization lemmas. Covers the Andersen-Lake Table-2 cell for the true boundary at expiry. Axioms-clean. LIMITS: only 0 < r, 0 <= q <= r; the q > r > 0, q < 0 and negative-rate cells (including the double-boundary case) are not treated.",

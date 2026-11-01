@@ -411,7 +411,7 @@ import MathFin.BlackScholes.JumpDiffusionMixing
 -- Compensated jumps lift the Black–Scholes implied volatility strictly above σ
 import MathFin.BlackScholes.JumpImpliedVol
 -- The Ju-Zhong quadratic approximation's r -> 0 limit: the pre-fix and post-fix
--- closed forms agree for every r != 0, and the conditional zero-rate limit
+-- closed forms agree for every r != 0, and agree in the limit as r -> 0 too
 import MathFin.BlackScholes.JuZhongZeroRateLimit
 -- The canonical jump-diffusion model: the hypotheses are satisfiable for every
 -- expected jump count and jump law, and the call depends only on these two
