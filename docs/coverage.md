@@ -26,6 +26,33 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Removable singularities in two stochastic-vol smile models (2026-11-01)
+
+Four `full` entries in `benchmarks/black_scholes.json`. Corpus 754 → 758.
+
+- **`mf-sabr-fk-y-beta-one-limit`** (`tendsto_sabrFKY_beta_one`): QuantLib's
+  `SabrFlochKennedyVolatility` (Le Floc'h & Kennedy, SSRN 2467231, 2014) normalizing transform
+  `y(k) = -(F^(1-β) - k^(1-β))/(1-β)` is `0/0` at `β = 1`; it tends to `-log(F/k)` as `β → 1`,
+  `β ≠ 1`, for `F, k > 0`.
+- **`mf-sabr-fk-omega0-nu-zero-limit`** (`tendsto_sabrFKOmega0_nu_zero`, via
+  `tendsto_sabrFKDint_nu_zero` and `sabrFKDint_eq_sabrX` reusing `SABRImpliedVol.lean`'s
+  `sabrX`): the same engine's leading-order vol `ω₀(k) = log(F/k)/Dint(k)` is `∞·0` at `ν = 0`;
+  it tends to `-α log(F/k)/y` as `ν → 0`, `ν ≠ 0`, for `α ≠ 0`, `ρ ≠ 1`, `y ≠ 0`. Neither entry
+  covers the full Le Floc'h-Kennedy expansion (the `ω₀` correction terms, `D(F)`, `D(k)`) or its
+  approximation quality against the true SABR implied volatility.
+- **`mf-heston-small-vol-of-vol-blackscholes-limit`** (`MathFin.Heston.tendsto_hestonProfile_smallVolOfVol_blackScholes`):
+  the Heston transform's Riccati closed forms (`hestonA`, `hestonBv`) carry a `2κθ/ξ²`
+  prefactor that is `∞ · 0` at vol-of-vol `ξ = 0` (the cancellation QuantLib's
+  `AnalyticHestonEngine::chF` Taylor-expands around, for `σ ≤ 1e-6` and `κ ≥ 1e-8`); the
+  transform tends to the Black-Scholes real moment generating function for `κ > 0`,
+  `0 < u < 1`, `v, θ ≥ 0`, `t ≤ T`. Only the real moment transform at the Riccati level is
+  covered, not the complex characteristic function or the identification with an actual
+  Heston process's `E[e^{u log S_T}]`.
+- **`mf-heston-zero-vol-of-vol-integrated-variance`** (`integral_vasicekDeterministic`): the
+  integrated deterministic variance feeding the limit above, `∫₀^τ v(s) ds = v₀B(τ) +
+  θ(τ - B(τ))` for the `ξ = 0` variance path `v(s) = θ + (v₀ - θ)e^{-κs}`, reusing
+  `FixedIncome/Vasicek.lean`'s `vasicekBondB`.
+
 ### One route to Merton's formula; one Black–Scholes family (2026-10-30)
 
 Issue #362. Corpus 713 → 711 (`mf-merton-from-general-jump-law` and `mf-merton-model-exists` removed).
