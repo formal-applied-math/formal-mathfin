@@ -130,6 +130,73 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-11-01 — corpus 759, modules 688 — American early-exercise approximations at their degenerate boundary
+
+Scope: a single-reviewer pass over this branch's own addition — Ju-Zhong's quadratic-approximation
+`r -> 0` limit and the Andersen-Lake-Offengenden QD+ fixed-point endpoint limits (5 entries, corpus
+754 -> 759) — not the upstream growth 742 -> 754 already absorbed from `origin/main`'s own merged
+PRs, which is on the maintainer's own cadence.
+
+### The standing first pass: prose against statement
+
+Four review-and-fix rounds plus a GitHub Copilot automated pass (addressed with inline replies on
+the PR) ran against this branch before opening it, and again after each round of fixes, closing
+with three consecutive clean rounds and an independent-model (Fable) pass. Real overclaims caught
+and fixed in that process, not cosmetic:
+
+- A benchmark snippet (`mf-qdplus-k12-endpoint-differentiability-tight`) didn't compile standalone
+  — missing a namespace `open`. Fixed and reverified via `lake env lean`.
+- Two `reference` fields cited "MathFin issue #1534"/"#1512" — neither exists on the tracker; these
+  are QuantLib's own PR numbers, mislabeled. Corrected.
+- `benchmarks/american_put_boundary.json`'s source attribution collapsed to a single pre-existing
+  entry's source (Robert Martin's `AmericanPutConvexity`) once new QuantLib/Ju-Zhong/Andersen-Lake
+  entries were added to the same file, wrongly implying all 7 statements shared one provenance.
+  Fixed with the standard "Several works" fallback this repo already uses elsewhere.
+- A citation claimed QuantLib PR#1534 only added the double-boundary cells; it actually added the
+  whole Table-2 switch (European cells too). The load-bearing claim — the `0<r, 0<=q<=r` cell is
+  unchanged by that PR — was and remains correct; the "only" was imprecise. Tightened.
+- Copilot additionally found: `tendsto_juValueRaw_zero_rate`'s corollary pair
+  (`bawPut_no_positive_root_zero_rate`, `bawPut_criticalPrice_eq_zero_zero_rate`) only excludes a
+  positive root, it doesn't establish `S* = 0` solves the equation; and the Hölder-boundary
+  counterexample's description implied differentiability is necessary for the endpoint limit when
+  it only proves differentiability sufficient and continuity alone insufficient. Both reworded,
+  including a second occurrence of the same invalid inference Copilot's own follow-up caught in a
+  docstring directly above the corollary.
+
+A third module (Bjerksund-Stensland) was scoped alongside these but held back before the PR was
+ever opened: it imports only `Mathlib`, reuses none of the library's Black-Scholes machinery, and
+fails `test_every_module_is_connected`. Not included; needs a genuine bridge theorem first.
+
+### Lens gradients
+
+1. **Inspired math quality.** Exemplar: the Hölder-boundary counterexample pair
+   (`tendsto_qdfpK12_endpoint_holder` / `not_tendsto_qdfpK12_endpoint_holder`) proves the
+   differentiability hypothesis is *tight*, not just sufficient — a real tightness result, not
+   bookkeeping. Upgrade: none proposed this round.
+4. **Architectural ingenuity.** The four QD+ integrand families (`K12`, `K3`, `ni`, `di`) share one
+   endpoint-limit proof shape (time-change composed with a boundary-ratio derivative); each is one
+   lemma, not a copy-pasted four-way duplication. Upgrade: a shared helper abstracting the common
+   "compose with the time change, specialize the ratio limit" step across the four could shrink the
+   file further, left as a backlog item, not executed this round.
+7. **Concept clarity.** Post-fix exemplar: both modules' "Scope (disclosed)" sections now state
+   exactly what's conditional (the critical-price continuity hypothesis; the abstract-boundary
+   scope of the QD+ entries) rather than narrating the result as unconditional. Upgrade: the
+   Bjerksund-Stensland exclusion note belongs in the PR description (where it is) and in
+   `docs/coverage.md`'s dated entry (where it was, until a round-4 Fable pass removed it as
+   workspace-process narrative out of place in a maintainer-facing audit log — the PR description
+   is now the one place carrying that disclosure, which is the right call).
+2–3, 5–6, 8. No findings beyond the standing first pass above.
+
+### Evidence
+
+Four fix-and-reroll cycles (reaching three consecutive clean rounds twice, after each round of
+real findings) plus two independent-model (Fable) passes, one of which found the five items listed
+above and the other of which, run last, reported clean. Citations verified against the real
+QuantLib source (`gh pr diff` on #1512, #1534, #2739) and the cited papers (Ju-Zhong 1999,
+Andersen-Lake-Offengenden 2016, Healy arXiv:2109.15157), not just trusted strings. Zero `sorry`,
+`#print axioms` on every public declaration showing exactly `[propext, Classical.choice,
+Quot.sound]`. `lake build`/`lake lint` clean; ledger fresh after the hosted sweep.
+
 ## 2026-10-31 — corpus 742, modules 678 — elegance: does each headline proof read as its argument
 
 Scope: lens 8 alone, at the maintainer's bar ("mathematical highest quality … and beauty"), over the
