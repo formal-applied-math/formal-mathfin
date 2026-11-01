@@ -924,6 +924,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.BracketCompensator.condExp_sq_sub_bracket. SCOPE, stated honestly. (1) The bracket is bracketProcess, the omega-wise time-integral of the squared predictable representative of phi, clamped at the horizon; it is proved ADAPTED here (Adapted (natFiltration hBmeas) (bracketProcess ...)), a.e. nondecreasing and zero at 0 -- but it is still NOT identified with a pathwise quadratic variation, since no limit of sums along partitions is taken anywhere. (2) The conclusion is the conditional-expectation identity, not a bundled Martingale structure for t -> M_t^2 - bracket_t: M is an Lp-valued process and supplies only a.e. adaptedness, which Martingale does not accept (the same gap MarketCompletenessInPrice.pricePathCondExp works around elsewhere). (3) M is an Ito integral against a Brownian motion on a bounded horizon [0,T], not a general continuous L^2 martingale, so this is not the Doob-Meyer decomposition -- existence and uniqueness of a compensator for an arbitrary submartingale is not proved. (4) a <= b <= T."
       }
+    },
+    {
+      "id": "mf-flow-duality-const",
+      "name": "Weak Uniqueness for the Constant-Coefficient Forward Equation",
+      "description": "Two probability-measure flows obeying the integrated weak forward equation with the same constant drift and variance, and a common initial law, coincide at every later time. The argument pairs both flows against cos(ξ·)/sin(ξ·) at every frequency ξ: the trigonometric test's constant-coefficient derivative chain turns the pairing difference into a linear Volterra system with a zero start; a Lipschitz bound from the identity's bounded integrand gives continuity, the one-sided fundamental theorem of calculus gives the right derivative, and Grönwall's inequality forces the pair to vanish. Equal pairings at every frequency give equal characteristic functions, and MeasureTheory.Measure.ext_of_charFun concludes.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.FlowDuality\n\nopen MeasureTheory MathFin\n\n/-- **Weak uniqueness for the constant-coefficient forward equation.** Two\n    probability-measure flows `ρ η : ℝ → Measure ℝ` obeying the integrated weak\n    forward equation `∫ f dρ_s = ∫ f dρ_0 + ∫ r in 0..s, (b·∫ f' dρ_r + v/2·∫ f'' dρ_r)`\n    (for every test with three uniformly bounded derivatives, the test itself bounded\n    too) with the SAME constant drift `b` and variance `v`, and sharing an initial law\n    `ρ 0 = η 0`, coincide at every later time `s ∈ (0, T]`. Re-export of\n    `MathFin.weakForwardUniqueConst`. -/\ntheorem weak_uniqueness_constant_coefficient_forward_equation\n    {ρ η : ℝ → Measure ℝ} {b v T : ℝ}\n    (hρ : IsWeakForwardFlow b v T ρ) (hη : IsWeakForwardFlow b v T η)\n    (hstart : ρ 0 = η 0) :\n    ∀ s ∈ Set.Ioc (0 : ℝ) T, ρ s = η s :=\n  weakForwardUniqueConst hρ hη hstart\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Weak uniqueness via the characteristic-function method for SDEs with constant coefficients (classical; e.g. Karatzas-Shreve V.4, Stroock-Varadhan); Bagaria ch. 9 (Kolmogorov forward equation context)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of weak uniqueness for IsWeakForwardFlow, a hypothesis class with two disclosed strengthenings relative to a bare Fokker-Planck/forward-equation hypothesis: (1) the test class bounds the test function itself (not just its first three derivatives), which is what makes every pairing well-defined against a probability measure without a separate integrability side condition; (2) the identity hypothesis directly supplies the interval-integrability of the pairing integrand (automatic in practice when the pairing maps are continuous, e.g. for flows built from Ito processes, but not re-derived here from a weaker hypothesis). No cutoff/truncation and no Gronwall-constant blowup: the bound is uniform in time on [0, T]."
+      }
     }
   ]
 }
