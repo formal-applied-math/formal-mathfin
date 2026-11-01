@@ -130,7 +130,7 @@ alignment:
       module: benchmarks/actuarial.json
       status: full 8 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
-    - source: Robert Martin, AmericanPutConvexity, https://github.com/robertmartin8/AmericanPutConvexity/tree/9b2b208520341a63b64eef43c1ecb3c5708a8e63
+    - source: "Robert Martin, AmericanPutConvexity, https://github.com/robertmartin8/AmericanPutConvexity/tree/9b2b208520341a63b64eef43c1ecb3c5708a8e63; Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
       lean: 7 statements
       module: benchmarks/american_put_boundary.json
       status: full 7 · wrapper 0 · reduced 0 · placeholder 0

@@ -410,6 +410,8 @@ import MathFin.BlackScholes.MertonStrikeGreeks
 import MathFin.BlackScholes.JumpDiffusionMixing
 -- Compensated jumps lift the Black–Scholes implied volatility strictly above σ
 import MathFin.BlackScholes.JumpImpliedVol
+-- The Ju-Zhong quadratic approximation's r -> 0 limit: the pre-fix and post-fix
+-- closed forms agree for every r != 0, and the conditional zero-rate limit
 import MathFin.BlackScholes.JuZhongZeroRateLimit
 -- The canonical jump-diffusion model: the hypotheses are satisfiable for every
 -- expected jump count and jump law, and the call depends only on these two
@@ -777,7 +779,10 @@ import MathFin.Execution.RollSpread
 import MathFin.BlackScholes.AmericanPut.Stopping.PhysicalBoundaryConvexity
 import MathFin.BlackScholes.AmericanPut.Stopping.PlanePartial
 import MathFin.BlackScholes.AmericanPut.Stopping.AEHorizonValue
+-- The American put exercise boundary tends to the strike at expiry
 import MathFin.BlackScholes.AmericanPut.Stopping.ActualBoundaryExpiryLimit
+-- The Andersen-Lake-Offengenden QD+ fixed-point quadrature integrand's endpoint
+-- limits, and that differentiability of the boundary cannot be weakened to continuity
 import MathFin.BlackScholes.AmericanQDPlusLimits
 -- QRM bridges: equicorrelation, Gaussian VaR/ES-optimal = Markowitz portfolios, the HHI
 -- systematic floor, and the square-root-of-time rule for GBM losses
