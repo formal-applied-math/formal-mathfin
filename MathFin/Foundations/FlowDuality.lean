@@ -67,12 +67,12 @@ def IsWeakForwardFlow (b v T : ℝ) (ρ : ℝ → Measure ℝ) : Prop :=
 
 /-! ### The pairing layer
 
-Against a probability measure, the pairing with a bounded measurable function
-is bounded by the sup bound; the integrated identity then makes every
-admissible pairing Lipschitz-continuous in time. -/
+Against a probability measure, the pairing with a bounded function is bounded
+by the sup bound; the integrated identity then makes every admissible
+pairing Lipschitz-continuous in time. -/
 
-/-- The pairing of a bounded measurable function against a probability measure
-is bounded by the sup bound. -/
+/-- The pairing of a bounded function against a probability measure is
+bounded by the sup bound. -/
 lemma abs_pairing_le {μ : Measure ℝ} (hμ : IsProbabilityMeasure μ) {g : ℝ → ℝ} {C : ℝ}
     (hg : ∀ x, |g x| ≤ C) : |∫ y, g y ∂μ| ≤ C := by
   have h1 : |∫ y, g y ∂μ| ≤ ∫ y, |g y| ∂μ := abs_integral_le_integral_abs
@@ -157,6 +157,30 @@ lemma abs_pairing_lipschitz {b v T : ℝ} {ρ : ℝ → Measure ℝ} (hρ : IsWe
         rw [hhalf]
         exact add_le_add (mul_le_mul_of_nonneg_left hb1' (abs_nonneg b))
           (mul_le_mul_of_nonneg_left hb2' (by positivity))
+
+/-- Two flows' pairing differences against the same admissible test are Lipschitz, with
+twice the single-flow constant: the shared triangle-inequality step behind both `hUlip` and
+`hWlip` in `pairing_cos_sin_eq`. -/
+private lemma diff_pairing_lipschitz {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
+    (hρ : IsWeakForwardFlow b v T ρ) (hη : IsWeakForwardFlow b v T η)
+    {g g' g'' g''' : ℝ → ℝ} {C0 C1 C2 C3 : ℝ}
+    (h1 : ∀ x, HasDerivAt g (g' x) x) (h2 : ∀ x, HasDerivAt g' (g'' x) x)
+    (h3 : ∀ x, HasDerivAt g'' (g''' x) x)
+    (h0 : ∀ x, |g x| ≤ C0) (hb1 : ∀ x, |g' x| ≤ C1) (hb2 : ∀ x, |g'' x| ≤ C2)
+    (hb3 : ∀ x, |g''' x| ≤ C3)
+    {s₀ s : ℝ} (hs₀ : s₀ ∈ Set.Icc (0 : ℝ) T) (hs : s ∈ Set.Icc (0 : ℝ) T) :
+    |((∫ y, g y ∂(ρ s)) - ∫ y, g y ∂(η s)) - ((∫ y, g y ∂(ρ s₀)) - ∫ y, g y ∂(η s₀))|
+      ≤ 2 * (|b| * C1 + |v| / 2 * C2) * |s - s₀| := by
+  have h1' := abs_pairing_lipschitz hρ h1 h2 h3 h0 hb1 hb2 hb3 hs₀ hs
+  have h2' := abs_pairing_lipschitz hη h1 h2 h3 h0 hb1 hb2 hb3 hs₀ hs
+  calc |((∫ y, g y ∂(ρ s)) - ∫ y, g y ∂(η s)) - ((∫ y, g y ∂(ρ s₀)) - ∫ y, g y ∂(η s₀))|
+      = |((∫ y, g y ∂(ρ s)) - ∫ y, g y ∂(ρ s₀)) - ((∫ y, g y ∂(η s)) - ∫ y, g y ∂(η s₀))| := by
+        congr 1; ring
+    _ ≤ |(∫ y, g y ∂(ρ s)) - ∫ y, g y ∂(ρ s₀)| + |(∫ y, g y ∂(η s)) - ∫ y, g y ∂(η s₀)| :=
+        abs_sub _ _
+    _ ≤ (|b| * C1 + |v| / 2 * C2) * |s - s₀| + (|b| * C1 + |v| / 2 * C2) * |s - s₀| :=
+        add_le_add h1' h2'
+    _ = 2 * (|b| * C1 + |v| / 2 * C2) * |s - s₀| := by ring
 
 /-- A function Lipschitz on `[0, T]` (with a known-nonnegative constant) is continuous
 there: the `ε`-`δ` argument shared by every Lipschitz-from-a-pairing-identity bound in
@@ -285,6 +309,27 @@ lemma hasDerivWithinAt_Ici_of_continuousOn {h : ℝ → ℝ} {x T : ℝ}
     ContinuousOn.intervalIntegrable_of_Icc hx0 (hcont.mono (Set.Icc_subset_Icc_right hxT.le))
   exact intervalIntegral.integral_hasDerivWithinAt_right hintg hmeas hb
 
+/-- An admissible pairing is the Volterra primitive of its generator value, once the
+generator is recognized as a named function `h`: the shared `pairing_increment` + generator
+rewrite step behind both `hCprim` and `hSprim` in `hasDerivWithinAt_cosPairing_sinPairing`. -/
+private lemma pairing_volterra_primitive {b v T : ℝ} {μ : ℝ → Measure ℝ}
+    (hμ : IsWeakForwardFlow b v T μ) (hT : 0 < T)
+    {g g' g'' g''' : ℝ → ℝ} {C0 C1 C2 C3 : ℝ}
+    (h1 : ∀ x, HasDerivAt g (g' x) x) (h2 : ∀ x, HasDerivAt g' (g'' x) x)
+    (h3 : ∀ x, HasDerivAt g'' (g''' x) x)
+    (h0 : ∀ x, |g x| ≤ C0) (hb1 : ∀ x, |g' x| ≤ C1) (hb2 : ∀ x, |g'' x| ≤ C2)
+    (hb3 : ∀ x, |g''' x| ≤ C3) (h : ℝ → ℝ)
+    (hheq : ∀ r, h r = b * ∫ y, g' y ∂(μ r) + v / 2 * ∫ y, g'' y ∂(μ r)) :
+    ∀ s ∈ Set.Icc (0 : ℝ) T,
+      (∫ y, g y ∂(μ s)) = (∫ y, g y ∂(μ 0)) + ∫ r in (0 : ℝ)..s, h r := by
+  intro s hs
+  have hinc := pairing_increment hμ h1 h2 h3 h0 hb1 hb2 hb3 (Set.left_mem_Icc.mpr hT.le) hs
+  have hcongr : (∫ r in (0 : ℝ)..s,
+      (b * ∫ y, g' y ∂(μ r) + v / 2 * ∫ y, g'' y ∂(μ r))) = ∫ r in (0 : ℝ)..s, h r :=
+    intervalIntegral.integral_congr fun r _ => (hheq r).symm
+  rw [hcongr] at hinc
+  linarith [hinc]
+
 /-! ### The Volterra system at a fixed frequency -/
 
 /-- For a flow obeying the weak forward equation with constant coefficients,
@@ -329,33 +374,15 @@ lemma hasDerivWithinAt_cosPairing_sinPairing {b v T : ℝ} {μ : ℝ → Measure
     rw [hkdef]
     exact e1.sub e2
   have hCprim : ∀ s ∈ Set.Icc (0 : ℝ) T,
-      (∫ y, Real.cos (ξ * y) ∂(μ s)) = (∫ y, Real.cos (ξ * y) ∂(μ 0)) + ∫ r in (0 : ℝ)..s, h r := by
-    intro s hs
-    have hinc := pairing_increment hμ (hasDerivAt_cosMul ξ) (hasDerivAt_negSinMul ξ) (hasDerivAt_negCosSqMul ξ) hb0 hb1 hb2 hb3
-      (Set.left_mem_Icc.mpr hT.le) hs
-    have hcongr : (∫ r in (0 : ℝ)..s,
-        (b * ∫ y, (-ξ * Real.sin (ξ * y)) ∂(μ r) + v / 2 * ∫ y, (-ξ ^ 2 * Real.cos (ξ * y)) ∂(μ r)))
-        = ∫ r in (0 : ℝ)..s, h r := by
-      apply intervalIntegral.integral_congr
-      intro r _
-      simp only [hhdef, integral_const_mul]
-      ring
-    rw [hcongr] at hinc
-    linarith [hinc]
+      (∫ y, Real.cos (ξ * y) ∂(μ s)) = (∫ y, Real.cos (ξ * y) ∂(μ 0)) + ∫ r in (0 : ℝ)..s, h r :=
+    pairing_volterra_primitive hμ hT (hasDerivAt_cosMul ξ) (hasDerivAt_negSinMul ξ)
+      (hasDerivAt_negCosSqMul ξ) hb0 hb1 hb2 hb3 h fun r => by
+        simp only [hhdef, integral_const_mul]; ring
   have hSprim : ∀ s ∈ Set.Icc (0 : ℝ) T,
-      (∫ y, Real.sin (ξ * y) ∂(μ s)) = (∫ y, Real.sin (ξ * y) ∂(μ 0)) + ∫ r in (0 : ℝ)..s, k r := by
-    intro s hs
-    have hinc := pairing_increment hμ (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ) (hasDerivAt_negSinSqMul ξ) hb0' hb1' hb2' hb3'
-      (Set.left_mem_Icc.mpr hT.le) hs
-    have hcongr : (∫ r in (0 : ℝ)..s,
-        (b * ∫ y, (ξ * Real.cos (ξ * y)) ∂(μ r) + v / 2 * ∫ y, (-ξ ^ 2 * Real.sin (ξ * y)) ∂(μ r)))
-        = ∫ r in (0 : ℝ)..s, k r := by
-      apply intervalIntegral.integral_congr
-      intro r _
-      simp only [hkdef, integral_const_mul]
-      ring
-    rw [hcongr] at hinc
-    linarith [hinc]
+      (∫ y, Real.sin (ξ * y) ∂(μ s)) = (∫ y, Real.sin (ξ * y) ∂(μ 0)) + ∫ r in (0 : ℝ)..s, k r :=
+    pairing_volterra_primitive hμ hT (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ)
+      (hasDerivAt_negSinSqMul ξ) hb0' hb1' hb2' hb3' k fun r => by
+        simp only [hkdef, integral_const_mul]; ring
   have hCderiv0 : HasDerivWithinAt (fun u => ∫ r in (0 : ℝ)..u, h r) (h x) (Set.Ici x) x :=
     hasDerivWithinAt_Ici_of_continuousOn hhcont hx0 hxT
   have hSderiv0 : HasDerivWithinAt (fun u => ∫ r in (0 : ℝ)..u, k r) (k x) (Set.Ici x) x :=
@@ -383,14 +410,13 @@ inequality (applied to the `ℝ × ℝ`-valued pair, whose sup-norm bounds the
 derivative by `K` times itself) forces both to vanish. -/
 lemma pairing_cos_sin_eq {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
     (hρ : IsWeakForwardFlow b v T ρ) (hη : IsWeakForwardFlow b v T η)
-    (hstart : ρ 0 = η 0) (_hT : 0 < T) (ξ : ℝ) :
+    (hstart : ρ 0 = η 0) (ξ : ℝ) :
     ∀ s ∈ Set.Icc (0 : ℝ) T,
       (∫ y, Real.cos (ξ * y) ∂(ρ s) = ∫ y, Real.cos (ξ * y) ∂(η s)) ∧
       (∫ y, Real.sin (ξ * y) ∂(ρ s) = ∫ y, Real.sin (ξ * y) ∂(η s)) := by
   obtain ⟨hb0, hb1, hb2, hb3⟩ := abs_cosChain_bounds ξ
   obtain ⟨hb0', hb1', hb2', hb3'⟩ := abs_sinChain_bounds ξ
   set K : ℝ := |b| * |ξ| + |v| / 2 * ξ ^ 2 with hKdef
-  have hK0 : 0 ≤ K := by rw [hKdef]; positivity
   set U : ℝ → ℝ := fun s => (∫ y, Real.cos (ξ * y) ∂(ρ s)) - ∫ y, Real.cos (ξ * y) ∂(η s)
     with hUdef
   set W : ℝ → ℝ := fun s => (∫ y, Real.sin (ξ * y) ∂(ρ s)) - ∫ y, Real.sin (ξ * y) ∂(η s)
@@ -398,35 +424,15 @@ lemma pairing_cos_sin_eq {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
   have hUlip : ∀ s₀ s, s₀ ∈ Set.Icc (0 : ℝ) T → s ∈ Set.Icc (0 : ℝ) T →
       |U s - U s₀| ≤ 2 * K * |s - s₀| := by
     intro s₀ s hs₀ hs
-    have h1 := abs_pairing_lipschitz hρ (hasDerivAt_cosMul ξ) (hasDerivAt_negSinMul ξ) (hasDerivAt_negCosSqMul ξ) hb0 hb1 hb2 hb3 hs₀ hs
-    have h2 := abs_pairing_lipschitz hη (hasDerivAt_cosMul ξ) (hasDerivAt_negSinMul ξ) (hasDerivAt_negCosSqMul ξ) hb0 hb1 hb2 hb3 hs₀ hs
-    have heq : U s - U s₀ = ((∫ y, Real.cos (ξ * y) ∂(ρ s)) - ∫ y, Real.cos (ξ * y) ∂(ρ s₀))
-        - ((∫ y, Real.cos (ξ * y) ∂(η s)) - ∫ y, Real.cos (ξ * y) ∂(η s₀)) := by
-      simp only [hUdef]; ring
-    rw [heq]
-    calc |((∫ y, Real.cos (ξ * y) ∂(ρ s)) - ∫ y, Real.cos (ξ * y) ∂(ρ s₀))
-          - ((∫ y, Real.cos (ξ * y) ∂(η s)) - ∫ y, Real.cos (ξ * y) ∂(η s₀))|
-        ≤ |(∫ y, Real.cos (ξ * y) ∂(ρ s)) - ∫ y, Real.cos (ξ * y) ∂(ρ s₀)|
-          + |(∫ y, Real.cos (ξ * y) ∂(η s)) - ∫ y, Real.cos (ξ * y) ∂(η s₀)| :=
-          abs_sub _ _
-      _ ≤ K * |s - s₀| + K * |s - s₀| := by rw [← hKdef] at h1 h2; linarith [h1, h2]
-      _ = 2 * K * |s - s₀| := by ring
+    have := diff_pairing_lipschitz hρ hη (hasDerivAt_cosMul ξ) (hasDerivAt_negSinMul ξ)
+      (hasDerivAt_negCosSqMul ξ) hb0 hb1 hb2 hb3 hs₀ hs
+    simpa only [hUdef, hKdef] using this
   have hWlip : ∀ s₀ s, s₀ ∈ Set.Icc (0 : ℝ) T → s ∈ Set.Icc (0 : ℝ) T →
       |W s - W s₀| ≤ 2 * K * |s - s₀| := by
     intro s₀ s hs₀ hs
-    have h1 := abs_pairing_lipschitz hρ (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ) (hasDerivAt_negSinSqMul ξ) hb0' hb1' hb2' hb3' hs₀ hs
-    have h2 := abs_pairing_lipschitz hη (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ) (hasDerivAt_negSinSqMul ξ) hb0' hb1' hb2' hb3' hs₀ hs
-    have heq : W s - W s₀ = ((∫ y, Real.sin (ξ * y) ∂(ρ s)) - ∫ y, Real.sin (ξ * y) ∂(ρ s₀))
-        - ((∫ y, Real.sin (ξ * y) ∂(η s)) - ∫ y, Real.sin (ξ * y) ∂(η s₀)) := by
-      simp only [hWdef]; ring
-    rw [heq]
-    calc |((∫ y, Real.sin (ξ * y) ∂(ρ s)) - ∫ y, Real.sin (ξ * y) ∂(ρ s₀))
-          - ((∫ y, Real.sin (ξ * y) ∂(η s)) - ∫ y, Real.sin (ξ * y) ∂(η s₀))|
-        ≤ |(∫ y, Real.sin (ξ * y) ∂(ρ s)) - ∫ y, Real.sin (ξ * y) ∂(ρ s₀)|
-          + |(∫ y, Real.sin (ξ * y) ∂(η s)) - ∫ y, Real.sin (ξ * y) ∂(η s₀)| :=
-          abs_sub _ _
-      _ ≤ K * |s - s₀| + K * |s - s₀| := by rw [← hKdef] at h1 h2; linarith [h1, h2]
-      _ = 2 * K * |s - s₀| := by ring
+    have := diff_pairing_lipschitz hρ hη (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ)
+      (hasDerivAt_negSinSqMul ξ) hb0' hb1' hb2' hb3' hs₀ hs
+    simpa only [hWdef, hKdef] using this
   have hUcont : ContinuousOn U (Set.Icc 0 T) := continuousOn_of_lipschitzOn_Icc (by positivity) hUlip
   have hWcont : ContinuousOn W (Set.Icc 0 T) := continuousOn_of_lipschitzOn_Icc (by positivity) hWlip
   set F : ℝ → ℝ × ℝ := fun s => (U s, W s) with hFdef
@@ -498,11 +504,10 @@ theorem weakForwardUniqueConst {ρ η : ℝ → Measure ℝ} {b v T : ℝ}
   intro s hs
   haveI := hρ.1 s
   haveI := hη.1 s
-  have hT : 0 < T := hs.1.trans_le hs.2
   have hsIcc : s ∈ Set.Icc (0 : ℝ) T := ⟨hs.1.le, hs.2⟩
   have hchar : charFun (ρ s) = charFun (η s) := by
     funext ξ
-    obtain ⟨hc, hsi⟩ := pairing_cos_sin_eq hρ hη hstart hT ξ s hsIcc
+    obtain ⟨hc, hsi⟩ := pairing_cos_sin_eq hρ hη hstart ξ s hsIcc
     have hexp : ∀ x : ℝ, Complex.exp ((ξ : ℂ) * (x : ℂ) * Complex.I)
         = (Real.cos (ξ * x) : ℂ) + (Real.sin (ξ * x) : ℂ) * Complex.I := by
       intro x
