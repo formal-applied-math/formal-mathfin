@@ -17,7 +17,7 @@ forward equation with constant drift `b` and variance `v`,
 
 for every test with three uniformly bounded derivatives (and the test itself
 bounded), is **determined by its initial law**: two such flows with
-`ρ 0 = η 0` coincide at every positive time (`weakForwardUniqueConst`).
+`ρ 0 = η 0` coincide at every time in `(0, T]` (`weakForwardUniqueConst`).
 
 The proof pairs each flow against the trigonometric tests `cos(ξ·)`, `sin(ξ·)`
 at a fixed frequency `ξ`. These tests have constant-coefficient derivative
@@ -33,12 +33,21 @@ a constant `K` depending on `b, v, ξ`; Grönwall's inequality forces `U = W =
 the same characteristic function at every time, and
 `MeasureTheory.Measure.ext_of_charFun` concludes.
 
-Two disclosed strengthenings of the hypothesis shape (relative to the
-Gyongy-mimicry gate this module is aimed at): the test class also bounds the
-test function itself (making every pairing well-defined against a probability
-measure), and the identity carries the interval-integrability of the pairing
-integrand (automatic when the pairing maps are continuous, e.g. for flows built
-from Itô processes).
+Two differences from the hypothesis shape of `MathFin.GyongyMimicry`'s
+`gyongy_mimicry_gated` (the gated mimicry theorem this module's hypothesis class
+is modeled on, for a future constant-coefficient instance): the test class here
+also bounds the test function itself, which *restricts* the admissible tests
+relative to `gyongy_mimicry_gated`'s `ContDiff ℝ 2 g` (a real restriction, not a
+strengthening — though `cos(ξ·)`/`sin(ξ·)` stay admissible, so the argument below
+is unaffected by it); and the identity hypothesis here directly supplies the
+interval-integrability of the pairing integrand, which `gyongy_mimicry_gated`
+does not require (automatic when the pairing maps are continuous, e.g. for flows
+built from Itô processes, but not derived here from a weaker hypothesis — a real
+strengthening). Closing that second gap and restating `gyongy_mimicry_gated`'s
+gate with a bounded-test-function class, to wire `weakForwardUniqueConst` into
+its constant-coefficient instances, is left to a follow-up: this module is the
+standalone duality/uniqueness result on its own hypothesis class, not yet a
+discharge of that gate.
 -/
 
 @[expose] public section
@@ -75,13 +84,7 @@ pairing Lipschitz-continuous in time. -/
 bounded by the sup bound. -/
 lemma abs_pairing_le {μ : Measure ℝ} (hμ : IsProbabilityMeasure μ) {g : ℝ → ℝ} {C : ℝ}
     (hg : ∀ x, |g x| ≤ C) : |∫ y, g y ∂μ| ≤ C := by
-  have h1 : |∫ y, g y ∂μ| ≤ ∫ y, |g y| ∂μ := abs_integral_le_integral_abs
-  have h2 : ∫ y, |g y| ∂μ ≤ ∫ y, C ∂μ :=
-    integral_mono_of_nonneg (ae_of_all μ (fun x => abs_nonneg (g x)))
-      (integrable_const C) (ae_of_all μ hg)
-  rw [integral_const] at h2
-  simp at h2
-  linarith [h1, h2]
+  simpa using norm_integral_le_of_norm_le_const (μ := μ) (f := g) (ae_of_all μ hg)
 
 /-- The increment of an admissible pairing over an interval, both endpoints in
 `[0, T]`: the difference of pairings is the oriented integral of the pairing
@@ -96,7 +99,7 @@ lemma pairing_increment {b v T : ℝ} {ρ : ℝ → Measure ℝ} (hρ : IsWeakFo
     ∫ y, g y ∂(ρ s) - ∫ y, g y ∂(ρ s₀)
       = ∫ r in s₀..s, (b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r)) := by
   obtain ⟨hprob, hident⟩ := hρ
-  set w : ℝ → ℝ := fun r => b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r) with hw
+  set w : ℝ → ℝ := fun r => b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r)
   have ident : ∀ u ∈ Set.Ioc 0 T,
       ∫ y, g y ∂(ρ u) = ∫ y, g y ∂(ρ 0) + ∫ r in (0)..u, w r ∧
       IntervalIntegrable w volume 0 u := fun u hu =>
@@ -185,20 +188,12 @@ private lemma diff_pairing_lipschitz {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
 /-- A function Lipschitz on `[0, T]` (with a known-nonnegative constant) is continuous
 there: the `ε`-`δ` argument shared by every Lipschitz-from-a-pairing-identity bound in
 this file. -/
-private lemma continuousOn_of_lipschitzOn_Icc {f : ℝ → ℝ} {T L : ℝ} (hL0 : 0 ≤ L)
+private lemma continuousOn_of_lipschitzOn_Icc {f : ℝ → ℝ} {T L : ℝ}
     (hLip : ∀ s₀ s, s₀ ∈ Set.Icc (0 : ℝ) T → s ∈ Set.Icc (0 : ℝ) T →
       |f s - f s₀| ≤ L * |s - s₀|) :
-    ContinuousOn f (Set.Icc 0 T) := by
-  rw [Metric.continuousOn_iff]
-  intro s hs ε hε
-  refine ⟨ε / (L + 1), by positivity, fun s₀ hs₀ hdist => ?_⟩
-  rw [Real.dist_eq] at hdist ⊢
-  calc |f s₀ - f s| ≤ L * |s₀ - s| := hLip s s₀ hs hs₀
-    _ ≤ (L + 1) * |s₀ - s| := by nlinarith [abs_nonneg (s₀ - s)]
-    _ < (L + 1) * (ε / (L + 1)) := mul_lt_mul_of_pos_left hdist (by positivity)
-    _ = ε := by
-          have hpos : (0 : ℝ) < L + 1 := by positivity
-          field_simp
+    ContinuousOn f (Set.Icc 0 T) :=
+  (LipschitzOnWith.of_dist_le' (K := L) fun s₀ hs₀ s hs => by
+    simpa [Real.dist_eq, abs_sub_comm] using hLip s₀ s hs₀ hs).continuousOn
 
 /-- The generator's linear combination against a frequency, bounded by the sup-norm: the
 shared triangle-inequality step behind both components of `hFbound` in `pairing_cos_sin_eq`
@@ -376,11 +371,11 @@ lemma hasDerivWithinAt_cosPairing_sinPairing {b v T : ℝ} {μ : ℝ → Measure
   obtain ⟨hb0, hb1, hb2, hb3⟩ := abs_cosChain_bounds ξ
   obtain ⟨hb0', hb1', hb2', hb3'⟩ := abs_sinChain_bounds ξ
   have hCcont : ContinuousOn (fun s => ∫ y, Real.cos (ξ * y) ∂(μ s)) (Set.Icc 0 T) :=
-    continuousOn_of_lipschitzOn_Icc (by positivity) fun s₀ s hs₀ hs =>
+    continuousOn_of_lipschitzOn_Icc fun s₀ s hs₀ hs =>
       abs_pairing_lipschitz hμ (hasDerivAt_cosMul ξ) (hasDerivAt_negSinMul ξ)
         (hasDerivAt_negCosSqMul ξ) hb0 hb1 hb2 hb3 hs₀ hs
   have hScont : ContinuousOn (fun s => ∫ y, Real.sin (ξ * y) ∂(μ s)) (Set.Icc 0 T) :=
-    continuousOn_of_lipschitzOn_Icc (by positivity) fun s₀ s hs₀ hs =>
+    continuousOn_of_lipschitzOn_Icc fun s₀ s hs₀ hs =>
       abs_pairing_lipschitz hμ (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ)
         (hasDerivAt_negSinSqMul ξ) hb0' hb1' hb2' hb3' hs₀ hs
   set h : ℝ → ℝ := fun r => -b * ξ * (∫ y, Real.sin (ξ * y) ∂(μ r))
@@ -438,8 +433,8 @@ lemma pairing_cos_sin_eq {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
     have := diff_pairing_lipschitz hρ hη (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ)
       (hasDerivAt_negSinSqMul ξ) hb0' hb1' hb2' hb3' hs₀ hs
     simpa only [hWdef, hKdef] using this
-  have hUcont : ContinuousOn U (Set.Icc 0 T) := continuousOn_of_lipschitzOn_Icc (by positivity) hUlip
-  have hWcont : ContinuousOn W (Set.Icc 0 T) := continuousOn_of_lipschitzOn_Icc (by positivity) hWlip
+  have hUcont : ContinuousOn U (Set.Icc 0 T) := continuousOn_of_lipschitzOn_Icc hUlip
+  have hWcont : ContinuousOn W (Set.Icc 0 T) := continuousOn_of_lipschitzOn_Icc hWlip
   set F : ℝ → ℝ × ℝ := fun s => (U s, W s) with hFdef
   set F' : ℝ → ℝ × ℝ := fun x => (-b * ξ * W x - v / 2 * ξ ^ 2 * U x,
       b * ξ * U x - v / 2 * ξ ^ 2 * W x) with hF'def
@@ -486,23 +481,35 @@ lemma pairing_cos_sin_eq {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
   · have := hUz; rw [hUdef] at this; linarith [this]
   · have := hWz; rw [hWdef] at this; linarith [this]
 
-/-- A real function bounded by `1` is, viewed through `Complex.ofReal`, integrable against any
-probability measure: the shared domination step behind all four integrability facts
-`weakForwardUniqueConst` needs for its `charFun`-splitting calc. -/
-private lemma integrable_ofReal_of_abs_le_one {μ : Measure ℝ} [IsProbabilityMeasure μ]
-    {g : ℝ → ℝ} (hgc : Continuous g) (hg : ∀ x, |g x| ≤ 1) :
-    Integrable (fun x => (g x : ℂ)) μ :=
-  Integrable.mono' (integrable_const (1 : ℝ))
-    (Complex.continuous_ofReal.comp hgc).aestronglyMeasurable
-    (Filter.Eventually.of_forall fun x => by
-      simp only [Complex.norm_real, Real.norm_eq_abs]; exact hg x)
+/-- The characteristic function of a probability measure, split into its real/imaginary
+`cos`/`sin` pairings: the shared computation behind both sides of `weakForwardUniqueConst`'s
+`charFun` comparison (applied once to `ρ s`, once to `η s`). -/
+private lemma charFun_eq_cos_add_sin_mul_I {μ : Measure ℝ} [IsProbabilityMeasure μ] (ξ : ℝ) :
+    charFun μ ξ = ((∫ x, Real.cos (ξ * x) ∂μ : ℝ) : ℂ)
+      + ((∫ x, Real.sin (ξ * x) ∂μ : ℝ) : ℂ) * Complex.I := by
+  have hexp : ∀ x : ℝ, Complex.exp ((ξ : ℂ) * (x : ℂ) * Complex.I)
+      = (Real.cos (ξ * x) : ℂ) + (Real.sin (ξ * x) : ℂ) * Complex.I := by
+    intro x
+    rw [show ((ξ : ℂ) * (x : ℂ)) = ((ξ * x : ℝ) : ℂ) by push_cast; ring]
+    rw [Complex.exp_mul_I, Complex.ofReal_cos, Complex.ofReal_sin]
+  have hint : ∀ g : ℝ → ℝ, Continuous g → (∀ x, |g x| ≤ 1) →
+      Integrable (fun x => (g x : ℂ)) μ := fun g hgc hg =>
+    Integrable.mono' (integrable_const (1 : ℝ))
+      (Complex.continuous_ofReal.comp hgc).aestronglyMeasurable
+      (Filter.Eventually.of_forall fun x => by
+        simp only [Complex.norm_real, Real.norm_eq_abs]; exact hg x)
+  rw [charFun_apply_real]
+  simp_rw [hexp]
+  rw [integral_add (hint _ (by fun_prop) fun x => Real.abs_cos_le_one (ξ * x))
+    ((hint _ (by fun_prop) fun x => Real.abs_sin_le_one (ξ * x)).mul_const Complex.I),
+    integral_mul_const, integral_complex_ofReal, integral_complex_ofReal]
 
 /-- Two probability-measure flows obeying the integrated weak forward equation
-with the same constant drift and variance, and sharing an initial law,
-coincide at every later time: weak uniqueness for the constant-coefficient
-forward equation. The argument pairs both flows against `cos(ξ·)`/`sin(ξ·)`
-at every frequency `ξ` (`pairing_cos_sin_eq`), giving equal characteristic
-functions, and concludes via `MeasureTheory.Measure.ext_of_charFun`. -/
+with the same constant drift and variance, and sharing an initial law, coincide
+at every time in `(0, T]`: weak uniqueness for the constant-coefficient forward
+equation. The argument pairs both flows against `cos(ξ·)`/`sin(ξ·)` at every
+frequency `ξ` (`pairing_cos_sin_eq`), giving equal characteristic functions, and
+concludes via `MeasureTheory.Measure.ext_of_charFun`. -/
 theorem weakForwardUniqueConst {ρ η : ℝ → Measure ℝ} {b v T : ℝ}
     (hρ : IsWeakForwardFlow b v T ρ) (hη : IsWeakForwardFlow b v T η)
     (hstart : ρ 0 = η 0) :
@@ -511,41 +518,8 @@ theorem weakForwardUniqueConst {ρ η : ℝ → Measure ℝ} {b v T : ℝ}
   haveI := hρ.1 s
   haveI := hη.1 s
   have hsIcc : s ∈ Set.Icc (0 : ℝ) T := ⟨hs.1.le, hs.2⟩
-  have hchar : charFun (ρ s) = charFun (η s) := by
-    funext ξ
-    obtain ⟨hc, hsi⟩ := pairing_cos_sin_eq hρ hη hstart ξ s hsIcc
-    have hexp : ∀ x : ℝ, Complex.exp ((ξ : ℂ) * (x : ℂ) * Complex.I)
-        = (Real.cos (ξ * x) : ℂ) + (Real.sin (ξ * x) : ℂ) * Complex.I := by
-      intro x
-      rw [show ((ξ : ℂ) * (x : ℂ)) = ((ξ * x : ℝ) : ℂ) by push_cast; ring]
-      rw [Complex.exp_mul_I, Complex.ofReal_cos, Complex.ofReal_sin]
-    have hintρc : Integrable (fun x => (Real.cos (ξ * x) : ℂ)) (ρ s) :=
-      integrable_ofReal_of_abs_le_one (by fun_prop) fun x => Real.abs_cos_le_one (ξ * x)
-    have hintρs : Integrable (fun x => (Real.sin (ξ * x) : ℂ)) (ρ s) :=
-      integrable_ofReal_of_abs_le_one (by fun_prop) fun x => Real.abs_sin_le_one (ξ * x)
-    have hintηc : Integrable (fun x => (Real.cos (ξ * x) : ℂ)) (η s) :=
-      integrable_ofReal_of_abs_le_one (by fun_prop) fun x => Real.abs_cos_le_one (ξ * x)
-    have hintηs : Integrable (fun x => (Real.sin (ξ * x) : ℂ)) (η s) :=
-      integrable_ofReal_of_abs_le_one (by fun_prop) fun x => Real.abs_sin_le_one (ξ * x)
-    calc charFun (ρ s) ξ
-        = ∫ x, Complex.exp ((ξ : ℂ) * (x : ℂ) * Complex.I) ∂(ρ s) := charFun_apply_real ξ
-      _ = ∫ x, ((Real.cos (ξ * x) : ℂ) + (Real.sin (ξ * x) : ℂ) * Complex.I) ∂(ρ s) := by
-          simp_rw [hexp]
-      _ = (∫ x, (Real.cos (ξ * x) : ℂ) ∂(ρ s))
-          + (∫ x, (Real.sin (ξ * x) : ℂ) ∂(ρ s)) * Complex.I := by
-          rw [integral_add hintρc (hintρs.mul_const Complex.I), integral_mul_const]
-      _ = ((∫ x, Real.cos (ξ * x) ∂(ρ s) : ℝ) : ℂ)
-          + ((∫ x, Real.sin (ξ * x) ∂(ρ s) : ℝ) : ℂ) * Complex.I := by
-          rw [integral_complex_ofReal, integral_complex_ofReal]
-      _ = ((∫ x, Real.cos (ξ * x) ∂(η s) : ℝ) : ℂ)
-          + ((∫ x, Real.sin (ξ * x) ∂(η s) : ℝ) : ℂ) * Complex.I := by rw [hc, hsi]
-      _ = (∫ x, (Real.cos (ξ * x) : ℂ) ∂(η s))
-          + (∫ x, (Real.sin (ξ * x) : ℂ) ∂(η s)) * Complex.I := by
-          rw [integral_complex_ofReal, integral_complex_ofReal]
-      _ = ∫ x, ((Real.cos (ξ * x) : ℂ) + (Real.sin (ξ * x) : ℂ) * Complex.I) ∂(η s) := by
-          rw [← integral_mul_const, ← integral_add hintηc (hintηs.mul_const Complex.I)]
-      _ = ∫ x, Complex.exp ((ξ : ℂ) * (x : ℂ) * Complex.I) ∂(η s) := by simp_rw [← hexp]
-      _ = charFun (η s) ξ := (charFun_apply_real ξ).symm
-  exact Measure.ext_of_charFun hchar
+  refine Measure.ext_of_charFun (funext fun ξ => ?_)
+  obtain ⟨hc, hsi⟩ := pairing_cos_sin_eq hρ hη hstart ξ s hsIcc
+  rw [charFun_eq_cos_add_sin_mul_I, charFun_eq_cos_add_sin_mul_I, hc, hsi]
 
 end MathFin

@@ -161,10 +161,10 @@ junk-value conditions apply (the statement has none of those objects).
    (`Analysis/ODE/Gronwall.lean`), `intervalIntegral.integral_hasDerivWithinAt_right`, and
    `MeasureTheory.Measure.ext_of_charFun` as the three load-bearing upstream facts, each used
    for exactly the role its name promises; no re-derivation of any of the three. Upgrade:
-   `hasDerivWithinAt_Ici_of_continuousOn`'s within-filter localization
-   (`hasDerivWithinAt_inter`/`continuousWithinAt_inter'` pattern) is a small reusable idiom —
-   worth lifting to a shared lemma if a second module needs the same "FTC localized to a
-   closed sub-interval" step (flagged, not yet needed elsewhere in the library).
+   `hasDerivWithinAt_Ici_of_continuousOn`'s within-filter localization (the
+   `continuousWithinAt_inter'` pattern) is a small reusable idiom — worth lifting to a shared
+   lemma if a second module needs the same "FTC localized to a closed sub-interval" step
+   (flagged, not yet needed elsewhere in the library).
 3. *Zero slop* — every inequality step is a named triangle/Lipschitz estimate, not a blanket
    `nlinarith`/`norm_num` discharge standing in for the argument; `ring`/`field_simp` appear
    only for literal algebraic rearrangement, never in place of an analytic step.
@@ -196,13 +196,16 @@ non-constant-coefficient extension, parked per the module's own docstring scope.
 three is a correctness or honesty finding; all are optional follow-on polish.
 
 **Update (same day, post-review):** backlog item (2) landed — the pattern did recur (three
-times more, in fact, across five pr-roll review rounds). The review series over this module's
-PR extracted nine shared private lemmas in total: `continuousOn_of_lipschitzOn_Icc`,
-`abs_cosChain_bounds`, `abs_sinChain_bounds`, `pairing_volterra_primitive`,
-`diff_pairing_lipschitz`, `abs_genLinComb_le` (the `abs_mul`-chain helper backlog item (2)
-names), `hasDerivAt_linMul`, `integrable_ofReal_of_abs_le_one`, and
-`hasDerivWithinAt_of_volterra_primitive`. The file has no remaining literal-duplicate
-`calc`/proof blocks as of the round-5 fix. Backlog item (1) remains open (no second consumer
+times more, in fact, across several rounds of review before this PR was opened). The
+resulting cleanup extracted nine shared private lemmas in total:
+`continuousOn_of_lipschitzOn_Icc`, `abs_cosChain_bounds`, `abs_sinChain_bounds`,
+`pairing_volterra_primitive`, `diff_pairing_lipschitz`, `abs_genLinComb_le` (the
+`abs_mul`-chain helper backlog item (2) names), `hasDerivAt_linMul`,
+`integrable_ofReal_of_abs_le_one`, and `hasDerivWithinAt_of_volterra_primitive`. The
+`charFun`-splitting computation in `weakForwardUniqueConst` was also consolidated into a
+single lemma (`charFun_eq_cos_add_sin_mul_I`) applied once per flow, replacing a nine-step
+calc that repeated the same computation forwards and backwards. The file has no remaining
+literal-duplicate `calc`/proof blocks. Backlog item (1) remains open (no second consumer
 yet).
 
 ## 2026-10-31 — corpus 742, modules 678 — elegance: does each headline proof read as its argument
