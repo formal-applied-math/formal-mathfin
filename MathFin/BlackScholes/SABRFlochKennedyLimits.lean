@@ -11,9 +11,11 @@ public import MathFin.BlackScholes.SABRImpliedVol
 /-!
 # The β → 1 and ν → 0 limits of the Le Floc'h–Kennedy SABR building blocks
 
-Le Floc'h & Kennedy, "Explicit SABR Calibration through Simple Expansions" (SSRN 2467231,
-2014), write the SABR implied volatility (model `dF = α̂ F^β dW₁`, `dα̂ = ν α̂ dW₂`,
-`dW₁ dW₂ = ρ dt`) in terms of two building blocks of the strike `k`, given the forward `F`:
+Transcribed from QuantLib's `ql/termstructures/volatility/sabr.cpp`
+(`SabrFlochKennedyVolatility`), the implementation of Le Floc'h & Kennedy, "Explicit SABR
+Calibration through Simple Expansions" (SSRN 2467231, 2014). The SABR implied volatility
+(model `dF = α̂ F^β dW₁`, `dα̂ = ν α̂ dW₂`, `dW₁ dW₂ = ρ dt`) is written in terms of two
+building blocks of the strike `k`, given the forward `F`:
 
 * the normalizing transform `y(k) = ∫_F^k x^(-β) dx = -(F^(1-β) - k^(1-β)) / (1-β)`;
 * the distance `Dint(k) = ∫_k^F dx / D(x)`, `D(x) = √(α² + 2αρν y(x) + ν² y(x)²) · x^β`, in
@@ -25,7 +27,9 @@ singularities on admissible SABR parameters: `y` is `0/0` at `β = 1` (the logno
 fill them:
 
 * `tendsto_sabrFKY_beta_one` — `y(k) → -log(F/k)` as `β → 1` (`F, k > 0`);
-* `tendsto_sabrFKDint_nu_zero` — `Dint → -y/α` as `ν → 0` (`ρ ≠ 1`, every `α`, `y`);
+* `tendsto_sabrFKDint_nu_zero` — `Dint → -y/α` as `ν → 0` (`ρ ≠ 1`, every `α`, `y`; at
+  `α = 0` this holds only through Lean's `x/0 = 0` junk value, not as a fact about the
+  closed form, which is undefined there);
 * `tendsto_sabrFKOmega0_nu_zero` — hence `ω₀(k) → -α log(F/k) / y` as `ν → 0` (`y ≠ 0`).
 
 The `ν → 0` limit reuses Hagan's `x(z)` (`sabrX`, `BlackScholes/SABRImpliedVol.lean`):
@@ -103,11 +107,12 @@ theorem sabrFKDint_eq_sabrX (α ρ ν y : ℝ) :
   congr 3
   ring
 
-/-- **`Dint → -y/α` as `ν → 0`, `ν ≠ 0`** (`ρ ≠ 1`, every `α`, `y`): the `∞ · 0` in the
-closed form at zero vol-of-vol is removable. Via `sabrFKDint_eq_sabrX`, `Dint` is the difference
-quotient at `ν = 0` of `ν ↦ x(-(y/α)ν)`, whose derivative there is `x'(0) · (-y/α) = -y/α`
-(`hasDerivAt_sabrX_zero`). This is `∫_k^F dx / D(x)` with `D(x) = α x^β`, the `ν = 0` diffusion
-coefficient. -/
+/-- **`Dint → -y/α` as `ν → 0`, `ν ≠ 0`** (`ρ ≠ 1`, every `α`, `y`; at `α = 0` this holds
+only through Lean's `x/0 = 0` junk value, not as a fact about the closed form, which is
+undefined there): the `∞ · 0` in the closed form at zero vol-of-vol is removable. Via
+`sabrFKDint_eq_sabrX`, `Dint` is the difference quotient at `ν = 0` of `ν ↦ x(-(y/α)ν)`,
+whose derivative there is `x'(0) · (-y/α) = -y/α` (`hasDerivAt_sabrX_zero`). This is
+`∫_k^F dx / D(x)` with `D(x) = α x^β`, the `ν = 0` diffusion coefficient. -/
 theorem tendsto_sabrFKDint_nu_zero {α ρ : ℝ} (hρ : ρ ≠ 1) (y : ℝ) :
     Tendsto (fun ν ↦ sabrFKDint α ρ ν y) (𝓝[≠] 0) (𝓝 (-y / α)) := by
   have hinner : HasDerivAt (fun ν : ℝ ↦ -(y / α) * ν) (-(y / α)) 0 := by
@@ -124,7 +129,7 @@ theorem tendsto_sabrFKDint_nu_zero {α ρ : ℝ} (hρ : ρ ≠ 1) (y : ℝ) :
   simp [sabrFKDint_eq_sabrX, h0]
 
 /-- **The leading-order vol at zero vol-of-vol**: `ω₀ → -α log(F/k) / y` as `ν → 0`, `ν ≠ 0`
-(`α ≠ 0`, `ρ ≠ 1`, `y ≠ 0`, i.e. `k ≠ F`). With `y = -log(F/k)` (the `β = 1` value of
+(`α ≠ 0`, `ρ ≠ 1`, `y ≠ 0`, i.e. `k ≠ F`). With `y = -log(F/k)` (the `β = 1` limit of
 `tendsto_sabrFKY_beta_one`) this is `α`, the lognormal vol. -/
 theorem tendsto_sabrFKOmega0_nu_zero {F k α ρ y : ℝ} (hα : α ≠ 0) (hρ : ρ ≠ 1) (hy : y ≠ 0) :
     Tendsto (fun ν ↦ sabrFKOmega0 F k α ρ ν y) (𝓝[≠] 0) (𝓝 (-α * Real.log (F / k) / y)) := by

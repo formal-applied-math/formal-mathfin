@@ -1596,7 +1596,7 @@
       },
       "metadata": {
         "chapter": 9,
-        "reference": "Le Floc'h & Kennedy, \"Explicit SABR Calibration through Simple Expansions,\" SSRN 2467231, 2014; cf. Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002 (the base SABR implied-vol expansion this one refines)",
+        "reference": "Transcribed from QuantLib's ql/termstructures/volatility/sabr.cpp (SabrFlochKennedyVolatility), the implementation of Le Floc'h & Kennedy, \"Explicit SABR Calibration through Simple Expansions,\" SSRN 2467231, 2014; cf. Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002 (the base SABR implied-vol expansion this one refines)",
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the beta -> 1 limit of the printed closed form. Lives in MathFin/BlackScholes/SABRFlochKennedyLimits.lean (tendsto_sabrFKY_beta_one, via a difference-quotient argument on the derivative of ε ↦ k^ε - F^ε at ε = 0). Axioms-clean. LIMITS: only the normalizing transform y's own limit is covered, not the full Le Floc'h-Kennedy vol (the ω0 correction terms, D(F), D(k), or the (k^β - F^β)/(k - F) factor), its derivation from the SABR dynamics, or its approximation quality against the true SABR implied vol."
@@ -1612,7 +1612,7 @@
       },
       "metadata": {
         "chapter": 9,
-        "reference": "Le Floc'h & Kennedy, \"Explicit SABR Calibration through Simple Expansions,\" SSRN 2467231, 2014; cf. Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002 (the base SABR implied-vol expansion this one refines)",
+        "reference": "Transcribed from QuantLib's ql/termstructures/volatility/sabr.cpp (SabrFlochKennedyVolatility), the implementation of Le Floc'h & Kennedy, \"Explicit SABR Calibration through Simple Expansions,\" SSRN 2467231, 2014; cf. Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002 (the base SABR implied-vol expansion this one refines)",
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the nu -> 0 limit of the printed closed form. Lives in MathFin/BlackScholes/SABRFlochKennedyLimits.lean (tendsto_sabrFKOmega0_nu_zero, built on tendsto_sabrFKDint_nu_zero and the identity sabrFKDint_eq_sabrX relating Dint to Hagan's sabrX via hasDerivAt_sabrX_zero from SABRImpliedVol.lean). Axioms-clean. LIMITS: only the leading-order vol omega_0's own limit is covered, not the full Le Floc'h-Kennedy expansion (the correction terms in log omega_0, D(F), D(k), or the (k^β - F^β)/(k - F) factor), its derivation from the SABR dynamics, or its approximation quality against the true SABR implied vol."
@@ -1660,7 +1660,7 @@
       },
       "metadata": {
         "chapter": 14,
-        "reference": "Heston (1993), A closed-form solution for options with stochastic volatility with applications to bond and currency options, Review of Financial Studies 6(2), 327-343; the small-vol-of-vol branch matches QuantLib's AnalyticHestonEngine::chF Taylor expansion at sigma <= 1e-6",
+        "reference": "Heston (1993), A closed-form solution for options with stochastic volatility with applications to bond and currency options, Review of Financial Studies 6(2), 327-343; the small-vol-of-vol branch matches QuantLib's AnalyticHestonEngine::chF Taylor expansion, taken for sigma <= 1e-6 and kappa >= 1e-8",
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, MathFin/BlackScholes/HestonSmallVolOfVol.lean. Builds on the pre-existing Heston.lean Riccati closed forms (hestonA, hestonBv) and FixedIncome/Vasicek.lean + VasicekBondPrice.lean for the deterministic xi=0 variance path; the A-flow limit is proved via its FTC-integral form, avoiding the closed form's own 2*kappa*theta/xi^2 cancellation. Scope inherited from Heston.lean: the real moment transform 0 < u < 1 at the Riccati level, not the complex characteristic function or the identification of the profile with E[e^{u log S_T}] for an actual Heston process. Axioms-clean."
