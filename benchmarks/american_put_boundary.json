@@ -85,7 +85,7 @@
       },
       "metadata": {
         "chapter": 9,
-        "reference": "Andersen, Lake & Offengenden, \"High-performance American option pricing\", Journal of Computational Finance (2016); QuantLib's qdfpamericanengine.cpp; MathFin issue #1534.",
+        "reference": "Andersen, Lake & Offengenden, \"High-performance American option pricing\", Journal of Computational Finance (2016); QuantLib's qdfpamericanengine.cpp; QuantLib PR#1534.",
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, MathFin/BlackScholes/AmericanPut/Stopping/ActualBoundaryExpiryLimit.lean (tendsto_brownianUsualExerciseBoundary_expiry), a corollary composing the existing American-put boundary convexity stack's continuity-at-expiry result (canonicalStockBoundary_continuousAt) with its normalization lemmas. Covers the Andersen-Lake Table-2 cell for the true boundary at expiry. Axioms-clean. LIMITS: only 0 < r, 0 <= q <= r; the q > r > 0, q < 0 and negative-rate cells (including the double-boundary case) are not treated."
@@ -101,7 +101,7 @@
       },
       "metadata": {
         "chapter": 9,
-        "reference": "Healy, \"Pricing American options under negative rates\", arXiv:2109.15157, §5.1 (restates Andersen-Lake-Offengenden's fixed-point equations); QuantLib's qdfpamericanengine.cpp; MathFin issue #1512.",
+        "reference": "Healy, \"Pricing American options under negative rates\", arXiv:2109.15157, §5.1 (restates Andersen-Lake-Offengenden's fixed-point equations); QuantLib's qdfpamericanengine.cpp; QuantLib PR#1512.",
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, MathFin/BlackScholes/AmericanQDPlusLimits.lean (tendsto_qdfpK12_endpoint), over an abstract boundary B rather than Andersen-Lake's specific boundary formula. The sibling integrands K3, ni, di have matching endpoint-limit theorems in the same file (tendsto_qdfpK3_endpoint, tendsto_qdfpNi_endpoint, tendsto_qdfpDi_endpoint), and each has an off-diagonal (b != B(tau)) counterpart tending to 0 or a step function instead. Axioms-clean. LIMITS: purely the one-sided limit of the printed quadrature integrand; no claim about the fixed-point iteration's convergence, the boundary B itself, or American-option pricing accuracy."
@@ -113,11 +113,11 @@
       "description": "The QD+ fixed-point integrand K12's endpoint limit at y = -1 on the diagonal b = B(tau) (exp(q*tau)*(sqrt(tau)/sigma)/sqrt(2*pi), the value QuantLib's quadrature rule implicitly assumes) requires the boundary B to be differentiable at tau, not merely continuous. For the continuous, 1/2-Holder boundary B(s) = b*exp(-c*sqrt(tau-s)) (so B(tau) = b), the same integrand instead tends to exp(q*tau)*(sqrt(tau)/sigma)*phi(c/sigma), which differs from the differentiable-case value whenever c != 0. This pair (the Holder boundary's own limit, and its distinctness from the differentiable-case value) shows the differentiability hypothesis is not an artifact of the proof technique.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.AmericanQDPlusLimits\n\nopen Filter MathFin\nopen scoped Topology Real\n\ntheorem qdplus_k12_endpoint_differentiability_tight_thm {r q σ τ b c : ℝ}\n    (hσ : 0 < σ) (hτ : 0 < τ) (hb : 0 < b) (hc : c ≠ 0) :\n    Tendsto (qdfpK12 (fun s ↦ b * Real.exp (-(c * Real.sqrt (τ - s)))) r q σ τ b) (𝓝[>] (-1))\n        (𝓝 (Real.exp (q * τ) * (Real.sqrt τ / σ) * gaussianPDFReal 0 1 (c / σ))) ∧\n      ¬ Tendsto (qdfpK12 (fun s ↦ b * Real.exp (-(c * Real.sqrt (τ - s)))) r q σ τ b) (𝓝[>] (-1))\n        (𝓝 (Real.exp (q * τ) * (Real.sqrt τ / σ) / Real.sqrt (2 * π))) :=\n  ⟨tendsto_qdfpK12_endpoint_holder hσ hτ hb,\n    not_tendsto_qdfpK12_endpoint_holder hσ hτ hb hc⟩\n"
+        "lean": "import MathFin.BlackScholes.AmericanQDPlusLimits\n\nopen Filter MathFin ProbabilityTheory\nopen scoped Topology Real\n\ntheorem qdplus_k12_endpoint_differentiability_tight_thm {r q σ τ b c : ℝ}\n    (hσ : 0 < σ) (hτ : 0 < τ) (hb : 0 < b) (hc : c ≠ 0) :\n    Tendsto (qdfpK12 (fun s ↦ b * Real.exp (-(c * Real.sqrt (τ - s)))) r q σ τ b) (𝓝[>] (-1))\n        (𝓝 (Real.exp (q * τ) * (Real.sqrt τ / σ) * gaussianPDFReal 0 1 (c / σ))) ∧\n      ¬ Tendsto (qdfpK12 (fun s ↦ b * Real.exp (-(c * Real.sqrt (τ - s)))) r q σ τ b) (𝓝[>] (-1))\n        (𝓝 (Real.exp (q * τ) * (Real.sqrt τ / σ) / Real.sqrt (2 * π))) :=\n  ⟨tendsto_qdfpK12_endpoint_holder hσ hτ hb,\n    not_tendsto_qdfpK12_endpoint_holder hσ hτ hb hc⟩\n"
       },
       "metadata": {
         "chapter": 9,
-        "reference": "Healy, \"Pricing American options under negative rates\", arXiv:2109.15157, §5.1; QuantLib's qdfpamericanengine.cpp; MathFin issue #1512.",
+        "reference": "Healy, \"Pricing American options under negative rates\", arXiv:2109.15157, §5.1; QuantLib's qdfpamericanengine.cpp; QuantLib PR#1512.",
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, MathFin/BlackScholes/AmericanQDPlusLimits.lean (tendsto_qdfpK12_endpoint_holder, not_tendsto_qdfpK12_endpoint_holder), bundled here as a conjunction of the two theorems for a single benchmark entry. The continuous boundary B(s) = b*exp(-c*sqrt(tau-s)) is an explicit counterexample, not a generic continuous boundary; the claim is only that continuity alone does not pin down the endpoint value QuantLib's quadrature assumes. Axioms-clean."
