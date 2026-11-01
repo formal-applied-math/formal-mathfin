@@ -481,6 +481,9 @@ import MathFin.BlackScholes.Dupire
 -- The Heston 2D affine transform at the generator/PDE level: the rho-shifted Riccati
 -- closed forms, the pricing PDE, and the gated real-moment expectation
 import MathFin.BlackScholes.Heston
+-- The Heston transform at vanishing vol-of-vol: the Black-Scholes moment with the integrated
+-- deterministic variance
+import MathFin.BlackScholes.HestonSmallVolOfVol
 import MathFin.BlackScholes.Lookback
 import MathFin.BlackScholes.BarrierParity
 import MathFin.BlackScholes.PowerOption
