@@ -17,8 +17,8 @@ vol-of-vol `ξ` in two places that break at `ξ = 0`: the prefactor `2κθ/ξ²`
 multiplying the bracket `((γ + κ − ρξu)/2)τ − log(D(τ)/(2γ))` whose two terms each tend to
 `κτ`. Each piece alone diverges like `κ²θτ/ξ²`; their difference is `O(ξ²)`. This is the
 cancellation behind QuantLib's `AnalyticHestonEngine::chF` small-`σ` Taylor branch (taken
-for `σ ≤ 1e-6`), which `COSHestonEngine`, `AnalyticPTDHestonEngine` and `HestonRNDCalculator`
-lack. This file proves the limit those engines should reach.
+for `σ ≤ 1e-6` and `κ ≥ 1e-8`), which `COSHestonEngine`, `AnalyticPTDHestonEngine` and
+`HestonRNDCalculator` lack. This file proves the limit those engines should reach.
 
 At `ξ = 0` the variance follows the deterministic ODE `dv = κ(θ − v)dt`, whose solution is
 `vasicekDeterministic v₀ θ κ` (`FixedIncome/Vasicek`), and the transform tends to the
