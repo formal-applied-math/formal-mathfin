@@ -391,6 +391,9 @@ import MathFin.BlackScholes.ImpliedVolatility
 -- SABR (Hagan-Kumar-Lesniewski-Woodward 2002) lognormal implied-vol asymptotic
 -- approximation: eq. 2.17 -> eq. 2.18 as K -> f, backbone law, ATM Black-76 price
 import MathFin.BlackScholes.SABRImpliedVol
+-- Le Floc'h-Kennedy SABR building blocks: y(k) -> -log(F/k) as beta -> 1,
+-- Dint -> -y/alpha as nu -> 0 (the removable singularities of the closed forms)
+import MathFin.BlackScholes.SABRFlochKennedyLimits
 import MathFin.BlackScholes.LognormalMoments
 import MathFin.BlackScholes.VarianceSwap
 -- Merton (1976) jump-diffusion: Poisson-mixture price, compensation

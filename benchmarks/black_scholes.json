@@ -1587,6 +1587,38 @@
       }
     },
     {
+      "id": "mf-sabr-fk-y-beta-one-limit",
+      "name": "Le Floc'h-Kennedy SABR Normalizing Transform Tends to -log(F/k) as beta -> 1",
+      "domain": "mathematical_finance",
+      "description": "Le Floc'h & Kennedy's normalizing transform y(k) = -(F^(1-beta) - k^(1-beta))/(1-beta), one of the two building blocks of their SABR implied-vol expansion, is 0/0 at the lognormal case beta = 1. The removable singularity resolves to y(k) -> -log(F/k) as beta -> 1, beta != 1, for F, k > 0. The full Le Floc'h-Kennedy expansion and its approximation quality against the true SABR implied vol are not formalized here.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.SABRFlochKennedyLimits\n\nopen MathFin Filter Topology\n\ntheorem sabr_fk_y_beta_one_thm {F k : ℝ} (hF : 0 < F) (hk : 0 < k) :\n    Tendsto (fun β ↦ sabrFKY F k β) (𝓝[≠] 1) (𝓝 (-Real.log (F / k))) :=\n  tendsto_sabrFKY_beta_one hF hk\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Le Floc'h & Kennedy, \"Explicit SABR Calibration through Simple Expansions,\" SSRN 2467231, 2014; cf. Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002 (the base SABR implied-vol expansion this one refines)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the beta -> 1 limit of the printed closed form. Lives in MathFin/BlackScholes/SABRFlochKennedyLimits.lean (tendsto_sabrFKY_beta_one, via a difference-quotient argument on the derivative of ε ↦ k^ε - F^ε at ε = 0). Axioms-clean. LIMITS: only the normalizing transform y's own limit is covered, not the full Le Floc'h-Kennedy vol (the ω0 correction terms, D(F), D(k), or the (k^β - F^β)/(k - F) factor), its derivation from the SABR dynamics, or its approximation quality against the true SABR implied vol."
+      }
+    },
+    {
+      "id": "mf-sabr-fk-omega0-nu-zero-limit",
+      "name": "Le Floc'h-Kennedy Leading-Order SABR Vol Tends to the Lognormal Vol as nu -> 0",
+      "domain": "mathematical_finance",
+      "description": "Le Floc'h & Kennedy's leading-order vol omega_0(k) = log(F/k)/Dint(k) is an infinity-times-zero indeterminate form at zero vol-of-vol nu = 0, since their distance Dint(k) = (1/nu)*log(1) there. The removable singularity resolves to omega_0(k) -> -alpha*log(F/k)/y as nu -> 0, nu != 0, for alpha != 0, rho != 1, y != 0 (k != F); at y = -log(F/k) (the beta = 1 case) this limit is exactly alpha, the lognormal vol. The limit is obtained via Dint = nu^-1 * x(-nu*y/alpha), reusing Hagan's x(z) building block and its known slope x'(0) = 1 at the origin.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.SABRFlochKennedyLimits\n\nopen MathFin Filter Topology\n\ntheorem sabr_fk_omega0_nu_zero_thm {F k α ρ y : ℝ} (hα : α ≠ 0) (hρ : ρ ≠ 1) (hy : y ≠ 0) :\n    Tendsto (fun ν ↦ sabrFKOmega0 F k α ρ ν y) (𝓝[≠] 0) (𝓝 (-α * Real.log (F / k) / y)) :=\n  tendsto_sabrFKOmega0_nu_zero hα hρ hy\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Le Floc'h & Kennedy, \"Explicit SABR Calibration through Simple Expansions,\" SSRN 2467231, 2014; cf. Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002 (the base SABR implied-vol expansion this one refines)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the nu -> 0 limit of the printed closed form. Lives in MathFin/BlackScholes/SABRFlochKennedyLimits.lean (tendsto_sabrFKOmega0_nu_zero, built on tendsto_sabrFKDint_nu_zero and the identity sabrFKDint_eq_sabrX relating Dint to Hagan's sabrX via hasDerivAt_sabrX_zero from SABRImpliedVol.lean). Axioms-clean. LIMITS: only the leading-order vol omega_0's own limit is covered, not the full Le Floc'h-Kennedy expansion (the correction terms in log omega_0, D(F), D(k), or the (k^β - F^β)/(k - F) factor), its derivation from the SABR dynamics, or its approximation quality against the true SABR implied vol."
+      }
+    },
+    {
       "id": "mf-dupire-local-vol",
       "name": "Dupire Local-Volatility Formula",
       "description": "Dupire's local-vol formula at zero rates, for a driftless X = c + ∫δ dB with δ bounded, adapted and path-continuous (so lognormal models are outside the class): if σ_loc(K)²K² is a continuous version of E[δ_t² | X_t = K] on a strike window and the call surface C(t,K) = E[(X_t − K)⁺] is C² in strike (continuous C_KK) and C¹ in time (jointly continuous C_T), these regularity conditions being assumed, then σ_loc(K)² = 2C_T/(K²C_KK) at every strike of the window with C_KK > 0. Existence of a local-vol diffusion reproducing C is not proved.",
