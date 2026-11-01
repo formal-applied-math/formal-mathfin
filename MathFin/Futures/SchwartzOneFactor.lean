@@ -92,8 +92,8 @@ theorem tendsto_schwartzFuturesPrice_atTop (x₀ θ σ : ℝ) {κ : ℝ} (hκ : 
     Tendsto (schwartzFuturesPrice x₀ θ κ σ) atTop
       (𝓝 (Real.exp (θ + σ ^ 2 / (4 * κ)))) := by
   have hm : Tendsto (fun t ↦ vasicekSDEMean x₀ θ κ t) atTop (𝓝 θ) :=
-    (vasicekDeterministic_tendsto_mean x₀ θ κ hκ).congr fun t ↦ by
-      unfold vasicekDeterministic vasicekSDEMean; ring
+    (vasicekDeterministic_tendsto_mean x₀ θ κ hκ).congr fun t ↦
+      (vasicekSDEMean_eq_deterministic x₀ θ κ t).symm
   have hv := tendsto_vasicekSDEVariance_atTop σ hκ
   have hlim : θ + σ ^ 2 / (2 * κ) / 2 = θ + σ ^ 2 / (4 * κ) := by ring
   rw [← hlim]

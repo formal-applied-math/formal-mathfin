@@ -104,9 +104,7 @@ private lemma vasicekKernelLp_integral_sq {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0
     ∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekKernelLp κ hκ.le T u) ^ 2
       = vasicekSDEVariance 1 κ T := by
   rw [vasicekSDEVariance, one_pow, one_mul, ← vasicekKernel_integral_sq κ hκ.ne' T]
-  refine integral_congr_ae ?_
-  filter_upwards [(vasicekKernel_memLp κ hκ.le T).coeFn_toLp] with u hu
-  rw [vasicekKernelLp, hu]
+  exact (vasicekKernel_memLp κ hκ.le T).integral_sq_toLp
 
 /-! ### The short rate and the bond under the Girsanov measure -/
 

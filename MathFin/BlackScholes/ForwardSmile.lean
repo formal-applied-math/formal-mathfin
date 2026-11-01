@@ -109,6 +109,15 @@ noncomputable def dpl (k w : ℝ) : ℝ := (-k + w / 2) / Real.sqrt w
 /-- The lower standardized normal argument: `d₋ = (−k − w/2)/√w`. -/
 noncomputable def dmi (k w : ℝ) : ℝ := (-k - w / 2) / Real.sqrt w
 
+/-- `d₊ = −k/√w + √w/2`: the form in which `d₊` is written when `w` is a squared root variance
+(for `w ≤ 0` both sides are `0`, as `√w = 0`). -/
+theorem dpl_eq (k w : ℝ) : dpl k w = -k / Real.sqrt w + Real.sqrt w / 2 := by
+  rw [dpl, add_div, div_right_comm, Real.div_sqrt]
+
+/-- `d₋ = −k/√w − √w/2`, as `dpl_eq`. -/
+theorem dmi_eq (k w : ℝ) : dmi k w = -k / Real.sqrt w - Real.sqrt w / 2 := by
+  rw [dmi, sub_div, div_right_comm, Real.div_sqrt]
+
 /-- The Black-76 call normalized by the forward: `c(k,w) = Φ(d₊) − e^k·Φ(d₋)`,
 the zero-rates `bsV` in `(k, w)` coordinates. -/
 noncomputable def blackForm (k w : ℝ) : ℝ := Phi (dpl k w) - Real.exp k * Phi (dmi k w)
@@ -536,12 +545,10 @@ noncomputable def smileN (σ ψ₁ T₀ ε k T : ℝ) : ℝ :=
 `δ = −k·w_k/w + w_k²·(k²−w−w²/4)/(4w²) + w_kk/2`, specialized to this surface (so
 `w_kk/2 = (εψ₁/√(T+T₀))²·T` is spelled out); Dupire's ratio is `w_T/(1 + δ)`
 (`dupireRatio_eq`). `1 + smileDelta` has the algebraic form of Durrleman's function `g`, which
-`MathFin.SVI.durrleman` (`SVI/Reduction.lean`) defines for the SVI variance only; here this
-surface's variance stands in for SVI's, and no lemma connects the two. Likewise
-`dpl`/`dmi`/`blackForm`/`exp_mul_pdf_dmi` above mirror `SVI.blackPlus`/`blackMinus`/
-`logBlackCall`/`black_density_identity` (`SVI/BlackSmile.lean`) with an abstract total
-variance `w` standing in for `SVI.variance p k`; see those modules for the fully worked SVI
-case. -/
+`MathFin.SVI.durrleman` (`SVI/Reduction.lean`) defines for the SVI variance: where the two have the
+same total variance, slope and curvature they are equal (`SVI.durrleman_eq_one_add_smileDelta`).
+The SVI development (`SVI/BlackSmile.lean`) uses `dpl`, `dmi`, `blackForm` and `exp_mul_pdf_dmi`
+directly, at `w = SVI.variance p k`. -/
 noncomputable def smileDelta (σ ψ₁ T₀ ε k T : ℝ) : ℝ :=
   -k * wSlope σ ψ₁ T₀ ε T k / totalVar σ ψ₁ T₀ ε k T
     + wSlope σ ψ₁ T₀ ε T k ^ 2 * (k ^ 2 - totalVar σ ψ₁ T₀ ε k T

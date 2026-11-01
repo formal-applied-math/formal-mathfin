@@ -7,40 +7,37 @@ module
 
 public import MathFin.Foundations.ItoIntegralProcessMartingale
 public import MathFin.Foundations.ItoIntegralCLM
+public import MathFin.Foundations.ItoIntegralProcessL2Inf
 
 /-! # The general-integrand Itô integral as an L² martingale on `[0,T]` (B1b)
 
 B1a built the simple-integrand Itô integral `t ↦ (V●B)_t` as a continuous L²
 martingale. This file extends it to a **general** predictable integrand
-`φ ∈ Lp ℝ 2 (trimMeasure_T T)` (= Degenne's `L2Predictable` on `[0,T]`) by
-density: the process `t ↦ (φ●B)_t := ∫₀ᵗ φ dB` is a continuous L² martingale, with
+`φ ∈ Lp ℝ 2 (trimMeasure_T T)` (= Degenne's `L2Predictable` on `[0,T]`): the process `t ↦ (φ●B)_t := ∫₀ᵗ φ dB` is a continuous L² martingale, with
 the Itô contraction `‖(φ●B)_t‖ ≤ ‖φ‖` and the terminal Itô isometry
 `‖(φ●B)_T‖ = ‖φ‖`. The explicit time-indexed isometry
 `E[(φ●B)_t²] = ∫₀ᵗ E[φ_s²] ds` is proved in the companion module
 `ItoIntegralProcessIsometry` (`itoProcessCLM_norm_sq`), by density-transferring the
 band-restricted simple-process isometry against a band-truncation CLM.
 
-The construction mirrors `ItoIntegralCLM.itoIntegralCLM_T`: extend the linear map
-`V ↦ itoSimpleProcessLp V t` (B1a's t-process) along the *same* dense embedding
-`simpleAssembly_T` via `LinearMap.extendOfNorm`. The only new analytic input is the
-contraction bound `‖itoSimpleProcessLp V t‖ ≤ ‖simpleProcessL2_T V‖`, which holds
-because `(V●B)_t = E[(V●B)_T | 𝓕_t]` (B1a's martingale + terminal agreement) and
-conditional expectation is an L² contraction. The bridge to B1a is then
-*definitional* (`extendOfNorm_eq`).
+The process is *defined* as the infinite-horizon process `itoProcessL2Inf`
+(`ItoIntegralProcessL2Inf`) composed with `bandExtend`, i.e. as the `𝓕_t`-conditional-expectation
+projection (`condExpL2`) of the terminal integral `itoIntegralCLM_T`; its martingale property,
+adaptedness and the contraction `‖(φ●B)_t‖ ≤ ‖φ‖` are those of the infinite-horizon engine,
+proved there once. The bridge to B1a's simple-integrand process (`itoProcessCLM_simpleAssembly_T`)
+is B1a's martingale property.
 
 The infinite-horizon `[0,∞)` integral (σ-finite predictable exhaustion) is the
 separate later milestone B2.
 
 ## Result
 
-* `itoSimpleProcessLp_norm_le` — the contraction bound `extendOfNorm` consumes.
-* `itoProcessLM`, `itoProcessCLM` — B1a's t-process as a linear map, and its extension to a
-  general predictable `L²` integrand.
-* `itoProcessCLM_simpleAssembly_T` — the definitional bridge back to B1a.
+* `itoProcessCLM` — the Itô integral process of a general predictable `L²` integrand.
+* `itoProcessCLM_simpleAssembly_T` — the bridge back to B1a.
 * `itoProcessCLM_zero_time` — the process starts at `0`.
 * `condExp_itoSimple_eq` — B1a's martingale read to the terminal.
-* `itoProcessCLM_eq_condExpL2` — **the key identity**: `(φ●B)_t` is the `𝓕_t`-projection of
-  the terminal integral.
+* `itoProcessCLM_eq_condExpL2` — **the key identity** (by definition): `(φ●B)_t` is the
+  `𝓕_t`-projection of the terminal integral.
 * `itoProcessCLM_aeStronglyMeasurable`, `itoIntegralProcessGen_isMartingale` — its two
   corollaries: a.e.-adaptedness and the martingale property.
 * `itoProcessCLM_norm_le` — the contraction `‖(φ●B)_t‖ ≤ ‖φ‖`.
@@ -55,7 +52,7 @@ namespace MathFin
 namespace ItoIntegralProcessGeneral
 
 open MeasureTheory ProbabilityTheory
-open ItoIntegralL2 ItoIntegralCLM ItoIntegralProcess
+open ItoIntegralL2 ItoIntegralCLM ItoIntegralProcess ItoIntegralProcessL2Infinite
 open scoped NNReal ENNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
@@ -63,74 +60,52 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 
 include hB
 
-/-- **The contraction bound** — the one new analytic input. For a `T`-bounded
-simple process, the L² norm of the t-process `(V●B)_t` is at most that of its
-embedding `simpleProcessL2_T V`: indeed `(V●B)_t = μ[(V●B)_T | 𝓕_t]` (B1a's
-martingale at `t ≤ T`, with `(V●B)_T = itoSimple V` since `T` is past every right
-endpoint), and conditional expectation is an L² contraction. This is the bound
-`LinearMap.extendOfNorm` consumes to produce the general Itô integral CLM. -/
-theorem itoSimpleProcessLp_norm_le (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (V : SimpleProcess ℝ (natFiltration hBmeas)) (hVT : ∀ p ∈ V.value.support, p.2 ≤ T) :
-    ‖itoSimpleProcessLp hB hBmeas V t‖ ≤ ‖simpleProcessL2_T (μ := μ) T hBmeas V‖ := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  -- `‖simpleProcessL2_T T V‖ = ‖itoSimpleLp V‖`: the T-Itô isometry on simple processes.
-  have hnorm_eq : ‖simpleProcessL2_T (μ := μ) T hBmeas V‖ = ‖itoSimpleLp hB hBmeas V‖ :=
-    (assembly_isometry_T hB T hBmeas ⟨V, hVT⟩).symm
-  rw [hnorm_eq]
-  -- `(V●B)_t = μ[itoSimple V | 𝓕_t]`: B1a's martingale at `t ≤ T' = t ⊔ T`, with
-  -- `(V●B)_{T'} = itoSimple V` since `T'` is past every right endpoint.
-  have hT'eq : itoSimpleProcess hBmeas V (max t T) = itoSimple hBmeas V :=
-    itoSimpleProcess_eq_itoSimple hBmeas V fun p hp ↦ (hVT p hp).trans (le_max_right t T)
-  have hcond : (μ[fun ω ↦ itoSimpleProcess hBmeas V (max t T) ω | natFiltration hBmeas t])
-      =ᵐ[μ] fun ω ↦ itoSimpleProcess hBmeas V t ω :=
-    (itoSimpleProcess_isMartingale hB hBmeas V).2 t (max t T) (le_max_left t T)
-  simp only [hT'eq] at hcond
-  -- conditional expectation is an L² contraction.
-  simp only [itoSimpleProcessLp, itoSimpleLp, Lp.norm_toLp]
-  refine ENNReal.toReal_mono (memLp_itoSimple hB hBmeas V).2.ne ?_
-  calc eLpNorm (itoSimpleProcess hBmeas V t) 2 μ
-      = eLpNorm (μ[itoSimple hBmeas V | natFiltration hBmeas t]) 2 μ :=
-        (eLpNorm_congr_ae hcond).symm
-    _ ≤ eLpNorm (itoSimple hBmeas V) 2 μ := eLpNorm_condExp_le_eLpNorm _ (by simp)
-
-/-- **B1a's t-process as a linear map** on the `T`-bounded simple processes,
-`V ↦ (V●B)_t`. The target of the `extendOfNorm` extension. -/
-noncomputable def itoProcessLM (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) :
-    TBoundedSP T hBmeas →ₗ[ℝ] Lp ℝ 2 μ where
-  toFun V := itoSimpleProcessLp hB hBmeas V.val t
-  map_add' V W := by
-    change itoSimpleProcessLp hB hBmeas ((V + W).val) t = _
-    rw [Submodule.coe_add, itoSimpleProcessLp, itoSimpleProcessLp, itoSimpleProcessLp,
-        ← MemLp.toLp_add (memLp_itoSimpleProcess hB hBmeas V.val t)
-          (memLp_itoSimpleProcess hB hBmeas W.val t)]
-    congr 1
-    exact itoSimpleProcess_add hBmeas V.val W.val t
-  map_smul' c V := by
-    change itoSimpleProcessLp hB hBmeas ((c • V).val) t = _
-    rw [Submodule.coe_smul, itoSimpleProcessLp, itoSimpleProcessLp, RingHom.id_apply,
-        ← MemLp.toLp_const_smul c (memLp_itoSimpleProcess hB hBmeas V.val t)]
-    congr 1
-    exact itoSimpleProcess_smul hBmeas c V.val t
-
-/-- **The general Itô integral as a CLM on `[0,T]`.** Extends B1a's t-process
-`itoProcessLM` along the dense embedding `simpleAssembly_T` (the same one that
-builds `itoIntegralCLM_T`), via `LinearMap.extendOfNorm` with the contraction
-bound `itoSimpleProcessLp_norm_le`. For `φ ∈ L²(predictable, [0,T])`, this is
-`∫₀ᵗ φ dB ∈ L²(μ)`. -/
+/-- **The Itô integral process on `[0,T]`**: the `𝓕_t`-conditional-expectation projection
+(`condExpL2`) of the terminal integral `itoIntegralCLM_T`. For `φ ∈ L²(predictable, [0,T])`, this
+is `∫₀ᵗ φ dB ∈ L²(μ)`; it is the band restriction `itoProcessL2Inf t ∘ bandExtend T` of the
+infinite-horizon process. -/
 noncomputable def itoProcessCLM (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) :
     Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) →L[ℝ] Lp ℝ 2 μ :=
-  (itoProcessLM hB T t hBmeas).extendOfNorm (simpleAssembly_T (μ := μ) T hBmeas)
+  (itoProcessL2Inf hB t hBmeas).comp (bandExtend T hBmeas).toContinuousLinearMap
 
-/-- **The bridge to B1a (definitional).** On the embedding of a `T`-bounded simple
-process, the general CLM reproduces B1a's t-process `(V●B)_t`. Immediate from
-`extendOfNorm_eq` + the contraction bound + `simpleAssembly_T_denseRange`. -/
+/-- **The key identity.** The general Itô integral at time `t` is the
+conditional-expectation projection of its terminal value `∫₀ᵀ φ dB` onto `𝓕_t`:
+`(φ●B)_t = condExpL2 𝓕_t (itoIntegralCLM_T T φ)`. Adaptedness and the martingale
+property are corollaries. -/
+theorem itoProcessCLM_eq_condExpL2 (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    itoProcessCLM hB T t hBmeas φ
+      = (condExpL2 ℝ ℝ ((natFiltration hBmeas).le t)
+          (itoIntegralCLM_T hB T hBmeas φ) : Lp ℝ 2 μ) :=
+  rfl
+
+omit [IsProbabilityMeasure μ] in
+/-- B1a's martingale to the terminal: `μ[itoSimple V | 𝓕_t] = (V●B)_t` for
+`T`-bounded `V` (`(V●B)_{T'} = itoSimple V` at `T' = t ⊔ T`). -/
+theorem condExp_itoSimple_eq (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (V : SimpleProcess ℝ (natFiltration hBmeas)) (hVT : ∀ p ∈ V.value.support, p.2 ≤ T) :
+    μ[itoSimple hBmeas V | natFiltration hBmeas t]
+      =ᵐ[μ] fun ω ↦ itoSimpleProcess hBmeas V t ω := by
+  have hT'eq : itoSimpleProcess hBmeas V (max t T) = itoSimple hBmeas V :=
+    itoSimpleProcess_eq_itoSimple hBmeas V fun p hp ↦ (hVT p hp).trans (le_max_right t T)
+  simpa only [hT'eq] using (itoSimpleProcess_isMartingale hB hBmeas V).2 t (max t T)
+      (le_max_left t T)
+
+/-- **The bridge to B1a.** On the embedding of a `T`-bounded simple process, the general CLM
+reproduces B1a's t-process `(V●B)_t`: on simple processes the terminal integral is `itoSimple V`
+and B1a's martingale reads `μ[itoSimple V | 𝓕_t] = (V●B)_t`. -/
 theorem itoProcessCLM_simpleAssembly_T (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (V : TBoundedSP T hBmeas) :
     itoProcessCLM hB T t hBmeas (simpleAssembly_T (μ := μ) T hBmeas V)
       = itoSimpleProcessLp hB hBmeas V.val t := by
-  rw [itoProcessCLM, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-    ⟨1, fun W ↦ by rw [one_mul]; exact itoSimpleProcessLp_norm_le hB T t hBmeas W.val W.property⟩]
-  rfl
+  rw [itoProcessCLM_eq_condExpL2, itoIntegralCLM_T_simpleAssembly_T]
+  refine Lp.ext ?_
+  simp only [itoSimpleProcessLp, itoSimpleLp]
+  filter_upwards [(memLp_itoSimpleProcess hB hBmeas V.val t).coeFn_toLp,
+    (memLp_itoSimple hB hBmeas V.val).condExpL2_ae_eq_condExp (𝕜 := ℝ)
+        ((natFiltration hBmeas).le t),
+    condExp_itoSimple_eq hB T t hBmeas V.val V.property] with ω hω1 hω2 hω3
+  rw [hω2, hω3, hω1]
 
 /-- **The Itô integral process starts at zero.** On the dense simple processes this is
 `itoSimpleProcess_zero_time`, and both sides are continuous-linear in the integrand. -/
@@ -145,100 +120,30 @@ theorem itoProcessCLM_simpleAssembly_T (T t : ℝ≥0) (hBmeas : ∀ u, Measurab
   rw [itoSimpleProcess_zero_time]
   exact (Lp.coeFn_zero ℝ 2 μ).symm
 
-omit [IsProbabilityMeasure μ] in
-/-- B1a's martingale to the terminal: `μ[itoSimple V | 𝓕_t] = (V●B)_t` for
-`T`-bounded `V` (`(V●B)_{T'} = itoSimple V` at `T' = t ⊔ T`). -/
-theorem condExp_itoSimple_eq (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (V : SimpleProcess ℝ (natFiltration hBmeas)) (hVT : ∀ p ∈ V.value.support, p.2 ≤ T) :
-    μ[itoSimple hBmeas V | natFiltration hBmeas t]
-      =ᵐ[μ] fun ω ↦ itoSimpleProcess hBmeas V t ω := by
-  have hT'eq : itoSimpleProcess hBmeas V (max t T) = itoSimple hBmeas V :=
-    itoSimpleProcess_eq_itoSimple hBmeas V fun p hp ↦ (hVT p hp).trans (le_max_right t T)
-  simpa only [hT'eq] using (itoSimpleProcess_isMartingale hB hBmeas V).2 t (max t T)
-      (le_max_left t T)
-
-/-- **The key identity.** The general Itô integral at time `t` is the
-conditional-expectation projection of its terminal value `∫₀ᵀ φ dB` onto `𝓕_t`:
-`(φ●B)_t = condExpL2 𝓕_t (itoIntegralCLM_T T φ)`. On the dense simple processes
-this is B1a's martingale `(V●B)_t = μ[itoSimple V | 𝓕_t]`; both sides are
-continuous-linear in `φ`, so it holds for all `φ`. Adaptedness and the martingale
-property are corollaries. -/
-theorem itoProcessCLM_eq_condExpL2 (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    itoProcessCLM hB T t hBmeas φ
-      = (condExpL2 ℝ ℝ ((natFiltration hBmeas).le t)
-          (itoIntegralCLM_T hB T hBmeas φ) : Lp ℝ 2 μ) := by
-  have hcont_R : Continuous fun ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) ↦
-      (condExpL2 ℝ ℝ ((natFiltration hBmeas).le t)
-        (itoIntegralCLM_T hB T hBmeas ψ) : Lp ℝ 2 μ) :=
-    (continuous_subtype_val.comp (condExpL2 ℝ ℝ ((natFiltration hBmeas).le t)).continuous).comp
-      (itoIntegralCLM_T hB T hBmeas).continuous
-  refine congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-    (itoProcessCLM hB T t hBmeas).continuous hcont_R (funext fun V ↦ ?_)) φ
-  simp only [Function.comp_apply]
-  rw [itoProcessCLM_simpleAssembly_T, itoIntegralCLM_T_simpleAssembly_T]
-  refine Lp.ext ?_
-  simp only [itoSimpleProcessLp, itoSimpleLp]
-  filter_upwards [(memLp_itoSimpleProcess hB hBmeas V.val t).coeFn_toLp,
-    (memLp_itoSimple hB hBmeas V.val).condExpL2_ae_eq_condExp (𝕜 := ℝ)
-        ((natFiltration hBmeas).le t),
-    condExp_itoSimple_eq hB T t hBmeas V.val V.property] with ω hω1 hω2 hω3
-  rw [hω1, ← hω3, hω2]
-
-/-- **a.e.-adaptedness.** `(φ●B)_t` is a.e. `𝓕_t`-measurable: by the key identity it
-is (a `condExpL2` projection onto) the `𝓕_t`-measurable subspace. -/
+/-- **a.e.-adaptedness.** `(φ●B)_t` is a.e. `𝓕_t`-measurable: it is the `condExpL2`
+projection onto the `𝓕_t`-measurable subspace (`itoProcessL2Inf_aeStronglyMeasurable`). -/
 theorem itoProcessCLM_aeStronglyMeasurable (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     AEStronglyMeasurable[natFiltration hBmeas t]
-      (itoProcessCLM hB T t hBmeas φ : Ω → ℝ) μ := by
-  rw [itoProcessCLM_eq_condExpL2]
-  exact mem_lpMeas_iff_aestronglyMeasurable.mp
-    (condExpL2 ℝ ℝ ((natFiltration hBmeas).le t) (itoIntegralCLM_T hB T hBmeas φ)).2
+      (itoProcessCLM hB T t hBmeas φ : Ω → ℝ) μ :=
+  itoProcessL2Inf_aeStronglyMeasurable hB t hBmeas (bandExtend T hBmeas φ)
 
 /-- **The general Itô integral is an L² martingale (B1b).** For `i ≤ j`,
-`μ[(φ●B)_j | 𝓕_i] =ᵐ (φ●B)_i`. By the key identity each `(φ●B)_k` is the `𝓕_k`-
-conditional expectation of the terminal integral `∫₀ᵀ φ dB`, so the martingale
-property is the conditional-expectation tower `μ[μ[X | 𝓕_j] | 𝓕_i] = μ[X | 𝓕_i]`. -/
+`μ[(φ●B)_j | 𝓕_i] =ᵐ (φ●B)_i`: the martingale property of the infinite-horizon process
+(`itoProcessL2Inf_isMartingale`), the conditional-expectation tower for `∫₀ᵀ φ dB`. -/
 theorem itoIntegralProcessGen_isMartingale (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {i j : ℝ≥0} (hij : i ≤ j) :
     μ[(itoProcessCLM hB T j hBmeas φ : Ω → ℝ) | natFiltration hBmeas i]
-      =ᵐ[μ] (itoProcessCLM hB T i hBmeas φ : Ω → ℝ) := by
-  -- each value is the conditional expectation of the terminal integral `X`.
-  have hbridge : ∀ k : ℝ≥0,
-      ((condExpL2 ℝ ℝ ((natFiltration hBmeas).le k)
-          (itoIntegralCLM_T hB T hBmeas φ) : Lp ℝ 2 μ) : Ω → ℝ)
-        =ᵐ[μ] μ[(itoIntegralCLM_T hB T hBmeas φ : Ω → ℝ) | natFiltration hBmeas k] := by
-    intro k
-    have h := (Lp.memLp (itoIntegralCLM_T hB T hBmeas φ)).condExpL2_ae_eq_condExp
-      (𝕜 := ℝ) ((natFiltration hBmeas).le k)
-    rwa [Lp.toLp_coeFn] at h
-  rw [itoProcessCLM_eq_condExpL2, itoProcessCLM_eq_condExpL2]
-  calc μ[((condExpL2 ℝ ℝ ((natFiltration hBmeas).le j)
-            (itoIntegralCLM_T hB T hBmeas φ) : Lp ℝ 2 μ) : Ω → ℝ) | natFiltration hBmeas i]
-      =ᵐ[μ] μ[μ[(itoIntegralCLM_T hB T hBmeas φ : Ω → ℝ) | natFiltration hBmeas j]
-              | natFiltration hBmeas i] := condExp_congr_ae (hbridge j)
-    _ =ᵐ[μ] μ[(itoIntegralCLM_T hB T hBmeas φ : Ω → ℝ) | natFiltration hBmeas i] :=
-        condExp_condExp_of_le ((natFiltration hBmeas).mono hij) ((natFiltration hBmeas).le j)
-    _ =ᵐ[μ] ((condExpL2 ℝ ℝ ((natFiltration hBmeas).le i)
-              (itoIntegralCLM_T hB T hBmeas φ) : Lp ℝ 2 μ) : Ω → ℝ) := (hbridge i).symm
+      =ᵐ[μ] (itoProcessCLM hB T i hBmeas φ : Ω → ℝ) :=
+  itoProcessL2Inf_isMartingale hB hBmeas (bandExtend T hBmeas φ) hij
 
-/-- **The Itô-isometry contraction.** `‖(φ●B)_t‖ ≤ ‖φ‖`: by the key identity
-`(φ●B)_t` is the `𝓕_t`-conditional expectation of `∫₀ᵀ φ dB`, and conditional
-expectation is an L² contraction; the terminal integral is an isometry
-(`itoIntegralCLM_T_norm`). -/
+/-- **The Itô-isometry contraction.** `‖(φ●B)_t‖ ≤ ‖φ‖`: conditional expectation is an L²
+contraction (`itoProcessL2Inf_norm_le`) and `bandExtend` is an isometry. -/
 theorem itoProcessCLM_norm_le (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    ‖itoProcessCLM hB T t hBmeas φ‖ ≤ ‖φ‖ := by
-  have hae : (itoProcessCLM hB T t hBmeas φ : Ω → ℝ)
-      =ᵐ[μ] μ[(itoIntegralCLM_T hB T hBmeas φ : Ω → ℝ) | natFiltration hBmeas t] := by
-    rw [itoProcessCLM_eq_condExpL2]
-    have h := (Lp.memLp (itoIntegralCLM_T hB T hBmeas φ)).condExpL2_ae_eq_condExp
-      (𝕜 := ℝ) ((natFiltration hBmeas).le t)
-    rwa [Lp.toLp_coeFn] at h
-  rw [Lp.norm_def, ← itoIntegralCLM_T_norm hB T hBmeas φ, Lp.norm_def]
-  refine ENNReal.toReal_mono (Lp.memLp (itoIntegralCLM_T hB T hBmeas φ)).2.ne ?_
-  rw [eLpNorm_congr_ae hae]
-  exact eLpNorm_condExp_le_eLpNorm _ (by simp)
+    ‖itoProcessCLM hB T t hBmeas φ‖ ≤ ‖φ‖ :=
+  (itoProcessL2Inf_norm_le hB t hBmeas (bandExtend T hBmeas φ)).trans_eq
+    (LinearIsometry.norm_map _ _)
 
 /-- **At the terminal time the process is the terminal integral.** `(φ●B)_T = itoIntegralCLM_T φ`
 as `Lp` elements: both are continuous-linear in `φ` and reproduce `itoSimple V` on the dense

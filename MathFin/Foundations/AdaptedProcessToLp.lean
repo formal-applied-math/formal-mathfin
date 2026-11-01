@@ -130,4 +130,17 @@ theorem processToLpPredictable_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (
       =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Function.uncurry σ :=
   (memLp_uncurry_of_bdd_predictable T hBmeas hpred hbdd).coeFn_toLp
 
+/-- **The predictable realization agrees with `σ` on almost every `ω`-slice.** The a.e. identification
+`processToLpPredictable_coeFn` over `trimMeasure_T`, read through the product measure
+`timeMeasure_T T ⊗ μ` (`ae_eq_of_ae_eq_trim`) as: for `μ`-a.e. `ω`, the path `s ↦ σ s ω` and the
+representative `s ↦ ⇑(processToLpPredictable σ) (s, ω)` agree for `timeMeasure_T T`-a.e. `s`. -/
+theorem processToLpPredictable_ae_slice (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    {σ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) σ)
+    {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C) :
+    ∀ᵐ ω ∂μ, ∀ᵐ s ∂(timeMeasure_T T),
+      processToLpPredictable (μ := μ) T hBmeas hpred hbdd (s, ω) = σ s ω :=
+  Measure.ae_ae_of_ae_prod
+    ((Measure.measurePreserving_swap (μ := μ) (ν := timeMeasure_T T)).quasiMeasurePreserving.ae
+      (ae_eq_of_ae_eq_trim (processToLpPredictable_coeFn (μ := μ) T hBmeas hpred hbdd)))
+
 end MathFin

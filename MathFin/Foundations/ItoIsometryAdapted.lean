@@ -17,18 +17,20 @@ The Wiener integral (`Foundations/WienerIntegralL2.lean`) handles
 covariance `E[(B_t-B_s)(B_v-B_u)] = vol((s,t]∩(u,v])`. That is *not* the
 Itô integral. The Itô integral allows a **random, adapted** integrand
 `φ`, and the cross-terms vanish for a different, deeper reason: the next
-increment `B_{t₁} - B_{t₀}` is *independent of the past* `𝓕_{t₀}` (the weak
-Markov property `IsPreBrownianReal.indepFun_shift`), and has mean zero.
+increment `B_{t₁} - B_{t₀}` is *independent of the past* `𝓕_{t₀}` and has mean zero.
 
-This file builds that genuinely-stochastic core, grounded directly on
-Mathlib's `IsPreBrownianReal.indepFun_shift` and `hasLaw_sub`. Adaptedness is
-encoded faithfully as factoring through the *past process*
-`fun (t : Set.Iic t₀) ↦ B t ω` — the natural Brownian filtration, which is
-exactly what `indepFun_shift` is stated against.
+This file builds that genuinely-stochastic core **once, against an arbitrary filtration**:
+`hF : IsFilteredPreBrownian B 𝓕 μ` (BrownianMotion's class: `B` is `𝓕`-adapted and the
+increment `B t - B s` is independent of `𝓕 s`), and "adapted at `t₀`" is Mathlib's
+`Measurable[𝓕 t₀]`. The natural filtration is the instance
+`IsPreBrownianReal.isFilteredPreBrownian` (`ItoIntegralL2.natFiltration`). The
+Poisson isometry (`PoissonCompensatedIsometryAdapted.lean`) is the same argument against
+`PoissonRandomMeasure.pastFiltration`, with the independent-scattering field
+`indep_of_disjoint_region` in place of `hF.indep`.
 
 ## Crux results
 
-* `adapted_indepFun_increment` — an integrand adapted to `𝓕_{t₀}` is
+* `adapted_indepFun_increment` — an integrand `𝓕_{t₀}`-measurable is
   independent of the forward increment `B_{t₁} - B_{t₀}`.
 * `integral_adapted_mul_increment` — **martingale-difference property**:
   `E[φ · (B_{t₁} - B_{t₀})] = 0` for `φ` adapted and integrable. This is
@@ -49,15 +51,11 @@ to its terminal value `X ∞` in `L²`, i.e. the Doob-space isomorphism, not
 `‖∫ φ dB‖₂² = ∫ 𝔼[φ²] dt`. The two compose rather than compete, and consuming
 `SquareIntegrable` for our `L²`-martingale layer is an open follow-up — see
 `docs/archive/upstream-consumption-review-2026-07-27.md`.)
-We re-encode adaptedness concretely as `AdaptedAt` (factoring through
-`pastProcess`) so that the weak-Markov independence `IsPreBrownianReal.indepFun_shift`
-applies directly. The deterministic moments `integral_two_increment` /
-`integral_increment_sq` are *consumed* as the shared-start (`s = u`) and
-diagonal instances of `WienerIntegralL2.covariance_increment_aux` — the single
-shared increment-covariance lemma (consolidated 2026-06-07; they had been
-re-derived here while this file predated the `module` convention and did not
-import that layer). Unifying onto the package's `SimpleProcess`/`L2Predictable`
-remains deferred to a structural pass of the simple-process layer.
+The deterministic second moment `integral_increment_sq` is *consumed* as the diagonal
+instance of `WienerIntegralL2.covariance_increment_aux` — the single
+shared increment-covariance lemma. Unifying onto the package's
+`SimpleProcess`/`L2Predictable` remains deferred to a structural pass of the
+simple-process layer.
 -/
 
 @[expose] public section
@@ -69,87 +67,28 @@ open MeasureTheory ProbabilityTheory
 open scoped NNReal ENNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
+  {B : ℝ≥0 → Ω → ℝ} {𝓕 : Filtration ℝ≥0 mΩ}
 
-/-- The past process up to time `t₀`: `ω ↦ (fun t : Iic t₀ ↦ B t ω)`.
-This is the random variable generating the natural filtration `𝓕_{t₀}`. -/
-def pastProcess (B : ℝ≥0 → Ω → ℝ) (t₀ : ℝ≥0) : Ω → (Set.Iic t₀ → ℝ) :=
-  fun ω t ↦ B t ω
+/-! ### Adaptedness of the Brownian coordinates -/
 
-/-- A function `φ : Ω → ℝ` is **adapted at `t₀`** if it factors through the
-past process via a measurable map — i.e. it is `𝓕_{t₀}`-measurable in the
-natural Brownian filtration. -/
-def AdaptedAt (B : ℝ≥0 → Ω → ℝ) (t₀ : ℝ≥0) (φ : Ω → ℝ) : Prop :=
-  ∃ g : (Set.Iic t₀ → ℝ) → ℝ, Measurable g ∧ φ = g ∘ pastProcess B t₀
+/-- `B u` is `𝓕 t`-measurable for `u ≤ t`: the process is adapted. -/
+theorem _root_.ProbabilityTheory.IsFilteredPreBrownian.measurable_eval_of_le
+    (hF : IsFilteredPreBrownian B 𝓕 μ) {u t : ℝ≥0} (hu : u ≤ t) : Measurable[𝓕 t] (B u) :=
+  ((hF.stronglyAdapted u).mono (𝓕.mono hu)).measurable
 
-/-- Measurability of an adapted integrand (factors through the measurable
-past process). -/
-theorem AdaptedAt.measurable (hBmeas : ∀ t, Measurable (B t)) {t₀ : ℝ≥0}
-    {φ : Ω → ℝ} (hφ : AdaptedAt B t₀ φ) : Measurable φ := by
-  obtain ⟨g, hg, rfl⟩ := hφ
-  exact hg.comp (measurable_pi_lambda _ fun _ ↦ hBmeas _)
+/-- Each `B t` is ambient-measurable. -/
+theorem _root_.ProbabilityTheory.IsFilteredPreBrownian.measurable_eval
+    (hF : IsFilteredPreBrownian B 𝓕 μ) (t : ℝ≥0) : Measurable (B t) :=
+  (hF.measurable_eval_of_le le_rfl).mono (𝓕.le t) le_rfl
 
-/-! ### Adaptedness algebra (the natural Brownian filtration `𝓕_{t₀}`)
-
-`AdaptedAt B t₀` behaves as a `𝓕_{t₀}`-measurability predicate: it contains
-each `B u` for `u ≤ t₀`, is monotone in `t₀`, and is closed under products
-and differences. This is exactly the closure needed to certify that the
-cross-term factor `φⱼ · ΔBⱼ · φₖ` is `𝓕_{tₖ}`-measurable. -/
-
-/-- `B u` is adapted at any later time `t₀ ≥ u`. -/
-theorem adaptedAt_eval {t₀ u : ℝ≥0} (hu : u ≤ t₀) : AdaptedAt B t₀ (B u) :=
-  ⟨fun p ↦ p ⟨u, hu⟩, measurable_pi_apply _, rfl⟩
-
-/-- `g (B u)` is adapted at any later time `t₀ ≥ u`, for measurable `g` (it factors
-through the past process as `(fun p ↦ g (p ⟨u,_⟩)) ∘ pastProcess`). Generalizes
-`adaptedAt_eval` (the `g = id` case). -/
-theorem adaptedAt_comp_eval {t₀ u : ℝ≥0} (hu : u ≤ t₀) {g : ℝ → ℝ} (hg : Measurable g) :
-    AdaptedAt B t₀ (fun ω ↦ g (B u ω)) :=
-  ⟨fun p ↦ g (p ⟨u, hu⟩), hg.comp (measurable_pi_apply _), rfl⟩
-
-/-- Adaptedness is monotone in the time index. -/
-theorem AdaptedAt.mono {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) {φ : Ω → ℝ}
-    (hφ : AdaptedAt B t₀ φ) : AdaptedAt B t₁ φ := by
-  obtain ⟨g, hg, rfl⟩ := hφ
-  exact ⟨g ∘ fun p : Set.Iic t₁ → ℝ ↦ fun s : Set.Iic t₀ ↦ p ⟨(s : ℝ≥0), le_trans s.2 ht⟩,
-    hg.comp (measurable_pi_lambda _ fun _ ↦ measurable_pi_apply _), rfl⟩
-
-/-- Products of adapted integrands are adapted. -/
-theorem AdaptedAt.mul {t₀ : ℝ≥0} {φ ψ : Ω → ℝ}
-    (hφ : AdaptedAt B t₀ φ) (hψ : AdaptedAt B t₀ ψ) :
-    AdaptedAt B t₀ (fun ω ↦ φ ω * ψ ω) := by
-  obtain ⟨g, hg, rfl⟩ := hφ
-  obtain ⟨h, hh, rfl⟩ := hψ
-  exact ⟨fun p ↦ g p * h p, hg.mul hh, rfl⟩
-
-/-- Differences of adapted integrands are adapted. -/
-theorem AdaptedAt.sub {t₀ : ℝ≥0} {φ ψ : Ω → ℝ}
-    (hφ : AdaptedAt B t₀ φ) (hψ : AdaptedAt B t₀ ψ) :
-    AdaptedAt B t₀ (fun ω ↦ φ ω - ψ ω) := by
-  obtain ⟨g, hg, rfl⟩ := hφ
-  obtain ⟨h, hh, rfl⟩ := hψ
-  exact ⟨fun p ↦ g p - h p, hg.sub hh, rfl⟩
-
-include hB
-
-/-- An adapted integrand is independent of the forward increment. The deep
-content: `B_{t₁} - B_{t₀}` is independent of `𝓕_{t₀}` (weak Markov,
-`IsPreBrownianReal.indepFun_shift`), and `φ` is `𝓕_{t₀}`-measurable. -/
+/-- An integrand `𝓕_{t₀}`-measurable is independent of the forward increment
+`B_{t₁} - B_{t₀}` (the filtered-Brownian independence `hF.indep`, read through
+`comap φ ≤ 𝓕 t₀`). -/
 theorem adapted_indepFun_increment
-    (_hBmeas : ∀ t, Measurable (B t)) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
-    {φ : Ω → ℝ} (hφ : AdaptedAt B t₀ φ) :
-    IndepFun φ (fun ω ↦ B t₁ ω - B t₀ ω) μ := by
-  obtain ⟨g, hg, rfl⟩ := hφ
-  -- Forward increment process is independent of the past process.
-  have hshift := hB.indepFun_shift t₀
-  -- `B t₁ - B t₀ = eval_(t₁-t₀) ∘ fwd`, with `t₀ + (t₁-t₀) = t₁`.
-  have hΔ : t₀ + (t₁ - t₀) = t₁ := add_tsub_cancel_of_le ht
-  have hfun : (fun ω ↦ B t₁ ω - B t₀ ω) =
-      (fun p : ℝ≥0 → ℝ ↦ p (t₁ - t₀)) ∘ (fun ω t ↦ B (t₀ + t) ω - B t₀ ω) := by
-    funext ω
-    simp only [Function.comp_apply, hΔ]
-  rw [hfun]
-  exact hshift.symm.comp hg (measurable_pi_apply _)
+    (hF : IsFilteredPreBrownian B 𝓕 μ) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
+    {φ : Ω → ℝ} (hφ : Measurable[𝓕 t₀] φ) :
+    IndepFun φ (fun ω ↦ B t₁ ω - B t₀ ω) μ :=
+  (IndepFun_iff_Indep _ _ _).2 (indep_of_indep_of_le_left (hF.indep t₀ t₁ ht).symm hφ.comap_le)
 
 /-- **Martingale-difference property of the Itô integral** (discrete form):
 for `φ` adapted to `𝓕_{t₀}`, the integrand times the next Brownian increment
@@ -157,23 +96,24 @@ has mean zero, `E[φ · (B_{t₁} - B_{t₀})] = 0`. This is the reason the Itô
 integral is a martingale — and it holds for *random* `φ`, where the Wiener
 (deterministic) covariance argument does not apply. -/
 theorem integral_adapted_mul_increment
-    (hBmeas : ∀ t, Measurable (B t)) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
-    {φ : Ω → ℝ} (hφ : AdaptedAt B t₀ φ) :
+    (hF : IsFilteredPreBrownian B 𝓕 μ) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
+    {φ : Ω → ℝ} (hφ : Measurable[𝓕 t₀] φ) :
     ∫ ω, φ ω * (B t₁ ω - B t₀ ω) ∂μ = 0 := by
-  have hindep := adapted_indepFun_increment hB hBmeas ht hφ
-  have hφm : Measurable φ := hφ.measurable hBmeas
-  have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) := (hBmeas t₁).sub (hBmeas t₀)
+  have hindep := adapted_indepFun_increment hF ht hφ
+  have hφm : Measurable φ := hφ.mono (𝓕.le t₀) le_rfl
+  have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) :=
+    (hF.measurable_eval t₁).sub (hF.measurable_eval t₀)
   rw [hindep.integral_fun_mul_eq_mul_integral hφm.aestronglyMeasurable
         hΔm.aestronglyMeasurable]
   have hmean : ∫ ω, (B t₁ ω - B t₀ ω) ∂μ = 0 := by
-    have h := (hB.hasLaw_sub t₁ t₀).integral_eq
+    have h := (hF.hasLaw_sub t₁ t₀).integral_eq
     rwa [integral_id_gaussianReal] at h
   rw [hmean, mul_zero]
 
 /-- The forward increment has second moment `E[(B_{t₁} - B_{t₀})²] = t₁ - t₀`: the
 diagonal instance of the Wiener-layer increment covariance
 `WienerIntegralL2.covariance_increment_aux`. -/
-theorem integral_increment_sq
+theorem integral_increment_sq (hB : IsPreBrownianReal B μ)
     {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
     ∫ ω, (B t₁ ω - B t₀ ω) ^ 2 ∂μ = (t₁ : ℝ) - t₀ := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
@@ -185,50 +125,49 @@ theorem integral_increment_sq
 
 /-- **General isometry kernel**: for `χ` adapted to `𝓕_{t₀}`,
 `E[χ · (B_{t₁} - B_{t₀})²] = E[χ] · (t₁ - t₀)`. The increment's square is
-independent of the past (weak Markov) and has mean `t₁ - t₀`. Specialises to
+independent of the past and has mean `t₁ - t₀`. Specialises to
 `integral_adapted_sq_mul_increment_sq` (take `χ = φ²`); supplies the *diagonal*
 term of the bilinear isometry below (`χ = φₖ · ψₖ`). -/
 theorem integral_adapted_mul_increment_sq
-    (hBmeas : ∀ t, Measurable (B t)) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
-    {χ : Ω → ℝ} (hχ : AdaptedAt B t₀ χ) :
+    (hF : IsFilteredPreBrownian B 𝓕 μ) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
+    {χ : Ω → ℝ} (hχ : Measurable[𝓕 t₀] χ) :
     ∫ ω, χ ω * (B t₁ ω - B t₀ ω) ^ 2 ∂μ = (∫ ω, χ ω ∂μ) * ((t₁ : ℝ) - t₀) := by
-  have hχm : Measurable χ := hχ.measurable hBmeas
-  have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) := (hBmeas t₁).sub (hBmeas t₀)
-  have hindep := adapted_indepFun_increment hB hBmeas ht hχ
+  have hχm : Measurable χ := hχ.mono (𝓕.le t₀) le_rfl
+  have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) :=
+    (hF.measurable_eval t₁).sub (hF.measurable_eval t₀)
+  have hindep := adapted_indepFun_increment hF ht hχ
   have hindep2 := hindep.comp (φ := (id : ℝ → ℝ)) (ψ := fun x : ℝ ↦ x ^ 2)
     measurable_id (by fun_prop)
   have key := hindep2.integral_fun_mul_eq_mul_integral
     hχm.aestronglyMeasurable (hΔm.pow_const 2).aestronglyMeasurable
   simp only [Function.comp_apply, id_eq] at key
-  rw [key, integral_increment_sq hB ht]
+  rw [key, integral_increment_sq hF.toIsPreBrownianReal ht]
 
 /-- **Isometry kernel** (the diagonal term of the Itô isometry): for `φ`
 adapted to `𝓕_{t₀}`, `E[φ² · (B_{t₁} - B_{t₀})²] = E[φ²] · (t₁ - t₀)`. The
 `χ = φ²` instance of `integral_adapted_mul_increment_sq`. -/
 theorem integral_adapted_sq_mul_increment_sq
-    (hBmeas : ∀ t, Measurable (B t)) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
-    {φ : Ω → ℝ} (hφ : AdaptedAt B t₀ φ) :
+    (hF : IsFilteredPreBrownian B 𝓕 μ) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
+    {φ : Ω → ℝ} (hφ : Measurable[𝓕 t₀] φ) :
     ∫ ω, (φ ω) ^ 2 * (B t₁ ω - B t₀ ω) ^ 2 ∂μ =
-      (∫ ω, (φ ω) ^ 2 ∂μ) * ((t₁ : ℝ) - t₀) := by
-  have hχ : AdaptedAt B t₀ (fun ω ↦ (φ ω) ^ 2) := by
-    obtain ⟨g, hg, rfl⟩ := hφ
-    exact ⟨fun p ↦ (g p) ^ 2, hg.pow_const 2, rfl⟩
-  exact integral_adapted_mul_increment_sq hB hBmeas ht hχ
+      (∫ ω, (φ ω) ^ 2 ∂μ) * ((t₁ : ℝ) - t₀) :=
+  integral_adapted_mul_increment_sq hF ht (hφ.pow_const 2)
 
 /-- If `φ` is adapted to `𝓕_{t₀}` and in `L²`, then `φ · (B_{t₁} - B_{t₀})` is
 in `L²`: the increment is in `L²` and independent of `φ`, so the product's
 square is integrable. This is the `L²`-membership of a single term of an
 adapted simple integral. -/
 theorem memLp_adapted_mul_increment
-    (hBmeas : ∀ t, Measurable (B t)) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
-    {φ : Ω → ℝ} (hφ : AdaptedAt B t₀ φ) (hφL2 : MemLp φ 2 μ) :
+    (hF : IsFilteredPreBrownian B 𝓕 μ) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
+    {φ : Ω → ℝ} (hφ : Measurable[𝓕 t₀] φ) (hφL2 : MemLp φ 2 μ) :
     MemLp (fun ω ↦ φ ω * (B t₁ ω - B t₀ ω)) 2 μ := by
-  have hindep := adapted_indepFun_increment hB hBmeas ht hφ
-  have hφm : Measurable φ := hφ.measurable hBmeas
-  have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) := (hBmeas t₁).sub (hBmeas t₀)
+  have hindep := adapted_indepFun_increment hF ht hφ
+  have hφm : Measurable φ := hφ.mono (𝓕.le t₀) le_rfl
+  have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) :=
+    (hF.measurable_eval t₁).sub (hF.measurable_eval t₀)
   have hφsq : Integrable (fun ω ↦ (φ ω) ^ 2) μ := hφL2.integrable_sq
   have hΔsq : Integrable (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 2) μ :=
-    (hB.isGaussianProcess.hasGaussianLaw_sub.memLp_two).integrable_sq
+    (hF.isGaussianProcess.hasGaussianLaw_sub.memLp_two).integrable_sq
   have hindep2 := hindep.comp (φ := fun x : ℝ ↦ x ^ 2) (ψ := fun x : ℝ ↦ x ^ 2)
     (by fun_prop) (by fun_prop)
   have hprod : Integrable
@@ -244,17 +183,18 @@ theorem memLp_adapted_mul_increment
 `ψ` and `j < k`, `E[(φⱼ·ΔBⱼ)·(ψₖ·ΔBₖ)] = 0`. The factor `φⱼ·ΔBⱼ·ψₖ` is
 `𝓕_{tₖ}`-measurable, and `ΔBₖ` is independent of it with mean zero. -/
 theorem integral_cross_increment_bilinear_eq_zero
-    (hBmeas : ∀ s, Measurable (B s)) {t : ℕ → ℝ≥0} (hmono : Monotone t)
-    {φ ψ : ℕ → Ω → ℝ} (hφ : ∀ n, AdaptedAt B (t n) (φ n))
-    (hψ : ∀ n, AdaptedAt B (t n) (ψ n)) {j k : ℕ} (hjk : j < k) :
+    (hF : IsFilteredPreBrownian B 𝓕 μ) {t : ℕ → ℝ≥0} (hmono : Monotone t)
+    {φ ψ : ℕ → Ω → ℝ} (hφ : ∀ n, Measurable[𝓕 (t n)] (φ n))
+    (hψ : ∀ n, Measurable[𝓕 (t n)] (ψ n)) {j k : ℕ} (hjk : j < k) :
     ∫ ω, (φ j ω * (B (t (j + 1)) ω - B (t j) ω)) *
           (ψ k ω * (B (t (k + 1)) ω - B (t k) ω)) ∂μ = 0 := by
-  have hΦ : AdaptedAt B (t k)
+  have hΦ : Measurable[𝓕 (t k)]
       (fun ω ↦ φ j ω * (B (t (j + 1)) ω - B (t j) ω) * ψ k ω) :=
-    (((hφ j).mono (hmono hjk.le)).mul
-      ((adaptedAt_eval (hmono hjk)).sub (adaptedAt_eval (hmono hjk.le)))).mul (hψ k)
+    (((hφ j).mono (𝓕.mono (hmono hjk.le)) le_rfl).mul
+      ((hF.measurable_eval_of_le (hmono hjk)).sub
+        (hF.measurable_eval_of_le (hmono hjk.le)))).mul (hψ k)
   have hstep : t k ≤ t (k + 1) := hmono (Nat.le_succ k)
-  have h0 := integral_adapted_mul_increment hB hBmeas hstep hΦ
+  have h0 := integral_adapted_mul_increment hF hstep hΦ
   rw [show (fun ω ↦ (φ j ω * (B (t (j + 1)) ω - B (t j) ω)) *
         (ψ k ω * (B (t (k + 1)) ω - B (t k) ω)))
       = (fun ω ↦ (φ j ω * (B (t (j + 1)) ω - B (t j) ω) * ψ k ω) *
@@ -271,20 +211,20 @@ adapted simple integrals is the `L²(Ω × [0,T])` inner product of the integran
 The diagonal terms give the mixed kernel `integral_adapted_mul_increment_sq`;
 the off-diagonal terms vanish by `integral_cross_increment_bilinear_eq_zero`. -/
 theorem ito_isometry_discrete_bilinear
-    (hBmeas : ∀ s, Measurable (B s)) {N : ℕ} {t : ℕ → ℝ≥0} (hmono : Monotone t)
-    {φ ψ : ℕ → Ω → ℝ} (hφ : ∀ n, AdaptedAt B (t n) (φ n))
-    (hψ : ∀ n, AdaptedAt B (t n) (ψ n))
+    (hF : IsFilteredPreBrownian B 𝓕 μ) {N : ℕ} {t : ℕ → ℝ≥0} (hmono : Monotone t)
+    {φ ψ : ℕ → Ω → ℝ} (hφ : ∀ n, Measurable[𝓕 (t n)] (φ n))
+    (hψ : ∀ n, Measurable[𝓕 (t n)] (ψ n))
     (hφL2 : ∀ n, MemLp (φ n) 2 μ) (hψL2 : ∀ n, MemLp (ψ n) 2 μ) :
     ∫ ω, (∑ k ∈ Finset.range N, φ k ω * (B (t (k + 1)) ω - B (t k) ω)) *
           (∑ k ∈ Finset.range N, ψ k ω * (B (t (k + 1)) ω - B (t k) ω)) ∂μ =
       ∑ k ∈ Finset.range N, (∫ ω, φ k ω * ψ k ω ∂μ) * ((t (k + 1) : ℝ) - t k) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  haveI : IsProbabilityMeasure μ := hF.isGaussianProcess.isProbabilityMeasure
   set a : ℕ → Ω → ℝ := fun k ω ↦ φ k ω * (B (t (k + 1)) ω - B (t k) ω) with ha_def
   set b : ℕ → Ω → ℝ := fun k ω ↦ ψ k ω * (B (t (k + 1)) ω - B (t k) ω) with hb_def
   have ha_L2 : ∀ k, MemLp (a k) 2 μ := fun k ↦
-    memLp_adapted_mul_increment hB hBmeas (hmono (Nat.le_succ k)) (hφ k) (hφL2 k)
+    memLp_adapted_mul_increment hF (hmono (Nat.le_succ k)) (hφ k) (hφL2 k)
   have hb_L2 : ∀ k, MemLp (b k) 2 μ := fun k ↦
-    memLp_adapted_mul_increment hB hBmeas (hmono (Nat.le_succ k)) (hψ k) (hψL2 k)
+    memLp_adapted_mul_increment hF (hmono (Nat.le_succ k)) (hψ k) (hψL2 k)
   have hint : ∀ j k, Integrable (fun ω ↦ a j ω * b k ω) μ := fun j k ↦
     (ha_L2 j).integrable_mul (hb_L2 k)
   -- Diagonal term = mixed variance kernel.
@@ -292,19 +232,19 @@ theorem ito_isometry_discrete_bilinear
       (∫ ω, φ k ω * ψ k ω ∂μ) * ((t (k + 1) : ℝ) - t k) := by
     intro k
     have hstep : t k ≤ t (k + 1) := hmono (Nat.le_succ k)
-    have hχ : AdaptedAt B (t k) (fun ω ↦ φ k ω * ψ k ω) := (hφ k).mul (hψ k)
+    have hχ : Measurable[𝓕 (t k)] (fun ω ↦ φ k ω * ψ k ω) := (hφ k).mul (hψ k)
     rw [show (fun ω ↦ a k ω * b k ω)
           = (fun ω ↦ (φ k ω * ψ k ω) * (B (t (k + 1)) ω - B (t k) ω) ^ 2) from by
             funext ω; simp only [ha_def, hb_def]; ring]
-    exact integral_adapted_mul_increment_sq hB hBmeas hstep hχ
+    exact integral_adapted_mul_increment_sq hF hstep hχ
   -- Off-diagonal terms vanish.
   have hcross : ∀ j ∈ Finset.range N, ∀ k ∈ Finset.range N, j ≠ k →
       ∫ ω, a j ω * b k ω ∂μ = 0 := by
     intro j _ k _ hjk
     rcases lt_or_gt_of_ne hjk with h | h
-    · exact integral_cross_increment_bilinear_eq_zero hB hBmeas hmono hφ hψ h
+    · exact integral_cross_increment_bilinear_eq_zero hF hmono hφ hψ h
     · rw [show (fun ω ↦ a j ω * b k ω) = (fun ω ↦ b k ω * a j ω) from by funext ω; ring]
-      exact integral_cross_increment_bilinear_eq_zero hB hBmeas hmono hψ hφ h
+      exact integral_cross_increment_bilinear_eq_zero hF hmono hψ hφ h
   calc ∫ ω, (∑ k ∈ Finset.range N, a k ω) * (∑ k ∈ Finset.range N, b k ω) ∂μ
       = ∫ ω, ∑ j ∈ Finset.range N, ∑ k ∈ Finset.range N, a j ω * b k ω ∂μ := by
         refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
@@ -327,16 +267,17 @@ theorem ito_isometry_discrete_bilinear
 Itô isometry — the integrand is *random*. It is the `ψ = φ` diagonal of the
 inner-product form `ito_isometry_discrete_bilinear` (`x² = x·x`). -/
 theorem ito_isometry_discrete
-    (hBmeas : ∀ s, Measurable (B s)) {N : ℕ} {t : ℕ → ℝ≥0} (hmono : Monotone t)
-    {φ : ℕ → Ω → ℝ} (hadapt : ∀ n, AdaptedAt B (t n) (φ n))
+    (hF : IsFilteredPreBrownian B 𝓕 μ) {N : ℕ} {t : ℕ → ℝ≥0} (hmono : Monotone t)
+    {φ : ℕ → Ω → ℝ} (hadapt : ∀ n, Measurable[𝓕 (t n)] (φ n))
     (hL2 : ∀ n, MemLp (φ n) 2 μ) :
     ∫ ω, (∑ k ∈ Finset.range N, φ k ω * (B (t (k + 1)) ω - B (t k) ω)) ^ 2 ∂μ =
       ∑ k ∈ Finset.range N, (∫ ω, (φ k ω) ^ 2 ∂μ) * ((t (k + 1) : ℝ) - t k) := by
   simp only [pow_two]
-  exact ito_isometry_discrete_bilinear hB hBmeas hmono hadapt hadapt hL2 hL2
+  exact ito_isometry_discrete_bilinear hF hmono hadapt hadapt hL2 hL2
 
 /-- `E[B_s²] = s` (mean zero, variance `s`). -/
-theorem integral_eval_sq (hBmeas : ∀ s, Measurable (B s)) (s : ℝ≥0) :
+theorem integral_eval_sq (hB : IsPreBrownianReal B μ) (hBmeas : ∀ s, Measurable (B s))
+    (s : ℝ≥0) :
     ∫ ω, (B s ω) ^ 2 ∂μ = (s : ℝ) := by
   rw [← variance_of_integral_eq_zero (hBmeas s).aemeasurable (hB.integral_eval s)]
   show Var[B s; μ] = (s : ℝ)
@@ -350,13 +291,14 @@ remaining hypotheses beyond measurability. Taking the adapted `L²` integrand
 
 the Riemann-sum form of the Itô isometry `E[(∫₀ᵀ B dB)²] = ∫₀ᵀ t dt`. -/
 theorem ito_isometry_brownian_self
-    (hBmeas : ∀ s, Measurable (B s)) {N : ℕ} {t : ℕ → ℝ≥0} (hmono : Monotone t) :
+    (hF : IsFilteredPreBrownian B 𝓕 μ) {N : ℕ} {t : ℕ → ℝ≥0} (hmono : Monotone t) :
     ∫ ω, (∑ k ∈ Finset.range N, B (t k) ω * (B (t (k + 1)) ω - B (t k) ω)) ^ 2 ∂μ =
       ∑ k ∈ Finset.range N, (t k : ℝ) * ((t (k + 1) : ℝ) - t k) := by
-  rw [ito_isometry_discrete hB hBmeas hmono (φ := fun k ↦ B (t k))
-    (fun n ↦ adaptedAt_eval le_rfl)
-    (fun n ↦ (hB.isGaussianProcess.hasGaussianLaw_eval (t n)).memLp_two)]
-  exact Finset.sum_congr rfl (fun k _ ↦ by rw [integral_eval_sq hB hBmeas])
+  rw [ito_isometry_discrete hF hmono (φ := fun k ↦ B (t k))
+    (fun n ↦ hF.measurable_eval_of_le le_rfl)
+    (fun n ↦ (hF.isGaussianProcess.hasGaussianLaw_eval (t n)).memLp_two)]
+  exact Finset.sum_congr rfl
+    (fun k _ ↦ by rw [integral_eval_sq hF.toIsPreBrownianReal hF.measurable_eval])
 
 /-! ### Pairing identity for predictable rectangles
 
@@ -368,40 +310,14 @@ The bridge to the *continuous* Itô integral. For an adapted indicator `f`
 This is the adapted generalisation of `WienerIntegralL2.covariance_increment_aux`
 (take `f = g = 1`). It is the inner-product identity that makes the assembly of
 predictable simple integrands an isometry into `L²(Ω × [0,T])`. The split-at-the-
-later-start argument: the pre-overlap part pairs to zero (martingale difference),
-and the post-overlap part has both increments *forward* of the later start, so the
-adapted coefficient factors out (weak Markov), leaving the deterministic overlap
-covariance `integral_two_increment`. -/
-
-/-- An adapted integrand is independent of *any* measurable functional of the
-forward increment process `u ↦ B_{t₀+u} − B_{t₀}` (weak Markov,
-`IsPreBrownianReal.indepFun_shift`). Generalises `adapted_indepFun_increment` from a
-single forward evaluation to functionals of several future increments. -/
-theorem adapted_indepFun_forward
-    (_hBmeas : ∀ t, Measurable (B t)) {t₀ : ℝ≥0}
-    {φ : Ω → ℝ} (hφ : AdaptedAt B t₀ φ)
-    {H : (ℝ≥0 → ℝ) → ℝ} (hH : Measurable H) :
-    IndepFun φ (fun ω ↦ H (fun u ↦ B (t₀ + u) ω - B t₀ ω)) μ := by
-  obtain ⟨g, hg, rfl⟩ := hφ
-  exact (hB.indepFun_shift t₀).symm.comp hg hH
-
-/-- Two increments sharing a start: `E[(B_t − B_a)(B_{t'} − B_a)] = min t t' − a`
-for `a ≤ t`, `a ≤ t'`: the shared-start instance of the Wiener-layer increment
-covariance `WienerIntegralL2.covariance_increment_aux` (`max a a = a`, and the
-overlap `min t t' − a` is nonnegative); the stochastic content lives in
-`rect_increment_pairing`. -/
-theorem integral_two_increment
-    {a t t' : ℝ≥0} (hat : a ≤ t) (hat' : a ≤ t') :
-    ∫ ω, (B t ω - B a ω) * (B t' ω - B a ω) ∂μ = ((min t t' : ℝ≥0) : ℝ) - a := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have h := WienerIntegralL2.covariance_increment_aux hB a t a t' hat hat'
-  simp only [max_self] at h
-  rw [h, NNReal.coe_min, max_eq_right]
-  exact sub_nonneg.mpr (le_min (NNReal.coe_le_coe.mpr hat) (NNReal.coe_le_coe.mpr hat'))
+later-start argument: the pre-overlap part pairs to zero (martingale difference), and in
+the post-overlap part both increments are *forward* of the later start; splitting the longer
+at the shorter's end, the cross piece is a martingale difference and the diagonal piece is
+the isometry kernel (`integral_adapted_mul_increment_mul_increment`). -/
 
 /-- Integrability of `h · ΔB · ΔB'` for `h` bounded (the products that appear
 when splitting the rectangle pairing). -/
-private lemma integrable_bdd_two_increment
+private lemma integrable_bdd_two_increment (hB : IsPreBrownianReal B μ)
     {h : Ω → ℝ} (hhm : Measurable h)
     {C : ℝ} (hhb : ∀ ω, |h ω| ≤ C) (a b c d : ℝ≥0) :
     Integrable (fun ω ↦ h ω * ((B b ω - B a ω) * (B d ω - B c ω))) μ := by
@@ -411,17 +327,43 @@ private lemma integrable_bdd_two_increment
   exact hprod.bdd_mul hhm.aestronglyMeasurable
     (Filter.Eventually.of_forall fun ω ↦ by rw [Real.norm_eq_abs]; exact hhb ω)
 
+/-- **Two nested forward increments from one start**: for a bounded `χ` adapted to
+`𝓕_a` and `a ≤ b ≤ c`, `E[χ·(B_b − B_a)·(B_c − B_a)] = E[χ]·(b − a)`. Split
+`B_c − B_a = (B_c − B_b) + (B_b − B_a)`: the first piece pairs `χ·(B_b − B_a)` (which is
+`𝓕_b`-measurable) with a forward increment, a martingale difference; the second is the
+isometry kernel. -/
+theorem integral_adapted_mul_increment_mul_increment
+    (hF : IsFilteredPreBrownian B 𝓕 μ) {a b c : ℝ≥0} (hab : a ≤ b) (hbc : b ≤ c)
+    {χ : Ω → ℝ} (hχ : Measurable[𝓕 a] χ) {C : ℝ} (hχb : ∀ ω, |χ ω| ≤ C) :
+    ∫ ω, χ ω * ((B b ω - B a ω) * (B c ω - B a ω)) ∂μ = (∫ ω, χ ω ∂μ) * ((b : ℝ) - a) := by
+  have hχm : Measurable χ := hχ.mono (𝓕.le a) le_rfl
+  have hB' := hF.toIsPreBrownianReal
+  have hχb' : Measurable[𝓕 b] (fun ω ↦ χ ω * (B b ω - B a ω)) :=
+    (hχ.mono (𝓕.mono hab) le_rfl).mul
+      ((hF.measurable_eval_of_le le_rfl).sub (hF.measurable_eval_of_le hab))
+  have h1 := integral_adapted_mul_increment hF hbc hχb'
+  have h2 := integral_adapted_mul_increment_sq hF hab hχ
+  have hsplit : ∀ ω, χ ω * ((B b ω - B a ω) * (B c ω - B a ω))
+      = χ ω * (B b ω - B a ω) * (B c ω - B b ω) + χ ω * (B b ω - B a ω) ^ 2 := fun ω ↦ by ring
+  simp_rw [hsplit]
+  rw [integral_add, h1, h2, zero_add]
+  · exact (integrable_bdd_two_increment hB' hχm hχb a b b c).congr
+      (Filter.Eventually.of_forall fun ω ↦ by ring)
+  · exact (integrable_bdd_two_increment hB' hχm hχb a b a b).congr
+      (Filter.Eventually.of_forall fun ω ↦ by ring)
+
 /-- Pairing identity, oriented case `s ≤ s'`. -/
 private lemma rect_increment_pairing_aux
-    (hBmeas : ∀ s, Measurable (B s)) {f g : Ω → ℝ} {s t s' t' : ℝ≥0}
-    (hf : AdaptedAt B s f) (hg : AdaptedAt B s' g)
+    (hF : IsFilteredPreBrownian B 𝓕 μ) {f g : Ω → ℝ} {s t s' t' : ℝ≥0}
+    (hf : Measurable[𝓕 s] f) (hg : Measurable[𝓕 s'] g)
     {Cf Cg : ℝ} (hfb : ∀ ω, |f ω| ≤ Cf) (hgb : ∀ ω, |g ω| ≤ Cg)
     (_hst : s ≤ t) (hst' : s' ≤ t') (hss' : s ≤ s') :
     ∫ ω, (f ω * (B t ω - B s ω)) * (g ω * (B t' ω - B s' ω)) ∂μ =
       (∫ ω, f ω * g ω ∂μ) * max 0 ((min (t : ℝ) t') - max (s : ℝ) s') := by
-  have hfm : Measurable f := hf.measurable hBmeas
-  have hgm : Measurable g := hg.measurable hBmeas
-  have hfg : AdaptedAt B s' (fun ω ↦ f ω * g ω) := (hf.mono hss').mul hg
+  have hB' := hF.toIsPreBrownianReal
+  have hfm : Measurable f := hf.mono (𝓕.le s) le_rfl
+  have hgm : Measurable g := hg.mono (𝓕.le s') le_rfl
+  have hfg : Measurable[𝓕 s'] (fun ω ↦ f ω * g ω) := (hf.mono (𝓕.mono hss') le_rfl).mul hg
   have hfgm : Measurable (fun ω ↦ f ω * g ω) := hfm.mul hgm
   have hfgb : ∀ ω, |f ω * g ω| ≤ Cf * Cg := fun ω ↦ by
     rw [abs_mul]
@@ -430,9 +372,10 @@ private lemma rect_increment_pairing_aux
   rw [hmaxss']
   by_cases htle : t ≤ s'
   · -- Disjoint intervals: the whole pairing is a forward increment with mean zero.
-    have hχ : AdaptedAt B s' (fun ω ↦ f ω * (B t ω - B s ω) * g ω) :=
-      ((hf.mono hss').mul ((adaptedAt_eval htle).sub (adaptedAt_eval hss'))).mul hg
-    have h0 := integral_adapted_mul_increment hB hBmeas hst' hχ
+    have hχ : Measurable[𝓕 s'] (fun ω ↦ f ω * (B t ω - B s ω) * g ω) :=
+      ((hf.mono (𝓕.mono hss') le_rfl).mul
+        ((hF.measurable_eval_of_le htle).sub (hF.measurable_eval_of_le hss'))).mul hg
+    have h0 := integral_adapted_mul_increment hF hst' hχ
     have hzero : max (0 : ℝ) ((min (t : ℝ) t') - s') = 0 := by
       refine max_eq_left ?_
       have : (min (t : ℝ) t') ≤ (s' : ℝ) :=
@@ -443,33 +386,23 @@ private lemma rect_increment_pairing_aux
   · -- Overlapping intervals: split the first increment at the later start `s'`.
     replace htle := not_le.mp htle
     have hT1 : ∫ ω, f ω * g ω * ((B s' ω - B s ω) * (B t' ω - B s' ω)) ∂μ = 0 := by
-      have hχ : AdaptedAt B s' (fun ω ↦ f ω * g ω * (B s' ω - B s ω)) :=
-        hfg.mul ((adaptedAt_eval le_rfl).sub (adaptedAt_eval hss'))
-      have h0 := integral_adapted_mul_increment hB hBmeas hst' hχ
+      have hχ : Measurable[𝓕 s'] (fun ω ↦ f ω * g ω * (B s' ω - B s ω)) :=
+        hfg.mul ((hF.measurable_eval_of_le le_rfl).sub (hF.measurable_eval_of_le hss'))
+      have h0 := integral_adapted_mul_increment hF hst' hχ
       rw [← h0]
       exact integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by ring)
-    have hindep : IndepFun (fun ω ↦ f ω * g ω)
-        (fun ω ↦ (B t ω - B s' ω) * (B t' ω - B s' ω)) μ := by
-      have hH : Measurable (fun p : ℝ≥0 → ℝ ↦ p (t - s') * p (t' - s')) := by fun_prop
-      have hi := adapted_indepFun_forward hB hBmeas hfg hH
-      have heq : (fun ω ↦ (fun p : ℝ≥0 → ℝ ↦ p (t - s') * p (t' - s'))
-            (fun u ↦ B (s' + u) ω - B s' ω))
-          = (fun ω ↦ (B t ω - B s' ω) * (B t' ω - B s' ω)) := by
-        funext ω
-        simp only [add_tsub_cancel_of_le htle.le, add_tsub_cancel_of_le hst']
-      rwa [heq] at hi
-    have hXm : Measurable (fun ω ↦ (B t ω - B s' ω) * (B t' ω - B s' ω)) :=
-      ((hBmeas t).sub (hBmeas s')).mul ((hBmeas t').sub (hBmeas s'))
     have hT2 : ∫ ω, f ω * g ω * ((B t ω - B s' ω) * (B t' ω - B s' ω)) ∂μ
         = (∫ ω, f ω * g ω ∂μ) * (((min t t' : ℝ≥0) : ℝ) - s') := by
-      rw [hindep.integral_fun_mul_eq_mul_integral hfgm.aestronglyMeasurable
-            hXm.aestronglyMeasurable,
-          integral_two_increment hB htle.le hst']
+      rcases le_total t t' with htt | htt
+      · rw [min_eq_left htt]
+        exact integral_adapted_mul_increment_mul_increment hF htle.le htt hfg hfgb
+      · rw [min_eq_right htt, ← integral_adapted_mul_increment_mul_increment hF hst' htt hfg hfgb]
+        exact integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by ring)
     have hsum : ∫ ω, (f ω * (B t ω - B s ω)) * (g ω * (B t' ω - B s' ω)) ∂μ
         = (∫ ω, f ω * g ω * ((B s' ω - B s ω) * (B t' ω - B s' ω)) ∂μ)
           + ∫ ω, f ω * g ω * ((B t ω - B s' ω) * (B t' ω - B s' ω)) ∂μ := by
-      rw [← integral_add (integrable_bdd_two_increment hB hfgm hfgb s s' s' t')
-                         (integrable_bdd_two_increment hB hfgm hfgb s' t s' t')]
+      rw [← integral_add (integrable_bdd_two_increment hB' hfgm hfgb s s' s' t')
+                         (integrable_bdd_two_increment hB' hfgm hfgb s' t s' t')]
       exact integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by ring)
     have hcoe : ((min t t' : ℝ≥0) : ℝ) = min (t : ℝ) t' := by
       rcases le_total t t' with h | h
@@ -490,18 +423,18 @@ with `vol((s,t] ∩ (s',t']) = max 0 (min t t' − max s s')`. The adapted
 generalisation of the Wiener covariance identity, and the inner-product core of
 the continuous Itô isometry. -/
 theorem rect_increment_pairing
-    (hBmeas : ∀ s, Measurable (B s)) {f g : Ω → ℝ} {s t s' t' : ℝ≥0}
-    (hf : AdaptedAt B s f) (hg : AdaptedAt B s' g)
+    (hF : IsFilteredPreBrownian B 𝓕 μ) {f g : Ω → ℝ} {s t s' t' : ℝ≥0}
+    (hf : Measurable[𝓕 s] f) (hg : Measurable[𝓕 s'] g)
     {Cf Cg : ℝ} (hfb : ∀ ω, |f ω| ≤ Cf) (hgb : ∀ ω, |g ω| ≤ Cg)
     (hst : s ≤ t) (hst' : s' ≤ t') :
     ∫ ω, (f ω * (B t ω - B s ω)) * (g ω * (B t' ω - B s' ω)) ∂μ =
       (∫ ω, f ω * g ω ∂μ) * max 0 ((min (t : ℝ) t') - max (s : ℝ) s') := by
   rcases le_total s s' with h | h
-  · exact rect_increment_pairing_aux hB hBmeas hf hg hfb hgb hst hst' h
+  · exact rect_increment_pairing_aux hF hf hg hfb hgb hst hst' h
   · rw [show (∫ ω, (f ω * (B t ω - B s ω)) * (g ω * (B t' ω - B s' ω)) ∂μ)
           = ∫ ω, (g ω * (B t' ω - B s' ω)) * (f ω * (B t ω - B s ω)) ∂μ from
         integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by ring),
-        rect_increment_pairing_aux hB hBmeas hg hf hgb hfb hst' hst h]
+        rect_increment_pairing_aux hF hg hf hgb hfb hst' hst h]
     congr 1
     · exact integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by ring)
     · rw [min_comm (t' : ℝ) t, max_comm (s' : ℝ) s]

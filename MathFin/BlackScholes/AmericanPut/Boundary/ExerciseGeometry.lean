@@ -17,7 +17,7 @@ then excludes a boundary at the strike at any positive time.
 
 ## Result
 
-Public entry points include `price_nonneg`, `price_hasDerivAt_boundary`, `boundary_neg`,
+Public entry points include `price_hasDerivAt_boundary`, `boundary_neg`,
 `boundary_forcing_pos`.
 -/
 
@@ -29,10 +29,6 @@ open Set Filter
 open scoped Topology ContDiff
 
 variable {k h : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-
-theorem price_nonneg (hp : DividendPutSolution k h p b) (x : ℝ)
-    {t : ℝ} (ht : 0 ≤ t) : 0 ≤ p x t :=
-  (putPayoff_nonneg x).trans (hp.dominates x t ht)
 
 /-- The two one-sided derivatives agree, so the spatial derivative exists
 on the whole line at contact. This does not assert joint or second-order
@@ -58,7 +54,7 @@ theorem boundary_neg (hp : DividendPutSolution k h p b)
     have hz : p (b t) t = 0 := by rw [hp.exercise (b t) t ht le_rfl, he]; simp
     change p (b t) t ≤ p x t
     rw [hz]
-    exact hp.price_nonneg x ht.le
+    exact hp.nonneg x ht.le
   have hd := (hp.price_hasDerivAt_boundary ht).deriv
   rw [hm.deriv_eq_zero, he, Real.exp_zero] at hd
   norm_num at hd

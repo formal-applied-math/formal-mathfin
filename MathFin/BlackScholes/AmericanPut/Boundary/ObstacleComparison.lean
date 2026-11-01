@@ -201,25 +201,4 @@ theorem DividendPutSolution.obstacle_comparison
     (fun x t ht hT hl hr _ => hUj x t ht hT hl hr)
     (fun x t ht hT hl hr _ => hsub x t ht hT hl hr) hinit hleft hright
 
-/-- Zero-dividend milestone on the original normalized solution contract.
-This specializes the newly proved obstacle comparison, without using a
-published comparison theorem as an axiom. -/
-theorem zeroDividend_obstacle_comparison
-    {k T : ℝ} {p U : ℝ → ℝ → ℝ} {b L R : ℝ → ℝ}
-    (hp : NormalizedPutSolution k p b)
-    (hL : Continuous L) (hR : Continuous R)
-    (hQ : IsCompact (twoSidedStrip L R T))
-    (hUc : ContinuousOn (fun z : ℝ × ℝ => U z.1 z.2) (twoSidedStrip L R T))
-    (hUs : ∀ t, 0 < t → t ≤ T → ContDiff ℝ 2 (fun x => U x t))
-    (hUj : ∀ x t, 0 < t → t ≤ T → L t < x → x < R t →
-      ContDiffAt ℝ 2 (fun z : ℝ × ℝ => U z.1 z.2) (x,t))
-    (hsub : ∀ x t, 0 < t → t ≤ T → L t < x → x < R t →
-      deriv (U x) t ≤ spatialOperator k (fun y => U y t) x)
-    (hinit : ∀ x, L 0 ≤ x → x ≤ R 0 → U x 0 ≤ p x 0)
-    (hleft : ∀ t, 0 ≤ t → t ≤ T → U (L t) t ≤ p (L t) t)
-    (hright : ∀ t, 0 ≤ t → t ≤ T → U (R t) t ≤ p (R t) t) :
-    ∀ z ∈ twoSidedStrip L R T, U z.1 z.2 ≤ p z.1 z.2 :=
-  (dividendPutSolution_zero_iff.mpr hp).obstacle_comparison hL hR hQ hUc hUs hUj
-    (fun x t ht hT hl hr => by simpa using hsub x t ht hT hl hr) hinit hleft hright
-
 end MathFin.BlackScholes.AmericanPut.Boundary

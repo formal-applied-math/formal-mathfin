@@ -163,33 +163,33 @@
     {
       "id": "mf-ftap-discrete-complete",
       "name": "Finite-Ω Multi-Period FTAP (Harrison–Pliska)",
-      "description": "On a finite full-support probability space with a filtration and an adapted scalar discounted price over a finite horizon, the market has no arbitrage ⟺ it admits an equivalent martingale measure. The finite case of Dalang–Morton–Willinger: backward via global separation of the attainable-gains subspace from the standard simplex, forward via martingale-transform telescoping.",
+      "description": "On a finite full-support probability space with a filtration and an adapted scalar discounted price over a finite horizon, the market has no arbitrage ⟺ it admits an equivalent martingale measure. The finite case of Dalang–Morton–Willinger: backward via global separation of the attainable-gains subspace from the standard simplex, forward via the martingale-transform argument (IsEMM.noArbitrage).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.FTAPDiscrete\n\nopen MeasureTheory\n\n/-- **Finite-Ω multi-period FTAP** (Harrison–Pliska; the finite case of\n    Dalang–Morton–Willinger). On a finite full-support probability space with a\n    filtration `𝓕` and an adapted scalar discounted price `S` over a finite\n    horizon `T`, the market has no arbitrage iff it admits an equivalent\n    martingale measure. Backward: the attainable-gains subspace misses the\n    standard simplex under no arbitrage, so the separating hyperplane is the EMM.\n    Forward: martingale-transform telescoping. Re-exports\n    `MathFin.ftap_discrete`. -/\ntheorem ftap_discrete_complete {Ω : Type*} [Fintype Ω] [Nonempty Ω]\n    {mΩ : MeasurableSpace Ω} [MeasurableSingletonClass Ω] (𝓕 : Filtration ℕ mΩ)\n    (P : Measure Ω) [IsProbabilityMeasure P] (S : ℕ → Ω → ℝ) (T : ℕ)\n    (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :\n    MathFin.NoArbitrage 𝓕 P S T ↔ ∃ Q, MathFin.IsEMM 𝓕 P S T Q :=\n  MathFin.ftap_discrete 𝓕 P S T hS hP\n"
+        "lean": "import MathFin.Foundations.FTAPDiscrete\n\nopen MeasureTheory\n\n/-- **Finite-Ω multi-period FTAP** (Harrison–Pliska; the finite case of\n    Dalang–Morton–Willinger). On a finite full-support probability space with a\n    filtration `𝓕` and an adapted scalar discounted price `S` over a finite\n    horizon `T`, the market has no arbitrage iff it admits an equivalent\n    martingale measure. Backward: the attainable-gains subspace misses the\n    standard simplex under no arbitrage, so the separating hyperplane is the EMM.\n    Forward: `MathFin.IsEMM.noArbitrage` (the martingale-transform argument). Re-exports\n    `MathFin.ftap_discrete`. -/\ntheorem ftap_discrete_complete {Ω : Type*} [Fintype Ω] [Nonempty Ω]\n    {mΩ : MeasurableSpace Ω} [MeasurableSingletonClass Ω] (𝓕 : Filtration ℕ mΩ)\n    (P : Measure Ω) [IsProbabilityMeasure P] (S : ℕ → Ω → ℝ) (T : ℕ)\n    (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :\n    MathFin.NoArbitrage 𝓕 P S T ↔ ∃ Q, MathFin.IsEMM 𝓕 P S T Q :=\n  MathFin.ftap_discrete 𝓕 P S T hS hP\n"
       },
       "metadata": {
         "chapter": 14,
         "reference": "Finite-Ω Fundamental Theorem of Asset Pricing / Harrison–Pliska 1981 (finite Dalang–Morton–Willinger)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full multi-period biconditional NoArbitrage ⟺ ∃ EMM re-exported from MathFin/Foundations/FTAPDiscrete.lean. Scope: finite Ω, one scalar discounted asset, finite horizon T, full-support P. Backward direction via global geometric Hahn–Banach separation of the attainable-gains subspace from the standard simplex (Foundations/ConvexSeparation.lean) + PMF normalisation + the conditional-expectation characterisation; forward via martingale-transform telescoping. The general-Ω DMW (L⁰-closedness + measurable selection) and the d-asset generalisation are out of scope. No axioms beyond Mathlib defaults."
+        "formalization_scope": "Full multi-period biconditional NoArbitrage ⟺ ∃ EMM re-exported from MathFin/Foundations/FTAPDiscrete.lean. Scope: finite Ω, one scalar discounted asset, finite horizon T, full-support P. Backward direction via global geometric Hahn–Banach separation of the attainable-gains subspace from the standard simplex (Foundations/ConvexSeparation.lean) + PMF normalisation + the conditional-expectation characterisation; forward via MathFin.IsEMM.noArbitrage (the martingale-transform argument, shared with the one-period vector FTAP). NoArbitrage and IsEMM are the general discrete notions of Foundations/FTAP.lean (strategies predictable and bounded up to T, the price frozen at T a Q-martingale); on a finite space boundedness is automatic. The general-Ω DMW (L⁰-closedness + measurable selection) and the d-asset generalisation are out of scope. No axioms beyond Mathlib defaults."
       }
     },
     {
       "id": "mf-ftap-one-period-general",
       "name": "General-Ω One-Period FTAP (Föllmer–Schied)",
-      "description": "On an arbitrary probability space, a single scalar discounted excess return Y ∈ L⁰ admits no arbitrage ⟺ there is an equivalent martingale measure Q ~ P under which Y is integrable with E_Q[Y] = 0. The Föllmer–Schied / one-period Dalang–Morton–Willinger theorem — the measure-theoretic step beyond finite Ω: backward via a bounded-density reduction to L¹, the scalar no-arbitrage dichotomy, and a two-region balancing withDensity (no Hahn–Banach, no Kreps–Yan).",
+      "description": "On an arbitrary probability space, a single scalar discounted excess return Y ∈ L⁰ admits no arbitrage ⟺ there is an equivalent martingale measure Q ~ P under which Y is integrable with E_Q[Y] = 0. The Föllmer–Schied / one-period Dalang–Morton–Willinger theorem — the measure-theoretic step beyond finite Ω — obtained as the F = ℝ case of the d-asset theorem (backward via a bounded-density reduction to L¹ and an explicit logistic tilt; no Hahn–Banach, no Kreps–Yan).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.FTAPOnePeriod\n\nopen MeasureTheory\n\n/-- **General-Ω one-period FTAP** (Föllmer–Schied §1.2 / one-period\n    Dalang–Morton–Willinger). For a single measurable scalar discounted excess\n    return `Y` on an arbitrary probability space `(Ω, P)`, no arbitrage holds iff\n    there is an equivalent martingale measure `Q ~ P` under which `Y` is\n    integrable and `E_Q[Y] = 0`. Backward: a bounded-density reduction to `L¹`,\n    the scalar no-arbitrage dichotomy, and a two-region balancing `withDensity`.\n    Re-exports `MathFin.OnePeriod.ftap_one_period`. -/\ntheorem ftap_one_period_general {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (P : Measure Ω) [IsProbabilityMeasure P] (Y : Ω → ℝ) (hY : Measurable Y) :\n    MathFin.OnePeriod.NoArbitrage P Y ↔ ∃ Q, MathFin.OnePeriod.IsEMM P Y Q :=\n  MathFin.OnePeriod.ftap_one_period P Y hY\n"
+        "lean": "import MathFin.Foundations.FTAPOnePeriod\n\nopen MeasureTheory\n\n/-- **General-Ω one-period FTAP** (Föllmer–Schied §1.2 / one-period\n    Dalang–Morton–Willinger). For a single measurable scalar discounted excess\n    return `Y` on an arbitrary probability space `(Ω, P)`, no arbitrage holds iff\n    there is an equivalent martingale measure `Q ~ P` under which `Y` is\n    integrable and `E_Q[Y] = 0`. The `F = ℝ` case of the d-asset\n    theorem (backward: bounded-density reduction to `L¹` and a logistic tilt).\n    Re-exports `MathFin.OnePeriod.ftap_one_period`. -/\ntheorem ftap_one_period_general {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (P : Measure Ω) [IsProbabilityMeasure P] (Y : Ω → ℝ) (hY : Measurable Y) :\n    MathFin.OnePeriod.NoArbitrage P Y ↔ ∃ Q, MathFin.OnePeriod.IsEMM P Y Q :=\n  MathFin.OnePeriod.ftap_one_period P Y hY\n"
       },
       "metadata": {
         "chapter": 14,
         "reference": "H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed., de Gruyter (2016), §1.2 (fundamental theorem of asset pricing, one period; the one-period case of Dalang–Morton–Willinger)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full biconditional NoArbitrage ⟺ ∃ EMM re-exported from MathFin/Foundations/FTAPOnePeriod.lean. Scope: one trading period, one scalar L⁰ return Y, arbitrary probability space (Ω, P). Backward direction (NA ⟹ EMM) is the elementary Föllmer–Schied route: a bounded strictly-positive density reduction (P̃ = P.withDensity of (1+|Y|)⁻¹/κ) making Y integrable, the scalar no-arbitrage dichotomy (a one-signed Y is killed by θ = ±1), and the two-region balancing withDensity Z = λ·𝟙_{Y≥0} + μ·𝟙_{Y<0} that re-weights up/down moves until Y is fair — no Hahn–Banach, no Kreps–Yan. Forward via E_Q[θ·Y] = 0. The general-Ω multi-period DMW (measurable selection) and the d-asset case are out of scope. No axioms beyond Mathlib defaults."
+        "formalization_scope": "Full biconditional NoArbitrage ⟺ ∃ EMM re-exported from MathFin/Foundations/FTAPOnePeriod.lean. Scope: one trading period, one scalar L⁰ return Y, arbitrary probability space (Ω, P). The theorem is a corollary of OnePeriodVector.ftap_one_period_vector at F = ℝ (OnePeriod.noArbitrage_iff_vector identifies the scalar and vector no-arbitrage conditions; the scalar IsEMM is the vector IsEMM): backward direction by a bounded strictly-positive density reduction (P̃ = P.withDensity of (1+‖Y‖)⁻¹/κ) making Y integrable, then the softplus-potential minimiser's logistic weight as the EMM density; forward via MathFin.emm_implies_no_arbitrage at horizon 1. The general-Ω multi-period DMW (measurable selection) is out of scope. No axioms beyond Mathlib defaults."
       }
     },
     {
@@ -276,16 +276,16 @@
       "id": "mf-continuous-emm-sampled",
       "name": "A Continuous-Time EMM Sampled Is a Discrete-Time EMM",
       "domain": "mathematical_finance",
-      "description": "If Q is an equivalent martingale measure for a scalar discounted price S in continuous time (Q ~ P and S a Q-martingale for a filtration 𝓕 indexed by ℝ≥0), then for any monotone schedule t 0 ≤ t 1 ≤ ⋯ and any horizon T, Q is an equivalent martingale measure in the finite-horizon discrete-time sense for the sampled price n ↦ S (t n) and the sampled filtration n ↦ 𝓕 (t n). General Ω. One direction only, and the discrete-time FTAP itself still needs a finite Ω.",
+      "description": "If Q is an equivalent martingale measure up to a horizon T for a scalar discounted price S in continuous time (Q ~ P and S a Q-martingale on [0,T] for a filtration 𝓕 indexed by ℝ≥0), then for any monotone schedule t 0 ≤ t 1 ≤ ⋯ whose dates up to a discrete horizon T' lie in [0,T], Q is an equivalent martingale measure in the finite-horizon discrete-time sense (horizon T') for the sampled price n ↦ S (t n) and the sampled filtration n ↦ 𝓕 (t n). General Ω. One direction only, and the discrete-time FTAP itself still needs a finite Ω.",
       "code": {
-        "lean": "import MathFin.Foundations.FTAPDiscrete\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **A continuous-time EMM, sampled along a monotone schedule, is a discrete-time EMM** for\n    the sampled price and filtration, at every finite horizon. Re-exports\n    `MathFin.ContinuousMarket.IsEMM.sampled`. -/\ntheorem continuous_emm_sampled {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {𝓕 : Filtration ℝ≥0 mΩ} {S : ℝ≥0 → Ω → ℝ} {Q : Measure Ω}\n    (h : MathFin.ContinuousMarket.IsEMM (P := P) (𝓕 := 𝓕) S Q)\n    {t : ℕ → ℝ≥0} (ht : Monotone t) (T : ℕ) :\n    MathFin.IsEMM (MathFin.ContinuousMarket.sampledFiltration 𝓕 ht) P (fun n ↦ S (t n)) T Q :=\n  h.sampled ht T\n"
+        "lean": "import MathFin.Foundations.FTAPDiscrete\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- **A continuous-time EMM up to `T`, sampled along a monotone schedule inside `[0, T]`, is a\n    discrete-time EMM** for the sampled price and filtration, at the discrete horizon `T'`.\n    Re-exports `MathFin.ContinuousMarket.IsEMM.sampled`. -/\ntheorem continuous_emm_sampled {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {𝓕 : Filtration ℝ≥0 mΩ} {S : ℝ≥0 → Ω → ℝ} {T : ℝ≥0} {Q : Measure Ω}\n    (h : MathFin.ContinuousMarket.IsEMM 𝓕 P S T Q)\n    {t : ℕ → ℝ≥0} (ht : Monotone t) (T' : ℕ) (hT' : t T' ≤ T) :\n    MathFin.IsEMM (MathFin.ContinuousMarket.sampledFiltration 𝓕 ht) P (fun n ↦ S (t n)) T' Q :=\n  h.sampled ht T' hT'\n"
       },
       "metadata": {
         "chapter": 14,
         "reference": "S. E. Shreve, Stochastic Calculus for Finance II: Continuous-Time Models, Springer (2004), §5.4 (fundamental theorems of asset pricing); H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed., de Gruyter (2016), §5.2",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.ContinuousMarket.IsEMM.sampled (MathFin/Foundations/FTAPDiscrete.lean), built on martingale_comp_monotone (MathFin/Foundations/ContinuousMarket.lean). SCOPE: scalar price (F = ℝ), arbitrary probability space, any monotone schedule and horizon. Not claimed: the converse (a measure that is a discrete EMM along every schedule need not make S adapted at all times), and any discrete-time no-arbitrage conclusion for non-finite Ω (ftap_discrete assumes a finite full-support space)."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.ContinuousMarket.IsEMM.sampled (MathFin/Foundations/ContinuousMarket.lean), built on the three consequences of the continuous EMM before the horizon (martingale_min_iff, MathFin/Foundations/MartingaleFrozen.lean). SCOPE: this entry states the scalar price (F = ℝ); the library theorem holds for any finite-dimensional real inner-product space, arbitrary probability space, any monotone schedule whose first T'+1 dates lie in [0,T]. A Q-martingale on all of ℝ≥0 is an EMM at every T, so it covers the all-horizon case. Not claimed: the converse (a measure that is a discrete EMM along every schedule need not make S adapted at all times), and any discrete-time no-arbitrage conclusion for non-finite Ω (ftap_discrete assumes a finite full-support space)."
       }
     },
     {
@@ -334,6 +334,38 @@
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.exists_pos_price_le_superReplication (MathFin/Foundations/SuperhedgingDuality.lean). SCOPE: composes the multi-state FTAP's backward direction (hasEMM_multi_of_not_hasArbitrage) with emm_le_superReplication. Not proved: the reverse inequality / superhedging duality equality, which needs closedness of the finitely generated super-replication cone (absent from Mathlib at this pin); nonemptiness of the set of super-replication costs is not stated."
+      }
+    },
+    {
+      "id": "mf-covered-interest-parity",
+      "name": "Covered Interest Parity from No-Arbitrage",
+      "domain": "mathematical_finance",
+      "description": "In a finite-state market with state prices q and terminal spot S_T (domestic per foreign), pricing the domestic zero-coupon bond at e^{−r_d T} and the foreign zero-coupon bond, held in domestic currency, at S·e^{−r_f T}: the forward contract paying S_T − F has zero value iff F = S·e^{(r_d − r_f)T}.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.FxForwardParity\n\nopen MathFin\n\n/-- **Covered interest parity.** -/\ntheorem covered_interest_parity_thm {ι : Type*} (s : Finset ι) (q S_T : ι → ℝ)\n    (S r_d r_f T F : ℝ)\n    (h_dom : ∑ i ∈ s, q i = Real.exp (-(r_d * T)))\n    (h_for : ∑ i ∈ s, q i * S_T i = S * Real.exp (-(r_f * T))) :\n    ∑ i ∈ s, q i * (S_T i - F) = 0 ↔ F = S * Real.exp ((r_d - r_f) * T) :=\n  covered_interest_parity s q S_T S r_d r_f T F h_dom h_for\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Covered interest parity (Hull, Options, Futures, and Other Derivatives, forward on a foreign currency)",
+        "difficulty": "basic",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.covered_interest_parity (MathFin/FixedIncome/FxForwardParity.lean): forward_price_from_no_arbitrage (MathFin/Foundations/NoArbitrageDerivations.lean) with the foreign zero-coupon bond as the asset, then exponential algebra. covered_interest_parity_discrete gives the one-period form S·(1 + r_d)/(1 + r_f) (for 1 + r_d ≠ 0). SCOPE: finite state space, deterministic rates."
+      }
+    },
+    {
+      "id": "mf-covered-eq-uncovered-interest-parity",
+      "name": "Covered and Uncovered Interest Parity Agree",
+      "domain": "mathematical_finance",
+      "description": "If a finite-state market (domestic bond at e^{−r_d T}, foreign bond in domestic currency at S·e^{−r_f T}) prices the forward S_T − F to zero, and the Garman–Kohlhagen hypothesis holds with the same spot S and rates, then F = E_Q[S_T]; the market and the lognormal model are separate hypotheses sharing S, r_d, r_f and T, and the parity is risk-neutral only.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.FxForwardParity\n\nopen MathFin MeasureTheory\n\n/-- **Covered and uncovered parity agree.** -/\ntheorem covered_eq_uncovered_interest_parity_thm {ι : Type*} (s : Finset ι) (q S_T : ι → ℝ)\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S K r_d r_f σ T F : ℝ} {Z : Ω → ℝ}\n    (h_dom : ∑ i ∈ s, q i = Real.exp (-(r_d * T)))\n    (h_for : ∑ i ∈ s, q i * S_T i = S * Real.exp (-(r_f * T)))\n    (hF : ∑ i ∈ s, q i * (S_T i - F) = 0) (h : BSCallHyp Q S K (r_d - r_f) σ T Z) :\n    F = ∫ ω, bsTerminal S (r_d - r_f) σ T (Z ω) ∂Q :=\n  covered_eq_uncovered_interest_parity s q S_T h_dom h_for hF h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Covered vs uncovered interest parity (Hull, Options, Futures, and Other Derivatives, currency forwards and currency options); the uncovered-parity half is Garman & Kohlhagen, 'Foreign currency option values', J. Int. Money Finance 2 (1983) 231–237",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.covered_eq_uncovered_interest_parity (MathFin/FixedIncome/FxForwardParity.lean), composing covered_interest_parity (from forward_price_from_no_arbitrage) with uncovered_interest_parity (from expected_terminal_eq_forward, MathFin/BlackScholes/Forward.lean, the Gaussian MGF, at drift r_d − r_f, the hypothesis of garman_kohlhagen_call_formula). SCOPE: the finite-state market and the lognormal model are separate hypotheses sharing spot and rates; that one model realizes both is not constructed. The uncovered-parity half is risk-neutral (pricing-measure) only: uncovered parity under the physical measure is an economic hypothesis and is not formalized. K plays no part in the conclusion; it is carried because BSCallHyp requires K > 0. The uncovered-parity half is the same expected_terminal_eq_forward as mf-forward-price (benchmarks/black_scholes.json), at drift r_d − r_f instead of a generic r."
       }
     }
   ]

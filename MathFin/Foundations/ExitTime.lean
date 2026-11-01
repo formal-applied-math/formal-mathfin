@@ -133,11 +133,12 @@ lemma exists_le_abs_eq_iInter_iUnion
       hs_max (Set.mem_Icc.mpr ⟨zero_le, hq_le⟩)
     linarith
 
-/-- **The exit time is a stopping time for the raw Brownian filtration.** No right-continuity:
-the hit set is closed, so `{exitTime N ≤ i}` is the measurable rational `⋂ₘ ⋃_{q ≤ i}` event. -/
-theorem isStoppingTime_exitTime (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (N : ℕ) :
-    IsStoppingTime (ItoIntegralL2.natFiltration hBmeas) (exitTime B N) := by
+/-- **The exit time of a continuous adapted process is a stopping time**, for any filtration: no
+right-continuity, the hit set being closed, so `{exitTime N ≤ i}` is the rational `⋂ₘ ⋃_{q ≤ i}`
+event. -/
+theorem isStoppingTime_exitTime_of_measurable {𝓕 : Filtration ℝ≥0 mΩ}
+    (hBmeas : ∀ t, Measurable[𝓕 t] (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
+    (N : ℕ) : IsStoppingTime 𝓕 (exitTime B N) := by
   intro i
   have hset : {ω | exitTime B N ω ≤ (i : WithTop ℝ≥0)}
       = ⋂ m : ℕ, ⋃ q : {q : ℚ // Real.toNNReal q ≤ i},
@@ -147,10 +148,14 @@ theorem isStoppingTime_exitTime (hBmeas : ∀ t, Measurable (B t))
     rw [exitTime_le_iff hBcont, exists_le_abs_eq_iInter_iUnion hBcont]
   rw [hset]
   refine MeasurableSet.iInter fun m ↦ MeasurableSet.iUnion fun q ↦ ?_
-  refine measurableSet_le measurable_const ?_
-  exact (continuous_abs.measurable.comp
-    (measurable_eval_natFiltration hBmeas (Real.toNNReal (q : ℚ)))).mono
-    ((natFiltration hBmeas).mono q.2) le_rfl
+  exact measurableSet_le measurable_const
+    ((continuous_abs.measurable.comp (hBmeas _)).mono (𝓕.mono q.2) le_rfl)
+
+/-- **The exit time is a stopping time for the raw Brownian filtration.** -/
+theorem isStoppingTime_exitTime (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (N : ℕ) :
+    IsStoppingTime (ItoIntegralL2.natFiltration hBmeas) (exitTime B N) :=
+  isStoppingTime_exitTime_of_measurable (fun t ↦ (ItoIntegralL2.stronglyAdapted_natFiltration hBmeas t).measurable) hBcont N
 
 /-- **The exit times increase with `N`** (the closed exterior shrinks, so the hit comes later or
 never): `N ≤ M → exitTime N ω ≤ exitTime M ω`, pointwise in `ω`. -/
@@ -185,6 +190,16 @@ lemma exitTime_tendsto_top (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s 
   have h2 : |B s ω| < (N : ℝ) := lt_of_lt_of_le hN₀ (by exact_mod_cast hN)
   linarith
 
+/-- **The exit times of a continuous adapted process form a localizing sequence**: each is a
+stopping time (closed-set route, no right-continuity), the sequence is monotone, and it escapes to
+`⊤` (continuous paths are bounded on compacts). -/
+theorem isLocalizingSequence_exitTime_of_measurable {𝓕 : Filtration ℝ≥0 mΩ}
+    (hBmeas : ∀ t, Measurable[𝓕 t] (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) :
+    IsLocalizingSequence 𝓕 (fun N ↦ exitTime B N) μ where
+  isStoppingTime := isStoppingTime_exitTime_of_measurable hBmeas hBcont
+  tendsto_top := Filter.Eventually.of_forall (exitTime_tendsto_top hBcont)
+  mono := Filter.Eventually.of_forall (exitTime_monotone hBcont)
+
 /-- **The Brownian exit times form a localizing sequence** for the null-augmented filtration:
 each `exitTime N` is a stopping time (closed-set route, no right-continuity), the sequence is
 a.s. monotone, and it escapes to `⊤` a.s. (continuous paths are bounded on compacts). This is the
@@ -192,11 +207,72 @@ repo's first genuine `IsLocalizingSequence` — the localization engine that lif
 bounded-derivative Itô formula to unbounded coefficients. -/
 theorem isLocalizingSequence_exitTime (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) :
-    IsLocalizingSequence (augFiltration (μ := μ) hBmeas) (fun N ↦ exitTime B N) μ where
-  isStoppingTime := fun N i ↦
-    (show natFiltration hBmeas i ≤ augFiltration (μ := μ) hBmeas i by
-      rw [augFiltration_apply]; exact le_sup_left) _ (isStoppingTime_exitTime hBmeas hBcont N i)
-  tendsto_top := Filter.Eventually.of_forall (exitTime_tendsto_top hBcont)
-  mono := Filter.Eventually.of_forall (exitTime_monotone hBcont)
+    IsLocalizingSequence (augFiltration (μ := μ) hBmeas) (fun N ↦ exitTime B N) μ :=
+  isLocalizingSequence_exitTime_of_measurable (fun t ↦
+    (ItoIntegralL2.stronglyAdapted_natFiltration hBmeas t).measurable.mono le_sup_left le_rfl) hBcont
+
+/-- **The path stays confined up to the exit time.** On `{s ≤ τ_N}` with `0 < s`, `|B_s| ≤ N`:
+for `u < s ≤ τ_N` the exit has not happened (`|B_u| < N`), and left-continuity carries the bound
+to the boundary value at `s`. -/
+lemma abs_le_N_of_le_exitTime (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
+    {N : ℕ} {s : ℝ≥0} {ω : Ω} (hs0 : 0 < s)
+    (h : (s : WithTop ℝ≥0) ≤ exitTime B N ω) : |B s ω| ≤ (N : ℝ) := by
+  have hbelow : ∀ u : ℝ≥0, u < s → |B u ω| < (N : ℝ) := by
+    intro u hu
+    by_contra hN
+    rw [not_lt] at hN
+    have hle : exitTime B N ω ≤ (u : WithTop ℝ≥0) :=
+      (exitTime_le_iff hBcont N u ω).mpr ⟨u, ⟨zero_le, le_refl u⟩, hN⟩
+    exact absurd hle (not_le.mpr (lt_of_lt_of_le (by exact_mod_cast hu) h))
+  have htend : Tendsto (fun u : ℝ≥0 ↦ |B u ω|) (𝓝[<] s) (𝓝 (|B s ω|)) :=
+    (continuous_abs.comp (hBcont ω)).continuousWithinAt
+  haveI : (𝓝[<] s).NeBot := nhdsWithin_Iio_neBot' ⟨0, hs0⟩ le_rfl
+  exact le_of_tendsto htend
+    (eventually_nhdsWithin_of_forall fun u hu ↦ le_of_lt (hbelow u hu))
+
+/-- **Up to a positive exit time the path stays in `[−N, N]`**, the time `0` included: there the
+exit has not yet happened. -/
+lemma abs_le_of_le_exitTime (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
+    {N : ℕ} {s : ℝ≥0} {ω : Ω} (hpos : ⊥ < exitTime B N ω)
+    (h : (s : WithTop ℝ≥0) ≤ exitTime B N ω) : |B s ω| ≤ (N : ℝ) := by
+  rcases (zero_le : 0 ≤ s).eq_or_lt with rfl | hs0
+  · by_contra hN
+    exact hpos.not_ge <| (exitTime_le_iff hBcont N 0 ω).mpr ⟨0, ⟨le_rfl, le_rfl⟩, (not_le.mp hN).le⟩
+  · exact abs_le_N_of_le_exitTime hBcont hs0 h
+
+/-- **A process that is a martingale up to a stopping time, stopped there, is a martingale.** If
+the adapted right-continuous `X` is almost surely the right-continuous martingale `M` on the
+stochastic interval `[0, τ]` (when `τ > 0`), then `X` stopped at `τ` (and zeroed on `{τ = 0}`) is,
+at each time, almost surely `M` stopped the same way, a martingale
+(`Martingale.stoppedProcess_indicator`), and it is adapted
+(`StronglyAdapted.stoppedProcess_indicator`). -/
+theorem martingale_stoppedProcess_of_ae_eq [IsFiniteMeasure μ] {𝓕 : Filtration ℝ≥0 mΩ}
+    {τ : Ω → WithTop ℝ≥0} (hτ : IsStoppingTime 𝓕 τ) (hB : StronglyAdapted 𝓕 B)
+    (hBc : ∀ ω, IsRightContinuous fun t ↦ B t ω) {M : ℝ≥0 → Ω → ℝ} (hM : Martingale M 𝓕 μ)
+    (hMc : ∀ ω, IsRightContinuous fun t ↦ M t ω)
+    (hBM : ∀ᵐ ω ∂μ, ⊥ < τ ω → ∀ u : ℝ≥0, (u : WithTop ℝ≥0) ≤ τ ω → B u ω = M u ω) :
+    Martingale (stoppedProcess (fun i ↦ {ω | ⊥ < τ ω}.indicator (B i)) τ) 𝓕 μ := by
+  have hstop (i : ℝ≥0) :
+      (fun ω ↦ stoppedProcess (fun j ↦ {ω | ⊥ < τ ω}.indicator (B j)) τ i ω)
+        =ᵐ[μ] fun ω ↦ stoppedProcess (fun j ↦ {ω | ⊥ < τ ω}.indicator (M j)) τ i ω := by
+    filter_upwards [hBM] with ω hω
+    by_cases hpos : ⊥ < τ ω
+    · have hmem : ω ∈ {ω | ⊥ < τ ω} := hpos
+      rcases le_total (i : WithTop ℝ≥0) (τ ω) with hle | hge
+      · rw [stoppedProcess_eq_of_le hle, stoppedProcess_eq_of_le hle,
+          Set.indicator_of_mem hmem, Set.indicator_of_mem hmem]
+        exact hω hpos i hle
+      · rw [stoppedProcess_eq_of_ge hge, stoppedProcess_eq_of_ge hge,
+          Set.indicator_of_mem hmem, Set.indicator_of_mem hmem]
+        obtain ⟨v, hv⟩ := WithTop.ne_top_iff_exists.mp (ne_top_of_le_ne_top WithTop.coe_ne_top hge)
+        refine hω hpos (τ ω).untopA (le_of_eq ?_)
+        rw [← hv]; rfl
+    · have hnmem : ω ∉ {ω | ⊥ < τ ω} := hpos
+      have hle : τ ω ≤ (i : WithTop ℝ≥0) := (not_lt.mp hpos).trans bot_le
+      rw [stoppedProcess_eq_of_ge hle, stoppedProcess_eq_of_ge hle,
+        Set.indicator_of_notMem hnmem, Set.indicator_of_notMem hnmem]
+  refine ⟨hB.stoppedProcess_indicator hBc hτ, fun i j hij ↦ ?_⟩
+  exact (condExp_congr_ae (hstop j)).trans <|
+    ((hM.stoppedProcess_indicator hMc hτ).2 i j hij).trans (hstop i).symm
 
 end MathFin

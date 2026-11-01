@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.Binomial.Model
 public import MathFin.Binomial.American
+public import MathFin.Binomial.Bermudan
 public import MathFin.Binomial.CRRClosedForm
 
 /-!
@@ -56,13 +57,13 @@ version of the equality is proved, and its CRR limit is the Black–Scholes call
 * `call_intrinsic_le_binomialPrice`: the intrinsic value `max(S − K, 0)`
   is bounded above by the European call's binomial price at every step
   `n` (multi-step extension of the one-period dominance, by induction).
-* `americanCallPrice_le_binomialPrice`: the American call price is bounded
-  above by the European call price at every step. With
-  `binomialPrice_le_americanPrice` (the trivial direction in
-  `Binomial.American`), this gives:
+* `bermudanCallPrice_eq_binomialPrice`: for every exercise set `E`, the `E`-exercise call price
+  equals the European call price at every step, the European price process being a martingale
+  above the payoff and hence above the Snell envelope `bermudanPrice E`; the reverse inequality is
+  `bermudanPrice_mono` (`Binomial.Bermudan`) for `∅ ⊆ E`.
 * `americanCallPrice_eq_binomialPrice`: **American call = European call**
   for the non-dividend call in the binomial tree (Merton 1973), at every
-  step `n` and every spot `S`.
+  step `n` and every spot `S` (the case `E = univ`).
 * `crr_americanCall_tendsto_bs`: on the Cox–Ross–Rubinstein tree with `r ≥ 0`, the
   `n`-step American call price converges to the Black–Scholes European call price
   `S₀·Φ(d₁) − K·e^{−rT}·Φ(d₂)` (the equality above, transported along
@@ -207,24 +208,19 @@ theorem call_one_period_continuation_dominates_intrinsic
     · exact le_refl _
   linarith
 
-/-! ## Multi-step Merton 1973 (induction on `n`)
+/-! ## Multi-step Merton 1973
 
 The one-period dominance `call_one_period_continuation_dominates_intrinsic`
-extends to arbitrary horizons by induction. At each step:
+extends to arbitrary horizons by induction, which puts the intrinsic payoff below the European
+price at every step (`call_intrinsic_le_binomialPrice`). The European price process is then a
+martingale dominating the payoff, and `americanPrice` is the smallest supermartingale doing so
+(the Snell envelope, `bermudanPrice_le_of_supermartingale_dominating`), which gives
+American ≤ European.
 
-* **Intrinsic ≤ European price**: combine the one-period dominance with the
-  inductive hypothesis at the daughter nodes, transported through the
-  monotonicity of `binomialOptionPriceOnePeriod`.
-* **American ≤ European**: from `americanPrice_succ`, the Bellman is a `max`
-  of the intrinsic and the continuation. Intrinsic ≤ European (just shown);
-  continuation ≤ European (by inductive hypothesis at the daughters +
-  monotonicity). Hence `max` of the two ≤ European.
-
-The reverse inequality `binomialPrice ≤ americanPrice` is `Binomial.American`'s
-`binomialPrice_le_americanPrice` (a one-line corollary of the supermartingale
-property: the American Bellman writes max(intrinsic, continuation), and the
-continuation is exactly the European recursion). Together they give
-equality. -/
+The reverse inequality `binomialPrice ≤ americanPrice` is `Binomial.Bermudan`'s
+`bermudanPrice_mono` for the exercise sets `∅ ⊆ univ` (the European price is a
+supermartingale dominating the payoff at maturity, so it is above the smaller envelope).
+Together they give equality. -/
 
 /-- **Intrinsic ≤ European binomial price** (multi-step) for the call payoff
 with `r ≥ 0, K ≥ 0`.
@@ -256,51 +252,33 @@ theorem call_intrinsic_le_binomialPrice {u d r K : ℝ} (h : BinomialNoArb u d r
       (fun S' ↦ max (S' - K) 0) n S
     linarith
 
-/-- **Merton 1973 (multi-step): American ≤ European call** in the binomial tree
-for `r ≥ 0, K ≥ 0`.
+/-- **Merton 1973 (multi-step): no exercise date adds value to the call.** For every exercise set
+`E` (any Bermudan schedule), the `E`-exercise tree price of the call equals the European binomial
+price, for `r ≥ 0, K ≥ 0`.
 
-The Bellman `max(intrinsic, continuation)` is bounded above by the European
-price because (i) the intrinsic is bounded by the European price
-(`call_intrinsic_le_binomialPrice`), and (ii) the American continuation is
-bounded by the European continuation (inductive hypothesis at the daughters,
-plus monotonicity of the one-period operator). -/
-theorem americanCallPrice_le_binomialPrice {u d r K : ℝ} (h : BinomialNoArb u d r)
-    (hr : 0 ≤ r) (hK : 0 ≤ K) :
-    ∀ (n : ℕ) (S : ℝ),
-      americanPrice u d r (fun S' ↦ max (S' - K) 0) n S ≤
-        binomialPrice u d r (fun S' ↦ max (S' - K) 0) n S := by
-  intro n
-  induction n with
-  | zero =>
-    intro S
-    simp [americanPrice]
-  | succ n ih =>
-    intro S
-    rw [americanPrice_succ]
-    have h_intrinsic : max (S - K) 0 ≤
-        binomialPrice u d r (fun S' ↦ max (S' - K) 0) (n + 1) S :=
-      call_intrinsic_le_binomialPrice (K := K) h hr hK (n + 1) S
-    have h_cont : binomialOptionPriceOnePeriod u d r
-          (americanPrice u d r (fun S' ↦ max (S' - K) 0) n (S * u))
-          (americanPrice u d r (fun S' ↦ max (S' - K) 0) n (S * d)) ≤
-        binomialPrice u d r (fun S' ↦ max (S' - K) 0) (n + 1) S := by
-      rw [binomialPrice_succ_eq_onePeriod]
-      exact binomialOptionPriceOnePeriod_mono (h := h) (ih (S * u)) (ih (S * d))
-    exact max_le h_intrinsic h_cont
+The European price process is a martingale (the one-period recursion
+`binomialPrice_succ_eq_onePeriod`) that dominates the intrinsic payoff
+(`call_intrinsic_le_binomialPrice`), so it dominates the smallest such process, the Snell envelope
+`bermudanPrice E` (`bermudanPrice_le_of_supermartingale_dominating`); the reverse inequality is
+`bermudanPrice_mono` for `∅ ⊆ E`. -/
+theorem bermudanCallPrice_eq_binomialPrice {u d r K : ℝ} (h : BinomialNoArb u d r)
+    (hr : 0 ≤ r) (hK : 0 ≤ K) (E : Set ℕ) (n : ℕ) (S : ℝ) :
+    bermudanPrice E u d r (fun S' ↦ max (S' - K) 0) n S =
+      binomialPrice u d r (fun S' ↦ max (S' - K) 0) n S :=
+  le_antisymm
+    (bermudanPrice_le_of_supermartingale_dominating h E _ (binomialPrice u d r _)
+      (fun n _ S ↦ call_intrinsic_le_binomialPrice h hr hK n S)
+      (fun n S ↦ (binomialPrice_succ_eq_onePeriod u d r _ n S).ge) n S)
+    (bermudanPrice_mono h _ (Set.empty_subset E) n S)
 
 /-- **Merton 1973 (multi-step, equality form)**: the American call price equals
 the European call price at every step in the no-dividend binomial tree, for
-`r ≥ 0, K ≥ 0`.
-
-Both inequalities together: `americanCallPrice_le_binomialPrice` (this file)
-+ `binomialPrice_le_americanPrice` (`Binomial.American`). -/
+`r ≥ 0, K ≥ 0` (the case `E = univ` of `bermudanCallPrice_eq_binomialPrice`). -/
 theorem americanCallPrice_eq_binomialPrice {u d r K : ℝ} (h : BinomialNoArb u d r)
     (hr : 0 ≤ r) (hK : 0 ≤ K) (n : ℕ) (S : ℝ) :
     americanPrice u d r (fun S' ↦ max (S' - K) 0) n S =
       binomialPrice u d r (fun S' ↦ max (S' - K) 0) n S :=
-  le_antisymm
-    (americanCallPrice_le_binomialPrice (K := K) h hr hK n S)
-    (binomialPrice_le_americanPrice h _ n S)
+  bermudanCallPrice_eq_binomialPrice h hr hK Set.univ n S
 
 /-! ## The CRR American call converges to the Black–Scholes call -/
 

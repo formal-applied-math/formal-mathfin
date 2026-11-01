@@ -123,12 +123,12 @@ fully proven upstream (in Degenne's package, since moved to Mathlib). The deduct
 
 | Theorem | Content |
 |---|---|
-| `adapted_indepFun_increment` | An integrand adapted to `𝓕_{t₀}` is independent of the forward increment `B_{t₁} − B_{t₀}` (via `indepFun_shift`). |
+| `adapted_indepFun_increment` | An integrand adapted to `𝓕_{t₀}` is independent of the forward increment `B_{t₁} − B_{t₀}` (from `IsFilteredPreBrownian.indep`). |
 | `integral_adapted_mul_increment` | **Martingale-difference property.** `E[φ·(B_{t₁}−B_{t₀})] = 0` for adapted `φ` — the reason the Itô integral is a martingale, and it holds for *random* `φ`. |
 | `integral_adapted_sq_mul_increment_sq` | **Isometry kernel.** `E[φ²·(B_{t₁}−B_{t₀})²] = E[φ²]·(t₁−t₀)`. |
-| `adaptedAt_eval`/`.mono`/`.mul`/`.sub` | The adaptedness algebra (the natural Brownian filtration `𝓕_{t₀}` as a closure), used to certify the cross-term factors are `𝓕_{tₖ}`-measurable. |
+| `IsFilteredPreBrownian.measurable_eval_of_le` | `B u` is `𝓕_t`-measurable for `u ≤ t`; with `Measurable.mono (𝓕.mono _)` and `.mul`/`.sub` it certifies the cross-term factors are `𝓕_{tₖ}`-measurable. The whole core is stated against an arbitrary filtration `𝓕` with `IsFilteredPreBrownian B 𝓕 μ`. |
 | **`ito_isometry_discrete`** | **The discrete Itô isometry.** `E[(Σₖ φₖ·ΔBₖ)²] = Σₖ E[φₖ²]·(t_{k+1}−t_k)` for adapted `L²` integrands. Diagonal = variance kernel; off-diagonal = 0 by the martingale-difference property. |
-| **`ito_isometry_brownian_self`** | **The `∫₀ᵀ B dB` Riemann-sum isometry**, `E[(Σₖ B(tₖ)·ΔBₖ)²] = Σₖ tₖ·Δtₖ` — a fully-discharged instance (no remaining hypotheses beyond measurability + a monotone partition). |
+| **`ito_isometry_brownian_self`** | **The `∫₀ᵀ B dB` Riemann-sum isometry**, `E[(Σₖ B(tₖ)·ΔBₖ)²] = Σₖ tₖ·Δtₖ` — a fully-discharged instance (no remaining hypotheses beyond the filtered-Brownian structure + a monotone partition). |
 
 All build-enforced axioms-clean (`MathFin/AxiomAudit.lean`).
 
@@ -264,7 +264,7 @@ The pricing-measure argument is four steps, and none of them is stochastic integ
 element composed with an isometry — so continuity is `innerSL`'s and square-integrability of the
 density is exactly what buys it. On a band the integral is `Z·(S_b − S_a)`, a bounded predictable
 weight against a `Q`-martingale increment, whose mean is zero by a lemma that predates all of
-this (`ContinuousMarket.increment_integral_zero`, previously private). A simple process is the
+this (`integral_inner_sub_eq_zero`, previously the private `increment_integral_zero`). A simple process is the
 finite sum of its bands. And the simple processes are dense. That is the whole proof.
 
 **The abstraction boundary, again drawn deliberately.** Square-integrability of the density is

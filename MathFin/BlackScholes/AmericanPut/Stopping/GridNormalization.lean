@@ -34,8 +34,8 @@ theorem cappedGridTime_scale (a T δ : ℝ≥0) (i : ℕ) :
 theorem brownianGridMarkovAux_scale {Z Z' : ℕ → ℝ → ℝ} {K d β β' σ σ' : ℝ}
     {a : ℝ≥0} (hK : 0 ≤ K) (hβ : β' * (a : ℝ) = β) (hσ : σ' ^ 2 * (a : ℝ) = σ ^ 2)
     (hZ : ∀ i x, Z i (x + d) = K * Z' i x) (T δ : ℝ≥0) (n i : ℕ) (x : ℝ) :
-    brownianGridMarkovAux Z T δ β σ n i (x+d) =
-      K*brownianGridMarkovAux Z' (a*T) (a*δ) β' σ' n i x := by
+    brownianGridMarkovAux Z (cappedGridTime T δ) β σ n i (x+d) =
+      K*brownianGridMarkovAux Z' (cappedGridTime (a*T) (a*δ)) β' σ' n i x := by
   induction n generalizing i x with
   | zero => exact hZ i x
   | succ n ih =>

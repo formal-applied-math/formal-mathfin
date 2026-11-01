@@ -17,8 +17,8 @@ a value `x`, averaging `g(x, Y)` over `Y` alone, and then averaging the result o
   `𝔼[g(X, Y)] = ∫ x, 𝔼[g(x, Y)] d(law X)`.
 
 This is the *freezing lemma*. When `X = N` is a count it is the law of total expectation over the
-number of jumps, the step every Poisson-mixture computation takes: the Merton jump-diffusion price
-(`BlackScholes/MertonModel.lean`) and the compound-Poisson moment generating function
+number of jumps, the step every Poisson-mixture computation takes: the jump-diffusion price,
+Merton's among them, and the compound-Poisson moment generating function
 (`Actuarial/CompoundPoissonMGF.lean`) both go through it. With `X` a jump part of any law it is
 the mixing formula of `BlackScholes/JumpDiffusionMixing.lean`: a jump-diffusion call is the
 Black–Scholes price averaged over the jumps.
@@ -55,6 +55,8 @@ prices of `BlackScholes/JumpDiffusionOptionPrices.lean`).
   `ν = Poisson(Λ)` this is the Poisson-mixture step.
 * `condExp_comp_prodMk_of_indep`: the conditional freezing lemma (Shreve's independence lemma),
   `𝔼[g(X, Y) | 𝓜] = G(X)` for `X` measurable for `𝓜` and `Y` independent of `𝓜`.
+* `condExp_mul_of_indep`: `𝔼[X·Y | m] = X·𝔼[Y]` for `X` measurable for `m` and `Y` for a σ-algebra
+  independent of `m`.
 * `indepFun_prodMk_of_indepFun_prodMk`: if `X` is independent of `(Y, W)` and `Y` of `W`, then
   `Y` is independent of `(X, W)`. Mutual independence of three variables can be stated with any
   of them split off first.
@@ -192,6 +194,23 @@ theorem condExp_comp_prodMk_of_indep [NormedSpace ℝ E] [CompleteSpace E] (hm :
           rw [map_restrict_prodMk_of_indep hm hX hY hi hs, integral_prod g (hgs s hs)]
       _ = ∫ ω in s, g (X ω, Y ω) ∂P :=
           integral_map (hX'.aemeasurable.prodMk hY).restrict hg.aestronglyMeasurable
+
+/-- **Pulling out a known factor against an independent one.** If `X` is `m`-measurable and `Y`
+is measurable for a σ-algebra `m'` independent of `m` (both integrable), then
+`𝔼[X·Y | m] = X·𝔼[Y]` almost surely: given `m`, `X` is known and `Y` keeps its mean. With
+`X = e^{a+Z}` and `Y = e^{W}`, for `Z` known and `W` independent of the past, this is the
+conditional exponential moment of a sum. -/
+theorem condExp_mul_of_indep {m' : MeasurableSpace Ω} {X Y : Ω → ℝ} (hm : m ≤ mΩ)
+    (hm' : m' ≤ mΩ) (hi : Indep m' m P) (hX : StronglyMeasurable[m] X)
+    (hY : StronglyMeasurable[m'] Y) (hXi : Integrable X P) (hYi : Integrable Y P) :
+    P[X * Y | m] =ᵐ[P] fun ω ↦ X ω * ∫ ω, Y ω ∂P := by
+  have hind : IndepFun X Y P :=
+    (IndepFun_iff_Indep _ _ _).2
+      (indep_of_indep_of_le_right (indep_of_indep_of_le_left hi.symm hX.measurable.comap_le)
+        hY.measurable.comap_le)
+  refine (condExp_mul_of_stronglyMeasurable_left hX (hind.integrable_mul hXi hYi) hYi).trans ?_
+  filter_upwards [condExp_indep_eq hm' hm hY hi] with ω h
+  rw [Pi.mul_apply, h]
 
 /-! ### Re-associating independence -/
 

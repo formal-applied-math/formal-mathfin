@@ -43,7 +43,8 @@ theorem brownianLogState_usual_adapted (β σ x : ℝ) :
 /-- Exit rule from the rectangle of spatial half-width `R` and duration `δ`, for the
 Brownian log-state started at `x`, on the completed usual filtration. -/
 noncomputable def actualRectangleExitRule (k h x R : ℝ) (δ : ℝ≥0) :
-    @BoundedRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit) brownianUsualFiltration δ :=
+    @StoppingRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit) ℝ≥0 _
+      brownianUsualFiltration δ :=
   @rectangleExitRule _ (completedMeasurableSpace gaussianLimit) brownianUsualFiltration
     (brownianLogState (k-h-1) (Real.sqrt 2) x)
     (brownianLogState_usual_adapted (k-h-1) (Real.sqrt 2) x)
@@ -51,7 +52,7 @@ noncomputable def actualRectangleExitRule (k h x R : ℝ) (δ : ℝ≥0) :
 
 /-- The stopping time of `actualRectangleExitRule`. -/
 noncomputable def actualRectangleExitTime (k h x R : ℝ) (δ : ℝ≥0) : (ℝ≥0 → ℝ) → ℝ≥0 :=
-  @BoundedRule.time _ (completedMeasurableSpace gaussianLimit) brownianUsualFiltration δ
+  @StoppingRule.time _ (completedMeasurableSpace gaussianLimit) ℝ≥0 _ brownianUsualFiltration δ
     (actualRectangleExitRule k h x R δ)
 
 theorem actualRectangleExit_boundary_ae (k h x : ℝ) {R : ℝ} (hR : 0 < R)
@@ -82,14 +83,9 @@ theorem actualRectangleExit_le_contact {k h : ℝ} (hk : 0 ≤ k) {x R : ℝ} {T
     (brownianLogState_continuous (k-h-1) (Real.sqrt 2) x) ω hlt
   have hp :=
       hrect (τ.time ω) hs.2.le (brownianLogState (k-h-1) (Real.sqrt 2) x (τ.time ω) ω) hs.1.le
-  have hz :=
-      canonicalContactRule_contact (h := h) hk brownianUsual_adapted continuous_brownian x T ω
-  change canonicalGap brownian k h x T (τ.time ω) ω = 0 at hz
-  have ht : (τ.time ω : ℝ) ≤ T := by exact_mod_cast τ.le_horizon ω
-  have hg : 0 < canonicalGap brownian k h x T (τ.time ω) ω := by
-    simpa only [canonicalGap,canonicalLogPath,brownianLogState,NNReal.coe_min,
-      min_eq_left (τ.le_horizon ω),min_eq_left ht] using sub_pos.mpr hp.2
-  exact (ne_of_gt hg) hz
+  have hz := canonicalContactRule_price_eq (h := h) hk brownianUsual_adapted
+    continuous_brownian x T ω
+  exact hp.2.ne' hz
 
 theorem canonicalPrice_rectangle_meanValue {k h : ℝ} (hk : 0 ≤ k) {x R : ℝ} {T δ : ℝ≥0}
     (hδT : δ ≤ T) (hrect : InContinuationRectangle k h x T R δ) :
@@ -116,7 +112,7 @@ theorem canonicalPrice_rectangle_meanValue {k h : ℝ} (hk : 0 ≤ k) {x R : ℝ
           ω = _
     rw [min_eq_left hle]
     have ht : actualRectangleExitTime k h x R δ ω ≤ T := (ρ.le_horizon ω).trans hδT
-    simp only [canonicalDiscountedPrice,min_eq_left ht]
+    simp only [canonicalDiscountedPrice_apply,min_eq_left ht]
   rw [hfun] at he
   exact he
 

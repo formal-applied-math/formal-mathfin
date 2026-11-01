@@ -71,13 +71,7 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
   (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (σ t))
   (hcont : ∀ ω, Continuous (fun t : ℝ≥0 ↦ σ t ω)) {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C)
 
-/-! ### Tools: the partition and the pointwise split -/
-
-/-- The cells of the uniform partition have length `T/n`. -/
-theorem unifPart_succ_sub (n k : ℕ) :
-    ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) / n := by
-  push_cast [unifPart]
-  ring
+/-! ### Tools: the pointwise split -/
 
 /-- **The pointwise split.** Write `m` for the increment of the martingale part and `D = m − s·b`
 for its freezing defect against the frozen increment `s·b`. Then `m² − (s·b)² = 2D·m − D²`, so a
@@ -130,7 +124,7 @@ theorem tendsto_integral_abs_weighted_qv {v : ℝ≥0 → Ω → ℝ}
     (fun n ↦ integral_abs_le_sqrt_integral_sq (memLp_weighted_qv_sub hB T
       (fun s ↦ ((hv_adap s).mono ((natFiltration hBmeas).le s)).measurable) hv_cont hv_bdd n))
     (by simpa using (tendsto_weighted_qv_process_of_ae_continuous hB hBmeas
-      (fun s ↦ adaptedAt_of_measurable_natural hBmeas (hv_adap s).measurable)
+      (fun s ↦ (hv_adap s).measurable)
       ((abs_nonneg _).trans (hv_bdd 0 (nonempty_of_isProbabilityMeasure μ).some)) hv_bdd T
       hv_cont).sqrt)
 

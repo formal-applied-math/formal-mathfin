@@ -21,23 +21,24 @@ namespace MathFin.BlackScholes.AmericanPut.Stopping
 
 open Set Filter MeasureTheory ProbabilityTheory Boundary
 open scoped NNReal Topology
+open MathFin.ItoLocalMartingale (nullAugmentation supermartingale_nullAugmentation)
 
 /-- The usual filtration of `brownian`: the completed raw filtration, null-augmented and then
 made right-continuous. -/
 noncomputable def brownianUsualFiltration :
     Filtration ℝ≥0 (completedMeasurableSpace gaussianLimit) :=
-  (ambientNullAugmentation (mΩ := completedMeasurableSpace gaussianLimit)
+  (nullAugmentation (m0 := completedMeasurableSpace gaussianLimit)
     (completedAmbientFiltration gaussianLimit brownianFiltration)
     (completedMeasure gaussianLimit)).rightCont
 
 theorem brownian_completedRaw_le_usual :
     completedAmbientFiltration gaussianLimit brownianFiltration ≤ brownianUsualFiltration :=
-  le_trans le_sup_left (ambientNullAugmentation (mΩ := completedMeasurableSpace gaussianLimit)
+  le_trans le_sup_left (nullAugmentation (m0 := completedMeasurableSpace gaussianLimit)
     (completedAmbientFiltration gaussianLimit brownianFiltration)
         (completedMeasure gaussianLimit)).le_rightCont
 
 instance brownianUsualFiltration_isRightContinuous : brownianUsualFiltration.IsRightContinuous :=
-  inferInstanceAs ((ambientNullAugmentation (mΩ := completedMeasurableSpace gaussianLimit)
+  inferInstanceAs ((nullAugmentation (m0 := completedMeasurableSpace gaussianLimit)
     (completedAmbientFiltration gaussianLimit brownianFiltration)
     (completedMeasure gaussianLimit)).rightCont.IsRightContinuous)
 
@@ -45,11 +46,11 @@ instance brownianUsualFiltration_isComplete :
     brownianUsualFiltration.IsComplete (completedMeasure gaussianLimit) := by
   constructor
   intro s hs t
-  apply (ambientNullAugmentation (mΩ := completedMeasurableSpace gaussianLimit)
+  apply (nullAugmentation (m0 := completedMeasurableSpace gaussianLimit)
     (completedAmbientFiltration gaussianLimit brownianFiltration)
     (completedMeasure gaussianLimit)).le_rightCont t
   apply (show MathFin.ItoLocalMartingale.nullsAlg _ (completedMeasure gaussianLimit) ≤
-    ambientNullAugmentation (mΩ := completedMeasurableSpace gaussianLimit)
+    nullAugmentation (m0 := completedMeasurableSpace gaussianLimit)
       (completedAmbientFiltration gaussianLimit brownianFiltration)
       (completedMeasure gaussianLimit) t from le_sup_right)
   exact MeasurableSpace.measurableSet_generateFrom ⟨measurableSet_of_null hs,hs⟩
@@ -76,27 +77,24 @@ theorem brownianClassicalCandidate_usual_supermartingale {K r q σ S : ℝ}
     (hK : 0 ≤ K) (hr : 0 ≤ r) (hσ : 0 < σ) (T : ℝ≥0) :
     Supermartingale (classicalCandidate brownian K r q σ S p T)
       brownianUsualFiltration (completedMeasure gaussianLimit) := by
-  have hb (t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ‖classicalCandidate brownian K r q σ S p T t ω‖ ≤ K := by
-    obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp brownian hK hr T t ω
-    simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
+  have hb (t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ‖classicalCandidate brownian K r q σ S p T t ω‖ ≤ K :=
+    classicalCandidate_norm_le hp.toPutEnvelope brownian hK hr T t ω
   have hu := bounded_supermartingale_completion gaussianLimit
-    (brownianClassicalCandidate_supermartingale hp hK hr hσ T) hb
+    (brownianClassicalCandidate_supermartingale hp.toPutEnvelope hp.putWaiting hK hr hσ T) hb
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
-  exact bounded_continuous_supermartingale_rightCont (supermartingale_ambientNullAugmentation hu)
-    (classicalCandidate_continuous hp continuous_brownian T) hb
+  exact bounded_continuous_supermartingale_rightCont (supermartingale_nullAugmentation hu)
+    (classicalCandidate_continuous hp.toPutEnvelope continuous_brownian T) hb
 
 theorem brownianUsualAmericanPut_eq_raw {K r q σ S : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 < K) (hr : 0 ≤ r) (hσ : 0 < σ) (hS : 0 < S) (T : ℝ≥0) :
     brownianUsualAmericanPut K r q σ S T = brownianAmericanPut K r q σ S T := by
-  have hb (t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ‖classicalCandidate brownian K r q σ S p T t ω‖ ≤ K := by
-    obtain ⟨hlo,hhi⟩ :=
-        classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp brownian hK.le hr T t ω
-    simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
+  have hb (t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ‖classicalCandidate brownian K r q σ S p T t ω‖ ≤ K :=
+    classicalCandidate_norm_le hp.toPutEnvelope brownian hK.le hr T t ω
   have hU0 : StronglyMeasurable (classicalCandidate brownian K r q σ S p T 0) :=
-    ((classicalCandidate_adapted hp brownian_adapted T 0).mono (brownianFiltration.le 0)
-        le_rfl).stronglyMeasurable
+    ((classicalCandidate_adapted hp.toPutEnvelope brownian_adapted T 0).mono
+      (brownianFiltration.le 0) le_rfl).stronglyMeasurable
   have hI0 := integral_completion_original gaussianLimit hU0
   have hinitial :=
       classicalCandidate_initial isBrownianReal_brownian.eval_zero_ae_eq_zero K r q σ S p T
@@ -112,14 +110,14 @@ theorem brownianUsualAmericanPut_eq_raw {K r q σ S : ℝ}
   have θbound := θ.le_horizon
   let μ := completedMeasure gaussianLimit
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
-  let θ' : BoundedRule brownianUsualFiltration T :=
+  let θ' : StoppingRule brownianUsualFiltration T :=
     { time := θtime
       stopping := fun t => brownian_completedRaw_le_usual t _ (θstop t)
       le_horizon := θbound }
   apply le_antisymm
   · have hu := value_le_supermartingale_candidate brownian_completed_measurable hK.le hr hS.le
-      hsuper (classicalCandidate_continuous hp continuous_brownian T) hb
-      (fun _ ht ω => classicalCandidate_dominates hp brownian hK hS ht ω)
+      hsuper (classicalCandidate_continuous hp.toPutEnvelope continuous_brownian T) hb
+      (fun _ ht ω => classicalCandidate_dominates hp.toPutEnvelope brownian hK hS ht ω)
     rw [hI0,integral_congr_ae hinitial] at hu
     simp only [integral_const,probReal_univ,one_smul] at hu
     rw [hprice]

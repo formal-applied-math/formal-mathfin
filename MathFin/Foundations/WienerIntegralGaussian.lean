@@ -278,5 +278,19 @@ theorem wienerIntegralLp_hasLaw_gaussian (hB : IsPreBrownianReal B μ) (T : ℝ�
     congr 2
     exact Lp_real_two_norm_sq (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) f
 
+/-- The `L²` representative of an `L²` function has the same squared integral. -/
+theorem _root_.MeasureTheory.MemLp.integral_sq_toLp {α : Type*} {mα : MeasurableSpace α}
+    {ν : Measure α} {f : α → ℝ} (hf : MemLp f 2 ν) :
+    ∫ x, (hf.toLp f x) ^ 2 ∂ν = ∫ x, f x ^ 2 ∂ν :=
+  integral_congr_ae <| hf.coeFn_toLp.mono fun _ hx ↦ by simp only [hx]
+
+/-- **`HasLaw` form with the variance given**: when `∫₀ᵀ f² = v`, the Wiener integral of `f` is
+`N(0, v)`. -/
+theorem wienerIntegralLp_hasLaw_gaussian_of_integral_sq (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+    (f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)))) {v : ℝ}
+    (hv : ∫ s in Set.Ioc (0 : ℝ) (T : ℝ), (f s) ^ 2 ∂volume = v) :
+    HasLaw (fun ω ↦ (wienerIntegralLp B hB T f) ω) (gaussianReal 0 v.toNNReal) μ :=
+  hv ▸ wienerIntegralLp_hasLaw_gaussian hB T f
+
 end WienerIntegralL2
 end MathFin

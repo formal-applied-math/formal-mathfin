@@ -17,7 +17,7 @@ continuation region. No boundary monotonicity or convexity is used.
 ## Result
 
 Public entry points include `exists_boundary_sqrt_bound`, `boundary_below_linear_eventually`,
-`boundary_ratio_tendsto_atBot`, `zeroDividend_boundary_ratio_tendsto_atBot`.
+`boundary_ratio_tendsto_atBot`.
 -/
 
 @[expose] public section
@@ -85,11 +85,5 @@ theorem boundary_ratio_tendsto_atBot {k h : ℝ}
   exact hratio.le.trans ha
 
 end DividendPutSolution
-
-/-- The same checked expiry input on the original zero-dividend contract. -/
-theorem zeroDividend_boundary_ratio_tendsto_atBot {k : ℝ}
-    {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} (hp : NormalizedPutSolution k p b) :
-    Tendsto (fun t => b t/t) (𝓝[>] 0) atBot :=
-  (dividendPutSolution_zero_iff.mpr hp).boundary_ratio_tendsto_atBot
 
 end MathFin.BlackScholes.AmericanPut.Boundary

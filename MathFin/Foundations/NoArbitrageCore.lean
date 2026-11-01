@@ -10,13 +10,14 @@ public import Mathlib
 /-!
 # No-arbitrage core: a nonnegative zero-mean payoff vanishes
 
-The shared analytic heart of the forward FTAP, discrete and continuous alike. A `Q`-integrable
+The shared analytic heart of the forward FTAP. A `Q`-integrable
 `f` that is `Q`-a.s. nonnegative with `∫ f dQ = 0` is `Q`-a.s. zero, so its positive set is
-`Q`-null (`ae_zero_of_nonneg_of_integral_zero`). Each forward-FTAP setting supplies the
-zero-integral its own way: the discrete `FTAP.emm_implies_no_arbitrage` gets it from a
-martingale transform started at `0` (`martingale_nonneg_terminal_ae_zero`, below), while the
-continuous `ContinuousMarket.isEMM_noArbitrageSimple` gets it term-by-term from the pull-out
-property. Both then close through `ae_zero_of_nonneg_of_integral_zero`.
+`Q`-null (`ae_zero_of_nonneg_of_integral_zero`). The zero integral comes from a martingale
+transform started at `0` (`martingale_nonneg_terminal_ae_zero`, below), which is what the
+discrete-time `IsEMM.noArbitrage` does; the one-period, finite-Ω and continuous-time
+(`ContinuousMarket.isEMM_noArbitrageSimple`, through sampling) forward directions are its
+instances. `ae_eq_zero_of_nonneg_of_null_pos` turns the null positive set into
+the `=ᵐ 0` form of the no-arbitrage definitions.
 -/
 
 @[expose] public section
@@ -34,6 +35,15 @@ theorem ae_zero_of_nonneg_of_integral_zero
     Q {ω | 0 < f ω} = 0 := by
   have hf_zero : f =ᵐ[Q] 0 := (integral_eq_zero_iff_of_nonneg_ae hf_nonneg hf_int).mp hf0
   exact measure_mono_null (fun ω hω ↦ ne_of_gt hω) (ae_iff.mp hf_zero)
+
+/-- **A nonnegative payoff with a null positive set is a.e. zero.** The no-arbitrage
+definitions of every setting conclude `=ᵐ[P] 0`; the forward FTAP produces the null positive
+set. -/
+theorem ae_eq_zero_of_nonneg_of_null_pos
+    {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} {f : Ω → ℝ}
+    (hnn : 0 ≤ᵐ[P] f) (h : P {ω | 0 < f ω} = 0) : f =ᵐ[P] 0 := by
+  filter_upwards [hnn, measure_eq_zero_iff_ae_notMem.mp h] with ω h1 h2
+  exact le_antisymm (not_lt.mp h2) h1
 
 /-- **A nonnegative martingale started at `0` vanishes at the terminal time.** The discrete
 forward FTAP's route to zero mean: `∫ V_T dQ = ∫ V_0 dQ = 0`, then

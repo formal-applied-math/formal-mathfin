@@ -42,7 +42,7 @@ theorem dividend_curvature_claim : DividendCurvatureClaim := by
   intro k h p b hp
   exact dividend_log_curvature hp
 
-/-- Zero-dividend milestone: weak log curvature on the original contract.
+/-- Zero-dividend milestone: weak log curvature for `NormalizedPutSolution`.
 This is the new proof specialized, not an independent CCJZ proof and not the
 strict logarithmic curvature statement of that paper. -/
 theorem zeroDividend_weak_curvature_claim : ZeroDividendWeakCurvatureClaim :=

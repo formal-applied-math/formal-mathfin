@@ -17,17 +17,19 @@ zero-coupon bond `P(·, T)` maturing at `T` as the numéraire, instead of the mo
 market. Its defining property is that the **forward price is a `Q^T`-martingale**:
 for any traded claim,
 
-  `P(0, T) · 𝔼^{Q^T}[X] = 𝔼^Q[e^{−rT} · X]`,
+  `P(0, T) · 𝔼^{Q^T}[X] = 𝔼^Q[X / B_T]`,
 
-and in particular the forward price of the spot is its `Q^T`-expectation,
-`𝔼^{Q^T}[S_T] = S_0 / P(0, T) = F(0, T)`.
+with `B` the bank account and `P(0, T) = 𝔼^Q[1/B_T]` the bond price. In the constant-rate
+model this gives `𝔼^{Q^T}[S_T] = S_0 / P(0, T) = F(0, T)`.
 
 This is the natural next instance of the change-of-numéraire engine
 (`Foundations/Numeraire`), after the stock numéraire and the exchange-option
 `S²`-numéraire. Reading off the engine's slots for the bond numéraire against the
-money-market reference (`B_T = e^{rT}`, `B_0 = 1`): the bond pays one unit at
-maturity, so `N_T = P(T, T) = 1`, with `N_0 = P(0, T) = e^{−rT}` the constant-rate
-zero-coupon price (`FixedIncome/ZCB.zcb`).
+bank-account reference: the bond pays one unit at maturity, so `N_T = P(T, T) = 1`, with
+`N_0 = P(0, T) = 𝔼^Q[1/B_T]` and `B_0 = 1`. This is the one `T`-forward measure of the
+library: the Hull–White `S`-forward measure (`FixedIncome/TimingAdjustment`), the nominal
+forward measure of the inflation swap (`FixedIncome/Inflation`) and the constant-rate case
+below are all `forwardMeasure Q B` for their bank accounts `B`.
 
 ## Honest scope
 
@@ -35,17 +37,18 @@ In the **constant-rate** world the bond `P(t, T) = e^{−r(T−t)}` is determini
 so the density `dQ^T/dQ = (N_T·B_0)/(N_0·B_T) = e^{rT}/e^{rT} = 1` and `Q^T = Q`
 coincides with the risk-neutral measure — the forward-price identity below then
 reduces to the familiar `𝔼^Q[S_T] = S_0·e^{rT}`. The *construction* and the
-change-of-numéraire identity are stated for the general engine and carry over
-verbatim to a stochastic short rate (where `P(·, T)` is a genuine `Q`-martingale
-numéraire and `Q^T ≠ Q`); only the concrete constant-rate instance is degenerate.
+change-of-numéraire identity are stated for a general bank account and carry over verbatim
+to a stochastic short rate (where `Q^T ≠ Q`); only the concrete constant-rate instance is
+degenerate.
 
 ## Main results
 
 * `forwardMeasure` — the measure `Q^T` as a `numeraireMeasure` instance.
 * `forwardMeasure_isProbabilityMeasure` — `Q^T` is a probability measure.
 * `forwardMeasure_price` — the bond-numéraire change-of-measure identity
-  `e^{−rT}·𝔼^{Q^T}[X] = 𝔼^Q[e^{−rT}·X]`.
-* `forwardMeasure_expected_spot` — `𝔼^{Q^T}[S_T] = S_0·e^{rT}` from the EMM property.
+  `P(0,T)·𝔼^{Q^T}[X] = 𝔼^Q[X/B_T]`.
+* `forwardMeasure_expected_spot` — `𝔼^{Q^T}[S_T] = S_0·e^{rT}` from the EMM property,
+  at the constant bank account `e^{rT}`.
 * `forwardMeasure_bs_expected_terminal` — the concrete Black–Scholes instance.
 -/
 
@@ -58,53 +61,62 @@ open scoped ENNReal
 
 variable {Ω : Type*} [MeasurableSpace Ω]
 
-/-- The **T-forward measure** `Q^T`: the change-of-numéraire measure with the
-zero-coupon bond `P(·, T)` as numéraire. In the constant-rate model
-`N_T = P(T, T) = 1`, `N_0 = P(0, T) = e^{−rT}`, against the money-market
-reference `B_T = e^{rT}`, `B_0 = 1`. -/
-noncomputable def forwardMeasure (Q : Measure Ω) (r T : ℝ) : Measure Ω :=
-  numeraireMeasure Q (fun _ ↦ Real.exp (r * T)) (fun _ ↦ (1 : ℝ)) 1 (Real.exp (-(r * T)))
+/-- The **T-forward measure** `Q^T` for the bank account `B` (its terminal value `B_T`): the
+change-of-numéraire measure with the zero-coupon bond `P(·, T)` as numéraire, `N_T = 1`,
+`N_0 = P(0, T) = 𝔼^Q[1/B_T]`, against the reference `B_T`, `B_0 = 1`. Its density is
+`dQ^T/dQ = (1/B_T)/P(0,T)`. It is a probability measure only when `B > 0` and `1/B` is
+integrable (`forwardMeasure_isProbabilityMeasure`); when `1/B` is not integrable, `∫ 1/B` is the
+Bochner junk value `0` and this is not a price measure. -/
+noncomputable def forwardMeasure (Q : Measure Ω) (B : Ω → ℝ) : Measure Ω :=
+  numeraireMeasure Q B (fun _ ↦ (1 : ℝ)) 1 (∫ ω, 1 / B ω ∂Q)
 
-/-- **The T-forward measure is a probability measure.** The normalisation
-`𝔼^Q[N_T/B_T] = N_0/B_0` reads `𝔼^Q[e^{−rT}] = e^{−rT}`, which holds because the
-integrand is the constant `e^{−rT}` and `Q` is a probability measure. -/
-theorem forwardMeasure_isProbabilityMeasure {Q : Measure Ω} [IsProbabilityMeasure Q] (r T : ℝ) :
-    IsProbabilityMeasure (forwardMeasure Q r T) := by
-  refine numeraireMeasure_isProbabilityMeasure (fun _ ↦ one_pos) (fun _ ↦ Real.exp_pos _)
-    one_pos (Real.exp_pos _) (integrable_const _) ?_
-  have hconst : (fun ω : Ω ↦ (1 : ℝ) / Real.exp (r * T)) = fun _ ↦ Real.exp (-(r * T)) := by
-    funext ω; simp [Real.exp_neg]
-  rw [hconst, integral_const]
-  simp
+/-- The integral `P(0, T) = 𝔼[1/B_T]` of a positive integrable discount factor is positive. -/
+lemma integral_one_div_pos {Q : Measure Ω} [IsProbabilityMeasure Q] {B : Ω → ℝ}
+    (hB : ∀ ω, 0 < B ω) (hint : Integrable (fun ω ↦ 1 / B ω) Q) :
+    0 < ∫ ω, 1 / B ω ∂Q := by
+  rw [integral_pos_iff_support_of_nonneg (fun ω ↦ (one_div_pos.2 (hB ω)).le) hint]
+  have : Function.support (fun ω ↦ 1 / B ω) = Set.univ :=
+    Set.eq_univ_of_forall fun ω ↦ (one_div_pos.2 (hB ω)).ne'
+  rw [this, measure_univ]
+  exact zero_lt_one
 
-/-- **The bond-numéraire change of measure**: `e^{−rT}·𝔼^{Q^T}[X] = 𝔼^Q[e^{−rT}·X]`.
-Directly the change-of-numéraire theorem with the bond slots `N_T = 1`,
-`N_0 = e^{−rT}`, `B_T = e^{rT}`, `B_0 = 1` (no integrability hypothesis needed). -/
-theorem forwardMeasure_price {Q : Measure Ω} (X : Ω → ℝ) (r T : ℝ) :
-    Real.exp (-(r * T)) * ∫ ω, X ω ∂(forwardMeasure Q r T)
-      = ∫ ω, Real.exp (-(r * T)) * X ω ∂Q := by
-  have h := changeOfNumeraire (Q := Q) (BT := fun _ ↦ Real.exp (r * T))
-    (NT := fun _ ↦ (1 : ℝ)) (B0 := (1 : ℝ)) (N0 := Real.exp (-(r * T))) X
-    measurable_const measurable_const (fun _ ↦ one_pos) (fun _ ↦ Real.exp_pos _)
-    (by norm_num) (Real.exp_pos _)
-  simp only [div_one, one_mul] at h
-  rw [forwardMeasure, h]
-  refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
-  change X ω / Real.exp (r * T) = Real.exp (-(r * T)) * X ω
-  rw [div_eq_mul_inv, ← Real.exp_neg, mul_comm]
+/-- **The T-forward measure is a probability measure**: the normalisation
+`𝔼^Q[N_T/B_T] = N_0/B_0` reads `𝔼^Q[1/B_T] = P(0,T)`, which is the definition of `P(0,T)`.
+This is the one probability lemma behind every forward measure of the library. (Equivalence with
+`Q` is `numeraireMeasure_isEquivProbMeasure`, not proved here.) -/
+theorem forwardMeasure_isProbabilityMeasure {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {B : Ω → ℝ} (hB : ∀ ω, 0 < B ω) (hint : Integrable (fun ω ↦ 1 / B ω) Q) :
+    IsProbabilityMeasure (forwardMeasure Q B) :=
+  numeraireMeasure_isProbabilityMeasure (fun _ ↦ one_pos) hB one_pos
+    (integral_one_div_pos hB hint) hint (div_one _).symm
 
-/-- **The forward price is the `Q^T`-expectation of the spot**: given the EMM
-property `𝔼^Q[e^{−rT}·S_T] = S_0`, one has `𝔼^{Q^T}[S_T] = S_0·e^{rT} = S_0/P(0,T)`
-— the no-arbitrage forward price. -/
-theorem forwardMeasure_expected_spot {Q : Measure Ω} (S_0 r T : ℝ) (X : Ω → ℝ)
-    (hEMM : ∫ ω, Real.exp (-(r * T)) * X ω ∂Q = S_0) :
-    ∫ ω, X ω ∂(forwardMeasure Q r T) = S_0 * Real.exp (r * T) := by
-  have hp := forwardMeasure_price (Q := Q) X r T
-  rw [hEMM] at hp
-  have key : ∫ ω, X ω ∂(forwardMeasure Q r T)
-      = Real.exp (r * T) * (Real.exp (-(r * T)) * ∫ ω, X ω ∂(forwardMeasure Q r T)) := by
-    rw [← mul_assoc, ← Real.exp_add, show r * T + -(r * T) = 0 from by ring, Real.exp_zero, one_mul]
-  rw [key, hp, mul_comm]
+/-- **The bond-numéraire change of measure**: `P(0,T)·𝔼^{Q^T}[X] = 𝔼^Q[X/B_T]`.
+Directly the change-of-numéraire theorem with the bond slots `N_T = 1`, `N_0 = P(0,T)`,
+`B_0 = 1` (no integrability hypothesis needed). -/
+theorem forwardMeasure_price {Q : Measure Ω} {B : Ω → ℝ} (X : Ω → ℝ)
+    (hBmeas : Measurable B) (hB : ∀ ω, 0 < B ω) (hP0 : 0 < ∫ ω, 1 / B ω ∂Q) :
+    (∫ ω, 1 / B ω ∂Q) * ∫ ω, X ω ∂(forwardMeasure Q B) = ∫ ω, X ω / B ω ∂Q := by
+  unfold forwardMeasure
+  simpa using changeOfNumeraire (Q := Q) (BT := B) (NT := fun _ ↦ (1 : ℝ)) (B0 := 1)
+    (N0 := ∫ ω, 1 / B ω ∂Q) X measurable_const hBmeas (fun _ ↦ one_pos) hB zero_le_one hP0
+
+/-- **The forward price is the `Q^T`-expectation of the spot**: at the constant bank account
+`e^{rT}` and given the EMM property `𝔼^Q[e^{−rT}·S_T] = S_0`, one has
+`𝔼^{Q^T}[S_T] = S_0·e^{rT} = S_0/P(0,T)` — the no-arbitrage forward price. -/
+theorem forwardMeasure_expected_spot {Q : Measure Ω} [IsProbabilityMeasure Q] (S_0 r T : ℝ)
+    (X : Ω → ℝ) (hEMM : ∫ ω, Real.exp (-(r * T)) * X ω ∂Q = S_0) :
+    ∫ ω, X ω ∂(forwardMeasure Q fun _ ↦ Real.exp (r * T)) = S_0 * Real.exp (r * T) := by
+  have hp := forwardMeasure_price (Q := Q) X (B := fun _ ↦ Real.exp (r * T))
+    measurable_const (fun _ ↦ Real.exp_pos _)
+    (by simp only [integral_const, probReal_univ, one_smul]; positivity)
+  simp only [integral_const, probReal_univ, one_smul, ← Real.exp_neg,
+    div_eq_mul_inv] at hp
+  have hEMM' : ∫ ω, X ω * Real.exp (-(r * T)) ∂Q = S_0 := by
+    rw [← hEMM]; exact integral_congr_ae (ae_of_all _ fun ω ↦ mul_comm _ _)
+  rw [hEMM'] at hp
+  have he : Real.exp (-(r * T)) * Real.exp (r * T) = 1 := by rw [← Real.exp_add]; simp
+  linear_combination (Real.exp (r * T)) * hp
+    - (∫ ω, X ω ∂(forwardMeasure Q fun _ ↦ Real.exp (r * T))) * he
 
 /-- **The Black–Scholes forward price under the T-forward measure**: for the
 `BSCallHyp` lognormal terminal, `𝔼^{Q^T}[S_T] = S_0·e^{rT}`. Combines the
@@ -112,7 +124,8 @@ theorem forwardMeasure_expected_spot {Q : Measure Ω} (S_0 r T : ℝ) (X : Ω �
 `discounted_terminal_eq_S0`. -/
 theorem forwardMeasure_bs_expected_terminal {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :
-    ∫ ω, bsTerminal S_0 r σ T (Z ω) ∂(forwardMeasure Q r T) = S_0 * Real.exp (r * T) :=
+    ∫ ω, bsTerminal S_0 r σ T (Z ω) ∂(forwardMeasure Q fun _ ↦ Real.exp (r * T))
+      = S_0 * Real.exp (r * T) :=
   forwardMeasure_expected_spot S_0 r T _ (discounted_terminal_eq_S0 h)
 
 end MathFin

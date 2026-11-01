@@ -60,12 +60,6 @@ open MeasureTheory ProbabilityTheory Set
 open scoped NNReal
 open WienerIntegralL2
 
-/-- The restricted volume measure on `(0, T]` is finite. -/
-private instance abcd_finite_restrict (T : ℝ≥0) :
-    IsFiniteMeasure (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) :=
-  ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, Real.volume_Ioc];
-      exact ENNReal.ofReal_lt_top⟩
-
 /-- The ABCD integrand of the forward fixing at `T`: at calendar time `u` its volatility is the
 ABCD shape at the time to maturity `T − u`. -/
 noncomputable def abcdKernel (a b c d T : ℝ) : ℝ → ℝ := fun u ↦ abcdVol a b c d (T - u)
@@ -113,15 +107,9 @@ integrand (`wienerIntegralLp_hasLaw_gaussian`) with its variance in closed form.
 theorem abcdWienerIntegral_hasLaw (hB : IsPreBrownianReal B μ) (a b c d : ℝ) (hc : c ≠ 0)
     (T : ℝ≥0) :
     HasLaw (fun ω ↦ wienerIntegralLp B hB T (abcdKernelLp a b c d T) ω)
-      (gaussianReal 0 (abcdTotalVar a b c d T).toNNReal) μ := by
-  have hW := wienerIntegralLp_hasLaw_gaussian hB T (abcdKernelLp a b c d T)
-  have hInt : ∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (abcdKernelLp a b c d T u) ^ 2 ∂volume
-      = abcdTotalVar a b c d T := by
-    rw [← abcdKernel_integral_sq a b c d hc T]
-    refine integral_congr_ae ?_
-    filter_upwards [(abcdKernel_memLp a b c d T).coeFn_toLp] with u hu
-    rw [abcdKernelLp, hu]
-  rwa [hInt] at hW
+      (gaussianReal 0 (abcdTotalVar a b c d T).toNNReal) μ :=
+  wienerIntegralLp_hasLaw_gaussian_of_integral_sq hB T (abcdKernelLp a b c d T)
+    ((abcdKernel_memLp a b c d T).integral_sq_toLp.trans (abcdKernel_integral_sq a b c d hc T))
 
 /-- The forward fixing at `T` under ABCD volatility, in solved form:
 `F_T = F₀ · exp(−v(T)/2 + ∫₀ᵀ f(T − u) dB_u)`. -/

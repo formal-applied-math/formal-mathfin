@@ -38,11 +38,8 @@ theorem canonicalPrice_continuousBoundaryPutSolution {k h : ℝ}
     dividend_le_rate := hhk
     boundary_initial := canonicalLogBoundary_initial hk
     boundary_continuous := canonicalLogBoundary_continuousOn hk hh hhk
-    price_continuous := (canonicalPrice_continuous hk.le).continuousOn
+    toPutEnvelope := canonicalPrice_putEnvelope hk.le
     price_smooth := ?_
-    initial := canonicalPrice_initial hk.le
-    dominates := fun x t _ => (canonicalPrice_bounds hk.le x t).1
-    bounded := fun x t _ => (canonicalPrice_bounds hk.le x t).2
     exercise := ?_
     continuation := ?_
     equation := ?_

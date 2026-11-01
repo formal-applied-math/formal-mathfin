@@ -79,18 +79,14 @@ theorem brownianInteriorRule_martingale {p : ℝ → ℝ → ℝ} {b : ℝ → �
   have hA := stoppedClassicalCandidate_stronglyAdapted
     (K := K) (r := r) (q := q) (σ := σ) (S := S) hp brownian_adapted continuous_brownian θ
   have hU0 : StronglyMeasurable[brownianFiltration 0] (U 0) :=
-    (classicalCandidate_adapted hp brownian_adapted T 0).stronglyMeasurable
+    (classicalCandidate_adapted hp.toPutEnvelope brownian_adapted T 0).stronglyMeasurable
   have hXadapt : StronglyAdapted brownianFiltration X :=
     fun t => (hA t).sub (hU0.mono (brownianFiltration.mono zero_le))
   have hXcont : ∀ ω, Continuous (fun t => X t ω) := fun ω =>
-    ((classicalCandidate_continuous hp continuous_brownian T ω).comp
+    ((classicalCandidate_continuous hp.toPutEnvelope continuous_brownian T ω).comp
       (continuous_id.min continuous_const)).sub continuous_const
-  have hb : ∀ t ω, ‖U t ω‖ ≤ K := by
-    intro t ω
-    obtain ⟨hlo,hhi⟩ :=
-        classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp brownian hK.le hr T t ω
-    change ‖classicalCandidate brownian K r q σ S p T t ω‖ ≤ K
-    simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
+  have hb : ∀ t ω, ‖U t ω‖ ≤ K :=
+    classicalCandidate_norm_le (q := q) (σ := σ) (S := S) hp.toPutEnvelope brownian hK.le hr T
   obtain ⟨M,_hMcont,hM,heq⟩ := brownianInteriorRule_ito_representation hp hK hS hσ T n
   have hθ : IsStoppingTime brownianAugFiltration (fun ω => (θ.time ω : WithTop ℝ≥0)) :=
     fun t => brownianFiltration_le_aug t _ (θ.stopping t)
@@ -141,7 +137,7 @@ theorem brownianClassicalContactRule_expectedReward {K r q σ S : ℝ}
   calc
     _ = ∫ ω, U (θ.time ω) ω ∂gaussianLimit := integral_congr_ae
       (Eventually.of_forall (fun ω => (classicalContactRule_contact
-        hp brownian_adapted continuous_brownian hK hS T ω).symm))
+        hp.toPutEnvelope brownian_adapted continuous_brownian hK hS T ω).symm))
     _ = ∫ ω, U 0 ω ∂gaussianLimit := hm.symm
     _ = _ := by
       rw [integral_congr_ae (classicalCandidate_initial

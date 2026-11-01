@@ -88,7 +88,7 @@ noncomputable def gsrSigma (σ1 σ2 Tstar u : ℝ) : ℝ := if u ≤ Tstar then 
 
 /-- `gsrSigma` is measurable: it is an `ite` on the measurable set `{u | u ≤ Tstar}` with
 constant branches. -/
-private lemma gsrSigma_measurable (σ1 σ2 Tstar : ℝ) : Measurable (gsrSigma σ1 σ2 Tstar) := by
+lemma gsrSigma_measurable (σ1 σ2 Tstar : ℝ) : Measurable (gsrSigma σ1 σ2 Tstar) := by
   unfold gsrSigma
   exact Measurable.ite measurableSet_Iic measurable_const measurable_const
 
@@ -146,57 +146,67 @@ noncomputable def gsrBondV (κ σ1 σ2 Tstar T : ℝ) : ℝ :=
     + σ2 ^ 2 * (vasicekIntegratedKernelSqAntideriv κ T T
       - vasicekIntegratedKernelSqAntideriv κ T Tstar)
 
+/-- **The GSR variance over a window `(a, T]`**: `σ₁²·(F(m) − F(a)) + σ₂²·(F(T) − F(m))` with
+`m = max a T*` the part of the window before the breakpoint ending at `m` (empty when `a ≥ T*`);
+`gsrBondV` is the window `(0, T]`. -/
+noncomputable def gsrBondVIoc (κ σ1 σ2 Tstar a T : ℝ) : ℝ :=
+  σ1 ^ 2 * (vasicekIntegratedKernelSqAntideriv κ T (max a Tstar)
+      - vasicekIntegratedKernelSqAntideriv κ T a)
+    + σ2 ^ 2 * (vasicekIntegratedKernelSqAntideriv κ T T
+      - vasicekIntegratedKernelSqAntideriv κ T (max a Tstar))
+
+lemma gsrBondVIoc_zero {Tstar : ℝ} (hTstar0 : 0 ≤ Tstar) (κ σ1 σ2 T : ℝ) :
+    gsrBondVIoc κ σ1 σ2 Tstar 0 T = gsrBondV κ σ1 σ2 Tstar T := by
+  rw [gsrBondVIoc, gsrBondV, max_eq_right hTstar0]
+
+/-- **The squared `L²` norm of the GSR kernel over a window `(a, T]`**, by splitting the window at
+`max a T*` (`gsrKernel` is exactly `σ₁ · g` on the part before `T*` and `σ₂ · g` after it, a case
+split on `gsrSigma`'s own definition) and applying `integral_vasicekIntegratedKernel_sq_eq_sub`
+on each piece. -/
+theorem gsrKernel_integral_sq_Ioc_eq {κ : ℝ} (hκ : 0 < κ) (σ1 σ2 Tstar a T : ℝ)
+    (haT : a ≤ T) (hTstarT : Tstar ≤ T) :
+    ∫ u in Set.Ioc a T, (gsrKernel σ1 σ2 Tstar κ T u) ^ 2 ∂volume
+      = gsrBondVIoc κ σ1 σ2 Tstar a T := by
+  set m := max a Tstar with hm
+  have ham : a ≤ m := le_max_left _ _
+  have hmT : m ≤ T := max_le haT hTstarT
+  have heq1 : Set.EqOn (fun u ↦ (gsrKernel σ1 σ2 Tstar κ T u) ^ 2)
+      (fun u ↦ σ1 ^ 2 * vasicekIntegratedKernel κ T u ^ 2) (Set.Ioc a m) := by
+    intro u hu
+    have : u ≤ Tstar := by
+      rcases le_total a Tstar with h | h
+      · exact (hu.2.trans_eq (max_eq_right h))
+      · exact absurd (hu.2.trans_eq (max_eq_left h)) (not_le.2 hu.1)
+    simp only [gsrKernel, gsrSigma, if_pos this]
+    ring
+  have heq2 : Set.EqOn (fun u ↦ (gsrKernel σ1 σ2 Tstar κ T u) ^ 2)
+      (fun u ↦ σ2 ^ 2 * vasicekIntegratedKernel κ T u ^ 2) (Set.Ioc m T) := by
+    intro u hu
+    simp only [gsrKernel, gsrSigma, if_neg (not_le.mpr (lt_of_le_of_lt (le_max_right _ _) hu.1))]
+    ring
+  have hcont (c : ℝ) {x y : ℝ} (hxy : x ≤ y) : IntegrableOn
+      (fun u ↦ c * vasicekIntegratedKernel κ T u ^ 2) (Set.Ioc x y) volume :=
+    (intervalIntegrable_iff_integrableOn_Ioc_of_le hxy).mp
+      (by apply Continuous.intervalIntegrable; unfold vasicekIntegratedKernel; fun_prop)
+  have hmeas1 := (hcont (σ1 ^ 2) ham).congr_fun heq1.symm measurableSet_Ioc
+  have hmeas2 := (hcont (σ2 ^ 2) hmT).congr_fun heq2.symm measurableSet_Ioc
+  have hdisj : Disjoint (Set.Ioc a m) (Set.Ioc m T) :=
+    Set.disjoint_left.mpr (fun x hx1 hx2 ↦ absurd hx2.1 (not_lt.mpr hx1.2))
+  rw [← Set.Ioc_union_Ioc_eq_Ioc ham hmT, setIntegral_union hdisj measurableSet_Ioc hmeas1 hmeas2,
+    setIntegral_congr_fun measurableSet_Ioc heq1, setIntegral_congr_fun measurableSet_Ioc heq2,
+    integral_const_mul, integral_const_mul, ← intervalIntegral.integral_of_le ham,
+    ← intervalIntegral.integral_of_le hmT,
+    integral_vasicekIntegratedKernel_sq_eq_sub κ T a m hκ.ne',
+    integral_vasicekIntegratedKernel_sq_eq_sub κ T m T hκ.ne', gsrBondVIoc]
+
 /-- **The core calculus fact**: the `(0,T]`-window squared `L²` norm of the GSR kernel is
-the closed-form `gsrBondV`, by splitting the window at `T*` (`gsrKernel` restricted to
-`(0,T*]` is exactly `σ₁ · g`, and restricted to `(T*,T]` is exactly `σ₂ · g` — no
-approximation, a genuine case split on `gsrSigma`'s own definition) and applying
-`integral_vasicekIntegratedKernel_sq_eq_sub` on each piece. -/
+the closed-form `gsrBondV` (`gsrKernel_integral_sq_Ioc_eq` on the window `(0, T]`). -/
 theorem gsrKernel_integral_sq_eq {κ : ℝ} (hκ : 0 < κ) (σ1 σ2 Tstar T : ℝ)
     (hTstar0 : 0 ≤ Tstar) (hTstarT : Tstar ≤ T) :
     ∫ u in Set.Ioc (0 : ℝ) T, (gsrKernel σ1 σ2 Tstar κ T u) ^ 2 ∂volume
-      = gsrBondV κ σ1 σ2 Tstar T := by
-  have heq1 : Set.EqOn (fun u ↦ (gsrKernel σ1 σ2 Tstar κ T u) ^ 2)
-      (fun u ↦ σ1 ^ 2 * vasicekIntegratedKernel κ T u ^ 2) (Set.Ioc (0 : ℝ) Tstar) := by
-    intro u hu
-    simp only [gsrKernel, gsrSigma, if_pos hu.2]
-    ring
-  have heq2 : Set.EqOn (fun u ↦ (gsrKernel σ1 σ2 Tstar κ T u) ^ 2)
-      (fun u ↦ σ2 ^ 2 * vasicekIntegratedKernel κ T u ^ 2) (Set.Ioc Tstar T) := by
-    intro u hu
-    simp only [gsrKernel, gsrSigma, if_neg (not_le.mpr hu.1)]
-    ring
-  have hcont1 : IntegrableOn (fun u ↦ σ1 ^ 2 * vasicekIntegratedKernel κ T u ^ 2)
-      (Set.Ioc (0 : ℝ) Tstar) volume :=
-    (intervalIntegrable_iff_integrableOn_Ioc_of_le hTstar0).mp
-      (by apply Continuous.intervalIntegrable; unfold vasicekIntegratedKernel; fun_prop)
-  have hcont2 : IntegrableOn (fun u ↦ σ2 ^ 2 * vasicekIntegratedKernel κ T u ^ 2)
-      (Set.Ioc Tstar T) volume :=
-    (intervalIntegrable_iff_integrableOn_Ioc_of_le hTstarT).mp
-      (by apply Continuous.intervalIntegrable; unfold vasicekIntegratedKernel; fun_prop)
-  have hmeas1 : IntegrableOn (fun u ↦ (gsrKernel σ1 σ2 Tstar κ T u) ^ 2)
-      (Set.Ioc (0 : ℝ) Tstar) volume := hcont1.congr_fun heq1.symm measurableSet_Ioc
-  have hmeas2 : IntegrableOn (fun u ↦ (gsrKernel σ1 σ2 Tstar κ T u) ^ 2)
-      (Set.Ioc Tstar T) volume := hcont2.congr_fun heq2.symm measurableSet_Ioc
-  have hdisj : Disjoint (Set.Ioc (0 : ℝ) Tstar) (Set.Ioc Tstar T) :=
-    Set.disjoint_left.mpr (fun x hx1 hx2 ↦ absurd hx2.1 (not_lt.mpr hx1.2))
-  have hstep1 : ∫ u in Set.Ioc (0 : ℝ) T, (gsrKernel σ1 σ2 Tstar κ T u) ^ 2 ∂volume
-      = (∫ u in Set.Ioc (0 : ℝ) Tstar, (gsrKernel σ1 σ2 Tstar κ T u) ^ 2 ∂volume)
-        + ∫ u in Set.Ioc Tstar T, (gsrKernel σ1 σ2 Tstar κ T u) ^ 2 ∂volume := by
-    rw [← Set.Ioc_union_Ioc_eq_Ioc hTstar0 hTstarT,
-      setIntegral_union hdisj measurableSet_Ioc hmeas1 hmeas2]
-  have hstep2 : ∫ u in Set.Ioc (0 : ℝ) Tstar, (gsrKernel σ1 σ2 Tstar κ T u) ^ 2 ∂volume
-      = σ1 ^ 2 * (vasicekIntegratedKernelSqAntideriv κ T Tstar
-          - vasicekIntegratedKernelSqAntideriv κ T 0) := by
-    rw [setIntegral_congr_fun measurableSet_Ioc heq1, integral_const_mul,
-      ← intervalIntegral.integral_of_le hTstar0,
-      integral_vasicekIntegratedKernel_sq_eq_sub κ T 0 Tstar hκ.ne']
-  have hstep3 : ∫ u in Set.Ioc Tstar T, (gsrKernel σ1 σ2 Tstar κ T u) ^ 2 ∂volume
-      = σ2 ^ 2 * (vasicekIntegratedKernelSqAntideriv κ T T
-          - vasicekIntegratedKernelSqAntideriv κ T Tstar) := by
-    rw [setIntegral_congr_fun measurableSet_Ioc heq2, integral_const_mul,
-      ← intervalIntegral.integral_of_le hTstarT,
-      integral_vasicekIntegratedKernel_sq_eq_sub κ T Tstar T hκ.ne']
-  rw [hstep1, hstep2, hstep3, gsrBondV]
+      = gsrBondV κ σ1 σ2 Tstar T :=
+  (gsrKernel_integral_sq_Ioc_eq hκ σ1 σ2 Tstar 0 T (hTstar0.trans hTstarT) hTstarT).trans
+    (gsrBondVIoc_zero hTstar0 κ σ1 σ2 T)
 
 /-! ### The GSR short rate and the bond price -/
 
@@ -206,21 +216,8 @@ private lemma gsrKernelLp_integral_sq {κ : ℝ} (hκ : 0 < κ) (σ1 σ2 : ℝ) 
     (hTstarT : (Tstar : ℝ) ≤ (T : ℝ)) :
     (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (gsrKernelLp hκ σ1 σ2 (Tstar : ℝ) T u) ^ 2 ∂volume)
       = gsrBondV κ σ1 σ2 (Tstar : ℝ) (T : ℝ) := by
-  rw [show (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (gsrKernelLp hκ σ1 σ2 (Tstar : ℝ) T u) ^ 2 ∂volume)
-        = ∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (gsrKernel σ1 σ2 (Tstar : ℝ) κ (T : ℝ) u) ^ 2 ∂volume by
-      refine integral_congr_ae ?_
-      filter_upwards [(gsrKernel_memLp hκ σ1 σ2 (Tstar : ℝ) T).coeFn_toLp] with u hu
-      rw [gsrKernelLp, hu]]
-  exact gsrKernel_integral_sq_eq hκ σ1 σ2 (Tstar : ℝ) (T : ℝ) Tstar.2 hTstarT
-
-/-- The centred diffusion law for the GSR kernel: `∫₀ᵀ σ(u)g(u) dB_u` is centred
-Gaussian with variance `gsrBondV κ σ₁ σ₂ T* T`. -/
-private lemma gsrWienerLaw (hB : IsPreBrownianReal B μ) {κ : ℝ} (hκ : 0 < κ)
-    (σ1 σ2 : ℝ) (Tstar T : ℝ≥0) (hTstarT : (Tstar : ℝ) ≤ (T : ℝ)) :
-    HasLaw (fun ω ↦ wienerIntegralLp B hB T (gsrKernelLp hκ σ1 σ2 (Tstar : ℝ) T) ω)
-      (gaussianReal 0 (gsrBondV κ σ1 σ2 (Tstar : ℝ) (T : ℝ)).toNNReal) μ := by
-  have h0 := wienerIntegralLp_hasLaw_gaussian hB T (gsrKernelLp hκ σ1 σ2 (Tstar : ℝ) T)
-  rwa [gsrKernelLp_integral_sq hκ σ1 σ2 Tstar T hTstarT] at h0
+  exact (gsrKernel_memLp hκ σ1 σ2 (Tstar : ℝ) T).integral_sq_toLp.trans
+    (gsrKernel_integral_sq_eq hκ σ1 σ2 (Tstar : ℝ) (T : ℝ) Tstar.2 hTstarT)
 
 /-- **The GSR integrated short rate**, *defined* by its Wiener representation: deterministic
 mean (the Vasicek mean, unchanged — only the volatility axis is piecewise here) plus the
@@ -239,7 +236,8 @@ theorem gsrIntegratedRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ) (r₀ θ
     HasLaw (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar T)
       (gaussianReal (vasicekIntegratedMean r₀ θ κ (T : ℝ))
         (gsrBondV κ σ1 σ2 (Tstar : ℝ) (T : ℝ)).toNNReal) μ := by
-  have hW := gsrWienerLaw hB hκ σ1 σ2 Tstar T hTstarT
+  have hW := wienerIntegralLp_hasLaw_gaussian_of_integral_sq hB T
+    (gsrKernelLp hκ σ1 σ2 (Tstar : ℝ) T) (gsrKernelLp_integral_sq hκ σ1 σ2 Tstar T hTstarT)
   have hShift := gaussianReal_const_add hW (vasicekIntegratedMean r₀ θ κ (T : ℝ))
   convert hShift using 2 <;> first | rfl | ring
 

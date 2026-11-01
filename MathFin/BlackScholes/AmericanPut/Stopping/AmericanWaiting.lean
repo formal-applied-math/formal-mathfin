@@ -15,7 +15,7 @@ continuous-time dynamic programming, without assuming an optimal continuous rule
 ## Result
 
 Public entry points include `brownianAmericanPut_wait_integral`, `brownianLogState_integral`,
-`brownianAmericanPut_wait`, `canonicalPrice_wait`.
+`brownianAmericanPut_wait`, `canonicalPrice_wait`, `canonicalPrice_putWaiting`.
 -/
 
 @[expose] public section
@@ -45,7 +45,7 @@ theorem brownianAmericanPut_wait_integral {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 
     (fun n => Eventually.of_forall (fun ω => by
       have hb := brownianGridMarkovAux_bound
         (fun i y => discountedLogPayoff_bound hK hr (cappedGridTime T (gridStep n) i) y)
-        T (gridStep n) (r-q-σ^2/2) σ ⌈T/gridStep n⌉₊ 0
+        (cappedGridTime T (gridStep n)) (r-q-σ^2/2) σ ⌈T/gridStep n⌉₊ 0
         (brownianLogState (r-q-σ^2/2) σ x u ω)
       have he : Real.exp (-r*(u : ℝ)) ≤ 1 := Real.exp_le_one_iff.mpr (by nlinarith [u.coe_nonneg])
       rw [norm_mul,Real.norm_eq_abs,abs_of_pos (Real.exp_pos _)]
@@ -92,5 +92,14 @@ theorem canonicalPrice_wait {k h : ℝ} (hk : 0 ≤ k) (u T : ℝ≥0) (x : ℝ)
       [hprice,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num),div_self (show (2 : ℝ) ≠ 0 by norm_num)]
       at he
   exact he
+
+/-- The actual price waits: dynamic programming (`canonicalPrice_wait`) in the form
+`PutWaiting` takes. -/
+theorem canonicalPrice_putWaiting {k h : ℝ} (hk : 0 ≤ k) : PutWaiting k h (canonicalPrice k h) where
+  evolution_le {a t} ha hat x := by
+    have he := canonicalPrice_wait (h := h) hk (t-a).toNNReal a.toNNReal x
+    rw [NNReal.coe_add,Real.coe_toNNReal _ (sub_nonneg.mpr hat),Real.coe_toNNReal _ ha,
+      sub_add_cancel] at he
+    exact he
 
 end MathFin.BlackScholes.AmericanPut.Stopping

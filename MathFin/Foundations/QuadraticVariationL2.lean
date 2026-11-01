@@ -9,6 +9,7 @@ public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.ItoIsometryAdapted
 public import MathFin.Foundations.GaussianMoments
+public import MathFin.Foundations.UnifPart
 
 /-!
 # The L² quadratic variation of Brownian motion
@@ -75,15 +76,12 @@ theorem integral_increment_sq_centered {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁
   exact hcomp
 
 omit hB in
-/-- A squared increment over `[a, b] ⊆ [0, c]`, shifted by any constant, is `𝓕_c`-adapted:
+/-- A squared increment over `[a, b] ⊆ [0, c]`, shifted by any constant, is `𝓕_c`-measurable:
 it is built from `B a, B b` (`a, b ≤ c`) by difference, square, and subtraction. -/
-theorem adaptedAt_increment_sq_sub {a b c : ℝ≥0} (hac : a ≤ c) (hbc : b ≤ c) (r : ℝ) :
-    AdaptedAt B c (fun ω ↦ (B b ω - B a ω) ^ 2 - r) := by
-  have hincr : AdaptedAt B c (fun ω ↦ B b ω - B a ω) :=
-    (adaptedAt_eval hbc).sub (adaptedAt_eval hac)
-  have hsq : AdaptedAt B c (fun ω ↦ (B b ω - B a ω) ^ 2) := by
-    simpa only [← pow_two] using hincr.mul hincr
-  exact hsq.sub ⟨fun _ ↦ r, measurable_const, rfl⟩
+theorem measurable_increment_sq_sub {𝓕 : Filtration ℝ≥0 mΩ} (hF : IsFilteredPreBrownian B 𝓕 μ)
+    {a b c : ℝ≥0} (hac : a ≤ c) (hbc : b ≤ c) (r : ℝ) :
+    Measurable[𝓕 c] (fun ω ↦ (B b ω - B a ω) ^ 2 - r) :=
+  (((hF.measurable_eval_of_le hbc).sub (hF.measurable_eval_of_le hac)).pow_const 2).sub_const r
 
 /-- **A centered squared Brownian increment has mean zero**: `E[(ΔB)² − (t₁−t₀)] = 0`
 for `t₀ ≤ t₁`. The law-transfer of `integral_sq_sub_var_gaussianReal` — i.e. `E[(ΔB)²] = t₁−t₀`.
@@ -109,27 +107,31 @@ theorem memLp_increment_four (t₀ t₁ : ℝ≥0) :
   exact (memLp_map_measure_iff measurable_id.aestronglyMeasurable
     (hB.hasLaw_sub t₁ t₀).aemeasurable).mp hmap
 
+omit hB in
 /-- **Pairwise orthogonality of centered squared increments** (the vanishing cross terms).
 For disjoint ordered intervals `a ≤ b ≤ c ≤ d`,
 `E[((ΔB_{a,b})² − (b−a)) · ((ΔB_{c,d})² − (d−c))] = 0`. The two centered squares are functions
 of the *independent* increments over `[a,b]` and `[c,d]` (weak Markov), and the second is mean
 zero — so the product's expectation factorises to `(…)·0`. This is what makes the quadratic
 variation's L² fluctuation a *sum* of the per-interval `2(Δt)²` terms (Pythagoras). -/
-theorem integral_increment_sq_centered_cross (hBmeas : ∀ t, Measurable (B t))
+theorem integral_increment_sq_centered_cross {𝓕 : Filtration ℝ≥0 mΩ}
+    (hF : IsFilteredPreBrownian B 𝓕 μ)
     {a b c d : ℝ≥0} (hab : a ≤ b) (hbc : b ≤ c) (hcd : c ≤ d) :
     ∫ ω, ((B b ω - B a ω) ^ 2 - ((b : ℝ) - a)) * ((B d ω - B c ω) ^ 2 - ((d : ℝ) - c)) ∂μ = 0 := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  haveI : IsProbabilityMeasure μ := hF.isGaussianProcess.isProbabilityMeasure
   set χ : Ω → ℝ := fun ω ↦ (B b ω - B a ω) ^ 2 - ((b : ℝ) - a) with hχdef
-  have hχ_adapted : AdaptedAt B c χ :=
-    adaptedAt_increment_sq_sub (hab.trans hbc) hbc ((b : ℝ) - a)
+  have hχ_adapted : Measurable[𝓕 c] χ :=
+    measurable_increment_sq_sub hF (hab.trans hbc) hbc ((b : ℝ) - a)
   have hindep : IndepFun χ (fun ω ↦ (B d ω - B c ω) ^ 2 - ((d : ℝ) - c)) μ := by
-    have h := (adapted_indepFun_increment hB hBmeas hcd hχ_adapted).comp
+    have h := (adapted_indepFun_increment hF hcd hχ_adapted).comp
       (φ := (id : ℝ → ℝ)) (ψ := fun x ↦ x ^ 2 - ((d : ℝ) - c)) measurable_id (by fun_prop)
     simpa [Function.comp_def] using h
-  have hχm : Measurable χ := hχ_adapted.measurable hBmeas
-  have hYm : Measurable (fun ω ↦ (B d ω - B c ω) ^ 2 - ((d : ℝ) - c)) := by fun_prop
+  have hχm : Measurable χ := hχ_adapted.mono (𝓕.le c) le_rfl
+  have hYm : Measurable (fun ω ↦ (B d ω - B c ω) ^ 2 - ((d : ℝ) - c)) := by
+    have := hF.measurable_eval
+    fun_prop
   rw [hindep.integral_fun_mul_eq_mul_integral hχm.aestronglyMeasurable hYm.aestronglyMeasurable,
-      integral_increment_centered_mean hB hcd, mul_zero]
+      integral_increment_centered_mean hF.toIsPreBrownianReal hcd, mul_zero]
 
 /-- A centered squared Brownian increment is in `L²` (`Yₖ = (ΔB)² − Δt`): the squared
 increment is `L²` since the increment is `L⁴`, and a constant is `L²` on a probability space. -/
@@ -183,11 +185,11 @@ theorem sum_increment_sq_sub_sq_integral (hBmeas : ∀ t, Measurable (B t))
     rcases lt_or_gt_of_ne hlk with hlt | hgt
     · -- l < k
       rw [show (fun ω ↦ Y k ω * Y l ω) = fun ω ↦ Y l ω * Y k ω from funext fun ω ↦ mul_comm _ _]
-      exact integral_increment_sq_centered_cross hB hBmeas (hmono (Nat.le_succ l))
-        (hmono (Nat.succ_le_of_lt hlt)) (hmono (Nat.le_succ k))
+      exact integral_increment_sq_centered_cross (hB.isFilteredPreBrownian hBmeas)
+        (hmono (Nat.le_succ l)) (hmono (Nat.succ_le_of_lt hlt)) (hmono (Nat.le_succ k))
     · -- k < l
-      exact integral_increment_sq_centered_cross hB hBmeas (hmono (Nat.le_succ k))
-        (hmono (Nat.succ_le_of_lt hgt)) (hmono (Nat.le_succ l))
+      exact integral_increment_sq_centered_cross (hB.isFilteredPreBrownian hBmeas)
+        (hmono (Nat.le_succ k)) (hmono (Nat.succ_le_of_lt hgt)) (hmono (Nat.le_succ l))
   calc ∫ ω, (∑ k ∈ Finset.range n, (B (s (k + 1)) ω - B (s k) ω) ^ 2 - (s n : ℝ)) ^ 2 ∂μ
       = ∫ ω, (∑ k ∈ Finset.range n, Y k ω) ^ 2 ∂μ := by
         refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
@@ -232,10 +234,6 @@ theorem sum_increment_sq_sub_sq_le (hBmeas : ∀ t, Measurable (B t))
         nlinarith [hδ k hk, hΔ0]
     _ = 2 * δ * (s n : ℝ) := by rw [← Finset.mul_sum, htel]
 
-omit hB in
-/-- The uniform partition of `[0, T]`: the `n`-th refinement places its `k`-th node at `kT/n`. -/
-noncomputable def unifPart (T : ℝ≥0) (n k : ℕ) : ℝ≥0 := (k : ℝ≥0) / (n : ℝ≥0) * T
-
 /-- **Brownian motion has quadratic variation `T` (textbook L² form).** Along the uniform
 partition of `[0, T]` into `n` pieces, the sum of squared increments converges to `T` in mean
 square: `E[(∑_{k<n} (B_{(k+1)T/n} − B_{kT/n})² − T)²] → 0`. Immediate from the mesh bound
@@ -249,19 +247,11 @@ theorem tendsto_qv (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
     (Eventually.of_forall fun n ↦ integral_nonneg fun ω ↦ sq_nonneg _) ?_
     (tendsto_const_div_atTop_nhds_zero_nat (2 * (T : ℝ) ^ 2))
   filter_upwards [eventually_gt_atTop 0] with n hn
-  have hn0 : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-  have hnR : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-  have hmono : Monotone (unifPart T n) := fun a b hab ↦ by
-    simp only [unifPart]; gcongr
-  have hs0 : unifPart T n 0 = 0 := by simp [unifPart]
-  have hsn : unifPart T n n = T := by simp only [unifPart, div_self hn0, one_mul]
-  have hgap : ∀ k ∈ Finset.range n, (unifPart T n (k + 1) : ℝ) - unifPart T n k ≤ (T : ℝ) / n := by
-    intro k _
-    have : (unifPart T n (k + 1) : ℝ) - unifPart T n k = (T : ℝ) / n := by
-      simp only [unifPart]; push_cast; field_simp; ring
-    exact le_of_eq this
-  have hbound := sum_increment_sq_sub_sq_le hB hBmeas hmono hs0 n hgap
-  rw [hsn] at hbound
+  have hgap : ∀ k ∈ Finset.range n, (unifPart T n (k + 1) : ℝ) - unifPart T n k ≤ (T : ℝ) / n :=
+    fun k _ ↦ (unifPart_succ_sub T n k).le
+  have hbound := sum_increment_sq_sub_sq_le hB hBmeas (unifPart_mono T n) (unifPart_zero T n) n
+    hgap
+  rw [unifPart_self T hn.ne'] at hbound
   rw [show (2 : ℝ) * (T : ℝ) ^ 2 / (n : ℝ) = 2 * ((T : ℝ) / n) * T from by ring]
   exact hbound
 

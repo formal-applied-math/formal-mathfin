@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.PlaneIto
+public import MathFin.BlackScholes.AmericanPut.Boundary.DividendProblem
 
 /-!
 # Zero-drift smooth Ito localizations of the classical price
@@ -56,7 +57,8 @@ theorem brownianPriceKernel_localization_zero_drift {p : ℝ → ℝ → ℝ} {b
       (fun y => brownianPriceKernel p K r q σ x₀ T z.1 y) :=
     hz.comp_tendsto (show Tendsto (fun y : ℝ => (z.1,y)) (𝓝 z.2) (𝓝 z) by
       convert! (continuous_const.prodMk continuous_id).tendsto z.2 using 1)
-  rw [show z = (z.1,z.2) from rfl,planeGenerator_eq_partials hG,htEq.deriv_eq,hxEq.deriv.deriv_eq]
+  rw [show z = (z.1,z.2) from rfl,planeGenerator_eq_partials (hG.of_le (by norm_num)),
+    htEq.deriv_eq,hxEq.deriv.deriv_eq]
   exact brownianPriceKernel_heat_equation hp hσ hzt hzx
 
 theorem local_price_ito {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
@@ -78,6 +80,7 @@ theorem local_price_ito {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
             planeGenerator G (u,W u ω) ∂MathFin.ItoIntegralL2.timeMeasure) := by
   obtain ⟨G,hG,hcompact,heq,hzero⟩ :=
       brownianPriceKernel_localization_zero_drift (K := K) hp hσ ht hx
-  exact ⟨G,hG,hcompact,heq,hzero,plane_ito_localMartingale hW hmeas hpaths hG⟩
+  exact ⟨G,hG,hcompact,heq,hzero,
+    plane_ito_localMartingale hW hmeas hpaths (hG.of_le (by norm_num))⟩
 
 end MathFin.BlackScholes.AmericanPut.Stopping

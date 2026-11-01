@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.JointPriceContinuity
 public import MathFin.BlackScholes.AmericanPut.Stopping.SpotDecay
+public import MathFin.BlackScholes.AmericanPut.Boundary.ContinuousBoundaryProblem
 
 /-! # An actual stopping-value candidate for the normalized classical price
 
@@ -17,7 +18,7 @@ classical contract uses nonnegative times. No PDE or boundary is postulated.
 ## Result
 
 Public entry points include `canonicalPrice`, `canonicalPrice_continuous`, `canonicalPrice_initial`,
-`canonicalPrice_bounds`.
+`canonicalPrice_bounds`, `canonicalPrice_putEnvelope`.
 -/
 
 @[expose] public section
@@ -71,6 +72,14 @@ theorem canonicalPrice_bounds {k h : ℝ} (hk : 0 ≤ k) (x t : ℝ) :
     (by norm_num) hk (Real.exp_pos x).le,
     value_le_strike (P := μ) (𝓕 := brownianUsualFiltration) brownian_completed_measurable
       (by norm_num) hk (Real.exp_pos x).le⟩
+
+/-- The actual price is a `PutEnvelope`, so the classical first-contact and verification
+arguments apply to it at strike `1`, volatility `Real.sqrt 2` and spot `Real.exp x`. -/
+theorem canonicalPrice_putEnvelope {k h : ℝ} (hk : 0 ≤ k) : PutEnvelope (canonicalPrice k h) where
+  price_continuous := (canonicalPrice_continuous hk).continuousOn
+  initial := canonicalPrice_initial hk
+  dominates x t _ := (canonicalPrice_bounds hk x t).1
+  bounded x t _ := (canonicalPrice_bounds hk x t).2
 
 theorem canonicalPrice_normalization (k : ℝ) : normalizedRate k (Real.sqrt 2) = k := by
   simp only [normalizedRate,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]

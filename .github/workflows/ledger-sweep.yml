@@ -88,6 +88,24 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
+      # The Mathlib cache download flakes ("download failed", "Broken pipe") often enough
+      # that one bad mirror read used to fail the job. `lake exe cache get` only fetches
+      # what is missing, so retrying it is cheap; lean-action then skips its own fetch.
+      - name: Install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Mathlib cache (retried)
+        run: |
+          for i in 1 2 3 4; do
+            lake exe cache get && exit 0
+            echo "cache get failed (attempt $i), retrying in $((i * 20)) s"
+            sleep $((i * 20))
+          done
+          exit 1
+
       # Build the library once per shard so `lake env lean` has oleans to
       # elaborate against. `lint: false` for the same reason as pin-bump.yml:
       # the env-linter suite is advisory here and must not fail a sweep.
@@ -95,6 +113,7 @@ jobs:
         uses: leanprover/lean-action@v1
         with:
           lint: "false"
+          use-mathlib-cache: "false"
 
       # LEDGER_EXEC_LOCAL: run `lake env lean` in THIS environment rather than
       # `docker exec`-ing into the local daemon container.

@@ -38,7 +38,7 @@ not depend on `Q`.
 The middle step is the load-bearing one, and it is unavailable here. The wealth process built by
 martingale representation is an integral against `B`, whereas an EMM `Q` for `S` is a measure
 under which `S` — not `B` — is a martingale; `S` and `B` share only a filtration. Nothing in
-`IsEMM S Q` makes `∫₀ᵀ φ dB` a `Q`-fair game, so the uniqueness statement does **not** follow
+`IsEMM 𝓕 P S T Q` makes `∫₀ᵀ φ dB` a `Q`-fair game, so the uniqueness statement does **not** follow
 from `IsEMM` alone. The missing link is the stochastic integral `∫ φ dS`, whose absence
 `ContinuousMarket` already records as deliberate.
 
@@ -266,8 +266,8 @@ module docstring for why this replaces the `S`-only statement, and for the conve
 theorem emm_unique_of_complete (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) {S : ℝ≥0 → Ω → ℝ}
     {Q₁ Q₂ : Measure Ω}
-    (h₁ : ContinuousMarket.IsEMM (P := μ) (𝓕 := ItoIntegralL2.natFiltration hBmeas) S Q₁)
-    (h₂ : ContinuousMarket.IsEMM (P := μ) (𝓕 := ItoIntegralL2.natFiltration hBmeas) S Q₂)
+    (h₁ : ContinuousMarket.IsEMM (ItoIntegralL2.natFiltration hBmeas) μ S T Q₁)
+    (h₂ : ContinuousMarket.IsEMM (ItoIntegralL2.natFiltration hBmeas) μ S T Q₂)
     (hg₁ : PricesGainsAtZero hB T hBmeas Q₁) (hg₂ : PricesGainsAtZero hB T hBmeas Q₂)
     {A : Set Ω} (hA : MeasurableSet[ItoIntegralL2.natFiltration hBmeas T] A) :
     Q₁ A = Q₂ A :=

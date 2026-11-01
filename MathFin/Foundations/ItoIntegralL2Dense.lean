@@ -5,14 +5,14 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoIntegralCLM
+public import MathFin.Foundations.ItoIntegralHorizonDense
 
 /-!
 # Infinite-horizon Itô integral on `[0,∞)` as a continuous linear isometry
 
-This file builds the unbounded-horizon analogue of
-`ItoIntegralCLM.itoIntegralCLM_T`, reusing its finite-horizon density machinery
-via σ-finite exhaustion, delivering the Itô integral on all of `[0,∞)` as a
+This file builds the unbounded-horizon Itô integral (the horizon-`T` one,
+`ItoIntegralCLM.itoIntegralCLM_T`, is its restriction to the band `(0,T]`), reusing the
+finite-horizon density machinery of `ItoIntegralHorizonDense` via σ-finite exhaustion, delivering the Itô integral on all of `[0,∞)` as a
 continuous linear map
 
 `itoIntegralL2 : Lp ℝ 2 trim_full →L[ℝ] Lp ℝ 2 μ`
@@ -28,7 +28,7 @@ argument cannot use the finite-measure complement shortcut.
 The embedding and the Itô isometry on simple processes are already built
 (`ItoIntegralL2.simpleAssembly` / `assembly_isometry`). The one remaining step is
 **density** of the simple-process embedding in the predictable `L²`. We obtain it
-from the *finite-horizon* density machinery (`ItoIntegralCLM`) by a σ-finite
+from the *finite-horizon* density machinery (`ItoIntegralHorizonDense`) by a σ-finite
 exhaustion of the time axis:
 
 * the basic predictable rectangles `Ioc a b ×ˢ F` / `{0} ×ˢ F₀` are a π-system
@@ -320,6 +320,15 @@ theorem itoIntegralL2_norm (hBmeas : ∀ t, Measurable (B t))
   rw [itoIntegralL2]
   exact LinearMap.norm_extendOfNorm_eq_of_isometry
     (simpleAssembly_denseRange (μ := μ) hBmeas) (assembly_isometry hB hBmeas) f
+
+/-- **The `[0,∞)` integral of a simple process is its explicit simple integral**
+`itoSimpleLp V` (`extendOfNorm` on the dense embedding). -/
+lemma itoIntegralL2_simpleAssembly (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
+    itoIntegralL2 hB hBmeas (simpleAssembly hBmeas V) = itoSimpleLp hB hBmeas V := by
+  rw [itoIntegralL2, LinearMap.extendOfNorm_eq (simpleAssembly_denseRange (μ := μ) hBmeas)
+    ⟨1, fun W ↦ by rw [one_mul]; exact (assembly_isometry hB hBmeas W).le⟩]
+  rfl
 
 end ItoIntegralL2
 end MathFin

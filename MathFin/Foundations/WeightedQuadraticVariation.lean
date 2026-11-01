@@ -13,11 +13,10 @@ public import MathFin.Foundations.ItoIntegralL2
 The second-order term of Itô's lemma. For a **bounded adapted weight process** `w` with
 continuous paths, the `w`-weighted sum of squared Brownian increments along the uniform
 partition of `[0,T]` converges in `L²(μ)` to the pathwise integral `∫₀ᵀ w_s ds`
-(`tendsto_weighted_qv_process`). The classical instantiations are `w s ω = g (B s ω)` for
-bounded continuous `g` (`tendsto_weighted_qv`, the use case `g = f″` of the
-time-independent Itô formula) and `w s ω = h (s, B s ω)` for jointly continuous bounded
-`h` (the time-dependent Itô formula's `h = f_xx`) — the fluctuation engine never cared
-where the weight came from, only that it is adapted and bounded.
+(`tendsto_weighted_qv_process`). The classical instantiation is `w s ω = h (s, B s ω)` for
+jointly continuous bounded `h` (the time-dependent Itô formula's `h = f_xx`; the
+time-independent weight `g (B s ω)` is the case of `h` constant in time) — the fluctuation
+engine never cared where the weight came from, only that it is adapted and bounded.
 
 This generalizes `QuadraticVariationL2.tendsto_qv` (the `w ≡ 1` case, limit `T`). The
 proof splits the difference into
@@ -51,13 +50,13 @@ weighted-QV fluctuation's cross terms vanish. Immediate from the isometry kernel
 `integral_adapted_mul_increment_sq` (`E[χ·(ΔB)²] = E[χ]·(t₁−t₀)`) minus `(t₁−t₀)·E[χ]`. -/
 private theorem integral_adapted_mul_centered_sq
     (hBmeas : ∀ t, Measurable (B t)) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
-    {χ : Ω → ℝ} (hχ : AdaptedAt B t₀ χ) :
+    {χ : Ω → ℝ} (hχ : Measurable[ItoIntegralL2.natFiltration hBmeas t₀] χ) :
     ∫ ω, χ ω * ((B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) ∂μ = 0 := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hχm : Measurable χ := hχ.measurable hBmeas
+  have hχm : Measurable χ := hχ.mono ((ItoIntegralL2.natFiltration hBmeas).le t₀) le_rfl
   have hYm : Measurable (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) := by fun_prop
   have hindep : IndepFun χ (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) μ := by
-    have h := (adapted_indepFun_increment hB hBmeas ht hχ).comp
+    have h := (adapted_indepFun_increment (hB.isFilteredPreBrownian hBmeas) ht hχ).comp
       measurable_id (by fun_prop : Measurable (fun x : ℝ ↦ x ^ 2 - ((t₁ : ℝ) - t₀)))
     simpa [Function.comp_def] using h
   rw [hindep.integral_fun_mul_eq_mul_integral hχm.aestronglyMeasurable hYm.aestronglyMeasurable,
@@ -71,7 +70,7 @@ diagonal term is `≤ C²·2(Δtₖ)²` (pointwise `w² ≤ C²` plus
 `sum_increment_sq_sub_sq_integral`. -/
 private theorem weighted_fluctuation_integral_le
     (hBmeas : ∀ t, Measurable (B t))
-    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, AdaptedAt B s (w s))
+    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, Measurable[ItoIntegralL2.natFiltration hBmeas s] (w s))
     {C : ℝ} (hC : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
     ∫ ω, (∑ k ∈ Finset.range n,
         w (unifPart T n k) ω
@@ -80,12 +79,13 @@ private theorem weighted_fluctuation_integral_le
       ≤ ∑ k ∈ Finset.range n,
           C ^ 2 * (2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 2) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hmono : Monotone (unifPart T n) := fun i j hij ↦ by simp only [unifPart]; gcongr
+  have hmono : Monotone (unifPart T n) := unifPart_mono T n
   set t : ℕ → ℝ≥0 := unifPart T n
   set Y : ℕ → Ω → ℝ := fun k ω ↦ (B (t (k + 1)) ω - B (t k) ω) ^ 2 - ((t (k + 1) : ℝ) - t k)
     with hY_def
   set a : ℕ → Ω → ℝ := fun k ω ↦ w (t k) ω * Y k ω with ha_def
-  have hw_meas : ∀ s, Measurable (w s) := fun s ↦ (hw_adapt s).measurable hBmeas
+  have hw_meas : ∀ s, Measurable (w s) := fun s ↦
+    (hw_adapt s).mono ((ItoIntegralL2.natFiltration hBmeas).le s) le_rfl
   have hYL2 : ∀ k, MemLp (Y k) 2 μ := fun k ↦ memLp_increment_sq_centered_two hB (t k) (t (k + 1)) _
   have ha_aesm : ∀ k, AEStronglyMeasurable (a k) μ := fun k ↦
     (hw_meas (t k)).aestronglyMeasurable.mul (hYL2 k).aestronglyMeasurable
@@ -96,24 +96,26 @@ private theorem weighted_fluctuation_integral_le
       exact mul_le_mul_of_nonneg_right (hw_bdd _ _) (abs_nonneg _))
   have hint : ∀ k l, Integrable (fun ω ↦ a k ω * a l ω) μ :=
     fun k l ↦ (haL2 k).integrable_mul (haL2 l)
-  have hY_adapt : ∀ k, AdaptedAt B (t (k + 1)) (Y k) := fun k ↦
-    adaptedAt_increment_sq_sub (hmono (Nat.le_succ k)) le_rfl _
-  have ha_adapt : ∀ k, AdaptedAt B (t (k + 1)) (a k) := fun k ↦
-    ((hw_adapt (t k)).mono (hmono (Nat.le_succ k))).mul (hY_adapt k)
+  set 𝓕 := ItoIntegralL2.natFiltration hBmeas
+  have hY_adapt : ∀ k, Measurable[𝓕 (t (k + 1))] (Y k) := fun k ↦
+    measurable_increment_sq_sub (hB.isFilteredPreBrownian hBmeas)
+      (hmono (Nat.le_succ k)) le_rfl _
+  have ha_adapt : ∀ k, Measurable[𝓕 (t (k + 1))] (a k) := fun k ↦
+    ((hw_adapt (t k)).mono (𝓕.mono (hmono (Nat.le_succ k))) le_rfl).mul (hY_adapt k)
   have hcross : ∀ k ∈ Finset.range n, ∀ l ∈ Finset.range n, l ≠ k →
       ∫ ω, a k ω * a l ω ∂μ = 0 := by
     intro k _ l _ hlk
     rcases lt_or_gt_of_ne hlk with hlt | hgt
-    · have hχ : AdaptedAt B (t k) (fun ω ↦ a l ω * w (t k) ω) :=
-        ((ha_adapt l).mono (hmono (Nat.succ_le_of_lt hlt))).mul (hw_adapt (t k))
+    · have hχ : Measurable[𝓕 (t k)] (fun ω ↦ a l ω * w (t k) ω) :=
+        ((ha_adapt l).mono (𝓕.mono (hmono (Nat.succ_le_of_lt hlt))) le_rfl).mul (hw_adapt (t k))
       have h := integral_adapted_mul_centered_sq hB hBmeas (hmono (Nat.le_succ k)) hχ
       rw [show (fun ω ↦ a k ω * a l ω)
             = (fun ω ↦ (a l ω * w (t k) ω)
                 * ((B (t (k + 1)) ω - B (t k) ω) ^ 2 - ((t (k + 1) : ℝ) - t k)))
           from funext fun ω ↦ by simp only [ha_def, hY_def]; ring]
       exact h
-    · have hχ : AdaptedAt B (t l) (fun ω ↦ a k ω * w (t l) ω) :=
-        ((ha_adapt k).mono (hmono (Nat.succ_le_of_lt hgt))).mul (hw_adapt (t l))
+    · have hχ : Measurable[𝓕 (t l)] (fun ω ↦ a k ω * w (t l) ω) :=
+        ((ha_adapt k).mono (𝓕.mono (hmono (Nat.succ_le_of_lt hgt))) le_rfl).mul (hw_adapt (t l))
       have h := integral_adapted_mul_centered_sq hB hBmeas (hmono (Nat.le_succ l)) hχ
       rw [show (fun ω ↦ a k ω * a l ω)
             = (fun ω ↦ (a k ω * w (t l) ω)
@@ -157,7 +159,7 @@ rate `2C²T²/n`. Squeeze of the per-`n` bound `weighted_fluctuation_integral_le
 weighted analogue of the `tendsto_qv` rate `2T²/n`). -/
 private theorem tendsto_weighted_fluctuation
     (hBmeas : ∀ t, Measurable (B t))
-    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, AdaptedAt B s (w s))
+    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, Measurable[ItoIntegralL2.natFiltration hBmeas s] (w s))
     {C : ℝ} (hC : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0) :
     Tendsto (fun n : ℕ ↦
         ∫ ω, (∑ k ∈ Finset.range n,
@@ -171,7 +173,7 @@ private theorem tendsto_weighted_fluctuation
   filter_upwards [eventually_gt_atTop 0] with n hn
   refine (weighted_fluctuation_integral_le hB hBmeas hw_adapt hC hw_bdd T n).trans (le_of_eq ?_)
   have hΔ : ∀ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) / n :=
-    fun k _ ↦ by simp only [unifPart]; push_cast; field_simp; ring
+    fun k _ ↦ unifPart_succ_sub T n k
   have hn0 : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
   rw [show (∑ k ∈ Finset.range n, C ^ 2 * (2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 2))
         = ∑ _k ∈ Finset.range n, C ^ 2 * (2 * ((T : ℝ) / n) ^ 2)
@@ -204,20 +206,10 @@ theorem tendsto_riemann_continuous {h : ℝ≥0 → ℝ} (hcont : Continuous h)
     ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, hν,
         ItoIntegralL2.timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
   -- partition facts
-  have hmono : ∀ n, Monotone (unifPart T n) := fun n a b hab ↦ by
-    simp only [unifPart]; gcongr
-  have hzero : ∀ n, unifPart T n 0 = 0 := fun n ↦ by simp [unifPart]
-  have hlast : ∀ n, 0 < n → unifPart T n n = T := fun n hn ↦ by
-    have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-    simp only [unifPart, div_self hne, one_mul]
-  have hle_T : ∀ n k, k ≤ n → unifPart T n k ≤ T := fun n k hk ↦ by
-    rcases Nat.eq_zero_or_pos n with hn0 | hn
-    · subst hn0; rw [Nat.le_zero.mp hk, hzero]; exact zero_le
-    · exact (hmono n hk).trans_eq (hlast n hn)
+  have hmono := unifPart_mono T
+  have hlast : ∀ n, 0 < n → unifPart T n n = T := fun n hn ↦ unifPart_self T hn.ne'
   have hgap : ∀ n, 0 < n → ∀ k, (unifPart T n (k + 1) : ℝ) - unifPart T n k = (T : ℝ) / n :=
-    fun n hn k ↦ by
-      have hn0 : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-      simp only [unifPart]; push_cast; field_simp; ring
+    fun n _ k ↦ unifPart_succ_sub T n k
   -- the left-endpoint step function
   set F : ℕ → ℝ≥0 → ℝ := fun n s ↦ ∑ k ∈ Finset.range n,
     (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator (fun _ ↦ h (unifPart T n k)) s
@@ -234,7 +226,7 @@ theorem tendsto_riemann_continuous {h : ℝ≥0 → ℝ} (hcont : Continuous h)
     have hKlt : K < n := lt_of_le_of_lt hKle (Nat.sub_lt hn one_pos)
     have hlow : unifPart T n K < s := by
       rcases Nat.eq_zero_or_pos K with hK0 | hKpos
-      · rw [hK0, hzero]; exact hs.1
+      · rw [hK0, unifPart_zero]; exact hs.1
       · have hmin := Nat.find_min hex (m := K - 1) (Nat.sub_lt hKpos one_pos)
         have hK1 : K - 1 + 1 = K := by omega
         rw [hK1] at hmin
@@ -264,7 +256,7 @@ theorem tendsto_riemann_continuous {h : ℝ≥0 → ℝ} (hcont : Continuous h)
     rcases Nat.eq_zero_or_pos n with hn0 | hn
     · simp only [hF, hn0, Finset.range_zero, Finset.sum_empty, norm_zero]; exact hC0
     · obtain ⟨k, hklt, hval, _⟩ := hkey n hn s hs
-      rw [hval, Real.norm_eq_abs]; exact hbdd _ (hle_T n k hklt.le)
+      rw [hval, Real.norm_eq_abs]; exact hbdd _ (unifPart_le_T hklt.le)
   -- pointwise convergence `F n s → h s` on `(0,T]`
   have hptwise : ∀ s ∈ Set.Ioc (0 : ℝ≥0) T, Tendsto (fun n ↦ F n s) atTop (𝓝 (h s)) := by
     intro s hs
@@ -300,7 +292,7 @@ theorem tendsto_riemann_continuous {h : ℝ≥0 → ℝ} (hcont : Continuous h)
     rw [setIntegral_indicator measurableSet_Ioc, setIntegral_const, smul_eq_mul,
       show Set.Ioc (0 : ℝ≥0) T ∩ Set.Ioc (unifPart T n k) (unifPart T n (k + 1))
           = Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) by
-        rw [Set.Ioc_inter_Ioc, max_eq_right zero_le, min_eq_right (hle_T n (k + 1) hkn)],
+        rw [Set.Ioc_inter_Ioc, max_eq_right zero_le, min_eq_right (unifPart_le_T hkn)],
       measureReal_def, hν, ItoIntegralL2.timeMeasure_Ioc, ENNReal.toReal_ofReal
         (sub_nonneg.mpr (by exact_mod_cast hmono n (Nat.le_succ k)))]
     ring
@@ -316,17 +308,6 @@ theorem tendsto_riemann_continuous {h : ℝ≥0 → ℝ} (hcont : Continuous h)
   exact (tendsto_congr hstep_integ).mp hconv
 
 omit hB in
-/-- The uniform-partition mesh telescopes: `∑_{k<n} (t_{k+1} − t_k) = T` for `n > 0`. -/
-private lemma unifPart_mesh_sum (T : ℝ≥0) {n : ℕ} (hn : 0 < n) :
-    ∑ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) := by
-  rw [Finset.sum_range_sub (fun k ↦ (unifPart T n k : ℝ))]
-  have h1 : unifPart T n n = T := by
-    have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-    simp only [unifPart, div_self hne, one_mul]
-  have h0 : unifPart T n 0 = 0 := by simp [unifPart]
-  rw [h1, h0]; simp
-
-omit hB in
 /-- A left-endpoint Riemann weight-sum of a bounded process is bounded by `C·T`:
 `|∑_{k<n} w_{t_k}(ω)·(t_{k+1} − t_k)| ≤ C·T`. Shared left-endpoint bound for the
 weighted-QV Riemann term, `memLp_pathIntegral_process`, and the time-dependent Itô
@@ -337,8 +318,7 @@ lemma abs_riemann_weight_sum_le {w : ℝ≥0 → Ω → ℝ} {C : ℝ} (hC0 : 0 
         w (unifPart T n k) ω * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)| ≤ C * T := by
   have hΔnn : ∀ k, (0 : ℝ) ≤ (unifPart T n (k + 1) : ℝ) - unifPart T n k := fun k ↦
     sub_nonneg.mpr (by
-      exact_mod_cast (show Monotone (unifPart T n) from fun a b hab ↦ by
-        simp only [unifPart]; gcongr) (Nat.le_succ k))
+      exact_mod_cast unifPart_mono T n (Nat.le_succ k))
   rcases Nat.eq_zero_or_pos n with hn0 | hn
   · subst hn0
     simp only [Finset.range_zero, Finset.sum_empty, abs_zero]
@@ -354,7 +334,7 @@ lemma abs_riemann_weight_sum_le {w : ℝ≥0 → Ω → ℝ} {C : ℝ} (hC0 : 0 
             exact mul_le_mul_of_nonneg_right (hw_bdd _ _) (hΔnn k)
       _ = C * ∑ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
           rw [Finset.mul_sum]
-      _ = C * T := by rw [unifPart_mesh_sum T hn]
+      _ = C * T := by rw [unifPart_mesh_sum T hn.ne']
 
 omit hB in
 /-- **The pathwise integral `ω ↦ ∫₀ᵀ w_s(ω) ds` of a measurable process with continuous paths
@@ -483,14 +463,6 @@ theorem exists_continuous_version_of_ae_continuousOn
     · simpa only [Set.indicator_of_mem hω] using hw_bdd _ ω
     · simpa only [Set.indicator_of_notMem hω, abs_zero] using hC0
 
-omit hB in
-/-- A partition point is at most `T`. -/
-private theorem unifPart_le {T : ℝ≥0} {n k : ℕ} (hk : k ≤ n) : unifPart T n k ≤ T := by
-  rcases Nat.eq_zero_or_pos n with rfl | hn
-  · simp [unifPart]
-  · exact mul_le_of_le_one_left zero_le
-      ((div_le_one (Nat.cast_pos.2 hn)).2 (Nat.cast_le.2 hk))
-
 /-- **Weighted quadratic variation, process-weight form, for almost surely continuous paths.**
 For a bounded adapted weight process `w` whose paths are almost surely continuous on `[0,T]`, the
 `w`-weighted sum of squared increments along the uniform partition of `[0,T]` converges in `L²(μ)`
@@ -502,7 +474,7 @@ there the weight is replaced by a version continuous on every path
 survive that replacement, which is why it is done for Term II only. -/
 theorem tendsto_weighted_qv_process_of_ae_continuous
     (hBmeas : ∀ t, Measurable (B t))
-    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, AdaptedAt B s (w s))
+    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, Measurable[ItoIntegralL2.natFiltration hBmeas s] (w s))
     {C : ℝ} (hC0 : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0)
     (hw_cont : ∀ᵐ ω ∂μ, ContinuousOn (fun s ↦ w s ω) (Set.Icc 0 T)) :
     Tendsto (fun n : ℕ ↦
@@ -512,7 +484,8 @@ theorem tendsto_weighted_qv_process_of_ae_continuous
               - ∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure) ^ 2 ∂μ)
       atTop (𝓝 0) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hw_meas : ∀ s, Measurable (w s) := fun s ↦ (hw_adapt s).measurable hBmeas
+  have hw_meas : ∀ s, Measurable (w s) := fun s ↦
+    (hw_adapt s).mono ((ItoIntegralL2.natFiltration hBmeas).le s) le_rfl
   set Ssum : ℕ → Ω → ℝ := fun n ω ↦ ∑ k ∈ Finset.range n,
       w (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 with hSsum
   set Rsum : ℕ → Ω → ℝ := fun n ω ↦ ∑ k ∈ Finset.range n,
@@ -543,7 +516,7 @@ theorem tendsto_weighted_qv_process_of_ae_continuous
       - ∫ s in Set.Ioc 0 T, v s ω ∂ItoIntegralL2.timeMeasure) ^ 2 = (Rsum n ω - Ipath ω) ^ 2 := by
     filter_upwards [hv] with ω hω n
     rw [Finset.sum_congr rfl fun k hk ↦ by
-        rw [hω _ (unifPart_le (Finset.mem_range.mp hk).le)],
+        rw [hω _ (unifPart_le_T (Finset.mem_range.mp hk).le)],
       setIntegral_congr_fun measurableSet_Ioc fun s hs ↦ hω s hs.2]
   have hTermII : Tendsto (fun n ↦ ∫ ω, (Rsum n ω - Ipath ω) ^ 2 ∂μ) atTop (𝓝 0) :=
     (tendsto_riemann_L2_process hv_meas hv_cont hC0 hv_bdd T).congr fun n ↦
@@ -600,7 +573,7 @@ uniform partition of `[0,T]` converges in `L²(μ)` to `∫₀ᵀ w_s ds`. Both 
 `tendsto_weighted_qv_process_of_ae_continuous` in which every path is continuous. -/
 theorem tendsto_weighted_qv_process
     (hBmeas : ∀ t, Measurable (B t))
-    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, AdaptedAt B s (w s))
+    {w : ℝ≥0 → Ω → ℝ} (hw_adapt : ∀ s, Measurable[ItoIntegralL2.natFiltration hBmeas s] (w s))
     (hw_cont : ∀ ω, Continuous fun s ↦ w s ω)
     {C : ℝ} (hC0 : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0) :
     Tendsto (fun n : ℕ ↦
@@ -611,26 +584,6 @@ theorem tendsto_weighted_qv_process
       atTop (𝓝 0) :=
   tendsto_weighted_qv_process_of_ae_continuous hB hBmeas hw_adapt hC0 hw_bdd T
     (Eventually.of_forall fun ω ↦ (hw_cont ω).continuousOn)
-
-/-- **Weighted quadratic variation.** For bounded continuous `g`, the `g(B)`-weighted sum
-of squared increments along the uniform partition of `[0,T]` converges in `L²(μ)` to
-`∫₀ᵀ g(B_s) ds`. The continuous-weight generalization of `tendsto_qv`; the instantiation
-`w s ω = g (B s ω)` of `tendsto_weighted_qv_process`. -/
-theorem tendsto_weighted_qv
-    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ B s ω))
-    {g : ℝ → ℝ} (hg_cont : Continuous g) {C : ℝ} (hg_bdd : ∀ x, |g x| ≤ C) (T : ℝ≥0) :
-    Tendsto (fun n : ℕ ↦
-        ∫ ω, (∑ k ∈ Finset.range n,
-                g (B (unifPart T n k) ω)
-                  * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
-              - ∫ s in Set.Ioc 0 T, g (B s ω) ∂ItoIntegralL2.timeMeasure) ^ 2 ∂μ)
-      atTop (𝓝 0) :=
-  tendsto_weighted_qv_process hB hBmeas
-    (w := fun s ω ↦ g (B s ω))
-    (fun _s ↦ adaptedAt_comp_eval le_rfl hg_cont.measurable)
-    (fun ω ↦ hg_cont.comp (hBcont ω))
-    (le_trans (abs_nonneg _) (hg_bdd 0))
-    (fun _s _ω ↦ hg_bdd _) T
 
 omit hB in
 /-- The pathwise integral `ω ↦ ∫₀ᵀ w_s(ω) ds` of a bounded measurable process with
@@ -645,20 +598,6 @@ theorem memLp_pathIntegral_process [IsFiniteMeasure μ]
   MemLp.of_bound (measurable_pathIntegral hw_meas hw_cont T).aestronglyMeasurable
     (C * T) (Eventually.of_forall fun ω ↦ by
       rw [Real.norm_eq_abs]; exact abs_pathIntegral_le hw_cont hC0 hw_bdd T ω)
-
-/-- The pathwise second-order term `ω ↦ ∫₀ᵀ g(B_s ω) ds` of a bounded continuous weight
-lies in `L²(μ)`. The instantiation `w s ω = g (B s ω)` of `memLp_pathIntegral_process`. -/
-theorem memLp_pathIntegral (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ B s ω)) {g : ℝ → ℝ} (hg_cont : Continuous g)
-    {C : ℝ} (hg_bdd : ∀ x, |g x| ≤ C) (T : ℝ≥0) :
-    MemLp (fun ω ↦ ∫ s in Set.Ioc 0 T, g (B s ω) ∂ItoIntegralL2.timeMeasure) 2 μ := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  exact memLp_pathIntegral_process (μ := μ)
-    (w := fun s ω ↦ g (B s ω))
-    (fun s ↦ hg_cont.measurable.comp (hBmeas s))
-    (fun ω ↦ hg_cont.comp (hBcont ω))
-    (le_trans (abs_nonneg _) (hg_bdd 0))
-    (fun _s _ω ↦ hg_bdd _) T
 
 omit hB in
 /-- `memLp_pathIntegral_process` for a weight whose paths are continuous on `[0, T]` only almost

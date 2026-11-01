@@ -6,17 +6,23 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.StrictExerciseGeometry
+public import MathFin.BlackScholes.AmericanPut.Stopping.ClassicalContact
 
 /-! # A first-contact rule constructed from the actual stopping price
 
-The undiscounted price/payoff gap is continuous, adapted, nonnegative and zero
-at expiry. Its first zero is therefore an admissible rule with actual payoff
-contact. Optimality and the dynamic programming principle are not assumed.
+The actual price `canonicalPrice` is a `PutEnvelope`, so the classical first-contact rule
+`classicalContactRule` applies to it at strike `1`, rate `k`, dividend `h`, volatility
+`Real.sqrt 2` and spot `Real.exp x`: the rule stopping at the first zero of the gap between the
+discounted price and the discounted payoff is admissible and exercises at payoff contact. The
+lemmas here only restate the classical ones in the normalized conventions
+(`x + (k-h-1)*t + Real.sqrt 2 * W t` for the log spot, remaining time `T - t`).
+Optimality and the dynamic programming principle are not assumed.
 
 ## Result
 
-Public entry points include `canonicalLogPath`, `canonicalGap`, `canonicalLogPath_exp`,
-`canonicalGap_continuous`.
+Public entry points include `classicalLogSpot_canonical`, `normalizedRate_sqrt_two`,
+`canonicalContactRule`, `canonicalContactRule_contact`, `canonicalContactRule_price_eq`,
+`canonicalContactRule_continuation_before`.
 -/
 
 @[expose] public section
@@ -28,102 +34,93 @@ open scoped NNReal Topology
 
 variable {Ω : Type*}
 
-/-- Log-price path from `x` with drift `k-h-1` and volatility `Real.sqrt 2`, evaluated at
-the capped time `min t T`. -/
-noncomputable def canonicalLogPath (W : ℝ≥0 → Ω → ℝ) (k h x : ℝ)
-    (T t : ℝ≥0) (ω : Ω) : ℝ :=
-  x+(k-h-1)*(min t T : ℝ)+Real.sqrt 2*W (min t T) ω
-
-/-- Gap between the canonical price at remaining time `T-min t T` and the put payoff, both
-taken along `canonicalLogPath`. -/
-noncomputable def canonicalGap (W : ℝ≥0 → Ω → ℝ) (k h x : ℝ)
-    (T t : ℝ≥0) (ω : Ω) : ℝ :=
-  canonicalPrice k h (canonicalLogPath W k h x T t ω) ((T : ℝ)-(min t T : ℝ))-
-    putPayoff (canonicalLogPath W k h x T t ω)
-
-theorem canonicalLogPath_exp (W : ℝ≥0 → Ω → ℝ) (k h x : ℝ)
-    (T t : ℝ≥0) (ω : Ω) :
-    Real.exp (canonicalLogPath W k h x T t ω) =
-      MathFin.gbmValue (Real.exp x) (k-h) (Real.sqrt 2) (min t T) (W (min t T) ω) := by
-  unfold canonicalLogPath MathFin.gbmValue
-  rw [Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num),← Real.exp_add]
-  congr 1
+/-- At strike `1`, spot `Real.exp x` and volatility `Real.sqrt 2` the strike-normalized log spot
+is `x + (k-h-1)*t + Real.sqrt 2 * W t`. -/
+theorem classicalLogSpot_canonical (W : ℝ≥0 → Ω → ℝ) (k h x : ℝ) (t : ℝ≥0) (ω : Ω) :
+    classicalLogSpot W 1 k h (Real.sqrt 2) (Real.exp x) t ω =
+      x+(k-h-1)*(t : ℝ)+Real.sqrt 2*W t ω := by
+  simp only [classicalLogSpot,div_one,Real.log_exp,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]
   ring
 
-theorem canonicalGap_continuous {W : ℝ≥0 → Ω → ℝ} {k h : ℝ} (hk : 0 ≤ k)
-    (hpaths : ∀ ω, Continuous (fun t => W t ω)) (x : ℝ) (T : ℝ≥0) (ω : Ω) :
-    Continuous (fun t => canonicalGap W k h x T t ω) := by
-  have hx : Continuous (fun t => canonicalLogPath W k h x T t ω) := by
-    unfold canonicalLogPath
-    fun_prop
-  have hp := (canonicalPrice_continuous (h := h) hk).comp
-    (hx.prodMk (show Continuous (fun t : ℝ≥0 => (T : ℝ)-(min t T : ℝ)) by fun_prop))
-  exact hp.sub (by unfold putPayoff; fun_prop)
+/-- At volatility `Real.sqrt 2` the normalized time `σ^2/2*s` is the physical time `s`. -/
+theorem sqrt_two_sq_div_two_mul (s : ℝ) : Real.sqrt 2^2/2*s = s := by
+  rw [Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]
+  ring
 
-theorem canonicalGap_nonneg {W : ℝ≥0 → Ω → ℝ} {k h : ℝ} (hk : 0 ≤ k)
-    (x : ℝ) (T t : ℝ≥0) (ω : Ω) : 0 ≤ canonicalGap W k h x T t ω :=
-  sub_nonneg.mpr (canonicalPrice_bounds hk _ _).1
-
-theorem canonicalGap_terminal {W : ℝ≥0 → Ω → ℝ} {k h : ℝ} (hk : 0 ≤ k)
-    (x : ℝ) (T : ℝ≥0) (ω : Ω) : canonicalGap W k h x T T ω = 0 := by
-  simp only [canonicalGap,min_self,sub_self,canonicalPrice_initial hk]
+/-- At volatility `Real.sqrt 2` the normalized rate is the rate itself. -/
+theorem normalizedRate_sqrt_two (r : ℝ) : normalizedRate r (Real.sqrt 2) = r := by
+  rw [normalizedRate,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]
+  ring
 
 variable [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
   {W : ℝ≥0 → Ω → ℝ} {k h : ℝ}
 
-theorem canonicalGap_adapted (hk : 0 ≤ k) (hW : Adapted 𝓕 W) (x : ℝ) (T : ℝ≥0) :
-    Adapted 𝓕 (canonicalGap W k h x T) := by
-  intro t
-  have hw : Measurable[𝓕 t] (W (min t T)) :=
-    (hW _).mono (𝓕.mono (min_le_left t T)) le_rfl
-  have hx : Measurable[𝓕 t] (canonicalLogPath W k h x T t) := by
-    unfold canonicalLogPath
-    fun_prop
-  have hp := (canonicalPrice_continuous (h := h) hk).measurable.comp
-    (hx.prodMk (measurable_const (a := (T : ℝ)-(min t T : ℝ))))
-  exact hp.sub (by unfold putPayoff; fun_prop)
-
-/-- The rule stopping at the first zero of `canonicalGap`, that is, at first contact of the
-price with the payoff. -/
+/-- The rule stopping at the first zero of the gap between the discounted price and the
+discounted payoff, that is, at first contact of the price with the payoff: the classical
+first-contact rule for the actual price. -/
 noncomputable def canonicalContactRule (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
-    (hpaths : ∀ ω, Continuous (fun t => W t ω)) (x : ℝ) (T : ℝ≥0) : BoundedRule 𝓕 T :=
-  firstContactRule (Z := canonicalGap W k h x T)
-    (canonicalGap_adapted hk hW x T) (canonicalGap_continuous hk hpaths x T)
-    (canonicalGap_nonneg hk x T) T (canonicalGap_terminal hk x T)
+    (hpaths : ∀ ω, Continuous (fun t => W t ω)) (x : ℝ) (T : ℝ≥0) : StoppingRule 𝓕 T :=
+  classicalContactRule (K := 1) (r := k) (q := h) (σ := Real.sqrt 2)
+    (canonicalPrice_putEnvelope (h := h) hk) hW hpaths one_pos (Real.exp_pos x) T
 
-theorem canonicalContactRule_contact (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
+theorem canonicalContactRule_price_eq (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
     (hpaths : ∀ ω, Continuous (fun t => W t ω)) (x : ℝ) (T : ℝ≥0) (ω : Ω) :
-    let θ := canonicalContactRule (h := h) hk hW hpaths x T
-    canonicalGap W k h x T (θ.time ω) ω = 0 :=
-  (firstContactTime_mem (canonicalGap_continuous hk hpaths x T)
-    (canonicalGap_terminal hk x T) ω).2
+    let s := (canonicalContactRule (h := h) hk hW hpaths x T).time ω
+    canonicalPrice k h (x+(k-h-1)*(s : ℝ)+Real.sqrt 2*W s ω) ((T : ℝ)-(s : ℝ)) =
+      putPayoff (x+(k-h-1)*(s : ℝ)+Real.sqrt 2*W s ω) := by
+  have he := classicalContactRule_price_eq (K := 1) (r := k) (q := h) (σ := Real.sqrt 2)
+    (canonicalPrice_putEnvelope (h := h) hk) hW hpaths one_pos (Real.exp_pos x) T ω
+  simp only [classicalLogSpot_canonical,sqrt_two_sq_div_two_mul] at he
+  exact he
 
 theorem canonicalContactRule_continuation_before (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
     (hpaths : ∀ ω, Continuous (fun t => W t ω)) (x : ℝ) (T : ℝ≥0) (ω : Ω)
     {t : ℝ≥0} (ht : t < (canonicalContactRule (h := h) hk hW hpaths x T).time ω) :
-    (canonicalLogPath W k h x T t ω, (T : ℝ)-(t : ℝ)) ∈ canonicalContinuationRegion k h := by
-  have hT := (canonicalContactRule (h := h) hk hW hpaths x T).le_horizon ω
-  have htT : t < T := ht.trans_le hT
-  have hg := firstContactTime_pos_before (canonicalGap_continuous (h := h) hk hpaths x T)
-    (canonicalGap_nonneg hk x T) (canonicalGap_terminal hk x T) ω ht
+    (x+(k-h-1)*(t : ℝ)+Real.sqrt 2*W t ω, (T : ℝ)-(t : ℝ)) ∈ canonicalContinuationRegion k h := by
+  obtain ⟨htT,hlt⟩ := classicalContactRule_payoff_lt (K := 1) (r := k) (q := h)
+    (σ := Real.sqrt 2) (canonicalPrice_putEnvelope (h := h) hk) hW hpaths one_pos
+    (Real.exp_pos x) ω ht
   refine ⟨sub_pos.mpr (by exact_mod_cast htT),?_⟩
-  simpa only [canonicalGap,NNReal.coe_min,
-    min_eq_left (show (t : ℝ) ≤ (T : ℝ) by exact_mod_cast htT.le),sub_pos] using hg
+  simpa only [classicalLogSpot_canonical,sqrt_two_sq_div_two_mul] using hlt
 
 theorem canonicalContactRule_exercise_before_expiry (hk : 0 ≤ k) (hW : Adapted 𝓕 W)
     (hpaths : ∀ ω, Continuous (fun t => W t ω)) (x : ℝ) (T : ℝ≥0) (ω : Ω)
     (ht : (canonicalContactRule (h := h) hk hW hpaths x T).time ω < T) :
     let s := (canonicalContactRule (h := h) hk hW hpaths x T).time ω
-    Real.exp (canonicalLogPath W k h x T s ω) ≤ canonicalStockBoundary k h ((T : ℝ)-(s : ℝ)) := by
-  let s := (canonicalContactRule (h := h) hk hW hpaths x T).time ω
-  have hs : (s : ℝ) < (T : ℝ) := by exact_mod_cast ht
-  have hz := canonicalContactRule_contact (h := h) hk hW hpaths x T ω
-  change canonicalGap W k h x T s ω = 0 at hz
-  have he : canonicalPrice k h (canonicalLogPath W k h x T s ω) ((T : ℝ)-(s : ℝ)) =
-      putPayoff (canonicalLogPath W k h x T s ω) := by
-    apply sub_eq_zero.mp
-    simpa only [canonicalGap,NNReal.coe_min,min_eq_left hs.le] using hz
-  exact (canonicalPrice_contact_iff hk _ (sub_pos.mpr hs)).mp he
+    Real.exp (x+(k-h-1)*(s : ℝ)+Real.sqrt 2*W s ω) ≤
+      canonicalStockBoundary k h ((T : ℝ)-(s : ℝ)) :=
+  (canonicalPrice_contact_iff hk _ (sub_pos.mpr (by exact_mod_cast ht))).mp
+    (canonicalContactRule_price_eq hk hW hpaths x T ω)
+
+/-- The discounted actual price along the Brownian log-state: the classical candidate of the
+actual price `canonicalPrice k h`, at strike `1`, rate `k`, dividend `h`, volatility
+`Real.sqrt 2` and spot `Real.exp x`. -/
+noncomputable abbrev canonicalDiscountedPrice (k h x : ℝ) (T : ℝ≥0) :=
+  classicalCandidate brownian 1 k h (Real.sqrt 2) (Real.exp x) (canonicalPrice k h) T
+
+section Brownian
+
+variable [MeasurableSpace (ℝ≥0 → ℝ)] {𝓖 : Filtration ℝ≥0 ‹MeasurableSpace (ℝ≥0 → ℝ)›}
+
+/-- At first contact the discounted actual price equals the discounted reward. -/
+theorem canonicalContactRule_contact (hk : 0 ≤ k) (hW : Adapted 𝓖 brownian)
+    (hpaths : ∀ ω, Continuous (fun t => brownian t ω)) (x : ℝ) (T : ℝ≥0) (ω : ℝ≥0 → ℝ) :
+    let θ := canonicalContactRule (h := h) hk hW hpaths x T
+    canonicalDiscountedPrice k h x T (θ.time ω) ω =
+      putReward brownian 1 k h (Real.sqrt 2) (Real.exp x) θ.time ω :=
+  classicalContactRule_contact (K := 1) (r := k) (q := h) (σ := Real.sqrt 2)
+    (canonicalPrice_putEnvelope (h := h) hk) hW hpaths one_pos (Real.exp_pos x) T ω
+
+/-- Before first contact the discounted actual price strictly exceeds the discounted reward. -/
+theorem canonicalContactRule_reward_lt (hk : 0 ≤ k) (hW : Adapted 𝓖 brownian)
+    (hpaths : ∀ ω, Continuous (fun t => brownian t ω)) (x : ℝ) (T : ℝ≥0) (ω : ℝ≥0 → ℝ)
+    {t : ℝ≥0} (ht : t < (canonicalContactRule (h := h) hk hW hpaths x T).time ω) :
+    frozenPutReward brownian 1 k h (Real.sqrt 2) (Real.exp x) T t ω <
+      canonicalDiscountedPrice k h x T t ω :=
+  classicalContactRule_reward_lt (K := 1) (r := k) (q := h) (σ := Real.sqrt 2)
+    (canonicalPrice_putEnvelope (h := h) hk) hW hpaths one_pos (Real.exp_pos x) ω ht
+
+end Brownian
 
 theorem brownianUsual_adapted :
     @Adapted _ _ (completedMeasurableSpace gaussianLimit) _ _ _
@@ -133,7 +130,8 @@ theorem brownianUsual_adapted :
 
 /-- Concrete admissible rule on the completed usual Brownian space. -/
 noncomputable def brownianUsualActualContactRule {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) (T : ℝ≥0) :
-    @BoundedRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit) brownianUsualFiltration T :=
+    @StoppingRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit) ℝ≥0 _
+      brownianUsualFiltration T :=
   @canonicalContactRule _ (completedMeasurableSpace gaussianLimit) brownianUsualFiltration
     brownian k h hk brownianUsual_adapted continuous_brownian x T
 

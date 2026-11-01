@@ -50,6 +50,12 @@ open scoped NNReal
 
 variable {Ω : Type*} [MeasurableSpace Ω]
 
+/-- The Black–Scholes terminal price at the standard-normal sample `z` is geometric Brownian
+motion at the Brownian value `√T·z`. -/
+theorem bsTerminal_eq_gbmValue (S₀ r σ T z : ℝ) :
+    bsTerminal S₀ r σ T z = gbmValue S₀ r σ T (Real.sqrt T * z) := by
+  rw [bsTerminal, gbmValue, mul_assoc]
+
 /-- **Exercise at maturity is worth the Black–Scholes–Merton put.** For a pre-Brownian motion
 `W` under `P` and `S, K, σ > 0`, `T > 0`, the expected discounted payoff of the deterministic
 rule `θ ≡ T`, `E[e^{−rT}·(K − S·e^{(r−q−σ²/2)T + σ W_T})⁺]`, is `bsPDiv K r q σ S T`. -/
@@ -60,8 +66,9 @@ theorem maturityReward_eq_bsPDiv {P : Measure Ω} [IsProbabilityMeasure P]
   have hT' : (0 : ℝ) < T := NNReal.coe_pos.mpr hT
   rw [← bs_dividends_put_formula_via_brownian P W hW hS hK hσ hT', Real.toNNReal_coe]
   refine integral_congr_ae (ae_of_all _ fun ω ↦ ?_)
-  simp only [putReward, gbmValue, bsTerminal]
-  rw [mul_assoc σ, mul_div_cancel₀ _ (Real.sqrt_pos.mpr hT').ne']
+  have hs : Real.sqrt (T : ℝ) * (W T ω / Real.sqrt (T : ℝ)) = W T ω := by
+    field_simp [(Real.sqrt_pos.mpr hT').ne']
+  simp only [putReward, bsTerminal_eq_gbmValue, hs]
 
 /-- **The American put dominates the Black–Scholes–Merton European put.** For a jointly
 measurable pre-Brownian motion `W` under `P`, any filtration `𝓕`, `r ≥ 0` and `S, K, σ, T > 0`,

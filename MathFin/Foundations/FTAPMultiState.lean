@@ -9,6 +9,7 @@ public import Mathlib
 public import MathFin.Foundations.FTAPTwoState
 public import MathFin.Foundations.ConvexSeparation
 public import MathFin.Foundations.FTAPOnePeriodVector
+public import MathFin.Foundations.StatePrices
 
 /-!
 # Multi-state FTAP (both directions)
@@ -39,10 +40,10 @@ one-period market of `Foundations/FTAPOnePeriodVector.lean` on the state space `
 `noArbitrage_of_emm_multi`: if there exists `q : Fin N → ℝ` with
 `q_i > 0`, `Σ q_i = 1`, and `Σ q_i · z k i = 0` for every asset `k`,
 then no portfolio yields a non-negative payoff with at least one
-strictly positive state (no arbitrage). Standard linearity argument:
-under EMM, every portfolio's `q`-weighted excess return is zero, but
-non-negative components with one strictly positive ⟹ strictly positive
-weighted sum, contradiction.
+strictly positive state (no arbitrage). Not a fourth argument: `q` is a full-support
+probability on `Fin N` and an EMM for `multiStateReturn z` against itself, so the forward
+direction of `Foundations/FTAPOnePeriodVector.lean` (`OnePeriodVector.noArbitrage_of_isEMM`,
+itself `IsEMM.noArbitrage` at horizon one) applies.
 
 ## Backward FTAP (proved)
 
@@ -84,13 +85,15 @@ the EMM. Together with the forward direction this is the biconditional
 * `hasEMM_multi_iff_not_hasArbitrage`: the multi-state FTAP biconditional.
 * `hasEMM_two_state_iff_not_hasArbitrage`: the two-state FTAP biconditional.
 * `hasEMM_multi_state_iff_exists_isEMM`: the measure form of the finite-state EMM.
+* `exists_statePrices_of_hasEMM`: an EMM for the excess return `S − S₀/DF` is the state-price
+  vector `DF · q` of the no-arbitrage derivations (`Foundations/NoArbitrageDerivations.lean`).
 -/
 
 @[expose] public section
 
 namespace MathFin
 
-open Finset
+open Finset MeasureTheory
 
 /-- **EMM existence in a multi-state market** (`N` states, `M` assets):
 there exists a strictly positive probability `q : Fin N → ℝ` with `Σ q
@@ -110,40 +113,72 @@ def HasArbitrage_multi_state {N M : ℕ} (z : Fin M → Fin N → ℝ) : Prop :=
     (∀ i, 0 ≤ ∑ k, θ k * z k i) ∧
     (∃ i₀, 0 < ∑ k, θ k * z k i₀)
 
-/-- **Forward FTAP, multi-state**: EMM ⟹ no arbitrage. Standard
-linearity proof: under EMM, every portfolio's `q`-weighted excess
-return is `Σ_i q_i · (Σ_k θ_k · z k i) = Σ_k θ_k · (Σ_i q_i · z k i) =
-Σ_k θ_k · 0 = 0`. If the portfolio's payoff is non-negative in every
-state and strictly positive in at least one, the `q`-weighted sum is
-strictly positive (positive `q_i` times positive payoff at `i₀`),
-contradiction. -/
+/-! ### The finite-state market as a one-period market on `Ω = Fin N`
+
+On the state space `Fin N` (discrete σ-algebra) with a full-support probability `P`, the
+return matrix `z` is the `ℝᴹ`-valued random vector `multiStateReturn z`, a portfolio
+`θ : Fin M → ℝ` is a vector of `ℝᴹ`, and its payoff `∑ₖ θₖ z k i` is the inner product
+`⟪θ, multiStateReturn z i⟫`. `P`-a.e. statements are statements about every state. -/
+
+/-- The excess-return matrix read as a random vector on the state space: in state `i`, the
+`M` assets' excess returns as a point of `ℝᴹ = EuclideanSpace ℝ (Fin M)`. -/
+def multiStateReturn {N M : ℕ} (z : Fin M → Fin N → ℝ) (i : Fin N) :
+    EuclideanSpace ℝ (Fin M) :=
+  WithLp.toLp 2 fun k ↦ z k i
+
+/-- A portfolio's payoff in state `i` is its inner product with the return vector. -/
+lemma inner_multiStateReturn {N M : ℕ} (z : Fin M → Fin N → ℝ)
+    (θ : EuclideanSpace ℝ (Fin M)) (i : Fin N) :
+    inner ℝ θ (multiStateReturn z i) = ∑ k, θ k * z k i := by
+  rw [EuclideanSpace.inner_eq_star_dotProduct]
+  simp only [multiStateReturn, WithLp.ofLp_toLp, dotProduct, Pi.star_apply, star_trivial]
+  exact Finset.sum_congr rfl fun k _ ↦ mul_comm _ _
+
+/-- **Matrix arbitrage is measure-theoretic arbitrage.** For any measure `P` on the states
+charging every state, a portfolio with non-negative payoff in every state and a
+positive payoff in some state exists iff `OnePeriodVector.NoArbitrage` fails for the return
+vector `multiStateReturn z`. -/
+theorem hasArbitrage_multi_state_iff_not_noArbitrage {N M : ℕ} (z : Fin M → Fin N → ℝ)
+    (P : Measure (Fin N)) (hP : ∀ i, P {i} ≠ 0) :
+    HasArbitrage_multi_state z ↔ ¬ OnePeriodVector.NoArbitrage P (multiStateReturn z) := by
+  have hae (p : Fin N → Prop) : (∀ᵐ i ∂P, p i) ↔ ∀ i, p i := by
+    rw [ae_iff_of_countable]
+    exact forall_congr' fun i ↦ ⟨fun h ↦ h (hP i), fun h _ ↦ h⟩
+  simp only [OnePeriodVector.NoArbitrage, Filter.EventuallyLE, Filter.EventuallyEq, hae,
+    inner_multiStateReturn, Pi.zero_apply, not_forall]
+  constructor
+  · rintro ⟨θ, hnn, i₀, hpos⟩
+    exact ⟨WithLp.toLp 2 θ, hnn, i₀, hpos.ne'⟩
+  · rintro ⟨θ, hnn, i₀, hne⟩
+    exact ⟨WithLp.ofLp θ, hnn, i₀, lt_of_le_of_ne (hnn i₀) (Ne.symm hne)⟩
+
+/-- **Forward FTAP, multi-state**: EMM ⟹ no arbitrage. The EMM vector `q` is a full-support
+probability `Q` on the states, and `Q` is a one-period EMM for the return vector
+`multiStateReturn z` against itself (`E_Q[multiStateReturn z] = ∑ᵢ qᵢ · (z k i)ₖ = 0`);
+`OnePeriodVector.noArbitrage_of_isEMM` (an instance of `IsEMM.noArbitrage`) is no
+arbitrage for it, which is `¬ HasArbitrage_multi_state z` by
+`hasArbitrage_multi_state_iff_not_noArbitrage`. -/
 theorem noArbitrage_of_emm_multi {N M : ℕ} (z : Fin M → Fin N → ℝ)
     (h_emm : HasEMM_multi_state z) :
     ¬ HasArbitrage_multi_state z := by
-  obtain ⟨q, hq_pos, _hq_sum, h_q_z⟩ := h_emm
-  rintro ⟨θ, h_nn, i₀, h_pos⟩
-  -- Compute the q-weighted portfolio payoff and show it equals 0.
-  have h_swap : ∑ i, q i * (∑ k, θ k * z k i) = ∑ k, θ k * (∑ i, q i * z k i) := by
-    -- Distribute q i over inner ∑ k on LHS, θ k over inner ∑ i on RHS,
-    -- then both sides are ∑ ∑ over indexes that swap via Finset.sum_comm.
-    simp_rw [Finset.mul_sum]
-    rw [Finset.sum_comm]
-    refine Finset.sum_congr rfl fun k _ ↦ ?_
-    refine Finset.sum_congr rfl fun i _ ↦ ?_
-    ring
-  have h_zero : ∑ i, q i * (∑ k, θ k * z k i) = 0 := by
-    rw [h_swap]
-    refine Finset.sum_eq_zero fun k _ ↦ ?_
-    rw [h_q_z k, mul_zero]
-  -- But each term ≥ 0 and the i₀-term is > 0, so the sum is > 0. Contradiction.
-  have h_term_nn : ∀ i ∈ (Finset.univ : Finset (Fin N)),
-      0 ≤ q i * (∑ k, θ k * z k i) :=
-    fun i _ ↦ mul_nonneg (hq_pos i).le (h_nn i)
-  have h_term_pos : 0 < q i₀ * (∑ k, θ k * z k i₀) :=
-    mul_pos (hq_pos i₀) h_pos
-  have h_sum_pos : 0 < ∑ i, q i * (∑ k, θ k * z k i) :=
-    Finset.sum_pos' h_term_nn ⟨i₀, Finset.mem_univ _, h_term_pos⟩
-  exact h_sum_pos.ne' h_zero
+  obtain ⟨q, hq_pos, hq_sum, hq_fair⟩ := h_emm
+  let p : PMF (Fin N) := PMF.ofFintype (fun i ↦ ENNReal.ofReal (q i)) <| by
+    rw [← ENNReal.ofReal_sum_of_nonneg fun i _ ↦ (hq_pos i).le, hq_sum, ENNReal.ofReal_one]
+  have hQ (i : Fin N) : p.toMeasure.real {i} = q i := by
+    rw [measureReal_def, PMF.toMeasure_apply_singleton _ _ (measurableSet_singleton i)]
+    exact ENNReal.toReal_ofReal (hq_pos i).le
+  have hne (i : Fin N) : p.toMeasure {i} ≠ 0 := by
+    rw [PMF.toMeasure_apply_singleton _ _ (measurableSet_singleton i)]
+    exact (ENNReal.ofReal_pos.mpr (hq_pos i)).ne'
+  rw [hasArbitrage_multi_state_iff_not_noArbitrage z p.toMeasure hne, not_not]
+  refine OnePeriodVector.noArbitrage_of_isEMM p.toMeasure (multiStateReturn z)
+    (measurable_of_finite _)
+    ⟨⟨inferInstance, .rfl, .rfl⟩, Integrable.of_finite, ?_⟩
+  rw [integral_fintype Integrable.of_finite]
+  ext k
+  simp only [hQ, multiStateReturn, WithLp.ofLp_sum, WithLp.ofLp_smul, Finset.sum_apply,
+    Pi.smul_apply, smul_eq_mul, WithLp.ofLp_zero, Pi.zero_apply]
+  exact hq_fair k
 
 /-- **Normalising a positive pricing vector.** A strictly positive `q` under which every
 asset's excess return is fair, divided by its total mass, is an EMM. -/
@@ -253,48 +288,7 @@ theorem signs_opposite_of_not_hasArbitrage_two_state {z_up z_down : ℝ}
     simp [hd] at hz
   · exact Or.inl ⟨hu, by nlinarith [mul_pos ha hu]⟩
 
-/-! ### The finite-state market as a one-period market on `Ω = Fin N`
-
-On the state space `Fin N` (discrete σ-algebra) with a full-support probability `P`, the
-return matrix `z` is the `ℝᴹ`-valued random vector `multiStateReturn z`, a portfolio
-`θ : Fin M → ℝ` is a vector of `ℝᴹ`, and its payoff `∑ₖ θₖ z k i` is the inner product
-`⟪θ, multiStateReturn z i⟫`. `P`-a.e. statements are statements about every state. -/
-
 section MeasureForm
-
-open MeasureTheory
-
-/-- The excess-return matrix read as a random vector on the state space: in state `i`, the
-`M` assets' excess returns as a point of `ℝᴹ = EuclideanSpace ℝ (Fin M)`. -/
-def multiStateReturn {N M : ℕ} (z : Fin M → Fin N → ℝ) (i : Fin N) :
-    EuclideanSpace ℝ (Fin M) :=
-  WithLp.toLp 2 fun k ↦ z k i
-
-/-- A portfolio's payoff in state `i` is its inner product with the return vector. -/
-lemma inner_multiStateReturn {N M : ℕ} (z : Fin M → Fin N → ℝ)
-    (θ : EuclideanSpace ℝ (Fin M)) (i : Fin N) :
-    inner ℝ θ (multiStateReturn z i) = ∑ k, θ k * z k i := by
-  rw [EuclideanSpace.inner_eq_star_dotProduct]
-  simp only [multiStateReturn, WithLp.ofLp_toLp, dotProduct, Pi.star_apply, star_trivial]
-  exact Finset.sum_congr rfl fun k _ ↦ mul_comm _ _
-
-/-- **Matrix arbitrage is measure-theoretic arbitrage.** For any measure `P` on the states
-charging every state, a portfolio with non-negative payoff in every state and a
-positive payoff in some state exists iff `OnePeriodVector.NoArbitrage` fails for the return
-vector `multiStateReturn z`. -/
-theorem hasArbitrage_multi_state_iff_not_noArbitrage {N M : ℕ} (z : Fin M → Fin N → ℝ)
-    (P : Measure (Fin N)) (hP : ∀ i, P {i} ≠ 0) :
-    HasArbitrage_multi_state z ↔ ¬ OnePeriodVector.NoArbitrage P (multiStateReturn z) := by
-  have hae (p : Fin N → Prop) : (∀ᵐ i ∂P, p i) ↔ ∀ i, p i := by
-    rw [ae_iff_of_countable]
-    exact forall_congr' fun i ↦ ⟨fun h ↦ h (hP i), fun h _ ↦ h⟩
-  simp only [OnePeriodVector.NoArbitrage, Filter.EventuallyLE, Filter.EventuallyEq, hae,
-    inner_multiStateReturn, Pi.zero_apply, not_forall]
-  constructor
-  · rintro ⟨θ, hnn, i₀, hpos⟩
-    exact ⟨WithLp.toLp 2 θ, hnn, i₀, hpos.ne'⟩
-  · rintro ⟨θ, hnn, i₀, hne⟩
-    exact ⟨WithLp.ofLp θ, hnn, i₀, lt_of_le_of_ne (hnn i₀) (Ne.symm hne)⟩
 
 /-- **The finite-state EMM is the one-period EMM on `Fin N`.** For any probability `P` on
 the states charging every state, an EMM vector `q` (strictly positive, summing to `1`,
@@ -311,5 +305,24 @@ theorem hasEMM_multi_state_iff_exists_isEMM {N M : ℕ} [NeZero N] (z : Fin M �
   exact OnePeriodVector.ftap_one_period_vector P _ (measurable_of_finite _)
 
 end MeasureForm
+
+/-- **State prices from an EMM.** If the one-asset market with terminal values `S` and the
+excess return `S i − S₀/DF` (the asset's value against its forward `S₀/DF`) has an EMM `p`,
+then `q = DF · p` is a strictly positive state-price vector that prices the unit bond at `DF`
+and the asset at `S₀` — exactly the bond and stock constraints of
+`putCall_parity_from_no_arbitrage` and `forward_price_from_no_arbitrage`. -/
+theorem exists_statePrices_of_hasEMM {N : ℕ} (S : Fin N → ℝ) {DF : ℝ} (S₀ : ℝ) (hDF : 0 < DF)
+    (h : HasEMM_multi_state (M := 1) fun _ i ↦ S i - S₀ / DF) :
+    ∃ q : Fin N → ℝ, (∀ i, 0 < q i) ∧ ∑ i, q i = DF ∧
+      statePricePricing Finset.univ q S = S₀ := by
+  obtain ⟨p, hp, hsum, hz⟩ := h
+  have hmean : ∑ i, p i * S i = S₀ / DF := by
+    have h0 := hz 0
+    simp only [mul_sub, Finset.sum_sub_distrib, ← Finset.sum_mul, hsum, one_mul] at h0
+    linarith
+  refine ⟨fun i ↦ DF * p i, fun i ↦ mul_pos hDF (hp i), ?_, ?_⟩
+  · rw [← Finset.mul_sum, hsum, mul_one]
+  · simp only [statePricePricing, mul_assoc, ← Finset.mul_sum, hmean]
+    field_simp
 
 end MathFin

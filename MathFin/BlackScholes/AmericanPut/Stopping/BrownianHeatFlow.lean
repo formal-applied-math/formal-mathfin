@@ -12,7 +12,7 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianModel
 ## Result
 
 Public entry points include `brownianHeatFlow`, `brownianHeatFlow_zero`,
-`brownianHeatFlow_continuous`, `brownianHeatFlow_bound`.
+`brownianHeatFlow_continuous`, `brownianHeatFlow_bound`, `PutWaiting`.
 -/
 
 @[expose] public section
@@ -66,14 +66,25 @@ theorem brownianHeatFlow_eq_kernel {f : ℝ → ℝ} (hf : Continuous f) {t : �
 noncomputable def linearPriceEvolution (f : ℝ → ℝ) (k h a x t : ℝ) : ℝ :=
   Real.exp (-k*(t-a))*brownianHeatFlow f (2*(t-a)).toNNReal (x+(k-h-1)*(t-a))
 
+/-- A put price `p` (pairs `(log spot, time remaining)`) *waits* at normalized rates `k`, `h`
+if it dominates its own discounted Gaussian evolution: for remaining times `0 ≤ a ≤ t`, the price
+at remaining time `t` is at least the discounted expectation of the price at remaining time `a`
+after a Brownian wait of length `t-a` (`linearPriceEvolution`). This is the one inequality the
+stopping verification needs beyond `PutEnvelope p`. Classical solutions satisfy it by the
+parabolic comparison (`DividendPutSolution.putWaiting`); the stopping value satisfies it by
+dynamic programming (`canonicalPrice_putWaiting`). -/
+structure PutWaiting (k h : ℝ) (p : ℝ → ℝ → ℝ) : Prop where
+  evolution_le : ∀ {a t : ℝ}, 0 ≤ a → a ≤ t → ∀ x,
+    linearPriceEvolution (fun y ↦ p y a) k h a x t ≤ p x t
+
 theorem linearPriceEvolution_initial (f : ℝ → ℝ) (k h a x : ℝ) :
     linearPriceEvolution f k h a x a = f x := by
   simp [linearPriceEvolution,brownianHeatFlow_zero]
 
 theorem linearPriceEvolution_continuous {f : ℝ → ℝ} {C : ℝ}
     (hf : Continuous f) (hbound : ∀ x, ‖f x‖ ≤ C) (k h a : ℝ) :
-    Continuous (fun z : ℝ × ℝ => linearPriceEvolution f k h a z.1 z.2) := by
-  exact (show Continuous (fun z : ℝ × ℝ => Real.exp (-k*(z.2-a))) by fun_prop).mul
+    Continuous (fun z : ℝ × ℝ => linearPriceEvolution f k h a z.1 z.2) :=
+  (show Continuous (fun z : ℝ × ℝ => Real.exp (-k*(z.2-a))) by fun_prop).mul
     ((brownianHeatFlow_continuous hf hbound).comp
       (show Continuous (fun z : ℝ × ℝ => ((2*(z.2-a)).toNNReal,z.1+(k-h-1)*(z.2-a))) by fun_prop))
 

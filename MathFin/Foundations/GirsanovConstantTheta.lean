@@ -32,8 +32,8 @@ exponentials —
 both `P`-martingales; the engine turns `D_t = exp(a·B^θ_t − ½a² t)` into a
 `Q`-martingale. The one genuinely new estimate is the mixed-time integrability of
 `D_u · Z_T`, by AM–GM (`exp(a X_u)·exp(−θ X_T) ≤ exp(2a X_u) + exp(−2θ X_T)`, each a
-Gaussian-MGF term via `integrable_exp_mul_of_hasLaw`) — the same device as
-`bs_discounted_isQMartingale`.
+Gaussian-MGF term via `integrable_exp_mul_of_hasLaw`). The Black–Scholes discounted-price
+martingale `bs_discounted_isQMartingale` is this theorem at `a = σ`.
 
 The identity `E_Q[exp(a(B^θ_t − B^θ_s)) | 𝓕_s] = exp(½a²(t−s))` for all `a`, together with
 `B^θ_0 = 0`, determines every finite-dimensional law of `B^θ` on `[0,T]` as that of a `Q`-Brownian
@@ -143,7 +143,7 @@ theorem expBtheta_isQMartingale
   exact changeOfMeasure_setIntegral_eq T hZmeasT hZpos hDsm hZ hZD hmix hst htT hA
 
 /-- **The constant-θ Girsanov measure is a probability measure.** `Q = P.withDensity Z_T`
-with the Wald density `Z_T = exp(−θ X_T − ½θ² T)`: the density is measurable, strictly
+with the Wald density `Z_T = exp(−θ X_T − ½θ² T)`: the density is strictly
 positive, `P`-integrable (Gaussian MGF), and has unit `P`-mean — the Wald exponential is a
 `P`-martingale started at `Z_0 = exp(−θ X_0) = 1` (since `X_0 = 0` a.s.), so `∫ Z_T dP =
 ∫ Z_0 dP = 1`. -/
@@ -157,7 +157,6 @@ theorem girsanovMeasure_isProbabilityMeasure
   have hmeasX : ∀ v, Measurable (X v) := fun v ↦
     ((hX.stronglyAdapted v).mono (𝓕.le v)).measurable
   set g : Ω → ℝ := fun ω ↦ Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2)
-  have hgmeas : Measurable g := Real.measurable_exp.comp (((hmeasX T).const_mul (-θ)).sub_const _)
   have hgpos : ∀ ω, 0 < g ω := fun ω ↦ Real.exp_pos _
   have hgfactor : g = fun ω ↦ Real.exp (-(θ ^ 2 * (T : ℝ) / 2)) * Real.exp (-θ * X T ω) := by
     funext ω
@@ -197,7 +196,7 @@ theorem girsanovMeasure_isProbabilityMeasure
         = ∫ ω, Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2) ∂P := rfl
       _ = ∫ ω, Real.exp (-θ * X 0 ω - θ ^ 2 * ((0 : ℝ≥0) : ℝ) / 2) ∂P := hmean.symm
       _ = 1 := hZ0
-  exact (isEquivProbMeasure_withDensity P hgmeas hgpos hgint hgsum).1
+  exact (isEquivProbMeasure_withDensity P hgpos hgint hgsum).isProb
 
 /-- **The constant-θ drift-corrected process, packaged as exponential-martingale data.**
 For constant `θ`, the process `B^θ_u = X_u + θ u` is `𝓕`-adapted, starts at `0` a.e. under the
@@ -280,14 +279,9 @@ theorem Btheta_isQBrownianMotion
     {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
     {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
     (θ : ℝ) (T : ℝ≥0) :
-    (∀ᵐ ω ∂(P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))),
-        X 0 ω + θ * ((0 : ℝ≥0) : ℝ) = 0)
-      ∧ (∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T →
-          (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))).map
-              (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))) = gaussianReal 0 (t - s))
-      ∧ HasIndepIncrements (fun (t : Set.Iic T) ω ↦ X t ω + θ * ((t : ℝ≥0) : ℝ))
-          (P.withDensity fun ω ↦ ENNReal.ofReal
-            (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) := by
+    IsBrownianOn (P.withDensity fun ω ↦
+      ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) T
+      fun t ω ↦ X t ω + θ * (t : ℝ) := by
   haveI : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
       (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T

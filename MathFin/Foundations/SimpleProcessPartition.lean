@@ -358,7 +358,7 @@ For a dense simple approximant `V` of a bounded predictable `θ`, `marshalStepSP
 single-partition step process on the marshalled cells whose per-cell multiplier is the
 `[−C,C]`-clamp of `marshalMult`. Since the marshalled cells are disjoint, clamping the multipliers
 clamps the *process*, so the L² distance to `θ̂` only shrinks (`clampM` is a contraction toward any
-`|·| ≤ C` target). Mirrors the adapted Riemann bridge `ItoIntegralRiemannBridgeAdapted.stepσ` with
+`|·| ≤ C` target). Mirrors the adapted Riemann bridge `ItoIntegralBrownian.stepσ` with
 the uniform grid replaced by the marshalled partition and `θ(tₖ)` replaced by
 `clampM C (marshalMult · )`. -/
 
@@ -628,8 +628,7 @@ theorem tendstoInMeasure_marshalStochSum (hB : IsPreBrownianReal B μ) (T : ℝ�
 
 /-- **The stochastic-exponent a.e.-subsequence extraction.** Every subsequence `ns` of the clamped
 stochastic exponents has a further subsequence converging a.e. to `∫θ dB` — the single stochastic
-input the a.e.-subsequence set-integral engine of the assembly needs (mirror of
-`exists_subseq_riemannσ_ae`). -/
+input the a.e.-subsequence set-integral engine of the assembly needs. -/
 theorem exists_subseq_marshalStochSum_ae (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)

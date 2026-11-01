@@ -5,115 +5,108 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Binomial.PathMeasure
+public import MathFin.Foundations.MartingaleTransform
 
 /-!
 # Binomial martingale representation (completeness of the binomial market)
 
-On the binomial tree — coin-flip paths `ω : ℕ → Bool`, with the **risk-neutral one-step
-condition** `q·X_{n+1}(…,U) + (1 − q)·X_{n+1}(…,D) = X_n` (the explicit form of the conditional
-expectation w.r.t. the binomial filtration) — every martingale `M` is the discrete stochastic
-integral of a **predictable** strategy `H` against the discounted asset `S`:
+On the binomial tree, with the coin flips i.i.d. `Bernoulli(q)` for `0 < q < 1`
+(`coinFlipMeasure q`) and Mathlib's filtration of the flips `flipFiltration` (`ℱₙ = σ(ω₀, …,
+ω_{n−1})`, the pullback on `[0, T]` of `horizonFiltration T`), every `Martingale M` is the discrete
+stochastic integral of a **predictable** strategy `A` against any non-degenerate martingale `S`:
 
-  `M_N(ω) = M_0(ω) + ∑_{k<N} H_k(ω)·(S_{k+1}(ω) − S_k(ω))` (`binomial_martingale_representation`).
+  `M_N = M_0 + (A · S)_N` (`binomial_martingale_representation`),
 
-This is the **martingale representation theorem** in discrete time — the second pillar of the
-fundamental theorem of asset pricing (completeness: every contingent claim is replicable). The
-hedge ratio is the node-wise *delta* `H_n = ΔM_{n+1} / ΔS_{n+1}` (the change in `M` over the
-change in `S` across the two children of a node); it is predictable because it is fixed *before*
-the `(n+1)`-th flip is revealed.
+where `(A · S)_N(ω) = ∑_{k<N} A_{k+1}(ω)·(S_{k+1}(ω) − S_k(ω))` is the library's
+`martingaleTransform`, and predictable is Mathlib's `StronglyAdapted flipFiltration (A ∘ succ)`:
+the holding `A_{k+1}` over `(k, k+1]` is `ℱₖ`-strongly measurable, fixed by the first `k` flips.
 
-The argument is purely algebraic and pathwise — no measure theory. The one-step identity
-(`repr_one_step`) is the node-wise delta hedge, and the multi-period form telescopes. It is the
-discrete companion of the abstract martingale-transform converse
-(`Foundations/MartingaleTransform.lean`).
+This is the **martingale representation theorem** in discrete time, the second pillar of the
+fundamental theorem of asset pricing (completeness: every contingent claim is replicable). It is
+the converse of `martingaleTransform_isMartingale` (`Foundations/MartingaleTransform.lean`): there
+a predictable bounded `A` turns a martingale into a martingale; here every martingale of the tree
+is such a transform of `S`. The hedge ratio is the node-wise *delta* `hedgeRatio M S n`
+(`Binomial/FlipPaths.lean`), the change in `M` over the change in `S` across the two children of
+a node. The conditional expectation is the node average (`oneStep_of_martingale`), so the argument
+is the pathwise one-period delta hedge `repr_one_step`, telescoped.
+
+The path space `ℕ → Bool` is the setting for the whole tree: the infinite-horizon spot and
+claims of `Binomial/`, the contracts' scenarios and the Snell envelope live there, and
+`flipFiltration` is the horizon filtration of the finite market pulled back along `flips T`
+(`comap_flips_horizonFiltration`), where `FTAPDiscrete` needs finiteness. The representation
+needs none, so it is stated once, here.
+
+## Main results
+
+* `binomial_martingale_representation` — every martingale of the flip filtration is its initial
+  value plus the `martingaleTransform` of a predictable hedge.
+* `binomialPrice_replication` — the tree price of a European claim is the initial capital of a
+  hedge: the representation applied to the discounted tree value and the discounted spot.
 -/
 
 @[expose] public section
 
 namespace MathFin
 
-/-- A real function of an infinite coin-flip path is **`n`-adapted** when it depends only on the
-first `n` flips `ω 0, …, ω (n−1)`. -/
-def PathAdaptedAt (n : ℕ) (X : (ℕ → Bool) → ℝ) : Prop :=
-  ∀ ω ω' : ℕ → Bool, (∀ i, i < n → ω i = ω' i) → X ω = X ω'
+open MeasureTheory
+open scoped NNReal
 
-variable {q : ℝ} {M S : ℕ → (ℕ → Bool) → ℝ}
+variable {q : ℝ≥0} {M S : ℕ → (ℕ → Bool) → ℝ}
 
-/-- The **node-wise hedge ratio** (discrete delta): the change in `M` over the change in `S`
-across the up/down children of the level-`n` node carrying path `ω`. -/
-noncomputable def hedgeRatio (M S : ℕ → (ℕ → Bool) → ℝ) (n : ℕ) (ω : ℕ → Bool) : ℝ :=
-  (M (n + 1) (Function.update ω n true) - M (n + 1) (Function.update ω n false)) /
-    (S (n + 1) (Function.update ω n true) - S (n + 1) (Function.update ω n false))
-
-/-- **One-step representation (the node-wise delta hedge).** Under the risk-neutral one-step
-condition for `M` and `S` and non-degeneracy of `S`'s branching, the one-period change in `M`
-equals the hedge ratio times the one-period change in `S`, on every path. -/
-theorem repr_one_step
-    (hM_mart : ∀ n ω, q * M (n + 1) (Function.update ω n true)
-        + (1 - q) * M (n + 1) (Function.update ω n false) = M n ω)
-    (hS_mart : ∀ n ω, q * S (n + 1) (Function.update ω n true)
-        + (1 - q) * S (n + 1) (Function.update ω n false) = S n ω)
-    (hS_nondeg : ∀ n ω, S (n + 1) (Function.update ω n true)
-        ≠ S (n + 1) (Function.update ω n false))
-    (n : ℕ) (ω : ℕ → Bool) :
-    M (n + 1) ω - M n ω = hedgeRatio M S n ω * (S (n + 1) ω - S n ω) := by
-  have hne : S (n + 1) (Function.update ω n true) - S (n + 1) (Function.update ω n false) ≠ 0 :=
-    sub_ne_zero.mpr (hS_nondeg n ω)
-  rw [hedgeRatio, ← hM_mart n ω, ← hS_mart n ω]
-  by_cases hb : ω n = true
-  · have hωeq : Function.update ω n true = ω := by
-      conv_rhs => rw [← Function.update_eq_self n ω]
-      rw [hb]
-    rw [hωeq] at hne ⊢
-    field_simp
-    ring
-  · have hbf : ω n = false := by simpa using hb
-    have hωeq : Function.update ω n false = ω := by
-      conv_rhs => rw [← Function.update_eq_self n ω]
-      rw [hbf]
-    rw [hωeq] at hne ⊢
-    field_simp
-    ring
-
-/-- **Binomial martingale representation theorem.** Under the risk-neutral one-step condition,
-every martingale `M` is the discrete stochastic integral of the predictable hedge
-`hedgeRatio M S` against the discounted asset `S`:
-`M_N = M_0 + ∑_{k<N} H_k·(S_{k+1} − S_k)`, with `H` adapted (predictable). The binomial market is
-complete — every claim is replicable by a self-financing strategy. -/
-theorem binomial_martingale_representation
-    (hM_adapt : ∀ n, PathAdaptedAt n (M n)) (hS_adapt : ∀ n, PathAdaptedAt n (S n))
-    (hM_mart : ∀ n ω, q * M (n + 1) (Function.update ω n true)
-        + (1 - q) * M (n + 1) (Function.update ω n false) = M n ω)
-    (hS_mart : ∀ n ω, q * S (n + 1) (Function.update ω n true)
-        + (1 - q) * S (n + 1) (Function.update ω n false) = S n ω)
+/-- **Binomial martingale representation theorem.** Under i.i.d. `Bernoulli(q)` flips with
+`0 < q < 1`, every martingale `M` of the flip filtration is its initial value plus the
+`martingaleTransform` of a predictable hedge `A` against a martingale `S` whose two children at
+every node differ: `M_N = M_0 + ∑_{k<N} A_{k+1}·(S_{k+1} − S_k)`. The holding `A_{k+1}` over
+`(k, k+1]` is `ℱₖ`-strongly measurable, i.e. depends only on the first `k` flips; it is the
+node-wise delta `hedgeRatio M S k`. The binomial market is complete: every claim is replicable by
+a self-financing strategy. -/
+theorem binomial_martingale_representation (hq0 : 0 < q) (hq1 : q < 1)
+    (hM : Martingale M flipFiltration (coinFlipMeasure q hq1.le))
+    (hS : Martingale S flipFiltration (coinFlipMeasure q hq1.le))
     (hS_nondeg : ∀ n ω, S (n + 1) (Function.update ω n true)
         ≠ S (n + 1) (Function.update ω n false)) :
-    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H n)) ∧
-      ∀ N ω, M N ω = M 0 ω + ∑ k ∈ Finset.range N, H k ω * (S (k + 1) ω - S k ω) := by
-  refine ⟨hedgeRatio M S, ?_, ?_⟩
+    ∃ A : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ A (n + 1)) ∧
+      ∀ N ω, M N ω = M 0 ω + martingaleTransform A S N ω := by
+  refine ⟨fun n ↦ hedgeRatio M S (n - 1), fun n ↦ stronglyMeasurable_flipFiltration_iff.2 ?_, ?_⟩
   · -- predictability: the hedge ratio depends only on the first `n` flips
-    intro n ω ω' hω
-    have key : ∀ b : Bool,
-        M (n + 1) (Function.update ω n b) = M (n + 1) (Function.update ω' n b) ∧
-        S (n + 1) (Function.update ω n b) = S (n + 1) (Function.update ω' n b) := by
-      intro b
-      have hagree : ∀ i, i < n + 1 → Function.update ω n b i = Function.update ω' n b i := by
-        intro i hi
-        rcases eq_or_ne i n with rfl | hi'
-        · simp
-        · rw [Function.update_of_ne hi', Function.update_of_ne hi']
-          exact hω i (by omega)
-      exact ⟨hM_adapt (n + 1) _ _ hagree, hS_adapt (n + 1) _ _ hagree⟩
-    simp only [hedgeRatio]
-    rw [(key true).1, (key true).2, (key false).1, (key false).2]
+    intro ω ω' hω
+    have hM' := stronglyMeasurable_flipFiltration_iff.1 (hM.stronglyAdapted (n + 1))
+    have hS' := stronglyMeasurable_flipFiltration_iff.1 (hS.stronglyAdapted (n + 1))
+    simp only [hedgeRatio, Nat.add_sub_cancel, hM'.fixFlip true ω ω' hω,
+      hM'.fixFlip false ω ω' hω, hS'.fixFlip true ω ω' hω, hS'.fixFlip false ω ω' hω]
   · -- the representation telescopes from the one-step identity
     intro N ω
     induction N with
     | zero => simp
     | succ N ih =>
-      rw [Finset.sum_range_succ, ← add_assoc, ← ih,
-          ← repr_one_step hM_mart hS_mart hS_nondeg N ω]
+      rw [martingaleTransform_real] at ih ⊢
+      rw [Finset.sum_range_succ, ← add_assoc, ← ih, Nat.add_sub_cancel,
+        ← repr_one_step (oneStep_of_martingale hq0 hq1 hM) (oneStep_of_martingale hq0 hq1 hS)
+          hS_nondeg N ω]
       ring
+
+/-- **The tree price is the cost of a hedge.** Under no-arbitrage and `S₀ ≠ 0`, for every payoff
+`g` and horizon `N` there is a predictable strategy `H` (`H_{k+1}` is `ℱₖ`-strongly measurable,
+it depends only on the first `k` flips) whose `martingaleTransform` against the discounted spot,
+added to the tree price, is the discounted payoff on every path:
+
+  `e^{−rN} g(S_N) = binomialPrice u d r g N S₀ + ∑_{k<N} H_{k+1} (S̃_{k+1} − S̃_k)`.
+
+The two martingales are the discounted tree value (`martingale_discountedTreeValue`) and the
+discounted spot (`martingale_discountedSpot`) under `Bernoulli(crrUpProb u d r)` flips. -/
+theorem binomialPrice_replication {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : ℝ} (hS₀ : S₀ ≠ 0)
+    (g : ℝ → ℝ) (N : ℕ) :
+    ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧ ∀ ω,
+      Real.exp (-(r * N)) * g (spotPath S₀ u d N ω) = binomialPrice u d r g N S₀
+        + martingaleTransform H (discountedSpot S₀ u d r) N ω := by
+  have hp := crrUpProb_mem_Ioo h
+  obtain ⟨q, hqcrr⟩ : ∃ q : ℝ≥0, crrUpProb u d r = q := ⟨⟨_, hp.1.le⟩, rfl⟩
+  have hq0 : 0 < q := by exact_mod_cast hqcrr ▸ hp.1
+  have hq1 : q < 1 := by exact_mod_cast hqcrr ▸ hp.2
+  obtain ⟨H, hH, hrep⟩ := binomial_martingale_representation hq0 hq1
+    (martingale_discountedTreeValue u d r g N S₀ hq1.le hqcrr)
+    (martingale_discountedSpot h S₀ hq1.le hqcrr) (discountedSpot_update_ne h hS₀)
+  exact ⟨H, hH, fun ω ↦ by simpa [discountedTreeValue] using hrep N ω⟩
 
 end MathFin

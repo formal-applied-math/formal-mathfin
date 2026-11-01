@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.Foundations.ChangeOfMeasure
+public import MathFin.Foundations.EquivMeasure
 
 /-!
 # The change of numéraire
@@ -47,8 +48,10 @@ choosing `B`, `N` and reading off the density.
 ## Main results
 
 * `MathFin.numeraireMeasure` — the tilted measure `Q^N = Q.withDensity(dQ^N/dQ)`.
-* `MathFin.numeraireMeasure_isProbabilityMeasure` — `Q^N` is a probability
-  measure, under the martingale/normalization condition `𝔼^Q[N_T/B_T] = N₀/B₀`.
+* `MathFin.numeraireMeasure_isEquivProbMeasure` — `Q^N` is a probability measure
+  equivalent to `Q` (`Q^N ≪ Q` and `Q ≪ Q^N`), under the martingale/normalization
+  condition `𝔼^Q[N_T/B_T] = N₀/B₀`; `numeraireMeasure_isProbabilityMeasure` is its first
+  component.
 * `MathFin.changeOfNumeraire` — price invariance
   `N₀·𝔼^{Q^N}[X/N_T] = B₀·𝔼^Q[X/B_T]`.
 * `MathFin.changeOfNumeraire_setIntegral_eq` — the **dynamic** change of numéraire:
@@ -91,28 +94,32 @@ section
 
 variable [MeasurableSpace Ω] {Q : Measure Ω} {BT NT : Ω → ℝ} {B0 N0 : ℝ}
 
-/-- **The numéraire measure is a probability measure.** Under the tradeability /
-normalization condition `𝔼^Q[N_T/B_T] = N₀/B₀` (equivalently: `N/B` is a
-`Q`-martingale), the total mass `∫ dQ^N/dQ ∂Q` equals `(B₀/N₀)·(N₀/B₀) = 1`. -/
+/-- **The numéraire measure is an equivalent probability measure.** Under the tradeability /
+normalization condition `𝔼^Q[N_T/B_T] = N₀/B₀` (equivalently: `N/B` is a `Q`-martingale), the
+density `(N_T·B₀)/(N₀·B_T)` is strictly positive with `Q`-mean `(B₀/N₀)·(N₀/B₀) = 1`, so
+`Q^N` is a probability measure with `Q^N ≪ Q` and `Q ≪ Q^N` (`isEquivProbMeasure_withDensity`). -/
+theorem numeraireMeasure_isEquivProbMeasure
+    (hNTpos : ∀ ω, 0 < NT ω) (hBTpos : ∀ ω, 0 < BT ω) (hB0 : 0 < B0) (hN0 : 0 < N0)
+    (hint : Integrable (fun ω ↦ NT ω / BT ω) Q)
+    (hmart : ∫ ω, NT ω / BT ω ∂Q = N0 / B0) :
+    IsEquivProbMeasure Q (numeraireMeasure Q BT NT B0 N0) := by
+  have heq : (fun ω ↦ NT ω * B0 / (N0 * BT ω)) = fun ω ↦ (B0 / N0) * (NT ω / BT ω) := by
+    funext ω; ring
+  refine isEquivProbMeasure_withDensity Q (g := fun ω ↦ NT ω * B0 / (N0 * BT ω))
+    (fun ω ↦ div_pos (mul_pos (hNTpos ω) hB0) (mul_pos hN0 (hBTpos ω)))
+    (by rw [heq]; exact hint.const_mul _) ?_
+  rw [heq, integral_const_mul, hmart]
+  field_simp
+
+/-- **The numéraire measure is a probability measure** — the first component of
+`numeraireMeasure_isEquivProbMeasure`, under the same normalization condition
+`𝔼^Q[N_T/B_T] = N₀/B₀`. -/
 theorem numeraireMeasure_isProbabilityMeasure
     (hNTpos : ∀ ω, 0 < NT ω) (hBTpos : ∀ ω, 0 < BT ω) (hB0 : 0 < B0) (hN0 : 0 < N0)
     (hint : Integrable (fun ω ↦ NT ω / BT ω) Q)
     (hmart : ∫ ω, NT ω / BT ω ∂Q = N0 / B0) :
-    IsProbabilityMeasure (numeraireMeasure Q BT NT B0 N0) := by
-  constructor
-  have hden : numeraireMeasure Q BT NT B0 N0
-      = Q.withDensity (fun ω ↦ ENNReal.ofReal (NT ω * B0 / (N0 * BT ω))) := rfl
-  rw [hden, withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ]
-  have hρnn : 0 ≤ᵐ[Q] fun ω ↦ NT ω * B0 / (N0 * BT ω) :=
-    ae_of_all _ (numeraireDensity_toReal_nonneg hNTpos hBTpos hB0.le hN0)
-  have heq : (fun ω ↦ NT ω * B0 / (N0 * BT ω)) = fun ω ↦ (B0 / N0) * (NT ω / BT ω) := by
-    funext ω; ring
-  have hρint : Integrable (fun ω ↦ NT ω * B0 / (N0 * BT ω)) Q := by
-    rw [heq]; exact hint.const_mul _
-  rw [← ofReal_integral_eq_lintegral_ofReal hρint hρnn, heq, integral_const_mul, hmart]
-  have hone : B0 / N0 * (N0 / B0) = 1 := by
-    field_simp
-  rw [hone, ENNReal.ofReal_one]
+    IsProbabilityMeasure (numeraireMeasure Q BT NT B0 N0) :=
+  (numeraireMeasure_isEquivProbMeasure hNTpos hBTpos hB0 hN0 hint hmart).isProb
 
 /-- **The change-of-numéraire theorem.** Price is numéraire-invariant:
 

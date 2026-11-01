@@ -10,7 +10,7 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.Verification
 /-! # Ordered bounded continuous-time optional sampling 
 ## Result
 
-Public entry points include `BoundedRule.minimum`, `expected_gridValue_tendsto`,
+Public entry points include `expected_gridValue_tendsto`,
 `expected_stoppedValue_le_of_le`.
 -/
 
@@ -23,19 +23,9 @@ open scoped NNReal Topology
 
 variable {Ω : Type*} [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
 
-/-- The pointwise minimum `fun ω => min (θ.time ω) (η.time ω)` of two rules with horizon `T`. -/
-def BoundedRule.minimum {T : ℝ≥0} (θ η : BoundedRule 𝓕 T) : BoundedRule 𝓕 T where
-  time := fun ω => min (θ.time ω) (η.time ω)
-  stopping := by
-    intro t
-    convert! (θ.stopping t).union (η.stopping t) using 1
-    ext ω
-    simp only [mem_ofPred_eq,WithTop.coe_le_coe,min_le_iff,mem_union]
-  le_horizon := fun ω => (min_le_left _ _).trans (θ.le_horizon ω)
-
 theorem expected_gridValue_tendsto {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}
     (hU : Supermartingale U 𝓕 P) (hc : ∀ ω, Continuous (fun t => U t ω))
-    {C : ℝ} (hb : ∀ t ω, ‖U t ω‖ ≤ C) {T : ℝ≥0} (θ : BoundedRule 𝓕 T) :
+    {C : ℝ} (hb : ∀ t ω, ‖U t ω‖ ≤ C) {T : ℝ≥0} (θ : StoppingRule 𝓕 T) :
     Tendsto (fun n => ∫ ω, U ((gridIndex θ (gridStep n) ω : ℝ≥0)*gridStep n) ω ∂P)
       atTop (𝓝 (∫ ω, U (θ.time ω) ω ∂P)) := by
   have hm : Measurable U.uncurry := measurable_uncurry_of_continuous_of_measurable hc
@@ -51,7 +41,7 @@ theorem expected_gridValue_tendsto {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ
 theorem expected_stoppedValue_le_of_le {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}
     (hU : Supermartingale U 𝓕 P) (hc : ∀ ω, Continuous (fun t => U t ω))
     {C : ℝ} (hb : ∀ t ω, ‖U t ω‖ ≤ C) {T : ℝ≥0}
-    (θ η : BoundedRule 𝓕 T) (hθη : ∀ ω, θ.time ω ≤ η.time ω) :
+    (θ η : StoppingRule 𝓕 T) (hθη : ∀ ω, θ.time ω ≤ η.time ω) :
     (∫ ω, U (η.time ω) ω ∂P) ≤ ∫ ω, U (θ.time ω) ω ∂P := by
   apply le_of_tendsto_of_tendsto (expected_gridValue_tendsto hU hc hb η)
     (expected_gridValue_tendsto hU hc hb θ)

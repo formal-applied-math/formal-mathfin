@@ -21,7 +21,7 @@ and Rémy Degenne's BrownianMotion package. The declarations registered from \
 this repository are the Artzner–Delbaen–Eber–Heath representation theorem for \
 coherent risk measures on a finite state space — a coherent risk measure is the \
 least upper bound of expected loss over its representing set of probability \
-vectors, obtained by separating a rejected position from the acceptance cone — \
+vectors, obtained by separating a rejected loss from the acceptance cone — \
 together with the coherence of worst-case loss, which witnesses on a nonempty \
 state space that the representation theorem's hypothesis is satisfiable. They sit in a wider corpus \
 covering continuous-time stochastic processes and mathematical finance: the \

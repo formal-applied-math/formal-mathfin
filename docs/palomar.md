@@ -35,10 +35,13 @@ Two declarations are compared, both in namespace `ADEH`:
 - `ADEH.coherentRisk_isLUB` — the Artzner–Delbaen–Eber–Heath representation
   theorem on a finite state space: a coherent risk measure is the *least upper
   bound* of expected loss over its representing set of probability vectors.
-  Discharged against [`MathFin.coherentRisk_isLUB`](../MathFin/RiskMeasures/AcceptanceSet.lean).
+  Discharged against [`MathFin.coherentRisk_isLUB`](../MathFin/RiskMeasures/AcceptanceSet.lean)
+  applied to `L ↦ ρ (-L)`, through
+  [`MathFin.isCoherentRiskMeasure_neg_iff`](../MathFin/RiskMeasures/PositionsConvention.lean).
 - `ADEH.worstCase_isCoherentRisk` — worst-case loss satisfies the four
   coherence axioms. Discharged against
-  [`MathFin.worstCase_isCoherent`](../MathFin/RiskMeasures/WorstCaseRisk.lean).
+  [`MathFin.worstCase_isCoherent`](../MathFin/RiskMeasures/WorstCaseRisk.lean), transported along
+  the same equivalence.
 
 ## Why the second declaration is there
 
@@ -62,9 +65,14 @@ The Challenge's **transitive import closure** may contain only Lean core,
 Mathlib, Tau Ceti, or CSLib — no project-specific source, and previous
 registration does not make a repository an approved Challenge dependency. So
 `Challenge.lean` may not import `MathFin`, and may not import
-`BrownianMotion` either. It restates `IsCoherentRisk` and `representingSet`
-with the same bodies as their `MathFin` counterparts; the bridge in
-`Solution.lean` is definitional.
+`BrownianMotion` either. It states coherence for *positions* (`IsCoherentRisk`: `ρ` decreasing,
+`ρ (X + m) = ρ X - m`) and a `representingSet` of its own. The library has one coherence
+structure, `MathFin.IsCoherentRiskMeasure`, in the *loss* convention of McNeil–Frey–Embrechts, and
+no copy of `IsCoherentRisk`: `Solution.lean` declares the Challenge's structure and
+`representingSet` with the same bodies, and discharges the theorems by the equivalence
+`MathFin.isCoherentRiskMeasure_neg_iff` (the positions axioms hold exactly when
+`L ↦ ρ (-L)` is an `IsCoherentRiskMeasure` for a finite measure charging every state) together with the sign flip
+`ADEH.representingSet ρ = MathFin.representingSet (fun L ↦ ρ (-L))`.
 
 That rule is why this result was submitted first. Its statement is expressible
 in Mathlib alone — finite index type, real-valued payoffs, `IsLUB` — whereas the

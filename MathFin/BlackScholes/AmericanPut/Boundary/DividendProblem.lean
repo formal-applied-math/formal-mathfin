@@ -5,33 +5,32 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Boundary.Problem
+public import MathFin.BlackScholes.AmericanPut.Boundary.ContinuousBoundaryProblem
 
 /-!
-# The dividend extension and its zero-dividend consistency check
+# The classical put contract and its zero-dividend case
 
-This is the classical solution contract for the proposed theorem. No boundary
-monotonicity, curvature, zero-count invariant, or comparison principle is assumed.
-Existence remains an obligation; stochastic identification from this contract
-is proved in `Stopping/ClassicalSupermartingale` and `Stopping/UsualBrownianValue`.
-At zero dividends the contract is equivalent to the existing CCJZ contract.
+`DividendPutSolution k h p b` is `ContinuousBoundaryPutSolution k h p b` together with
+smoothness of the boundary at positive times: the classical solution contract for the
+proposed theorem. No boundary monotonicity, curvature, zero-count invariant, or comparison
+principle is assumed. Existence remains an obligation; stochastic identification from this
+contract is proved in `Stopping/ClassicalSupermartingale` and `Stopping/UsualBrownianValue`.
+
+The CCJZ zero-dividend contract `NormalizedPutSolution k p b` is by definition the case
+`h = 0`, so every result proved for `DividendPutSolution` applies to it as stated.
 
 ## Result
 
-Public entry points include `dividendSpatialOperator`, `normalized_dividend_regime`,
-`liu_condition_normalization`, `DividendPutSolution`.
+Public entry points include `DividendPutSolution`, `NormalizedPutSolution`,
+`normalized_dividend_regime`, `liu_condition_normalization`, `DividendCurvatureClaim`.
 -/
 
 @[expose] public section
 
 namespace MathFin.BlackScholes.AmericanPut.Boundary
 
-open Filter
-open scoped Topology ContDiff
-
-/-- The spatial Black--Scholes operator with dividends: `f'' + (k - h - 1) * f' - k * f`. -/
-noncomputable def dividendSpatialOperator (k h : ℝ) (f : ℝ → ℝ) (x : ℝ) : ℝ :=
-  deriv (deriv f) x + (k - h - 1) * deriv f x - k * f x
+open Set
+open scoped ContDiff
 
 theorem normalized_dividend_regime {r q σ : ℝ}
     (hr : 0 < r) (hq : 0 ≤ q) (hqr : q ≤ r) (hσ : 0 < σ) :
@@ -51,101 +50,64 @@ theorem liu_condition_normalization {r q σ : ℝ} (hσ : 0 < σ) :
   rw [← div_self hs.ne', ← add_div, div_le_div_iff_of_pos_right hs]
   constructor <;> intro h <;> nlinarith
 
-@[simp] theorem dividendSpatialOperator_zero (k : ℝ) (f : ℝ → ℝ) (x : ℝ) :
-    dividendSpatialOperator k 0 f x = spatialOperator k f x := by
-  simp [dividendSpatialOperator, spatialOperator]
-
-/-- Classical normalized put solution in the regime `0 ≤ h ≤ k`, `0 < k`.
+/-- Classical normalized put solution in the regime `0 ≤ h ≤ k`, `0 < k`: the
+continuous-boundary contract with a boundary smooth at positive times.
 Pairs are `(log spot, time remaining)`. Boundary derivatives are one-sided. -/
-structure DividendPutSolution (k h : ℝ) (p : ℝ → ℝ → ℝ) (b : ℝ → ℝ) : Prop where
-  rate_pos : 0 < k
-  dividend_nonneg : 0 ≤ h
-  dividend_le_rate : h ≤ k
-  boundary_initial : b 0 = 0
-  boundary_continuous : ContinuousOn b (Set.Ici 0)
-  boundary_smooth : ContDiffOn ℝ ∞ b (Set.Ioi 0)
-  price_continuous : ContinuousOn (fun z : ℝ × ℝ => p z.1 z.2) {z | 0 ≤ z.2}
-  price_smooth : ContDiffOn ℝ ∞ (fun z : ℝ × ℝ => p z.1 z.2) (continuationRegion b)
-  initial : ∀ x, p x 0 = putPayoff x
-  dominates : ∀ x t, 0 ≤ t → putPayoff x ≤ p x t
-  bounded : ∀ x t, 0 ≤ t → p x t ≤ 1
-  exercise : ∀ x t, 0 < t → x ≤ b t → p x t = 1 - Real.exp x
-  continuation : ∀ x t, 0 < t → b t < x → putPayoff x < p x t
-  equation : ∀ x t, 0 < t → b t < x →
-    deriv (p x) t = dividendSpatialOperator k h (fun y => p y t) x
-  smooth_fit : ∀ t, 0 < t → HasDerivWithinAt (fun x => p x t)
-    (-Real.exp (b t)) (Set.Ici (b t)) (b t)
-  gradient_trace : ∀ t, 0 < t →
-    Tendsto (fun x => deriv (fun y => p y t) x)
-      (nhdsWithin (b t) (Set.Ioi (b t))) (nhds (-Real.exp (b t)))
-  decay : ∀ t, 0 ≤ t → Tendsto (fun x => p x t) atTop (nhds 0)
+structure DividendPutSolution (k h : ℝ) (p : ℝ → ℝ → ℝ) (b : ℝ → ℝ) : Prop
+    extends ContinuousBoundaryPutSolution k h p b where
+  boundary_smooth : ContDiffOn ℝ ∞ b (Ioi 0)
+
+instance {k h : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} :
+    Coe (DividendPutSolution k h p b) (ContinuousBoundaryPutSolution k h p b) :=
+  ⟨DividendPutSolution.toContinuousBoundaryPutSolution⟩
+
+/-- The CCJZ (2008), (1.1) zero-dividend contract, with the stopping-region extension and
+initial payoff on all log prices: the case `h = 0` of `DividendPutSolution`. The smoothness
+requirements describe the intended classical solution class. The actual stopping price is proved
+to satisfy the `ContinuousBoundaryPutSolution` part
+(`canonicalPrice_continuousBoundaryPutSolution`); smoothness of its boundary (`boundary_smooth`)
+is the remaining separate obligation. -/
+abbrev NormalizedPutSolution (k : ℝ) (p : ℝ → ℝ → ℝ) (b : ℝ → ℝ) : Prop :=
+  DividendPutSolution k 0 p b
 
 namespace DividendPutSolution
 
 variable {k h : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
 
-theorem boundary_nonpos (hp : DividendPutSolution k h p b) {t : ℝ} (ht : 0 < t) :
-    b t ≤ 0 := by
-  have hv := (putPayoff_nonneg (b t)).trans (hp.dominates (b t) t ht.le)
-  rw [hp.exercise (b t) t ht le_rfl] at hv
-  exact Real.exp_le_one_iff.mp (by linarith)
+/-- Regularity supplies actual derivatives, avoiding Lean's default derivative
+value for a nondifferentiable function. -/
+theorem boundary_hasDerivAt (hp : DividendPutSolution k h p b) {t : ℝ} (ht : 0 < t) :
+    HasDerivAt b (deriv b t) t :=
+  ((hp.boundary_smooth.contDiffAt (isOpen_Ioi.mem_nhds ht)).differentiableAt
+    (by simp)).hasDerivAt
 
-/-- Interior smoothness at a space-time point follows from the moving-domain
-contract and continuity of the boundary; no smoothness across it is assumed. -/
-theorem price_contDiffAt (hp : DividendPutSolution k h p b)
-    {x t : ℝ} (ht : 0 < t) (hx : b t < x) :
-    ContDiffAt ℝ ∞ (fun z : ℝ × ℝ => p z.1 z.2) (x, t) := by
-  have hb : ContinuousAt b t := hp.boundary_continuous.continuousAt (Ici_mem_nhds ht)
-  have hbt : ContinuousAt (fun z : ℝ × ℝ => b z.2) (x, t) := hb.comp continuousAt_snd
-  have ht' : ∀ᶠ z : ℝ × ℝ in nhds (x, t), 0 < z.2 :=
-    continuousAt_const.eventually_lt continuousAt_snd ht
-  have hx' : ∀ᶠ z : ℝ × ℝ in nhds (x, t), b z.2 < z.1 :=
-    hbt.eventually_lt continuousAt_fst hx
-  apply hp.price_smooth.contDiffAt
-  exact ht'.and hx'
+theorem boundary_hasDerivAt_deriv (hp : DividendPutSolution k h p b)
+    {t : ℝ} (ht : 0 < t) : HasDerivAt (deriv b) (deriv (deriv b) t) t := by
+  have hs : ContDiffOn ℝ ∞ (deriv b) (Ioi 0) :=
+    hp.boundary_smooth.deriv_of_isOpen isOpen_Ioi (by simp)
+  exact ((hs.contDiffAt (isOpen_Ioi.mem_nhds ht)).differentiableAt (by simp)).hasDerivAt
+
+/-- The remaining analytic curvature input suffices for the stock boundary.
+This is a reduction lemma, not a proof of that input. -/
+theorem stock_curvature_of_log_curvature (hp : DividendPutSolution k h p b)
+    {E σ expiry T : ℝ} (hE : 0 < E) (hσ : 0 < σ) (hT : T < expiry)
+    (hcurvature : 0 < deriv (deriv b) (normalizedTime σ expiry T)) :
+    0 < deriv (deriv (stockBoundary E σ expiry b)) T :=
+  deriv2_stockBoundary_pos hE hσ hT (fun _ ht => hp.boundary_hasDerivAt ht)
+    (hp.boundary_hasDerivAt_deriv (normalizedTime_pos hσ hT)) hcurvature
 
 end DividendPutSolution
 
-/-- No changed model is hidden in the zero-dividend specialization. -/
-theorem dividendPutSolution_zero_iff {k : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} :
-    DividendPutSolution k 0 p b ↔ NormalizedPutSolution k p b := by
-  constructor
-  · intro h
-    exact {
-      rate_pos := h.rate_pos
-      boundary_initial := h.boundary_initial
-      boundary_continuous := h.boundary_continuous
-      boundary_smooth := h.boundary_smooth
-      price_continuous := h.price_continuous
-      price_smooth := h.price_smooth
-      initial := h.initial
-      dominates := h.dominates
-      bounded := h.bounded
-      exercise := h.exercise
-      continuation := h.continuation
-      equation := fun x t ht hx => by simpa using h.equation x t ht hx
-      smooth_fit := h.smooth_fit
-      gradient_trace := h.gradient_trace
-      decay := h.decay }
-  · intro h
-    exact {
-      rate_pos := h.rate_pos
-      dividend_nonneg := le_rfl
-      dividend_le_rate := h.rate_pos.le
-      boundary_initial := h.boundary_initial
-      boundary_continuous := h.boundary_continuous
-      boundary_smooth := h.boundary_smooth
-      price_continuous := h.price_continuous
-      price_smooth := h.price_smooth
-      initial := h.initial
-      dominates := h.dominates
-      bounded := h.bounded
-      exercise := h.exercise
-      continuation := h.continuation
-      equation := fun x t ht hx => by simpa using h.equation x t ht hx
-      smooth_fit := h.smooth_fit
-      gradient_trace := h.gradient_trace
-      decay := h.decay }
+/-- OPEN analytic goal (CCJZ's strict log curvature), deliberately a proposition
+definition and not a theorem. Existence and stochastic identification must additionally
+be proved. -/
+def NormalizedCurvatureClaim : Prop :=
+  ∀ (k : ℝ) (p : ℝ → ℝ → ℝ) (b : ℝ → ℝ),
+    NormalizedPutSolution k p b → ∀ t, 0 < t → 0 < deriv (deriv b) t
+
+/-- OPEN non-vacuity obligation, separate from the conditional curvature claim. -/
+def NormalizedExistenceClaim : Prop :=
+  ∀ k : ℝ, 0 < k → ∃ p b, NormalizedPutSolution k p b
 
 /-- Classical-solution target, proved in `ComparisonConclusion.lean`.
 This definition alone is not a proof or an identification with a stopping value. -/
@@ -169,19 +131,14 @@ def LiuRangeCurvatureClaim : Prop :=
 /-- A reduction between the claims. Their proofs are supplied separately in
 `ComparisonConclusion.lean`. -/
 theorem dividendCurvature_specializations (hmain : DividendCurvatureClaim) :
-    ZeroDividendWeakCurvatureClaim ∧ LiuRangeCurvatureClaim := by
-  constructor
-  · intro k p b hb t ht
-    exact hmain k 0 p b (dividendPutSolution_zero_iff.mpr hb) t ht
-  · intro k h p b hb _ t ht
-    exact hmain k h p b hb t ht
+    ZeroDividendWeakCurvatureClaim ∧ LiuRangeCurvatureClaim :=
+  ⟨fun k p b hb => hmain k 0 p b hb, fun k h p b hb _ => hmain k h p b hb⟩
 
 /-- The published strict theorem would imply the weak zero-dividend milestone.
 The strict hypothesis remains open; the weak claim is now proved by the
 alternative comparison route in `ComparisonConclusion.lean`. -/
 theorem publishedCurvature_implies_weak (hccjz : NormalizedCurvatureClaim) :
-    ZeroDividendWeakCurvatureClaim := by
-  intro k p b hb t ht
-  exact (hccjz k p b hb t ht).le
+    ZeroDividendWeakCurvatureClaim :=
+  fun k p b hb t ht => (hccjz k p b hb t ht).le
 
 end MathFin.BlackScholes.AmericanPut.Boundary

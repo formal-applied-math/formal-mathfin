@@ -6,8 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
-public import MathFin.Binomial.Model
 public import MathFin.Binomial.American
+public import MathFin.Binomial.SnellEnvelope
 
 /-!
 # Bermudan sandwich: European ≤ Bermudan ≤ American
@@ -26,8 +26,9 @@ Results:
 
 * `bermudan_sandwich`: `Eur ⊆ Berm ⊆ Amer ⇒ sup_Eur ≤ sup_Berm ≤ sup_Amer`
   (both inequalities, via `Finset.sup'_mono`) — the abstract optimal-stopping form.
-* `bermudanPrice`: the genuine CRR-tree Bermudan price over an early-exercise step
-  set `E`, interpolating `binomialPrice` (European) and `americanPrice` (American).
+* `bermudanPrice_mono`: the genuine CRR-tree price `bermudanPrice E` (`Binomial/Model.lean`,
+  the one recursion with `E = ∅` European and `E = univ` American) is monotone in the
+  early-exercise step set `E`, as an instance of Snell minimality.
 * `binomialPrice_le_bermudanPrice_le_americanPrice`: the sandwich as an actual
   discounted-expectation price ordering (not an abstract `sup'` over a free value).
 -/
@@ -58,79 +59,22 @@ lemma bermudan_sandwich
 /-! ## The genuine price-tree Bermudan sandwich
 
 `bermudan_sandwich` above is the abstract optimal-stopping monotonicity on a free
-value function. Here is the honest CRR-tree instance: a `bermudanPrice` recursion
-interpolating the European (`binomialPrice`) and American (`americanPrice`) Bellman
-recursions over an admissible early-exercise step set `E ⊆ ℕ`, with the sandwich as
-a genuine price ordering. -/
+value function. Here is the honest CRR-tree instance: the one recursion `bermudanPrice E`,
+with `E = ∅` the European price `binomialPrice` and `E = univ` the American price
+`americanPrice`, is monotone in the early-exercise step set `E ⊆ ℕ` — an instance of Snell
+minimality — and the sandwich is a genuine price ordering. -/
 
-open scoped Classical in
-/-- **Bermudan option price** on the CRR tree with early-exercise steps `E ⊆ ℕ`
-(steps-remaining at which early exercise is allowed): the Bellman recursion takes
-`max(intrinsic, continuation)` exactly at steps in `E`, the bare discounted
-continuation otherwise. `E = ∅` is the European price, `E = univ` the American. -/
-noncomputable def bermudanPrice (E : Set ℕ) (u d r : ℝ) (g : ℝ → ℝ) : ℕ → ℝ → ℝ
-  | 0, S => g S
-  | n + 1, S =>
-      if (n + 1) ∈ E then
-        max (g S) (binomialOptionPriceOnePeriod u d r
-          (bermudanPrice E u d r g n (S * u)) (bermudanPrice E u d r g n (S * d)))
-      else
-        binomialOptionPriceOnePeriod u d r
-          (bermudanPrice E u d r g n (S * u)) (bermudanPrice E u d r g n (S * d))
-
-open scoped Classical in
-@[simp] lemma bermudanPrice_zero (E : Set ℕ) (u d r : ℝ) (g : ℝ → ℝ) (S : ℝ) :
-    bermudanPrice E u d r g 0 S = g S := rfl
-
-open scoped Classical in
-lemma bermudanPrice_succ (E : Set ℕ) (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
-    bermudanPrice E u d r g (n + 1) S =
-      if (n + 1) ∈ E then
-        max (g S) (binomialOptionPriceOnePeriod u d r
-          (bermudanPrice E u d r g n (S * u)) (bermudanPrice E u d r g n (S * d)))
-      else
-        binomialOptionPriceOnePeriod u d r
-          (bermudanPrice E u d r g n (S * u)) (bermudanPrice E u d r g n (S * d)) := rfl
-
-open scoped Classical in
-/-- `bermudanPrice ∅ = binomialPrice`: never exercising early is the European price. -/
-lemma bermudanPrice_empty (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
-    bermudanPrice ∅ u d r g n S = binomialPrice u d r g n S := by
-  induction n generalizing S with
-  | zero => rfl
-  | succ n ih =>
-    rw [bermudanPrice_succ, if_neg (by simp), ih (S * u), ih (S * d),
-        ← binomialPrice_succ_eq_onePeriod]
-
-open scoped Classical in
-/-- `bermudanPrice univ = americanPrice`: always allowing exercise is the American price. -/
-lemma bermudanPrice_univ (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
-    bermudanPrice Set.univ u d r g n S = americanPrice u d r g n S := by
-  induction n generalizing S with
-  | zero => rfl
-  | succ n ih =>
-    rw [bermudanPrice_succ, if_pos (Set.mem_univ _), ih (S * u), ih (S * d),
-        ← americanPrice_succ]
-
-open scoped Classical in
 /-- **Monotone in the exercise set**: enlarging the admissible early-exercise set
-never lowers the price (`BinomialNoArb` makes the continuation monotone). -/
+never lowers the price. The larger-set price is a supermartingale dominating the payoff at
+every exercise date of the smaller set, so it dominates the smaller-set price by Snell
+minimality (`bermudanPrice_le_of_supermartingale_dominating`). -/
 lemma bermudanPrice_mono {u d r : ℝ} (h : BinomialNoArb u d r) (g : ℝ → ℝ)
     {E₁ E₂ : Set ℕ} (hE : E₁ ⊆ E₂) (n : ℕ) (S : ℝ) :
-    bermudanPrice E₁ u d r g n S ≤ bermudanPrice E₂ u d r g n S := by
-  induction n generalizing S with
-  | zero => simp
-  | succ n ih =>
-    have hcont := binomialOptionPriceOnePeriod_mono h (ih (S * u)) (ih (S * d))
-    rw [bermudanPrice_succ, bermudanPrice_succ]
-    by_cases h1 : (n + 1) ∈ E₁
-    · rw [if_pos h1, if_pos (hE h1)]; exact max_le_max le_rfl hcont
-    · rw [if_neg h1]
-      by_cases h2 : (n + 1) ∈ E₂
-      · rw [if_pos h2]; exact le_trans hcont (le_max_right _ _)
-      · rw [if_neg h2]; exact hcont
+    bermudanPrice E₁ u d r g n S ≤ bermudanPrice E₂ u d r g n S :=
+  bermudanPrice_le_of_supermartingale_dominating h E₁ g (bermudanPrice E₂ u d r g)
+    (fun _ hn S ↦ le_bermudanPrice (hn.imp_right (@hE _)) u d r g S)
+    (bermudanPrice_supermartingale E₂ u d r g) n S
 
-open scoped Classical in
 /-- **Bermudan sandwich (genuine price-tree form)**: `European ≤ Bermudan ≤
 American` for any admissible early-exercise set `E`, at every step and spot —
 the three legs are the actual discounted-expectation CRR recursions, not an
@@ -139,7 +83,7 @@ theorem binomialPrice_le_bermudanPrice_le_americanPrice {u d r : ℝ}
     (h : BinomialNoArb u d r) (g : ℝ → ℝ) (E : Set ℕ) (n : ℕ) (S : ℝ) :
     binomialPrice u d r g n S ≤ bermudanPrice E u d r g n S ∧
       bermudanPrice E u d r g n S ≤ americanPrice u d r g n S :=
-  ⟨(bermudanPrice_empty u d r g n S) ▸ bermudanPrice_mono h g (Set.empty_subset E) n S,
-   (bermudanPrice_univ u d r g n S) ▸ bermudanPrice_mono h g (Set.subset_univ E) n S⟩
+  ⟨bermudanPrice_mono h g (Set.empty_subset E) n S,
+   bermudanPrice_mono h g (Set.subset_univ E) n S⟩
 
 end MathFin

@@ -211,10 +211,8 @@ theorem simpleGirsanovMeasure_isProbabilityMeasure (s : ℕ → ℝ≥0) (hs : M
     IsProbabilityMeasure
       (P.withDensity fun ω ↦ ENNReal.ofReal (simpleDoleansExp (X := X) s d N T ω)) := by
   have hmart := simpleDoleansExp_isMartingale (X := X) (P := P) s hs d hd hd_bdd N
-  have hZmeas : Measurable (fun ω ↦ simpleDoleansExp (X := X) s d N T ω) :=
-    ((hmart.1 T).mono (𝓕.le T)).measurable
-  exact (isEquivProbMeasure_withDensity P hZmeas (fun ω ↦ simpleDoleansExp_pos s d N T ω)
-    (hmart.integrable T) (simpleDoleansExp_integral_eq_one s hs d hd hd_bdd N T)).1
+  exact (isEquivProbMeasure_withDensity P (fun ω ↦ simpleDoleansExp_pos s d N T ω)
+    (hmart.integrable T) (simpleDoleansExp_integral_eq_one s hs d hd hd_bdd N T)).isProb
 
 /-- **Adaptedness of the simple drift.** `simpleDrift s c N u` is `𝓕_u`-measurable when the
 multipliers are adapted (`c i` is `𝓕_{s i}`-measurable): each cell contributes
@@ -419,17 +417,9 @@ adapted-integrand Itô formula. -/
 theorem Btheta_simple_isQBrownianMotion (s : ℕ → ℝ≥0) (hs : Monotone s) (hs0 : s 0 = 0)
     (c : ℕ → Ω → ℝ) (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
-    (∀ᵐ ω ∂(P.withDensity fun ω ↦
-        ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)),
-        X 0 ω + simpleDrift s c N 0 ω = 0)
-      ∧ (∀ ⦃s' t' : ℝ≥0⦄, s' ≤ t' → t' ≤ T →
-          (P.withDensity fun ω ↦
-              ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)).map
-            (fun ω ↦ (X t' ω + simpleDrift s c N t' ω) - (X s' ω + simpleDrift s c N s' ω))
-            = gaussianReal 0 (t' - s'))
-      ∧ HasIndepIncrements (fun (t' : Set.Iic T) ω ↦ X t' ω + simpleDrift s c N t' ω)
-          (P.withDensity fun ω ↦
-            ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)) := by
+    IsBrownianOn (P.withDensity fun ω ↦
+      ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)) T
+      fun t ω ↦ X t ω + simpleDrift s c N t ω := by
   have hdneg : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (fun ω ↦ -(c i ω)) :=
     fun i ↦ (hc i).neg
   have hbneg : ∀ i ω, |(-(c i ω))| ≤ K := fun i ω ↦ by rw [abs_neg]; exact hc_bdd i ω

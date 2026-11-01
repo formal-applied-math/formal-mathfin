@@ -39,15 +39,7 @@ theorem brownianUsualActualContactRule_value_preserving {k h : ℝ} (hk : 0 ≤ 
   let τ := brownianUsualActualContactRule (h := h) hk x T
   have hc (ω : ℝ≥0 → ℝ) : canonicalDiscountedPrice k h x T (τ.time ω) ω =
       putReward brownian 1 k h (Real.sqrt 2) (Real.exp x) τ.time ω := by
-    have hg := canonicalDiscountedPrice_gap k h x T (τ.time ω) ω
-    have hz :=
-        canonicalContactRule_contact (h := h) hk brownianUsual_adapted continuous_brownian x T ω
-    change canonicalGap brownian k h x T (τ.time ω) ω = 0 at hz
-    rw [hz,mul_zero] at hg
-    have hh := sub_eq_zero.mp hg
-    convert! hh using 1
-    unfold putReward
-    simp only [min_eq_left (τ.le_horizon ω)]
+    exact canonicalContactRule_contact hk brownianUsual_adapted continuous_brownian x T ω
   change (∫ ω, canonicalDiscountedPrice k h x T (τ.time ω) ω ∂μ) = _
   rw [integral_congr_ae (Eventually.of_forall hc),integral_congr_ae hinit]
   simp only [integral_const,probReal_univ,one_smul]
@@ -68,10 +60,10 @@ theorem brownianUsualActualContactRule_martingale {k h : ℝ} (hk : 0 ≤ k) (x 
 
 /-- Mean-value identity at any bounded observation rule, capped at first contact. -/
 theorem canonicalPrice_contact_meanValue {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) (T : ℝ≥0)
-    (η : @BoundedRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit)
+    (η : @StoppingRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit) ℝ≥0 _
         brownianUsualFiltration T) :
     (∫ ω, canonicalDiscountedPrice k h x T
-      (min (@BoundedRule.time _ (completedMeasurableSpace gaussianLimit)
+      (min (@StoppingRule.time _ (completedMeasurableSpace gaussianLimit) ℝ≥0 _
           brownianUsualFiltration T η ω)
         (brownianUsualActualContactTime (h := h) hk x T ω)) ω ∂completedMeasure gaussianLimit) =
       canonicalPrice k h x (T : ℝ) := by

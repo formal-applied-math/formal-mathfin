@@ -11,7 +11,7 @@ public import MathFin.Foundations.ItoIntegralRiemannBridgeTD
 
 /-! # Time-dependent Itô formula in `L²` (named-limit + CLM-identified)
 
-Summit A′: the time-dependent analogue of `ito_formula_L2` / `ito_formula_L2_bddDeriv`.
+Summit A′: the time-dependent analogue of `ito_formula_L2_bddDeriv`, of which that is the `f_t = 0` case.
 For `f(t, x)` of class `C^{1,2}` with the displayed bounded higher partials,
 
   `f(T, B_T) − f(0, B_0) =ᵐ[μ] itoIntegralCLM_T gfx + ∫₀ᵀ (f_t + ½ f_xx)(s, B_s) ds`,
@@ -128,7 +128,8 @@ theorem ito_formula_td_L2
   -- weight `f_xx(·, B)` (A1′), and the 2D Itô–Taylor remainder (A3′)
   have hA1 := tendsto_weighted_qv_process hB hBmeas
     (w := fun s ω ↦ f_xx s (B s ω))
-    (fun s ↦ adaptedAt_comp_eval le_rfl (hf_xxm s))
+    (fun s ↦ (hf_xxm s).comp
+      ((hB.isFilteredPreBrownian hBmeas).measurable_eval_of_le le_rfl))
     hwxx_cont hC20 (fun s ω ↦ hbd_xx _ _) T
   have hA2 := tendsto_riemann_L2_process (μ := μ)
     (w := fun s ω ↦ f_t s (B s ω))
@@ -217,10 +218,8 @@ theorem ito_formula_td_L2
     intro ω
     have hd := discrete_ito_formula_2d n (fun k ↦ (unifPart T n k : ℝ))
       (fun k ↦ B (unifPart T n k) ω) f f_t f_x f_xx
-    have hnn : unifPart T n n = T := by
-      have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-      simp only [unifPart, div_self hne, one_mul]
-    have hz : unifPart T n 0 = 0 := by simp [unifPart]
+    have hnn : unifPart T n n = T := unifPart_self T hn.ne'
+    have hz : unifPart T n 0 = 0 := unifPart_zero T n
     rw [hnn, hz, NNReal.coe_zero] at hd
     simp only [hIsum, hTsum, hQVw, hRem]
     linarith [hd]
@@ -332,12 +331,15 @@ theorem ito_formula_td_L2_bddDeriv
   have hcore := ito_formula_td_L2 hB hBmeas hBcont T hf_t hf_tt hf_tx hf_x hf_xx
     hf_xxx hf_xx_cont hbd_t hbd_xx hbd_tt hbd_tx hbd_xxx
   have hcoreI : Tendsto (fun n ↦
-      ∫ ω, (riemannφTD hBmeas f_x T n ω - I ω) ^ 2 ∂μ) atTop (𝓝 0) := hcore
-  have hcore_Lp : Tendsto (fun n ↦ (memLp_riemannφTD hB hBmeas hfx_meas hbd_x T n).toLp
-      (riemannφTD hBmeas f_x T n)) atTop (𝓝 (hI_memLp.toLp I)) :=
-    tendsto_iff_norm_sub_tendsto_zero.mpr
-      (tendsto_norm_toLp_sub' (fun n ↦ memLp_riemannφTD hB hBmeas hfx_meas hbd_x T n)
-        hI_memLp hcoreI)
+      ∫ ω, (riemannσ (B := B) (fun s ω ↦ f_x s (B s ω)) T n ω - I ω) ^ 2 ∂μ) atTop (𝓝 0) :=
+    hcore
+  have hRmem (n : ℕ) : MemLp (riemannσ (B := B) (fun s ω ↦ f_x s (B s ω)) T n) 2 μ :=
+    memLp_riemannσ hB hBmeas (fun t ↦ stronglyMeasurable_comp_eval hBmeas (hfx_meas t) t)
+      (fun _ _ ↦ hbd_x _ _) T n
+  have hcore_Lp : Tendsto (fun n ↦
+      (hRmem n).toLp (riemannσ (B := B) (fun s ω ↦ f_x s (B s ω)) T n))
+      atTop (𝓝 (hI_memLp.toLp I)) :=
+    tendsto_iff_norm_sub_tendsto_zero.mpr (tendsto_norm_toLp_sub' hRmem hI_memLp hcoreI)
   -- both are the `L²` limit of the same sums ⇒ they coincide
   have huniq : hI_memLp.toLp I = itoIntegralCLM_T hB T hBmeas gfx :=
     tendsto_nhds_unique hcore_Lp hgfx

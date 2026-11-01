@@ -34,19 +34,20 @@ variable {K r q σ S : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
 applied to the classical gap `classicalGap brownian K r q σ S p T`. -/
 noncomputable def brownianInteriorRule
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
-    (T : ℝ≥0) (n : ℕ) : BoundedRule brownianFiltration T :=
+    (T : ℝ≥0) (n : ℕ) : StoppingRule brownianFiltration T :=
   interiorRule (Z := classicalGap brownian K r q σ S p T)
-    (classicalGap_adapted hp brownian_adapted T) brownian_adapted
-    (classicalGap_continuous hp continuous_brownian T) continuous_brownian T n
+    (classicalGap_adapted hp.toPutEnvelope brownian_adapted T) brownian_adapted
+    (classicalGap_continuous hp.toPutEnvelope continuous_brownian T) continuous_brownian T n
 
 theorem brownianInteriorRule_tendsto
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 < K) (hS : 0 < S) (T : ℝ≥0) (ω : ℝ≥0 → ℝ) :
     Tendsto (fun n => (brownianInteriorRule (K := K) (S := S) hp T n).time ω) atTop
       (𝓝 ((brownianClassicalContactRule hp hK hS T).time ω)) :=
-  interiorRule_tendsto_contact (classicalGap_adapted hp brownian_adapted T) brownian_adapted
-    (classicalGap_continuous hp continuous_brownian T) continuous_brownian
-    (classicalGap_nonneg hp hK hS T) (classicalGap_terminal hp hK hS T) ω
+  interiorRule_tendsto_contact (classicalGap_adapted hp.toPutEnvelope brownian_adapted T)
+    brownian_adapted (classicalGap_continuous hp.toPutEnvelope continuous_brownian T)
+    continuous_brownian (classicalGap_nonneg hp.toPutEnvelope hK hS T)
+    (classicalGap_terminal hp.toPutEnvelope hK hS T) ω
 
 theorem brownian_contact_martingale_of_interior_localMartingales
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)

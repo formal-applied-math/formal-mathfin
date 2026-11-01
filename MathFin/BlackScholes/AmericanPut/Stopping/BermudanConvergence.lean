@@ -16,8 +16,8 @@ is needed for this approximation theorem.
 
 ## Result
 
-Public entry points include `GridRule`, `GridRule.zero`, `GridRule.maturity`,
-`BoundedRule.toGridRule`.
+Public entry points include `gridAmericanPutValue`, `expectedReward_le_gridValue`,
+`gridValue_tendsto_americanValue`.
 -/
 
 @[expose] public section
@@ -29,34 +29,22 @@ open scoped NNReal Topology
 
 variable {Ω : Type*} [MeasurableSpace Ω]
 
-/-- A bounded rule for `𝓕` whose exercise time always lands in the finite grid
-`exerciseGrid T δ`. -/
-def GridRule (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (T δ : ℝ≥0) :=
-  {θ : BoundedRule 𝓕 T // ∀ ω, θ.time ω ∈ exerciseGrid T δ}
+/-- The rule that exercises immediately, at time `0`, is a grid rule. -/
+theorem zero_mem_valuedIn_exerciseGrid (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (T δ : ℝ≥0) :
+    StoppingRule.zero 𝓕 T ∈ StoppingRule.valuedIn 𝓕 T (exerciseGrid T δ) :=
+  fun _ => zero_mem_exerciseGrid T δ
 
-/-- The grid rule that exercises immediately at time `0`. -/
-def GridRule.zero (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (T δ : ℝ≥0) : GridRule 𝓕 T δ :=
-  ⟨BoundedRule.zero 𝓕 T,fun _ => zero_mem_exerciseGrid T δ⟩
-
-/-- The grid rule that always waits until maturity `T`, which is a grid time once `0 < δ`. -/
-def GridRule.maturity (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (T : ℝ≥0)
-    {δ : ℝ≥0} (hδ : 0 < δ) : GridRule 𝓕 T δ :=
-  ⟨BoundedRule.constant 𝓕 T T le_rfl,fun _ => maturity_mem_exerciseGrid T hδ⟩
-
-instance gridRule_nonempty (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (T δ : ℝ≥0) :
-    Nonempty (GridRule 𝓕 T δ) := ⟨GridRule.zero 𝓕 T δ⟩
-
-/-- The grid rule obtained from `θ` by rounding its exercise time up to the next grid time
-(`BoundedRule.roundUp`). -/
-noncomputable def BoundedRule.toGridRule {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
-    {T δ : ℝ≥0} (θ : BoundedRule 𝓕 T) (hδ : 0 < δ) : GridRule 𝓕 T δ :=
-  ⟨θ.roundUp hδ,θ.roundUp_mem_grid hδ⟩
+/-- The rule that always waits until maturity `T` is a grid rule once `0 < δ`. -/
+theorem maturity_mem_valuedIn_exerciseGrid (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (T : ℝ≥0)
+    {δ : ℝ≥0} (hδ : 0 < δ) :
+    StoppingRule.constant 𝓕 T T le_rfl ∈ StoppingRule.valuedIn 𝓕 T (exerciseGrid T δ) :=
+  fun _ => maturity_mem_exerciseGrid T hδ
 
 /-- The supremum of the expected discounted put reward over rules that exercise only on the
-grid `exerciseGrid T δ`. -/
+grid `exerciseGrid T δ`: `stoppingValue` over `StoppingRule.valuedIn 𝓕 T (exerciseGrid T δ)`. -/
 noncomputable def gridAmericanPutValue (P : Measure Ω) (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›)
     (W : ℝ≥0 → Ω → ℝ) (K r q σ S : ℝ) (T δ : ℝ≥0) : ℝ :=
-  sSup (range (fun θ : GridRule 𝓕 T δ => ∫ ω, putReward W K r q σ S θ.val.time ω ∂P))
+  stoppingValue P 𝓕 (putRewardAt W K r q σ S) T (StoppingRule.valuedIn 𝓕 T (exerciseGrid T δ))
 
 variable {P : Measure Ω} [IsProbabilityMeasure P]
   {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {W : ℝ≥0 → Ω → ℝ}
@@ -64,37 +52,33 @@ variable {P : Measure Ω} [IsProbabilityMeasure P]
 
 theorem gridValue_le_value (hW : Measurable W.uncurry)
     (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) :
-    gridAmericanPutValue P 𝓕 W K r q σ S T δ ≤ americanPutValue P 𝓕 W K r q σ S T := by
-  apply csSup_le (range_nonempty _)
-  rintro _ ⟨θ,rfl⟩
-  exact expectedReward_le_value hW hK hr hS θ.val
+    gridAmericanPutValue P 𝓕 W K r q σ S T δ ≤ americanPutValue P 𝓕 W K r q σ S T :=
+  stoppingValue_le ⟨_,zero_mem_valuedIn_exerciseGrid 𝓕 T δ⟩
+    fun θ _ ↦ expectedReward_le_value hW hK hr hS θ
 
 theorem expectedReward_le_gridValue (hW : Measurable W.uncurry)
-    (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) (θ : GridRule 𝓕 T δ) :
-    (∫ ω, putReward W K r q σ S θ.val.time ω ∂P) ≤ gridAmericanPutValue P 𝓕 W K r q σ S T δ := by
-  unfold gridAmericanPutValue
-  apply le_csSup
-  · refine ⟨K,?_⟩
-    rintro _ ⟨η,rfl⟩
-    exact expectedReward_le_strike hW hK hr hS η.val
-  · exact ⟨θ,rfl⟩
+    (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) (θ : StoppingRule 𝓕 T)
+    (hθ : θ ∈ StoppingRule.valuedIn 𝓕 T (exerciseGrid T δ)) :
+    (∫ ω, putReward W K r q σ S θ.time ω ∂P) ≤ gridAmericanPutValue P 𝓕 W K r q σ S T δ :=
+  integral_le_stoppingValue (Z := putRewardAt W K r q σ S)
+    (fun η _ ↦ expectedReward_le_strike hW hK hr hS η) hθ
 
 theorem gridValue_nonneg (hW : Measurable W.uncurry)
     (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) :
     0 ≤ gridAmericanPutValue P 𝓕 W K r q σ S T δ :=
   (integral_nonneg (putReward_nonneg W K r q σ S _)).trans
-    (expectedReward_le_gridValue hW hK hr hS (GridRule.zero 𝓕 T δ))
+    (expectedReward_le_gridValue hW hK hr hS _ (zero_mem_valuedIn_exerciseGrid 𝓕 T δ))
 
 theorem payoff_le_gridValue (hW : Measurable W.uncurry)
     (hzero : ∀ᵐ ω ∂P, W 0 ω = 0) (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) :
     max (K-S) 0 ≤ gridAmericanPutValue P 𝓕 W K r q σ S T δ := by
   rw [← expectedReward_zero (𝓕 := 𝓕) (T := T) hzero]
-  exact expectedReward_le_gridValue hW hK hr hS (GridRule.zero 𝓕 T δ)
+  exact expectedReward_le_gridValue hW hK hr hS _ (zero_mem_valuedIn_exerciseGrid 𝓕 T δ)
 
 theorem european_expectation_le_gridValue (hW : Measurable W.uncurry)
     (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) (hδ : 0 < δ) :
     (∫ ω, putReward W K r q σ S (fun _ => T) ω ∂P) ≤ gridAmericanPutValue P 𝓕 W K r q σ S T δ :=
-  expectedReward_le_gridValue hW hK hr hS (GridRule.maturity 𝓕 T hδ)
+  expectedReward_le_gridValue hW hK hr hS _ (maturity_mem_valuedIn_exerciseGrid 𝓕 T hδ)
 
 theorem gridValue_tendsto_americanValue (hW : Measurable W.uncurry)
     (hpaths : ∀ ω, Continuous (fun t => W t ω))
@@ -104,12 +88,11 @@ theorem gridValue_tendsto_americanValue (hW : Measurable W.uncurry)
   apply tendsto_order.mpr
   constructor
   · intro a ha
-    obtain ⟨_,⟨θ,rfl⟩,hθ⟩ := exists_lt_of_lt_csSup
-      (exerciseValues_nonempty (P := P) (𝓕 := 𝓕) (W := W) (K := K) (r := r)
-        (q := q) (σ := σ) (S := S) (T := T)) ha
+    obtain ⟨θ,-,hθ⟩ := exists_lt_of_lt_stoppingValue ha univ_nonempty
     have he := expectedReward_roundUp_tendsto (P := P) (q := q) (σ := σ) hW hpaths hK hr hS θ
     filter_upwards [he.eventually (Ioi_mem_nhds hθ)] with n hn
-    exact hn.trans_le (expectedReward_le_gridValue hW hK hr hS (θ.toGridRule (gridStep_pos n)))
+    exact hn.trans_le (expectedReward_le_gridValue hW hK hr hS (θ.roundUp (gridStep_pos n))
+      (θ.roundUp_mem_grid (gridStep_pos n)))
   · intro a ha
     exact Eventually.of_forall (fun _ => (gridValue_le_value hW hK hr hS).trans_lt ha)
 

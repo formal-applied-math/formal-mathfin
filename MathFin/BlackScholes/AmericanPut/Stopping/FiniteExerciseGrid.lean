@@ -42,7 +42,7 @@ theorem maturity_mem_exerciseGrid (T : ℝ≥0) {δ : ℝ≥0} (hδ : 0 < δ) :
 
 variable {Ω : Type*} [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
 
-theorem rounded_time_stopping (θ : BoundedRule 𝓕 T) (hδ : 0 < δ) :
+theorem rounded_time_stopping (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) :
     IsStoppingTime 𝓕 (fun ω => ((min ((gridIndex θ δ ω : ℝ≥0)*δ) T : ℝ≥0) : WithTop ℝ≥0)) := by
   intro t
   by_cases hT : T ≤ t
@@ -65,29 +65,29 @@ theorem rounded_time_stopping (θ : BoundedRule 𝓕 T) (hδ : 0 < δ) :
 
 /-- The rule `θ` rounded up to the next multiple of `δ` and capped at maturity, exercising at
 `min ((⌈θ.time ω/δ⌉₊ : ℝ≥0)*δ) T`. -/
-noncomputable def BoundedRule.roundUp (θ : BoundedRule 𝓕 T) (hδ : 0 < δ) : BoundedRule 𝓕 T where
+noncomputable def StoppingRule.roundUp (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) : StoppingRule 𝓕 T where
   time := fun ω => min ((gridIndex θ δ ω : ℝ≥0)*δ) T
   stopping := rounded_time_stopping θ hδ
   le_horizon := fun _ => min_le_right _ _
 
-theorem BoundedRule.le_roundUp (θ : BoundedRule 𝓕 T) (hδ : 0 < δ) (ω : Ω) :
+theorem StoppingRule.le_roundUp (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) (ω : Ω) :
     θ.time ω ≤ (θ.roundUp hδ).time ω :=
   le_min ((div_le_iff₀ hδ).mp (Nat.le_ceil (θ.time ω/δ))) (θ.le_horizon ω)
 
-theorem BoundedRule.roundUp_mem_grid (θ : BoundedRule 𝓕 T) (hδ : 0 < δ) (ω : Ω) :
+theorem StoppingRule.roundUp_mem_grid (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) (ω : Ω) :
     (θ.roundUp hδ).time ω ∈ exerciseGrid T δ := by
   apply Finset.mem_image.mpr
   exact ⟨gridIndex θ δ ω,Finset.mem_range.mpr (Nat.lt_succ_of_le (gridIndex_bounded θ ω)),rfl⟩
 
-theorem BoundedRule.roundUp_time_tendsto (θ : BoundedRule 𝓕 T) (ω : Ω) :
+theorem StoppingRule.roundUp_time_tendsto (θ : StoppingRule 𝓕 T) (ω : Ω) :
     Tendsto (fun n => (θ.roundUp (gridStep_pos n)).time ω) atTop (𝓝 (θ.time ω)) := by
   have hh := (gridValue_time_tendsto θ ω).min (tendsto_const_nhds (x := T))
-  simpa only [BoundedRule.roundUp,min_eq_left (θ.le_horizon ω)] using hh
+  simpa only [StoppingRule.roundUp,min_eq_left (θ.le_horizon ω)] using hh
 
 theorem expectedReward_roundUp_tendsto {P : Measure Ω} [IsProbabilityMeasure P]
     {W : ℝ≥0 → Ω → ℝ} (hW : Measurable W.uncurry)
     (hpaths : ∀ ω, Continuous (fun t => W t ω))
-    {K r q σ S : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) (θ : BoundedRule 𝓕 T) :
+    {K r q σ S : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) (θ : StoppingRule 𝓕 T) :
     Tendsto (fun n => ∫ ω, putReward W K r q σ S (θ.roundUp (gridStep_pos n)).time ω ∂P)
       atTop (𝓝 (∫ ω, putReward W K r q σ S θ.time ω ∂P)) := by
   apply tendsto_integral_of_dominated_convergence (fun _ => K)
