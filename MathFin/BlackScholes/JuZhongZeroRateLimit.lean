@@ -144,7 +144,7 @@ noncomputable def juBRaw (φ q σ T r : ℝ) : ℝ :=
     / (2 * (2 * juLambdaRaw φ q σ T r + juBeta q σ r - 1))
 
 /-- The pre-fix `c = −(1 − h)M/(2q_QD + N − 1)·[V_E_h/hA + 1/h + q_QD′/(2q_QD + N − 1)]`
-(Li eq. (32)). -/
+(Li eq. (32), `c₀`, with QuantLib's `V_E_h/hA` in place of Li's Θ-term). -/
 noncomputable def juCRaw (φ K q σ T r Sk : ℝ) : ℝ :=
   -((1 - juH T r) * juAlpha σ r / (2 * juLambdaRaw φ q σ T r + juBeta q σ r - 1))
     * (juVEhRaw φ K q σ T r Sk / juHA φ K q σ T r Sk + 1 / juH T r
@@ -194,8 +194,8 @@ noncomputable def juValue (φ K q σ T r Sk S : ℝ) : ℝ :=
 /-! ### The removable singularity `α/h → 2/(σ²T)` -/
 
 /-- `vasicekBondB κ T → T` as `κ → 0` (two-sided): `B` is the slope of `κ ↦ 1 − e^{−κT}` at
-`0`. Restated here from the sibling Vasicek zero-mean-reversion build so this file does not
-depend on it. -/
+`0`. Proved locally and privately, rather than imported, so this file has no dependency on
+any other zero-mean-reversion-limit development. -/
 private lemma tendsto_vasicekBondB_zero (T : ℝ) :
     Tendsto (fun κ ↦ vasicekBondB κ T) (𝓝[≠] 0) (𝓝 T) := by
   have hd : HasDerivAt (fun κ ↦ 1 - Real.exp (-(κ * T))) T 0 := by
@@ -259,9 +259,10 @@ lemma juCRaw_eq (φ K q : ℝ) {σ T r : ℝ} (hσ : σ ≠ 0) (hT : T ≠ 0) (h
     ← juAlpha_mul_juVEhRaw φ K q hσ hT hr, juRho, if_neg hr]
   ring
 
-/-- **The fix preserves semantics.** For every `r ≠ 0` the post-fix (limit-stable) Ju–Zhong
-price equals the pre-fix one, identically in `S*` and `S`. Pure algebra: `α·(X/hA) = (αX)/hA`
-holds in Lean even when `hA = 0`, so no hypothesis on `hA` or `1 − χ` is needed. -/
+/-- **The fix preserves semantics.** For every `σ ≠ 0`, `T ≠ 0` and `r ≠ 0` the post-fix
+(limit-stable) Ju–Zhong price equals the pre-fix one, identically in `S*` and `S`. Pure
+algebra: `α·(X/hA) = (αX)/hA` holds in Lean even when `hA = 0`, so no hypothesis on `hA` or
+`1 − χ` is needed. -/
 theorem juValueRaw_eq_juValue (φ K q : ℝ) {σ T r : ℝ} (hσ : σ ≠ 0) (hT : T ≠ 0) (hr : r ≠ 0)
     (Sk S : ℝ) : juValueRaw φ K q σ T r Sk S = juValue φ K q σ T r Sk S := by
   rw [juValueRaw, juValue, juChiRaw, juChi, juBRaw_eq φ q σ T hr, juCRaw_eq φ K q hσ hT hr,
@@ -386,9 +387,9 @@ lemma juVE_neg_one (K q σ T r S : ℝ) : juVE (-1) K q σ T r S = bsPDiv K r q 
 
 /-- **The pointwise half of the put "no early exercise" exit.** If `DR = e^{−rT} ≥ 1` and
 `DR ≥ DQ = e^{−qT}`, then for `0 < S ≤ K` the intrinsic value is below the parity bound
-`K·DR − S·DQ`, which is below the European put `bsPDiv`. This is the inequality behind the
-PR's comment that holding is worth at least `K·DR − S·DQ`; the optional-stopping half
-(American = European) is not formalized. -/
+`K·DR − S·DQ`, which is below the European put `bsPDiv`. This is the inequality behind
+QuantLib's comment in `juquadraticengine.cpp` that holding is worth at least `K·DR − S·DQ`;
+the optional-stopping half (American = European) is not formalized. -/
 theorem put_intrinsic_le_parityBound {K r q σ S T : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T)
     (hS : 0 < S) (hSK : S ≤ K) (hDR : 1 ≤ Real.exp (-(r * T)))
     (hDRQ : Real.exp (-(q * T)) ≤ Real.exp (-(r * T))) :
@@ -416,8 +417,9 @@ The equation (Li eq. (9), with `q_QD` at its `r = 0` value `juLambda (-1) q σ T
 `K − S − p(S) = −S(1 − e^{−qT}Φ(−d₁(S)))/q_QD`. Its left side is `≤ 0` (parity at `r = 0` and
 a nonnegative call give `p(S) ≥ K − S·e^{−qT} ≥ K − S`); its right side is `> 0`
 (`q_QD < 0` and `1 − e^{−qT}Φ(−d₁) ≥ Φ(d₁) > 0`). So `S* = 0`, and with it `hA = 0`: the stable
-formula still divides by zero for such puts, and the PR's early exit is what handles `r = 0`
-there. The rewrite and the exit are jointly necessary. -/
+formula still divides by zero for such puts, and QuantLib's early exit in
+`juquadraticengine.cpp` is what handles `r = 0` there. The rewrite and the exit are jointly
+necessary. -/
 theorem bawPut_no_positive_root_zero_rate {K q σ T S : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     (hT : 0 < T) (hq : 0 ≤ q) (hS : 0 < S) :
     K - S - bsPDiv K 0 q σ S T ≠

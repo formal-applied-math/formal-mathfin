@@ -46,7 +46,7 @@
     {
       "id": "mf-ju-zhong-raw-eq-stable",
       "name": "Ju-Zhong Quadratic Approximation: NaN Fix Preserves Semantics",
-      "description": "For every nonzero risk-free rate r, the pre-fix Ju-Zhong (1999) modified quadratic-approximation price juValueRaw (computing alpha/h = (2r/sigma^2)/(1 - e^{-rT}) directly, which is 0/0 at r = 0) equals the post-fix, limit-stable price juValue (using rho, the removable-singularity extension of alpha/h, extended by its limit 2/(sigma^2 T) at r = 0), identically in the critical price S* and the spot S. This is the algebraic identity behind QuantLib's rewrite of juquadraticengine.cpp that removes a NaN at r = 0: the rewrite changes nothing for r != 0.",
+      "description": "For every nonzero volatility sigma, time-to-expiry T, and risk-free rate r, the pre-fix Ju-Zhong (1999) modified quadratic-approximation price juValueRaw (computing alpha/h = (2r/sigma^2)/(1 - e^{-rT}) directly, which is 0/0 at r = 0) equals the post-fix, limit-stable price juValue (using rho, the removable-singularity extension of alpha/h, extended by its limit 2/(sigma^2 T) at r = 0), identically in the critical price S* and the spot S. This is the algebraic identity behind QuantLib's rewrite of juquadraticengine.cpp that removes a NaN at r = 0: the rewrite changes nothing for r != 0.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.BlackScholes.JuZhongZeroRateLimit\n\nopen MathFin\n\ntheorem ju_zhong_raw_eq_stable_thm (φ K q : ℝ) {σ T r : ℝ} (hσ : σ ≠ 0) (hT : T ≠ 0)\n    (hr : r ≠ 0) (Sk S : ℝ) :\n    MathFin.juValueRaw φ K q σ T r Sk S = MathFin.juValue φ K q σ T r Sk S :=\n  MathFin.juValueRaw_eq_juValue φ K q hσ hT hr Sk S\n"
@@ -56,7 +56,7 @@
         "reference": "N. Ju and R. Zhong, \"An approximate formula for pricing American options\", Journal of Derivatives 7(2) (1999), 31-40 (the quadratic approximation rewritten here as QuantLib's juquadraticengine.cpp).",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof, identically in the critical price S* and spot S, for every r != 0. Pure algebra: alpha*(X/hA) = (alpha*X)/hA holds in Lean even when hA = 0, so no hypothesis on hA or on 1 - chi is needed. Lives in MathFin/BlackScholes/JuZhongZeroRateLimit.lean. Axioms-clean.",
+        "formalization_scope": "Full formal proof, identically in the critical price S* and spot S, for every sigma != 0, T != 0 and r != 0. Pure algebra: alpha*(X/hA) = (alpha*X)/hA holds in Lean even when hA = 0, so no hypothesis on hA or on 1 - chi is needed. Lives in MathFin/BlackScholes/JuZhongZeroRateLimit.lean. Axioms-clean.",
         "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
       }
     },

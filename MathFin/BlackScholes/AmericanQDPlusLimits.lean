@@ -247,7 +247,8 @@ theorem tendsto_qdfpK12_endpoint {B : ℝ → ℝ} {r q σ τ : ℝ} (hσ : 0 < 
     (tendsto_qdfpTimeChange hτ)
   have := (tendsto_exp_qdfpDiscount q hτ).mul
     (((tendsto_qdfpHalfJacobian τ).mul ((continuous_Phi.tendsto 0).comp hd)).add
-      (((by unfold gaussianPDFReal; fun_prop : Continuous (gaussianPDFReal 0 1)).tendsto 0).comp hd |>.const_mul (Real.sqrt τ / σ)))
+      (((by unfold gaussianPDFReal; fun_prop : Continuous (gaussianPDFReal 0 1)).tendsto 0).comp
+        hd |>.const_mul (Real.sqrt τ / σ)))
   rw [gaussianPDFReal_zero_one_zero] at this
   convert this using 2 <;> first | rfl | ring
 

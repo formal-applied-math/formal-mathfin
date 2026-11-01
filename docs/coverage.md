@@ -48,11 +48,6 @@ nonvanishing side conditions are hypotheses, not derived), and the QD+ entries a
 abstract boundary, with no claim about the fixed-point iteration's convergence or pricing
 accuracy.
 
-A third module (an American-call trigger-price limit for the Bjerksund–Stensland approximation)
-was scoped alongside these but held back: it does not yet reuse any of the library's existing
-Black–Scholes machinery, so it fails the module-connectivity check and needs a genuine bridge
-theorem before it can land.
-
 ### One route to Merton's formula; one Black–Scholes family (2026-10-30)
 
 Issue #362. Corpus 713 → 711 (`mf-merton-from-general-jump-law` and `mf-merton-model-exists` removed).
